@@ -42,7 +42,23 @@ before = after = 0
 for f in leans:
     after += sorries(open(f).read())
     rc, old = sh(f"git show {base}:{f}"); before += sorries(old) if rc == 0 else 0
-rep(after <= before, f"sorry count in changed files {before} before, {after} after")
+# DECOMPOSE rule, Steve live 2026-10-27 via lrefresh: new sorries are allowed only in NEW files and only on
+# theorems whose doc comment starts with LEAF; an existing file may never gain a sorry.
+new_files = [f for f in leans if sh(f"git cat-file -e {base}:{f}")[0] != 0]
+leaf_new = bad_new = 0; bo = ao = 0
+for f in leans:
+    tx = open(f).read()
+    if f in new_files:
+        for mm in re.finditer(r"(?:theorem|lemma)\s+\S+", tx):
+            nxt_m = re.search(r"\n(?:/--|@\[|theorem |lemma |def |end |namespace |section )", tx[mm.end():])
+            body = tx[mm.start(): mm.end() + (nxt_m.start() if nxt_m else len(tx))]
+            if not re.search(r"\bsorry\b", re.sub(r"--[^\n]*|/-.*?-/", "", body, flags=re.S)): continue
+            doc = tx[max(0, mm.start() - 800):mm.start()]; d = doc.rfind("/--")
+            if d != -1 and re.match(r"/--\s*LEAF", doc[d:]): leaf_new += 1
+            else: bad_new += 1
+    else:
+        ao += sorries(tx); rc, old_t = sh(f"git show {base}:{f}"); bo += sorries(old_t) if rc == 0 else 0
+rep(ao <= bo and bad_new == 0, f"sorry count in changed files {before} before, {after} after; existing files {bo} to {ao}; new files {leaf_new} LEAF sorries allowed, {bad_new} sorries not marked LEAF")
 names = []
 for f in leans:
     mod = "LeanLab." + f[len("LeanLab/LeanLab/"):-5].replace("/", ".")
