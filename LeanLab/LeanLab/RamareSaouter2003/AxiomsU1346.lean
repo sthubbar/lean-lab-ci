@@ -1,0 +1,7 @@
+import LeanLab.RamareSaouter2003.Theorem4Literal
+#print axioms LeanLab.RamareSaouter2003.Thm4Literal.jLower15Lit_of_jLower15
+#print axioms LeanLab.RamareSaouter2003.Thm4Literal.jLowerLit_of_jLower
+#print axioms LeanLab.RamareSaouter2003.Thm4Literal.jLowerLit_of
+#print axioms LeanLab.RamareSaouter2003.Thm4Literal.theorem4Fm_of_lit
+#print axioms LeanLab.RamareSaouter2003.Thm4Literal.theorem4Fm_of_split_lit
+#print axioms LeanLab.RamareSaouter2003.Thm4Literal.theorem2At1e20_of_split_lit

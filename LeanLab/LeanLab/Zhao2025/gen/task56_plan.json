@@ -1,0 +1,357 @@
+{
+  "WrapperObstruction": {
+    "names": "wrapper_obstruction",
+    "twin": "wrapper_obstruction is PROVED as a lab interface counterexample. For n = 1, l11 = 0.7, R = T = 0 and S = 2, the wrapper input holds and the square sum is 8. These data are the concrete instance. Source: the reviewed Theorem12 interface for display 1.10, page 3. This is not a counterexample to the paper.",
+    "next": "verify CaseMargins."
+  },
+  "CaseMargins": {
+    "names": "closes_below",
+    "twin": "closes_below is PROVED arithmetic. If the two admissible layout C polynomials are below b, the square sum of R plus T is below b. Source: the lab refinement of Section 4, pages 15 and 16. Instance: n = 0, every real parameter zero except b = 1, and R = T = 0.",
+    "next": "verify DisplayInputs."
+  },
+  "UniformMargin": {
+    "names": "non_small_bound",
+    "twin": "non_small_bound is CONDITIONAL ON the repaired CaseInputs. It bounds the layout energy below 0.999 when lambda is at least 0.01. The boundary label zero uses the derived 4.5, not an assumed square sum. Source: Section 4 on pages 13 to 16 and the lab layout C refinement. Instance: label 1, n = 0, lambda = 0.05 and all weights zero. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "Display110": {
+    "names": "uniform_energy",
+    "twin": "gap is the minimum of 4c0 and 0.001. uniform_energy is CONDITIONAL ON the repaired CaseInputs and c0 at most lambda. For label zero, the only missing analytic input is SmallCaseZeroEstimates for displays 4.1, 4.3 and 4.4. The variable cutoff covers every positive lambda at most 0.01 and 4.5 is derived. One positive gap works for every labelled layout. Source: displays 1.10 and 4.1 to 4.6 on pages 3, 13 and 14. Nonempty instance: c0 = lambda = 0.000001, n = 0 and a singleton exponential weight, checked in tiny_lambda_gap_example. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "LayoutSum": {
+    "names": "layout_square_sum",
+    "twin": "headCount and tailCount count the disjoint blocks. LayoutIndex is their finite disjoint union. layoutS retains S at a head and defines S as R plus T at a tail. layout_square_sum is PROVED reindexing: the sum of layoutS squared equals layoutEnergy. Source: displays 2.28 and 2.29 on page 7 and 4.10 and 4.11 on pages 14 and 15. Instance: k = 4, n = 1 and R = T = S = 0.",
+    "next": "verify Display110Sum."
+  },
+  "Display110Sum": {
+    "names": "display110_conditional",
+    "twin": "display110_conditional is CONDITIONAL ON the repaired CaseInputs. One positive c1 works for all finite layouts with lambda at least c0. Label zero names SmallCaseZeroEstimates for 4.1, 4.3 and 4.4 and derives 4.5. Source: display 1.10 on page 3 and pages 13 and 14. Instance: the positive singleton model at lambda = c0 = 0.000001. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "FiniteWeights": {
+    "names": "weight_split",
+    "twin": "zeroSum is the finite sum of exp of minus 10 lambda over 3. cappedSum replaces lambda by its maximum with the cutoff. residualSum is zeroSum minus cappedSum. weight_split is PROVED: residualSum and cappedSum are nonnegative, and zeroSum is their sum. Source: display 2.28 on page 7 and display 3.14 on page 9. Nonempty instance: a singleton with lambda = 1 and cutoff = 1, so residualSum = 0 and cappedSum = zeroSum = exp of minus 10 over 3.",
+    "next": "verify Display110Zeros."
+  },
+  "Display110Zeros": {
+    "names": "display110_zero_sums",
+    "twin": "display110_zero_sums is CONDITIONAL ON the repaired CaseInputs. The head and tail zero weights are explicit finite exponential sums and the split identity is proved. Label zero names SmallCaseZeroEstimates, with cutoff max of 5.68 and 1.09 log of inverse lambda. Source: displays 1.10, 3.14 and 4.1 to 4.6 on pages 3, 9, 13 and 14. Instance: label zero, n = 0, one head zero with lambda = c0 = 0.000001 and empty tails. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "PackedZeros": {
+    "names": "packed_square_sum",
+    "twin": "packedZeros enumerates a finite layout on natural indices and puts empty zero sets after it. packed_square_sum is PROVED: the resulting square series is summable and equals the finite square sum. Natural index zero represents paper index one. Source: displays 1.10 and 2.28 on pages 3 and 7. Nonempty instance: k = 10, n = 1 and a singleton tail with lambda = 1.",
+    "next": "verify Display110Tsum."
+  },
+  "Display110Tsum": {
+    "names": "display110_tsum",
+    "twin": "display110_tsum is CONDITIONAL ON the repaired CaseInputs. It proves summability and the infinite nested square sum bound with one positive gap. For small lambda the named analytic input is SmallCaseZeroEstimates for 4.1, 4.3 and 4.4. There is no fixed 0.0085 lower threshold. Source: display 1.10 on page 3 and pages 13 and 14. Instance: the singleton head model at lambda = c0 = 0.000001 with empty tails and empty padding. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "Display110Wrapper": {
+    "names": "display1_10_conditional",
+    "twin": "display1_10_conditional is CONDITIONAL ON existence of a repaired CaseInputs label. Its small case names SmallCaseZeroEstimates for 4.1, 4.3 and 4.4. It does not claim that the unchanged legacy Lemma24_dichotomy covers tiny lambda. One positive c1 bounds the explicitly linked nested infinite square sum. Source: display 1.10 on page 3 and pages 13 and 14. Instance: label zero, n = 0, lambda = c0 = 0.000001, singleton heads and empty tails. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "BMonotone": {
+    "names": "exp_integral",
+    "twin": "exp_integral is PROVED: for c nonzero, the integral of exp of c times u from a to b is the difference of its endpoint values divided by c. Source: an elementary helper for display 2.22 on page 6. Instance: a = 0, b = c = 1.",
+    "next": "verify LaplaceOrder."
+  },
+  "LaplaceOrder": {
+    "names": "weighted_integral_antitone",
+    "twin": "weighted_integral_antitone is PROVED: a nonnegative continuous kernel on a nonnegative interval has a Laplace integral that decreases as its real parameter increases. Source: the argument of display 2.24 on page 6. Instance: kernel 1 on the interval from 0 to 1, with parameters 1 and 2.",
+    "next": "verify BIntegral."
+  },
+  "BIntegral": {
+    "names": "B_eq_laplace",
+    "twin": "BLaplace is the split integral of the positive kernel in display 2.22. B_eq_laplace is PROVED: for positive l and l0, the printed B expression equals that integral representation for every t. Source: displays 2.15 and 2.22 on pages 5 and 6. Instance: t = l = l0 = 1.",
+    "next": "verify PaperTheorem14."
+  },
+  "PaperTheorem14": {
+    "names": "theorem14_hypotheses",
+    "twin": "primeCountAP counts primes up to X congruent to a modulo q. PaperTheorem14 is STATED and cited as a Prop, with no axiom and no sorry. For fixed theta at least 5 and positive epsilon, all sufficiently large q and reduced residue classes have positive prime count at X = q to theta, at most 2 plus epsilon times X divided by phi q times log X. Source: displays 1.15 and 1.16 on page 3. theorem14_hypotheses is a PROVED domain instance: theta = 5, epsilon = 1, a = 1 and q = 2. It does not prove Theorem 1.4.",
+    "next": "finish the elementary input audit and publish the checked branch."
+  },
+  "DisplayInstances": {
+    "names": "nonempty_zero_inputs",
+    "twin": "nonempty_zero_inputs is PROVED. The last case bundle holds for singleton tail sets with lambda = cutoff = l11 = 1 and empty head sets. R and T are the actual residualSum and cappedSum of those sets. Source: display 3.14 on page 9 and Section 4 on page 16. This singleton is the nonempty instance for the conditional nested sum theorems. It is real zero data, not an existence assertion for a Dirichlet L zero.",
+    "next": "continue the elementary input audit."
+  },
+  "BIntegralOrder": {
+    "names": "BLaplace_order",
+    "twin": "BLaplace_order is PROVED. For nonnegative t and positive l0, the split integral is nonnegative and decreases with l. Source: displays 2.22 and 2.24 on page 6. Instance: t = l = l0 = 1 and L = 2.",
+    "next": "continue the elementary input audit."
+  },
+  "BOrder": {
+    "names": "B_order",
+    "twin": "B_order is PROVED. For nonnegative t, positive l and l0 and L at least l, B at l is nonnegative and B at L is at most B at l. Source: Lemma 2.3 and displays 2.22 and 2.24 on page 6. Instance: t = l = l0 = 1 and L = 2.",
+    "next": "continue the elementary input audit."
+  },
+  "CMonotone": {
+    "names": "C_antitone",
+    "twin": "C_antitone is PROVED. For positive x, y, z, l and l0, increasing the cutoff from l to L decreases C. Source: Lemma 2.3 on page 6 and display 3.5 on page 8. Instance: x = y = z = l = l0 = 1 and L = 2.",
+    "next": "continue the elementary input audit."
+  },
+  "Equation313": {
+    "names": "eq313_actual_conditional",
+    "twin": "eq313_actual_conditional is CONDITIONAL ON the epsilon retaining variant of display 3.12, with C fixed to its printed formula. For nonnegative epsilon and L at least 1.311, N at L is at most 1 plus epsilon times 19.62 times exp of 8L over 3. The monotonicity hypothesis and the free function Cf of the earlier wrapper are discharged. Source: displays 3.12 and 3.13 on page 9. Instance: N = 0 and epsilon = 0. The actual C is nonnegative, so the cited upper bound hypothesis can hold. This is an epsilon retaining named variant. It differs from the literal printed coefficient by the factor 1 plus epsilon. The exact printed 3.13 coefficient is handled separately by eq313_exact_from34.",
+    "next": "continue the elementary input audit."
+  },
+  "BZero": {
+    "names": "B_zero_eq",
+    "twin": "B_zero_eq is PROVED. For l nonzero, B at lambda0 zero equals one sixth of the quotient 1 minus exp of minus 2lt over l, plus the square of the quotient 1 minus exp of minus lt over l. Source: display 2.19 on page 6. Instance: t = l = 1.",
+    "next": "continue the elementary input audit."
+  },
+  "BZeroIntegral": {
+    "names": "B_zero_laplace",
+    "twin": "B_zero_laplace is PROVED. For l nonzero, B at lambda0 zero is one sixth of the Laplace integral on 0 to 2t plus the square of the Laplace integral on 0 to t, both with exp of minus lu. Source: display 2.19 on page 6. Instance: t = l = 1.",
+    "next": "continue the elementary input audit."
+  },
+  "BZeroOrder": {
+    "names": "B_zero_order",
+    "twin": "B_zero_order is PROVED. For nonnegative t, positive l and L at least l, B at lambda0 zero is nonnegative and decreases when l increases to L. Source: display 2.19 and Lemma 2.3 on page 6. Instance: t = l = 1 and L = 2.",
+    "next": "continue the elementary input audit."
+  },
+  "BNonnegOrder": {
+    "names": "B_nonneg_order",
+    "twin": "B_nonneg_order is PROVED. The nonnegativity and antitone property of B hold for every nonnegative lambda0, nonnegative t and positive lambda. Source: Lemma 2.3 on page 6. Instances: t = l = 1, L = 2 and lambda0 = 0 or 1.",
+    "next": "continue the elementary input audit."
+  },
+  "CNonnegOrder": {
+    "names": "C_antitone_nonneg",
+    "twin": "C_antitone_nonneg is PROVED. For positive x, y, z and l and nonnegative lambda0, C decreases as the cutoff grows from l to L. Source: Lemma 2.3 on page 6 and display 3.5 on page 8. Instance: x = y = z = l = 1, lambda0 = 0 and L = 2.",
+    "next": "continue the elementary input audit."
+  },
+  "Cor32Actual": {
+    "names": "cor32_actual_conditional",
+    "twin": "cor32_actual_conditional is CONDITIONAL ON display 3.15 alone with the actual C, computed exponent 3334 over 1500 and epsilon from 0 to 0.001. For every cutoff L at least 5.2, T at L is at most 100 times exp of minus 2.22L and at most 0.001. The monotonicity input for lambda0 zero is discharged. Source: displays 3.15 to 3.19 on page 10. Instance: T = 0 and epsilon = 0, since the actual C is nonnegative.",
+    "next": "continue the elementary input audit."
+  },
+  "ExpPair": {
+    "names": "exp_pair_monotone",
+    "twin": "exp_pair_monotone is PROVED. For nonnegative u, lambda and lambda0, increasing lambda increases exp of lambda u plus exp of minus lambda plus twice lambda0 times u. It is a positive multiple of cosh on nonnegative arguments. Source: displays 2.23 and 2.25 on pages 6 and 7. Instance: u = lambda = 1, lambda0 = 0 and the larger lambda = 2.",
+    "next": "finish the scaling inequality in display 2.18."
+  },
+  "ExpPairIntegral": {
+    "names": "exp_pair_integral",
+    "twin": "exp_pair_integral is PROVED. For a nonzero, the integral from 0 to t of exp of au plus exp of minus au is the difference of their endpoint values divided by a. Source: an elementary helper for display 2.23 on page 6. Instance: t = a = 1.",
+    "next": "finish the scaling inequality in display 2.18."
+  },
+  "BScaledIntegral": {
+    "names": "B_scaled_eq",
+    "twin": "BScaled is the symmetric integral representation of exp of lambda t times B. B_scaled_eq is PROVED: for positive lambda and lambda0, the printed B formula equals that representation after scaling. Source: displays 2.20 and 2.23 on page 6. Instance: t = lambda = lambda0 = 1.",
+    "next": "finish the scaling inequality in display 2.18."
+  },
+  "BScaledOrder": {
+    "names": "B_scaled_order",
+    "twin": "B_scaled_order is PROVED. For nonnegative t and positive lambda and lambda0, the product of exp of lambda t and B increases when lambda increases. Source: displays 2.23 and 2.25 on pages 6 and 7. Instance: t = lambda = lambda0 = 1 and the larger lambda = 2.",
+    "next": "finish the scaling inequality in display 2.18."
+  },
+  "BZeroScaledIntegral": {
+    "names": "B_zero_scaled_eq",
+    "twin": "B_zero_scaled_eq is PROVED. For lambda nonzero, exp of lambda t times B at lambda0 zero is one sixth of the symmetric exponential pair integral on 0 to t, plus the square of that integral on zero to half of t. Source: the algebra of display 2.19 on page 6. Instance: t = lambda = 1.",
+    "next": "state and check the remaining cited main statements."
+  },
+  "BZeroScaledOrder": {
+    "names": "B_zero_scaled_order",
+    "twin": "B_zero_scaled_order is PROVED. For nonnegative t and positive lambda, exp of lambda t times B at lambda0 zero increases with lambda. Source: the zero branch in the proof of Lemma 2.3 on page 6. Instance: t = lambda = 1 and the larger lambda = 2.",
+    "next": "state and check the remaining cited main statements."
+  },
+  "BScaledNonnegOrder": {
+    "names": "B_scaled_nonneg_order",
+    "twin": "B_scaled_nonneg_order is PROVED. For nonnegative t and lambda0 and positive lambda, exp of lambda t times B increases with lambda. Source: Lemma 2.3 on pages 6 and 7. Instances: t = lambda = 1, the larger lambda = 2, and lambda0 = 0 or 1.",
+    "next": "state and check the remaining cited main statements."
+  },
+  "Lemma23": {
+    "names": "lemma2_3",
+    "twin": "lemma2_3 is PROVED. For nonnegative t and lambda0 and positive lambda and Lambda, exp of minus max of Lambda minus lambda and zero times t, multiplied by B at lambda, is at most B at Lambda. Source: display 2.18 on page 6. Instances: t = lambda = 1, Lambda = 2 and lambda0 = 0 or 1. This is the positive parameter variant used under c0 positive. No value of the literal divided formula at lambda zero is claimed.",
+    "next": "state and check the remaining cited main statements."
+  },
+  "LowerBoundBarrier": {
+    "names": "lower_bound_alone_not_enough",
+    "twin": "lower_bound_alone_not_enough is PROVED for abstract real data. For every positive c0, some finite number of repeated lambda values equal to c0 gives one inner exponential sum whose square exceeds 1. A lower bound on lambda alone cannot replace the cited zero density input. Source: display 1.9 on page 2 and display 1.10 on page 3. Instance: c0 = 1 satisfies the hypothesis. No assertion about actual Dirichlet L zeroes or an error in the paper is made.",
+    "next": "complete the cited statement checks and final audit."
+  },
+  "PaperTheorem13": {
+    "names": "theorem13_empty",
+    "twin": "weightFive retains multiplicities and sums exp of minus 5 lambda over a finite multiset. PaperTheorem13 is a STATED cited specification for the complete scaled zero multiset provider Z of q and H. For each positive c0 there is one positive c1, independent of H, with the bound in display 1.14 once q exceeds a threshold depending on H and c0 and every lambda is at least c0. theorem13_empty is a PROVED satisfiability instance with Z empty, c1 = 1 over 2 and threshold 1. Source: displays 1.13 and 1.14 on page 3. No identification of Z with actual Dirichlet L zeroes is proved here.",
+    "next": "complete the cited statement checks and final audit."
+  },
+  "Lemma24Bounds": {
+    "names": "lemma24_nonempty_model",
+    "twin": "Lemma24Bounds is STATED and cited. It records all eight implications and the three unconditional conclusions in the actual Lemma 2.4, distinct from the lab display bundle with a similar name. The natural index four lower bound corresponds to paper index five. lemma24_nonempty_model is PROVED arithmetic satisfiability: one lambda value 0.005 has count N at L equal to one exactly when 0.005 is at most L, with first value 0.005 and remaining default first values 1. Every conditional row is active and N at 1 is one. Source: Lemma 2.4 on pages 7 and 8. Identification with actual Dirichlet zero data remains cited, and the Heath-Brown source audit remains blocked.",
+    "next": "reduce the count and tail bounds to display 3.4."
+  },
+  "CappedWeights": {
+    "names": "capped_weight_reduction",
+    "twin": "weightedCappedSum is the finite capped exponential sum with general weight k. capped_weight_reduction is PROVED. If k is at most W, the W weighted capped sum is at most exp of minus W minus k times L, multiplied by the k weighted capped sum. Source: the reduction of display 3.4 to display 3.15 on pages 8 and 10. Nonempty instance: one lambda value 1, cutoff 1, W = 10 over 3 and k = 1, where equality holds.",
+    "next": "reduce the count and tail bounds to display 3.4."
+  },
+  "Eq315From34": {
+    "names": "eq315_from34",
+    "twin": "eq315_from34 is CONDITIONAL ON display 3.4 alone with the actual C. For k in the interval from 0 to 10 over 3, the capped 10 over 3 weight sum is bounded by 1 plus epsilon times exp of minus 10 over 3 minus k times L, multiplied by C. Source: displays 3.4 and 3.15 on pages 8 and 10. Instance: empty zero family, x = y = z = L = lambda0 = 1, k = 1 and epsilon = 0. The actual C is nonnegative.",
+    "next": "finish the source comparison and full branch check."
+  },
+  "CountWeights": {
+    "names": "count_le_weighted",
+    "twin": "count_le_weighted is PROVED. For any finite real lambda family, real k and real cutoff L, its count at most L is at most exp of kL times the k weighted capped sum. Source: the elementary count step in display 3.12 on page 9. Nonempty instance: one lambda value 1 with k = L = 1 gives equality.",
+    "next": "finish the source comparison and full branch check."
+  },
+  "CountFrom34": {
+    "names": "count_from34",
+    "twin": "count_from34 is CONDITIONAL ON display 3.4 alone with the actual C. The finite count at most L is at most 1 plus epsilon times C times exp of kL. Source: displays 3.4 and 3.12 on pages 8 and 9. Instance: empty zero family, x = y = z = L = lambda0 = k = 1 and epsilon = 0. This is an epsilon retaining named variant. It differs from the literal printed coefficient by the factor 1 plus epsilon. The exact printed 3.13 coefficient is handled separately by eq313_exact_from34.",
+    "next": "finish the source comparison and full branch check."
+  },
+  "Eq313From34": {
+    "names": "eq313_from34",
+    "twin": "eq313_from34 is CONDITIONAL ON display 3.4 alone at the printed parameters. For nonnegative epsilon and every L at least 1.311, the actual finite zero count is at most 1 plus epsilon times 19.62 times exp of 8L over 3. Display 3.12 and monotonicity of C are both derived. Source: displays 3.4, 3.12 and 3.13 on pages 8 and 9. Instance: empty zero family and epsilon = 0. This is an epsilon retaining named variant. It differs from the literal printed coefficient by the factor 1 plus epsilon. The exact printed 3.13 coefficient is handled separately by eq313_exact_from34.",
+    "next": "finish the source comparison and full branch check."
+  },
+  "Cor32From34": {
+    "names": "cor32_from34",
+    "twin": "cor32_from34 is CONDITIONAL ON display 3.4 alone at the printed M bounded parameters, with weight 833 over 750 and epsilon from 0 to 0.001. For L at least 5.2, the actual capped 10 over 3 weight sum is at most 100 times exp of minus 2.22L and at most 0.001. Display 3.15, monotonicity and the numerical constant are derived. Source: display 3.4 on page 8 and displays 3.15 to 3.19 on page 10. Instance: empty zero family and epsilon = 0.",
+    "next": "finish the source comparison and full branch check."
+  },
+  "C313Tighter": {
+    "names": "C313_tighter",
+    "twin": "C313_tighter is PROVED. At the printed parameters x = 1 over 12, y = 1 over 4, z = 1 over 6, Lambda = 1.311 and lambda0 = 1 over 2, C is at most 19.612. This tighter arithmetic enclosure leaves room below the printed 19.62. Source: displays 3.5 and 3.13 on pages 8 and 9. These printed positive parameters are the concrete instance.",
+    "next": "finish the source comparison and full branch check."
+  },
+  "Eq313Exact": {
+    "names": "eq313_exact_from34",
+    "twin": "eq313_exact_from34 is CONDITIONAL ON display 3.4 alone with the actual C and epsilon from 0 to 0.0001. For every L at least 1.311, the actual finite count at most L is at most 19.62 times exp of 8L over 3, with no extra epsilon factor. The bound C at most 19.612 absorbs epsilon explicitly. Source: displays 3.4 and 3.13 on pages 8 and 9. Instance: empty zero family and epsilon = 0.",
+    "next": "finish the source comparison and full branch check."
+  },
+  "WeightedSqrtB": {
+    "names": "weighted_sqrt_B",
+    "twin": "weighted_sqrt_B is PROVED. For nonnegative t1, t2 and lambda0 and positive lambda and Lambda, exp of minus half of t1 plus t2 times max of Lambda minus lambda and zero, multiplied by the square root of the two B factors at lambda, is at most the square root of the two B factors at Lambda. Source: display 3.9 on page 9. Instance: t1 = t2 = lambda = lambda0 = 1 and Lambda = 2.",
+    "next": "derive the finite kernel form of display 3.8 or complete the final audit."
+  },
+  "SmoothingWeight": {
+    "names": "smoothing_weight_lower",
+    "twin": "smoothingWeight is exp of minus k lambda times exp of minus a times max of Lambda minus lambda and zero. smoothing_weight_lower is PROVED: when a is at most k, this weight dominates exp of minus k times max of lambda and Lambda. Source: display 3.11 on page 9. Instance: lambda = a = 1 and Lambda = k = 2.",
+    "next": "derive the finite kernel form of display 3.8 or complete the final audit."
+  },
+  "Lemma31From38": {
+    "names": "lemma3_1_from38",
+    "twin": "Estimate38 is the cited order form of display 3.8 using a nonnegative envelope instead of a finite maximum. lemma3_1_from38 is CONDITIONAL ON Estimate38 alone with positive x, y, z, Lambda and lambda values, nonnegative lambda0 and either exponent of display 3.3. It proves display 3.4 with the actual C. The steps 3.9 and 3.11 are discharged. Source: displays 3.3 and 3.8 to 3.11 on pages 8 and 9. Instance: empty zero family, x = y = z = Lambda = lambda0 = 1, epsilon = 0 and k equal to the first branch of 3.3. Every nonnegative envelope makes Estimate38 true for this empty family.",
+    "next": "derive the finite kernel form of display 3.8 or complete the final audit."
+  },
+  "FiniteSchur": {
+    "names": "finite_schur",
+    "twin": "finite_schur is PROVED. For a finite symmetric nonnegative real kernel A and arbitrary real coefficients a, the sum of a at i times a at j times A at i,j is at most the sum of a at i squared times the row sum of A. Source: the 2ab bound in display 3.7 on page 9. Nonempty instance: a one by one kernel with a = A = 1, giving equality.",
+    "next": "derive the finite kernel form of display 3.8."
+  },
+  "SqrtRowBound": {
+    "names": "sqrt_row_bound",
+    "twin": "sqrt_row_bound is PROVED. If two finite rows are nonnegative and their sums are at most B1 and B2, then the sum of square roots of their pointwise products is at most the square root of B1 times B2. Source: the Cauchy Schwarz step in display 3.7 on page 9, using display 2.14 on page 5. Nonempty instance: one entry in each row, with g1 = B1 = 4 and g2 = B2 = 9, giving equality at 6.",
+    "next": "derive the finite kernel form of display 3.8."
+  },
+  "KernelEnergy": {
+    "names": "kernel_energy_le_rows",
+    "twin": "kernelEnergy is the finite quadratic sum of w at i times w at j times exp of k times lambda i plus lambda j over 2 times A at i,j. kernel_energy_le_rows is PROVED: a symmetric nonnegative A bounds this by the sum of w at i squared times exp of k lambda i times the row sum. Source: display 3.7 on page 9. Nonempty instance: one entry, w = lambda = A = 1 and k = 2, giving equality at exp of 2.",
+    "next": "derive Estimate38 from the quadratic input and row bounds."
+  },
+  "KernelEnvelope": {
+    "names": "smoothing_kernel_envelope",
+    "twin": "smoothing_kernel_envelope is PROVED. If a finite symmetric nonnegative kernel has row sums at most D at i and the smoothing factor times D at i is at most M, its quadratic expression at smoothingWeight is at most M times the sum of those weights. Source: displays 3.7 and 3.8 on page 9. Nonempty instance: one entry, A = D = M = lambda = Lambda = 1 and k = a = 0, giving equality at 1.",
+    "next": "derive Estimate38 from the quadratic input and row bounds."
+  },
+  "Estimate38WithError": {
+    "names": "estimate38_with_error",
+    "twin": "estimate38_with_error is CONDITIONAL ON Estimate36 at error e0 and row bounds inflated by a nonnegative factor r. If the product of one plus e0 and r is at most one plus e, then Estimate38 holds at e. Source: displays 3.6 to 3.8 on pages 8 and 9. Instance: empty family, x = y = z = L = l0 = r = 1 and e0 = e = 0.",
+    "next": "absorb the additive row error using an eventual threshold."
+  },
+  "BPositive": {
+    "names": "B_positive",
+    "twin": "B_positive is PROVED. B at positive t and lambda and nonnegative lambda0 is strictly positive. Both lambda0 branches are covered by their positive integral forms. Source: displays 2.19 and 2.22 on page 6. Instance: t = lambda = lambda0 = 1.",
+    "next": "absorb the additive row error using an eventual threshold."
+  },
+  "UniformRowBudget": {
+    "names": "uniform_row_budget",
+    "twin": "uniform_row_budget is PROVED. Positive t1, t2, H and eta and nonnegative lambda0 admit a single positive delta at most eta times either B for every lambda in zero to H. The choice is eta times the minimum of the two B values at H. Source: uniform error choice between displays 2.14 and 3.7 on pages 5 and 9. Nonempty instance: t1 = t2 = H = eta = lambda0 = 1, with lambda = 1.",
+    "next": "prove the eventual form of Lemma 3.1 with additive row errors."
+  },
+  "EpsilonBudget": {
+    "names": "epsilon_budget",
+    "twin": "epsilon_budget is PROVED. Every positive e admits a positive d such that one plus d squared is at most one plus e. The choice is min e 1 divided by 4. Source: error absorption between displays 2.14 and 3.8 on pages 5 and 9. Instance: e = 1 and d = 1/4.",
+    "next": "prove the eventual form of Lemma 3.1 with additive row errors."
+  },
+  "Lemma31Eventual": {
+    "names": "lemma3_1_eventual",
+    "twin": "lemma3_1_eventual is CONDITIONAL ON eventual quadratic estimate 3.6 and eventual additive row estimates 2.14. For bounded positive lambda, nonnegative symmetric kernels and the parameters of 3.3, every positive target epsilon has a common modulus threshold giving display 3.4 with the actual C. The row error is chosen before that threshold using a positive uniform B bound. The two error thresholds are combined by their maximum. Identification of kernels with actual Dirichlet zeros is not proved. Source: displays 2.14 and 3.3 to 3.11 on pages 5, 8 and 9. Instance: all finite families empty at every q, x = y = z = L = l0 = H = 1, first exponent branch, with both input thresholds zero.",
+    "next": "audit every new statement against the paper and run the branch checker."
+  },
+  "CappedStep": {
+    "names": "capped_step",
+    "twin": "capped_step is PROVED. For nonnegative k and L at most U, the capped exponential sum at L is at most the sum at U plus the count of lambda at most U times exp of minus kL minus exp of minus kU. Source: one interval of display 3.27 on page 11. Nonempty instance: one lambda equal to L = 1, U = 2 and k = 1, giving equality.",
+    "next": "audit the remaining analytic inputs and all new source matches."
+  },
+  "PaperTheorem12": {
+    "names": "theorem12_empty",
+    "twin": "PaperTheorem12 is the full STATED cited specification with disjoint character clusters, the conductor bound of display 1.9 and the lower bound on every lambda. clusterZeroMultiset preserves multiplicity. The positive gap depends only on c0 and the modulus threshold depends on H and c0. The zero provider remains an interpretation requirement. theorem12_empty is a PROVED empty zero provider model with c1 = 1/2 and Q = 1. Source: displays 1.7 to 1.10 on pages 2 and 3. AI wrote the Lean code. Goldbach is open.",
+    "next": "complete the statement review and final checks."
+  },
+  "GOrder": {
+    "names": "Gz_order",
+    "twin": "Gz_order is PROVED. The actual G of display 3.22 is nonnegative on the real line and decreases as its real argument increases. The proof uses the nonnegative polynomial kernel of 3.21 on zero to two. Source: page 10. Instance: a = 0 and b = 1.",
+    "next": "complete the source audit and run the full branch checker."
+  },
+  "GDenominator": {
+    "names": "Gz_negative_lower",
+    "twin": "Gz_negative_lower is PROVED. For every nonpositive z, G at z is at least 8/9. Source: displays 3.22 and 3.23 on page 10 and the exact integral of g. Instance: z = 0 gives equality.",
+    "next": "complete the source audit and run the full branch checker."
+  },
+  "PsiOrder": {
+    "names": "psiR_antitone",
+    "twin": "psiR_antitone is PROVED. For positive x and nonnegative lambda0, the actual normalized ratio G of L minus lambda0 over x divided by G of minus lambda0 over x decreases with L. The denominator is positive. Source: display 3.23 on page 10. Instance: x = lambda0 = 1 and cutoffs 1 and 2.",
+    "next": "complete the source audit and run the full branch checker."
+  },
+  "DensityExcess": {
+    "names": "density_excess_nonneg",
+    "twin": "densityExcess is the finite sum over lambda at most L of psi at lambda minus psi at L. density_excess_nonneg is PROVED for positive x and nonnegative lambda0. Source: display 3.23 on page 10 and display 3.29 on page 11. Nonempty instance: one lambda equal to L = x = lambda0 = 1, giving zero excess.",
+    "next": "complete the source audit and run the full branch checker."
+  },
+  "CountFrom325": {
+    "names": "count_from325",
+    "twin": "count_from325 is CONDITIONAL ON the scalar inequality 3.25. For a nonnegative excess D and nonnegative Delta with epsilon less than Delta squared, the inequality the product of Delta squared minus epsilon and N, plus twice Delta D at most 1 implies N at most the reciprocal of Delta squared minus epsilon. Source: displays 3.25 and 3.26 on page 11. Nonempty instance: N = Delta = 1 and D = epsilon = 0, giving equality.",
+    "next": "complete the source audit and run the full branch checker."
+  },
+  "T5From325": {
+    "names": "t5_from325",
+    "twin": "t5_from325 is CONDITIONAL ON display 3.25 for the actual densityExcess and terminal bound 3.20. At lambda0 = 0.857 and epsilon between zero and ten to minus eight, the finite capped sum at 1.363 is at most 0.09063. The actual excess is nonnegative and all counts use the existing certified grid. The density estimate is used on the strict interior Delta positive and Delta squared above epsilon. Source: displays 3.25 to 3.27 on page 11. Instance: empty family and epsilon zero satisfy both inputs.",
+    "next": "complete the source audit and run the full branch checker."
+  },
+  "T5From325And34": {
+    "names": "t5_from325_and34",
+    "twin": "t5_from325_and34 is CONDITIONAL ON display 3.25 for the actual densityExcess and display 3.4 at the Corollary 3.2 parameters. For epsilon between zero and ten to minus eight, the actual capped 10/3 sum at 1.363 is at most 0.09063. The terminal tail, count step, grid arithmetic and excess positivity are discharged. Source: displays 3.4, 3.16 and 3.25 to 3.27 on pages 8, 10 and 11. Instance: empty family and epsilon zero satisfy the two analytic inputs.",
+    "next": "complete the source audit and run the full branch checker."
+  },
+  "PaperTheorem12Full": {
+    "names": "theorem12_full_empty",
+    "twin": "PaperTheorem12Full is an abbreviation for the corrected full PaperTheorem12. It includes both structural cluster hypotheses in display 1.9. theorem12_full_empty is a PROVED empty provider model with c1 = 1/2 and Q = 1. Source: pages 2 and 3. AI wrote the Lean code. Goldbach is open.",
+    "next": "complete the statement review and final checks."
+  },
+  "SmallCaseInstances": {
+    "names": "small_case_estimates_instance,small_case_inputs_instance,tiny_lambda_gap_example",
+    "twin": "smallCaseModelS is a single positive exponential weight at index zero. small_case_estimates_instance and small_case_inputs_instance are PROVED nonempty abstract models of the named estimates and repaired case zero. They cover every positive lambda at most 0.01. tiny_lambda_gap_example proves a positive gap and the singleton square bound at lambda = 0.000001. These are abstract real lambda models, not Dirichlet zero existence claims. Source: displays 4.1 to 4.6 on pages 13 and 14. The displayed singleton is the concrete instance. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "ConductorClusterInstance": {
+    "names": "conductor_cluster_nonempty",
+    "twin": "conductor_cluster_nonempty is PROVED. One cluster contains the principal character modulo two and all other clusters are empty. With c0 = 1/100 the clusters are pairwise disjoint and every within cluster product has conductor 1 at most 100. Source: display 1.9 on page 2. This nonempty character cluster is the concrete structural instance and asserts no zero existence. AI wrote the Lean code. Goldbach is open.",
+    "next": "finish the source audit, seal check and branch check."
+  },
+  "SmallCaseCutoff": {
+    "names": "small_case_cutoff_spec",
+    "twin": "smallCaseCutoff is max of 5.68 and 1.09 log of inverse lambda, as on page 13 before 4.1. small_case_cutoff_spec proves that it is at least 5.68 and its exponential condition holds for every positive lambda. Instance: lambda = 0.001. AI wrote the Lean code. Goldbach is open.",
+    "next": "check the repaired small case."
+  },
+  "SmallCaseBound": {
+    "names": "small_case_square_bound",
+    "twin": "small_case_square_bound derives 4.5, CONDITIONAL ON SmallCaseZeroEstimates for 4.1, 4.3 and the total tail consequence of 4.4. It contains no square sum premise. Source: pages 13 and 14. Instance: a singleton lambda 0.001 and its capped weight. AI wrote the Lean code. Goldbach is open.",
+    "next": "check the repaired small case models."
+  }
+}

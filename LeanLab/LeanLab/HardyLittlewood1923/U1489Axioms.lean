@@ -1,0 +1,9 @@
+import LeanLab.HardyLittlewood1923.U1489TruncB
+
+#print axioms LeanLab.HardyLittlewood1923.U1489.truncExplicitPrimB_of_trunc
+#print axioms LeanLab.HardyLittlewood1923.U1489.quarter_le
+#print axioms LeanLab.HardyLittlewood1923.U1489.psiChiPrimBound_of_B
+#print axioms LeanLab.HardyLittlewood1923.U1489.psiPowerLog_of_B
+#print axioms LeanLab.HardyLittlewood1923.U1489.printedA_form_all_U1489
+#print axioms LeanLab.HardyLittlewood1923.U1489.printedA_form_all_U1489_of_trunc
+#print axioms LeanLab.HardyLittlewood1923.U1489.truncB_premise_nonvacuous

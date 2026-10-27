@@ -1,0 +1,2 @@
+LeanLab/LeanLab/Ported/Zeta23/RvM/ReZeroCount.lean | https://github.com/anthropics/formal-math | e1a4e6508154ea59f030480661590a9fe3018011 | zeta23/Zeta23/RvM/ReZeroCount.lean | Anthropic, PBC | Copyright 2026 Anthropic, PBC | Apache 2.0 | narrow port of finite_zeros_closedBall with namespace and imports adapted
+LeanLab/LeanLab/Ported/Zeta23/LICENSE | Apache 2.0 license copied from zeta23/LICENSE at the same source commit

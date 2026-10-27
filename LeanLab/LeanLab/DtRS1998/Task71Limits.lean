@@ -1,0 +1,51 @@
+/-
+AI wrote this Lean code for CODEX task71.
+P0037 Table 1, printed page 213, row B = 10^70.
+This is a limitation of one generated recursive Pocklington certificate.
+It is not a claim about the paper or the primality of the candidate.
+Binary Goldbach is open.
+-/
+import LeanLab.DtRS1998.Pock
+
+namespace LeanLab.DtRS1998.Task71.Limits
+
+/-- The recursive candidate at which the partial generator stopped. -/
+def recursive70 : ℕ := 23548139461501146794391775105848886879447654840791029100790746523
+
+/-- The available factored part divides n minus one but misses the required bound. -/
+theorem partial70_insufficient :
+    42 ∣ recursive70 - 1 ∧ ¬ (recursive70 < (42 + 1) ^ 2) := by
+  unfold recursive70
+  decide +kernel
+
+/-- The recorded part for the row at 10^75 does not meet the size condition. -/
+theorem partial75_insufficient :
+    31654390873664920159903060 ∣ 389408099688473520249221183800623052959501557632398753894080996884735181 - 1 ∧
+    ¬ (389408099688473520249221183800623052959501557632398753894080996884735181 < (31654390873664920159903060 + 1) ^ 2) := by decide +kernel
+
+/-- The recorded part for the row at 10^80 does not meet the size condition. -/
+theorem partial80_insufficient :
+    10 ∣ 99999999999999999999999999999999999999999999999999999999999999999999999999943331 - 1 ∧
+    ¬ (99999999999999999999999999999999999999999999999999999999999999999999999999943331 < (10 + 1) ^ 2) := by decide +kernel
+
+/-- The recorded part for the row at 10^85 does not meet the size condition. -/
+theorem partial85_insufficient :
+    8072016524 ∣ 9999999999999999999999999999999999999999999999999999999999999999999999999999999948797 - 1 ∧
+    ¬ (9999999999999999999999999999999999999999999999999999999999999999999999999999999948797 < (8072016524 + 1) ^ 2) := by decide +kernel
+
+/-- The recorded part for the row at 10^90 does not meet the size condition. -/
+theorem partial90_insufficient :
+    696462121613183223830336 ∣ 1679046988346873026146887221139362418417358968325633914812660916662337 - 1 ∧
+    ¬ (1679046988346873026146887221139362418417358968325633914812660916662337 < (696462121613183223830336 + 1) ^ 2) := by decide +kernel
+
+/-- The recorded part for the row at 10^95 does not meet the size condition. -/
+theorem partial95_insufficient :
+    18486306834219251176 ∣ 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999936329 - 1 ∧
+    ¬ (99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999936329 < (18486306834219251176 + 1) ^ 2) := by decide +kernel
+
+/-- The recorded part for the row at 10^100 does not meet the size condition. -/
+theorem partial100_insufficient :
+    1609640230945874 ∣ 121102053427637474107505113230305586303985336542008690721798720091195355634266224958303 - 1 ∧
+    ¬ (121102053427637474107505113230305586303985336542008690721798720091195355634266224958303 < (1609640230945874 + 1) ^ 2) := by decide +kernel
+
+end LeanLab.DtRS1998.Task71.Limits

@@ -1,0 +1,95 @@
+# PUBLIC MIRROR copy, sthubbar/lean-lab-ci, written by ci_mirror.py 2026-10-27: free minutes, so every agent branch
+# builds, Codex included; main builds nightly to keep the cache warm.
+# Lean Lab GATE CHECK on GitHub's own runners. Written 2026-10-25 by lean-refresh with Steve live.
+# Every push to an agent branch gets a build, check_branch.sh and seal_check.py, run by GitHub, not by any agent,
+# so the result is a check the agent cannot fake. lean-merge reads the check status instead of building itself.
+# main is built once a night to refresh the shared cache of compiled lab modules, so branch builds stay incremental.
+# Fixed 2026-10-26 by lean-merge with Steve live: run 40241400738 hit the 120 minute job limit in the main build,
+# and the cache save ran as the cancelled post step, so nothing was kept. Now the save is its own step that runs
+# even after a failed or timed out build, so every run keeps its compiled modules and the next one resumes;
+# job limit 350 minutes, build capped at 320. Only LeanLab/.lake/build is cached: Mathlib comes from cache get.
+# Fixed 2026-10-26 07:00Z by lean-merge with Steve live, FIX 3: every branch run failed for two gate bugs, not agent work.
+# 1. seal.txt and check.txt were written into the checkout, so check_branch.sh failed them as outside, uncommitted files.
+#    Reports now go to RUNNER_TEMP. 2. The tag GATE-CI made check_branch.sh demand a LOG.md line starting GATE, which
+#    no agent writes; the tag is now the worker's own prefix, GEMINI-CI, ARISTOTLE-CI or GROK-CI. Agents must never
+#    write a GATE line themselves. 3. A push runs the workflow file of the pushed commit, so branches cut before a fix
+#    keep failing; workflow_dispatch with input branch now runs THIS file from main against any branch:
+#    POST actions/workflows/lean-gate.yml/dispatches {"ref":"main","inputs":{"branch":"<name>"}}.
+name: lean-gate
+on:
+  push:
+    # Full-lane workers only, to stay inside the 2,000 free private-repo minutes a month; Codex keeps the fast lane.
+    branches: ['gemini/**', 'GEMINI**', 'jules**', 'aristotle/**', 'grok/**', 'codex/**', 'task*']
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Agent branch to gate with this workflow file; empty means build main'
+        required: false
+        default: ''
+concurrency:
+  group: lean-gate-${{ inputs.branch || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' || inputs.branch != '' }}
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch || github.ref }}
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL; df -h /
+      - name: Restore compiled lab modules
+        uses: actions/cache/restore@v4
+        with:
+          path: LeanLab/.lake/build
+          key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-${{ github.run_id }}
+          restore-keys: |
+            lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-
+      - name: Lean and Mathlib cache
+        run: bash scripts/agent_setup.sh
+      - name: Nightly main build, refreshes the shared cache
+        if: github.ref == 'refs/heads/main' && !inputs.branch
+        run: |
+          set -o pipefail
+          cd LeanLab && export PATH="$HOME/.elan/bin:$PATH"
+          timeout 19200 lake build 2>&1 | tail -60
+      - name: Save compiled lab modules, even after a failed or timed out build
+        if: always() && github.ref == 'refs/heads/main' && !inputs.branch
+        uses: actions/cache/save@v4
+        with:
+          path: LeanLab/.lake/build
+          key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-${{ github.run_id }}
+      - name: Gate check of the branch
+        if: github.ref != 'refs/heads/main' || inputs.branch
+        env:
+          BR: ${{ inputs.branch || github.ref_name }}
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          OUT="$RUNNER_TEMP/gate"; mkdir -p "$OUT"
+          git fetch -q origin main
+          git config user.name lean-gate; git config user.email lean-gate@users.noreply.github.com
+          # Ledger files take both sides, as the gate does.
+          printf "LOG.md merge=union\n**/LOG.md merge=union\n**/PROGRESS.md merge=union\n**/STATEMENTS.md merge=union\n" >> .git/info/attributes
+          git merge -q --no-edit origin/main || { echo "MERGE CONFLICT with main outside ledger files"; git diff --name-only --diff-filter=U; exit 1; }
+          case "$BR" in codex/*) TAG=CODEX-CI;; aristotle/*) TAG=ARISTOTLE-CI;; grok/*) TAG=GROK-CI;; *) TAG=GEMINI-CI;; esac
+          FOLDERS=$(git diff --name-only origin/main HEAD -- LeanLab/LeanLab | cut -d/ -f3 | sort -u | grep -v '^$' | paste -sd, -)
+          echo "branch: $BR  tag: $TAG  folders: $FOLDERS"
+          python3 scripts/seal_check.py origin/main | tee "$OUT/seal.txt"
+          if [ -n "$FOLDERS" ]; then bash scripts/check_branch.sh "$FOLDERS" "$TAG" | tee "$OUT/check.txt"; else echo "RESULT PASS no Lean folders changed" | tee "$OUT/check.txt"; fi
+          cp LeanLab/LeanLab/*/build/$TAG-CHECK.txt "$OUT/" 2>/dev/null || true
+          if grep -q "^SEAL FAIL" "$OUT/seal.txt"; then echo "GATE CI: SEAL FAIL"; exit 1; fi
+          REAL=$(grep "^FAIL" "$OUT/check.txt" | grep -v -E "LOG.md has a line|STATEMENTS.md updated|PROGRESS.md updated|everything committed|uncommitted changes remain" || true)
+          if [ -n "$REAL" ]; then echo "GATE CI: real FAIL lines:"; echo "$REAL"; exit 1; fi
+          echo "GATE CI: PASS"
+      - name: Keep the reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-report
+          path: ${{ runner.temp }}/gate/
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,43 @@
+import LeanLab.GoldbachShort78.BHPRegions
+import LeanLab.GoldbachShort78.BHPBookkeeping
+import LeanLab.GoldbachShort78.Instances
+import LeanLab.GoldbachShort78.LiNormalization
+import LeanLab.GoldbachShort78.Growth
+import LeanLab.GoldbachShort78.BHPConsequences
+#print axioms LeanLab.GoldbachShort78.mem_primeInterval
+#print axioms LeanLab.GoldbachShort78.right_tiles_count
+#print axioms LeanLab.GoldbachShort78.exists_tile_number
+#print axioms LeanLab.GoldbachShort78.quarter_rpow_le
+#print axioms LeanLab.GoldbachShort78.printed_count_in_tile
+#print axioms LeanLab.GoldbachShort78.bhpWindowCount_of_printed
+
+#print axioms LeanLab.GoldbachShort78.primesAll_of_printed
+#print axioms LeanLab.GoldbachShort78.goldbach_short_bhp_of_printed
+#print axioms LeanLab.GoldbachShort78.goldbach_short_78_of_printed
+#print axioms LeanLab.GoldbachShort78.goldbach_short_bhp_li_eps_of_printed
+#print axioms LeanLab.GoldbachShort78.eventually_rpow_le_mul
+#print axioms LeanLab.GoldbachShort78.short_b_side_conditions_eventually
+#print axioms LeanLab.GoldbachShort78.short_b_size_forces_exponent_lt_one
+#print axioms LeanLab.GoldbachShort78.goldbach_short_b_eventually
+#print axioms LeanLab.GoldbachShort78.goldbach_short_bhp_li_eps_eventually
+#print axioms LeanLab.GoldbachShort78.almostAllCount_of_power_exceptions
+#print axioms LeanLab.GoldbachShort78.liAlmostAllCountEps_of_printed
+#print axioms LeanLab.GoldbachShort78.primeInterval_card_eq_primeCounting_sub
+#print axioms LeanLab.GoldbachShort78.goldbach_short_of_printed_counts
+#print axioms LeanLab.GoldbachShort78.almostAllCount_of_primesAll
+#print axioms LeanLab.GoldbachShort78.explicitShort78_of_printed
+#print axioms LeanLab.GoldbachShort78.bhp_backward_prime_of_printed
+#print axioms LeanLab.GoldbachShort78.primesAll_one_bertrand
+#print axioms LeanLab.GoldbachShort78.bhp_lemma10_sum_bound
+#print axioms LeanLab.GoldbachShort78.bhp_lemma10
+#print axioms LeanLab.GoldbachShort78.bhp_lemma10_last_term_bound
+#print axioms LeanLab.GoldbachShort78.bhp_lemma11_gap_core
+#print axioms LeanLab.GoldbachShort78.bhp_lemma11
+#print axioms LeanLab.GoldbachShort78.bhp_alphaStar_bounds
+#print axioms LeanLab.GoldbachShort78.bhp_small_terms_subsum
+#print axioms LeanLab.GoldbachShort78.bhp_regionA_iff_B
+#print axioms LeanLab.GoldbachShort78.bhp_regionE_iff_F
+#print axioms LeanLab.GoldbachShort78.bhp_least_index_instance
+#print axioms LeanLab.GoldbachShort78.bhp_lemma11_sharp_instance
+#print axioms LeanLab.GoldbachShort78.bhp_remaining_input_budget
+#print axioms LeanLab.GoldbachShort78.bhp_exp_chord
