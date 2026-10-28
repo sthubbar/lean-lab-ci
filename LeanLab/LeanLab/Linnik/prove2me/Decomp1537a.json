@@ -1,0 +1,337 @@
+{
+  "name": "Linnik class bounds for $s(m-2^\\nu)$ via odd squarefree moduli",
+  "description": "This mission concerns arithmetic weights attached to differences between an integer and powers of two. For a nonzero integer $h$, the singular factor $s(h)$ is the finite product of $1+1/(p-2)$ over odd primes dividing $h$. The auxiliary weight $k(d)$ is supported on odd squarefree integers, and $\\xi(d)$ records the multiplicative order of $2$ modulo $d$. The exponent range is $1\\le\\nu\\le L$, and zero differences are excluded.\n\nThe target is a uniform bound for sums of $s(m-2^\\nu)$ subject to $r\\mid C(m-2^\\nu)$. For every $\\eta>0$, sufficiently large $L$ and a sufficiently large odd squarefree part $r^\\prime$ relative to $C$ give an upper bound $\\eta L$, uniformly for integers $m$ with $|m|\\le2^{2L}$. Such estimates control contributions from exceptional arithmetic classes in problems involving primes and powers of two. Binary Goldbach remains open.\n\nThe source is J. Pintz and I. Z. Ruzsa, [On Linnik's approximation to Goldbach's problem. II](https://doi.org/10.1007/s10474-020-01077-8), Acta Mathematica Hungarica, 2020. The relevant material is Lemma 1 and displays $2.34$ through $2.40$, together with the class restriction in display $4.3$. The lab states a general form allowing negative $m$ and all nonzero differences; this scope is preserved here.\n\nAI wrote these Lean statements in an AI-run Lean lab. This is a draft for Steve's human audit before submission to Prove2Me; the required human audit is pending. The sixteen open leaves and final assembly are presented as proof obligations. Compilation with admitted proofs checks their syntax and types, without establishing their truth.",
+  "mission_type": "ResearchPaper",
+  "field_query": "number theory",
+  "lab_file": "LeanLab/LeanLab/Linnik/Decomp1537a.lean",
+  "items": [
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_kf",
+      "definition_title": "Odd squarefree divisor weight",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\nnoncomputable def kf (d : ℕ) : ℝ :=\n  if Odd d ∧ Squarefree d then ∏ p ∈ d.primeFactors, 1 / ((p : ℝ) - 2) else 0\n\nend LL_Decomp1537a",
+      "natural_language_statement": "For $d\\in\\mathbb N$, define $k(d)=\\prod_{p\\mid d}1/(p-2)$ if $d$ is odd and squarefree, and $k(d)=0$ otherwise."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_xi",
+      "definition_title": "Order of two modulo a natural number",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\nnoncomputable def xi (d : ℕ) : ℕ := orderOf (2 : ZMod d)\n\nend LL_Decomp1537a",
+      "natural_language_statement": "For $d\\in\\mathbb N$, define $\\xi(d)$ as the multiplicative order of $2$ in $\\mathbb Z/d\\mathbb Z$, using the Lean order convention of zero when the order is infinite."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_sfac",
+      "definition_title": "Odd prime singular factor",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\nnoncomputable def sfac (h : ℤ) : ℝ :=\n  ∏ p ∈ h.natAbs.primeFactors.filter (fun p => 2 < p), (1 + 1 / ((p : ℝ) - 2))\n\nend LL_Decomp1537a",
+      "natural_language_statement": "For $h\\in\\mathbb Z$, define $s(h)=\\prod_{p\\mid |h|,\\ p>2}(1+1/(p-2))$, with the product over the prime factors of $|h|$ as implemented by Lean."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_nus",
+      "definition_title": "Admissible exponents",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\ndef nus (m : ℤ) (q L : ℕ) : Finset ℕ :=\n  (Icc 1 L).filter (fun ν => m - 2 ^ ν ≠ 0 ∧ (q : ℤ) ∣ m - 2 ^ ν)\n\nend LL_Decomp1537a",
+      "natural_language_statement": "For $m\\in\\mathbb Z$ and $q,L\\in\\mathbb N$, let $\\mathcal N(m,q,L)$ be the exponents $1\\le\\nu\\le L$ such that $m\\ne 2^\\nu$ and $q\\mid m-2^\\nu$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_Aq",
+      "definition_title": "Restricted singular factor sum",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\nnoncomputable def Aq (m : ℤ) (q L : ℕ) : ℝ := ∑ ν ∈ nus m q L, sfac (m - 2 ^ ν)\n\nend LL_Decomp1537a",
+      "natural_language_statement": "Define $A_q(m,L)=\\sum_{\\nu\\in\\mathcal N(m,q,L)}s(m-2^\\nu)$ for $m\\in\\mathbb Z$ and $q,L\\in\\mathbb N$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_Pm",
+      "definition_title": "Product of nonzero differences",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\ndef Pm (m : ℤ) (L : ℕ) : ℕ :=\n  ∏ ν ∈ (Icc 1 L).filter (fun ν => m - 2 ^ ν ≠ 0), (m - 2 ^ ν).natAbs\n\nend LL_Decomp1537a",
+      "natural_language_statement": "Define $P(m,L)=\\prod_{1\\le\\nu\\le L,\\ m\\ne 2^\\nu}|m-2^\\nu|$ as a natural number."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_oddSqf",
+      "definition_title": "Odd squarefree part",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\ndef oddSqf (r : ℕ) : ℕ := ∏ p ∈ r.primeFactors.filter (fun p => 2 < p), p\n\nend LL_Decomp1537a",
+      "natural_language_statement": "For $r\\in\\mathbb N$, define its odd squarefree part $r^\\prime=\\prod_{p\\mid r,\\ p>2}p$, using Lean prime factors also when $r=0$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1537a_qOf",
+      "definition_title": "Reduced odd squarefree modulus",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1537a\n\nopen Finset Real\n\ndef qOf (r C : ℕ) : ℕ := oddSqf r / Nat.gcd (oddSqf r) C\n\nend LL_Decomp1537a",
+      "natural_language_statement": "For $r,C\\in\\mathbb N$, define $q(r,C)=r^\\prime/\\gcd(r^\\prime,C)$ by natural number division."
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.sfac_eq_sum_kf",
+      "theorem_title": "Divisor expansion of the singular factor",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem sfac_eq_sum_kf (h : ℤ) (hh : h ≠ 0) :\n    sfac h = ∑ d ∈ h.natAbs.divisors, kf d := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every nonzero integer $h$, one has $s(h)=\\sum_{d\\mid |h|}k(d)$, where the divisors are positive.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_kf\nimport Definitions.Def_LL_Decomp1537a_sfac\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, displays 2.36 and 2.40",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Divisor expansion of the singular factor",
+      "milestone_description": "For every nonzero integer $h$, one has $s(h)=\\sum_{d\\mid |h|}k(d)$, where the divisors are positive.",
+      "lab_decl": "sfac_eq_sum_kf"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.Aq_eq_sum",
+      "theorem_title": "Reindexing the restricted divisor sum",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem Aq_eq_sum (m : ℤ) (q L : ℕ) :\n    Aq m q L = ∑ d ∈ (Pm m L).divisors, kf d * ((nus m (Nat.lcm d q) L).card : ℝ) := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every $m\\in\\mathbb Z$ and $q,L\\in\\mathbb N$, $A_q(m,L)=\\sum_{d\\mid P(m,L)}k(d)\\,|\\mathcal N(m,\\operatorname{lcm}(d,q),L)|$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_kf\nimport Definitions.Def_LL_Decomp1537a_sfac\nimport Definitions.Def_LL_Decomp1537a_nus\nimport Definitions.Def_LL_Decomp1537a_Aq\nimport Definitions.Def_LL_Decomp1537a_Pm\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.36",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Reindexing the restricted divisor sum",
+      "milestone_description": "For every $m\\in\\mathbb Z$ and $q,L\\in\\mathbb N$, $A_q(m,L)=\\sum_{d\\mid P(m,L)}k(d)\\,|\\mathcal N(m,\\operatorname{lcm}(d,q),L)|$.",
+      "lab_decl": "Aq_eq_sum"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.card_nus_le",
+      "theorem_title": "Counting exponents in a residue class",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem card_nus_le (m : ℤ) {n : ℕ} (L : ℕ) (hn : Odd n) :\n    ((nus m n L).card : ℝ) ≤ L / xi n + 1 := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every integer $m$, odd natural number $n$, and $L\\in\\mathbb N$, $|\\mathcal N(m,n,L)|\\le L/\\xi(n)+1$, with division in $\\mathbb R$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_xi\nimport Definitions.Def_LL_Decomp1537a_nus\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.36",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Counting exponents in a residue class",
+      "milestone_description": "For every integer $m$, odd natural number $n$, and $L\\in\\mathbb N$, $|\\mathcal N(m,n,L)|\\le L/\\xi(n)+1$, with division in $\\mathbb R$.",
+      "lab_decl": "card_nus_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.xi_le_of_dvd",
+      "theorem_title": "Monotonicity of the order under divisibility",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem xi_le_of_dvd {d n : ℕ} (hn : Odd n) (hd : d ∣ n) : xi d ≤ xi n := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "If $n$ is an odd natural number and $d\\mid n$, then $\\xi(d)\\le\\xi(n)$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_xi\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.38",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Monotonicity of the order under divisibility",
+      "milestone_description": "If $n$ is an odd natural number and $d\\mid n$, then $\\xi(d)\\le\\xi(n)$.",
+      "lab_decl": "xi_le_of_dvd"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.log_le_xi_mul",
+      "theorem_title": "A logarithmic lower bound for the order",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem log_le_xi_mul {q : ℕ} (hq : Odd q) : Real.log q ≤ xi q * Real.log 2 := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every odd natural number $q$, $\\log q\\le\\xi(q)\\log 2$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_xi\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, before display 2.38",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "A logarithmic lower bound for the order",
+      "milestone_description": "For every odd natural number $q$, $\\log q\\le\\xi(q)\\log 2$.",
+      "lab_decl": "log_le_xi_mul"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.summable_kf_div_xi",
+      "theorem_title": "Summability of Romanov's weighted series",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem summable_kf_div_xi : Summable (fun d : ℕ => kf d / (xi d : ℝ)) := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "The real series $\\sum_{d\\in\\mathbb N}k(d)/\\xi(d)$ is summable, with division interpreted in Lean over $\\mathbb R$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_kf\nimport Definitions.Def_LL_Decomp1537a_xi\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, after display 2.37",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Summability of Romanov's weighted series",
+      "milestone_description": "The real series $\\sum_{d\\in\\mathbb N}k(d)/\\xi(d)$ is summable, with division interpreted in Lean over $\\mathbb R$.",
+      "lab_decl": "summable_kf_div_xi"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.tail_small",
+      "theorem_title": "Uniform smallness of finite tails",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem tail_small {f : ℕ → ℝ} (hf : Summable f) (h0 : ∀ d, 0 ≤ f d) {η : ℝ} (hη : 0 < η) :\n    ∃ D : ℕ, ∀ s : Finset ℕ, (∀ d ∈ s, D < d) → ∑ d ∈ s, f d < η := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every summable nonnegative function $f:\\mathbb N\\to\\mathbb R$ and every $\\eta>0$, there exists $D\\in\\mathbb N$ such that $\\sum_{d\\in S}f(d)<\\eta$ for every finite $S\\subset\\{d:D<d\\}$.",
+      "preamble": "import Mathlib\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.37",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Uniform smallness of finite tails",
+      "milestone_description": "For every summable nonnegative function $f:\\mathbb N\\to\\mathbb R$ and every $\\eta>0$, there exists $D\\in\\mathbb N$ such that $\\sum_{d\\in S}f(d)<\\eta$ for every finite $S\\subset\\{d:D<d\\}$.",
+      "lab_decl": "tail_small"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.sum_div_xi_lcm_le",
+      "theorem_title": "Splitting the least common multiple order sum",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem sum_div_xi_lcm_le {q : ℕ} (hq : Odd q) (D : ℕ) (s : Finset ℕ) :\n    ∑ d ∈ s, kf d / (xi (Nat.lcm d q) : ℝ) ≤\n      (∑ d ∈ range (D + 1), kf d) / xi q + ∑ d ∈ s.filter (fun d => D < d), kf d / xi d := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every odd $q\\in\\mathbb N$, cutoff $D\\in\\mathbb N$, and finite $S\\subset\\mathbb N$, $\\sum_{d\\in S}k(d)/\\xi(\\operatorname{lcm}(d,q))\\le (\\sum_{d=0}^{D}k(d))/\\xi(q)+\\sum_{d\\in S,\\ d>D}k(d)/\\xi(d)$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_kf\nimport Definitions.Def_LL_Decomp1537a_xi\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.38",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Splitting the least common multiple order sum",
+      "milestone_description": "For every odd $q\\in\\mathbb N$, cutoff $D\\in\\mathbb N$, and finite $S\\subset\\mathbb N$, $\\sum_{d\\in S}k(d)/\\xi(\\operatorname{lcm}(d,q))\\le (\\sum_{d=0}^{D}k(d))/\\xi(q)+\\sum_{d\\in S,\\ d>D}k(d)/\\xi(d)$.",
+      "lab_decl": "sum_div_xi_lcm_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.Pm_le",
+      "theorem_title": "Size of the difference product",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem Pm_le {m : ℤ} {L : ℕ} (hm : |m| ≤ 2 ^ (2 * L)) : Pm m L ≤ 2 ^ ((2 * L + 1) * L) := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "If $m\\in\\mathbb Z$, $L\\in\\mathbb N$, and $|m|\\le 2^{2L}$, then $P(m,L)\\le 2^{(2L+1)L}$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_Pm\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.39",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Size of the difference product",
+      "milestone_description": "If $m\\in\\mathbb Z$, $L\\in\\mathbb N$, and $|m|\\le 2^{2L}$, then $P(m,L)\\le 2^{(2L+1)L}$.",
+      "lab_decl": "Pm_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.large_prime_prod_le",
+      "theorem_title": "The large prime product bound",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem large_prime_prod_le {L P : ℕ} (hL : 2 ≤ L) (hP : 0 < P)\n    (hPle : P ≤ 2 ^ ((2 * L + 1) * L)) :\n    ∏ p ∈ (P.primeFactors.filter (fun p => 2 < p)).filter (fun p => ¬ p ≤ L ^ 3),\n      (1 + 1 / ((p : ℝ) - 2)) ≤ Real.exp 3 := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For $L,P\\in\\mathbb N$ with $L\\ge2$ and $0<P\\le2^{(2L+1)L}$, $\\prod_{p\\mid P,\\ p>2,\\ p>L^3}(1+1/(p-2))\\le e^3$.",
+      "preamble": "import Mathlib\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.40",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "The large prime product bound",
+      "milestone_description": "For $L,P\\in\\mathbb N$ with $L\\ge2$ and $0<P\\le2^{(2L+1)L}$, $\\prod_{p\\mid P,\\ p>2,\\ p>L^3}(1+1/(p-2))\\le e^3$.",
+      "lab_decl": "large_prime_prod_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.small_prime_prod_le",
+      "theorem_title": "Comparison of small prime products",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem small_prime_prod_le (P x : ℕ) :\n    ∏ p ∈ (P.primeFactors.filter (fun p => 2 < p)).filter (fun p => p ≤ x),\n      (1 + 1 / ((p : ℝ) - 2)) ≤\n    ∏ p ∈ (range (x + 1)).filter (fun p => p.Prime ∧ 2 < p), (1 + 1 / ((p : ℝ) - 2)) := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For all $P,x\\in\\mathbb N$, $\\prod_{p\\mid P,\\ 2<p\\le x}(1+1/(p-2))\\le\\prod_{p\\text{ prime},\\ 2<p\\le x}(1+1/(p-2))$.",
+      "preamble": "import Mathlib\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.40",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Comparison of small prime products",
+      "milestone_description": "For all $P,x\\in\\mathbb N$, $\\prod_{p\\mid P,\\ 2<p\\le x}(1+1/(p-2))\\le\\prod_{p\\text{ prime},\\ 2<p\\le x}(1+1/(p-2))$.",
+      "lab_decl": "small_prime_prod_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.mertens_prod",
+      "theorem_title": "A Mertens type product bound",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem mertens_prod : ∃ C : ℝ, ∀ x : ℕ, 2 ≤ x →\n    ∏ p ∈ (range (x + 1)).filter (fun p => p.Prime ∧ 2 < p), (1 + 1 / ((p : ℝ) - 2)) ≤\n      C * Real.log x := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "There exists $C\\in\\mathbb R$ such that for every natural $x\\ge2$, $\\prod_{p\\text{ prime},\\ 2<p\\le x}(1+1/(p-2))\\le C\\log x$.",
+      "preamble": "import Mathlib\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.40",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "A Mertens type product bound",
+      "milestone_description": "There exists $C\\in\\mathbb R$ such that for every natural $x\\ge2$, $\\prod_{p\\text{ prime},\\ 2<p\\le x}(1+1/(p-2))\\le C\\log x$.",
+      "lab_decl": "mertens_prod"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.log_le_mul_eventually",
+      "theorem_title": "Eventual domination of the logarithm",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem log_le_mul_eventually {c : ℝ} (hc : 0 < c) :\n    ∃ L0 : ℕ, ∀ L : ℕ, L0 ≤ L → Real.log L ≤ c * L := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every real $c>0$, there exists $L_0\\in\\mathbb N$ such that $\\log L\\le cL$ for every natural $L\\ge L_0$.",
+      "preamble": "import Mathlib\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 7, display 2.40",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Eventual domination of the logarithm",
+      "milestone_description": "For every real $c>0$, there exists $L_0\\in\\mathbb N$ such that $\\log L\\le cL$ for every natural $L\\ge L_0$.",
+      "lab_decl": "log_le_mul_eventually"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.qOf_dvd",
+      "theorem_title": "Divisibility by the reduced modulus",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem qOf_dvd {r C : ℕ} {h : ℤ} (hr : 0 < r) (hdvd : (r : ℤ) ∣ C * h) :\n    (qOf r C : ℤ) ∣ h := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For $r,C\\in\\mathbb N$ and $h\\in\\mathbb Z$, if $r>0$ and $r\\mid Ch$, then $q(r,C)\\mid h$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_oddSqf\nimport Definitions.Def_LL_Decomp1537a_qOf\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 9, display 4.3 and p. 6, Lemma 1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Divisibility by the reduced modulus",
+      "milestone_description": "For $r,C\\in\\mathbb N$ and $h\\in\\mathbb Z$, if $r>0$ and $r\\mid Ch$, then $q(r,C)\\mid h$.",
+      "lab_decl": "qOf_dvd"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.qOf_odd",
+      "theorem_title": "Oddness of the reduced modulus",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem qOf_odd (r C : ℕ) : Odd (qOf r C) := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every $r,C\\in\\mathbb N$, the natural number $q(r,C)$ is odd.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_oddSqf\nimport Definitions.Def_LL_Decomp1537a_qOf\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 6, Lemma 1 and p. 9, display 4.3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Oddness of the reduced modulus",
+      "milestone_description": "For every $r,C\\in\\mathbb N$, the natural number $q(r,C)$ is odd.",
+      "lab_decl": "qOf_odd"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.le_qOf_mul",
+      "theorem_title": "Size of the reduced modulus",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem le_qOf_mul (r C : ℕ) (hC : 0 < C) : oddSqf r ≤ qOf r C * C := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every $r,C\\in\\mathbb N$ with $C>0$, $r^\\prime\\le q(r,C)C$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_oddSqf\nimport Definitions.Def_LL_Decomp1537a_qOf\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; p. 5, display 2.27 and p. 6, Lemma 1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Size of the reduced modulus",
+      "milestone_description": "For every $r,C\\in\\mathbb N$ with $C>0$, $r^\\prime\\le q(r,C)C$.",
+      "lab_decl": "le_qOf_mul"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1537a.lemma1_class",
+      "theorem_title": "Uniform singular factor bound in a divisibility class",
+      "formal_statement": "namespace LL_Decomp1537a\ntheorem lemma1_class {η : ℝ} (hη : 0 < η) :\n    ∃ T L0 : ℕ, ∀ L : ℕ, L0 ≤ L → ∀ r C : ℕ, 0 < r → 0 < C → T * C ≤ oddSqf r →\n      ∀ m : ℤ, |m| ≤ 2 ^ (2 * L) →\n        ∑ ν ∈ (Icc 1 L).filter (fun ν => m - 2 ^ ν ≠ 0 ∧ (r : ℤ) ∣ C * (m - 2 ^ ν)),\n          sfac (m - 2 ^ ν) ≤ η * L := by sorry\nend LL_Decomp1537a",
+      "natural_language_statement": "For every $\\eta>0$, there exist $T,L_0\\in\\mathbb N$ such that for all $L\\ge L_0$, positive natural $r,C$ with $TC\\le r^\\prime$, and integers $m$ with $|m|\\le2^{2L}$, $\\sum_{1\\le\\nu\\le L,\\ m\\ne2^\\nu,\\ r\\mid C(m-2^\\nu)}s(m-2^\\nu)\\le\\eta L$. This is the final lab assembly, conditional in the lab on its open leaves.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1537a_sfac\nimport Definitions.Def_LL_Decomp1537a_oddSqf\n\nopen Finset Real",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik’s approximation to Goldbach’s problem. II, Acta Mathematica Hungarica 161, 569–582, 2020. https://doi.org/10.1007/s10474-020-01077-8; pp. 9 and 11, displays 4.5 and 6.3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": true,
+      "milestone_title": "Uniform singular factor bound in a divisibility class",
+      "milestone_description": "For every $\\eta>0$, there exist $T,L_0\\in\\mathbb N$ such that for all $L\\ge L_0$, positive natural $r,C$ with $TC\\le r^\\prime$, and integers $m$ with $|m|\\le2^{2L}$, $\\sum_{1\\le\\nu\\le L,\\ m\\ne2^\\nu,\\ r\\mid C(m-2^\\nu)}s(m-2^\\nu)\\le\\eta L$. This is the final lab assembly, conditional in the lab on its open leaves.",
+      "lab_decl": "lemma1_class"
+    }
+  ]
+}
