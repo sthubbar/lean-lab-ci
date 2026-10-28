@@ -20,7 +20,7 @@ Leaves, with GRH as an explicit argument where the paper assumes it:
 * `Lemma9J`, Lemma 9 p. 1227, Chen's weighted inequality: PROVED, from `U7153.lemma10`.
 * `Thm5J`, `Thm6J`, `Thm7J`, Theorems 5, 6, 7, pp. 1228, 1231, 1234-1235.
 * `Bracket13375`, the Section 5.4 combination of the three exact brackets at the new parameters
-  is within 10⁻⁵ of `Journal.K3J`; numeric certificate, Python only so far.
+  is at least `Journal.K3J` − 10⁻⁵, a one-sided lower bound; PROVED in Cert1567.
 * `section55_step`, Section 5.5 p. 1241, π₂'(N) ≥ π₂(N) − √N − 1: PROVED.
 
 `chenThreshold13375_of_leaves`: the threshold, CONDITIONAL ON `Thm5J`, `Thm6J`, `Thm7J`,
@@ -202,22 +202,22 @@ def Cond25 (α A u X₂ : ℝ) : Prop :=
 
 /-- **Theorem 5**, p. 1228: S(A, ℙ, z) > 8 U_N N/log² N · B5. -/
 def Thm5J : Prop :=
-  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε →
-    0 < α → α < 1 / 8 → 0 < A → Cond19 α A u X₂ → 4e18 ≤ X₂ → X₂ ≤ (n : ℝ) →
+  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
+    0 < α → α < 1 / 8 → 0 < A → Cond19 α A u X₂ → 4e18 ≤ X₂ → X₂ ≤ (n : ℝ) → Even n →
     8 * (UNfull n * n / log n ^ 2) * B5J α A ε C₂ X₂ n < (U7153.SA n : ℝ)
 
 /-- **Theorem 6**, pp. 1231-1232: Σ_{z ≤ q < y, q ∤ N} S(A_q, ℙ, z) ≤ 8 U_N N/log² N · B6. -/
 def Thm6J : Prop :=
-  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε →
-    0 < α → α < 1 / 24 → 0 < A → Cond19 α A u X₂ → exp (exp 10) ≤ X₂ → X₂ ≤ (n : ℝ) →
+  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
+    0 < α → α < 1 / 24 → 0 < A → Cond19 α A u X₂ → exp (exp 10) ≤ X₂ → X₂ ≤ (n : ℝ) → Even n →
     ∑ q ∈ (U7153.Qset n).filter (fun q => ¬ q ∣ n), (U7153.SAq n q : ℝ)
       ≤ 8 * (UNfull n * n / log n ^ 2) * B6J α A ε C₁ X₂ n
 
 /-- **Theorem 7**, pp. 1234-1235: S(B, ℙ, y) ≤ U_N N/log² N · B7. -/
 def Thm7J : Prop :=
-  ∀ (α A u ε C₁ C₂ X₂ ε₁ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε →
+  ∀ (α A u ε C₁ C₂ X₂ ε₁ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
     0 < ε₁ → ε₁ < 1 → 0 < α → α < 1 / 16 → 0 < A → Cond25 α A u X₂ → exp (exp 10) ≤ X₂ →
-    X₂ ≤ (n : ℝ) →
+    X₂ ≤ (n : ℝ) → Even n →
     (U7153.SB n : ℝ) ≤ UNfull n * n / log n ^ 2 * B7J α A ε C₁ X₂ ε₁
 
 /-! ### Lemma 9, p. 1227, PROVED -/
@@ -423,7 +423,7 @@ the error terms are PROVED. -/
 theorem chenThreshold13375_of_leaves (h5 : Thm5J) (h6 : Thm6J) (h7 : Thm7J)
     (hT4 : LinearSieveT4 (1 / 8349) 112 114) (hε : Eps1500) (hB : Bracket13375) :
     ChenThreshold13375 := by
-  intro hG n _ hn
+  intro hG n hev hn
   obtain ⟨hX18, hX10⟩ := X2_ranges
   have c19 := cond19_13375
   have c25 := cond25_13375
@@ -431,12 +431,12 @@ theorem chenThreshold13375_of_leaves (h5 : Thm5J) (h6 : Thm6J) (h7 : Thm7J)
   have hL : exp 13.375 ≤ log (n : ℝ) := by
     rw [← log_exp (exp 13.375)]; exact log_le_log (exp_pos _) hn
   have h24 : (2 : ℝ) ^ 24 ≤ n := by linarith
-  have H5 := h5 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 hε.le
-    (by norm_num) (by norm_num) (by norm_num) c19 hX18 hn
-  have H6 := h6 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 hε.le
-    (by norm_num) (by norm_num) (by norm_num) c19 hX10 hn
-  have H7 := h7 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) 1e-20 n hG hT4 hε.le
-    (by norm_num) (by norm_num) (by norm_num) (by norm_num) (by norm_num) c25 hX10 hn
+  have H5 := h5 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 hε.le (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) c19 hX18 hn hev
+  have H6 := h6 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 hε.le (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) c19 hX10 hn hev
+  have H7 := h7 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) 1e-20 n hG hT4 hε.le (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) (by norm_num) c25 hX10 hn hev
   rw [sum_Qset_filter] at H6
   have H9 := U7153.lemma10 n h24
   have HB := hB n hn

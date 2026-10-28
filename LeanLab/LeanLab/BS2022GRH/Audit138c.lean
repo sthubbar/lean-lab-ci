@@ -43,8 +43,16 @@ theorem b6_negative (N : ℝ) (hN : 1 < N) :
   change B6J 0.00256 10 1 ((-B6J 0.00256 10 1 0 X N - 1) / b) X N < 0
   rw [heq, div_mul_cancel₀ _ hb.ne']
   linarith
-/-- Lab transcription audit, CONDITIONAL ON the sealed Thm6J, not a disproof of GRH. -/
-theorem thm6J_excludes_grh (h6 : Thm6J) : ¬ GRH := by
+/-- The sealed `Thm6J` as it stood before the 2026-10-27 statement fix, kept verbatim for this audit.
+U-1580, 2026-10-28: the live `Thm6J` now carries `0 < ε → ε < 1 / 63 →` and `Even n →`. -/
+def Thm6JOld : Prop :=
+  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε →
+    0 < α → α < 1 / 24 → 0 < A → Cond19 α A u X₂ → exp (exp 10) ≤ X₂ → X₂ ≤ (n : ℝ) →
+    ∑ q ∈ (U7153.Qset n).filter (fun q => ¬ q ∣ n), (U7153.SAq n q : ℝ)
+      ≤ 8 * (UNfull n * n / log n ^ 2) * B6J α A ε C₁ X₂ n
+
+/-- Lab transcription audit, CONDITIONAL ON the pre-fix sealed Thm6J, not a disproof of GRH. -/
+theorem thm6J_excludes_grh (h6 : Thm6JOld) : ¬ GRH := by
   intro hGRH
   obtain ⟨n, _hnEven, hn⟩ := threshold_nonvacuous
   have hn1 : (1 : ℝ) < n := lt_of_lt_of_le (by linarith [X2_ranges.1]) hn
@@ -120,8 +128,16 @@ theorem b7_negative : ∃ C₁ : ℝ, B7J 0.00256 10 1 C₁ (exp (exp 13.375)) (
   change B7J 0.00256 10 1 ((-B7J 0.00256 10 1 0 X (1 / 2) - 1) / b) X (1 / 2) < 0
   rw [heq, div_mul_cancel₀ _ hb.ne']
   linarith
-/-- Lab transcription audit, CONDITIONAL ON the sealed Thm7J, not a disproof of GRH. -/
-theorem thm7J_excludes_grh (h7 : Thm7J) : ¬ GRH := by
+/-- The sealed `Thm7J` as it stood before the 2026-10-27 statement fix, kept verbatim for this audit.
+U-1580, 2026-10-28: the live `Thm7J` now carries `0 < ε → ε < 1 / 63 →` and `Even n →`. -/
+def Thm7JOld : Prop :=
+  ∀ (α A u ε C₁ C₂ X₂ ε₁ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε →
+    0 < ε₁ → ε₁ < 1 → 0 < α → α < 1 / 16 → 0 < A → Cond25 α A u X₂ → exp (exp 10) ≤ X₂ →
+    X₂ ≤ (n : ℝ) →
+    (U7153.SB n : ℝ) ≤ UNfull n * n / log n ^ 2 * B7J α A ε C₁ X₂ ε₁
+
+/-- Lab transcription audit, CONDITIONAL ON the pre-fix sealed Thm7J, not a disproof of GRH. -/
+theorem thm7J_excludes_grh (h7 : Thm7JOld) : ¬ GRH := by
   intro hGRH
   obtain ⟨n, _hnEven, hn⟩ := threshold_nonvacuous
   have hn1 : (1 : ℝ) < n := lt_of_lt_of_le (by linarith [X2_ranges.1]) hn

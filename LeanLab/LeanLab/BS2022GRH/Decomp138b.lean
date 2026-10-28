@@ -48,10 +48,18 @@ theorem bracket_unbounded (α A X N T : ℝ) (hα : α < 1 / 8)
   rw [heq, div_mul_cancel₀ _ hb.ne']
   linarith
 
+/-- The sealed `Thm5J` as it stood before the 2026-10-27 statement fix, kept verbatim for this audit.
+U-1580, 2026-10-28: the live `Thm5J` now carries `0 < ε → ε < 1 / 63 →` and `Even n →`, so the
+audit below is restated against this archived copy. -/
+def Thm5JOld : Prop :=
+  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε →
+    0 < α → α < 1 / 8 → 0 < A → Cond19 α A u X₂ → 4e18 ≤ X₂ → X₂ ≤ (n : ℝ) →
+    8 * (UNfull n * n / log n ^ 2) * B5J α A ε C₂ X₂ n < (U7153.SA n : ℝ)
+
 /-- Theorem 5 transcription audit, p. 1228.
-The sealed predicate implies the negation of the lab GRH predicate because epsilon = 1
+The pre-fix sealed predicate implies the negation of the lab GRH predicate because epsilon = 1
 makes its sieve hypothesis vacuous and C₂ is unrestricted. This is a lab encoding issue. -/
-theorem thm5J_excludes_grh (h5 : Thm5J) : ¬ GRH := by
+theorem thm5J_excludes_grh (h5 : Thm5JOld) : ¬ GRH := by
   intro hGRH
   obtain ⟨n, hnEven, hn⟩ := threshold_nonvacuous
   have hn0 : (0 : ℝ) < n := lt_of_lt_of_le (exp_pos _) hn

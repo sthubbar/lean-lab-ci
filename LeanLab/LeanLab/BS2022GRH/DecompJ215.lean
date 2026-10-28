@@ -32,6 +32,6 @@ lemma leaf_comb (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ)
 
 /-- **Theorem 5**, p. 1228: S(A, ℙ, z) > 8 U_N N/log² N · B5. -/
 theorem thm5J_assembly : LeanLab.BS2022GRH.ChenThresholdGRH.Thm5J := by
-  intro α A u ε C₁ C₂ X₂ n hGRH hSieve heps halpha1 halpha2 hA hCond hX2X hX2N
+  intro α A u ε C₁ C₂ X₂ n hGRH hSieve heps _hε0 _hε1 halpha1 halpha2 hA hCond hX2X hX2N _hev
   apply leaf_comb α A u ε C₁ C₂ X₂ n hGRH hSieve heps halpha1 halpha2 hA hCond hX2X hX2N
   exact leaf2_bracket α A ε C₂ X₂ n
