@@ -15,6 +15,8 @@ So Corollary 2 is CONDITIONAL ON Theorem 2 only.
 import LeanLab.Perelli1996.Merge
 
 namespace LeanLab.Perelli1996
+-- 2026-10-28 architect: encoding A now lives in StatementsA, namespace EncA
+open LeanLab.Perelli1996.EncA
 open Finset Real Polynomial Filter Topology Asymptotics
 open scoped ArithmeticFunction.vonMangoldt
 

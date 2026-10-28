@@ -12,12 +12,47 @@ namespace LeanLab.KanieckiGap
 theorem large_p_gap_bound (hS : LeanLab.DERZ1997.Schoenfeld61) {p x : ℕ} (hp : p.Prime)
     (hsmall : ¬ nextPrime p ≤ 7263 * 10 ^ 10) (hpR : (23 * 10 ^ 8 : ℝ) ≤ p)
     (hpx : p ≤ x) :
-    (gapAt p : ℝ) < √(x : ℝ) * Real.log x ^ 2 / (4 * Real.pi) := sorry
+    (gapAt p : ℝ) < √(x : ℝ) * Real.log x ^ 2 / (4 * Real.pi) := by
+  have hpi := Real.pi_lt_d2
+  have hpi0 := Real.pi_pos
+  obtain ⟨hq1, hq2⟩ := nextPrime_spec p
+  have h2p := nextPrime_le_two_mul (p := p) hp.one_lt.le
+  set q := nextPrime p with hq
+  have hθ := theta_before_next p
+  rw [← hq] at hθ
+  have hcast : ((q - 1 : ℕ) : ℝ) = (p : ℝ) + (gapAt p : ℝ) - 1 := by
+    unfold gapAt; rw [← hq]
+    rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega)]; push_cast; ring
+  have hg1 : (1 : ℝ) ≤ gapAt p := by unfold gapAt; exact_mod_cast (by omega : 1 ≤ q - p)
+  have hS1 := hS ((q - 1 : ℕ) : ℝ) (by rw [hcast]; linarith)
+  have hS2 := hS (p : ℝ) hpR
+  have hgp : (gapAt p : ℝ) ≤ p := by unfold gapAt; exact_mod_cast (by omega : q - p ≤ p)
+  have hkey : (gapAt p : ℝ) - 1 < B p + B (p + gapAt p - 1) := by
+    rw [hθ, hcast] at hS1
+    have a1 := (abs_lt.mp hS1).1
+    have a2 := (abs_lt.mp hS2).2
+    unfold B; linarith
+  refine (core hpR hg1 hgp hkey).trans_le ?_
+  have hpx' : (p : ℝ) ≤ x := by exact_mod_cast hpx
+  have hLp := log_ge_21_5 hpR
+  gcongr
 
 /-- LEAF. Page 371, (6.1). Upper bound for gapAt p in the small p case. -/
 theorem small_p_gap_bound (hY : YoungPotler) {p x : ℕ} (hp : p.Prime)
     (hsmall : nextPrime p ≤ 7263 * 10 ^ 10) (hx : 23 * 10 ^ 8 ≤ x) :
-    (gapAt p : ℝ) < √(x : ℝ) * Real.log x ^ 2 / (4 * Real.pi) := sorry
+    (gapAt p : ℝ) < √(x : ℝ) * Real.log x ^ 2 / (4 * Real.pi) := by
+  have hx0 : (0 : ℝ) < x := by exact_mod_cast (by linarith)
+  have hxR : (23 * 10 ^ 8 : ℝ) ≤ x := by exact_mod_cast hx
+  have hLx := log_ge_21_5 hxR
+  have h778 := hY p hp hsmall
+  have : (gapAt p : ℝ) ≤ 778 := by exact_mod_cast h778
+  have hsx : (47958 : ℝ) ≤ √(x : ℝ) := by
+    rw [Real.le_sqrt (by norm_num) hx0.le]; linarith
+  have hpi := Real.pi_lt_d2
+  have hpi0 := Real.pi_pos
+  rw [lt_div_iff₀ (by positivity)]
+  nlinarith [mul_le_mul hsx (pow_le_pow_left₀ (by norm_num) hLx 2) (by norm_num)
+    (Real.sqrt_nonneg _)]
 
 /-- LEAF. Page 371, paragraph 4. Combining large p and small p cases.
  CONDITIONAL ON Schoenfeld61 and YoungPotler. -/

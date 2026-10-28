@@ -1,0 +1,327 @@
+{
+  "name": "Vaughan decomposition of $S(\\alpha)$ and dyadic bounds: Liu-Wang Decomp1543a",
+  "description": "The von Mangoldt function $\\Lambda(n)$ equals $\\log p$ when $n$ is a positive power of a prime $p$, and is zero otherwise. Its exponential sum $S_\\Lambda(c,N,\\alpha)=\\sum_{1\\le n\\le N,\\ cN<n}\\Lambda(n)e^{2\\pi i\\alpha n}$ measures cancellation in the distribution of prime powers. Here $N$ is a natural cutoff and $c,\\alpha$ are real parameters. The Möbius function $\\mu$ supplies the arithmetic weights in Vaughan's four-part decomposition.\n\nThis mission packages the coefficient identity, its exponential-sum assembly, and the dyadic and counting statements appearing in the lab's treatment of the fourth component. It includes a rational approximation condition $|\\alpha-a/q|\\le q^{-2}$ with $q\\ge1$ and $\\gcd(a,q)=1$, a truncated reciprocal-distance kernel, second-moment inequalities, and an explicit squarefree count. The individual statements have their own hypotheses; restrictions from the surrounding analytic argument are not silently added. The strict lower cutoff and the finite truncations are part of the formal specification.\n\nThe source is Ming-Chit Liu and Tianze Wang, [On the Vinogradov bound in the three primes Goldbach conjecture](https://doi.org/10.4064/aa105-2-3), *Acta Arithmetica* 105, 2002, pp. 133 to 175, especially Section 6, pp. 168 to 174. The kernel estimate is cited there from Wang and Chen 1994, Lemma 2; the lab interprets its distance as distance to the nearest integer. Explicit estimates for these sums support quantitative applications of the circle method. This mission claims no progress on binary Goldbach, which remains open.\n\nThese statements come from an AI-run Lean lab. Drafts are audited by a human before submission to the public platform; this draft is prepared for that audit. The mission preserves eleven open declarations and presents the lab's existing assembly as its single goal. No proof is supplied here.",
+  "mission_type": "ResearchPaper",
+  "field_query": "number theory",
+  "lab_file": "LeanLab/LeanLab/LiuWang2002/Decomp1543a.lean",
+  "items": [
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_e",
+      "definition_title": "Additive exponential",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def e (x : ℝ) : ℂ := Complex.exp (2 * π * Complex.I * x)\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $x$, define $e(x)=\\exp(2\\pi i x)$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_nint",
+      "definition_title": "Distance to the nearest integer",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def nint (x : ℝ) : ℝ := |x - round x|\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $x$, define $\\operatorname{nint}(x)=|x-\\operatorname{round}(x)|$, the distance to the nearest integer."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_minK",
+      "definition_title": "Truncated reciprocal distance kernel",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_nint\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def minK (X θ : ℝ) : ℝ := if nint θ = 0 then X else min X (1 / (2 * nint θ))\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $X,\\theta$, define $K(X,\\theta)=X$ when $\\operatorname{nint}(\\theta)=0$, and otherwise $K(X,\\theta)=\\min\\{X,1/(2\\operatorname{nint}(\\theta))\\}$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_rangeN",
+      "definition_title": "Truncated natural interval",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def rangeN (c : ℝ) (N : ℕ) : Finset ℕ := (Icc 1 N).filter (fun n => c * N < n)\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $c$ and natural $N$, define $R(c,N)=\\{n\\in\\mathbb N:1\\le n\\le N,\\ cN<n\\}$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_Ssum",
+      "definition_title": "Weighted exponential sum",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_e\nimport Definitions.Def_LL_Decomp1543a_rangeN\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def Ssum (f : ℕ → ℝ) (c : ℝ) (N : ℕ) (α : ℝ) : ℂ :=\n  ∑ n ∈ rangeN c N, (f n : ℂ) * e (α * n)\nend LL_Decomp1543a",
+      "natural_language_statement": "For $f:\\mathbb N\\to\\mathbb R$, real $c,\\alpha$ and natural $N$, define $S_f(c,N,\\alpha)=\\sum_{n\\in R(c,N)}f(n)e(\\alpha n)$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_lam1",
+      "definition_title": "First Vaughan coefficient",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def lam1 (U : ℝ) (n : ℕ) : ℝ := if (n : ℝ) ≤ U then vonMangoldt n else 0\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $U$ and natural $n$, define $\\Lambda_1(U,n)=\\Lambda(n)$ if $n\\le U$, and zero otherwise, where $\\Lambda$ is the von Mangoldt function."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_lam2",
+      "definition_title": "Second Vaughan coefficient",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def lam2 (V : ℝ) (n : ℕ) : ℝ :=\n  ∑ t ∈ n.divisors.filter (fun t : ℕ => (t : ℝ) ≤ V), (moebius t : ℝ) * Real.log ((n / t : ℕ) : ℝ)\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $V$ and natural $n$, define $\\Lambda_2(V,n)=\\sum_{t\\mid n,\\ t\\le V}\\mu(t)\\log(n/t)$, using natural-number division in the logarithm; $\\mu$ is the Möbius function and the divisor sum is empty at $n=0$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_lam3",
+      "definition_title": "Third Vaughan coefficient",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def lam3 (U V : ℝ) (n : ℕ) : ℝ :=\n  -∑ r ∈ n.divisors, ∑ t ∈ n.divisors,\n    if (r : ℝ) ≤ U ∧ (t : ℝ) ≤ V ∧ r * t ∣ n then vonMangoldt r * (moebius t : ℝ) else 0\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $U,V$ and natural $n$, define $\\Lambda_3(U,V,n)=-\\sum_{r\\mid n}\\sum_{t\\mid n,\\ r\\le U,\\ t\\le V,\\ rt\\mid n}\\Lambda(r)\\mu(t)$, with empty divisor sums at $n=0$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_am",
+      "definition_title": "Large-divisor von Mangoldt weight",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def am (U : ℝ) (m : ℕ) : ℝ :=\n  ∑ r ∈ m.divisors.filter (fun r : ℕ => U < (r : ℝ)), vonMangoldt r\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $U$ and natural $m$, define $a_m(U)=\\sum_{r\\mid m,\\ U<r}\\Lambda(r)$, with an empty divisor sum at $m=0$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_lam4",
+      "definition_title": "Fourth Vaughan coefficient",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_am\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def lam4 (U V : ℝ) (n : ℕ) : ℝ :=\n  ∑ t ∈ n.divisors.filter (fun t : ℕ => V < (t : ℝ)), (moebius t : ℝ) * am U (n / t)\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $U,V$ and natural $n$, define $\\Lambda_4(U,V,n)=\\sum_{t\\mid n,\\ V<t}\\mu(t)a_{n/t}(U)$, using natural-number division and an empty divisor sum at $n=0$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_Dioph",
+      "definition_title": "Rational approximation condition",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\ndef Dioph (α : ℝ) (a : ℤ) (q : ℕ) : Prop :=\n  1 ≤ q ∧ Int.gcd a q = 1 ∧ |α - a / q| ≤ 1 / (q : ℝ) ^ 2\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $\\alpha$, integer $a$ and natural $q$, define $\\operatorname{Dioph}(\\alpha,a,q)$ to mean $q\\ge1$, $\\gcd(a,q)=1$ and $|\\alpha-a/q|\\le q^{-2}$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_tBlock",
+      "definition_title": "Finite dyadic block",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def tBlock (N : ℕ) (M : ℝ) : Finset ℕ := (Icc 1 N).filter (fun t => M < t ∧ (t : ℝ) ≤ 2 * M)\nend LL_Decomp1543a",
+      "natural_language_statement": "For natural $N$ and real $M$, define $T(N,M)=\\{t\\in\\mathbb N:1\\le t\\le N,\\ M<t\\le2M\\}$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_mRange",
+      "definition_title": "Inner product-constrained interval",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def mRange (c : ℝ) (N : ℕ) (U : ℝ) (t : ℕ) : Finset ℕ :=\n  (Icc 1 N).filter (fun m => c * N < ((m * t : ℕ) : ℝ) ∧ m * t ≤ N ∧ U < m)\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $c,U$ and natural $N,t$, define $\\mathcal M(c,N,U,t)=\\{m\\in\\mathbb N:1\\le m\\le N,\\ cN<mt\\le N,\\ U<m\\}$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_inner",
+      "definition_title": "Inner weighted exponential sum",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_e\nimport Definitions.Def_LL_Decomp1543a_am\nimport Definitions.Def_LL_Decomp1543a_mRange\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def inner (c : ℝ) (N : ℕ) (U α : ℝ) (t : ℕ) : ℂ :=\n  ∑ m ∈ mRange c N U t, (am U m : ℂ) * e (α * ((m * t : ℕ) : ℝ))\nend LL_Decomp1543a",
+      "natural_language_statement": "Define $I(c,N,U,\\alpha,t)=\\sum_{m\\in\\mathcal M(c,N,U,t)}a_m(U)e(\\alpha mt)$ for real $c,U,\\alpha$ and natural $N,t$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_block",
+      "definition_title": "Möbius-weighted dyadic block sum",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_e\nimport Definitions.Def_LL_Decomp1543a_am\nimport Definitions.Def_LL_Decomp1543a_tBlock\nimport Definitions.Def_LL_Decomp1543a_mRange\nimport Definitions.Def_LL_Decomp1543a_inner\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def block (c : ℝ) (N : ℕ) (U M α : ℝ) : ℂ :=\n  ∑ t ∈ tBlock N M, (moebius t : ℂ) * inner c N U α t\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $c,U,M,\\alpha$ and natural $N$, define $B(c,N,U,M,\\alpha)=\\sum_{t\\in T(N,M)}\\mu(t)I(c,N,U,\\alpha,t)$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_Jn",
+      "definition_title": "Number of dyadic blocks",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def Jn (N : ℕ) (U V : ℝ) : ℕ := ⌊Real.log (N / (U * V)) / Real.log 2⌋₊ + 1\nend LL_Decomp1543a",
+      "natural_language_statement": "For natural $N$ and real $U,V$, define $J(N,U,V)=\\lfloor\\log(N/(UV))/\\log2\\rfloor_++1$, where $\\lfloor x\\rfloor_+$ is the natural-number floor, truncated at zero."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_lRange",
+      "definition_title": "Finite coefficient interval",
+      "definition": "import Mathlib\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\nnoncomputable def lRange (N : ℕ) (U X : ℝ) : Finset ℕ := (Icc 1 N).filter (fun m => U < m ∧ (m : ℝ) ≤ X)\nend LL_Decomp1543a",
+      "natural_language_statement": "For natural $N$ and real $U,X$, define $L(N,U,X)=\\{m\\in\\mathbb N:1\\le m\\le N,\\ U<m\\le X\\}$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1543a_WCLemma2",
+      "definition_title": "Wang and Chen short-interval kernel estimate",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_nint\nimport Definitions.Def_LL_Decomp1543a_minK\nimport Definitions.Def_LL_Decomp1543a_Dioph\n\nopen Real Finset ArithmeticFunction\n\nnamespace LL_Decomp1543a\ndef WCLemma2 : Prop :=\n  ∀ (α : ℝ) (a : ℤ) (q : ℕ), Dioph α a q → ∀ X : ℝ, 0 < X → ∀ (Y : ℕ) (Z : ℤ), 1 ≤ Y →\n    ∑ n ∈ Ioc Z (Z + Y), minK X (α * n) ≤ (((Y / q : ℕ) : ℝ) + 1) * (5 * X + q * Real.log q)\nend LL_Decomp1543a",
+      "natural_language_statement": "Define $\\mathrm{WCLemma2}$ to assert that, for all $\\operatorname{Dioph}(\\alpha,a,q)$, real $X>0$, natural $Y\\ge1$ and integer $Z$, $\\sum_{Z<n\\le Z+Y}K(X,\\alpha n)\\le(\\lfloor Y/q\\rfloor+1)(5X+q\\log q)$, where $n$ ranges over integers and $Y/q$ is natural-number division."
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.wc_lemma2",
+      "theorem_title": "Wang and Chen kernel bound",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem wc_lemma2 : WCLemma2 := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "The proposition $\\mathrm{WCLemma2}$ holds: for every $\\operatorname{Dioph}(\\alpha,a,q)$, real $X>0$, natural $Y\\ge1$ and integer $Z$, $\\sum_{Z<n\\le Z+Y}K(X,\\alpha n)\\le(\\lfloor Y/q\\rfloor+1)(5X+q\\log q)$. The kernel uses distance to the nearest integer, as specified by the lab.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_nint\nimport Definitions.Def_LL_Decomp1543a_minK\nimport Definitions.Def_LL_Decomp1543a_Dioph\nimport Definitions.Def_LL_Decomp1543a_WCLemma2\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 169, Lemma 6.3, citing Wang and Chen 1994, Lemma 2. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Wang and Chen kernel bound",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "wc_lemma2"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.vaughan_coeff",
+      "theorem_title": "Coefficientwise Vaughan identity",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem vaughan_coeff (U V : ℝ) (hV : 1 ≤ V) (n : ℕ) (hn : 1 ≤ n) :\n    (vonMangoldt n : ℝ) = lam1 U n + lam2 V n + lam3 U V n + lam4 U V n := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For every real $U,V$ with $V\\ge1$ and natural $n\\ge1$, $\\Lambda(n)=\\Lambda_1(U,n)+\\Lambda_2(V,n)+\\Lambda_3(U,V,n)+\\Lambda_4(U,V,n)$. No lower bound on $U$ is assumed.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_lam1\nimport Definitions.Def_LL_Decomp1543a_lam2\nimport Definitions.Def_LL_Decomp1543a_lam3\nimport Definitions.Def_LL_Decomp1543a_am\nimport Definitions.Def_LL_Decomp1543a_lam4\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, pp. 168 to 169, equations 6.7 and 6.8. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Coefficientwise Vaughan identity",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "vaughan_coeff"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.block_cauchy",
+      "theorem_title": "Cauchy bound for a Möbius-weighted sum",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem block_cauchy (T : Finset ℕ) (z : ℕ → ℂ) :\n    ‖∑ t ∈ T, (moebius t : ℂ) * z t‖ ≤\n      √(∑ t ∈ T, |(moebius t : ℝ)|) * √(∑ t ∈ T, ‖z t‖ ^ 2) := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For every finite $T\\subset\\mathbb N$ and function $z:\\mathbb N\\to\\mathbb C$, $\\left|\\sum_{t\\in T}\\mu(t)z(t)\\right|\\le\\sqrt{\\sum_{t\\in T}|\\mu(t)|}\\sqrt{\\sum_{t\\in T}|z(t)|^2}$.",
+      "preamble": "import Mathlib\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 170, equation 6.11. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Cauchy bound for a Möbius-weighted sum",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "block_cauchy"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.geom_dyadic",
+      "theorem_title": "Geometric sum on a dyadic integer interval",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem geom_dyadic (θ M : ℝ) (hM : 0 ≤ M) (A B : ℤ) (hA : ⌊M⌋ ≤ A) (hB : B ≤ ⌊2 * M⌋) :\n    ‖∑ t ∈ Ioc A B, e (θ * t)‖ ≤ minK (M + 1 / 2) θ := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For all real $\\theta$, $M\\ge0$ and integers $A,B$ with $\\lfloor M\\rfloor\\le A$ and $B\\le\\lfloor2M\\rfloor$, $\\left|\\sum_{A<t\\le B}e(\\theta t)\\right|\\le K(M+1/2,\\theta)$. The statement imposes no further restriction on $M$ or on the order of $A,B$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_e\nimport Definitions.Def_LL_Decomp1543a_nint\nimport Definitions.Def_LL_Decomp1543a_minK\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 171, geometric-sum input to the first display. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Geometric sum on a dyadic integer interval",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "geom_dyadic"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.square_expand",
+      "theorem_title": "Second-moment bound conditional on geometric sums",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem square_expand (c : ℝ) (N : ℕ) (U M α : ℝ) (hU : 0 ≤ U) (hM : 1 ≤ M)\n    (hgeom : ∀ θ : ℝ, ∀ A B : ℤ, ⌊M⌋ ≤ A → B ≤ ⌊2 * M⌋ →\n      ‖∑ t ∈ Ioc A B, e (θ * t)‖ ≤ minK (M + 1 / 2) θ) :\n    ∑ t ∈ tBlock N M, ‖inner c N U α t‖ ^ 2 ≤\n      ∑ m ∈ lRange N U (N / M), am U m ^ 2 *\n        ∑ l ∈ lRange N U (N / M), minK (M + 1 / 2) (α * ((m : ℝ) - l)) := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For real $c,\\alpha$, natural $N$, $U\\ge0$ and $M\\ge1$, assume $\\left|\\sum_{A<t\\le B}e(\\theta t)\\right|\\le K(M+1/2,\\theta)$ for every real $\\theta$ and integers $A,B$ with $\\lfloor M\\rfloor\\le A$ and $B\\le\\lfloor2M\\rfloor$. Conditional on that hypothesis, $\\sum_{t\\in T(N,M)}|I(c,N,U,\\alpha,t)|^2\\le\\sum_{m\\in L(N,U,N/M)}a_m(U)^2\\sum_{l\\in L(N,U,N/M)}K(M+1/2,\\alpha(m-l))$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_e\nimport Definitions.Def_LL_Decomp1543a_nint\nimport Definitions.Def_LL_Decomp1543a_minK\nimport Definitions.Def_LL_Decomp1543a_am\nimport Definitions.Def_LL_Decomp1543a_tBlock\nimport Definitions.Def_LL_Decomp1543a_mRange\nimport Definitions.Def_LL_Decomp1543a_inner\nimport Definitions.Def_LL_Decomp1543a_lRange\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 171, first display following equation 6.11. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Second-moment bound conditional on geometric sums",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "square_expand"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.inner_l_sum",
+      "theorem_title": "Kernel sum conditional on the Wang and Chen input",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem inner_l_sum (hwc : WCLemma2) (α : ℝ) (a : ℤ) (q : ℕ) (hD : Dioph α a q) (N : ℕ)\n    (U Y X : ℝ) (hU : 0 ≤ U) (hX : 0 < X) (m : ℕ) :\n    ∑ l ∈ lRange N U Y, minK X (α * ((m : ℝ) - l)) ≤\n      ((((⌊Y⌋₊ - ⌊U⌋₊) / q : ℕ) : ℝ) + 1) * (5 * X + q * Real.log q) := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "Assume $\\mathrm{WCLemma2}$ and $\\operatorname{Dioph}(\\alpha,a,q)$. For every natural $N,m$, real $U\\ge0$, real $Y$ and real $X>0$, $\\sum_{l\\in L(N,U,Y)}K(X,\\alpha(m-l))\\le\\left(\\left\\lfloor\\frac{\\max(\\lfloor Y\\rfloor_+-\\lfloor U\\rfloor_+,0)}q\\right\\rfloor+1\\right)(5X+q\\log q)$, where the subtraction and division in the bracket are natural-number operations.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_nint\nimport Definitions.Def_LL_Decomp1543a_minK\nimport Definitions.Def_LL_Decomp1543a_Dioph\nimport Definitions.Def_LL_Decomp1543a_lRange\nimport Definitions.Def_LL_Decomp1543a_WCLemma2\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 171, equation 6.12. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Kernel sum conditional on the Wang and Chen input",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "inner_l_sum"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.S4_dyadic",
+      "theorem_title": "Dyadic decomposition of the fourth Vaughan sum",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem S4_dyadic (c : ℝ) (N : ℕ) (U V α : ℝ) (hU : 0 < U) (hV : 0 < V) :\n    Ssum (lam4 U V) c N α = ∑ j ∈ range (Jn N U V), block c N U (2 ^ j * V) α := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For every real $c,\\alpha$, natural $N$ and positive real $U,V$, $S_{\\Lambda_4(U,V,\\cdot)}(c,N,\\alpha)=\\sum_{0\\le j<J(N,U,V)}B(c,N,U,2^jV,\\alpha)$. No additional hypothesis $UV\\le N$ is present.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_e\nimport Definitions.Def_LL_Decomp1543a_rangeN\nimport Definitions.Def_LL_Decomp1543a_Ssum\nimport Definitions.Def_LL_Decomp1543a_am\nimport Definitions.Def_LL_Decomp1543a_lam4\nimport Definitions.Def_LL_Decomp1543a_tBlock\nimport Definitions.Def_LL_Decomp1543a_mRange\nimport Definitions.Def_LL_Decomp1543a_inner\nimport Definitions.Def_LL_Decomp1543a_block\nimport Definitions.Def_LL_Decomp1543a_Jn\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 170, equations 6.10 and 6.11. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Dyadic decomposition of the fourth Vaughan sum",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "S4_dyadic"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.squarefree_dyadic",
+      "theorem_title": "Explicit squarefree count on a dyadic block",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem squarefree_dyadic (N : ℕ) (M : ℝ) (hM : exp 13.066 ≤ M) :\n    ∑ t ∈ tBlock N M, |(moebius t : ℝ)| ≤ 0.6111 * M := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For every natural $N$ and real $M\\ge\\exp(13.066)$, $\\sum_{t\\in T(N,M)}|\\mu(t)|\\le0.6111M$. Thus the count is restricted to $1\\le t\\le N$ as well as $M<t\\le2M$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_tBlock\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 173, equation 6.20. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Explicit squarefree count on a dyadic block",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "squarefree_dyadic"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.dyadic_sqrt_sum",
+      "theorem_title": "Sum of square roots of dyadic scales",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem dyadic_sqrt_sum (N : ℕ) (U V : ℝ) (hU : 0 < U) (hV : 0 < V) (J : ℕ) (hJ : 1 ≤ J)\n    (hJV : 2 ^ (J - 1) * V ≤ N / U) :\n    ∑ j ∈ range J, √(2 ^ j * V) ≤ (2 + √2) * √(N / U) := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For natural $N$, positive real $U,V$ and natural $J\\ge1$ satisfying $2^{J-1}V\\le N/U$, $\\sum_{0\\le j<J}\\sqrt{2^jV}\\le(2+\\sqrt2)\\sqrt{N/U}$.",
+      "preamble": "import Mathlib\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 174, first line. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Sum of square roots of dyadic scales",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "dyadic_sqrt_sum"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.dyadic_invsqrt_sum",
+      "theorem_title": "Sum of reciprocal square roots of dyadic scales",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem dyadic_invsqrt_sum (V : ℝ) (hV : 0 < V) (J : ℕ) :\n    ∑ j ∈ range J, 1 / √(2 ^ j * V) ≤ (2 + √2) / √V := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For every positive real $V$ and natural $J$, $\\sum_{0\\le j<J}1/\\sqrt{2^jV}\\le(2+\\sqrt2)/\\sqrt V$. The sum is empty when $J=0$.",
+      "preamble": "import Mathlib\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 174, first two lines. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Sum of reciprocal square roots of dyadic scales",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "dyadic_invsqrt_sum"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.J_props",
+      "theorem_title": "Endpoint and logarithmic bounds for the dyadic count",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem J_props (N : ℕ) (U V : ℝ) (hU : 0 < U) (hV : 0 < V) (hUV : U * V ≤ N) :\n    2 ^ (Jn N U V - 1) * V ≤ N / U ∧\n      (Jn N U V : ℝ) ≤ 1 + Real.log (N / (U * V)) / Real.log 2 := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For natural $N$ and positive real $U,V$ satisfying $UV\\le N$, let $J=J(N,U,V)$. Then $2^{J-1}V\\le N/U$ and $J\\le1+\\log(N/(UV))/\\log2$, with natural-number subtraction in $J-1$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_Jn\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 170, equation 6.10. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Endpoint and logarithmic bounds for the dyadic count",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. The formal statement and all constants are preserved from the lab.",
+      "lab_decl": "J_props"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1543a.S_split",
+      "theorem_title": "Assembly of the four Vaughan exponential sums",
+      "formal_statement": "namespace LL_Decomp1543a\ntheorem S_split (c : ℝ) (N : ℕ) (U V α : ℝ) (hV : 1 ≤ V) :\n    Ssum (fun n => (vonMangoldt n : ℝ)) c N α =\n      Ssum (lam1 U) c N α + Ssum (lam2 V) c N α + Ssum (lam3 U V) c N α +\n        Ssum (lam4 U V) c N α := by sorry\nend LL_Decomp1543a",
+      "natural_language_statement": "For every real $c,U,V,\\alpha$ and natural $N$ with $V\\ge1$, $S_\\Lambda(c,N,\\alpha)=S_{\\Lambda_1(U,\\cdot)}(c,N,\\alpha)+S_{\\Lambda_2(V,\\cdot)}(c,N,\\alpha)+S_{\\Lambda_3(U,V,\\cdot)}(c,N,\\alpha)+S_{\\Lambda_4(U,V,\\cdot)}(c,N,\\alpha)$. All sums use the strict lower cutoff $cN<n$ and $1\\le n\\le N$; this is the lab assembly conditional on the coefficient identity.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1543a_e\nimport Definitions.Def_LL_Decomp1543a_rangeN\nimport Definitions.Def_LL_Decomp1543a_Ssum\nimport Definitions.Def_LL_Decomp1543a_lam1\nimport Definitions.Def_LL_Decomp1543a_lam2\nimport Definitions.Def_LL_Decomp1543a_lam3\nimport Definitions.Def_LL_Decomp1543a_am\nimport Definitions.Def_LL_Decomp1543a_lam4\n\nopen Real Finset ArithmeticFunction",
+      "source": "M. C. Liu and T. Z. Wang, On the Vinogradov bound in the three primes Goldbach conjecture, Acta Arith. 105, 2002, p. 168, equation 6.7, with definitions in equation 6.8 on p. 169. https://doi.org/10.4064/aa105-2-3",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": true,
+      "milestone_title": "Assembly of the four Vaughan exponential sums",
+      "milestone_description": "Establish the exact lab statement with its stated hypotheses. This is the mission assembly goal, conditional in the lab on vaughan_coeff.",
+      "lab_decl": "S_split"
+    }
+  ]
+}

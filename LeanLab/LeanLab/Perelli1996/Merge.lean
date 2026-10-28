@@ -13,10 +13,12 @@ Languasco2004. Encoding B is the repo copy, now `Perelli1996/B/*`, namespace
 * `corollary1b_of_theorem1`: A's `Corollary1b F` CONDITIONAL ON A's `Theorem1 F` only, so the
   cited `corollary1b` sorry of Statements.lean is no longer needed by any downstream use.
 -/
-import LeanLab.Perelli1996.Statements
+import LeanLab.Perelli1996.StatementsA
 import LeanLab.Perelli1996.B.Cor1b
 
 namespace LeanLab.Perelli1996
+-- 2026-10-28 architect: encoding A now lives in StatementsA, namespace EncA
+open LeanLab.Perelli1996.EncA
 open Finset Real Polynomial Filter Topology
 
 attribute [local instance] Classical.propDecidable

@@ -200,22 +200,27 @@ def Cond25 (α A u X₂ : ℝ) : Prop :=
 
 /-! ### Theorems 5, 6, 7, CITED, with GRH and the linear sieve as arguments -/
 
+/-! U-1580 follow up, 2026-10-28, architect ruling with Steve live: each leaf now also takes
+`0 ≤ C₁ → 0 ≤ C₂ →` after the sieve. Table 1 of the paper gives positive C₁, C₂ only, so this
+is faithful, costs the I-0088 instance nothing at 112 and 114, and removes any route where a
+sieve witness with a negative constant would make B6J or B5J degenerate. -/
+
 /-- **Theorem 5**, p. 1228: S(A, ℙ, z) > 8 U_N N/log² N · B5. -/
 def Thm5J : Prop :=
-  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
+  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → 0 ≤ C₁ → 0 ≤ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
     0 < α → α < 1 / 8 → 0 < A → Cond19 α A u X₂ → 4e18 ≤ X₂ → X₂ ≤ (n : ℝ) → Even n →
     8 * (UNfull n * n / log n ^ 2) * B5J α A ε C₂ X₂ n < (U7153.SA n : ℝ)
 
 /-- **Theorem 6**, pp. 1231-1232: Σ_{z ≤ q < y, q ∤ N} S(A_q, ℙ, z) ≤ 8 U_N N/log² N · B6. -/
 def Thm6J : Prop :=
-  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
+  ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → 0 ≤ C₁ → 0 ≤ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
     0 < α → α < 1 / 24 → 0 < A → Cond19 α A u X₂ → exp (exp 10) ≤ X₂ → X₂ ≤ (n : ℝ) → Even n →
     ∑ q ∈ (U7153.Qset n).filter (fun q => ¬ q ∣ n), (U7153.SAq n q : ℝ)
       ≤ 8 * (UNfull n * n / log n ^ 2) * B6J α A ε C₁ X₂ n
 
 /-- **Theorem 7**, pp. 1234-1235: S(B, ℙ, y) ≤ U_N N/log² N · B7. -/
 def Thm7J : Prop :=
-  ∀ (α A u ε C₁ C₂ X₂ ε₁ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
+  ∀ (α A u ε C₁ C₂ X₂ ε₁ : ℝ) (n : ℕ), GRH → LinearSieveT4 ε C₁ C₂ → 0 ≤ C₁ → 0 ≤ C₂ → epsJ u ≤ ε → 0 < ε → ε < 1 / 63 →
     0 < ε₁ → ε₁ < 1 → 0 < α → α < 1 / 16 → 0 < A → Cond25 α A u X₂ → exp (exp 10) ≤ X₂ →
     X₂ ≤ (n : ℝ) → Even n →
     (U7153.SB n : ℝ) ≤ UNfull n * n / log n ^ 2 * B7J α A ε C₁ X₂ ε₁
@@ -431,11 +436,11 @@ theorem chenThreshold13375_of_leaves (h5 : Thm5J) (h6 : Thm6J) (h7 : Thm7J)
   have hL : exp 13.375 ≤ log (n : ℝ) := by
     rw [← log_exp (exp 13.375)]; exact log_le_log (exp_pos _) hn
   have h24 : (2 : ℝ) ^ 24 ≤ n := by linarith
-  have H5 := h5 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 hε.le (by norm_num) (by norm_num)
+  have H5 := h5 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 (by norm_num) (by norm_num) hε.le (by norm_num) (by norm_num)
     (by norm_num) (by norm_num) (by norm_num) c19 hX18 hn hev
-  have H6 := h6 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 hε.le (by norm_num) (by norm_num)
+  have H6 := h6 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) n hG hT4 (by norm_num) (by norm_num) hε.le (by norm_num) (by norm_num)
     (by norm_num) (by norm_num) (by norm_num) c19 hX10 hn hev
-  have H7 := h7 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) 1e-20 n hG hT4 hε.le (by norm_num) (by norm_num)
+  have H7 := h7 0.00256 10 1500 (1 / 8349) 112 114 (exp (exp 13.375)) 1e-20 n hG hT4 (by norm_num) (by norm_num) hε.le (by norm_num) (by norm_num)
     (by norm_num) (by norm_num) (by norm_num) (by norm_num) (by norm_num) c25 hX10 hn hev
   rw [sum_Qset_filter] at H6
   have H9 := U7153.lemma10 n h24

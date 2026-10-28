@@ -28,12 +28,12 @@ log free bound with exponent A' satisfying A' c < 2 is needed for σ ≥ 1 - η.
 import Mathlib
 import LeanLab.Routes.U1578Sweep
 import LeanLab.PerelliPintz1992.Section6
-import LeanLab.Perelli1996.Statements
+import LeanLab.Perelli1996.StatementsA
 
 namespace LeanLab.Routes.U1579
 open Polynomial
 open LeanLab.PerelliPintz1992.Section6 (allCharacterCount zeroCount zeroRegion)
-open LeanLab.Perelli1996 (Admissible deg nRange err R Fn CF F2 Theorem1 Theorem2)
+open LeanLab.Perelli1996.EncA (Admissible deg nRange err R Fn CF F2 Theorem1 Theorem2)
 
 /-! ### Zero density inputs -/
 
@@ -243,8 +243,8 @@ theorem thm1_vacuity :
     Admissible (F2 1) ∧ deg (F2 1) = 1 ∧ 2 / (7 * deg (F2 1)) < 29 / 100 ∧
       ∀ N : ℝ, 1 ≤ N → N ^ (29 / 100 : ℝ) ≤ N ∧ N ≤ N ^ (1 / deg (F2 1)) := by
   have hd : deg (F2 1) = 1 := by
-    unfold deg; rw [LeanLab.Perelli1996.F2_natDegree]; norm_num
-  refine ⟨LeanLab.Perelli1996.F2_admissible le_rfl, hd, by rw [hd]; norm_num, fun N hN => ?_⟩
+    unfold deg; rw [LeanLab.Perelli1996.EncA.F2_natDegree]; norm_num
+  refine ⟨LeanLab.Perelli1996.EncA.F2_admissible le_rfl, hd, by rw [hd]; norm_num, fun N hN => ?_⟩
   rw [hd]
   refine ⟨?_, by simp⟩
   calc N ^ (29 / 100 : ℝ) ≤ N ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le hN (by norm_num)
@@ -257,7 +257,7 @@ theorem thm2_vacuity :
       ∀ N : ℝ, 1 ≤ N → N ^ (15 / 100 : ℝ) ≤ N ^ (99 / 100 : ℝ) ∧
         N ^ (99 / 100 : ℝ) ≤ N ^ (1 / deg (F2 1) - 1 / 100) := by
   have hd : deg (F2 1) = 1 := by
-    unfold deg; rw [LeanLab.Perelli1996.F2_natDegree]; norm_num
+    unfold deg; rw [LeanLab.Perelli1996.EncA.F2_natDegree]; norm_num
   refine ⟨by rw [hd]; norm_num, fun N hN => ⟨?_, ?_⟩⟩
   · exact Real.rpow_le_rpow_of_exponent_le hN (by norm_num)
   · rw [hd]; norm_num

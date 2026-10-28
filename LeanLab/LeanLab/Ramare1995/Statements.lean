@@ -56,9 +56,11 @@ noncomputable def goldbachCount (X : ℝ) : ℕ :=
   #{n ∈ Ioc ⌊X⌋₊ ⌊2 * X⌋₊ | IsGoldbachSum n}
 
 /-- Theorem 2, p. 646, WEAK FORM: for `X > exp 67` a positive proportion of `]X, 2X]` are
-sums of two primes. The paper gives an explicit constant that the lab has not yet read
-off the PDF; VERIFY must replace `∃ c` by that constant. Not proved in the lab. -/
-theorem theorem2_weak : ∃ c : ℝ, 0 < c ∧ ∀ X : ℝ, Real.exp 67 < X → c * X ≤ goldbachCount X := by
-  sorry
+sums of two primes, with an unspecified constant. The paper's explicit form, `X/5`, is the
+cited input of Theorem1.lean. Retired 2026-10-19 by PC run 20261019T1403Z-32628, unit U-1068,
+from a `sorry` theorem into this Prop; PROVED unconditional, with an ineffective constant, as
+`LeanLab.Ramare1995.Theorem2Weak.theorem2_weak` in Theorem2Weak.lean. -/
+def theorem2_weak_stmt : Prop :=
+  ∃ c : ℝ, 0 < c ∧ ∀ X : ℝ, Real.exp 67 < X → c * X ≤ goldbachCount X
 
 end LeanLab.Ramare1995

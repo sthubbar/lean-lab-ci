@@ -14,6 +14,9 @@ What it checks, in every .lean file the branch changed:
      instance, structure, class or inductive body was invisible, the Thm5J Thm6J Thm7J Prop edit gave SEAL PASS.
      For every such declaration that exists at BASE, the whole body is compared too; a changed body with the same
      statement is a REVIEW item, never a mechanical merge. Theorem and lemma proofs stay free to change.
+     PROP BODIES ARE STATEMENTS, lean architect 2026-10-28 with Steve live: for a def or abbrev whose type ends in
+     Prop, the body is the statement itself, so a changed body is a FAIL, exactly as rule 1. Only an ARCHITECT
+     statement unit with a DECISION line may pass it, through the reviewer path of the gate table.
   4. A WARN line when the work tree has uncommitted .lean changes: only committed work is checked.
 Prints one line per finding and a last line:
   SEAL PASS            no sealed statement changed and no new trust surface: mechanical merge allowed
@@ -30,8 +33,21 @@ KW = r"(?:theorem|lemma|def|abbrev|structure|class|instance|axiom|opaque|inducti
 DECL = re.compile(r"^(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable|unsafe|partial)\s+)*(" + KW + r")\b\s*([^\s:({\[]*)", re.M)
 
 def strip_comments(t):
-    t = re.sub(r"/-.*?-/", "", t, flags=re.S)
-    return re.sub(r"--[^\n]*", "", t)
+    """Remove Lean comments. Block comments nest in Lean, so a non-greedy regex is wrong: a
+    commented-out body holding docstrings left declarations visible. Architect 2026-10-28."""
+    out, i, depth, n = [], 0, 0, len(t)
+    while i < n:
+        if t.startswith("/-", i):
+            depth += 1; i += 2; continue
+        if depth and t.startswith("-/", i):
+            depth -= 1; i += 2; continue
+        if depth:
+            if t[i] == "\n": out.append("\n")
+            i += 1; continue
+        if t.startswith("--", i):
+            j = t.find("\n", i); i = n if j == -1 else j; continue
+        out.append(t[i]); i += 1
+    return "".join(out)
 
 TOPLVL = re.compile(r"^(?:end|namespace|section|open|variable|universe|attribute|set_option|noncomputable\s+section|#)\b", re.M)
 
@@ -96,7 +112,11 @@ def main():
             print(f"FAIL changed {k[1]} {k[0]} in {where[k]}\n  was: {s[:300]}\n  now: {B[k][:300]}"); fails += 1
     for k, s in FA.items():
         if k in FB and k in B and B[k] == A.get(k) and FB[k] != s:
-            print(f"REVIEW changed body {k[1]} {k[0]} in {where[k]}\n  was: {s[:300]}\n  now: {FB[k][:300]}"); reviews += 1
+            if k[1] in ("def", "abbrev") and re.search(r":\s*(?:[^:=]*→\s*)?Prop\s*$", A[k]):
+                # the body of a Prop-valued def IS the statement, so a change is a sealed-statement change
+                print(f"FAIL changed Prop body {k[1]} {k[0]} in {where[k]}\n  was: {s[:300]}\n  now: {FB[k][:300]}"); fails += 1
+            else:
+                print(f"REVIEW changed body {k[1]} {k[0]} in {where[k]}\n  was: {s[:300]}\n  now: {FB[k][:300]}"); reviews += 1
     for k, s in B.items():
         if k in A: continue
         kind = k[1]

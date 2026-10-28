@@ -7,7 +7,10 @@ Python from the largest Proth prime at most T - 2e21 upward. 519 Proth primes fr
 `Proth.prime_of_prothB`, every gap below 4e18 hence at most 4e18 - 2. The last rung sits
 3634404899287990271 below T, inside 4e18. Rechecked before Lean by a separate Miller-Rabin script.
 These are the lab's rungs, not the paper's: its data file was deleted, Section 4.
-Result: ternary Goldbach from about T - 2e21 to T, CONDITIONAL ON binary Goldbach to 4e18.
+Result: ternary Goldbach to T, CONDITIONAL ON binary Goldbach to 4e18, `EvenGoldbachUpTo (4 * 10 ^ 18)`,
+AND ternary Goldbach to v0 + 2 = 8875694143621751943882526949379, `TernaryGoldbachUpTo (v0 + 2)`.
+Relabelled by unit U-1401, run 20261021T1203Z-6472, after verify unit U-1374: `top_segment` is
+NOT PROVED unconditionally; it only extends a ternary range already assumed up to about T - 2e21.
 AI-written Lean code, Claude, 2026-10-21. Checked only by the Lean kernel.
 Ternary Goldbach is Helfgott's theorem; binary Goldbach is OPEN.
 -/
@@ -580,7 +583,9 @@ theorem tail_prime : ∀ p ∈ pairs.tail.map val, p.Prime :=
   fun p hp => vals_prime p (by rw [split]; exact List.mem_cons_of_mem _ hp)
 
 /-- The top segment: ternary Goldbach to `v0 + 2` and binary Goldbach to 4e18 give ternary
-Goldbach to T. CONDITIONAL ON both inputs; the ladder part is kernel checked. -/
+Goldbach to T. CONDITIONAL ON `EvenGoldbachUpTo (4 * 10 ^ 18)` AND
+`TernaryGoldbachUpTo (v0 + 2)`; NOT PROVED unconditionally. Only the 519 rungs, their primality
+and their gaps are kernel checked; the last rung is 3634404899287990271 below T. -/
 theorem top_segment (hB : EvenGoldbachUpTo (4 * 10 ^ 18))
     (hA : TernaryGoldbachUpTo (8875694143621751943882526949377 + 2)) : TernaryGoldbachUpTo T :=
   ternary_of_lower_and_ladder2 hB hA v0_prime (by norm_num [v0]) le_rfl _ tail_prime chain
@@ -590,3 +595,4 @@ theorem top_segment (hB : EvenGoldbachUpTo (4 * 10 ^ 18))
 theorem segment_width : T - (8875694143621751943882526949377 + 2) > 2 * 10 ^ 21 := by norm_num [T]
 
 end LeanLab.HelfgottPlatt.U6816.Top
+
