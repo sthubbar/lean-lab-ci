@@ -28,7 +28,31 @@ theorem prime_of_weighted_gap150 (q a X : ℕ)
       ∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime),
         vonMangoldt n) :
     ∃ p : ℕ, p.Prime ∧ p % q = a % q ∧ p ≤ X := by
-  sorry
+  have h_split : (Finset.Icc 1 X).filter (fun n => n % q = a % q) =
+      ((Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ n.Prime)) ∪
+      ((Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime)) := by
+    ext n
+    simp only [Finset.mem_filter, Finset.mem_union]
+    tauto
+  have h_disj : Disjoint ((Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ n.Prime))
+      ((Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime)) := by
+    rw [Finset.disjoint_filter]
+    intro n _ hn1 hn2
+    exact hn2.2 hn1.2
+  have h_sum : ∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q), vonMangoldt n =
+      (∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ n.Prime), vonMangoldt n) +
+      (∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime), vonMangoldt n) := by
+    rw [h_split]
+    exact Finset.sum_union h_disj
+  rw [h_sum] at hgap
+  have h_pos : ∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ n.Prime), vonMangoldt n > 0 := by
+    linarith
+  have h_ne_zero : ∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ n.Prime), vonMangoldt n ≠ 0 := by
+    linarith
+  have ⟨p, hp, hp_pos⟩ := Finset.exists_ne_zero_of_sum_ne_zero h_ne_zero
+  simp only [Finset.mem_filter, Finset.mem_Icc] at hp
+  use p
+  exact ⟨hp.2.2, hp.2.1, hp.1.2⟩
 
 /-- Exactly the sealed Theorem61 proposition. CONDITIONAL on the two OPEN leaves. -/
 theorem theorem61_decomposed150 : Theorem61 := by
