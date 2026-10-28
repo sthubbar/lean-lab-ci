@@ -5,6 +5,43 @@ namespace LeanLab.GoldbachGaps.DecompJ205
 open Real Chebyshev Finset Filter Topology
 open LeanLab.GoldbachGaps.Goldston1990
 
+lemma fejer_eq (N K : ℕ) (hNK : K ≤ N) :
+    fejer N K = ∑ n ∈ Icc (N - K) (N + K), ((K : ℝ) - |(n : ℝ) - N|) * Rg n := by
+  unfold fejer
+  apply sum_bij (fun j _ => j + N - K)
+  case hi =>
+    intro a ha
+    simp only [mem_range] at ha
+    simp only [mem_Icc]
+    have h1 : N - K ≤ a + N - K := by omega
+    have h2 : a + N - K ≤ N + K := by omega
+    exact ⟨h1, h2⟩
+  case h =>
+    intro a ha
+    simp only [mem_range] at ha
+    congr 2
+    · have h1 : ((a + N - K : ℕ) : ℝ) = (a : ℝ) + (N : ℝ) - (K : ℝ) := by
+        have : a + N ≥ K := by omega
+        rw [Nat.cast_sub this, Nat.cast_add]
+      rw [h1]
+      have : (a : ℝ) + (N : ℝ) - (K : ℝ) - (N : ℝ) = (a : ℝ) - (K : ℝ) := by ring
+      rw [this]
+    · have h1 : N + a - K = a + N - K := by omega
+      rw [h1]
+  case i_inj =>
+    intro a1 ha1 a2 ha2 heq
+    omega
+  case i_surj =>
+    intro b hb
+    simp only [mem_Icc] at hb
+    use b - (N - K)
+    have h1 : N - K ≤ b := hb.1
+    have h2 : b ≤ N + K := hb.2
+    refine ⟨?_, ?_⟩
+    · simp only [mem_range]
+      omega
+    · omega
+
 /-- LEAF p. 291: fejer asymptotic from J = o(K^2 N) -/
 theorem leaf_fejer_asymp (K : ℕ → ℕ) :
     Tendsto (fun N : ℕ => Jg N (K N) / ((K N : ℝ) ^ 2 * N)) atTop (nhds 0) →
