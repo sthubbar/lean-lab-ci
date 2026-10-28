@@ -33,7 +33,9 @@ theorem major_arcs_combine131 (k : ℕ) (hk : 1 ≤ k) (η : ℝ) (hη : 0 < η)
 /-- LEAF. Page 3, an admissible P always exists for large X. -/
 theorem admissible_P_exists131 :
     ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∃ P : ℝ, AdmissibleP131 X P := by
-  sorry
+  refine ⟨1, fun X hX => ⟨(X : ℝ) ^ ((2:ℝ) / 5), ?_⟩⟩
+  dsimp [AdmissibleP131]
+  exact ⟨le_rfl, Real.rpow_le_rpow_of_exponent_le (Nat.one_le_cast.mpr hX) (by norm_num)⟩
 
 /-- Assembly of the major arc asymptotic from the decomposition. -/
 theorem major_asymptotic131_assembly (k : ℕ) (hk : 1 ≤ k) (ε : ℝ) (hε : 0 < ε) :
