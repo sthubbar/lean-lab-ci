@@ -38,7 +38,17 @@ theorem prod_bound {F : ℕ → ℂ} {f : ℕ → ℝ} {L : ℂ} {l : ℝ}
     (hF : Tendsto (fun X : ℕ => ∏ p ∈ (Finset.range X).filter Nat.Prime, F p) atTop (𝓝 L))
     (hf : Tendsto (fun X : ℕ => ∏ p ∈ (Finset.range X).filter Nat.Prime, f p) atTop (𝓝 l))
     (h_bound : ∀ p, ‖F p‖ ≤ f p) : ‖L‖ ≤ l := by
-  sorry
+  have H : ∀ X : ℕ, ‖∏ p ∈ (Finset.range X).filter Nat.Prime, F p‖ ≤ ∏ p ∈ (Finset.range X).filter Nat.Prime, f p := by
+    intro X
+    induction' Finset.filter Nat.Prime (Finset.range X) using Finset.induction with a s ha ih
+    · simp
+    · rw [Finset.prod_insert ha, Finset.prod_insert ha]
+      calc
+        ‖F a * ∏ p ∈ s, F p‖ = ‖F a‖ * ‖∏ p ∈ s, F p‖ := by rw [norm_mul]
+        _ ≤ f a * ∏ p ∈ s, f p := by
+          apply mul_le_mul (h_bound a) ih (norm_nonneg _)
+          exact le_trans (norm_nonneg _) (h_bound a)
+  exact le_of_tendsto_of_tendsto' hF.norm hf H
 
 /-- The assembly theorem for `bound65` (Pintz's Main Lemma on page 23). -/
 theorem bound65_decomposed : Bound65 := by
