@@ -1,0 +1,149 @@
+{
+  "name": "Power-of-two exponential sums: the $11(1+\\lambda L)$ deviation bound",
+  "description": "The sum $G_L(x)=\\sum_{j=0}^{L-1}\\exp(2\\pi i\\,2^j x)$ records how the phases associated with powers of two align as $x$ varies over the unit interval. Its real part is the cosine sum $S_L(x)$, and $E_L(\\lambda)=\\int_0^1 e^{\\lambda S_L(x)}\\,dx$ is its exponential moment. The deviation set consists of points where $|G_L(x)|>dL$; its size is measured by Lebesgue measure.\n\nThis mission packages six open analytic and combinatorial statements together with the lab's final assembly target $\\mu(D_{L,d})\\le11(1+\\lambda L)e^{-\\lambda dL}E_L(\\lambda)$ for $\\lambda\\ge0$. The statements include comparisons of moments and a general exponential-integral inequality with explicitly quantified hypotheses. The constant $11(1+\\lambda L)$ is the weaker explicit version used by this lab, rather than the paper's bound involving an unspecified absolute constant and a square root.\n\nThe source is J. Pintz and I. Z. Ruzsa, [On Linnik's approximation to Goldbach's problem, I](https://doi.org/10.4064/aa109-2-6), Acta Arithmetica 109.2, 2003, pp. 169 to 194, especially Section 4, pp. 172 to 177, and Section 7, p. 184. Such bounds control exceptional sets in the study of representations by two primes and powers of two. Binary Goldbach remains open.\n\nThese statements come from an AI-run Lean lab; AI wrote the Lean code. This is a draft for human audit before submission to the public platform. No completed human audit is claimed here. The assembly in the lab is conditional on the open leaves. This mission preserves the lab statements and supplies no proofs.",
+  "mission_type": "ResearchPaper",
+  "field_query": "number theory",
+  "lab_file": "LeanLab/LeanLab/Linnik/Decomp1536a.lean",
+  "items": [
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1536a_Gpow",
+      "definition_title": "The power-of-two exponential sum",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1536a\n\nopen Real MeasureTheory Finset\n\nnoncomputable def Gpow (L : ℕ) (x : ℝ) : ℂ :=\n  ∑ j ∈ range L, Complex.exp (2 * π * Complex.I * ((2 : ℂ) ^ j * x))\n\nend LL_Decomp1536a",
+      "natural_language_statement": "For $L\\in\\mathbb N$ and $x\\in\\mathbb R$, define the complex exponential sum $G_L(x)=\\sum_{j=0}^{L-1}\\exp(2\\pi i\\,2^j x)$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1536a_Spow",
+      "definition_title": "The cosine sum",
+      "definition": "import Mathlib\n\nnamespace LL_Decomp1536a\n\nopen Real MeasureTheory Finset\n\nnoncomputable def Spow (L : ℕ) (x : ℝ) : ℝ :=\n  ∑ j ∈ range L, Real.cos (2 * π * ((2 : ℝ) ^ j * x))\n\nend LL_Decomp1536a",
+      "natural_language_statement": "For $L\\in\\mathbb N$ and $x\\in\\mathbb R$, define $S_L(x)=\\sum_{j=0}^{L-1}\\cos(2\\pi\\,2^j x)$, the real part of $G_L(x)$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1536a_EL",
+      "definition_title": "The cosine exponential moment",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1536a_Spow\n\nnamespace LL_Decomp1536a\n\nopen Real MeasureTheory Finset\n\nnoncomputable def EL (L : ℕ) (lam : ℝ) : ℝ :=\n  ∫ x in (0 : ℝ)..1, Real.exp (lam * Spow L x)\n\nend LL_Decomp1536a",
+      "natural_language_statement": "For $L\\in\\mathbb N$ and $\\lambda\\in\\mathbb R$, define the exponential moment $E_L(\\lambda)=\\int_0^1\\exp(\\lambda S_L(x))\\,dx$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1536a_devSet",
+      "definition_title": "The large deviation set",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1536a_Gpow\n\nnamespace LL_Decomp1536a\n\nopen Real MeasureTheory Finset\n\ndef devSet (L : ℕ) (d : ℝ) : Set ℝ :=\n  {x | x ∈ Set.Icc (0 : ℝ) 1 ∧ d * L < ‖Gpow L x‖}\n\nend LL_Decomp1536a",
+      "natural_language_statement": "For $L\\in\\mathbb N$ and $d\\in\\mathbb R$, define the deviation set $D_{L,d}=\\{x\\in[0,1]:|G_L(x)|>dL\\}$."
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1536a.markov",
+      "theorem_title": "Exponential Chebyshev bound",
+      "formal_statement": "namespace LL_Decomp1536a\ntheorem markov {L : ℕ} {d lam : ℝ} (hlam : 0 ≤ lam) :\n    volume (devSet L d) ≤\n      ENNReal.ofReal (Real.exp (-(lam * d * L)) * ∫ x in (0 : ℝ)..1, Real.exp (lam * ‖Gpow L x‖)) := by sorry\nend LL_Decomp1536a",
+      "natural_language_statement": "For every $L\\in\\mathbb N$, $d\\in\\mathbb R$, and $\\lambda\\ge0$, the Lebesgue measure satisfies $\\mu(D_{L,d})\\le e^{-\\lambda dL}\\int_0^1 e^{\\lambda|G_L(x)|}\\,dx$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1536a_Gpow\nimport Definitions.Def_LL_Decomp1536a_devSet\n\nopen Real MeasureTheory Finset",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik's approximation to Goldbach's problem, I, Acta Arithmetica 109.2, 2003, 169 to 194. https://doi.org/10.4064/aa109-2-6; Section 7, p. 184",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Exponential Chebyshev bound",
+      "milestone_description": "Establish the stated leaf from Section 7, p. 184.",
+      "lab_decl": "markov"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1536a.exp_le_even_partial",
+      "theorem_title": "Finite even exponential bound",
+      "formal_statement": "namespace LL_Decomp1536a\ntheorem exp_le_even_partial {A r : ℝ} (hr : 0 ≤ r) (hrA : r ≤ A) :\n    Real.exp r ≤\n      2 * ∑ j ∈ range (2 * ⌈A⌉₊ + 1), r ^ (2 * j) / ((2 * j).factorial : ℝ) + 1 := by sorry\nend LL_Decomp1536a",
+      "natural_language_statement": "For real numbers $A,r$ with $0\\le r\\le A$, one has $e^r\\le 2\\sum_{j=0}^{2\\lceil A\\rceil}r^{2j}/(2j)!+1$. Here the ceiling is the natural-number ceiling, which agrees with the usual ceiling because $A\\ge0$.",
+      "preamble": "import Mathlib\n\nopen Real MeasureTheory Finset",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik's approximation to Goldbach's problem, I, Acta Arithmetica 109.2, 2003, 169 to 194. https://doi.org/10.4064/aa109-2-6; Section 4, displays 4.15 and 4.17, pp. 176 to 177; explicit lab variant",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Finite even exponential bound",
+      "milestone_description": "Establish the stated leaf from Section 4, displays 4.15 and 4.17, pp. 176 to 177; explicit lab variant.",
+      "lab_decl": "exp_le_even_partial"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1536a.moment_binom",
+      "theorem_title": "Central binomial comparison of even moments",
+      "formal_statement": "namespace LL_Decomp1536a\ntheorem moment_binom (L j : ℕ) :\n    (Nat.centralBinom j : ℝ) / 4 ^ j * ∫ x in (0 : ℝ)..1, ‖Gpow L x‖ ^ (2 * j) ≤\n      ∫ x in (0 : ℝ)..1, Spow L x ^ (2 * j) := by sorry\nend LL_Decomp1536a",
+      "natural_language_statement": "For all $L,j\\in\\mathbb N$, one has $\\binom{2j}{j}4^{-j}\\int_0^1|G_L(x)|^{2j}\\,dx\\le\\int_0^1 S_L(x)^{2j}\\,dx$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1536a_Gpow\nimport Definitions.Def_LL_Decomp1536a_Spow\n\nopen Real MeasureTheory Finset",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik's approximation to Goldbach's problem, I, Acta Arithmetica 109.2, 2003, 169 to 194. https://doi.org/10.4064/aa109-2-6; Section 4, before display 4.16, p. 176",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Central binomial comparison of even moments",
+      "milestone_description": "Establish the stated leaf from Section 4, before display 4.16, p. 176.",
+      "lab_decl": "moment_binom"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1536a.four_pow_le",
+      "theorem_title": "A weak central binomial estimate",
+      "formal_statement": "namespace LL_Decomp1536a\ntheorem four_pow_le (j : ℕ) : (4 : ℝ) ^ j ≤ (2 * j + 1) * Nat.centralBinom j := by sorry\nend LL_Decomp1536a",
+      "natural_language_statement": "For every $j\\in\\mathbb N$, one has $4^j\\le(2j+1)\\binom{2j}{j}$.",
+      "preamble": "import Mathlib\n\nopen Real MeasureTheory Finset",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik's approximation to Goldbach's problem, I, Acta Arithmetica 109.2, 2003, 169 to 194. https://doi.org/10.4064/aa109-2-6; Section 4, weak substitute for the estimate behind display 4.16, p. 176",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "A weak central binomial estimate",
+      "milestone_description": "Establish the stated leaf from Section 4, weak substitute for the estimate behind display 4.16, p. 176.",
+      "lab_decl": "four_pow_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1536a.moment_SL_nonneg",
+      "theorem_title": "Nonnegative cosine-sum moments",
+      "formal_statement": "namespace LL_Decomp1536a\ntheorem moment_SL_nonneg (L n : ℕ) : 0 ≤ ∫ x in (0 : ℝ)..1, Spow L x ^ n := by sorry\nend LL_Decomp1536a",
+      "natural_language_statement": "For every $L,n\\in\\mathbb N$, the moment $\\int_0^1 S_L(x)^n\\,dx$ is nonnegative.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1536a_Spow\n\nopen Real MeasureTheory Finset",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik's approximation to Goldbach's problem, I, Acta Arithmetica 109.2, 2003, 169 to 194. https://doi.org/10.4064/aa109-2-6; Section 4, after display 4.17, p. 176",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Nonnegative cosine-sum moments",
+      "milestone_description": "Establish the stated leaf from Section 4, after display 4.17, p. 176.",
+      "lab_decl": "moment_SL_nonneg"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1536a.even_partial_le_int_exp",
+      "theorem_title": "Even partial sums of an exponential moment",
+      "formal_statement": "namespace LL_Decomp1536a\ntheorem even_partial_le_int_exp {f : ℝ → ℝ} (hf : Continuous f)\n    (hmom : ∀ n : ℕ, 0 ≤ ∫ x in (0 : ℝ)..1, f x ^ n) {lam : ℝ} (hlam : 0 ≤ lam) (K : ℕ) :\n    ∑ j ∈ range K, lam ^ (2 * j) / ((2 * j).factorial : ℝ) * ∫ x in (0 : ℝ)..1, f x ^ (2 * j) ≤\n      ∫ x in (0 : ℝ)..1, Real.exp (lam * f x) := by sorry\nend LL_Decomp1536a",
+      "natural_language_statement": "Let $f:\\mathbb R\\to\\mathbb R$ be continuous and suppose $\\int_0^1 f(x)^n\\,dx\\ge0$ for every $n\\in\\mathbb N$. For every $\\lambda\\ge0$ and $K\\in\\mathbb N$, one has $\\sum_{j=0}^{K-1}\\frac{\\lambda^{2j}}{(2j)!}\\int_0^1 f(x)^{2j}\\,dx\\le\\int_0^1 e^{\\lambda f(x)}\\,dx$.",
+      "preamble": "import Mathlib\n\nopen Real MeasureTheory Finset",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik's approximation to Goldbach's problem, I, Acta Arithmetica 109.2, 2003, 169 to 194. https://doi.org/10.4064/aa109-2-6; Section 4, estimate following display 4.17, p. 176",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Even partial sums of an exponential moment",
+      "milestone_description": "Establish the stated leaf from Section 4, estimate following display 4.17, p. 176.",
+      "lab_decl": "even_partial_le_int_exp"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1536a.devSet_le",
+      "theorem_title": "Large deviations in terms of the cosine exponential moment",
+      "formal_statement": "namespace LL_Decomp1536a\ntheorem devSet_le (L : ℕ) (d : ℝ) {lam : ℝ} (hlam : 0 ≤ lam) :\n    volume (devSet L d) ≤\n      ENNReal.ofReal (11 * (1 + lam * L) * Real.exp (-(lam * d * L)) * EL L lam) := by sorry\nend LL_Decomp1536a",
+      "natural_language_statement": "For every $L\\in\\mathbb N$, $d\\in\\mathbb R$, and $\\lambda\\ge0$, one has $\\mu(D_{L,d})\\le11(1+\\lambda L)e^{-\\lambda dL}E_L(\\lambda)$. The lab assembly is conditional on the open leaves of this mission.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1536a_EL\nimport Definitions.Def_LL_Decomp1536a_devSet\n\nopen Real MeasureTheory Finset",
+      "source": "J. Pintz and I. Z. Ruzsa, On Linnik's approximation to Goldbach's problem, I, Acta Arithmetica 109.2, 2003, 169 to 194. https://doi.org/10.4064/aa109-2-6; Section 7, p. 184, with the weaker explicit lab form of Lemma 4, pp. 175 to 177",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": true,
+      "milestone_title": "Large deviations in terms of the cosine exponential moment",
+      "milestone_description": "Establish the stated assembly bound, conditional in the lab on its open leaves.",
+      "lab_decl": "devSet_le"
+    }
+  ]
+}
