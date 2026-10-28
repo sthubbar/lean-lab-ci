@@ -28,7 +28,57 @@ theorem leaf_cor2_bound (hCor2 : Corollary2) (A ε c : ℝ) (hA : 0 < A) (hε : 
 theorem leaf_wu_dominates_exc (c C : ℝ) (hc : 0 < c) :
   ∃ Y0 > 0, ∀ Y : ℝ, Y0 ≤ Y →
     C * Y * Real.log Y ^ (-3 : ℝ) < c * Y / (Real.log Y) ^ 2 := by
-  sorry
+  use max (Real.exp (max (C / c) 1)) 2 + 1
+  refine ⟨by positivity, ?_⟩
+  intro Y hY
+  have hY0_pos : 0 < max (Real.exp (max (C / c) 1)) 2 + 1 := by positivity
+  have hY_pos : 0 < Y := by linarith
+  have hY_gt_e : Real.exp 1 < Y := by
+    calc
+      Real.exp 1 ≤ Real.exp (max (C / c) 1) := Real.exp_monotone (le_max_right _ _)
+      _ ≤ max (Real.exp (max (C / c) 1)) 2 := le_max_left _ _
+      _ < max (Real.exp (max (C / c) 1)) 2 + 1 := by linarith
+      _ ≤ Y := hY
+  have hlogY_gt_1 : 1 < Real.log Y := by
+    rw [← Real.log_exp 1]
+    exact Real.log_lt_log (Real.exp_pos 1) hY_gt_e
+  have hlogY_pos : 0 < Real.log Y := by linarith
+  have hY_gt_exp_Cc : Real.exp (C / c) < Y := by
+    calc
+      Real.exp (C / c) ≤ Real.exp (max (C / c) 1) := Real.exp_monotone (le_max_left _ _)
+      _ ≤ max (Real.exp (max (C / c) 1)) 2 := le_max_left _ _
+      _ < max (Real.exp (max (C / c) 1)) 2 + 1 := by linarith
+      _ ≤ Y := hY
+  have hCc_lt_logY : C / c < Real.log Y := by
+    rw [← Real.log_exp (C / c)]
+    exact Real.log_lt_log (Real.exp_pos _) hY_gt_exp_Cc
+  have hC_lt_c_logY : C < c * Real.log Y := by
+    have := (div_lt_iff₀ hc).mp hCc_lt_logY
+    linarith
+
+  have hC_Y_lt : C * Y < c * Y * Real.log Y := by
+    nlinarith
+
+  have eq1 : C * Y * Real.log Y ^ (-3 : ℝ) = (C * Y) / (Real.log Y) ^ (3 : ℝ) := by
+    rw [Real.rpow_neg (by linarith)]
+    ring
+
+  have eq2 : c * Y / (Real.log Y) ^ 2 = (c * Y * Real.log Y) / (Real.log Y) ^ (3 : ℝ) := by
+    have hlogY_cubed : (Real.log Y) ^ (3 : ℝ) = (Real.log Y) ^ 2 * Real.log Y := by
+      have : (3 : ℝ) = 2 + 1 := by norm_num
+      rw [this, Real.rpow_add (by linarith)]
+      simp
+    rw [hlogY_cubed]
+    have hlogY_ne_zero : Real.log Y ≠ 0 := by linarith
+    have h1 : (c * Y * Real.log Y) / ((Real.log Y) ^ 2 * Real.log Y) = c * Y / (Real.log Y) ^ 2 := by
+      rw [div_mul_eq_div_div]
+      have h2 : (c * Y * Real.log Y) / (Real.log Y) ^ 2 / Real.log Y = (c * Y / (Real.log Y) ^ 2) * (Real.log Y / Real.log Y) := by ring
+      rw [h2, div_self hlogY_ne_zero, mul_one]
+    exact h1.symm
+
+  rw [eq1, eq2]
+  have h_pos3 : 0 < (Real.log Y) ^ (3 : ℝ) := by positivity
+  exact (div_lt_div_iff_of_pos_right h_pos3).mpr hC_Y_lt
 
 /-- LEAF: The assembly theorem for Corollary 3.
 "So not all of them can be exceptions in Corollary 1.2, so there is at least one of them being the sum of two primes p2 and p3... Note that Corollary 1.2 is applicable since we assumed that X1 + X2 + 2Y <= n << Y^{3/2 - \epsilon}..." -/
