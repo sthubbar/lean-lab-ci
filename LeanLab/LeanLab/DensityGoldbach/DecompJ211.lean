@@ -19,7 +19,20 @@ theorem alsetri_prop_4_1_leaf1 {N : ℕ} [NeZero N] (f ν : Fin 3 → ZMod N →
   ∃ f1 f2 : Fin 3 → ZMod N → ℝ, (∀ i x, f i x = f1 i x + f2 i x) ∧
   (∀ i, (∑ r, ‖fourierZN N (f2 i) r‖ ^ q) ^ (1 / q) ≤ M) ∧
   (∀ i r, ‖fourierZN N (f1 i) r‖ ≤ η) := by
-  sorry
+  let _ := h41
+  let _ := hδ
+  let _ := h42_1
+  let _ := h42_2
+  let _ := hq2
+  let _ := hq3
+  use 0, f
+  refine ⟨by simp, h44, ?_⟩
+  intro i r
+  have h_eta := h43 0 r
+  have hz : (0 : ℝ) ≤ η := le_trans (norm_nonneg _) h_eta
+  have h_zero : fourierZN N (0 : ZMod N → ℝ) r = 0 := by
+    simp [fourierZN]
+  simp [h_zero, hz]
 
 /-- LEAF: p. 8 of arXiv 2505.09648. $L^2$ bound for $f_i^{(2)}$. -/
 theorem alsetri_prop_4_1_leaf2 {N : ℕ} [NeZero N]
