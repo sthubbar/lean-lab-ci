@@ -1,0 +1,213 @@
+{
+  "name": "Vaughan's first moment distribution bound for $x\\ge10^{52}$: Decomp1525c",
+  "description": "This mission concerns an explicit first moment estimate for representations by two odd primes. For a real parameter $x$, the weighted count $\\Psi(x)$ assigns weight $\\log p_1$ to prime pairs with $3\\le p_1\\le x-3$ and $x-p_1<p_2\\le2x-p_1$. The comparison term is $M(x)=\\int_3^x u/\\log u\\,du+\\int_x^{2x}(2x-u)/\\log u\\,du$. The moving interval sum $I_x(u)$ records the logarithmic weights of admissible primes at a given integration parameter.\n\nThe target is $|\\Psi(x)-M(x)|<x^2/(5\\log^2x)$ for $x\\ge10^{52}$, conditional on two explicit inputs: a Chebyshev theta error estimate above $678407$ and a preliminary prime pair integral approximation valid throughout the target range. The individual tasks specify exact identities, integrability assertions, and numerical error estimates. Each hypothesis and constant is retained from the lab file. The assembly statement is included as the mission goal even though its assembly proof already exists in the lab; the ten leaves remain open.\n\nThe source is R. C. Vaughan, [On the estimation of Schnirelman's constant](https://doi.org/10.1515/crll.1977.290.93), Journal für die reine und angewandte Mathematik 290, 1977, pages 93 to 108, specifically page 103 in the proof of Lemma 11. Such explicit estimates support bounds for expressing integers as sums of a bounded number of primes. Binary Goldbach remains open.\n\nThese statements come from an AI-run Lean lab, with AI-written Lean code, and were audited by a human before submission. This is a draft for the platform's human audit before submission; it supplies no new proofs.",
+  "mission_type": "ResearchPaper",
+  "field_query": "number theory",
+  "lab_file": "LeanLab/LeanLab/SchnirelmannBounds/Decomp1525c.lean",
+  "items": [
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1525c_P1V",
+      "definition_title": "Admissible odd primes",
+      "definition": "import Mathlib\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical\nnoncomputable section\nnamespace LL_Decomp1525c\ndef P1V (x : ℝ) : Finset ℕ := (Icc 3 ⌊x - 3⌋₊).filter Nat.Prime\nend LL_Decomp1525c",
+      "natural_language_statement": "For real $x$, $P_1(x)$ is the finite set of primes $p$ with $3\\le p\\le\\lfloor x-3\\rfloor_+$, where $\\lfloor\\cdot\\rfloor_+$ is the natural number floor."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1525c_PsiV",
+      "definition_title": "Weighted count of prime pairs",
+      "definition": "import Mathlib\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical\nnoncomputable section\nnamespace LL_Decomp1525c\ndef PsiV (x : ℝ) : ℝ :=\n  ∑ p₁ ∈ (Icc 3 ⌊x - 3⌋₊).filter Nat.Prime,\n    ∑ _p₂ ∈ (Icc 1 ⌊2 * x - p₁⌋₊).filter (fun p : ℕ => p.Prime ∧ x - p₁ < (p : ℝ)), Real.log p₁\nend LL_Decomp1525c",
+      "natural_language_statement": "For real $x$, $\\Psi(x)$ sums $\\log p_1$ over prime pairs satisfying $3\\le p_1\\le\\lfloor x-3\\rfloor_+$, $1\\le p_2\\le\\lfloor 2x-p_1\\rfloor_+$, and $x-p_1<p_2$."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1525c_mainIntegralV",
+      "definition_title": "Main integral for the first moment",
+      "definition": "import Mathlib\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical\nnoncomputable section\nnamespace LL_Decomp1525c\ndef mainIntegralV (x : ℝ) : ℝ :=\n  (∫ u in (3 : ℝ)..x, u / Real.log u) + ∫ u in x..(2 * x), (2 * x - u) / Real.log u\nend LL_Decomp1525c",
+      "natural_language_statement": "For real $x$, define $M(x)=\\int_3^x u/\\log u\\,du+\\int_x^{2x}(2x-u)/\\log u\\,du$, using oriented interval integrals."
+    },
+    {
+      "kind": "definition",
+      "definition_name": "LL_Decomp1525c_thetaI",
+      "definition_title": "Moving interval prime logarithm sum",
+      "definition": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical\nnoncomputable section\nnamespace LL_Decomp1525c\ndef thetaI (x u : ℝ) : ℝ :=\n  ∑ p ∈ (P1V x).filter (fun p : ℕ => x - p < u ∧ u ≤ 2 * x - p), Real.log p\nend LL_Decomp1525c",
+      "natural_language_statement": "For real $x,u$, define $I_x(u)=\\sum_{p\\in P_1(x),\\ x-p<u\\le2x-p}\\log p$."
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.swap",
+      "theorem_title": "Exchange the prime sum and integral",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem swap (x : ℝ) (hx : 6 ≤ x) :\n    ∑ p ∈ P1V x, Real.log p * ∫ u in (x - p)..(2 * x - p), 1 / Real.log u =\n      ∫ u in (3 : ℝ)..(2 * x), thetaI x u / Real.log u := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "For every real $x\\ge6$, $\\sum_{p\\in P_1(x)}\\log p\\int_{x-p}^{2x-p}du/\\log u=\\int_3^{2x}I_x(u)/\\log u\\,du$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Exchange the prime sum and integral",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "swap"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.thetaI_low",
+      "theorem_title": "Identify the lower interval prime sum",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem thetaI_low (x u : ℝ) (hx : 6 ≤ x) (hu3 : 3 ≤ u) (hux : u ≤ x) :\n    thetaI x u = Chebyshev.theta (x - 3) - Chebyshev.theta (max (x - u) 2) := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "For real $x\\ge6$ and $3\\le u\\le x$, $I_x(u)=\\theta(x-3)-\\theta(\\max(x-u,2))$, where $\\theta(t)=\\sum_{p\\le t}\\log p$ over primes.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Identify the lower interval prime sum",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "thetaI_low"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.thetaI_high",
+      "theorem_title": "Identify the upper interval prime sum",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem thetaI_high (x u : ℝ) (hx : 6 ≤ x) (hxu : x ≤ u) (hu : u ≤ 2 * x) :\n    thetaI x u = max (Chebyshev.theta (min (x - 3) (2 * x - u)) - Real.log 2) 0 := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "For real $x\\ge6$ and $x\\le u\\le2x$, $I_x(u)=\\max(\\theta(\\min(x-3,2x-u))-\\log2,0)$, where $\\theta$ is Chebyshev's prime logarithm sum.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Identify the upper interval prime sum",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "thetaI_high"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.low_pointwise",
+      "theorem_title": "Bound the lower interval pointwise error",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem low_pointwise\n    (h215 : ∀ y : ℝ, 678407 ≤ y → |Chebyshev.theta y - y| < y / (40 * Real.log y))\n    (x u : ℝ) (hx : 10 ^ 52 ≤ x) (hu3 : 3 ≤ u) (hux : u ≤ x) :\n    |thetaI x u - u| ≤ x / (40 * Real.log x)\n      + max (x - u) 2 / (40 * Real.log (max (x - u) 2)) + 678412 := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "Assume $|\\theta(y)-y|<y/(40\\log y)$ for every real $y\\ge678407$, where $\\theta$ is Chebyshev's prime logarithm sum. For real $x\\ge10^{52}$ and $3\\le u\\le x$, with $t=\\max(x-u,2)$, $|I_x(u)-u|\\le x/(40\\log x)+t/(40\\log t)+678412$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Bound the lower interval pointwise error",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "low_pointwise"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.low_majorant",
+      "theorem_title": "Bound the lower majorant integral",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem low_majorant (x : ℝ) (hx : 10 ^ 52 ≤ x) :\n    ∫ u in (3 : ℝ)..x, (x / (40 * Real.log x)\n      + max (x - u) 2 / (40 * Real.log (max (x - u) 2)) + 678412) / Real.log u\n      ≤ x ^ 2 / (20 * Real.log x ^ 2) := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "For every real $x\\ge10^{52}$, with $t(u)=\\max(x-u,2)$, $\\int_3^x [x/(40\\log x)+t(u)/(40\\log t(u))+678412]/\\log u\\,du\\le x^2/(20\\log^2x)$.",
+      "preamble": "import Mathlib\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Bound the lower majorant integral",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "low_majorant"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.high_pointwise",
+      "theorem_title": "Bound the upper interval pointwise error",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem high_pointwise\n    (h215 : ∀ y : ℝ, 678407 ≤ y → |Chebyshev.theta y - y| < y / (40 * Real.log y))\n    (x u : ℝ) (hx : 10 ^ 52 ≤ x) (hxu : x ≤ u) (hu : u ≤ 2 * x) :\n    |thetaI x u - (2 * x - u)| ≤\n      max (min (x - 3) (2 * x - u)) 2 / (40 * Real.log (max (min (x - 3) (2 * x - u)) 2))\n        + 678412 := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "Assume $|\\theta(y)-y|<y/(40\\log y)$ for every real $y\\ge678407$, where $\\theta$ is Chebyshev's prime logarithm sum. For real $x\\ge10^{52}$ and $x\\le u\\le2x$, with $s=\\max(\\min(x-3,2x-u),2)$, $|I_x(u)-(2x-u)|\\le s/(40\\log s)+678412$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Bound the upper interval pointwise error",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "high_pointwise"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.high_majorant",
+      "theorem_title": "Bound the upper majorant integral",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem high_majorant (x : ℝ) (hx : 10 ^ 52 ≤ x) :\n    ∫ u in x..(2 * x), (max (min (x - 3) (2 * x - u)) 2 /\n        (40 * Real.log (max (min (x - 3) (2 * x - u)) 2)) + 678412) / Real.log u\n      ≤ x ^ 2 / (20 * Real.log x ^ 2) := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "For every real $x\\ge10^{52}$, with $s(u)=\\max(\\min(x-3,2x-u),2)$, $\\int_x^{2x}[s(u)/(40\\log s(u))+678412]/\\log u\\,du\\le x^2/(20\\log^2x)$.",
+      "preamble": "import Mathlib\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Bound the upper majorant integral",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "high_majorant"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.thetaI_integrable",
+      "theorem_title": "Establish interval integrability",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem thetaI_integrable (x : ℝ) (hx : 6 ≤ x) :\n    IntervalIntegrable (fun u => thetaI x u / Real.log u) volume 3 x ∧\n    IntervalIntegrable (fun u => thetaI x u / Real.log u) volume x (2 * x) := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "For every real $x\\ge6$, the function $u\\mapsto I_x(u)/\\log u$ is interval integrable with respect to Lebesgue measure on both $[3,x]$ and $[x,2x]$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Establish interval integrability",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "thetaI_integrable"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.low_compare",
+      "theorem_title": "Compare the lower integrals",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem low_compare\n    (h215 : ∀ y : ℝ, 678407 ≤ y → |Chebyshev.theta y - y| < y / (40 * Real.log y))\n    (x : ℝ) (hx : 10 ^ 52 ≤ x) :\n    |(∫ u in (3 : ℝ)..x, thetaI x u / Real.log u) - ∫ u in (3 : ℝ)..x, u / Real.log u|\n      ≤ x ^ 2 / (20 * Real.log x ^ 2) := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "Assume $|\\theta(y)-y|<y/(40\\log y)$ for every real $y\\ge678407$, where $\\theta$ is Chebyshev's prime logarithm sum. For every real $x\\ge10^{52}$, $|\\int_3^x I_x(u)/\\log u\\,du-\\int_3^x u/\\log u\\,du|\\le x^2/(20\\log^2x)$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Compare the lower integrals",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "low_compare"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.high_compare",
+      "theorem_title": "Compare the upper integrals",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem high_compare\n    (h215 : ∀ y : ℝ, 678407 ≤ y → |Chebyshev.theta y - y| < y / (40 * Real.log y))\n    (x : ℝ) (hx : 10 ^ 52 ≤ x) :\n    |(∫ u in x..(2 * x), thetaI x u / Real.log u) - ∫ u in x..(2 * x), (2 * x - u) / Real.log u|\n      ≤ x ^ 2 / (20 * Real.log x ^ 2) := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "Assume $|\\theta(y)-y|<y/(40\\log y)$ for every real $y\\ge678407$, where $\\theta$ is Chebyshev's prime logarithm sum. For every real $x\\ge10^{52}$, $|\\int_x^{2x}I_x(u)/\\log u\\,du-\\int_x^{2x}(2x-u)/\\log u\\,du|\\le x^2/(20\\log^2x)$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_thetaI\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Compare the upper integrals",
+      "milestone_description": "Establish the stated open leaf with its exact constants and hypotheses.",
+      "lab_decl": "high_compare"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1525c.distribution_of",
+      "theorem_title": "Assemble the conditional distribution bound",
+      "formal_statement": "namespace LL_Decomp1525c\ntheorem distribution_of\n    (h215 : ∀ y : ℝ, 678407 ≤ y → |Chebyshev.theta y - y| < y / (40 * Real.log y))\n    (hPI : ∀ x : ℝ, 10 ^ 52 ≤ x →\n      |PsiV x - ∑ p ∈ P1V x, Real.log p * ∫ u in (x - p)..(2 * x - p), 1 / Real.log u|\n        < x ^ 2 / (12 * Real.log x ^ 2)) :\n    ∀ x : ℝ, 10 ^ 52 ≤ x → |PsiV x - mainIntegralV x| < x ^ 2 / (5 * Real.log x ^ 2) := by sorry\nend LL_Decomp1525c",
+      "natural_language_statement": "Assume $|\\theta(y)-y|<y/(40\\log y)$ for every real $y\\ge678407$, where $\\theta$ is Chebyshev's prime logarithm sum. Also assume that for every real $z\\ge10^{52}$, $|\\Psi(z)-\\sum_{p\\in P_1(z)}\\log p\\int_{z-p}^{2z-p}du/\\log u|<z^2/(12\\log^2z)$. Conditional on these two inputs, every real $x\\ge10^{52}$ satisfies $|\\Psi(x)-M(x)|<x^2/(5\\log^2x)$.",
+      "preamble": "import Mathlib\nimport Definitions.Def_LL_Decomp1525c_P1V\nimport Definitions.Def_LL_Decomp1525c_PsiV\nimport Definitions.Def_LL_Decomp1525c_mainIntegralV\nopen Finset Real MeasureTheory intervalIntegral\nopen scoped Classical",
+      "source": "R. C. Vaughan, On the estimation of Schnirelman's constant, J. reine angew. Math. 290, 1977, pp. 93 to 108, p. 103, proof of Lemma 11. https://doi.org/10.1515/crll.1977.290.93",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": true,
+      "milestone_title": "Assemble the conditional distribution bound",
+      "milestone_description": "Establish the stated conditional assembly estimate.",
+      "lab_decl": "distribution_of"
+    }
+  ]
+}
