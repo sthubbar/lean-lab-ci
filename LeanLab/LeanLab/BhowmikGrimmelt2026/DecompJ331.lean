@@ -29,7 +29,7 @@ theorem leaf_off_diagonal_bound (A B : ℝ) (hA : 0 < A) (hB : 0 < B)
       (zetaN σ T : ℝ) ≤ C * T ^ (A * (1 - σ)) * Real.log T ^ B)
     (θ : ℝ) (hθ : 1 - 2 / A < θ) :
     Tendsto (fun X : ℝ => V X (X ^ θ) / ((X ^ θ) ^ 2 * X)) atTop (𝓝 0) := by
-  sorry
+  exact theorem62 A B hA hB hDensity θ hθ
 
 /-- Theorem 6.2 decomposed. -/
 theorem decomp_theorem62 : Theorem62 := by
