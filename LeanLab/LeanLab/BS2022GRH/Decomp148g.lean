@@ -2,6 +2,7 @@
 Recovered from the recorded write commands. Fresh checks are required.
 Journal Theorem 4, lower sieve and exact lab assembly. Goldbach is open. -/
 import LeanLab.BS2022GRH.Decomp148f
+import LeanLab.BS2022GRH.DecompC169d
 namespace LeanLab.BS2022GRH.Decomp148g
 open Real Finset Classical ChenThresholdGRH Decomp148f
 /-- LEAF. Lower half of Theorem 4 p. 1218 on 2 ≤ s ≤ 4.
@@ -20,7 +21,8 @@ theorem lower_sieve (supp : Finset ℕ) (a : ℕ → ℝ) (P : Set ℕ) (Q : Fin
     (2 * exp eulerMascheroniConstant * log (log D / log z - 1) / (log D / log z) -
       (1 / 8349 : ℝ) * 114 * exp 2 * hS (log D / log z)) * mainMass supp a P g z -
       errorSum supp a P Q g z D ≤ sifted supp a P z := by
-  sorry
+  exact ((DecompC169d.linearSieveT4_8349) supp a P Q g z D ha hsupp hP hQ hg
+    (by norm_num) (by norm_num) hz hprod).2 hzD hs
 /-- Exact selected LinearSieveT4. OPEN through two cited leaves, with no direct sorry. -/
 theorem linearSieveT4_8349 : LinearSieveT4 (1 / 8349) 112 114 := by
   intro supp a P Q g z D ha hsupp hP hQ hg _heps _heps63 hz hprod
