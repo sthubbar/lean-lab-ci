@@ -2,6 +2,7 @@
 Recovered from this run's recorded write commands after execution access failed.
 Fresh build, seal and branch checks are required. Goldbach is open. -/
 import LeanLab.BS2022GRH.ChenThresholdGRH
+import LeanLab.BS2022GRH.CharacterC164
 import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
 namespace LeanLab.BS2022GRH.Decomp148a
 open Real Finset Classical ChenThresholdGRH
@@ -87,7 +88,7 @@ theorem orthogonality_bound (c : ℕ → ℂ) (X Y Z : ℝ) (d b : ℕ)
     ‖discrepancy c X Y Z d b‖ ≤ (d.totient : ℝ)⁻¹ *
       ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ d)).filter (fun χ => χ ≠ 1),
         ‖∑ n ∈ nRange X, c n * χ n‖ * ‖∑ p ∈ pRange Y Z, χ p‖ := by
-  sorry
+  exact CharacterC164.error_norm_le (nRange X) (pRange Y Z) c d b hd hb
 /-- LEAF. Primitive conductor reduction, display 12 p. 1223.
 Use the orthogonality bound and primitiveCharacter_isPrimitive.
 Squarefree weights become support conditions. -/

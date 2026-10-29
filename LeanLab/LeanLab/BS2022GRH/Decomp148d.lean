@@ -1,7 +1,7 @@
 /- AI wrote this Lean code for CODEX task148.
 Recovered from the recorded write commands. Fresh checks are required.
 Journal Lemma 8, normalization and exact assembly. Goldbach is open. -/
-import LeanLab.BS2022GRH.Decomp148b
+import LeanLab.BS2022GRH.DecompC164b
 import LeanLab.BS2022GRH.Decomp148c
 namespace LeanLab.BS2022GRH.Decomp148d
 open Real Finset Classical ChenThresholdGRH Decomp148a Decomp148b Decomp148c
@@ -11,14 +11,14 @@ theorem small_normalized (X Y D : ℝ) (hX : 25 ≤ X) (hY : 25 ≤ Y)
     (hD : 1 < D) (hDX : D < √(X * Y))
     (hbal : √(X * Y) / D ≤ cutoff Y) (hcutD : cutoff Y ≤ D) :
     smallBound X Y D (cutoff Y) ≤ smallCoeff X Y D * scale X Y D := by
-  sorry
+  exact (DecompC164b.small_identity X Y D hX hY hD hDX hbal hcutD).le
 /-- LEAF. Normalize display 16 to display 18, p. 1226.
 Simplify real powers and the reciprocal cutoff term. -/
 theorem large_normalized (X Y D : ℝ) (hX : 25 ≤ X) (hY : 25 ≤ Y)
     (hD : 1 < D) (hDX : D < √(X * Y))
     (hbal : √(X * Y) / D ≤ cutoff Y) (hcutD : cutoff Y ≤ D) :
     largeBound X Y D (cutoff Y) ≤ largeCoeff X Y D * scale X Y D := by
-  sorry
+  exact (DecompC164b.large_identity X Y D hX hY hD hDX hbal hcutD).le
 /-- Elementary strict cutoff range from the balancing condition, p. 1226. -/
 theorem cutoff_gt_one (X Y D : ℝ) (hD : 1 < D) (hDX : D < √(X * Y))
     (hbal : √(X * Y) / D ≤ cutoff Y) : 1 < cutoff Y := by
