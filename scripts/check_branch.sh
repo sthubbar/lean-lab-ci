@@ -13,7 +13,9 @@ export PATH="$HOME/.elan/bin:$PATH"
 FOLDER=$(echo "$FOLDER" | tr -d " " | sed -E "s#(^|,)(\./)?(LeanLab/)*#\1#g; s#/(,|$)#\1#g"); F1="${FOLDER%%,*}"
 OUT="LeanLab/LeanLab/$F1/build/$TAG-CHECK.txt"; mkdir -p "$(dirname "$OUT")"
 git fetch -q origin main 2>/dev/null
-BASE=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || echo "")
+# CHECK_BASE override, lrefresh 2026-10-29 on lmerge findings 10-24 and 10-25: an audit on a worktree of new main found no
+# changed files and passed empty. Audits run: CHECK_BASE=<pre-run main sha> bash scripts/check_branch.sh <Folder> GATE-AUDIT
+BASE="${CHECK_BASE:-$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || echo "")}"
 python3 - "$FOLDER" "$TAG" "$BASE" "$OUT" <<'PY'
 import subprocess, sys, re, os
 folder, tag, base, out = sys.argv[1:5]
@@ -62,7 +64,12 @@ rep(ao <= bo and bad_new == 0, f"sorry count in changed files {before} before, {
 names = []
 for f in leans:
     mod = "LeanLab." + f[len("LeanLab/LeanLab/"):-5].replace("/", ".")
-    rc, log = sh(f"lake build {mod}", cwd="LeanLab")
+    serial = "LEAN_NUM_THREADS=1 " if os.environ.get("CHECK_SERIAL") == "1" else ""
+    rc, log = sh(f"{serial}lake build {mod}", cwd="LeanLab")
+    # OOM RETRY, lrefresh 2026-10-29 on lmerge findings: big certificate modules, MuStar55Cert and Akeno2026, were killed
+    # with exit 137 on 7 GB. Lake 4.35 has no -j; LEAN_NUM_THREADS=1 builds one module at a time, single-threaded, tested 2026-10-29.
+    if rc != 0 and not serial and re.search(r"\b137\b|Killed|out of memory|signal 9|SIGKILL", log):
+        rc, log = sh(f"LEAN_NUM_THREADS=1 lake build {mod}", cwd="LeanLab"); log = "OOM retry, serial build. " + log
     rep(rc == 0, f"lake build {mod} exit {rc}" + ("" if rc == 0 else ": " + log.strip().splitlines()[-1][:200] if log.strip() else ""))
     ns = []; text = re.sub(r"/-.*?-/", "", open(f).read(), flags=re.S)
     for line in text.splitlines():

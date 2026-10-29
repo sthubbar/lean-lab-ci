@@ -19,7 +19,7 @@ name: lean-gate
 on:
   push:
     # Full-lane workers only, to stay inside the 2,000 free private-repo minutes a month; Codex keeps the fast lane.
-    branches: ['gemini/**', 'GEMINI**', 'jules**', 'aristotle/**', 'grok/**', 'codex/**', 'task*', 'gemini-**', 'codex-**']
+    branches: ['gemini/**', 'GEMINI**', 'jules**', 'aristotle/**', 'grok/**', 'codex/**', 'task*', 'gemini-**', 'codex-**', 'decompose-**']
   schedule:
     - cron: '17 9 * * *'
   workflow_dispatch:
