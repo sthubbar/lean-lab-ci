@@ -30,7 +30,12 @@ Assemblies, CONDITIONAL ON the leaves below and on the stated inputs, no sorry o
 
 AI wrote this Lean code, Claude, checked only by the Lean kernel. Binary Goldbach is OPEN.
 -/
+/-
+CODEX task170 completed every original LEAF proof. The dependency labels above record the original
+decomposition. The analytic assemblies retain their explicit cited input hypotheses. AI wrote these proofs.
+-/
 import Mathlib
+import LeanLab.Linnik.U7206Display6
 import LeanLab.Linnik.Decomp1537a
 import LeanLab.Linnik.PR2020
 
@@ -129,6 +134,56 @@ lemma sing_le {c0 : ℝ} (hc0 : 0 ≤ c0) (hc1 : c0 ≤ 1) (h : ℤ) : sing c0 h
   · positivity
   · nlinarith
 
+/-- LEAF. Unit U-1537. Sums weighted by `r_{k,k}` are sums over pairs, as in (5.2) p. 10 and
+(6.3) p. 11: `∑_m r_{k,k}(m) g(m) = ∑_{(ν, μ)} g(2^{ν₁} + ... - 2^{μ_k})`. -/
+theorem rkk_sum_eq (k L : ℕ) (g : ℤ → ℝ) :
+    ∑ m ∈ mset k L, (rkk k L m : ℝ) * g m = ∑ x : pairs k L, g (difc x) := by
+  have hb (ν : Fin k → Fin L) : svv ν ≤ k * 2 ^ (L + 1) := by
+    unfold svv
+    calc
+      ∑ i, 2 ^ ((ν i : ℕ) + 1) ≤ ∑ _i : Fin k, 2 ^ (L + 1) :=
+        sum_le_sum fun i _ => Nat.pow_le_pow_right (by norm_num) (by omega)
+      _ = _ := by simp
+  have hm : ∀ x ∈ (univ : Finset (pairs k L)), difc x ∈ mset k L := by
+    intro x _
+    have h1 : (svv x.1 : ℤ) ≤ (k * 2 ^ (L + 1) : ℕ) := by exact_mod_cast hb x.1
+    have h2 : (svv x.2 : ℤ) ≤ (k * 2 ^ (L + 1) : ℕ) := by exact_mod_cast hb x.2
+    simp only [mset, mem_Icc, difc, Bk]
+    constructor <;> omega
+  rw [← sum_fiberwise_of_maps_to hm (fun x => g (difc x))]
+  apply sum_congr rfl
+  intro m _
+  calc
+    _ = ∑ x ∈ univ.filter (fun x : pairs k L => difc x = m), g m := by
+      simp [rkk, nsmul_eq_mul]
+    _ = _ := sum_congr rfl fun x hx => by rw [(mem_filter.mp hx).2]
+
+/-- The finite Fourier expansion of the even moment of G. P0035 p.11 display 6.3. -/
+theorem Gsum_norm_pow_expand (k L : ℕ) (α : ℝ) :
+    ‖Gsum L α‖ ^ (2 * k) = ∑ x : pairs k L, (ee (-((difc x : ℝ) * α))).re := by
+  have hconj (x : ℝ) : (starRingEnd ℂ) (ee x) = ee (-x) := by
+    simpa only [ee, LeanLab.Linnik.U1412Display53.eC, LeanLab.Linnik.U1434Lemma21.e_eq_eC] using
+      (LeanLab.PNTPort.LargeSieve.e_neg x).symm
+  have hpow : Gsum L α ^ k = ∑ ν : Fin k → Fin L, ee (svv ν * α) :=
+    LeanLab.Linnik.U1434Lemma21.Gs_pow k L α
+  have hn : ((‖Gsum L α‖ ^ (2 * k) : ℝ) : ℂ) =
+      (starRingEnd ℂ) (Gsum L α ^ k) * Gsum L α ^ k := by
+    conv_rhs => rw [mul_comm]
+    rw [Complex.mul_conj, Complex.normSq_eq_norm_sq, norm_pow, ← pow_mul, Nat.mul_comm k 2]
+  have hh : (starRingEnd ℂ) (Gsum L α ^ k) * Gsum L α ^ k =
+      ∑ x : pairs k L, ee (-((difc x : ℝ) * α)) := by
+    rw [hpow, map_sum, sum_mul_sum, Fintype.sum_prod_type]
+    refine sum_congr rfl fun ν _ => sum_congr rfl fun μ _ => ?_
+    rw [hconj]
+    change LeanLab.Linnik.U1412Display53.eC _ * LeanLab.Linnik.U1412Display53.eC _ =
+      LeanLab.Linnik.U1412Display53.eC _
+    rw [← LeanLab.Linnik.U1434Lemma21.eC_add]
+    congr 1
+    simp only [difc, Int.cast_sub, Int.cast_natCast]
+    ring
+  have hh' := congrArg Complex.re (hn.trans hh)
+  simpa only [Complex.ofReal_re, Complex.re_sum] using hh'
+
 /-! ### Leaves: Parseval, the arcs, and `R₁` -/
 
 /-- LEAF. Unit U-1537. Parseval over one period, (4.1) p. 8 and (6.2) p. 11:
@@ -137,7 +192,35 @@ lemma sing_le {c0 : ℝ} (hc0 : 0 ≤ c0) (hc1 : c0 ≤ 1) (h : ℤ) : sing c0 h
 theorem parseval_k (N1 N k L : ℕ) (Q : ℝ) :
     ∫ α in Ufull Q, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2 =
       ∑ n ∈ range (N + k * 2 ^ (L + 1) + 1), (rk' N1 N k L n) ^ 2 := by
-  sorry
+  let R := N + k * 2 ^ (L + 1) + 1
+  have hs (α : ℝ) : Ssum N1 N α = LeanLab.Linnik.U1426ChainWire.Sm N1 N α := by
+    unfold Ssum LeanLab.Linnik.U1426ChainWire.Sm LeanLab.Linnik.LiLiuLemma43.SA
+    simp only [LeanLab.Linnik.U1434Lemma21.e_eq_eC]
+    rfl
+  have hrep (α : ℝ) : Ssum N1 N α * Gsum L α ^ k =
+      LeanLab.Linnik.LiLiuLemma43.SA (range R) (fun n => (rk' N1 N k L n : ℂ)) α := by
+    rw [hs]
+    exact LeanLab.Linnik.U1434Lemma21.SG_pow k N1 N L R (by
+      dsimp [R]
+      have := Nat.pow_le_pow_right (by norm_num : 1 ≤ 2) (Nat.le_succ L)
+      simp only [Nat.succ_eq_add_one] at this
+      have := Nat.mul_le_mul_left k this
+      omega) α
+  simp_rw [hrep]
+  have hp : Function.Periodic (fun α =>
+      ‖LeanLab.Linnik.LiLiuLemma43.SA (range R) (fun n => (rk' N1 N k L n : ℂ)) α‖ ^ 2) 1 := by
+    intro x
+    dsimp only
+    rw [LeanLab.Linnik.LiLiuLemma43Int.SA_periodic]
+  have he := hp.intervalIntegral_add_eq (1 / Q) 0
+  simp only [zero_add] at he
+  rw [intervalIntegral.integral_of_le (by linarith), intervalIntegral.integral_of_le zero_le_one] at he
+  have hparse : ∫ α in Set.Ioc (0 : ℝ) 1,
+      ‖LeanLab.Linnik.LiLiuLemma43.SA (range R) (fun n => (rk' N1 N k L n : ℂ)) α‖ ^ 2 =
+      ∑ n ∈ range R, rk' N1 N k L n ^ 2 := by
+    rw [← integral_Icc_eq_integral_Ioc]
+    exact LeanLab.Linnik.U1426ChainWire.parseval _ _
+  simpa [R, Ufull, add_comm] using he.trans hparse
 
 /-- LEAF. Unit U-1537. The three way split of (6.2) p. 11, `∫_0^1 = ∫_𝔐 + ∫_{C(𝔐) ∩ E*} +
 ∫_{C(𝔐) ∖ E*}`, for a measurable `E*`; with `E* = ∅` it is the split `∫_0^1 - ∫_𝔐` of (4.4) p. 9. -/
@@ -146,7 +229,19 @@ theorem split3 (N1 N k L : ℕ) (P Q : ℝ) (E : Set ℝ) (hE : MeasurableSet E)
       (∫ α in majorArcs P Q ∩ Ufull Q, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2) +
       (∫ α in (Ufull Q \ majorArcs P Q) ∩ E, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2) +
       ∫ α in (Ufull Q \ majorArcs P Q) \ E, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2 := by
-  sorry
+  have hc : Continuous (fun α => ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2) := by
+    unfold Ssum Gsum ee
+    fun_prop
+  have hI : IntegrableOn (fun α => ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2) (Ufull Q) :=
+    hc.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
+  have hM : MeasurableSet (majorArcs P Q) := by
+    unfold majorArcs
+    exact MeasurableSet.biUnion (Set.to_countable _) fun q _ =>
+      MeasurableSet.biUnion (Set.to_countable _) fun a _ => measurableSet_Icc
+  have h1 := integral_inter_add_sdiff hM hI
+  have h2 := integral_inter_add_sdiff (s := Ufull Q \ majorArcs P Q) hE (hI.mono_set Set.diff_subset)
+  rw [Set.inter_comm] at h1
+  linarith
 
 /-- LEAF. Unit U-1537. The first line of (6.3) p. 11, and with `k = 1` the middle of (4.4) p. 9:
 `∫_𝔐 |S|² |G|^{2k} = ∑_m r_{k,k}(m) R₁(m)`, real parts, since `|G^k|² = ∑_m r_{k,k}(m) e(mα)` and
@@ -154,19 +249,99 @@ theorem split3 (N1 N k L : ℕ) (P Q : ℝ) (E : Set ℝ) (hE : MeasurableSet E)
 theorem major_expand (N1 N k L : ℕ) (P Q : ℝ) :
     ∫ α in majorArcs P Q ∩ Ufull Q, ‖Ssum N1 N α‖ ^ 2 * ‖Gsum L α‖ ^ (2 * k) =
       ∑ m ∈ mset k L, (rkk k L m : ℝ) * (R1 N1 N P Q m).re := by
-  sorry
+  have hsub : majorArcs P Q ∩ Ufull Q ⊆ Set.Icc (1 / Q) (1 + 1 / Q) :=
+    fun α hα => Set.Ioc_subset_Icc_self hα.2
+  have hi (m : ℤ) : IntegrableOn
+      (fun α => ((‖Ssum N1 N α‖ ^ 2 : ℝ) : ℂ) * ee (-(m * α)))
+      (majorArcs P Q ∩ Ufull Q) := by
+    have hc : Continuous (fun α : ℝ => ((‖Ssum N1 N α‖ ^ 2 : ℝ) : ℂ) * ee (-(m * α))) := by
+      unfold Ssum ee; fun_prop
+    exact hc.integrableOn_Icc.mono_set hsub
+  have hint (m : ℤ) : IntegrableOn
+      (fun α => ‖Ssum N1 N α‖ ^ 2 * (ee (-(m * α))).re) (majorArcs P Q ∩ Ufull Q) := by
+    simpa only [RCLike.re_to_complex, Complex.re_ofReal_mul] using (hi m).re
+  have hr (m : ℤ) :
+      (∫ α in majorArcs P Q ∩ Ufull Q, ‖Ssum N1 N α‖ ^ 2 * (ee (-(m * α))).re) =
+        (R1 N1 N P Q m).re := by
+    simpa only [R1, RCLike.re_to_complex, Complex.re_ofReal_mul] using integral_re (hi m)
+  rw [rkk_sum_eq]
+  simp_rw [Gsum_norm_pow_expand, mul_sum]
+  rw [integral_finsetSum _ (fun x _ => hint (difc x))]
+  exact sum_congr rfl fun x _ => hr (difc x)
 
 /-- LEAF. Unit U-1537. The second line of (6.3) p. 11: `R₁(0) = ∫_𝔐 |S|² ≤ ∫_0^1 |S|² =
 ∑_{N₁ < p ≤ N} log² p`. -/
 theorem R1_zero_re_le (N1 N : ℕ) (P Q : ℝ) :
     (R1 N1 N P Q 0).re ≤ ∑ p ∈ primesIn N1 N, Real.log p ^ 2 := by
-  sorry
+  have hc : Continuous (fun α => ‖Ssum N1 N α‖ ^ 2) := by unfold Ssum ee; fun_prop
+  have hi : IntegrableOn (fun α => ‖Ssum N1 N α‖ ^ 2) (Ufull Q) :=
+    hc.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
+  have hs (α : ℝ) : Ssum N1 N α =
+      LeanLab.Linnik.LiLiuLemma43.SA (primesIn N1 N) (fun p => (Real.log p : ℂ)) α := by
+    unfold Ssum LeanLab.Linnik.LiLiuLemma43.SA
+    simp only [LeanLab.Linnik.U1434Lemma21.e_eq_eC]
+    rfl
+  have hp : Function.Periodic (fun α => ‖Ssum N1 N α‖ ^ 2) 1 := by
+    intro x
+    dsimp only
+    simp only [hs, LeanLab.Linnik.LiLiuLemma43Int.SA_periodic]
+  have he := hp.intervalIntegral_add_eq (1 / Q) 0
+  simp only [zero_add] at he
+  rw [intervalIntegral.integral_of_le (by linarith), intervalIntegral.integral_of_le zero_le_one] at he
+  have hparse : ∫ α in Set.Ioc (0 : ℝ) 1, ‖Ssum N1 N α‖ ^ 2 =
+      ∑ p ∈ primesIn N1 N, Real.log p ^ 2 := by
+    simp_rw [hs]
+    rw [← integral_Icc_eq_integral_Ioc]
+    exact LeanLab.Linnik.U1426ChainWire.parseval _ _
+  have hfull : ∫ α in Ufull Q, ‖Ssum N1 N α‖ ^ 2 =
+      ∑ p ∈ primesIn N1 N, Real.log p ^ 2 := by
+    simpa [Ufull, add_comm] using he.trans hparse
+  have hr : (R1 N1 N P Q 0).re = ∫ α in majorArcs P Q ∩ Ufull Q, ‖Ssum N1 N α‖ ^ 2 := by
+    have h0 : ee 0 = 1 := by simp [ee]
+    simp only [R1, Int.cast_zero, zero_mul, neg_zero, h0, mul_one]
+    have hh : (∫ α in majorArcs P Q ∩ Ufull Q, ((‖Ssum N1 N α‖ ^ 2 : ℝ) : ℂ)) =
+        ((∫ α in majorArcs P Q ∩ Ufull Q, ‖Ssum N1 N α‖ ^ 2 : ℝ) : ℂ) := integral_ofReal
+    rw [hh]
+    rfl
+  rw [hr, ← hfull]
+  exact setIntegral_mono_set (s := majorArcs P Q ∩ Ufull Q) hi
+    (Filter.Eventually.of_forall fun _ => sq_nonneg _)
+    (Filter.Eventually.of_forall fun α (hα : α ∈ majorArcs P Q ∩ Ufull Q) => hα.2)
 
 /-- LEAF. Unit U-1537. `∑_{p ≤ N} log² p ≤ 2N log N`, the factor `2N log N` in the third line
 of (6.3) p. 11, from `θ(N) ≤ N log 4`. -/
 theorem sum_log_sq_le (N1 N : ℕ) :
     ∑ p ∈ primesIn N1 N, Real.log p ^ 2 ≤ 2 * N * Real.log N := by
-  sorry
+  have hlogN : 0 ≤ Real.log N := Real.log_natCast_nonneg N
+  calc
+    ∑ p ∈ primesIn N1 N, Real.log p ^ 2 ≤
+        ∑ p ∈ primesIn N1 N, Real.log p * Real.log N := by
+      apply sum_le_sum
+      intro p hp
+      have hpN := (mem_Ioc.mp (mem_filter.mp hp).1).2
+      have hp0 := (mem_filter.mp hp).2.pos
+      have hlog := Real.log_le_log (x := (p : ℝ)) (y := (N : ℝ)) (by exact_mod_cast hp0) (by exact_mod_cast hpN)
+      nlinarith [mul_le_mul_of_nonneg_left hlog (Real.log_natCast_nonneg p)]
+    _ = (∑ p ∈ primesIn N1 N, Real.log p) * Real.log N := by rw [sum_mul]
+    _ ≤ Chebyshev.theta N * Real.log N := by
+      apply mul_le_mul_of_nonneg_right _ hlogN
+      apply sum_le_sum_of_subset_of_nonneg
+      · intro p hp
+        have hp' := mem_filter.mp hp
+        exact mem_filter.mpr ⟨mem_Ioc.mpr ⟨by have := hp'.2.pos; omega,
+          by simpa using (mem_Ioc.mp hp'.1).2⟩, hp'.2⟩
+      · intro p _ _; exact Real.log_natCast_nonneg p
+    _ ≤ (Real.log 4 * N) * Real.log N :=
+      mul_le_mul_of_nonneg_right (Chebyshev.theta_le_log4_mul_x (by positivity)) hlogN
+    _ ≤ 2 * N * Real.log N := by
+      have h4 : Real.log 4 ≤ 2 := by
+        rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+        have h2 : Real.log 2 ≤ 1 := by
+          have hh := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)
+          linarith
+        norm_num only [Nat.cast_ofNat]
+        linarith
+      gcongr
 
 /-- LEAF. Unit U-1537. `R₁(0) = ∫_𝔐 |S|² ≥ 0`, used for "by `R₁(0) > 0`" before (4.7) p. 9. -/
 theorem R1_zero_re_nonneg (N1 N : ℕ) (P Q : ℝ) : 0 ≤ (R1 N1 N P Q 0).re := by
@@ -193,7 +368,89 @@ theorem R1_zero_re_nonneg (N1 N : ℕ) (P Q : ℝ) : 0 ≤ (R1 N1 N P Q 0).re :=
 theorem pair_k1 (N1 N L : ℕ) (P Q : ℝ) :
     ∑ m ∈ mset 1 L, (rkk 1 L m : ℝ) * (R1 N1 N P Q m).re =
       L * (R1 N1 N P Q 0).re + 2 * ∑ x ∈ star L, (R1 N1 N P Q (hdiff x)).re := by
-  sorry
+  let M := majorArcs P Q ∩ Ufull Q
+  let I := Icc 1 L
+  let F (a b : ℕ) := (R1 N1 N P Q ((2 : ℤ) ^ b - 2 ^ a)).re
+  have hi (h : ℤ) : IntegrableOn
+      (fun α => ((‖Ssum N1 N α‖ ^ 2 : ℝ) : ℂ) * ee (-(h * α))) M := by
+    have hc : Continuous (fun α : ℝ => ((‖Ssum N1 N α‖ ^ 2 : ℝ) : ℂ) * ee (-(h * α))) := by
+      unfold Ssum ee; fun_prop
+    exact hc.integrableOn_Icc.mono_set (fun α hα => Set.Ioc_subset_Icc_self hα.2)
+  have hint (h : ℤ) : IntegrableOn
+      (fun α => ‖Ssum N1 N α‖ ^ 2 * (ee (-(h * α))).re) M := by
+    simpa only [RCLike.re_to_complex, Complex.re_ofReal_mul] using (hi h).re
+  have hr (h : ℤ) : (∫ α in M, ‖Ssum N1 N α‖ ^ 2 * (ee (-(h * α))).re) =
+      (R1 N1 N P Q h).re := by
+    simpa only [R1, RCLike.re_to_complex, Complex.re_ofReal_mul] using integral_re (hi h)
+  have heven (x : ℝ) : (ee (-x)).re = (ee x).re := by
+    change (LeanLab.Linnik.U1412Display53.eC (-x)).re = (LeanLab.Linnik.U1412Display53.eC x).re
+    simp only [← LeanLab.Linnik.U1434Lemma21.e_eq_eC, LeanLab.PNTPort.LargeSieve.e_neg, Complex.conj_re]
+  have hsym (a b : ℕ) : F a b = F b a := by
+    dsimp [F]
+    rw [← hr, ← hr]
+    apply integral_congr_ae
+    apply Filter.Eventually.of_forall
+    intro α
+    have hh : -((((2 : ℤ) ^ a - 2 ^ b : ℤ) : ℝ) * α) =
+        -(-((((2 : ℤ) ^ b - 2 ^ a : ℤ) : ℝ) * α)) := by push_cast; ring
+    dsimp only
+    rw [hh, heven]
+    simp only [neg_neg]
+  have hdiag (a : ℕ) : F a a = (R1 N1 N P Q 0).re := by simp [F]
+  have hex : ∫ α in M, ‖Ssum N1 N α‖ ^ 2 * ‖Gsum L α‖ ^ 2 = ∑ a ∈ I, ∑ b ∈ I, F a b := by
+    have hG (α : ℝ) : ‖Gsum L α‖ ^ 2 =
+        ∑ a ∈ I, ∑ b ∈ I, (ee (-((((2 : ℤ) ^ b - 2 ^ a : ℤ) : ℝ) * α))).re := by
+      have hh := LeanLab.Linnik.U7205Display34.normG_sq L α
+      change ‖Gsum L α‖ ^ 2 = _ at hh
+      rw [hh]
+      apply sum_congr rfl
+      intro a _
+      apply sum_congr rfl
+      intro b _
+      change (ee (((2 : ℝ) ^ a - 2 ^ b) * α)).re = _
+      congr 2
+      push_cast
+      ring
+    simp_rw [hG, mul_sum]
+    rw [integral_finsetSum _ (fun a _ => integrable_finsetSum _ fun b _ => hint _)]
+    apply sum_congr rfl
+    intro a _
+    rw [integral_finsetSum _ (fun b _ => hint _)]
+    exact sum_congr rfl fun b _ => hr _
+  have hsplit : ∑ a ∈ I, ∑ b ∈ I, F a b =
+      ∑ a ∈ I, ∑ b ∈ I, ((if a = b then (R1 N1 N P Q 0).re else 0) +
+        (if a < b then F a b else 0) + (if b < a then F a b else 0)) := by
+    apply sum_congr rfl
+    intro a _
+    apply sum_congr rfl
+    intro b _
+    rcases lt_trichotomy a b with h | h | h
+    · simp [h, h.ne, h.not_gt]
+    · subst b; simp [hdiag]
+    · simp [h, h.ne', h.not_gt]
+  have hupper : (∑ a ∈ I, ∑ b ∈ I, if b < a then F a b else 0) =
+      ∑ a ∈ I, ∑ b ∈ I, if a < b then F a b else 0 := by
+    rw [sum_comm]
+    apply sum_congr rfl
+    intro a _
+    apply sum_congr rfl
+    intro b _
+    rw [hsym b a]
+  have hstar : (∑ a ∈ I, ∑ b ∈ I, if a < b then F a b else 0) =
+      ∑ x ∈ star L, (R1 N1 N P Q (hdiff x)).re := by
+    simp only [star, sum_filter, sum_product, I, hdiff, F]
+  rw [← major_expand]
+  norm_num only [mul_one]
+  rw [hex, hsplit]
+  simp_rw [sum_add_distrib]
+  rw [hupper, hstar]
+  have hD : (∑ a ∈ I, ∑ b ∈ I, if a = b then (R1 N1 N P Q 0).re else 0) =
+      L * (R1 N1 N P Q 0).re := by
+    simp only [I, sum_ite_eq, mem_Icc]
+    rw [sum_ite_of_true (fun a ha => mem_Icc.mp ha)]
+    simp
+  rw [hD]
+  ring
 
 /-- LEAF. Unit U-1537. (6.4) p. 11: on a set `A ⊆ C(𝔐)` where `|G| ≤ c L`, Lemma 6,
 `∫_A |S G^k|² ≤ (cL)^{2k-2} ∫_{C(𝔐)} |S G|²`. -/
@@ -201,7 +458,30 @@ theorem minor_compare (N1 N k L : ℕ) (P Q : ℝ) (hk : 1 ≤ k) {A : Set ℝ} 
     (hA : A ⊆ Ufull Q \ majorArcs P Q) {c : ℝ} (hc : 0 ≤ c)
     (hG : ∀ α ∈ A, ‖Gsum L α‖ ≤ c * L) :
     ∫ α in A, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2 ≤ (c * L) ^ (2 * k - 2) * S2 N1 N L P Q := by
-  sorry
+  have c1 : Continuous (fun α => ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2) := by
+    unfold Ssum Gsum ee; fun_prop
+  have c2 : Continuous (fun α => ‖Ssum N1 N α * Gsum L α‖ ^ 2) := by
+    unfold Ssum Gsum ee; fun_prop
+  have hAU : A ⊆ Set.Icc (1 / Q) (1 + 1 / Q) :=
+    fun α hα => Set.Ioc_subset_Icc_self (hA hα).1
+  have i1 : IntegrableOn (fun α => ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2) A :=
+    c1.integrableOn_Icc.mono_set hAU
+  have i2U : IntegrableOn (fun α => ‖Ssum N1 N α * Gsum L α‖ ^ 2)
+      (Set.Icc (1 / Q) (1 + 1 / Q)) := c2.integrableOn_Icc
+  have hMU : Ufull Q \ majorArcs P Q ⊆ Set.Icc (1 / Q) (1 + 1 / Q) :=
+    fun α hα => Set.Ioc_subset_Icc_self hα.1
+  have i2 := (i2U.mono_set hAU).const_mul ((c * L) ^ (2 * k - 2))
+  calc
+    _ ≤ ∫ α in A, (c * L) ^ (2 * k - 2) * ‖Ssum N1 N α * Gsum L α‖ ^ 2 :=
+      setIntegral_mono_on i1 i2 hAm fun α hα =>
+        LeanLab.Linnik.U7206.pointwise hk (hG α hα)
+    _ = (c * L) ^ (2 * k - 2) * ∫ α in A, ‖Ssum N1 N α * Gsum L α‖ ^ 2 :=
+      integral_const_mul _ _
+    _ ≤ _ := by
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      exact setIntegral_mono_set (i2U.mono_set hMU)
+        (Filter.Eventually.of_forall fun _ => by positivity)
+        (Filter.Eventually.of_forall fun α hα => hA hα)
 
 /-- LEAF. Unit U-1537. (6.5) p. 11: `∫_{C(𝔐) ∩ E*} |S G^k|² ≤ |E*| sup_{C(𝔐)} |S|² L^{2k}`. The
 paper writes `|E*| N^{8/5} L^8`; the factor `L^{2k}` from `|G|^{2k} ≤ L^{2k}` is dropped there,
@@ -210,7 +490,31 @@ theorem E_part (N1 N k L : ℕ) (P Q : ℝ) {E : Set ℝ} (hE : MeasurableSet E)
     (hEf : volume E ≠ ⊤) {Ssup : ℝ} (hS : ∀ α ∈ Ufull Q \ majorArcs P Q, ‖Ssum N1 N α‖ ≤ Ssup) :
     ∫ α in (Ufull Q \ majorArcs P Q) ∩ E, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2 ≤
       (volume E).toReal * Ssup ^ 2 * (L : ℝ) ^ (2 * k) := by
-  sorry
+  have hnorm (x : ℝ) : ‖ee x‖ = 1 := by simp [ee, Complex.norm_exp, Complex.mul_re]
+  have hG (α : ℝ) : ‖Gsum L α‖ ≤ L := by
+    calc
+      ‖Gsum L α‖ ≤ ∑ ν ∈ Icc 1 L, ‖ee (2 ^ ν * α)‖ := norm_sum_le _ _
+      _ = L := by simp [hnorm]
+  let A := (Ufull Q \ majorArcs P Q) ∩ E
+  have hfin : volume A < ⊤ :=
+    lt_of_le_of_lt (measure_mono Set.inter_subset_right) (lt_top_iff_ne_top.mpr hEf)
+  have hb : ∀ α ∈ A, ‖‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2‖ ≤
+      Ssup ^ 2 * (L : ℝ) ^ (2 * k) := by
+    intro α hα
+    rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _), norm_mul, norm_pow, mul_pow,
+      show (‖Gsum L α‖ ^ k) ^ 2 = ‖Gsum L α‖ ^ (2 * k) by rw [← pow_mul, Nat.mul_comm]]
+    exact mul_le_mul (pow_le_pow_left₀ (norm_nonneg _) (hS α hα.1) 2)
+      (pow_le_pow_left₀ (norm_nonneg _) (hG α) _) (by positivity) (by positivity)
+  have hh := norm_setIntegral_le_of_norm_le_const hfin hb
+  have hm : (volume A).toReal ≤ (volume E).toReal :=
+    ENNReal.toReal_mono hEf (measure_mono Set.inter_subset_right)
+  calc
+    ∫ α in A, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2 ≤
+        ‖∫ α in A, ‖Ssum N1 N α * Gsum L α ^ k‖ ^ 2‖ := Real.le_norm_self _
+    _ ≤ (Ssup ^ 2 * (L : ℝ) ^ (2 * k)) * (volume A).toReal := hh
+    _ ≤ (Ssup ^ 2 * (L : ℝ) ^ (2 * k)) * (volume E).toReal :=
+      mul_le_mul_of_nonneg_left hm (by positivity)
+    _ = _ := by ring
 
 /-! ### Leaves: the end of the proof, (6.6) to (6.10) -/
 
@@ -218,16 +522,75 @@ theorem E_part (N1 N k L : ℕ) (P Q : ℝ) {E : Set ℝ} (hE : MeasurableSet E)
 splitting the `2k` powers of 2 into two groups of `k`. -/
 theorem convolution (N1 N k L : ℕ) :
     rK'' N1 N k L = ∑ m ∈ range (N + 1), rk' N1 N k L m * rk' N1 N k L (N - m) := by
-  sorry
+  have inner (A B : ℕ) (x y : ℝ) :
+      ∑ n ∈ range (N + 1), (if A = n then x else 0) * (if B = N - n then y else 0) =
+        if A + B = N then x * y else 0 := by
+    simp_rw [ite_mul, zero_mul]
+    rw [sum_ite_eq (range (N + 1)) A]
+    by_cases hA : A ≤ N
+    · rw [if_pos (mem_range.mpr (by omega))]
+      by_cases hB : A + B = N
+      · rw [if_pos (by omega), if_pos hB, mul_comm]
+      · rw [if_neg (by omega), if_neg hB]; simp
+    · rw [if_neg (by simp; omega), if_neg (by omega)]
+  have split (p q : ℕ) (x : ℝ) :
+      (∑ ν : Fin (2 * k) → Fin L, if p + q + svv ν = N then x else 0) =
+        ∑ ν1 : Fin k → Fin L, ∑ ν2 : Fin k → Fin L,
+          if p + svv ν1 + (q + svv ν2) = N then x else 0 := by
+    rw [two_mul, ← Fintype.sum_prod_type', ← (Fin.appendEquiv k k).sum_comp]
+    refine Fintype.sum_congr _ _ fun ν => ?_
+    have hh : p + q + svv (Fin.appendEquiv k k ν) = p + svv ν.1 + (q + svv ν.2) := by
+      simp only [Fin.appendEquiv_apply, svv, Fin.sum_univ_add, Fin.append_left, Fin.append_right]
+      ring
+    rw [hh]
+  unfold rK''
+  simp_rw [split]
+  unfold rk'
+  simp_rw [sum_mul_sum]
+  symm
+  rw [sum_comm]
+  refine sum_congr rfl fun p _ => ?_
+  rw [sum_comm]
+  refine sum_congr rfl fun q _ => ?_
+  rw [sum_comm]
+  refine sum_congr rfl fun ν1 _ => ?_
+  rw [sum_comm]
+  refine sum_congr rfl fun ν2 _ => ?_
+  exact inner _ _ _ _
 
 /-- LEAF. Unit U-1537. `r'_k(n) = 0` for even `n` when `N₁ ≥ 2`: then `p` is odd and the powers of
 2 are even; this is why only odd `n` occur in (6.7) to (6.10) p. 12. -/
 theorem rk'_even (N1 N k L : ℕ) (hN1 : 2 ≤ N1) {n : ℕ} (hn : Even n) : rk' N1 N k L n = 0 := by
-  sorry
+  apply sum_eq_zero
+  intro p hp
+  apply sum_eq_zero
+  intro ν _
+  have hpm := mem_filter.mp hp
+  have hpodd : Odd p := hpm.2.odd_of_ne_two (by have := (mem_Ioc.mp hpm.1).1; omega)
+  have hs : Even (svv ν) := by
+    apply Finset.even_sum
+    intro i _
+    exact Even.pow_of_ne_zero (by norm_num : Even (2 : ℕ)) (by omega)
+  have hne : p + svv ν ≠ n := by
+    intro he
+    have := hpodd.add_even hs
+    rw [he] at this
+    exact (Nat.not_even_iff_odd.mpr this) hn
+  simp [hne]
 
 /-- LEAF. Unit U-1537. For even `N` there are `N/2` odd `n ≤ N`, the `N/2` in (6.10) p. 12. -/
 theorem odd_count {N : ℕ} (hN : Even N) : ((range (N + 1)).filter Odd).card = N / 2 := by
-  sorry
+  obtain ⟨n, rfl⟩ := hN
+  have he : (range (n + n + 1)).filter Odd = (range n).image (fun i => 2 * i + 1) := by
+    ext x
+    simp only [mem_filter, mem_range, mem_image]
+    constructor
+    · rintro ⟨hx, i, rfl⟩
+      exact ⟨i, by omega, by omega⟩
+    · rintro ⟨i, hi, rfl⟩
+      exact ⟨by omega, ⟨i, by omega⟩⟩
+  rw [he, card_image_of_injective _ (by intro a b h; dsimp at h; omega), card_range]
+  omega
 
 /-- LEAF. Unit U-1537. `r''_{2k}(N) > 0` gives a representation of `N` as two primes plus `2k`
 powers of 2 with exponents `≥ 1`, the conclusion of Theorem 1 p. 1 from (6.9) to (6.11) p. 12. The
@@ -235,7 +598,22 @@ conclusion is the body of `LeanLab.Linnik.LinnikExact (2 * k) N`. -/
 theorem exists_of_pos {N1 N k L : ℕ} (h : 0 < rK'' N1 N k L) :
     ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ ∃ ν : Fin (2 * k) → ℕ, (∀ i, 1 ≤ ν i) ∧
       N = p + q + ∑ i, 2 ^ ν i := by
-  sorry
+  have choose {ι : Type} (s : Finset ι) (f : ι → ℝ) (hh : 0 < ∑ i ∈ s, f i) :
+      ∃ i ∈ s, 0 < f i := by
+    by_contra! hn
+    have := sum_nonpos hn
+    linarith
+  unfold rK'' at h
+  obtain ⟨p, hp, hpv⟩ := choose _ _ h
+  obtain ⟨q, hq, hqv⟩ := choose _ _ hpv
+  obtain ⟨ν, _, hν⟩ := choose _ _ hqv
+  split_ifs at hν with he
+  · refine ⟨p, q, (mem_filter.mp hp).2, (mem_filter.mp hq).2,
+      (fun i => (ν i : ℕ) + 1), ?_, ?_⟩
+    · intro i
+      exact Nat.succ_le_succ (Nat.zero_le _)
+    · exact he.symm
+  · simp at hν
 
 /-! ### Leaves: the exceptional classes in (4.5) and (6.3) -/
 
@@ -244,7 +622,16 @@ theorem exists_of_pos {N1 N k L : ℕ} (h : 0 < rK'' N1 N k L) :
 theorem union_bound {ι : Type*} (s : Finset ι) (rs : Finset ℕ) (P : ℕ → ι → Prop)
     [∀ r x, Decidable (P r x)] (f : ι → ℝ) (hf : ∀ x, 0 ≤ f x) :
     ∑ x ∈ s.filter (fun x => ∃ r ∈ rs, P r x), f x ≤ ∑ r ∈ rs, ∑ x ∈ s.filter (P r), f x := by
-  sorry
+  classical
+  simp only [sum_filter]
+  rw [sum_comm]
+  apply sum_le_sum
+  intro x hx
+  split_ifs with h
+  · obtain ⟨r, hr, hp⟩ := h
+    exact (by simpa [hp] using (single_le_sum (f := fun r => if P r x then f x else 0)
+      (fun r _ => by split_ifs <;> first | exact hf x | exact le_rfl) hr))
+  · exact sum_nonneg fun r _ => by split_ifs <;> first | exact hf x | exact le_rfl
 
 /-- LEAF. Unit U-1537. The sentence after (4.5) p. 9: fixing `ν₂` and putting `m = 2^{ν₂}`, the
 bad `ν₁ < ν₂` of one class `H_i` contribute at most the Lemma 1 bound `T`, so over all `ν₂ ≤ L`
@@ -254,7 +641,31 @@ theorem bad_reindex_1 {L r C : ℕ} {T : ℝ}
       ∑ ν ∈ (Icc 1 L).filter (fun ν => m - 2 ^ ν ≠ 0 ∧ (r : ℤ) ∣ C * (m - 2 ^ ν)),
         sfac (m - 2 ^ ν) ≤ T) :
     ∑ x ∈ (star L).filter (fun x => (r : ℤ) ∣ C * hdiff x), sfac (hdiff x) ≤ L * T := by
-  sorry
+  unfold star hdiff
+  rw [filter_filter, sum_filter, sum_product, sum_comm]
+  calc
+    _ ≤ ∑ b ∈ Icc 1 L, T := by
+      apply sum_le_sum
+      intro b hb
+      have hbL := (mem_Icc.mp hb).2
+      have hbm : |(2 : ℤ) ^ b| ≤ 2 ^ (2 * L) := by
+        rw [abs_of_nonneg (by positivity)]
+        exact pow_le_pow_right₀ (by norm_num) (by omega)
+      calc
+        _ ≤ ∑ a ∈ (Icc 1 L).filter (fun a => (2 : ℤ) ^ b - 2 ^ a ≠ 0 ∧
+            (r : ℤ) ∣ C * ((2 : ℤ) ^ b - 2 ^ a)), sfac ((2 : ℤ) ^ b - 2 ^ a) := by
+          rw [sum_filter]
+          apply sum_le_sum
+          intro a ha
+          by_cases hab : a < b ∧ (r : ℤ) ∣ C * ((2 : ℤ) ^ b - 2 ^ a)
+          · have hp : (2 : ℤ) ^ a < 2 ^ b := pow_lt_pow_right₀ (by norm_num) hab.1
+            have hn : (2 : ℤ) ^ b - 2 ^ a ≠ 0 := by omega
+            simp only [if_pos hab, if_pos (show (2 : ℤ) ^ b - 2 ^ a ≠ 0 ∧ (r : ℤ) ∣ C * ((2 : ℤ) ^ b - 2 ^ a) from ⟨hn, hab.2⟩)]
+            exact le_rfl
+          · rw [if_neg hab]
+            split_ifs <;> first | exact sfac_nonneg _ | exact le_rfl
+        _ ≤ T := hT _ hbm
+    _ = _ := by simp
 
 /-- LEAF. Unit U-1537. The last sum of (6.3) p. 11: fixing `ν₁, ..., ν_k, μ₁, ..., μ_{k-1}` and
 putting `m = 2^{ν₁} + ... - 2^{μ_{k-1}}`, `|m| ≤ k 2^L ≤ 2^{2L}`, the bad `μ_k` of one class
@@ -265,13 +676,61 @@ theorem bad_reindex_k {k L r C : ℕ} {T : ℝ} (hk : 1 ≤ k) (hL : 2 * k ≤ 2
         sfac (m - 2 ^ ν) ≤ T) :
     ∑ x ∈ univ.filter (fun x : pairs k L => difc x ≠ 0 ∧ (r : ℤ) ∣ C * difc x), sfac (difc x) ≤
       (L : ℝ) ^ (2 * k - 1) * T := by
-  sorry
-
-/-- LEAF. Unit U-1537. Sums weighted by `r_{k,k}` are sums over pairs, as in (5.2) p. 10 and
-(6.3) p. 11: `∑_m r_{k,k}(m) g(m) = ∑_{(ν, μ)} g(2^{ν₁} + ... - 2^{μ_k})`. -/
-theorem rkk_sum_eq (k L : ℕ) (g : ℤ → ℝ) :
-    ∑ m ∈ mset k L, (rkk k L m : ℝ) * g m = ∑ x : pairs k L, g (difc x) := by
-  sorry
+  obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
+  have hb {n : ℕ} (ν : Fin n → Fin L) : svv ν ≤ n * 2 ^ L := by
+    unfold svv
+    calc
+      ∑ i, 2 ^ ((ν i : ℕ) + 1) ≤ ∑ _i : Fin n, 2 ^ L :=
+        sum_le_sum fun i _ => Nat.pow_le_pow_right (by norm_num) (by omega)
+      _ = _ := by simp
+  have hbig : (j + 1) * 2 ^ L ≤ 2 ^ (2 * L) := by
+    calc
+      _ ≤ 2 ^ L * 2 ^ L := Nat.mul_le_mul_right _ (by omega)
+      _ = _ := by rw [← pow_add, two_mul]
+  have hs (ν : Fin (j + 1) → Fin L) (μ : Fin j → Fin L) :
+      (∑ a : Fin L, if difc (ν, Fin.cons a μ) ≠ 0 ∧ (r : ℤ) ∣ C * difc (ν, Fin.cons a μ)
+        then sfac (difc (ν, Fin.cons a μ)) else 0) ≤ T := by
+    let m : ℤ := (svv ν : ℤ) - svv μ
+    have hm : |m| ≤ 2 ^ (2 * L) := by
+      have hn : (svv ν : ℤ) ≤ (2 : ℤ) ^ (2 * L) := by exact_mod_cast (hb ν).trans hbig
+      have hμ : (svv μ : ℤ) ≤ (2 : ℤ) ^ (2 * L) := by
+        exact_mod_cast (hb μ).trans ((Nat.mul_le_mul_right (2 ^ L) (by omega : j ≤ j + 1)).trans hbig)
+      dsimp [m]
+      rw [abs_le]
+      constructor <;> omega
+    have hd (a : Fin L) : difc (ν, Fin.cons a μ) = m - 2 ^ ((a : ℕ) + 1) := by
+      have hh : svv (Fin.cons a μ) = 2 ^ ((a : ℕ) + 1) + svv μ := by
+        simp [svv, Fin.sum_univ_succ]
+      simp only [difc, hh, Nat.cast_add, Nat.cast_pow, Nat.cast_ofNat, m]
+      ring
+    simp_rw [hd]
+    have hi : Icc 1 L = (range L).map ⟨(· + 1), add_left_injective 1⟩ := by
+      ext x
+      simp only [mem_Icc, mem_map, mem_range, Function.Embedding.coeFn_mk]
+      constructor
+      · intro h; exact ⟨x - 1, by omega, by omega⟩
+      · rintro ⟨a, ha, rfl⟩; omega
+    have ht := hT m hm
+    rw [sum_filter, hi, sum_map] at ht
+    rw [Fin.sum_univ_eq_sum_range (fun a : ℕ => if m - 2 ^ (a + 1) ≠ 0 ∧
+      (r : ℤ) ∣ C * (m - 2 ^ (a + 1)) then sfac (m - 2 ^ (a + 1)) else 0) L]
+    exact ht
+  rw [sum_filter, Fintype.sum_prod_type]
+  calc
+    _ = ∑ ν : Fin (j + 1) → Fin L, ∑ μ : Fin j → Fin L, ∑ a : Fin L,
+        if difc (ν, Fin.cons a μ) ≠ 0 ∧ (r : ℤ) ∣ C * difc (ν, Fin.cons a μ)
+          then sfac (difc (ν, Fin.cons a μ)) else 0 := by
+      apply sum_congr rfl
+      intro ν _
+      rw [← (Fin.consEquiv (fun _ : Fin (j + 1) => Fin L)).sum_comp, Fintype.sum_prod_type, sum_comm]
+      rfl
+    _ ≤ ∑ _ν : Fin (j + 1) → Fin L, ∑ _μ : Fin j → Fin L, T :=
+      sum_le_sum fun ν _ => sum_le_sum fun μ _ => hs ν μ
+    _ = _ := by
+      simp only [sum_const, card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul, Nat.cast_pow]
+      rw [← mul_assoc, ← pow_add]
+      congr 2
+      omega
 
 /-! ### Assemblies: Lemma 5, p. 8 -/
 
@@ -654,5 +1113,144 @@ theorem k4_representation (N1 N L : ℕ) (hN : Even N) (hN1 : 2 ≤ N1) (hNpos :
     ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ ∃ ν : Fin (2 * 4) → ℕ, (∀ i, 1 ≤ ν i) ∧
       N = p + q + ∑ i, 2 ^ ν i :=
   exists_of_pos (k4_positive N1 N L hN hN1 hNpos hL A δ hA hδ hsq hsum)
+
+/-- Finite bounds before the prime number theorem step. P0035 p.11 display 6.6. -/
+theorem first_moment_bounds (N1 N k L : ℕ) :
+    (L : ℝ) ^ k * (Chebyshev.theta ((N - k * 2 ^ L : ℕ) : ℝ) - Chebyshev.theta N1) ≤
+      ∑ n ∈ range (N + 1), rk' N1 N k L n ∧
+    (∑ n ∈ range (N + 1), rk' N1 N k L n) ≤ (L : ℝ) ^ k * Chebyshev.theta N := by
+  have hsum : (∑ n ∈ range (N + 1), rk' N1 N k L n) =
+      ∑ p ∈ primesIn N1 N, ∑ ν : Fin k → Fin L,
+        if p + svv ν ≤ N then Real.log p else 0 := by
+    unfold rk'
+    rw [sum_comm]
+    apply sum_congr rfl
+    intro p _
+    rw [sum_comm]
+    apply sum_congr rfl
+    intro ν _
+    rw [sum_ite_eq]
+    simp only [mem_range, Nat.lt_succ_iff]
+  rw [hsum]
+  have hnon : 0 ≤ ∑ p ∈ primesIn N1 N, ∑ ν : Fin k → Fin L,
+      if p + svv ν ≤ N then Real.log p else 0 :=
+    sum_nonneg fun p _ => sum_nonneg fun ν _ => by
+      split_ifs <;> first | exact Real.log_natCast_nonneg p | exact le_rfl
+  constructor
+  · by_cases hMN : N1 ≤ N - k * 2 ^ L
+    · rw [← LeanLab.Linnik.LiLiuDisplay37.sum_primesIn hMN, mul_sum]
+      calc
+        _ = ∑ p ∈ primesIn N1 (N - k * 2 ^ L), ∑ ν : Fin k → Fin L,
+            if p + svv ν ≤ N then Real.log p else 0 := by
+          apply sum_congr rfl
+          intro p hp
+          have hp' := mem_filter.mp hp
+          have hp0 := hp'.2.pos
+          have hpN := (mem_Ioc.mp hp'.1).2
+          have hin (ν : Fin k → Fin L) : p + svv ν ≤ N := by
+            have hh : svv ν ≤ k * 2 ^ L := LeanLab.Linnik.U1434Lemma21.sv_le ν
+            omega
+          simp only [if_pos (hin _), sum_const, card_univ, Fintype.card_fun,
+            Fintype.card_fin, nsmul_eq_mul, Nat.cast_pow]
+        _ ≤ _ := by
+          apply sum_le_sum_of_subset_of_nonneg
+          · intro p hp
+            simp only [primesIn, mem_filter, mem_Ioc] at hp ⊢
+            exact ⟨⟨hp.1.1, by omega⟩, hp.2⟩
+          · intro p _ _
+            apply sum_nonneg
+            intro ν _
+            split_ifs <;> first | exact Real.log_natCast_nonneg p | exact le_rfl
+    · have ht : Chebyshev.theta ((N - k * 2 ^ L : ℕ) : ℝ) ≤ Chebyshev.theta N1 :=
+        Chebyshev.theta_mono (by exact_mod_cast (show N - k * 2 ^ L ≤ N1 by omega))
+      exact (mul_nonpos_of_nonneg_of_nonpos (by positivity) (sub_nonpos.mpr ht)).trans hnon
+  · calc
+      _ ≤ ∑ p ∈ primesIn N1 N, ∑ _ν : Fin k → Fin L, Real.log p := by
+        apply sum_le_sum
+        intro p _
+        apply sum_le_sum
+        intro ν _
+        split_ifs <;> first | exact le_rfl | exact Real.log_natCast_nonneg p
+      _ = (L : ℝ) ^ k * ∑ p ∈ primesIn N1 N, Real.log p := by
+        rw [mul_sum]
+        apply sum_congr rfl
+        intro p _
+        simp only [sum_const, card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul, Nat.cast_pow]
+      _ ≤ _ := mul_le_mul_of_nonneg_left
+        (LeanLab.Linnik.U1434Lemma21.sum_primes_le_theta N1 N) (by positivity)
+
+open Filter
+open LeanLab.Linnik.U1426ChainWire (Lfun)
+open LeanLab.Linnik.U1429Display58 (N1f)
+/-- The prime number theorem step with the paper cutoff. P0035 p.11 display 6.6. -/
+theorem first_moment_estimate (k : ℕ) {κ : ℝ} (hκ : 0 < κ) {δ : ℝ} (hδ : 0 < δ) :
+    ∀ᶠ N : ℕ in atTop,
+      |(∑ n ∈ range (N + 1), rk' (N1f κ N) N k (Lfun N) n) - N * (Lfun N : ℝ) ^ k| ≤
+        δ * N * (Lfun N : ℝ) ^ k := by
+  let ε := min δ 1
+  have hε : 0 < ε := lt_min hδ zero_lt_one
+  have hε1 : ε ≤ 1 := min_le_right _ _
+  have hεδ : ε ≤ δ := min_le_left _ _
+  obtain ⟨C, hC⟩ := LeanLab.Linnik.LiLiuDisplay37PNT.theta_pnt (ε / 4) (by positivity)
+  have hC0 : 0 ≤ C := by have hh := hC 0; simpa using hh
+  have hsmall : ∀ᶠ N : ℕ in atTop, (k : ℝ) * 2 ^ Lfun N ≤ ε / 4 * N := by
+    have hh := LeanLab.Linnik.U1434Lemma21.two_pow_small
+      (η := ε / (4 * ((k : ℝ) + 1))) (by positivity)
+    filter_upwards [hh] with N hN
+    have hs := mul_le_mul_of_nonneg_left hN (by positivity : 0 ≤ (k : ℝ) + 1)
+    have he : ((k : ℝ) + 1) * (ε / (4 * ((k : ℝ) + 1)) * N) = ε / 4 * N := by
+      field_simp
+    rw [he] at hs
+    have hp : 0 ≤ (2 : ℝ) ^ Lfun N := by positivity
+    nlinarith
+  filter_upwards [hsmall, LeanLab.Linnik.U1434Lemma21.N1_small hκ
+    (η := ε / 8) (by positivity), tendsto_natCast_atTop_atTop.eventually_ge_atTop (8 * C / ε)]
+    with N h2 hMmax hCN
+  have hCN' : 8 * C ≤ ε * N := by rwa [div_le_iff₀' hε] at hCN
+  have hN0 : (0 : ℝ) ≤ N := Nat.cast_nonneg _
+  let K := N - k * 2 ^ Lfun N
+  let M := N1f κ N
+  have hM : (M : ℝ) ≤ ε / 8 * N := by
+    have hm : (M : ℝ) ≤ (max M 2 : ℕ) := by exact_mod_cast Nat.le_max_left M 2
+    exact hm.trans hMmax
+  have hKle : k * 2 ^ Lfun N ≤ N := by
+    have hh : ((k * 2 ^ Lfun N : ℕ) : ℝ) ≤ N := by push_cast; nlinarith
+    exact_mod_cast hh
+  have hKr : (K : ℝ) = N - (k : ℝ) * 2 ^ Lfun N := by
+    dsimp [K]
+    rw [Nat.cast_sub hKle]
+    push_cast
+    rfl
+  have hθK := hC K
+  have hθM := hC M
+  have hθN := hC N
+  rw [abs_le] at hθK hθM hθN
+  have hK0 : (0 : ℝ) ≤ K := Nat.cast_nonneg _
+  have hM0 : (0 : ℝ) ≤ M := Nat.cast_nonneg _
+  have hKN : (1 - ε / 4) * N ≤ (K : ℝ) := by rw [hKr]; linarith
+  have hq : (1 - ε / 2) * N ≤ (1 - ε / 4) * K := by
+    have hh := mul_le_mul_of_nonneg_left hKN (by linarith : (0 : ℝ) ≤ 1 - ε / 4)
+    nlinarith
+  have hloθ : (1 - ε) * N ≤ Chebyshev.theta K - Chebyshev.theta M := by
+    nlinarith
+  have hupθ : Chebyshev.theta N ≤ (1 + ε) * N := by nlinarith
+  obtain ⟨hlo, hup⟩ := first_moment_bounds (N1f κ N) N k (Lfun N)
+  have hw : 0 ≤ (Lfun N : ℝ) ^ k := by positivity
+  have hwl : (1 - ε) * (N * (Lfun N : ℝ) ^ k) ≤
+      ∑ n ∈ range (N + 1), rk' (N1f κ N) N k (Lfun N) n := by
+    calc
+      _ = (Lfun N : ℝ) ^ k * ((1 - ε) * N) := by ring
+      _ ≤ (Lfun N : ℝ) ^ k * (Chebyshev.theta K - Chebyshev.theta M) :=
+        mul_le_mul_of_nonneg_left hloθ hw
+      _ ≤ _ := hlo
+  have hwu : (∑ n ∈ range (N + 1), rk' (N1f κ N) N k (Lfun N) n) ≤
+      (1 + ε) * (N * (Lfun N : ℝ) ^ k) := by
+    calc
+      _ ≤ (Lfun N : ℝ) ^ k * Chebyshev.theta N := hup
+      _ ≤ (Lfun N : ℝ) ^ k * ((1 + ε) * N) := mul_le_mul_of_nonneg_left hupθ hw
+      _ = _ := by ring
+  have heδ := mul_le_mul_of_nonneg_right hεδ (mul_nonneg hN0 hw)
+  rw [abs_le]
+  constructor <;> nlinarith
 
 end LeanLab.Linnik.Decomp1537c
