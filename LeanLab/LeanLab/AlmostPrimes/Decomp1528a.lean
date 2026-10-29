@@ -15,7 +15,9 @@ Already in the lab, not restated: `AlmostPrimes.RSLogSum.sum_log_div_lt_log`
 The lab modules are not imported (none is built in this checkout); the one helper re-proved
 here, `log_factorial_ge'`, is proved, not a leaf.
 
-Leaves: 11. Assemblies, proved from the leaves with no sorry of their own:
+All 11 leaves are filled by OpenAI Codex task160, 2026-10-28. AI wrote the Lean proofs.
+Build and axiom evidence: build/codex-task160.log. All statements are unchanged.
+Assemblies:
 `mertens1_upper_nat`, `mertens1_lower_nat`, `mertens1_abs` (|Σ_{p ≤ x} log p/p - log x| ≤ 2 for
 x ≥ 1), `vonMangoldt_mertens_nat`.
 Known mathematics. Goldbach is open.
@@ -38,30 +40,203 @@ theorem log_factorial_le_sum (n : ℕ) :
     log (n.factorial : ℝ) ≤
       (n : ℝ) * ∑ p ∈ Nat.primesLE n, log p / p +
         (n : ℝ) * ∑ p ∈ Nat.primesLE n, log p / ((p : ℝ) * ((p : ℝ) - 1)) := by
-  sorry
+  have hfac : log (n.factorial : ℝ) =
+      ∑ p ∈ Nat.primesLE n, (n.factorial.factorization p : ℝ) * log p := by
+    rw [Real.log_nat_eq_sum_factorization]
+    apply Finsupp.sum_of_support_subset
+    · intro p hp
+      rw [Nat.support_factorization] at hp
+      have hpp := Nat.prime_of_mem_primeFactors hp
+      have hle := (Nat.Prime.dvd_factorial hpp).1 (Nat.dvd_of_mem_primeFactors hp)
+      rw [Nat.primesLE_eq_filter_Icc_zero, mem_filter, mem_Icc]
+      exact ⟨⟨Nat.zero_le _, hle⟩, hpp⟩
+    · intro p _; simp
+  rw [hfac, mul_sum, mul_sum, ← sum_add_distrib]
+  apply sum_le_sum
+  intro p hp
+  have hpp : p.Prime := Nat.prime_of_mem_primesBelow hp
+  have hp1 : (1 : ℝ) < p := by exact_mod_cast hpp.one_lt
+  have hp0 : (0 : ℝ) < p := by linarith
+  have hb : (n.factorial.factorization p : ℝ) ≤ (n : ℝ) / ((p : ℝ) - 1) := by
+    have hb : (n.factorial.factorization p : ℝ) ≤ (n / (p - 1) : ℕ) := by
+      exact_mod_cast Nat.factorization_factorial_le_div_pred hpp n
+    have hc : ((n / (p - 1) : ℕ) : ℝ) ≤ (n : ℝ) / ((p : ℝ) - 1) := by
+      simpa only [Nat.cast_sub hpp.one_le, Nat.cast_one] using
+        (Nat.cast_div_le (m := n) (n := p - 1) (α := ℝ))
+    exact hb.trans hc
+  calc (n.factorial.factorization p : ℝ) * log p ≤
+      ((n : ℝ) / ((p : ℝ) - 1)) * log p :=
+        mul_le_mul_of_nonneg_right hb (Real.log_nonneg hp1.le)
+    _ = _ := by field_simp; ring
 
 /-- LEAF. Legendre lower half: for every natural n,
 n Σ_{p ≤ n} log p / p - θ(n) ≤ log n!.
 Proof: v_p(n!) ≥ ⌊n/p⌋ ≥ n/p - 1, summed against log p. Ingham, Thm 7. Unit U-1528. -/
 theorem sum_sub_theta_le_log_factorial (n : ℕ) :
     (n : ℝ) * ∑ p ∈ Nat.primesLE n, log p / p - θ n ≤ log (n.factorial : ℝ) := by
-  sorry
+  have hfac : log (n.factorial : ℝ) =
+      ∑ p ∈ Nat.primesLE n, (n.factorial.factorization p : ℝ) * log p := by
+    rw [Real.log_nat_eq_sum_factorization]
+    apply Finsupp.sum_of_support_subset
+    · intro p hp
+      rw [Nat.support_factorization] at hp
+      have hpp := Nat.prime_of_mem_primeFactors hp
+      have hle := (Nat.Prime.dvd_factorial hpp).1 (Nat.dvd_of_mem_primeFactors hp)
+      rw [Nat.primesLE_eq_filter_Icc_zero, mem_filter, mem_Icc]
+      exact ⟨⟨Nat.zero_le _, hle⟩, hpp⟩
+    · intro p _; simp
+  rw [hfac, theta_eq_sum_primesLE_log, mul_sum, ← sum_sub_distrib]
+  apply sum_le_sum
+  intro p hp
+  have hpp : p.Prime := Nat.prime_of_mem_primesBelow hp
+  have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
+  have hlog : 0 ≤ log (p : ℝ) := Real.log_nonneg (by exact_mod_cast hpp.one_le)
+  have hleg : n / p ≤ n.factorial.factorization p := by
+    rw [Nat.factorization_factorial hpp (b := Nat.log p n + 2) (by omega)]
+    simpa only [pow_one] using
+      (Finset.single_le_sum (f := fun i : ℕ => n / p ^ i) (fun i _ => Nat.zero_le _)
+        (show 1 ∈ Ico 1 (Nat.log p n + 2) by simp))
+  have hfloor : (n : ℝ) / p - 1 ≤ ((n / p : ℕ) : ℝ) := by
+    rw [sub_le_iff_le_add, div_le_iff₀ hp0]
+    have hlt : (n : ℝ) < ((n / p : ℕ) : ℝ) * p + p := by
+      exact_mod_cast Nat.lt_div_mul_add (a := n) hpp.pos
+    nlinarith
+  have hcast : ((n / p : ℕ) : ℝ) ≤ (n.factorial.factorization p : ℝ) := by
+    exact_mod_cast hleg
+  calc (n : ℝ) * (log p / p) - log p = ((n : ℝ) / p - 1) * log p := by ring
+    _ ≤ _ := mul_le_mul_of_nonneg_right (hfloor.trans hcast) hlog
 
 /-! ### The constant Σ_p log p/(p(p - 1)) = 0.75536... -/
 
+set_option maxHeartbeats 800000 in
 /-- LEAF. Head of the prime sum: Σ_{p ≤ 1000} log p / (p (p - 1)) ≤ 0.7545.
 Python value 0.754375. Kernel check with rational bounds for log p. Rosser-Schoenfeld 1962,
 (2.11) and p. 70, the constant E = -γ - Σ_p log p/(p(p - 1)). Unit U-1528. -/
 theorem sum_log_div_pp1_head :
     ∑ p ∈ Nat.primesLE 1000, log p / ((p : ℝ) * ((p : ℝ) - 1)) ≤ 0.7545 := by
-  sorry
+  let b : ℕ → ℕ := fun p => if p < 17 then 512 else 64
+  let a : ℕ → ℕ := fun p => Nat.clog 2 (p ^ b p)
+  let u : ℕ → ℚ := fun p =>
+    if p = 2 then 0.6931471808 else
+    if p = 3 then 1.0986122888 else
+    if p = 5 then 1.6094379126 else (a p : ℚ) / b p * 0.6931471808
+  have hlog (p : ℕ) (hp : p ∈ Nat.primesLE 1000) : log p ≤ (u p : ℝ) := by
+    by_cases h2 : p = 2
+    · subst p; simpa [u] using Real.log_two_lt_d9.le
+    by_cases h3 : p = 3
+    · subst p; simpa [u] using Real.log_three_lt_d9.le
+    by_cases h5 : p = 5
+    · subst p; simpa [u] using Real.log_five_lt_d9.le
+    have hp0 : (0 : ℝ) < p := by
+      exact_mod_cast (Nat.prime_of_mem_primesLE hp).pos
+    have hpow : (p : ℝ) ^ b p ≤ (2 : ℝ) ^ a p := by
+      exact_mod_cast Nat.le_pow_clog (by norm_num : 1 < 2) (p ^ b p)
+    have h := Real.log_le_log (pow_pos hp0 _) hpow
+    rw [Real.log_pow, Real.log_pow] at h
+    have hb : (0 : ℝ) < b p := by dsimp [b]; split_ifs <;> norm_num
+    have hbound : log p ≤ (a p : ℝ) / b p * log 2 := by
+      rw [div_mul_eq_mul_div, le_div_iff₀ hb]
+      nlinarith only [h]
+    calc log p ≤ (a p : ℝ) / b p * log 2 := hbound
+      _ ≤ (a p : ℝ) / b p * 0.6931471808 :=
+        mul_le_mul_of_nonneg_left Real.log_two_lt_d9.le (by positivity)
+      _ = (u p : ℝ) := by simp [u, h2, h3, h5]
+  let cand : ℕ → Bool := fun p => decide (2 ≤ p) &&
+    !(List.range' 2 30).any (fun d => decide (d < p) && p % d == 0)
+  let C : Finset ℕ := (range 1001).filter (fun p => cand p = true)
+  have hsub : Nat.primesLE 1000 ⊆ C := by
+    intro p hp
+    simp only [C, mem_filter, mem_range]
+    refine ⟨Nat.lt_succ_of_le (Nat.le_of_mem_primesLE hp), ?_⟩
+    have hpp := Nat.prime_of_mem_primesLE hp
+    have hsmall : (List.range' 2 30).any (fun d => decide (d < p) && p % d == 0) = false := by
+      rw [Bool.eq_false_iff]
+      intro h
+      obtain ⟨d, hd, hdp⟩ := List.any_eq_true.mp h
+      rw [List.mem_range'_1] at hd
+      simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq] at hdp
+      have hdvd : d ∣ p := Nat.dvd_of_mod_eq_zero hdp.2
+      rcases (Nat.dvd_prime hpp).mp hdvd with h | h <;> omega
+    simp [cand, hpp.two_le, hsmall]
+  let v : ℕ → ℕ := fun p =>
+    ⌈u p / ((p : ℚ) * ((p : ℚ) - 1)) * (10 : ℚ) ^ 10⌉₊
+  have hcert : ∑ p ∈ C, v p ≤ 7545000000 := by
+    dsimp only [C, cand, v, u, a, b]
+    decide +kernel
+  have hcertPrime : ∑ p ∈ Nat.primesLE 1000, v p ≤ 7545000000 :=
+    (sum_le_sum_of_subset hsub).trans hcert
+  have hv (p : ℕ) : (u p : ℝ) / ((p : ℝ) * ((p : ℝ) - 1)) ≤ (v p : ℝ) / 10 ^ 10 := by
+    have h : u p / ((p : ℚ) * ((p : ℚ) - 1)) * (10 : ℚ) ^ 10 ≤ (v p : ℚ) :=
+      Nat.le_ceil _
+    have hr : (u p : ℝ) / ((p : ℝ) * ((p : ℝ) - 1)) * (10 : ℝ) ^ 10 ≤ (v p : ℝ) := by
+      exact_mod_cast h
+    exact (le_div_iff₀ (by norm_num : (0 : ℝ) < 10 ^ 10)).2 hr
+  calc ∑ p ∈ Nat.primesLE 1000, log p / ((p : ℝ) * ((p : ℝ) - 1)) ≤
+      ∑ p ∈ Nat.primesLE 1000, (u p : ℝ) / ((p : ℝ) * ((p : ℝ) - 1)) := by
+        apply sum_le_sum
+        intro p hp
+        apply div_le_div_of_nonneg_right (hlog p hp)
+        have hp1 : (1 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primesLE hp).one_le
+        exact mul_nonneg (Nat.cast_nonneg p) (by linarith)
+    _ ≤ ∑ p ∈ Nat.primesLE 1000, (v p : ℝ) / 10 ^ 10 := sum_le_sum (fun p _ => hv p)
+    _ = ((∑ p ∈ Nat.primesLE 1000, v p : ℕ) : ℝ) / 10 ^ 10 := by
+      rw [← sum_div, Nat.cast_sum]
+    _ ≤ (7545000000 : ℝ) / 10 ^ 10 := by
+      apply div_le_div_of_nonneg_right _ (by positivity)
+      exact_mod_cast hcertPrime
+    _ = 0.7545 := by norm_num
 
 /-- LEAF. Tail over all integers: for every n, Σ_{1000 < m ≤ n} log m / (m (m - 1)) ≤ 0.009.
 Python value of the full tail 0.007908; g(1000) = 0.0089078. Proof: log m/(m(m - 1)) ≤ g(m - 1) - g(m) with
 g(t) = (log t + 2)/t for t ≥ 1000, telescoping. Rosser-Schoenfeld 1962, p. 70 style. Unit U-1528. -/
 theorem sum_log_div_pp1_tail (n : ℕ) :
     ∑ m ∈ Ioc 1000 n, log m / ((m : ℝ) * ((m : ℝ) - 1)) ≤ 0.009 := by
-  sorry
+  let g : ℕ → ℝ := fun k => (log k + 2) / k
+  have hstrong : ∀ k : ℕ, 1000 ≤ k →
+      ∑ m ∈ Ioc 1000 k, log m / ((m : ℝ) * ((m : ℝ) - 1)) ≤ g 1000 - g k := by
+    intro k hk
+    induction k, hk using Nat.le_induction with
+    | base => simp
+    | succ k hk ih =>
+      rw [sum_Ioc_succ_top hk]
+      have hk1 : (1 : ℝ) ≤ k := by exact_mod_cast (show 1 ≤ k by omega)
+      have hk0 : (0 : ℝ) < k := by linarith
+      have hl := Real.log_le_sub_one_of_pos (div_pos (by positivity : (0 : ℝ) < k + 1) hk0)
+      rw [Real.log_div (by positivity : (k : ℝ) + 1 ≠ 0) hk0.ne'] at hl
+      have he : ((k : ℝ) + 1) / k - 1 = 1 / k := by field_simp; ring
+      rw [he] at hl
+      have hb : ((k : ℝ) + 1) * (log ((k : ℝ) + 1) - log k) ≤ 2 := by
+        calc ((k : ℝ) + 1) * (log ((k : ℝ) + 1) - log k) ≤
+            ((k : ℝ) + 1) * (1 / k) := mul_le_mul_of_nonneg_left hl (by positivity)
+          _ ≤ 2 := by rw [mul_one_div, div_le_iff₀ hk0]; linarith
+      have heq : g k - g (k + 1) -
+          log (k + 1 : ℕ) / (((k + 1 : ℕ) : ℝ) * (((k + 1 : ℕ) : ℝ) - 1)) =
+          (2 - ((k : ℝ) + 1) * (log ((k : ℝ) + 1) - log k)) /
+            ((k : ℝ) * ((k : ℝ) + 1)) := by
+        dsimp [g]
+        push_cast
+        simp only [add_sub_cancel_right]
+        field_simp
+        ring
+      have hstep := div_nonneg (sub_nonneg.mpr hb)
+        (show 0 ≤ (k : ℝ) * ((k : ℝ) + 1) by positivity)
+      rw [← heq] at hstep
+      linarith
+  by_cases hn : 1000 ≤ n
+  · have h := hstrong n hn
+    have hgn : 0 ≤ g n := by
+      have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (show 1 ≤ n by omega)
+      exact div_nonneg (by linarith [Real.log_nonneg hn1]) (Nat.cast_nonneg n)
+    have hlog : log (1000 : ℝ) < 7 := by
+      have h := Real.log_le_log (by norm_num : (0 : ℝ) < 1000)
+        (by norm_num : (1000 : ℝ) ≤ 2 ^ 10)
+      rw [Real.log_pow] at h
+      norm_num only [Nat.cast_ofNat] at h
+      linarith [Real.log_two_lt_d9]
+    have hg : g 1000 ≤ 0.009 := by dsimp [g]; norm_num; linarith
+    linarith
+  · rw [Ioc_eq_empty (by omega), sum_empty]
+    norm_num
 
 /-- LEAF. Prime tail inside the integer tail: for every n,
 Σ_{p ≤ n} log p/(p(p - 1)) ≤ Σ_{p ≤ 1000} log p/(p(p - 1)) + Σ_{1000 < m ≤ n} log m/(m(m - 1)),
@@ -70,7 +245,26 @@ theorem sum_log_div_pp1_split (n : ℕ) :
     ∑ p ∈ Nat.primesLE n, log p / ((p : ℝ) * ((p : ℝ) - 1)) ≤
       ∑ p ∈ Nat.primesLE 1000, log p / ((p : ℝ) * ((p : ℝ) - 1)) +
         ∑ m ∈ Ioc 1000 n, log m / ((m : ℝ) * ((m : ℝ) - 1)) := by
-  sorry
+  let f : ℕ → ℝ := fun p => log p / ((p : ℝ) * ((p : ℝ) - 1))
+  have hnon (p : ℕ) : 0 ≤ f p := by
+    rcases p with _ | p
+    · simp [f]
+    have hp : (1 : ℝ) ≤ (p + 1 : ℕ) := by exact_mod_cast Nat.succ_le_succ (Nat.zero_le p)
+    exact div_nonneg (Real.log_nonneg hp) (mul_nonneg (by positivity) (by linarith))
+  have hsub : Nat.primesLE n ⊆ Nat.primesLE 1000 ∪ Ioc 1000 n := by
+    intro p hp
+    rcases le_or_gt p 1000 with h | h
+    · exact mem_union_left _ (Nat.mem_primesLE.mpr ⟨h, Nat.prime_of_mem_primesLE hp⟩)
+    · exact mem_union_right _ (mem_Ioc.mpr ⟨h, Nat.le_of_mem_primesLE hp⟩)
+  calc ∑ p ∈ Nat.primesLE n, f p ≤ ∑ p ∈ Nat.primesLE 1000 ∪ Ioc 1000 n, f p :=
+      sum_le_sum_of_subset_of_nonneg hsub (fun p _ _ => hnon p)
+    _ = ∑ p ∈ Nat.primesLE 1000, f p + ∑ p ∈ Ioc 1000 n, f p := by
+      apply sum_union
+      apply disjoint_left.mpr
+      intro p hp hq
+      have := Nat.le_of_mem_primesLE hp
+      have := (mem_Ioc.mp hq).1
+      omega
 
 /-- Σ_{p ≤ n} log p / (p (p - 1)) ≤ 0.7635 for every n, from the three leaves above. -/
 theorem sum_log_div_pp1_le (n : ℕ) :
@@ -139,12 +333,42 @@ theorem mertens1_lower_nat (n : ℕ) (hn : 1 ≤ n) :
 Python: worst value 0.897 near x = 5. Unit U-1528. -/
 theorem mertens1_small {x : ℝ} (hx : 1 ≤ x) (hx5 : x < 5) :
     |∑ p ∈ Nat.primesLE ⌊x⌋₊, log p / p - log x| ≤ 2 := by
-  sorry
+  have hx0 : 0 < x := by linarith
+  have hn : ⌊x⌋₊ ≤ 4 := by
+    have : ⌊x⌋₊ < 5 := (Nat.floor_lt hx0.le).2 hx5
+    omega
+  have hnon : 0 ≤ ∑ p ∈ Nat.primesLE ⌊x⌋₊, log p / p := by
+    apply sum_nonneg
+    intro p _
+    exact div_nonneg (Real.log_natCast_nonneg p) (Nat.cast_nonneg p)
+  have hsum : ∑ p ∈ Nat.primesLE ⌊x⌋₊, log p / p ≤ log 2 / 2 + log 3 / 3 := by
+    have hsub := Nat.primesLE_mono hn
+    have h := sum_le_sum_of_subset_of_nonneg (f := fun p : ℕ => log p / p) hsub
+      (fun p _ _ => div_nonneg (Real.log_natCast_nonneg p) (Nat.cast_nonneg p))
+    have hset : Nat.primesLE 4 = {2, 3} := by decide
+    simpa [hset] using h
+  have hl : 0 ≤ log x := Real.log_nonneg hx
+  have hu : log x ≤ log 5 := Real.log_le_log hx0 hx5.le
+  have h2 := Real.log_two_lt_d9
+  have h3 := Real.log_three_lt_d9
+  have h5 := Real.log_five_lt_d9
+  rw [abs_le]
+  constructor <;> linarith
 
 /-- LEAF. Floor step: for x ≥ 5, log x ≤ log ⌊x⌋ + 0.2, since x < ⌊x⌋ + 1 and
 log(1 + 1/5) = 0.1823 < 0.2. Unit U-1528. -/
 theorem log_le_log_floor_add {x : ℝ} (hx : 5 ≤ x) : log x ≤ log (⌊x⌋₊ : ℝ) + 0.2 := by
-  sorry
+  have hn5 : 5 ≤ ⌊x⌋₊ := Nat.le_floor hx
+  have hn0 : (0 : ℝ) < ⌊x⌋₊ := by exact_mod_cast (show 0 < ⌊x⌋₊ by omega)
+  have hx0 : 0 < x := by linarith
+  have h := Real.log_le_sub_one_of_pos (div_pos hx0 hn0)
+  rw [Real.log_div hx0.ne' hn0.ne'] at h
+  have hlt : x < (⌊x⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one x
+  have hn5' : (5 : ℝ) ≤ ⌊x⌋₊ := by exact_mod_cast hn5
+  have hb : x / (⌊x⌋₊ : ℝ) - 1 ≤ 0.2 := by
+    rw [sub_le_iff_le_add, div_le_iff₀ hn0]
+    nlinarith
+  linarith
 
 /-- **Mertens' first theorem, explicit, real form**: for every real x ≥ 1,
 |Σ_{p ≤ x} log p / p - log x| ≤ 2. Assembly from the leaves of this file and Mathlib.
@@ -175,7 +399,10 @@ Theory I, Section 2.2. Unit U-1528. -/
 theorem log_factorial_eq_vonMangoldt (n : ℕ) :
     log (n.factorial : ℝ) =
       ∑ m ∈ Icc 1 n, ArithmeticFunction.vonMangoldt m * ((n / m : ℕ) : ℝ) := by
-  sorry
+  have h := ArithmeticFunction.sum_Ioc_mul_zeta_eq_sum ArithmeticFunction.vonMangoldt n
+  rw [ArithmeticFunction.vonMangoldt_mul_zeta] at h
+  rw [← Real.sum_log_eq_log_factorial]
+  simpa only [ArithmeticFunction.log_apply, ← Finset.Icc_add_one_left_eq_Ioc, zero_add] using h
 
 /-- LEAF. Upper half for Λ: for n ≥ 1, n Σ_{m ≤ n} Λ(m)/m ≤ log n! + ψ(n), from
 n/m ≤ ⌊n/m⌋ + 1 and `log_factorial_eq_vonMangoldt`. Montgomery-Vaughan I, Section 2.2.
@@ -183,18 +410,62 @@ Unit U-1528. -/
 theorem vonMangoldt_sum_le (n : ℕ) :
     (n : ℝ) * ∑ m ∈ Icc 1 n, ArithmeticFunction.vonMangoldt m / m ≤
       log (n.factorial : ℝ) + ψ n := by
-  sorry
+  have hpsi : ψ (n : ℝ) = ∑ m ∈ Icc 1 n, ArithmeticFunction.vonMangoldt m := by
+    simp [Chebyshev.psi, ← Finset.Icc_add_one_left_eq_Ioc]
+  rw [log_factorial_eq_vonMangoldt, hpsi, mul_sum, ← sum_add_distrib]
+  apply sum_le_sum
+  intro m hm
+  have hm0 : 0 < m := (mem_Icc.mp hm).1
+  have hm0' : (0 : ℝ) < m := by exact_mod_cast hm0
+  have hdiv : (n : ℝ) / m ≤ ((n / m : ℕ) : ℝ) + 1 := by
+    rw [div_le_iff₀ hm0']
+    have hlt : (n : ℝ) < ((n / m : ℕ) : ℝ) * m + m := by
+      exact_mod_cast Nat.lt_div_mul_add (a := n) hm0
+    nlinarith
+  have hnon : 0 ≤ ArithmeticFunction.vonMangoldt m := ArithmeticFunction.vonMangoldt_nonneg
+  calc (n : ℝ) * (ArithmeticFunction.vonMangoldt m / m) =
+        ArithmeticFunction.vonMangoldt m * ((n : ℝ) / m) := by ring
+    _ ≤ ArithmeticFunction.vonMangoldt m * (((n / m : ℕ) : ℝ) + 1) :=
+      mul_le_mul_of_nonneg_left hdiv hnon
+    _ = _ := by ring
 
 /-- LEAF. Lower half for Λ: for every n, log n! ≤ n Σ_{m ≤ n} Λ(m)/m, from ⌊n/m⌋ ≤ n/m and
 `log_factorial_eq_vonMangoldt`. Montgomery-Vaughan I, Section 2.2. Unit U-1528. -/
 theorem log_factorial_le_vonMangoldt_sum (n : ℕ) :
     log (n.factorial : ℝ) ≤ (n : ℝ) * ∑ m ∈ Icc 1 n, ArithmeticFunction.vonMangoldt m / m := by
-  sorry
+  rw [log_factorial_eq_vonMangoldt, mul_sum]
+  apply sum_le_sum
+  intro m hm
+  have hnon : 0 ≤ ArithmeticFunction.vonMangoldt m := ArithmeticFunction.vonMangoldt_nonneg
+  calc ArithmeticFunction.vonMangoldt m * ((n / m : ℕ) : ℝ) ≤
+        ArithmeticFunction.vonMangoldt m * ((n : ℝ) / m) :=
+      mul_le_mul_of_nonneg_left Nat.cast_div_le hnon
+    _ = _ := by ring
 
 /-- LEAF. Numeric step: for every real t ≥ 1, log 4 + 2 log t / √t ≤ 3; the maximum of
 log t/√t is 2/e at t = e², and log 4 + 4/e = 2.858. Unit U-1528. -/
 theorem log4_add_le_three {t : ℝ} (ht : 1 ≤ t) : log 4 + 2 * log t / √t ≤ 3 := by
-  sorry
+  have ht0 : 0 < t := by linarith
+  have hs : 0 < √t := Real.sqrt_pos.mpr ht0
+  have h := Real.log_le_sub_one_of_pos (div_pos hs (Real.exp_pos 1))
+  rw [Real.log_div hs.ne' (Real.exp_pos 1).ne', Real.log_exp,
+    Real.log_sqrt ht0.le] at h
+  have hlog : log t ≤ 2 * √t / exp 1 := by
+    calc log t = 2 * (log t / 2) := by ring
+         _ ≤ 2 * (√t / exp 1) := mul_le_mul_of_nonneg_left (by linarith only [h]) (by norm_num)
+         _ = _ := by ring
+  have hdiv : 2 * log t / √t ≤ 4 / exp 1 := by
+    calc 2 * log t / √t ≤ 2 * (2 * √t / exp 1) / √t :=
+          div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hlog (by norm_num)) hs.le
+         _ = _ := by field_simp; ring
+  have h4 : log (4 : ℝ) < 1.4 := by
+    rw [Real.log_four_eq]
+    linarith [Real.log_two_lt_d9]
+  have he : (2.5 : ℝ) < exp 1 := by linarith [Real.exp_one_gt_d9]
+  have hi : (4 : ℝ) / exp 1 ≤ 1.6 := by
+    rw [div_le_iff₀ (exp_pos 1)]
+    linarith
+  linarith
 
 /-- **Mertens' first theorem for Λ, explicit**: for n ≥ 1,
 log n - 1 ≤ Σ_{m ≤ n} Λ(m)/m ≤ log n + 3. Python: the true deviation lies in [-0.627, 0] up to

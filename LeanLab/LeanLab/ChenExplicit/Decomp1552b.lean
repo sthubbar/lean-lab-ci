@@ -2,6 +2,10 @@
 AI-written Lean code, Claude, 2026-10-26, run 20261026T1219Z-15327, unit U-1552, track T1, DECOMPOSE.
 T. Yamada 2015, Explicit Chen's theorem, arXiv 1511.03409v2, Section 7, proof of Theorem 7.1.
 
+Codex task161 proof additions, 2026-10-28. AI wrote the Lean code.
+Six original leaves have unconditional proofs. Eq123 is CONDITIONAL ON h72.
+The remaining OPEN leaves are eq43_V1, lemma72 and eq125_phi.
+
 Part b: the sieve side of Theorem 7.1, (107) and (117) to (126), with the explicit
 Bombieri-Vinogradov type Lemma 7.2, (99). Every `sorry` here is an OPEN LEAF, except
 `thm31_upper_applied`, which is Yamada's Theorem 3.1 from his unpublished reference [22] and is
@@ -19,6 +23,7 @@ Corrections built in, see ChenExplicit/STATEMENTS.md, U-1552 block:
 Chen's theorem is known; binary Goldbach is OPEN.
 -/
 import LeanLab.ChenExplicit.Decomp1552a
+import LeanLab.ChenExplicit.Reductions
 
 open Finset Real
 open scoped Classical
@@ -104,7 +109,51 @@ since `p₁p₂p₃ < N` and `w_j ≤ p₁` give `w_j p₂p₃ < N`, the `J` blo
 and sifting by fewer primes keeps more elements. -/
 theorem eq107_sub (N q₁ : ℕ) (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 1 / 100) :
     SB N (z8 N) (y3 N) ≤ ((BSharp N ε).filter (SiftedZ N q₁ (y3 N))).card := by
-  sorry
+  unfold SB
+  apply Finset.card_le_card_of_injOn (fun b => N - b)
+  · intro b hb
+    obtain ⟨hbB, hbS⟩ := mem_filter.mp hb
+    obtain ⟨hbN, hbB⟩ := mem_filter.mp hbB
+    have hbN : b < N := mem_range.mp hbN
+    obtain ⟨p₁, p₂, p₃, hp₁, hp₂, hp₃, hz, hy, hyp₂, hp₂₃, hprod, hcop, hbeq⟩ := hbB
+    have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+    have hzpos : 0 < z8 N := rpow_pos_of_pos hNp _
+    have hrpos : 0 < 1 + ε := by linarith
+    obtain ⟨j, hjlo, hjhi⟩ := exists_nat_pow_near
+      ((one_le_div hzpos).mpr hz) (show 1 < 1 + ε by linarith)
+    have hwlo : wj N ε j ≤ p₁ := by
+      unfold wj
+      simpa only [mul_comm] using (le_div_iff₀ hzpos).mp hjlo
+    have hwhi : (p₁ : ℝ) < (1 + ε) * wj N ε j := by
+      have h := (div_lt_iff₀ hzpos).mp hjhi
+      simpa only [wj, pow_succ, mul_assoc, mul_comm, mul_left_comm] using h
+    have hj : j < Jblk N ε := by
+      apply Nat.lt_ceil.mpr
+      apply (lt_div_iff₀ (log_pos (show 1 < 1 + ε by linarith))).2
+      have hp : (1 + ε) ^ j < y3 N / z8 N := hjlo.trans_lt ((div_lt_div_iff_of_pos_right hzpos).mpr hy)
+      have hl := log_lt_log (pow_pos hrpos _) hp
+      rwa [log_pow] at hl
+    have hNb : N - b = p₁ * p₂ * p₃ := by omega
+    apply mem_filter.mpr
+    constructor
+    · apply mem_biUnion.mpr
+      refine ⟨j, mem_range.mpr hj, mem_filter.mpr ⟨mem_range.mpr ?_, ?_⟩⟩
+      · change N - b < 2 * N
+        omega
+      · refine ⟨p₁, p₂, p₃, hp₁, hp₂, hp₃, hz, hy, hyp₂, hp₂₃, ?_, ?_, hwlo, hwhi, hNb⟩
+        · have hprodR : (p₁ : ℝ) * p₂ * p₃ < N := by exact_mod_cast hprod
+          exact (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hwlo (Nat.cast_nonneg _)) (Nat.cast_nonneg _)).trans_lt hprodR
+        · exact Nat.Coprime.of_dvd_left (dvd_mul_left (p₂ * p₃) p₁) (by simpa only [mul_assoc] using hcop)
+    · intro r hr hry hrN hrq hrd
+      apply hbS r hr hry hrN
+      have heq : (N : ℤ) - (N - b : ℕ) = b := by rw [Int.natCast_sub (by omega)]; ring
+      rw [heq] at hrd
+      exact_mod_cast hrd
+  · intro a ha b hb hab
+    have haN := mem_range.mp (mem_filter.mp (mem_filter.mp ha).1).1
+    have hbN := mem_range.mp (mem_filter.mp (mem_filter.mp hb).1).1
+    change N - a = N - b at hab
+    omega
 
 /-- (107), last inequality: `S(B^#, P^(1)(y)) ≤ Σ_j S(B^(j), P^(1)(y))`. PROVED. -/
 theorem sum_sifted_le (N q₁ : ℕ) (ε : ℝ) :
@@ -141,13 +190,64 @@ theorem eq43_V1 (N q₁ : ℕ) (hE : Even N) (hN : exp (exp 36) < N) (hq : Adm N
 `(1 + 1/(5 log² y)) (1 + 8 log y / y) ≤ 1 + 1/(5 log y)`. -/
 theorem eq118_num (N : ℕ) (hN : exp (exp 36) < N) :
     (1 + 1 / (5 * log (y3 N) ^ 2)) * (1 + 8 * log (y3 N) / y3 N) ≤ 1 + 1 / (5 * log (y3 N)) := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by
+    simpa using log_lt_log (exp_pos _) hN
+  have h36 : (3600 : ℝ) < exp 36 := by
+    have h := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 4
+    norm_num at h
+    linarith
+  set t := log (y3 N)
+  have htlog : t = (1 / 3 : ℝ) * log N := log_rpow hNp _
+  have ht : 1200 < t := by linarith
+  have htp : 0 < t := by linarith
+  have hty : exp t = y3 N := exp_log (rpow_pos_of_pos hNp _)
+  have hy : 100 * t ^ 2 ≤ exp t := by
+    have he := pow_div_factorial_le_exp t htp.le 3
+    norm_num at he
+    nlinarith [mul_nonneg (sq_nonneg t) (show 0 ≤ t - 600 by linarith)]
+  rw [← hty]
+  apply (mul_le_mul_iff_left₀ (show 0 < 5 * t ^ 2 * exp t by positivity)).mp
+  field_simp
+  nlinarith [mul_nonneg (show 0 ≤ t - 1 by linarith) (show 0 ≤ exp t - 100 * t ^ 2 by linarith),
+    mul_nonneg (sq_nonneg t) (show 0 ≤ t - 2 by linarith)]
 
 /-- LEAF. Unit U-1552. Positivity facts used in (118): for `N > exp exp 36`,
 `0 < log y` and `0 < log D` with `D = N^{1/2}/log^{10} N`, and `0 ≤ U_N^(1)`. -/
 theorem logs_pos (N q₁ : ℕ) (hN : exp (exp 36) < N) :
     0 < log (y3 N) ∧ 0 < log (Dsv N) ∧ 0 ≤ U1 N q₁ := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h36 : (3600 : ℝ) < exp 36 := by
+    have h := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 4
+    norm_num at h
+    linarith
+  have hLp : 0 < log N := by linarith
+  have hr := log_div_self_antitoneOn
+    (show exp 36 ∈ Set.Ici (exp 1) by simp only [Set.mem_Ici]; exact exp_le_exp.mpr (by norm_num))
+    (show log (N : ℝ) ∈ Set.Ici (exp 1) by
+      simp only [Set.mem_Ici]; exact (exp_le_exp.mpr (by norm_num : (1 : ℝ) ≤ 36)).trans hL.le)
+    hL.le
+  simp only [log_exp] at hr
+  have hratio : 36 / exp 36 < (1 / 20 : ℝ) := by
+    apply (div_lt_iff₀ (exp_pos _)).2
+    linarith
+  have hlog : log (log N) < log N / 20 := by
+    have h := hr.trans_lt hratio
+    simpa only [div_eq_mul_inv, one_mul, mul_comm] using (div_lt_iff₀ hLp).mp h
+  refine ⟨?_, ?_, ?_⟩
+  · change 0 < log ((N : ℝ) ^ ((1 : ℝ) / 3))
+    rw [log_rpow hNp]
+    positivity
+  · unfold Dsv
+    rw [log_div (sqrt_pos_of_pos hNp).ne' (pow_pos hLp _).ne', log_sqrt hNp.le, log_pow]
+    linarith
+  · unfold U1
+    apply mul_nonneg (U_pos N).le
+    split_ifs with hq
+    · have hqR : (2 : ℝ) < q₁ := by exact_mod_cast hq.2.1
+      apply div_nonneg <;> linarith
+    · norm_num
 
 /-- (118): `V^(1)(y) + U_N^(1) F(s)/log D ≤ U_N^(1) (2e^γ/log D + 1/(5 log² y))`, with the
 `298.87013` term carried along. PROVED, CONDITIONAL ON the leaves `eq43_V1`, `eq118_num`,
@@ -211,6 +311,103 @@ theorem lemma72 (N : ℕ) (hE : Even N) (hN : exp (exp 36) < N) :
       X * Y < 2 * N → z8 N < Y → z8 N ≤ Z → Lemma72At q₁ c res X Y Z := by
   sorry
 
+/-- Weighted product reindexing for Yamada eqs 105 and 120. -/
+theorem sum_Bj_bilinear (N : ℕ) (hN : exp (exp 36) < N) (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 1 / 100)
+    (j : ℕ) (hj : j < Jblk N ε) :
+    ∀ g : ℕ → ℝ, ∑ m ∈ Bj N ε j, g m =
+      ∑ n ∈ Ico 1 ⌈(N : ℝ) / wj N ε j⌉₊, ∑ p ∈ primesIco (wj N ε j) (Yj N ε j),
+        if (∃ r s : ℕ, r.Prime ∧ s.Prime ∧ y3 N ≤ r ∧ r ≤ s ∧ n = r * s ∧ Nat.Coprime n N)
+          then g (n * p) else 0 := by
+  let C := fun n : ℕ => ∃ r s : ℕ, r.Prime ∧ s.Prime ∧ y3 N ≤ r ∧ r ≤ s ∧ n = r * s ∧ Nat.Coprime n N
+  let X := (N : ℝ) / wj N ε j
+  let P := primesIco (wj N ε j) (Yj N ε j)
+  let T := ((Ico 1 ⌈X⌉₊).product P).filter (fun a => C a.1)
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have hLp : 0 < log N := by linarith [exp_pos (36 : ℝ)]
+  have hzpos : 0 < z8 N := rpow_pos_of_pos hNp _
+  have hypos : 0 < y3 N := rpow_pos_of_pos hNp _
+  have hb : 1 < 1 + ε := by linarith
+  have hwpos : 0 < wj N ε j := mul_pos hzpos (pow_pos (by linarith) _)
+  have hzw : z8 N ≤ wj N ε j := by
+    unfold wj
+    exact le_mul_of_one_le_right hzpos.le (one_le_pow₀ hb.le)
+  have hwy : wj N ε j < y3 N := by
+    apply (log_lt_log_iff hwpos hypos).mp
+    have h := (lt_div_iff₀ (log_pos hb)).mp (Nat.lt_ceil.mp hj)
+    rw [log_div hypos.ne' hzpos.ne', log_rpow hNp, log_rpow hNp] at h
+    rw [wj, log_mul hzpos.ne' (pow_pos (by linarith : 0 < 1 + ε) _).ne', log_pow, log_rpow hNp, log_rpow hNp]
+    linarith
+  have hT (n p : ℕ) : (n,p) ∈ T ↔ 1 ≤ n ∧ (n : ℝ) < X ∧ p.Prime ∧ wj N ε j ≤ p ∧
+      (p : ℝ) < Yj N ε j ∧ C n := by
+    simp only [T, P, primesIco, Finset.product_eq_sprod, mem_filter, Finset.mem_product, mem_Ico, mem_range, Nat.lt_ceil]
+    constructor
+    · rintro ⟨⟨⟨hn1, hnX⟩, hpY, hp, hwp⟩, hc⟩
+      exact ⟨hn1, hnX, hp, hwp, hpY, hc⟩
+    · rintro ⟨hn1, hnX, hp, hwp, hpY, hc⟩
+      exact ⟨⟨⟨hn1, hnX⟩, hpY, hp, hwp⟩, hc⟩
+  have hmap : Bj N ε j = T.image (fun a => a.1 * a.2) := by
+    ext m
+    constructor
+    · intro hm
+      obtain ⟨hmrange, p, r, s, hp, hr, hs, hz, hpy, hyr, hrs, hprod, hcop, hjlo, hjhi, hmeq⟩ := mem_filter.mp hm
+      apply mem_image.mpr
+      refine ⟨(r*s,p), (hT _ _).mpr ⟨?_, ?_, hp, hjlo, ?_, ?_⟩, ?_⟩
+      · exact Nat.one_le_iff_ne_zero.mpr (Nat.mul_ne_zero hr.ne_zero hs.ne_zero)
+      · apply (lt_div_iff₀ hwpos).mpr
+        push_cast
+        nlinarith
+      · exact lt_min hpy hjhi
+      · exact ⟨r,s,hr,hs,hyr,hrs,rfl,hcop⟩
+      · simpa only [mul_comm, mul_left_comm, mul_assoc] using hmeq.symm
+    · intro hm
+      obtain ⟨⟨n,p⟩, ht, hmeq⟩ := mem_image.mp hm
+      obtain ⟨hn1, hnX, hp, hwp, hpY, r,s,hr,hs,hyr,hrs,hne,hcop⟩ := (hT _ _).mp ht
+      have hpy : (p : ℝ) < y3 N := hpY.trans_le (min_le_left _ _)
+      have hpw : (p : ℝ) < (1 + ε) * wj N ε j := hpY.trans_le (min_le_right _ _)
+      have hnprod : wj N ε j * n < N := by
+        have h := (lt_div_iff₀ hwpos).mp hnX
+        nlinarith
+      have hmN : (m : ℝ) < 2 * N := by
+        have hnr : (0 : ℝ) < n := by exact_mod_cast hn1
+        have hmnp : (m : ℝ) = n * p := by exact_mod_cast hmeq.symm
+        rw [hmnp]
+        have h := mul_lt_mul_of_pos_left hpw hnr
+        have h' := mul_lt_mul_of_pos_left hnprod (by linarith : 0 < 1 + ε)
+        nlinarith
+      apply mem_filter.mpr
+      refine ⟨mem_range.mpr (by exact_mod_cast hmN), p,r,s,hp,hr,hs,hzw.trans hwp,hpy,hyr,hrs,?_,(by simpa only [hne] using hcop),hwp,hpw,?_⟩
+      · rw [hne] at hnprod
+        push_cast at hnprod
+        nlinarith
+      · rw [← hmeq, hne]; ring
+  have hinj : Set.InjOn (fun a : ℕ × ℕ => a.1 * a.2) (↑T : Set (ℕ × ℕ)) := by
+    intro a ha b hb hab
+    rcases a with ⟨n,p⟩
+    rcases b with ⟨m,q⟩
+    obtain ⟨hn1, hnX, hp, hwp, hpY, r,s,hr,hs,hyr,hrs,hne,hcop⟩ := (hT _ _).mp ha
+    obtain ⟨hm1, hmX, hq, hwq, hqY, u,v,hu,hv,hyu,huv,hme,hcopq⟩ := (hT _ _).mp hb
+    change n * p = m * q at hab
+    have hpq : p = q := by
+      have hd : p ∣ m * q := by rw [← hab]; exact dvd_mul_left p n
+      rcases hp.dvd_mul.mp hd with hpm | hpq
+      · rw [hme] at hpm
+        rcases hp.dvd_mul.mp hpm with hpu | hpv
+        · have he := (Nat.prime_dvd_prime_iff_eq hp hu).mp hpu
+          have hlt : (p : ℝ) < u := (hpY.trans_le (min_le_left _ _)).trans_le hyu
+          exact False.elim ((ne_of_lt hlt) (by exact_mod_cast he))
+        · have he := (Nat.prime_dvd_prime_iff_eq hp hv).mp hpv
+          have hlt : (p : ℝ) < v := (hpY.trans_le (min_le_left _ _)).trans_le (hyu.trans (by exact_mod_cast huv))
+          exact False.elim ((ne_of_lt hlt) (by exact_mod_cast he))
+      · exact (Nat.prime_dvd_prime_iff_eq hp hq).mp hpq
+    subst q
+    have hnm : n = m := Nat.eq_of_mul_eq_mul_right hp.pos hab
+    exact Prod.ext hnm rfl
+  intro g
+  rw [hmap, sum_image hinj]
+  simp only [T, sum_filter, Finset.product_eq_sprod, Finset.sum_product]
+  rfl
+
 /-- LEAF. Unit U-1552. Yamada 2015, (123), Section 7, from Lemma 7.2 with `X = N/w_j`,
 `Y = Y_j = min{y, (1+ε)w_j}`, `Z = max{w_j, z}`, residue `N`, and `c(n) = 1` for
 `n = p₂p₃`, `y ≤ p₂ ≤ p₃`, `(p₂p₃, N) = 1`: for even `N > exp exp 36`, `0 < ε < 1/100`,
@@ -223,16 +420,304 @@ theorem eq123 (N q₁ : ℕ) (hE : Even N) (hN : exp (exp 36) < N) (hq : Adm N q
       X * Y < 2 * N → z8 N < Y → z8 N ≤ Z → Lemma72At q₁ c res X Y Z)
     (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 1 / 100) (j : ℕ) (hj : j < Jblk N ε) :
     ∑ d ∈ Dset N q₁, |r1 N ε j d| ≤ exp (-144) * (1 + ε) * N / log (Yj N ε j) ^ 4 := by
-  sorry
+  let C := fun n : ℕ => ∃ r s : ℕ, r.Prime ∧ s.Prime ∧ y3 N ≤ r ∧ r ≤ s ∧ n = r * s ∧ Nat.Coprime n N
+  let c : ℕ → ℝ := fun n => if C n then 1 else 0
+  let res := fun d => if Nat.Coprime N d then N else 1
+  let X := (N : ℝ) / wj N ε j
+  let Y := Yj N ε j
+  let Z := wj N ε j
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h36 : (100000 : ℝ) < exp 36 := by
+    have h := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 5
+    norm_num at h
+    linarith
+  have hLp : 0 < log N := by linarith
+  have hzpos : 0 < z8 N := rpow_pos_of_pos hNp _
+  have hypos : 0 < y3 N := rpow_pos_of_pos hNp _
+  have hb : 1 < 1 + ε := by linarith
+  have hwpos : 0 < Z := mul_pos hzpos (pow_pos (by linarith) _)
+  have hzw : z8 N ≤ Z := by
+    unfold Z wj
+    exact le_mul_of_one_le_right hzpos.le (one_le_pow₀ hb.le)
+  have hwlog : log Z = log N / 8 + j * log (1 + ε) := by
+    change log (wj N ε j) = _
+    rw [wj, log_mul hzpos.ne' (pow_pos (by linarith : 0 < 1 + ε) _).ne', log_pow, log_rpow hNp]
+    ring
+  have hwy : Z < y3 N := by
+    apply (log_lt_log_iff hwpos hypos).mp
+    have h := (lt_div_iff₀ (log_pos hb)).mp (Nat.lt_ceil.mp hj)
+    rw [log_div hypos.ne' hzpos.ne', log_rpow hNp, log_rpow hNp] at h
+    rw [hwlog, log_rpow hNp]
+    linarith
+  have hwY : Z ≤ Y := le_min hwy.le (by dsimp [Z]; nlinarith)
+  have hYy : Y ≤ y3 N := min_le_left _ _
+  have hYw : Y ≤ (1 + ε) * Z := min_le_right _ _
+  have hYpos : 0 < Y := hwpos.trans_le hwY
+  have hYlog : 0 < log Y := by
+    have hlogz : 0 < log (z8 N) := by rw [log_rpow hNp]; positivity
+    exact hlogz.trans_le (log_le_log hzpos (hzw.trans hwY))
+  have hYlogL : log Y ≤ log N := by
+    have h := log_le_log hYpos hYy
+    rw [log_rpow hNp] at h
+    linarith
+  have hr := log_div_self_antitoneOn
+    (show exp 36 ∈ Set.Ici (exp 1) by simp only [Set.mem_Ici]; exact exp_le_exp.mpr (by norm_num))
+    (show log (N : ℝ) ∈ Set.Ici (exp 1) by
+      simp only [Set.mem_Ici]; exact (exp_le_exp.mpr (by norm_num : (1 : ℝ) ≤ 36)).trans hL.le)
+    hL.le
+  simp only [log_exp] at hr
+  have hratio : 36 / exp 36 < (1 / 1000 : ℝ) := by apply (div_lt_iff₀ (exp_pos _)).2; linarith
+  have hloglog : log (log N) < log N / 1000 := by
+    simpa only [div_eq_mul_inv, one_mul, mul_comm] using (div_lt_iff₀ hLp).mp (hr.trans_lt hratio)
+  have hXpos : 0 < X := div_pos hNp hwpos
+  have hXlarge : log Y ^ 10 < X := by
+    apply (log_lt_log_iff (pow_pos hYlog _) hXpos).mp
+    rw [log_pow]
+    have hll := (log_le_log hYlog hYlogL).trans_lt hloglog
+    have hwly := log_lt_log hwpos hwy
+    rw [log_rpow hNp] at hwly
+    change 10 * log (log Y) < log ((N : ℝ) / Z)
+    rw [log_div hNp.ne' hwpos.ne']
+    linarith
+  have hXupper : X ≤ N / z8 N := div_le_div_of_nonneg_left (Nat.cast_nonneg _) hzpos hzw
+  have hXYlo : (N : ℝ) ≤ X * Y := by
+    have hxZ : X * Z = N := by dsimp [X,Z]; field_simp [show wj N ε j ≠ 0 from hwpos.ne']
+    nlinarith [mul_le_mul_of_nonneg_left hwY hXpos.le]
+  have hXYhi : X * Y < 2 * N := by
+    have hxZ : X * Z = N := by dsimp [X,Z]; field_simp [show wj N ε j ≠ 0 from hwpos.ne']
+    have h := mul_le_mul_of_nonneg_left hYw hXpos.le
+    nlinarith
+  have hYz : z8 N < Y := lt_min (hzw.trans_lt hwy) (by nlinarith)
+  have hbound := h72 c res X Y Z (by intro n; dsimp [c]; split_ifs <;> norm_num)
+    (by intro d hd; dsimp [res]; split_ifs with h; exact h; exact Nat.coprime_one_left d)
+    hXlarge hXupper hXYhi hYz hzw
+  have hdprops (d : ℕ) (hd : d ∈ Dset N q₁) :
+      0 < d ∧ ¬ q₁ ∣ d ∧ Nat.Coprime N d ∧ res d = N := by
+    obtain ⟨hdD, hdP⟩ := mem_filter.mp hd
+    have hdp : 0 < d := Nat.pos_of_ne_zero hdP.1.ne_zero
+    have hnd : Nat.Coprime N d := by
+      apply Nat.coprime_of_dvd'
+      intro p hp hpN hpd
+      exact False.elim ((hdP.2 p hp hpd).2.1 hpN)
+    refine ⟨hdp, ?_, hnd, by change (if Nat.Coprime N d then N else 1) = N; exact ite_eq_left hnd⟩
+    intro hqd
+    rcases hq with hq0 | ⟨hqp, hqbound⟩
+    · subst q₁; simp only [zero_dvd_iff] at hqd; omega
+    · exact (hdP.2 q₁ hqp hqd).2.2 rfl
+  have hDupper : Dsv N ≤ sqrt (X * Y) / log Y ^ 10 := by
+    unfold Dsv
+    gcongr
+  have hdsub : Dset N q₁ ⊆ (range ⌈sqrt (X * Y) / log Y ^ 10⌉₊).filter (fun d => 0 < d ∧ ¬ q₁ ∣ d) := by
+    intro d hd
+    have hp := hdprops d hd
+    refine mem_filter.mpr ⟨mem_range.mpr (Nat.lt_ceil.mpr ?_), hp.1, hp.2.1⟩
+    exact (Nat.lt_ceil.mp (mem_range.mp (mem_filter.mp hd).1)).trans_le hDupper
+  have hcnt (g : ℕ → ℝ) := sum_Bj_bilinear N hN ε hε hε1 j hj g
+  have hdiv (d : ℕ) : cntDiv N ε j d = ∑ n ∈ Ico 1 ⌈X⌉₊, ∑ p ∈ primesIco Z Y,
+      if n * p ≡ N [MOD d] then c n else 0 := by
+    letI : DecidableEq ℤ := Classical.decEq ℤ
+    calc
+      _ = ∑ m ∈ Bj N ε j, if (d : ℤ) ∣ (N : ℤ) - (m : ℤ) then (1 : ℝ) else 0 := by
+        unfold cntDiv
+        simp only [Finset.bind_def, Finset.pure_def, Finset.sup_eq_biUnion,
+          Finset.biUnion_singleton, Finset.filter_image,
+          sum_boole]
+        exact congrArg (Nat.cast : ℕ → ℝ) (Finset.card_image_of_injective _ (Nat.cast_injective : Function.Injective (Nat.cast : ℕ → ℤ)))
+      _ = _ := (hcnt (fun m => if (d : ℤ) ∣ (N : ℤ) - (m : ℤ) then 1 else 0)).trans (by
+        apply sum_congr rfl
+        intro n hn
+        apply sum_congr rfl
+        intro p hp
+        change (if C n then (if (d : ℤ) ∣ (N : ℤ) - (n*p : ℕ) then 1 else 0) else 0) = _
+        dsimp only [c]
+        simp only [← Nat.modEq_iff_dvd]
+        split_ifs <;> rfl)
+  have hcop (d : ℕ) : cntCop N ε j d = ∑ n ∈ Ico 1 ⌈X⌉₊, ∑ p ∈ primesIco Z Y,
+      if Nat.Coprime (n * p) d then c n else 0 := by
+    calc
+      _ = ∑ m ∈ Bj N ε j, if Nat.Coprime m d then (1 : ℝ) else 0 := by simp only [sum_boole]; rfl
+      _ = _ := (hcnt (fun m => if Nat.Coprime m d then 1 else 0)).trans (by
+        apply sum_congr rfl
+        intro n hn
+        apply sum_congr rfl
+        intro p hp
+        change (if C n then (if Nat.Coprime (n*p) d then 1 else 0) else 0) = _
+        dsimp only [c]
+        split_ifs <;> rfl)
+  unfold Lemma72At at hbound
+  calc
+    _ ≤ ∑ d ∈ (range ⌈sqrt (X * Y) / log Y ^ 10⌉₊).filter (fun d => 0 < d ∧ ¬ q₁ ∣ d),
+        |∑ n ∈ Ico 1 ⌈X⌉₊, ∑ p ∈ primesIco Z Y, (if n*p ≡ res d [MOD d] then c n else 0) -
+          (1 / (d.totient : ℝ)) * ∑ n ∈ Ico 1 ⌈X⌉₊, ∑ p ∈ primesIco Z Y,
+            (if Nat.Coprime (n*p) d then c n else 0)| := by
+      apply (sum_le_sum fun d hd => le_of_eq ?_).trans
+        (sum_le_sum_of_subset_of_nonneg hdsub (by intros; positivity))
+      rw [(hdprops d hd).2.2.2, r1, hdiv, hcop]
+      congr 1
+      ring
+    _ ≤ exp (-144) * X * Y / log Y ^ 4 := hbound
+    _ ≤ _ := by
+      apply div_le_div_of_nonneg_right _ (by positivity)
+      have hxZ : X * Z = N := by dsimp [X,Z]; field_simp [show wj N ε j ≠ 0 from hwpos.ne']
+      have hxy : X * Y ≤ (1 + ε) * N := by
+        calc
+          _ ≤ X * ((1 + ε) * Z) := mul_le_mul_of_nonneg_left hYw hXpos.le
+          _ = (1 + ε) * (X * Z) := by ring
+          _ = _ := by rw [hxZ]
+      simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hxy (exp_pos (-144)).le
+
+/-- Reciprocal fourth power bound for the corrected block sum in Yamada eq 124. -/
+theorem sum_inv_affine_four_le (a h : ℝ) (ha : 0 < a) (hh : 0 < h) (n : ℕ) :
+    ∑ j ∈ range n, 1 / (a + j * h) ^ 4 ≤ 1 / a ^ 4 + 1 / (3 * h * a ^ 3) := by
+  have step (a h : ℝ) (ha : 0 < a) (hh : 0 < h) :
+      1 / (a + h) ^ 4 ≤ (1 / a ^ 3 - 1 / (a + h) ^ 3) / (3 * h) := by
+    apply (mul_le_mul_iff_left₀ (show 0 < 3 * h * a ^ 3 * (a + h) ^ 4 by positivity)).mp
+    field_simp
+    nlinarith [show 0 ≤ 6 * a ^ 2 * h ^ 2 + 4 * a * h ^ 3 + h ^ 4 by positivity]
+  have shifted (a h : ℝ) (ha : 0 < a) (hh : 0 < h) (n : ℕ) :
+      ∑ j ∈ range n, 1 / (a + (j + 1) * h) ^ 4 ≤
+        (1 / a ^ 3 - 1 / (a + n * h) ^ 3) / (3 * h) := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+      rw [sum_range_succ]
+      have hn : 0 < a + n * h := by positivity
+      have hs := step (a + n * h) h hn hh
+      calc
+        _ ≤ (1 / a ^ 3 - 1 / (a + n * h) ^ 3) / (3 * h) +
+            (1 / (a + n * h) ^ 3 - 1 / (a + n * h + h) ^ 3) / (3 * h) := by
+          convert add_le_add ih hs using 1; ring
+        _ = _ := by push_cast; ring
+  cases n with
+  | zero => simp; positivity
+  | succ n =>
+    rw [sum_range_succ']
+    have hs := shifted a h ha hh n
+    have hn : 0 ≤ 1 / (a + n * h) ^ 3 := by positivity
+    simp only [Nat.cast_add, Nat.cast_one, Nat.cast_zero, zero_mul, add_zero]
+    calc
+      _ ≤ (1 / a ^ 3 - 1 / (a + n * h) ^ 3) / (3 * h) + 1 / a ^ 4 := add_le_add hs (le_refl _)
+      _ ≤ 1 / a ^ 3 / (3 * h) + 1 / a ^ 4 := by gcongr; linarith
+      _ = _ := by ring
 
 /-- LEAF. Unit U-1552. Yamada 2015, (124), CORRECTED to `log⁴ Y_j`, Section 7: for
 `N > exp exp 36`, `0 < ε < 1/100`, `Σ_{j<J} e^{-144}(1+ε)N/log⁴ Y_j ≤ 1.2 e^{-139} N/(ε log³ N)`;
-by `log Y_j ≥ log z + (j+1) log(1+ε)` the sum is at most about `(8³/3) e^{-144}/(ε log³ N)`,
+by `log Y_j ≥ log z + j log(1+ε)` and reciprocal-cube telescoping the sum is at most about `(8³/3) e^{-144}/(ε log³ N)`,
 numerically `1.11 e^{-139}/(ε log³ N)`. -/
 theorem eq124 (N : ℕ) (hN : exp (exp 36) < N) (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 1 / 100) :
     ∑ j ∈ range (Jblk N ε), exp (-144) * (1 + ε) * N / log (Yj N ε j) ^ 4 ≤
       6 / 5 * exp (-139) * N / (ε * log N ^ 3) := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h36 : (100000 : ℝ) < exp 36 := by
+    have h := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 5
+    norm_num at h
+    linarith
+  have hLp : 0 < log N := by linarith
+  have hzpos : 0 < z8 N := rpow_pos_of_pos hNp _
+  have hypos : 0 < y3 N := rpow_pos_of_pos hNp _
+  have hb : 0 < 1 + ε := by linarith
+  have hh : 0 < log (1 + ε) := log_pos (by linarith)
+  have hY (j : ℕ) (hj : j ∈ range (Jblk N ε)) :
+      log N / 8 + j * log (1 + ε) ≤ log (Yj N ε j) := by
+    have hwpos : 0 < wj N ε j := mul_pos hzpos (pow_pos hb _)
+    have hwlog : log (wj N ε j) = log N / 8 + j * log (1 + ε) := by
+      rw [wj, log_mul hzpos.ne' (pow_pos hb _).ne', log_pow, log_rpow hNp]
+      ring
+    have hjr := Nat.lt_ceil.mp (mem_range.mp hj)
+    have hjl := (lt_div_iff₀ hh).mp hjr
+    rw [log_div hypos.ne' hzpos.ne', log_rpow hNp, log_rpow hNp] at hjl
+    have hwy : wj N ε j ≤ y3 N := by
+      apply (log_le_log_iff hwpos hypos).mp
+      rw [hwlog, log_rpow hNp]
+      linarith
+    have hwY : wj N ε j ≤ Yj N ε j := by
+      apply le_min hwy
+      nlinarith
+    rw [← hwlog]
+    exact log_le_log hwpos hwY
+  have hsum : ∑ j ∈ range (Jblk N ε), 1 / log (Yj N ε j) ^ 4 ≤
+      1 / (log N / 8) ^ 4 + 1 / (3 * log (1 + ε) * (log N / 8) ^ 3) := by
+    calc
+      _ ≤ ∑ j ∈ range (Jblk N ε), 1 / (log N / 8 + j * log (1 + ε)) ^ 4 := by
+        apply sum_le_sum
+        intro j hj
+        apply one_div_le_one_div_of_le (by positivity)
+        gcongr
+        exact hY j hj
+      _ ≤ _  := sum_inv_affine_four_le _ _ (by positivity) hh _
+  have hloglower : ε / (1 + ε) ≤ log (1 + ε) := by
+    have h := log_le_sub_one_of_pos (inv_pos.mpr hb)
+    rw [log_inv] at h
+    have he : 1 - (1 + ε)⁻¹ = ε / (1 + ε) := by field_simp <;> ring
+    linarith
+  have hexp : (148 : ℝ) < exp 5 := by
+    have h := sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 5) 13
+    norm_num [sum_range_succ] at h
+    linarith
+  have hcoeff : (1 + ε) * (4096 / log N + 512 / (3 * log (1 + ε))) ≤ (6 / 5) * exp 5 / ε := by
+    have hinv : 1 / log (1 + ε) ≤ (1 + ε) / ε := by
+      simpa only [one_div_div] using one_div_le_one_div_of_le (div_pos hε hb) hloglower
+    have hsmall : 4096 / log N < (1 : ℝ) := by apply (div_lt_iff₀ hLp).2; linarith
+    have hsq : (1 + ε) ^ 2 ≤ (101 / 100 : ℝ) ^ 2 := by gcongr <;> linarith
+
+    calc
+      _ ≤ (1 + ε) * (1 + (512 / 3) * ((1 + ε) / ε)) := by
+        apply mul_le_mul_of_nonneg_left _ hb.le
+        have hi := mul_le_mul_of_nonneg_left hinv (by norm_num : (0 : ℝ) ≤ 512 / 3)
+        have heq : 512 / (3 * log (1 + ε)) = (512 / 3) * (1 / log (1 + ε)) := by ring
+        rw [heq]
+        linarith
+      _ = (ε * (1 + ε) + (512 / 3) * (1 + ε) ^ 2) / ε := by field_simp
+      _ ≤ _ := by
+        apply div_le_div_of_nonneg_right _ hε.le
+        have hprod : ε * (1 + ε) ≤ (1 / 100 : ℝ) * (101 / 100) :=
+          mul_le_mul hε1.le (by linarith) hb.le (by norm_num)
+        nlinarith
+
+  calc
+    _ = (exp (-144) * (1 + ε) * N) * ∑ j ∈ range (Jblk N ε), 1 / log (Yj N ε j) ^ 4 := by rw [mul_sum]; congr 1; ext j; ring
+    _ ≤ (exp (-144) * (1 + ε) * N) *
+        (1 / (log N / 8) ^ 4 + 1 / (3 * log (1 + ε) * (log N / 8) ^ 3)) := mul_le_mul_of_nonneg_left hsum (by positivity)
+    _ = exp (-144) * N / log N ^ 3 * ((1 + ε) * (4096 / log N + 512 / (3 * log (1 + ε)))) := by field_simp <;> ring
+    _ ≤ exp (-144) * N / log N ^ 3 * ((6 / 5) * exp 5 / ε) := mul_le_mul_of_nonneg_left hcoeff (by positivity)
+    _ = _ := by
+      have he : exp (-144) * exp 5 = exp (-139) := by rw [← exp_add]; norm_num
+      field_simp
+      nlinarith [he]
+
+/-- The corrected geometric blocks are disjoint, Yamada eqs 105 and 106. -/
+theorem Bj_pairwise_disjoint (N : ℕ) (ε : ℝ) (hε : 0 < ε) (j k : ℕ) (hjk : j ≠ k) :
+    Disjoint (Bj N ε j) (Bj N ε k) := by
+  apply disjoint_left.mpr
+  intro m hmj hmk
+  obtain ⟨_, p, r, s, hp, hr, hs, hz, hpy, hyr, hrs, hprod, hcop, hjlo, hjhi, hm⟩ := mem_filter.mp hmj
+  obtain ⟨_, q, u, v, hq, hu, hv, hzq, hqy, hyu, huv, hprodq, hcopq, hklo, hkhi, hmq⟩ := mem_filter.mp hmk
+  have hpq : p = q := by
+    have hd : p ∣ q * u * v := by rw [← hmq, hm]; exact dvd_mul_of_dvd_left (dvd_mul_right p r) s
+    rcases hp.dvd_mul.mp hd with hd | hd
+    · rcases hp.dvd_mul.mp hd with hd | hd
+      · exact (Nat.prime_dvd_prime_iff_eq hp hq).mp hd
+      · have he := (Nat.prime_dvd_prime_iff_eq hp hu).mp hd
+        have : (p : ℝ) < u := hpy.trans_le hyu
+        exact False.elim ((ne_of_lt this) (by exact_mod_cast he))
+    · have he := (Nat.prime_dvd_prime_iff_eq hp hv).mp hd
+      have : (p : ℝ) < v := hpy.trans_le (hyu.trans (by exact_mod_cast huv))
+      exact False.elim ((ne_of_lt this) (by exact_mod_cast he))
+  subst q
+  have hb : 1 < 1 + ε := by linarith
+  have hw (a b : ℕ) (hab : a < b) : (1 + ε) * wj N ε a ≤ wj N ε b := by
+    unfold wj
+    have hzpos : 0 ≤ z8 N := rpow_nonneg (Nat.cast_nonneg _) _
+    have hpw := pow_le_pow_right₀ hb.le (show a + 1 ≤ b by omega)
+    have h := mul_le_mul_of_nonneg_left hpw hzpos
+    simpa only [pow_succ, mul_comm, mul_left_comm, mul_assoc] using h
+  rcases lt_or_gt_of_ne hjk with h | h
+  · have hbound := hw j k h
+    linarith
+  · have hbound := hw k j h
+    linarith
 
 /-- LEAF. Unit U-1552. Yamada 2015, (126), Section 7: for even `N > exp exp 36`,
 `0 < ε < 1/100`, admissible `q₁` and `d < D`, `d ∣ P^(1)(y)`:
@@ -241,7 +726,106 @@ four prime factors `≥ z`, and each gives at most `(1+ε)N/z` products. -/
 theorem eq126 (N q₁ : ℕ) (hE : Even N) (hN : exp (exp 36) < N) (hq : Adm N q₁)
     (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 1 / 100) (d : ℕ) (hd : d ∈ Dset N q₁) :
     ∑ j ∈ range (Jblk N ε), |r2 N ε j d| ≤ 8 * (N : ℝ) ^ ((7 : ℝ) / 8) / d.totient := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have hLp : 1 < log N := by linarith [add_one_le_exp (36 : ℝ)]
+  have hzpos : 0 < z8 N := rpow_pos_of_pos hNp _
+  have hz1 : 1 ≤ z8 N := by
+    apply one_le_rpow (by linarith [log_le_sub_one_of_pos hNp]) (by norm_num)
+  obtain ⟨hdD, hdP⟩ := mem_filter.mp hd
+  have hd0 : d ≠ 0 := hdP.1.ne_zero
+  have hdp : (0 : ℝ) < d := by exact_mod_cast Nat.pos_of_ne_zero hd0
+  have hdlt : (d : ℝ) < z8 N ^ 4 := by
+    have hds : (d : ℝ) < Dsv N := Nat.lt_ceil.mp (mem_range.mp hdD)
+    have hD : Dsv N ≤ sqrt (N : ℝ) := by
+      unfold Dsv
+      apply div_le_self (sqrt_nonneg _) (one_le_pow₀ hLp.le)
+    have hz4 : z8 N ^ 4 = sqrt (N : ℝ) := by
+      rw [sqrt_eq_rpow, ← rpow_natCast, ← rpow_mul hNp.le]
+      norm_num
+    rw [hz4]
+    exact hds.trans_le hD
+  let big := d.primeFactors.filter (fun p : ℕ => z8 N ≤ p)
+  have hbigcard : big.card ≤ 4 := by
+    by_contra hc
+    have hc4 : 4 ≤ big.card := by omega
+    have hdvd : (∏ p ∈ big, p) ∣ d :=
+      dvd_trans (Finset.prod_dvd_prod_of_subset _ _ _ (filter_subset _ _)) (Nat.prod_primeFactors_dvd d)
+    have hle : ((∏ p ∈ big, p : ℕ) : ℝ) ≤ d := by exact_mod_cast Nat.le_of_dvd (Nat.pos_of_ne_zero hd0) hdvd
+    have hge : z8 N ^ big.card ≤ ((∏ p ∈ big, p : ℕ) : ℝ) := by
+      push_cast
+      rw [← Finset.prod_const]
+      apply Finset.prod_le_prod₀ (fun _ _ => hzpos.le)
+      intro p hp
+      exact (mem_filter.mp hp).2
+    have hpow := pow_le_pow_right₀ hz1 hc4
+    linarith
+  let bad := fun j => (Bj N ε j).filter (fun m => ¬ Nat.Coprime m d)
+  have hbadDis : (↑(range (Jblk N ε)) : Set ℕ).PairwiseDisjoint bad := by
+    intro j hj k hk hne
+    exact (Bj_pairwise_disjoint N ε hε j k hne).mono (filter_subset _ _) (filter_subset _ _)
+  have hbadsub : (range (Jblk N ε)).biUnion bad ⊆
+      big.biUnion (fun p => (range (2 * N + 1)).filter (fun m => m ≠ 0 ∧ p ∣ m)) := by
+    intro m hm
+    obtain ⟨j, hj, hmb⟩ := mem_biUnion.mp hm
+    obtain ⟨hmj, hbad⟩ := mem_filter.mp hmb
+    obtain ⟨hmrange, p, r, s, hp, hr, hs, hz, hpy, hyr, hrs, hprod, hcop, hjlo, hjhi, hmeq⟩ := mem_filter.mp hmj
+    have hrd : Nat.Coprime r d := by
+      apply hr.coprime_iff_not_dvd.mpr
+      intro hrd
+      have h := (hdP.2 r hr hrd).1
+      linarith
+    have hsd : Nat.Coprime s d := by
+      apply hs.coprime_iff_not_dvd.mpr
+      intro hsd
+      have h := (hdP.2 s hs hsd).1
+      have hsr : (r : ℝ) ≤ s := by exact_mod_cast hrs
+      linarith
+    have hpd : p ∣ d := by
+      apply hp.dvd_iff_not_coprime.mpr
+      intro hpc
+      apply hbad
+      rw [hmeq]
+      exact (hpc.mul_left hrd).mul_left hsd
+    apply mem_biUnion.mpr
+    refine ⟨p, mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp, hpd, hd0⟩, hz⟩, mem_filter.mpr ⟨?_, ?_, ?_⟩⟩
+    · exact mem_range.mpr (by have h := mem_range.mp hmrange; omega)
+    · rw [hmeq]; exact Nat.mul_ne_zero (Nat.mul_ne_zero hp.ne_zero hr.ne_zero) hs.ne_zero
+    · rw [hmeq]; exact dvd_mul_of_dvd_left (dvd_mul_right p r) s
+  have hcount : ((range (Jblk N ε)).biUnion bad).card ≤
+      ∑ p ∈ big, (2 * N) / p := by
+    calc
+      _ ≤ (big.biUnion fun p => (range (2 * N + 1)).filter (fun m => m ≠ 0 ∧ p ∣ m)).card := card_le_card hbadsub
+      _ ≤ ∑ p ∈ big, ((range (2 * N + 1)).filter (fun m => m ≠ 0 ∧ p ∣ m)).card := card_biUnion_le
+      _ = _ := by congr 1; ext p; exact Nat.card_multiples' (2 * N) p
+  have hcountR : (∑ j ∈ range (Jblk N ε), ((bad j).card : ℝ)) ≤ 8 * (N : ℝ) ^ ((7 : ℝ) / 8) := by
+    rw [← Nat.cast_sum, ← card_biUnion hbadDis]
+    calc
+      _ ≤ ((∑ p ∈ big, (2 * N) / p : ℕ) : ℝ) := by exact_mod_cast hcount
+      _ ≤ ∑ p ∈ big, (2 * (N : ℝ)) / p := by
+        push_cast
+        apply sum_le_sum
+        intro p hp
+        simpa only [Nat.cast_mul, Nat.cast_ofNat] using (Nat.cast_div_le (m := 2 * N) (n := p) : ((2 * N) / p : ℕ) ≤ ((2 * N : ℕ) : ℝ) / p)
+      _ ≤ ∑ p ∈ big, 2 * (N : ℝ) / z8 N := by
+        apply sum_le_sum
+        intro p hp
+        apply div_le_div_of_nonneg_left (by positivity) hzpos (mem_filter.mp hp).2
+      _ = big.card * (2 * (N : ℝ) / z8 N) := by rw [sum_const, nsmul_eq_mul]
+      _ ≤ 4 * (2 * (N : ℝ) / z8 N) := by gcongr; exact_mod_cast hbigcard
+      _ = _ := by
+        rw [show (7 : ℝ) / 8 = 1 - 1 / 8 by norm_num, rpow_sub hNp, rpow_one]
+        ring
+  have hr2 (j : ℕ) : |r2 N ε j d| = ((bad j).card : ℝ) / d.totient := by
+    have hc := card_filter_add_card_filter_not (s := Bj N ε j) (fun m => Nat.Coprime m d)
+    have hcR : (Bj N ε j).card = ((Bj N ε j).filter fun m => Nat.Coprime m d).card + (bad j).card := by simpa only [bad] using hc.symm
+    unfold r2 cntCop
+    rw [hcR]
+    push_cast
+    rw [add_sub_cancel_left, abs_of_nonneg (by positivity)]
+  simp_rw [hr2]
+  rw [← sum_div]
+  exact div_le_div_of_nonneg_right hcountR (Nat.cast_nonneg _)
 
 /-- LEAF. Unit U-1552. Yamada 2015, (125), middle step, Section 7: for `N > exp exp 36`,
 `Σ_{d<D, d ∣ P^(1)(y)} 1/φ(d) < log N`, from `Σ_{d ≤ x} μ²(d)/φ(d) ≤ log x + 1.4` and
@@ -254,6 +838,34 @@ theorem eq125_phi (N q₁ : ℕ) (hN : exp (exp 36) < N) :
 `8 N^{7/8} log N < e^{-139} N / log³ N`. -/
 theorem eq125_num (N : ℕ) (hN : exp (exp 36) < N) :
     8 * (N : ℝ) ^ ((7 : ℝ) / 8) * log N < exp (-139) * N / log N ^ 3 := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h36 : (100000 : ℝ) < exp 36 := by
+    have h := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 5
+    norm_num at h
+    linarith
+  have hLp : 0 < log N := by linarith
+  have hr := log_div_self_antitoneOn
+    (show exp 36 ∈ Set.Ici (exp 1) by simp only [Set.mem_Ici]; exact exp_le_exp.mpr (by norm_num))
+    (show log (N : ℝ) ∈ Set.Ici (exp 1) by
+      simp only [Set.mem_Ici]; exact (exp_le_exp.mpr (by norm_num : (1 : ℝ) ≤ 36)).trans hL.le)
+    hL.le
+  simp only [log_exp] at hr
+  have hratio : 36 / exp 36 < (1 / 1000 : ℝ) := by
+    apply (div_lt_iff₀ (exp_pos _)).2
+    linarith
+  have hlog : log (log N) < log N / 1000 := by
+    simpa only [div_eq_mul_inv, one_mul, mul_comm] using (div_lt_iff₀ hLp).mp (hr.trans_lt hratio)
+  have h8 : log (8 : ℝ) ≤ 7 := by simpa only [show (8 : ℝ) - 1 = 7 by norm_num] using log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 8)
+  have hs : log 8 + log N * (7 / 8) + 4 * log (log N) < -139 + log N := by linarith
+  apply (lt_div_iff₀ (pow_pos hLp 3)).2
+  calc
+    8 * (N : ℝ) ^ ((7 : ℝ) / 8) * log N * log N ^ 3 =
+        exp (log 8 + log N * (7 / 8) + 4 * log (log N)) := by
+      rw [exp_add, exp_add, exp_log (by norm_num : (0 : ℝ) < 8),
+        ← rpow_def_of_pos hNp, show exp (4 * log (log N)) = log N ^ 4 from by simpa using (exp_nat_mul (log (log N)) 4).trans (by rw [exp_log hLp])]
+      ring
+    _ < exp (-139 + log N) := exp_lt_exp.mpr hs
+    _ = exp (-139) * N := by rw [exp_add, exp_log hNp]
 
 end LeanLab.ChenExplicit.D1552
