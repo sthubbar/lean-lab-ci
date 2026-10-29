@@ -4,7 +4,10 @@ T. Yamada 2015, Explicit Chen's theorem, arXiv 1511.03409v2, Section 7, proof of
 
 Codex task161 proof additions, 2026-10-28. AI wrote the Lean code.
 Six original leaves have unconditional proofs. Eq123 is CONDITIONAL ON h72.
-The remaining OPEN leaves are eq43_V1, lemma72 and eq125_phi.
+The remaining OPEN leaves are eq43_V1 and lemma72.
+
+Codex task173 proof additions, 2026-10-29. AI wrote the Lean code.
+Eq125_phi has an unconditional elementary proof through a finite Euler coefficient bound.
 
 Part b: the sieve side of Theorem 7.1, (107) and (117) to (126), with the explicit
 Bombieri-Vinogradov type Lemma 7.2, (99). Every `sorry` here is an OPEN LEAF, except
@@ -24,6 +27,8 @@ Chen's theorem is known; binary Goldbach is OPEN.
 -/
 import LeanLab.ChenExplicit.Decomp1552a
 import LeanLab.ChenExplicit.Reductions
+import LeanLab.RieselVaughan1983.OddSums
+import LeanLab.RieselVaughan1983.Lemma10Sum
 
 open Finset Real
 open scoped Classical
@@ -827,12 +832,233 @@ theorem eq126 (N q₁ : ℕ) (hE : Even N) (hN : exp (exp 36) < N) (hq : Adm N q
   rw [← sum_div]
   exact div_le_div_of_nonneg_right hcountR (Nat.cast_nonneg _)
 
+open LeanLab.RieselVaughan1983.OddSums
+
+/-- A finite prime product bound used for Yamada 2015 page 28 eq 125.
+The primes through 31 are checked exactly. The remaining factors have a telescoping bound. -/
+theorem prod_prime_inv_mul_pred_le_two (s : Finset ℕ) (hs : ∀ p ∈ s, p.Prime) :
+    ∏ p ∈ s, (1 + h10 p) ≤ 2 := by
+  let small : Finset ℕ := {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31}
+  let tail := s.filter (fun p => 31 < p)
+  have hhead : ∏ p ∈ s.filter (fun p => p ≤ 31), (1 + h10 p) ≤
+      ∏ p ∈ small, (1 + h10 p) := by
+    apply prod_le_prod_of_subset_of_one_le₀
+    · intro p hp
+      have hp' := (mem_filter.mp hp)
+      have hpr := hs p hp'.1
+      have hple := hp'.2
+      norm_num [small, Finset.mem_insert, Finset.mem_singleton] at ⊢
+      interval_cases p <;> norm_num [small] at *
+    · intro p hp; linarith [h10_nonneg p]
+    · intro p hp hnot; linarith [h10_nonneg p]
+  have hsum : ∑ p ∈ tail, h10 p ≤ 1 / 31 := by
+    let B := max 31 (s.sup id)
+    have hsub : tail ⊆ Icc 32 B := by
+      intro p hp
+      obtain ⟨hp, h31⟩ := mem_filter.mp hp
+      have hpb : p ≤ s.sup id := Finset.le_sup (f := id) hp
+      simp only [mem_Icc]
+      exact ⟨by omega, hpb.trans (le_max_right _ _)⟩
+    have hle : ∑ p ∈ tail, h10 p ≤ ∑ p ∈ Icc 32 B, h10 p :=
+      sum_le_sum_of_subset_of_nonneg hsub (fun p _ _ => h10_nonneg p)
+    have heq : Icc 2 B = Icc 2 31 ∪ Icc 32 B := by
+      ext p
+      simp only [mem_Icc, mem_union]
+      have : 31 ≤ B := le_max_left _ _
+      omega
+    have hdis : Disjoint (Icc 2 31) (Icc 32 B) := by
+      apply disjoint_left.mpr
+      intro p hp hq
+      simp only [mem_Icc] at hp hq
+      omega
+    have htotal := sum_inv_mul_pred_le B
+    change (∑ p ∈ Icc 2 B, h10 p) ≤ _ at htotal
+    rw [heq, sum_union hdis] at htotal
+    have hheadval : ∑ p ∈ Icc 2 31, h10 p = 30 / 31 := by
+      norm_num [Finset.sum_Icc_succ_top, h10]
+    rw [hheadval] at htotal
+    have hnon : (0 : ℝ) ≤ 1 / (max B 1 : ℕ) := by positivity
+    linarith
+  have htail : ∏ p ∈ tail, (1 + h10 p) ≤ 31 / 30 := by
+    calc
+      _ ≤ exp (∑ p ∈ tail, h10 p) := prod_le_exp h10 h10_nonneg tail
+      _ ≤ exp (1 / 31) := exp_le_exp.mpr hsum
+      _ ≤ 31 / 30 := by
+        have h := exp_bound_div_one_sub_of_interval (by norm_num : (0 : ℝ) ≤ 1 / 31) (by norm_num : (1 : ℝ) / 31 < 1)
+        norm_num at h ⊢
+        exact h
+  have hprod : (∏ p ∈ s, (1 + h10 p)) =
+      (∏ p ∈ s.filter (fun p => p ≤ 31), (1 + h10 p)) * ∏ p ∈ tail, (1 + h10 p) := by
+    simpa only [tail, Nat.not_le] using (prod_filter_mul_prod_filter_not s (fun p => p ≤ 31) (fun p => 1 + h10 p)).symm
+  rw [hprod]
+  calc
+    _ ≤ (∏ p ∈ small, (1 + h10 p)) * (31 / 30) :=
+      mul_le_mul hhead htail (prod_nonneg (fun p _ => by linarith [h10_nonneg p]))
+        (prod_nonneg (fun p _ => by linarith [h10_nonneg p]))
+    _ ≤ 2 := by norm_num [small, h10]
+
+
+open scoped ArithmeticFunction.Moebius
+
+/-- Elementary coefficient bound for Yamada page 28 eq 125. -/
+theorem sum_mu_sq_inv_mul_totient_le_two (B : ℕ) :
+    ∑ r ∈ Icc 1 B, ((μ r : ℝ)) ^ 2 / ((r : ℝ) * (r.totient : ℝ)) ≤ 2 := by
+  let S := (Icc 2 B).filter Nat.Prime
+  let R := (Icc 1 B).filter Squarefree
+  have hsplit : (∑ r ∈ Icc 1 B, ((μ r : ℝ)) ^ 2 / ((r : ℝ) * (r.totient : ℝ))) =
+      ∑ r ∈ R, ∏ p ∈ r.primeFactors, h10 p := by
+    rw [show (∑ r ∈ R, ∏ p ∈ r.primeFactors, h10 p) =
+        ∑ r ∈ Icc 1 B, if Squarefree r then ∏ p ∈ r.primeFactors, h10 p else 0 from sum_filter _ _]
+    apply sum_congr rfl
+    intro r hr
+    split_ifs with hs
+    · have hm : ((μ r : ℝ)) ^ 2 = 1 := by exact_mod_cast ArithmeticFunction.moebius_sq_eq_one_of_squarefree hs
+      rw [hm, inv_mul_totient_eq hs]
+    · rw [ArithmeticFunction.moebius_eq_zero_of_not_squarefree hs]; simp
+  have hinj : Set.InjOn (fun r : ℕ => r.primeFactors) (R : Set ℕ) := by
+    intro a ha b hb hab
+    have ea := Nat.prod_primeFactors_of_squarefree (mem_filter.mp ha).2
+    have eb := Nat.prod_primeFactors_of_squarefree (mem_filter.mp hb).2
+    change a.primeFactors = b.primeFactors at hab
+    rw [← ea, ← eb, hab]
+  have hsub : R.image Nat.primeFactors ⊆ S.powerset := by
+    intro T hT
+    obtain ⟨r, hr, rfl⟩ := mem_image.mp hT
+    apply mem_powerset.mpr
+    intro p hp
+    have hrB := mem_Icc.mp (mem_filter.mp hr).1
+    have hpp := Nat.prime_of_mem_primeFactors hp
+    have hpd := Nat.dvd_of_mem_primeFactors hp
+    exact mem_filter.mpr ⟨mem_Icc.mpr ⟨hpp.two_le,
+      (Nat.le_of_dvd hrB.1 hpd).trans hrB.2⟩, hpp⟩
+  calc
+    _ = ∑ r ∈ R, ∏ p ∈ r.primeFactors, h10 p := hsplit
+    _ = ∑ T ∈ R.image Nat.primeFactors, ∏ p ∈ T, h10 p := (sum_image (f := fun T : Finset ℕ => ∏ p ∈ T, h10 p) hinj).symm
+    _ ≤ ∑ T ∈ S.powerset, ∏ p ∈ T, h10 p :=
+      sum_le_sum_of_subset_of_nonneg hsub (fun T _ _ => prod_nonneg (fun p _ => h10_nonneg p))
+    _ = ∏ p ∈ S, (1 + h10 p) := (prod_one_add _).symm
+    _ ≤ 2 := prod_prime_inv_mul_pred_le_two S (fun p hp => (mem_filter.mp hp).2)
+
+
+/-- A logarithmic reciprocal totient bound derived for Yamada page 28 eq 125. -/
+theorem sum_inv_totient_le_two_log (M : ℕ) (hM : 1 ≤ M) :
+    ∑ d ∈ Icc 1 M, 1 / (d.totient : ℝ) ≤ 2 * (1 + Real.log M) := by
+  let G : ℕ → ℝ := fun r => ((μ r : ℝ)) ^ 2 / (r.totient : ℝ)
+  have hG : ∀ r, 0 ≤ G r := fun r => by dsimp [G]; positivity
+  have hlog : 0 ≤ 1 + log (M : ℝ) := by
+    have h : (1 : ℝ) ≤ M := by exact_mod_cast hM
+    linarith [log_nonneg h]
+  have hid : ∑ d ∈ Icc 1 M, 1 / (d.totient : ℝ) =
+      ∑ d ∈ Icc 1 M, ∑ r ∈ d.divisors, G r * (1 / (d : ℝ)) := by
+    apply sum_congr rfl
+    intro d hd
+    rw [LeanLab.RieselVaughan1983.L10.inv_totient_eq d (mem_Icc.mp hd).1, mul_sum]
+    apply sum_congr rfl
+    intro r hr
+    dsimp [G]
+    ring
+  have hswap : (∑ d ∈ Icc 1 M, ∑ r ∈ d.divisors, G r * (1 / (d : ℝ))) =
+      ∑ r ∈ Icc 1 M, ∑ d ∈ (Icc 1 M).filter (fun d => r ∣ d), G r * (1 / (d : ℝ)) := by
+    apply sum_comm'
+    intro d r
+    simp only [mem_Icc, mem_filter, Nat.mem_divisors]
+    constructor
+    · rintro ⟨⟨hd1, hdM⟩, hrd, hd0⟩
+      exact ⟨⟨⟨hd1, hdM⟩, hrd⟩,
+        ⟨Nat.pos_of_dvd_of_pos hrd hd1, (Nat.le_of_dvd hd1 hrd).trans hdM⟩⟩
+    · rintro ⟨⟨⟨hd1, hdM⟩, hrd⟩, hr⟩
+      exact ⟨⟨hd1, hdM⟩, hrd, by omega⟩
+  have hinner (r : ℕ) (hr : r ∈ Icc 1 M) :
+      ∑ d ∈ (Icc 1 M).filter (fun d => r ∣ d), G r * (1 / (d : ℝ)) ≤
+        G r / r * (1 + Real.log M) := by
+    have hr1 := (mem_Icc.mp hr).1
+    have hrp : (0 : ℝ) < r := by exact_mod_cast hr1
+    have hsub : (Icc 1 M).filter (fun d => r ∣ d) ⊆ (Icc 1 M).image (fun n => r * n) := by
+      intro d hd
+      obtain ⟨hd, ⟨n, rfl⟩⟩ := mem_filter.mp hd
+      have hdm := mem_Icc.mp hd
+      apply mem_image.mpr
+      refine ⟨n, mem_Icc.mpr ⟨?_, ?_⟩, rfl⟩
+      · nlinarith
+      · have := Nat.le_mul_of_pos_left n hr1
+        omega
+    have hinj : Set.InjOn (fun n : ℕ => r * n) (Icc 1 M : Set ℕ) := by
+      intro a ha b hb hab
+      exact Nat.eq_of_mul_eq_mul_left hr1 hab
+    calc
+      _ ≤ ∑ d ∈ (Icc 1 M).image (fun n => r * n), G r * (1 / (d : ℝ)) :=
+        sum_le_sum_of_subset_of_nonneg hsub (fun d _ _ => mul_nonneg (hG r) (by positivity))
+      _ = ∑ n ∈ Icc 1 M, G r * (1 / ((r * n : ℕ) : ℝ)) := sum_image hinj
+      _ = G r / r * ∑ n ∈ Icc 1 M, 1 / (n : ℝ) := by
+        rw [mul_sum]
+        apply sum_congr rfl
+        intro n hn
+        push_cast
+        ring
+      _ ≤ G r / r * (1 + Real.log M) := by
+        apply mul_le_mul_of_nonneg_left _ (div_nonneg (hG r) hrp.le)
+        simpa only [harmonic_eq_sum_Icc, Rat.cast_sum, Rat.cast_inv, Rat.cast_natCast,
+          one_div] using harmonic_le_one_add_log M
+  calc
+    _ = ∑ r ∈ Icc 1 M, ∑ d ∈ (Icc 1 M).filter (fun d => r ∣ d), G r * (1 / (d : ℝ)) := hid.trans hswap
+    _ ≤ ∑ r ∈ Icc 1 M, G r / r * (1 + Real.log M) := sum_le_sum hinner
+    _ = (∑ r ∈ Icc 1 M, ((μ r : ℝ)) ^ 2 / ((r : ℝ) * (r.totient : ℝ))) * (1 + Real.log M) := by
+      rw [← sum_mul]
+      congr 1
+      apply sum_congr rfl
+      intro r hr
+      dsimp [G]
+      ring
+    _ ≤ 2 * (1 + Real.log M) := mul_le_mul_of_nonneg_right (sum_mu_sq_inv_mul_totient_le_two M) hlog
+
 /-- LEAF. Unit U-1552. Yamada 2015, (125), middle step, Section 7: for `N > exp exp 36`,
 `Σ_{d<D, d ∣ P^(1)(y)} 1/φ(d) < log N`, from `Σ_{d ≤ x} μ²(d)/φ(d) ≤ log x + 1.4` and
 `D < N^{1/2}`. -/
 theorem eq125_phi (N q₁ : ℕ) (hN : exp (exp 36) < N) :
     ∑ d ∈ Dset N q₁, 1 / (d.totient : ℝ) < log N := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have hLp : 0 < log N := (exp_pos _).trans hL
+  have hLL : 36 < log (log N) := by simpa using log_lt_log (exp_pos _) hL
+  have hDp : 0 < Dsv N := div_pos (sqrt_pos_of_pos hNp) (pow_pos hLp _)
+  have hDlog : 0 < log (Dsv N) := (logs_pos N 0 hN).2.1
+  have hD1 : 1 < Dsv N := by
+    have h := exp_lt_exp.mpr hDlog
+    simpa only [exp_zero, exp_log hDp] using h
+  let M := ⌈Dsv N⌉₊
+  have hceil : Dsv N ≤ (M : ℝ) := Nat.le_ceil _
+  have hM1 : 1 ≤ M := by
+    have h : (1 : ℝ) < M := hD1.trans_le hceil
+    exact_mod_cast h.le
+  have hMle : (M : ℝ) ≤ 2 * Dsv N := by
+    have h := Nat.ceil_lt_add_one hDp.le
+    change (M : ℝ) < Dsv N + 1 at h
+    linarith
+  have hsub : Dset N q₁ ⊆ Icc 1 M := by
+    intro d hd
+    obtain ⟨hdr, hdP⟩ := mem_filter.mp hd
+    have hd0 := hdP.1.ne_zero
+    have hdM : d < M := mem_range.mp hdr
+    exact mem_Icc.mpr ⟨Nat.one_le_iff_ne_zero.mpr hd0, hdM.le⟩
+  have hsum : ∑ d ∈ Dset N q₁, 1 / (d.totient : ℝ) ≤ 2 * (1 + log M) := by
+    calc
+      _ ≤ ∑ d ∈ Icc 1 M, 1 / (d.totient : ℝ) :=
+        sum_le_sum_of_subset_of_nonneg hsub (fun d _ _ => by positivity)
+      _ ≤ _ := sum_inv_totient_le_two_log M hM1
+  have hlogM : log (M : ℝ) ≤ log 2 + log (Dsv N) := by
+    calc
+      _ ≤ log (2 * Dsv N) := log_le_log (by exact_mod_cast hM1) hMle
+      _ = _ := log_mul (by norm_num) hDp.ne'
+  have hlogD : log (Dsv N) = log N / 2 - 10 * log (log N) := by
+    unfold Dsv
+    rw [log_div (sqrt_pos_of_pos hNp).ne' (pow_pos hLp _).ne', log_sqrt hNp.le, log_pow]
+    norm_num
+  have hlog2 : log (2 : ℝ) ≤ 1 := by
+    have h := log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)
+    norm_num at h
+    exact h
+  linarith
+
 
 /-- LEAF. Unit U-1552. Yamada 2015, (125), last step, Section 7: for `N > exp exp 36`,
 `8 N^{7/8} log N < e^{-139} N / log³ N`. -/

@@ -22,6 +22,7 @@ the leaves. Local copies `P1V`, `PsiV`, `mainIntegralV` have the same text as `P
 AI-written Lean code, Claude, 2026-10-25. Binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.Ported.Prove2Me.Decomp1525c
 
 open Finset Real MeasureTheory intervalIntegral
 open scoped Classical
@@ -54,21 +55,21 @@ display. Unit U-1525. -/
 theorem swap (x : ℝ) (hx : 6 ≤ x) :
     ∑ p ∈ P1V x, Real.log p * ∫ u in (x - p)..(2 * x - p), 1 / Real.log u =
       ∫ u in (3 : ℝ)..(2 * x), thetaI x u / Real.log u := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.S218LLI.swap x hx
 
 /-- LEAF. `I(u)` on `[3, x]`: `I(u) = θ(x - 3) - θ(max(x - u, 2))`, the primes in
 `(max(x-u, 2), x-3]`. Vaughan 1977 p. 103, the integral over `[3, x]` in the third display.
 Unit U-1525. -/
 theorem thetaI_low (x u : ℝ) (hx : 6 ≤ x) (hu3 : 3 ≤ u) (hux : u ≤ x) :
     thetaI x u = Chebyshev.theta (x - 3) - Chebyshev.theta (max (x - u) 2) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.LowC.S218LL.thetaI_low_eq x u hx hu3 hux
 
 /-- LEAF. `I(u)` on `[x, 2x]`: `I(u) = max(θ(min(x-3, 2x-u)) - log 2, 0)`, the odd primes up to
 `min(x-3, 2x-u)`. Vaughan 1977 p. 103, the integrals over `[x, 2x]` and `[x, x+3]`.
 Unit U-1525. -/
 theorem thetaI_high (x u : ℝ) (hx : 6 ≤ x) (hxu : x ≤ u) (hu : u ≤ 2 * x) :
     thetaI x u = max (Chebyshev.theta (min (x - 3) (2 * x - u)) - Real.log 2) 0 := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.HighC.thetaI_high_eq x u hx hxu hu
 
 /-- LEAF. Pointwise bound on `[3, x]` from (2.15): with `t = max(x-u, 2)`,
 `|I(u) - u| ≤ x/(40 log x) + t/(40 log t) + 678412`; below 678407 use `|θ(t) - t| ≤ t` from
@@ -79,7 +80,7 @@ theorem low_pointwise
     (x u : ℝ) (hx : 10 ^ 52 ≤ x) (hu3 : 3 ≤ u) (hux : u ≤ x) :
     |thetaI x u - u| ≤ x / (40 * Real.log x)
       + max (x - u) 2 / (40 * Real.log (max (x - u) 2)) + 678412 := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.LowC.S218LLP.pw h215 x u hx hu3 hux
 
 /-- LEAF. The low majorant integral: for `x ≥ 10^52`,
 `∫_3^x (x/(40 log x) + t/(40 log t) + 678412) du/log u ≤ x²/(20 log² x)`, `t = max(x-u, 2)`;
@@ -89,7 +90,7 @@ theorem low_majorant (x : ℝ) (hx : 10 ^ 52 ≤ x) :
     ∫ u in (3 : ℝ)..x, (x / (40 * Real.log x)
       + max (x - u) 2 / (40 * Real.log (max (x - u) 2)) + 678412) / Real.log u
       ≤ x ^ 2 / (20 * Real.log x ^ 2) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.LowC.S218LLM.low_maj x hx
 
 /-- LEAF. Pointwise bound on `[x, 2x]` from (2.15): with `s = max(min(x-3, 2x-u), 2)`,
 `|I(u) - (2x - u)| ≤ s/(40 log s) + 678412`. Vaughan 1977 p. 103, `|θ(2x-u) - 2x + u|` and the
@@ -100,7 +101,7 @@ theorem high_pointwise
     |thetaI x u - (2 * x - u)| ≤
       max (min (x - 3) (2 * x - u)) 2 / (40 * Real.log (max (min (x - 3) (2 * x - u)) 2))
         + 678412 := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.HighC.S218LLP.pw h215 x u hx hxu hu
 
 /-- LEAF. The high majorant integral: for `x ≥ 10^52`,
 `∫_x^{2x} (s/(40 log s) + 678412) du/log u ≤ x²/(20 log² x)`, `s = max(min(x-3, 2x-u), 2)`;
@@ -109,14 +110,15 @@ theorem high_majorant (x : ℝ) (hx : 10 ^ 52 ≤ x) :
     ∫ u in x..(2 * x), (max (min (x - 3) (2 * x - u)) 2 /
         (40 * Real.log (max (min (x - 3) (2 * x - u)) 2)) + 678412) / Real.log u
       ≤ x ^ 2 / (20 * Real.log x ^ 2) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.HighC.S218LLM.high_maj x hx
 
 /-- LEAF. Integrability: `I(u)/log u` is a step function over `1/log u`, integrable on `[3, x]`
 and on `[x, 2x]` for `x ≥ 6`. Unit U-1525. -/
 theorem thetaI_integrable (x : ℝ) (hx : 6 ≤ x) :
     IntervalIntegrable (fun u => thetaI x u / Real.log u) volume 3 x ∧
     IntervalIntegrable (fun u => thetaI x u / Real.log u) volume x (2 * x) := by
-  sorry
+  exact ⟨LeanLab.Ported.Prove2Me.Decomp1525c.S218LLI.integrable_on x hx (by norm_num) (by linarith),
+    LeanLab.Ported.Prove2Me.Decomp1525c.S218LLI.integrable_on x hx (by linarith) (by linarith)⟩
 
 /-- LEAF. The low comparison: `|∫_3^x I(u)/log u - ∫_3^x u/log u| ≤ x²/(20 log² x)`, from
 `low_pointwise`, `low_majorant` and `thetaI_integrable` by `norm_integral_le_of_norm_le`.
@@ -126,7 +128,7 @@ theorem low_compare
     (x : ℝ) (hx : 10 ^ 52 ≤ x) :
     |(∫ u in (3 : ℝ)..x, thetaI x u / Real.log u) - ∫ u in (3 : ℝ)..x, u / Real.log u|
       ≤ x ^ 2 / (20 * Real.log x ^ 2) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.LowC.cmp h215 x hx
 
 /-- LEAF. The high comparison:
 `|∫_x^{2x} I(u)/log u - ∫_x^{2x} (2x-u)/log u| ≤ x²/(20 log² x)`, from `high_pointwise`,
@@ -136,7 +138,7 @@ theorem high_compare
     (x : ℝ) (hx : 10 ^ 52 ≤ x) :
     |(∫ u in x..(2 * x), thetaI x u / Real.log u) - ∫ u in x..(2 * x), (2 * x - u) / Real.log u|
       ≤ x ^ 2 / (20 * Real.log x ^ 2) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp1525c.HighC.cmp h215 x hx
 
 /-! ### Assembly -/
 
