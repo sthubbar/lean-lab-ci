@@ -677,5 +677,4 @@ end LeanLab.Pintz2021.Applications
 #print axioms LeanLab.Pintz2021.Sing_two_pow
 #print axioms LeanLab.Pintz2021.N_div_sqrt_P
 #print axioms LeanLab.Pintz2021.exponent_517
-#print axioms LeanLab.Pintz2021.pintz_lemma2
 

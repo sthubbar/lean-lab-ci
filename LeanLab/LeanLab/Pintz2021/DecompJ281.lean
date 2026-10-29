@@ -5,6 +5,7 @@ Riv. Mat. Univ. Parma 12 (2021), 181-199. Unit U-1581 decomposed, GEMINI task281
 AI-written Lean code, Gemini, 2026-10-28. Binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.Pintz2021.Audit168
 import LeanLab.Pintz2021.Statements
 import LeanLab.Pintz2021.Reduction3
 import LeanLab.Pintz2021.Lemma1U1369
@@ -69,14 +70,21 @@ theorem pole_mem_truncated {H P X U : ℝ} (hU : 0 ≤ U) :
 /-- LEAF P0054 page 8: The pole is not truncated by any U at least 1. -/
 theorem pole_not_truncated {m : ℕ} {U : ℝ} (hU : 1 ≤ U) :
     UCutoff pole pole m ≤ U := by
-  unfold UCutoff pole
-  simp [hU]
-  sorry
+  have hc : (lift pole (Nat.lcm pole.r pole.r) *
+      (lift pole (Nat.lcm pole.r pole.r))⁻¹).conductor = 1 := by
+    rw [Audit168.lift_pole, inv_one, mul_one]
+    change (1 : DirichletCharacter ℂ 1).conductor = 1
+    exact DirichletCharacter.conductor_one
+  simp only [UCutoff, hc]
+  simpa [pole] using hU
 
 /-- LEAF P0054 page 8: `cCoefPrime` for the pole is exactly `cCoef` for the pole, as the trivial character is real. -/
 theorem cCoefPrime_pole (q m : ℕ) :
     cCoefPrime pole pole q m = cCoef pole pole q m := by
-  sorry
+  have ht : tau q 1 = ((ArithmeticFunction.moebius q : ℤ) : ℂ) :=
+    (Audit168.cRam_one q 1).trans (PrincipalSeriesTask99.gauss_principal q)
+  simp only [cCoefPrime, cCoef, Audit168.lift_pole, inv_one, mul_one, ht, map_intCast]
+
 
 /-- LEAF P0054 page 8 display 2.21: Theorem 1 display 2.21 is cited as a leaf. -/
 theorem leaf_221 :
@@ -138,3 +146,7 @@ theorem assembly_222 :
 
 end
 end LeanLab.Pintz2021.DecompJ281
+
+#print axioms LeanLab.Pintz2021.DecompJ281.pole_not_truncated
+
+#print axioms LeanLab.Pintz2021.DecompJ281.cCoefPrime_pole

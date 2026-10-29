@@ -39,8 +39,6 @@ def Lemma2 : Prop :=
       ∑ ν ∈ (Finset.Icc 1 ⌊Lnu X⌋₊).filter (fun ν => 2 ^ ν < m ∧ q ∣ m - 2 ^ ν),
         Sing (m - 2 ^ ν) ≤ η * Lnu X
 
-/-- Cited. P0054 Lemma 2, quoted from Pintz and Ruzsa, PR2, Lemma 1. -/
-theorem pintz_lemma2 : Lemma2 := by sorry
 
 /-! ### Elementary facts about the singular series -/
 
