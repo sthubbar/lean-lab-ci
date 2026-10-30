@@ -19,6 +19,7 @@ import LeanLab.PNTPort.Vinogradov.Final
 import LeanLab.Linnik.Decomp1532b
 import LeanLab.Linnik.Gallagher1975Lemma2
 import LeanLab.Romanov.GallagherBridge
+import LeanLab.ExceptionalSet.MVMajorSing
 
 namespace LeanLab.Linnik.Decomp1532c
 
@@ -106,18 +107,7 @@ theorem G_eq_Gs (L : ℕ) (α : ℝ) : LeanLab.Linnik.Gallagher1975Lemma1.G L α
   push_cast
   ring
 
-/-- LEAF. Unit U-1532. Display (5), p. 138, for g = 2 where `D/φ(D) = 2`: there are `c > 0`,
-`C` and `θ₀ > 0` such that for `0 < θ ≤ θ₀`, `k ≥ 2` and `N ≥ N_{k,θ}`, with `P = N^θ`,
-`∫_𝔐 |S G^k|² ≤ 2 N L^{2k}/log² N · (1 + C(log² k / k + e^{-c/θ}))`. It follows from
-Theorem 3, p. 127, and Lemmas 5, 6, 8 and 10. -/
-theorem major_arc_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧ ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ →
-    ∀ k : ℕ, 2 ≤ k → ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
-      ∫ α in majorArcs N ((N : ℝ) ^ θ), ‖Sg N α * Gs (Nat.log 2 N) α ^ k‖ ^ 2 ≤
-        2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2 *
-          (1 + C * (Real.log k ^ 2 / k + Real.exp (-c / θ))) := by
-  -- LEAF. External analytic sources: Gallagher 1970 Inventiones 11 pp.329 to 339;
-  -- Montgomery and Vaughan 1975 Acta Arith.27 pp.353 to 370. See Gallagher 1975 p.138 display 5.
-  sorry
+
 
 /-- Auxiliary for the minor arc estimate on p.137 of Gallagher 1975. -/
 theorem vonMangoldt_prefix_bound {N q : ℕ} (hN : 2 ≤ N) {θ : ℝ} (hθ : 0 < θ) (hθmax : θ ≤ 2 / 5)
@@ -351,6 +341,600 @@ theorem major_arc_crude_bound (k L N : ℕ) (P : ℝ) :
   exact hmono.trans (mul_le_mul_of_nonneg_right
     (LeanLab.Linnik.Decomp1532c.major_arc_Sg_mean_le N P) (by positivity))
 
+
+/-- Gallagher 1975 p.134 proof of Lemma 5. Auxiliary binary uniqueness. -/
+theorem two_pow_add_sorted {a b c d : ℕ} (hab : a ≤ b) (hcd : c ≤ d)
+    (h : 2 ^ a + 2 ^ b = 2 ^ c + 2 ^ d) : a = c ∧ b = d := by
+  have hp : Function.Injective (fun n : ℕ => 2 ^ n) := Nat.pow_right_injective (by decide)
+  by_cases hab' : a = b
+  · subst b
+    have hleft : 2 ^ a + 2 ^ a = 2 ^ (a + 1) := by simp [pow_succ]; omega
+    rw [hleft] at h
+    by_cases hcd' : c = d
+    · subst d
+      have hright : 2 ^ c + 2 ^ c = 2 ^ (c + 1) := by simp [pow_succ]; omega
+      rw [hright] at h
+      have := hp h
+      constructor <;> omega
+    · have hc : c < d := by omega
+      have h1 := Nat.bitIndices_sum_map_two_pow (L := [a + 1]) (by simp [List.sortedLT_iff_pairwise])
+      have h2 := Nat.bitIndices_sum_map_two_pow (L := [c, d]) (by simpa [List.sortedLT_iff_pairwise] using hc)
+      simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero] at h1 h2
+      rw [← h] at h2
+      rw [h1] at h2
+      simp at h2
+  · have ha : a < b := by omega
+    have h1 := Nat.bitIndices_sum_map_two_pow (L := [a, b]) (by simpa [List.sortedLT_iff_pairwise] using ha)
+    by_cases hcd' : c = d
+    · subst d
+      have hright : 2 ^ c + 2 ^ c = 2 ^ (c + 1) := by simp [pow_succ]; omega
+      rw [hright] at h
+      have h2 := Nat.bitIndices_sum_map_two_pow (L := [c + 1]) (by simp [List.sortedLT_iff_pairwise])
+      simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero] at h1 h2
+      rw [h] at h1
+      rw [h2] at h1
+      simp at h1
+    · have hc : c < d := by omega
+      have h2 := Nat.bitIndices_sum_map_two_pow (L := [c, d]) (by simpa [List.sortedLT_iff_pairwise] using hc)
+      simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero] at h1 h2
+      rw [h] at h1
+      rw [h2] at h1
+      simpa using h1.symm
+
+
+/-- Gallagher 1975 p.134 proof of Lemma 5. -/
+theorem two_pow_add_eq {a b c d : ℕ} (h : 2 ^ a + 2 ^ b = 2 ^ c + 2 ^ d) :
+    (a = c ∧ b = d) ∨ (a = d ∧ b = c) := by
+  rcases le_total a b with hab | hba
+  · rcases le_total c d with hcd | hdc
+    · exact Or.inl (two_pow_add_sorted hab hcd h)
+    · have hs := two_pow_add_sorted hab hdc (by simpa [add_comm] using h)
+      exact Or.inr hs
+  · rcases le_total c d with hcd | hdc
+    · have hs := two_pow_add_sorted hba hcd (by simpa [add_comm] using h)
+      exact Or.inr ⟨hs.2, hs.1⟩
+    · have hs := two_pow_add_sorted hba hdc (by simpa [add_comm] using h)
+      exact Or.inl ⟨hs.2, hs.1⟩
+
+
+/-- Gallagher 1975 p.134 proof of Lemma 5. Auxiliary finite interval form. -/
+theorem two_pow_pair_fiber_card (L n : ℕ) :
+    #{x ∈ (univ : Finset (Fin L × Fin L)) | 2 ^ (x.1 : ℕ) + 2 ^ (x.2 : ℕ) = n} ≤ 2 := by
+  classical
+  let s := (univ : Finset (Fin L × Fin L)).filter
+    (fun x => 2 ^ (x.1 : ℕ) + 2 ^ (x.2 : ℕ) = n)
+  change s.card ≤ 2
+  by_cases hs : s.Nonempty
+  · obtain ⟨x, hx⟩ := hs
+    have hsub : s ⊆ {x, (x.2, x.1)} := by
+      intro y hy
+      have he : 2 ^ (y.1 : ℕ) + 2 ^ (y.2 : ℕ) = 2 ^ (x.1 : ℕ) + 2 ^ (x.2 : ℕ) :=
+        (mem_filter.mp hy).2.trans (mem_filter.mp hx).2.symm
+      rcases two_pow_add_eq he with h | h
+      · have hyx : y = x := Prod.ext (Fin.ext h.1) (Fin.ext h.2)
+        simp [hyx]
+      · have hyx : y = (x.2, x.1) := Prod.ext (Fin.ext h.1) (Fin.ext h.2)
+        simp [hyx]
+    exact (card_le_card hsub).trans (card_le_two)
+  · rw [not_nonempty_iff_eq_empty.mp hs]
+    simp
+
+
+/-- Gallagher 1975 p.134 Lemma 5 display 4. Fiber counting form. -/
+theorem equal_sum_tuple_count (k L : ℕ) :
+    #{x : (Fin (k + 2) → Fin L) × (Fin (k + 2) → Fin L) |
+      (∑ i, 2 ^ ((x.1 i : ℕ) + 1)) = ∑ i, 2 ^ ((x.2 i : ℕ) + 1)} ≤
+      2 * L ^ (2 * k + 2) := by
+  classical
+  let s := (univ : Finset ((Fin (k + 2) → Fin L) × (Fin (k + 2) → Fin L))).filter
+    (fun x => (∑ i, 2 ^ ((x.1 i : ℕ) + 1)) = ∑ i, 2 ^ ((x.2 i : ℕ) + 1))
+  let f : ((Fin (k + 2) → Fin L) × (Fin (k + 2) → Fin L)) →
+      (Fin (k + 2) → Fin L) × (Fin k → Fin L) :=
+    fun x => (x.1, fun i => x.2 i.succ.succ)
+  have hf : ∀ b ∈ s.image f, #{x ∈ s | f x = b} ≤ 2 := by
+    intro b hb
+    obtain ⟨x, hx, hxb⟩ := mem_image.mp hb
+    let y : (Fin (k + 2) → Fin L) × (Fin (k + 2) → Fin L) :=
+      (x.1, Fin.cons (x.2 1) (Fin.cons (x.2 0) (fun i => x.2 i.succ.succ)))
+    have hsub : {z ∈ s | f z = b} ⊆ {x, y} := by
+      intro z hz
+      obtain ⟨hz, hzb⟩ := mem_filter.mp hz
+      have hfx : f z = f x := hzb.trans hxb.symm
+      have hfst : z.1 = x.1 := by simpa only [f] using congrArg Prod.fst hfx
+      have htail : (fun i : Fin k => z.2 i.succ.succ) = fun i => x.2 i.succ.succ :=
+        congrArg Prod.snd hfx
+      have hsum : (∑ i, 2 ^ ((z.2 i : ℕ) + 1)) = ∑ i, 2 ^ ((x.2 i : ℕ) + 1) := by
+        rw [← (mem_filter.mp hz).2, hfst, (mem_filter.mp hx).2]
+      simp only [Fin.sum_univ_succ] at hsum
+      have hrest : (∑ i : Fin k, 2 ^ ((z.2 i.succ.succ : ℕ) + 1)) =
+          ∑ i : Fin k, 2 ^ ((x.2 i.succ.succ : ℕ) + 1) := by
+        apply sum_congr rfl
+        intro i hi
+        rw [congrFun htail i]
+      have hpair : 2 ^ ((z.2 0 : ℕ) + 1) + 2 ^ ((z.2 1 : ℕ) + 1) =
+          2 ^ ((x.2 0 : ℕ) + 1) + 2 ^ ((x.2 1 : ℕ) + 1) := by
+        change _ + (2 ^ ((z.2 1 : ℕ) + 1) + _) = _ + (2 ^ ((x.2 1 : ℕ) + 1) + _) at hsum
+        omega
+      rcases two_pow_add_eq hpair with hp | hp
+      · have he : z = x := by
+          apply Prod.ext hfst
+          funext i
+          refine Fin.cases ?_ (fun j => Fin.cases ?_ (fun j => ?_) j) i
+          · exact Fin.ext (by omega)
+          · apply Fin.ext
+            change (z.2 1 : ℕ) = x.2 1
+            omega
+          · exact congrFun htail j
+        simp [he]
+      · have he : z = y := by
+          apply Prod.ext (y := y) (by exact hfst)
+          change z.2 = Fin.cons (x.2 1) (Fin.cons (x.2 0) (fun i => x.2 i.succ.succ))
+          funext i
+          refine Fin.cases ?_ (fun j => Fin.cases ?_ (fun j => ?_) j) i
+          · exact Fin.ext (by simpa [y] using (show (z.2 0 : ℕ) = x.2 1 by omega))
+          · simpa [y] using (show z.2 1 = x.2 0 from Fin.ext (by omega))
+          · simpa [y] using congrFun htail j
+        simp [he]
+    exact (card_le_card hsub).trans card_le_two
+  have h := s.card_le_mul_card_image 2 hf
+  have him : (s.image f).card ≤ L ^ (2 * k + 2) := by
+    calc _ ≤ Fintype.card ((Fin (k + 2) → Fin L) × (Fin k → Fin L)) := card_le_univ _
+         _ = _ := by simp [Fintype.card_prod, ← pow_add]; congr 1; omega
+  exact h.trans (Nat.mul_le_mul_left 2 him)
+
+
+/-- Gallagher 1975 p.134 Lemma 5 display 4. Constant 2 for base 2. -/
+theorem diagonal_tuple_count {k : ℕ} (hk : 2 ≤ k) (L : ℕ) :
+    #{x : LeanLab.Linnik.Decomp1532a.pairs k L | LeanLab.Linnik.Decomp1532a.dif x = 0} ≤
+      2 * L ^ (2 * k - 2) := by
+  obtain ⟨j, rfl⟩ : ∃ j, k = j + 2 := ⟨k - 2, by omega⟩
+  convert equal_sum_tuple_count j L using 1
+  · congr 1
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+      LeanLab.Linnik.Decomp1532a.dif, sub_eq_zero, Nat.cast_inj]
+    rfl
+  · congr 2
+
+
+/-- Gallagher 1975 p.138 zero frequency estimate before display 5. -/
+theorem major_arc_diagonal_le {k L N : ℕ} (hk : 2 ≤ k) (P : ℝ) :
+    (#{x : LeanLab.Linnik.Decomp1532a.pairs k L | LeanLab.Linnik.Decomp1532a.dif x = 0} : ℝ) *
+        (∫ α in majorArcs N P, ‖Sg N α‖ ^ 2) ≤
+      2 * (L : ℝ) ^ (2 * k - 2) * (Nat.primeCounting N : ℝ) := by
+  have hc : (#{x : LeanLab.Linnik.Decomp1532a.pairs k L | LeanLab.Linnik.Decomp1532a.dif x = 0} : ℝ) ≤
+      2 * (L : ℝ) ^ (2 * k - 2) := by exact_mod_cast diagonal_tuple_count hk L
+  exact mul_le_mul hc (major_arc_Sg_mean_le N P)
+    (integral_nonneg fun _ => sq_nonneg _) (by positivity)
+
+
+/-- Gallagher 1975 p.138 zero frequency estimate before display 5. -/
+theorem major_arc_diagonal_negligible {k : ℕ} (hk : 2 ≤ k) {δ : ℝ} (hδ : 0 < δ) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ P : ℝ,
+      (#{x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) |
+        LeanLab.Linnik.Decomp1532a.dif x = 0} : ℝ) *
+          (∫ α in majorArcs N P, ‖Sg N α‖ ^ 2) ≤
+        δ * (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) := by
+  obtain ⟨N₁, hN₁⟩ := major_arc_Sg_mean_eventually 1 (by norm_num)
+  have hlog : Tendsto (fun N : ℕ => Real.log N) atTop atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  obtain ⟨N₂, hN₂⟩ := eventually_atTop.mp (hlog.eventually_ge_atTop ((Real.log 4 + 1) / δ))
+  refine ⟨max 8 (max N₁ N₂), fun N hN P => ?_⟩
+  have hN8 : 8 ≤ N := le_trans (le_max_left _ _) hN
+  have hNN₁ : N₁ ≤ N := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hN
+  have hNN₂ : N₂ ≤ N := le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hN
+  have hl : 0 < Real.log N := Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hL := LeanLab.Linnik.U7206.log_le_L hN8
+  have hcoef : (Real.log 4 + 1) / Real.log N ≤ δ := by
+    apply (div_le_iff₀ hl).mpr
+    have h := (div_le_iff₀ hδ).mp (hN₂ N hNN₂)
+    nlinarith
+  have hc : (#{x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) |
+      LeanLab.Linnik.Decomp1532a.dif x = 0} : ℝ) ≤
+      2 * (Nat.log 2 N : ℝ) ^ (2 * k - 2) := by
+    exact_mod_cast diagonal_tuple_count hk (Nat.log 2 N)
+  have hd := mul_le_mul hc (hN₁ N hNN₁ P)
+    (integral_nonneg fun _ => sq_nonneg _) (by positivity)
+  have hp : (Nat.log 2 N : ℝ) ^ (2 * k) =
+      (Nat.log 2 N : ℝ) ^ (2 * k - 2) * (Nat.log 2 N : ℝ) ^ 2 := by
+    rw [← pow_add]; congr 1; omega
+  have hbase : 2 * (N : ℝ) * (Nat.log 2 N : ℝ) ^ (2 * k - 2) ≤
+      2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2 := by
+    rw [le_div_iff₀ (sq_pos_of_pos hl), hp]
+    calc _ = (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k - 2)) * Real.log N ^ 2 := by ring
+         _ ≤ (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k - 2)) * (Nat.log 2 N : ℝ) ^ 2 :=
+           mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hl.le hL 2) (by positivity)
+         _ = _ := by ring
+  calc _ ≤ 2 * (Nat.log 2 N : ℝ) ^ (2 * k - 2) * ((Real.log 4 + 1) * N / Real.log N) := hd
+       _ = ((Real.log 4 + 1) / Real.log N) * (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k - 2)) := by ring
+       _ ≤ δ * (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k - 2)) :=
+         mul_le_mul_of_nonneg_right hcoef (by positivity)
+       _ ≤ _ := mul_le_mul_of_nonneg_left hbase hδ.le
+
+
+/-- Gallagher 1975 p.130 divisor formula before display 11. -/
+theorem ramanujanSum_im_zero (q : ℕ) (n : ℤ) : (LeanLab.Linnik.Decomp1532b.ramanujanSum q n).im = 0 := by
+  rcases Nat.eq_zero_or_pos q with rfl | hq
+  · simp [LeanLab.Linnik.Decomp1532b.ramanujanSum]
+  · rw [LeanLab.Linnik.Decomp1532b.ramanujanSum_eq_divisor_sum hq n]
+    simp
+
+
+/-- Gallagher 1975 p.130 divisor formula before display 11. Auxiliary signed frequency identity. -/
+theorem ramanujanSum_neg (q : ℕ) (n : ℤ) : LeanLab.Linnik.Decomp1532b.ramanujanSum q (-n) = LeanLab.Linnik.Decomp1532b.ramanujanSum q n := by
+  rcases Nat.eq_zero_or_pos q with rfl | hq
+  · simp [LeanLab.Linnik.Decomp1532b.ramanujanSum]
+  · simp only [LeanLab.Linnik.Decomp1532b.ramanujanSum_eq_divisor_sum hq, Int.natAbs_neg]
+
+
+/-- Gallagher 1975 pp.130 and 138. Auxiliary signed frequency identity. -/
+theorem singSeries_neg (n : ℤ) : LeanLab.Linnik.Decomp1532b.singSeries (-n) = LeanLab.Linnik.Decomp1532b.singSeries n := by
+  unfold LeanLab.Linnik.Decomp1532b.singSeries
+  simp_rw [ramanujanSum_neg]
+
+
+/-- Gallagher 1975 p.130 real divisor formula defining the singular series. -/
+theorem singSeries_im_zero (n : ℤ) : (LeanLab.Linnik.Decomp1532b.singSeries n).im = 0 := by
+  let f : ℕ → ℂ := fun q =>
+    ((ArithmeticFunction.moebius q : ℤ) : ℂ) ^ 2 / (q.totient : ℂ) ^ 2 * LeanLab.Linnik.Decomp1532b.ramanujanSum q n
+  have hf : ∀ q, (f q).im = 0 := by
+    intro q
+    have hr : ((ArithmeticFunction.moebius q : ℤ) : ℂ) ^ 2 / (q.totient : ℂ) ^ 2 =
+        ((((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 / (q.totient : ℝ) ^ 2 : ℝ) : ℂ) := by
+      push_cast
+      rfl
+    dsimp [f]
+    rw [hr]
+    rw [Complex.mul_im, Complex.ofReal_im, ramanujanSum_im_zero]
+    ring
+  have he : (∑' q, f q) = ((∑' q, (f q).re : ℝ) : ℂ) := by
+    rw [Complex.ofReal_tsum]
+    apply tsum_congr
+    intro q
+    apply Complex.ext
+    · simp
+    · simpa using hf q
+  change (∑' q, f q).im = 0
+  rw [he]
+  rfl
+
+
+/-- Gallagher 1975 p.127 choice P equal N to theta. Auxiliary range comparison with the lab logarithmic Siegel Walfisz estimate. -/
+theorem logarithmic_range_lt_power (A : ℝ) {θ : ℝ} (hθ : 0 < θ) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → (Real.log N) ^ A < (N : ℝ) ^ θ := by
+  have hr : Tendsto (fun N : ℕ => (Real.log N) ^ A / (N : ℝ) ^ θ) atTop (𝓝 0) :=
+    (isLittleO_log_rpow_rpow_atTop A hθ).tendsto_div_nhds_zero.comp tendsto_natCast_atTop_atTop
+  obtain ⟨N₀, hN₀⟩ := eventually_atTop.mp (hr.eventually (gt_mem_nhds (by norm_num : (0 : ℝ) < 1)))
+  refine ⟨max 1 N₀, fun N hN => ?_⟩
+  have hNpos : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  exact (div_lt_one (Real.rpow_pos_of_pos hNpos θ)).mp (hN₀ N (by omega))
+
+
+/-- Gallagher 1975 p.138 display 5. Auxiliary method limit from Mathlib Chebyshev lower bound. This is not a paper error. -/
+theorem primeCounting_not_log_sq_bounded (B : ℝ) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → B * N / Real.log N ^ 2 < Nat.primeCounting N := by
+  have hlog : Tendsto (fun N : ℕ => Real.log N) atTop atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hr : Tendsto (fun N : ℕ => Real.log ((N : ℝ) + 1) / N) atTop (𝓝 0) := by
+    have h := (Real.tendsto_pow_log_div_mul_add_atTop 1 (-1) 1 (by norm_num)).comp
+      ((tendsto_natCast_atTop_atTop (R := ℝ)).comp (tendsto_add_atTop_nat 1))
+    simpa [Function.comp_def, add_assoc] using h
+  obtain ⟨N₁, hN₁⟩ := eventually_atTop.mp
+    (hr.eventually (gt_mem_nhds (show (0 : ℝ) < Real.log 2 / 2 by positivity)))
+  obtain ⟨N₂, hN₂⟩ := eventually_atTop.mp (hlog.eventually_gt_atTop (2 * B / Real.log 2))
+  refine ⟨max 2 (max N₁ N₂), fun N hN => ?_⟩
+  have hN2 : 2 ≤ N := le_trans (le_max_left _ _) hN
+  have hn : (0 : ℝ) < N := by exact_mod_cast (by omega : 0 < N)
+  have hl : 0 < Real.log N := Real.log_pos (by exact_mod_cast hN2)
+  have hsmall := hN₁ N (by omega)
+  have hlarge := hN₂ N (by omega)
+  have hhalf : Real.log ((N : ℝ) + 1) < N * (Real.log 2 / 2) :=
+    by simpa [mul_comm] using (div_lt_iff₀ hn).mp hsmall
+  have hcoef : B < (Real.log 2 / 2) * Real.log N := by
+    have h := (div_lt_iff₀ hlog2).mp hlarge
+    nlinarith
+  have hpi := Chebyshev.pi_ge N
+  calc
+    B * N / Real.log N ^ 2 < (Real.log 2 / 2) * N / Real.log N := by
+      rw [div_lt_div_iff₀ (sq_pos_of_pos hl) hl]
+      nlinarith [mul_pos hn hl, mul_pos (sub_pos.mpr hcoef) (mul_pos hn hl)]
+    _ ≤ ((N : ℝ) * Real.log 2 - Real.log ((N : ℝ) + 1)) / Real.log N := by
+      apply div_le_div_of_nonneg_right _ hl.le
+      nlinarith
+    _ ≤ _ := by simpa only [Nat.cast_add, Nat.cast_one] using hpi
+
+
+
+
+/-- Gallagher 1975 p.138 zero frequency bound before display 5. The displayed absolute constant is made explicit using Mathlib Chebyshev. -/
+theorem major_arc_diagonal_order : ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+    ∀ k : ℕ, 2 ≤ k → ∀ P : ℝ,
+      (#{x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) |
+        LeanLab.Linnik.Decomp1532a.dif x = 0} : ℝ) *
+          (∫ α in majorArcs N P, ‖Sg N α‖ ^ 2) ≤
+        (2 * (Real.log 4 + 1) / Real.log 2) * N * (Nat.log 2 N : ℝ) ^ (2 * k - 3) := by
+  obtain ⟨N₁, hN₁⟩ := major_arc_Sg_mean_eventually 1 (by norm_num)
+  refine ⟨max 8 N₁, fun N hN k hk P => ?_⟩
+  have hN8 : 8 ≤ N := le_trans (le_max_left _ _) hN
+  have hl : 0 < Real.log N := Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hL : (Nat.log 2 N : ℝ) ≤ Real.log N / Real.log 2 := by
+    simpa [Real.logb] using Real.natLog_le_logb N 2
+  have hc : (#{x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) |
+      LeanLab.Linnik.Decomp1532a.dif x = 0} : ℝ) ≤
+      2 * (Nat.log 2 N : ℝ) ^ (2 * k - 2) := by
+    exact_mod_cast diagonal_tuple_count hk (Nat.log 2 N)
+  have hd := mul_le_mul hc (hN₁ N (by omega) P)
+    (integral_nonneg fun _ => sq_nonneg _) (by positivity)
+  have hp : (Nat.log 2 N : ℝ) ^ (2 * k - 2) =
+      (Nat.log 2 N : ℝ) ^ (2 * k - 3) * (Nat.log 2 N : ℝ) := by
+    rw [← pow_succ]
+    congr 1
+    omega
+  calc _ ≤ 2 * (Nat.log 2 N : ℝ) ^ (2 * k - 2) * ((Real.log 4 + 1) * N / Real.log N) := hd
+       _ = (2 * (Nat.log 2 N : ℝ) ^ (2 * k - 3) * ((Real.log 4 + 1) * N / Real.log N)) *
+           (Nat.log 2 N : ℝ) := by rw [hp]; ring
+       _ ≤ (2 * (Nat.log 2 N : ℝ) ^ (2 * k - 3) * ((Real.log 4 + 1) * N / Real.log N)) *
+           (Real.log N / Real.log 2) :=
+         mul_le_mul_of_nonneg_left hL (by positivity)
+       _ = _ := by field_simp
+
+
+/-- Gallagher 1975 p.130 singular series and Montgomery and Vaughan 1975 p.363 display 6.16. Auxiliary definition bridge. -/
+theorem singSeries_term_eq_f2 (q : ℕ) (n : ℤ) :
+    ((ArithmeticFunction.moebius q : ℤ) : ℂ) ^ 2 / (q.totient : ℂ) ^ 2 * LeanLab.Linnik.Decomp1532b.ramanujanSum q n =
+      (LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q : ℂ) := by
+  rcases Nat.eq_zero_or_pos q with rfl | hq
+  · simp
+  · rw [LeanLab.ExceptionalSet.MVMajor.f2_apply hq,
+      LeanLab.Linnik.Decomp1532b.ramanujanSum_eq_divisor_sum hq n]
+    unfold LeanLab.HeathBrown1985.ramanujan
+    push_cast
+    rw [Nat.gcd_comm]
+    ring
+
+
+/-- Gallagher 1975 pp.125 and 130 and Montgomery and Vaughan 1975 p.363 display 6.16. -/
+theorem singSeries_eq_tsum_f2 (n : ℤ) :
+    LeanLab.Linnik.Decomp1532b.singSeries n = ((∑' q : ℕ, LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q : ℝ) : ℂ) := by
+  unfold LeanLab.Linnik.Decomp1532b.singSeries
+  rw [Complex.ofReal_tsum]
+  apply tsum_congr
+  intro q
+  exact singSeries_term_eq_f2 q n
+
+
+/-- Gallagher 1975 p.125 singular product and p.138 use of J at n at most J at zero. Proved by the existing truncated binary series estimate ExceptionalSet.MVMajor.sing2_ge and the odd case. -/
+theorem singSeries_re_nonneg {n : ℤ} (hn : n ≠ 0) : 0 ≤ (LeanLab.Linnik.Decomp1532b.singSeries n).re := by
+  by_cases he : Even n
+  · have hm : Even n.natAbs := Int.natAbs_even.mpr he
+    have hm0 : n.natAbs ≠ 0 := Int.natAbs_ne_zero.mpr hn
+    have hsc : Summable (fun q : ℕ => (LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q : ℂ)) :=
+      (LeanLab.Linnik.Decomp1532b.summable_singSeries hn).congr (fun q => singSeries_term_eq_f2 q n)
+    have hsr : Summable (fun q : ℕ => LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q) := by
+      simpa using Complex.reCLM.summable hsc
+    have hpartial : Tendsto (fun P : ℕ => ∑ q ∈ Icc 1 P,
+        LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q) atTop
+        (𝓝 (∑' q : ℕ, LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q)) := by
+      have ht := hsr.hasSum.tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
+      convert ht using 1
+      ext P
+      change _ = ∑ q ∈ range (P + 1), LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q
+      have hs : range (P + 1) = insert 0 (Icc 1 P) := by
+        ext q
+        simp only [mem_range, mem_insert, mem_Icc]
+        omega
+      rw [hs, sum_insert (by simp)]
+      simp
+    have hlo : Tendsto (fun P : ℕ => 1 - Real.exp 8 * LeanLab.ExceptionalSet.MVMajor.G n.natAbs /
+        Real.sqrt (P : ℝ)) atTop (𝓝 1) := by
+      have hz : Tendsto (fun P : ℕ => Real.exp 8 * LeanLab.ExceptionalSet.MVMajor.G n.natAbs /
+          Real.sqrt (P : ℝ)) atTop (𝓝 0) :=
+        tendsto_const_nhds.div_atTop (Real.tendsto_sqrt_atTop.comp tendsto_natCast_atTop_atTop)
+      simpa using tendsto_const_nhds.sub hz
+    have hlower : 1 ≤ ∑' q : ℕ, LeanLab.ExceptionalSet.MVMajor.f2 n.natAbs q := by
+      apply le_of_tendsto_of_tendsto hlo hpartial
+      filter_upwards [eventually_ge_atTop 2] with P hP
+      exact LeanLab.ExceptionalSet.MVMajor.sing2_ge hm hm0 hP
+    rw [singSeries_eq_tsum_f2, Complex.ofReal_re]
+    linarith
+  · have ho : Odd n := Int.not_even_iff_odd.mp he
+    rw [LeanLab.Linnik.Decomp1532b.singSeries_odd ho]
+    simp
+
+
+/-- Gallagher 1975 p.138 use of J at n at most J at zero before display 5. -/
+theorem weighted_singSeries_le (k L N : ℕ) :
+    (∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+      LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+        (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re) ≤
+      LeanLab.Linnik.Decomp1532b.Jn N 0 *
+        (∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+          (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re) := by
+  rw [mul_sum]
+  apply sum_le_sum
+  intro x hx
+  exact mul_le_mul_of_nonneg_right (LeanLab.Linnik.Decomp1532b.Jn_le_J0 N _)
+    (singSeries_re_nonneg (mem_filter.mp hx).2)
+
+
+/-- ASSEMBLY. CONDITIONAL ON Decomp1532b.lemma6. Gallagher 1975 p.138 main term before display 5, using J at zero asymptotic on p.130 and Lemma 6 on p.134. -/
+theorem weighted_singSeries_main_bound : ∃ K : ℝ, ∀ k : ℕ, 2 ≤ k →
+    ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+      (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+        LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+          (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re) ≤
+        2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2 *
+          (1 + K * (Real.log k ^ 2 / k)) := by
+  obtain ⟨C6, h6⟩ := LeanLab.Linnik.Decomp1532b.lemma6
+  refine ⟨1 + |C6|, fun k hk => ?_⟩
+  let y : ℝ := Real.log k ^ 2 / k
+  have hkpos : (0 : ℝ) < k := by exact_mod_cast (show 0 < k by omega)
+  have hlogk : 0 < Real.log k := Real.log_pos (by exact_mod_cast (show 1 < k by omega))
+  have hy : 0 < y := div_pos (sq_pos_of_pos hlogk) hkpos
+  let ε : ℝ := min y 1
+  have hε : 0 < ε := lt_min hy zero_lt_one
+  obtain ⟨N6, hN6⟩ := h6 k hk
+  obtain ⟨NJ, hNJ⟩ := eventually_atTop.mp
+    (LeanLab.Linnik.Decomp1532b.J0_asymp.eventually
+      (gt_mem_nhds (show (1 : ℝ) < 1 + ε by linarith)))
+  refine ⟨max 8 (max N6 NJ), fun N hN => ?_⟩
+  let l : ℝ := Nat.log 2 N
+  let p : ℝ := l ^ (2 * k)
+  let B : ℝ := (N : ℝ) / Real.log N ^ 2
+  have hN8 : 8 ≤ N := by omega
+  have hn : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hl : 0 < Real.log N := Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hB : 0 < B := div_pos hn (sq_pos_of_pos hl)
+  have hJ : LeanLab.Linnik.Decomp1532b.Jn N 0 ≤ (1 + ε) * B :=
+    ((div_lt_iff₀ hB).mp (hNJ N (by omega))).le
+  have hcast : (2 * (Nat.log 2 N : ℂ) ^ (2 * k) : ℂ) = ((2 * p : ℝ) : ℂ) := by
+    dsimp [p, l]
+    push_cast
+    rfl
+  have hreal :
+      (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+          (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re) - 2 * p ≤ C6 * y * p := by
+    have h := (Complex.re_le_norm
+      ((∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0, LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)) -
+        2 * (Nat.log 2 N : ℂ) ^ (2 * k))).trans (hN6 N (by omega))
+    rw [hcast, Complex.sub_re, Complex.re_sum, Complex.ofReal_re] at h
+    exact h
+  have hsum0 : 0 ≤ ∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+      LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+        (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re := by
+    apply sum_nonneg
+    intro x hx
+    exact singSeries_re_nonneg (mem_filter.mp hx).2
+  have hsum : (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+      LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+        (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re) ≤ (2 + |C6| * y) * p := by
+    have hc := mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right (le_abs_self C6) hy.le) (show 0 ≤ p by dsimp [p, l]; positivity)
+    nlinarith
+  have he1 : ε ≤ 1 := min_le_right _ _
+  have hey : ε ≤ y := min_le_left _ _
+  have hprod : (1 + ε) * (2 + |C6| * y) ≤ 2 * (1 + (1 + |C6|) * y) := by
+    have hmult := mul_le_mul_of_nonneg_right (show 1 + ε ≤ 2 by linarith)
+      (mul_nonneg (abs_nonneg C6) hy.le)
+    nlinarith
+  calc _ ≤ LeanLab.Linnik.Decomp1532b.Jn N 0 * (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+          LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+            (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re) := weighted_singSeries_le k _ N
+       _ ≤ ((1 + ε) * B) * ((2 + |C6| * y) * p) := mul_le_mul hJ hsum hsum0 (by positivity)
+       _ = (B * p) * ((1 + ε) * (2 + |C6| * y)) := by ring
+       _ ≤ (B * p) * (2 * (1 + (1 + |C6|) * y)) :=
+         mul_le_mul_of_nonneg_left hprod (by dsimp [B, p, l]; positivity)
+       _ = _ := by dsimp [B, p, l, y]; ring
+
+/-- LEAF. Gallagher 1975 p.127 Theorem 3 and p.138 nonzero correlation error before display 5.
+The absolute error after subtracting the J times singular series main term has a uniform
+exponential part and a remainder that vanishes for fixed k and theta.
+The averaging uses Lemmas 8, 9 and 10 on pp.136 and 137 and the exceptional conductor bound
+on p.127. Lemma 6 is not part of this input.
+External inputs include Gallagher 1970 Inventiones 11 pp.329 to 339 and Montgomery and
+Vaughan 1975 Acta Arithmetica 27 pp.353 to 370. -/
+theorem major_arc_remainder_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
+    ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∀ k : ℕ, 2 ≤ k → ∀ δ : ℝ, 0 < δ →
+      ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+        |(∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+            LeanLab.Linnik.Decomp1532a.dif x ≠ 0, ∫ α in majorArcs N ((N : ℝ) ^ θ),
+              ‖Sg N α‖ ^ 2 *
+                (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) -
+          (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+            LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+              LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+                (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
+          (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) *
+            (C * Real.exp (-c / θ) + δ) := by
+  sorry
+
+/-- ASSEMBLY. CONDITIONAL ON weighted_singSeries_main_bound and major_arc_remainder_bound. Gallagher 1975 p.138 nonzero contribution before display 5. -/
+theorem major_arc_nonzero_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧ ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ →
+    ∀ k : ℕ, 2 ≤ k → ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+      (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0, ∫ α in majorArcs N ((N : ℝ) ^ θ),
+          ‖Sg N α‖ ^ 2 *
+            (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) ≤
+        2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2 *
+          (1 + C * (Real.log k ^ 2 / k + Real.exp (-c / θ))) := by
+  obtain ⟨K, hmain⟩ := weighted_singSeries_main_bound
+  obtain ⟨c, C, θ₀, hc, hθ₀, herror⟩ := major_arc_remainder_bound
+  refine ⟨c, |K| + |C| + 1, θ₀, hc, hθ₀, fun θ hθ hθmax k hk => ?_⟩
+  let y : ℝ := Real.log k ^ 2 / k
+  have hkpos : (0 : ℝ) < k := by exact_mod_cast (show 0 < k by omega)
+  have hlogk : 0 < Real.log k := Real.log_pos (by exact_mod_cast (show 1 < k by omega))
+  have hy : 0 < y := div_pos (sq_pos_of_pos hlogk) hkpos
+  obtain ⟨N₁, hN₁⟩ := hmain k hk
+  obtain ⟨N₂, hN₂⟩ := herror θ hθ hθmax k hk y hy
+  refine ⟨max N₁ N₂, fun N hN => ?_⟩
+  let M : ℝ := 2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2
+  let S : ℝ := ∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+    LeanLab.Linnik.Decomp1532a.dif x ≠ 0, ∫ α in majorArcs N ((N : ℝ) ^ θ),
+      ‖Sg N α‖ ^ 2 *
+        (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re
+  let W : ℝ := ∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+    LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+      LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+        (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re
+  have hM : 0 ≤ M := by dsimp [M]; positivity
+  have hm : W ≤ M * (1 + K * y) := hN₁ N (by omega)
+  have he : |S - W| ≤ M * (C * Real.exp (-c / θ) + y) := hN₂ N (by omega)
+  have hupper : S ≤ W + M * (C * Real.exp (-c / θ) + y) := by
+    have h := (le_abs_self (S - W)).trans he
+    linarith
+  have hcoef : (K + 1) * y + C * Real.exp (-c / θ) ≤
+      (|K| + |C| + 1) * (y + Real.exp (-c / θ)) := by
+    have hky := mul_le_mul_of_nonneg_right (le_abs_self K) hy.le
+    have hce := mul_le_mul_of_nonneg_right (le_abs_self C) (Real.exp_pos (-c / θ)).le
+    have hcy : 0 ≤ |C| * y := by positivity
+    have hke : 0 ≤ (|K| + 1) * Real.exp (-c / θ) := by positivity
+    nlinarith
+  change S ≤ M * (1 + (|K| + |C| + 1) * (y + Real.exp (-c / θ)))
+  calc S ≤ W + M * (C * Real.exp (-c / θ) + y) := hupper
+       _ ≤ M * (1 + K * y) + M * (C * Real.exp (-c / θ) + y) := add_le_add hm le_rfl
+       _ = M * (1 + ((K + 1) * y + C * Real.exp (-c / θ))) := by ring
+       _ ≤ _ := mul_le_mul_of_nonneg_left (add_le_add le_rfl hcoef) hM
+
+/-- LEAF. Unit U-1532. Display (5), p. 138, for g = 2 where `D/φ(D) = 2`: there are `c > 0`,
+`C` and `θ₀ > 0` such that for `0 < θ ≤ θ₀`, `k ≥ 2` and `N ≥ N_{k,θ}`, with `P = N^θ`,
+`∫_𝔐 |S G^k|² ≤ 2 N L^{2k}/log² N · (1 + C(log² k / k + e^{-c/θ}))`. It follows from
+Theorem 3, p. 127, and Lemmas 5, 6, 8 and 10. -/
+theorem major_arc_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧ ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ →
+    ∀ k : ℕ, 2 ≤ k → ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+      ∫ α in majorArcs N ((N : ℝ) ^ θ), ‖Sg N α * Gs (Nat.log 2 N) α ^ k‖ ^ 2 ≤
+        2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2 *
+          (1 + C * (Real.log k ^ 2 / k + Real.exp (-c / θ))) := by
+  -- LEAF. External analytic sources: Gallagher 1970 Inventiones 11 pp.329 to 339;
+  -- Montgomery and Vaughan 1975 Acta Arith.27 pp.353 to 370. See Gallagher 1975 p.138 display 5.
+  obtain ⟨c, C, θ₀, hc, hθ₀, hnonzero⟩ := major_arc_nonzero_bound
+  refine ⟨c, |C| + 1, θ₀, hc, hθ₀, fun θ hθ hθmax k hk => ?_⟩
+  let y : ℝ := Real.log k ^ 2 / k
+  have hkpos : (0 : ℝ) < k := by exact_mod_cast (show 0 < k by omega)
+  have hlogk : 0 < Real.log k := Real.log_pos (by exact_mod_cast (show 1 < k by omega))
+  have hy : 0 < y := div_pos (sq_pos_of_pos hlogk) hkpos
+  obtain ⟨Nd, hd⟩ := major_arc_diagonal_negligible hk hy
+  obtain ⟨Nk, hNk⟩ := hnonzero θ hθ hθmax k hk
+  refine ⟨max Nd Nk, fun N hN => ?_⟩
+  have hD := hd N (by omega) ((N : ℝ) ^ θ)
+  have hS := hNk N (by omega)
+  let M : ℝ := 2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2
+  have hM : 0 ≤ M := by dsimp [M]; positivity
+  have he : 0 ≤ y + Real.exp (-c / θ) := by positivity
+  have hC : C * (y + Real.exp (-c / θ)) + y ≤
+      (|C| + 1) * (y + Real.exp (-c / θ)) := by
+    calc _ ≤ |C| * (y + Real.exp (-c / θ)) + (y + Real.exp (-c / θ)) :=
+           add_le_add (mul_le_mul_of_nonneg_right (le_abs_self C) he)
+             (le_add_of_nonneg_right (Real.exp_pos _).le)
+         _ = _ := by ring
+  rw [major_arc_diagonal_split]
+  calc _ ≤ y * M + M * (1 + C * (y + Real.exp (-c / θ))) := add_le_add hD hS
+       _ = M * (1 + (C * (y + Real.exp (-c / θ)) + y)) := by ring
+       _ ≤ M * (1 + (|C| + 1) * (y + Real.exp (-c / θ))) :=
+         mul_le_mul_of_nonneg_left (add_le_add le_rfl hC) hM
 
 /-- LEAF. Unit U-1532. Lemma 11, display (1) p. 137, Vinogradov and Montgomery: there are `C`,
 `θ₀ > 0` and `E` such that for `0 < θ ≤ θ₀`, `N ≥ 2`, `P = N^θ` and `α ∈ [0, 1]` off the major
