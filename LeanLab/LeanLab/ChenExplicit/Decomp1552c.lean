@@ -14,6 +14,7 @@ Chen's theorem is known; binary Goldbach is OPEN.
 -/
 import LeanLab.ChenExplicit.Decomp1552b
 import LeanLab.ChenExplicit.Thm71Fix
+import LeanLab.ChenExplicit.BJSCbar
 
 open Finset Real
 open scoped Classical
@@ -29,13 +30,35 @@ lemma c2_eq : c2 = I73 + 1 / 10 ^ 8 := rfl
 /-- LEAF. Unit U-1552. Yamada 2015, Lemma 7.3, numerical lower bound: `0.3 ≤ c₂`; the value is
 `c₂ ≈ 0.3630837`. -/
 theorem c2_ge : (3 / 10 : ℝ) ≤ c2 := by
-  sorry
+  have h : (3630 / 10000 : ℝ) < I73 := BJS.cbar_gt
+  rw [c2_eq]
+  linarith
 
 /-- LEAF. Unit U-1552. Yamada 2015, (47), Section 4: for `N > exp exp 36` and `q₁` as in (46),
 `U_N^(1) ≤ U_N (q₁-1)/(q₁-2) ≤ U_N (1 + ε₀(N))`. -/
 theorem eq47 (N q₁ : ℕ) (hN : exp (exp 36) < N) (hq : Adm N q₁) :
     U1 N q₁ ≤ U N * (1 + eps0' N) := by
-  sorry
+  have he0 : 0 ≤ eps0' N := by
+    unfold eps0'
+    exact div_nonneg (by norm_num) (le_trans (by norm_num) (le_max_left _ _))
+  unfold U1
+  apply mul_le_mul_of_nonneg_left _ (U_pos N).le
+  split_ifs with h
+  · rcases hq with hz | ⟨_, hq⟩
+    · subst q₁; norm_num at h
+    have hm : 0 < max 57 (log (log N)) := lt_of_lt_of_le (by norm_num) (le_max_left _ _)
+    have hq2 : max 57 (log (log N)) ≤ (q₁ : ℝ) - 2 := by
+      apply max_le
+      · linarith [le_trans (le_max_left _ _) hq]
+      · linarith [le_trans (le_max_right _ _) hq]
+    have hqp : 0 < (q₁ : ℝ) - 2 := hm.trans_le hq2
+    have hi := one_div_le_one_div_of_le hm hq2
+    have he : ((q₁ : ℝ) - 1) / ((q₁ : ℝ) - 2) = 1 + 1 / ((q₁ : ℝ) - 2) := by
+      field_simp
+      ring
+    rw [he]
+    simpa only [eps0', add_comm] using add_le_add_left hi 1
+  · linarith
 
 /-- LEAF. Unit U-1552. Numerical step from (127) and Lemma 7.3 to (128), Section 7: for
 `N > exp exp 36`, `D = N^{1/2}/log^{10} N`, `y = N^{1/3}`, `L = log N` and `0.3 ≤ c ≤ 1`,
@@ -48,7 +71,126 @@ theorem eq128_num (N : ℕ) (hN : exp (exp 36) < N) (c : ℝ) (hc : 3 / 10 ≤ c
           29887013 / 100000 / (log (Dsv N) * √(log (Dsv N))) + 1 / (5 * log (y3 N) ^ 2)) ≤
       c / log N * (4 * exp eulerMascheroniConstant / log N +
         84533255 / 100000 / (log N * √(log N))) := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  set L := log (N : ℝ) with hLeq
+  have hLp : 0 < L := (exp_pos _).trans hL
+  have hlogD : log (Dsv N) = L / 2 - 10 * log L := by
+    unfold Dsv
+    rw [log_div (sqrt_pos_of_pos hNp).ne' (pow_pos hLp _).ne', log_sqrt hNp.le, log_pow]
+    ring
+  have hlogy : log (y3 N) = L / 3 := by rw [log_rpow hNp]; ring
+  have hest : 1 / (L / 2 - 10 * log L) ≤ 2 / L + 3 / 100000 / (L * √L) ∧
+      29887013 / 100000 / ((L / 2 - 10 * log L) * √(L / 2 - 10 * log L)) ≤
+        8453324 / 10000 / (L * √L) := by
+    clear * - L hL
+    have hLp : 0 < L := (exp_pos _).trans hL
+    have hsp : 0 < √L := sqrt_pos.mpr hLp
+    have hsq : √L ^ 2 = L := sq_sqrt hLp.le
+    have hs : 50000000 ≤ √L := by
+      have he : √(exp (36 : ℝ)) = exp 18 := by
+        apply (sq_eq_sq₀ (sqrt_nonneg _) (exp_pos _).le).mp
+        rw [sq_sqrt (exp_pos _).le, ← exp_nat_mul]
+        norm_num
+      have h := sqrt_le_sqrt hL.le
+      rw [he] at h
+      have hexp := exp_18_gt
+      norm_num at hexp
+      linarith
+    have hratio := Real.log_div_sqrt_antitoneOn
+      (show exp (36 : ℝ) ∈ Set.Ici (exp 2) by simp only [Set.mem_Ici]; exact exp_le_exp.mpr (by norm_num))
+      (show L ∈ Set.Ici (exp 2) by simp only [Set.mem_Ici]; exact (exp_le_exp.mpr (by norm_num : (2 : ℝ) ≤ 36)).trans hL.le) hL.le
+    have he : √(exp (36 : ℝ)) = exp 18 := by
+        apply (sq_eq_sq₀ (sqrt_nonneg _) (exp_pos _).le).mp
+        rw [sq_sqrt (exp_pos _).le, ← exp_nat_mul]
+        norm_num
+    dsimp only at hratio
+    rw [log_exp, he] at hratio
+    have he18 : 36 / exp 18 ≤ 36 / 50000000 := div_le_div_of_nonneg_left (by norm_num) (by norm_num) (by have h := exp_18_gt; norm_num at h; linarith)
+    have hl : log L ≤ 36 / 50000000 * √L := (div_le_iff₀ hsp).mp (hratio.trans he18)
+    have hls := mul_le_mul_of_nonneg_right hl hsp.le
+    have hls' : log L * √L ≤ 36 / 50000000 * L := by nlinarith [hls]
+    set d := L / 2 - 10 * log L with hd
+    have hdlo : (4999999999 / 10000000000 : ℝ) * L ≤ d := by
+      have hs' : 50000000 * √L ≤ L := by nlinarith
+      nlinarith
+    have hdp : 0 < d := by nlinarith
+    constructor
+    · apply (div_le_iff₀ hdp).mpr
+      apply (mul_le_mul_iff_left₀ (show 0 < L * √L by positivity)).mp
+      field_simp
+      rw [hd]
+      nlinarith [mul_nonneg (show 0 ≤ √L - 50000000 by linarith) hsp.le]
+    · have hroot : (707106781 / 1000000000 : ℝ) * √L ≤ √d := by
+        apply (le_sqrt (by positivity) hdp.le).mpr
+        nlinarith
+      have hprod : (3535533904 / 10000000000 : ℝ) * (L * √L) ≤ d * √d := by
+        have hp := mul_le_mul hdlo hroot (by positivity : (0 : ℝ) ≤ 707106781 / 1000000000 * √L) hdp.le
+        nlinarith
+      apply (div_le_div_iff₀ (by positivity) (by positivity)).mpr
+      nlinarith
+  have hg : exp eulerMascheroniConstant ≤ (2 : ℝ) := by
+    apply (le_log_iff_exp_le (by norm_num : (0 : ℝ) < 2)).mp
+    linarith [eulerMascheroniConstant_lt_two_thirds, log_two_gt_d9]
+  have hnumeric (L s d g c : ℝ) (hs : 50000000 ≤ s) (hsq : s ^ 2 = L)
+      (hg0 : 0 ≤ g) (hg : g ≤ 2) (hc : 3 / 10 ≤ c)
+      (hdi : 1 / d ≤ 2 / L + 3 / 100000 / (L * s))
+      (hdt : 29887013 / 100000 / (d * √d) ≤ 8453324 / 10000 / (L * s)) :
+      (c / L + 2257 / 1000 / L ^ 2) *
+        (2 * g / d + 29887013 / 100000 / (d * √d) + 9 / (5 * L ^ 2)) ≤
+      c / L * (4 * g / L + 84533255 / 100000 / (L * s)) := by
+    clear * - L s d g c hs hsq hg0 hg hc hdi hdt
+    have hsp : 0 < s := by linarith
+    have hLp : 0 < L := by nlinarith
+    have hiy : 9 / (5 * L ^ 2) ≤ 1 / 1000000 / (L * s) := by
+      apply (div_le_div_iff₀ (by positivity) (by positivity)).mpr
+      nlinarith [mul_nonneg (show 0 ≤ s - 50000000 by linarith) (sq_nonneg s)]
+    have hK : 2 * g / d + 29887013 / 100000 / (d * √d) + 9 / (5 * L ^ 2) ≤
+        4 * g / L + 845332521 / 1000000 / (L * s) := by
+      have hi := mul_le_mul_of_nonneg_left hdi (show 0 ≤ 2 * g by positivity)
+      have hg' : 2 * g * (3 / 100000 / (L * s)) ≤ 12 / 100000 / (L * s) := by
+        rw [← mul_div_assoc]
+        exact div_le_div_of_nonneg_right (by linarith) (by positivity)
+      have he : 2 * g * (1 / d) = 2 * g / d := by ring
+      rw [he] at hi
+      have he' : 2 * g * (2 / L + 3 / 100000 / (L * s)) =
+          4 * g / L + 2 * g * (3 / 100000 / (L * s)) := by ring
+      rw [he'] at hi
+      have sumid : 8453324 / 10000 / (L * s) + 12 / 100000 / (L * s) +
+          1 / 1000000 / (L * s) = 845332521 / 1000000 / (L * s) := by ring
+      linarith
+    have hfirst : 0 ≤ c / L + 2257 / 1000 / L ^ 2 := by positivity
+    refine (mul_le_mul_of_nonneg_left hK hfirst).trans ?_
+    set t := 1 / s with ht
+    have htp : 0 < t := by rw [ht]; positivity
+    have htmax : t ≤ 1 / 50000000 := by rw [ht]; exact one_div_le_one_div_of_le (by norm_num) hs
+    have hL : 1 / L = t ^ 2 := by rw [ht, ← hsq]; ring
+    have hb : 4 * g + 845332521 / 1000000 * t ≤ 9 := by nlinarith
+    have hex : 2257 / 1000 * t * (4 * g + 845332521 / 1000000 * t) ≤ c * (29 / 1000000) := by
+      have hmul := mul_le_mul hb htmax htp.le (by norm_num : (0 : ℝ) ≤ 9)
+      nlinarith
+    have hex' := mul_le_mul_of_nonneg_right hex htp.le
+    have hcore : (c + 2257 / 1000 * t ^ 2) * (4 * g + 845332521 / 1000000 * t) ≤
+        c * (4 * g + 84533255 / 100000 * t) := by nlinarith [hex']
+    have hfinal := mul_le_mul_of_nonneg_right hcore (show 0 ≤ (1 / L) ^ 2 by positivity)
+    rw [ht] at hfinal
+    subst L
+    convert hfinal using 1 <;> field_simp <;> ring
+  have hs : 50000000 ≤ √L := by
+    have he : √(exp (36 : ℝ)) = exp 18 := by
+      apply (sq_eq_sq₀ (sqrt_nonneg _) (exp_pos _).le).mp
+      rw [sq_sqrt (exp_pos _).le, ← exp_nat_mul]
+      norm_num
+    have h := sqrt_le_sqrt hL.le
+    rw [he] at h
+    have hexp := exp_18_gt
+    norm_num at hexp
+    linarith
+  rw [hlogD, hlogy]
+  have hy : 1 / (5 * (L / 3) ^ 2) = 9 / (5 * L ^ 2) := by ring
+  rw [hy]
+  exact hnumeric L (√L) (L / 2 - 10 * log L) (exp eulerMascheroniConstant) c
+    hs (sq_sqrt hLp.le) (exp_pos _).le hg hc hest.1 hest.2
 
 /-- Real arithmetic for `lemma73_corr`. PROVED. -/
 lemma key73 (I ε a E : ℝ) (ha : 0 < a) (hε : 0 < ε) (hε1 : ε < 1 / 100) (hI : I ≤ 1)
