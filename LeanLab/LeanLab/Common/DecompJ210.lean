@@ -52,10 +52,21 @@ theorem leaf4_dusart (x : ℝ) (hL1 : 1 < Real.log x) :
       rw [h_sub_lhs]
       have : (0.01 + 0.01 * (1 + 1 / (40 * L ^ 2))) / L ^ 2 = (0.02 + 0.01 / (40 * L ^ 2)) / L ^ 2 := by ring
       rw [this]
-      have h_step : (0.02 + 0.01 / (40 * L ^ 2)) / L ^ 2 = 0.02 / L ^ 2 + 0.01 / (40 * L ^ 4) := by
-        sorry
-      rw [h_step]
-      sorry
+      have h_rhs_div : 1 / (40 * L ^ 2) = (1 / 40) / L ^ 2 := by rw [div_div]
+      have h40L2 : 0 < 40 * L ^ 2 := by positivity
+      have hlin : 0.8 * L ^ 2 + 0.01 < L ^ 2 := by linarith
+      have hdiv : (0.8 * L ^ 2 + 0.01) / (40 * L ^ 2) < L ^ 2 / (40 * L ^ 2) :=
+        div_lt_div_of_pos_right hlin h40L2
+      have h_l : (0.8 * L ^ 2 + 0.01) / (40 * L ^ 2) = 0.02 + 0.01 / (40 * L ^ 2) := by
+        rw [add_div, mul_div_mul_right 0.8 40 (ne_of_gt hL2pos)]
+        norm_num
+      have h_r : L ^ 2 / (40 * L ^ 2) = 1 / 40 := by
+        have : L ^ 2 / (40 * L ^ 2) = (1 * L ^ 2) / (40 * L ^ 2) := by ring
+        rw [this, mul_div_mul_right 1 40 (ne_of_gt hL2pos)]
+      rw [h_l, h_r] at hdiv
+      have h_final := div_lt_div_of_pos_right hdiv hL2pos
+      rw [h_rhs_div]
+      exact h_final
     exact key_inner
   exact key
 
