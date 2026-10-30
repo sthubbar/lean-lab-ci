@@ -182,18 +182,64 @@ theorem YY_eq {N : ℝ} (hN : 0 < N) :
 since `N/Y = (32π)^{-κ} N^δ`. -/
 theorem log_N_div_YY : ∃ N0 : ℝ, ∀ N : ℝ, N0 ≤ N →
     0 < YY N ∧ YY N < N ∧ del / 2 * Real.log N ≤ Real.log (N / YY N) := by
-  sorry
+  let C : ℝ := (32 * π) ^ kap
+  have hC : 0 < C := by dsimp [C]; positivity
+  obtain ⟨N0, hN0⟩ := Filter.eventually_atTop.1
+    (Real.tendsto_log_atTop.eventually_ge_atTop (max 1 (2 * Real.log C / del)))
+  refine ⟨max N0 1, fun N hN => ?_⟩
+  have hNpos : 0 < N := by have := (le_max_right N0 1).trans hN; linarith
+  have hlog := hN0 N ((le_max_left _ _).trans hN)
+  have hlog1 : 1 ≤ Real.log N := (le_max_left _ _).trans hlog
+  have hlarge : 2 * Real.log C / del ≤ Real.log N := (le_max_right _ _).trans hlog
+  have hbound : Real.log C ≤ del / 2 * Real.log N := by
+    have := (div_le_iff₀ del_pos).mp hlarge
+    linarith
+  have hYpos : 0 < YY N := by rw [YY_eq hNpos]; positivity
+  have heq : Real.log (N / YY N) = del * Real.log N - Real.log C := by
+    rw [Real.log_div hNpos.ne' hYpos.ne', YY_eq hNpos,
+      Real.log_mul hC.ne' (Real.rpow_pos_of_pos hNpos _).ne', Real.log_rpow hNpos]
+    dsimp [del, C]
+    ring
+  have hsave : del / 2 * Real.log N ≤ Real.log (N / YY N) := by rw [heq]; linarith
+  refine ⟨hYpos, ?_, hsave⟩
+  have hd := del_pos
+  have hpos : 0 < Real.log (N / YY N) := lt_of_lt_of_le (by positivity) hsave
+  have := (Real.log_pos_iff (div_nonneg hNpos.le hYpos.le)).mp hpos
+  simpa only [one_mul] using (lt_div_iff₀ hYpos).mp this
 
 /-- LEAF. Unit U-1545. For `c₁ > 0` and large `N`: `log N ≥ 1` and `η = c₁/log N ≤ 1/2`. -/
 theorem eta_small_eventually {c1 : ℝ} (hc1 : 0 < c1) : ∃ N0 : ℝ, ∀ N : ℝ, N0 ≤ N →
     1 ≤ Real.log N ∧ c1 / Real.log N ≤ 1 / 2 := by
-  sorry
+  obtain ⟨N0, hN0⟩ := Filter.eventually_atTop.1
+    (Real.tendsto_log_atTop.eventually_ge_atTop (max 1 (2 * c1)))
+  refine ⟨N0, fun N hN => ?_⟩
+  have hlog := hN0 N hN
+  have h1 : 1 ≤ Real.log N := (le_max_left _ _).trans hlog
+  refine ⟨h1, (div_le_iff₀ (by linarith : 0 < Real.log N)).2 ?_⟩
+  have h2 := (le_max_right 1 (2*c1)).trans hlog
+  linarith
 
 /-- LEAF. Unit U-1545. The zeros with `β < 1/2` are negligible: for `A₀ ≥ 0` and large `N`,
 `N^{-1/2} A₀ N^{c+1/4} log N ≤ 1`, since `c + 1/4 = 0.3715 < 1/2`. -/
 theorem low_count_eventually {A0 : ℝ} (hA0 : 0 ≤ A0) : ∃ N0 : ℝ, ∀ N : ℝ, N0 ≤ N →
     N ^ (-(1 / 2) : ℝ) * (A0 * N ^ (cLu + 1 / 4) * Real.log N) ≤ 1 := by
-  sorry
+  let r : ℝ := 1 / 2 - (cLu + 1 / 4)
+  have hr : 0 < r := by norm_num [r, cLu]
+  have ht := (isLittleO_log_rpow_atTop hr).tendsto_div_nhds_zero.const_mul A0
+  have he : ∀ᶠ N : ℝ in Filter.atTop, A0 * (Real.log N / N ^ r) ≤ 1 :=
+    ht.eventually (ge_mem_nhds (by norm_num))
+  obtain ⟨N0, hN0⟩ := Filter.eventually_atTop.1 he
+  refine ⟨max N0 1, fun N hN => ?_⟩
+  have hN0' : 0 < N := by have := (le_max_right N0 1).trans hN; linarith
+  have heq : N ^ (-(1 / 2) : ℝ) * (A0 * N ^ (cLu + 1 / 4) * Real.log N) =
+      A0 * (Real.log N / N ^ r) := by
+    have hp : N ^ (-(1 / 2) : ℝ) * N ^ (cLu + 1 / 4) = N ^ (-r) := by
+      rw [← Real.rpow_add hN0']; congr 1; dsimp [r]; ring
+    calc
+      _ = A0 * Real.log N * (N ^ (-(1 / 2) : ℝ) * N ^ (cLu + 1 / 4)) := by ring
+      _ = _ := by rw [hp, Real.rpow_neg hN0'.le]; ring
+  rw [heq]
+  exact hN0 N ((le_max_left _ _).trans hN)
 
 /-! ### Leaves on the zero sums -/
 
@@ -201,7 +247,19 @@ theorem low_count_eventually {A0 : ℝ} (hA0 : 0 ≤ A0) : ∃ N0 : ℝ, ∀ N :
 `Σ_{i ∈ Z, β_i < 1/2} x^{β_i - 1} ≤ x^{-1/2} #Z`. -/
 theorem low_sum_le {ι : Type*} (Z : Finset ι) (β : ι → ℝ) {x : ℝ} (hx : 1 ≤ x) :
     ∑ i ∈ Z.filter (fun i => β i < 1 / 2), x ^ (β i - 1) ≤ x ^ (-(1 / 2) : ℝ) * Z.card := by
-  sorry
+  calc
+    ∑ i ∈ Z.filter (fun i => β i < 1 / 2), x ^ (β i - 1)
+        ≤ ∑ i ∈ Z.filter (fun i => β i < 1 / 2), x ^ (-(1 / 2) : ℝ) := by
+          apply Finset.sum_le_sum
+          intro i hi
+          exact Real.rpow_le_rpow_of_exponent_le hx (by
+            have := (Finset.mem_filter.mp hi).2
+            linarith)
+    _ = x ^ (-(1 / 2) : ℝ) * (Z.filter (fun i => β i < 1 / 2)).card := by
+      simp [mul_comm]
+    _ ≤ x ^ (-(1 / 2) : ℝ) * Z.card := by
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      exact_mod_cast Finset.card_filter_le Z (fun i => β i < 1 / 2)
 
 /-- LEAF. Unit U-1545. The exceptional zero `β̃` of p. 2368 contributes at most 1: if `#E ≤ 1`,
 `β ≤ 1` on `E` and `x ≥ 1`, then `Σ_{i ∈ E} x^{β_i - 1} ≤ 1`. -/
@@ -230,7 +288,38 @@ theorem integral_ratio_le_gen {σ₀ η x Y : ℝ} (hx : 1 < x) (hY : 0 < Y) (hY
     (hη : 0 ≤ η) (hσ : σ₀ ≤ 1 - η) :
     ∫ α in σ₀..(1 - η), Real.log x * (Y / x) ^ (1 - α) ≤
       Real.log x / Real.log (x / Y) * (Y / x) ^ η := by
-  sorry
+  have hx0 : 0 < x := by linarith
+  have hL : 0 < Real.log x := Real.log_pos hx
+  let r := Y / x
+  have hr0 : 0 < r := div_pos hY hx0
+  have hr1 : r < 1 := (div_lt_one hx0).2 hYx
+  have hlog0 : Real.log r < 0 := Real.log_neg hr0 hr1
+  let c := -(Real.log x / Real.log r)
+  have hc0 : 0 ≤ c := by
+    dsimp [c]
+    exact neg_nonneg.mpr (div_nonpos_of_nonneg_of_nonpos hL.le hlog0.le)
+  have hd : ∀ t : ℝ, HasDerivAt (fun a : ℝ => c * r ^ (1-a)) (Real.log x * r ^ (1-t)) t := by
+    intro t
+    have hh := HasDerivAt.const_rpow hr0 ((hasDerivAt_id t).const_sub 1)
+    convert hh.const_mul c using 1 <;> dsimp [c] <;> field_simp [hlog0.ne] <;> ring
+  have hi : IntervalIntegrable (fun a : ℝ => Real.log x * r ^ (1-a)) volume σ₀ (1-η) := by
+    apply Continuous.intervalIntegrable
+    fun_prop
+  have hint := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht => hd t) hi
+  have hc : c = Real.log x / Real.log (x/Y) := by
+    have he : Real.log (x/Y) = -Real.log r := by
+      dsimp [r]
+      rw [Real.log_div hx0.ne' hY.ne', Real.log_div hY.ne' hx0.ne']
+      ring
+    rw [he]
+    dsimp [c]
+    ring
+  change (∫ a in σ₀..(1-η), Real.log x * r ^ (1-a)) ≤ _
+  rw [hint]
+  have he : (1-(1-η) : ℝ) = η := by ring
+  rw [he]
+  calc c * r ^ η - c * r ^ (1-σ₀) ≤ c * r ^ η := sub_le_self _ (mul_nonneg hc0 (by positivity))
+    _ = _ := by rw [hc]
 
 /-- LEAF. Unit U-1545. The same with the dyadic loss `1/(1-α)`: for `x > 1`, `0 < Y < x`,
 `η > 0`, `σ₀ ≤ 1 - η`,
@@ -239,7 +328,28 @@ theorem integral_ratio_inv_le {σ₀ η x Y : ℝ} (hx : 1 < x) (hY : 0 < Y) (hY
     (hη : 0 < η) (hσ : σ₀ ≤ 1 - η) :
     ∫ α in σ₀..(1 - η), Real.log x * (Y / x) ^ (1 - α) / (1 - α) ≤
       Real.log x / (η * Real.log (x / Y)) * (Y / x) ^ η := by
-  sorry
+  have hx0 : 0 < x := by linarith
+  have hL : 0 < Real.log x := Real.log_pos hx
+  have hcont : ContinuousOn
+      (fun a : ℝ => Real.log x * (Y / x) ^ (1-a) / (1-a)) (Set.Icc σ₀ (1-η)) := by
+    apply ContinuousOn.div (by fun_prop) (by fun_prop)
+    intro a ha
+    have : 0 < 1-a := by linarith [ha.2]
+    exact this.ne'
+  have hi := hcont.intervalIntegrable_of_Icc (μ := volume) hσ
+  have hc : Continuous (fun a : ℝ => Real.log x * (Y / x) ^ (1-a) / η) := by fun_prop
+  calc
+    (∫ a in σ₀..(1-η), Real.log x * (Y / x) ^ (1-a) / (1-a))
+        ≤ ∫ a in σ₀..(1-η), Real.log x * (Y / x) ^ (1-a) / η := by
+          apply intervalIntegral.integral_mono_on hσ hi (hc.intervalIntegrable _ _)
+          intro a ha
+          apply div_le_div_of_nonneg_left (by positivity) hη
+          linarith [ha.2]
+    _ = (∫ a in σ₀..(1-η), Real.log x * (Y / x) ^ (1-a)) / η :=
+      intervalIntegral.integral_div η _
+    _ ≤ (Real.log x / Real.log (x/Y) * (Y/x)^η) / η :=
+      div_le_div_of_nonneg_right (integral_ratio_le_gen hx hY hYx hη.le hσ) hη.le
+    _ = _ := by ring
 
 /-- LEAF. Unit U-1545. Inserting a density count with the loss `1/(1-α)`: if
 `σ₀ ≤ β_i ≤ 1 - η`, `η > 0`, `x > 1`, `Y > 0`, `A ≥ 0` and `#{β_i ≥ α} ≤ A Y^{1-α}/(1-α)` for
@@ -252,7 +362,60 @@ theorem count_integral_inv_le {ι : Type*} (I : Finset ι) (β : ι → ℝ) {σ
       ((I.filter (fun i => α ≤ β i)).card : ℝ) ≤ A * Y ^ (1 - α) / (1 - α)) :
     ∫ α in σ₀..1, Real.log x * x ^ (α - 1) * ((I.filter (fun i => α ≤ β i)).card : ℝ) ≤
       A * ∫ α in σ₀..(1 - η), Real.log x * (Y / x) ^ (1 - α) / (1 - α) := by
-  sorry
+  classical
+  have hx0 : 0 < x := by linarith
+  have hL : 0 ≤ Real.log x := (Real.log_pos hx).le
+  let f : ℝ → ℝ := fun a => Real.log x * x^(a-1)
+  let g : ℝ → ℝ := fun a => f a * ((I.filter (fun i => a ≤ β i)).card : ℝ)
+  have hf : Continuous f := by dsimp [f]; fun_prop
+  have hgpoint (a : ℝ) : g a = ∑ i ∈ I, (Set.Iic (β i)).indicator f a := by
+    simp only [Set.indicator_apply, Set.mem_Iic]
+    rw [← Finset.sum_filter]
+    simp only [Finset.sum_const, nsmul_eq_mul]
+    dsimp [g]
+    ring
+  have hg (a b : ℝ) : IntervalIntegrable g volume a b := by
+    have hh : g = fun t => ∑ i ∈ I, (Set.Iic (β i)).indicator f t := funext hgpoint
+    rw [hh]
+    have hi : ∀ i ∈ I, IntervalIntegrable ((Set.Iic (β i)).indicator f) volume a b := by
+      intro i hi
+      have hfint := hf.intervalIntegrable (μ := volume) a b
+      exact ⟨hfint.1.indicator measurableSet_Iic, hfint.2.indicator measurableSet_Iic⟩
+    convert IntervalIntegrable.sum I hi using 1
+    ext t
+    simp only [Finset.sum_apply]
+  have hz : ∫ a in (1-η)..1, g a = 0 := by
+    apply intervalIntegral.integral_zero_ae
+    filter_upwards [] with a
+    intro ha
+    rw [Set.uIoc_of_le (by linarith : 1-η ≤ 1)] at ha
+    have he : I.filter (fun i => a ≤ β i) = ∅ := by
+      apply Finset.filter_eq_empty_iff.mpr
+      intro i hi
+      linarith [(hβ i hi).2, ha.1]
+    simp [g, he]
+  have heq : (∫ a in σ₀..1, g a) = ∫ a in σ₀..(1-η), g a := by
+    have hh := intervalIntegral.integral_add_adjacent_intervals (hg σ₀ (1-η)) (hg (1-η) 1)
+    rw [hz, add_zero] at hh
+    exact hh.symm
+  change (∫ a in σ₀..1, g a) ≤ _
+  rw [heq, ← intervalIntegral.integral_const_mul]
+  have hc : ContinuousOn
+      (fun a : ℝ => A * (Real.log x * (Y/x)^(1-a) / (1-a))) (Set.Icc σ₀ (1-η)) := by
+    apply ContinuousOn.const_mul _ A
+    apply ContinuousOn.div (by fun_prop) (by fun_prop)
+    intro a ha
+    have : 0 < 1-a := by linarith [ha.2]
+    exact this.ne'
+  apply intervalIntegral.integral_mono_on hσ (hg σ₀ (1-η))
+    (hc.intervalIntegrable_of_Icc hσ)
+  intro a ha
+  have hc := hcount a ⟨ha.1, by linarith [ha.2]⟩
+  have hpow : x^(a-1) * Y^(1-a) = (Y/x)^(1-a) := by
+    rw [Real.div_rpow hY.le hx0.le, div_eq_mul_inv, ← Real.rpow_neg hx0.le, neg_sub]
+    ring
+  calc g a ≤ f a * (A * Y^(1-a) / (1-a)) := mul_le_mul_of_nonneg_left hc (by dsimp [f]; positivity)
+    _ = A * (Real.log x * (Y/x)^(1-a) / (1-a)) := by dsimp [f]; rw [← hpow]; ring
 
 /-! ### Leaves on the dyadic blocks -/
 
@@ -311,7 +474,26 @@ theorem two_rpow_sub_one_ge {s : ℝ} (hs : 0 ≤ s) : s * Real.log 2 ≤ (2 : �
 `Σ_{j ≤ J} (B 2^j)^s ≤ (2 B 2^J)^s / (s log 2)`. -/
 theorem geom_rpow_sum_le {s B : ℝ} (hs : 0 < s) (hB : 0 < B) (J : ℕ) :
     ∑ j ∈ range (J + 1), (B * 2 ^ j) ^ s ≤ (2 * B * 2 ^ J) ^ s / (s * Real.log 2) := by
-  sorry
+  have hr : 1 < (2 : ℝ) ^ s := Real.one_lt_rpow (by norm_num) hs
+  have hden : 0 < s * Real.log 2 := mul_pos hs (Real.log_pos (by norm_num))
+  have heq : (∑ j ∈ range (J+1), (B * 2^j)^s) =
+      B^s * ∑ j ∈ range (J+1), ((2 : ℝ)^s)^j := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    rw [Real.mul_rpow hB.le (by positivity), ← Real.rpow_pow_comm (by norm_num)]
+  have htop : (2 * B * 2^J)^s = B^s * ((2 : ℝ)^s)^(J+1) := by
+    rw [show 2 * B * (2:ℝ)^J = B * (2:ℝ)^(J+1) by rw [pow_succ]; ring,
+      Real.mul_rpow hB.le (by positivity), ← Real.rpow_pow_comm (by norm_num)]
+  rw [heq, htop, le_div_iff₀ hden]
+  have hgeom := geom_sum_mul ((2 : ℝ)^s) (J+1)
+  have hsave := two_rpow_sub_one_ge hs.le
+  have hsum : 0 ≤ ∑ j ∈ range (J+1), ((2 : ℝ)^s)^j := by positivity
+  have hbound : (∑ j ∈ range (J+1), ((2 : ℝ)^s)^j) * (s * Real.log 2) ≤
+      ((2 : ℝ)^s)^(J+1) := by nlinarith [mul_le_mul_of_nonneg_left hsave hsum]
+  calc (B^s * ∑ j ∈ range (J+1), ((2 : ℝ)^s)^j) * (s * Real.log 2)
+      = B^s * ((∑ j ∈ range (J+1), ((2 : ℝ)^s)^j) * (s * Real.log 2)) := by ring
+    _ ≤ B^s * ((2 : ℝ)^s)^(J+1) := mul_le_mul_of_nonneg_left hbound (by positivity)
 
 /-- LEAF. Unit U-1545. The union bound over the dyadic blocks: with `1 ≤ q_i ≤ P`, `1 ≤ P ≤ K`,
 `q_i |γ_i| ≤ K` and (38) for the family, for `1/2 ≤ α ≤ 1`,
@@ -324,7 +506,42 @@ theorem dyadic_count {ι : Type*} (Z : Finset ι) (q : ι → ℕ) (β γ : ι �
     {α : ℝ} (hα1 : 1 / 2 ≤ α) (hα2 : α ≤ 1) :
     ((Z.filter (fun i => α ≤ β i)).card : ℝ) ≤
       A * ∑ j ∈ range (Nat.log 2 ⌊P⌋₊ + 1), (4 * 2 ^ j * K) ^ (kap * (1 - α)) := by
-  sorry
+  classical
+  let J := Nat.log 2 ⌊P⌋₊
+  let S : ℕ → Finset ι := fun j => Z.filter
+    (fun i => (q i : ℝ) ≤ 2^(j+1) ∧ |γ i| ≤ K / 2^j ∧ α ≤ β i)
+  have hsub : Z.filter (fun i => α ≤ β i) ⊆ (range (J+1)).biUnion S := by
+    intro i hi
+    obtain ⟨hiZ, hiα⟩ := Finset.mem_filter.mp hi
+    obtain ⟨hj, hjq, hqj⟩ := block_mem (hq1 i hiZ) (hqP i hiZ)
+    have hp := block_params hjq hqj (hreg i hiZ)
+    apply Finset.mem_biUnion.mpr
+    refine ⟨Nat.log 2 (q i), Finset.mem_range.mpr (Nat.lt_succ_of_le hj), ?_⟩
+    exact Finset.mem_filter.mpr ⟨hiZ, hp.1, hp.2, hiα⟩
+  have hcard : ((Z.filter (fun i => α ≤ β i)).card : ℝ) ≤
+      ∑ j ∈ range (J+1), ((S j).card : ℝ) := by
+    exact_mod_cast (Finset.card_le_card hsub).trans Finset.card_biUnion_le
+  calc
+    ((Z.filter (fun i => α ≤ β i)).card : ℝ)
+        ≤ ∑ j ∈ range (J+1), ((S j).card : ℝ) := hcard
+    _ ≤ ∑ j ∈ range (J+1), A * (4 * 2^j * K) ^ (kap * (1-α)) := by
+      apply Finset.sum_le_sum
+      intro j hj
+      have hjJ : j ≤ J := Nat.le_of_lt_succ (Finset.mem_range.mp hj)
+      have hjP : (2 : ℝ)^j ≤ P :=
+        (pow_le_pow_right₀ (by norm_num : (1:ℝ) ≤ 2) hjJ).trans (two_pow_log_le hP)
+      have hT : 1 ≤ K / (2:ℝ)^j := by
+        rw [le_div_iff₀ (by positivity)]
+        simpa only [one_mul] using hjP.trans hPK
+      have hx : 1 ≤ (2:ℝ)^(j+1) := one_le_pow₀ (by norm_num)
+      have hd := hD ((2:ℝ)^(j+1)) (K / (2:ℝ)^j) α hx hT hα1 hα2
+      have heq : ((2:ℝ)^(j+1))^2 * (K / (2:ℝ)^j) = 4 * (2:ℝ)^j * K := by
+        rw [pow_succ]
+        field_simp
+        <;> ring
+      rw [heq] at hd
+      exact hd
+    _ = _ := by rw [Finset.mul_sum]
 
 /-! ### Assemblies, CONDITIONAL ON the leaves above -/
 
@@ -651,5 +868,93 @@ theorem vacuity_hypDyadic :
   · have h1 : (1 : ℝ) ≤ (3 : ℝ) ^ (cLu + 1 / 4) := Real.one_le_rpow (by norm_num) (by norm_num [cLu])
     simp only [Finset.card_singleton, Nat.cast_one, one_mul]
     nlinarith
+
+/-- CODEX task185. AI wrote the new Lean proofs. Binary Goldbach is open.
+The rectangle at height `N^{0.001}` used in display 40 on p. 2369 has
+`P² N^{0.001} ≤ 8 P K` for `N ≥ 1`. -/
+theorem small_height_rectangle_le {N : ℝ} (hN : 1 ≤ N) :
+    PP N ^ 2 * N ^ (1 / 1000 : ℝ) ≤ 8 * PP N * KK N := by
+  have hN0 : 0 < N := by linarith
+  have hsmall : PP N * N ^ (1 / 1000 : ℝ) ≤ KK N := by
+    calc PP N * N ^ (1 / 1000 : ℝ)
+        = N ^ (cLu + 1 / 1000 : ℝ) := by unfold PP; rw [← Real.rpow_add hN0]
+      _ ≤ N ^ (1 / 4 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le hN (by norm_num [cLu])
+      _ ≤ KK N := by
+        unfold KK
+        have hp := Real.pi_gt_three
+        nlinarith [Real.rpow_pos_of_pos hN0 (1 / 4 : ℝ)]
+  have hP : 0 ≤ PP N := (PP_le_KK hN).1.trans' (by norm_num)
+  have hK : 0 ≤ KK N := (PP_le_KK hN).2.trans' hP
+  calc PP N ^ 2 * N ^ (1 / 1000 : ℝ)
+      = PP N * (PP N * N ^ (1 / 1000 : ℝ)) := by ring
+    _ ≤ PP N * KK N := mul_le_mul_of_nonneg_left hsmall hP
+    _ ≤ 8 * PP N * KK N := by nlinarith [mul_nonneg hP hK]
+
+/-- CONDITIONAL ON Density38. The small-height rectangle of display 40, p. 2369,
+satisfies the region density hypothesis without a dyadic loss. -/
+theorem density_region_of_small_height {ι : Type*} (Z : Finset ι) (q : ι → ℕ)
+    (β γ : ι → ℝ) {N A : ℝ} (hN : 1 ≤ N) (hA : 0 ≤ A)
+    (hq : ∀ i ∈ Z, (q i : ℝ) ≤ PP N)
+    (hγ : ∀ i ∈ Z, |γ i| ≤ N ^ (1 / 1000 : ℝ))
+    (hD : Density38 Z q β γ A) :
+    ∀ α : ℝ, 1 / 2 ≤ α → α ≤ 1 →
+      ((Z.filter (fun i => α ≤ β i)).card : ℝ) ≤ A * YY N ^ (1 - α) := by
+  intro α hα0 hα1
+  have hN0 : 0 < N := by linarith
+  have hf : Z.filter (fun i => (q i : ℝ) ≤ PP N ∧
+      |γ i| ≤ N ^ (1 / 1000 : ℝ) ∧ α ≤ β i) = Z.filter (fun i => α ≤ β i) := by
+    ext i
+    simp only [Finset.mem_filter]
+    constructor
+    · rintro ⟨hi, _, _, hα⟩; exact ⟨hi, hα⟩
+    · rintro ⟨hi, hα⟩; exact ⟨hi, hq i hi, hγ i hi, hα⟩
+  have hd := hD (PP N) (N ^ (1 / 1000 : ℝ)) α (PP_le_KK hN).1
+    (Real.one_le_rpow hN (by norm_num)) hα0 hα1
+  rw [hf] at hd
+  apply hd.trans
+  have hP : 0 < PP N := lt_of_lt_of_le zero_lt_one (PP_le_KK hN).1
+  have hK : 0 < KK N := hP.trans_le (PP_le_KK hN).2
+  unfold YY
+  rw [← Real.rpow_mul (by positivity)]
+  apply mul_le_mul_of_nonneg_left _ hA
+  exact Real.rpow_le_rpow (by positivity) (small_height_rectangle_le hN)
+    (mul_nonneg kap_pos.le (by linarith))
+
+/-- CONDITIONAL ON Density38 and the total zero count. The zero sum at the height
+`N^{0.001}` of display 40, p. 2369, is uniformly bounded for large N. -/
+theorem eq39_of_small_height {A A0 : ℝ} (hA : 0 ≤ A) (hA0 : 0 ≤ A0) :
+    ∃ C N0 : ℝ, ∀ N : ℝ, N0 ≤ N → ∀ {ι : Type} (Z : Finset ι)
+      (q : ι → ℕ) (β γ : ι → ℝ),
+      (∀ i ∈ Z, β i ≤ 1) → (∀ i ∈ Z, (q i : ℝ) ≤ PP N) →
+      (∀ i ∈ Z, |γ i| ≤ N ^ (1 / 1000 : ℝ)) → Density38 Z q β γ A →
+      (Z.card : ℝ) ≤ A0 * N ^ (cLu + 1 / 4) * Real.log N →
+      ∑ i ∈ Z, N ^ (β i - 1) ≤ C := by
+  obtain ⟨C, N0, hC⟩ := eq39_of_region hA hA0
+  refine ⟨C, max N0 1, ?_⟩
+  intro N hN ι Z q β γ hβ hq hγ hD hcount
+  have hN1 : 1 ≤ N := (le_max_right N0 1).trans hN
+  exact hC N ((le_max_left N0 1).trans hN) Z β
+    ⟨hβ, density_region_of_small_height Z q β γ hN1 hA hq hγ hD, hcount⟩
+
+/-- Finite-model audit of the total-count input behind equation 39 on p. 2369.
+Density38 controls only real parts at least one half. A family of copies with
+beta zero satisfies Density38 with A zero and has arbitrarily large weight at
+any fixed x greater than one. This is not a family of actual L-function zeros. -/
+theorem density38_alone_unbounded {x : ℝ} (hx : 1 < x) (C : ℝ) :
+    ∃ m : ℕ, Density38 (range m) (fun _ => 1) (fun _ => 0) (fun _ => 0) 0 ∧
+      C < ∑ i ∈ range m, x ^ ((0 : ℝ) - 1) := by
+  obtain ⟨m, hm⟩ := exists_nat_gt (C * x)
+  refine ⟨m, ?_, ?_⟩
+  · intro y T α hy hT hα hα1
+    have he : (range m).filter (fun _ => (1 : ℝ) ≤ y ∧ |(0 : ℝ)| ≤ T ∧ α ≤ 0) = ∅ := by
+      apply Finset.filter_eq_empty_iff.mpr
+      intro i hi h
+      linarith [h.2.2]
+    simp only [Nat.cast_one, he, Finset.card_empty, Nat.cast_zero, zero_mul, le_refl]
+  · have hs : (∑ i ∈ range m, x ^ ((0 : ℝ) - 1)) = (m : ℝ) / x := by
+      norm_num [Real.rpow_neg_one, div_eq_mul_inv]
+    rw [hs]
+    exact (lt_div_iff₀ (by linarith : 0 < x)).2 hm
 
 end LeanLab.ExceptionalSet.Decomp1545a

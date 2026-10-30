@@ -20,6 +20,7 @@ Assembly: `minor_approx`, every point of `[0, 1]` off the major arcs has an appr
 `a/q` with `P < q ≤ N/P`, the starting point of Lemma 11, p. 137.
 
 AI-written Lean code, Claude, 2026-10-26. Checked only by the Lean kernel.
+Proof additions by Codex task189 on 2026-10-30. AI wrote the Lean code.
 Binary Goldbach is OPEN.
 -/
 import Mathlib
@@ -27,8 +28,15 @@ import LeanLab.Linnik.Decomp1532a
 import LeanLab.Linnik.U7204Display4
 import LeanLab.Zinoviev1997.TotientTail
 import LeanLab.PNTPort.DirichletZF.Siegel
+import LeanLab.Romanov.Decomp134
+import LeanLab.PNTPort.DirichletZF.Landau
+import LeanLab.PNTPort.StrongPNT.StrongPNT
+import LeanLab.Romanov.TotientWeights134
+import LeanLab.Linnik.Decomp1537a
 
 namespace LeanLab.Linnik.Decomp1532b
+
+open LeanLab.PNTPort.DirichletZF
 
 open Finset MeasureTheory ZMod ArithmeticFunction Filter Asymptotics
 open LeanLab.PNTPort.DirichletZF (siegel_zero riemannZeta_real_neg L_lift lift_ne_one lift_sq)
@@ -36,7 +44,9 @@ open scoped Topology
 open scoped ArithmeticFunction.Moebius
 open LeanLab.PNTPort.Vinogradov (sum_moebius_divisors)
 open LeanLab.PNTPort.LargeSieve (dist0 norm_e e_add norm_geom_le)
-open LeanLab.Linnik.Decomp1532a (pairs dif)
+open LeanLab.Linnik.Decomp1532a (pairs dif ordTwo)
+open LeanLab.Linnik.U1434Lemma21 (sv)
+open LeanLab.Linnik.U1426ChainWire (Gs)
 open LeanLab.Linnik.U1412Display53 (eC)
 
 /-- The major arcs `𝔐`, display (2) p. 127, with `Q = N/P`, so `1/(qQ) = P/(qN)`. -/
@@ -487,6 +497,7 @@ theorem lemma6 : ∃ C : ℝ, ∀ k : ℕ, 2 ≤ k → ∃ Nk : ℕ, ∀ N : ℕ
     ‖∑ x : pairs k (Nat.log 2 N) with dif x ≠ 0, singSeries (dif x) -
         2 * ((Nat.log 2 N : ℕ) : ℂ) ^ (2 * k)‖ ≤
       C * (Real.log k ^ 2 / k) * (Nat.log 2 N : ℝ) ^ (2 * k) := by
+  -- LEAF. Gallagher 1975 pp.134 and 135. The uniform truncated singular series tail and the E and R parameter estimate remain.
   sorry
 
 /-- The diagonal identity for J of zero, p.127 and p.130. -/
@@ -739,6 +750,78 @@ theorem large_sieve_level_one (a : ℕ → ℂ) (M N : ℕ) :
       (N : ℝ) * ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by simpa using hc
   exact (hnorm.trans hc').trans (mul_le_mul_of_nonneg_right (by linarith) (sum_nonneg fun _ _ => sq_nonneg _))
 
+/-- Gallagher p.131 character orthogonality reduces the multiplicative sieve to additive sums. -/
+theorem primitive_sieve_le_additive (a : ℕ → ℂ) (M N Q : ℕ) :
+    ∑ q ∈ Icc 1 Q, ((q : ℝ) / q.totient) *
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖∑ n ∈ Ioc M (M + N), a n * χ n‖ ^ 2 ≤
+    ∑ q ∈ Icc 1 Q, ∑ c ∈ (range q).filter (fun c => Nat.Coprime c q),
+      ‖∑ n ∈ Ioc M (M + N), (starRingEnd ℂ) (a n) * LeanLab.PNTPort.LargeSieve.e (n * ((c : ℝ) / q))‖ ^ 2 := by
+  classical
+  apply sum_le_sum
+  intro q hq
+  letI : NeZero q := ⟨by have := (mem_Icc.mp hq).1; omega⟩
+  let emb : ℕ ↪ ℤ := ⟨Int.ofNat, Int.ofNat_injective⟩
+  let I : Finset ℤ := (Ioc M (M + N)).map emb
+  let az : ℤ → ℂ := fun z => a z.toNat
+  have h := LeanLab.PNTPort.LargeSieve.prim_chars_le I az (q := q)
+  simpa only [I, az, sum_map, emb, Function.Embedding.coeFn_mk,
+    Int.ofNat_eq_natCast, Int.toNat_natCast, Int.cast_natCast, Int.cast_ofNat] using h
+
+/-- At real part at least one a primitive character has no zeros. This closes the endpoint
+of the p.131 density estimate. -/
+theorem zeroCount_eq_zero_of_one_le {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hp : χ.IsPrimitive) {σ : ℝ} (hσ : 1 ≤ σ) (T : ℝ) : zeroCount χ σ T = 0 := by
+  have hne (ρ : ℂ) (hρ : σ ≤ ρ.re) : χ.LFunction ρ ≠ 0 := by
+    by_cases hχ : χ = 1
+    · have hq : q = 1 := by
+        have hh := hp
+        rw [DirichletCharacter.IsPrimitive, hχ, DirichletCharacter.conductor_one] at hh
+        exact hh.symm
+      subst q
+      rw [DirichletCharacter.LFunction_modOne_eq]
+      exact riemannZeta_ne_zero_of_one_le_re (hσ.trans hρ)
+    · exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ) (hσ.trans hρ)
+  have he : {ρ : ℂ | χ.LFunction ρ = 0 ∧ σ ≤ ρ.re ∧ |ρ.im| ≤ T} = ∅ := by
+    ext ρ
+    simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
+    rintro ⟨hz, hβ, ht⟩
+    exact hne ρ hβ hz
+  simp only [zeroCount, he, Set.ncard_empty]
+
+/-- The primitive family count vanishes at the sigma one endpoint of p.131. -/
+theorem density_sum_at_one (T : ℝ) :
+    ∑ q ∈ range ⌊T⌋₊,
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ 1 T : ℝ) = 0 := by
+  classical
+  apply sum_eq_zero
+  intro q hq
+  apply sum_eq_zero
+  intro χ hχ
+  rw [zeroCount_eq_zero_of_one_le χ (mem_filter.mp hχ).2 le_rfl, Nat.cast_zero]
+
+/-- LEAF. Montgomery 1971, Topics in multiplicative number theory, sharp additive large sieve.
+Gallagher 1975 p.131, the input behind display 14. Only the sharp Fourier sampling bound
+remains here. Primitive character orthogonality is proved separately. -/
+theorem additive_large_sieve_sharp (a : ℕ → ℂ) (M N Q : ℕ) :
+    ∑ q ∈ Icc 1 Q, ∑ c ∈ (range q).filter (fun c => Nat.Coprime c q),
+      ‖∑ n ∈ Ioc M (M + N), a n * LeanLab.PNTPort.LargeSieve.e (n * ((c : ℝ) / q))‖ ^ 2 ≤
+      ((N : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by
+  sorry
+
+/-- LEAF. Gallagher 1970, A large sieve density estimate near sigma equals one,
+Inventiones 11 pp.329 to 339. Montgomery and Vaughan 1975 Section 7.
+Gallagher 1975 p.131 display 14.
+The endpoint sigma one is proved separately by nonvanishing. -/
+theorem gallagher_density_lt_one : ∃ c C : ℝ, 0 < c ∧ 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ σ : ℝ, 1 / 2 ≤ σ → σ < 1 →
+    ∑ q ∈ range ⌊T⌋₊,
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ σ T : ℝ) ≤ C * T ^ (c * (1 - σ)) := by
+  classical
+  sorry
+
 /-- LEAF. Unit U-1532. The multiplicative large sieve over primitive characters,
 `Σ_{q ≤ Q} q/φ(q) Σ*_χ |Σ_{M < n ≤ M+N} a_n χ(n)|² ≤ (N + Q²) Σ |a_n|²`, the input behind the
 bound for `E` in display (14) p. 131 and behind the density estimate below. -/
@@ -748,8 +831,12 @@ theorem large_sieve (a : ℕ → ℂ) (M N Q : ℕ) :
         ‖∑ n ∈ Ioc M (M + N), a n * χ n‖ ^ 2 ≤
       ((N : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by
   classical
-  -- LEAF. External source: Montgomery 1971, Topics in multiplicative number theory. The lab constant N plus 2Q squared is too weak.
-  sorry
+  calc
+    _ ≤ _ := primitive_sieve_le_additive a M N Q
+    _ ≤ ((N : ℝ) + (Q : ℝ) ^ 2) *
+        ∑ n ∈ Ioc M (M + N), ‖(starRingEnd ℂ) (a n)‖ ^ 2 :=
+      additive_large_sieve_sharp (fun n => (starRingEnd ℂ) (a n)) M N Q
+    _ = _ := by simp only [Complex.norm_conj]
 
 /-- LEAF. Unit U-1532. Gallagher's density estimate for zeros near `σ = 1`: for `T ≥ 2` and
 `1/2 ≤ σ ≤ 1`, the zeros with `Re ρ ≥ σ`, `|Im ρ| ≤ T` of all `L(s, χ)`, `χ` primitive of
@@ -760,15 +847,132 @@ theorem gallagher_density : ∃ c C : ℝ, 0 < c ∧ ∀ T : ℝ, 2 ≤ T → �
       ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
         (zeroCount χ σ T : ℝ) ≤ C * T ^ (c * (1 - σ)) := by
   classical
-  -- LEAF. External sources: Gallagher 1970, Inventiones 11 pp.329 to 339; Montgomery and Vaughan 1975, Section 7.
-  sorry
+  obtain ⟨c, C, hc, hC, h⟩ := gallagher_density_lt_one
+  refine ⟨c, C, hc, ?_⟩
+  intro T hT σ hσ hσ1
+  by_cases hs : σ = 1
+  · subst σ
+    rw [density_sum_at_one]
+    simpa using hC
+  · exact h T hT σ hσ (lt_of_le_of_ne hσ1 hs)
 
-/-- LEAF. Unit U-1532. Page's theorem, p. 127: there is `b > 0` such that for every `T ≥ 2` at
-most one primitive character of conductor at most `T` has an L-function with a zero in
-`Re ρ ≥ 1 - b/log T`, `|Im ρ| ≤ T`. -/
-theorem page_subsingleton : ∃ b : ℝ, 0 < b ∧ ∀ T : ℝ, 2 ≤ T → (excSet b T).Subsingleton := by
-  -- LEAF. External source: Davenport 1967, Multiplicative number theory, Chapters 13 and 14.
-  sorry
+/-- The logarithm in the existing zero free region is bounded uniformly in the paper box. -/
+theorem log_Bt_le_log_height : ∃ K : ℝ, 0 < K ∧ ∀ {q : ℕ} [NeZero q] {T t : ℝ},
+    2 ≤ T → (q : ℝ) ≤ T → |t| ≤ T → Real.log (Bt q t) ≤ K * Real.log T := by
+  let A := Real.log (6 * Z)
+  let K := A / Real.log 2 + 2
+  have hZ := one_le_Z
+  have hA : 0 ≤ A := Real.log_nonneg (by linarith)
+  have hl2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  refine ⟨K, by dsimp [K]; positivity, ?_⟩
+  intro q _ T t hT hq ht
+  have hT0 : 0 < T := by linarith
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)
+  have hlog : Real.log 2 ≤ Real.log T := Real.log_le_log (by norm_num) hT
+  have hBt : Bt q t ≤ (6 * Z) * T ^ 2 := by
+    unfold Bt
+    have h1 := mul_le_mul hq (show |t| + 3 ≤ 3 * T by linarith) (by positivity) hT0.le
+    nlinarith [mul_le_mul_of_nonneg_right h1 (show 0 ≤ Z by linarith)]
+  calc
+    Real.log (Bt q t) ≤ Real.log ((6 * Z) * T ^ 2) :=
+      Real.log_le_log (by unfold Bt; positivity) hBt
+    _ = A + 2 * Real.log T := by rw [Real.log_mul (by positivity) (by positivity), Real.log_pow]; norm_num [A]
+    _ ≤ K * Real.log T := by
+      have hmul : A ≤ A / Real.log 2 * Real.log T := by
+        rw [div_mul_eq_mul_div, le_div_iff₀ hl2]
+        exact mul_le_mul_of_nonneg_left hlog hA
+      dsimp [K]
+      nlinarith
+
+/-- The nonprincipal part of the exceptional zero reality assertion on p.127. -/
+theorem height_box_real_nonprincipal : ∃ b : ℝ, 0 < b ∧ ∀ {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q), χ ≠ 1 → ∀ {T : ℝ}, 2 ≤ T → (q : ℝ) ≤ T →
+    ∀ ρ : ℂ, χ.LFunction ρ = 0 → 1 - b / Real.log T ≤ ρ.re → |ρ.im| ≤ T →
+      χ ^ 2 = 1 ∧ ρ.im = 0 := by
+  obtain ⟨K, hK, hlog⟩ := log_Bt_le_log_height
+  obtain ⟨c, c', hc, hc', hreg⟩ := zero_free_region_real
+  refine ⟨c / (2 * K), by positivity, ?_⟩
+  intro q _ χ hχ T hT hq ρ hz hβ ht
+  rcases (hreg q χ hχ).1 ρ hz with hleft | hright
+  · have hlT : 0 < Real.log T := Real.log_pos (by linarith)
+    have hlB : 0 < Real.log (Bt q ρ.im) := by linarith [one_le_log_Bt (N := q) ρ.im]
+    have hd : c / (K * Real.log T) ≤ c / Real.log (Bt q ρ.im) :=
+      div_le_div_of_nonneg_left hc.le hlB (hlog hT hq ht)
+    have hpos : 0 < c / (2 * K) / Real.log T := by positivity
+    have heq : c / (K * Real.log T) = 2 * (c / (2 * K) / Real.log T) := by field_simp
+    rw [heq] at hd
+    linarith
+  · exact ⟨hright.2.2.1, hright.2.2.2⟩
+
+/-- The principal primitive character has no zero in a uniform p.127 box. -/
+theorem zeta_height_box_nonzero : ∃ b : ℝ, 0 < b ∧ ∀ {T : ℝ}, 2 ≤ T →
+    ∀ ρ : ℂ, 1 - b / Real.log T ≤ ρ.re → |ρ.im| ≤ T → riemannZeta ρ ≠ 0 := by
+  obtain ⟨A, hA, hlarge⟩ := ZetaZeroFree1
+  obtain ⟨σ, hσ, hsmall⟩ := ZetaNoZerosInBox 3
+  let b := min A ((1 - σ) * Real.log 2)
+  have hb : 0 < b := lt_min hA.1 (mul_pos (by linarith) (Real.log_pos (by norm_num)))
+  refine ⟨b, hb, ?_⟩
+  intro T hT ρ hβ ht
+  have hlT : 0 < Real.log T := Real.log_pos (by linarith)
+  have hrep : (ρ.re : ℂ) + ρ.im * Complex.I = ρ := by simp
+  by_cases h1 : 1 ≤ ρ.re
+  · exact riemannZeta_ne_zero_of_one_le_re h1
+  by_cases ht3 : |ρ.im| ≤ 3
+  · have hcmp : b / Real.log T ≤ 1 - σ := by
+      apply (div_le_iff₀ hlT).mpr
+      have hlog := Real.log_le_log (by norm_num : (0 : ℝ) < 2) hT
+      have hmin : b ≤ (1 - σ) * Real.log 2 := min_le_right _ _
+      nlinarith
+    simpa only [hrep] using hsmall ρ.im ht3 ρ.re (by linarith)
+  · have ht3' : 3 < |ρ.im| := lt_of_not_ge ht3
+    have hlogt : 0 < Real.log |ρ.im| := Real.log_pos (by linarith)
+    have hcomp : b / Real.log T ≤ A / Real.log |ρ.im| := by
+      exact (div_le_div_of_nonneg_right (min_le_left _ _) hlT.le).trans
+        (div_le_div_of_nonneg_left hA.1.le hlogt (Real.log_le_log (by positivity) ht))
+    have hh := hlarge ρ.re ρ.im ht3' ⟨by simpa only [Real.rpow_one] using (show 1 - A / Real.log |ρ.im| ≤ ρ.re by linarith), lt_of_not_ge h1⟩
+    simpa only [hrep] using hh
+
+/-- Equality of primitive characters follows from equality at a common multiple. -/
+theorem primitive_sigma_eq_of_lift_eq {q₁ q₂ : ℕ}
+    (χ₁ : DirichletCharacter ℂ (q₁ + 1)) (χ₂ : DirichletCharacter ℂ (q₂ + 1))
+    (h₁ : χ₁.IsPrimitive) (h₂ : χ₂.IsPrimitive)
+    (he : DirichletCharacter.changeLevel (Nat.dvd_mul_right (q₁ + 1) (q₂ + 1)) χ₁ =
+      DirichletCharacter.changeLevel (Nat.dvd_mul_left (q₂ + 1) (q₁ + 1)) χ₂) :
+    (⟨q₁, χ₁⟩ : Σ q : ℕ, DirichletCharacter ℂ (q + 1)) = ⟨q₂, χ₂⟩ := by
+  have hc := congrArg DirichletCharacter.conductor he
+  rw [DirichletCharacter.conductor_changeLevel, DirichletCharacter.conductor_changeLevel,
+    h₁, h₂] at hc
+  have hq : q₁ = q₂ := by omega
+  subst q₂
+  have hχ := DirichletCharacter.changeLevel_injective (Nat.dvd_mul_right (q₁ + 1) (q₁ + 1)) he
+  subst χ₂
+  rfl
+
+/-- Narrowing the zero strip preserves membership in the exceptional family. -/
+theorem excSet_mono {b₁ b₂ T : ℝ} (hb : b₁ ≤ b₂) (hT : 2 ≤ T) :
+    excSet b₁ T ⊆ excSet b₂ T := by
+  rintro x ⟨hq, hp, ρ, hz, hβ, ht⟩
+  refine ⟨hq, hp, ρ, hz, ?_, ht⟩
+  have hdiv := div_le_div_of_nonneg_right hb (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)
+  linarith
+
+/-- No primitive principal character occurs in the uniform zero strip on p.127. -/
+theorem excSet_nonprincipal : ∃ b : ℝ, 0 < b ∧ ∀ T : ℝ, 2 ≤ T →
+    ∀ x ∈ excSet b T, x.2 ≠ 1 := by
+  obtain ⟨b, hb, hz⟩ := zeta_height_box_nonzero
+  refine ⟨b, hb, ?_⟩
+  intro T hT x hx he
+  have hc := hx.2.1
+  rw [DirichletCharacter.IsPrimitive, he, DirichletCharacter.conductor_one] at hc
+  have hq : x.1 = 0 := by omega
+  obtain ⟨ρ, hρ, hβ, ht⟩ := hx.2.2
+  have hzeta : riemannZeta ρ = 0 := by
+    rcases x with ⟨q, χ⟩
+    dsimp at hq
+    subst q
+    simpa only [he, DirichletCharacter.LFunction_modOne_eq] using hρ
+  exact hz hT ρ hβ ht hzeta
+
 
 /-- LEAF. Unit U-1532. The exceptional zero is real and its character is real, p. 127: for
 small `b > 0`, any zero in `Re ρ ≥ 1 - b/log T`, `|Im ρ| ≤ T` of `L(s, χ)`, `χ` primitive of
@@ -776,8 +980,261 @@ conductor at most `T`, has `Im ρ = 0`, and `χ² = 1`. -/
 theorem page_real : ∃ b : ℝ, 0 < b ∧ ∀ T : ℝ, 2 ≤ T → ∀ x ∈ excSet b T,
     x.2 ^ 2 = 1 ∧ ∀ ρ : ℂ, x.2.LFunction ρ = 0 → 1 - b / Real.log T ≤ ρ.re → |ρ.im| ≤ T →
       ρ.im = 0 := by
-  -- LEAF. External source: Davenport 1967, Multiplicative number theory, Chapters 13 and 14.
-  sorry
+  obtain ⟨bn, hbn, hn⟩ := height_box_real_nonprincipal
+  obtain ⟨bz, hbz, hz⟩ := zeta_height_box_nonzero
+  let b := min bn bz
+  refine ⟨b, lt_min hbn hbz, ?_⟩
+  intro T hT x hx
+  have hq : ((x.1 + 1 : ℕ) : ℝ) ≤ T := by simpa using hx.1
+  have hprim := hx.2.1
+  have hχ : x.2 ≠ 1 := by
+    intro he
+    have hlev : x.1 + 1 = 1 := by
+      have hc := hprim
+      rw [DirichletCharacter.IsPrimitive, he, DirichletCharacter.conductor_one] at hc
+      exact hc.symm
+    obtain ⟨ρ, hρ, hβ, ht⟩ := hx.2.2
+    have hzeta : riemannZeta ρ = 0 := by
+      have hxp : x.1 = 0 := by omega
+      rcases x with ⟨q, χ⟩
+      dsimp at hxp
+      subst q
+      simpa only [he, DirichletCharacter.LFunction_modOne_eq] using hρ
+    have hβz : 1 - bz / Real.log T ≤ ρ.re := by
+      have hcmp := div_le_div_of_nonneg_right (min_le_right bn bz) (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)
+      linarith
+    exact hz hT ρ hβz ht hzeta
+  have hmono (ρ : ℂ) (hβ : 1 - b / Real.log T ≤ ρ.re) : 1 - bn / Real.log T ≤ ρ.re := by
+    have hcmp := div_le_div_of_nonneg_right (min_le_left bn bz) (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)
+    linarith
+  obtain ⟨ρ, hρ, hβ, ht⟩ := hx.2.2
+  refine ⟨(hn x.2 hχ hT hq ρ hρ (hmono ρ hβ) ht).1, ?_⟩
+  intro ρ hρ hβ ht
+  exact (hn x.2 hχ hT hq ρ hρ (hmono ρ hβ) ht).2
+
+/-- The finite Fourier identity before the order split in Lemma 6 on pp.134 and 135. -/
+theorem ramanujan_tuple_sum_eq (q k L : ℕ) :
+    ∑ x : pairs k L, ramanujanSum q (dif x) =
+      ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        ((‖Gs L ((a : ℝ) / q)‖ ^ (2 * k) : ℝ) : ℂ) := by
+  classical
+  unfold ramanujanSum
+  rw [sum_comm]
+  apply sum_congr rfl
+  intro a ha
+  have hp : Gs L ((a : ℝ) / q) ^ k =
+      ∑ ν : Fin k → Fin L, eC (sv ν * ((a : ℝ) / q)) :=
+    LeanLab.Linnik.U1434Lemma21.Gs_pow k L _
+  have hc (x : ℝ) : (starRingEnd ℂ) (eC x) = eC (-x) := by
+    simpa only [LeanLab.Linnik.U1434Lemma21.e_eq_eC] using
+      (LeanLab.PNTPort.LargeSieve.e_neg x).symm
+  have hn : ((‖Gs L ((a : ℝ) / q)‖ ^ (2 * k) : ℝ) : ℂ) =
+      Gs L ((a : ℝ) / q) ^ k * (starRingEnd ℂ) (Gs L ((a : ℝ) / q) ^ k) := by
+    rw [Complex.mul_conj, Complex.normSq_eq_norm_sq, norm_pow, ← pow_mul, Nat.mul_comm k 2]
+  rw [hn, hp, map_sum, sum_mul_sum, Fintype.sum_prod_type]
+  apply sum_congr rfl
+  intro ν hν
+  apply sum_congr rfl
+  intro mu hmu
+  rw [hc, ← LeanLab.Linnik.U1434Lemma21.eC_add]
+  congr 1
+  simp only [dif, Int.cast_sub, Int.cast_natCast]
+  ring
+
+/-- The q one main term in the finite expansion of Lemma 6. -/
+theorem ramanujan_tuple_sum_one (k L : ℕ) :
+    ∑ x : pairs k L, ramanujanSum 1 (dif x) = (L : ℂ) ^ (2 * k) := by
+  have hR (n : ℤ) : ramanujanSum 1 n = 1 := by simp [ramanujanSum, eC]
+  simp only [hR, sum_const, nsmul_eq_mul, mul_one]
+  simp [pairs, Fintype.card_prod, ← pow_add, two_mul]
+
+/-- The justified finite sum and singular series exchange at the start of Lemma 6. -/
+theorem offdiag_singSeries_eq_tsum (k L : ℕ) :
+    ∑ x : pairs k L with dif x ≠ 0, singSeries (dif x) =
+      ∑' q : ℕ, ((ArithmeticFunction.moebius q : ℤ) : ℂ) ^ 2 / (q.totient : ℂ) ^ 2 *
+        ∑ x : pairs k L with dif x ≠ 0, ramanujanSum q (dif x) := by
+  classical
+  have hs : ∀ x ∈ (univ : Finset (pairs k L)).filter (fun x => dif x ≠ 0),
+      Summable (fun q : ℕ => ((ArithmeticFunction.moebius q : ℤ) : ℂ) ^ 2 /
+        (q.totient : ℂ) ^ 2 * ramanujanSum q (dif x)) := by
+    intro x hx
+    exact summable_singSeries (mem_filter.mp hx).2
+  simp only [singSeries]
+  rw [← Summable.tsum_finsetSum hs]
+  apply tsum_congr
+  intro q
+  exact (mul_sum _ _ _).symm
+
+/-- The zero frequency Ramanujan coefficient removed on p.134. -/
+theorem ramanujanSum_zero (q : ℕ) : ramanujanSum q 0 = (q.totient : ℂ) := by
+  simp [ramanujanSum, eC, Nat.totient, Nat.coprime_comm]
+
+/-- The square root order series used in Lemma 10 on p.137 is uniformly bounded. -/
+theorem half_order_totient_weight_le (S : Finset ℕ) :
+    ∑ q ∈ S with Odd q,
+      ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 /
+        ((q.totient : ℝ) * Real.sqrt (ordTwo q)) ≤ 16 * Real.log 2 * Real.exp 27 := by
+  classical
+  have hpoint (q : ℕ) (hq : q ∈ S.filter Odd) :
+      ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 /
+        ((q.totient : ℝ) * Real.sqrt (ordTwo q)) ≤ LeanLab.Romanov.halfOrderTerm q := by
+    have ho := (mem_filter.mp hq).2
+    by_cases hs : Squarefree q
+    · rw [LeanLab.Romanov.halfOrderTerm, ite_eq_left (show LeanLab.LPZ2007.OddSqf q from ⟨ho, hs⟩)]
+      rw [div_mul_eq_div_div]
+      exact div_le_div_of_nonneg_right
+        (LeanLab.Romanov.TotientWeights134.totientWeight_le_fd ⟨ho, hs⟩) (Real.sqrt_nonneg _)
+    · simp only [ArithmeticFunction.moebius_eq_zero_of_not_squarefree hs, Int.cast_zero,
+        zero_pow (by decide : 2 ≠ 0), zero_div]
+      exact LeanLab.Romanov.halfOrderTerm_nonneg q
+  exact (sum_le_sum hpoint).trans
+    ((LeanLab.Romanov.halfOrder_summable.sum_le_tsum _
+      (fun q _ => LeanLab.Romanov.halfOrderTerm_nonneg q)).trans LeanLab.Romanov.halfOrder_tsum_le)
+
+/-- The least common multiple order kernel in Lemma 10 on p.137 gains a square root order. -/
+theorem lcm_order_weight_le {f : ℕ} (hf : Odd f) (S : Finset ℕ) :
+    ∑ q ∈ S with Odd q,
+      ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 /
+        (q.totient : ℝ) / ordTwo (Nat.lcm f q) ≤
+      (16 * Real.log 2 * Real.exp 27) / Real.sqrt (ordTwo f) := by
+  classical
+  have hfpos : (0 : ℝ) < ordTwo f := by exact_mod_cast LeanLab.Linnik.Decomp1532a.ordTwo_pos hf
+  have hsf : 0 < Real.sqrt (ordTwo f) := Real.sqrt_pos.mpr hfpos
+  have hpoint (q : ℕ) (hq : q ∈ S.filter Odd) :
+      ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 / (q.totient : ℝ) / ordTwo (Nat.lcm f q) ≤
+      (((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 /
+        ((q.totient : ℝ) * Real.sqrt (ordTwo q))) / Real.sqrt (ordTwo f) := by
+    have hqo := (mem_filter.mp hq).2
+    have hlo : Odd (Nat.lcm f q) :=
+      (hf.mul hqo).of_dvd_nat (Nat.lcm_dvd (dvd_mul_right f q) (dvd_mul_left q f))
+    have hlpos : (0 : ℝ) < ordTwo (Nat.lcm f q) :=
+      by exact_mod_cast LeanLab.Linnik.Decomp1532a.ordTwo_pos hlo
+    have hqpos : (0 : ℝ) < ordTwo q :=
+      by exact_mod_cast LeanLab.Linnik.Decomp1532a.ordTwo_pos hqo
+    have hsqp : 0 < Real.sqrt (ordTwo q) := Real.sqrt_pos.mpr hqpos
+    have hfle : (ordTwo f : ℝ) ≤ ordTwo (Nat.lcm f q) := by
+      exact_mod_cast LeanLab.Linnik.Decomp1537a.xi_le_of_dvd hlo (Nat.dvd_lcm_left f q)
+    have hqle : (ordTwo q : ℝ) ≤ ordTwo (Nat.lcm f q) := by
+      exact_mod_cast LeanLab.Linnik.Decomp1537a.xi_le_of_dvd hlo (Nat.dvd_lcm_right f q)
+    have hsqrt : Real.sqrt (ordTwo f) * Real.sqrt (ordTwo q) ≤ ordTwo (Nat.lcm f q) := by
+      calc
+        _ = Real.sqrt ((ordTwo f : ℝ) * ordTwo q) := (Real.sqrt_mul hfpos.le _).symm
+        _ ≤ Real.sqrt ((ordTwo (Nat.lcm f q) : ℝ) * ordTwo (Nat.lcm f q)) :=
+          Real.sqrt_le_sqrt (mul_le_mul hfle hqle hqpos.le hlpos.le)
+        _ = _ := Real.sqrt_mul_self hlpos.le
+    have hh := div_le_div_of_nonneg_left
+      (show 0 ≤ ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 / (q.totient : ℝ) by positivity)
+      (mul_pos hsf hsqp) hsqrt
+    convert hh using 1 <;> rw [div_mul_eq_div_div] <;> ring
+  calc
+    _ ≤ ∑ q ∈ S with Odd q,
+      (((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 /
+        ((q.totient : ℝ) * Real.sqrt (ordTwo q))) / Real.sqrt (ordTwo f) := sum_le_sum hpoint
+    _ = (∑ q ∈ S with Odd q, ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 /
+        ((q.totient : ℝ) * Real.sqrt (ordTwo q))) / Real.sqrt (ordTwo f) := (sum_div _ _ _).symm
+    _ ≤ _ := div_le_div_of_nonneg_right (half_order_totient_weight_le S) hsf.le
+
+/-- The first divisor reduction of Lemma 10 on p.137 with an explicit factor eight. -/
+theorem exceptional_gcd_totient_le {r s : ℕ} (hs : 0 < s)
+    (hr : r = s ∨ r = 4 * s ∨ r = 8 * s) (n : ℕ) :
+    (Nat.gcd r n).totient ≤ 8 * ∑ f ∈ (Nat.gcd s n).divisors, f.totient := by
+  rw [Nat.sum_totient]
+  have hg : 0 < Nat.gcd s n := Nat.gcd_pos_of_pos_left n hs
+  have hbound (d : ℕ) (hd : 0 < d) : Nat.gcd (d * s) n ≤ d * Nat.gcd s n := by
+    apply Nat.le_of_dvd (Nat.mul_pos hd hg)
+    have hdiv : Nat.gcd (d * s) n ∣ Nat.gcd (d * s) (d * n) :=
+      Nat.gcd_dvd_gcd_of_dvd_right (d * s) (dvd_mul_left n d)
+    rwa [Nat.gcd_mul_left] at hdiv
+  have hφ := Nat.totient_le (Nat.gcd r n)
+  rcases hr with hr | hr | hr
+  · subst r; omega
+  · subst r; have hh := hbound 4 (by decide); omega
+  · subst r; exact hφ.trans (hbound 8 (by decide))
+
+/-- The direct Lemma 8 bound leaves a conductor factor and no logarithmic decay. -/
+theorem twisted_totient_crude : ∃ C : ℝ, ∀ k N r : ℕ,
+    1 ≤ k → k ≤ N → 2 ≤ N → 0 < r →
+    ∑ x : pairs k (Nat.log 2 N) with dif x ≠ 0,
+      ((dif x).natAbs : ℝ) / ((dif x).natAbs.totient : ℝ) *
+        ((r : ℝ) * (Nat.gcd r (dif x).natAbs).totient / (r.totient : ℝ) ^ 2) ≤
+      C * ((r : ℝ) / r.totient) * (Nat.log 2 N : ℝ) ^ (2 * k) := by
+  classical
+  obtain ⟨C, hC⟩ := LeanLab.Linnik.Decomp1532a.lemma8
+  refine ⟨C, ?_⟩
+  intro k N r hk hkN hN hr
+  have hφ : (0 : ℝ) < r.totient := by exact_mod_cast Nat.totient_pos.mpr hr
+  have hfactor (n : ℕ) :
+      (r : ℝ) * (Nat.gcd r n).totient / (r.totient : ℝ) ^ 2 ≤ (r : ℝ) / r.totient := by
+    have hdiv := Nat.totient_dvd_of_dvd (Nat.gcd_dvd_left r n)
+    have hle : ((Nat.gcd r n).totient : ℝ) ≤ r.totient := by
+      exact_mod_cast Nat.le_of_dvd (Nat.totient_pos.mpr hr) hdiv
+    calc
+      _ ≤ (r : ℝ) * r.totient / (r.totient : ℝ) ^ 2 :=
+        div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hle (Nat.cast_nonneg r)) (sq_nonneg _)
+      _ = _ := by field_simp
+  calc
+    _ ≤ ∑ x : pairs k (Nat.log 2 N) with dif x ≠ 0,
+        ((dif x).natAbs : ℝ) / ((dif x).natAbs.totient : ℝ) * ((r : ℝ) / r.totient) := by
+      apply sum_le_sum
+      intro x hx
+      exact mul_le_mul_of_nonneg_left (hfactor _) (by positivity)
+    _ = ((r : ℝ) / r.totient) *
+        (∑ x : pairs k (Nat.log 2 N) with dif x ≠ 0,
+          ((dif x).natAbs : ℝ) / ((dif x).natAbs.totient : ℝ)) := by rw [← sum_mul]; ring
+    _ ≤ ((r : ℝ) / r.totient) * (C * (Nat.log 2 N : ℝ) ^ (2 * k)) :=
+      mul_le_mul_of_nonneg_left (hC k N hk hkN hN) (by positivity)
+    _ = _ := by ring
+
+/-- LEAF. Unit U-1532. Page's theorem, p. 127: there is `b > 0` such that for every `T ≥ 2` at
+most one primitive character of conductor at most `T` has an L-function with a zero in
+`Re ρ ≥ 1 - b/log T`, `|Im ρ| ≤ T`. -/
+theorem page_subsingleton : ∃ b : ℝ, 0 < b ∧ ∀ T : ℝ, 2 ≤ T → (excSet b T).Subsingleton := by
+  obtain ⟨br, hbr, hr⟩ := page_real
+  obtain ⟨bn, hbn, hn⟩ := excSet_nonprincipal
+  obtain ⟨cl, hcl, hl⟩ := landau
+  let b := min (min br bn) cl
+  have hbr' : b ≤ br := (min_le_left _ _).trans (min_le_left _ _)
+  have hbn' : b ≤ bn := (min_le_left _ _).trans (min_le_right _ _)
+  have hcl' : b ≤ cl := min_le_right _ _
+  refine ⟨b, lt_min (lt_min hbr hbn) hcl, ?_⟩
+  intro T hT x hx y hy
+  have hxbr := excSet_mono hbr' hT hx
+  have hybr := excSet_mono hbr' hT hy
+  have hxne := hn T hT x (excSet_mono hbn' hT hx)
+  have hyne := hn T hT y (excSet_mono hbn' hT hy)
+  obtain ⟨ρ₁, hz₁, hb₁, ht₁⟩ := hx.2.2
+  obtain ⟨ρ₂, hz₂, hb₂, ht₂⟩ := hy.2.2
+  have hβbr₁ : 1 - br / Real.log T ≤ ρ₁.re := by
+    have hd := div_le_div_of_nonneg_right hbr' (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)
+    linarith
+  have hβbr₂ : 1 - br / Real.log T ≤ ρ₂.re := by
+    have hd := div_le_div_of_nonneg_right hbr' (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)
+    linarith
+  have him₁ := (hr T hT x hxbr).2 ρ₁ hz₁ hβbr₁ ht₁
+  have him₂ := (hr T hT y hybr).2 ρ₂ hz₂ hβbr₂ ht₂
+  have he₁ : (ρ₁.re : ℂ) = ρ₁ := by apply Complex.ext <;> simp [him₁]
+  have he₂ : (ρ₂.re : ℂ) = ρ₂ := by apply Complex.ext <;> simp [him₂]
+  have hzreal₁ : x.2.LFunction (ρ₁.re : ℂ) = 0 := by rwa [he₁]
+  have hzreal₂ : y.2.LFunction (ρ₂.re : ℂ) = 0 := by rwa [he₂]
+  have hbtop₁ : ρ₁.re ≤ 1 := by
+    by_contra hh
+    exact (DirichletCharacter.LFunction_ne_zero_of_one_le_re x.2 (Or.inl hxne) (by simpa using (le_of_lt (lt_of_not_ge hh)))) hz₁
+  have hbtop₂ : ρ₂.re ≤ 1 := by
+    by_contra hh
+    exact (DirichletCharacter.LFunction_ne_zero_of_one_le_re y.2 (Or.inl hyne) (by simpa using (le_of_lt (lt_of_not_ge hh)))) hz₂
+  have hQ : 2 ≤ ⌊T⌋₊ := Nat.le_floor (by simpa using hT)
+  have hxQ : x.1 + 1 ≤ ⌊T⌋₊ := Nat.le_floor (by simpa using hx.1)
+  have hyQ : y.1 + 1 ≤ ⌊T⌋₊ := Nat.le_floor (by simpa using hy.1)
+  have hlogQ : 0 < Real.log (⌊T⌋₊ : ℝ) := Real.log_pos (by exact_mod_cast hQ)
+  have hlogT : Real.log (⌊T⌋₊ : ℝ) ≤ Real.log T :=
+    Real.log_le_log (by exact_mod_cast (show 0 < ⌊T⌋₊ by omega)) (Nat.floor_le (by linarith))
+  have hcmp : b / Real.log T ≤ cl / Real.log (⌊T⌋₊ : ℝ) :=
+    (div_le_div_of_nonneg_right hcl' (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)).trans
+      (div_le_div_of_nonneg_left hcl.le hlogQ hlogT)
+  have hlift := hl ⌊T⌋₊ hQ (x.1 + 1) (y.1 + 1) hxQ hyQ x.2 y.2 hxne hyne
+    ρ₁.re ρ₂.re hbtop₁ hbtop₂ hzreal₁ hzreal₂ (by linarith) (by linarith)
+  exact primitive_sigma_eq_of_lift_eq x.2 y.2 hx.2.1 hy.2.1 hlift
+
 
 /-- LEAF. Unit U-1532. Siegel's theorem, p. 127: for each `ε > 0` there is `c > 0` such that a
 real zero `β` of `L(s, χ)`, `χ` real primitive of conductor `r`, has `1 - β ≥ c r^{-ε}`. -/
@@ -830,8 +1287,7 @@ theorem siegel : ∀ ε : ℝ, 0 < ε → ∃ c : ℝ, 0 < c ∧ ∀ q : ℕ, �
 theorem lemma9 {r : ℕ} (hr : 0 < r) (χ : DirichletCharacter ℂ r) (hχ : χ.IsPrimitive)
     (h2 : χ ^ 2 = 1) :
     ∃ r₀ : ℕ, Odd r₀ ∧ Squarefree r₀ ∧ (r = r₀ ∨ r = 4 * r₀ ∨ r = 8 * r₀) := by
-  -- LEAF. External sources: Page 1935, Proc. London Math. Soc. 39 pp.116 to 141; Suetuna 1926, Tohoku Math. J.27 pp.248 to 257.
-  sorry
+  exact LeanLab.Romanov.Decomp134.lemma9 hr χ hχ h2
 
 /-- LEAF. Unit U-1532. Lemma 10, display (8) p. 136: for `1 ≤ k ≤ N` and `r` of the form (7)
 with `1 < r ≤ N`, `Σ_{n ≠ 0} r_{k,k}(n) |n|/φ(|n|) · r φ((r, n))/φ(r)² ≤ C L^{2k}/(log r)^{1/3}`
@@ -842,6 +1298,145 @@ theorem lemma10 : ∃ C : ℝ, ∀ k N r : ℕ, 1 ≤ k → k ≤ N → 1 < r �
       ((dif x).natAbs : ℝ) / ((dif x).natAbs.totient : ℝ) *
         ((r : ℝ) * (Nat.gcd r (dif x).natAbs).totient / (r.totient : ℝ) ^ 2) ≤
       C * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log r ^ (1 / 3 : ℝ) := by
+  -- LEAF. Gallagher 1975 p.137. The uniform weighted one coordinate estimate and the final divisor and logarithm split remain.
   sorry
+
+/-- Gallagher 1975 p.127. The exceptional character has at most one zero in the height box. -/
+theorem page_zero_unique : ∃ b : ℝ, 0 < b ∧ ∀ T : ℝ, 2 ≤ T → ∀ x ∈ excSet b T,
+    ∀ ρ₁ ρ₂ : ℂ, x.2.LFunction ρ₁ = 0 → x.2.LFunction ρ₂ = 0 →
+      1 - b / Real.log T ≤ ρ₁.re → |ρ₁.im| ≤ T →
+      1 - b / Real.log T ≤ ρ₂.re → |ρ₂.im| ≤ T → ρ₁ = ρ₂ := by
+  obtain ⟨br, hbr, hr⟩ := page_real
+  obtain ⟨bn, hbn, hn⟩ := excSet_nonprincipal
+  obtain ⟨K, hK, hKlog⟩ := log_Bt_le_log_height
+  obtain ⟨c, hc, hpage⟩ := page_two_zeros
+  let b := min (min br bn) (c / K)
+  have hbbr : b ≤ br := (min_le_left _ _).trans (min_le_left _ _)
+  have hbbn : b ≤ bn := (min_le_left _ _).trans (min_le_right _ _)
+  have hbc : b ≤ c / K := min_le_right _ _
+  refine ⟨b, lt_min (lt_min hbr hbn) (by positivity), ?_⟩
+  intro T hT x hx ρ₁ ρ₂ hz₁ hz₂ hb₁ ht₁ hb₂ ht₂
+  have hχ := hn T hT x (excSet_mono hbbn hT hx)
+  have hxbr := excSet_mono hbbr hT hx
+  have hmono (ρ : ℂ) (hh : 1 - b / Real.log T ≤ ρ.re) :
+      1 - br / Real.log T ≤ ρ.re := by
+    have hd := div_le_div_of_nonneg_right hbbr (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)
+    linarith
+  have him₁ := (hr T hT x hxbr).2 ρ₁ hz₁ (hmono ρ₁ hb₁) ht₁
+  have him₂ := (hr T hT x hxbr).2 ρ₂ hz₂ (hmono ρ₂ hb₂) ht₂
+  have hlT : 0 < Real.log T := Real.log_pos (by linarith)
+  have hlB : 0 < Real.log (Bt (x.1 + 1) 0) := by
+    linarith [one_le_log_Bt (N := x.1 + 1) 0]
+  have hcmp : b / Real.log T ≤ c / Real.log (Bt (x.1 + 1) 0) := by
+    calc
+      b / Real.log T ≤ (c / K) / Real.log T := div_le_div_of_nonneg_right hbc hlT.le
+      _ = c / (K * Real.log T) := by rw [div_div]
+      _ ≤ c / Real.log (Bt (x.1 + 1) 0) :=
+        div_le_div_of_nonneg_left hc.le hlB
+          (hKlog hT (by simpa using hx.1) (by simp; linarith : |(0 : ℝ)| ≤ T))
+  exact hpage (x.1 + 1) x.2 hχ ρ₁ ρ₂ hz₁ hz₂ (by linarith)
+    (by rw [him₁, abs_zero]; positivity) (by linarith)
+    (by rw [him₂, abs_zero]; positivity)
+
+/-- Gallagher 1975 p.127. Every exceptional zero in a sufficiently narrow height box is simple. -/
+theorem page_zero_simple : ∃ b : ℝ, 0 < b ∧ ∀ T : ℝ, 2 ≤ T → ∀ x ∈ excSet b T,
+    ∀ ρ : ℂ, x.2.LFunction ρ = 0 → 1 - b / Real.log T ≤ ρ.re → |ρ.im| ≤ T →
+      analyticOrderNatAt x.2.LFunction ρ = 1 := by
+  obtain ⟨br, hbr, hr⟩ := page_real
+  obtain ⟨bn, hbn, hn⟩ := excSet_nonprincipal
+  obtain ⟨K, hK, hKlog⟩ := log_Bt_le_log_height
+  obtain ⟨c, hc, hc31, hcount⟩ := page_count
+  let b := min (min br bn) (c / K)
+  have hbbr : b ≤ br := (min_le_left _ _).trans (min_le_left _ _)
+  have hbbn : b ≤ bn := (min_le_left _ _).trans (min_le_right _ _)
+  have hbc : b ≤ c / K := min_le_right _ _
+  refine ⟨b, lt_min (lt_min hbr hbn) (by positivity), ?_⟩
+  intro T hT x hx ρ hz hb ht
+  have hχ := hn T hT x (excSet_mono hbbn hT hx)
+  have hxbr := excSet_mono hbbr hT hx
+  have hβbr : 1 - br / Real.log T ≤ ρ.re := by
+    have hd := div_le_div_of_nonneg_right hbbr (show 0 ≤ Real.log T by apply Real.log_nonneg; linarith)
+    linarith
+  have him := (hr T hT x hxbr).2 ρ hz hβbr ht
+  have hlT : 0 < Real.log T := Real.log_pos (by linarith)
+  have hlB : 0 < Real.log (Bt (x.1 + 1) 0) := by
+    linarith [one_le_log_Bt (N := x.1 + 1) 0]
+  have hcmp : b / Real.log T ≤ c / Real.log (Bt (x.1 + 1) 0) := by
+    calc
+      b / Real.log T ≤ (c / K) / Real.log T := div_le_div_of_nonneg_right hbc hlT.le
+      _ = c / (K * Real.log T) := by rw [div_div]
+      _ ≤ c / Real.log (Bt (x.1 + 1) 0) :=
+        div_le_div_of_nonneg_left hc.le hlB
+          (hKlog hT (by simpa using hx.1) (by simp; linarith : |(0 : ℝ)| ≤ T))
+  have hβ : 1 - c / Real.log (Bt (x.1 + 1) 0) ≤ ρ.re := by linarith
+  have hγ : |ρ.im| ≤ c / Real.log (Bt (x.1 + 1) 0) := by rw [him, abs_zero]; positivity
+  have hη31 : c / Real.log (Bt (x.1 + 1) 0) ≤ 1 / 31 := by
+    rw [div_le_iff₀ hlB]
+    have hh := one_le_log_Bt (N := x.1 + 1) 0
+    nlinarith
+  have hm := mem_Tset_of_box hχ hη31 hz hβ hγ
+  classical
+  have hmem : ρ - 3 / 2 ∈ (Tset hχ 0).filter (fun w =>
+      1 - c / Real.log (Bt (x.1 + 1) 0) ≤ w.re + 3 / 2 ∧
+      |w.im| ≤ c / Real.log (Bt (x.1 + 1) 0)) := by
+    refine Finset.mem_filter.mpr ⟨hm, ?_, ?_⟩
+    · have he : (ρ - 3 / 2).re + 3 / 2 = ρ.re := by simp
+      rw [he]
+      exact hβ
+    · have he : (ρ - 3 / 2).im = ρ.im := by simp
+      rw [he]
+      exact hγ
+  have hu : analyticOrderNatAt (fShift x.2 0) (ρ - 3 / 2) ≤ 1 :=
+    (Finset.single_le_sum (fun w _ => Nat.zero_le _) hmem).trans (hcount (x.1 + 1) x.2 hχ)
+  have hzshift : fShift x.2 0 (ρ - 3 / 2) = 0 := by simpa [fShift] using hz
+  have ho : analyticOrderNatAt (fShift x.2 0) (ρ - 3 / 2) = 1 :=
+    Nat.le_antisymm hu (one_le_order hχ 0 hzshift)
+  have hg : AnalyticAt ℂ (fun z : ℂ => z + 3 / 2) (ρ - 3 / 2) := by fun_prop
+  have hd : deriv (fun z : ℂ => z + 3 / 2) (ρ - 3 / 2) ≠ 0 := by simp
+  have hshift := analyticOrderAt_comp_of_deriv_ne_zero (f := x.2.LFunction) hg hd
+  have hnat := congrArg ENat.toNat hshift
+  have he : analyticOrderNatAt (fShift x.2 0) (ρ - 3 / 2) =
+      analyticOrderNatAt x.2.LFunction ρ := by
+    unfold analyticOrderNatAt
+    have hf : fShift x.2 0 = fun z : ℂ => x.2.LFunction (z + 3 / 2) := by
+      funext z
+      simp [fShift]
+    rw [hf]
+    simpa only [Function.comp_def, sub_add_cancel] using hnat
+  exact he.symm.trans ho
+
+/-- Gallagher 1975 p.127. The exceptional conductor exceeds every fixed power of log T
+up to a positive constant depending on that power. No effective constant is asserted. -/
+theorem exceptional_conductor_log_growth : ∃ b : ℝ, 0 < b ∧
+    ∀ B : ℝ, 0 < B → ∃ c : ℝ, 0 < c ∧ ∀ T : ℝ, 2 ≤ T →
+    ∀ x ∈ excSet b T, c * Real.log T ^ B ≤ (x.1 : ℝ) + 1 := by
+  obtain ⟨b, hb, hreal⟩ := page_real
+  refine ⟨b, hb, ?_⟩
+  intro B hB
+  obtain ⟨cs, hcs, hs⟩ := siegel (1 / B) (by positivity)
+  refine ⟨(cs / b) ^ B, Real.rpow_pos_of_pos (div_pos hcs hb) _, ?_⟩
+  intro T hT x hx
+  obtain ⟨ρ, hz, hβ, ht⟩ := hx.2.2
+  have hchi := (hreal T hT x hx).1
+  have him := (hreal T hT x hx).2 ρ hz hβ ht
+  have he : (ρ.re : ℂ) = ρ := by apply Complex.ext <;> simp [him]
+  have hzreal : x.2.LFunction (ρ.re : ℂ) = 0 := by rwa [he]
+  have hS := hs x.1 x.2 hx.2.1 hchi ρ.re hzreal
+  let r : ℝ := (x.1 : ℝ) + 1
+  have hr : 0 < r := by dsimp [r]; positivity
+  have hlT : 0 < Real.log T := Real.log_pos (by linarith)
+  have hbound : cs * r ^ (-(1 / B)) ≤ b / Real.log T := by
+    dsimp [r]
+    linarith
+  rw [Real.rpow_neg hr.le, ← div_eq_mul_inv] at hbound
+  have hp : 0 < r ^ (1 / B) := Real.rpow_pos_of_pos hr _
+  have hprod := (div_le_div_iff₀ hp hlT).mp hbound
+  have hbase : cs / b * Real.log T ≤ r ^ (1 / B) := by
+    rw [div_mul_eq_mul_div, div_le_iff₀ hb]
+    nlinarith
+  have hraise := Real.rpow_le_rpow (by positivity : 0 ≤ cs / b * Real.log T) hbase hB.le
+  rw [← Real.rpow_mul hr.le, one_div_mul_cancel hB.ne', Real.rpow_one] at hraise
+  rw [Real.mul_rpow (div_nonneg hcs.le hb.le) hlT.le] at hraise
+  exact hraise
 
 end LeanLab.Linnik.Decomp1532b
