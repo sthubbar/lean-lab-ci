@@ -139,31 +139,214 @@ theorem sq_sum_le_card_pos_mul_sum_sq (s : Finset ℕ) (f : ℕ → ℝ) (hf : �
     apply mul_le_mul_of_nonneg_left h_le (by positivity)
   exact le_trans H h_bound
 
+/-- Helper: for odd `N`, a pair of primes summing to `N` contains `2`. -/
+lemma two_of_odd_prime_pair {N p : ℕ} (hN : ¬ Even N) (hpN : p ≤ N) (hp : p.Prime)
+    (hq : (N - p).Prime) : p = 2 ∨ N - p = 2 := by
+  rcases hp.eq_two_or_odd' with h | h
+  · exact Or.inl h
+  rcases hq.eq_two_or_odd' with h' | h'
+  · exact Or.inr h'
+  exfalso
+  apply hN
+  have : N = p + (N - p) := by omega
+  rw [this]
+  exact h.add_odd h'
+
 /-- LEAF. For odd `N` the only representations use the prime 2:
 `rep N = 2 log 2 log (N - 2)` when `N - 2` is prime, else `0`. Definition of `rep`.
 Unit U-1526. -/
 theorem rep_of_odd {N : ℕ} (hN : ¬ Even N) :
     rep N = if (N - 2).Prime then 2 * Real.log 2 * Real.log ((N - 2 : ℕ) : ℝ) else 0 := by
-  sorry
+  unfold rep
+  split_ifs with hN2
+  · have h4 : 4 ≤ N := by
+      have := hN2.two_le
+      omega
+    have hne : (2 : ℕ) ≠ N - 2 := by
+      intro h
+      apply hN
+      exact ⟨2, by omega⟩
+    rw [sum_eq_add_of_mem 2 (N - 2) (mem_filter.mpr ⟨mem_range.mpr (by omega), Nat.prime_two⟩)
+      (mem_filter.mpr ⟨mem_range.mpr (by omega), hN2⟩) hne]
+    · have e : N - (N - 2) = 2 := by omega
+      simp only [hN2, e, Nat.prime_two, if_true]
+      push_cast
+      ring
+    · intro c hc hc2
+      rw [mem_filter, mem_range] at hc
+      rw [if_neg]
+      intro hq
+      rcases two_of_odd_prime_pair hN (by omega) hc.2 hq with h | h
+      · exact hc2.1 h
+      · exact hc2.2 (by omega)
+  · apply sum_eq_zero
+    intro c hc
+    rw [mem_filter, mem_range] at hc
+    rw [if_neg]
+    intro hq
+    rcases two_of_odd_prime_pair hN (by omega) hc.2 hq with h | h
+    · subst h; exact hN2 hq
+    · have : c = N - 2 := by omega
+      subst this; exact hN2 hc.2
+
+/-- Helper: `θ b` as a sum over the primes of `range (b + 1)`. -/
+lemma theta_natCast_eq (b : ℕ) :
+    θ (b : ℝ) = ∑ p ∈ (range (b + 1)).filter Nat.Prime, Real.log p := by
+  rw [Chebyshev.theta_eq_sum_Icc, Nat.floor_natCast]
+  congr 1
+  ext x
+  simp [mem_range]
 
 /-- LEAF. The odd integers of `]a, b]` carry total weight at most `2 log 2 · θ(b)`:
 each odd `N` contributes only through the prime `N - 2 ≤ b`. Uses `rep_of_odd`.
 Unit U-1526. -/
 theorem sum_rep_odd_le (a b : ℕ) :
     ∑ N ∈ (Ioc a b).filter (fun N => ¬ Even N), rep N ≤ 2 * Real.log 2 * θ (b : ℝ) := by
-  sorry
+  set S := (Ioc a b).filter (fun N => ¬ Even N)
+  have e1 : ∑ N ∈ S, rep N
+      = ∑ N ∈ S.filter (fun N => (N - 2).Prime), 2 * Real.log 2 * Real.log ((N - 2 : ℕ) : ℝ) := by
+    rw [sum_filter (fun N : ℕ => (N - 2).Prime)]
+    apply sum_congr rfl
+    intro N hN
+    rw [mem_filter] at hN
+    exact rep_of_odd hN.2
+  rw [e1, ← mul_sum, theta_natCast_eq]
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  have hinj : Set.InjOn (fun N : ℕ => N - 2) (S.filter (fun N => (N - 2).Prime) : Set ℕ) := by
+    intro x hx y hy hxy
+    simp only [coe_filter, Set.mem_setOf_eq] at hx hy
+    have := hx.2.two_le
+    have := hy.2.two_le
+    simp only at hxy
+    omega
+  rw [← sum_image (f := fun q : ℕ => Real.log (q : ℝ)) hinj]
+  apply sum_le_sum_of_subset_of_nonneg
+  · intro q hq
+    rw [mem_image] at hq
+    obtain ⟨N, hN, rfl⟩ := hq
+    simp only [S, mem_filter, mem_Ioc] at hN
+    rw [mem_filter, mem_range]
+    exact ⟨by omega, hN.2⟩
+  · intro x _ _
+    exact Real.log_natCast_nonneg _
 
 /-- LEAF. Each term of `rep N` is at most `(log N)²`, so `rep N ≤ (log N)² · gcount N`.
 Definition of `rep`; Halberstam-Richert Ch. 3, the passage from weighted to unweighted
 counts. Unit U-1526. -/
 theorem rep_le_log_sq_mul_gcount (N : ℕ) : rep N ≤ Real.log N ^ 2 * gcount N := by
-  sorry
+  unfold rep gcount
+  rw [sum_filter]
+  have h : ∀ p ∈ range (N + 1),
+      (if p.Prime then (if (N - p).Prime then Real.log p * Real.log ((N - p : ℕ) : ℝ) else 0)
+        else 0) ≤ if p.Prime ∧ (N - p).Prime then Real.log N ^ 2 else 0 := by
+    intro p hp
+    rw [mem_range] at hp
+    split_ifs with h1 h2 h3 h3
+    · have hp1 : (1 : ℝ) ≤ p := by exact_mod_cast h1.one_lt.le
+      have hq1 : (1 : ℝ) ≤ ((N - p : ℕ) : ℝ) := by exact_mod_cast h2.one_lt.le
+      have hpN : (p : ℝ) ≤ N := by exact_mod_cast (by omega : p ≤ N)
+      have hqN : ((N - p : ℕ) : ℝ) ≤ N := by exact_mod_cast (by omega : N - p ≤ N)
+      have a1 : Real.log p ≤ Real.log N := Real.log_le_log (by linarith) hpN
+      have a2 : Real.log ((N - p : ℕ) : ℝ) ≤ Real.log N := Real.log_le_log (by linarith) hqN
+      have b1 : 0 ≤ Real.log p := Real.log_nonneg hp1
+      have b2 : 0 ≤ Real.log ((N - p : ℕ) : ℝ) := Real.log_nonneg hq1
+      rw [sq]
+      exact mul_le_mul a1 a2 b2 (le_trans b1 a1)
+    · exact absurd ⟨h1, h2⟩ h3
+    · positivity
+    · exact le_rfl
+    · positivity
+    · exact le_rfl
+  refine le_trans (sum_le_sum h) ?_
+  rw [← sum_filter, sum_const, nsmul_eq_mul, mul_comm]
 
 /-- LEAF. Upper sanity bound for the first moment: `Σ_{N ∈ ]a, b]} rep N ≤ θ(b)²`, since the
 pairs `(p, q)` with `a < p + q ≤ b` have `p, q ≤ b`. Unit U-1526. -/
 theorem sum_rep_Ioc_le_theta_sq (a b : ℕ) :
     ∑ N ∈ Ioc a b, rep N ≤ θ (b : ℝ) ^ 2 := by
-  sorry
+  set g : ℕ → ℕ → ℝ := fun i j =>
+    if i.Prime ∧ j.Prime then Real.log i * Real.log j else 0 with hg
+  have g0 : ∀ i j, 0 ≤ g i j := by
+    intro i j
+    simp only [hg]
+    split_ifs
+    · exact mul_nonneg (Real.log_natCast_nonneg _) (Real.log_natCast_nonneg _)
+    · exact le_rfl
+  have hrep : ∀ N, rep N = ∑ k ∈ range (N + 1), g k (N - k) := by
+    intro N
+    unfold rep
+    rw [sum_filter]
+    apply sum_congr rfl
+    intro k _
+    simp only [hg]
+    split_ifs <;> simp_all
+  have step1 : ∑ N ∈ Ioc a b, rep N ≤ ∑ N ∈ range (b + 1), rep N := by
+    apply sum_le_sum_of_subset_of_nonneg
+    · intro x hx
+      rw [mem_Ioc] at hx
+      rw [mem_range]
+      omega
+    · intro x _ _
+      exact rep_nonneg x
+  refine le_trans step1 ?_
+  simp only [hrep]
+  rw [sum_comm' (t' := range (b + 1)) (s' := fun k => Icc k b)]
+  swap
+  · intro x y
+    simp only [mem_range, mem_Icc]
+    omega
+  have hth : θ (b : ℝ) ^ 2 = ∑ i ∈ range (b + 1), ∑ j ∈ range (b + 1), g i j := by
+    rw [theta_natCast_eq, sq, sum_mul_sum, sum_filter]
+    apply sum_congr rfl
+    intro i _
+    rw [sum_filter]
+    split_ifs with hi
+    · apply sum_congr rfl
+      intro j _
+      simp only [hg]
+      split_ifs <;> simp_all
+    · symm
+      apply sum_eq_zero
+      intro j _
+      simp only [hg]
+      rw [if_neg (by tauto)]
+  rw [hth]
+  apply sum_le_sum
+  intro i _
+  have hinj : Set.InjOn (fun N : ℕ => N - i) (Icc i b : Set ℕ) := by
+    intro x hx y hy hxy
+    simp only [coe_Icc, Set.mem_Icc] at hx hy
+    simp only at hxy
+    omega
+  rw [← sum_image (f := fun j => g i j) hinj]
+  apply sum_le_sum_of_subset_of_nonneg
+  · intro j hj
+    rw [mem_image] at hj
+    obtain ⟨N, hN, rfl⟩ := hj
+    rw [mem_Icc] at hN
+    rw [mem_range]
+    omega
+  · intro j _ _
+    exact g0 i j
+
+/-- Helper: `]m, n]` holds at most `(n - m + 1) / 2` even integers. -/
+lemma two_mul_card_even_Ioc_le {m n : ℕ} (h : m ≤ n) :
+    2 * #((Ioc m n).filter Even) ≤ n - m + 1 := by
+  have hu : (Ioc 0 n).filter Even = (Ioc 0 m).filter Even ∪ (Ioc m n).filter Even := by
+    rw [← filter_union, Ioc_union_Ioc_eq_Ioc (Nat.zero_le m) h]
+  have hd : Disjoint ((Ioc 0 m).filter Even) ((Ioc m n).filter Even) := by
+    apply disjoint_filter_filter
+    rw [disjoint_left]
+    intro x hx hx'
+    rw [mem_Ioc] at hx hx'
+    omega
+  have hcount : ∀ k, #((Ioc 0 k).filter Even) = k / 2 := by
+    intro k
+    rw [← Nat.Ioc_filter_dvd_card_eq_div k 2]
+    congr 1
+  have := card_union_of_disjoint hd
+  rw [← hu, hcount, hcount] at this
+  omega
 
 /-- LEAF. The even integers of `]X, 2X]` number at most `X/2 + 1`, so the density in
 Theorem 2 cannot exceed one half. Ramaré 1995 Section 2.3, p. 653, the expected count `X/2`.
@@ -179,7 +362,15 @@ theorem card_evenBlock_le {X : ℝ} (hX : 0 ≤ X) : (#(evenBlock X) : ℝ) ≤ 
   have e3 : (#((Ioc ⌊X⌋₊ ⌊2 * X⌋₊).filter Even) : ℝ) ≤ (#((Icc (⌊X⌋₊ + 1) ⌊2 * X⌋₊).filter Even) : ℝ) := by
     exact Nat.cast_le.mpr (card_le_card e2)
   have h_bound : (#((Icc (⌊X⌋₊ + 1) ⌊2 * X⌋₊).filter Even) : ℝ) ≤ ((⌊2 * X⌋₊ : ℝ) - (⌊X⌋₊ : ℝ) + 1) / 2 := by
-    sorry
+    have hmn : ⌊X⌋₊ ≤ ⌊2 * X⌋₊ := Nat.floor_mono (by linarith)
+    have hI : Icc (⌊X⌋₊ + 1) ⌊2 * X⌋₊ = Ioc ⌊X⌋₊ ⌊2 * X⌋₊ := by
+      ext x; simp only [mem_Icc, mem_Ioc]; omega
+    rw [hI]
+    have hc := two_mul_card_even_Ioc_le hmn
+    have hc' : (2 : ℝ) * (#((Ioc ⌊X⌋₊ ⌊2 * X⌋₊).filter Even) : ℝ)
+        ≤ ((⌊2 * X⌋₊ - ⌊X⌋₊ + 1 : ℕ) : ℝ) := by exact_mod_cast hc
+    rw [Nat.cast_add, Nat.cast_sub hmn, Nat.cast_one] at hc'
+    linarith
   have h_bound2 : ((⌊2 * X⌋₊ : ℝ) - (⌊X⌋₊ : ℝ) + 1) / 2 ≤ X / 2 + 1 := by
     have h1 : (⌊2 * X⌋₊ : ℝ) ≤ 2 * X := Nat.floor_le (by positivity)
     have h2 : X - 1 < (⌊X⌋₊ : ℝ) := sub_lt_iff_lt_add.mpr (Nat.lt_floor_add_one X)
