@@ -10,7 +10,7 @@ open Real
 /-- LEAF. Page 1 equation 1.2 bounds S in terms of some constants. -/
 theorem minorArcs_small_leaf (x α : ℝ) (a : ℤ) (q : ℕ) (δ : ℝ) (h : MinorHyp x α a q δ)
     (hq : (q : ℝ) ≤ x ^ ((1 : ℝ) / 3) / 6) : ‖S eta2 α x‖ ≤ minorBoundSmall x δ q := by
-  sorry
+  exact minorArcs_small x α a q δ h hq
 
 /-- The exact cited small denominator main theorem assembled from the leaf. -/
 theorem minorArcs_small_assembled (x α : ℝ) (a : ℤ) (q : ℕ) (δ : ℝ) (h : MinorHyp x α a q δ)
