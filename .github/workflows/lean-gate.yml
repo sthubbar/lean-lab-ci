@@ -19,7 +19,7 @@ name: lean-gate
 on:
   push:
     # Full-lane workers only, to stay inside the 2,000 free private-repo minutes a month; Codex keeps the fast lane.
-    branches: ['gemini/**', 'GEMINI**', 'jules**', 'aristotle/**', 'grok/**', 'codex/**', 'task*', 'gemini-**', 'codex-**', 'decompose-**']
+    branches: ['gemini/**', 'GEMINI**', 'jules**', 'aristotle/**', 'grok/**', 'codex/**', 'task*', 'gemini-**', 'codex-**', 'decompose-**', 'agy/**']
   schedule:
     - cron: '17 9 * * *'
   workflow_dispatch:
@@ -75,7 +75,7 @@ jobs:
           # Ledger files take both sides, as the gate does.
           printf "LOG.md merge=union\n**/LOG.md merge=union\n**/PROGRESS.md merge=union\n**/STATEMENTS.md merge=union\n" >> .git/info/attributes
           git merge -q --no-edit origin/main || { echo "MERGE CONFLICT with main outside ledger files"; git diff --name-only --diff-filter=U; exit 1; }
-          case "$BR" in codex/*) TAG=CODEX-CI;; aristotle/*) TAG=ARISTOTLE-CI;; grok/*) TAG=GROK-CI;; *) TAG=GEMINI-CI;; esac
+          case "$BR" in codex/*) TAG=CODEX-CI;; agy/*) TAG=AGY-CI;; aristotle/*) TAG=ARISTOTLE-CI;; grok/*) TAG=GROK-CI;; *) TAG=GEMINI-CI;; esac
           FOLDERS=$(git diff --name-only origin/main HEAD -- LeanLab/LeanLab | cut -d/ -f3 | sort -u | grep -v '^$' | paste -sd, -)
           echo "branch: $BR  tag: $TAG  folders: $FOLDERS"
           python3 scripts/seal_check.py origin/main | tee "$OUT/seal.txt"
