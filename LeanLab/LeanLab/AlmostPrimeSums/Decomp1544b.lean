@@ -798,6 +798,809 @@ theorem rhoK_hasSum {K : ℕ} (hK : Even K) (hK2 : 2 ≤ K) :
   rw [heq]
   ring
 
+/-- Derived prime reciprocal sum bound over the prime factors of K for the uniform moment route
+to Lemma 3, p. 62. -/
+lemma prime_recip_sum_bound (K : ℕ) (hK2 : 2 ≤ K) :
+    ∑ p ∈ K.primeFactors, 10 / (p : ℝ) ≤ 10 * (3 ^ 40 : ℝ) + 22 + (1 / 4 : ℝ) * log (log K) := by
+  have hK0 : 0 < K := by omega
+  have hK1 : (1 : ℝ) ≤ K := by exact_mod_cast (show 1 ≤ K by omega)
+  have hlogK : 0 < log (K : ℝ) := log_pos (by exact_mod_cast (show 1 < K by omega))
+  set L := ⌊log (K : ℝ)⌋₊
+  have hsplit1 : K.primeFactors =
+      K.primeFactors.filter (· ≤ L) ∪ K.primeFactors.filter (¬ · ≤ L) :=
+    (filter_union_filter_not_eq _ _).symm
+  rw [hsplit1, sum_union (disjoint_filter_filter_not _ _ _)]
+  have hlarge : ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), 10 / (p : ℝ) ≤ 10 / log 2 := by
+    calc ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), 10 / (p : ℝ)
+        ≤ ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), 10 / log (K : ℝ) := by
+          apply sum_le_sum
+          intro p hp
+          have hpL : L < p := not_le.mp (mem_filter.mp hp).2
+          have hlogp : log (K : ℝ) ≤ p := by
+            have := Nat.lt_floor_add_one (log (K : ℝ))
+            have : (L : ℝ) + 1 ≤ p := by exact_mod_cast hpL
+            linarith
+          exact div_le_div_of_nonneg_left (by norm_num) hlogK hlogp
+      _ = ((K.primeFactors.filter (¬ · ≤ L)).card : ℝ) * (10 / log (K : ℝ)) := by
+          rw [sum_const, nsmul_eq_mul]
+      _ ≤ (K.primeFactors.card : ℝ) * (10 / log (K : ℝ)) := by
+          gcongr
+          exact filter_subset _ _
+      _ ≤ (log (K : ℝ) / log 2) * (10 / log (K : ℝ)) := by
+          gcongr
+          rw [le_div_iff₀ (log_pos one_lt_two)]
+          exact LeanLab.HeathBrown1985.card_primeFactors_mul_log_two_le K (by omega)
+      _ = 10 / log 2 := by
+          field_simp [hlogK.ne', (log_pos one_lt_two).ne']
+  have h10log2 : 10 / log (2 : ℝ) ≤ 20 := by
+    rw [div_le_iff₀ (log_pos one_lt_two)]
+    have := log_two_gt_d9
+    linarith
+  set M := 3 ^ 40
+  set S := K.primeFactors.filter (· ≤ L)
+  have hsplit2 : S = S.filter (· ≤ M) ∪ S.filter (¬ · ≤ M) :=
+    (filter_union_filter_not_eq _ _).symm
+  rw [hsplit2, sum_union (disjoint_filter_filter_not _ _ _)]
+  have hsmall : ∑ p ∈ S.filter (· ≤ M), 10 / (p : ℝ) ≤ 10 * (3 ^ 40 : ℝ) := by
+    calc ∑ p ∈ S.filter (· ≤ M), 10 / (p : ℝ)
+        ≤ ∑ p ∈ S.filter (· ≤ M), (10 : ℝ) := by
+          apply sum_le_sum
+          intro p hp
+          have hp1 : (1 : ℝ) ≤ p := by
+            exact_mod_cast (Nat.prime_of_mem_primeFactors (mem_filter.mp (mem_filter.mp hp).1).1).one_le
+          exact div_le_self (by norm_num) hp1
+      _ = ((S.filter (· ≤ M)).card : ℝ) * 10 := by rw [sum_const, nsmul_eq_mul]
+      _ ≤ ((Icc 1 M).card : ℝ) * 10 := by
+          gcongr
+          intro p hp
+          rw [mem_Icc]
+          have hp1 := (Nat.prime_of_mem_primeFactors (mem_filter.mp (mem_filter.mp hp).1).1).one_le
+          have hpM := (mem_filter.mp hp).2
+          exact ⟨hp1, hpM⟩
+      _ = 10 * (3 ^ 40 : ℝ) := by
+          rw [Nat.card_Icc]
+          dsimp [M]
+          norm_num
+  by_cases hmed_empty : S.filter (¬ · ≤ M) = ∅
+  · rw [hmed_empty, sum_empty]
+    have hK2R : log (2 : ℝ) ≤ log (K : ℝ) := log_le_log (by norm_num) (by exact_mod_cast hK2)
+    have hl2 : (1 / 2 : ℝ) ≤ log 2 := by have := log_two_gt_d9; linarith
+    have hll2 : -log 2 ≤ log (log (K : ℝ)) := by
+      have := log_le_log (by positivity) (hl2.trans hK2R)
+      rw [log_div (by norm_num) (by norm_num), log_one, zero_sub] at this
+      exact this
+    have := log_two_lt_d9
+    linarith
+  · obtain ⟨p0, hp0⟩ := Finset.nonempty_iff_ne_empty.mpr hmed_empty
+    have hp0L : p0 ≤ L := (mem_filter.mp (mem_filter.mp hp0).1).2
+    have hp0_gt : M < p0 := not_le.mp (mem_filter.mp hp0).2
+    have hMpos : 1 ≤ M := by dsimp [M]; norm_num
+    have hL1 : 1 ≤ (L : ℝ) := by exact_mod_cast (show 1 ≤ L by omega)
+    have hmed : ∑ p ∈ S.filter (¬ · ≤ M), 10 / (p : ℝ) ≤ (1 / 4 : ℝ) * (log (log (K : ℝ)) + 2) := by
+      calc ∑ p ∈ S.filter (¬ · ≤ M), 10 / (p : ℝ)
+          ≤ ∑ p ∈ S.filter (¬ · ≤ M), (1 / 4 : ℝ) * (log (p : ℝ) / p) := by
+            apply sum_le_sum
+            intro p hp
+            have hp_gt : M < p := not_le.mp (mem_filter.mp hp).2
+            have hp_pos : (0 : ℝ) < p := by
+              have : 0 < p := lt_of_lt_of_le hMpos hp_gt.le
+              exact_mod_cast this
+            have h40 : (40 : ℝ) ≤ log (p : ℝ) := by
+              have h3 : (3 : ℝ) ^ 40 ≤ p := by exact_mod_cast hp_gt.le
+              have hl3 : 1 ≤ log (3 : ℝ) := by
+                have := log_three_gt_d9
+                linarith
+              calc (40 : ℝ) ≤ 40 * log 3 := by linarith
+                _ = log ((3 : ℝ) ^ 40) := (log_pow 3 40).symm
+                _ ≤ log (p : ℝ) := log_le_log (by positivity) h3
+            rw [mul_div_assoc', div_le_div_iff_of_pos_right hp_pos]
+            linarith
+        _ = (1 / 4 : ℝ) * ∑ p ∈ S.filter (¬ · ≤ M), log (p : ℝ) / p := by rw [← mul_sum]
+        _ ≤ (1 / 4 : ℝ) * ∑ p ∈ Nat.primesLE L, log (p : ℝ) / p := by
+            apply mul_le_mul_of_nonneg_left _ (by norm_num)
+            apply sum_le_sum_of_subset_of_nonneg
+            · intro p hp
+              have hpS := (mem_filter.mp hp).1
+              have hpK := (mem_filter.mp hpS).1
+              have hpL := (mem_filter.mp hpS).2
+              exact Nat.mem_primesBelow.mpr ⟨Nat.lt_succ_of_le hpL, Nat.prime_of_mem_primeFactors hpK⟩
+            · intro p _ _; exact div_nonneg (log_natCast_nonneg p) (Nat.cast_nonneg p)
+        _ ≤ (1 / 4 : ℝ) * (log (L : ℝ) + 2) := by
+            apply mul_le_mul_of_nonneg_left _ (by norm_num)
+            have hm := (abs_le.mp (LeanLab.AlmostPrimes.Decomp1528a.mertens1_abs hL1)).2
+            simp only [Nat.floor_natCast] at hm
+            linarith
+        _ ≤ (1 / 4 : ℝ) * (log (log (K : ℝ)) + 2) := by
+            apply mul_le_mul_of_nonneg_left _ (by norm_num)
+            linarith [log_le_log (by positivity) (Nat.floor_le hlogK.le)]
+    linarith
+
+/-- Derived logarithm prime factor decomposition for the uniform moment route to Lemma 3, p. 62. -/
+lemma log_eq_sum_primeFactors {n : ℕ} (hn : n ≠ 0) :
+    log (n : ℝ) = ∑ p ∈ n.primeFactors, (n.factorization p : ℝ) * log (p : ℝ) := by
+  have hprod := Nat.prod_factorization_pow_eq_self hn
+  have hcast : (n : ℝ) = ∏ p ∈ n.primeFactors, (p : ℝ) ^ (n.factorization p) := by
+    conv_lhs => rw [← hprod]
+    rw [Finsupp.prod, Nat.support_factorization]
+    push_cast
+    rfl
+  rw [hcast, log_prod (fun p hp => pow_ne_zero _ (by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).ne_zero))]
+  apply sum_congr rfl
+  intro p _
+  rw [log_pow]
+
+/-- Derived support property of ρ_K at prime powers above cubes for Lemma 3, p. 62. -/
+lemma rhoK_eq_zero_of_factorization_gt {K n p : ℕ} (hp : p.Prime)
+    (h : 3 < n.factorization p) : rhoK K n = 0 := by
+  by_cases hn : n = 0
+  · subst n; simp
+  have hdvd : p ^ (n.factorization p) ∣ n := Nat.ordProj_dvd n p
+  have heq : n = p ^ (n.factorization p) * (n / p ^ (n.factorization p)) :=
+    (Nat.mul_div_cancel' hdvd).symm
+  have hcop : (p ^ (n.factorization p)).Coprime (n / p ^ (n.factorization p)) :=
+    (Nat.coprime_ordCompl hp hn).pow_left _
+  rw [heq, (rhoK_multiplicative K).map_mul_of_coprime hcop, rhoK_prime_pow_zero K hp (by omega), zero_mul]
+
+/-- Derived additive logarithmic bound on the support of ρ_K for Lemma 3, p. 62. -/
+lemma log_le_three_sum_primeFactors {K d : ℕ} (hd : d ≠ 0) (hrho : rhoK K d ≠ 0) :
+    log (d : ℝ) ≤ 3 * ∑ p ∈ d.primeFactors, log (p : ℝ) := by
+  rw [log_eq_sum_primeFactors hd, mul_sum]
+  apply sum_le_sum
+  intro p hp
+  have hpp := Nat.prime_of_mem_primeFactors hp
+  have hk3 : d.factorization p ≤ 3 := by
+    by_contra hgt
+    exact hrho (rhoK_eq_zero_of_factorization_gt hpp (not_le.mp hgt))
+  have hk3R : (d.factorization p : ℝ) ≤ 3 := by exact_mod_cast hk3
+  exact mul_le_mul_of_nonneg_right hk3R (log_natCast_nonneg p)
+
+/-- Derived squared logarithmic bound on the support of ρ_K for Lemma 3, p. 62. -/
+lemma one_add_log_sq_le_sum_primeFactors {K d : ℕ} (hd : 1 ≤ d) (hrho : rhoK K d ≠ 0) :
+    (1 + log (d : ℝ)) ^ 2 ≤ 2 + 18 * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 := by
+  have hd0 : d ≠ 0 := by omega
+  have h1 : log (d : ℝ) ≤ 3 * ∑ p ∈ d.primeFactors, log (p : ℝ) :=
+    log_le_three_sum_primeFactors hd0 hrho
+  have hlog0 : 0 ≤ log (d : ℝ) := log_nonneg (by exact_mod_cast hd)
+  have hsq : (log (d : ℝ)) ^ 2 ≤ 9 * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 := by
+    calc (log (d : ℝ)) ^ 2 ≤ (3 * ∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 :=
+          pow_le_pow_left₀ hlog0 h1 2
+      _ = 9 * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 := by ring
+  have h2 : (1 + log (d : ℝ)) ^ 2 ≤ 2 + 2 * (log (d : ℝ)) ^ 2 := by
+    have : 0 ≤ (1 - log (d : ℝ)) ^ 2 := sq_nonneg _
+    linarith
+  linarith
+
+/-- Derived prime-multiple factorization bound for weighted sums of |ρ_K| for Lemma 3, p. 62. -/
+lemma sum_rhoK_dvd_prime_add_le (K : ℕ) (g : ℕ → ℝ) (hgnn : ∀ n, 0 ≤ g n)
+    {n p : ℕ} (hp : p.Prime) {c : ℝ} (hc : 0 ≤ c)
+    (hgm : ∀ {k m : ℕ}, 1 ≤ k → k ≤ 3 → m ≠ 0 → (p ^ k).Coprime m → g (p ^ k * m) ≤ c + g m) :
+    ∑ d ∈ (Ioc 0 n).filter (p ∣ ·), |rhoK K d| * g d ≤
+      (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) *
+        (c * (∑ m ∈ Ioc 0 n, |rhoK K m|) + ∑ m ∈ Ioc 0 n, |rhoK K m| * g m) := by
+  have hsub : ∑ d ∈ (Ioc 0 n).filter (p ∣ ·), |rhoK K d| * g d ≤
+      ∑ k ∈ Icc 1 3, ∑ m ∈ Ioc 0 n, |rhoK K (p ^ k)| * (|rhoK K m| * (c + g m)) := by
+    rw [← sum_product']
+    have hfilter : ∑ d ∈ (Ioc 0 n).filter (p ∣ ·), |rhoK K d| * g d =
+        ∑ d ∈ ((Ioc 0 n).filter (p ∣ ·)).filter (fun d => d.factorization p ≤ 3), |rhoK K d| * g d := by
+      rw [← sum_subset (filter_subset (fun d => d.factorization p ≤ 3) ((Ioc 0 n).filter (p ∣ ·)))]
+      intro d hd hnot
+      have hk : 3 < d.factorization p := not_le.mp fun hle => hnot (mem_filter.mpr ⟨hd, hle⟩)
+      rw [rhoK_eq_zero_of_factorization_gt hp hk, abs_zero, zero_mul]
+    rw [hfilter]
+    let φ : ℕ → ℕ × ℕ := fun d => (d.factorization p, d / p ^ (d.factorization p))
+    have hmaps : ∀ d ∈ ((Ioc 0 n).filter (p ∣ ·)).filter (fun d => d.factorization p ≤ 3),
+        φ d ∈ (Icc 1 3) ×ˢ (Ioc 0 n) := by
+      intro d hd
+      simp only [mem_filter, mem_Ioc, mem_product, mem_Icc, φ] at hd ⊢
+      obtain ⟨⟨⟨hd0, hdn⟩, hpd⟩, hk3⟩ := hd
+      have hk1 : 1 ≤ d.factorization p := hp.dvd_iff_one_le_factorization (by omega) |>.mp hpd
+      have hdvd : p ^ (d.factorization p) ∣ d := Nat.ordProj_dvd d p
+      have hpos : 0 < d / p ^ (d.factorization p) := Nat.div_pos (Nat.le_of_dvd hd0 hdvd) (pow_pos hp.pos _)
+      exact ⟨⟨hk1, hk3⟩, ⟨hpos, Nat.div_le_self _ _ |>.trans hdn⟩⟩
+    have hinj : Set.InjOn φ (((Ioc 0 n).filter (p ∣ ·)).filter (fun d => d.factorization p ≤ 3) : Set ℕ) := by
+      intro d1 hd1 d2 hd2 heq
+      simp only [Prod.mk.injEq, φ] at heq
+      have hdvd1 : p ^ (d1.factorization p) ∣ d1 := Nat.ordProj_dvd d1 p
+      have hdvd2 : p ^ (d2.factorization p) ∣ d2 := Nat.ordProj_dvd d2 p
+      have heq1 := (Nat.mul_div_cancel' hdvd1).symm
+      have heq2 := (Nat.mul_div_cancel' hdvd2).symm
+      exact heq1.trans ((congr_arg₂ (· * ·) (congr_arg (p ^ ·) heq.1) heq.2).trans heq2.symm)
+    calc ∑ d ∈ ((Ioc 0 n).filter (p ∣ ·)).filter (fun d => d.factorization p ≤ 3), |rhoK K d| * g d
+        ≤ ∑ d ∈ ((Ioc 0 n).filter (p ∣ ·)).filter (fun d => d.factorization p ≤ 3),
+            |rhoK K (p ^ (φ d).1)| * (|rhoK K (φ d).2| * (c + g (φ d).2)) := by
+          apply sum_le_sum
+          intro d hd
+          simp only [mem_filter, mem_Ioc] at hd
+          obtain ⟨⟨⟨hd0, hdn⟩, hpd⟩, hk3⟩ := hd
+          have hd_ne : d ≠ 0 := by omega
+          have hk1 : 1 ≤ d.factorization p := hp.dvd_iff_one_le_factorization hd_ne |>.mp hpd
+          have hdvd : p ^ (d.factorization p) ∣ d := Nat.ordProj_dvd d p
+          have hm_pos : 0 < d / p ^ (d.factorization p) := Nat.div_pos (Nat.le_of_dvd hd0 hdvd) (pow_pos hp.pos _)
+          have hcop : (p ^ (d.factorization p)).Coprime (d / p ^ (d.factorization p)) :=
+            (Nat.coprime_ordCompl hp hd_ne).pow_left _
+          have heq : d = p ^ (d.factorization p) * (d / p ^ (d.factorization p)) :=
+            (Nat.mul_div_cancel' hdvd).symm
+          have hrho_mul : |rhoK K d| = |rhoK K (p ^ (φ d).1)| * |rhoK K (φ d).2| := by
+            conv_lhs => rw [heq]
+            rw [(rhoK_multiplicative K).map_mul_of_coprime hcop, abs_mul]
+          have hg_le : g d ≤ c + g (φ d).2 := by
+            conv_lhs => rw [heq]
+            exact hgm hk1 hk3 (by omega) hcop
+          rw [hrho_mul, mul_assoc]
+          exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hg_le (abs_nonneg _)) (abs_nonneg _)
+      _ = ∑ x ∈ (((Ioc 0 n).filter (p ∣ ·)).filter (fun d => d.factorization p ≤ 3)).image φ,
+            |rhoK K (p ^ x.1)| * (|rhoK K x.2| * (c + g x.2)) := by
+          rw [sum_image hinj]
+      _ ≤ ∑ x ∈ (Icc 1 3) ×ˢ (Ioc 0 n), |rhoK K (p ^ x.1)| * (|rhoK K x.2| * (c + g x.2)) := by
+          apply sum_le_sum_of_subset_of_nonneg
+          · rw [image_subset_iff]; exact hmaps
+          · intro x _ _
+            have : 0 ≤ c + g x.2 := add_nonneg hc (hgnn _)
+            positivity
+  refine hsub.trans (le_of_eq ?_)
+  have hsum_m : ∀ k, ∑ m ∈ Ioc 0 n, |rhoK K (p ^ k)| * (|rhoK K m| * (c + g m)) =
+      |rhoK K (p ^ k)| * (c * (∑ m ∈ Ioc 0 n, |rhoK K m|) + ∑ m ∈ Ioc 0 n, |rhoK K m| * g m) := by
+    intro k
+    rw [← mul_sum]
+    congr 1
+    have hdist : ∀ m : ℕ, |rhoK K m| * (c + g m) = |rhoK K m| * c + |rhoK K m| * g m :=
+      fun m => mul_add _ _ _
+    simp_rw [hdist, sum_add_distrib, ← sum_mul]
+    ring
+  simp_rw [hsum_m, ← sum_mul]
+  congr 1
+  have : Icc 1 3 = {1, 2, 3} := by decide
+  rw [this]
+  simp only [sum_insert (by decide : (1:ℕ) ∉ ({2, 3} : Finset ℕ)),
+    sum_insert (by decide : (2:ℕ) ∉ ({3} : Finset ℕ)), sum_singleton, pow_one]
+  ring
+
+/-- Derived prime-factor sum interchange for weighted sums of |ρ_K| for Lemma 3, p. 62. -/
+lemma sum_rhoK_log_primeFactors_add_le (K : ℕ) (g : ℕ → ℝ) (hgnn : ∀ n, 0 ≤ g n) (c : ℕ → ℝ) (hcnn : ∀ p, 0 ≤ c p)
+    (hgm : ∀ {p k m : ℕ}, p.Prime → 1 ≤ k → k ≤ 3 → m ≠ 0 → (p ^ k).Coprime m → g (p ^ k * m) ≤ c p + g m)
+    (n : ℕ) :
+    ∑ d ∈ Ioc 0 n, |rhoK K d| * g d * (∑ p ∈ d.primeFactors, log (p : ℝ)) ≤
+      (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) * c p) *
+        (∑ m ∈ Ioc 0 n, |rhoK K m|) +
+      (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) *
+        (∑ m ∈ Ioc 0 n, |rhoK K m| * g m) := by
+  have hswap : ∑ d ∈ Ioc 0 n, |rhoK K d| * g d * (∑ p ∈ d.primeFactors, log (p : ℝ)) =
+      ∑ p ∈ (Ioc 0 n).filter Nat.Prime, log (p : ℝ) * ∑ d ∈ (Ioc 0 n).filter (p ∣ ·), |rhoK K d| * g d := by
+    have h1 : ∑ d ∈ Ioc 0 n, |rhoK K d| * g d * (∑ p ∈ d.primeFactors, log (p : ℝ)) =
+        ∑ d ∈ Ioc 0 n, ∑ p ∈ d.primeFactors, |rhoK K d| * g d * log (p : ℝ) := by
+      apply sum_congr rfl; intro d _; exact mul_sum _ _ _
+    rw [h1, sum_comm' (t' := (Ioc 0 n).filter Nat.Prime) (s' := fun p => (Ioc 0 n).filter (p ∣ ·))]
+    · apply sum_congr rfl
+      intro p _
+      rw [mul_sum]
+      apply sum_congr rfl
+      intro d _
+      ring
+    · intro d p
+      simp only [mem_Ioc, Nat.mem_primeFactors, ne_eq, mem_filter]
+      constructor
+      · rintro ⟨⟨hd0, hdn⟩, hpp, hpd, _⟩
+        exact ⟨⟨⟨hd0, hdn⟩, hpd⟩, ⟨hpp.pos, Nat.le_of_dvd hd0 hpd |>.trans hdn⟩, hpp⟩
+      · rintro ⟨⟨⟨hd0, hdn⟩, hpd⟩, _, hpp⟩
+        exact ⟨⟨hd0, hdn⟩, hpp, hpd, by omega⟩
+  rw [hswap, sum_mul, sum_mul, ← sum_add_distrib]
+  apply sum_le_sum
+  intro p hp
+  have hpp : p.Prime := (mem_filter.mp hp).2
+  have hle := sum_rhoK_dvd_prime_add_le K g hgnn (n := n) hpp (hcnn p) (fun hk1 hk3 hm0 hcop => hgm hpp hk1 hk3 hm0 hcop)
+  have hlog : 0 ≤ log (p : ℝ) := log_natCast_nonneg p
+  calc log (p : ℝ) * ∑ d ∈ (Ioc 0 n).filter (p ∣ ·), |rhoK K d| * g d
+      ≤ log (p : ℝ) * ((|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) *
+          (c p * (∑ m ∈ Ioc 0 n, |rhoK K m|) + ∑ m ∈ Ioc 0 n, |rhoK K m| * g m)) :=
+        mul_le_mul_of_nonneg_left hle hlog
+    _ = (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) * c p * ∑ m ∈ Ioc 0 n, |rhoK K m| +
+        (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) * ∑ m ∈ Ioc 0 n, |rhoK K m| * g m := by
+        ring
+
+/-- Derived first prime-logarithm moment inequality for |ρ_K| for Lemma 3, p. 62. -/
+lemma sum_rhoK_log_primeFactors_le (K n : ℕ) :
+    ∑ d ∈ Ioc 0 n, |rhoK K d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ≤
+      (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) *
+        (∑ m ∈ Ioc 0 n, |rhoK K m|) := by
+  have h := sum_rhoK_log_primeFactors_add_le K (fun _ => 1) (fun _ => zero_le_one) (fun _ => 0) (fun _ => le_rfl)
+    (fun _ _ _ _ _ => by norm_num) n
+  simpa using h
+
+/-- Derived second prime-logarithm moment inequality for |ρ_K| for Lemma 3, p. 62. -/
+lemma sum_rhoK_log_primeFactors_sq_le (K n : ℕ) :
+    ∑ d ∈ Ioc 0 n, |rhoK K d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 ≤
+      (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2) *
+        (∑ m ∈ Ioc 0 n, |rhoK K m|) +
+      (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) ^ 2 *
+        (∑ m ∈ Ioc 0 n, |rhoK K m|) := by
+  let g1 : ℕ → ℝ := fun d => ∑ q ∈ d.primeFactors, log (q : ℝ)
+  have hg1_nn : ∀ m, 0 ≤ g1 m := fun m => sum_nonneg fun q _ => log_natCast_nonneg q
+  have hg1_m : ∀ {p k m : ℕ}, p.Prime → 1 ≤ k → k ≤ 3 → m ≠ 0 → (p ^ k).Coprime m →
+      g1 (p ^ k * m) ≤ log (p : ℝ) + g1 m := by
+    intro p k m hp hk1 _ hm0 hcop
+    have hpk0 : p ^ k ≠ 0 := pow_ne_zero k hp.ne_zero
+    dsimp [g1]
+    rw [Nat.primeFactors_mul hpk0 hm0, sum_union hcop.disjoint_primeFactors,
+      Nat.primeFactors_prime_pow (by omega : k ≠ 0) hp, sum_singleton]
+  have h1 := sum_rhoK_log_primeFactors_add_le K g1 hg1_nn (fun p => log (p : ℝ))
+    (fun p => log_natCast_nonneg p) hg1_m n
+  have h2 := sum_rhoK_log_primeFactors_le K n
+  have h3 : (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) *
+      (∑ m ∈ Ioc 0 n, |rhoK K m| * g1 m) ≤
+      (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) ^ 2 *
+        (∑ m ∈ Ioc 0 n, |rhoK K m|) := by
+    have hpos : 0 ≤ ∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) :=
+      sum_nonneg fun p _ => mul_nonneg (by positivity) (log_natCast_nonneg p)
+    calc (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) *
+          (∑ m ∈ Ioc 0 n, |rhoK K m| * g1 m)
+        ≤ (∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) *
+          ((∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)) *
+            (∑ m ∈ Ioc 0 n, |rhoK K m|)) := mul_le_mul_of_nonneg_left h2 hpos
+      _ = _ := by ring
+  have heq : ∑ d ∈ Ioc 0 n, |rhoK K d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 =
+      ∑ d ∈ Ioc 0 n, |rhoK K d| * g1 d * (∑ p ∈ d.primeFactors, log (p : ℝ)) := by
+    apply sum_congr rfl; intro d _; dsimp [g1]; ring
+  have heq2 : ∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) * log (p : ℝ) =
+      ∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2 := by
+    apply sum_congr rfl; intro p _; ring
+  rw [heq]
+  rw [heq2] at h1
+  linarith
+
+/-- Derived sixteenth-power bound on log x for Lemma 3, p. 62. -/
+lemma log_le_sixteen_rpow {x : ℝ} (hx : 0 ≤ x) : log x ≤ 16 * x ^ (1 / 16 : ℝ) := by
+  have h := log_le_rpow_div hx (by norm_num : (0 : ℝ) < 1 / 16)
+  linarith
+
+/-- Derived eighth-power bound on log² x for Lemma 3, p. 62. -/
+lemma log_sq_le_256_rpow {x : ℝ} (hx : 1 ≤ x) : (log x) ^ 2 ≤ 256 * x ^ (1 / 8 : ℝ) := by
+  have hx0 : 0 ≤ x := by linarith
+  have hl0 : 0 ≤ log x := log_nonneg hx
+  have h1 := log_le_sixteen_rpow hx0
+  have hr : (x ^ (1 / 16 : ℝ)) ^ 2 = x ^ (1 / 8 : ℝ) := by
+    rw [← rpow_mul_natCast hx0]; norm_num
+  calc (log x) ^ 2 ≤ (16 * x ^ (1 / 16 : ℝ)) ^ 2 := pow_le_pow_left₀ hl0 h1 2
+    _ = 256 * (x ^ (1 / 16 : ℝ)) ^ 2 := by ring
+    _ = 256 * x ^ (1 / 8 : ℝ) := by rw [hr]
+
+/-- Derived local bound on |ρ_K| at prime powers for primes dividing K for Lemma 3, p. 62. -/
+lemma rhoK_prime_abs_dvd {K p : ℕ} (hp : p.Prime) (hpK : p ∣ K) :
+    |rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)| ≤ 3 / (p : ℝ) := by
+  have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hp.two_le
+  have hp0 : (0 : ℝ) < p := by positivity
+  rw [rhoK_prime K hp, rhoK_prime_sq K hp, rhoK_prime_cube K hp, hK_prime K hp, ite_eq_left hpK]
+  have h1 : |0 - 2 / (p : ℝ)| = 2 / (p : ℝ) := by
+    rw [zero_sub, abs_neg, abs_of_nonneg (by positivity)]
+  have h2 : |1 / (p : ℝ) ^ 2 - 2 * 0 / (p : ℝ)| = 1 / (p : ℝ) ^ 2 := by
+    rw [mul_zero, zero_div, sub_zero, abs_of_nonneg (by positivity)]
+  have h3 : |(0 : ℝ) / (p : ℝ) ^ 2| = 0 := by simp
+  rw [h1, h2, h3, add_zero]
+  have hp_sq : 2 / (p : ℝ) + 1 / (p : ℝ) ^ 2 ≤ 2 / (p : ℝ) + 1 / (p : ℝ) := by
+    gcongr
+    nlinarith
+  linarith [show 2 / (p : ℝ) + 1 / (p : ℝ) = 3 / (p : ℝ) by ring]
+
+/-- Derived exponential Euler-product bound on partial sums of |ρ_K| for Lemma 3, p. 62. -/
+lemma rhoK_sum_le_exp (K : ℕ) (hK : Even K) (hK2 : 2 ≤ K) (n : ℕ) :
+    ∑ d ∈ Ioc 0 n, |rhoK K d| ≤
+      Real.exp ((∑ p ∈ K.primeFactors, 3 / (p : ℝ)) +
+        ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ)) := by
+  let f : ℕ → ℝ := fun d => |rhoK K d|
+  have hnn : ∀ d, 0 ≤ f d := fun d => abs_nonneg _
+  have h0 : f 0 = 0 := by simp [f]
+  have h1 : f 1 = 1 := by simp [f, (rhoK_multiplicative K).map_one]
+  have hmul : ∀ {a b : ℕ}, a.Coprime b → f (a * b) = f a * f b := by
+    intro a b hab; simp [f, (rhoK_multiplicative K).map_mul_of_coprime hab, abs_mul]
+  have hpow : ∀ {p k : ℕ}, p.Prime → 4 ≤ k → f (p ^ k) = 0 := by
+    intro p k hp hk; simp [f, rhoK_prime_pow_zero K hp hk]
+  have hloc {p : ℕ} (hp : p.Prime) : HasSum (fun k : ℕ => f (p ^ k))
+      (1 + f p + f (p ^ 2) + f (p ^ 3)) := by
+    have hz : ∀ k ∉ range 4, f (p ^ k) = 0 := fun k hk => hpow hp (by simpa using hk)
+    convert hasSum_sum_of_ne_finset_zero hz using 1
+    · norm_num [sum_range_succ, h1]
+    · infer_instance
+  have hnorm : ∀ {p : ℕ}, p.Prime → Summable (fun k : ℕ => ‖f (p ^ k)‖) := by
+    intro p hp
+    simpa only [Real.norm_eq_abs, abs_of_nonneg (hnn _)] using (hloc hp).summable
+  let N := n + 1
+  have H := (EulerProduct.summable_and_hasSum_smoothNumbers_prod_primesBelow_tsum
+    (f := f) h1 (fun h => hmul h) (fun hp => hnorm hp) N).2
+  have H' := (hasSum_subtype_iff_indicator (f := f) (s := (N.smoothNumbers : Set ℕ))).mp H
+  have e1 : ∑ d ∈ Ioc 0 n, f d = ∑ d ∈ Ioc 0 n, (N.smoothNumbers : Set ℕ).indicator f d := by
+    apply sum_congr rfl
+    intro d hd
+    have hd_mem := mem_Ioc.mp hd
+    rw [Set.indicator_of_mem (Nat.mem_smoothNumbers_of_lt hd_mem.1 (by omega : d < N))]
+  rw [e1]
+  have htsum_summable : Summable (fun p : Nat.Primes => 27 * (p : ℝ) ^ (-2 : ℝ)) :=
+    ((Nat.Primes.summable_rpow (r := -2)).mpr (by norm_num)).mul_left 27
+  calc ∑ d ∈ Ioc 0 n, (N.smoothNumbers : Set ℕ).indicator f d
+      ≤ ∏ p ∈ N.primesBelow, ∑' k : ℕ, f (p ^ k) := by
+        apply sum_le_hasSum _ _ H'
+        intro i _
+        by_cases hi : i ∈ (N.smoothNumbers : Set ℕ)
+        · rw [Set.indicator_of_mem hi]; exact hnn i
+        · rw [Set.indicator_of_notMem hi]
+    _ = ∏ p ∈ N.primesBelow, (1 + (f p + f (p ^ 2) + f (p ^ 3))) := by
+        apply prod_congr rfl
+        intro p hp
+        rw [(hloc (Nat.prime_of_mem_primesBelow hp)).tsum_eq]
+        ring
+    _ ≤ ∏ p ∈ N.primesBelow, Real.exp (f p + f (p ^ 2) + f (p ^ 3)) :=
+        prod_le_prod₀ (fun p _ => by linarith [hnn p, hnn (p ^ 2), hnn (p ^ 3)])
+          (fun p _ => by linarith [Real.add_one_le_exp (f p + f (p ^ 2) + f (p ^ 3))])
+    _ = Real.exp (∑ p ∈ N.primesBelow, (f p + f (p ^ 2) + f (p ^ 3))) := (Real.exp_sum _ _).symm
+    _ ≤ Real.exp ((∑ p ∈ K.primeFactors, 3 / (p : ℝ)) +
+          ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ)) := by
+        apply Real.exp_le_exp.mpr
+        have hsplit : N.primesBelow = N.primesBelow.filter (· ∣ K) ∪ N.primesBelow.filter (¬ · ∣ K) :=
+          (filter_union_filter_not_eq _ _).symm
+        rw [hsplit, sum_union (disjoint_filter_filter_not _ _ _)]
+        apply add_le_add
+        · calc ∑ p ∈ N.primesBelow.filter (· ∣ K), (f p + f (p ^ 2) + f (p ^ 3))
+              ≤ ∑ p ∈ N.primesBelow.filter (· ∣ K), 3 / (p : ℝ) := by
+                apply sum_le_sum
+                intro p hp
+                exact rhoK_prime_abs_dvd (Nat.prime_of_mem_primesBelow (mem_filter.mp hp).1) (mem_filter.mp hp).2
+            _ ≤ ∑ p ∈ K.primeFactors, 3 / (p : ℝ) := by
+                apply sum_le_sum_of_subset_of_nonneg
+                · intro p hp
+                  have h1 := (mem_filter.mp hp).1
+                  have h2 := (mem_filter.mp hp).2
+                  exact Nat.mem_primeFactors.mpr ⟨Nat.prime_of_mem_primesBelow h1, h2, by omega⟩
+                · intro p _ _; positivity
+        · calc ∑ p ∈ N.primesBelow.filter (¬ · ∣ K), (f p + f (p ^ 2) + f (p ^ 3))
+              ≤ ∑ p ∈ N.primesBelow.filter (¬ · ∣ K), 27 * (p : ℝ) ^ (-2 : ℝ) := by
+                apply sum_le_sum
+                intro p hp
+                have hpp := Nat.prime_of_mem_primesBelow (mem_filter.mp hp).1
+                have hpK := (mem_filter.mp hp).2
+                have hp2 : 2 < p := by
+                  have := hpp.two_le
+                  have hp_ne_2 : p ≠ 2 := fun h => hpK (h ▸ even_iff_two_dvd.mp hK)
+                  omega
+                have htail := rhoK_prime_tail_bound hpp hp2 hpK
+                have heq : 27 / (p : ℝ) ^ 2 = 27 * (p : ℝ) ^ (-2 : ℝ) := by
+                  have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
+                  rw [div_eq_mul_inv, ← rpow_natCast, ← rpow_neg hp0.le]; norm_num
+                linarith
+            _ ≤ ∑ p ∈ N.primesBelow, 27 * (p : ℝ) ^ (-2 : ℝ) := by
+                apply sum_le_sum_of_subset_of_nonneg (filter_subset _ _)
+                intro p _ _; positivity
+            _ ≤ ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ) := by
+                rw [← sum_subtype_of_mem (p := Nat.Prime) (fun p : ℕ => 27 * (p : ℝ) ^ (-2 : ℝ))
+                  (fun p hp => Nat.prime_of_mem_primesBelow hp)]
+                exact Summable.sum_le_tsum (L := SummationFilter.unconditional Nat.Primes) _
+                  (fun p _ => by positivity) htsum_summable
+
+/-- Derived bound on the sum of log p over prime factors of K for Lemma 3, p. 62. -/
+lemma sum_log_primeFactors_le (K : ℕ) (hK1 : 1 ≤ K) :
+    ∑ p ∈ K.primeFactors, log (p : ℝ) ≤ log (K : ℝ) := by
+  have hprod : ∏ p ∈ K.primeFactors, p ≤ K :=
+    Nat.le_of_dvd hK1 (Nat.prod_primeFactors_dvd K)
+  have hcast : ((∏ p ∈ K.primeFactors, p : ℕ) : ℝ) ≤ K := by exact_mod_cast hprod
+  rw [Nat.cast_prod] at hcast
+  have hpos : 0 < ∏ p ∈ K.primeFactors, (p : ℝ) :=
+    prod_pos fun p hp => by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).pos
+  rw [← log_prod (fun p hp => by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).ne_zero)]
+  exact log_le_log hpos hcast
+
+/-- Derived bound on Σ_{p ∣ K} log p / p for Lemma 3, p. 62. -/
+lemma sum_log_div_primeFactors_le (K : ℕ) (hK2 : 2 ≤ K) :
+    ∑ p ∈ K.primeFactors, log (p : ℝ) / p ≤ 6 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by
+  have hlogK : 0 < log (K : ℝ) := log_pos (by exact_mod_cast (show 1 < K by omega))
+  set L := ⌊log (K : ℝ)⌋₊
+  have hsplit : K.primeFactors =
+      K.primeFactors.filter (· ≤ L) ∪ K.primeFactors.filter (¬ · ≤ L) :=
+    (filter_union_filter_not_eq _ _).symm
+  rw [hsplit, sum_union (disjoint_filter_filter_not _ _ _)]
+  have hlarge : ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), log (p : ℝ) / p ≤ 2 := by
+    calc ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), log (p : ℝ) / p
+        ≤ ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), log (p : ℝ) / log (K : ℝ) := by
+          apply sum_le_sum
+          intro p hp
+          have hpL : L < p := not_le.mp (mem_filter.mp hp).2
+          have hlogp : log (K : ℝ) ≤ p := by
+            have := Nat.lt_floor_add_one (log (K : ℝ))
+            have : (L : ℝ) + 1 ≤ p := by exact_mod_cast hpL
+            linarith
+          exact div_le_div_of_nonneg_left (log_natCast_nonneg p) hlogK hlogp
+      _ = (∑ p ∈ K.primeFactors.filter (¬ · ≤ L), log (p : ℝ)) / log (K : ℝ) := (sum_div _ _ _).symm
+      _ ≤ (∑ p ∈ K.primeFactors, log (p : ℝ)) / log (K : ℝ) :=
+          div_le_div_of_nonneg_right
+            (sum_le_sum_of_subset_of_nonneg (filter_subset _ _) (fun p _ _ => log_natCast_nonneg p)) hlogK.le
+      _ ≤ log (K : ℝ) / log (K : ℝ) :=
+          div_le_div_of_nonneg_right (sum_log_primeFactors_le K (by omega)) hlogK.le
+      _ = 1 := div_self hlogK.ne'
+      _ ≤ 2 := by norm_num
+  by_cases hsmall_empty : K.primeFactors.filter (· ≤ L) = ∅
+  · rw [hsmall_empty, sum_empty]
+    have : 0 ≤ (log (K : ℝ)) ^ (1 / 16 : ℝ) := by positivity
+    linarith
+  · obtain ⟨p0, hp0⟩ := Finset.nonempty_iff_ne_empty.mpr hsmall_empty
+    have hp0L : p0 ≤ L := (mem_filter.mp hp0).2
+    have hp0_ge1 : 1 ≤ p0 := (Nat.prime_of_mem_primeFactors (mem_filter.mp hp0).1).one_le
+    have hL1 : 1 ≤ (L : ℝ) := by exact_mod_cast (show 1 ≤ L by omega)
+    have hsmall : ∑ p ∈ K.primeFactors.filter (· ≤ L), log (p : ℝ) / p ≤ 2 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by
+      calc ∑ p ∈ K.primeFactors.filter (· ≤ L), log (p : ℝ) / p
+          ≤ ∑ p ∈ Nat.primesLE L, log (p : ℝ) / p := by
+            apply sum_le_sum_of_subset_of_nonneg
+            · intro p hp
+              exact Nat.mem_primesBelow.mpr ⟨Nat.lt_succ_of_le (mem_filter.mp hp).2,
+                Nat.prime_of_mem_primeFactors (mem_filter.mp hp).1⟩
+            · intro p _ _; exact div_nonneg (log_natCast_nonneg p) (Nat.cast_nonneg p)
+        _ ≤ log (L : ℝ) + 2 := by
+            have hm := (abs_le.mp (LeanLab.AlmostPrimes.Decomp1528a.mertens1_abs hL1)).2
+            simp only [Nat.floor_natCast] at hm
+            linarith
+        _ ≤ log (log (K : ℝ)) + 2 := by
+            linarith [log_le_log (by positivity) (Nat.floor_le hlogK.le)]
+        _ ≤ 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 2 := by
+            linarith [log_le_sixteen_rpow hlogK.le]
+        _ = 2 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by ring
+    linarith
+
+/-- Derived bound on Σ_{p ∣ K} log² p / p for Lemma 3, p. 62. -/
+lemma sum_log_sq_div_primeFactors_le (K : ℕ) (hK2 : 2 ≤ K) :
+    ∑ p ∈ K.primeFactors, (log (p : ℝ)) ^ 2 / p ≤
+      16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + (6 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) := by
+  have hlogK : 0 < log (K : ℝ) := log_pos (by exact_mod_cast (show 1 < K by omega))
+  set L := ⌊log (K : ℝ)⌋₊
+  have hsplit : K.primeFactors =
+      K.primeFactors.filter (· ≤ L) ∪ K.primeFactors.filter (¬ · ≤ L) :=
+    (filter_union_filter_not_eq _ _).symm
+  rw [hsplit, sum_union (disjoint_filter_filter_not _ _ _)]
+  have hlarge : ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), (log (p : ℝ)) ^ 2 / p ≤
+      16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by
+    calc ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), (log (p : ℝ)) ^ 2 / p
+        ≤ ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), (16 / (log (K : ℝ)) ^ (15 / 16 : ℝ)) * log (p : ℝ) := by
+          apply sum_le_sum
+          intro p hp
+          have hpL : L < p := not_le.mp (mem_filter.mp hp).2
+          have hp_ge_logK : log (K : ℝ) ≤ p := by
+            have := Nat.lt_floor_add_one (log (K : ℝ))
+            have : (L : ℝ) + 1 ≤ p := by exact_mod_cast hpL
+            linarith
+          have hp0 : (0 : ℝ) < p := lt_of_lt_of_le hlogK hp_ge_logK
+          have hl16 : log (p : ℝ) ≤ 16 * (p : ℝ) ^ (1 / 16 : ℝ) := log_le_sixteen_rpow hp0.le
+          have hdiv : log (p : ℝ) / p ≤ 16 / (log (K : ℝ)) ^ (15 / 16 : ℝ) := by
+            have hrpow_p : (p : ℝ) ^ (1 / 16 : ℝ) / p = 1 / (p : ℝ) ^ (15 / 16 : ℝ) := by
+              rw [div_eq_iff hp0.ne']
+              calc (p : ℝ) ^ (1 / 16 : ℝ) = (p : ℝ) ^ (-15 / 16 + 1 : ℝ) := by norm_num
+                _ = (p : ℝ) ^ (-15 / 16 : ℝ) * (p : ℝ) ^ (1 : ℝ) := rpow_add hp0 (-15 / 16) 1
+                _ = 1 / (p : ℝ) ^ (15 / 16 : ℝ) * p := by
+                    rw [rpow_one, one_div, ← rpow_neg hp0.le]; norm_num
+            calc log (p : ℝ) / p ≤ (16 * (p : ℝ) ^ (1 / 16 : ℝ)) / p :=
+                  div_le_div_of_nonneg_right hl16 hp0.le
+              _ = 16 * ((p : ℝ) ^ (1 / 16 : ℝ) / p) := by ring
+              _ = 16 / (p : ℝ) ^ (15 / 16 : ℝ) := by rw [hrpow_p]; ring
+              _ ≤ 16 / (log (K : ℝ)) ^ (15 / 16 : ℝ) :=
+                  div_le_div_of_nonneg_left (by norm_num) (rpow_pos_of_pos hlogK _)
+                    (rpow_le_rpow hlogK.le hp_ge_logK (by norm_num))
+          calc (log (p : ℝ)) ^ 2 / p = (log (p : ℝ) / p) * log (p : ℝ) := by ring
+            _ ≤ (16 / (log (K : ℝ)) ^ (15 / 16 : ℝ)) * log (p : ℝ) :=
+                mul_le_mul_of_nonneg_right hdiv (log_natCast_nonneg p)
+      _ = (16 / (log (K : ℝ)) ^ (15 / 16 : ℝ)) * ∑ p ∈ K.primeFactors.filter (¬ · ≤ L), log (p : ℝ) :=
+          (mul_sum _ _ _).symm
+      _ ≤ (16 / (log (K : ℝ)) ^ (15 / 16 : ℝ)) * log (K : ℝ) := by
+          apply mul_le_mul_of_nonneg_left _ (by positivity)
+          exact (sum_le_sum_of_subset_of_nonneg (filter_subset _ _)
+            (fun p _ _ => log_natCast_nonneg p)).trans (sum_log_primeFactors_le K (by omega))
+      _ = 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by
+          have hrpow_K : (16 / (log (K : ℝ)) ^ (15 / 16 : ℝ)) * log (K : ℝ) = 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by
+            have h1 : (log (K : ℝ)) ^ (15 / 16 : ℝ) * (log (K : ℝ)) ^ (1 / 16 : ℝ) = log (K : ℝ) := by
+              rw [← rpow_add hlogK]; norm_num
+            have hpos : (log (K : ℝ)) ^ (15 / 16 : ℝ) ≠ 0 := (rpow_pos_of_pos hlogK _).ne'
+            rw [div_mul_eq_mul_div, div_eq_iff hpos]
+            linarith
+          exact hrpow_K
+  have hsmall : ∑ p ∈ K.primeFactors.filter (· ≤ L), (log (p : ℝ)) ^ 2 / p ≤
+      (6 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) := by
+    calc ∑ p ∈ K.primeFactors.filter (· ≤ L), (log (p : ℝ)) ^ 2 / p
+        ≤ ∑ p ∈ K.primeFactors.filter (· ≤ L), (log (p : ℝ) / p) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) := by
+          apply sum_le_sum
+          intro p hp
+          have hpL : (p : ℝ) ≤ log (K : ℝ) :=
+            (Nat.cast_le.mpr (mem_filter.mp hp).2).trans (Nat.floor_le hlogK.le)
+          have hp0 : (0 : ℝ) < p := by
+            exact_mod_cast (Nat.prime_of_mem_primeFactors (mem_filter.mp hp).1).pos
+          have hlp : log (p : ℝ) ≤ 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) :=
+            (log_le_log hp0 hpL).trans (log_le_sixteen_rpow hlogK.le)
+          calc (log (p : ℝ)) ^ 2 / p = (log (p : ℝ) / p) * log (p : ℝ) := by ring
+            _ ≤ (log (p : ℝ) / p) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) :=
+                mul_le_mul_of_nonneg_left hlp (div_nonneg (log_natCast_nonneg p) (Nat.cast_nonneg p))
+      _ = (∑ p ∈ K.primeFactors.filter (· ≤ L), log (p : ℝ) / p) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) :=
+          (sum_mul _ _ _).symm
+      _ ≤ (∑ p ∈ K.primeFactors, log (p : ℝ) / p) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) := by
+          apply mul_le_mul_of_nonneg_right _ (by positivity)
+          exact sum_le_sum_of_subset_of_nonneg (filter_subset _ _)
+            (fun p _ _ => div_nonneg (log_natCast_nonneg p) (Nat.cast_nonneg p))
+      _ ≤ (6 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) :=
+          mul_le_mul_of_nonneg_right (sum_log_div_primeFactors_le K hK2) (by positivity)
+  linarith
+
+/-- Derived fourth-root logarithmic bound on partial sums of |ρ_K| for Lemma 3, p. 62. -/
+lemma rhoK_sum_le_rpow (K : ℕ) (hK : Even K) (hK2 : 2 ≤ K) (n : ℕ) :
+    ∑ d ∈ Ioc 0 n, |rhoK K d| ≤
+      Real.exp (10 * (3 ^ 40 : ℝ) + 22 + ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ)) *
+        (log (K : ℝ)) ^ (1 / 4 : ℝ) := by
+  have hlogK : 0 < log (K : ℝ) := log_pos (by exact_mod_cast (show 1 < K by omega))
+  have h1 := rhoK_sum_le_exp K hK hK2 n
+  have h2 : ∑ p ∈ K.primeFactors, 3 / (p : ℝ) ≤ ∑ p ∈ K.primeFactors, 10 / (p : ℝ) := by
+    apply sum_le_sum; intro p _; gcongr; norm_num
+  have h3 := (h2.trans (prime_recip_sum_bound K hK2))
+  calc ∑ d ∈ Ioc 0 n, |rhoK K d|
+      ≤ Real.exp ((10 * (3 ^ 40 : ℝ) + 22 + (1 / 4 : ℝ) * log (log (K : ℝ))) +
+          ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ)) :=
+        h1.trans (Real.exp_le_exp.mpr (by linarith))
+    _ = Real.exp (10 * (3 ^ 40 : ℝ) + 22 + ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ)) *
+          Real.exp ((1 / 4 : ℝ) * log (log (K : ℝ))) := by
+        rw [← Real.exp_add]; congr 1; ring
+    _ = Real.exp (10 * (3 ^ 40 : ℝ) + 22 + ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ)) *
+          (log (K : ℝ)) ^ (1 / 4 : ℝ) := by
+        rw [rpow_def_of_pos hlogK, mul_comm (log (log (K : ℝ)))]
+
+/-- Derived bound on the prime-logarithm weighted local sum of |ρ_K| for Lemma 3, p. 62. -/
+lemma sum_rhoK_prime_log_le (K : ℕ) (hK : Even K) (hK2 : 2 ≤ K) (n : ℕ) :
+    ∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) ≤
+      (18 + 432 * ∑' p : Nat.Primes, (p : ℝ) ^ (-31 / 16 : ℝ)) + 48 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by
+  have hsplit : (Ioc 0 n).filter Nat.Prime =
+      ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K) ∪ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K) :=
+    (filter_union_filter_not_eq _ _).symm
+  rw [hsplit, sum_union (disjoint_filter_filter_not _ _ _)]
+  have hdvd : ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K),
+      (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) ≤
+      18 + 48 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by
+    calc ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K),
+          (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)
+        ≤ ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K), 3 * (log (p : ℝ) / p) := by
+          apply sum_le_sum
+          intro p hp
+          have hpp := (mem_filter.mp (mem_filter.mp hp).1).2
+          have hpK := (mem_filter.mp hp).2
+          have hle := mul_le_mul_of_nonneg_right (rhoK_prime_abs_dvd hpp hpK) (log_natCast_nonneg p)
+          linarith [show 3 / (p : ℝ) * log (p : ℝ) = 3 * (log (p : ℝ) / p) by ring]
+      _ = 3 * ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K), log (p : ℝ) / p := (mul_sum _ _ _).symm
+      _ ≤ 3 * ∑ p ∈ K.primeFactors, log (p : ℝ) / p := by
+          apply mul_le_mul_of_nonneg_left _ (by norm_num)
+          apply sum_le_sum_of_subset_of_nonneg
+          · intro p hp
+            exact Nat.mem_primeFactors.mpr ⟨(mem_filter.mp (mem_filter.mp hp).1).2, (mem_filter.mp hp).2, by omega⟩
+          · intro p _ _; exact div_nonneg (log_natCast_nonneg p) (Nat.cast_nonneg p)
+      _ ≤ 3 * (6 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) :=
+          mul_le_mul_of_nonneg_left (sum_log_div_primeFactors_le K hK2) (by norm_num)
+      _ = 18 + 48 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := by ring
+  have htsum : Summable (fun p : Nat.Primes => (p : ℝ) ^ (-31 / 16 : ℝ)) :=
+    (Nat.Primes.summable_rpow (r := -31 / 16)).mpr (by norm_num)
+  have hndvd : ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K),
+      (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ) ≤
+      432 * ∑' p : Nat.Primes, (p : ℝ) ^ (-31 / 16 : ℝ) := by
+    calc ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K),
+          (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)
+        ≤ ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K), 432 * (p : ℝ) ^ (-31 / 16 : ℝ) := by
+          apply sum_le_sum
+          intro p hp
+          have hpp := (mem_filter.mp (mem_filter.mp hp).1).2
+          have hpK := (mem_filter.mp hp).2
+          have hp2 : 2 < p := by
+            have := hpp.two_le
+            have hp_ne_2 : p ≠ 2 := fun h => hpK (h ▸ even_iff_two_dvd.mp hK)
+            omega
+          have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
+          have htail := rhoK_prime_tail_bound hpp hp2 hpK
+          have hl16 := log_le_sixteen_rpow hp0.le
+          calc (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)
+              ≤ (27 / (p : ℝ) ^ 2) * (16 * (p : ℝ) ^ (1 / 16 : ℝ)) :=
+                mul_le_mul htail hl16 (log_natCast_nonneg p) (by positivity)
+            _ = 432 * ((p : ℝ) ^ (-2 : ℝ) * (p : ℝ) ^ (1 / 16 : ℝ)) := by
+                rw [div_eq_mul_inv, ← rpow_natCast, ← rpow_neg hp0.le]; norm_num; ring
+            _ = 432 * (p : ℝ) ^ (-31 / 16 : ℝ) := by
+                rw [← rpow_add hp0]; norm_num
+      _ ≤ ∑ p ∈ (Ioc 0 n).filter Nat.Prime, 432 * (p : ℝ) ^ (-31 / 16 : ℝ) :=
+          sum_le_sum_of_subset_of_nonneg (filter_subset _ _) (fun p _ _ => by positivity)
+      _ = 432 * ∑ p ∈ (Ioc 0 n).filter Nat.Prime, (p : ℝ) ^ (-31 / 16 : ℝ) := (mul_sum _ _ _).symm
+      _ ≤ 432 * ∑' p : Nat.Primes, (p : ℝ) ^ (-31 / 16 : ℝ) := by
+          apply mul_le_mul_of_nonneg_left _ (by norm_num)
+          rw [← sum_subtype_of_mem (p := Nat.Prime) (fun p : ℕ => (p : ℝ) ^ (-31 / 16 : ℝ))
+            (fun p hp => (mem_filter.mp hp).2)]
+          exact Summable.sum_le_tsum (L := SummationFilter.unconditional Nat.Primes) _
+            (fun p _ => by positivity) htsum
+  linarith
+
+/-- Derived bound on the squared prime-logarithm weighted local sum of |ρ_K| for Lemma 3, p. 62. -/
+lemma sum_rhoK_prime_log_sq_le (K : ℕ) (hK : Even K) (hK2 : 2 ≤ K) (n : ℕ) :
+    ∑ p ∈ (Ioc 0 n).filter Nat.Prime, (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2 ≤
+      6912 * (∑' p : Nat.Primes, (p : ℝ) ^ (-15 / 8 : ℝ)) +
+        336 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 768 * (log (K : ℝ)) ^ (1 / 8 : ℝ) := by
+  have hlogK : 0 < log (K : ℝ) := log_pos (by exact_mod_cast (show 1 < K by omega))
+  have hsplit : (Ioc 0 n).filter Nat.Prime =
+      ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K) ∪ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K) :=
+    (filter_union_filter_not_eq _ _).symm
+  rw [hsplit, sum_union (disjoint_filter_filter_not _ _ _)]
+  have hdvd : ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K),
+      (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2 ≤
+      336 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 768 * (log (K : ℝ)) ^ (1 / 8 : ℝ) := by
+    have hrpow_sq : ((log (K : ℝ)) ^ (1 / 16 : ℝ)) ^ 2 = (log (K : ℝ)) ^ (1 / 8 : ℝ) := by
+      rw [← rpow_mul_natCast hlogK.le]; norm_num
+    calc ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K),
+          (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2
+        ≤ ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K), 3 * ((log (p : ℝ)) ^ 2 / p) := by
+          apply sum_le_sum
+          intro p hp
+          have hpp := (mem_filter.mp (mem_filter.mp hp).1).2
+          have hpK := (mem_filter.mp hp).2
+          have hle := mul_le_mul_of_nonneg_right (rhoK_prime_abs_dvd hpp hpK) (sq_nonneg (log (p : ℝ)))
+          linarith [show 3 / (p : ℝ) * (log (p : ℝ)) ^ 2 = 3 * ((log (p : ℝ)) ^ 2 / p) by ring]
+      _ = 3 * ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (· ∣ K), (log (p : ℝ)) ^ 2 / p := (mul_sum _ _ _).symm
+      _ ≤ 3 * ∑ p ∈ K.primeFactors, (log (p : ℝ)) ^ 2 / p := by
+          apply mul_le_mul_of_nonneg_left _ (by norm_num)
+          apply sum_le_sum_of_subset_of_nonneg
+          · intro p hp
+            exact Nat.mem_primeFactors.mpr ⟨(mem_filter.mp (mem_filter.mp hp).1).2, (mem_filter.mp hp).2, by omega⟩
+          · intro p _ _; exact div_nonneg (sq_nonneg _) (Nat.cast_nonneg p)
+      _ ≤ 3 * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + (6 + 16 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) * (16 * (log (K : ℝ)) ^ (1 / 16 : ℝ))) :=
+          mul_le_mul_of_nonneg_left (sum_log_sq_div_primeFactors_le K hK2) (by norm_num)
+      _ = 336 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 768 * ((log (K : ℝ)) ^ (1 / 16 : ℝ)) ^ 2 := by ring
+      _ = 336 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 768 * (log (K : ℝ)) ^ (1 / 8 : ℝ) := by rw [hrpow_sq]
+  have htsum : Summable (fun p : Nat.Primes => (p : ℝ) ^ (-15 / 8 : ℝ)) :=
+    (Nat.Primes.summable_rpow (r := -15 / 8)).mpr (by norm_num)
+  have hndvd : ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K),
+      (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2 ≤
+      6912 * ∑' p : Nat.Primes, (p : ℝ) ^ (-15 / 8 : ℝ) := by
+    calc ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K),
+          (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2
+        ≤ ∑ p ∈ ((Ioc 0 n).filter Nat.Prime).filter (¬ · ∣ K), 6912 * (p : ℝ) ^ (-15 / 8 : ℝ) := by
+          apply sum_le_sum
+          intro p hp
+          have hpp := (mem_filter.mp (mem_filter.mp hp).1).2
+          have hpK := (mem_filter.mp hp).2
+          have hp2 : 2 < p := by
+            have := hpp.two_le
+            have hp_ne_2 : p ≠ 2 := fun h => hpK (h ▸ even_iff_two_dvd.mp hK)
+            omega
+          have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
+          have hp1 : (1 : ℝ) ≤ p := by exact_mod_cast hpp.one_le
+          have htail := rhoK_prime_tail_bound hpp hp2 hpK
+          have hl8 := log_sq_le_256_rpow hp1
+          calc (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2
+              ≤ (27 / (p : ℝ) ^ 2) * (256 * (p : ℝ) ^ (1 / 8 : ℝ)) :=
+                mul_le_mul htail hl8 (sq_nonneg _) (by positivity)
+            _ = 6912 * ((p : ℝ) ^ (-2 : ℝ) * (p : ℝ) ^ (1 / 8 : ℝ)) := by
+                rw [div_eq_mul_inv, ← rpow_natCast, ← rpow_neg hp0.le]; norm_num; ring
+            _ = 6912 * (p : ℝ) ^ (-15 / 8 : ℝ) := by
+                rw [← rpow_add hp0]; norm_num
+      _ ≤ ∑ p ∈ (Ioc 0 n).filter Nat.Prime, 6912 * (p : ℝ) ^ (-15 / 8 : ℝ) :=
+          sum_le_sum_of_subset_of_nonneg (filter_subset _ _) (fun p _ _ => by positivity)
+      _ = 6912 * ∑ p ∈ (Ioc 0 n).filter Nat.Prime, (p : ℝ) ^ (-15 / 8 : ℝ) := (mul_sum _ _ _).symm
+      _ ≤ 6912 * ∑' p : Nat.Primes, (p : ℝ) ^ (-15 / 8 : ℝ) := by
+          apply mul_le_mul_of_nonneg_left _ (by norm_num)
+          rw [← sum_subtype_of_mem (p := Nat.Prime) (fun p : ℕ => (p : ℝ) ^ (-15 / 8 : ℝ))
+            (fun p hp => (mem_filter.mp hp).2)]
+          exact Summable.sum_le_tsum (L := SummationFilter.unconditional Nat.Primes) _
+            (fun p _ => by positivity) htsum
+  linarith
+
+/-- Derived real-power comparison up to exponent 1/2 for x ≥ 1/2 for Lemma 3, p. 62. -/
+lemma rpow_le_two_sqrt {x a : ℝ} (hx : 1 / 2 ≤ x) (ha0 : 0 ≤ a) (ha1 : a ≤ 1 / 2) :
+    x ^ a ≤ 2 * √x := by
+  have hx0 : 0 ≤ x := by linarith
+  have h2x : 1 ≤ 2 * x := by linarith
+  have h1 : (2 * x) ^ a ≤ (2 * x) ^ (1 / 2 : ℝ) :=
+    rpow_le_rpow_of_exponent_le h2x ha1
+  have h2 : x ^ a ≤ (2 * x) ^ a :=
+    rpow_le_rpow hx0 (by linarith) ha0
+  have h3 : (2 * x) ^ (1 / 2 : ℝ) = 2 ^ (1 / 2 : ℝ) * x ^ (1 / 2 : ℝ) :=
+    mul_rpow (by norm_num) hx0
+  have h4 : (2 : ℝ) ^ (1 / 2 : ℝ) ≤ 2 := by
+    calc (2 : ℝ) ^ (1 / 2 : ℝ) ≤ (2 : ℝ) ^ (1 : ℝ) :=
+          rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+      _ = 2 := rpow_one 2
+  have h5 : x ^ (1 / 2 : ℝ) = √x := (sqrt_eq_rpow x).symm
+  have h6 : 2 ^ (1 / 2 : ℝ) * x ^ (1 / 2 : ℝ) ≤ 2 * √x := by
+    rw [h5]
+    exact mul_le_mul_of_nonneg_right h4 (sqrt_nonneg x)
+  linarith
+
 /-- LEAF. Unit U-1544. Moment bound, uniform in K: Σ_{d ≤ n} |ρ_K(d)| (1 + log d)² ≤ C √(log K)
 for even K ≥ 2. ρ_K is multiplicative, supported on cube free times p³, with
 |ρ_K(p)| ≤ 2/p at p ∣ K and ≤ 4/(p(p - 2)) at p ∤ K; the full sum is ≪ (log log K)⁴. Route for
@@ -805,7 +1608,118 @@ Lemma 3, p. 62. -/
 theorem rhoK_moment :
     ∃ C : ℝ, 0 < C ∧ ∀ K : ℕ, Even K → 2 ≤ K → ∀ n : ℕ,
       ∑ d ∈ Ioc 0 n, |rhoK K d| * (1 + log d) ^ 2 ≤ C * √(log K) := by
-  sorry
+  let C0 : ℝ := Real.exp (10 * (3 ^ 40 : ℝ) + 22 + ∑' p : Nat.Primes, 27 * (p : ℝ) ^ (-2 : ℝ))
+  let A1 : ℝ := 18 + 432 * ∑' p : Nat.Primes, (p : ℝ) ^ (-31 / 16 : ℝ)
+  let A2 : ℝ := 6912 * ∑' p : Nat.Primes, (p : ℝ) ^ (-15 / 8 : ℝ)
+  have hC0 : 0 < C0 := Real.exp_pos _
+  have hA1 : 0 < A1 := by
+    dsimp [A1]
+    have : 0 ≤ ∑' p : Nat.Primes, (p : ℝ) ^ (-31 / 16 : ℝ) :=
+      tsum_nonneg (fun p => by positivity)
+    linarith
+  have hA2 : 0 ≤ A2 := by
+    dsimp [A2]
+    have : 0 ≤ ∑' p : Nat.Primes, (p : ℝ) ^ (-15 / 8 : ℝ) :=
+      tsum_nonneg (fun p => by positivity)
+    linarith
+  refine ⟨C0 * (4 + 36 * (A2 + 2208) + 36 * (A1 ^ 2 + 96 * A1 + 2304)), by positivity,
+    fun K hK hK2 n => ?_⟩
+  have hlogK_half : 1 / 2 ≤ log (K : ℝ) := by
+    have h2K : (2 : ℝ) ≤ K := by exact_mod_cast hK2
+    have hlog2 : 1 / 2 ≤ log 2 := by
+      have := Real.log_two_gt_d9
+      linarith
+    exact hlog2.trans (log_le_log (by norm_num) h2K)
+  have hlogK0 : 0 < log (K : ℝ) := by linarith
+  set S0 := ∑ d ∈ Ioc 0 n, |rhoK K d|
+  set U1 := ∑ p ∈ (Ioc 0 n).filter Nat.Prime,
+    (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * log (p : ℝ)
+  set U2 := ∑ p ∈ (Ioc 0 n).filter Nat.Prime,
+    (|rhoK K p| + |rhoK K (p ^ 2)| + |rhoK K (p ^ 3)|) * (log (p : ℝ)) ^ 2
+  have hS0_nonneg : 0 ≤ S0 := sum_nonneg (fun d _ => abs_nonneg _)
+  have hU1_nonneg : 0 ≤ U1 := sum_nonneg (fun p _ => mul_nonneg (by positivity) (log_natCast_nonneg p))
+  have hU2_nonneg : 0 ≤ U2 := sum_nonneg (fun p _ => mul_nonneg (by positivity) (sq_nonneg _))
+  have hstep1 : ∑ d ∈ Ioc 0 n, |rhoK K d| * (1 + log d) ^ 2 ≤
+      2 * S0 + 18 * ∑ d ∈ Ioc 0 n, |rhoK K d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 := by
+    calc ∑ d ∈ Ioc 0 n, |rhoK K d| * (1 + log d) ^ 2
+        ≤ ∑ d ∈ Ioc 0 n, (2 * |rhoK K d| + 18 * (|rhoK K d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2)) := by
+          apply sum_le_sum
+          intro d hd
+          by_cases hrho : rhoK K d = 0
+          · simp [hrho]
+          · have hd1 : 1 ≤ d := (mem_Ioc.mp hd).1
+            have hle := one_add_log_sq_le_sum_primeFactors hd1 hrho
+            have hmul := mul_le_mul_of_nonneg_left hle (abs_nonneg (rhoK K d))
+            linarith
+      _ = 2 * S0 + 18 * ∑ d ∈ Ioc 0 n, |rhoK K d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 := by
+          rw [sum_add_distrib, ← mul_sum, ← mul_sum]
+  have hstep2 : ∑ d ∈ Ioc 0 n, |rhoK K d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 ≤
+      U2 * S0 + U1 ^ 2 * S0 :=
+    sum_rhoK_log_primeFactors_sq_le K n
+  have hS0 : S0 ≤ C0 * (log (K : ℝ)) ^ (1 / 4 : ℝ) := rhoK_sum_le_rpow K hK hK2 n
+  have hU1 : U1 ≤ A1 + 48 * (log (K : ℝ)) ^ (1 / 16 : ℝ) := sum_rhoK_prime_log_le K hK hK2 n
+  have hU2 : U2 ≤ A2 + 336 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 768 * (log (K : ℝ)) ^ (1 / 8 : ℝ) :=
+    sum_rhoK_prime_log_sq_le K hK hK2 n
+  have hr_4 : (log (K : ℝ)) ^ (1 / 4 : ℝ) ≤ 2 * √(log (K : ℝ)) :=
+    rpow_le_two_sqrt hlogK_half (by norm_num) (by norm_num)
+  have hr_5_16 : (log (K : ℝ)) ^ (1 / 16 : ℝ) * (log (K : ℝ)) ^ (1 / 4 : ℝ) ≤ 2 * √(log (K : ℝ)) := by
+    rw [← rpow_add hlogK0]
+    norm_num
+    exact rpow_le_two_sqrt hlogK_half (by norm_num) (by norm_num)
+  have hr_3_8 : (log (K : ℝ)) ^ (1 / 8 : ℝ) * (log (K : ℝ)) ^ (1 / 4 : ℝ) ≤ 2 * √(log (K : ℝ)) := by
+    rw [← rpow_add hlogK0]
+    norm_num
+    exact rpow_le_two_sqrt hlogK_half (by norm_num) (by norm_num)
+  have hr_sq : ((log (K : ℝ)) ^ (1 / 16 : ℝ)) ^ 2 = (log (K : ℝ)) ^ (1 / 8 : ℝ) := by
+    rw [← rpow_mul_natCast hlogK0.le]; norm_num
+  have hU1_sq : U1 ^ 2 ≤ A1 ^ 2 + 96 * A1 * (log (K : ℝ)) ^ (1 / 16 : ℝ) +
+      2304 * (log (K : ℝ)) ^ (1 / 8 : ℝ) := by
+    calc U1 ^ 2 ≤ (A1 + 48 * (log (K : ℝ)) ^ (1 / 16 : ℝ)) ^ 2 :=
+          pow_le_pow_left₀ hU1_nonneg hU1 2
+      _ = A1 ^ 2 + 96 * A1 * (log (K : ℝ)) ^ (1 / 16 : ℝ) +
+          2304 * ((log (K : ℝ)) ^ (1 / 16 : ℝ)) ^ 2 := by ring
+      _ = A1 ^ 2 + 96 * A1 * (log (K : ℝ)) ^ (1 / 16 : ℝ) +
+          2304 * (log (K : ℝ)) ^ (1 / 8 : ℝ) := by rw [hr_sq]
+  have hU2_S0 : U2 * S0 ≤ C0 * (2 * A2 + 2208) * √(log (K : ℝ)) := by
+    calc U2 * S0
+        ≤ (A2 + 336 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 768 * (log (K : ℝ)) ^ (1 / 8 : ℝ)) *
+            (C0 * (log (K : ℝ)) ^ (1 / 4 : ℝ)) :=
+          mul_le_mul hU2 hS0 hS0_nonneg (by positivity)
+      _ = C0 * (A2 * (log (K : ℝ)) ^ (1 / 4 : ℝ) +
+            336 * ((log (K : ℝ)) ^ (1 / 16 : ℝ) * (log (K : ℝ)) ^ (1 / 4 : ℝ)) +
+            768 * ((log (K : ℝ)) ^ (1 / 8 : ℝ) * (log (K : ℝ)) ^ (1 / 4 : ℝ))) := by ring
+      _ ≤ C0 * (A2 * (2 * √(log (K : ℝ))) + 336 * (2 * √(log (K : ℝ))) + 768 * (2 * √(log (K : ℝ)))) := by
+          apply mul_le_mul_of_nonneg_left _ hC0.le
+          have h1 : A2 * (log (K : ℝ)) ^ (1 / 4 : ℝ) ≤ A2 * (2 * √(log (K : ℝ))) :=
+            mul_le_mul_of_nonneg_left hr_4 hA2
+          linarith
+      _ ≤ C0 * (2 * A2 + 2208) * √(log (K : ℝ)) := by
+          have : 0 ≤ C0 * A2 * √(log (K : ℝ)) := by positivity
+          linarith
+  have hU1_S0 : U1 ^ 2 * S0 ≤ C0 * (2 * A1 ^ 2 + 192 * A1 + 4608) * √(log (K : ℝ)) := by
+    calc U1 ^ 2 * S0
+        ≤ (A1 ^ 2 + 96 * A1 * (log (K : ℝ)) ^ (1 / 16 : ℝ) + 2304 * (log (K : ℝ)) ^ (1 / 8 : ℝ)) *
+            (C0 * (log (K : ℝ)) ^ (1 / 4 : ℝ)) :=
+          mul_le_mul hU1_sq hS0 hS0_nonneg (by positivity)
+      _ = C0 * (A1 ^ 2 * (log (K : ℝ)) ^ (1 / 4 : ℝ) +
+            96 * A1 * ((log (K : ℝ)) ^ (1 / 16 : ℝ) * (log (K : ℝ)) ^ (1 / 4 : ℝ)) +
+            2304 * ((log (K : ℝ)) ^ (1 / 8 : ℝ) * (log (K : ℝ)) ^ (1 / 4 : ℝ))) := by ring
+      _ ≤ C0 * (A1 ^ 2 * (2 * √(log (K : ℝ))) + 96 * A1 * (2 * √(log (K : ℝ))) + 2304 * (2 * √(log (K : ℝ)))) := by
+          apply mul_le_mul_of_nonneg_left _ hC0.le
+          have h1 : A1 ^ 2 * (log (K : ℝ)) ^ (1 / 4 : ℝ) ≤ A1 ^ 2 * (2 * √(log (K : ℝ))) :=
+            mul_le_mul_of_nonneg_left hr_4 (sq_nonneg A1)
+          have h2 : 96 * A1 * ((log (K : ℝ)) ^ (1 / 16 : ℝ) * (log (K : ℝ)) ^ (1 / 4 : ℝ)) ≤
+              96 * A1 * (2 * √(log (K : ℝ))) :=
+            mul_le_mul_of_nonneg_left hr_5_16 (by positivity)
+          linarith
+      _ = C0 * (2 * A1 ^ 2 + 192 * A1 + 4608) * √(log (K : ℝ)) := by ring
+  have hS0_sqrt : 2 * S0 ≤ C0 * 4 * √(log (K : ℝ)) := by
+    calc 2 * S0 ≤ 2 * (C0 * (log (K : ℝ)) ^ (1 / 4 : ℝ)) := by linarith
+      _ = 2 * C0 * (log (K : ℝ)) ^ (1 / 4 : ℝ) := by ring
+      _ ≤ 2 * C0 * (2 * √(log (K : ℝ))) := mul_le_mul_of_nonneg_left hr_4 (by positivity)
+      _ = C0 * 4 * √(log (K : ℝ)) := by ring
+  have hA2_sqrt : 0 ≤ C0 * A2 * √(log (K : ℝ)) := by positivity
+  linarith
 
 /-- Σ_{n ≤ y} τ(n)/n = ½ log² y + 2γ log y + O(1) for y ≥ 1.
 Unconditional assembly from `harmonic_asymp`, `sum_log_div_asymp`, with Mathlib
@@ -1800,5 +2714,45 @@ example : Summable (fun n : ℕ => (1 : ArithmeticFunction ℝ) n) := by
       norm_num
     rw [he]
     exact summable_zero
+example : ∑ p ∈ (2 : ℕ).primeFactors, 10 / (p : ℝ) ≤ 10 * (3 ^ 40 : ℝ) + 22 + (1 / 4 : ℝ) * log (log 2) :=
+  prime_recip_sum_bound 2 (by norm_num)
+example : log (2 : ℝ) = ∑ p ∈ (2 : ℕ).primeFactors, ((2 : ℕ).factorization p : ℝ) * log (p : ℝ) :=
+  log_eq_sum_primeFactors (by norm_num)
+example : rhoK 2 (2 ^ 4) = 0 :=
+  rhoK_eq_zero_of_factorization_gt Nat.prime_two
+    (by rw [Nat.Prime.factorization_pow Nat.prime_two, Finsupp.single_eq_same]; norm_num)
+example : log ((1 : ℕ) : ℝ) ≤ 3 * ∑ p ∈ (1 : ℕ).primeFactors, log (p : ℝ) :=
+  log_le_three_sum_primeFactors (K := 2) (d := 1) (by norm_num) (by rw [(rhoK_multiplicative 2).map_one]; norm_num)
+example : (1 + log ((1 : ℕ) : ℝ)) ^ 2 ≤ 2 + 18 * (∑ p ∈ (1 : ℕ).primeFactors, log (p : ℝ)) ^ 2 :=
+  one_add_log_sq_le_sum_primeFactors (K := 2) (d := 1) (by norm_num) (by rw [(rhoK_multiplicative 2).map_one]; norm_num)
+example : ∑ d ∈ Ioc 0 1, |rhoK 2 d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ≤
+    (∑ p ∈ (Ioc 0 1).filter Nat.Prime, (|rhoK 2 p| + |rhoK 2 (p ^ 2)| + |rhoK 2 (p ^ 3)|) * log (p : ℝ)) *
+      (∑ m ∈ Ioc 0 1, |rhoK 2 m|) :=
+  sum_rhoK_log_primeFactors_le 2 1
+example : ∑ d ∈ Ioc 0 1, |rhoK 2 d| * (∑ p ∈ d.primeFactors, log (p : ℝ)) ^ 2 ≤
+    (∑ p ∈ (Ioc 0 1).filter Nat.Prime, (|rhoK 2 p| + |rhoK 2 (p ^ 2)| + |rhoK 2 (p ^ 3)|) * (log (p : ℝ)) ^ 2) *
+      (∑ m ∈ Ioc 0 1, |rhoK 2 m|) +
+    (∑ p ∈ (Ioc 0 1).filter Nat.Prime, (|rhoK 2 p| + |rhoK 2 (p ^ 2)| + |rhoK 2 (p ^ 3)|) * log (p : ℝ)) ^ 2 *
+      (∑ m ∈ Ioc 0 1, |rhoK 2 m|) :=
+  sum_rhoK_log_primeFactors_sq_le 2 1
+example : log (1 : ℝ) ≤ 16 * (1 : ℝ) ^ (1 / 16 : ℝ) :=
+  log_le_sixteen_rpow (by norm_num)
+example : (log (1 : ℝ)) ^ 2 ≤ 256 * (1 : ℝ) ^ (1 / 8 : ℝ) :=
+  log_sq_le_256_rpow (by norm_num)
+example : |rhoK 2 2| + |rhoK 2 (2 ^ 2)| + |rhoK 2 (2 ^ 3)| ≤ 3 / (2 : ℝ) :=
+  rhoK_prime_abs_dvd Nat.prime_two (dvd_refl 2)
+example : ∑ p ∈ (2 : ℕ).primeFactors, log (p : ℝ) ≤ log (2 : ℝ) :=
+  sum_log_primeFactors_le 2 (by norm_num)
+example : ∑ p ∈ (2 : ℕ).primeFactors, log (p : ℝ) / p ≤ 6 + 16 * (log (2 : ℝ)) ^ (1 / 16 : ℝ) :=
+  sum_log_div_primeFactors_le 2 (by norm_num)
+example : ∑ p ∈ (2 : ℕ).primeFactors, (log (p : ℝ)) ^ 2 / p ≤
+    16 * (log (2 : ℝ)) ^ (1 / 16 : ℝ) + (6 + 16 * (log (2 : ℝ)) ^ (1 / 16 : ℝ)) * (16 * (log (2 : ℝ)) ^ (1 / 16 : ℝ)) :=
+  sum_log_sq_div_primeFactors_le 2 (by norm_num)
+example : (1 : ℝ) ^ (1 / 4 : ℝ) ≤ 2 * √(1 : ℝ) :=
+  rpow_le_two_sqrt (by norm_num) (by norm_num) (by norm_num)
+example : ∃ C : ℝ, 0 < C ∧ ∀ n : ℕ,
+    ∑ d ∈ Ioc 0 n, |rhoK 2 d| * (1 + log d) ^ 2 ≤ C * √(log 2) := by
+  obtain ⟨C, hC, h⟩ := rhoK_moment
+  exact ⟨C, hC, h 2 (by decide) (by norm_num)⟩
 
 end LeanLab.AlmostPrimeSums.Decomp1544b
