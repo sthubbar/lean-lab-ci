@@ -1,0 +1,201 @@
+{
+  "name": "Explicit Mertens bounds for $\\sum_{p\\le x}\\log p/p$: Decomp1528a",
+  "description": "For a real cutoff $x\\ge1$, consider the weighted prime sum $\\sum_{p\\le x}\\log p/p$, where $p$ ranges over primes and $\\log$ is the natural logarithm. Mertens' first theorem says that this sum differs from $\\log x$ by a bounded amount. This mission asks for the explicit bound $\\left|\\sum_{p\\le x}\\log p/p-\\log x\\right|\\le2$ over the entire stated range.\n\nThe open statements also concern the logarithm of a factorial, finite sums of $\\log p/[p(p-1)]$, and the von Mangoldt function $\\Lambda$, which equals $\\log p$ at positive prime powers and zero elsewhere. Chebyshev's functions $\\theta$ and $\\psi$ record the corresponding accumulated logarithmic weights. These objects provide explicit control of prime sums used in analytic number theory and sieve estimates. Exact constants and endpoint ranges matter when such estimates feed into quantitative results about almost primes, integers with few prime factors.\n\nThe source context is P. J. Campbell, [A Sharper Explicit Result for the Sum of Two Almost Primes](https://arxiv.org/abs/2608.09488v1), Section 4. The lab identifies the classical background as Rosser and Schoenfeld, *Approximate formulas for some functions of prime numbers*, Illinois Journal of Mathematics 6, 1962, especially p. 70, with factorial identities also attributed to Ingham and Montgomery and Vaughan. These are lab formulations of classical material, rather than a claim that every displayed leaf is printed verbatim in Campbell.\n\nThe statements come from an AI-run Lean lab. Drafts undergo human audit before submission to the public platform; this draft is prepared for that audit. The mission contains eleven open leaves and one assembly goal, using only Mathlib objects. No new mathematical result is claimed, and Goldbach's conjecture remains open.",
+  "mission_type": "ResearchPaper",
+  "field_query": "number theory",
+  "lab_file": "LeanLab/LeanLab/AlmostPrimes/Decomp1528a.lean",
+  "items": [
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.log_factorial_le_sum",
+      "theorem_title": "Legendre upper bound for the logarithm of a factorial",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem log_factorial_le_sum (n : ℕ) :\n    log (n.factorial : ℝ) ≤\n      (n : ℝ) * ∑ p ∈ Nat.primesLE n, log p / p +\n        (n : ℝ) * ∑ p ∈ Nat.primesLE n, log p / ((p : ℝ) * ((p : ℝ) - 1)) := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every natural number $n$, $\\log(n!)\\le n\\sum_{p\\le n}\\frac{\\log p}{p}+n\\sum_{p\\le n}\\frac{\\log p}{p(p-1)}$, where both sums run over primes.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Legendre formula; Ingham, The Distribution of Prime Numbers, Theorem 7; Rosser and Schoenfeld 1962, p. 70 style. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Legendre upper bound",
+      "milestone_description": "Establish the stated upper bound for every natural number, including zero.",
+      "lab_decl": "log_factorial_le_sum"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.sum_sub_theta_le_log_factorial",
+      "theorem_title": "Legendre lower bound using the Chebyshev function",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem sum_sub_theta_le_log_factorial (n : ℕ) :\n    (n : ℝ) * ∑ p ∈ Nat.primesLE n, log p / p - θ n ≤ log (n.factorial : ℝ) := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every natural number $n$, $n\\sum_{p\\le n}\\frac{\\log p}{p}-\\theta(n)\\le\\log(n!)$, where $\\theta(n)=\\sum_{p\\le n}\\log p$ and the sums run over primes.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Ingham, The Distribution of Prime Numbers, Theorem 7. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Legendre lower bound",
+      "milestone_description": "Establish the stated lower bound involving the prime logarithm sum.",
+      "lab_decl": "sum_sub_theta_le_log_factorial"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.sum_log_div_pp1_head",
+      "theorem_title": "Explicit bound for the prime sum through $1000$",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem sum_log_div_pp1_head :\n    ∑ p ∈ Nat.primesLE 1000, log p / ((p : ℝ) * ((p : ℝ) - 1)) ≤ 0.7545 := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "The finite sum over primes satisfies $\\sum_{p\\le1000}\\frac{\\log p}{p(p-1)}\\le0.7545$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Rosser and Schoenfeld 1962, equation 2.11 and the constant E on p. 70; the bound 0.7545 is the lab leaf. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Prime head bound at $1000$",
+      "milestone_description": "Verify the exact decimal upper bound for the finite prime sum.",
+      "lab_decl": "sum_log_div_pp1_head"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.sum_log_div_pp1_tail",
+      "theorem_title": "Uniform bound for the integer tail beyond $1000$",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem sum_log_div_pp1_tail (n : ℕ) :\n    ∑ m ∈ Ioc 1000 n, log m / ((m : ℝ) * ((m : ℝ) - 1)) ≤ 0.009 := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every natural number $n$, $\\sum_{1000<m\\le n}\\frac{\\log m}{m(m-1)}\\le0.009$, with the sum over integers and with an empty sum when $n\\le1000$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Rosser and Schoenfeld 1962, p. 70 style; elementary tail estimate stated in the lab. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Integer tail bound beyond $1000$",
+      "milestone_description": "Establish the uniform bound for all finite integer tails in the statement.",
+      "lab_decl": "sum_log_div_pp1_tail"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.sum_log_div_pp1_split",
+      "theorem_title": "Prime sum bounded by a fixed head and an integer tail",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem sum_log_div_pp1_split (n : ℕ) :\n    ∑ p ∈ Nat.primesLE n, log p / ((p : ℝ) * ((p : ℝ) - 1)) ≤\n      ∑ p ∈ Nat.primesLE 1000, log p / ((p : ℝ) * ((p : ℝ) - 1)) +\n        ∑ m ∈ Ioc 1000 n, log m / ((m : ℝ) * ((m : ℝ) - 1)) := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every natural number $n$, $\\sum_{p\\le n}\\frac{\\log p}{p(p-1)}\\le\\sum_{p\\le1000}\\frac{\\log p}{p(p-1)}+\\sum_{1000<m\\le n}\\frac{\\log m}{m(m-1)}$, where $p$ runs over primes and $m$ over integers.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Elementary finite-sum comparison in lab unit U-1528. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Split the prime sum at $1000$",
+      "milestone_description": "Establish the stated comparison for every natural cutoff.",
+      "lab_decl": "sum_log_div_pp1_split"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.mertens1_small",
+      "theorem_title": "Explicit Mertens bound on $1\\le x<5$",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem mertens1_small {x : ℝ} (hx : 1 ≤ x) (hx5 : x < 5) :\n    |∑ p ∈ Nat.primesLE ⌊x⌋₊, log p / p - log x| ≤ 2 := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every real number $x$ with $1\\le x<5$, $\\left|\\sum_{p\\le\\lfloor x\\rfloor}\\frac{\\log p}{p}-\\log x\\right|\\le2$, where the sum runs over primes.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, small-range component of the explicit Mertens estimate; compare Rosser and Schoenfeld 1962, equations 3.21 and 3.24. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Mertens bound on the small real range",
+      "milestone_description": "Establish the absolute error bound throughout the stated small range.",
+      "lab_decl": "mertens1_small"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.log_le_log_floor_add",
+      "theorem_title": "Logarithm comparison with the natural floor",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem log_le_log_floor_add {x : ℝ} (hx : 5 ≤ x) : log x ≤ log (⌊x⌋₊ : ℝ) + 0.2 := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every real number $x\\ge5$, $\\log x\\le\\log\\lfloor x\\rfloor+0.2$, where $\\lfloor x\\rfloor$ is the natural-number floor.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Elementary logarithm estimate in lab unit U-1528. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Logarithm bound across the floor step",
+      "milestone_description": "Establish the exact additive bound for every real number at least five.",
+      "lab_decl": "log_le_log_floor_add"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.log_factorial_eq_vonMangoldt",
+      "theorem_title": "Chebyshev identity for the logarithm of a factorial",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem log_factorial_eq_vonMangoldt (n : ℕ) :\n    log (n.factorial : ℝ) =\n      ∑ m ∈ Icc 1 n, ArithmeticFunction.vonMangoldt m * ((n / m : ℕ) : ℝ) := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every natural number $n$, $\\log(n!)=\\sum_{m=1}^{n}\\Lambda(m)\\lfloor n/m\\rfloor$, where $\\Lambda(m)=\\log p$ if $m$ is a positive power of a prime $p$, and $\\Lambda(m)=0$ otherwise.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Ingham, The Distribution of Prime Numbers, Theorem 7 proof; Montgomery and Vaughan, Multiplicative Number Theory I, Section 2.2. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Factorial identity with the von Mangoldt function",
+      "milestone_description": "Establish the identity for all natural numbers with the integer quotient used in Lean.",
+      "lab_decl": "log_factorial_eq_vonMangoldt"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.vonMangoldt_sum_le",
+      "theorem_title": "Upper bound for the weighted von Mangoldt sum",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem vonMangoldt_sum_le (n : ℕ) :\n    (n : ℝ) * ∑ m ∈ Icc 1 n, ArithmeticFunction.vonMangoldt m / m ≤\n      log (n.factorial : ℝ) + ψ n := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every natural number $n$, $n\\sum_{m=1}^{n}\\frac{\\Lambda(m)}{m}\\le\\log(n!)+\\psi(n)$, where $\\Lambda$ is the von Mangoldt function and $\\psi(n)=\\sum_{m=1}^{n}\\Lambda(m)$. The statement includes $n=0$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Montgomery and Vaughan, Multiplicative Number Theory I, Section 2.2; lab unit U-1528. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Upper comparison for the von Mangoldt sum",
+      "milestone_description": "Establish the stated bound for every natural number, including zero.",
+      "lab_decl": "vonMangoldt_sum_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.log_factorial_le_vonMangoldt_sum",
+      "theorem_title": "Factorial bounded by the weighted von Mangoldt sum",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem log_factorial_le_vonMangoldt_sum (n : ℕ) :\n    log (n.factorial : ℝ) ≤ (n : ℝ) * ∑ m ∈ Icc 1 n, ArithmeticFunction.vonMangoldt m / m := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every natural number $n$, $\\log(n!)\\le n\\sum_{m=1}^{n}\\frac{\\Lambda(m)}{m}$, where $\\Lambda$ is the von Mangoldt function and the sum is empty for $n=0$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Montgomery and Vaughan, Multiplicative Number Theory I, Section 2.2; lab unit U-1528. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Lower comparison for the von Mangoldt sum",
+      "milestone_description": "Establish the stated factorial comparison for every natural number.",
+      "lab_decl": "log_factorial_le_vonMangoldt_sum"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.log4_add_le_three",
+      "theorem_title": "Uniform logarithmic bound with a square-root denominator",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem log4_add_le_three {t : ℝ} (ht : 1 ≤ t) : log 4 + 2 * log t / √t ≤ 3 := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every real number $t\\ge1$, $\\log4+\\frac{2\\log t}{\\sqrt t}\\le3$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Elementary real inequality in lab unit U-1528, used with the Chebyshev psi estimate. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Numerical logarithm and square-root inequality",
+      "milestone_description": "Establish the uniform inequality with the exact constant three.",
+      "lab_decl": "log4_add_le_three"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528a.mertens1_abs",
+      "theorem_title": "Mertens first theorem with explicit absolute error $2$",
+      "formal_statement": "namespace LL_Decomp1528a\ntheorem mertens1_abs {x : ℝ} (hx : 1 ≤ x) :\n    |∑ p ∈ Nat.primesLE ⌊x⌋₊, log p / p - log x| ≤ 2 := by sorry\nend LL_Decomp1528a",
+      "natural_language_statement": "For every real number $x\\ge1$, $\\left|\\sum_{p\\le\\lfloor x\\rfloor}\\frac{\\log p}{p}-\\log x\\right|\\le2$, where the sum runs over primes and $\\log$ denotes the natural logarithm.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Rosser and Schoenfeld 1962, equations 3.21 and 3.24, p. 70; lab unit U-1528 assembly mertens1_abs, in the explicit-estimate context of Campbell 2026, Section 4. Source context: https://arxiv.org/abs/2608.09488v1",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": true,
+      "milestone_title": "Assemble the explicit real Mertens bound",
+      "milestone_description": "Complete the main real-variable assembly target with absolute error at most two for every real number at least one.",
+      "lab_decl": "mertens1_abs"
+    }
+  ]
+}

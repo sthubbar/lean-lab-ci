@@ -1,0 +1,153 @@
+{
+  "name": "Explicit Chebyshev and prime-counting bounds for $x\\ge11$: Decomp1528c",
+  "description": "The Chebyshev function $\\theta(x)=\\sum_{p\\le x}\\log p$ measures the accumulated logarithmic weight of primes. Its companion $\\psi(x)=\\sum_{p^k\\le x}\\log p$ also counts prime powers, with each positive exponent contributing once. The prime-counting function $\\pi(x)$ counts primes at most $x$, and $\\log$ denotes the natural logarithm. These functions give complementary quantitative descriptions of the distribution of primes.\n\nThis mission collects explicit inequalities for these functions, with every constant and endpoint fixed. The main assembly target is $\\pi(x)\\ge x/(2\\log x)$ for real $x\\ge11$. A companion assembly states $\\theta(x)\\ge x/2$ on the same range. The seven open leaves include three natural-number ranges for a slightly stronger theta bound, a large-argument estimate with coefficient $0.9$, two inequalities at doubled natural arguments, and an upper bound for prime counting on $60184\\le x\\le2\\cdot10^6$.\n\nSuch explicit estimates supply numerical inputs in analytic number theory and in estimates concerning almost primes, integers having few prime factors. Their value lies in specified constants and valid ranges. The source context is P. J. Campbell, [A Sharper Explicit Result for the Sum of Two Almost Primes](https://arxiv.org/abs/2608.09488v1). The lab cites classical Chebyshev estimates and Hardy and Wright for the doubled-argument statements. The finite prime-counting upper bound is a restricted form of Theorem 6.9 in P. Dusart, [Estimates of Some Functions Over Primes without R.H.](https://arxiv.org/abs/1002.0442). These are lab formulations, without a claim that each leaf appears verbatim in Campbell.\n\nThe statements come from an AI-run Lean lab and undergo human audit before submission to the public platform. This draft is prepared for that audit. AI wrote the Lean code. No new mathematical result is claimed, and Goldbach's conjecture remains open.",
+  "mission_type": "ResearchPaper",
+  "field_query": "number theory",
+  "lab_file": "LeanLab/LeanLab/AlmostPrimes/Decomp1528c.lean",
+  "items": [
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.theta_ge_half_large",
+      "theorem_title": "Large natural range for the half-theta bound",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem theta_ge_half_large (n : ℕ) (hn : 10 ^ 4 ≤ n) : ((n : ℝ) + 1) / 2 ≤ θ n := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every natural number $n\\ge10^4$, $\\theta(n)\\ge(n+1)/2$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Lab large-range formulation; comparison cited in the lab: Rosser and Schoenfeld 1962, equation 3.14, p. 70.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Large natural range for the half-theta bound",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "theta_ge_half_large"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.theta_ge_half_mid",
+      "theorem_title": "Middle natural range for the half-theta bound",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem theta_ge_half_mid (n : ℕ) (h1 : 1000 ≤ n) (h2 : n < 10 ^ 4) : ((n : ℝ) + 1) / 2 ≤ θ n := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every natural number $n$ with $1000\\le n<10^4$, $\\theta(n)\\ge(n+1)/2$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Exact range and constant as stated in Decomp1528c.lean.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Middle natural range for the half-theta bound",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "theta_ge_half_mid"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.theta_ge_half_small",
+      "theorem_title": "Small natural range for the half-theta bound",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem theta_ge_half_small (n : ℕ) (h1 : 11 ≤ n) (h2 : n < 1000) : ((n : ℝ) + 1) / 2 ≤ θ n := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every natural number $n$ with $11\\le n<1000$, $\\theta(n)\\ge(n+1)/2$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Exact range and constant as stated in Decomp1528c.lean.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Small natural range for the half-theta bound",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "theta_ge_half_small"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.theta_ge_half",
+      "theorem_title": "Half-theta lower bound for real arguments",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem theta_ge_half {x : ℝ} (hx : 11 ≤ x) : x / 2 ≤ θ x := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every real number $x\\ge11$, $\\theta(x)\\ge x/2$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Exact range and constant as stated in Decomp1528c.lean.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Half-theta lower bound for real arguments",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "theta_ge_half"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.pi_ge_half",
+      "theorem_title": "Explicit lower bound for the prime-counting function",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem pi_ge_half {x : ℝ} (hx : 11 ≤ x) : x / (2 * log x) ≤ (Nat.primeCounting ⌊x⌋₊ : ℝ) := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every real number $x\\ge11$, $\\pi(x)\\ge x/(2\\log x)$, where $\\pi(x)$ counts primes at most $\\lfloor x\\rfloor$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Exact range and constant as stated in Decomp1528c.lean.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": true,
+      "milestone_title": "Explicit lower bound for the prime-counting function",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "pi_ge_half"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.theta_ge_09_large",
+      "theorem_title": "Sharper theta lower bound for large real arguments",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem theta_ge_09_large {x : ℝ} (hx : 10 ^ 8 ≤ x) : 0.9 * x ≤ θ x := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every real number $x\\ge10^8$, $\\theta(x)\\ge0.9x$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Exact range and constant as stated in Decomp1528c.lean.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Sharper theta lower bound for large real arguments",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "theta_ge_09_large"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.theta_two_mul_sub_le",
+      "theorem_title": "Theta increment at a doubled natural argument",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem theta_two_mul_sub_le (n : ℕ) : θ (2 * n) - θ n ≤ n * log 4 := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every natural number $n$, $\\theta(2n)-\\theta(n)\\le n\\log4$, including $n=0$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Chebyshev 1852; Hardy and Wright, Theorem 415 proof, as cited in the lab.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Theta increment at a doubled natural argument",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "theta_two_mul_sub_le"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.psi_two_mul_ge",
+      "theorem_title": "Psi lower bound at even natural arguments",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem psi_two_mul_ge (n : ℕ) (hn : 1 ≤ n) :\n    (n : ℝ) * log 4 - log (2 * n + 1) ≤ ψ (2 * n) := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every natural number $n\\ge1$, $\\psi(2n)\\ge n\\log4-\\log(2n+1)$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. Chebyshev 1852; Hardy and Wright, Theorem 414 proof, as cited in the lab.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Psi lower bound at even natural arguments",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "psi_two_mul_ge"
+    },
+    {
+      "kind": "theorem",
+      "theorem_name": "LL_Decomp1528c.dusartPi11_finite",
+      "theorem_title": "Finite-range Dusart upper bound for prime counting",
+      "formal_statement": "namespace LL_Decomp1528c\ntheorem dusartPi11_finite {x : ℝ} (h1 : 60184 ≤ x) (h2 : x ≤ 2 * 10 ^ 6) :\n    (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ x / (log x - 1.1) := by sorry\nend LL_Decomp1528c",
+      "natural_language_statement": "For every real number $x$ with $60184\\le x\\le2\\cdot10^6$, $\\pi(x)\\le x/(\\log x-1.1)$, where $\\pi(x)$ counts primes at most $\\lfloor x\\rfloor$.",
+      "preamble": "import Mathlib\n\nopen Real Finset Chebyshev",
+      "source": "Lab unit U-1528, classical Chebyshev bounds; source context: P. J. Campbell 2026, https://arxiv.org/abs/2608.09488v1. P. Dusart 2010, arXiv 1002.0442, Theorem 6.9, restricted here to the stated finite range: https://arxiv.org/abs/1002.0442.",
+      "tags": [
+        "number-theory"
+      ],
+      "goal": false,
+      "milestone_title": "Finite-range Dusart upper bound for prime counting",
+      "milestone_description": "Establish the stated inequality throughout its full quantified range.",
+      "lab_decl": "dusartPi11_finite"
+    }
+  ]
+}

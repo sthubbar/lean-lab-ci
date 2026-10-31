@@ -1,0 +1,1 @@
+-- Retired by PC 20261020T0103Z-16649: id clash with R-0018 of PC 20261020T0202Z-8791. The same content now lives in Routes/R0019SparseShifts.lean, namespace LeanLab.Routes.R0019; this file's earlier version is in git history and in OneDrive Routes/old/misnamed-20261020T0103Z-16649/.

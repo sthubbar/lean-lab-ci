@@ -1,0 +1,11 @@
+/-
+I-0065 block 19: every even n in [53532, 54242] has minGB n ≤ 211.
+AI-written Lean code, Claude, 2026-10-17, run 20261017T1402Z-26900. Binary Goldbach is OPEN.
+-/
+import LeanLab.Verifications.Top50.RecBase
+
+namespace LeanLab.Verifications.Top50.Fast
+
+theorem recBlock_19 : allGBb 211 356 53532 = true := by decide +kernel
+
+end LeanLab.Verifications.Top50.Fast

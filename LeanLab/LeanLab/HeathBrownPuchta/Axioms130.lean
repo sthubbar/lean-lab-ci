@@ -1,0 +1,50 @@
+import LeanLab.HeathBrownPuchta.Conditional130
+import LeanLab.HeathBrownPuchta.Decomp130
+import LeanLab.HeathBrownPuchta.Decomp1530a
+import LeanLab.HeathBrownPuchta.Decomp1530b
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.ee_int_shift
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.TL_split
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.TL_periodic
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.TL_norm_le
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.TL_re_continuous
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.iterate_bound
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.diag_scale
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.exp_pointwise_le
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.avg_le_F
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.Sexp_le_small
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.periodic_average
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.exp_markov
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.Lpar_le_log
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.Lpar_ge_log
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.sum_id_le
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.offdiag_scale
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.orth
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.divisor_swap
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.TL_re_at
+#print axioms LeanLab.HeathBrownPuchta.Decomp130.scale
+#print axioms LeanLab.HeathBrownPuchta.Decomp130.integral_split
+#print axioms LeanLab.HeathBrownPuchta.Decomp130.theorem1
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.transfer
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.Sexp_bound
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.exceptional_bound
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.exponent_conversion
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.partial_summation
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.h_pow_sub
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.kappa_floor_le
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.E_num_uncond
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.E_num_grh
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.offdiag_grouping
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530a.rotation
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.Fzero_ge_one
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.circle_count
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.circle_positive
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.ee_grid_sum
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.moment_formula
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.moment_abs_le
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.re_power_sum_le
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.avg_le_avg_zero
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530c.F_eq_Fzero
+#print axioms LeanLab.HeathBrownPuchta.Conditional130.summable_of_log_bound
+#print axioms LeanLab.HeathBrownPuchta.Conditional130.C2_summable_of_LLW
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.finite_parseval
+#print axioms LeanLab.HeathBrownPuchta.Decomp1530b.J_expand
