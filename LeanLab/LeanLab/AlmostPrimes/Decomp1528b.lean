@@ -14,13 +14,15 @@ Lemma 4.2, whose margin is 0.6 percent. Their use: unconditional explicit forms 
 weaker inputs, and they sharpen `PNTSieve.Mertens.sum_inv_primes_le` (constant 12) and
 `PNTSieve.mertens_product_ge` (e^{-16}), which are not restated.
 
-Leaves: 12. Assemblies: `mertens2_block`, `mertens2_exists_B`, `sum_recip_le_explicit`,
-`mertens3_block`, `mertens_prod_upper`; each CONDITIONAL only on leaves of this file and of
-Decomp1528a.
+All twelve original leaves are proved. AI wrote the Lean proofs in task196.
+Assemblies: `mertens2_block`, `mertens2_exists_B`, `sum_recip_le_explicit`,
+`mertens3_block`, `mertens_prod_upper`; all are proved without cited inputs.
+Build and axiom evidence: build/codex-task196.log.
 Known mathematics. Goldbach is open.
 -/
 import Mathlib
 import LeanLab.AlmostPrimes.Decomp1528a
+import LeanLab.AlmostPrimes.DDLemma21
 
 open Real Finset Filter Topology
 
@@ -38,7 +40,53 @@ theorem abel_recip {x y : ℝ} (hy : 2 ≤ y) (hyx : y ≤ x) :
       (∑ p ∈ Nat.primesLE ⌊x⌋₊, log p / p) / log x -
         (∑ p ∈ Nat.primesLE ⌊y⌋₊, log p / p) / log y +
         ∫ t in y..x, (∑ p ∈ Nat.primesLE ⌊t⌋₊, log p / p) / (t * log t ^ 2) := by
-  sorry
+  let c : ℕ → ℝ := fun n => if n.Prime then log n / n else 0
+  let f : ℝ → ℝ := fun t => (log t)⁻¹
+  have hs (t : ℝ) : (∑ k ∈ Icc 0 ⌊t⌋₊, c k) =
+      ∑ p ∈ Nat.primesLE ⌊t⌋₊, log p / p := by
+    simp only [c, ← sum_filter]
+    congr 1
+    ext k
+    simp [Nat.mem_primesLE]
+  have hd (t : ℝ) (ht : 1 < t) : HasDerivAt f (-(1 / (t * log t ^ 2))) t := by
+    have ht0 : t ≠ 0 := by linarith
+    have hl : log t ≠ 0 := (Real.log_pos ht).ne'
+    convert (Real.hasDerivAt_log ht0).inv hl using 1
+    field_simp
+  have hc : ContinuousOn (fun t : ℝ => -(1 / (t * log t ^ 2))) (Set.Icc y x) := by
+    intro t ht
+    have ht0 : t ≠ 0 := by linarith [ht.1]
+    have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+    have hden : t * log t ^ 2 ≠ 0 := mul_ne_zero ht0 (pow_ne_zero 2 hl)
+    apply ContinuousAt.continuousWithinAt
+    fun_prop (disch := assumption)
+  have hi : MeasureTheory.IntegrableOn (deriv f) (Set.Icc y x) := by
+    exact hc.integrableOn_Icc.congr_fun
+      (fun t ht => (hd t (by linarith [ht.1])).deriv.symm) measurableSet_Icc
+  have h := sum_mul_eq_sub_sub_integral_mul c (by linarith : 0 ≤ y) hyx
+    (fun t ht => (hd t (by linarith [ht.1])).differentiableAt) hi
+  have hleft : (∑ k ∈ Ioc ⌊y⌋₊ ⌊x⌋₊, f k * c k) =
+      ∑ p ∈ (Ioc ⌊y⌋₊ ⌊x⌋₊).filter Nat.Prime, (1 : ℝ) / p := by
+    rw [sum_filter]
+    apply sum_congr rfl
+    intro p _
+    dsimp [f, c]
+    split_ifs with hp
+    · have hl : log (p : ℝ) ≠ 0 := (Real.log_pos (by exact_mod_cast hp.one_lt)).ne'
+      field_simp
+    · simp
+  have hI : (∫ t in Set.Ioc y x, deriv f t * ∑ k ∈ Icc 0 ⌊t⌋₊, c k) =
+      -(∫ t in y..x, (∑ p ∈ Nat.primesLE ⌊t⌋₊, log p / p) / (t * log t ^ 2)) := by
+    rw [← intervalIntegral.integral_of_le hyx, ← intervalIntegral.integral_neg]
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le hyx] at ht
+    change deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k) =
+      -((∑ p ∈ Nat.primesLE ⌊t⌋₊, log p / p) / (t * log t ^ 2))
+    rw [(hd t (by linarith [ht.1])).deriv, hs]
+    ring
+  rw [hleft, hs, hs, hI] at h
+  simpa [f, div_eq_mul_inv, mul_comm, sub_neg_eq_add] using h
 
 /-- LEAF. For real 1 < y ≤ x, ∫_y^x 1/(t log t) dt = log log x - log log y.
 Antiderivative log log t. Unit U-1528. -/
@@ -76,7 +124,84 @@ so it is interval integrable. Unit U-1528. -/
 theorem integral_A_sub {x y : ℝ} (hy : 2 ≤ y) (hyx : y ≤ x) :
     |(∫ t in y..x, (∑ p ∈ Nat.primesLE ⌊t⌋₊, log p / p) / (t * log t ^ 2)) -
         (log (log x) - log (log y))| ≤ 2 * (1 / log y - 1 / log x) := by
-  sorry
+  let A : ℝ → ℝ := fun t => ∑ p ∈ Nat.primesLE ⌊t⌋₊, log p / p
+  let w : ℝ → ℝ := fun t => 1 / (t * log t ^ 2)
+  have hw : ContinuousOn w (Set.Icc y x) := by
+    intro t ht
+    have ht0 : t ≠ 0 := by linarith [ht.1]
+    have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+    have hden : t * log t ^ 2 ≠ 0 := mul_ne_zero ht0 (pow_ne_zero 2 hl)
+    apply ContinuousAt.continuousWithinAt
+    dsimp [w]
+    fun_prop (disch := assumption)
+  have hwi : IntervalIntegrable w MeasureTheory.volume y x := by
+    apply ContinuousOn.intervalIntegrable
+    rwa [Set.uIcc_of_le hyx]
+  have hAi : IntervalIntegrable (fun t => A t / (t * log t ^ 2))
+      MeasureTheory.volume y x := by
+    let c : ℕ → ℝ := fun n => if n.Prime then log n / n else 0
+    have hs (t : ℝ) : (∑ k ∈ Icc 0 ⌊t⌋₊, c k) = A t := by
+      dsimp [A, c]
+      rw [← sum_filter]
+      congr 1
+      ext k
+      simp [Nat.mem_primesLE]
+    rw [intervalIntegrable_iff_integrableOn_Icc_of_le hyx]
+    have hi := integrableOn_mul_sum_Icc c (m := 0) (by linarith : 0 ≤ y) hw.integrableOn_Icc
+    simpa only [hs, w, one_div, div_eq_mul_inv, mul_comm, one_mul] using hi
+  have hLi : IntervalIntegrable (fun t : ℝ => 1 / (t * log t))
+      MeasureTheory.volume y x := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hyx]
+    intro t ht
+    have ht0 : t ≠ 0 := by linarith [ht.1]
+    have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+    have hden : t * log t ≠ 0 := mul_ne_zero ht0 hl
+    apply ContinuousAt.continuousWithinAt
+    fun_prop (disch := assumption)
+  have hsplit : (∫ t in y..x, A t / (t * log t ^ 2)) -
+      (log (log x) - log (log y)) =
+      ∫ t in y..x, (A t - log t) / (t * log t ^ 2) := by
+    rw [← integral_inv_mul_log (by linarith : 1 < y) hyx,
+      ← intervalIntegral.integral_sub hAi hLi]
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le hyx] at ht
+    have ht0 : t ≠ 0 := by linarith [ht.1]
+    have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+    dsimp
+    field_simp
+  have hbound : |∫ t in y..x, (A t - log t) / (t * log t ^ 2)| ≤
+      ∫ t in y..x, 2 * w t := by
+    have hb := intervalIntegral.norm_integral_le_of_norm_le (μ := MeasureTheory.volume)
+      (f := fun t => (A t - log t) / (t * log t ^ 2)) hyx
+      (g := fun t => 2 * w t) (Filter.Eventually.of_forall (fun t ht => by
+        have ht2 : 2 ≤ t := le_trans hy ht.1.le
+        have hden : 0 < t * log t ^ 2 := by
+          have hlog := Real.log_pos (by linarith : 1 < t)
+          positivity
+        rw [Real.norm_eq_abs, abs_div, abs_of_pos hden]
+        have h := Decomp1528a.mertens1_abs (x := t) (by linarith)
+        exact (div_le_div_of_nonneg_right h hden.le).trans_eq (by dsimp [w]; ring)))
+      (hwi.const_mul 2)
+    exact hb
+  have hint : (∫ t in y..x, w t) = 1 / log y - 1 / log x := by
+    have hd : ∀ t ∈ Set.uIcc y x,
+        HasDerivAt (fun t : ℝ => -(log t)⁻¹) (w t) t := by
+      intro t ht
+      rw [Set.uIcc_of_le hyx] at ht
+      have ht0 : t ≠ 0 := by linarith [ht.1]
+      have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+      convert ((Real.hasDerivAt_log ht0).inv hl).neg using 1
+      dsimp [w]
+      field_simp
+    have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt hd hwi
+    simpa only [one_div, neg_sub_neg] using hi
+  change |(∫ t in y..x, A t / (t * log t ^ 2)) - _| ≤ _
+  rw [hsplit]
+  calc _ ≤ ∫ t in y..x, 2 * w t := hbound
+    _ = 2 * (1 / log y - 1 / log x) := by
+      rw [intervalIntegral.integral_const_mul, hint]
 
 /-- **Explicit Mertens second theorem, block form**: for real 2 ≤ y ≤ x,
 |Σ_{y < p ≤ x} 1/p - (log log x - log log y)| ≤ 4/log y.
@@ -277,7 +402,18 @@ theorem sum_recip_le_explicit {x : ℝ} (hx : 2 ≤ x) :
 p. 75 style. Unit U-1528. -/
 theorem neg_log_one_sub_inv_bounds {p : ℝ} (hp : 2 ≤ p) :
     0 ≤ -log (1 - 1 / p) - 1 / p ∧ -log (1 - 1 / p) - 1 / p ≤ 1 / (2 * p * (p - 1)) := by
-  sorry
+  have hp0 : 0 < p := by linarith
+  have hlt : 1 / p < 1 := (div_lt_one hp0).2 (by linarith)
+  have hpos : 0 < 1 - 1 / p := by linarith
+  constructor
+  · have h := Real.log_le_sub_one_of_pos hpos
+    linarith
+  · have h := DDLemma21.neg_log_one_sub_le (x := 1 / p) (by positivity) hlt
+    have he : (1 / p) ^ 2 / (2 * (1 - 1 / p)) = 1 / (2 * p * (p - 1)) := by
+      have hp1 : p - 1 ≠ 0 := by linarith
+      field_simp
+    rw [he] at h
+    linarith
 
 /-- LEAF. Telescoping tail: for naturals 1 ≤ m, Σ_{m < p ≤ n, p prime} 1/(p (p - 1)) ≤ 1/m, since
 1/(k(k - 1)) = 1/(k - 1) - 1/k. Unit U-1528. -/
@@ -400,7 +536,47 @@ H_N · ∏_{p ≤ N} (1 - 1/p) ≤ 1, H_N = Σ_{n ≤ N} 1/n (Mathlib `harmonic`
 Rosser-Schoenfeld 1962, p. 70 style. Unit U-1528. -/
 theorem harmonic_mul_prod_le (N : ℕ) :
     (harmonic N : ℝ) * ∏ p ∈ Nat.primesLE N, (1 - (1 : ℝ) / p) ≤ 1 := by
-  sorry
+  let f : ℕ →* ℝ :=
+    { toFun := fun n => (n : ℝ)⁻¹
+      map_one' := by simp
+      map_mul' := by intro a b; simp [mul_comm] }
+  have hsmall : ∀ {p : ℕ}, p.Prime → ‖f p‖ < 1 := by
+    intro p hp
+    change ‖(p : ℝ)⁻¹‖ < 1
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    exact inv_lt_one_of_one_lt₀ (by exact_mod_cast hp.one_lt)
+  have hseries := EulerProduct.summable_and_hasSum_factoredNumbers_prod_filter_prime_geometric
+    (f := f) hsmall (Nat.primesLE N)
+  have hfilter : (Nat.primesLE N).filter Nat.Prime = Nat.primesLE N := by
+    ext p
+    simp [Nat.mem_primesLE]
+  have hmem : ∀ n ∈ Icc 1 N, n ∈ Nat.factoredNumbers (Nat.primesLE N) := by
+    intro n hn
+    rw [Nat.mem_factoredNumbers_iff_forall_le]
+    refine ⟨by have := (mem_Icc.mp hn).1; omega, ?_⟩
+    intro p hpn hp _
+    exact Nat.mem_primesLE.mpr ⟨le_trans hpn (mem_Icc.mp hn).2, hp⟩
+  have hsum := sum_le_hasSum
+    ((Icc 1 N).subtype (fun n => n ∈ Nat.factoredNumbers (Nat.primesLE N)))
+    (fun n _ => show 0 ≤ f n by dsimp [f]; positivity) hseries.2
+  rw [hfilter] at hsum
+  have hH : (harmonic N : ℝ) ≤ ∏ p ∈ Nat.primesLE N, (1 - (1 : ℝ) / p)⁻¹ := by
+    change (∑ n ∈ (Icc 1 N).subtype (fun n => n ∈ Nat.factoredNumbers (Nat.primesLE N)),
+      ((n : ℕ) : ℝ)⁻¹) ≤ ∏ p ∈ Nat.primesLE N, (1 - (p : ℝ)⁻¹)⁻¹ at hsum
+    rw [sum_subtype_of_mem (fun n : ℕ => (n : ℝ)⁻¹) hmem] at hsum
+    simpa only [harmonic_eq_sum_Icc, Rat.cast_sum, Rat.cast_inv, Rat.cast_natCast, one_div] using hsum
+  have hP : 0 < ∏ p ∈ Nat.primesLE N, (1 - (1 : ℝ) / p) := by
+    apply prod_pos
+    intro p hp
+    have hp1 : (1 : ℝ) < p := by exact_mod_cast (Nat.prime_of_mem_primesLE hp).one_lt
+    have hp0 : (0 : ℝ) < p := by linarith
+    exact sub_pos.mpr ((div_lt_one hp0).2 hp1)
+  rw [prod_inv_distrib] at hH
+  calc (harmonic N : ℝ) * ∏ p ∈ Nat.primesLE N, (1 - (1 : ℝ) / p)
+      ≤ (∏ p ∈ Nat.primesLE N, (1 - (1 : ℝ) / p))⁻¹ *
+          ∏ p ∈ Nat.primesLE N, (1 - (1 : ℝ) / p) :=
+        mul_le_mul_of_nonneg_right hH hP.le
+    _ = 1 := inv_mul_cancel₀ hP.ne'
 
 /-- **Elementary Mertens product upper bound**: ∏_{p ≤ x} (1 - 1/p) ≤ 1/log x for real x ≥ 2.
 Rosser-Schoenfeld (3.26), p. 70, has e^{-γ}(1 + 1/(2 log² x))/log x, sharper by 0.56.
@@ -431,7 +607,60 @@ the product is ≥ (log 2/2) e^{-5.771 - 1/4}/log x = 8.4·10^{-4}/log x. Sharpe
 e^{-γ}(1 - 1/(2 log² x))/log x for x ≥ 285. Unit U-1528. -/
 theorem mertens_prod_lower {x : ℝ} (hx : 2 ≤ x) :
     1 / (1500 * log x) ≤ ∏ p ∈ Nat.primesLE ⌊x⌋₊, (1 - (1 : ℝ) / p) := by
-  sorry
+  have hlx : 0 < log x := Real.log_pos (by linarith)
+  have hl2 : 0 < log (2 : ℝ) := Real.log_pos (by norm_num)
+  let S := (Ioc 2 ⌊x⌋₊).filter Nat.Prime
+  let Q : ℝ := ∏ p ∈ S, (1 - (1 : ℝ) / p)
+  have hQ : 0 < Q := by
+    apply prod_pos
+    intro p hp
+    have hp1 : (1 : ℝ) < p := by exact_mod_cast (mem_filter.mp hp).2.one_lt
+    exact sub_pos.mpr ((div_lt_one (by linarith : (0 : ℝ) < p)).2 hp1)
+  have hset : Nat.primesLE ⌊x⌋₊ = insert 2 S := by
+    have hx2 : 2 ≤ ⌊x⌋₊ := Nat.le_floor hx
+    ext p
+    simp only [Nat.mem_primesLE, mem_insert, S, mem_filter, mem_Ioc]
+    constructor
+    · rintro ⟨hpn, hp⟩
+      by_cases hp2 : p = 2
+      · exact Or.inl hp2
+      · exact Or.inr ⟨⟨by have := hp.two_le; omega, hpn⟩, hp⟩
+    · rintro (rfl | ⟨⟨_, hpn⟩, hp⟩)
+      · exact ⟨hx2, Nat.prime_two⟩
+      · exact ⟨hpn, hp⟩
+  have hsplit : (∏ p ∈ Nat.primesLE ⌊x⌋₊, (1 - (1 : ℝ) / p)) = (1 / 2) * Q := by
+    rw [hset, prod_insert]
+    · norm_num [Q]
+    · simp [S]
+  have hb := mertens3_block (le_refl (2 : ℝ)) hx
+  norm_num only [Nat.floor_ofNat, Nat.cast_ofNat] at hb
+  change |log Q + (log (log x) - log (log 2))| ≤ 4 / log 2 + 1 / 4 at hb
+  have he : 4 / log (2 : ℝ) + 1 / (2 * 2) ≤ 6.021 := by
+    linarith [loglog2_bounds.2]
+  have hc : (6.021 : ℝ) ≤ log 750 + log (log 2) := by
+    rw [← Real.log_mul (by norm_num : (750 : ℝ) ≠ 0) hl2.ne']
+    apply (Real.le_log_iff_exp_le (by positivity)).2
+    have he01 : exp (0.1 : ℝ) ≤ 10 / 9 := by
+      have hh := Real.exp_bound_div_one_sub_of_interval (x := (0.1 : ℝ)) (by norm_num) (by norm_num)
+      norm_num at hh ⊢
+      exact hh
+    have hexp : exp (6.1 : ℝ) ≤ (2.7182818286 : ℝ) ^ 6 * (10 / 9) := by
+      rw [show (6.1 : ℝ) = (6 : ℕ) * 1 + 0.1 by norm_num, Real.exp_add, Real.exp_nat_mul]
+      exact mul_le_mul (pow_le_pow_left₀ (Real.exp_pos 1).le Real.exp_one_lt_d9.le 6)
+        he01 (Real.exp_pos _).le (by positivity)
+    calc exp (6.021 : ℝ) ≤ exp 6.1 := Real.exp_le_exp.mpr (by norm_num)
+      _ ≤ (2.7182818286 : ℝ) ^ 6 * (10 / 9) := hexp
+      _ ≤ 500 := by norm_num
+      _ ≤ 750 * log 2 := by linarith [Real.log_two_gt_d9]
+  have hlog : log (1 / (750 * log x)) ≤ log Q := by
+    rw [Real.log_div one_ne_zero (by positivity : (750 : ℝ) * log x ≠ 0),
+      Real.log_one, Real.log_mul (by norm_num : (750 : ℝ) ≠ 0) hlx.ne']
+    linarith [(abs_le.mp hb).1]
+  have hle : 1 / (750 * log x) ≤ Q :=
+    (Real.log_le_log_iff (by positivity) hQ).mp hlog
+  rw [hsplit]
+  calc 1 / (1500 * log x) = (1 / 2) * (1 / (750 * log x)) := by ring
+    _ ≤ (1 / 2) * Q := mul_le_mul_of_nonneg_left hle (by norm_num)
 
 /-! ### Vacuity instances -/
 
@@ -443,5 +672,18 @@ example : Tendsto (fun x : ℝ => 1 / x) atTop (𝓝 0) ∧
     ∀ x y : ℝ, 1 ≤ y → y ≤ x → |(0 : ℝ) - 0| ≤ 1 / y := by
   refine ⟨?_, fun x y hy _ => by simp; positivity⟩
   simpa using tendsto_inv_atTop_zero
+
+/-- The logarithmic error bound has the concrete instance p = 2. -/
+example : 0 ≤ -log (1 - 1 / (2 : ℝ)) - 1 / 2 ∧
+    -log (1 - 1 / (2 : ℝ)) - 1 / 2 ≤ 1 / (2 * 2 * (2 - 1)) :=
+  neg_log_one_sub_inv_bounds (by norm_num)
+
+/-- The Euler product inequality has a nonempty instance N = 2. -/
+example : (harmonic 2 : ℝ) * ∏ p ∈ Nat.primesLE 2, (1 - (1 : ℝ) / p) ≤ 1 :=
+  harmonic_mul_prod_le 2
+
+/-- The lower product bound has the concrete instance x = 2. -/
+example : 1 / (1500 * log (2 : ℝ)) ≤ ∏ p ∈ Nat.primesLE ⌊(2 : ℝ)⌋₊,
+    (1 - (1 : ℝ) / p) := mertens_prod_lower (by norm_num)
 
 end LeanLab.AlmostPrimes.Decomp1528b
