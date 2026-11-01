@@ -19,14 +19,11 @@ Binary Goldbach is OPEN; this is an upper bound for representation counts on ave
 -/
 import Mathlib
 import LeanLab.Ramare1995.Decomp1526a
-import LeanLab.Ramare1995.AristotleTrial04
-import LeanLab.Ramare1995.AristotleTrial05
-import LeanLab.ChenDoubleSieve.SelbergUpper
-import LeanLab.ChenExplicit.GammaBounds
-import LeanLab.RieselVaughan1983.Lemma1Gamma1
-import LeanLab.RieselVaughan1983.Stieltjes1Enclosure
 
-open Finset Real Filter Topology
+set_option maxHeartbeats 4000000
+set_option maxRecDepth 400000
+
+open Finset Real
 open scoped Classical
 
 noncomputable section
@@ -98,20 +95,163 @@ theorem gfun_nonneg (d : ℕ) : 0 ≤ gfun d := by
     positivity
   · rfl
 
+private lemma squarefree_prod_of_prime {t : Finset ℕ} (h : ∀ p ∈ t, Nat.Prime p) :
+    Squarefree (∏ p ∈ t, p) := by
+  classical
+  induction t using Finset.induction with
+  | empty => simp
+  | insert a s ha ih =>
+    rw [Finset.prod_insert ha, Nat.squarefree_mul_iff]
+    refine ⟨?_, (h a (Finset.mem_insert_self a s)).squarefree,
+      ih fun p hp => h p (Finset.mem_insert_of_mem hp)⟩
+    refine Nat.Coprime.prod_right fun p hp => ?_
+    exact (Nat.coprime_primes (h a (Finset.mem_insert_self a s))
+      (h p (Finset.mem_insert_of_mem hp))).mpr fun hEq => ha (hEq.symm ▸ hp)
+
+/-- `∏ (1 + F p)` over a set of primes is the sum of `∏ F p` over its subsets. -/
+private lemma prod_one_add_eq_sum_powerset (s : Finset ℕ) (F : ℕ → ℝ) :
+    ∏ p ∈ s, (1 + F p) = ∑ t ∈ s.powerset, ∏ p ∈ t, F p := by
+  have hswap : ∏ p ∈ s, (1 + F p) = ∏ p ∈ s, (F p + 1) :=
+    Finset.prod_congr rfl fun p _ => add_comm (1 : ℝ) (F p)
+  rw [hswap]
+  have h := Finset.prod_add F (fun _ => (1 : ℝ)) s
+  rw [h]
+  refine Finset.sum_congr rfl fun t _ => ?_
+  simp
+
+/-- Odd squarefree divisors of `m ≠ 0` correspond, by their set of prime factors, to the subsets
+of the odd primes of `m`. -/
+private lemma sum_sqfree_odd_divisors_eq_powerset {m : ℕ} (hm : m ≠ 0) (W : ℕ → ℝ) :
+    ∑ d ∈ m.divisors.filter (fun d => Squarefree d ∧ ¬ Even d), ∏ p ∈ d.primeFactors, W p
+      = ∑ t ∈ (m.primeFactors.filter (2 < ·)).powerset, ∏ p ∈ t, W p := by
+  classical
+  refine Finset.sum_bij (fun d _ => d.primeFactors) ?_ ?_ ?_ ?_
+  · intro d hd
+    simp only [mem_filter, mem_powerset, Nat.mem_divisors] at hd ⊢
+    obtain ⟨⟨hdvd, -⟩, hsq, hodd⟩ := hd
+    have hd0 : d ≠ 0 :=
+      (Nat.pos_of_dvd_of_pos hdvd (Nat.pos_of_ne_zero hm)).ne'
+    intro p hp
+    rw [Nat.mem_primeFactors] at hp
+    have hp2 : 2 < p := by
+      rcases Nat.lt_or_ge 2 p with hlt | hge
+      · exact hlt
+      · exact absurd (even_iff_two_dvd.mpr (le_antisymm hge hp.1.two_le ▸ hp.2.1)) hodd
+    exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp.1, hp.2.1.trans hdvd, hm⟩, hp2⟩
+  · intro d1 hd1 d2 hd2 heq
+    simp only [mem_filter] at hd1 hd2
+    rw [← Nat.prod_primeFactors_of_squarefree hd1.2.1, heq,
+      Nat.prod_primeFactors_of_squarefree hd2.2.1]
+  · intro t ht
+    simp only [mem_powerset] at ht
+    have hprime : ∀ p ∈ t, Nat.Prime p := fun p hp =>
+      (Nat.mem_primeFactors.mp (mem_filter.mp (ht hp)).1).1
+    refine ⟨∏ p ∈ t, p, ?_, Nat.primeFactors_prod hprime⟩
+    rw [mem_filter]
+    have hpos : (0 : ℕ) < ∏ p ∈ t, p := Finset.prod_pos fun p hp => (hprime p hp).pos
+    refine ⟨Nat.mem_divisors.mpr ⟨?_, hm⟩, squarefree_prod_of_prime hprime, ?_⟩
+    · exact (Finset.prod_dvd_prod_of_subset t m.primeFactors (fun p => p)
+        (ht.trans (Finset.filter_subset _ _))).trans (Nat.prod_primeFactors_dvd m)
+    · rw [even_iff_two_dvd]
+      intro h2
+      have hmem : 2 ∈ (∏ p ∈ t, p).primeFactors :=
+        Nat.mem_primeFactors.mpr ⟨Nat.prime_two, h2, hpos.ne'⟩
+      rw [Nat.primeFactors_prod hprime] at hmem
+      have := ht hmem
+      simp only [mem_filter] at this
+      omega
+  · intro d _
+    rfl
+
 /-- LEAF. Divisor expansion `h(m)² = Σ_{d ∣ m} g(d)` for `m ≥ 1`: for an odd prime `p`,
 `((p - 1)/(p - 2))² = 1 + (2p - 3)/(p - 2)²`, and expanding the product over the odd primes of
 `m` gives the sum over odd squarefree divisors. Halberstam-Richert Ch. 3, multiplicative
 expansions; Ramaré 1995 Section 3, p. 656. Unit U-1526. -/
 theorem oddFac_sq_eq_sum_divisors {m : ℕ} (hm : m ≠ 0) :
     oddFac m ^ 2 = ∑ d ∈ m.divisors, gfun d := by
-  exact AristotleTrial04.oddFac_sq_eq_sum_divisors hm
+  classical
+  have hW : ∀ p ∈ m.primeFactors.filter (2 < ·),
+      (((p : ℝ) - 1) / ((p : ℝ) - 2)) ^ 2 =
+        1 + (2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2 := by
+    intro p hp
+    simp only [mem_filter] at hp
+    have hp3 : (3 : ℝ) ≤ p := by exact_mod_cast (by omega : 3 ≤ p)
+    have hne : (p : ℝ) - 2 ≠ 0 := by linarith
+    field_simp
+    ring
+  have hfac : oddFac m ^ 2 = ∏ p ∈ m.primeFactors.filter (2 < ·),
+      (1 + (2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2) := by
+    unfold oddFac
+    rw [← Finset.prod_pow]
+    exact Finset.prod_congr rfl hW
+  have hpa : ∏ p ∈ m.primeFactors.filter (2 < ·),
+        (1 + (2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2)
+      = ∑ t ∈ (m.primeFactors.filter (2 < ·)).powerset,
+          ∏ p ∈ t, ((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2) :=
+    prod_one_add_eq_sum_powerset _ _
+  have hg : ∑ d ∈ m.divisors, gfun d
+      = ∑ d ∈ m.divisors.filter (fun d => Squarefree d ∧ ¬ Even d),
+          ∏ p ∈ d.primeFactors, ((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2) := by
+    have h1 : ∑ d ∈ m.divisors, gfun d
+        = ∑ d ∈ m.divisors, if (Squarefree d ∧ ¬ Even d)
+            then (∏ p ∈ d.primeFactors, ((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2)) else 0 := by
+      refine Finset.sum_congr rfl fun d _ => ?_
+      rfl
+    rw [h1, Finset.sum_filter]
+  rw [hfac, hpa, hg, sum_sqfree_odd_divisors_eq_powerset hm
+    (fun p => (2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2)]
+
+/-- The multiples of `d > 0` in `[1, n]` number `n / d`. -/
+private lemma card_filter_dvd_Icc (n d : ℕ) :
+    #((Icc 1 n).filter fun m => d ∣ m) = n / d := by
+  have h : (Icc 1 n).filter (fun m => d ∣ m)
+      = (range (n + 1)).filter (fun k => k ≠ 0 ∧ d ∣ k) := by
+    ext k
+    simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_range]
+    constructor
+    · rintro ⟨⟨h1, h2⟩, h3⟩
+      exact ⟨Nat.lt_succ_of_le h2, by omega, h3⟩
+    · rintro ⟨h1, h2, h3⟩
+      exact ⟨⟨by omega, by omega⟩, h3⟩
+  rw [h, Nat.card_multiples' n d]
+
+/-- Divisors of `m ∈ [1, n]` are the divisors of `m` lying in `[1, n]`. -/
+private lemma sum_divisors_eq_sum_Icc (n : ℕ) (f : ℕ → ℝ) :
+    ∑ m ∈ Icc 1 n, ∑ d ∈ m.divisors, f d
+      = ∑ m ∈ Icc 1 n, ∑ d ∈ Icc 1 n, if d ∣ m then f d else 0 := by
+  refine Finset.sum_congr rfl fun m hm => ?_
+  simp only [mem_Icc] at hm
+  have hm0 : m ≠ 0 := by omega
+  rw [← Finset.sum_filter]
+  congr 1
+  ext d
+  simp only [mem_filter, Nat.mem_divisors, mem_Icc]
+  constructor
+  · rintro ⟨h1, -⟩
+    exact ⟨⟨Nat.pos_of_dvd_of_pos h1 (by omega), (Nat.le_of_dvd (by omega) h1).trans hm.2⟩, h1⟩
+  · rintro ⟨⟨-, _⟩, h3⟩
+    exact ⟨h3, hm0⟩
 
 /-- LEAF. Interchange and `⌊n/d⌋ ≤ n/d`: for `g ≥ 0`,
 `Σ_{m ≤ n} Σ_{d ∣ m} g(d) ≤ n Σ_{d ≤ n} g(d)/d`. Elementary, Nathanson GTM 164 Section 7.4;
 Montgomery-Vaughan, Multiplicative Number Theory I, Section 2.1. Unit U-1526. -/
 theorem sum_Icc_sum_divisors_le (n : ℕ) :
     ∑ m ∈ Icc 1 n, ∑ d ∈ m.divisors, gfun d ≤ n * ∑ d ∈ Icc 1 n, gfun d / d := by
-  exact AristotleTrial05.sum_Icc_sum_divisors_le n
+  rw [sum_divisors_eq_sum_Icc n gfun, Finset.sum_comm]
+  have hstep : ∀ d ∈ Icc 1 n,
+      ∑ m ∈ Icc 1 n, (if d ∣ m then gfun d else 0)
+        = gfun d * ((n / d : ℕ) : ℝ) := by
+    intro d hd
+    simp only [mem_Icc] at hd
+    rw [← Finset.sum_filter, Finset.sum_const, card_filter_dvd_Icc n d, nsmul_eq_mul]
+    ring
+  rw [Finset.sum_congr rfl hstep]
+  calc ∑ d ∈ Icc 1 n, gfun d * ((n / d : ℕ) : ℝ)
+      ≤ ∑ d ∈ Icc 1 n, gfun d * ((n : ℝ) / d) :=
+        Finset.sum_le_sum fun d _ => mul_le_mul_of_nonneg_left Nat.cast_div_le (gfun_nonneg d)
+    _ = ∑ d ∈ Icc 1 n, n * (gfun d / d) := Finset.sum_congr rfl fun d _ => by ring
+    _ = n * ∑ d ∈ Icc 1 n, gfun d / d :=
+        (Finset.mul_sum (s := Icc 1 n) (f := fun d => gfun d / d) (a := (n : ℝ))).symm
 
 /-- LEAF. Rankin-free Euler product bound: `Σ_{d ≤ n} g(d)/d ≤ ∏_{2 < p ≤ n} (1 + g(p)/p)`,
 since `g(d)/d` is multiplicative, supported on odd squarefree `d`, and every such `d ≤ n`
@@ -120,87 +260,179 @@ theorem sum_gfun_div_le_prod (n : ℕ) :
     ∑ d ∈ Icc 1 n, gfun d / d ≤
       ∏ p ∈ (Icc 3 n).filter Nat.Prime,
         (1 + (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2)) := by
-  let S := (Icc 1 n).filter (fun d => Squarefree d ∧ ¬ Even d)
-  let P := (Icc 3 n).filter Nat.Prime
-  let a : ℕ → ℝ := fun p => (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2)
-  have hs : ∑ d ∈ Icc 1 n, gfun d / d = ∑ d ∈ S, gfun d / d := by
-    rw [sum_filter]
-    apply sum_congr rfl
-    intro d _
-    by_cases h : Squarefree d ∧ ¬ Even d
-    · rw [ite_eq_left h]
-    · rw [ite_eq_right h]
-      simp only [gfun, ite_eq_right h, zero_div]
-  have hf : ∀ d ∈ S, gfun d / d = ∏ p ∈ d.primeFactors, a p := by
-    intro d hd
-    have hd' := (mem_filter.mp hd).2
-    have hdcast : (d : ℝ) = ∏ p ∈ d.primeFactors, (p : ℝ) := by
-      rw [← Nat.cast_prod, Nat.prod_primeFactors_of_squarefree hd'.1]
-    rw [gfun, ite_eq_left hd', hdcast, ← Finset.prod_div_distrib]
-    apply prod_congr rfl
-    intro p _
-    dsimp [a]
-    simp only [div_div, mul_comm]
-  have hinj : Set.InjOn Nat.primeFactors (S : Set ℕ) := by
-    intro d hd e he hde
-    have hd' := (mem_filter.mp hd).2.1
-    have he' := (mem_filter.mp he).2.1
-    rw [← Nat.prod_primeFactors_of_squarefree hd',
-      ← Nat.prod_primeFactors_of_squarefree he', hde]
-  have hsub : S.image Nat.primeFactors ⊆ P.powerset := by
-    intro T hT
-    obtain ⟨d, hd, rfl⟩ := mem_image.mp hT
-    have hd' := mem_filter.mp hd
-    apply mem_powerset.mpr
+  classical
+  set W : ℕ → ℝ := fun p => (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2) with hWdef
+  set sf := (Icc 1 n).filter (fun d => Squarefree d ∧ ¬ Even d) with hsf
+  set S := (Icc 3 n).filter Nat.Prime with hS
+  have hWnonneg : ∀ p ∈ S, 0 ≤ W p := by
     intro p hp
-    have hpp := Nat.prime_of_mem_primeFactors hp
-    have hpd := Nat.dvd_of_mem_primeFactors hp
-    have hp2 : p ≠ 2 := by
-      intro heq
-      subst p
-      exact hd'.2.2 (even_iff_two_dvd.mpr hpd)
-    have hp3 : 3 ≤ p := by have := hpp.two_le; omega
-    exact mem_filter.mpr ⟨mem_Icc.mpr ⟨hp3,
-      (Nat.le_of_dvd (by have := (mem_Icc.mp hd'.1).1; omega) hpd).trans
-        (mem_Icc.mp hd'.1).2⟩, hpp⟩
-  rw [hs, sum_congr rfl hf, ← sum_image (f := fun T : Finset ℕ => ∏ p ∈ T, a p) hinj]
-  change _ ≤ ∏ p ∈ P, (1 + a p)
-  rw [prod_one_add]
-  apply sum_le_sum_of_subset_of_nonneg hsub
-  intro T hT _
-  apply prod_nonneg
-  intro p hp
-  have hpm := (mem_powerset.mp hT) hp
-  have hp3 : (3 : ℝ) ≤ p := by
-    exact_mod_cast (mem_Icc.mp (mem_filter.mp hpm).1).1
-  apply div_nonneg
-  · linarith
-  · positivity
+    simp only [hS, mem_filter, mem_Icc] at hp
+    have hp3 : (3 : ℝ) ≤ p := by exact_mod_cast hp.1.1
+    have hnum : 0 ≤ 2 * (p : ℝ) - 3 := by linarith
+    have hden : 0 < (p : ℝ) * ((p : ℝ) - 2) ^ 2 := by
+      have h1 : (0 : ℝ) < p := by linarith
+      have h2 : (0 : ℝ) < (p : ℝ) - 2 := by linarith
+      positivity
+    simp only [hWdef]
+    exact div_nonneg hnum hden.le
+  -- every odd prime factor of a squarefree odd `d` is at least `3`
+  have hpf3 : ∀ d : ℕ, Squarefree d → ¬ Even d → ∀ p ∈ d.primeFactors, 3 ≤ p := by
+    intro d _ hodd p hp
+    rw [Nat.mem_primeFactors] at hp
+    have hp2 : 2 < p := by
+      rcases Nat.lt_or_ge 2 p with h | h
+      · exact h
+      · exact absurd (even_iff_two_dvd.mpr (le_antisymm h hp.1.two_le ▸ hp.2.1)) hodd
+    omega
+  -- rewrite `g / d` as a product over the prime factors
+  have h1 : ∑ d ∈ Icc 1 n, gfun d / d = ∑ d ∈ sf, ∏ p ∈ d.primeFactors, W p := by
+    have hite : ∑ d ∈ Icc 1 n, gfun d / d
+        = ∑ d ∈ Icc 1 n, if (Squarefree d ∧ ¬ Even d)
+            then (∏ p ∈ d.primeFactors, W p) else 0 := by
+      refine Finset.sum_congr rfl fun d hd => ?_
+      simp only [mem_Icc] at hd
+      have hd0 : (d : ℝ) ≠ 0 := by
+        have : d ≠ 0 := by omega
+        exact_mod_cast this
+      by_cases hc : Squarefree d ∧ ¬ Even d
+      · rw [if_pos hc]
+        have hgf : gfun d = ∏ p ∈ d.primeFactors, ((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2) := by
+          simp only [gfun, if_pos hc]
+        have hdeq : (d : ℝ) = ∏ p ∈ d.primeFactors, (p : ℝ) := by
+          rw [← Nat.cast_prod, Nat.prod_primeFactors_of_squarefree hc.1]
+        have hfac : ∀ p ∈ d.primeFactors,
+            ((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2) / p = W p := by
+          intro p hp
+          have hp3 : (3 : ℝ) ≤ p := by exact_mod_cast hpf3 d hc.1 hc.2 p hp
+          have hp0 : (p : ℝ) ≠ 0 := by linarith
+          have hp2 : (p : ℝ) - 2 ≠ 0 := by linarith
+          simp only [hWdef]
+          field_simp
+        calc gfun d / (d : ℝ)
+            = (∏ p ∈ d.primeFactors, ((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2)) / (d : ℝ) := by
+                rw [hgf]
+          _ = (∏ p ∈ d.primeFactors, ((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2)) /
+                (∏ p ∈ d.primeFactors, (p : ℝ)) := by rw [hdeq]
+          _ = ∏ p ∈ d.primeFactors,
+                (((2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2) / p) :=
+                (Finset.prod_div_distrib (s := d.primeFactors)
+                  (f := fun p => (2 * (p : ℝ) - 3) / ((p : ℝ) - 2) ^ 2)
+                  (g := fun p => (p : ℝ))).symm
+          _ = ∏ p ∈ d.primeFactors, W p := Finset.prod_congr rfl hfac
+      · rw [if_neg hc]
+        have hz : gfun d = 0 := by simp only [gfun, if_neg hc]
+        rw [hz, zero_div]
+    rw [hite, ← Finset.sum_filter]
+  rw [h1]
+  -- the prime-factor sets of the odd squarefree `d ∈ [1,n]` are subsets of `S`
+  have hsub : sf.image (fun d => d.primeFactors) ⊆ S.powerset := by
+    intro t ht
+    simp only [mem_image, hsf, mem_filter, mem_Icc] at ht
+    obtain ⟨d, ⟨⟨hd1, hdn⟩, hsq, hodd⟩, rfl⟩ := ht
+    rw [mem_powerset]
+    intro p hp
+    obtain ⟨hp3, hp1, hpdvd⟩ : 3 ≤ p ∧ Nat.Prime p ∧ p ∣ d :=
+      ⟨hpf3 d hsq hodd p hp, (Nat.mem_primeFactors.mp hp).1, (Nat.mem_primeFactors.mp hp).2.1⟩
+    exact mem_filter.mpr ⟨mem_Icc.mpr ⟨hp3, (Nat.le_of_dvd (by omega) hpdvd).trans hdn⟩, hp1⟩
+  have hinj : Set.InjOn (fun d => d.primeFactors) (sf : Set ℕ) := by
+    intro d1 hd1 d2 hd2 heq
+    simp only [Finset.mem_coe, hsf, mem_filter] at hd1 hd2
+    have heq' : d1.primeFactors = d2.primeFactors := heq
+    rw [← Nat.prod_primeFactors_of_squarefree hd1.2.1, heq',
+      Nat.prod_primeFactors_of_squarefree hd2.2.1]
+  have himg : ∑ d ∈ sf, ∏ p ∈ d.primeFactors, W p
+      = ∑ T ∈ sf.image (fun d => d.primeFactors), ∏ p ∈ T, W p :=
+    (Finset.sum_image (f := fun t => ∏ p ∈ t, W p) (s := sf)
+      (g := fun d => d.primeFactors) hinj).symm
+  rw [himg]
+  refine (Finset.sum_le_sum_of_subset_of_nonneg hsub ?_).trans_eq ?_
+  · intro T hT _
+    exact Finset.prod_nonneg fun p hp => hWnonneg p (mem_powerset.mp hT hp)
+  · exact (prod_one_add_eq_sum_powerset S W).symm
 
-set_option maxHeartbeats 2000000 in
-/-- Finite certificate for the product leaf. The cutoff 499 leaves room for a
-rational telescoping tail over all integers. Auxiliary computation for the
-mean value route in Ramaré 1995 Section 3, p. 656 to 667. -/
-theorem prod_odd_primes_499_le :
-    (∏ p ∈ (Icc 3 499).filter Nat.Prime,
-      (1 + (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2))) ≤
-      (2.65 : ℝ) * (497 / 499) := by
-  have he : (Icc 3 499).filter Nat.Prime = {3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499} := by decide +kernel
-  rw [he]
-  norm_num
+/-- A telescoping bound for `Σ 2/(p - 2)²` over an interval of integers. -/
+private lemma sum_Icc_shift_inv_sq_aux (N : ℕ) (hN : 523 ≤ N) :
+    ∑ p ∈ Icc 523 N, (2 : ℝ) / ((p : ℝ) - 2) ^ 2
+      ≤ 1 / 520 + 1 / 521 - 1 / ((N : ℝ) - 2) - 1 / ((N : ℝ) - 1) := by
+  induction N, hN using Nat.le_induction with
+  | base =>
+    rw [Finset.Icc_self, Finset.sum_singleton]
+    push_cast
+    norm_num
+  | succ N hN ih =>
+    rw [Finset.sum_Icc_succ_top (by omega)]
+    push_cast
+    have hN0 : (523 : ℝ) ≤ N := by
+      have : 523 ≤ N := by omega
+      exact_mod_cast this
+    have e1 : (N : ℝ) + 1 - 2 = (N : ℝ) - 1 := by ring
+    have e2 : (N : ℝ) + 1 - 1 = (N : ℝ) := by ring
+    rw [e1, e2]
+    have hkey : (2 : ℝ) / ((N : ℝ) - 1) ^ 2 ≤ 1 / ((N : ℝ) - 2) - 1 / (N : ℝ) := by
+      have h1 : (0 : ℝ) < (N : ℝ) - 2 := by linarith
+      have h2 : (0 : ℝ) < (N : ℝ) - 1 := by linarith
+      have h3 : (0 : ℝ) < (N : ℝ) := by linarith
+      have hl : (0 : ℝ) < ((N : ℝ) - 1) ^ 2 := by positivity
+      have hr : (0 : ℝ) < ((N : ℝ) - 2) * (N : ℝ) := by positivity
+      have e : 1 / ((N : ℝ) - 2) - 1 / (N : ℝ) = 2 / (((N : ℝ) - 2) * (N : ℝ)) := by
+        field_simp
+        ring
+      rw [e, div_le_div_iff₀ hl hr]
+      nlinarith
+    linarith
 
-/-- Rational tail step for the product leaf. Multiplying the factor at x
-by the previous potential gives at most the next potential for x at least 4.
-Lab auxiliary estimate for Ramaré 1995 Section 3, p. 656 to 667. -/
-theorem euler_factor_step (x : ℝ) (hx : 4 ≤ x) :
-    (1 + (2 * x - 3) / (x * (x - 2) ^ 2)) * ((x - 3) / (x - 1)) ≤
-      (x - 2) / x := by
-  have hx0 : 0 < x := by linarith
-  have hx1 : 0 < x - 1 := by linarith
-  have hx2 : 0 < x - 2 := by linarith
-  rw [← mul_div_assoc, div_le_div_iff₀ hx1 hx0]
-  field_simp
-  nlinarith [sq_nonneg (x - 2)]
+/-- The tail `Σ 2/(p - 2)²` from `523` is at most `1/520 + 1/521`. -/
+private lemma sum_Icc_shift_inv_sq_le (N : ℕ) :
+    ∑ p ∈ Icc 523 N, (2 : ℝ) / ((p : ℝ) - 2) ^ 2 ≤ 1 / 520 + 1 / 521 := by
+  rcases Nat.lt_or_ge N 523 with hN | hN
+  · rw [Finset.Icc_eq_empty (by omega)]
+    simp only [Finset.sum_empty]
+    positivity
+  · have h := sum_Icc_shift_inv_sq_aux N hN
+    have hN0 : (523 : ℝ) ≤ N := by exact_mod_cast hN
+    have h1 : (0 : ℝ) < (N : ℝ) - 2 := by linarith
+    have h2 : (0 : ℝ) < (N : ℝ) - 1 := by linarith
+    have : 0 ≤ 1 / ((N : ℝ) - 2) + 1 / ((N : ℝ) - 1) := by positivity
+    linarith
+
+/-- `∏ (1 + g) ≤ exp (Σ g)` when `g ≥ 0` on the index set. -/
+private lemma prod_one_add_le_exp_sum (s : Finset ℕ) (g : ℕ → ℝ) (h : ∀ i ∈ s, 0 ≤ g i) :
+    ∏ i ∈ s, (1 + g i) ≤ Real.exp (∑ i ∈ s, g i) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert a s ha ih =>
+    rw [Finset.prod_insert ha, Finset.sum_insert ha, Real.exp_add]
+    have hga : 0 ≤ g a := h a (Finset.mem_insert_self a s)
+    have hpa : 1 + g a ≤ Real.exp (g a) := by linarith [Real.add_one_le_exp (g a)]
+    have hpos : 0 < ∏ i ∈ s, (1 + g i) :=
+      Finset.prod_pos fun i hi => by linarith [h i (Finset.mem_insert_of_mem hi)]
+    have hih := ih fun i hi => h i (Finset.mem_insert_of_mem hi)
+    exact mul_le_mul hpa hih hpos.le (Real.exp_pos _).le
+
+/-- A product of factors `1 + g ≥ 1` is at least `1`. -/
+private lemma one_le_prod_one_add {s : Finset ℕ} {g : ℕ → ℝ} (h : ∀ p ∈ s, 0 ≤ g p) :
+    1 ≤ ∏ p ∈ s, (1 + g p) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert a t ha ih =>
+    rw [Finset.prod_insert ha]
+    have h1 : 1 ≤ 1 + g a := by linarith [h a (Finset.mem_insert_self a t)]
+    have h2 : 1 ≤ ∏ p ∈ t, (1 + g p) := ih fun p hp => h p (Finset.mem_insert_of_mem hp)
+    have h3 : (0 : ℝ) ≤ ∏ p ∈ t, (1 + g p) := by linarith
+    have h4 : (0 : ℝ) ≤ 1 + g a := by linarith
+    exact le_trans (by norm_num : (1 : ℝ) ≤ 1 * 1) (mul_le_mul h1 h2 zero_le_one h4)
+
+/-- Monotonicity of such a product in the index set. -/
+private lemma prod_le_prod_one_add_of_subset {s₁ s₂ : Finset ℕ} (h : s₁ ⊆ s₂) {g : ℕ → ℝ}
+    (hg : ∀ p ∈ s₂, 0 ≤ g p) : ∏ p ∈ s₁, (1 + g p) ≤ ∏ p ∈ s₂, (1 + g p) := by
+  have hb : 0 ≤ ∏ p ∈ s₁, (1 + g p) := Finset.prod_nonneg fun p hp => by linarith [hg p (h hp)]
+  have hone : 1 ≤ ∏ p ∈ s₂ \ s₁, (1 + g p) :=
+    one_le_prod_one_add fun p hp => hg p (Finset.mem_sdiff.mp hp).1
+  calc ∏ p ∈ s₁, (1 + g p)
+      ≤ (∏ p ∈ s₂ \ s₁, (1 + g p)) * ∏ p ∈ s₁, (1 + g p) := le_mul_of_one_le_left hb hone
+    _ = ∏ p ∈ s₂, (1 + g p) := Finset.prod_sdiff h
 
 /-- LEAF. Numerical bound: `∏_{2 < p ≤ n} (1 + (2p - 3)/(p (p - 2)²)) ≤ 2.65` for every `n`.
 The full product is `2.63985...`; a proof can bound the primes up to 100 exactly and the
@@ -209,60 +441,117 @@ Ramaré 1995 Section 3, p. 656 to 667 for products of this kind. Unit U-1526. -/
 theorem prod_odd_primes_le (n : ℕ) :
     ∏ p ∈ (Icc 3 n).filter Nat.Prime,
         (1 + (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2)) ≤ 2.65 := by
-  have hbase := prod_odd_primes_499_le
-  let f : ℕ → ℝ := fun p => 1 + (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2)
-  let F : ℕ → ℝ := fun k => ∏ p ∈ (Icc 3 k).filter Nat.Prime, f p
-  have hf : ∀ p, 3 ≤ p → 1 ≤ f p := by
+  classical
+  set g : ℕ → ℝ := fun p => (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2) with hg
+  have hPL : (Icc 3 521).filter Nat.Prime = {3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521} := by
+    decide
+  have hheadlit : ∏ p ∈ ({3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521} : Finset ℕ), (1 + g p) ≤ 263847 / 100000 := by
+    norm_num [hg]
+  have hhead : ∏ p ∈ (Icc 3 521).filter Nat.Prime, (1 + g p) ≤ 263847 / 100000 := by
+    rw [hPL]
+    exact hheadlit
+  have hgpos : ∀ p : ℕ, 3 ≤ p → 0 ≤ g p := by
     intro p hp
-    have hp' : (3 : ℝ) ≤ p := by exact_mod_cast hp
-    dsimp [f]
-    have : 0 ≤ (2 * (p : ℝ) - 3) / ((p : ℝ) * ((p : ℝ) - 2) ^ 2) := by
-      apply div_nonneg <;> nlinarith
-    linarith
-  have hind : ∀ k : ℕ, 499 ≤ k → F k ≤ 2.65 * (((k : ℝ) - 2) / k) := by
-    intro k hk
-    induction k, hk using Nat.le_induction with
-    | base => simpa only [F, f, Nat.cast_ofNat, show (499 : ℝ) - 2 = 497 by norm_num] using hbase
-    | succ k hk ih =>
-      have hk' : (499 : ℝ) ≤ k := by exact_mod_cast hk
-      have he : F (k + 1) = F k * (if (k + 1).Prime then f (k + 1) else 1) := by
-        dsimp [F]
-        simp only [prod_filter]
-        rw [prod_Icc_succ_top (by omega)]
-      rw [he]
-      by_cases hp : (k + 1).Prime
-      · rw [ite_eq_left hp]
-        have hs := euler_factor_step ((k : ℝ) + 1) (by linarith)
-        have hs' : f (k + 1) * (((k : ℝ) - 2) / k) ≤
-            ((((k + 1 : ℕ) : ℝ) - 2) / (k + 1)) := by
-          simpa only [f, Nat.cast_add, Nat.cast_one, add_sub_cancel_right,
-            show ∀ x : ℝ, x + 1 - 3 = x - 2 by intro x; ring] using hs
-        calc F k * f (k + 1) ≤ (2.65 * (((k : ℝ) - 2) / k)) * f (k + 1) :=
-            mul_le_mul_of_nonneg_right ih (by have := hf (k+1) (by omega); linarith)
-          _ = 2.65 * (f (k + 1) * (((k : ℝ) - 2) / k)) := by ring
-          _ ≤ _ := by
-            simpa only [Nat.cast_add, Nat.cast_one] using
-              mul_le_mul_of_nonneg_left hs' (by norm_num : (0 : ℝ) ≤ 2.65)
-      · rw [ite_eq_right hp, mul_one]
-        refine ih.trans ?_
-        apply mul_le_mul_of_nonneg_left _ (by norm_num)
-        push_cast
-        rw [div_le_div_iff₀ (by positivity : (0 : ℝ) < k) (by positivity : (0 : ℝ) < k + 1)]
-        nlinarith
-  change F n ≤ 2.65
-  by_cases hn : 499 ≤ n
-  · refine (hind n hn).trans ?_
-    have hn' : (499 : ℝ) ≤ n := by exact_mod_cast hn
-    have hratio : ((n : ℝ) - 2) / n ≤ 1 := (div_le_one (by linarith)).mpr (by linarith)
-    nlinarith
-  · have hsub : (Icc 3 n).filter Nat.Prime ⊆ (Icc 3 499).filter Nat.Prime := by
+    have hp3 : (3 : ℝ) ≤ p := by exact_mod_cast hp
+    have hnum : 0 ≤ 2 * (p : ℝ) - 3 := by linarith
+    have hden : 0 < (p : ℝ) * ((p : ℝ) - 2) ^ 2 := by
+      have h1 : (0 : ℝ) < (p : ℝ) := by linarith
+      have h2 : (0 : ℝ) < (p : ℝ) - 2 := by linarith
+      positivity
+    simp only [hg]
+    exact div_nonneg hnum hden.le
+  rcases Nat.lt_or_ge n 521 with hn | hn
+  · have hsub : (Icc 3 n).filter Nat.Prime ⊆ (Icc 3 521).filter Nat.Prime := by
       intro p hp
       simp only [mem_filter, mem_Icc] at hp ⊢
       exact ⟨⟨hp.1.1, by omega⟩, hp.2⟩
-    have hm : F n ≤ F 499 := prod_le_prod_of_subset_of_one_le₀ hsub
-      (fun p hp => (zero_le_one : (0 : ℝ) ≤ 1).trans (hf p (mem_Icc.mp (mem_filter.mp hp).1).1))
-      (fun p hp _ => hf p (mem_Icc.mp (mem_filter.mp hp).1).1)
-    exact hm.trans (hbase.trans (by norm_num))
+    have hle := prod_le_prod_one_add_of_subset hsub
+      (fun p hp => hgpos p (by simp only [mem_filter, mem_Icc] at hp; omega))
+    linarith
+  · have hsplit : Icc 3 n = Icc 3 521 ∪ Ioc 521 n := by
+      ext k
+      simp only [mem_union, mem_Icc, mem_Ioc]
+      omega
+    rw [hsplit, Finset.filter_union]
+    rw [Finset.prod_union (by
+      rw [Finset.disjoint_left]
+      intro a ha hb
+      simp only [mem_filter, mem_Icc] at ha
+      simp only [mem_filter, mem_Ioc] at hb
+      omega)]
+    have hnonneg : ∀ p ∈ (Ioc 521 n).filter Nat.Prime, 0 ≤ g p := by
+      intro p hp
+      simp only [mem_filter, mem_Ioc] at hp
+      exact hgpos p (by omega)
+    have htail_nn : 0 ≤ ∏ p ∈ (Ioc 521 n).filter Nat.Prime, (1 + g p) :=
+      Finset.prod_nonneg fun p hp => by linarith [hnonneg p hp]
+    have htail : ∏ p ∈ (Ioc 521 n).filter Nat.Prime, (1 + g p) ≤ (265 / 100) / (263847 / 100000) := by
+      have hexp : ∏ p ∈ (Ioc 521 n).filter Nat.Prime, (1 + g p)
+          ≤ Real.exp (∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p) :=
+        prod_one_add_le_exp_sum _ g hnonneg
+      have hsum_le : ∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p ≤ 1 / 520 + 1 / 521 := by
+        have hpt : ∀ p ∈ (Ioc 521 n).filter Nat.Prime, g p ≤ 2 / ((p : ℝ) - 2) ^ 2 := by
+          intro p hp
+          simp only [mem_filter, mem_Ioc] at hp
+          have hp3 : (3 : ℝ) ≤ p := by
+            have : (3 : ℕ) ≤ p := by omega
+            exact_mod_cast this
+          have h1 : (0 : ℝ) < (p : ℝ) := by linarith
+          have h2 : (0 : ℝ) < (p : ℝ) - 2 := by linarith
+          have hsq : (0 : ℝ) < ((p : ℝ) - 2) ^ 2 := by positivity
+          have hden : 0 < (p : ℝ) * ((p : ℝ) - 2) ^ 2 := by positivity
+          simp only [hg]
+          rw [div_le_div_iff₀ hden hsq]
+          nlinarith
+        refine (Finset.sum_le_sum hpt).trans ?_
+        have hsub2 : (Ioc 521 n).filter Nat.Prime ⊆ Icc 523 n := by
+          intro p hp
+          simp only [mem_filter, mem_Ioc] at hp
+          obtain ⟨⟨hp1, hp2⟩, hpp⟩ := hp
+          refine mem_Icc.mpr ⟨?_, hp2⟩
+          have hne : p ≠ 522 := by
+            rintro rfl
+            norm_num at hpp
+          omega
+        exact (Finset.sum_le_sum_of_subset_of_nonneg hsub2
+          fun k _ _ => by positivity).trans (sum_Icc_shift_inv_sq_le n)
+      have hexp2 : Real.exp (∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p)
+          ≤ 1 + (1 / 520 + 1 / 521) + (1 / 520 + 1 / 521) ^ 2 := by
+        have h0 : (0 : ℝ) ≤ ∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p :=
+          Finset.sum_nonneg hnonneg
+        have hb := Real.exp_bound (x := ∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p) (n := 2)
+          (by rw [abs_le]; constructor <;> linarith) (by norm_num)
+        have h2 : |∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p| =
+            ∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p := abs_of_nonneg h0
+        rw [h2] at hb
+        have hs : (∑ m ∈ Finset.range 2,
+            (∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p) ^ m / (m.factorial : ℝ))
+            = 1 + ∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p := by
+          simp [Finset.sum_range_succ]
+        rw [hs] at hb
+        have h3 : (∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p) ^ 2 *
+            ((↑(Nat.succ 2) : ℝ) / ((↑(Nat.factorial 2) : ℝ) * ↑(2 : ℕ)))
+            = 3 / 4 * (∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p) ^ 2 := by
+          have hc : ((↑(Nat.succ 2) : ℝ) / ((↑(Nat.factorial 2) : ℝ) * ↑(2 : ℕ))) = 3 / 4 := by
+            norm_num
+          rw [hc]
+          ring
+        rw [h3] at hb
+        have h4 := (abs_le.mp hb).2
+        have h5 : (∑ p ∈ (Ioc 521 n).filter Nat.Prime, g p) ^ 2
+            ≤ (1 / 520 + 1 / 521) ^ 2 := by nlinarith
+        nlinarith
+      have hexp3 : (1 : ℝ) + (1 / 520 + 1 / 521) + (1 / 520 + 1 / 521) ^ 2
+          ≤ (265 / 100) / (263847 / 100000) := by
+        have ht : (1 / 520 + 1 / 521 : ℝ) = 1041 / 270920 := by norm_num
+        rw [ht]
+        norm_num
+      exact hexp.trans (hexp2.trans hexp3)
+    have hfin : (263847 / 100000) * ((265 / 100) / (263847 / 100000)) ≤ (2.65 : ℝ) := by
+      have h : (0 : ℝ) < 263847 / 100000 := by norm_num
+      rw [mul_comm, div_mul_cancel₀ _ h.ne']
+      norm_num
+    exact (mul_le_mul hhead htail htail_nn (by norm_num)).trans hfin
 
 /-- **Mean value of `h²`**, assembly, zero sorry of its own: `Σ_{m ≤ n} h(m)² ≤ 2.65 n`. -/
 theorem sum_oddFac_sq_le (n : ℕ) : ∑ m ∈ Icc 1 n, oddFac m ^ 2 ≤ 2.65 * n := by
@@ -368,21 +657,6 @@ theorem rep_le_of_gcount_le {A : ℝ} {N : ℕ} (hN : 2 ≤ N)
         linarith
       positivity
 
-/-- Explicit threshold estimate for the Selberg leaf. The twentieth term
-of the exponential series suffices for L at least 67. Auxiliary arithmetic
-for the range of Theorem 2, Ramaré 1995 p. 646. -/
-theorem four_mul_pow_eight_le_exp {L : ℝ} (hL : 67 ≤ L) : 4 * L ^ 8 ≤ exp (3 * L / 4) := by
-  have h0 : 0 ≤ L := by linarith
-  have hp : (67 : ℝ) ^ 12 ≤ L ^ 12 := pow_le_pow_left₀ (by norm_num) hL 12
-  have hc : (4 : ℝ) ≤ ((3 / 4 : ℝ) ^ 20 / (Nat.factorial 20 : ℝ)) * 67 ^ 12 := by
-    norm_num
-  calc 4 * L ^ 8 ≤ (((3 / 4 : ℝ) ^ 20 / (Nat.factorial 20 : ℝ)) * 67 ^ 12) * L ^ 8 :=
-      mul_le_mul_of_nonneg_right hc (by positivity)
-    _ ≤ (((3 / 4 : ℝ) ^ 20 / (Nat.factorial 20 : ℝ)) * L ^ 12) * L ^ 8 := by
-      gcongr
-    _ = (3 * L / 4) ^ 20 / (Nat.factorial 20 : ℝ) := by ring
-    _ ≤ exp (3 * L / 4) := Real.pow_div_factorial_le_exp (3 * L / 4) (by positivity) 20
-
 /-- LEAF. Explicit Selberg upper bound in the range of Theorem 2: for even `N ≥ exp 67`,
 `gcount N ≤ 800 h(N) N / (log N)²`. Selberg's sieve at level `z = N^{1/4}`,
 Halberstam-Richert Thm 3.11; in the lab, `LeanLab.SchnirelmannGoldbach.S1.r_le_of_even`
@@ -392,79 +666,7 @@ once `4 (log N)⁸ ≤ N^{3/4}`, true for `log N ≥ 67`; `gcount N = r N` since
 prime. Unit U-1526. -/
 theorem gcount_le_selberg {N : ℕ} (hN : Even N) (hN67 : exp 67 ≤ N) :
     (gcount N : ℝ) ≤ 800 * oddFac N * N / Real.log N ^ 2 := by
-  have hN2 : 2 ≤ N := by
-    have h := (Real.add_one_le_exp (67 : ℝ)).trans hN67
-    exact_mod_cast (show (2 : ℝ) ≤ N by linarith)
-  have hN0 : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
-  let L := Real.log (N : ℝ)
-  have hL67 : 67 ≤ L := by
-    exact (Real.le_log_iff_exp_le hN0).mpr hN67
-  have hL0 : 0 < L := by linarith
-  have hpow : 4 * L ^ 8 ≤ (N : ℝ) ^ ((3 : ℝ) / 4) := by
-    rw [Real.rpow_def_of_pos hN0]
-    change 4 * L ^ 8 ≤ exp (L * (3 / 4))
-    rw [show L * (3 / 4) = 3 * L / 4 by ring]
-    exact four_mul_pow_eight_le_exp hL67
-  let z : ℝ := (N : ℝ) ^ ((1 : ℝ) / 4)
-  have hz1 : 1 < z := Real.one_lt_rpow (by exact_mod_cast (show 1 < N by omega)) (by norm_num)
-  have hz0 : 0 < z := by linarith
-  have hlz : Real.log z = L / 4 := by
-    change Real.log ((N : ℝ) ^ ((1 : ℝ) / 4)) = L / 4
-    rw [Real.log_rpow hN0]
-    ring
-  have hr := LeanLab.SchnirelmannGoldbach.S1.r_le_of_even hN (by omega) hz1
-  rw [hlz] at hr
-  have hsp : LeanLab.SchnirelmannGoldbach.singProd N ≤ 3 / 2 * oddFac N :=
-    LeanLab.ChenDoubleSieve.singProd_le_oddFactor N hN (by omega)
-  have hodd := oddFac_one_le N
-  have hmain : 32 * N * LeanLab.SchnirelmannGoldbach.singProd N / (L / 4) ^ 2 ≤
-      768 * oddFac N * N / L ^ 2 := by
-    rw [div_le_div_iff₀ (by positivity) (by positivity)]
-    have h := mul_le_mul_of_nonneg_left hsp (by positivity : 0 ≤ 32 * (N : ℝ))
-    nlinarith [sq_nonneg L, mul_pos hN0 (sq_pos_of_pos hL0)]
-  have herr : z * (1 + L / 4) ^ 6 + 2 * (z + 1) ≤ oddFac N * N / L ^ 2 := by
-    have h1 : (1 + L / 4) ^ 6 ≤ L ^ 6 := pow_le_pow_left₀ (by positivity) (by linarith) 6
-    have hzN : z * (N : ℝ) ^ ((3 : ℝ) / 4) = N := by
-      change (N : ℝ) ^ ((1 : ℝ) / 4) * (N : ℝ) ^ ((3 : ℝ) / 4) = N
-      rw [← Real.rpow_add hN0]
-      norm_num
-    have hL6 : 4 ≤ L ^ 6 := by
-      calc (4 : ℝ) ≤ 4 ^ 6 := by norm_num
-        _ ≤ L ^ 6 := pow_le_pow_left₀ (by norm_num) (by linarith) 6
-    have hz6 : z * (1 + L / 4) ^ 6 + 2 * (z + 1) ≤ 4 * z * L ^ 6 := by
-      have a1 := mul_le_mul_of_nonneg_left h1 hz0.le
-      have a2 := mul_le_mul_of_nonneg_left hL6 hz0.le
-      linarith
-    have key : 4 * z * L ^ 6 * L ^ 2 ≤ N := by
-      calc 4 * z * L ^ 6 * L ^ 2 = z * (4 * L ^ 8) := by ring
-        _ ≤ z * (N : ℝ) ^ ((3 : ℝ) / 4) := mul_le_mul_of_nonneg_left hpow hz0.le
-        _ = N := hzN
-    rw [le_div_iff₀ (by positivity)]
-    calc (z * (1 + L / 4) ^ 6 + 2 * (z + 1)) * L ^ 2 ≤ 4 * z * L ^ 6 * L ^ 2 :=
-        mul_le_mul_of_nonneg_right hz6 (by positivity)
-      _ ≤ N := key
-      _ ≤ oddFac N * N := by nlinarith
-  have he : gcount N = LeanLab.SchnirelmannGoldbach.r N := by
-    unfold gcount LeanLab.SchnirelmannGoldbach.r
-    congr 1
-    ext p
-    simp only [mem_filter, mem_range]
-    constructor
-    · rintro ⟨hp, hpr, hq⟩
-      refine ⟨?_, hpr, hq⟩
-      have hne : p ≠ N := by
-        rintro rfl
-        exact Nat.not_prime_zero (by simpa using hq)
-      omega
-    · rintro ⟨hp, hpr, hq⟩
-      exact ⟨by omega, hpr, hq⟩
-  rw [he]
-  calc (LeanLab.SchnirelmannGoldbach.r N : ℝ) ≤ _ := hr
-    _ ≤ 768 * oddFac N * N / L ^ 2 + oddFac N * N / L ^ 2 := by linarith
-    _ = 769 * oddFac N * N / L ^ 2 := by ring
-    _ ≤ 800 * oddFac N * N / L ^ 2 := by
-      apply div_le_div_of_nonneg_right _ (by positivity)
-      nlinarith
+  sorry
 
 /-- LEAF. **Second moment from an individual bound**: if `gcount N ≤ A h(N) N/(log N)²` for
 every even `N ≥ exp 67`, then `Σ_{N even in ]X, 2X]} rep(N)² ≤ 10.6 A² X³` for `X ≥ exp 67`:
@@ -543,387 +745,6 @@ theorem second_moment {X : ℝ} (hX : exp 67 ≤ X) :
     (fun N hN h67 => gcount_le_selberg hN h67) hX
   norm_num at this ⊢
   linarith
-
-/-- Ramaré 1995, Lemma 3.1, p. 656, at a natural cutoff. Removing the
-primes dividing d costs at most their finite Euler product. Conversely,
-that Euler product times the restricted sum fits below the sum up to n times d.
-The squarefree filter represents the factor mu squared in the paper. -/
-theorem lemma31_nat (F : ArithmeticFunction ℝ) (hF : F.IsMultiplicative)
-    (hpos : ∀ k, 0 ≤ F k) (n d : ℕ) (hd : d ≠ 0) :
-    (∑ m ∈ (Icc 1 n).filter Squarefree, F m) ≤
-      (∏ p ∈ d.primeFactors, (1 + F p)) *
-        ∑ m ∈ (Icc 1 n).filter (fun m => Squarefree m ∧ Nat.Coprime m d), F m ∧
-    (∏ p ∈ d.primeFactors, (1 + F p)) *
-        (∑ m ∈ (Icc 1 n).filter (fun m => Squarefree m ∧ Nat.Coprime m d), F m) ≤
-      ∑ m ∈ (Icc 1 (n * d)).filter Squarefree, F m := by
-  let A := (Icc 1 n).filter Squarefree
-  let D := d.divisors.filter Squarefree
-  let C := (Icc 1 n).filter (fun m => Squarefree m ∧ Nat.Coprime m d)
-  let W : ℕ × ℕ → ℝ := fun x => F x.1 * F x.2
-  have hsum : ∑ a ∈ D, F a = ∏ p ∈ d.primeFactors, (1 + F p) := by
-    dsimp [D]
-    rw [Nat.sum_divisors_filter_squarefree hd, prod_one_add]
-    have he : (UniqueFactorizationMonoid.normalizedFactors d).toFinset = d.primeFactors := by
-      rw [Nat.factors_eq]
-      rfl
-    rw [he]
-    apply sum_congr rfl
-    intro t ht
-    have ht' := mem_powerset.mp ht
-    have he' : t.val.prod = ∏ a ∈ t, a := by
-      rw [Finset.prod_eq_multiset_prod, Multiset.map_id']
-    rw [he', hF.map_prod_of_subset_primeFactors d t ht']
-  have emid : (∏ p ∈ d.primeFactors, (1 + F p)) * (∑ m ∈ C, F m) =
-      ∑ x ∈ D ×ˢ C, W x := by
-    rw [← hsum, sum_product, sum_mul]
-    apply sum_congr rfl
-    intro a _
-    rw [mul_sum]
-  change (∑ m ∈ A, F m) ≤ _ ∧ _ ≤ _
-  rw [emid]
-  constructor
-  · let T : ℕ → ℕ × ℕ := fun m => (Nat.gcd m d, m / Nat.gcd m d)
-    have hmul : ∀ m, (T m).1 * (T m).2 = m := fun m =>
-      Nat.mul_div_cancel' (Nat.gcd_dvd_left m d)
-    have hinj : Set.InjOn T (A : Set ℕ) := by
-      intro m hm k hk hmk
-      have h := congrArg (fun x : ℕ × ℕ => x.1 * x.2) hmk
-      simpa only [hmul] using h
-    have hsub : A.image T ⊆ D ×ˢ C := by
-      intro x hx
-      obtain ⟨m, hm, rfl⟩ := mem_image.mp hx
-      have hm' := mem_filter.mp hm
-      have hmsq := hm'.2
-      have hmn := mem_Icc.mp hm'.1
-      have hq : m / Nat.gcd m d ∣ m := Nat.div_dvd_of_dvd (Nat.gcd_dvd_left m d)
-      have hqpos : 1 ≤ m / Nat.gcd m d := by
-        have h := hmul m
-        dsimp [T] at h
-        rcases Nat.eq_zero_or_pos (m / Nat.gcd m d) with hz | hz
-        · rw [hz, mul_zero] at h
-          omega
-        · exact hz
-      apply mem_product.mpr
-      constructor
-      · apply mem_filter.mpr
-        exact ⟨Nat.mem_divisors.mpr ⟨Nat.gcd_dvd_right m d, hd⟩,
-          Squarefree.squarefree_of_dvd (Nat.gcd_dvd_left m d) hmsq⟩
-      · apply mem_filter.mpr
-        exact ⟨mem_Icc.mpr ⟨hqpos, (Nat.div_le_self m _).trans hmn.2⟩,
-          Squarefree.squarefree_of_dvd hq hmsq, Nat.coprime_div_gcd_of_squarefree hmsq hd⟩
-    have hw : ∀ m ∈ A, W (T m) = F m := by
-      intro m hm
-      have hmsq := (mem_filter.mp hm).2
-      have hc := Nat.coprime_div_gcd_of_squarefree hmsq hd
-      have hc' : Nat.Coprime (Nat.gcd m d) (m / Nat.gcd m d) :=
-        (hc.of_dvd_right (Nat.gcd_dvd_right m d)).symm
-      dsimp [W, T]
-      rw [← hF.map_mul_of_coprime hc', Nat.mul_div_cancel' (Nat.gcd_dvd_left m d)]
-    calc
-      (∑ m ∈ A, F m) = ∑ x ∈ A.image T, W x := by
-        rw [sum_image hinj]
-        exact sum_congr rfl fun m hm => (hw m hm).symm
-      _ ≤ ∑ x ∈ D ×ˢ C, W x :=
-        sum_le_sum_of_subset_of_nonneg hsub (fun x _ _ => mul_nonneg (hpos _) (hpos _))
-  · let U : ℕ × ℕ → ℕ := fun x => x.1 * x.2
-    have hinj : Set.InjOn U ((D ×ˢ C : Finset (ℕ × ℕ)) : Set (ℕ × ℕ)) := by
-      intro x hx y hy hxy
-      obtain ⟨hxD, hxC⟩ := mem_product.mp hx
-      obtain ⟨hyD, hyC⟩ := mem_product.mp hy
-      have hxdiv := (Nat.mem_divisors.mp (mem_filter.mp hxD).1).1
-      have hydiv := (Nat.mem_divisors.mp (mem_filter.mp hyD).1).1
-      have hxcop := (mem_filter.mp hxC).2.2
-      have hycop := (mem_filter.mp hyC).2.2
-      have hdx : x.1 ∣ y.1 :=
-        (hycop.of_dvd_right hxdiv).symm.dvd_of_dvd_mul_right
-          (by dsimp [U] at hxy; rw [← hxy]; exact dvd_mul_right _ _)
-      have hdy : y.1 ∣ x.1 :=
-        (hxcop.of_dvd_right hydiv).symm.dvd_of_dvd_mul_right
-          (by dsimp [U] at hxy; rw [hxy]; exact dvd_mul_right _ _)
-      have he : x.1 = y.1 := Nat.dvd_antisymm hdx hdy
-      apply Prod.ext he
-      have hx0 : 0 < x.1 := Nat.pos_of_mem_divisors (mem_filter.mp hxD).1
-      dsimp [U] at hxy
-      rw [← he] at hxy
-      exact Nat.eq_of_mul_eq_mul_left hx0 hxy
-    have hsub : (D ×ˢ C).image U ⊆ (Icc 1 (n * d)).filter Squarefree := by
-      intro m hm
-      obtain ⟨x, hx, rfl⟩ := mem_image.mp hm
-      obtain ⟨hxD, hxC⟩ := mem_product.mp hx
-      have hxdiv := (Nat.mem_divisors.mp (mem_filter.mp hxD).1).1
-      have hxsq := (mem_filter.mp hxD).2
-      have hxC' := mem_filter.mp hxC
-      have hxcn := mem_Icc.mp hxC'.1
-      have hc : Nat.Coprime x.1 x.2 := (hxC'.2.2.of_dvd_right hxdiv).symm
-      have hxd : x.1 ≤ d := Nat.le_of_dvd (Nat.pos_of_ne_zero hd) hxdiv
-      have hxpos : 1 ≤ x.1 := Nat.pos_of_mem_divisors (mem_filter.mp hxD).1
-      apply mem_filter.mpr
-      constructor
-      · exact mem_Icc.mpr ⟨by dsimp [U]; nlinarith,
-          by dsimp [U]; nlinarith [Nat.mul_le_mul hxd hxcn.2]⟩
-      · exact Nat.squarefree_mul_iff.mpr ⟨hc, hxsq, hxC'.2.1⟩
-    have hw : ∀ x ∈ D ×ˢ C, F (U x) = W x := by
-      intro x hx
-      obtain ⟨hxD, hxC⟩ := mem_product.mp hx
-      have hxdiv := (Nat.mem_divisors.mp (mem_filter.mp hxD).1).1
-      have hc := (mem_filter.mp hxC).2.2
-      exact hF.map_mul_of_coprime ((hc.of_dvd_right hxdiv).symm)
-    calc
-      (∑ x ∈ D ×ˢ C, W x) = ∑ m ∈ (D ×ˢ C).image U, F m := by
-        rw [sum_image hinj]
-        exact sum_congr rfl fun x hx => (hw x hx).symm
-      _ ≤ ∑ m ∈ (Icc 1 (n * d)).filter Squarefree, F m :=
-        sum_le_sum_of_subset_of_nonneg hsub (fun m _ _ => hpos m)
-
-/-- Ramaré 1995, Lemma 3.1, p. 656. The two bounds for every real
-nonnegative cutoff. Squarefree filters represent mu squared. -/
-theorem lemma31 (F : ArithmeticFunction ℝ) (hF : F.IsMultiplicative)
-    (hpos : ∀ k, 0 ≤ F k) (x : ℝ) (hx : 0 ≤ x) (d : ℕ) (hd : d ≠ 0) :
-    (∑ m ∈ (Icc 1 ⌊x⌋₊).filter Squarefree, F m) ≤
-      (∏ p ∈ d.primeFactors, (1 + F p)) *
-        ∑ m ∈ (Icc 1 ⌊x⌋₊).filter (fun m => Squarefree m ∧ Nat.Coprime m d), F m ∧
-    (∏ p ∈ d.primeFactors, (1 + F p)) *
-        (∑ m ∈ (Icc 1 ⌊x⌋₊).filter (fun m => Squarefree m ∧ Nat.Coprime m d), F m) ≤
-      ∑ m ∈ (Icc 1 ⌊x * (d : ℝ)⌋₊).filter Squarefree, F m := by
-  have h := lemma31_nat F hF hpos ⌊x⌋₊ d hd
-  constructor
-  · exact h.1
-  · refine h.2.trans ?_
-    have hcut : ⌊x⌋₊ * d ≤ ⌊x * (d : ℝ)⌋₊ := by
-      apply Nat.le_floor
-      push_cast
-      exact mul_le_mul_of_nonneg_right (Nat.floor_le hx) (Nat.cast_nonneg d)
-    apply sum_le_sum_of_subset_of_nonneg
-    · intro m hm
-      have hm' := mem_filter.mp hm
-      exact mem_filter.mpr ⟨mem_Icc.mpr ⟨(mem_Icc.mp hm'.1).1,
-        (mem_Icc.mp hm'.1).2.trans hcut⟩, hm'.2⟩
-    · intro m _ _
-      exact hpos m
-
-/-- Auxiliary bound for Ramaré 1995 Lemma 3.3, p. 657. For n at least 1
-and t between n and n plus 1, the harmonic error is at most 1 divided by 2n.
-Uses the existing GammaBounds upper and lower estimates. -/
-theorem harmonic_error_le_half_inv {n : ℕ} (hn : 1 ≤ n) {t : ℝ} (hnt : (n : ℝ) ≤ t) (htn : t ≤ (n : ℝ) + 1) :
-    |(harmonic n : ℝ) - log t - eulerMascheroniConstant| ≤ 1 / (2 * n) := by
-  have hn0 : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
-  have ht0 : 0 < t := hn0.trans_le hnt
-  have hnh : 0 < (n : ℝ) + 1/2 := by linarith
-  have hu := LeanLab.ChenExplicit.Gamma.u_le_gamma n hn
-  have hw := LeanLab.ChenExplicit.Gamma.gamma_le_w n
-  unfold LeanLab.ChenExplicit.Gamma.u at hu
-  unfold LeanLab.ChenExplicit.Gamma.w at hw
-  apply abs_le.mpr
-  constructor
-  · have he := Real.log_le_sub_one_of_pos (div_pos ht0 hnh)
-    rw [Real.log_div (ne_of_gt ht0) (ne_of_gt hnh)] at he
-    have hdiff : log t - log ((n : ℝ) + 1/2) ≤ 1 / (2 * n) := by
-      calc log t - log ((n : ℝ) + 1/2) ≤ t / ((n : ℝ) + 1/2) - 1 := he
-        _ = (t - ((n : ℝ) + 1/2)) / ((n : ℝ) + 1/2) := by field_simp
-        _ ≤ (1/2) / ((n : ℝ) + 1/2) := by
-          apply div_le_div_of_nonneg_right _ hnh.le
-          linarith
-        _ ≤ (1/2) / (n : ℝ) :=
-          div_le_div_of_nonneg_left (by norm_num) hn0 (by linarith)
-        _ = 1 / (2 * n) := by rw [div_div]
-    linarith
-  · have hlog := Real.log_le_log hn0 hnt
-    linarith
-
-/-- Ramaré 1995, p. 658, the numerical constant in the proof of
-Lemma 3.3. GammaBounds and twelve exponential series terms certify it. -/
-theorem gamma_exp_le_09105 : 3 * exp (-1 - eulerMascheroniConstant / 3) ≤ 0.9105 := by
-  have hseries := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 + 0.57720 / 3) 12
-  have hnum : (3 / 0.9105 : ℝ) ≤ exp (1 + 0.57720 / 3) := by
-    calc
-      (3 / 0.9105 : ℝ) ≤ ∑ i ∈ range 12, (1 + 0.57720 / 3 : ℝ)^i / i.factorial := by
-        norm_num [sum_range_succ]
-      _ ≤ _ := hseries
-  have hexp : exp (1 + 0.57720 / 3) ≤ exp (1 + eulerMascheroniConstant / 3) := by
-    apply Real.exp_le_exp.mpr
-    linarith [LeanLab.ChenExplicit.Gamma.gamma_gt]
-  rw [show -1 - eulerMascheroniConstant / 3 = -(1 + eulerMascheroniConstant / 3) by ring,
-    Real.exp_neg, ← div_eq_mul_inv, div_le_iff₀ (exp_pos _)]
-  have h := (div_le_iff₀ (by norm_num : (0 : ℝ) < 0.9105)).mp (hnum.trans hexp)
-  linarith
-
-/-- Ramaré 1995, Lemma 3.3, first estimate, p. 657. For every positive
-real t, the harmonic sum up to t differs from log t plus gamma by at most
-0.9105 times t to the power negative one third. The range below 1 follows
-from the optimization on p. 658. -/
-theorem lemma33_harmonic {t : ℝ} (ht : 0 < t) :
-    |(harmonic ⌊t⌋₊ : ℝ) - log t - eulerMascheroniConstant| ≤
-      0.9105 * t ^ (-1 / 3 : ℝ) := by
-  have hmax (g t : ℝ) (ht : 0 < t) :
-      (-log t - g) * t ^ (1 / 3 : ℝ) ≤ 3 * exp (-1 - g / 3) := by
-    let y := -(log t + g) / 3
-    have hcoeff : -log t - g = 3 * y := by dsimp [y]; ring
-    have hroot : t ^ (1 / 3 : ℝ) = exp (-y) * exp (-g / 3) := by
-      rw [Real.rpow_def_of_pos ht, ← Real.exp_add]
-      congr 1
-      dsimp [y]
-      ring
-    rw [hcoeff, hroot]
-    calc
-      (3 * y) * (exp (-y) * exp (-g / 3)) = (3 * exp (-g / 3)) * (y * exp (-y)) := by ring
-      _ ≤ (3 * exp (-g / 3)) * exp (-1) :=
-        mul_le_mul_of_nonneg_left (Real.mul_exp_neg_le_exp_neg_one y) (by positivity)
-      _ = 3 * exp (-1 - g / 3) := by
-        rw [mul_assoc, ← Real.exp_add,
-          show -g / 3 + -1 = -1 - g / 3 by ring]
-  have hrpos : 0 < t ^ (1 / 3 : ℝ) := Real.rpow_pos_of_pos ht _
-  rw [show (-1 / 3 : ℝ) = -(1 / 3) by ring, Real.rpow_neg ht.le,
-    ← div_eq_mul_inv, le_div_iff₀ hrpos]
-  by_cases ht1 : t < 1
-  · have hf : ⌊t⌋₊ = 0 := Nat.floor_eq_zero.mpr ht1
-    simp only [hf, harmonic_zero, Rat.cast_zero, zero_sub]
-    have hu := (hmax eulerMascheroniConstant t ht).trans gamma_exp_le_09105
-    have hlog : log t ≤ 0 := Real.log_nonpos ht.le ht1.le
-    have hr : t ^ (1 / 3 : ℝ) ≤ 1 := Real.rpow_le_one ht.le ht1.le (by norm_num)
-    have hl : (log t + eulerMascheroniConstant) * t ^ (1 / 3 : ℝ) ≤ 0.9105 := by
-      calc
-        (log t + eulerMascheroniConstant) * t ^ (1 / 3 : ℝ) ≤
-            (2 / 3) * t ^ (1 / 3 : ℝ) := by
-          apply mul_le_mul_of_nonneg_right _ hrpos.le
-          linarith [Real.eulerMascheroniConstant_lt_two_thirds]
-        _ ≤ 2 / 3 := by nlinarith
-        _ ≤ 0.9105 := by norm_num
-    have he : |(-log t - eulerMascheroniConstant) * t ^ (1 / 3 : ℝ)| ≤ 0.9105 :=
-      abs_le.mpr ⟨by nlinarith, hu⟩
-    simpa only [abs_mul, abs_of_pos hrpos] using he
-  · have ht1' : 1 ≤ t := le_of_not_gt ht1
-    have hn : 1 ≤ ⌊t⌋₊ := Nat.le_floor (by simpa only [Nat.cast_one] using ht1')
-    have hnt : (⌊t⌋₊ : ℝ) ≤ t := Nat.floor_le ht.le
-    have htn : t ≤ (⌊t⌋₊ : ℝ) + 1 := (Nat.lt_floor_add_one t).le
-    have hrle : t ^ (1 / 3 : ℝ) ≤ t := by
-      simpa only [Real.rpow_one] using
-        Real.rpow_le_rpow_of_exponent_le ht1' (by norm_num : (1 / 3 : ℝ) ≤ 1)
-    by_cases hn1 : ⌊t⌋₊ = 1
-    · have ht2 : t ≤ 2 := by
-        rw [hn1] at htn
-        norm_num at htn
-        exact htn
-      have hlog0 : 0 ≤ log t := Real.log_nonneg ht1'
-      have hlog2 : log t ≤ log 2 := Real.log_le_log ht ht2
-      have herr : |(harmonic ⌊t⌋₊ : ℝ) - log t - eulerMascheroniConstant| ≤ 0.45 := by
-        have hH : (harmonic ⌊t⌋₊ : ℝ) = 1 := by rw [hn1]; norm_num [harmonic]
-        rw [hH]
-        apply abs_le.mpr
-        constructor <;> linarith [LeanLab.ChenExplicit.Gamma.gamma_gt,
-          Real.eulerMascheroniConstant_lt_two_thirds, Real.log_two_lt_d9]
-      have hm := mul_le_mul herr (hrle.trans ht2) hrpos.le (by norm_num : (0 : ℝ) ≤ 0.45)
-      norm_num at hm
-      linarith
-    · have hn2 : (2 : ℝ) ≤ ⌊t⌋₊ := by exact_mod_cast (show 2 ≤ ⌊t⌋₊ by omega)
-      have herr := harmonic_error_le_half_inv hn hnt htn
-      have hm := mul_le_mul herr hrle hrpos.le
-        (by positivity : (0 : ℝ) ≤ 1 / (2 * (⌊t⌋₊ : ℝ)))
-      have hb : 1 / (2 * (⌊t⌋₊ : ℝ)) * t ≤ 0.75 := by
-        rw [show 1 / (2 * (⌊t⌋₊ : ℝ)) * t = t / (2 * (⌊t⌋₊ : ℝ)) by ring,
-          div_le_iff₀ (by positivity)]
-        linarith
-      linarith
-
-/-- Ramaré 1995, Lemma 3.1, p. 656, in the printed notation with
-mu squared weights. This is the same theorem as lemma31. -/
-theorem lemma31_moebius (F : ArithmeticFunction ℝ) (hF : F.IsMultiplicative)
-    (hpos : ∀ k, 0 ≤ F k) (x : ℝ) (hx : 0 ≤ x) (d : ℕ) (hd : d ≠ 0) :
-    (∑ m ∈ Icc 1 ⌊x⌋₊, (ArithmeticFunction.moebius m : ℝ)^2 * F m) ≤
-      (∏ p ∈ d.primeFactors, (1 + F p)) *
-        ∑ m ∈ (Icc 1 ⌊x⌋₊).filter (fun m => Nat.Coprime m d),
-          (ArithmeticFunction.moebius m : ℝ)^2 * F m ∧
-    (∏ p ∈ d.primeFactors, (1 + F p)) *
-        (∑ m ∈ (Icc 1 ⌊x⌋₊).filter (fun m => Nat.Coprime m d),
-          (ArithmeticFunction.moebius m : ℝ)^2 * F m) ≤
-      ∑ m ∈ Icc 1 ⌊x * (d : ℝ)⌋₊, (ArithmeticFunction.moebius m : ℝ)^2 * F m := by
-  have esum : ∀ s : Finset ℕ,
-      (∑ m ∈ s, (ArithmeticFunction.moebius m : ℝ)^2 * F m) =
-        ∑ m ∈ s.filter Squarefree, F m := by
-    intro s
-    rw [sum_filter]
-    apply sum_congr rfl
-    intro m _
-    by_cases hsq : Squarefree m
-    · have hm : (ArithmeticFunction.moebius m : ℝ)^2 = 1 := by
-        exact_mod_cast ArithmeticFunction.moebius_sq_eq_one_of_squarefree hsq
-      rw [hm, one_mul, ite_eq_left hsq]
-    · rw [ArithmeticFunction.moebius_eq_zero_of_not_squarefree hsq]
-      simp [hsq]
-  have hfilt : ((Icc 1 ⌊x⌋₊).filter (fun m => Nat.Coprime m d)).filter Squarefree =
-      (Icc 1 ⌊x⌋₊).filter (fun m => Squarefree m ∧ Nat.Coprime m d) := by
-    ext m
-    simp only [mem_filter]
-    tauto
-  simp_rw [esum]
-  rw [hfilt]
-  exact lemma31 F hF hpos x hx d hd
-
-/-- QUESTION for independent source review. The literal second estimate
-of Ramaré 1995 Lemma 3.3, p. 657, is incompatible with the cited
-Riesel and Vaughan 1983 Lemma 1, p. 48. The printed coefficient of the
-first Stieltjes constant is one. The cited formula has coefficient two.
-This proof compares the two vanishing errors and uses the same proved
-logarithmic harmonic limit for the Stieltjes constant. -/
-theorem lemma33_divisor_printed_false : ¬ ∀ t : ℝ, 0 < t →
-    |(∑ m ∈ Icc 1 ⌊t⌋₊, (m.divisors.card : ℝ) / m) -
-        (1 / 2) * log t ^ 2 - 2 * eulerMascheroniConstant * log t -
-        eulerMascheroniConstant ^ 2 + LeanLab.RieselVaughan1983.stieltjes1| ≤
-      1.641 * t ^ (-(1 / 3 : ℝ)) := by
-  let g := LeanLab.RieselVaughan1983.stieltjes1
-  have hg : g < 0 := by
-    change LeanLab.RieselVaughan1983.stieltjes1 < 0
-    have hs := LeanLab.RieselVaughan1983.sigma_bound_stieltjes1 2 (by decide)
-    have he : LeanLab.RieselVaughan1983.cseq 2 = log 2 / 4 - log 2 ^ 2 / 2 := by
-      norm_num [LeanLab.RieselVaughan1983.cseq, LeanLab.RieselVaughan1983.Lsum,
-        show Icc 1 2 = ({1, 2} : Finset ℕ) by decide]
-      ring
-    rw [he, abs_le] at hs
-    norm_num at hs
-    nlinarith [Real.log_two_gt_d9, Real.log_two_lt_d9]
-  let f : ℝ → ℝ := fun t =>
-    (∑ m ∈ Icc 1 ⌊t⌋₊, (m.divisors.card : ℝ) / m) -
-      (1 / 2) * log t ^ 2 - 2 * eulerMascheroniConstant * log t - eulerMascheroniConstant ^ 2
-  intro h
-  change ∀ t : ℝ, 0 < t → |f t + g| ≤ 1.641 * t ^ (-(1 / 3 : ℝ)) at h
-  have ht : Tendsto (fun t : ℝ => (2 * 1.641) * t ^ (-(1 / 3 : ℝ))) atTop (𝓝 0) := by
-    simpa only [mul_zero] using
-      (tendsto_rpow_neg_atTop (by norm_num : (0 : ℝ) < 1 / 3)).const_mul (2 * 1.641)
-  have hb : ∀ᶠ t : ℝ in atTop, |g| ≤ (2 * 1.641) * t ^ (-(1 / 3 : ℝ)) := by
-    filter_upwards [eventually_ge_atTop (16 : ℝ)] with t ht16
-    have h1 := h t (by linarith)
-    have h2 := LeanLab.RieselVaughan1983.lemma1_ge16_stieltjes1 t ht16
-    change |f t + 2 * g| < (1641 / 1000) * t ^ (-(1 / 3 : ℝ)) at h2
-    have htriangle := norm_sub_le (f t + 2 * g) (f t + g)
-    simp only [Real.norm_eq_abs, show (f t + 2 * g) - (f t + g) = g by ring] at htriangle
-    linarith
-  have hz : |g| ≤ 0 := ge_of_tendsto ht hb
-  have he : g = 0 := abs_nonpos_iff.mp hz
-  linarith
-
-/-- Corrected second estimate corresponding to Ramaré 1995 Lemma 3.3,
-p. 657. The coefficient two is the one in the cited Riesel and Vaughan
-1983 Lemma 1, p. 48. The lab has already proved that cited result. -/
-theorem lemma33_divisor_corrected {t : ℝ} (ht : 0 < t) :
-    |(∑ m ∈ Icc 1 ⌊t⌋₊, (m.divisors.card : ℝ) / m) -
-        (1 / 2) * log t ^ 2 - 2 * eulerMascheroniConstant * log t -
-        eulerMascheroniConstant ^ 2 + 2 * LeanLab.RieselVaughan1983.stieltjes1| ≤
-      1.641 * t ^ (-(1 / 3 : ℝ)) := by
-  have h := LeanLab.RieselVaughan1983.StieltjesCert.lemma1_stieltjes1_unconditional t ht
-  simpa only [LeanLab.RieselVaughan1983.lem1E,
-    show (1641 / 1000 : ℝ) = 1.641 by norm_num] using h.le
-
-/-- Diagnostic for the sealed Decomp1526c sum_rep_Ioc_eq leaf. At a = 4
-and b = 2 the left side is zero and the right side is negative log squared 2.
-This is a lab statement issue, already recorded in PROGRESS, not a claim
-about the paper. No statement in file c is changed. -/
-theorem sum_rep_Ioc_eq_counterexample :
-    (∑ N ∈ Ioc 4 2, rep N) ≠
-      ∑ p ∈ (range (2 + 1)).filter Nat.Prime,
-        Real.log p * (Chebyshev.theta ((2 - p : ℕ) : ℝ) - Chebyshev.theta ((4 - p : ℕ) : ℝ)) := by
-  have hI : Ioc 4 2 = (∅ : Finset ℕ) := by decide
-  have hP : (range (2 + 1)).filter Nat.Prime = ({2} : Finset ℕ) := by decide
-  rw [hI, sum_empty, hP, sum_singleton]
-  norm_num [theta_natCast_eq, sum_filter, sum_range_succ]
 
 /-- Vacuity: `h(15)` has two odd prime factors, so the product in `oddFac` is not empty;
 `h ≥ 1` always. -/
