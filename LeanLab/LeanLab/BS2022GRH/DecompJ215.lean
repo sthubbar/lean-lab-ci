@@ -6,6 +6,7 @@ import Mathlib
 import LeanLab.BS2022GRH.ChenThresholdGRH
 import LeanLab.BS2022GRH.Params
 import LeanLab.BS2022GRH.U7154UN
+import LeanLab.BS2022GRH.Decomp138b
 import LeanLab.DERZ1997.Statements
 
 open Real
@@ -17,6 +18,27 @@ lemma leaf2_bracket (α A ε C₂ X₂ N : ℝ) :
         - ε * C₂ * (3 * exp (8 * α - 2) / (4 - 8 * α)))
     - 1 / 8 * (1 - 0.62 * log X₂ / X₂ ^ (1 / 16 : ℝ))⁻¹ * LeanLab.BS2022GRH.ChenThresholdGRH.invTw * LeanLab.BS2022GRH.ChenThresholdGRH.cGJ X₂ / log N ^ (A - 2) := by
   rfl
+
+/-- leaf_comb is FALSE. Its hypothesis list is verbatim the archived pre-fix Theorem 5 of
+Decomp138b, `Thm5JOld`, which the U-1580 audit refutes given GRH: at ε = 1 the sieve
+hypothesis of `LinearSieveT4` is vacuous and `sieve_of_bad_epsilon` proves it, while
+unbounded C₂ makes the bracket `B5J` exceed any fixed bound by `bracket_unbounded`. So
+leaf_comb contradicts GRH. The sealed live `Thm5J` carries
+`0 < ε → ε < 1 / 63 → 0 ≤ C₁ → 0 ≤ C₂ → Even n →` after the 2026-10-27 fix and
+`thm5J_assembly` discards exactly those hypotheses. This helper is the machine-checked
+refutation: the kernel verifies that the hypothesis list below matches `Thm5JOld` by accepting
+`thm5J_excludes_grh` for it. AI wrote the Lean code. Binary Goldbach is open. -/
+theorem leaf_comb_excludes_GRH
+    (hLC : ∀ (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ), LeanLab.DERZ1997.GRH →
+      LeanLab.BS2022GRH.ChenThresholdGRH.LinearSieveT4 ε C₁ C₂ →
+      LeanLab.BS2022GRH.ChenThresholdGRH.epsJ u ≤ ε →
+      0 < α → α < 1 / 8 → 0 < A → LeanLab.BS2022GRH.ChenThresholdGRH.Cond19 α A u X₂ →
+      4e18 ≤ X₂ → X₂ ≤ (n : ℝ) →
+      8 * (LeanLab.BS2022GRH.UNfull n * n / log n ^ 2) *
+        LeanLab.BS2022GRH.ChenThresholdGRH.B5J α A ε C₂ X₂ n <
+        (LeanLab.BS2022GRH.U7153.SA n : ℝ)) :
+    ¬ LeanLab.DERZ1997.GRH :=
+  LeanLab.BS2022GRH.Decomp138b.thm5J_excludes_grh hLC
 
 /-- LEAF p.1228: Core combination step -/
 lemma leaf_comb (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ)
