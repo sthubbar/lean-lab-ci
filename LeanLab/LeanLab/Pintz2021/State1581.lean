@@ -117,16 +117,21 @@ def Thm1Hyp (ε H0 X0 H X P0 : ℝ) : Prop :=
 
 /-- **Theorem 1**, (2.20), CITED from Pin1. For every sufficiently small `ε > 0` there are
 `c_ε > 0` and constants such that for `P₀ ≤ X^{4/9-ε}` one can choose `P ∈ [P₀X^{-ε}, P₀]` with:
-`E = E(H, √X)` at level `P` is finite, every generalized singular series of (2.5) converges, and
+`E = E(H, √X)` at level `P` is finite, every generalized singular series of (2.5) converges at every
+positive frequency `m`, and
 for all `m ≤ X`
 `R₁(m) = ∑_{i,j ∈ E} A(ϱᵢ)A(ϱⱼ) 𝔖(χᵢ,χⱼ,m) I(ϱᵢ,ϱⱼ,m) + O_ε(𝔖(m) X e^{-c_ε H}) + O_ε(X^{1-ε})`. -/
+-- DECISION 2026-10-31 architect PC 20261031T2333Z-383: the convergence clause now asks `0 < m`.
+-- Audit168.sealed_target_false proved the old clause false at `m = 0`, where the pole series
+-- diverges; the paper uses Goldbach and prime difference frequencies only. Old form kept as
+-- Audit168.Theorem1_220_v1.
 def Theorem1_220 : Prop :=
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg : ExcPair → ExcPair → ℕ → ℂ,
-          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ,
+          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
             Tendsto (singPartial z w m) atTop (𝓝 (Sg z w m))) ∧
           ∀ m : ℕ, (m : ℝ) ≤ X →
             ‖R1maj ε X P m - mainTerm (excSet H (Real.sqrt X) P X) Sg ε X m‖ ≤

@@ -105,8 +105,23 @@ theorem zero_no_limit (s : ℂ) :
     _ = _ := he
     _ ≤ B := hB ⟨N, rfl⟩
 
-/-- The sealed Theorem1_220 is false because its convergence clause includes zero. -/
-theorem sealed_target_false : ¬ Theorem1_220 := by
+/-- The form of `Theorem1_220` sealed 2026-10-28, kept as a record after the 2026-10-31 architect
+repair restricted its convergence clause to positive frequencies. -/
+def Theorem1_220_v1 : Prop :=
+  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+      ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
+        (excSet H (Real.sqrt X) P X).Finite ∧
+        ∃ Sg : ExcPair → ExcPair → ℕ → ℂ,
+          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ,
+            Tendsto (singPartial z w m) atTop (𝓝 (Sg z w m))) ∧
+          ∀ m : ℕ, (m : ℝ) ≤ X →
+            ‖R1maj ε X P m - mainTerm (excSet H (Real.sqrt X) P X) Sg ε X m‖ ≤
+              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε))
+
+/-- The 2026-10-28 sealed form of Theorem1_220 is false because its convergence clause includes
+zero. -/
+theorem sealed_target_false : ¬ Theorem1_220_v1 := by
   rintro ⟨ε0, hε0, h⟩
   let ε := min (ε0 / 2) (1 / 9)
   have hε : 0 < ε := lt_min (by positivity) (by norm_num)

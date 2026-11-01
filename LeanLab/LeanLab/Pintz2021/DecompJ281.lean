@@ -12,6 +12,7 @@ import LeanLab.Pintz2021.Lemma1U1369
 import LeanLab.Pintz2021.WeightedKernelsTask08
 import LeanLab.Pintz2021.DifferenceTask53
 import LeanLab.Pintz2021.State1581
+import LeanLab.Pintz2021.Applications
 
 namespace LeanLab.Pintz2021.DecompJ281
 
@@ -86,63 +87,130 @@ theorem cCoefPrime_pole (q m : ℕ) :
   simp only [cCoefPrime, cCoef, Audit168.lift_pole, inv_one, mul_one, ht, map_intCast]
 
 
-/-- LEAF P0054 page 8 display 2.21: Theorem 1 display 2.21 is cited as a leaf. -/
+/-- LEAF P0054 page 8 display 2.21: Theorem 1 display 2.21 is cited as a leaf.
+DECISION 2026-10-31 architect PC 20261031T2333Z-383: convergence asked only at `0 < m`;
+LeafAudit168.untruncated_leaf_false refuted the old clause at `m = 0`. -/
 theorem leaf_221 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ,
+          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
           ∀ m : ℕ, (m : ℝ) ≤ X →
             ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
               C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) := by sorry
 
 
-/-- LEAF P0054 page 8 display 2.22: The difference between the full and truncated main terms is bounded by the additional error. -/
+/-- LEAF P0054 page 8 display 2.22: The difference between the full and truncated main terms is
+bounded by the additional error `O(𝔖(m) X log U / √U)`, inside Theorem 1's parameter range.
+DECISION 2026-10-31 architect PC 20261031T2333Z-383: the old form quantified over every `Sg'`, `U`,
+`X`, `H`, `P` and `m` with one constant, and LeafAudit168.unrestricted_tail_false refuted it at
+`U = 0`. It now takes Theorem 1's range, `P ≤ P₀`, a finite `E`, `Sg'` the actual limits of the
+series at positive frequencies, `m ∈ [X/4, X/2]` as in (2.21), and `U ≥ 2`; the constant may depend
+on `ε`, matching the `O_ε` of Theorem 1. -/
 theorem leaf_truncation_error :
-  ∃ C' : ℝ, 0 < C' ∧ ∀ H X P U ε : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-    ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
-     mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
+  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+    ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
+      Thm1Hyp ε H0 X0 H X P0 → P ≤ P0 →
+      (excSet H (Real.sqrt X) P X).Finite →
+      (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
+        Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
+      X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U →
+      ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
+        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
       C' * (Sing m * X * Real.log U / Real.sqrt U) := by sorry
 
-/-- LEAF P0054 page 8 display 2.22: The combined error bound is derived from the main term bound and the truncation bound via triangle inequality. -/
+/-- LEAF P0054 page 8 display 2.22: The combined error bound is derived from the main term bound and the truncation bound via triangle inequality.
+DECISION 2026-10-31 architect PC 20261031T2333Z-383: takes `1 ≤ X`, so `log U ≥ 0`;
+LeafAudit168.triangle_leaf_false refuted the old form at `X = -1`. Now PROVED. -/
 theorem leaf_triangle_inequality {H X P U ε ε0 c C C' : ℝ} {m : ℕ} {Sg' : ExcPair → ExcPair → ℕ → ℂ}
     (h_bound1 : ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
       C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)))
     (h_bound2 : ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
       C' * (Sing m * X * Real.log U / Real.sqrt U))
-    (hU : U = Real.sqrt X) :
+    (hU : U = Real.sqrt X) (hX : 1 ≤ X) :
     ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
-      max C C' * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) + Sing m * X * Real.log U / (X ^ (1/4 : ℝ))) := by sorry
+      max C C' * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) + Sing m * X * Real.log U / (X ^ (1/4 : ℝ))) := by
+  have hS := Applications.Sing_pos m
+  have hX0 : (0 : ℝ) ≤ X := by linarith
+  have hU1 : 1 ≤ U := by
+    rw [hU, show (1 : ℝ) = Real.sqrt 1 by simp]; exact Real.sqrt_le_sqrt hX
+  have hsq : Real.sqrt U = X ^ (1 / 4 : ℝ) := by
+    rw [hU, Real.sqrt_eq_rpow, Real.sqrt_eq_rpow, ← Real.rpow_mul hX0]; norm_num
+  rw [← hsq]
+  have ha : 0 ≤ Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) :=
+    add_nonneg (mul_nonneg (mul_nonneg hS.le hX0) (Real.exp_pos _).le) (Real.rpow_nonneg hX0 _)
+  have hb : 0 ≤ Sing m * X * Real.log U / Real.sqrt U :=
+    div_nonneg (mul_nonneg (mul_nonneg hS.le hX0) (Real.log_nonneg hU1)) (Real.sqrt_nonneg _)
+  calc _ ≤ ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ +
+        ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
+          mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ :=
+        norm_sub_le_norm_sub_add_norm_sub _ _ _
+    _ ≤ C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) +
+        C' * (Sing m * X * Real.log U / Real.sqrt U) := add_le_add h_bound1 h_bound2
+    _ ≤ max C C' * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) +
+        max C C' * (Sing m * X * Real.log U / Real.sqrt U) :=
+        add_le_add (mul_le_mul_of_nonneg_right (le_max_left _ _) ha)
+          (mul_le_mul_of_nonneg_right (le_max_right _ _) hb)
+    _ = _ := by ring
 
-/-- Assembly theorem for 2.22, proved directly from the leaf. -/
+/-- Assembly theorem for 2.22, proved from the leaves. Changed 2026-10-31 only in its convergence
+clause, now `0 < m` as in leaf_221; the proof takes `X₀` at least 4 so that `U = √X ≥ 2`. -/
 theorem assembly_222 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ,
+          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
           ∀ m : ℕ, X / 4 ≤ m ∧ (m : ℝ) ≤ X / 2 →
             ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X (Real.sqrt X) m‖ ≤
               C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) + Sing m * X * Real.log (Real.sqrt X) / (X ^ (1/4 : ℝ))) := by
-  obtain ⟨ε0, hε0, h1⟩ := leaf_221
-  obtain ⟨C', hC'pos, hC'⟩ := leaf_truncation_error
-  refine ⟨ε0, hε0, ?_⟩
-  intro ε hε hε0'
-  obtain ⟨c, H0, C, X0, hc, h2⟩ := h1 ε hε hε0'
-  refine ⟨c, H0, max C C', X0, hc, ?_⟩
+  obtain ⟨ε1, hε1, h1⟩ := leaf_221
+  obtain ⟨ε2, hε2, h2⟩ := leaf_truncation_error
+  refine ⟨min ε1 ε2, lt_min hε1 hε2, ?_⟩
+  intro ε hε hεlt
+  obtain ⟨c, H0, C, X0, hc, hA⟩ := h1 ε hε (lt_of_lt_of_le hεlt (min_le_left _ _))
+  obtain ⟨H0', C', X0', hC', hB⟩ := h2 ε hε (lt_of_lt_of_le hεlt (min_le_right _ _))
+  refine ⟨c, max H0 H0', max C C', max (max X0 X0') 4, hc, ?_⟩
   intro H X P0 hHyp
-  obtain ⟨P, hP1, hP2, hFin, Sg', hSg1, hSg2⟩ := h2 H X P0 hHyp
+  obtain ⟨hH0, hHlog, hX0, hP01, hP0X⟩ := hHyp
+  have hXa : X0 ≤ X := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hX0
+  have hXb : X0' ≤ X := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hX0
+  have hX4 : (4 : ℝ) ≤ X := le_trans (le_max_right _ _) hX0
+  have hHA : Thm1Hyp ε H0 X0 H X P0 :=
+    ⟨le_trans (le_max_left _ _) hH0, hHlog, hXa, hP01, hP0X⟩
+  have hHB : Thm1Hyp ε H0' X0' H X P0 :=
+    ⟨le_trans (le_max_right _ _) hH0, hHlog, hXb, hP01, hP0X⟩
+  obtain ⟨P, hP1, hP2, hFin, Sg', hSg1, hSg2⟩ := hA H X P0 hHA
   refine ⟨P, hP1, hP2, hFin, Sg', hSg1, ?_⟩
-  intro m hm1
-  have hm2 := hm1.2
-  have h_bound1 := hSg2 m (by linarith)
-  have h_bound2 := hC' H X P (Real.sqrt X) ε Sg' m
-  exact leaf_triangle_inequality h_bound1 h_bound2 rfl
+  intro m hm
+  have hU2 : (2 : ℝ) ≤ Real.sqrt X := by
+    rw [show (2 : ℝ) = Real.sqrt 4 by
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
+    exact Real.sqrt_le_sqrt hX4
+  have hb1' := hSg2 m (by linarith [hm.2])
+  have hX1 : (1 : ℝ) ≤ X := by linarith
+  have ha1 : 0 < Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε1) :=
+    add_pos_of_nonneg_of_pos
+      (mul_nonneg (mul_nonneg (Applications.Sing_pos m).le (by linarith)) (Real.exp_pos _).le)
+      (Real.rpow_pos_of_pos (by linarith) _)
+  have hC0 : 0 ≤ C := by
+    by_contra hneg
+    have : C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε1)) < 0 :=
+      mul_neg_of_neg_of_pos (lt_of_not_ge hneg) ha1
+    linarith [norm_nonneg (R1majPrime ε X P m -
+      mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m)]
+  have hpow : X ^ (1 - ε1) ≤ X ^ (1 - min ε1 ε2) :=
+    Real.rpow_le_rpow_of_exponent_le hX1 (by linarith [min_le_left ε1 ε2])
+  have hb1 : ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
+      C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - min ε1 ε2)) :=
+    le_trans hb1' (mul_le_mul_of_nonneg_left (by linarith) hC0)
+  have hb2 := hB H X P0 P (Real.sqrt X) Sg' m hHB hP2 hFin hSg1 hm.1 hm.2 hU2
+  exact leaf_triangle_inequality hb1 hb2 rfl (by linarith)
 
 end
 end LeanLab.Pintz2021.DecompJ281
@@ -150,3 +218,7 @@ end LeanLab.Pintz2021.DecompJ281
 #print axioms LeanLab.Pintz2021.DecompJ281.pole_not_truncated
 
 #print axioms LeanLab.Pintz2021.DecompJ281.cCoefPrime_pole
+
+#print axioms LeanLab.Pintz2021.DecompJ281.leaf_triangle_inequality
+
+#print axioms LeanLab.Pintz2021.DecompJ281.assembly_222
