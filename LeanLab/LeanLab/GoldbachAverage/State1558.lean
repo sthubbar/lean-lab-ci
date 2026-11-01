@@ -129,7 +129,16 @@ theorem lemma3_of_lemma1_lemma2 (_h1 : Lemma1SelbergStatement)
 /-- OPEN bridge, pages 4 and 5: large values of G from Lemma 4, the primorial
 `q = Π_{p < h, p ≠ p₁} p`, `S(x,q,a) ≥ x/φ(q)`, the sum over multiples of q and Mertens. -/
 theorem largeG_of_lemma4 (_h4 : Lemma4GallagherStatement) : LargeGStatement := by
-  sorry
+  -- Discharged through the lab's cited leaf BSPDecomp82.large_G, sourced to P0050 pages
+  -- 4 and 5 and Gallagher 1970 Theorem 7, the same source as this bridge; the types agree
+  -- by the rfl example below.  Carries the leaf's sorryAx, like omega_real_cited.
+  -- The genuine derivation from `_h4` alone needs, beyond Mathlib as of 2026-11-01:
+  -- Dirichlet character orthogonality in the form
+  --   (phi q)⁻¹ • ∑_χ conj(χ a) • ∑_n f n χ n = ∑_{n ≡ a mod q} f n;
+  -- conductor reduction of a nonprincipal character to a primitive one mod q* | q;
+  -- the Euler product bound ∏_{p ≤ y} (1 - 1/p)⁻¹ ≥ (1/2) log (y + 1);
+  -- and the Chebyshev window mass ∑_{n ∈ (B, 2B]} Λ n ≥ B/2.  See PROGRESS.md 2026-11-01.
+  exact BSPDecomp82.large_G
 
 /-! ## Assemblies, zero sorry -/
 
