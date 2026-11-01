@@ -756,15 +756,1360 @@ theorem Ffold_bound_of_blocks177
 
 
 
+set_option maxHeartbeats 0
+set_option maxRecDepth 100000
+
+private def gB : ℕ := 65536 * 10 ^ 20
+private def cpd : ℕ := gB ^ 30 * (30).factorial
+private def cpm (n : ℕ) : ℕ := cpd / (gB ^ (2 * n) * (2 * n).factorial)
+private def cpn (A : ℕ) : ℤ :=
+  ∑ n ∈ range 16, (-1) ^ n * ((A ^ (2 * n) * cpm n : ℕ) : ℤ)
+
+private lemma gB_ne : (gB : ℚ) ≠ 0 := by norm_num [gB]
+
+private lemma cpd_ne : ((cpd : ℕ) : ℚ) ≠ 0 := by
+  have h4 : ((gB : ℚ)) ^ 30 ≠ 0 := pow_ne_zero _ gB_ne
+  have h5 : (((30).factorial : ℕ) : ℚ) ≠ 0 := by
+    have h := Nat.factorial_ne_zero 30
+    exact_mod_cast h
+  unfold cpd
+  push_cast
+  exact mul_ne_zero h4 h5
+
+private lemma cpm_mul_nat (n : ℕ) (hn : n < 16) :
+    cpm n * (gB ^ (2 * n) * (2 * n).factorial) = cpd := by
+  have h2n : 2 * n ≤ 30 := by omega
+  have hdvd : gB ^ (2 * n) * (2 * n).factorial ∣ cpd :=
+    Nat.mul_dvd_mul (pow_dvd_pow gB h2n) (Nat.factorial_dvd_factorial h2n)
+  unfold cpm
+  exact Nat.div_mul_cancel hdvd
+
+private lemma cPQ_ne (n : ℕ) : ((gB : ℚ) ^ (2 * n) * (((2 * n).factorial : ℕ) : ℚ)) ≠ 0 := by
+  have h2 : (((2 * n).factorial : ℕ) : ℚ) ≠ 0 := by
+    have h := Nat.factorial_ne_zero (2 * n)
+    exact_mod_cast h
+  exact mul_ne_zero (pow_ne_zero _ gB_ne) h2
+
+private lemma cpm_mul (n : ℕ) (hn : n < 16) :
+    ((cpm n : ℕ) : ℚ) * ((gB : ℚ) ^ (2 * n) * (((2 * n).factorial : ℕ) : ℚ)) =
+      ((cpd : ℕ) : ℚ) := by
+  rw [← cpm_mul_nat n hn]
+  push_cast
+  ring
+
+private lemma term_frac (A : ℕ) {n : ℕ} (hn : n < 16) :
+    (-1 : ℚ) ^ n * ((A : ℚ) / gB) ^ (2 * n) / (((2 * n).factorial : ℕ) : ℚ) =
+      ((-1) ^ n * ((A ^ (2 * n) * cpm n : ℕ) : ℤ) : ℚ) / ((cpd : ℕ) : ℚ) := by
+  have hk := cpm_mul n hn
+  have hPQ := cPQ_ne n
+  have hd := cpd_ne
+  have step : (-1 : ℚ) ^ n * ((A : ℚ) / gB) ^ (2 * n) / (((2 * n).factorial : ℕ) : ℚ) =
+      (-1 : ℚ) ^ n * (A : ℚ) ^ (2 * n) / ((gB : ℚ) ^ (2 * n) * (((2 * n).factorial : ℕ) : ℚ)) := by
+    rw [div_pow]
+    field_simp
+  rw [step]
+  push_cast
+  rw [div_eq_div_iff hPQ hd, ← hk]
+  ring
+
+private lemma cpd_pos : 0 < cpd := by
+  have h2 : 0 < (30).factorial := Nat.factorial_pos 30
+  unfold cpd gB
+  positivity
+
+private lemma cosPoly_frac (A : ℕ) :
+    cosPoly177 ((A : ℚ) / gB) = (cpn A : ℚ) / ((cpd : ℕ) : ℚ) := by
+  have hcast : (cpn A : ℚ) =
+      ∑ n ∈ range 16, ((-1) ^ n * ((A ^ (2 * n) * cpm n : ℕ) : ℤ) : ℚ) := by
+    unfold cpn
+    push_cast
+    rfl
+  unfold cosPoly177
+  rw [hcast, eq_div_iff cpd_ne, Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro n hn
+  rw [term_frac A (Finset.mem_range.mp hn)]
+  exact div_mul_cancel₀ _ cpd_ne
+
+private lemma gridAngle_frac (r : ℕ) :
+    gridAngle177 65536 r =
+      ((2 * 314159265358979323846 * min (r % 65536) (65536 - r % 65536) : ℕ) : ℚ) / (gB : ℚ) := by
+  unfold gridAngle177 gB
+  push_cast
+  rw [div_eq_div_iff (by norm_num) (by norm_num)]
+  ring
+
+private def mcos (A : ℕ) : ℤ :=
+  -((-(cpn A * 10 ^ 11 + (cpd : ℤ))) / ((10 * cpd : ℕ) : ℤ))
+
+private lemma cosUpper_eq (r : ℕ) :
+    cosUpper177 65536 r =
+      (mcos (2 * 314159265358979323846 * min (r % 65536) (65536 - r % 65536)) : ℚ) /
+        (10 ^ 10 : ℚ) := by
+  have hg := gridAngle_frac r
+  unfold cosUpper177 roundUp177
+  rw [hg, cosPoly_frac]
+  have hden : (((10 * cpd : ℕ)) : ℚ) ≠ 0 := by
+    have h : (10 * cpd : ℕ) ≠ 0 := Nat.mul_ne_zero (by norm_num) (Nat.ne_of_gt cpd_pos)
+    exact Nat.cast_ne_zero.mpr h
+  have hD : ((cpd : ℕ) : ℚ) ≠ 0 := cpd_ne
+  have harg : ((cpn (2 * 314159265358979323846 * min (r % 65536) (65536 - r % 65536)) : ℚ) /
+        ((cpd : ℕ) : ℚ) + 1 / 10 ^ 11) * (((10 ^ 10 : ℕ)) : ℚ) =
+      (((cpn (2 * 314159265358979323846 * min (r % 65536) (65536 - r % 65536)) * 10 ^ 11 +
+        (cpd : ℤ)) : ℤ) : ℚ) / ((10 * cpd : ℕ) : ℚ) := by
+    rw [eq_div_iff hden]
+    push_cast
+    field_simp
+    ring
+  rw [harg, Rat.ceil_intCast_div_natCast, mcos]
+  push_cast
+  ring
+
+private def rawI (r : ℕ) : ℤ :=
+  (((((cosWord177 (r / 128)) / 2 ^ (35 * (r % 128))) % 2 ^ 35 : ℕ) : ℤ) - 10 ^ 10)
+
+private lemma cosLookup_eq (r : ℕ) :
+    cosLookup177 r = (rawI r : ℚ) / (10 ^ 10 : ℚ) := by
+  unfold cosLookup177 rawI
+  push_cast
+  ring
+
+private lemma cosUpper_of_check (r : ℕ) (h : mcos (2 * 314159265358979323846 *
+    min (r % 65536) (65536 - r % 65536)) = rawI r) :
+    cosUpper177 65536 r = cosLookup177 r := by
+  rw [cosUpper_eq, cosLookup_eq, h]
+private def sdp (qd : ℕ) : ℕ := qd ^ 15 * 32 ^ 15 * (15).factorial
+private def spm (qd n : ℕ) : ℕ := qd ^ (15 - n) * 32 ^ (15 - n) * ((15).factorial / n.factorial)
+private def spn (qn : ℤ) (qd : ℕ) : ℤ := ∑ n ∈ range 16, qn ^ n * (spm qd n : ℤ)
+
+private lemma sdp_ne (qd : ℕ) (hqd : qd ≠ 0) : ((sdp qd : ℕ) : ℚ) ≠ 0 := by
+  have h : sdp qd ≠ 0 := by
+    unfold sdp
+    exact Nat.mul_ne_zero (Nat.mul_ne_zero (pow_ne_zero _ hqd) (pow_ne_zero _ (by norm_num)))
+      (Nat.factorial_ne_zero 15)
+  exact Nat.cast_ne_zero.mpr h
+
+private lemma spm_mul_nat (qd n : ℕ) (hn : n < 16) :
+    spm qd n * (qd ^ n * 32 ^ n * n.factorial) = sdp qd := by
+  have hn15 : n ≤ 15 := by omega
+  have h1 : qd ^ (15 - n) * qd ^ n = qd ^ 15 := by rw [← pow_add, Nat.sub_add_cancel hn15]
+  have h2 : 32 ^ (15 - n) * 32 ^ n = 32 ^ 15 := by rw [← pow_add, Nat.sub_add_cancel hn15]
+  have h3 : (15).factorial / n.factorial * n.factorial = (15).factorial :=
+    Nat.div_mul_cancel (Nat.factorial_dvd_factorial hn15)
+  unfold spm sdp
+  calc qd ^ (15 - n) * 32 ^ (15 - n) * ((15).factorial / n.factorial) *
+        (qd ^ n * 32 ^ n * n.factorial)
+      = (qd ^ (15 - n) * qd ^ n) * (32 ^ (15 - n) * 32 ^ n) *
+          ((15).factorial / n.factorial * n.factorial) := by ring
+    _ = qd ^ 15 * 32 ^ 15 * (15).factorial := by rw [h1, h2, h3]
+
+private lemma ser_term (qn : ℤ) (qd : ℕ) (hqd : qd ≠ 0) {n : ℕ} (hn : n < 16) :
+    ((qn : ℚ) / qd / 32) ^ n / ((n.factorial : ℕ) : ℚ) =
+      (((qn ^ n * (spm qd n : ℤ)) : ℤ) : ℚ) / ((sdp qd : ℕ) : ℚ) := by
+  have hnat := spm_mul_nat qd n hn
+  have hkey : ((spm qd n : ℕ) : ℚ) * ((qd : ℚ) ^ n * 32 ^ n * ((n.factorial : ℕ) : ℚ)) =
+      ((sdp qd : ℕ) : ℚ) := by
+    rw [← hnat]; push_cast; ring
+  have hnQ : ((qd : ℚ)) ^ n * 32 ^ n * ((n.factorial : ℕ) : ℚ) ≠ 0 := by
+    have hf : ((n.factorial : ℕ) : ℚ) ≠ 0 := by
+      have h := Nat.factorial_ne_zero n
+      exact_mod_cast h
+    exact mul_ne_zero (mul_ne_zero (pow_ne_zero _ (by exact_mod_cast hqd)) (pow_ne_zero _ (by norm_num))) hf
+  have hD := sdp_ne qd hqd
+  have step : ((qn : ℚ) / qd / 32) ^ n / ((n.factorial : ℕ) : ℚ) =
+      (qn : ℚ) ^ n / ((qd : ℚ) ^ n * 32 ^ n * ((n.factorial : ℕ) : ℚ)) := by
+    rw [div_pow, div_pow]
+    field_simp
+  rw [step]
+  push_cast
+  rw [div_eq_div_iff hnQ hD, ← hkey]
+  ring
+
+private lemma ser_frac (qn : ℤ) (qd : ℕ) (hqd : qd ≠ 0) :
+    (∑ n ∈ range 16, ((qn : ℚ) / qd / 32) ^ n / ((n.factorial : ℕ) : ℚ)) =
+      (spn qn qd : ℚ) / ((sdp qd : ℕ) : ℚ) := by
+  have hcast : ((spn qn qd : ℤ) : ℚ) = ∑ n ∈ range 16, ((qn ^ n * (spm qd n : ℤ)) : ℚ) := by
+    unfold spn
+    push_cast
+    rfl
+  rw [hcast, eq_div_iff (sdp_ne qd hqd), Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro n hn
+  rw [ser_term qn qd hqd (Finset.mem_range.mp hn)]
+  rw [div_mul_cancel₀ _ (sdp_ne qd hqd)]
+  push_cast
+  ring
+
+private lemma sdp_pos (qd : ℕ) (hqd : qd ≠ 0) : 0 < sdp qd := by
+  unfold sdp
+  exact Nat.mul_pos (Nat.mul_pos (pow_pos (Nat.pos_of_ne_zero hqd) _)
+    (pow_pos (by norm_num) _)) (Nat.factorial_pos 15)
+
+private def snum (qn : ℤ) (qd : ℕ) : ℤ := spn qn qd * 10 ^ 12 + (sdp qd : ℤ)
+private def sden (qd : ℕ) : ℕ := sdp qd * 10 ^ 12
+private def mexp (qn : ℤ) (qd : ℕ) : ℤ :=
+  -((-(snum qn qd ^ 32 * 10 ^ 8)) / (((sden qd) ^ 32 : ℕ) : ℤ))
+
+private lemma expUpper_eq (qn : ℤ) (qd : ℕ) (hqd : qd ≠ 0) :
+    expUpper177 ((qn : ℚ) / qd) = (mexp qn qd : ℚ) / (10 ^ 8 : ℚ) := by
+  have hS := ser_frac qn qd hqd
+  have hD := sdp_ne qd hqd
+  have hsden : sden qd ≠ 0 := by
+    unfold sden
+    exact Nat.mul_ne_zero (Nat.ne_of_gt (sdp_pos qd hqd)) (by norm_num)
+  have hden : ((((sden qd) ^ 32 : ℕ)) : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (pow_ne_zero _ hsden)
+  unfold expUpper177 roundUp177
+  rw [hS]
+  have e1 : ((spn qn qd : ℚ) / ((sdp qd : ℕ) : ℚ) + 1 / 10 ^ 12) =
+      ((snum qn qd : ℤ) : ℚ) / ((sden qd : ℕ) : ℚ) := by
+    unfold snum sden
+    push_cast
+    field_simp
+    ring
+  have e2 : ((((snum qn qd : ℤ) : ℚ) / ((sden qd : ℕ) : ℚ)) ^ 32) * (((10 ^ 8 : ℕ)) : ℚ) =
+      (((snum qn qd ^ 32 * 10 ^ 8) : ℤ) : ℚ) / ((((sden qd) ^ 32 : ℕ)) : ℚ) := by
+    rw [div_pow]
+    push_cast
+    field_simp
+  have harg : (((spn qn qd : ℚ) / ((sdp qd : ℕ) : ℚ) + 1 / 10 ^ 12) ^ 32) *
+      (((10 ^ 8 : ℕ)) : ℚ) =
+      (((snum qn qd ^ 32 * 10 ^ 8) : ℤ) : ℚ) / ((((sden qd) ^ 32 : ℕ)) : ℚ) := by
+    rw [e1, e2]
+  rw [harg, Rat.ceil_intCast_div_natCast, mexp]
+  push_cast
+  ring
+
+/-! ### Reading the packed cosine table at an arbitrary residue -/
+
+private def cv (r : ℕ) : ℤ := rawI (min (r % 65536) (65536 - r % 65536))
+
+private lemma cosCached_eq (r : ℕ) : cosCached177 r = (cv r : ℚ) / (10 ^ 10 : ℚ) := by
+  unfold cosCached177
+  exact cosLookup_eq _
+
+private def cc (r : ℕ) : ℤ := ∑ n ∈ range 16, cv (r * 2 ^ n)
+
+private lemma cc_eq (r : ℕ) :
+    (∑ n ∈ range 16, cosCached177 (r * 2 ^ n)) = ((cc r : ℤ) : ℚ) / (10 ^ 10 : ℚ) := by
+  have h1 : (∑ n ∈ range 16, cosCached177 (r * 2 ^ n))
+      = ∑ n ∈ range 16, (cv (r * 2 ^ n) : ℚ) / (10 ^ 10 : ℚ) := by
+    apply Finset.sum_congr rfl
+    intro n hn
+    exact cosCached_eq _
+  rw [h1]
+  have hcast : (((cc r : ℤ)) : ℚ) = ∑ n ∈ range 16, (cv (r * 2 ^ n) : ℚ) := by
+    unfold cc
+    push_cast
+    rfl
+  rw [hcast, ← Finset.sum_div]
+
+private lemma arg_eq (q : ℤ) (r : ℕ) : ((q : ℚ) / 1000) * ((cc r : ℚ) / (10 ^ 10 : ℚ))
+    = ((q * cc r : ℤ) : ℚ) / ((10 ^ 13 : ℕ) : ℚ) := by
+  push_cast
+  field_simp
+  ring
+
+private lemma cachedTerm_eq (q : ℤ) (r : ℕ) :
+    cachedTerm177 (q / 1000) r = (mexp (q * cc r) (10 ^ 13) : ℚ) / (10 ^ 8 : ℚ) := by
+  unfold cachedTerm177
+  rw [cc_eq, arg_eq]
+  exact expUpper_eq (q * cc r) (10 ^ 13) (by norm_num)
+
+private lemma cachedBlock_eq (q : ℤ) (b : ℕ) :
+    cachedBlock177 (q / 1000) b =
+      ((∑ r ∈ range 128, mexp (q * cc (128 * b + r + 1)) (10 ^ 13) : ℤ) : ℚ) / (10 ^ 8 : ℚ) := by
+  unfold cachedBlock177
+  have h1 : (∑ r ∈ range 128, cachedTerm177 (q / 1000) (128 * b + r + 1))
+      = ∑ r ∈ range 128, (mexp (q * cc (128 * b + r + 1)) (10 ^ 13) : ℚ) / (10 ^ 8 : ℚ) := by
+    apply Finset.sum_congr rfl
+    intro r hr
+    exact cachedTerm_eq q _
+  rw [h1]
+  have hcast : (((∑ r ∈ range 128, mexp (q * cc (128 * b + r + 1)) (10 ^ 13) : ℤ)) : ℚ)
+      = ∑ r ∈ range 128, (mexp (q * cc (128 * b + r + 1)) (10 ^ 13) : ℚ) := by
+    push_cast
+    rfl
+  rw [hcast, ← Finset.sum_div]
+
+private lemma blk_le (q : ℤ) (b B : ℕ)
+    (h : (1000 : ℤ) * (∑ r ∈ range 128, mexp (q * cc (128 * b + r + 1)) (10 ^ 13))
+      ≤ (B : ℤ) * 10 ^ 8) :
+    cachedBlock177 (q / 1000) b ≤ (B : ℚ) / 1000 := by
+  rw [cachedBlock_eq]
+  rw [div_le_div_iff₀ (by norm_num) (by norm_num)]
+  have hq : ((1000 : ℤ) * (∑ r ∈ range 128, mexp (q * cc (128 * b + r + 1)) (10 ^ 13)) : ℚ)
+      ≤ (((B : ℤ) * 10 ^ 8) : ℚ) := by exact_mod_cast h
+  push_cast at hq ⊢
+  linarith
+
+private lemma hend_le (m0 m1 : ℤ) (S Bnum Bden : ℕ) (hB : 0 < Bden)
+    (h : ((m0 - m1) * ((1000 : ℤ) * Bden) + 2 * (S : ℤ) * ((10 ^ 8 : ℤ) * Bden))
+      ≤ (Bnum : ℤ) * ((10 ^ 8 : ℤ) * 1000 * 65536)) :
+    ((m0 : ℚ) / (10 ^ 8 : ℚ) - (m1 : ℚ) / (10 ^ 8 : ℚ) + 2 * ((S : ℚ) / 1000)) / 65536
+      ≤ (Bnum : ℚ) / Bden := by
+  have hq : (((m0 - m1) * ((1000 : ℤ) * Bden) + 2 * (S : ℤ) * ((10 ^ 8 : ℤ) * Bden) : ℤ) : ℚ)
+      ≤ (((Bnum : ℤ) * ((10 ^ 8 : ℤ) * 1000 * 65536) : ℤ) : ℚ) := by exact_mod_cast h
+  push_cast at hq
+  have hBq : (0 : ℚ) < (Bden : ℚ) := by exact_mod_cast hB
+  have key : ((m0 : ℚ) / (10 ^ 8 : ℚ) - (m1 : ℚ) / (10 ^ 8 : ℚ) + 2 * ((S : ℚ) / 1000)) / 65536
+      = ((m0 - m1) * 1000 + 2 * (S : ℚ) * 10 ^ 8) / (10 ^ 8 * 1000 * 65536) := by
+    field_simp
+  rw [key, div_le_div_iff₀ (by positivity) hBq]
+  linarith
+
+private lemma ckc0 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 0 + k.val) % 65536)
+      (65536 - (512 * 0 + k.val) % 65536)) = rawI (512 * 0 + k.val) := by decide
+
+private lemma ckc1 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 1 + k.val) % 65536)
+      (65536 - (512 * 1 + k.val) % 65536)) = rawI (512 * 1 + k.val) := by decide
+
+private lemma ckc2 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 2 + k.val) % 65536)
+      (65536 - (512 * 2 + k.val) % 65536)) = rawI (512 * 2 + k.val) := by decide
+
+private lemma ckc3 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 3 + k.val) % 65536)
+      (65536 - (512 * 3 + k.val) % 65536)) = rawI (512 * 3 + k.val) := by decide
+
+private lemma ckc4 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 4 + k.val) % 65536)
+      (65536 - (512 * 4 + k.val) % 65536)) = rawI (512 * 4 + k.val) := by decide
+
+private lemma ckc5 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 5 + k.val) % 65536)
+      (65536 - (512 * 5 + k.val) % 65536)) = rawI (512 * 5 + k.val) := by decide
+
+private lemma ckc6 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 6 + k.val) % 65536)
+      (65536 - (512 * 6 + k.val) % 65536)) = rawI (512 * 6 + k.val) := by decide
+
+private lemma ckc7 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 7 + k.val) % 65536)
+      (65536 - (512 * 7 + k.val) % 65536)) = rawI (512 * 7 + k.val) := by decide
+
+private lemma ckc8 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 8 + k.val) % 65536)
+      (65536 - (512 * 8 + k.val) % 65536)) = rawI (512 * 8 + k.val) := by decide
+
+private lemma ckc9 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 9 + k.val) % 65536)
+      (65536 - (512 * 9 + k.val) % 65536)) = rawI (512 * 9 + k.val) := by decide
+
+private lemma ckc10 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 10 + k.val) % 65536)
+      (65536 - (512 * 10 + k.val) % 65536)) = rawI (512 * 10 + k.val) := by decide
+
+private lemma ckc11 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 11 + k.val) % 65536)
+      (65536 - (512 * 11 + k.val) % 65536)) = rawI (512 * 11 + k.val) := by decide
+
+private lemma ckc12 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 12 + k.val) % 65536)
+      (65536 - (512 * 12 + k.val) % 65536)) = rawI (512 * 12 + k.val) := by decide
+
+private lemma ckc13 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 13 + k.val) % 65536)
+      (65536 - (512 * 13 + k.val) % 65536)) = rawI (512 * 13 + k.val) := by decide
+
+private lemma ckc14 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 14 + k.val) % 65536)
+      (65536 - (512 * 14 + k.val) % 65536)) = rawI (512 * 14 + k.val) := by decide
+
+private lemma ckc15 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 15 + k.val) % 65536)
+      (65536 - (512 * 15 + k.val) % 65536)) = rawI (512 * 15 + k.val) := by decide
+
+private lemma ckc16 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 16 + k.val) % 65536)
+      (65536 - (512 * 16 + k.val) % 65536)) = rawI (512 * 16 + k.val) := by decide
+
+private lemma ckc17 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 17 + k.val) % 65536)
+      (65536 - (512 * 17 + k.val) % 65536)) = rawI (512 * 17 + k.val) := by decide
+
+private lemma ckc18 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 18 + k.val) % 65536)
+      (65536 - (512 * 18 + k.val) % 65536)) = rawI (512 * 18 + k.val) := by decide
+
+private lemma ckc19 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 19 + k.val) % 65536)
+      (65536 - (512 * 19 + k.val) % 65536)) = rawI (512 * 19 + k.val) := by decide
+
+private lemma ckc20 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 20 + k.val) % 65536)
+      (65536 - (512 * 20 + k.val) % 65536)) = rawI (512 * 20 + k.val) := by decide
+
+private lemma ckc21 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 21 + k.val) % 65536)
+      (65536 - (512 * 21 + k.val) % 65536)) = rawI (512 * 21 + k.val) := by decide
+
+private lemma ckc22 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 22 + k.val) % 65536)
+      (65536 - (512 * 22 + k.val) % 65536)) = rawI (512 * 22 + k.val) := by decide
+
+private lemma ckc23 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 23 + k.val) % 65536)
+      (65536 - (512 * 23 + k.val) % 65536)) = rawI (512 * 23 + k.val) := by decide
+
+private lemma ckc24 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 24 + k.val) % 65536)
+      (65536 - (512 * 24 + k.val) % 65536)) = rawI (512 * 24 + k.val) := by decide
+
+private lemma ckc25 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 25 + k.val) % 65536)
+      (65536 - (512 * 25 + k.val) % 65536)) = rawI (512 * 25 + k.val) := by decide
+
+private lemma ckc26 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 26 + k.val) % 65536)
+      (65536 - (512 * 26 + k.val) % 65536)) = rawI (512 * 26 + k.val) := by decide
+
+private lemma ckc27 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 27 + k.val) % 65536)
+      (65536 - (512 * 27 + k.val) % 65536)) = rawI (512 * 27 + k.val) := by decide
+
+private lemma ckc28 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 28 + k.val) % 65536)
+      (65536 - (512 * 28 + k.val) % 65536)) = rawI (512 * 28 + k.val) := by decide
+
+private lemma ckc29 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 29 + k.val) % 65536)
+      (65536 - (512 * 29 + k.val) % 65536)) = rawI (512 * 29 + k.val) := by decide
+
+private lemma ckc30 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 30 + k.val) % 65536)
+      (65536 - (512 * 30 + k.val) % 65536)) = rawI (512 * 30 + k.val) := by decide
+
+private lemma ckc31 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 31 + k.val) % 65536)
+      (65536 - (512 * 31 + k.val) % 65536)) = rawI (512 * 31 + k.val) := by decide
+
+private lemma ckc32 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 32 + k.val) % 65536)
+      (65536 - (512 * 32 + k.val) % 65536)) = rawI (512 * 32 + k.val) := by decide
+
+private lemma ckc33 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 33 + k.val) % 65536)
+      (65536 - (512 * 33 + k.val) % 65536)) = rawI (512 * 33 + k.val) := by decide
+
+private lemma ckc34 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 34 + k.val) % 65536)
+      (65536 - (512 * 34 + k.val) % 65536)) = rawI (512 * 34 + k.val) := by decide
+
+private lemma ckc35 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 35 + k.val) % 65536)
+      (65536 - (512 * 35 + k.val) % 65536)) = rawI (512 * 35 + k.val) := by decide
+
+private lemma ckc36 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 36 + k.val) % 65536)
+      (65536 - (512 * 36 + k.val) % 65536)) = rawI (512 * 36 + k.val) := by decide
+
+private lemma ckc37 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 37 + k.val) % 65536)
+      (65536 - (512 * 37 + k.val) % 65536)) = rawI (512 * 37 + k.val) := by decide
+
+private lemma ckc38 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 38 + k.val) % 65536)
+      (65536 - (512 * 38 + k.val) % 65536)) = rawI (512 * 38 + k.val) := by decide
+
+private lemma ckc39 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 39 + k.val) % 65536)
+      (65536 - (512 * 39 + k.val) % 65536)) = rawI (512 * 39 + k.val) := by decide
+
+private lemma ckc40 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 40 + k.val) % 65536)
+      (65536 - (512 * 40 + k.val) % 65536)) = rawI (512 * 40 + k.val) := by decide
+
+private lemma ckc41 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 41 + k.val) % 65536)
+      (65536 - (512 * 41 + k.val) % 65536)) = rawI (512 * 41 + k.val) := by decide
+
+private lemma ckc42 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 42 + k.val) % 65536)
+      (65536 - (512 * 42 + k.val) % 65536)) = rawI (512 * 42 + k.val) := by decide
+
+private lemma ckc43 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 43 + k.val) % 65536)
+      (65536 - (512 * 43 + k.val) % 65536)) = rawI (512 * 43 + k.val) := by decide
+
+private lemma ckc44 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 44 + k.val) % 65536)
+      (65536 - (512 * 44 + k.val) % 65536)) = rawI (512 * 44 + k.val) := by decide
+
+private lemma ckc45 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 45 + k.val) % 65536)
+      (65536 - (512 * 45 + k.val) % 65536)) = rawI (512 * 45 + k.val) := by decide
+
+private lemma ckc46 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 46 + k.val) % 65536)
+      (65536 - (512 * 46 + k.val) % 65536)) = rawI (512 * 46 + k.val) := by decide
+
+private lemma ckc47 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 47 + k.val) % 65536)
+      (65536 - (512 * 47 + k.val) % 65536)) = rawI (512 * 47 + k.val) := by decide
+
+private lemma ckc48 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 48 + k.val) % 65536)
+      (65536 - (512 * 48 + k.val) % 65536)) = rawI (512 * 48 + k.val) := by decide
+
+private lemma ckc49 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 49 + k.val) % 65536)
+      (65536 - (512 * 49 + k.val) % 65536)) = rawI (512 * 49 + k.val) := by decide
+
+private lemma ckc50 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 50 + k.val) % 65536)
+      (65536 - (512 * 50 + k.val) % 65536)) = rawI (512 * 50 + k.val) := by decide
+
+private lemma ckc51 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 51 + k.val) % 65536)
+      (65536 - (512 * 51 + k.val) % 65536)) = rawI (512 * 51 + k.val) := by decide
+
+private lemma ckc52 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 52 + k.val) % 65536)
+      (65536 - (512 * 52 + k.val) % 65536)) = rawI (512 * 52 + k.val) := by decide
+
+private lemma ckc53 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 53 + k.val) % 65536)
+      (65536 - (512 * 53 + k.val) % 65536)) = rawI (512 * 53 + k.val) := by decide
+
+private lemma ckc54 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 54 + k.val) % 65536)
+      (65536 - (512 * 54 + k.val) % 65536)) = rawI (512 * 54 + k.val) := by decide
+
+private lemma ckc55 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 55 + k.val) % 65536)
+      (65536 - (512 * 55 + k.val) % 65536)) = rawI (512 * 55 + k.val) := by decide
+
+private lemma ckc56 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 56 + k.val) % 65536)
+      (65536 - (512 * 56 + k.val) % 65536)) = rawI (512 * 56 + k.val) := by decide
+
+private lemma ckc57 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 57 + k.val) % 65536)
+      (65536 - (512 * 57 + k.val) % 65536)) = rawI (512 * 57 + k.val) := by decide
+
+private lemma ckc58 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 58 + k.val) % 65536)
+      (65536 - (512 * 58 + k.val) % 65536)) = rawI (512 * 58 + k.val) := by decide
+
+private lemma ckc59 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 59 + k.val) % 65536)
+      (65536 - (512 * 59 + k.val) % 65536)) = rawI (512 * 59 + k.val) := by decide
+
+private lemma ckc60 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 60 + k.val) % 65536)
+      (65536 - (512 * 60 + k.val) % 65536)) = rawI (512 * 60 + k.val) := by decide
+
+private lemma ckc61 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 61 + k.val) % 65536)
+      (65536 - (512 * 61 + k.val) % 65536)) = rawI (512 * 61 + k.val) := by decide
+
+private lemma ckc62 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 62 + k.val) % 65536)
+      (65536 - (512 * 62 + k.val) % 65536)) = rawI (512 * 62 + k.val) := by decide
+
+private lemma ckc63 : ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * 63 + k.val) % 65536)
+      (65536 - (512 * 63 + k.val) % 65536)) = rawI (512 * 63 + k.val) := by decide
+
+private lemma cbu0 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 0 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 0 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu1 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 1 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 1 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu2 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 2 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 2 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu3 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 3 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 3 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu4 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 4 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 4 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu5 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 5 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 5 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu6 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 6 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 6 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu7 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 7 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 7 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu8 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 8 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 8 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu9 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 9 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 9 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu10 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 10 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 10 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu11 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 11 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 11 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu12 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 12 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 12 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu13 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 13 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 13 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu14 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 14 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 14 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu15 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 15 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 15 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu16 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 16 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 16 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu17 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 17 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 17 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu18 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 18 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 18 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu19 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 19 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 19 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu20 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 20 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 20 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu21 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 21 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 21 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu22 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 22 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 22 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu23 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 23 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 23 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu24 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 24 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 24 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu25 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 25 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 25 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu26 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 26 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 26 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu27 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 27 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 27 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu28 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 28 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 28 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu29 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 29 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 29 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu30 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 30 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 30 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu31 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 31 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 31 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu32 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 32 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 32 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu33 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 33 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 33 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu34 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 34 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 34 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu35 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 35 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 35 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu36 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 36 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 36 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu37 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 37 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 37 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu38 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 38 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 38 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu39 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 39 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 39 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu40 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 40 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 40 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu41 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 41 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 41 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu42 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 42 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 42 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu43 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 43 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 43 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu44 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 44 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 44 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu45 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 45 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 45 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu46 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 46 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 46 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu47 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 47 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 47 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu48 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 48 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 48 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu49 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 49 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 49 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu50 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 50 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 50 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu51 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 51 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 51 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu52 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 52 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 52 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu53 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 53 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 53 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu54 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 54 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 54 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu55 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 55 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 55 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu56 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 56 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 56 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu57 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 57 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 57 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu58 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 58 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 58 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu59 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 59 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 59 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu60 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 60 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 60 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu61 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 61 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 61 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu62 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 62 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 62 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbu63 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * 63 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * 63 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg0 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 0 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 0 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg1 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 1 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 1 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg2 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 2 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 2 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg3 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 3 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 3 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg4 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 4 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 4 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg5 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 5 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 5 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg6 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 6 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 6 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg7 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 7 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 7 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg8 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 8 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 8 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg9 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 9 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 9 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg10 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 10 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 10 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg11 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 11 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 11 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg12 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 12 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 12 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg13 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 13 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 13 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg14 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 14 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 14 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg15 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 15 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 15 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg16 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 16 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 16 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg17 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 17 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 17 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg18 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 18 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 18 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg19 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 19 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 19 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg20 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 20 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 20 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg21 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 21 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 21 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg22 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 22 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 22 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg23 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 23 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 23 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg24 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 24 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 24 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg25 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 25 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 25 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg26 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 26 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 26 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg27 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 27 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 27 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg28 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 28 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 28 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg29 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 29 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 29 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg30 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 30 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 30 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg31 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 31 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 31 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg32 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 32 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 32 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg33 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 33 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 33 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg34 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 34 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 34 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg35 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 35 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 35 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg36 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 36 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 36 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg37 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 37 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 37 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg38 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 38 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 38 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg39 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 39 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 39 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg40 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 40 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 40 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg41 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 41 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 41 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg42 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 42 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 42 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg43 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 43 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 43 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg44 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 44 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 44 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg45 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 45 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 45 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg46 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 46 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 46 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg47 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 47 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 47 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg48 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 48 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 48 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg49 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 49 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 49 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg50 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 50 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 50 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg51 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 51 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 51 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg52 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 52 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 52 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg53 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 53 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 53 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg54 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 54 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 54 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg55 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 55 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 55 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg56 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 56 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 56 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg57 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 57 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 57 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg58 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 58 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 58 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg59 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 59 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 59 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg60 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 60 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 60 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg61 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 61 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 61 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg62 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 62 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 62 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma cbg63 : ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * 63 + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * 63 + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by decide
+
+private lemma ckc_all : ∀ c : Fin 64, ∀ k : Fin 512,
+    mcos (2 * 314159265358979323846 * min ((512 * c.val + k.val) % 65536)
+      (65536 - (512 * c.val + k.val) % 65536)) = rawI (512 * c.val + k.val) := by
+  intro c k
+  fin_cases c
+  · exact ckc0 k
+  · exact ckc1 k
+  · exact ckc2 k
+  · exact ckc3 k
+  · exact ckc4 k
+  · exact ckc5 k
+  · exact ckc6 k
+  · exact ckc7 k
+  · exact ckc8 k
+  · exact ckc9 k
+  · exact ckc10 k
+  · exact ckc11 k
+  · exact ckc12 k
+  · exact ckc13 k
+  · exact ckc14 k
+  · exact ckc15 k
+  · exact ckc16 k
+  · exact ckc17 k
+  · exact ckc18 k
+  · exact ckc19 k
+  · exact ckc20 k
+  · exact ckc21 k
+  · exact ckc22 k
+  · exact ckc23 k
+  · exact ckc24 k
+  · exact ckc25 k
+  · exact ckc26 k
+  · exact ckc27 k
+  · exact ckc28 k
+  · exact ckc29 k
+  · exact ckc30 k
+  · exact ckc31 k
+  · exact ckc32 k
+  · exact ckc33 k
+  · exact ckc34 k
+  · exact ckc35 k
+  · exact ckc36 k
+  · exact ckc37 k
+  · exact ckc38 k
+  · exact ckc39 k
+  · exact ckc40 k
+  · exact ckc41 k
+  · exact ckc42 k
+  · exact ckc43 k
+  · exact ckc44 k
+  · exact ckc45 k
+  · exact ckc46 k
+  · exact ckc47 k
+  · exact ckc48 k
+  · exact ckc49 k
+  · exact ckc50 k
+  · exact ckc51 k
+  · exact ckc52 k
+  · exact ckc53 k
+  · exact ckc54 k
+  · exact ckc55 k
+  · exact ckc56 k
+  · exact ckc57 k
+  · exact ckc58 k
+  · exact ckc59 k
+  · exact ckc60 k
+  · exact ckc61 k
+  · exact ckc62 k
+  · exact ckc63 k
+
+private lemma cbu_all : ∀ c : Fin 64, ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * (4 * c.val + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[4 * c.val + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by
+  intro c j
+  fin_cases c
+  · exact cbu0 j
+  · exact cbu1 j
+  · exact cbu2 j
+  · exact cbu3 j
+  · exact cbu4 j
+  · exact cbu5 j
+  · exact cbu6 j
+  · exact cbu7 j
+  · exact cbu8 j
+  · exact cbu9 j
+  · exact cbu10 j
+  · exact cbu11 j
+  · exact cbu12 j
+  · exact cbu13 j
+  · exact cbu14 j
+  · exact cbu15 j
+  · exact cbu16 j
+  · exact cbu17 j
+  · exact cbu18 j
+  · exact cbu19 j
+  · exact cbu20 j
+  · exact cbu21 j
+  · exact cbu22 j
+  · exact cbu23 j
+  · exact cbu24 j
+  · exact cbu25 j
+  · exact cbu26 j
+  · exact cbu27 j
+  · exact cbu28 j
+  · exact cbu29 j
+  · exact cbu30 j
+  · exact cbu31 j
+  · exact cbu32 j
+  · exact cbu33 j
+  · exact cbu34 j
+  · exact cbu35 j
+  · exact cbu36 j
+  · exact cbu37 j
+  · exact cbu38 j
+  · exact cbu39 j
+  · exact cbu40 j
+  · exact cbu41 j
+  · exact cbu42 j
+  · exact cbu43 j
+  · exact cbu44 j
+  · exact cbu45 j
+  · exact cbu46 j
+  · exact cbu47 j
+  · exact cbu48 j
+  · exact cbu49 j
+  · exact cbu50 j
+  · exact cbu51 j
+  · exact cbu52 j
+  · exact cbu53 j
+  · exact cbu54 j
+  · exact cbu55 j
+  · exact cbu56 j
+  · exact cbu57 j
+  · exact cbu58 j
+  · exact cbu59 j
+  · exact cbu60 j
+  · exact cbu61 j
+  · exact cbu62 j
+  · exact cbu63 j
+
+private lemma cbg_all : ∀ c : Fin 64, ∀ j : Fin 4,
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * (4 * c.val + j.val) + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[4 * c.val + j.val]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by
+  intro c j
+  fin_cases c
+  · exact cbg0 j
+  · exact cbg1 j
+  · exact cbg2 j
+  · exact cbg3 j
+  · exact cbg4 j
+  · exact cbg5 j
+  · exact cbg6 j
+  · exact cbg7 j
+  · exact cbg8 j
+  · exact cbg9 j
+  · exact cbg10 j
+  · exact cbg11 j
+  · exact cbg12 j
+  · exact cbg13 j
+  · exact cbg14 j
+  · exact cbg15 j
+  · exact cbg16 j
+  · exact cbg17 j
+  · exact cbg18 j
+  · exact cbg19 j
+  · exact cbg20 j
+  · exact cbg21 j
+  · exact cbg22 j
+  · exact cbg23 j
+  · exact cbg24 j
+  · exact cbg25 j
+  · exact cbg26 j
+  · exact cbg27 j
+  · exact cbg28 j
+  · exact cbg29 j
+  · exact cbg30 j
+  · exact cbg31 j
+  · exact cbg32 j
+  · exact cbg33 j
+  · exact cbg34 j
+  · exact cbg35 j
+  · exact cbg36 j
+  · exact cbg37 j
+  · exact cbg38 j
+  · exact cbg39 j
+  · exact cbg40 j
+  · exact cbg41 j
+  · exact cbg42 j
+  · exact cbg43 j
+  · exact cbg44 j
+  · exact cbg45 j
+  · exact cbg46 j
+  · exact cbg47 j
+  · exact cbg48 j
+  · exact cbg49 j
+  · exact cbg50 j
+  · exact cbg51 j
+  · exact cbg52 j
+  · exact cbg53 j
+  · exact cbg54 j
+  · exact cbg55 j
+  · exact cbg56 j
+  · exact cbg57 j
+  · exact cbg58 j
+  · exact cbg59 j
+  · exact cbg60 j
+  · exact cbg61 j
+  · exact cbg62 j
+  · exact cbg63 j
+
+/-- The packed table agrees with the rounded Taylor polynomial at every residue below `32769`. -/
+private lemma hcos : ∀ i : Fin 32769, mcos (2 * 314159265358979323846 *
+    min (i.val % 65536) (65536 - i.val % 65536)) = rawI i.val := by
+  intro i
+  by_cases h : i.val = 32768
+  · rw [h]
+    decide
+  · have hc : i.val / 512 < 64 := by have := i.isLt; omega
+    have hk : i.val % 512 < 512 := Nat.mod_lt _ (by norm_num)
+    have key := ckc_all ⟨i.val / 512, hc⟩ ⟨i.val % 512, hk⟩
+    have hdm : 512 * (i.val / 512) + i.val % 512 = i.val := by omega
+    rwa [hdm] at key
+
+private lemma ckE_uncond (b : ℕ) (hb : b < 256) :
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (1181 * cc (128 * b + r + 1)) (10 ^ 13))
+      ≤ (((blockUncond177[b]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by
+  have key := cbu_all ⟨b / 4, by omega⟩ ⟨b % 4, Nat.mod_lt _ (by norm_num)⟩
+  have hdm : 4 * (b / 4) + b % 4 = b := by omega
+  rwa [hdm] at key
+
+private lemma ckE_grh (b : ℕ) (hb : b < 256) :
+    (1000 : ℤ) * (∑ r ∈ range 128, mexp (905 * cc (128 * b + r + 1)) (10 ^ 13))
+      ≤ (((blockGrh177[b]?.getD 0 : ℕ)) : ℤ) * 10 ^ 8 := by
+  have key := cbg_all ⟨b / 4, by omega⟩ ⟨b % 4, Nat.mod_lt _ (by norm_num)⟩
+  have hdm : 4 * (b / 4) + b % 4 = b := by omega
+  rwa [hdm] at key
+
+private def Sbound (bnds : Array ℕ) : ℕ := ∑ b ∈ range 256, (bnds[b]?.getD 0 : ℕ)
+
+private lemma Sbound_eq (bnds : Array ℕ) :
+    (∑ b ∈ range 256, ((bnds[b]?.getD 0 : ℕ) : ℚ) / 1000) = ((Sbound bnds : ℕ) : ℚ) / 1000 := by
+  unfold Sbound
+  have hc : (((∑ b ∈ range 256, (bnds[b]?.getD 0 : ℕ)) : ℕ) : ℚ)
+      = ∑ b ∈ range 256, ((bnds[b]?.getD 0 : ℕ) : ℚ) := by
+    push_cast
+    rfl
+  rw [hc, Finset.sum_div]
+
+private lemma ckEnd_uncond :
+    ((mexp (1181 * cc 0) (10 ^ 13) - mexp (1181 * cc 32768) (10 ^ 13)) * ((1000 : ℤ) * 100))
+      + 2 * (Sbound blockUncond177 : ℤ) * ((10 ^ 8 : ℤ) * 100)
+      ≤ (477015 : ℤ) * ((10 ^ 8 : ℤ) * 1000 * 65536) := by decide
+
+private lemma ckEnd_grh :
+    ((mexp (905 * cc 0) (10 ^ 13) - mexp (905 * cc 32768) (10 ^ 13)) * ((1000 : ℤ) * 1000))
+      + 2 * (Sbound blockGrh177 : ℤ) * ((10 ^ 8 : ℤ) * 1000)
+      ≤ (136398 : ℤ) * ((10 ^ 8 : ℤ) * 1000 * 65536) := by decide
+
 /-- LEAF. Section 7, pages 30 and 31, display 44 at xi equal to 1.181.
 The remaining task is a closed inequality of rational finite sums. -/
 theorem Ffold_uncond177 : Ffold177 (1181 / 1000) ≤ 477015 / 100 := by
-  sorry
+  have hcor : ∀ r < 32769, cosUpper177 65536 r = cosLookup177 r :=
+    fun r hr => cosUpper_of_check r (hcos ⟨r, hr⟩)
+  refine Ffold_bound_of_blocks177 hcor (1181 / 1000) (477015 / 100) blockUncond177 ?_ ?_
+  · intro b
+    exact blk_le 1181 b.val (blockUncond177[b.val]?.getD 0) (ckE_uncond b.val b.isLt)
+  · have h0 := cachedTerm_eq (1181 : ℤ) 0
+    have h1 := cachedTerm_eq (1181 : ℤ) 32768
+    have hq : (1181 : ℚ) = ((1181 : ℤ) : ℚ) := by norm_num
+    rw [hq, h0, h1, Sbound_eq]
+    exact hend_le _ _ _ 477015 100 (by norm_num) (ckEnd_uncond)
 
 /-- LEAF. Section 7, pages 30 and 31, display 44 at xi equal to 0.905.
 The remaining task is a closed inequality of rational finite sums. -/
 theorem Ffold_grh177 : Ffold177 (905 / 1000) ≤ 136398 / 1000 := by
-  sorry
+  have hcor : ∀ r < 32769, cosUpper177 65536 r = cosLookup177 r :=
+    fun r hr => cosUpper_of_check r (hcos ⟨r, hr⟩)
+  refine Ffold_bound_of_blocks177 hcor (905 / 1000) (136398 / 1000) blockGrh177 ?_ ?_
+  · intro b
+    exact blk_le 905 b.val (blockGrh177[b.val]?.getD 0) (ckE_grh b.val b.isLt)
+  · have h0 := cachedTerm_eq (905 : ℤ) 0
+    have h1 := cachedTerm_eq (905 : ℤ) 32768
+    have hq : (905 : ℚ) = ((905 : ℤ) : ℚ) := by norm_num
+    rw [hq, h0, h1, Sbound_eq]
+    exact hend_le _ _ _ 136398 1000 (by norm_num) (ckEnd_grh)
 
 /-! ### Leaves: the explicit values at `h = 16` -/
 
