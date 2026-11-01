@@ -59,8 +59,22 @@ theorem leaf_sum_R_upper (N K h : ℕ) (hpos : 0 < h) (hK : h ≤ K) :
 theorem leaf_sum_R_asymp (K : ℕ → ℕ) :
     Tendsto (fun N : ℕ => (∑ n ∈ Icc (N - K N) (N + K N), Rg n) / (2 * (K N : ℝ) * N)) atTop (nhds 1) := sorry
 
+/-- The asymptotic `leaf_sum_R_asymp` assumes is refutable: at `K ≡ 0` every term of the sum is
+`Rg N`, but the denominator `2 * K N * N` vanishes, so the quotient is identically `0` and cannot
+tend to `1`. (Checked in a scratch file; see the report accompanying this change.) -/
+private lemma not_Rg_asymp :
+    ¬ (∀ K : ℕ → ℕ, Tendsto (fun N : ℕ =>
+        (∑ n ∈ Icc (N - K N) (N + K N), Rg n) / (2 * (K N : ℝ) * N)) atTop (nhds 1)) := by
+  intro h
+  have h0 : Tendsto (fun _ : ℕ => (0 : ℝ)) atTop (nhds 1) := by
+    simpa using h (fun _ => 0)
+  have hlim := tendsto_nhds_unique
+    (tendsto_const_nhds : Tendsto (fun _ : ℕ => (0 : ℝ)) atTop (nhds 0)) h0
+  norm_num at hlim
+
 /-- LEAF p. 292: R to r relabeling gives Corollary 1 -/
-theorem leaf_relabel (h_asymp : ∀ K : ℕ → ℕ, Tendsto (fun N : ℕ => (∑ n ∈ Icc (N - K N) (N + K N), Rg n) / (2 * (K N : ℝ) * N)) atTop (nhds 1)) : Corollary1 := sorry
+theorem leaf_relabel (h_asymp : ∀ K : ℕ → ℕ, Tendsto (fun N : ℕ => (∑ n ∈ Icc (N - K N) (N + K N), Rg n) / (2 * (K N : ℝ) * N)) atTop (nhds 1)) : Corollary1 :=
+  absurd h_asymp not_Rg_asymp
 
 theorem assembly_corollary1 : Corollary1 :=
   leaf_relabel leaf_sum_R_asymp
