@@ -2,8 +2,12 @@ import LeanLab.Ricci1937.TheoremsCD
 import LeanLab.Ricci1937.CFactorBounds
 import LeanLab.Brun1919.Sieve
 import LeanLab.PNTSieve.MertensProduct
+import LeanLab.PNTSieve.MertensLower
 import LeanLab.PNTSieve.BrunPure
 import LeanLab.Ricci1937.Tau23
+import LeanLab.Ricci1937.Section2
+import LeanLab.PNTSieve.BrunBlocksRel
+import LeanLab.SchnirelmannGoldbach.PureSieve
 
 /-!
 Ricci 1937, Theorem D, pages 88 and 89.
@@ -754,6 +758,849 @@ lemma decompJ365_pair_brun_product_lower (h N : ℕ) (heven : Even h) (P : Finse
   have hlinear : (∑ p ∈ P, f p) = ∑ p ∈ P, nuN h p := sum_congr rfl hfP
   rw [hprod, hlinear] at hmul
   linarith
+
+/-- Second memoir pages 106 and 107, auxiliary weight sum for indexed values.
+Repeated values retain their index multiplicity. -/
+lemma decompJ365_indexed_weight_sum (I Ω : Finset ℕ) (F : ℕ → ℕ) (c : Finset ℕ → ℝ) :
+    ∑ i ∈ I, wEval Ω c (F i) =
+      ∑ S ∈ Ω.powerset, c S * (#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ) := by
+  unfold wEval ind
+  rw [sum_comm]
+  apply sum_congr rfl
+  intro S hS
+  rw [← mul_sum]
+  simp only [sum_boole]
+
+/-- Pages 88 and 89, auxiliary indexed block sieve step.
+The block conditions and the error bounds are supplied, not asserted to hold asymptotically. -/
+lemma decompJ365_indexed_blocks_lower (I : Finset ℕ) (F : ℕ → ℕ)
+    (Bs : List Block) (hG : Good Bs) (x : ℕ → ℝ)
+    (hx0 : ∀ p, 0 ≤ x p) (hx1 : ∀ p, x p < 1) (X : ℝ) (hX : 0 ≤ X)
+    (hρ : rhoSum x Bs ≤ 1 / 10) (E : Finset ℕ → ℝ)
+    (hE : ∀ S ⊆ univB Bs,
+      |(#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ) - X * ∏ p ∈ S, x p| ≤ E S) :
+    X * (∏ p ∈ univB Bs, (1 - x p)) * (1 - 5 * rhoSum x Bs) -
+      3 ^ Bs.length * ∑ S ∈ (univB Bs).powerset.filter (fun S => cL Bs S ≠ 0), E S ≤
+      #{i ∈ I | ∀ p ∈ univB Bs, ¬ p ∣ F i} := by
+  let R : Finset ℕ → ℝ := fun S =>
+    (#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ) - X * ∏ p ∈ S, x p
+  have hsplit : ∑ i ∈ I, wEval (univB Bs) (cL Bs) (F i) =
+      X * wMain (univB Bs) (cL Bs) x +
+        ∑ S ∈ (univB Bs).powerset, cL Bs S * R S := by
+    rw [decompJ365_indexed_weight_sum]
+    unfold wMain
+    rw [mul_sum, ← sum_add_distrib]
+    apply sum_congr rfl
+    intro S hS
+    dsimp [R]
+    ring
+  have hpoint : ∑ i ∈ I, wEval (univB Bs) (cL Bs) (F i) ≤
+      (#{i ∈ I | ∀ p ∈ univB Bs, ¬ p ∣ F i} : ℝ) := by
+    calc
+      _ ≤ ∑ i ∈ I, xind (univB Bs) (F i) :=
+        sum_le_sum (fun i _ => (blocks_pointwise Bs hG (F i)).1)
+      _ = _ := by simp [xind, filter_eq_empty_iff]
+  have hrem : ∑ S ∈ (univB Bs).powerset, |cL Bs S| * |R S| ≤
+      3 ^ Bs.length * ∑ S ∈ (univB Bs).powerset.filter (fun S => cL Bs S ≠ 0), E S := by
+    rw [mul_sum, sum_filter]
+    apply sum_le_sum
+    intro S hS
+    split_ifs with hc
+    · exact mul_le_mul (coeff_bounds Bs S).2 (hE S (mem_powerset.mp hS))
+        (abs_nonneg _) (by positivity)
+    · push Not at hc
+      rw [hc]
+      simp
+  have hlo : -(∑ S ∈ (univB Bs).powerset, |cL Bs S| * |R S|) ≤
+      ∑ S ∈ (univB Bs).powerset, cL Bs S * R S := by
+    rw [← sum_neg_distrib]
+    apply sum_le_sum
+    intro S hS
+    rw [← abs_mul]
+    exact neg_abs_le _
+  have hV : 0 ≤ ∏ p ∈ univB Bs, (1 - x p) :=
+    prod_nonneg (fun p _ => sub_nonneg.mpr (hx1 p).le)
+  have hd := (d_le_of_sum x hx0 (fun p => (hx1 p).le) Bs hρ).2.2.2
+  have hm := (abs_le.mp (blocks_rel_dev x hx0 hx1 Bs hG).2).1
+  have hmul := mul_le_mul_of_nonneg_left hd hV
+  have hmain : (∏ p ∈ univB Bs, (1 - x p)) * (1 - 5 * rhoSum x Bs) ≤
+      wMain (univB Bs) (cL Bs) x := by nlinarith
+  have hXmain := mul_le_mul_of_nonneg_left hmain hX
+  rw [hsplit] at hpoint
+  nlinarith
+
+/-- Second memoir pages 106 and 107, auxiliary level bound for all retained root errors. -/
+lemma decompJ365_root_sum_le (h : ℕ) (Ω : Finset ℕ) (hΩ : ∀ p ∈ Ω, p.Prime)
+    (U : Finset (Finset ℕ)) (hU : ∀ S ∈ U, S ⊆ Ω) (L : ℝ) (hL : 1 ≤ L)
+    (hlevel : ∀ S ∈ U, ((∏ p ∈ S, p : ℕ) : ℝ) ≤ L) :
+    (∑ S ∈ U, (LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p) : ℝ)) ≤
+      L * (1 + Real.log L) ^ 2 := by
+  let M := ∏ p ∈ Ω, p
+  have hM : Squarefree M := by
+    apply Finset.squarefree_prod_of_pairwise_isCoprime
+    · intro p hp q hq hpq
+      exact Nat.coprime_iff_isRelPrime.mp ((Nat.coprime_primes (hΩ p hp) (hΩ q hq)).mpr hpq)
+    · intro p hp
+      exact (hΩ p hp).squarefree
+  let D := U.image (fun S => ∏ p ∈ S, p)
+  have hD : D ⊆ M.divisors := by
+    intro d hd
+    obtain ⟨S, hS, rfl⟩ := mem_image.mp hd
+    apply Nat.mem_divisors.mpr
+    exact ⟨Finset.prod_dvd_prod_of_subset S Ω id (hU S hS), hM.ne_zero⟩
+  have hinj : Set.InjOn (fun S : Finset ℕ => ∏ p ∈ S, p) U := by
+    intro S hS T hT heq
+    have hSp := Nat.primeFactors_prod (fun p hp => hΩ p (hU S hS hp))
+    have hTp := Nat.primeFactors_prod (fun p hp => hΩ p (hU T hT hp))
+    dsimp only at heq
+    rw [← hSp, ← hTp, heq]
+  calc
+    _ = ∑ d ∈ D, (LeanLab.SchnirelmannGoldbach.S1.cnt h d : ℝ) := (sum_image hinj).symm
+    _ ≤ ∑ d ∈ D, if (d : ℝ) ≤ L then (2 : ℝ) ^ ArithmeticFunction.cardDistinctFactors d else 0 := by
+      apply sum_le_sum
+      intro d hd
+      obtain ⟨S, hS, rfl⟩ := mem_image.mp hd
+      rw [ite_eq_left (hlevel S hS)]
+      exact cnt_le_two_pow (hM.squarefree_of_dvd (Nat.dvd_of_mem_divisors (hD hd)))
+    _ ≤ ∑ d ∈ M.divisors, if (d : ℝ) ≤ L then (2 : ℝ) ^ ArithmeticFunction.cardDistinctFactors d else 0 :=
+      sum_le_sum_of_subset_of_nonneg hD (fun d _ _ => by split_ifs <;> positivity)
+    _ ≤ _ := LeanLab.PNTSieve.Aux.sum_pow_cardDistinctFactors_le_self_mul_log_pow L hL hM
+
+/-- Page 88, auxiliary one decreasing step Brun inequality.
+The first prime block sieves both factors. The second block sieves only the first factor. -/
+lemma decompJ365_mixed_brun_lower (I P Q : Finset ℕ) (F G : ℕ → ℕ)
+    (hP : ∀ p ∈ P, p.Prime) (hQ : ∀ p ∈ Q, p.Prime)
+    {re ro se so : ℕ} (hre : Even re) (hro : Odd ro) (hse : Even se) (hso : Odd so) :
+    (∑ i ∈ I,
+      (wEval P (tc re) (F i * G i) * wEval Q (tc so) (F i) +
+      wEval P (tc ro) (F i * G i) * wEval Q (tc se) (F i) -
+      wEval P (tc re) (F i * G i) * wEval Q (tc se) (F i))) ≤
+      (#{i ∈ I | (∀ p ∈ P, ¬ p ∣ F i * G i) ∧ ∀ p ∈ Q, ¬ p ∣ F i} : ℝ) := by
+  calc
+    _ ≤ ∑ i ∈ I, xind P (F i * G i) * xind Q (F i) := by
+      apply sum_le_sum
+      intro i hi
+      obtain ⟨hl, hu⟩ := tc_bounds P hP hre hro (F i * G i)
+      obtain ⟨hl', hu'⟩ := tc_bounds Q hQ hse hso (F i)
+      exact two_block_pointwise_real (xind_nonneg _ _) (xind_nonneg _ _) hl hu hl' hu'
+    _ = _ := by
+      simp [xind, filter_eq_empty_iff, ← ite_and, and_comm]
+
+/-- Second memoir page 106 formula 24.5, auxiliary indexed two-factor weight expansion. -/
+lemma decompJ365_mixed_weight_sum (I P Q : Finset ℕ) (F G : ℕ → ℕ)
+    (c d : Finset ℕ → ℝ) :
+    (∑ i ∈ I, wEval P c (F i * G i) * wEval Q d (F i)) =
+      ∑ S ∈ P.powerset, ∑ T ∈ Q.powerset, c S * d T *
+        (#{i ∈ I | (∏ p ∈ S, p) ∣ F i * G i ∧ (∏ p ∈ T, p) ∣ F i} : ℝ) := by
+  simp_rw [wEval, sum_mul_sum]
+  rw [sum_comm]
+  apply sum_congr rfl
+  intro S hS
+  rw [sum_comm]
+  apply sum_congr rfl
+  intro T hT
+  have ht : ∀ i : ℕ,
+      c S * ind S (F i * G i) * (d T * ind T (F i)) =
+        c S * d T * (if (∏ p ∈ S, p) ∣ F i * G i ∧ (∏ p ∈ T, p) ∣ F i then 1 else 0) := by
+    intro i
+    unfold ind
+    split_ifs <;> simp_all
+  simp_rw [ht]
+  rw [← mul_sum, sum_boole]
+
+/-- Second memoir page 106 formula 24.5, auxiliary mixed cutoff remainder.
+The modulus d tests both W factors and the coprime modulus e tests the first factor. -/
+lemma decompJ365_mixed_W_periodic_remainder (H N d e : ℕ) (hNH : N ≤ H)
+    (hd : 0 < d) (he : 0 < e) (hde : Nat.Coprime d e) :
+    |(#{m ∈ range N | d ∣ m * (H - m) ∧ e ∣ m} : ℝ) -
+      (LeanLab.SchnirelmannGoldbach.S1.cnt H d : ℝ) * N / (d * e)| ≤
+        LeanLab.SchnirelmannGoldbach.S1.cnt H d := by
+  let Q : ℕ → Prop := fun m => rootPred H d m ∧ (m : ZMod e) = 0
+  have hperiod : Function.Periodic Q (d * e) := by
+    intro m
+    simp [Q, rootPred, Nat.cast_add, Nat.cast_mul]
+  have : NeZero d := ⟨hd.ne'⟩
+  have : NeZero e := ⟨he.ne'⟩
+  have : NeZero (d * e) := ⟨(Nat.mul_pos hd he).ne'⟩
+  let E := ZMod.chineseRemainder hde
+  have hcast (m : ℕ) : E (m : ZMod (d * e)) = ((m : ZMod d), (m : ZMod e)) := by
+    rw [map_natCast]
+    rfl
+  have hcnt : #{m ∈ range (d * e) | Q m} = LeanLab.SchnirelmannGoldbach.S1.cnt H d := by
+    rw [card_zmod_roots, Fintype.card_subtype]
+    refine Finset.card_bij (fun (m : ℕ) _ => (m : ZMod d)) ?_ ?_ ?_
+    · intro m hm
+      simp only [mem_filter, mem_range] at hm
+      exact mem_filter.mpr ⟨mem_univ _, hm.2.1⟩
+    · intro a ha b hb hab
+      obtain ⟨haI, haQ⟩ := mem_filter.mp ha
+      obtain ⟨hbI, hbQ⟩ := mem_filter.mp hb
+      have heq : E (a : ZMod (d * e)) = E (b : ZMod (d * e)) := by
+        rw [hcast, hcast]
+        apply Prod.ext hab
+        exact haQ.2.trans hbQ.2.symm
+      have hz := congrArg ZMod.val (E.injective heq)
+      simpa [ZMod.val_cast_of_lt (mem_range.mp haI),
+        ZMod.val_cast_of_lt (mem_range.mp hbI)] using hz
+    · intro z hz
+      have hzroot := (mem_filter.mp hz).2
+      let y := E.symm (z, 0)
+      have hy : E (y.val : ZMod (d * e)) = (z, 0) := by
+        rw [ZMod.natCast_zmod_val]
+        exact E.apply_symm_apply _
+      rw [hcast] at hy
+      obtain ⟨hy1, hy2⟩ := Prod.ext_iff.mp hy
+      dsimp only at hy1 hy2
+      refine ⟨y.val, mem_filter.mpr ⟨mem_range.mpr (ZMod.val_lt y), ?_⟩, hy1⟩
+      change rootPred H d y.val ∧ (y.val : ZMod e) = 0
+      refine ⟨?_, hy2⟩
+      change (y.val : ZMod d) * ((H : ZMod d) - y.val) = 0
+      rw [hy1]
+      exact hzroot
+  have heq : #{m ∈ range N | d ∣ m * (H - m) ∧ e ∣ m} = #{m ∈ range N | Q m} := by
+    congr 1
+    apply filter_congr
+    intro m hm
+    have hmH : m ≤ H := (mem_range.mp hm).le.trans hNH
+    simp only [Q, ← dvd_iff_rootPred hmH, ZMod.natCast_eq_zero_iff]
+  rw [heq, ← hcnt]
+  simpa only [Nat.cast_mul] using count_periodic_approx Q (Nat.mul_pos hd he) hperiod N
+
+/-- Pages 88 and 89: survivors of the two prime cutoffs enter the exact W count. -/
+lemma decompJ365_mixed_survivors_le_wCount (a b N t v : ℕ) (hv : 2 ≤ v) (_hvt : v ≤ t)
+    (ht : (N : ℝ) ^ (1 / ((a : ℝ) + 1)) ≤ t)
+    (hvpow : (N : ℝ) ^ (1 / ((b : ℝ) + 1)) ≤ v) :
+    #{A ∈ range N | (∀ p ∈ Nat.primesLE v, ¬ p ∣ A * (N - A)) ∧
+      ∀ p ∈ Nat.primesLE t \ Nat.primesLE v, ¬ p ∣ A} ≤ wCount a b N := by
+  unfold wCount
+  apply card_le_card
+  intro A hA
+  obtain ⟨hAN, hlow, hhigh⟩ := mem_filter.mp hA
+  have hAN' : A < N := mem_range.mp hAN
+  have hA0 : A ≠ 0 := by
+    intro hzero
+    apply hlow 2 (Nat.mem_primesLE.mpr ⟨hv, Nat.prime_two⟩)
+    simp [hzero]
+  have hA1 : 1 ≤ A := by omega
+  have hB1 : 1 ≤ N - A := by omega
+  have hfirst : ∀ p ∈ A.primeFactorsList, (N : ℝ) ^ (1 / ((a : ℝ) + 1)) < (p : ℝ) := by
+    intro p hp
+    obtain ⟨hpprime, hpdvd⟩ := (Nat.mem_primeFactorsList hA0).mp hp
+    by_contra hle
+    have hpt : p ≤ t := by exact_mod_cast (le_trans (not_lt.mp hle) ht)
+    by_cases hpv : p ≤ v
+    · exact hlow p (Nat.mem_primesLE.mpr ⟨hpv, hpprime⟩) (dvd_mul_of_dvd_left hpdvd _)
+    · exact hhigh p (mem_sdiff.mpr ⟨Nat.mem_primesLE.mpr ⟨hpt, hpprime⟩,
+        fun hpv' => hpv (Nat.mem_primesLE.mp hpv').1⟩) hpdvd
+  have hsecond : ∀ p ∈ (N - A).primeFactorsList,
+      (N : ℝ) ^ (1 / ((b : ℝ) + 1)) < (p : ℝ) := by
+    intro p hp
+    obtain ⟨hpprime, hpdvd⟩ := (Nat.mem_primeFactorsList (by omega : N - A ≠ 0)).mp hp
+    by_contra hle
+    have hpv : p ≤ v := by exact_mod_cast (le_trans (not_lt.mp hle) hvpow)
+    exact hlow p (Nat.mem_primesLE.mpr ⟨hpv, hpprime⟩) (dvd_mul_of_dvd_right hpdvd _)
+  exact mem_filter.mpr ⟨mem_Icc.mpr ⟨hA1, by omega⟩,
+    decompJ365_almostGT_of_lt hA1 hAN' hfirst,
+    decompJ365_almostGT_of_lt hB1 (by omega) hsecond⟩
+
+/-- Pages 88 and 89, auxiliary finite block lower sieve for the Z pair polynomial.
+A positive asymptotic balance of the block ratios and the level is still required. -/
+lemma decompJ365_pair_blocks_lower (h N : ℕ) (Bs : List Block) (hG : Good Bs)
+    (x : ℕ → ℝ) (hx0 : ∀ p, 0 ≤ x p) (hx1 : ∀ p, x p < 1)
+    (hx : ∀ p ∈ univB Bs, x p = nuN h p) (hρ : rhoSum x Bs ≤ 1 / 10)
+    (L : ℝ) (hL : 1 ≤ L) (hlevel : (lev Bs : ℝ) ≤ L) :
+    (N : ℝ) * (∏ p ∈ univB Bs, (1 - nuN h p)) * (1 - 5 * rhoSum x Bs) -
+      3 ^ Bs.length * (L * (1 + Real.log L) ^ 2) ≤
+      #{m ∈ range N | ∀ p ∈ univB Bs, ¬ p ∣ m * (m + h)} := by
+  have hprime := univB_prime Bs hG
+  have hdensity (S : Finset ℕ) (hS : S ⊆ univB Bs) :
+      (LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p) : ℝ) / (∏ p ∈ S, p) =
+        ∏ p ∈ S, x p := by
+    rw [cnt_prod_primes h S (fun p hp => hprime p (hS hp)), Nat.cast_prod, ← prod_div_distrib]
+    apply prod_congr rfl
+    intro p hp
+    rw [hx p (hS hp), nuN_prime (hprime p (hS hp))]
+  have hE (S : Finset ℕ) (hS : S ⊆ univB Bs) :
+      |(#{m ∈ range N | (∏ p ∈ S, p) ∣ m * (m + h)} : ℝ) -
+        N * ∏ p ∈ S, x p| ≤ LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p) := by
+    have hd : 0 < ∏ p ∈ S, p := prod_pos (fun p hp => (hprime p (hS hp)).pos)
+    have heq : (N : ℝ) * ∏ p ∈ S, x p =
+        (LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p) : ℝ) * N / (∏ p ∈ S, p) := by
+      rw [← hdensity S hS]
+      ring
+    rw [heq]
+    exact decompJ365_pair_periodic_remainder h N _ hd
+  have hraw := decompJ365_indexed_blocks_lower (range N) (fun m => m * (m + h))
+    Bs hG x hx0 hx1 N (Nat.cast_nonneg N) hρ
+    (fun S => (LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p) : ℝ)) hE
+  have hrem := decompJ365_root_sum_le h (univB Bs) hprime
+    ((univB Bs).powerset.filter (fun S => cL Bs S ≠ 0))
+    (fun S hS => mem_powerset.mp (mem_filter.mp hS).1) L hL (by
+      intro S hS
+      have hS' := mem_filter.mp hS
+      have hsupp := support_prod Bs hG S (mem_powerset.mp hS'.1) (Or.inl hS'.2)
+      exact (by exact_mod_cast hsupp : ((∏ p ∈ S, p : ℕ) : ℝ) ≤ lev Bs).trans hlevel)
+  have hprod : (∏ p ∈ univB Bs, (1 - x p)) = ∏ p ∈ univB Bs, (1 - nuN h p) :=
+    prod_congr rfl (fun p hp => by rw [hx p hp])
+  rw [hprod] at hraw
+  have hmul := mul_le_mul_of_nonneg_left hrem (by positivity : (0 : ℝ) ≤ 3 ^ Bs.length)
+  linarith
+
+/-- Pages 88 and 89, auxiliary finite block lower sieve for the W pair polynomial.
+A positive asymptotic balance of the block ratios and the level is still required. -/
+lemma decompJ365_W_blocks_lower (N : ℕ) (Bs : List Block) (hG : Good Bs)
+    (x : ℕ → ℝ) (hx0 : ∀ p, 0 ≤ x p) (hx1 : ∀ p, x p < 1)
+    (hx : ∀ p ∈ univB Bs, x p = nuN N p) (hρ : rhoSum x Bs ≤ 1 / 10)
+    (L : ℝ) (hL : 1 ≤ L) (hlevel : (lev Bs : ℝ) ≤ L) :
+    (N : ℝ) * (∏ p ∈ univB Bs, (1 - nuN N p)) * (1 - 5 * rhoSum x Bs) -
+      3 ^ Bs.length * (L * (1 + Real.log L) ^ 2) ≤
+      #{m ∈ range N | ∀ p ∈ univB Bs, ¬ p ∣ m * (N - m)} := by
+  have hprime := univB_prime Bs hG
+  have hE (S : Finset ℕ) (hS : S ⊆ univB Bs) :
+      |(#{m ∈ range N | (∏ p ∈ S, p) ∣ m * (N - m)} : ℝ) -
+        N * ∏ p ∈ S, x p| ≤ LeanLab.SchnirelmannGoldbach.S1.cnt N (∏ p ∈ S, p) := by
+    have hc := LeanLab.SchnirelmannGoldbach.PureSieve.multiples_error N S
+      (fun p hp => hprime p (hS hp))
+    have hxS : (∏ p ∈ S, (LeanLab.SchnirelmannGoldbach.S1.wt N p / p)) = ∏ p ∈ S, x p := by
+      apply prod_congr rfl
+      intro p hp
+      rw [hx p (hS hp), nuN_prime (hprime p (hS hp))]
+    rw [hxS] at hc
+    rw [cnt_prod_primes N S (fun p hp => hprime p (hS hp))]
+    simpa only [LeanLab.SchnirelmannGoldbach.PureSieve.multiples] using hc
+  have hraw := decompJ365_indexed_blocks_lower (range N) (fun m => m * (N - m))
+    Bs hG x hx0 hx1 N (Nat.cast_nonneg N) hρ
+    (fun S => (LeanLab.SchnirelmannGoldbach.S1.cnt N (∏ p ∈ S, p) : ℝ)) hE
+  have hrem := decompJ365_root_sum_le N (univB Bs) hprime
+    ((univB Bs).powerset.filter (fun S => cL Bs S ≠ 0))
+    (fun S hS => mem_powerset.mp (mem_filter.mp hS).1) L hL (by
+      intro S hS
+      have hS' := mem_filter.mp hS
+      have hsupp := support_prod Bs hG S (mem_powerset.mp hS'.1) (Or.inl hS'.2)
+      exact (by exact_mod_cast hsupp : ((∏ p ∈ S, p : ℕ) : ℝ) ≤ lev Bs).trans hlevel)
+  have hprod : (∏ p ∈ univB Bs, (1 - x p)) = ∏ p ∈ univB Bs, (1 - nuN N p) :=
+    prod_congr rfl (fun p hp => by rw [hx p hp])
+  rw [hprod] at hraw
+  have hmul := mul_le_mul_of_nonneg_left hrem (by positivity : (0 : ℝ) ≤ 3 ^ Bs.length)
+  linarith
+
+/-- Negative auxiliary route check for page 88: at every fixed pure Brun order,
+the factorial error majorant eventually exceeds the entire density product. -/
+lemma decompJ365_fixed_brun_certificate_negative (h r : ℕ) (heven : Even h) :
+    ∀ᶠ z : ℕ in atTop,
+      (∏ p ∈ Nat.primesLE z, (1 - nuN h p)) -
+        (∑ p ∈ Nat.primesLE z, nuN h p) ^ (r + 1) / ((r + 1).factorial : ℝ) < 0 := by
+  let f : ℕ → ℝ := Set.indicator {p | p.Prime} (fun p => (1 : ℝ) / p)
+  have hf0 : ∀ p, 0 ≤ f p := fun p => Set.indicator_nonneg (fun q _ => by positivity) p
+  have hdiv : Tendsto (fun z : ℕ => ∑ p ∈ range z, f p) atTop atTop :=
+    (not_summable_iff_tendsto_nat_atTop_of_nonneg hf0).mp not_summable_one_div_on_primes
+  have hmass : ∀ z : ℕ, (∑ p ∈ range z, f p) ≤ ∑ p ∈ Nat.primesLE z, nuN h p := by
+    intro z
+    have hsub : (range z).filter Nat.Prime ⊆ Nat.primesLE z := by
+      intro p hp
+      obtain ⟨hpz, hpprime⟩ := mem_filter.mp hp
+      exact Nat.mem_primesLE.mpr ⟨(mem_range.mp hpz).le, hpprime⟩
+    have hsum : (∑ p ∈ range z, f p) = ∑ p ∈ (range z).filter Nat.Prime, (1 : ℝ) / p := by
+      rw [sum_filter]
+      apply sum_congr rfl
+      intro p hp
+      by_cases hpp : p.Prime <;> simp [f, hpp]
+    rw [hsum]
+    calc
+      _ ≤ ∑ p ∈ (range z).filter Nat.Prime, nuN h p := by
+        apply sum_le_sum
+        intro p hp
+        rw [nuN_prime (mem_filter.mp hp).2]
+        exact div_le_div_of_nonneg_right (one_le_wt h p) (Nat.cast_nonneg p)
+      _ ≤ _ := sum_le_sum_of_subset_of_nonneg hsub (fun p _ _ => nuN_nonneg h p)
+  have hmassdiv : Tendsto (fun z : ℕ => ∑ p ∈ Nat.primesLE z, nuN h p) atTop atTop :=
+    tendsto_atTop_mono hmass hdiv
+  filter_upwards [hmassdiv.eventually (eventually_ge_atTop (((r + 1).factorial : ℝ) + 2))] with z hz
+  have hfac : (0 : ℝ) < (r + 1).factorial := by exact_mod_cast Nat.factorial_pos (r + 1)
+  have hmass1 : 1 ≤ ∑ p ∈ Nat.primesLE z, nuN h p := by linarith
+  have hp := le_self_pow₀ hmass1 (by omega : r + 1 ≠ 0)
+  have herr : 1 < (∑ p ∈ Nat.primesLE z, nuN h p) ^ (r + 1) / ((r + 1).factorial : ℝ) := by
+    apply (one_lt_div hfac).mpr
+    linarith
+  have hprod : (∏ p ∈ Nat.primesLE z, (1 - nuN h p)) ≤ 1 := by
+    apply prod_le_one₀
+    · intro p hp
+      exact sub_nonneg.mpr (nuN_lt_one heven (Nat.prime_of_mem_primesLE hp)).le
+    · intro p hp
+      exact sub_le_self _ (nuN_nonneg h p)
+  linarith
+
+/-- Pages 75, 88 and 89: fixed roughness cutoffs and strict size margins
+supply the factor counts for either sign of the Z shift. -/
+lemma decompJ365_rough_survivors_le_zCount (a b ξ : ℕ) (m : ℤ) (R S : ℝ)
+    (hR : 1 ≤ R) (hS : 1 ≤ S)
+    (hsizeR : (ξ : ℝ) < R ^ (a + 1))
+    (hsizeS : ((ξ + 2 * m.natAbs : ℕ) : ℝ) < S ^ (b + 1))
+    (htR : (ξ : ℝ) ^ (1 / ((a : ℝ) + 1)) ≤ R)
+    (htS : (ξ : ℝ) ^ (1 / ((b : ℝ) + 1)) ≤ S) :
+    #{x ∈ Icc (1 : ℕ) ξ | 0 < ((x : ℕ) : ℤ) + 2 * m ∧
+      (∀ p : ℕ, p.Prime → p ∣ x → R < (p : ℝ)) ∧
+      ∀ p : ℕ, p.Prime → p ∣ (((x : ℕ) : ℤ) + 2 * m).toNat → S < (p : ℝ)} ≤ zCount a b m ξ := by
+  unfold zCount
+  apply card_le_card
+  intro x hx
+  rw [mem_filter] at hx
+  obtain ⟨hxI, hpos, hfirst, hsecond⟩ := hx
+  obtain ⟨hx1, hxξ⟩ := mem_Icc.mp hxI
+  have hBcast : ((((x : ℕ) : ℤ) + 2 * m).toNat : ℤ) = ((x : ℕ) : ℤ) + 2 * m :=
+    Int.toNat_of_nonneg hpos.le
+  have hmabs : m ≤ (m.natAbs : ℤ) := Int.le_natAbs
+  have hB1 : 1 ≤ (((x : ℕ) : ℤ) + 2 * m).toNat := by omega
+  have hBbound : (((x : ℕ) : ℤ) + 2 * m).toNat ≤ ξ + 2 * m.natAbs := by omega
+  have hroughA : ∀ p ∈ x.primeFactorsList, R < (p : ℝ) := by
+    intro p hp
+    obtain ⟨hpprime, hpdvd⟩ := (Nat.mem_primeFactorsList (by omega : x ≠ 0)).mp hp
+    exact hfirst p hpprime hpdvd
+  have hroughB : ∀ p ∈ ((((x : ℕ) : ℤ) + 2 * m).toNat).primeFactorsList, S < (p : ℝ) := by
+    intro p hp
+    obtain ⟨hpprime, hpdvd⟩ := (Nat.mem_primeFactorsList (by omega : (((x : ℕ) : ℤ) + 2 * m).toNat ≠ 0)).mp hp
+    exact hsecond p hpprime hpdvd
+  have hfirst' := almostGT_of_pow_bound hx1 hR hroughA
+    ((by exact_mod_cast hxξ : (x : ℝ) ≤ ξ).trans_lt hsizeR)
+  have hBboundR : (((((x : ℕ) : ℤ) + 2 * m).toNat) : ℝ) ≤ ((ξ + 2 * m.natAbs : ℕ) : ℝ) := by
+    exact_mod_cast hBbound
+  have hsecond' := almostGT_of_pow_bound hB1 hS hroughB (hBboundR.trans_lt hsizeS)
+  have hxcast : (x : ℝ) ≤ ξ := by exact_mod_cast hxξ
+  refine mem_filter.mpr ⟨hxI, almostGT_mono hfirst' le_rfl ?_, hpos,
+    almostGT_mono hsecond' le_rfl ?_⟩
+  · exact (Real.rpow_le_rpow (Nat.cast_nonneg x) hxcast (by positivity)).trans htR
+  · exact (Real.rpow_le_rpow (Nat.cast_nonneg x) hxcast (by positivity)).trans htS
+
+/-- Second memoir pages 106 and 107, auxiliary discrepancy bound for mixed indexed weights. -/
+lemma decompJ365_mixed_weight_error (I P Q : Finset ℕ) (F G : ℕ → ℕ)
+    (c d : Finset ℕ → ℝ) (x y : ℕ → ℝ) (X : ℝ)
+    (E : Finset ℕ → Finset ℕ → ℝ)
+    (hE : ∀ S ⊆ P, ∀ T ⊆ Q,
+      |(#{i ∈ I | (∏ p ∈ S, p) ∣ F i * G i ∧ (∏ p ∈ T, p) ∣ F i} : ℝ) -
+        X * (∏ p ∈ S, x p) * (∏ p ∈ T, y p)| ≤ E S T) :
+    |(∑ i ∈ I, wEval P c (F i * G i) * wEval Q d (F i)) -
+      X * wMain P c x * wMain Q d y| ≤
+      ∑ S ∈ P.powerset, ∑ T ∈ Q.powerset, |c S| * |d T| * E S T := by
+  have hsplit : (∑ i ∈ I, wEval P c (F i * G i) * wEval Q d (F i)) -
+      X * wMain P c x * wMain Q d y =
+      ∑ S ∈ P.powerset, ∑ T ∈ Q.powerset, c S * d T *
+        ((#{i ∈ I | (∏ p ∈ S, p) ∣ F i * G i ∧ (∏ p ∈ T, p) ∣ F i} : ℝ) -
+          X * (∏ p ∈ S, x p) * (∏ p ∈ T, y p)) := by
+    rw [decompJ365_mixed_weight_sum]
+    unfold wMain
+    rw [mul_assoc X, sum_mul_sum, mul_sum, ← sum_sub_distrib]
+    apply sum_congr rfl
+    intro S hS
+    rw [mul_sum, ← sum_sub_distrib]
+    apply sum_congr rfl
+    intro T hT
+    ring
+  rw [hsplit]
+  apply (abs_sum_le_sum_abs _ _).trans
+  apply sum_le_sum
+  intro S hS
+  apply (abs_sum_le_sum_abs _ _).trans
+  apply sum_le_sum
+  intro T hT
+  rw [abs_mul, abs_mul]
+  exact mul_le_mul_of_nonneg_left (hE S (mem_powerset.mp hS) T (mem_powerset.mp hT))
+    (mul_nonneg (abs_nonneg _) (abs_nonneg _))
+
+/-- Pages 88 and 89 and second memoir page 106: explicit mixed W weight discrepancy. -/
+lemma decompJ365_mixed_W_weight_error (N : ℕ) (P Q : Finset ℕ)
+    (hP : ∀ p ∈ P, p.Prime) (hQ : ∀ p ∈ Q, p.Prime) (hPQ : Disjoint P Q)
+    (c d : Finset ℕ → ℝ) :
+    |(∑ m ∈ range N, wEval P c (m * (N - m)) * wEval Q d m) -
+      N * wMain P c (fun p => nuN N p) * wMain Q d (fun p => (1 : ℝ) / p)| ≤
+      (∑ S ∈ P.powerset, |c S| * (LeanLab.SchnirelmannGoldbach.S1.cnt N (∏ p ∈ S, p) : ℝ)) *
+        (∑ T ∈ Q.powerset, |d T|) := by
+  have hE (S : Finset ℕ) (hS : S ⊆ P) (T : Finset ℕ) (hT : T ⊆ Q) :
+      |(#{m ∈ range N | (∏ p ∈ S, p) ∣ m * (N - m) ∧ (∏ p ∈ T, p) ∣ m} : ℝ) -
+        N * (∏ p ∈ S, nuN N p) * (∏ p ∈ T, (1 : ℝ) / p)| ≤
+          LeanLab.SchnirelmannGoldbach.S1.cnt N (∏ p ∈ S, p) := by
+    have hd : 0 < ∏ p ∈ S, p := prod_pos (fun p hp => (hP p (hS hp)).pos)
+    have he : 0 < ∏ p ∈ T, p := prod_pos (fun p hp => (hQ p (hT hp)).pos)
+    have hcop := coprime_prod_of_disjoint hP hQ hPQ hS hT
+    have hl : (LeanLab.SchnirelmannGoldbach.S1.cnt N (∏ p ∈ S, p) : ℝ) / (∏ p ∈ S, p) =
+        ∏ p ∈ S, nuN N p := by
+      rw [cnt_prod_primes N S (fun p hp => hP p (hS hp)), Nat.cast_prod, ← prod_div_distrib]
+      apply prod_congr rfl
+      intro p hp
+      rw [nuN_prime (hP p (hS hp))]
+    have hh : (∏ p ∈ T, (1 : ℝ) / p) = 1 / ((∏ p ∈ T, p : ℕ) : ℝ) := by
+      rw [prod_div_distrib, prod_const_one, Nat.cast_prod]
+    have hmain : (N : ℝ) * (∏ p ∈ S, nuN N p) * (∏ p ∈ T, (1 : ℝ) / p) =
+        (LeanLab.SchnirelmannGoldbach.S1.cnt N (∏ p ∈ S, p) : ℝ) * N /
+          ((∏ p ∈ S, p : ℕ) * (∏ p ∈ T, p : ℕ)) := by
+      rw [← hl, hh]
+      field_simp
+    rw [hmain]
+    exact decompJ365_mixed_W_periodic_remainder N N _ _ le_rfl hd he hcop
+  have hraw := decompJ365_mixed_weight_error (range N) P Q (fun m => m) (fun m => N - m)
+    c d (fun p => nuN N p) (fun p => (1 : ℝ) / p) N
+    (fun S _ => (LeanLab.SchnirelmannGoldbach.S1.cnt N (∏ p ∈ S, p) : ℝ)) hE
+  refine hraw.trans_eq ?_
+  rw [sum_mul_sum]
+  apply sum_congr rfl
+  intro S hS
+  apply sum_congr rfl
+  intro T hT
+  ring
+
+/-- Negative auxiliary route check for page 88: an odd level one block with
+reciprocal density mass at least one half fails the relative error budget one tenth. -/
+lemma decompJ365_shallow_block_ratio_gt (P : Finset ℕ) (x : ℕ → ℝ)
+    (hx0 : ∀ p, 0 ≤ x p) (hx1 : ∀ p, x p < 1)
+    (hmass : (1 / 2 : ℝ) ≤ ∑ p ∈ P, x p) (re : ℕ) :
+    (1 / 10 : ℝ) < rho x (P, re, 1) := by
+  let V := ∏ p ∈ P, (1 - x p)
+  have hV : 0 < V := prod_pos (fun p _ => sub_pos.mpr (hx1 p))
+  have hV1 : V ≤ 1 := prod_le_one₀ (fun p _ => sub_nonneg.mpr (hx1 p).le)
+    (fun p _ => sub_le_self _ (hx0 p))
+  have hr0 := rho_nonneg x hx0 (fun p => (hx1 p).le) (P, re, 1)
+  have hE : truncErr P x 1 ≤ rho x (P, re, 1) * V := by
+    dsimp [rho, V]
+    rw [div_mul_cancel₀ _ hV.ne']
+    exact le_max_right _ _
+  have hE0 : (1 / 8 : ℝ) ≤ truncErr P x 1 := by
+    norm_num [truncErr]
+    nlinarith
+  have hmul := mul_le_mul_of_nonneg_left hV1 hr0
+  nlinarith
+
+/-- Second memoir pages 92 and 93 formula 11.5, auxiliary Brun pairing step.
+Erasing a distinguished element preserves admissibility. Every admissible even
+subset avoiding that element has an admissible extension. -/
+lemma decompJ365_brun_toggle_lower (γ : Finset ℕ) (ν : ℕ) (hν : ν ∈ γ)
+    (A : Finset ℕ → Prop) [DecidablePred A]
+    (herase : ∀ S ⊆ γ, A S → A (S.erase ν))
+    (hext : ∀ S ⊆ γ, ν ∉ S → Even S.card → A S → A (insert ν S)) :
+    (∑ S ∈ γ.powerset, if A S then (-1 : ℝ) ^ S.card else 0) ≤ 0 := by
+  have hνnot : ν ∉ γ.erase ν := notMem_erase ν γ
+  have hγ : insert ν (γ.erase ν) = γ := insert_erase hν
+  rw [← hγ, sum_powerset_insert hνnot, ← sum_add_distrib]
+  apply sum_nonpos
+  intro S hS
+  have hSsub : S ⊆ γ := (mem_powerset.mp hS).trans (erase_subset ν γ)
+  have hνS : ν ∉ S := notMem_of_mem_powerset_of_notMem hS hνnot
+  have hinsub : insert ν S ⊆ γ := insert_subset hν hSsub
+  have herase' : A (insert ν S) → A S := by
+    intro hi
+    simpa only [erase_insert hνS] using herase (insert ν S) hinsub hi
+  rw [card_insert_of_notMem hνS, pow_succ]
+  by_cases hAS : A S
+  · rw [ite_eq_left hAS]
+    rcases Nat.even_or_odd S.card with heven | hodd
+    · rw [ite_eq_left (hext S hSsub hνS heven hAS), heven.neg_one_pow]
+      norm_num
+    · rw [hodd.neg_one_pow]
+      split_ifs <;> norm_num
+  · rw [ite_eq_right hAS, ite_eq_right (fun hi => hAS (herase' hi))]
+    norm_num
+
+/-- Second memoir pages 92, 93 and 107, auxiliary indexed Brun lower sieve.
+The supplied admissible family satisfies the erase and even extension pairing conditions. -/
+lemma decompJ365_decreasing_family_lower (I P : Finset ℕ) (F : ℕ → ℕ)
+    (hP : ∀ p ∈ P, p.Prime) (A : Finset ℕ → Prop) [DecidablePred A] (hA0 : A ∅)
+    (hpair : ∀ γ ⊆ P, γ.Nonempty → ∃ ν ∈ γ,
+      (∀ S ⊆ γ, A S → A (S.erase ν)) ∧
+      ∀ S ⊆ γ, ν ∉ S → Even S.card → A S → A (insert ν S)) :
+    (∑ S ∈ P.powerset, (if A S then (-1 : ℝ) ^ S.card else 0) *
+      (#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ)) ≤
+      #{i ∈ I | ∀ p ∈ P, ¬ p ∣ F i} := by
+  have hpoint (n : ℕ) : wEval P (fun S => if A S then (-1 : ℝ) ^ S.card else 0) n ≤ xind P n := by
+    let γ := P.filter (· ∣ n)
+    have hγP : γ ⊆ P := filter_subset _ _
+    have hsets : P.powerset.filter (fun S => (∏ p ∈ S, p) ∣ n) = γ.powerset := by
+      ext S
+      simp only [mem_filter, mem_powerset]
+      constructor
+      · rintro ⟨hSP, hd⟩
+        exact (dvd_iff_subset P hP hSP n).mp hd
+      · intro hSγ
+        have hSP := hSγ.trans hγP
+        exact ⟨hSP, (dvd_iff_subset P hP hSP n).mpr hSγ⟩
+    have hsum : wEval P (fun S => if A S then (-1 : ℝ) ^ S.card else 0) n =
+        ∑ S ∈ γ.powerset, if A S then (-1 : ℝ) ^ S.card else 0 := by
+      unfold wEval ind
+      simp only [mul_ite, mul_one, mul_zero]
+      rw [← sum_filter, hsets]
+    rw [hsum]
+    by_cases hγ : γ = ∅
+    · simp [hγ, xind, hA0, show P.filter (· ∣ n) = ∅ from hγ]
+    · obtain ⟨ν, hν, herase, hext⟩ := hpair γ hγP (nonempty_iff_ne_empty.mpr hγ)
+      have hz : xind P n = 0 := ite_eq_right hγ
+      rw [hz]
+      exact decompJ365_brun_toggle_lower γ ν hν A herase hext
+  rw [← decompJ365_indexed_weight_sum]
+  calc
+    _ ≤ ∑ i ∈ I, xind P (F i) := sum_le_sum (fun i _ => hpoint (F i))
+    _ = _ := by simp [xind, filter_eq_empty_iff]
+
+/-- Second memoir pages 91 to 93 and 107, auxiliary decreasing step Brun sieve.
+Each nested upper prime segment has an odd cardinality cap on retained subsets. -/
+lemma decompJ365_decreasing_brun_lower (I P J : Finset ℕ) (F : ℕ → ℕ)
+    (hP : ∀ p ∈ P, p.Prime) (cutoff level : ℕ → ℕ) :
+    (∑ S ∈ P.powerset.filter (fun S => ∀ j ∈ J,
+        (S.filter (fun p => cutoff j < p)).card ≤ 2 * level j + 1),
+      (-1 : ℝ) ^ S.card * (#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ)) ≤
+      #{i ∈ I | ∀ p ∈ P, ¬ p ∣ F i} := by
+  let A : Finset ℕ → Prop := fun S => ∀ j ∈ J,
+    (S.filter (fun p => cutoff j < p)).card ≤ 2 * level j + 1
+  have hA0 : A ∅ := by simp [A]
+  have hpair : ∀ γ ⊆ P, γ.Nonempty → ∃ ν ∈ γ,
+      (∀ S ⊆ γ, A S → A (S.erase ν)) ∧
+      ∀ S ⊆ γ, ν ∉ S → Even S.card → A S → A (insert ν S) := by
+    intro γ hγP hγ
+    let ν := γ.min' hγ
+    have hν : ν ∈ γ := min'_mem γ hγ
+    refine ⟨ν, hν, ?_, ?_⟩
+    · intro S hS hAS j hj
+      have hsub : (S.erase ν).filter (fun p => cutoff j < p) ⊆
+          S.filter (fun p => cutoff j < p) := by
+        intro p hp
+        obtain ⟨hpS, hpc⟩ := mem_filter.mp hp
+        exact mem_filter.mpr ⟨(mem_erase.mp hpS).2, hpc⟩
+      exact (card_le_card hsub).trans (hAS j hj)
+    · intro S hS hνS hEven hAS j hj
+      by_cases hcν : cutoff j < ν
+      · have hall : ∀ p ∈ S, cutoff j < p := fun p hp =>
+          hcν.trans_le (min'_le γ p (hS hp))
+        have hf : S.filter (fun p => cutoff j < p) = S := filter_eq_self.mpr hall
+        have hfi : (insert ν S).filter (fun p => cutoff j < p) = insert ν S := by
+          apply filter_eq_self.mpr
+          intro p hp
+          rcases mem_insert.mp hp with rfl | hp
+          · exact hcν
+          · exact hall p hp
+        have hbound := hAS j hj
+        rw [hf] at hbound
+        rw [hfi, card_insert_of_notMem hνS]
+        rcases hEven with ⟨k, hk⟩
+        omega
+      · simpa only [filter_insert, ite_eq_right hcν] using hAS j hj
+  have hlower := decompJ365_decreasing_family_lower I P F hP A hA0 hpair
+  rw [sum_filter]
+  simpa only [A, ite_mul, zero_mul] using hlower
+
+/-- First memoir page 81 formula 2.6: the three block lower head is exactly
+the signed factorial sum with nested odd caps one, three and five. -/
+lemma decompJ365_lower_head_identity (t₁ t₂ t₃ : ℚ) :
+    (∑ i ∈ range 2, ∑ j ∈ range 4, ∑ k ∈ range 6,
+      if i + j ≤ 3 ∧ i + j + k ≤ 5 then
+        (-1 : ℚ) ^ (i + j + k) * (t₁ ^ i / (i.factorial : ℚ)) *
+          (t₂ ^ j / (j.factorial : ℚ)) * (t₃ ^ k / (k.factorial : ℚ)) else 0) =
+      Ebar3 t₁ t₂ t₃ := by
+  norm_num [sum_range_succ, Nat.factorial, Ebar3]
+  ring
+
+/-- Second memoir page 107, auxiliary support gain from one decreasing step.
+One large element costs t and the remaining at most 2r elements cost v each. -/
+lemma decompJ365_one_step_support (S : Finset ℕ) (t v r : ℕ) (hv : 1 ≤ v) (hvt : v ≤ t)
+    (ht : ∀ p ∈ S, p ≤ t) (hcard : S.card ≤ 2 * r + 1)
+    (hhigh : (S.filter (fun p => v < p)).card ≤ 1) :
+    (∏ p ∈ S, p) ≤ t * v ^ (2 * r) := by
+  by_cases hall : ∀ p ∈ S, p ≤ v
+  · calc
+      _ ≤ v ^ S.card := prod_le_pow_card S id v hall
+      _ ≤ v ^ (2 * r + 1) := Nat.pow_le_pow_right hv hcard
+      _ = v * v ^ (2 * r) := pow_succ' _ _
+      _ ≤ _ := Nat.mul_le_mul_right _ hvt
+  · push Not at hall
+    obtain ⟨q, hq, hqv⟩ := hall
+    have hqh : q ∈ S.filter (fun p => v < p) := mem_filter.mpr ⟨hq, hqv⟩
+    have hsmall : ∀ p ∈ S.erase q, p ≤ v := by
+      intro p hp
+      obtain ⟨hpq, hpS⟩ := mem_erase.mp hp
+      by_contra hpv
+      have hph : p ∈ S.filter (fun p => v < p) := mem_filter.mpr ⟨hpS, lt_of_not_ge hpv⟩
+      exact hpq (card_le_one.mp hhigh p hph q hqh)
+    have hcard' : (S.erase q).card ≤ 2 * r := by
+      rw [card_erase_of_mem hq]
+      omega
+    rw [← mul_prod_erase S (fun p : ℕ => p) hq]
+    exact Nat.mul_le_mul (ht q hq)
+      ((prod_le_pow_card (S.erase q) id v hsmall).trans (Nat.pow_le_pow_right hv hcard'))
+
+/-- Second memoir pages 106 and 107, auxiliary decreasing step lower sieve with
+an explicit level remainder. The retained main sum still needs an analytic lower bound. -/
+lemma decompJ365_decreasing_lower_explicit (I P J : Finset ℕ) (F : ℕ → ℕ)
+    (hP : ∀ p ∈ P, p.Prime) (cutoff level : ℕ → ℕ) (h : ℕ) (X : ℝ) (x : ℕ → ℝ)
+    (herror : ∀ S ⊆ P,
+      |(#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ) - X * ∏ p ∈ S, x p| ≤
+        LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p))
+    (L : ℝ) (hL : 1 ≤ L)
+    (hlevel : ∀ S ⊆ P, (∀ j ∈ J,
+      (S.filter (fun p => cutoff j < p)).card ≤ 2 * level j + 1) →
+        ((∏ p ∈ S, p : ℕ) : ℝ) ≤ L) :
+    let U := P.powerset.filter (fun S => ∀ j ∈ J,
+      (S.filter (fun p => cutoff j < p)).card ≤ 2 * level j + 1)
+    X * (∑ S ∈ U, (-1 : ℝ) ^ S.card * ∏ p ∈ S, x p) - L * (1 + Real.log L) ^ 2 ≤
+      #{i ∈ I | ∀ p ∈ P, ¬ p ∣ F i} := by
+  let U := P.powerset.filter (fun S => ∀ j ∈ J,
+    (S.filter (fun p => cutoff j < p)).card ≤ 2 * level j + 1)
+  have hUP : ∀ S ∈ U, S ⊆ P := fun S hS => mem_powerset.mp (mem_filter.mp hS).1
+  have hterm (S : Finset ℕ) (hS : S ∈ U) :
+      X * ((-1 : ℝ) ^ S.card * ∏ p ∈ S, x p) -
+        LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p) ≤
+      (-1 : ℝ) ^ S.card * (#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ) := by
+    have herr : |(-1 : ℝ) ^ S.card *
+        ((#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ) - X * ∏ p ∈ S, x p)| ≤
+          LeanLab.SchnirelmannGoldbach.S1.cnt h (∏ p ∈ S, p) := by
+      simpa only [abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul] using herror S (hUP S hS)
+    have hlo := (abs_le.mp herr).1
+    nlinarith
+  have hsum := sum_le_sum hterm
+  rw [sum_sub_distrib, ← mul_sum] at hsum
+  have hraw := decompJ365_decreasing_brun_lower I P J F hP cutoff level
+  have hrem := decompJ365_root_sum_le h P hP U hUP L hL
+    (fun S hS => hlevel S (hUP S hS) (mem_filter.mp hS).2)
+  change X * (∑ S ∈ U, (-1 : ℝ) ^ S.card * ∏ p ∈ S, x p) - L * (1 + Real.log L) ^ 2 ≤ _
+  change (∑ S ∈ U, (-1 : ℝ) ^ S.card *
+    (#{i ∈ I | (∏ p ∈ S, p) ∣ F i} : ℝ)) ≤ _ at hraw
+  linarith
+
+/-- Second memoir pages 108 and 109, auxiliary sharp reciprocal prime block upper bound.
+Partial summation of the lab Mertens bounds gives a vanishing endpoint loss. -/
+lemma decompJ365_prime_block_upper (y w : ℕ) (hy : 2 ≤ y) (hyw : y ≤ w) :
+    (∑ p ∈ (Ioc y w).filter Nat.Prime, (1 : ℝ) / p) ≤
+      Real.log (Real.log w / Real.log y) + 14 / Real.log y := by
+  have hyR : (2 : ℝ) ≤ y := by exact_mod_cast hy
+  have hwR : (2 : ℝ) ≤ w := by exact_mod_cast hy.trans hyw
+  have hly : 0 < Real.log y := Real.log_pos (by linarith)
+  have hlw : 0 < Real.log w := Real.log_pos (by linarith)
+  have hsplitE : E w = E y + ∑ p ∈ (Ioc y w).filter Nat.Prime, (1 : ℝ) / p := by
+    rw [E_eq, E_eq]
+    have hsets : (Icc 1 w).filter Nat.Prime =
+        (Icc 1 y).filter Nat.Prime ∪ (Ioc y w).filter Nat.Prime := by
+      rw [← filter_union]
+      congr 1
+      ext p
+      simp only [mem_union, mem_Icc, mem_Ioc]
+      omega
+    rw [hsets, sum_union]
+    rw [disjoint_left]
+    intro p hp hq
+    have hp' := (mem_Icc.mp (mem_filter.mp hp).1).2
+    have hq' := (mem_Ioc.mp (mem_filter.mp hq).1).1
+    omega
+  have hab : E w - E y = C w / Real.log w - C y / Real.log y +
+      ∑ n ∈ Ico y w, C n * (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1)) := by
+    have hw := abel w (hy.trans hyw)
+    have hy' := abel y hy
+    have hs := sum_Ico_consecutive
+      (fun n : ℕ => C n * (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1))) hy hyw
+    linarith
+  have hb1 : C w / Real.log w ≤ 1 + 7 / Real.log w := by
+    rw [div_le_iff₀ hlw, add_mul, one_mul, div_mul_cancel₀ _ hlw.ne']
+    exact C_le w (by omega)
+  have hb2 : 1 - 7 / Real.log y ≤ C y / Real.log y := by
+    apply (le_div_iff₀ hly).mpr
+    rw [sub_mul, one_mul, div_mul_cancel₀ _ hly.ne']
+    exact C_ge y
+  have hterm : ∀ n ∈ Ico y w, C n * (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1)) ≤
+      (Real.log (Real.log ((n : ℝ) + 1)) - Real.log (Real.log n)) +
+        7 * (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1)) := by
+    intro n hn
+    have hn2 : 2 ≤ n := hy.trans (mem_Ico.mp hn).1
+    have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn2
+    have hl : 0 < Real.log n := Real.log_pos (by linarith)
+    have hl1 : 0 < Real.log ((n : ℝ) + 1) := Real.log_pos (by linarith)
+    have hd := diff_nonneg hn2
+    have h1 := mul_le_mul_of_nonneg_right (C_le n (by omega)) hd
+    have h2 : Real.log n * (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1)) ≤
+        Real.log (Real.log ((n : ℝ) + 1)) - Real.log (Real.log n) := by
+      rw [← Real.log_div hl1.ne' hl.ne']
+      have hh := Real.one_sub_inv_le_log_of_pos (div_pos hl1 hl)
+      rw [inv_div] at hh
+      have heq : Real.log n * (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1)) =
+          1 - Real.log n / Real.log ((n : ℝ) + 1) := by field_simp
+      rw [heq]
+      exact hh
+    nlinarith
+  have hs := sum_le_sum hterm
+  rw [sum_add_distrib, ← mul_sum] at hs
+  have htele (g : ℕ → ℝ) : ∑ n ∈ Ico y w, (g (n + 1) - g n) = g w - g y := by
+    have hw := tele_sum w (hy.trans hyw) g
+    have hy' := tele_sum y hy g
+    have hh := sum_Ico_consecutive (fun n => g (n + 1) - g n) hy hyw
+    linarith
+  have ht1 : ∑ n ∈ Ico y w, (Real.log (Real.log ((n : ℝ) + 1)) - Real.log (Real.log n)) =
+      Real.log (Real.log w) - Real.log (Real.log y) := by
+    simpa only [Nat.cast_add, Nat.cast_one] using htele (fun n => Real.log (Real.log n))
+  have ht2 : ∑ n ∈ Ico y w, (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1)) =
+      1 / Real.log y - 1 / Real.log w := by
+    have hh := htele (fun n => -(1 / Real.log n))
+    simp only [Nat.cast_add, Nat.cast_one, sub_neg_eq_add] at hh
+    have heq : (∑ n ∈ Ico y w, (1 / Real.log n - 1 / Real.log ((n : ℝ) + 1))) =
+        ∑ n ∈ Ico y w, (-(1 / Real.log ((n : ℝ) + 1)) + 1 / Real.log n) :=
+      sum_congr rfl (fun n _ => by ring)
+    rw [heq, hh]
+    ring
+  rw [ht1, ht2] at hs
+  rw [Real.log_div hlw.ne' hly.ne']
+  have he1 : 7 / Real.log w = 7 * (1 / Real.log w) := by ring
+  have he2 : 7 / Real.log y = 7 * (1 / Real.log y) := by ring
+  have he3 : 14 / Real.log y = 14 * (1 / Real.log y) := by ring
+  linarith
+
+/-- First memoir page 88 and second memoir page 109: the pair root density
+mass on a prime block has the dimension two logarithmic upper bound. -/
+lemma decompJ365_pair_block_mass_upper (h y w : ℕ) (hy : 2 ≤ y) (hyw : y ≤ w) :
+    (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤
+      2 * Real.log (Real.log w / Real.log y) + 28 / Real.log y := by
+  calc
+    _ ≤ ∑ p ∈ (Ioc y w).filter Nat.Prime, 2 * ((1 : ℝ) / p) := by
+      apply sum_le_sum
+      intro p hp
+      rw [nuN_prime (mem_filter.mp hp).2]
+      simpa only [mul_one_div] using
+        div_le_div_of_nonneg_right (wt_le_two h p) (Nat.cast_nonneg p)
+    _ = 2 * ∑ p ∈ (Ioc y w).filter Nat.Prime, (1 : ℝ) / p := (mul_sum _ _ _).symm
+    _ ≤ 2 * (Real.log (Real.log w / Real.log y) + 14 / Real.log y) :=
+      mul_le_mul_of_nonneg_left (decompJ365_prime_block_upper y w hy hyw) (by norm_num)
+    _ = _ := by ring
+
+/-- Second memoir page 109: each fixed logarithmic prime block has an eventual
+uniform dimension two mass budget, with any positive endpoint allowance. -/
+lemma decompJ365_pair_block_mass_eventually (θ ε : ℝ) (hε : 0 < ε) :
+    ∃ Y : ℕ, 2 ≤ Y ∧ ∀ h y w : ℕ, Y ≤ y → y ≤ w →
+      Real.log w ≤ Real.exp (θ / 2) * Real.log y →
+        (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ θ + ε := by
+  have hgrowth : Tendsto (fun y : ℕ => Real.log (y : ℝ)) atTop atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  obtain ⟨Y, hY⟩ := eventually_atTop.mp (hgrowth.eventually (eventually_ge_atTop (28 / ε)))
+  refine ⟨max Y 2, by omega, ?_⟩
+  intro h y w hy hyw hratio
+  have hy2 : 2 ≤ y := by omega
+  have hly : 0 < Real.log y := Real.log_pos (by exact_mod_cast (by omega : 1 < y))
+  have hlw : 0 < Real.log w := Real.log_pos (by exact_mod_cast (by omega : 1 < w))
+  have herr : 28 / Real.log y ≤ ε := by
+    apply (div_le_iff₀ hly).mpr
+    have hh := mul_le_mul_of_nonneg_right (hY y (by omega)) hε.le
+    rw [div_mul_cancel₀ _ hε.ne'] at hh
+    linarith
+  have hquot : Real.log w / Real.log y ≤ Real.exp (θ / 2) := (div_le_iff₀ hly).mpr hratio
+  have hlog := Real.log_le_log (div_pos hlw hly) hquot
+  rw [Real.log_exp] at hlog
+  have hmain := decompJ365_pair_block_mass_upper h y w hy2 hyw
+  linarith
+
+/-- Second memoir page 95: Newton's identity at degree two gives the exact
+quadratic error in the factorial approximation to the prime block main sum. -/
+lemma decompJ365_esymm_two (x : ℕ → ℝ) (P : Finset ℕ) :
+    2 * esymm x P 2 = (∑ p ∈ P, x p) ^ 2 - ∑ p ∈ P, (x p) ^ 2 := by
+  have hone (Q : Finset ℕ) : esymm x Q 1 = ∑ p ∈ Q, x p := by
+    induction Q using Finset.induction_on with
+    | empty => rw [esymm_empty_succ x 0]; simp
+    | insert a Q ha ih =>
+      rw [esymm_succ_insert x ha 0, esymm_zero, ih, sum_insert ha]
+      ring
+  induction P using Finset.induction_on with
+  | empty => rw [esymm_empty_succ x 1]; simp
+  | insert a P ha ih =>
+    rw [esymm_succ_insert x ha 1, hone, sum_insert ha, sum_insert ha]
+    nlinarith
 
 /-- LEAF. Pages 75, 88 and 89: the remaining positive lower count for Z.
 The upper estimate is decompJ365_zCount_upper. The decreasing step Brun lower sieve remains open. -/
