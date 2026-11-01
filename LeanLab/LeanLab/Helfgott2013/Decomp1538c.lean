@@ -148,11 +148,112 @@ theorem integral_eC (k : ℤ) :
       · refine Continuous.mul continuous_const ?_
         exact continuous_algebraMap ℝ ℂ
 
+private lemma eC_star (t : ℝ) : starRingEnd ℂ (eC t) = eC (-t) := by
+  unfold eC
+  rw [← Complex.exp_conj]
+  congr 1
+  simp only [map_mul, Complex.conj_ofReal, Complex.conj_I, map_ofNat]
+  push_cast
+  ring_nf
+
+private lemma eC_add (s t : ℝ) : eC s * eC t = eC (s + t) := by
+  simp [eC, Complex.exp_add, mul_add]
+
+private lemma trig_mul_star (A : Finset ℤ) (c : ℤ → ℂ) (α : ℝ) :
+    trig A c α * starRingEnd ℂ (trig A c α)
+      = ∑ m ∈ A, ∑ n ∈ A, c m * starRingEnd ℂ (c n) * eC (α * ((m - n : ℤ) : ℝ)) := by
+  simp only [trig, map_sum, map_mul, eC_star]
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun m _ => ?_
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  have step : c m * eC (α * (m : ℝ)) * (starRingEnd ℂ (c n) * eC (-(α * (n : ℝ))))
+      = c m * starRingEnd ℂ (c n) * (eC (α * (m : ℝ)) * eC (-(α * (n : ℝ)))) := by ring_nf
+  rw [step, eC_add]
+  congr 1
+  push_cast
+  ring_nf
+
+private lemma integrable_eC_mul (z : ℂ) (k : ℤ) :
+    Integrable (fun α : ℝ => z * eC (α * (k : ℝ))) (volume.restrict (Set.Ioc (0 : ℝ) 1)) := by
+  have hcont : Continuous fun α : ℝ => z * eC (α * (k : ℝ)) := by
+    have h1 : Continuous fun α : ℝ => eC (α * (k : ℝ)) := by
+      unfold eC
+      fun_prop
+    exact continuous_const.mul h1
+  exact MeasureTheory.IntegrableOn.mono_set (Continuous.integrableOn_Icc hcont) Set.Ioc_subset_Icc_self
+
+private lemma integral_eC_restrict (k : ℤ) :
+    ∫ α, eC (α * (k : ℝ)) ∂(volume.restrict (Set.Ioc (0 : ℝ) 1))
+      = if k = 0 then (1 : ℂ) else 0 := by
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)]
+  exact integral_eC k
+
 /-- LEAF. Unit U-1538. Parseval for a trigonometric polynomial:
 `∫_0^1 |S1(α)|² dα = ∑_{n ∈ A} |c_n|²`; p. 48, the line
 `(1/∑|a_n|²) ∫_{R/Z} |S1(α)|² dα = 1`. -/
 theorem parseval_trig (A : Finset ℤ) (c : ℤ → ℂ) :
-    ∫ α in (0 : ℝ)..1, ‖trig A c α‖ ^ 2 = ∑ n ∈ A, ‖c n‖ ^ 2 := by sorry
+    ∫ α in (0 : ℝ)..1, ‖trig A c α‖ ^ 2 = ∑ n ∈ A, ‖c n‖ ^ 2 := by
+  rw [intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)]
+  set μ : Measure ℝ := volume.restrict (Set.Ioc (0 : ℝ) 1) with hμ
+  have hcont : Continuous fun α : ℝ => trig A c α := by
+    unfold trig
+    refine continuous_finsetSum _ ?_
+    intro n _
+    exact Continuous.mul continuous_const (by unfold eC; fun_prop)
+  have hFcont : Continuous fun α : ℝ => trig A c α * starRingEnd ℂ (trig A c α) :=
+    hcont.mul hcont.star
+  have hFint : Integrable (fun α : ℝ => trig A c α * starRingEnd ℂ (trig A c α)) μ :=
+    MeasureTheory.IntegrableOn.mono_set (Continuous.integrableOn_Icc hFcont) Set.Ioc_subset_Icc_self
+  have hpt : ∀ α : ℝ, RCLike.re (trig A c α * starRingEnd ℂ (trig A c α)) = ‖trig A c α‖ ^ 2 := by
+    intro α
+    rw [Complex.mul_conj', ← Complex.ofReal_pow]
+    exact RCLike.ofReal_re _
+  have key : ∫ α, (trig A c α * starRingEnd ℂ (trig A c α)) ∂μ
+      = ∑ n ∈ A, ((‖c n‖ ^ 2 : ℝ) : ℂ) := by
+    have h1 : ∫ α, (trig A c α * starRingEnd ℂ (trig A c α)) ∂μ
+        = ∫ α, ∑ m ∈ A, ∑ n ∈ A,
+            c m * starRingEnd ℂ (c n) * eC (α * ((m - n : ℤ) : ℝ)) ∂μ := by
+      simp only [trig_mul_star]
+    rw [h1, MeasureTheory.integral_finsetSum]
+    swap
+    · intro m _
+      exact MeasureTheory.integrable_finsetSum A
+        (fun n _ => integrable_eC_mul (c m * starRingEnd ℂ (c n)) (m - n))
+    have h2 : ∀ m ∈ A, ∫ α, ∑ n ∈ A, c m * starRingEnd ℂ (c n) * eC (α * ((m - n : ℤ) : ℝ)) ∂μ
+        = ∑ n ∈ A, c m * starRingEnd ℂ (c n) * (if m - n = 0 then (1 : ℂ) else 0) := by
+      intro m _
+      rw [MeasureTheory.integral_finsetSum]
+      swap
+      · intro n _
+        exact integrable_eC_mul (c m * starRingEnd ℂ (c n)) (m - n)
+      refine Finset.sum_congr rfl fun n _ => ?_
+      rw [MeasureTheory.integral_const_mul, integral_eC_restrict]
+    rw [Finset.sum_congr rfl h2]
+    have h3 : ∀ m ∈ A, ∑ n ∈ A, c m * starRingEnd ℂ (c n) * (if m - n = 0 then (1 : ℂ) else 0)
+        = c m * starRingEnd ℂ (c m) := by
+      intro m hm
+      have h4 : ∑ n ∈ A, c m * starRingEnd ℂ (c n) * (if m - n = 0 then (1 : ℂ) else 0)
+          = ∑ n ∈ A, (if m = n then c m * starRingEnd ℂ (c n) else 0) := by
+        refine Finset.sum_congr rfl fun n _ => ?_
+        by_cases hmn : n = m
+        · subst hmn; simp
+        · have h1 : ¬ (m - n = 0) := sub_ne_zero.mpr (fun h => hmn h.symm)
+          have h2 : ¬ (m = n) := fun h => hmn h.symm
+          simp [h1, h2]
+      rw [h4, Finset.sum_ite_eq]
+      simp [hm]
+    rw [Finset.sum_congr rfl h3]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    rw [Complex.mul_conj', ← Complex.ofReal_pow]
+  calc ∫ α, ‖trig A c α‖ ^ 2 ∂μ
+      = ∫ α, RCLike.re (trig A c α * starRingEnd ℂ (trig A c α)) ∂μ :=
+        integral_congr_ae (Filter.Eventually.of_forall fun α => (hpt α).symm)
+    _ = RCLike.re (∫ α, trig A c α * starRingEnd ℂ (trig A c α) ∂μ) := integral_re hFint
+    _ = RCLike.re (∑ n ∈ A, ((‖c n‖ ^ 2 : ℝ) : ℂ)) := by rw [key]
+    _ = ∑ n ∈ A, ‖c n‖ ^ 2 := by
+        rw [← Complex.ofReal_sum]
+        exact RCLike.ofReal_re _
 
 /-- LEAF. Unit U-1538. A trigonometric polynomial is continuous; p. 47, Prop. 6.2. -/
 theorem continuous_trig (A : Finset ℤ) (c : ℤ → ℂ) : Continuous (trig A c) := by
