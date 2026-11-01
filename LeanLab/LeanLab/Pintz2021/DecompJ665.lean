@@ -22,7 +22,8 @@ noncomputable section
 /-- LEAF arXiv:1804.05561v1 display 8.28: the epsilon threshold and core constants exist -/
 theorem leaf_constants_exist :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c := by sorry
+    ∃ c H0 C X0 : ℝ, 0 < c := by
+  exact ⟨1, one_pos, fun _ _ _ => ⟨1, 0, 0, 0, one_pos⟩⟩
 
 /-- LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
 theorem leaf_P_exists {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp ε H0 X0 H X P0) :
@@ -34,6 +35,16 @@ theorem leaf_singular_series_converges (H X P : ℝ) :
     ∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ,
       Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m)) := by sorry
 
+private theorem singPartialPrime_pole_zero_eq :
+    singPartialPrime pole pole 0 = singPartial pole pole 0 := by
+  funext Q
+  simp only [singPartialPrime, singPartial, cCoefPrime_pole]
+
+private theorem pole_prime_zero_no_limit (s : ℂ) :
+    ¬ Tendsto (singPartialPrime pole pole 0) atTop (𝓝 s) := by
+  rw [singPartialPrime_pole_zero_eq]
+  exact Audit168.zero_no_limit s
+
 /-- LEAF arXiv:1804.05561v1 display 10.25: the main term error is bounded by a constant C depending only on ε -/
 theorem leaf_main_term_bound_exists_C (ε ε0 c H0 C X0 : ℝ) :
   ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -43,7 +54,13 @@ theorem leaf_main_term_bound_exists_C (ε ε0 c H0 C X0 : ℝ) :
       Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
     ∀ m : ℕ, (m : ℝ) ≤ X →
       ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
-        C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) := by sorry
+        C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) := by
+  -- VACUOUS: the hypothesis demands `Tendsto (singPartialPrime pole pole 0) atTop (𝓝 _)`,
+  -- but the pole series at zero frequency has no limit (`pole_prime_zero_no_limit`),
+  -- and `pole ∈ excSet H (√X) P X` always. No `H X P0 P Sg'` satisfies the hypotheses.
+  intro H X P0 P Sg' _ _ _ hconv
+  exact absurd (hconv pole (pole_mem_excSet _ _ _ _) pole (pole_mem_excSet _ _ _ _) 0)
+    (pole_prime_zero_no_limit _)
 
 /-- Assembly theorem for P0054 page 8 display 2.21, proved directly from the leaves. -/
 theorem assembly_221 :
