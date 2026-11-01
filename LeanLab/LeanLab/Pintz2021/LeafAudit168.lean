@@ -30,10 +30,10 @@ theorem main_poleSeries (H P X ε : ℝ) (m : ℕ) :
 
 /-- A zero cutoff removes the supplied pole term. -/
 theorem truncated_poleSeries_zero (H P X ε : ℝ) (m : ℕ) :
-    mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) poleSeries ε X 0 m = 0 := by
+    mainTermTruncatedPrime_v1 (excSet H (Real.sqrt X) P X) poleSeries ε X 0 m = 0 := by
   have hcut : ¬ UCutoff pole pole m ≤ (0 : ℝ) := by
     norm_num [UCutoff, pole]
-  unfold mainTermTruncatedPrime poleSeries
+  unfold mainTermTruncatedPrime_v1 poleSeries
   simp_rw [finsum_eq_if]
   rw [finsum_eq_single _ pole (by intro z hz; simp [hz])]
   simp only [pole_mem_excSet, show pole.ρ.im = 0 from rfl, abs_zero, le_refl,
@@ -57,7 +57,7 @@ theorem unrestricted_tail_false :
     ¬ (∃ C' : ℝ, 0 < C' ∧ ∀ H X P U ε : ℝ,
       ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
         ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
-          mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
+          mainTermTruncatedPrime_v1 (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
             C' * (Sing m * X * Real.log U / Real.sqrt U)) := by
   rintro ⟨C, _, h⟩
   have ht := h 0 3 1 0 1 poleSeries 1
@@ -86,11 +86,11 @@ theorem triangle_leaf_false :
       ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
         C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) →
       ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
-        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
+        mainTermTruncatedPrime_v1 (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
           C' * (Sing m * X * Real.log U / Real.sqrt U) →
       U = Real.sqrt X →
       ‖R1majPrime ε X P m -
-        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
+        mainTermTruncatedPrime_v1 (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
           max C C' * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) +
             Sing m * X * Real.log U / X ^ (1 / 4 : ℝ))) := by
   intro h
@@ -109,13 +109,13 @@ theorem triangle_leaf_false :
     linarith
   have h2 : ‖mainTermPrime (excSet 0 (Real.sqrt (-1)) 1 (-1))
         (fun _ _ _ => 0) 1 (-1) 2 -
-      mainTermTruncatedPrime (excSet 0 (Real.sqrt (-1)) 1 (-1))
+      mainTermTruncatedPrime_v1 (excSet 0 (Real.sqrt (-1)) 1 (-1))
         (fun _ _ _ => 0) 1 (-1) 0 2‖ ≤
       (1 : ℝ) * (Sing 2 * (-1) * Real.log 0 / Real.sqrt 0) := by
-    simp [mainTermPrime, mainTermTruncatedPrime]
+    simp [mainTermPrime, mainTermTruncatedPrime_v1]
   have ht := h (H := 0) (X := -1) (P := 1) (U := 0) (ε := 1) (ε0 := 1)
     (c := 0) (C := -1) (C' := 1) (m := 2) (Sg' := fun _ _ _ => 0) h1 h2 (by norm_num)
-  simp [negative_scale_major_zero, mainTermTruncatedPrime] at ht
+  simp [negative_scale_major_zero, mainTermTruncatedPrime_v1] at ht
   linarith
 
 /-- The exact existing untruncated prime leaf is false at zero frequency. -/

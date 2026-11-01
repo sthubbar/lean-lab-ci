@@ -25,6 +25,9 @@ Proof additions by Codex task195 on 2026-10-31 UTC. AI wrote the Lean code.
 Binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.HardyLittlewood1923.U1482ZeroCount
+import LeanLab.RieselVaughan1983.LargeSieveSchur
+import LeanLab.PNTPort.LargeSieve.Montgomery
 import LeanLab.Linnik.Decomp1532a
 import LeanLab.HeathBrown1985.DivisorEps
 import LeanLab.Linnik.U7204Display4
@@ -794,6 +797,389 @@ theorem density_sum_at_one (T : ℝ) :
   intro χ hχ
   rw [zeroCount_eq_zero_of_one_le χ (mem_filter.mp hχ).2 le_rfl, Nat.cast_zero]
 
+/-- Gallagher 1975 p.131. Auxiliary exact diagonal and off-diagonal Fourier energy identity. -/
+theorem fourier_energy_split {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (t : Finset ℤ) (α : ι → ℝ) (b : ι → ℂ) :
+    ∑ n ∈ t, ‖∑ r ∈ s, b r * LeanLab.PNTPort.LargeSieve.e (n * α r)‖ ^ 2 =
+      (t.card : ℝ) * ∑ r ∈ s, ‖b r‖ ^ 2 +
+      ∑ r ∈ s, ∑ r' ∈ s.erase r,
+        (b r * (starRingEnd ℂ) (b r') *
+          ∑ n ∈ t, LeanLab.PNTPort.LargeSieve.e (n * (α r - α r'))).re := by
+  classical
+  have hn (n : ℤ) : ‖∑ r ∈ s, b r * LeanLab.PNTPort.LargeSieve.e (n * α r)‖ ^ 2 =
+      ∑ r ∈ s, ∑ r' ∈ s, (b r * (starRingEnd ℂ) (b r') *
+        LeanLab.PNTPort.LargeSieve.e (n * (α r - α r'))).re := by
+    have h := congrArg Complex.re (LeanLab.PNTPort.LargeSieve.normSq_dualSum s α b n)
+    simpa only [LeanLab.PNTPort.LargeSieve.dualSum, Complex.ofReal_re, Complex.re_sum] using h
+  simp_rw [hn]
+  rw [sum_comm]
+  have hr (r : ι) (hr : r ∈ s) :
+      (∑ n ∈ t, ∑ r' ∈ s,
+        (b r * (starRingEnd ℂ) (b r') *
+          LeanLab.PNTPort.LargeSieve.e (n * (α r - α r'))).re) =
+      (t.card : ℝ) * ‖b r‖ ^ 2 + ∑ r' ∈ s.erase r,
+        (b r * (starRingEnd ℂ) (b r') *
+          ∑ n ∈ t, LeanLab.PNTPort.LargeSieve.e (n * (α r - α r'))).re := by
+    rw [sum_comm]
+    rw [← sum_erase_add _ _ hr]
+    simp only [sub_self, mul_zero, LeanLab.PNTPort.LargeSieve.e_zero, mul_one,
+      Complex.mul_conj', ← Complex.ofReal_pow, Complex.ofReal_re, sum_const, nsmul_eq_mul]
+    rw [add_comm]
+    congr 1
+    apply sum_congr rfl
+    intro r' hr'
+    rw [mul_sum, Complex.re_sum]
+  rw [sum_congr rfl hr, sum_add_distrib, mul_sum]
+
+/-- Montgomery and Vaughan 1974 pp.73 to 82. Auxiliary normalization of the circular kernel. -/
+theorem circular_kernel_eq_cosecant (θ : ℝ) :
+    LeanLab.PNTPort.LargeSieve.e (θ / 2) /
+        (LeanLab.PNTPort.LargeSieve.e θ - 1) =
+      1 / (2 * Complex.I * (Real.sin (Real.pi * θ) : ℂ)) := by
+  have hx : LeanLab.PNTPort.LargeSieve.e θ =
+      LeanLab.PNTPort.LargeSieve.e (θ / 2) ^ 2 := by
+    rw [pow_two, ← e_add]
+    congr 1
+    ring
+  have he : LeanLab.PNTPort.LargeSieve.e (θ / 2) ≠ 0 :=
+    Complex.exp_ne_zero _
+  have hs : LeanLab.PNTPort.LargeSieve.e (θ / 2) -
+      (LeanLab.PNTPort.LargeSieve.e (θ / 2))⁻¹ =
+      2 * Complex.I * (Real.sin (Real.pi * θ) : ℂ) := by
+    unfold LeanLab.PNTPort.LargeSieve.e
+    have harg : Complex.I * ((2 * Real.pi * (θ / 2) : ℝ) : ℂ) =
+        (Real.pi * θ : ℂ) * Complex.I := by push_cast; ring
+    simp only [harg]
+    rw [← Complex.exp_neg]
+    rw [show -((Real.pi * θ : ℂ) * Complex.I) =
+      (-((Real.pi * θ : ℂ))) * Complex.I by ring,
+      Complex.exp_mul_I, Complex.exp_mul_I]
+    simp only [Complex.cos_neg, Complex.sin_neg, ← Complex.ofReal_mul, ← Complex.ofReal_sin]
+    ring
+  have hd : LeanLab.PNTPort.LargeSieve.e θ - 1 =
+      LeanLab.PNTPort.LargeSieve.e (θ / 2) *
+        (2 * Complex.I * (Real.sin (Real.pi * θ) : ℂ)) := by
+    rw [← hs, mul_sub, mul_inv_cancel₀ he, ← pow_two, ← hx]
+  rw [hd, div_mul_eq_div_div, div_self he]
+
+/-- Gallagher 1975 p.131. Auxiliary absolute bound for the normalized circular kernel. -/
+theorem circular_kernel_norm_le {θ δ : ℝ} (hδ : 0 < δ) (hθ : δ ≤ dist0 θ) :
+    ‖LeanLab.PNTPort.LargeSieve.e (θ / 2) /
+      (LeanLab.PNTPort.LargeSieve.e θ - 1)‖ ≤ 1 / (4 * δ) := by
+  rw [norm_div, norm_e]
+  apply one_div_le_one_div_of_le (by positivity)
+  exact (mul_le_mul_of_nonneg_left hθ (by norm_num)).trans
+    (LeanLab.PNTPort.LargeSieve.four_dist0_le θ)
+
+
+/-- Gallagher 1975 p.131. The circular Hilbert constant for at most three spaced points
+follows from the absolute kernel estimate and the proved symmetric Schur inequality. -/
+theorem circular_hilbert_small_family {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (α : ι → ℝ) {δ : ℝ} (hδ : 0 < δ)
+    (hs : LeanLab.PNTPort.LargeSieve.Spaced s α δ) (hcard : s.card ≤ 3) (b : ι → ℂ) :
+    ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') *
+        (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+          (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))‖ ≤
+      (1 / (2 * δ)) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
+  classical
+  let K : ι → ι → ℝ := fun r r' => if r = r' then 0 else 1 / (4 * δ)
+  have hK0 : ∀ r r', 0 ≤ K r r' := by intro r r'; dsimp [K]; split_ifs <;> positivity
+  have hKsym : ∀ r r', K r r' = K r' r := by
+    intro r r'
+    simp only [K]
+    split_ifs <;> simp_all
+  have hrow (r : ι) (hr : r ∈ s) : ∑ r' ∈ s, K r r' ≤ 1 / (2 * δ) := by
+    rw [← sum_erase_add _ _ hr]
+    have he : ∑ r' ∈ s.erase r, K r r' = ((s.erase r).card : ℝ) * (1 / (4 * δ)) := by
+      calc
+        _ = ∑ _r' ∈ s.erase r, (1 / (4 * δ)) := by
+          apply sum_congr rfl
+          intro r' hr'
+          exact if_neg (mem_erase.mp hr').1.symm
+        _ = _ := by simp
+    rw [he]
+    simp only [K, if_pos rfl, add_zero]
+    have hc : ((s.erase r).card : ℝ) ≤ 2 := by
+      have hh := card_erase_of_mem hr
+      exact_mod_cast (by omega : (s.erase r).card ≤ 2)
+    calc
+      _ ≤ 2 * (1 / (4 * δ)) := mul_le_mul_of_nonneg_right hc (by positivity)
+      _ = _ := by ring
+  have hnorm : ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') *
+        (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+          (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))‖ ≤
+      ∑ r ∈ s, ∑ r' ∈ s, ‖b r‖ * ‖b r'‖ * K r r' := by
+    apply (norm_sum_le _ _).trans
+    apply sum_le_sum
+    intro r hr
+    apply (norm_sum_le _ _).trans
+    have heq : (∑ r' ∈ s, ‖b r‖ * ‖b r'‖ * K r r') =
+        ∑ r' ∈ s.erase r, ‖b r‖ * ‖b r'‖ * K r r' := by
+      rw [← sum_erase_add _ _ hr]
+      simp [K]
+    rw [heq]
+    apply sum_le_sum
+    intro r' hr'
+    rw [norm_mul, norm_mul, Complex.norm_conj]
+    apply mul_le_mul_of_nonneg_left _ (by positivity)
+    change _ ≤ if r = r' then 0 else 1 / (4 * δ)
+    rw [if_neg (mem_erase.mp hr').1.symm]
+    exact circular_kernel_norm_le hδ (hs r hr r' (mem_erase.mp hr').2 (mem_erase.mp hr').1.symm)
+  calc
+    _ ≤ _ := hnorm
+    _ ≤ ∑ r ∈ s, ‖b r‖ ^ 2 * ∑ r' ∈ s, K r r' :=
+      LeanLab.PNTPort.LargeSieve.sum_sum_mul_le s (fun r => ‖b r‖) K hK0 hKsym
+    _ ≤ ∑ r ∈ s, ‖b r‖ ^ 2 * (1 / (2 * δ)) :=
+      sum_le_sum (fun r hr => mul_le_mul_of_nonneg_left (hrow r hr) (sq_nonneg _))
+    _ = _ := by rw [← sum_mul, mul_comm]
+
+/-- Gallagher 1975 p.131. Auxiliary endpoint form of the finite geometric kernel. -/
+theorem geometric_kernel_endpoints (M : ℤ) (N : ℕ) {θ : ℝ}
+    (hθ : 0 < dist0 θ) :
+    ∑ n ∈ Ioc M (M + N), LeanLab.PNTPort.LargeSieve.e (n * θ) =
+      (LeanLab.PNTPort.LargeSieve.e (((M : ℝ) + N + 1 / 2) * θ) -
+        LeanLab.PNTPort.LargeSieve.e (((M : ℝ) + 1 / 2) * θ)) *
+        (LeanLab.PNTPort.LargeSieve.e (θ / 2) /
+          (LeanLab.PNTPort.LargeSieve.e θ - 1)) := by
+  have hpos : 0 < ‖LeanLab.PNTPort.LargeSieve.e θ - 1‖ :=
+    lt_of_lt_of_le (by linarith) (LeanLab.PNTPort.LargeSieve.four_dist0_le θ)
+  have hne : LeanLab.PNTPort.LargeSieve.e θ ≠ 1 := by
+    intro h
+    simp [h] at hpos
+  have hk : (∑ n ∈ Ioc M (M + N), LeanLab.PNTPort.LargeSieve.e (n * θ)) =
+      LeanLab.PNTPort.LargeSieve.e (((M : ℝ) + 1) * θ) *
+        ∑ k ∈ range N, LeanLab.PNTPort.LargeSieve.e (k * θ) := by
+    rw [Int.Ioc_eq_finset_map, sum_map]
+    simp only [add_sub_cancel_left, Int.toNat_natCast, Function.Embedding.trans_apply,
+      Nat.castEmbedding_apply, addLeftEmbedding_apply]
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro k hk
+    rw [← e_add]
+    congr 1
+    push_cast
+    ring
+  have he1 : LeanLab.PNTPort.LargeSieve.e (((M : ℝ) + N + 1 / 2) * θ) *
+        LeanLab.PNTPort.LargeSieve.e (θ / 2) =
+      LeanLab.PNTPort.LargeSieve.e (((M : ℝ) + 1) * θ) *
+        LeanLab.PNTPort.LargeSieve.e (N * θ) := by
+    rw [← e_add, ← e_add]
+    congr 1
+    ring
+  have he0 : LeanLab.PNTPort.LargeSieve.e (((M : ℝ) + 1 / 2) * θ) *
+        LeanLab.PNTPort.LargeSieve.e (θ / 2) =
+      LeanLab.PNTPort.LargeSieve.e (((M : ℝ) + 1) * θ) := by
+    rw [← e_add]
+    congr 1
+    ring
+  rw [hk]
+  simp_rw [LeanLab.PNTPort.LargeSieve.e_nat_mul]
+  rw [geom_sum_eq hne]
+  simp only [← mul_div_assoc, sub_mul, mul_sub, mul_one]
+  rw [← LeanLab.PNTPort.LargeSieve.e_nat_mul, he1, he0]
+
+/-- Gallagher 1975 p.131. The circular Hilbert bound controls both endpoints of the
+geometric kernel. CONDITIONAL ON the supplied circular Hilbert bound. -/
+theorem offdiagonal_bound_of_hilbert {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (α : ι → ℝ) {δ : ℝ} (hδ : 0 < δ)
+    (hs : LeanLab.PNTPort.LargeSieve.Spaced s α δ)
+    (hh : ∀ v : ι → ℂ,
+      ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+        v r * (starRingEnd ℂ) (v r') *
+          (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+            (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))‖ ≤
+        (1 / (2 * δ)) * ∑ r ∈ s, ‖v r‖ ^ 2)
+    (b : ι → ℂ) (M : ℤ) (N : ℕ) :
+    ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') *
+        ∑ n ∈ Ioc M (M + N),
+          LeanLab.PNTPort.LargeSieve.e (n * (α r - α r'))‖ ≤
+      (1 / δ) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
+  classical
+  let H : (ι → ℂ) → ℂ := fun v => ∑ r ∈ s, ∑ r' ∈ s.erase r,
+    v r * (starRingEnd ℂ) (v r') *
+      (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+        (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))
+  let v : ℝ → ι → ℂ := fun u r => b r * LeanLab.PNTPort.LargeSieve.e (u * α r)
+  have hphase (u : ℝ) (r r' : ι) :
+      v u r * (starRingEnd ℂ) (v u r') = b r * (starRingEnd ℂ) (b r') *
+        LeanLab.PNTPort.LargeSieve.e (u * (α r - α r')) := by
+    simp only [v, map_mul, ← LeanLab.PNTPort.LargeSieve.e_neg]
+    rw [show u * (α r - α r') = u * α r + -(u * α r') by ring, e_add]
+    ring
+  have henergy (u : ℝ) : ∑ r ∈ s, ‖v u r‖ ^ 2 = ∑ r ∈ s, ‖b r‖ ^ 2 := by
+    simp only [v, norm_mul, norm_e, mul_one]
+  have hH (u : ℝ) : ‖H (v u)‖ ≤ (1 / (2 * δ)) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
+    simpa only [henergy] using hh (v u)
+  have heq : (∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') *
+        ∑ n ∈ Ioc M (M + N), LeanLab.PNTPort.LargeSieve.e (n * (α r - α r'))) =
+      H (v ((M : ℝ) + N + 1 / 2)) - H (v ((M : ℝ) + 1 / 2)) := by
+    simp only [H, ← sum_sub_distrib]
+    apply sum_congr rfl
+    intro r hr
+    apply sum_congr rfl
+    intro r' hr'
+    have hθ : 0 < dist0 (α r - α r') :=
+      hδ.trans_le (hs r hr r' (mem_erase.mp hr').2 (mem_erase.mp hr').1.symm)
+    rw [geometric_kernel_endpoints M N hθ, hphase, hphase]
+    ring
+  rw [heq]
+  calc
+    _ ≤ ‖H (v ((M : ℝ) + N + 1 / 2))‖ + ‖H (v ((M : ℝ) + 1 / 2))‖ := norm_sub_le _ _
+    _ ≤ (1 / (2 * δ)) * (∑ r ∈ s, ‖b r‖ ^ 2) +
+        (1 / (2 * δ)) * (∑ r ∈ s, ‖b r‖ ^ 2) := add_le_add (hH _) (hH _)
+    _ = _ := by ring
+
+/-- Montgomery and Vaughan 1974 pp.73 to 82. The classical cosecant estimate gives the
+normalized circular estimate with its exact factor one half. CONDITIONAL ON the supplied
+cosecant estimate. Gallagher 1975 p.131 uses the resulting sampling bound. -/
+theorem circular_hilbert_of_cosecant {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (α : ι → ℝ) {δ : ℝ} (hδ : 0 < δ) (b : ι → ℂ)
+    (hh : ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+        b r * (starRingEnd ℂ) (b r') /
+          (Real.sin (Real.pi * (α r - α r')) : ℂ)‖ ≤
+        (1 / δ) * ∑ r ∈ s, ‖b r‖ ^ 2) :
+    ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') *
+        (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+          (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))‖ ≤
+      (1 / (2 * δ)) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
+  have he : (∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') *
+        (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+          (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))) =
+      (1 / (2 * Complex.I)) * ∑ r ∈ s, ∑ r' ∈ s.erase r,
+        b r * (starRingEnd ℂ) (b r') /
+          (Real.sin (Real.pi * (α r - α r')) : ℂ) := by
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro r hr
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro r' hr'
+    rw [circular_kernel_eq_cosecant]
+    simp only [div_eq_mul_inv, mul_inv_rev]
+    ring
+  have hc : ‖(1 : ℂ) / (2 * Complex.I)‖ = 1 / 2 := by
+    norm_num [norm_div, norm_mul]
+  rw [he, norm_mul, hc]
+  calc
+    _ ≤ (1 / 2) * ((1 / δ) * ∑ r ∈ s, ‖b r‖ ^ 2) :=
+      mul_le_mul_of_nonneg_left hh (by norm_num)
+    _ = _ := by ring
+
+/-- Gallagher 1975 p.131. Exact finite duality preserves the sharp constant.
+CONDITIONAL ON the supplied circular Hilbert bound. -/
+theorem spaced_sampling_of_hilbert {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (α : ι → ℝ) {δ : ℝ} (hδ : 0 < δ)
+    (hs : LeanLab.PNTPort.LargeSieve.Spaced s α δ)
+    (hh : ∀ v : ι → ℂ,
+      ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+        v r * (starRingEnd ℂ) (v r') *
+          (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+            (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))‖ ≤
+        (1 / (2 * δ)) * ∑ r ∈ s, ‖v r‖ ^ 2)
+    (a : ℤ → ℂ) (M : ℤ) (N : ℕ) :
+    ∑ r ∈ s, ‖∑ n ∈ Ioc M (M + N), a n * LeanLab.PNTPort.LargeSieve.e (n * α r)‖ ^ 2 ≤
+      ((N : ℝ) + 1 / δ) * ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by
+  apply LeanLab.RieselVaughan1983.LargeSieveSchur.primal_of_dual (by positivity) M N
+  intro b
+  change (∑ n ∈ Ioc M (M + N),
+    ‖∑ r ∈ s, b r * LeanLab.PNTPort.LargeSieve.e (n * α r)‖ ^ 2) ≤ _
+  rw [fourier_energy_split]
+  have hcard : (Ioc M (M + (N : ℤ))).card = N :=
+    LeanLab.RieselVaughan1983.LargeSieveSchur.card_Ioc_eq M N
+  rw [hcard]
+  have hre : (∑ r ∈ s, ∑ r' ∈ s.erase r,
+      (b r * (starRingEnd ℂ) (b r') *
+        ∑ n ∈ Ioc M (M + N), LeanLab.PNTPort.LargeSieve.e (n * (α r - α r'))).re) ≤
+      (1 / δ) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
+    simpa only [Complex.re_sum] using
+      (Complex.re_le_norm _).trans (offdiagonal_bound_of_hilbert s α hδ hs hh b M N)
+  calc
+    _ ≤ (N : ℝ) * (∑ r ∈ s, ‖b r‖ ^ 2) + (1 / δ) * ∑ r ∈ s, ‖b r‖ ^ 2 :=
+      add_le_add le_rfl hre
+    _ = _ := by ring
+
+/-- Gallagher 1975 p.131. Farey spacing turns the sharp dual constant into N plus Q squared.
+CONDITIONAL ON the supplied circular Hilbert bound at the reduced fractions. -/
+theorem farey_sampling_of_hilbert (a : ℕ → ℂ) (M N Q : ℕ)
+    (hh : ∀ b : ℕ × ℕ → ℂ,
+      ‖∑ r ∈ LeanLab.PNTPort.LargeSieve.farey Q,
+        ∑ r' ∈ (LeanLab.PNTPort.LargeSieve.farey Q).erase r,
+          b r * (starRingEnd ℂ) (b r') *
+            (LeanLab.PNTPort.LargeSieve.e
+                ((LeanLab.PNTPort.LargeSieve.fareyPt r - LeanLab.PNTPort.LargeSieve.fareyPt r') / 2) /
+              (LeanLab.PNTPort.LargeSieve.e
+                (LeanLab.PNTPort.LargeSieve.fareyPt r - LeanLab.PNTPort.LargeSieve.fareyPt r') - 1))‖ ≤
+        (1 / (2 * (1 / (Q : ℝ) ^ 2))) *
+          ∑ r ∈ LeanLab.PNTPort.LargeSieve.farey Q, ‖b r‖ ^ 2) :
+    ∑ q ∈ Icc 1 Q, ∑ c ∈ (range q).filter (fun c => Nat.Coprime c q),
+      ‖∑ n ∈ Ioc M (M + N), a n * LeanLab.PNTPort.LargeSieve.e (n * ((c : ℝ) / q))‖ ^ 2 ≤
+      ((N : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by
+  classical
+  by_cases hQ : Q = 0
+  · subst Q
+    simp only [show Icc 1 (0 : ℕ) = ∅ by decide, sum_empty,
+      Nat.cast_zero, zero_pow, add_zero]
+    positivity
+  have hQpos : (0 : ℝ) < Q := by exact_mod_cast Nat.pos_of_ne_zero hQ
+  let emb : ℕ ↪ ℤ := ⟨Int.ofNat, Int.ofNat_injective⟩
+  have hI : Ioc (M : ℤ) ((M : ℤ) + N) = (Ioc M (M + N)).map emb := by
+    ext z
+    simp only [Finset.mem_Ioc, Finset.mem_map, emb, Function.Embedding.coeFn_mk, Int.ofNat_eq_natCast]
+    constructor
+    · rintro ⟨hz1, hz2⟩
+      refine ⟨z.toNat, ⟨?_, ?_⟩, ?_⟩ <;> omega
+    · rintro ⟨n, ⟨hn1, hn2⟩, rfl⟩
+      constructor <;> omega
+  have hδ : (0 : ℝ) < 1 / (Q : ℝ) ^ 2 := by positivity
+  have hbound := spaced_sampling_of_hilbert
+    (LeanLab.PNTPort.LargeSieve.farey Q) LeanLab.PNTPort.LargeSieve.fareyPt
+    hδ (LeanLab.PNTPort.LargeSieve.farey_spaced Q)
+    hh
+    (fun z : ℤ => a z.toNat) (M : ℤ) N
+  rw [hI] at hbound
+  simp only [sum_map, emb, Function.Embedding.coeFn_mk,
+    Int.ofNat_eq_natCast, Int.toNat_natCast, Int.cast_natCast] at hbound
+  have hconst : (1 : ℝ) / (1 / (Q : ℝ) ^ 2) = (Q : ℝ) ^ 2 := by simp
+  rw [hconst] at hbound
+  rw [LeanLab.PNTPort.LargeSieve.farey_sum_eq] at hbound
+  simpa only [LeanLab.PNTPort.LargeSieve.U, LeanLab.PNTPort.LargeSieve.fareyPt,
+    Nat.coprime_comm] using hbound
+
+/-- LEAF. Montgomery and Vaughan, Hilbert's inequality, 1974 pp.73 to 82.
+The classical circular cosecant inequality for separated points is the remaining input.
+The family size is at least four because smaller families are proved by the Schur estimate.
+The quotient normalization, geometric endpoints, duality and Farey constant are separate.
+This supplies the sharp sampling input behind Gallagher 1975 p.131 display 14. -/
+theorem cosecant_hilbert_large_family {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (α : ι → ℝ) {δ : ℝ} (hδ : 0 < δ)
+    (hs : LeanLab.PNTPort.LargeSieve.Spaced s α δ) (hcard : 4 ≤ s.card) (b : ι → ℂ) :
+    ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') /
+        (Real.sin (Real.pi * (α r - α r')) : ℂ)‖ ≤
+      (1 / δ) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
+  sorry
+
+/-- Gallagher 1975 p.131. The circular Hilbert bound is proved for small families and is
+CONDITIONAL ON cosecant_hilbert_large_family for every larger family. -/
+theorem circular_hilbert_sharp {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (α : ι → ℝ) {δ : ℝ} (hδ : 0 < δ)
+    (hs : LeanLab.PNTPort.LargeSieve.Spaced s α δ) (b : ι → ℂ) :
+    ‖∑ r ∈ s, ∑ r' ∈ s.erase r,
+      b r * (starRingEnd ℂ) (b r') *
+        (LeanLab.PNTPort.LargeSieve.e ((α r - α r') / 2) /
+          (LeanLab.PNTPort.LargeSieve.e (α r - α r') - 1))‖ ≤
+      (1 / (2 * δ)) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
+  by_cases hc : s.card ≤ 3
+  · exact circular_hilbert_small_family s α hδ hs hc b
+  · exact circular_hilbert_of_cosecant s α hδ b
+      (cosecant_hilbert_large_family s α hδ hs (by omega) b)
+
 /-- LEAF. Montgomery 1971, Topics in multiplicative number theory, sharp additive large sieve.
 Gallagher 1975 p.131, the input behind display 14. Only the sharp Fourier sampling bound
 remains here. Primitive character orthogonality is proved separately. -/
@@ -801,7 +1187,17 @@ theorem additive_large_sieve_sharp (a : ℕ → ℂ) (M N Q : ℕ) :
     ∑ q ∈ Icc 1 Q, ∑ c ∈ (range q).filter (fun c => Nat.Coprime c q),
       ‖∑ n ∈ Ioc M (M + N), a n * LeanLab.PNTPort.LargeSieve.e (n * ((c : ℝ) / q))‖ ^ 2 ≤
       ((N : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by
-  sorry
+  classical
+  apply farey_sampling_of_hilbert a M N Q
+  intro b
+  by_cases hQ : Q = 0
+  · subst Q
+    simp [LeanLab.PNTPort.LargeSieve.farey]
+  have hQpos : (0 : ℝ) < Q := by exact_mod_cast Nat.pos_of_ne_zero hQ
+  have hδ : (0 : ℝ) < 1 / (Q : ℝ) ^ 2 := by positivity
+  exact circular_hilbert_sharp (LeanLab.PNTPort.LargeSieve.farey Q)
+    LeanLab.PNTPort.LargeSieve.fareyPt hδ
+    (LeanLab.PNTPort.LargeSieve.farey_spaced Q) b
 
 /-- LEAF. Unit U-1532. The multiplicative large sieve over primitive characters,
 `Σ_{q ≤ Q} q/φ(q) Σ*_χ |Σ_{M < n ≤ M+N} a_n χ(n)|² ≤ (N + Q²) Σ |a_n|²`, the input behind the
@@ -3073,6 +3469,207 @@ theorem density_sum_in_page_strip : ∃ b : ℝ, 0 < b ∧ ∀ T : ℝ, 2 ≤ T 
     _ = (I.card : ℝ) := by simp
     _ ≤ 1 := by exact_mod_cast hI
 
+/-- Gallagher 1975 p.131. Auxiliary total count from the proved unit height estimate.
+The constant is uniform in the primitive character, real part and height. -/
+theorem zeroCount_le_unit_height : ∃ A : ℝ, 0 ≤ A ∧
+    ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q), χ.IsPrimitive →
+    ∀ σ T : ℝ, 1 / 2 ≤ σ → 0 ≤ T →
+      (zeroCount χ σ T : ℝ) ≤ (⌊T⌋₊ + 1 : ℕ) * A * Real.log (q * (T + 2)) := by
+  obtain ⟨A, hA, huall⟩ := LeanLab.HardyLittlewood1923.U1482.zeroCountUnit
+  refine ⟨A, hA, fun q _ χ hp σ T hσ hT => ?_⟩
+  have hu := huall q χ hp
+  classical
+  let W : ℕ → Finset ℂ := fun j => (hu j (Nat.cast_nonneg _)).1.toFinset
+  have hψ : q = 1 ∨ χ ≠ 1 := by
+    by_cases hq : q = 1
+    · exact Or.inl hq
+    · right
+      intro hχ
+      apply hq
+      have hh := hp
+      rw [DirichletCharacter.isPrimitive_def, hχ, DirichletCharacter.conductor_one] at hh
+      exact hh.symm
+  have hnt {ρ : ℂ} (hz : χ.LFunction ρ = 0) (hβ : σ ≤ ρ.re) :
+      LeanLab.HardyLittlewood1923.U1479.IsNTZero χ ρ := by
+    refine ⟨hz, by linarith, ?_⟩
+    by_contra h
+    have hre : 1 ≤ ρ.re := le_of_not_gt h
+    rcases hψ with rfl | hχ
+    · rw [DirichletCharacter.LFunction_modOne_eq] at hz
+      exact riemannZeta_ne_zero_of_one_le_re hre hz
+    · exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ) hre hz
+  have horder {ρ : ℂ} (hρ : LeanLab.HardyLittlewood1923.U1479.IsNTZero χ ρ) :
+      1 ≤ LeanLab.HardyLittlewood1923.U1479.mult χ ρ := by
+    have hw : ρ ≠ 1 := by
+      intro he
+      have hh := hρ.2.2
+      simp [he] at hh
+    have hz : analyticOrderNatAt χ.LFunction ρ ≠ 0 := by
+      simp only [analyticOrderNatAt, ne_eq, ENat.toNat_eq_zero, not_or]
+      exact ⟨(LeanLab.HardyLittlewood1923.U1482.L_analyticAt χ hw).analyticOrderAt_ne_zero.mpr hρ.1,
+        LeanLab.HardyLittlewood1923.U1482.L_ord_ne_top χ hψ hw⟩
+    change (1 : ℝ) ≤ (analyticOrderNatAt χ.LFunction ρ : ℝ)
+    exact_mod_cast Nat.one_le_iff_ne_zero.mpr hz
+  have hcard (j : ℕ) : ((W j).card : ℝ) ≤ A * Real.log (q * ((j : ℝ) + 2)) := by
+    have hmem (ρ : ℂ) (hρ : ρ ∈ W j) :
+        LeanLab.HardyLittlewood1923.U1479.IsNTZero χ ρ ∧
+          (j : ℝ) ≤ |ρ.im| ∧ |ρ.im| ≤ (j : ℝ) + 1 := by
+      simpa only [W, Set.Finite.mem_toFinset, Set.mem_setOf_eq] using hρ
+    calc
+      _ = ∑ _ρ ∈ W j, (1 : ℝ) := by simp
+      _ ≤ ∑ ρ ∈ W j, LeanLab.HardyLittlewood1923.U1479.mult χ ρ :=
+        sum_le_sum (fun ρ hρ => horder (hmem ρ hρ).1)
+      _ ≤ _ := (hu j (Nat.cast_nonneg _)).2 (W j) hmem
+  let U : Finset ℂ := (range (⌊T⌋₊ + 1)).biUnion W
+  have hsub : {ρ : ℂ | χ.LFunction ρ = 0 ∧ σ ≤ ρ.re ∧ |ρ.im| ≤ T} ⊆ (U : Set ℂ) := by
+    intro ρ hρ
+    have hj : ⌊|ρ.im|⌋₊ < ⌊T⌋₊ + 1 := by
+      have := Nat.floor_mono hρ.2.2
+      omega
+    apply mem_biUnion.mpr
+    refine ⟨⌊|ρ.im|⌋₊, mem_range.mpr hj, ?_⟩
+    simp only [W, Set.Finite.mem_toFinset]
+    exact ⟨hnt hρ.1 hρ.2.1, Nat.floor_le (abs_nonneg _), (Nat.lt_floor_add_one _).le⟩
+  have hc : zeroCount χ σ T ≤ U.card := by
+    simpa only [zeroCount, Set.ncard_coe_finset] using Set.ncard_le_ncard hsub U.finite_toSet
+  calc
+    _ ≤ (U.card : ℝ) := by exact_mod_cast hc
+    _ ≤ ∑ j ∈ range (⌊T⌋₊ + 1), ((W j).card : ℝ) := by
+      exact_mod_cast card_biUnion_le
+    _ ≤ ∑ j ∈ range (⌊T⌋₊ + 1), A * Real.log (q * (T + 2)) := by
+      apply sum_le_sum
+      intro j hj
+      have hjT : (j : ℝ) ≤ T :=
+        (show (j : ℝ) ≤ ⌊T⌋₊ by exact_mod_cast (by have := mem_range.mp hj; omega : j ≤ ⌊T⌋₊)).trans
+          (Nat.floor_le hT)
+      apply (hcard j).trans
+      apply mul_le_mul_of_nonneg_left _ hA
+      apply Real.log_le_log (mul_pos (by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)) (by positivity))
+      exact mul_le_mul_of_nonneg_left (by linarith) (Nat.cast_nonneg _)
+    _ = _ := by simp; ring
+
+/-- Gallagher 1975 p.131. Auxiliary polynomial bound for the whole primitive family.
+This uses the proved unit height count and no density estimate. -/
+theorem density_sum_polynomial : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ σ : ℝ, 1 / 2 ≤ σ →
+    ∑ q ∈ range ⌊T⌋₊,
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ σ T : ℝ) ≤ C * T ^ (4 : ℕ) := by
+  classical
+  obtain ⟨A, hA, hu⟩ := zeroCount_le_unit_height
+  refine ⟨4 * A, by positivity, fun T hT σ hσ => ?_⟩
+  have hT0 : 0 ≤ T := by linarith
+  have hTpos : 0 < T := by linarith
+  have hK : ((⌊T⌋₊ + 1 : ℕ) : ℝ) ≤ 2 * T := by
+    have := Nat.floor_le hT0
+    push_cast
+    linarith
+  have hsingle (q : ℕ) (hq : q ∈ range ⌊T⌋₊)
+      (χ : DirichletCharacter ℂ (q + 1)) (hp : χ.IsPrimitive) :
+      (zeroCount χ σ T : ℝ) ≤ 4 * A * T ^ 2 := by
+    have hqT : ((q + 1 : ℕ) : ℝ) ≤ T := by
+      have hn : q + 1 ≤ ⌊T⌋₊ := by have := mem_range.mp hq; omega
+      exact (show ((q + 1 : ℕ) : ℝ) ≤ ⌊T⌋₊ by exact_mod_cast hn).trans (Nat.floor_le hT0)
+    have hlog : Real.log ((q + 1 : ℕ) * (T + 2)) ≤ 2 * T := by
+      calc
+        _ ≤ Real.log (T * (T + 2)) :=
+          Real.log_le_log (by positivity) (mul_le_mul_of_nonneg_right hqT (by positivity))
+        _ = Real.log T + Real.log (T + 2) :=
+          Real.log_mul hTpos.ne' (by positivity)
+        _ ≤ (T - 1) + (T + 2 - 1) := add_le_add
+          (Real.log_le_sub_one_of_pos hTpos) (Real.log_le_sub_one_of_pos (by positivity))
+        _ = 2 * T := by ring
+    have hlog0 : 0 ≤ Real.log ((q + 1 : ℕ) * (T + 2)) := by
+      apply Real.log_nonneg
+      have hq1 : (1 : ℝ) ≤ (q + 1 : ℕ) := by exact_mod_cast (by omega : 1 ≤ q + 1)
+      have hmul := mul_le_mul_of_nonneg_right hq1 (show 0 ≤ T + 2 by linarith)
+      nlinarith
+    calc
+      _ ≤ ((⌊T⌋₊ + 1 : ℕ) : ℝ) * A * Real.log ((q + 1 : ℕ) * (T + 2)) :=
+        hu (q + 1) χ hp σ T hσ hT0
+      _ ≤ (2 * T) * A * (2 * T) :=
+        mul_le_mul (mul_le_mul_of_nonneg_right hK hA) hlog hlog0 (by positivity)
+      _ = _ := by ring
+  have hfamily (q : ℕ) (hq : q ∈ range ⌊T⌋₊) :
+      (∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ σ T : ℝ)) ≤ T * (4 * A * T ^ 2) := by
+    let S := (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive)
+    have hcard : (S.card : ℝ) ≤ T := by
+      have hc : S.card ≤ (q + 1).totient := by
+        calc
+          S.card ≤ Fintype.card (DirichletCharacter ℂ (q + 1)) := card_le_univ _
+          _ = (q + 1).totient := by
+            rw [← Nat.card_eq_fintype_card,
+              DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity]
+      have hn : q + 1 ≤ ⌊T⌋₊ := by have := mem_range.mp hq; omega
+      exact (show (S.card : ℝ) ≤ ⌊T⌋₊ by
+        exact_mod_cast hc.trans ((Nat.totient_le _).trans hn)).trans (Nat.floor_le hT0)
+    calc
+      _ ≤ ∑ _χ ∈ S, (4 * A * T ^ 2) :=
+        sum_le_sum (fun χ hχ => hsingle q hq χ (mem_filter.mp hχ).2)
+      _ = (S.card : ℝ) * (4 * A * T ^ 2) := by simp
+      _ ≤ _ := mul_le_mul_of_nonneg_right hcard (by positivity)
+  calc
+    _ ≤ ∑ _q ∈ range ⌊T⌋₊, T * (4 * A * T ^ 2) := sum_le_sum hfamily
+    _ = (⌊T⌋₊ : ℝ) * (T * (4 * A * T ^ 2)) := by simp
+    _ ≤ T * (T * (4 * A * T ^ 2)) :=
+      mul_le_mul_of_nonneg_right (Nat.floor_le hT0) (by positivity)
+    _ = _ := by ring
+
+
+/-- Gallagher 1975 p.131. The region at most three quarters needs no density theorem. -/
+theorem density_sum_away_from_one : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ σ : ℝ, 1 / 2 ≤ σ → σ ≤ 3 / 4 →
+    ∑ q ∈ range ⌊T⌋₊,
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ σ T : ℝ) ≤ C * T ^ (16 * (1 - σ)) := by
+  obtain ⟨C, hC, h⟩ := density_sum_polynomial
+  refine ⟨C, hC, fun T hT σ hσ hσ' => (h T hT σ hσ).trans ?_⟩
+  apply mul_le_mul_of_nonneg_left _ hC
+  rw [← Real.rpow_natCast]
+  exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num at *; linarith)
+
+/-- LEAF. Gallagher 1970, A large sieve density estimate near sigma equals one,
+Inventiones 11 pp.329 to 339, Theorem 6. Montgomery and Vaughan 1975 p.366 Section 7.
+Gallagher 1975 p.131 display 14. The polynomial range at most three quarters and the
+fixed Page strip are proved separately. Only the intervening band remains. -/
+theorem gallagher_density_transition : ∀ b : ℝ, 0 < b → ∃ c C : ℝ, 0 < c ∧ 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ σ : ℝ, 3 / 4 < σ → σ < 1 - b / Real.log T →
+    ∑ q ∈ range ⌊T⌋₊,
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ σ T : ℝ) ≤ C * T ^ (c * (1 - σ)) := by
+  sorry
+
+/-- Gallagher 1975 p.131. Auxiliary obstruction to removing a logarithmic density loss
+uniformly in the band below a Page strip. This is not a counterexample to the density theorem. -/
+theorem logarithmic_loss_not_uniformly_absorbable (b : ℝ) (hb : 0 < b) (c C : ℝ) :
+    ∃ T σ : ℝ, 2 ≤ T ∧ 3 / 4 < σ ∧ σ < 1 - b / Real.log T ∧
+      C * T ^ (c * (1 - σ)) < Real.log T := by
+  let x : ℝ := max (max (Real.log 2 + 1) (8 * b + 1))
+    (C * Real.exp (2 * b * c) + 1)
+  have hxlog : Real.log 2 + 1 ≤ x :=
+    (le_max_left _ _).trans (le_max_left _ _)
+  have hxb : 8 * b + 1 ≤ x :=
+    (le_max_right _ _).trans (le_max_left _ _)
+  have hxC : C * Real.exp (2 * b * c) + 1 ≤ x := le_max_right _ _
+  have hx : 0 < x := by linarith
+  have hxne : x ≠ 0 := hx.ne'
+  have hbdiv : 0 < b / x := div_pos hb hx
+  refine ⟨Real.exp x, 1 - 2 * b / x, ?_, ?_, ?_, ?_⟩
+  · calc
+      2 = Real.exp (Real.log 2) := (Real.exp_log (by norm_num)).symm
+      _ ≤ Real.exp x := Real.exp_le_exp.mpr (by linarith)
+  · have hsmall : 2 * b / x < 1 / 4 := (div_lt_iff₀ hx).mpr (by nlinarith)
+    linarith
+  · rw [Real.log_exp, mul_div_assoc]
+    linarith
+  · rw [Real.log_exp, Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp]
+    have he : x * (c * (1 - (1 - 2 * b / x))) = 2 * b * c := by
+      field_simp
+      ring
+    rw [he]
+    linarith
+
 /-- LEAF. Gallagher 1970, A large sieve density estimate near sigma equals one,
 Inventiones 11 pp.329 to 339. Montgomery and Vaughan 1975 Section 7.
 Gallagher 1975 p.131 display 14. The primitive family count inside a fixed Page strip
@@ -3082,7 +3679,26 @@ theorem gallagher_density_away_from_one : ∀ b : ℝ, 0 < b → ∃ c C : ℝ, 
     ∑ q ∈ range ⌊T⌋₊,
       ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
         (zeroCount χ σ T : ℝ) ≤ C * T ^ (c * (1 - σ)) := by
-  sorry
+  intro b hb
+  obtain ⟨c, C, hc, hC, h⟩ := gallagher_density_transition b hb
+  obtain ⟨D, hD, haway⟩ := density_sum_away_from_one
+  refine ⟨max c 16, max C D, lt_max_of_lt_left hc,
+    hC.trans (le_max_left _ _), fun T hT σ hσ hσb => ?_⟩
+  have hσ1 : σ < 1 := by
+    have hl : 0 < Real.log T := Real.log_pos (by linarith)
+    have := div_pos hb hl
+    linarith
+  have hp (d : ℝ) (hd : d ≤ max c 16) :
+      T ^ (d * (1 - σ)) ≤ T ^ (max c 16 * (1 - σ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by linarith)
+      (mul_le_mul_of_nonneg_right hd (by linarith))
+  by_cases hs : σ ≤ 3 / 4
+  · exact (haway T hT σ hσ hs).trans
+      (mul_le_mul (le_max_right C D) (hp 16 (le_max_right c 16)) (by positivity)
+        (hD.trans (le_max_right _ _)))
+  · exact (h T hT σ (lt_of_not_ge hs) hσb).trans
+      (mul_le_mul (le_max_left C D) (hp c (le_max_left c 16)) (by positivity)
+        (hC.trans (le_max_left _ _)))
 
 /-- LEAF. Gallagher 1970, A large sieve density estimate near sigma equals one,
 Inventiones 11 pp.329 to 339. Montgomery and Vaughan 1975 Section 7.

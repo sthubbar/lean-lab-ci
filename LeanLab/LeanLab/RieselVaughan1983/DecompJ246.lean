@@ -1,8 +1,9 @@
 /-
 AI wrote the Lean code. Binary Goldbach is OPEN.
 Task163 isolates the elementary steps of Lemma 6 i on pages 56 and 57.
-The two external analytic leaves remain open. The large-x integral leaf now depends
-on the theta leaf. No unconditional proof of a cited theta input is claimed.
+Task202 isolates two cited analytic source leaves. Both remain open.
+The original theta and prime-counting leaves are conditional assemblies.
+No unconditional proof of a cited theta input is claimed.
 -/
 import LeanLab.RieselVaughan1983.Lemma8
 import LeanLab.RieselVaughan1983.Lemma6Theta
@@ -353,18 +354,198 @@ theorem lemma6i_of_theta_and_rs
 
 end Task163
 
+namespace Task202
+
+/-- LEAF. Dusart 2010 page 4 Theorem 5.2, k = 1, eta = 0.001.
+Source: https://arxiv.org/abs/1002.0442v1.
+CITED analytic input. Unproved here. Consumers are CONDITIONAL ON this leaf. -/
+theorem dusart2010_theta_k1 (x : ℝ) (hx : 908994923 ≤ x) :
+    |θ x - x| < 1 / 1000 * x / log x := by
+  sorry
+
+/-- LEAF. Riesel and Vaughan 1983 page 57, first display, quoting Rosser
+and Schoenfeld 1975 Corollary 2 to Theorem 7.
+Only the bounded initial interval below the Dusart threshold is left open.
+Source: https://doi.org/10.1007/BF02384300, page 57.
+CITED analytic input. Unproved here. Consumers are CONDITIONAL ON this leaf. -/
+theorem rs1975_theta_lower_initial (x : ℝ) (hx : 678407 ≤ x)
+    (hxD : x < 908994923) :
+    x - x / (40 * log x) < θ x := by
+  sorry
+
+/-- The cited Rosser and Schoenfeld input reduces to a bounded initial interval.
+CONDITIONAL ON the supplied Dusart bound and initial theta bound. -/
+theorem rs1975_of_dusart_k1_and_initial
+    (hD : ∀ t : ℝ, 908994923 ≤ t → |θ t - t| ≤ 1 / 1000 * t / log t)
+    (hinit : ∀ t : ℝ, 678407 ≤ t → t < 908994923 →
+      t - t / (40 * log t) ≤ θ t) : Lemma6Theta.RS1975Cor2Thm7 := by
+  intro t ht
+  by_cases htD : 908994923 ≤ t
+  · have ht0 : 0 < t := by linarith
+    have hlog : 0 < log t := log_pos (by linarith)
+    have hsmall : 1 / 1000 * t / log t < t / (40 * log t) := by
+      rw [div_mul_eq_div_div, div_lt_div_iff_of_pos_right hlog]
+      linarith
+    have htheta := (abs_le.mp (hD t htD)).1
+    linarith
+  · exact hinit t ht (lt_of_not_ge htD)
+
+/-- Lemma 6 i from two explicit analytic inputs, without using either open leaf.
+CONDITIONAL ON the supplied Dusart and Rosser and Schoenfeld inputs. -/
+theorem lemma6i_of_dusart_k1_and_initial
+    (hD : ∀ t : ℝ, 908994923 ≤ t → |θ t - t| ≤ 1 / 1000 * t / log t)
+    (hinit : ∀ t : ℝ, 678407 ≤ t → t < 908994923 →
+      t - t / (40 * log t) ≤ θ t) : Lemma6i := by
+  refine Task163.lemma6i_of_theta_and_rs ?_ (rs1975_of_dusart_k1_and_initial hD hinit)
+  intro t ht
+  have ht0 : 0 < t := (exp_pos (22 : ℝ)).trans_le ht
+  have hL : 22 ≤ log t := by
+    rw [← log_exp (22 : ℝ)]
+    exact log_le_log (exp_pos _) ht
+  exact (Task163.theta_lower_of_dusart_k1 hD t ht0 hL).le
+
+/-- Page 56 monotonicity of X to power 11/4 times exp minus X.
+The proof uses the logarithm tangent inequality from Mathlib. -/
+theorem rs1975_decay_le (a X : ℝ) (ha : (11 / 4 : ℝ) ≤ a) (hX : a ≤ X) :
+    X ^ (11 / 4 : ℝ) * exp (-X) ≤ a ^ (11 / 4 : ℝ) * exp (-a) := by
+  have ha0 : 0 < a := by linarith
+  have hX0 : 0 < X := ha0.trans_le hX
+  have hlog0 : 0 ≤ log X - log a := sub_nonneg.mpr (log_le_log ha0 hX)
+  have hlog : log X - log a ≤ X / a - 1 := by
+    simpa only [log_div hX0.ne' ha0.ne'] using
+      log_le_sub_one_of_pos (div_pos hX0 ha0)
+  have hm := mul_le_mul_of_nonneg_right hlog ha0.le
+  simp only [sub_mul, div_mul_cancel₀ _ ha0.ne', one_mul] at hm
+  have hp := mul_le_mul_of_nonneg_right ha hlog0
+  rw [rpow_def_of_pos hX0, rpow_def_of_pos ha0, ← exp_add, ← exp_add]
+  apply exp_le_exp.mpr
+  linarith
+
+set_option maxRecDepth 4000 in
+set_option maxHeartbeats 1000000 in
+/-- Page 56 numerical reduction of the explicit error formula on page 55.
+The rational cutoff 17.635 lies below `sqrt (3000 / R)`. -/
+theorem rs1975_error_budget (X : ℝ) (hX : 3527 / 200 ≤ X) :
+    (257634 / 1000000 : ℝ) * (9645908801 / 1000000000) *
+      (1 + (96642 / 100000 : ℝ) / X) * X ^ (11 / 4 : ℝ) * exp (-X) <
+        154 / 1000000 := by
+  have hpow : (3527 / 200 : ℝ) ^ (11 / 4 : ℝ) ≤ 5353 / 2 := by
+    apply (rpow_le_rpow_iff (rpow_nonneg (by norm_num : (0 : ℝ) ≤ 3527 / 200) _)
+      (by norm_num) (by norm_num : (0 : ℝ) < 4)).mp
+    rw [← rpow_mul (by norm_num : (0 : ℝ) ≤ 3527 / 200)]
+    norm_num
+  have he : (45570000 : ℝ) ≤ exp (3527 / 200) := by
+    have h := sum_le_exp_of_nonneg (x := (3527 / 200 : ℝ)) (by norm_num) 35
+    norm_num [Finset.sum_range_succ] at h
+    linarith
+  have hend : (3527 / 200 : ℝ) ^ (11 / 4 : ℝ) * exp (-(3527 / 200)) ≤
+      (5353 / 2 : ℝ) / 45570000 := by
+    calc
+      _ = (3527 / 200 : ℝ) ^ (11 / 4 : ℝ) / exp (3527 / 200) := by
+        simp only [exp_neg, div_eq_mul_inv]
+      _ ≤ (5353 / 2 : ℝ) / exp (3527 / 200) :=
+        div_le_div_of_nonneg_right hpow (exp_pos _).le
+      _ ≤ _ := div_le_div_of_nonneg_left (by norm_num) (by norm_num) he
+  have hg := (rs1975_decay_le (3527 / 200) X (by norm_num) hX).trans hend
+  have hq : 1 + (96642 / 100000 : ℝ) / X ≤
+      1 + (96642 / 100000 : ℝ) / (3527 / 200) := by
+    have h := div_le_div_of_nonneg_left
+      (by norm_num : (0 : ℝ) ≤ 96642 / 100000)
+      (by norm_num : (0 : ℝ) < 3527 / 200) hX
+    linarith only [h]
+  calc
+    _ = ((257634 / 1000000 : ℝ) * (9645908801 / 1000000000)) *
+        (1 + (96642 / 100000 : ℝ) / X) * (X ^ (11 / 4 : ℝ) * exp (-X)) := by ring
+    _ ≤ ((257634 / 1000000 : ℝ) * (9645908801 / 1000000000)) *
+        (1 + (96642 / 100000 : ℝ) / (3527 / 200)) *
+          (X ^ (11 / 4 : ℝ) * exp (-X)) :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hq (by norm_num)) (by positivity)
+    _ ≤ ((257634 / 1000000 : ℝ) * (9645908801 / 1000000000)) *
+        (1 + (96642 / 100000 : ℝ) / (3527 / 200)) * ((5353 / 2 : ℝ) / 45570000) :=
+      mul_le_mul_of_nonneg_left hg (by norm_num)
+    _ < _ := by norm_num
+
+/-- Page 56 equation 4.3 from the explicit Theorem 2 error quoted on page 55.
+CONDITIONAL ON the pointwise Rosser and Schoenfeld analytic error input. -/
+theorem theta_error_4_3_of_rs1975 (x : ℝ) (hx0 : 0 < x) (hx : 3000 ≤ log x)
+    (hRS : |θ x - x| ≤ x * ((257634 / 1000000 : ℝ) *
+      (1 + (96642 / 100000 : ℝ) / sqrt (log x / (9645908801 / 1000000000))) *
+      (sqrt (log x / (9645908801 / 1000000000))) ^ (3 / 4 : ℝ) *
+      exp (-sqrt (log x / (9645908801 / 1000000000))))) :
+    |θ x - x| < 154 / 1000000 * x / log x := by
+  have hL0 : 0 < log x := by linarith
+  set X := sqrt (log x / (9645908801 / 1000000000))
+  change |θ x - x| ≤ x * ((257634 / 1000000 : ℝ) *
+    (1 + (96642 / 100000 : ℝ) / X) * X ^ (3 / 4 : ℝ) * exp (-X)) at hRS
+  have hX0 : 0 < X := by
+    dsimp only [X]
+    exact sqrt_pos.mpr (div_pos hL0 (by norm_num))
+  have hXX : X ^ 2 = log x / (9645908801 / 1000000000) := by
+    dsimp only [X]
+    exact sq_sqrt (div_nonneg hL0.le (by norm_num))
+  have hX : (3527 / 200 : ℝ) ≤ X := by
+    by_contra! h
+    have hs := pow_lt_pow_left₀ h hX0.le (by decide : (2 : ℕ) ≠ 0)
+    nlinarith only [hs, hXX, hx]
+  have hLid : log x = (9645908801 / 1000000000 : ℝ) * X ^ 2 := by
+    nlinarith only [hXX]
+  have hp : X ^ (3 / 4 : ℝ) * X ^ 2 = X ^ (11 / 4 : ℝ) := by
+    rw [← rpow_natCast X 2, ← rpow_add hX0]
+    norm_num
+  have hbudget : (257634 / 1000000 : ℝ) * (1 + (96642 / 100000 : ℝ) / X) *
+      X ^ (3 / 4 : ℝ) * exp (-X) * log x < 154 / 1000000 := by
+    calc
+      _ = (257634 / 1000000 : ℝ) * (9645908801 / 1000000000) *
+          (1 + (96642 / 100000 : ℝ) / X) * X ^ (11 / 4 : ℝ) * exp (-X) := by
+        rw [hLid, ← hp]
+        ring
+      _ < _ := rs1975_error_budget X hX
+  have heps : (257634 / 1000000 : ℝ) * (1 + (96642 / 100000 : ℝ) / X) *
+      X ^ (3 / 4 : ℝ) * exp (-X) < (154 / 1000000 : ℝ) / log x :=
+    (lt_div_iff₀ hL0).2 hbudget
+  calc
+    _ ≤ x * ((257634 / 1000000 : ℝ) * (1 + (96642 / 100000 : ℝ) / X) *
+        X ^ (3 / 4 : ℝ) * exp (-X)) := hRS
+    _ < x * ((154 / 1000000 : ℝ) / log x) := mul_lt_mul_of_pos_left heps hx0
+    _ = _ := by ring
+
+/-- Lemma 6 i from the four original analytic inputs quoted on pages 55 to 57.
+CONDITIONAL ON Rosser and Schoenfeld Theorem 2, its psi table bound,
+the 1962 Theorem 6 gap and the 1975 Corollary 2 to Theorem 7 lower bound. -/
+theorem lemma6i_of_original_rs_inputs
+    (hRS2 : ∀ t : ℝ, 0 < t → 105 ≤ log t →
+      |θ t - t| ≤ t * ((257634 / 1000000 : ℝ) *
+        (1 + (96642 / 100000 : ℝ) / sqrt (log t / (9645908801 / 1000000000))) *
+        (sqrt (log t / (9645908801 / 1000000000))) ^ (3 / 4 : ℝ) *
+        exp (-sqrt (log t / (9645908801 / 1000000000)))))
+    (h44 : ∀ t : ℝ, 0 < t → 22 ≤ log t → log t ≤ 5000 →
+      |ψ t - t| ≤ 822 / 100000 * t / log t)
+    (h62 : ∀ t : ℝ, 0 < t →
+      ψ t - θ t ≤ 1.001102 * sqrt t + 3 * t ^ (1 / 3 : ℝ))
+    (hRS7 : Lemma6Theta.RS1975Cor2Thm7) : Lemma6i := by
+  refine Task163.lemma6i_of_theta_and_rs ?_ hRS7
+  intro t ht
+  have ht0 : 0 < t := (exp_pos (22 : ℝ)).trans_le ht
+  have hL : 22 ≤ log t := by
+    rw [← log_exp (22 : ℝ)]
+    exact log_le_log (exp_pos _) ht
+  exact (Task163.theta_lower_of_paper_inputs
+    (fun u hu0 huL ↦ (theta_error_4_3_of_rs1975 u hu0 huL
+      (hRS2 u hu0 (by linarith))).le) h44 h62 t ht0 hL).le
+
+end Task202
+
 /-- LEAF. Page 56, (4.5): θ(x) > x - 0.00862 x / log x for log x >= 22. -/
 theorem theta_lower_bound_4_5 (x : ℝ) (hx0 : 0 < x) (hx : 22 ≤ Real.log x) :
     x - 862 / 100000 * x / Real.log x < θ x := by
-  -- Rosser and Schoenfeld 1975 Theorem 2 and table on page 267.
-  -- Rosser and Schoenfeld 1962 Theorem 6 supplies the psi minus theta error.
-  -- Alternative source: Dusart 2010 Theorem 5.2 k = 1, eta = 0.001, x1 = 908994923.
-  sorry
+  -- CONDITIONAL ON Task202.dusart2010_theta_k1.
+  exact Task163.theta_lower_of_dusart_k1
+    (fun t ht ↦ (Task202.dusart2010_theta_k1 t ht).le) x hx0 hx
 
 /-- LEAF. Page 56, integral bound leading to (4.1) for log x >= 32. -/
 theorem lemma6i_integral_32 (x : ℝ) (hx0 : 0 < x) (hx : 32 ≤ Real.log x) :
     x / Real.log x + 9911 / 10000 * x / Real.log x ^ 2 < (Nat.primeCounting ⌊x⌋₊ : ℝ) := by
-  -- CONDITIONAL ON the open theta_lower_bound_4_5 leaf.
+  -- CONDITIONAL ON Task202.dusart2010_theta_k1 through equation 4.5.
   refine Task163.integral_32_of_theta ?_ x hx0 hx
   intro t ht
   have ht0 : 0 < t := (exp_pos (22 : ℝ)).trans_le ht
@@ -376,9 +557,18 @@ theorem lemma6i_integral_32 (x : ℝ) (hx0 : 0 < x) (hx : 32 ≤ Real.log x) :
 /-- LEAF. Page 57, Rosser-Schoenfeld corollary bound for log x between 17 and 35. -/
 theorem lemma6i_integral_17_35 (x : ℝ) (hx0 : 0 < x) (hx1 : 17 ≤ Real.log x) (hx2 : Real.log x ≤ 35) :
     x / Real.log x + 9911 / 10000 * x / Real.log x ^ 2 < (Nat.primeCounting ⌊x⌋₊ : ℝ) := by
-  -- Rosser and Schoenfeld 1975 Corollary 2 to Theorem 7.
-  -- Task163.integral_17_35_of_rs proves the integral step with that input explicit.
-  sorry
+  -- CONDITIONAL ON the two Task202 analytic source leaves.
+  have hRS : Lemma6Theta.RS1975Cor2Thm7 :=
+    Task202.rs1975_of_dusart_k1_and_initial
+      (fun t ht ↦ (Task202.dusart2010_theta_k1 t ht).le)
+      (fun t ht htD ↦ (Task202.rs1975_theta_lower_initial t ht htD).le)
+  have h := Task163.integral_17_35_of_rs hRS x hx0 hx1 hx2
+  have hB : 0 < x / log x ^ 2 := div_pos hx0 (sq_pos_of_pos (by linarith))
+  have hsmall : (9911 / 10000 : ℝ) * (x / log x ^ 2) < x / log x ^ 2 := by
+    exact (mul_lt_mul_of_pos_right (by norm_num : (9911 / 10000 : ℝ) < 1) hB).trans_eq
+      (one_mul _)
+  rw [mul_div_assoc]
+  linarith
 
 /-- The exact cited statement of Lemma 6 (i). -/
 theorem lemma6i_decomposed : Lemma6i := by

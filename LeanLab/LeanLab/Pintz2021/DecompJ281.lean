@@ -54,13 +54,28 @@ def UCutoff (z w : ExcPair) (m : ℕ) : ℝ :=
       ((lift z (Nat.lcm z.r w.r) * (lift w (Nat.lcm z.r w.r))⁻¹).conductor : ℝ))
 
 
-/-- The truncated main term of (2.12). -/
-def mainTermTruncatedPrime (E : Set ExcPair) (Sg' : ExcPair → ExcPair → ℕ → ℂ) (ε X U : ℝ) (m : ℕ) : ℂ :=
+/-- The pre-2026-11-01 form of the truncated main term of (2.12), without the paper's
+`[r₁, r₂] ≤ P` restriction; kept so LeafAudit168's refutations still build. -/
+def mainTermTruncatedPrime_v1 (E : Set ExcPair) (Sg' : ExcPair → ExcPair → ℕ → ℂ) (ε X U : ℝ) (m : ℕ) : ℂ :=
   ∑ᶠ (z) (_ : z ∈ E ∧ |z.ρ.im| ≤ U), ∑ᶠ (w) (_ : w ∈ E ∧ |w.ρ.im| ≤ U),
     if UCutoff z w m ≤ U then
       ((mult z * mult w : ℕ) : ℂ) * (Asign z : ℂ) * (Asign w : ℂ) * Sg' z w m *
         WeightedKernelsTask08.weightedKernel (X1 ε X) X z.ρ w.ρ m true
     else 0
+
+/-- The truncated main term of (2.12).
+DECISION 2026-11-01 architect PC 20261101T0240Z-32570 U-1591: adds the paper's [r₁, r₂] ≤ P restriction of display 2.22, matching Truncation168.retainedPairs; old form mainTermTruncatedPrime_v1. -/
+def mainTermTruncatedPrime (E : Set ExcPair) (Sg' : ExcPair → ExcPair → ℕ → ℂ) (ε X P U : ℝ) (m : ℕ) : ℂ :=
+  ∑ᶠ (z) (_ : z ∈ E ∧ |z.ρ.im| ≤ U), ∑ᶠ (w) (_ : w ∈ E ∧ |w.ρ.im| ≤ U),
+    if (Nat.lcm z.r w.r : ℝ) ≤ P ∧ UCutoff z w m ≤ U then
+      ((mult z * mult w : ℕ) : ℂ) * (Asign z : ℂ) * (Asign w : ℂ) * Sg' z w m *
+        WeightedKernelsTask08.weightedKernel (X1 ε X) X z.ρ w.ρ m true
+    else 0
+
+/-- LEAF P0054 page 8: for `1 ≤ P` the pole pair passes the `[r₁, r₂] ≤ P` restriction. -/
+theorem pole_lcm_retained {P : ℝ} (hP : 1 ≤ P) :
+    (Nat.lcm pole.r pole.r : ℝ) ≤ P := by
+  simpa [pole] using hP
 
 /-- LEAF P0054 page 8: The pole lies in the truncated subset if U is at least 0. -/
 theorem pole_mem_truncated {H P X U : ℝ} (hU : 0 ≤ U) :
@@ -109,7 +124,8 @@ DECISION 2026-10-31 architect PC 20261031T2333Z-383: the old form quantified ove
 `X`, `H`, `P` and `m` with one constant, and LeafAudit168.unrestricted_tail_false refuted it at
 `U = 0`. It now takes Theorem 1's range, `P ≤ P₀`, a finite `E`, `Sg'` the actual limits of the
 series at positive frequencies, `m ∈ [X/4, X/2]` as in (2.21), and `U ≥ 2`; the constant may depend
-on `ε`, matching the `O_ε` of Theorem 1. -/
+on `ε`, matching the `O_ε` of Theorem 1.
+DECISION 2026-11-01 U-1591: the truncated term now keeps only pairs with [r₁, r₂] ≤ P, as in the paper. -/
 theorem leaf_truncation_error :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
@@ -119,7 +135,7 @@ theorem leaf_truncation_error :
         Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
       X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U →
       ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
-        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
+        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
       C' * (Sing m * X * Real.log U / Real.sqrt U) := by sorry
 
 /-- LEAF P0054 page 8 display 2.22: The combined error bound is derived from the main term bound and the truncation bound via triangle inequality.
@@ -128,10 +144,10 @@ LeafAudit168.triangle_leaf_false refuted the old form at `X = -1`. Now PROVED. -
 theorem leaf_triangle_inequality {H X P U ε ε0 c C C' : ℝ} {m : ℕ} {Sg' : ExcPair → ExcPair → ℕ → ℂ}
     (h_bound1 : ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
       C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)))
-    (h_bound2 : ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
+    (h_bound2 : ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
       C' * (Sing m * X * Real.log U / Real.sqrt U))
     (hU : U = Real.sqrt X) (hX : 1 ≤ X) :
-    ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ ≤
+    ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
       max C C' * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) + Sing m * X * Real.log U / (X ^ (1/4 : ℝ))) := by
   have hS := Applications.Sing_pos m
   have hX0 : (0 : ℝ) ≤ X := by linarith
@@ -146,7 +162,7 @@ theorem leaf_triangle_inequality {H X P U ε ε0 c C C' : ℝ} {m : ℕ} {Sg' : 
     div_nonneg (mul_nonneg (mul_nonneg hS.le hX0) (Real.log_nonneg hU1)) (Real.sqrt_nonneg _)
   calc _ ≤ ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ +
         ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
-          mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X U m‖ :=
+          mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ :=
         norm_sub_le_norm_sub_add_norm_sub _ _ _
     _ ≤ C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) +
         C' * (Sing m * X * Real.log U / Real.sqrt U) := add_le_add h_bound1 h_bound2
@@ -167,7 +183,7 @@ theorem assembly_222 :
           (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
           ∀ m : ℕ, X / 4 ≤ m ∧ (m : ℝ) ≤ X / 2 →
-            ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X (Real.sqrt X) m‖ ≤
+            ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P (Real.sqrt X) m‖ ≤
               C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) + Sing m * X * Real.log (Real.sqrt X) / (X ^ (1/4 : ℝ))) := by
   obtain ⟨ε1, hε1, h1⟩ := leaf_221
   obtain ⟨ε2, hε2, h2⟩ := leaf_truncation_error
@@ -216,6 +232,8 @@ end
 end LeanLab.Pintz2021.DecompJ281
 
 #print axioms LeanLab.Pintz2021.DecompJ281.pole_not_truncated
+
+#print axioms LeanLab.Pintz2021.DecompJ281.pole_lcm_retained
 
 #print axioms LeanLab.Pintz2021.DecompJ281.cCoefPrime_pole
 
