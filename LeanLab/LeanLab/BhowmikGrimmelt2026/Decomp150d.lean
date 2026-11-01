@@ -24,6 +24,49 @@ noncomputable def minorError150 (ϕ G : ℝ → ℝ) (X N : ℕ) (ϑ η : ℝ) :
     Sphi ϕ N α ^ 2 * (1 - bRhat G ((X : ℝ) ^ ϑ)
       (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))
 
+private theorem integral_split_indicator150 {f : ℝ → ℂ} (hf : Continuous f) (s : Set ℝ)
+    (hs : MeasurableSet s) :
+    (∫ α in (0 : ℝ)..1, f α) =
+      (∫ α in (0 : ℝ)..1, Set.indicator s f α) +
+      (∫ α in (0 : ℝ)..1, Set.indicator sᶜ f α) := by
+  have hIoc : MeasurableSet (Set.Ioc (0 : ℝ) 1) := measurableSet_Ioc
+  have hintf : IntegrableOn f (Set.Ioc (0 : ℝ) 1) volume := hf.integrableOn_Ioc
+  have hi1 : IntegrableOn f (Set.Ioc (0 : ℝ) 1 ∩ s) volume :=
+    hintf.mono_set Set.inter_subset_left
+  have hi2 : IntegrableOn f (Set.Ioc (0 : ℝ) 1 ∩ sᶜ) volume :=
+    hintf.mono_set Set.inter_subset_left
+  have hms1 : MeasurableSet (Set.Ioc (0 : ℝ) 1 ∩ s) := hIoc.inter hs
+  have hms2 : MeasurableSet (Set.Ioc (0 : ℝ) 1 ∩ sᶜ) := hIoc.inter hs.compl
+  have hdis : Disjoint (Set.Ioc (0 : ℝ) 1 ∩ s) (Set.Ioc (0 : ℝ) 1 ∩ sᶜ) := by
+    rw [Set.disjoint_right]
+    intro x hx hx'
+    exact hx.2 hx'.2
+  have hun : (Set.Ioc (0 : ℝ) 1 ∩ s) ∪ (Set.Ioc (0 : ℝ) 1 ∩ sᶜ) = Set.Ioc (0 : ℝ) 1 := by
+    ext x
+    simp
+  have hiu : IntegrableOn f ((Set.Ioc (0 : ℝ) 1 ∩ s) ∪ (Set.Ioc (0 : ℝ) 1 ∩ sᶜ))
+      (volume : Measure ℝ) := by
+    rw [hun]
+    exact hintf
+  have h01 : (0 : ℝ) ≤ 1 := by norm_num
+  rw [intervalIntegral.integral_of_le h01, intervalIntegral.integral_of_le h01,
+    intervalIntegral.integral_of_le h01, setIntegral_indicator hs,
+    setIntegral_indicator hs.compl]
+  rw [← setIntegral_union hdis hms2 hi1 hi2, hun]
+
+private theorem integral_split_if150 {f : ℝ → ℂ} (hf : Continuous f) (P : ℝ → Prop)
+    (hs : MeasurableSet {α : ℝ | P α}) :
+    (∫ α in (0 : ℝ)..1, f α) =
+      (∫ α in (0 : ℝ)..1, if P α then f α else 0) +
+      (∫ α in (0 : ℝ)..1, if P α then 0 else f α) := by
+  have hind1 : (fun α => if P α then f α else 0) = Set.indicator {α : ℝ | P α} f := by
+    funext α
+    by_cases h : P α <;> simp [Set.indicator, h]
+  have hind2 : (fun α => if P α then 0 else f α) = Set.indicator {α : ℝ | P α}ᶜ f := by
+    funext α
+    by_cases h : P α <;> simp [Set.indicator, h]
+  rw [hind1, hind2, integral_split_indicator150 hf _ hs]
+
 /-- LEAF. Page 26, exact error identity followed by the major and minor arc split.
 OPEN elementary integrability step. ApproximationError already proves the unsplit identity. -/
 theorem error_split150 {ϕ G : ℝ → ℝ} (hG : IsMajorWeight G)
@@ -32,7 +75,26 @@ theorem error_split150 {ϕ G : ℝ → ℝ} (hG : IsMajorWeight G)
       Sphi ϕ N α ^ 2 * bRhat G ((X : ℝ) ^ ϑ)
         (fun q => η * X * q / (X : ℝ) ^ ϑ) α * ee (-(N * α))) =
       majorError150 ϕ G X N ϑ η + minorError150 ϕ G X N ϑ η := by
-  sorry
+  have hXpos : (0 : ℝ) < X := by exact_mod_cast (by omega : 0 < X)
+  have hR : 0 < (X : ℝ) ^ ϑ := Real.rpow_pos_of_pos hXpos ϑ
+  have hT : ∀ q ∈ Finset.Icc 1 ⌊(X : ℝ) ^ ϑ⌋₊, 0 < η * X * q / (X : ℝ) ^ ϑ := by
+    intro q hqmem
+    have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hqmem).1
+    have hq : 0 < (q : ℝ) := by exact_mod_cast hq1
+    exact div_pos (mul_pos (mul_pos hη hXpos) hq) hR
+  rw [rphi_sub_weighted_integral hG.supp hG.even ((X : ℝ) ^ ϑ)
+    (fun q => η * X * q / (X : ℝ) ^ ϑ) hT ϕ N]
+  have hcS := continuous_Sphi ϕ N
+  have hcb := continuous_bRhat hG.supp hG.even ((X : ℝ) ^ ϑ)
+    (fun q => η * X * q / (X : ℝ) ^ ϑ) hT
+  have hce : Continuous (fun α : ℝ => ee (-(N * α))) :=
+    ee_contDiff.continuous.comp ((continuous_const.mul continuous_id).neg)
+  have hfc : Continuous (fun α : ℝ => Sphi ϕ N α ^ 2 *
+      (1 - bRhat G ((X : ℝ) ^ ϑ) (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) :=
+    ((hcS.pow 2).mul (continuous_const.sub hcb)).mul hce
+  rw [integral_split_if150 hfc (MajorArc X ((X : ℝ) ^ ϑ))
+    (measurableSet_majorArc84 _ _)]
+  rfl
 
 /-- LEAF. Page 27, major arc contribution in the proof of 7.8.
 OPEN family estimate. The written Parseval step uses one function, while Sphi depends on N.
