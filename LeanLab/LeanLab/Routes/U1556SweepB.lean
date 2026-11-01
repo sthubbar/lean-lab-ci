@@ -21,13 +21,6 @@ a = 3/2, 1.9327 at a*. Numerics: Routes/numerics/U1556/.
   proofs from leaves, gives `(x, x + 2.19 log² x]` for `x ≥ 10^18`.
 * `goldbach_219_all`: every `x ≥ 4`, CONDITIONAL ON the named inputs and the leaves.
 -/
-/-
-CODEX task204, 2026-11-01. AI wrote the new Lean proofs.
-Five of the six task leaves are proved. The quantitative dqt_Wa_le bound is open.
-Its integrability component is proved by dqt_Wa_elementary.
-The headline Goldbach conclusion remains CONDITIONAL. Binary Goldbach is open.
-Build and axiom evidence is in Routes/build/codex-task204.log.
--/
 import Mathlib
 import LeanLab.Routes.U1556Sweep
 
@@ -84,66 +77,254 @@ theorem hadamardKa_vacuity : HadamardKa (3 / 2) (fun _ : Unit => (14 : ℝ)) := 
     nlinarith
   linarith
 
-/-! ### Open leaves: SmoothY for the weight `w_a` -/
+/-! ### Private helpers for the two SmoothY leaves: `w_a(v) = exp(-a|v|)` and its Fourier
+transform `K_a`.  These sit immediately above `integrableOn_P_Wa`. -/
 
-/-- The logarithmic substitution gives the exponential weight. Lab identity for U-1556. -/
-theorem exp_Wa (a v : ℝ) :
-    Real.exp v * Real.exp v * Wa a (Real.exp v) = Real.exp (-a * |v|) := by
-  unfold Wa
+private noncomputable def wa (a v : ℝ) : ℝ := Real.exp (-a * |v|)
+
+private noncomputable def ga (a t v : ℝ) : ℂ :=
+  Complex.exp (((-(a * |v|) : ℝ) : ℂ) + (t : ℂ) * (v : ℂ) * Complex.I)
+
+private theorem ga_Iic {a t v : ℝ} (hv : v ≤ 0) :
+    ga a t v = Complex.exp (((a : ℂ) + (t : ℂ) * Complex.I) * (v : ℂ)) := by
+  unfold ga
+  congr 1
+  rw [abs_of_nonpos hv]
+  push_cast
+  ring
+
+private theorem ga_Ioi {a t v : ℝ} (hv : 0 < v) :
+    ga a t v = Complex.exp (((-(a : ℂ)) + (t : ℂ) * Complex.I) * (v : ℂ)) := by
+  unfold ga
+  congr 1
+  rw [abs_of_pos hv]
+  push_cast
+  ring
+
+private theorem int_ga_Iic {a t : ℝ} (ha : 0 < a) : IntegrableOn (ga a t) (Iic 0) := by
+  have h := integrableOn_exp_mul_complex_Iic (a := (a : ℂ) + (t : ℂ) * Complex.I) (by simpa using ha) 0
+  exact h.congr_fun (fun v hv => (ga_Iic hv).symm) measurableSet_Iic
+
+private theorem int_ga_Ioi {a t : ℝ} (ha : 0 < a) : IntegrableOn (ga a t) (Ioi 0) := by
+  have h := integrableOn_exp_mul_complex_Ioi (a := (-(a : ℂ)) + (t : ℂ) * Complex.I) (by simpa using ha) 0
+  exact h.congr_fun (fun v hv => (ga_Ioi hv).symm) measurableSet_Ioi
+
+private theorem integrable_ga {a t : ℝ} (ha : 0 < a) : Integrable (ga a t) := by
+  have h := (int_ga_Iic (t := t) ha).union (int_ga_Ioi (t := t) ha)
+  rwa [Iic_union_Ioi, integrableOn_univ] at h
+
+/-- The Fourier transform of `e^{-a|v|}`: `∫ e^{-a|v|} e^{itv} dv = 2a/(a² + t²)`. -/
+private theorem integral_ga (a t : ℝ) (ha : 0 < a) : ∫ v, ga a t v = (Ka a t : ℂ) := by
+  have hI1 := int_ga_Iic (t := t) ha
+  have hI2 := int_ga_Ioi (t := t) ha
+  rw [← intervalIntegral.integral_Iic_add_Ioi hI1 hI2]
+  rw [setIntegral_congr_fun measurableSet_Iic (fun v hv => ga_Iic hv),
+    setIntegral_congr_fun measurableSet_Ioi (fun v hv => ga_Ioi hv)]
+  rw [integral_exp_mul_complex_Iic (a := (a : ℂ) + (t : ℂ) * Complex.I) (by simpa using ha),
+    integral_exp_mul_complex_Ioi (a := (-(a : ℂ)) + (t : ℂ) * Complex.I) (by simpa using ha)]
+  have h1 : ((a : ℂ) + (t : ℂ) * Complex.I) ≠ 0 := by
+    intro h; have := congrArg Complex.re h; simp at this; linarith
+  have h2 : (-(a : ℂ) + (t : ℂ) * Complex.I) ≠ 0 := by
+    intro h; have := congrArg Complex.re h; simp at this; linarith
+  have h4 : ((a : ℂ) ^ 2 + (t : ℂ) ^ 2) ≠ 0 := by
+    have hp : (0 : ℝ) < a ^ 2 + t ^ 2 := by positivity
+    exact_mod_cast hp.ne'
+  unfold Ka
+  push_cast
+  simp only [mul_zero, Complex.exp_zero]
+  have e2 : ((a : ℂ) ^ 2 + (t : ℂ) ^ 2)
+      = -(((a : ℂ) + (t : ℂ) * Complex.I) * (-(a : ℂ) + (t : ℂ) * Complex.I)) := by
+    have h : ((a : ℂ) + (t : ℂ) * Complex.I) * (-(a : ℂ) + (t : ℂ) * Complex.I)
+        = ((t : ℂ) * Complex.I) ^ 2 - (a : ℂ) ^ 2 := by ring
+    rw [h, mul_pow, Complex.I_sq]
+    ring
+  field_simp
+  rw [e2]
+  ring
+
+private theorem Ka_nonneg {a t : ℝ} (ha : 0 < a) : 0 ≤ Ka a t := by
+  unfold Ka
+  positivity
+
+private theorem wa_eq_ga (a v : ℝ) : (wa a v : ℂ) = ga a 0 v := by
+  unfold wa ga
+  push_cast
+  simp
+
+private theorem wa_nonneg_aux (a v : ℝ) : 0 ≤ wa a v := by
+  unfold wa; positivity
+
+private theorem continuous_wa (a : ℝ) : Continuous (wa a) := by
+  unfold wa; fun_prop
+
+private theorem integrable_wa {a : ℝ} (ha : 0 < a) : Integrable (wa a) := by
+  have h := (integrable_ga (t := 0) ha).norm
+  refine h.congr (Filter.Eventually.of_forall fun v => ?_)
+  show ‖ga a 0 v‖ = wa a v
+  unfold ga wa
+  rw [Complex.norm_exp]
+  congr 1
+  push_cast
+  simp
+
+/-- `e^v · e^v · W_a(e^v) = e^{-a|v|}`. -/
+private theorem exp_Wa (a v : ℝ) :
+    Real.exp v * Real.exp v * Wa a (Real.exp v) = wa a v := by
+  unfold Wa wa
   split_ifs with h
   · have hv : v ≤ 0 := Real.exp_le_one_iff.mp h
-    rw [abs_of_pos (Real.exp_pos v), Real.rpow_def_of_pos (Real.exp_pos v),
-      Real.log_exp, abs_of_nonpos hv, ← Real.exp_add, ← Real.exp_add]
-    congr 1
-    ring
-  · have hv : 0 < v := Real.one_lt_exp_iff.mp (lt_of_not_ge h)
-    rw [Real.rpow_def_of_pos (Real.exp_pos v), Real.log_exp, abs_of_pos hv,
+    have he : (Real.exp v) ^ (a - 2) = Real.exp ((a - 2) * v) := by
+      rw [Real.rpow_def_of_pos (Real.exp_pos v), Real.log_exp, mul_comm]
+    rw [abs_of_nonneg (Real.exp_pos v).le, he, abs_of_nonpos hv,
       ← Real.exp_add, ← Real.exp_add]
-    congr 1
-    ring
+    congr 1; ring
+  · have hv : 0 < v := Real.one_lt_exp_iff.mp (lt_of_not_ge h)
+    have he : (Real.exp v) ^ (-2 - a) = Real.exp ((-2 - a) * v) := by
+      rw [Real.rpow_def_of_pos (Real.exp_pos v), Real.log_exp, mul_comm]
+    rw [he, abs_of_pos hv, ← Real.exp_add, ← Real.exp_add]
+    congr 1; ring
 
-/-- A finite trigonometric sum has integrable square against any positive exponential decay. -/
-theorem integrable_Fwa {a : ℝ} (ha : 0 < a) (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ) :
-    Integrable (fun v => ‖F s c γ v‖ ^ 2 * Real.exp (-a * |v|)) := by
-  have hi : IntegrableOn (fun v : ℝ => Real.exp (-a * |v|)) (Iic 0) := by
-    refine (integrableOn_exp_mul_Iic ha 0).congr_fun ?_ measurableSet_Iic
-    intro v hv
-    change v ≤ 0 at hv
-    change Real.exp (a * v) = Real.exp (-a * |v|)
-    rw [abs_of_nonpos hv]
+private theorem normSq_F_ga {ι : Type*} (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ) (a v : ℝ) :
+    ((‖SmoothKernel.F s c γ v‖ ^ 2 : ℝ) : ℂ) * (wa a v : ℂ)
+      = ∑ i ∈ s, ∑ j ∈ s, c i * starRingEnd ℂ (c j) * ga a (γ i - γ j) v := by
+  rw [Complex.ofReal_pow, ← Complex.mul_conj', wa_eq_ga]
+  unfold SmoothKernel.F
+  rw [map_sum, Finset.sum_mul_sum, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [map_mul, ← Complex.exp_conj]
+  unfold ga
+  have e : starRingEnd ℂ ((γ j : ℂ) * (v : ℂ) * Complex.I) = -((γ j : ℂ) * (v : ℂ) * Complex.I) := by
+    simp [Complex.conj_ofReal]
+  rw [e]
+  have hsum : Complex.exp ((γ i : ℂ) * (v : ℂ) * Complex.I) *
+      Complex.exp (-((γ j : ℂ) * (v : ℂ) * Complex.I)) *
+      Complex.exp (((-(a * |v|) : ℝ) : ℂ) + ((0 : ℝ) : ℂ) * (v : ℂ) * Complex.I)
+      = Complex.exp (((-(a * |v|) : ℝ) : ℂ) + ((γ i - γ j : ℝ) : ℂ) * (v : ℂ) * Complex.I) := by
+    rw [← Complex.exp_add, ← Complex.exp_add]
     congr 1
+    push_cast
     ring
-  have hj : IntegrableOn (fun v : ℝ => Real.exp (-a * |v|)) (Ioi 0) := by
-    refine (integrableOn_exp_mul_Ioi (neg_neg_of_pos ha) 0).congr_fun ?_ measurableSet_Ioi
-    intro v hv
-    change 0 < v at hv
-    change Real.exp (-a * v) = Real.exp (-a * |v|)
-    rw [abs_of_pos hv]
-  have hw : Integrable (fun v : ℝ => Real.exp (-a * |v|)) := by
-    have h := hi.union hj
-    rwa [Iic_union_Ioi, integrableOn_univ] at h
+  calc c i * Complex.exp ((γ i : ℂ) * (v : ℂ) * Complex.I) *
+        (starRingEnd ℂ (c j) * Complex.exp (-((γ j : ℂ) * (v : ℂ) * Complex.I))) *
+        Complex.exp (((-(a * |v|) : ℝ) : ℂ) + ((0 : ℝ) : ℂ) * (v : ℂ) * Complex.I)
+      = c i * starRingEnd ℂ (c j) * (Complex.exp ((γ i : ℂ) * (v : ℂ) * Complex.I) *
+        Complex.exp (-((γ j : ℂ) * (v : ℂ) * Complex.I)) *
+        Complex.exp (((-(a * |v|) : ℝ) : ℂ) + ((0 : ℝ) : ℂ) * (v : ℂ) * Complex.I)) := by ring
+    _ = c i * starRingEnd ℂ (c j) *
+        Complex.exp (((-(a * |v|) : ℝ) : ℂ) + ((γ i - γ j : ℝ) : ℂ) * (v : ℂ) * Complex.I) := by
+        rw [hsum]
+
+/-- The exact identity: `∫ |F|² e^{-a|v|} = Σ_{i,j} a_i conj(a_j) 2a/(a² + (γ_i - γ_j)²)`. -/
+private theorem integral_normSq_ga {ι : Type*} (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ)
+    (a : ℝ) (ha : 0 < a) :
+    (((∫ v, ‖SmoothKernel.F s c γ v‖ ^ 2 * wa a v : ℝ)) : ℂ)
+      = ∑ i ∈ s, ∑ j ∈ s, c i * starRingEnd ℂ (c j) * (Ka a (γ i - γ j) : ℂ) := by
+  rw [← integral_complex_ofReal]
+  have e : (fun v => (((‖SmoothKernel.F s c γ v‖ ^ 2 * wa a v : ℝ)) : ℂ))
+      = fun v => ∑ i ∈ s, ∑ j ∈ s, c i * starRingEnd ℂ (c j) * ga a (γ i - γ j) v := by
+    funext v; push_cast; rw [← normSq_F_ga]; push_cast; ring
+  rw [e, integral_finsetSum _ (fun i _ => integrable_finsetSum _
+    (fun j _ => (integrable_ga ha (t := γ i - γ j)).const_mul _))]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [integral_finsetSum _ (fun j _ => (integrable_ga ha (t := γ i - γ j)).const_mul _)]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [integral_const_mul, integral_ga a (γ i - γ j) ha]
+
+private theorem Ka_comm (a s t : ℝ) : Ka a (s - t) = Ka a (t - s) := by
+  unfold Ka; rw [show s - t = -(t - s) by ring, sq, sq]; ring
+
+/-- The diagonal bound: `∫ |F|² e^{-a|v|} ≤ Σ_i |c_i|² Σ_j 2a/(a² + (γ_i - γ_j)²)`. -/
+private theorem integral_normSq_ga_le {ι : Type*} (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ)
+    (a : ℝ) (ha : 0 < a) :
+    ∫ v, ‖SmoothKernel.F s c γ v‖ ^ 2 * wa a v
+      ≤ ∑ i ∈ s, ‖c i‖ ^ 2 * ∑ j ∈ s, Ka a (γ i - γ j) := by
+  have h := integral_normSq_ga s c γ a ha
+  set Nrm := ∫ v, ‖SmoothKernel.F s c γ v‖ ^ 2 * wa a v
+  have hre : Nrm = (∑ i ∈ s, ∑ j ∈ s, c i * starRingEnd ℂ (c j) * (Ka a (γ i - γ j) : ℂ)).re := by
+    rw [← h]; simp
+  have step : ∀ i j, (c i * starRingEnd ℂ (c j) * (Ka a (γ i - γ j) : ℂ)).re
+      ≤ (‖c i‖ ^ 2 + ‖c j‖ ^ 2) / 2 * Ka a (γ i - γ j) := by
+    intro i j
+    have h1 : (c i * starRingEnd ℂ (c j) * (Ka a (γ i - γ j) : ℂ)).re
+        ≤ ‖c i * starRingEnd ℂ (c j) * (Ka a (γ i - γ j) : ℂ)‖ := Complex.re_le_norm _
+    have h2 : ‖c i * starRingEnd ℂ (c j) * (Ka a (γ i - γ j) : ℂ)‖
+        = ‖c i‖ * ‖c j‖ * Ka a (γ i - γ j) := by
+      rw [norm_mul, norm_mul, Complex.norm_conj, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonneg (Ka_nonneg ha)]
+    have h3 : ‖c i‖ * ‖c j‖ ≤ (‖c i‖ ^ 2 + ‖c j‖ ^ 2) / 2 := by
+      nlinarith [sq_nonneg (‖c i‖ - ‖c j‖)]
+    have h4 := mul_le_mul_of_nonneg_right h3 (Ka_nonneg (t := γ i - γ j) ha)
+    linarith
+  rw [hre, Complex.re_sum]
+  calc ∑ i ∈ s, (∑ j ∈ s, c i * starRingEnd ℂ (c j) * (Ka a (γ i - γ j) : ℂ)).re
+      ≤ ∑ i ∈ s, ∑ j ∈ s, (‖c i‖ ^ 2 + ‖c j‖ ^ 2) / 2 * Ka a (γ i - γ j) := by
+        refine Finset.sum_le_sum fun i _ => ?_
+        rw [Complex.re_sum]
+        exact Finset.sum_le_sum fun j _ => step i j
+    _ = ∑ i ∈ s, ‖c i‖ ^ 2 * ∑ j ∈ s, Ka a (γ i - γ j) := by
+        have e1 : ∑ i ∈ s, ∑ j ∈ s, (‖c i‖ ^ 2 + ‖c j‖ ^ 2) / 2 * Ka a (γ i - γ j)
+            = (∑ i ∈ s, ∑ j ∈ s, ‖c i‖ ^ 2 * Ka a (γ i - γ j)) / 2
+              + (∑ i ∈ s, ∑ j ∈ s, ‖c j‖ ^ 2 * Ka a (γ i - γ j)) / 2 := by
+          rw [Finset.sum_div, Finset.sum_div, ← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [Finset.sum_div, Finset.sum_div, ← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl fun j _ => ?_
+          ring
+        have e2 : ∑ i ∈ s, ∑ j ∈ s, ‖c j‖ ^ 2 * Ka a (γ i - γ j)
+            = ∑ i ∈ s, ∑ j ∈ s, ‖c i‖ ^ 2 * Ka a (γ i - γ j) := by
+          rw [Finset.sum_comm]
+          refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+          rw [Ka_comm]
+        rw [e1, e2]
+        simp_rw [Finset.mul_sum]
+        ring
+
+private theorem integrable_Fwa {ι : Type*} (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ)
+    {a : ℝ} (ha : 0 < a) : Integrable (fun v => ‖SmoothKernel.F s c γ v‖ ^ 2 * wa a v) := by
   set B := ∑ i ∈ s, ‖c i‖
-  have hb : ∀ v, ‖F s c γ v‖ ≤ B := by
-    intro v
-    unfold LeanLab.ChirreHagen2025.SmoothKernel.F
+  have hb : ∀ v, ‖SmoothKernel.F s c γ v‖ ≤ B := by
+    intro v; unfold SmoothKernel.F
     refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_)
-    rw [norm_mul, Complex.norm_exp]
-    simp
-  refine (hw.const_mul (B ^ 2)).mono' ?_ (Filter.Eventually.of_forall fun v => ?_)
-  · apply Continuous.aestronglyMeasurable
-    apply Continuous.mul ((continuous_F s c γ).norm.pow 2)
-    fun_prop
-  · rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
-    exact mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (norm_nonneg _) (hb v) 2)
-      (Real.exp_pos _).le
+    rw [norm_mul, Complex.norm_exp]; simp
+  refine (integrable_wa ha).const_mul (B ^ 2) |>.mono'
+    (((continuous_F s c γ).norm.pow 2).mul (continuous_wa a)).aestronglyMeasurable
+    (Filter.Eventually.of_forall fun v => ?_)
+  have hw : 0 ≤ wa a v := wa_nonneg_aux a v
+  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+  have := pow_le_pow_left₀ (norm_nonneg _) (hb v) 2
+  nlinarith
+
+/-- The substitution `y = x e^v` for the weight `W_a`. -/
+private theorem integral_P_Wa {ι : Type*} (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ) (a : ℝ)
+    {x : ℝ} (hx : 0 < x) :
+    ∫ y in Ioi 0, ‖P s c γ y‖ ^ 2 * Wa a (y / x)
+      = x ^ 2 * ∫ v, ‖SmoothKernel.F s (cx c γ x) γ v‖ ^ 2 * wa a v := by
+  have h1 := integral_comp_mul_left_Ioi (fun y => ‖P s c γ y‖ ^ 2 * Wa a (y / x)) 0 hx
+  rw [mul_zero] at h1
+  have h2 := integral_comp_exp (fun u => ‖P s c γ (x * u)‖ ^ 2 * Wa a (x * u / x))
+  rw [← h2, smul_eq_mul] at h1
+  have e : (fun v => Real.exp v • (‖P s c γ (x * Real.exp v)‖ ^ 2 * Wa a (x * Real.exp v / x)))
+      = fun v => x * (‖SmoothKernel.F s (cx c γ x) γ v‖ ^ 2 * wa a v) := by
+    funext v
+    rw [smul_eq_mul, normSq_P_exp s c γ hx, mul_div_cancel_left₀ _ hx.ne', ← exp_Wa a v]
+    ring
+  rw [e, integral_const_mul] at h1
+  have : ∫ y in Ioi 0, ‖P s c γ y‖ ^ 2 * Wa a (y / x)
+      = x * (x⁻¹ * ∫ y in Ioi 0, ‖P s c γ y‖ ^ 2 * Wa a (y / x)) := by
+    field_simp
+  rw [this, ← h1]; ring
+
+/-! ### Open leaves: SmoothY for the weight `w_a` -/
 
 /-- LEAF. Unit U-1556. SmoothY `integrableOn_P_W` for `w_a`: for `a > 0`, `x > 0` and a finite
 sum `P(y) = Σ_i c_i y^{1/2 + iγ_i}`, `|P(y)|² W_a(y/x)` is integrable on `y > 0`.
 Plain math: `|P(y)|² ≪ y`, and `y · y^{a-2}` near 0, `y · y^{-2-a}` near ∞ are integrable. -/
 theorem integrableOn_P_Wa {a : ℝ} (ha : 0 < a) (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ) {x : ℝ}
     (hx : 0 < x) : IntegrableOn (fun y => ‖P s c γ y‖ ^ 2 * Wa a (y / x)) (Ioi 0) := by
-  have hF := (integrable_Fwa ha s (cx c γ x) γ).const_mul x
-  have e : (fun v => x * (‖F s (cx c γ x) γ v‖ ^ 2 * Real.exp (-a * |v|)))
+  have hF := (integrable_Fwa s (cx c γ x) γ ha).const_mul x
+  have e : (fun v => x * (‖SmoothKernel.F s (cx c γ x) γ v‖ ^ 2 * wa a v))
       = fun v => Real.exp v • (‖P s c γ (x * Real.exp v)‖ ^ 2 * Wa a (x * Real.exp v / x)) := by
     funext v
     rw [smul_eq_mul, normSq_P_exp s c γ hx, mul_div_cancel_left₀ _ hx.ne', ← exp_Wa a v]
@@ -153,55 +334,6 @@ theorem integrableOn_P_Wa {a : ℝ} (ha : 0 < a) (s : Finset ι) (c : ι → ℂ
     (fun y => ‖P s c γ y‖ ^ 2 * Wa a (y / x)) 0 hx).mp hF
   rwa [mul_zero] at h
 
-/-- Rescaling the existing SmoothKernel bound gives the kernel at every positive decay rate. -/
-theorem integral_Fwa_le {a : ℝ} (ha : 0 < a) (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ) :
-    ∫ v, ‖F s c γ v‖ ^ 2 * Real.exp (-a * |v|)
-      ≤ ∑ i ∈ s, ‖c i‖ ^ 2 * ∑ j ∈ s, Ka a (γ i - γ j) := by
-  let r : ℝ := 2 / a
-  have hr : 0 < r := by dsimp [r]; positivity
-  have har : a * r = 2 := by dsimp [r]; field_simp
-  have he : (fun v => ‖F s c γ (r * v)‖ ^ 2 * Real.exp (-a * |r * v|)) =
-      fun v => ‖F s c (fun i => γ i * r) v‖ ^ 2 * w v := by
-    funext v
-    have hF : F s c γ (r * v) = F s c (fun i => γ i * r) v := by
-      unfold LeanLab.ChirreHagen2025.SmoothKernel.F
-      apply Finset.sum_congr rfl
-      intro i hi
-      congr 2
-      push_cast
-      ring
-    rw [hF, abs_mul, abs_of_pos hr]
-    congr 2
-    calc -a * (r * |v|) = -(a * r) * |v| := by ring
-      _ = -2 * |v| := by rw [har]
-  have hchange := MeasureTheory.Measure.integral_comp_mul_left
-    (fun v => ‖F s c γ v‖ ^ 2 * Real.exp (-a * |v|)) r
-  rw [he, abs_of_pos (inv_pos.mpr hr), smul_eq_mul] at hchange
-  have hbound := mul_le_mul_of_nonneg_left (integral_normSq_le s c (fun i => γ i * r)) hr.le
-  have hK : ∀ u v : ℝ, r * K (u * r - v * r) = Ka a (u - v) := by
-    intro u v
-    dsimp [r, K, Ka]
-    have ha0 : a ≠ 0 := ha.ne'
-    have hden : a ^ 2 + (u - v) ^ 2 ≠ 0 := ne_of_gt (by positivity)
-    field_simp
-    <;> ring
-  have hsum : r * (∑ i ∈ s, ‖c i‖ ^ 2 * ∑ j ∈ s, K (γ i * r - γ j * r)) =
-      ∑ i ∈ s, ‖c i‖ ^ 2 * ∑ j ∈ s, Ka a (γ i - γ j) := by
-    rw [Finset.mul_sum]
-    apply Finset.sum_congr rfl
-    intro i hi
-    rw [← mul_assoc, mul_comm r, mul_assoc, Finset.mul_sum]
-    congr 1
-    apply Finset.sum_congr rfl
-    intro j hj
-    exact hK _ _
-  rw [hsum] at hbound
-  have hid : r * (∫ v, ‖F s c (fun i => γ i * r) v‖ ^ 2 * w v) =
-      ∫ v, ‖F s c γ v‖ ^ 2 * Real.exp (-a * |v|) := by
-    rw [hchange]
-    field_simp
-  rwa [hid] at hbound
-
 /-- LEAF. Unit U-1556. SmoothY `integral_P_W_le` for `w_a`: for `a > 0`, `x > 0`,
 `∫_0^∞ |P(y)|² W_a(y/x) dy ≤ x² Σ_i |c_i|² Σ_j 2a/(a² + (γ_i - γ_j)²)`.
 Plain math: `y = x e^v` turns the left side into `x² ∫ |Σ_i c_i x^{iγ_i} e^{iγ_i v}|² e^{-a|v|} dv`;
@@ -210,25 +342,10 @@ theorem integral_P_Wa_le {a : ℝ} (ha : 0 < a) (s : Finset ι) (c : ι → ℂ)
     (hx : 0 < x) :
     ∫ y in Ioi 0, ‖P s c γ y‖ ^ 2 * Wa a (y / x)
       ≤ x ^ 2 * ∑ i ∈ s, ‖c i‖ ^ 2 * ∑ j ∈ s, Ka a (γ i - γ j) := by
-  have h1 := integral_comp_mul_left_Ioi
-    (fun y => ‖P s c γ y‖ ^ 2 * Wa a (y / x)) 0 hx
-  rw [mul_zero] at h1
-  have h2 := integral_comp_exp (fun u => ‖P s c γ (x * u)‖ ^ 2 * Wa a (x * u / x))
-  rw [← h2, smul_eq_mul] at h1
-  have e : (fun v => Real.exp v • (‖P s c γ (x * Real.exp v)‖ ^ 2 * Wa a (x * Real.exp v / x)))
-      = fun v => x * (‖F s (cx c γ x) γ v‖ ^ 2 * Real.exp (-a * |v|)) := by
-    funext v
-    rw [smul_eq_mul, normSq_P_exp s c γ hx, mul_div_cancel_left₀ _ hx.ne', ← exp_Wa a v]
-    ring
-  rw [e, integral_const_mul] at h1
-  have he : (∫ y in Ioi 0, ‖P s c γ y‖ ^ 2 * Wa a (y / x)) =
-      x ^ 2 * ∫ v, ‖F s (cx c γ x) γ v‖ ^ 2 * Real.exp (-a * |v|) := by
-    have h := congrArg (fun r : ℝ => x * r) h1
-    field_simp at h
-    simpa only [neg_mul] using h.symm
-  rw [he]
-  apply mul_le_mul_of_nonneg_left _ (sq_nonneg x)
-  simpa only [norm_cx c γ hx] using integral_Fwa_le ha s (cx c γ x) γ
+  rw [integral_P_Wa s c γ a hx]
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  have h := integral_normSq_ga_le s (cx c γ x) γ a ha
+  simpa [norm_cx c γ hx] using h
 
 /-- The weighted ψ form for `W_a`, CONDITIONAL ON the two leaves above, ExplicitA and
 `HadamardKa a`, for any bound `B₀` on `Σ |c_i|² log|γ_i|`. Real proof via `fatou_weighted`.
@@ -255,81 +372,111 @@ theorem A_sq_Wa_le {a : ℝ} (ha : 0 < a) {γ : ι → ℝ} {Z : ℕ → Finset 
   have m5 := mul_le_mul_of_nonneg_left (m3.trans (hD (Z n))) (sq_nonneg X)
   linarith
 
-/-! ### Open leaves: the ψ to θ step for `W_{3/2}` -/
+/-! ### Private helpers for `bias_Wa_le` -/
 
-/-- Exponential form of a power moment of Wa. -/
-theorem exp_Wa_moment (a q v : ℝ) :
-    Real.exp v * (Real.exp v) ^ q * Wa a (Real.exp v) =
-      Real.exp ((q - 1) * v - a * |v|) := by
-  rw [Real.rpow_def_of_pos (Real.exp_pos v), Real.log_exp]
+private theorem Wa_32_eq_of_pos {u : ℝ} (hu : 0 < u) :
+    Wa (3 / 2) u = if u ≤ 1 then u ^ (-(1 / 2) : ℝ) else u ^ (-(7 / 2) : ℝ) := by
   unfold Wa
-  split_ifs with h
-  · have hv : v ≤ 0 := Real.exp_le_one_iff.mp h
-    rw [abs_of_pos (Real.exp_pos v), Real.rpow_def_of_pos (Real.exp_pos v),
-      Real.log_exp, abs_of_nonpos hv, ← Real.exp_add, ← Real.exp_add]
-    congr 1
-    ring
-  · have hv : 0 < v := Real.one_lt_exp_iff.mp (lt_of_not_ge h)
-    rw [Real.rpow_def_of_pos (Real.exp_pos v), Real.log_exp, abs_of_pos hv,
-      ← Real.exp_add, ← Real.exp_add]
-    congr 1
-    ring
+  have h1 : (3 : ℝ) / 2 - 2 = -(1 / 2) := by norm_num
+  have h2 : -2 - (3 : ℝ) / 2 = -(7 / 2) := by norm_num
+  rw [h1, h2, abs_of_pos hu]
 
-/-- The convergent power moments of Wa have an elementary exact value. -/
-theorem Wa_moment {a q x : ℝ} (hx : 0 < x) (hl : 0 < q + a - 1) (hr : q - a - 1 < 0) :
-    IntegrableOn (fun y : ℝ => y ^ q * Wa a (y / x)) (Ioi 0) ∧
-      (∫ y in Ioi 0, y ^ q * Wa a (y / x)) =
-        x * x ^ q * (1 / (q + a - 1) - 1 / (q - a - 1)) := by
-  let g : ℝ → ℝ := fun v => Real.exp ((q - 1) * v - a * |v|)
-  have heL : ∀ v ∈ Iic (0 : ℝ), g v = Real.exp ((q + a - 1) * v) := by
-    intro v hv
-    change v ≤ 0 at hv
-    dsimp [g]
-    rw [abs_of_nonpos hv]
-    congr 1
-    ring
-  have heR : ∀ v ∈ Ioi (0 : ℝ), g v = Real.exp ((q - a - 1) * v) := by
-    intro v hv
-    change 0 < v at hv
-    dsimp [g]
-    rw [abs_of_pos hv]
-    congr 1
-    ring
-  have hiL : IntegrableOn g (Iic 0) :=
-    (integrableOn_exp_mul_Iic hl 0).congr_fun (fun v hv => (heL v hv).symm) measurableSet_Iic
-  have hiR : IntegrableOn g (Ioi 0) :=
-    (integrableOn_exp_mul_Ioi hr 0).congr_fun (fun v hv => (heR v hv).symm) measurableSet_Ioi
-  have hi : Integrable g := by
-    have h := hiL.union hiR
-    rwa [Iic_union_Ioi, integrableOn_univ] at h
-  have hIg : (∫ v, g v) = 1 / (q + a - 1) - 1 / (q - a - 1) := by
-    rw [← intervalIntegral.integral_Iic_add_Ioi hiL hiR]
-    rw [setIntegral_congr_fun measurableSet_Iic heL,
-      setIntegral_congr_fun measurableSet_Ioi heR,
-      integral_exp_mul_Iic hl, integral_exp_mul_Ioi hr]
-    simp
-    ring
-  have he : (fun v => Real.exp v • ((x * Real.exp v) ^ q * Wa a (x * Real.exp v / x))) =
-      fun v => x ^ q * g v := by
-    funext v
-    rw [smul_eq_mul, mul_div_cancel_left₀ _ hx.ne', Real.mul_rpow hx.le (Real.exp_pos v).le]
-    calc Real.exp v * (x ^ q * (Real.exp v) ^ q * Wa a (Real.exp v)) =
-        x ^ q * (Real.exp v * (Real.exp v) ^ q * Wa a (Real.exp v)) := by ring
-      _ = _ := by rw [exp_Wa_moment]
-  have hcomp : IntegrableOn (fun u => (x * u) ^ q * Wa a (x * u / x)) (Ioi 0) := by
-    apply (integrable_comp_exp _).mp
+private theorem div_rpow_neg_half {y X : ℝ} (hy : 0 < y) (hX : 0 < X) :
+    (y / X) ^ (-(1 / 2) : ℝ) = X ^ (1 / 2 : ℝ) * y ^ (-(1 / 2) : ℝ) := by
+  have hyn : y ^ (-(1 / 2) : ℝ) = (y ^ (1 / 2 : ℝ))⁻¹ := by
+    rw [show (-(1 / 2) : ℝ) = -(1 / 2) by norm_num, Real.rpow_neg hy.le]
+  have hXn : X ^ (-(1 / 2) : ℝ) = (X ^ (1 / 2 : ℝ))⁻¹ := by
+    rw [show (-(1 / 2) : ℝ) = -(1 / 2) by norm_num, Real.rpow_neg hX.le]
+  rw [Real.div_rpow hy.le hX.le, hyn, hXn]
+  have h1 : y ^ (1 / 2 : ℝ) ≠ 0 := (Real.rpow_pos_of_pos hy _).ne'
+  have h2 : X ^ (1 / 2 : ℝ) ≠ 0 := (Real.rpow_pos_of_pos hX _).ne'
+  field_simp
+
+private theorem div_rpow_neg_seven {y X : ℝ} (hy : 0 < y) (hX : 0 < X) :
+    (y / X) ^ (-(7 / 2) : ℝ) = X ^ (7 / 2 : ℝ) * y ^ (-(7 / 2) : ℝ) := by
+  have hyn : y ^ (-(7 / 2) : ℝ) = (y ^ (7 / 2 : ℝ))⁻¹ := by
+    rw [show (-(7 / 2) : ℝ) = -(7 / 2) by norm_num, Real.rpow_neg hy.le]
+  have hXn : X ^ (-(7 / 2) : ℝ) = (X ^ (7 / 2 : ℝ))⁻¹ := by
+    rw [show (-(7 / 2) : ℝ) = -(7 / 2) by norm_num, Real.rpow_neg hX.le]
+  rw [Real.div_rpow hy.le hX.le, hyn, hXn]
+  have h1 : y ^ (7 / 2 : ℝ) ≠ 0 := (Real.rpow_pos_of_pos hy _).ne'
+  have h2 : X ^ (7 / 2 : ℝ) ≠ 0 := (Real.rpow_pos_of_pos hX _).ne'
+  field_simp
+
+private theorem Wa_32_div_spec {X : ℝ} (hX : 2 ≤ X) :
+    IntegrableOn (fun y => Wa (3 / 2) (y / X)) (Ioi 2) ∧
+      ∫ y in Ioi 2, Wa (3 / 2) (y / X) ≤ 3 * X := by
+  have hX0 : 0 < X := by linarith
+  have hc1 : ∀ y ∈ Ioc (2 : ℝ) X, Wa (3 / 2) (y / X) = X ^ (1 / 2 : ℝ) * y ^ (-(1 / 2) : ℝ) := by
+    intro y hy
+    have hy0 : 0 < y := by linarith [hy.1]
+    have hyX : y / X ≤ 1 := (div_le_one hX0).mpr hy.2
+    rw [Wa_32_eq_of_pos (div_pos hy0 hX0), if_pos hyX, div_rpow_neg_half hy0 hX0]
+  have hi1 : IntegrableOn (fun y => Wa (3 / 2) (y / X)) (Ioc 2 X) := by
+    have hb : IntegrableOn (fun y : ℝ => X ^ (1 / 2 : ℝ) * y ^ (-(1 / 2) : ℝ)) (Ioc 2 X) := by
+      rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le hX]
+      exact (intervalIntegral.intervalIntegrable_rpow' (a := (2 : ℝ)) (b := X)
+        (by norm_num : (-1 : ℝ) < -(1 / 2))).const_mul _
+    exact hb.congr_fun (fun y hy => (hc1 y hy).symm) measurableSet_Ioc
+  have hc2 : ∀ y ∈ Ioi X, Wa (3 / 2) (y / X) = X ^ (7 / 2 : ℝ) * y ^ (-(7 / 2) : ℝ) := by
+    intro y hy
+    have hygt : (X : ℝ) < y := hy
+    have hy0 : 0 < y := by linarith
+    have hyX : ¬ (y / X ≤ 1) := by rw [div_le_one hX0]; linarith
+    rw [Wa_32_eq_of_pos (div_pos hy0 hX0), if_neg hyX, div_rpow_neg_seven hy0 hX0]
+  have hi2 : IntegrableOn (fun y => Wa (3 / 2) (y / X)) (Ioi X) := by
+    have hb : IntegrableOn (fun y : ℝ => X ^ (7 / 2 : ℝ) * y ^ (-(7 / 2) : ℝ)) (Ioi X) :=
+      (integrableOn_Ioi_rpow_of_lt (a := (-(7 / 2) : ℝ)) (by norm_num) hX0).const_mul _
+    exact hb.congr_fun (fun y hy => (hc2 y hy).symm) measurableSet_Ioi
+  have hp1 : ∫ y in Ioc (2 : ℝ) X, Wa (3 / 2) (y / X) ≤ 2 * X := by
+    rw [setIntegral_congr_fun measurableSet_Ioc hc1, integral_const_mul,
+      ← intervalIntegral.integral_of_le hX,
+      integral_rpow (Or.inl (by norm_num : (-1 : ℝ) < -(1 / 2)))]
+    have h1 : (-(1 / 2) : ℝ) + 1 = 1 / 2 := by norm_num
+    rw [h1]
+    have hpos : 0 ≤ X ^ (1 / 2 : ℝ) := Real.rpow_nonneg hX0.le _
+    have hX1 : X ^ (1 / 2 : ℝ) * X ^ (1 / 2 : ℝ) = X := by
+      rw [← Real.rpow_add hX0]; norm_num
+    have h2p : 0 ≤ (2 : ℝ) ^ (1 / 2 : ℝ) := Real.rpow_nonneg (by norm_num) _
+    have hpp : 0 ≤ X ^ (1 / 2 : ℝ) * (2 : ℝ) ^ (1 / 2 : ℝ) := mul_nonneg hpos h2p
+    nlinarith [hpp, hX1]
+  have hp2 : ∫ y in Ioi X, Wa (3 / 2) (y / X) ≤ (2 / 5) * X := by
+    rw [setIntegral_congr_fun measurableSet_Ioi hc2, integral_const_mul,
+      integral_Ioi_rpow_of_lt (a := (-(7 / 2) : ℝ)) (by norm_num) hX0]
+    have h5 : (-(7 / 2) : ℝ) + 1 = -(5 / 2) := by norm_num
+    rw [h5]
+    have hX1 : X ^ (7 / 2 : ℝ) * X ^ (-(5 / 2) : ℝ) = X := by
+      rw [← Real.rpow_add hX0]; norm_num
+    have hsimpl : -(X ^ (-(5 / 2) : ℝ)) / (-(5 / 2) : ℝ) = (2 / 5) * X ^ (-(5 / 2) : ℝ) := by
+      field_simp
+    rw [hsimpl]
+    have he : X ^ (7 / 2 : ℝ) * ((2 / 5) * X ^ (-(5 / 2) : ℝ)) = (2 / 5) * X := by
+      rw [← mul_assoc, mul_comm (X ^ (7 / 2 : ℝ)) (2 / 5), mul_assoc, hX1]
     rw [he]
-    exact hi.const_mul _
-  have hI := (integrableOn_Ioi_comp_mul_left_iff
-    (fun y : ℝ => y ^ q * Wa a (y / x)) 0 hx).mp hcomp
-  rw [mul_zero] at hI
-  refine ⟨hI, ?_⟩
-  have hscale := integral_comp_mul_left_Ioi (fun y : ℝ => y ^ q * Wa a (y / x)) 0 hx
-  rw [mul_zero, ← integral_comp_exp (fun u => (x * u) ^ q * Wa a (x * u / x)),
-    he, integral_const_mul, hIg, smul_eq_mul] at hscale
-  have h := congrArg (fun r : ℝ => x * r) hscale
-  rw [← mul_assoc x x⁻¹, mul_inv_cancel₀ hx.ne', one_mul] at h
-  simpa only [mul_assoc] using h.symm
+  have hdisj : Disjoint (Ioc (2 : ℝ) X) (Ioi X) := by
+    rw [disjoint_left]
+    intro y hy1 hy2
+    simp only [mem_Ioc] at hy1
+    simp only [mem_Ioi] at hy2
+    linarith
+  have hset : Ioi (2 : ℝ) = Ioc 2 X ∪ Ioi X := by
+    ext y
+    simp only [mem_Ioi, mem_union, mem_Ioc]
+    constructor
+    · intro hy
+      rcases le_or_gt y X with h | h
+      · exact Or.inl ⟨hy, h⟩
+      · exact Or.inr h
+    · rintro (⟨h1, _⟩ | h1)
+      · exact h1
+      · linarith
+  refine ⟨?_, ?_⟩
+  · rw [hset]
+    exact hi1.union hi2
+  · rw [hset, setIntegral_union hdisj measurableSet_Ioi hi1 hi2]
+    linarith
+
+/-! ### Open leaves: the ψ to θ step for `W_{3/2}` -/
 
 /-- LEAF. Unit U-1556. For `0 < δ ≤ 1`, `X ≥ 2`: `B_δ(y)² W_{3/2}(y/X)` is integrable on `y > 2`
 with integral at most `3δ²X`. Plain math: `B_δ² ≤ δ²` for `y ≥ 2` (lab `Bf_sq_le`), and
@@ -337,92 +484,25 @@ with integral at most `3δ²X`. Plain math: `B_δ² ≤ δ²` for `y ≥ 2` (lab
 theorem bias_Wa_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1) (hX : 2 ≤ X) :
     IntegrableOn (fun y => Bf δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Bf δ y ^ 2 * Wa (3 / 2) (y / X) ≤ 3 * δ ^ 2 * X := by
-  have hX0 : 0 < X := by linarith
-  obtain ⟨hW, hIW⟩ := Wa_moment (a := 3 / 2) (q := 0) hX0 (by norm_num) (by norm_num)
-  simp only [Real.rpow_zero, one_mul] at hW hIW
-  have hIW' : (∫ y in Ioi 0, Wa (3 / 2) (y / X)) = 12 / 5 * X := by
-    norm_num at hIW
-    linarith only [hIW]
-  have hW2 := hW.mono_set (Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 2))
-  have hM := hW2.const_mul (δ ^ 2)
-  have hpt : ∀ᵐ y ∂volume.restrict (Ioi (2 : ℝ)),
-      Bf δ y ^ 2 * Wa (3 / 2) (y / X) ≤ δ ^ 2 * Wa (3 / 2) (y / X) := by
+  obtain ⟨hWint, hWb⟩ := Wa_32_div_spec hX
+  have hpt : ∀ y ∈ Ioi (2 : ℝ), Bf δ y ^ 2 * Wa (3 / 2) (y / X) ≤ δ ^ 2 * Wa (3 / 2) (y / X) := by
+    intro y hy
+    have hb : Bf δ y ^ 2 ≤ δ ^ 2 := Bf_sq_le hδ hδ1 (le_of_lt hy)
+    exact mul_le_mul_of_nonneg_right hb (Wa_nonneg _ _)
+  have hmeas : AEStronglyMeasurable (fun y : ℝ => Bf δ y ^ 2 * Wa (3 / 2) (y / X))
+      (volume.restrict (Ioi 2)) :=
+    (((measurable_Bf δ).pow_const 2).mul (measurable_Wa_div (3 / 2) X)).aestronglyMeasurable
+  have hprod : IntegrableOn (fun y => Bf δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
+    refine Integrable.mono' (hWint.const_mul (δ ^ 2)) hmeas ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with y hy
-    exact mul_le_mul_of_nonneg_right (Bf_sq_le hδ hδ1 hy.le) (Wa_nonneg _ _)
-  have hB : IntegrableOn (fun y => Bf δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
-    apply hM.mono' (((measurable_Bf δ).pow_const 2).mul (measurable_Wa_div _ _)).aestronglyMeasurable
-    filter_upwards [hpt] with y hy
-    change ‖Bf δ y ^ 2 * Wa (3 / 2) (y / X)‖ ≤ δ ^ 2 * Wa (3 / 2) (y / X)
     rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (sq_nonneg _) (Wa_nonneg _ _))]
-    exact hy
-  refine ⟨hB, ?_⟩
-  have hmono := integral_mono_ae hB hM hpt
+    exact hpt y hy
+  refine ⟨hprod, ?_⟩
+  have hmono := setIntegral_mono_on hprod (hWint.const_mul (δ ^ 2)) measurableSet_Ioi hpt
   rw [integral_const_mul] at hmono
-  have hsub : (∫ y in Ioi 2, Wa (3 / 2) (y / X)) ≤ ∫ y in Ioi 0, Wa (3 / 2) (y / X) :=
-    setIntegral_mono_set hW (Filter.Eventually.of_forall (fun y => Wa_nonneg _ _))
-      (Filter.Eventually.of_forall (Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 2)))
-  rw [hIW'] at hsub
-  have hfinal := mul_le_mul_of_nonneg_left hsub (sq_nonneg δ)
-  nlinarith [mul_nonneg (sq_nonneg δ) hX0.le]
-
-/-- The elementary Chebyshev bound proves integrability but has cubic centre dependence. -/
-theorem dqt_Wa_elementary {δ X : ℝ} (hδ : 0 < δ) (hX : 0 < X) :
-    IntegrableOn (fun y => Dqt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) ∧
-      (∫ y in Ioi 2, Dqt δ y ^ 2 * Wa (3 / 2) (y / X)) ≤
-        588 / 5 * (1 + δ) ^ 2 * X ^ 3 := by
-  obtain ⟨hW, hIW⟩ := Wa_moment (a := 3 / 2) (q := 2) hX (by norm_num) (by norm_num)
-  simp only [Real.rpow_two] at hW hIW
-  have hIW' : (∫ y in Ioi 0, y ^ 2 * Wa (3 / 2) (y / X)) = 12 / 5 * X ^ 3 := by
-    norm_num at hIW
-    nlinarith only [hIW]
-  have hW2 := hW.mono_set (Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 2))
-  have hM := hW2.const_mul (49 * (1 + δ) ^ 2)
-  have hpt : ∀ᵐ y ∂volume.restrict (Ioi (2 : ℝ)),
-      Dqt δ y ^ 2 * Wa (3 / 2) (y / X) ≤
-        (49 * (1 + δ) ^ 2) * (y ^ 2 * Wa (3 / 2) (y / X)) := by
-    filter_upwards [ae_restrict_mem measurableSet_Ioi] with y hy
-    have hy0 : 0 ≤ y := by linarith [show 2 < y from hy]
-    have hD0 : 0 ≤ Dqt δ y := by
-      simpa only [Dqt, Dpt, fpt] using Dpt_nonneg hδ.le hy0
-    have hp := psi_le_const_mul_self (x := (1 + δ) * y) (by positivity)
-    have hlog := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 4)
-    have hp7 : ψ ((1 + δ) * y) ≤ 7 * ((1 + δ) * y) :=
-      hp.trans (mul_le_mul_of_nonneg_right (by linarith) (by positivity))
-    have hd : Dqt δ y ≤ 7 * (1 + δ) * y := by
-      unfold Dqt
-      linarith [theta_nonneg ((1 + δ) * y), theta_le_psi y]
-    have hs : Dqt δ y ^ 2 ≤ 49 * (1 + δ) ^ 2 * y ^ 2 := by
-      have hh := mul_le_mul hd hd hD0 (by positivity)
-      nlinarith only [hh]
-    have hh := mul_le_mul_of_nonneg_right hs (Wa_nonneg (3 / 2) (y / X))
-    nlinarith only [hh]
-  have hD : IntegrableOn (fun y => Dqt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
-    apply hM.mono' (((measurable_Dqt δ).pow_const 2).mul (measurable_Wa_div _ _)).aestronglyMeasurable
-    filter_upwards [hpt] with y hy
-    change ‖Dqt δ y ^ 2 * Wa (3 / 2) (y / X)‖ ≤ (49 * (1 + δ) ^ 2) * (y ^ 2 * Wa (3 / 2) (y / X))
-    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (sq_nonneg _) (Wa_nonneg _ _))]
-    exact hy
-  refine ⟨hD, ?_⟩
-  have hmono := integral_mono_ae hD hM hpt
-  rw [integral_const_mul] at hmono
-  have hsub : (∫ y in Ioi 2, y ^ 2 * Wa (3 / 2) (y / X)) ≤
-      ∫ y in Ioi 0, y ^ 2 * Wa (3 / 2) (y / X) :=
-    setIntegral_mono_set hW
-      (Filter.Eventually.of_forall (fun y => mul_nonneg (sq_nonneg _) (Wa_nonneg _ _)))
-      (Filter.Eventually.of_forall (Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 2)))
-  rw [hIW'] at hsub
-  have hfinal := mul_le_mul_of_nonneg_left hsub (by positivity : 0 ≤ 49 * (1 + δ) ^ 2)
-  nlinarith only [hmono, hfinal]
-
-/-- The elementary cubic majorant exceeds the requested bound at its threshold. -/
-theorem elementary_dqt_bound_exceeds_target_at_threshold :
-    1 / (10 : ℝ) ^ 6 * (1 / 10 ^ 13) * Real.log (2.0001 / (1 / 10 ^ 13)) ^ 2 * (10 ^ 13) ^ 2 <
-      588 / 5 * (1 + 1 / 10 ^ 13) ^ 2 * (10 ^ 13) ^ 3 := by
-  have h0 : 0 ≤ Real.log (2.0001 / (1 / (10 : ℝ) ^ 13)) := Real.log_nonneg (by norm_num)
-  have hlog := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2.0001 / (1 / (10 : ℝ) ^ 13))
-  have hs := pow_le_pow_left₀ h0 hlog 2
-  norm_num at hs ⊢
-  nlinarith only [hs]
+  have h3 : δ ^ 2 * ∫ y in Ioi 2, Wa (3 / 2) (y / X) ≤ δ ^ 2 * (3 * X) :=
+    mul_le_mul_of_nonneg_left hWb (sq_nonneg δ)
+  nlinarith
 
 /-- LEAF. Unit U-1556. Unconditional: for `0 < δ ≤ 10^-13`, `X ≥ 10^13`, with
 `D = (ψ - θ)((1+δ)y) - (ψ - θ)(y)`, `D² W_{3/2}(y/X)` is integrable on `y > 2` and its integral
@@ -432,7 +512,6 @@ theorem dqt_Wa_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 
     IntegrableOn (fun y => Dqt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Dqt δ y ^ 2 * Wa (3 / 2) (y / X)
         ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
-  refine ⟨(dqt_Wa_elementary hδ (by linarith)).1, ?_⟩
   sorry
 
 /-- CONDITIONAL INPUT, named: the θ mean square with weight `W_a` at every centre `X ≥ X0`.
@@ -711,621 +790,12 @@ theorem ee_le_weighted_a {x δ : ℝ} (hx : 128 ≤ x) (hδ : 0 < δ)
   · exact Filter.Eventually.of_forall (fun t ht => lt_of_le_of_lt ha ht.1)
 
 
-/-- The pairing weight is symmetric about one half. -/
-theorem Ua_symm (s : ℝ) : Ua (1 - s) = Ua s := by
-  unfold Ua
-  rw [sub_sub_cancel, mul_comm]
-
-/-- On the positive left half the fourth power of the weight is rational. -/
-theorem Ua_fourth_left {s : ℝ} (hs : 0 < s) (hs1 : s ≤ 1 / 2) :
-    Ua s ^ 4 = 1 / (256 * s * (1 - s) ^ 7) := by
-  have ht : 0 < 1 - s := by linarith
-  have hw1 : Wa (3 / 2) (2 * s) = (2 * s) ^ (-1 / 2 : ℝ) := by
-    unfold Wa
-    rw [if_pos (by linarith), abs_of_pos (by positivity)]
-    norm_num
-  have hw2 : Wa (3 / 2) (2 * (1 - s)) = (2 * (1 - s)) ^ (-7 / 2 : ℝ) := by
-    unfold Wa
-    split_ifs with h
-    · have he : 2 * (1 - s) = 1 := by linarith
-      simp [he]
-    · norm_num
-  have hp1 : (Wa (3 / 2) (2 * s)) ^ 2 = (2 * s)⁻¹ := by
-    rw [hw1, ← Real.rpow_mul_natCast (by positivity)]
-    norm_num [Real.rpow_neg_one]
-  have hp2 : (Wa (3 / 2) (2 * (1 - s))) ^ 2 = ((2 * (1 - s)) ^ 7)⁻¹ := by
-    rw [hw2, ← Real.rpow_mul_natCast (by positivity)]
-    norm_num [Real.rpow_neg (by positivity : 0 ≤ 2 * (1 - s))]
-  calc Ua s ^ 4 = (Ua s ^ 2) ^ 2 := by ring
-    _ = _ := by
-      rw [Ua_sq, mul_pow, hp1, hp2]
-      field_simp
-      <;> ring
-
-/-- The truncated pairing weight is bounded by one. -/
-theorem Ua_le_one_interval {s : ℝ} (hs : 1 / 64 ≤ s) (hs1 : s ≤ 63 / 64) : Ua s ≤ 1 := by
-  have hleft : ∀ t : ℝ, 1 / 64 ≤ t → t ≤ 1 / 2 → Ua t ≤ 1 := by
-    intro t ht ht1
-    have ht0 : 0 < t := by linarith
-    have htc : 0 < 1 - t := by linarith
-    have hden : 1 ≤ 256 * t * (1 - t) ^ 7 := by
-      by_cases ht8 : t ≤ 1 / 8
-      · have hp : (7 / 8 : ℝ) ^ 7 ≤ (1 - t) ^ 7 :=
-          pow_le_pow_left₀ (by norm_num) (by linarith) 7
-        have hm := mul_le_mul ht hp (by norm_num : (0 : ℝ) ≤ (7 / 8 : ℝ) ^ 7) ht0.le
-        norm_num at hm
-        nlinarith only [hm]
-      · let h := 1 - 2 * t
-        have hh0 : 0 ≤ h := by dsimp [h]; linarith
-        have hh1 : h ≤ 3 / 4 := by dsimp [h]; linarith
-        have hb : 1 + 7 * h ≤ (1 + h) ^ 7 := by
-          have hp : 0 ≤ 21 * h ^ 2 + 35 * h ^ 3 + 35 * h ^ 4 + 21 * h ^ 5 + 7 * h ^ 6 + h ^ 7 := by positivity
-          nlinarith only [hp]
-        have hm := mul_le_mul_of_nonneg_left hb (show 0 ≤ 1 - h by linarith)
-        have hk := mul_nonneg hh0 (show 0 ≤ 6 - 7 * h by linarith)
-        have he : 256 * t * (1 - t) ^ 7 = (1 - h) * (1 + h) ^ 7 := by dsimp [h]; ring
-        rw [he]
-        nlinarith only [hm, hk]
-    apply (pow_le_one_iff_of_nonneg (Ua_nonneg _) (by decide : (4 : ℕ) ≠ 0)).mp
-    rw [Ua_fourth_left ht0 ht1]
-    exact (div_le_one (by positivity)).mpr hden
-  by_cases hs2 : s ≤ 1 / 2
-  · exact hleft s hs hs2
-  · rw [← Ua_symm]
-    exact hleft (1 - s) (by linarith) (by linarith)
-
-/-- The scaled factor in the cross term is bounded on the truncated interval. -/
-theorem Ua_phi_le {s : ℝ} (hs : 1 / 64 ≤ s) (hs1 : s ≤ 63 / 64) :
-    Ua s * (1 - s) ≤ 3 / 4 := by
-  have hs0 : 0 < s := by linarith
-  have hsc : 0 < 1 - s := by linarith
-  by_cases hs4 : 1 / 4 ≤ s
-  · have hu := Ua_le_one_interval hs hs1
-    nlinarith [mul_nonneg (show 0 ≤ 1 - s by linarith) (show 0 ≤ 1 - Ua s by linarith)]
-  · have hs2 : s ≤ 1 / 2 := by linarith
-    have hp : (Ua s * (1 - s)) ^ 4 = 1 / (256 * s * (1 - s) ^ 3) := by
-      rw [mul_pow, Ua_fourth_left hs0 hs2]
-      field_simp
-      <;> ring
-    have hden : (4 / 3 : ℝ) ^ 4 ≤ 256 * s * (1 - s) ^ 3 := by
-      by_cases hs16 : s ≤ 1 / 16
-      · have hc : (15 / 16 : ℝ) ^ 3 ≤ (1 - s) ^ 3 :=
-          pow_le_pow_left₀ (by norm_num) (by linarith) 3
-        have hm := mul_le_mul hs hc (by norm_num : (0 : ℝ) ≤ (15 / 16 : ℝ) ^ 3) hs0.le
-        norm_num at hm
-        nlinarith only [hm]
-      · have hc : (3 / 4 : ℝ) ^ 3 ≤ (1 - s) ^ 3 :=
-          pow_le_pow_left₀ (by norm_num) (by linarith) 3
-        have hm := mul_le_mul (show 1 / 16 ≤ s by linarith) hc (by norm_num : (0 : ℝ) ≤ (3 / 4 : ℝ) ^ 3) hs0.le
-        norm_num at hm
-        nlinarith only [hm]
-    apply (pow_le_pow_iff_left₀ (mul_nonneg (Ua_nonneg _) hsc.le) (by norm_num : (0 : ℝ) ≤ 3 / 4) (by decide : (4 : ℕ) ≠ 0)).mp
-    rw [hp, div_le_iff₀ (by positivity)]
-    norm_num at hden ⊢
-    nlinarith only [hden]
-
-
-set_option maxHeartbeats 2000000 in
-/-- The positive left branch of the cross factor. -/
-theorem Ua_phi_left {s : ℝ} (hs : 0 < s) (hs1 : s ≤ 1 / 2) :
-    Ua s * (1 - s) = s ^ (-1 / 4 : ℝ) * (1 - s) ^ (-3 / 4 : ℝ) / 4 := by
-  have ht : 0 < 1 - s := by linarith
-  apply (pow_left_inj₀ (mul_nonneg (Ua_nonneg _) ht.le) (by positivity) (by decide : (4 : ℕ) ≠ 0)).mp
-  rw [mul_pow, Ua_fourth_left hs hs1, div_pow, mul_pow,
-    ← Real.rpow_mul_natCast hs.le, ← Real.rpow_mul_natCast ht.le]
-  norm_num [Real.rpow_neg_one, Real.rpow_neg ht.le]
-  field_simp
-  <;> ring
-
-set_option maxHeartbeats 2000000 in
-/-- The positive right branch of the cross factor. -/
-theorem Ua_phi_right {s : ℝ} (hs : 1 / 2 ≤ s) (hs1 : s < 1) :
-    Ua s * (1 - s) = (1 - s) ^ (3 / 4 : ℝ) * s ^ (-7 / 4 : ℝ) / 4 := by
-  have hs0 : 0 < s := by linarith
-  have ht : 0 < 1 - s := by linarith
-  apply (pow_left_inj₀ (mul_nonneg (Ua_nonneg _) ht.le) (by positivity) (by decide : (4 : ℕ) ≠ 0)).mp
-  rw [mul_pow, ← Ua_symm s, Ua_fourth_left ht (by linarith), sub_sub_cancel,
-    div_pow, mul_pow, ← Real.rpow_mul_natCast ht.le, ← Real.rpow_mul_natCast hs0.le]
-  norm_num [Real.rpow_neg hs0.le]
-  field_simp
-  <;> ring
-
-set_option maxHeartbeats 2000000 in
-/-- The derivative of the explicitly scaled left branch is three quarters times Ua. -/
-theorem scaled_phi_left_deriv {s p : ℝ} (hs : 0 < s) (hp : 0 < p) (hps : p * s ≤ 1 / 2) :
-    HasDerivAt (fun q : ℝ => q * ((q * s) ^ (-1 / 4 : ℝ) * (1 - q * s) ^ (-3 / 4 : ℝ) / 4))
-      (3 / 4 * Ua (p * s)) p := by
-  have hps0 : 0 < p * s := mul_pos hp hs
-  have ht : 0 < 1 - p * s := by linarith
-  have h₁ := ((hasDerivAt_id p).mul_const s).rpow_const
-    (p := (-1 / 4 : ℝ)) (Or.inl hps0.ne')
-  have h₂ := ((hasDerivAt_const p (1 : ℝ)).sub ((hasDerivAt_id p).mul_const s)).rpow_const
-    (p := (-3 / 4 : ℝ)) (Or.inl ht.ne')
-  have hU : Ua (p * s) = ((p * s) ^ (-1 / 4 : ℝ) * (1 - p * s) ^ (-3 / 4 : ℝ) / 4) / (1 - p * s) :=
-    (eq_div_iff ht.ne').mpr (Ua_phi_left hps0 hps)
-  convert (hasDerivAt_id p).mul ((h₁.mul h₂).div_const 4) using 1 <;> try { funext q; rfl }
-  dsimp
-  rw [Real.rpow_sub_one hps0.ne' (-1 / 4), Real.rpow_sub_one ht.ne' (-3 / 4), hU]
-  field_simp
-  <;> ring
-
-set_option maxHeartbeats 2000000 in
-/-- The derivative of the explicitly scaled right branch is minus three quarters times Ua. -/
-theorem scaled_phi_right_deriv {s p : ℝ} (hs : 0 < s) (hp : 0 < p)
-    (hps : 1 / 2 ≤ p * s) (hps1 : p * s < 1) :
-    HasDerivAt (fun q : ℝ => q * ((1 - q * s) ^ (3 / 4 : ℝ) * (q * s) ^ (-7 / 4 : ℝ) / 4))
-      (-3 / 4 * Ua (p * s)) p := by
-  have hps0 : 0 < p * s := mul_pos hp hs
-  have ht : 0 < 1 - p * s := by linarith
-  have h₁ := ((hasDerivAt_const p (1 : ℝ)).sub ((hasDerivAt_id p).mul_const s)).rpow_const
-    (p := (3 / 4 : ℝ)) (Or.inl ht.ne')
-  have h₂ := ((hasDerivAt_id p).mul_const s).rpow_const
-    (p := (-7 / 4 : ℝ)) (Or.inl hps0.ne')
-  have hU : Ua (p * s) = ((1 - p * s) ^ (3 / 4 : ℝ) * (p * s) ^ (-7 / 4 : ℝ) / 4) / (1 - p * s) :=
-    (eq_div_iff ht.ne').mpr (Ua_phi_right hps hps1)
-  convert (hasDerivAt_id p).mul ((h₁.mul h₂).div_const 4) using 1 <;> try { funext q; rfl }
-  dsimp
-  rw [Real.rpow_sub_one ht.ne' (3 / 4), Real.rpow_sub_one hps0.ne' (-7 / 4), hU]
-  field_simp
-  <;> ring
-
-set_option maxHeartbeats 2000000 in
-/-- The explicitly scaled left cross factor is three quarters Lipschitz. -/
-theorem phi_scaled_left_a {p q s : ℝ} (hp : 0 < p) (hpq : p ≤ q) (hs : 0 < s)
-    (hps : 1 / 64 ≤ p * s) (hqs : q * s ≤ 1 / 2) :
-    |q * (Ua (q * s) * (1 - q * s)) - p * (Ua (p * s) * (1 - p * s))| ≤ 3 / 4 * (q - p) := by
-  let H : ℝ → ℝ := fun q => q * ((q * s) ^ (-1 / 4 : ℝ) * (1 - q * s) ^ (-3 / 4 : ℝ) / 4)
-  have hq : 0 < q := lt_of_lt_of_le hp hpq
-  have hbound : ∀ z ∈ Icc p q, ‖3 / 4 * Ua (z * s)‖ ≤ 3 / 4 := by
-    intro z hz
-    have hlo : 1 / 64 ≤ z * s := hps.trans (mul_le_mul_of_nonneg_right hz.1 hs.le)
-    have hhi : z * s ≤ 1 / 2 := (mul_le_mul_of_nonneg_right hz.2 hs.le).trans hqs
-    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 3 / 4) (Ua_nonneg _))]
-    nlinarith [Ua_le_one_interval hlo (by linarith)]
-  have hd : ∀ z ∈ Icc p q, HasDerivWithinAt H (3 / 4 * Ua (z * s)) (Icc p q) z := by
-    intro z hz
-    exact (scaled_phi_left_deriv hs (lt_of_lt_of_le hp hz.1)
-      ((mul_le_mul_of_nonneg_right hz.2 hs.le).trans hqs)).hasDerivWithinAt
-  have h := Convex.norm_image_sub_le_of_norm_hasDerivWithin_le hd hbound (convex_Icc p q)
-    (left_mem_Icc.mpr hpq) (right_mem_Icc.mpr hpq)
-  dsimp [H] at h
-  rw [← Ua_phi_left (mul_pos hq hs) hqs,
-    ← Ua_phi_left (mul_pos hp hs) ((mul_le_mul_of_nonneg_right hpq hs.le).trans hqs)] at h
-  simpa only [Real.norm_eq_abs, abs_of_nonneg (sub_nonneg.mpr hpq)] using h
-
-set_option maxHeartbeats 2000000 in
-/-- The explicitly scaled right cross factor is three quarters Lipschitz. -/
-theorem phi_scaled_right_a {p q s : ℝ} (hp : 0 < p) (hpq : p ≤ q) (hs : 0 < s)
-    (hps : 1 / 2 ≤ p * s) (hqs : q * s ≤ 63 / 64) :
-    |q * (Ua (q * s) * (1 - q * s)) - p * (Ua (p * s) * (1 - p * s))| ≤ 3 / 4 * (q - p) := by
-  let H : ℝ → ℝ := fun q => q * ((1 - q * s) ^ (3 / 4 : ℝ) * (q * s) ^ (-7 / 4 : ℝ) / 4)
-  have hq : 0 < q := lt_of_lt_of_le hp hpq
-  have hbound : ∀ z ∈ Icc p q, ‖-3 / 4 * Ua (z * s)‖ ≤ 3 / 4 := by
-    intro z hz
-    have hlo : 1 / 2 ≤ z * s := hps.trans (mul_le_mul_of_nonneg_right hz.1 hs.le)
-    have hhi : z * s ≤ 63 / 64 := (mul_le_mul_of_nonneg_right hz.2 hs.le).trans hqs
-    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (Ua_nonneg _)]
-    norm_num
-    nlinarith [Ua_le_one_interval (by linarith) hhi]
-  have hd : ∀ z ∈ Icc p q, HasDerivWithinAt H (-3 / 4 * Ua (z * s)) (Icc p q) z := by
-    intro z hz
-    exact (scaled_phi_right_deriv hs (lt_of_lt_of_le hp hz.1)
-      (hps.trans (mul_le_mul_of_nonneg_right hz.1 hs.le))
-      (lt_of_le_of_lt (mul_le_mul_of_nonneg_right hz.2 hs.le) (by linarith))).hasDerivWithinAt
-  have h := Convex.norm_image_sub_le_of_norm_hasDerivWithin_le hd hbound (convex_Icc p q)
-    (left_mem_Icc.mpr hpq) (right_mem_Icc.mpr hpq)
-  dsimp [H] at h
-  rw [← Ua_phi_right (hps.trans (mul_le_mul_of_nonneg_right hpq hs.le)) (by linarith),
-    ← Ua_phi_right hps (lt_of_le_of_lt (mul_le_mul_of_nonneg_right hpq hs.le) (by linarith))] at h
-  simpa only [Real.norm_eq_abs, abs_of_nonneg (sub_nonneg.mpr hpq)] using h
-
-set_option maxHeartbeats 2000000 in
-/-- Multiplicative dilation of the truncated cross factor. -/
-theorem phi_dilate_a {q s : ℝ} (hq : 0 < q) (hq1 : q ≤ 1)
-    (hqs : 1 / 64 ≤ q * s) (hs1 : s ≤ 63 / 64) :
-    |q * (Ua (q * s) * (1 - q * s)) - Ua s * (1 - s)| ≤ 3 / 4 * (1 - q) := by
-  have hs : 0 < s := by
-    have hp : 0 < q * s := by linarith
-    by_contra hn
-    have hprod := mul_nonpos_of_nonneg_of_nonpos hq.le (le_of_not_gt hn)
-    linarith
-  have hqs1 : q * s ≤ s := by nlinarith
-  by_cases hleft : s ≤ 1 / 2
-  · have h := phi_scaled_left_a hq hq1 hs hqs (by simpa using hleft)
-    simpa only [one_mul, abs_sub_comm] using h
-  · by_cases hright : 1 / 2 ≤ q * s
-    · have h := phi_scaled_right_a hq hq1 hs hright (by simpa using hs1)
-      simpa only [one_mul, abs_sub_comm] using h
-    · let r := 1 / (2 * s)
-      have hr : 0 < r := by dsimp [r]; positivity
-      have hrs : r * s = 1 / 2 := by dsimp [r]; field_simp
-      have hqr : q ≤ r := by
-        dsimp [r]
-        rw [le_div_iff₀ (by positivity)]
-        linarith
-      have hr1 : r ≤ 1 := by
-        dsimp [r]
-        rw [div_le_one (by positivity)]
-        linarith
-      have hL := phi_scaled_left_a hq hqr hs hqs (le_of_eq hrs)
-      have hR := phi_scaled_right_a hr hr1 hs (le_of_eq hrs.symm) (by simpa using hs1)
-      simp only [one_mul] at hR
-      have htri := abs_sub_le (q * (Ua (q * s) * (1 - q * s)))
-        (r * (Ua (r * s) * (1 - r * s))) (Ua s * (1 - s))
-      rw [abs_sub_comm (q * _) (r * _)] at htri
-      rw [abs_sub_comm (r * _) (Ua s * (1 - s))] at htri
-      linarith
-
-
-set_option maxHeartbeats 2000000 in
 /-- LEAF. Unit U-1556. As U-1522 `cross_le` with `U_a`: with `|θ(u) - u| ≤ ηu` for `u ≥ x/64`,
 `|cross| ≤ 4ηδ²x³`. -/
 theorem cross_le_a {x δ η : ℝ} (hx : 128 ≤ x) (hδ : 0 < δ) (hδ1 : δ ≤ 1) (hη : 0 ≤ η)
     (hR : ∀ u : ℝ, x / 64 ≤ u → |θ u - u| ≤ η * u) :
     |crossTa x δ| ≤ 4 * η * δ ^ 2 * x ^ 3 := by
-  have hxpos : 0 < x := by linarith
-  have hxne : x ≠ 0 := hxpos.ne'
-  let a := x / 64
-  let b := 63 * x / 64
-  have ha : 0 < a := by dsimp [a]; positivity
-  have hab : a ≤ b := by dsimp [a, b]; linarith
-  have hba : b - a ≤ x := by dsimp [a, b]; linarith
-  have hb : 0 < b := by dsimp [b]; positivity
-  have hbx : b ≤ x := by dsimp [b]; linarith
-  have hE : ∀ y, a ≤ y → |U1522.Eθ δ y| ≤ η * (2 + δ) * y := by
-    intro y hy
-    have hy0 : 0 ≤ y := le_trans ha.le hy
-    have hky : a ≤ (1 + δ) * y := by nlinarith
-    have h1 := hR ((1 + δ) * y) hky
-    have h2 := hR y hy
-    have he : U1522.Eθ δ y = (θ ((1 + δ) * y) - (1 + δ) * y) - (θ y - y) := by
-      unfold U1522.Eθ
-      ring
-    rw [he]
-    exact (abs_sub _ _).trans (by linarith)
-  by_cases hdlarge : 1 / 3 ≤ δ
-  · have hbnd : |∫ t in a..b, Ua (t / x) *
-        (t * U1522.Eθ δ (x - t) + (x - t) * U1522.Eθ δ t)| ≤
-        (η * (2 + δ) * x ^ 2 / 2) * (b - a) := by
-      have h := intervalIntegral.norm_integral_le_of_norm_le_const
-        (a := a) (b := b) (C := η * (2 + δ) * x ^ 2 / 2)
-        (f := fun t => Ua (t / x) * (t * U1522.Eθ δ (x - t) + (x - t) * U1522.Eθ δ t))
-      rw [Real.norm_eq_abs, abs_of_nonneg (sub_nonneg.mpr hab)] at h
-      apply h
-      intro t ht
-      rw [Set.uIoc_of_le hab] at ht
-      have ht0 : 0 ≤ t := by linarith [ht.1]
-      have hxt0 : 0 ≤ x - t := by linarith [ht.2]
-      have hxt : a ≤ x - t := by dsimp [a, b] at *; linarith [ht.2]
-      have he1 := hE t ht.1.le
-      have he2 := hE (x - t) hxt
-      have hu0 : 0 ≤ Ua (t / x) := Real.sqrt_nonneg _
-      have hu1 : Ua (t / x) ≤ 1 := Ua_le_one_interval
-        ((div_le_div_iff₀ (by norm_num) hxpos).mpr (by dsimp [a] at ht; linarith [ht.1]))
-        ((div_le_div_iff₀ hxpos (by norm_num)).mpr (by dsimp [b] at ht; linarith [ht.2]))
-      rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg hu0]
-      calc
-        _ ≤ Ua (t / x) * (|t * U1522.Eθ δ (x - t)| + |(x - t) * U1522.Eθ δ t|) :=
-          mul_le_mul_of_nonneg_left (abs_add_le _ _) hu0
-        _ ≤ Ua (t / x) * (2 * η * (2 + δ) * (t * (x - t))) := by
-          rw [abs_mul, abs_mul, abs_of_nonneg ht0, abs_of_nonneg hxt0]
-          nlinarith [mul_le_mul_of_nonneg_left he2 ht0, mul_le_mul_of_nonneg_left he1 hxt0]
-        _ ≤ 2 * η * (2 + δ) * (t * (x - t)) := by
-          exact mul_le_of_le_one_left (by positivity) hu1
-        _ ≤ η * (2 + δ) * x ^ 2 / 2 := by
-          nlinarith [mul_nonneg (show 0 ≤ η * (2 + δ) by positivity) (sq_nonneg (t - x / 2))]
-    change |δ * (∫ t in a..b, Ua (t / x) *
-      (t * U1522.Eθ δ (x - t) + (x - t) * U1522.Eθ δ t))| ≤ _
-    rw [abs_mul, abs_of_pos hδ]
-    calc
-      _ ≤ δ * ((η * (2 + δ) * x ^ 2 / 2) * (b - a)) := mul_le_mul_of_nonneg_left hbnd hδ.le
-      _ ≤ δ * ((η * (2 + δ) * x ^ 2 / 2) * x) := by gcongr
-      _ ≤ 4 * η * δ ^ 2 * x ^ 3 := by
-        have hh : 2 + δ ≤ 8 * δ := by linarith
-        have hp := mul_le_mul_of_nonneg_left hh (show 0 ≤ η * δ * x ^ 3 / 2 by positivity)
-        nlinarith
-  · have hdsmall : δ ≤ 1 / 3 := le_of_lt (lt_of_not_ge hdlarge)
-    let clamp : ℝ → ℝ := fun t => max a (min t b)
-    let g : ℝ → ℝ := fun t => Ua (clamp t / x) * (x - clamp t)
-    have hc : Continuous clamp := by dsimp [clamp]; fun_prop
-    have hclamp : ∀ t, a ≤ clamp t ∧ clamp t ≤ b := by
-      intro t
-      dsimp [clamp]
-      exact ⟨le_max_left _ _, max_le hab (min_le_right _ _)⟩
-    have hmap : ∀ t, clamp t / x ∈ Icc (1 / 64 : ℝ) (63 / 64) := by
-      intro t
-      have hlo : x / 64 ≤ clamp t := (hclamp t).1
-      have hhi : clamp t ≤ 63 * x / 64 := (hclamp t).2
-      constructor
-      · exact (div_le_div_iff₀ (by norm_num) hxpos).mpr (by linarith only [hlo])
-      · exact (div_le_div_iff₀ hxpos (by norm_num)).mpr (by linarith only [hhi])
-    have hcU : Continuous (fun t => Ua (clamp t / x)) := by
-      apply continuousOn_univ.mp
-      exact continuous_Ua_interval.comp ((hc.div_const x).continuousOn) (fun t ht => hmap t)
-    have hg : Continuous g := hcU.mul (continuous_const.sub hc)
-    have hgform : ∀ t, a ≤ t → t ≤ b → g t = Ua (t / x) * (x - t) := by
-      intro t ht ht1
-      dsimp [g, clamp]
-      rw [min_eq_left ht1, max_eq_right ht]
-    have hgb : ∀ t, |g t| ≤ 3 / 4 * x := by
-      intro t
-      have hp := Ua_phi_le (hmap t).1 (hmap t).2
-      have hc0 : 0 ≤ clamp t := le_trans ha.le (hclamp t).1
-      have hcx : clamp t ≤ x := le_trans (hclamp t).2 hbx
-      have he : g t = x * (Ua (clamp t / x) * (1 - clamp t / x)) := by
-        dsimp [g]
-        field_simp
-        <;> ring
-      rw [he, abs_mul, abs_of_pos hxpos, abs_of_nonneg
-        (mul_nonneg (Ua_nonneg _) (by rw [sub_nonneg, div_le_one hxpos]; exact hcx))]
-      nlinarith [mul_le_mul_of_nonneg_left hp hxpos.le]
-    let q : ℝ := 1 / (1 + δ)
-    have hk : 0 < 1 + δ := by linarith
-    have hq : 0 < q := by dsimp [q]; positivity
-    have hq1 : q ≤ 1 := by dsimp [q]; rw [div_le_one hk]; linarith
-    have hqrel : q * (1 + δ) = 1 := by dsimp [q]; field_simp
-    have hqd : 1 - q ≤ δ := by nlinarith [mul_nonneg hδ.le (sub_nonneg.mpr hq1)]
-    have hD : ∀ u, (1 + δ) * a ≤ u → u ≤ b →
-        |g (u / (1 + δ)) / (1 + δ) - g u| ≤ 3 / 4 * δ * x := by
-      intro u hu0 hu1
-      have hua : a ≤ u := by nlinarith
-      have huqa : a ≤ u / (1 + δ) := by rw [le_div_iff₀ hk]; nlinarith
-      have huqb : u / (1 + δ) ≤ b := by rw [div_le_iff₀ hk]; nlinarith
-      have hearg : u / (1 + δ) / x = q * (u / x) := by dsimp [q]; ring
-      have hlo : 1 / 64 ≤ q * (u / x) := by
-        rw [← hearg]
-        exact (div_le_div_iff₀ (by norm_num) hxpos).mpr (by dsimp [a] at huqa; linarith)
-      have hhi : u / x ≤ 63 / 64 :=
-        (div_le_div_iff₀ hxpos (by norm_num)).mpr (by dsimp [b] at hu1; linarith)
-      have hd := phi_dilate_a hq hq1 hlo hhi
-      have he : g (u / (1 + δ)) / (1 + δ) - g u =
-          x * (q * (Ua (q * (u / x)) * (1 - q * (u / x))) - Ua (u / x) * (1 - u / x)) := by
-        rw [hgform _ huqa huqb, hgform _ hua hu1]
-        dsimp [q]
-        field_simp
-        <;> ring
-      rw [he, abs_mul, abs_of_pos hxpos]
-      calc _ ≤ x * (3 / 4 * (1 - q)) := mul_le_mul_of_nonneg_left hd hxpos.le
-        _ ≤ 3 / 4 * δ * x := by nlinarith
-    have iE : ∀ c d, IntervalIntegrable (U1522.Eθ δ) volume c d :=
-      fun c d => LeanLab.ChirreHagen2025.Eθ_ii hδ c d
-    have iEr : IntervalIntegrable (fun t => U1522.Eθ δ (x - t)) volume a b := by
-      simpa only [sub_sub_cancel] using (iE (x - a) (x - b)).comp_sub_left x
-    have hU : ContinuousOn (fun t => Ua (t / x)) (uIcc a b) := by
-      apply continuous_Ua_interval.comp (continuous_id.div_const x).continuousOn
-      intro t ht
-      rw [uIcc_of_le hab] at ht
-      change t / x ∈ Icc (1 / 64 : ℝ) (63 / 64)
-      have hlo : x / 64 ≤ t := ht.1
-      have hhi : t ≤ 63 * x / 64 := ht.2
-      constructor
-      · exact (div_le_div_iff₀ (by norm_num) hxpos).mpr (by linarith only [hlo])
-      · exact (div_le_div_iff₀ hxpos (by norm_num)).mpr (by linarith only [hhi])
-    have i1 : IntervalIntegrable (fun t => Ua (t / x) * t * U1522.Eθ δ (x - t)) volume a b :=
-      iEr.continuousOn_mul (hU.mul continuous_id.continuousOn)
-    have i2 := (iE a b).continuousOn_mul hg.continuousOn
-    have href : (∫ t in a..b, Ua (t / x) * t * U1522.Eθ δ (x - t)) =
-        ∫ t in a..b, g t * U1522.Eθ δ t := by
-      calc
-        _ = ∫ t in a..b, g (x - t) * U1522.Eθ δ (x - t) := by
-          apply intervalIntegral.integral_congr
-          intro t ht
-          rw [uIcc_of_le hab] at ht
-          have hxt : a ≤ x - t ∧ x - t ≤ b := by dsimp [a, b] at *; constructor <;> linarith [ht.1, ht.2]
-          change Ua (t / x) * t * U1522.Eθ δ (x - t) = g (x - t) * U1522.Eθ δ (x - t)
-          rw [hgform _ hxt.1 hxt.2]
-          have hearg : (x - t) / x = 1 - t / x := by field_simp <;> ring
-          rw [hearg, Ua_symm, sub_sub_cancel]
-        _ = _ := by
-          rw [intervalIntegral.integral_comp_sub_left (fun u => g u * U1522.Eθ δ u) x]
-          have he1 : x - b = a := by dsimp [a, b]; ring
-          have he2 : x - a = b := by dsimp [a, b]; ring
-          rw [he1, he2]
-    have hcross : crossTa x δ = 2 * δ * ∫ t in a..b, g t * U1522.Eθ δ t := by
-      unfold crossTa
-      change δ * (∫ t in a..b, Ua (t / x) *
-        (t * U1522.Eθ δ (x - t) + (x - t) * U1522.Eθ δ t)) = _
-      have he : (∫ t in a..b, Ua (t / x) * (t * U1522.Eθ δ (x - t) + (x - t) * U1522.Eθ δ t)) =
-          (∫ t in a..b, Ua (t / x) * t * U1522.Eθ δ (x - t)) + ∫ t in a..b, g t * U1522.Eθ δ t := by
-        rw [← intervalIntegral.integral_add i1 i2]
-        apply intervalIntegral.integral_congr
-        intro t ht
-        rw [uIcc_of_le hab] at ht
-        change Ua (t / x) * (t * U1522.Eθ δ (x - t) + (x - t) * U1522.Eθ δ t) =
-          Ua (t / x) * t * U1522.Eθ δ (x - t) + g t * U1522.Eθ δ t
-        rw [hgform _ ht.1 ht.2]
-        ring
-      rw [he, href]
-      ring
-    let ρ := (4 / 3 : ℝ) * b * η
-    have hρ : ∀ u, a ≤ u → u ≤ (1 + δ) * b → |LeanLab.ChirreHagen2025.Rθ u| ≤ ρ := by
-      intro u hu0 hu1
-      have hr := hR u hu0
-      change |θ u - u| ≤ ρ
-      dsimp [ρ]
-      nlinarith [mul_le_mul_of_nonneg_right hu1 hη,
-        mul_nonneg (show 0 ≤ 1 / 3 - δ by linarith) (mul_nonneg hb.le hη)]
-    have hcbd := LeanLab.ChirreHagen2025.cross_bound hg hδ ha
-      (by dsimp [a, b]; nlinarith [mul_le_mul_of_nonneg_right hδ1 hxpos.le]) hρ hD
-      (fun u hu0 hu1 => hgb u) (fun u hu0 hu1 => by
-        rw [abs_div, abs_of_pos hk, div_le_iff₀ hk]
-        have hh := hgb (u / (1 + δ))
-        nlinarith [mul_nonneg hδ.le hxpos.le])
-    change |∫ t in a..b, g t * U1522.Eθ δ t| ≤ _ at hcbd
-    rw [hcross, abs_mul, abs_of_nonneg (by positivity : 0 ≤ 2 * δ)]
-    calc
-      _ ≤ (2 * δ) * ((3 / 4 * δ * x) * ρ * (b - a) + (3 / 4 * x) * ρ * (δ * b) + (3 / 4 * x) * ρ * (δ * a)) :=
-        mul_le_mul_of_nonneg_left hcbd (by positivity)
-      _ ≤ 4 * η * δ ^ 2 * x ^ 3 := by
-        dsimp [a, b, ρ]
-        have hp : 0 ≤ η * δ ^ 2 * x ^ 3 := by positivity
-        nlinarith only [hp]
-
-
-/-- A quartic change of variable removes the fractional powers from the left half main term. -/
-theorem Ua_quartic_substitution {z : ℝ} (hz : 0 < z) (hz1 : z ≤ 1) :
-    Ua (z ^ 4 / (1 + z ^ 4)) *
-      ((z ^ 4 / (1 + z ^ 4)) * (1 - z ^ 4 / (1 + z ^ 4))) = z ^ 3 / 4 := by
-  let s := z ^ 4 / (1 + z ^ 4)
-  have hd : 0 < 1 + z ^ 4 := by positivity
-  have hz4 : z ^ 4 ≤ 1 := pow_le_one₀ hz.le hz1
-  have hs : 0 < s := by dsimp [s]; positivity
-  have hs1 : s ≤ 1 / 2 := by dsimp [s]; rw [div_le_iff₀ hd]; linarith
-  have ht : 0 < 1 - s := by linarith
-  have hw1 : Wa (3 / 2) (2 * s) = (2 * s) ^ (-1 / 2 : ℝ) := by
-    unfold Wa
-    rw [if_pos (by linarith), abs_of_pos (by positivity)]
-    norm_num
-  have hw2 : Wa (3 / 2) (2 * (1 - s)) = (2 * (1 - s)) ^ (-7 / 2 : ℝ) := by
-    unfold Wa
-    split_ifs with h
-    · have he : 2 * (1 - s) = 1 := by linarith
-      simp [he]
-    · norm_num
-  have hp1 : (Wa (3 / 2) (2 * s)) ^ 2 = (2 * s)⁻¹ := by
-    rw [hw1, ← Real.rpow_mul_natCast (by positivity)]
-    norm_num [Real.rpow_neg_one]
-  have hp2 : (Wa (3 / 2) (2 * (1 - s))) ^ 2 = ((2 * (1 - s)) ^ 7)⁻¹ := by
-    rw [hw2, ← Real.rpow_mul_natCast (by positivity)]
-    norm_num [Real.rpow_neg (by positivity : 0 ≤ 2 * (1 - s))]
-  have hu4 : Ua s ^ 4 = (2 * s)⁻¹ * ((2 * (1 - s)) ^ 7)⁻¹ := by
-    calc Ua s ^ 4 = (Ua s ^ 2) ^ 2 := by ring
-      _ = _ := by rw [Ua_sq, mul_pow, hp1, hp2]
-  have hu : Ua s = (1 + z ^ 4) ^ 2 / (4 * z) := by
-    apply (pow_left_inj₀ (Ua_nonneg _) (by positivity) (by decide : (4 : ℕ) ≠ 0)).mp
-    rw [hu4]
-    dsimp [s]
-    field_simp
-    <;> ring
-  change Ua s * (s * (1 - s)) = _
-  rw [hu]
-  dsimp [s]
-  field_simp
-  <;> ring
-
-
-set_option maxHeartbeats 2000000 in
-/-- A twelve term geometric lower polynomial certifies the rational main integral. -/
-theorem rational_main_integral_lower : (0.1154 : ℝ) ≤ ∫ z in (71 / 200 : ℝ)..1, 2 * z ^ 6 / (1 + z ^ 4) ^ 2 := by
-  let Q : ℝ → ℝ := fun z => (4089 / 2048 : ℝ) * z ^ 6 + (-2025 / 512 : ℝ) * z ^ 10 + (11721 / 2048 : ℝ) * z ^ 14 + (-7099 / 1024 : ℝ) * z ^ 18 + (7265 / 1024 : ℝ) * z ^ 22 + (-6 / 1 : ℝ) * z ^ 26 + (4165 / 1024 : ℝ) * z ^ 30 + (-1093 / 512 : ℝ) * z ^ 34 + (1701 / 2048 : ℝ) * z ^ 38 + (-115 / 512 : ℝ) * z ^ 42 + (77 / 2048 : ℝ) * z ^ 46 + (-3 / 1024 : ℝ) * z ^ 50
-  let G : ℝ → ℝ := fun z => (4089 / 14336 : ℝ) * z ^ 7 + (-2025 / 5632 : ℝ) * z ^ 11 + (3907 / 10240 : ℝ) * z ^ 15 + (-7099 / 19456 : ℝ) * z ^ 19 + (7265 / 23552 : ℝ) * z ^ 23 + (-2 / 9 : ℝ) * z ^ 27 + (4165 / 31744 : ℝ) * z ^ 31 + (-1093 / 17920 : ℝ) * z ^ 35 + (567 / 26624 : ℝ) * z ^ 39 + (-115 / 22016 : ℝ) * z ^ 43 + (77 / 96256 : ℝ) * z ^ 47 + (-1 / 17408 : ℝ) * z ^ 51
-  have hd : ∀ z, HasDerivAt G (Q z) z := by
-    intro z
-    convert (((((((((((((hasDerivAt_pow 7 z).const_mul (4089 / 14336 : ℝ)).add ((hasDerivAt_pow 11 z).const_mul (-2025 / 5632 : ℝ))).add ((hasDerivAt_pow 15 z).const_mul (3907 / 10240 : ℝ))).add ((hasDerivAt_pow 19 z).const_mul (-7099 / 19456 : ℝ))).add ((hasDerivAt_pow 23 z).const_mul (7265 / 23552 : ℝ))).add ((hasDerivAt_pow 27 z).const_mul (-2 / 9 : ℝ))).add ((hasDerivAt_pow 31 z).const_mul (4165 / 31744 : ℝ))).add ((hasDerivAt_pow 35 z).const_mul (-1093 / 17920 : ℝ))).add ((hasDerivAt_pow 39 z).const_mul (567 / 26624 : ℝ))).add ((hasDerivAt_pow 43 z).const_mul (-115 / 22016 : ℝ))).add ((hasDerivAt_pow 47 z).const_mul (77 / 96256 : ℝ))).add ((hasDerivAt_pow 51 z).const_mul (-1 / 17408 : ℝ))) using 1 <;> dsimp [G, Q] <;> ring
-  have hq : Continuous Q := by dsimp [Q]; fun_prop
-  have hG : (∫ z in (71 / 200 : ℝ)..1, Q z) = G 1 - G (71 / 200) := by
-    exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun z hz => hd z) (hq.intervalIntegrable _ _)
-  have hnum : (0.1154 : ℝ) ≤ G 1 - G (71 / 200) := by norm_num [G]
-  rw [← hG] at hnum
-  refine hnum.trans ?_
-  apply intervalIntegral.integral_mono_on (by norm_num) (hq.intervalIntegrable _ _) ?_
-  · intro z hz
-    have hz0 : 0 ≤ z := by linarith [hz.1]
-    have hz4 : z ^ 4 ≤ 1 := pow_le_one₀ hz0 hz.2
-    have hlast : 0 ≤ 13 - 12 * ((1 - z ^ 4) / 2) := by nlinarith [show 0 ≤ z ^ 4 by positivity]
-    have hrem : 0 ≤ 2 * z ^ 6 * ((1 - z ^ 4) / 2) ^ 12 * (13 - 12 * ((1 - z ^ 4) / 2)) := mul_nonneg (by positivity) hlast
-    have he : 2 * z ^ 6 - Q z * (1 + z ^ 4) ^ 2 =
-        2 * z ^ 6 * ((1 - z ^ 4) / 2) ^ 12 * (13 - 12 * ((1 - z ^ 4) / 2)) := by dsimp [Q]; ring
-    rw [le_div_iff₀ (by positivity : 0 < (1 + z ^ 4) ^ 2)]
-    linarith
-  · apply Continuous.intervalIntegrable
-    apply Continuous.div
-    · fun_prop
-    · fun_prop
-    · intro z; positivity
-
-/-- Exact rational lower integration gives the normalized main term. -/
-theorem normalized_main_ge_a :
-    (0.1154 : ℝ) ≤ ∫ s in (1 / 64 : ℝ)..(63 / 64), Ua s * (s * (1 - s)) := by
-  let f : ℝ → ℝ := fun s => Ua s * (s * (1 - s))
-  have hf : ContinuousOn f (Icc (1 / 64 : ℝ) (63 / 64)) := by
-    apply continuous_Ua_interval.mul
-    apply Continuous.continuousOn
-    fun_prop
-  have hfi : IntervalIntegrable f volume (1 / 64) (63 / 64) := hf.intervalIntegrable_of_Icc (by norm_num : (1 / 64 : ℝ) ≤ 63 / 64)
-  have iL : IntervalIntegrable f volume (1 / 64) (1 / 2) :=
-    hfi.mono_set (by
-      intro t ht
-      rw [uIcc_of_le (by norm_num)] at ht ⊢
-      constructor <;> linarith [ht.1, ht.2])
-  have iR : IntervalIntegrable f volume (1 / 2) (63 / 64) :=
-    hfi.mono_set (by
-      intro t ht
-      rw [uIcc_of_le (by norm_num)] at ht ⊢
-      constructor <;> linarith [ht.1, ht.2])
-  have href : (∫ s in (1 / 64 : ℝ)..(1 / 2), f s) =
-      ∫ s in (1 / 2 : ℝ)..(63 / 64), f s := by
-    calc
-      _ = ∫ s in (1 / 64 : ℝ)..(1 / 2), f (1 - s) := by
-        apply intervalIntegral.integral_congr
-        intro s hs
-        dsimp [f]
-        rw [Ua_symm, sub_sub_cancel]
-        ring
-      _ = _ := by
-        rw [intervalIntegral.integral_comp_sub_left]
-        norm_num
-  have hfull : (∫ s in (1 / 64 : ℝ)..(63 / 64), f s) =
-      2 * ∫ s in (1 / 64 : ℝ)..(1 / 2), f s := by
-    rw [← intervalIntegral.integral_add_adjacent_intervals iL iR, ← href]
-    ring
-  let T : ℝ → ℝ := fun z => z ^ 4 / (1 + z ^ 4)
-  let T' : ℝ → ℝ := fun z => 4 * z ^ 3 / (1 + z ^ 4) ^ 2
-  have hTd : ∀ z, HasDerivAt T (T' z) z := by
-    intro z
-    have hn : 1 + z ^ 4 ≠ 0 := ne_of_gt (by positivity)
-    convert (hasDerivAt_pow 4 z).div ((hasDerivAt_pow 4 z).const_add 1) hn using 1 <;>
-      dsimp [T, T'] <;> field_simp <;> ring
-  have hTc : Continuous T' := by
-    dsimp [T']
-    apply Continuous.div
-    · fun_prop
-    · fun_prop
-    · intro z; positivity
-  have hmap : MapsTo T (uIcc (71 / 200 : ℝ) 1) (Icc (1 / 64 : ℝ) (63 / 64)) := by
-    intro z hz
-    rw [uIcc_of_le (by norm_num)] at hz
-    have hz0 : 0 ≤ z := by linarith [hz.1]
-    have hz4 : (71 / 200 : ℝ) ^ 4 ≤ z ^ 4 := pow_le_pow_left₀ (by norm_num) hz.1 4
-    have hz41 : z ^ 4 ≤ 1 := pow_le_one₀ hz0 hz.2
-    dsimp [T]
-    constructor
-    · rw [le_div_iff₀ (by positivity)]
-      norm_num at hz4
-      linarith
-    · rw [div_le_iff₀ (by positivity)]
-      linarith
-  have hsub := intervalIntegral.integral_comp_mul_deriv'
-    (fun z hz => hTd z) hTc.continuousOn (hf.mono (Set.image_subset_iff.mpr hmap))
-  have he : (∫ z in (71 / 200 : ℝ)..1, (f ∘ T) z * T' z) =
-      ∫ z in (71 / 200 : ℝ)..1, z ^ 6 / (1 + z ^ 4) ^ 2 := by
-    apply intervalIntegral.integral_congr
-    intro z hz
-    rw [uIcc_of_le (by norm_num)] at hz
-    have hz0 : 0 < z := by linarith [hz.1]
-    dsimp [Function.comp_def, f, T, T']
-    rw [Ua_quartic_substitution hz0 hz.2]
-    ring
-  have hT1 : T 1 = 1 / 2 := by norm_num [T]
-  rw [he, hT1] at hsub
-  have hlow : 1 / 64 ≤ T (71 / 200) := by norm_num [T]
-  have hhigh : T (71 / 200) ≤ 1 / 2 := by norm_num [T]
-  have hmono : (∫ s in T (71 / 200)..(1 / 2), f s) ≤ ∫ s in (1 / 64 : ℝ)..(1 / 2), f s := by
-    apply intervalIntegral.integral_mono_interval hlow hhigh le_rfl _ iL
-    filter_upwards [ae_restrict_mem measurableSet_Ioc] with s hs
-    dsimp [f]
-    exact mul_nonneg (Ua_nonneg _) (mul_nonneg (by linarith [hs.1]) (by linarith [hs.2]))
-  have hrat := rational_main_integral_lower
-  have htwo : (∫ z in (71 / 200 : ℝ)..1, 2 * z ^ 6 / (1 + z ^ 4) ^ 2) =
-      2 * ∫ z in (71 / 200 : ℝ)..1, z ^ 6 / (1 + z ^ 4) ^ 2 := by
-    rw [← intervalIntegral.integral_const_mul]
-    apply intervalIntegral.integral_congr
-    intro z hz
-    ring
-  rw [htwo, hsub] at hrat
-  change (0.1154 : ℝ) ≤ ∫ s in (1 / 64 : ℝ)..(63 / 64), f s
-  rw [hfull]
-  linarith
+  sorry
 
 
 /-- LEAF. Unit U-1556. The truncated main term for `a = 3/2`:
@@ -1334,27 +804,7 @@ for `s ≤ 1/2`, symmetric, and `2 ∫_{1/64}^{1/2} (s/(1-s))^{3/4}/4 ds = 0.115
 (numerics/U1556/kernel_family_output.txt). -/
 theorem main_ge_a {x : ℝ} (hx : 0 < x) :
     0.1154 * x ^ 3 ≤ ∫ t in (x / 64)..(63 * x / 64), Ua (t / x) * (t * (x - t)) := by
-  have hxne : x ≠ 0 := hx.ne'
-  have he : (∫ t in (x / 64)..(63 * x / 64), Ua (t / x) * (t * (x - t))) =
-      x ^ 3 * ∫ s in (1 / 64 : ℝ)..(63 / 64), Ua s * (s * (1 - s)) := by
-    calc
-      _ = ∫ t in (x / 64)..(63 * x / 64),
-          x ^ 2 * (Ua (t / x) * ((t / x) * (1 - t / x))) := by
-        apply intervalIntegral.integral_congr
-        intro t ht
-        field_simp
-        <;> ring
-      _ = _ := by
-        rw [intervalIntegral.integral_const_mul,
-          intervalIntegral.integral_comp_div (fun s => Ua s * (s * (1 - s))) hxne]
-        have ha : x / 64 / x = (1 / 64 : ℝ) := by field_simp
-        have hb : 63 * x / 64 / x = (63 / 64 : ℝ) := by field_simp
-        rw [ha, hb]
-        simp only [smul_eq_mul]
-        ring
-  rw [he]
-  have h := mul_le_mul_of_nonneg_left normalized_main_ge_a (by positivity : 0 ≤ x ^ 3)
-  nlinarith only [h]
+  sorry
 
 /-- ASSEMBLY, CONDITIONAL ON `WeightedJθa (3/2) c X0 δ0`, `|θ u - u| ≤ ηu` for `u ≥ x/64` with
 `η ≤ 10^-6`, and the leaves `pairing_expand_a`, `ee_le_weighted_a`, `cross_le_a`, `main_ge_a`
