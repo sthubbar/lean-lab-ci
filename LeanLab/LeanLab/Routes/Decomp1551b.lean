@@ -60,12 +60,711 @@ theorem hadamard_logDeriv_order_one (f : ℂ → ℂ) (hf : Differentiable ℂ f
         (1 / (s - (i.1 : ℂ)) + 1 / (i.1 : ℂ)) := by
   sorry
 
+private lemma norm_cpow_nat_neg (n : ℕ) (s : ℂ) (hn : 0 < n) :
+    ‖(n : ℂ) ^ (-s)‖ = (n : ℝ) ^ (-s.re) := by
+  rw [Complex.norm_natCast_cpow_of_pos hn]
+  simp
+
+private lemma zeta_sum_le (N : ℕ) (s : ℂ) (hσ : 0 ≤ s.re) :
+    ‖∑ n ∈ Finset.range (N + 1), 1 / (n : ℂ) ^ s‖ ≤ (N : ℝ) + 1 := by
+  refine (norm_sum_le _ _).trans ?_
+  have h1 : ∀ n ∈ Finset.range (N + 1), ‖1 / (n : ℂ) ^ s‖ ≤ 1 := by
+    intro n _
+    rcases Nat.eq_zero_or_pos n with h | h
+    · rw [h, Nat.cast_zero, norm_div, norm_one]
+      by_cases hs : s = 0
+      · simp [hs]
+      · rw [Complex.zero_cpow hs]
+        simp
+    · rw [norm_div, norm_one, Complex.norm_natCast_cpow_of_pos h]
+      simpa [one_div] using
+        inv_le_one_of_one_le₀ (Real.one_le_rpow (x := (n : ℝ)) (by exact_mod_cast h) hσ)
+  calc ∑ n ∈ Finset.range (N + 1), ‖1 / (n : ℂ) ^ s‖ ≤ ∑ n ∈ Finset.range (N + 1), (1 : ℝ) :=
+        Finset.sum_le_sum h1
+    _ = (N : ℝ) + 1 := by simp
+
+/-- `‖ζ(σ + it)‖ ≤ 5 |t|` for `σ ≥ 1/2` and `|t| > 3`, from the Euler–Maclaurin
+decomposition `riemannZeta0`. -/
+private lemma zeta_bound_im (σ t : ℝ) (hσ : 1 / 2 ≤ σ) (ht : 3 < |t|) :
+    ‖ζ ((σ : ℂ) + (t : ℂ) * I)‖ ≤ 5 * |t| := by
+  have hσpos : 0 < σ := by linarith
+  set N : ℕ := ⌊|t|⌋₊ with hN
+  have hN1 : 1 ≤ N := by
+    rw [hN]; exact Nat.le_floor (by push_cast; linarith)
+  have hNle : (N : ℝ) ≤ |t| := by rw [hN]; exact Nat.floor_le (abs_nonneg t)
+  have htne : t ≠ 0 := by
+    intro h; rw [h] at ht; simp only [abs_zero] at ht; linarith
+  set s : ℂ := (σ : ℂ) + (t : ℂ) * I with hsdef
+  have hsim : s.im = t := by simp [hsdef]
+  have hsre : s.re = σ := by simp [hsdef]
+  have him1 : (1 - s).im = -t := by simp [hsim]
+  have hne1 : s ≠ 1 := by
+    intro h
+    have him := congrArg Complex.im h
+    rw [hsim] at him
+    simp at him
+    exact htne him
+  have hre : 0 < s.re := by rw [hsre]; exact hσpos
+  rw [← Zeta0EqZeta (N := N) (by omega) hre hne1, riemannZeta0]
+  have hI : ‖∫ x in Set.Ioi (N : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖ ≤ (N : ℝ) ^ (-σ) / σ :=
+    ZetaBnd_aux1b N hN1 (σ := σ) (t := t) hσpos
+  have hsum : ‖∑ n ∈ Finset.range (N + 1), 1 / (n : ℂ) ^ s‖ ≤ (N : ℝ) + 1 :=
+    zeta_sum_le N s (by rw [hsre]; linarith)
+  have hnum2 : ‖(N : ℂ) ^ (1 - s)‖ = (N : ℝ) ^ (1 - σ) := by
+    rw [Complex.norm_natCast_cpow_of_pos (by omega)]
+    simp [hsre]
+  have hden2 : |t| ≤ ‖1 - s‖ := by
+    have h := Complex.abs_im_le_norm (1 - s)
+    rw [him1, abs_neg] at h
+    exact h
+  have hNpos : (0 : ℝ) < ‖1 - s‖ := by
+    rw [norm_pos_iff]
+    intro h
+    have him := congrArg Complex.im h
+    rw [him1] at him
+    simp at him
+    exact htne him
+  have hterm2 : ‖(-(N : ℂ) ^ (1 - s)) / (1 - s)‖ ≤ 1 := by
+    rw [norm_div, norm_neg, hnum2, div_le_one hNpos]
+    have h1 : (N : ℝ) ^ (1 - σ) ≤ (N : ℝ) ^ ((1 / 2 : ℝ)) :=
+      Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast hN1) (by linarith)
+    have h2a : (N : ℝ) ^ ((1 / 2 : ℝ)) ≤ |t| ^ ((1 / 2 : ℝ)) :=
+      Real.rpow_le_rpow (by positivity) hNle (by norm_num)
+    have h2b : |t| ^ ((1 / 2 : ℝ)) ≤ |t| := by
+      simpa using Real.rpow_le_rpow_of_exponent_le (x := |t|) (by linarith)
+        (by norm_num : (1 / 2 : ℝ) ≤ 1)
+    linarith
+  have hterm3 : ‖(-(N : ℂ) ^ (-s)) / 2‖ ≤ 1 / 2 := by
+    rw [norm_div, norm_neg, norm_cpow_nat_neg N s (by omega), hsre]
+    rw [show ‖(2 : ℂ)‖ = 2 from by norm_num, div_le_div_iff_of_pos_right (by norm_num : (0:ℝ) < 2)]
+    calc (N : ℝ) ^ (-σ) ≤ (N : ℝ) ^ (0 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast hN1) (by linarith)
+      _ = 1 := Real.rpow_zero _
+  have hterm4 : ‖s * ∫ x in Set.Ioi (N : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖
+      ≤ 1 + 2 * |t| := by
+    rw [norm_mul]
+    have h1 : ‖s‖ ≤ σ + |t| := by
+      calc ‖s‖ = ‖(σ : ℂ) + (t : ℂ) * I‖ := by rw [hsdef]
+        _ ≤ ‖(σ : ℂ)‖ + ‖(t : ℂ) * I‖ := norm_add_le _ _
+        _ = σ + |t| := by simp [abs_of_pos hσpos]
+    have h2 : (N : ℝ) ^ (-σ) ≤ 1 := by
+      calc (N : ℝ) ^ (-σ) ≤ (N : ℝ) ^ (0 : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast hN1) (by linarith)
+        _ = 1 := Real.rpow_zero _
+    have h4 : ‖s‖ * ((N : ℝ) ^ (-σ) / σ) ≤ (σ + |t|) * (1 / σ) := by
+      exact mul_le_mul h1 ((div_le_div_iff_of_pos_right hσpos).mpr h2) (by positivity)
+        (by linarith [abs_nonneg t])
+    have h5 : (σ + |t|) * (1 / σ) = 1 + |t| / σ := by field_simp
+    have h6 : |t| / σ ≤ 2 * |t| := by
+      rw [div_le_iff₀ hσpos]
+      nlinarith [abs_nonneg t]
+    calc ‖s‖ * ‖∫ x in Set.Ioi (N : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖
+        ≤ ‖s‖ * ((N : ℝ) ^ (-σ) / σ) := mul_le_mul_of_nonneg_left hI (norm_nonneg _)
+      _ ≤ (σ + |t|) * (1 / σ) := h4
+      _ = 1 + |t| / σ := h5
+      _ ≤ 1 + 2 * |t| := by linarith
+  have hsum4 : ‖(∑ n ∈ Finset.range (N + 1), 1 / (n : ℂ) ^ s)
+      + ((-(N : ℂ) ^ (1 - s)) / (1 - s)) + ((-(N : ℂ) ^ (-s)) / 2)
+      + (s * ∫ x in Set.Ioi (N : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1))‖
+      ≤ ‖∑ n ∈ Finset.range (N + 1), 1 / (n : ℂ) ^ s‖
+        + ‖(-(N : ℂ) ^ (1 - s)) / (1 - s)‖ + ‖(-(N : ℂ) ^ (-s)) / 2‖
+        + ‖s * ∫ x in Set.Ioi (N : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖ :=
+    norm_add₄_le
+  have hfin : ((N : ℝ) + 1) + 1 + 1 / 2 + (1 + 2 * |t|) ≤ 5 * |t| := by
+    nlinarith [hNle, abs_nonneg t, ht]
+  have h1 : ‖∑ n ∈ Finset.range (N + 1), 1 / (n : ℂ) ^ s‖
+      + ‖(-(N : ℂ) ^ (1 - s)) / (1 - s)‖ + ‖(-(N : ℂ) ^ (-s)) / 2‖
+      + ‖s * ∫ x in Set.Ioi (N : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖
+      ≤ ((N : ℝ) + 1) + 1 + 1 / 2 + (1 + 2 * |t|) := by linarith
+  exact hsum4.trans (h1.trans hfin)
+
+/-- `‖ζ(σ + it)‖ ≤ 6 (1 + |t|)` for `σ ≥ 2`, from the Euler–Maclaurin decomposition with
+`N = 3`. -/
+private lemma zeta_bound_re (σ t : ℝ) (hσ : 2 ≤ σ) :
+    ‖ζ ((σ : ℂ) + (t : ℂ) * I)‖ ≤ 6 * (1 + |t|) := by
+  have hσpos : 0 < σ := by linarith
+  set s : ℂ := (σ : ℂ) + (t : ℂ) * I with hsdef
+  have hsim : s.im = t := by simp [hsdef]
+  have hsre : s.re = σ := by simp [hsdef]
+  have hne1 : s ≠ 1 := by
+    intro h
+    have := congrArg Complex.re h
+    rw [hsre] at this
+    simp at this
+    linarith
+  have hre : 0 < s.re := by rw [hsre]; exact hσpos
+  rw [← Zeta0EqZeta (N := 3) (by norm_num) hre hne1, riemannZeta0]
+  have hI : ‖∫ x in Set.Ioi (3 : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖ ≤ (3 : ℝ) ^ (-σ) / σ :=
+    ZetaBnd_aux1b 3 (by norm_num) (σ := σ) (t := t) hσpos
+  have hsum : ‖∑ n ∈ Finset.range (3 + 1), 1 / (n : ℂ) ^ s‖ ≤ (3 : ℝ) + 1 :=
+    zeta_sum_le 3 s (by rw [hsre]; linarith)
+  have hnum2 : ‖((3 : ℝ) : ℂ) ^ (1 - s)‖ = (3 : ℝ) ^ (1 - σ) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num)]
+    simp [hsre]
+  have hden2 : (1 : ℝ) ≤ ‖1 - s‖ := by
+    have h := Complex.abs_re_le_norm (1 - s)
+    rw [show (1 - s).re = 1 - σ by simp [hsre], abs_of_neg (by linarith)] at h
+    linarith
+  have hNpos : (0 : ℝ) < ‖1 - s‖ := by linarith
+  have hterm2 : ‖(-((3 : ℝ) : ℂ) ^ (1 - s)) / (1 - s)‖ ≤ 1 / 3 := by
+    rw [norm_div, norm_neg, hnum2, div_le_iff₀ hNpos]
+    have h1 : (3 : ℝ) ^ (1 - σ) ≤ (3 : ℝ) ^ (-1 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+    have h0 : (3 : ℝ) ^ (-1 : ℝ) = 1 / 3 := by
+      rw [Real.rpow_neg_one]; norm_num
+    rw [h0] at h1
+    nlinarith [h1, hden2]
+  have hterm3 : ‖(-((3 : ℝ) : ℂ) ^ (-s)) / 2‖ ≤ 1 / 2 := by
+    rw [norm_div, norm_neg, Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num),
+      show (-s).re = -σ from by simp [hsre]]
+    rw [show ‖(2 : ℂ)‖ = 2 from by norm_num, div_le_div_iff_of_pos_right (by norm_num : (0:ℝ) < 2)]
+    calc (3 : ℝ) ^ (-σ) ≤ (3 : ℝ) ^ (0 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+      _ = 1 := Real.rpow_zero _
+  have hterm4 : ‖s * ∫ x in Set.Ioi (3 : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖
+      ≤ (1 + |t|) / 3 := by
+    rw [norm_mul]
+    have h1 : ‖s‖ ≤ σ + |t| := by
+      calc ‖s‖ = ‖(σ : ℂ) + (t : ℂ) * I‖ := by rw [hsdef]
+        _ ≤ ‖(σ : ℂ)‖ + ‖(t : ℂ) * I‖ := norm_add_le _ _
+        _ = σ + |t| := by simp [abs_of_pos hσpos]
+    have h2 : (3 : ℝ) ^ (-σ) ≤ 1 / 3 := by
+      calc (3 : ℝ) ^ (-σ) ≤ (3 : ℝ) ^ (-1 : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+        _ = 1 / 3 := by rw [Real.rpow_neg_one]; norm_num
+    have h4 : ‖s‖ * ((3 : ℝ) ^ (-σ) / σ) ≤ (σ + |t|) * ((1 / 3) / σ) := by
+      exact mul_le_mul h1 ((div_le_div_iff_of_pos_right hσpos).mpr h2) (by positivity)
+        (by linarith [abs_nonneg t])
+    have h5 : (σ + |t|) * ((1 / 3) / σ) = (1 + |t| / σ) / 3 := by field_simp
+    have h6 : |t| / σ ≤ |t| := by
+      rw [div_le_iff₀ hσpos]
+      nlinarith [abs_nonneg t]
+    calc ‖s‖ * ‖∫ x in Set.Ioi (3 : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖
+        ≤ ‖s‖ * ((3 : ℝ) ^ (-σ) / σ) := mul_le_mul_of_nonneg_left hI (norm_nonneg _)
+      _ ≤ (σ + |t|) * ((1 / 3) / σ) := h4
+      _ = (1 + |t| / σ) / 3 := h5
+      _ ≤ (1 + |t|) / 3 := by linarith
+  have hsum4 : ‖(∑ n ∈ Finset.range (3 + 1), 1 / (n : ℂ) ^ s)
+      + ((-((3 : ℝ) : ℂ) ^ (1 - s)) / (1 - s)) + ((-((3 : ℝ) : ℂ) ^ (-s)) / 2)
+      + (s * ∫ x in Set.Ioi (3 : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1))‖
+      ≤ ‖∑ n ∈ Finset.range (3 + 1), 1 / (n : ℂ) ^ s‖
+        + ‖(-((3 : ℝ) : ℂ) ^ (1 - s)) / (1 - s)‖ + ‖(-((3 : ℝ) : ℂ) ^ (-s)) / 2‖
+        + ‖s * ∫ x in Set.Ioi (3 : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖ :=
+    norm_add₄_le
+  have h1 : ‖∑ n ∈ Finset.range (3 + 1), 1 / (n : ℂ) ^ s‖
+      + ‖(-((3 : ℝ) : ℂ) ^ (1 - s)) / (1 - s)‖ + ‖(-((3 : ℝ) : ℂ) ^ (-s)) / 2‖
+      + ‖s * ∫ x in Set.Ioi (3 : ℝ), (⌊x⌋ + 1 / 2 - x) / (x : ℂ) ^ (s + 1)‖
+      ≤ ((3 : ℝ) + 1) + 1 / 3 + 1 / 2 + (1 + |t|) / 3 := by linarith
+  have hfin : ((3 : ℝ) + 1) + 1 / 3 + 1 / 2 + (1 + |t|) / 3 ≤ 6 * (1 + |t|) := by
+    nlinarith [abs_nonneg t]
+  exact hsum4.trans (h1.trans hfin)
+
+/-- `‖ζ s‖ ≤ 6 (1 + ‖s‖)` for `Re s ≥ 1/2` and `‖s‖ ≥ 4`. -/
+private lemma zeta_bound (s : ℂ) (hre : 1 / 2 ≤ s.re) (hn : 4 ≤ ‖s‖) :
+    ‖ζ s‖ ≤ 6 * (1 + ‖s‖) := by
+  have hrw : ((s.re : ℂ) + (s.im : ℂ) * I) = s := Complex.re_add_im s
+  have hsq : ‖s‖ ^ 2 = s.re ^ 2 + s.im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]; ring
+  rcases le_or_gt |s.im| 3 with ht | ht
+  · have hσ2 : 2 ≤ s.re := by
+      have h1 : (16 : ℝ) ≤ ‖s‖ ^ 2 := by nlinarith [norm_nonneg s]
+      have h2 : s.im ^ 2 ≤ 9 := by nlinarith [abs_le.mp ht]
+      have h3 : 0 < s.re := by linarith
+      nlinarith
+    have := zeta_bound_re s.re s.im hσ2
+    rw [hrw] at this
+    have h2 : 6 * (1 + |s.im|) ≤ 6 * (1 + ‖s‖) := by
+      linarith [Complex.abs_im_le_norm s]
+    linarith
+  · have := zeta_bound_im s.re s.im hre ht
+    rw [hrw] at this
+    have h2 : 5 * |s.im| ≤ 6 * (1 + ‖s‖) := by linarith [Complex.abs_im_le_norm s]
+    linarith
+
+/-! ### Auxiliary numeric facts -/
+
+private lemma one_le_log_add_two {x : ℝ} (hx : 2 ≤ x) : 1 ≤ Real.log (x + 2) := by
+  rw [Real.le_log_iff_exp_le (by linarith)]
+  linarith [Real.exp_one_lt_three.le]
+
+private lemma sqrt_two_pi_le : Real.sqrt (2 * Real.pi) ≤ 3 := by
+  rw [Real.sqrt_le_left (by norm_num)]
+  nlinarith [Real.pi_lt_four]
+
+private lemma inv_le_four {x : ℝ} (hx : 1 / 4 ≤ x) : x⁻¹ ≤ 4 := by
+  rw [← one_div, div_le_iff₀ (by linarith : (0:ℝ) < x)]
+  linarith
+
+private lemma twelve_sq_le_exp (x : ℝ) (hx : 2 ≤ x) :
+    12 * (x + 2) ^ 2 ≤ Real.exp (100 * x * Real.log (x + 2)) := by
+  have h1 : 12 * (x + 2) ^ 2 ≤ 48 * x ^ 2 := by nlinarith
+  have h2 : 48 * x ^ 2 ≤ Real.exp (100 * x) := by
+    have h := Real.pow_div_factorial_le_exp (100 * x) (by linarith) 3
+    have hfac : (((3 : ℕ).factorial : ℝ)) = 6 := by norm_num
+    rw [hfac] at h
+    nlinarith [h, sq_nonneg x, hx]
+  have h3 : Real.exp (100 * x) ≤ Real.exp (100 * x * Real.log (x + 2)) := by
+    apply Real.exp_le_exp.mpr
+    have hL := one_le_log_add_two hx
+    nlinarith
+  linarith
+
+private lemma three_mul_pow_le_exp (x : ℝ) (hx : 2 ≤ x) (k : ℕ) (hk : (k : ℝ) ≤ x) :
+    3 * (2 * x + 1) ^ (k + 2) ≤ Real.exp (100 * x * Real.log (x + 2)) := by
+  have hL := one_le_log_add_two hx
+  have hpos : 0 < 3 * (2 * x + 1) ^ (k + 2) := by positivity
+  rw [← Real.log_le_iff_le_exp hpos]
+  have hbase : 0 < 2 * x + 1 := by linarith
+  rw [Real.log_mul (by norm_num) (by positivity), Real.log_pow]
+  push_cast
+  have hlog2 : Real.log (2 * x + 1) ≤ 2 * Real.log (x + 2) := by
+    have h1 : 2 * x + 1 ≤ (x + 2) ^ 2 := by nlinarith
+    have h2 := Real.log_le_log hbase h1
+    rw [Real.log_pow] at h2
+    push_cast at h2
+    linarith
+  have hlog3 : Real.log 3 ≤ 2 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    nlinarith [Real.exp_one_gt_two, Real.exp_pos 1,
+      show Real.exp 2 = Real.exp 1 * Real.exp 1 by rw [← Real.exp_add]; norm_num]
+  have hLnn : (0:ℝ) ≤ Real.log (x + 2) := by linarith
+  have hstep1 : ((k : ℝ) + 2) * Real.log (2 * x + 1) ≤ (x + 3) * (2 * Real.log (x + 2)) := by
+    apply mul_le_mul _ hlog2 (Real.log_nonneg (by linarith)) (by linarith)
+    linarith
+  nlinarith [hstep1, hlog3, hL, hx, hLnn]
+
+/-! ### Growth of `Γ` -/
+
+private lemma Gamma_shift (k : ℕ) (w : ℂ) (h : (k : ℝ) < w.re) :
+    Gamma w = Gamma (w - k) * ∏ j ∈ Finset.range k, (w - 1 - (j : ℂ)) := by
+  induction k generalizing w with
+  | zero => simp
+  | succ k ih =>
+    have hk : (k : ℝ) < w.re := by
+      have h' : ((k : ℕ) : ℝ) + 1 < w.re := by
+        have := h; push_cast at this; exact this
+      linarith
+    rw [ih w hk, Finset.prod_range_succ]
+    have hne : w - (k : ℂ) - 1 ≠ 0 := by
+      intro h0
+      have hre0 : w.re = (k : ℝ) + 1 := by
+        have h1 := congrArg Complex.re h0
+        have h2 : w.re - (k : ℝ) - 1 = 0 := by simpa using h1
+        linarith
+      have h' : ((k : ℕ) : ℝ) + 1 < w.re := by have := h; push_cast at this; exact this
+      linarith
+    have hadd : Gamma (w - (k : ℂ)) = (w - (k : ℂ) - 1) * Gamma (w - (k : ℂ) - 1) := by
+      have := Complex.Gamma_add_one (w - (k : ℂ) - 1) hne
+      rwa [show w - (k : ℂ) - 1 + 1 = w - (k : ℂ) by ring] at this
+    have hcast : w - (((k + 1 : ℕ)) : ℂ) = w - (k : ℂ) - 1 := by push_cast; ring
+    rw [hadd, hcast]
+    ring
+
+private lemma fac_bound (w : ℂ) (m : ℕ) (hm : (m : ℝ) ≤ ‖w‖) :
+    ‖w - 1 - (m : ℂ)‖ ≤ 2 * ‖w‖ + 1 := by
+  have h2 : ‖-1 - (m : ℂ)‖ ≤ ‖(-1 : ℂ)‖ + ‖(m : ℂ)‖ := norm_sub_le _ _
+  have h3 : ‖(-1 : ℂ)‖ = 1 := by norm_num
+  have h4 : ‖(m : ℂ)‖ = (m : ℝ) := by simp
+  have h5 : ‖w - 1 - (m : ℂ)‖ ≤ ‖w‖ + ‖-1 - (m : ℂ)‖ := by
+    have := norm_add_le w (-1 - (m : ℂ))
+    rwa [show w + (-1 - (m : ℂ)) = w - 1 - (m : ℂ) by ring] at this
+  rw [h3, h4] at h2
+  linarith
+
+private lemma prod_bound (w : ℂ) (m : ℕ) (hm : (m : ℝ) ≤ ‖w‖) :
+    ‖∏ j ∈ Finset.range m, (w - 1 - (j : ℂ))‖ ≤ (2 * ‖w‖ + 1) ^ m := by
+  rw [norm_prod]
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    have hm' : (m : ℝ) ≤ ‖w‖ := by
+      have : ((m : ℕ) : ℝ) ≤ ((m + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.le_succ m
+      linarith
+    rw [Finset.prod_range_succ, pow_succ]
+    exact mul_le_mul (ih hm') (fac_bound w m hm') (norm_nonneg _) (by positivity)
+
+private lemma Gamma_bound_of_im (w : ℂ) (hre : 1 / 4 ≤ w.re) (hn : 2 ≤ ‖w‖) (him : 0 ≤ w.im) :
+    ‖Gamma w‖ ≤ Real.exp (100 * ‖w‖ * Real.log (‖w‖ + 2)) := by
+  have hx : (2:ℝ) ≤ ‖w‖ := hn
+  rcases lt_or_ge w.re (1 / 2) with hlt | hge
+  · have hwne : w ≠ 0 := by
+      intro h; rw [h] at hre; simp at hre; linarith
+    have hsplit : Gamma w = Gamma (w + 1) / w := by
+      rw [Complex.Gamma_add_one w hwne]; field_simp
+    have hPL := LeanLab.PNTPort.ZetaZeros.norm_Gamma_le_PL2 (s := w + 1)
+      (by simp; linarith) (by simp; linarith)
+    have him1 : (w + 1).im = w.im := by simp
+    have hexp : Real.exp (-(Real.pi * (w + 1).im / 2)) ≤ 1 := by
+      rw [Real.exp_le_one_iff, him1]
+      nlinarith [Real.pi_pos]
+    have h2 : ‖(w + 1) + 1‖ ≤ ‖w‖ + 2 := by
+      calc ‖(w + 1) + 1‖ = ‖w + 2‖ := by ring_nf
+        _ ≤ ‖w‖ + ‖(2 : ℂ)‖ := norm_add_le _ _
+        _ = ‖w‖ + 2 := by norm_num
+    have hs : 0 ≤ Real.sqrt (2 * Real.pi) := Real.sqrt_nonneg _
+    have hnum : ‖Gamma (w + 1)‖ ≤ Real.sqrt (2 * Real.pi) * (‖w‖ + 2) ^ 2 := by
+      have hstep : Real.sqrt (2 * Real.pi) * ‖(w + 1) + 1‖ ^ 2 *
+          Real.exp (-(Real.pi * (w + 1).im / 2)) ≤ Real.sqrt (2 * Real.pi) * (‖w‖ + 2) ^ 2 * 1 := by
+        apply mul_le_mul _ hexp (Real.exp_pos _).le (by positivity)
+        apply mul_le_mul_of_nonneg_left _ hs
+        exact pow_le_pow_left₀ (norm_nonneg _) h2 2
+      calc ‖Gamma (w + 1)‖
+          ≤ Real.sqrt (2 * Real.pi) * ‖(w + 1) + 1‖ ^ 2 *
+              Real.exp (-(Real.pi * (w + 1).im / 2)) := hPL
+        _ ≤ Real.sqrt (2 * Real.pi) * (‖w‖ + 2) ^ 2 * 1 := hstep
+        _ = Real.sqrt (2 * Real.pi) * (‖w‖ + 2) ^ 2 := by ring
+    have hinv : ‖w‖⁻¹ ≤ 4 := inv_le_four (le_trans hre (le_trans (le_abs_self _)
+      (Complex.abs_re_le_norm w)))
+    have hmain : ‖Gamma w‖ ≤ 12 * (‖w‖ + 2) ^ 2 := by
+      rw [hsplit, norm_div, div_eq_mul_inv]
+      have hstep : ‖Gamma (w + 1)‖ * ‖w‖⁻¹ ≤ (Real.sqrt (2 * Real.pi) * (‖w‖ + 2) ^ 2) * 4 :=
+        mul_le_mul hnum hinv (by positivity) (by positivity)
+      have hstep2 : (Real.sqrt (2 * Real.pi) * (‖w‖ + 2) ^ 2) * 4 ≤ 12 * (‖w‖ + 2) ^ 2 := by
+        nlinarith [sqrt_two_pi_le, sq_nonneg (‖w‖ + 2)]
+      linarith
+    have hfin : 12 * (‖w‖ + 2) ^ 2 ≤ Real.exp (100 * ‖w‖ * Real.log (‖w‖ + 2)) :=
+      twelve_sq_le_exp ‖w‖ hx
+    linarith
+  · set k : ℕ := ⌊w.re - 1 / 2⌋₊ with hkdef
+    have hk_le : (k : ℝ) ≤ w.re - 1 / 2 := by
+      rw [hkdef]; exact Nat.floor_le (by linarith)
+    have hk_lt : w.re - 1 / 2 < (k : ℝ) + 1 := by
+      rw [hkdef]; exact Nat.lt_floor_add_one _
+    have hkre : 1 / 2 ≤ (w - (k : ℂ)).re := by simp; linarith
+    have hkre' : (w - (k : ℂ)).re ≤ 3 / 2 := by simp; linarith
+    have hPL := LeanLab.PNTPort.ZetaZeros.norm_Gamma_le_PL2 (s := w - (k : ℂ))
+      (by linarith) (by linarith)
+    have himk : (w - (k : ℂ)).im = w.im := by simp
+    have hkx : (k : ℝ) ≤ ‖w‖ := by
+      have h1 : w.re ≤ ‖w‖ := le_trans (le_abs_self _) (Complex.abs_re_le_norm w)
+      linarith
+    have hs : 0 ≤ Real.sqrt (2 * Real.pi) := Real.sqrt_nonneg _
+    have hstep2 : ‖(w - (k : ℂ)) + 1‖ ≤ 2 * ‖w‖ + 1 := by
+      have ha : ‖(w - (k : ℂ)) + 1‖ ≤ ‖w - (k : ℂ)‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
+      have hb : ‖w - (k : ℂ)‖ ≤ ‖w‖ + ‖(k : ℂ)‖ := norm_sub_le _ _
+      have hc : ‖(k : ℂ)‖ = (k : ℝ) := by simp
+      have hd : ‖(1 : ℂ)‖ = 1 := by norm_num
+      rw [hc] at hb
+      rw [hd] at ha
+      linarith
+    have hGk : ‖Gamma (w - (k : ℂ))‖ ≤ Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ 2 := by
+      have hexp : Real.exp (-(Real.pi * (w - (k : ℂ)).im / 2)) ≤ 1 := by
+        rw [Real.exp_le_one_iff, himk]
+        nlinarith [Real.pi_pos]
+      have hstep : Real.sqrt (2 * Real.pi) * ‖(w - (k : ℂ)) + 1‖ ^ 2 *
+          Real.exp (-(Real.pi * (w - (k : ℂ)).im / 2)) ≤
+          Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ 2 * 1 := by
+        apply mul_le_mul _ hexp (Real.exp_pos _).le (by positivity)
+        apply mul_le_mul_of_nonneg_left _ hs
+        exact pow_le_pow_left₀ (norm_nonneg _) hstep2 2
+      calc ‖Gamma (w - (k : ℂ))‖
+          ≤ Real.sqrt (2 * Real.pi) * ‖(w - (k : ℂ)) + 1‖ ^ 2 *
+              Real.exp (-(Real.pi * (w - (k : ℂ)).im / 2)) := hPL
+        _ ≤ Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ 2 * 1 := hstep
+        _ = Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ 2 := by ring
+    have hP : ‖∏ j ∈ Finset.range k, (w - 1 - (j : ℂ))‖ ≤ (2 * ‖w‖ + 1) ^ k :=
+      prod_bound w k hkx
+    have hshift := Gamma_shift k w (by linarith)
+    have hfinal : ‖Gamma w‖ ≤ Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ (k + 2) := by
+      rw [hshift, norm_mul]
+      have hstep : ‖Gamma (w - (k : ℂ))‖ * ‖∏ j ∈ Finset.range k, (w - 1 - (j : ℂ))‖
+          ≤ (Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ 2) * (2 * ‖w‖ + 1) ^ k :=
+        mul_le_mul hGk hP (norm_nonneg _) (by positivity)
+      calc ‖Gamma (w - (k : ℂ))‖ * ‖∏ j ∈ Finset.range k, (w - 1 - (j : ℂ))‖
+          ≤ (Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ 2) * (2 * ‖w‖ + 1) ^ k := hstep
+        _ = Real.sqrt (2 * Real.pi) * ((2 * ‖w‖ + 1) ^ 2 * (2 * ‖w‖ + 1) ^ k) := by ring
+        _ = Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ (k + 2) := by
+            rw [← pow_add]; ring_nf
+    have h3 : Real.sqrt (2 * Real.pi) * (2 * ‖w‖ + 1) ^ (k + 2) ≤ 3 * (2 * ‖w‖ + 1) ^ (k + 2) := by
+      have h0 : (0:ℝ) ≤ (2 * ‖w‖ + 1) ^ (k + 2) := by positivity
+      nlinarith [sqrt_two_pi_le]
+    exact hfinal.trans (h3.trans (three_mul_pow_le_exp ‖w‖ hx k hkx))
+
+private lemma Gamma_growth (w : ℂ) (hre : 1 / 4 ≤ w.re) (hn : 2 ≤ ‖w‖) :
+    ‖Gamma w‖ ≤ Real.exp (100 * ‖w‖ * Real.log (‖w‖ + 2)) := by
+  rcases le_or_gt 0 w.im with him | him
+  · exact Gamma_bound_of_im w hre hn him
+  · have h1 : ‖Gamma ((starRingEnd ℂ) w)‖ ≤
+        Real.exp (100 * ‖(starRingEnd ℂ) w‖ * Real.log (‖(starRingEnd ℂ) w‖ + 2)) :=
+      Gamma_bound_of_im ((starRingEnd ℂ) w) (by simpa using hre) (by simpa using hn)
+        (by simpa using him.le)
+    rwa [Complex.Gamma_conj, Complex.norm_conj, Complex.norm_conj] at h1
+
+/-! ### Bounds for `Λ₀` -/
+
+private lemma norm_pi_cpow_le_one (s : ℂ) (hre : 0 ≤ s.re) :
+    ‖(Real.pi : ℂ) ^ (-s / 2)‖ ≤ 1 := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+  rw [show (-s / 2).re = -s.re / 2 from by simp]
+  calc (Real.pi : ℝ) ^ (-s.re / 2) ≤ Real.pi ^ (0 : ℝ) := by
+        apply Real.rpow_le_rpow_of_exponent_le
+          (by linarith [Real.pi_gt_three] : (1:ℝ) ≤ Real.pi) (by linarith)
+    _ = 1 := Real.rpow_zero _
+
+/-- `‖Λ₀ s‖` bound for `Re s ≥ 1/2` and `‖s‖ ≥ 4`. -/
+private lemma completedZeta_bound_half (s : ℂ) (hre : 1 / 2 ≤ s.re) (hn : 4 ≤ ‖s‖) :
+    ‖completedRiemannZeta₀ s‖ ≤ Real.exp (1000 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+  have hs0 : s ≠ 0 := by
+    intro h; rw [h] at hn; simp at hn; linarith
+  have hx : (2:ℝ) ≤ ‖s‖ := by linarith
+  have hpi : (Real.pi : ℂ) ^ (-s / 2) ≠ 0 :=
+    Complex.cpow_ne_zero_iff.mpr (Or.inl (ofReal_ne_zero.mpr Real.pi_ne_zero))
+  have hG : Gamma (s / 2) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
+  have hid : completedRiemannZeta₀ s
+      = (Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s + 1 / s + 1 / (1 - s) := by
+    have h := riemannZeta_eq_completedRiemannZeta₀ hs0
+    rw [eq_div_iff (mul_ne_zero hpi hG)] at h
+    linear_combination -h
+  -- bounds for the three pieces
+  have hpi1 := norm_pi_cpow_le_one s (by linarith)
+  have hGn : ‖s / 2‖ = ‖s‖ / 2 := by
+    rw [Complex.norm_div]; norm_num
+  have hGbd : ‖Gamma (s / 2)‖ ≤ Real.exp (100 * (‖s‖ / 2) * Real.log (‖s‖ / 2 + 2)) := by
+    have h1 : (1 / 4 : ℝ) ≤ (s / 2).re := by simp; linarith
+    have h2 : (2 : ℝ) ≤ ‖s / 2‖ := by rw [hGn]; linarith
+    have h3 := Gamma_growth (s / 2) h1 h2
+    rwa [hGn] at h3
+  have hzbd := zeta_bound s hre hn
+  have hsix : 6 * (1 + ‖s‖) ≤ Real.exp (100 * ‖s‖) := by
+    have h := Real.pow_div_factorial_le_exp (100 * ‖s‖) (by positivity) 2
+    have hfac : (((2 : ℕ).factorial : ℝ)) = 2 := by norm_num
+    rw [hfac] at h
+    have hx0 : (0:ℝ) ≤ ‖s‖ := norm_nonneg _
+    nlinarith [h, hx0]
+  have hinv1 : ‖(1:ℂ) / s‖ ≤ 1 := by
+    rw [norm_div, norm_one, div_le_one (by linarith)]
+    linarith
+  have hden : (1:ℝ) ≤ ‖1 - s‖ := by
+    rcases le_or_gt 2 s.re with h2 | h2
+    · have h := Complex.abs_re_le_norm (1 - s)
+      rw [show (1 - s).re = 1 - s.re by simp, abs_of_neg (by linarith)] at h
+      linarith
+    · have h := Complex.abs_im_le_norm (1 - s)
+      rw [show (1 - s).im = -s.im by simp, abs_neg] at h
+      have hsq : s.re ^ 2 + s.im ^ 2 = ‖s‖ ^ 2 := by
+        rw [Complex.sq_norm, Complex.normSq_apply]; ring
+      have hsq' : (12:ℝ) ≤ s.im ^ 2 := by nlinarith
+      have : (3:ℝ) ≤ |s.im| := by nlinarith [abs_nonneg s.im, sq_abs s.im]
+      linarith
+  have hinv2 : ‖(1:ℂ) / (1 - s)‖ ≤ 1 := by
+    rw [norm_div, norm_one, div_le_one (by linarith)]
+    exact hden
+  -- assemble
+  have hbd : ‖completedRiemannZeta₀ s‖ ≤
+      Real.exp (100 * (‖s‖ / 2) * Real.log (‖s‖ / 2 + 2)) * Real.exp (100 * ‖s‖) + 2 := by
+    rw [hid]
+    have h1 : ‖(Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s + 1 / s + 1 / (1 - s)‖
+        ≤ ‖(Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s‖ + ‖1 / s‖ + ‖1 / (1 - s)‖ := by
+      have h2 : ‖(Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s + 1 / s + 1 / (1 - s)‖
+          ≤ ‖(Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s + 1 / s‖ + ‖1 / (1 - s)‖ :=
+        norm_add_le _ _
+      have h3 : ‖(Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s + 1 / s‖
+          ≤ ‖(Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s‖ + ‖1 / s‖ := norm_add_le _ _
+      linarith
+    have h1' : ‖1 / s‖ ≤ 1 := by simpa [one_div] using hinv1
+    have h1'' : ‖1 / (1 - s)‖ ≤ 1 := by simpa [one_div] using hinv2
+    have h4 : ‖(Real.pi : ℂ) ^ (-s / 2) * Gamma (s / 2) * ζ s‖
+        ≤ Real.exp (100 * (‖s‖ / 2) * Real.log (‖s‖ / 2 + 2)) * Real.exp (100 * ‖s‖) := by
+      rw [norm_mul, norm_mul]
+      have hA : ‖(Real.pi : ℂ) ^ (-s / 2)‖ * ‖Gamma (s / 2)‖
+          ≤ 1 * Real.exp (100 * (‖s‖ / 2) * Real.log (‖s‖ / 2 + 2)) :=
+        mul_le_mul hpi1 hGbd (norm_nonneg _) (by norm_num)
+      have hz2 : ‖ζ s‖ ≤ Real.exp (100 * ‖s‖) := le_trans hzbd hsix
+      have h5 : ‖(Real.pi : ℂ) ^ (-s / 2)‖ * ‖Gamma (s / 2)‖ * ‖ζ s‖
+          ≤ 1 * Real.exp (100 * (‖s‖ / 2) * Real.log (‖s‖ / 2 + 2)) * Real.exp (100 * ‖s‖) :=
+        mul_le_mul hA hz2 (norm_nonneg _) (by positivity)
+      linarith
+    linarith
+  have hcomb : Real.exp (100 * (‖s‖ / 2) * Real.log (‖s‖ / 2 + 2)) * Real.exp (100 * ‖s‖)
+      ≤ Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+    rw [← Real.exp_add]
+    apply Real.exp_le_exp.mpr
+    have hL := one_le_log_add_two hx
+    have hlog : Real.log (‖s‖ / 2 + 2) ≤ Real.log (‖s‖ + 2) :=
+      Real.log_le_log (by linarith) (by linarith)
+    have hx0 : (0:ℝ) ≤ ‖s‖ := norm_nonneg _
+    nlinarith [hL, hlog, hx0, mul_nonneg hx0 (by linarith : (0:ℝ) ≤ Real.log (‖s‖ + 2))]
+  have htwo : (2:ℝ) ≤ Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+    have hL := one_le_log_add_two hx
+    have hx0 : (0:ℝ) ≤ ‖s‖ := norm_nonneg _
+    have h1 : 500 * ‖s‖ * Real.log (‖s‖ + 2) + 1 ≤
+        Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) :=
+      Real.add_one_le_exp (500 * ‖s‖ * Real.log (‖s‖ + 2))
+    have h2 : (1:ℝ) ≤ 500 * ‖s‖ * Real.log (‖s‖ + 2) := by nlinarith
+    linarith
+  calc ‖completedRiemannZeta₀ s‖
+      ≤ Real.exp (100 * (‖s‖ / 2) * Real.log (‖s‖ / 2 + 2)) * Real.exp (100 * ‖s‖) + 2 := hbd
+    _ ≤ Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) +
+        Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) := by linarith
+    _ = 2 * Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) := by ring
+    _ ≤ Real.exp (1000 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+        have hL := one_le_log_add_two hx
+        have hx0 : (0:ℝ) ≤ ‖s‖ := norm_nonneg _
+        have h1 : Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) * Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2))
+            = Real.exp (1000 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+          rw [← Real.exp_add]; ring_nf
+        have h2 : (2:ℝ) ≤ Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) := htwo
+        have h0 : (0:ℝ) < Real.exp (500 * ‖s‖ * Real.log (‖s‖ + 2)) := Real.exp_pos _
+        nlinarith [h1, h2, h0]
+
 /-- LEAF. Unit U-1551. Davenport chapter 12, page 80, first displays: `ξ` has order one,
 `|ξ(s)| ≤ C exp(C |s| log(|s| + 2))` for all `s`, from Stirling for `Γ(s/2)` and
 `ζ(s) ≪ |s|` on `Re s ≥ 1/2`, with `ξ(1-s) = ξ(s)` for the other half plane. -/
 theorem xi_growth :
     ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, ‖xi s‖ ≤ C * Real.exp (C * ‖s‖ * Real.log (‖s‖ + 2)) := by
-  sorry
+  obtain ⟨M, hM⟩ := (isCompact_closedBall (0 : ℂ) 4).exists_bound_of_continuousOn
+    differentiable_completedZeta₀.continuous.continuousOn
+  have hM0 : 0 ≤ M := le_trans (norm_nonneg _) (hM 0 (by simp [Metric.mem_closedBall]))
+  refine ⟨1000 * (M + 1) + 10000, by positivity, fun s => ?_⟩
+  have hC1 : (10 * M + 1 / 2 : ℝ) ≤ 1000 * (M + 1) + 10000 := by linarith
+  have hC2 : (1100 : ℝ) ≤ 1000 * (M + 1) + 10000 := by linarith
+  have hC0 : (0:ℝ) < 1000 * (M + 1) + 10000 := by linarith
+  rcases le_or_gt ‖s‖ 4 with hs | hs
+  · have hb : ‖completedRiemannZeta₀ s‖ ≤ M :=
+      hM s (by simpa [Metric.mem_closedBall, dist_zero_right] using hs)
+    have h1 : ‖s - 1‖ ≤ 5 := by
+      calc ‖s - 1‖ ≤ ‖s‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
+        _ = ‖s‖ + 1 := by norm_num
+        _ ≤ 5 := by linarith
+    have h4 : ‖s * (s - 1) * completedRiemannZeta₀ s + 1‖
+        ≤ ‖s‖ * ‖s - 1‖ * ‖completedRiemannZeta₀ s‖ + 1 := by
+      have h5 : ‖s * (s - 1) * completedRiemannZeta₀ s + 1‖
+          ≤ ‖s * (s - 1) * completedRiemannZeta₀ s‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
+      rw [norm_mul, norm_mul, show ‖(1 : ℂ)‖ = 1 from by norm_num] at h5
+      linarith
+    have h5 : ‖s‖ * ‖s - 1‖ * ‖completedRiemannZeta₀ s‖ ≤ 4 * 5 * M := by
+      have h6 : ‖s‖ * ‖s - 1‖ ≤ 4 * 5 :=
+        mul_le_mul hs h1 (norm_nonneg _) (by norm_num)
+      have h7 : ‖s‖ * ‖s - 1‖ * ‖completedRiemannZeta₀ s‖ ≤ (4 * 5) * M :=
+        mul_le_mul h6 hb (norm_nonneg _) (by norm_num)
+      linarith
+    have h2 : ‖xi s‖ ≤ 10 * M + 1 / 2 := by
+      unfold xi
+      rw [norm_div, show ‖(2 : ℂ)‖ = 2 from by norm_num, div_le_iff₀ (by norm_num : (0:ℝ) < 2)]
+      linarith
+    have hexp1 : (1:ℝ) ≤ Real.exp ((1000 * (M + 1) + 10000) * ‖s‖ * Real.log (‖s‖ + 2)) := by
+      apply Real.one_le_exp
+      have hL : (0:ℝ) ≤ Real.log (‖s‖ + 2) := Real.log_nonneg (by linarith [norm_nonneg s])
+      have hnn : (0:ℝ) ≤ ‖s‖ := norm_nonneg s
+      positivity
+    have hpos : (0:ℝ) < Real.exp ((1000 * (M + 1) + 10000) * ‖s‖ * Real.log (‖s‖ + 2)) :=
+      Real.exp_pos _
+    nlinarith [h2, hC1, hexp1, hpos]
+  · have hΛ : ‖completedRiemannZeta₀ s‖ ≤ Real.exp (8000 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+      rcases le_or_gt (1 / 2 : ℝ) s.re with hre | hre
+      · have h := completedZeta_bound_half s hre (le_of_lt hs)
+        calc ‖completedRiemannZeta₀ s‖ ≤ Real.exp (1000 * ‖s‖ * Real.log (‖s‖ + 2)) := h
+          _ ≤ Real.exp (8000 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+              apply Real.exp_le_exp.mpr
+              have hL : (0:ℝ) ≤ Real.log (‖s‖ + 2) := Real.log_nonneg (by linarith [norm_nonneg s])
+              have : (0:ℝ) ≤ ‖s‖ := norm_nonneg s
+              nlinarith
+      · -- use `Λ₀ (1 - s) = Λ₀ s`
+        have hsym : completedRiemannZeta₀ (1 - s) = completedRiemannZeta₀ s :=
+          completedRiemannZeta₀_one_sub s
+        have hre' : (1 / 2 : ℝ) ≤ (1 - s).re := by simp; linarith
+        have hn' : (4:ℝ) ≤ ‖1 - s‖ := by
+          have hsq : (1 - s).re ^ 2 + (1 - s).im ^ 2 = ‖1 - s‖ ^ 2 := by
+            rw [Complex.sq_norm, Complex.normSq_apply]; ring
+          have hsq2 : s.re ^ 2 + s.im ^ 2 = ‖s‖ ^ 2 := by
+            rw [Complex.sq_norm, Complex.normSq_apply]; ring
+          have h1 : (1 - s).re = 1 - s.re := by simp
+          have h2 : (1 - s).im = -s.im := by simp
+          have h3 : (16:ℝ) ≤ ‖s‖ ^ 2 := by nlinarith [norm_nonneg s]
+          have h16 : (16:ℝ) ≤ (1 - s).re ^ 2 + (1 - s).im ^ 2 := by
+            rw [h1, h2]
+            nlinarith
+          have h5 : (16:ℝ) ≤ Complex.normSq (1 - s) := by
+            rw [Complex.normSq_apply]
+            nlinarith
+          rw [Complex.norm_def]
+          refine (Real.le_sqrt (show (0:ℝ) ≤ 4 by norm_num) (by positivity)).mpr ?_
+          have h6 : (4:ℝ) ^ 2 = 16 := by norm_num
+          rw [h6]
+          exact h5
+        have h := completedZeta_bound_half (1 - s) hre' hn'
+        rw [hsym] at h
+        have hle : ‖1 - s‖ ≤ 2 * ‖s‖ := by
+          have h1 : ‖1 - s‖ ≤ ‖(1:ℂ)‖ + ‖s‖ := by
+            have := norm_sub_le (1:ℂ) s
+            rwa [show (1:ℂ) - s = 1 - s from rfl] at this
+          rw [show ‖(1:ℂ)‖ = 1 from by norm_num] at h1
+          linarith
+        have hnn : (0:ℝ) ≤ ‖s‖ := norm_nonneg s
+        calc ‖completedRiemannZeta₀ s‖ ≤ Real.exp (1000 * ‖1 - s‖ * Real.log (‖1 - s‖ + 2)) := h
+          _ ≤ Real.exp (8000 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+              apply Real.exp_le_exp.mpr
+              have hL : (0:ℝ) ≤ Real.log (‖s‖ + 2) := Real.log_nonneg (by linarith)
+              have hlog : Real.log (‖1 - s‖ + 2) ≤ Real.log (2 * ‖s‖ + 2) :=
+                Real.log_le_log (by linarith) (by linarith)
+              have hlog2 : Real.log (2 * ‖s‖ + 2) ≤ 2 * Real.log (‖s‖ + 2) := by
+                have h1 : 2 * ‖s‖ + 2 ≤ (‖s‖ + 2) ^ 2 := by nlinarith
+                have h2 := Real.log_le_log (by linarith : (0:ℝ) < 2 * ‖s‖ + 2) h1
+                rw [Real.log_pow] at h2
+                push_cast at h2
+                linarith
+              have h0log : (0:ℝ) ≤ Real.log (‖1 - s‖ + 2) :=
+                Real.log_nonneg (by linarith)
+              have hprod : ‖1 - s‖ * Real.log (‖1 - s‖ + 2)
+                  ≤ (2 * ‖s‖) * (2 * Real.log (‖s‖ + 2)) :=
+                mul_le_mul hle (le_trans hlog hlog2) h0log (by linarith)
+              nlinarith [hprod]
+    -- final assembly in the large case
+    have h1 : ‖s - 1‖ ≤ 2 * ‖s‖ := by
+      have := norm_sub_le s (1:ℂ)
+      rw [show ‖(1:ℂ)‖ = 1 from by norm_num] at this
+      linarith
+    have h4 : ‖s * (s - 1) * completedRiemannZeta₀ s + 1‖
+        ≤ ‖s‖ * ‖s - 1‖ * ‖completedRiemannZeta₀ s‖ + 1 := by
+      have h5 : ‖s * (s - 1) * completedRiemannZeta₀ s + 1‖
+          ≤ ‖s * (s - 1) * completedRiemannZeta₀ s‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
+      rw [norm_mul, norm_mul, show ‖(1 : ℂ)‖ = 1 from by norm_num] at h5
+      linarith
+    have h6 : ‖s‖ * ‖s - 1‖ ≤ 2 * ‖s‖ ^ 2 := by
+      have h7 := mul_le_mul_of_nonneg_left h1 (norm_nonneg s)
+      nlinarith [h7, norm_nonneg s]
+    have h9 : (2 * ‖s‖ ^ 2 : ℝ) ≤ Real.exp (100 * ‖s‖) := by
+      have h := Real.pow_div_factorial_le_exp (100 * ‖s‖) (by positivity) 2
+      have hfac : (((2 : ℕ).factorial : ℝ)) = 2 := by norm_num
+      rw [hfac] at h
+      nlinarith [h, norm_nonneg s]
+    have hΛnn : (0:ℝ) ≤ Real.exp (8000 * ‖s‖ * Real.log (‖s‖ + 2)) := (Real.exp_pos _).le
+    have h7 : ‖s‖ * ‖s - 1‖ * ‖completedRiemannZeta₀ s‖
+        ≤ Real.exp (100 * ‖s‖) * Real.exp (8000 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+      have h8 : ‖s‖ * ‖s - 1‖ * ‖completedRiemannZeta₀ s‖
+          ≤ (2 * ‖s‖ ^ 2) * Real.exp (8000 * ‖s‖ * Real.log (‖s‖ + 2)) :=
+        mul_le_mul h6 hΛ (norm_nonneg _) (by positivity)
+      have h10 := mul_le_mul_of_nonneg_right h9 hΛnn
+      linarith
+    have h11 : Real.exp (100 * ‖s‖) * Real.exp (8000 * ‖s‖ * Real.log (‖s‖ + 2))
+        ≤ Real.exp (8100 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+      rw [← Real.exp_add]
+      apply Real.exp_le_exp.mpr
+      have hL := one_le_log_add_two (by linarith : (2:ℝ) ≤ ‖s‖)
+      have hnn : (0:ℝ) ≤ ‖s‖ := norm_nonneg s
+      nlinarith [hL, hnn]
+    have h3 : ‖xi s‖ ≤ Real.exp (8100 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+      unfold xi
+      rw [norm_div, show ‖(2 : ℂ)‖ = 2 from by norm_num, div_le_iff₀ (by norm_num : (0:ℝ) < 2)]
+      have hone : (1:ℝ) ≤ Real.exp (8100 * ‖s‖ * Real.log (‖s‖ + 2)) := by
+        apply Real.one_le_exp
+        have hL : (0:ℝ) ≤ Real.log (‖s‖ + 2) := Real.log_nonneg (by linarith)
+        have hnn : (0:ℝ) ≤ ‖s‖ := norm_nonneg s
+        positivity
+      linarith
+    have hmono : Real.exp (8100 * ‖s‖ * Real.log (‖s‖ + 2))
+        ≤ Real.exp ((1000 * (M + 1) + 10000) * ‖s‖ * Real.log (‖s‖ + 2)) := by
+      apply Real.exp_le_exp.mpr
+      have hL : (0:ℝ) ≤ Real.log (‖s‖ + 2) := Real.log_nonneg (by linarith [norm_nonneg s])
+      have hnn : (0:ℝ) ≤ ‖s‖ := norm_nonneg s
+      have h21 : (8100:ℝ) ≤ 1000 * (M + 1) + 10000 := by linarith
+      nlinarith [hL, hnn, mul_nonneg hnn hL]
+    have hcle : (1:ℝ) ≤ 1000 * (M + 1) + 10000 := by linarith
+    have hpos : (0:ℝ) < Real.exp ((1000 * (M + 1) + 10000) * ‖s‖ * Real.log (‖s‖ + 2)) :=
+      Real.exp_pos _
+    have hfin : ‖xi s‖ ≤ Real.exp ((1000 * (M + 1) + 10000) * ‖s‖ * Real.log (‖s‖ + 2)) :=
+      le_trans h3 hmono
+    nlinarith [hfin, hcle, hpos]
 
 /-- LEAF. Unit U-1551. Davenport chapter 12, page 79: the zeros of `ξ` are exactly the zeros
 of `ζ` in the critical strip, with the same multiplicity, since `s(s-1)/2 · π^{-s/2} Γ(s/2)`
