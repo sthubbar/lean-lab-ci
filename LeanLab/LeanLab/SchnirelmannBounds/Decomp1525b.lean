@@ -22,6 +22,8 @@ AI-written Lean code, Claude, 2026-10-25. Binary Goldbach is OPEN.
 -/
 import LeanLab.SchnirelmannBounds.Decomp1525a
 import LeanLab.Helfgott2013.GammaFine
+import LeanLab.PNTPort.LargeSieve.Montgomery
+import LeanLab.RieselVaughan1983.Stieltjes1Enclosure
 
 open Finset Real MeasureTheory
 open scoped Classical
@@ -60,6 +62,188 @@ def tau1 (r : ℕ) : ℕ := (r.divisors.filter Odd).card
 /-- `Π_{p | n, p > 2} (p-1)/(p-2)`, the singular factor of Lemmas 7 and 8. -/
 def singQ (n : ℕ) : ℝ := ∏ p ∈ n.primeFactors.filter (2 < ·), ((p : ℝ) - 1) / ((p : ℝ) - 2)
 
+/-- Agreement of the two exponential conventions in the large sieve modules. -/
+theorem ee_eq_largeSieve_e (t : ℝ) : ee t = LeanLab.PNTPort.LargeSieve.e t := by
+  unfold ee LeanLab.PNTPort.LargeSieve.e
+  congr 1
+  push_cast
+  ring
+
+
+/-- Weighted finite duality for Montgomery and Vaughan 1973 Theorem 1.
+The dual estimate is an explicit hypothesis. -/
+theorem weighted_sampling_of_dual {ι κ : Type*} (R : Finset ι) (J : Finset κ)
+    (c : ι → κ → ℂ) (w : ι → ℝ) (hw : ∀ r ∈ R, 0 < w r)
+    (hdual : ∀ b : ι → ℂ,
+      ∑ n ∈ J, ‖∑ r ∈ R, b r * c r n‖^2 ≤ ∑ r ∈ R, w r * ‖b r‖^2)
+    (a : κ → ℂ) :
+    ∑ r ∈ R, ‖∑ n ∈ J, a n*c r n‖^2/w r ≤ ∑ n ∈ J, ‖a n‖^2 := by
+  let S : ι → ℂ := fun r => ∑ n ∈ J, a n*c r n
+  let b : ι → ℂ := fun r => (starRingEnd ℂ) (S r)/(w r : ℂ)
+  let X : ℝ := ∑ r ∈ R, ‖S r‖^2/w r
+  let A : ℝ := ∑ n ∈ J, ‖a n‖^2
+  let T : κ → ℂ := fun n => ∑ r ∈ R, b r*c r n
+  have hX0 : 0 ≤ X := sum_nonneg (fun r hr => div_nonneg (sq_nonneg _) (hw r hr).le)
+  have hA0 : 0 ≤ A := sum_nonneg (fun n hn => sq_nonneg _)
+  have henergy : ∑ r ∈ R, w r*‖b r‖^2 = X := by
+    apply sum_congr rfl
+    intro r hr
+    dsimp [b]
+    rw [norm_div, Complex.norm_conj, Complex.norm_real, Real.norm_of_nonneg (hw r hr).le, div_pow]
+    field_simp
+  have hT : ∑ n ∈ J, ‖T n‖^2 ≤ X := by
+    simpa only [T, henergy] using hdual b
+  have hX : (X : ℂ) = ∑ n ∈ J, a n*T n := by
+    dsimp only [X]
+    rw [Complex.ofReal_sum]
+    simp_rw [Complex.ofReal_div, Complex.ofReal_pow, ← Complex.mul_conj']
+    dsimp only [T, b, S]
+    simp_rw [mul_sum, sum_mul]
+    rw [sum_comm]
+    apply sum_congr rfl
+    intro r hr
+    rw [Finset.sum_div]
+    apply sum_congr rfl
+    intro n hn
+    ring
+  have h1 : X ≤ ∑ n ∈ J, ‖a n‖*‖T n‖ := by
+    have hh : X = ‖(X : ℂ)‖ := by simp [Real.norm_of_nonneg hX0]
+    rw [hh, hX]
+    simpa only [norm_mul] using norm_sum_le J (fun n => a n*T n)
+  have h2 := sum_mul_sq_le_sq_mul_sq J (fun n => ‖a n‖) (fun n => ‖T n‖)
+  have h3 : X^2 ≤ A*X := by
+    calc
+      X^2 ≤ (∑ n ∈ J, ‖a n‖*‖T n‖)^2 := pow_le_pow_left₀ hX0 h1 2
+      _ ≤ A * ∑ n ∈ J, ‖T n‖^2 := h2
+      _ ≤ A*X := mul_le_mul_of_nonneg_left hT hA0
+  change X ≤ A
+  rcases eq_or_lt_of_le hX0 with h0 | hp
+  · rw [← h0]; exact hA0
+  · exact le_of_mul_le_mul_left (by nlinarith : X*X ≤ X*A) hp
+
+
+/-- The weighted Farey leaf follows from its exact dual estimate.
+The dual estimate remains an explicit hypothesis. -/
+theorem mv_large_sieve_of_dual (M N : ℕ) (Q : ℝ) (hN : 1 ≤ N) (hQ : 1 ≤ Q)
+    (hdual : ∀ b : (Σ _ : ℕ, ℕ) → ℂ,
+      ∑ n ∈ Ioc M (M+N),
+        ‖∑ q ∈ Icc 1 ⌊Q⌋₊, ∑ r ∈ (Icc 1 q).filter (fun r => r.Coprime q),
+          b ⟨q,r⟩*ee ((r : ℝ)*n/q)‖^2 ≤
+      ∑ q ∈ Icc 1 ⌊Q⌋₊, ∑ r ∈ (Icc 1 q).filter (fun r => r.Coprime q),
+        ((N : ℝ)+3/2*q*Q)*‖b ⟨q,r⟩‖^2)
+    (a : ℕ → ℂ) :
+    ∑ q ∈ Icc 1 ⌊Q⌋₊, ∑ r ∈ (Icc 1 q).filter (fun r => r.Coprime q),
+      ‖∑ n ∈ Ioc M (M+N), a n*ee ((r : ℝ)*n/q)‖^2/((N : ℝ)+3/2*q*Q) ≤
+      ∑ n ∈ Ioc M (M+N), ‖a n‖^2 := by
+  let R := (Icc 1 ⌊Q⌋₊).sigma (fun q => (Icc 1 q).filter (fun r => r.Coprime q))
+  let c : (Σ _ : ℕ, ℕ) → ℕ → ℂ := fun r n => ee ((r.2 : ℝ)*n/r.1)
+  let w : (Σ _ : ℕ, ℕ) → ℝ := fun r => (N : ℝ)+3/2*r.1*Q
+  have hN0 : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hQ0 : 0 < Q := by linarith
+  have hh := weighted_sampling_of_dual R (Ioc M (M+N)) c w
+    (fun r hr => by dsimp [w]; positivity)
+    (fun b => by simpa only [R, c, w, Finset.sum_sigma'] using hdual b) a
+  simpa only [R, c, w, Finset.sum_sigma'] using hh
+
+/-- Diagonal and off diagonal energy for a finite complex sampling matrix.
+This is the algebraic split behind Montgomery and Vaughan 1973 Theorem 1. -/
+theorem sampling_energy_split {ι κ : Type*} [DecidableEq ι]
+    (R : Finset ι) (J : Finset κ) (c : ι → κ → ℂ) (b : ι → ℂ) :
+    (∑ n ∈ J, ‖∑ r ∈ R, b r*c r n‖^2) =
+      (∑ r ∈ R, ‖b r‖^2 * ∑ n ∈ J, ‖c r n‖^2) +
+        (∑ r ∈ R, ∑ t ∈ R.erase r,
+          b r*(starRingEnd ℂ) (b t) * ∑ n ∈ J, c r n*(starRingEnd ℂ) (c t n)).re := by
+  let K : ι → ι → ℂ := fun r t =>
+    b r*(starRingEnd ℂ) (b t) * ∑ n ∈ J, c r n*(starRingEnd ℂ) (c t n)
+  have hcomplex : ((∑ n ∈ J, ‖∑ r ∈ R, b r*c r n‖^2 : ℝ) : ℂ) =
+      ∑ r ∈ R, ∑ t ∈ R, K r t := by
+    rw [Complex.ofReal_sum]
+    simp_rw [LeanLab.PNTPort.LargeSieve.ofReal_normSq_sum]
+    rw [sum_comm]
+    apply sum_congr rfl
+    intro r hr
+    rw [sum_comm]
+    apply sum_congr rfl
+    intro t ht
+    dsimp [K]
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro n hn
+    rw [map_mul]
+    ring
+  have hdiag (r : ι) : K r r = ((‖b r‖^2 * ∑ n ∈ J, ‖c r n‖^2 : ℝ) : ℂ) := by
+    dsimp [K]
+    rw [Complex.ofReal_mul, Complex.ofReal_pow, ← Complex.mul_conj', Complex.ofReal_sum]
+    congr 1
+    apply sum_congr rfl
+    intro n hn
+    rw [Complex.ofReal_pow, ← Complex.mul_conj']
+  have hsplit : (∑ r ∈ R, ∑ t ∈ R, K r t) =
+      (∑ r ∈ R, K r r) + ∑ r ∈ R, ∑ t ∈ R.erase r, K r t := by
+    rw [← sum_add_distrib]
+    apply sum_congr rfl
+    intro r hr
+    exact (add_sum_erase R (K r) hr).symm
+  rw [hsplit] at hcomplex
+  have hh := congrArg Complex.re hcomplex
+  simpa only [Complex.add_re, Complex.re_sum, hdiag, Complex.ofReal_re, K] using hh
+
+
+/-- The weighted dual estimate follows from its off diagonal Gram bound.
+The Gram bound remains an explicit analytic hypothesis. -/
+theorem weighted_dual_of_gram {ι κ : Type*} [DecidableEq ι]
+    (R : Finset ι) (J : Finset κ) (c : ι → κ → ℂ) (w : ι → ℝ)
+    (hgram : ∀ b : ι → ℂ,
+      (∑ r ∈ R, ∑ t ∈ R.erase r,
+        b r*(starRingEnd ℂ) (b t) * ∑ n ∈ J, c r n*(starRingEnd ℂ) (c t n)).re ≤
+      ∑ r ∈ R, (w r-∑ n ∈ J, ‖c r n‖^2)*‖b r‖^2)
+    (b : ι → ℂ) :
+    ∑ n ∈ J, ‖∑ r ∈ R, b r*c r n‖^2 ≤ ∑ r ∈ R, w r*‖b r‖^2 := by
+  rw [sampling_energy_split]
+  apply (add_le_add (le_refl (∑ r ∈ R, ‖b r‖^2 * ∑ n ∈ J, ‖c r n‖^2)) (hgram b)).trans_eq
+  rw [← sum_add_distrib]
+  apply sum_congr rfl
+  intro r hr
+  ring
+
+
+
+/-- The weighted Farey sieve follows from its off diagonal Hilbert estimate.
+The Hilbert estimate remains an explicit analytic hypothesis. -/
+theorem mv_large_sieve_of_hilbert (M N : ℕ) (Q : ℝ) (hN : 1 ≤ N) (hQ : 1 ≤ Q)
+    (R : Finset (Σ _ : ℕ, ℕ))
+    (hR : R = (Icc 1 ⌊Q⌋₊).sigma (fun q => (Icc 1 q).filter (fun r => r.Coprime q)))
+    (hHilbert : ∀ b : (Σ _ : ℕ, ℕ) → ℂ,
+      (∑ r ∈ R, ∑ t ∈ R.erase r, b r*(starRingEnd ℂ) (b t) *
+        ∑ n ∈ Ioc M (M+N), ee ((r.2 : ℝ)*n/r.1)*(starRingEnd ℂ) (ee ((t.2 : ℝ)*n/t.1))).re ≤
+      ∑ r ∈ R, (3/2*r.1*Q)*‖b r‖^2)
+    (a : ℕ → ℂ) :
+    ∑ q ∈ Icc 1 ⌊Q⌋₊, ∑ r ∈ (Icc 1 q).filter (fun r => r.Coprime q),
+      ‖∑ n ∈ Ioc M (M+N), a n*ee ((r : ℝ)*n/q)‖^2/((N : ℝ)+3/2*q*Q) ≤
+      ∑ n ∈ Ioc M (M+N), ‖a n‖^2 := by
+  apply mv_large_sieve_of_dual M N Q hN hQ
+  intro b
+  let c : (Σ _ : ℕ, ℕ) → ℕ → ℂ := fun r n => ee ((r.2 : ℝ)*n/r.1)
+  let w : (Σ _ : ℕ, ℕ) → ℝ := fun r => (N : ℝ)+3/2*r.1*Q
+  have hd (r : (Σ _ : ℕ, ℕ)) : ∑ n ∈ Ioc M (M+N), ‖c r n‖^2 = (N : ℝ) := by
+    have he (t : ℝ) : ‖ee t‖ = 1 := by
+      unfold ee
+      rw [Complex.norm_exp]
+      simp
+    simp [c, he]
+  have hh := weighted_dual_of_gram R (Ioc M (M+N)) c w (by
+    intro v
+    simpa only [c, w, hd, add_sub_cancel_left] using hHilbert v) b
+  simpa only [hR, c, w, Finset.sum_sigma'] using hh
+
+
+/-- The existing weak lab sieve ceiling exceeds the denominator needed on page 101.
+This is a comparison of proof budgets. -/
+theorem weak_large_sieve_ceiling (N q : ℕ) (Q : ℝ) (hQ : 0 < Q) (hq : (q : ℝ) ≤ Q) :
+    (N : ℝ)+3/2*q*Q < N+2*Q^2 := by
+  have hh := mul_le_mul_of_nonneg_right hq hQ.le
+  nlinarith [sq_pos_of_pos hQ]
+
 /-! ### Leaves: the large sieve -/
 
 /-- LEAF. Montgomery-Vaughan's weighted large sieve at the Farey points `b/q`, `q ≤ Q`:
@@ -82,7 +266,61 @@ theorem montgomery_sieve (S : Finset ℕ) (q : ℕ) (hq0 : 0 < q) (hq : Squarefr
     (hΩ : ∀ p ∈ q.primeFactors, (∀ w ∈ Ω p, w < p) ∧ (Ω p).card < p ∧ ∀ s ∈ S, s % p ∉ Ω p) :
     (S.card : ℝ) ^ 2 * ∏ p ∈ q.primeFactors, ((Ω p).card : ℝ) / ((p : ℝ) - (Ω p).card)
       ≤ ∑ b ∈ (Icc 1 q).filter (fun b => b.Coprime q), ‖∑ s ∈ S, ee ((b : ℝ) * s / q)‖ ^ 2 := by
-  sorry
+  let I : Finset ℤ := S.image (fun s : ℕ => (s : ℤ))
+  let B : ℕ → Finset ℕ := fun p => if p ∈ q.primeFactors then Ω p else ∅
+  have hB : ∀ p, p.Prime → B p ⊆ range p ∧ (B p).card < p := by
+    intro p hp
+    by_cases h : p ∈ q.primeFactors
+    · simp only [B, h, ite_true]
+      exact ⟨fun w hw => mem_range.mpr ((hΩ p h).1 w hw), (hΩ p h).2.1⟩
+    · simp only [B, if_neg h, card_empty]
+      exact ⟨empty_subset _, hp.pos⟩
+  have hav : ∀ p ∈ q.primeFactors, LeanLab.PNTPort.LargeSieve.Avoids I (fun _ => 1) p (B p) := by
+    intro p hp n hn hb
+    obtain ⟨s, hs, rfl⟩ := mem_image.mp hn
+    have hh : ((s : ℤ) % (p : ℤ)).toNat = s % p := by omega
+    simp only [B, hp, ite_true, hh] at hb
+    exact False.elim ((hΩ p hp).2.2 s hs hb)
+  have h := LeanLab.PNTPort.LargeSieve.Pr_sqf_ge I (fun _ => 1) B hB q hq hav
+  have hW : LeanLab.PNTPort.LargeSieve.hW B q =
+      ∏ p ∈ q.primeFactors, ((Ω p).card : ℝ) / ((p : ℝ)-(Ω p).card) := by
+    unfold LeanLab.PNTPort.LargeSieve.hW
+    apply prod_congr rfl
+    intro p hp
+    simp only [B, if_pos hp]
+  have hS0 : LeanLab.PNTPort.LargeSieve.S I (fun _ => 1) 0 = (S.card : ℂ) := by
+    simp [LeanLab.PNTPort.LargeSieve.S, LeanLab.PNTPort.LargeSieve.e_zero, I,
+      Finset.card_image_of_injective _ Nat.cast_injective]
+  have hsum (b : ℕ) : LeanLab.PNTPort.LargeSieve.S I (fun _ => 1) ((b : ℝ)/q) =
+      ∑ s ∈ S, ee ((b : ℝ)*s/q) := by
+    unfold LeanLab.PNTPort.LargeSieve.S
+    rw [Finset.sum_image]
+    · apply sum_congr rfl
+      intro s hs
+      simp only [one_mul, Int.cast_natCast, ee_eq_largeSieve_e]
+      congr 1
+      ring
+    · exact Nat.cast_injective.injOn
+  rw [hW, hS0] at h
+  simp only [Complex.norm_natCast] at h
+  rw [mul_comm] at h
+  by_cases hq1 : q = 1
+  · subst q
+    have hee (s : ℕ) : ee (s : ℝ) = 1 := by
+      rw [ee_eq_largeSieve_e]
+      exact_mod_cast LeanLab.PNTPort.LargeSieve.e_int (s : ℤ)
+    simp [hee]
+  · have hU : LeanLab.PNTPort.LargeSieve.U q = (Icc 1 q).filter (fun b => b.Coprime q) := by
+      ext b
+      simp only [LeanLab.PNTPort.LargeSieve.U, mem_filter, mem_range, mem_Icc]
+      constructor
+      · rintro ⟨hb, hc⟩
+        have hb0 : b ≠ 0 := by intro he; subst b; exact hq1 (by simpa using hc)
+        exact ⟨⟨by omega, by omega⟩, hc.symm⟩
+      · rintro ⟨⟨hb0, hb⟩, hc⟩
+        have hbq : b ≠ q := by intro he; subst b; exact hq1 (by simpa using hc)
+        exact ⟨by omega, hc.symm⟩
+    simpa only [LeanLab.PNTPort.LargeSieve.Pr, hU, hsum] using h
 
 /-- **Montgomery-Vaughan 1973 Corollary 1, PROVED from `mv_large_sieve` and
 `montgomery_sieve`**: `|S| · Σ_{q ≤ Q} μ²(q) (N + (3/2)qQ)^{-1} Π_{p|q} ω(p)/(p - ω(p)) ≤ 1`
@@ -529,6 +767,73 @@ theorem sifted_le (x : ℝ) (hx : 6 ≤ x) (h : ℤ) (he : Even h) :
 
 /-! ### Leaves: Lemmas 4, 5, 6 and the constants -/
 
+/-- The local odd divisor count in the convolution on pages 97 and 98. -/
+theorem tau1_prime_pow {p : ℕ} (hp : p.Prime) (m : ℕ) :
+    tau1 (p^m) = if p = 2 then 1 else m+1 := by
+  rw [tau1, Nat.divisors_prime_pow hp, Finset.filter_map, Finset.card_map]
+  by_cases hp2 : p = 2
+  · subst p
+    have hodd (k : ℕ) : Odd (2^k) ↔ k = 0 := by
+      by_cases hk : k = 0
+      · simp [hk]
+      · rw [Nat.odd_pow_iff hk]
+        simp [hk]
+    simp [hodd]
+  · have hpo : Odd p := hp.odd_of_ne_two hp2
+    simp [hp2, hpo.pow, Finset.filter_true_of_mem]
+
+
+/-- The local odd divisor series used in Lemma 4 on pages 97 and 98. -/
+theorem hasSum_tau1_prime_power {p : ℕ} (hp : p.Prime) :
+    HasSum (fun m : ℕ => (tau1 (p^m) : ℝ)/(p : ℝ)^m)
+      (if p = 2 then 2 else (p : ℝ)^2/((p : ℝ)-1)^2) := by
+  have hpR : (1 : ℝ) < p := by exact_mod_cast hp.one_lt
+  have hr0 : 0 ≤ (1 : ℝ)/p := by positivity
+  have hr1 : (1 : ℝ)/p < 1 := (div_lt_one (by linarith)).mpr hpR
+  by_cases hp2 : p = 2
+  · subst p
+    have hh := hasSum_geometric_of_lt_one (by norm_num : (0 : ℝ) ≤ 1/2) (by norm_num : (1 : ℝ)/2 < 1)
+    convert hh using 1
+    · funext m
+      simp [tau1_prime_pow, hp, one_div_pow]
+    · norm_num
+  · have hh := hasSum_choose_mul_geometric_of_norm_lt_one 1
+      (show ‖(1 : ℝ)/p‖ < 1 by rw [Real.norm_of_nonneg hr0]; exact hr1)
+    convert hh using 1
+    · funext m
+      simp [tau1_prime_pow hp, hp2, one_div_pow, div_eq_mul_inv]
+    · simp only [hp2, ite_false]
+      norm_num only [Nat.reduceAdd]
+      field_simp
+
+
+/-- The local Euler mass of the divisor convolution on page 98. -/
+theorem lemma4_local_factor {p : ℕ} (hp : p.Prime) :
+    (∑' m : ℕ, (tau1 (p^m) : ℝ)/(p : ℝ)^m) * (∑' m : ℕ, g (p^m)) =
+      if p = 2 then 2 else (p : ℝ)/((p : ℝ)-2) := by
+  rw [(hasSum_tau1_prime_power hp).tsum_eq, (hasSum_g_prime_power hp).tsum_eq]
+  by_cases hp2 : p = 2
+  · subst p
+    norm_num
+  · have hpgt : 2 < p := lt_of_le_of_ne hp.two_le (Ne.symm hp2)
+    have hpR : (2 : ℝ) < p := by exact_mod_cast hpgt
+    simp only [hp2, hpgt, ite_false, ite_true]
+    field_simp [show (p : ℝ) ≠ 0 by linarith, show (p : ℝ)-1 ≠ 0 by linarith,
+      show (p : ℝ)-2 ≠ 0 by linarith]
+    ring
+
+/-- The prime factor redistribution in Vaughan 1977 pages 97 and 98.
+A and B stand for a kernel value and the value after multiplication by p. -/
+theorem lemma4_prime_reweight (p A B : ℝ) (hp : 2 < p) (hAB : B ≤ A) :
+    A+2/(p-2)*B ≤ (p-1)/(p-2)*(A+1/(p-1)*B) := by
+  have h1 : A+2/(p-2)*B = (A*(p-2)+2*B)/(p-2) := by
+    field_simp [show p-2 ≠ 0 by linarith]
+  have h2 : (p-1)/(p-2)*(A+1/(p-1)*B) = ((p-1)*A+B)/(p-2) := by
+    field_simp [show p-1 ≠ 0 by linarith, show p-2 ≠ 0 by linarith]
+  rw [h1,h2]
+  apply div_le_div_of_nonneg_right _ (by linarith : 0 ≤ p-2)
+  nlinarith
+
 /-- LEAF. Lemma 4, (3.5), in truncated form: for `y ≥ 0`, `z ≥ 1`, `n` even and every finite
 set `T` of pairs `(r, d)` with `s(rd) ≤ z`,
 `Π_{p|n,p>2} (p-2)/(p-1) · Σ_{(r,d) ∈ T} g(d) τ₁(r)/(r + r y s(rd)) ≤ S_n(z, y)`. The terms are
@@ -551,6 +856,114 @@ theorem gamma_bounds :
     linarith
   · have h := LeanLab.Helfgott2013.GammaFine.gamma_lt_fine
     linarith
+
+open LeanLab.RieselVaughan1983 in
+/-- The sharper hyperbola remainder used to close Lemma 5 above 121.
+This extracts the intermediate bound in Riesel and Vaughan 1983 page 49. -/
+theorem lemma5_divisor_error (x : ℝ) (hx : 16 ≤ x) :
+    |lem1E stieltjes1 x| < 2*(1/(⌊Real.sqrt x⌋₊ : ℝ)) := by
+  let g1 := stieltjes1
+  have hL := stieltjes1_hL
+  have hx0 : 0 < x := by linarith
+  obtain ⟨z, hzdef⟩ : ∃ z, z = Real.sqrt x := ⟨_, rfl⟩
+  have hzz : z * z = x := by rw [hzdef]; exact Real.mul_self_sqrt hx0.le
+  have hz4 : 4 ≤ z := by
+    rw [hzdef, show (4 : ℝ) = Real.sqrt 16 by
+      rw [show (16 : ℝ) = 4 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
+    exact Real.sqrt_le_sqrt hx
+  obtain ⟨N, hNdef⟩ : ∃ N, N = ⌊z⌋₊ := ⟨_, rfl⟩
+  obtain ⟨X, hXdef⟩ : ∃ X, X = ⌊x⌋₊ := ⟨_, rfl⟩
+  rw [← hzdef, ← hNdef]
+  have hN4 : 4 ≤ N := by rw [hNdef]; exact Nat.le_floor (by exact_mod_cast hz4)
+  have hNz : (N : ℝ) ≤ z := by rw [hNdef]; exact Nat.floor_le (by linarith)
+  have hzN : z < N + 1 := by rw [hNdef]; exact Nat.lt_floor_add_one z
+  have hN4' : (4 : ℝ) ≤ N := by exact_mod_cast hN4
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hXx : (X : ℝ) ≤ x := by rw [hXdef]; exact Nat.floor_le hx0.le
+  have hNNx : (N : ℝ) * N ≤ x := by nlinarith
+  have hxNN : x < ((N : ℝ) + 1) * (N + 1) := by nlinarith
+  have hN1 : N * N ≤ X := by
+    rw [hXdef]; apply Nat.le_floor; push_cast; exact hNNx
+  have hN2 : X < (N + 1) * (N + 1) := by
+    have : (X : ℝ) < ((N + 1) * (N + 1) : ℕ) := by push_cast; linarith
+    exact_mod_cast this
+  unfold lem1E
+  rw [← hXdef, divsum_eq, hyperbola X N hN1 hN2]
+  have hsplit : ∑ a ∈ Icc 1 N, (harmonic (X / a) : ℝ) / a
+      = (Real.log x + eulerMascheroniConstant) * (harmonic N : ℝ) - Lsum N
+        + ∑ a ∈ Icc 1 N,
+          ((harmonic ⌊x / a⌋₊ : ℝ) - Real.log (x / a) - eulerMascheroniConstant) / a := by
+    rw [sum_Icc_inv N, Finset.mul_sum, Lsum, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+    refine sum_congr rfl (fun a ha => ?_)
+    rw [Finset.mem_Icc] at ha
+    have ha0 : (0 : ℝ) < a := by exact_mod_cast ha.1
+    rw [Nat.floor_div_natCast, ← hXdef, Real.log_div hx0.ne' ha0.ne']
+    field_simp; ring
+  have hSr : |∑ a ∈ Icc 1 N,
+      ((harmonic ⌊x / a⌋₊ : ℝ) - Real.log (x / a) - eulerMascheroniConstant) / a|
+        ≤ 1 / (N : ℝ) / 2 + (1 / (N : ℝ)) ^ 2 := by
+    refine (abs_sum_le_sum_abs _ _).trans ?_
+    have hterm : ∀ a ∈ Icc 1 N,
+        |((harmonic ⌊x / a⌋₊ : ℝ) - Real.log (x / a) - eulerMascheroniConstant) / a|
+          ≤ 1 / (2 * x) + N / x ^ 2 := by
+      intro a ha
+      rw [Finset.mem_Icc] at ha
+      have ha0 : (0 : ℝ) < a := by exact_mod_cast ha.1
+      have haN : (a : ℝ) ≤ N := by exact_mod_cast ha.2
+      have hy4 : 4 ≤ x / a := by
+        rw [le_div_iff₀ ha0]; nlinarith
+      have hR := R_bound (x / a) hy4
+      rw [abs_div, abs_of_pos ha0, div_le_iff₀ ha0]
+      have e : (1 / (2 * (x / a)) + 1 / (x / a) ^ 2) = (1 / (2 * x) + a / x ^ 2) * a := by
+        field_simp
+      rw [e] at hR
+      have : (1 / (2 * x) + a / x ^ 2) * a ≤ (1 / (2 * x) + N / x ^ 2) * a := by
+        apply mul_le_mul_of_nonneg_right _ ha0.le
+        have : (a : ℝ) / x ^ 2 ≤ N / x ^ 2 := div_le_div_of_nonneg_right haN (by positivity)
+        linarith
+      linarith
+    refine (sum_le_sum hterm).trans ?_
+    rw [sum_const, Nat.card_Icc, nsmul_eq_mul, Nat.add_sub_cancel]
+    have h1 : (N : ℝ) * (1 / (2 * x)) ≤ 1 / (N : ℝ) / 2 := by
+      rw [show (N : ℝ) * (1 / (2 * x)) = N / (2 * x) by ring,
+        show 1 / (N : ℝ) / 2 = 1 / (2 * N) by ring, div_le_div_iff₀ (by positivity) (by positivity)]
+      nlinarith
+    have h2 : (N : ℝ) * (N / x ^ 2) ≤ (1 / (N : ℝ)) ^ 2 := by
+      rw [show (N : ℝ) * (N / x ^ 2) = (N * N) / x ^ 2 by ring, div_pow, one_pow,
+        div_le_div_iff₀ (by positivity) (by positivity)]
+      have : ((N : ℝ) * N) * ((N : ℝ) * N) ≤ x * x := mul_le_mul hNNx hNNx (by positivity) hx0.le
+      nlinarith
+    nlinarith
+  rw [hsplit]
+  obtain ⟨hHl, hHu⟩ := harm_bounds N (by omega)
+  have hσ := sigma_bound g1 hL N (by omega)
+  have hlam0 : 0 ≤ Real.log z - Real.log N := by
+    have := Real.log_le_log hN0 hNz; linarith
+  have hlam1 : Real.log z - Real.log N ≤ 1 / N := by
+    rw [← Real.log_div (by linarith) hN0.ne']
+    have h1 := Real.log_le_sub_one_of_pos (show 0 < z / N by positivity)
+    have h2 : z / N - 1 ≤ 1 / N := by
+      rw [div_sub_one hN0.ne', div_le_div_iff_of_pos_right hN0]; linarith
+    linarith
+  have hlogx : Real.log x = 2 * (Real.log N + (Real.log z - Real.log N)) := by
+    rw [← hzz, Real.log_mul (by linarith) (by linarith)]; ring
+  have hlN0 : 0 ≤ Real.log N := Real.log_nonneg (by linarith)
+  have hlN := log_le_div_e N hN0
+  have hlNu : Real.log N * (1 / N) ≤ 10 / 27 := by
+    rw [mul_one_div, div_le_iff₀ hN0]; linarith
+  refine (final_alg (Real.log N) (Real.log z - Real.log N)
+    ((harmonic N : ℝ) - Real.log N - 1 / N / 2 - eulerMascheroniConstant) (cseq N - g1) _ (1 / N)
+    eulerMascheroniConstant g1 _ _ _ (by ring) hlogx (by unfold cseq; ring) (by positivity)
+    (by rw [div_le_div_iff₀ hN0 (by norm_num)]; linarith) ?_ ?_ hlam0 hlam1
+    (by rw [show (1 : ℝ) / N / 10 = 1 / (10 * N) by ring]; exact hσ) hSr hlN0 hlNu)
+  · rw [div_pow, one_pow]
+    have : 1 / (8 * (N : ℝ) ^ 2) = 1 / N ^ 2 / 8 := by ring
+    have h1 : 1 / (2 * (N : ℝ)) = 1 / N / 2 := by ring
+    rw [this, h1] at hHl; linarith
+  · have h1 : 1 / (2 * (N : ℝ)) = 1 / N / 2 := by ring
+    rw [h1] at hHu; linarith
+
+
 
 set_option maxHeartbeats 1000000 in
 /-- The finite range below 42 in the proof of Lemma 5, Vaughan 1977 page 99.
@@ -598,6 +1011,176 @@ theorem lemma5_below_42 (z : ℝ) (hz : 1 ≤ z) (hz42 : z < 42) :
   have hm := mul_le_mul hcoef hlog hlog0 (by norm_num : (0:ℝ) ≤ 57722/100000+693148/2000000)
   linarith
 
+/-- Odd and even divisors split the divisor count in Vaughan 1977 equation 3.6. -/
+theorem tau1_add_even_divisors (r : ℕ) :
+    tau1 r + (r.divisors.filter Even).card = r.divisors.card := by
+  have hh := Finset.card_filter_add_card_filter_not (s := r.divisors) Odd
+  simpa [tau1, Nat.not_odd_iff_even] using hh
+
+/-- The even divisors of a positive multiple of two are twice the divisors of its half. -/
+theorem even_divisors_image (m : ℕ) :
+    ((2*m).divisors.filter Even) = m.divisors.image (2*·) := by
+  ext d
+  simp only [mem_filter, Nat.mem_divisors, mem_image]
+  constructor
+  · rintro ⟨⟨hd, hm0⟩, he⟩
+    obtain ⟨k, rfl⟩ := he.two_dvd
+    refine ⟨k, ⟨?_, by omega⟩, rfl⟩
+    exact Nat.dvd_of_mul_dvd_mul_left (by norm_num) hd
+  · rintro ⟨k, ⟨hk, hm0⟩, rfl⟩
+    exact ⟨⟨Nat.mul_dvd_mul_left 2 hk, by omega⟩, even_two_mul k⟩
+
+/-- Equation 3.6 on page 98 expressed as finite real sums. -/
+theorem lemma5_divisor_identity (z : ℝ) (hz : 1 ≤ z) :
+    (∑ r ∈ Icc 1 ⌊z⌋₊, (tau1 r : ℝ)/r) =
+      (∑ r ∈ Icc 1 ⌊z⌋₊, (r.divisors.card : ℝ)/r) -
+        1/2 * ∑ m ∈ Icc 1 ⌊z/2⌋₊, (m.divisors.card : ℝ)/m := by
+  let E := (Icc 1 ⌊z⌋₊).filter Even
+  have hE : E = (Icc 1 ⌊z/2⌋₊).image (2*·) := by
+    ext r
+    simp only [E, mem_filter, mem_Icc, mem_image]
+    constructor
+    · rintro ⟨⟨hr1, hrz⟩, he⟩
+      obtain ⟨m, rfl⟩ := he.two_dvd
+      refine ⟨m, ⟨by omega, ?_⟩, rfl⟩
+      apply Nat.le_floor
+      have hrR := (Nat.le_floor_iff (by linarith : 0 ≤ z)).mp hrz
+      push_cast at hrR
+      linarith
+    · rintro ⟨m, ⟨hm1, hmz⟩, rfl⟩
+      refine ⟨⟨by omega, ?_⟩, even_two_mul m⟩
+      apply Nat.le_floor
+      have hmR := (Nat.le_floor_iff (by linarith : 0 ≤ z/2)).mp hmz
+      push_cast
+      linarith
+  have hzero (r : ℕ) (hr : ¬ Even r) : (r.divisors.filter Even).card = 0 := by
+    rw [card_eq_zero, filter_eq_empty_iff]
+    intro d hd he
+    exact hr (even_iff_two_dvd.mpr (dvd_trans he.two_dvd (Nat.dvd_of_mem_divisors hd)))
+  have hsum : (∑ r ∈ Icc 1 ⌊z⌋₊, ((r.divisors.filter Even).card : ℝ)/r) =
+      1/2 * ∑ m ∈ Icc 1 ⌊z/2⌋₊, (m.divisors.card : ℝ)/m := by
+    calc
+      _ = ∑ r ∈ E, ((r.divisors.filter Even).card : ℝ)/r := by
+        symm
+        apply sum_subset (filter_subset _ _)
+        intro r hr hnot
+        have he : ¬ Even r := by simpa [E, hr] using hnot
+        simp [hzero r he]
+      _ = _ := by
+        rw [hE, sum_image]
+        · rw [mul_sum]
+          apply sum_congr rfl
+          intro m hm
+          rw [even_divisors_image, card_image_of_injective _ (fun a b h => by omega)]
+          push_cast
+          ring
+        · intro a ha b hb he
+          change 2*a = 2*b at he
+          omega
+  have hcount (r : ℕ) : (tau1 r : ℝ)+(r.divisors.filter Even).card = r.divisors.card := by
+    exact_mod_cast tau1_add_even_divisors r
+  have hsum' : (∑ r ∈ Icc 1 ⌊z⌋₊, (tau1 r : ℝ)/r) +
+      (∑ r ∈ Icc 1 ⌊z⌋₊, ((r.divisors.filter Even).card : ℝ)/r) =
+      ∑ r ∈ Icc 1 ⌊z⌋₊, (r.divisors.card : ℝ)/r := by
+    rw [← sum_add_distrib]
+    apply sum_congr rfl
+    intro r hr
+    rw [← add_div, hcount]
+  linarith
+
+set_option maxHeartbeats 1000000 in
+/-- The finite range below 121 in the alternate proof of Vaughan Lemma 5, page 99.
+The 79 new endpoint certificates close the range from 42 to 121. -/
+theorem lemma5_below_121 (z : ℝ) (hz : 1 ≤ z) (hz42 : z < 121) :
+    1 / 4 * Real.log z ^ 2 + (Real.eulerMascheroniConstant + 1 / 2 * Real.log 2) * Real.log z
+      + 0.1833 < ∑ r ∈ Icc 1 ⌊z⌋₊, (tau1 r : ℝ) / r := by
+  by_cases hsmall : z < 42
+  · exact lemma5_below_42 z hz hsmall
+  have hzlarge : 42 ≤ z := le_of_not_gt hsmall
+  let U : ℕ → ℚ := fun n =>
+    (([376121, 378419, 380667, 382865, 385015, 387121, 389183, 391203, 393183, 395125, 397030, 398899, 400734, 402536, 404306, 406045, 407754, 409435, 411088, 412714, 414314, 415889, 417439, 418966, 420470, 421951, 423411, 424850, 426268, 427667, 429046, 430407, 431749, 433074, 434381, 435671, 436945, 438203, 439445, 440672, 441885, 443082, 444266, 445435, 446591, 447734, 448864, 449981, 451086, 452179, 453260, 454330, 455388, 456435, 457472, 458497, 459512, 460518, 461513, 462498, 463473, 464440, 465397, 466344, 467283, 468214, 469135, 470049, 470954, 471850, 472739, 473620, 474494, 475360, 476218, 477069, 477913, 478750, 479580] : List ℚ).getD (n-42) 0) / 100000
+  have cert : ∀ n ∈ Icc 42 120,
+      0 ≤ U n ∧ (n+1 : ℚ) < ∑ k ∈ range 20, (U n)^k / (k.factorial : ℚ) ∧
+        1/4*(U n)^2+(57722/100000+693148/2000000)*(U n)+1833/10000 <
+          ∑ r ∈ Icc 1 n, (tau1 r : ℚ)/r := by
+    decide +kernel
+  have hn1 : 1 ≤ ⌊z⌋₊ := Nat.floor_pos.mpr hz
+  have hnlo : 42 ≤ ⌊z⌋₊ := Nat.le_floor hzlarge
+  have hn42 : ⌊z⌋₊ ≤ 120 := by
+    have hh := Nat.floor_le (by linarith : 0 ≤ z)
+    have hh2 : (⌊z⌋₊ : ℝ) < 121 := hh.trans_lt hz42
+    have hh3 : ⌊z⌋₊ < 121 := by exact_mod_cast hh2
+    omega
+  obtain ⟨hu, he, hs⟩ := cert ⌊z⌋₊ (mem_Icc.mpr ⟨hnlo, hn42⟩)
+  have huR : 0 ≤ (U ⌊z⌋₊ : ℝ) := by exact_mod_cast hu
+  have heR : (⌊z⌋₊ : ℝ)+1 < ∑ k ∈ range 20, (U ⌊z⌋₊ : ℝ)^k / (k.factorial : ℝ) := by
+    exact_mod_cast he
+  have hlog : Real.log z ≤ (U ⌊z⌋₊ : ℝ) := by
+    rw [Real.log_le_iff_le_exp (by linarith : 0 < z)]
+    exact (Nat.lt_floor_add_one z).le.trans
+      (heR.le.trans (Real.sum_le_exp_of_nonneg huR 20))
+  have hsR : (1:ℝ)/4*(U ⌊z⌋₊ : ℝ)^2+
+      (57722/100000+693148/2000000)*(U ⌊z⌋₊ : ℝ)+1833/10000 <
+      ∑ r ∈ Icc 1 ⌊z⌋₊, (tau1 r : ℝ)/r := by
+    have hh := (Rat.cast_lt (K := ℝ)).mpr hs
+    push_cast at hh
+    norm_num at hh ⊢
+    exact hh
+  have hg := gamma_bounds.2
+  have hl := Real.log_two_lt_d9
+  have hlog0 : 0 ≤ Real.log z := Real.log_nonneg hz
+  have hsq := pow_le_pow_left₀ hlog0 hlog 2
+  have hcoef : Real.eulerMascheroniConstant+1/2*Real.log 2 ≤ 57722/100000+693148/2000000 := by linarith
+  have hm := mul_le_mul hcoef hlog hlog0 (by norm_num : (0:ℝ) ≤ 57722/100000+693148/2000000)
+  linarith
+
+
+open LeanLab.RieselVaughan1983 in
+/-- The analytic range of Vaughan 1977 Lemma 5, using the existing hyperbola remainder. -/
+theorem lemma5_above_121 (z : ℝ) (hz : 121 ≤ z) :
+    1/4*Real.log z^2+(Real.eulerMascheroniConstant+1/2*Real.log 2)*Real.log z+0.1833 <
+      ∑ r ∈ Icc 1 ⌊z⌋₊, (tau1 r : ℝ)/r := by
+  have hz0 : 0 < z := by linarith
+  have hN1 : (11 : ℝ) ≤ ⌊Real.sqrt z⌋₊ := by
+    exact_mod_cast (Nat.le_floor (show (11 : ℝ) ≤ Real.sqrt z by
+      rw [Real.le_sqrt (by norm_num) hz0.le]
+      norm_num
+      exact hz) : 11 ≤ ⌊Real.sqrt z⌋₊)
+  have hN2 : (7 : ℝ) ≤ ⌊Real.sqrt (z/2)⌋₊ := by
+    exact_mod_cast (Nat.le_floor (show (7 : ℝ) ≤ Real.sqrt (z/2) by
+      rw [Real.le_sqrt (by norm_num) (by positivity)]
+      norm_num
+      linarith) : 7 ≤ ⌊Real.sqrt (z/2)⌋₊)
+  have hE1 := lemma5_divisor_error z (by linarith)
+  have hE2 := lemma5_divisor_error (z/2) (by linarith)
+  have hb1 : 2*(1/(⌊Real.sqrt z⌋₊ : ℝ)) ≤ 2/11 := by
+    have hh := one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 11) hN1
+    linarith
+  have hb2 : 2*(1/(⌊Real.sqrt (z/2)⌋₊ : ℝ)) ≤ 2/7 := by
+    have hh := one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 7) hN2
+    linarith
+  have he1 := abs_lt.mp (hE1.trans_le hb1)
+  have he2 := abs_lt.mp (hE2.trans_le hb2)
+  have hloghalf : Real.log (z/2) = Real.log z-Real.log 2 :=
+    Real.log_div hz0.ne' (by norm_num)
+  have hg := gamma_bounds
+  have hloglo : (0.693147 : ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hloghi : Real.log 2 ≤ (0.693148 : ℝ) := by linarith [Real.log_two_lt_d9]
+  have hprod : (0.57721 : ℝ)*0.693147 ≤ Real.eulerMascheroniConstant*Real.log 2 :=
+    mul_le_mul hg.1.le hloglo (by norm_num) (by linarith)
+  have hsqlo : (0.57721 : ℝ)^2 ≤ Real.eulerMascheroniConstant^2 :=
+    pow_le_pow_left₀ (by norm_num) hg.1.le 2
+  have hsqhi : Real.log 2^2 ≤ (0.693148 : ℝ)^2 :=
+    pow_le_pow_left₀ (by linarith) hloghi 2
+  have hst := LeanLab.RieselVaughan1983.StieltjesCert.stieltjes1_bounds.2
+  have hc : (0.1833 : ℝ) < Real.eulerMascheroniConstant*Real.log 2-Real.log 2^2/4+
+      Real.eulerMascheroniConstant^2/2-stieltjes1-2/11-1/7 := by
+    linarith
+  rw [lemma5_divisor_identity z (by linarith)]
+  unfold lem1E at he1 he2
+  rw [hloghalf] at he2
+  nlinarith only [he1.1, he2.2, hc]
+
 /-- LEAF. Lemma 5: for `z ≥ 1`,
 `Σ_{r ≤ z} τ₁(r)/r > (1/4) log² z + (γ + (1/2) log 2) log z + 0.1833`. Vaughan 1977 p. 98 and
 99, Lemma 5, via (3.6), (3.7) and Euler-Maclaurin for `z ≥ 42`, direct check below 42; the
@@ -605,7 +1188,9 @@ margin is small, about `10^{-4}`, near some integers. Unit U-1525. -/
 theorem lemma5 (z : ℝ) (hz : 1 ≤ z) :
     1 / 4 * Real.log z ^ 2 + (Real.eulerMascheroniConstant + 1 / 2 * Real.log 2) * Real.log z
       + 0.1833 < ∑ r ∈ Icc 1 ⌊z⌋₊, (tau1 r : ℝ) / r := by
-  sorry
+  by_cases hsmall : z < 121
+  · exact lemma5_below_121 z hz hsmall
+  · exact lemma5_above_121 z (le_of_not_gt hsmall)
 
 /-- The nonnegative remainder at the end of Lemma 6, Vaughan 1977 page 99.
 Mathlib's rational lower bound for the logarithm gives the claim directly. -/
@@ -1088,6 +1673,88 @@ theorem lemma4_rectangular_tsum (n : ℕ) (hn : Even n) (hn0 : 0 < n) (z : ℝ) 
     Real.tsum_le_of_sum_le hnneg (lemma4_rectangular n hn hn0 z hz)⟩
 
 
+/-- The radical cutoff bounds its logarithm on page 100. -/
+theorem eq310_log_cutoff (d : ℕ) (z : ℝ) (hdz : (sk d : ℝ) ≤ z) :
+    0 ≤ Real.log (sk d) ∧ Real.log (sk d) ≤ Real.log z := by
+  have hs : 0 < (sk d : ℝ) := by
+    exact_mod_cast Finset.prod_pos (fun p hp => (Nat.prime_of_mem_primeFactors hp).pos)
+  exact ⟨Real.log_natCast_nonneg _, Real.log_le_log hs hdz⟩
+
+/-- The square logarithm moment restricted by the radical is summable. -/
+theorem eq310_log_sq_summable (z : ℝ) (hz : 1 ≤ z) :
+    Summable (fun d => if (sk d : ℝ) ≤ z then g d * Real.log (sk d)^2 else 0) := by
+  apply Summable.of_nonneg_of_le _ _ (hasSum_g.summable.mul_right (Real.log z^2))
+  · intro d
+    split_ifs
+    · exact mul_nonneg (g_nonneg d) (sq_nonneg _)
+    · exact le_rfl
+  · intro d
+    split_ifs with hd
+    · have hh := eq310_log_cutoff d z hd
+      exact mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hh.1 hh.2 2) (g_nonneg d)
+    · exact mul_nonneg (g_nonneg d) (sq_nonneg _)
+
+/-- Termwise application of Lemma 6 in the proof of equation 3.10.
+Lemma 6 supplies the comparison. -/
+theorem eq310_term (d : ℕ) (z : ℝ) (hz : 1 ≤ z) :
+    (if (sk d : ℝ) ≤ z then
+      g d*(1/4*Real.log (z/(sk d : ℝ))^2 + Real.eulerMascheroniConstant*Real.log (z/(sk d : ℝ))-0.0458)
+      else 0) ≤
+    (if 1 ≤ d ∧ (sk d : ℝ) ≤ z then
+      ∑ r ∈ Icc 1 ⌊z/(sk d : ℝ)⌋₊, z/(z+r*(sk d : ℝ))*((g d*(tau1 r : ℝ))/r) else 0) := by
+  by_cases hd0 : d = 0
+  · subst d
+    simp [g]
+  by_cases hd : (sk d : ℝ) ≤ z
+  · simp only [hd, Nat.one_le_iff_ne_zero.mpr hd0, and_self, ite_true]
+    have hs : 0 < (sk d : ℝ) := by
+      exact_mod_cast Finset.prod_pos (fun p hp => (Nat.prime_of_mem_primeFactors hp).pos)
+    have ht : 1 ≤ z/(sk d : ℝ) := (le_div_iff₀ hs).mpr (by simpa using hd)
+    have hh := mul_le_mul_of_nonneg_left (lemma6 (z/(sk d : ℝ)) ht).le (g_nonneg d)
+    rw [Finset.mul_sum] at hh
+    apply hh.trans_eq
+    apply sum_congr rfl
+    intro r hr
+    have hz0 : z ≠ 0 := by linarith
+    field_simp
+  · simp [hd]
+
+set_option maxHeartbeats 1000000 in
+/-- The truncated logarithmic polynomial sum on page 100. -/
+theorem eq310_polynomial_sum (z : ℝ) (hz : 1 ≤ z) :
+    HasSum (fun d => if (sk d : ℝ) ≤ z then
+      g d*(1/4*Real.log (z/(sk d : ℝ))^2 + Real.eulerMascheroniConstant*Real.log (z/(sk d : ℝ))-0.0458)
+      else 0)
+      ((Real.log z^2/4+Real.eulerMascheroniConstant*Real.log z-0.0458)*
+          (∑' d, if (sk d : ℝ) ≤ z then g d else 0)
+       -(Real.log z/2+Real.eulerMascheroniConstant)*
+          (∑' d, if (sk d : ℝ) ≤ z then g d*Real.log (sk d) else 0)
+       +(∑' d, if (sk d : ℝ) ≤ z then g d*Real.log (sk d)^2 else 0)/4) := by
+  have hs : Summable (fun d => if (sk d : ℝ) ≤ z then g d else 0) := by
+    apply Summable.of_nonneg_of_le _ _ hasSum_g.summable
+    · intro d; split_ifs
+      · exact g_nonneg d
+      · exact le_rfl
+    · intro d; split_ifs <;> simp_all [g_nonneg]
+  have ht : Summable (fun d => if (sk d : ℝ) ≤ z then g d*Real.log (sk d) else 0) := by
+    apply Summable.of_nonneg_of_le _ _ hasSum_g_log.summable
+    · intro d; split_ifs
+      · exact mul_nonneg (g_nonneg d) (Real.log_natCast_nonneg _)
+      · exact le_rfl
+    · intro d; split_ifs <;> simp_all [mul_nonneg (g_nonneg d) (Real.log_natCast_nonneg (sk d))]
+  have hu := eq310_log_sq_summable z hz
+  have hh := ((hs.hasSum.mul_left (Real.log z^2/4+Real.eulerMascheroniConstant*Real.log z-0.0458)).sub
+    (ht.hasSum.mul_left (Real.log z/2+Real.eulerMascheroniConstant))).add (hu.hasSum.div_const 4)
+  apply hh.congr_fun
+  intro d
+  by_cases hd : (sk d : ℝ) ≤ z
+  · simp only [hd, ite_true]
+    have hs0 : (sk d : ℝ) ≠ 0 := by
+      exact_mod_cast Finset.prod_ne_zero_iff.mpr (fun p hp => (Nat.prime_of_mem_primeFactors hp).ne_zero)
+    rw [Real.log_div (by linarith : z ≠ 0) hs0]
+    ring
+  · simp [hd]
+
 /-- LEAF. (3.10): with `z = (2x/3)^{1/2}`, `L = log x`, `ℓ = log(3/2)`,
 `Σ₁ = Σ_{s(d) ≤ z} g(d)`, `Σ₂ = Σ_d g(d) log s(d)`, `Σ₃ = Σ_{s(d) ≤ z} g(d) log² s(d)`,
 `Σ₄ = Σ_d g(d)`:
@@ -1106,7 +1773,64 @@ theorem eq310 (x : ℝ) (hx : 10 ^ 9 ≤ x) (n : ℕ) (hn : Even n) (hn0 : 0 < n
       - (Real.eulerMascheroniConstant * Real.log (3 / 2) / 2 + 0.0458
           - Real.log (3 / 2) ^ 2 / 16) * (∑' d, g d)
       < Sn n (zz x) (zz x)⁻¹ * singQ n := by
-  sorry
+  let z := zz x
+  have hz : 1 ≤ z := by
+    dsimp [z, zz]
+    rw [Real.le_sqrt (by norm_num) (by linarith)]
+    norm_num
+    linarith
+  have hz0 : 0 < z := by linarith
+  have hx0 : 0 < x := by positivity
+  have hlog : Real.log z = (Real.log x-Real.log (3/2))/2 := by
+    dsimp [z, zz]
+    rw [Real.log_sqrt (by linarith), Real.log_div (by positivity) (by norm_num),
+      Real.log_mul (by norm_num) hx0.ne', Real.log_div (by norm_num) (by norm_num)]
+    ring
+  let F : ℕ → ℝ := fun d => if (sk d : ℝ) ≤ z then
+    g d*(1/4*Real.log (z/(sk d : ℝ))^2+Real.eulerMascheroniConstant*Real.log (z/(sk d : ℝ))-0.0458) else 0
+  let B : ℕ → ℝ := fun d => if 1 ≤ d ∧ (sk d : ℝ) ≤ z then
+    ∑ r ∈ Icc 1 ⌊z/(sk d : ℝ)⌋₊, z/(z+r*(sk d : ℝ))*((g d*(tau1 r : ℝ))/r) else 0
+  have hsF := eq310_polynomial_sum z hz
+  have hsB := lemma4_rectangular_tsum n hn hn0 z hz
+  have hstrict : F 1 < B 1 := by
+    simpa [F, B, sk, g_one, hz] using lemma6 z hz
+  have hlt : (∑' d, F d) < ∑' d, B d :=
+    Summable.tsum_lt_tsum (fun d => eq310_term d z hz) hstrict hsF.summable hsB.1
+  have hs : Summable (fun d => if (sk d : ℝ) ≤ z then g d else 0) := by
+    apply Summable.of_nonneg_of_le _ _ hasSum_g.summable
+    · intro d; split_ifs
+      · exact g_nonneg d
+      · exact le_rfl
+    · intro d; split_ifs <;> simp_all [g_nonneg]
+  have ht : Summable (fun d => if (sk d : ℝ) ≤ z then g d*Real.log (sk d) else 0) := by
+    apply Summable.of_nonneg_of_le _ _ hasSum_g_log.summable
+    · intro d; split_ifs
+      · exact mul_nonneg (g_nonneg d) (Real.log_natCast_nonneg _)
+      · exact le_rfl
+    · intro d; split_ifs <;> simp_all [mul_nonneg (g_nonneg d) (Real.log_natCast_nonneg (sk d))]
+  have hmass : (∑' d, if (sk d : ℝ) ≤ z then g d else 0) ≤ ∑' d, g d := by
+    exact Summable.tsum_le_tsum (fun d => by split_ifs <;> simp_all [g_nonneg]) hs hasSum_g.summable
+  have hmoment : (∑' d, if (sk d : ℝ) ≤ z then g d*Real.log (sk d) else 0) ≤ ∑' d, g d*Real.log (sk d) := by
+    exact Summable.tsum_le_tsum (fun d => by split_ifs <;> simp_all [mul_nonneg (g_nonneg d) (Real.log_natCast_nonneg (sk d))]) ht hasSum_g_log.summable
+  have hg : 0 < Real.eulerMascheroniConstant := by linarith [gamma_bounds.1]
+  have hl : 0 ≤ Real.log z := Real.log_nonneg hz
+  have hb : 0 ≤ Real.log z/2+Real.eulerMascheroniConstant := by positivity
+  have hell : 0 < Real.log (3/2) := Real.log_pos (by norm_num)
+  have hellhi : Real.log (3/2) < 1 := by
+    have hh := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 3/2)
+    linarith
+  have hc : 0 ≤ Real.eulerMascheroniConstant*Real.log (3/2)/2+0.0458-Real.log (3/2)^2/16 := by
+    have hg1 := gamma_bounds.1
+    nlinarith
+  have hm := mul_le_mul_of_nonneg_left hmass hc
+  have ht' := mul_le_mul_of_nonneg_left hmoment hb
+  have heq := hsF.tsum_eq
+  change (∑' d, F d) = _ at heq
+  have hfin := hlt.trans_le hsB.2
+  dsimp [z] at hlog heq hm ht' hfin
+  rw [hlog] at heq ht'
+  nlinarith [heq, hm, ht', hfin]
+
 
 /-- LEAF. (3.13) with the tail bound: `S_n(z, z^{-1}) Π_{p|n,p>2} (p-1)/(p-2) >
 (16C)^{-1}(L² + 1.666 L - 6.52) - 2.61 x^{-1/4} (L²/16 + 0.238 L)`. Proof: `eq310` with
