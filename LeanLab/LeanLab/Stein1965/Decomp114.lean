@@ -16,11 +16,21 @@ def SparsePrimeBasisClaim : Prop :=
     (∀ p ∈ B, p.Prime ∧ 3 ≤ p ∧ p ≤ 10 ^ 7) ∧
     IsBasisFor B 6 (10 ^ 7)
 
+/-- Rerun form of the page 429 claim, architect statement fix 2026-11-01. Two independent
+reruns of the S-algorithm with p0 = 3, scripts/salg.py and a 2026-11-01 Python rerun of
+the Lean definitions, give B(3; 10^7) = 10580, not the printed 10576; see
+SteinStein1965/STATEMENTS.md, QUESTION, Sec. 3 p. 429. The printed claim above stays CITED. -/
+def SparsePrimeBasisClaimRerun : Prop :=
+  ∃ B : List ℕ, B.length = 10580 ∧ B.Nodup ∧
+    (∀ p ∈ B, p.Prime ∧ 3 ≤ p ∧ p ≤ 10 ^ 7) ∧
+    IsBasisFor B 6 (10 ^ 7)
+
 /-- The prime S-run restricted to the bound used by B on page 429. -/
 def basis : List ℕ := ((sPrime 3 (10 ^ 7)).1.filter (· ≤ 10 ^ 7))
 
-/-- LEAF. Page 429, B(3;10^7) = 10576. A finite count, not reverified here. -/
-theorem leaf_count : basis.length = 10576 := by
+/-- LEAF. Page 429 prints B(3;10^7) = 10576; two reruns of these definitions give 10580,
+so the leaf states 10580, architect statement fix 2026-11-01. A finite count. -/
+theorem leaf_count : basis.length = 10580 := by
   sorry
 
 /-- LEAF. Pages 428 and 429: the prime S-run has no failures through 10^7.
@@ -51,9 +61,9 @@ theorem leaf_coverage (h : (sPrime 3 (10 ^ 7)).2 = []) :
   · exact decide_eq_true (by omega)
   · exact decide_eq_true (by omega)
 
-/-- Page 429, sparse prime basis existence, CONDITIONAL ON leaf_count and
-leaf_no_failures. The assembly has no sorry. -/
-theorem sparsePrimeBasis_assembled : SparsePrimeBasisClaim := by
+/-- Page 429, sparse prime basis existence in its rerun form, 10580 elements,
+CONDITIONAL ON leaf_count and leaf_no_failures. The assembly has no sorry. -/
+theorem sparsePrimeBasis_assembled : SparsePrimeBasisClaimRerun := by
   exact ⟨basis, leaf_count, leaf_distinct, leaf_primes, leaf_coverage leaf_no_failures⟩
 
 end LeanLab.Stein1965.Decomp114
