@@ -5,13 +5,15 @@ T. Yamada 2015, Explicit Chen's theorem, arXiv 1511.03409v2, Section 7, proof of
 Codex task186 proof additions, 2026-10-30. AI wrote the Lean code.
 Five original leaves and the supporting lemmas below have unconditional proofs.
 The eq109_pi application is CONDITIONAL ON the existing cited prime counting input.
-The eq112_tail assembly is CONDITIONAL ON the local eq112_tail_abel leaf.
-The three remaining OPEN leaves are eq112_main, eq112_tail_abel and eq116_sum.
+Codex task212 proof additions, 2026-11-01. AI wrote the Lean code.
+Three general finite Abel lemmas are PROVED with committed build and axiom evidence.
+The head, corrected tail and H sum applications are CONDITIONAL ON prime_reciprocal_eq7.
+That cited display 7 estimate is the only remaining local sorry.
 
 Part a of the decomposition of Yamada's Theorem 7.1, the bound for `S(B, P(y))`:
 the blocks `B^(j)` of (105), (106) and the leaves of Lemma 7.3, (108) to (116).
 The lab holds Theorem 7.1 only as the cited hypothesis `Thm71W` (Thm71Fix.lean, F-0028).
-Every `sorry` below is an OPEN LEAF for a prover; the assembly `lemma73_corr` is in
+The remaining `sorry` is the cited prime reciprocal LEAF; the assembly `lemma73_corr` is in
 Decomp1552c.lean, CONDITIONAL ON these leaves.
 
 Corrections built in, see ChenExplicit/STATEMENTS.md, U-1552 block:
@@ -26,7 +28,7 @@ import LeanLab.ChenExplicit.Bridge
 import LeanLab.ChenExplicit.Decomp94
 import LeanLab.PNTSieve.MertensLower
 
-open Finset Real
+open Finset Real MeasureTheory
 open scoped Classical
 
 noncomputable section
@@ -72,6 +74,461 @@ def H (N : ℕ) (u : ℝ) : ℝ :=
 
 /-- `c₂ - 10⁻⁸ = ∫_{1/8}^{1/3} log(2 - 3β) / (β(1-β)) dβ`, Lemma 7.3. -/
 def I73 : ℝ := ∫ β in (1 / 8 : ℝ)..(1 / 3), log (2 - 3 * β) / (β * (1 - β))
+
+/-- Finite Abel identity with real sample points and a continuously differentiable weight. -/
+theorem finite_abel_identity {ι : Type*} (s : Finset ι) (v c : ι → ℝ)
+    (a b : ℝ) (hab : a ≤ b) (hv : ∀ i ∈ s, v i ∈ Set.Icc a b)
+    (f f' : ℝ → ℝ) (hf : ∀ t ∈ Set.Icc a b, HasDerivAt f (f' t) t)
+    (hc : ContinuousOn f' (Set.Icc a b)) :
+    ∑ i ∈ s, c i * f (v i) = f b * ∑ i ∈ s, c i -
+      ∫ t in a..b, f' t * ∑ i ∈ s.filter (fun i => v i < t), c i := by
+  have hint : IntervalIntegrable f' volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    rwa [Set.uIcc_of_le hab]
+  have hinti (i : ι) : IntervalIntegrable
+      (fun t => if v i < t then f' t else 0) volume a b := by
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hab]
+    exact hint.1.indicator measurableSet_Ioi
+  have hi (i : ι) (his : i ∈ s) :
+      (∫ t in a..b, if v i < t then f' t else 0) = f b - f (v i) := by
+    have hp := hv i his
+    have hset : Set.Ioi (v i) ∩ Set.Ioc a b = Set.Ioc (v i) b := by
+      ext t
+      simp only [Set.mem_inter_iff, Set.mem_Ioi, Set.mem_Ioc]
+      constructor
+      · tauto
+      · rintro ⟨ht, htb⟩
+        exact ⟨ht, lt_of_le_of_lt hp.1 ht, htb⟩
+    have heq : (∫ t in a..b, if v i < t then f' t else 0) = ∫ t in v i..b, f' t := by
+      rw [intervalIntegral.integral_of_le hab, intervalIntegral.integral_of_le hp.2]
+      change (∫ t in Set.Ioc a b, (Set.Ioi (v i)).indicator f' t) = _
+      rw [integral_indicator measurableSet_Ioi, Measure.restrict_restrict measurableSet_Ioi, hset]
+    rw [heq]
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+    · intro t ht
+      rw [Set.uIcc_of_le hp.2] at ht
+      exact hf t ⟨hp.1.trans ht.1, ht.2⟩
+    · apply hint.mono_set
+      rw [Set.uIcc_of_le hab, Set.uIcc_of_le hp.2]
+      exact Set.Icc_subset_Icc hp.1 le_rfl
+  have hs : (∫ t in a..b, f' t * ∑ i ∈ s.filter (fun i => v i < t), c i) =
+      ∑ i ∈ s, c i * (f b - f (v i)) := by
+    calc
+      _ = ∫ t in a..b, ∑ i ∈ s, c i * (if v i < t then f' t else 0) := by
+        apply intervalIntegral.integral_congr
+        intro t ht
+        dsimp only
+        rw [sum_filter, mul_sum]
+        apply sum_congr rfl
+        intro i hi
+        split_ifs <;> ring
+      _ = ∑ i ∈ s, ∫ t in a..b, c i * (if v i < t then f' t else 0) :=
+        intervalIntegral.integral_finsetSum (fun i hi => (hinti i).const_mul _)
+      _ = _ := by
+        apply sum_congr rfl
+        intro i his
+        rw [intervalIntegral.integral_const_mul, hi i his]
+  rw [hs]
+  simp_rw [mul_sub]
+  rw [sum_sub_distrib, ← sum_mul]
+  ring
+/-- A prefix error transfers to a decreasing nonnegative smooth weight without enlarging the error. -/
+theorem finite_abel_antitone {ι : Type*} (s : Finset ι) (v c : ι → ℝ)
+    (a b E : ℝ) (hab : a ≤ b) (hv : ∀ i ∈ s, v i ∈ Set.Ico a b)
+    (f f' g g' : ℝ → ℝ)
+    (hf : ∀ t ∈ Set.Icc a b, HasDerivAt f (f' t) t)
+    (hg : ∀ t ∈ Set.Icc a b, HasDerivAt g (g' t) t)
+    (hfc : ContinuousOn f' (Set.Icc a b)) (hgc : ContinuousOn g' (Set.Icc a b))
+    (hfb : 0 ≤ f b) (hf' : ∀ t ∈ Set.Icc a b, f' t ≤ 0)
+    (hprefix : ∀ t ∈ Set.Icc a b,
+      ∑ i ∈ s.filter (fun i => v i < t), c i ≤ g t - g a + E) :
+    ∑ i ∈ s, c i * f (v i) ≤ (∫ t in a..b, f t * g' t) + E * f a := by
+  have hu (t : ℝ) (ht : t ∈ Set.uIcc a b) : t ∈ Set.Icc a b := by
+    rwa [Set.uIcc_of_le hab] at ht
+  have hfi : IntervalIntegrable f' volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    rwa [Set.uIcc_of_le hab]
+  have hgi : IntervalIntegrable g' volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    rwa [Set.uIcc_of_le hab]
+  have hcontf : ContinuousOn f (Set.Icc a b) :=
+    fun t ht => (hf t ht).continuousAt.continuousWithinAt
+  have hcontg : ContinuousOn g (Set.Icc a b) :=
+    fun t ht => (hg t ht).continuousAt.continuousWithinAt
+  have hstep (i : ι) : IntervalIntegrable
+      (fun t => c i * (if v i < t then f' t else 0)) volume a b := by
+    apply IntervalIntegrable.const_mul
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hab]
+    exact hfi.1.indicator measurableSet_Ioi
+  have hpi : IntervalIntegrable
+      (fun t => f' t * ∑ i ∈ s.filter (fun i => v i < t), c i) volume a b := by
+    have hh := IntervalIntegrable.sum s (fun i hi => hstep i)
+    apply hh.congr
+    intro t ht
+    simp only [Finset.sum_apply]
+    rw [sum_filter, mul_sum]
+    apply sum_congr rfl
+    intro i hi
+    split_ifs <;> ring
+  have hbi : IntervalIntegrable (fun t => f' t * (g t - g a + E)) volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hab]
+    exact hfc.mul ((hcontg.sub continuousOn_const).add continuousOn_const)
+  have hi := intervalIntegral.integral_mono_on hab hbi hpi (fun t ht =>
+    mul_le_mul_of_nonpos_left (hprefix t ht) (hf' t ht))
+  have htotal : ∑ i ∈ s, c i ≤ g b - g a + E := by
+    have hh := hprefix b ⟨hab, le_rfl⟩
+    have he : s.filter (fun i => v i < b) = s := filter_eq_self.mpr (fun i hi => (hv i hi).2)
+    rwa [he] at hh
+  have hid := finite_abel_identity s v c a b hab
+    (fun i hi => ⟨(hv i hi).1, (hv i hi).2.le⟩) f f' hf hfc
+  have hmain := mul_le_mul_of_nonneg_left htotal hfb
+  have hparts := intervalIntegral.integral_mul_deriv_eq_deriv_mul
+    (fun t ht => hf t (hu t ht))
+    (fun t ht => (hg t (hu t ht)).sub_const (g a - E)) hfi hgi
+  have heq : (∫ t in a..b, f' t * (g t - g a + E)) =
+      f b * (g b - g a + E) - f a * E - ∫ t in a..b, f t * g' t := by
+    have hgeq : (fun t => f' t * (g t - (g a - E))) = (fun t => f' t * (g t - g a + E)) := by
+      funext t
+      ring
+    rw [hgeq] at hparts
+    linarith
+  rw [heq] at hi
+  linarith
+
+/-- A suffix error transfers to an increasing nonnegative smooth weight. -/
+theorem finite_abel_monotone {ι : Type*} (s : Finset ι) (v c : ι → ℝ)
+    (a b E : ℝ) (hab : a ≤ b) (hv : ∀ i ∈ s, v i ∈ Set.Ico a b)
+    (f f' g g' : ℝ → ℝ)
+    (hf : ∀ t ∈ Set.Icc a b, HasDerivAt f (f' t) t)
+    (hg : ∀ t ∈ Set.Icc a b, HasDerivAt g (g' t) t)
+    (hfc : ContinuousOn f' (Set.Icc a b)) (hgc : ContinuousOn g' (Set.Icc a b))
+    (hfa : 0 ≤ f a) (hf' : ∀ t ∈ Set.Icc a b, 0 ≤ f' t)
+    (hsuffix : ∀ t ∈ Set.Icc a b,
+      ∑ i ∈ s.filter (fun i => t ≤ v i), c i ≤ g b - g t + E) :
+    ∑ i ∈ s, c i * f (v i) ≤ (∫ t in a..b, f t * g' t) + E * f b := by
+  have hu (t : ℝ) (ht : t ∈ Set.uIcc a b) : t ∈ Set.Icc a b := by
+    rwa [Set.uIcc_of_le hab] at ht
+  have hfi : IntervalIntegrable f' volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    rwa [Set.uIcc_of_le hab]
+  have hgi : IntervalIntegrable g' volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    rwa [Set.uIcc_of_le hab]
+  have hcontg : ContinuousOn g (Set.Icc a b) :=
+    fun t ht => (hg t ht).continuousAt.continuousWithinAt
+  have hstep (i : ι) : IntervalIntegrable
+      (fun t => c i * (if t ≤ v i then f' t else 0)) volume a b := by
+    apply IntervalIntegrable.const_mul
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hab]
+    exact hfi.1.indicator measurableSet_Iic
+  have hsi : IntervalIntegrable
+      (fun t => f' t * ∑ i ∈ s.filter (fun i => t ≤ v i), c i) volume a b := by
+    have hh := IntervalIntegrable.sum s (fun i hi => hstep i)
+    apply hh.congr
+    intro t ht
+    simp only [Finset.sum_apply]
+    rw [sum_filter, mul_sum]
+    apply sum_congr rfl
+    intro i hi
+    split_ifs <;> ring
+  have hbi : IntervalIntegrable (fun t => f' t * (g b - g t + E)) volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hab]
+    exact hfc.mul ((continuousOn_const.sub hcontg).add continuousOn_const)
+  have hi := intervalIntegral.integral_mono_on hab hsi hbi (fun t ht =>
+    mul_le_mul_of_nonneg_left (hsuffix t ht) (hf' t ht))
+  have htotal : ∑ i ∈ s, c i ≤ g b - g a + E := by
+    have hh := hsuffix a ⟨le_rfl, hab⟩
+    have he : s.filter (fun i => a ≤ v i) = s := filter_eq_self.mpr (fun i hi => (hv i hi).1)
+    rwa [he] at hh
+  have hid := finite_abel_identity s v c a b hab
+    (fun i hi => ⟨(hv i hi).1, (hv i hi).2.le⟩) f f' hf hfc
+  have hsplit (t : ℝ) :
+      f' t * ∑ i ∈ s.filter (fun i => v i < t), c i =
+        f' t * ∑ i ∈ s, c i - f' t * ∑ i ∈ s.filter (fun i => t ≤ v i), c i := by
+    rw [sum_filter, sum_filter, mul_sum, mul_sum, mul_sum, ← sum_sub_distrib]
+    apply sum_congr rfl
+    intro i hi
+    by_cases h : v i < t
+    · simp [h, not_le.mpr h]
+    · simp [h, le_of_not_gt h]
+  have hft := intervalIntegral.integral_eq_sub_of_hasDerivAt
+    (fun t ht => hf t (hu t ht)) hfi
+  have hidentity : ∑ i ∈ s, c i * f (v i) = f a * ∑ i ∈ s, c i +
+      ∫ t in a..b, f' t * ∑ i ∈ s.filter (fun i => t ≤ v i), c i := by
+    simp_rw [hsplit] at hid
+    rw [intervalIntegral.integral_sub (hfi.mul_const _) hsi,
+      intervalIntegral.integral_mul_const, hft] at hid
+    linarith
+  have hparts := intervalIntegral.integral_mul_deriv_eq_deriv_mul
+    (fun t ht => hf t (hu t ht))
+    (fun t ht => ((hg t (hu t ht)).const_sub (g b + E))) hfi hgi.neg
+  have heq : (∫ t in a..b, f' t * (g b - g t + E)) =
+      (∫ t in a..b, f t * g' t) + f b * E - f a * (g b - g a + E) := by
+    have hgeq : (fun t => f' t * (g b + E - g t)) =
+        (fun t => f' t * (g b - g t + E)) := by funext t; ring
+    rw [hgeq] at hparts
+    rw [show (fun t => f t * -g' t) = (fun t => -(f t * g' t)) by funext t; ring,
+      intervalIntegral.integral_neg] at hparts
+    linarith
+  have hmain := mul_le_mul_of_nonneg_left htotal hfa
+  rw [heq] at hi
+  linarith
+
+/-- Prime Abel comparison for a decreasing smooth weight, conditional on an interval estimate. -/
+theorem prime_abel_antitone (a b E : ℝ) (ha : 1 < a) (hab : a ≤ b)
+    (s : Finset ℕ) (hs : ∀ p ∈ s, p.Prime ∧ a ≤ (p : ℝ) ∧ (p : ℝ) < b)
+    (f f' : ℝ → ℝ) (hf : ∀ t ∈ Set.Icc a b, HasDerivAt f (f' t) t)
+    (hfc : ContinuousOn f' (Set.Icc a b))
+    (hfb : 0 ≤ f b) (hf' : ∀ t ∈ Set.Icc a b, f' t ≤ 0)
+    (hM : ∀ x y : ℝ, a ≤ x → x ≤ y → y ≤ b →
+      ∑ p ∈ primesIco x y, (1 : ℝ) / p ≤ log (log y) - log (log x) + E) :
+    ∑ p ∈ s, f p / p ≤ (∫ t in a..b, f t / (t * log t)) + E * f a := by
+  have hg : ∀ t ∈ Set.Icc a b,
+      HasDerivAt (fun t => log (log t)) (1 / (t * log t)) t := by
+    intro t ht
+    have ht1 : 1 < t := ha.trans_le ht.1
+    convert ((hasDerivAt_log (by linarith : t ≠ 0)).log (log_pos ht1).ne') using 1 <;> field_simp
+  have hgc : ContinuousOn (fun t => 1 / (t * log t)) (Set.Icc a b) := by
+    apply continuousOn_const.div (continuousOn_id.mul (continuousOn_log.mono ?_))
+    · intro t ht
+      have : 1 < t := ha.trans_le ht.1
+      exact mul_ne_zero (ne_of_gt (by linarith : 0 < t)) (log_pos this).ne'
+    · intro t ht
+      have : 1 < t := ha.trans_le ht.1
+      exact ne_of_gt (by linarith)
+  have hh := finite_abel_antitone s (fun p => (p : ℝ)) (fun p => (1 : ℝ) / p)
+    a b E hab (fun p hp => ⟨(hs p hp).2.1, (hs p hp).2.2⟩)
+    f f' (fun t => log (log t)) (fun t => 1 / (t * log t)) hf hg hfc hgc hfb hf' ?_
+  · simpa only [div_eq_mul_inv, one_mul, mul_one, mul_comm] using hh
+  · intro t ht
+    refine le_trans (sum_le_sum_of_subset_of_nonneg ?_ (fun p hp hn => by positivity))
+      (hM a t le_rfl ht.1 ht.2)
+    intro p hp
+    obtain ⟨hps, hpt⟩ := mem_filter.mp hp
+    exact mem_filter.mpr ⟨mem_range.mpr (Nat.lt_ceil.mpr hpt), (hs p hps).1, (hs p hps).2.1⟩
+
+/-- Prime Abel comparison for an increasing smooth weight, conditional on an interval estimate. -/
+theorem prime_abel_monotone (a b E : ℝ) (ha : 1 < a) (hab : a ≤ b)
+    (s : Finset ℕ) (hs : ∀ p ∈ s, p.Prime ∧ a ≤ (p : ℝ) ∧ (p : ℝ) < b)
+    (f f' : ℝ → ℝ) (hf : ∀ t ∈ Set.Icc a b, HasDerivAt f (f' t) t)
+    (hfc : ContinuousOn f' (Set.Icc a b))
+    (hfa : 0 ≤ f a) (hf' : ∀ t ∈ Set.Icc a b, 0 ≤ f' t)
+    (hM : ∀ x y : ℝ, a ≤ x → x ≤ y → y ≤ b →
+      ∑ p ∈ primesIco x y, (1 : ℝ) / p ≤ log (log y) - log (log x) + E) :
+    ∑ p ∈ s, f p / p ≤ (∫ t in a..b, f t / (t * log t)) + E * f b := by
+  have hg : ∀ t ∈ Set.Icc a b,
+      HasDerivAt (fun t => log (log t)) (1 / (t * log t)) t := by
+    intro t ht
+    have ht1 : 1 < t := ha.trans_le ht.1
+    convert ((hasDerivAt_log (by linarith : t ≠ 0)).log (log_pos ht1).ne') using 1 <;> field_simp
+  have hgc : ContinuousOn (fun t => 1 / (t * log t)) (Set.Icc a b) := by
+    apply continuousOn_const.div (continuousOn_id.mul (continuousOn_log.mono ?_))
+    · intro t ht
+      have : 1 < t := ha.trans_le ht.1
+      exact mul_ne_zero (ne_of_gt (by linarith : 0 < t)) (log_pos this).ne'
+    · intro t ht
+      have : 1 < t := ha.trans_le ht.1
+      exact ne_of_gt (by linarith)
+  have hh := finite_abel_monotone s (fun p => (p : ℝ)) (fun p => (1 : ℝ) / p)
+    a b E hab (fun p hp => ⟨(hs p hp).2.1, (hs p hp).2.2⟩)
+    f f' (fun t => log (log t)) (fun t => 1 / (t * log t)) hf hg hfc hgc hfa hf' ?_
+  · simpa only [div_eq_mul_inv, one_mul, mul_one, mul_comm] using hh
+  · intro t ht
+    refine le_trans (sum_le_sum_of_subset_of_nonneg ?_ (fun p hp hn => by positivity))
+      (hM t b ht.1 ht.2 le_rfl)
+    intro p hp
+    obtain ⟨hps, hpt⟩ := mem_filter.mp hp
+    exact mem_filter.mpr ⟨mem_range.mpr (Nat.lt_ceil.mpr (hs p hps).2.2), (hs p hps).1, hpt⟩
+
+/-- LEAF. Yamada 2015 page 3 Lemma 2.2 display 7, from Dusart 2010 Theorem 6.10.
+Source https://arxiv.org/abs/1511.03409v2 and https://arxiv.org/abs/1002.0442.
+This is the single cited prime distribution input for the three Section 7 Abel applications. -/
+theorem prime_reciprocal_eq7 (a b : ℝ) (ha : 1 < a) (hb : 10372 < b) (hab : a ≤ b) :
+    ∑ p ∈ primesIco a b, (1 : ℝ) / p <
+      log (log b) - log (log a) + 1 / (5 * log a ^ 2) + 8 / (15 * log a ^ 3) := by
+  sorry
+
+/-- Uniform quarter error above exp 16, conditional on the cited display 7. -/
+theorem prime_reciprocal_quarter (a x y : ℝ) (ha : exp 16 ≤ a)
+    (hax : a ≤ x) (hxy : x ≤ y) :
+    ∑ p ∈ primesIco x y, (1 : ℝ) / p ≤
+      log (log y) - log (log x) + 1 / (4 * log a ^ 2) := by
+  have ha0 : 0 < a := (exp_pos _).trans_le ha
+  have hx0 : 0 < x := ha0.trans_le hax
+  have hla : 16 ≤ log a := by simpa using log_le_log (exp_pos 16) ha
+  have hlax : log a ≤ log x := log_le_log ha0 hax
+  have hlx : 0 < log x := by linarith
+  have hcut : (10372 : ℝ) < exp 16 := by
+    have h := pow_lt_pow_left₀ exp_one_gt_two (by norm_num : (0 : ℝ) ≤ 2) (by norm_num : 16 ≠ 0)
+    have he : exp (16 : ℝ) = exp 1 ^ 16 := by rw [← exp_nat_mul]; norm_num
+    rw [he]
+    norm_num at h ⊢
+    exact lt_trans (by norm_num) h
+  have hbound := (prime_reciprocal_eq7 x y (by exact (one_lt_exp_iff.mpr (by norm_num : (0 : ℝ) < 16)).trans_le (ha.trans hax))
+    (hcut.trans_le (ha.trans (hax.trans hxy))) hxy).le
+  have he : 1 / (5 * log x ^ 2) + 8 / (15 * log x ^ 3) =
+      (1 / 5 + 8 / (15 * log x)) / log x ^ 2 := by field_simp <;> ring
+  have hcoef : (1 / 5 : ℝ) + 8 / (15 * log x) ≤ 1 / 4 := by
+    have hh : 8 / (15 * log x) ≤ (1 / 4 : ℝ) - 1 / 5 := by
+      apply (div_le_iff₀ (by positivity)).2
+      linarith
+    linarith
+  have herror : 1 / (5 * log x ^ 2) + 8 / (15 * log x ^ 3) ≤ 1 / (4 * log a ^ 2) := by
+    rw [he]
+    calc
+      _ ≤ (1 / 4 : ℝ) / log x ^ 2 := div_le_div_of_nonneg_right hcoef (sq_nonneg _)
+      _ = 1 / (4 * log x ^ 2) := by ring
+      _ ≤ _ := one_div_le_one_div_of_le (by positivity)
+        (by nlinarith [sq_nonneg (log x - log a)])
+  linarith
+
+/-- Smooth positive logarithmic weight comparison, conditional on display 7. -/
+theorem hP_prime_sum_le (N p : ℕ) (hN : (0 : ℝ) < N) (hp : (0 : ℝ) < p)
+    (a b : ℝ) (ha : exp 16 ≤ a) (hab : a ≤ b)
+    (hb : 0 < log (N / (p * b))) (s : Finset ℕ)
+    (hs : ∀ q ∈ s, q.Prime ∧ a ≤ (q : ℝ) ∧ (q : ℝ) < b) :
+    ∑ q ∈ s, 1 / ((q : ℝ) * log (N / (p * q))) ≤
+      (∫ t in a..b, 1 / (t * log t * log (N / (p * t)))) +
+        hP N p b / (4 * log a ^ 2) := by
+  have ha0 : 0 < a := (exp_pos _).trans_le ha
+  have ha1 : 1 < a := (one_lt_exp_iff.mpr (by norm_num : (0 : ℝ) < 16)).trans_le ha
+  have htpos : ∀ t ∈ Set.Icc a b, 0 < t := fun t ht => ha0.trans_le ht.1
+  have hlpos : ∀ t ∈ Set.Icc a b, 0 < log (N / (p * t)) := by
+    intro t ht
+    apply hb.trans_le
+    apply log_le_log (div_pos hN (mul_pos hp (ha0.trans_le hab)))
+    apply div_le_div_of_nonneg_left hN.le (mul_pos hp (htpos t ht))
+    exact mul_le_mul_of_nonneg_left ht.2 hp.le
+  let f' : ℝ → ℝ := fun t => 1 / (t * log (N / (p * t)) ^ 2)
+  have hf : ∀ t ∈ Set.Icc a b, HasDerivAt (hP N p) (f' t) t := by
+    intro t ht
+    have ht0 := htpos t ht
+    have harg := div_pos hN (mul_pos hp ht0)
+    have hd := (((hasDerivAt_const t (N : ℝ)).div
+      ((hasDerivAt_id t).const_mul (p : ℝ)) (mul_pos hp ht0).ne').log harg.ne').inv
+      (hlpos t ht).ne'
+    convert hd using 1
+    · funext u
+      simp [hP, one_div]
+    · dsimp [f']
+      field_simp
+      <;> ring
+  have hfc : ContinuousOn f' (Set.Icc a b) := by
+    intro t ht
+    have ht0 := htpos t ht
+    have hl0 := hlpos t ht
+    have hp0 := hp.ne'
+    have hpt : (p : ℝ) * t ≠ 0 := (mul_pos hp ht0).ne'
+    have harg := (div_pos hN (mul_pos hp ht0)).ne'
+    have hd : t * log (N / (p * t)) ^ 2 ≠ 0 := mul_ne_zero ht0.ne' (pow_ne_zero 2 hl0.ne')
+    apply ContinuousAt.continuousWithinAt
+    dsimp [f']
+    fun_prop (disch := assumption)
+  have hh := prime_abel_monotone a b (1 / (4 * log a ^ 2)) ha1 hab s hs
+    (hP N p) f' hf hfc (by dsimp [hP]; exact (one_div_pos.mpr (hlpos a ⟨le_rfl, hab⟩)).le)
+    (fun t ht => by have ht0 := htpos t ht; dsimp [f']; positivity) ?_
+  · convert hh using 1
+    · apply sum_congr rfl
+      intro q hq
+      dsimp [hP]
+      ring
+    · congr 1
+      · apply intervalIntegral.integral_congr
+        intro t ht
+        dsimp [hP]
+        ring
+      · ring
+  · intro x y hax hxy hyb
+    exact prime_reciprocal_quarter a x y ha hax hxy
+
+/-- The closed logarithmic Chen weight satisfies the decreasing Abel comparison. Conditional on display 7. -/
+theorem chen_log_weight_sum_le (L a b : ℝ) (hL : 0 < L) (ha : exp 16 ≤ a)
+    (hab : a ≤ b) (hb : log b ≤ L / 3) (s : Finset ℕ)
+    (hs : ∀ p ∈ s, p.Prime ∧ a ≤ (p : ℝ) ∧ (p : ℝ) < b)
+    (f : ℝ → ℝ)
+    (hformula : ∀ t ∈ Set.Icc a b,
+      f t = log (2 - 3 * (log t / L)) / ((1 - log t / L) * L)) :
+    ∑ p ∈ s, f p / p ≤ (∫ t in a..b, f t / (t * log t)) + f a / (4 * log a ^ 2) := by
+  have ha0 : 0 < a := (exp_pos _).trans_le ha
+  have ha1 : 1 < a := (one_lt_exp_iff.mpr (by norm_num : (0 : ℝ) < 16)).trans_le ha
+  have hfacts : ∀ t ∈ Set.Icc a b,
+      0 < t ∧ log t / L ∈ Set.Icc (0 : ℝ) (1 / 3) := by
+    intro t ht
+    have ht0 := ha0.trans_le ht.1
+    have htl : 0 < log t := log_pos (ha1.trans_le ht.1)
+    have hhi := (log_le_log ht0 ht.2).trans hb
+    exact ⟨ht0, (div_pos htl hL).le, (div_le_iff₀ hL).2 (by linarith)⟩
+  let F : ℝ → ℝ := fun α => log (2 - 3 * α) / (1 - α)
+  let F' : ℝ → ℝ := fun α =>
+    ((-3 / (2 - 3 * α)) * (1 - α) + log (2 - 3 * α)) / (1 - α) ^ 2
+  have hderiv : ∀ α ∈ Set.Icc (0 : ℝ) (1 / 3), HasDerivAt F (F' α) α := by
+    intro α hα
+    have hp : 0 < 2 - 3 * α := by have := hα.2; linarith
+    have hd : 0 < 1 - α := by have := hα.2; linarith
+    have d1 := (((hasDerivAt_id α).const_mul 3).const_sub 2).log hp.ne'
+    have d2 := (hasDerivAt_id α).const_sub 1
+    convert d1.div d2 hd.ne' using 1
+    · rfl
+    · dsimp [F']; ring
+  have hnonpos : ∀ α ∈ Set.Icc (0 : ℝ) (1 / 3), F' α ≤ 0 := by
+    intro α hα
+    have hp : 0 < 2 - 3 * α := by have := hα.2; linarith
+    have hl := log_le_sub_one_of_pos hp
+    have hlg : log (2 - 3 * α) ≤ 1 := by have := hα.1; linarith
+    have hr : (-3 / (2 - 3 * α)) * (1 - α) ≤ -1 := by
+      rw [div_mul_eq_mul_div]
+      apply (div_le_iff₀ hp).2
+      linarith
+    exact div_nonpos_of_nonpos_of_nonneg (by linarith) (sq_nonneg _)
+  let G : ℝ → ℝ := fun t => F (log t / L) / L
+  let G' : ℝ → ℝ := fun t => (F' (log t / L) * (t⁻¹ / L)) / L
+  have hG : ∀ t ∈ Set.Icc a b, HasDerivAt G (G' t) t := by
+    intro t ht
+    exact ((hderiv (log t / L) (hfacts t ht).2).comp t
+      ((hasDerivAt_log (hfacts t ht).1.ne').div_const L)).div_const L
+  have hGc : ContinuousOn G' (Set.Icc a b) := by
+    intro t ht
+    obtain ⟨ht0, hαlo, hαhi⟩ := hfacts t ht
+    have hp : 2 - 3 * (log t / L) ≠ 0 := by linarith
+    have hd : 1 - log t / L ≠ 0 := by linarith
+    have hd2 : (1 - log t / L) ^ 2 ≠ 0 := pow_ne_zero 2 hd
+    have htne := ht0.ne'
+    have hF : ContinuousAt F' ((fun u : ℝ => log u / L) t) := by
+      dsimp [F']
+      fun_prop (disch := assumption)
+    have hti : ContinuousAt (fun t : ℝ => t⁻¹) t := by fun_prop (disch := assumption)
+    exact (((hF.comp (f := fun u : ℝ => log u / L) ((continuousAt_log htne).div_const L)).mul
+      (hti.div_const L)).div_const L).continuousWithinAt
+  have heq : ∀ t ∈ Set.Icc a b, G t = f t := by
+    intro t ht
+    rw [hformula t ht]
+    dsimp [G, F]
+    rw [div_div]
+  have hGb : 0 ≤ G b := by
+    obtain ⟨hαlo, hαhi⟩ := (hfacts b ⟨hab, le_rfl⟩).2
+    dsimp [G, F]
+    apply div_nonneg _ hL.le
+    apply div_nonneg _ (by linarith)
+    exact log_nonneg (by linarith)
+  have hh := prime_abel_antitone a b (1 / (4 * log a ^ 2)) ha1 hab s hs G G'
+    hG hGc hGb (fun t ht => div_nonpos_of_nonpos_of_nonneg
+      (mul_nonpos_of_nonpos_of_nonneg (hnonpos _ (hfacts t ht).2)
+        (div_nonneg (inv_nonneg.mpr (hfacts t ht).1.le) hL.le)) hL.le)
+    (fun x y hax hxy hyb => prime_reciprocal_quarter a x y ha hax hxy)
+  convert hh using 1
+  · apply sum_congr rfl
+    intro p hp
+    rw [heq p ⟨(hs p hp).2.1, (hs p hp).2.2.le⟩]
+  · congr 1
+    · apply intervalIntegral.integral_congr
+      intro t ht
+      rw [Set.uIcc_of_le hab] at ht
+      dsimp only
+      rw [heq t ht]
+    · rw [heq a ⟨le_rfl, hab⟩]
+      ring
 
 /-- Closed form of H at a real power, Yamada page 25 eq 111. -/
 theorem H_rpow_eq (N : ℕ) (hN : (1 : ℝ) < N) (α : ℝ) (hα : α ≤ 1 / 3) :
@@ -676,7 +1133,41 @@ theorem eq112_main (N : ℕ) (hN : exp (exp 36) < N) (ε : ℝ) (hε : 0 < ε) (
     ∑ p₂ ∈ (primesIco (y3 N) (wP N ε p₁)).filter (fun p : ℕ => (p : ℝ) < √(N / p₁)),
         1 / ((p₂ : ℝ) * log (N / (p₁ * p₂))) ≤
       H N p₁ + hP N p₁ (√(N / p₁)) / (4 * log (y3 N) ^ 2) := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h48 : (48 : ℝ) < log N := by
+    have hh := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 2
+    norm_num at hh
+    linarith
+  have hpp : (0 : ℝ) < p₁ := by exact_mod_cast (mem_filter.mp hp₁).2.1.pos
+  have hpy : (p₁ : ℝ) < y3 N := Nat.lt_ceil.mp (mem_range.mp (mem_filter.mp hp₁).1)
+  have hy0 : 0 < y3 N := rpow_pos_of_pos hNp _
+  have hly : log (y3 N) = log N / 3 := by rw [log_rpow hNp]; ring
+  have hlp : log (p₁ : ℝ) < log N / 3 := by
+    have hh := log_lt_log hpp hpy
+    rwa [hly] at hh
+  have hyexp : exp 16 ≤ y3 N := by
+    rw [← exp_log hy0]
+    apply exp_le_exp.mpr
+    rw [hly]
+    linarith
+  have hq : 0 < (N : ℝ) / p₁ := div_pos hNp hpp
+  have hs0 : 0 < √((N : ℝ) / p₁) := sqrt_pos_of_pos hq
+  have hls : log (√((N : ℝ) / p₁)) = (log N - log p₁) / 2 := by
+    rw [log_sqrt hq.le, log_div hNp.ne' hpp.ne']
+  have hys : y3 N ≤ √((N : ℝ) / p₁) := by
+    apply (log_le_log_iff hy0 hs0).mp
+    rw [hly, hls]
+    linarith
+  have hlog : 0 < log (N / (p₁ * √(N / p₁))) := by
+    rw [log_div hNp.ne' (mul_pos hpp hs0).ne', log_mul hpp.ne' hs0.ne', hls]
+    linarith
+  have hh := hP_prime_sum_le N p₁ hNp hpp (y3 N) (√((N : ℝ) / p₁)) hyexp hys hlog
+    ((primesIco (y3 N) (wP N ε p₁)).filter (fun p : ℕ => (p : ℝ) < √(N / p₁))) ?_
+  · simpa only [H, sqrt_eq_rpow] using hh
+  · intro q hq
+    obtain ⟨hq, hqs⟩ := mem_filter.mp hq
+    exact ⟨(mem_filter.mp hq).2.1, (mem_filter.mp hq).2.2, hqs⟩
 
 /-- LEAF. Unit U-1552. Yamada 2015, (113), Section 7: for `N > exp exp 36` and a prime
 `z ≤ p₁ < y`, `h_{p₁}((N/p₁)^{1/2}) / (4 log² y) ≤ 9(1 + e^{-50}) / (4 log² N)`.
@@ -733,13 +1224,57 @@ theorem eq112_tail_abel (N : ℕ) (hN : exp (exp 36) < N) (ε : ℝ) (hε : 0 < 
         1 / ((p₂ : ℝ) * log (N / (p₁ * p₂))) ≤
       (∫ t in √((N : ℝ) / p₁)..wP N ε p₁, 1 / (t * log t * log (N / (p₁ * t)))) +
         hP N p₁ (wP N ε p₁) / (4 * log (√((N : ℝ) / p₁)) ^ 2) := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h48 : (48 : ℝ) < log N := by
+    have hh := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 2
+    norm_num at hh
+    linarith
+  have hpp : (0 : ℝ) < p₁ := by exact_mod_cast (mem_filter.mp hp₁).2.1.pos
+  have hpy : (p₁ : ℝ) < y3 N := Nat.lt_ceil.mp (mem_range.mp (mem_filter.mp hp₁).1)
+  have hy0 : 0 < y3 N := rpow_pos_of_pos hNp _
+  have hly : log (y3 N) = log N / 3 := by rw [log_rpow hNp]; ring
+  have hlp : log (p₁ : ℝ) < log N / 3 := by
+    have hh := log_lt_log hpp hpy
+    rwa [hly] at hh
+  have hyexp : exp 16 ≤ y3 N := by
+    rw [← exp_log hy0]
+    apply exp_le_exp.mpr
+    rw [hly]
+    linarith
+  have hq : 0 < (N : ℝ) / p₁ := div_pos hNp hpp
+  have hs0 : 0 < √((N : ℝ) / p₁) := sqrt_pos_of_pos hq
+  have hls : log (√((N : ℝ) / p₁)) = (log N - log p₁) / 2 := by
+    rw [log_sqrt hq.le, log_div hNp.ne' hpp.ne']
+  have hys : y3 N ≤ √((N : ℝ) / p₁) := by
+    apply (log_le_log_iff hy0 hs0).mp
+    rw [hly, hls]
+    linarith
+  have hep : 0 < 1 + ε := by linarith
+  have harg : 0 < (1 + ε) * N / p₁ := div_pos (mul_pos hep hNp) hpp
+  have hw0 : 0 < wP N ε p₁ := sqrt_pos_of_pos harg
+  have hsw : √((N : ℝ) / p₁) ≤ wP N ε p₁ := by
+    apply sqrt_le_sqrt
+    exact div_le_div_of_nonneg_right (by nlinarith) hpp.le
+  have hlw : log (wP N ε p₁) = (log N - log p₁ + log (1 + ε)) / 2 := by
+    rw [wP, log_sqrt harg.le, log_div (mul_pos hep hNp).ne' hpp.ne', log_mul hep.ne' hNp.ne']
+    ring
+  have hlog : 0 < log (N / (p₁ * wP N ε p₁)) := by
+    rw [log_div hNp.ne' (mul_pos hpp hw0).ne', log_mul hpp.ne' hw0.ne', hlw]
+    have hh := log_le_sub_one_of_pos hep
+    linarith
+  apply hP_prime_sum_le N p₁ hNp hpp (√((N : ℝ) / p₁)) (wP N ε p₁)
+    (hyexp.trans hys) hsw hlog
+  intro q hq
+  obtain ⟨hq, hqs⟩ := mem_filter.mp hq
+  exact ⟨(mem_filter.mp hq).2.1, le_of_not_gt hqs,
+    Nat.lt_ceil.mp (mem_range.mp (mem_filter.mp hq).1)⟩
 
 /-- LEAF. Unit U-1552. Correction to Yamada 2015, (109) and (112), Section 7: the primes
 `(N/p₁)^{1/2} ≤ p₂ < w(p₁)` left out of (112). For `N > exp exp 36`, `0 < ε < 1/100` and a
 prime `z ≤ p₁ < y`, their sum of `h_{p₁}(p₂)/p₂` is at most `(5ε + 7/log N) / log² N`;
 heuristically it is about `4.5 ε / log² N`, from `h ≤ 3/log N` and (7).
-CONDITIONAL ON the remaining local prime summation leaf `eq112_tail_abel`. -/
+CONDITIONAL ON the cited `prime_reciprocal_eq7` through `eq112_tail_abel`. -/
 theorem eq112_tail (N : ℕ) (hN : exp (exp 36) < N) (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 1 / 100)
     (p₁ : ℕ) (hp₁ : p₁ ∈ primesIco (z8 N) (y3 N)) :
     ∑ p₂ ∈ (primesIco (y3 N) (wP N ε p₁)).filter (fun p : ℕ => ¬ (p : ℝ) < √(N / p₁)),
@@ -884,7 +1419,43 @@ with `d log log u = du/(u log u)`; `H` is decreasing, so `max{H(z), H(y)} = H(z)
 theorem eq116_sum (N : ℕ) (hN : exp (exp 36) < N) :
     ∑ p₁ ∈ primesIco (z8 N) (y3 N), H N p₁ / p₁ ≤
       (∫ u in z8 N..y3 N, H N u / (u * log u)) + H N (z8 N) / (4 * log (z8 N) ^ 2) := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h128 : (128 : ℝ) < log N := by
+    have hh := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 2
+    norm_num at hh
+    linarith
+  have hLp : 0 < log (N : ℝ) := by linarith
+  have hN1 : (1 : ℝ) < N := by
+    have hh := one_lt_exp_iff.mpr hLp
+    rwa [exp_log hNp] at hh
+  have hz : log (z8 N) = log N / 8 := by rw [log_rpow hNp]; ring
+  have hy : log (y3 N) = log N / 3 := by rw [log_rpow hNp]; ring
+  have hz0 : 0 < z8 N := rpow_pos_of_pos hNp _
+  have hzy : z8 N ≤ y3 N := rpow_le_rpow_of_exponent_le hN1.le (by norm_num)
+  have hzexp : exp 16 ≤ z8 N := by
+    rw [← exp_log hz0]
+    apply exp_le_exp.mpr
+    rw [hz]
+    linarith
+  apply chen_log_weight_sum_le (log N) (z8 N) (y3 N) hLp hzexp hzy hy.le
+    (primesIco (z8 N) (y3 N)) ?_ (H N) ?_
+  · intro p hp
+    exact ⟨(mem_filter.mp hp).2.1, (mem_filter.mp hp).2.2,
+      Nat.lt_ceil.mp (mem_range.mp (mem_filter.mp hp).1)⟩
+  · intro u hu
+    have hu0 := hz0.trans_le hu.1
+    have hlogu : log u / log N ≤ 1 / 3 := by
+      apply (div_le_iff₀ hLp).2
+      have hh := log_le_log hu0 hu.2
+      rw [hy] at hh
+      linarith
+    have he : (N : ℝ) ^ (log u / log N) = u := by
+      rw [rpow_def_of_pos hNp]
+      have hh : log (N : ℝ) * (log u / log N) = log u := by field_simp
+      rw [hh, exp_log hu0]
+    have hh := H_rpow_eq N hN1 (log u / log N) hlogu
+    rwa [he] at hh
 
 /-- LEAF. Unit U-1552. Yamada 2015, (111) and (116), Section 7: for `N > exp exp 36`,
 `∫_z^y H(u) d log log u = (1/log N) ∫_{1/8}^{1/3} log(2 - 3β)/(β(1-β)) dβ`, by `u = N^α`,
