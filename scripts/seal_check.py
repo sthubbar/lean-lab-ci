@@ -55,8 +55,8 @@ def strip_comments(t, blank_strings=False):
         if depth and t.startswith("-/", i):
             depth -= 1; i += 2; continue
         if depth:
-            if t[i] == "\n": out.append("\n")
-            i += 1; continue
+            if t[i] == "\n": out.append("\n"); i += 1; continue
+            m = _INNER.search(t, i + 1); i = m.start() if m else n; continue
         if t.startswith("--", i):
             j = t.find("\n", i); i = n if j == -1 else j; continue
         if t.startswith("'\"'", i):
@@ -71,9 +71,13 @@ def strip_comments(t, blank_strings=False):
                 j = min(j + 1, n)
             s = t[i:j]
             out.append('""' + "\n" * s.count("\n") if blank_strings else s); i = j; continue
-        out.append(t[i]); i += 1
+        m = _OUTER.search(t, i + 1); j = m.start() if m else n; out.append(t[i:j]); i = j
     return "".join(out)
 _RAW = re.compile(r'r(#*)"')
+# lmerge 2026-11-02: jump to the next character that matters. The char loop took 1.4 s on a 2 MB certificate, about 20 minutes on
+# codex/task227, 337 Lean files, and each timeout wedged the gate queue. Output is byte-identical, tested on those 337 files.
+_OUTER = re.compile(r"""/-|--|'"'|"|r#*\"""")
+_INNER = re.compile(r"/-|-/|\n")
 
 TOPLVL = re.compile(r"^(?:end|namespace|section|open|variable|universe|attribute|set_option|noncomputable\s+section|#)\b", re.M)
 
