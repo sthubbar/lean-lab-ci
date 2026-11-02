@@ -1,0 +1,91 @@
+{
+  "iteration": 4,
+  "ell": 113,
+  "target": 3692,
+  "source": "batches/task255-21-programs.jsonl",
+  "input_runs": [
+    [
+      0,
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      15,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      798,
+      8,
+      30,
+      1,
+      0
+    ],
+    [
+      0,
+      813,
+      8,
+      30,
+      1,
+      0
+    ],
+    [
+      1,
+      30,
+      24,
+      32,
+      1,
+      0
+    ],
+    [
+      1,
+      46,
+      24,
+      32,
+      1,
+      0
+    ],
+    [
+      2,
+      0,
+      15,
+      1,
+      1,
+      0
+    ],
+    [
+      2,
+      1596,
+      8,
+      1,
+      1,
+      0
+    ],
+    [
+      2,
+      2635,
+      16,
+      1,
+      1,
+      0
+    ],
+    [
+      2,
+      1604,
+      8,
+      1,
+      1,
+      0
+    ]
+  ],
+  "observed_rss_kib": 10802136,
+  "action": "process terminated; completed rows preserved",
+  "reason": "presolve disabled on a large interleaved I and J model"
+}
