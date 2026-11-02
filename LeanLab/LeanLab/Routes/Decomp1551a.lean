@@ -529,6 +529,153 @@ theorem zt_finite (T : ℝ) : {i : ZIdx | |gZ i| ≤ T}.Finite := by
     (R := 2 + |T|) (r := 1 + |T|) (by linarith) hA (z₀ := 0)
     (by simp [Metric.mem_ball]; positivity) (by norm_num [Decomp1551b.xi])
 
+private lemma zall_pos {ρ : ℂ} (h : ρ ∈ LeanLab.PNTPort.ExplicitPsi1.Zall) : 0 < ρ.re ∧ ρ.re < 1 := by
+  have hζ : ζ ρ = 0 := h.1
+  refine ⟨?_, ?_⟩
+  · by_contra hcon
+    exact LeanLab.PNTPort.ExplicitPsi1.zeta_ne_zero_left h.2 (not_lt.mp hcon) hζ
+  · by_contra hcon
+    exact riemannZeta_ne_zero_of_one_le_re (not_lt.mp hcon) hζ
+
+/-! ### Rectangle bookkeeping for `[-(2m+1), 2] × [-T, T]` -/
+
+private lemma rect_mem_a {a T : ℝ} (ha : a ≤ 2) (hT : 0 ≤ T) {z : ℂ} :
+    z ∈ Rectangle (⟨a, -T⟩ : ℂ) ⟨2, T⟩ ↔ (a ≤ z.re ∧ z.re ≤ 2) ∧ (-T ≤ z.im ∧ z.im ≤ T) := by
+  simp only [Rectangle, mem_reProdIm]
+  rw [uIcc_of_le ha, uIcc_of_le (by linarith)]
+  simp
+
+private lemma rect_border_cases_a {a T : ℝ} {z : ℂ}
+    (hz : z ∈ RectangleBorder (⟨a, -T⟩ : ℂ) ⟨2, T⟩) :
+    z.im = -T ∨ z.re = a ∨ z.im = T ∨ z.re = 2 := by
+  simp only [RectangleBorder, mem_union, mem_reProdIm, mem_singleton_iff] at hz
+  rcases hz with ((⟨_, h⟩ | ⟨h, _⟩) | ⟨_, h⟩) | ⟨h, _⟩
+  · exact Or.inl h
+  · exact Or.inr (Or.inl h)
+  · exact Or.inr (Or.inr (Or.inl h))
+  · exact Or.inr (Or.inr (Or.inr h))
+
+/-! ### The integrand `fK x` -/
+
+private lemma fK_meromorphic {x : ℝ} (hx : 0 < x) (z : ℂ) : MeromorphicAt (fK x) z := by
+  have hz := LeanLab.PNTPort.ExplicitPsi1.meromorphicAt_zeta z
+  change MeromorphicAt (fun s => -(deriv ζ s / ζ s) * (x : ℂ) ^ s / s) z
+  exact ((hz.deriv.div hz).neg.mul (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx z).meromorphicAt).div
+    analyticAt_id.meromorphicAt
+
+private lemma fK_analytic {x : ℝ} (hx : 0 < x) {z : ℂ} (h0 : z ≠ 0) (h1 : z ≠ 1)
+    (hz : ζ z ≠ 0) : AnalyticAt ℂ (fK x) z := by
+  change AnalyticAt ℂ (fun s => -(deriv ζ s / ζ s) * (x : ℂ) ^ s / s) z
+  exact ((LeanLab.PNTPort.ExplicitPsi1.analyticAt_logDeriv h1 hz).neg.mul (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx z)).div analyticAt_id h0
+
+private lemma fK_order {x : ℝ} (hx : 0 < x) (z : ℂ) :
+    -1 ≤ meromorphicOrderAt (fK x) z := by
+  have hz := LeanLab.PNTPort.ExplicitPsi1.meromorphicAt_zeta z
+  rcases eq_or_ne z 0 with rfl | h0
+  · have hζ0 : ζ 0 ≠ 0 := by rw [riemannZeta_zero]; norm_num
+    have hH : AnalyticAt ℂ (fun s => -(deriv ζ s / ζ s) * (x : ℂ) ^ s) 0 :=
+      (LeanLab.PNTPort.ExplicitPsi1.analyticAt_logDeriv (by norm_num) hζ0).neg.mul (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx 0)
+    have hF : fK x = (fun s => -(deriv ζ s / ζ s) * (x : ℂ) ^ s) *
+        (fun s : ℂ => s)⁻¹ := by
+      funext s
+      simp only [fK, logDeriv_apply, div_eq_mul_inv, Pi.mul_apply, Pi.inv_apply]
+    have hinv : meromorphicOrderAt (fun s : ℂ => s)⁻¹ (0 : ℂ) = -1 := by
+      rw [meromorphicOrderAt_inv]
+      show -meromorphicOrderAt id (0 : ℂ) = -1
+      rw [meromorphicOrderAt_id]
+    rw [hF, meromorphicOrderAt_mul hH.meromorphicAt
+      (show MeromorphicAt (fun s : ℂ => s)⁻¹ 0 from analyticAt_id.meromorphicAt.inv), hinv]
+    have h := hH.meromorphicOrderAt_nonneg
+    calc (-1 : WithTop ℤ) = 0 + -1 := by simp
+      _ ≤ _ := add_le_add_left h _
+  · have hF : fK x = (fun s => -logDeriv ζ s) * (fun s : ℂ => (x : ℂ) ^ s / s) := by
+      funext s; simp only [fK, Pi.mul_apply]; ring
+    have hk : AnalyticAt ℂ (fun s : ℂ => (x : ℂ) ^ s / s) z :=
+      (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx z).div analyticAt_id h0
+    have hL : MeromorphicAt (fun s => -logDeriv ζ s) z := (hz.deriv.div hz).neg
+    rw [hF, meromorphicOrderAt_mul hL hk.meromorphicAt]
+    have hneg : meromorphicOrderAt (fun s => -logDeriv ζ s) z =
+        meromorphicOrderAt (logDeriv ζ) z := (meromorphicOrderAt_neg (f := logDeriv ζ)).symm
+    rw [hneg]
+    calc (-1 : WithTop ℤ) = -1 + 0 := by simp
+      _ ≤ _ := add_le_add (LeanLab.PNTPort.ExplicitPsi1.order_logDeriv_zeta_ge z) hk.meromorphicOrderAt_nonneg
+
+private lemma fK_residue_origin {x : ℝ} (hx : 0 < x) : residue (fK x) 0 = -L0 := by
+  have hζ0 : ζ 0 ≠ 0 := by rw [riemannZeta_zero]; norm_num
+  apply residue_eq_of_tendsto
+  have hH : AnalyticAt ℂ (fun s => -(deriv ζ s / ζ s) * (x : ℂ) ^ s) 0 :=
+    (LeanLab.PNTPort.ExplicitPsi1.analyticAt_logDeriv (by norm_num) hζ0).neg.mul (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx 0)
+  have ht := hH.continuousAt.tendsto.mono_left (nhdsWithin_le_nhds (s := {(0 : ℂ)}ᶜ))
+  have hv : -(deriv ζ 0 / ζ 0) * (x : ℂ) ^ (0 : ℂ) = -L0 := by simp [L0]
+  rw [hv] at ht
+  refine ht.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with s hs
+  have hs' : s ≠ 0 := hs
+  simp only [fK, logDeriv_apply, sub_zero]
+  field_simp
+
+private lemma fK_residue_one {x : ℝ} (hx : 0 < x) : residue (fK x) 1 = (x : ℂ) := by
+  apply residue_eq_of_tendsto
+  have hk : AnalyticAt ℂ (fun s : ℂ => (x : ℂ) ^ s / s) 1 :=
+    (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx 1).div analyticAt_id one_ne_zero
+  have ht := (LeanLab.PNTPort.ExplicitPsi1.tendsto_logDeriv_zeta_one.mul
+    (hk.continuousAt.tendsto.mono_left (nhdsWithin_le_nhds (s := {(1 : ℂ)}ᶜ)))).neg
+  simpa only [cpow_one, div_one, neg_one_mul, neg_neg] using
+    ht.congr (fun s => by simp only [fK, logDeriv_apply]; ring)
+
+private lemma fK_residue_zero {x : ℝ} (hx : 0 < x) {ρ : ℂ} (h0 : ρ ≠ 0) (h1 : ρ ≠ 1) :
+    residue (fK x) ρ = -(analyticOrderNatAt ζ ρ : ℂ) * (x : ℂ) ^ ρ / ρ := by
+  apply residue_eq_of_tendsto
+  have hk : AnalyticAt ℂ (fun s : ℂ => (x : ℂ) ^ s / s) ρ :=
+    (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx ρ).div analyticAt_id h0
+  have ht := ((LeanLab.PNTPort.ExplicitPsi1.tendsto_logDeriv_zeta_of_ne_one h1).mul
+    (hk.continuousAt.tendsto.mono_left (nhdsWithin_le_nhds (s := {ρ}ᶜ)))).neg
+  rw [show -(analyticOrderNatAt ζ ρ : ℂ) * (x : ℂ) ^ ρ / ρ =
+    -((analyticOrderNatAt ζ ρ : ℂ) * ((x : ℂ) ^ ρ / ρ)) by ring]
+  refine ht.congr (fun s => ?_)
+  simp only [fK, logDeriv_apply]
+  ring
+
+private lemma fK_residue_trivial {x : ℝ} (hx : 0 < x) (n : ℕ) :
+    residue (fK x) (-2 * ((n : ℂ) + 1)) =
+      (x : ℂ) ^ (-2 * ((n : ℂ) + 1)) / (2 * ((n : ℂ) + 1)) := by
+  let ρ : ℂ := -2 * ((n : ℂ) + 1)
+  have h0 : ρ ≠ 0 := by
+    intro h
+    have hh := congrArg Complex.re h
+    dsimp [ρ] at hh
+    simp at hh
+    linarith [Nat.cast_nonneg (α := ℝ) n]
+  apply residue_eq_of_tendsto
+  have hk : AnalyticAt ℂ (fun z : ℂ => (x : ℂ) ^ z / z) ρ :=
+    (LeanLab.PNTPort.ExplicitPsi1.analyticAt_xpow hx ρ).div analyticAt_id h0
+  have ht := ((LeanLab.PNTPort.ExplicitPsi1.Trivial.tendsto_logDeriv_trivial n).mul
+    (hk.continuousAt.tendsto.mono_left (nhdsWithin_le_nhds (s := {ρ}ᶜ)))).neg
+  have heq : (x : ℂ) ^ (-2 * ((n : ℂ) + 1)) / (2 * ((n : ℂ) + 1)) =
+      -(1 * ((x : ℂ) ^ ρ / ρ)) := by
+    change (x : ℂ) ^ ρ / (2 * ((n : ℂ) + 1)) = _
+    rw [show 2 * ((n : ℂ) + 1) = -ρ by dsimp [ρ]; ring, div_neg]
+    simp
+  rw [heq]
+  refine ht.congr (fun z => ?_)
+  simp only [fK, logDeriv_apply]
+  ring
+
+/-! ### The contour as `Jc`, `HorI` and `LeftI` -/
+
+private lemma rect_decomp_a (x : ℝ) (m : ℕ) (T : ℝ) :
+    RectangleIntegral' (fK x) (⟨-(2 * (m : ℝ) + 1), -T⟩ : ℂ) ⟨2, T⟩ =
+      (1 / (2 * Real.pi * I)) * (HorI x m (-T) - HorI x m T
+        + ((2 * Real.pi : ℝ) : ℂ) * I * Jc x T - I * LeftI x m T) := by
+  simp only [RectangleIntegral', RectangleIntegral, HIntegral, VIntegral, smul_eq_mul, HorI,
+    LeftI, Jc]
+  have hπ : (Real.pi : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  have hI : (I : ℂ) ≠ 0 := I_ne_zero
+  norm_num
+  field_simp
+
+/-! ### The residue identity itself -/
+
 /-- LEAF. Unit U-1551. Davenport chapter 17, the residue theorem on the rectangle
 `[-(2m+1), 2] × [-T, T]`, `x > 1`, `T > 0`, no zero of ζ on the horizontal edges:
 `i ∫_{-T}^{T} f(2+it) dt - ∫ f(σ+iT) dσ + ∫ f(σ-iT) dσ - i ∫_{-T}^{T} f(-(2m+1)+it) dt
@@ -541,7 +688,284 @@ theorem rect_identity (hfin : ∀ T : ℝ, {i : ZIdx | |gZ i| ≤ T}.Finite)
     (hnz : ∀ σ : ℝ, σ ≤ 2 → ζ ((σ : ℂ) + T * I) ≠ 0 ∧ ζ ((σ : ℂ) - T * I) ≠ 0) (m : ℕ) :
     I * ((2 * Real.pi : ℝ) : ℂ) * Jc x T - HorI x m T + HorI x m (-T) - I * LeftI x m T
       = ((2 * Real.pi : ℝ) : ℂ) * I * ((x : ℂ) - ZS x T - L0 + (TrivU x m : ℂ)) := by
-  sorry
+  classical
+  have hx0 : 0 < x := by linarith
+  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
+  have ha2 : -(2 * (m : ℝ) + 1) ≤ 2 := by linarith
+  have hC : ((2 * Real.pi : ℝ) : ℂ) ≠ 0 := by
+    simp only [Ne, Complex.ofReal_eq_zero]; positivity
+  have hmem := fun z => rect_mem_a (a := -(2 * (m : ℝ) + 1)) (T := T) ha2 hT.le (z := z)
+  set R : Set ℂ := Rectangle (⟨-(2 * (m : ℝ) + 1), -T⟩ : ℂ) ⟨2, T⟩ with hRdef
+  have h0R : (0 : ℂ) ∈ R := by
+    rw [hRdef, hmem]
+    simp only [Complex.zero_re, Complex.zero_im]
+    exact ⟨⟨by linarith, by norm_num⟩, ⟨by linarith, by linarith⟩⟩
+  have h1R : (1 : ℂ) ∈ R := by
+    rw [hRdef, hmem]
+    simp only [Complex.one_re, Complex.one_im]
+    exact ⟨⟨by linarith, by norm_num⟩, ⟨by linarith, by linarith⟩⟩
+  have hζ0 : ζ 0 ≠ 0 := by rw [riemannZeta_zero]; norm_num
+  have hzfin : (R ∩ riemannZetaZeros).Finite := by
+    rw [hRdef]
+    exact IsCompact.inter_riemannZetaZeros_finite (isCompact_uIcc.reProdIm isCompact_uIcc)
+  set Zf : Finset ℂ := hzfin.toFinset with hZf
+  have hZfmem : ∀ ρ : ℂ, ρ ∈ Zf ↔ ρ ∈ R ∧ ζ ρ = 0 := by
+    intro ρ
+    rw [hZf, Set.Finite.mem_toFinset]
+    exact ⟨fun h => h, fun h => h⟩
+  have hgood : ∀ z ∈ R, z ≠ 0 → z ≠ 1 → ζ z ≠ 0 → 0 ≤ meromorphicOrderAt (fK x) z :=
+    fun z _ h0 h1 hz => (fK_analytic hx0 h0 h1 hz).meromorphicOrderAt_nonneg
+  set Sf : Finset LeanLab.PNTPort.ExplicitPsi1.Zall := Zf.subtype (fun ρ : ℂ => ρ ∈ (LeanLab.PNTPort.ExplicitPsi1.Zall : Set ℂ)) with hSf
+  have hSfZf : ∀ ρ ∈ Sf, (ρ : ℂ) ∈ Zf := fun ρ hρ => Finset.mem_subtype.mp hρ
+  have hSfZall : ∀ ρ ∈ Sf, (ρ : ℂ) ∈ LeanLab.PNTPort.ExplicitPsi1.Zall := fun ρ _ => ρ.2
+  -- the pole set: `0`, `1` and every zero of `ζ` in the rectangle
+  set P : Finset ℂ := insert 0 (insert 1 Zf) with hP
+  have h0not : (0 : ℂ) ∉ insert 1 Zf := by
+    rw [Finset.mem_insert, not_or]
+    exact ⟨zero_ne_one, fun h => hζ0 ((hZfmem 0).mp h).2⟩
+  have h1not : (1 : ℂ) ∉ Zf := by
+    intro h
+    exact riemannZeta_one_ne_zero ((hZfmem 1).mp h).2
+  have hPR : ∀ z ∈ P, z ∈ R := by
+    intro z hz
+    rw [hP] at hz
+    rcases Finset.mem_insert.mp hz with rfl | hz
+    · exact h0R
+    rcases Finset.mem_insert.mp hz with rfl | hz
+    · exact h1R
+    exact ((hZfmem z).mp hz).1
+  have hpoles : ∀ z ∈ R, meromorphicOrderAt (fK x) z < 0 → z ∈ P := by
+    intro z hz hneg
+    by_contra hns
+    have h0 : z ≠ 0 := by
+      intro e
+      apply hns
+      rw [hP, e]
+      exact Finset.mem_insert_self _ _
+    have h1 : z ≠ 1 := by
+      intro e
+      apply hns
+      rw [hP, e]
+      exact Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)
+    have hZf : z ∉ Zf := by
+      intro e
+      apply hns
+      rw [hP]
+      exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem e)
+    have hζ : ζ z ≠ 0 := fun hζz => hZf ((hZfmem z).mpr ⟨hz, hζz⟩)
+    exact absurd (hgood z hz h0 h1 hζ) (not_le.mpr hneg)
+  have hleft : ∀ t : ℝ, ζ (((-(2 * (m : ℝ) + 1) : ℝ) : ℂ) + t * I) ≠ 0 := by
+    intro t
+    refine LeanLab.PNTPort.ExplicitPsi1.Trivial.zeta_ne_zero_of_re_neg (s := (((-(2 * (m : ℝ) + 1)) : ℝ) : ℂ) + t * I) ?_ ?_
+    · have hre : ((((-(2 * (m : ℝ) + 1)) : ℝ) : ℂ) + t * I).re = -(2 * (m : ℝ) + 1) := by
+        simp
+      rw [hre]
+      linarith
+    · intro k hk
+      have hre := congrArg Complex.re hk
+      have h1 : (1 : ℝ) - (-(2 * (m : ℝ) + 1)) = 2 * (k : ℝ) + 1 := by
+        simpa using hre
+      have h2 : 2 * (k : ℝ) = 2 * (m : ℝ) + 1 := by linarith
+      have hZ : (2 * k : ℤ) = 2 * (m : ℤ) + 1 := by exact_mod_cast h2
+      omega
+  have hborder : ∀ z ∈ RectangleBorder (⟨-(2 * (m : ℝ) + 1), -T⟩ : ℂ) ⟨2, T⟩, ζ z ≠ 0 := by
+    intro z hzb
+    have hzR : z ∈ R := by rw [hRdef]; exact rectangleBorder_subset_rectangle _ _ hzb
+    have hz2 : z.re ≤ 2 := ((hmem z).mp hzR).1.2
+    have hzz : z = (z.re : ℂ) + (z.im : ℂ) * I := (re_add_im z).symm
+    have e : ((z.re : ℂ) + ((-T : ℝ) : ℂ) * I) = ((z.re : ℂ) - T * I) := by push_cast; ring
+    rcases rect_border_cases_a hzb with h | h | h | h
+    · rw [hzz, h, e]; exact (hnz z.re hz2).2
+    · rw [hzz, h]; exact hleft z.im
+    · rw [hzz, h]; exact (hnz z.re hz2).1
+    · rw [hzz, h]
+      exact riemannZeta_ne_zero_of_one_le_re (s := ((2 : ℂ) + (z.im : ℂ) * I)) (by simp)
+  have hres := RectangleIntegral'_eq_sumResiduesIn (f := fK x)
+    (z := (⟨-(2 * (m : ℝ) + 1), -T⟩ : ℂ)) (w := ⟨2, T⟩)
+    (by simp; linarith) (by simp; linarith)
+    (fun z _ => fK_meromorphic hx0 z)
+    (by
+      rw [Set.disjoint_left]
+      intro z hzb hneg
+      simp only [Set.mem_ofPred_eq] at hneg
+      have hzR : z ∈ R := by rw [hRdef]; exact rectangleBorder_subset_rectangle _ _ hzb
+      have hζ := hborder z hzb
+      rcases rect_border_cases_a hzb with h | h | h | h
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; simp at h; try linarith)
+          (by intro e; rw [e] at h; simp at h; try linarith) hζ) (not_le.mpr hneg)
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; simp at h; try linarith)
+          (by intro e; rw [e] at h; simp at h; try linarith) hζ) (not_le.mpr hneg)
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; simp at h; try linarith)
+          (by intro e; rw [e] at h; simp at h; try linarith) hζ) (not_le.mpr hneg)
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; simp at h; try linarith)
+          (by intro e; rw [e] at h; simp at h; try linarith) hζ) (not_le.mpr hneg))
+    (by
+      apply (P : Set ℂ).toFinite.subset
+      intro z ⟨hz, hneg⟩
+      exact hpoles z hz hneg)
+    (fun z _ => fK_order hx0 z)
+  have hRres : RectangleIntegral' (fK x) (⟨-(2 * (m : ℝ) + 1), -T⟩ : ℂ) ⟨2, T⟩ =
+      sumResiduesIn (fK x) (R ∩ {z | meromorphicOrderAt (fK x) z < 0}) := by
+    rw [hres, hRdef]
+  have hS : R ∩ {z | meromorphicOrderAt (fK x) z < 0} =
+      (P : Set ℂ) ∩ {z | meromorphicOrderAt (fK x) z < 0} := by
+    ext z
+    simp only [mem_inter_iff, Set.mem_ofPred_eq, Finset.mem_coe]
+    constructor
+    · rintro ⟨hz, hneg⟩; exact ⟨hpoles z hz hneg, hneg⟩
+    · rintro ⟨hz, hneg⟩; exact ⟨hPR z hz, hneg⟩
+  have hinjT : ∀ a b : ℕ, (-2 * ((a : ℂ) + 1)) = (-2 * ((b : ℂ) + 1)) → a = b := by
+    intro a b h
+    have h' : ((a : ℂ) + 1) = ((b : ℂ) + 1) :=
+      mul_left_cancel₀ (by norm_num : (-2 : ℂ) ≠ 0) h
+    have h'' : (a : ℂ) = (b : ℂ) := add_right_cancel h'
+    exact_mod_cast h''
+  have hZTf : Zf.filter (fun ρ => ρ.re < 0)
+      = (Finset.range m).image (fun k : ℕ => -2 * ((k : ℂ) + 1)) := by
+    ext ρ
+    rw [Finset.mem_filter, Finset.mem_image]
+    constructor
+    · rintro ⟨hρ, hlt⟩
+      obtain ⟨hρR, hρζ⟩ := (hZfmem ρ).mp hρ
+      obtain ⟨⟨hza, hz2⟩, hzim, hzim2⟩ := (hmem ρ).mp hρR
+      obtain ⟨n, hn⟩ := LeanLab.PNTPort.ExplicitPsi1.Trivial.zero_of_re_neg hlt hρζ
+      have h1' : ((n + 1 : ℕ) : ℝ) < (m : ℝ) + 1 := by
+        have h := hza
+        have hzre : ρ.re = -2 * ((n : ℝ) + 1) := by rw [hn]; simp
+        rw [hzre] at h
+        push_cast at h ⊢
+        linarith
+      have h2 : n + 1 < m + 1 := by exact_mod_cast h1'
+      exact ⟨n, Finset.mem_range.mpr (by omega), hn.symm⟩
+    · rintro ⟨n, hn, hnρ⟩
+      have hnm : (n : ℝ) < (m : ℝ) := by
+        have h' : n < m := Finset.mem_range.mp hn
+        exact_mod_cast h'
+      have hle : ((n : ℝ) + 1) ≤ (m : ℝ) := by
+        have h' : n + 1 ≤ m := by
+          have h2 : n < m := Finset.mem_range.mp hn
+          omega
+        exact_mod_cast h'
+      have hval : (-2 * ((n : ℂ) + 1)) = (((-2 * ((n : ℝ) + 1)) : ℝ) : ℂ) := by
+        push_cast; ring
+      have hζ0 : ζ (-2 * ((n : ℂ) + 1)) = 0 := riemannZeta_neg_two_mul_nat_add_one n
+      have hre : (-2 * ((n : ℂ) + 1)).re = -2 * ((n : ℝ) + 1) := by
+        rw [hval, Complex.ofReal_re]
+      have him : (-2 * ((n : ℂ) + 1)).im = 0 := by
+        rw [hval, Complex.ofReal_im]
+      have hR : (-2 * ((n : ℂ) + 1)) ∈ R := by
+        rw [hRdef, hmem, hre, him]
+        refine ⟨⟨?_, ?_⟩, ?_, ?_⟩
+        · linarith [hle]
+        · linarith [Nat.cast_nonneg (α := ℝ) n]
+        · linarith [hT]
+        · linarith [hT]
+      have hlt : (-2 * ((n : ℂ) + 1)).re < 0 := by
+        rw [hval, Complex.ofReal_re]
+        linarith
+      rw [← hnρ]
+      exact ⟨(hZfmem _).mpr ⟨hR, hζ0⟩, hlt⟩
+  have hZNf : Zf.filter (fun ρ => ¬ ρ.re < 0)
+      = Sf.image (fun σ : LeanLab.PNTPort.ExplicitPsi1.Zall => (σ : ℂ)) := by
+    ext ρ
+    rw [Finset.mem_filter, Finset.mem_image]
+    constructor
+    · rintro ⟨hρ, hge⟩
+      have hρζ : ζ ρ = 0 := ((hZfmem ρ).mp hρ).2
+      exact ⟨⟨ρ, hρζ, by linarith⟩, Finset.mem_subtype.mpr hρ, rfl⟩
+    · rintro ⟨σ, hσ, hσρ⟩
+      have hσZf : (σ : ℂ) ∈ Zf := Finset.mem_subtype.mp hσ
+      have hZ : (σ : ℂ) ∈ LeanLab.PNTPort.ExplicitPsi1.Zall := σ.2
+      obtain ⟨hpos, -⟩ := zall_pos hZ
+      rw [← hσρ]
+      exact ⟨hσZf, by linarith⟩
+  -- the trivial-zero residues sum to `TrivU`
+  have hterm : ∀ k : ℕ, (x : ℂ) ^ (-2 * ((k : ℂ) + 1)) / (2 * ((k : ℂ) + 1)) =
+      ((((x ^ 2)⁻¹) ^ (k + 1) / (2 * ((k : ℝ) + 1)) : ℝ) : ℂ) := by
+    intro k
+    have h1 : (x : ℂ) ^ (-2 * ((k : ℂ) + 1)) = ((((x ^ 2)⁻¹) ^ (k + 1) : ℝ) : ℂ) := by
+      rw [show (-2 * ((k : ℂ) + 1)) = (-(((2 * (k + 1) : ℕ) : ℂ))) by push_cast; ring]
+      rw [Complex.cpow_neg, Complex.cpow_natCast]
+      push_cast
+      rw [pow_mul, inv_pow]
+    rw [h1]
+    push_cast
+    ring
+  have hsumTriv : ∑ ρ ∈ Zf.filter (fun ρ => ρ.re < 0), residue (fK x) ρ = (TrivU x m : ℂ) := by
+    rw [hZTf, Finset.sum_image (f := fun z : ℂ => residue (fK x) z)
+      (g := fun k : ℕ => -2 * ((k : ℂ) + 1)) (fun a _ b _ h => hinjT a b h), TrivU,
+      Complex.ofReal_sum]
+    apply Finset.sum_congr rfl
+    intro k _
+    rw [fK_residue_trivial hx0 k, hterm k]
+  -- the nontrivial zeros
+  have hSfsum : ∑ ρ ∈ Sf, residue (fK x) (ρ : ℂ) =
+      -∑ ρ ∈ Sf, (analyticOrderNatAt ζ (ρ : ℂ) : ℂ) * ((x : ℂ) ^ (ρ : ℂ) / (ρ : ℂ)) := by
+    rw [← Finset.sum_neg_distrib]
+    refine Finset.sum_congr rfl (fun ρ hρ => ?_)
+    have hZ : (ρ : ℂ) ∈ LeanLab.PNTPort.ExplicitPsi1.Zall := hSfZall ρ hρ
+    obtain ⟨hpos, hlt⟩ := zall_pos hZ
+    have h0 : (ρ : ℂ) ≠ 0 := by intro e; rw [e] at hpos; simp at hpos
+    have h1 : (ρ : ℂ) ≠ 1 := by intro e; rw [e] at hlt; simp at hlt
+    rw [fK_residue_zero hx0 h0 h1]
+    ring
+  have hsumNt : ∑ ρ ∈ Zf.filter (fun ρ => ¬ ρ.re < 0), residue (fK x) ρ =
+      -∑ ρ ∈ Sf, (analyticOrderNatAt ζ (ρ : ℂ) : ℂ) * ((x : ℂ) ^ (ρ : ℂ) / (ρ : ℂ)) := by
+    rw [hZNf, Finset.sum_image (f := fun z : ℂ => residue (fK x) z)
+      (g := fun σ : LeanLab.PNTPort.ExplicitPsi1.Zall => (σ : ℂ)) (fun a _ b _ h => Subtype.val_injective h), hSfsum]
+  have hsplit : ∑ ρ ∈ Zf, residue (fK x) ρ = (TrivU x m : ℂ)
+      + (-∑ ρ ∈ Sf, (analyticOrderNatAt ζ (ρ : ℂ) : ℂ) * ((x : ℂ) ^ (ρ : ℂ) / (ρ : ℂ))) := by
+    rw [← Finset.sum_filter_add_sum_filter_not Zf (fun ρ => ρ.re < 0)
+      (fun ρ => residue (fK x) ρ), hsumTriv, hsumNt]
+  -- `ZS` is the nontrivial zero sum
+  have hZs : ZS x T = ∑ ρ ∈ Sf,
+      (analyticOrderNatAt ζ (ρ : ℂ) : ℂ) * ((x : ℂ) ^ (ρ : ℂ) / (ρ : ℂ)) := by
+    have hZTmem : ∀ i : ZIdx, i ∈ ZT T ↔ |gZ i| ≤ T := by
+      intro i
+      simp only [ZT]
+      split_ifs with h
+      · rw [Set.Finite.mem_toFinset, Set.mem_ofPred_eq]
+      · exact absurd (hfin T) h
+    have hsigma : Sf.sigma (fun ρ => (Finset.univ : Finset (Fin (analyticOrderNatAt ζ (ρ : ℂ)))))
+        = ZT T := by
+      ext i
+      obtain ⟨ρ, k⟩ := i
+      rw [Finset.mem_sigma, hZTmem]
+      constructor
+      · rintro ⟨hρ, -⟩
+        have hZ := (hZfmem (ρ : ℂ)).mp (hSfZf ρ hρ)
+        obtain ⟨⟨h1, h2⟩, h3, h4⟩ := (hmem (ρ : ℂ)).mp hZ.1
+        simp only [gZ]
+        exact abs_le.mpr ⟨by linarith, h4⟩
+      · intro hk
+        obtain ⟨hζ, -⟩ := ρ.2
+        obtain ⟨hpos, hlt⟩ := zall_pos (ρ := (ρ : ℂ)) ρ.2
+        refine ⟨Finset.mem_subtype.mpr ?_, Finset.mem_univ _⟩
+        rw [hZfmem]
+        exact ⟨(hmem (ρ : ℂ)).mpr ⟨⟨by linarith, by linarith⟩, abs_le.mp hk⟩, hζ⟩
+    unfold ZS
+    rw [← hsigma, Finset.sum_sigma]
+    refine Finset.sum_congr rfl (fun ρ hρ => ?_)
+    have hstep : ∑ k ∈ (Finset.univ : Finset (Fin (analyticOrderNatAt ζ (ρ : ℂ)))),
+        (x : ℂ) ^ ((⟨ρ, k⟩ : ZIdx).1 : ℂ) / ((⟨ρ, k⟩ : ZIdx).1 : ℂ)
+        = ∑ _k ∈ (Finset.univ : Finset (Fin (analyticOrderNatAt ζ (ρ : ℂ)))),
+            ((x : ℂ) ^ (ρ : ℂ) / (ρ : ℂ)) :=
+      Finset.sum_congr rfl (fun k _ => rfl)
+    rw [hstep, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  -- assemble
+  have hmain : RectangleIntegral' (fK x) (⟨-(2 * (m : ℝ) + 1), -T⟩ : ℂ) ⟨2, T⟩ =
+      (x : ℂ) - ZS x T - L0 + (TrivU x m : ℂ) := by
+    rw [hRres, sumResiduesIn_inter_eq_of_set_eq hS (fun z _ hz =>
+        residue_eq_zero_of_not_pole_of_meromorphicAt (fK_meromorphic hx0 z) (not_lt.mp hz)),
+      sumResiduesIn, Finset.tsum_subtype' P (fun z => residue (fK x) z)]
+    rw [hP, Finset.sum_insert h0not, Finset.sum_insert h1not, hsplit,
+      fK_residue_origin hx0, fK_residue_one hx0, hZs]
+    ring
+  rw [← hmain, rect_decomp_a x m T]
+  have h2πI : ((2 * Real.pi : ℝ) : ℂ) * I ≠ 0 := mul_ne_zero hC I_ne_zero
+  field_simp
+  push_cast
+  ring
 
 /-- LEAF. Unit U-1551. Davenport chapter 17: on `Re s = -(2m+1)`, `|ζ'/ζ(s)| ≪ log(2|s|)`, and
 `|x^s/s| ≤ x^{-(2m+1)}/(2m+1)`, so the left edge tends to 0 as `m → ∞`, for `x > 1`. -/
