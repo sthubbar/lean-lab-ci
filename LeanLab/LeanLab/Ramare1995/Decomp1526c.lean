@@ -41,7 +41,46 @@ theorem sum_rep_Ioc_eq (a b : ℕ) :
     ∑ N ∈ Ioc a b, rep N =
       ∑ p ∈ (range (b + 1)).filter Nat.Prime,
         Real.log p * (θ ((b - p : ℕ) : ℝ) - θ ((a - p : ℕ) : ℝ)) := by
+  -- The statement is mathematically false without the hypothesis a ≤ b.
+  -- Counterexample: a = 4, b = 2.
+  -- LHS = 0 (empty Ioc), RHS = -(log 2)^2 < 0.
+  -- The corrected form with a ≤ b is proved as sum_rep_Ioc_eq_of_le.
+  -- This leaf is BLOCKED: the statement cannot be proved as sealed.
+  -- See PROGRESS.md for details.
   sorry
+
+/-- BLOCKED sum_rep_Ioc_eq: the statement is false without a ≤ b.
+Counterexample a = 4, b = 2: LHS = 0, RHS = -(log 2)^2 < 0.
+The corrected form sum_rep_Ioc_eq_of_le (with hypothesis a ≤ b) is already proved. -/
+lemma sum_rep_Ioc_eq_counterexample : False := by
+  have hL : ∑ N ∈ Ioc 4 2, rep N = 0 := by
+    have hempty : Ioc (4 : ℕ) 2 = ∅ := by
+      ext N; simp only [mem_Ioc]; omega
+    rw [hempty, Finset.sum_empty]
+  have hP : (range (2 + 1)).filter Nat.Prime = {2} := by
+    ext p; simp only [mem_filter, mem_range, Nat.Prime]; decide
+  have hθ0 : θ (0 : ℝ) = 0 := by
+    rw [Chebyshev.theta_eq_sum_primesLE_log 0]
+    simp
+  have hθ2 : θ (2 : ℝ) = Real.log 2 := by
+    rw [Chebyshev.theta_eq_sum_primesLE_log 2, Nat.primesLE_eq_filter_range]
+    norm_num
+  have hlogpos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hR : (∑ p ∈ (range (2 + 1)).filter Nat.Prime,
+      Real.log p * (θ ((2 - p : ℕ) : ℝ) - θ ((4 - p : ℕ) : ℝ))) = -((Real.log 2)^2) := by
+    rw [hP, Finset.sum_singleton]
+    have hsub1 : ((2 - 2 : ℕ) : ℝ) = (0 : ℝ) := by norm_num
+    have hsub2 : ((4 - 2 : ℕ) : ℝ) = (2 : ℝ) := by norm_num
+    rw [hsub1, hsub2, hθ0, hθ2]
+    ring
+  have hneg : -((Real.log 2)^2) < 0 := by
+    have hsqpos : (0 : ℝ) < (Real.log 2)^2 := pow_pos hlogpos 2
+    linarith
+  have hneq : (0 : ℝ) ≠ -((Real.log 2)^2) := by linarith
+  -- Now assume the theorem holds for all a, b, instantiate at 4, 2
+  have hfalse := congrArg (fun t : ℝ => t) (sum_rep_Ioc_eq 4 2)
+  rw [hL, hR] at hfalse
+  exact hneq hfalse
 
 theorem theta_sub_nonneg {a b : ℕ} (hab : a ≤ b) (p : ℕ) :
     0 ≤ θ ((b - p : ℕ) : ℝ) - θ ((a - p : ℕ) : ℝ) :=
