@@ -12,7 +12,8 @@ open LeanLab.Perelli1996.Section3
 noncomputable section
 
 /-- LEAF. Pages 487 and 489, equations 30 and 32.
-The prime mean estimate bounding the difference between R and Sing. -/
+The prime mean estimate bounding the difference between R and Sing.
+BLOCKED: OUT OF REACH. Requires large sieve and Vaughan's identity (unformalized external literature). -/
 theorem leaf_prime_mean_estimate (F : ℤ[X]) (hF : Admissible F) :
     ∀ A ε : ℝ, 0 < A → 0 < ε → ∃ C N₀ : ℝ,
       ∀ N H : ℝ, N₀ ≤ N → N ^ (1 / (6 * (F.natDegree : ℝ)) + ε) ≤ H →
@@ -20,6 +21,10 @@ theorem leaf_prime_mean_estimate (F : ℤ[X]) (hF : Admissible F) :
         |(∑ n ∈ win F N H, R (Fv F n).toNat) -
           (F.leadingCoeff : ℝ) * N * ∑ n ∈ win F N H, Sing (Fv F n).toNat| ≤
             C * H * N * Real.log N ^ (-A) := by
+  -- BLOCKED: OUT OF REACH. Requires large sieve and Vaughan's identity.
+  -- No CITED lemma in Mean103.lean or Average88.lean proves this.
+  -- Searched Mathlib for large sieve, Vaughan identity, Bombieri-Vinogradov - none found.
+  -- This is unformalized external literature (Vaughan 1981, Perelli 1996).
   sorry
 
 /-- Theorem 2, page 479, assembled from the prime mean estimate and the singular average.
