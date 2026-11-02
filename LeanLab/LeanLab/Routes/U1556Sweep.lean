@@ -148,6 +148,84 @@ theorem measurable_Etheta (δ : ℝ) : Measurable (U1522.Eθ δ) := by
   unfold U1522.Eθ
   exact ((ht.comp hl).sub ht).sub (measurable_const.mul measurable_id)
 
+/-! ### The weight `W` on `(0, ∞)`: `∫_0^∞ W = 4/3`
+
+`W(u) = 1` on `(0, 1]` and `u^(-4)` on `(1, ∞)`, so `∫_0^∞ W = 1 + 1/3 = 4/3`. Unit U-1556. -/
+
+/-- `W u = u ^ (-4)` for `u > 1`. Unit U-1556. -/
+private lemma W_eq_rpow_neg_four {u : ℝ} (hu : 1 < u) : W u = u ^ (-4 : ℝ) := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  unfold W
+  split_ifs with h
+  · exact absurd h (not_le.mpr hu)
+  · rw [show (-4 : ℝ) = -((4 : ℕ) : ℝ) by norm_num, Real.rpow_neg hu0, Real.rpow_natCast]
+
+/-- `W = 1` on `(0, 1]`. Unit U-1556. -/
+private lemma W_eq_one_of_le_one {u : ℝ} (hu : u ≤ 1) : W u = 1 := by
+  simp [W, hu]
+
+private lemma integrableOn_W_Ioc_zero_one : IntegrableOn W (Ioc (0 : ℝ) 1) := by
+  have h1 : IntegrableOn (fun _ : ℝ => (1 : ℝ)) (Ioc (0 : ℝ) 1) :=
+    MeasureTheory.integrableOn_const (μ := volume) (s := Ioc (0 : ℝ) 1) (C := 1) (by simp)
+  exact h1.congr_fun (fun u hu => (W_eq_one_of_le_one hu.2).symm) measurableSet_Ioc
+
+private lemma integral_W_Ioc_zero_one : ∫ u in Ioc (0 : ℝ) 1, W u = 1 := by
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioc
+    (fun u hu => W_eq_one_of_le_one hu.2)]
+  rw [MeasureTheory.setIntegral_const]
+  have hvol : volume (Ioc (0 : ℝ) 1) = 1 := by
+    rw [Real.volume_Ioc]; norm_num
+  rw [measureReal_def, hvol]
+  norm_num
+
+private lemma integrableOn_W_Ioi_one : IntegrableOn W (Ioi (1 : ℝ)) := by
+  have h : IntegrableOn (fun u : ℝ => u ^ (-4 : ℝ)) (Ioi (1 : ℝ)) :=
+    integrableOn_Ioi_rpow_of_lt (by norm_num) one_pos
+  exact h.congr_fun (fun u hu => (W_eq_rpow_neg_four hu).symm) measurableSet_Ioi
+
+private lemma integral_W_Ioi_one : ∫ u in Ioi (1 : ℝ), W u = 1 / 3 := by
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    (fun u hu => W_eq_rpow_neg_four hu)]
+  rw [integral_Ioi_rpow_of_lt (by norm_num) one_pos]
+  norm_num
+
+private lemma integrableOn_W_Ioi_zero : IntegrableOn W (Ioi (0 : ℝ)) := by
+  have h := integrableOn_W_Ioc_zero_one.union integrableOn_W_Ioi_one
+  rwa [Set.Ioc_union_Ioi_eq_Ioi (a := (0 : ℝ)) (b := 1) (by norm_num)] at h
+
+private lemma integral_W_Ioi_zero : ∫ u in Ioi (0 : ℝ), W u = 4 / 3 := by
+  have hd : Disjoint (Ioc (0 : ℝ) 1) (Ioi (1 : ℝ)) := by
+    rw [Set.disjoint_left]
+    intro u hu hu'
+    exact absurd hu.2 (not_le.mpr hu')
+  rw [← Set.Ioc_union_Ioi_eq_Ioi (a := (0 : ℝ)) (b := 1) (by norm_num),
+    MeasureTheory.setIntegral_union hd measurableSet_Ioi integrableOn_W_Ioc_zero_one
+      integrableOn_W_Ioi_one,
+    integral_W_Ioc_zero_one, integral_W_Ioi_one]
+  norm_num
+
+private lemma integrableOn_W_div (X : ℝ) (hX : 0 < X) :
+    IntegrableOn (fun y : ℝ => W (y / X)) (Ioi (0 : ℝ)) := by
+  have h0 : IntegrableOn (fun u : ℝ => W u) (Ioi (0 * X⁻¹)) := by
+    simpa [zero_mul] using integrableOn_W_Ioi_zero
+  have h := (integrableOn_Ioi_comp_mul_right_iff (fun u : ℝ => W u) (0 : ℝ)
+    (a := X⁻¹) (by positivity)).mpr h0
+  simpa [div_eq_mul_inv] using h
+
+/-- `∫_{y>2} W(y/X) dy ≤ 2X` for `X > 0`. Unit U-1556. -/
+private lemma integral_W_div_le {X : ℝ} (hX : 0 < X) :
+    ∫ y in Ioi (2 : ℝ), W (y / X) ≤ 2 * X := by
+  have h0 := integrableOn_W_div X hX
+  have hmono : ∫ y in Ioi (2 : ℝ), W (y / X) ≤ ∫ y in Ioi (0 : ℝ), W (y / X) :=
+    MeasureTheory.setIntegral_mono_set h0
+      (Filter.Eventually.of_forall fun y => W_nonneg _)
+      (Filter.Eventually.of_forall (Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 2)))
+  have hsub : (∫ y in Ioi (0 : ℝ), W (y / X)) = X * ∫ u in Ioi (0 : ℝ), W u := by
+    have h := integral_comp_mul_right_Ioi (fun u : ℝ => W u) (0 : ℝ) (b := X⁻¹) (by positivity)
+    simpa [smul_eq_mul, inv_inv, zero_mul, div_eq_mul_inv] using h
+  rw [hsub, integral_W_Ioi_zero] at hmono
+  linarith
+
 /-! ### Open leaves: the ψ to θ step with the weight kept -/
 
 /-- LEAF. Unit U-1556. The bias term of the explicit formula, weighted: for `0 < δ ≤ 1` and
@@ -156,7 +234,25 @@ Plain math: `B_δ(y)² ≤ δ²` for `y ≥ 2` (lab `Bf_sq_le`) and `∫_2^∞ W
 theorem bias_W_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1) (hX : 2 ≤ X) :
     IntegrableOn (fun y => Bf δ y ^ 2 * W (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Bf δ y ^ 2 * W (y / X) ≤ 2 * δ ^ 2 * X := by
-  sorry
+  have hX0 : 0 < X := by linarith
+  have hI2 : IntegrableOn (fun y : ℝ => W (y / X)) (Ioi (2 : ℝ)) :=
+    (integrableOn_W_div X hX0).mono_set (Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 2))
+  have hM : IntegrableOn (fun y => δ ^ 2 * W (y / X)) (Ioi 2) := hI2.const_mul _
+  have hpt : ∀ᵐ y ∂(volume.restrict (Ioi (2 : ℝ))),
+      Bf δ y ^ 2 * W (y / X) ≤ δ ^ 2 * W (y / X) := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with y hy
+    exact mul_le_mul_of_nonneg_right (Bf_sq_le hδ hδ1 hy.le) (W_nonneg _)
+  have hB : IntegrableOn (fun y => Bf δ y ^ 2 * W (y / X)) (Ioi 2) := by
+    refine hM.mono' (((measurable_Bf δ).pow_const 2).mul (measurable_W_div X)).aestronglyMeasurable ?_
+    filter_upwards [hpt] with y hy
+    change ‖Bf δ y ^ 2 * W (y / X)‖ ≤ δ ^ 2 * W (y / X)
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (sq_nonneg _) (W_nonneg _))]
+    exact hy
+  refine ⟨hB, ?_⟩
+  have hmono := integral_mono_ae hB hM hpt
+  rw [integral_const_mul] at hmono
+  have hb := mul_le_mul_of_nonneg_left (integral_W_div_le hX0) (sq_nonneg δ)
+  linarith
 
 /-- LEAF. Unit U-1556. The prime power difference, weighted, unconditional: for
 `0 < δ ≤ 10^-13` and `X ≥ 10^13`, `D(y)² W(y/X)` with `D = (ψ - θ)((1+δ)y) - (ψ - θ)(y)` is
