@@ -79,7 +79,7 @@ jobs:
           FOLDERS=$(git diff --name-only origin/main HEAD -- LeanLab/LeanLab | cut -d/ -f3 | sort -u | grep -v '^$' | paste -sd, -)
           echo "branch: $BR  tag: $TAG  folders: $FOLDERS"
           python3 scripts/seal_check.py origin/main | tee "$OUT/seal.txt"
-          if [ -n "$FOLDERS" ]; then bash scripts/check_branch.sh "$FOLDERS" "$TAG" | tee "$OUT/check.txt"; else echo "RESULT PASS no Lean folders changed" | tee "$OUT/check.txt"; fi
+          if [ -n "$FOLDERS" ]; then CHECK_BASE=$(git rev-parse origin/main) bash scripts/check_branch.sh "$FOLDERS" "$TAG" | tee "$OUT/check.txt"; else echo "RESULT PASS no Lean folders changed" | tee "$OUT/check.txt"; fi
           cp LeanLab/LeanLab/*/build/$TAG-CHECK.txt "$OUT/" 2>/dev/null || true
           if grep -q "^SEAL FAIL" "$OUT/seal.txt"; then echo "GATE CI: SEAL FAIL"; exit 1; fi
           REAL=$(grep "^FAIL" "$OUT/check.txt" | grep -v -E "LOG.md has a line|STATEMENTS.md updated|PROGRESS.md updated|everything committed|uncommitted changes remain" || true)
