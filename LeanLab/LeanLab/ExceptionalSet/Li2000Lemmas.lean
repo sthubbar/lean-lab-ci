@@ -1,5 +1,5 @@
 /-
-CODEX task85 status: eleven valid original open leaves now have proofs. The coefficient conjunction at 279.6 is false and stays sealed. A counterexample and safe coefficient bounds are proved below. The second scalar assemblies for Lemma 6 parts i to v are added. The three cited analytic inputs remain conditional.
+CODEX task85 status: twelve valid original open leaves now have proofs. lemma6_i_coef is FALSE; counterexample and safe coefficient bounds proved below. The second scalar assemblies for Lemma 6 parts i to v are added. The three cited analytic inputs remain conditional.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 /-
@@ -301,7 +301,10 @@ theorem lemma6_i_coef_safe (l : ℝ) (hl : 5 < l) :
 
 
 
-/-- A counterexample to the sealed 279.6 coefficient bound. The paper prints 279.7. -/
+/-- A counterexample to the sealed 279.6 coefficient bound. The paper prints 279.7.
+The second conjunct is FALSE for l ∈ (5, 5.00063…); at l = 5.000001 the value ≈ 279.6012 > 279.6.
+BLOCKED: the statement is sealed and unprovable as written; see lemma6_i_coef_safe for the
+safe bound ≤ 279.61. -/
 theorem lemma6_i_coef_second_counterexample : (279.6 : ℝ) <
     0.2292 * (5.000001 + 42.9) * (1.45 - 0.95 + 2 * Real.pi / 23.4) /
       (2 * 5.000001 * (1.042 - 0.95) * 0.0328) := by
