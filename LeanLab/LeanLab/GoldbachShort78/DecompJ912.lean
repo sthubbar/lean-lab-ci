@@ -67,11 +67,11 @@ theorem leaf_bhp_main_count :
     (0.06 : ℝ) * t ^ (0.525 : ℝ) / Real.log t +
     (0.21 : ℝ) * t ^ (0.525 : ℝ) / Real.log t +
     (0.34 : ℝ) * t ^ (0.525 : ℝ) / Real.log t) := by
-  obtain ⟨T, hT1, hT2⟩ := leaf_bhp_1
-  use T, hT1
-  intro t ht
-  have h1 := hT2 t ht
-  have h2 := leaf_bhp_diff t (lt_of_lt_of_le hT1 ht)
+  obtain ⟨T, hT1, hc⟩ := leaf_bhp_1
+  refine ⟨T, hT1, fun t ht => ?_⟩
+  have ht1 : 1 < t := lt_of_lt_of_le hT1 ht
+  have hd := leaf_bhp_diff t ht1
+  have h := hc t ht
   linarith
 
 /-- Assembly of the final printed display of BHP 2001 p. 562. -/
