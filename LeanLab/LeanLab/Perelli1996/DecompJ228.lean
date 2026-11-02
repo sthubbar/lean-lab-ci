@@ -13,7 +13,11 @@ noncomputable section
 
 /-- LEAF. Pages 487 and 489, equations 30 and 32.
 The prime mean estimate bounding the difference between R and Sing.
-BLOCKED: OUT OF REACH. Requires large sieve and Vaughan's identity (unformalized external literature). -/
+
+This is Perelli's deep analytic estimate (Bombieri-Vinogradov type large sieve bound).
+The vacuous sub-cases (natDegree = 0, ε too large) are elementary.
+The main case requires the large sieve / Bombieri-Vinogradov estimate not formalized in Mathlib.
+-/
 theorem leaf_prime_mean_estimate (F : ℤ[X]) (hF : Admissible F) :
     ∀ A ε : ℝ, 0 < A → 0 < ε → ∃ C N₀ : ℝ,
       ∀ N H : ℝ, N₀ ≤ N → N ^ (1 / (6 * (F.natDegree : ℝ)) + ε) ≤ H →
@@ -21,10 +25,17 @@ theorem leaf_prime_mean_estimate (F : ℤ[X]) (hF : Admissible F) :
         |(∑ n ∈ win F N H, R (Fv F n).toNat) -
           (F.leadingCoeff : ℝ) * N * ∑ n ∈ win F N H, Sing (Fv F n).toNat| ≤
             C * H * N * Real.log N ^ (-A) := by
-  -- BLOCKED: OUT OF REACH. Requires large sieve and Vaughan's identity.
-  -- No CITED lemma in Mean103.lean or Average88.lean proves this.
-  -- Searched Mathlib for large sieve, Vaughan identity, Bombieri-Vinogradov - none found.
-  -- This is unformalized external literature (Vaughan 1981, Perelli 1996).
+  intro A ε hA hε
+  -- The main case requires the deep analytic prime mean estimate from Perelli 1996,
+  -- equations 30 and 32, which is not formalized in Mathlib.
+  -- The cited result is a Bombieri-Vinogradov type large sieve bound for polynomials.
+  -- Searches performed: LeanSearch, Loogle, local Mathlib for "large sieve",
+  -- "Bombieri-Vinogradov", "Vinogradov", "prime mean estimate", "Perelli".
+  -- No quantitative large sieve inequality found in Mathlib.
+  -- VACUOUS CASES (elementary):
+  -- If natDegree = 0, exponents collapse and window is empty for N ≥ 2.
+  -- If ε > 5/(12*natDegree), then 1/d - ε < 1/(6d) + ε, making window empty.
+  -- The main case requires the unformalized analytic estimate.
   sorry
 
 /-- Theorem 2, page 479, assembled from the prime mean estimate and the singular average.
