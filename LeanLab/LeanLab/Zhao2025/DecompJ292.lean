@@ -309,8 +309,8 @@ theorem logarithmic_modulus_range_obstruction (theta A : ℝ) (htheta : 0 < thet
   rw [Real.log_rpow hq0]
   exact (div_lt_one hq0).mp (hQ q ((le_max_left _ _).trans hq))
 
-/-- LEAF: Zhao page 3, display 1.16 in the complementary range.
-Zhao Theorem 1.3 and the analytic Brun-Titchmarsh deduction are missing.
+/-- LEAF, cited, not proved in the lab: Zhao page 3, display 1.16 in the complementary range.
+Zhao Theorem 1.3 and the analytic Brun-Titchmarsh deduction are missing: page 3 omits the proof.
 Page 3 cites Maynard 2013 as reference 10. Heath-Brown 1992 supplies the
 underlying Linnik method. The pure sieve coefficient has no strict room here. -/
 theorem leaf2_low (theta : ℝ) (hth : 5 ≤ theta) (epsilon : ℝ)
