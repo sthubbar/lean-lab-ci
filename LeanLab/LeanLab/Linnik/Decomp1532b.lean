@@ -25,6 +25,10 @@ Proof additions by Codex task195 on 2026-10-31 UTC. AI wrote the Lean code.
 Binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.RieselVaughan1983.MuPhiSum
+import LeanLab.RieselVaughan1983.GaussImprim
+import LeanLab.PNTSieve.MertensUpper
+import LeanLab.Linnik.U1394Fejer
 import LeanLab.Linnik.HilbertCosecant
 import LeanLab.HardyLittlewood1923.U1482ZeroCount
 import LeanLab.RieselVaughan1983.LargeSieveSchur
@@ -3657,6 +3661,1795 @@ theorem density_sum_fixed_gap (η : ℝ) (hη : 0 < η) : ∃ C : ℝ, 0 ≤ C �
   norm_num only [Nat.cast_ofNat]
   linarith
 
+/-- Finite interpolation identity behind Gallagher 1970 p.334, Turan step. -/
+theorem power_sum_interpolation {n : ℕ} (z a b : Fin n → ℂ) (M : ℕ) :
+    (∑ j, b j * ∑ i, a i * z i ^ (M + 1 + j.val)) =
+      ∑ i, a i * z i ^ (M + 1) * ∑ j, b j * z i ^ j.val := by
+  simp only [Finset.mul_sum]
+  rw [sum_comm]
+  apply sum_congr rfl
+  intro i _
+  apply sum_congr rfl
+  intro j _
+  rw [pow_add]
+  ring
+
+
+
+open scoped Classical
+/-- Nonzero interpolation data force a nonzero power sum in the next n powers. -/
+theorem power_sum_nonzero_of_injective {n : ℕ} (z a : Fin n → ℂ) (M : ℕ)
+    (hz : Function.Injective z) (ha : ∃ i, a i ≠ 0 ∧ z i ≠ 0) :
+    ∃ j : Fin n, (∑ i, a i * z i ^ (M + 1 + j.val)) ≠ 0 := by
+  by_contra h
+  push Not at h
+  have hv : (fun i => a i * z i ^ (M + 1)) = 0 := by
+    apply Matrix.eq_zero_of_forall_pow_sum_mul_pow_eq_zero hz
+    intro j
+    simpa only [pow_add, mul_assoc] using h j
+  obtain ⟨i, hai, hzi⟩ := ha
+  have := congr_fun hv i
+  exact (mul_ne_zero hai (pow_ne_zero _ hzi)) this
+
+
+/-- The interpolation coefficient norm controls the largest power sum. -/
+theorem power_sum_interpolation_bound {n : ℕ} (z a b : Fin n → ℂ) (M : ℕ)
+    {B : ℝ} (hB : ∀ j : Fin n, ‖∑ i, a i * z i ^ (M + 1 + j.val)‖ ≤ B) :
+    ‖∑ i, a i * z i ^ (M + 1) * ∑ j, b j * z i ^ j.val‖ ≤
+      (∑ j, ‖b j‖) * B := by
+  rw [← power_sum_interpolation]
+  calc
+    _ ≤ ∑ j, ‖b j * ∑ i, a i * z i ^ (M + 1 + j.val)‖ := norm_sum_le _ _
+    _ ≤ ∑ j, ‖b j‖ * B := by
+      apply sum_le_sum
+      intro j _
+      rw [norm_mul]
+      exact mul_le_mul_of_nonneg_left (hB j) (norm_nonneg _)
+    _ = _ := (sum_mul ..).symm
+
+
+/-- A bounded interpolant supplies a quantitative power sum lower bound. -/
+theorem power_sum_lower_bound_of_interpolant {n : ℕ} (hn : 0 < n)
+    (z a b : Fin n → ℂ) (M : ℕ) {A B : ℝ} (hB : 0 < B)
+    (hcoeff : (∑ j, ‖b j‖) ≤ B)
+    (hvalue : A ≤ ‖∑ i, a i * z i ^ (M + 1) * ∑ j, b j * z i ^ j.val‖) :
+    ∃ j : Fin n, A / B ≤ ‖∑ i, a i * z i ^ (M + 1 + j.val)‖ := by
+  classical
+  let : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  obtain ⟨j, _, hj⟩ := exists_max_image (univ : Finset (Fin n))
+    (fun j => ‖∑ i, a i * z i ^ (M + 1 + j.val)‖) univ_nonempty
+  refine ⟨j, (div_le_iff₀ hB).mpr ?_⟩
+  calc
+    A ≤ _ := hvalue
+    _ ≤ (∑ j, ‖b j‖) * ‖∑ i, a i * z i ^ (M + 1 + j.val)‖ :=
+      power_sum_interpolation_bound z a b M (fun k => hj k (mem_univ k))
+    _ ≤ B * ‖∑ i, a i * z i ^ (M + 1 + j.val)‖ :=
+      mul_le_mul_of_nonneg_right hcoeff (norm_nonneg _)
+    _ = _ := mul_comm _ _
+
+
+/-- The pure single term Turan bound has no cancellation. -/
+theorem turan_power_sum_single {z : ℂ} (hz : 1 ≤ ‖z‖) (M : ℕ) (hM : 1 ≤ M) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧ (1 / 50 : ℝ) ^ M ≤ ‖z ^ ν‖ := by
+  refine ⟨M + 1, by omega, by omega, ?_⟩
+  calc
+    (1 / 50 : ℝ) ^ M ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
+    _ ≤ ‖z ^ (M + 1)‖ := by rw [norm_pow]; exact one_le_pow₀ hz
+
+
+/-- Repeated roots are combined with their positive multiplicities.
+Qualitative finite part of Gallagher 1970 p.334, with no separation assumption. -/
+theorem pure_power_sum_nonzero {n : ℕ} (z : Fin n → ℂ) (M : ℕ)
+    (hz : ∃ i, z i ≠ 0) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ M + n ∧ (∑ i, z i ^ ν) ≠ 0 := by
+  classical
+  let s : Finset ℂ := univ.image z
+  let LeanLab.PNTPort.LargeSieve.e : Fin s.card ≃ ↥s := s.equivFin.symm
+  let v : Fin s.card → ℂ := fun i => (LeanLab.PNTPort.LargeSieve.e i).val
+  let a : Fin s.card → ℂ := fun j => ((univ.filter (fun i => z i = v j)).card : ℂ)
+  have hv : Function.Injective v := by
+    intro i j hij
+    apply LeanLab.PNTPort.LargeSieve.e.injective
+    exact Subtype.ext hij
+  have hsum (k : ℕ) : (∑ j, a j * v j ^ k) = ∑ i, z i ^ k := by
+    calc
+      _ = ∑ u : ↥s, ((univ.filter (fun i => z i = u.val)).card : ℂ) * u.val ^ k :=
+        LeanLab.PNTPort.LargeSieve.e.sum_comp _
+      _ = ∑ u ∈ s, ((univ.filter (fun i => z i = u)).card : ℂ) * u ^ k :=
+        sum_coe_sort s (fun u : ℂ =>
+          (((univ : Finset (Fin n)).filter (fun i => z i = u)).card : ℂ) * u ^ k)
+      _ = ∑ u ∈ s, ∑ i ∈ univ.filter (fun i => z i = u), z i ^ k := by
+        apply sum_congr rfl
+        intro u _
+        rw [show (∑ i ∈ univ.filter (fun i => z i = u), z i ^ k) =
+            ∑ _i ∈ univ.filter (fun i => z i = u), u ^ k from
+          sum_congr rfl (fun i hi => by rw [(mem_filter.mp hi).2])]
+        simp
+      _ = _ := sum_fiberwise_of_maps_to (fun i hi => mem_image_of_mem z hi) _
+  have ha : ∃ j, a j ≠ 0 ∧ v j ≠ 0 := by
+    obtain ⟨i, hi⟩ := hz
+    have hzi : z i ∈ s := mem_image_of_mem z (mem_univ i)
+    let j := LeanLab.PNTPort.LargeSieve.e.symm ⟨z i, hzi⟩
+    have hj : v j = z i := by simp [v, j]
+    refine ⟨j, ?_, hj ▸ hi⟩
+    dsimp [a]
+    apply Nat.cast_ne_zero.mpr
+    apply card_ne_zero.mpr
+    exact ⟨i, mem_filter.mpr ⟨mem_univ _, hj.symm⟩⟩
+  obtain ⟨j, hj⟩ := power_sum_nonzero_of_injective v a M hv ha
+  have hcard : s.card ≤ n := by
+    exact (card_image_le).trans (by simp)
+  refine ⟨M + 1 + j.val, by omega, by have := j.isLt; omega, ?_⟩
+  rwa [hsum] at hj
+
+
+/-- Compactness gives a uniform lower bound at each fixed length and starting power.
+This does not supply the exponential constant required by Turan's theorem. -/
+theorem pure_power_sum_fixed_length {n : ℕ} (hn : 0 < n) (M : ℕ) :
+    ∃ ε : ℝ, 0 < ε ∧ ∀ z : Fin n → ℂ, ‖z‖ = 1 →
+      ∃ ν : ℕ, M < ν ∧ ν ≤ M + n ∧ ε ≤ ‖∑ i, z i ^ ν‖ := by
+  classical
+  let : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  let F : (Fin n → ℂ) → ℝ := fun z => ∑ j : Fin n, ‖∑ i, z i ^ (M + 1 + j.val)‖
+  have hF : Continuous F := by dsimp [F]; fun_prop
+  have hpos (z : Fin n → ℂ) (hz : ‖z‖ = 1) : 0 < F z := by
+    have hne : z ≠ 0 := by intro he; simp [he] at hz
+    have hex : ∃ i, z i ≠ 0 := by
+      by_contra h
+      push Not at h
+      exact hne (funext h)
+    obtain ⟨ν, hνM, hνn, hν⟩ := pure_power_sum_nonzero z M hex
+    let j : Fin n := ⟨ν - (M + 1), by omega⟩
+    have hj : M + 1 + j.val = ν := by dsimp [j]; omega
+    have hle : ‖∑ i, z i ^ ν‖ ≤ F z := by
+      dsimp [F]
+      rw [← hj]
+      exact single_le_sum (fun k _ => norm_nonneg (∑ i, z i ^ (M + 1 + k.val))) (mem_univ j)
+    exact (norm_pos_iff.mpr hν).trans_le hle
+  have hs : IsCompact (Metric.sphere (0 : Fin n → ℂ) 1) := isCompact_sphere _ _
+  have hne : (Metric.sphere (0 : Fin n → ℂ) 1).Nonempty :=
+    NormedSpace.sphere_nonempty.mpr (by norm_num : (0 : ℝ) ≤ 1)
+  obtain ⟨z₀, hz₀, hmin⟩ := hs.exists_isMinOn hne hF.continuousOn
+  have hz₀norm : ‖z₀‖ = 1 := by simpa using hz₀
+  have hε : 0 < F z₀ / (n : ℝ) := div_pos (hpos z₀ hz₀norm) (by exact_mod_cast hn)
+  refine ⟨F z₀ / n, hε, ?_⟩
+  intro z hz
+  obtain ⟨j, _, hj⟩ := exists_max_image (univ : Finset (Fin n))
+    (fun j => ‖∑ i, z i ^ (M + 1 + j.val)‖) univ_nonempty
+  refine ⟨M + 1 + j.val, by omega, by have := j.isLt; omega, ?_⟩
+  rw [div_le_iff₀ (by exact_mod_cast hn : (0 : ℝ) < n)]
+  have hlow : F z₀ ≤ F z := hmin (by simpa using hz)
+  have hu : F z ≤ (n : ℝ) * ‖∑ i, z i ^ (M + 1 + j.val)‖ := by
+    calc
+      F z ≤ ∑ _k : Fin n, ‖∑ i, z i ^ (M + 1 + j.val)‖ :=
+        sum_le_sum (fun k _ => hj k (mem_univ k))
+      _ = _ := by simp
+  nlinarith
+
+
+/-- A singleton selector has unbounded coefficients as two roots coalesce.
+This is a limitation of a fixed singleton interpolation route to Gallagher p.334. -/
+theorem singleton_selector_unbounded (B : ℝ) (hB : 0 ≤ B) :
+    ∃ r : ℝ, 0 < r ∧ r < 1 ∧
+      ∀ b₀ b₁ : ℂ, b₀ + b₁ = 1 → b₀ + (r : ℂ) * b₁ = 0 → B < ‖b₁‖ := by
+  let d : ℝ := 1 / (B + 2)
+  have hd : 0 < d := by dsimp [d]; positivity
+  have hd1 : d < 1 := by dsimp [d]; rw [div_lt_one (by linarith)]; linarith
+  have hdB : d * (B + 2) = 1 := by dsimp [d]; field_simp
+  refine ⟨1 - d, by linarith, by linarith, ?_⟩
+  intro b₀ b₁ h₀ h₁
+  have he : (d : ℂ) * b₁ = 1 := by
+    push_cast at h₁
+    linear_combination h₀ - h₁
+  have hn := congrArg norm he
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hd, norm_one] at hn
+  nlinarith
+
+
+/-- Quantitative two root auxiliary for the finite Turan step on Gallagher p.334.
+It handles cancellation for one unit root and a second root in the closed unit disc. -/
+theorem two_term_power_sum_bound (w : ℂ) (hw : ‖w‖ ≤ 1) (k : ℕ) :
+    1 / (4 * (k : ℝ) + 4) ≤ ‖1 + w ^ k‖ ∨
+      1 / (4 * (k : ℝ) + 4) ≤ ‖1 + w ^ (k + 1)‖ := by
+  let d : ℝ := 1 / (4 * (k : ℝ) + 4)
+  have hd : 0 < d := by dsimp [d]; positivity
+  have hd4 : d ≤ 1 / 4 := by dsimp [d]; apply one_div_le_one_div_of_le (by norm_num); linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ (k : ℝ))]
+  have hdc : (4 * (k : ℝ) + 4) * d = 1 := by dsimp [d]; field_simp
+  by_contra h
+  push Not at h
+  change ‖1 + w ^ k‖ < d ∧ ‖1 + w ^ (k + 1)‖ < d at h
+  have hwp : (1 / 2 : ℝ) ≤ ‖w ^ k‖ := by
+    have ht := norm_sub_le (1 + w ^ k) (w ^ k)
+    simp only [add_sub_cancel_right, norm_one] at ht
+    linarith [h.1]
+  have hdiff : ‖w ^ k‖ * ‖w - 1‖ < 2 * d := by
+    rw [← norm_mul]
+    have he : w ^ k * (w - 1) = (1 + w ^ (k + 1)) - (1 + w ^ k) := by
+      rw [pow_succ]; ring
+    rw [he]
+    exact (norm_sub_le _ _).trans_lt (by linarith [h.1, h.2])
+  have hnear : ‖1 - w‖ < 4 * d := by
+    rw [norm_sub_rev]
+    nlinarith [mul_le_mul_of_nonneg_right hwp (norm_nonneg (w - 1))]
+  have hsum : ‖∑ j ∈ range k, w ^ j‖ ≤ (k : ℝ) := by
+    calc
+      _ ≤ ∑ j ∈ range k, ‖w ^ j‖ := norm_sum_le _ _
+      _ ≤ ∑ _j ∈ range k, (1 : ℝ) := by
+        apply sum_le_sum
+        intro j _
+        rw [norm_pow]
+        exact pow_le_one₀ (norm_nonneg _) hw
+      _ = _ := by simp
+  have htel : ‖1 - w ^ k‖ ≤ (k : ℝ) * ‖1 - w‖ := by
+    rw [← geom_sum_mul_neg w k, norm_mul]
+    exact mul_le_mul_of_nonneg_right hsum (norm_nonneg _)
+  have ht := norm_add_le (1 + w ^ k) (1 - w ^ k)
+  have he : (1 + w ^ k) + (1 - w ^ k) = (2 : ℂ) := by ring
+  rw [he] at ht
+  norm_num only [Complex.norm_ofNat] at ht
+  have hh := mul_le_mul_of_nonneg_left hnear.le (Nat.cast_nonneg k)
+  nlinarith [h.1]
+
+
+/-- The two root Turan bound with the explicit constant used on Gallagher p.334.
+This finite case includes cancellation. The general finite interpolation leaf remains separate. -/
+theorem turan_power_sum_pair (z w : ℂ) (hz : 1 ≤ ‖z‖) (hw : ‖w‖ ≤ ‖z‖)
+    (M : ℕ) (hM : 2 ≤ M) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧ (1 / 50 : ℝ) ^ M ≤ ‖z ^ ν + w ^ ν‖ := by
+  have hz0 : z ≠ 0 := by intro he; norm_num [he] at hz
+  have hr : ‖w / z‖ ≤ 1 := by rw [norm_div, div_le_one (by linarith : 0 < ‖z‖)]; exact hw
+  have hp : ∀ m : ℕ, 1 ≤ m → 4 * (m : ℝ) + 8 ≤ (50 : ℝ) ^ m := by
+    intro m
+    induction m with
+    | zero => omega
+    | succ m ih =>
+      intro hm
+      by_cases hm0 : m = 0
+      · subst m; norm_num
+      · have hprev := ih (by omega)
+        rw [pow_succ]
+        push_cast
+        nlinarith [pow_nonneg (by norm_num : (0 : ℝ) ≤ 50) m]
+  have hsmall : (1 / 50 : ℝ) ^ M ≤ 1 / (4 * ((M + 1 : ℕ) : ℝ) + 4) := by
+    rw [div_pow, one_pow]
+    apply one_div_le_one_div_of_le (by positivity)
+    have := hp M (by omega)
+    push_cast
+    linarith
+  have hscale (ν : ℕ) : ‖1 + (w / z) ^ ν‖ ≤ ‖z ^ ν + w ^ ν‖ := by
+    have he : z ^ ν + w ^ ν = z ^ ν * (1 + (w / z) ^ ν) := by
+      rw [div_pow]
+      field_simp
+    rw [he, norm_mul, norm_pow]
+    exact le_mul_of_one_le_left (norm_nonneg _) (one_le_pow₀ hz)
+  rcases two_term_power_sum_bound (w / z) hr (M + 1) with h | h
+  · exact ⟨M + 1, by omega, by omega, hsmall.trans (h.trans (hscale _))⟩
+  · exact ⟨M + 2, by omega, by omega, hsmall.trans (h.trans (hscale _))⟩
+
+
+/-- LEAF. Finite interpolation construction in Turan's second power sum theorem.
+Gallagher 1970 p.334 after display 21. Vaughan author notes, Vol.3 pp.351 to 353,
+proof of Theorem K.3. Corollary K.5 and 16e less than 50 give this coefficient bound.
+No L-function or analytic number theory assumption occurs in this finite statement. -/
+theorem turan_interpolant {n M : ℕ} (hn : 0 < n) (hnM : n ≤ M)
+    (z : Fin n → ℂ) (hz : ∀ i, ‖z i‖ ≤ 1) (hunit : ∃ i, ‖z i‖ = 1) :
+    ∃ J : Finset (Fin n), J.Nonempty ∧ ∃ b : Fin n → ℂ,
+      (∀ i, z i ^ (M + 1) * (∑ j, b j * z i ^ j.val) = if i ∈ J then 1 else 0) ∧
+      (∑ j, ‖b j‖) ≤ (50 : ℝ) ^ M := by
+  sorry
+
+
+/-- Turan's finite lower bound used in Gallagher 1970 p.334.
+CONDITIONAL ON the finite interpolation construction turan_interpolant. -/
+theorem turan_power_sum_lower_bound_normalized {n M : ℕ} (hn : 0 < n) (hnM : n ≤ M)
+    (z : Fin n → ℂ) (hz : ∀ i, ‖z i‖ ≤ 1) (hunit : ∃ i, ‖z i‖ = 1) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧ (1 / 50 : ℝ) ^ M ≤ ‖∑ i, z i ^ ν‖ := by
+  classical
+  obtain ⟨J, hJ, b, hbi, hb⟩ := turan_interpolant hn hnM z hz hunit
+  have hv : (1 : ℝ) ≤ ‖∑ i, (1 : ℂ) * z i ^ (M + 1) * ∑ j, b j * z i ^ j.val‖ := by
+    simp_rw [one_mul, hbi]
+    simp only [sum_ite_mem, sum_const, nsmul_eq_mul, mul_one, Complex.norm_natCast]
+    simp only [univ_inter]
+    exact_mod_cast (Nat.succ_le_iff.mpr hJ.card_pos)
+  obtain ⟨j, hj⟩ := power_sum_lower_bound_of_interpolant hn z (fun _ => 1) b M
+    (by positivity : (0 : ℝ) < 50 ^ M) hb hv
+  refine ⟨M + 1 + j.val, by omega, by have := j.isLt; omega, ?_⟩
+  simpa only [one_mul, div_pow, one_pow] using hj
+
+
+/-- General pure power sum form of the Turan input on Gallagher 1970 p.334.
+CONDITIONAL ON turan_interpolant. Normalizing the largest root costs no lower bound. -/
+theorem turan_power_sum_lower_bound {n M : ℕ} (hn : 0 < n) (hnM : n ≤ M)
+    (z : Fin n → ℂ) (hz : ∃ i, 1 ≤ ‖z i‖) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧ (1 / 50 : ℝ) ^ M ≤ ‖∑ i, z i ^ ν‖ := by
+  classical
+  let : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  obtain ⟨i, _, hi⟩ := exists_max_image (univ : Finset (Fin n)) (fun j => ‖z j‖) univ_nonempty
+  let R : ℝ := ‖z i‖
+  have hR1 : 1 ≤ R := by
+    obtain ⟨j, hj⟩ := hz
+    exact hj.trans (hi j (mem_univ j))
+  have hR : 0 < R := by linarith
+  let w : Fin n → ℂ := fun j => z j / (R : ℂ)
+  have hwnorm (j : Fin n) : ‖w j‖ = ‖z j‖ / R := by
+    dsimp [w]
+    rw [norm_div, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hR]
+  have hw : ∀ j, ‖w j‖ ≤ 1 := by
+    intro j
+    rw [hwnorm, div_le_one hR]
+    exact hi j (mem_univ j)
+  have hwi : ∃ j, ‖w j‖ = 1 := ⟨i, by rw [hwnorm]; exact div_self hR.ne'⟩
+  obtain ⟨ν, hνM, hν2, hν⟩ := turan_power_sum_lower_bound_normalized hn hnM w hw hwi
+  refine ⟨ν, hνM, hν2, hν.trans ?_⟩
+  have hsum : (∑ j, w j ^ ν) = (∑ j, z j ^ ν) / (R : ℂ) ^ ν := by
+    dsimp [w]
+    simp_rw [div_pow]
+    exact (sum_div ..).symm
+  rw [hsum, norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hR]
+  have hpow : 1 ≤ R ^ ν := one_le_pow₀ hR1
+  rw [div_le_iff₀ (by positivity : 0 < R ^ ν)]
+  nlinarith [mul_le_mul_of_nonneg_left hpow (norm_nonneg (∑ j, z j ^ ν))]
+
+
+open FourierTransform
+open LeanLab.Linnik.U1394Fejer
+/-- Fourier inversion for the Fejer kernel used in Gallagher 1970 p.330. -/
+theorem integral_fejer_exp (x : ℝ) :
+    ∫ t : ℝ, LeanLab.PNTPort.LargeSieve.e (x * t) * (fej t : ℂ) = (tri x : ℂ) := by
+  have hF : 𝓕 (fun u => (tri u : ℂ)) = fun t => (fej t : ℂ) := by
+    funext t
+    rw [fourier_tri, fej_eq_G]
+  have hFi : Integrable (𝓕 (fun u => (tri u : ℂ))) := by
+    rw [hF]
+    exact integrable_fej.ofReal
+  have hi := integrable_tri.fourierInv_fourier_eq hFi
+    ((Complex.continuous_ofReal.comp continuous_tri).continuousAt (x := x))
+  rw [Real.fourierInv_eq', hF] at hi
+  convert hi using 1
+  apply integral_congr_ae
+  filter_upwards [] with t
+  simp only [Real.inner_apply, smul_eq_mul]
+  unfold LeanLab.PNTPort.LargeSieve.e
+  congr 2
+  push_cast
+  ring
+
+
+/-- The scaled Fourier kernel for Gallagher 1970 p.330 Lemma 1. -/
+theorem integral_fejer_exp_scaled (x : ℝ) {δ : ℝ} (hδ : 0 < δ) :
+    ∫ t : ℝ, LeanLab.PNTPort.LargeSieve.e (x * t) * (fej (δ * t) : ℂ) = (δ⁻¹ * tri (x / δ) : ℝ) := by
+  have heq : (fun t : ℝ => LeanLab.PNTPort.LargeSieve.e (x * t) * (fej (δ * t) : ℂ)) =
+      fun t => (fun u => LeanLab.PNTPort.LargeSieve.e ((x / δ) * u) * (fej u : ℂ)) (δ * t) := by
+    ext t
+    congr 2
+    field_simp
+  rw [heq, Measure.integral_comp_mul_left (fun u : ℝ => LeanLab.PNTPort.LargeSieve.e ((x / δ) * u) * (fej u : ℂ)) δ, integral_fejer_exp]
+  simp only [abs_of_pos (inv_pos.mpr hδ), Complex.real_smul, Complex.ofReal_mul]
+
+
+/-- Integrability of the phase times Fejer weight. -/
+theorem integrable_fejer_phase (x : ℝ) {δ : ℝ} (hδ : 0 < δ) :
+    Integrable (fun t : ℝ => LeanLab.PNTPort.LargeSieve.e (x * t) * (fej (δ * t) : ℂ)) := by
+  have hi := integrable_fej.comp_mul_left' hδ.ne'
+  apply hi.mono'
+  · apply Continuous.aestronglyMeasurable
+    apply Continuous.mul
+    · unfold LeanLab.PNTPort.LargeSieve.e; fun_prop
+    · exact Complex.continuous_ofReal.comp (continuous_fej.comp (continuous_const.mul continuous_id))
+  · filter_upwards [] with t
+    rw [norm_mul, norm_e, one_mul, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (fej_nonneg _)]
+
+
+/-- Exact smoothed Fourier energy for any finite real frequency family. -/
+theorem fejer_exponential_energy {ι : Type*} (s : Finset ι) (a : ι → ℂ) (freq : ι → ℝ)
+    {δ : ℝ} (hδ : 0 < δ) :
+    ((∫ t : ℝ, ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t) : ℝ) : ℂ) =
+      (δ⁻¹ : ℂ) * ∑ i ∈ s, ∑ j ∈ s,
+        a i * (starRingEnd ℂ) (a j) * (tri ((freq i - freq j) / δ) : ℂ) := by
+  have heq (t : ℝ) : ((‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t) : ℝ) : ℂ) =
+      ∑ i ∈ s, ∑ j ∈ s,
+        a i * (starRingEnd ℂ) (a j) * (LeanLab.PNTPort.LargeSieve.e ((freq i - freq j) * t) * (fej (δ * t) : ℂ)) := by
+    rw [Complex.ofReal_mul, Complex.ofReal_pow, ← Complex.mul_conj', map_sum,
+      sum_mul_sum, sum_mul]
+    apply sum_congr rfl
+    intro i _
+    rw [sum_mul]
+    apply sum_congr rfl
+    intro j _
+    rw [map_mul, ← LeanLab.PNTPort.LargeSieve.e_neg]
+    rw [show (freq i - freq j) * t = freq i * t + -(freq j * t) by ring, e_add]
+    ring
+  rw [← integral_complex_ofReal]
+  simp_rw [heq]
+  rw [integral_finsetSum _ (fun i _ => integrable_finsetSum _ (fun j _ =>
+    (integrable_fejer_phase (freq i - freq j) hδ).const_mul _)), mul_sum]
+  apply sum_congr rfl
+  intro i _
+  rw [integral_finsetSum _ (fun j _ => (integrable_fejer_phase (freq i - freq j) hδ).const_mul _),
+    mul_sum]
+  apply sum_congr rfl
+  intro j _
+  rw [integral_const_mul, integral_fejer_exp_scaled _ hδ]
+  push_cast
+  ring
+
+
+/-- The Fejer weight has an explicit positive lower bound near zero. -/
+theorem fejer_lower_half {u : ℝ} (hu : |u| ≤ 1 / 2) : 4 / Real.pi ^ 2 ≤ fej u := by
+  by_cases hz : u = 0
+  · subst u
+    have h0 : fej 0 = 1 := by simp [fej, LeanLab.PNTPort.LargeSieve.e]
+    rw [h0, div_le_one (by positivity : (0 : ℝ) < Real.pi ^ 2)]
+    nlinarith [Real.pi_gt_three]
+  · have hs := LeanLab.PNTPort.LargeSieve.two_abs_le_abs_sin hu
+    have hs2 := pow_le_pow_left₀ (by positivity : (0 : ℝ) ≤ 2 * |u|) hs 2
+    simp only [mul_pow, sq_abs] at hs2
+    rw [fej_ne hz, le_div_iff₀ (by positivity : (0 : ℝ) < (Real.pi * u) ^ 2)]
+    calc
+      4 / Real.pi ^ 2 * (Real.pi * u) ^ 2 = 4 * u ^ 2 := by field_simp
+      _ ≤ _ := by norm_num at hs2; exact hs2
+
+
+/-- Integrability of a finite Fourier energy with Fejer weight. -/
+theorem integrable_fejer_energy {ι : Type*} (s : Finset ι) (a : ι → ℂ)
+    (freq : ι → ℝ) {δ : ℝ} (hδ : 0 < δ) :
+    Integrable (fun t : ℝ => ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t)) := by
+  have hsum (t : ℝ) : ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ≤ ∑ i ∈ s, ‖a i‖ := by
+    calc
+      _ ≤ ∑ i ∈ s, ‖a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ := norm_sum_le _ _
+      _ = _ := by simp only [norm_mul, norm_e, mul_one]
+  have hi := (integrable_fej.comp_mul_left' hδ.ne').const_mul ((∑ i ∈ s, ‖a i‖) ^ 2)
+  apply hi.mono'
+  · apply Continuous.aestronglyMeasurable
+    apply Continuous.mul
+    · unfold LeanLab.PNTPort.LargeSieve.e; fun_prop
+    · exact continuous_fej.comp (continuous_const.mul continuous_id)
+  · filter_upwards [] with t
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (sq_nonneg _) (fej_nonneg _))]
+    exact mul_le_mul_of_nonneg_right
+      (pow_le_pow_left₀ (norm_nonneg _) (hsum t) 2) (fej_nonneg _)
+
+
+/-- Finite frequency form of the smoothing step in Gallagher 1970 p.330 Lemma 1.
+The triangle quadratic form is exactly the short interval energy kernel. -/
+theorem gallagher_frequency_smoothing {ι : Type*} (s : Finset ι) (a : ι → ℂ)
+    (freq : ι → ℝ) {δ T : ℝ} (hδ : 0 < δ) (hT : 0 ≤ T) (hδT : δ * T ≤ 1 / 2) :
+    (∫ t in (-T)..T, ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2) ≤
+      (Real.pi ^ 2 / (4 * δ)) *
+        (∑ i ∈ s, ∑ j ∈ s, a i * (starRingEnd ℂ) (a j) *
+          (tri ((freq i - freq j) / δ) : ℂ)).re := by
+  have hc : Continuous (fun t : ℝ => ∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)) := by
+    unfold LeanLab.PNTPort.LargeSieve.e; fun_prop
+  have hw : Continuous (fun t : ℝ => ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t)) :=
+    (hc.norm.pow 2).mul (continuous_fej.comp (continuous_const.mul continuous_id))
+  have hpt (t : ℝ) (ht : t ∈ Set.Icc (-T) T) :
+      ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 ≤
+        (Real.pi ^ 2 / 4) * (‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t)) := by
+    have ht' : |t| ≤ T := abs_le.mpr ht
+    have hnear : |δ * t| ≤ 1 / 2 := by
+      rw [abs_mul, abs_of_pos hδ]
+      exact (mul_le_mul_of_nonneg_left ht' hδ.le).trans hδT
+    have hlow := fejer_lower_half hnear
+    have hone : (1 : ℝ) ≤ (Real.pi ^ 2 / 4) * fej (δ * t) := by
+      calc
+        1 = (Real.pi ^ 2 / 4) * (4 / Real.pi ^ 2) := by field_simp
+        _ ≤ _ := mul_le_mul_of_nonneg_left hlow (by positivity)
+    have hh := mul_le_mul_of_nonneg_left hone (sq_nonneg ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖)
+    nlinarith
+  have he := congrArg Complex.re (fejer_exponential_energy s a freq hδ)
+  simp only [← Complex.ofReal_inv, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im, zero_mul, sub_zero] at he
+  calc
+    _ ≤ ∫ t in (-T)..T, (Real.pi ^ 2 / 4) *
+        (‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t)) :=
+      intervalIntegral.integral_mono_on (by linarith) ((hc.norm.pow 2).intervalIntegrable _ _)
+        ((continuous_const.mul hw).intervalIntegrable _ _) hpt
+    _ = (Real.pi ^ 2 / 4) * ∫ t in (-T)..T,
+        ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t) :=
+      intervalIntegral.integral_const_mul _ _
+    _ ≤ (Real.pi ^ 2 / 4) * ∫ t : ℝ,
+        ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2 * fej (δ * t) := by
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      rw [intervalIntegral.integral_of_le (by linarith : -T ≤ T)]
+      exact setIntegral_le_integral (integrable_fejer_energy s a freq hδ)
+        (Filter.Eventually.of_forall (fun t => mul_nonneg (sq_nonneg _) (fej_nonneg _)))
+    _ = _ := by rw [he]; ring
+
+
+/-- The real interval overlap kernel behind Gallagher 1970 p.330 Lemma 1. -/
+theorem interval_window_overlap (a b δ : ℝ) (_hδ : 0 ≤ δ) :
+    ∫ x : ℝ, (Set.Icc (a - δ) a).indicator (fun _ => (1 : ℝ)) x *
+      (Set.Icc (b - δ) b).indicator (fun _ => (1 : ℝ)) x = max 0 (δ - |a - b|) := by
+  have heq : (fun x : ℝ => (Set.Icc (a - δ) a).indicator (fun _ => (1 : ℝ)) x *
+      (Set.Icc (b - δ) b).indicator (fun _ => (1 : ℝ)) x) =
+      (Set.Icc (a - δ) a ∩ Set.Icc (b - δ) b).indicator (fun _ => 1) := by
+    ext x
+    simp only [← Set.inter_indicator_mul, one_mul]
+  rw [heq, integral_indicator_const 1 (measurableSet_Icc.inter measurableSet_Icc),
+    Set.Icc_inter_Icc, smul_eq_mul, mul_one, Real.volume_real_Icc]
+  rw [max_comm]
+  rcases le_total a b with hab | hba
+  · rw [min_eq_left hab, max_eq_right (by linarith : a - δ ≤ b - δ),
+      abs_of_nonpos (by linarith : a - b ≤ 0)]
+    congr 1; ring
+  · rw [min_eq_right hba, max_eq_left (by linarith : b - δ ≤ a - δ),
+      abs_of_nonneg (by linarith : 0 ≤ a - b)]
+    congr 1; ring
+
+
+/-- A finite short interval sum in the frequency variable. -/
+noncomputable def frequencyWindow {ι : Type*} (s : Finset ι) (a : ι → ℂ)
+    (freq : ι → ℝ) (δ x : ℝ) : ℂ :=
+  ∑ i ∈ s, (Set.Icc (freq i - δ) (freq i)).indicator (fun _ => a i) x
+
+
+/-- Exact overlap identity for the short interval energy in Gallagher p.330. -/
+theorem frequency_window_energy {ι : Type*} (s : Finset ι) (a : ι → ℂ)
+    (freq : ι → ℝ) {δ : ℝ} (hδ : 0 < δ) :
+    ((∫ x : ℝ, ‖frequencyWindow s a freq δ x‖ ^ 2 : ℝ) : ℂ) =
+      (δ : ℂ) * ∑ i ∈ s, ∑ j ∈ s, a i * (starRingEnd ℂ) (a j) *
+        (tri ((freq i - freq j) / δ) : ℂ) := by
+  let A : ι → Set ℝ := fun i => Set.Icc (freq i - δ) (freq i)
+  have hAi (i j : ι) : Integrable (fun x => (A i ∩ A j).indicator
+      (fun _ => a i * (starRingEnd ℂ) (a j)) x) := by
+    apply IntegrableOn.integrable_indicator _ (measurableSet_Icc.inter measurableSet_Icc)
+    exact (continuous_const.integrableOn_Icc).mono_set Set.inter_subset_left
+  have hpt (x : ℝ) : ((‖frequencyWindow s a freq δ x‖ ^ 2 : ℝ) : ℂ) =
+      ∑ i ∈ s, ∑ j ∈ s, (A i ∩ A j).indicator
+        (fun _ => a i * (starRingEnd ℂ) (a j)) x := by
+    unfold frequencyWindow
+    rw [Complex.ofReal_pow, ← Complex.mul_conj', map_sum, sum_mul_sum]
+    apply sum_congr rfl
+    intro i _
+    apply sum_congr rfl
+    intro j _
+    change (A i).indicator (fun _ => a i) x *
+      (starRingEnd ℂ) ((A j).indicator (fun _ => a j) x) = _
+    by_cases hi : x ∈ A i <;> by_cases hj : x ∈ A j <;>
+      simp [hi, hj, Set.indicator_of_mem, Set.indicator_of_notMem]
+  have hover (i j : ι) : volume.real (A i ∩ A j) =
+      δ * tri ((freq i - freq j) / δ) := by
+    have hi := interval_window_overlap (freq i) (freq j) δ hδ.le
+    have he : (fun x : ℝ => (A i).indicator (fun _ => (1 : ℝ)) x *
+        (A j).indicator (fun _ => (1 : ℝ)) x) =
+        (A i ∩ A j).indicator (fun _ => (1 : ℝ)) := by
+      ext x
+      simp only [← Set.inter_indicator_mul, one_mul]
+    change (∫ x : ℝ, (A i).indicator (fun _ => (1 : ℝ)) x *
+      (A j).indicator (fun _ => (1 : ℝ)) x) = _ at hi
+    rw [he, integral_indicator_const 1 (measurableSet_Icc.inter measurableSet_Icc),
+      smul_eq_mul, mul_one] at hi
+    rw [hi]
+    unfold tri
+    rw [abs_div, abs_of_pos hδ]
+    by_cases h : |freq i - freq j| ≤ δ
+    · rw [max_eq_right (by linarith), max_eq_right (by
+        rw [sub_nonneg, div_le_one hδ]; exact h)]
+      field_simp
+    · have hh : δ < |freq i - freq j| := lt_of_not_ge h
+      rw [max_eq_left (by linarith), max_eq_left (by
+        rw [sub_nonpos, le_div_iff₀ hδ]; linarith)]
+      ring
+  rw [← integral_complex_ofReal]
+  simp_rw [hpt]
+  rw [integral_finsetSum _ (fun i _ => integrable_finsetSum _ (fun j _ => hAi i j)), mul_sum]
+  apply sum_congr rfl
+  intro i _
+  rw [integral_finsetSum _ (fun j _ => hAi i j), mul_sum]
+  apply sum_congr rfl
+  intro j _
+  rw [integral_indicator_const _ (measurableSet_Icc.inter measurableSet_Icc), hover]
+  simp only [Complex.real_smul, Complex.ofReal_mul]
+  ring
+
+
+/-- Gallagher 1970 p.330 Lemma 1 for a finite family, with explicit constant.
+Closed frequency windows change only finitely many endpoints in the outer integral. -/
+theorem gallagher_window_smoothing {ι : Type*} (s : Finset ι) (a : ι → ℂ)
+    (freq : ι → ℝ) {δ T : ℝ} (hδ : 0 < δ) (hT : 0 ≤ T) (hδT : δ * T ≤ 1 / 2) :
+    (∫ t in (-T)..T, ‖∑ i ∈ s, a i * LeanLab.PNTPort.LargeSieve.e (freq i * t)‖ ^ 2) ≤
+      (Real.pi ^ 2 / (4 * δ ^ 2)) * ∫ x : ℝ, ‖frequencyWindow s a freq δ x‖ ^ 2 := by
+  have he := congrArg Complex.re (frequency_window_energy s a freq hδ)
+  simp only [Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im, zero_mul, sub_zero] at he
+  have hh := gallagher_frequency_smoothing s a freq hδ hT hδT
+  apply hh.trans_eq
+  rw [he]
+  field_simp
+
+
+/-- Dropping the totient weights in Gallagher 1970 p.332 Lemma 3. -/
+theorem large_sieve_unweighted
+    (a : ℕ → ℂ) (M L Q : ℕ) :
+    (∑ q ∈ Finset.Icc 1 Q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖∑ n ∈ Ioc M (M + L), a n * χ n‖ ^ 2) ≤
+      ((L : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Ioc M (M + L), ‖a n‖ ^ 2 := by
+  apply le_trans _ (large_sieve a M L Q)
+  apply sum_le_sum
+  intro q hq
+  have hq0 : 0 < q := (mem_Icc.mp hq).1
+  have hφ0 : (0 : ℝ) < q.totient := by exact_mod_cast Nat.totient_pos.mpr hq0
+  have hφq : (q.totient : ℝ) ≤ q := by exact_mod_cast Nat.totient_le q
+  have hweight : (1 : ℝ) ≤ q / (q.totient : ℝ) := (le_div_iff₀ hφ0).mpr (by simpa using hφq)
+  exact le_mul_of_one_le_left (sum_nonneg (fun _ _ => sq_nonneg _)) hweight
+
+
+/-- The finite sieve applies to any subset of an integer interval. -/
+theorem large_sieve_finset
+    (s : Finset ℕ) (a : ℕ → ℂ) (M L Q : ℕ) (hs : s ⊆ Ioc M (M + L)) :
+    (∑ q ∈ Finset.Icc 1 Q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖∑ n ∈ s, a n * χ n‖ ^ 2) ≤
+      ((L : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ s, ‖a n‖ ^ 2 := by
+  classical
+  let b : ℕ → ℂ := fun n => if n ∈ s then a n else 0
+  have hset : (Finset.Ioc M (M + L)).filter (fun n => n ∈ s) = s := by
+    ext n
+    simp only [mem_filter]
+    exact and_iff_right_of_imp (fun hn => hs hn)
+  have hsum {q : ℕ} (χ : DirichletCharacter ℂ q) :
+      (∑ n ∈ Ioc M (M + L), b n * χ n) = ∑ n ∈ s, a n * χ n := by
+    simp only [b, ite_mul, zero_mul, ← sum_filter, hset]
+  have henergy : (∑ n ∈ Ioc M (M + L), ‖b n‖ ^ 2) = ∑ n ∈ s, ‖a n‖ ^ 2 := by
+    simp only [b, apply_ite norm, norm_zero, ite_pow, zero_pow (by norm_num : 2 ≠ 0),
+      ← sum_filter, hset]
+  simpa only [hsum, henergy] using large_sieve_unweighted b M L Q
+
+
+/-- Real endpoints cost at most two extra integers in the finite sieve. -/
+theorem large_sieve_real_interval
+    (s : Finset ℕ) (a : ℕ → ℂ) (Q : ℕ) {x y : ℝ}
+    (hx : 0 ≤ x) (hxy : x ≤ y)
+    (hs : ∀ n ∈ s, 1 ≤ n ∧ x ≤ n ∧ (n : ℝ) ≤ y) :
+    (∑ q ∈ Finset.Icc 1 Q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖∑ n ∈ s, a n * χ n‖ ^ 2) ≤
+      (y - x + 2 + (Q : ℝ) ^ 2) * ∑ n ∈ s, ‖a n‖ ^ 2 := by
+  let M := ⌊x⌋₊ - 1
+  let U := ⌊y⌋₊
+  have hMU : M ≤ U := (Nat.sub_le _ _).trans (Nat.floor_mono hxy)
+  have hs' : s ⊆ Ioc M (M + (U - M)) := by
+    intro n hn
+    have hn1 := (hs n hn).1
+    have hxn : ⌊x⌋₊ ≤ n := by
+      have := (Nat.floor_le hx).trans (hs n hn).2.1
+      exact_mod_cast this
+    have hny : n ≤ U := Nat.le_floor (hs n hn).2.2
+    rw [Finset.mem_Ioc, Nat.add_sub_of_le hMU]
+    dsimp [M]
+    omega
+  have hMlow : x - 2 ≤ (M : ℝ) := by
+    have hfloor := Nat.lt_floor_add_one x
+    have hnat : ⌊x⌋₊ ≤ M + 1 := by dsimp [M]; omega
+    have hnatR : (⌊x⌋₊ : ℝ) ≤ (M : ℝ) + 1 := by exact_mod_cast hnat
+    linarith
+  have hUL : ((U - M : ℕ) : ℝ) ≤ y - x + 2 := by
+    rw [Nat.cast_sub hMU]
+    have hu : (U : ℝ) ≤ y := Nat.floor_le (hx.trans hxy)
+    linarith
+  apply (large_sieve_finset s a M (U - M) Q hs').trans
+  apply mul_le_mul_of_nonneg_right _ (sum_nonneg (fun _ _ => sq_nonneg _))
+  linarith
+
+
+/-- Finite Dirichlet polynomial for Gallagher 1970 p.331 display 11. -/
+noncomputable def characterPolynomial {q : ℕ} (χ : DirichletCharacter ℂ q)
+    (a : ℕ → ℂ) (N : ℕ) (t : ℝ) : ℂ :=
+  ∑ n ∈ Finset.Icc 1 N, a n * χ n * Complex.exp (-((Real.log n * t : ℝ) : ℂ) * Complex.I)
+
+
+/-- Primitive character mean square for Gallagher 1970 p.332 display 15. -/
+noncomputable def hybridEnergy (Q N : ℕ) (a : ℕ → ℂ) (T : ℝ) : ℝ :=
+  ∑ q ∈ Finset.Icc 1 Q,
+    ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+      ∫ t in (-T)..T, ‖characterPolynomial χ a N t‖ ^ 2
+
+
+/-- The prime detector sum S of Gallagher 1970 p.333. -/
+noncomputable def primeDetector {q : ℕ} (χ : DirichletCharacter ℂ q)
+    (x y v : ℝ) : ℂ :=
+  ∑ p ∈ (Finset.Ioc ⌊x⌋₊ ⌊y⌋₊).filter Nat.Prime,
+    (Real.log p / (p : ℝ) : ℂ) * χ p *
+      Complex.exp (-((Real.log p * v : ℝ) : ℂ) * Complex.I)
+
+
+/-- Integrability of the finite frequency window energy. -/
+theorem integrable_frequencyWindow_energy {ι : Type*} (s : Finset ι) (a : ι → ℂ)
+    (freq : ι → ℝ) (δ : ℝ) :
+    Integrable (fun x : ℝ => ‖frequencyWindow s a freq δ x‖ ^ 2) := by
+  have hi : Integrable (frequencyWindow s a freq δ) := by
+    unfold frequencyWindow
+    apply integrable_finsetSum
+    intro i _
+    exact continuous_const.integrableOn_Icc.integrable_indicator measurableSet_Icc
+  have hb (x : ℝ) : ‖frequencyWindow s a freq δ x‖ ≤ ∑ i ∈ s, ‖a i‖ := by
+    unfold frequencyWindow
+    apply (norm_sum_le _ _).trans
+    apply sum_le_sum
+    intro i _
+    by_cases hx : x ∈ Set.Icc (freq i - δ) (freq i)
+    · simp [hx]
+    · simp [hx]
+  apply (hi.norm.const_mul (∑ i ∈ s, ‖a i‖)).mono'
+  · exact hi.aestronglyMeasurable.norm.pow 2
+  · filter_upwards [] with x
+    rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    have hh := mul_le_mul_of_nonneg_right (hb x) (norm_nonneg (frequencyWindow s a freq δ x))
+    nlinarith
+
+
+/-- The finite real interval sieve controls every logarithmic window. -/
+theorem mellin_window_sieve
+    (a : ℕ → ℂ) (Q N : ℕ) {δ : ℝ} (hδ : 0 ≤ δ) (u : ℝ) :
+    (∑ q ∈ Finset.Icc 1 Q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u‖ ^ 2) ≤
+      (Real.exp (u + δ) - Real.exp u + 2 + (Q : ℝ) ^ 2) *
+        ∑ n ∈ Finset.Icc 1 N, (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u := by
+  classical
+  let S : Finset ℕ := (Finset.Icc 1 N).filter (fun n => u ∈ Set.Icc (Real.log n - δ) (Real.log n))
+  have heq {q : ℕ} (χ : DirichletCharacter ℂ q) :
+      frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u =
+      ∑ n ∈ S, a n * χ n := by
+    simp only [frequencyWindow, S, sum_filter, Set.indicator]
+  have hnorm : (∑ n ∈ S, ‖a n‖ ^ 2) =
+      ∑ n ∈ Finset.Icc 1 N, (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u := by
+    simp only [S, sum_filter, Set.indicator]
+  have hs : ∀ n ∈ S, 1 ≤ n ∧ Real.exp u ≤ n ∧ (n : ℝ) ≤ Real.exp (u + δ) := by
+    intro n hn
+    obtain ⟨hnN, hnu⟩ := mem_filter.mp hn
+    have hn1 := (mem_Icc.mp hnN).1
+    have hnpos : (0 : ℝ) < n := by exact_mod_cast hn1
+    refine ⟨hn1, ?_, ?_⟩
+    · calc
+        Real.exp u ≤ Real.exp (Real.log n) := Real.exp_le_exp.mpr hnu.2
+        _ = _ := Real.exp_log hnpos
+    · calc
+        (n : ℝ) = Real.exp (Real.log n) := (Real.exp_log hnpos).symm
+        _ ≤ Real.exp (u + δ) := Real.exp_le_exp.mpr (by linarith [hnu.1])
+  simpa only [heq, hnorm] using large_sieve_real_interval S a Q
+    (Real.exp_pos u).le (Real.exp_le_exp.mpr (by linarith)) hs
+
+
+/-- The scalar logarithmic window integral in the proof of Gallagher Theorem 3. -/
+theorem integral_mellin_window_weight (l B δ : ℝ) (hδ : 0 ≤ δ) :
+    ∫ u : ℝ, (Real.exp (u + δ) - Real.exp u + 2 + B) *
+      (Set.Icc (l - δ) l).indicator (fun _ => (1 : ℝ)) u =
+      δ * (B + 2) + (Real.exp δ - 1) * (Real.exp l - Real.exp (l - δ)) := by
+  have he : (fun u : ℝ => (Real.exp (u + δ) - Real.exp u + 2 + B) *
+      (Set.Icc (l - δ) l).indicator (fun _ => (1 : ℝ)) u) =
+      (Set.Icc (l - δ) l).indicator (fun u => Real.exp (u + δ) - Real.exp u + 2 + B) := by
+    ext u
+    by_cases hu : u ∈ Set.Icc (l - δ) l <;> simp [hu]
+  rw [he, integral_indicator measurableSet_Icc, integral_Icc_eq_integral_Ioc,
+    ← intervalIntegral.integral_of_le (by linarith : l - δ ≤ l)]
+  have hd (u : ℝ) : HasDerivAt
+      (fun u => (Real.exp δ - 1) * Real.exp u + (B + 2) * u)
+      (Real.exp (u + δ) - Real.exp u + 2 + B) u := by
+    convert ((Real.hasDerivAt_exp u).const_mul (Real.exp δ - 1)).add
+      ((hasDerivAt_id u).const_mul (B + 2)) using 1 <;> first | rfl | (rw [Real.exp_add]; ring)
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _ => hd u)
+    ((by fun_prop : Continuous (fun u : ℝ => Real.exp (u + δ) - Real.exp u + 2 + B)).intervalIntegrable _ _)]
+  ring
+
+
+/-- The scalar window coefficient has the hybrid scale, not the pointwise T loss. -/
+theorem mellin_window_weight_bound (l B : ℝ) {δ : ℝ} (hδ : 0 ≤ δ) (hδ1 : δ ≤ 1) :
+    ∫ u : ℝ, (Real.exp (u + δ) - Real.exp u + 2 + B) *
+      (Set.Icc (l - δ) l).indicator (fun _ => (1 : ℝ)) u ≤
+      δ * (B + 2) + 2 * δ ^ 2 * Real.exp l := by
+  rw [integral_mellin_window_weight l B δ hδ]
+  have habs : |δ| ≤ 1 := by rw [abs_of_nonneg hδ]; exact hδ1
+  have h₁ : Real.exp δ - 1 ≤ 2 * δ := by
+    have := Real.abs_exp_sub_one_le habs
+    rw [abs_of_nonneg hδ] at this
+    exact (le_abs_self _).trans this
+  have h₂ : 1 - Real.exp (-δ) ≤ δ := by linarith [Real.add_one_le_exp (-δ)]
+  have h₂0 : 0 ≤ 1 - Real.exp (-δ) := by
+    have := Real.exp_le_one_iff.mpr (neg_nonpos.mpr hδ)
+    linarith
+  have hp := mul_le_mul h₁ h₂ h₂0 (by positivity : (0 : ℝ) ≤ 2 * δ)
+  have he : Real.exp l - Real.exp (l - δ) = Real.exp l * (1 - Real.exp (-δ)) := by
+    rw [Real.exp_sub, Real.exp_neg]
+    ring
+  rw [he]
+  have hpe := mul_le_mul_of_nonneg_right hp (Real.exp_pos l).le
+  nlinarith
+
+
+/-- Integrating the logarithmic windows gives Q squared delta plus n delta squared. -/
+theorem integrated_mellin_window_sieve
+    (a : ℕ → ℂ) (Q N : ℕ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1) :
+    (∑ q ∈ Finset.Icc 1 Q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ∫ u : ℝ, ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n)
+          (fun n => Real.log n) δ u‖ ^ 2) ≤
+      ∑ n ∈ Finset.Icc 1 N, (δ * ((Q : ℝ) ^ 2 + 2) + 2 * δ ^ 2 * n) * ‖a n‖ ^ 2 := by
+  classical
+  let K : ℝ → ℝ := fun u => Real.exp (u + δ) - Real.exp u + 2 + (Q : ℝ) ^ 2
+  let W {q : ℕ} (χ : DirichletCharacter ℂ q) (u : ℝ) :=
+    ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u‖ ^ 2
+  have hiW {q : ℕ} (χ : DirichletCharacter ℂ q) : Integrable (W χ) :=
+    integrable_frequencyWindow_energy _ _ _ _
+  have hiR (n : ℕ) : Integrable (fun u => K u *
+      (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u) := by
+    have heq : (fun u => K u * (Set.Icc (Real.log n - δ) (Real.log n)).indicator
+        (fun _ => ‖a n‖ ^ 2) u) =
+        (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun u => K u * ‖a n‖ ^ 2) := by
+      ext u
+      by_cases hu : u ∈ Set.Icc (Real.log n - δ) (Real.log n) <;> simp [hu]
+    rw [heq]
+    exact (by dsimp [K]; fun_prop : Continuous (fun u => K u * ‖a n‖ ^ 2)).integrableOn_Icc.integrable_indicator measurableSet_Icc
+  have heq (q : ℕ) :
+      (∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), ∫ u, W χ u) =
+      ∫ u, ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), W χ u :=
+    (integral_finsetSum _ (fun χ _ => hiW χ)).symm
+  change (∑ q ∈ Finset.Icc 1 Q,
+    ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), ∫ u, W χ u) ≤ _
+  simp_rw [heq]
+  rw [← integral_finsetSum _ (fun q _ => integrable_finsetSum _ (fun χ _ => hiW χ))]
+  calc
+    _ ≤ ∫ u, ∑ n ∈ Finset.Icc 1 N, K u *
+        (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u := by
+      apply integral_mono
+        (integrable_finsetSum _ (fun q _ => integrable_finsetSum _ (fun χ _ => hiW χ)))
+        (integrable_finsetSum _ (fun n _ => hiR n))
+      intro u
+      dsimp only [W, K]
+      rw [← mul_sum]
+      exact mellin_window_sieve a Q N hδ.le u
+    _ = ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 *
+        ∫ u : ℝ, K u * (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => (1 : ℝ)) u := by
+      rw [integral_finsetSum _ (fun n _ => hiR n)]
+      apply sum_congr rfl
+      intro n _
+      rw [← integral_const_mul]
+      apply integral_congr_ae
+      filter_upwards [] with u
+      by_cases hu : u ∈ Set.Icc (Real.log n - δ) (Real.log n)
+      · simp [hu]; ring
+      · simp [hu]
+    _ ≤ _ := by
+      apply sum_le_sum
+      intro n hn
+      have hnpos : (0 : ℝ) < n := by exact_mod_cast (mem_Icc.mp hn).1
+      have hb := mellin_window_weight_bound (Real.log n) ((Q : ℝ) ^ 2) hδ.le hδ1
+      rw [Real.exp_log hnpos] at hb
+      dsimp [K]
+      have hh := mul_le_mul_of_nonneg_left hb (sq_nonneg ‖a n‖)
+      nlinarith
+
+
+/-- Rescaling the Dirichlet polynomial height by two pi. -/
+theorem characterPolynomial_time_integral {q : ℕ} (χ : DirichletCharacter ℂ q)
+    (a : ℕ → ℂ) (N : ℕ) (T : ℝ) :
+    (∫ v in (-T)..T, ‖characterPolynomial χ a N v‖ ^ 2) =
+      (2 * Real.pi) * ∫ t in (-(T / (2 * Real.pi)))..(T / (2 * Real.pi)),
+        ‖∑ n ∈ Finset.Icc 1 N, (a n * χ n) * LeanLab.PNTPort.LargeSieve.e (Real.log n * t)‖ ^ 2 := by
+  let c : ℝ := -1 / (2 * Real.pi)
+  have hc : c ≠ 0 := by dsimp [c]; positivity
+  let P : ℝ → ℝ := fun t => ‖∑ n ∈ Finset.Icc 1 N, (a n * χ n) * LeanLab.PNTPort.LargeSieve.e (Real.log n * t)‖ ^ 2
+  have heq (v : ℝ) : ‖characterPolynomial χ a N v‖ ^ 2 = P (c * v) := by
+    congr 2
+    unfold characterPolynomial
+    apply sum_congr rfl
+    intro n _
+    congr 1
+    unfold LeanLab.PNTPort.LargeSieve.e
+    congr 1
+    dsimp [c]
+    push_cast
+    field_simp
+  simp_rw [heq]
+  rw [intervalIntegral.integral_comp_mul_left P hc]
+  have h₁ : c * (-T) = T / (2 * Real.pi) := by dsimp [c]; ring
+  have h₂ : c * T = -(T / (2 * Real.pi)) := by dsimp [c]; ring
+  rw [h₁, h₂, intervalIntegral.integral_symm]
+  dsimp [c, P]
+  simp only [inv_div, inv_neg, inv_one, smul_eq_mul]
+  ring
+
+
+/-- Gallagher Theorem 3 from the sharp finite multiplicative large sieve. -/
+theorem hybrid_mean_value_bound
+    (Q N : ℕ) (hQ : 1 ≤ Q) (a : ℕ → ℂ) {T : ℝ} (hT : 1 ≤ T) :
+    hybridEnergy Q N a T ≤ (2 * Real.pi ^ 3) *
+      ∑ n ∈ Finset.Icc 1 N, ((Q : ℝ) ^ 2 * T + n) * ‖a n‖ ^ 2 := by
+  classical
+  let δ : ℝ := 1 / T
+  have hTpos : 0 < T := by linarith
+  have hδ : 0 < δ := by dsimp [δ]; positivity
+  have hδ1 : δ ≤ 1 := by dsimp [δ]; rw [div_le_one hTpos]; exact hT
+  let C : ℝ := Real.pi ^ 3 / (2 * δ ^ 2)
+  have hC : 0 ≤ C := by dsimp [C]; positivity
+  let W {q : ℕ} (χ : DirichletCharacter ℂ q) :=
+    ∫ u : ℝ, ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u‖ ^ 2
+  have htime {q : ℕ} (χ : DirichletCharacter ℂ q) :
+      (∫ v in (-T)..T, ‖characterPolynomial χ a N v‖ ^ 2) ≤ C * W χ := by
+    rw [characterPolynomial_time_integral]
+    have hnear : δ * (T / (2 * Real.pi)) ≤ 1 / 2 := by
+      dsimp [δ]
+      have he : (1 / T) * (T / (2 * Real.pi)) = 1 / (2 * Real.pi) := by field_simp
+      rw [he, div_le_div_iff₀ (by positivity) (by norm_num)]
+      linarith [Real.pi_gt_three]
+    have hh := gallagher_window_smoothing (Finset.Icc 1 N) (fun n => a n * χ n)
+      (fun n => Real.log n) hδ (div_nonneg hTpos.le (by positivity)) hnear
+    apply (mul_le_mul_of_nonneg_left hh (by positivity : (0 : ℝ) ≤ 2 * Real.pi)).trans_eq
+    dsimp [C, W]
+    ring
+  unfold hybridEnergy
+  calc
+    _ ≤ ∑ q ∈ Finset.Icc 1 Q,
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), C * W χ :=
+      sum_le_sum (fun q _ => sum_le_sum (fun χ _ => htime χ))
+    _ = C * (∑ q ∈ Finset.Icc 1 Q,
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), W χ) := by
+      simp only [mul_sum]
+    _ ≤ C * ∑ n ∈ Finset.Icc 1 N, (δ * ((Q : ℝ) ^ 2 + 2) + 2 * δ ^ 2 * n) * ‖a n‖ ^ 2 :=
+      mul_le_mul_of_nonneg_left (integrated_mellin_window_sieve a Q N hδ hδ1) hC
+    _ ≤ _ := by
+      rw [mul_sum, mul_sum]
+      apply sum_le_sum
+      intro n _
+      rw [← mul_assoc, ← mul_assoc]
+      apply mul_le_mul_of_nonneg_right _ (sq_nonneg _)
+      have hQr : (1 : ℝ) ≤ Q := by exact_mod_cast hQ
+      have hQsq : (1 : ℝ) ≤ (Q : ℝ) ^ 2 := by nlinarith
+      have he : C * (δ * ((Q : ℝ) ^ 2 + 2) + 2 * δ ^ 2 * n) =
+          (Real.pi ^ 3 / 2) * T * ((Q : ℝ) ^ 2 + 2) + Real.pi ^ 3 * n := by
+        dsimp [C, δ]
+        field_simp
+      rw [he]
+      have hmult := mul_le_mul_of_nonneg_left
+        (show (Q : ℝ) ^ 2 + 2 ≤ 3 * (Q : ℝ) ^ 2 by linarith)
+        (show 0 ≤ (Real.pi ^ 3 / 2) * T by positivity)
+      have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+      have hrest : 0 ≤ Real.pi ^ 3 * ((Q : ℝ) ^ 2 * T) := by positivity
+      have hrest2 : 0 ≤ Real.pi ^ 3 * n := by positivity
+      nlinarith
+
+
+/-- Continuity in the height variable does not require an analytic number theory input. -/
+theorem continuous_characterPolynomial {q : ℕ} (χ : DirichletCharacter ℂ q)
+    (a : ℕ → ℂ) (N : ℕ) : Continuous (characterPolynomial χ a N) := by
+  unfold characterPolynomial
+  fun_prop
+
+
+/-- Nonnegativity of the hybrid energy for nonnegative time. -/
+theorem hybridEnergy_nonneg (Q N : ℕ) (a : ℕ → ℂ) {T : ℝ} (hT : 0 ≤ T) :
+    0 ≤ hybridEnergy Q N a T := by
+  unfold hybridEnergy
+  apply sum_nonneg
+  intro q _
+  apply sum_nonneg
+  intro χ _
+  exact intervalIntegral.integral_nonneg (by linarith) (fun t _ => sq_nonneg _)
+
+
+/-- Unit modulus of the height twist. -/
+theorem norm_mellin_twist (n : ℕ) (t : ℝ) :
+    ‖Complex.exp (-((Real.log n * t : ℝ) : ℂ) * Complex.I)‖ = 1 := by
+  rw [Complex.norm_exp]
+  simp only [Complex.mul_re, Complex.neg_re, Complex.neg_im, Complex.ofReal_re, Complex.ofReal_im,
+    Complex.I_re, Complex.I_im, neg_zero, mul_zero, zero_mul, sub_zero, Real.exp_zero]
+
+
+/-- Integrating a fixed pointwise family bound gives the length of the time interval. -/
+theorem hybridEnergy_le_of_pointwise (Q N : ℕ) (a : ℕ → ℂ) {T B : ℝ}
+    (hT : 0 ≤ T)
+    (hbound : ∀ t : ℝ, -T ≤ t → t ≤ T →
+      ∑ q ∈ Icc 1 Q,
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖characterPolynomial χ a N t‖ ^ 2 ≤ B) :
+    hybridEnergy Q N a T ≤ 2 * T * B := by
+  classical
+  have hc {q : ℕ} (χ : DirichletCharacter ℂ q) :
+      Continuous (fun t => ‖characterPolynomial χ a N t‖ ^ 2) :=
+    (continuous_characterPolynomial χ a N).norm.pow 2
+  have heq (q : ℕ) :
+      (∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ∫ t in (-T)..T, ‖characterPolynomial χ a N t‖ ^ 2) =
+      ∫ t in (-T)..T,
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖characterPolynomial χ a N t‖ ^ 2 :=
+    (intervalIntegral.integral_finsetSum (fun χ _ => (hc χ).intervalIntegrable _ _)).symm
+  unfold hybridEnergy
+  simp_rw [heq]
+  rw [← intervalIntegral.integral_finsetSum (fun q _ =>
+    (continuous_finsetSum _ (fun χ _ => hc χ)).intervalIntegrable _ _)]
+  calc
+    _ ≤ ∫ t in (-T)..T, B := intervalIntegral.integral_mono_on (by linarith)
+      ((continuous_finsetSum _ (fun q _ =>
+        continuous_finsetSum _ (fun χ _ => hc χ))).intervalIntegrable _ _)
+      (continuous_const.intervalIntegrable _ _) (fun t ht => hbound t ht.1 ht.2)
+    _ = _ := by simp only [intervalIntegral.integral_const, smul_eq_mul]; ring
+
+
+/-- Pointwise application of the already proved multiplicative large sieve. -/
+theorem characterPolynomial_pointwise_sieve
+    (Q N : ℕ) (a : ℕ → ℂ) (t : ℝ) :
+    (∑ q ∈ Icc 1 Q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖characterPolynomial χ a N t‖ ^ 2) ≤
+      ((N : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Icc 1 N, ‖a n‖ ^ 2 := by
+  classical
+  let b : ℕ → ℂ := fun n => a n * Complex.exp (-((Real.log n * t : ℝ) : ℂ) * Complex.I)
+  have hI : Ioc 0 (0 + N) = Icc 1 N := by ext n; simp; omega
+  have heq {q : ℕ} (χ : DirichletCharacter ℂ q) :
+      characterPolynomial χ a N t = ∑ n ∈ Ioc 0 (0 + N), b n * χ n := by
+    rw [hI]
+    unfold characterPolynomial
+    apply sum_congr rfl
+    intro n _
+    dsimp [b]
+    ring
+  have hnorm (n : ℕ) : ‖b n‖ = ‖a n‖ := by
+    dsimp [b]
+    rw [norm_mul, norm_mellin_twist, mul_one]
+  calc
+    _ ≤ ∑ q ∈ Icc 1 Q, ((q : ℝ) / q.totient) *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖characterPolynomial χ a N t‖ ^ 2 := by
+      apply sum_le_sum
+      intro q hq
+      have hq0 : 0 < q := (mem_Icc.mp hq).1
+      have hφ0 : (0 : ℝ) < q.totient := by exact_mod_cast Nat.totient_pos.mpr hq0
+      have hφq : (q.totient : ℝ) ≤ q := by exact_mod_cast Nat.totient_le q
+      have hweight : (1 : ℝ) ≤ q / (q.totient : ℝ) := (le_div_iff₀ hφ0).mpr (by simpa using hφq)
+      exact le_mul_of_one_le_left (sum_nonneg (fun _ _ => sq_nonneg _)) hweight
+    _ = _ := by simp_rw [heq]
+    _ ≤ _ := large_sieve b 0 N Q
+    _ = _ := by rw [hI]; simp_rw [hnorm]
+
+
+/-- Direct time integration of the pointwise sieve, with its full T loss visible. -/
+theorem hybridEnergy_pointwise_bound
+    (Q N : ℕ) (a : ℕ → ℂ) {T : ℝ} (hT : 0 ≤ T) :
+    hybridEnergy Q N a T ≤
+      2 * T * ((N : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Icc 1 N, ‖a n‖ ^ 2 := by
+  have hh := hybridEnergy_le_of_pointwise Q N a hT
+    (fun t _ _ => characterPolynomial_pointwise_sieve Q N a t)
+  exact hh.trans_eq (by ring)
+
+
+/-- The full hybrid coefficient follows for support length at most Q squared. -/
+theorem hybridEnergy_short_support
+    (Q N : ℕ) (a : ℕ → ℂ) (hN : N ≤ Q ^ 2) {T : ℝ} (hT : 0 ≤ T) :
+    hybridEnergy Q N a T ≤
+      4 * ∑ n ∈ Icc 1 N, ((Q : ℝ) ^ 2 * T + n) * ‖a n‖ ^ 2 := by
+  have hNr : (N : ℝ) ≤ (Q : ℝ) ^ 2 := by exact_mod_cast hN
+  calc
+    _ ≤ 2 * T * ((N : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Icc 1 N, ‖a n‖ ^ 2 :=
+      hybridEnergy_pointwise_bound Q N a hT
+    _ ≤ (4 * ((Q : ℝ) ^ 2 * T)) * ∑ n ∈ Icc 1 N, ‖a n‖ ^ 2 := by
+      apply mul_le_mul_of_nonneg_right _ (sum_nonneg (fun _ _ => sq_nonneg _))
+      nlinarith
+    _ = 4 * ∑ n ∈ Icc 1 N, ((Q : ℝ) ^ 2 * T) * ‖a n‖ ^ 2 := by
+      simp only [mul_sum]
+      apply sum_congr rfl
+      intro n _
+      ring
+    _ ≤ _ := by
+      apply mul_le_mul_of_nonneg_left _ (by norm_num)
+      apply sum_le_sum
+      intro n _
+      apply mul_le_mul_of_nonneg_right _ (sq_nonneg _)
+      exact le_add_of_nonneg_right (Nat.cast_nonneg n)
+
+
+/-- The pointwise sieve coefficient does not imply the hybrid coefficient uniformly. -/
+theorem pointwise_hybrid_coefficient_insufficient (C : ℝ) :
+    ∃ N : ℕ, 1 ≤ N ∧ C * ((N : ℝ) + N) < 2 * N * ((N : ℝ) + 1) := by
+  obtain ⟨N, hN⟩ := exists_nat_gt (max C 1)
+  have hN1 : (1 : ℝ) < N := (le_max_right _ _).trans_lt hN
+  have hNC : C < (N : ℝ) := (le_max_left _ _).trans_lt hN
+  refine ⟨N, by exact_mod_cast hN1.le, ?_⟩
+  nlinarith
+
+
+/-- Weighted Schwarz step in Gallagher 1970 p.336 before display 25. -/
+theorem detector_weighted_cauchy {α : Type*} [MeasurableSpace α] (measure : Measure α)
+    (f w : α → ℝ) (hw : ∀ᵐ x ∂measure, 0 ≤ w x)
+    (hwi : Integrable w measure) (hfi : Integrable (fun x => f x * w x) measure)
+    (hf2i : Integrable (fun x => f x ^ 2 * w x) measure)
+    (hwpos : 0 < ∫ x, w x ∂measure) :
+    (∫ x, f x * w x ∂measure) ^ 2 ≤ (∫ x, w x ∂measure) * ∫ x, f x ^ 2 * w x ∂measure := by
+  let c : ℝ := (∫ x, f x * w x ∂measure) / (∫ x, w x ∂measure)
+  have heq : (fun x => (f x - c) ^ 2 * w x) =
+      fun x => f x ^ 2 * w x - (2 * c) * (f x * w x) + c ^ 2 * w x := by
+    ext x
+    ring
+  have _hi : Integrable (fun x => (f x - c) ^ 2 * w x) measure := by
+    rw [heq]
+    exact (hf2i.sub (hfi.const_mul _)).add (hwi.const_mul _)
+  have hp : 0 ≤ ∫ x, (f x - c) ^ 2 * w x ∂measure :=
+    integral_nonneg_of_ae (hw.mono fun x hx => mul_nonneg (sq_nonneg _) hx)
+  rw [heq] at hp
+  rw [integral_add (f := fun x => f x ^ 2 * w x - (2 * c) * (f x * w x))
+    (g := fun x => c ^ 2 * w x) (hf2i.sub (hfi.const_mul _)) (hwi.const_mul _),
+    integral_sub (f := fun x => f x ^ 2 * w x)
+    (g := fun x => (2 * c) * (f x * w x)) hf2i (hfi.const_mul _),
+    integral_const_mul, integral_const_mul] at hp
+  have hc : c * (∫ x, w x ∂measure) = ∫ x, f x * w x ∂measure := by
+    dsimp [c]
+    exact div_mul_cancel₀ _ hwpos.ne'
+  nlinarith [mul_nonneg hp hwpos.le]
+
+
+/-- Squaring a supplied L1 detector gives its weighted L2 lower bound. -/
+theorem detector_l2_of_l1 {α : Type*} [MeasurableSpace α] (measure : Measure α)
+    (f w : α → ℝ) (hw : ∀ᵐ x ∂measure, 0 ≤ w x)
+    (hwi : Integrable w measure) (hfi : Integrable (fun x => f x * w x) measure)
+    (hf2i : Integrable (fun x => f x ^ 2 * w x) measure)
+    (hwpos : 0 < ∫ x, w x ∂measure) {H : ℝ} (hH : 0 ≤ H)
+    (hlower : H ≤ ∫ x, f x * w x ∂measure) :
+    H ^ 2 / (∫ x, w x ∂measure) ≤ ∫ x, f x ^ 2 * w x ∂measure := by
+  have hc := detector_weighted_cauchy measure f w hw hwi hfi hf2i hwpos
+  rw [div_le_iff₀ hwpos]
+  nlinarith
+
+
+/-- Logarithmic mass in the Schwarz step before Gallagher 1970 display 25. -/
+theorem logarithmic_window_mass {x : ℝ} (hx : 0 < x) (B : ℝ) :
+    ∫ y in x..(x ^ B), (1 : ℝ) / y = (B - 1) * Real.log x := by
+  rw [integral_one_div_of_pos hx (Real.rpow_pos_of_pos hx B),
+    Real.log_div (Real.rpow_pos_of_pos hx B).ne' hx.ne', Real.log_rpow hx]
+  ring
+
+
+/-- Prime coefficient estimate in Gallagher 1970 p.336 after display 25. -/
+theorem prime_log_sq_div_sum_le (N : ℕ) (hN : 1 ≤ N) :
+    ∑ p ∈ Nat.primesLE N, Real.log p ^ 2 / p ≤ Real.log N * (Real.log N + 7) := by
+  have hL : 0 ≤ Real.log N := Real.log_nonneg (by exact_mod_cast hN)
+  calc
+    _ ≤ ∑ p ∈ Nat.primesLE N, Real.log N * (Real.log p / p) := by
+      apply sum_le_sum
+      intro p hp
+      obtain ⟨hpN, hpprime⟩ := Nat.mem_primesLE.mp hp
+      have hp0 : (0 : ℝ) < p := by exact_mod_cast hpprime.pos
+      have hlog : Real.log p ≤ Real.log N :=
+        Real.log_le_log hp0 (by exact_mod_cast hpN)
+      have hlog0 : 0 ≤ Real.log p :=
+        Real.log_nonneg (by exact_mod_cast hpprime.one_lt.le)
+      have h := mul_le_mul_of_nonneg_right hlog (div_nonneg hlog0 hp0.le)
+      convert h using 1; ring
+    _ = Real.log N * LeanLab.PNTSieve.Mertens.C N := by
+      rw [LeanLab.PNTSieve.Mertens.C_eq, mul_sum]
+    _ ≤ _ := mul_le_mul_of_nonneg_left (LeanLab.PNTSieve.Mertens.C_le N hN) hL
+
+
+/-- Large prime support removes the Q squared T part of the hybrid coefficient. -/
+theorem prime_detector_coefficient_energy_le (N : ℕ) (hN : 1 ≤ N)
+    (s : Finset ℕ) {K : ℝ}
+    (hs : ∀ p ∈ s, p.Prime ∧ p ≤ N ∧ K ≤ p) :
+    ∑ p ∈ s, (K + p) * (Real.log p / p) ^ 2 ≤
+      2 * Real.log N * (Real.log N + 7) := by
+  have hsub : s ⊆ Nat.primesLE N := by
+    intro p hp
+    exact Nat.mem_primesLE.mpr ⟨(hs p hp).2.1, (hs p hp).1⟩
+  calc
+    _ ≤ ∑ p ∈ s, 2 * (Real.log p ^ 2 / p) := by
+      apply sum_le_sum
+      intro p hp
+      have hpp := hs p hp
+      have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.1.pos
+      have hmul := mul_le_mul_of_nonneg_right hpp.2.2 (sq_nonneg (Real.log p / p))
+      calc
+        (K + p) * (Real.log p / p) ^ 2 ≤ ((p : ℝ) + p) * (Real.log p / p) ^ 2 := by
+          nlinarith
+        _ = 2 * (Real.log p ^ 2 / p) := by field_simp; ring
+    _ ≤ ∑ p ∈ Nat.primesLE N, 2 * (Real.log p ^ 2 / p) :=
+      sum_le_sum_of_subset_of_nonneg hsub (fun p _ _ => by positivity)
+    _ = 2 * ∑ p ∈ Nat.primesLE N, Real.log p ^ 2 / p := (mul_sum ..).symm
+    _ ≤ _ := by
+      have := mul_le_mul_of_nonneg_left (prime_log_sq_div_sum_le N hN) (by norm_num : (0 : ℝ) ≤ 2)
+      nlinarith
+
+
+/-- Gallagher 1970 p.332 Theorem 3 display 15, derived here from
+Theorem 1 and Lemma 3. The finite Dirichlet polynomial starts at one.
+There is no unrestricted additive shift in the coefficient on the right. -/
+theorem gallagher_hybrid_mean_value : ∃ C : ℝ, 0 < C ∧
+    ∀ Q : ℕ, 1 ≤ Q → ∀ T : ℝ, 1 ≤ T → ∀ N : ℕ, ∀ a : ℕ → ℂ,
+      hybridEnergy Q N a T ≤
+        C * ∑ n ∈ Icc 1 N, ((Q : ℝ) ^ 2 * T + n) * ‖a n‖ ^ 2 := by
+  refine ⟨2 * Real.pi ^ 3, by positivity, ?_⟩
+  intro Q hQ T hT N a
+  exact hybrid_mean_value_bound Q N hQ a hT
+
+
+/-- LEAF. Gallagher 1970 pp.333 to 335, Theorem 5 display 20.
+CONDITIONAL ON the finite Turan power bound. The remaining proof is the analytic
+logarithmic derivative expansion, its tail estimate, prime power removal and partial summation.
+The principal character height exclusion is part of the source statement. -/
+theorem gallagher_zero_detector_of_turan
+    (hpower : ∀ n M : ℕ, 0 < n → n ≤ M → ∀ z : Fin n → ℂ, (∃ i, 1 ≤ ‖z i‖) →
+      ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧ (1 / 50 : ℝ) ^ M ≤ ‖∑ i, z i ^ ν‖) :
+    ∃ r₀ A B C c : ℝ,
+    0 < r₀ ∧ r₀ ≤ 1 / 4 ∧ 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+        |v| ≤ T → (χ = 1 → 2 ≤ |v|) → 1 / Real.log T ≤ r → r ≤ r₀ →
+        (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + v * Complex.I)‖ ≤ r) →
+        ∀ x : ℝ, T ^ A ≤ x →
+          c * x ^ (-C * r) * Real.log x ^ 2 ≤
+            ∫ y in x..(x ^ B), ‖primeDetector χ x y v‖ / y := by
+  sorry
+
+
+/-- Gallagher 1970 p.333 Theorem 5 display 20.
+CONDITIONAL ON turan_interpolant and gallagher_zero_detector_of_turan. -/
+theorem gallagher_zero_detector : ∃ r₀ A B C c : ℝ,
+    0 < r₀ ∧ r₀ ≤ 1 / 4 ∧ 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+        |v| ≤ T → (χ = 1 → 2 ≤ |v|) → 1 / Real.log T ≤ r → r ≤ r₀ →
+        (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + v * Complex.I)‖ ≤ r) →
+        ∀ x : ℝ, T ^ A ≤ x →
+          c * x ^ (-C * r) * Real.log x ^ 2 ≤
+            ∫ y in x..(x ^ B), ‖primeDetector χ x y v‖ / y := by
+  exact gallagher_zero_detector_of_turan
+    (fun n M hn hnM z hz => turan_power_sum_lower_bound hn hnM z hz)
+
+
+/-- Complex coefficient form of the finite Gauss identity in Gallagher 1970 p.333.
+The conjugated additive coefficients account for the conjugate character in the Gauss sum.
+This identity is one finite input to display 18. -/
+theorem weighted_gauss_parseval {q : ℕ} [NeZero q] (s : Finset ℕ) (a : ℕ → ℂ)
+    (hs : ∀ n ∈ s, IsUnit (n : ZMod q)) :
+    (q.totient : ℝ) * ∑ b ∈ (univ : Finset (ZMod q)).filter IsUnit,
+      ‖∑ n ∈ s, star (a n) * stdAddChar (b * (n : ZMod q))‖ ^ 2 =
+    ∑ χ : DirichletCharacter ℂ q,
+      ‖gaussSum χ stdAddChar‖ ^ 2 * ‖∑ n ∈ s, a n * χ (n : ZMod q)‖ ^ 2 := by
+  rw [← LeanLab.RieselVaughan1983.GaussImprim.sum_norm_sq_twist]
+  apply sum_congr rfl
+  intro χ _
+  have he : ∑ b, χ b * ∑ n ∈ s, star (a n) * stdAddChar (b * (n : ZMod q)) =
+      gaussSum χ stdAddChar * star (∑ n ∈ s, a n * χ (n : ZMod q)) := by
+    calc
+      _ = ∑ n ∈ s, star (a n) * ∑ b, χ b * stdAddChar (b * (n : ZMod q)) := by
+        simp_rw [mul_sum]
+        rw [sum_comm]
+        apply sum_congr rfl
+        intro n _
+        apply sum_congr rfl
+        intro b _
+        ring
+      _ = ∑ n ∈ s, star (a n) * (gaussSum χ stdAddChar * star (χ (n : ZMod q))) := by
+        apply sum_congr rfl
+        intro n hn
+        congr 1
+        have hu := hs n hn
+        have h := gaussSum_mulShift_eq χ stdAddChar hu.unit
+        rw [hu.unit_spec, gaussSum] at h
+        rw [MulChar.star_apply', mul_comm (gaussSum χ stdAddChar), ← h]
+        apply sum_congr rfl
+        intro b _
+        rw [AddChar.mulShift_apply, mul_comm (n : ZMod q) b]
+      _ = _ := by
+        rw [star_sum, mul_sum]
+        apply sum_congr rfl
+        intro n _
+        rw [star_mul]
+        ring
+  rw [he, norm_mul, mul_pow, norm_star]
+
+
+/-- Complex coefficient conductor regrouping in Gallagher 1970 p.333 display 19.
+The support is prime to the larger modulus so changing level preserves every term. -/
+theorem weighted_character_conductor_fiber (s : Finset ℕ) (a : ℕ → ℂ)
+    {q r : ℕ} [NeZero q] (hrq : r ∣ q) (hs : ∀ n ∈ s, n.Coprime q) :
+    (∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.conductor = r),
+      ‖∑ n ∈ s, a n * χ (n : ZMod q)‖ ^ 2) =
+    ∑ ψ ∈ (univ : Finset (DirichletCharacter ℂ r)).filter (fun ψ => ψ.conductor = r),
+      ‖∑ n ∈ s, a n * ψ (n : ZMod r)‖ ^ 2 := by
+  classical
+  have hr : r ≠ 0 := by
+    rintro rfl
+    exact NeZero.ne q (Nat.eq_zero_of_zero_dvd hrq)
+  letI : NeZero r := ⟨hr⟩
+  symm
+  apply sum_bij (fun ψ _ => DirichletCharacter.changeLevel hrq ψ)
+  · intro ψ hψ
+    rw [mem_filter] at hψ ⊢
+    exact ⟨mem_univ _, by rw [DirichletCharacter.conductor_changeLevel]; exact hψ.2⟩
+  · intro ψ1 _ ψ2 _ h
+    exact DirichletCharacter.changeLevel_injective hrq h
+  · intro χ hχ
+    rw [mem_filter] at hχ
+    have hf : χ.FactorsThrough r := by
+      have := χ.factorsThrough_conductor
+      rwa [hχ.2] at this
+    obtain ⟨_, χ₀, hχ₀⟩ := hf
+    refine ⟨χ₀, ?_, hχ₀.symm⟩
+    rw [mem_filter]
+    refine ⟨mem_univ _, ?_⟩
+    rw [← DirichletCharacter.conductor_changeLevel χ₀ hrq, ← hχ₀, hχ.2]
+  · intro ψ _
+    congr 2
+    apply sum_congr rfl
+    intro n hn
+    congr 1
+    have hu : IsUnit (n : ZMod q) := (ZMod.isUnit_iff_coprime n q).mpr (hs n hn)
+    have he := DirichletCharacter.changeLevel_eq_cast_of_dvd ψ hrq hu.unit
+    rw [hu.unit_spec] at he
+    rw [he, ZMod.cast_natCast hrq]
+
+/-- Finite conductor lower bound in Gallagher 1970 p.333 display 19.
+Only squarefree conductor multiples prime to the conductor are retained. -/
+theorem weighted_gauss_conductor_lower (s : Finset ℕ) (a : ℕ → ℂ)
+    {q : ℕ} [NeZero q] (hs : ∀ n ∈ s, n.Coprime q) :
+    (∑ r ∈ q.divisors.filter (fun r => (q / r).Coprime r),
+      ((μ (q / r) : ℤ) : ℝ) ^ 2 * r *
+        ∑ ψ ∈ (univ : Finset (DirichletCharacter ℂ r)).filter (fun ψ => ψ.conductor = r),
+          ‖∑ n ∈ s, a n * ψ (n : ZMod r)‖ ^ 2) ≤
+    ∑ χ : DirichletCharacter ℂ q,
+      ‖gaussSum χ stdAddChar‖ ^ 2 * ‖∑ n ∈ s, a n * χ (n : ZMod q)‖ ^ 2 := by
+  classical
+  have hq : q ≠ 0 := NeZero.ne q
+  let E : ℕ → ℝ := fun r =>
+    ∑ ψ ∈ (univ : Finset (DirichletCharacter ℂ r)).filter (fun ψ => ψ.conductor = r),
+      ‖∑ n ∈ s, a n * ψ (n : ZMod r)‖ ^ 2
+  change (∑ r ∈ q.divisors.filter (fun r => (q / r).Coprime r),
+    ((μ (q / r) : ℤ) : ℝ) ^ 2 * r * E r) ≤ _
+  set good : DirichletCharacter ℂ q → Prop :=
+    fun χ => Squarefree (q / χ.conductor) ∧ χ.conductor.Coprime (q / χ.conductor)
+  calc ∑ r ∈ q.divisors.filter (fun r => (q / r).Coprime r),
+        ((μ (q / r) : ℤ) : ℝ) ^ 2 * r * E r
+      = ∑ r ∈ q.divisors.filter (fun r => Squarefree (q / r) ∧ r.Coprime (q / r)),
+          ∑ χ ∈ (univ.filter good).filter (fun χ => χ.conductor = r),
+            ‖gaussSum χ stdAddChar‖ ^ 2 * ‖∑ n ∈ s, a n * χ (n : ZMod q)‖ ^ 2 := by
+        rw [sum_filter, sum_filter]
+        refine sum_congr rfl fun r hr => ?_
+        have hrq : r ∣ q := Nat.dvd_of_mem_divisors hr
+        by_cases hsq : Squarefree (q / r)
+        · by_cases hc : r.Coprime (q / r)
+          · rw [if_pos hc.symm, if_pos ⟨hsq, hc⟩, filter_filter]
+            have hf : univ.filter (fun χ : DirichletCharacter ℂ q => good χ ∧ χ.conductor = r) =
+                univ.filter (fun χ => χ.conductor = r) := by
+              ext χ; simp only [mem_filter, mem_univ, true_and, good]
+              constructor
+              · exact fun h => h.2
+              · intro h; refine ⟨?_, h⟩; rw [h]; exact ⟨hsq, hc⟩
+            rw [hf]
+            dsimp only [E]
+            rw [← weighted_character_conductor_fiber s a hrq hs, mul_sum]
+            refine sum_congr rfl fun χ hχ => ?_
+            rw [mem_filter] at hχ
+            have hg : good χ := by simp only [good]; rw [hχ.2]; exact ⟨hsq, hc⟩
+            have hm : ((μ (q / r) : ℤ) : ℝ) ^ 2 = 1 := by
+              exact_mod_cast ArithmeticFunction.moebius_sq_eq_one_of_squarefree hsq
+            rw [LeanLab.RieselVaughan1983.GaussImprim.norm_sq_gaussSum_eq_conductor χ hg.1 hg.2, hχ.2, hm]
+            ring
+          · rw [if_neg (fun h => hc h.symm), if_neg (fun h => hc h.2)]
+        · have hm0 : ((μ (q / r) : ℤ) : ℝ) = 0 := by
+            rw [ArithmeticFunction.moebius_eq_zero_of_not_squarefree hsq]; simp
+          simp [hsq]
+      _ = ∑ χ ∈ univ.filter good,
+            ‖gaussSum χ stdAddChar‖ ^ 2 * ‖∑ n ∈ s, a n * χ (n : ZMod q)‖ ^ 2 := by
+        refine sum_fiberwise_of_maps_to
+          (g := fun χ : DirichletCharacter ℂ q => χ.conductor) (fun χ hχ => ?_) _
+        rw [mem_filter] at hχ ⊢
+        exact ⟨Nat.mem_divisors.mpr ⟨χ.conductor_dvd_level, hq⟩, hχ.2⟩
+      _ ≤ _ := sum_le_sum_of_subset_of_nonneg (filter_subset _ _)
+          (fun _ _ _ => mul_nonneg (sq_nonneg _) (sq_nonneg _))
+
+/-- The logarithmic conductor gain in Gallagher 1970 p.333 after display 19.
+The proof uses the coprime Moebius over totient lower bound already proved in the lab. -/
+theorem logarithmic_conductor_weight_le
+    (Q : ℕ) (E : ℕ → ℝ) (hE : ∀ r ∈ Finset.Icc 1 Q, 0 ≤ E r) :
+    (∑ r ∈ Finset.Icc 1 Q, Real.log ((Q : ℝ) / r) * E r) ≤
+    ∑ q ∈ Finset.Icc 1 Q, (q.totient : ℝ)⁻¹ *
+      ∑ r ∈ q.divisors.filter (fun r => (q / r).Coprime r),
+        ((μ (q / r) : ℤ) : ℝ) ^ 2 * r * E r := by
+  let F : ℕ → ℕ → ℝ := fun r m => ((μ m : ℤ) : ℝ) ^ 2 * r / ((r * m).totient : ℝ) * E r
+  have heq : (∑ q ∈ Finset.Icc 1 Q, (q.totient : ℝ)⁻¹ *
+      ∑ r ∈ q.divisors.filter (fun r => (q / r).Coprime r),
+        ((μ (q / r) : ℤ) : ℝ) ^ 2 * r * E r) =
+      ∑ q ∈ Finset.Icc 1 Q, ∑ r ∈ q.divisors.filter (fun r => (q / r).Coprime r), F r (q / r) := by
+    apply sum_congr rfl
+    intro q _
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro r hr
+    have hrd : r ∣ q := Nat.dvd_of_mem_divisors (mem_filter.mp hr).1
+    dsimp [F]
+    rw [Nat.mul_div_cancel' hrd]
+    ring
+  rw [heq, LeanLab.RieselVaughan1983.Page65.sum_swap]
+  apply sum_le_sum
+  intro r hr
+  have hr1 : 1 ≤ r := (mem_Icc.mp hr).1
+  have hrpos : (0 : ℝ) < r := by exact_mod_cast hr1
+  have hlog := mul_le_mul_of_nonneg_right
+    (LeanLab.RieselVaughan1983.MuPhi.log_le_mu_phi_sum r hr1 ((Q : ℝ) / r) (div_nonneg (Nat.cast_nonneg _) hrpos.le)) (hE r hr)
+  apply hlog.trans_eq
+  have hset := LeanLab.RieselVaughan1983.Page65.m_range hr1 (Nat.cast_nonneg Q : (0 : ℝ) ≤ Q)
+  simp only [Nat.floor_natCast] at hset
+  rw [hset, mul_sum, sum_mul]
+  apply sum_congr rfl
+  intro m hm
+  simp only [mem_filter, mem_Icc] at hm
+  have hφr : (r.totient : ℝ) ≠ 0 := by
+    exact_mod_cast (Nat.totient_pos.mpr (by omega)).ne'
+  have hφm : (m.totient : ℝ) ≠ 0 := by
+    exact_mod_cast (Nat.totient_pos.mpr (by omega)).ne'
+  dsimp [F]
+  rw [Nat.totient_mul hm.2.2.symm]
+  push_cast
+  field_simp
+
+/-- The finite rough support character sieve reduces to the sharp additive sieve.
+Gallagher 1970 pp.332 and 333, displays 17 through 19. -/
+theorem rough_character_sieve_le_additive
+    (s : Finset ℕ) (a : ℕ → ℂ) (Q : ℕ)
+    (hs : ∀ n ∈ s, ∀ q ∈ Finset.Icc 1 Q, n.Coprime q) :
+    (∑ q ∈ Finset.Icc 1 Q, Real.log ((Q : ℝ) / q) *
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖∑ n ∈ s, a n * χ n‖ ^ 2) ≤
+    ∑ q ∈ Finset.Icc 1 Q, ∑ c ∈ (range q).filter (fun c => c.Coprime q),
+      ‖∑ n ∈ s, star (a n) * LeanLab.PNTPort.LargeSieve.e (n * ((c : ℝ) / q))‖ ^ 2 := by
+  classical
+  let E : ℕ → ℝ := fun q =>
+    ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.conductor = q),
+      ‖∑ n ∈ s, a n * χ n‖ ^ 2
+  have hEeq (q : ℕ) : E q =
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ‖∑ n ∈ s, a n * χ n‖ ^ 2 := by
+    dsimp only [E]
+    rw [sum_filter, sum_filter]
+    apply sum_congr rfl
+    intro χ _
+    by_cases hχ : χ.conductor = q
+    · simp [DirichletCharacter.IsPrimitive, hχ]
+    · simp [DirichletCharacter.IsPrimitive, hχ]
+  simp_rw [← hEeq]
+  apply (logarithmic_conductor_weight_le Q E (fun q _ => sum_nonneg (fun χ _ => sq_nonneg _))).trans
+  apply sum_le_sum
+  intro q hq
+  have hq1 : 1 ≤ q := (mem_Icc.mp hq).1
+  letI : NeZero q := ⟨by omega⟩
+  have hφ : (0 : ℝ) < q.totient := by exact_mod_cast Nat.totient_pos.mpr (by omega)
+  have hlow := weighted_gauss_conductor_lower s a (fun n hn => hs n hn q hq)
+  have hunit : ∀ n ∈ s, IsUnit (n : ZMod q) :=
+    fun n hn => (ZMod.isUnit_iff_coprime n q).mpr (hs n hn q hq)
+  rw [← weighted_gauss_parseval s a hunit] at hlow
+  have hdiv : (q.totient : ℝ)⁻¹ *
+      (∑ r ∈ q.divisors.filter (fun r => (q / r).Coprime r),
+        ((μ (q / r) : ℤ) : ℝ) ^ 2 * r * E r) ≤
+      ∑ b ∈ (univ : Finset (ZMod q)).filter IsUnit,
+        ‖∑ n ∈ s, star (a n) * stdAddChar (b * (n : ZMod q))‖ ^ 2 := by
+    rw [inv_mul_le_iff₀ hφ]
+    exact hlow
+  apply hdiv.trans_eq
+  rw [sum_filter, LeanLab.PNTPort.LargeSieve.sum_zmod_eq_sum_range, sum_filter]
+  apply sum_congr rfl
+  intro c _
+  by_cases hc : c.Coprime q
+  · rw [if_pos ((ZMod.isUnit_iff_coprime c q).mpr hc), if_pos hc]
+    congr 2
+    apply sum_congr rfl
+    intro n _
+    congr 1
+    rw [mul_comm (c : ZMod q) (n : ZMod q)]
+    simpa only [Int.cast_natCast] using
+      LeanLab.PNTPort.LargeSieve.stdAddChar_mul_natCast (q := q) (n : ℤ) c
+  · rw [if_neg (fun h => hc ((ZMod.isUnit_iff_coprime c q).mp h)), if_neg hc]
+
+/-- Gallagher 1970 p.332 Lemma 4 display 17, proved using the complex coefficient
+Gauss identity, conductor regrouping and the coprime Moebius over totient lower bound
+on p.333 displays 18 and 19. For integer endpoints the constant can be one. -/
+theorem gallagher_rough_finite_sieve :
+    ∃ C : ℝ, 0 < C ∧ ∀ Q : ℕ, 1 ≤ Q → ∀ (a : ℕ → ℂ) (M L : ℕ),
+      (∀ n ∈ Finset.Ioc M (M + L), ∀ p : ℕ, p.Prime → p ≤ Q → p ∣ n → a n = 0) →
+      (∑ q ∈ Finset.Icc 1 Q, Real.log ((Q : ℝ) / q) *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖∑ n ∈ Finset.Ioc M (M + L), a n * χ n‖ ^ 2) ≤
+        C * ((L : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Finset.Ioc M (M + L), ‖a n‖ ^ 2 := by
+  classical
+  refine ⟨1, by norm_num, ?_⟩
+  intro Q hQ a M L hrough
+  let S : Finset ℕ := (Finset.Ioc M (M + L)).filter (fun n => a n ≠ 0)
+  have hs : ∀ n ∈ S, ∀ q ∈ Finset.Icc 1 Q, n.Coprime q := by
+    intro n hn q hq
+    obtain ⟨hnI, hna⟩ := mem_filter.mp hn
+    by_contra hc
+    obtain ⟨p, hp, hpn, hpq⟩ := Nat.Prime.not_coprime_iff_dvd.mp hc
+    have hpQ : p ≤ Q := (Nat.le_of_dvd (by have := (mem_Icc.mp hq).1; omega) hpq).trans (mem_Icc.mp hq).2
+    exact hna (hrough n hnI p hp hpQ hpn)
+  have hsum (f : ℕ → ℂ) : (∑ n ∈ S, a n * f n) = ∑ n ∈ Finset.Ioc M (M + L), a n * f n := by
+    dsimp [S]
+    rw [sum_filter]
+    apply sum_congr rfl
+    intro n _
+    by_cases hn : a n = 0 <;> simp [hn]
+  have hstar (f : ℕ → ℂ) : (∑ n ∈ S, star (a n) * f n) =
+      ∑ n ∈ Finset.Ioc M (M + L), star (a n) * f n := by
+    dsimp [S]
+    rw [sum_filter]
+    apply sum_congr rfl
+    intro n _
+    by_cases hn : a n = 0 <;> simp [hn]
+  have hb := rough_character_sieve_le_additive S a Q hs
+  simp_rw [hsum, hstar] at hb
+  apply hb.trans
+  simpa only [norm_star, one_mul] using additive_large_sieve_sharp (fun n => star (a n)) M L Q
+
+/-- Gallagher 1970 p.332 Theorem 4 from its finite Lemma 4 input.
+CONDITIONAL ON the supplied finite rough support sieve. The time smoothing is proved here. -/
+theorem hybrid_of_weighted_finite_sieve
+    (Q : ℕ) (hQ : 1 ≤ Q) (C : ℝ) (hC : 0 ≤ C) (weight : ℕ → ℝ)
+    (hw : ∀ q ∈ Finset.Icc 1 Q, 0 ≤ weight q)
+    (hfinite : ∀ (b : ℕ → ℂ) (M L : ℕ),
+      (∀ n ∈ Finset.Ioc M (M + L), ∀ p : ℕ, p.Prime → p ≤ Q → p ∣ n → b n = 0) →
+      (∑ q ∈ Finset.Icc 1 Q, weight q *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖∑ n ∈ Finset.Ioc M (M + L), b n * χ n‖ ^ 2) ≤
+        C * ((L : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ Finset.Ioc M (M + L), ‖b n‖ ^ 2)
+    (N : ℕ) (a : ℕ → ℂ)
+    (hrough : ∀ n ∈ Finset.Icc 1 N, ∀ p : ℕ, p.Prime → p ≤ Q → p ∣ n → a n = 0)
+    {T : ℝ} (hT : 1 ≤ T) :
+    (∑ q ∈ Finset.Icc 1 Q, weight q *
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+        ∫ t in (-T)..T, ‖characterPolynomial χ a N t‖ ^ 2) ≤
+      (2 * Real.pi ^ 3 * C) *
+        ∑ n ∈ Finset.Icc 1 N, ((Q : ℝ) ^ 2 * T + n) * ‖a n‖ ^ 2 := by
+  have hsieve (s : Finset ℕ) (M L : ℕ) (hs : s ⊆ Finset.Ioc M (M + L))
+      (hsN : s ⊆ Finset.Icc 1 N) :
+      (∑ q ∈ Finset.Icc 1 Q, weight q *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖∑ n ∈ s, a n * χ n‖ ^ 2) ≤
+        C * ((L : ℝ) + (Q : ℝ) ^ 2) * ∑ n ∈ s, ‖a n‖ ^ 2 := by
+    let b : ℕ → ℂ := fun n => if n ∈ s then a n else 0
+    have hb : ∀ n ∈ Finset.Ioc M (M + L), ∀ p : ℕ, p.Prime → p ≤ Q → p ∣ n → b n = 0 := by
+      intro n _ p hp hpQ hpn
+      by_cases hn : n ∈ s
+      · simp only [b, if_pos hn]
+        exact hrough n (hsN hn) p hp hpQ hpn
+      · simp [b, hn]
+    have hset : (Finset.Ioc M (M + L)).filter (fun n => n ∈ s) = s := by
+      ext n
+      simp only [mem_filter]
+      exact and_iff_right_of_imp (fun hn => hs hn)
+    have hsum {q : ℕ} (χ : DirichletCharacter ℂ q) :
+        (∑ n ∈ Finset.Ioc M (M + L), b n * χ n) = ∑ n ∈ s, a n * χ n := by
+      simp only [b, ite_mul, zero_mul, ← sum_filter, hset]
+    have henergy : (∑ n ∈ Finset.Ioc M (M + L), ‖b n‖ ^ 2) = ∑ n ∈ s, ‖a n‖ ^ 2 := by
+      simp only [b, apply_ite norm, norm_zero, ite_pow, zero_pow (by norm_num : 2 ≠ 0),
+        ← sum_filter, hset]
+    simpa only [hsum, henergy] using hfinite b M L hb
+  have hreal (s : Finset ℕ) (hsN : s ⊆ Finset.Icc 1 N) {x y : ℝ}
+      (hx : 0 ≤ x) (hxy : x ≤ y)
+      (hs : ∀ n ∈ s, 1 ≤ n ∧ x ≤ n ∧ (n : ℝ) ≤ y) :
+      (∑ q ∈ Finset.Icc 1 Q, weight q *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖∑ n ∈ s, a n * χ n‖ ^ 2) ≤
+        C * (y - x + 2 + (Q : ℝ) ^ 2) * ∑ n ∈ s, ‖a n‖ ^ 2 := by
+    let M := ⌊x⌋₊ - 1
+    let U := ⌊y⌋₊
+    have hMU : M ≤ U := (Nat.sub_le _ _).trans (Nat.floor_mono hxy)
+    have hs' : s ⊆ Finset.Ioc M (M + (U - M)) := by
+      intro n hn
+      have hn1 := (hs n hn).1
+      have hxn : ⌊x⌋₊ ≤ n := by
+        have := (Nat.floor_le hx).trans (hs n hn).2.1
+        exact_mod_cast this
+      have hny : n ≤ U := Nat.le_floor (hs n hn).2.2
+      rw [Finset.mem_Ioc, Nat.add_sub_of_le hMU]
+      dsimp [M]
+      omega
+    have hMlow : x - 2 ≤ (M : ℝ) := by
+      have hfloor := Nat.lt_floor_add_one x
+      have hnat : ⌊x⌋₊ ≤ M + 1 := by dsimp [M]; omega
+      have hnatR : (⌊x⌋₊ : ℝ) ≤ (M : ℝ) + 1 := by exact_mod_cast hnat
+      linarith
+    have hUL : ((U - M : ℕ) : ℝ) ≤ y - x + 2 := by
+      rw [Nat.cast_sub hMU]
+      have hu : (U : ℝ) ≤ y := Nat.floor_le (hx.trans hxy)
+      linarith
+    apply (hsieve s M (U - M) hs' hsN).trans
+    apply mul_le_mul_of_nonneg_right _ (sum_nonneg (fun _ _ => sq_nonneg _))
+    exact mul_le_mul_of_nonneg_left (by linarith) hC
+  have hwindow {δ : ℝ} (hδ : 0 ≤ δ) (u : ℝ) :
+      (∑ q ∈ Finset.Icc 1 Q, weight q *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u‖ ^ 2) ≤
+        C * (Real.exp (u + δ) - Real.exp u + 2 + (Q : ℝ) ^ 2) *
+          ∑ n ∈ Finset.Icc 1 N, (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u := by
+    let S : Finset ℕ := (Finset.Icc 1 N).filter (fun n => u ∈ Set.Icc (Real.log n - δ) (Real.log n))
+    have heq {q : ℕ} (χ : DirichletCharacter ℂ q) :
+        frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u =
+        ∑ n ∈ S, a n * χ n := by
+      simp only [frequencyWindow, S, sum_filter, Set.indicator]
+    have hnorm : (∑ n ∈ S, ‖a n‖ ^ 2) =
+        ∑ n ∈ Finset.Icc 1 N, (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u := by
+      simp only [S, sum_filter, Set.indicator]
+    have hs : ∀ n ∈ S, 1 ≤ n ∧ Real.exp u ≤ n ∧ (n : ℝ) ≤ Real.exp (u + δ) := by
+      intro n hn
+      obtain ⟨hnN, hnu⟩ := mem_filter.mp hn
+      have hn1 := (mem_Icc.mp hnN).1
+      have hnpos : (0 : ℝ) < n := by exact_mod_cast hn1
+      refine ⟨hn1, ?_, ?_⟩
+      · calc
+          Real.exp u ≤ Real.exp (Real.log n) := Real.exp_le_exp.mpr hnu.2
+          _ = _ := Real.exp_log hnpos
+      · calc
+          (n : ℝ) = Real.exp (Real.log n) := (Real.exp_log hnpos).symm
+          _ ≤ Real.exp (u + δ) := Real.exp_le_exp.mpr (by linarith [hnu.1])
+    simpa only [heq, hnorm] using hreal S (filter_subset _ _) (Real.exp_pos u).le
+      (Real.exp_le_exp.mpr (by linarith)) hs
+  have hintegrated {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1) :
+      (∑ q ∈ Finset.Icc 1 Q, weight q *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ∫ u : ℝ, ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n)
+            (fun n => Real.log n) δ u‖ ^ 2) ≤
+        C * ∑ n ∈ Finset.Icc 1 N, (δ * ((Q : ℝ) ^ 2 + 2) + 2 * δ ^ 2 * n) * ‖a n‖ ^ 2 := by
+    let K : ℝ → ℝ := fun u => Real.exp (u + δ) - Real.exp u + 2 + (Q : ℝ) ^ 2
+    let W {q : ℕ} (χ : DirichletCharacter ℂ q) (u : ℝ) :=
+      ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u‖ ^ 2
+    have hiW {q : ℕ} (χ : DirichletCharacter ℂ q) : Integrable (W χ) :=
+      integrable_frequencyWindow_energy _ _ _ _
+    have hiR (n : ℕ) : Integrable (fun u => K u *
+        (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u) := by
+      have heq : (fun u => K u * (Set.Icc (Real.log n - δ) (Real.log n)).indicator
+          (fun _ => ‖a n‖ ^ 2) u) =
+          (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun u => K u * ‖a n‖ ^ 2) := by
+        ext u
+        by_cases hu : u ∈ Set.Icc (Real.log n - δ) (Real.log n) <;> simp [hu]
+      rw [heq]
+      exact (by dsimp [K]; fun_prop : Continuous (fun u => K u * ‖a n‖ ^ 2)).integrableOn_Icc.integrable_indicator measurableSet_Icc
+    have heq (q : ℕ) :
+        (∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), ∫ u, W χ u) =
+        ∫ u, ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), W χ u :=
+      (integral_finsetSum _ (fun χ _ => hiW χ)).symm
+    change (∑ q ∈ Finset.Icc 1 Q, weight q *
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), ∫ u, W χ u) ≤ _
+    simp_rw [heq, ← integral_const_mul]
+    rw [← integral_finsetSum _ (fun q _ => (integrable_finsetSum _ (fun χ _ => hiW χ)).const_mul _)]
+    calc
+      _ ≤ ∫ u, C * ∑ n ∈ Finset.Icc 1 N, K u *
+          (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => ‖a n‖ ^ 2) u := by
+        apply integral_mono
+          (integrable_finsetSum _ (fun q _ => (integrable_finsetSum _ (fun χ _ => hiW χ)).const_mul _))
+          ((integrable_finsetSum _ (fun n _ => hiR n)).const_mul _)
+        intro u
+        dsimp only [W, K]
+        rw [← mul_sum, ← mul_assoc]
+        exact hwindow hδ.le u
+      _ = C * ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 *
+          ∫ u : ℝ, K u * (Set.Icc (Real.log n - δ) (Real.log n)).indicator (fun _ => (1 : ℝ)) u := by
+        rw [integral_const_mul, integral_finsetSum _ (fun n _ => hiR n)]
+        congr 1
+        apply sum_congr rfl
+        intro n _
+        rw [← integral_const_mul]
+        apply integral_congr_ae
+        filter_upwards [] with u
+        by_cases hu : u ∈ Set.Icc (Real.log n - δ) (Real.log n)
+        · simp [hu]; ring
+        · simp [hu]
+      _ ≤ _ := by
+        apply mul_le_mul_of_nonneg_left _ hC
+        apply sum_le_sum
+        intro n hn
+        have hnpos : (0 : ℝ) < n := by exact_mod_cast (mem_Icc.mp hn).1
+        have hb := mellin_window_weight_bound (Real.log n) ((Q : ℝ) ^ 2) hδ.le hδ1
+        rw [Real.exp_log hnpos] at hb
+        dsimp [K]
+        have hh := mul_le_mul_of_nonneg_left hb (sq_nonneg ‖a n‖)
+        nlinarith
+  let δ : ℝ := 1 / T
+  have hTpos : 0 < T := by linarith
+  have hδ : 0 < δ := by dsimp [δ]; positivity
+  have hδ1 : δ ≤ 1 := by dsimp [δ]; rw [div_le_one hTpos]; exact hT
+  let D : ℝ := Real.pi ^ 3 / (2 * δ ^ 2)
+  have hD : 0 ≤ D := by dsimp [D]; positivity
+  let W {q : ℕ} (χ : DirichletCharacter ℂ q) :=
+    ∫ u : ℝ, ‖frequencyWindow (Finset.Icc 1 N) (fun n => a n * χ n) (fun n => Real.log n) δ u‖ ^ 2
+  have htime {q : ℕ} (χ : DirichletCharacter ℂ q) :
+      (∫ v in (-T)..T, ‖characterPolynomial χ a N v‖ ^ 2) ≤ D * W χ := by
+    rw [characterPolynomial_time_integral]
+    have hnear : δ * (T / (2 * Real.pi)) ≤ 1 / 2 := by
+      dsimp [δ]
+      have he : (1 / T) * (T / (2 * Real.pi)) = 1 / (2 * Real.pi) := by field_simp
+      rw [he, div_le_div_iff₀ (by positivity) (by norm_num)]
+      linarith [Real.pi_gt_three]
+    have hh := gallagher_window_smoothing (Finset.Icc 1 N) (fun n => a n * χ n)
+      (fun n => Real.log n) hδ (div_nonneg hTpos.le (by positivity)) hnear
+    apply (mul_le_mul_of_nonneg_left hh (by positivity : (0 : ℝ) ≤ 2 * Real.pi)).trans_eq
+    dsimp [D, W]
+    ring
+  calc
+    _ ≤ ∑ q ∈ Finset.Icc 1 Q, weight q *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), D * W χ := by
+      apply sum_le_sum
+      intro q hq
+      exact mul_le_mul_of_nonneg_left (sum_le_sum (fun χ _ => htime χ)) (hw q hq)
+    _ = D * (∑ q ∈ Finset.Icc 1 Q, weight q *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive), W χ) := by
+      simp only [mul_sum]
+      apply sum_congr rfl
+      intro q _
+      apply sum_congr rfl
+      intro χ _
+      ring
+    _ ≤ D * (C * ∑ n ∈ Finset.Icc 1 N,
+        (δ * ((Q : ℝ) ^ 2 + 2) + 2 * δ ^ 2 * n) * ‖a n‖ ^ 2) :=
+      mul_le_mul_of_nonneg_left (hintegrated hδ hδ1) hD
+    _ ≤ _ := by
+      simp only [mul_sum]
+      apply sum_le_sum
+      intro n _
+      have hQr : (1 : ℝ) ≤ Q := by exact_mod_cast hQ
+      have hQsq : (1 : ℝ) ≤ (Q : ℝ) ^ 2 := by nlinarith
+      have he : D * (δ * ((Q : ℝ) ^ 2 + 2) + 2 * δ ^ 2 * n) =
+          (Real.pi ^ 3 / 2) * T * ((Q : ℝ) ^ 2 + 2) + Real.pi ^ 3 * n := by
+        dsimp [D, δ]
+        field_simp
+      have hmult := mul_le_mul_of_nonneg_left
+        (show (Q : ℝ) ^ 2 + 2 ≤ 3 * (Q : ℝ) ^ 2 by linarith)
+        (show 0 ≤ (Real.pi ^ 3 / 2) * T by positivity)
+      have hrest : 0 ≤ Real.pi ^ 3 * ((Q : ℝ) ^ 2 * T) := by positivity
+      have hrest2 : 0 ≤ Real.pi ^ 3 * n := by positivity
+      have hb : D * (δ * ((Q : ℝ) ^ 2 + 2) + 2 * δ ^ 2 * n) ≤
+          2 * Real.pi ^ 3 * ((Q : ℝ) ^ 2 * T + n) := by rw [he]; nlinarith
+      have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hb hC) (sq_nonneg ‖a n‖)
+      convert hh using 1 <;> ring
+
+/-- Gallagher 1970 p.332 Theorem 4 display 16. The rough support hypothesis
+is essential. Its finite input is Lemma 4 display 17, proved using imprimitive Gauss sums
+and the coprime Moebius over totient lower bound on p.333 displays 18 and 19.
+The already proved smoothing for Theorem 3 supplies the time variable argument. -/
+theorem gallagher_prime_hybrid_mean_value : ∃ C : ℝ, 0 < C ∧ ∀ Q : ℕ, 1 ≤ Q → ∀ T : ℝ, 1 ≤ T →
+    ∀ N : ℕ, ∀ a : ℕ → ℂ,
+      (∀ n ∈ Finset.Icc 1 N, ∀ p : ℕ, p.Prime → p ≤ Q → p ∣ n → a n = 0) →
+      (∑ q ∈ Finset.Icc 1 Q, Real.log ((Q : ℝ) / q) *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ∫ t in (-T)..T, ‖characterPolynomial χ a N t‖ ^ 2) ≤
+        C * ∑ n ∈ Finset.Icc 1 N, ((Q : ℝ) ^ 2 * T + n) * ‖a n‖ ^ 2 := by
+  obtain ⟨C, hC, hfinite⟩ := gallagher_rough_finite_sieve
+  refine ⟨2 * Real.pi ^ 3 * C, by positivity, ?_⟩
+  intro Q hQ T hT N a hrough
+  apply hybrid_of_weighted_finite_sieve Q hQ C hC.le (fun q => Real.log ((Q : ℝ) / q))
+    _ (hfinite Q hQ) N a hrough hT
+  intro q hq
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast (Finset.mem_Icc.mp hq).1
+  apply Real.log_nonneg
+  rw [le_div_iff₀ hq0, one_mul]
+  exact_mod_cast (Finset.mem_Icc.mp hq).2
+
+
+/-- LEAF. Gallagher 1970 p.336, passage from Theorem 5 to display 25 and then
+Theorem 6 display 24. CONDITIONAL ON the supplied L1 detector and rough hybrid bound.
+The remaining proof requires the local zero count from p.333 and the interval covering
+and integration argument on p.336, including the bounded principal low height contribution.
+The original polynomial region and Page strip are not repeated in this input. -/
+theorem gallagher_density_from_detector_and_prime_hybrid
+    (hdetector : ∃ r₀ A B C c : ℝ,
+    0 < r₀ ∧ r₀ ≤ 1 / 4 ∧ 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+        |v| ≤ T → (χ = 1 → 2 ≤ |v|) → 1 / Real.log T ≤ r → r ≤ r₀ →
+        (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + v * Complex.I)‖ ≤ r) →
+        ∀ x : ℝ, T ^ A ≤ x →
+          c * x ^ (-C * r) * Real.log x ^ 2 ≤
+            ∫ y in x..(x ^ B), ‖primeDetector χ x y v‖ / y)
+    (hprime : ∃ C : ℝ, 0 < C ∧ ∀ Q : ℕ, 1 ≤ Q → ∀ T : ℝ, 1 ≤ T →
+    ∀ N : ℕ, ∀ a : ℕ → ℂ,
+      (∀ n ∈ Finset.Icc 1 N, ∀ p : ℕ, p.Prime → p ≤ Q → p ∣ n → a n = 0) →
+      (∑ q ∈ Finset.Icc 1 Q, Real.log ((Q : ℝ) / q) *
+        ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ q)).filter (fun χ => χ.IsPrimitive),
+          ∫ t in (-T)..T, ‖characterPolynomial χ a N t‖ ^ 2) ≤
+        C * ∑ n ∈ Finset.Icc 1 N, ((Q : ℝ) ^ 2 * T + n) * ‖a n‖ ^ 2) :
+    ∀ b : ℝ, 0 < b → ∃ c C : ℝ, 0 < c ∧ 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ σ : ℝ, 3 / 4 < σ → σ < 1 - b / Real.log T →
+    ∑ q ∈ range ⌊T⌋₊,
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ σ T : ℝ) ≤ C * T ^ (c * (1 - σ)) := by
+  sorry
+
+
 /-- LEAF. Gallagher 1970, A large sieve density estimate near sigma equals one,
 Inventiones 11 pp.329 to 339, Theorem 6. Montgomery and Vaughan 1975 p.366 Section 7.
 Gallagher 1975 p.131 display 14. The polynomial range at most three quarters and the
@@ -3666,7 +5459,8 @@ theorem gallagher_density_transition : ∀ b : ℝ, 0 < b → ∃ c C : ℝ, 0 <
     ∑ q ∈ range ⌊T⌋₊,
       ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
         (zeroCount χ σ T : ℝ) ≤ C * T ^ (c * (1 - σ)) := by
-  sorry
+  exact gallagher_density_from_detector_and_prime_hybrid
+    gallagher_zero_detector gallagher_prime_hybrid_mean_value
 
 /-- Gallagher 1975 p.131. Auxiliary obstruction to removing a logarithmic density loss
 uniformly in the band below a Page strip. This is not a counterexample to the density theorem. -/
