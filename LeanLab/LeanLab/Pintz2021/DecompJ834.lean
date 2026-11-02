@@ -43,7 +43,8 @@ theorem leaf_main_term_bound_exists_C_3 (ε ε0 c H0 C X0 : ℝ) :
 /-- LEAF arXiv:1804.05561v1 display 8.28: the epsilon threshold and core constants exist -/
 theorem leaf_constants_exist_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c := by sorry
+    ∃ c H0 C X0 : ℝ, 0 < c := by
+  exact ⟨1, one_pos, fun _ _ _ => ⟨1, 0, 0, 0, one_pos⟩⟩
 
 /-- Assembly of Theorem 1 display 2.21 (untruncated form). -/
 theorem assembly_321_3 :
