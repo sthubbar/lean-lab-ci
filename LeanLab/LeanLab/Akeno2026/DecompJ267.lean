@@ -33,7 +33,7 @@ theorem thm1_1_cauchy_schwarz (θ : ℝ) (k : ℕ) (w₁ w₂ : ℝ → ℝ) (X 
 
 /-- LEAF. Page 8 equation 9 (part 4).
 The final step of the reduction from k > 0 to k = 0. -/
-theorem thm1_1_reduction_to_k0 (θ : ℝ) (hk0 : LevelGP θ) : LevelGP θ := by sorry
+theorem thm1_1_reduction_to_k0 (θ : ℝ) (hk0 : LevelGP θ) : LevelGP θ := hk0
 
 /-- The exact sealed cited Prop for Theorem 1.1, assembled from the leaf with no sorry in this proof.
 Uses the cited akeno_thm3_1 through the base case leaf. -/
