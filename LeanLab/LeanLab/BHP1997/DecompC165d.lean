@@ -966,6 +966,891 @@ theorem upper_short_weight_analytic
             ∀ m ∈ rightInterval ε x, primeWeight m ≤ b1 x m := by
   sorry
 
+/-- Page 51. Numerators of the four-prime grid, with denominator 400000. -/
+def lowerFourGridPoint (i : ℕ) : ℕ := 49996+587*i
+
+/-- Page 51. Real endpoints of the four-prime grid. -/
+noncomputable def lowerFourGridReal (i : ℕ) : ℝ := (lowerFourGridPoint i : ℝ)/400000
+
+/-- Page 51. A sufficient grouping test for four explicit prime factors.
+The residual factor stays in L. -/
+def lowerFourGridCovered (a A b B c C d D : ℕ) : Bool :=
+  upperGridCovered a A b B c C || upperGridCovered a A b B d D ||
+  upperGridCovered a A c C d D || upperGridCovered b B c C d D ||
+  upperGridGood (a+b+c) (A+B+C) d D || upperGridGood (a+b+d) (A+B+D) c C ||
+  upperGridGood (a+c+d) (A+C+D) b B || upperGridGood (b+c+d) (B+C+D) a A
+
+/-- Page 51. The same sufficient prime groupings in real exponent coordinates.
+This paper Prop requires Claude review before merge. -/
+def lowerFourCovered (ε a b c d : ℝ) : Prop :=
+  upperPrimeCovered ε a b c ∨ upperPrimeCovered ε a b d ∨
+  upperPrimeCovered ε a c d ∨ upperPrimeCovered ε b c d ∨
+  upperPairRegion ε (a+b+c) d ∨ upperPairRegion ε (a+b+d) c ∨
+  upperPairRegion ε (a+c+d) b ∨ upperPairRegion ε (b+c+d) a
+
+/-- Page 51. Conservative four-prime discarded integrand after the second decomposition.
+The last prime and the residual rough factor are both at least the fourth prime.
+The triple product cutoff is the condition for taking that decomposition. -/
+noncomputable def lowerFourDeletedIntegrand (ω : ℝ → ℝ) (ε a b c d : ℝ) : ℝ :=
+  if (1+7*(2*(1/16-1/10^5)))/15-ε ≤ d ∧ d ≤ c ∧ c ≤ b ∧ b ≤ a ∧
+      a+2*b ≤ 1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε ∧
+      a+b+c ≤ 1/2+(2*(1/16-1/10^5))/4-2*ε ∧ ¬lowerFourCovered ε a b c d then
+    if (1-a-b-c-d)/d < 1 then 0 else ω ((1-a-b-c-d)/d)/(a*b*c*d^2)
+  else 0
+
+/-- Page 51. Upward integer cell bound, with whole-cell support and grouping exclusions. -/
+def lowerFourCellWeight (i j k l : ℕ) : ℕ :=
+  if i+2 ≤ j ∨ j+2 ≤ k ∨ k+2 ≤ l then 0 else
+    let a := lowerFourGridPoint i
+    let b := lowerFourGridPoint j
+    let c := lowerFourGridPoint k
+    let d := lowerFourGridPoint l
+    if 224998 < a+2*b ∨ 212498 < a+b+c ∨ 400000 < a+b+c+2*d then 0 else
+      if lowerFourGridCovered a (a+587) b (b+587) c (c+587) d (d+587) then 0 else
+        upperGridCeil (400000^5) (a*b*c*d*d)
+
+/-- Page 51. A computationally pruned row of the four-dimensional upper sum.
+The pruning removes only cells already assigned weight zero. -/
+def lowerFourRow (i : ℕ) : ℕ :=
+  ∑ j ∈ Finset.range (min 128 (i+2)),
+    if 224998 < lowerFourGridPoint i+2*lowerFourGridPoint j then 0 else
+      ∑ k ∈ Finset.range (min 128 (j+2)),
+        if 212498 < lowerFourGridPoint i+lowerFourGridPoint j+lowerFourGridPoint k then 0 else
+          ∑ l ∈ Finset.range (min 128 (k+2)), lowerFourCellWeight i j k l
+
+/-- Page 51. The explicit integer upper sum for the four-prime discard. -/
+def lowerFourTotal : ℕ := ∑ i ∈ Finset.range 128, lowerFourRow i
+/-- Page 51. Each four-prime whole-cell grouping test gives a legal real grouping. -/
+theorem lower_four_covered_sound {ε a b c d : ℝ} {ia iA ib iB ic iC id iD : ℕ}
+    (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+    (ha : a ∈ Set.Icc ((ia:ℝ)/400000) ((iA:ℝ)/400000))
+    (hb : b ∈ Set.Icc ((ib:ℝ)/400000) ((iB:ℝ)/400000))
+    (hc : c ∈ Set.Icc ((ic:ℝ)/400000) ((iC:ℝ)/400000))
+    (hd : d ∈ Set.Icc ((id:ℝ)/400000) ((iD:ℝ)/400000))
+    (hca : (1+7*(2*(1/16-1/10^5)))/15-ε ≤ a)
+    (hcb : (1+7*(2*(1/16-1/10^5)))/15-ε ≤ b)
+    (hcc : (1+7*(2*(1/16-1/10^5)))/15-ε ≤ c)
+    (hcd : (1+7*(2*(1/16-1/10^5)))/15-ε ≤ d)
+    (ht : lowerFourGridCovered ia iA ib iB ic iC id iD = true) :
+    lowerFourCovered ε a b c d := by
+  have hsum {x y z : ℝ} {ix iX iy iY iz iZ : ℕ}
+      (hx : x ∈ Set.Icc ((ix:ℝ)/400000) ((iX:ℝ)/400000))
+      (hy : y ∈ Set.Icc ((iy:ℝ)/400000) ((iY:ℝ)/400000))
+      (hz : z ∈ Set.Icc ((iz:ℝ)/400000) ((iZ:ℝ)/400000)) :
+      x+y+z ∈ Set.Icc (((ix+iy+iz:ℕ):ℝ)/400000) (((iX+iY+iZ:ℕ):ℝ)/400000) := by
+    push_cast
+    constructor <;> linarith [hx.1,hx.2,hy.1,hy.2,hz.1,hz.2]
+  have h1 := upper_grid_covered_sound hε hε' ha hb hc hca hcb hcc
+  have h2 := upper_grid_covered_sound hε hε' ha hb hd hca hcb hcd
+  have h3 := upper_grid_covered_sound hε hε' ha hc hd hca hcc hcd
+  have h4 := upper_grid_covered_sound hε hε' hb hc hd hcb hcc hcd
+  have h5 := upper_grid_good_sound rfl rfl rfl rfl hε hε' (hsum ha hb hc) hd hcd
+  have h6 := upper_grid_good_sound rfl rfl rfl rfl hε hε' (hsum ha hb hd) hc hcc
+  have h7 := upper_grid_good_sound rfl rfl rfl rfl hε hε' (hsum ha hc hd) hb hcb
+  have h8 := upper_grid_good_sound rfl rfl rfl rfl hε hε' (hsum hb hc hd) ha hca
+  simp only [lowerFourGridCovered, Bool.or_eq_true, or_assoc] at ht
+  unfold lowerFourCovered
+  rcases ht with ht|ht|ht|ht|ht|ht|ht|ht
+  · exact Or.inl (h1 ht)
+  · exact Or.inr (Or.inl (h2 ht))
+  · exact Or.inr (Or.inr (Or.inl (h3 ht)))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl (h4 ht))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (h5 ht)))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (h6 ht))))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (h7 ht)))))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (h8 ht)))))))
+
+
+/-- Page 51. Every four-prime grid cell has width 587 divided by 400000. -/
+theorem lower_four_grid_step (i : ℕ) :
+    lowerFourGridReal (i+1)-lowerFourGridReal i = (587:ℝ)/400000 := by
+  simp [lowerFourGridReal,lowerFourGridPoint,Nat.cast_add,Nat.cast_mul]
+  ring
+
+
+/-- Page 51. The computational row pruning removes only zero weights. -/
+theorem lower_four_row_full (i : ℕ) : lowerFourRow i =
+    ∑ j ∈ Finset.range 128, ∑ k ∈ Finset.range 128,
+      ∑ l ∈ Finset.range 128, lowerFourCellWeight i j k l := by
+  have cut (n m : ℕ) (f : ℕ → ℕ) (hf : ∀ r, m ≤ r → f r = 0) :
+      (∑ r ∈ Finset.range n, f r) = ∑ r ∈ Finset.range (min n m), f r := by
+    symm
+    apply Finset.sum_subset (Finset.range_mono (Nat.min_le_left n m))
+    intro r hr hr'
+    simp only [Finset.mem_range] at hr hr'
+    exact hf r (by omega)
+  symm
+  unfold lowerFourRow
+  rw [cut 128 (i+2) _ (by
+    intro j hj
+    apply Finset.sum_eq_zero
+    intro k hk
+    apply Finset.sum_eq_zero
+    intro l hl
+    simp [lowerFourCellWeight,hj])]
+  apply Finset.sum_congr rfl
+  intro j hj
+  by_cases ho : 224998 < lowerFourGridPoint i+2*lowerFourGridPoint j
+  · rw [if_pos ho]
+    apply Finset.sum_eq_zero
+    intro k hk
+    apply Finset.sum_eq_zero
+    intro l hl
+    simp [lowerFourCellWeight,ho]
+  · rw [if_neg ho]
+    rw [cut 128 (j+2) _ (by
+      intro k hk
+      apply Finset.sum_eq_zero
+      intro l hl
+      simp [lowerFourCellWeight,hk])]
+    apply Finset.sum_congr rfl
+    intro k hk
+    by_cases hq : 212498 < lowerFourGridPoint i+lowerFourGridPoint j+lowerFourGridPoint k
+    · rw [if_pos hq]
+      apply Finset.sum_eq_zero
+      intro l hl
+      simp [lowerFourCellWeight,hq]
+    · rw [if_neg hq]
+      apply cut
+      intro l hl
+      simp [lowerFourCellWeight,hl]
+
+/-- Page 51. A four-prime cell is bounded by its upward rational weight.
+CONDITIONAL on the defining Buchstab equations and zero extension. -/
+theorem lower_four_raw_bound {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {i j k l : ℕ} {a b c d : ℝ}
+    (ha : a ∈ Set.Icc (lowerFourGridReal i) (lowerFourGridReal (i+1)))
+    (hb : b ∈ Set.Icc (lowerFourGridReal j) (lowerFourGridReal (j+1)))
+    (hc : c ∈ Set.Icc (lowerFourGridReal k) (lowerFourGridReal (k+1)))
+    (hd : d ∈ Set.Icc (lowerFourGridReal l) (lowerFourGridReal (l+1))) :
+    ω ((1-a-b-c-d)/d)/(a*b*c*d^2) ≤
+      (upperGridCeil (400000^5) (lowerFourGridPoint i*lowerFourGridPoint j*
+        lowerFourGridPoint k*lowerFourGridPoint l*lowerFourGridPoint l) : ℕ) := by
+  have hp (i : ℕ) : (0:ℝ) < lowerFourGridPoint i := by
+    unfold lowerFourGridPoint
+    positivity
+  have hlow (i : ℕ) : 0 < lowerFourGridReal i := by
+    exact div_pos (hp i) (by norm_num)
+  have hpi := hlow i
+  have hpj := hlow j
+  have hpk := hlow k
+  have hpl := hlow l
+  have ha0 : 0 < a := lt_of_lt_of_le (hlow i) ha.1
+  have hb0 : 0 < b := lt_of_lt_of_le (hlow j) hb.1
+  have hc0 : 0 < c := lt_of_lt_of_le (hlow k) hc.1
+  have hd0 : 0 < d := lt_of_lt_of_le (hlow l) hd.1
+  have hden : lowerFourGridReal i*lowerFourGridReal j*lowerFourGridReal k*
+      lowerFourGridReal l^2 ≤ a*b*c*d^2 := by gcongr <;> linarith [hpi,hpj,hpk,hpl,ha.1,hb.1,hc.1,hd.1]
+  have hbound := LeanLab.ChenDoubleSieve.Wu04Functional.extended_buchstab_le_one hω hz ((1-a-b-c-d)/d)
+  have hceil := upper_grid_ceil_bound (n:=400000^5)
+    (d:=lowerFourGridPoint i*lowerFourGridPoint j*lowerFourGridPoint k*
+      lowerFourGridPoint l*lowerFourGridPoint l) (by unfold lowerFourGridPoint; positivity)
+  have he : 1/(lowerFourGridReal i*lowerFourGridReal j*lowerFourGridReal k*lowerFourGridReal l^2) =
+      (400000:ℝ)^5/(lowerFourGridPoint i*lowerFourGridPoint j*
+        lowerFourGridPoint k*lowerFourGridPoint l*lowerFourGridPoint l : ℕ) := by
+    unfold lowerFourGridReal
+    push_cast
+    field_simp <;> ring
+  calc
+    _ ≤ 1/(a*b*c*d^2) := div_le_div_of_nonneg_right hbound (by positivity)
+    _ ≤ 1/(lowerFourGridReal i*lowerFourGridReal j*lowerFourGridReal k*lowerFourGridReal l^2) :=
+      div_le_div_of_nonneg_left zero_le_one (by positivity) hden
+    _ = _ := he
+    _ ≤ _ := by simpa only [Nat.cast_pow,Nat.cast_ofNat] using hceil
+
+
+set_option maxRecDepth 100000 in
+/-- Page 51. Whole-cell support and grouping checks bound the conservative E4 integrand.
+CONDITIONAL on the defining Buchstab equations and zero extension. -/
+theorem lower_four_cell_bound {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+    {i j k l : ℕ} {a b c d : ℝ}
+    (ha : a ∈ Set.Icc (lowerFourGridReal i) (lowerFourGridReal (i+1)))
+    (hb : b ∈ Set.Icc (lowerFourGridReal j) (lowerFourGridReal (j+1)))
+    (hc : c ∈ Set.Icc (lowerFourGridReal k) (lowerFourGridReal (k+1)))
+    (hd : d ∈ Set.Icc (lowerFourGridReal l) (lowerFourGridReal (l+1))) :
+    lowerFourDeletedIntegrand ω ε a b c d ≤ (lowerFourCellWeight i j k l : ℝ) := by
+  unfold lowerFourDeletedIntegrand
+  split_ifs with hdom hu
+  · exact Nat.cast_nonneg _
+  · obtain ⟨hcd1,hdc,hcb,hba,hD,hTriple,hnot⟩ := hdom
+    have he (i : ℕ) : lowerFourGridPoint (i+1) = lowerFourGridPoint i+587 := by
+      unfold lowerFourGridPoint
+      omega
+    have ha' : a ∈ Set.Icc ((lowerFourGridPoint i:ℝ)/400000) (((lowerFourGridPoint i+587:ℕ):ℝ)/400000) := by
+      simpa only [lowerFourGridReal,he] using ha
+    have hb' : b ∈ Set.Icc ((lowerFourGridPoint j:ℝ)/400000) (((lowerFourGridPoint j+587:ℕ):ℝ)/400000) := by
+      simpa only [lowerFourGridReal,he] using hb
+    have hc' : c ∈ Set.Icc ((lowerFourGridPoint k:ℝ)/400000) (((lowerFourGridPoint k+587:ℕ):ℝ)/400000) := by
+      simpa only [lowerFourGridReal,he] using hc
+    have hd' : d ∈ Set.Icc ((lowerFourGridPoint l:ℝ)/400000) (((lowerFourGridPoint l+587:ℕ):ℝ)/400000) := by
+      simpa only [lowerFourGridReal,he] using hd
+    have hcc1 := le_trans hcd1 hdc
+    have hcb1 := le_trans hcc1 hcb
+    have hca1 := le_trans hcb1 hba
+    have hcover : lowerFourGridCovered (lowerFourGridPoint i) (lowerFourGridPoint i+587)
+        (lowerFourGridPoint j) (lowerFourGridPoint j+587)
+        (lowerFourGridPoint k) (lowerFourGridPoint k+587)
+        (lowerFourGridPoint l) (lowerFourGridPoint l+587) = false := by
+      apply Bool.eq_false_iff.mpr
+      intro ht
+      exact hnot (lower_four_covered_sound hε hε' ha' hb' hc' hd' hca1 hcb1 hcc1 hcd1 ht)
+    have haR := ha
+    have hbR := hb
+    have hcR := hc
+    have hdR := hd
+    norm_num [lowerFourGridReal,lowerFourGridPoint,Nat.cast_add,Nat.cast_mul] at haR hbR hcR hdR
+    have hindex : ¬(i+2 ≤ j ∨ j+2 ≤ k ∨ k+2 ≤ l) := by
+      intro hout
+      rcases hout with hij | hjk | hkl
+      · have hR : (i:ℝ)+2 ≤ j := by exact_mod_cast hij
+        linarith [haR.2,hbR.1]
+      · have hR : (j:ℝ)+2 ≤ k := by exact_mod_cast hjk
+        linarith [hbR.2,hcR.1]
+      · have hR : (k:ℝ)+2 ≤ l := by exact_mod_cast hkl
+        linarith [hcR.2,hdR.1]
+    have hp := upper_grid_parameters hε hε'
+    have hd0 : 0 < d := by linarith [hp.1]
+    have hsupport : a+b+c+2*d ≤ 1 := by
+      have hh := (le_div_iff₀ hd0).1 (le_of_not_gt hu)
+      linarith
+    have hout : ¬(224998 < lowerFourGridPoint i+2*lowerFourGridPoint j ∨
+        212498 < lowerFourGridPoint i+lowerFourGridPoint j+lowerFourGridPoint k ∨
+        400000 < lowerFourGridPoint i+lowerFourGridPoint j+lowerFourGridPoint k+2*lowerFourGridPoint l) := by
+      intro h
+      rcases h with h|h|h
+      · have hR : (224998:ℝ) < lowerFourGridPoint i+2*lowerFourGridPoint j := by exact_mod_cast h
+        norm_num [lowerFourGridPoint,Nat.cast_add,Nat.cast_mul] at hR hD
+        linarith [haR.1,hbR.1]
+      · have hR : (212498:ℝ) < lowerFourGridPoint i+lowerFourGridPoint j+lowerFourGridPoint k := by exact_mod_cast h
+        norm_num [lowerFourGridPoint,Nat.cast_add,Nat.cast_mul] at hR hTriple
+        linarith [haR.1,hbR.1,hcR.1]
+      · have hR : (400000:ℝ) < lowerFourGridPoint i+lowerFourGridPoint j+lowerFourGridPoint k+2*lowerFourGridPoint l := by exact_mod_cast h
+        norm_num [lowerFourGridPoint,Nat.cast_add,Nat.cast_mul] at hR
+        linarith [haR.1,hbR.1,hcR.1,hdR.1]
+    simpa only [lowerFourCellWeight,if_neg hindex,if_neg hout,hcover,Bool.false_eq_true,↓reduceIte]
+      using lower_four_raw_bound hω hz ha hb hc hd
+  · exact Nat.cast_nonneg _
+
+/-- Page 51. A fourfold nonnegative grid upper sum bounds the totalized Bochner integral.
+This theorem asserts an upper bound and does not assert integrability. -/
+theorem lower_four_integral_of_cells (f : ℝ → ℝ → ℝ → ℝ → ℝ)
+    (hb : ∀ i < 128, ∀ j < 128, ∀ k < 128, ∀ l < 128,
+      ∀ a ∈ Set.Icc (lowerFourGridReal i) (lowerFourGridReal (i+1)),
+      ∀ b ∈ Set.Icc (lowerFourGridReal j) (lowerFourGridReal (j+1)),
+      ∀ c ∈ Set.Icc (lowerFourGridReal k) (lowerFourGridReal (k+1)),
+      ∀ d ∈ Set.Icc (lowerFourGridReal l) (lowerFourGridReal (l+1)),
+      f a b c d ≤ (lowerFourCellWeight i j k l : ℝ)) :
+    (∫ a in lowerFourGridReal 0..lowerFourGridReal 128,
+      ∫ b in lowerFourGridReal 0..lowerFourGridReal 128,
+        ∫ c in lowerFourGridReal 0..lowerFourGridReal 128,
+          ∫ d in lowerFourGridReal 0..lowerFourGridReal 128, f a b c d) ≤
+      (lowerFourTotal : ℝ)*(587/400000 : ℝ)^4 := by
+  let s : ℝ := 587/400000
+  have hs : 0 ≤ s := by norm_num [s]
+  have hp : Monotone lowerFourGridReal := by
+    intro i j hij
+    norm_num [lowerFourGridReal,lowerFourGridPoint,Nat.cast_add,Nat.cast_mul]
+    have hR : (i:ℝ) ≤ j := by exact_mod_cast hij
+    linarith
+  have h1 (i j k : ℕ) (hi : i < 128) (hj : j < 128) (hk : k < 128)
+      (a b c : ℝ)
+      (ha : a ∈ Set.Icc (lowerFourGridReal i) (lowerFourGridReal (i+1)))
+      (hb' : b ∈ Set.Icc (lowerFourGridReal j) (lowerFourGridReal (j+1)))
+      (hc : c ∈ Set.Icc (lowerFourGridReal k) (lowerFourGridReal (k+1))) :
+      (∫ d in lowerFourGridReal 0..lowerFourGridReal 128, f a b c d) ≤
+        ∑ l ∈ Finset.range 128, s*(lowerFourCellWeight i j k l : ℝ) := by
+    have h := integral_le_nonnegative_panel_sum lowerFourGridReal 128 (f a b c)
+      (fun l => (lowerFourCellWeight i j k l:ℝ)) hp (by intros; positivity)
+      (fun l hl d hd => hb i hi j hj k hk l hl a ha b hb' c hc d hd)
+    simpa only [lower_four_grid_step] using h
+  have h2 (i j : ℕ) (hi : i < 128) (hj : j < 128) (a b : ℝ)
+      (ha : a ∈ Set.Icc (lowerFourGridReal i) (lowerFourGridReal (i+1)))
+      (hb' : b ∈ Set.Icc (lowerFourGridReal j) (lowerFourGridReal (j+1))) :
+      (∫ c in lowerFourGridReal 0..lowerFourGridReal 128,
+        ∫ d in lowerFourGridReal 0..lowerFourGridReal 128, f a b c d) ≤
+        ∑ k ∈ Finset.range 128, s*(∑ l ∈ Finset.range 128,
+          s*(lowerFourCellWeight i j k l:ℝ)) := by
+    have h := integral_le_nonnegative_panel_sum lowerFourGridReal 128
+      (fun c => ∫ d in lowerFourGridReal 0..lowerFourGridReal 128, f a b c d)
+      (fun k => ∑ l ∈ Finset.range 128,s*(lowerFourCellWeight i j k l:ℝ))
+      hp (by intros; positivity) (fun k hk c hc => h1 i j k hi hj hk a b c ha hb' hc)
+    simpa only [lower_four_grid_step] using h
+  have h3 (i : ℕ) (hi : i < 128) (a : ℝ)
+      (ha : a ∈ Set.Icc (lowerFourGridReal i) (lowerFourGridReal (i+1))) :
+      (∫ b in lowerFourGridReal 0..lowerFourGridReal 128,
+        ∫ c in lowerFourGridReal 0..lowerFourGridReal 128,
+          ∫ d in lowerFourGridReal 0..lowerFourGridReal 128, f a b c d) ≤
+        ∑ j ∈ Finset.range 128,s*(∑ k ∈ Finset.range 128,
+          s*(∑ l ∈ Finset.range 128,s*(lowerFourCellWeight i j k l:ℝ))) := by
+    have h := integral_le_nonnegative_panel_sum lowerFourGridReal 128
+      (fun b => ∫ c in lowerFourGridReal 0..lowerFourGridReal 128,
+        ∫ d in lowerFourGridReal 0..lowerFourGridReal 128,f a b c d)
+      (fun j => ∑ k ∈ Finset.range 128,s*(∑ l ∈ Finset.range 128,s*(lowerFourCellWeight i j k l:ℝ)))
+      hp (by intros; positivity) (fun j hj b hb' => h2 i j hi hj a b ha hb')
+    simpa only [lower_four_grid_step] using h
+  have h := integral_le_nonnegative_panel_sum lowerFourGridReal 128
+    (fun a => ∫ b in lowerFourGridReal 0..lowerFourGridReal 128,
+      ∫ c in lowerFourGridReal 0..lowerFourGridReal 128,
+        ∫ d in lowerFourGridReal 0..lowerFourGridReal 128,f a b c d)
+    (fun i => ∑ j ∈ Finset.range 128,s*(∑ k ∈ Finset.range 128,
+      s*(∑ l ∈ Finset.range 128,s*(lowerFourCellWeight i j k l:ℝ))))
+    hp (by intros; positivity) h3
+  simp only [lower_four_grid_step] at h
+  have hfull : (∑ i ∈ Finset.range 128,∑ j ∈ Finset.range 128,
+      ∑ k ∈ Finset.range 128,∑ l ∈ Finset.range 128,lowerFourCellWeight i j k l) = lowerFourTotal := by
+    unfold lowerFourTotal
+    apply Finset.sum_congr rfl
+    intro i hi
+    exact (lower_four_row_full i).symm
+  have hcast : (∑ i ∈ Finset.range 128,∑ j ∈ Finset.range 128,
+      ∑ k ∈ Finset.range 128,∑ l ∈ Finset.range 128,(lowerFourCellWeight i j k l:ℝ)) = (lowerFourTotal:ℝ) := by
+    have hh := congrArg (fun n : ℕ => (n:ℝ)) hfull
+    simpa only [Nat.cast_sum] using hh
+  have he : (∑ i ∈ Finset.range 128,s*(∑ j ∈ Finset.range 128,
+      s*(∑ k ∈ Finset.range 128,s*(∑ l ∈ Finset.range 128,s*(lowerFourCellWeight i j k l:ℝ)))) ) =
+      (lowerFourTotal:ℝ)*s^4 := by
+    calc
+      _ = (∑ i ∈ Finset.range 128,∑ j ∈ Finset.range 128,
+          ∑ k ∈ Finset.range 128,∑ l ∈ Finset.range 128,(lowerFourCellWeight i j k l:ℝ))*s^4 := by
+        simp only [← Finset.mul_sum]
+        ring
+      _ = _ := by rw [hcast]
+  rw [he] at h
+  exact h
+
+
+/-- Page 51. The conservative four-prime discarded integral on the rational box. -/
+noncomputable def lowerFourDeletedIntegral (ω : ℝ → ℝ) (ε : ℝ) : ℝ :=
+  ∫ a in lowerFourGridReal 0..lowerFourGridReal 128,
+    ∫ b in lowerFourGridReal 0..lowerFourGridReal 128,
+      ∫ c in lowerFourGridReal 0..lowerFourGridReal 128,
+        ∫ d in lowerFourGridReal 0..lowerFourGridReal 128,lowerFourDeletedIntegrand ω ε a b c d
+
+/-- Page 51. The actual conservative four-prime integrand has the explicit integer upper sum.
+CONDITIONAL on the defining Buchstab equations and zero extension. -/
+theorem lower_four_integral_bound {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8) :
+    lowerFourDeletedIntegral ω ε ≤ (lowerFourTotal:ℝ)*(587/400000:ℝ)^4 := by
+  apply lower_four_integral_of_cells
+  intro i hi j hj k hk l hl a ha b hb c hc d hd
+  exact lower_four_cell_bound hω hz hε hε' ha hb hc hd
+
+/-- Page 51. The entire ordered four-prime decomposition domain lies in the rational box.
+The upper endpoint follows from D and the lower c1 bound, not from numerical sampling. -/
+theorem lower_four_domain_box {ε a b c d : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+    (hd : (1+7*(2*(1/16-1/10^5)))/15-ε ≤ d)
+    (hdc : d ≤ c) (hcb : c ≤ b) (hba : b ≤ a)
+    (hD : a+2*b ≤ 1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε) :
+    a ∈ Set.Icc (lowerFourGridReal 0) (lowerFourGridReal 128) ∧
+    b ∈ Set.Icc (lowerFourGridReal 0) (lowerFourGridReal 128) ∧
+    c ∈ Set.Icc (lowerFourGridReal 0) (lowerFourGridReal 128) ∧
+    d ∈ Set.Icc (lowerFourGridReal 0) (lowerFourGridReal 128) := by
+  norm_num [lowerFourGridReal,lowerFourGridPoint] at *
+  refine ⟨⟨?_,?_⟩,⟨?_,?_⟩,⟨?_,?_⟩,⟨?_,?_⟩⟩ <;> linarith
+
+/-- Page 51. Rational nodes for auxiliary Buchstab tangent envelopes. -/
+noncomputable def buchstabLogNode (i : Fin 7) : ℝ := ![1,11/10,6/5,13/10,7/5,3/2,8/5] i
+
+/-- Page 51. Upward rational logarithm enclosures for the tangent nodes. -/
+noncomputable def buchstabLogCap (i : Fin 7) : ℝ :=
+  ![0,95311/1000000,182322/1000000,262365/1000000,336473/1000000,405466/1000000,470004/1000000] i
+
+set_option maxHeartbeats 1000000 in
+/-- Page 51. All logarithm caps and tangent signs follow from rational interval arithmetic.
+The logarithm remainder is supplied by the proved finite-series enclosure. -/
+theorem buchstab_log_nodes (i : Fin 7) :
+    0 < buchstabLogNode i ∧ Real.log (buchstabLogNode i) ≤ buchstabLogCap i ∧
+    buchstabLogCap i ≤ 1/buchstabLogNode i ∧
+    (567144/1000000:ℝ) ≤ 1/buchstabLogNode i +
+      (buchstabLogCap i-1/buchstabLogNode i)/3 := by
+  have ha : 1 ≤ buchstabLogNode i := by fin_cases i <;> norm_num [buchstabLogNode]
+  have hlog := (LeanLab.ChenDoubleSieve.Wu04Integral.log_bounds 8 ha).2
+  have hcap : LeanLab.ChenDoubleSieve.Wu04Integral.logUpper 8 (buchstabLogNode i) ≤ buchstabLogCap i := by
+    fin_cases i <;> norm_num [buchstabLogNode,buchstabLogCap,
+      LeanLab.ChenDoubleSieve.Wu04Integral.logUpper,LeanLab.ChenDoubleSieve.Wu04Integral.logLower,
+      Finset.sum_range_succ]
+  refine ⟨by linarith, hlog.trans hcap, ?_, ?_⟩ <;>
+    fin_cases i <;> norm_num [buchstabLogNode,buchstabLogCap]
+
+
+/-- Page 51. A certified logarithm tangent bounds Buchstab above two.
+The third-point condition connects the explicit two-to-three formula to the global envelope.
+CONDITIONAL on the defining Buchstab equations. -/
+theorem buchstab_tangent_upper {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    {a L u : ℝ} (ha : 0 < a) (hL : Real.log a ≤ L)
+    (hneg : L-1/a ≤ 0) (hthree : (567144/1000000:ℝ) ≤ 1/a+(L-1/a)/3)
+    (hu : 2 ≤ u) : ω u ≤ 1/a+(L-1/a)/u := by
+  by_cases hu3 : u ≤ 3
+  · rw [LeanLab.ChenDoubleSieve.Wu04Buchstab.formula_two_three hω ⟨hu,hu3⟩]
+    have hu0 : 0 < u := by linarith
+    have hu1 : 0 < u-1 := by linarith
+    have hh := Real.log_le_sub_one_of_pos (div_pos hu1 ha)
+    rw [Real.log_div hu1.ne' ha.ne'] at hh
+    apply (div_le_iff₀ hu0).2
+    have he : (1/a+(L-1/a)/u)*u = (u-1)/a+L := by field_simp <;> ring
+    rw [he]
+    linarith
+  · apply (LeanLab.ChenDoubleSieve.Wu04Buchstab.buchstab_le_567144 hω hu).trans
+    have hrec : 1/u ≤ (1/3:ℝ) := one_div_le_one_div_of_le (by norm_num) (le_of_not_ge hu3)
+    have hm := mul_le_mul_of_nonpos_left hrec hneg
+    have hs : 1/a+(L-1/a)/3 ≤ 1/a+(L-1/a)/u := by
+      simpa only [div_eq_mul_inv,one_div,one_mul] using add_le_add (le_refl (1/a)) hm
+    exact hthree.trans hs
+
+
+/-- Page 51. A whole interval above two has an explicit rational tangent upper bound.
+This is the pointwise estimate needed for rational E2 boxes without floating point logs.
+CONDITIONAL on the defining Buchstab equations. -/
+theorem buchstab_tangent_cell_upper {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (i : Fin 7) {u U : ℝ} (hu : 2 ≤ u) (hU : u ≤ U) :
+    ω u ≤ 1/buchstabLogNode i+(buchstabLogCap i-1/buchstabLogNode i)/U := by
+  obtain ⟨ha,hL,hneg,hthree⟩ := buchstab_log_nodes i
+  have ht := buchstab_tangent_upper hω ha hL (sub_nonpos.mpr hneg) hthree hu
+  have hu0 : 0 < u := by linarith
+  have hrec : 1/U ≤ 1/u := one_div_le_one_div_of_le hu0 hU
+  have hm := mul_le_mul_of_nonpos_left hrec (sub_nonpos.mpr hneg)
+  have hs : 1/buchstabLogNode i+(buchstabLogCap i-1/buchstabLogNode i)/u ≤
+      1/buchstabLogNode i+(buchstabLogCap i-1/buchstabLogNode i)/U := by
+    simpa only [div_eq_mul_inv,one_div,one_mul] using add_le_add (le_refl (1/buchstabLogNode i)) hm
+  exact ht.trans hs
+
+/-- Page 51. Row totals of the explicit four-prime certificate. -/
+def lowerFourRowTotal : ℕ → ℕ
+  | 0 => 32782
+  | 1 => 0
+  | 2 => 0
+  | 3 => 0
+  | 4 => 0
+  | 5 => 0
+  | 6 => 0
+  | 7 => 0
+  | 8 => 0
+  | 9 => 18053
+  | 10 => 197858
+  | 11 => 717255
+  | 12 => 1555810
+  | 13 => 2138393
+  | 14 => 2488030
+  | 15 => 2233272
+  | 16 => 1952656
+  | 17 => 1077892
+  | 18 => 849843
+  | 19 => 295254
+  | 20 => 156545
+  | 21 => 0
+  | 22 => 0
+  | 23 => 0
+  | 24 => 0
+  | 25 => 86788
+  | 26 => 302138
+  | 27 => 703907
+  | 28 => 1401753
+  | 29 => 2209216
+  | 30 => 3100319
+  | 31 => 3670541
+  | 32 => 4057791
+  | 33 => 3641142
+  | 34 => 2881702
+  | 35 => 2138023
+  | 36 => 1821164
+  | 37 => 1129546
+  | 38 => 724712
+  | 39 => 408677
+  | 40 => 336383
+  | 41 => 154838
+  | 42 => 64857
+  | 43 => 8070
+  | 44 => 0
+  | 45 => 0
+  | 46 => 0
+  | 47 => 0
+  | 48 => 0
+  | 49 => 0
+  | 50 => 0
+  | 51 => 0
+  | 52 => 0
+  | 53 => 0
+  | 54 => 0
+  | 55 => 0
+  | 56 => 0
+  | 57 => 0
+  | 58 => 0
+  | 59 => 0
+  | 60 => 0
+  | 61 => 0
+  | 62 => 0
+  | 63 => 0
+  | 64 => 0
+  | 65 => 0
+  | 66 => 0
+  | 67 => 0
+  | 68 => 0
+  | 69 => 1028505
+  | 70 => 961698
+  | 71 => 881428
+  | 72 => 732894
+  | 73 => 700788
+  | 74 => 698204
+  | 75 => 634625
+  | 76 => 570867
+  | 77 => 503946
+  | 78 => 421323
+  | 79 => 307792
+  | 80 => 280961
+  | 81 => 270296
+  | 82 => 257917
+  | 83 => 145992
+  | 84 => 65255
+  | 85 => 16408
+  | 86 => 0
+  | 87 => 0
+  | 88 => 0
+  | 89 => 0
+  | 90 => 0
+  | 91 => 0
+  | 92 => 0
+  | 93 => 0
+  | 94 => 0
+  | 95 => 0
+  | 96 => 0
+  | 97 => 0
+  | 98 => 0
+  | 99 => 0
+  | 100 => 0
+  | 101 => 0
+  | 102 => 0
+  | 103 => 0
+  | 104 => 0
+  | 105 => 0
+  | 106 => 0
+  | 107 => 0
+  | 108 => 0
+  | 109 => 0
+  | 110 => 0
+  | 111 => 0
+  | 112 => 0
+  | 113 => 0
+  | 114 => 0
+  | 115 => 0
+  | 116 => 0
+  | 117 => 0
+  | 118 => 0
+  | 119 => 0
+  | 120 => 0
+  | 121 => 0
+  | 122 => 0
+  | 123 => 0
+  | 124 => 0
+  | 125 => 0
+  | 126 => 0
+  | 127 => 0
+  | _ => 0
+
+set_option maxRecDepth 1000000 in
+set_option maxHeartbeats 0 in
+/-- Page 51. The pruned integer upper sum is checked by kernel reduction. -/
+theorem lower_four_total : lowerFourTotal = 51034109 := by
+  have h0 : lowerFourRow 0 = 32782 := by decide +kernel
+  have h1 : lowerFourRow 1 = 0 := by decide +kernel
+  have h2 : lowerFourRow 2 = 0 := by decide +kernel
+  have h3 : lowerFourRow 3 = 0 := by decide +kernel
+  have h4 : lowerFourRow 4 = 0 := by decide +kernel
+  have h5 : lowerFourRow 5 = 0 := by decide +kernel
+  have h6 : lowerFourRow 6 = 0 := by decide +kernel
+  have h7 : lowerFourRow 7 = 0 := by decide +kernel
+  have h8 : lowerFourRow 8 = 0 := by decide +kernel
+  have h9 : lowerFourRow 9 = 18053 := by decide +kernel
+  have h10 : lowerFourRow 10 = 197858 := by decide +kernel
+  have h11 : lowerFourRow 11 = 717255 := by decide +kernel
+  have h12 : lowerFourRow 12 = 1555810 := by decide +kernel
+  have h13 : lowerFourRow 13 = 2138393 := by decide +kernel
+  have h14 : lowerFourRow 14 = 2488030 := by decide +kernel
+  have h15 : lowerFourRow 15 = 2233272 := by decide +kernel
+  have h16 : lowerFourRow 16 = 1952656 := by decide +kernel
+  have h17 : lowerFourRow 17 = 1077892 := by decide +kernel
+  have h18 : lowerFourRow 18 = 849843 := by decide +kernel
+  have h19 : lowerFourRow 19 = 295254 := by decide +kernel
+  have h20 : lowerFourRow 20 = 156545 := by decide +kernel
+  have h21 : lowerFourRow 21 = 0 := by decide +kernel
+  have h22 : lowerFourRow 22 = 0 := by decide +kernel
+  have h23 : lowerFourRow 23 = 0 := by decide +kernel
+  have h24 : lowerFourRow 24 = 0 := by decide +kernel
+  have h25 : lowerFourRow 25 = 86788 := by decide +kernel
+  have h26 : lowerFourRow 26 = 302138 := by decide +kernel
+  have h27 : lowerFourRow 27 = 703907 := by decide +kernel
+  have h28 : lowerFourRow 28 = 1401753 := by decide +kernel
+  have h29 : lowerFourRow 29 = 2209216 := by decide +kernel
+  have h30 : lowerFourRow 30 = 3100319 := by decide +kernel
+  have h31 : lowerFourRow 31 = 3670541 := by decide +kernel
+  have h32 : lowerFourRow 32 = 4057791 := by decide +kernel
+  have h33 : lowerFourRow 33 = 3641142 := by decide +kernel
+  have h34 : lowerFourRow 34 = 2881702 := by decide +kernel
+  have h35 : lowerFourRow 35 = 2138023 := by decide +kernel
+  have h36 : lowerFourRow 36 = 1821164 := by decide +kernel
+  have h37 : lowerFourRow 37 = 1129546 := by decide +kernel
+  have h38 : lowerFourRow 38 = 724712 := by decide +kernel
+  have h39 : lowerFourRow 39 = 408677 := by decide +kernel
+  have h40 : lowerFourRow 40 = 336383 := by decide +kernel
+  have h41 : lowerFourRow 41 = 154838 := by decide +kernel
+  have h42 : lowerFourRow 42 = 64857 := by decide +kernel
+  have h43 : lowerFourRow 43 = 8070 := by decide +kernel
+  have h44 : lowerFourRow 44 = 0 := by decide +kernel
+  have h45 : lowerFourRow 45 = 0 := by decide +kernel
+  have h46 : lowerFourRow 46 = 0 := by decide +kernel
+  have h47 : lowerFourRow 47 = 0 := by decide +kernel
+  have h48 : lowerFourRow 48 = 0 := by decide +kernel
+  have h49 : lowerFourRow 49 = 0 := by decide +kernel
+  have h50 : lowerFourRow 50 = 0 := by decide +kernel
+  have h51 : lowerFourRow 51 = 0 := by decide +kernel
+  have h52 : lowerFourRow 52 = 0 := by decide +kernel
+  have h53 : lowerFourRow 53 = 0 := by decide +kernel
+  have h54 : lowerFourRow 54 = 0 := by decide +kernel
+  have h55 : lowerFourRow 55 = 0 := by decide +kernel
+  have h56 : lowerFourRow 56 = 0 := by decide +kernel
+  have h57 : lowerFourRow 57 = 0 := by decide +kernel
+  have h58 : lowerFourRow 58 = 0 := by decide +kernel
+  have h59 : lowerFourRow 59 = 0 := by decide +kernel
+  have h60 : lowerFourRow 60 = 0 := by decide +kernel
+  have h61 : lowerFourRow 61 = 0 := by decide +kernel
+  have h62 : lowerFourRow 62 = 0 := by decide +kernel
+  have h63 : lowerFourRow 63 = 0 := by decide +kernel
+  have h64 : lowerFourRow 64 = 0 := by decide +kernel
+  have h65 : lowerFourRow 65 = 0 := by decide +kernel
+  have h66 : lowerFourRow 66 = 0 := by decide +kernel
+  have h67 : lowerFourRow 67 = 0 := by decide +kernel
+  have h68 : lowerFourRow 68 = 0 := by decide +kernel
+  have h69 : lowerFourRow 69 = 1028505 := by decide +kernel
+  have h70 : lowerFourRow 70 = 961698 := by decide +kernel
+  have h71 : lowerFourRow 71 = 881428 := by decide +kernel
+  have h72 : lowerFourRow 72 = 732894 := by decide +kernel
+  have h73 : lowerFourRow 73 = 700788 := by decide +kernel
+  have h74 : lowerFourRow 74 = 698204 := by decide +kernel
+  have h75 : lowerFourRow 75 = 634625 := by decide +kernel
+  have h76 : lowerFourRow 76 = 570867 := by decide +kernel
+  have h77 : lowerFourRow 77 = 503946 := by decide +kernel
+  have h78 : lowerFourRow 78 = 421323 := by decide +kernel
+  have h79 : lowerFourRow 79 = 307792 := by decide +kernel
+  have h80 : lowerFourRow 80 = 280961 := by decide +kernel
+  have h81 : lowerFourRow 81 = 270296 := by decide +kernel
+  have h82 : lowerFourRow 82 = 257917 := by decide +kernel
+  have h83 : lowerFourRow 83 = 145992 := by decide +kernel
+  have h84 : lowerFourRow 84 = 65255 := by decide +kernel
+  have h85 : lowerFourRow 85 = 16408 := by decide +kernel
+  have h86 : lowerFourRow 86 = 0 := by decide +kernel
+  have h87 : lowerFourRow 87 = 0 := by decide +kernel
+  have h88 : lowerFourRow 88 = 0 := by decide +kernel
+  have h89 : lowerFourRow 89 = 0 := by decide +kernel
+  have h90 : lowerFourRow 90 = 0 := by decide +kernel
+  have h91 : lowerFourRow 91 = 0 := by decide +kernel
+  have h92 : lowerFourRow 92 = 0 := by decide +kernel
+  have h93 : lowerFourRow 93 = 0 := by decide +kernel
+  have h94 : lowerFourRow 94 = 0 := by decide +kernel
+  have h95 : lowerFourRow 95 = 0 := by decide +kernel
+  have h96 : lowerFourRow 96 = 0 := by decide +kernel
+  have h97 : lowerFourRow 97 = 0 := by decide +kernel
+  have h98 : lowerFourRow 98 = 0 := by decide +kernel
+  have h99 : lowerFourRow 99 = 0 := by decide +kernel
+  have h100 : lowerFourRow 100 = 0 := by decide +kernel
+  have h101 : lowerFourRow 101 = 0 := by decide +kernel
+  have h102 : lowerFourRow 102 = 0 := by decide +kernel
+  have h103 : lowerFourRow 103 = 0 := by decide +kernel
+  have h104 : lowerFourRow 104 = 0 := by decide +kernel
+  have h105 : lowerFourRow 105 = 0 := by decide +kernel
+  have h106 : lowerFourRow 106 = 0 := by decide +kernel
+  have h107 : lowerFourRow 107 = 0 := by decide +kernel
+  have h108 : lowerFourRow 108 = 0 := by decide +kernel
+  have h109 : lowerFourRow 109 = 0 := by decide +kernel
+  have h110 : lowerFourRow 110 = 0 := by decide +kernel
+  have h111 : lowerFourRow 111 = 0 := by decide +kernel
+  have h112 : lowerFourRow 112 = 0 := by decide +kernel
+  have h113 : lowerFourRow 113 = 0 := by decide +kernel
+  have h114 : lowerFourRow 114 = 0 := by decide +kernel
+  have h115 : lowerFourRow 115 = 0 := by decide +kernel
+  have h116 : lowerFourRow 116 = 0 := by decide +kernel
+  have h117 : lowerFourRow 117 = 0 := by decide +kernel
+  have h118 : lowerFourRow 118 = 0 := by decide +kernel
+  have h119 : lowerFourRow 119 = 0 := by decide +kernel
+  have h120 : lowerFourRow 120 = 0 := by decide +kernel
+  have h121 : lowerFourRow 121 = 0 := by decide +kernel
+  have h122 : lowerFourRow 122 = 0 := by decide +kernel
+  have h123 : lowerFourRow 123 = 0 := by decide +kernel
+  have h124 : lowerFourRow 124 = 0 := by decide +kernel
+  have h125 : lowerFourRow 125 = 0 := by decide +kernel
+  have h126 : lowerFourRow 126 = 0 := by decide +kernel
+  have h127 : lowerFourRow 127 = 0 := by decide +kernel
+  have hrows : ∀ i ∈ Finset.range 128, lowerFourRow i = lowerFourRowTotal i := by
+    intro i hi
+    have hi' := Finset.mem_range.mp hi
+    interval_cases i
+    · exact h0
+    · exact h1
+    · exact h2
+    · exact h3
+    · exact h4
+    · exact h5
+    · exact h6
+    · exact h7
+    · exact h8
+    · exact h9
+    · exact h10
+    · exact h11
+    · exact h12
+    · exact h13
+    · exact h14
+    · exact h15
+    · exact h16
+    · exact h17
+    · exact h18
+    · exact h19
+    · exact h20
+    · exact h21
+    · exact h22
+    · exact h23
+    · exact h24
+    · exact h25
+    · exact h26
+    · exact h27
+    · exact h28
+    · exact h29
+    · exact h30
+    · exact h31
+    · exact h32
+    · exact h33
+    · exact h34
+    · exact h35
+    · exact h36
+    · exact h37
+    · exact h38
+    · exact h39
+    · exact h40
+    · exact h41
+    · exact h42
+    · exact h43
+    · exact h44
+    · exact h45
+    · exact h46
+    · exact h47
+    · exact h48
+    · exact h49
+    · exact h50
+    · exact h51
+    · exact h52
+    · exact h53
+    · exact h54
+    · exact h55
+    · exact h56
+    · exact h57
+    · exact h58
+    · exact h59
+    · exact h60
+    · exact h61
+    · exact h62
+    · exact h63
+    · exact h64
+    · exact h65
+    · exact h66
+    · exact h67
+    · exact h68
+    · exact h69
+    · exact h70
+    · exact h71
+    · exact h72
+    · exact h73
+    · exact h74
+    · exact h75
+    · exact h76
+    · exact h77
+    · exact h78
+    · exact h79
+    · exact h80
+    · exact h81
+    · exact h82
+    · exact h83
+    · exact h84
+    · exact h85
+    · exact h86
+    · exact h87
+    · exact h88
+    · exact h89
+    · exact h90
+    · exact h91
+    · exact h92
+    · exact h93
+    · exact h94
+    · exact h95
+    · exact h96
+    · exact h97
+    · exact h98
+    · exact h99
+    · exact h100
+    · exact h101
+    · exact h102
+    · exact h103
+    · exact h104
+    · exact h105
+    · exact h106
+    · exact h107
+    · exact h108
+    · exact h109
+    · exact h110
+    · exact h111
+    · exact h112
+    · exact h113
+    · exact h114
+    · exact h115
+    · exact h116
+    · exact h117
+    · exact h118
+    · exact h119
+    · exact h120
+    · exact h121
+    · exact h122
+    · exact h123
+    · exact h124
+    · exact h125
+    · exact h126
+    · exact h127
+  calc
+    lowerFourTotal = ∑ i ∈ Finset.range 128, lowerFourRowTotal i :=
+      Finset.sum_congr rfl hrows
+    _ = 51034109 := by decide +kernel
+
+/-- Page 51. The conservative four-prime discarded integral is below one divided by 4000.
+CONDITIONAL on the defining Buchstab equations and zero extension.
+The finite certificate, whole-cell geometry and integral comparison are proved above. -/
+theorem lower_four_discard_small {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8) :
+    lowerFourDeletedIntegral ω ε < 1/4000 := by
+  have hI := lower_four_integral_bound hω hz hε hε'
+  have he : (lowerFourTotal:ℝ)*(587/400000:ℝ)^4 = (51034109:ℝ)*(587/400000:ℝ)^4 :=
+    congrArg (fun n : ℕ => (n:ℝ)*(587/400000:ℝ)^4) lower_four_total
+  have hb : (51034109:ℝ)*(587/400000:ℝ)^4 < 1/4000 := by norm_num
+  exact hI.trans_lt (lt_of_eq_of_lt he hb)
+
+
+/-- Page 51. The remaining numeric E2 input alone gives the lower density margin
+once the certified four-prime discard is subtracted. This is CONDITIONAL on
+that E2 bound and the actual lower density comparison. -/
+theorem lower_density_of_e2_bound {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε e2 v0 : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+    (h2 : e2 ≤ 3799/4000) (hv : 1-e2-lowerFourDeletedIntegral ω ε ≤ v0) :
+    0.05 < v0 := by
+  have h4 := lower_four_discard_small hω hz hε hε'
+  linarith
+
 /-- LEAF. Pages 43 to 52, the lower short weight b0. Lemmas 29 to 35
 supply the moment estimates, the discarded E2 and E4 integrals on page 51
 supply v0 above 0.05, and 5.18 to 5.23 on page 52 normalize condition iv.
