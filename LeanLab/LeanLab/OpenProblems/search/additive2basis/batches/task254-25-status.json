@@ -1,0 +1,1 @@
+{"ell": 4, "target": 3, "status": "OPTIMAL", "seconds": 0.007, "variables": 38, "branches": 114, "conflicts": 3, "score": {"valid": true, "ell": 4, "sizes": [2, 2, 0], "m": 4, "ratio": "1/4", "ratio_float": 0.25, "surplus": -184, "verdict": "BELOW", "miss_below": 3, "miss": 0}}
