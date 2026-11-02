@@ -830,6 +830,27 @@ theorem weighted_singSeries_main_bound : ∃ K : ℝ, ∀ k : ℕ, 2 ≤ k →
          mul_le_mul_of_nonneg_left hprod (by dsimp [B, p, l]; positivity)
        _ = _ := by dsimp [B, p, l, y]; ring
 
+/-- Gallagher 1975 p.138 before display 5. Auxiliary fiberwise reduction: the remainder is at
+most the sum over nonzero differences of the per frequency error of Theorem 3. -/
+theorem major_arc_remainder_le_fiber_sum (k L N : ℕ) (P : ℝ) (E : ℤ → ℝ)
+    (hE : ∀ n : ℤ, n ≠ 0 → |(∫ α in majorArcs N P, ‖Sg N α‖ ^ 2 *
+        (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) -
+        LeanLab.Linnik.Decomp1532b.Jn N n *
+          (LeanLab.Linnik.Decomp1532b.singSeries n).re| ≤ E n) :
+    |(∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0, ∫ α in majorArcs N P,
+          ‖Sg N α‖ ^ 2 *
+            (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) -
+      (∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+          LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+            (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
+      ∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0, E (LeanLab.Linnik.Decomp1532a.dif x) := by
+  rw [← sum_sub_distrib]
+  refine (abs_sum_le_sum_abs _ _).trans (sum_le_sum fun x hx => ?_)
+  exact hE _ (mem_filter.mp hx).2
+
 /-- LEAF. Gallagher 1975 p.127 Theorem 3 and p.138 nonzero correlation error before display 5.
 The absolute error after subtracting the J times singular series main term has a uniform
 exponential part and a remainder that vanishes for fixed k and theta.
