@@ -88,7 +88,9 @@ if names:
     lines = [l for l in ax.splitlines() if "depends on axioms" in l or "does not depend on any axioms" in l]
     bad = [l for l in lines if "depends on axioms" in l and not set(re.findall(r"[\w.]+", l.split("depends on axioms")[1])) <= ok3]
     rep(len(lines) >= len(names), f"#print axioms ran for {len(lines)} of {len(names)} theorems" + ("" if rc == 0 else f", lean exit {rc}"))
-    rep(None if bad else True, "axioms only propext, Classical.choice, Quot.sound" if not bad else f"{len(bad)} theorems use other axioms, label them CONDITIONAL or sorry: " + " | ".join(b.strip()[:160] for b in bad[:8]))
+    # lproof 2026-11-01 PROPOSAL: was WARN for every foreign axiom, so Lean.ofReduceBool passed CI; now only a sorryAx from an open LEAF is a WARN.
+    worse = [l for l in bad if set(re.findall(r"[\w.]+", l.split("depends on axioms")[1])) - ok3 - {"sorryAx"}]
+    rep(False if worse else None if bad else True, "axioms only propext, Classical.choice, Quot.sound" if not bad else f"{len(bad)} theorems use other axioms, label them CONDITIONAL or sorry: " + " | ".join(b.strip()[:160] for b in (worse or bad)[:8]))
     R.append("AXIOMS\n" + "\n".join(lines))
     stm = any(f in {m + "STATEMENTS.md" for m in mines} for f in changed)
     rep(stm, "STATEMENTS.md updated with twins for new theorems")

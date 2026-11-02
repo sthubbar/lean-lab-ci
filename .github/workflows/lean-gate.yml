@@ -70,7 +70,7 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           OUT="$RUNNER_TEMP/gate"; mkdir -p "$OUT"
-          git fetch -q origin main
+          git fetch -q origin +sealtest-base-20261102:refs/remotes/origin/main  # SEAL TEST ONLY
           git config user.name lean-gate; git config user.email lean-gate@users.noreply.github.com
           # Ledger files take both sides, as the gate does.
           printf "LOG.md merge=union\n**/LOG.md merge=union\n**/PROGRESS.md merge=union\n**/STATEMENTS.md merge=union\n" >> .git/info/attributes
@@ -85,6 +85,14 @@ jobs:
           REAL=$(grep "^FAIL" "$OUT/check.txt" | grep -v -E "LOG.md has a line|STATEMENTS.md updated|PROGRESS.md updated|everything committed|uncommitted changes remain" || true)
           if [ -n "$REAL" ]; then echo "GATE CI: real FAIL lines:"; echo "$REAL"; exit 1; fi
           echo "GATE CI: PASS"
+      - name: Vacuity warning, never fails the gate
+        if: success() && (github.ref != 'refs/heads/main' || inputs.branch)
+        continue-on-error: true
+        timeout-minutes: 45
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          OUT="$RUNNER_TEMP/gate"; mkdir -p "$OUT"
+          python3 scripts/vacuity_check.py origin/main --timeout 1500 | tee "$OUT/vacuity.txt" || true
       - name: Keep the reports
         if: always()
         uses: actions/upload-artifact@v4
