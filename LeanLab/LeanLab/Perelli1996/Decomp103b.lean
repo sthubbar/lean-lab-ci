@@ -5,6 +5,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Perelli1996.VaughanInput
 import LeanLab.Perelli1996.Linear88
 import LeanLab.Perelli1996.Divisor103
+import LeanLab.PNTPort.Vinogradov.Count
 
 namespace LeanLab.Perelli1996.Decomp103b
 open Finset Real Polynomial
@@ -101,6 +102,66 @@ theorem heavyCost_le (F : ℤ[X]) (c N H D α : ℝ) (hH : 1 ≤ H)
   simp only [Bool.true_eq, ite_true]
   exact div_le_div_of_nonneg_right hb (by positivity)
 
+/-- The linear envelope is bounded by the standard rational geometric cap. -/
+theorem linearEnvelope_le_G (H β : ℝ) (hH : 0 ≤ H + 1) :
+    linearEnvelope H β ≤ LeanLab.PNTPort.Vinogradov.G (H + 1) β := by
+  unfold linearEnvelope
+  apply csSup_le
+  · refine ⟨0, 0, 0, ?_, ?_⟩
+    · simpa using hH
+    · simp [Kernel.T]
+  · rintro x ⟨start, len, hlen, rfl⟩
+    by_cases hround : β = (round β : ℝ)
+    · have hn := Kernel.norm_T_le start len β
+      have hd : LeanLab.PNTPort.LargeSieve.dist0 β = 0 := by
+        unfold LeanLab.PNTPort.LargeSieve.dist0
+        rw [hround]
+        simp
+      rw [LeanLab.PNTPort.Vinogradov.G, if_pos hd]
+      exact hn.trans hlen
+    · have hn := Kernel.norm_T_le_min start len hround
+      have hd : LeanLab.PNTPort.LargeSieve.dist0 β ≠ 0 := by
+        intro hz
+        apply hround
+        unfold LeanLab.PNTPort.LargeSieve.dist0 at hz
+        exact sub_eq_zero.mp (abs_eq_zero.mp hz)
+      rw [LeanLab.PNTPort.Vinogradov.G, if_neg hd]
+      exact hn.trans (min_le_min hlen (le_refl _))
+
+/-- The light cost is at most the logarithmic cutoff times the full envelope sum. -/
+theorem divisorCost_false_le_envelope_sum (F : ℤ[X]) (c N H D α : ℝ)
+    (hH : 1 ≤ H) (hL : 0 < Real.log N) :
+    divisorCost F c N H D α false ≤
+      (Real.log N ^ D *
+        ∑ h ∈ Icc 1 ⌊c * H ^ (F.natDegree - 1)⌋₊,
+          linearEnvelope H (α * h)) / H ^ F.natDegree := by
+  classical
+  let s := Icc 1 ⌊c * H ^ (F.natDegree - 1)⌋₊
+  have hH0 : 0 < H := by linarith
+  unfold divisorCost
+  simp only [Bool.false_eq_true, ite_false]
+  apply div_le_div_of_nonneg_right _ (by positivity)
+  calc
+    _ ≤ ∑ h ∈ s.filter
+        (fun h => (divisorCount F.natDegree h : ℝ) ≤ Real.log N ^ D),
+        Real.log N ^ D * linearEnvelope H (α * h) := by
+      apply Finset.sum_le_sum
+      intro h hh
+      obtain ⟨hs, ht⟩ := Finset.mem_filter.mp hh
+      exact mul_le_mul ht (le_refl _) (linearEnvelope_nonneg _ _)
+        (Real.rpow_nonneg hL.le _)
+    _ ≤ Real.log N ^ D * ∑ h ∈ s, linearEnvelope H (α * h) := by
+      calc
+        _ ≤ Real.log N ^ D *
+            ∑ h ∈ s.filter
+              (fun h => (divisorCount F.natDegree h : ℝ) ≤ Real.log N ^ D),
+              linearEnvelope H (α * h) := by
+          rw [Finset.mul_sum]
+        _ ≤ Real.log N ^ D * ∑ h ∈ s, linearEnvelope H (α * h) := by
+          apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg hL.le _)
+          apply Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+          intro _ _ _; exact linearEnvelope_nonneg _ _
+
 /-- LEAF. Page 482 equation 7, normalized by H to the k.
 Vaughan 1981 page 120 supplies the divisor second moment. -/
 theorem leaf_heavy (F : ℤ[X]) (hF : Admissible F) (hk : 2 ≤ F.natDegree)
@@ -196,6 +257,198 @@ theorem leaf_heavy (F : ℤ[X]) (hF : Admissible F) (hk : 2 ≤ F.natDegree)
     _ = _ := by dsimp [C]; ring
 
 
+
+/-- In the interior denominator range, the light cost has the sharp rational shape. -/
+theorem lightCost_interior (F : ℤ[X]) (hk : 2 ≤ F.natDegree)
+    (c N H D α : ℝ) (hc : 0 < c) (hD : 0 < D) (hH : 1 ≤ H)
+    (hL : 1 ≤ Real.log N) (hHk : H ^ F.natDegree ≤ N)
+    (a : ℤ) (q : ℕ) (hq : 0 < q) (hcop : Nat.Coprime a.natAbs q)
+    (happ : |α - (a : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2)
+    (hqsmall : (q : ℝ) < H ^ F.natDegree) :
+    divisorCost F c N H D α false ≤
+      (8 * c + 8) * (1 / (q : ℝ) + 1 / H + (q : ℝ) / H ^ F.natDegree) *
+        Real.log N ^ (D + 1) := by
+  classical
+  let k := F.natDegree
+  let M := ⌊c * H ^ (F.natDegree - 1)⌋₊
+  have hk1 : 1 ≤ k := by dsimp [k]; omega
+  have hH0 : 0 < H := by linarith
+  have hq1 : 1 ≤ q := by omega
+  have hqR : (0 : ℝ) < q := by exact_mod_cast hq
+  have hM : (M : ℝ) ≤ c * H ^ (k - 1) := by
+    dsimp [M, k]
+    exact Nat.floor_le (by positivity)
+  have hcopI : IsCoprime a (q : ℤ) := by
+    rw [Int.isCoprime_iff_gcd_eq_one, Int.gcd_eq_natAbs]
+    rw [Nat.coprime_iff_gcd_eq_one] at hcop
+    simpa using hcop
+  have hG := LeanLab.PNTPort.Vinogradov.sum_G_le hq1 hcopI happ M
+    (Y := H + 1) (by linarith)
+  have hsumG : (∑ h ∈ Icc 1 M, linearEnvelope H (α * h)) ≤
+      ((M : ℝ) / (q : ℝ) + 1) *
+        (4 * (H + 1) + (q : ℝ) * (1 + Real.log (q : ℝ))) := by
+    calc
+      _ ≤ ∑ h ∈ Icc 1 M, LeanLab.PNTPort.Vinogradov.G (H + 1) (α * h) := by
+        apply Finset.sum_le_sum
+        intro h hh
+        exact linearEnvelope_le_G H (α * h) (by linarith)
+      _ ≤ _ := hG
+  have hL0 : 0 < Real.log N := lt_of_lt_of_le (by norm_num) hL
+  have hcost := divisorCost_false_le_envelope_sum F c N H D α hH hL0
+  have hqN : (q : ℝ) ≤ N := by
+    have : (q : ℝ) < H ^ F.natDegree := hqsmall
+    linarith [hHk]
+  have hlogq : Real.log (q : ℝ) ≤ Real.log N := Real.log_le_log hqR hqN
+  have hMshape : (M : ℝ) ≤ c * H ^ (k - 1) := hM
+  have hHp1 : (k - 1 : ℕ) ≤ k := by omega
+  have hHpow : H ^ (k - 1) ≤ H ^ k := pow_le_pow_right₀ hH hHp1
+  have hHL : (H : ℝ) ≤ 2 * H := by linarith
+  have hqterm : (q : ℝ) * (1 + Real.log (q : ℝ)) ≤
+      2 * (q : ℝ) * Real.log N := by
+    have hlog1 : 1 ≤ Real.log N := hL
+    nlinarith [mul_nonneg hqR.le (sub_nonneg.mpr hlogq)]
+  have hsumshape :
+      (∑ h ∈ Icc 1 M, linearEnvelope H (α * h)) / H ^ k ≤
+        8 * c / (q : ℝ) + 8 / H + 2 * c * Real.log N / H +
+          2 * (q : ℝ) * Real.log N / H ^ k := by
+    have hfactor :
+        ((M : ℝ) / (q : ℝ) + 1) *
+            (4 * (H + 1) + (q : ℝ) * (1 + Real.log (q : ℝ))) / H ^ k ≤
+          8 * c / (q : ℝ) + 8 / H + 2 * c * Real.log N / H +
+            2 * (q : ℝ) * Real.log N / H ^ k := by
+      have hHrel : H ^ k = H ^ (k - 1) * H := by
+        conv_lhs => rw [show k = k - 1 + 1 by dsimp [k]; omega, pow_succ]
+      have hMterm : (M : ℝ) / (q : ℝ) * 4 * (H + 1) / H ^ k ≤
+          8 * c / (q : ℝ) := by
+        have hA : (M : ℝ) / (q : ℝ) ≤ c * H ^ (k - 1) / (q : ℝ) :=
+          div_le_div_of_nonneg_right hMshape (by positivity)
+        have hB : 4 * (H + 1) ≤ 8 * H := by nlinarith
+        have hnum : (M : ℝ) / (q : ℝ) * (4 * (H + 1)) ≤
+            (c * H ^ (k - 1) / (q : ℝ)) * (8 * H) := by
+          exact mul_le_mul hA hB (by positivity) (by positivity)
+        calc
+          _ ≤ ((c * H ^ (k - 1) / (q : ℝ)) * (8 * H)) / H ^ k := by
+            apply div_le_div_of_nonneg_right
+            simpa only [mul_assoc] using hnum
+            positivity
+          _ = 8 * c / (q : ℝ) := by rw [hHrel]; field_simp; ring
+      have hYterm : 4 * (H + 1) / H ^ k ≤ 8 / H := by
+        have hHge : H ≤ H ^ (k - 1) := by
+          calc
+            H = H ^ 1 := by norm_num
+            _ ≤ H ^ (k - 1) := pow_le_pow_right₀ hH (by omega)
+        have hnum : 4 * (H + 1) ≤ 8 * H ^ (k - 1) := by
+          nlinarith [hHge]
+        calc
+          _ ≤ 8 * H ^ (k - 1) / H ^ k := by
+            exact div_le_div_of_nonneg_right hnum (by positivity)
+          _ = 8 / H := by rw [hHrel]; field_simp; ring
+      have hlogterm : 1 + Real.log (q : ℝ) ≤ 2 * Real.log N := by
+        have hlog1 : 1 ≤ Real.log N := hL
+        nlinarith
+      have hMlog : (M : ℝ) / (q : ℝ) * (q : ℝ) *
+          (1 + Real.log (q : ℝ)) / H ^ k ≤ 2 * c * Real.log N / H := by
+        have hA : M ≤ c * H ^ (k - 1) := hMshape
+        have hB : 1 + Real.log (q : ℝ) ≤ 2 * Real.log N := hlogterm
+        calc
+          _ = (M : ℝ) * (1 + Real.log (q : ℝ)) / H ^ k := by field_simp
+          _ ≤ (c * H ^ (k - 1)) * (2 * Real.log N) / H ^ k := by
+            gcongr
+          _ = 2 * c * Real.log N / H := by rw [hHrel]; field_simp; ring
+      have hqlog : (q : ℝ) * (1 + Real.log (q : ℝ)) / H ^ k ≤
+          2 * (q : ℝ) * Real.log N / H ^ k := by
+        gcongr
+      calc
+        _ = (M : ℝ) / (q : ℝ) * 4 * (H + 1) / H ^ k +
+            4 * (H + 1) / H ^ k +
+            (M : ℝ) / (q : ℝ) * (q : ℝ) * (1 + Real.log (q : ℝ)) / H ^ k +
+            (q : ℝ) * (1 + Real.log (q : ℝ)) / H ^ k := by ring
+        _ ≤ (8 * c / (q : ℝ) + 8 / H) +
+            (2 * c * Real.log N / H + 2 * (q : ℝ) * Real.log N / H ^ k) := by
+          have hab := add_le_add hMterm hYterm
+          have hcd := add_le_add hMlog hqlog
+          linarith
+        _ = _ := by ring
+    calc
+      _ ≤ ((M : ℝ) / (q : ℝ) + 1) *
+          (4 * (H + 1) + (q : ℝ) * (1 + Real.log (q : ℝ))) / H ^ k := by
+        exact (div_le_div_of_nonneg_right hsumG (by positivity))
+      _ ≤ _ := hfactor
+  have hpower : Real.log N ^ D ≤ Real.log N ^ (D + 1) :=
+    Real.rpow_le_rpow_of_exponent_le hL (by linarith)
+  have hcost' : divisorCost F c N H D α false ≤
+      Real.log N ^ D *
+        (8 * c / (q : ℝ) + 8 / H + 2 * c * Real.log N / H +
+          2 * (q : ℝ) * Real.log N / H ^ k) := by
+    calc
+      _ ≤ (Real.log N ^ D *
+          (∑ h ∈ Icc 1 ⌊c * H ^ (F.natDegree - 1)⌋₊,
+            linearEnvelope H (α * h))) / H ^ F.natDegree := hcost
+      _ = Real.log N ^ D *
+          ((∑ h ∈ Icc 1 M, linearEnvelope H (α * h)) / H ^ k) := by
+        rw [show M = ⌊c * H ^ (F.natDegree - 1)⌋₊ by rfl]
+        dsimp only [k]
+        ring
+      _ ≤ _ := by
+        exact mul_le_mul_of_nonneg_left hsumshape
+          (Real.rpow_nonneg hL0.le _)
+  calc
+    _ ≤ Real.log N ^ D *
+        (8 * c / (q : ℝ) + 8 / H + 2 * c * Real.log N / H +
+          2 * (q : ℝ) * Real.log N / H ^ k) := hcost'
+    _ ≤ (8 * c + 8) * (1 / (q : ℝ) + 1 / H + (q : ℝ) / H ^ F.natDegree) *
+        Real.log N ^ (D + 1) := by
+      have hL0 : 0 < Real.log N := hL0
+      have hpowD : 0 ≤ Real.log N ^ D := Real.rpow_nonneg hL0.le _
+      have hpowD1 : 0 ≤ Real.log N ^ (D + 1) := Real.rpow_nonneg hL0.le _
+      have h1 : Real.log N ^ D * (8 * c / (q : ℝ)) ≤
+          (8 * c + 8) * (1 / (q : ℝ)) * Real.log N ^ (D + 1) := by
+        calc
+          _ ≤ Real.log N ^ (D + 1) * (8 * c / (q : ℝ)) :=
+            mul_le_mul_of_nonneg_right hpower (by positivity)
+          _ ≤ Real.log N ^ (D + 1) * ((8 * c + 8) / (q : ℝ)) := by
+            gcongr
+            linarith
+          _ = _ := by ring
+      have h2 : Real.log N ^ D * (8 / H) ≤
+          (8 * c + 8) * (1 / H) * Real.log N ^ (D + 1) := by
+        calc
+          _ ≤ Real.log N ^ (D + 1) * (8 / H) :=
+            mul_le_mul_of_nonneg_right hpower (by positivity)
+          _ ≤ Real.log N ^ (D + 1) * ((8 * c + 8) / H) := by
+            gcongr
+            linarith
+          _ = _ := by ring
+      have hrpow : Real.log N ^ D * Real.log N = Real.log N ^ (D + 1) := by
+        simpa only [Real.rpow_one] using (Real.rpow_add hL0 D 1).symm
+      have h23 : Real.log N ^ D * (8 / H + 2 * c * Real.log N / H) ≤
+          (8 * c + 8) * (1 / H) * Real.log N ^ (D + 1) := by
+        have hc0 : 0 ≤ c := hc.le
+        have hinner : 8 + 2 * c * Real.log N ≤ (8 * c + 8) * Real.log N := by
+          nlinarith [hL]
+        calc
+          _ = (Real.log N ^ D / H) * (8 + 2 * c * Real.log N) := by ring
+          _ ≤ (Real.log N ^ D / H) * ((8 * c + 8) * Real.log N) := by
+            exact mul_le_mul_of_nonneg_left hinner (by positivity)
+          _ = _ := by rw [← hrpow]; ring
+      have h4 : Real.log N ^ D * (2 * (q : ℝ) * Real.log N / H ^ k) ≤
+          (8 * c + 8) * ((q : ℝ) / H ^ k) * Real.log N ^ (D + 1) := by
+        calc
+          _ = (2 * (q : ℝ) / H ^ k) * (Real.log N ^ D * Real.log N) := by ring
+          _ = (2 * (q : ℝ) / H ^ k) * Real.log N ^ (D + 1) := by rw [hrpow]
+          _ ≤ ((8 * c + 8) * (q : ℝ) / H ^ k) * Real.log N ^ (D + 1) := by
+            gcongr
+            linarith
+          _ = _ := by ring
+      calc
+        _ = Real.log N ^ D * (8 * c / (q : ℝ)) +
+            Real.log N ^ D * (8 / H + 2 * c * Real.log N / H) +
+            Real.log N ^ D * (2 * (q : ℝ) * Real.log N / H ^ k) := by ring
+        _ ≤ (8 * c + 8) * (1 / (q : ℝ)) * Real.log N ^ (D + 1) +
+            (8 * c + 8) * (1 / H) * Real.log N ^ (D + 1) +
+            (8 * c + 8) * ((q : ℝ) / H ^ k) * Real.log N ^ (D + 1) := by
+          exact add_le_add (add_le_add h1 h23) h4
+        _ = _ := by simp only [k]; ring
 
 /-- LEAF. Page 482 equation 8, normalized by H to the k.
 Vaughan 1981 Lemma 2.2 supplies the rational linear sum estimate. -/
