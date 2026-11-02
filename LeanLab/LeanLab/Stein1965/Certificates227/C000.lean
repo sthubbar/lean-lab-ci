@@ -1,0 +1,33 @@
+/-
+AI wrote this Lean code for CODEX task227. Goldbach is open.
+Explicit untrusted boundary values for the seed 3 certificate on pages 428 and 429.
+The kernel checks every equality. This chunk has 60 events.
+-/
+import LeanLab.Stein1965.WindowReplay227
+namespace LeanLab.Stein1965.Certificates227
+open LeanLab.SteinStein1965
+open LeanLab.Stein1965.Replay3
+open LeanLab.Stein1965.Window227
+open LeanLab.Stein1965.WindowReplay227
+set_option maxRecDepth 1000000
+set_option maxHeartbeats 0
+def initial227 : BitState := window bitSeed3 6 10000000
+
+def gaps000 : List ℕ := [3, 1, 2, 2, 2, 2, 3, 1, 2, 2, 8, 2, 11, 2, 2, 4, 3, 10, 3, 16, 0, 7, 15, 13, 3, 4, 3, 10, 3, 2, 28, 11, 0, 5, 6, 10, 4, 4, 8, 4, 22, 17, 9, 8, 22, 2, 3, 40, 3, 10, 12, 10, 30, 1, 29, 11, 8, 17, 0, 12]
+
+def state000 : BitState :=
+  ⟨[3, 5, 7, 13, 19, 23, 31, 37, 43, 47, 53, 61, 79, 83, 109, 113, 101, 131, 139, 157, 167, 199, 107, 211, 251, 281, 269, 283, 307, 313, 337, 293, 401, 421, 383, 439, 449, 431, 457, 491, 509, 523, 569, 601, 521, 643, 673, 691, 701, 769, 773, 811, 839, 863, 881, 929, 883, 1013, 1031, 1063, 1069, 1093], [], 0x20000020800000008000200000000000000000000200000000000a00008000008000000800000000220000000000000000200800020000000800000000020000000200000000000a00200008000000020200808020000200008000000000020000020800200a00200008000000000800800000008020000808000228200008800020208820808820a8, 0x40000041000041050000410400410004000100004400000410001400111454010400511414001144444100451010014110505400555040551104505054450404441415400514051510501455450111544555455451554451514415054554540115155114555551515555454551505515555445550045511455455555550555454555555555555555⟩
+
+theorem check000 :
+    windowReplay (fun _ a => a) gaps000 6 10000000 initial227 = some state000 := by
+  decide +kernel
+
+def trace000 : List ℕ := gaps000
+
+theorem prefix000 :
+    windowReplay (fun _ a => a) trace000 6 10000000 initial227 = some state000 := by
+  exact check000
+
+end LeanLab.Stein1965.Certificates227
+#print axioms LeanLab.Stein1965.Certificates227.check000
+#print axioms LeanLab.Stein1965.Certificates227.prefix000

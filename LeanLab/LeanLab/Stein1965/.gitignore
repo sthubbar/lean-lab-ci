@@ -1,0 +1,9 @@
+work/task227-*.txt
+work/batch227.txt
+work/batch-core227.txt
+work/emission227.txt
+work/emission-core227.txt
+work/emission-*.txt
+work/inspect227.lean
+work/bench227.lean
+work/batch-*.txt

@@ -4,6 +4,7 @@ AI wrote this Lean code for CODEX task114. Goldbach is open.
 The count and the failure-free run remain cited computational inputs.
 -/
 import LeanLab.SteinStein1965.Distinct
+import LeanLab.Stein1965.Full227
 
 namespace LeanLab.Stein1965.Decomp114
 
@@ -31,12 +32,12 @@ def basis : List ℕ := ((sPrime 3 (10 ^ 7)).1.filter (· ≤ 10 ^ 7))
 /-- LEAF. Page 429 prints B(3;10^7) = 10576; two reruns of these definitions give 10580,
 so the leaf states 10580, architect statement fix 2026-11-01. A finite count. -/
 theorem leaf_count : basis.length = 10580 := by
-  sorry
+  exact LeanLab.Stein1965.Full227.count
 
 /-- LEAF. Pages 428 and 429: the prime S-run has no failures through 10^7.
 This computational input is not reverified here. -/
 theorem leaf_no_failures : (sPrime 3 (10 ^ 7)).2 = [] := by
-  sorry
+  exact LeanLab.Stein1965.Full227.no_failures
 
 /-- LEAF. Section 2, equation 2.3, page 427: selected primes remain prime. -/
 theorem leaf_primes : ∀ p ∈ basis, p.Prime ∧ 3 ≤ p ∧ p ≤ 10 ^ 7 := by
