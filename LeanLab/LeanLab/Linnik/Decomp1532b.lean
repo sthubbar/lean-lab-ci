@@ -25,6 +25,7 @@ Proof additions by Codex task195 on 2026-10-31 UTC. AI wrote the Lean code.
 Binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.Linnik.HilbertCosecant
 import LeanLab.HardyLittlewood1923.U1482ZeroCount
 import LeanLab.RieselVaughan1983.LargeSieveSchur
 import LeanLab.PNTPort.LargeSieve.Montgomery
@@ -1163,7 +1164,7 @@ theorem cosecant_hilbert_large_family {ι : Type*} [DecidableEq ι] (s : Finset 
       b r * (starRingEnd ℂ) (b r') /
         (Real.sin (Real.pi * (α r - α r')) : ℂ)‖ ≤
       (1 / δ) * ∑ r ∈ s, ‖b r‖ ^ 2 := by
-  sorry
+  exact LeanLab.Linnik.HilbertCosecant.cosecant_hilbert s α hδ hs b
 
 /-- Gallagher 1975 p.131. The circular Hilbert bound is proved for small families and is
 CONDITIONAL ON cosecant_hilbert_large_family for every larger family. -/
@@ -1179,6 +1180,17 @@ theorem circular_hilbert_sharp {ι : Type*} [DecidableEq ι] (s : Finset ι)
   · exact circular_hilbert_small_family s α hδ hs hc b
   · exact circular_hilbert_of_cosecant s α hδ b
       (cosecant_hilbert_large_family s α hδ hs (by omega) b)
+
+/-- Gallagher 1975 p.131. The general separated sampling estimate now has no supplied
+Hilbert hypothesis. The additive interval coefficient is N plus reciprocal delta. -/
+theorem spaced_sampling {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (α : ι → ℝ) {δ : ℝ} (hδ : 0 < δ)
+    (hs : LeanLab.PNTPort.LargeSieve.Spaced s α δ)
+    (a : ℤ → ℂ) (M : ℤ) (N : ℕ) :
+    ∑ r ∈ s, ‖∑ n ∈ Ioc M (M + N), a n * LeanLab.PNTPort.LargeSieve.e (n * α r)‖ ^ 2 ≤
+      ((N : ℝ) + 1 / δ) * ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by
+  exact spaced_sampling_of_hilbert s α hδ hs
+    (fun v => circular_hilbert_sharp s α hδ hs v) a M N
 
 /-- LEAF. Montgomery 1971, Topics in multiplicative number theory, sharp additive large sieve.
 Gallagher 1975 p.131, the input behind display 14. Only the sharp Fourier sampling bound
@@ -3628,6 +3640,22 @@ theorem density_sum_away_from_one : ∃ C : ℝ, 0 ≤ C ∧
   apply mul_le_mul_of_nonneg_left _ hC
   rw [← Real.rpow_natCast]
   exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num at *; linarith)
+
+/-- Gallagher 1970 p.335, reduction before Theorem 6. The polynomial count proves
+any region with a fixed positive horizontal gap. The exponent is explicit in the gap. -/
+theorem density_sum_fixed_gap (η : ℝ) (hη : 0 < η) : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ σ : ℝ, 1 / 2 ≤ σ → σ ≤ 1 - η →
+    ∑ q ∈ range ⌊T⌋₊,
+      ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ (q + 1))).filter (fun χ => χ.IsPrimitive),
+        (zeroCount χ σ T : ℝ) ≤ C * T ^ ((4 / η) * (1 - σ)) := by
+  obtain ⟨C, hC, h⟩ := density_sum_polynomial
+  refine ⟨C, hC, fun T hT σ hσ hgap => (h T hT σ hσ).trans ?_⟩
+  apply mul_le_mul_of_nonneg_left _ hC
+  rw [← Real.rpow_natCast]
+  apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+  rw [div_mul_eq_mul_div, le_div_iff₀ hη]
+  norm_num only [Nat.cast_ofNat]
+  linarith
 
 /-- LEAF. Gallagher 1970, A large sieve density estimate near sigma equals one,
 Inventiones 11 pp.329 to 339, Theorem 6. Montgomery and Vaughan 1975 p.366 Section 7.
