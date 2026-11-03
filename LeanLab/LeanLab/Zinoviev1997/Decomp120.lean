@@ -107,7 +107,12 @@ theorem prime_reduction (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
 
 /-- LEAF. Displays 3.2 to 3.4, pages 349 to 351, and the Ramanujan identity on page 351.
 Partial summation from Proposition 1.4 and the two integrated remainders give this bound.
-The constant 3.8 leaves room above the displayed 2.99, 0.14 and 0.001 estimates. -/
+The constant 3.8 leaves room above the displayed 2.99, 0.14 and 0.001 estimates.
+BLOCKED FREE-ms-leanstral task84: requires GRH-based prime sum estimates (weighted partial summation,
+explicit formula remainder bounds) not available in Mathlib. The lab's DERZ1997 namespace defines
+GRH but provides no lemmas about prime sums under GRH. Depends on lemma12_T, lemma12_zero,
+lemma13_explicit_budget, and prop14_error_bound from State1546, all of which have open sorries.
+Searches ran: LeanSearch, Loogle, Mathlib docs. -/
 theorem residue_integral_approximation (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
     (hG : LeanLab.DERZ1997.GRH)
     (q : ℕ) (hq : q ∈ Finset.Icc 1 (arcCutoff N))
