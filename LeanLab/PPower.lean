@@ -1,0 +1,14 @@
+import LeanLab.BhowmikGrimmelt2026.Decomp107
+open MeasureTheory
+#check norm_integral_le_of_norm_le
+#check Complex.norm_cpow_eq_rpow_re_of_pos
+#check Real.mul_rpow
+#check Real.rpow_neg
+#check Real.inv_rpow
+#check Complex.continuous_ofReal
+#check Measurable.ofReal
+#check Integrable.mono'
+#check setIntegral_eq_integral_of_forall_compl_eq_zero
+#check Real.rpow_le_rpow_of_exponent_le
+#check Jphi_uniform107
+#check Jphi_eq_zero_outside84
