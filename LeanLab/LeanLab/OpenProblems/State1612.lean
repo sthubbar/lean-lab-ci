@@ -1,0 +1,217 @@
+import Mathlib
+import LeanLab.Common.Goldbach
+
+/-!
+# Two OPEN problems, sealed statements and small routes
+
+Unit U-1612, run 20261103T0803Z-22341, 2026-11-03. AI wrote the Lean code. Targets for the network,
+no claim of progress. Nothing here counts as progress on Goldbach. Neither is tagged ORIGINAL: both
+have a prior statement, see the search record in the out folder, LITSEARCH-U1612-20261103.md.
+
+1. `Euler8n3Statement`: every `8n + 3`, `n ≥ 1`, is an odd square plus twice a prime. Claim of Euler
+   as cited from Pólya on primepuzzles.net Conjecture 68, read 2026-11-03, there Unresolved, and
+   MathOverflow 135608, page blocked for fetch, not worked around. POOL line 216. `n = 0` is false,
+   `not_isEuler_three`, so the sealed form has `n ≥ 1`. The pool wording omits this.
+2. `PowerfulPrimeStatement`: every powerful `N > 1` is a prime plus a powerful number. POOL line 194,
+   MathOverflow 269080, page blocked for fetch, statement taken from the pool line, status UNVERIFIED
+   from the page; three web searches found no resolution. `1` must count as powerful,
+   `not_rep_four_of_one_excluded`.
+-/
+
+namespace LeanLab.OpenProblems.State1612
+
+open LeanLab
+
+/-! ### 1. Euler's 8n + 3 -/
+
+/-- `m` is an odd square plus twice a prime. -/
+def IsEuler (m : ℕ) : Prop := ∃ x p : ℕ, Odd x ∧ p.Prime ∧ m = x ^ 2 + 2 * p
+
+/-- **OPEN, sealed.** Every `8n + 3` with `n ≥ 1` is `x² + 2p` with `x` odd, `p` prime. -/
+def Euler8n3Statement : Prop := ∀ n : ℕ, 1 ≤ n → IsEuler (8 * n + 3)
+
+/-- `n = 0` is a genuine exception, so `1 ≤ n` is needed. -/
+theorem not_isEuler_three : ¬ IsEuler 3 := by
+  rintro ⟨x, p, _, hp, e⟩
+  have := hp.two_le
+  have hx : x ^ 2 ≥ 0 := Nat.zero_le _
+  omega
+
+/-- Vacuity: `11 = 1 + 2·5`. -/
+theorem isEuler_eleven : IsEuler 11 := ⟨1, 5, by decide, by norm_num, by norm_num⟩
+
+/-- `x` odd gives `x² ≡ 1 mod 8`, so the prime is `1 mod 4`. -/
+theorem prime_mod_four {n x p : ℕ} (hx : Odd x) (e : 8 * n + 3 = x ^ 2 + 2 * p) : p % 4 = 1 := by
+  obtain ⟨k, rfl⟩ := hx
+  have h : (2 * k + 1) ^ 2 = 4 * (k * (k + 1)) + 1 := by ring
+  have h2 : Even (k * (k + 1)) := Nat.even_mul_succ_self k
+  obtain ⟨j, hj⟩ := h2
+  rw [h, hj] at e
+  omega
+
+/-- The triangular form: `4n + 1 - 2 k (k + 1)` is prime for some `k`, the form of Conjecture 68. -/
+theorem isEuler_iff_triangular (n : ℕ) :
+    IsEuler (8 * n + 3) ↔ ∃ k p : ℕ, p.Prime ∧ 4 * n + 1 = p + 2 * k * (k + 1) := by
+  constructor
+  · rintro ⟨x, p, ⟨k, rfl⟩, hp, e⟩
+    refine ⟨k, p, hp, ?_⟩
+    have h : (2 * k + 1) ^ 2 = 4 * k * (k + 1) + 1 := by ring
+    have h' : 2 * k * (k + 1) * 2 = 4 * k * (k + 1) := by ring
+    rw [h] at e
+    omega
+  · rintro ⟨k, p, hp, e⟩
+    refine ⟨2 * k + 1, p, ⟨k, rfl⟩, hp, ?_⟩
+    have h : (2 * k + 1) ^ 2 = 4 * k * (k + 1) + 1 := by ring
+    have h' : 2 * k * (k + 1) * 2 = 4 * k * (k + 1) := by ring
+    rw [h]
+    omega
+
+/-- `8n + 3` is never a square, so no algebraic factorisation blocks it, unlike `p + x²`. -/
+theorem not_square_8n3 (n : ℕ) : ¬ IsSquare (8 * n + 3) := by
+  rintro ⟨r, hr⟩
+  have h : (r * r) % 8 = 0 ∨ (r * r) % 8 = 1 ∨ (r * r) % 8 = 4 := by
+    have : r % 8 < 8 := Nat.mod_lt _ (by norm_num)
+    rw [Nat.mul_mod]
+    interval_cases (r % 8) <;> simp
+  omega
+
+/-- Finite search, `x` odd below the bound. -/
+def euB (n : ℕ) : Bool :=
+  (List.range 40).any fun k =>
+    decide (2 * k * (k + 1) < 4 * n + 1) && primeB (4 * n + 1 - 2 * k * (k + 1))
+
+theorem euB_sound {n : ℕ} (h : euB n = true) : IsEuler (8 * n + 3) := by
+  rw [isEuler_iff_triangular]
+  simp only [euB, List.any_eq_true, Bool.and_eq_true, decide_eq_true_eq] at h
+  obtain ⟨k, _, h1, h2⟩ := h
+  exact ⟨k, _, primeB_sound h2, by omega⟩
+
+/-- A small range, for vacuity and a smoke test only. Far below what is recorded: Vantieghem on
+Conjecture 68 reports `N ≤ 10⁹`. KNOWN. -/
+theorem euler_le_1000 : ∀ n, 1 ≤ n → n ≤ 1000 → IsEuler (8 * n + 3) := by
+  have h : (List.range 1001).all (fun n => n == 0 || euB n) = true := by decide +kernel
+  intro n h1 h2
+  have := List.all_eq_true.mp h n (List.mem_range.mpr (by omega))
+  simp only [Bool.or_eq_true, beq_iff_eq] at this
+  rcases this with h0 | h0
+  · omega
+  · exact euB_sound h0
+
+attribute [local instance] Classical.propDecidable in
+/-- Number of `n ≤ X`, `n ≥ 1`, with no representation. -/
+noncomputable def euExc (X : ℕ) : ℕ :=
+  ((Finset.Icc 1 X).filter fun n => ¬ IsEuler (8 * n + 3)).card
+
+/-- The sealed statement says exactly that the exception count is always zero. -/
+theorem statement_iff_euExc : Euler8n3Statement ↔ ∀ X, euExc X = 0 := by
+  classical
+  constructor
+  · intro h X
+    unfold euExc
+    rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+    intro n hn
+    simpa using h n (Finset.mem_Icc.mp hn).1
+  · intro h n hn
+    have := h n
+    unfold euExc at this
+    rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff] at this
+    simpa using this (Finset.mem_Icc.mpr ⟨hn, le_rfl⟩)
+
+/-- ROUTE, sorry, NOT PROVED. The smallest step: a positive proportion of `8n + 3` are represented.
+Expected by a second moment over `x`, as in Hua's sum of a prime and a square; not searched as a
+named theorem for this restricted form. Weaker than the problem. -/
+theorem route_euler_positive_density :
+    ∃ c : ℝ, 0 < c ∧ ∀ᶠ X : ℕ in Filter.atTop, c * X ≤ ((X - euExc X : ℕ) : ℝ) := by
+  sorry
+
+/-- ROUTE, sorry, NOT PROVED. Almost all `8n + 3` are represented, the analogue for `2p + x²` of
+Davenport and Heilbronn 1937 for `p + x²`. Weaker than the problem. -/
+theorem route_euler_almost_all :
+    ∀ ε : ℝ, 0 < ε → ∀ᶠ X : ℕ in Filter.atTop, (euExc X : ℝ) ≤ ε * X := by
+  sorry
+
+/-! ### 2. Powerful number as a prime plus a powerful number -/
+
+/-- `n` is powerful: every prime factor divides it at least twice. `1` counts. -/
+def Powerful (n : ℕ) : Prop := 0 < n ∧ ∀ p : ℕ, p.Prime → p ∣ n → p ^ 2 ∣ n
+
+/-- **OPEN, sealed.** Every powerful `N > 1` is a prime plus a powerful number. -/
+def PowerfulPrimeStatement : Prop :=
+  ∀ N : ℕ, Powerful N → 1 < N → ∃ p M : ℕ, p.Prime ∧ Powerful M ∧ N = p + M
+
+theorem powerful_one : Powerful 1 :=
+  ⟨one_pos, fun p hp h => absurd (Nat.dvd_one.mp h) hp.ne_one⟩
+
+theorem powerful_sq {k : ℕ} (hk : 0 < k) : Powerful (k ^ 2) :=
+  ⟨by positivity, fun _ hp h => pow_dvd_pow_of_dvd (hp.dvd_of_dvd_pow h) 2⟩
+
+theorem powerful_eight_sq {a : ℕ} (ha : 0 < a) : Powerful (8 * a ^ 2) := by
+  refine ⟨by positivity, fun p hp h => ?_⟩
+  rcases (Nat.Prime.dvd_mul hp).mp h with h8 | h2
+  · have : p ∣ 2 ^ 3 := by simpa using h8
+    have h2' := (Nat.prime_dvd_prime_iff_eq hp Nat.prime_two).mp (hp.dvd_of_dvd_pow this)
+    subst h2'
+    exact ⟨2 * a ^ 2, by ring⟩
+  · exact Dvd.dvd.mul_left (pow_dvd_pow_of_dvd (hp.dvd_of_dvd_pow h2) 2) 8
+
+theorem not_powerful_six : ¬ Powerful 6 := by
+  rintro ⟨_, h⟩
+  exact absurd (h 2 Nat.prime_two (by norm_num)) (by norm_num)
+
+theorem not_powerful_two : ¬ Powerful 2 := by
+  rintro ⟨_, h⟩
+  exact absurd (h 2 Nat.prime_two (by norm_num)) (by norm_num)
+
+/-- Vacuity: `4 = 3 + 1`, `9 = 5 + 4`. -/
+theorem rep_four : ∃ p M : ℕ, p.Prime ∧ Powerful M ∧ 4 = p + M :=
+  ⟨3, 1, Nat.prime_three, powerful_one, rfl⟩
+
+theorem rep_nine : ∃ p M : ℕ, p.Prime ∧ Powerful M ∧ 9 = p + M :=
+  ⟨5, 4, by norm_num, by simpa using powerful_sq (k := 2) (by norm_num), rfl⟩
+
+/-- If `1` were excluded, `4` would fail, so the statement needs `1` powerful. -/
+theorem not_rep_four_of_one_excluded :
+    ¬ ∃ p M : ℕ, p.Prime ∧ Powerful M ∧ 1 < M ∧ 4 = p + M := by
+  rintro ⟨p, M, hp, hM, h1, e⟩
+  have := hp.two_le
+  have hM2 : M = 2 := by omega
+  subst hM2
+  exact not_powerful_two hM
+
+/-- The square route: if `2m - 1` is prime then `m² = (2m - 1) + (m - 1)²`. PROVED, elementary. -/
+theorem sq_of_prime {m : ℕ} (hm : 2 ≤ m) (hp : (2 * m - 1).Prime) :
+    ∃ p M : ℕ, p.Prime ∧ Powerful M ∧ m ^ 2 = p + M := by
+  refine ⟨_, (m - 1) ^ 2, hp, powerful_sq (by omega), ?_⟩
+  obtain ⟨k, rfl⟩ : ∃ k, m = k + 1 := ⟨m - 1, by omega⟩
+  have h1 : 2 * (k + 1) - 1 = 2 * k + 1 := by omega
+  have h2 : k + 1 - 1 = k := by omega
+  rw [h1, h2]
+  ring
+
+/-- With square `M`, `m²` is `p + M` only for `p = 2m - 1`, so the square route is exhausted when
+`2m - 1` is composite and a nonsquare `M` is forced. PROVED, elementary. -/
+theorem sq_route_exhausted {m p a : ℕ} (hp : p.Prime) (e : m ^ 2 = p + a ^ 2) : p = 2 * m - 1 := by
+  have hp2 := hp.two_le
+  have ham : a < m := by
+    by_contra hc
+    have : m ^ 2 ≤ a ^ 2 := Nat.pow_le_pow_left (not_lt.mp hc) 2
+    omega
+  obtain ⟨d, rfl⟩ : ∃ d, m = a + d := ⟨m - a, by omega⟩
+  have hd : 0 < d := by omega
+  have hpd : p = d * (2 * a + d) := by
+    have : (a + d) ^ 2 = d * (2 * a + d) + a ^ 2 := by ring
+    omega
+  rcases (Nat.prime_mul_iff.mp (hpd ▸ hp)) with ⟨hd2, h⟩ | ⟨_, h⟩
+  · have := hd2.two_le
+    omega
+  · subst h
+    omega
+
+/-- ROUTE, sorry, NOT PROVED. Infinitely many squares with `2m - 1` composite still work, through
+`M = 8 a²`. Plan: the Pell family `m² - 8 a² = 17`, `(5, 1) ↦ (3m + 8a, m + 3a)`, plus a periodicity
+mod a small prime to force `2m - 1` composite. Python checked the first terms only. -/
+theorem route_powerful_nonsquare_family :
+    ∀ K : ℕ, ∃ m > K, ¬ (2 * m - 1).Prime ∧ ∃ p a : ℕ, p.Prime ∧ 0 < a ∧ m ^ 2 = p + 8 * a ^ 2 := by
+  sorry
+
+end LeanLab.OpenProblems.State1612

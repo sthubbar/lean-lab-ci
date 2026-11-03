@@ -31,33 +31,48 @@ theorem dirPoly_eq_lift (a : ℕ → ℂ) (c1 c2 F : ℝ)
   classical
   simp [truncatedCoeffs, Thm4.dirPoly, characterWeight, mul_div_assoc]
 
-/-- LEAF. Page 11, Lemma 1, display 3.3. Montgomery reference 21,
-Lemma 1.4 and Theorem 6.4. The hybrid mean square estimate is CITED.
-This leaf is OPEN and does not follow from the finite kernel estimates. -/
+/-- LEAF, CITED. Page 11, Lemma 1, display 3.3. Montgomery reference 21, Lemma 1.4 and
+Theorem 6.4, cited not proved in the lab. U-1609 decision: a citation wall, the paper's own proof is
+one line of citation, there are no cases to re-cut, and it restates the cited stub on purpose.
+It does not follow from the finite kernel estimates. -/
 theorem hybrid_mean_square : Lemma1MeanSquare := by
   sorry
 
-/-- LEAF. Page 11, Lemma 1, display 3.4. Page 12 cites Montgomery
-reference 21, Theorem 8.3, then Huxley reference 14, Section 2.
-The weak Chebyshev consequence of 3.3 is insufficient. CITED and OPEN. -/
+/-- LEAF, CITED. Page 11, Lemma 1, display 3.4. Page 12 cites Montgomery reference 21,
+Theorem 8.3, then Huxley reference 14, Section 2, cited not proved in the lab. U-1609 decision: a
+citation wall, as for display 3.3. The weak Chebyshev consequence of 3.3 is insufficient.
+`0 < V` is required: `Audit1609.large_values_zero_V_false` refutes the form with `0 ≤ V`. -/
 theorem hybrid_large_values : Lemma1LargeValues := by
   sorry
 
-/-- LEAF. Pages 12 to 15, Theorem 4 proof. Dyadically split the three
-norms, apply 3.3 and 3.4 to the powers of each polynomial, and sum the
-resulting level sets. The finite exponent inequalities in all four cases
-are proved in Thm4Exponents. The remaining polynomial power coefficients,
-dyadic decomposition and norm interpolation form this OPEN analytic leaf.
-The coefficient divisor exponent determines the small epsilon cutoff. -/
-theorem dyadic_mean_value (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues) :
-    Thm4.Theorem4Paper := by
+/-- Page 12, "using (3.1) to bound G(P^g) by 𝓛^B". A divisor bound on coefficients gives a log
+power bound on the coefficient energy, uniformly in the sequence. -/
+def EnergyLogBound : Prop :=
+  ∀ B c1 c2 : ℝ, 0 < c1 → c1 < c2 → ∃ K C : ℝ, 0 < C ∧
+    ∀ a : ℕ → ℂ, Thm4.CoeffBound a B → ∀ F : ℝ, 2 ≤ F →
+      energy a c1 c2 F ≤ C * Real.log F ^ K
+
+/-- LEAF, OPEN. Page 12, the coefficient input cut out of `dyadic_mean_value` by U-1609. It is a
+divisor moment bound, `Σ_{n ≤ F} τ(n)^{2B}/n ≪ (log F)^K`, elementary and not in Mathlib. It is
+exactly what the bound `energy_small_power` cannot give, see `positive_power_not_log_bounded`. -/
+theorem energy_log_bound : EnergyLogBound := by
+  sorry
+
+/-- LEAF, OPEN. Pages 12 to 15, the paper's own proof of Theorem 4. It is not cited: dyadically
+split the three norms, apply 3.3 and 3.4 to the powers of each polynomial, and sum the level sets.
+Its conclusion is the Prop that DecompC165b consumes, so Section 3 of the assembly rests on this
+leaf together with the citation wall above, and on no finer reduction. The case exponents are proved
+in Thm4Exponents and in `classify_cell_exponent` below. The coefficient divisor exponent determines
+the small epsilon cutoff. -/
+theorem dyadic_mean_value (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues)
+    (henergy : EnergyLogBound) : Thm4.Theorem4Paper := by
   sorry
 
 /-- Pages 11 to 15, the exact Section 3 mean value statement used by
-DecompC165b.section3_mean_values. CONDITIONAL on the three OPEN leaves.
+DecompC165b.section3_mean_values. CONDITIONAL on the two CITED leaves and the two OPEN leaves.
 There is no direct sorry in this assembly. -/
 theorem section3_mean_values : Thm4.Theorem4Paper := by
-  exact dyadic_mean_value hybrid_mean_square hybrid_large_values
+  exact dyadic_mean_value hybrid_mean_square hybrid_large_values energy_log_bound
 
 /-- Page 12, powers are evaluated finite Dirichlet convolutions. -/
 theorem dirPoly_pow_eq_lift (a : ℕ → ℂ) (c1 c2 F : ℝ)

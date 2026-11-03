@@ -43,7 +43,7 @@ EXCLUDED = {"ChenPrimeExceptional", "Common", "HelfgottOverview", "KaiScaffoldin
 # (Folder, main theorem, method). Several lines for one folder: the smallest closure wins, non-STUB preferred.
 # Started from research/finish-ranking-20261101T0802Z.md; add a line when a clearly better main appears.
 CURATED = [
-    ("BHP1997", "LeanLab.BHP1997.Decomp132.theorem1", "curated"),
+    ("BHP1997", "LeanLab.BHP1997.AssemblyC165.theorem1", "curated"),  # Decomp132.theorem1 rests on a dead duplicate sieve_data, architect 20261103
     ("BS2022GRH", "thm5J_assembly", "curated"),
     ("BS2022GRH", "LeanLab.BS2022GRH.DecompC169a.thm5J", "curated"),
     ("Helfgott2013", "LeanLab.Helfgott2013.U1538.prop62_arcs", "auto"),

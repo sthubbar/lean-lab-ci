@@ -851,11 +851,65 @@ theorem major_arc_remainder_le_fiber_sum (k L N : ℕ) (P : ℝ) (E : ℤ → �
   refine (abs_sum_le_sum_abs _ _).trans (sum_le_sum fun x hx => ?_)
   exact hE _ (mem_filter.mp hx).2
 
-/-- LEAF. Gallagher 1975 p.127 Theorem 3 and p.138 nonzero correlation error before display 5.
-The absolute error after subtracting the J times singular series main term has a uniform
-exponential part and a remainder that vanishes for fixed k and theta.
-The averaging uses Lemmas 8, 9 and 10 on pp.136 and 137 and the exceptional conductor bound
-on p.127. Lemma 6 is not part of this input.
+/-- The plain form of the nonzero correlation error before Gallagher 1975 p.138 display (5): the
+same averaged error as `major_arc_remainder_bound`, with no `e^{-c/θ}` term. For each fixed
+`θ ≤ θ₀`, `k ≥ 2` and `δ > 0` the error is at most `δ` times the main size for large `N`.
+The average over the tuple differences is essential. The frequency by frequency form is not
+what is claimed: in Theorem 3 p.127 the quoted exceptional term is of size about `1` when the
+exceptional conductor divides `n`. -/
+def Display5PlainExpansion : Prop :=
+  ∃ θ₀ : ℝ, 0 < θ₀ ∧ ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∀ k : ℕ, 2 ≤ k → ∀ δ : ℝ, 0 < δ →
+      ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+        |(∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+            LeanLab.Linnik.Decomp1532a.dif x ≠ 0, ∫ α in majorArcs N ((N : ℝ) ^ θ),
+              ‖Sg N α‖ ^ 2 *
+                (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) -
+          (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+            LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+              LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+                (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
+          (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * δ
+
+/-- PROVED reduction, reproducing the worker result of 20261103T0714Z: the plain form implies
+`major_arc_remainder_bound`, with `c = 1` and `C = 0`. This is one way only. The plain form is
+STRONGER than Gallagher's Theorem 3 p.127 and display (5) p.138, both of which keep `e^{-c/θ}`,
+so this reduction does not remove the density input; see `display5_plain_expansion`. -/
+theorem major_arc_remainder_bound_of_plain (h : Display5PlainExpansion) :
+    ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
+    ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∀ k : ℕ, 2 ≤ k → ∀ δ : ℝ, 0 < δ →
+      ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+        |(∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+            LeanLab.Linnik.Decomp1532a.dif x ≠ 0, ∫ α in majorArcs N ((N : ℝ) ^ θ),
+              ‖Sg N α‖ ^ 2 *
+                (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) -
+          (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+            LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
+              LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+                (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
+          (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) *
+            (C * Real.exp (-c / θ) + δ) := by
+  obtain ⟨θ₀, hθ₀, h⟩ := h
+  refine ⟨1, 0, θ₀, one_pos, hθ₀, fun θ hθ hθ₀' k hk δ hδ => ?_⟩
+  simpa using h θ hθ hθ₀' k hk δ hδ
+
+/-- LEAF, OPEN. The plain expansion, Gallagher 1975 p.138, the display before (5), with the
+`e^{-c/θ}` term removed. It is stronger than what Gallagher prints.
+Route: Pintz and Ruzsa 2020 P0035 Theorem 2 display (2.19), error `O(N e^{-cH})` with `H`
+free, Corollary 1 displays (2.25) and (2.26), the remark (2.32), and Lemma 1 display (2.34)
+for the thin set of bad differences. Gaps to fill on that route: P0035 takes `P` in a window
+`[P₀ N^{-ε₀}, P₀]`, here `P = N^θ` exactly; it weights primes by `log p` on `(N₁, N]`, here
+weight one on `[1, N]`; (2.25) needs `|h| ≤ εN/4`, here `|dif x|` reaches about `k N`.
+Not a Bombieri Vinogradov consequence: P0029 Proposition 5.2 and the comment after it say the
+saving is only `exp(-c log N / log R)` and cannot absorb any logarithmic loss, and (2.15) uses a
+density theorem. A log free zero density estimate is needed here. -/
+theorem display5_plain_expansion : Display5PlainExpansion := by
+  sorry
+
+/-- ASSEMBLY, CONDITIONAL ON `display5_plain_expansion`. Gallagher 1975 p.127 Theorem 3 and p.138
+nonzero correlation error before display 5. The statement is unchanged. A direct proof with
+`C e^{-c/θ}` kept, on Gallagher's own route, may replace this proof body and would drop the
+stronger leaf. The averaging uses Lemmas 8, 9 and 10 on pp.136 and 137 and the exceptional
+conductor bound on p.127. Lemma 6 is not part of this input.
 External inputs include Gallagher 1970 Inventiones 11 pp.329 to 339 and Montgomery and
 Vaughan 1975 Acta Arithmetica 27 pp.353 to 370. -/
 theorem major_arc_remainder_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
@@ -870,8 +924,8 @@ theorem major_arc_remainder_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) *
-            (C * Real.exp (-c / θ) + δ) := by
-  sorry
+            (C * Real.exp (-c / θ) + δ) :=
+  major_arc_remainder_bound_of_plain display5_plain_expansion
 
 /-- ASSEMBLY. CONDITIONAL ON weighted_singSeries_main_bound and major_arc_remainder_bound. Gallagher 1975 p.138 nonzero contribution before display 5. -/
 theorem major_arc_nonzero_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧ ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ →

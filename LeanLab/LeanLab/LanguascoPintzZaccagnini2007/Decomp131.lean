@@ -1,4 +1,4 @@
-import LeanLab.LanguascoPintzZaccagnini2007.Truncation131
+import LeanLab.LanguascoPintzZaccagnini2007.DecompJ218
 
 namespace LeanLab.LPZ2007
 
@@ -46,8 +46,10 @@ theorem minor_mean_square131 (k : ℕ) (hk : 1 ≤ k) :
           K * (X : ℝ) ^ ((13 : ℝ) / 5) * Lg X ^ (2 * k + 9) := by
   exact minor_mean_square_proved131 k
 
-/-- LEAF. Display 25 on page 8, with the factor 2c0 restored from display 2.
+/-- Display 25 on page 8, with the factor 2c0 restored from display 2.
 The major arc averaging proof gives a uniform additive error o(N L^k).
+CONDITIONAL on the open leaves `major_arcs_j1_131`, CITED Corollary 4.2, and
+`major_arcs_combine131` in DecompJ218.lean, through `major_asymptotic131_assembly`.
 Source outside P0045: Pintz Theorem 10 cited as Lemma 4.1, and the Iwaniec
 zero free region and primitive real character facts in Corollary 4.2 on page 6.
 The arithmetic Lemmas 6.1 and 6.2 are already proved in this folder. -/
@@ -55,8 +57,8 @@ theorem major_asymptotic131 (k : ℕ) (hk : 1 ≤ k) (ε : ℝ) (hε : 0 < ε) :
     ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∃ P : ℝ, AdmissibleP131 X P ∧
       ∀ N ∈ evenJ131 X,
         |majorContribution131 k X N P - coefficient131 k N * N * Lg X ^ k| ≤
-          ε * N * Lg X ^ k := by
-  sorry
+          ε * N * Lg X ^ k :=
+  major_asymptotic131_assembly k hk ε hε
 
 /-- LEAF. Page 9 conclusion: three error contributions combine by the triangle inequality.
 This elementary statement is independent of the cited analytic inputs. -/

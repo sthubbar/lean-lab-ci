@@ -29,8 +29,12 @@ import LeanLab.BHP1997.AssemblyC165
 #print axioms LeanLab.BHP1997.DecompC165c.hybrid_mean_square
 #print axioms LeanLab.BHP1997.DecompC165c.hybrid_large_values
 #print axioms LeanLab.BHP1997.DecompC165c.dyadic_mean_value
+#print axioms LeanLab.BHP1997.DecompC165c.energy_log_bound
 #print axioms LeanLab.BHP1997.DecompC165c.section3_mean_values
 #print axioms LeanLab.BHP1997.DecompC165d.lower_short_weight
+#print axioms LeanLab.BHP1997.DecompC165d.lower_short_weight_analytic
+#print axioms LeanLab.BHP1997.DecompC165d.lower_two_integral_bound
+#print axioms LeanLab.BHP1997.DecompC165d.right_density_mono
 #print axioms LeanLab.BHP1997.DecompC165d.upper_short_weight
 #print axioms LeanLab.BHP1997.DecompC165d.section5_weights
 #print axioms LeanLab.BHP1997.DecompC165b.pair_correlation

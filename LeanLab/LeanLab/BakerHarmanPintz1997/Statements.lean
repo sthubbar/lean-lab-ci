@@ -500,7 +500,8 @@ def Lemma10 : Prop :=
       max (Ml x) (Nl x) ≤ x ^ (0.46 + ε / 8)) →
     Concl39 (fun x => [M x, N x, (⟨fun _ => 1, Finset.Ioo ⌊c1 * Ll x⌋₊ ⌈c2 * Ll x⌉₊⟩ : DP)]) 𝒮
 
-/-- CITED. Lemma 10. -/
+/-- CITED. Lemma 10 as printed. FALSE as encoded, refuted by `lemma10_false`: never use this
+declaration. The repaired form is `Lemma10Repaired` in DecompJ381. Nothing imports this theorem. -/
 theorem lemma10 : Lemma10 := by sorry
 
 /-! ### Section 4, sieving the interval `I`, pages 24-42 -/

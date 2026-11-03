@@ -1,7 +1,7 @@
 /-
 Baker, Harman and Pintz 1997, pages 11, 23 and 24.
 CODEX task223. Principal character diagnostic for the sealed large L leaf.
-The exact leaf is refuted with clean axioms. The source issue remains a QUESTION.
+The old leaf is refuted with clean axioms, and U-1609 re-cut it against that refutation.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BakerHarmanPintz1997.Statements
@@ -652,7 +652,44 @@ theorem lemma10_false : ¬ Lemma10 := by
 
 #print axioms lemma10_false
 
-/-- LEAF. p. 23, Case L > qT. -/
+/-- The long polynomial `L(s,χ) = Σ_{l ≍ F} χ(l) l^{-s}` of Lemma 10, p. 23. -/
+noncomputable def longDP (c1 c2 F : ℝ) : DP := ⟨fun _ => 1, Finset.Ioo ⌊c1 * F⌋₊ ⌈c2 * F⌉₊⟩
+
+/-- The pointwise input of the case `L > qT`, p. 24, for a family: the printed `‖L‖_∞ ≪ 𝓛^B` for
+`χ ≠ χ₀`, and the same plus the polar main term `L^{1/2}/(1+|t|)` for `χ = χ₀`. The printed bound
+without that term is false: `Audit1609.bare_long_sup_false`. -/
+def LongSup (c1 c2 : ℝ) (Ll : ℝ → ℝ) (𝒮 : ℝ → Set Cfg) : Prop :=
+  ∃ B' K X0 : ℝ, ∀ x, X0 ≤ x → ∀ c ∈ 𝒮 x, ∀ e ∈ c.S,
+    (e.2 ≠ 1 → ‖(longDP c1 c2 (Ll x)).eval e.2 (half e.1)‖ ≤ K * L x ^ B') ∧
+    (e.2 = 1 → ‖(longDP c1 c2 (Ll x)).eval e.2 (half e.1)‖ ≤
+      K * (L x ^ B' + Ll x ^ (1 / 2 : ℝ) / (1 + |e.1|)))
+
+/-- Lemma 10, p. 23, repaired by U-1609: the printed hypotheses plus the lower bound `T₀ ≤ MN`, which
+the printed statement lacks. Without it `lemma10_false` refutes the statement. -/
+def Lemma10Repaired : Prop :=
+  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+  ∀ (A0 B c1 c2 : ℝ) (M N : ℝ → DP) (Ml Nl Ll : ℝ → ℝ) (𝒮 : ℝ → Set Cfg), 0 < c1 → c1 < c2 →
+    FamOK (fun x => [M x, N x]) [Ml, Nl] B c1 c2 →
+    (∀ x, Ml x * Nl x * Ll x = x) →
+    (∀ x, ∀ c ∈ 𝒮 x, c.Std x ∧ (c.q : ℝ) ≤ L x ^ A0 ∧ T0 x ≤ c.T ∧ c.T ≤ T1 ε x ∧
+      ∀ e ∈ c.S, e.2 = 1 → c.T / 2 ≤ |e.1| ∧ |e.1| ≤ c.T) →
+    (∀ x, max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) ≤ x ^ (0.775 + ε / 8) ∨
+      max (Ml x) (Nl x) ≤ x ^ (0.46 + ε / 8)) →
+    (∃ X1 : ℝ, ∀ x, X1 ≤ x → T0 x ≤ Ml x * Nl x) →
+    Concl39 (fun x => [M x, N x, (⟨fun _ => 1, Finset.Ioo ⌊c1 * Ll x⌋₊ ⌈c2 * Ll x⌉₊⟩ : DP)]) 𝒮
+
+/-- LEAF, OPEN. p. 24, the reflection step, reference 24 eq. (21), with the polar term of `χ₀` the
+print omits. It should follow from `DecompJ883.fgm_bound` by partial summation over dyadic blocks. -/
+theorem lemma10_reflection_sup :
+  ∀ c1 c2 : ℝ, 0 < c1 → c1 < c2 → ∃ K : ℝ, 0 ≤ K ∧
+  ∀ (F : ℝ) (c : Cfg), 2 ≤ F → 1 ≤ c.q → 2 < c.T → (c.q : ℝ) * c.T < F →
+    ∀ e ∈ c.S, |e.1| ≤ c.T →
+      (e.2 ≠ 1 → ‖(longDP c1 c2 F).eval e.2 (half e.1)‖ ≤ K * Real.log F) ∧
+      (e.2 = 1 → ‖(longDP c1 c2 F).eval e.2 (half e.1)‖ ≤
+        K * (Real.log F + F ^ (1 / 2 : ℝ) / (1 + |e.1|))) := by sorry
+
+/-- LEAF, OPEN. p. 24, Case L > qT, re-cut by U-1609: takes the pointwise input `LongSup`, (3.38) or
+(3.39), and `T₀ ≤ MN`. The old form had none of the three and is `lemma10_large_L_false`. -/
 theorem lemma10_large_L :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
   ∀ (A0 B c1 c2 : ℝ) (M N : ℝ → DP) (Ml Nl Ll : ℝ → ℝ) (𝒮 : ℝ → Set Cfg), 0 < c1 → c1 < c2 →
@@ -661,6 +698,10 @@ theorem lemma10_large_L :
     (∀ x, ∀ c ∈ 𝒮 x, c.Std x ∧ (c.q : ℝ) ≤ L x ^ A0 ∧ T0 x ≤ c.T ∧ c.T ≤ T1 ε x ∧
       ∀ e ∈ c.S, e.2 = 1 → c.T / 2 ≤ |e.1| ∧ |e.1| ≤ c.T) →
     (∀ x, ∀ c ∈ 𝒮 x, (c.q : ℝ) * c.T < Ll x) →
+    (∀ x, max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) ≤ x ^ (0.775 + ε / 8) ∨
+      max (Ml x) (Nl x) ≤ x ^ (0.46 + ε / 8)) →
+    (∃ X1 : ℝ, ∀ x, X1 ≤ x → T0 x ≤ Ml x * Nl x) →
+    LongSup c1 c2 Ll 𝒮 →
     Concl39 (fun x => [M x, N x, (⟨fun _ => 1, Finset.Ioo ⌊c1 * Ll x⌋₊ ⌈c2 * Ll x⌉₊⟩ : DP)]) 𝒮 := by sorry
 
 /-- LEAF. p. 24, Case L ≤ qT and (3.38). -/
@@ -687,15 +728,43 @@ theorem lemma10_small_L_339 :
     (∀ x, ∀ c ∈ 𝒮 x, Ll x ≤ (c.q : ℝ) * c.T) →
     Concl39 (fun x => [M x, N x, (⟨fun _ => 1, Finset.Ioo ⌊c1 * Ll x⌋₊ ⌈c2 * Ll x⌉₊⟩ : DP)]) 𝒮 := by sorry
 
-theorem lemma10_decomposed : Lemma10 := by
+/-- `LongSup` on the large part of a family, from `lemma10_reflection_sup` and `T₀ ≤ MN`. -/
+theorem longSup_of_reflection {c1 c2 : ℝ} (hc1 : 0 < c1) (hc2 : c1 < c2) {Ml Nl Ll : ℝ → ℝ}
+    {𝒮 : ℝ → Set Cfg} (hprod : ∀ x, Ml x * Nl x * Ll x = x)
+    (hstd : ∀ x, ∀ c ∈ 𝒮 x, c.Std x) (hlarge : ∀ x, ∀ c ∈ 𝒮 x, (c.q : ℝ) * c.T < Ll x)
+    (hMN : ∃ X1 : ℝ, ∀ x, X1 ≤ x → T0 x ≤ Ml x * Nl x) : LongSup c1 c2 Ll 𝒮 := by
+  obtain ⟨K, hK, hrefl⟩ := lemma10_reflection_sup c1 c2 hc1 hc2
+  obtain ⟨X1, hX1⟩ := hMN
+  refine ⟨1, K, max X1 1, ?_⟩
+  intro x hx c hc e he
+  have hx1 : X1 ≤ x := (le_max_left _ _).trans hx
+  have hx2 : 1 ≤ x := (le_max_right _ _).trans hx
+  obtain ⟨hws, hq, -, hT, -⟩ := hstd x c hc
+  have hq' : (1 : ℝ) ≤ c.q := by exact_mod_cast hq
+  have hlt := hlarge x c hc
+  have hF : 2 ≤ Ll x := by nlinarith
+  have hT0 : 1 ≤ T0 x := Real.one_le_exp (Real.rpow_nonneg (Real.log_nonneg hx2) _)
+  have hprodge : 1 ≤ Ml x * Nl x := hT0.trans (hX1 x hx1)
+  have hLx : Ll x ≤ x := by
+    have h := hprod x
+    nlinarith
+  have hlog : Real.log (Ll x) ≤ L x := Real.log_le_log (by linarith) hLx
+  obtain ⟨hne, heq⟩ := hrefl (Ll x) c hF hq hT hlt e he (hws e he).1
+  rw [Real.rpow_one]
+  refine ⟨fun h => (hne h).trans (mul_le_mul_of_nonneg_left hlog hK), fun h => (heq h).trans ?_⟩
+  exact mul_le_mul_of_nonneg_left (by linarith) hK
+
+/-- Lemma 10 as repaired by U-1609. CONDITIONAL ON its four OPEN leaves in this file. -/
+theorem lemma10_decomposed : Lemma10Repaired := by
   rcases lemma10_large_L with ⟨ε0_1, h_ε0_1, h_large⟩
   rcases lemma10_small_L_338 with ⟨ε0_2, h_ε0_2, h_small_338⟩
   rcases lemma10_small_L_339 with ⟨ε0_3, h_ε0_3, h_small_339⟩
   use min ε0_1 (min ε0_2 ε0_3)
   refine ⟨by positivity, fun ε hε1 hε2 => ?_⟩
-  intro A0 B c1 c2 M N Ml Nl Ll 𝒮 hc1 hc2 h_fam_ok h_prod h_c h_or A hA
+  intro A0 B c1 c2 M N Ml Nl Ll 𝒮 hc1 hc2 h_fam_ok h_prod h_c h_or h_MN A hA
 
-  have h_large_spec := h_large ε hε1 (lt_of_lt_of_le hε2 (min_le_left _ _)) A0 B c1 c2 M N Ml Nl Ll (fun x => {c ∈ 𝒮 x | (c.q : ℝ) * c.T < Ll x}) hc1 hc2 h_fam_ok h_prod (fun x c hc => h_c x c hc.1) (fun x c hc => hc.2) A hA
+  have h_large_spec := h_large ε hε1 (lt_of_lt_of_le hε2 (min_le_left _ _)) A0 B c1 c2 M N Ml Nl Ll (fun x => {c ∈ 𝒮 x | (c.q : ℝ) * c.T < Ll x}) hc1 hc2 h_fam_ok h_prod (fun x c hc => h_c x c hc.1) (fun x c hc => hc.2) h_or h_MN
+    (longSup_of_reflection hc1 hc2 h_prod (fun x c hc => (h_c x c hc.1).1) (fun x c hc => hc.2) h_MN) A hA
   have h_small_338_spec := h_small_338 ε hε1 (lt_of_lt_of_le hε2 (le_trans (min_le_right _ _) (min_le_left _ _))) A0 B c1 c2 M N Ml Nl Ll (fun x => {c ∈ 𝒮 x | Ll x ≤ (c.q : ℝ) * c.T ∧ max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) ≤ x ^ (0.775 + ε / 8)}) hc1 hc2 h_fam_ok h_prod (fun x c hc => h_c x c hc.1) (fun x c hc => hc.2.2) (fun x c hc => hc.2.1) A hA
   have h_small_339_spec := h_small_339 ε hε1 (lt_of_lt_of_le hε2 (le_trans (min_le_right _ _) (min_le_right _ _))) A0 B c1 c2 M N Ml Nl Ll (fun x => {c ∈ 𝒮 x | Ll x ≤ (c.q : ℝ) * c.T ∧ max (Ml x) (Nl x) ≤ x ^ (0.46 + ε / 8)}) hc1 hc2 h_fam_ok h_prod (fun x c hc => h_c x c hc.1) (fun x c hc => hc.2.2) (fun x c hc => hc.2.1) A hA
 

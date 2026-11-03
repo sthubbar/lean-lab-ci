@@ -8,7 +8,8 @@ attribute [local instance] Classical.propDecidable
 theorem fgm_eta (ε : ℝ) (hε : 0 < ε) : 0 < min (ε / 8) (1 / 4) :=
   lt_min (by positivity) (by norm_num)
 
-/-- LEAF. Page 21, Fujii-Gallagher-Montgomery bound. -/
+/-- LEAF, CITED. Page 21, Fujii-Gallagher-Montgomery bound, reference 6 Theorem 1, cited not proved
+in the lab. Statement unchanged by U-1609: not refuted, blocked on the citation. -/
 theorem fgm_bound :
   ∃ C_FGM : ℝ, 0 < C_FGM ∧
   ∀ q : ℕ, q ≥ 1 → ∀ χ : DirichletCharacter ℂ q, ∀ t : ℝ,
@@ -18,9 +19,11 @@ theorem fgm_bound :
     ∫ y in N..u, (y : ℂ) ^ (-(t : ℂ) * Complex.I)‖
   ≤ C_FGM * (q : ℝ) ^ (1 / 2 : ℝ) * (|t| + 1) ^ (1 / 2 : ℝ) * log ((q : ℝ) * (|t| + 2)) := by sorry
 
-/-- LEAF. Page 21. Discretization error between discrete sum and integral. -/
+/-- LEAF, OPEN. Outline step for page 21, the paper prints no such display. Discretization error
+between discrete sum and integral, in the nonresonant range `|t| ≤ N` only. U-1609 added that
+hypothesis: at `t = 2πN` the old form fails, `Audit1609.old_fgm_discretization_error_false`. -/
 theorem fgm_discretization_error :
-  ∃ C_disc : ℝ, 0 ≤ C_disc ∧ ∀ N N1 : ℝ, 1 ≤ N → N ≤ N1 → N1 ≤ 2 * N → ∀ t : ℝ,
+  ∃ C_disc : ℝ, 0 ≤ C_disc ∧ ∀ N N1 : ℝ, 1 ≤ N → N ≤ N1 → N1 ≤ 2 * N → ∀ t : ℝ, |t| ≤ N →
   ‖∑ n ∈ Ioc ⌊N⌋₊ ⌊N1⌋₊, (n : ℂ) ^ (-(t : ℂ) * Complex.I) * (n : ℂ) ^ (-1 / 2 : ℂ) -
     ∫ y in N..N1, (y : ℂ) ^ (-1 / 2 : ℂ) * (y : ℂ) ^ (-(t : ℂ) * Complex.I)‖
   ≤ C_disc * (N : ℝ) ^ (-1 / 2 : ℝ) := by sorry
@@ -194,11 +197,26 @@ theorem fgm_frequency_conversion :
     _ = 2 * N ^ (15 / 16 : ℝ) := Real.sqrt_sq hB
     _ = 2 * N ^ (1 - 1 / 16 : ℝ) := by congr 2; norm_num
 
-/-- LEAF. Page 21. Combination of remainder bounds. -/
+/-- Page 21. Combination of remainder bounds. U-1609 added `0 ≤ C_FGM` and `0 ≤ K_2`: the old form
+fails at `C_FGM = -1`, `Audit1609.old_fgm_combine_remainders_false`. -/
 theorem fgm_combine_remainders :
-  ∀ C_FGM K_2 N ε : ℝ, 1 ≤ N → 0 < ε →
+  ∀ C_FGM K_2 N ε : ℝ, 0 ≤ C_FGM → 0 ≤ K_2 → 1 ≤ N → 0 < ε →
   C_FGM * N ^ (-1 / 2 : ℝ) * (K_2 * N ^ (ε / 8)) * (2 * N ^ (1 - ε / 4))
-  ≤ 2 * C_FGM * K_2 * N ^ (1 / 2 - min (ε / 8) (1 / 4)) := by sorry
+  ≤ 2 * C_FGM * K_2 * N ^ (1 / 2 - min (ε / 8) (1 / 4)) := by
+  intro C K N ε hC hK hN hε
+  have hN0 : 0 < N := by linarith
+  have hprod : N ^ (-1 / 2 : ℝ) * N ^ (ε / 8) * N ^ (1 - ε / 4) = N ^ (1 / 2 - ε / 8) := by
+    rw [← Real.rpow_add hN0, ← Real.rpow_add hN0]
+    congr 1
+    ring
+  have hmono : N ^ (1 / 2 - ε / 8) ≤ N ^ (1 / 2 - min (ε / 8) (1 / 4)) :=
+    Real.rpow_le_rpow_of_exponent_le hN (by linarith [min_le_left (ε / 8) (1 / 4 : ℝ)])
+  calc
+    C * N ^ (-1 / 2 : ℝ) * (K * N ^ (ε / 8)) * (2 * N ^ (1 - ε / 4))
+        = 2 * C * K * (N ^ (-1 / 2 : ℝ) * N ^ (ε / 8) * N ^ (1 - ε / 4)) := by ring
+    _ = 2 * C * K * N ^ (1 / 2 - ε / 8) := by rw [hprod]
+    _ ≤ 2 * C * K * N ^ (1 / 2 - min (ε / 8) (1 / 4)) :=
+      mul_le_mul_of_nonneg_left hmono (by positivity)
 
 /-- LEAF. Page 21. Main decomposition branch -/
 theorem fgm_branch :
