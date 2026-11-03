@@ -207,11 +207,122 @@ theorem sq_route_exhausted {m p a : ℕ} (hp : p.Prime) (e : m ^ 2 = p + a ^ 2) 
   · subst h
     omega
 
+
+mutual
+def pellM : ℕ → ℕ
+| 0 => 5
+| (n+1) => 3 * pellM n + 8 * pellA n
+
+def pellA : ℕ → ℕ
+| 0 => 1
+| (n+1) => pellM n + 3 * pellA n
+end
+
+def state (n : ℕ) : ℕ × ℕ := (pellM n % 5, pellA n % 5)
+
+lemma state_succ (n : ℕ) : state (n + 1) = ((3 * (state n).1 + 8 * (state n).2) % 5, ((state n).1 + 3 * (state n).2) % 5) := by
+  dsimp [state]
+  have h1 : pellM (n + 1) = 3 * pellM n + 8 * pellA n := rfl
+  have h2 : pellA (n + 1) = pellM n + 3 * pellA n := rfl
+  rw [h1, h2]
+  ext <;> dsimp <;> omega
+
+lemma state_6n (n : ℕ) : state (6 * n) = (0, 1) := by
+  induction' n with n ih
+  · rfl
+  · have h1 : 6 * (n + 1) = 6 * n + 6 := by ring
+    rw [h1]
+    have step1 : state (6 * n + 1) = (3, 3) := by rw [state_succ, ih]; rfl
+    have step2 : state (6 * n + 2) = (3, 2) := by rw [state_succ, step1]; rfl
+    have step3 : state (6 * n + 3) = (0, 4) := by rw [state_succ, step2]; rfl
+    have step4 : state (6 * n + 4) = (2, 2) := by rw [state_succ, step3]; rfl
+    have step5 : state (6 * n + 5) = (2, 3) := by rw [state_succ, step4]; rfl
+    have step6 : state (6 * n + 6) = (0, 1) := by rw [state_succ, step5]; rfl
+    exact step6
+
+lemma state_6n_1 (n : ℕ) : state (6 * n + 1) = (3, 3) := by
+  have step1 : state (6 * n + 1) = (3, 3) := by rw [state_succ, state_6n]; rfl
+  exact step1
+
+lemma pell_eq (n : ℕ) : (pellM n)^2 = 17 + 8 * (pellA n)^2 := by
+  induction' n with n ih
+  · rfl
+  · have h1 : pellM (n+1) = 3 * pellM n + 8 * pellA n := rfl
+    have h2 : pellA (n+1) = pellM n + 3 * pellA n := rfl
+    rw [h1, h2]
+    nlinarith
+
+lemma div_5_2m_1 (n : ℕ) : (2 * pellM (6 * n + 1) - 1) % 5 = 0 := by
+  have h : pellM (6 * n + 1) % 5 = 3 := by
+    have h2 := state_6n_1 n
+    exact congrArg Prod.fst h2
+  omega
+
+lemma pellM_ge (n : ℕ) : pellM n ≥ 5 := by
+  induction' n with n ih
+  · rfl
+  · have h1 : pellM (n+1) = 3 * pellM n + 8 * pellA n := rfl
+    rw [h1]
+    omega
+
+lemma pellM_ge_11 (n : ℕ) : pellM (n + 1) ≥ 23 := by
+  induction' n with n ih
+  · rfl
+  · have h1 : pellM (n+2) = 3 * pellM (n+1) + 8 * pellA (n+1) := rfl
+    rw [h1]
+    omega
+
+lemma not_prime_2m_1 (n : ℕ) : ¬ (2 * pellM (6 * n + 1) - 1).Prime := by
+  intro h
+  have h1 := div_5_2m_1 n
+  have h2 : 5 ∣ 2 * pellM (6 * n + 1) - 1 := Nat.dvd_of_mod_eq_zero h1
+  have h3 : 2 * pellM (6 * n + 1) - 1 = 5 := by
+    have tmp := (Nat.prime_dvd_prime_iff_eq (by norm_num) h).mp h2
+    exact tmp.symm
+  have h4 : pellM (6 * n + 1) ≥ 23 := by
+    have := pellM_ge_11 (6 * n)
+    exact this
+  omega
+
+lemma pellA_ge_1 (n : ℕ) : pellA n ≥ 1 := by
+  induction' n with n ih
+  · rfl
+  · have h2 : pellA (n+1) = pellM n + 3 * pellA n := rfl
+    rw [h2]
+    omega
+
+lemma pellM_mono (n : ℕ) : pellM n < pellM (n + 1) := by
+  have h1 : pellM (n+1) = 3 * pellM n + 8 * pellA n := rfl
+  rw [h1]
+  have hm := pellM_ge n
+  omega
+
+lemma pellM_ge_n (n : ℕ) : pellM n ≥ n := by
+  induction' n with n ih
+  · omega
+  · have h := pellM_mono n
+    omega
+
 /-- ROUTE, sorry, NOT PROVED. Infinitely many squares with `2m - 1` composite still work, through
 `M = 8 a²`. Plan: the Pell family `m² - 8 a² = 17`, `(5, 1) ↦ (3m + 8a, m + 3a)`, plus a periodicity
 mod a small prime to force `2m - 1` composite. Python checked the first terms only. -/
 theorem route_powerful_nonsquare_family :
     ∀ K : ℕ, ∃ m > K, ¬ (2 * m - 1).Prime ∧ ∃ p a : ℕ, p.Prime ∧ 0 < a ∧ m ^ 2 = p + 8 * a ^ 2 := by
-  sorry
+  intro K
+  let N := K
+  use pellM (6 * N + 1)
+  constructor
+  · have h1 := pellM_ge_n (6 * N + 1)
+    omega
+  · constructor
+    · exact not_prime_2m_1 N
+    · use 17, pellA (6 * N + 1)
+      constructor
+      · norm_num
+      · constructor
+        · have := pellA_ge_1 (6 * N + 1)
+          omega
+        · have := pell_eq (6 * N + 1)
+          omega
 
 end LeanLab.OpenProblems.State1612
