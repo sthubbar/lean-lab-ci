@@ -16,7 +16,7 @@ git fetch -q origin main 2>/dev/null
 # CHECK_BASE override, lrefresh 2026-10-29 on lmerge findings 10-24 and 10-25: an audit on a worktree of new main found no
 # changed files and passed empty. Audits run: CHECK_BASE=<pre-run main sha> bash scripts/check_branch.sh <Folder> GATE-AUDIT
 BASE="${CHECK_BASE:-$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || echo "")}"
-python3 - "$FOLDER" "$TAG" "$BASE" "$OUT" <<'PY'
+python - "$FOLDER" "$TAG" "$BASE" "$OUT" <<'PY'
 import subprocess, sys, re, os
 folder, tag, base, out = sys.argv[1:5]
 prefix = tag.split("-")[0]
