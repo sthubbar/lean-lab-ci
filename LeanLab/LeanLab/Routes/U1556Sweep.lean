@@ -265,7 +265,204 @@ theorem dqt_W_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 1
     IntegrableOn (fun y => Dqt δ y ^ 2 * W (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Dqt δ y ^ 2 * W (y / X)
         ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
-  sorry
+  have hX0 : 0 < X := by linarith
+  have hδ0 : 0 ≤ δ := hδ.le
+  have hL1 : 1 ≤ Real.log (2.0001 / δ) := L_ge_one hδ hδ1
+  have hLpos : 0 < Real.log (2.0001 / δ) := by linarith
+  have hL2 : 1 ≤ Real.log (2.0001 / δ) ^ 2 := by nlinarith
+  -- Dqt is the same as Dpt from the lab
+  have hDqt_eq_Dpt : Dqt δ = Dpt δ := by
+    ext y; unfold Dqt Dpt fpt; ring
+  -- Nonnegativity of Dqt
+  have hDqt_nonneg : ∀ y, 0 ≤ Dqt δ y := by
+    intro y; rw [hDqt_eq_Dpt]; exact Dpt_nonneg hδ0 (by
+      by_cases hy : 0 ≤ y; · exact hy; · have : Dpt δ y = Dpt δ 0 := by
+        unfold Dpt fpt; simp [max_eq_left (by linarith), max_eq_right (by linarith)]; ring
+      rw [this]; exact Dpt_nonneg hδ0 (by norm_num))
+  -- Key observation: for y ≤ X, we have δ√y ≤ δ√X ≤ (1/10^13)·√(10^13) = 10^(-13/2) < 1
+  have hδ_sqrt_X_lt_one : δ * √X < 1 := by
+    have hδX : δ * X ≤ 1 / 10 ^ 13 * X := mul_le_mul_of_nonneg_right hδ1 hX0.le
+    have hX_bound : 1 / 10 ^ 13 * X ≤ X * X / 10 ^ 26 := by
+      rw [div_mul_eq_mul_div, one_mul, div_le_div_iff₀ (by norm_num) (by norm_num)]
+      nlinarith
+    have hδX2 : (δ * X) ^ 2 ≤ (X ^ 2) ^ 2 / 10 ^ 52 := by
+      have h := mul_le_mul_of_nonneg_left hδX (by positivity : 0 ≤ δ * X)
+      nlinarith
+    have h_sqrt : δ * √X = √((δ * X) ^ 2) := by
+      rw [Real.sqrt_sq (by positivity : 0 ≤ δ * X), Real.mul_self_sqrt hX0.le]
+      ring
+    rw [h_sqrt]
+    have h_target : (X ^ 2) ^ 2 / 10 ^ 52 < 1 := by
+      have hX13 : (10 : ℝ) ^ 13 ≤ X := hX
+      have hX26 : (10 : ℝ) ^ 26 ≤ X ^ 2 := by nlinarith
+      have hX52 : (10 : ℝ) ^ 52 ≤ (X ^ 2) ^ 2 := by nlinarith
+      calc (X ^ 2) ^ 2 / 10 ^ 52 ≤ (X ^ 2) ^ 2 / (X ^ 2) ^ 2 := by
+        refine (div_le_div_right (by positivity)).mpr ?_
+        exact hX52
+      _ = 1 := by field_simp [pow_ne_zero 2 hX0.ne']
+    nlinarith
+  have hδ_sqrt_y_lt_one : ∀ y, y ≤ X → δ * √y < 1 := by
+    intro y hy
+    have h_sqrt : √y ≤ √X := Real.sqrt_le_sqrt hy
+    have : δ * √y ≤ δ * √X := mul_le_mul_of_nonneg_left h_sqrt hδ0
+    linarith
+  -- On (2, X]: use Dpt_le
+  have h_on_Ioc : ∀ y, y ∈ Ioc (2 : ℝ) X → Dqt δ y ≤ Real.log ((1 + δ) * y) ^ 2 / Real.log 2 := by
+    intro y hy
+    have hy1 : 1 ≤ y := by linarith
+    have hδy : δ * √y < 1 := hδ_sqrt_y_lt_one y hy.2
+    rw [hDqt_eq_Dpt]
+    exact Dpt_le hy1 hδ hδy
+  -- On (X, ∞): use crude bound
+  have h_on_Ioi : ∀ y, y ∈ Ioi X → Dqt δ y ≤ 1.1062 * (1 + δ) * y + 2 * Real.log ((1 + δ) * y) ^ 2 + 160 := by
+    intro y hy
+    have hy2 : 2 ≤ y := by linarith
+    unfold Dqt
+    have h1 : Dqt δ y ≤ ψ ((1 + δ) * y) := by
+      have : 0 ≤ ψ y - θ y := by
+        have := theta_le_psi y; linarith
+      linarith
+    have h2 : ψ ((1 + δ) * y) ≤ 1.1062 * ((1 + δ) * y) + 2 * Real.log ((1 + δ) * y) ^ 2 + 160 :=
+      psi_le_real (by nlinarith)
+    linarith
+  -- Split integral: Ioi 2 = Ioc 2 X ∪ Ioi X
+  have hsplit : Ioi (2 : ℝ) = Ioc (2 : ℝ) X ∪ Ioi X := by
+    ext y; constructor
+    · intro hy; rcases le_or_lt y X with h | h
+      · exact Or.inl ⟨hy, h⟩
+      · exact Or.inr h
+    · intro hy; rcases hy with (⟨hy2, _⟩ | hyX)
+      · exact hy2
+      · exact Set.mem_Ioi.mpr (lt_of_lt_of_le (by norm_num : (2 : ℝ) < X) hyX)
+  have hdisjoint : Disjoint (Ioc (2 : ℝ) X) (Ioi X) := by
+    rw [Set.disjoint_left]
+    intro y hy1 hy2
+    exact hy1.2.not_lt hy2
+  have hmeas1 : MeasurableSet (Ioc (2 : ℝ) X) := measurableSet_Ioc
+  have hmeas2 : MeasurableSet (Ioi X) := measurableSet_Ioi
+  -- Build integrability using Dpt_sq_ii from the lab
+  have hint : IntegrableOn (fun y => Dqt δ y ^ 2 * W (y / X)) (Ioi 2) := by
+    rw [hsplit]
+    have hint_Ioc : IntegrableOn (fun y => Dqt δ y ^ 2 * W (y / X)) (Ioc (2 : ℝ) X) := by
+      -- Use Dpt_sq_ii for integrability of Dqt^2 on bounded intervals
+      have h_int_Dpt_sq : IntervalIntegrable (fun y => Dpt δ y ^ 2) volume 2 X :=
+        Dpt_sq_ii hδ (by norm_num) (by linarith)
+      -- W(y/X) is bounded on Ioc 2 X
+      have hW_bound : ∀ y ∈ Ioc (2 : ℝ) X, W (y / X) ≤ 1 := by
+        intro y hy
+        have hyX : y / X ≤ 1 := (div_le_one hX0).mpr hy.2
+        unfold W
+        split_ifs with h
+        · rfl
+        · exfalso; linarith
+      have h_bound : (fun y => Dqt δ y ^ 2 * W (y / X)) ≤
+          (fun y => Dqt δ y ^ 2 * 1) := by
+        intro y; by_cases hy : y ∈ Ioc (2 : ℝ) X
+        · gcongr; exact hW_bound y hy
+        · exact by simp
+      have h_int_Dqt_sq : IntegrableOn (fun y => Dqt δ y ^ 2) (Ioc (2 : ℝ) X) := by
+        rw [hDqt_eq_Dpt]
+        -- Dpt_sq_ii gives interval integrability, which implies integrableOn
+        have h := h_int_Dpt_sq.integrableOn_Ioc
+        -- But we need to restrict to Ioc 2 X
+        exact h.mono_set (Set.Ioc_subset_Ioc_right (by linarith))
+      have h_int_const : IntegrableOn (fun _ : ℝ => (1 : ℝ)) (Ioc (2 : ℝ) X) :=
+        MeasureTheory.integrableOn_const (μ := volume) (s := Ioc (2 : ℝ) X) (C := 1) (by simp)
+      exact (h_int_Dqt_sq.mul h_int_const).mono' ?_ (Filter.Eventually.of_forall h_bound)
+      -- AEStronglyMeasurable
+      refine ((measurable_Dqt δ).pow_const 2).mul (measurable_W_div X) |>.aestronglyMeasurable
+    have hint_Ioi : IntegrableOn (fun y => Dqt δ y ^ 2 * W (y / X)) (Ioi X) := by
+      -- On Ioi X, W(y/X) = (X/y)^4, which decays fast
+      -- Use that Dqt^2 * W is integrable by comparison with y^{-2}
+      have h_bound : ∀ y ∈ Ioi X, Dqt δ y ^ 2 * W (y / X) ≤
+          (1.1062 * (1 + δ) * y + 2 * Real.log ((1 + δ) * y) ^ 2 + 160) ^ 2 * ((X / y) ^ 4) := by
+        intro y hy
+        have hD := h_on_Ioi y hy
+        have hW : W (y / X) = (X / y) ^ 4 := by
+          unfold W
+          have hyX : 1 < y / X := (one_lt_div hX0).mpr hy
+          simp [hyX.le]
+        rw [hW]
+        gcongr
+      -- The RHS is integrable on Ioi X because (X/y)^4 decays like y^{-4}
+      -- and the polynomial term grows like y^2 log^4 y, so product decays like y^{-2} log^4 y
+      -- which is integrable at infinity
+      have h_int_tail : IntegrableOn
+          (fun y => (1.1062 * (1 + δ) * y + 2 * Real.log ((1 + δ) * y) ^ 2 + 160) ^ 2 * ((X / y) ^ 4))
+          (Ioi X) := by
+        -- For y ≥ X ≥ 10^13, we have log y ≤ y^{1/100} (very weak bound)
+        -- So the polynomial term is O(y^2) and (X/y)^4 = X^4/y^4
+        -- Product is O(X^4/y^2), which is integrable on Ioi X
+        -- Use explicit constant: for y ≥ X, log y ≤ y^{1/100} ≤ y^{1/2} (since y ≥ 1)
+        -- Actually, simpler: use that for y ≥ X, log y ≤ y (since log y ≤ y - 1 for y ≥ 1)
+        -- So (a*y + b*log^2 y + c)^2 ≤ (a*y + b*y + c)^2 ≤ ((a+b+c)*y)^2 for y ≥ 1
+        -- And ((a+b+c)*y)^2 * (X/y)^4 = (a+b+c)^2 * X^4 / y^2
+        -- which is integrable on Ioi X
+        have h_poly_bound : ∀ y, X ≤ y →
+            (1.1062 * (1 + δ) * y + 2 * Real.log ((1 + δ) * y) ^ 2 + 160) ^ 2 ≤
+            ((1.1062 * (1 + δ) + 2 + 160) * y) ^ 2 := by
+          intro y hy
+          have hy1 : 1 ≤ y := by linarith
+          have hlog : Real.log ((1 + δ) * y) ≤ y := by
+            have : Real.log ((1 + δ) * y) ≤ (1 + δ) * y - 1 := Real.log_le_sub_one_of_pos (by positivity)
+            linarith
+          have hlog_sq : Real.log ((1 + δ) * y) ^ 2 ≤ y ^ 2 := by
+            nlinarith
+          nlinarith
+        have h_int : IntegrableOn (fun y => ((1.1062 * (1 + δ) + 2 + 160) * X ^ 2) ^ 2 * (y ^ (-2 : ℝ))) (Ioi X) := by
+          -- y^{-2} is integrable on Ioi X for X > 0
+          have h_int_rpow : IntegrableOn (fun y => y ^ (-2 : ℝ)) (Ioi X) := by
+            refine (integrableOn_Ioi_rpow_of_lt (by norm_num : (-2 : ℝ) < -1) hX0).congr_fun ?_
+              measurableSet_Ioi
+            intro y hy
+            rfl
+          exact h_int_rpow.const_mul ((1.1062 * (1 + δ) + 2 + 160) ^ 2 * X ^ 4)
+        refine h_int.congr_fun ?_ measurableSet_Ioi
+        intro y hy
+        have hyX : X ≤ y := Set.mem_Ioi.mp hy
+        have h_poly := h_poly_bound y hyX
+        have hW : (X / y) ^ 4 = X ^ 4 * (y ^ (-4 : ℝ)) := by
+          rw [div_eq_mul_inv, mul_pow, ← Real.rpow_neg (by positivity : 0 ≤ y), Real.rpow_natCast]
+        rw [hW]
+        calc (1.1062 * (1 + δ) * y + 2 * Real.log ((1 + δ) * y) ^ 2 + 160) ^ 2 * (X ^ 4 * (y ^ (-4 : ℝ)))
+            ≤ ((1.1062 * (1 + δ) + 2 + 160) * y) ^ 2 * (X ^ 4 * (y ^ (-4 : ℝ))) := by
+          gcongr
+        _ = ((1.1062 * (1 + δ) + 2 + 160) ^ 2 * X ^ 4) * (y ^ 2 * y ^ (-4 : ℝ)) := by ring
+        _ = ((1.1062 * (1 + δ) + 2 + 160) ^ 2 * X ^ 4) * (y ^ (-2 : ℝ)) := by
+          rw [← Real.rpow_add (by positivity : 0 < y), show (2 : ℝ) + (-4 : ℝ) = (-2 : ℝ) by ring]
+          exact Real.rpow_add (by positivity : 0 < y) (by norm_num : (2 : ℝ) + (-4 : ℝ) = (-2 : ℝ))
+        -- Actually, y^2 * y^{-4} = y^{-2} only if y > 0, which it is
+        -- But Real.rpow_add requires exponents to be such that the sum is defined
+        -- Simpler: y^2 * y^{-4} = y^{-2} by ring
+        _ = ((1.1062 * (1 + δ) + 2 + 160) ^ 2 * X ^ 4) * (y ^ (-2 : ℝ)) := by
+          rw [show (y : ℝ) ^ (2 : ℝ) * (y : ℝ) ^ (-4 : ℝ) = (y : ℝ) ^ ((-2 : ℝ)) by
+            rw [← Real.rpow_add (by positivity : 0 < y)]
+            · ring
+            · norm_num]
+      exact h_int_tail.mono' ?_ (Filter.Eventually.of_forall h_bound)
+      -- AEStronglyMeasurable
+      refine ((measurable_Dqt δ).pow_const 2).mul (measurable_W_div X) |>.aestronglyMeasurable
+    exact hint_Ioc.add hint_Ioi
+  -- Now the integral bound
+  have hint_Ioc_bound : ∫ y in Ioc (2 : ℝ) X, Dqt δ y ^ 2 * W (y / X) ≤
+      1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
+    sorry
+  have hint_Ioi_bound : ∫ y in Ioi X, Dqt δ y ^ 2 * W (y / X) ≤
+      1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
+    sorry
+  have h_total : ∫ y in Ioi 2, Dqt δ y ^ 2 * W (y / X) ≤
+      1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
+    rw [hsplit, MeasureTheory.setIntegral_union hdisjoint hmeas1 hmeas2
+      (by
+        -- Need to extract the integrability from hint
+        have := hint
+        rw [hsplit] at this
+        exact this.1)
+      (by
+        rw [hsplit] at hint
+        exact this.2)]
+    linarith
+  exact ⟨hint, h_total⟩
 
 /-! ### Assembly -/
 
