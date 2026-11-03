@@ -76,6 +76,67 @@ theorem eta_eq_integral (η : ℝ → ℝ) (h_diff : ContDiff ℝ 1 η) (h_supp 
   rw [h_int] at H2
   linarith
 
+/-- A smooth cutoff supported in `[0,1]`, used for the counterexample to `S_eq_integral`. -/
+private noncomputable def counterEta : ℝ → ℝ :=
+  (⟨1 / 4, 1 / 2, by norm_num, by norm_num⟩ : ContDiffBump (1 / 2 : ℝ)).toFun
+
+/-- The specialized identity in `S_eq_integral` has a checked counterexample. -/
+theorem S_eq_integral_counterexample :
+    ¬ (ContDiff ℝ 1 counterEta →
+        Function.support counterEta ⊆ Set.Icc (0:ℝ) 1 →
+        LeanLab.Tao2012.Cor48.S counterEta 1 ⌊(3:ℝ)⌋₊ 3 0 =
+          - (1 / 3 : ℂ) * ∫ y in (0:ℝ)..3,
+            ((deriv counterEta (y / 3) : ℝ) : ℂ) * LeanLab.Tao2012.Cor48.S one_Icc 1 ⌊y⌋₊ y 0) := by
+  intro h
+  have hdiff : ContDiff ℝ 1 counterEta := by
+    exact (⟨1 / 4, 1 / 2, by norm_num, by norm_num⟩ : ContDiffBump (1 / 2 : ℝ)).contDiff (n := 1)
+  have hsupp : Function.support counterEta ⊆ Set.Icc (0:ℝ) 1 := by
+    unfold counterEta
+    rw [(⟨1 / 4, 1 / 2, by norm_num, by norm_num⟩ : ContDiffBump (1 / 2 : ℝ)).support_eq]
+    intro t ht
+    have hdist : dist t (1 / 2 : ℝ) < 1 / 2 := Metric.mem_ball.mp ht
+    have habs : |t - 1 / 2| < 1 / 2 := by simpa [Real.dist_eq] using hdist
+    rw [abs_lt] at habs
+    exact ⟨by linarith, by linarith⟩
+  have htwo : counterEta (2 / 3) = 1 := by
+    apply (⟨1 / 4, 1 / 2, by norm_num, by norm_num⟩ : ContDiffBump (1 / 2 : ℝ)).one_of_mem_closedBall
+    rw [Metric.mem_closedBall]
+    simp [Real.dist_eq]
+    norm_num
+  have hlhs : LeanLab.Tao2012.Cor48.S counterEta 1 ⌊(3:ℝ)⌋₊ 3 0 = (Real.log 2 : ℂ) := by
+    unfold LeanLab.Tao2012.Cor48.S
+    norm_num [Finset.sum_range_succ, htwo,
+      ArithmeticFunction.vonMangoldt_apply_prime (by norm_num : Nat.Prime 2)]
+  have hrhs : ∫ y in (0:ℝ)..3, ((deriv counterEta (y / 3) : ℝ) : ℂ) *
+      LeanLab.Tao2012.Cor48.S one_Icc 1 ⌊y⌋₊ y 0 = 0 := by
+    have hne : ∀ᵐ y : ℝ ∂volume, y ≠ 3 := by
+      simp [MeasureTheory.ae_iff, MeasureTheory.measure_singleton]
+    have hc := intervalIntegral.integral_congr_ae (μ := volume) (a := 0) (b := 3)
+      (f := fun y : ℝ => ((deriv counterEta (y / 3) : ℝ) : ℂ) *
+        LeanLab.Tao2012.Cor48.S one_Icc 1 ⌊y⌋₊ y 0) (g := fun _ : ℝ => (0 : ℂ)) ?_
+    simpa using hc
+    filter_upwards [hne] with y hy
+    intro hyu
+    rw [Set.uIoc_of_le (by norm_num)] at hyu
+    have hy3 : y < 3 := by
+      rcases hyu.2.eq_or_lt with rfl | h
+      · exact (hy rfl).elim
+      · exact h
+    have hz : LeanLab.Tao2012.Cor48.S one_Icc 1 ⌊y⌋₊ y 0 = 0 := by
+      apply Finset.sum_eq_zero
+      intro n hn
+      simp only [mem_range] at hn
+      have hfloor : ⌊y⌋₊ < 3 := (Nat.floor_lt (le_of_lt hyu.1)).2 hy3
+      have hn2 : n < 2 := by omega
+      interval_cases n <;> simp [ArithmeticFunction.vonMangoldt_apply]
+    simp [hz]
+  have heq := h hdiff hsupp
+  rw [hlhs, hrhs] at heq
+  simp only [mul_zero] at heq
+  have hlog : Real.log 2 ≠ 0 := (Real.log_pos (by norm_num : (1:ℝ) < 2)).ne'
+  have hclog : (Real.log 2 : ℂ) ≠ 0 := by exact_mod_cast hlog
+  exact hclog heq
+
 /-- LEAF. Tao 2012, page 16, Lemma 4.2 proof. Summation by parts identity for `S`.
 This substitutes the integral form of `η(n/x)` and exchanges the sum and the integral. -/
 theorem S_eq_integral (η : ℝ → ℝ) (h_diff : ContDiff ℝ 1 η) (h_supp : Function.support η ⊆ Set.Icc 0 1)
