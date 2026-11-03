@@ -1,6 +1,7 @@
 import LeanLab.OpenProblems.Erdos9
 import LeanLab.OpenProblems.Lemoine
 import LeanLab.OpenProblems.Erdos17
+import LeanLab.BrunGap.Final
 
 /-!
 # OpenProblems, named route lemmas for the provers
@@ -737,14 +738,182 @@ theorem route_lemoine_positive_density :
       c * N ≤ (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) := by
   sorry
 
+section
+
+open LeanLab.BrunGap LeanLab.SchnirelmannGoldbach
+
+/-! Private support for `route_cluster_count_le`, from the lab's Brun bound `gapUpper` for prime
+pairs at an even gap `h` (`LeanLab/BrunGap/Final.lean`), imported by the one line added at the top
+of this file. Same proof as `results/RouteLemmas_leaf3_modulo_brun.lean`. -/
+
+private lemma singProd_pos' (n : ℕ) : 0 < singProd n := by
+  unfold singProd
+  refine Finset.prod_pos (fun p hp => ?_)
+  have h : (0 : ℝ) ≤ 1 / (p : ℝ) := by positivity
+  linarith
+
+/-- primes `9 < p ≤ x` with `p - d` prime. -/
+private def S (x d : ℕ) : Set ℕ := {p : ℕ | p.Prime ∧ (p - d).Prime ∧ 9 < p} ∩ Set.Iic x
+
+/-- primes `q < x` with `q + d` prime, the set counted by `gapCount`. -/
+private def G (x d : ℕ) : Set ℕ := {q : ℕ | q.Prime ∧ (q + d).Prime} ∩ Set.Iio x
+
+private lemma G_eq (x d : ℕ) :
+    G x d = ↑((Finset.range x).filter (fun q => q.Prime ∧ (q + d).Prime)) := by
+  ext q
+  constructor
+  · intro h
+    simp only [G, Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_Iio, Finset.coe_filter,
+      Finset.mem_range, Set.mem_ofPred_eq] at h ⊢
+    exact ⟨h.2, h.1⟩
+  · intro h
+    simp only [G, Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_Iio, Finset.coe_filter,
+      Finset.mem_range, Set.mem_ofPred_eq] at h ⊢
+    exact ⟨h.2, h.1⟩
+
+private lemma S_ncard_le (x d : ℕ) (hd0 : 0 < d) (hd : d ≤ 9) : (S x d).ncard ≤ gapCount d x := by
+  classical
+  have hfin : (G x d).Finite := Set.Finite.subset (Set.finite_Iio x) Set.inter_subset_right
+  have hle : (S x d).ncard ≤ (G x d).ncard := by
+    refine Set.ncard_le_ncard_of_injOn (fun p => p - d) ?_ ?_ hfin
+    · intro p hp
+      simp only [S, G, Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_Iio] at hp ⊢
+      obtain ⟨⟨hpp, hpd, h9⟩, hpx⟩ := hp
+      have hdp : d ≤ p := by omega
+      have hlt : p - d < p := Nat.sub_lt (by omega) hd0
+      exact ⟨⟨hpd, by rwa [Nat.sub_add_cancel hdp]⟩, Nat.lt_of_lt_of_le hlt hpx⟩
+    · intro a ha b hb hab
+      simp only [S, G, Set.mem_inter_iff, Set.mem_setOf_eq] at ha hb
+      have hda : d ≤ a := by have := ha.1.2.2; omega
+      have hdb : d ≤ b := by have := hb.1.2.2; omega
+      have hab' : a - d = b - d := hab
+      calc a = (a - d) + d := (Nat.sub_add_cancel hda).symm
+        _ = (b - d) + d := by rw [hab']
+        _ = b := Nat.sub_add_cancel hdb
+  rw [G_eq, Set.ncard_coe_finset] at hle
+  simpa [gapCount] using hle
+
+/-- Counting core: cluster primes up to `x` are at most ten plus the three prime-pair counts at
+gaps `2, 4, 6`. Nothing analytic here. -/
+private theorem cluster_count_core (x : ℕ) :
+    ({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard ≤
+      10 + (gapCount 2 x + gapCount 4 x + gapCount 6 x) := by
+  classical
+  have hsub : {p : ℕ | IsClusterPrime p} ∩ Set.Iic x ⊆
+      (Set.Iic 9 : Set ℕ) ∪ (S x 2 ∪ (S x 4 ∪ S x 6)) := by
+    intro p hp
+    simp only [Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_Iic] at hp
+    obtain ⟨hcl, hpx⟩ := hp
+    rcases Nat.lt_or_ge 9 p with h | h
+    · have hodd : Odd p := hcl.1.odd_of_ne_two (by omega)
+      rcases prime_near_of_cluster hcl hodd h with h2 | h4 | h6
+      · exact Or.inr (Or.inl ⟨⟨hcl.1, h2, h⟩, hpx⟩)
+      · exact Or.inr (Or.inr (Or.inl ⟨⟨hcl.1, h4, h⟩, hpx⟩))
+      · exact Or.inr (Or.inr (Or.inr ⟨⟨hcl.1, h6, h⟩, hpx⟩))
+    · exact Or.inl h
+  have hfin : ∀ d, (S x d).Finite := fun d => Set.Finite.subset (Set.finite_Iic x) Set.inter_subset_right
+  have h1 : ({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard ≤
+      ((Set.Iic 9 : Set ℕ) ∪ (S x 2 ∪ (S x 4 ∪ S x 6))).ncard :=
+    Set.ncard_le_ncard hsub ((Set.finite_Iic 9).union ((hfin 2).union ((hfin 4).union (hfin 6))))
+  have h2 : ((Set.Iic 9 : Set ℕ) ∪ (S x 2 ∪ (S x 4 ∪ S x 6))).ncard ≤
+      10 + (S x 2).ncard + (S x 4).ncard + (S x 6).ncard := by
+    have a := Set.ncard_union_le (Set.Iic 9 : Set ℕ) (S x 2 ∪ (S x 4 ∪ S x 6))
+    have b := Set.ncard_union_le (S x 2) (S x 4 ∪ S x 6)
+    have c := Set.ncard_union_le (S x 4) (S x 6)
+    have h9 : (Set.Iic 9 : Set ℕ).ncard = 10 := by simp
+    omega
+  have h3 : (S x 2).ncard ≤ gapCount 2 x := S_ncard_le x 2 (by norm_num) (by norm_num)
+  have h4 : (S x 4).ncard ≤ gapCount 4 x := S_ncard_le x 4 (by norm_num) (by norm_num)
+  have h6 : (S x 6).ncard ≤ gapCount 6 x := S_ncard_le x 6 (by norm_num) (by norm_num)
+  omega
+
+/-- `log x ^ 2 ≤ 4 x` for `x ≥ 1`. -/
+private lemma log_sq_le (x : ℝ) (hx : 1 ≤ x) : Real.log x ^ 2 ≤ 4 * x := by
+  have hx0 : 0 < x := by linarith
+  have hs : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx0
+  have h1 : Real.log x = 2 * Real.log (Real.sqrt x) := by
+    rw [Real.log_sqrt hx0.le]; ring
+  have h2 : Real.log (Real.sqrt x) ≤ Real.sqrt x - 1 := Real.log_le_sub_one_of_pos hs
+  have h3 : Real.log x ≤ 2 * Real.sqrt x := by rw [h1]; linarith
+  have h4 : 0 ≤ Real.log x := Real.log_nonneg hx
+  have h5 : (Real.sqrt x) ^ 2 = x := Real.sq_sqrt hx0.le
+  nlinarith [Real.sqrt_nonneg x]
+
+/-- **`route_cluster_count_le` modulo the lab's Brun bound for gaps `2, 4, 6`.** -/
+private theorem cluster_count_le_of_gapUpper :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℕ, 3 ≤ x →
+      (({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard : ℝ) ≤ C * x / Real.log x ^ 2 := by
+  classical
+  obtain ⟨C2, hC2⟩ := gapUpper 2 ⟨1, by norm_num⟩ (by norm_num)
+  obtain ⟨C4, hC4⟩ := gapUpper 4 ⟨2, by norm_num⟩ (by norm_num)
+  obtain ⟨C6, hC6⟩ := gapUpper 6 ⟨3, by norm_num⟩ (by norm_num)
+  have hsp2 := singProd_pos' 2
+  have hsp4 := singProd_pos' 4
+  have hsp6 := singProd_pos' 6
+  set K : ℝ := |C2| * singProd 2 + |C4| * singProd 4 + |C6| * singProd 6 with hK
+  have hK0 : 0 ≤ K := by
+    rw [hK]
+    have h1 : (0:ℝ) ≤ |C2| * singProd 2 := mul_nonneg (abs_nonneg C2) hsp2.le
+    have h2 : (0:ℝ) ≤ |C4| * singProd 4 := mul_nonneg (abs_nonneg C4) hsp4.le
+    have h3 : (0:ℝ) ≤ |C6| * singProd 6 := mul_nonneg (abs_nonneg C6) hsp6.le
+    linarith
+  refine ⟨K + 40, by linarith, ?_⟩
+  intro x hx
+  have hx1 : (1 : ℝ) ≤ x := by exact_mod_cast (by omega : 1 ≤ x)
+  have hx0 : (0 : ℝ) < x := by exact_mod_cast (by omega : 0 < x)
+  have hlogx : 0 < Real.log x := Real.log_pos (by exact_mod_cast (by omega : 1 < x))
+  have hlog : 0 < Real.log x ^ 2 := by positivity
+  set q : ℝ := (x : ℝ) / Real.log x ^ 2 with hq
+  have hq0 : 0 ≤ q := by positivity
+  have hq4 : (1 : ℝ) / 4 ≤ q := by
+    have h : (1 : ℝ) / 4 * Real.log x ^ 2 ≤ x := by
+      nlinarith [log_sq_le x hx1]
+    exact (le_div_iff₀ hlog).mpr h
+  have hcore : (({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard : ℝ) ≤
+      10 + ((gapCount 2 x : ℝ) + (gapCount 4 x : ℝ) + (gapCount 6 x : ℝ)) := by
+    have hnat := cluster_count_core x
+    have hR : (({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard : ℝ) ≤
+        ((10 + (gapCount 2 x + gapCount 4 x + gapCount 6 x) : ℕ) : ℝ) := by
+      exact_mod_cast hnat
+    push_cast at hR
+    linarith
+  have hgc2 : (gapCount 2 x : ℝ) ≤ C2 * singProd 2 * q := by
+    have e : C2 * singProd 2 * (x : ℝ) / Real.log x ^ 2 = C2 * singProd 2 * q := by
+      rw [hq]; ring
+    rw [← e]; exact hC2 x (by omega)
+  have hgc4 : (gapCount 4 x : ℝ) ≤ C4 * singProd 4 * q := by
+    have e : C4 * singProd 4 * (x : ℝ) / Real.log x ^ 2 = C4 * singProd 4 * q := by
+      rw [hq]; ring
+    rw [← e]; exact hC4 x (by omega)
+  have hgc6 : (gapCount 6 x : ℝ) ≤ C6 * singProd 6 * q := by
+    have e : C6 * singProd 6 * (x : ℝ) / Real.log x ^ 2 = C6 * singProd 6 * q := by
+      rw [hq]; ring
+    rw [← e]; exact hC6 x (by omega)
+  have hKge : C2 * singProd 2 + C4 * singProd 4 + C6 * singProd 6 ≤ K := by
+    have h1 : C2 * singProd 2 ≤ |C2| * singProd 2 :=
+      mul_le_mul_of_nonneg_right (le_abs_self C2) hsp2.le
+    have h2 : C4 * singProd 4 ≤ |C4| * singProd 4 :=
+      mul_le_mul_of_nonneg_right (le_abs_self C4) hsp4.le
+    have h3 : C6 * singProd 6 ≤ |C6| * singProd 6 :=
+      mul_le_mul_of_nonneg_right (le_abs_self C6) hsp6.le
+    rw [hK]; linarith
+  have hKq : (C2 * singProd 2 + C4 * singProd 4 + C6 * singProd 6) * q ≤ K * q :=
+    mul_le_mul_of_nonneg_right hKge hq0
+  have h40 : (10 : ℝ) ≤ 40 * q := by linarith
+  have hgoal : (K + 40) * (x : ℝ) / Real.log x ^ 2 = (K + 40) * q := by
+    rw [hq]; ring
+  rw [hgoal]
+  nlinarith [hcore, hgc2, hgc4, hgc6, hKq, h40]
+end
+
 /-- Unit U-1603, route lemma, OPEN in the lab. Plain math: at most `C x / (log x)^2` cluster primes
 lie below `x`, from `prime_near_of_cluster` and a sieve bound for prime pairs with a fixed even
 difference, as in the lab's `BrunGap`. Weaker than the Blecksmith, Erdős and Selfridge bound on the
 Erdős 17 page, and it points away from infinitely many, so it bounds the problem, not solves it. -/
 theorem route_cluster_count_le :
     ∃ C : ℝ, 0 < C ∧ ∀ x : ℕ, 3 ≤ x →
-      (({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard : ℝ) ≤ C * x / Real.log x ^ 2 := by
-  sorry
+      (({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard : ℝ) ≤ C * x / Real.log x ^ 2 :=
+  cluster_count_le_of_gapUpper
 
 end LeanLab.OpenProblems
 
