@@ -1083,5 +1083,137 @@ theorem minor (F : ℤ[X]) (hF : Admissible F)
       have hcoef : CP * CW ≤ 2 * CP * CW := by nlinarith [mul_pos hCP hCW]
       gcongr
 
+/-- Helper. Pointwise split of the squared major weight into the divisor part and the
+logarithmic part. Used to reduce the Nair mean leaf to a pure divisor mean. -/
+theorem majorWeight_sq_le (m : ℕ) (N : ℝ) :
+    majorWeight m N ^ 2 ≤
+      2 * (((m : ℝ) * m.divisors.card / m.totient) ^ 2) + 2 * Real.log N ^ 2 := by
+  unfold majorWeight
+  nlinarith [sq_nonneg ((m : ℝ) * m.divisors.card / m.totient - Real.log N)]
+
+/-- Helper. Page 481 equation 4, reduced to the Nair 1992 short interval mean of the
+divisor part of the weight. CONDITIONAL ON that divisor mean input. -/
+theorem nair_mean_of_divisor_mean (F : ℤ[X]) (hF : Admissible F)
+    (hNair : ∃ e : ℝ, 0 ≤ e ∧ ∀ ε : ℝ, 0 < ε → ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧
+      ∀ N H : ℝ, N₀ ≤ N → N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H →
+        H ≤ N ^ (1 / (F.natDegree : ℝ)) →
+        ∑ n ∈ win F N H,
+          (((Fv F n).toNat : ℝ) * (Fv F n).toNat.divisors.card /
+            (Fv F n).toNat.totient) ^ 2 ≤ C * H * Real.log N ^ e) :
+    ∃ d : ℝ, 0 ≤ d ∧ ∀ ε : ℝ, 0 < ε →
+      ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
+      N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H →
+      H ≤ N ^ (1 / (F.natDegree : ℝ)) →
+      ∑ n ∈ win F N H, majorWeight (Fv F n).toNat N ^ 2 ≤
+        C * H * Real.log N ^ d := by
+  obtain ⟨e, he, hdiv⟩ := hNair
+  refine ⟨e + 2, by linarith, ?_⟩
+  intro ε hε
+  obtain ⟨C, N₀, hC, hN₀, hsum⟩ := hdiv ε hε
+  refine ⟨2 * C + 4, max 3 N₀, by linarith, hN₀.trans (le_max_right _ _), ?_⟩
+  intro N H hN hH1 hH2
+  have hN3 : 3 ≤ N := (le_max_left 3 N₀).trans hN
+  have hN0 : 0 < N := by linarith
+  have hL : 0 < Real.log N := Real.log_pos (by linarith)
+  have hH0 : 0 < H := (Real.rpow_pos_of_pos hN0 _).trans_le hH1
+  have hL1 : 1 ≤ Real.log N := by
+    have h := Real.log_le_log (Real.exp_pos 1) (by linarith : Real.exp 1 ≤ N)
+    simpa using h
+  have hlogLE : Real.log N ^ 2 ≤ Real.log N ^ (e + 2) :=
+    Real.rpow_le_rpow_of_exponent_le hL1 (by linarith)
+  have hlogLEe : Real.log N ^ e ≤ Real.log N ^ (e + 2) :=
+    Real.rpow_le_rpow_of_exponent_le hL1 (by linarith)
+  have hstep := Finset.sum_le_sum (fun n _ => majorWeight_sq_le (Fv F n).toNat N)
+  have hcard := card_win_le F hN0.le hH0.le
+  calc ∑ n ∈ win F N H, majorWeight (Fv F n).toNat N ^ 2
+      ≤ ∑ n ∈ win F N H,
+          2 * (((Fv F n).toNat : ℝ) * (Fv F n).toNat.divisors.card /
+            (Fv F n).toNat.totient) ^ 2 + 2 * Real.log N ^ 2 := hstep
+    _ = 2 * ∑ n ∈ win F N H,
+          (((Fv F n).toNat : ℝ) * (Fv F n).toNat.divisors.card /
+            (Fv F n).toNat.totient) ^ 2 +
+        ((win F N H).card : ℝ) * (2 * Real.log N ^ 2) := by
+        simp only [Finset.mul_sum, Finset.sum_add_distrib, Finset.sum_const,
+          nsmul_eq_mul]
+        ring
+    _ ≤ 2 * (C * H * Real.log N ^ e) + (H + 1) * (2 * Real.log N ^ (e + 2)) := by
+        have hs := hsum N H ((le_max_right 3 N₀).trans hN) hH1 hH2
+        refine add_le_add ?_ ?_
+        · exact mul_le_mul_of_nonneg_left hs (by linarith)
+        · exact mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_right hcard (by positivity)) hlogLE
+    _ ≤ (2 * C + 4) * H * Real.log N ^ (e + 2) := by
+        have h2H : (H : ℝ) + 1 ≤ 2 * H := by linarith
+        have hle2 : 0 ≤ Real.log N ^ (e + 2) := (Real.rpow_pos_of_pos hL _).le
+        calc 2 * (C * H * Real.log N ^ e) + (H + 1) * (2 * Real.log N ^ (e + 2))
+            ≤ 2 * (C * H * Real.log N ^ (e + 2)) +
+              (2 * H) * (2 * Real.log N ^ (e + 2)) := by
+              refine add_le_add ?_ ?_
+              · exact mul_le_mul_of_nonneg_left
+                  (mul_le_mul_of_nonneg_right hlogLEe (by positivity)) (by positivity)
+              · exact mul_le_mul_of_nonneg_right
+                  (mul_le_mul_of_nonneg_left h2H (by positivity)) hle2
+          _ = (2 * C + 4) * H * Real.log N ^ (e + 2) := by ring
+
+/-- Helper. Page 481 equations 2 and 3, squared, reduced to the Vaughan 1981 Chapter 3
+major arc approximation. CONDITIONAL ON that major arc error input with the divisor
+weight logarithmic saving. -/
+theorem major_pointwise_of_vaughan (F : ℤ[X]) (hF : Admissible F)
+    (c : ℝ) (hc : 0 < c) (A ε B : ℝ) (hA : 0 < A) (hε : 0 < ε) (hB : 0 < B)
+    (hV : ∃ CV NV : ℝ, 0 < CV ∧ 3 ≤ NV ∧ ∀ N : ℝ, NV ≤ N → ∀ m : ℕ, m ≤ ⌊c * N⌋₊ →
+      ‖(∫ α in Set.Icc 0 1 ∩ majorArcs N B, coefficientIntegrand ⌊c * N⌋₊ m α) -
+        ((m : ℝ) * Sing m : ℂ)‖ ≤
+        CV * N * (Real.log N ^ (-B) * majorWeight m N + Real.log N ^ (-A / 2))) :
+    ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
+      N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H →
+      H ≤ N ^ (1 / (F.natDegree : ℝ)) →
+      (∀ n ∈ win F N H, 0 ≤ Fv F n ∧ (Fv F n).toNat ≤ ⌊c * N⌋₊) →
+      ∀ n ∈ win F N H,
+      ‖(∫ α in Set.Icc 0 1 ∩ majorArcs N B,
+          coefficientIntegrand ⌊c * N⌋₊ (Fv F n).toNat α) -
+        ((Fv F n : ℝ) * Sing (Fv F n).toNat : ℂ)‖ ^ 2 ≤
+        C * N ^ 2 * (Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 +
+          Real.log N ^ (-A)) := by
+  obtain ⟨CV, NV, hCV, hNV, hV⟩ := hV
+  refine ⟨2 * CV ^ 2, NV, by nlinarith [sq_pos_of_pos hCV], hNV, ?_⟩
+  intro N H hN hH1 hH2 hcut n hn
+  obtain ⟨hpos, hle⟩ := hcut n hn
+  have hN0 : 0 < N := by linarith
+  have hL : 0 < Real.log N := Real.log_pos (by linarith)
+  have hcast : ((Fv F n).toNat : ℝ) = (Fv F n : ℝ) := by
+    exact_mod_cast Int.toNat_of_nonneg hpos
+  have hv := hV N hN (Fv F n).toNat hle
+  rw [hcast] at hv
+  have hsplit : (Real.log N ^ (-A / 2)) ^ 2 = Real.log N ^ (-A) := by
+    rw [← Real.rpow_mul hL.le]
+    congr 1
+    ring
+  have hsplitB : (Real.log N ^ (-B) * majorWeight (Fv F n).toNat N) ^ 2 =
+      Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 := by
+    rw [mul_pow, ← Real.rpow_mul hL.le]
+    congr 1
+    ring
+  have htri : (Real.log N ^ (-B) * majorWeight (Fv F n).toNat N +
+      Real.log N ^ (-A / 2)) ^ 2 ≤
+      2 * (Real.log N ^ (-B) * majorWeight (Fv F n).toNat N) ^ 2 +
+        2 * (Real.log N ^ (-A / 2)) ^ 2 := by
+    nlinarith [sq_nonneg (Real.log N ^ (-B) * majorWeight (Fv F n).toNat N -
+      Real.log N ^ (-A / 2))]
+  calc ‖(∫ α in Set.Icc 0 1 ∩ majorArcs N B,
+      coefficientIntegrand ⌊c * N⌋₊ (Fv F n).toNat α) -
+      ((Fv F n : ℝ) * Sing (Fv F n).toNat : ℂ)‖ ^ 2
+      ≤ (CV * N * (Real.log N ^ (-B) * majorWeight (Fv F n).toNat N +
+          Real.log N ^ (-A / 2))) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) hv 2
+    _ = CV ^ 2 * N ^ 2 * (Real.log N ^ (-B) * majorWeight (Fv F n).toNat N +
+          Real.log N ^ (-A / 2)) ^ 2 := by ring
+    _ ≤ CV ^ 2 * N ^ 2 * (2 * (Real.log N ^ (-B) *
+            majorWeight (Fv F n).toNat N) ^ 2 +
+          2 * (Real.log N ^ (-A / 2)) ^ 2) :=
+          mul_le_mul_of_nonneg_left htri (by positivity)
+    _ = (2 * CV ^ 2) * N ^ 2 * (Real.log N ^ (-2 * B) *
+          majorWeight (Fv F n).toNat N ^ 2 + Real.log N ^ (-A)) := by
+        rw [hsplitB, hsplit]
+        ring
+
 end
 end LeanLab.Perelli1996.Decomp103
