@@ -1,9 +1,3 @@
-/-
-AI wrote this Lean code. Codex task120, 2026-10-26.
-Lemma 3.1, P0097, pages 349 to 352.
-The analytic approximation remains CONDITIONAL.
-Binary Goldbach is open.
--/
 import LeanLab.Zinoviev1997.ArcArithmetic
 import LeanLab.Zinoviev1997.ModelFormula
 import LeanLab.Zinoviev1997.State1546
@@ -108,7 +102,7 @@ theorem prime_reduction (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
 /-- LEAF. Displays 3.2 to 3.4, pages 349 to 351, and the Ramanujan identity on page 351.
 Partial summation from Proposition 1.4 and the two integrated remainders give this bound.
 The constant 3.8 leaves room above the displayed 2.99, 0.14 and 0.001 estimates.
-BLOCKED FREE-ms-leanstral task84: requires GRH-based prime sum estimates (weighted partial summation,
+BLOCKED FREE-ms-leanstral task90: requires GRH-based prime sum estimates (weighted partial summation,
 explicit formula remainder bounds) not available in Mathlib. The lab's DERZ1997 namespace defines
 GRH but provides no lemmas about prime sums under GRH. Depends on lemma12_T, lemma12_zero,
 lemma13_explicit_budget, and prop14_error_bound from State1546, all of which have open sorries.
