@@ -1,15 +1,9 @@
-name = "LeanLab"
-defaultTargets = ["LeanLab"]
+import Lake
+open Lake DSL
 
-[leanOptions]
-pp.unicode.fun = true
-autoImplicit = false
+package LeanLab where
+  leanOptions := #[⟨`pp.unicode.fun, true⟩, ⟨`autoImplicit, false⟩]
 
-[[require]]
-name = "mathlib"
-scope = "leanprover-community"
-rev = "v4.35.0"
+require mathlib from "leanprover-community" @ "v4.35.0"
 
-[[lean_lib]]
-name = "LeanLab"
-globs = ["LeanLab.+"]
+lean_lib LeanLab
