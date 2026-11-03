@@ -304,6 +304,584 @@ theorem psi_progression_GRH : GRH → ∃ c : ℝ, ∀ (q : ℕ) [NeZero q] (a :
   rw [← h_bound_r]
   exact h_bound
 
+
+namespace L1Num
+
+open Real
+
+set_option maxHeartbeats 1000000
+
+/-- `log (1+x) ≤ 2 √x` for `x ≥ 0`. -/
+lemma log_one_add_le_two_sqrt {x : ℝ} (hx : 0 ≤ x) :
+    Real.log (1 + x) ≤ 2 * Real.sqrt x := by
+  have hx1 : (0 : ℝ) < 1 + x := by linarith
+  rw [Real.log_le_iff_le_exp hx1]
+  have ht : 0 ≤ Real.sqrt x := Real.sqrt_nonneg x
+  have hsq : Real.sqrt x * Real.sqrt x = x := Real.mul_self_sqrt hx
+  have hexp : Real.exp (2 * Real.sqrt x) = (Real.exp (Real.sqrt x)) ^ 2 := by
+    rw [show 2 * Real.sqrt x = Real.sqrt x + Real.sqrt x by ring, Real.exp_add]
+    ring
+  rw [hexp]
+  have h1 : 1 + Real.sqrt x ≤ Real.exp (Real.sqrt x) := by
+    have := Real.add_one_le_exp (Real.sqrt x); linarith
+  have h2 : (1 + Real.sqrt x) ^ 2 ≤ (Real.exp (Real.sqrt x)) ^ 2 := by
+    nlinarith [Real.exp_pos (Real.sqrt x)]
+  have h3 : 1 + x ≤ (1 + Real.sqrt x) ^ 2 := by nlinarith
+  linarith
+
+/-- `log (1+x)^2 ≤ 4x` for `x ≥ 0`. -/
+lemma log_one_add_sq_le {x : ℝ} (hx : 0 ≤ x) : Real.log (1 + x) ^ 2 ≤ 4 * x := by
+  have h := log_one_add_le_two_sqrt hx
+  have h0 : 0 ≤ Real.log (1 + x) := Real.log_nonneg (by linarith)
+  have h1 : 0 ≤ 2 * Real.sqrt x := by positivity
+  have h2 : (2 * Real.sqrt x) ^ 2 = 4 * x := by
+    have hs := Real.sq_sqrt hx
+    nlinarith [Real.sqrt_nonneg x]
+  nlinarith
+
+/-- `exp (-x) ≤ 1/(1+x)` for `x ≥ 0`. -/
+lemma exp_neg_le_inv_one_add {x : ℝ} (hx : 0 ≤ x) :
+    Real.exp (-x) ≤ 1 / (1 + x) := by
+  have hx1 : (0 : ℝ) < 1 + x := by linarith
+  have hlog : Real.log (1 + x) ≤ x := by
+    have h := Real.log_le_sub_one_of_pos hx1
+    linarith
+  have h2 : 1 + x ≤ Real.exp x := by
+    have h := Real.exp_le_exp.mpr hlog
+    rwa [Real.exp_log hx1] at h
+  have hmul : (1 + x) * Real.exp (-x) ≤ 1 := by
+    have h := mul_le_mul_of_nonneg_right h2 (le_of_lt (Real.exp_pos (-x)))
+    have h1 : Real.exp x * Real.exp (-x) = 1 := by
+      rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]
+    linarith
+  rw [le_div_iff₀ hx1]
+  linarith
+
+/-- `1 - exp(-x) ≥ x/2` for `0 ≤ x ≤ 1`. -/
+lemma half_le_one_sub_exp_neg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) :
+    x / 2 ≤ 1 - Real.exp (-x) := by
+  have h := exp_neg_le_inv_one_add hx0
+  have hx : (0 : ℝ) < 1 + x := by linarith
+  have h2 : 1 / (1 + x) ≤ 1 - x / 2 := by
+    rw [div_le_iff₀ hx]
+    nlinarith
+  linarith
+
+/-- `√(n+1) exp(-n/(2N)) ≤ √N` for `N ≥ 1`. -/
+lemma sqrt_succ_mul_exp_half_le {N : ℝ} (hN : 1 ≤ N) (n : ℕ) :
+    Real.sqrt ((n : ℝ) + 1) * Real.exp (-(n : ℝ) / (2 * N)) ≤ Real.sqrt N := by
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hs : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  have hexp : Real.exp (-(n : ℝ) / (2 * N)) = Real.sqrt (Real.exp (-(n : ℝ) / N)) := by
+    rw [← Real.exp_half]
+    congr 1
+    field_simp
+  rw [hexp, ← Real.sqrt_mul (le_of_lt hs)]
+  apply Real.sqrt_le_sqrt
+  have hlog : Real.log (((n : ℝ) + 1) / N) ≤ (n : ℝ) / N := by
+    have h1 : Real.log (((n : ℝ) + 1) / N) ≤ ((n : ℝ) + 1) / N - 1 :=
+      Real.log_le_sub_one_of_pos (by positivity)
+    have h2 : ((n : ℝ) + 1) / N ≤ (n : ℝ) / N + 1 := by
+      rw [div_le_iff₀ hN0]
+      field_simp
+      linarith
+    linarith
+  have hkey : Real.log (((n : ℝ) + 1) * Real.exp (-(n : ℝ) / N)) ≤ Real.log N := by
+    rw [Real.log_mul (ne_of_gt hs) (ne_of_gt (Real.exp_pos _)), Real.log_exp]
+    have h3 : Real.log ((n : ℝ) + 1) = Real.log (((n : ℝ) + 1) / N) + Real.log N := by
+      rw [Real.log_div (ne_of_gt hs) hN0.ne']
+      ring
+    have h4 : -(n : ℝ) / N = -((n : ℝ) / N) := by ring
+    rw [h4]
+    linarith
+  exact (Real.log_le_log_iff (by positivity) hN0).mp hkey
+
+/-- `1 - exp(-1/(2N)) ≥ 1/(4N)` for `N ≥ 1`. -/
+lemma one_sub_exp_ge {N : ℝ} (hN : 1 ≤ N) :
+    1 / (4 * N) ≤ 1 - Real.exp (-(1 / (2 * N))) := by
+  have hx0 : 0 ≤ 1 / (2 * N) := by positivity
+  have hx1 : 1 / (2 * N) ≤ 1 := by
+    rw [div_le_one (by linarith : (0:ℝ) < 2 * N)]
+    linarith
+  have h := half_le_one_sub_exp_neg hx0 hx1
+  have heq : (1 / (2 * N)) / 2 = 1 / (4 * N) := by
+    field_simp
+    ring
+  linarith
+
+lemma exp_neg_half_lt_one {N : ℝ} (hN : 1 ≤ N) :
+    ‖Real.exp (-(1 / (2 * N)))‖ < 1 := by
+  rw [Real.norm_eq_abs, abs_of_nonneg (le_of_lt (Real.exp_pos _)), Real.exp_lt_one_iff]
+  have : (0 : ℝ) < 1 / (2 * N) := by positivity
+  linarith
+
+/-- Geometric sum bound. -/
+lemma tsum_pow_le {N : ℝ} (hN : 1 ≤ N) :
+    (∑' n : ℕ, Real.exp (-(1 / (2 * N))) ^ n) ≤ 4 * N := by
+  set r : ℝ := Real.exp (-(1 / (2 * N))) with hr
+  have hr1 : ‖r‖ < 1 := exp_neg_half_lt_one hN
+  have hge : 1 / (4 * N) ≤ 1 - r := by
+    rw [hr]; exact one_sub_exp_ge hN
+  have hpos : (0 : ℝ) < 1 / (4 * N) := by positivity
+  have hd : (0 : ℝ) < 1 - r := by linarith
+  rw [tsum_geometric_of_norm_lt_one hr1, ← one_div]
+  calc 1 / (1 - r) ≤ 1 / (1 / (4 * N)) := one_div_le_one_div_of_le hpos hge
+    _ = 4 * N := by field_simp
+
+/-- First-moment geometric sum bound. -/
+lemma tsum_n_mul_le {N : ℝ} (hN : 1 ≤ N) :
+    (∑' n : ℕ, (n : ℝ) * Real.exp (-(1 / (2 * N))) ^ n) ≤ 16 * N ^ 2 := by
+  set r : ℝ := Real.exp (-(1 / (2 * N))) with hr
+  have hr0 : 0 ≤ r := le_of_lt (Real.exp_pos _)
+  have hr1 : ‖r‖ < 1 := exp_neg_half_lt_one hN
+  have hrle : r ≤ 1 := by
+    rw [hr]
+    calc Real.exp (-(1 / (2 * N))) ≤ Real.exp 0 := by
+          apply Real.exp_le_exp.mpr
+          have : (0 : ℝ) < 1 / (2 * N) := by positivity
+          linarith
+      _ = 1 := Real.exp_zero
+  have hge : 1 / (4 * N) ≤ 1 - r := by
+    rw [hr]; exact one_sub_exp_ge hN
+  have hpos : (0 : ℝ) < 1 / (4 * N) := by positivity
+  have hd : (0 : ℝ) < 1 - r := by linarith
+  rw [tsum_coe_mul_geometric_of_norm_lt_one hr1]
+  have hstep1 : r / (1 - r) ^ 2 ≤ 1 / (1 - r) ^ 2 := by
+    apply div_le_div_of_nonneg_right hrle
+    positivity
+  have hsq : (1 / (4 * N)) ^ 2 ≤ (1 - r) ^ 2 := by
+    apply pow_le_pow_left₀ (le_of_lt hpos) hge
+  have hstep2 : 1 / (1 - r) ^ 2 ≤ 1 / (1 / (4 * N)) ^ 2 :=
+    one_div_le_one_div_of_le (by positivity) hsq
+  have hfin : 1 / (1 / (4 * N)) ^ 2 = 16 * N ^ 2 := by
+    field_simp
+    ring
+  linarith
+
+/-- The final numeric step of the assembly. -/
+lemma final_bound {M X s : ℝ} (hM : 0 ≤ M) (hX : 0 ≤ X)
+    (h1 : 128 * M * s ≤ 268.8 * M * X) (h2 : 1 ≤ 1.5 * X) :
+    1 + (8 * M * X + 128 * M * s) ≤ (300 * M + 3) * X := by
+  have hpos : (0 : ℝ) ≤ (23.2 * M + 1.5) * X := by
+    apply mul_nonneg _ hX
+    linarith
+  linarith [h1, h2, hpos]
+
+
+/-- Summability of the weighted square-root sum. -/
+lemma main_sum_summable {N : ℝ} (hN : 1 ≤ N) {q : ℕ} (hq : 1 ≤ q) :
+    Summable (fun n : ℕ => Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+      Real.exp (-(n : ℝ) / N)) := by
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  set r : ℝ := Real.exp (-(1 / (2 * N))) with hr
+  set L : ℝ := Real.log ((q : ℝ) * N) with hL
+  have hL0 : 0 ≤ L := by rw [hL]; exact Real.log_nonneg (by nlinarith)
+  have hr1 : ‖r‖ < 1 := exp_neg_half_lt_one hN
+  have hrn : ∀ n : ℕ, Real.exp (-(n : ℝ) / (2 * N)) = r ^ n := by
+    intro n
+    rw [hr, ← Real.exp_nat_mul]
+    congr 1
+    push_cast
+    field_simp
+  have hsumm1 : Summable (fun n : ℕ => r ^ n) := summable_geometric_of_norm_lt_one hr1
+  have hsumm2 : Summable (fun n : ℕ => (n : ℝ) * r ^ n) :=
+    (hasSum_coe_mul_geometric_of_norm_lt_one hr1).summable
+  have hterm : ∀ n : ℕ,
+      Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+        Real.exp (-(n : ℝ) / N) ≤
+      (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n) := by
+    intro n
+    have hn0 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+    have hs1 : Real.sqrt ((n : ℝ) + 1) * Real.exp (-(n : ℝ) / (2 * N)) ≤ Real.sqrt N :=
+      sqrt_succ_mul_exp_half_le hN n
+    have hpos2 : (0 : ℝ) ≤ Real.exp (-(n : ℝ) / (2 * N)) := le_of_lt (Real.exp_pos _)
+    have hA0 : 0 ≤ Real.log ((q : ℝ) * ((n : ℝ) + 1)) :=
+      Real.log_nonneg (by nlinarith)
+    have hnN : (0 : ℝ) ≤ (n : ℝ) / N := by positivity
+    have hB0 : 0 ≤ Real.log (1 + (n : ℝ) / N) := Real.log_nonneg (by linarith)
+    have hlog : Real.log ((q : ℝ) * ((n : ℝ) + 1)) ≤ L + Real.log (1 + (n : ℝ) / N) := by
+      have h1 : (q : ℝ) * ((n : ℝ) + 1) = ((q : ℝ) * N) * (((n : ℝ) + 1) / N) := by
+        field_simp
+      rw [h1, Real.log_mul (by positivity) (by positivity), hL]
+      have h2 : Real.log (((n : ℝ) + 1) / N) ≤ Real.log (1 + (n : ℝ) / N) := by
+        apply Real.log_le_log (by positivity)
+        rw [div_le_iff₀ hN0]
+        have h3 : (1 + (n : ℝ) / N) * N = N + (n : ℝ) := by
+          field_simp
+        linarith [h3]
+      linarith
+    have hBsq := log_one_add_sq_le (show (0 : ℝ) ≤ (n : ℝ) / N by positivity)
+    have hL2 : Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 ≤ 2 * L ^ 2 + 8 * ((n : ℝ) / N) := by
+      have h5 : 0 ≤ L + Real.log (1 + (n : ℝ) / N) := by linarith
+      have h6 : Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 ≤
+          (L + Real.log (1 + (n : ℝ) / N)) ^ 2 := by nlinarith
+      have h7 : (L + Real.log (1 + (n : ℝ) / N)) ^ 2 ≤
+          2 * L ^ 2 + 2 * Real.log (1 + (n : ℝ) / N) ^ 2 := by
+        nlinarith [sq_nonneg (L - Real.log (1 + (n : ℝ) / N))]
+      linarith [h6, h7, hBsq]
+    have hs2 : Real.exp (-(n : ℝ) / N) =
+        Real.exp (-(n : ℝ) / (2 * N)) * Real.exp (-(n : ℝ) / (2 * N)) := by
+      rw [← Real.exp_add]
+      congr 1
+      field_simp
+      ring
+    have h2 : Real.exp (-(n : ℝ) / (2 * N)) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 ≤
+        r ^ n * (2 * L ^ 2 + 8 * ((n : ℝ) / N)) := by
+      rw [← hrn n]
+      exact mul_le_mul_of_nonneg_left hL2 hpos2
+    calc Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+          Real.exp (-(n : ℝ) / N)
+        = (Real.sqrt ((n : ℝ) + 1) * Real.exp (-(n : ℝ) / (2 * N))) *
+            (Real.exp (-(n : ℝ) / (2 * N)) *
+              Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2) := by
+          rw [hs2]; ring
+      _ ≤ Real.sqrt N * (r ^ n * (2 * L ^ 2 + 8 * ((n : ℝ) / N))) :=
+          mul_le_mul hs1 h2 (mul_nonneg hpos2 (sq_nonneg _)) (Real.sqrt_nonneg N)
+      _ = (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n) := by ring
+  have hsplit : (fun n : ℕ => (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n))
+      = (fun n : ℕ => (2 * L ^ 2 * Real.sqrt N) * r ^ n +
+          (8 * Real.sqrt N / N) * ((n : ℝ) * r ^ n)) := by
+    funext n
+    ring
+  have hsumm3 : Summable (fun n : ℕ => (2 * L ^ 2 * Real.sqrt N) * r ^ n) :=
+    hsumm1.mul_left _
+  have hsumm4 : Summable (fun n : ℕ => (8 * Real.sqrt N / N) * ((n : ℝ) * r ^ n)) :=
+    hsumm2.mul_left _
+  have hg : Summable (fun n : ℕ => (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n)) := by
+    rw [hsplit]
+    exact hsumm3.add hsumm4
+  exact Summable.of_nonneg_of_le (fun n => by positivity) hterm hg
+
+/-- The geometric main term is at most `N`. -/
+lemma geom_main_le {N : ℝ} (hN : 1 ≤ N) :
+    Real.exp (-(1 / N)) / (1 - Real.exp (-(1 / N))) ≤ N := by
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hx0 : 0 ≤ 1 / N := by positivity
+  have hrle : Real.exp (-(1 / N)) ≤ 1 / (1 + 1 / N) := exp_neg_le_inv_one_add hx0
+  have hrpos : 0 < Real.exp (-(1 / N)) := Real.exp_pos _
+  have hrlt1 : Real.exp (-(1 / N)) < 1 := by
+    rw [Real.exp_lt_one_iff]
+    have : (0 : ℝ) < 1 / N := by positivity
+    linarith
+  have hpos : 0 < 1 - Real.exp (-(1 / N)) := by linarith
+  have h2 : Real.exp (-(1 / N)) ≤ N / (N + 1) := by
+    refine hrle.trans_eq ?_
+    field_simp
+  rw [div_le_iff₀ hpos]
+  have h2' : Real.exp (-(1 / N)) * (N + 1) ≤ N := by
+    have hm := mul_le_mul_of_nonneg_right h2 (by linarith : (0 : ℝ) ≤ N + 1)
+    rw [div_mul_cancel₀ _ (by linarith : N + 1 ≠ 0)] at hm
+    exact hm
+  nlinarith [h2', hrpos, hpos, hN0]
+
+/-- The geometric main term is at least `N - 1`. -/
+lemma geom_main_ge {N : ℝ} (hN : 1 ≤ N) :
+    N - 1 ≤ Real.exp (-(1 / N)) / (1 - Real.exp (-(1 / N))) := by
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hrpos : 0 < Real.exp (-(1 / N)) := Real.exp_pos _
+  have hrlt1 : Real.exp (-(1 / N)) < 1 := by
+    rw [Real.exp_lt_one_iff]
+    have : (0 : ℝ) < 1 / N := by positivity
+    linarith
+  have hpos : 0 < 1 - Real.exp (-(1 / N)) := by linarith
+  have h1 : 1 - 1 / N ≤ Real.exp (-(1 / N)) := by
+    have := Real.add_one_le_exp (-(1 / N))
+    linarith
+  rw [le_div_iff₀ hpos]
+  have h2 : (1 - 1 / N) * N = N - 1 := by
+    field_simp
+  nlinarith [h1, h2, hN0]
+
+/-- The weighted square-root sum estimate. -/
+lemma main_sum_le {N : ℝ} (hN : 2 ≤ N) {q : ℕ} (hq : 1 ≤ q) :
+    (∑' n : ℕ, Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+        Real.exp (-(n : ℝ) / N)) ≤
+      8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N := by
+  have hN1 : (1 : ℝ) ≤ N := by linarith
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  have hq0 : (0 : ℝ) < (q : ℝ) := by linarith
+  set r : ℝ := Real.exp (-(1 / (2 * N))) with hr
+  set L : ℝ := Real.log ((q : ℝ) * N) with hL
+  have hqN : (1 : ℝ) ≤ (q : ℝ) * N := by nlinarith
+  have hL0 : 0 ≤ L := by rw [hL]; exact Real.log_nonneg hqN
+  have hr1 : ‖r‖ < 1 := exp_neg_half_lt_one hN1
+  have hrn : ∀ n : ℕ, Real.exp (-(n : ℝ) / (2 * N)) = r ^ n := by
+    intro n
+    rw [hr, ← Real.exp_nat_mul]
+    congr 1
+    push_cast
+    field_simp
+  have hsumm1 : Summable (fun n : ℕ => r ^ n) := summable_geometric_of_norm_lt_one hr1
+  have hsumm2 : Summable (fun n : ℕ => (n : ℝ) * r ^ n) :=
+    (hasSum_coe_mul_geometric_of_norm_lt_one hr1).summable
+  have hterm : ∀ n : ℕ,
+      Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+        Real.exp (-(n : ℝ) / N) ≤
+      (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n) := by
+    intro n
+    have hn0 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+    have hs1 : Real.sqrt ((n : ℝ) + 1) * Real.exp (-(n : ℝ) / (2 * N)) ≤ Real.sqrt N :=
+      sqrt_succ_mul_exp_half_le hN1 n
+    have hpos2 : (0 : ℝ) ≤ Real.exp (-(n : ℝ) / (2 * N)) := le_of_lt (Real.exp_pos _)
+    have hA0 : 0 ≤ Real.log ((q : ℝ) * ((n : ℝ) + 1)) :=
+      Real.log_nonneg (by nlinarith [hq1, hn0])
+    have hnN : (0 : ℝ) ≤ (n : ℝ) / N := by positivity
+    have hB0 : 0 ≤ Real.log (1 + (n : ℝ) / N) := Real.log_nonneg (by linarith)
+    have hlog : Real.log ((q : ℝ) * ((n : ℝ) + 1)) ≤ L + Real.log (1 + (n : ℝ) / N) := by
+      have h1 : (q : ℝ) * ((n : ℝ) + 1) = ((q : ℝ) * N) * (((n : ℝ) + 1) / N) := by
+        field_simp
+      rw [h1, Real.log_mul (by positivity) (by positivity), hL]
+      have h2 : Real.log (((n : ℝ) + 1) / N) ≤ Real.log (1 + (n : ℝ) / N) := by
+        apply Real.log_le_log (by positivity)
+        rw [div_le_iff₀ hN0]
+        have h3 : (1 + (n : ℝ) / N) * N = N + (n : ℝ) := by
+          field_simp
+        linarith [h3]
+      linarith
+    have hBsq := log_one_add_sq_le (show (0 : ℝ) ≤ (n : ℝ) / N by positivity)
+    have hL2 : Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 ≤ 2 * L ^ 2 + 8 * ((n : ℝ) / N) := by
+      have h5 : 0 ≤ L + Real.log (1 + (n : ℝ) / N) := by linarith
+      have h6 : Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 ≤
+          (L + Real.log (1 + (n : ℝ) / N)) ^ 2 := by nlinarith
+      have h7 : (L + Real.log (1 + (n : ℝ) / N)) ^ 2 ≤
+          2 * L ^ 2 + 2 * Real.log (1 + (n : ℝ) / N) ^ 2 := by
+        nlinarith [sq_nonneg (L - Real.log (1 + (n : ℝ) / N))]
+      linarith [h6, h7, hBsq]
+    have hs2 : Real.exp (-(n : ℝ) / N) =
+        Real.exp (-(n : ℝ) / (2 * N)) * Real.exp (-(n : ℝ) / (2 * N)) := by
+      rw [← Real.exp_add]
+      congr 1
+      field_simp
+      ring
+    have h2 : Real.exp (-(n : ℝ) / (2 * N)) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 ≤
+        r ^ n * (2 * L ^ 2 + 8 * ((n : ℝ) / N)) := by
+      rw [← hrn n]
+      exact mul_le_mul_of_nonneg_left hL2 hpos2
+    calc Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+          Real.exp (-(n : ℝ) / N)
+        = (Real.sqrt ((n : ℝ) + 1) * Real.exp (-(n : ℝ) / (2 * N))) *
+            (Real.exp (-(n : ℝ) / (2 * N)) *
+              Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2) := by
+          rw [hs2]; ring
+      _ ≤ Real.sqrt N * (r ^ n * (2 * L ^ 2 + 8 * ((n : ℝ) / N))) :=
+          mul_le_mul hs1 h2 (mul_nonneg hpos2 (sq_nonneg _)) (Real.sqrt_nonneg N)
+      _ = (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n) := by ring
+  have hsplit : (fun n : ℕ => (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n))
+      = (fun n : ℕ => (2 * L ^ 2 * Real.sqrt N) * r ^ n +
+          (8 * Real.sqrt N / N) * ((n : ℝ) * r ^ n)) := by
+    funext n
+    ring
+  have hsumm3 : Summable (fun n : ℕ => (2 * L ^ 2 * Real.sqrt N) * r ^ n) :=
+    hsumm1.mul_left _
+  have hsumm4 : Summable (fun n : ℕ => (8 * Real.sqrt N / N) * ((n : ℝ) * r ^ n)) :=
+    hsumm2.mul_left _
+  have hg : Summable (fun n : ℕ => (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n)) := by
+    rw [hsplit]
+    exact hsumm3.add hsumm4
+  have hf : Summable (fun n : ℕ => Real.sqrt ((n : ℝ) + 1) *
+      Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * Real.exp (-(n : ℝ) / N)) :=
+    main_sum_summable hN1 hq
+  have hle : (∑' n : ℕ, Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+        Real.exp (-(n : ℝ) / N)) ≤
+      ∑' n : ℕ, (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n) :=
+    Summable.tsum_le_tsum hterm hf hg
+  have hval : (∑' n : ℕ, (2 * L ^ 2 + 8 * ((n : ℝ) / N)) * (Real.sqrt N * r ^ n)) =
+      (2 * L ^ 2 * Real.sqrt N) * (∑' n : ℕ, r ^ n) +
+        (8 * Real.sqrt N / N) * (∑' n : ℕ, (n : ℝ) * r ^ n) := by
+    rw [hsplit, hsumm3.tsum_add hsumm4, tsum_mul_left, tsum_mul_left]
+  have hp := tsum_pow_le hN1
+  have hn := tsum_n_mul_le hN1
+  have hfac1 : 0 ≤ 2 * L ^ 2 * Real.sqrt N := by positivity
+  have hfac2 : 0 ≤ 8 * Real.sqrt N / N := by positivity
+  have hstep : (2 * L ^ 2 * Real.sqrt N) * (∑' n : ℕ, r ^ n) +
+      (8 * Real.sqrt N / N) * (∑' n : ℕ, (n : ℝ) * r ^ n) ≤
+      (2 * L ^ 2 * Real.sqrt N) * (4 * N) + (8 * Real.sqrt N / N) * (16 * N ^ 2) :=
+    add_le_add (mul_le_mul_of_nonneg_left hp hfac1) (mul_le_mul_of_nonneg_left hn hfac2)
+  have h1 : (2 * L ^ 2 * Real.sqrt N) * (4 * N) = 8 * N * Real.sqrt N * L ^ 2 := by ring
+  have h2 : (8 * Real.sqrt N / N) * (16 * N ^ 2) = 128 * N * Real.sqrt N := by
+    field_simp
+    ring
+  have h3 : (0:ℝ) ≤ 128 * N * Real.sqrt N := by positivity
+  linarith [hle, hval, hstep, h1, h2, h3]
+
+end L1Num
+
+section smoothed_psiChi_GRH_proof
+
+open Real Filter Topology
+
+set_option maxHeartbeats 1000000
+
+
+
+
+/-- Partial summation: the partial sums of `χ Λ` against a decreasing weight. -/
+private lemma abel_summation {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (f : ℕ → ℝ) :
+    ∀ M : ℕ,
+      (∑ n ∈ Finset.range (M + 1),
+          χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) * (f n : ℂ))
+        = (∑ n ∈ Finset.range (M + 1),
+            χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ)) * (f M : ℂ)
+          + ∑ n ∈ Finset.range M,
+              (∑ k ∈ Finset.range (n + 1),
+                χ (k : ZMod q) * (ArithmeticFunction.vonMangoldt k : ℂ)) *
+                ((f n : ℂ) - (f (n + 1) : ℂ)) := by
+  intro M
+  induction M with
+  | zero => simp
+  | succ M ih =>
+      rw [Finset.sum_range_succ
+            (f := fun k => χ (k : ZMod q) * (ArithmeticFunction.vonMangoldt k : ℂ) * (f k : ℂ)),
+          Finset.sum_range_succ
+            (f := fun k => χ (k : ZMod q) * (ArithmeticFunction.vonMangoldt k : ℂ)),
+          ih,
+          Finset.sum_range_succ
+            (f := fun k => (∑ j ∈ Finset.range (k + 1),
+              χ (j : ZMod q) * (ArithmeticFunction.vonMangoldt j : ℂ)) *
+                ((f k : ℂ) - (f (k + 1) : ℂ)))]
+      ring
+
+/-- The telescoping identity `∑_{n<M} n (f n - f (n+1)) + M f M = ∑_{n<M} f (n+1)`. -/
+private lemma telescope_identity (f : ℕ → ℝ) :
+    ∀ M : ℕ,
+      (∑ n ∈ Finset.range M, (n : ℂ) * ((f n : ℂ) - (f (n + 1) : ℂ)))
+        + (M : ℂ) * (f M : ℂ) = ∑ n ∈ Finset.range M, (f (n + 1) : ℂ) := by
+  intro M
+  induction M with
+  | zero => simp
+  | succ M ih =>
+      rw [Finset.sum_range_succ
+            (f := fun n => (n : ℂ) * ((f n : ℂ) - (f (n + 1) : ℂ))),
+          Finset.sum_range_succ (f := fun n => (f (n + 1) : ℂ))]
+      push_cast
+      linear_combination ih
+
+/-- The partial sums of `χ Λ` over `range (M+1)` are `ψ (M, χ)`. -/
+private lemma range_eq_psiChi {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) :
+    ∀ M : ℕ,
+      (∑ n ∈ Finset.range (M + 1),
+          χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ)) = psiChi χ (M : ℝ) := by
+  intro M
+  induction M with
+  | zero => simp [psiChi]
+  | succ M ih =>
+      rw [Finset.sum_range_succ, ih]
+      have h1 : psiChi χ ((M : ℝ) + 1) =
+          psiChi χ (M : ℝ) +
+            χ (((M + 1 : ℕ)) : ZMod q) * (ArithmeticFunction.vonMangoldt (M + 1) : ℂ) := by
+        simp only [psiChi]
+        rw [show ⌊(M : ℝ) + 1⌋₊ = M + 1 by
+              rw [Nat.floor_add_one (by positivity), Nat.floor_natCast],
+            Nat.floor_natCast]
+        rw [Finset.sum_Ioc_succ_top (Nat.zero_le M)]
+      rw [show (((M + 1 : ℕ)) : ℝ) = (M : ℝ) + 1 by push_cast; ring]
+      exact h1.symm
+
+
+
+/-! ### Proof of `smoothed_psiChi_GRH` -/
+
+/-- Boundary term of the partial summation tends to zero. -/
+private lemma tendsto_boundary {q : ℕ} (hq : 1 ≤ q) {N : ℝ} (hN : 1 ≤ N) {c : ℝ} (hc : 0 ≤ c)
+    (E : ℕ → ℂ)
+    (hE : ∀ n : ℕ, ‖E n‖ ≤
+      c * Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2) :
+    Tendsto (fun M : ℕ => E M * (Real.exp (-(M : ℝ) / N) : ℂ)) atTop (𝓝 0) := by
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  have hbd : ∀ M : ℕ, 1 ≤ M → ‖E M * (Real.exp (-(M : ℝ) / N) : ℂ)‖ ≤
+      c * (q : ℝ) ^ 2 * 8 * N ^ 3 * (((M : ℝ) / N) ^ 3 * Real.exp (-((M : ℝ) / N))) := by
+    intro M hM
+    have hx1 : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
+    have hM0 : (0 : ℝ) < (M : ℝ) := by linarith
+    have hexp : (0 : ℝ) < Real.exp (-(M : ℝ) / N) := Real.exp_pos _
+    have hfM : ‖(Real.exp (-(M : ℝ) / N) : ℂ)‖ = Real.exp (-(M : ℝ) / N) := by
+      rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hexp]
+    -- `√(M+1) ≤ 2M`
+    have hsq : Real.sqrt ((M : ℝ) + 1) ≤ 2 * (M : ℝ) := by
+      have h1 : Real.sqrt ((M : ℝ) + 1) ≤ (M : ℝ) + 1 := by
+        have hx : (0 : ℝ) ≤ (M : ℝ) + 1 := by positivity
+        have hs : Real.sqrt ((M : ℝ) + 1) * Real.sqrt ((M : ℝ) + 1) = (M : ℝ) + 1 :=
+          Real.mul_self_sqrt hx
+        have hge1 : (1 : ℝ) ≤ Real.sqrt ((M : ℝ) + 1) := by
+          nlinarith [hs, Real.sqrt_nonneg ((M : ℝ) + 1)]
+        nlinarith [hs, Real.sqrt_nonneg ((M : ℝ) + 1)]
+      linarith
+    -- `log (q (M+1)) ≤ q (M+1) ≤ 2qM`
+    have hy1 : (1 : ℝ) ≤ (q : ℝ) * ((M : ℝ) + 1) := by nlinarith
+    have hlogy : Real.log ((q : ℝ) * ((M : ℝ) + 1)) ≤ (q : ℝ) * ((M : ℝ) + 1) := by
+      have h := Real.log_le_sub_one_of_pos (by linarith : (0 : ℝ) < (q : ℝ) * ((M : ℝ) + 1))
+      linarith
+    have hlog0 : 0 ≤ Real.log ((q : ℝ) * ((M : ℝ) + 1)) := Real.log_nonneg hy1
+    have hlogM : Real.log ((q : ℝ) * ((M : ℝ) + 1)) ^ 2 ≤ (2 * (q : ℝ) * (M : ℝ)) ^ 2 := by
+      have hq0 : (0 : ℝ) < (q : ℝ) := by linarith
+      have h1 : (q : ℝ) * ((M : ℝ) + 1) ≤ 2 * (q : ℝ) * (M : ℝ) := by nlinarith
+      have h2 : (0 : ℝ) ≤ (q : ℝ) * ((M : ℝ) + 1) := by linarith
+      have h3 : ((q : ℝ) * ((M : ℝ) + 1)) ^ 2 ≤ (2 * (q : ℝ) * (M : ℝ)) ^ 2 :=
+        pow_le_pow_left₀ h2 h1 2
+      nlinarith
+    have hpool : Real.sqrt ((M : ℝ) + 1) * Real.log ((q : ℝ) * ((M : ℝ) + 1)) ^ 2 ≤
+        (2 * (M : ℝ)) * (2 * (q : ℝ) * (M : ℝ)) ^ 2 :=
+      mul_le_mul hsq hlogM (by positivity) (by positivity)
+    have hA : ‖E M‖ ≤ c * ((2 * (M : ℝ)) * (2 * (q : ℝ) * (M : ℝ)) ^ 2) := by
+      refine (hE M).trans ?_
+      calc c * Real.sqrt ((M : ℝ) + 1) * Real.log ((q : ℝ) * ((M : ℝ) + 1)) ^ 2
+          = c * (Real.sqrt ((M : ℝ) + 1) * Real.log ((q : ℝ) * ((M : ℝ) + 1)) ^ 2) := by ring
+        _ ≤ c * ((2 * (M : ℝ)) * (2 * (q : ℝ) * (M : ℝ)) ^ 2) :=
+            mul_le_mul_of_nonneg_left hpool hc
+    rw [norm_mul, hfM]
+    refine (mul_le_mul_of_nonneg_right hA (le_of_lt hexp)).trans (le_of_eq ?_)
+    field_simp
+    ring
+  have hlim : Tendsto (fun x : ℝ => x ^ 3 * Real.exp (-x)) atTop (𝓝 0) :=
+    tendsto_pow_mul_exp_neg_atTop_nhds_zero 3
+  have hlim2 : Tendsto (fun M : ℕ => (M : ℝ) / N) atTop atTop := by
+    have h1 : Tendsto (fun M : ℕ => (1 / N) * (M : ℝ)) atTop atTop :=
+      tendsto_natCast_atTop_atTop.const_mul_atTop (by positivity)
+    simpa [div_eq_inv_mul] using h1
+  have hlim3 : Tendsto (fun M : ℕ => ((M : ℝ) / N) ^ 3 * Real.exp (-((M : ℝ) / N)))
+      atTop (𝓝 0) := hlim.comp hlim2
+  have hlim4 : Tendsto (fun M : ℕ =>
+      c * (q : ℝ) ^ 2 * 8 * N ^ 3 * (((M : ℝ) / N) ^ 3 * Real.exp (-((M : ℝ) / N))))
+      atTop (𝓝 0) := by
+    have h := hlim3.const_mul (c * (q : ℝ) ^ 2 * 8 * N ^ 3)
+    simpa [mul_assoc] using h
+  refine squeeze_zero' ?_ ?_ hlim4
+  · filter_upwards with M
+    exact norm_nonneg _
+  · filter_upwards [Filter.eventually_ge_atTop 1] with M hM
+    exact hbd M hM
+
+/-- `∑_{n} f (n+1)` equals the geometric main term. -/
+private lemma tsum_shift_exp (N : ℝ) (hN : 0 < N) :
+    (∑' n : ℕ, (Real.exp (-(((n + 1 : ℕ)) : ℝ) / N) : ℂ)) =
+      ((Real.exp (-(1 / N)) / (1 - Real.exp (-(1 / N)))) : ℂ) := by
+  have hr1c : ‖(Real.exp (-(1 / N)) : ℂ)‖ < 1 := by
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _), Real.exp_lt_one_iff]
+    have : (0 : ℝ) < 1 / N := by positivity
+    linarith
+  have h1 : (fun n : ℕ => (Real.exp (-(((n + 1 : ℕ)) : ℝ) / N) : ℂ)) =
+      (fun n : ℕ => (Real.exp (-(1 / N)) : ℂ) * (Real.exp (-(1 / N)) : ℂ) ^ n) := by
+    funext n
+    have h2 : Real.exp (-(((n + 1 : ℕ)) : ℝ) / N) = Real.exp (-(1 / N)) ^ (n + 1) := by
+      rw [← Real.exp_nat_mul]
+      congr 1
+      push_cast
+      field_simp
+    rw [h2]
+    push_cast
+    ring
+  rw [h1, tsum_mul_left, tsum_geometric_of_norm_lt_one hr1c]
+  have h4 : ((Real.exp (-(1 / N)) : ℂ) * (1 - (Real.exp (-(1 / N)) : ℂ))⁻¹) =
+      ((Real.exp (-(1 / N)) / (1 - Real.exp (-(1 / N)))) : ℂ) := by
+    push_cast
+    ring
+  rw [h4]
+
+
 /-- LEAF. Smoothed twisted sum under GRH: there is an absolute `c` with
 `|∑_n χ(n) Λ(n) e^{-n/N} - δ_χ N| ≤ c √N log²(qN)` for every `χ` mod `q` and `N ≥ 2`.
 Partial summation `∑ χ(n)Λ(n) e^{-n/N} = ∫_0^∞ ψ(t, χ) e^{-t/N} dt/N` with
@@ -314,7 +892,377 @@ theorem smoothed_psiChi_GRH : GRH → ∃ c : ℝ, ∀ (q : ℕ) [NeZero q]
       ‖(∑' n : ℕ, χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) *
           (Real.exp (-n / N) : ℂ)) - (if χ = 1 then (N : ℂ) else 0)‖ ≤
         c * √N * Real.log (q * N) ^ 2 := by
-  sorry
+  intro hG
+  obtain ⟨c₀, hc₀⟩ := psiChi_bound_of_GRH hG
+  refine ⟨300 * (max c₀ 0 + 2) + 3, ?_⟩
+  intro q hq χ N hN
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hN1 : (1 : ℝ) ≤ N := by linarith
+  have hq1' : (1 : ℕ) ≤ q := Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq1'
+  set f : ℕ → ℝ := fun n => Real.exp (-(n : ℝ) / N) with hfdef
+  set d : ℂ := if χ = 1 then 1 else 0 with hddef
+  set E : ℕ → ℂ := fun n =>
+    (∑ k ∈ Finset.range (n + 1),
+      χ (k : ZMod q) * (ArithmeticFunction.vonMangoldt k : ℂ)) - d * (n : ℂ) with hEdef
+  set C : ℝ := max c₀ 0 + 2 with hCdef
+  have hC2 : (2 : ℝ) ≤ C := by rw [hCdef]; linarith [le_max_right c₀ 0]
+  have hC0 : (0 : ℝ) ≤ C := by linarith
+  have hc0C : c₀ ≤ C := by rw [hCdef]; linarith [le_max_left c₀ 0]
+  have hdN : d * (N : ℂ) = (if χ = 1 then (N : ℂ) else 0) := by
+    rw [hddef]; split_ifs <;> simp
+  have hdnorm : ‖d‖ ≤ 1 := by
+    rw [hddef]; split_ifs <;> simp
+  -- the identity for the partial sums
+  have hSM : ∀ M : ℕ,
+      (∑ n ∈ Finset.range (M + 1), χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ))
+        = d * (M : ℂ) + E M := by
+    intro M
+    simp only [hEdef]
+    ring
+  have hTM : ∀ M : ℕ,
+      (∑ n ∈ Finset.range (M + 1),
+          χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) * (f n : ℂ))
+        = d * (∑ n ∈ Finset.range M, (f (n + 1) : ℂ)) + E M * (f M : ℂ)
+          + ∑ n ∈ Finset.range M, E n * ((f n : ℂ) - (f (n + 1) : ℂ)) := by
+    intro M
+    have hsplit : (∑ n ∈ Finset.range M,
+        (d * (n : ℂ) + E n) * ((f n : ℂ) - (f (n + 1) : ℂ)))
+        = d * (∑ n ∈ Finset.range M, (n : ℂ) * ((f n : ℂ) - (f (n + 1) : ℂ)))
+          + ∑ n ∈ Finset.range M, E n * ((f n : ℂ) - (f (n + 1) : ℂ)) := by
+      have hpt : ∀ n : ℕ, (d * (n : ℂ) + E n) * ((f n : ℂ) - (f (n + 1) : ℂ))
+          = d * ((n : ℂ) * ((f n : ℂ) - (f (n + 1) : ℂ)))
+            + E n * ((f n : ℂ) - (f (n + 1) : ℂ)) := by
+        intro n
+        ring
+      simp only [hpt]
+      rw [Finset.sum_add_distrib, Finset.mul_sum]
+    have htel := telescope_identity f M
+    rw [abel_summation χ f M, hSM M,
+      Finset.sum_congr rfl (fun n (_ : n ∈ Finset.range M) => by rw [hSM n]),
+      hsplit, ← htel, mul_add]
+    ring
+  -- the bound on `E`
+  have hEbound : ∀ n : ℕ, ‖E n‖ ≤
+      C * Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 := by
+    intro n
+    rcases lt_or_ge n 2 with hn | hn
+    · interval_cases n
+      · have h0 : E 0 = 0 := by simp [hEdef]
+        rw [h0, norm_zero]
+        positivity
+      · have h1 : ‖E 1‖ ≤ 1 := by
+          have h0 : E 1 = -d := by
+            simp only [hEdef, Finset.sum_range_succ]
+            simp
+          rw [h0, norm_neg]
+          exact hdnorm
+        have hlog2 : Real.log 2 ≤ Real.log ((q : ℝ) * 2) := by
+          apply Real.log_le_log (by norm_num)
+          nlinarith
+        have hl2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+        have hR : (1 : ℝ) ≤ C * Real.sqrt ((1 : ℝ) + 1) * Real.log ((q : ℝ) * ((1 : ℝ) + 1)) ^ 2 := by
+          have hs2 : (1.4 : ℝ) ≤ Real.sqrt 2 := by
+            nlinarith [Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2), Real.sqrt_nonneg 2]
+          have hsq2 : ((1 : ℝ) + 1) = 2 := by norm_num
+          rw [hsq2]
+          have hspos : (0 : ℝ) ≤ Real.log ((q : ℝ) * 2) := Real.log_nonneg (by nlinarith)
+          have hprod : (1.4 : ℝ) * (0.6931471803) ^ 2 ≤
+              Real.sqrt 2 * Real.log ((q : ℝ) * 2) ^ 2 := by
+            apply mul_le_mul hs2 (by nlinarith) (by norm_num) (Real.sqrt_nonneg 2)
+          nlinarith
+        have hcast : C * Real.sqrt (((1 : ℕ) : ℝ) + 1) * Real.log ((q : ℝ) * (((1 : ℕ) : ℝ) + 1)) ^ 2
+            = C * Real.sqrt ((1 : ℝ) + 1) * Real.log ((q : ℝ) * ((1 : ℝ) + 1)) ^ 2 := by
+          norm_num
+        rw [hcast]
+        linarith
+    · have hx2 : (2 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+      have hb := hc₀ q χ (n : ℝ) hx2
+      have hEn : E n = psiChi χ (n : ℝ) - (if χ = 1 then ((n : ℝ) : ℂ) else 0) := by
+        have h0 : E n = (∑ k ∈ Finset.range (n + 1),
+            χ (k : ZMod q) * (ArithmeticFunction.vonMangoldt k : ℂ)) - d * (n : ℂ) := by
+          simp only [hEdef]
+        rw [h0, range_eq_psiChi χ n, hddef]
+        split_ifs <;> simp
+      rw [hEn]
+      have hb' : ‖psiChi χ (n : ℝ) - (if χ = 1 then ((n : ℝ) : ℂ) else 0)‖ ≤
+          c₀ * Real.sqrt (n : ℝ) * Real.log ((q : ℝ) * (n : ℝ)) ^ 2 := hb
+      refine hb'.trans ?_
+      have hsn : Real.sqrt (n : ℝ) ≤ Real.sqrt ((n : ℝ) + 1) := Real.sqrt_le_sqrt (by linarith)
+      have hlogs : Real.log ((q : ℝ) * (n : ℝ)) ≤ Real.log ((q : ℝ) * ((n : ℝ) + 1)) := by
+        apply Real.log_le_log (by positivity)
+        nlinarith
+      have hl0 : (0 : ℝ) ≤ Real.log ((q : ℝ) * (n : ℝ)) := Real.log_nonneg (by nlinarith)
+      have hl1 : (0 : ℝ) ≤ Real.log ((q : ℝ) * ((n : ℝ) + 1)) := Real.log_nonneg (by nlinarith)
+      have hA : (0 : ℝ) ≤ Real.sqrt (n : ℝ) * Real.log ((q : ℝ) * (n : ℝ)) ^ 2 := by positivity
+      have hlogsq : Real.log ((q : ℝ) * (n : ℝ)) ^ 2 ≤
+          Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 :=
+        pow_le_pow_left₀ hl0 hlogs 2
+      have hB : Real.sqrt (n : ℝ) * Real.log ((q : ℝ) * (n : ℝ)) ^ 2 ≤
+          Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 :=
+        mul_le_mul hsn hlogsq (sq_nonneg _) (Real.sqrt_nonneg _)
+      calc c₀ * Real.sqrt (n : ℝ) * Real.log ((q : ℝ) * (n : ℝ)) ^ 2
+          = c₀ * (Real.sqrt (n : ℝ) * Real.log ((q : ℝ) * (n : ℝ)) ^ 2) := by ring
+        _ ≤ C * (Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2) :=
+            mul_le_mul hc0C hB hA hC0
+        _ = C * Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 := by ring
+  -- the weight differences
+  have hΔ : ∀ n : ℕ, ‖(f n : ℂ) - (f (n + 1) : ℂ)‖ ≤ f n / N := by
+    intro n
+    have hfn : (0 : ℝ) < f n := by simp only [hfdef]; positivity
+    have hf1 : (0 : ℝ) < f (n + 1) := by simp only [hfdef]; positivity
+    have hdec : f (n + 1) ≤ f n := by
+      simp only [hfdef]
+      apply Real.exp_le_exp.mpr
+      rw [show -(((n + 1 : ℕ)) : ℝ) / N = -((n : ℝ) + 1) / N by push_cast; ring]
+      apply div_le_div_of_nonneg_right _ hN0.le
+      linarith
+    have hreal : ‖(f n : ℂ) - (f (n + 1) : ℂ)‖ = f n - f (n + 1) := by
+      rw [← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by linarith)]
+    rw [hreal]
+    have hsp : f n * (1 - Real.exp (-(1 / N))) = f n - f (n + 1) := by
+      simp only [hfdef]
+      have he : Real.exp (-(((n + 1 : ℕ)) : ℝ) / N) =
+          Real.exp (-(1 / N)) * Real.exp (-(n : ℝ) / N) := by
+        rw [← Real.exp_add]
+        congr 1
+        push_cast
+        field_simp
+        ring
+      rw [he]; ring
+    rw [← hsp]
+    have h1 : 1 - Real.exp (-(1 / N)) ≤ 1 / N := by
+      have h := Real.add_one_le_exp (-(1 / N))
+      linarith
+    have h2 : (0 : ℝ) ≤ 1 - Real.exp (-(1 / N)) := by
+      have h : Real.exp (-(1 / N)) < 1 := by
+        rw [Real.exp_lt_one_iff]
+        have : (0 : ℝ) < 1 / N := by positivity
+        linarith
+      linarith
+    calc f n * (1 - Real.exp (-(1 / N))) ≤ f n * (1 / N) :=
+          mul_le_mul_of_nonneg_left h1 (le_of_lt hfn)
+      _ = f n / N := by ring
+  -- the error term is bounded by the weighted sum
+  have hErr_pt : ∀ n : ℕ, ‖E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖ ≤
+      C / N * (Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * f n) := by
+    intro n
+    have hfn : (0 : ℝ) < f n := by simp only [hfdef]; positivity
+    have h1 : ‖E n‖ * ‖(f n : ℂ) - (f (n + 1) : ℂ)‖ ≤
+        (C * Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2) * (f n / N) := by
+      apply mul_le_mul (hEbound n) (hΔ n) (norm_nonneg _) (by positivity)
+    rw [norm_mul]
+    calc ‖E n‖ * ‖(f n : ℂ) - (f (n + 1) : ℂ)‖
+        ≤ (C * Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2) * (f n / N) := h1
+      _ = C / N * (Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * f n) := by
+          ring
+  have hsumm_maj : Summable (fun n : ℕ =>
+      Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * f n) := by
+    have h := L1Num.main_sum_summable hN1 hq1'
+    simpa [hfdef] using h
+  have hsumm_majK : Summable (fun n : ℕ => C / N *
+      (Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * f n)) :=
+    hsumm_maj.mul_left _
+  have hsumm_err : Summable (fun n : ℕ => E n * ((f n : ℂ) - (f (n + 1) : ℂ))) := by
+    apply Summable.of_norm
+    exact Summable.of_nonneg_of_le (fun n => norm_nonneg _) hErr_pt hsumm_majK
+  have hErr_bd : ‖∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖ ≤
+      C / N * (8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N) := by
+    have h1 : ‖∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖ ≤
+        ∑' n : ℕ, ‖E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖ :=
+      norm_tsum_le_tsum_norm hsumm_err.norm
+    have h2 : (∑' n : ℕ, ‖E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖) ≤
+        ∑' n : ℕ, C / N *
+          (Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * f n) :=
+      Summable.tsum_le_tsum hErr_pt hsumm_err.norm hsumm_majK
+    have h3 : (∑' n : ℕ, C / N *
+        (Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * f n)) =
+        C / N * (∑' n : ℕ,
+          Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+            Real.exp (-(n : ℝ) / N)) := by
+      rw [tsum_mul_left]
+    have h4 : (∑' n : ℕ, Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 *
+        Real.exp (-(n : ℝ) / N)) ≤
+        8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N :=
+      L1Num.main_sum_le hN hq1'
+    have h5 : (0 : ℝ) ≤ C / N := by positivity
+    calc ‖∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖
+        ≤ ∑' n : ℕ, ‖E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖ := h1
+      _ ≤ ∑' n : ℕ, C / N *
+            (Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * f n) := h2
+      _ = C / N * (∑' n : ℕ, Real.sqrt ((n : ℝ) + 1) *
+            Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * Real.exp (-(n : ℝ) / N)) := h3
+      _ ≤ C / N * (8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N) :=
+          mul_le_mul_of_nonneg_left h4 h5
+  -- the main term
+  have hmain : ‖(∑' n : ℕ, (Real.exp (-(((n + 1 : ℕ)) : ℝ) / N) : ℂ)) - (N : ℂ)‖ ≤ 1 := by
+    rw [tsum_shift_exp N hN0]
+    have h1 : ((Real.exp (-(1 / N)) / (1 - Real.exp (-(1 / N)))) : ℂ) - (N : ℂ) =
+        ((Real.exp (-(1 / N)) / (1 - Real.exp (-(1 / N))) - N : ℝ) : ℂ) := by
+      push_cast
+      ring
+    rw [h1, Complex.norm_real, Real.norm_eq_abs, abs_le]
+    constructor
+    · have := L1Num.geom_main_ge hN1; linarith
+    · have := L1Num.geom_main_le hN1; linarith
+  -- summability of the two remaining series
+  have hr1 : ‖(Real.exp (-(1 / N)) : ℂ)‖ < 1 := by
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _), Real.exp_lt_one_iff]
+    have : (0 : ℝ) < 1 / N := by positivity
+    linarith
+  have hsumm_f1 : Summable (fun n : ℕ => (f (n + 1) : ℂ)) := by
+    have hgeom : Summable (fun n : ℕ => (Real.exp (-(1 / N)) : ℂ) ^ n) :=
+      summable_geometric_of_norm_lt_one hr1
+    have hmul : Summable (fun n : ℕ => (Real.exp (-(1 / N)) : ℂ) *
+        (Real.exp (-(1 / N)) : ℂ) ^ n) := hgeom.mul_left _
+    refine hmul.congr ?_
+    intro n
+    simp only [hfdef]
+    have he : Real.exp (-(((n + 1 : ℕ)) : ℝ) / N) = Real.exp (-(1 / N)) ^ (n + 1) := by
+      rw [← Real.exp_nat_mul]
+      congr 1
+      push_cast
+      field_simp
+    rw [he, pow_succ]
+    push_cast
+    exact mul_comm _ _
+  have hΛ1 : ∀ n : ℕ, ArithmeticFunction.vonMangoldt n ≤ (n : ℝ) + 1 := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with h | h
+    · subst h; simp
+    · have hn1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast h
+      have h1 := ArithmeticFunction.vonMangoldt_le_log (n := n)
+      have h2 : Real.log (n : ℝ) ≤ (n : ℝ) - 1 := Real.log_le_sub_one_of_pos (by linarith)
+      linarith
+  have hsumm_af : Summable (fun n : ℕ =>
+      χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) * (f n : ℂ)) := by
+    set r : ℝ := Real.exp (-(1 / N)) with hrdef
+    have hr0 : 0 ≤ r := le_of_lt (Real.exp_pos _)
+    have hr1 : ‖r‖ < 1 := by
+      rw [hrdef, Real.norm_eq_abs, abs_of_nonneg hr0, Real.exp_lt_one_iff]
+      have : (0 : ℝ) < 1 / N := by positivity
+      linarith
+    have h2 : Summable (fun n : ℕ => (n : ℝ) * r ^ n) :=
+      (hasSum_coe_mul_geometric_of_norm_lt_one hr1).summable
+    have h3 : Summable (fun n : ℕ => r ^ n) := summable_geometric_of_norm_lt_one hr1
+    refine Summable.of_norm_bounded (h2.add h3) ?_
+    intro n
+    have hfn : f n = r ^ n := by
+      rw [hfdef, hrdef, ← Real.exp_nat_mul]
+      congr 1
+      push_cast
+      field_simp
+    have hfnpos : (0 : ℝ) < f n := by rw [hfn]; positivity
+    have hχ : ‖χ (n : ZMod q)‖ ≤ 1 := DirichletCharacter.norm_le_one χ _
+    have hΛn : (0 : ℝ) ≤ ArithmeticFunction.vonMangoldt n := ArithmeticFunction.vonMangoldt_nonneg
+    have hΛ1n : ArithmeticFunction.vonMangoldt n ≤ (n : ℝ) + 1 := hΛ1 n
+    have hnorm : ‖χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) * (f n : ℂ)‖ =
+        ‖χ (n : ZMod q)‖ * ArithmeticFunction.vonMangoldt n * f n := by
+      rw [norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hΛn,
+        Complex.norm_real, Real.norm_eq_abs, abs_of_pos hfnpos]
+    rw [hnorm]
+    have hstep : ‖χ (n : ZMod q)‖ * ArithmeticFunction.vonMangoldt n * f n ≤
+        1 * ((n : ℝ) + 1) * f n := by
+      have h4 : ‖χ (n : ZMod q)‖ * ArithmeticFunction.vonMangoldt n ≤ 1 * ((n : ℝ) + 1) :=
+        mul_le_mul hχ hΛ1n hΛn (by norm_num)
+      exact mul_le_mul_of_nonneg_right h4 (le_of_lt hfnpos)
+    refine hstep.trans (le_of_eq ?_)
+    rw [hfn]
+    ring
+  -- limits
+  have hTendT : Tendsto (fun M : ℕ => ∑ n ∈ Finset.range (M + 1),
+      χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) * (f n : ℂ))
+      atTop (𝓝 (∑' n : ℕ, χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) * (f n : ℂ))) :=
+    hsumm_af.hasSum.tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
+  have hTendG : Tendsto (fun M : ℕ => d * (∑ n ∈ Finset.range M, (f (n + 1) : ℂ)) +
+      E M * (f M : ℂ) + ∑ n ∈ Finset.range M, E n * ((f n : ℂ) - (f (n + 1) : ℂ)))
+      atTop (𝓝 (d * (∑' n : ℕ, (f (n + 1) : ℂ)) +
+        ∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ)))) := by
+    have h1 : Tendsto (fun M : ℕ => ∑ n ∈ Finset.range M, (f (n + 1) : ℂ))
+        atTop (𝓝 (∑' n : ℕ, (f (n + 1) : ℂ))) := hsumm_f1.hasSum.tendsto_sum_nat
+    have h2 : Tendsto (fun M : ℕ => ∑ n ∈ Finset.range M, E n * ((f n : ℂ) - (f (n + 1) : ℂ)))
+        atTop (𝓝 (∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ)))) :=
+      hsumm_err.hasSum.tendsto_sum_nat
+    have h3 : Tendsto (fun M : ℕ => E M * (f M : ℂ)) atTop (𝓝 0) := by
+      have h := tendsto_boundary hq1' hN1 hC0 E hEbound
+      simpa [hfdef] using h
+    have h4 := ((h1.const_mul d).add h3).add h2
+    simpa [add_assoc] using h4
+  have hfin : (∑' n : ℕ, χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) * (f n : ℂ)) =
+      d * (∑' n : ℕ, (f (n + 1) : ℂ)) +
+        ∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ)) :=
+    tendsto_nhds_unique hTendT (hTendG.congr' (Filter.Eventually.of_forall (fun M => (hTM M).symm)))
+  -- final assembly
+  have hlog2 : Real.log 2 ≤ Real.log ((q : ℝ) * N) := by
+    apply Real.log_le_log (by norm_num)
+    nlinarith
+  have hlog2' : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+  have hLpos : (0 : ℝ) ≤ Real.log ((q : ℝ) * N) := by linarith
+  have hbase : (2 : ℝ) / 3 ≤ Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 := by
+    have h1 : (1.4 : ℝ) ≤ Real.sqrt 2 := by
+      nlinarith [Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2), Real.sqrt_nonneg 2]
+    have h2 : Real.sqrt 2 ≤ Real.sqrt N := Real.sqrt_le_sqrt (by linarith)
+    nlinarith [Real.sqrt_nonneg N]
+  have hspl : d * (∑' n : ℕ, (f (n + 1) : ℂ)) +
+        (∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))) - d * (N : ℂ) =
+      d * ((∑' n : ℕ, (f (n + 1) : ℂ)) - (N : ℂ)) +
+        (∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))) := by ring
+  have hgoal_f : ‖d * (∑' n : ℕ, (f (n + 1) : ℂ)) +
+        (∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))) - d * (N : ℂ)‖ ≤
+      (300 * (max c₀ 0 + 2) + 3) * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 := by
+    rw [hspl]
+    have hA : ‖d * ((∑' n : ℕ, (f (n + 1) : ℂ)) - (N : ℂ))‖ ≤ 1 := by
+      rw [norm_mul]
+      calc ‖d‖ * ‖(∑' n : ℕ, (f (n + 1) : ℂ)) - (N : ℂ)‖ ≤ 1 * 1 := by
+            apply mul_le_mul hdnorm hmain (norm_nonneg _) (by norm_num)
+        _ = 1 := by norm_num
+    have hB : ‖∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖ ≤
+        C / N * (8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N) :=
+      hErr_bd
+    have hX : (0 : ℝ) ≤ Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 := by positivity
+    have hCN : C / N * (8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N) =
+        8 * C * (Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2) + 128 * C * Real.sqrt N := by
+      field_simp
+    have hCs : C = max c₀ 0 + 2 := hCdef
+    have hLsq : (0.4804 : ℝ) ≤ Real.log ((q : ℝ) * N) ^ 2 := by
+      have h1 : (0.6931471803 : ℝ) ≤ Real.log ((q : ℝ) * N) := le_trans hlog2'.le hlog2
+      have h2 : (0 : ℝ) ≤ Real.log ((q : ℝ) * N) := hLpos
+      nlinarith
+    have hsqN : Real.sqrt N ≤ 2.1 * (Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2) := by
+      nlinarith [hX, hLsq, Real.sqrt_nonneg N]
+    have hone : (1 : ℝ) ≤ 1.5 * (Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2) := by
+      linarith [hbase, hX]
+    calc ‖d * ((∑' n : ℕ, (f (n + 1) : ℂ)) - (N : ℂ)) +
+          (∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ)))‖
+        ≤ ‖d * ((∑' n : ℕ, (f (n + 1) : ℂ)) - (N : ℂ))‖ +
+          ‖∑' n : ℕ, E n * ((f n : ℂ) - (f (n + 1) : ℂ))‖ := norm_add_le _ _
+      _ ≤ 1 + C / N * (8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 +
+            128 * N * Real.sqrt N) := add_le_add hA hB
+      _ ≤ (300 * (max c₀ 0 + 2) + 3) * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 := by
+          rw [hCN, hCs]
+          rw [show (300 * (max c₀ 0 + 2) + 3) * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2
+              = (300 * (max c₀ 0 + 2) + 3) *
+                (Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2) by ring]
+          have hM0 : (0 : ℝ) ≤ max c₀ 0 + 2 := by positivity
+          have hX0 : (0 : ℝ) ≤ Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 := by positivity
+          have hS1 : 128 * (max c₀ 0 + 2) * Real.sqrt N ≤
+              268.8 * (max c₀ 0 + 2) * (Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2) := by
+            nlinarith [hsqN]
+          have hS2 : (1 : ℝ) ≤ 1.5 * (Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2) := hone
+          exact L1Num.final_bound hM0 hX0 hS1 hS2
+  have hgoal2 : ‖(∑' n : ℕ, χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) *
+        (Real.exp (-n / N) : ℂ)) - (if χ = 1 then (N : ℂ) else 0)‖ ≤
+      (300 * (max c₀ 0 + 2) + 3) * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 := by
+    rw [← hdN]
+    have hf1 : (∑' n : ℕ, χ (n : ZMod q) * (ArithmeticFunction.vonMangoldt n : ℂ) *
+          (Real.exp (-n / N) : ℂ)) =
+        d * (∑' n : ℕ, (Real.exp (-(n + 1) / N) : ℂ)) +
+          ∑' n : ℕ, E n * ((Real.exp (-n / N) : ℂ) - (Real.exp (-(n + 1) / N) : ℂ)) := by
+      simpa [hfdef] using hfin
+    rw [hf1]
+    simpa [hfdef] using hgoal_f
+  exact hgoal2
+end smoothed_psiChi_GRH_proof
 
 /-- LEAF. Gauss sum bound: `|τ(χ)| ≤ √q` for every Dirichlet character mod `q`, with
 `τ(χ) = ∑_b χ(b) e(b/q)`. For `χ` induced by primitive `χ*` mod `d`,
