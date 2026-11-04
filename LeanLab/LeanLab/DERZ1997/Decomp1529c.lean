@@ -27,6 +27,8 @@ import Mathlib
 import LeanLab.DERZ1997.Decomp1529b
 import LeanLab.DERZ1997.LemmaPsi
 import LeanLab.PerelliPintz1992.Decomp1519
+import LeanLab.PNTPort.Vinogradov.Final
+import LeanLab.PNTPort.Vinogradov.MajorArc
 
 namespace LeanLab.DERZ1997.Decomp1529c
 open Complex LeanLab.DERZ1997 LeanLab.DERZ1997.Decomp1529a LeanLab.DERZ1997.Decomp1529b
@@ -1421,6 +1423,605 @@ theorem gaussSum_one {q : ℕ} [NeZero q] :
   rw [hsum]
   simpa only [Nat.cast_one] using LeanLab.PerelliPintz1992.Decomp1519.ramanujan_coprime (q := q) (a := 1) (NeZero.pos q) (Nat.coprime_one_left q)
 
+/-! ### CODEX task248 bridges -/
+
+open Filter Topology LeanLab.PNTPort.LargeSieve
+
+/-- At every unit residue, evaluating a character at the residue inverse equals evaluating the inverse character.
+Davenport chapter 9 page 65, the character expansion used on P0011 page 100.
+AI wrote the Lean code. -/
+lemma character_inv_unit248 {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    {m : ZMod q} (hm : IsUnit m) : χ m⁻¹ = χ⁻¹ m := by
+  rw [MulChar.inv_apply, ← hm.unit_spec, Ring.inverse_unit, ZMod.inv_coe_unit]
+
+example := character_inv_unit248 (q := 4)
+  (1 : DirichletCharacter ℂ 4) (m := 1) isUnit_one
+
+/-- For any finite complex weight, the additive sum restricted to unit residues equals the Gauss weighted sum of inverse character sums, divided by the totient.
+Davenport chapter 9 page 65 and chapter 26 page 147. This is auxiliary finite algebra for P0011 page 100.
+AI wrote the Lean code. -/
+lemma additive_unit_expansion248
+    {q : ℕ} [NeZero q] {m : ZMod q} (hm : IsUnit m) (w : ℕ → ℂ) (N : ℕ) :
+    (∑ n ∈ Finset.range (N + 1), if IsUnit (n : ZMod q) then
+        ZMod.stdAddChar (m * (n : ZMod q)) * w n else 0) =
+      (1 / (q.totient : ℂ)) * ∑ χ : DirichletCharacter ℂ q,
+        χ⁻¹ m * gaussSum χ ZMod.stdAddChar *
+          ∑ n ∈ Finset.range (N + 1), χ⁻¹ (n : ZMod q) * w n := by
+  classical
+  have hpoint (n : ℕ) : (if IsUnit (n : ZMod q) then
+      ZMod.stdAddChar (m * (n : ZMod q)) * w n else 0) =
+      (1 / (q.totient : ℂ)) * ∑ χ : DirichletCharacter ℂ q,
+        χ⁻¹ m * gaussSum χ ZMod.stdAddChar * (χ⁻¹ (n : ZMod q) * w n) := by
+    by_cases hn : IsUnit (n : ZMod q)
+    · rw [if_pos hn, stdAddChar_eq_sum_gauss (hm.mul hn)]
+      simp_rw [character_inv_unit248 _ (hm.mul hn), map_mul]
+      rw [Finset.mul_sum, Finset.sum_mul, Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro χ hχ
+      ring
+    · rw [if_neg hn]
+      simp [MulChar.map_nonunit _ hn]
+  simp_rw [hpoint]
+  rw [← Finset.mul_sum, Finset.sum_comm]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro χ hχ
+  rw [Finset.mul_sum]
+
+example := additive_unit_expansion248 (q := 4) (m := 1)
+  isUnit_one (fun _ => (0 : ℂ)) 2
+
+/-- If every character error has norm at most a nonnegative B, its Gauss weighted average has norm at most square root q times B. The residue need not be a unit.
+Davenport chapter 9 page 66 and chapter 26 page 147. The square root estimate reuses gaussSum_norm_le.
+AI wrote the Lean code. -/
+lemma gauss_aggregate_bound248
+    {q : ℕ} [NeZero q] (m : ZMod q) (F : DirichletCharacter ℂ q → ℂ)
+    {B : ℝ} (hB : 0 ≤ B) (hF : ∀ χ, ‖F χ‖ ≤ B) :
+    ‖(1 / (q.totient : ℂ)) * ∑ χ : DirichletCharacter ℂ q,
+      χ⁻¹ m * gaussSum χ ZMod.stdAddChar * F χ‖ ≤ Real.sqrt q * B := by
+  classical
+  have ht : (0 : ℝ) < q.totient := by
+    exact_mod_cast Nat.totient_pos.mpr (NeZero.pos q)
+  have hcard : Fintype.card (DirichletCharacter ℂ q) = q.totient := by
+    simpa only [Nat.card_eq_fintype_card] using
+      DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity ℂ q
+  have hnorm : ‖(1 / (q.totient : ℂ))‖ = 1 / (q.totient : ℝ) := by
+    simp [norm_div, Complex.norm_natCast]
+  rw [norm_mul, hnorm]
+  have hs : ‖∑ χ : DirichletCharacter ℂ q,
+      χ⁻¹ m * gaussSum χ ZMod.stdAddChar * F χ‖ ≤
+      (q.totient : ℝ) * (Real.sqrt q * B) := by
+    calc
+      _ ≤ ∑ χ : DirichletCharacter ℂ q,
+          ‖χ⁻¹ m * gaussSum χ ZMod.stdAddChar * F χ‖ := norm_sum_le _ _
+      _ ≤ ∑ χ : DirichletCharacter ℂ q, Real.sqrt q * B := by
+        apply Finset.sum_le_sum
+        intro χ hχ
+        rw [norm_mul, norm_mul]
+        calc
+          _ ≤ (1 * Real.sqrt q) * B := by
+            apply mul_le_mul _ (hF χ) (norm_nonneg _) (by positivity)
+            exact mul_le_mul (DirichletCharacter.norm_le_one _ _) (gaussSum_norm_le χ)
+              (norm_nonneg _) (by norm_num)
+          _ = _ := by ring
+      _ = _ := by simp [hcard]
+  calc
+    _ ≤ (1 / (q.totient : ℝ)) * ((q.totient : ℝ) * (Real.sqrt q * B)) :=
+      mul_le_mul_of_nonneg_left hs (by positivity)
+    _ = _ := by field_simp
+
+example := gauss_aggregate_bound248 (q := 4) (1 : ZMod 4)
+  (fun _ => (0 : ℂ)) (B := 0) (by norm_num) (by intro χ; simp)
+
+/-- At a unit residue, a common character psi error bound B gives an additive sum error at most square root q times B on the unit terms. The main term is Mobius q times N divided by the totient.
+Davenport chapter 26 page 147, the major arc decomposition supporting P0011 page 100.
+AI wrote the Lean code. -/
+lemma additive_unit_bound248 {q : ℕ} [NeZero q] {m : ZMod q} (hm : IsUnit m)
+    (N : ℕ) {B : ℝ} (hB : 0 ≤ B)
+    (hχ : ∀ χ : DirichletCharacter ℂ q,
+      ‖LeanLab.DERZ1997.Decomp1529b.psiChi χ (N : ℝ) -
+        (if χ = 1 then (N : ℂ) else 0)‖ ≤ B) :
+    ‖(∑ n ∈ Finset.range (N + 1), if IsUnit (n : ZMod q) then
+        ZMod.stdAddChar (m * (n : ZMod q)) * (ArithmeticFunction.vonMangoldt n : ℂ) else 0) -
+      (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) * N‖ ≤ Real.sqrt q * B := by
+  classical
+  have he := additive_unit_expansion248 hm
+    (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) N
+  simp_rw [range_eq_psiChi] at he
+  have hmain : (1 / (q.totient : ℂ)) * ∑ χ : DirichletCharacter ℂ q,
+      χ⁻¹ m * gaussSum χ ZMod.stdAddChar *
+        (if χ⁻¹ = 1 then (N : ℂ) else 0) =
+      (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) * N := by
+    simp [inv_eq_one, mul_ite, gaussSum_one, MulChar.one_apply hm]
+    ring
+  have hrewrite : (∑ n ∈ Finset.range (N + 1), if IsUnit (n : ZMod q) then
+        ZMod.stdAddChar (m * (n : ZMod q)) * (ArithmeticFunction.vonMangoldt n : ℂ) else 0) -
+      (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) * N =
+      (1 / (q.totient : ℂ)) * ∑ χ : DirichletCharacter ℂ q,
+        χ⁻¹ m * gaussSum χ ZMod.stdAddChar *
+          (LeanLab.DERZ1997.Decomp1529b.psiChi χ⁻¹ (N : ℝ) -
+            (if χ⁻¹ = 1 then (N : ℂ) else 0)) := by
+    simp_rw [mul_sub]
+    rw [Finset.sum_sub_distrib, mul_sub, he, hmain]
+  rw [hrewrite]
+  exact gauss_aggregate_bound248 m _ hB (fun χ => hχ χ⁻¹)
+
+example := additive_unit_bound248 (q := 4) (m := 1) isUnit_one 0
+  (B := 0) (by norm_num) (by intro χ; simp [psiChi])
+
+/-- The same additive error over all terms is at most square root q times B plus the noncoprime von Mangoldt mass.
+Davenport chapter 26 page 147, the major arc decomposition supporting P0011 page 100.
+AI wrote the Lean code. -/
+lemma full_additive_bound248 {q : ℕ} [NeZero q] {m : ZMod q} (hm : IsUnit m)
+    (N : ℕ) {B : ℝ} (hB : 0 ≤ B)
+    (hχ : ∀ χ : DirichletCharacter ℂ q,
+      ‖LeanLab.DERZ1997.Decomp1529b.psiChi χ (N : ℝ) -
+        (if χ = 1 then (N : ℂ) else 0)‖ ≤ B) :
+    ‖(∑ n ∈ Finset.range (N + 1),
+        ZMod.stdAddChar (m * (n : ZMod q)) * (ArithmeticFunction.vonMangoldt n : ℂ)) -
+      (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) * N‖ ≤
+      Real.sqrt q * B + LeanLab.PNTPort.BV.psiBad (N : ℝ) q := by
+  classical
+  let f : ℕ → ℂ := fun n => ZMod.stdAddChar (m * (n : ZMod q)) *
+    (ArithmeticFunction.vonMangoldt n : ℂ)
+  have hsplit : (∑ n ∈ Finset.range (N + 1), f n) =
+      (∑ n ∈ Finset.range (N + 1), if IsUnit (n : ZMod q) then f n else 0) +
+      ∑ n ∈ Finset.range (N + 1), if ¬ IsUnit (n : ZMod q) then f n else 0 := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro n hn
+    split_ifs <;> simp_all
+  have hbad : ‖∑ n ∈ Finset.range (N + 1),
+      if ¬ IsUnit (n : ZMod q) then f n else 0‖ ≤ LeanLab.PNTPort.BV.psiBad (N : ℝ) q := by
+    have hreal : (∑ n ∈ Finset.range (N + 1), if ¬ IsUnit (n : ZMod q) then
+        ArithmeticFunction.vonMangoldt n else 0) = LeanLab.PNTPort.BV.psiBad (N : ℝ) q := by
+      unfold LeanLab.PNTPort.BV.psiBad
+      rw [Nat.floor_natCast, Finset.sum_filter]
+      simp_rw [ZMod.isUnit_iff_coprime]
+      symm
+      apply Finset.sum_subset
+      · intro n hn
+        simp only [Finset.mem_Icc, Finset.mem_range] at hn ⊢
+        omega
+      · intro n hn hnot
+        have hn0 : n = 0 := by
+          simp only [Finset.mem_range, Finset.mem_Icc] at hn hnot
+          omega
+        subst n
+        simp
+    calc
+      _ ≤ ∑ n ∈ Finset.range (N + 1),
+          ‖if ¬ IsUnit (n : ZMod q) then f n else 0‖ := norm_sum_le _ _
+      _ = ∑ n ∈ Finset.range (N + 1), if ¬ IsUnit (n : ZMod q) then
+          ArithmeticFunction.vonMangoldt n else 0 := by
+        apply Finset.sum_congr rfl
+        intro n hn
+        by_cases hu : IsUnit (n : ZMod q)
+        · simp only [not_true_eq_false, hu, ite_false, norm_zero]
+        · simp only [hu, not_false_eq_true, ite_true]
+          change ‖ZMod.stdAddChar (m * (n : ZMod q)) *
+            (ArithmeticFunction.vonMangoldt n : ℂ)‖ = ArithmeticFunction.vonMangoldt n
+          rw [norm_mul, show ‖ZMod.stdAddChar (m * (n : ZMod q))‖ = 1 from
+            Circle.norm_coe (ZMod.toCircle _), one_mul, Complex.norm_real,
+            Real.norm_eq_abs, abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg]
+      _ = _ := hreal
+  change ‖(∑ n ∈ Finset.range (N + 1), f n) - _‖ ≤ _
+  rw [hsplit, add_sub_right_comm]
+  exact (norm_add_le _ _).trans (add_le_add (additive_unit_bound248 hm N hB hχ) hbad)
+
+example := full_additive_bound248 (q := 4) (m := 1) isUnit_one 0
+  (B := 0) (by norm_num) (by intro χ; simp [psiChi])
+
+/-- Under GRH, the finite additive von Mangoldt sum at any unit residue has error at most C times square root q times square root N times log squared qN, for one absolute nonnegative C and every integer N at least two.
+Davenport chapters 20 and 26, pages 125 and 147. This combines the existing character bound with the finite Gauss decomposition.
+AI wrote the Lean code. -/
+lemma rational_partial_GRH248 (hG : LeanLab.DERZ1997.GRH) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (q : ℕ) [NeZero q] (m : ZMod q), IsUnit m →
+      ∀ n : ℕ, 2 ≤ n →
+      ‖(∑ k ∈ Finset.range (n + 1), ZMod.stdAddChar (m * (k : ZMod q)) *
+          (ArithmeticFunction.vonMangoldt k : ℂ)) -
+        (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) * n‖ ≤
+          C * Real.sqrt q * Real.sqrt n * Real.log ((q : ℝ) * n) ^ 2 := by
+  obtain ⟨c, hc⟩ := LeanLab.DERZ1997.Decomp1529b.psiChi_bound_of_GRH hG
+  let C : ℝ := max c 0 + 2
+  have hC0 : 0 ≤ C := by dsimp [C]; positivity
+  refine ⟨C, hC0, ?_⟩
+  intro q hq m hm n hn
+  have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn
+  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hs : 1 ≤ Real.sqrt q := by rw [Real.one_le_sqrt]; exact hqR
+  have hlog0 : 0 ≤ Real.log ((q : ℝ) * n) := Real.log_nonneg (by nlinarith)
+  have hlogq : Real.log q ≤ Real.log ((q : ℝ) * n) :=
+    Real.log_le_log (by linarith) (by nlinarith)
+  have hlogn : Real.log n ≤ Real.log ((q : ℝ) * n) :=
+    Real.log_le_log (by linarith) (by nlinarith)
+  have hχ (χ : DirichletCharacter ℂ q) :
+      ‖LeanLab.DERZ1997.Decomp1529b.psiChi χ (n : ℝ) -
+        (if χ = 1 then (n : ℂ) else 0)‖ ≤
+        max c 0 * Real.sqrt n * Real.log ((q : ℝ) * n) ^ 2 := by
+    exact (hc q χ n hnR).trans (by gcongr; exact le_max_left c 0)
+  have h := full_additive_bound248 hm n (by positivity) hχ
+  have hbad := LeanLab.PNTPort.BV.psiBad_le (x := (n : ℝ)) (by linarith)
+    (q := q) (Nat.one_le_iff_ne_zero.mpr (NeZero.ne q))
+  have hlog2 : (1 : ℝ) ≤ 2 * Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hquot : Real.log q / Real.log 2 ≤ 2 * Real.log ((q : ℝ) * n) := by
+    rw [div_le_iff₀ (by positivity : (0 : ℝ) < Real.log 2)]
+    nlinarith [Real.log_natCast_nonneg q]
+  have hbad2 : LeanLab.PNTPort.BV.psiBad (n : ℝ) q ≤
+      2 * Real.log ((q : ℝ) * n) ^ 2 := by
+    calc
+      _ ≤ Real.log q / Real.log 2 * Real.log n := hbad
+      _ ≤ (2 * Real.log ((q : ℝ) * n)) * Real.log ((q : ℝ) * n) :=
+        mul_le_mul hquot hlogn (Real.log_natCast_nonneg n) (by positivity)
+      _ = _ := by ring
+  have hsn : 1 ≤ Real.sqrt n := by rw [Real.one_le_sqrt]; linarith
+  have hprod : 1 ≤ Real.sqrt q * Real.sqrt n := one_le_mul_of_one_le_of_one_le hs hsn
+  have hextra : 2 * Real.log ((q : ℝ) * n) ^ 2 ≤
+      2 * Real.sqrt q * Real.sqrt n * Real.log ((q : ℝ) * n) ^ 2 := by
+    nlinarith [mul_le_mul_of_nonneg_right hprod (sq_nonneg (Real.log ((q : ℝ) * n)))]
+  calc
+    _ ≤ Real.sqrt q * (max c 0 * Real.sqrt n * Real.log ((q : ℝ) * n) ^ 2) +
+        LeanLab.PNTPort.BV.psiBad (n : ℝ) q := h
+    _ ≤ Real.sqrt q * (max c 0 * Real.sqrt n * Real.log ((q : ℝ) * n) ^ 2) +
+        2 * Real.sqrt q * Real.sqrt n * Real.log ((q : ℝ) * n) ^ 2 :=
+      add_le_add le_rfl (hbad2.trans hextra)
+    _ = _ := by dsimp [C]; ring
+
+example : (1 : ℕ) ≤ 1 ∧ (2 : ℕ) ≤ 2 ∧ IsUnit (0 : ZMod 1) := by
+  refine ⟨le_rfl, le_rfl, ?_⟩
+  rw [show (0 : ZMod 1) = 1 from Subsingleton.elim _ _]
+  exact isUnit_one
+
+/-- The rational additive coefficients with their constant main term removed have partial sums bounded by C times square root q times square root of n plus one times log squared of q times n plus one. The zero coefficient is corrected to zero. The bound includes cutoffs zero and one.
+Davenport chapter 26 page 147, auxiliary endpoint bookkeeping for P0011 page 100.
+AI wrote the Lean code. -/
+lemma rational_error_all248 (hG : LeanLab.DERZ1997.GRH) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (q : ℕ) [NeZero q] (m : ZMod q), IsUnit m →
+      ∀ n : ℕ,
+      ‖∑ k ∈ Finset.range (n + 1),
+        (ZMod.stdAddChar (m * (k : ZMod q)) * (ArithmeticFunction.vonMangoldt k : ℂ) -
+          (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) +
+          if k = 0 then (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) else 0)‖ ≤
+        C * Real.sqrt q * Real.sqrt ((n : ℝ) + 1) *
+          Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 := by
+  obtain ⟨C, hC, hc⟩ := rational_partial_GRH248 hG
+  refine ⟨C + 2, by positivity, ?_⟩
+  intro q hq m hm n
+  let d : ℂ := (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ)
+  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hs : 1 ≤ Real.sqrt q := by rw [Real.one_le_sqrt]; exact hqR
+  have ht : (1 : ℝ) ≤ q.totient := by exact_mod_cast Nat.totient_pos.mpr (NeZero.pos q)
+  have hd : ‖d‖ ≤ 1 := by
+    dsimp [d]
+    rw [norm_div, Complex.norm_natCast, div_le_one (by linarith : (0 : ℝ) < q.totient)]
+    have hmu : ‖(ArithmeticFunction.moebius q : ℂ)‖ ≤ 1 := by
+      rw [Complex.norm_intCast]
+      exact_mod_cast ArithmeticFunction.abs_moebius_le_one (n := q)
+    exact hmu.trans ht
+  have hsum (n : ℕ) : (∑ k ∈ Finset.range (n + 1),
+      (ZMod.stdAddChar (m * (k : ZMod q)) * (ArithmeticFunction.vonMangoldt k : ℂ) - d +
+        if k = 0 then d else 0)) =
+      (∑ k ∈ Finset.range (n + 1),
+        ZMod.stdAddChar (m * (k : ZMod q)) * (ArithmeticFunction.vonMangoldt k : ℂ)) - d * n := by
+    rw [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+    simp
+    push_cast
+    ring
+  change ‖∑ k ∈ Finset.range (n + 1),
+    (ZMod.stdAddChar (m * (k : ZMod q)) * (ArithmeticFunction.vonMangoldt k : ℂ) - d +
+      if k = 0 then d else 0)‖ ≤ _
+  rcases lt_or_ge n 2 with hn | hn
+  · interval_cases n
+    · simp
+      positivity
+    · have hl : (0.69 : ℝ) ≤ Real.log ((q : ℝ) * 2) := by
+        have h := Real.log_le_log (by norm_num : (0 : ℝ) < 2)
+          (show (2 : ℝ) ≤ (q : ℝ) * 2 by nlinarith)
+        linarith [Real.log_two_gt_d9]
+      have hs2 : (1.4 : ℝ) ≤ Real.sqrt 2 := by
+        nlinarith [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2), Real.sqrt_nonneg (2 : ℝ)]
+      have hC2 : (2 : ℝ) ≤ (C + 2) * Real.sqrt q := by nlinarith
+      have hl2 : (0.4761 : ℝ) ≤ Real.log ((q : ℝ) * 2) ^ 2 := by nlinarith
+      rw [hsum]
+      simp only [Finset.sum_range_succ]
+      simp only [Finset.sum_range_zero, ArithmeticFunction.map_zero,
+        ArithmeticFunction.vonMangoldt_apply_one, Complex.ofReal_zero, mul_zero, add_zero,
+        Nat.cast_one, mul_one, zero_sub, norm_neg]
+      norm_num only [Nat.cast_one, one_add_one_eq_two]
+      have hprod : (2 : ℝ) * 1.4 ≤ (C + 2) * Real.sqrt q * Real.sqrt 2 :=
+        mul_le_mul hC2 hs2 (by norm_num) (by positivity)
+      have hfin := mul_le_mul hprod hl2 (by norm_num : (0 : ℝ) ≤ 0.4761) (by positivity)
+      linarith
+  · rw [hsum]
+    have hb := hc q m hm n hn
+    change ‖_ - d * (n : ℂ)‖ ≤ _ at hb
+    have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn
+    have hlogn : 0 ≤ Real.log ((q : ℝ) * n) := Real.log_nonneg (by nlinarith)
+    have hlog : Real.log ((q : ℝ) * n) ≤ Real.log ((q : ℝ) * ((n : ℝ) + 1)) :=
+      Real.log_le_log (by positivity) (by nlinarith)
+    have hsqrt := Real.sqrt_le_sqrt (show (n : ℝ) ≤ (n : ℝ) + 1 by linarith)
+    apply hb.trans
+    gcongr
+    linarith
+
+example : (∑ k ∈ Finset.range (0 + 1),
+    (ZMod.stdAddChar ((0 : ZMod 1) * (k : ZMod 1)) *
+      (ArithmeticFunction.vonMangoldt k : ℂ) -
+      (ArithmeticFunction.moebius 1 : ℂ) / ((1 : ℕ).totient : ℂ) +
+      if k = 0 then (ArithmeticFunction.moebius 1 : ℂ) / ((1 : ℕ).totient : ℂ) else 0)) = 0 := by
+  simp
+
+/-- For positive N, the difference of consecutive exponentially damped additive weights has norm at most one divided by N plus two pi times absolute beta, multiplied by exp of negative n divided by N.
+Davenport chapter 26 page 146, the partial summation weight for P0011 page 100.
+AI wrote the Lean code. -/
+lemma smoothed_weight_step248 {N : ℝ} (hN : 0 < N) (β : ℝ) (n : ℕ) :
+    ‖LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (Real.exp (-(n : ℝ) / N) : ℂ) -
+      LeanLab.PNTPort.LargeSieve.e (((n + 1 : ℕ) : ℝ) * β) * (Real.exp (-((n + 1 : ℕ) : ℝ) / N) : ℂ)‖ ≤
+      (1 / N + 2 * Real.pi * |β|) * Real.exp (-(n : ℝ) / N) := by
+  let f : ℕ → ℝ := fun n => Real.exp (-(n : ℝ) / N)
+  have hf (n : ℕ) : 0 < f n := Real.exp_pos _
+  have hdec : f (n + 1) ≤ f n := by
+    apply Real.exp_le_exp.mpr
+    change -((n + 1 : ℕ) : ℝ) / N ≤ -(n : ℝ) / N
+    apply div_le_div_of_nonneg_right _ hN.le
+    push_cast
+    linarith
+  have hsplit : f (n + 1) = f n * Real.exp (-(1 / N)) := by
+    dsimp [f]
+    rw [← Real.exp_add]
+    congr 1
+    push_cast
+    ring
+  have hdiff : ‖(f n : ℂ) - (f (n + 1) : ℂ)‖ ≤ f n / N := by
+    rw [← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (sub_nonneg.mpr hdec), hsplit]
+    have he : 1 - Real.exp (-(1 / N)) ≤ 1 / N := by
+      linarith [Real.add_one_le_exp (-(1 / N))]
+    calc
+      _ = f n * (1 - Real.exp (-(1 / N))) := by ring
+      _ ≤ f n * (1 / N) := mul_le_mul_of_nonneg_left he (hf n).le
+      _ = _ := by ring
+  have hid : LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (f n : ℂ) - LeanLab.PNTPort.LargeSieve.e (((n + 1 : ℕ) : ℝ) * β) * (f (n + 1) : ℂ) =
+      LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * ((f n : ℂ) - (f (n + 1) : ℂ)) +
+        (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) - LeanLab.PNTPort.LargeSieve.e (((n + 1 : ℕ) : ℝ) * β)) * (f (n + 1) : ℂ) := by ring
+  change ‖LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (f n : ℂ) - LeanLab.PNTPort.LargeSieve.e (((n + 1 : ℕ) : ℝ) * β) * (f (n + 1) : ℂ)‖ ≤ _
+  rw [hid]
+  calc
+    _ ≤ ‖LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * ((f n : ℂ) - (f (n + 1) : ℂ))‖ +
+        ‖(LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) - LeanLab.PNTPort.LargeSieve.e (((n + 1 : ℕ) : ℝ) * β)) * (f (n + 1) : ℂ)‖ := norm_add_le _ _
+    _ ≤ f n / N + (2 * Real.pi * |β|) * f (n + 1) := by
+      simp only [norm_mul, LeanLab.PNTPort.LargeSieve.norm_e, one_mul, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos (hf (n + 1))]
+      exact add_le_add hdiff (mul_le_mul_of_nonneg_right
+        (LeanLab.PNTPort.Vinogradov.norm_e_sub_succ n β) (hf (n + 1)).le)
+    _ ≤ f n / N + (2 * Real.pi * |β|) * f n := by gcongr
+    _ = _ := by dsimp [f]; ring
+
+example := smoothed_weight_step248 (N := 2) (by norm_num) 1 3
+
+/-- If a complex sequence has square root logarithmic partial sum bounds with nonnegative constant C, and its damped twisted series is summable, that series has norm at most 300 C times one plus two pi absolute beta N times square root N times log squared qN.
+Davenport chapter 26 page 146, discrete partial summation for P0011 page 100. The explicit 300 is a derived auxiliary constant.
+AI wrote the Lean code. -/
+lemma smoothed_bound_of_partial248 {q : ℕ} (hq : 1 ≤ q) {N : ℝ} (hN : 2 ≤ N)
+    (β : ℝ) (a : ℕ → ℂ) {C : ℝ} (hC : 0 ≤ C)
+    (hA : ∀ n : ℕ, ‖∑ k ∈ Finset.range (n + 1), a k‖ ≤
+      C * Real.sqrt ((n : ℝ) + 1) * Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2)
+    (hs : Summable (fun n : ℕ => a n *
+      (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (Real.exp (-(n : ℝ) / N) : ℂ)))) :
+    ‖∑' n : ℕ, a n * (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (Real.exp (-(n : ℝ) / N) : ℂ))‖ ≤
+      300 * C * (1 + 2 * Real.pi * |β| * N) * Real.sqrt N *
+        Real.log ((q : ℝ) * N) ^ 2 := by
+  have hN0 : 0 < N := by linarith
+  have hN1 : 1 ≤ N := by linarith
+  let A : ℕ → ℂ := fun n => ∑ k ∈ Finset.range (n + 1), a k
+  let g : ℕ → ℂ := fun n => LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (Real.exp (-(n : ℝ) / N) : ℂ)
+  let M : ℕ → ℝ := fun n => Real.sqrt ((n : ℝ) + 1) *
+    Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2 * Real.exp (-(n : ℝ) / N)
+  let K : ℝ := C * (1 / N + 2 * Real.pi * |β|)
+  have hK : 0 ≤ K := by dsimp [K]; positivity
+  have hM : Summable M := L1Num.main_sum_summable hN1 hq
+  have hpt (n : ℕ) : ‖A n * (g n - g (n + 1))‖ ≤ K * M n := by
+    rw [norm_mul]
+    calc
+      _ ≤ (C * Real.sqrt ((n : ℝ) + 1) *
+            Real.log ((q : ℝ) * ((n : ℝ) + 1)) ^ 2) *
+          ((1 / N + 2 * Real.pi * |β|) * Real.exp (-(n : ℝ) / N)) := by
+        exact mul_le_mul (hA n) (smoothed_weight_step248 hN0 β n)
+          (norm_nonneg _) (by positivity)
+      _ = _ := by dsimp [K, M]; ring
+  have herr : Summable (fun n => A n * (g n - g (n + 1))) :=
+    Summable.of_norm_bounded (hM.mul_left K) hpt
+  have hboundary : Tendsto (fun n : ℕ => A n * g n) atTop (𝓝 0) := by
+    rw [tendsto_zero_iff_norm_tendsto_zero]
+    have h := tendsto_boundary hq hN1 hC A hA
+    rw [tendsto_zero_iff_norm_tendsto_zero] at h
+    convert h using 1
+    funext n
+    simp [g, norm_mul, LeanLab.PNTPort.LargeSieve.norm_e]
+  have hfin (n : ℕ) : (∑ k ∈ Finset.range (n + 1), a k * g k) =
+      A n * g n + ∑ k ∈ Finset.range n, A k * (g k - g (k + 1)) := by
+    have h := Finset.sum_range_by_parts g a (n + 1)
+    simp only [Nat.add_sub_cancel, smul_eq_mul] at h
+    calc
+      _ = ∑ k ∈ Finset.range (n + 1), g k * a k := by
+        apply Finset.sum_congr rfl
+        intro k hk
+        ring
+      _ = _ := h
+      _ = _ := by
+        dsimp [A]
+        simp only [sub_mul, mul_sub, Finset.sum_sub_distrib, mul_comm]
+        ring
+  have heq : (∑' n : ℕ, a n * g n) = ∑' n : ℕ, A n * (g n - g (n + 1)) := by
+    have h1 := hs.hasSum.tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
+    have h2 := hboundary.add herr.hasSum.tendsto_sum_nat
+    simp only [zero_add] at h2
+    exact tendsto_nhds_unique h1 (h2.congr' (Filter.Eventually.of_forall fun n => (hfin n).symm))
+  change ‖∑' n : ℕ, a n * g n‖ ≤ _
+  rw [heq]
+  have hbd : ‖∑' n : ℕ, A n * (g n - g (n + 1))‖ ≤
+      K * (8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N) := by
+    calc
+      _ ≤ ∑' n : ℕ, ‖A n * (g n - g (n + 1))‖ := norm_tsum_le_tsum_norm herr.norm
+      _ ≤ ∑' n : ℕ, K * M n := Summable.tsum_le_tsum hpt herr.norm (hM.mul_left K)
+      _ = K * ∑' n : ℕ, M n := by rw [tsum_mul_left]
+      _ ≤ _ := mul_le_mul_of_nonneg_left (L1Num.main_sum_le hN hq) hK
+  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  have hlog : (0.69 : ℝ) ≤ Real.log ((q : ℝ) * N) := by
+    have h2 : (2 : ℝ) ≤ (q : ℝ) * N := by nlinarith
+    have h := Real.log_le_log (by norm_num : (0 : ℝ) < 2) h2
+    linarith [Real.log_two_gt_d9]
+  have hnum : (8 * Real.log ((q : ℝ) * N) ^ 2 + 128) ≤
+      300 * Real.log ((q : ℝ) * N) ^ 2 := by nlinarith
+  have he : K * (8 * N * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2 + 128 * N * Real.sqrt N) =
+      C * (1 + 2 * Real.pi * |β| * N) * Real.sqrt N *
+        (8 * Real.log ((q : ℝ) * N) ^ 2 + 128) := by
+    dsimp [K]
+    field_simp [ne_of_gt hN0]
+    <;> ring
+  apply hbd.trans
+  rw [he]
+  calc
+    _ ≤ C * (1 + 2 * Real.pi * |β| * N) * Real.sqrt N *
+        (300 * Real.log ((q : ℝ) * N) ^ 2) :=
+      mul_le_mul_of_nonneg_left hnum (by positivity)
+    _ = _ := by ring
+
+example := smoothed_bound_of_partial248 (q := 1) (N := 2)
+  (by norm_num) (by norm_num) 1 (fun _ => (0 : ℂ)) (C := 0)
+  (by norm_num) (by intro n; simp) (by simp)
+
+/-- For positive N and every real beta, the exponentially damped additive weight is absolutely summable.
+P0011 page 100, the definition of S and the permitted sum manipulations. Mathlib geometric convergence supplies the proof.
+AI wrote the Lean code. -/
+lemma smoothed_weight_summable248 {N : ℝ} (hN : 0 < N) (β : ℝ) :
+    Summable (fun n : ℕ => LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (Real.exp (-(n : ℝ) / N) : ℂ)) := by
+  let r : ℝ := Real.exp (-(1 / N))
+  have hr : ‖r‖ < 1 := by
+    change |Real.exp (-(1 / N))| < 1
+    rw [abs_of_pos (Real.exp_pos _), Real.exp_lt_one_iff]
+    have : 0 < 1 / N := by positivity
+    linarith
+  have hexp (n : ℕ) : Real.exp (-(n : ℝ) / N) = r ^ n := by
+    dsimp [r]
+    rw [← Real.exp_nat_mul]
+    congr 1
+    ring
+  apply Summable.of_norm_bounded (summable_geometric_of_norm_lt_one hr)
+  intro n
+  rw [norm_mul, LeanLab.PNTPort.LargeSieve.norm_e, one_mul, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (Real.exp_pos _), hexp]
+
+example := smoothed_weight_summable248 (N := 2) (by norm_num) 1
+
+/-- For any complex multiplier bounded in norm by one, its von Mangoldt series with exponential damping and an additive twist is absolutely summable for positive N.
+P0011 page 100, the definition of S. This uses the elementary von Mangoldt coefficient bound and geometric convergence.
+AI wrote the Lean code. -/
+lemma smoothed_vonMangoldt_summable248 {N : ℝ} (hN : 0 < N) (β : ℝ)
+    (z : ℕ → ℂ) (hz : ∀ n, ‖z n‖ ≤ 1) :
+    Summable (fun n : ℕ => z n * (ArithmeticFunction.vonMangoldt n : ℂ) *
+      (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * β) * (Real.exp (-(n : ℝ) / N) : ℂ))) := by
+  let r : ℝ := Real.exp (-(1 / N))
+  have hr : ‖r‖ < 1 := by
+    change |Real.exp (-(1 / N))| < 1
+    rw [abs_of_pos (Real.exp_pos _), Real.exp_lt_one_iff]
+    have : 0 < 1 / N := by positivity
+    linarith
+  have hgeom := summable_geometric_of_norm_lt_one hr
+  have hlin := (hasSum_coe_mul_geometric_of_norm_lt_one hr).summable
+  have hs : Summable (fun n : ℕ => ((n : ℝ) + 1) * r ^ n) := by
+    simpa only [add_mul, one_mul] using hlin.add hgeom
+  have hΛ (n : ℕ) : ArithmeticFunction.vonMangoldt n ≤ (n : ℝ) + 1 := by
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst n; simp
+    · have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+      have := ArithmeticFunction.vonMangoldt_le_log (n := n)
+      have := Real.log_le_sub_one_of_pos hn0
+      linarith
+  have hexp (n : ℕ) : Real.exp (-(n : ℝ) / N) = r ^ n := by
+    dsimp [r]
+    rw [← Real.exp_nat_mul]
+    congr 1
+    ring
+  apply Summable.of_norm_bounded hs
+  intro n
+  rw [norm_mul, norm_mul, norm_mul, LeanLab.PNTPort.LargeSieve.norm_e, one_mul, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg,
+    Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _), hexp]
+  have hb : ‖z n‖ * ArithmeticFunction.vonMangoldt n ≤ (n : ℝ) + 1 := by
+    calc
+      _ ≤ 1 * ((n : ℝ) + 1) := mul_le_mul (hz n) (hΛ n)
+        ArithmeticFunction.vonMangoldt_nonneg zero_le_one
+      _ = _ := one_mul _
+  exact mul_le_mul_of_nonneg_right hb (by dsimp [r]; positivity)
+
+example := smoothed_vonMangoldt_summable248 (N := 2) (by norm_num) 1
+  (fun _ => (1 : ℂ)) (by intro n; simp)
+
+/-- The standard additive character at a times n modulo q equals the complex exponential with frequency a n divided by q. Negative a and modulus one are included.
+Davenport chapter 9 page 65 and the exponential convention on P0011 page 100. This is a Mathlib encoding bridge.
+AI wrote the Lean code. -/
+lemma stdAddChar_mul_int248 {q : ℕ} [NeZero q] (a : ℤ) (n : ℕ) :
+    ZMod.stdAddChar ((a : ZMod q) * (n : ZMod q)) =
+      LeanLab.PNTPort.LargeSieve.e ((a : ℝ) * n / q) := by
+  have h := ZMod.stdAddChar_coe (N := q) (a * (n : ℤ))
+  simp only [Int.cast_mul, Int.cast_natCast] at h
+  rw [h]
+  unfold LeanLab.PNTPort.LargeSieve.e
+  congr 1
+  push_cast
+  ring
+
+example := stdAddChar_mul_int248 (q := 4) (-1) 3
+
+/-- The weighted sum S is unchanged when any integer is added to alpha. This holds for every real damping parameter.
+P0011 page 100, the definition of S and the shifted circle integral. This is auxiliary periodicity from the integer frequency convention.
+AI wrote the Lean code. -/
+lemma SW_add_int248 (N α : ℝ) (m : ℤ) : SW N (α + m) = SW N α := by
+  unfold SW
+  apply tsum_congr
+  intro n
+  push_cast
+  have harg : -(2 * Real.pi * I * (α + m) * n) =
+      -(2 * Real.pi * I * α * n) + (((-m * (n : ℤ) : ℤ) : ℂ) * (2 * Real.pi * I)) := by
+    push_cast
+    ring
+  rw [harg, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+example := SW_add_int248 9 (1 / 3) (-1)
+
+/-- For natural N, the cubic circle integrand S cubed times exp of two pi i alpha N is unchanged by every integer shift of alpha.
+P0011 page 100, the circle integral preceding the major arc subdivision. This is the periodicity calculation underlying the shifted interval.
+AI wrote the Lean code. -/
+lemma circle_kernel_add_int248 (N : ℕ) (α : ℝ) (m : ℤ) :
+    SW N (α + m) ^ 3 * Complex.exp (2 * Real.pi * I * (α + m) * N) =
+      SW N α ^ 3 * Complex.exp (2 * Real.pi * I * α * N) := by
+  rw [SW_add_int248]
+  have harg : 2 * Real.pi * I * (α + m) * N =
+      2 * Real.pi * I * α * N + (((m * (N : ℤ) : ℤ) : ℂ) * (2 * Real.pi * I)) := by
+    push_cast
+    ring
+  rw [harg, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+example := circle_kernel_add_int248 9 (1 / 3) (-1)
+
+/-- For every natural N and real w, integrating the cubic circle integrand over negative w through one minus w gives the same value as integrating over zero through one.
+P0011 page 100, the shifted interval in the circle integral. Reuses Mathlib Function.Periodic.intervalIntegral_add_eq. This identity alone does not identify the integral with the prime-triple count or bound its remainder.
+AI wrote the Lean code. -/
+lemma circle_integral_shift248 (N : ℕ) (w : ℝ) :
+    (∫ α : ℝ in (-w)..(1 - w),
+      SW N α ^ 3 * Complex.exp (2 * Real.pi * I * α * N)) =
+      ∫ α : ℝ in (0 : ℝ)..1,
+        SW N α ^ 3 * Complex.exp (2 * Real.pi * I * α * N) := by
+  have hperiod : Function.Periodic (fun α : ℝ =>
+      SW N α ^ 3 * Complex.exp (2 * Real.pi * I * α * N)) 1 := by
+    intro α
+    simpa only [Int.cast_one, Complex.ofReal_add, Complex.ofReal_one] using circle_kernel_add_int248 N α 1
+  simpa only [zero_add, show -w + 1 = 1 - w by ring] using
+    hperiod.intervalIntegral_add_eq (-w) 0
+
+example := circle_integral_shift248 9 (1 / 7)
+
 /-- LEAF. Major arcs under GRH: there is an absolute `c` such that for `q ≥ 1`, `a` coprime
 to `q`, real `β` and `N ≥ 2`,
 `|S(a/q + β) - (μ(q)/φ(q)) ∑_{n ≥ 0} e^{-2πiβn} e^{-n/N}| ≤ c √q (1 + |β| N) √N log²(qN)`.
@@ -1434,7 +2035,129 @@ theorem major_arc_GRH : GRH → ∃ c : ℝ, ∀ (q : ℕ) (a : ℤ), 1 ≤ q �
       ‖SW N (a / q + β) - ((ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ)) *
           ∑' n : ℕ, Complex.exp (-(2 * Real.pi * I * β * n)) * (Real.exp (-n / N) : ℂ)‖ ≤
         c * √q * (1 + |β| * N) * √N * Real.log (q * N) ^ 2 := by
-  sorry
+  intro hG
+  obtain ⟨C, hC, hpartial⟩ := rational_error_all248 hG
+  refine ⟨(300 * C + 3) * (1 + 2 * Real.pi), ?_⟩
+  intro q a hq hcop β N hN
+  letI : NeZero q := ⟨by omega⟩
+  have hN0 : 0 < N := by linarith
+  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  let m : ZMod q := -(a : ZMod q)
+  have hm : IsUnit m := by
+    exact ((ZMod.coe_int_isUnit_iff_isCoprime a q).mpr
+      (Int.isCoprime_iff_gcd_eq_one.mpr hcop).symm).neg
+  let d : ℂ := (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ)
+  let z : ℕ → ℂ := fun n => ZMod.stdAddChar (m * (n : ZMod q))
+  let g : ℕ → ℂ := fun n => LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * (-β)) * (Real.exp (-(n : ℝ) / N) : ℂ)
+  let f : ℕ → ℂ := fun n => z n * (ArithmeticFunction.vonMangoldt n : ℂ) - d +
+    if n = 0 then d else 0
+  have ht : (1 : ℝ) ≤ q.totient := by exact_mod_cast Nat.totient_pos.mpr (NeZero.pos q)
+  have hd : ‖d‖ ≤ 1 := by
+    dsimp [d]
+    rw [norm_div, Complex.norm_natCast, div_le_one (by linarith : (0 : ℝ) < q.totient)]
+    have hmu : ‖(ArithmeticFunction.moebius q : ℂ)‖ ≤ 1 := by
+      rw [Complex.norm_intCast]
+      exact_mod_cast ArithmeticFunction.abs_moebius_le_one (n := q)
+    exact hmu.trans ht
+  have hz (n : ℕ) : ‖z n‖ ≤ 1 := by
+    exact le_of_eq (Circle.norm_coe (ZMod.toCircle _))
+  have hs0 : Summable (fun n => z n * (ArithmeticFunction.vonMangoldt n : ℂ) * g n) :=
+    smoothed_vonMangoldt_summable248 hN0 (-β) z hz
+  have hsg : Summable g := smoothed_weight_summable248 hN0 (-β)
+  have hsd : Summable (fun n => d * g n) := hsg.mul_left d
+  have hsi : Summable (fun n : ℕ => if n = 0 then d else 0) := (hasSum_ite_eq 0 d).summable
+  have hpoint (n : ℕ) : f n * g n =
+      z n * (ArithmeticFunction.vonMangoldt n : ℂ) * g n - d * g n +
+        if n = 0 then d else 0 := by
+    by_cases hn : n = 0
+    · subst n
+      simp [f, g, LeanLab.PNTPort.LargeSieve.e_zero]
+    · simp only [f, if_neg hn, add_zero]
+      ring
+  have hsf : Summable (fun n => f n * g n) :=
+    ((hs0.sub hsd).add hsi).congr (fun n => (hpoint n).symm)
+  have hphase (n : ℕ) : z n * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * (-β)) =
+      Complex.exp (-(2 * Real.pi * I * (a / q + β) * n)) := by
+    dsimp [z, m]
+    rw [show (-(a : ZMod q)) = ((-a : ℤ) : ZMod q) by simp,
+      stdAddChar_mul_int248]
+    unfold LeanLab.PNTPort.LargeSieve.e
+    rw [← Complex.exp_add]
+    congr 1
+    push_cast
+    ring
+  have hbasephase (n : ℕ) : LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * (-β)) =
+      Complex.exp (-(2 * Real.pi * I * β * n)) := by
+    unfold LeanLab.PNTPort.LargeSieve.e
+    congr 1
+    push_cast
+    ring
+  have hSW : (∑' n : ℕ, z n * (ArithmeticFunction.vonMangoldt n : ℂ) * g n) =
+      SW N (a / q + β) := by
+    unfold SW
+    apply tsum_congr
+    intro n
+    dsimp [g]
+    rw [show z n * (ArithmeticFunction.vonMangoldt n : ℂ) *
+          (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * (-β)) * (Real.exp (-(n : ℝ) / N) : ℂ)) =
+        (ArithmeticFunction.vonMangoldt n : ℂ) * (z n * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * (-β))) *
+          (Real.exp (-(n : ℝ) / N) : ℂ) by ring, hphase]
+    push_cast
+    rfl
+  have heq : (∑' n : ℕ, f n * g n) = SW N (a / q + β) -
+      d * (∑' n : ℕ, Complex.exp (-(2 * Real.pi * I * β * n)) *
+        (Real.exp (-(n : ℝ) / N) : ℂ)) + d := by
+    simp_rw [hpoint]
+    rw [Summable.tsum_add (hs0.sub hsd) hsi, Summable.tsum_sub hs0 hsd,
+      tsum_mul_left, hSW, tsum_ite_eq]
+    simp_rw [g, hbasephase]
+  have hb := smoothed_bound_of_partial248 hq hN (-β) f
+    (C := C * Real.sqrt q) (by positivity) (hpartial q m hm) hsf
+  simp only [abs_neg] at hb
+  have hnorm : ‖SW N (a / q + β) - d *
+      ∑' n : ℕ, Complex.exp (-(2 * Real.pi * I * β * n)) *
+        (Real.exp (-(n : ℝ) / N) : ℂ)‖ ≤
+      300 * (C * Real.sqrt q) * (1 + 2 * Real.pi * |β| * N) * Real.sqrt N *
+        Real.log ((q : ℝ) * N) ^ 2 + 1 := by
+    have he : SW N (a / q + β) - d *
+        (∑' n : ℕ, Complex.exp (-(2 * Real.pi * I * β * n)) *
+          (Real.exp (-(n : ℝ) / N) : ℂ)) = (∑' n : ℕ, f n * g n) - d := by
+      rw [heq]
+      ring
+    rw [he]
+    exact (norm_sub_le _ _).trans (add_le_add hb hd)
+  have hlog : (0.69 : ℝ) ≤ Real.log ((q : ℝ) * N) := by
+    have h := Real.log_le_log (by norm_num : (0 : ℝ) < 2)
+      (show (2 : ℝ) ≤ (q : ℝ) * N by nlinarith)
+    linarith [Real.log_two_gt_d9]
+  have hlog2 : (0.4761 : ℝ) ≤ Real.log ((q : ℝ) * N) ^ 2 := by nlinarith
+  have hsN : 1 ≤ Real.sqrt N := by rw [Real.one_le_sqrt]; linarith
+  have hsq : 1 ≤ Real.sqrt q := by rw [Real.one_le_sqrt]; exact hqR
+  let X : ℝ := Real.sqrt q * Real.sqrt N * Real.log ((q : ℝ) * N) ^ 2
+  let t : ℝ := |β| * N
+  have hX : 0 ≤ X := by dsimp [X]; positivity
+  have ht0 : 0 ≤ t := by dsimp [t]; positivity
+  have hone : 1 ≤ 3 * X := by
+    have hp : 1 ≤ Real.sqrt q * Real.sqrt N := one_le_mul_of_one_le_of_one_le hsq hsN
+    have hL : Real.log ((q : ℝ) * N) ^ 2 ≤ X := by
+      dsimp [X]
+      nlinarith [mul_le_mul_of_nonneg_right hp (sq_nonneg (Real.log ((q : ℝ) * N)))]
+    linarith
+  have hfactor : 1 + 2 * Real.pi * t ≤ (1 + 2 * Real.pi) * (1 + t) := by
+    nlinarith [Real.pi_pos]
+  have hfactor1 : 1 ≤ (1 + 2 * Real.pi) * (1 + t) := by nlinarith [Real.pi_pos]
+  apply hnorm.trans
+  change 300 * (C * Real.sqrt q) * (1 + 2 * Real.pi * |β| * N) * Real.sqrt N *
+      Real.log ((q : ℝ) * N) ^ 2 + 1 ≤ _
+  calc
+    _ = 300 * C * (1 + 2 * Real.pi * t) * X + 1 := by dsimp [X, t]; ring
+    _ ≤ 300 * C * ((1 + 2 * Real.pi) * (1 + t)) * X +
+        3 * ((1 + 2 * Real.pi) * (1 + t)) * X := by
+      apply add_le_add
+      · exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hfactor (by positivity)) hX
+      · have hh : 3 * X ≤ 3 * ((1 + 2 * Real.pi) * (1 + t)) * X := by nlinarith
+        exact hone.trans hh
+    _ = _ := by dsimp [X, t]; ring
 
 /-- LEAF. Vinogradov-Vaughan minor arc bound, unconditional: there is an absolute `c` such
 that for `N ≥ 2`, `q ≥ 1`, `a` coprime to `q`, `|α - a/q| ≤ 1/q²`,
@@ -1445,7 +2168,103 @@ theorem vaughan_minor_arc : ∃ c : ℝ, ∀ N : ℕ, 2 ≤ N → ∀ (α : ℝ)
       ‖∑ n ∈ Finset.Icc 1 N, (ArithmeticFunction.vonMangoldt n : ℂ) *
           Complex.exp (2 * Real.pi * I * α * n)‖ ≤
         c * ((N : ℝ) / √q + (N : ℝ) ^ ((4 : ℝ) / 5) + √(N * q)) * Real.log N ^ 4 := by
-  sorry
+  refine ⟨24300, ?_⟩
+  intro N hN α a q hq hcop hα
+  have hlogfactor : (1 + Real.log N) ^ 4 ≤ 81 * Real.log N ^ 4 := by
+    have hlog : (1 : ℝ) / 2 ≤ Real.log N := by
+      have h := Real.log_le_log (by norm_num : (0 : ℝ) < 2)
+        (show (2 : ℝ) ≤ N by exact_mod_cast hN)
+      linarith [Real.log_two_gt_d9]
+    have h := pow_le_pow_left₀ (by positivity : (0 : ℝ) ≤ 1 + Real.log N)
+      (show 1 + Real.log N ≤ 3 * Real.log N by linarith) 4
+    nlinarith [h]
+  have htrivial : ‖∑ n ∈ Finset.Icc 1 N, (ArithmeticFunction.vonMangoldt n : ℂ) *
+      Complex.exp (2 * Real.pi * I * α * n)‖ ≤ 6 * N := by
+    have he (n : ℕ) : ‖Complex.exp (2 * Real.pi * I * α * n)‖ = 1 := by
+      rw [Complex.norm_exp]
+      simp
+    have hψ := Chebyshev.psi_le_const_mul_self (x := (N : ℝ)) (by positivity)
+    rw [Chebyshev.psi, Nat.floor_natCast] at hψ
+    have hI : Finset.Ioc 0 N = Finset.Icc 1 N := by ext n; simp; omega
+    rw [hI] at hψ
+    have h4 : Real.log 4 + 4 ≤ 6 := by
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+      norm_num
+      linarith [Real.log_two_lt_d9]
+    calc
+      _ ≤ ∑ n ∈ Finset.Icc 1 N, ‖(ArithmeticFunction.vonMangoldt n : ℂ) *
+        Complex.exp (2 * Real.pi * I * α * n)‖ := norm_sum_le _ _
+      _ = ∑ n ∈ Finset.Icc 1 N, ArithmeticFunction.vonMangoldt n := by
+        apply Finset.sum_congr rfl
+        intro n hn
+        rw [norm_mul, he, mul_one, Complex.norm_real, Real.norm_eq_abs,
+          abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg]
+      _ ≤ (Real.log 4 + 4) * N := hψ
+      _ ≤ 6 * N := mul_le_mul_of_nonneg_right h4 (by positivity)
+  have hN0 : (0 : ℝ) ≤ N := by positivity
+  have hq0 : (0 : ℝ) ≤ q := by positivity
+  have hX0 : 0 ≤ (N : ℝ) / Real.sqrt q + (N : ℝ) ^ ((4 : ℝ) / 5) +
+      Real.sqrt (N * q) := by positivity
+  by_cases hqN : q ≤ N
+  · have h := LeanLab.PNTPort.Vinogradov.vinogradov_minor hq
+      (Int.isCoprime_iff_gcd_eq_one.mpr hcop) hα hqN
+    have hS : LeanLab.PNTPort.Vinogradov.S N α =
+        ∑ n ∈ Finset.Icc 1 N, (ArithmeticFunction.vonMangoldt n : ℂ) *
+          Complex.exp (2 * Real.pi * I * α * n) := by
+      unfold LeanLab.PNTPort.Vinogradov.S
+      apply Finset.sum_congr rfl
+      intro n hn
+      unfold LeanLab.PNTPort.LargeSieve.e
+      congr 2
+      push_cast
+      ring
+    rw [hS] at h
+    have hp := mul_le_mul_of_nonneg_left hlogfactor
+      (show 0 ≤ 300 * ((N : ℝ) / Real.sqrt q + (N : ℝ) ^ ((4 : ℝ) / 5) +
+        Real.sqrt (N * q)) by positivity)
+    calc
+      _ ≤ _ := h
+      _ ≤ _ := hp
+      _ = _ := by ring
+  · have hNq : (N : ℝ) ≤ q := by exact_mod_cast (Nat.le_of_lt (Nat.lt_of_not_ge hqN))
+    have hNs : (N : ℝ) ≤ Real.sqrt (N * q) := by
+      rw [Real.le_sqrt hN0 (mul_nonneg hN0 hq0)]
+      nlinarith
+    have hNX : (N : ℝ) ≤ (N : ℝ) / Real.sqrt q +
+        (N : ℝ) ^ ((4 : ℝ) / 5) + Real.sqrt (N * q) := by
+      linarith [div_nonneg hN0 (Real.sqrt_nonneg (q : ℝ)),
+        Real.rpow_nonneg hN0 ((4 : ℝ) / 5)]
+    have hl : (1 : ℝ) / 2 ≤ Real.log N := by
+      have h := Real.log_le_log (by norm_num : (0 : ℝ) < 2)
+        (show (2 : ℝ) ≤ N by exact_mod_cast hN)
+      linarith [Real.log_two_gt_d9]
+    have hp : (1 : ℝ) / 16 ≤ Real.log N ^ 4 := by
+      have := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1 / 2) hl 4
+      norm_num at this
+      exact this
+    have hscale : (6 : ℝ) ≤ 24300 * Real.log N ^ 4 := by linarith
+    calc
+      _ ≤ 6 * (N : ℝ) := htrivial
+      _ ≤ 6 * ((N : ℝ) / Real.sqrt q + (N : ℝ) ^ ((4 : ℝ) / 5) +
+          Real.sqrt (N * q)) := mul_le_mul_of_nonneg_left hNX (by norm_num)
+      _ ≤ (24300 * Real.log N ^ 4) * ((N : ℝ) / Real.sqrt q +
+          (N : ℝ) ^ ((4 : ℝ) / 5) + Real.sqrt (N * q)) :=
+        mul_le_mul_of_nonneg_right hscale hX0
+      _ = _ := by ring
+
+/-! Additional nonzero and composite-modulus instances for task248. -/
+
+example := gauss_aggregate_bound248 (q := 4) (1 : ZMod 4)
+  (fun _ => (1 : ℂ)) (B := 1) (by norm_num) (by intro χ; simp)
+
+example := (Classical.choose_spec vaughan_minor_arc)
+  2 (by norm_num) (1 / 5) 1 5 (by norm_num) (by norm_num) (by norm_num)
+
+example := (Classical.choose_spec vaughan_minor_arc)
+  9 (by norm_num) (1 / 3) 1 3 (by norm_num) (by norm_num) (by norm_num)
+
+example (hG : GRH) := (Classical.choose_spec (major_arc_GRH hG))
+  4 1 (by norm_num) (by norm_num) (1 / 7) 9 (by norm_num)
 
 /-! ### Vacuity -/
 

@@ -6,6 +6,7 @@ import LeanLab.PNTSieve.MertensLower
 import LeanLab.PNTSieve.BrunPure
 import LeanLab.Ricci1937.Tau23
 import LeanLab.Ricci1937.Section2
+import LeanLab.Ricci1937.SigmaBar
 import LeanLab.PNTSieve.BrunBlocksRel
 import LeanLab.SchnirelmannGoldbach.PureSieve
 
@@ -1601,6 +1602,1097 @@ lemma decompJ365_esymm_two (x : ℕ → ℝ) (P : Finset ℕ) :
   | insert a P ha ih =>
     rw [esymm_succ_insert x ha 1, hone, sum_insert ha, sum_insert ha]
     nlinarith
+
+/-- Second memoir page 95, auxiliary symmetric sum recurrence.
+Marking one element of a subset counts each subset once per element. -/
+lemma decompJ365_esymm_erase_sum (x : ℕ → ℝ) (P : Finset ℕ) (r : ℕ) :
+    (∑ p ∈ P, x p * esymm x (P.erase p) r) = (r + 1) * esymm x P (r + 1) := by
+  induction P using Finset.induction_on generalizing r with
+  | empty => simp [esymm_empty_succ]
+  | insert a P ha ih =>
+    cases r with
+    | zero =>
+      simp only [esymm_zero, mul_one, Nat.cast_zero, zero_add, one_mul]
+      have hone (Q : Finset ℕ) : esymm x Q 1 = ∑ p ∈ Q, x p := by
+        induction Q using Finset.induction_on with
+        | empty => simp [esymm_empty_succ]
+        | insert b Q hb hih => rw [esymm_succ_insert x hb 0, esymm_zero, hih, sum_insert hb]; ring
+      exact (hone _).symm
+    | succ r =>
+      rw [sum_insert ha, erase_insert ha, esymm_succ_insert x ha (r + 1)]
+      have he (p : ℕ) (hp : p ∈ P) :
+          esymm x ((insert a P).erase p) (r + 1) =
+            esymm x (P.erase p) (r + 1) + x a * esymm x (P.erase p) r := by
+        rw [erase_insert_of_ne (ne_of_mem_of_not_mem hp ha).symm,
+          esymm_succ_insert x (fun h => ha (mem_of_mem_erase h))]
+      have hsums : (∑ p ∈ P, x p * esymm x ((insert a P).erase p) (r + 1)) =
+          ∑ p ∈ P, (x p * esymm x (P.erase p) (r + 1) + x p * (x a * esymm x (P.erase p) r)) := by
+        apply sum_congr rfl
+        intro p hp
+        rw [he p hp, mul_add]
+      rw [hsums, sum_add_distrib]
+      rw [ih (r + 1)]
+      have hs : (∑ p ∈ P, x p * (x a * esymm x (P.erase p) r)) =
+          x a * ((r + 1) * esymm x P (r + 1)) := by
+        rw [← ih r, mul_sum]
+        apply sum_congr rfl
+        intro p hp
+        ring
+      rw [hs]
+      push_cast
+      ring
+
+/-- Second memoir page 95, auxiliary symmetric sum collision estimate. -/
+lemma decompJ365_esymm_collision_identity (x : ℕ → ℝ) (P : Finset ℕ) (r : ℕ) :
+    (∑ p ∈ P, x p) * esymm x P (r + 1) =
+      (r + 2) * esymm x P (r + 2) +
+        ∑ p ∈ P, (x p) ^ 2 * esymm x (P.erase p) r := by
+  have hsplit (p : ℕ) (hp : p ∈ P) :
+      esymm x P (r + 1) = esymm x (P.erase p) (r + 1) +
+        x p * esymm x (P.erase p) r := by
+    simpa only [insert_erase hp] using
+      esymm_succ_insert x (notMem_erase p P) r
+  rw [sum_mul]
+  calc
+    _ = ∑ p ∈ P, (x p * esymm x (P.erase p) (r + 1) +
+        (x p) ^ 2 * esymm x (P.erase p) r) := by
+      apply sum_congr rfl
+      intro p hp
+      rw [hsplit p hp]
+      ring
+    _ = _ := by
+      rw [sum_add_distrib, decompJ365_esymm_erase_sum]
+      rw [show r + 1 + 1 = r + 2 by omega]
+      push_cast
+      ring
+
+/-- Second memoir page 95, auxiliary symmetric sum collision estimate. -/
+lemma decompJ365_esymm_collision_bound (x : ℕ → ℝ) (hx : ∀ p, 0 ≤ x p)
+    (P : Finset ℕ) (r : ℕ) :
+    (r.factorial : ℝ) * (∑ p ∈ P, (x p) ^ 2 * esymm x (P.erase p) r) ≤
+      (∑ p ∈ P, (x p) ^ 2) * (∑ p ∈ P, x p) ^ r := by
+  rw [mul_sum, sum_mul]
+  apply sum_le_sum
+  intro p hp
+  have hs : (∑ q ∈ P.erase p, x q) ≤ ∑ q ∈ P, x q := by
+    exact sum_le_sum_of_subset_of_nonneg (erase_subset p P) (fun q _ _ => hx q)
+  have hpow : (∑ q ∈ P.erase p, x q) ^ r ≤ (∑ q ∈ P, x q) ^ r :=
+    pow_le_pow_left₀ (sum_nonneg fun q _ => hx q) hs r
+  have he := (factorial_mul_esymm_le x hx (P.erase p) r).trans hpow
+  nlinarith [mul_le_mul_of_nonneg_left he (sq_nonneg (x p))]
+
+/-- Second memoir page 95, auxiliary symmetric sum collision estimate. -/
+lemma decompJ365_esymm_lower_add_two (x : ℕ → ℝ) (hx : ∀ p, 0 ≤ x p)
+    (P : Finset ℕ) (r : ℕ) :
+    (∑ p ∈ P, x p) ^ (r + 2) - ((r + 2).choose 2 : ℝ) *
+      (∑ p ∈ P, x p) ^ r * (∑ p ∈ P, (x p) ^ 2) ≤
+        ((r + 2).factorial : ℝ) * esymm x P (r + 2) := by
+  have ht : 0 ≤ ∑ p ∈ P, x p := sum_nonneg fun p _ => hx p
+  induction r with
+  | zero =>
+    have hrec := decompJ365_esymm_collision_identity x P 0
+    have hone := decompJ365_esymm_erase_sum x P 0
+    simp only [esymm_zero, mul_one, Nat.cast_zero, zero_add, one_mul] at hone
+    norm_num [esymm_zero] at hrec ⊢
+    rw [← hone] at hrec
+    nlinarith
+  | succ r ih =>
+    have hrec := decompJ365_esymm_collision_identity x P (r + 1)
+    have hbound := decompJ365_esymm_collision_bound x hx P (r + 1)
+    have hmul := mul_le_mul_of_nonneg_left ih ht
+    have hmul' := mul_le_mul_of_nonneg_left hbound (show (0 : ℝ) ≤ r + 2 by positivity)
+    have hchoose : ((r + 1 + 2).choose 2 : ℝ) = ((r + 2).choose 2 : ℝ) + (r + 2) := by
+      rw [show r + 1 + 2 = (r + 2) + 1 by omega, Nat.choose_succ_succ']
+      simp only [Nat.choose_one_right, Nat.cast_add]
+      ring
+    have hf : ((r + 2).factorial : ℝ) = (r + 2) * ((r + 1).factorial : ℝ) := by
+      rw [Nat.factorial_succ]
+      push_cast
+      ring
+    have hf' : ((r + 1 + 2).factorial : ℝ) =
+        (r + 3) * ((r + 2).factorial : ℝ) := by
+      rw [show r + 1 + 2 = (r + 2) + 1 by omega, Nat.factorial_succ]
+      push_cast
+      ring
+    have hc : ((r + 2).factorial : ℝ) *
+        (∑ p ∈ P, (x p) ^ 2 * esymm x (P.erase p) (r + 1)) ≤
+          (r + 2) * ((∑ p ∈ P, (x p) ^ 2) * (∑ p ∈ P, x p) ^ (r + 1)) := by
+      calc
+        _ = (r + 2) * (((r + 1).factorial : ℝ) *
+            (∑ p ∈ P, (x p) ^ 2 * esymm x (P.erase p) (r + 1))) := by rw [hf]; ring
+        _ ≤ _ := hmul'
+    calc
+      _ = (∑ p ∈ P, x p) * ((∑ p ∈ P, x p) ^ (r + 2) -
+          ((r + 2).choose 2 : ℝ) * (∑ p ∈ P, x p) ^ r * (∑ p ∈ P, (x p) ^ 2)) -
+            (r + 2) * ((∑ p ∈ P, (x p) ^ 2) * (∑ p ∈ P, x p) ^ (r + 1)) := by
+        rw [hchoose]
+        ring
+      _ ≤ (∑ p ∈ P, x p) * (((r + 2).factorial : ℝ) * esymm x P (r + 2)) -
+          ((r + 2).factorial : ℝ) *
+            (∑ p ∈ P, (x p) ^ 2 * esymm x (P.erase p) (r + 1)) := sub_le_sub hmul hc
+      _ = _ := by
+        rw [hf']
+        have hrec' := congrArg (fun z : ℝ => ((r + 2).factorial : ℝ) * z) hrec
+        simp only [Nat.cast_add, Nat.cast_one] at hrec'
+        rw [show r + 1 + 1 = r + 2 by omega] at hrec'
+        linear_combination hrec'
+
+/-- Second memoir page 95, auxiliary symmetric sum collision estimate. -/
+lemma decompJ365_esymm_bounds (x : ℕ → ℝ) (hx : ∀ p, 0 ≤ x p)
+    (P : Finset ℕ) (r : ℕ) :
+    (∑ p ∈ P, x p) ^ r - (r.choose 2 : ℝ) *
+      (∑ p ∈ P, x p) ^ (r - 2) * (∑ p ∈ P, (x p) ^ 2) ≤
+        (r.factorial : ℝ) * esymm x P r ∧
+      (r.factorial : ℝ) * esymm x P r ≤ (∑ p ∈ P, x p) ^ r := by
+  refine ⟨?_, factorial_mul_esymm_le x hx P r⟩
+  rcases r with _ | r
+  · simp [esymm_zero]
+  rcases r with _ | r
+  · have h := decompJ365_esymm_erase_sum x P 0
+    simpa [esymm_zero] using h.le
+  · simpa using decompJ365_esymm_lower_add_two x hx P r
+
+/-- Second memoir page 95, auxiliary symmetric sum collision estimate. -/
+lemma decompJ365_esymm_approx (x : ℕ → ℝ) (hx : ∀ p, 0 ≤ x p)
+    (P : Finset ℕ) (r : ℕ) :
+    |esymm x P r - (∑ p ∈ P, x p) ^ r / (r.factorial : ℝ)| ≤
+      (r.choose 2 : ℝ) * (∑ p ∈ P, x p) ^ (r - 2) *
+        (∑ p ∈ P, (x p) ^ 2) / (r.factorial : ℝ) := by
+  obtain ⟨hl, hu⟩ := decompJ365_esymm_bounds x hx P r
+  have hf : (0 : ℝ) < r.factorial := by exact_mod_cast Nat.factorial_pos r
+  rw [abs_sub_comm, abs_of_nonneg (sub_nonneg.mpr ((le_div_iff₀ hf).mpr (by nlinarith)))]
+  apply (le_div_iff₀ hf).mpr
+  rw [sub_mul, div_mul_cancel₀ _ hf.ne']
+  nlinarith
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_pair_block_square_upper (h y w : ℕ) (hy : 0 < y) :
+    (∑ p ∈ (Ioc y w).filter Nat.Prime, (nuN h p) ^ 2) ≤
+      (2 / (y : ℝ)) * ∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p := by
+  rw [mul_sum]
+  apply sum_le_sum
+  intro p hp
+  obtain ⟨hpI, hpP⟩ := mem_filter.mp hp
+  have hyp : (y : ℝ) ≤ p := by exact_mod_cast (mem_Ioc.mp hpI).1.le
+  have hyR : (0 : ℝ) < y := by exact_mod_cast hy
+  have hpR : (0 : ℝ) < p := hyR.trans_le hyp
+  have hnu : nuN h p ≤ 2 / (y : ℝ) := by
+    rw [nuN_prime hpP]
+    exact (div_le_div_of_nonneg_right (wt_le_two h p) hpR.le).trans
+      (div_le_div_of_nonneg_left (by norm_num) hyR hyp)
+  nlinarith [mul_le_mul_of_nonneg_right hnu (nuN_nonneg h p)]
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_pair_block_square_eventually (θ ε : ℝ) (hε : 0 < ε) :
+    ∃ Y : ℕ, 2 ≤ Y ∧ ∀ h y w : ℕ, Y ≤ y → y ≤ w →
+      Real.log w ≤ Real.exp (θ / 2) * Real.log y →
+        (∑ p ∈ (Ioc y w).filter Nat.Prime, (nuN h p) ^ 2) ≤ ε := by
+  obtain ⟨Y₁, hY₁, hm⟩ := decompJ365_pair_block_mass_eventually θ 1 (by norm_num)
+  obtain ⟨Y₂, hY₂⟩ := exists_nat_ge (2 * max (θ + 1) 0 / ε)
+  refine ⟨max Y₁ Y₂, le_trans hY₁ (le_max_left _ _), ?_⟩
+  intro h y w hy hyw hr
+  have hy2 : 2 ≤ y := hY₁.trans ((le_max_left _ _).trans hy)
+  have hyR : (0 : ℝ) < y := by exact_mod_cast (by omega : 0 < y)
+  have hm' := hm h y w ((le_max_left _ _).trans hy) hyw hr
+  have hlarge : 2 * max (θ + 1) 0 / ε ≤ (y : ℝ) :=
+    hY₂.trans (by exact_mod_cast ((le_max_right Y₁ Y₂).trans hy))
+  calc
+    _ ≤ 2 / (y : ℝ) * (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) :=
+      decompJ365_pair_block_square_upper h y w (by omega)
+    _ ≤ 2 / (y : ℝ) * max (θ + 1) 0 :=
+      mul_le_mul_of_nonneg_left (hm'.trans (le_max_left _ _)) (by positivity)
+    _ ≤ ε := by
+      rw [div_mul_eq_mul_div, div_le_iff₀ hyR]
+      have hh := (div_le_iff₀ hε).mp hlarge
+      nlinarith
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_nested_layer_bound (S : Finset ℕ) (f : ℕ → ℝ) (u : ℕ → ℝ)
+    (hu : ∀ i, u (i + 1) ≤ u i) (hf : ∀ p ∈ S, f p ≤ u 0) (n : ℕ) :
+    (∑ p ∈ S, f p) ≤ (S.card : ℝ) * u n +
+      ∑ i ∈ range n, (u i - u (i + 1)) * (S.filter (fun p => u (i + 1) < f p)).card := by
+  have hpoint (a : ℝ) (ha : a ≤ u 0) (k : ℕ) :
+      a ≤ u k + ∑ i ∈ range k, if u (i + 1) < a then u i - u (i + 1) else 0 := by
+    induction k with
+    | zero => simpa using ha
+    | succ k ih =>
+      rw [sum_range_succ]
+      by_cases h : u (k + 1) < a
+      · rw [ite_eq_left h]
+        linarith
+      · rw [ite_eq_right h, add_zero]
+        have hsum : 0 ≤ ∑ i ∈ range k,
+            if u (i + 1) < a then u i - u (i + 1) else 0 := by
+          apply sum_nonneg
+          intro i hi
+          split_ifs
+          · exact sub_nonneg.mpr (hu i)
+          · exact le_rfl
+        linarith
+  calc
+    _ ≤ ∑ p ∈ S, (u n + ∑ i ∈ range n,
+        if u (i + 1) < f p then u i - u (i + 1) else 0) :=
+      sum_le_sum (fun p hp => hpoint (f p) (hf p hp) n)
+    _ = _ := by
+      rw [sum_add_distrib, sum_const, nsmul_eq_mul, sum_comm]
+      congr 1
+      apply sum_congr rfl
+      intro i hi
+      rw [← sum_filter]
+      simp only [sum_const, nsmul_eq_mul]
+      ring
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_nested_log_support (S : Finset ℕ) (f : ℕ → ℝ) (u : ℕ → ℝ)
+    (hu : ∀ i, u (i + 1) ≤ u i) (hf : ∀ p ∈ S, f p ≤ u 0)
+    (n : ℕ) (hn : 0 ≤ u n) (hc : S.card ≤ 2 * n + 1)
+    (hcap : ∀ i ∈ range n, (S.filter (fun p => u (i + 1) < f p)).card ≤ 2 * i + 1) :
+    (∑ p ∈ S, f p) ≤ u 0 + 2 * ∑ i ∈ range n, u (i + 1) := by
+  have htel (k : ℕ) : ((2 * k + 1 : ℕ) : ℝ) * u k +
+      (∑ i ∈ range k, (u i - u (i + 1)) * (2 * i + 1 : ℕ)) =
+        u 0 + 2 * ∑ i ∈ range k, u (i + 1) := by
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      rw [sum_range_succ, sum_range_succ]
+      push_cast at ih ⊢
+      linear_combination ih
+  calc
+    _ ≤ (S.card : ℝ) * u n +
+        ∑ i ∈ range n, (u i - u (i + 1)) * (S.filter (fun p => u (i + 1) < f p)).card :=
+      decompJ365_nested_layer_bound S f u hu hf n
+    _ ≤ ((2 * n + 1 : ℕ) : ℝ) * u n +
+        ∑ i ∈ range n, (u i - u (i + 1)) * (2 * i + 1 : ℕ) := by
+      apply add_le_add
+      · exact mul_le_mul_of_nonneg_right (by exact_mod_cast hc) hn
+      · apply sum_le_sum
+        intro i hi
+        exact mul_le_mul_of_nonneg_left (by exact_mod_cast hcap i hi) (sub_nonneg.mpr (hu i))
+    _ = _ := htel n
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_nested_power_support (S : Finset ℕ) (T : ℝ) (hT : 1 < T)
+    (α : ℕ → ℝ) (hα : ∀ i, α (i + 1) ≤ α i) (n : ℕ) (hn : 0 ≤ α n)
+    (hp : ∀ p ∈ S, 0 < p) (hmax : ∀ p ∈ S, (p : ℝ) ≤ T ^ (α 0))
+    (hc : S.card ≤ 2 * n + 1)
+    (hcap : ∀ i ∈ range n,
+      (S.filter (fun p : ℕ => T ^ (α (i + 1)) < (p : ℝ))).card ≤ 2 * i + 1) :
+    ((∏ p ∈ S, p : ℕ) : ℝ) ≤ T ^ (α 0 + 2 * ∑ i ∈ range n, α (i + 1)) := by
+  have hT0 : 0 < T := lt_trans zero_lt_one hT
+  have hlogT : 0 < Real.log T := Real.log_pos hT
+  have hpR : ∀ p ∈ S, (0 : ℝ) < p := fun p h => by exact_mod_cast hp p h
+  have hupper : ∀ p ∈ S, Real.log (p : ℝ) ≤ α 0 * Real.log T := by
+    intro p h
+    have hl := Real.log_le_log (hpR p h) (hmax p h)
+    rwa [Real.log_rpow hT0] at hl
+  have hfilters (i : ℕ) : S.filter (fun p : ℕ => α (i + 1) * Real.log T < Real.log (p : ℝ)) =
+      S.filter (fun p : ℕ => T ^ (α (i + 1)) < (p : ℝ)) := by
+    apply filter_congr
+    intro p hpS
+    rw [← Real.log_rpow hT0]
+    exact Real.log_lt_log_iff (Real.rpow_pos_of_pos hT0 _) (hpR p hpS)
+  have hs := decompJ365_nested_log_support S (fun p => Real.log (p : ℝ))
+    (fun i => α i * Real.log T)
+    (fun i => mul_le_mul_of_nonneg_right (hα i) hlogT.le)
+    hupper n (mul_nonneg hn hlogT.le) hc (by simpa only [hfilters] using hcap)
+  have hprod : (0 : ℝ) < ∏ p ∈ S, (p : ℝ) := prod_pos hpR
+  have hlogprod : Real.log (∏ p ∈ S, (p : ℝ)) = ∑ p ∈ S, Real.log (p : ℝ) :=
+    Real.log_prod (fun p h => (hpR p h).ne')
+  have hexp : ∏ p ∈ S, (p : ℝ) ≤
+      Real.exp ((α 0 + 2 * ∑ i ∈ range n, α (i + 1)) * Real.log T) := by
+    rw [← Real.exp_log hprod, Real.exp_le_exp, hlogprod]
+    simpa only [add_mul, mul_assoc, sum_mul] using hs
+  simpa only [Nat.cast_prod, Real.rpow_def_of_pos hT0, mul_comm (Real.log T)] using hexp
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_nested_saved_support (S : Finset ℕ) (N T δ τ κ : ℝ)
+    (hN : 1 ≤ N) (hT : 1 < T) (hTN : T ≤ N ^ δ) (hτ : 0 ≤ τ) (_hκ : 0 < κ)
+    (α : ℕ → ℝ) (hα : ∀ i, α (i + 1) ≤ α i) (hα₀ : α 0 = 1)
+    (n : ℕ) (hn : 0 ≤ α n) (hsum : (∑ i ∈ range n, α (i + 1)) ≤ τ)
+    (hp : ∀ p ∈ S, 0 < p) (hmax : ∀ p ∈ S, (p : ℝ) ≤ T)
+    (hc : S.card ≤ 2 * n + 1)
+    (hcap : ∀ i ∈ range n,
+      (S.filter (fun p : ℕ => T ^ (α (i + 1)) < (p : ℝ))).card ≤ 2 * i + 1)
+    (hsave : δ * (1 + 2 * τ) ≤ 1 - κ) :
+    ((∏ p ∈ S, p : ℕ) : ℝ) ≤ N ^ (1 - κ) := by
+  have hs := decompJ365_nested_power_support S T hT α hα n hn hp
+    (by simpa only [hα₀, Real.rpow_one] using hmax) hc hcap
+  rw [hα₀] at hs
+  calc
+    _ ≤ T ^ (1 + 2 * ∑ i ∈ range n, α (i + 1)) := hs
+    _ ≤ T ^ (1 + 2 * τ) := Real.rpow_le_rpow_of_exponent_le hT.le (by linarith)
+    _ ≤ (N ^ δ) ^ (1 + 2 * τ) :=
+      Real.rpow_le_rpow (le_trans zero_le_one hT.le) hTN (by positivity)
+    _ = N ^ (δ * (1 + 2 * τ)) := (Real.rpow_mul (le_trans zero_le_one hN) _ _).symm
+    _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hN hsave
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_choose_saved_exponent (A B C E : ℝ)
+    (hA : 0 < A) (hB : 0 < B) (hC : 0 < C) (_hE : 0 < E)
+    (hCA : C < A) (hECB : E * C < B) :
+    ∃ δ κ : ℝ, 0 < δ ∧ 0 < κ ∧ 1 / A < δ ∧ E / B < δ ∧ δ * C ≤ 1 - κ := by
+  have h₁ : 1 / A < 1 / C := one_div_lt_one_div_of_lt hC hCA
+  have h₂ : E / B < 1 / C := (div_lt_div_iff₀ hB hC).mpr (by simpa using hECB)
+  obtain ⟨δ, hδlo, hδhi⟩ := exists_between (max_lt h₁ h₂)
+  have hδC : δ * C < 1 := (lt_div_iff₀ hC).mp hδhi
+  refine ⟨δ, 1 - δ * C, ?_, by linarith, ?_, ?_, by linarith⟩
+  · exact (div_pos zero_lt_one hA).trans ((le_max_left _ _).trans_lt hδlo)
+  · exact (le_max_left _ _).trans_lt hδlo
+  · exact (le_max_right _ _).trans_lt hδlo
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_esymm_tendsto (x : ℕ → ℕ → ℝ) (P : ℕ → Finset ℕ)
+    (hx : ∀ n p, 0 ≤ x n p) (t : ℝ)
+    (ht : Tendsto (fun n => ∑ p ∈ P n, x n p) atTop (nhds t))
+    (hq : Tendsto (fun n => ∑ p ∈ P n, (x n p) ^ 2) atTop (nhds 0)) (r : ℕ) :
+    Tendsto (fun n => esymm (x n) (P n) r) atTop (nhds (t ^ r / (r.factorial : ℝ))) := by
+  have hf : (0 : ℝ) < r.factorial := by exact_mod_cast Nat.factorial_pos r
+  have hl : Tendsto (fun n => ((∑ p ∈ P n, x n p) ^ r -
+      (r.choose 2 : ℝ) * (∑ p ∈ P n, x n p) ^ (r - 2) *
+        (∑ p ∈ P n, (x n p) ^ 2)) / (r.factorial : ℝ)) atTop
+          (nhds (t ^ r / (r.factorial : ℝ))) := by
+    simpa using ((ht.pow r).sub (((tendsto_const_nhds.mul (ht.pow (r - 2))).mul hq))).div_const
+      (r.factorial : ℝ)
+  have hu := (ht.pow r).div_const (r.factorial : ℝ)
+  apply tendsto_of_tendsto_of_tendsto_of_le_of_le hl hu
+  · intro n
+    have h := (decompJ365_esymm_bounds (x n) (hx n) (P n) r).1
+    exact (div_le_iff₀ hf).mpr (by nlinarith)
+  · intro n
+    have h := (decompJ365_esymm_bounds (x n) (hx n) (P n) r).2
+    exact (le_div_iff₀ hf).mpr (by nlinarith)
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_lower_head_identity_cast (t₁ t₂ t₃ : ℚ) :
+    (∑ i ∈ range 2, ∑ j ∈ range 4, ∑ k ∈ range 6,
+      if i + j ≤ 3 ∧ i + j + k ≤ 5 then
+        (-1 : ℝ) ^ (i + j + k) * ((t₁ : ℝ) ^ i / (i.factorial : ℝ)) *
+          ((t₂ : ℝ) ^ j / (j.factorial : ℝ)) * ((t₃ : ℝ) ^ k / (k.factorial : ℝ)) else 0) =
+      (Ebar3 t₁ t₂ t₃ : ℝ) := by
+  have h := congrArg (fun q : ℚ => (q : ℝ)) (decompJ365_lower_head_identity t₁ t₂ t₃)
+  push_cast at h
+  simp only [apply_ite] at h
+  push_cast at h
+  exact h
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_lower_head_tendsto (x : ℕ → ℕ → ℝ)
+    (P₁ P₂ P₃ : ℕ → Finset ℕ) (hx : ∀ n p, 0 ≤ x n p) (t₁ t₂ t₃ : ℚ)
+    (ht₁ : Tendsto (fun n => ∑ p ∈ P₁ n, x n p) atTop (nhds (t₁ : ℝ)))
+    (ht₂ : Tendsto (fun n => ∑ p ∈ P₂ n, x n p) atTop (nhds (t₂ : ℝ)))
+    (ht₃ : Tendsto (fun n => ∑ p ∈ P₃ n, x n p) atTop (nhds (t₃ : ℝ)))
+    (hq₁ : Tendsto (fun n => ∑ p ∈ P₁ n, (x n p) ^ 2) atTop (nhds 0))
+    (hq₂ : Tendsto (fun n => ∑ p ∈ P₂ n, (x n p) ^ 2) atTop (nhds 0))
+    (hq₃ : Tendsto (fun n => ∑ p ∈ P₃ n, (x n p) ^ 2) atTop (nhds 0)) :
+    Tendsto (fun n => ∑ i ∈ range 2, ∑ j ∈ range 4, ∑ k ∈ range 6,
+      if i + j ≤ 3 ∧ i + j + k ≤ 5 then
+        (-1 : ℝ) ^ (i + j + k) * esymm (x n) (P₁ n) i *
+          esymm (x n) (P₂ n) j * esymm (x n) (P₃ n) k else 0)
+      atTop (nhds (Ebar3 t₁ t₂ t₃ : ℝ)) := by
+  rw [← decompJ365_lower_head_identity_cast]
+  apply tendsto_finsetSum
+  intro i hi
+  apply tendsto_finsetSum
+  intro j hj
+  apply tendsto_finsetSum
+  intro k hk
+  by_cases hc : i + j ≤ 3 ∧ i + j + k ≤ 5
+  · simp only [ite_eq_left hc]
+    exact ((tendsto_const_nhds.mul (decompJ365_esymm_tendsto x P₁ hx t₁ ht₁ hq₁ i)).mul
+      (decompJ365_esymm_tendsto x P₂ hx t₂ ht₂ hq₂ j)).mul
+        (decompJ365_esymm_tendsto x P₃ hx t₃ ht₃ hq₃ k)
+  · simp only [ite_eq_right hc]
+    exact tendsto_const_nhds
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_first_four_saved_exponents :
+    let t₂ := exp (-(log (4 / 3 : ℝ)) / 2) * ricciTau 2
+    let t₃ := exp (-(log (2 : ℝ)) / 2) * ricciTau 2
+    let t₄ := exp (-0.90 : ℝ) + exp (-(log (4 : ℝ)) / 2) *
+      (exp (-1.46 / 2) + exp (-1.98 / 2) / (1 - exp (-0.50 / 2)))
+    (∃ δ κ : ℝ, 0 < δ ∧ 0 < κ ∧ 1 / 7 < δ ∧ 1 / 7 < δ ∧
+      δ * (1 + 2 * ricciTau 2 + 2 * 0.001) ≤ 1 - κ) ∧
+    (∃ δ κ : ℝ, 0 < δ ∧ 0 < κ ∧ 1 / 6 < δ ∧ (4 / 3 : ℝ) / 8 < δ ∧
+      δ * (1 + 2 * t₂ + 2 * 0.001) ≤ 1 - κ) ∧
+    (∃ δ κ : ℝ, 0 < δ ∧ 0 < κ ∧ 1 / 5 < δ ∧ (2 : ℝ) / 10 < δ ∧
+      δ * (1 + 2 * t₃ + 2 * 0.001) ≤ 1 - κ) ∧
+    (∃ δ κ : ℝ, 0 < δ ∧ 0 < κ ∧ 1 / 4 < δ ∧ (4 : ℝ) / 16 < δ ∧
+      δ * (1 + 2 * t₄ + 2 * 0.001) ≤ 1 - κ) := by
+  have hd : 0 < 1 - exp (-0.50 / 2 : ℝ) := by
+    apply sub_pos.mpr
+    exact exp_lt_one_iff.mpr (by norm_num)
+  have ht : 0 ≤ ricciTau 2 := by unfold ricciTau; positivity
+  have hm := decompJ365_first_four_margins
+  dsimp only at hm ⊢
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · simpa using decompJ365_choose_saved_exponent 7 7
+      (1 + 2 * ricciTau 2 + 2 * 0.001) 1
+      (by norm_num) (by norm_num) (by positivity) (by norm_num) hm.1
+      (by simpa using hm.1)
+  · exact decompJ365_choose_saved_exponent 6 8
+      (1 + 2 * (exp (-(log (4 / 3 : ℝ)) / 2) * ricciTau 2) + 2 * 0.001) (4 / 3)
+      (by norm_num) (by norm_num) (by positivity) (by norm_num) hm.2.1.1 hm.2.1.2
+  · exact decompJ365_choose_saved_exponent 5 10
+      (1 + 2 * (exp (-(log (2 : ℝ)) / 2) * ricciTau 2) + 2 * 0.001) 2
+      (by norm_num) (by norm_num) (by positivity) (by norm_num) hm.2.2.1.1 hm.2.2.1.2
+  · exact decompJ365_choose_saved_exponent 4 16
+      (1 + 2 * (exp (-0.90 : ℝ) + exp (-(log (4 : ℝ)) / 2) *
+        (exp (-1.46 / 2) + exp (-1.98 / 2) / (1 - exp (-0.50 / 2)))) + 2 * 0.001) 4
+      (by norm_num) (by norm_num) (by positivity) (by norm_num) hm.2.2.2.1 hm.2.2.2.2
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_pair_block_mass_unbounded (Y : ℕ) (t : ℝ) :
+    ∃ W : ℕ, Y ≤ W ∧ ∀ h w : ℕ, W ≤ w →
+      t ≤ ∑ p ∈ (Ioc Y w).filter Nat.Prime, nuN h p := by
+  let f : ℕ → ℝ := Set.indicator {p | p.Prime} (fun p => (1 : ℝ) / p)
+  have hf0 : ∀ p, 0 ≤ f p := fun p => Set.indicator_nonneg (fun q _ => by positivity) p
+  have hdiv : Tendsto (fun z : ℕ => ∑ p ∈ range z, f p) atTop atTop :=
+    (not_summable_iff_tendsto_nat_atTop_of_nonneg hf0).mp not_summable_one_div_on_primes
+  obtain ⟨W, hW⟩ := eventually_atTop.mp
+    (hdiv.eventually (eventually_ge_atTop (t + ∑ p ∈ range (Y + 1), f p)))
+  refine ⟨max Y W, le_max_left _ _, ?_⟩
+  intro h w hw
+  have hYw : Y ≤ w := (le_max_left _ _).trans hw
+  have hbig := hW (w + 1) (by omega)
+  have hsplit : (∑ p ∈ range (Y + 1), f p) + (∑ p ∈ Ioc Y w, f p) =
+      ∑ p ∈ range (w + 1), f p := by
+    have hsets : Ioc Y w = Ico (Y + 1) (w + 1) := by ext p; simp only [mem_Ioc, mem_Ico]; omega
+    rw [hsets]
+    simpa using sum_Ico_consecutive f (Nat.zero_le (Y + 1)) (by omega : Y + 1 ≤ w + 1)
+  have hs : (∑ p ∈ Ioc Y w, f p) =
+      ∑ p ∈ (Ioc Y w).filter Nat.Prime, (1 : ℝ) / p := by
+    rw [sum_filter]
+    apply sum_congr rfl
+    intro p hp
+    by_cases hpp : p.Prime <;> simp [f, hpp]
+  have hlow : (∑ p ∈ (Ioc Y w).filter Nat.Prime, (1 : ℝ) / p) ≤
+      ∑ p ∈ (Ioc Y w).filter Nat.Prime, nuN h p := by
+    apply sum_le_sum
+    intro p hp
+    rw [nuN_prime (mem_filter.mp hp).2]
+    exact div_le_div_of_nonneg_right (one_le_wt h p) (Nat.cast_nonneg p)
+  rw [hs] at hsplit
+  linarith
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_pair_block_choose (h Y w : ℕ) (hY : 0 < Y) (hYw : Y ≤ w)
+    (t : ℝ) (ht : 0 < t)
+    (hmass : t < ∑ p ∈ (Ioc Y w).filter Nat.Prime, nuN h p) :
+    ∃ y : ℕ, Y < y ∧ y ≤ w ∧
+      t - 2 / (Y : ℝ) < (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ∧
+        (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ t := by
+  have hex : ∃ y : ℕ, Y ≤ y ∧ y ≤ w ∧
+      (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ t := by
+    exact ⟨w, hYw, le_rfl, by simpa using ht.le⟩
+  let y := Nat.find hex
+  obtain ⟨hYy, hyw, hym⟩ := Nat.find_spec hex
+  change Y ≤ y at hYy
+  change y ≤ w at hyw
+  change (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ t at hym
+  have hYy' : Y < y := by
+    by_contra h
+    have heq : y = Y := by omega
+    rw [heq] at hym
+    linarith
+  have hyprev : t < ∑ p ∈ (Ioc (y - 1) w).filter Nat.Prime, nuN h p := by
+    have hmin := Nat.find_min hex (show y - 1 < y by omega)
+    have hcond : Y ≤ y - 1 ∧ y - 1 ≤ w := by omega
+    exact lt_of_not_ge (fun hm => hmin ⟨hcond.1, hcond.2, hm⟩)
+  have hsplit : Ioc (y - 1) w = insert y (Ioc y w) := by
+    ext p
+    simp only [mem_Ioc, mem_insert]
+    omega
+  have hnot : y ∉ (Ioc y w).filter Nat.Prime := by simp
+  have hyR : (0 : ℝ) < y := by exact_mod_cast (by omega : 0 < y)
+  have hYR : (0 : ℝ) < Y := by exact_mod_cast hY
+  have hstep : (∑ p ∈ (Ioc (y - 1) w).filter Nat.Prime, nuN h p) ≤
+      (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) + 2 / (Y : ℝ) := by
+    rw [hsplit, filter_insert]
+    by_cases hprime : y.Prime
+    · rw [ite_eq_left hprime, sum_insert hnot]
+      have hnu : nuN h y ≤ 2 / (Y : ℝ) := by
+        rw [nuN_prime hprime]
+        exact (div_le_div_of_nonneg_right (wt_le_two h y) hyR.le).trans
+          (div_le_div_of_nonneg_left (by norm_num) hYR (by exact_mod_cast hYy))
+      linarith
+    · rw [ite_eq_right hprime]
+      exact le_add_of_nonneg_right (by positivity)
+  exact ⟨y, hYy', hyw, by linarith, hym⟩
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_pair_block_cutoff_upper (h y w : ℕ) (θ ε : ℝ)
+    (hy : 2 ≤ y) (hyw : y ≤ w)
+    (hmass : θ - ε ≤ ∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p)
+    (hend : 28 / Real.log y ≤ ε) :
+    (y : ℝ) ≤ (w : ℝ) ^ Real.exp (-θ / 2 + ε) := by
+  have hyR : (0 : ℝ) < y := by exact_mod_cast (by omega : 0 < y)
+  have hwR : (0 : ℝ) < w := by exact_mod_cast (by omega : 0 < w)
+  have hly : 0 < Real.log y := Real.log_pos (by exact_mod_cast (by omega : 1 < y))
+  have hlw : 0 < Real.log w := Real.log_pos (by exact_mod_cast (by omega : 1 < w))
+  have hmain := decompJ365_pair_block_mass_upper h y w hy hyw
+  have hl : θ / 2 - ε ≤ Real.log (Real.log w / Real.log y) := by linarith
+  have hexp : Real.exp (θ / 2 - ε) ≤ Real.log w / Real.log y := by
+    simpa only [Real.exp_log (div_pos hlw hly)] using Real.exp_le_exp.mpr hl
+  have hm := (le_div_iff₀ hly).mp hexp
+  have hm' := mul_le_mul_of_nonneg_left hm (Real.exp_pos (-θ / 2 + ε)).le
+  have he : Real.exp (-θ / 2 + ε) * Real.exp (θ / 2 - ε) = 1 := by
+    rw [← Real.exp_add]
+    rw [show (-θ / 2 + ε) + (θ / 2 - ε) = 0 by ring, Real.exp_zero]
+  rw [← mul_assoc, he, one_mul] at hm'
+  apply (Real.log_le_log_iff hyR (Real.rpow_pos_of_pos hwR _)).mp
+  rwa [Real.log_rpow hwR]
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_pair_block_choose_eventually (θ ε : ℝ) (hθ : 0 < θ) (hε : 0 < ε) :
+    ∃ Y : ℕ, 2 ≤ Y ∧ ∀ Z : ℕ, Y ≤ Z → ∃ W : ℕ, Z ≤ W ∧
+      ∀ h w : ℕ, W ≤ w → ∃ y : ℕ, Z < y ∧ y ≤ w ∧
+        θ - ε < (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ∧
+        (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ θ ∧
+        (y : ℝ) ≤ (w : ℝ) ^ Real.exp (-θ / 2 + ε) := by
+  have hgrowth : Tendsto (fun y : ℕ => Real.log (y : ℝ)) atTop atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  obtain ⟨Y₁, hY₁⟩ := eventually_atTop.mp
+    (hgrowth.eventually (eventually_ge_atTop (28 / ε)))
+  obtain ⟨Y₂, hY₂⟩ := exists_nat_ge (2 / ε)
+  refine ⟨max (max Y₁ Y₂) 2, le_max_right _ _, ?_⟩
+  intro Z hZ
+  have hZ2 : 2 ≤ Z := (le_max_right _ _).trans hZ
+  have hZR : (0 : ℝ) < Z := by exact_mod_cast (by omega : 0 < Z)
+  have hlarge : 2 / ε ≤ (Z : ℝ) := hY₂.trans (by
+    exact_mod_cast ((le_max_right Y₁ Y₂).trans ((le_max_left (max Y₁ Y₂) 2).trans hZ)))
+  have hsmall : 2 / (Z : ℝ) ≤ ε := by
+    rw [div_le_iff₀ hZR]
+    have hh := (div_le_iff₀ hε).mp hlarge
+    linarith
+  obtain ⟨W, hW, hm⟩ := decompJ365_pair_block_mass_unbounded Z (θ + 1)
+  refine ⟨W, hW, ?_⟩
+  intro h w hw
+  have hmass : θ < ∑ p ∈ (Ioc Z w).filter Nat.Prime, nuN h p := by
+    have hh := hm h w hw
+    linarith
+  obtain ⟨y, hZy, hyw, hlo, hhi⟩ := decompJ365_pair_block_choose h Z w (by omega)
+    (hW.trans hw) θ hθ hmass
+  have hy2 : 2 ≤ y := by omega
+  have hly : 0 < Real.log y := Real.log_pos (by exact_mod_cast (by omega : 1 < y))
+  have hend : 28 / Real.log y ≤ ε := by
+    rw [div_le_iff₀ hly]
+    have hh := mul_le_mul_of_nonneg_right (hY₁ y (by omega)) hε.le
+    rw [div_mul_cancel₀ _ hε.ne'] at hh
+    linarith
+  have hlo' : θ - ε < ∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p := by linarith
+  exact ⟨y, hZy, hyw, hlo', hhi,
+    decompJ365_pair_block_cutoff_upper h y w θ ε hy2 hyw hlo'.le hend⟩
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_pair_block_mass_sequence (h : ℕ → ℕ) (θ : ℝ) (hθ : 0 < θ) :
+    ∃ y w : ℕ → ℕ, Tendsto y atTop atTop ∧ (∀ n, y n ≤ w n) ∧
+      Tendsto (fun n => ∑ p ∈ (Ioc (y n) (w n)).filter Nat.Prime, nuN (h n) p)
+        atTop (nhds θ) ∧
+      Tendsto (fun n => ∑ p ∈ (Ioc (y n) (w n)).filter Nat.Prime, (nuN (h n) p) ^ 2)
+        atTop (nhds 0) ∧
+      ∀ n, (y n : ℝ) ≤ (w n : ℝ) ^ Real.exp (-θ / 2 + 1 / ((n : ℝ) + 1)) := by
+  have hchoose (n : ℕ) : ∃ y w : ℕ, n + 2 ≤ y ∧ y ≤ w ∧
+      θ - 1 / ((n : ℝ) + 1) < (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN (h n) p) ∧
+      (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN (h n) p) ≤ θ ∧
+      (y : ℝ) ≤ (w : ℝ) ^ Real.exp (-θ / 2 + 1 / ((n : ℝ) + 1)) := by
+    obtain ⟨Y, hY, hYprop⟩ := decompJ365_pair_block_choose_eventually θ
+      (1 / ((n : ℝ) + 1)) hθ (by positivity)
+    obtain ⟨W, hW, hWprop⟩ := hYprop (max Y (n + 2)) (le_max_left _ _)
+    obtain ⟨y, hy, hyW, hlo, hhi, hpow⟩ := hWprop (h n) W le_rfl
+    exact ⟨y, W, by omega, hyW, hlo, hhi, hpow⟩
+  choose y w hy using hchoose
+  have hydiv : Tendsto y atTop atTop :=
+    tendsto_atTop_mono (fun n => (hy n).1) (tendsto_add_atTop_nat 2)
+  have heps : Tendsto (fun n : ℕ => 1 / ((n : ℝ) + 1)) atTop (nhds 0) :=
+    tendsto_one_div_add_atTop_nhds_zero_nat
+  have hmass : Tendsto (fun n => ∑ p ∈ (Ioc (y n) (w n)).filter Nat.Prime, nuN (h n) p)
+      atTop (nhds θ) := by
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le
+      (by simpa using tendsto_const_nhds.sub heps) tendsto_const_nhds
+    · intro n
+      simpa only [one_div] using (hy n).2.2.1.le
+    · intro n
+      exact (hy n).2.2.2.1
+  have hyR : Tendsto (fun n => (y n : ℝ)) atTop atTop :=
+    tendsto_natCast_atTop_atTop.comp hydiv
+  have hbound : Tendsto (fun n => 2 / (y n : ℝ) * θ) atTop (nhds 0) := by
+    simpa [div_eq_mul_inv] using ((tendsto_inv_atTop_zero.comp hyR).const_mul 2).mul_const θ
+  have hsq : Tendsto (fun n => ∑ p ∈ (Ioc (y n) (w n)).filter Nat.Prime, (nuN (h n) p) ^ 2)
+      atTop (nhds 0) := by
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hbound
+    · intro n
+      exact sum_nonneg (fun p _ => sq_nonneg _)
+    · intro n
+      have hypos : 0 < y n := by have := (hy n).1; omega
+      calc
+        _ ≤ 2 / (y n : ℝ) * ∑ p ∈ (Ioc (y n) (w n)).filter Nat.Prime, nuN (h n) p :=
+          decompJ365_pair_block_square_upper (h n) (y n) (w n) hypos
+        _ ≤ _ := mul_le_mul_of_nonneg_left (hy n).2.2.2.1 (by positivity)
+  exact ⟨y, w, hydiv, fun n => (hy n).2.1, hmass, hsq, fun n => (hy n).2.2.2.2⟩
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_main_positive_of_head_comparison (H M : ℕ → ℝ)
+    (hH : Tendsto H atTop (nhds (Ebar3 (90 / 100) (56 / 100) (52 / 100) : ℝ)))
+    (hM : ∀ᶠ n : ℕ in atTop,
+      exp (0.90 + 0.56 + 0.52) * (H n -
+        (0.90 * 0.56 ^ (2 : ℕ) * 0.52 ^ (2 : ℕ) /
+          (0.50 ^ (5 : ℕ) * exp (3 * 0.50))) *
+        ∑' k : ℕ, ricciBetaBarTerm (exp (0.5 : ℝ) / 4) (4 + k)) ≤ M n) :
+    ∀ᶠ n : ℕ in atTop, (0.00066 : ℝ) < M n := by
+  have hlim : Tendsto (fun n => exp (0.90 + 0.56 + 0.52) * (H n -
+      (0.90 * 0.56 ^ (2 : ℕ) * 0.52 ^ (2 : ℕ) /
+        (0.50 ^ (5 : ℕ) * exp (3 * 0.50))) *
+      ∑' k : ℕ, ricciBetaBarTerm (exp (0.5 : ℝ) / 4) (4 + k)))
+        atTop (nhds ricciSigmaBarLower) := by
+    unfold ricciSigmaBarLower
+    exact tendsto_const_nhds.mul (hH.sub tendsto_const_nhds)
+  have hpos := hlim.eventually (eventually_gt_nhds ricciSigmaBarLower_gt)
+  filter_upwards [hM, hpos] with n hn hposn
+  exact hposn.trans_le hn
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_three_blocks_choose (ε : ℝ) (hε : 0 < ε) (Z : ℕ) :
+    ∃ W : ℕ, Z ≤ W ∧ ∀ h w : ℕ, W ≤ w → ∃ a b c : ℕ,
+      Z < c ∧ c ≤ b ∧ b ≤ a ∧ a ≤ w ∧
+      (0.90 - ε < (∑ p ∈ (Ioc a w).filter Nat.Prime, nuN h p) ∧
+        (∑ p ∈ (Ioc a w).filter Nat.Prime, nuN h p) ≤ 0.90) ∧
+      (0.56 - ε < (∑ p ∈ (Ioc b a).filter Nat.Prime, nuN h p) ∧
+        (∑ p ∈ (Ioc b a).filter Nat.Prime, nuN h p) ≤ 0.56) ∧
+      (0.52 - ε < (∑ p ∈ (Ioc c b).filter Nat.Prime, nuN h p) ∧
+        (∑ p ∈ (Ioc c b).filter Nat.Prime, nuN h p) ≤ 0.52) ∧
+      (a : ℝ) ≤ (w : ℝ) ^ Real.exp (-0.90 / 2 + ε) ∧
+      (b : ℝ) ≤ (a : ℝ) ^ Real.exp (-0.56 / 2 + ε) ∧
+      (c : ℝ) ≤ (b : ℝ) ^ Real.exp (-0.52 / 2 + ε) := by
+  obtain ⟨Y₃, _, h₃⟩ := decompJ365_pair_block_choose_eventually 0.52 ε (by norm_num) hε
+  obtain ⟨W₃, hW₃, h₃'⟩ := h₃ (max Y₃ Z) (le_max_left _ _)
+  obtain ⟨Y₂, _, h₂⟩ := decompJ365_pair_block_choose_eventually 0.56 ε (by norm_num) hε
+  obtain ⟨W₂, hW₂, h₂'⟩ := h₂ (max Y₂ W₃) (le_max_left _ _)
+  obtain ⟨Y₁, _, h₁⟩ := decompJ365_pair_block_choose_eventually 0.90 ε (by norm_num) hε
+  obtain ⟨W₁, hW₁, h₁'⟩ := h₁ (max Y₁ W₂) (le_max_left _ _)
+  refine ⟨W₁, by omega, ?_⟩
+  intro h w hw
+  obtain ⟨a, ha, haw, ha₀, ha₁, hap⟩ := h₁' h w hw
+  obtain ⟨b, hb, hba, hb₀, hb₁, hbp⟩ := h₂' h a (by omega)
+  obtain ⟨c, hc, hcb, hc₀, hc₁, hcp⟩ := h₃' h b (by omega)
+  exact ⟨a, b, c, by omega, hcb, hba, haw, ⟨ha₀, ha₁⟩, ⟨hb₀, hb₁⟩,
+    ⟨hc₀, hc₁⟩, hap, hbp, hcp⟩
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_tau_support_perturbation (η : ℝ) (hη : 0 < η) :
+    ∃ ε : ℝ, 0 < ε ∧ ε < 1 / 4 ∧
+      exp (-0.90 / 2 + ε) + exp (-1.46 / 2 + 2 * ε) +
+        exp (-1.98 / 2 + 3 * ε) / (1 - exp (-0.50 / 2 + ε)) < ricciTau 2 + η := by
+  let g : ℝ → ℝ := fun ε => exp (-0.90 / 2 + ε) + exp (-1.46 / 2 + 2 * ε) +
+    exp (-1.98 / 2 + 3 * ε) / (1 - exp (-0.50 / 2 + ε))
+  have hd : 1 - exp (-0.50 / 2 : ℝ) ≠ 0 := by
+    have he : exp (-0.50 / 2 : ℝ) < 1 := exp_lt_one_iff.mpr (by norm_num)
+    linarith
+  have hg0 : g 0 = ricciTau 2 := by simp [g, ricciTau]
+  have hcont : ContinuousAt g 0 := by
+    dsimp [g]
+    fun_prop (disch := simpa using hd)
+  have hnear : ∀ᶠ ε : ℝ in nhds 0, g ε < ricciTau 2 + η :=
+    hcont.tendsto.eventually (eventually_lt_nhds (by rw [hg0]; linarith))
+  obtain ⟨δ, hδ, hball⟩ := Metric.eventually_nhds_iff.mp hnear
+  let ε := min (δ / 2) (1 / 8)
+  have hε : 0 < ε := lt_min (by positivity) (by norm_num)
+  have hεδ : ε < δ := (min_le_left _ _).trans_lt (by linarith)
+  refine ⟨ε, hε, lt_of_le_of_lt (min_le_right _ _) (by norm_num), ?_⟩
+  apply hball
+  simpa [Real.dist_eq, abs_of_pos hε] using hεδ
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_support_geometric_sum (ε : ℝ) (hε : ε < 1 / 4) (n : ℕ) :
+    let a : ℕ → ℝ := fun i => if i = 0 then exp (-0.90 / 2 + ε)
+      else if i = 1 then exp (-1.46 / 2 + 2 * ε)
+      else exp (-1.98 / 2 + 3 * ε) * exp (-0.50 / 2 + ε) ^ (i - 2)
+    (∑ i ∈ range n, a i) ≤
+      exp (-0.90 / 2 + ε) + exp (-1.46 / 2 + 2 * ε) +
+        exp (-1.98 / 2 + 3 * ε) / (1 - exp (-0.50 / 2 + ε)) := by
+  dsimp only
+  let q := exp (-0.50 / 2 + ε)
+  have hq0 : 0 ≤ q := (exp_pos _).le
+  have hq1 : q < 1 := exp_lt_one_iff.mpr (by linarith)
+  have hgeom (k : ℕ) : (∑ i ∈ range k, q ^ i) ≤ 1 / (1 - q) := by
+    have hsum := (hasSum_geometric_of_lt_one hq0 hq1).summable.sum_le_tsum
+      (range k) (fun i _ => pow_nonneg hq0 i)
+    simpa only [(hasSum_geometric_of_lt_one hq0 hq1).tsum_eq, one_div] using hsum
+  rcases n with _ | n
+  · simp only [range_zero, sum_empty]
+    positivity
+  rcases n with _ | n
+  · simp only [Nat.zero_add, range_one, sum_singleton]
+    have hd : 0 < 1 - q := sub_pos.mpr hq1
+    change exp (-0.90 / 2 + ε) ≤ exp (-0.90 / 2 + ε) +
+      exp (-1.46 / 2 + 2 * ε) + exp (-1.98 / 2 + 3 * ε) / (1 - q)
+    have hcdiv : 0 ≤ exp (-1.98 / 2 + 3 * ε) / (1 - q) :=
+      div_nonneg (exp_pos _).le hd.le
+    linarith [exp_pos (-1.46 / 2 + 2 * ε)]
+  · rw [show n + 1 + 1 = 2 + n by omega, sum_range_add]
+    have hhead : (∑ i ∈ range 2, if i = 0 then exp (-0.90 / 2 + ε)
+        else if i = 1 then exp (-1.46 / 2 + 2 * ε)
+        else exp (-1.98 / 2 + 3 * ε) * exp (-0.50 / 2 + ε) ^ (i - 2)) =
+          exp (-0.90 / 2 + ε) + exp (-1.46 / 2 + 2 * ε) := by
+      norm_num [sum_range_succ]
+    rw [hhead]
+    have htail : (∑ i ∈ range n,
+        if 2 + i = 0 then exp (-0.90 / 2 + ε)
+        else if 2 + i = 1 then exp (-1.46 / 2 + 2 * ε)
+        else exp (-1.98 / 2 + 3 * ε) * q ^ (2 + i - 2)) =
+          exp (-1.98 / 2 + 3 * ε) * ∑ i ∈ range n, q ^ i := by
+      rw [mul_sum]
+      apply sum_congr rfl
+      intro i hi
+      have h1 : 2 + i ≠ 1 := by omega
+      simp [h1, show 2 + i - 2 = i by omega]
+    change _ ≤ exp (-0.90 / 2 + ε) + exp (-1.46 / 2 + 2 * ε) +
+      exp (-1.98 / 2 + 3 * ε) / (1 - q)
+    rw [htail]
+    have hh := mul_le_mul_of_nonneg_left (hgeom n) (exp_pos (-1.98 / 2 + 3 * ε)).le
+    simpa only [mul_one_div, add_comm] using add_le_add_left hh
+      (exp (-0.90 / 2 + ε) + exp (-1.46 / 2 + 2 * ε))
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_three_blocks_head_positive (h : ℕ → ℕ) :
+    ∃ a b c w : ℕ → ℕ,
+      (∀ n, c n ≤ b n ∧ b n ≤ a n ∧ a n ≤ w n) ∧ Tendsto c atTop atTop ∧
+      Tendsto (fun n => ∑ i ∈ range 2, ∑ j ∈ range 4, ∑ k ∈ range 6,
+        if i + j ≤ 3 ∧ i + j + k ≤ 5 then
+          (-1 : ℝ) ^ (i + j + k) *
+            esymm (nuN (h n)) ((Ioc (a n) (w n)).filter Nat.Prime) i *
+            esymm (nuN (h n)) ((Ioc (b n) (a n)).filter Nat.Prime) j *
+            esymm (nuN (h n)) ((Ioc (c n) (b n)).filter Nat.Prime) k else 0)
+        atTop (nhds (Ebar3 (90 / 100) (56 / 100) (52 / 100) : ℝ)) ∧
+      ∀ᶠ n : ℕ in atTop, (0.0122847 : ℝ) <
+        ∑ i ∈ range 2, ∑ j ∈ range 4, ∑ k ∈ range 6,
+          if i + j ≤ 3 ∧ i + j + k ≤ 5 then
+            (-1 : ℝ) ^ (i + j + k) *
+              esymm (nuN (h n)) ((Ioc (a n) (w n)).filter Nat.Prime) i *
+              esymm (nuN (h n)) ((Ioc (b n) (a n)).filter Nat.Prime) j *
+              esymm (nuN (h n)) ((Ioc (c n) (b n)).filter Nat.Prime) k else 0 := by
+  have hchoose (n : ℕ) : ∃ a b c w : ℕ, n + 2 < c ∧ c ≤ b ∧ b ≤ a ∧ a ≤ w ∧
+      (0.90 - 1 / ((n : ℝ) + 1) < (∑ p ∈ (Ioc a w).filter Nat.Prime, nuN (h n) p) ∧
+        (∑ p ∈ (Ioc a w).filter Nat.Prime, nuN (h n) p) ≤ 0.90) ∧
+      (0.56 - 1 / ((n : ℝ) + 1) < (∑ p ∈ (Ioc b a).filter Nat.Prime, nuN (h n) p) ∧
+        (∑ p ∈ (Ioc b a).filter Nat.Prime, nuN (h n) p) ≤ 0.56) ∧
+      (0.52 - 1 / ((n : ℝ) + 1) < (∑ p ∈ (Ioc c b).filter Nat.Prime, nuN (h n) p) ∧
+        (∑ p ∈ (Ioc c b).filter Nat.Prime, nuN (h n) p) ≤ 0.52) := by
+    obtain ⟨W, _, hW⟩ := decompJ365_three_blocks_choose (1 / ((n : ℝ) + 1)) (by positivity) (n + 2)
+    obtain ⟨a, b, c, hc, hcb, hba, haw, h₁, h₂, h₃, _⟩ := hW (h n) W le_rfl
+    exact ⟨a, b, c, W, hc, hcb, hba, haw, h₁, h₂, h₃⟩
+  choose a b c w hc using hchoose
+  have hcdiv : Tendsto c atTop atTop :=
+    tendsto_atTop_mono (fun n => (hc n).1.le) (tendsto_add_atTop_nat 2)
+  have hbdiv : Tendsto b atTop atTop := tendsto_atTop_mono (fun n => (hc n).2.1) hcdiv
+  have hadiv : Tendsto a atTop atTop := tendsto_atTop_mono (fun n => (hc n).2.2.1) hbdiv
+  have heps : Tendsto (fun n : ℕ => 1 / ((n : ℝ) + 1)) atTop (nhds 0) :=
+    tendsto_one_div_add_atTop_nhds_zero_nat
+  have hm₁ := fun n => (hc n).2.2.2.2.1
+  have hm₂ := fun n => (hc n).2.2.2.2.2.1
+  have hm₃ := fun n => (hc n).2.2.2.2.2.2
+  have hmass (l u : ℕ → ℕ) (t : ℝ)
+      (hm : ∀ n : ℕ, t - 1 / ((n : ℝ) + 1) <
+          (∑ p ∈ (Ioc (l n) (u n)).filter Nat.Prime, nuN (h n) p) ∧
+        (∑ p ∈ (Ioc (l n) (u n)).filter Nat.Prime, nuN (h n) p) ≤ t) :
+      Tendsto (fun n => ∑ p ∈ (Ioc (l n) (u n)).filter Nat.Prime, nuN (h n) p)
+        atTop (nhds t) := by
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le
+      (by simpa using tendsto_const_nhds.sub heps) tendsto_const_nhds
+    · intro n
+      simpa only [one_div] using (hm n).1.le
+    · exact fun n => (hm n).2
+  have hsquare (l u : ℕ → ℕ) (t : ℝ) (hl : Tendsto l atTop atTop)
+      (hl0 : ∀ n, 0 < l n)
+      (hm : ∀ n, (∑ p ∈ (Ioc (l n) (u n)).filter Nat.Prime, nuN (h n) p) ≤ t) :
+      Tendsto (fun n => ∑ p ∈ (Ioc (l n) (u n)).filter Nat.Prime, (nuN (h n) p) ^ 2)
+        atTop (nhds 0) := by
+    have hlR : Tendsto (fun n => (l n : ℝ)) atTop atTop := tendsto_natCast_atTop_atTop.comp hl
+    have hbound : Tendsto (fun n => 2 / (l n : ℝ) * t) atTop (nhds 0) := by
+      simpa [div_eq_mul_inv] using ((tendsto_inv_atTop_zero.comp hlR).const_mul 2).mul_const t
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hbound
+    · exact fun n => sum_nonneg (fun p _ => sq_nonneg _)
+    · intro n
+      exact (decompJ365_pair_block_square_upper (h n) (l n) (u n) (hl0 n)).trans
+        (mul_le_mul_of_nonneg_left (hm n) (by positivity))
+  have ha0 : ∀ n, 0 < a n := by intro n; have := hc n; omega
+  have hb0 : ∀ n, 0 < b n := by intro n; have := hc n; omega
+  have hc0 : ∀ n, 0 < c n := by intro n; have := hc n; omega
+  have hH := decompJ365_lower_head_tendsto (fun n => nuN (h n))
+    (fun n => (Ioc (a n) (w n)).filter Nat.Prime)
+    (fun n => (Ioc (b n) (a n)).filter Nat.Prime)
+    (fun n => (Ioc (c n) (b n)).filter Nat.Prime)
+    (fun n => nuN_nonneg (h n)) (90 / 100) (56 / 100) (52 / 100)
+    (by convert hmass a w 0.90 hm₁ using 1
+        norm_num)
+    (by convert hmass b a 0.56 hm₂ using 1
+        norm_num)
+    (by convert hmass c b 0.52 hm₃ using 1
+        norm_num)
+    (hsquare a w 0.90 hadiv ha0 (fun n => (hm₁ n).2))
+    (hsquare b a 0.56 hbdiv hb0 (fun n => (hm₂ n).2))
+    (hsquare c b 0.52 hcdiv hc0 (fun n => (hm₃ n).2))
+  have hr : (0.0122847 : ℝ) < (Ebar3 (90 / 100) (56 / 100) (52 / 100) : ℝ) := by
+    norm_num [Ebar3]
+  exact ⟨a, b, c, w, fun n => ⟨(hc n).2.1, (hc n).2.2.1, (hc n).2.2.2.1⟩,
+    hcdiv, hH, hH.eventually (eventually_gt_nhds hr)⟩
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_uncorrected_beta_certificate_negative :
+    (Ebar3 (90 / 100) (56 / 100) (52 / 100) : ℝ) -
+      (0.544 : ℝ) * (∑ k ∈ range 7, ricciBetaMajorant 0.4 (4 + k)) < 0 := by
+  norm_num [Ebar3, ricciBetaMajorant, sum_range_succ, Nat.factorial]
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_uncorrected_beta_head_negative :
+    (Ebar3 (90 / 100) (56 / 100) (52 / 100) : ℝ) -
+      (0.90 * 0.56 ^ (2 : ℕ) * 0.52 ^ (2 : ℕ) /
+        (0.50 ^ (5 : ℕ) * exp (3 * 0.50))) *
+      (∑ k ∈ range 7, ricciBetaMajorant (exp (0.5 : ℝ) / 4) (4 + k)) < 0 := by
+  let K : ℝ := 0.90 * 0.56 ^ (2 : ℕ) * 0.52 ^ (2 : ℕ) /
+    (0.50 ^ (5 : ℕ) * exp (3 * 0.50))
+  have hq : (0.4 : ℝ) ≤ exp 0.5 / 4 := by
+    have hh : (1.6 : ℝ) ≤ exp 0.5 := ricci_exp_lower (by norm_num)
+      (by norm_num [sum_range_succ, Nat.factorial])
+    linarith
+  have he075 : exp (0.75 : ℝ) ≤ 2.118 := ricci_exp_upper_small (by norm_num) (by norm_num)
+    (by norm_num [sum_range_succ, Nat.factorial])
+  have he15 : exp (1.5 : ℝ) ≤ 4.486 := by
+    rw [show (1.5 : ℝ) = 0.75 + 0.75 by norm_num, exp_add]
+    nlinarith [exp_pos (0.75 : ℝ)]
+  have hK : (0.544 : ℝ) ≤ K := by
+    dsimp [K]
+    rw [le_div_iff₀ (by positivity)]
+    norm_num
+    nlinarith
+  have hsum : (∑ k ∈ range 7, ricciBetaMajorant 0.4 (4 + k)) ≤
+      ∑ k ∈ range 7, ricciBetaMajorant (exp (0.5 : ℝ) / 4) (4 + k) := by
+    apply sum_le_sum
+    intro k hk
+    unfold ricciBetaMajorant
+    gcongr
+  have hs0 : 0 ≤ ∑ k ∈ range 7, ricciBetaMajorant 0.4 (4 + k) := by
+    apply sum_nonneg
+    intro k hk
+    unfold ricciBetaMajorant
+    positivity
+  have hprod := mul_le_mul hK hsum hs0 (by positivity : (0 : ℝ) ≤ K)
+  have hbase := decompJ365_uncorrected_beta_certificate_negative
+  change (Ebar3 (90 / 100) (56 / 100) (52 / 100) : ℝ) - K * _ < 0
+  linarith
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_support_profile (η : ℝ) (hη : 0 < η) :
+    ∃ ε : ℝ, ∃ α : ℕ → ℝ, 0 < ε ∧ ε < 1 / 4 ∧ α 0 = 1 ∧
+      (∀ i, 0 < α i) ∧ (∀ i, α (i + 1) ≤ α i) ∧
+      (∀ n, (∑ i ∈ range n, α (i + 1)) ≤ ricciTau 2 + η) ∧
+      α 1 = exp (-0.90 / 2 + ε) ∧ α 2 = exp (-1.46 / 2 + 2 * ε) ∧
+      ∀ i, α (i + 3) = exp (-1.98 / 2 + 3 * ε) * exp (-0.50 / 2 + ε) ^ i := by
+  obtain ⟨ε, hε0, hε, hsum⟩ := decompJ365_tau_support_perturbation η hη
+  let q := exp (-0.50 / 2 + ε)
+  let α : ℕ → ℝ := fun i => if i = 0 then 1 else if i = 1 then exp (-0.90 / 2 + ε)
+    else if i = 2 then exp (-1.46 / 2 + 2 * ε)
+    else exp (-1.98 / 2 + 3 * ε) * q ^ (i - 3)
+  have hq : q < 1 := exp_lt_one_iff.mpr (by linarith)
+  have hq0 : 0 ≤ q := (exp_pos _).le
+  have hpos (i : ℕ) : 0 < α i := by
+    dsimp [α]
+    split_ifs <;> positivity
+  have hmono (i : ℕ) : α (i + 1) ≤ α i := by
+    rcases i with _ | i
+    · simpa [α] using exp_le_one_iff.mpr (show -0.90 / 2 + ε ≤ 0 by linarith)
+    rcases i with _ | i
+    · simp only [Nat.zero_add]
+      change exp (-1.46 / 2 + 2 * ε) ≤ exp (-0.90 / 2 + ε)
+      exact exp_le_exp.mpr (by linarith)
+    rcases i with _ | i
+    · change exp (-1.98 / 2 + 3 * ε) * q ^ 0 ≤ exp (-1.46 / 2 + 2 * ε)
+      rw [pow_zero, mul_one]
+      exact exp_le_exp.mpr (by linarith)
+    · have hne0 : i + 1 + 1 + 1 ≠ 0 := by omega
+      have hne1 : i + 1 + 1 + 1 ≠ 1 := by omega
+      have hne2 : i + 1 + 1 + 1 ≠ 2 := by omega
+      have hne0' : i + 1 + 1 + 1 + 1 ≠ 0 := by omega
+      have hne1' : i + 1 + 1 + 1 + 1 ≠ 1 := by omega
+      have hne2' : i + 1 + 1 + 1 + 1 ≠ 2 := by omega
+      simp only [α, ite_eq_right hne0, ite_eq_right hne1, ite_eq_right hne2,
+        ite_eq_right hne0', ite_eq_right hne1', ite_eq_right hne2']
+      rw [show i + 1 + 1 + 1 - 3 = i by omega,
+        show i + 1 + 1 + 1 + 1 - 3 = i + 1 by omega, pow_succ]
+      nlinarith [mul_le_mul_of_nonneg_left hq.le
+        (show 0 ≤ exp (-1.98 / 2 + 3 * ε) * q ^ i by positivity)]
+  have hshift (i : ℕ) : α (i + 1) = if i = 0 then exp (-0.90 / 2 + ε)
+      else if i = 1 then exp (-1.46 / 2 + 2 * ε)
+      else exp (-1.98 / 2 + 3 * ε) * q ^ (i - 2) := by
+    by_cases hi0 : i = 0
+    · subst i
+      norm_num [α]
+    by_cases hi1 : i = 1
+    · subst i
+      norm_num [α]
+    have h2 : i + 1 ≠ 2 := by omega
+    simp [α, hi0, hi1, h2, show i + 1 - 3 = i - 2 by omega]
+  refine ⟨ε, α, hε0, hε, by simp [α], hpos, hmono, ?_, by simp [α], by simp [α], ?_⟩
+  · intro n
+    simp_rw [hshift]
+    exact (decompJ365_support_geometric_sum ε hε n).trans hsum.le
+  · intro i
+    have h1 : i + 3 ≠ 1 := by omega
+    have h2 : i + 3 ≠ 2 := by omega
+    simp [α, h1, h2, show i + 3 - 3 = i by omega, q]
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_beta_bar_four_coefficient :
+    (∑ i ∈ range 2, ∑ j ∈ range 4, ∑ k ∈ range 6,
+      if i + j ≤ 3 ∧ i + j + k ≤ 5 then
+        (1 : ℚ) / ((i.factorial : ℚ) * j.factorial * k.factorial * (8 - i - j - k).factorial)
+      else 0) = 1783 / 8064 ∧ (1783 / 8064 : ℚ) ≤ 979 / 4032 := by
+  norm_num [sum_range_succ, Nat.factorial]
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_beta_bar_four_printed :
+    (∑ i ∈ range 2, ∑ j ∈ range 4, ∑ k ∈ range 6,
+      if i + j ≤ 3 ∧ i + j + k ≤ 5 then
+        ((90 / 100 : ℚ) ^ i / (i.factorial : ℚ)) *
+        ((56 / 100 : ℚ) ^ j / (j.factorial : ℚ)) *
+        ((52 / 100 : ℚ) ^ k / (k.factorial : ℚ)) *
+        ((50 / 100 : ℚ) ^ (8 - i - j - k) / ((8 - i - j - k).factorial : ℚ))
+      else 0) ≤
+      (90 / 100 : ℚ) * (56 / 100 : ℚ) ^ 2 * (52 / 100 : ℚ) ^ 2 * (50 / 100 : ℚ) ^ 3 *
+        (979 / 4032 : ℚ) := by
+  norm_num [sum_range_succ, Nat.factorial]
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_first_case_support_parameters :
+    ∃ ε : ℝ, ∃ α : ℕ → ℝ, ∃ δ κ : ℝ,
+      0 < ε ∧ ε < 1 / 4 ∧ 0 < δ ∧ 0 < κ ∧ 1 / 7 < δ ∧
+      α 1 = exp (-0.90 / 2 + ε) ∧ α 2 = exp (-1.46 / 2 + 2 * ε) ∧
+      (∀ i, α (i + 3) = exp (-1.98 / 2 + 3 * ε) * exp (-0.50 / 2 + ε) ^ i) ∧
+      ∀ (n : ℕ) (S : Finset ℕ) (N T : ℝ), 1 ≤ N → 1 < T → T ≤ N ^ δ →
+        (∀ p ∈ S, 0 < p) → (∀ p ∈ S, (p : ℝ) ≤ T) → S.card ≤ 2 * n + 1 →
+        (∀ i ∈ range n,
+          (S.filter (fun p : ℕ => T ^ (α (i + 1)) < (p : ℝ))).card ≤ 2 * i + 1) →
+        ((∏ p ∈ S, p : ℕ) : ℝ) ≤ N ^ (1 - κ) := by
+  obtain ⟨ε, α, hε0, hε, hα0, hpos, hmono, hsum, hα1, hα2, htail⟩ :=
+    decompJ365_support_profile 0.001 (by norm_num)
+  have hm := decompJ365_first_four_saved_exponents
+  dsimp only at hm
+  obtain ⟨δ, κ, hδ, hκ, hδ7, _, hsave⟩ := hm.1
+  refine ⟨ε, α, δ, κ, hε0, hε, hδ, hκ, hδ7, hα1, hα2, htail, ?_⟩
+  intro n S N T hN hT hTN hp hmax hc hcap
+  have hτ : 0 ≤ ricciTau 2 + 0.001 := by simpa using hsum 0
+  apply decompJ365_nested_saved_support S N T δ (ricciTau 2 + 0.001) κ hN hT hTN hτ hκ
+    α hmono hα0 n (hpos n).le (hsum n) hp hmax hc hcap
+  convert hsave using 1 <;> ring
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_boundary_monomial (t₁ t₂ t₃ t : ℝ) (ht : 0 < t)
+    (ht₃ : t ≤ t₃) (ht₂ : t₃ ≤ t₂) (ht₁ : t₂ ≤ t₁)
+    (i j k l b : ℕ) (hb : 3 ≤ b) (hi : i ≤ 1) (hij : i + j ≤ 3)
+    (hijk : i + j + k ≤ 5) (hs : i + j + k + l = 2 * b) :
+    t₁ ^ i * t₂ ^ j * t₃ ^ k * t ^ l ≤ t₁ * t₂ ^ 2 * t₃ ^ 2 * t ^ (2 * b - 5) := by
+  have ht₃0 : 0 < t₃ := ht.trans_le ht₃
+  have ht₂0 : 0 < t₂ := ht₃0.trans_le ht₂
+  have ht₁0 : 0 < t₁ := ht₂0.trans_le ht₁
+  have hlog₁ : 0 ≤ log t₁ - log t₂ := sub_nonneg.mpr (log_le_log ht₂0 ht₁)
+  have hlog₂ : 0 ≤ log t₂ - log t₃ := sub_nonneg.mpr (log_le_log ht₃0 ht₂)
+  have hlog₃ : 0 ≤ log t₃ - log t := sub_nonneg.mpr (log_le_log ht ht₃)
+  have hiR : (i : ℝ) ≤ 1 := by exact_mod_cast hi
+  have hijR : (i : ℝ) + j ≤ 3 := by exact_mod_cast hij
+  have hijkR : (i : ℝ) + j + k ≤ 5 := by exact_mod_cast hijk
+  have hsR : (i : ℝ) + j + k + l = 2 * b := by exact_mod_cast hs
+  have hsub : ((2 * b - 5 : ℕ) : ℝ) = 2 * (b : ℝ) - 5 := by
+    rw [Nat.cast_sub (by omega : 5 ≤ 2 * b)]
+    push_cast
+    ring
+  apply (log_le_log_iff (by positivity) (by positivity)).mp
+  rw [log_mul (by positivity) (by positivity), log_mul (by positivity) (by positivity),
+    log_mul (by positivity) (by positivity), log_mul (by positivity) (by positivity),
+    log_mul (by positivity) (by positivity), log_mul (by positivity) (by positivity)]
+  simp only [log_pow, hsub, Nat.cast_ofNat]
+  have hbalance := congrArg (fun z : ℝ => z * log t) hsR
+  nlinarith [mul_nonneg (sub_nonneg.mpr hiR) hlog₁,
+    mul_nonneg (sub_nonneg.mpr hijR) hlog₂,
+    mul_nonneg (sub_nonneg.mpr hijkR) hlog₃]
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_beta_boundary_bound (J : Finset (ℕ × ℕ × ℕ × ℕ))
+    (t₁ t₂ t₃ t : ℝ) (ht : 0 < t) (ht₃ : t ≤ t₃) (ht₂ : t₃ ≤ t₂) (ht₁ : t₂ ≤ t₁)
+    (b : ℕ) (hb : 3 ≤ b)
+    (hJ : ∀ q ∈ J, q.1 ≤ 1 ∧ q.1 + q.2.1 ≤ 3 ∧ q.1 + q.2.1 + q.2.2.1 ≤ 5 ∧
+      q.1 + q.2.1 + q.2.2.1 + q.2.2.2 = 2 * b) :
+    (∑ q ∈ J, (t₁ ^ q.1 / (q.1.factorial : ℝ)) *
+      (t₂ ^ q.2.1 / (q.2.1.factorial : ℝ)) *
+      (t₃ ^ q.2.2.1 / (q.2.2.1.factorial : ℝ)) *
+      (t ^ q.2.2.2 / (q.2.2.2.factorial : ℝ))) ≤
+      t₁ * t₂ ^ 2 * t₃ ^ 2 * t ^ (2 * b - 5) *
+        ∑ q ∈ J, 1 / ((q.1.factorial : ℝ) * q.2.1.factorial *
+          q.2.2.1.factorial * q.2.2.2.factorial) := by
+  rw [mul_sum]
+  apply sum_le_sum
+  intro q hq
+  obtain ⟨hi, hij, hijk, hs⟩ := hJ q hq
+  have hm := decompJ365_boundary_monomial t₁ t₂ t₃ t ht ht₃ ht₂ ht₁
+    q.1 q.2.1 q.2.2.1 q.2.2.2 b hb hi hij hijk hs
+  have hd : (0 : ℝ) ≤ (q.1.factorial : ℝ) * q.2.1.factorial *
+      q.2.2.1.factorial * q.2.2.2.factorial := by positivity
+  have hh := div_le_div_of_nonneg_right hm hd
+  convert hh using 1 <;> ring
+
+/-- Auxiliary step for the decreasing sieve.
+The exact source scope and concrete instance are recorded in STATEMENTS.md. -/
+lemma decompJ365_normalized_lower_iteration (E v Φ : ℕ → ℝ)
+    (hv : ∀ i, 0 < v i) (hstep : ∀ i, v i * E i - Φ i ≤ E (i + 1)) (n : ℕ) :
+    E 0 - (∑ i ∈ range n, Φ i / (∏ j ∈ range (i + 1), v j)) ≤
+      E n / (∏ j ∈ range n, v j) := by
+  have hp (k : ℕ) : 0 < ∏ j ∈ range k, v j := prod_pos (fun j _ => hv j)
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have hs : E n / (∏ j ∈ range n, v j) - Φ n / (∏ j ∈ range (n + 1), v j) ≤
+        E (n + 1) / (∏ j ∈ range (n + 1), v j) := by
+      apply (le_div_iff₀ (hp (n + 1))).mpr
+      rw [sub_mul, div_mul_cancel₀ _ (hp (n + 1)).ne']
+      have heq : (E n / (∏ j ∈ range n, v j)) * (∏ j ∈ range (n + 1), v j) =
+          v n * E n := by
+        rw [prod_range_succ]
+        field_simp [(hp n).ne']
+      rw [heq]
+      exact hstep n
+    calc
+      _ = (E 0 - (∑ i ∈ range n, Φ i / (∏ j ∈ range (i + 1), v j))) -
+          Φ n / (∏ j ∈ range (n + 1), v j) := by rw [sum_range_succ]; ring
+      _ ≤ E n / (∏ j ∈ range n, v j) - Φ n / (∏ j ∈ range (n + 1), v j) :=
+        sub_le_sub_right ih _
+      _ ≤ _ := hs
 
 /-- LEAF. Pages 75, 88 and 89: the remaining positive lower count for Z.
 The upper estimate is decompJ365_zCount_upper. The decreasing step Brun lower sieve remains open. -/

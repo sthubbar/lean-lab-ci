@@ -1,0 +1,68 @@
+{
+  "scorer_valid_rows": 649,
+  "distinct_placements": 369,
+  "program_placements": 19,
+  "annealer_iterations": 1347420160,
+  "repair_proposals": 32890375,
+  "subrun_proposals": 733069792,
+  "completed_subrun_sources": 284,
+  "complete_subrun_domains": 69232,
+  "interrupted_subrun_domains": 221,
+  "BEATS": 0,
+  "by_batch": {
+    "task291-01": {
+      "rows": 16,
+      "best_ratio": 0.289115646,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-02": {
+      "rows": 18,
+      "best_ratio": 0.289115646,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-03": {
+      "rows": 16,
+      "best_ratio": 0.289115646,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-04": {
+      "rows": 2,
+      "best_ratio": 0.12596707,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-05": {
+      "rows": 132,
+      "best_ratio": 0.289115646,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-06": {
+      "rows": 284,
+      "best_ratio": 0.289115646,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-07": {
+      "rows": 78,
+      "best_ratio": 0.2890625,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-0801": {
+      "rows": 25,
+      "best_ratio": 0.288979592,
+      "best_miss": 1,
+      "BEATS": 0
+    },
+    "task291-09": {
+      "rows": 78,
+      "best_ratio": 0.2890625,
+      "best_miss": 1,
+      "BEATS": 0
+    }
+  }
+}

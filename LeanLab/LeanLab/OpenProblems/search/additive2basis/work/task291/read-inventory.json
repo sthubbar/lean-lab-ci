@@ -1,0 +1,134 @@
+[
+  {
+    "file": "../../PROGRESS.md",
+    "bytes": 106254,
+    "sha256": "d0720ce89f749ea205a67d2fc78ad9d3e4f9c30502352d8071d9512f255a8ead",
+    "lines": 451
+  },
+  {
+    "file": "../../STATEMENTS.md",
+    "bytes": 30964,
+    "sha256": "636b47a1dc1219682de3414df43fab125431f9e3d10a7c8e97dd8f767fb06e25",
+    "lines": 245
+  },
+  {
+    "file": "../../Erdos17.lean",
+    "bytes": 8175,
+    "sha256": "b29f8aa88ac6fe6a46a26facbc0843cfa8ec06ec5cc8c0aeecdf63dcb141f803",
+    "lines": 175
+  },
+  {
+    "file": "../../Erdos273.lean",
+    "bytes": 13671,
+    "sha256": "4c4f10cd68cfbb1117e5bfca69cdeb9ef733cb6a7a6b1350226d0d96427d3c22",
+    "lines": 276
+  },
+  {
+    "file": "../../Erdos273Tree.lean",
+    "bytes": 9543,
+    "sha256": "8c9bfc687df49e62e0018a841be1021b5b07a9258614b820abfeed900b1470af",
+    "lines": 212
+  },
+  {
+    "file": "../../Erdos9.lean",
+    "bytes": 6613,
+    "sha256": "8c79156a9d45fdf3da9b3454e0fec11f83a2a4f1f8f65ac71d78489d3ddfc23c",
+    "lines": 148
+  },
+  {
+    "file": "../../EulerDensity.lean",
+    "bytes": 3319,
+    "sha256": "c66f3f1b41a0f5fde89a0bcfbddd9fdff044c1e0f297a91320abcf5ff22acfac",
+    "lines": 74
+  },
+  {
+    "file": "../../KohonenAsymptotic.lean",
+    "bytes": 3841,
+    "sha256": "ae147168c8e4bc8b66a348c77dbffc86ca1626d4f2be0f6717e4e53b34bfe67e",
+    "lines": 84
+  },
+  {
+    "file": "../../KohonenCardinality.lean",
+    "bytes": 9005,
+    "sha256": "078e23e6b64a8683819caa6c9caf34ca4731359899d8d067e8dbf9cfe8ef68de",
+    "lines": 198
+  },
+  {
+    "file": "../../KohonenCeiling.lean",
+    "bytes": 3413,
+    "sha256": "7b10edb03f5a8ce55e7b60bd401c1b785ba0cbed2456383e09774e6876af0393",
+    "lines": 68
+  },
+  {
+    "file": "../../KohonenNormalization.lean",
+    "bytes": 7098,
+    "sha256": "f3d81c81a381e6a931452d527093b9d2b3681be3559f6ed2d2fd2d79b50611c9",
+    "lines": 133
+  },
+  {
+    "file": "../../KohonenOverlap.lean",
+    "bytes": 6153,
+    "sha256": "73fda76aba151d03130c0794070ac3896cf2826b9cf494188d45fd66a6deaf8d",
+    "lines": 131
+  },
+  {
+    "file": "../../KohonenRange.lean",
+    "bytes": 6420,
+    "sha256": "500f804540fc5dd7587a53706c4f53e59a005e969111de0a8952d6e1c0fac1df",
+    "lines": 142
+  },
+  {
+    "file": "../../KohonenSumset.lean",
+    "bytes": 6993,
+    "sha256": "e3a164e05723ea01b2dcce5f8d291ea326113c9495c9d30b47c287dc12a0e84f",
+    "lines": 143
+  },
+  {
+    "file": "../../Lemoine.lean",
+    "bytes": 6748,
+    "sha256": "b11f1df1179ac4060c5a24109bb324391cbe5722aac3182c5a234f0f1a2d2535",
+    "lines": 137
+  },
+  {
+    "file": "../../Novelty1615.lean",
+    "bytes": 1602,
+    "sha256": "7e2c2d4886f70f54c5d5f84b07fbbdb1258cc6052a83af9ff86bd0b3a50e2813",
+    "lines": 32
+  },
+  {
+    "file": "../../PrimeCheck.lean",
+    "bytes": 1706,
+    "sha256": "d29f2562adb6d67ffa51400e18f4a4e0162e6eecead60c151e2c24e7ab6830c5",
+    "lines": 46
+  },
+  {
+    "file": "../../RouteLemmas.lean",
+    "bytes": 90472,
+    "sha256": "0c4cfbe4f754a72eacd9dbb02fe7b540a8bea6ab8ccb9c50e9f798ca6d0a3b02",
+    "lines": 1889
+  },
+  {
+    "file": "../../Scratch66.lean",
+    "bytes": 361,
+    "sha256": "9e9831eea4ead4cacc30034299d18bb43897e57e9ffbb84fe439b6773b0d4ee3",
+    "lines": 10
+  },
+  {
+    "file": "../../SearchAdditive2Basis.lean",
+    "bytes": 12460,
+    "sha256": "b4114280c09eea56708f10834893bfa4c7b5c7120b0ae3d106e52ee8f6e061ab",
+    "lines": 250
+  },
+  {
+    "file": "../../State1612.lean",
+    "bytes": 12809,
+    "sha256": "1c12ffd63ee689e9e1084efd4be34aca25bf7ae337ab49fcba31bbeec3230e5e",
+    "lines": 328
+  },
+  {
+    "file": "../../State1616.lean",
+    "bytes": 47257,
+    "sha256": "96c95ec0d4ddb981a697f92075ce13bc9a2dec43924f12e6ac4e66ed048449df",
+    "lines": 1045
+  }
+]
