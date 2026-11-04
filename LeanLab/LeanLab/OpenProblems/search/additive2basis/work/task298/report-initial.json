@@ -1,0 +1,95 @@
+{
+  "batches": [
+    {
+      "batch": "task298-01",
+      "domains": 1116,
+      "complete": 1116,
+      "joins": 10029286,
+      "scored": 10,
+      "best_ratio": "235/1849",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-02",
+      "domains": 136,
+      "complete": 136,
+      "joins": 1434938611,
+      "scored": 2,
+      "best_ratio": "235/1849",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-03",
+      "domains": 113,
+      "complete": 80,
+      "joins": 9831027593,
+      "scored": 2,
+      "best_ratio": "235/1849",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-04",
+      "domains": 1700,
+      "complete": 1700,
+      "joins": 214500011,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-05",
+      "domains": 703,
+      "complete": 686,
+      "joins": 6690874712,
+      "scored": 7,
+      "best_ratio": "410/3249",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-07",
+      "domains": 29,
+      "complete": 16,
+      "joins": 3655060503,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-08",
+      "domains": 1681,
+      "complete": 1681,
+      "joins": 238342766,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-09",
+      "domains": 859,
+      "complete": 859,
+      "joins": 123199772,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-10",
+      "domains": 34,
+      "complete": 32,
+      "joins": 374352062,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    }
+  ],
+  "scored": 21,
+  "distinct": 10,
+  "program_records_checked": 21,
+  "duplicate_exact_domains": 0,
+  "BEATS": 0,
+  "independent_coverage": "MATCH",
+  "judge_sources": "UNCHANGED",
+  "prior_batches": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "BEST_generators": 10
+}

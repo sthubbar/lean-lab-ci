@@ -1,0 +1,7 @@
+{
+  "batch": "task298-02",
+  "status": "interrupted shared executable replacement",
+  "observed_exception": "PermissionError: [Errno 13] Permission denied: '/tmp/task298/mitm'",
+  "completed_status_records": 136,
+  "provenance": "summary of observed tool output, not a replayed command log"
+}

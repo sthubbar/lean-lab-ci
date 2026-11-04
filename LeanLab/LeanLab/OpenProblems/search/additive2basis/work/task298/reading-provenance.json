@@ -1,0 +1,12 @@
+[
+  {
+    "url": "https://arxiv.org/pdf/1403.5945",
+    "sha256": "16ff3ea0de780fce7e5d44f35dbf2b60c0266e8af08189c850d3edc45cf1ccf1",
+    "reading_copy": "outside repository"
+  },
+  {
+    "url": "https://oeis.org/search?q=id:A006638&fmt=json",
+    "sha256": "ffde427597305e6e07569ffe4dec7aaa1867efaca733bd0dde11fee50077aa28",
+    "reading_copy": "outside repository"
+  }
+]

@@ -1,0 +1,570 @@
+[
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/Erdos17.lean",
+    "lines": 175,
+    "sha256": "b29f8aa88ac6fe6a46a26facbc0843cfa8ec06ec5cc8c0aeecdf63dcb141f803",
+    "imports": [
+      "LeanLab.OpenProblems.PrimeCheck"
+    ],
+    "declarations": [
+      "IsClusterPrime",
+      "Erdos17Statement",
+      "Unblocked",
+      "cluster_iff_composite",
+      "prime_near_of_cluster",
+      "not_isClusterPrime_97",
+      "isClusterPrime_5",
+      "clusterB",
+      "a038133",
+      "table_check",
+      "clusterB_iff",
+      "oeis_a038133"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/Erdos273.lean",
+    "lines": 276,
+    "sha256": "4c4f10cd68cfbb1117e5bfca69cdeb9ef733cb6a7a6b1350226d0d96427d3c22",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "Covers",
+      "CoverBy",
+      "Erdos273Statement",
+      "not_covers_empty",
+      "coverBy_two",
+      "coverBy_mono",
+      "selfridge",
+      "selfridge_mod",
+      "selfridge_dvd",
+      "covers_selfridge",
+      "cover_three",
+      "checkCover",
+      "covers_of_check",
+      "statement_of_check",
+      "check_selfridge",
+      "card_class_le",
+      "one_le_sum_inv",
+      "lowModuli",
+      "low_sum_lt",
+      "mem_lowModuli",
+      "exists_modulus_ge_70"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/Erdos273Tree.lean",
+    "lines": 212,
+    "sha256": "8c9bfc687df49e62e0018a841be1021b5b07a9258614b820abfeed900b1470af",
+    "imports": [
+      "LeanLab.OpenProblems.Erdos273"
+    ],
+    "declarations": [
+      "CoverTree",
+      "checkTree",
+      "exists_refined_class",
+      "checkTree_sound",
+      "covers_of_tree",
+      "selfridgeTree",
+      "check_selfridge_tree",
+      "covers_selfridge_tree",
+      "check_single_pair_false",
+      "checkCover_of_covers",
+      "checkCover_of_tree",
+      "checkTree_single_pair_false",
+      "exists_tree_of_factors",
+      "covers_iff_exists_tree"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/Erdos9.lean",
+    "lines": 148,
+    "sha256": "8c79156a9d45fdf3da9b3454e0fec11f83a2a4f1f8f65ac71d78489d3ddfc23c",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "Erdos9A",
+      "PosUpperDensity",
+      "Erdos9Statement",
+      "posUpperDensity_univ",
+      "not_posUpperDensity_empty",
+      "one_mem",
+      "three_mem",
+      "five_not_mem",
+      "hasFac",
+      "not_prime_of_hasFac",
+      "checkAll",
+      "checkAll_1117175145",
+      "mem_of_checkAll",
+      "mem_1117175145",
+      "vacuity",
+      "not_polignac_of_mem"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/EulerDensity.lean",
+    "lines": 74,
+    "sha256": "c66f3f1b41a0f5fde89a0bcfbddd9fdff044c1e0f297a91320abcf5ff22acfac",
+    "imports": [
+      "LeanLab.OpenProblems.State1612"
+    ],
+    "declarations": [
+      "euExc_le",
+      "represented_count_eq",
+      "isEuler_of_four_mul_add_one_prime",
+      "euler_represented_infinite",
+      "positive_density_of_almost_all"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/KohonenAsymptotic.lean",
+    "lines": 84,
+    "sha256": "ae147168c8e4bc8b66a348c77dbffc86ca1626d4f2be0f6717e4e53b34bfe67e",
+    "imports": [
+      "LeanLab.OpenProblems.SearchAdditive2Basis"
+    ],
+    "declarations": [
+      "kohonen_cardinality_bound",
+      "kohonen_asymptotic"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/KohonenCardinality.lean",
+    "lines": 198,
+    "sha256": "078e23e6b64a8683819caa6c9caf34ca4731359899d8d067e8dbf9cfe8ef68de",
+    "imports": [
+      "LeanLab.OpenProblems.SearchAdditive2Basis"
+    ],
+    "declarations": [
+      "segments_lt_block",
+      "place_block",
+      "card_place_eq",
+      "disjoint_place_of_blocks",
+      "kohonen_basis_card",
+      "kohonen_endpoint",
+      "kohonen_exact_certificate"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/KohonenCeiling.lean",
+    "lines": 68,
+    "sha256": "7b10edb03f5a8ce55e7b60bd401c1b785ba0cbed2456383e09774e6876af0393",
+    "imports": [
+      "LeanLab.OpenProblems.SearchAdditive2Basis"
+    ],
+    "declarations": [
+      "covered_blocks_le_mixed_products",
+      "three_mul_covered_blocks_le_sq_segments"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/KohonenNormalization.lean",
+    "lines": 133,
+    "sha256": "f3d81c81a381e6a931452d527093b9d2b3681be3559f6ed2d2fd2d79b50611c9",
+    "imports": [
+      "LeanLab.OpenProblems.KohonenOverlap",
+      "LeanLab.OpenProblems.KohonenSumset"
+    ],
+    "declarations": [
+      "basis_card_div_t_tendsto",
+      "basis_sumset_limsup_le_mixed_ratio",
+      "three_kind_geometric_limsup_le"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/KohonenOverlap.lean",
+    "lines": 131,
+    "sha256": "73fda76aba151d03130c0794070ac3896cf2826b9cf494188d45fd66a6deaf8d",
+    "imports": [
+      "LeanLab.OpenProblems.KohonenCardinality"
+    ],
+    "declarations": [
+      "place_inter_subset",
+      "segment_inter_card_le",
+      "card_basis_lower"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/KohonenRange.lean",
+    "lines": 142,
+    "sha256": "500f804540fc5dd7587a53706c4f53e59a005e969111de0a8952d6e1c0fac1df",
+    "imports": [
+      "LeanLab.OpenProblems.KohonenAsymptotic"
+    ],
+    "declarations": [
+      "covered_range_le_card_sq",
+      "maximalRange_le_sq",
+      "le_maximalRange",
+      "maximalRange_ratio_le_one",
+      "kohonen_liminf",
+      "covered_range_le_choose_two",
+      "maximalRange_le_choose_two",
+      "maximalRange_attained"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/KohonenSumset.lean",
+    "lines": 143,
+    "sha256": "e3a164e05723ea01b2dcce5f8d291ea326113c9495c9d30b47c287dc12a0e84f",
+    "imports": [
+      "LeanLab.OpenProblems.SearchAdditive2Basis"
+    ],
+    "declarations": [
+      "card_progression_add_self_le",
+      "card_place_add_le",
+      "card_union_three_add_self_le",
+      "card_basis_add_le"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/Lemoine.lean",
+    "lines": 137,
+    "sha256": "b11f1df1179ac4060c5a24109bb324391cbe5722aac3182c5a234f0f1a2d2535",
+    "imports": [
+      "LeanLab.OpenProblems.PrimeCheck"
+    ],
+    "declarations": [
+      "IsLemoine",
+      "LemoineConjecture",
+      "LemoineAbove",
+      "isLemoine_7",
+      "not_isLemoine_5",
+      "repCount",
+      "a046927",
+      "repCount_eq_a046927",
+      "smallQ",
+      "blockCheck",
+      "block0",
+      "block1",
+      "block2",
+      "block3",
+      "block4",
+      "block5",
+      "block6",
+      "block7",
+      "block8",
+      "block9",
+      "blocks",
+      "smallQ_prime",
+      "lemoine_le_20001",
+      "for",
+      "lemoine_iff_above",
+      "three_primes_of_isLemoine"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/Novelty1615.lean",
+    "lines": 32,
+    "sha256": "7e2c2d4886f70f54c5d5f84b07fbbdb1258cc6052a83af9ff86bd0b3a50e2813",
+    "imports": [
+      "LeanLab.OpenProblems.Erdos273"
+    ],
+    "declarations": [
+      "LcmBound",
+      "lcmBound_vacuity",
+      "lcm_ge_8000000"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/PrimeCheck.lean",
+    "lines": 46,
+    "sha256": "d29f2562adb6d67ffa51400e18f4a4e0162e6eecead60c151e2c24e7ab6830c5",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "primeB",
+      "primeB_iff"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/RouteLemmas.lean",
+    "lines": 1889,
+    "sha256": "0c4cfbe4f754a72eacd9dbb02fe7b540a8bea6ab8ccb9c50e9f798ca6d0a3b02",
+    "imports": [
+      "LeanLab.OpenProblems.Erdos9",
+      "LeanLab.OpenProblems.Lemoine",
+      "LeanLab.OpenProblems.Erdos17",
+      "LeanLab.BrunGap.Final"
+    ],
+    "declarations": [
+      "route_erdos9A_infinite",
+      "lemoine_positive_density_aux",
+      "route_lemoine_positive_density",
+      "route_cluster_count_le"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/Scratch66.lean",
+    "lines": 10,
+    "sha256": "9e9831eea4ead4cacc30034299d18bb43897e57e9ffbb84fe439b6773b0d4ee3",
+    "imports": [
+      "LeanLab.OpenProblems.Erdos9",
+      "LeanLab.OpenProblems.Lemoine",
+      "LeanLab.OpenProblems.Erdos17",
+      "LeanLab.BrunGap.Uniform"
+    ],
+    "declarations": []
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/SearchAdditive2Basis.lean",
+    "lines": 250,
+    "sha256": "b4114280c09eea56708f10834893bfa4c7b5c7120b0ae3d106e52ee8f6e061ab",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "V",
+      "H",
+      "S",
+      "place",
+      "basis",
+      "sumHits",
+      "blockOK",
+      "coversB",
+      "sumHits_spec",
+      "vh",
+      "vs",
+      "hs_lower",
+      "hs_upper",
+      "mem_place",
+      "sumset_of_covers",
+      "card_place_le",
+      "card_basis_le",
+      "certificate_of_covers",
+      "Beats",
+      "RecordBeaten",
+      "recordBeaten_of_certificate",
+      "kI",
+      "kJ",
+      "kK",
+      "kohonen_covers",
+      "kohonen_certificate",
+      "kohonen_not_511",
+      "small_not_covers",
+      "kohonen_not_beats"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/State1612.lean",
+    "lines": 328,
+    "sha256": "1c12ffd63ee689e9e1084efd4be34aca25bf7ae337ab49fcba31bbeec3230e5e",
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach"
+    ],
+    "declarations": [
+      "IsEuler",
+      "Euler8n3Statement",
+      "not_isEuler_three",
+      "isEuler_eleven",
+      "prime_mod_four",
+      "isEuler_iff_triangular",
+      "not_square_8n3",
+      "euB",
+      "euB_sound",
+      "euler_le_1000",
+      "statement_iff_euExc",
+      "route_euler_positive_density",
+      "route_euler_almost_all",
+      "Powerful",
+      "PowerfulPrimeStatement",
+      "powerful_one",
+      "powerful_sq",
+      "powerful_eight_sq",
+      "not_powerful_six",
+      "not_powerful_two",
+      "rep_four",
+      "rep_nine",
+      "not_rep_four_of_one_excluded",
+      "sq_of_prime",
+      "sq_route_exhausted",
+      "pellM",
+      "pellA",
+      "state",
+      "state_succ",
+      "state_6n",
+      "state_6n_1",
+      "pell_eq",
+      "div_5_2m_1",
+      "pellM_ge",
+      "pellM_ge_11",
+      "not_prime_2m_1",
+      "pellA_ge_1",
+      "pellM_mono",
+      "pellM_ge_n",
+      "route_powerful_nonsquare_family"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/State1616.lean",
+    "lines": 1045,
+    "sha256": "96c95ec0d4ddb981a697f92075ce13bc9a2dec43924f12e6ac4e66ed048449df",
+    "imports": [
+      "Mathlib",
+      "LeanLab.OpenProblems.Erdos9",
+      "LeanLab.OpenProblems.PrimeCheck"
+    ],
+    "declarations": [
+      "SumPrimePows",
+      "Erdos10Statement",
+      "popc",
+      "popc_zero",
+      "popc_step",
+      "popc_two_mul",
+      "popc_two_mul_add_one",
+      "popc_two_pow",
+      "popc_add",
+      "popc_sum_le",
+      "exists_multiset",
+      "mem_iff",
+      "sumPrimePows_mono",
+      "mem_popc_sub_two",
+      "one_not_mem",
+      "two_mem",
+      "three_mem",
+      "not_mem_one",
+      "not_tail_one",
+      "not_statement_of_one_excluded",
+      "not_mem_three_of_erdos9",
+      "grechuk_not_mem",
+      "ClassLE",
+      "at",
+      "Erdos1055Statement",
+      "Erdos1055Limit",
+      "Selfridge1055Bounded",
+      "not_classLE_zero",
+      "classLE_succ_iff",
+      "mkLE",
+      "ClassLE.fac",
+      "ClassLE.prime",
+      "classLE_one_two",
+      "classLE_one_three",
+      "classLE_succ",
+      "classLE_mono",
+      "classLE_of_two_or_three",
+      "two_mul_le_of_dvd",
+      "exists_classLE",
+      "exists_isClass",
+      "isClass_unique",
+      "isClass_one_iff",
+      "isClass_of_le",
+      "at",
+      "isClass_succ_iff",
+      "exists_factor_of_succ",
+      "exists_isClass_down",
+      "lt_class_of_dvd",
+      "exists_prime_dvd_succ",
+      "isClass_one_five",
+      "exists_isClass_ne",
+      "exists_isClass_of_pos",
+      "infinite_class_gt",
+      "two_pow_add_one_le",
+      "two_pow_add_one_le_leastPrime",
+      "isClass_leastPrime",
+      "two_mul_leastPrime_le",
+      "factor_two_mul",
+      "classLE_one_seven",
+      "isClass_two_13",
+      "classLE_two_19",
+      "not_classLE_one_19",
+      "isClass_three_37",
+      "isClass_four_73",
+      "Lit",
+      "lit_iff",
+      "lit_two",
+      "lit_statement_iff",
+      "lit_of_statement",
+      "not_limit_and_bounded",
+      "DistinctRun",
+      "Erdos852PartOne",
+      "Erdos852PartTwo",
+      "nth_lt_succ",
+      "gap_cases",
+      "sum_range_le_sum_finset",
+      "sum_gap",
+      "run_span",
+      "nth_succ_of_consec",
+      "chk",
+      "chk_nth",
+      "run15",
+      "diffAt",
+      "gap_of_chk",
+      "exists_distinctRun_15",
+      "distinctRun_zero_two",
+      "not_distinctRun_zero_three",
+      "Erdos238Statement",
+      "pairwise_of_adjacent",
+      "gap_gt_of_lt_two",
+      "exists_run_31"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/old/20261103-stale-PC-RouteLemmas.lean",
+    "lines": 48,
+    "sha256": "c857b628f241351efa7faec0359dd0d97052b65481afbb9e32045ce8037408c8",
+    "imports": [
+      "LeanLab.OpenProblems.Erdos9",
+      "LeanLab.OpenProblems.Lemoine",
+      "LeanLab.OpenProblems.Erdos17"
+    ],
+    "declarations": [
+      "route_erdos9A_infinite",
+      "route_lemoine_positive_density",
+      "route_cluster_count_le"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/old/20261104-stale-PC-RouteLemmas.lean",
+    "lines": 753,
+    "sha256": "447cae47a2189731bcfd840860829e69012b129199c576e5813e8f93834e45f9",
+    "imports": [
+      "LeanLab.OpenProblems.Erdos9",
+      "LeanLab.OpenProblems.Lemoine",
+      "LeanLab.OpenProblems.Erdos17"
+    ],
+    "declarations": [
+      "route_erdos9A_infinite",
+      "route_lemoine_positive_density",
+      "route_cluster_count_le"
+    ]
+  },
+  {
+    "path": "LeanLab/LeanLab/OpenProblems/old/20261104-stale-PC-State1612.lean",
+    "lines": 217,
+    "sha256": "f24e3d34d108789177abf3a9c8301944af4915bc9ea80395a402e343f16cc41a",
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach"
+    ],
+    "declarations": [
+      "IsEuler",
+      "Euler8n3Statement",
+      "not_isEuler_three",
+      "isEuler_eleven",
+      "prime_mod_four",
+      "isEuler_iff_triangular",
+      "not_square_8n3",
+      "euB",
+      "euB_sound",
+      "euler_le_1000",
+      "statement_iff_euExc",
+      "route_euler_positive_density",
+      "route_euler_almost_all",
+      "Powerful",
+      "PowerfulPrimeStatement",
+      "powerful_one",
+      "powerful_sq",
+      "powerful_eight_sq",
+      "not_powerful_six",
+      "not_powerful_two",
+      "rep_four",
+      "rep_nine",
+      "not_rep_four_of_one_excluded",
+      "sq_of_prime",
+      "sq_route_exhausted",
+      "route_powerful_nonsquare_family"
+    ]
+  }
+]

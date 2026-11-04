@@ -1,0 +1,185 @@
+{
+  "batches": [
+    {
+      "batch": "task298-01",
+      "domains": 1116,
+      "complete": 1116,
+      "joins": 10029286,
+      "indexed_domains": 0,
+      "scored": 10,
+      "best_ratio": "235/1849",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-02",
+      "domains": 136,
+      "complete": 136,
+      "joins": 1434938611,
+      "indexed_domains": 0,
+      "scored": 2,
+      "best_ratio": "235/1849",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-03",
+      "domains": 721,
+      "complete": 501,
+      "joins": 66541477571,
+      "indexed_domains": 0,
+      "scored": 7,
+      "best_ratio": "235/1849",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-04",
+      "domains": 1700,
+      "complete": 1700,
+      "joins": 214500011,
+      "indexed_domains": 0,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-05",
+      "domains": 980,
+      "complete": 963,
+      "joins": 9776549196,
+      "indexed_domains": 0,
+      "scored": 8,
+      "best_ratio": "110/867",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-06",
+      "domains": 86,
+      "complete": 86,
+      "joins": 10610497,
+      "indexed_domains": 0,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-07",
+      "domains": 401,
+      "complete": 325,
+      "joins": 60893433761,
+      "indexed_domains": 0,
+      "scored": 5,
+      "best_ratio": "235/1849",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-08",
+      "domains": 1681,
+      "complete": 1681,
+      "joins": 238342766,
+      "indexed_domains": 0,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-09",
+      "domains": 859,
+      "complete": 859,
+      "joins": 123199772,
+      "indexed_domains": 0,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-10",
+      "domains": 1690,
+      "complete": 1688,
+      "joins": 16033386057,
+      "indexed_domains": 0,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-11",
+      "domains": 368,
+      "complete": 264,
+      "joins": 44018216,
+      "indexed_domains": 368,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-13",
+      "domains": 970,
+      "complete": 791,
+      "joins": 71226051,
+      "indexed_domains": 970,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-14",
+      "domains": 96,
+      "complete": 96,
+      "joins": 733197,
+      "indexed_domains": 96,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    },
+    {
+      "batch": "task298-15",
+      "domains": 236,
+      "complete": 173,
+      "joins": 21341592,
+      "indexed_domains": 236,
+      "scored": 1,
+      "best_ratio": "191/1521",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-16",
+      "domains": 42,
+      "complete": 37,
+      "joins": 2938603,
+      "indexed_domains": 42,
+      "scored": 2,
+      "best_ratio": "634/5041",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-17",
+      "domains": 60,
+      "complete": 53,
+      "joins": 2312409,
+      "indexed_domains": 60,
+      "scored": 1,
+      "best_ratio": "410/3249",
+      "best_miss": 1
+    },
+    {
+      "batch": "task298-18",
+      "domains": 229,
+      "complete": 162,
+      "joins": 11899057,
+      "indexed_domains": 229,
+      "scored": 0,
+      "best_ratio": null,
+      "best_miss": null
+    }
+  ],
+  "scored": 36,
+  "distinct": 12,
+  "program_records_checked": 36,
+  "source_generators_checked": 1071,
+  "duplicate_exact_domains": 0,
+  "BEATS": 0,
+  "independent_coverage": "MATCH",
+  "judge_sources": "UNCHANGED",
+  "prior_batches": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "BEST_generators": 10
+}

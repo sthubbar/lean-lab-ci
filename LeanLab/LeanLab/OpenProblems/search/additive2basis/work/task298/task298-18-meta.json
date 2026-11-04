@@ -1,0 +1,20 @@
+{
+  "arguments": {
+    "name": "task298-18",
+    "low": 18,
+    "high": 120,
+    "radius": -1,
+    "steps": 6,
+    "seconds": 5.0,
+    "budget": 660.0,
+    "seed": 298,
+    "transfer": true,
+    "indexed": true,
+    "resume": [],
+    "min_index": 284,
+    "manifest": "work/task298/source-seeds-diverse.jsonl"
+  },
+  "utc_start": "2026-11-04T18:04:56.991164+00:00",
+  "C_sha256": "e3a3cb750b9b20507a6352d805352c98a6986ae9886800f7a59b01606cd5139e",
+  "Python_sha256": "a7801228737425fb5cd2c5e7fb07498c85973705e929bb495e143572c28f0ae9"
+}

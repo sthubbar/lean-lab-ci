@@ -1,0 +1,22 @@
+{
+  "arguments": {
+    "name": "task298-14",
+    "low": 18,
+    "high": 60,
+    "radius": -1,
+    "steps": 3,
+    "seconds": 5.0,
+    "budget": 600.0,
+    "seed": 298,
+    "transfer": true,
+    "indexed": true,
+    "resume": [
+      "batches/task298-10-status.jsonl"
+    ],
+    "min_index": 0,
+    "manifest": "work/task298/source-seeds.jsonl"
+  },
+  "utc_start": "2026-11-04T17:33:08.339695+00:00",
+  "C_sha256": "e3a3cb750b9b20507a6352d805352c98a6986ae9886800f7a59b01606cd5139e",
+  "Python_sha256": "a7801228737425fb5cd2c5e7fb07498c85973705e929bb495e143572c28f0ae9"
+}
