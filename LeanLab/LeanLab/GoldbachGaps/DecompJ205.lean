@@ -78,7 +78,58 @@ theorem leaf_fejer_asymp (K : ℕ → ℕ)
     (hK : ∀ᶠ N : ℕ in atTop, 1 ≤ K N ∧ (K N : ℝ) ≤ N / Real.log N ^ 3)
     (hinf : Tendsto K atTop atTop) :
     Tendsto (fun N : ℕ => Jg N (K N) / ((K N : ℝ) ^ 2 * N)) atTop (nhds 0) →
-    Tendsto (fun N : ℕ => fejer N (K N) / ((K N : ℝ) ^ 2 * N)) atTop (nhds 1) := sorry
+    Tendsto (fun N : ℕ => fejer N (K N) / ((K N : ℝ) ^ 2 * N)) atTop (nhds 1) := by
+  intro hJ
+  obtain ⟨C, hC, hT⟩ := theorem6_proved
+  rw [Metric.tendsto_atTop]
+  intro δ hδ
+  obtain ⟨N0, hN0⟩ := hT (δ / 3) (by positivity)
+  have e1 : ∀ᶠ N : ℕ in atTop, Jg N (K N) / ((K N : ℝ) ^ 2 * N) < δ / 3 :=
+    hJ.eventually (Iio_mem_nhds (by positivity))
+  have e2 : ∀ᶠ N : ℕ in atTop, C * ((K N : ℝ))⁻¹ < δ / 3 := by
+    have h1 : Tendsto (fun N : ℕ => ((K N : ℝ))⁻¹) atTop (nhds 0) :=
+      tendsto_inv_atTop_zero.comp (tendsto_natCast_atTop_atTop.comp hinf)
+    have h2 : Tendsto (fun N : ℕ => C * ((K N : ℝ))⁻¹) atTop (nhds (C * 0)) :=
+      tendsto_const_nhds.mul h1
+    rw [mul_zero] at h2
+    exact h2.eventually (Iio_mem_nhds (by positivity))
+  have e3 : ∀ᶠ N : ℕ in atTop, N0 ≤ N := eventually_ge_atTop N0
+  obtain ⟨M, hM⟩ := eventually_atTop.1 (e1.and (e2.and (e3.and hK)))
+  refine ⟨M, fun N hN => ?_⟩
+  obtain ⟨h1, h2, h3, h4a, h4b⟩ := hM N hN
+  have hKpos : (0 : ℝ) < K N := by exact_mod_cast h4a
+  -- the range `1 ≤ K ≤ N / log³ N` forces `N > 1`
+  have hq : (1 : ℝ) ≤ (N : ℝ) / Real.log N ^ 3 := le_trans (by exact_mod_cast h4a) h4b
+  have hL3 : 0 < Real.log N ^ 3 := by
+    rcases lt_trichotomy (Real.log N ^ 3) 0 with h | h | h
+    · have hle : (N : ℝ) / Real.log N ^ 3 ≤ 0 :=
+        div_nonpos_of_nonneg_of_nonpos (Nat.cast_nonneg N) h.le
+      linarith
+    · rw [h, div_zero] at h4b
+      linarith
+    · exact h
+  have hlogpos : 0 < Real.log N := by
+    by_contra h
+    push_neg at h
+    exact absurd hL3 (not_lt.mpr ((by decide : Odd 3).pow_nonpos h))
+  have hN1 : (1 : ℝ) < N := (Real.log_pos_iff (Nat.cast_nonneg N)).mp hlogpos
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hD : 0 < (K N : ℝ) ^ 2 * N := by positivity
+  rw [Real.dist_eq]
+  have hrw : fejer N (K N) / ((K N : ℝ) ^ 2 * N) - 1 =
+      (fejer N (K N) - (K N : ℝ) ^ 2 * N) / ((K N : ℝ) ^ 2 * N) := by
+    field_simp
+  rw [hrw, abs_div, abs_of_pos hD, div_lt_iff₀ hD]
+  have hJ' : Jg N (K N) < δ / 3 * ((K N : ℝ) ^ 2 * N) := by
+    rwa [div_lt_iff₀ hD] at h1
+  have hCK : C * (K N : ℝ) * N < δ / 3 * ((K N : ℝ) ^ 2 * N) := by
+    have hm := mul_lt_mul_of_pos_right h2 hD
+    have he : C * ((K N : ℝ))⁻¹ * ((K N : ℝ) ^ 2 * N) = C * (K N : ℝ) * N := by
+      field_simp
+    rwa [he] at hm
+  have hT' := hN0 N h3 (K N) h4a h4b
+  have heps : δ / 3 * ((K N : ℝ) ^ 2 * N) * 3 = δ * ((K N : ℝ) ^ 2 * N) := by ring
+  linarith
 
 /-- PROVED p. 292: `S(K) - S(K - h) ≤ h Σ_{|n| ≤ K} R(N + n)`, so the backward difference quotient
 is the lower bound. The old leaf ran the forward difference this way and was false. -/
