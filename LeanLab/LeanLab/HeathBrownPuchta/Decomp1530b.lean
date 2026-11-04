@@ -337,10 +337,406 @@ theorem divisor_swap (κ : ℕ → ℝ) (J : ℕ) :
     intro n hn
     simp [f, (mem_Ioc.mp hn).1.ne']
 
+/-- `π(n) ≤ n/3 + 5`: primes other than `2` and `3` are coprime to `6`. -/
+private theorem pcount_le (n : ℕ) : Nat.primeCounting n ≤ n / 3 + 5 := by
+  rcases Nat.lt_or_ge n 6 with h | h
+  · interval_cases n <;> decide
+  · have h6 : Nat.primeCounting 6 = 3 := by decide
+    have ht : Nat.totient 6 = 2 := by decide
+    have key := Nat.primeCounting_add_le (a := 6) (k := 6) (by norm_num) (by norm_num) (n - 6)
+    rw [show 6 + (n - 6) = n by omega, h6, ht] at key
+    have hd : 2 * ((n - 6) / 6 + 1) ≤ n / 3 := by omega
+    omega
+
+private theorem card_odd_primes_le {t : Finset ℕ} (hne : t.Nonempty)
+    (hpr : ∀ p ∈ t, p.Prime) : t.card ≤ t.max' hne / 3 + 5 := by
+  have hsub : t ⊆ Nat.primesLE (t.max' hne) := by
+    intro p hp
+    exact Nat.mem_primesLE.mpr ⟨Finset.le_max' t p hp, hpr p hp⟩
+  calc t.card ≤ (Nat.primesLE (t.max' hne)).card := Finset.card_le_card hsub
+    _ = Nat.primeCounting (t.max' hne) := Nat.primesLE_card_eq_primeCounting _
+    _ ≤ _ := pcount_le _
+
+private noncomputable def Qprod (x : ℕ) : ℕ := ∏ k ∈ Icc 1 x, (2 ^ k - 1)
+
+private theorem Qprod_ne_zero (x : ℕ) : Qprod x ≠ 0 := by
+  rw [Qprod, Finset.prod_ne_zero_iff]
+  intro k hk
+  have hk1 : 1 ≤ k := (Finset.mem_Icc.mp hk).1
+  have h2 : 2 ≤ 2 ^ k := by
+    calc 2 = 2 ^ 1 := by norm_num
+      _ ≤ 2 ^ k := Nat.pow_le_pow_right (by norm_num) hk1
+  omega
+
+private theorem Qprod_le (x : ℕ) : Qprod x ≤ 2 ^ (x * x) := by
+  rw [Qprod]
+  calc ∏ k ∈ Icc 1 x, (2 ^ k - 1) ≤ (2 ^ x) ^ (Icc 1 x).card :=
+        Finset.prod_le_pow_card _ _ _ fun k hk => by
+          have hk2 : k ≤ x := (Finset.mem_Icc.mp hk).2
+          have h2 : 2 ^ k ≤ 2 ^ x := Nat.pow_le_pow_right (by norm_num) hk2
+          exact (Nat.sub_le _ _).trans h2
+    _ = 2 ^ (x * x) := by rw [Nat.card_Icc, ← pow_mul, show x + 1 - 1 = x by omega]
+
+private theorem eps_pos_of_odd {d : ℕ} (hd : Odd d) : 0 < eps d := by
+  have hd0 : d ≠ 0 := by rintro rfl; exact absurd hd (by decide)
+  have h1 : (2 : ZMod d) ^ Nat.totient d = 1 := by
+    have := Nat.ModEq.pow_totient (Nat.coprime_two_left.mpr hd)
+    have := (ZMod.natCast_eq_natCast_iff _ _ _).mpr this
+    simpa using this
+  exact orderOf_pos_iff.mpr (isOfFinOrder_iff_pow_eq_one.mpr
+    ⟨_, Nat.totient_pos.mpr (Nat.pos_of_ne_zero hd0), h1⟩)
+
+private theorem dvd_two_pow_eps (d : ℕ) : d ∣ 2 ^ eps d - 1 := by
+  have h1 : (2 : ZMod d) ^ eps d = 1 := pow_orderOf_eq_one _
+  rw [← ZMod.natCast_eq_zero_iff]
+  rw [Nat.cast_sub Nat.one_le_two_pow]
+  push_cast
+  rw [h1, sub_self]
+
+private theorem dvd_Qprod {d x : ℕ} (hpos : 0 < eps d) (hle : eps d ≤ x) : d ∣ Qprod x :=
+  (dvd_two_pow_eps d).trans (Finset.dvd_prod_of_mem _ (Finset.mem_Icc.mpr ⟨hpos, hle⟩))
+
+private theorem card_pf_le {P : ℕ} (hP : P ≠ 0) {k : ℕ} (hk : P ≤ 2 ^ k) :
+    P.primeFactors.card ≤ k := by
+  have h1 : 2 ^ P.primeFactors.card ≤ ∏ p ∈ P.primeFactors, p :=
+    Finset.pow_card_le_prod _ _ _ fun p hp => (Nat.prime_of_mem_primeFactors hp).two_le
+  have h2 : ∏ p ∈ P.primeFactors, p ≤ P :=
+    Nat.le_of_dvd (Nat.pos_of_ne_zero hP) (Nat.prod_primeFactors_dvd P)
+  exact (pow_le_pow_iff_right₀ (by norm_num : 1 < 2)).mp (h1.trans (h2.trans hk))
+
+private theorem sum_inv_sub_two_le : ∀ (m : ℕ) (t : Finset ℕ), t.card = m →
+    (∀ p ∈ t, p.Prime) → 2 ∉ t →
+    ∑ p ∈ t, 1 / ((p : ℝ) - 2) ≤ 2 / 5 * Real.log ((t.card : ℝ) + 4) + 200 := by
+  intro m
+  induction m using Nat.strong_induction_on with
+  | _ m ih =>
+    intro t hcard hpr h2mem
+    rcases Nat.lt_or_ge m 61 with hm | hm
+    · have hone : ∀ p ∈ t, 1 / ((p : ℝ) - 2) ≤ 1 := by
+        intro p hp
+        have hpp := hpr p hp
+        have hp2 : p ≠ 2 := fun hh => h2mem (hh ▸ hp)
+        have hp3 : (3 : ℕ) ≤ p := by
+          have := hpp.two_le
+          omega
+        have h3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp3
+        rw [div_le_one (by linarith)]
+        linarith
+      have hsum : ∑ p ∈ t, 1 / ((p : ℝ) - 2) ≤ (t.card : ℝ) := by
+        calc ∑ p ∈ t, 1 / ((p : ℝ) - 2) ≤ ∑ _p ∈ t, (1 : ℝ) := Finset.sum_le_sum hone
+          _ = (t.card : ℝ) := by simp
+      have hcl : (t.card : ℝ) ≤ 60 := by
+        have h2 : t.card ≤ 60 := by omega
+        exact_mod_cast h2
+      have hlog0 : 0 ≤ Real.log ((t.card : ℝ) + 4) := by
+        apply Real.log_nonneg
+        have h2 : (0 : ℝ) ≤ (t.card : ℝ) := Nat.cast_nonneg _
+        linarith
+      have hfin : (t.card : ℝ) ≤ 2 / 5 * Real.log ((t.card : ℝ) + 4) + 200 := by nlinarith
+      linarith
+    · have hm61 : 61 ≤ m := hm
+      have hne : t.Nonempty := by
+        rw [Finset.nonempty_iff_ne_empty]
+        intro he
+        rw [he] at hcard
+        simp at hcard
+        omega
+      set M := t.max' hne with hMdef
+      have hMt : M ∈ t := Finset.max'_mem t hne
+      have hMge : 3 * (m - 5) ≤ M := by
+        have h1 := card_odd_primes_le hne hpr
+        rw [hcard, ← hMdef] at h1
+        have h2 : (m - 5) * 3 ≤ (M / 3) * 3 := by
+          apply Nat.mul_le_mul_right
+          omega
+        have h3 : (M / 3) * 3 ≤ M := Nat.div_mul_le_self M 3
+        omega
+      have hMr : (3 : ℝ) * ((m : ℝ) - 5) ≤ (M : ℝ) := by
+        have h1 : ((3 * (m - 5) : ℕ) : ℝ) ≤ (M : ℝ) := by exact_mod_cast hMge
+        rw [Nat.cast_mul, Nat.cast_sub (by omega : 5 ≤ m)] at h1
+        push_cast at h1
+        linarith
+      have hmR : (61 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm61
+      have hM2 : (0 : ℝ) < (M : ℝ) - 2 := by linarith
+      have hcard' : (t.erase M).card = m - 1 := by
+        rw [Finset.card_erase_of_mem hMt, hcard]
+      have hpr' : ∀ p ∈ t.erase M, p.Prime := fun p hp => hpr p (Finset.mem_of_mem_erase hp)
+      have h2' : 2 ∉ t.erase M := fun hh => h2mem (Finset.mem_of_mem_erase hh)
+      have hih := ih (m - 1) (by omega) (t.erase M) hcard' hpr' h2'
+      have hci2 : ((t.erase M).card : ℝ) + 4 = (m : ℝ) + 3 := by
+        rw [hcard', Nat.cast_sub (by omega : 1 ≤ m)]
+        push_cast
+        ring
+      rw [hci2] at hih
+      have hsplit : ∑ p ∈ t, 1 / ((p : ℝ) - 2) =
+          (∑ p ∈ t.erase M, 1 / ((p : ℝ) - 2)) + 1 / ((M : ℝ) - 2) :=
+        (Finset.sum_erase_add _ _ hMt).symm
+      have hstep : 1 / ((M : ℝ) - 2) ≤ 2 / (5 * ((m : ℝ) + 4)) := by
+        rw [le_div_iff₀ (by positivity : (0 : ℝ) < 5 * ((m : ℝ) + 4)),
+          div_mul_eq_mul_div, div_le_iff₀ hM2]
+        nlinarith
+      have hlog : 2 / (5 * ((m : ℝ) + 4)) ≤
+          2 / 5 * Real.log (((m : ℝ) + 4) / ((m : ℝ) + 3)) := by
+        have hx : (0 : ℝ) < ((m : ℝ) + 4) / ((m : ℝ) + 3) := by positivity
+        have h1 := Real.one_sub_inv_le_log_of_pos hx
+        have hinv : (((m : ℝ) + 4) / ((m : ℝ) + 3))⁻¹ = ((m : ℝ) + 3) / ((m : ℝ) + 4) := by
+          rw [inv_div]
+        rw [hinv] at h1
+        have hone : (1 : ℝ) - ((m : ℝ) + 3) / ((m : ℝ) + 4) = 1 / ((m : ℝ) + 4) := by
+          field_simp
+          ring
+        rw [hone] at h1
+        have hval : 2 / (5 * ((m : ℝ) + 4)) = 2 / 5 * (1 / ((m : ℝ) + 4)) := by
+          field_simp
+        rw [hval]
+        exact mul_le_mul_of_nonneg_left h1 (by norm_num)
+      have hlogadd : 2 / 5 * Real.log ((m : ℝ) + 3) +
+          2 / 5 * Real.log (((m : ℝ) + 4) / ((m : ℝ) + 3)) =
+          2 / 5 * Real.log ((m : ℝ) + 4) := by
+        rw [Real.log_div (by positivity) (by positivity)]
+        ring
+      have hfinal : 2 / 5 * Real.log ((m : ℝ) + 3) + 200 + 2 / (5 * ((m : ℝ) + 4)) ≤
+          2 / 5 * Real.log ((m : ℝ) + 4) + 200 := by linarith [hlog, hlogadd]
+      rw [hsplit, hcard]
+      linarith [hih, hstep, hfinal]
+
+private theorem cast_h_le_exp (n : ℕ) :
+    ((h n : ℚ) : ℝ) ≤
+      Real.exp (∑ p ∈ n.primeFactors.filter (fun p => p ≠ 2), 1 / ((p : ℝ) - 2)) := by
+  have hgt : ∀ p ∈ n.primeFactors.filter (fun p => p ≠ 2), (0 : ℝ) < (p : ℝ) - 2 := by
+    intro p hp
+    have hp2 : p ≠ 2 := (Finset.mem_filter.mp hp).2
+    have hpp := Nat.prime_of_mem_primeFactors (Finset.mem_of_mem_filter p hp)
+    have hp3 : (3 : ℕ) ≤ p := by
+      have := hpp.two_le
+      omega
+    have h3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp3
+    linarith
+  have hstep : ∀ p ∈ n.primeFactors.filter (fun p => p ≠ 2),
+      ((p : ℝ) - 1) / ((p : ℝ) - 2) = 1 + 1 / ((p : ℝ) - 2) := by
+    intro p hp
+    have hp2 : (p : ℝ) - 2 ≠ 0 := ne_of_gt (hgt p hp)
+    field_simp
+    ring
+  unfold h
+  push_cast
+  rw [Finset.prod_congr rfl hstep]
+  calc ∏ p ∈ n.primeFactors.filter (fun p => p ≠ 2), (1 + 1 / ((p : ℝ) - 2))
+      ≤ ∏ p ∈ n.primeFactors.filter (fun p => p ≠ 2), Real.exp (1 / ((p : ℝ) - 2)) := by
+        refine Finset.prod_le_prod₀ (fun p hp => ?_) (fun p hp => ?_)
+        · have h3 := hgt p hp
+          have h4 : (0 : ℝ) < 1 / ((p : ℝ) - 2) := by positivity
+          linarith
+        · have h3 := Real.add_one_le_exp (1 / ((p : ℝ) - 2))
+          linarith
+    _ = Real.exp (∑ p ∈ n.primeFactors.filter (fun p => p ≠ 2), 1 / ((p : ℝ) - 2)) :=
+        (Real.exp_sum _ _).symm
+
+private theorem hQ_le (x : ℕ) (hx : 2 ≤ x) :
+    ((h (Qprod x) : ℚ) : ℝ) ≤
+      Real.exp 200 * Real.exp (2 / 5 * Real.log (2 * ((x : ℝ) ^ 2))) := by
+  set t : Finset ℕ := (Qprod x).primeFactors.filter (fun p => p ≠ 2) with ht
+  have hpr : ∀ p ∈ t, p.Prime := fun p hp =>
+    Nat.prime_of_mem_primeFactors (Finset.mem_of_mem_filter p hp)
+  have h2m : 2 ∉ t := by simp [ht]
+  have hcast := cast_h_le_exp (Qprod x)
+  have hkey := sum_inv_sub_two_le t.card t rfl hpr h2m
+  have hcardle : t.card ≤ x * x := by
+    have h1 : t.card ≤ (Qprod x).primeFactors.card :=
+      Finset.card_le_card (Finset.filter_subset _ _)
+    have h2 := card_pf_le (Qprod_ne_zero x) (Qprod_le x)
+    omega
+  have hcardR : (t.card : ℝ) + 4 ≤ 2 * ((x : ℝ) ^ 2) := by
+    have h1 : (t.card : ℝ) ≤ (x : ℝ) ^ 2 := by
+      have h2 : ((t.card : ℕ) : ℝ) ≤ ((x * x : ℕ) : ℝ) := by exact_mod_cast hcardle
+      push_cast at h2
+      linarith
+    have hxR : (2 : ℝ) ≤ (x : ℝ) := by exact_mod_cast hx
+    nlinarith
+  calc ((h (Qprod x) : ℚ) : ℝ)
+      ≤ Real.exp (∑ p ∈ (Qprod x).primeFactors.filter (fun p => p ≠ 2), 1 / ((p : ℝ) - 2)) :=
+        hcast
+    _ = Real.exp (∑ p ∈ t, 1 / ((p : ℝ) - 2)) := by rw [ht]
+    _ ≤ Real.exp (2 / 5 * Real.log ((t.card : ℝ) + 4) + 200) := Real.exp_le_exp.mpr hkey
+    _ = Real.exp 200 * Real.exp (2 / 5 * Real.log ((t.card : ℝ) + 4)) := by
+        rw [show 2 / 5 * Real.log ((t.card : ℝ) + 4) + 200 =
+          200 + 2 / 5 * Real.log ((t.card : ℝ) + 4) by ring, Real.exp_add]
+    _ ≤ Real.exp 200 * Real.exp (2 / 5 * Real.log (2 * ((x : ℝ) ^ 2))) := by
+        apply mul_le_mul_of_nonneg_left _ (Real.exp_pos 200).le
+        apply Real.exp_le_exp.mpr
+        refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+        exact Real.log_le_log (by positivity) hcardR
+
+private noncomputable def rho : ℝ := Real.exp (-(Real.log 2) / 5)
+
+private theorem rho_pos : 0 < rho := Real.exp_pos _
+
+private theorem rho_lt_one : rho < 1 := by
+  rw [rho, show (1 : ℝ) = Real.exp 0 by rw [Real.exp_zero]]
+  apply Real.exp_lt_exp.mpr
+  have h := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  linarith
+
+private theorem block_major (j : ℕ) :
+    (1 / 2 : ℝ) ^ j *
+        (Real.exp 200 * Real.exp (2 / 5 * Real.log (2 * ((2 : ℝ) ^ (j + 1)) ^ 2)))
+      ≤ Real.exp 200 * 4 * rho ^ j := by
+  have hxval : (2 : ℝ) * ((2 : ℝ) ^ (j + 1)) ^ 2 = (2 : ℝ) ^ (2 * j + 3) := by
+    rw [pow_two, ← pow_add, mul_comm (2 : ℝ), ← pow_succ]
+    congr 1
+    omega
+  have hlog2 : Real.log ((2 : ℝ) ^ (2 * j + 3)) = (2 * (j : ℝ) + 3) * Real.log 2 := by
+    rw [Real.log_pow]
+    push_cast
+    ring
+  have hhalf : (1 / 2 : ℝ) ^ j = Real.exp (-((j : ℝ) * Real.log 2)) := by
+    rw [Real.exp_neg, Real.exp_nat_mul, Real.exp_log (by norm_num : (0 : ℝ) < 2), one_div,
+      inv_pow]
+  have h4 : (4 : ℝ) = Real.exp (Real.log 4) := (Real.exp_log (by norm_num)).symm
+  have hlog4 : Real.log 4 = 2 * Real.log 2 := by
+    rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+    push_cast
+    ring
+  have hrho : rho ^ j = Real.exp (-((j : ℝ) * (Real.log 2 / 5))) := by
+    rw [rho, ← Real.exp_nat_mul]
+    congr 1
+    ring
+  have hL : (1 / 2 : ℝ) ^ j *
+      (Real.exp 200 * Real.exp (2 / 5 * Real.log (2 * ((2 : ℝ) ^ (j + 1)) ^ 2))) =
+      Real.exp (200 + (6 - (j : ℝ)) / 5 * Real.log 2) := by
+    rw [hxval, hlog2, hhalf, ← Real.exp_add, ← Real.exp_add]
+    congr 1
+    ring
+  have hR : Real.exp 200 * 4 * rho ^ j =
+      Real.exp (200 + (10 - (j : ℝ)) / 5 * Real.log 2) := by
+    rw [h4, hrho, hlog4, ← Real.exp_add, ← Real.exp_add]
+    congr 1
+    ring
+  rw [hL, hR]
+  apply Real.exp_le_exp.mpr
+  have hpos := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  nlinarith
+
+private theorem block_le (S : Finset ℕ) (j : ℕ) :
+    ∑ d ∈ S.filter (fun d => Odd d ∧ Nat.log 2 (eps d) = j), C2Inputs.f d ≤
+      Real.exp 200 * 4 * rho ^ j := by
+  set T : Finset ℕ := S.filter (fun d => Odd d ∧ Nat.log 2 (eps d) = j) with hT
+  have hpos : ∀ d ∈ T, 0 < eps d := fun d hd =>
+    eps_pos_of_odd (Finset.mem_filter.mp hd).2.1
+  have hle : ∀ d ∈ T, eps d ≤ 2 ^ (j + 1) := by
+    intro d hd
+    have hdj : Nat.log 2 (eps d) = j := (Finset.mem_filter.mp hd).2.2
+    have hlt := Nat.lt_pow_succ_log_self (by norm_num : 1 < 2) (eps d)
+    rw [hdj] at hlt
+    omega
+  have hbase : ∀ d ∈ T, ((eps d : ℝ))⁻¹ ≤ (1 / 2 : ℝ) ^ j := by
+    intro d hd
+    have h2 : 2 ^ j ≤ eps d := by
+      have hdj : Nat.log 2 (eps d) = j := (Finset.mem_filter.mp hd).2.2
+      rw [← hdj]
+      exact Nat.pow_log_le_self 2 (hpos d hd).ne'
+    have h2R : (2 : ℝ) ^ j ≤ (eps d : ℝ) := by exact_mod_cast h2
+    have hposR : (0 : ℝ) < (eps d : ℝ) := by exact_mod_cast hpos d hd
+    have h3 : ((eps d : ℝ))⁻¹ ≤ ((2 : ℝ) ^ j)⁻¹ :=
+      (inv_le_inv₀ hposR (by positivity)).mpr h2R
+    have h4 : (1 / 2 : ℝ) ^ j = ((2 : ℝ) ^ j)⁻¹ := by rw [one_div, inv_pow]
+    rw [h4]
+    exact h3
+  have hsub : ∑ d ∈ T, (k d : ℝ) ≤ ((h (Qprod (2 ^ (j + 1))) : ℚ) : ℝ) := by
+    have hQ := Qprod_ne_zero (2 ^ (j + 1))
+    have hdiv : ∀ d ∈ T, d ∈ (Qprod (2 ^ (j + 1))).divisors := by
+      intro d hd
+      exact Nat.mem_divisors.mpr ⟨dvd_Qprod (hpos d hd) (hle d hd), hQ⟩
+    have hcast : ((h (Qprod (2 ^ (j + 1))) : ℚ) : ℝ) =
+        ∑ d ∈ (Qprod (2 ^ (j + 1))).divisors, (k d : ℝ) := by
+      rw [h_eq_sum_k _ hQ]
+      push_cast
+      rfl
+    rw [hcast]
+    exact Finset.sum_le_sum_of_subset_of_nonneg hdiv (fun d _ _ => by
+      have h3 := k_nonneg d
+      exact_mod_cast h3)
+  calc ∑ d ∈ T, C2Inputs.f d ≤ ∑ d ∈ T, (k d : ℝ) * (1 / 2 : ℝ) ^ j := by
+        refine Finset.sum_le_sum fun d hd => ?_
+        have hkn : (0 : ℝ) ≤ (k d : ℝ) := by
+          have h3 := k_nonneg d
+          exact_mod_cast h3
+        rw [C2Inputs.f, div_eq_mul_inv]
+        exact mul_le_mul_of_nonneg_left (hbase d hd) hkn
+    _ = (∑ d ∈ T, (k d : ℝ)) * (1 / 2 : ℝ) ^ j := by rw [Finset.sum_mul]
+    _ ≤ ((h (Qprod (2 ^ (j + 1))) : ℚ) : ℝ) * (1 / 2 : ℝ) ^ j := by
+        apply mul_le_mul_of_nonneg_right hsub (by positivity)
+    _ = (1 / 2 : ℝ) ^ j * ((h (Qprod (2 ^ (j + 1))) : ℚ) : ℝ) := by ring
+    _ ≤ (1 / 2 : ℝ) ^ j *
+          (Real.exp 200 * Real.exp (2 / 5 * Real.log (2 * ((2 : ℝ) ^ (j + 1)) ^ 2))) := by
+        apply mul_le_mul_of_nonneg_left _ (by positivity)
+        have h := hQ_le (2 ^ (j + 1)) (by
+          calc 2 = 2 ^ 1 := by norm_num
+            _ ≤ 2 ^ (j + 1) := Nat.pow_le_pow_right (by norm_num) (by omega))
+        simpa only [Nat.cast_pow, Nat.cast_ofNat] using h
+    _ ≤ Real.exp 200 * 4 * rho ^ j := block_major j
+
+private theorem partial_le (S : Finset ℕ) :
+    ∑ d ∈ S, C2Inputs.f d ≤ ∑' j : ℕ, (Real.exp 200 * 4 * rho ^ j) := by
+  have hmaj : Summable fun j : ℕ => Real.exp 200 * 4 * rho ^ j :=
+    (summable_geometric_of_lt_one rho_pos.le rho_lt_one).mul_left _
+  have hzero : ∑ d ∈ S.filter (fun d => ¬ Odd d), C2Inputs.f d = 0 := by
+    apply Finset.sum_eq_zero
+    intro d hd
+    have hno : ¬ Odd d := (Finset.mem_filter.mp hd).2
+    have hk : k d = 0 := by simp [k, hno]
+    rw [C2Inputs.f, hk]
+    simp
+  have hsplit : ∑ d ∈ S, C2Inputs.f d = ∑ d ∈ S.filter (fun d => Odd d), C2Inputs.f d := by
+    have h := Finset.sum_filter_add_sum_filter_not (s := S) (p := fun d => Odd d)
+      (f := fun d => C2Inputs.f d)
+    rw [hzero, add_zero] at h
+    exact h.symm
+  rw [hsplit]
+  set U : Finset ℕ := S.filter (fun d => Odd d) with hU
+  have hmaps : ∀ d ∈ U, Nat.log 2 (eps d) ∈ U.image (fun d => Nat.log 2 (eps d)) :=
+    fun d hd => Finset.mem_image_of_mem _ hd
+  have hfib := Finset.sum_fiberwise_of_maps_to hmaps (fun d => C2Inputs.f d)
+  rw [← hfib]
+  calc ∑ j ∈ U.image (fun d => Nat.log 2 (eps d)),
+        ∑ d ∈ U.filter (fun d => Nat.log 2 (eps d) = j), C2Inputs.f d
+      ≤ ∑ j ∈ U.image (fun d => Nat.log 2 (eps d)), (Real.exp 200 * 4 * rho ^ j) := by
+        refine Finset.sum_le_sum fun j _ => ?_
+        have he : U.filter (fun d => Nat.log 2 (eps d) = j) =
+            S.filter (fun d => Odd d ∧ Nat.log 2 (eps d) = j) := by
+          ext d
+          simp only [hU, Finset.mem_filter, and_assoc]
+        rw [he]
+        exact block_le S j
+    _ ≤ ∑' j : ℕ, (Real.exp 200 * 4 * rho ^ j) :=
+        hmaj.sum_le_tsum _ (fun j _ => by
+          have h3 : (0 : ℝ) ≤ rho ^ j := pow_nonneg rho_pos.le j
+          positivity)
+
 /-- LEAF. Unit U-1530. The series `Σ_{e ≥ 1} κ(e)/e`, which is `C₂` regrouped, converges;
 Section 5, display 35. -/
 theorem C2_summable : Summable fun e : ℕ => kappaTrue (e + 1) / ((e : ℝ) + 1) := by
-  sorry
+  have hf : Summable fun d : ℕ => C2Inputs.f d :=
+    summable_of_sum_range_le (fun d => C2Inputs.f_nonneg d) (fun n => partial_le (range n))
+  have hinj : Function.Injective (fun p : (Σ e, {d // eps d = e}) => p.2.1) := by
+    rintro ⟨e1, c1⟩ ⟨e2, c2⟩ heq
+    simp only at heq
+    have h1 : eps c1.1 = e1 := c1.2
+    have h2 : eps c2.1 = e2 := c2.2
+    have he : e1 = e2 := by rw [← h1, ← h2, heq]
+    subst he
+    have hc : c1 = c2 := Subtype.ext heq
+    rw [hc]
+  have hsig : Summable fun p : (Σ e, {d // eps d = e}) => C2Inputs.f p.2.1 :=
+    hf.comp_injective hinj
+  have hiff := summable_sigma_of_nonneg
+    (f := fun p : (Σ e, {d // eps d = e}) => C2Inputs.f p.2.1)
+    (fun p => C2Inputs.f_nonneg p.2.1)
+  have hfib : Summable fun e : ℕ => ∑' c : {d // eps d = e}, C2Inputs.f c.1 := (hiff.mp hsig).2
+  have hF : Summable fun e : ℕ => kappaTrue e / (e : ℝ) :=
+    hfib.congr (fun e => C2Inputs.fiber_tsum e)
+  have h2 := (summable_nat_add_iff 1).mpr hF
+  simpa [Nat.cast_add, Nat.cast_one] using h2
 
 /-- LEAF. Unit U-1530. Given convergence, `Σ_{1 ≤ e ≤ J} κ(e) [J/e] ≤ C₂ J`, from `[J/e] ≤ J/e`,
 `κ ≥ 0` and the lab's `grouping`; Section 5, the upper half of
