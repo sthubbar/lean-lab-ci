@@ -222,6 +222,9 @@ def repair_ok(base, f, short, changed):
     if not m: return False, "no theorem of that name at BASE"
     doc = old[max(0, m.start() - 800):m.start()]; d = doc.rfind("/--")
     if d == -1 or not re.match(r"/--\s*LEAF", doc[d:]): return False, "it is not marked /-- LEAF at BASE"
+    # the LEAF docstring must sit on this theorem: only whitespace between its closing -/ and the declaration line, 2026-11-04
+    e = doc.find("-/", d)
+    if e == -1 or doc[e + 2:].strip(): return False, "its nearest /-- LEAF docstring belongs to another declaration"
     t = strip_comments(old); ms = [x for x in DECL.finditer(t) if (x.group(2) or "").split(".")[-1] == short]
     if not ms: return False, "no declaration of that name at BASE"
     nxt = DECL.search(t, ms[0].end()); body = t[ms[0].start():nxt.start() if nxt else len(t)]
