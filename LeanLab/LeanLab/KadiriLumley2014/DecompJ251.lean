@@ -90,7 +90,9 @@ theorem lemma2_5 {r : PrintedRow} (hr : r ∈ tableTwo) {X : ℝ}
 -- paper's Lemma 2.6 bounds the zero sum by a positive quantity, not by zero.
 -- The sibling unit KadiriLumley2014/DecompJ336 asserts summability
 -- (`lemma2_2_summable`, itself a leaf), and under summability this is false.
-/-- LEAF. Page 10 Lemma 2.6. Unproved estimate. -/
+/-- REFUTED given summability and one zero, `Audit1614.old_lemma2_6_false_of_summable`: a nonnegative sum
+is not `≤ 0`; the paper bounds it by a positive quantity. Do not prove this.
+LEAF. Page 10 Lemma 2.6. Unproved estimate. -/
 theorem lemma2_6 {r : PrintedRow} (hr : r ∈ tableTwo) {X : ℝ}
   (hX : Real.exp 38 ≤ X) :
   zeroError r.m r.deltaQ r.uQ X ≤ 0 := by sorry
@@ -100,7 +102,9 @@ theorem lemma2_6 {r : PrintedRow} (hr : r ∈ tableTwo) {X : ℝ}
 -- and `X = Real.exp 38`: the hypotheses hold and `tailCoefficient * tailMass /
 -- ∫ weight` is `> 0`.  (Checked in Lean against this very statement; the paper's
 -- tail term is a positive correction that must fit inside the numeric budget.)
-/-- LEAF. Page 12 Theorem 3.2. Unproved estimate. -/
+/-- REFUTED, `Audit1614.old_theorem3_2_false`, first row of Table 2. Do not prove this. A repair needs the
+per row budget of Table 2, see the open `Decomp92.table_zero_budget`, which this split does not reach.
+LEAF. Page 12 Theorem 3.2. Unproved estimate. -/
 theorem theorem3_2 {r : PrintedRow} (hr : r ∈ tableTwo) {a X : ℝ}
   (ha : a ∈ Icc (r.aQ : ℝ) ((r.aQ : ℝ) + 1 / 10000))
   (hX : Real.exp 38 ≤ X) :

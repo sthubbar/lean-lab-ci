@@ -8,24 +8,24 @@ namespace LeanLab.BakerHarmanPintz1997
 open Finset
 attribute [local instance] Classical.propDecidable
 
-/-- The transfer error in equation 4.2. -/
-noncomputable def transferError (ε : ℝ) (c : ℝ → ℕ → ℂ) (x : ℝ)
+/-- The transfer error in the repaired equation 4.2, window y, display 4.5 on page 25. -/
+noncomputable def transferError (c : ℝ → ℕ → ℂ) (x y : ℝ)
     {q : ℕ} (χ : DirichletCharacter ℂ q) : ℂ :=
-  (∑ k ∈ Iset ε x, c x k * χ (k : ZMod q)) -
-    ((Yof ε x / y1 x : ℝ) : ℂ) *
+  (∑ k ∈ Ioc ⌊x - y⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q)) -
+    ((y / y1 x : ℝ) : ℂ) *
       ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q)
 
 /-- The finite transfer error is additive in its coefficient family. -/
-theorem transferError_add (ε : ℝ) (c d : ℝ → ℕ → ℂ) (x : ℝ)
+theorem transferError_add (c d : ℝ → ℕ → ℂ) (x y : ℝ)
     {q : ℕ} (χ : DirichletCharacter ℂ q) :
-    transferError ε (c + d) x χ = transferError ε c x χ + transferError ε d x χ := by
+    transferError (c + d) x y χ = transferError c x y χ + transferError d x y χ := by
   simp only [transferError, Pi.add_apply, add_mul, sum_add_distrib, mul_add]
   ring
 
 /-- The finite transfer error commutes with multiplication by a constant. -/
-theorem transferError_smul (ε : ℝ) (c : ℝ → ℕ → ℂ) (x : ℝ)
+theorem transferError_smul (c : ℝ → ℕ → ℂ) (x y : ℝ)
     {q : ℕ} (χ : DirichletCharacter ℂ q) (z : ℂ) :
-    transferError ε (fun x k => z * c x k) x χ = z * transferError ε c x χ := by
+    transferError (fun x k => z * c x k) x y χ = z * transferError c x y χ := by
   simp only [transferError, mul_assoc, ← mul_sum]
   ring
 
@@ -35,14 +35,15 @@ theorem holds42_add {ε : ℝ} {c d : ℝ → ℕ → ℂ}
   intro A hA
   obtain ⟨C, Xc, hc⟩ := hc A hA
   obtain ⟨D, Xd, hd⟩ := hd A hA
-  refine ⟨C + D, max Xc Xd, fun x hx q hq hqA χ => ?_⟩
-  change ‖transferError ε (c + d) x χ‖ ≤ _
+  refine ⟨C + D, max Xc Xd, fun x hx q hq hqA χ y hy hy1 => ?_⟩
+  change ‖transferError (c + d) x y χ‖ ≤ _
   rw [transferError_add]
-  calc ‖transferError ε c x χ + transferError ε d x χ‖ ≤
-        ‖transferError ε c x χ‖ + ‖transferError ε d x χ‖ := norm_add_le _ _
-    _ ≤ C * Yof ε x / L x ^ A + D * Yof ε x / L x ^ A :=
-        add_le_add (hc x (le_trans (le_max_left _ _) hx) q hqA χ)
-          (hd x (le_trans (le_max_right _ _) hx) q hqA χ)
+  calc ‖transferError c x y χ + transferError d x y χ‖ ≤
+        ‖transferError c x y χ‖ + ‖transferError d x y χ‖ := norm_add_le _ _
+    _ ≤ C * (y / L x ^ A + x ^ (0.55 + 11 * ε / 12)) +
+          D * (y / L x ^ A + x ^ (0.55 + 11 * ε / 12)) :=
+        add_le_add (hc x (le_trans (le_max_left _ _) hx) q hqA χ y hy hy1)
+          (hd x (le_trans (le_max_right _ _) hx) q hqA χ y hy hy1)
     _ = _ := by ring
 
 /-- Equation 4.2 is closed under a constant complex multiple. -/
@@ -50,11 +51,12 @@ theorem holds42_smul {ε : ℝ} {c : ℝ → ℕ → ℂ} (hc : Holds42 ε c) (z
     Holds42 ε (fun x k => z * c x k) := by
   intro A hA
   obtain ⟨C, X, hc⟩ := hc A hA
-  refine ⟨‖z‖ * C, X, fun x hx q hq hqA χ => ?_⟩
-  change ‖transferError ε (fun x k => z * c x k) x χ‖ ≤ _
+  refine ⟨‖z‖ * C, X, fun x hx q hq hqA χ y hy hy1 => ?_⟩
+  change ‖transferError (fun x k => z * c x k) x y χ‖ ≤ _
   rw [transferError_smul, norm_mul]
-  calc ‖z‖ * ‖transferError ε c x χ‖ ≤ ‖z‖ * (C * Yof ε x / L x ^ A) :=
-        mul_le_mul_of_nonneg_left (hc x hx q hqA χ) (norm_nonneg z)
+  calc ‖z‖ * ‖transferError c x y χ‖ ≤
+        ‖z‖ * (C * (y / L x ^ A + x ^ (0.55 + 11 * ε / 12))) :=
+        mul_le_mul_of_nonneg_left (hc x hx q hqA χ y hy hy1) (norm_nonneg z)
     _ = _ := by ring
 
 /-- Equation 4.2 is closed under subtraction of coefficient families. -/

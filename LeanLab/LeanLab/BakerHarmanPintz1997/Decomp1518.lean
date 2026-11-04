@@ -115,16 +115,16 @@ theorem holds42_congr_ev {ε : ℝ} {c d : ℝ → ℕ → ℂ}
   obtain ⟨X, hX⟩ := hcd
   intro A hA
   obtain ⟨C, X0, hC⟩ := hc A hA
-  refine ⟨C, max X X0, fun x hx q hq hqA χ => ?_⟩
+  refine ⟨C, max X X0, fun x hx q hq hqA χ y hy hy1 => ?_⟩
   have heq : ∀ S : Finset ℕ, (∀ k ∈ S, 0 < k) →
       (∑ k ∈ S, d x k * χ (k : ZMod q)) = ∑ k ∈ S, c x k * χ (k : ZMod q) := by
     intro S hS
     apply sum_congr rfl
     intro k hk
     rw [hX x ((le_max_left _ _).trans hx) k (hS k hk)]
-  rw [heq (Iset ε x) (fun k hk => by have := (mem_Ioc.mp hk).1; omega),
+  rw [heq (Ioc ⌊x - y⌋₊ ⌊x⌋₊) (fun k hk => by have := (mem_Ioc.mp hk).1; omega),
     heq (Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊) (fun k hk => by have := (mem_Ioc.mp hk).1; omega)]
-  exact hC x ((le_max_right _ _).trans hx) q hqA χ
+  exact hC x ((le_max_right _ _).trans hx) q hqA χ y hy hy1
 
 
 /-- Lemma 12, p. 26, with its range condition (4.8) or (4.9) required only for large `x`, the
@@ -321,21 +321,23 @@ theorem norm_sum_sub_char_le {q : ℕ} (χ : DirichletCharacter ℂ q) (S : Fins
       rw [← sub_mul, norm_mul]
       exact (mul_le_of_le_one_right (norm_nonneg _) (χ.norm_le_one _)).trans (h k hk)
 
-/-- (4.11) used at `q = 1`, `χ = χ₀`: `Σ_{k ∈ I} c''_k ≤ (Y/y₁) Σ_{k ∈ I₁} c''_k + O(Y𝓛^{-A})`,
-p. 26. Unit U-1518. -/
+/-- (4.11) used at `q = 1`, `χ = χ₀`, repaired form:
+`Σ_{x-y<k≤x} c''_k ≤ (y/y₁) Σ_{k ∈ I₁} c''_k + O(y𝓛^{-A} + x^{0.55+11ε/12})`, pp. 25 and 26.
+Unit U-1518, restated by U-1617. -/
 theorem holds42_real_upper {ε : ℝ} {e : ℝ → ℕ → ℝ} (h : Holds42 ε fun x k => (e x k : ℂ)) :
-    ∀ A : ℝ, 0 < A → ∃ C X0 : ℝ, ∀ x : ℝ, X0 ≤ x →
-      ∑ k ∈ Iset ε x, e x k ≤
-        Yof ε x / y1 x * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, e x k + C * Yof ε x / L x ^ A := by
+    ∀ A : ℝ, 0 < A → ∃ C X0 : ℝ, ∀ x : ℝ, X0 ≤ x → ∀ y : ℝ, 2 ≤ y → y ≤ y1 x →
+      ∑ k ∈ Ioc ⌊x - y⌋₊ ⌊x⌋₊, e x k ≤
+        y / y1 x * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, e x k +
+          C * (y / L x ^ A + x ^ (0.55 + 11 * ε / 12)) := by
   intro A hA
   obtain ⟨C, X0, hC⟩ := h A hA
-  refine ⟨C, max X0 (Real.exp 1), fun x hx => ?_⟩
+  refine ⟨C, max X0 (Real.exp 1), fun x hx y hy hy1 => ?_⟩
   have hxexp : Real.exp 1 ≤ x := (le_max_right _ _).trans hx
   have hx0 : 0 < x := (Real.exp_pos _).trans_le hxexp
   have hlog : 1 ≤ L x := by
     simpa [L] using Real.log_le_log (Real.exp_pos 1) hxexp
   have he := hC x ((le_max_left _ _).trans hx) 1
-    (by simpa using Real.one_le_rpow hlog hA.le) (1 : DirichletCharacter ℂ 1)
+    (by simpa using Real.one_le_rpow hlog hA.le) (1 : DirichletCharacter ℂ 1) y hy hy1
   have hχ : ∀ k : ℕ, (1 : DirichletCharacter ℂ 1) (k : ZMod 1) = 1 := by
     intro k
     apply MulChar.one_apply
@@ -397,8 +399,8 @@ theorem holds42_of_dominated {ε : ℝ} {c c' : ℝ → ℕ → ℂ} {e : ℝ �
   obtain ⟨C2, X2, h2⟩ := h412 A hA
   obtain ⟨X3, h3⟩ := hdom
   obtain ⟨C4, X4, h4⟩ := holds42_real_upper h411 A hA
-  refine ⟨C1 + C4 + 2 * C2, max (max X1 X2) (max X3 (max X4 1)), ?_⟩
-  intro x hx q _ hq χ
+  refine ⟨C1 + C4 + 2 * |C2|, max (max X1 X2) (max X3 (max X4 1)), ?_⟩
+  intro x hx q _ hq χ y hy2 hyy
   have hx1 : X1 ≤ x := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hx
   have hx2 : X2 ≤ x := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hx
   have hx3 : X3 ≤ x := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hx
@@ -408,49 +410,59 @@ theorem holds42_of_dominated {ε : ℝ} {c c' : ℝ → ℕ → ℂ} {e : ℝ �
     (le_max_right _ _)) hx
   have hxpos : 0 < x := by linarith
   have hy1 : 0 < y1 x := y1_pos hxpos
-  have hr : 0 ≤ Yof ε x / y1 x := div_nonneg (Yof_nonneg ε hxpos.le) hy1.le
-  have key : ∑ k ∈ Iset ε x, c x k * χ (k : ZMod q) -
-      ((Yof ε x / y1 x : ℝ) : ℂ) * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q) =
-      (∑ k ∈ Iset ε x, c' x k * χ (k : ZMod q) -
-        ((Yof ε x / y1 x : ℝ) : ℂ) * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c' x k * χ (k : ZMod q)) +
-      (∑ k ∈ Iset ε x, c x k * χ (k : ZMod q) - ∑ k ∈ Iset ε x, c' x k * χ (k : ZMod q)) -
-      ((Yof ε x / y1 x : ℝ) : ℂ) *
-        (∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q) -
-          ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c' x k * χ (k : ZMod q)) := by ring
+  have hr : 0 ≤ y / y1 x := div_nonneg (by linarith) hy1.le
+  set W := Ioc ⌊x - y⌋₊ ⌊x⌋₊ with hW
+  set W1 := Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊ with hW1
+  have key : ∑ k ∈ W, c x k * χ (k : ZMod q) -
+      ((y / y1 x : ℝ) : ℂ) * ∑ k ∈ W1, c x k * χ (k : ZMod q) =
+      (∑ k ∈ W, c' x k * χ (k : ZMod q) -
+        ((y / y1 x : ℝ) : ℂ) * ∑ k ∈ W1, c' x k * χ (k : ZMod q)) +
+      (∑ k ∈ W, c x k * χ (k : ZMod q) - ∑ k ∈ W, c' x k * χ (k : ZMod q)) -
+      ((y / y1 x : ℝ) : ℂ) *
+        (∑ k ∈ W1, c x k * χ (k : ZMod q) - ∑ k ∈ W1, c' x k * χ (k : ZMod q)) := by ring
   rw [key]
-  have hA1 := h1 x hx1 q hq χ
-  have hB := norm_sum_sub_char_le χ (Iset ε x) (c x) (c' x) (e x) (fun k _ => h3 x hx3 k)
-  have hC := norm_sum_sub_char_le χ (Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊) (c x) (c' x) (e x)
-    (fun k _ => h3 x hx3 k)
-  have hD := h4 x hx4
+  have hA1 := h1 x hx1 q hq χ y hy2 hyy
+  have hB := norm_sum_sub_char_le χ W (c x) (c' x) (e x) (fun k _ => h3 x hx3 k)
+  have hC := norm_sum_sub_char_le χ W1 (c x) (c' x) (e x) (fun k _ => h3 x hx3 k)
+  have hD := h4 x hx4 y hy2 hyy
   have hE := h2 x hx2
-  have hF : Yof ε x / y1 x * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, e x k ≤ C2 * Yof ε x / L x ^ A := by
-    have e1 : Yof ε x / y1 x * (C2 * y1 x / L x ^ A) = C2 * Yof ε x / L x ^ A := by
-      rw [show Yof ε x / y1 x * (C2 * y1 x / L x ^ A) =
-        (Yof ε x / y1 x * y1 x) * C2 / L x ^ A by ring, div_mul_cancel₀ _ hy1.ne']
+  have hLA : 0 ≤ L x ^ A := Real.rpow_nonneg (by
+    unfold L; exact Real.log_nonneg hxone) _
+  have hP : 0 ≤ x ^ (0.55 + 11 * ε / 12 : ℝ) := Real.rpow_nonneg hxpos.le _
+  set P := x ^ (0.55 + 11 * ε / 12 : ℝ) with hPdef
+  have hyL : 0 ≤ y / L x ^ A := div_nonneg (by linarith) hLA
+  have hF : y / y1 x * ∑ k ∈ W1, e x k ≤ C2 * y / L x ^ A := by
+    have e1 : y / y1 x * (C2 * y1 x / L x ^ A) = C2 * y / L x ^ A := by
+      rw [show y / y1 x * (C2 * y1 x / L x ^ A) =
+        (y / y1 x * y1 x) * C2 / L x ^ A by ring, div_mul_cancel₀ _ hy1.ne']
       ring
-    calc Yof ε x / y1 x * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, e x k ≤
-        Yof ε x / y1 x * (C2 * y1 x / L x ^ A) := mul_le_mul_of_nonneg_left hE hr
+    calc y / y1 x * ∑ k ∈ W1, e x k ≤ y / y1 x * (C2 * y1 x / L x ^ A) :=
+          mul_le_mul_of_nonneg_left hE hr
       _ = _ := e1
-  have hnorm : ‖((Yof ε x / y1 x : ℝ) : ℂ) *
-      (∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q) -
-        ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c' x k * χ (k : ZMod q))‖ ≤
-      Yof ε x / y1 x * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, e x k := by
+  have hF' : C2 * y / L x ^ A ≤ |C2| * (y / L x ^ A + P) := by
+    have : C2 * y / L x ^ A = C2 * (y / L x ^ A) := by ring
+    rw [this]
+    calc C2 * (y / L x ^ A) ≤ |C2| * (y / L x ^ A) :=
+          mul_le_mul_of_nonneg_right (le_abs_self _) hyL
+      _ ≤ _ := mul_le_mul_of_nonneg_left (by linarith) (abs_nonneg _)
+  have hnorm : ‖((y / y1 x : ℝ) : ℂ) *
+      (∑ k ∈ W1, c x k * χ (k : ZMod q) - ∑ k ∈ W1, c' x k * χ (k : ZMod q))‖ ≤
+      y / y1 x * ∑ k ∈ W1, e x k := by
     rw [norm_mul, Complex.norm_of_nonneg hr]
     exact mul_le_mul_of_nonneg_left hC hr
-  have htot : (C1 + C4 + 2 * C2) * Yof ε x / L x ^ A =
-      C1 * Yof ε x / L x ^ A + C4 * Yof ε x / L x ^ A + 2 * (C2 * Yof ε x / L x ^ A) := by ring
+  have htot : (C1 + C4 + 2 * |C2|) * (y / L x ^ A + P) =
+      C1 * (y / L x ^ A + P) + C4 * (y / L x ^ A + P) +
+        2 * (|C2| * (y / L x ^ A + P)) := by ring
   rw [htot]
-  calc _ ≤ ‖(∑ k ∈ Iset ε x, c' x k * χ (k : ZMod q) -
-        ((Yof ε x / y1 x : ℝ) : ℂ) * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c' x k * χ (k : ZMod q)) +
-      (∑ k ∈ Iset ε x, c x k * χ (k : ZMod q) - ∑ k ∈ Iset ε x, c' x k * χ (k : ZMod q))‖ +
-      ‖((Yof ε x / y1 x : ℝ) : ℂ) *
-        (∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q) -
-          ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c' x k * χ (k : ZMod q))‖ := norm_sub_le _ _
+  calc _ ≤ ‖(∑ k ∈ W, c' x k * χ (k : ZMod q) -
+        ((y / y1 x : ℝ) : ℂ) * ∑ k ∈ W1, c' x k * χ (k : ZMod q)) +
+      (∑ k ∈ W, c x k * χ (k : ZMod q) - ∑ k ∈ W, c' x k * χ (k : ZMod q))‖ +
+      ‖((y / y1 x : ℝ) : ℂ) *
+        (∑ k ∈ W1, c x k * χ (k : ZMod q) - ∑ k ∈ W1, c' x k * χ (k : ZMod q))‖ := norm_sub_le _ _
     _ ≤ _ := by
-      have := norm_add_le (∑ k ∈ Iset ε x, c' x k * χ (k : ZMod q) -
-        ((Yof ε x / y1 x : ℝ) : ℂ) * ∑ k ∈ Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c' x k * χ (k : ZMod q))
-        (∑ k ∈ Iset ε x, c x k * χ (k : ZMod q) - ∑ k ∈ Iset ε x, c' x k * χ (k : ZMod q))
+      have := norm_add_le (∑ k ∈ W, c' x k * χ (k : ZMod q) -
+        ((y / y1 x : ℝ) : ℂ) * ∑ k ∈ W1, c' x k * χ (k : ZMod q))
+        (∑ k ∈ W, c x k * χ (k : ZMod q) - ∑ k ∈ W, c' x k * χ (k : ZMod q))
       linarith
 
 /-- Lemma 12, p. 26, reduced to (4.10), (4.11), (4.12) for the explicit `c'_k = conv2T` and

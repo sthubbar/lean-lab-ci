@@ -145,11 +145,11 @@ theorem verified_zeros (hG : HelfgottInput) (q : ℕ) [NeZero q] (hq : q ≤ 300
     exact Or.inl him
   · exact Or.inl ⟨hEven, hq, by norm_num at him ⊢; exact him⟩
 
-/-- LEAF. P0014 Proposition 4.6, pages 43 and 44, display 4.43 with the factor 6 repair.
-The analytic input is not formalized. Its proof uses Lemmas 4.1, 4.4 and 4.5.
-Lemma 4.1 in turn uses the explicit formula and the Landau estimate in Lemma 4.2,
-whose outside source is Montgomery and Vaughan, Multiplicative Number Theory I, Lemma 6.3.
--/
+/-- LEAF, CITED. P0014 Proposition 4.6, pages 43 and 44, display 4.43, with the factor 6 repair.
+PAGE CHECK U-1613: faithful. Every constant of display 4.43, x at least 1, T at least the max of
+4 pi^2 abs delta and 100, the zero hypothesis, q at least 1 and the half line main term match the
+print. The only change is 1 + 6 abs delta for 1 + 5 abs delta, which is weaker.
+The analytic input is not formalized. Its proof uses Lemmas 4.1, 4.4 and 4.5. -/
 theorem gaussian_explicit_estimate (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (δ T : ℝ)
     (hT : max (4 * π ^ 2 * |δ|) 100 ≤ T)

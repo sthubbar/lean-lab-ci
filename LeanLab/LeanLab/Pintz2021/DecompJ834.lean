@@ -19,7 +19,8 @@ open LeanLab.Pintz2021.DecompJ665
 
 namespace LeanLab.Pintz2021.DecompJ834
 
-/-- LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
+/-- REFUTED, `DecompJ665.P_leaf_false`, no `0 < ε`. Repaired in `DecompJ579.leaf_P_exists`. Do not prove this.
+LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
 theorem leaf_P_exists_3 {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp ε H0 X0 H X P0) :
   ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧ (excSet H (Real.sqrt X) P X).Finite := by sorry
 
@@ -29,7 +30,8 @@ theorem leaf_singular_series_converges_3 (H X P : ℝ) :
     ∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
       Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m)) := by sorry
 
-/-- LEAF arXiv:1804.05561v1 display 10.25: the main term error is bounded by a constant C depending only on ε -/
+/-- REFUTED given `leaf_singular_series_converges_3`, `Audit1614.old_leaf_main_term_bound_exists_C_false_of_converges`: `C` is universal, take `C = -1`. Use `DecompJ579.leaf_main_term_bound`. Do not prove this.
+LEAF arXiv:1804.05561v1 display 10.25: the main term error is bounded by a constant C depending only on ε -/
 theorem leaf_main_term_bound_exists_C_3 (ε ε0 c H0 C X0 : ℝ) :
   ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
     Thm1Hyp ε H0 X0 H X P0 →

@@ -1,7 +1,7 @@
 /-
 P0069, pages 11, 24 and 26. Positive index bookkeeping for Lemma 11.
 This reuses the task78 coefficient bounds and Decomp1518 transfer congruence.
-No claim resolves the normalization QUESTION for the sealed transfer predicate.
+The normalization QUESTION was settled by U-1617, Audit1617.lean.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BakerHarmanPintz1997.CoefficientBounds
@@ -52,16 +52,19 @@ theorem conv2E_erase_zero_bound (a b : ℕ → ℂ) (M N w γ B : ℝ) (hB : 0 �
     · positivity)]
   exact conv2E_le_tau a b M N w γ B hB ha hb hk
 
-/-- Page 24, Lemma 11 with 3.1 required only at positive indices.
-CONDITIONAL ON the sealed Lemma11 and the displayed mean value hypothesis. -/
+/-- Page 24, repaired Lemma 11 with 3.1 required only at positive indices.
+CONDITIONAL ON the sealed Lemma11 and the displayed mean value hypothesis at both signs of t. -/
 theorem lemma11_positive (h11 : Lemma11) :
     ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 → ∀ (B : ℝ) (c : ℝ → ℕ → ℂ),
     (∀ x k, 0 < k → ‖c x k‖ ≤ tau k ^ B) →
     (∀ A : ℝ, 0 < A → ∃ C X0 : ℝ, ∀ x : ℝ, X0 ≤ x →
       ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ L x ^ A → ∀ χ : DirichletCharacter ℂ q,
-      ∫ t in (T0 x)..(T1 ε x),
+      (∫ t in (T0 x)..(T1 ε x),
         ‖(⟨c x, Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊⟩ : DP).eval χ (half t)‖ ≤
-        C * x ^ (1 / 2 : ℝ) / L x ^ A) → Holds42 ε c := by
+        C * x ^ (1 / 2 : ℝ) / L x ^ A) ∧
+      (∫ t in (T0 x)..(T1 ε x),
+        ‖(⟨c x, Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊⟩ : DP).eval χ (half (-t))‖ ≤
+        C * x ^ (1 / 2 : ℝ) / L x ^ A)) → Holds42 ε c := by
   obtain ⟨ε0, hε0, h11⟩ := h11
   refine ⟨ε0, hε0, ?_⟩
   intro ε hε hεsmall B c hc hmean
@@ -81,7 +84,8 @@ theorem lemma11_positive (h11 : Lemma11) :
       intro k hk
       have hkpos : 0 < k := lt_of_le_of_lt (Nat.zero_le _) (mem_Ioc.mp hk).1
       simp [hkpos.ne']
-    simpa only [heq] using hC x hx q hq χ
+    obtain ⟨h1, h2⟩ := hC x hx q hq χ
+    exact ⟨by simpa only [heq] using h1, by simpa only [heq] using h2⟩
 
 #print axioms holds42_erase_zero_iff
 #print axioms coefficient_erase_zero

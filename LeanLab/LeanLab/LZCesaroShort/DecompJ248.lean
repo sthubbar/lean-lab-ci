@@ -1,5 +1,6 @@
 import LeanLab.LZCesaroShort.Statements
 import LeanLab.LZCesaroShort.Lemma5
+import LeanLab.LZCesaroShort.Theorem1PProved
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 
 namespace LeanLab.LZCesaroShort
@@ -7,9 +8,13 @@ namespace LeanLab.LZCesaroShort
 open Complex MeasureTheory Filter Topology Finset
 open scoped ArithmeticFunction.vonMangoldt
 
-/-- LEAF arXiv:1606.00869v2 page 2, bound for the exponential sum TH. -/
+/-- arXiv:1606.00869v2 page 2, Lemma 5, bound for the exponential sum TH. DECISION U-1614: `G H α ^ 2`
+replaces `min H (1/‖α‖)`, in which `‖α‖` was the absolute value of the real, not the distance to the
+nearest integer; the old form is false at `α = 0`, `Audit1614.old_lemma5_bound_TH_leaf_false`.
+PROVED from `lemma5_full`. -/
 theorem lemma5_bound_TH_leaf : ∃ K : ℝ, ∀ N H : ℕ, ∀ α : ℝ, 2 ≤ N → 1 ≤ H → H ≤ N →
-    ‖TH N H H α‖ ≤ K * min (H : ℝ) (1 / ‖α‖) := by sorry
+    ‖TH N H H α‖ ≤ K * LeanLab.PNTPort.Vinogradov.G H α ^ 2 :=
+  ⟨1, fun _ _ α _ _ hHN => by simpa using lemma5_full hHN α⟩
 
 /-- `α ↦ e (n * α)` is continuous. -/
 private lemma continuous_e_mul_freq (n : ℕ) :
@@ -107,18 +112,23 @@ theorem integral_T_wsum_leaf : ∃ K : ℝ, ∀ N H : ℕ, 2 ≤ N → 1 ≤ H �
   rw [intervalIntegral.integral_mul_const, integral_TH_period_eq_zero hHN, zero_mul, norm_zero]
   simp
 
-/-- LEAF arXiv:1606.00869v2 page 2, bound for the partial sum over y. -/
-theorem theorem2a_partial_sum_bound_leaf : ∃ K : ℝ, ∀ N H : ℕ, 2 ≤ N → 1 ≤ H → H ≤ N → ∀ y : ℝ, -(H : ℝ) ≤ y → y < H →
-    |wsum N H y| ≤ K * N * Real.log N ^ 2 * Real.log (2 * H) := by sorry
+/-- arXiv:1606.00869v2 page 2, bound for the partial sum over y, PROVED under RH. DECISION U-1614: the paper
+assumes RH, `hRH` added; not a falsity, the old form dropped the hypothesis of the theorem and is
+not known without RH. Same Prop as `Theorem2a`, proved under RH as `theorem2a_proved` in
+`LZCesaroShort/Theorem1PProved`. -/
+theorem theorem2a_partial_sum_bound_leaf (hRH : RiemannHypothesis) : ∃ K : ℝ, ∀ N H : ℕ, 2 ≤ N → 1 ≤ H → H ≤ N → ∀ y : ℝ, -(H : ℝ) ≤ y → y < H →
+    |wsum N H y| ≤ K * N * Real.log N ^ 2 * Real.log (2 * H) :=
+  theorem2a_proved hRH
 
-/-- LEAF arXiv:1606.00869v2 page 2, theorem1 from theorem2b component. -/
-theorem theorem1_from_theorem2b_leaf : ∃ K : ℝ, ∀ N H : ℕ, 2 ≤ N → 1 ≤ H → H ≤ N →
+/-- LEAF arXiv:1606.00869v2 page 2, theorem1 from theorem2b component. DECISION U-1614: `hRH` added,
+the paper's Theorem 1 assumes RH, the old form had none; not a falsity. -/
+theorem theorem1_from_theorem2b_leaf (_hRH : RiemannHypothesis) : ∃ K : ℝ, ∀ N H : ℕ, 2 ≤ N → 1 ≤ H → H ≤ N →
     ‖((cesaro N H : ℝ) : ℂ) - (H : ℂ) * N + 2 / (H : ℂ) * ZH N H‖
       ≤ K * (N * Real.log (2 * (N : ℝ) ^ 2 / H) + H * Real.log N ^ 2 * Real.log (2 * H)) := by sorry
 
 /-- The exact Theorem1 Prop is conditionally dependent on Theorem2b and Sec5. -/
 theorem lz_theorem1_decomp_assembly : RiemannHypothesis → Theorem1 := by
-  intro _
-  exact theorem1_from_theorem2b_leaf
+  intro hRH
+  exact theorem1_from_theorem2b_leaf hRH
 
 end LeanLab.LZCesaroShort

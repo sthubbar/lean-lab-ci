@@ -18,7 +18,10 @@ theorem theorem_6_param_C_Y0_exists (A ε B c1 c2 c3 : ℝ) (a1 a2 : ℤ) :
   use 1, 1
   exact ⟨by norm_num, by norm_num⟩
 
-/-- LEAF: Abstract statement for Theorem 6 bounds. -/
+/-- REFUTED, `Audit1614.old_theorem_6_abstract_bounds_false`: `C` is universally quantified, so `C = -1`
+kills it, and the caller fixes `B = 1` before seeing `A`. Do not prove this. No longer used:
+`theorem_6_assembly` now cites `theorem_6`. Kept as text of record.
+LEAF: Abstract statement for Theorem 6 bounds. -/
 theorem theorem_6_abstract_bounds (A ε B c1 c2 c3 C Y0 X1 X2 Y Q1 Q2 : ℝ) (a1 a2 : ℤ)
   (hY0 : Y0 ≤ Y) (hc1 : c1 * X1 ^ (2 / 3 + ε) ≤ Y) (hYX1 : Y ≤ X1) (hYX2 : Y ≤ X2)
   (hX2 : X2 ≤ 2 * X1 - Y) (hQ1_1 : 1 ≤ Q1) (hQ1 : Q1 ≤ c2 * Y ^ (3 / 2 : ℝ) * X1 ^ (-(1 / 2) : ℝ))
@@ -26,25 +29,8 @@ theorem theorem_6_abstract_bounds (A ε B c1 c2 c3 C Y0 X1 X2 Y Q1 Q2 : ℝ) (a1
   thm6LHS X1 X2 Y Q1 Q2 a1 a2 ≤ C * Y ^ 2 * Real.log Y ^ (-A) := by
   sorry
 
-/-- The assembly theorem for Theorem 6. -/
-theorem theorem_6_assembly : Theorem6 := by
-  intro A ε hA hε
-  obtain ⟨B, hB⟩ := theorem_6_param_B_exists A ε hA hε
-  use B, hB
-  intro c1 c2 c3 hc1 hc2 hc3 a1 a2
-  obtain ⟨C, Y0, hC, hY0⟩ := theorem_6_param_C_Y0_exists A ε B c1 c2 c3 a1 a2
-  use C, Y0
-  intro X1 X2 Y Q1 Q2 hY0_le hc1_le hY_X1 hY_X2 hX2_le hQ1_1 hQ1_le hQ2_1 hQ2_le ha1_le
-  apply theorem_6_abstract_bounds A ε B c1 c2 c3 C Y0 X1 X2 Y Q1 Q2 a1 a2
-  · exact hY0_le
-  · exact hc1_le
-  · exact hY_X1
-  · exact hY_X2
-  · exact hX2_le
-  · exact hQ1_1
-  · exact hQ1_le
-  · exact hQ2_1
-  · exact hQ2_le
-  · exact ha1_le
+/-- Theorem 6, the cited statement. DECISION U-1614: the old proof ran through the false
+`theorem_6_abstract_bounds`, which said nothing more than Theorem 6, so this decomposition is hollow. -/
+theorem theorem_6_assembly : Theorem6 := theorem_6
 
 end LeanLab.Halupczok2012

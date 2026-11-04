@@ -311,13 +311,17 @@ theorem card_chars_le (Q : ℕ) :
 `Σ_{q ≤ Q} Σ*_{χ mod q} ∫_{-T}^{T} |Σ_{n=M+1}^{M+N} a_n χ(n) n^{it}|² dt ≤ C (N + Q²T) Σ |a_n|²`,
 the inner sum over primitive `χ`. From the multiplicative large sieve (Decomp1524a
 `mult_large_sieve`) and Gallagher's lemma (Decomp1524b `gallagher_lemma`).
-Gallagher 1970 Theorem 2; Montgomery, Topics, Theorem 6.4. Unit U-1524. -/
+Gallagher 1970 Theorem 2; Montgomery, Topics, Theorem 6.4. Unit U-1524.
+DECISION U-1614: the factor is `M + N + Q²T`, the length up to the top of the support, not
+`N + Q²T`. Gallagher's bound carries the weight `Q²T + n` on `|a_n|²`, Iwaniec-Kowalski Theorem 9.12
+has `n ≤ N`, Montgomery-Vaughan 1975 p. 366 (7.1) is the case `Q = 1`. The old form with `N` alone
+is false for `M` large, `HybridShiftBarrier.hybrid_large_sieve_not_valid`. -/
 theorem hybrid_large_sieve : ∃ C : ℝ, 0 < C ∧ ∀ Q : ℕ, 1 ≤ Q → ∀ T : ℝ, 1 ≤ T →
     ∀ (M N : ℕ) (a : ℕ → ℂ),
       ∑ q ∈ Finset.Icc 1 Q, ∑ χ : DirichletCharacter ℂ q with χ.IsPrimitive,
         ∫ t in (-T)..T, ‖∑ n ∈ Finset.Icc (M + 1) (M + N),
           a n * χ (n : ZMod q) * (n : ℂ) ^ ((t : ℂ) * Complex.I)‖ ^ 2 ≤
-      C * (N + (Q : ℝ) ^ 2 * T) * ∑ n ∈ Finset.Icc (M + 1) (M + N), ‖a n‖ ^ 2 := by
+      C * ((M + N : ℕ) + (Q : ℝ) ^ 2 * T) * ∑ n ∈ Finset.Icc (M + 1) (M + N), ‖a n‖ ^ 2 := by
   sorry
 
 /-- LEAF. Zero detection, the mollified coefficient at `n = 1`:

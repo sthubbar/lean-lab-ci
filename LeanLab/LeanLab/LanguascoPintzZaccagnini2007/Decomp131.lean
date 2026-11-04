@@ -48,8 +48,8 @@ theorem minor_mean_square131 (k : ℕ) (hk : 1 ≤ k) :
 
 /-- Display 25 on page 8, with the factor 2c0 restored from display 2.
 The major arc averaging proof gives a uniform additive error o(N L^k).
-CONDITIONAL on the open leaves `major_arcs_j1_131`, CITED Corollary 4.2, and
-`major_arcs_combine131` in DecompJ218.lean, through `major_asymptotic131_assembly`.
+CONDITIONAL on `cor42_published131`, CITED Corollary 4.2, on the OPEN window extension
+`cor42_window_extension131`, and on `major_arcs_combine131` in DecompJ218.lean, through `major_asymptotic131_assembly`.
 Source outside P0045: Pintz Theorem 10 cited as Lemma 4.1, and the Iwaniec
 zero free region and primitive real character facts in Corollary 4.2 on page 6.
 The arithmetic Lemmas 6.1 and 6.2 are already proved in this folder. -/

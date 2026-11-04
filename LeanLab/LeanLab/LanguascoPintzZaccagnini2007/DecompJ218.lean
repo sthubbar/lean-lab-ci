@@ -5,7 +5,7 @@ import LeanLab.LanguascoPintzZaccagnini2007.Residues131
 /-!
 P0045 U-1608. Re-cut of the major arc decomposition of display 25, page 8.
 The old leaves are kept as text and refuted in Audit1608.lean.
-Open leaves here: `major_arcs_j1_131`, Corollary 4.2 for the BINARY integral,
+Open leaves here: `cor42_published131` and `cor42_window_extension131`, Corollary 4.2 for the BINARY integral,
 and `major_arcs_combine131`, displays 15 to 24, the singular series average.
 `major_arcs_j2_131`, displays 12 to 14, is proved here from Lemma 6.2.
 `major_asymptotic131_assembly` is proved from these and has no sorry of its own.
@@ -432,22 +432,42 @@ def SingularAverageStatement131 : Prop :=
           ((N - tuplePower131 ν : ℕ) : ℝ) * Sing (N - tuplePower131 ν) -
         coefficient131 k N * N * Lg X ^ k| ≤ ε * N * Lg X ^ k
 
-/-- LEAF, CITED. Corollary 4.2 on page 6 together with its last sentence, for the BINARY
-major arc integral R_M(n) of display 4. The moduli E are the generalised exceptional moduli,
-display 9 is `Nonexceptional131`, and display 10 is the bound on `oddRad131`.
-P is produced by the statement, not given: page 3 says P cannot be fixed directly.
-The constant A may depend on eta, which the use in display 14 allows.
-The window [X/2, X] replaces J(X) because displays 11 and 12 use n = N - M below 2X/3 when N
-is near 2X/3; Lemma 6.2 is stated on the same window, and Zaccagnini circle.pdf 7.2 states
-the corollary for all even n up to the size parameter.
-Source outside P0045: Pintz, ELAZ 2004, Theorem 10, cited as Lemma 4.1; Jutila; Iwaniec. -/
+/-- Corollary 4.2 for the binary integral on a chosen window W of even n. Same constants, same P
+and E for the whole window. `Cor42Statement131` is the instance W = evenWindow131. -/
+def Cor42OnWindow131 (W : ℕ → Finset ℕ) : Prop :=
+  ∀ η : ℝ, 0 < η →
+    ∃ (K₁ Cstar : ℕ) (c A : ℝ), 0 < Cstar ∧ 0 < c ∧ 0 ≤ A ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+      ∃ (P : ℝ) (E : Finset ℕ), AdmissibleP131 X P ∧ ExceptionalModuli131 K₁ c X E ∧
+        (∀ n ∈ W X, Nonexceptional131 Cstar E n →
+          |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
+        (∀ n ∈ W X, |binaryMajor131 X n P| ≤ A * n * Sing n)
+
+/-- LEAF, CITED. Published Corollary 4.2 with Lemma 4.1 of P0045, page 6, for the binary integral
+R_M of display 4 on exactly J(X) = [2X/3, X]. E is the exceptional moduli, display 9 is
+`Nonexceptional131`, display 10 bounds `oddRad131`, P is chosen by the statement, page 3.
+Source of Lemma 4.1: Pintz, ELAZ 2004, Theorem 10; Jutila; Iwaniec. -/
+theorem cor42_published131 : Cor42OnWindow131 evenJ131 := by
+  sorry
+
+/-- LEAF, OPEN. Extends Corollary 4.2 from J(X) to the window [X/2, X] that displays 11 and 12
+use, keeping the same P and E: n = N - M falls below 2X/3 when N is near 2X/3. The covering by
+J(3X/4) does not close it: R_M depends on X through S and the arcs, and only the sum R_M + R_m
+is free of X, see Audit1617. Lemma 6.2 is on the same window. The explicit formula
+proof should carry over for n of size X. Unit U-1617. -/
+theorem cor42_window_extension131 :
+    Cor42OnWindow131 evenJ131 → Cor42OnWindow131 evenWindow131 := by
+  sorry
+
+/-- Corollary 4.2 on the window [X/2, X], the form the assembly uses. CONDITIONAL on
+`cor42_published131` and `cor42_window_extension131`. No direct sorry. Unit U-1617 split the old
+single leaf; the statement is unchanged. -/
 theorem major_arcs_j1_131 (η : ℝ) (hη : 0 < η) :
     ∃ (K₁ Cstar : ℕ) (c A : ℝ), 0 < Cstar ∧ 0 < c ∧ 0 ≤ A ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
       ∃ (P : ℝ) (E : Finset ℕ), AdmissibleP131 X P ∧ ExceptionalModuli131 K₁ c X E ∧
         (∀ n ∈ evenWindow131 X, Nonexceptional131 Cstar E n →
           |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
-        (∀ n ∈ evenWindow131 X, |binaryMajor131 X n P| ≤ A * n * Sing n) := by
-  sorry
+        (∀ n ∈ evenWindow131 X, |binaryMajor131 X n P| ≤ A * n * Sing n) :=
+  cor42_window_extension131 cor42_published131 η hη
 
 /-- LEAF. Displays 15 to 24 on pages 7 and 8, with the factor 2c0 restored from display 2.
 The weighted singular series sum over tuples in [1, L']^k is 2c0 C(k,N) N L^k up to

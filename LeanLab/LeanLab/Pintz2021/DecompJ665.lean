@@ -26,11 +26,13 @@ theorem leaf_constants_exist :
     ∃ c H0 C X0 : ℝ, 0 < c := by
   exact ⟨1, one_pos, fun _ _ _ => ⟨1, 0, 0, 0, one_pos⟩⟩
 
-/-- LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
+/-- REFUTED, `P_leaf_false` below. Repaired in `DecompJ579.leaf_P_exists`. Do not prove this.
+LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
 theorem leaf_P_exists {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp ε H0 X0 H X P0) :
   ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧ (excSet H (Real.sqrt X) P X).Finite := by sorry
 
-/-- LEAF arXiv:1804.05561v1 display 9.16: the singular series converges -/
+/-- REFUTED, `singular_series_leaf_false` below, false at `m = 0`. Repaired in `DecompJ579.leaf_singular_series_converges`. Do not prove this.
+LEAF arXiv:1804.05561v1 display 9.16: the singular series converges -/
 theorem leaf_singular_series_converges (H X P : ℝ) :
   ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
     ∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ,

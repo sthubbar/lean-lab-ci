@@ -11,7 +11,13 @@ Writes MOUNTAIN.md: one row per FILE with open sorries, sorted by fewest open so
 prover takes; claims are per file since 2026-10-26, CLAIMS/<Folder>/<FileStem>. Workers never edit statements: scripts/seal_check.py.
 """
 import re, subprocess, sys, collections
-REF = sys.argv[1] if len(sys.argv) > 1 else "origin/main"
+USAGE = "Usage, from the repo root: python3 scripts/mountain.py [REF]    default REF origin/main. Writes MOUNTAIN.md."
+# Fixed 2026-11-01 by lean-refresh: a --help call once ran a scan of a ref named --help and wrote an empty MOUNTAIN.md.
+# Any flag, or more than one argument, prints usage and exits 0 without writing a file.
+_args = sys.argv[1:]
+if len(_args) > 1 or any(a.startswith("-") for a in _args):
+    print(USAGE); sys.exit(0)
+REF = _args[0] if _args else "origin/main"
 def sh(c): return subprocess.run(c, shell=True, capture_output=True, text=True).stdout
 files = [f for f in sh(f"git ls-tree -r --name-only {REF} -- LeanLab/LeanLab").split() if f.endswith(".lean") and "/old/" not in f]
 DECL = re.compile(r"^(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable)\s+)*(theorem|lemma)\s+([^\s:({\[]+)", re.M)
@@ -33,6 +39,7 @@ for f in files:
         doc = t2[max(0, m.start() - 600):m.start()]
         d = doc.rfind("/--"); docs = doc[d:] if d != -1 and "-/" in doc[d:] else ""
         sec = t2[:m.start()]; s = sec.rfind("/-!"); section = sec[s:s+300] if s != -1 else ""
+        if re.match(r"/--\s*REFUTED\b", docs): continue  # architect U-1614: a leaf a kernel check refuted is no work for a prover; audit theorem named in its doc
         unit = re.search(r"\bUnit U-\d+", docs)
         paper_main = re.search(r"\bP\d{4}\b", docs) or re.match(r"(?:theorem|lemma)\s+\S+\s*:\s*[A-Z][\w.]*\s*:=\s*by\s+sorry", body.strip())
         if CITED_RE.search(docs) or (not unit and (CITED_RE.search(section) or file_cited or paper_main)): cited += 1
@@ -48,5 +55,8 @@ out = ["# MOUNTAIN, open proof work on main", "",
        "| Open | Folder | File | Declarations |", "|---|---|---|---|"]
 for n, folder, f, opens in rows:
     out.append(f"| {n} | {folder} | {f.split('LeanLab/LeanLab/')[1]} | {', '.join(opens[:8])}{' ...' if len(opens) > 8 else ''} |")
+if not rows:
+    # Guard added 2026-11-01: never overwrite MOUNTAIN.md with an empty table, a bad REF or a failed git call gives zero rows.
+    print(f"WARNING mountain.py: zero rows from {REF}, files scanned {len(files)}; MOUNTAIN.md not written"); sys.exit(1)
 open("MOUNTAIN.md", "w").write("\n".join(out) + "\n")
 print(f"OPEN {tot['open']} CITED {tot['cited']} FILES {len(rows)}")

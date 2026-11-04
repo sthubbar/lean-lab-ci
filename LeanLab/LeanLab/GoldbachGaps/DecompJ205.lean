@@ -153,12 +153,17 @@ def SumRAsymp (K : ℕ → ℕ) : Prop :=
     Tendsto (fun N : ℕ => (∑ n ∈ Icc (N - K N) (N + K N), Rg n) / (2 * (K N : ℝ) * N)) atTop (nhds 1)
 
 /-- LEAF p. 292: `Σ_{|n| ≤ K} R(N + n) ~ 2 K N`, under the Theorem's range and `J(N, K) = o(K² N)`.
-The paper differences `S` at `K ± h`, `h = f(K) K`, so it uses `J` at `K ± h` as well as at `K`; see
-QUESTION Q-1610 in STATEMENTS.md. -/
+OPEN. Q-1610 answered by U-1613: true as stated, by hand, unformalized. J at K only is enough. The
+printed differencing needs J at K plus or minus h, which needs a sieve bound `J(M, h) ≪ h² M`. The
+better route is the trapezoid leaf in the docstring of `leaf_relabel`, at M = N and M = N - K,
+using that J is monotone in its first argument. -/
 theorem leaf_sum_R_asymp (K : ℕ → ℕ) : SumRAsymp K := sorry
 
-/-- LEAF p. 292: `R` to `r` relabeling gives Corollary 1. OPEN. The old proof was vacuous: its
-hypothesis was the false old `leaf_sum_R_asymp`. The hypothesis now carries the range and `J`. -/
+/-- LEAF p. 292, Corollary 1. OPEN. Q-1610, U-1613: `Corollary1` is true as stated, by hand, but
+not by relabeling: the moved centre wants J at K/2, which J at K does not bound. Hypothesis
+`h_asymp` is then unused. Route: `∫ (θ(x+K)-θ(x)) (θ(N-x+h)-θ(N-x)) dx` over [1, N] is a trapezoid
+sum of R on [N, N+K+h], h = ε K. Its error is at most `√(J(N,K) J(N,h))` by Cauchy, with
+`J(N,h) ≪ h²N` from the pair sieve. The edges take the sieve bound for R. -/
 theorem leaf_relabel (h_asymp : ∀ K : ℕ → ℕ, SumRAsymp K) : Corollary1 := sorry
 
 theorem assembly_corollary1 : Corollary1 :=

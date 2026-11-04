@@ -48,7 +48,7 @@ CURATED = [
     ("BS2022GRH", "LeanLab.BS2022GRH.DecompC169a.thm5J", "curated"),
     ("Helfgott2013", "LeanLab.Helfgott2013.U1538.prop62_arcs", "auto"),
     ("Linnik", "LeanLab.Linnik.Decomp1532c.theorem1_of_leaves", "curated"),
-    ("BakerHarmanPintz1997", "LeanLab.BakerHarmanPintz1997.theorem1_via_prop12", "curated"),
+    ("BakerHarmanPintz1997", "LeanLab.BakerHarmanPintz1997.theorem1_of_theorem2_15", "curated"),  # U-1613: theorem1_via_prop12 is hollow, prop12 is display 1.2
     ("HelfgottMajor", "LeanLab.HelfgottMajor.Decomp123.theorem_1_1", "curated"),
     ("LanguascoPintzZaccagnini2007", "LeanLab.LPZ2007.repaired_mainJ131", "curated"),
     ("Linnik1951", "LeanLab.Linnik1951.linnik1951_decomposed111", "curated"),

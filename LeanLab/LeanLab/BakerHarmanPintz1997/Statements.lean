@@ -509,25 +509,36 @@ theorem lemma10 : Lemma10 := by sorry
 /-- `y₁ = x exp(-3 log^{1/3} x)`, p. 24. -/
 noncomputable def y1 (x : ℝ) : ℝ := x * Real.exp (-3 * Real.log x ^ (1 / 3 : ℝ))
 
-/-- (4.2), p. 24, for a family `c_k = c x k`: for all `A > 0`, all `χ mod q`, `q ≤ 𝓛^A`,
-`Σ_{k ∈ I} c_k χ(k) = (Y/y₁) Σ_{k ∈ I₁} c_k χ(k) + O(Y𝓛^{-A})`, `I₁ = (x - y₁, x]`. -/
+/-- Repaired (4.2), U-1617. Plain math twin: for all `A > 0`, all `χ mod q`, `q ≤ 𝓛^A` and all
+`y` with `2 ≤ y ≤ y₁`, `Σ_{x-y<k≤x} c_k χ(k) = (y/y₁) Σ_{k ∈ I₁} c_k χ(k) + O(y𝓛^{-A} + x^{0.55+11ε/12})`,
+`I₁ = (x - y₁, x]`. Source: P0069 p. 25, display (4.5), used at `y` and at `y₁`, the form that also
+gives the windows of (1.7), p. 3. The old form compared the sum over `I`, width `2Y`, with `Y/y₁`
+times the sum over `I₁`; it is `Holds42Old` in Audit1617, refuted there by `lemma11Old_false`. The
+case `y = 2Y` is the sum over `I` with the factor `2Y/y₁`, see `holds42_interval`. Vacuity instance
+`holds42_zero_instance`. -/
 def Holds42 (ε : ℝ) (c : ℝ → ℕ → ℂ) : Prop :=
   ∀ A : ℝ, 0 < A → ∃ C X0 : ℝ, ∀ x : ℝ, X0 ≤ x → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ L x ^ A →
-    ∀ χ : DirichletCharacter ℂ q,
-      ‖∑ k ∈ Iset ε x, c x k * χ (k : ZMod q) -
-        ((Yof ε x / y1 x : ℝ) : ℂ) * ∑ k ∈ Finset.Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q)‖ ≤
-      C * Yof ε x / L x ^ A
+    ∀ χ : DirichletCharacter ℂ q, ∀ y : ℝ, 2 ≤ y → y ≤ y1 x →
+      ‖∑ k ∈ Finset.Ioc ⌊x - y⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q) -
+        ((y / y1 x : ℝ) : ℂ) * ∑ k ∈ Finset.Ioc ⌊x - y1 x⌋₊ ⌊x⌋₊, c x k * χ (k : ZMod q)‖ ≤
+      C * (y / L x ^ A + x ^ (0.55 + 11 * ε / 12))
 
-/-- **Lemma 11**, p. 24. If `F(s,χ) = Σ_{k ~ x} c_k χ(k) k^{-s}` satisfies (3.1) and (4.1),
-`∫_{T₀}^{T₁} abs F(1/2+it,χ) dt ≪ x^{1/2}𝓛^{-A}`, then (4.2). We read `k ~ x` as `x/2 < k ≤ 2x`. -/
+/-- **Lemma 11**, p. 24, repaired by U-1617. If `F(s,χ) = Σ_{k ~ x} c_k χ(k) k^{-s}` satisfies (3.1)
+and (4.1), `∫_{T₀}^{T₁} abs F(1/2 ± it,χ) dt ≪ x^{1/2}𝓛^{-A}`, then (4.5) in the form `Holds42`.
+We read `k ~ x` as `x/2 < k ≤ 2x`. Both signs of `t` are required: the Perron proof on p. 25 runs
+over `T₀ ≤ abs(Im s) ≤ T₁`, and for complex `c` the sign `-t` is not `+t` at the conjugate character.
+Vacuity instance: `plateau_mean` in Audit1617, a family of positive density. -/
 def Lemma11 : Prop :=
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 → ∀ (B : ℝ) (c : ℝ → ℕ → ℂ),
     (∀ x k, ‖c x k‖ ≤ tau k ^ B) →
     (∀ A : ℝ, 0 < A → ∃ C X0 : ℝ, ∀ x : ℝ, X0 ≤ x → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ L x ^ A →
       ∀ χ : DirichletCharacter ℂ q,
-        ∫ t in (T0 x)..(T1 ε x),
+        (∫ t in (T0 x)..(T1 ε x),
           ‖(⟨c x, Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊⟩ : DP).eval χ (half t)‖ ≤
-          C * x ^ (1 / 2 : ℝ) / L x ^ A) →
+          C * x ^ (1 / 2 : ℝ) / L x ^ A) ∧
+        (∫ t in (T0 x)..(T1 ε x),
+          ‖(⟨c x, Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊⟩ : DP).eval χ (half (-t))‖ ≤
+          C * x ^ (1 / 2 : ℝ) / L x ^ A)) →
     Holds42 ε c
 
 /-- CITED. Lemma 11, after Heath-Brown [10]. -/

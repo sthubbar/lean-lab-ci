@@ -34,14 +34,13 @@ namespace LeanLab.Ramare1995.Decomp1526c
 open LeanLab LeanLab.SchnirelmannConstant LeanLab.Ramare1995.Section9
 open LeanLab.Ramare1995.Decomp1526a LeanLab.Ramare1995.Decomp1526b
 
-/-- LEAF. Interchange: `Σ_{a < N ≤ b} rep N = Σ_{p ≤ b} log p (θ(b - p) - θ(a - p))`, with
+/- LEAF. Interchange: `Σ_{a < N ≤ b} rep N = Σ_{p ≤ b} log p (θ(b - p) - θ(a - p))`, with
 natural subtraction; for `p ≥ a` the second term is `θ(0) = 0`. Definition of `rep`;
-Ramaré 1995 Section 5, p. 678, the opening of the proof of Proposition 1. Unit U-1526. -/
-theorem sum_rep_Ioc_eq (a b : ℕ) :
-    ∑ N ∈ Ioc a b, rep N =
-      ∑ p ∈ (range (b + 1)).filter Nat.Prime,
-        Real.log p * (θ ((b - p : ℕ) : ℝ) - θ ((a - p : ℕ) : ℝ)) := by
-  sorry
+Ramaré 1995 Section 5, p. 678, the opening of the proof of Proposition 1. Unit U-1526.
+RETIRED by U-1614: the form for all `a b` is false at `a = 4, b = 2`,
+`Decomp1526b.sum_rep_Ioc_eq_counterexample`. The repaired `sum_rep_Ioc_eq`, with `a ≤ b`, is proved
+below after its helpers.
+theorem sum_rep_Ioc_eq (a b : ℕ) : stated for all a b, RETIRED, no proof term -/
 
 theorem theta_sub_nonneg {a b : ℕ} (hab : a ≤ b) (p : ℕ) :
     0 ≤ θ ((b - p : ℕ) : ℝ) - θ ((a - p : ℕ) : ℝ) :=
@@ -497,6 +496,15 @@ theorem sum_prime_pairs_reduced_residues {a b d : ℕ} (hab : a ≤ b) (hd : 0 <
     rw [Nat.add_mod p q d, Nat.add_mod r q d, hpr, Nat.mod_eq_of_lt hrlt]
   rw [hdiv]
 
+
+/-- Interchange: `Σ_{a < N ≤ b} rep N = Σ_{p ≤ b} log p (θ(b - p) - θ(a - p))`, for `a ≤ b`. Ramaré 1995
+Section 5, p. 678. DECISION U-1614: `a ≤ b` added, the old form is false at `a = 4, b = 2`,
+`Decomp1526b.sum_rep_Ioc_eq_counterexample`. PROVED. -/
+theorem sum_rep_Ioc_eq {a b : ℕ} (hab : a ≤ b) :
+    ∑ N ∈ Ioc a b, rep N =
+      ∑ p ∈ (range (b + 1)).filter Nat.Prime,
+        Real.log (p : ℝ) * (θ ((b - p : ℕ) : ℝ) - θ ((a - p : ℕ) : ℝ)) :=
+  sum_rep_Ioc_eq_of_le hab
 
 /-- LEAF. Drop the primes `a < p ≤ b`, whose terms are `≥ 0` by `theta_sub_nonneg`:
 `Σ_{a < N ≤ b} rep N ≥ Σ_{p ≤ a} log p (θ(b - p) - θ(a - p))` for `a ≤ b`. Uses
