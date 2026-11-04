@@ -173,6 +173,29 @@ theorem band_variation_cauchy_schwarz {X : ℝ} (hX : 0 < X) (U T : ℝ)
   rw [hval, hfun]
   exact expsum_variation_cauchy s c γ
 
+/-- Helper: derivative of the band sum expressed via the exponential sum. -/
+private theorem zSum_band_deriv_eq_expsum_deriv {X : ℝ} (hX : 0 < X) (U T : ℝ)
+    (q : ℕ) [NeZero q] (a : ℕ) {ι : Type} {s : Finset ι} {c : ι → ℂ} {γ : ι → ℝ}
+    (hsum : ∀ v : ℝ, zSum (X * Real.exp v) U T q a = ∑ i ∈ s, c i * Complex.exp (Complex.I * γ i * v)) :
+    (fun t : ℝ => zSum (X * Real.exp t) U T q a) = (fun t : ℝ => ∑ i ∈ s, c i * Complex.exp (Complex.I * γ i * t)) := by
+  funext t
+  rw [hsum t]
+  <;> linarith
+
+/-- Helper: weighted energy identity for the derivative of an exponential sum. -/
+private theorem finite_energy_identity_deriv {ι : Type*} (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ) :
+    Integrable (fun v : ℝ => ‖∑ i ∈ s, c i * (Complex.I * γ i) * Complex.exp (Complex.I * γ i * v)‖ ^ 2 * Real.exp (-2 * |v|)) ∧
+    ((∫ v : ℝ, ‖∑ i ∈ s, c i * (Complex.I * γ i) * Complex.exp (Complex.I * γ i * v)‖ ^ 2 * Real.exp (-2 * |v|) : ℝ) : ℂ) =
+      ∑ i ∈ s, ∑ j ∈ s, c i * starRingEnd ℂ (c j) * (Complex.I * γ i) * (-(Complex.I * γ j)) * (w (γ i - γ j) : ℂ) := by
+  sorry
+
+/-- Helper: bound on the weighted energy of the derivative by T² times the weighted energy of the sum. -/
+private lemma weighted_deriv_le_T_sq_weighted {ι : Type*} (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ) (T : ℝ)
+    (hT : ∀ i ∈ s, |γ i| ≤ T) :
+    (∑ i ∈ s, ∑ j ∈ s, (c i * starRingEnd ℂ (c j) * (Complex.I * γ i) * (-(Complex.I * γ j)) * (w (γ i - γ j) : ℂ)).re) ≤
+      (T ^ 2 : ℝ) * (∑ i ∈ s, ∑ j ∈ s, (c i * starRingEnd ℂ (c j) * (w (γ i - γ j) : ℂ)).re) := by
+  sorry
+
 /-- LEAF. Page 355, partial summation in the deduction of display 13.
 The differentiated band sum has local squared L2 norm bounded by an
 absolute constant times T squared times the uniform correlation bound.
@@ -185,7 +208,83 @@ theorem band_derivative_mass :
           (∫ v in (-1 : ℝ)..1,
             ‖deriv (fun t : ℝ => zSum (X * Real.exp t) U T q a) v‖ ^ 2) ≤
               C * T ^ 2 * M := by
-  sorry
+  intro hGRH
+  have h_main : ∃ (C : ℝ), 0 ≤ C ∧ ∀ (X : ℝ) (hX : 0 < X) (U T : ℝ) (hU : 0 ≤ U) (hUT : U < T) (hT : 1 ≤ T) (q : ℕ) [NeZero q] (a : ℕ) (ha : Nat.Coprime a q) (M : ℝ) (hM : ∀ u, U ≤ u → u ≤ T → ‖F X u q a‖ ≤ M), (∫ v in (-1 : ℝ)..1, ‖deriv (fun t : ℝ => zSum (X * Real.exp t) U T q a) v‖ ^ 2) ≤ C * T ^ 2 * M := by
+    use 4 * Real.exp 2
+    constructor
+    · positivity
+    · intro X hX U T hU hUT hT q _ a ha M hM
+      have h₁ : (∫ v in (-1 : ℝ)..1, ‖deriv (fun t : ℝ => zSum (X * Real.exp t) U T q a) v‖ ^ 2) ≤ 4 * Real.exp 2 * T ^ 2 * M := by
+        -- Step 1: Write the band sum as a difference of two full sums
+        have h_band_sub : zSum (X * Real.exp 0) U T q a = zSum (X * Real.exp 0) (-1 : ℝ) T q a - zSum (X * Real.exp 0) (-1 : ℝ) U q a := by
+          have h₂ := Mass108.zSum_band_eq_sub (X * Real.exp 0) U T (by linarith) q a
+          simpa [Real.exp_zero] using h₂
+        -- Step 2: Get exponential sum representations for the full sums
+        -- Full sum from -1 to T (using U = -1 in zSum_band_eq_expsum)
+        have h_full_T : ∃ (ι : Type) (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ), (∀ v : ℝ, zSum (X * Real.exp v) (-1 : ℝ) T q a = ∑ i ∈ s, c i * Complex.exp (Complex.I * γ i * v)) ∧ (∀ i ∈ s, |γ i| ≤ T) := by
+          have h₁ : ∃ (ι : Type) (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ), ∀ v : ℝ, zSum (X * Real.exp v) (-1 : ℝ) T q a = ∑ i ∈ s, c i * Complex.exp (Complex.I * γ i * v) := by
+            -- Use zSum_band_eq_expsum with U = -1
+            have h₂ := zSum_band_eq_expsum hX (-1 : ℝ) T q a
+            obtain ⟨ι, s, c, γ, h₃⟩ := h₂
+            exact ⟨ι, s, c, γ, h₃⟩
+          obtain ⟨ι, s, c, γ, h₄⟩ := h₁
+          refine' ⟨ι, s, c, γ, h₄, _⟩
+          sorry
+        -- Full sum from -1 to U (using U = -1 in zSum_band_eq_expsum)
+        have h_full_U : ∃ (ι : Type) (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ), (∀ v : ℝ, zSum (X * Real.exp v) (-1 : ℝ) U q a = ∑ i ∈ s, c i * Complex.exp (Complex.I * γ i * v)) ∧ (∀ i ∈ s, |γ i| ≤ U) := by
+          have h₁ : ∃ (ι : Type) (s : Finset ι) (c : ι → ℂ) (γ : ι → ℝ), ∀ v : ℝ, zSum (X * Real.exp v) (-1 : ℝ) U q a = ∑ i ∈ s, c i * Complex.exp (Complex.I * γ i * v) := by
+            -- Use zSum_band_eq_expsum with U = -1
+            have h₂ := zSum_band_eq_expsum hX (-1 : ℝ) U q a
+            obtain ⟨ι, s, c, γ, h₃⟩ := h₂
+            exact ⟨ι, s, c, γ, h₃⟩
+          obtain ⟨ι, s, c, γ, h₄⟩ := h₁
+          refine' ⟨ι, s, c, γ, h₄, _⟩
+          sorry
+        -- Step 3: Bound the local integral of the derivative of the full sum from -1 to T
+        have h_deriv_full_T : (∫ v in (-1 : ℝ)..1, ‖deriv (fun t : ℝ => zSum (X * Real.exp t) (-1 : ℝ) T q a) v‖ ^ 2) ≤ Real.exp 2 * T ^ 2 * ‖F X T q a‖ := by sorry
+        -- Step 4: Bound the local integral of the derivative of the full sum from -1 to U
+        have h_deriv_full_U : (∫ v in (-1 : ℝ)..1, ‖deriv (fun t : ℝ => zSum (X * Real.exp t) (-1 : ℝ) U q a) v‖ ^ 2) ≤ Real.exp 2 * U ^ 2 * ‖F X U q a‖ := by sorry
+        -- Step 5: Bound the band sum derivative using the difference
+        have h_deriv_band : (∫ v in (-1 : ℝ)..1, ‖deriv (fun t : ℝ => zSum (X * Real.exp t) U T q a) v‖ ^ 2) ≤ 2 * (Real.exp 2 * T ^ 2 * ‖F X T q a‖ + Real.exp 2 * U ^ 2 * ‖F X U q a‖) := by sorry
+        -- Step 6: Use the hypothesis hM to bound ‖F X T q a‖ and ‖F X U q a‖ by M
+        have hF_T : ‖F X T q a‖ ≤ M := by
+          have h₂ := hM T (by linarith) (by linarith)
+          exact h₂
+        have hF_U : ‖F X U q a‖ ≤ M := by
+          have h₂ := hM U (by linarith) (by linarith)
+          exact h₂
+        -- Step 7: Prove M ≥ 0 (since norms are nonnegative)
+        have hM0 : 0 ≤ M := by
+          have h₅ : 0 ≤ ‖F X U q a‖ := norm_nonneg _
+          have h₆ : ‖F X U q a‖ ≤ M := hF_U
+          linarith
+        -- Step 8: Combine to get the final bound
+        have h_final : (∫ v in (-1 : ℝ)..1, ‖deriv (fun t : ℝ => zSum (X * Real.exp t) U T q a) v‖ ^ 2) ≤ 4 * Real.exp 2 * T ^ 2 * M := by
+          have h₃ : (2 : ℝ) * (Real.exp 2 * T ^ 2 * ‖F X T q a‖ + Real.exp 2 * U ^ 2 * ‖F X U q a‖) ≤ 4 * Real.exp 2 * T ^ 2 * M := by
+            have h₄ : 0 ≤ U := by linarith
+            have h₅ : U < T := hUT
+            have h₆ : 0 ≤ T := by linarith
+            have h₇ : 0 ≤ Real.exp 2 := Real.exp_pos 2 |>.le
+            have h₈ : 0 ≤ T ^ 2 := by positivity
+            have h₉ : 0 ≤ U ^ 2 := by positivity
+            have h₁₀ : U ^ 2 ≤ T ^ 2 := by
+              nlinarith [sq_nonneg (U - T), sq_nonneg (U + T)]
+            have h₁₁ : Real.exp 2 * U ^ 2 * ‖F X U q a‖ ≤ Real.exp 2 * T ^ 2 * M := by
+              calc
+                Real.exp 2 * U ^ 2 * ‖F X U q a‖ ≤ Real.exp 2 * U ^ 2 * M := by gcongr <;> simp_all [norm_nonneg]
+                _ ≤ Real.exp 2 * T ^ 2 * M := by gcongr <;> nlinarith
+            have h₁₂ : Real.exp 2 * T ^ 2 * ‖F X T q a‖ ≤ Real.exp 2 * T ^ 2 * M := by
+              gcongr <;> simp_all [norm_nonneg]
+            nlinarith [Real.exp_pos 2 |>.le]
+          linarith
+        linarith
+      -- Convert the final bound to the required form
+      have h₂ : (4 : ℝ) * Real.exp 2 * T ^ 2 * M = (4 * Real.exp 2 : ℝ) * T ^ 2 * M := by ring
+      linarith
+  obtain ⟨C, hC, hC'⟩ := h_main
+  refine' ⟨C, hC, _⟩
+  intro X hX U T hU hUT hT q _ a ha M hM
+  exact hC' X hX U T hU hUT hT q a ha M hM
 
 /-- Page 355 display 13, with exactly the statement of variation_control.
 CONDITIONAL ON band_variation_cauchy_schwarz and band_derivative_mass. -/
