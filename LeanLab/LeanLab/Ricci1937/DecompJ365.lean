@@ -1602,6 +1602,13 @@ lemma decompJ365_esymm_two (x : ℕ → ℝ) (P : Finset ℕ) :
     rw [esymm_succ_insert x ha 1, hone, sum_insert ha, sum_insert ha]
     nlinarith
 
+/-- Auxiliary check for the empty block certificate. With no primes in the
+sifting set, every integer in the range survives. This proves that the empty
+block gives no roughness information for the lower sieve. -/
+lemma decompJ365_empty_block_count (h N : ℕ) :
+    #{m ∈ range N | ∀ p ∈ (∅ : Finset ℕ), ¬ p ∣ m * (m + h)} = N := by
+  simp
+
 /-- LEAF. Pages 75, 88 and 89: the remaining positive lower count for Z.
 The upper estimate is decompJ365_zCount_upper. The decreasing step Brun lower sieve remains open. -/
 theorem decompJ365_Z_lower_6_6 :
