@@ -1,5 +1,9 @@
 import LeanLab.ChirreHagen2025.Statements
 import LeanLab.ChirreHagen2025.Additional122
+import LeanLab.ChirreHagen2025.Summability272
+import LeanLab.ChirreHagen2025.TailIntegral297
+import LeanLab.ChirreHagen2025.TailNumeric297
+import LeanLab.ChirreHagen2025.PrimeSplit297
 import Mathlib
 
 /-!
@@ -14,12 +18,15 @@ open Real
 theorem tail_bound (n0 : ℕ) (hn0 : n0 = 26355867) :
   (∑' n : ℕ, if n0 < n then Real.log ((n : ℝ) * Real.log (n : ℝ)) / (Real.sqrt ((n : ℝ) * Real.log (n : ℝ)) * ((n : ℝ) * Real.log (n : ℝ) - 1)) else 0)
     ≤ ∫ x in Set.Ici (n0 : ℝ), Real.log (x * Real.log x) / (Real.sqrt (x * Real.log x) * (x * Real.log x - 1)) := by
-  sorry
+  simpa only [TailIntegral297.tailWeight, TailIntegral297.weight] using
+    TailIntegral297.tail_sum_le_integral n0 (by omega)
 
 /-- LEAF. P0075 page 14, numerical evaluation of the integral tail. -/
 theorem tail_integral_bound (n0 : ℝ) (hn0 : n0 = 26355867) :
   (∫ x in Set.Ici n0, Real.log (x * Real.log x) / (Real.sqrt (x * Real.log x) * (x * Real.log x - 1))) < 0.000104 := by
-  sorry
+  subst n0
+  simpa only [TailIntegral297.tailWeight, TailIntegral297.weight] using
+    TailNumeric297.tail_integral_lt
 
 /-- LEAF. P0075 page 14, numerical evaluation of the finite sum. -/
 theorem head_sum_bound (n0 : ℕ) (hn0 : n0 = 26355867) :
@@ -36,11 +43,13 @@ theorem sum_split_bound (n0 : ℕ) (hn0 : n0 = 26355867) :
   (∑' p : Nat.Primes, Real.log (p : ℝ) / (Real.sqrt (p : ℝ) * ((p : ℝ) - 1))) ≤
     (∑ p ∈ Finset.filter Nat.Prime (Finset.Icc 1 (Nat.nth Nat.Prime n0)), Real.log (p : ℝ) / (Real.sqrt (p : ℝ) * ((p : ℝ) - 1))) +
     (∑' n : ℕ, if n0 < n then Real.log ((n : ℝ) * Real.log (n : ℝ)) / (Real.sqrt ((n : ℝ) * Real.log (n : ℝ)) * ((n : ℝ) * Real.log (n : ℝ) - 1)) else 0) := by
-  sorry
+  simpa only [TailIntegral297.weight, TailIntegral297.tailWeight] using
+    PrimeSplit297.sum_split_of_lower_bound n0 (by omega)
+      (fun n hn => nth_prime_lower_bound n (by omega))
 
 /-- LEAF. P0075 page 13, summability of the series. -/
 theorem part1_summable : Summable (fun p : Nat.Primes => Real.log (p : ℝ) / (Real.sqrt (p : ℝ) * ((p : ℝ) - 1))) := by
-  sorry
+  exact Summability272.part1_summable
 
 /-- P0075 Lemma A.1 part 1, assembled. -/
 theorem lemmaA1_part1_assembled : Additional122.lemmaA1_part1 := by

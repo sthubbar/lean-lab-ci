@@ -15,6 +15,7 @@ Lemma72Proof.lean by CODEX task46 from Poisson summation, without a cited input.
 -/
 import Mathlib
 import LeanLab.BhowmikGrimmelt2026.Minor84
+import LeanLab.BhowmikGrimmelt2026.GallagherStandard261
 import LeanLab.Common.Goldbach
 import LeanLab.ExceptionalSet.Statements
 import LeanLab.LanguascoPerelli1996.Statements
@@ -162,8 +163,9 @@ def GallagherStandard : Prop :=
       C * η ^ 2 * ∫ x : ℝ,
         ‖∑ n ∈ (Finset.Icc 1 N).filter (fun n : ℕ => x < n ∧ (n : ℝ) ≤ x + 1 / (2 * η)), a n‖ ^ 2
 
-/-- CITED, Gallagher 1970, standard form. -/
-theorem gallagherStandard : GallagherStandard := by sorry
+/-- Gallagher 1970, standard form, proved by specialization of the real frequency theorem. -/
+theorem gallagherStandard : GallagherStandard := by
+  exact ⟨Real.pi ^ 2, gallagher_standard_explicit261⟩
 
 /-! ## Section 6: zero density and Pintz -/
 
