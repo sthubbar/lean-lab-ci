@@ -2195,6 +2195,2292 @@ theorem archimedean_opposite107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ)
         C * N ^ ((ρ₁ + ρ₂).re - 1) * (1 + (|ρ₁.im| + |ρ₂.im|)) ^ (-A) :=
   opposite_of_Jdecay107 hϕ hG hA (JphiDecay107_proof hϕ hA)
 
+/-! ## Helpers for the closing of `archimedean_same107` (display 7.19, equal signs).
+
+The `v`-direction integration by parts against the phase `e^{i τ log v}`, the Fubini step that
+puts the `σ`-integral outside, and the assembly of the equal-sign leaf.  AI wrote the Lean code.
+Goldbach is open. -/
+
+open Filter
+
+open scoped Topology
+
+private theorem abs_add_of_mul_nonneg107' {t₁ t₂ : ℝ} (h : 0 ≤ t₁ * t₂) :
+    |t₁ + t₂| = |t₁| + |t₂| := by
+  rcases mul_nonneg_iff.mp h with ⟨h1, h2⟩ | ⟨h1, h2⟩
+  · rw [abs_of_nonneg h1, abs_of_nonneg h2, abs_of_nonneg (by linarith)]
+  · rw [abs_of_nonpos h1, abs_of_nonpos h2, abs_of_nonpos (by linarith)]
+    ring
+
+private theorem hasDerivAt_phase107' {τ : ℝ} {v : ℝ} (hv : 0 < v) :
+    HasDerivAt (fun w : ℝ => τ * Real.log w) (τ / v) v := by
+  have h := (Real.hasDerivAt_log hv.ne').const_mul τ
+  have h2 : τ * v⁻¹ = τ / v := by ring
+  rwa [h2] at h
+
+private theorem hasDerivAt_cexp_phase107' {τ : ℝ} {v : ℝ} (hv : 0 < v) :
+    HasDerivAt (fun w : ℝ => Complex.exp (Complex.I * ((τ * Real.log w : ℝ) : ℂ)))
+      (Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+        (Complex.I * ((τ / v : ℝ) : ℂ))) v := by
+  have hp : HasDerivAt (fun w : ℝ => τ * Real.log w) (τ / v) v := hasDerivAt_phase107' hv
+  have h1 : HasDerivAt (fun w : ℝ => Complex.I * ((τ * Real.log w : ℝ) : ℂ))
+      (Complex.I * ((τ / v : ℝ) : ℂ)) v := by
+    have h := hp.ofReal_comp
+    simpa using h.const_mul Complex.I
+  exact h1.cexp
+
+/-- `u = e^{iΦ} · (v/τ)(-i)` has derivative `e^{iΦ}(1 - i/τ)`. -/
+private theorem hasDerivAt_ephase_id107' {τ : ℝ} (hτ : τ ≠ 0) {v : ℝ} (hv : 0 < v) :
+    HasDerivAt (fun w : ℝ => Complex.exp (Complex.I * ((τ * Real.log w : ℝ) : ℂ)) *
+        (((w / τ : ℝ) : ℂ) * (-Complex.I)))
+      (Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * (1 - Complex.I / (τ : ℂ))) v := by
+  have hII : (Complex.I : ℂ) * Complex.I = -1 := Complex.I_mul_I
+  have hlin : HasDerivAt (fun w : ℝ => ((w / τ : ℝ) : ℂ) * (-Complex.I))
+      (((τ : ℝ)⁻¹ : ℝ) * (-Complex.I) : ℂ) v := by
+    have h : HasDerivAt (fun w : ℝ => (w / τ : ℝ)) (τ⁻¹) v := by
+      simpa using (hasDerivAt_id v).div_const τ
+    simpa using h.ofReal_comp.mul_const (-Complex.I)
+  have hprod := (hasDerivAt_cexp_phase107' (τ := τ) hv).mul hlin
+  have hkey : ((τ / v : ℝ) : ℂ) * ((v / τ : ℝ) : ℂ) = 1 := by
+    rw [← Complex.ofReal_mul]
+    have h : τ / v * (v / τ) = 1 := by field_simp
+    rw [h]
+    norm_num
+  have hterm : Complex.I * ((τ / v : ℝ) : ℂ) * (((v / τ : ℝ) : ℂ) * (-Complex.I)) = 1 := by
+    have hassoc : Complex.I * ((τ / v : ℝ) : ℂ) * (((v / τ : ℝ) : ℂ) * (-Complex.I))
+        = (Complex.I * (-Complex.I)) * (((τ / v : ℝ) : ℂ) * ((v / τ : ℝ) : ℂ)) := by ring
+    rw [hassoc, hkey, mul_neg, hII]
+    norm_num
+  have hlin2 : (((τ : ℝ)⁻¹ : ℝ) * (-Complex.I) : ℂ) = -(Complex.I / (τ : ℂ)) := by
+    have hinv : (((τ : ℝ)⁻¹ : ℝ) : ℂ) = (τ : ℂ)⁻¹ := by
+      rw [← Complex.ofReal_inv]
+    rw [hinv, div_eq_mul_inv]
+    ring
+  rw [hlin2] at hprod
+  have hval : Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * (Complex.I * ((τ / v : ℝ) : ℂ)) *
+        (((v / τ : ℝ) : ℂ) * (-Complex.I)) +
+        Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * (-(Complex.I / (τ : ℂ))) =
+      Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * (1 - Complex.I / (τ : ℂ)) := by
+    rw [show Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+          (Complex.I * ((τ / v : ℝ) : ℂ)) * (((v / τ : ℝ) : ℂ) * (-Complex.I)) =
+        Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+          (Complex.I * ((τ / v : ℝ) : ℂ) * (((v / τ : ℝ) : ℂ) * (-Complex.I))) from by ring,
+      hterm, mul_one]
+    ring
+  rw [← hval]
+  exact hprod
+
+private theorem one_sub_I_div_ne_zero107' {τ : ℝ} (hτ : τ ≠ 0) :
+    (1 - Complex.I / (τ : ℂ)) ≠ 0 := by
+  have hτc : (τ : ℂ) ≠ 0 := by exact_mod_cast hτ
+  have hnum : ((τ : ℂ) - Complex.I) ≠ 0 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp [Complex.div_re, Complex.div_im] at hre
+    exact absurd hre hτ
+  have heq : 1 - Complex.I / (τ : ℂ) = ((τ : ℂ) - Complex.I) / (τ : ℂ) := by
+    field_simp
+  rw [heq]
+  exact div_ne_zero hnum hτc
+
+/-- One integration by parts against the phase `e^{iΦ}`: with `f` vanishing at both endpoints,
+`∫ e^{iΦ} f = -(1-i/τ)⁻¹ ∫ e^{iΦ} (v/τ)(-i) f'`. -/
+private theorem ibp_v_phase_step107' {τ a b : ℝ} (hτ : τ ≠ 0) (ha : 0 < a) (hab : a ≤ b)
+    {f f' : ℝ → ℂ} (hf : ∀ v ∈ Set.uIcc a b, HasDerivAt f (f' v) v)
+    (hf' : IntervalIntegrable f' volume a b)
+    (hfa : f a = 0) (hfb : f b = 0) :
+    ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f v
+      = -(1 - Complex.I / (τ : ℂ))⁻¹ *
+        ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+          ((((v / τ : ℝ) : ℂ) * (-Complex.I)) * f' v) := by
+  have hne := one_sub_I_div_ne_zero107' hτ
+  have hdiff : ∀ v ∈ Set.uIcc a b, HasDerivAt
+      (fun w : ℝ => Complex.exp (Complex.I * ((τ * Real.log w : ℝ) : ℂ)) *
+        (((w / τ : ℝ) : ℂ) * (-Complex.I)))
+      (Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * (1 - Complex.I / (τ : ℂ))) v := by
+    intro v hv
+    rw [Set.uIcc_of_le hab] at hv
+    have hv0 : 0 < v := lt_of_lt_of_le ha (Set.mem_Icc.mp hv).1
+    exact hasDerivAt_ephase_id107' hτ hv0
+  have hcont : ContinuousOn
+      (fun v : ℝ => Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+        (1 - Complex.I / (τ : ℂ))) (Set.uIcc a b) := by
+    apply ContinuousOn.mul _ continuousOn_const
+    apply ContinuousOn.cexp
+    apply ContinuousOn.const_mul
+    refine Complex.continuous_ofReal.comp_continuousOn ?_
+    exact ContinuousOn.mul continuousOn_const
+      (Real.continuousOn_log.mono (fun x hx => by
+        have hx' : x ∈ Set.Icc a b := Set.uIcc_of_le hab ▸ hx
+        have hx0 : 0 < x := lt_of_lt_of_le ha hx'.1
+        simpa [Set.mem_compl_iff] using hx0.ne'))
+  have hparts := intervalIntegral.integral_mul_deriv_eq_deriv_mul
+    (u := fun w : ℝ => Complex.exp (Complex.I * ((τ * Real.log w : ℝ) : ℂ)) *
+      (((w / τ : ℝ) : ℂ) * (-Complex.I)))
+    (u' := fun v : ℝ => Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+      (1 - Complex.I / (τ : ℂ)))
+    (v := f) (v' := f') hdiff hf hcont.intervalIntegrable hf'
+  rw [hfa, hfb] at hparts
+  simp only [mul_zero, sub_zero, sub_self] at hparts
+  -- hparts : ∫ v, u v * f' v = -∫ v, u' v * f v
+  have hleft : ∫ v in a..b, (fun w : ℝ => Complex.exp (Complex.I * ((τ * Real.log w : ℝ) : ℂ)) *
+        (((w / τ : ℝ) : ℂ) * (-Complex.I))) v * f' v
+      = ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+          ((((v / τ : ℝ) : ℂ) * (-Complex.I)) * f' v) := by
+    apply intervalIntegral.integral_congr
+    intro v _
+    ring
+  have hright : ∫ v in a..b, (fun v : ℝ => Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+        (1 - Complex.I / (τ : ℂ))) v * f v
+      = (1 - Complex.I / (τ : ℂ)) *
+        ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f v := by
+    rw [← intervalIntegral.integral_const_mul]
+    apply intervalIntegral.integral_congr
+    intro v _
+    ring
+  rw [hleft, hright] at hparts
+  rw [hparts]
+  have hX : ∀ X : ℂ, -(1 - Complex.I / (τ : ℂ))⁻¹ * (0 - (1 - Complex.I / (τ : ℂ)) * X) = X := by
+    intro X
+    field_simp
+    ring
+  exact (hX _).symm
+
+/-- The `k`-fold iteration of the by-parts step: the family satisfies `f (j+1) = Λ (g j)`
+with `g j` the derivative of `f j`, so every `f j` may be replaced by `f k` under `e^{iΦ}`. -/
+private theorem ibp_v_phase_iter107' {τ a b : ℝ} (hτ : τ ≠ 0) (ha : 0 < a) (hab : a ≤ b)
+    (k : ℕ) : ∀ (f g : ℕ → ℝ → ℂ),
+    (∀ j, j ≤ k → ∀ v ∈ Set.uIcc a b, HasDerivAt (f j) (g j v) v) →
+    (∀ j, j < k → ∀ v ∈ Set.uIcc a b,
+      f (j + 1) v = -(1 - Complex.I / (τ : ℂ))⁻¹ *
+        ((((v / τ : ℝ) : ℂ) * (-Complex.I)) * g j v)) →
+    (∀ j, j < k → IntervalIntegrable (g j) volume a b) →
+    (∀ j, j ≤ k → f j a = 0) → (∀ j, j ≤ k → f j b = 0) →
+    ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f 0 v
+      = ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f k v := by
+  induction k with
+  | zero =>
+    intro f g hder hform hint hza hzb
+    simp
+  | succ k ih =>
+    intro f g hder hform hint hza hzb
+    have hstep : ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f 0 v
+        = ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f 1 v := by
+      rw [ibp_v_phase_step107' (τ := τ) (a := a) (b := b) hτ ha hab
+        (hder 0 (Nat.zero_le _)) (hint 0 (Nat.succ_pos k))
+        (hza 0 (Nat.zero_le _)) (hzb 0 (Nat.zero_le _))]
+      rw [show -(1 - Complex.I / (τ : ℂ))⁻¹ *
+          ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+            ((((v / τ : ℝ) : ℂ) * (-Complex.I)) * g 0 v)
+          = ∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+            (-(1 - Complex.I / (τ : ℂ))⁻¹ *
+              ((((v / τ : ℝ) : ℂ) * (-Complex.I)) * g 0 v)) from by
+        rw [← intervalIntegral.integral_const_mul]
+        apply intervalIntegral.integral_congr
+        intro v _
+        ring]
+      apply intervalIntegral.integral_congr
+      intro v hv
+      have h := hform 0 (Nat.succ_pos k) v hv
+      simp only [Pi.mul_apply]
+      rw [show f 1 v = -(1 - Complex.I / (τ : ℂ))⁻¹ *
+        ((((v / τ : ℝ) : ℂ) * (-Complex.I)) * g 0 v) from h]
+    have hih := ih (f := fun j => f (j + 1)) (g := fun j => g (j + 1))
+      (fun j hj v hv => hder (j + 1) (by omega) v hv)
+      (fun j hj v hv => hform (j + 1) (by omega) v hv)
+      (fun j hj => hint (j + 1) (by omega))
+      (fun j hj => hza (j + 1) (by omega))
+      (fun j hj => hzb (j + 1) (by omega))
+    rw [hstep, hih]
+
+/-- Combinatorial core of the `v`-direction bound: a sequence with the recursion
+`J (r+1) l ≤ κ J r (l+1) + (l/τ) J r l` (a by-parts step either raises the derivative level,
+gaining `κ`, or keeps it at the price `l/τ ≤ n/τ`) satisfies
+`J r l ≤ 2^r Σ_i binom r i κ^i (n/τ)^{r-i} J 0 (l+i)`.  The binomial form matches the `κ`-gains
+against the index `i` (which carries the `N^{σ₀-1-i}` decay of the amplitude `ψ`), not against
+`n`; the `2^r` is the constant of the doubling of the two branches. -/
+private theorem star_bound107'' (n : ℕ) (κ τ : ℝ) (hκ : 0 ≤ κ) (hτ : 0 < τ)
+    (J : ℕ → ℕ → ℝ) (hJ0 : ∀ l, 0 ≤ J 0 l)
+    (hJ : ∀ r l, J (r + 1) l ≤ κ * J r (l + 1) + ((l : ℝ) / τ) * J r l) :
+    ∀ r l : ℕ, l + r ≤ n →
+      J r l ≤ 2 ^ r * ∑ i ∈ Finset.range (r + 1), (r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i) *
+        J 0 (l + i) := by
+  have keyA : ∀ (r l i : ℕ), i ≤ r → (l : ℝ) ≤ (n : ℝ) → 0 ≤ κ →
+      κ * (((r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i)) * J 0 (l + 1 + i)) ≤
+        (((r + 1).choose (i + 1) : ℝ) * κ ^ (i + 1) * ((n : ℝ) / τ) ^ ((r + 1) - (i + 1))) *
+          J 0 (l + i + 1) := by
+    intro r l i hir _ hk
+    have hchooseA : (r.choose i : ℝ) ≤ ((r + 1).choose (i + 1) : ℝ) := by
+      have h := Nat.choose_succ_succ r i
+      have h2 : r.choose i ≤ (r + 1).choose (i + 1) := by rw [h]; exact Nat.le_add_right _ _
+      exact_mod_cast h2
+    have hexpA : ((r + 1) - (i + 1)) = r - i := by omega
+    have hcoef : κ * ((r.choose i : ℝ) * κ ^ i) ≤ ((r + 1).choose (i + 1) : ℝ) * κ ^ (i + 1) := by
+      have heq : κ * ((r.choose i : ℝ) * κ ^ i) = (r.choose i : ℝ) * κ ^ (i + 1) := by ring
+      rw [heq]
+      exact mul_le_mul_of_nonneg_right hchooseA (pow_nonneg hk _)
+    have hX : (0 : ℝ) ≤ ((n : ℝ) / τ) ^ (r - i) * J 0 (l + 1 + i) :=
+      mul_nonneg (pow_nonneg (by positivity) _) (hJ0 _)
+    rw [hexpA]
+    calc κ * (((r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i)) * J 0 (l + 1 + i))
+        = (κ * ((r.choose i : ℝ) * κ ^ i)) * (((n : ℝ) / τ) ^ (r - i) * J 0 (l + 1 + i)) := by ring
+      _ ≤ (((r + 1).choose (i + 1) : ℝ) * κ ^ (i + 1)) *
+            (((n : ℝ) / τ) ^ (r - i) * J 0 (l + 1 + i)) := mul_le_mul_of_nonneg_right hcoef hX
+      _ = _ := by ring
+  have keyB : ∀ (r l i : ℕ), i ≤ r → (l : ℝ) ≤ (n : ℝ) → 0 < τ →
+      ((l : ℝ) / τ) * (((r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i)) * J 0 (l + i)) ≤
+        (((r + 1).choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ ((r + 1) - i)) * J 0 (l + i) := by
+    intro r l i hir hln hτpos
+    have hchooseB : (r.choose i : ℝ) ≤ ((r + 1).choose i : ℝ) := by
+      have h : r.choose i ≤ (r + 1).choose i := Nat.choose_le_choose i (Nat.le_succ r)
+      exact_mod_cast h
+    have hpow2 : ((n : ℝ) / τ) ^ ((r + 1) - i) = ((n : ℝ) / τ) ^ (r - i) * ((n : ℝ) / τ) := by
+      rw [show ((r + 1) - i) = ((r - i) + 1) from by omega, pow_succ]
+    rw [hpow2]
+    have hX : (0 : ℝ) ≤ ((n : ℝ) / τ) ^ (r - i) * J 0 (l + i) :=
+      mul_nonneg (pow_nonneg (by positivity) _) (hJ0 _)
+    have hlτ : ((l : ℝ) / τ) ≤ ((n : ℝ) / τ) := div_le_div_of_nonneg_right hln hτpos.le
+    have hcoef : ((l : ℝ) / τ) * ((r.choose i : ℝ) * κ ^ i)
+        ≤ ((n : ℝ) / τ) * (((r + 1).choose i : ℝ) * κ ^ i) :=
+      mul_le_mul hlτ (mul_le_mul_of_nonneg_right hchooseB (pow_nonneg hκ _))
+        (mul_nonneg (by exact_mod_cast Nat.zero_le _) (pow_nonneg hκ _)) (by positivity)
+    calc ((l : ℝ) / τ) * ((r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i) * J 0 (l + i))
+        = (((l : ℝ) / τ) * ((r.choose i : ℝ) * κ ^ i)) * (((n : ℝ) / τ) ^ (r - i) * J 0 (l + i)) := by
+          ring
+      _ ≤ (((n : ℝ) / τ) * (((r + 1).choose i : ℝ) * κ ^ i)) *
+            (((n : ℝ) / τ) ^ (r - i) * J 0 (l + i)) := mul_le_mul_of_nonneg_right hcoef hX
+      _ = _ := by ring
+  intro r
+  induction r with
+  | zero =>
+    intro l _
+    simp
+  | succ r ih =>
+    intro l hl
+    have hl1 : l + 1 + r ≤ n := by omega
+    have hl0 : l + r ≤ n := by omega
+    have hln : l ≤ n := by omega
+    have hlnr : (l : ℝ) ≤ (n : ℝ) := by exact_mod_cast hln
+    have hb : (0 : ℝ) ≤ (l : ℝ) / τ := by positivity
+    have h2r : (0 : ℝ) ≤ 2 ^ r := by positivity
+    have h1 := ih (l + 1) hl1
+    have h0 := ih l hl0
+    -- the target, with the two branches collapsed
+    have htarget : (2 : ℝ) ^ r * ∑ j ∈ Finset.range (r + 2),
+          ((r + 1).choose j : ℝ) * κ ^ j * ((n : ℝ) / τ) ^ ((r + 1) - j) * J 0 (l + j)
+        = 2 ^ r * (∑ j ∈ Finset.range (r + 2),
+            ((r + 1).choose j : ℝ) * κ ^ j * ((n : ℝ) / τ) ^ ((r + 1) - j) * J 0 (l + j)) := rfl
+    -- branch A
+    have hAshift : ∑ j ∈ Finset.range (r + 2),
+          ((r + 1).choose j : ℝ) * κ ^ j * ((n : ℝ) / τ) ^ ((r + 1) - j) * J 0 (l + j) =
+        (∑ i ∈ Finset.range (r + 1),
+          ((r + 1).choose (i + 1) : ℝ) * κ ^ (i + 1) * ((n : ℝ) / τ) ^ ((r + 1) - (i + 1)) *
+            J 0 (l + i + 1)) +
+        ((r + 1).choose 0 : ℝ) * κ ^ 0 * ((n : ℝ) / τ) ^ ((r + 1) - 0) * J 0 (l + 0) := by
+      rw [Finset.sum_range_succ']
+      rfl
+    have hA : κ * J r (l + 1) ≤ 2 ^ r * ∑ j ∈ Finset.range (r + 2),
+          ((r + 1).choose j : ℝ) * κ ^ j * ((n : ℝ) / τ) ^ ((r + 1) - j) * J 0 (l + j) := by
+      refine (mul_le_mul_of_nonneg_left h1 hκ).trans ?_
+      have hcol : κ * (2 ^ r * ∑ i ∈ Finset.range (r + 1),
+            (r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i) * J 0 (l + 1 + i))
+          = 2 ^ r * ∑ i ∈ Finset.range (r + 1),
+              κ * (((r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i)) * J 0 (l + 1 + i)) := by
+        rw [Finset.mul_sum, Finset.mul_sum, Finset.mul_sum]
+        exact Finset.sum_congr rfl fun i _ => by ring
+      rw [hcol]
+      refine mul_le_mul_of_nonneg_left ?_ h2r
+      refine (Finset.sum_le_sum fun i hi => keyA r l i (by
+        have hi2 := Finset.mem_range.mp hi; omega) hlnr hκ).trans ?_
+      rw [hAshift]
+      have hnn : (0 : ℝ) ≤ ((r + 1).choose 0 : ℝ) * κ ^ 0 * ((n : ℝ) / τ) ^ ((r + 1) - 0) * J 0 (l + 0) := by
+        refine mul_nonneg (mul_nonneg (mul_nonneg ?_ (pow_nonneg hκ 0)) (pow_nonneg (by positivity) _)) (hJ0 _)
+        exact_mod_cast Nat.zero_le _
+      linarith
+    -- branch B
+    have hB : ((l : ℝ) / τ) * J r l ≤ 2 ^ r * ∑ j ∈ Finset.range (r + 2),
+          ((r + 1).choose j : ℝ) * κ ^ j * ((n : ℝ) / τ) ^ ((r + 1) - j) * J 0 (l + j) := by
+      refine (mul_le_mul_of_nonneg_left h0 hb).trans ?_
+      have hcol : ((l : ℝ) / τ) * (2 ^ r * ∑ i ∈ Finset.range (r + 1),
+            (r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i) * J 0 (l + i))
+          = 2 ^ r * ∑ i ∈ Finset.range (r + 1),
+              ((l : ℝ) / τ) * (((r.choose i : ℝ) * κ ^ i * ((n : ℝ) / τ) ^ (r - i)) * J 0 (l + i)) := by
+        rw [Finset.mul_sum, Finset.mul_sum, Finset.mul_sum]
+        exact Finset.sum_congr rfl fun i _ => by ring
+      rw [hcol]
+      refine mul_le_mul_of_nonneg_left ?_ h2r
+      refine (Finset.sum_le_sum fun i hi => keyB r l i (by
+        have hi2 := Finset.mem_range.mp hi; omega) hlnr hτ).trans ?_
+      exact Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.mpr (Nat.le_succ (r + 1)))
+        (fun i _ _ => mul_nonneg (mul_nonneg (mul_nonneg (by exact_mod_cast Nat.zero_le _)
+          (pow_nonneg hκ _)) (pow_nonneg (by positivity) _)) (hJ0 _))
+    refine (hJ r l).trans ?_
+    refine (add_le_add hA hB).trans ?_
+    rw [← add_mul]
+    have : (2 : ℝ) ^ r + 2 ^ r = 2 ^ (r + 1) := by ring
+    rw [this]
+
+/-- The Euler identity for the `l`-th derivative of `v ↦ v * g v`: the operator `K g = v · g'`
+satisfies `(K g)^(l) = v · g^(l+1) + l · g^(l)`.  Stated as `(v · g)^(l) = v · g^(l) + l · g^(l-1)`,
+which is the form the by-parts recursion needs. -/
+private theorem iteratedDeriv_mul_id107 {g : ℝ → ℂ} (hg : ∀ m : ℕ, ContDiff ℝ (m : ℕ∞) g) :
+    ∀ (l : ℕ) (v : ℝ),
+      iteratedDeriv l (fun w : ℝ => (w : ℂ) * g w) v
+        = (v : ℂ) * iteratedDeriv l g v + (l : ℂ) * iteratedDeriv (l - 1) g v := by
+  intro l
+  induction l with
+  | zero =>
+    intro v
+    simp
+  | succ l ih =>
+    intro v
+    rw [iteratedDeriv_succ]
+    have hEq : iteratedDeriv l (fun w : ℝ => (w : ℂ) * g w) =ᶠ[nhds v]
+        ((fun w : ℝ => (w : ℂ) * iteratedDeriv l g w) +
+          fun w => (l : ℂ) * iteratedDeriv (l - 1) g w) := by
+      filter_upwards [] with w
+      exact ih w
+    rw [hEq.deriv_eq]
+    have h1 : HasDerivAt (fun w : ℝ => iteratedDeriv l g w) (iteratedDeriv (l + 1) g v) v := by
+      have hd : DifferentiableAt ℝ (fun w : ℝ => iteratedDeriv l g w) v :=
+        ((hg (l + 1)).differentiable_iteratedDeriv' l).differentiableAt
+      have h := hd.hasDerivAt
+      rw [← iteratedDeriv_succ] at h
+      exact h
+    have h2 : HasDerivAt (fun w : ℝ => (l : ℂ) * iteratedDeriv (l - 1) g w)
+        ((l : ℂ) * iteratedDeriv l g v) v := by
+      rcases Nat.eq_zero_or_pos l with h0 | hpos
+      · subst h0
+        simp only [Nat.cast_zero, zero_mul]
+        exact hasDerivAt_const v 0
+      · have hlt : ((l - 1 : ℕ) : WithTop ℕ∞) < ((l : ℕ) : WithTop ℕ∞) := by
+          have h : l - 1 < l := by omega
+          exact_mod_cast h
+        have hd : DifferentiableAt ℝ (fun w : ℝ => iteratedDeriv (l - 1) g w) v :=
+          ((hg l).differentiable_iteratedDeriv (l - 1) hlt).differentiableAt
+        have h := hd.hasDerivAt.const_mul ((l : ℂ))
+        have he : deriv (iteratedDeriv (l - 1) g) v = iteratedDeriv l g v := by
+          rw [← iteratedDeriv_succ, show l - 1 + 1 = l from by omega]
+        rwa [he] at h
+    have hin : HasDerivAt (fun w : ℝ => ((w : ℝ) : ℂ)) (1 : ℂ) v := by
+      simpa using (hasDerivAt_id v).ofReal_comp
+    have hA : HasDerivAt (fun w : ℝ => (w : ℂ) * iteratedDeriv l g w)
+        (1 * iteratedDeriv l g v + (v : ℂ) * iteratedDeriv (l + 1) g v) v := hin.mul h1
+    have hsum := hA.add h2
+    rw [hsum.deriv]
+    push_cast
+    ring
+
+/-- `deriv` commutes with `iteratedDeriv`: `l` derivatives of `deriv g` are `l+1` of `g`. -/
+private theorem iteratedDeriv_deriv107 {g : ℝ → ℂ} (l : ℕ) :
+    iteratedDeriv l (deriv g) = iteratedDeriv (l + 1) g :=
+  (iteratedDeriv_succ' (n := l) (f := g)).symm
+
+/-- The recursion of the by-parts scheme on the derivative integrals
+`J_{r,l} = ∫_a^b ‖(f_r)^{(l)}‖`: with `f_{r+1} = c · (v · f_r')` and `|v| ≤ V` on `[a,b]`,
+
+  `J_{r+1,l} ≤ ‖c‖ (V J_{r,l+1} + l J_{r,l})`,
+
+which is `iteratedDeriv_mul_id107` after Leibniz on the linear factor. -/
+private theorem iterNorm_rec107 {c : ℂ} {a b V : ℝ} (hab : a ≤ b) (hVc : 0 ≤ V)
+    (hV : ∀ v ∈ Set.uIcc a b, |v| ≤ V)
+    {f : ℕ → ℝ → ℂ} (hf : ∀ r v, f (r + 1) v = c * ((v : ℂ) * deriv (f r) v))
+    (hsm : ∀ r (n : ℕ∞), ContDiff ℝ n (f r)) :
+    ∀ r l, ∫ v in a..b, ‖iteratedDeriv l (f (r + 1)) v‖ ≤
+      ‖c‖ * ((∫ v in a..b, V * ‖iteratedDeriv (l + 1) (f r) v‖) +
+        ∫ v in a..b, (l : ℝ) * ‖iteratedDeriv l (f r) v‖) := by
+  intro r l
+  have hcd : ∀ n : ℕ, ContDiff ℝ (n : ℕ∞) (deriv (f r)) := by
+    intro n
+    exact (hsm r ((n : ℕ∞) + 1)).deriv'
+  have hfun : f (r + 1) = fun w : ℝ => c * ((w : ℂ) * deriv (f r) w) := by
+    funext w
+    exact hf r w
+  have hpt : ∀ v, iteratedDeriv l (f (r + 1)) v
+      = c * ((v : ℂ) * iteratedDeriv (l + 1) (f r) v + (l : ℂ) * iteratedDeriv l (f r) v) := by
+    intro v
+    rw [hfun, iteratedDeriv_const_mul_field]
+    congr 1
+    rcases l with _ | l
+    · simp [iteratedDeriv_one]
+    · have h := iteratedDeriv_mul_id107 hcd (l + 1) v
+      rw [h, iteratedDeriv_deriv107 (g := f r) (l + 1),
+        show l + 1 - 1 = l from by omega, iteratedDeriv_deriv107 (g := f r) l]
+      try ring
+  have hcont1 : Continuous (fun v => ‖iteratedDeriv (l + 1) (f r) v‖) :=
+    ((hsm r ((l : ℕ∞) + 1)).continuous_iteratedDeriv (l + 1) le_rfl).norm
+  have hcont0 : Continuous (fun v => ‖iteratedDeriv l (f r) v‖) :=
+    ((hsm r (l : ℕ∞)).continuous_iteratedDeriv l le_rfl).norm
+  have hcontL : Continuous (fun v => ‖iteratedDeriv l (f (r + 1)) v‖) :=
+    ((hsm (r + 1) (l : ℕ∞)).continuous_iteratedDeriv l le_rfl).norm
+  have hmono := intervalIntegral.integral_mono_on (μ := volume) (a := a) (b := b) hab
+    (f := fun v => ‖iteratedDeriv l (f (r + 1)) v‖)
+    (g := fun v => ‖c‖ * (V * ‖iteratedDeriv (l + 1) (f r) v‖ +
+      (l : ℝ) * ‖iteratedDeriv l (f r) v‖))
+    (hcontL.intervalIntegrable a b)
+    ((((hcont1.const_mul V).add (hcont0.const_mul (l : ℝ))).const_mul ‖c‖).intervalIntegrable a b)
+    (fun x hx => by
+      have hx' : x ∈ Set.uIcc a b := by rw [Set.uIcc_of_le hab]; exact hx
+      rw [hpt x, norm_mul]
+      refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg c)
+      have h1 : (0 : ℝ) ≤ ‖iteratedDeriv (l + 1) (f r) x‖ := norm_nonneg _
+      have h2 : |x| ≤ V := hV x hx'
+      calc ‖(x : ℂ) * iteratedDeriv (l + 1) (f r) x + (l : ℂ) * iteratedDeriv l (f r) x‖
+          ≤ ‖(x : ℂ) * iteratedDeriv (l + 1) (f r) x‖ +
+              ‖(l : ℂ) * iteratedDeriv l (f r) x‖ := norm_add_le _ _
+        _ = |x| * ‖iteratedDeriv (l + 1) (f r) x‖ + (l : ℝ) * ‖iteratedDeriv l (f r) x‖ := by
+            rw [norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs, Complex.norm_natCast]
+        _ ≤ V * ‖iteratedDeriv (l + 1) (f r) x‖ + (l : ℝ) * ‖iteratedDeriv l (f r) x‖ := by
+            have h3 := mul_le_mul_of_nonneg_right h2 h1
+            linarith
+    )
+  have h1i : IntervalIntegrable (fun v => V * ‖iteratedDeriv (l + 1) (f r) v‖) volume a b :=
+    (hcont1.const_mul V).intervalIntegrable a b
+  have h0i : IntervalIntegrable (fun v => (l : ℝ) * ‖iteratedDeriv l (f r) v‖) volume a b :=
+    (hcont0.const_mul ((l : ℝ))).intervalIntegrable a b
+  refine hmono.trans (le_of_eq ?_)
+  rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_add h1i h0i]
+
+/-- The recursion in the shape consumed by `star_bound107''`: with `κ = ‖c‖ V` and `‖c‖ ≤ 1/τ`,
+`J (r+1) l ≤ κ J r (l+1) + (l/τ) J r l` for `J r l = ∫_a^b ‖(f r)^(l)‖`. -/
+private theorem iterNorm_star107 {c : ℂ} {a b V τ : ℝ} (hab : a ≤ b) (hVc : 0 ≤ V)
+    (hτ : 0 < τ) (hc : ‖c‖ ≤ 1 / τ)
+    (hV : ∀ v ∈ Set.uIcc a b, |v| ≤ V)
+    {f : ℕ → ℝ → ℂ} (hf : ∀ r v, f (r + 1) v = c * ((v : ℂ) * deriv (f r) v))
+    (hsm : ∀ r (n : ℕ∞), ContDiff ℝ n (f r)) :
+    ∀ r l, (∫ v in a..b, ‖iteratedDeriv l (f (r + 1)) v‖)
+      ≤ (‖c‖ * V) * (∫ v in a..b, ‖iteratedDeriv (l + 1) (f r) v‖) +
+        ((l : ℝ) / τ) * (∫ v in a..b, ‖iteratedDeriv l (f r) v‖) := by
+  intro r l
+  have hcont1 : Continuous (fun v => ‖iteratedDeriv (l + 1) (f r) v‖) :=
+    ((hsm r ((l : ℕ∞) + 1)).continuous_iteratedDeriv (l + 1) le_rfl).norm
+  have hcont0 : Continuous (fun v => ‖iteratedDeriv l (f r) v‖) :=
+    ((hsm r (l : ℕ∞)).continuous_iteratedDeriv l le_rfl).norm
+  have h1i : IntervalIntegrable (fun v => V * ‖iteratedDeriv (l + 1) (f r) v‖) volume a b :=
+    (hcont1.const_mul V).intervalIntegrable a b
+  have h0i : IntervalIntegrable (fun v => (l : ℝ) * ‖iteratedDeriv l (f r) v‖) volume a b :=
+    (hcont0.const_mul ((l : ℝ))).intervalIntegrable a b
+  have hmain := iterNorm_rec107 hab hVc hV hf hsm r l
+  simp only [intervalIntegral.integral_const_mul] at hmain
+  set A := ∫ v in a..b, ‖iteratedDeriv (l + 1) (f r) v‖ with hA
+  set B := ∫ v in a..b, ‖iteratedDeriv l (f r) v‖ with hB
+  have hA0 : (0 : ℝ) ≤ A := by
+    rw [hA]; exact intervalIntegral.integral_nonneg hab (fun x _ => norm_nonneg _)
+  have hB0 : (0 : ℝ) ≤ B := by
+    rw [hB]; exact intervalIntegral.integral_nonneg hab (fun x _ => norm_nonneg _)
+  have hcl : ‖c‖ * (l : ℝ) ≤ (l : ℝ) / τ := by
+    have hl : (0 : ℝ) ≤ (l : ℝ) := by positivity
+    calc ‖c‖ * (l : ℝ) ≤ (1 / τ) * l := mul_le_mul_of_nonneg_right hc hl
+      _ = (l : ℝ) / τ := by ring
+  have hgoal : ‖c‖ * (V * A + (l : ℝ) * B) ≤ (‖c‖ * V) * A + ((l : ℝ) / τ) * B := by
+    nlinarith [hcl, hA0, hB0, hVc, hτ, norm_nonneg c]
+  exact hmain.trans hgoal
+
+/-! ## The kernel's `v`-derivatives, and their integral
+
+`G_T x = T⁻¹ G (x/T)`, so `(G_T)^(m) x = T^{-(m+1)} G^(m) (x/T)` and hence, after the two affine
+substitutions `y ↦ y/T` and `w ↦ N - w`,
+
+  `‖(G_T(N - ·))^(m) v‖ = T^{-(m+1)} ‖G^(m)((N-v)/T)‖` and
+  `∫_ℝ ‖(G_T(N - ·))^(m)‖ = T^{-m} ∫_ℝ ‖G^(m)‖`.
+
+Only the inequality `≤` over the window `[N-2T-1, N+2T+1]` is needed for `J_{0,i}`; the interval
+integral is bounded by the integral over `ℝ`. -/
+
+/-- A public copy of the file's affine-composition formula for `iteratedDeriv` (the version in
+`Decomp107.lean` is `private`, so it cannot be used from this file). -/
+private theorem iteratedDeriv_affine_comp107b {f : ℝ → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
+    (c d : ℝ) : ∀ (m : ℕ) (σ : ℝ),
+      iteratedDeriv m (fun x : ℝ => f (c * x + d)) σ = c ^ m * iteratedDeriv m f (c * σ + d)
+  | 0, σ => by simp
+  | m + 1, σ => by
+    rw [iteratedDeriv_succ]
+    have hEq : iteratedDeriv m (fun x : ℝ => f (c * x + d)) =
+        fun x => c ^ m * iteratedDeriv m f (c * x + d) := by
+      funext x
+      exact iteratedDeriv_affine_comp107b hf c d m x
+    rw [hEq]
+    have haff : HasDerivAt (fun x : ℝ => c * x + d) c σ := by
+      simpa using ((hasDerivAt_id σ).const_mul c).const_add d
+    have hd1 : DifferentiableAt ℝ (iteratedDeriv m f) (c * σ + d) :=
+      (ContDiff.differentiable_iteratedDeriv' m (hf.of_le (by simp))).differentiableAt
+    have hinnerH : HasDerivAt (fun x : ℝ => iteratedDeriv m f (c * x + d))
+        (deriv (iteratedDeriv m f) (c * σ + d) * c) σ := by
+      have h : HasDerivAt (iteratedDeriv m f ∘ fun x : ℝ => c * x + d)
+          (deriv (iteratedDeriv m f) (c * σ + d) * c) σ :=
+        (hd1.hasDerivAt).comp σ haff
+      convert h using 1
+      funext x
+      rfl
+    have hderiv : deriv (fun x : ℝ => iteratedDeriv m f (c * x + d)) σ =
+        deriv (iteratedDeriv m f) (c * σ + d) * c := hinnerH.deriv
+    rw [deriv_const_mul _ hinnerH.differentiableAt, hderiv, iteratedDeriv_succ]
+    ring
+
+/-- If `g` vanishes on an open set, so does every iterated derivative. -/
+private theorem iteratedDeriv_GT_shift107 {G : ℝ → ℝ} (hG : IsMajorWeight G) {T : ℝ}
+    (m : ℕ) (N v : ℝ) :
+    iteratedDeriv m (fun w : ℝ => GT G T (N - w)) v
+      = (-1) ^ m * (T⁻¹) ^ (m + 1) * iteratedDeriv m G ((N - v) / T) := by
+  have hGT : ∀ (m : ℕ) (y : ℝ), iteratedDeriv m (GT G T) y
+      = (T⁻¹) ^ (m + 1) * iteratedDeriv m G (y / T) := by
+    intro m y
+    have hfun : GT G T = fun y : ℝ => T⁻¹ * G (T⁻¹ * y + 0) := by
+      funext y
+      simp only [GT, zero_add]
+      congr 2
+      ring
+    rw [hfun]
+    rw [show iteratedDeriv m (fun y : ℝ => T⁻¹ * G (T⁻¹ * y + 0)) y
+        = T⁻¹ * iteratedDeriv m (fun y : ℝ => G (T⁻¹ * y + 0)) y from by
+      simpa using iteratedDeriv_const_mul_field (n := m) (T⁻¹)
+        (fun y : ℝ => G (T⁻¹ * y + 0)) (x := y)]
+    rw [iteratedDeriv_affine_comp107b hG.smooth (T⁻¹) 0 m y]
+    rw [show (T⁻¹ * y + 0) = y / T by rw [add_zero, inv_mul_eq_div]]
+    ring
+  have hshift : ∀ (m : ℕ) (v : ℝ), iteratedDeriv m (fun w : ℝ => GT G T (N - w)) v
+      = (-1) ^ m * iteratedDeriv m (GT G T) (N - v) := by
+    intro m v
+    have hfun : (fun w : ℝ => GT G T (N - w)) = fun w : ℝ => GT G T ((-1) * w + N) := by
+      funext w
+      congr 1
+      ring
+    rw [hfun, iteratedDeriv_affine_comp107b (GT_contDiff hG.smooth T) (-1) N m v]
+    rw [show (-1 : ℝ) * v + N = N - v by ring]
+  rw [hshift m v, hGT m (N - v)]
+  ring
+
+/-- The window integral of the `m`-th `v`-derivative of the shifted kernel is at most
+`T^{-m} ∫ ‖G^(m)‖`. -/
+noncomputable def joint107 (ϕ G : ℝ → ℝ) (T N : ℝ) (ρ₁ ρ₂ : ℂ) (v σ : ℝ) : ℂ :=
+  (v : ℂ) ^ (ρ₁ + ρ₂ - 1) * (GT G T (N - v) : ℂ) *
+    (((amp107 ϕ N v ρ₁ ρ₂ σ : ℝ) : ℂ) * vexp107 ρ₁.im ρ₂.im σ)
+
+/-- The joint integrand is continuous at every point of `(0, ∞) × (0, 1)`. -/
+theorem continuousAt_joint107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G) (T N : ℝ)
+    {ρ₁ ρ₂ : ℂ} {p : ℝ × ℝ} (h1 : 0 < p.1) (h2 : 0 < p.2) (h3 : p.2 < 1) :
+    ContinuousAt (Function.uncurry (joint107 ϕ G T N ρ₁ ρ₂)) p := by
+  have hc : ContinuousAt (fun q : ℝ × ℝ => ((q.1 : ℝ) : ℂ) ^ (ρ₁ + ρ₂ - 1)) p :=
+    (Complex.continuousAt_ofReal_cpow_const p.1 (ρ₁ + ρ₂ - 1) (Or.inr (ne_of_gt h1))).comp
+      continuousAt_fst
+  have hGTc : Continuous (fun a : ℝ => (GT G T (N - a) : ℂ)) :=
+    Complex.continuous_ofReal.comp
+      ((GT_contDiff hG.smooth T).continuous.comp (by fun_prop))
+  have hGT : ContinuousAt (fun q : ℝ × ℝ => (GT G T (N - q.1) : ℂ)) p :=
+    hGTc.continuousAt.comp continuousAt_fst
+  have hpow1 : ContinuousAt (fun q : ℝ × ℝ => q.2 ^ (ρ₁.re - 1)) p :=
+    (Real.continuousAt_rpow_const p.2 (ρ₁.re - 1) (Or.inl (ne_of_gt h2))).comp
+      continuousAt_snd
+  have h1m : ContinuousAt (fun q : ℝ × ℝ => (1 : ℝ) - q.2) p := by fun_prop
+  have hpow2 : ContinuousAt (fun q : ℝ × ℝ => (1 - q.2) ^ (ρ₂.re - 1)) p :=
+    (Real.continuousAt_rpow_const (1 - p.2) (ρ₂.re - 1) (Or.inl (by linarith))).comp
+      (f := fun q : ℝ × ℝ => (1 : ℝ) - q.2) h1m
+  have hψ : ContinuousAt (fun q : ℝ × ℝ => ϕ (q.1 * q.2 / N) * ϕ (q.1 * (1 - q.2) / N)) p := by
+    have h2' : Continuous (fun q : ℝ × ℝ => ϕ (q.1 * q.2 / N)) :=
+      hϕ.smooth.continuous.comp (by fun_prop)
+    have h3' : Continuous (fun q : ℝ × ℝ => ϕ (q.1 * (1 - q.2) / N)) :=
+      hϕ.smooth.continuous.comp (by fun_prop)
+    exact (h2'.mul h3').continuousAt
+  have hamp : ContinuousAt (fun q : ℝ × ℝ => ((amp107 ϕ N q.1 ρ₁ ρ₂ q.2 : ℝ) : ℂ)) p := by
+    have hreal : ContinuousAt (fun q : ℝ × ℝ => amp107 ϕ N q.1 ρ₁ ρ₂ q.2) p := by
+      simp only [amp107]
+      have heq : ((fun q : ℝ × ℝ => q.2 ^ (ρ₁.re - 1)) *
+          (fun q : ℝ × ℝ => (1 - q.2) ^ (ρ₂.re - 1))) *
+          (fun q : ℝ × ℝ => ϕ (q.1 * q.2 / N) * ϕ (q.1 * (1 - q.2) / N)) =
+          (fun q : ℝ × ℝ => q.2 ^ (ρ₁.re - 1) * (1 - q.2) ^ (ρ₂.re - 1) *
+            (ϕ (q.1 * q.2 / N) * ϕ (q.1 * (1 - q.2) / N))) := by
+        funext q
+        simp only [Pi.mul_apply]
+      rw [← heq]
+      exact (hpow1.mul hpow2).mul hψ
+    exact Complex.continuous_ofReal.continuousAt.comp hreal
+  have hvexp : ContinuousAt (fun q : ℝ × ℝ => vexp107 ρ₁.im ρ₂.im q.2) p := by
+    have hlog1 : ContinuousAt (fun q : ℝ × ℝ => Real.log q.2) p :=
+      (Real.continuousAt_log (ne_of_gt h2)).comp continuousAt_snd
+    have hlog2 : ContinuousAt (fun q : ℝ × ℝ => Real.log (1 - q.2)) p :=
+      (Real.continuousAt_log (by linarith : (1 : ℝ) - p.2 ≠ 0)).comp
+        (f := fun q : ℝ × ℝ => (1 : ℝ) - q.2) h1m
+    have harg : ContinuousAt
+        (fun q : ℝ × ℝ => ((ρ₁.im * Real.log q.2 + ρ₂.im * Real.log (1 - q.2) : ℝ) : ℂ)) p := by
+      have hmul1 : ContinuousAt (fun q : ℝ × ℝ => ρ₁.im * Real.log q.2) p :=
+        continuousAt_const.mul hlog1
+      have hmul2 : ContinuousAt (fun q : ℝ × ℝ => ρ₂.im * Real.log (1 - q.2)) p :=
+        continuousAt_const.mul hlog2
+      have hsum : ContinuousAt
+          (fun q : ℝ × ℝ => ρ₁.im * Real.log q.2 + ρ₂.im * Real.log (1 - q.2)) p :=
+        hmul1.add hmul2
+      exact Complex.continuous_ofReal.continuousAt.comp hsum
+    exact Complex.continuous_exp.continuousAt.comp (continuousAt_const.mul harg)
+  have huncurry : Function.uncurry (joint107 ϕ G T N ρ₁ ρ₂)
+      = fun q : ℝ × ℝ => (q.1 : ℂ) ^ (ρ₁ + ρ₂ - 1) * (GT G T (N - q.1) : ℂ) *
+          (((amp107 ϕ N q.1 ρ₁ ρ₂ q.2 : ℝ) : ℂ) * vexp107 ρ₁.im ρ₂.im q.2) := rfl
+  rw [huncurry]
+  have heq : ((fun q : ℝ × ℝ => (q.1 : ℂ) ^ (ρ₁ + ρ₂ - 1)) *
+      (fun q : ℝ × ℝ => (GT G T (N - q.1) : ℂ))) *
+      ((fun q : ℝ × ℝ => ((amp107 ϕ N q.1 ρ₁ ρ₂ q.2 : ℝ) : ℂ)) *
+        (fun q : ℝ × ℝ => vexp107 ρ₁.im ρ₂.im q.2)) =
+      (fun q : ℝ × ℝ => (q.1 : ℂ) ^ (ρ₁ + ρ₂ - 1) * (GT G T (N - q.1) : ℂ) *
+        (((amp107 ϕ N q.1 ρ₁ ρ₂ q.2 : ℝ) : ℂ) * vexp107 ρ₁.im ρ₂.im q.2)) := by
+    funext q
+    simp only [Pi.mul_apply]
+  rw [← heq]
+  exact (hc.mul hGT).mul (hamp.mul hvexp)
+
+/-- The joint integrand is continuous on a box inside `(0, ∞) × (0, 1)`. -/
+theorem continuousOn_joint107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G) (T N : ℝ)
+    {α β a b : ℝ} (hα : 0 < α) (hαβ : α ≤ β) (ha : 0 < a) (hab : a ≤ b) (hb : b < 1)
+    (ρ₁ ρ₂ : ℂ) :
+    ContinuousOn (Function.uncurry (joint107 ϕ G T N ρ₁ ρ₂)) (Set.uIcc α β ×ˢ Set.uIcc a b) := by
+  intro p hp
+  refine (continuousAt_joint107 hϕ hG T N ?_ ?_ ?_).continuousWithinAt
+  · have h := hp.1
+    rw [Set.uIcc_of_le hαβ] at h
+    linarith [h.1]
+  · have h := hp.2
+    rw [Set.uIcc_of_le hab] at h
+    linarith [h.1]
+  · have h := hp.2
+    rw [Set.uIcc_of_le hab] at h
+    linarith [h.2]
+
+/-- Fubini for the equal-sign leaf: the two interval integrations commute. -/
+theorem joint_swap107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G) {T N : ℝ}
+    {α β a b : ℝ} (hα : 0 < α) (hαβ : α ≤ β) (ha : 0 < a) (hab : a ≤ b) (hb : b < 1)
+    (ρ₁ ρ₂ : ℂ) :
+    ∫ v in α..β, ∫ σ in a..b, joint107 ϕ G T N ρ₁ ρ₂ v σ
+      = ∫ σ in a..b, ∫ v in α..β, joint107 ϕ G T N ρ₁ ρ₂ v σ := by
+  refine MeasureTheory.intervalIntegral_intervalIntegral_swap ?_
+  refine ((continuousOn_joint107 hϕ hG T N hα hαβ ha hab hb ρ₁ ρ₂).integrableOn_compact
+    (isCompact_uIcc.prod isCompact_uIcc)).mono_set ?_
+  exact Set.prod_mono Set.uIoc_subset_uIcc Set.uIoc_subset_uIcc
+
+/-! ## (21) The `v`-derivative chain of the complex power
+
+The equal-sign leaf's integrand is complex, so the by-parts lemmas above take a `ℂ`-valued
+amplitude against the real kernel. The phase factor `v ↦ v ^ (ρ₁ + ρ₂ - 1)` then has an explicit
+`j`-th derivative chain, bounded by `(1 + ‖c‖) ^ j · j! · v ^ (c.re - j)`. -/
+
+/-- The derivative of a complex power at a positive real point. -/
+theorem exists_cutoff_vderiv_bound107 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) :
+    ∃ D : ℕ → ℝ, (∀ m, 0 ≤ D m) ∧ ∀ (N : ℝ), 0 < N → ∀ (m : ℕ) (σ : ℝ), 0 < σ → σ ≤ 4 / 5 →
+      ∀ v : ℝ, ‖iteratedDeriv m (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) v‖
+        ≤ D m / N ^ m := by
+  obtain ⟨R, hR⟩ := exists_iteratedDeriv_phi_bound107 hϕ
+  set R' : ℕ → ℝ := fun m => max (R m) 0 with hR'def
+  have hR'0 : ∀ m, 0 ≤ R' m := fun m => le_max_right _ _
+  have hR'b : ∀ (m : ℕ) (x : ℝ), ‖iteratedDeriv m ϕ x‖ ≤ R' m := fun m x =>
+    (hR m x).trans (le_max_left _ _)
+  refine ⟨fun m => ∑ i ∈ Finset.range (m + 1), (m.choose i : ℝ) * R' i * R' (m - i),
+    fun m => Finset.sum_nonneg fun i _ =>
+      mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (hR'0 i)) (hR'0 (m - i)), ?_⟩
+  intro N hN m σ hσ0 hσ1 v
+  have h1m0 : (0 : ℝ) < 1 - σ := by linarith
+  have hfac : ∀ (c : ℝ), 0 < c → c ≤ 1 → ∀ (i : ℕ) (x : ℝ),
+      ‖iteratedDeriv i (fun w : ℝ => ϕ (w * c / N)) x‖ ≤ R' i / N ^ i := by
+    intro c hc0 hc1 i x
+    have hfun : (fun w : ℝ => ϕ (w * c / N)) = fun w : ℝ => ϕ (c / N * w + 0) := by
+      funext w
+      congr 1
+      ring
+    rw [hfun, iteratedDeriv_affine_comp107 hϕ.smooth (c / N) 0 i x, norm_mul, norm_pow,
+      Real.norm_eq_abs, abs_of_pos (div_pos hc0 hN)]
+    have hle : c / N ≤ 1 / N := by gcongr
+    have hpow : (c / N) ^ i ≤ (1 / N) ^ i := pow_le_pow_left₀ (by positivity) hle i
+    have hone : (1 / N : ℝ) ^ i = 1 / N ^ i := by rw [div_pow, one_pow]
+    have hstep : (c / N) ^ i * ‖iteratedDeriv i ϕ (c / N * x + 0)‖ ≤ (1 / N) ^ i * R' i :=
+      mul_le_mul hpow (hR'b i _) (norm_nonneg _) (by positivity)
+    calc (c / N) ^ i * ‖iteratedDeriv i ϕ (c / N * x + 0)‖ ≤ (1 / N) ^ i * R' i := hstep
+      _ = R' i / N ^ i := by rw [hone]; ring
+  have hcd1 : ContDiff ℝ (m : ℕ∞) (fun w : ℝ => ϕ (w * σ / N)) :=
+    (hϕ.smooth.comp ((contDiff_id.mul contDiff_const).div_const N)).of_le
+      (by rw [WithTop.coe_le_coe]; exact le_top)
+  have hcd2 : ContDiff ℝ (m : ℕ∞) (fun w : ℝ => ϕ (w * (1 - σ) / N)) :=
+    (hϕ.smooth.comp ((contDiff_id.mul contDiff_const).div_const N)).of_le
+      (by rw [WithTop.coe_le_coe]; exact le_top)
+  have hmain := norm_iteratedDeriv_mul_le107_real
+    (f := fun w : ℝ => ϕ (w * σ / N)) (g := fun w : ℝ => ϕ (w * (1 - σ) / N)) (n := m)
+    hcd1 hcd2 v
+  refine hmain.trans ?_
+  have hterm : ∀ i ∈ Finset.range (m + 1),
+      (m.choose i : ℝ) * ‖iteratedDeriv i (fun w : ℝ => ϕ (w * σ / N)) v‖ *
+        ‖iteratedDeriv (m - i) (fun w : ℝ => ϕ (w * (1 - σ) / N)) v‖
+      ≤ (m.choose i : ℝ) * R' i * R' (m - i) / N ^ m := by
+    intro i hi
+    have hi_le : i ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+    have hb1 := hfac σ hσ0 (by linarith) i v
+    have hb2 := hfac (1 - σ) h1m0 (by linarith) (m - i) v
+    have hsub : i + (m - i) = m := Nat.add_sub_cancel' hi_le
+    have hkey : R' i / N ^ i * (R' (m - i) / N ^ (m - i)) = R' i * R' (m - i) / N ^ m := by
+      rw [div_mul_div_comm, ← pow_add, hsub]
+    calc (m.choose i : ℝ) * ‖iteratedDeriv i (fun w : ℝ => ϕ (w * σ / N)) v‖ *
+          ‖iteratedDeriv (m - i) (fun w : ℝ => ϕ (w * (1 - σ) / N)) v‖
+        ≤ (m.choose i : ℝ) * (R' i / N ^ i) * (R' (m - i) / N ^ (m - i)) := by
+          refine mul_le_mul (mul_le_mul le_rfl hb1 (norm_nonneg _) (Nat.cast_nonneg _)) hb2
+            (norm_nonneg _) ?_
+          exact mul_nonneg (Nat.cast_nonneg _) (div_nonneg (hR'0 i) (by positivity))
+      _ = (m.choose i : ℝ) * R' i * R' (m - i) / N ^ m := by
+          rw [show (m.choose i : ℝ) * (R' i / N ^ i) * (R' (m - i) / N ^ (m - i))
+              = (m.choose i : ℝ) * (R' i / N ^ i * (R' (m - i) / N ^ (m - i))) from by ring,
+            hkey]
+          ring
+  calc ∑ i ∈ Finset.range (m + 1), (m.choose i : ℝ) *
+        ‖iteratedDeriv i (fun w : ℝ => ϕ (w * σ / N)) v‖ *
+          ‖iteratedDeriv (m - i) (fun w : ℝ => ϕ (w * (1 - σ) / N)) v‖
+      ≤ ∑ i ∈ Finset.range (m + 1), (m.choose i : ℝ) * R' i * R' (m - i) / N ^ m :=
+        Finset.sum_le_sum hterm
+    _ = (∑ i ∈ Finset.range (m + 1), (m.choose i : ℝ) * R' i * R' (m - i)) / N ^ m :=
+        (Finset.sum_div _ _ _).symm
+
+
+
+/-! ## (23) The `v`-amplitude of the equal-sign leaf
+
+`archimedean_same107` integrates by parts in `v` against the phase `e^{i tau log v}`,
+`tau = (rho_1 + rho_2).im`.  The amplitude is
+`A_sigma v = v ^ (s0 - 1) phi (v sigma / N) phi (v (1 - sigma) / N) G_T (N - v)`,
+`s0 = (rho_1 + rho_2).re`.  This section checks that it is globally smooth (the cutoffs vanish
+on `v <= 2N/5`, so the singular power at `v = 0` is multiplied by zero) and that it is supported
+in `[2N/5, 8N/5]`. -/
+
+/-- The cutoff vanishes below `1/5`. -/
+private theorem phi_zero_le107' {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) {x : ℝ} (hx : x ≤ 1 / 5) :
+    ϕ x = 0 := by
+  by_contra h
+  have hmem : x ∈ tsupport ϕ := subset_tsupport ϕ h
+  have hs := hϕ.supp hmem
+  linarith [hs.1]
+
+/-- The cutoff vanishes above `4/5`. -/
+private theorem pair_zero_of_v_out107' {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) {N : ℝ} (hN : 0 < N)
+    {v σ : ℝ} (hv : v ≤ 2 * N / 5 ∨ 8 * N / 5 ≤ v) :
+    ϕ (v * σ / N) * ϕ (v * (1 - σ) / N) = 0 := by
+  by_contra hne
+  obtain ⟨h1, h2⟩ := phi_pair_support84 hϕ hN hne
+  rcases hv with h | h <;> linarith
+
+/-- The cutoff pair vanishes for nonpositive `v` and `0 < sigma`. -/
+private theorem pair_zero_of_v_nonpos107' {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) {N : ℝ} (hN : 0 < N)
+    {v σ : ℝ} (hσ : 0 < σ) (hv : v ≤ 0) :
+    ϕ (v * σ / N) * ϕ (v * (1 - σ) / N) = 0 := by
+  have h : v * σ / N ≤ 1 / 5 := by
+    have h2 : v * σ ≤ 0 := by nlinarith
+    have : v * σ / N ≤ 0 := div_nonpos_of_nonpos_of_nonneg h2 (le_of_lt hN)
+    linarith
+  rw [phi_zero_le107' hϕ h, zero_mul]
+
+/-- The `v`-amplitude of the equal-sign leaf is smooth everywhere: for `0 < sigma <= 4/5` the
+cutoff pair vanishes on a neighbourhood of every `v <= 0`. -/
+private theorem contDiff_afun107' {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G)
+    {N T b σ : ℝ} (hN : 0 < N) (hσ : 0 < σ) :
+    ∀ n : ℕ∞, ContDiff ℝ n (fun v : ℝ =>
+      ((v ^ b * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ)) := by
+  intro n
+  rw [contDiff_iff_contDiffAt]
+  intro v
+  rcases lt_or_ge 0 v with hv | hv
+  · have h1 : ContDiffAt ℝ n (fun w : ℝ => w ^ b) v :=
+      contDiffAt_id.rpow_const_of_ne (ne_of_gt hv)
+    have h2 : ContDiffAt ℝ n (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) v := by
+      have ha : ContDiffAt ℝ n (fun w : ℝ => ϕ (w * σ / N)) v :=
+        (hϕ.smooth.contDiffAt.comp v ((contDiffAt_id.mul contDiffAt_const).div_const N)).of_le
+          (by simp)
+      have hb : ContDiffAt ℝ n (fun w : ℝ => ϕ (w * (1 - σ) / N)) v :=
+        (hϕ.smooth.contDiffAt.comp v ((contDiffAt_id.mul contDiffAt_const).div_const N)).of_le
+          (by simp)
+      exact ha.mul hb
+    have h3 : ContDiffAt ℝ n (fun w : ℝ => GT G T (N - w)) v := by
+      have hs : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun w : ℝ => GT G T (N - w)) := by
+        have hfun : (fun w : ℝ => GT G T (N - w)) = fun w : ℝ => T⁻¹ * G ((N - w) / T) := by
+          funext w
+          simp only [GT]
+        rw [hfun]
+        exact contDiff_const.mul (hG.smooth.comp ((contDiff_const.sub contDiff_id).div_const T))
+      exact hs.contDiffAt.of_le (by simp)
+    have h4 : ContDiffAt ℝ n (fun w : ℝ => (w ^ b * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) *
+        GT G T (N - w) : ℝ)) v := ((h1.mul h2).mul h3)
+    exact (Complex.ofRealCLM.contDiff.contDiffAt).comp v h4
+  · have hlt : v < N / 5 := by
+      have : (0 : ℝ) < N / 5 := by positivity
+      linarith
+    have hev : (fun w : ℝ => ((w ^ b * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) *
+        GT G T (N - w) : ℝ) : ℂ)) =ᶠ[𝓝 v] 0 := by
+      filter_upwards [eventually_lt_nhds hlt] with w hw
+      have hzero : ϕ (w * σ / N) * ϕ (w * (1 - σ) / N) = 0 := by
+        rcases lt_or_ge w 0 with hw0 | hw0
+        · exact pair_zero_of_v_nonpos107' hϕ hN hσ hw0.le
+        · exact pair_zero_of_v_out107' hϕ hN (Or.inl (by linarith))
+      simp [hzero]
+    exact (contDiffAt_const (c := (0 : ℂ)) (x := v)).congr_of_eventuallyEq hev
+
+
+/-- On the effective window `[N/8, 9N/5]` the closed form of `iteratedDeriv` of a real power
+gives the bound `m! 8^(m+1) N ^ (a - m)` for every exponent `a` in `(-1, 1]`. -/
+private theorem rpow_vbound107' {a N v : ℝ} (ha0 : -1 < a) (ha1 : a ≤ 1) (hN : 0 < N)
+    {m : ℕ} (hv : v ∈ Set.Icc (N / 8) (9 * N / 5)) :
+    ‖iteratedDeriv m (fun w : ℝ => w ^ a) v‖ ≤
+      ((m.factorial : ℕ) : ℝ) * (8 : ℝ) ^ ((m : ℝ) + 1) * N ^ (a - (m : ℝ)) := by
+  have hv0 : 0 < v := by linarith [hv.1]
+  rw [iteratedDeriv_rpow107 a hv0 m, Real.norm_eq_abs, abs_mul]
+  have hfac : |∏ i ∈ Finset.range m, (a - (i : ℝ))| ≤ ((m.factorial : ℕ) : ℝ) := by
+    induction m with
+    | zero => simp
+    | succ m ih =>
+      rw [Finset.prod_range_succ, Nat.factorial_succ, abs_mul]
+      have h1 : |a - (m : ℝ)| ≤ (m : ℝ) + 1 := by
+        rw [abs_le]
+        constructor <;> linarith
+      push_cast
+      have h2 : |∏ i ∈ Finset.range m, (a - ↑i)| * |a - ↑m| ≤ ↑(m.factorial) * (↑m + 1) :=
+        mul_le_mul ih h1 (abs_nonneg _) (by positivity)
+      linarith [h2]
+  have hpow : |v ^ (a - (m : ℝ))| ≤ (8 : ℝ) ^ ((m : ℝ) + 1) * N ^ (a - (m : ℝ)) := by
+    have hpos : (0 : ℝ) < v ^ (a - (m : ℝ)) := Real.rpow_pos_of_pos hv0 _
+    rw [abs_of_pos hpos]
+    have hNp : (0 : ℝ) ≤ N ^ (a - (m : ℝ)) := Real.rpow_nonneg hN.le _
+    rcases le_or_gt 0 (a - (m : ℝ)) with h | h
+    · have hstep : v ^ (a - (m : ℝ)) ≤ ((9 / 5 : ℝ) * N) ^ (a - (m : ℝ)) :=
+        Real.rpow_le_rpow hv0.le (by linarith [hv.2]) h
+      have hsplit : ((9 / 5 : ℝ) * N) ^ (a - (m : ℝ)) =
+          (9 / 5 : ℝ) ^ (a - (m : ℝ)) * N ^ (a - (m : ℝ)) :=
+        Real.mul_rpow (by norm_num) hN.le
+      have hconst : (9 / 5 : ℝ) ^ (a - (m : ℝ)) ≤ (8 : ℝ) ^ ((m : ℝ) + 1) := by
+        have hle1 : (9 / 5 : ℝ) ^ (a - (m : ℝ)) ≤ (9 / 5 : ℝ) ^ (1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (x := (9 / 5 : ℝ)) (by norm_num : (1 : ℝ) ≤ 9 / 5)
+            (by linarith)
+        rw [Real.rpow_one] at hle1
+        have hbase : (9 / 5 : ℝ) ≤ (8 : ℝ) ^ ((m : ℝ) + 1) := by
+          have h1 : (8 : ℝ) ^ (1 : ℝ) ≤ (8 : ℝ) ^ ((m : ℝ) + 1) :=
+            Real.rpow_le_rpow_of_exponent_le (x := (8 : ℝ)) (by norm_num : (1 : ℝ) ≤ 8)
+              (by linarith [Nat.cast_nonneg (α := ℝ) m])
+          rw [Real.rpow_one] at h1
+          linarith
+        linarith
+      calc v ^ (a - (m : ℝ)) ≤ (9 / 5 : ℝ) ^ (a - (m : ℝ)) * N ^ (a - (m : ℝ)) := by
+            rw [← hsplit]; exact hstep
+        _ ≤ (8 : ℝ) ^ ((m : ℝ) + 1) * N ^ (a - (m : ℝ)) :=
+            mul_le_mul_of_nonneg_right hconst hNp
+    · have hstep : v ^ (a - (m : ℝ)) ≤ ((1 / 8 : ℝ) * N) ^ (a - (m : ℝ)) :=
+        Real.rpow_le_rpow_of_nonpos (by linarith [hv.1]) (by linarith [hv.1]) h.le
+      have hsplit : ((1 / 8 : ℝ) * N) ^ (a - (m : ℝ)) =
+          (1 / 8 : ℝ) ^ (a - (m : ℝ)) * N ^ (a - (m : ℝ)) :=
+        Real.mul_rpow (by norm_num) hN.le
+      have hconst : (1 / 8 : ℝ) ^ (a - (m : ℝ)) ≤ (8 : ℝ) ^ ((m : ℝ) + 1) := by
+        have heq : (1 / 8 : ℝ) ^ (a - (m : ℝ)) = (8 : ℝ) ^ ((m : ℝ) - a) := by
+          rw [show (1 / 8 : ℝ) = (8 : ℝ)⁻¹ by norm_num,
+            Real.inv_rpow (by norm_num : (0 : ℝ) ≤ 8),
+            ← Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 8)]
+          congr 1
+          ring
+        rw [heq]
+        refine Real.rpow_le_rpow_of_exponent_le (x := (8 : ℝ)) (by norm_num) ?_
+        linarith
+      calc v ^ (a - (m : ℝ)) ≤ (1 / 8 : ℝ) ^ (a - (m : ℝ)) * N ^ (a - (m : ℝ)) := by
+            rw [← hsplit]; exact hstep
+        _ ≤ (8 : ℝ) ^ ((m : ℝ) + 1) * N ^ (a - (m : ℝ)) :=
+            mul_le_mul_of_nonneg_right hconst hNp
+  have hNn : (0 : ℝ) ≤ N ^ (a - (m : ℝ)) := Real.rpow_nonneg hN.le _
+  calc |∏ i ∈ Finset.range m, (a - (i : ℝ))| * |v ^ (a - (m : ℝ))|
+      ≤ ((m.factorial : ℕ) : ℝ) * ((8 : ℝ) ^ ((m : ℝ) + 1) * N ^ (a - (m : ℝ))) :=
+        mul_le_mul hfac hpow (abs_nonneg _) (by positivity)
+    _ = ((m.factorial : ℕ) : ℝ) * (8 : ℝ) ^ ((m : ℝ) + 1) * N ^ (a - (m : ℝ)) := by ring
+
+/-- The `m`-th derivative of the dilated kernel is `(1/T)^m` times a bounded factor. -/
+private theorem integral_norm_ker_deriv107' {G : ℝ → ℝ} (hG : IsMajorWeight G) {T : ℝ}
+    (hT : 0 < T) (l : ℕ) (N : ℝ) :
+    (∫ v : ℝ, ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖)
+      = (1 / T) ^ l * ∫ x : ℝ, ‖iteratedDeriv l G x‖ := by
+  have hT1 : (0 : ℝ) < T := hT
+  have hpt : ∀ v : ℝ, ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖
+      = (T⁻¹) ^ (l + 1) * ‖iteratedDeriv l G ((N - v) / T)‖ := by
+    intro v
+    rw [iteratedDeriv_GT_shift107 hG l N v, norm_mul, norm_mul]
+    rw [show ‖((-1 : ℝ) ^ l : ℝ)‖ = 1 from by
+      rw [Real.norm_eq_abs, abs_pow, abs_neg, abs_one, one_pow]]
+    rw [show ‖((T⁻¹) ^ (l + 1) : ℝ)‖ = (T⁻¹) ^ (l + 1) from by
+      rw [Real.norm_eq_abs, abs_of_nonneg (pow_nonneg (by positivity) _)]]
+    ring
+  rw [show (fun v : ℝ => ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖)
+      = fun v : ℝ => (T⁻¹) ^ (l + 1) * ‖iteratedDeriv l G ((N - v) / T)‖ from by
+    funext v
+    exact hpt v]
+  rw [integral_const_mul]
+  have hsub : (∫ v : ℝ, ‖iteratedDeriv l G ((N - v) / T)‖)
+      = ∫ u : ℝ, ‖iteratedDeriv l G (u / T)‖ := by
+    have h1 : (∫ v : ℝ, (fun u : ℝ => ‖iteratedDeriv l G (u / T)‖) (N - v))
+        = ∫ u : ℝ, ‖iteratedDeriv l G (u / T)‖ :=
+      integral_sub_left_eq_self (fun u : ℝ => ‖iteratedDeriv l G (u / T)‖) volume N
+    simpa only [sub_div] using h1
+  have hcomp : (∫ u : ℝ, ‖iteratedDeriv l G (u / T)‖)
+      = T * ∫ x : ℝ, ‖iteratedDeriv l G x‖ := by
+    rw [Measure.integral_comp_div (g := fun z : ℝ => ‖iteratedDeriv l G z‖) (a := T),
+      abs_of_pos hT1]
+    rfl
+  rw [hsub, hcomp]
+  have hcoef : (T⁻¹) ^ (l + 1) * (T * ∫ x : ℝ, ‖iteratedDeriv l G x‖)
+      = (1 / T) ^ l * ∫ x : ℝ, ‖iteratedDeriv l G x‖ := by
+    have h1 : (T⁻¹) ^ (l + 1) * T = (T⁻¹) ^ l := by
+      rw [pow_succ]
+      field_simp
+    calc (T⁻¹) ^ (l + 1) * (T * ∫ x : ℝ, ‖iteratedDeriv l G x‖)
+        = ((T⁻¹) ^ (l + 1) * T) * ∫ x : ℝ, ‖iteratedDeriv l G x‖ := by ring
+      _ = (T⁻¹) ^ l * ∫ x : ℝ, ‖iteratedDeriv l G x‖ := by rw [h1]
+      _ = (1 / T) ^ l * ∫ x : ℝ, ‖iteratedDeriv l G x‖ := by rw [one_div]
+  exact hcoef
+
+/-- The `v`-derivatives of `v ↦ v ^ a φ(vσ/N) φ(v(1-σ)/N)` on the effective window: each
+derivative costs one factor `1/N`, and the size is `N ^ a`. -/
+private theorem pfun_deriv_bound107' {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) (r : ℕ) :
+    ∃ K : ℝ, 1 ≤ K ∧ ∀ (N a σ : ℝ), 0 < N → 0 < σ → σ ≤ 4 / 5 → a ∈ Set.Ioc (-1) 1 →
+      ∀ (j : ℕ), j ≤ r → ∀ v ∈ Set.Icc (N / 8) (9 * N / 5),
+      ‖iteratedDeriv j (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) v‖
+        ≤ K * N ^ a * (K / N) ^ j := by
+  obtain ⟨D, hD0, hD⟩ := exists_cutoff_vderiv_bound107 hϕ
+  set Ds : ℝ := ∑ i ∈ Finset.range (r + 1), D i with hDs
+  set Ps : ℝ := ((r.factorial : ℕ) : ℝ) * (8 : ℝ) ^ (r + 1) with hPs
+  have hDs0 : (0 : ℝ) ≤ Ds := by
+    rw [hDs]
+    exact Finset.sum_nonneg (fun i _ => hD0 i)
+  have hPs0 : (0 : ℝ) ≤ Ps := by
+    rw [hPs]
+    exact mul_nonneg (Nat.cast_nonneg _) (by positivity)
+  have hDle : ∀ i, i ≤ r → D i ≤ Ds := by
+    intro i hi
+    rw [hDs]
+    exact Finset.single_le_sum (f := D) (fun k _ => hD0 k) (Finset.mem_range.mpr (by omega))
+  have hPle : ∀ i, i ≤ r → ((i.factorial : ℕ) : ℝ) * (8 : ℝ) ^ (i + 1) ≤ Ps := by
+    intro i hi
+    rw [hPs]
+    have h1 : ((i.factorial : ℕ) : ℝ) ≤ ((r.factorial : ℕ) : ℝ) := by
+      have : i.factorial ≤ r.factorial := Nat.factorial_le hi
+      exact_mod_cast this
+    have h2 : (8 : ℝ) ^ (i + 1) ≤ (8 : ℝ) ^ (r + 1) :=
+      pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 8) (by omega)
+    exact mul_le_mul h1 h2 (by positivity) (by positivity)
+  have hKmain : (1 : ℝ) ≤ Ps * Ds * 2 ^ r + 1 := by
+    have h0 : (0 : ℝ) ≤ Ps * Ds * 2 ^ r := by positivity
+    linarith
+  refine ⟨Ps * Ds * 2 ^ r + 1, hKmain, ?_⟩
+  intro N a σ hN hσ hσ1 ha j hj v hv
+  have hv0 : 0 < v := by linarith [hv.1]
+  have hNa : (0 : ℝ) ≤ N ^ a := Real.rpow_nonneg hN.le _
+  have hψcd : ∀ n : ℕ∞, ContDiff ℝ n (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) := by
+    intro n
+    have h1 : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun w : ℝ => ϕ (w * σ / N)) :=
+      hϕ.smooth.comp ((contDiff_id.mul contDiff_const).div_const N)
+    have h2 : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun w : ℝ => ϕ (w * (1 - σ) / N)) :=
+      hϕ.smooth.comp ((contDiff_id.mul contDiff_const).div_const N)
+    exact (h1.mul h2).of_le (WithTop.coe_le_coe.mpr le_top)
+  have hPcdOn : ContDiffOn ℝ (j : ℕ∞) (fun w : ℝ => w ^ a) (Set.Ioi 0) :=
+    (contDiffOn_id.rpow_const_of_ne (fun x hx => ne_of_gt hx)).of_le le_top
+  have hPcdAt : ∀ i, i ≤ j → ContDiffAt ℝ (i : ℕ∞) (fun w : ℝ => w ^ a) v := fun i _ =>
+    (contDiffAt_id.rpow_const_of_ne (ne_of_gt hv0)).of_le le_top
+  have hleib := norm_iteratedDerivWithin_mul_le107_real (s := Set.Ioi (0 : ℝ))
+    (f := fun w : ℝ => w ^ a) (g := fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))
+    (n := j) hPcdOn (hψcd (j : ℕ∞)).contDiffOn (uniqueDiffOn_Ioi 0) hv0
+  have hconv : ‖iteratedDerivWithin j
+      (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) (Set.Ioi 0) v‖
+      = ‖iteratedDeriv j
+        (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) v‖ :=
+    congrArg (fun z : ℝ => ‖z‖)
+      (iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ioi 0)
+        ((hPcdAt j le_rfl).mul ((hψcd (j : ℕ∞)).contDiffAt)) hv0)
+  rw [hconv] at hleib
+  have hterm : ∀ i ∈ Finset.range (j + 1),
+      (j.choose i : ℝ) *
+          ‖iteratedDerivWithin i (fun w : ℝ => w ^ a) (Set.Ioi 0) v‖ *
+        ‖iteratedDerivWithin (j - i)
+          (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) (Set.Ioi 0) v‖
+      ≤ (j.choose i : ℝ) * N ^ a * (1 / N) ^ j * (Ps * Ds) := by
+    intro i hi
+    have hir : i ≤ r := by
+      have := Finset.mem_range.mp hi
+      omega
+    have hij : i ≤ j := by
+      have := Finset.mem_range.mp hi
+      omega
+    have hconvP : ‖iteratedDerivWithin i (fun w : ℝ => w ^ a) (Set.Ioi 0) v‖
+        = ‖iteratedDeriv i (fun w : ℝ => w ^ a) v‖ :=
+      congrArg (fun z : ℝ => ‖z‖)
+        (iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ioi 0) (hPcdAt i hij) hv0)
+    have hconvψ : ‖iteratedDerivWithin (j - i)
+        (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) (Set.Ioi 0) v‖
+        = ‖iteratedDeriv (j - i)
+          (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) v‖ :=
+      congrArg (fun z : ℝ => ‖z‖)
+        (iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ioi 0)
+          ((hψcd ((j - i : ℕ) : ℕ∞)).contDiffAt) hv0)
+    rw [hconvP, hconvψ]
+    have h8 : (8 : ℝ) ^ ((i : ℝ) + 1) = (8 : ℝ) ^ (i + 1) := by
+      rw [show ((i : ℝ) + 1) = ((i + 1 : ℕ) : ℝ) by push_cast; ring, Real.rpow_natCast]
+    have h1 : ‖iteratedDeriv i (fun w : ℝ => w ^ a) v‖
+        ≤ (Ps * (1 / N) ^ i) * N ^ a := by
+      refine (rpow_vbound107' ha.1 ha.2 hN hv).trans ?_
+      rw [h8]
+      have hile : ((i.factorial : ℕ) : ℝ) * (8 : ℝ) ^ (i + 1) ≤ Ps := hPle i hir
+      have hna : (0 : ℝ) ≤ N ^ a * (1 / N) ^ i := by positivity
+      have hrw : N ^ (a - (i : ℝ)) = N ^ a * (1 / N) ^ i := by
+        have hNi : N ^ (i : ℝ) = N ^ i := Real.rpow_natCast N i
+        rw [Real.rpow_sub hN, hNi, div_pow, one_pow, mul_one_div]
+      calc ((i.factorial : ℕ) : ℝ) * (8 : ℝ) ^ (i + 1) * N ^ (a - (i : ℝ))
+          = (((i.factorial : ℕ) : ℝ) * (8 : ℝ) ^ (i + 1)) * (N ^ a * (1 / N) ^ i) := by
+            rw [hrw, mul_assoc]
+        _ ≤ Ps * (N ^ a * (1 / N) ^ i) := mul_le_mul_of_nonneg_right hile hna
+        _ = (Ps * (1 / N) ^ i) * N ^ a := by ring
+    have h2 : ‖iteratedDeriv (j - i) (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) v‖
+        ≤ Ds * (1 / N) ^ (j - i) := by
+      have hNi : (0 : ℝ) < N ^ (j - i) := by positivity
+      have heq : Ds * (1 / N) ^ (j - i) = Ds / N ^ (j - i) := by
+        rw [div_pow, one_pow, mul_one_div]
+      rw [heq]
+      exact (hD N hN (j - i) σ hσ hσ1 v).trans
+        (div_le_div_of_nonneg_right (hDle (j - i) (by omega)) hNi.le)
+    have hpowmul : (1 / N) ^ i * (1 / N) ^ (j - i) = (1 / N) ^ j := by
+      rw [← pow_add]
+      congr 1
+      omega
+    calc (j.choose i : ℝ) * ‖iteratedDeriv i (fun w : ℝ => w ^ a) v‖ *
+          ‖iteratedDeriv (j - i) (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) v‖
+        ≤ (j.choose i : ℝ) * ((Ps * (1 / N) ^ i) * N ^ a) * (Ds * (1 / N) ^ (j - i)) := by
+          refine mul_le_mul (mul_le_mul le_rfl h1 (norm_nonneg _) (Nat.cast_nonneg _)) h2
+            (norm_nonneg _) (by positivity)
+      _ = (j.choose i : ℝ) * N ^ a * ((1 / N) ^ i * (1 / N) ^ (j - i)) * (Ps * Ds) := by ring
+      _ = (j.choose i : ℝ) * N ^ a * (1 / N) ^ j * (Ps * Ds) := by rw [hpowmul]
+  refine (hleib.trans (Finset.sum_le_sum hterm)).trans ?_
+  have hsum2 : ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) * N ^ a * (1 / N) ^ j * (Ps * Ds)
+      = (2 : ℝ) ^ j * N ^ a * (1 / N) ^ j * (Ps * Ds) := by
+    have hch : ((∑ i ∈ Finset.range (j + 1), j.choose i : ℕ) : ℝ) = (2 : ℝ) ^ j := by
+      rw [Nat.sum_range_choose]
+      push_cast
+      ring
+    have hch' : (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ)) = (2 : ℝ) ^ j := by
+      rw [← Nat.cast_sum, Nat.sum_range_choose]
+      push_cast
+      ring
+    calc ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) * N ^ a * (1 / N) ^ j * (Ps * Ds)
+        = (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ)) *
+            (N ^ a * (1 / N) ^ j * (Ps * Ds)) := by
+          rw [Finset.sum_mul]
+          refine Finset.sum_congr rfl fun i _ => by ring
+      _ = (2 : ℝ) ^ j * N ^ a * (1 / N) ^ j * (Ps * Ds) := by rw [hch']; ring
+  rw [hsum2]
+  have h2j : (2 : ℝ) ^ j ≤ 2 ^ r := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) (by omega)
+  have hstep1 : (2 : ℝ) ^ j * N ^ a * (1 / N) ^ j * (Ps * Ds)
+      ≤ (Ps * Ds * 2 ^ r) * (N ^ a * (1 / N) ^ j) := by
+    calc (2 : ℝ) ^ j * N ^ a * (1 / N) ^ j * (Ps * Ds)
+        = 2 ^ j * (N ^ a * (1 / N) ^ j * (Ps * Ds)) := by ring
+      _ ≤ 2 ^ r * (N ^ a * (1 / N) ^ j * (Ps * Ds)) :=
+          mul_le_mul_of_nonneg_right h2j (by positivity)
+      _ = (Ps * Ds * 2 ^ r) * (N ^ a * (1 / N) ^ j) := by ring
+  refine hstep1.trans ?_
+  have hK1 : (1 : ℝ) ≤ Ps * Ds * 2 ^ r + 1 := by
+    have h0 : (0 : ℝ) ≤ Ps * Ds * 2 ^ r := by positivity
+    linarith
+  have hexp : (1 / N) ^ j ≤ ((Ps * Ds * 2 ^ r + 1) / N) ^ j := by
+    have hle : (1 / N : ℝ) ≤ (Ps * Ds * 2 ^ r + 1) / N := by
+      rw [div_le_div_iff_of_pos_right hN]
+      linarith
+    exact pow_le_pow_left₀ (by positivity) hle j
+  calc (Ps * Ds * 2 ^ r) * (N ^ a * (1 / N) ^ j)
+      ≤ (Ps * Ds * 2 ^ r + 1) * (N ^ a * ((Ps * Ds * 2 ^ r + 1) / N) ^ j) := by
+        refine mul_le_mul (by linarith) ?_ (by positivity) (by positivity)
+        exact mul_le_mul_of_nonneg_left hexp hNa
+    _ = (Ps * Ds * 2 ^ r + 1) * N ^ a * ((Ps * Ds * 2 ^ r + 1) / N) ^ j := by ring
+
+/-- The base bound of the `v`-direction by-parts scheme: the integral of `‖A^{(k)}‖` over the
+effective window grows only like `N ^ a (1/N + 1/T) ^ k`, because the kernel factor is
+*integrated* (`∫‖(G_T(N-·))^{(l)}‖ = T^{-l} ∫‖G^{(l)}‖`) rather than estimated by a supremum
+times the length of the window. -/
+private theorem afun_integral_deriv_bound107' {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ)
+    (hG : IsMajorWeight G) (r : ℕ) :
+    ∃ K : ℝ, 1 ≤ K ∧ ∀ (N T a σ : ℝ), 0 < N → 1 ≤ T → 0 < σ → σ ≤ 4 / 5 →
+      a ∈ Set.Ioc (-1) 1 → ∀ (k : ℕ), k ≤ r →
+      (∫ v in (N / 8)..(9 * N / 5), ‖iteratedDeriv k (fun w : ℝ =>
+        ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v‖)
+        ≤ K * N ^ a * (K * (1 / N + 1 / T)) ^ k := by
+  obtain ⟨Kp, hKp1, hKp⟩ := pfun_deriv_bound107' hϕ r
+  set Gs : ℝ := ∑ l ∈ Finset.range (r + 1), ∫ x : ℝ, ‖iteratedDeriv l G x‖ with hGs
+  have hGint0 : ∀ l : ℕ, (0 : ℝ) ≤ ∫ x : ℝ, ‖iteratedDeriv l G x‖ := fun l =>
+    integral_nonneg (fun x => norm_nonneg _)
+  have hGs0 : (0 : ℝ) ≤ Gs := by
+    rw [hGs]
+    exact Finset.sum_nonneg (fun l _ => hGint0 l)
+  have hGsle : ∀ l, l ≤ r → (∫ x : ℝ, ‖iteratedDeriv l G x‖) ≤ Gs := by
+    intro l hl
+    rw [hGs]
+    exact Finset.single_le_sum (f := fun l => ∫ x : ℝ, ‖iteratedDeriv l G x‖)
+      (fun l _ => hGint0 l) (Finset.mem_range.mpr (by omega))
+  have hKmain : (1 : ℝ) ≤ 2 ^ r * Kp * Gs + Kp + 1 := by
+    have h0 : (0 : ℝ) ≤ 2 ^ r * Kp * Gs := by positivity
+    linarith
+  refine ⟨2 ^ r * Kp * Gs + Kp + 1, hKmain, ?_⟩
+  intro N T a σ hN hT hσ hσ1 ha k hk
+  have hT0 : (0 : ℝ) < T := by linarith
+  have hab : N / 8 ≤ 9 * N / 5 := by linarith
+  have hNa : (0 : ℝ) ≤ N ^ a := Real.rpow_nonneg hN.le _
+  -- smoothness of the kernel factor and its derivatives
+  have hκsm : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun w : ℝ => GT G T (N - w)) := by
+    have hfun : (fun w : ℝ => GT G T (N - w)) = fun w : ℝ => T⁻¹ * G ((N - w) / T) := by
+      funext w
+      simp only [GT]
+    rw [hfun]
+    exact contDiff_const.mul (hG.smooth.comp ((contDiff_const.sub contDiff_id).div_const T))
+  have hκcd : ∀ n : ℕ∞, ContDiff ℝ n (fun w : ℝ => GT G T (N - w)) := fun n =>
+    hκsm.of_le (WithTop.coe_le_coe.mpr le_top)
+  have hκcont : ∀ l : ℕ, Continuous (fun v : ℝ =>
+      ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖) := fun l =>
+    ((hκcd (l : ℕ∞)).continuous_iteratedDeriv l le_rfl).norm
+  have hcs0 : HasCompactSupport (fun w : ℝ => GT G T (N - w)) := by
+    apply HasCompactSupport.of_support_subset_isCompact (K := Set.Icc (N - 2 * T) (N + 2 * T))
+      isCompact_Icc
+    intro x hx
+    by_contra hxK
+    apply hx
+    refine GT_eq_zero hG.supp hT0 ?_
+    simp only [Set.mem_Icc, not_and_or, not_le] at hxK
+    rcases hxK with h | h
+    · rw [abs_of_pos (by linarith)]
+      linarith
+    · rw [abs_of_neg (by linarith)]
+      linarith
+  have hκcs : ∀ l : ℕ, HasCompactSupport (iteratedDeriv l (fun w : ℝ => GT G T (N - w))) := by
+    intro l
+    induction l with
+    | zero => simpa using hcs0
+    | succ l ih => simpa only [iteratedDeriv_succ] using ih.deriv
+  have hκInt : ∀ l : ℕ, Integrable (fun v : ℝ =>
+      ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖) := fun l =>
+    (hκcont l).integrable_of_hasCompactSupport ((hκcs l).norm)
+  have hκbbox : ∀ l, l ≤ r → (∫ v in (N / 8)..(9 * N / 5),
+      ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖) ≤ (1 / T) ^ l * Gs := by
+    intro l hl
+    have h1 : (∫ v in (N / 8)..(9 * N / 5),
+        ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖)
+        ≤ ∫ v : ℝ, ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖ := by
+      rw [intervalIntegral.integral_of_le hab]
+      exact setIntegral_le_integral (hκInt l) (Eventually.of_forall (fun x => norm_nonneg _))
+    have h2 : (∫ v : ℝ, ‖iteratedDeriv l (fun w : ℝ => GT G T (N - w)) v‖)
+        = (1 / T) ^ l * ∫ x : ℝ, ‖iteratedDeriv l G x‖ :=
+      integral_norm_ker_deriv107' hG hT0 l N
+    rw [h2] at h1
+    refine h1.trans ?_
+    exact mul_le_mul_of_nonneg_left (hGsle l hl) (by positivity)
+  -- the pointwise Leibniz bound on the window
+  have hpt : ∀ v ∈ Set.Icc (N / 8) (9 * N / 5),
+      ‖iteratedDeriv k (fun w : ℝ =>
+        ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v‖
+      ≤ ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+          ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖ := by
+    intro v hv
+    have hv0 : 0 < v := by
+      have h1 : (0 : ℝ) < N / 8 := by positivity
+      linarith [hv.1]
+    have hvmem : v ∈ Set.Ioi (0 : ℝ) := hv0
+    have hψcd : ∀ n : ℕ∞, ContDiff ℝ n (fun w : ℝ => ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) := by
+      intro n
+      have h1 : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun w : ℝ => ϕ (w * σ / N)) :=
+        hϕ.smooth.comp ((contDiff_id.mul contDiff_const).div_const N)
+      have h2 : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun w : ℝ => ϕ (w * (1 - σ) / N)) :=
+        hϕ.smooth.comp ((contDiff_id.mul contDiff_const).div_const N)
+      exact (h1.mul h2).of_le (WithTop.coe_le_coe.mpr le_top)
+    have hcdA : ContDiffAt ℝ (k : ℕ∞)
+        (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w)) v := by
+      have h1 : ContDiffAt ℝ (k : ℕ∞) (fun w : ℝ => w ^ a) v :=
+        (contDiffAt_id.rpow_const_of_ne (ne_of_gt hv0)).of_le le_top
+      exact (h1.mul ((hψcd (k : ℕ∞)).contDiffAt)).mul ((hκcd (k : ℕ∞)).contDiffAt)
+    have hcast : ‖iteratedDeriv k (fun w : ℝ =>
+        ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v‖
+        ≤ ‖iteratedDeriv k (fun w : ℝ =>
+          w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w)) v‖ :=
+      norm_iteratedDeriv_ofReal_le107 hcdA
+    have hPcdOn : ContDiffOn ℝ (k : ℕ∞)
+        (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) (Set.Ioi 0) := by
+      have h1 : ContDiffOn ℝ (k : ℕ∞) (fun w : ℝ => w ^ a) (Set.Ioi 0) :=
+        (contDiffOn_id.rpow_const_of_ne (fun x hx => ne_of_gt hx)).of_le le_top
+      exact h1.mul ((hψcd (k : ℕ∞)).contDiffOn)
+    have hleib := norm_iteratedDerivWithin_mul_le107_real (s := Set.Ioi (0 : ℝ))
+      (f := fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)))
+      (g := fun w : ℝ => GT G T (N - w)) (n := k) hPcdOn (hκcd (k : ℕ∞)).contDiffOn
+      (uniqueDiffOn_Ioi 0) hvmem
+    have hconv : ‖iteratedDerivWithin k (fun w : ℝ =>
+        w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w)) (Set.Ioi 0) v‖
+        = ‖iteratedDeriv k (fun w : ℝ =>
+          w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w)) v‖ :=
+      congrArg (fun z : ℝ => ‖z‖)
+        (iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ioi 0) hcdA hvmem)
+    rw [hconv] at hleib
+    refine hcast.trans (hleib.trans (Finset.sum_le_sum ?_))
+    intro i hi
+    have hik : i ≤ r := by
+      have := Finset.mem_range.mp hi
+      omega
+    have hcdP : ContDiffAt ℝ (i : ℕ∞)
+        (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) v :=
+      ((contDiffAt_id.rpow_const_of_ne (ne_of_gt hv0)).of_le le_top).mul
+        ((hψcd (i : ℕ∞)).contDiffAt)
+    have hconvP : ‖iteratedDerivWithin i
+        (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) (Set.Ioi 0) v‖
+        = ‖iteratedDeriv i
+          (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) v‖ :=
+      congrArg (fun z : ℝ => ‖z‖)
+        (iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ioi 0) hcdP hvmem)
+    have hconvκ : ‖iteratedDerivWithin (k - i) (fun w : ℝ => GT G T (N - w)) (Set.Ioi 0) v‖
+        = ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖ :=
+      congrArg (fun z : ℝ => ‖z‖)
+        (iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ioi 0)
+          ((hκcd ((k - i : ℕ) : ℕ∞)).contDiffAt) hvmem)
+    rw [hconvP, hconvκ]
+    have hPi : ‖iteratedDeriv i
+        (fun w : ℝ => w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N))) v‖
+        ≤ Kp * N ^ a * (Kp / N) ^ i :=
+      hKp N a σ hN hσ hσ1 ha i hik v ⟨by linarith [hv.1], by linarith [hv.2]⟩
+    refine mul_le_mul_of_nonneg_right (mul_le_mul le_rfl hPi (norm_nonneg _) (by positivity))
+      (norm_nonneg _)
+  -- integrate the pointwise bound
+  have hcont1 : IntervalIntegrable (fun v : ℝ => ‖iteratedDeriv k (fun w : ℝ =>
+      ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v‖)
+      volume (N / 8) (9 * N / 5) := by
+    have hsm : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun w : ℝ =>
+        ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) :=
+      contDiff_afun107' hϕ hG hN hσ (⊤ : ℕ∞)
+    exact (((hsm.continuous_iteratedDeriv k (WithTop.coe_le_coe.mpr le_top))).norm).intervalIntegrable
+      _ _
+  have hsumcont : Continuous (fun v : ℝ => ∑ i ∈ Finset.range (k + 1),
+      (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+        ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖) := by
+    refine continuous_finsetSum _ (fun i _ => ?_)
+    exact continuous_const.mul (hκcont (k - i))
+  have hmono : (∫ v in (N / 8)..(9 * N / 5), ‖iteratedDeriv k (fun w : ℝ =>
+      ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v‖)
+      ≤ ∫ v in (N / 8)..(9 * N / 5), ∑ i ∈ Finset.range (k + 1),
+          (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+            ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖ :=
+    intervalIntegral.integral_mono_on (μ := volume) (a := N / 8) (b := 9 * N / 5) hab
+      hcont1 (hsumcont.intervalIntegrable _ _) hpt
+  have hsum_int : (∫ v in (N / 8)..(9 * N / 5), ∑ i ∈ Finset.range (k + 1),
+        (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+          ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖)
+      = ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+          (∫ v in (N / 8)..(9 * N / 5),
+            ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖) := by
+    rw [intervalIntegral.integral_finsetSum]
+    · refine Finset.sum_congr rfl fun i _ => ?_
+      rw [intervalIntegral.integral_const_mul]
+    · intro i _
+      exact (continuous_const.mul (hκcont (k - i))).intervalIntegrable _ _
+  have hstepA : (∫ v in (N / 8)..(9 * N / 5), ‖iteratedDeriv k (fun w : ℝ =>
+      ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v‖)
+      ≤ ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+          (∫ v in (N / 8)..(9 * N / 5),
+            ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖) :=
+    hmono.trans (le_of_eq hsum_int)
+  have hstepB : ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+        (∫ v in (N / 8)..(9 * N / 5), ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖)
+      ≤ 2 ^ k * Kp * N ^ a * Gs * (Kp * (1 / N + 1 / T)) ^ k := by
+    have hterm : ∀ i ∈ Finset.range (k + 1),
+        (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+          (∫ v in (N / 8)..(9 * N / 5), ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖)
+        ≤ Kp * N ^ a * Gs * ((k.choose i : ℝ) * (Kp * (1 / N + 1 / T)) ^ k) := by
+      intro i hi
+      have hbbox := hκbbox (k - i) (by omega)
+      have h1 : (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+          (∫ v in (N / 8)..(9 * N / 5), ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖)
+          ≤ (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) * ((1 / T) ^ (k - i) * Gs) :=
+        mul_le_mul_of_nonneg_left hbbox (by positivity)
+      have hK0 : (0 : ℝ) ≤ Kp := le_trans zero_le_one hKp1
+      have hb0 : (0 : ℝ) ≤ (1 / N) := by positivity
+      have hc0 : (0 : ℝ) ≤ 1 / T := by positivity
+      have hbase : (Kp / N) ^ i * (1 / T) ^ (k - i) ≤ (Kp * (1 / N + 1 / T)) ^ k := by
+        have hsplit : Kp * (1 / N + 1 / T) = Kp / N + Kp / T := by
+          rw [mul_add]
+          ring
+        have hle1 : Kp / N ≤ Kp * (1 / N + 1 / T) := by
+          rw [hsplit]
+          have : (0 : ℝ) ≤ Kp / T := by positivity
+          linarith
+        have hle2 : 1 / T ≤ Kp * (1 / N + 1 / T) := by
+          rw [hsplit]
+          have h2 : (0 : ℝ) ≤ Kp / N := by positivity
+          have h3 : (1 / T : ℝ) ≤ Kp / T := by
+            rw [div_le_div_iff_of_pos_right hT0]
+            linarith
+          linarith
+        have h1 : (Kp / N) ^ i ≤ (Kp * (1 / N + 1 / T)) ^ i :=
+          pow_le_pow_left₀ (by positivity) hle1 i
+        have h2 : (1 / T) ^ (k - i) ≤ (Kp * (1 / N + 1 / T)) ^ (k - i) :=
+          pow_le_pow_left₀ (by positivity) hle2 (k - i)
+        calc (Kp / N) ^ i * (1 / T) ^ (k - i)
+            ≤ (Kp * (1 / N + 1 / T)) ^ i * (Kp * (1 / N + 1 / T)) ^ (k - i) :=
+              mul_le_mul h1 h2 (by positivity) (by positivity)
+          _ = (Kp * (1 / N + 1 / T)) ^ (i + (k - i)) := by rw [← pow_add]
+          _ = (Kp * (1 / N + 1 / T)) ^ k := by
+              rw [show i + (k - i) = k from
+                Nat.add_sub_cancel' (by have := Finset.mem_range.mp hi; omega)]
+      have h2 : Kp * N ^ a * (Kp / N) ^ i * ((1 / T) ^ (k - i) * Gs)
+          = Kp * N ^ a * Gs * ((Kp / N) ^ i * (1 / T) ^ (k - i)) := by ring
+      calc (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) *
+            (∫ v in (N / 8)..(9 * N / 5), ‖iteratedDeriv (k - i) (fun w : ℝ => GT G T (N - w)) v‖)
+          ≤ (k.choose i : ℝ) * (Kp * N ^ a * (Kp / N) ^ i) * ((1 / T) ^ (k - i) * Gs) := h1
+        _ = (k.choose i : ℝ) * (Kp * N ^ a * Gs * ((Kp / N) ^ i * (1 / T) ^ (k - i))) := by ring
+        _ ≤ (k.choose i : ℝ) * (Kp * N ^ a * Gs * (Kp * (1 / N + 1 / T)) ^ k) := by
+            refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
+            exact mul_le_mul_of_nonneg_left hbase (by positivity)
+        _ = Kp * N ^ a * Gs * ((k.choose i : ℝ) * (Kp * (1 / N + 1 / T)) ^ k) := by ring
+    refine (Finset.sum_le_sum hterm).trans (le_of_eq ?_)
+    have hsum2 : ∑ i ∈ Finset.range (k + 1),
+        Kp * N ^ a * Gs * ((k.choose i : ℝ) * (Kp * (1 / N + 1 / T)) ^ k)
+        = (Kp * N ^ a * Gs * (Kp * (1 / N + 1 / T)) ^ k) *
+            ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) := by
+      rw [Finset.mul_sum (s := Finset.range (k + 1))
+        (f := fun i => (k.choose i : ℝ))]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      ring
+    rw [hsum2]
+    have hch : (∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ)) = (2 : ℝ) ^ k := by
+      rw [← Nat.cast_sum, Nat.sum_range_choose]
+      push_cast
+      ring
+    rw [hch]
+    ring
+  refine hstepA.trans (hstepB.trans ?_)
+  have h2k : (2 : ℝ) ^ k ≤ 2 ^ r := pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) (by omega)
+  have hKpLe : Kp ≤ 2 ^ r * Kp * Gs + Kp + 1 := by
+    have h0 : (0 : ℝ) ≤ 2 ^ r * Kp * Gs := by positivity
+    linarith
+  have hC2 : 2 ^ r * Kp * Gs ≤ 2 ^ r * Kp * Gs + Kp + 1 := by
+    have h0 : (0 : ℝ) ≤ Kp + 1 := by linarith
+    linarith
+  have hXk : (Kp * (1 / N + 1 / T)) ^ k ≤
+      ((2 ^ r * Kp * Gs + Kp + 1) * (1 / N + 1 / T)) ^ k := by
+    refine pow_le_pow_left₀ (by positivity) ?_ k
+    exact mul_le_mul_of_nonneg_right hKpLe (by positivity)
+  calc 2 ^ k * Kp * N ^ a * Gs * (Kp * (1 / N + 1 / T)) ^ k
+      = (2 ^ k * Kp * Gs) * (N ^ a * (Kp * (1 / N + 1 / T)) ^ k) := by ring
+    _ ≤ (2 ^ r * Kp * Gs) * (N ^ a * ((2 ^ r * Kp * Gs + Kp + 1) * (1 / N + 1 / T)) ^ k) := by
+        refine mul_le_mul ?_ ?_ (by positivity) (by positivity)
+        · have h1 : (2 : ℝ) ^ k * Kp ≤ 2 ^ r * Kp :=
+            mul_le_mul_of_nonneg_right h2k (by linarith)
+          exact mul_le_mul_of_nonneg_right h1 (by positivity)
+        · exact mul_le_mul_of_nonneg_left hXk hNa
+    _ ≤ (2 ^ r * Kp * Gs + Kp + 1) * N ^ a *
+          ((2 ^ r * Kp * Gs + Kp + 1) * (1 / N + 1 / T)) ^ k := by
+        have hZ := mul_le_mul_of_nonneg_right hC2
+          (show (0 : ℝ) ≤ N ^ a *
+            ((2 ^ r * Kp * Gs + Kp + 1) * (1 / N + 1 / T)) ^ k by positivity)
+        calc (2 ^ r * Kp * Gs) *
+              (N ^ a * ((2 ^ r * Kp * Gs + Kp + 1) * (1 / N + 1 / T)) ^ k)
+            ≤ (2 ^ r * Kp * Gs + Kp + 1) *
+                (N ^ a * ((2 ^ r * Kp * Gs + Kp + 1) * (1 / N + 1 / T)) ^ k) := hZ
+          _ = (2 ^ r * Kp * Gs + Kp + 1) * N ^ a *
+                ((2 ^ r * Kp * Gs + Kp + 1) * (1 / N + 1 / T)) ^ k := by ring
+
+
+/-- A function that vanishes on a neighbourhood of a point has all its iterated derivatives zero
+there — the form in which the boundary terms of the `v`-direction by-parts step disappear. -/
+private theorem afun_eq_zero_lt107' {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) {N T a σ v : ℝ} (hN : 0 < N)
+    (hσ : 0 < σ) (hσ1 : σ ≤ 4 / 5) (hv : v < N / 4) :
+    (fun w : ℝ => ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v
+      = 0 := by
+  have harg : v * σ / N ≤ 1 / 5 := by
+    apply div_le_iff₀ hN |>.mpr
+    nlinarith
+  have hzero : ϕ (v * σ / N) = 0 := phi_zero_le107' hϕ harg
+  show ((v ^ a * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ) = 0
+  simp [hzero]
+
+/-- The equal-sign amplitude vanishes on the open set `8N/5 < v` (there the cutoff pair is zero). -/
+private theorem afun_eq_zero_gt107' {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) {N T a σ v : ℝ} (hN : 0 < N)
+    (hσ : 0 < σ) (hσ1 : σ ≤ 4 / 5) (hv : 8 * N / 5 < v) :
+    (fun w : ℝ => ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ)) v
+      = 0 := by
+  have hzero : ϕ (v * σ / N) * ϕ (v * (1 - σ) / N) = 0 := by
+    refine pair_zero_of_v_out107' hϕ hN (Or.inr ?_)
+    linarith
+  show ((v ^ a * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ) = 0
+  simp [hzero]
+
+/-- All `v`-derivatives of the equal-sign amplitude vanish at every point of the two open sets
+`v < N/4` and `8N/5 < v`: this is what makes the boundary terms at `N/8` and `9N/5` vanish. -/
+private theorem ibp_L1_bound107' {A : ℝ → ℂ} {f : ℕ → ℝ → ℂ} {c : ℂ} {a b V τ M D : ℝ}
+    (ha : 0 < a) (hab : a ≤ b) (hV0 : 0 ≤ V) (hV : ∀ v ∈ Set.uIcc a b, |v| ≤ V)
+    (hτ : 0 < τ) (hc : ‖c‖ ≤ 1 / τ)
+    (hcdef : c = -(1 - Complex.I / (τ : ℂ))⁻¹ * (-(Complex.I / (τ : ℂ))))
+    (hf : ∀ r v, f (r + 1) v = c * ((v : ℂ) * deriv (f r) v))
+    (hsm : ∀ r (n : ℕ∞), ContDiff ℝ n (f r)) (hf0 : f 0 = A)
+    (hvan : ∀ j : ℕ, f j a = 0) (hvan' : ∀ j : ℕ, f j b = 0)
+    (hM0 : 0 ≤ M) (hD0 : 0 ≤ D) (k : ℕ)
+    (hbase : ∀ l, l ≤ k → (∫ v in a..b, ‖iteratedDeriv l A v‖) ≤ M * D ^ l) :
+    ‖∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * A v‖
+      ≤ 2 ^ k * ∑ i ∈ Finset.range (k + 1),
+          (k.choose i : ℝ) * (V / τ) ^ i * ((k : ℝ) / τ) ^ (k - i) * (M * D ^ i) := by
+  have hτne : τ ≠ 0 := hτ.ne'
+  have hstep : ∀ j, j < k → ∀ v ∈ Set.uIcc a b,
+      f (j + 1) v = -(1 - Complex.I / (τ : ℂ))⁻¹ *
+        ((((v / τ : ℝ) : ℂ) * (-Complex.I)) * deriv (f j) v) := by
+    intro j hj v hv
+    rw [hf j v, hcdef]
+    push_cast
+    ring
+  have hder : ∀ j, j ≤ k → ∀ v ∈ Set.uIcc a b, HasDerivAt (f j) (deriv (f j) v) v := by
+    intro j hj v hv
+    exact (((hsm j (⊤ : ℕ∞))).differentiable (by simp)).differentiableAt.hasDerivAt
+  have hint : ∀ j, j < k → IntervalIntegrable (deriv (f j)) volume a b := by
+    intro j hj
+    have hc1 : Continuous (deriv (f j)) := by
+      have h := (hsm j (1 : ℕ∞)).continuous_iteratedDeriv 1 le_rfl
+      rwa [iteratedDeriv_one] at h
+    exact hc1.intervalIntegrable a b
+  have hiter := ibp_v_phase_iter107' (τ := τ) (a := a) (b := b) hτne ha hab k f
+    (fun j => deriv (f j)) hder hstep hint (fun j _ => hvan j) (fun j _ => hvan' j)
+  rw [hf0] at hiter
+  have hJrec : ∀ r l, (∫ v in a..b, ‖iteratedDeriv l (f (r + 1)) v‖)
+      ≤ (‖c‖ * V) * (∫ v in a..b, ‖iteratedDeriv (l + 1) (f r) v‖) +
+        ((l : ℝ) / τ) * (∫ v in a..b, ‖iteratedDeriv l (f r) v‖) :=
+    fun r l => iterNorm_star107 hab hV0 hτ hc hV hf
+      (fun r n => hsm r n) r l
+  have hstar := star_bound107'' k (‖c‖ * V) τ (by positivity) hτ
+    (fun r l => ∫ v in a..b, ‖iteratedDeriv l (f r) v‖)
+    (fun l => intervalIntegral.integral_nonneg hab (fun x _ => norm_nonneg _)) hJrec k 0
+    (by omega)
+  have hbase' : ∀ i, i ≤ k → (∫ v in a..b, ‖iteratedDeriv i (f 0) v‖) ≤ M * D ^ i := by
+    intro i hi
+    rw [hf0]
+    exact hbase i hi
+  have hsum_le : ∑ i ∈ Finset.range (k + 1),
+      (k.choose i : ℝ) * (‖c‖ * V) ^ i * ((k : ℝ) / τ) ^ (k - i) *
+        (∫ v in a..b, ‖iteratedDeriv i (f 0) v‖)
+      ≤ ∑ i ∈ Finset.range (k + 1),
+          (k.choose i : ℝ) * (V / τ) ^ i * ((k : ℝ) / τ) ^ (k - i) * (M * D ^ i) := by
+    refine Finset.sum_le_sum ?_
+    intro i hi
+    have hik : i ≤ k := by
+      have := Finset.mem_range.mp hi
+      omega
+    have h1 : (‖c‖ * V) ^ i ≤ (V / τ) ^ i := by
+      refine pow_le_pow_left₀ (by positivity) ?_ i
+      calc ‖c‖ * V ≤ (1 / τ) * V := mul_le_mul_of_nonneg_right hc hV0
+        _ = V / τ := by ring
+    have h3 : (∫ v in a..b, ‖iteratedDeriv i (f 0) v‖) ≤ M * D ^ i := hbase' i hik
+    have hb0 : (0 : ℝ) ≤ (k.choose i : ℝ) := Nat.cast_nonneg _
+    have hb1 : (0 : ℝ) ≤ (V / τ) ^ i := by positivity
+    have hb2 : (0 : ℝ) ≤ ((k : ℝ) / τ) ^ (k - i) := by positivity
+    have e1 : (k.choose i : ℝ) * (‖c‖ * V) ^ i ≤ (k.choose i : ℝ) * (V / τ) ^ i :=
+      mul_le_mul_of_nonneg_left h1 hb0
+    have e2 : (k.choose i : ℝ) * (‖c‖ * V) ^ i * ((k : ℝ) / τ) ^ (k - i)
+        ≤ (k.choose i : ℝ) * (V / τ) ^ i * ((k : ℝ) / τ) ^ (k - i) :=
+      mul_le_mul_of_nonneg_right e1 hb2
+    exact mul_le_mul e2 h3
+      (intervalIntegral.integral_nonneg hab (fun x _ => norm_nonneg _)) (by positivity)
+  have hnorm : ‖∫ v in a..b, Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f k v‖
+      ≤ ∫ v in a..b, ‖iteratedDeriv 0 (f k) v‖ := by
+    have h1 : ‖∫ v in a..b,
+        (fun v : ℝ => Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f k v) v‖
+        ≤ ∫ v in a..b, ‖Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f k v‖ := by
+      rw [intervalIntegral.integral_of_le hab, intervalIntegral.integral_of_le hab]
+      exact MeasureTheory.norm_integral_le_integral_norm
+        (f := fun v : ℝ => Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * f k v)
+    refine h1.trans ?_
+    refine le_of_eq (intervalIntegral.integral_congr fun v hv => ?_)
+    rw [iteratedDeriv_zero, norm_mul]
+    have hexp : ‖Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ))‖ = 1 := by
+      rw [show Complex.I * ((τ * Real.log v : ℝ) : ℂ) = ((τ * Real.log v : ℝ) : ℂ) * Complex.I
+        from by ring]
+      exact Complex.norm_exp_ofReal_mul_I _
+    rw [hexp, one_mul]
+  rw [hiter]
+  refine hnorm.trans (hstar.trans ?_)
+  simpa only [Nat.zero_add] using mul_le_mul_of_nonneg_left hsum_le (by positivity)
+
+
+/-- A function that vanishes near a point has zero derivative there (the step that propagates the
+vanishing of the amplitude on the open sets `v < N/4` and `8N/5 < v` to the whole by-parts
+family). -/
+private theorem deriv_eq_zero_of_eventually107' {f : ℝ → ℂ} {x : ℝ}
+    (h : ∀ᶠ y in 𝓝 x, f y = 0) : deriv f x = 0 := by
+  have hev : f =ᶠ[𝓝 x] (fun _ => (0 : ℂ)) := h
+  rw [hev.deriv_eq]
+  simp
+
+/-- The constant of the by-parts step, `c = -(1-I/τ)⁻¹(-(I/τ))`, has `‖c‖ ≤ 1/τ` for `τ > 0`. -/
+private theorem norm_c_ibp107' {τ : ℝ} (hτ : 0 < τ) :
+    ‖-(1 - Complex.I / (τ : ℂ))⁻¹ * (-(Complex.I / (τ : ℂ)))‖ ≤ 1 / τ := by
+  have hτc : (τ : ℂ) ≠ 0 := by exact_mod_cast hτ.ne'
+  have hinv : ‖(1 - Complex.I / (τ : ℂ))‖ = Real.sqrt (τ ^ 2 + 1) / τ := by
+    have heq : (1 - Complex.I / (τ : ℂ)) = ((τ : ℂ) - Complex.I) / (τ : ℂ) := by
+      field_simp
+    rw [heq, norm_div, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hτ]
+    congr 1
+    have hsq : ‖((τ : ℂ) - Complex.I)‖ ^ 2 = τ ^ 2 + 1 := by
+      rw [Complex.sq_norm, Complex.normSq_apply]
+      simp only [Complex.sub_re, Complex.sub_im, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im]
+      ring
+    have hnn : (0 : ℝ) ≤ ‖((τ : ℂ) - Complex.I)‖ := norm_nonneg _
+    calc ‖((τ : ℂ) - Complex.I)‖ = Real.sqrt (‖((τ : ℂ) - Complex.I)‖ ^ 2) :=
+          (Real.sqrt_sq hnn).symm
+      _ = Real.sqrt (τ ^ 2 + 1) := by rw [hsq]
+  have hge : (1 : ℝ) ≤ Real.sqrt (τ ^ 2 + 1) / τ := by
+    rw [le_div_iff₀ hτ, one_mul]
+    have h1 : τ ≤ Real.sqrt (τ ^ 2 + 1) := by
+      have h2 : Real.sqrt (τ ^ 2) ≤ Real.sqrt (τ ^ 2 + 1) :=
+        Real.sqrt_le_sqrt (by linarith [sq_nonneg τ])
+      rwa [Real.sqrt_sq (le_of_lt hτ)] at h2
+    linarith
+  have hnorm0 : (0 : ℝ) < ‖(1 - Complex.I / (τ : ℂ))‖ := by
+    rw [hinv]
+    exact div_pos (Real.sqrt_pos.mpr (by positivity)) hτ
+  rw [norm_mul, norm_neg, norm_inv, norm_neg, norm_div, Complex.norm_I, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_pos hτ, one_div]
+  rw [hinv]
+  -- `(sqrt (τ²+1)/τ)⁻¹ * (1/τ) ≤ 1/τ` because the first factor is at most one
+  have hle : (Real.sqrt (τ ^ 2 + 1) / τ)⁻¹ ≤ 1 := by
+    rw [inv_le_one₀ (by positivity)]
+    exact hge
+  calc (Real.sqrt (τ ^ 2 + 1) / τ)⁻¹ * τ⁻¹ ≤ 1 * τ⁻¹ := by
+        refine mul_le_mul_of_nonneg_right hle (by positivity)
+    _ = τ⁻¹ := one_mul _
+
+
+/-- Collapsing the binomial sum of `ibp_L1_bound107'`: with `W = V·D + k` every term is at most
+`C(k,i) · M · (W/τ)^k`, so the whole sum is `2^k · 2^k · M · (W/τ)^k`. -/
+private theorem ibp_sum_collapse107' {V M D τ : ℝ} (hV0 : 0 ≤ V) (hM0 : 0 ≤ M)
+    (hD0 : 0 ≤ D) (hτ : 0 < τ) (k : ℕ) :
+    2 ^ k * ∑ i ∈ Finset.range (k + 1),
+        (k.choose i : ℝ) * (V / τ) ^ i * ((k : ℝ) / τ) ^ (k - i) * (M * D ^ i)
+      ≤ (2 * 2) ^ k * (M * (((V * D + (k : ℝ)) / τ) ^ k)) := by
+  have hW0 : (0 : ℝ) ≤ V * D + (k : ℝ) := by positivity
+  have hWτ : (0 : ℝ) ≤ (V * D + (k : ℝ)) / τ := by positivity
+  have hterm : ∀ i ∈ Finset.range (k + 1),
+      (k.choose i : ℝ) * (V / τ) ^ i * ((k : ℝ) / τ) ^ (k - i) * (M * D ^ i)
+      ≤ (k.choose i : ℝ) * (M * (((V * D + (k : ℝ)) / τ) ^ k)) := by
+    intro i hi
+    have hik : i ≤ k := by
+      have := Finset.mem_range.mp hi
+      omega
+    have h1 : (V / τ) ^ i * D ^ i = ((V * D) / τ) ^ i := by
+      rw [← mul_pow]
+      congr 1
+      ring
+    have h2 : ((V * D) / τ) ^ i ≤ ((V * D + (k : ℝ)) / τ) ^ i := by
+      refine pow_le_pow_left₀ (by positivity) ?_ i
+      rw [div_le_div_iff_of_pos_right hτ]
+      linarith [Nat.cast_nonneg (α := ℝ) k]
+    have h3 : ((k : ℝ) / τ) ^ (k - i) ≤ ((V * D + (k : ℝ)) / τ) ^ (k - i) := by
+      refine pow_le_pow_left₀ (by positivity) ?_ (k - i)
+      rw [div_le_div_iff_of_pos_right hτ]
+      have h1 : (0 : ℝ) ≤ V * D := mul_nonneg hV0 hD0
+      linarith
+    have h4 : ((V * D) / τ) ^ i * ((k : ℝ) / τ) ^ (k - i)
+        ≤ (((V * D + (k : ℝ)) / τ) ^ i) * (((V * D + (k : ℝ)) / τ) ^ (k - i)) :=
+      mul_le_mul h2 h3 (by positivity) (by positivity)
+    have h5 : (((V * D + (k : ℝ)) / τ) ^ i) * (((V * D + (k : ℝ)) / τ) ^ (k - i))
+        = ((V * D + (k : ℝ)) / τ) ^ k := by
+      rw [← pow_add, Nat.add_sub_cancel' hik]
+    have hb0 : (0 : ℝ) ≤ (k.choose i : ℝ) := Nat.cast_nonneg _
+    calc (k.choose i : ℝ) * (V / τ) ^ i * ((k : ℝ) / τ) ^ (k - i) * (M * D ^ i)
+        = (k.choose i : ℝ) * (((V / τ) ^ i * D ^ i) * ((k : ℝ) / τ) ^ (k - i)) * M := by
+          ring
+      _ = (k.choose i : ℝ) * ((((V * D) / τ) ^ i) * ((k : ℝ) / τ) ^ (k - i)) * M := by
+          rw [h1]
+      _ ≤ (k.choose i : ℝ) * (((V * D + (k : ℝ)) / τ) ^ k) * M := by
+          refine mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left ?_ hb0) hM0
+          rw [← h5]
+          exact h4
+      _ = (k.choose i : ℝ) * (M * (((V * D + (k : ℝ)) / τ) ^ k)) := by ring
+  have hsum : ∑ i ∈ Finset.range (k + 1),
+        (k.choose i : ℝ) * (M * (((V * D + (k : ℝ)) / τ) ^ k))
+      = (2 : ℝ) ^ k * (M * (((V * D + (k : ℝ)) / τ) ^ k)) := by
+    rw [← Finset.sum_mul]
+    congr 1
+    rw [← Nat.cast_sum, Nat.sum_range_choose]
+    push_cast
+    ring
+  calc 2 ^ k * ∑ i ∈ Finset.range (k + 1),
+        (k.choose i : ℝ) * (V / τ) ^ i * ((k : ℝ) / τ) ^ (k - i) * (M * D ^ i)
+      ≤ 2 ^ k * ∑ i ∈ Finset.range (k + 1),
+          (k.choose i : ℝ) * (M * (((V * D + (k : ℝ)) / τ) ^ k)) := by
+        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum hterm) (by positivity)
+    _ = 2 ^ k * ((2 : ℝ) ^ k * (M * (((V * D + (k : ℝ)) / τ) ^ k))) := by rw [hsum]
+    _ = (2 * 2) ^ k * (M * (((V * D + (k : ℝ)) / τ) ^ k)) := by
+        rw [mul_pow]
+        ring
+
+
+
+
+/-- The final arithmetic step of the `v`-direction estimate: if the gain scale `VD` satisfies
+`VD ≤ (18 K_b/5) (N/T)` and `k ≤ r`, then the collapsed bound is at most
+`C · ((C·N)/(T τ))^k` with `C = (2·2)^r K_b (18K_b/5 + r)^r + K_b + 1`. -/
+private theorem v_ibp_bound107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G) (r : ℕ) :
+    ∃ K : ℝ, 1 ≤ K ∧ ∀ (N T a σ τ : ℝ), 0 < N → 1 ≤ T → T ≤ N → 0 < σ → σ ≤ 4 / 5 →
+      a ∈ Set.Ioc (-1) 1 → 0 < τ → ∀ (k : ℕ), k ≤ r →
+      ‖∫ v in (N / 8)..(9 * N / 5),
+          Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+            ((v ^ a * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ)‖
+        ≤ K * N ^ a * (K * N / (T * τ)) ^ k := by
+  obtain ⟨Kb, hKb1, hKb⟩ := afun_integral_deriv_bound107' hϕ hG r
+  set K : ℝ := (2 * 2) ^ r * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ r) + 1 with hK
+  have hK1 : 1 ≤ K := by
+    rw [hK]
+    have h0 : (0 : ℝ) ≤ (2 * 2) ^ r * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ r) := by positivity
+    linarith
+  refine ⟨K, hK1, ?_⟩
+  intro N T a σ τ hN hT hTN hσ hσ1 ha hτ k hkr
+  have hT0 : (0 : ℝ) < T := by linarith
+  have hNT : (1 : ℝ) ≤ N / T := by rw [le_div_iff₀ hT0]; linarith
+  have hNa : (0 : ℝ) ≤ N ^ a := Real.rpow_nonneg hN.le _
+  have hKb0 : (0 : ℝ) ≤ Kb := by linarith
+  set A : ℝ → ℂ := fun w =>
+    ((w ^ a * (ϕ (w * σ / N) * ϕ (w * (1 - σ) / N)) * GT G T (N - w) : ℝ) : ℂ) with hA
+  set c : ℂ := -(1 - Complex.I / (τ : ℂ))⁻¹ * (-(Complex.I / (τ : ℂ))) with hcdef
+  set f : ℕ → ℝ → ℂ :=
+    fun j => Nat.rec A (fun _ prev => fun v => c * ((v : ℂ) * deriv prev v)) j with hf
+  have hfrec : ∀ (j : ℕ) (v : ℝ), f (j + 1) v = c * ((v : ℂ) * deriv (f j) v) := fun j v => rfl
+  have hf0 : f 0 = A := rfl
+  have hsm : ∀ j (n : ℕ∞), ContDiff ℝ n (f j) := by
+    intro j
+    induction j with
+    | zero =>
+      intro n
+      rw [hf0, hA]
+      exact contDiff_afun107' (T := T) (b := a) hϕ hG hN hσ n
+    | succ j ih =>
+      intro n
+      have hd : ContDiff ℝ n (deriv (f j)) := (ih (n + 1)).deriv'
+      have hfun : f (j + 1) = fun v : ℝ => c * ((v : ℂ) * deriv (f j) v) := by
+        funext v
+        exact hfrec j v
+      rw [hfun]
+      have hv : ContDiff ℝ n (fun v : ℝ => (v : ℂ)) :=
+        Complex.ofRealCLM.contDiff.comp contDiff_id
+      exact contDiff_const.mul (hv.mul hd)
+  have hvanish : ∀ j (v : ℝ), (v < N / 4 ∨ 8 * N / 5 < v) → f j v = 0 := by
+    intro j
+    induction j with
+    | zero =>
+      intro v hv
+      rw [hf0]
+      rcases hv with hv | hv
+      · exact afun_eq_zero_lt107' hϕ hN hσ hσ1 hv
+      · exact afun_eq_zero_gt107' hϕ hN hσ hσ1 hv
+    | succ j ih =>
+      intro v hv
+      rw [hfrec j v]
+      have hd : deriv (f j) v = 0 := by
+        refine deriv_eq_zero_of_eventually107' ?_
+        rcases hv with hv | hv
+        · have hopen : IsOpen {y : ℝ | y < N / 4} := isOpen_lt continuous_id continuous_const
+          filter_upwards [hopen.mem_nhds hv] with y hy
+          exact ih y (Or.inl hy)
+        · have hopen : IsOpen {y : ℝ | 8 * N / 5 < y} := isOpen_lt continuous_const continuous_id
+          filter_upwards [hopen.mem_nhds hv] with y hy
+          exact ih y (Or.inr hy)
+      rw [hd, mul_zero, mul_zero]
+  have hvanA : ∀ j : ℕ, f j (N / 8) = 0 := by
+    intro j
+    refine hvanish j _ (Or.inl ?_)
+    linarith
+  have hvanB : ∀ j : ℕ, f j (9 * N / 5) = 0 := by
+    intro j
+    refine hvanish j _ (Or.inr ?_)
+    linarith
+  have hV : ∀ v ∈ Set.uIcc (N / 8) (9 * N / 5), |v| ≤ 9 * N / 5 := by
+    intro v hv
+    rw [Set.uIcc_of_le (by linarith : N / 8 ≤ 9 * N / 5)] at hv
+    have hv0 : 0 ≤ v := by linarith [hv.1]
+    rw [abs_of_nonneg hv0]
+    exact hv.2
+  have hbase : ∀ l, l ≤ k → (∫ v in (N / 8)..(9 * N / 5),
+      ‖iteratedDeriv l A v‖) ≤ (Kb * N ^ a) * (Kb * (1 / N + 1 / T)) ^ l := by
+    intro l hl
+    have h1 := hKb N T a σ hN hT hσ hσ1 ha l (le_trans hl hkr)
+    simpa only [hA] using h1
+  have hM0 : (0 : ℝ) ≤ Kb * N ^ a := by positivity
+  have hD0 : (0 : ℝ) ≤ Kb * (1 / N + 1 / T) := by positivity
+  have hmain := ibp_L1_bound107' (A := A) (f := f) (c := c) (τ := τ)
+    (a := N / 8) (b := 9 * N / 5) (V := 9 * N / 5) (M := Kb * N ^ a)
+    (D := Kb * (1 / N + 1 / T))
+    (show (0 : ℝ) < N / 8 by positivity)
+    (show N / 8 ≤ 9 * N / 5 by linarith)
+    (by positivity) hV hτ (norm_c_ibp107' hτ) rfl hfrec hsm hf0 hvanA hvanB hM0 hD0 k hbase
+  have hcol := ibp_sum_collapse107' (V := 9 * N / 5) (M := Kb * N ^ a)
+    (D := Kb * (1 / N + 1 / T)) (τ := τ) (by positivity) hM0 hD0 hτ k
+  -- (a) the gain scale
+  have hVD : (9 * N / 5) * (Kb * (1 / N + 1 / T)) ≤ (18 * Kb / 5) * (N / T) := by
+    have h1 : (1 / N : ℝ) ≤ 1 / T := one_div_le_one_div_of_le hT0 hTN
+    have h4 : (9 * N / 5) * (1 / N) = 9 / 5 := by field_simp
+    have h5 : (9 * N / 5) * (1 / T) = 9 / 5 * (N / T) := by field_simp
+    have h2 : (9 * N / 5) * (1 / N + 1 / T) ≤ 18 / 5 * (N / T) := by
+      rw [mul_add, h4, h5]
+      nlinarith [hNT]
+    calc (9 * N / 5) * (Kb * (1 / N + 1 / T)) = Kb * ((9 * N / 5) * (1 / N + 1 / T)) := by ring
+      _ ≤ Kb * (18 / 5 * (N / T)) := mul_le_mul_of_nonneg_left h2 hKb0
+      _ = (18 * Kb / 5) * (N / T) := by ring
+  have hgain : (9 * N / 5) * (Kb * (1 / N + 1 / T)) + (k : ℝ) ≤
+      (18 * Kb / 5 + (r : ℝ)) * (N / T) := by
+    have hk : (k : ℝ) ≤ (r : ℝ) := by exact_mod_cast hkr
+    have hr0 : (0 : ℝ) ≤ (r : ℝ) := Nat.cast_nonneg r
+    have hkrT : (r : ℝ) ≤ (r : ℝ) * (N / T) := by
+      calc (r : ℝ) = (r : ℝ) * 1 := by ring
+        _ ≤ (r : ℝ) * (N / T) := mul_le_mul_of_nonneg_left hNT hr0
+    nlinarith [hVD, hk, hkrT]
+  have hstep : (((9 * N / 5) * (Kb * (1 / N + 1 / T)) + (k : ℝ)) / τ) ^ k
+      ≤ ((18 * Kb / 5 + (r : ℝ)) * (N / (T * τ))) ^ k := by
+    refine pow_le_pow_left₀ (by positivity) ?_ k
+    have h2 : ((18 * Kb / 5 + (r : ℝ)) * (N / T)) / τ
+        = (18 * Kb / 5 + (r : ℝ)) * (N / (T * τ)) := by
+      field_simp
+    rw [← h2]
+    exact div_le_div_of_nonneg_right hgain hτ.le
+  have hcoef : (2 * 2) ^ k * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ k)
+      ≤ (2 * 2) ^ r * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ r) := by
+    have h1 : (2 * 2 : ℝ) ^ k ≤ (2 * 2) ^ r := pow_le_pow_right₀ (by norm_num) hkr
+    have hbase1 : (1 : ℝ) ≤ 18 * Kb / 5 + (r : ℝ) := by
+      have h0 : (0 : ℝ) ≤ 18 * Kb / 5 := by positivity
+      linarith [Nat.cast_nonneg (α := ℝ) r]
+    have h2 : (18 * Kb / 5 + (r : ℝ)) ^ k ≤ (18 * Kb / 5 + (r : ℝ)) ^ r :=
+      pow_le_pow_right₀ hbase1 hkr
+    calc (2 * 2) ^ k * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ k)
+        = ((2 * 2) ^ k * Kb) * ((18 * Kb / 5 + (r : ℝ)) ^ k) := by ring
+      _ ≤ ((2 * 2) ^ r * Kb) * ((18 * Kb / 5 + (r : ℝ)) ^ r) := by
+          refine mul_le_mul (mul_le_mul_of_nonneg_right h1 hKb0) h2 (by positivity) ?_
+          exact mul_nonneg (by positivity) hKb0
+      _ = (2 * 2) ^ r * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ r) := by ring
+  have hC0le : (2 * 2) ^ r * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ r) ≤ K := by
+    rw [hK]
+    linarith
+  calc ‖∫ v in (N / 8)..(9 * N / 5),
+        Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) *
+          ((v ^ a * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ)‖
+      = ‖∫ v in (N / 8)..(9 * N / 5),
+          Complex.exp (Complex.I * ((τ * Real.log v : ℝ) : ℂ)) * A v‖ := by rw [hA]
+    _ ≤ (2 * 2) ^ k * ((Kb * N ^ a) *
+          ((((9 * N / 5) * (Kb * (1 / N + 1 / T)) + (k : ℝ)) / τ) ^ k)) := hmain.trans hcol
+    _ ≤ (2 * 2) ^ k * ((Kb * N ^ a) *
+          (((18 * Kb / 5 + (r : ℝ)) * (N / (T * τ))) ^ k)) := by
+        refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hstep hM0) (by positivity)
+    _ = ((2 * 2) ^ k * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ k)) * N ^ a *
+          ((N / (T * τ)) ^ k) := by
+        have hZ : ((18 * Kb / 5 + (r : ℝ)) * (N / (T * τ))) ^ k
+            = ((18 * Kb / 5 + (r : ℝ)) ^ k) * ((N / (T * τ)) ^ k) := mul_pow _ _ _
+        rw [hZ]
+        ring
+    _ ≤ ((2 * 2) ^ r * Kb * ((18 * Kb / 5 + (r : ℝ)) ^ r)) * N ^ a *
+          ((N / (T * τ)) ^ k) := by
+        refine mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hcoef hNa) (by positivity)
+    _ ≤ K * N ^ a * ((N / (T * τ)) ^ k) := by
+        refine mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right ?_ hNa) (by positivity)
+        linarith
+    _ ≤ K * N ^ a * ((K * N / (T * τ)) ^ k) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        refine pow_le_pow_left₀ (by positivity) ?_ k
+        have h0 : (0 : ℝ) ≤ N / (T * τ) := by positivity
+        have h1 : N / (T * τ) ≤ K * (N / (T * τ)) := by
+          calc N / (T * τ) = 1 * (N / (T * τ)) := by ring
+            _ ≤ K * (N / (T * τ)) := mul_le_mul_of_nonneg_right hK1 h0
+        calc N / (T * τ) ≤ K * (N / (T * τ)) := h1
+          _ = K * N / (T * τ) := by ring
+
+/-! ## The phase sign and the inner `v`-integral of the equal-sign leaf -/
+
+/-- For a real-valued amplitude, reversing the sign of the phase does not change the norm. -/
+private theorem norm_integral_exp_phase_abs107 {F : ℝ → ℂ} (hF : ∀ v, (starRingEnd ℂ) (F v) = F v)
+    (c : ℝ) (s : Set ℝ) (hs : MeasurableSet s) :
+    ‖∫ v in s, Complex.exp (Complex.I * ((c * Real.log v : ℝ) : ℂ)) * F v‖
+      = ‖∫ v in s, Complex.exp (Complex.I * ((|c| * Real.log v : ℝ) : ℂ)) * F v‖ := by
+  rcases le_total 0 c with hc | hc
+  · rw [abs_of_nonneg hc]
+  · rw [abs_of_nonpos hc]
+    have hpt : ∀ v : ℝ, Complex.exp (Complex.I * ((-c * Real.log v : ℝ) : ℂ)) * F v
+        = (starRingEnd ℂ) (Complex.exp (Complex.I * ((c * Real.log v : ℝ) : ℂ)) * F v) := by
+      intro v
+      have hsw : (starRingEnd ℂ) (Complex.I * ((c * Real.log v : ℝ) : ℂ))
+          = Complex.I * ((-c * Real.log v : ℝ) : ℂ) := by
+        rw [map_mul, Complex.conj_I, Complex.conj_ofReal]
+        push_cast
+        ring
+      rw [map_mul, hF v, ← Complex.exp_conj, hsw]
+    have hstar : ∫ v in s, Complex.exp (Complex.I * ((-c * Real.log v : ℝ) : ℂ)) * F v
+        = (starRingEnd ℂ)
+            (∫ v in s, Complex.exp (Complex.I * ((c * Real.log v : ℝ) : ℂ)) * F v) := by
+      rw [show (∫ v in s, Complex.exp (Complex.I * ((-c * Real.log v : ℝ) : ℂ)) * F v)
+          = ∫ v in s, (starRingEnd ℂ)
+              (Complex.exp (Complex.I * ((c * Real.log v : ℝ) : ℂ)) * F v) from by
+        apply setIntegral_congr_fun hs
+        intro v _
+        exact hpt v]
+      exact integral_conj (μ := volume.restrict s) (𝕜 := ℂ)
+        (f := fun v : ℝ => Complex.exp (Complex.I * ((c * Real.log v : ℝ) : ℂ)) * F v)
+    rw [hstar, Complex.norm_conj]
+
+/-- The inner `v`-integral of the equal-sign leaf, in the shape of the by-parts estimate. -/
+private theorem inner_v_bound107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G) (r : ℕ) :
+    ∃ K : ℝ, 1 ≤ K ∧ ∀ (N T : ℝ) (ρ₁ ρ₂ : ℂ) (σ : ℝ), 0 < N → 1 ≤ T → T ≤ N →
+      0 < ρ₁.re → ρ₁.re ≤ 1 → 0 < ρ₂.re → ρ₂.re ≤ 1 →
+      0 < σ → σ ≤ 4 / 5 → 0 < |(ρ₁ + ρ₂).im| → ∀ k : ℕ, k ≤ r →
+      ‖∫ v in (N / 8)..(9 * N / 5), (v : ℂ) ^ (ρ₁ + ρ₂ - 1) * (GT G T (N - v) : ℂ) *
+        (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ)‖
+        ≤ K * N ^ ((ρ₁ + ρ₂).re - 1) * (K * N / (T * |(ρ₁ + ρ₂).im|)) ^ k := by
+  obtain ⟨K, hK1, hK⟩ := v_ibp_bound107 hϕ hG r
+  refine ⟨K, hK1, ?_⟩
+  intro N T ρ₁ ρ₂ σ hN hT hTN h₁ h₁' h₂ h₂' hσ hσ1 hτ k hkr
+  set S : ℂ := ρ₁ + ρ₂ with hS
+  set a : ℝ := S.re - 1 with ha
+  have hSre : a ∈ Set.Ioc (-1) 1 := by
+    constructor
+    · rw [ha, hS]
+      simp only [Complex.add_re]
+      linarith
+    · rw [ha, hS]
+      simp only [Complex.add_re]
+      linarith
+  have htime : ∀ v ∈ Set.uIcc (N / 8) (9 * N / 5), (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+        (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ)
+      = Complex.exp (Complex.I * ((S.im * Real.log v : ℝ) : ℂ)) *
+        ((v ^ a * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ) := by
+    intro v hv
+    have hv0 : 0 < v := by
+      have hv' := Set.uIcc_of_le (by linarith : N / 8 ≤ 9 * N / 5) ▸ hv
+      linarith [hv'.1]
+    rw [cpow_split107 hv0 S, ha]
+    push_cast
+    ring
+  have hEq : ∫ v in (N / 8)..(9 * N / 5), (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+        (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ)
+      = ∫ v in (N / 8)..(9 * N / 5), Complex.exp (Complex.I * ((S.im * Real.log v : ℝ) : ℂ)) *
+        ((v ^ a * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ) := by
+    apply intervalIntegral.integral_congr
+    intro v hv
+    exact htime v hv
+  rw [hEq]
+  have hab : N / 8 ≤ 9 * N / 5 := by linarith
+  rw [intervalIntegral.integral_of_le hab]
+  rw [norm_integral_exp_phase_abs107
+    (F := fun v : ℝ => ((v ^ a * (ϕ (v * σ / N) * ϕ (v * (1 - σ) / N)) * GT G T (N - v) : ℝ) : ℂ))
+    (fun v => Complex.conj_ofReal _) (S.im) (Set.Ioc (N / 8) (9 * N / 5)) measurableSet_Ioc]
+  have hfin := hK N T a σ |S.im| hN hT hTN hσ hσ1 hSre hτ k hkr
+  rw [intervalIntegral.integral_of_le hab] at hfin
+  simpa only [hS, ha] using hfin
+
+/-! ## The equal-sign leaf -/
+
+/-- On the sigma support `[1/5, 4/5]` a complex power costs at most five. -/
+private theorem cpow_norm_le_five107 {σ : ℝ} (h0 : 0 < σ) (hlo : (1 / 5 : ℝ) ≤ σ)
+    (hhi : σ ≤ 4 / 5) {ρ : ℂ} (hρ : 0 < ρ.re) : ‖(σ : ℂ) ^ (ρ - 1)‖ ≤ 5 := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos h0, Complex.sub_re, Complex.one_re]
+  rcases le_total ρ.re 1 with hle | hle
+  · have hexp : ρ.re - 1 ≤ 0 := by linarith
+    have h1 : σ ^ (ρ.re - 1) ≤ (1 / 5 : ℝ) ^ (ρ.re - 1) :=
+      Real.rpow_le_rpow_of_nonpos (by norm_num) hlo hexp
+    have h2 : (1 / 5 : ℝ) ^ (ρ.re - 1) = 5 ^ (1 - ρ.re) := by
+      rw [show (1 / 5 : ℝ) = 5 ^ (-1 : ℝ) by rw [Real.rpow_neg_one]; norm_num]
+      rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+      congr 1
+      ring
+    have h3 : (5 : ℝ) ^ (1 - ρ.re) ≤ 5 ^ (1 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+    rw [Real.rpow_one] at h3
+    linarith [h1, h2, h3]
+  · have h1 : σ ^ (ρ.re - 1) ≤ (4 / 5 : ℝ) ^ (ρ.re - 1) :=
+      Real.rpow_le_rpow h0.le hhi (by linarith)
+    have h2 : (4 / 5 : ℝ) ^ (ρ.re - 1) ≤ 1 :=
+      Real.rpow_le_one (by norm_num) (by norm_num) (by linarith)
+    linarith
+
+/-- Factoring the joint integrand into the sigma weight and the `v`-amplitude. -/
+private theorem joint107_factor {ϕ G : ℝ → ℝ} {N T : ℝ} (ρ₁ ρ₂ : ℂ) {v σ : ℝ}
+    (hσ0 : 0 < σ) (hσ1 : σ < 1) :
+    joint107 ϕ G T N ρ₁ ρ₂ v σ
+      = ((σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)) *
+          ((v : ℂ) ^ (ρ₁ + ρ₂ - 1) * (GT G T (N - v) : ℂ) *
+            (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ)) := by
+  have h1m : (0 : ℝ) < 1 - σ := by linarith
+  simp only [joint107, vexp107, amp107]
+  rw [cpow_split107 hσ0 ρ₁, cpow_split107 h1m ρ₂]
+  rw [show Complex.exp (Complex.I * (((ρ₁.im * Real.log σ + ρ₂.im * Real.log (1 - σ) : ℝ)) : ℂ))
+      = Complex.exp (Complex.I * ((ρ₁.im * Real.log σ : ℝ) : ℂ)) *
+        Complex.exp (Complex.I * ((ρ₂.im * Real.log (1 - σ) : ℝ) : ℂ)) from by
+    rw [← Complex.exp_add]
+    congr 1
+    push_cast
+    ring]
+  push_cast
+  ring
+
+set_option maxHeartbeats 2000000 in
+private theorem same_leaf107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ)
+    (hG : IsMajorWeight G) (A : ℝ) (hA : 0 < A) :
+    ∃ C : ℝ, ∀ N T : ℝ, 1 ≤ T → T ≤ N → ∀ ρ₁ ρ₂ : ℂ,
+      0 < ρ₁.re → ρ₁.re ≤ 1 → 0 < ρ₂.re → ρ₂.re ≤ 1 → 0 ≤ ρ₁.im * ρ₂.im →
+      ‖∫ v in Set.Ioi (0 : ℝ), (v : ℂ) ^ (ρ₁ + ρ₂ - 1) *
+          (GT G T (N - v) : ℂ) * Jphi ϕ N v ρ₁ ρ₂‖ ≤
+        C * N ^ ((ρ₁ + ρ₂).re - 1) *
+          (1 + (|ρ₁.im| + |ρ₂.im|) * T / N) ^ (-A) := by
+  set r : ℕ := Nat.ceil A with hr
+  have hAr : A ≤ (r : ℝ) := by
+    rw [hr]
+    exact_mod_cast Nat.le_ceil A
+  obtain ⟨Ki, hKi1, hKi⟩ := inner_v_bound107 hϕ hG r
+  obtain ⟨CJ, hCJ0, hCJ⟩ := Jphi_uniform107 hϕ
+  have hKi0 : (0 : ℝ) ≤ Ki := by linarith
+  have hKip : ∀ n : ℕ, (1 : ℝ) ≤ Ki ^ n := fun n => one_le_pow₀ hKi1
+  set Cval : ℝ := 15 * Ki ^ (r + 1) * 2 ^ A + 15 * Ki * 2 ^ A + (5 / 2) * CJ + 1 with hCval
+  have hCval0 : (0 : ℝ) ≤ Cval := by positivity
+  have hterm1 : (0 : ℝ) ≤ 15 * Ki ^ (r + 1) * 2 ^ A :=
+    mul_nonneg (mul_nonneg (by norm_num) (pow_nonneg hKi0 _))
+      (le_of_lt (Real.rpow_pos_of_pos (by norm_num) A))
+  have hterm2 : (0 : ℝ) ≤ 15 * Ki * 2 ^ A :=
+    mul_nonneg (mul_nonneg (by norm_num) hKi0) (le_of_lt (Real.rpow_pos_of_pos (by norm_num) A))
+  have hterm3 : (0 : ℝ) ≤ (5 / 2) * CJ := by positivity
+  refine ⟨Cval, ?_⟩
+  intro N T hT hTN ρ₁ ρ₂ h₁ h₁' h₂ h₂' hsign
+  have hN : 0 < N := by linarith
+  have hT0 : 0 < T := by linarith
+  set S : ℂ := ρ₁ + ρ₂ with hS
+  set a : ℝ := S.re - 1 with ha
+  have hSre : S.re = ρ₁.re + ρ₂.re := by simp [hS, Complex.add_re]
+  have hSre1 : 0 < S.re := by rw [hSre]; linarith
+  have hSre2 : S.re ≤ 2 := by rw [hSre]; linarith
+  have hUeq : |S.im| = |ρ₁.im| + |ρ₂.im| := by
+    rw [hS, Complex.add_im]
+    exact abs_add_of_mul_nonneg107' hsign
+  set U : ℝ := |ρ₁.im| + |ρ₂.im| with hU
+  have hU0 : 0 ≤ U := by positivity
+  have hUT0 : (0 : ℝ) ≤ U * T / N := by positivity
+  have hare : a = (ρ₁ + ρ₂).re - 1 := by rw [ha, hS]
+  set F : ℝ → ℂ := fun v =>
+    (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) * Jphi ϕ N v ρ₁ ρ₂ with hF
+  have hNas : (0 : ℝ) ≤ N ^ (S.re - 1) := Real.rpow_nonneg hN.le _
+  -- `Jphi` vanishes off the effective `v` window
+  have hzero : ∀ v : ℝ, (v ≤ (2 / 5) * N ∨ (8 / 5) * N ≤ v) → F v = 0 := by
+    intro v hv
+    have hJ : Jphi ϕ N v ρ₁ ρ₂ = 0 := Jphi_eq_zero_outside84 hϕ hN hv ρ₁ ρ₂
+    simp only [hF, hJ, mul_zero]
+  rcases eq_or_lt_of_le hU0 with hUz | hUp
+  · -- `U = 0`: the crude absolute bound
+    have hscale : ∀ v : ℝ, 0 < v → v ^ (S.re - 1) ≤ (5 / 2) * N ^ (S.re - 1) ∨ F v = 0 := by
+      intro v hv0
+      by_cases hout : v ≤ (2 / 5) * N ∨ (8 / 5) * N ≤ v
+      · exact Or.inr (hzero v hout)
+      · push_neg at hout
+        exact Or.inl (rpow_scale_bound107 hN hout.1.le hout.2.le hSre1 hSre2)
+    have hpt : ∀ v ∈ Set.Ioi (0 : ℝ),
+        ‖F v‖ ≤ (5 / 2) * N ^ (S.re - 1) * (CJ * GT G T (N - v)) := by
+      intro v hv
+      have hv0 : 0 < v := hv
+      have hGT := nonneg_GT107 hG hT0 (N - v)
+      rcases hscale v hv0 with hs | hFv
+      · have hnorm : ‖F v‖ =
+            v ^ (S.re - 1) * GT G T (N - v) * ‖Jphi ϕ N v ρ₁ ρ₂‖ := by
+          rw [hF, norm_mul, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hv0, Complex.sub_re,
+            Complex.one_re, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hGT]
+        rw [hnorm]
+        have hJb := hCJ N hN v ρ₁ ρ₂ h₁ h₂
+        have hJ0 : (0 : ℝ) ≤ ‖Jphi ϕ N v ρ₁ ρ₂‖ := norm_nonneg _
+        have hs1 : v ^ (S.re - 1) * GT G T (N - v)
+            ≤ (5 / 2) * N ^ (S.re - 1) * GT G T (N - v) :=
+          mul_le_mul_of_nonneg_right hs hGT
+        calc v ^ (S.re - 1) * GT G T (N - v) * ‖Jphi ϕ N v ρ₁ ρ₂‖
+            = (v ^ (S.re - 1) * GT G T (N - v)) * ‖Jphi ϕ N v ρ₁ ρ₂‖ := by ring
+          _ ≤ ((5 / 2) * N ^ (S.re - 1) * GT G T (N - v)) * CJ :=
+              mul_le_mul hs1 hJb hJ0 (by positivity)
+          _ = (5 / 2) * N ^ (S.re - 1) * (CJ * GT G T (N - v)) := by ring
+      · rw [hFv, norm_zero]
+        positivity
+    have hIntble : IntegrableOn (fun v : ℝ =>
+        (5 / 2) * N ^ (S.re - 1) * (CJ * GT G T (N - v))) (Set.Ioi 0) :=
+      ((((integrable_GT107 hG hT0).comp_sub_left N).const_mul CJ).const_mul
+        ((5 / 2) * N ^ (S.re - 1))).integrableOn
+    have hgt_int : ∫ v in Set.Ioi (0 : ℝ), GT G T (N - v) ≤ 1 := by
+      have hile : Integrable (fun v : ℝ => GT G T (N - v)) volume :=
+        (integrable_GT107 hG hT0).comp_sub_left N
+      have hle : ∫ v in Set.Ioi (0 : ℝ), GT G T (N - v) ≤ ∫ v : ℝ, GT G T (N - v) :=
+        setIntegral_le_integral hile
+          (Filter.Eventually.of_forall (fun v => nonneg_GT107 hG hT0 (N - v)))
+      rwa [integral_sub_left_eq_self (GT G T) volume N, integral_GT107 hG hT0] at hle
+    have hInt : ∫ v in Set.Ioi (0 : ℝ), (5 / 2) * N ^ (S.re - 1) * (CJ * GT G T (N - v))
+        ≤ (5 / 2) * N ^ (S.re - 1) * (CJ * 1) := by
+      rw [integral_const_mul, integral_const_mul]
+      have hfac : (0 : ℝ) ≤ (5 / 2) * N ^ (S.re - 1) * CJ := by positivity
+      nlinarith [hgt_int]
+    have hdom : ∀ᵐ v ∂(volume.restrict (Set.Ioi (0 : ℝ))),
+        ‖F v‖ ≤ (5 / 2) * N ^ (S.re - 1) * (CJ * GT G T (N - v)) := by
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with v hv using hpt v hv
+    have hmain := (norm_integral_le_of_norm_le
+      (μ := volume.restrict (Set.Ioi (0 : ℝ))) hIntble hdom).trans hInt
+    have hone : (1 + (|ρ₁.im| + |ρ₂.im|) * T / N) ^ (-A) = 1 := by
+      rw [← hU, ← hUz]
+      norm_num
+    rw [hone, mul_one]
+    have hstep2 : (5 / 2) * N ^ (S.re - 1) * (CJ * 1) ≤ Cval * N ^ ((ρ₁ + ρ₂).re - 1) := by
+      rw [← hare]
+      have hCJ' : (5 / 2) * CJ ≤ Cval := by
+        rw [hCval]
+        linarith [hterm1, hterm2]
+      calc (5 / 2) * N ^ a * (CJ * 1) = ((5 / 2) * CJ) * N ^ a := by ring
+        _ ≤ Cval * N ^ a := mul_le_mul_of_nonneg_right hCJ' hNas
+    exact hmain.trans hstep2
+  · -- `U > 0`
+    have hSp : 0 < |S.im| := by rw [hUeq, hU]; exact hUp
+    have hkey : ∀ k : ℕ, k ≤ r → ‖∫ v in Set.Ioi (0 : ℝ), F v‖
+        ≤ 15 * (Ki * N ^ a * (Ki * N / (T * |S.im|)) ^ k) := by
+      intro k hkr
+      -- restrict the outer integral to the finite window
+      have hind : ∫ v in Set.Ioi (0 : ℝ), F v = ∫ v in (N / 8)..(9 * N / 5), F v := by
+        have h1 : (Set.Ioi (0 : ℝ)).indicator F = F := by
+          funext v
+          by_cases hv : v ∈ Set.Ioi (0 : ℝ)
+          · rw [Set.indicator_of_mem hv]
+          · rw [Set.indicator_of_notMem hv]
+            refine (hzero v (Or.inl ?_)).symm
+            have hle : v ≤ 0 := le_of_not_gt hv
+            linarith
+        have h2 : (Set.Ioc (N / 8) (9 * N / 5)).indicator F = F := by
+          funext v
+          by_cases hv : v ∈ Set.Ioc (N / 8) (9 * N / 5)
+          · rw [Set.indicator_of_mem hv]
+          · rw [Set.indicator_of_notMem hv]
+            rw [Set.mem_Ioc] at hv
+            rcases not_and_or.mp hv with h | h
+            · refine (hzero v (Or.inl (by have := (not_lt.mp h : v ≤ N / 8); linarith))).symm
+            · refine (hzero v (Or.inr (by have := (not_le.mp h : 9 * N / 5 < v); linarith))).symm
+        calc ∫ v in Set.Ioi (0 : ℝ), F v = ∫ v, (Set.Ioi (0 : ℝ)).indicator F v :=
+              (integral_indicator measurableSet_Ioi).symm
+          _ = ∫ v, F v := by rw [h1]
+          _ = ∫ v, (Set.Ioc (N / 8) (9 * N / 5)).indicator F v := by rw [h2]
+          _ = ∫ v in (N / 8)..(9 * N / 5), F v := by
+              rw [integral_indicator measurableSet_Ioc,
+                intervalIntegral.integral_of_le (by linarith : N / 8 ≤ 9 * N / 5)]
+      -- `Jphi` restricted to the sigma window
+      have hJphi : ∀ v : ℝ, Jphi ϕ N v ρ₁ ρ₂ = ∫ σ in (1 / 5)..(4 / 5),
+          (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+            (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1) := by
+        intro v
+        have hg : ∀ σ : ℝ, (σ ≤ 1 / 5 ∨ 4 / 5 ≤ σ) →
+            (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+              (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1) = 0 := by
+          intro σ hσ
+          have hz : ϕ (v * σ / N) * ϕ (v * (1 - σ) / N) = 0 := by
+            by_contra hne
+            have hs := phi_pair_sigma_support84 hϕ hN hne
+            rcases hσ with h | h
+            · linarith [hs.1]
+            · linarith [hs.2]
+          simp only [hz, Complex.ofReal_zero, zero_mul]
+        unfold Jphi
+        have hA1 : ∫ σ in (0 : ℝ)..1,
+            (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+              (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)
+            = ∫ σ : ℝ, (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+              (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1) := by
+          rw [intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)]
+          rw [← integral_indicator measurableSet_Ioc]
+          refine integral_congr_ae (Filter.Eventually.of_forall fun σ => ?_)
+          by_cases hσ : σ ∈ Set.Ioc (0 : ℝ) 1
+          · rw [Set.indicator_of_mem hσ]
+          · rw [Set.indicator_of_notMem hσ]
+            refine (hg σ ?_).symm
+            rw [Set.mem_Ioc] at hσ
+            rcases not_and_or.mp hσ with h | h
+            · exact Or.inl (by linarith)
+            · exact Or.inr (by linarith)
+        have hA2 : ∫ σ in (1 / 5)..(4 / 5),
+            (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+              (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)
+            = ∫ σ : ℝ, (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+              (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1) := by
+          rw [intervalIntegral.integral_of_le (by norm_num : (1 / 5 : ℝ) ≤ 4 / 5)]
+          rw [← integral_indicator measurableSet_Ioc]
+          refine integral_congr_ae (Filter.Eventually.of_forall fun σ => ?_)
+          by_cases hσ : σ ∈ Set.Ioc (1 / 5 : ℝ) (4 / 5)
+          · rw [Set.indicator_of_mem hσ]
+          · rw [Set.indicator_of_notMem hσ]
+            refine (hg σ ?_).symm
+            rw [Set.mem_Ioc] at hσ
+            rcases not_and_or.mp hσ with h | h
+            · exact Or.inl (by linarith)
+            · exact Or.inr (by linarith)
+        rw [hA1, hA2]
+      -- `F` as an iterated integral of the joint integrand
+      have hFv : ∀ v : ℝ, F v = ∫ σ in (1 / 5)..(4 / 5),
+          joint107 ϕ G T N ρ₁ ρ₂ v σ := by
+        intro v
+        simp only [hF]
+        rw [hJphi v]
+        rw [show (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+            (∫ σ in (1 / 5)..(4 / 5),
+              (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+                (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1))
+            = ∫ σ in (1 / 5)..(4 / 5),
+              (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+                ((((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) *
+                  (σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)) from by
+          rw [intervalIntegral.integral_const_mul]]
+        apply intervalIntegral.integral_congr
+        intro σ hσ
+        beta_reduce
+        rw [Set.uIcc_of_le (by norm_num : (1 / 5 : ℝ) ≤ 4 / 5)] at hσ
+        have hσ0 : 0 < σ := by linarith [hσ.1]
+        have hσ1 : σ < 1 := by linarith [hσ.2]
+        rw [joint107_factor ρ₁ ρ₂ hσ0 hσ1]
+        rw [show ((ρ₁ + ρ₂ - 1)) = (S - 1) from by rw [hS]]
+        ring
+      -- the inner bound
+      have hinner : ∀ σ ∈ Set.uIoc (1 / 5 : ℝ) (4 / 5),
+          ‖∫ v in (N / 8)..(9 * N / 5), joint107 ϕ G T N ρ₁ ρ₂ v σ‖
+            ≤ 25 * (Ki * N ^ a * (Ki * N / (T * |S.im|)) ^ k) := by
+        intro σ hσ
+        rw [Set.uIoc_of_le (by norm_num : (1 / 5 : ℝ) ≤ 4 / 5)] at hσ
+        have hσ0 : 0 < σ := by linarith [hσ.1]
+        have hσ2 : σ ≤ 4 / 5 := hσ.2
+        have hσlo : (1 / 5 : ℝ) ≤ σ := by linarith [hσ.1]
+        have hσ1m : 0 < 1 - σ := by linarith
+        have hσ1lo : (1 / 5 : ℝ) ≤ 1 - σ := by linarith
+        have hσ1hi : 1 - σ ≤ 4 / 5 := by linarith
+        have hpull : ∫ v in (N / 8)..(9 * N / 5), joint107 ϕ G T N ρ₁ ρ₂ v σ
+            = ((σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)) *
+              ∫ v in (N / 8)..(9 * N / 5), (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+                (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ) := by
+          rw [show ∫ v in (N / 8)..(9 * N / 5), joint107 ϕ G T N ρ₁ ρ₂ v σ
+              = ∫ v in (N / 8)..(9 * N / 5),
+                ((σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)) *
+                  ((v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+                    (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ)) from by
+            apply intervalIntegral.integral_congr
+            intro v hv
+            beta_reduce
+            rw [joint107_factor ρ₁ ρ₂ hσ0 (by linarith)]]
+          rw [intervalIntegral.integral_const_mul]
+        rw [hpull]
+        have hc1 : ‖(σ : ℂ) ^ (ρ₁ - 1)‖ ≤ 5 := cpow_norm_le_five107 hσ0 hσlo hσ2 h₁
+        have hc2 : ‖((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)‖ ≤ 5 :=
+          cpow_norm_le_five107 hσ1m hσ1lo hσ1hi h₂
+        have hcb : ‖(σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)‖ ≤ 25 := by
+          rw [norm_mul]
+          nlinarith [hc1, hc2, norm_nonneg ((σ : ℂ) ^ (ρ₁ - 1)),
+            norm_nonneg (((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1))]
+        have hib := hKi N T ρ₁ ρ₂ σ hN hT hTN h₁ h₁' h₂ h₂' hσ0 hσ2 hSp k hkr
+        have hnn : (0 : ℝ) ≤ Ki * N ^ a * (Ki * N / (T * |S.im|)) ^ k := by positivity
+        calc ‖((σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)) *
+              ∫ v in (N / 8)..(9 * N / 5), (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+                (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ)‖
+            = ‖(σ : ℂ) ^ (ρ₁ - 1) * ((1 - σ : ℝ) : ℂ) ^ (ρ₂ - 1)‖ *
+              ‖∫ v in (N / 8)..(9 * N / 5), (v : ℂ) ^ (S - 1) * (GT G T (N - v) : ℂ) *
+                (((ϕ (v * σ / N)) * (ϕ (v * (1 - σ) / N)) : ℝ) : ℂ)‖ := norm_mul _ _
+          _ ≤ 25 * (Ki * N ^ a * (Ki * N / (T * |S.im|)) ^ k) :=
+              mul_le_mul hcb hib (norm_nonneg _) (by positivity)
+      calc ‖∫ v in Set.Ioi (0 : ℝ), F v‖
+          = ‖∫ v in (N / 8)..(9 * N / 5), F v‖ := by rw [hind]
+        _ = ‖∫ v in (N / 8)..(9 * N / 5),
+              ∫ σ in (1 / 5)..(4 / 5), joint107 ϕ G T N ρ₁ ρ₂ v σ‖ := by
+            rw [intervalIntegral.integral_congr (fun v _ => hFv v)]
+        _ = ‖∫ σ in (1 / 5)..(4 / 5),
+              ∫ v in (N / 8)..(9 * N / 5), joint107 ϕ G T N ρ₁ ρ₂ v σ‖ := by
+            rw [joint_swap107 hϕ hG (α := N / 8) (β := 9 * N / 5) (a := 1 / 5) (b := 4 / 5)
+              (by positivity) (by linarith) (by norm_num) (by norm_num) (by norm_num) ρ₁ ρ₂]
+        _ ≤ (25 * (Ki * N ^ a * (Ki * N / (T * |S.im|)) ^ k)) * |4 / 5 - 1 / 5| :=
+            intervalIntegral.norm_integral_le_of_norm_le_const hinner
+        _ = 15 * (Ki * N ^ a * (Ki * N / (T * |S.im|)) ^ k) := by
+            rw [show |(4 : ℝ) / 5 - 1 / 5| = 3 / 5 by norm_num]
+            ring
+    have hshape : (ρ₁ + ρ₂).re - 1 = a := by rw [ha, hS]
+    rcases le_total (U * T / N) 1 with hsmall | hbig
+    · -- small gain scale: `k = 0`
+      have h0 := hkey 0 (Nat.zero_le r)
+      rw [pow_zero, mul_one] at h0
+      have hx1 : (1 : ℝ) ≤ 1 + U * T / N := by linarith
+      have hone : (1 + (|ρ₁.im| + |ρ₂.im|) * T / N) ^ (-A) = (1 + U * T / N) ^ (-A) := by
+        rw [← hU]
+      rw [hone]
+      have hxa2 : (2 : ℝ) ^ (-A) ≤ (1 + U * T / N) ^ (-A) :=
+        Real.rpow_le_rpow_of_nonpos (by linarith : (0 : ℝ) < 1 + U * T / N)
+          (by linarith : 1 + U * T / N ≤ 2) (by linarith : -A ≤ 0)
+      have hxa2' : (0 : ℝ) ≤ (2 : ℝ) ^ (-A) := by positivity
+      have hprod : (2 : ℝ) ^ A * 2 ^ (-A) = 1 := by
+        rw [← Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
+        norm_num
+      have hprod2 : (0 : ℝ) ≤ (2 : ℝ) ^ A := by positivity
+      have hKi2 : (0 : ℝ) ≤ 15 * Ki := by positivity
+      have hCge : 15 * Ki * (2 : ℝ) ^ A ≤ Cval := by
+        rw [hCval]
+        have h1 : (0 : ℝ) ≤ 15 * Ki ^ (r + 1) * 2 ^ A := hterm1
+        have h2 : (0 : ℝ) ≤ (5 / 2) * CJ + 1 := by linarith
+        linarith
+      have hsmall' : 15 * (Ki * N ^ a) ≤ Cval * N ^ a * (1 + U * T / N) ^ (-A) := by
+        have hc : 15 * Ki ≤ Cval * (1 + U * T / N) ^ (-A) := by
+          calc 15 * Ki = 15 * Ki * ((2 : ℝ) ^ A * 2 ^ (-A)) := by rw [hprod, mul_one]
+            _ = (15 * Ki * (2 : ℝ) ^ A) * 2 ^ (-A) := by ring
+            _ ≤ Cval * (1 + U * T / N) ^ (-A) :=
+                mul_le_mul hCge hxa2 hxa2' hCval0
+        calc 15 * (Ki * N ^ a) = (15 * Ki) * N ^ a := by ring
+          _ ≤ (Cval * (1 + U * T / N) ^ (-A)) * N ^ a :=
+              mul_le_mul_of_nonneg_right hc hNas
+          _ = Cval * N ^ a * (1 + U * T / N) ^ (-A) := by ring
+      rw [← hshape]
+      exact h0.trans hsmall'
+    · -- large gain scale: `k = r`
+      have h0 := hkey r le_rfl
+      have hx1 : (1 : ℝ) ≤ U * T / N := hbig
+      have hxpos : (0 : ℝ) < U * T / N := by
+        have : (0 : ℝ) < U := hUp
+        positivity
+      have hone : (1 + (|ρ₁.im| + |ρ₂.im|) * T / N) ^ (-A) = (1 + U * T / N) ^ (-A) := by
+        rw [← hU]
+      rw [hone]
+      have hrewrite : (Ki * N / (T * |S.im|)) ^ r = Ki ^ r * (U * T / N) ^ (-(r : ℝ)) := by
+        rw [hUeq]
+        have hTU : (0 : ℝ) < T * U := by positivity
+        have hNr : N / (T * U) = (U * T / N)⁻¹ := by
+          rw [inv_div]
+          congr 1
+          ring
+        rw [show Ki * N / (T * U) = Ki * (N / (T * U)) by ring, mul_pow, hNr]
+        rw [show ((U * T / N)⁻¹) = (U * T / N) ^ (-1 : ℝ) from (Real.rpow_neg_one _).symm]
+        have hstep3 : ((U * T / N) ^ (-1 : ℝ)) ^ r = (U * T / N) ^ (-(r : ℝ)) := by
+          rw [← Real.rpow_natCast]
+          rw [← Real.rpow_mul (le_of_lt hxpos)]
+          congr 1
+          push_cast
+          ring
+        rw [hstep3]
+      rw [hrewrite] at h0
+      have hxmono : (U * T / N) ^ (-(r : ℝ)) ≤ (U * T / N) ^ (-A) :=
+        Real.rpow_le_rpow_of_exponent_le hx1 (by linarith)
+      have hxleA : (U * T / N) ^ (-A) ≤ 2 ^ A * (1 + U * T / N) ^ (-A) := by
+        have h2 : (1 + U * T / N) ≤ 2 * (U * T / N) := by linarith
+        have h3 : (2 * (U * T / N)) ^ (-A) ≤ (1 + U * T / N) ^ (-A) :=
+          Real.rpow_le_rpow_of_nonpos (by linarith) h2 (by linarith)
+        rw [Real.mul_rpow (by norm_num) hxpos.le] at h3
+        have h4 : (2 : ℝ) ^ (-A) * 2 ^ A = 1 := by
+          rw [← Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
+          norm_num
+        have h2A : (0 : ℝ) < (2 : ℝ) ^ A := Real.rpow_pos_of_pos (by norm_num) _
+        have h2mA : (0 : ℝ) < (2 : ℝ) ^ (-A) := Real.rpow_pos_of_pos (by norm_num) _
+        have hxA : (0 : ℝ) < (U * T / N) ^ (-A) := Real.rpow_pos_of_pos hxpos _
+        have : (2 : ℝ) ^ (-A) * (U * T / N) ^ (-A) ≤ (1 + U * T / N) ^ (-A) := h3
+        nlinarith [this, h4, h2A, h2mA, hxA]
+      have hKipos : (0 : ℝ) ≤ Ki := hKi0
+      have hstep : 15 * (Ki * N ^ a * (Ki ^ r * (U * T / N) ^ (-(r : ℝ))))
+          ≤ Cval * N ^ a * (1 + U * T / N) ^ (-A) := by
+        have hzr : (U * T / N) ^ (-(r : ℝ)) ≤ 2 ^ A * (1 + U * T / N) ^ (-A) :=
+          hxmono.trans hxleA
+        have hCge : 15 * Ki ^ (r + 1) * 2 ^ A ≤ Cval := by
+          rw [hCval]
+          linarith [hterm2, hterm3]
+        have hxp : (0 : ℝ) ≤ (1 + U * T / N) ^ (-A) :=
+          le_of_lt (Real.rpow_pos_of_pos (by linarith : (0 : ℝ) < 1 + U * T / N) (-A))
+        have hPa : (0 : ℝ) ≤ N ^ a := Real.rpow_nonneg hN.le _
+        calc 15 * (Ki * N ^ a * (Ki ^ r * (U * T / N) ^ (-(r : ℝ))))
+            = (15 * Ki ^ (r + 1)) * N ^ a * (U * T / N) ^ (-(r : ℝ)) := by
+              rw [pow_succ]; ring
+          _ ≤ (15 * Ki ^ (r + 1)) * N ^ a * (2 ^ A * (1 + U * T / N) ^ (-A)) := by
+              exact mul_le_mul_of_nonneg_left hzr (by positivity)
+          _ = (15 * Ki ^ (r + 1) * 2 ^ A) * N ^ a * (1 + U * T / N) ^ (-A) := by ring
+          _ ≤ Cval * N ^ a * (1 + U * T / N) ^ (-A) := by
+              refine mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hCge hPa) (by positivity)
+      rw [← hshape]
+      exact h0.trans hstep
+
 /-- LEAF. Page 29 proof of 7.19, equal signs including zero.
 Repeated integration by parts in v gives decay at scale T / N. -/
 theorem archimedean_same107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ)
@@ -2204,8 +4490,8 @@ theorem archimedean_same107 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ)
       ‖∫ v in Set.Ioi (0 : ℝ), (v : ℂ) ^ (ρ₁ + ρ₂ - 1) *
           (GT G T (N - v) : ℂ) * Jphi ϕ N v ρ₁ ρ₂‖ ≤
         C * N ^ ((ρ₁ + ρ₂).re - 1) *
-          (1 + (|ρ₁.im| + |ρ₂.im|) * T / N) ^ (-A) := by
-  sorry
+          (1 + (|ρ₁.im| + |ρ₂.im|) * T / N) ^ (-A) :=
+  same_leaf107 hϕ hG A hA
 
 /-- Page 29 proof of 7.20. The normalized dilated kernel is integrable. -/
 theorem integrable_GT150 {G : ℝ → ℝ} (hG : IsMajorWeight G)
