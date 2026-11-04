@@ -1,0 +1,13 @@
+{
+  "arguments": {
+    "name": "task304-04",
+    "start": 600,
+    "end": 740,
+    "seconds": 3.0
+  },
+  "utc_start": "2026-11-04T19:16:20.904887+00:00",
+  "C_sha256": "f0a01c630a1e37a5eaeedeaf0484e112712e1f8293ca94402e7235a0d8be422a",
+  "Python_sha256": "18d9a3471eddb26254a6a6324427ca692bb7eb4bd09b63e007c8ec479749fb48",
+  "domain_count": 140,
+  "filter": "all holes, alternating high and low, cap zero"
+}

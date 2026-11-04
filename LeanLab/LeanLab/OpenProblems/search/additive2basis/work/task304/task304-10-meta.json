@@ -1,0 +1,22 @@
+{
+  "arguments": {
+    "label": "global-three",
+    "first_batch": 10,
+    "radius": -1,
+    "steps": 1,
+    "seconds": 3.0,
+    "budget": 1500.0,
+    "cap": 0,
+    "low": 18,
+    "high": 120,
+    "seed": 304,
+    "topology": "contiguous",
+    "transfer": false,
+    "stream": true,
+    "source": "both"
+  },
+  "utc_start": "2026-11-04T19:20:13.846078+00:00",
+  "jobs": 4125,
+  "C_sha256": "fe3e3efda1ebd2e2f2270295c8f5f3369236d4e4bddb388680907b38efd354a3",
+  "Python_sha256": "a641aaeb88dc009ca93c84c7d11e6eed40e357237e4260f9d940d3028b7ec4c9"
+}

@@ -1,0 +1,21 @@
+{
+  "arguments": {
+    "label": "local-three",
+    "first_batch": 5,
+    "radius": 12,
+    "steps": 1,
+    "seconds": 2.0,
+    "budget": 900.0,
+    "cap": 1,
+    "low": 18,
+    "high": 120,
+    "seed": 304,
+    "topology": "contiguous",
+    "transfer": false,
+    "source": "both"
+  },
+  "utc_start": "2026-11-04T19:17:43.204091+00:00",
+  "jobs": 4125,
+  "C_sha256": "06efb8442e61754f94ea03b34fa3ce6911f6ef2a6bc7ee99b84255822daf5e71",
+  "Python_sha256": "26e2f760681a3748f269be452344db094fce35066a7965fae36d4fae9d088e64"
+}

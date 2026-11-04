@@ -1,0 +1,24 @@
+{
+  "arguments": {
+    "label": "local-ijk",
+    "first_batch": 20,
+    "radius": 12,
+    "steps": 1,
+    "seconds": 2.0,
+    "budget": 600.0,
+    "cap": 1,
+    "low": 18,
+    "high": 120,
+    "seed": 304,
+    "topology": "contiguous",
+    "transfer": false,
+    "stream": false,
+    "centered": false,
+    "lazy": false,
+    "source": "both"
+  },
+  "utc_start": "2026-11-04T19:29:09.979269+00:00",
+  "jobs": 12200,
+  "C_sha256": "56598844d1bbe94fe75f53cd3f28cde34e24c466a23a6b4cbbeacc86a1c8b2eb",
+  "Python_sha256": "79550a5961d6e9b819d5457d0a6e96cf9682396a2da31eee36975d95572898c6"
+}

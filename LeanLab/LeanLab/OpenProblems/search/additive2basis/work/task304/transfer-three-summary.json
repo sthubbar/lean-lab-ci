@@ -1,0 +1,14 @@
+{
+  "FINISHED": "transfer-three",
+  "last_batch": "task304-64",
+  "visited": 11893,
+  "complete": 11893,
+  "scored": 110,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 0,
+  "jobs": 24194,
+  "stop": "wall_budget",
+  "seconds": 600.027933867,
+  "utc_end": "2026-11-04T19:40:08.089135+00:00"
+}

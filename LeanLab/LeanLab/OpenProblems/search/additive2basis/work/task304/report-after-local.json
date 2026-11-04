@@ -1,0 +1,278 @@
+{
+  "batches": [
+    {
+      "batch": "task304-01",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-02",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-03",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-04",
+      "domains": 140,
+      "complete": 140,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-05",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 7,
+      "scored": 5,
+      "best_ratio": "110/867"
+    },
+    {
+      "batch": "task304-06",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 2,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-07",
+      "domains": 841,
+      "complete": 841,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 7,
+      "scored": 3,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-08",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 6,
+      "scored": 5,
+      "best_ratio": "500/3969"
+    },
+    {
+      "batch": "task304-09",
+      "domains": 764,
+      "complete": 764,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 1,
+      "scored": 1,
+      "best_ratio": "235/1849"
+    },
+    {
+      "batch": "task304-10",
+      "domains": 245,
+      "complete": 61,
+      "interrupted": 184,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-20",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 2,
+      "best_ratio": "634/5041"
+    },
+    {
+      "batch": "task304-21",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 8,
+      "scored": 3,
+      "best_ratio": "166/1323"
+    },
+    {
+      "batch": "task304-22",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 1,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-23",
+      "domains": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 9,
+      "scored": 6,
+      "best_ratio": "234/1849"
+    },
+    {
+      "batch": "task304-24",
+      "domains": 825,
+      "complete": 825,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 4,
+      "scored": 1,
+      "best_ratio": "636/5041"
+    },
+    {
+      "batch": "task304-25",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 8,
+      "scored": 6,
+      "best_ratio": "210/1681"
+    },
+    {
+      "batch": "task304-26",
+      "domains": 825,
+      "complete": 825,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 1,
+      "scored": 1,
+      "best_ratio": "346/2809"
+    },
+    {
+      "batch": "task304-27",
+      "domains": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 13,
+      "scored": 9,
+      "best_ratio": "534/4225"
+    },
+    {
+      "batch": "task304-28",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 3,
+      "scored": 2,
+      "best_ratio": "120/961"
+    },
+    {
+      "batch": "task304-29",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 9,
+      "scored": 5,
+      "best_ratio": "236/1849"
+    },
+    {
+      "batch": "task304-30",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 1,
+      "best_ratio": "410/3249"
+    },
+    {
+      "batch": "task304-31",
+      "domains": 825,
+      "complete": 825,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 6,
+      "scored": 3,
+      "best_ratio": "307/2450"
+    },
+    {
+      "batch": "task304-32",
+      "domains": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 10,
+      "scored": 6,
+      "best_ratio": "236/1849"
+    },
+    {
+      "batch": "task304-33",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 5,
+      "scored": 3,
+      "best_ratio": "462/3721"
+    },
+    {
+      "batch": "task304-34",
+      "domains": 664,
+      "complete": 664,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 5,
+      "scored": 4,
+      "best_ratio": "166/1323"
+    },
+    {
+      "batch": "task304-50",
+      "domains": 411,
+      "complete": 411,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 14,
+      "scored": 6,
+      "best_ratio": "31/242"
+    }
+  ],
+  "timeout_revisits": 740,
+  "three_run_domains": 16981,
+  "scored": 75,
+  "distinct": 65,
+  "saved_generators": 75,
+  "BEATS": 0,
+  "failures": 0,
+  "independent_coverage": "MATCH",
+  "exact_domains": "MATCH",
+  "BEST_generators": 10,
+  "judge_sources": "UNCHANGED",
+  "prior_batches": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_task_artifact_bytes": 650751
+}

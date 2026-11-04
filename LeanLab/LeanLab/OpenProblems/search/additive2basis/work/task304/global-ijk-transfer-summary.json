@@ -1,0 +1,14 @@
+{
+  "FINISHED": "global-ijk-transfer",
+  "last_batch": "task304-101",
+  "visited": 876,
+  "complete": 164,
+  "scored": 0,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 0,
+  "jobs": 61570,
+  "stop": "wall_budget",
+  "seconds": 2250.701859557,
+  "utc_end": "2026-11-04T20:11:25.761420+00:00"
+}

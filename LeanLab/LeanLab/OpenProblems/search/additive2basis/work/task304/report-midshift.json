@@ -1,0 +1,118 @@
+{
+  "batches": [
+    {
+      "batch": "task304-01",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-02",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-03",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-04",
+      "domains": 140,
+      "complete": 140,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-05",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 7,
+      "scored": 5,
+      "best_ratio": "110/867"
+    },
+    {
+      "batch": "task304-06",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 2,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-07",
+      "domains": 841,
+      "complete": 841,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 7,
+      "scored": 3,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-08",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 6,
+      "scored": 5,
+      "best_ratio": "500/3969"
+    },
+    {
+      "batch": "task304-09",
+      "domains": 764,
+      "complete": 764,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 1,
+      "scored": 1,
+      "best_ratio": "235/1849"
+    },
+    {
+      "batch": "task304-10",
+      "domains": 36,
+      "complete": 12,
+      "interrupted": 24,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    }
+  ],
+  "timeout_revisits": 740,
+  "three_run_domains": 4161,
+  "scored": 16,
+  "distinct": 16,
+  "saved_generators": 16,
+  "BEATS": 0,
+  "failures": 0,
+  "independent_coverage": "MATCH",
+  "exact_domains": "MATCH",
+  "BEST_generators": 10,
+  "judge_sources": "UNCHANGED",
+  "prior_batches": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_task_artifact_bytes": 650703
+}

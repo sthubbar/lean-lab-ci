@@ -1,0 +1,14 @@
+{
+  "FINISHED": "local-three",
+  "last_batch": "task304-09",
+  "visited": 4125,
+  "complete": 4125,
+  "scored": 16,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 0,
+  "jobs": 4125,
+  "stop": "all_jobs",
+  "seconds": 33.25238225999999,
+  "utc_end": "2026-11-04T19:18:16.460629+00:00"
+}

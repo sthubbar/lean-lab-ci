@@ -1,0 +1,14 @@
+{
+  "FINISHED": "local-ijk",
+  "last_batch": "task304-34",
+  "visited": 12200,
+  "complete": 12200,
+  "scored": 53,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 0,
+  "jobs": 12200,
+  "stop": "all_jobs",
+  "seconds": 33.81511666100005,
+  "utc_end": "2026-11-04T19:29:43.855238+00:00"
+}

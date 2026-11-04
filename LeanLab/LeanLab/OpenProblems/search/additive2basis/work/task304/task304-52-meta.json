@@ -1,0 +1,24 @@
+{
+  "arguments": {
+    "label": "transfer-three",
+    "first_batch": 50,
+    "radius": 24,
+    "steps": 3,
+    "seconds": 2.0,
+    "budget": 600.0,
+    "cap": 1,
+    "low": 18,
+    "high": 120,
+    "seed": 30450,
+    "topology": "alternate",
+    "transfer": true,
+    "stream": false,
+    "centered": false,
+    "lazy": true,
+    "source": "both"
+  },
+  "utc_start": "2026-11-04T19:30:07.831338+00:00",
+  "jobs": 24194,
+  "C_sha256": "f0df378ea4e270536e21d1d80cd71a584e10068dface42c0d5592e63489129c1",
+  "Python_sha256": "b27cf0711114cb9d9de2bd089e8b980e39ddf6612cd80dfbf98c5fd570fb9ec8"
+}

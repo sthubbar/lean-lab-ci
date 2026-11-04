@@ -1,0 +1,428 @@
+{
+  "batches": [
+    {
+      "batch": "task304-01",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-02",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-03",
+      "domains": 200,
+      "complete": 200,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-04",
+      "domains": 140,
+      "complete": 140,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-05",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 7,
+      "scored": 5,
+      "best_ratio": "110/867"
+    },
+    {
+      "batch": "task304-06",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 2,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-07",
+      "domains": 841,
+      "complete": 841,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 7,
+      "scored": 3,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-08",
+      "domains": 840,
+      "complete": 840,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 6,
+      "scored": 5,
+      "best_ratio": "500/3969"
+    },
+    {
+      "batch": "task304-09",
+      "domains": 764,
+      "complete": 764,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 1,
+      "scored": 1,
+      "best_ratio": "235/1849"
+    },
+    {
+      "batch": "task304-10",
+      "domains": 522,
+      "complete": 134,
+      "interrupted": 388,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-100",
+      "domains": 181,
+      "complete": 32,
+      "interrupted": 149,
+      "failures": 0,
+      "exact_join_checks": 0,
+      "scored": 0,
+      "best_ratio": null
+    },
+    {
+      "batch": "task304-20",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 2,
+      "best_ratio": "634/5041"
+    },
+    {
+      "batch": "task304-21",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 8,
+      "scored": 3,
+      "best_ratio": "166/1323"
+    },
+    {
+      "batch": "task304-22",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 1,
+      "best_ratio": "191/1521"
+    },
+    {
+      "batch": "task304-23",
+      "domains": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 9,
+      "scored": 6,
+      "best_ratio": "234/1849"
+    },
+    {
+      "batch": "task304-24",
+      "domains": 825,
+      "complete": 825,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 4,
+      "scored": 1,
+      "best_ratio": "636/5041"
+    },
+    {
+      "batch": "task304-25",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 8,
+      "scored": 6,
+      "best_ratio": "210/1681"
+    },
+    {
+      "batch": "task304-26",
+      "domains": 825,
+      "complete": 825,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 1,
+      "scored": 1,
+      "best_ratio": "346/2809"
+    },
+    {
+      "batch": "task304-27",
+      "domains": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 13,
+      "scored": 9,
+      "best_ratio": "534/4225"
+    },
+    {
+      "batch": "task304-28",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 3,
+      "scored": 2,
+      "best_ratio": "120/961"
+    },
+    {
+      "batch": "task304-29",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 9,
+      "scored": 5,
+      "best_ratio": "236/1849"
+    },
+    {
+      "batch": "task304-30",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 2,
+      "scored": 1,
+      "best_ratio": "410/3249"
+    },
+    {
+      "batch": "task304-31",
+      "domains": 825,
+      "complete": 825,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 6,
+      "scored": 3,
+      "best_ratio": "307/2450"
+    },
+    {
+      "batch": "task304-32",
+      "domains": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 10,
+      "scored": 6,
+      "best_ratio": "236/1849"
+    },
+    {
+      "batch": "task304-33",
+      "domains": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 5,
+      "scored": 3,
+      "best_ratio": "462/3721"
+    },
+    {
+      "batch": "task304-34",
+      "domains": 664,
+      "complete": 664,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 5,
+      "scored": 4,
+      "best_ratio": "166/1323"
+    },
+    {
+      "batch": "task304-50",
+      "domains": 836,
+      "complete": 836,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 19,
+      "scored": 9,
+      "best_ratio": "31/242"
+    },
+    {
+      "batch": "task304-51",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 14,
+      "scored": 4,
+      "best_ratio": "163/784"
+    },
+    {
+      "batch": "task304-52",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 8,
+      "scored": 6,
+      "best_ratio": "173/1352"
+    },
+    {
+      "batch": "task304-53",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 11,
+      "scored": 5,
+      "best_ratio": "383/3042"
+    },
+    {
+      "batch": "task304-54",
+      "domains": 836,
+      "complete": 836,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 16,
+      "scored": 8,
+      "best_ratio": "41/324"
+    },
+    {
+      "batch": "task304-55",
+      "domains": 836,
+      "complete": 836,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 23,
+      "scored": 11,
+      "best_ratio": "5/24"
+    },
+    {
+      "batch": "task304-56",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 15,
+      "scored": 5,
+      "best_ratio": "93/448"
+    },
+    {
+      "batch": "task304-57",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 19,
+      "scored": 8,
+      "best_ratio": "31/242"
+    },
+    {
+      "batch": "task304-58",
+      "domains": 836,
+      "complete": 836,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 17,
+      "scored": 7,
+      "best_ratio": "151/729"
+    },
+    {
+      "batch": "task304-59",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 24,
+      "scored": 8,
+      "best_ratio": "22/175"
+    },
+    {
+      "batch": "task304-60",
+      "domains": 836,
+      "complete": 836,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 42,
+      "scored": 13,
+      "best_ratio": "163/784"
+    },
+    {
+      "batch": "task304-61",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 14,
+      "scored": 4,
+      "best_ratio": "107/841"
+    },
+    {
+      "batch": "task304-62",
+      "domains": 836,
+      "complete": 836,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 27,
+      "scored": 14,
+      "best_ratio": "60/289"
+    },
+    {
+      "batch": "task304-63",
+      "domains": 837,
+      "complete": 837,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 6,
+      "scored": 3,
+      "best_ratio": "41/324"
+    },
+    {
+      "batch": "task304-64",
+      "domains": 181,
+      "complete": 181,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_join_checks": 10,
+      "scored": 5,
+      "best_ratio": "81/640"
+    }
+  ],
+  "timeout_revisits": 740,
+  "three_run_domains": 28921,
+  "scored": 179,
+  "distinct": 157,
+  "saved_generators": 179,
+  "BEATS": 0,
+  "failures": 0,
+  "independent_coverage": "MATCH",
+  "exact_domains": "MATCH",
+  "BEST_generators": 10,
+  "judge_sources": "UNCHANGED",
+  "prior_batches": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_task_artifact_bytes": 650884
+}
