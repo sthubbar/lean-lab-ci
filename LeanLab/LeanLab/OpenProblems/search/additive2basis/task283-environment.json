@@ -1,0 +1,14 @@
+{
+  "start_utc": "2026-11-04 09:06:26 UTC",
+  "initial_main": "e80459440",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "ortools": "9.15.6755",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "gcc": "gcc (Debian 14.2.0-19) 14.2.0",
+  "solver_workers": 1,
+  "worker_virtual_memory_bytes": 9663676416,
+  "worker_core_dump_limit": 0,
+  "model": "GPT-6 Codex",
+  "reasoning_effort": "not exposed by runtime",
+  "lean_builds": "none under program search override"
+}
