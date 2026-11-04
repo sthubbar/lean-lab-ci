@@ -8,13 +8,14 @@ No L2 assumption is added.
 -/
 import LeanLab.Tolev2009.Decomp83
 
-open Finset Real
+open Finset Real Complex
 
 namespace LeanLab.Tolev2009.Decomp286b
 
 open LeanLab.Tolev2009 LeanLab.Tolev2009.Faithful
 open LeanLab.Tolev2009.FinalReduction LeanLab.Tolev2009.Displays14to16
 open LeanLab.Tolev2009.Dyadic
+open Complex
 
 /-- The number of ordered factorizations into five positive integers, tau5 in display 53. -/
 noncomputable def tau5 (n : ℕ) : ℕ := (ArithmeticFunction.zeta ^ 5) n
@@ -39,6 +40,96 @@ theorem bilinear_nonzero :
     bilinear (fun k => if k = 1 then 1 else 0) 1 1 6 0 3 (1 / 2) 1 3 6
       (fun m => if m = 1 then 1 else 0) (fun _ => 1) = 3 := by
   norm_num [bilinear, L2Bound.weight, ee_zero, Finset.sum_Ioc_succ_top]
+
+/-- Bound the norm of the bilinear form by the sum of termwise norms. -/
+lemma bilinear_norm_le_sum (lam : ℕ → ℝ) (l₃ K N : ℕ) (α x M M₁ H H₁ : ℝ)
+    (a b : ℕ → ℂ) :
+    ‖bilinear lam l₃ K N α x M M₁ H H₁ a b‖ ≤
+      ∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊,
+        ‖(if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then
+          a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ)
+        else 0 : ℂ)‖ := by
+  simp only [bilinear]
+  have h₁ : ‖∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊, (if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) else 0 : ℂ)‖ ≤ ∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ‖∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊, (if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) else 0 : ℂ)‖ := by
+    exact norm_sum_le _ _
+  have h₂ : ∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ‖∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊, (if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) else 0 : ℂ)‖ ≤ ∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊, ‖(if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) else 0 : ℂ)‖ := by
+    apply Finset.sum_le_sum
+    intro m hm
+    exact norm_sum_le _ _
+  calc
+    ‖∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊, (if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) else 0 : ℂ)‖ ≤ ∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ‖∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊, (if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) else 0 : ℂ)‖ := h₁
+    _ ≤ ∑ m ∈ Ioc ⌊M⌋₊ ⌊M₁⌋₊, ∑ l ∈ Ioc ⌊H⌋₊ ⌊H₁⌋₊, ‖(if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) else 0 : ℂ)‖ := h₂
+
+/-- If the condition in the bilinear form is false, the term is zero. -/
+lemma bilinear_term_zero {lam : ℕ → ℝ} {l₃ K N : ℕ} {α x M M₁ H H₁ : ℝ}
+    {a b : ℕ → ℂ} {m l : ℕ}
+    (h : ¬(x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N)) :
+    (if x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N then
+      a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ)
+    else 0 : ℂ) = 0 := by
+  split_ifs <;> simp_all
+
+/-- The norm of the exponential factor ee is 1. -/
+lemma norm_ee_one (x : ℝ) : ‖(ee x : ℂ)‖ = 1 := by
+  rw [norm_ee]
+
+/-- The weight function is bounded by K when lambda is bounded by 1. -/
+lemma weight_bound (lam : ℕ → ℝ) (l₃ K n : ℕ) (hlam : ∀ k, |lam k| ≤ 1) :
+    |L2Bound.weight lam l₃ K n| ≤ K := by
+  exact L2Bound.weight_le lam l₃ K n hlam
+
+/-- Bound the norm of a single term in the bilinear sum when the condition holds. -/
+lemma bilinear_term_bound {lam : ℕ → ℝ} {l₃ K N : ℕ} {α x : ℝ} {a b : ℕ → ℂ} {m l : ℕ}
+    (hcond : x < (m * l : ℕ) ∧ (m * l : ℕ) ≤ 2 * x ∧ m * l ≤ N)
+    (ha : ‖a m‖ ≤ (tau5 m : ℝ) * Real.log N)
+    (hb : ‖b l‖ ≤ (tau5 l : ℝ) * Real.log N)
+    (hlam : ∀ k, |lam k| ≤ 1) :
+    ‖(a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) : ℂ)‖ ≤
+      (tau5 m : ℝ) * Real.log N * (tau5 l : ℝ) * Real.log N * (K : ℝ) := by
+  have h₁ : ‖(a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) : ℂ)‖ =
+      ‖a m‖ * ‖b l‖ * ‖(ee (α * (m * l : ℕ)) : ℂ)‖ * ‖(L2Bound.weight lam l₃ K (m * l) : ℂ)‖ := by
+    calc
+      ‖(a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ) : ℂ)‖ =
+          ‖a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ)‖ := by rfl
+      _ = ‖a m‖ * ‖b l‖ * ‖(ee (α * (m * l : ℕ)) : ℂ)‖ * ‖(L2Bound.weight lam l₃ K (m * l) : ℂ)‖ := by
+        calc
+          ‖a m * b l * ee (α * (m * l : ℕ)) * (L2Bound.weight lam l₃ K (m * l) : ℂ)‖ =
+              ‖a m * b l‖ * ‖ee (α * (m * l : ℕ))‖ * ‖(L2Bound.weight lam l₃ K (m * l) : ℂ)‖ := by
+            simp [norm_mul, norm_mul]
+          _ = ‖a m‖ * ‖b l‖ * ‖ee (α * (m * l : ℕ))‖ * ‖(L2Bound.weight lam l₃ K (m * l) : ℂ)‖ := by
+            simp [norm_mul]
+          _ = ‖a m‖ * ‖b l‖ * ‖(ee (α * (m * l : ℕ)) : ℂ)‖ * ‖(L2Bound.weight lam l₃ K (m * l) : ℂ)‖ := by norm_cast
+  rw [h₁]
+  have h₂ : ‖(ee (α * (m * l : ℕ)) : ℂ)‖ = 1 := by
+    rw [norm_ee]
+  rw [h₂]
+  have h₃ : ‖(L2Bound.weight lam l₃ K (m * l) : ℂ)‖ = |L2Bound.weight lam l₃ K (m * l)| := by
+    simp [Complex.norm_eq_abs, Complex.abs, Complex.normSq, Real.sqrt_eq_iff_sq_eq]
+    <;> norm_cast
+    <;> simp [Real.sqrt_eq_iff_sq_eq]
+    <;> ring_nf
+    <;> norm_num
+    <;> simp_all [abs_of_nonneg, abs_of_nonpos, le_of_lt]
+    <;> norm_num
+    <;> linarith
+  rw [h₃]
+  have h₄ : |L2Bound.weight lam l₃ K (m * l)| ≤ K := by
+    exact weight_bound lam l₃ K (m * l) hlam
+  have h₅ : 0 ≤ (tau5 m : ℝ) * Real.log N := by positivity
+  have h₆ : 0 ≤ (tau5 l : ℝ) * Real.log N := by positivity
+  have h₇ : 0 ≤ (K : ℝ) := by positivity
+  have h₈ : 0 ≤ ‖a m‖ := by positivity
+  have h₉ : 0 ≤ ‖b l‖ := by positivity
+  have h₁₀ : ‖a m‖ ≤ (tau5 m : ℝ) * Real.log N := ha
+  have h₁₁ : ‖b l‖ ≤ (tau5 l : ℝ) * Real.log N := hb
+  calc
+    ‖a m‖ * ‖b l‖ * (1 : ℝ) * |L2Bound.weight lam l₃ K (m * l)| ≤
+        ‖a m‖ * ‖b l‖ * (1 : ℝ) * (K : ℝ) := by
+      gcongr <;> norm_cast <;> linarith
+    _ = ‖a m‖ * ‖b l‖ * (K : ℝ) := by ring
+    _ ≤ ((tau5 m : ℝ) * Real.log N) * ((tau5 l : ℝ) * Real.log N) * (K : ℝ) := by
+      gcongr <;> norm_num <;> linarith
+    _ = (tau5 m : ℝ) * Real.log N * (tau5 l : ℝ) * Real.log N * (K : ℝ) := by ring
 
 /-- LEAF. Tolev 1999 page 86 displays 64 to 66, the two Type I estimates.
 Adapted to Tolev 2009 display 12 with a fixed residue and the smaller modulus cutoff.
