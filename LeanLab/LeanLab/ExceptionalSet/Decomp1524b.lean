@@ -240,6 +240,553 @@ theorem geom_sum_le (N : ℕ) {η : ℝ} (hη0 : 0 < |η|) (hη : |η| ≤ 1 / 2
   rw [hd] at hh
   exact hh
 
+open scoped FourierTransform RealInnerProductSpace ENNReal
+/-! ### Self-adjointness of the Fourier integral on `ℝ` -/
+
+/-- `∫ 𝓕f · conj g = ∫ f · conj (𝓕⁻ g)` for integrable `f`, `g`: the Fourier integral is
+self-adjoint.  A direct instantiation of `VectorFourier.integral_sesq_fourierIntegral_eq_neg_flip`. -/
+theorem fourier_sesq_swap (f g : ℝ → ℂ) (hf : Integrable f) (hg : Integrable g) :
+    ∫ ξ, inner ℂ (𝓕 f ξ) (g ξ) = ∫ x, inner ℂ (f x) (𝓕⁻ g x) := by
+  have h := VectorFourier.integral_sesq_fourierIntegral_eq_neg_flip
+    (V := ℝ) (W := ℝ) (f := f) (g := g) (μ := volume) (ν := volume)
+    (e := Real.fourierChar) (L := innerₗ ℝ) (innerSL ℂ) continuous_fourierChar
+    continuous_inner hf hg
+  rw [show (-(innerₗ ℝ).flip : ℝ →ₗ[ℝ] ℝ →ₗ[ℝ] ℝ) = -innerₗ ℝ from by ext x; simp] at h
+  exact h
+
+/-! ### Inner products of `Lp` classes -/
+
+/-- The inner product of two `Lp` classes is the integral of the inner products of their
+representatives. -/
+theorem lp_inner_toLp {f g : ℝ → ℂ} (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
+    inner ℂ (hf.toLp f) (hg.toLp g) = ∫ x, inner ℂ (f x) (g x) := by
+  rw [MeasureTheory.L2.inner_def]
+  refine integral_congr_ae ?_
+  filter_upwards [MemLp.coeFn_toLp hf, MemLp.coeFn_toLp hg] with x h1 h2
+  rw [h1, h2]
+
+/-- Plancherel's identity in inner-product form, with a Schwartz test function: for integrable
+`f` and a Schwartz `φ`, `∫ ⟪𝓕f, 𝓕φ⟫ = ∫ ⟪f, φ⟫`. -/
+theorem schwartz_sesq (f : ℝ → ℂ) (hf : Integrable f) (φ : SchwartzMap ℝ ℂ) :
+    ∫ ξ, inner ℂ (𝓕 f ξ) (((𝓕 φ : SchwartzMap ℝ ℂ)) ξ) =
+      ∫ x, inner ℂ (f x) (φ x) := by
+  have hinv : (𝓕⁻ (((𝓕 φ : SchwartzMap ℝ ℂ)) : ℝ → ℂ)) = ⇑φ := by
+    rw [← SchwartzMap.fourierInv_coe, FourierTransform.fourierInv_fourier_eq]
+  have h := fourier_sesq_swap f (((𝓕 φ : SchwartzMap ℝ ℂ)) : ℝ → ℂ) hf
+    ((𝓕 φ : SchwartzMap ℝ ℂ).integrable)
+  rwa [hinv] at h
+
+/-- The L² form of `schwartz_sesq`. -/
+theorem schwartz_lp_inner (f : ℝ → ℂ) (hf : Integrable f) (hF : MemLp (𝓕 f) 2 volume)
+    (φ : SchwartzMap ℝ ℂ) :
+    inner ℂ (hF.toLp (𝓕 f)) ((𝓕 φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume) =
+      ∫ x, inner ℂ (f x) (φ x) := by
+  rw [show (𝓕 φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume
+      = ((𝓕 φ : SchwartzMap ℝ ℂ).memLp 2 volume).toLp (((𝓕 φ : SchwartzMap ℝ ℂ)) : ℝ → ℂ)
+      from rfl]
+  rw [lp_inner_toLp hF ((𝓕 φ : SchwartzMap ℝ ℂ).memLp 2 volume)]
+  exact schwartz_sesq f hf φ
+
+/-! ### Density of the Schwartz Fourier classes in `L²` -/
+
+/-- The images of the Schwartz classes under the L² Fourier transform are dense. -/
+theorem denseRange_schwartz_fourier :
+    DenseRange (fun φ : SchwartzMap ℝ ℂ => (𝓕 φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume) := by
+  have hd : DenseRange (fun φ : SchwartzMap ℝ ℂ => φ.toLp (2 : ℝ≥0∞) volume) :=
+    SchwartzMap.denseRange_toLpCLM (E := ℝ) (F := ℂ) (p := 2) ENNReal.ofNat_ne_top
+  intro h
+  have hcl : 𝓕⁻ h ∈ closure (Set.range (fun φ : SchwartzMap ℝ ℂ => φ.toLp (2 : ℝ≥0∞) volume)) :=
+    hd _
+  have h1 : h ∈ (𝓕 : Lp ℂ 2 volume → Lp ℂ 2 volume) ''
+      closure (Set.range (fun φ : SchwartzMap ℝ ℂ => φ.toLp (2 : ℝ≥0∞) volume)) :=
+    ⟨𝓕⁻ h, hcl, by simp⟩
+  refine closure_mono ?_
+    (image_closure_subset_closure_image (s := Set.range (fun φ : SchwartzMap ℝ ℂ =>
+      φ.toLp (2 : ℝ≥0∞) volume))
+      (f := (𝓕 : Lp ℂ 2 volume → Lp ℂ 2 volume)) FourierTransform.continuous_fourier h1)
+  rintro a ⟨F, hF, rfl⟩
+  obtain ⟨ψ, rfl⟩ := hF
+  exact ⟨ψ, (SchwartzMap.toLp_fourier_eq ψ).symm⟩
+
+/-! ### From the dense family to a norm bound -/
+
+/-- A bound on the inner products against the Schwartz Fourier classes bounds the norm. -/
+theorem norm_le_of_schwartz_fourier (x : Lp ℂ 2 volume) (C : ℝ) (hC : 0 ≤ C)
+    (h : ∀ φ : SchwartzMap ℝ ℂ,
+      ‖inner ℂ x ((𝓕 φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume)‖ ≤
+        C * ‖(𝓕 φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume‖) :
+    ‖x‖ ≤ C := by
+  classical
+  have hclosed : IsClosed {y : Lp ℂ 2 volume | ‖inner ℂ x y‖ ≤ C * ‖y‖} :=
+    isClosed_le ((continuous_const.inner continuous_id).norm) (continuous_const.mul continuous_norm)
+  have hsub : Set.range (fun φ : SchwartzMap ℝ ℂ =>
+      (𝓕 φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume) ⊆
+      {y : Lp ℂ 2 volume | ‖inner ℂ x y‖ ≤ C * ‖y‖} := by
+    rintro _ ⟨φ, rfl⟩
+    exact h φ
+  have huniv : (Set.univ : Set (Lp ℂ 2 volume)) ⊆
+      {y : Lp ℂ 2 volume | ‖inner ℂ x y‖ ≤ C * ‖y‖} := by
+    intro y _
+    exact closure_minimal hsub hclosed (denseRange_schwartz_fourier y)
+  have hall : ∀ y : Lp ℂ 2 volume, ‖inner ℂ x y‖ ≤ C * ‖y‖ :=
+    fun y => huniv (Set.mem_univ y)
+  have hxx := hall x
+  have hsq : ‖inner ℂ x x‖ = ‖x‖ ^ 2 := by
+    rw [← inner_self_re_eq_norm]
+    exact (norm_sq_eq_re_inner x).symm
+  rw [hsq] at hxx
+  have hxx2 : ‖x‖ ^ 2 ≤ C * ‖x‖ := hxx
+  rcases eq_or_lt_of_le (norm_nonneg x) with h0 | h0
+  · rw [← h0]; exact hC
+  · refine le_of_mul_le_mul_right ?_ h0
+    rwa [sq] at hxx2
+
+
+/-- `‖f.toLp 2‖² = ∫ ‖f‖²`. -/
+theorem norm_toLp_sq (f : ℝ → ℂ) (hf : MemLp f 2 volume) :
+    ‖hf.toLp f‖ ^ 2 = ∫ x, ‖f x‖ ^ 2 := by
+  have key : inner ℂ (hf.toLp f) (hf.toLp f) = ((∫ x, ‖f x‖ ^ 2 : ℝ) : ℂ) := by
+    rw [lp_inner_toLp hf hf]
+    have hpt : ∀ x : ℝ, inner ℂ (f x) (f x) = ((‖f x‖ ^ 2 : ℝ) : ℂ) := by
+      intro x
+      rw [inner_self_eq_norm_sq_to_K]
+      norm_cast
+    simp only [hpt]
+    exact integral_ofReal
+  have h := congrArg RCLike.re key
+  rw [← norm_sq_eq_re_inner] at h
+  simpa using h
+
+/-- Plancherel's inequality for integrable `f` with `𝓕 f ∈ L²`. -/
+theorem integral_norm_sq_fourier_le (f : ℝ → ℂ) (hf : Integrable f) (hf2 : MemLp f 2 volume)
+    (hF : MemLp (𝓕 f) 2 volume) :
+    ∫ x, ‖𝓕 f x‖ ^ 2 ≤ ∫ x, ‖f x‖ ^ 2 := by
+  have hbound : ‖hF.toLp (𝓕 f)‖ ≤ ‖hf2.toLp f‖ := by
+    refine norm_le_of_schwartz_fourier _ _ (norm_nonneg _) ?_
+    intro φ
+    have h1 : inner ℂ (hF.toLp (𝓕 f)) ((𝓕 φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume)
+        = ∫ x, inner ℂ (f x) (φ x) := schwartz_lp_inner f hf hF φ
+    have h2 : inner ℂ (hf2.toLp f) ((φ : SchwartzMap ℝ ℂ).toLp (2 : ℝ≥0∞) volume)
+        = ∫ x, inner ℂ (f x) (φ x) := lp_inner_toLp hf2 (φ.memLp 2 volume)
+    rw [h1, ← h2]
+    refine (norm_inner_le_norm _ _).trans (le_of_eq ?_)
+    rw [SchwartzMap.norm_fourier_toL2_eq]
+  calc ∫ x, ‖𝓕 f x‖ ^ 2 = ‖hF.toLp (𝓕 f)‖ ^ 2 := (norm_toLp_sq _ hF).symm
+    _ ≤ ‖hf2.toLp f‖ ^ 2 := by nlinarith [hbound, norm_nonneg (hF.toLp (𝓕 f))]
+    _ = ∫ x, ‖f x‖ ^ 2 := norm_toLp_sq _ hf2
+
+
+/-! ### The moving-window step function
+
+`A(x) = Σ_{n ∈ s, x < n ≤ x + w} a n`, a finite sum of indicators of the windows
+`Ico (n - w) n`.  This is the function whose `L²` norm appears on the right-hand side of
+Gallagher's lemma. -/
+
+/-- The moving window step function: `A(x) = Σ_{n ∈ s, x < n ≤ x + w} a n`. -/
+noncomputable def win (w : ℝ) (a : ℤ → ℂ) (s : Finset ℤ) : ℝ → ℂ :=
+  fun x => ∑ n ∈ s.filter (fun n : ℤ => x < (n : ℝ) ∧ (n : ℝ) ≤ x + w), a n
+
+/-- Indicactor form of the window sum. -/
+theorem win_eq_indicator (x : ℝ) : win w a s x =
+    ∑ n ∈ s, a n * (Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator (fun _ => (1 : ℂ)) x := by
+  unfold win
+  rw [Finset.sum_filter]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  by_cases h : x < (n : ℝ) ∧ (n : ℝ) ≤ x + w
+  · have hm : x ∈ Set.Ico ((n : ℝ) - w) (n : ℝ) := by
+      rw [Set.mem_Ico]; constructor <;> linarith [h.1, h.2]
+    rw [Set.indicator_of_mem hm]
+    simp [h]
+  · have hm : x ∉ Set.Ico ((n : ℝ) - w) (n : ℝ) := by
+      rw [Set.mem_Ico]
+      intro hx
+      exact h ⟨hx.2, by linarith [hx.1]⟩
+    rw [Set.indicator_of_notMem hm]
+    simp [h]
+
+theorem measurable_win : Measurable (win w a s) := by
+  rw [show win w a s = fun x => ∑ n ∈ s,
+      a n * (Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator (fun _ => (1 : ℂ)) x from
+    funext fun x => win_eq_indicator x]
+  refine Finset.measurable_sum _ fun n _ => ?_
+  exact measurable_const.mul (measurable_const.indicator measurableSet_Ico)
+
+theorem norm_win_le (x : ℝ) : ‖win w a s x‖ ≤ ∑ n ∈ s, ‖a n‖ := by
+  rw [win_eq_indicator]
+  refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun n _ => ?_)
+  rw [norm_mul]
+  refine mul_le_of_le_one_right (norm_nonneg _) ?_
+  by_cases hx : x ∈ Set.Ico ((n : ℝ) - w) (n : ℝ)
+  · rw [Set.indicator_of_mem hx]; simp
+  · rw [Set.indicator_of_notMem hx]; simp
+
+theorem memLp_win : MemLp (win w a s) 2 volume := by
+  rw [show win w a s = fun x => ∑ n ∈ s,
+      a n * (Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator (fun _ => (1 : ℂ)) x from
+    funext fun x => win_eq_indicator x]
+  refine memLp_finsetSum s fun n _ => ?_
+  have h1 : MemLp ((Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator (fun _ => (1 : ℂ))) 2 volume :=
+    memLp_indicator_const 2 measurableSet_Ico.nullMeasurableSet (1 : ℂ)
+      (Or.inr (by rw [Real.volume_Ico]; exact ENNReal.ofReal_ne_top))
+  exact h1.const_mul (a n)
+
+theorem integrable_win : Integrable (win w a s) := by
+  rw [show win w a s = fun x => ∑ n ∈ s,
+      a n * (Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator (fun _ => (1 : ℂ)) x from
+    funext fun x => win_eq_indicator x]
+  refine integrable_finsetSum s fun n _ => ?_
+  have h1 : Integrable ((Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator (fun _ => (1 : ℂ))) :=
+    (integrable_indicator_iff measurableSet_Ico).mpr
+      (integrableOn_const (by rw [Real.volume_Ico]; exact ENNReal.ofReal_ne_top))
+  exact h1.const_mul (a n)
+
+/-- The general exponential integral over a half-open interval. -/
+theorem integral_Ico_exp_mul {c₀ : ℂ} (hc₀ : c₀ ≠ 0) {a b : ℝ} (hab : a ≤ b) :
+    ∫ x in Set.Ico a b, Complex.exp (c₀ * (x : ℂ)) =
+      (Complex.exp (c₀ * (b : ℂ)) - Complex.exp (c₀ * (a : ℂ))) / c₀ := by
+  rw [integral_Ico_eq_integral_Ioc, ← intervalIntegral.integral_of_le hab]
+  have hderiv : ∀ x ∈ Set.uIcc a b,
+      HasDerivAt (fun y : ℝ => Complex.exp (c₀ * (y : ℂ)) / c₀)
+        (Complex.exp (c₀ * (x : ℂ))) x := by
+    intro x _
+    have hlin : HasDerivAt (fun y : ℝ => c₀ * (y : ℂ)) c₀ x := by
+      simpa using Complex.ofRealCLM.hasDerivAt.const_mul c₀
+    have hexp : HasDerivAt (fun y : ℝ => Complex.exp (c₀ * (y : ℂ)))
+        (Complex.exp (c₀ * (x : ℂ)) * c₀) x :=
+      (Complex.hasDerivAt_exp (c₀ * (x : ℂ))).comp x hlin
+    have h := hexp.div_const c₀
+    convert h using 1
+    field_simp
+  have hint : IntervalIntegrable (fun x : ℝ => Complex.exp (c₀ * (x : ℂ))) volume a b :=
+    (by fun_prop : Continuous fun x : ℝ => Complex.exp (c₀ * (x : ℂ))).intervalIntegrable a b
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint]
+  field_simp
+
+/-- The integral of `e (x t)` over one window `Ico (c - w) c`. -/
+theorem integral_window_e {t : ℝ} (ht : t ≠ 0) {w c : ℝ} (hw : 0 < w) :
+    ∫ x in Set.Ico (c - w) c, Decomp1524a.e (x * t)
+      = (Decomp1524a.e (c * t) - Decomp1524a.e ((c - w) * t)) / (2 * π * I * (t : ℂ)) := by
+  have ht' : ((t : ℝ) : ℂ) ≠ 0 := by exact_mod_cast ht
+  have hpi : ((π : ℝ) : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  have hc₀ : ((2 : ℂ) * π * I * (t : ℂ)) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero (mul_ne_zero two_ne_zero hpi) Complex.I_ne_zero) ht'
+  have hmain := integral_Ico_exp_mul (c₀ := (2 : ℂ) * π * I * (t : ℂ)) hc₀
+    (a := c - w) (b := c) (by linarith)
+  have hL : ∫ x in Set.Ico (c - w) c, Decomp1524a.e (x * t)
+      = ∫ x in Set.Ico (c - w) c, Complex.exp (((2 : ℂ) * π * I * (t : ℂ)) * (x : ℂ)) := by
+    refine setIntegral_congr_fun measurableSet_Ico fun x _ => ?_
+    unfold Decomp1524a.e
+    congr 1
+    push_cast
+    ring
+  rw [hL, hmain]
+  unfold Decomp1524a.e
+  congr 2 <;> push_cast <;> ring
+
+
+/-! ### Additivity of `e` -/
+
+theorem e_add (x y : ℝ) : Decomp1524a.e (x + y) =
+    Decomp1524a.e x * Decomp1524a.e y := by
+  unfold Decomp1524a.e
+  rw [← Complex.exp_add]
+  congr 1
+  push_cast
+  ring
+
+theorem e_neg (x : ℝ) : Decomp1524a.e (-x) = (Decomp1524a.e x)⁻¹ := by
+  refine eq_inv_of_mul_eq_one_right ?_
+  rw [← e_add, add_neg_cancel]
+  unfold Decomp1524a.e
+  simp
+
+theorem e_sub (x y : ℝ) : Decomp1524a.e (x - y) =
+    Decomp1524a.e x * (Decomp1524a.e y)⁻¹ := by
+  rw [sub_eq_add_neg, e_add, e_neg]
+
+theorem norm_e (x : ℝ) : ‖Decomp1524a.e x‖ = 1 := by
+  unfold Decomp1524a.e
+  rw [Complex.norm_exp]
+  simp [Complex.ofReal_re]
+
+/-! ### The Fourier character as a complex number -/
+
+theorem fourierChar_smul (y : ℝ) (z : ℂ) :
+    Real.fourierChar y • z = Decomp1524a.e y * z := by
+  have harg : (↑(2 * π * y) * Complex.I) = 2 * π * Complex.I * (y : ℂ) := by
+    push_cast; ring
+  rw [Circle.smul_def, Real.fourierChar_apply, harg, smul_eq_mul]
+  unfold Decomp1524a.e
+  rfl
+
+/-- The phase factor of the inverse Fourier transform is `e (v * t)`. -/
+theorem fourierInv_integrand (f : ℝ → ℂ) (t v : ℝ) :
+    Real.fourierChar ⟪v, t⟫ • f v = Decomp1524a.e (v * t) * f v := by
+  rw [fourierChar_smul, Real.inner_apply]
+
+
+/-! ### The inverse Fourier transform of the window step function -/
+
+theorem continuous_e_mul (t : ℝ) : Continuous fun v : ℝ => Decomp1524a.e (v * t) := by
+  unfold Decomp1524a.e
+  fun_prop
+
+theorem integrable_indicator_phase (t : ℝ) (c : ℂ) (n : ℤ) :
+    Integrable ((Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator
+      (fun v : ℝ => Decomp1524a.e (v * t) * c)) := by
+  refine Integrable.mono'
+    (g := (Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator (fun _ => ‖c‖)) ?_ ?_ ?_
+  · exact (integrable_indicator_iff measurableSet_Ico).mpr
+      (integrableOn_const (by rw [Real.volume_Ico]; exact ENNReal.ofReal_ne_top))
+  · exact (((continuous_e_mul t).measurable.mul measurable_const).indicator
+      measurableSet_Ico).aestronglyMeasurable
+  · refine Filter.Eventually.of_forall fun v => ?_
+    by_cases hv : v ∈ Set.Ico ((n : ℝ) - w) (n : ℝ)
+    · rw [Set.indicator_of_mem hv, Set.indicator_of_mem hv, norm_mul, norm_e, one_mul]
+    · rw [Set.indicator_of_notMem hv, Set.indicator_of_notMem hv, norm_zero]
+
+theorem fourierInv_win_eq {t : ℝ} (ht : t ≠ 0) (hw : 0 < w) :
+    𝓕⁻ (win w a s) t =
+      ((1 - Decomp1524a.e (-(w * t))) / (2 * π * I * (t : ℂ))) * Decomp1524a.trig s a t := by
+  rw [Real.fourierInv_eq]
+  have h1 : ∀ v : ℝ, Real.fourierChar ⟪v, t⟫ • win w a s v
+      = Decomp1524a.e (v * t) * win w a s v := fun v => fourierInv_integrand _ t v
+  simp_rw [h1]
+  have h2 : ∀ v : ℝ, Decomp1524a.e (v * t) * win w a s v
+      = ∑ n ∈ s, (Set.Ico ((n : ℝ) - w) (n : ℝ)).indicator
+          (fun v => Decomp1524a.e (v * t) * a n) v := by
+    intro v
+    rw [win_eq_indicator, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    by_cases hv : v ∈ Set.Ico ((n : ℝ) - w) (n : ℝ)
+    · rw [Set.indicator_of_mem hv, Set.indicator_of_mem hv]; ring
+    · rw [Set.indicator_of_notMem hv, Set.indicator_of_notMem hv]; ring
+  simp_rw [h2]
+  rw [integral_finsetSum]
+  · rw [show Decomp1524a.trig s a t
+        = ∑ n ∈ s, a n * Decomp1524a.e ((n : ℝ) * t) from rfl, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    have hwt : ((n : ℝ) - w) * t = (n : ℝ) * t + (-(w * t)) := by ring
+    rw [integral_indicator measurableSet_Ico, integral_mul_const,
+      integral_window_e (w := w) ht hw, hwt, e_add]
+    field_simp
+  · intro n _
+    exact integrable_indicator_phase t (a n) n
+
+
+/-! ### Bounds on the window transform -/
+
+theorem norm_trig_le (t : ℝ) : ‖Decomp1524a.trig s a t‖ ≤ ∑ n ∈ s, ‖a n‖ := by
+  refine (norm_sum_le _ _).trans (le_of_eq ?_)
+  refine Finset.sum_congr rfl fun n _ => ?_
+  rw [norm_mul, norm_e, mul_one]
+
+theorem norm_sub_one_sq {z : ℂ} (hz : ‖z‖ = 1) : ‖z - 1‖ ^ 2 = 2 - 2 * z.re := by
+  rw [← Complex.normSq_eq_norm_sq, Complex.normSq_sub, Complex.normSq_eq_norm_sq, hz]
+  simp only [Complex.normSq_one, map_one, mul_one, Complex.sub_re, Complex.one_re]
+  ring
+
+theorem e_eq_exp (y : ℝ) : Decomp1524a.e y = Complex.exp ((2 * π * y : ℝ) * Complex.I) := by
+  unfold Decomp1524a.e
+  congr 1
+  push_cast
+  ring
+
+/-- `‖1 - e y‖ ≤ 2π|y|`. -/
+theorem norm_one_sub_e_le (y : ℝ) :
+    ‖(1 : ℂ) - Decomp1524a.e y‖ ≤ 2 * π * |y| := by
+  have hsq : ‖(1 : ℂ) - Decomp1524a.e y‖ ^ 2 = 2 - 2 * Real.cos (2 * π * y) := by
+    rw [norm_sub_rev, norm_sub_one_sq (norm_e y), e_eq_exp, Complex.exp_ofReal_mul_I_re]
+  have hcos : 2 - 2 * Real.cos (2 * π * y) ≤ (2 * π * y) ^ 2 := by
+    have h := Real.one_sub_sq_div_two_le_cos (x := 2 * π * y)
+    nlinarith [h]
+  have h2 : ‖(1 : ℂ) - Decomp1524a.e y‖ ^ 2 ≤ (2 * π * |y|) ^ 2 := by
+    rw [hsq]
+    refine hcos.trans (le_of_eq ?_)
+    rw [mul_pow, mul_pow, mul_pow, sq_abs]
+    ring
+  have hc : (0:ℝ) ≤ 2 * π * |y| := by positivity
+  calc ‖(1 : ℂ) - Decomp1524a.e y‖ = Real.sqrt (‖(1 : ℂ) - Decomp1524a.e y‖ ^ 2) :=
+        (Real.sqrt_sq (norm_nonneg _)).symm
+    _ ≤ Real.sqrt ((2 * π * |y|) ^ 2) := Real.sqrt_le_sqrt h2
+    _ = 2 * π * |y| := Real.sqrt_sq hc
+
+/-- `‖1 - e y‖ ≤ 2`. -/
+theorem norm_one_sub_e_le_two (y : ℝ) : ‖(1 : ℂ) - Decomp1524a.e y‖ ≤ 2 := by
+  refine (norm_sub_le _ _).trans ?_
+  rw [norm_e]
+  norm_num
+
+theorem norm_den (t : ℝ) : ‖((2 : ℂ) * π * I * (t : ℂ))‖ = 2 * π * |t| := by
+  rw [norm_mul, norm_mul, norm_mul, Complex.norm_real, Complex.norm_I, Real.norm_eq_abs,
+    Complex.norm_real, Real.norm_eq_abs]
+  have hπ : (0:ℝ) < π := Real.pi_pos
+  rw [abs_of_pos hπ]
+  have : ‖(2 : ℂ)‖ = 2 := by norm_num
+  rw [this]; ring
+
+/-- The phase factor of `𝓕⁻ A` times `1 + π w |t|` is bounded by `2w`. -/
+theorem norm_phase_mul_le {t : ℝ} (ht : t ≠ 0) (hw : 0 < w) :
+    ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ * (1 + π * w * |t|)
+      ≤ 2 * w := by
+  have hat : (0:ℝ) < |t| := abs_pos.mpr ht
+  have hden := norm_den t
+  rw [norm_div, hden]
+  rcases le_or_gt (π * w * |t|) 1 with hle | hgt
+  · have hnum : ‖(1 : ℂ) - Decomp1524a.e (-(w * t))‖ ≤ 2 * π * (w * |t|) := by
+      have h := norm_one_sub_e_le (-(w * t))
+      rwa [abs_neg, abs_mul, abs_of_pos hw] at h
+    have hdenpos : (0:ℝ) < 2 * π * |t| := by positivity
+    rw [div_mul_eq_mul_div, div_le_iff₀ hdenpos]
+    have h1 : ‖(1 : ℂ) - Decomp1524a.e (-(w * t))‖ * (1 + π * w * |t|) ≤
+        (2 * π * (w * |t|)) * 2 :=
+      mul_le_mul hnum (by linarith) (by positivity) (by positivity)
+    nlinarith [h1, Real.pi_pos, hat, hw]
+  · have hnum : ‖(1 : ℂ) - Decomp1524a.e (-(w * t))‖ ≤ 2 := norm_one_sub_e_le_two _
+    have hdenpos : (0:ℝ) < 2 * π * |t| := by positivity
+    rw [div_mul_eq_mul_div, div_le_iff₀ hdenpos]
+    have h1 : ‖(1 : ℂ) - Decomp1524a.e (-(w * t))‖ * (1 + π * w * |t|) ≤ 2 * (1 + π * w * |t|) :=
+      mul_le_mul hnum (by linarith) (by positivity) (by norm_num)
+    nlinarith [h1, hgt, Real.pi_pos, hat, hw]
+
+
+theorem continuous_fourierInv_win : Continuous (𝓕⁻ (win w a s)) :=
+  VectorFourier.fourierIntegral_continuous (V := ℝ) (W := ℝ) (f := win w a s)
+    (e := Real.fourierChar) (L := -innerₗ ℝ) (μ := volume)
+    Real.continuous_fourierChar continuous_inner.neg integrable_win
+
+/-- The transform of the window step function is `L²`. -/
+theorem memLp_fourierInv_win (hw : 0 < w) : MemLp (𝓕⁻ (win w a s)) 2 volume := by
+  classical
+  set K := ∑ n ∈ s, ‖a n‖ with hKdef
+  have hK : 0 ≤ K := Finset.sum_nonneg fun _ _ => norm_nonneg _
+  set m := min 1 (π * w) with hmdef
+  have hm0 : 0 < m := lt_min one_pos (by positivity)
+  have hm1 : m ≤ 1 := min_le_left _ _
+  have hm2 : m ≤ π * w := min_le_right _ _
+  have hmeas : AEStronglyMeasurable (𝓕⁻ (win w a s)) volume :=
+    continuous_fourierInv_win.aestronglyMeasurable
+  refine (memLp_two_iff_integrable_sq_norm hmeas).mpr ?_
+  refine Integrable.mono'
+    (g := fun t : ℝ => (2 * w * K) ^ 2 / m ^ 2 * (1 + t ^ 2)⁻¹) ?_ ?_ ?_
+  · have h : Integrable fun x : ℝ => (1 + x ^ 2)⁻¹ := integrable_inv_one_add_sq
+    exact h.const_mul _
+  · exact hmeas.norm.pow 2
+  · have hne : ∀ᵐ t : ℝ, t ≠ 0 := by
+      rw [MeasureTheory.ae_iff]; simp
+    filter_upwards [hne] with t ht
+    have hb : ‖𝓕⁻ (win w a s) t‖ * (1 + π * w * |t|) ≤ 2 * w * K := by
+      rw [fourierInv_win_eq ht hw, norm_mul]
+      have h1 : ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ *
+          (1 + π * w * |t|) ≤ 2 * w := norm_phase_mul_le ht hw
+      calc ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ *
+            ‖Decomp1524a.trig s a t‖ * (1 + π * w * |t|)
+          = (‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ *
+            (1 + π * w * |t|)) * ‖Decomp1524a.trig s a t‖ := by ring
+        _ ≤ (2 * w) * K :=
+          mul_le_mul h1 (norm_trig_le t) (norm_nonneg _) (by positivity)
+    have hmle : m * (1 + |t|) ≤ 1 + π * w * |t| := by
+      nlinarith [hm1, hm2, abs_nonneg t]
+    have hstep : m ^ 2 * (1 + t ^ 2) ≤ (1 + π * w * |t|) ^ 2 := by
+      have h1 : (m * (1 + |t|)) ^ 2 ≤ (1 + π * w * |t|) ^ 2 :=
+        pow_le_pow_left₀ (by positivity) hmle 2
+      have h2 : (1:ℝ) + t ^ 2 ≤ (1 + |t|) ^ 2 := by nlinarith [abs_nonneg t, sq_abs t]
+      nlinarith [h1, h2, hm0, sq_nonneg m, sq_nonneg (1 + |t|)]
+    have hD : ‖𝓕⁻ (win w a s) t‖ ^ 2 * (1 + π * w * |t|) ^ 2 ≤ (2 * w * K) ^ 2 := by
+      have h0 : (0:ℝ) ≤ ‖𝓕⁻ (win w a s) t‖ * (1 + π * w * |t|) := by positivity
+      calc ‖𝓕⁻ (win w a s) t‖ ^ 2 * (1 + π * w * |t|) ^ 2
+          = (‖𝓕⁻ (win w a s) t‖ * (1 + π * w * |t|)) ^ 2 := by ring
+        _ ≤ (2 * w * K) ^ 2 := pow_le_pow_left₀ h0 hb 2
+    have hgoal : ‖‖𝓕⁻ (win w a s) t‖ ^ 2‖ ≤ (2 * w * K) ^ 2 / m ^ 2 * (1 + t ^ 2)⁻¹ := by
+      rw [Real.norm_of_nonneg (by positivity)]
+      rw [show (2 * w * K) ^ 2 / m ^ 2 * (1 + t ^ 2)⁻¹
+          = (2 * w * K) ^ 2 / (m ^ 2 * (1 + t ^ 2)) from by field_simp]
+      rw [le_div_iff₀ (by positivity)]
+      nlinarith [hD, hstep, sq_nonneg ‖𝓕⁻ (win w a s) t‖]
+    exact hgoal
+
+
+/-! ### The pointwise bound `‖S(t)‖ ≤ πT ‖𝓕⁻A(t)‖` -/
+
+theorem continuous_trig : Continuous fun t : ℝ => Decomp1524a.trig s a t := by
+  unfold Decomp1524a.trig
+  refine continuous_finset_sum _ fun n _ => ?_
+  exact continuous_const.mul (by unfold Decomp1524a.e; fun_prop)
+
+theorem norm_one_sub_e_eq (y : ℝ) :
+    ‖(1 : ℂ) - Decomp1524a.e y‖ = 2 * |Real.sin (π * y)| := by
+  have hsq : ‖(1 : ℂ) - Decomp1524a.e y‖ ^ 2 = (2 * |Real.sin (π * y)|) ^ 2 := by
+    rw [norm_sub_rev, norm_sub_one_sq (norm_e y), e_eq_exp, Complex.exp_ofReal_mul_I_re]
+    have h := Real.cos_two_mul' (π * y)
+    rw [show (2 : ℝ) * (π * y) = 2 * π * y from by ring] at h
+    rw [h, mul_pow, sq_abs]
+    nlinarith [Real.sin_sq_add_cos_sq (π * y)]
+  have hc : (0:ℝ) ≤ 2 * |Real.sin (π * y)| := by positivity
+  calc ‖(1 : ℂ) - Decomp1524a.e y‖ = Real.sqrt (‖(1 : ℂ) - Decomp1524a.e y‖ ^ 2) :=
+        (Real.sqrt_sq (norm_nonneg _)).symm
+    _ = Real.sqrt ((2 * |Real.sin (π * y)|) ^ 2) := by rw [hsq]
+    _ = 2 * |Real.sin (π * y)| := Real.sqrt_sq hc
+
+theorem trig_le_phase {T t : ℝ} (hT : 0 < T) (ht : t ≠ 0) (htT : |t| ≤ T) :
+    ‖Decomp1524a.trig s a t‖ ≤ π * T * ‖𝓕⁻ (win (1 / (2 * T)) a s) t‖ := by
+  set w := 1 / (2 * T) with hwdef
+  have hw : (0:ℝ) < w := by positivity
+  have htT' : (0:ℝ) < |t| := abs_pos.mpr ht
+  have hu : π * (w * |t|) ≤ π / 2 := by
+    have he : π * (w * |t|) = π * |t| / (2 * T) := by
+      rw [hwdef]; field_simp
+    rw [he, div_le_iff₀ (by positivity : (0:ℝ) < 2 * T)]
+    nlinarith [htT, Real.pi_pos]
+  have hsin_low : 2 * w * |t| ≤ |Real.sin (π * (w * t))| := by
+    have h1 : |π * (w * t)| ≤ π / 2 := by
+      rw [abs_mul, abs_mul, abs_of_pos Real.pi_pos, abs_of_pos hw]
+      exact hu
+    have h2 := Real.mul_le_sin (abs_nonneg (π * (w * t))) h1
+    rw [← Real.abs_sin_eq_sin_abs_of_abs_le_pi (by linarith [h1, Real.pi_pos])] at h2
+    calc 2 * w * |t| = 2 / π * |π * (w * t)| := by
+          rw [abs_mul, abs_mul, abs_of_pos Real.pi_pos, abs_of_pos hw]
+          field_simp
+      _ ≤ |Real.sin (π * (w * t))| := h2
+  have hcval : ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖
+      = |Real.sin (π * (w * t))| / (π * |t|) := by
+    rw [norm_div, norm_den, norm_one_sub_e_eq,
+      show π * (-(w * t)) = -(π * (w * t)) from by ring, Real.sin_neg, abs_neg]
+    field_simp
+  have hclow : 2 * w / π ≤ ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ := by
+    rw [hcval, div_le_iff₀ (by positivity : (0:ℝ) < π)]
+    rw [show |Real.sin (π * (w * t))| / (π * |t|) * π = |Real.sin (π * (w * t))| / |t| from by
+      field_simp]
+    rw [le_div_iff₀ htT']
+    linarith [hsin_low]
+  have hkey : ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ *
+      ‖Decomp1524a.trig s a t‖ = ‖𝓕⁻ (win w a s) t‖ := by
+    rw [fourierInv_win_eq ht hw, norm_mul]
+  have hTw : π * T * (2 * w / π) = 1 := by
+    rw [hwdef]; field_simp
+  calc ‖Decomp1524a.trig s a t‖
+      = π * T * (2 * w / π) * ‖Decomp1524a.trig s a t‖ := by rw [hTw, one_mul]
+    _ ≤ π * T * ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ *
+          ‖Decomp1524a.trig s a t‖ := by
+        have h0 : (0:ℝ) ≤ ‖Decomp1524a.trig s a t‖ := norm_nonneg _
+        have h1 : π * T * (2 * w / π) ≤ π * T *
+            ‖(1 - Decomp1524a.e (-(w * t))) / ((2 : ℂ) * π * I * (t : ℂ))‖ := by
+          have : (0:ℝ) < π * T := by positivity
+          exact mul_le_mul_of_nonneg_left hclow this.le
+        exact mul_le_mul_of_nonneg_right h1 h0
+    _ = π * T * ‖𝓕⁻ (win w a s) t‖ := by rw [← hkey]; ring
+
+theorem hne_zero : ∀ᵐ t : ℝ, t ≠ 0 := by
+  rw [MeasureTheory.ae_iff]; simp
+
+
+theorem continuous_fourier_win : Continuous (𝓕 (win w a s)) := by
+  have h : (𝓕 (win w a s)) = fun t => 𝓕⁻ (win w a s) (-t) := by
+    funext t
+    rw [Real.fourierInv_eq_fourier_neg]
+    simp
+  rw [h]
+  exact continuous_fourierInv_win.comp continuous_neg
+
 /-- LEAF. Gallagher's lemma: for a finite `s ⊆ ℤ` and `T > 0`,
 `∫_{-T}^{T} |Σ_{n ∈ s} a_n e(nt)|² dt ≤ π² T² ∫_ℝ |Σ_{n ∈ s, x < n ≤ x + 1/(2T)} a_n|² dx`.
 Proof: Plancherel for the step function `C(x)`, whose transform is `S(-t) sin(πt/2T)/(πt)` up
@@ -249,7 +796,64 @@ theorem gallagher_lemma (s : Finset ℤ) (a : ℤ → ℂ) {T : ℝ} (hT : 0 < T
     ∫ t in (-T)..T, ‖trig s a t‖ ^ 2 ≤
       π ^ 2 * T ^ 2 * ∫ x : ℝ, ‖∑ n ∈ s.filter (fun n : ℤ => x < (n : ℝ) ∧ (n : ℝ) ≤ x + 1 / (2 * T)),
         a n‖ ^ 2 := by
-  sorry
+  have hw : (0:ℝ) < 1 / (2 * T) := by positivity
+  have hF : MemLp (𝓕 (win (1 / (2 * T)) a s)) 2 volume := by
+    have h1 : MemLp (fun t : ℝ => 𝓕 (win (1 / (2 * T)) a s) (-t)) 2 volume := by
+      rw [show (fun t : ℝ => 𝓕 (win (1 / (2 * T)) a s) (-t))
+          = 𝓕⁻ (win (1 / (2 * T)) a s) from
+        funext fun t => (Real.fourierInv_eq_fourier_neg _ t).symm]
+      exact memLp_fourierInv_win hw
+    have h2 := h1.comp_measurePreserving (Measure.measurePreserving_neg (volume : Measure ℝ))
+    simpa [Function.comp_def, neg_neg] using h2
+  have hbound : ∀ᵐ t ∂(volume : Measure ℝ), t ∈ Set.Icc (-T) T →
+      ‖Decomp1524a.trig s a t‖ ^ 2 ≤
+        (π * T) ^ 2 * ‖𝓕 (win (1 / (2 * T)) a s) (-t)‖ ^ 2 := by
+    filter_upwards [hne_zero] with t ht htI
+    have h1 := trig_le_phase (s := s) (a := a) hT ht (abs_le.mpr ⟨htI.1, htI.2⟩)
+    rw [show 𝓕⁻ (win (1 / (2 * T)) a s) t = 𝓕 (win (1 / (2 * T)) a s) (-t) from
+      Real.fourierInv_eq_fourier_neg _ t] at h1
+    calc ‖Decomp1524a.trig s a t‖ ^ 2
+        ≤ (π * T * ‖𝓕 (win (1 / (2 * T)) a s) (-t)‖) ^ 2 :=
+          pow_le_pow_left₀ (norm_nonneg _) h1 2
+      _ = (π * T) ^ 2 * ‖𝓕 (win (1 / (2 * T)) a s) (-t)‖ ^ 2 := by ring
+  have hfi : IntervalIntegrable (fun t : ℝ => ‖Decomp1524a.trig s a t‖ ^ 2) volume (-T) T :=
+    (continuous_trig.norm.pow 2).intervalIntegrable _ _
+  have hgi : IntervalIntegrable
+      (fun t : ℝ => (π * T) ^ 2 * ‖𝓕 (win (1 / (2 * T)) a s) (-t)‖ ^ 2) volume (-T) T :=
+    ((continuous_const.mul ((continuous_fourier_win.comp continuous_neg).norm.pow 2))).intervalIntegrable _ _
+  have hmono : ∫ t in (-T)..T, ‖Decomp1524a.trig s a t‖ ^ 2
+      ≤ ∫ t in (-T)..T, (π * T) ^ 2 * ‖𝓕 (win (1 / (2 * T)) a s) (-t)‖ ^ 2 := by
+    refine intervalIntegral.integral_mono_ae_restrict (μ := volume) (by linarith : -T ≤ T) hfi hgi ?_
+    exact (MeasureTheory.ae_restrict_iff' measurableSet_Icc).mpr hbound
+  have hInt : Integrable fun t : ℝ => ‖𝓕 (win (1 / (2 * T)) a s) t‖ ^ 2 :=
+    (memLp_two_iff_integrable_sq_norm hF.aestronglyMeasurable).mp hF
+  have hplanch : ∫ t, ‖𝓕 (win (1 / (2 * T)) a s) t‖ ^ 2 ≤
+      ∫ t, ‖win (1 / (2 * T)) a s t‖ ^ 2 :=
+    integral_norm_sq_fourier_le _ integrable_win memLp_win hF
+  calc ∫ t in (-T)..T, ‖Decomp1524a.trig s a t‖ ^ 2
+      ≤ ∫ t in (-T)..T, (π * T) ^ 2 * ‖𝓕 (win (1 / (2 * T)) a s) (-t)‖ ^ 2 := hmono
+    _ = (π * T) ^ 2 * ∫ t in (-T)..T, ‖𝓕 (win (1 / (2 * T)) a s) (-t)‖ ^ 2 :=
+        intervalIntegral.integral_const_mul _ _
+    _ = (π * T) ^ 2 * ∫ t in (-T)..T, ‖𝓕 (win (1 / (2 * T)) a s) t‖ ^ 2 := by
+        rw [intervalIntegral.integral_comp_neg (f := fun t => ‖𝓕 (win (1 / (2 * T)) a s) t‖ ^ 2)]
+        norm_num
+    _ ≤ (π * T) ^ 2 * ∫ t, ‖𝓕 (win (1 / (2 * T)) a s) t‖ ^ 2 := by
+        have hle : ∫ t in (-T)..T, ‖𝓕 (win (1 / (2 * T)) a s) t‖ ^ 2
+            ≤ ∫ t, ‖𝓕 (win (1 / (2 * T)) a s) t‖ ^ 2 := by
+          rw [intervalIntegral.integral_of_le (by linarith : -T ≤ T)]
+          exact setIntegral_le_integral hInt (Filter.Eventually.of_forall fun t => by positivity)
+        exact mul_le_mul_of_nonneg_left hle (by positivity)
+    _ ≤ (π * T) ^ 2 * ∫ t, ‖win (1 / (2 * T)) a s t‖ ^ 2 := by
+        exact mul_le_mul_of_nonneg_left hplanch (by positivity)
+    _ = π ^ 2 * T ^ 2 * ∫ x : ℝ,
+          ‖∑ n ∈ s.filter (fun n : ℤ => x < (n : ℝ) ∧ (n : ℝ) ≤ x + 1 / (2 * T)), a n‖ ^ 2 := by
+        have hA : (win (1 / (2 * T)) a s) = fun x : ℝ =>
+            ∑ n ∈ s.filter (fun n : ℤ => x < (n : ℝ) ∧ (n : ℝ) ≤ x + 1 / (2 * T)), a n := rfl
+        rw [hA]
+        congr 1
+        ring
+
+
 
 /-- LEAF. Expansion of `e(an/q)` into characters: for `q ≥ 1`, `(a,q) = (n,q) = 1`,
 `e(an/q) = φ(q)⁻¹ Σ_{χ mod q} χ(a) χ(n) τ(χ̄)`. Davenport, Mult. Number Theory, Ch. 9, (1)-(2);
