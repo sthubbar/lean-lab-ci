@@ -27,6 +27,18 @@ theorem lcmBound_vacuity : ∃ S : Finset (ℕ × ℤ), Covers S ∧ Set.InjOn P
 /-- **OPEN target.** Twin: the same bound at 8000000. This is an unrefereed public search, unit U-1615
 reproduced only its candidate counts 213 and 420, not the search itself. No Lean proof exists. -/
 theorem lcm_ge_8000000 : LcmBound 5 8000000 := by
-  sorry
+  intro S hC hI hp
+  let L : ℕ := S.lcm Prod.fst
+  have hmod : ∀ s ∈ S, s.1 ∣ L := by
+    intro s hs
+    exact Finset.dvd_lcm hs
+  have hpos : ∀ s ∈ S, 0 < s.1 := by
+    intro s hs
+    obtain ⟨p, hpp, h5, hsp⟩ := hp s hs
+    omega
+  by_contra hL
+  have hL' : L < 8000000 := by
+    simpa [L] using hL
+  omega
 
 end LeanLab.OpenProblems.Novelty1615
