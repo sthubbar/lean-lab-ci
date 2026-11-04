@@ -1,0 +1,16 @@
+{
+  "start_utc": "2026-11-04 11:06:57 UTC",
+  "initial_clock_utc": "2026-11-04 11:04:56 UTC",
+  "initial_main": "860d9ebcc",
+  "model": "GPT-6 Codex",
+  "reasoning_effort": "not exposed by runtime",
+  "solver_workers": 1,
+  "worker_virtual_memory_bytes": 7516192768,
+  "worker_core_dump_limit": 0,
+  "lean_builds": "none under program search override",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "ortools": "9.15.6755",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "gcc": "gcc (Debian 14.2.0-19) 14.2.0",
+  "max_concurrent_search_processes": 3
+}

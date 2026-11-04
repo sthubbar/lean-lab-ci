@@ -1,0 +1,418 @@
+{
+  "request": {
+    "p": [
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        2,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        41,
+        2,
+        2,
+        1,
+        0
+      ],
+      [
+        0,
+        37,
+        2,
+        2,
+        1,
+        0
+      ],
+      [
+        1,
+        4,
+        5,
+        6,
+        1,
+        0
+      ],
+      [
+        1,
+        7,
+        5,
+        6,
+        1,
+        0
+      ],
+      [
+        2,
+        0,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        76,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        77,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        123,
+        3,
+        1,
+        1,
+        0
+      ]
+    ],
+    "seconds": 1,
+    "seed": 28523,
+    "length_radius": 2,
+    "start_radius": 24,
+    "preserve_prefix": true,
+    "allow_empty": true,
+    "encoding": "witness",
+    "step_radius": 1,
+    "require_cardinality_change": true
+  },
+  "result": null,
+  "info": {
+    "status": "UNKNOWN",
+    "ell": 24,
+    "target": 167,
+    "build_seconds": 0.13789340099992842,
+    "solve_seconds": 0.842590766,
+    "bound": 0.0,
+    "objective_kind": "weighted missing count then prefix",
+    "input_runs": [
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        2,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        41,
+        2,
+        2,
+        1,
+        0
+      ],
+      [
+        0,
+        37,
+        2,
+        2,
+        1,
+        0
+      ],
+      [
+        1,
+        4,
+        5,
+        6,
+        1,
+        0
+      ],
+      [
+        1,
+        7,
+        5,
+        6,
+        1,
+        0
+      ],
+      [
+        2,
+        0,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        76,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        77,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        123,
+        3,
+        1,
+        1,
+        0
+      ]
+    ],
+    "input_score": {
+      "valid": true,
+      "ell": 24,
+      "sizes": [
+        6,
+        10,
+        8
+      ],
+      "m": 34,
+      "ratio": "17/288",
+      "ratio_float": 0.059027778,
+      "surplus": -38964,
+      "verdict": "BELOW",
+      "miss_below": 167,
+      "miss": 12
+    },
+    "prefix_floor": 34,
+    "hint_runs": [
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        2,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        25,
+        3,
+        2,
+        1,
+        0
+      ],
+      [
+        0,
+        61,
+        3,
+        2,
+        1,
+        0
+      ],
+      [
+        1,
+        4,
+        4,
+        6,
+        1,
+        0
+      ],
+      [
+        1,
+        7,
+        3,
+        6,
+        1,
+        0
+      ],
+      [
+        2,
+        0,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        93,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        100,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        123,
+        3,
+        1,
+        1,
+        0
+      ]
+    ],
+    "hint_score": {
+      "valid": true,
+      "ell": 24,
+      "sizes": [
+        8,
+        7,
+        9
+      ],
+      "m": 50,
+      "ratio": "25/288",
+      "ratio_float": 0.086805556,
+      "surplus": -34260,
+      "verdict": "BELOW",
+      "miss_below": 167,
+      "miss": 19
+    },
+    "external_hint": true,
+    "start_radius": 24,
+    "length_choices": [
+      [
+        1
+      ],
+      [
+        1
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        0,
+        1,
+        2,
+        3
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    ],
+    "require_cardinality_change": true,
+    "encoding": "witness",
+    "allow_empty": true,
+    "step_choices": [
+      [
+        1
+      ],
+      [
+        1
+      ],
+      [
+        1,
+        2,
+        3
+      ],
+      [
+        1,
+        2,
+        3
+      ],
+      [
+        5,
+        6,
+        7
+      ],
+      [
+        5,
+        6,
+        7
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ]
+    ],
+    "fixed_starts": false,
+    "freeze_anchor": false,
+    "start_indices": null,
+    "model_variables": 11491,
+    "model_constraints": 11929,
+    "hit_variables": 2782,
+    "restrictions": "two I anchors, at most two I runs, at most two J runs, at most four ordered disjoint dense K runs, finite step choices, finite run lengths, local starts, fixed total cardinality",
+    "warm_source": "batches/task285-19-programs.jsonl:10; batches/task285-19-status.jsonl:13"
+  }
+}

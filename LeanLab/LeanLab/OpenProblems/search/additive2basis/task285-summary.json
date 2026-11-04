@@ -1,0 +1,21 @@
+{
+  "batches_closed": 22,
+  "campaign_solves": 333,
+  "campaign_statuses": {
+    "FEASIBLE": 254,
+    "UNKNOWN": 58,
+    "OPTIMAL": 21
+  },
+  "scored_rows": 675,
+  "distinct_task285_placements": 366,
+  "program_records_regenerated": 595,
+  "sum_preserving_tuple_visits": 426957,
+  "annealer_iterations": 490733568,
+  "external_hints_in_final_campaign": 1,
+  "BEATS": 0,
+  "best_ratio": "85/294",
+  "independent_coverage": "MATCH",
+  "Lean_files_changed": 0,
+  "statements_added": 0,
+  "sorry_delta": 0
+}

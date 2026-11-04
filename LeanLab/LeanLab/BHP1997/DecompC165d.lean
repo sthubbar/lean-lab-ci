@@ -1874,6 +1874,551 @@ noncomputable def lowerTwoDeletedIntegrand (ω : ℝ → ℝ) (ε a b : ℝ) : �
 noncomputable def lowerTwoDeletedIntegral (ω : ℝ → ℝ) (ε : ℝ) : ℝ :=
   ∫ a in (1/10:ℝ)..(1/2:ℝ), ∫ b in (1/10:ℝ)..(1/2:ℝ), lowerTwoDeletedIntegrand ω ε a b
 
+/-- Page 51. The deleted pair lies in a fixed positive box. -/
+theorem lower_two_domain_box {ε a b : ℝ} (hε : ε ≤ 1/10^8)
+    (h : lowerTwoDiscarded ε a b) :
+    (12499/100000:ℝ) ≤ b ∧ b ≤ a ∧ a ≤ 1/2 ∧ a+2*b ≤ 1 := by
+  obtain ⟨hc, hba, ha, hs, _⟩ := h
+  exact ⟨by linarith, hba, ha, hs⟩
+
+/-- Page 51. Integer numerators of the 4096-cell E2 grid, denominator 409600000. -/
+def lowerTwoGridPoint (i : ℕ) : ℕ := 51195904 + 37501*i
+/-- Page 51. Sufficient whole-cell tests for D and the two repaired Q regions. -/
+def lowerTwoGridDQ (a A b B : ℕ) : Bool := decide (
+  150000000*(A+2*B) ≤ 84373897*409600000 ∨
+  (100000000*(4*A+7*B) ≤ 212497999*409600000 ∧
+    150004807*409600000 ≤ 400000000*(a+b)) ∨
+  (1100000000*B ≤ 249927989*409600000 ∧
+    100000000*(4*A+5*B) ≤ 212497999*409600000 ∧
+    105001763*409600000 ≤ 240000000*(a+b)))
+/-- Page 48. Sufficient whole-cell tests for R, P1 and P2 on the E2 grid. -/
+def lowerTwoGridRP (a A b B : ℕ) : Bool := decide (
+  B ≤ a ∧ 2*A ≤ 409600000 ∧ 1100000000*B ≤ 249927989*409600000 ∧
+    ((100000000*(2*B) ≤ 100000000*a+12497999*409600000 ∧
+        1100000000*A ≤ 249927989*409600000) ∨
+      (187502001*409600000 ≤ 100000000*(4*a+3*b) ∧
+        100000000*(4*A+3*B) ≤ 212497999*409600000) ∨
+      (187502001*409600000 ≤ 100000000*(4*a+b) ∧
+        100000000*(4*A+B) ≤ 212497999*409600000)))
+/-- Page 51. Upward integer division of a rational tangent cell envelope, scale 10000. -/
+def lowerTwoTangentWeight (p cap a b : ℕ) : ℕ :=
+  let r := 409600000-a-b
+  let num := 10000000*r-(10000000-p*cap)*b
+  (10000*409600000^3*num + p*1000000*r*a*b*b-1)/(p*1000000*r*a*b*b)
+/-- Page 51. Integer ceiling of the three basic Buchstab envelopes. -/
+def lowerTwoBaseWeight (a A b B : ℕ) : ℕ :=
+  let d := a*b*b
+  let ceil := fun n den : ℕ => (n+den-1)/den
+  if A+B < 409600000 then
+    min (ceil (10000*409600000^3) d)
+      (max (ceil (10000*567144*409600000^3) (1000000*d))
+        (ceil (10000*B*409600000^3) ((409600000-A-B)*d)))
+  else ceil (10000*409600000^3) d
+/-- Page 51. Whole-cell integer majorant for the E2 Buchstab integrand, scale 10000. -/
+def lowerTwoGridWeight (i j : ℕ) : ℕ :=
+  let a := lowerTwoGridPoint i
+  let b := lowerTwoGridPoint j
+  let A := a+37501
+  let B := b+37501
+  if A < b ∨ 409600000 < a+2*b then 0
+  else if lowerTwoGridDQ a A b B || lowerTwoGridRP a A b B then 0
+  else
+    let base := lowerTwoBaseWeight a A b B
+    if 3*B ≤ 409600000-A then
+      min base (min (lowerTwoTangentWeight 10 0 a b)
+        (min (lowerTwoTangentWeight 11 95311 a b)
+        (min (lowerTwoTangentWeight 12 182322 a b)
+        (min (lowerTwoTangentWeight 13 262365 a b)
+        (min (lowerTwoTangentWeight 14 336473 a b)
+        (min (lowerTwoTangentWeight 15 405466 a b)
+          (lowerTwoTangentWeight 16 470004 a b)))))))
+    else base
+
+/-- Page 51. The real endpoints of the 4096-cell E2 grid. -/
+noncomputable def lowerTwoGridReal (i : ℕ) : ℝ := (lowerTwoGridPoint i:ℝ)/409600000
+
+/-- Page 51. The full integer E2 cell sum. Its scale is 10000. -/
+def lowerTwoGridTotal : ℕ :=
+  ∑ i ∈ Finset.range 4096, ∑ j ∈ Finset.range 4096, lowerTwoGridWeight i j
+
+/-- Page 51. Eight-row blocks of the exact E2 integer sum. -/
+def lowerTwoGridBlock (k : ℕ) : ℕ :=
+  ∑ i ∈ Finset.range 8, ∑ j ∈ Finset.range 4096, lowerTwoGridWeight (8*k+i) j
+
+
+set_option maxHeartbeats 0
+set_option maxRecDepth 100000
+
+/-- Page 51. The actual E2 integral is bounded by the explicit whole-cell sum.
+This is the complete geometric and integral bridge, without the remaining arithmetic certificate. -/
+theorem lower_two_integral_grid_bound {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8) :
+    lowerTwoDeletedIntegral ω ε ≤
+      (lowerTwoGridTotal:ℝ)*(37501/409600000:ℝ)^2/10000 := by
+  /- Page 51. The discarded integrand vanishes on either lower cutoff strip. -/
+  have lower_two_cutoff_zero (ω : ℝ → ℝ) {ε a b : ℝ} (hε : ε ≤ 1/10^8)
+      (h : a ≤ 12499/100000 ∨ b ≤ 12499/100000) :
+      lowerTwoDeletedIntegrand ω ε a b = 0 := by
+    unfold lowerTwoDeletedIntegrand
+    split_ifs with hd
+    · obtain ⟨hc,hba,_,_,_⟩ := hd
+      rcases h with h | h <;> linarith
+    · rfl
+  /- Page 51. Removing zero cutoff strips leaves the actual E2 integral unchanged. -/
+  have lower_two_integral_trimmed (ω : ℝ → ℝ) {ε : ℝ} (hε : ε ≤ 1/10^8) :
+      lowerTwoDeletedIntegral ω ε =
+        ∫ a in (12499/100000:ℝ)..(1/2:ℝ),
+          ∫ b in (12499/100000:ℝ)..(1/2:ℝ), lowerTwoDeletedIntegrand ω ε a b := by
+    have hi (a : ℝ) :
+        (∫ b in (1/10:ℝ)..(1/2:ℝ), lowerTwoDeletedIntegrand ω ε a b) =
+          ∫ b in (12499/100000:ℝ)..(1/2:ℝ), lowerTwoDeletedIntegrand ω ε a b := by
+      rw [intervalIntegral.integral_of_le (by norm_num : (1/10:ℝ) ≤ 1/2),
+        intervalIntegral.integral_of_le (by norm_num : (12499/100000:ℝ) ≤ 1/2)]
+      apply MeasureTheory.setIntegral_eq_of_subset_of_forall_sdiff_eq_zero measurableSet_Ioc
+        (Set.Ioc_subset_Ioc (by norm_num) le_rfl)
+      intro b hb
+      have hc : b ≤ 12499/100000 := by
+        by_contra hn
+        exact hb.2 ⟨lt_of_not_ge hn,hb.1.2⟩
+      exact lower_two_cutoff_zero ω hε (Or.inr hc)
+    unfold lowerTwoDeletedIntegral
+    simp_rw [hi]
+    rw [intervalIntegral.integral_of_le (by norm_num : (1/10:ℝ) ≤ 1/2),
+      intervalIntegral.integral_of_le (by norm_num : (12499/100000:ℝ) ≤ 1/2)]
+    apply MeasureTheory.setIntegral_eq_of_subset_of_forall_sdiff_eq_zero measurableSet_Ioc
+      (Set.Ioc_subset_Ioc (by norm_num) le_rfl)
+    intro a ha
+    have hc : a ≤ 12499/100000 := by
+      by_contra hn
+      exact ha.2 ⟨lt_of_not_ge hn,ha.1.2⟩
+    have hz : (fun b => lowerTwoDeletedIntegrand ω ε a b) = (fun _ => (0:ℝ)) :=
+      funext (fun b => lower_two_cutoff_zero ω hε (Or.inl hc))
+    simp_rw [hz]
+    simp
+
+  /- Page 51. A whole cell covered by D or the two Q regions has no deleted pair. -/
+  have lower_two_covered_real {ε a A b B x y : ℝ}
+      (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+      (hx : x ∈ Set.Icc a A) (hy : y ∈ Set.Icc b B)
+      (hc : A+2*B ≤ 84373897/150000000 ∨
+        (4*A+7*B ≤ 212497999/100000000 ∧ 150004807/400000000 ≤ a+b) ∨
+        (B ≤ 249927989/1100000000 ∧ 4*A+5*B ≤ 212497999/100000000 ∧
+          105001763/240000000 ≤ a+b)) :
+      ¬ lowerTwoDiscarded ε x y := by
+    intro hd
+    obtain ⟨_, _, _, _, hn⟩ := hd
+    apply hn
+    rcases hc with hD | hQ1 | hQ2
+    · left
+      linarith [hx.2, hy.2]
+    · right; left
+      constructor <;> linarith [hx.1,hx.2,hy.1,hy.2,hQ1.1,hQ1.2]
+    · right; right; left
+      refine ⟨?_, ?_, ?_⟩ <;> linarith [hx.1,hx.2,hy.1,hy.2,hQ2.1,hQ2.2.1,hQ2.2.2]
+
+  /- Page 48. A whole E2 cell covered by R or either P region has no deleted pair. -/
+  have lower_two_rp_real {ε a A b B x y : ℝ}
+      (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+      (hx : x ∈ Set.Icc a A) (hy : y ∈ Set.Icc b B)
+      (hc : B ≤ a ∧ 2*A ≤ 1 ∧ B ≤ 249927989/1100000000 ∧
+        ((2*B ≤ a+12497999/100000000 ∧ A ≤ 249927989/1100000000) ∨
+          (187502001/100000000 ≤ 4*a+3*b ∧ 4*A+3*B ≤ 212497999/100000000) ∨
+          (187502001/100000000 ≤ 4*a+b ∧ 4*A+B ≤ 212497999/100000000))) :
+      ¬ lowerTwoDiscarded ε x y := by
+    intro hd
+    obtain ⟨hyc, _, _, _, hn⟩ := hd
+    apply hn
+    right; right; right
+    refine ⟨?_, ?_, hyc, ?_, ?_⟩
+    · linarith [hc.1,hx.1,hy.2]
+    · linarith [hc.2.1,hx.2]
+    · linarith [hc.2.2.1,hy.2]
+    rcases hc.2.2.2 with hr | hp | hp
+    · left
+      constructor <;> linarith [hr.1,hr.2,hx.1,hx.2,hy.2]
+    · right; left
+      rw [abs_le]
+      constructor <;> linarith [hp.1,hp.2,hx.1,hx.2,hy.1,hy.2]
+    · right; right
+      rw [abs_le]
+      constructor <;> linarith [hp.1,hp.2,hx.1,hx.2,hy.1,hy.2]
+
+  /- Page 51. Two-variable Buchstab envelopes on a positive rational cell. -/
+  have lower_two_cell_envelope {ω : ℝ → ℝ}
+      (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+      (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+      {a A b B x y : ℝ} (ha : 0 < a) (hb : 0 < b)
+      (hr : 0 < 1-A-B) (hx : x ∈ Set.Icc a A) (hy : y ∈ Set.Icc b B) :
+      ω ((1-x-y)/y)/(x*y^2) ≤
+        min (1/(a*b^2))
+          (max ((567144/1000000:ℝ)/(a*b^2)) ((B/(1-A-B))/(a*b^2))) := by
+    let u := (1-x-y)/y
+    have hx0 : 0 < x := ha.trans_le hx.1
+    have hy0 : 0 < y := hb.trans_le hy.1
+    have hB0 : 0 < B := hy0.trans_le hy.2
+    have hd : 0 < a*b^2 := by positivity
+    have hd' : 0 < x*y^2 := by positivity
+    have hdd : a*b^2 ≤ x*y^2 := by gcongr <;> linarith [hx.1,hy.1]
+    have h1 := LeanLab.ChenDoubleSieve.Wu04Functional.extended_buchstab_le_one hω hz u
+    refine le_min ((div_le_div_of_nonneg_right h1 hd'.le).trans
+      (div_le_div_of_nonneg_left zero_le_one hd hdd)) ?_
+    by_cases hu : 2 ≤ u
+    · apply le_trans _ (le_max_left _ _)
+      exact (div_le_div_of_nonneg_right
+        (LeanLab.ChenDoubleSieve.Wu04Buchstab.buchstab_le_567144 hω hu) hd'.le).trans
+        (div_le_div_of_nonneg_left (by norm_num) hd hdd)
+    · by_cases hu1 : u < 1
+      · rw [show ω u = 0 from hz u hu1, zero_div]
+        exact le_trans (by positivity) (le_max_left _ _)
+      · have huu : 1 ≤ u := le_of_not_gt hu1
+        have hw := hω.2.1 u huu (le_of_not_ge hu)
+        have hl : (1-A-B)/B ≤ u := by
+          apply (div_le_div_of_nonneg_left hr.le hy0 hy.2).trans
+          apply div_le_div_of_nonneg_right _ hy0.le
+          linarith [hx.2,hy.2]
+        have hrec : 1/u ≤ B/(1-A-B) := by
+          simpa only [one_div_div] using one_div_le_one_div_of_le (div_pos hr hB0) hl
+        apply le_trans _ (le_max_right _ _)
+        exact (div_le_div_of_nonneg_right (hw.le.trans hrec) hd'.le).trans
+          (div_le_div_of_nonneg_left (by positivity) hd hdd)
+
+  /- Page 51. A two-variable cell above argument two has every certified tangent bound. -/
+  have lower_two_tangent_envelope {ω : ℝ → ℝ}
+      (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+      (i : Fin 7) {a A b B x y : ℝ}
+      (ha : 0 < a) (hb : 0 < b) (hx : x ∈ Set.Icc a A)
+      (hy : y ∈ Set.Icc b B) (hu : 2*B ≤ 1-A-B) :
+      ω ((1-x-y)/y)/(x*y^2) ≤
+        (1/buchstabLogNode i+(buchstabLogCap i-1/buchstabLogNode i)/((1-a-b)/b))/(a*b^2) := by
+    have hx0 : 0 < x := ha.trans_le hx.1
+    have hy0 : 0 < y := hb.trans_le hy.1
+    have hB0 : 0 < B := hy0.trans_le hy.2
+    have hlow : 2 ≤ (1-x-y)/y := by
+      apply (le_div_iff₀ hy0).2
+      linarith [hx.2, hy.2]
+    have hnum : 0 ≤ 1-a-b := by linarith [hx.1, hx.2,hy.1,hy.2]
+    have hupper : (1-x-y)/y ≤ (1-a-b)/b := by
+      apply (div_le_div_of_nonneg_right
+        (show 1-x-y ≤ 1-a-b by linarith [hx.1,hy.1]) hy0.le).trans
+      exact div_le_div_of_nonneg_left hnum hb hy.1
+    have ht := buchstab_tangent_cell_upper hω i hlow hupper
+    have hcap0 : 0 ≤ 1/buchstabLogNode i+
+        (buchstabLogCap i-1/buchstabLogNode i)/((1-a-b)/b) :=
+      (buchstab_nonneg hω (by linarith : 1 ≤ (1-x-y)/y)).trans ht
+    have hd : 0 < a*b^2 := by positivity
+    have hdd : a*b^2 ≤ x*y^2 := by gcongr <;> linarith [hx.1,hy.1]
+    exact (div_le_div_of_nonneg_right ht (by positivity : 0 ≤ x*y^2)).trans
+      (div_le_div_of_nonneg_left hcap0 hd hdd)
+
+  /- Page 51. Clearing denominators connects the integer tangent certificate to its real envelope. -/
+  have lower_two_tangent_integer {a b p cap : ℕ}
+      (ha : 0 < a) (hb : 0 < b) (hp : 0 < p) (hc : p*cap ≤ 10000000)
+      (hr : a+3*b ≤ 409600000) :
+      (10/(p:ℝ)+((cap:ℝ)/1000000-10/p)/
+        ((1-(a:ℝ)/409600000-(b:ℝ)/409600000)/((b:ℝ)/409600000))) /
+        (((a:ℝ)/409600000)*((b:ℝ)/409600000)^2) ≤
+        (lowerTwoTangentWeight p cap a b:ℝ)/10000 := by
+    have har : (0:ℝ) < a := by exact_mod_cast ha
+    have hbr : (0:ℝ) < b := by exact_mod_cast hb
+    have hpr : (0:ℝ) < p := by exact_mod_cast hp
+    have hcr : (p:ℝ)*cap ≤ 10000000 := by exact_mod_cast hc
+    have hrr : (a:ℝ)+3*b ≤ 409600000 := by exact_mod_cast hr
+    have hab : a+b ≤ 409600000 := by omega
+    have hR : 0 < 409600000-a-b := by omega
+    have hRr : ((409600000-a-b:ℕ):ℝ) = 409600000-a-b := by
+      rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega)]
+      norm_num
+    have hpc : ((10000000-p*cap:ℕ):ℝ) = 10000000-(p:ℝ)*cap := by
+      rw [Nat.cast_sub hc]
+      norm_num
+    have hn : (10000000-p*cap)*b ≤ 10000000*(409600000-a-b) := by
+      calc
+        (10000000-p*cap)*b ≤ 10000000*b := Nat.mul_le_mul_right b (Nat.sub_le _ _)
+        _ ≤ 10000000*(409600000-a-b) := Nat.mul_le_mul_left _ (by omega)
+    have hncast : ((10000000*(409600000-a-b)-(10000000-p*cap)*b:ℕ):ℝ) =
+        10000000*(409600000-(a:ℝ)-b)-(10000000-(p:ℝ)*cap)*b := by
+      rw [Nat.cast_sub hn]
+      push_cast
+      rw [hRr, hpc]
+    have hd : 0 < p*1000000*(409600000-a-b)*a*b*b := by positivity
+    have hq := upper_grid_ceil_bound (n := 10000*409600000^3*
+      (10000000*(409600000-a-b)-(10000000-p*cap)*b)) hd
+    have heq : lowerTwoTangentWeight p cap a b =
+        upperGridCeil (10000*409600000^3*(10000000*(409600000-a-b)-(10000000-p*cap)*b))
+          (p*1000000*(409600000-a-b)*a*b*b) := rfl
+    rw [← heq] at hq
+    have he :
+        (10/(p:ℝ)+((cap:ℝ)/1000000-10/p)/
+          ((1-(a:ℝ)/409600000-(b:ℝ)/409600000)/((b:ℝ)/409600000))) /
+          (((a:ℝ)/409600000)*((b:ℝ)/409600000)^2) =
+        ((10000*409600000^3*(10000000*(409600000-a-b)-(10000000-p*cap)*b):ℕ):ℝ)/
+          ((p*1000000*(409600000-a-b)*a*b*b:ℕ):ℝ)/10000 := by
+      push_cast
+      rw [hncast, hRr]
+      have hr0 : (409600000:ℝ)-a-b ≠ 0 := by linarith
+      field_simp
+      <;> ring
+    rw [he]
+    exact div_le_div_of_nonneg_right hq (by norm_num)
+
+  /- Page 51. Integer ceilings bound the two-variable basic Buchstab envelope. -/
+  have lower_two_base_integer {ω : ℝ → ℝ}
+      (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+      (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+      {a A b B : ℕ} {x y : ℝ}
+      (ha : 0 < a) (hb : 0 < b)
+      (hx : x ∈ Set.Icc ((a:ℝ)/409600000) ((A:ℝ)/409600000))
+      (hy : y ∈ Set.Icc ((b:ℝ)/409600000) ((B:ℝ)/409600000)) :
+      ω ((1-x-y)/y)/(x*y^2) ≤ (lowerTwoBaseWeight a A b B:ℝ)/10000 := by
+    have har : (0:ℝ) < a := by exact_mod_cast ha
+    have hbr : (0:ℝ) < b := by exact_mod_cast hb
+    have hx0 : 0 < x := (div_pos har (by norm_num)).trans_le hx.1
+    have hy0 : 0 < y := (div_pos hbr (by norm_num)).trans_le hy.1
+    have hdd : ((a:ℝ)/409600000)*((b:ℝ)/409600000)^2 ≤ x*y^2 := by
+      gcongr <;> linarith [hx.1,hy.1]
+    have hd : 0 < a*b*b := by positivity
+    have hc0 := upper_grid_ceil_bound (n := 10000*409600000^3) hd
+    have he0 : 1/(((a:ℝ)/409600000)*((b:ℝ)/409600000)^2) =
+        ((10000*409600000^3:ℕ):ℝ)/((a*b*b:ℕ):ℝ)/10000 := by
+      push_cast
+      field_simp
+      <;> ring
+    have h0 : 1/(((a:ℝ)/409600000)*((b:ℝ)/409600000)^2) ≤
+        (upperGridCeil (10000*409600000^3) (a*b*b):ℝ)/10000 := by
+      rw [he0]
+      exact div_le_div_of_nonneg_right hc0 (by norm_num)
+    unfold lowerTwoBaseWeight
+    split_ifs with hr
+    · have hrr : (A:ℝ)+B < 409600000 := by exact_mod_cast hr
+      have hR : ((409600000-A-B:ℕ):ℝ) = 409600000-A-B := by
+        rw [Nat.cast_sub (by omega),Nat.cast_sub (by omega)]
+        norm_num
+      have hr0 : 0 < 409600000-A-B := by omega
+      have hc1 := upper_grid_ceil_bound (n := 10000*567144*409600000^3)
+        (show 0 < 1000000*(a*b*b) by positivity)
+      have hc2 := upper_grid_ceil_bound (n := 10000*B*409600000^3)
+        (show 0 < (409600000-A-B)*(a*b*b) by positivity)
+      have he1 : ((567144/1000000:ℝ)/(((a:ℝ)/409600000)*((b:ℝ)/409600000)^2)) =
+          ((10000*567144*409600000^3:ℕ):ℝ)/((1000000*(a*b*b):ℕ):ℝ)/10000 := by
+        push_cast
+        field_simp
+        <;> ring
+      have he2 : (((B:ℝ)/409600000/(1-(A:ℝ)/409600000-(B:ℝ)/409600000)) /
+          (((a:ℝ)/409600000)*((b:ℝ)/409600000)^2)) =
+          ((10000*B*409600000^3:ℕ):ℝ)/(((409600000-A-B)*(a*b*b):ℕ):ℝ)/10000 := by
+        push_cast
+        rw [hR]
+        have hr' : (409600000:ℝ)-A-B ≠ 0 := by linarith
+        field_simp
+        <;> ring
+      have h1 := div_le_div_of_nonneg_right hc1 (by norm_num : (0:ℝ) ≤ 10000)
+      have h2 := div_le_div_of_nonneg_right hc2 (by norm_num : (0:ℝ) ≤ 10000)
+      rw [← he1] at h1
+      rw [← he2] at h2
+      have he := lower_two_cell_envelope hω hz (div_pos har (by norm_num))
+        (div_pos hbr (by norm_num)) (by linarith : 0 < 1-(A:ℝ)/409600000-(B:ℝ)/409600000) hx hy
+      apply he.trans
+      push_cast
+      rw [← min_div_div_right (by norm_num : (0:ℝ) ≤ 10000),
+        ← max_div_div_right (by norm_num : (0:ℝ) ≤ 10000)]
+      exact min_le_min h0 (max_le_max h1 h2)
+    · have hw := LeanLab.ChenDoubleSieve.Wu04Functional.extended_buchstab_le_one hω hz ((1-x-y)/y)
+      exact ((div_le_div_of_nonneg_right hw (by positivity : 0 ≤ x*y^2)).trans
+        (div_le_div_of_nonneg_left zero_le_one (by positivity) hdd)).trans h0
+
+  /- Pages 48, 50 and 51. The integer whole-cell tests exclude every deleted pair in the cell. -/
+  have lower_two_grid_covered_sound {ε x y : ℝ} {a A b B : ℕ}
+      (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+      (hx : x ∈ Set.Icc ((a:ℝ)/409600000) ((A:ℝ)/409600000))
+      (hy : y ∈ Set.Icc ((b:ℝ)/409600000) ((B:ℝ)/409600000))
+      (ht : lowerTwoGridDQ a A b B || lowerTwoGridRP a A b B = true) :
+      ¬ lowerTwoDiscarded ε x y := by
+    simp only [Bool.or_eq_true] at ht
+    rcases ht with hd | hr
+    · simp only [lowerTwoGridDQ, decide_eq_true_eq] at hd
+      have hh :
+          150000000*((A:ℝ)+2*B) ≤ 84373897*409600000 ∨
+          (100000000*(4*(A:ℝ)+7*B) ≤ 212497999*409600000 ∧
+            150004807*409600000 ≤ 400000000*((a:ℝ)+b)) ∨
+          (1100000000*(B:ℝ) ≤ 249927989*409600000 ∧
+            100000000*(4*(A:ℝ)+5*B) ≤ 212497999*409600000 ∧
+            105001763*409600000 ≤ 240000000*((a:ℝ)+b)) := by exact_mod_cast hd
+      apply lower_two_covered_real hε hε' hx hy
+      rcases hh with hh | hh | hh
+      · left; linarith
+      · right; left; constructor <;> linarith [hh.1,hh.2]
+      · right; right; refine ⟨?_,?_,?_⟩ <;> linarith [hh.1,hh.2.1,hh.2.2]
+    · simp only [lowerTwoGridRP, decide_eq_true_eq] at hr
+      have hh : (B:ℝ) ≤ a ∧ 2*(A:ℝ) ≤ 409600000 ∧
+          1100000000*(B:ℝ) ≤ 249927989*409600000 ∧
+          ((100000000*(2*(B:ℝ)) ≤ 100000000*(a:ℝ)+12497999*409600000 ∧
+              1100000000*(A:ℝ) ≤ 249927989*409600000) ∨
+            (187502001*409600000 ≤ 100000000*(4*(a:ℝ)+3*b) ∧
+              100000000*(4*(A:ℝ)+3*B) ≤ 212497999*409600000) ∨
+            (187502001*409600000 ≤ 100000000*(4*(a:ℝ)+b) ∧
+              100000000*(4*(A:ℝ)+B) ≤ 212497999*409600000)) := by exact_mod_cast hr
+      apply lower_two_rp_real hε hε' hx hy
+      refine ⟨?_,?_,?_,?_⟩
+      · linarith [hh.1]
+      · linarith [hh.2.1]
+      · linarith [hh.2.2.1]
+      rcases hh.2.2.2 with hh | hh | hh
+      · left; constructor <;> linarith [hh.1,hh.2]
+      · right; left; constructor <;> linarith [hh.1,hh.2]
+      · right; right; constructor <;> linarith [hh.1,hh.2]
+
+  /- Page 51. The rational integer majorant bounds the actual deleted integrand on every cell. -/
+  have lower_two_grid_cell_bound {ω : ℝ → ℝ}
+      (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+      (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+      {ε : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8)
+      (i j : ℕ) {x y : ℝ}
+      (hx : x ∈ Set.Icc ((lowerTwoGridPoint i:ℝ)/409600000)
+        (((lowerTwoGridPoint i+37501:ℕ):ℝ)/409600000))
+      (hy : y ∈ Set.Icc ((lowerTwoGridPoint j:ℝ)/409600000)
+        (((lowerTwoGridPoint j+37501:ℕ):ℝ)/409600000)) :
+      lowerTwoDeletedIntegrand ω ε x y ≤ (lowerTwoGridWeight i j:ℝ)/10000 := by
+    let a := lowerTwoGridPoint i
+    let b := lowerTwoGridPoint j
+    let A := a+37501
+    let B := b+37501
+    have ha : 0 < a := by dsimp [a,lowerTwoGridPoint]; omega
+    have hb : 0 < b := by dsimp [b,lowerTwoGridPoint]; omega
+    change x ∈ Set.Icc ((a:ℝ)/409600000) ((A:ℝ)/409600000) at hx
+    change y ∈ Set.Icc ((b:ℝ)/409600000) ((B:ℝ)/409600000) at hy
+    unfold lowerTwoDeletedIntegrand
+    split_ifs with hd
+    · have hs := lower_two_domain_box hε' hd
+      change ω ((1-x-y)/y)/(x*y^2) ≤
+        ((if A < b ∨ 409600000 < a+2*b then 0
+        else if lowerTwoGridDQ a A b B || lowerTwoGridRP a A b B then 0
+        else if 3*B ≤ 409600000-A then
+          min (lowerTwoBaseWeight a A b B) (min (lowerTwoTangentWeight 10 0 a b)
+            (min (lowerTwoTangentWeight 11 95311 a b)
+            (min (lowerTwoTangentWeight 12 182322 a b)
+            (min (lowerTwoTangentWeight 13 262365 a b)
+            (min (lowerTwoTangentWeight 14 336473 a b)
+            (min (lowerTwoTangentWeight 15 405466 a b)
+              (lowerTwoTangentWeight 16 470004 a b)))))))
+        else lowerTwoBaseWeight a A b B : ℕ):ℝ)/10000
+      split_ifs with hout hcover htwo
+      · exfalso
+        rcases hout with hout | hout
+        · have hh : (A:ℝ) < b := by exact_mod_cast hout
+          linarith [hx.2,hy.1,hs.2.1]
+        · have hh : (409600000:ℝ) < a+2*b := by exact_mod_cast hout
+          linarith [hx.1,hy.1,hs.2.2.2]
+      · exact False.elim (lower_two_grid_covered_sound hε hε' hx hy hcover hd)
+      · have hbas := lower_two_base_integer hω hz ha hb hx hy
+        have hB0 : 0 < B := by dsimp [B]; omega
+        have hAD : A < 409600000 := Nat.sub_pos_iff_lt.mp
+          ((Nat.mul_pos (by decide : 0 < 3) hB0).trans_le htwo)
+        have hAB : A+3*B ≤ 409600000 := by
+          simpa only [Nat.add_comm] using (Nat.le_sub_iff_add_le hAD.le).mp htwo
+        have hthree : a+3*b ≤ 409600000 := by dsimp [A,B] at hAB; omega
+        have hreal : (a:ℝ)+3*b ≤ 409600000 := by exact_mod_cast hthree
+        have hU : 2*((B:ℝ)/409600000) ≤ 1-(A:ℝ)/409600000-(B:ℝ)/409600000 := by
+          have hh : (A:ℝ)+3*B ≤ 409600000 := by exact_mod_cast hAB
+          linarith
+        have ht (k : Fin 7) (p cap : ℕ) (hp : 0 < p) (hc : p*cap ≤ 10000000)
+            (hnode : buchstabLogNode k = (p:ℝ)/10)
+            (hcap : buchstabLogCap k = (cap:ℝ)/1000000) :
+            ω ((1-x-y)/y)/(x*y^2) ≤ (lowerTwoTangentWeight p cap a b:ℝ)/10000 := by
+          have hh := lower_two_tangent_envelope hω k
+            (show 0 < (a:ℝ)/409600000 by positivity)
+            (show 0 < (b:ℝ)/409600000 by positivity) hx hy hU
+          have hi := lower_two_tangent_integer ha hb hp hc hthree
+          rw [hnode,hcap] at hh
+          simp only [one_div_div, one_mul] at hh
+          exact hh.trans hi
+        apply (le_div_iff₀ (by norm_num : (0:ℝ) < 10000)).2
+        push_cast
+        refine le_min ((le_div_iff₀ (by norm_num : (0:ℝ) < 10000)).1 hbas) ?_
+        repeat' apply le_min
+        all_goals apply (le_div_iff₀ (by norm_num : (0:ℝ) < 10000)).1
+        · exact ht 0 10 0 (by norm_num) (by norm_num) (by norm_num [buchstabLogNode]) (by norm_num [buchstabLogCap])
+        · exact ht 1 11 95311 (by norm_num) (by norm_num) (by norm_num [buchstabLogNode]) (by norm_num [buchstabLogCap])
+        · exact ht 2 12 182322 (by norm_num) (by norm_num) (by norm_num [buchstabLogNode]) (by norm_num [buchstabLogCap])
+        · exact ht 3 13 262365 (by norm_num) (by norm_num) (by norm_num [buchstabLogNode]) (by norm_num [buchstabLogCap])
+        · exact ht 4 14 336473 (by norm_num) (by norm_num) (by norm_num [buchstabLogNode]) (by norm_num [buchstabLogCap])
+        · exact ht 5 15 405466 (by norm_num) (by norm_num) (by norm_num [buchstabLogNode]) (by norm_num [buchstabLogCap])
+        · exact ht 6 16 470004 (by norm_num) (by norm_num) (by norm_num [buchstabLogNode]) (by norm_num [buchstabLogCap])
+      · exact lower_two_base_integer hω hz ha hb hx hy
+    · positivity
+
+  /- Page 51. A nonnegative cell majorant bounds the totalized double integral. -/
+  have lower_two_integral_of_cells (p : ℕ → ℝ) (n : ℕ)
+      (f : ℝ → ℝ → ℝ) (w : ℕ → ℕ → ℝ)
+      (hp : Monotone p) (hw : ∀ i < n, ∀ j < n, 0 ≤ w i j)
+      (hb : ∀ i < n, ∀ j < n, ∀ a ∈ Set.Icc (p i) (p (i+1)),
+        ∀ b ∈ Set.Icc (p j) (p (j+1)), f a b ≤ w i j) :
+      (∫ a in p 0..p n, ∫ b in p 0..p n, f a b) ≤
+        ∑ i ∈ Finset.range n, ∑ j ∈ Finset.range n,
+          (p (i+1)-p i)*(p (j+1)-p j)*w i j := by
+    have hr (i : ℕ) (hi : i < n) (a : ℝ) (ha : a ∈ Set.Icc (p i) (p (i+1))) :=
+      integral_le_nonnegative_panel_sum p n (f a) (w i) hp (hw i hi)
+        (fun j hj b hb' => hb i hi j hj a ha b hb')
+    have hn (i : ℕ) (hi : i < n) :
+        0 ≤ ∑ j ∈ Finset.range n, (p (j+1)-p j)*w i j := by
+      apply Finset.sum_nonneg
+      intro j hj
+      exact mul_nonneg (sub_nonneg.mpr (hp (by omega))) (hw i hi j (Finset.mem_range.mp hj))
+    have hh := integral_le_nonnegative_panel_sum p n
+      (fun a => ∫ b in p 0..p n, f a b)
+      (fun i => ∑ j ∈ Finset.range n, (p (j+1)-p j)*w i j) hp hn hr
+    simpa only [Finset.mul_sum, mul_assoc] using hh
+
+  /- Page 51. Exact E2 grid width and endpoints. -/
+  have lower_two_grid_parameters :
+      Monotone lowerTwoGridReal ∧ lowerTwoGridReal 0 = 12499/100000 ∧
+        lowerTwoGridReal 4096 = 1/2 ∧
+        ∀ i, lowerTwoGridReal (i+1)-lowerTwoGridReal i = 37501/409600000 := by
+    refine ⟨?_,by norm_num [lowerTwoGridReal,lowerTwoGridPoint],
+      by norm_num [lowerTwoGridReal,lowerTwoGridPoint],?_⟩
+    · intro i j hij
+      dsimp [lowerTwoGridReal,lowerTwoGridPoint]
+      exact div_le_div_of_nonneg_right (by exact_mod_cast Nat.add_le_add_left (Nat.mul_le_mul_left 37501 hij) 51195904) (by norm_num)
+    · intro i
+      simp [lowerTwoGridReal,lowerTwoGridPoint,Nat.cast_add,Nat.cast_mul]
+      ring
+
+  /- Page 51. The actual discarded integral is bounded by the explicit finite cell sum. -/
+  have lower_two_integral_grid_bound {ω : ℝ → ℝ}
+      (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+      (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+      {ε : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8) :
+      lowerTwoDeletedIntegral ω ε ≤
+        (lowerTwoGridTotal:ℝ)*(37501/409600000:ℝ)^2/10000 := by
+    have hp := lower_two_grid_parameters
+    have hh := lower_two_integral_of_cells lowerTwoGridReal 4096
+      (lowerTwoDeletedIntegrand ω ε) (fun i j => (lowerTwoGridWeight i j:ℝ)/10000)
+      hp.1 (fun i _ j _ => by positivity)
+      (fun i _ j _ x hx y hy => by
+        apply lower_two_grid_cell_bound hω hz hε hε' i j
+        · simpa [lowerTwoGridReal,lowerTwoGridPoint,Nat.cast_add,Nat.cast_mul,
+            Nat.mul_add,Nat.add_assoc] using hx
+        · simpa [lowerTwoGridReal,lowerTwoGridPoint,Nat.cast_add,Nat.cast_mul,
+            Nat.mul_add,Nat.add_assoc] using hy)
+    rw [hp.2.1,hp.2.2.1] at hh
+    rw [lower_two_integral_trimmed ω hε']
+    apply hh.trans_eq
+    simp only [hp.2.2.2,lowerTwoGridTotal,Nat.cast_sum,Finset.sum_mul,Finset.sum_div]
+    apply Finset.sum_congr rfl
+    intro i hi
+    apply Finset.sum_congr rfl
+    intro j hj
+    ring
+
+  exact lower_two_integral_grid_bound hω hz hε hε'
+
+/-- LEAF, OPEN. Page 51. The exact integer sum for the conservative E2 grid.
+The full candidate kernel proof exceeded the bounded shift verification reserve.
+The candidate is retained as text and is not proof evidence. This replaces the old E2 leaf. -/
+theorem lower_two_grid_total : lowerTwoGridTotal = 1132433915806 := by
+  sorry
+
 /-- LEAF, OPEN. Page 51, "A computer calculation yields". The numeric `E₂` input of
 `lower_density_of_e2_bound`, a floating point quadrature gives about 0.9389. -/
 theorem lower_two_integral_bound {ω : ℝ → ℝ}
@@ -1881,7 +2426,9 @@ theorem lower_two_integral_bound {ω : ℝ → ℝ}
     (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
     {ε : ℝ} (hε : 0 ≤ ε) (hε' : ε ≤ 1/10^8) :
     lowerTwoDeletedIntegral ω ε ≤ 3799/4000 := by
-  sorry
+  have hh := lower_two_integral_grid_bound hω hz hε hε'
+  rw [lower_two_grid_total] at hh
+  exact hh.trans (by norm_num)
 
 /-- LEAF, OPEN. Pages 43 to 52, the lower short weight b0, with the page 51 formula for its density:
 `v₀` is 1 minus the integrals over `E₂` and `E₄`. Since `lowerFourDeletedIntegral` is the

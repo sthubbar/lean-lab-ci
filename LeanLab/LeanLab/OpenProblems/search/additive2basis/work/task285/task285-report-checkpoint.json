@@ -1,0 +1,70 @@
+{
+  "batches": [
+    {
+      "batch": "task285-01",
+      "scored": 1,
+      "statuses": {
+        "CONTROL_PASSED": 1
+      },
+      "best_ratio": "17/162",
+      "best_miss": 58,
+      "cardinality_changed": 0,
+      "colour_sizes_changed": 0,
+      "build_seconds_total": 0,
+      "build_seconds_max": 0,
+      "solve_seconds_total": 0,
+      "attempted_lengths": []
+    },
+    {
+      "batch": "task285-02",
+      "scored": 3,
+      "statuses": {
+        "FEASIBLE": 3
+      },
+      "best_ratio": "167/578",
+      "best_miss": 1,
+      "cardinality_changed": 0,
+      "colour_sizes_changed": 0,
+      "build_seconds_total": 6.57931609000002,
+      "build_seconds_max": 4.628862453000011,
+      "solve_seconds_total": 74.972143158,
+      "attempted_lengths": [
+        34,
+        56,
+        75
+      ]
+    },
+    {
+      "batch": "task285-03",
+      "scored": 2,
+      "statuses": {
+        "FEASIBLE": 1,
+        "OPTIMAL": 1
+      },
+      "best_ratio": "277/2178",
+      "best_miss": 1,
+      "cardinality_changed": 0,
+      "colour_sizes_changed": 0,
+      "build_seconds_total": 3.846404234999966,
+      "build_seconds_max": 3.6316896369999654,
+      "solve_seconds_total": 47.593498095,
+      "attempted_lengths": [
+        25,
+        66
+      ]
+    }
+  ],
+  "scored": 6,
+  "distinct": 6,
+  "program_records_checked": 6,
+  "lengths": [
+    18,
+    25,
+    34,
+    56,
+    66,
+    75
+  ],
+  "BEATS": 0,
+  "independent_coverage": "MATCH"
+}
