@@ -79,11 +79,224 @@ theorem minor_bound :
         ‖minorCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m‖ ^ 2 ≤
         C * windowLength N η * localization N η ^ 2 / Real.log N ^ A := by sorry
 
+private lemma phase_add (x y : ℝ) : phase x * phase y = phase (x + y) := by
+  unfold phase
+  rw [← Complex.exp_add]
+  congr 1
+  push_cast
+  ring
+
+private lemma integral_exp_int_period (n : ℤ) (a : ℝ) :
+    (∫ x in a..(1 + a), Complex.exp (2 * Real.pi * Complex.I * (n : ℂ) * (x : ℂ)))
+      = if n = 0 then 1 else 0 := by
+  by_cases hn : n = 0
+  · subst hn
+    simp
+  · rw [ite_eq_right hn]
+    have hc : (2 * Real.pi * Complex.I * (n : ℂ)) ≠ 0 := by
+      have hreal : (2 * Real.pi * (n : ℝ)) ≠ 0 :=
+        mul_ne_zero (mul_ne_zero two_ne_zero Real.pi_ne_zero) (by exact_mod_cast hn)
+      rw [show (2 * Real.pi * Complex.I * (n : ℂ)) = ((2 * Real.pi * (n : ℝ) : ℝ) : ℂ) * Complex.I by
+        push_cast; ring]
+      exact mul_ne_zero (Complex.ofReal_ne_zero.mpr hreal) Complex.I_ne_zero
+    rw [show (∫ x in a..(1 + a),
+        Complex.exp (2 * Real.pi * Complex.I * (n : ℂ) * (x : ℂ)))
+        = ∫ x in a..(1 + a),
+          Complex.exp ((2 * Real.pi * Complex.I * (n : ℂ)) * (x : ℂ)) from by
+      simp only [mul_assoc]]
+    rw [integral_exp_mul_complex hc]
+    rw [div_eq_zero_iff]
+    left
+    rw [sub_eq_zero]
+    have h1 : Complex.exp ((2 * Real.pi * Complex.I * (n : ℂ)) * ((1 + a : ℝ) : ℂ))
+        = Complex.exp ((2 * Real.pi * Complex.I * (n : ℂ)) * (a : ℂ)
+            + (n : ℂ) * (2 * Real.pi * Complex.I)) := by
+      congr 1
+      push_cast
+      ring
+    rw [h1, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+/-- The phase of a sum of two integer multiples of the period, with the coefficient of `-m`. -/
+private lemma phase_mul_three (h k m : ℕ) (α : ℝ) :
+    phase ((h : ℝ) * α) * phase ((k : ℝ) * α) * phase (-(m : ℝ) * α) =
+      Complex.exp (2 * Real.pi * Complex.I *
+        ((((h : ℤ) + (k : ℤ) - (m : ℤ) : ℤ)) : ℂ) * (α : ℂ)) := by
+  rw [phase_add, phase_add]
+  unfold phase
+  congr 1
+  push_cast
+  ring
+
+private lemma integrand_eq_sum (N Y : ℝ) (m : ℕ) (α : ℝ) :
+    firstSum N Y α * secondSum Y α * phase (-(m : ℝ) * α) =
+      ∑ h ∈ Ioc ⌊N - Y⌋₊ ⌊N⌋₊, ∑ k ∈ Icc 1 ⌊Y⌋₊,
+        ((Λ h : ℂ) * (Λ k : ℂ)) *
+          Complex.exp (2 * Real.pi * Complex.I *
+            ((((h : ℤ) + (k : ℤ) - (m : ℤ) : ℤ)) : ℂ) * (α : ℂ)) := by
+  unfold firstSum secondSum
+  rw [Finset.sum_mul, Finset.sum_mul]
+  apply Finset.sum_congr rfl; intro h _
+  rw [Finset.mul_sum, Finset.sum_mul]
+  apply Finset.sum_congr rfl; intro k _
+  rw [show ((Λ h : ℂ) * phase ((h : ℝ) * α)) * ((Λ k : ℂ) * phase ((k : ℝ) * α))
+        * phase (-(m : ℝ) * α) =
+      ((Λ h : ℂ) * (Λ k : ℂ)) *
+        (phase ((h : ℝ) * α) * phase ((k : ℝ) * α) * phase (-(m : ℝ) * α)) by ring,
+    phase_mul_three]
+
+private lemma pairs_eq (N Y : ℝ) (m : ℕ) :
+    pairs N Y m =
+      (Ioc ⌊N - Y⌋₊ ⌊N⌋₊).filter (fun h => 1 ≤ m - h ∧ m - h ≤ ⌊Y⌋₊) := by
+  unfold pairs
+  ext h
+  simp only [Finset.mem_filter, Finset.mem_Ioo, Finset.mem_Ioc]
+  constructor
+  · rintro ⟨⟨h0, hm⟩, hNY, hN, hY⟩
+    exact ⟨⟨(Nat.floor_lt' (by omega)).mpr hNY, (Nat.le_floor_iff' (by omega)).mpr hN⟩,
+      by omega, (Nat.le_floor_iff' (by omega)).mpr hY⟩
+  · rintro ⟨⟨hfloor, hNfloor⟩, h1, hYfloor⟩
+    exact ⟨⟨by omega, by omega⟩, (Nat.floor_lt' (by omega)).mp hfloor,
+      (Nat.le_floor_iff' (by omega)).mp hNfloor, (Nat.le_floor_iff' (by omega)).mp hYfloor⟩
+
+private lemma inner_sum_C (Y : ℝ) (m h : ℕ) :
+    ∑ k ∈ Icc 1 ⌊Y⌋₊, ((Λ h : ℂ) * (Λ k : ℂ)) * (if h + k = m then (1 : ℂ) else 0)
+      = if 1 ≤ m - h ∧ m - h ≤ ⌊Y⌋₊ then (Λ h : ℂ) * (Λ (m - h) : ℂ) else 0 := by
+  have key : ∀ k : ℕ, 1 ≤ k → ((Λ h : ℂ) * (Λ k : ℂ)) * (if h + k = m then (1 : ℂ) else 0)
+      = if k = m - h then (Λ h : ℂ) * (Λ (m - h) : ℂ) else 0 := by
+    intro k hk1
+    by_cases hk : h + k = m
+    · have hkh : k = m - h := by omega
+      rw [if_pos hk, if_pos hkh, mul_one, hkh]
+    · have hkh : k ≠ m - h := by
+        intro hh
+        rw [hh] at hk1
+        omega
+      rw [if_neg hk, if_neg hkh, mul_zero]
+  rw [Finset.sum_congr rfl (fun k hk => key k (Finset.mem_Icc.mp hk).1), Finset.sum_ite_eq']
+  simp only [Finset.mem_Icc]
+
+private lemma double_sum_eq_weighted_C (N Y : ℝ) (m : ℕ) :
+    ∑ h ∈ Ioc ⌊N - Y⌋₊ ⌊N⌋₊, ∑ k ∈ Icc 1 ⌊Y⌋₊,
+        ((Λ h : ℂ) * (Λ k : ℂ)) * (if h + k = m then (1 : ℂ) else 0)
+      = (weightedCount N Y m : ℂ) := by
+  rw [Finset.sum_congr rfl (fun h _ => inner_sum_C Y m h)]
+  rw [← Finset.sum_filter]
+  rw [← pairs_eq]
+  rw [weightedCount]
+  push_cast
+  rfl
+
+private lemma period_integral_eq_weighted (N Y H : ℝ) (m : ℕ) :
+    ∫ α in period H, firstSum N Y α * secondSum Y α * phase (-(m : ℝ) * α)
+      = (weightedCount N Y m : ℂ) := by
+  have hle : 2 / Real.sqrt H ≤ 1 + 2 / Real.sqrt H := by
+    have : (0 : ℝ) ≤ 2 / Real.sqrt H := by positivity
+    linarith
+  rw [show period H = Set.Icc (2 / Real.sqrt H) (1 + 2 / Real.sqrt H) from rfl,
+    integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le hle]
+  rw [intervalIntegral.integral_congr (fun α _ => integrand_eq_sum N Y m α)]
+  have hG : ∀ h k : ℕ, IntervalIntegrable (fun α : ℝ => ((Λ h : ℂ) * (Λ k : ℂ)) *
+      Complex.exp (2 * Real.pi * Complex.I *
+        ((((h : ℤ) + (k : ℤ) - (m : ℤ) : ℤ)) : ℂ) * (α : ℂ))) volume
+      (2 / Real.sqrt H) (1 + 2 / Real.sqrt H) := by
+    intro h k
+    exact (by fun_prop : Continuous fun α : ℝ => ((Λ h : ℂ) * (Λ k : ℂ)) *
+      Complex.exp (2 * Real.pi * Complex.I *
+        ((((h : ℤ) + (k : ℤ) - (m : ℤ) : ℤ)) : ℂ) * (α : ℂ))).intervalIntegrable _ _
+  have hGs : ∀ h : ℕ, IntervalIntegrable (fun α : ℝ => ∑ k ∈ Icc 1 ⌊Y⌋₊, ((Λ h : ℂ) * (Λ k : ℂ)) *
+      Complex.exp (2 * Real.pi * Complex.I *
+        ((((h : ℤ) + (k : ℤ) - (m : ℤ) : ℤ)) : ℂ) * (α : ℂ))) volume
+      (2 / Real.sqrt H) (1 + 2 / Real.sqrt H) := by
+    intro h
+    exact (by fun_prop : Continuous fun α : ℝ => ∑ k ∈ Icc 1 ⌊Y⌋₊, ((Λ h : ℂ) * (Λ k : ℂ)) *
+      Complex.exp (2 * Real.pi * Complex.I *
+        ((((h : ℤ) + (k : ℤ) - (m : ℤ) : ℤ)) : ℂ) * (α : ℂ))).intervalIntegrable _ _
+  rw [intervalIntegral.integral_finsetSum (fun h _ => hGs h)]
+  rw [Finset.sum_congr rfl
+    (fun h _ => intervalIntegral.integral_finsetSum (fun k _ => hG h k))]
+  have hterm : ∀ h k : ℕ, (∫ x in (2 / Real.sqrt H)..(1 + 2 / Real.sqrt H),
+      ((Λ h : ℂ) * (Λ k : ℂ)) * Complex.exp (2 * Real.pi * Complex.I *
+        ((((h : ℤ) + (k : ℤ) - (m : ℤ) : ℤ)) : ℂ) * (x : ℂ)))
+      = ((Λ h : ℂ) * (Λ k : ℂ)) * (if h + k = m then (1 : ℂ) else 0) := by
+    intro h k
+    rw [intervalIntegral.integral_const_mul, integral_exp_int_period]
+    congr 1
+    by_cases hk : h + k = m
+    · have hn : ((h : ℤ) + (k : ℤ) - (m : ℤ)) = 0 := by omega
+      rw [if_pos hk, if_pos hn]
+    · have hn : ¬(((h : ℤ) + (k : ℤ) - (m : ℤ)) = 0) := by omega
+      rw [if_neg hk, if_neg hn]
+  rw [Finset.sum_congr rfl (fun h _ => Finset.sum_congr rfl (fun k _ => hterm h k))]
+  rw [double_sum_eq_weighted_C]
+
+private lemma measurableSet_majorSet (N Y B : ℝ) : MeasurableSet (majorSet N Y B) := by
+  have h : majorSet N Y B = ⋃ (q : ℕ) (a : ℕ), {α : ℝ |
+      1 ≤ q ∧ (q : ℝ) ≤ Real.log N ^ B ∧ 1 ≤ a ∧ a ≤ q ∧ Nat.Coprime a q ∧
+        |α - (a : ℝ) / q| < Real.log N ^ (2 * B) / ((q : ℝ) * Y)} := by
+    ext α
+    simp only [majorSet, Set.mem_setOf_eq, Set.mem_iUnion]
+  rw [h]
+  apply MeasurableSet.iUnion; intro q
+  apply MeasurableSet.iUnion; intro a
+  by_cases hq : 1 ≤ q ∧ (q : ℝ) ≤ Real.log N ^ B ∧ 1 ≤ a ∧ a ≤ q ∧ Nat.Coprime a q
+  · obtain ⟨h1, h2, h3, h4, h5⟩ := hq
+    convert measurableSet_Ioo (a := (a : ℝ) / q - Real.log N ^ (2 * B) / ((q : ℝ) * Y))
+      (b := (a : ℝ) / q + Real.log N ^ (2 * B) / ((q : ℝ) * Y)) using 1
+    ext α
+    simp only [Set.mem_setOf_eq, Set.mem_Ioo]
+    constructor
+    · rintro ⟨-, -, -, -, -, hlt⟩
+      rw [abs_lt] at hlt
+      exact ⟨by linarith [hlt.1], by linarith [hlt.2]⟩
+    · rintro ⟨ha, hb⟩
+      exact ⟨h1, h2, h3, h4, h5, by rw [abs_lt]; exact ⟨by linarith, by linarith⟩⟩
+  · have hne : {α : ℝ | 1 ≤ q ∧ (q : ℝ) ≤ Real.log N ^ B ∧ 1 ≤ a ∧ a ≤ q ∧
+        Nat.Coprime a q ∧ |α - (a : ℝ) / q| < Real.log N ^ (2 * B) / ((q : ℝ) * Y)} = ∅ := by
+      ext α
+      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false]
+      constructor
+      · rintro ⟨h1, h2, h3, h4, h5, -⟩
+        exact hq ⟨h1, h2, h3, h4, h5⟩
+      · intro hh
+        exact hh.elim
+    rw [hne]
+    exact MeasurableSet.empty
+
+private lemma coeff_split (N Y H B : ℝ) (m : ℕ) :
+    majorCoefficient N Y H B m + minorCoefficient N Y H B m =
+      ∫ α in period H, firstSum N Y α * secondSum Y α * phase (-(m : ℝ) * α) := by
+  have hM : MeasurableSet (majorSet N Y B) := measurableSet_majorSet N Y B
+  have hcont : Continuous fun α : ℝ => firstSum N Y α * secondSum Y α * phase (-(m : ℝ) * α) := by
+    unfold firstSum secondSum phase
+    fun_prop
+  have hint : IntegrableOn
+      (fun α : ℝ => firstSum N Y α * secondSum Y α * phase (-(m : ℝ) * α))
+      (Set.Icc (2 / Real.sqrt H) (1 + 2 / Real.sqrt H)) volume :=
+    hcont.continuousOn.integrableOn_compact isCompact_Icc
+  unfold majorCoefficient minorCoefficient
+  rw [show period H = Set.Icc (2 / Real.sqrt H) (1 + 2 / Real.sqrt H) from rfl]
+  rw [← setIntegral_union
+    (s := Set.Icc (2 / Real.sqrt H) (1 + 2 / Real.sqrt H) ∩ majorSet N Y B)
+    (t := Set.Icc (2 / Real.sqrt H) (1 + 2 / Real.sqrt H) \ majorSet N Y B)
+    (by rw [Set.disjoint_left]; rintro x ⟨-, hxM⟩ ⟨-, hxnM⟩; exact hxnM hxM)
+    (measurableSet_Icc.diff hM)
+    (hint.mono_set Set.inter_subset_left) (hint.mono_set Set.sdiff_subset),
+    Set.inter_union_sdiff]
+
 /-- LEAF. Page 44 display 1, before applying Cauchy Schwarz.
 Fourier orthogonality and the partition of the period give the coefficient identity. -/
 theorem fourier_split (N η A : ℝ) (hN : 3 ≤ N) (hη : 0 < η) (m : ℕ) :
     (fullError N η m : ℂ) = majorError N η A m +
-      minorCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m := by sorry
+      minorCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m := by
+  have hkey : (weightedCount N (localization N η) m : ℂ) =
+      majorCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m +
+      minorCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m :=
+    ((coeff_split N (localization N η) (windowLength N η) (arcExponent η A) m).trans
+      (period_integral_eq_weighted N (localization N η) (windowLength N η) m)).symm
+  unfold fullError majorError
+  push_cast
+  rw [hkey]
+  ring
 
 /-- LEAF. Page 42 after Theorem 2 and page 44 after display 3.
 For an even non Goldbach integer, the singular main term dominates the
