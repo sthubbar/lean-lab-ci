@@ -132,10 +132,469 @@ def integralTerms (F f ω : ℝ → ℝ) : Fin 12 → ℝ :=
     36 / 5 * fourfold ω (fun t => 1 / 2 - 2 * kappa1 - t) kappa1 (1 / 10) (fun _ => kappa2) (fun t => t * (1 - t)) +
       8 * fourfold ω (fun t => 1 / 2 - 2 * kappa1 - t) (1 / 10) kappa2 (fun _ => kappa2) id]
 
+/-! ### Existence of the standard functions
+The delay equation of Wu 2004 equation 2.6 is solved by the method of steps in
+`DelaySolver` below. -/
+
+namespace DelaySolver
+open Set MeasureTheory intervalIntegral Filter
+open scoped Topology
+
+set_option maxHeartbeats 4000000 in
+/-- One-layer existence for the scalar delay equation `X' u = k u * X (u - 1)`.
+`X` is produced on `Icc 1 (N + 2)` with the integral form of the equation. -/
+private theorem delay_layer_exists (k : ℝ → ℝ) (hk : ContinuousOn k (Set.Ici (2 : ℝ)))
+    (φ : ℝ → ℝ) (hφ : ContinuousOn φ (Set.Icc (1 : ℝ) 2)) :
+    ∀ N : ℕ, ∃ X : ℝ → ℝ,
+      ContinuousOn X (Set.Icc (1 : ℝ) ((N : ℝ) + 2)) ∧
+      (∀ u ∈ Set.Icc (1 : ℝ) (2 : ℝ), X u = φ u) ∧
+      (∀ u ∈ Set.Icc (2 : ℝ) ((N : ℝ) + 2), X u = X 2 + ∫ t in (2 : ℝ)..u, k t * X (t - 1)) := by
+  intro N
+  induction N with
+  | zero =>
+    have h2 : (((0 : ℕ) : ℝ) + 2) = (2 : ℝ) := by norm_num
+    refine ⟨fun u => if u ≤ (2 : ℝ) then φ u else 0, ?_, ?_, ?_⟩
+    · rw [h2]
+      exact (continuousOn_congr (fun u hu => by simp [hu.2])).mpr hφ
+    · intro u hu
+      simp [hu.2]
+    · intro u hu
+      rw [h2] at hu
+      have hu2 : u = 2 := le_antisymm hu.2 hu.1
+      subst hu2
+      simp
+  | succ n ih =>
+    obtain ⟨X, hcont, hφX, heq⟩ := ih
+    have hidx : ((((n + 1 : ℕ)) : ℝ) + 2) = (n : ℝ) + 2 + 1 := by push_cast; ring
+    have hc1 : (1 : ℝ) ≤ (n : ℝ) + 2 := by
+      have : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+      linarith
+    have hc2 : (2 : ℝ) ≤ (n : ℝ) + 2 := by
+      have : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+      linarith
+    have hc3 : (n : ℝ) + 2 ≤ (n : ℝ) + 2 + 1 := by norm_num
+    have hfcont : ∀ a b : ℝ, 2 ≤ a → b ≤ (n : ℝ) + 2 + 1 →
+        ContinuousOn (fun t : ℝ => k t * X (t - 1)) (Set.Icc a b) := by
+      intro a b ha hb
+      have hk' : ContinuousOn k (Set.Icc a b) := by
+        refine hk.mono ?_
+        intro x hx
+        simp only [Set.mem_Ici]
+        linarith [hx.1]
+      have hXc : ContinuousOn (fun t : ℝ => X (t - 1)) (Set.Icc a b) := by
+        refine hcont.comp (continuous_id.sub continuous_const).continuousOn ?_
+        intro t ht
+        simp only [Set.mem_Icc]
+        constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+      exact hk'.mul hXc
+    have hub : ∀ a b : ℝ, a ≤ b → 2 ≤ a → b ≤ (n : ℝ) + 2 + 1 →
+        ContinuousOn (fun t : ℝ => k t * X (t - 1)) (uIcc a b) := by
+      intro a b hab ha hb
+      rw [uIcc_of_le hab]
+      exact hfcont a b ha hb
+    set X' : ℝ → ℝ := fun u =>
+      if u ≤ (n : ℝ) + 2 then X u
+      else X ((n : ℝ) + 2) + ∫ t in ((n : ℝ) + 2)..u, k t * X (t - 1) with hX'
+    have hstep : ∀ u : ℝ, X' u = if u ≤ (n : ℝ) + 2 then X u
+        else X ((n : ℝ) + 2) + ∫ t in ((n : ℝ) + 2)..u, k t * X (t - 1) :=
+      fun u => congrFun hX' u
+    refine ⟨X', ?_, ?_, ?_⟩
+    · rw [hidx]
+      have hun : Set.Icc (1 : ℝ) ((n : ℝ) + 2) ∪ Set.Icc ((n : ℝ) + 2) ((n : ℝ) + 2 + 1) =
+          Set.Icc (1 : ℝ) ((n : ℝ) + 2 + 1) := Icc_union_Icc_eq_Icc hc1 hc3
+      rw [← hun]
+      refine ContinuousOn.union_of_isClosed ?_ ?_ isClosed_Icc isClosed_Icc
+      · refine hcont.congr ?_
+        intro u hu
+        rw [hstep, if_pos hu.2]
+      · have hint : IntegrableOn (fun t : ℝ => k t * X (t - 1))
+            (uIcc ((n : ℝ) + 2) ((n : ℝ) + 2 + 1)) :=
+          (hub _ _ hc3 hc2 le_rfl).integrableOn_compact isCompact_uIcc
+        have hprim : ContinuousOn
+            (fun u => X ((n : ℝ) + 2) + ∫ t in ((n : ℝ) + 2)..u, k t * X (t - 1))
+            (Set.Icc ((n : ℝ) + 2) ((n : ℝ) + 2 + 1)) := by
+          have h := (continuousOn_const (c := X ((n : ℝ) + 2))).add
+            (continuousOn_primitive_interval hint)
+          rwa [uIcc_of_le hc3] at h
+        refine hprim.congr ?_
+        intro u hu
+        rw [hstep]
+        by_cases h : u ≤ (n : ℝ) + 2
+        · rw [if_pos h]
+          have hue : u = (n : ℝ) + 2 := le_antisymm h hu.1
+          subst hue
+          simp
+        · rw [if_neg h]
+    · intro u hu
+      have hu2 : u ≤ (n : ℝ) + 2 := by linarith [hu.2, hc2]
+      rw [hstep, if_pos hu2]
+      exact hφX u hu
+    · rw [hidx]
+      intro u hu
+      have hX'2 : X' 2 = X 2 := by
+        rw [hstep, if_pos hc2]
+      rw [hX'2]
+      by_cases h : u ≤ (n : ℝ) + 2
+      · have hX'u : X' u = X u := by
+          rw [hstep, if_pos h]
+        rw [hX'u, heq u ⟨hu.1, h⟩]
+        congr 1
+        refine integral_congr (fun t ht => ?_)
+        rw [uIcc_of_le hu.1] at ht
+        have hle : t - 1 ≤ (n : ℝ) + 2 := by linarith [ht.2]
+        rw [hstep, if_pos hle]
+      · have hX'u : X' u = X ((n : ℝ) + 2) + ∫ t in ((n : ℝ) + 2)..u, k t * X (t - 1) := by
+          rw [hstep, if_neg h]
+        rw [hX'u, heq ((n : ℝ) + 2) ⟨hc2, le_rfl⟩, add_assoc]
+        have hleu : u ≤ (n : ℝ) + 2 + 1 := hu.2
+        have hAB : IntervalIntegrable (fun t : ℝ => k t * X (t - 1)) volume (2 : ℝ)
+            ((n : ℝ) + 2) :=
+          (hub 2 ((n : ℝ) + 2) (by linarith) (by norm_num) (by linarith)).intervalIntegrable
+        have hBC : IntervalIntegrable (fun t : ℝ => k t * X (t - 1)) volume ((n : ℝ) + 2) u :=
+          (hub ((n : ℝ) + 2) u (le_of_not_ge h) hc2 hleu).intervalIntegrable
+        rw [integral_add_adjacent_intervals hAB hBC]
+        congr 1
+        refine integral_congr (fun t ht => ?_)
+        rw [uIcc_of_le hu.1] at ht
+        have hle : t - 1 ≤ (n : ℝ) + 2 := by linarith [ht.2]
+        rw [hstep, if_pos hle]
+
+set_option maxHeartbeats 4000000 in
+/-- Global existence for the scalar delay equation `X' u = k u * X (u - 1)`
+with prescribed values on `[1, 2]`. -/
+private theorem delay_exists (k : ℝ → ℝ) (hk : ContinuousOn k (Set.Ici (2 : ℝ)))
+    (φ : ℝ → ℝ) (hφ : ContinuousOn φ (Set.Icc (1 : ℝ) 2)) :
+    ∃ X : ℝ → ℝ, ContinuousOn X (Set.Ici (1 : ℝ)) ∧
+      (∀ u ∈ Set.Icc (1 : ℝ) 2, X u = φ u) ∧
+      (∀ u : ℝ, 2 ≤ u → X u = X 2 + ∫ t in (2 : ℝ)..u, k t * X (t - 1)) := by
+  classical
+  have hex : ∀ N : ℕ, ∃ X : ℝ → ℝ,
+      ContinuousOn X (Set.Icc (1 : ℝ) ((N : ℝ) + 2)) ∧
+      (∀ u ∈ Set.Icc (1 : ℝ) (2 : ℝ), X u = φ u) ∧
+      (∀ u ∈ Set.Icc (2 : ℝ) ((N : ℝ) + 2),
+        X u = X 2 + ∫ t in (2 : ℝ)..u, k t * X (t - 1)) :=
+    delay_layer_exists k hk φ hφ
+  -- two layer solutions agree on the common interval
+  have agree : ∀ (N M : ℕ) (X Y : ℝ → ℝ),
+      (∀ u ∈ Set.Icc (1 : ℝ) 2, X u = φ u) →
+      (∀ u ∈ Set.Icc (2 : ℝ) ((N : ℝ) + 2),
+        X u = X 2 + ∫ t in (2 : ℝ)..u, k t * X (t - 1)) →
+      (∀ u ∈ Set.Icc (1 : ℝ) 2, Y u = φ u) →
+      (∀ u ∈ Set.Icc (2 : ℝ) ((M : ℝ) + 2),
+        Y u = Y 2 + ∫ t in (2 : ℝ)..u, k t * Y (t - 1)) →
+      ∀ u ∈ Set.Icc (1 : ℝ) (((min N M : ℕ) : ℝ) + 2), X u = Y u := by
+    intro N M X Y hXφ hXe hYφ hYe
+    have key : ∀ n : ℕ, n ≤ N → n ≤ M → ∀ u ∈ Set.Icc (1 : ℝ) ((n : ℝ) + 2), X u = Y u := by
+      intro n
+      induction n with
+      | zero =>
+        intro _ _ u hu
+        have hu2 : u ≤ 2 := by
+          simpa using hu.2
+        rw [hXφ u ⟨hu.1, hu2⟩, hYφ u ⟨hu.1, hu2⟩]
+      | succ n ih =>
+        intro hnN hnM u hu
+        have hidx : (((n + 1 : ℕ)) : ℝ) + 2 = (n : ℝ) + 2 + 1 := by push_cast; ring
+        rw [hidx] at hu
+        have hn0 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+        by_cases h : u ≤ (n : ℝ) + 2
+        · exact ih (by omega) (by omega) u ⟨hu.1, h⟩
+        · have hgt : (n : ℝ) + 2 < u := not_le.mp h
+          have hu2 : (2 : ℝ) ≤ u := by linarith
+          have hcast : ((n + 1 : ℕ) : ℝ) ≤ (N : ℝ) := by exact_mod_cast hnN
+          have hcastM : ((n + 1 : ℕ) : ℝ) ≤ (M : ℝ) := by exact_mod_cast hnM
+          have huN : u ≤ (N : ℝ) + 2 := by push_cast at hcast; linarith [hu.2]
+          have huM : u ≤ (M : ℝ) + 2 := by push_cast at hcastM; linarith [hu.2]
+          rw [hXe u ⟨hu2, huN⟩, hYe u ⟨hu2, huM⟩]
+          congr 1
+          · exact ih (by omega) (by omega) 2 ⟨by norm_num, by linarith⟩
+          · refine integral_congr (fun t ht => ?_)
+            rw [uIcc_of_le hu2] at ht
+            have ht1 : (1 : ℝ) ≤ t - 1 := by linarith [ht.1]
+            have ht2 : t - 1 ≤ (n : ℝ) + 2 := by linarith [ht.2, hu.2]
+            rw [ih (by omega) (by omega) (t - 1) ⟨ht1, ht2⟩]
+    intro u hu
+    refine key (min N M) (min_le_left _ _) (min_le_right _ _) u ⟨hu.1, ?_⟩
+    rw [Nat.cast_min] at hu ⊢
+    rcases le_total (N : ℝ) (M : ℝ) with h | h
+    · rw [min_eq_left h] at hu ⊢
+      exact hu.2
+    · rw [min_eq_right h] at hu ⊢
+      exact hu.2
+  choose Xc hXc using hex
+  -- the index of the layer used at a point
+  set Nf : ℝ → ℕ := fun u => max 1 ⌈u⌉₊ with hNfdef
+  have hNfbig : ∀ u : ℝ, u ≤ (Nf u : ℝ) + 2 := by
+    intro u
+    have h1 : u ≤ (⌈u⌉₊ : ℝ) := Nat.le_ceil u
+    have h2 : (⌈u⌉₊ : ℝ) ≤ (Nf u : ℝ) := by
+      rw [hNfdef]
+      exact_mod_cast le_max_right 1 ⌈u⌉₊
+    linarith
+  set X : ℝ → ℝ := fun u => Xc (Nf u) u with hXdef
+  have hXval : ∀ v : ℝ, X v = Xc (Nf v) v := fun v => congrFun hXdef v
+  have hXeq : ∀ (N M : ℕ) (u : ℝ), u ∈ Set.Icc (1 : ℝ) (((min N M : ℕ) : ℝ) + 2) →
+      Xc N u = Xc M u :=
+    fun N M u hu => agree N M (Xc N) (Xc M) (hXc N).2.1 (hXc N).2.2 (hXc M).2.1 (hXc M).2.2 u hu
+  have hmem : ∀ (N M : ℕ) (u : ℝ), 1 ≤ u → u ≤ (N : ℝ) + 2 → u ≤ (M : ℝ) + 2 →
+      u ∈ Set.Icc (1 : ℝ) (((min N M : ℕ) : ℝ) + 2) := by
+    intro N M u h1 hN hM
+    refine ⟨h1, ?_⟩
+    rw [Nat.cast_min]
+    rcases le_total (N : ℝ) (M : ℝ) with h | h
+    · rw [min_eq_left h]; linarith
+    · rw [min_eq_right h]; linarith
+  have hφX : ∀ u ∈ Set.Icc (1 : ℝ) 2, X u = φ u := by
+    intro u hu
+    rw [hXval]
+    exact (hXc (Nf u)).2.1 u hu
+  have hXint : ∀ u : ℝ, 2 ≤ u → X u = X 2 + ∫ t in (2 : ℝ)..u, k t * X (t - 1) := by
+    intro u hu
+    have hstep := (hXc (Nf u)).2.2 u ⟨hu, hNfbig u⟩
+    rw [hXval, hstep]
+    congr 1
+    · rw [hXval]
+      exact hXeq (Nf u) (Nf 2) 2
+        (hmem _ _ 2 (by norm_num) (by linarith [hNfbig u]) (hNfbig 2))
+    · refine integral_congr (fun t ht => ?_)
+      rw [uIcc_of_le hu] at ht
+      have ht1 : (1 : ℝ) ≤ t - 1 := by linarith [ht.1]
+      have htle : t - 1 ≤ (Nf u : ℝ) + 2 := by linarith [ht.2, hNfbig u]
+      rw [hXval]
+      rw [hXeq (Nf u) (Nf (t - 1)) (t - 1) (hmem _ _ _ ht1 htle (hNfbig (t - 1)))]
+  have hcontIcc : ∀ n : ℕ, ContinuousOn X (Set.Icc (1 : ℝ) ((n : ℝ) + 2)) := by
+    intro n
+    refine ((hXc n).1).congr ?_
+    intro u hu
+    rw [hXval]
+    exact hXeq (Nf u) n u (hmem _ _ _ hu.1 (hNfbig u) hu.2)
+  have hcont : ContinuousOn X (Set.Ici (1 : ℝ)) := by
+    intro u hu
+    obtain ⟨n, hn⟩ := exists_nat_gt u
+    have hun : Set.Icc (1 : ℝ) ((n : ℝ) + 2) ∪ Set.Ioi ((n : ℝ) + 2) = Set.Ici (1 : ℝ) := by
+      ext x
+      simp only [mem_union, Set.mem_Icc, Set.mem_Ioi, Set.mem_Ici]
+      constructor
+      · rintro (⟨h1, _⟩ | h)
+        · exact h1
+        · linarith
+      · intro hx
+        by_cases h : x ≤ (n : ℝ) + 2
+        · exact Or.inl ⟨hx, h⟩
+        · exact Or.inr (not_le.mp h)
+    rw [← hun]
+    refine ContinuousWithinAt.union (hcontIcc n u ⟨hu, by linarith⟩) ?_
+    refine continuousWithinAt_of_notMem_closure ?_
+    simp only [closure_Ioi, Set.mem_Ici]
+    linarith
+  exact ⟨X, hcont, hφX, hXint⟩
+
+set_option maxHeartbeats 1000000 in
+/-- Derivative form of the delay equation. -/
+private theorem delay_hasDerivAt (k : ℝ → ℝ) (hk : ContinuousOn k (Set.Ici (2 : ℝ)))
+    (X : ℝ → ℝ) (hX : ContinuousOn X (Set.Ici (1 : ℝ)))
+    (hint : ∀ u : ℝ, 2 ≤ u → X u = X 2 + ∫ t in (2 : ℝ)..u, k t * X (t - 1))
+    {u : ℝ} (hu : 2 < u) : HasDerivAt X (k u * X (u - 1)) u := by
+  have hfcont : ContinuousOn (fun t : ℝ => k t * X (t - 1)) (Set.Ici (2 : ℝ)) := by
+    intro x hx
+    have h1 : ContinuousWithinAt k (Set.Ici (2 : ℝ)) x := hk x hx
+    have h2 : ContinuousWithinAt (fun t : ℝ => X (t - 1)) (Set.Ici (2 : ℝ)) x := by
+      have hx2 : (2 : ℝ) ≤ x := hx
+      refine ContinuousWithinAt.comp (hX (x - 1) (by simp only [Set.mem_Ici]; linarith))
+        (continuous_id.sub continuous_const).continuousWithinAt ?_
+      intro t ht
+      simp only [Set.mem_Ici] at ht ⊢
+      linarith
+    exact h1.mul h2
+  have hcont2 : ContinuousOn (fun t : ℝ => k t * X (t - 1)) (uIcc (2 : ℝ) u) := by
+    rw [uIcc_of_le (le_of_lt hu)]
+    exact hfcont.mono (fun x hx => hx.1)
+  have hInt : IntervalIntegrable (fun t : ℝ => k t * X (t - 1)) volume (2 : ℝ) u :=
+    hcont2.intervalIntegrable
+  have hmeas : StronglyMeasurableAtFilter (fun t : ℝ => k t * X (t - 1)) (𝓝 u) :=
+    (ContinuousOn.stronglyMeasurableAtFilter isOpen_Ioi
+      (hfcont.mono (fun x hx => le_of_lt hx))) u (by simpa only [Set.mem_Ioi] using hu)
+  have hfu : ContinuousAt (fun t : ℝ => k t * X (t - 1)) u :=
+    hfcont.continuousAt (Ici_mem_nhds hu)
+  have h1 : HasDerivAt (fun v : ℝ => ∫ t in (2 : ℝ)..v, k t * X (t - 1))
+      (k u * X (u - 1)) u := intervalIntegral.integral_hasDerivAt_right hInt hmeas hfu
+  have h2 : HasDerivAt (fun v : ℝ => X 2 + ∫ t in (2 : ℝ)..v, k t * X (t - 1))
+      (k u * X (u - 1)) u := h1.const_add (X 2)
+  refine h2.congr_of_eventuallyEq ?_
+  filter_upwards [Ioi_mem_nhds hu] with v hv
+  exact hint v hv.le
+
+set_option maxHeartbeats 1000000 in
+/-- Buchstab's function exists (Wu 2004 Lemma 2.10). -/
+private theorem exists_buchstab : ∃ ω : ℝ → ℝ, IsBuchstab ω := by
+  have hk : ContinuousOn (fun t : ℝ => 1 / (t - 1)) (Set.Ici (2 : ℝ)) := by
+    intro x hx
+    have hx2 : (2 : ℝ) ≤ x := hx
+    have hx1 : (1 : ℝ) < x := by linarith
+    have hden : (0 : ℝ) < x - 1 := by linarith
+    exact (continuousAt_const.div (continuousAt_id.sub continuousAt_const)
+      (ne_of_gt hden)).continuousWithinAt
+  obtain ⟨X, hXc, hXφ, hXint⟩ :=
+    delay_exists (fun t : ℝ => 1 / (t - 1)) hk (fun _ => 1) continuousOn_const
+  refine ⟨fun u => X u / u, ?_, ?_, ?_⟩
+  · refine hXc.div continuousOn_id ?_
+    intro u hu
+    have hu1 : (1 : ℝ) ≤ u := hu
+    exact ne_of_gt (by linarith)
+  · intro u h1 h2
+    change X u / u = 1 / u
+    rw [hXφ u ⟨h1, h2⟩]
+  · intro u hu
+    have hderiv : HasDerivAt X (1 / (u - 1) * X (u - 1)) u :=
+      delay_hasDerivAt (fun t : ℝ => 1 / (t - 1)) hk X hXc hXint hu
+    have hval : (fun v : ℝ => v * (X v / v)) =ᶠ[𝓝 u] X := by
+      filter_upwards [isOpen_ne.mem_nhds (show u ≠ 0 by linarith)] with v hv
+      field_simp
+    have hd : HasDerivAt X (X (u - 1) / (u - 1)) u := by
+      convert hderiv using 1
+      field_simp
+    exact hd.congr_of_eventuallyEq hval
+
+set_option maxHeartbeats 2000000 in
+/-- The linear sieve pair exists (Wu 2004 equation 2.6). -/
+private theorem exists_linear_sieve : ∃ F f : ℝ → ℝ, IsLinearSieve F f := by
+  have hk1 : ContinuousOn (fun t : ℝ => 1 / (t - 1)) (Set.Ici (2 : ℝ)) := by
+    intro x hx
+    have hx2 : (2 : ℝ) ≤ x := hx
+    have hden : (0 : ℝ) < x - 1 := by linarith
+    exact (continuousAt_const.div (continuousAt_id.sub continuousAt_const)
+      (ne_of_gt hden)).continuousWithinAt
+  have hk2 : ContinuousOn (fun t : ℝ => -(1 / (t - 1))) (Set.Ici (2 : ℝ)) := hk1.neg
+  have hφ : ContinuousOn (fun _ : ℝ => 2 * exp eulerMascheroniConstant) (Set.Icc (1 : ℝ) 2) :=
+    continuousOn_const
+  obtain ⟨P, hPc, hPφ, hPint⟩ :=
+    delay_exists (fun t : ℝ => 1 / (t - 1)) hk1 _ hφ
+  obtain ⟨M, hMc, hMφ, hMint⟩ :=
+    delay_exists (fun t : ℝ => -(1 / (t - 1))) hk2 _ hφ
+  have hPderiv : ∀ u : ℝ, 2 < u → HasDerivAt P (P (u - 1) / (u - 1)) u := by
+    intro u hu
+    have h := delay_hasDerivAt (fun t : ℝ => 1 / (t - 1)) hk1 P hPc hPint hu
+    convert h using 1
+    field_simp
+  have hMderiv : ∀ u : ℝ, 2 < u → HasDerivAt M (-(M (u - 1) / (u - 1))) u := by
+    intro u hu
+    have h := delay_hasDerivAt (fun t : ℝ => -(1 / (t - 1))) hk2 M hMc hMint hu
+    convert h using 1
+    field_simp
+  set Pe : ℝ → ℝ := fun u => P (max u 1) with hPe
+  set Me : ℝ → ℝ := fun u => M (max u 1) with hMe
+  have hPec : Continuous Pe :=
+    hPc.comp_continuous (by fun_prop) (fun u => by
+      simp only [Set.mem_Ici]; exact le_max_right _ _)
+  have hMec : Continuous Me :=
+    hMc.comp_continuous (by fun_prop) (fun u => by
+      simp only [Set.mem_Ici]; exact le_max_right _ _)
+  set G : ℝ → ℝ := fun u => (Pe u + Me u) / 2 with hG
+  set g : ℝ → ℝ := fun u => (Pe u - Me u) / 2 with hg
+  have hPv : ∀ u ∈ Set.Icc (0 : ℝ) 2, Pe u = 2 * exp eulerMascheroniConstant := by
+    intro u hu
+    simp only [hPe]
+    exact hPφ (max u 1) ⟨le_max_right _ _, max_le hu.2 (by norm_num)⟩
+  have hMv : ∀ u ∈ Set.Icc (0 : ℝ) 2, Me u = 2 * exp eulerMascheroniConstant := by
+    intro u hu
+    simp only [hMe]
+    exact hMφ (max u 1) ⟨le_max_right _ _, max_le hu.2 (by norm_num)⟩
+  refine ⟨fun u => G u / u, fun u => g u / u, ?_, ?_, ?_, ?_⟩
+  · -- continuity of `F`
+    exact (hPec.add hMec).div_const 2 |>.continuousOn.div continuousOn_id
+      (fun u hu => ne_of_gt hu)
+  · -- continuity of `f`
+    exact (hPec.sub hMec).div_const 2 |>.continuousOn.div continuousOn_id
+      (fun u hu => ne_of_gt hu)
+  · -- the initial values
+    intro u hu1 hu2
+    have hPu := hPv u ⟨le_of_lt hu1, hu2⟩
+    have hMu := hMv u ⟨le_of_lt hu1, hu2⟩
+    constructor
+    · show G u / u = 2 * exp eulerMascheroniConstant / u
+      rw [hG]
+      simp only [hPu, hMu]
+      field_simp
+      norm_num
+    · show g u / u = 0
+      rw [hg]
+      simp only [hPu, hMu]
+      ring
+  · -- the differential relations
+    intro u hu
+    have h1gt : (1 : ℝ) < u := by linarith
+    have hPeq : Pe =ᶠ[𝓝 u] P := by
+      filter_upwards [Ioi_mem_nhds h1gt] with v hv
+      simp only [hPe]
+      rw [max_eq_left (le_of_lt hv)]
+    have hMeq : Me =ᶠ[𝓝 u] M := by
+      filter_upwards [Ioi_mem_nhds h1gt] with v hv
+      simp only [hMe]
+      rw [max_eq_left (le_of_lt hv)]
+    have hP1 : Pe (u - 1) = P (u - 1) := by
+      simp only [hPe]
+      rw [max_eq_left (by linarith : (1 : ℝ) ≤ u - 1)]
+    have hM1 : Me (u - 1) = M (u - 1) := by
+      simp only [hMe]
+      rw [max_eq_left (by linarith : (1 : ℝ) ≤ u - 1)]
+    have hPed : HasDerivAt Pe (P (u - 1) / (u - 1)) u :=
+      (hPderiv u hu).congr_of_eventuallyEq hPeq
+    have hMed : HasDerivAt Me (-(M (u - 1) / (u - 1))) u :=
+      (hMderiv u hu).congr_of_eventuallyEq hMeq
+    have hGfun : (fun v : ℝ => (Pe v + Me v) / 2) = G := by rw [hG]
+    have hgfun : (fun v : ℝ => (Pe v - Me v) / 2) = g := by rw [hg]
+    constructor
+    · dsimp only
+      have h0 : HasDerivAt (fun v : ℝ => (Pe v + Me v) / 2)
+          ((P (u - 1) / (u - 1) + -(M (u - 1) / (u - 1))) / 2) u :=
+        (hPed.add hMed).div_const 2
+      have hGd : HasDerivAt G
+          ((P (u - 1) / (u - 1) - M (u - 1) / (u - 1)) / 2) u := by
+        have h1 := hGfun ▸ h0
+        have hval : (P (u - 1) / (u - 1) + -(M (u - 1) / (u - 1))) / 2 =
+            (P (u - 1) / (u - 1) - M (u - 1) / (u - 1)) / 2 := by ring
+        rwa [hval] at h1
+      have hval : (fun v : ℝ => v * (G v / v)) =ᶠ[𝓝 u] G := by
+        filter_upwards [isOpen_ne.mem_nhds (show u ≠ 0 by linarith)] with v hv
+        field_simp
+      have hgoal : g (u - 1) / (u - 1) =
+          (P (u - 1) / (u - 1) - M (u - 1) / (u - 1)) / 2 := by
+        show (Pe (u - 1) - Me (u - 1)) / 2 / (u - 1) = _
+        rw [hP1, hM1]
+        field_simp
+      rw [hgoal]
+      exact hGd.congr_of_eventuallyEq hval
+    · dsimp only
+      have h0 : HasDerivAt (fun v : ℝ => (Pe v - Me v) / 2)
+          ((P (u - 1) / (u - 1) - -(M (u - 1) / (u - 1))) / 2) u :=
+        (hPed.sub hMed).div_const 2
+      have hgd : HasDerivAt g
+          ((P (u - 1) / (u - 1) + (M (u - 1) / (u - 1))) / 2) u := by
+        have h1 := hgfun ▸ h0
+        have hval : (P (u - 1) / (u - 1) - -(M (u - 1) / (u - 1))) / 2 =
+            (P (u - 1) / (u - 1) + M (u - 1) / (u - 1)) / 2 := by ring
+        rwa [hval] at h1
+      have hval : (fun v : ℝ => v * (g v / v)) =ᶠ[𝓝 u] g := by
+        filter_upwards [isOpen_ne.mem_nhds (show u ≠ 0 by linarith)] with v hv
+        field_simp
+      have hgoal : G (u - 1) / (u - 1) =
+          (P (u - 1) / (u - 1) + M (u - 1) / (u - 1)) / 2 := by
+        show (Pe (u - 1) + Me (u - 1)) / 2 / (u - 1) = _
+        rw [hP1, hM1]
+        field_simp
+      rw [hgoal]
+      exact hgd.congr_of_eventuallyEq hval
+
+end DelaySolver
+
 /-- LEAF. Wu 2004 page 6 equation 2.6 and page 9 Lemma 2.10.
 The standard linear sieve pair and Buchstab function exist. -/
 theorem standard_functions : ∃ F f ω : ℝ → ℝ, IsLinearSieve F f ∧ IsBuchstab ω := by
-  sorry
+  obtain ⟨F, f, hF⟩ := DelaySolver.exists_linear_sieve
+  obtain ⟨ω, hω⟩ := DelaySolver.exists_buchstab
+  exact ⟨F, f, ω, hF, hω⟩
 
 /-- LEAF. Wu 2004 pages 34 to 37 equation 9.4, specialized to page 42's parameters.
 Drop the four nonnegative terms and retain the stated power remainder. -/
