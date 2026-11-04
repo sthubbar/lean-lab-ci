@@ -1,6 +1,7 @@
 import Mathlib
 import LeanLab.ExceptionalSet.BrudernPerelli1998
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.PrimeKernel264
 
 /-!
 Decomposition of Theorem 1 of P0082, Brüdern and Perelli 1998, repaired in unit U-1610.
@@ -84,7 +85,43 @@ the major arcs or for the minor arcs: `majorInt + minorInt = r(F(n))`, the sum (
 theorem leaf_dyadic_split (γ δ κ c₀ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) (hδ : 0 < δ) (hκ : 0 < κ)
     (hc₀ : 0 < c₀) : ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
       blockCount γ (fun n => ¬ Solvable γ n) N ≤
-        Eγ_minor_block γ δ κ N + Eγ_major_block γ δ κ c₀ N := by sorry
+        Eγ_minor_block γ δ κ N + Eγ_major_block γ δ κ c₀ N := by
+  obtain ⟨N₀, hN₀⟩ := PrimeKernel264.split_parameters_eventually γ δ κ c₀ h1 h2 hδ hκ hc₀
+  refine ⟨N₀, fun N hN => ?_⟩
+  rcases hN₀ N hN with ⟨hP, hΔ, hΔ1, hsave⟩
+  have hX : 0 < F γ N := Real.exp_pos _
+  have hsplit (n : ℕ) (hn : ¬ Solvable γ n) :
+      (majorInt γ δ κ N n).re ≤ ‖minorInt γ δ κ N n‖ := by
+    simpa only [majorInt, minorInt] using
+      PrimeKernel264.nonsolution_split
+        (PrimeKernel264.measurableSet_majorArcs (F γ N ^ (6 * δ)) (F γ N))
+        (γ := γ) hΔ hΔ1 hP n hn
+  have hthreshold : F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) <
+      c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)) := by
+    calc
+      _ < F γ N * (c₀ * calE γ κ N ^ (-(1 / 10 : ℝ))) :=
+        mul_lt_mul_of_pos_left hsave hX
+      _ = _ := by ring
+  let L := (window γ N).filter (fun n =>
+    F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) < ‖minorInt γ δ κ N n‖)
+  let R := (window γ N).filter (fun n =>
+    (majorInt γ δ κ N n).re < c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))
+  unfold blockCount Eγ_minor_block Eγ_major_block
+  suffices hcard : ((window γ N).filter (fun n => ¬ Solvable γ n)).card ≤ L.card + R.card by
+    convert hcard using 1 <;> congr 2
+  calc
+    _ ≤ (L ∪ R).card := by
+      apply Finset.card_le_card
+      intro n hn
+      rcases Finset.mem_filter.mp hn with ⟨hnW, hnno⟩
+      by_cases hm : F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) < ‖minorInt γ δ κ N n‖
+      · exact Finset.mem_union.mpr (Or.inl (Finset.mem_filter.mpr ⟨hnW, hm⟩))
+      · apply Finset.mem_union.mpr
+        right
+        apply Finset.mem_filter.mpr
+        exact ⟨hnW, lt_of_le_of_lt ((hsplit n hnno).trans (le_of_not_gt hm)) hthreshold⟩
+    _ ≤ L.card + R.card := Finset.card_union_le _ _
+
 
 /-- LEAF page 366, the variance bound of section 5, from Theorem 2 with `c = 1 - 3δ`, Vinogradov's
 bound for `S` on `𝔫` and Chebyshev. The paper states the exceptions as `O(N ℰ^{-1/4})`; we ask only

@@ -1,0 +1,10 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "ortools": "9.15.6755",
+  "main": "91ef7f4bc79c0fc4ab00ab569a3f1756ff4b8231",
+  "workers": 1,
+  "memory_cap_gib": 7,
+  "search_start_utc": "2026-11-04 13:08:43 UTC",
+  "concurrent_mutator_during_first_benchmark": true
+}

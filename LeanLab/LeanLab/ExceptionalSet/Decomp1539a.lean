@@ -29,7 +29,7 @@ the lower end of display (56), p. 377, lacks a `+ log 2 / log N` that display (5
 and the choice `C < γ(1 - θ)` on p. 377 must read `1 + C < γ(1 - θ)` for `s ≤ γ (log N)^{γ-1}`.
 -/
 import Mathlib
-import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.State1539Data264
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -1516,9 +1516,6 @@ theorem theorem2_of_all_leaves (h10 : Lemma10) : Theorem2 :=
   theorem2_of_leaves h10
     (lemma16a_of_leaves lemma15_of_leaves)
     (lemma16b_of_leaves (lemma14_of_leaves (lemma13_of_leaves lemma11_of_leaves lemma12_of_leaves)))
-
-/-- Theorem 2 from the CITED `lemma10` of State1539 and the leaves. -/
-theorem theorem2_via_karacuba : Theorem2 := theorem2_of_all_leaves lemma10
 
 theorem section8_derivative_inputs : Lemma11 ∧ Lemma12 ∧ Lemma13 ∧ Lemma14 ∧ Lemma15 ∧ Lemma16a ∧ Lemma16b := by
   have h11 := lemma11_of_leaves

@@ -202,6 +202,38 @@ def token_scan(f, old, new, sealed):
             break
     return fails, reviews
 
+# 8. LEAF REPAIR, 2026-11-04 local Claude Code session for Steve: a FALSE internal leaf could only be fixed by the architect, since
+#    any statement change is rule 1 FAIL. A changed statement passes as REPAIR, not FAIL, only when ALL hold:
+#    a. the file path and short name are a line of REPAIR_ALLOW.tsv read from MAIN, never from the branch, so no branch authorizes itself;
+#    b. it is a theorem or lemma, OPEN at BASE (its body held sorry) and marked /-- LEAF at BASE: never a proved or top sealed statement;
+#    c. every file that names the leaf is changed by the branch, so check_branch.sh rebuilds each parent that uses it.
+#    Every other declaration stays sealed, so the parent and the top statement cannot change. The kernel build of the parent is the proof
+#    that the repair is sound; the new leaf's faithfulness to the paper is a STATEMENTS.md note, not a trust question.
+def repair_allow():
+    for ref in ("origin/main", "main"):
+        rc, t = sh(f"git show {ref}:REPAIR_ALLOW.tsv")
+        if rc == 0:
+            return {tuple(l.split("\t")[:2]) for l in t.splitlines() if l.strip() and not l.startswith("#") and l.count("\t") >= 1}
+    return set()
+def repair_ok(base, f, short, changed):
+    rc, old = sh(f"git show {base}:'{f}'")
+    if rc: return False, "the file is new on the branch"
+    m = re.search(r"^[ \t]*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|nonrec)\s+)*(?:theorem|lemma)\s+(?:\S+\.)?" + re.escape(short) + r"(?![\w'.])", old, re.M)
+    if not m: return False, "no theorem of that name at BASE"
+    doc = old[max(0, m.start() - 800):m.start()]; d = doc.rfind("/--")
+    if d == -1 or not re.match(r"/--\s*LEAF", doc[d:]): return False, "it is not marked /-- LEAF at BASE"
+    t = strip_comments(old); ms = [x for x in DECL.finditer(t) if (x.group(2) or "").split(".")[-1] == short]
+    if not ms: return False, "no declaration of that name at BASE"
+    nxt = DECL.search(t, ms[0].end()); body = t[ms[0].start():nxt.start() if nxt else len(t)]
+    if not re.search(r"\bsorry\b", body): return False, "it was already proved at BASE"
+    rc, users = sh(f"git grep -l -w -e '{short}' HEAD -- 'LeanLab/LeanLab/*.lean'")
+    users = [u.split(":", 1)[-1] for u in users.split() if u]
+    # old/ copies are never built, and a mention in a comment or string uses nothing: count code mentions in built files only
+    users = [u for u in users if "/old/" not in u and re.search(r"(?<![\w'.])(?:\S+\.)?" + re.escape(short) + r"(?![\w'])", strip_comments(sh(f"git show HEAD:'{u}'")[1], True))]
+    stale = [u for u in users if u not in changed]
+    if stale: return False, "it is named in files the branch leaves unchanged, so their parents would not be rebuilt: " + ", ".join(stale[:4])
+    return True, f"OPEN LEAF at BASE, users {len(users)} all rebuilt by check_branch"
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else sh("git merge-base HEAD origin/main")[1].strip()
     if not base:
@@ -226,9 +258,14 @@ def main():
             for l in fl + rv: print(l)
             fails += len(fl); reviews += len(rv)
     # a declaration moved between changed files keeps its name: compare across all changed files together
+    allow = repair_allow(); repairs = 0
     for k, s in A.items():
         if k not in B:
             print(f"FAIL removed {k[1]} {k[0]}"); fails += 1
+        elif B[k] != s and allow and k[1] in ("theorem", "lemma") and (where[k], k[0].split(".")[-1]) in allow:
+            ok, why = repair_ok(base, where[k], k[0].split(".")[-1], [x for x in files.split() if x])
+            if ok: print(f"REPAIR changed leaf {k[1]} {k[0]} in {where[k]}, listed in REPAIR_ALLOW.tsv on main; {why}\n  was: {s[:300]}\n  now: {B[k][:300]}"); repairs += 1
+            else: print(f"FAIL changed {k[1]} {k[0]} in {where[k]}, listed in REPAIR_ALLOW.tsv but {why}\n  was: {s[:300]}\n  now: {B[k][:300]}"); fails += 1
         elif B[k] != s:
             print(f"FAIL changed {k[1]} {k[0]} in {where[k]}\n  was: {s[:300]}\n  now: {B[k][:300]}"); fails += 1
     for k, s in FA.items():
@@ -246,7 +283,7 @@ def main():
             print(f"REVIEW new {kind} {k[0]} in {where[k]}: {s[:300]}"); reviews += 1
     if fails: print(f"SEAL FAIL {fails}"); return 1
     if reviews: print(f"SEAL REVIEW {reviews}"); return 0
-    print("SEAL PASS"); return 0
+    print(f"SEAL PASS REPAIR {repairs}" if repairs else "SEAL PASS"); return 0
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,0 +1,276 @@
+{
+  "batches": [
+    {
+      "batch": "task288-01",
+      "scored": 617,
+      "statuses": {
+        "FINISHED": 1
+      },
+      "iterations": 5811272,
+      "encodings": {},
+      "best_ratio": "85/294",
+      "best_miss": 1
+    },
+    {
+      "batch": "task288-02",
+      "scored": 1,
+      "statuses": {
+        "CONTROL_PASSED": 1
+      },
+      "iterations": 0,
+      "encodings": {},
+      "best_ratio": "41/484",
+      "best_miss": 94
+    },
+    {
+      "batch": "task288-03",
+      "scored": 15,
+      "statuses": {
+        "FEASIBLE": 7,
+        "OPTIMAL": 8,
+        "UNKNOWN": 3
+      },
+      "iterations": 0,
+      "encodings": {
+        "clauses": {
+          "solves": 6,
+          "build_seconds": 1.819885915000043,
+          "solve_seconds": 21.600425176999998,
+          "branches": 390154,
+          "scored": 5,
+          "miss": 44
+        },
+        "shared": {
+          "solves": 6,
+          "build_seconds": 2.3683591120000074,
+          "solve_seconds": 25.260038256,
+          "branches": 421721,
+          "scored": 5,
+          "miss": 44
+        },
+        "exact": {
+          "solves": 6,
+          "build_seconds": 2.538251872000046,
+          "solve_seconds": 25.607188171,
+          "branches": 307773,
+          "scored": 5,
+          "miss": 43
+        }
+      },
+      "best_ratio": "85/294",
+      "best_miss": 1
+    },
+    {
+      "batch": "task288-04",
+      "scored": 308,
+      "statuses": {
+        "ENUMERATED": 411
+      },
+      "iterations": 0,
+      "encodings": {},
+      "best_ratio": "85/294",
+      "best_miss": 1
+    },
+    {
+      "batch": "task288-05",
+      "scored": 50,
+      "statuses": {
+        "FEASIBLE": 25,
+        "OPTIMAL": 25
+      },
+      "iterations": 0,
+      "encodings": {
+        "clauses": {
+          "solves": 50,
+          "build_seconds": 27.970298684000113,
+          "solve_seconds": 773.3066536079999,
+          "branches": 7926336,
+          "scored": 50,
+          "miss": 442
+        }
+      },
+      "best_ratio": "37/128",
+      "best_miss": 1
+    },
+    {
+      "batch": "task288-06",
+      "scored": 1,
+      "statuses": {
+        "ENUMERATOR_CONTROL_PASSED": 1
+      },
+      "iterations": 0,
+      "encodings": {},
+      "best_ratio": "17/242",
+      "best_miss": 95
+    },
+    {
+      "batch": "task288-10",
+      "scored": 1,
+      "statuses": {
+        "STEP_CONTROL_PASSED": 1
+      },
+      "iterations": 0,
+      "encodings": {},
+      "best_ratio": "41/484",
+      "best_miss": 94
+    },
+    {
+      "batch": "task288-11",
+      "scored": 10,
+      "statuses": {
+        "FEASIBLE": 10,
+        "UNKNOWN": 8
+      },
+      "iterations": 0,
+      "encodings": {
+        "clauses": {
+          "solves": 6,
+          "build_seconds": 5.929134067999826,
+          "solve_seconds": 29.787426957000005,
+          "branches": 348103,
+          "scored": 4,
+          "miss": 35
+        },
+        "shared": {
+          "solves": 6,
+          "build_seconds": 5.7877540819998785,
+          "solve_seconds": 28.877992655000003,
+          "branches": 243581,
+          "scored": 3,
+          "miss": 7
+        },
+        "exact": {
+          "solves": 6,
+          "build_seconds": 5.807216899000309,
+          "solve_seconds": 30.447846022,
+          "branches": 253340,
+          "scored": 3,
+          "miss": 7
+        }
+      },
+      "best_ratio": "85/294",
+      "best_miss": 1
+    },
+    {
+      "batch": "task288-12",
+      "scored": 1,
+      "statuses": {
+        "FIXED_STEP_HINT_CONTROL_PASSED": 1
+      },
+      "iterations": 0,
+      "encodings": {},
+      "best_ratio": "899/7200",
+      "best_miss": 34
+    }
+  ],
+  "scored": 1004,
+  "distinct": 407,
+  "program_records_checked": 1004,
+  "lengths": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120
+  ],
+  "BEATS": 0,
+  "independent_coverage": "MATCH"
+}

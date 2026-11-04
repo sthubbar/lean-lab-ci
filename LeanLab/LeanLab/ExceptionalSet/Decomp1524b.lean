@@ -1,5 +1,5 @@
 /-
-CODEX task85 status: nine original leaves now have proofs. Only gallagher_lemma remains open. The major arc approximation is conditional on its explicit progression discrepancy hypothesis.
+CODEX task264 status: all ten original leaves have proofs. Gallagher uses the Fourier integral Parseval bridge in WindowParseval264. The major arc approximation is conditional on its explicit progression discrepancy hypothesis.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 /-
@@ -25,6 +25,7 @@ AI-written Lean code, Claude, unit U-1524. Checked only by the Lean kernel.
 KNOWN mathematics. Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.Decomp1524a
+import LeanLab.ExceptionalSet.WindowParseval264
 import LeanLab.PNTPort.Vinogradov.MajorArc
 import LeanLab.Xi2012.Ramanujan
 import LeanLab.HardyLittlewood1923.CharacterExpansion
@@ -249,7 +250,23 @@ theorem gallagher_lemma (s : Finset ℤ) (a : ℤ → ℂ) {T : ℝ} (hT : 0 < T
     ∫ t in (-T)..T, ‖trig s a t‖ ^ 2 ≤
       π ^ 2 * T ^ 2 * ∫ x : ℝ, ‖∑ n ∈ s.filter (fun n : ℤ => x < (n : ℝ) ∧ (n : ℝ) ≤ x + 1 / (2 * T)),
         a n‖ ^ 2 := by
-  sorry
+  have he (t : ℝ) : trig s a (-t) = ∑ n ∈ s, a n *
+      Complex.exp ((-2 * π * t * Complex.I) * (n : ℝ)) := by
+    unfold trig e
+    apply Finset.sum_congr rfl
+    intro n hn
+    congr 2
+    push_cast
+    ring
+  have hi : (∫ t in (-T)..T, ‖trig s a t‖ ^ 2) =
+      ∫ t in (-T)..T, ‖trig s a (-t)‖ ^ 2 := by
+    simpa only [neg_neg] using
+      (intervalIntegral.integral_comp_neg (fun t : ℝ => ‖trig s a t‖ ^ 2)
+        (a := -T) (b := T)).symm
+  rw [hi]
+  simp_rw [he]
+  have h := WindowParseval264.window_bound s a hT
+  simpa only [WindowParseval264.window_eq_sum_filter] using h
 
 /-- LEAF. Expansion of `e(an/q)` into characters: for `q ≥ 1`, `(a,q) = (n,q) = 1`,
 `e(an/q) = φ(q)⁻¹ Σ_{χ mod q} χ(a) χ(n) τ(χ̄)`. Davenport, Mult. Number Theory, Ch. 9, (1)-(2);

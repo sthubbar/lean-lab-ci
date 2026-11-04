@@ -1,0 +1,32 @@
+{
+  "batches": [
+    {
+      "batch": "task288-02",
+      "scored": 1,
+      "statuses": {
+        "CONTROL_PASSED": 1
+      },
+      "iterations": 0,
+      "encodings": {},
+      "best_ratio": "41/484",
+      "best_miss": 94
+    },
+    {
+      "batch": "task288-03",
+      "scored": 0,
+      "statuses": {},
+      "iterations": 0,
+      "encodings": {},
+      "best_ratio": null,
+      "best_miss": null
+    }
+  ],
+  "scored": 1,
+  "distinct": 1,
+  "program_records_checked": 1,
+  "lengths": [
+    22
+  ],
+  "BEATS": 0,
+  "independent_coverage": "MATCH"
+}

@@ -1,0 +1,12 @@
+{
+  "scored": 2289,
+  "distinct": 737,
+  "program_records_checked": 2146,
+  "BEATS": 0,
+  "independent_coverage": "MATCH",
+  "program_proposals": 22261075,
+  "cardinality_tuple_visits": 1461587,
+  "annealer_iterations": 673185792,
+  "observed_complete_utc": "2026-11-04 14:11:02 UTC",
+  "batches": 17
+}
