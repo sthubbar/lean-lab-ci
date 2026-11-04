@@ -1490,6 +1490,908 @@ theorem task194_first_affine_term (N : ℝ) (q : ℕ) (hN : exp 30.95 ≤ N) (hq
   rw [Real.rpow_neg hq0.le, hqhalf]
   ring
 
+open Real Vaughan109 U1543 Finset
+
+/-- `√2 ≥ 1.4142`. -/
+private lemma wip_sqrt_two_lb : (1.4142 : ℝ) ≤ √2 :=
+  (Real.le_sqrt (by norm_num) (by norm_num)).mpr (by norm_num)
+
+/-- The tail sum `∑ (√2)^j` is dominated by its last term. -/
+private lemma wip_geom_sqrt_two (J : ℕ) (hJ : 1 ≤ J) :
+    (∑ j ∈ range J, (√2 : ℝ) ^ j) ≤ 3.415 * (√2 : ℝ) ^ (J - 1) := by
+  have hpos : (0 : ℝ) < √2 - 1 := by
+    have h := wip_sqrt_two_lb
+    linarith
+  have hsum : (∑ j ∈ range J, (√2 : ℝ) ^ j) * (√2 - 1) = (√2 : ℝ) ^ J - 1 :=
+    geom_sum_mul (√2) J
+  have h3 : √2 ≤ 3.415 * (√2 - 1) := by
+    have h := wip_sqrt_two_lb
+    linarith
+  have h1 : (∑ j ∈ range J, (√2 : ℝ) ^ j) * (√2 - 1) ≤
+      ((√2 : ℝ) ^ (J - 1) * 3.415) * (√2 - 1) := by
+    have h2 : (√2 : ℝ) ^ J = (√2 : ℝ) ^ (J - 1) * √2 := by
+      conv_lhs => rw [show J = (J - 1) + 1 by omega]
+      rw [pow_succ]
+    rw [hsum, h2]
+    have h4 : (0 : ℝ) ≤ (√2 : ℝ) ^ (J - 1) := by positivity
+    nlinarith [h3, h4]
+  have h5 := le_of_mul_le_mul_right h1 hpos
+  simpa [mul_comm] using h5
+
+/-- The decreasing tail sum `∑ (1/√2)^j` is bounded by `3.42`. -/
+private lemma wip_geom_inv_sqrt_two (J : ℕ) :
+    (∑ j ∈ range J, ((√2 : ℝ))⁻¹ ^ j) ≤ 3.42 := by
+  have hrec : (√2 : ℝ)⁻¹ ≤ 1 / 1.4142 := by
+    have h := one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 1.4142) wip_sqrt_two_lb
+    simpa [one_div] using h
+  have h1 : (1 - (√2 : ℝ)⁻¹) * (∑ j ∈ range J, ((√2 : ℝ))⁻¹ ^ j) =
+      1 - ((√2 : ℝ))⁻¹ ^ J := by
+    have hsum : (∑ j ∈ range J, ((√2 : ℝ))⁻¹ ^ j) * ((√2 : ℝ)⁻¹ - 1) =
+        ((√2 : ℝ))⁻¹ ^ J - 1 := geom_sum_mul _ J
+    nlinarith [hsum]
+  have h2 : (0 : ℝ) < 1 - (√2 : ℝ)⁻¹ := by linarith
+  have h3 : (0 : ℝ) < ((√2 : ℝ))⁻¹ ^ J := pow_pos (by positivity) J
+  have h4 : (1 - (√2 : ℝ)⁻¹) * 3.42 ≥ 1 := by linarith
+  nlinarith [h1, h2, h3, h4]
+
+/-- The last dyadic weight is at most the square root of the outer scale. -/
+private lemma wip_sqrt_two_pow_le (N : ℝ) (hNp : 0 < N) (hU : 0 < U N) (hV : 0 < V N)
+    (hJ1 : 1 ≤ Jn ⌊N⌋₊ (U N) (V N))
+    (hwin : ((Jn ⌊N⌋₊ (U N) (V N) : ℝ) - 1) * log 2 ≤ log (N / (U N * V N))) :
+    (√2 : ℝ) ^ (Jn ⌊N⌋₊ (U N) (V N) - 1) ≤ √(N / (U N * V N)) := by
+  have hx : 0 < N / (U N * V N) := by positivity
+  have hcast : (((Jn ⌊N⌋₊ (U N) (V N) - 1 : ℕ)) : ℝ) =
+      (Jn ⌊N⌋₊ (U N) (V N) : ℝ) - 1 := by
+    rw [Nat.cast_sub hJ1, Nat.cast_one]
+  have heq : (√2 : ℝ) ^ (Jn ⌊N⌋₊ (U N) (V N) - 1)
+      = exp ((((Jn ⌊N⌋₊ (U N) (V N) - 1 : ℕ)) : ℝ) * (log 2 / 2)) := by
+    rw [show log 2 / 2 = Real.log (√2 : ℝ) by
+      rw [Real.log_sqrt (by norm_num)]]
+    rw [Real.exp_nat_mul, Real.exp_log (by positivity : (0 : ℝ) < √2)]
+  rw [heq]
+  have hstep : (((Jn ⌊N⌋₊ (U N) (V N) - 1 : ℕ)) : ℝ) * (log 2 / 2) ≤
+      log (N / (U N * V N)) / 2 := by
+    rw [hcast]
+    linarith
+  refine (Real.exp_le_exp.mpr hstep).trans (le_of_eq ?_)
+  rw [show exp (log (N / (U N * V N)) / 2) = √(N / (U N * V N)) by
+    rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos hx]
+    congr 1
+    ring]
+
+/-- `√(2^j) = (√2)^j`. -/
+private lemma wip_sqrt_two_pow (j : ℕ) : √((2 : ℝ) ^ j) = (√2 : ℝ) ^ j := by
+  induction j with
+  | zero => simp
+  | succ n ih => rw [pow_succ, pow_succ, Real.sqrt_mul (by positivity), ih]
+
+/-- `√(N²/U) · log N = B N`. -/
+private lemma wip_sqrt_sq_le (N : ℝ) (hNp : 0 < N) (hU : 0 < U N)
+    (hlu : log (U N) = 2 / 5 * log N - 4 / 5 * log (log N)) (hLp : 0 < log N) :
+    √(N ^ 2 / U N) * log N = B N := by
+  have hx0 : (0 : ℝ) < N ^ 2 / U N := by positivity
+  have hx : 0 < √(N ^ 2 / U N) * log N :=
+    mul_pos (Real.sqrt_pos.mpr hx0) hLp
+  have hy : 0 < B N := by
+    unfold B
+    exact mul_pos (Real.rpow_pos_of_pos hNp _) (Real.rpow_pos_of_pos hLp _)
+  refine Real.log_injOn_pos (Set.mem_Ioi.mpr hx) (Set.mem_Ioi.mpr hy) ?_
+  rw [Real.log_mul (Real.sqrt_pos.mpr hx0).ne' hLp.ne', Real.log_sqrt hx0.le,
+    Real.log_div (by positivity) hU.ne', Real.log_pow]
+  unfold B
+  rw [Real.log_mul (by positivity) (Real.rpow_pos_of_pos hLp _).ne', Real.log_rpow hNp,
+    Real.log_rpow hLp]
+  push_cast
+  linarith
+
+/-- `B N · √(V N) = N · (log N)^{3/2}`. -/
+private lemma wip_B_sqrtV (N : ℝ) (hNp : 0 < N) (hV : 0 < V N)
+    (hlv : log (V N) = 2 / 5 * log N + 1 / 5 * log (log N)) (hLp : 0 < log N) :
+    B N * √(V N) = N * log N ^ (3 / 2 : ℝ) := by
+  have hB : 0 < B N := by
+    unfold B
+    exact mul_pos (Real.rpow_pos_of_pos hNp _) (Real.rpow_pos_of_pos hLp _)
+  have hx : 0 < B N * √(V N) := mul_pos hB (Real.sqrt_pos.mpr hV)
+  have hy : 0 < N * log N ^ (3 / 2 : ℝ) :=
+    mul_pos hNp (Real.rpow_pos_of_pos hLp _)
+  refine Real.log_injOn_pos (Set.mem_Ioi.mpr hx) (Set.mem_Ioi.mpr hy) ?_
+  rw [Real.log_mul hB.ne' (Real.sqrt_pos.mpr hV).ne', Real.log_sqrt hV.le]
+  unfold B
+  rw [Real.log_mul (by positivity) (Real.rpow_pos_of_pos hLp _).ne', Real.log_rpow hNp,
+    Real.log_rpow hLp, hlv, Real.log_mul hNp.ne' (Real.rpow_pos_of_pos hLp _).ne',
+    Real.log_rpow hLp]
+  ring
+
+/-- `T = log (N/(U N V N))` in terms of `log N`, and an upper bound. -/
+private lemma wip_T_bound (N : ℝ) (hNp : 0 < N) (hU : 0 < U N) (hV : 0 < V N)
+    (hLp : 0 < log N)
+    (hlu : log (U N) = 2 / 5 * log N - 4 / 5 * log (log N))
+    (hlv : log (V N) = 2 / 5 * log N + 1 / 5 * log (log N)) :
+    log (N / (U N * V N)) = log N / 5 + 3 / 5 * log (log N) ∧
+      log (N / (U N * V N)) ≤ 0.2194 * log N + 1.4595 := by
+  have hUVp : 0 < U N * V N := mul_pos hU hV
+  have hform : log (N / (U N * V N)) = log N / 5 + 3 / 5 * log (log N) := by
+    rw [log_div hNp.ne' hUVp.ne', log_mul hU.ne' hV.ne', hlu, hlv]
+    ring
+  refine ⟨hform, ?_⟩
+  have hloglog : log (log N) ≤ 2.4325 + log N / 30.95 := by
+    have h1 : log (log N / 30.95) = log (log N) - log (30.95 : ℝ) :=
+      log_div hLp.ne' (by norm_num)
+    have h2 := log_le_sub_one_of_pos (show (0 : ℝ) < log N / 30.95 by positivity)
+    have h3 : log (30.95 : ℝ) ≤ 3.4325 := Decomp109b.log_endpoint
+    linarith
+  have h6 : 3 / 5 * log (log N) ≤ 3 / 5 * (2.4325 + log N / 30.95) :=
+    mul_le_mul_of_nonneg_left hloglog (by norm_num)
+  have h7 : (3:ℝ) / 5 * (2.4325 + log N / 30.95) ≤ 1.4595 + 0.0194 * log N := by
+    have h8 : (3:ℝ) / 5 * (log N / 30.95) = (12 / 619 : ℝ) * log N := by
+      field_simp
+      ring
+    have h9 : (12 / 619 : ℝ) ≤ 0.0194 := by norm_num
+    nlinarith [h8, h9]
+  rw [hform]
+  linarith [h6, h7]
+
+set_option maxHeartbeats 4000000 in
+/-- Second kernel: `√5 · √(2^j V)` contributes at most `1.70 · B N`. -/
+private lemma wip_T2 (N : ℝ) (hN : exp 30.95 ≤ N) :
+    √(0.6111 * N) * √5 *
+      (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))
+      ≤ 1.70 * B N := by
+  have hNp : 0 < N := (exp_pos _).trans_le hN
+  have hL : 30.95 ≤ log N := (le_log_iff_exp_le hNp).mpr hN
+  have hLp : 0 < log N := by linarith
+  obtain ⟨-, hU, hV, hlu, hlv⟩ := task194_logs N hNp hL
+  have hUVp : 0 < U N * V N := mul_pos hU hV
+  obtain ⟨hTform, hTle⟩ := wip_T_bound N hNp hU hV hLp hlu hlv
+  have hJwin := task194_J_window N hN
+  set J := Jn ⌊N⌋₊ (U N) (V N) with hJdef
+  have hJ1 : 1 ≤ J := by rw [hJdef]; unfold Jn; omega
+  have hT6 : (6.1 : ℝ) ≤ log (N / (U N * V N)) := by
+    rw [hTform]
+    have h1 : 0 ≤ log (log N) := log_nonneg (by linarith)
+    nlinarith
+  have hJ2 : 3 ≤ J := by
+    have h2 : log (N / (U N * V N)) ≤ (J : ℝ) * log 2 + 0.001 := hJwin.2
+    have h3 : log 2 ≤ 0.6932 := by linarith [Real.log_two_lt_d9]
+    have h4 : (J : ℝ) * 0.6932 ≥ (J : ℝ) * log 2 :=
+      mul_le_mul_of_nonneg_left h3 (by positivity)
+    have h5 : (3 : ℝ) ≤ (J : ℝ) := by nlinarith
+    exact_mod_cast h5
+  have hwin : ((J : ℝ) - 1) * log 2 ≤ log (N / (U N * V N)) := hJwin.1
+  have hT0 : 0 ≤ log (N / (U N * V N)) := by
+    apply log_nonneg
+    rw [le_div_iff₀ hUVp]
+    have h1 := task194_floor_UV N hN
+    have h2 : (⌊N⌋₊ : ℝ) ≤ N := Nat.floor_le hNp.le
+    linarith
+  have hlog2 : (0 : ℝ) < log 2 := log_pos (by norm_num)
+  have hwle : ∀ j ∈ range J,
+      √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) ≤
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) := by
+    intro j hj
+    apply Real.sqrt_le_sqrt
+    have hj0 : (0 : ℝ) ≤ (j : ℝ) := by positivity
+    nlinarith [mul_nonneg hj0 hlog2.le, hLp]
+  have hsplit : ∀ j : ℕ, √((2 : ℝ) ^ j * V N) = (√2 : ℝ) ^ j * √(V N) := by
+    intro j
+    rw [Real.sqrt_mul (by positivity), wip_sqrt_two_pow j]
+  have hV2 : (0 : ℝ) ≤ √(V N) := Real.sqrt_nonneg _
+  have hs0 : (0 : ℝ) ≤ log (N / (U N * V N)) + 0.384 := by linarith
+  -- the three retained weights
+  have hcast : (((J - 1 : ℕ)) : ℝ) = (J : ℝ) - 1 := by
+    rw [Nat.cast_sub hJ1, Nat.cast_one]
+  have hcast2 : (((J - 2 : ℕ)) : ℝ) = (J : ℝ) - 2 := by
+    have h : 2 ≤ J := by omega
+    rw [Nat.cast_sub h]; simp
+  have hs1 : log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 1) * log 2 ≤ 1.079 := by
+    have h2 : log (N / (U N * V N)) ≤ (J : ℝ) * log 2 + 0.001 := hJwin.2
+    have h3 : log 2 ≤ 0.6932 := by linarith [Real.log_two_lt_d9]
+    nlinarith
+  have hs2 : log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 2) * log 2 ≤ 1.7725 := by
+    have h3 : log 2 ≤ 0.6932 := by linarith [Real.log_two_lt_d9]
+    nlinarith [hs1, h3]
+  have hw1 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 1) * log 2))
+      ≤ 1.0388 * √(0.5 * log N) := by
+    have harg : 0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 1) * log 2)
+        ≤ 1.079 * (0.5 * log N) := by nlinarith [hs1, hLp]
+    have h1 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 1) * log 2))
+        ≤ √(1.079 * (0.5 * log N)) := Real.sqrt_le_sqrt harg
+    refine h1.trans ?_
+    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 1.079)]
+    have h5 : √(1.079 : ℝ) ≤ 1.0388 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+    have h6 : (0 : ℝ) ≤ √(0.5 * log N) := Real.sqrt_nonneg _
+    nlinarith [h5, h6, mul_le_mul_of_nonneg_right h5 h6]
+  have hw2 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 2) * log 2))
+      ≤ 1.332 * √(0.5 * log N) := by
+    have harg : 0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 2) * log 2)
+        ≤ 1.7725 * (0.5 * log N) := by nlinarith [hs2, hLp]
+    have h1 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 2) * log 2))
+        ≤ √(1.7725 * (0.5 * log N)) := Real.sqrt_le_sqrt harg
+    refine h1.trans ?_
+    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 1.7725)]
+    have h5 : √(1.7725 : ℝ) ≤ 1.332 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+    have h6 : (0 : ℝ) ≤ √(0.5 * log N) := Real.sqrt_nonneg _
+    nlinarith [h5, h6, mul_le_mul_of_nonneg_right h5 h6]
+  -- split off the last two terms
+  have hsplit_sum : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))
+      = (∑ j ∈ range (J - 2),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N)) +
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 2) * log 2)) *
+          √(2 ^ (J - 2) * V N) +
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 1) * log 2)) *
+          √(2 ^ (J - 1) * V N) := by
+    have e1 := Finset.sum_range_succ
+      (fun j => √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N)) (J - 1)
+    have e2 := Finset.sum_range_succ
+      (fun j => √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N)) (J - 2)
+    rw [show (J - 1) + 1 = J by omega, hcast] at e1
+    rw [show (J - 2) + 1 = J - 1 by omega, hcast2] at e2
+    rw [e1, e2]
+    try ring
+  have hpart : (∑ j ∈ range (J - 2),
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))
+      ≤ (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) * √(V N)) *
+          (3.415 * (√2 : ℝ) ^ (J - 3)) := by
+    have hA : (∑ j ∈ range (J - 2),
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))
+        ≤ ∑ j ∈ range (J - 2),
+          (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) * √(V N)) * (√2 : ℝ) ^ j := by
+      apply sum_le_sum
+      intro j hj
+      have hmem : j ∈ range J := by
+        apply mem_range.mpr
+        have := mem_range.mp hj
+        omega
+      rw [hsplit j]
+      calc √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) *
+            ((√2 : ℝ) ^ j * √(V N))
+          ≤ √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) * ((√2 : ℝ) ^ j * √(V N)) := by
+            apply mul_le_mul_of_nonneg_right (hwle j hmem)
+            positivity
+        _ = (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) * √(V N)) * (√2 : ℝ) ^ j := by
+            ring
+    refine hA.trans ?_
+    rw [← Finset.mul_sum]
+    refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+    have hg := wip_geom_sqrt_two (J - 2) (by omega)
+    have he : (J - 2) - 1 = J - 3 := by omega
+    rwa [he] at hg
+  have ht2 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 2) * log 2)) *
+        √(2 ^ (J - 2) * V N) ≤ (1.332 * √(0.5 * log N)) * ((√2 : ℝ) ^ (J - 2) * √(V N)) := by
+    rw [hsplit (J - 2)]
+    exact mul_le_mul_of_nonneg hw2 le_rfl (by positivity) (by positivity)
+  have ht1 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((J : ℝ) - 1) * log 2)) *
+        √(2 ^ (J - 1) * V N) ≤ (1.0388 * √(0.5 * log N)) * ((√2 : ℝ) ^ (J - 1) * √(V N)) := by
+    rw [hsplit (J - 1)]
+    exact mul_le_mul_of_nonneg hw1 le_rfl (by positivity) (by positivity)
+  have hr1 : (√2 : ℝ) ^ (J - 1) ≤ √(N / (U N * V N)) :=
+    wip_sqrt_two_pow_le N hNp hU hV hJ1 hwin
+  have hp1 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) =
+      √(log (N / (U N * V N)) + 0.384) * √(0.5 * log N) := by
+    rw [Real.sqrt_mul (x := 0.5 * log N) (by positivity)]
+    ring
+  have hr3 : (√2 : ℝ) ^ (J - 3) = (√2 : ℝ) ^ (J - 1) / 2 := by
+    have h1 : (√2 : ℝ) ^ (J - 1) = (√2 : ℝ) ^ (J - 3) * (√2) ^ 2 := by
+      rw [show J - 1 = (J - 3) + 2 by omega, pow_add]
+    have h2 : (√2 : ℝ) ^ 2 = 2 := by
+      rw [pow_two, Real.mul_self_sqrt (by norm_num)]
+    rw [h1, h2]
+    field_simp
+  have hr2 : (√2 : ℝ) ^ (J - 2) = (√2 : ℝ) ^ (J - 1) / √2 := by
+    have h1 : (√2 : ℝ) ^ (J - 1) = (√2 : ℝ) ^ (J - 2) * √2 := by
+      rw [show J - 1 = (J - 2) + 1 by omega, pow_succ]
+    rw [h1]
+    field_simp
+  have hbig : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))
+      ≤ √(V N) * √(N / (U N * V N)) * √(0.5 * log N) *
+          (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) := by
+    have h1 : (0 : ℝ) ≤ √(V N) := hV2
+    have h2 : (0 : ℝ) ≤ √(N / (U N * V N)) := Real.sqrt_nonneg _
+    have h3 : (0 : ℝ) ≤ √(0.5 * log N) := Real.sqrt_nonneg _
+    have h4 : (0 : ℝ) ≤ √(log (N / (U N * V N)) + 0.384) := Real.sqrt_nonneg _
+    have h5 : (0 : ℝ) ≤ (√2 : ℝ) ^ (J - 1) := by positivity
+    have hs2p : (0 : ℝ) ≤ √(N / (U N * V N)) := h2
+    have e3 : √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) * √(V N) *
+        (3.415 * (√2 : ℝ) ^ (J - 3)) ≤
+        √(V N) * √(N / (U N * V N)) * √(0.5 * log N) *
+          (1.7075 * √(log (N / (U N * V N)) + 0.384)) := by
+      rw [hp1, hr3]
+      have h6 : (0 : ℝ) ≤ 1.7075 * (√(log (N / (U N * V N)) + 0.384) * √(0.5 * log N)) := by
+        positivity
+      calc √(log (N / (U N * V N)) + 0.384) * √(0.5 * log N) * √(V N) *
+            (3.415 * ((√2 : ℝ) ^ (J - 1) / 2))
+          = 1.7075 * (√(log (N / (U N * V N)) + 0.384) * √(0.5 * log N)) *
+              (√(V N) * (√2 : ℝ) ^ (J - 1)) := by ring
+        _ ≤ 1.7075 * (√(log (N / (U N * V N)) + 0.384) * √(0.5 * log N)) *
+              (√(V N) * √(N / (U N * V N))) := by
+            apply mul_le_mul_of_nonneg_left _ h6
+            exact mul_le_mul_of_nonneg_left hr1 hV2
+        _ = √(V N) * √(N / (U N * V N)) * √(0.5 * log N) *
+              (1.7075 * √(log (N / (U N * V N)) + 0.384)) := by ring
+    have e2' : (1.332 * √(0.5 * log N)) * ((√2 : ℝ) ^ (J - 2) * √(V N)) ≤
+        √(V N) * √(N / (U N * V N)) * √(0.5 * log N) * 0.942 := by
+      rw [hr2]
+      have h6 : (0 : ℝ) < √2 := Real.sqrt_pos.mpr (by norm_num)
+      have h7 : 1.332 / √2 ≤ 0.942 := by
+        rw [div_le_iff₀ h6]
+        nlinarith [wip_sqrt_two_lb]
+      calc (1.332 * √(0.5 * log N)) * ((√2 : ℝ) ^ (J - 1) / √2 * √(V N))
+          = (1.332 / √2) * ((√2 : ℝ) ^ (J - 1) * (√(0.5 * log N) * √(V N))) := by ring
+        _ ≤ (1.332 / √2) * (√(N / (U N * V N)) * (√(0.5 * log N) * √(V N))) := by
+            apply mul_le_mul_of_nonneg_left _ (by positivity)
+            exact mul_le_mul_of_nonneg_right hr1 (by positivity)
+        _ ≤ 0.942 * (√(N / (U N * V N)) * (√(0.5 * log N) * √(V N))) := by
+            apply mul_le_mul_of_nonneg_right h7 (by positivity)
+        _ = √(V N) * √(N / (U N * V N)) * √(0.5 * log N) * 0.942 := by ring
+    have e1' : (1.0388 * √(0.5 * log N)) * ((√2 : ℝ) ^ (J - 1) * √(V N)) ≤
+        √(V N) * √(N / (U N * V N)) * √(0.5 * log N) * 1.0388 := by
+      calc (1.0388 * √(0.5 * log N)) * ((√2 : ℝ) ^ (J - 1) * √(V N))
+          = 1.0388 * (√(0.5 * log N) * (√(V N) * (√2 : ℝ) ^ (J - 1))) := by ring
+        _ ≤ 1.0388 * (√(0.5 * log N) * (√(V N) * √(N / (U N * V N)))) := by
+            apply mul_le_mul_of_nonneg_left _ (by norm_num)
+            exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hr1 hV2) (by positivity)
+        _ = √(V N) * √(N / (U N * V N)) * √(0.5 * log N) * 1.0388 := by ring
+    rw [hsplit_sum]
+    linarith [hpart, ht2, ht1, e3, e2', e1']
+  have hcomb : √(V N) * √(N / (U N * V N)) = √(N / U N) := by
+    rw [← Real.sqrt_mul (by positivity)]
+    congr 1
+    field_simp
+  have hN2 : √N * √(N / U N) = √(N ^ 2 / U N) := by
+    rw [← Real.sqrt_mul (by positivity)]
+    congr 1
+    field_simp
+  have hBL : √(N ^ 2 / U N) * log N = B N := wip_sqrt_sq_le N hNp hU hlu hLp
+  have hBL' : √(N ^ 2 / U N) = B N / log N := by
+    rw [← hBL]
+    field_simp
+  have hB0 : (0 : ℝ) < B N := by
+    unfold B
+    exact mul_pos (Real.rpow_pos_of_pos hNp _) (Real.rpow_pos_of_pos hLp _)
+  have hc1 : √(0.6111 * N) * √5 ≤ 1.75 * √N := by
+    have h2 : √(0.6111 * N) ≤ 0.782 * √N := by
+      rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 0.6111)]
+      have h3 : √(0.6111 : ℝ) ≤ 0.782 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+      have h4 : (0 : ℝ) ≤ √(0.6111 : ℝ) := Real.sqrt_nonneg _
+      nlinarith [Real.sqrt_nonneg N]
+    have h3 : √5 ≤ 2.237 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+    have h4 : (0 : ℝ) ≤ √(0.6111 * N) := Real.sqrt_nonneg _
+    have h5 : (0 : ℝ) ≤ √5 := Real.sqrt_nonneg _
+    have h6 : (0 : ℝ) ≤ √N := Real.sqrt_nonneg _
+    nlinarith [h2, h3, h4, h5, h6]
+  have hsq15 : √(0.5 * log N) ≤ 0.70711 * √(log N) := by
+    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 0.5)]
+    have h2 : √(0.5 : ℝ) ≤ 0.70711 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+    have h3 : (0 : ℝ) ≤ √(0.5 : ℝ) := Real.sqrt_nonneg _
+    nlinarith [Real.sqrt_nonneg (log N)]
+  have hs0b : log (N / (U N * V N)) + 0.384 ≤ 0.2792 * log N := by nlinarith [hTle]
+  have hroot : √(log (N / (U N * V N)) + 0.384) ≤ 0.5284 * √(log N) := by
+    have h1 : √(log (N / (U N * V N)) + 0.384) ≤ √(0.2792 * log N) :=
+      Real.sqrt_le_sqrt hs0b
+    refine h1.trans ?_
+    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 0.2792)]
+    have h2 : √(0.2792 : ℝ) ≤ 0.5284 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+    have h3 : (0 : ℝ) ≤ √(0.2792 : ℝ) := Real.sqrt_nonneg _
+    nlinarith [Real.sqrt_nonneg (log N)]
+  have hL46 : (4.6 : ℝ) ≤ √(log N) := by
+    have h1 : √(21.16 : ℝ) ≤ √(log N) := Real.sqrt_le_sqrt (by linarith)
+    have h2 : √(21.16 : ℝ) = 4.6 := by
+      rw [show (21.16 : ℝ) = 4.6 ^ 2 by norm_num]
+      exact Real.sqrt_sq (by norm_num)
+    linarith [h1, h2]
+  have hfin : 1.2375 * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) ≤
+      1.70 * √(log N) := by
+    have h4 : (0 : ℝ) ≤ √(log (N / (U N * V N)) + 0.384) := Real.sqrt_nonneg _
+    nlinarith [hroot, hL46, h4, Real.sqrt_nonneg (log N)]
+  have hK : (0 : ℝ) ≤ 1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808 := by positivity
+  have hstep1 : √(0.6111 * N) * √5 * (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))
+      ≤ 1.75 * √N * (√(V N) * √(N / (U N * V N)) * √(0.5 * log N) *
+          (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808)) := by
+    have h2 : (0 : ℝ) ≤ ∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N) := by
+      apply Finset.sum_nonneg
+      intro j hj
+      positivity
+    calc √(0.6111 * N) * √5 * (∑ j ∈ range J,
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))
+        ≤ (1.75 * √N) * (∑ j ∈ range J,
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N)) :=
+          mul_le_mul_of_nonneg_right hc1 h2
+      _ ≤ 1.75 * √N * (√(V N) * √(N / (U N * V N)) * √(0.5 * log N) *
+            (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808)) :=
+          mul_le_mul_of_nonneg_left hbig (by positivity)
+  refine hstep1.trans ?_
+  rw [hcomb]
+  have h3 : (0 : ℝ) ≤ 1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808 := hK
+  have h4 : (0 : ℝ) ≤ √(N / U N) := Real.sqrt_nonneg _
+  have h5 : (0 : ℝ) ≤ √(0.5 * log N) := Real.sqrt_nonneg _
+  have h6 : (0 : ℝ) ≤ √N := Real.sqrt_nonneg _
+  -- assemble
+  have hq : 1.75 * √N * (√(N / U N) * √(0.5 * log N) *
+        (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808)) ≤
+      1.2375 * B N * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N) := by
+    have h7 : (0 : ℝ) < √(log N) := Real.sqrt_pos.mpr hLp
+    have h9 : √(0.5 * log N) ≤ 0.70711 * √(log N) := hsq15
+    have h10 : (0 : ℝ) ≤ 1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808 := hK
+    have h13 : √(0.5 * log N) * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) ≤
+        0.70711 * √(log N) * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) :=
+      mul_le_mul_of_nonneg_right h9 h10
+    have h14 : (0 : ℝ) ≤ B N / log N := div_nonneg hB0.le hLp.le
+    have h15 : (0 : ℝ) ≤ √(0.5 * log N) * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) :=
+      by positivity
+    calc 1.75 * √N * (√(N / U N) * √(0.5 * log N) *
+            (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808))
+        = 1.75 * (√N * √(N / U N)) *
+            (√(0.5 * log N) * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808)) := by ring
+      _ = 1.75 * √(N ^ 2 / U N) *
+            (√(0.5 * log N) * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808)) := by
+          rw [hN2]
+      _ ≤ 1.75 * √(N ^ 2 / U N) *
+            (0.70711 * √(log N) * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808)) := by
+          apply mul_le_mul_of_nonneg_left h13 (by positivity)
+      _ = 1.75 * (B N / log N) *
+            (0.70711 * √(log N) * (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808)) := by
+          rw [hBL']
+      _ = (1.75 * 0.70711) * B N *
+            (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N) := by
+          field_simp
+          rw [Real.sq_sqrt hLp.le]
+          try ring
+      _ ≤ 1.2375 * B N *
+            (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N) := by
+          have hcoef : (1.75 * 0.70711 : ℝ) ≤ 1.2375 := by norm_num
+          have h16 : (0 : ℝ) ≤ B N *
+              (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N) := by positivity
+          calc (1.75 * 0.70711) * B N *
+                (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N)
+              = (1.75 * 0.70711) * (B N *
+                (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N)) := by ring
+            _ ≤ 1.2375 * (B N *
+                (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N)) :=
+                mul_le_mul_of_nonneg_right hcoef h16
+            _ = 1.2375 * B N *
+                (1.7075 * √(log (N / (U N * V N)) + 0.384) + 1.9808) / √(log N) := by ring
+  refine hq.trans ?_
+  have h7 : (0 : ℝ) < √(log N) := Real.sqrt_pos.mpr hLp
+  have h8 : (0 : ℝ) ≤ B N := hB0.le
+  rw [div_le_iff₀ h7]
+  have h17 := mul_le_mul_of_nonneg_left hfin h8
+  nlinarith [h17, h8, hK, h7]
+
+set_option maxHeartbeats 1600000 in
+/-- Third kernel: `√(N log q)/√(2^j V)` contributes at most `1.01 · B N`. -/
+private lemma wip_T3 (N : ℝ) (q : ℕ) (hN : exp 30.95 ≤ N) (hq : 1 ≤ q)
+    (hq2 : (q : ℝ) < (1.0012 / 0.09) ^ 2 * N / log N ^ 5) :
+    √(0.6111 * N) * (√(N * log q) *
+      (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N)))
+      ≤ 1.01 * B N := by
+  have hNp : 0 < N := (exp_pos _).trans_le hN
+  have hL : 30.95 ≤ log N := (le_log_iff_exp_le hNp).mpr hN
+  have hLp : 0 < log N := by linarith
+  obtain ⟨-, hU, hV, hlu, hlv⟩ := task194_logs N hNp hL
+  obtain ⟨hTform, hTle⟩ := wip_T_bound N hNp hU hV hLp hlu hlv
+  have hJwin := task194_J_window N hN
+  set J := Jn ⌊N⌋₊ (U N) (V N) with hJdef
+  have hwin : ((J : ℝ) - 1) * log 2 ≤ log (N / (U N * V N)) := hJwin.1
+  have hlogq0 : 0 ≤ log (q : ℝ) := Real.log_natCast_nonneg q
+  have hlogq : log (q : ℝ) ≤ log N - 12.34 := task194_q_log_upper N q hNp hL hq2
+  have hlog2 : (0 : ℝ) < log 2 := log_pos (by norm_num)
+  have hwle : ∀ j ∈ range J,
+      √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) ≤
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) := by
+    intro j hj
+    apply Real.sqrt_le_sqrt
+    have hj0 : (0 : ℝ) ≤ (j : ℝ) := by positivity
+    nlinarith [mul_nonneg hj0 hlog2.le, hLp]
+  have hsplit : ∀ j : ℕ, √((2 : ℝ) ^ j * V N) = (√2 : ℝ) ^ j * √(V N) := by
+    intro j
+    rw [Real.sqrt_mul (by positivity), wip_sqrt_two_pow j]
+  have hsV : (0 : ℝ) < √(V N) := Real.sqrt_pos.mpr (by linarith)
+  have hterm : ∀ j ∈ range J,
+      √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N) ≤
+        (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) *
+          (((√2 : ℝ) ^ j)⁻¹) := by
+    intro j hj
+    rw [hsplit j]
+    have hpos : (0 : ℝ) < (√2 : ℝ) ^ j := by positivity
+    calc √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) /
+          ((√2 : ℝ) ^ j * √(V N))
+        = (√(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / (√2 : ℝ) ^ j) /
+            √(V N) := by field_simp
+      _ ≤ (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / (√2 : ℝ) ^ j) / √(V N) := by
+            apply div_le_div_of_nonneg_right _ (Real.sqrt_nonneg _)
+            exact div_le_div_of_nonneg_right (hwle j hj) (by positivity)
+      _ = (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) *
+            (((√2 : ℝ) ^ j)⁻¹) := by field_simp
+  have hsum3 : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N))
+      ≤ (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) * 3.42 := by
+    have h5 : (0 : ℝ) ≤ √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N) := by
+      positivity
+    have h2 : (∑ j ∈ range J,
+          (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) *
+            (((√2 : ℝ) ^ j)⁻¹)) =
+        (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) *
+          (∑ j ∈ range J, (((√2 : ℝ) ^ j)⁻¹)) := by
+      rw [Finset.mul_sum]
+    have h3 : (∑ j ∈ range J, (((√2 : ℝ) ^ j)⁻¹)) = (∑ j ∈ range J, ((√2 : ℝ))⁻¹ ^ j) := by
+      simp_rw [inv_pow]
+    have h4 : (∑ j ∈ range J, ((√2 : ℝ))⁻¹ ^ j) ≤ 3.42 := wip_geom_inv_sqrt_two J
+    calc (∑ j ∈ range J,
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N))
+        ≤ (∑ j ∈ range J,
+          (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) *
+            (((√2 : ℝ) ^ j)⁻¹)) := sum_le_sum hterm
+      _ = _ := h2
+      _ ≤ (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) * 3.42 := by
+          rw [h3]
+          exact mul_le_mul_of_nonneg_left h4 h5
+  have hS : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N)) *
+        √(V N)
+      ≤ 3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) := by
+    have h1 := mul_le_mul_of_nonneg_right hsum3 (le_of_lt hsV)
+    have h2 : (√(0.5 * log N * (log (N / (U N * V N)) + 0.384)) / √(V N)) * 3.42 * √(V N)
+        = 3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) := by
+      field_simp
+    linarith [h1, h2]
+  have hw0le : √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) ≤ 0.3741 * log N := by
+    have h1 : 0.5 * log N * (log (N / (U N * V N)) + 0.384) ≤ 0.1399 * (log N) ^ 2 := by
+      nlinarith [hTle, hLp]
+    have h3 : √(0.1399 * (log N) ^ 2) ≤ √((0.3741 * log N) ^ 2) := by
+      apply Real.sqrt_le_sqrt
+      nlinarith [hLp, sq_nonneg (log N)]
+    rw [Real.sqrt_sq (by positivity)] at h3
+    exact (Real.sqrt_le_sqrt h1).trans h3
+  have hL32 : log N ^ (3 / 2 : ℝ) = log N * √(log N) := by
+    have h := Real.rpow_add hLp (1:ℝ) (1/2:ℝ)
+    rw [show (3 / 2 : ℝ) = 1 + 1/2 by norm_num, h, Real.rpow_one, Real.sqrt_eq_rpow]
+  have hBsqrtV : B N * √(V N) = N * log N ^ (3 / 2 : ℝ) := wip_B_sqrtV N hNp hV hlv hLp
+  have hsqrtN0 : (0 : ℝ) ≤ √N := Real.sqrt_nonneg N
+  have hc : √(0.6111 * N) ≤ 0.7818 * √N := by
+    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 0.6111)]
+    have h2 : √(0.6111 : ℝ) ≤ 0.7818 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+    have h3 : (0 : ℝ) ≤ √(0.6111 : ℝ) := Real.sqrt_nonneg _
+    nlinarith [Real.sqrt_nonneg N]
+  have hlogqle : √(log (q : ℝ)) ≤ √(log N) := by
+    apply Real.sqrt_le_sqrt
+    linarith
+  have hsqrtL : (5.5 : ℝ) ≤ √(log N) := by
+    have h3 : √(30.95 : ℝ) ≤ √(log N) := Real.sqrt_le_sqrt hL
+    have h4 : (5.5 : ℝ) ≤ √(30.95 : ℝ) := by
+      rw [Real.le_sqrt (by norm_num) (by norm_num)]
+      norm_num
+    linarith
+  have hprod : √(0.6111 * N) * (√N * √(log (q:ℝ))) * (3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384)))
+      ≤ 1.001 * (N * (log N * √(log N))) := by
+    have h4 : (0 : ℝ) ≤ √(log N) := Real.sqrt_nonneg _
+    have h6 : (0 : ℝ) ≤ √(log (q:ℝ)) := Real.sqrt_nonneg _
+    have h7 : (0 : ℝ) ≤ √(0.5 * log N * (log (N / (U N * V N)) + 0.384)) :=
+      Real.sqrt_nonneg _
+    have h8 : (0 : ℝ) ≤ √N := hsqrtN0
+    calc √(0.6111 * N) * (√N * √(log (q:ℝ))) * (3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384)))
+        ≤ (0.7818 * √N) * (√N * √(log N)) * (3.42 * (0.3741 * log N)) := by
+          apply mul_le_mul
+          · exact mul_le_mul hc (mul_le_mul_of_nonneg_left hlogqle h8) (by positivity) (by positivity)
+          · exact mul_le_mul_of_nonneg_left hw0le (by norm_num)
+          · positivity
+          · positivity
+      _ = (0.7818 * 3.42 * 0.3741) * ((√N * √N) * (√(log N) * log N)) := by ring
+      _ ≤ 1.001 * ((√N * √N) * (√(log N) * log N)) :=
+          mul_le_mul_of_nonneg_right (by norm_num : (0.7818 * 3.42 * 0.3741 : ℝ) ≤ 1.001)
+            (by positivity)
+      _ = 1.001 * (N * (log N * √(log N))) := by
+          rw [Real.mul_self_sqrt hNp.le]
+          ring
+      _ ≤ 1.001 * (N * (log N * √(log N))) := le_rfl
+  have hkey : √(0.6111 * N) * (√(N * log (q:ℝ)) *
+        (∑ j ∈ range J,
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N))) *
+        √(V N)
+      ≤ 1.001 * (N * log N ^ (3 / 2 : ℝ)) := by
+    have hscale : √(N * log (q:ℝ)) = √N * √(log (q:ℝ)) :=
+      Real.sqrt_mul (x := N) (by positivity) (log (q:ℝ))
+    have s1 : √(0.6111 * N) * (√(N * log (q:ℝ)) *
+        (∑ j ∈ range J,
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N))) *
+        √(V N)
+        ≤ √(0.6111 * N) * √(N * log (q:ℝ)) *
+          (3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384))) := by
+      calc √(0.6111 * N) * (√(N * log (q:ℝ)) *
+            (∑ j ∈ range J,
+              √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N))) *
+            √(V N)
+          = √(0.6111 * N) * √(N * log (q:ℝ)) *
+              ((∑ j ∈ range J,
+                √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) /
+                  √(2 ^ j * V N)) * √(V N)) := by ring
+        _ ≤ √(0.6111 * N) * √(N * log (q:ℝ)) *
+              (3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384))) :=
+            mul_le_mul_of_nonneg_left hS (by positivity)
+    refine s1.trans ?_
+    calc √(0.6111 * N) * √(N * log (q:ℝ)) *
+          (3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384)))
+        = √(0.6111 * N) * (√N * √(log (q:ℝ))) *
+          (3.42 * √(0.5 * log N * (log (N / (U N * V N)) + 0.384))) := by rw [hscale]
+      _ ≤ 1.001 * (N * (log N * √(log N))) := hprod
+      _ = 1.001 * (N * log N ^ (3 / 2 : ℝ)) := by rw [hL32]
+  refine le_of_mul_le_mul_right ?_ hsV
+  have h2 : 1.001 * (N * log N ^ (3 / 2 : ℝ)) = 1.001 * (B N * √(V N)) := by rw [hBsqrtV]
+  rw [h2] at hkey
+  calc √(0.6111 * N) * (√(N * log (q:ℝ)) *
+        (∑ j ∈ range J,
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N))) * √(V N)
+      ≤ 1.001 * (B N * √(V N)) := hkey
+    _ ≤ 1.01 * B N * √(V N) := by
+        have h0 : (0 : ℝ) ≤ √(V N) := le_of_lt hsV
+        have hBp : (0 : ℝ) ≤ B N := by
+          unfold B
+          exact (mul_pos (Real.rpow_pos_of_pos hNp _) (Real.rpow_pos_of_pos hLp _)).le
+        nlinarith [h0, hBp]
+
+set_option maxHeartbeats 1600000 in
+/-- Fourth kernel: `√(q log q)` contributes at most `0.0785 · C N q`. -/
+private lemma wip_T4 (N : ℝ) (q : ℕ) (hN : exp 30.95 ≤ N) (hq : 1 ≤ q)
+    (hq2 : (q : ℝ) < (1.0012 / 0.09) ^ 2 * N / log N ^ 5) :
+    √(0.6111 * N) * (√(q * log q) *
+      (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)))) ≤ 0.0785 * C N q := by
+  have hNp : 0 < N := (exp_pos _).trans_le hN
+  have hL : 30.95 ≤ log N := (le_log_iff_exp_le hNp).mpr hN
+  have hLp : 0 < log N := by linarith
+  obtain ⟨-, hU, hV, hlu, hlv⟩ := task194_logs N hNp hL
+  obtain ⟨hTform, hTle⟩ := wip_T_bound N hNp hU hV hLp hlu hlv
+  have hJwin := task194_J_window N hN
+  set J := Jn ⌊N⌋₊ (U N) (V N) with hJdef
+  have hJ1 : 1 ≤ J := by rw [hJdef]; unfold Jn; omega
+  have hwin : ((J : ℝ) - 1) * log 2 ≤ log (N / (U N * V N)) := hJwin.1
+  have hlogq : log (q : ℝ) ≤ log N - 12.34 := task194_q_log_upper N q hNp hL hq2
+  have hlogq0 : 0 ≤ log (q : ℝ) := Real.log_natCast_nonneg q
+  have hlog2 : (0 : ℝ) < log 2 := log_pos (by norm_num)
+  -- Cauchy-Schwarz on the retained root sum
+  have hcs : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))) ^ 2 ≤
+      (J : ℝ) * (∑ j ∈ range J,
+        0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) := by
+    have h := Finset.sum_mul_sq_le_sq_mul_sq (range J)
+      (fun j => √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)))
+      (fun _ => (1 : ℝ))
+    simp only [mul_one, one_pow] at h
+    have h2 : ∀ j ∈ range J,
+        (√(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))) ^ 2 =
+          0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2) := by
+      intro j hj
+      apply Real.sq_sqrt
+      have hj0 : (0 : ℝ) ≤ (j : ℝ) := by positivity
+      have hjl : (j : ℝ) * log 2 ≤ log (N / (U N * V N)) := by
+        have h4 := mem_range.mp hj
+        have h5 : (j : ℝ) + 1 ≤ (J : ℝ) := by exact_mod_cast (show j + 1 ≤ J by omega)
+        nlinarith [hwin, hlog2]
+      nlinarith [hLp, hjl]
+    rw [Finset.sum_congr rfl h2] at h
+    have h3 : (∑ j ∈ range J, (1 : ℝ)) = (J : ℝ) := by simp
+    rw [h3] at h
+    linarith [h]
+  -- the arithmetic progression of weights
+  have hsumid : 2 * (∑ j ∈ range J, (j : ℝ)) = (J : ℝ) * ((J : ℝ) - 1) := by
+    induction J with
+    | zero => simp
+    | succ n ih =>
+        rw [sum_range_succ]
+        push_cast
+        nlinarith [ih]
+  have hJl : ((J : ℝ) - 1) * log 2 ≥ log (N / (U N * V N)) - 0.6942 := by
+    have h2 : log (N / (U N * V N)) ≤ (J : ℝ) * log 2 + 0.001 := hJwin.2
+    have h3 : log 2 ≤ 0.6932 := by linarith [Real.log_two_lt_d9]
+    nlinarith
+  have hsumw : (∑ j ∈ range J,
+        0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) ≤
+      0.5 * log N * ((J : ℝ) * (log (N / (U N * V N)) / 2 + 0.732)) := by
+    have hpt : ∀ j ∈ range J,
+        0.5 * log N * (log (N / (U N * V N)) + 0.384 - ((j : ℕ) : ℝ) * log 2) =
+          0.5 * log N * (log (N / (U N * V N)) + 0.384) - 0.5 * log N * log 2 * (j : ℝ) := by
+      intro j hj
+      ring
+    rw [sum_congr rfl hpt]
+    rw [Finset.sum_sub_distrib, Finset.sum_const, Finset.card_range, nsmul_eq_mul,
+      ← Finset.mul_sum]
+    have hsumpr : (∑ i ∈ range J, (i : ℝ)) ≥ ((J : ℝ) * ((J : ℝ) - 1)) / 2 := by
+      linarith [hsumid]
+    have hc1 : (0 : ℝ) ≤ 0.5 * log N * log 2 := by positivity
+    have hc2 : (0 : ℝ) ≤ 0.5 * log N * ((J : ℝ) / 2) := by positivity
+    have hm1 : 0.5 * log N * log 2 * (∑ i ∈ range J, (i : ℝ)) ≥
+        0.5 * log N * log 2 * (((J : ℝ) * ((J : ℝ) - 1)) / 2) := by
+      nlinarith [hsumpr, hc1]
+    have hm2 : 0.5 * log N * log 2 * (((J : ℝ) * ((J : ℝ) - 1)) / 2) ≥
+        0.5 * log N * ((J : ℝ) / 2) * (log (N / (U N * V N)) - 0.6942) := by
+      have h5 : 0.5 * log N * ((J : ℝ) / 2) * (((J : ℝ) - 1) * log 2) ≥
+          0.5 * log N * ((J : ℝ) / 2) * (log (N / (U N * V N)) - 0.6942) := by
+        apply mul_le_mul_of_nonneg_left hJl hc2
+      nlinarith [h5]
+    have hJ0 : (0 : ℝ) ≤ (J : ℝ) := by positivity
+    nlinarith [hm1, hm2, hJ0, hLp]
+  have hJb : (J : ℝ) * log 2 ≤ 0.2194 * log N + 1.4595 + log 2 := by
+    nlinarith [hwin, hTle]
+  have hJb2 : (J : ℝ) ≤ 0.3166 * log N + 3.1066 := by
+    have h3 : (0.6931 : ℝ) ≤ log 2 := by linarith [Real.log_two_gt_d9]
+    have h4 : (0 : ℝ) ≤ (J : ℝ) := by positivity
+    have h5 : (J : ℝ) * 0.6931 ≤ (J : ℝ) * log 2 := mul_le_mul_of_nonneg_left h3 h4
+    have h6 : log 2 ≤ 0.6932 := by linarith [Real.log_two_lt_d9]
+    nlinarith [h5, hJb, h6]
+  have hTq : log (N / (U N * V N)) / 2 + 0.732 ≤ 0.1097 * log N + 1.4618 := by
+    nlinarith [hTle]
+  have hTq0 : (0 : ℝ) ≤ log (N / (U N * V N)) / 2 + 0.732 := by
+    have h2 : 0 ≤ log (N / (U N * V N)) := by
+      apply log_nonneg
+      rw [le_div_iff₀ (mul_pos hU hV)]
+      have h1 := task194_floor_UV N hN
+      have h3 : (⌊N⌋₊ : ℝ) ≤ N := Nat.floor_le hNp.le
+      linarith
+    linarith
+  have hSsq : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))) ^ 2 ≤
+      0.5 * log N * (0.3166 * log N + 3.1066) ^ 2 * (0.1097 * log N + 1.4618) := by
+    have h1 : (J : ℝ) * (∑ j ∈ range J,
+        0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) ≤
+        (J : ℝ) * (0.5 * log N * ((J : ℝ) * (log (N / (U N * V N)) / 2 + 0.732))) :=
+      mul_le_mul_of_nonneg_left hsumw (by positivity)
+    have h2 : (J : ℝ) ^ 2 ≤ (0.3166 * log N + 3.1066) ^ 2 :=
+      pow_le_pow_left₀ (by positivity) hJb2 2
+    have h2' : (J : ℝ) ^ 2 * (log (N / (U N * V N)) / 2 + 0.732) ≤
+        (0.3166 * log N + 3.1066) ^ 2 * (log (N / (U N * V N)) / 2 + 0.732) :=
+      mul_le_mul_of_nonneg_right h2 hTq0
+    have h2'' : (0.3166 * log N + 3.1066) ^ 2 * (log (N / (U N * V N)) / 2 + 0.732) ≤
+        (0.3166 * log N + 3.1066) ^ 2 * (0.1097 * log N + 1.4618) :=
+      mul_le_mul_of_nonneg_left hTq (by positivity)
+    have h3 : (0 : ℝ) ≤ 0.5 * log N := by linarith
+    nlinarith [hcs, h1, h2', h2'', h3]
+  have hS0 : (0 : ℝ) ≤ ∑ j ∈ range J,
+      √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) :=
+    Finset.sum_nonneg (fun j hj => Real.sqrt_nonneg _)
+  have hSb : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))) ≤
+      √(log N / 2) * (0.3166 * log N + 3.1066) * √(0.1097 * log N + 1.4618) := by
+    have h1 : (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))) ≤
+        √(0.5 * log N * (0.3166 * log N + 3.1066) ^ 2 * (0.1097 * log N + 1.4618)) := by
+      rw [← Real.sqrt_sq hS0]
+      exact Real.sqrt_le_sqrt hSsq
+    refine h1.trans (le_of_eq ?_)
+    rw [show 0.5 * log N = log N / 2 by ring]
+    rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity),
+      Real.sqrt_sq (by positivity : (0 : ℝ) ≤ 0.3166 * log N + 3.1066)]
+  -- the scalar estimate for the remaining factors
+  have hscal : √(log N - 12.34) * √(log N / 2) * (0.3166 * log N + 3.1066) *
+      √(0.1097 * log N + 1.4618) ≤ 0.1004 * log N ^ (2.5 : ℝ) := by
+    have hsq1 : (0 : ℝ) ≤ √(log N - 12.34) * √(log N / 2) * (0.3166 * log N + 3.1066) *
+        √(0.1097 * log N + 1.4618) := by positivity
+    have hsq2 : (0 : ℝ) ≤ 0.1004 * log N ^ (2.5 : ℝ) := by positivity
+    have hLHS : (√(log N - 12.34) * √(log N / 2) * (0.3166 * log N + 3.1066) *
+        √(0.1097 * log N + 1.4618)) ^ 2 =
+        (log N - 12.34) * (log N / 2) * (0.3166 * log N + 3.1066) ^ 2 *
+          (0.1097 * log N + 1.4618) := by
+      rw [show (√(log N - 12.34) * √(log N / 2) * (0.3166 * log N + 3.1066) *
+          √(0.1097 * log N + 1.4618)) ^ 2 =
+          (√(log N - 12.34)) ^ 2 * (√(log N / 2)) ^ 2 *
+            (0.3166 * log N + 3.1066) ^ 2 * (√(0.1097 * log N + 1.4618)) ^ 2 by ring]
+      rw [Real.sq_sqrt (by linarith), Real.sq_sqrt (by linarith),
+        Real.sq_sqrt (by linarith)]
+    have hR : (0.1004 * log N ^ (2.5 : ℝ)) ^ 2 = 0.01008016 * (log N) ^ 5 := by
+      rw [mul_pow, show (0.1004 : ℝ) ^ 2 = 0.01008016 by norm_num,
+        show (log N ^ (2.5 : ℝ)) ^ 2 = (log N) ^ 5 by
+          rw [← Real.rpow_natCast _ 2, ← Real.rpow_mul hLp.le]
+          norm_num]
+    have hmain : (√(log N - 12.34) * √(log N / 2) * (0.3166 * log N + 3.1066) *
+        √(0.1097 * log N + 1.4618)) ^ 2 ≤ (0.1004 * log N ^ (2.5 : ℝ)) ^ 2 := by
+      rw [hLHS, hR]
+      have ht : (0 : ℝ) ≤ log N - 30.95 := by linarith
+      nlinarith [ht, pow_nonneg ht 2, pow_nonneg ht 3, pow_nonneg ht 4, pow_nonneg ht 5]
+    nlinarith [hmain, hsq1, hsq2]
+  have hsqq : √(q * log q) = √(q : ℝ) * √(log (q : ℝ)) :=
+    Real.sqrt_mul (x := (q : ℝ)) (by positivity) (log (q : ℝ))
+  have hc : √(0.6111 * N) ≤ 0.7818 * √N := by
+    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 0.6111)]
+    have h2 : √(0.6111 : ℝ) ≤ 0.7818 := (Real.sqrt_le_left (by norm_num)).mpr (by norm_num)
+    have h3 : (0 : ℝ) ≤ √(0.6111 : ℝ) := Real.sqrt_nonneg _
+    nlinarith [Real.sqrt_nonneg N]
+  have hlogqle : √(log (q : ℝ)) ≤ √(log N - 12.34) := Real.sqrt_le_sqrt hlogq
+  have hC0 : 0.0785 * C N q = 0.0785 * (√N * √(q : ℝ) * log N ^ (2.5 : ℝ)) := by
+    unfold C
+    rw [← Real.sqrt_eq_rpow N, ← Real.sqrt_eq_rpow (q : ℝ)]
+  rw [hC0]
+  have hNq : (0 : ℝ) ≤ √N * √(q : ℝ) := by positivity
+  calc √(0.6111 * N) * (√(q * log q) * (∑ j ∈ range J,
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))))
+      ≤ (0.7818 * √N) * ((√(q : ℝ) * √(log (q : ℝ))) * (∑ j ∈ range J,
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)))) := by
+        rw [hsqq]
+        exact mul_le_mul hc le_rfl (by positivity) (by positivity)
+    _ ≤ (0.7818 * √N) * ((√(q : ℝ) * √(log N - 12.34)) *
+          (√(log N / 2) * (0.3166 * log N + 3.1066) * √(0.1097 * log N + 1.4618))) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        refine mul_le_mul (mul_le_mul_of_nonneg_left hlogqle (by positivity)) hSb
+          (by positivity) (by positivity)
+    _ = 0.7818 * (√N * √(q : ℝ)) *
+          (√(log N - 12.34) * √(log N / 2) * (0.3166 * log N + 3.1066) *
+            √(0.1097 * log N + 1.4618)) := by ring
+    _ ≤ 0.7818 * (√N * √(q : ℝ)) * (0.1004 * log N ^ (2.5 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hscal (by positivity)
+    _ = (0.7818 * 0.1004) * (√N * √(q : ℝ) * log N ^ (2.5 : ℝ)) := by ring
+    _ ≤ 0.0785 * (√N * √(q : ℝ) * log N ^ (2.5 : ℝ)) := by
+        have h1 : (0.7818 * 0.1004 : ℝ) ≤ 0.0785 := by norm_num
+        have h2 : (0 : ℝ) ≤ √N * √(q : ℝ) * log N ^ (2.5 : ℝ) := by positivity
+        nlinarith
+
+set_option maxHeartbeats 1600000 in
+/-- The leaf of the paper decomposition: display 6.22 on page 174. -/
+private theorem wip_affine_numeric (N : ℝ) (q : ℕ)
+    (hN : exp 30.95 ≤ N) (hq : 1 ≤ q)
+    (hA : 0.28 * A N q < 1.0012 * N) (hC : 0.09 * C N q < 1.0012 * N) :
+    fourthAffineBound N q ≤ 0.2264 * A N q + 2.787 * B N + 0.0785 * C N q := by
+  have hNp : 0 < N := (exp_pos _).trans_le hN
+  have hL : 30.95 ≤ log N := (le_log_iff_exp_le hNp).mpr hN
+  have hLp : 0 < log N := by linarith
+  obtain ⟨hq1, hq2⟩ := task194_range_of_scales N q hNp hq hA hC hLp
+  have hB0 : (0 : ℝ) ≤ B N := by
+    unfold B
+    exact (mul_pos (Real.rpow_pos_of_pos hNp _) (Real.rpow_pos_of_pos hLp _)).le
+  have hC0 : (0 : ℝ) ≤ C N q := by
+    unfold C
+    have h1 : (0 : ℝ) < N ^ (1 / 2 : ℝ) := Real.rpow_pos_of_pos hNp _
+    have h2 : (0 : ℝ) ≤ (q : ℝ) ^ (1 / 2 : ℝ) := Real.rpow_nonneg (Nat.cast_nonneg q) _
+    have h3 : (0 : ℝ) < log N ^ (2.5 : ℝ) := Real.rpow_pos_of_pos hLp _
+    exact mul_nonneg (mul_nonneg h1.le h2) h3.le
+  have h1 := task194_first_affine_term N q hN hq
+  have h2 := wip_T2 N hN
+  have h3 := wip_T3 N q hN hq hq2
+  have h4 := wip_T4 N q hN hq hq2
+  have hsum_eq : (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+      √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) *
+        (√(5 * N / q) + √5 * √(2 ^ j * V N) +
+          √(N * log q) / √(2 ^ j * V N) + √(q * log q))) =
+      √(5 * N / q) * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))) +
+        √5 * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N)) +
+        √(N * log q) * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N)) +
+        √(q * log q) * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2))) := by
+    have hpt : ∀ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+        √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) *
+          (√(5 * N / q) + √5 * √(2 ^ j * V N) +
+            √(N * log q) / √(2 ^ j * V N) + √(q * log q)) =
+        √(5 * N / q) * √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) +
+          √5 * (√(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) *
+            √(2 ^ j * V N)) +
+          √(N * log q) * (√(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) /
+            √(2 ^ j * V N)) +
+          √(q * log q) * √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) := by
+      intro j hj
+      ring
+    rw [Finset.sum_congr rfl hpt]
+    rw [Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib]
+    rw [← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum]
+  have hd : fourthAffineBound N q =
+      √(0.6111 * N) * (√(5 * N / q) * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)))) +
+        √(0.6111 * N) * (√5 * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) * √(2 ^ j * V N))) +
+        √(0.6111 * N) * (√(N * log q) * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)) / √(2 ^ j * V N))) +
+        √(0.6111 * N) * (√(q * log q) * (∑ j ∈ range (Jn ⌊N⌋₊ (U N) (V N)),
+          √(0.5 * log N * (log (N / (U N * V N)) + 0.384 - j * log 2)))) := by
+    unfold fourthAffineBound
+    rw [hsum_eq]
+    ring
+  rw [hd]
+  nlinarith [h1, h2, h3, h4, hB0, hC0]
+
 /-- LEAF. Remaining affine coefficient estimate for Lemma 6.7, pages 170 to 174.
 This is a derived sufficient bound for display 6.22 on page 174 with retained
 block endpoints. The first contribution is proved by task194_first_affine_term.
@@ -1499,7 +2401,7 @@ theorem task194_affine_numeric (N : ℝ) (q : ℕ)
     (hA : 0.28 * A N q < 1.0012 * N) (hC : 0.09 * C N q < 1.0012 * N) :
     fourthAffineBound N q ≤
       0.2264 * A N q + 2.787 * B N + 0.0785 * C N q := by
-  sorry
+  exact wip_affine_numeric N q hN hq hA hC
 
 /-- LEAF. Remaining elementary envelope estimate for Lemma 6.7, pages 170 to 174.
 This is a derived sufficient target for the constants in display 6.22 on page 174.
