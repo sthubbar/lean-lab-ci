@@ -87,6 +87,43 @@ theorem representation_bridge :
         recovery N (localization N ε) n - 0.005 * scale N (localization N ε) n ≤
         (representations N (localization N ε) n : ℝ) := by sorry
 
+/-- The rpow/log comparison used per block: for `1 ≤ N`, `X/2 ≤ N ≤ 3X` and `4 ≤ X`,
+`N^a / log N^B ≤ 3^a * 2^B * X^a / log X^B`. -/
+private lemma rpow_log_div_le {a B X N : ℝ} (ha : 0 < a) (hB : 0 < B) (hX : 1 ≤ X)
+    (hX4 : 4 ≤ X) (hN1 : 1 ≤ N) (hNlo : X / 2 ≤ N) (hNhi : N ≤ 3 * X) :
+    N ^ a / Real.log N ^ B ≤ 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B := by
+  have hN0 : 0 < N := lt_of_lt_of_le one_pos hN1
+  have hX0 : 0 < X := by linarith
+  have hNa : N ^ a ≤ 3 ^ a * X ^ a := by
+    have h1 : N ^ a ≤ (3 * X) ^ a := Real.rpow_le_rpow hN0.le hNhi ha.le
+    rwa [Real.mul_rpow (by norm_num) hX0.le] at h1
+  have hlogXpos : 0 < Real.log X := Real.log_pos (by linarith)
+  have hlogN : Real.log X / 2 ≤ Real.log N := by
+    have h1 : Real.log (X / 2) ≤ Real.log N := Real.log_le_log (by linarith) hNlo
+    rw [Real.log_div (by linarith) (by norm_num)] at h1
+    have h2 : Real.log 2 ≤ Real.log X / 2 := by
+      have h3 : Real.log 4 ≤ Real.log X := Real.log_le_log (by norm_num) hX4
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow] at h3
+      norm_num at h3
+      linarith
+    linarith
+  have hlogNpos : 0 < Real.log N := lt_of_lt_of_le (by linarith) hlogN
+  have h2Bpos : (0 : ℝ) < 2 ^ B := Real.rpow_pos_of_pos (by norm_num) B
+  have hlogXN : Real.log X ^ B ≤ 2 ^ B * Real.log N ^ B := by
+    have h1 : (Real.log X / 2) ^ B ≤ Real.log N ^ B :=
+      Real.rpow_le_rpow (by positivity) hlogN hB.le
+    rw [Real.div_rpow hlogXpos.le (by norm_num)] at h1
+    have h2 : 2 ^ B * (Real.log X ^ B / 2 ^ B) = Real.log X ^ B := by
+      rw [mul_comm (2 ^ B) (Real.log X ^ B / 2 ^ B)]
+      exact div_mul_cancel₀ _ (ne_of_gt h2Bpos)
+    have h3 := mul_le_mul_of_nonneg_left h1 h2Bpos.le
+    linarith [h2, h3]
+  rw [div_le_div_iff₀ (Real.rpow_pos_of_pos hlogNpos B) (Real.rpow_pos_of_pos hlogXpos B)]
+  have hmain : N ^ a * Real.log X ^ B ≤ (3 ^ a * X ^ a) * (2 ^ B * Real.log N ^ B) :=
+    mul_le_mul hNa hlogXN (le_of_lt (Real.rpow_pos_of_pos hlogXpos B)) (by positivity)
+  calc N ^ a * Real.log X ^ B ≤ (3 ^ a * X ^ a) * (2 ^ B * Real.log N ^ B) := hmain
+    _ = (3 ^ a * 2 ^ B * X ^ a) * Real.log N ^ B := by ring
+
 /-- LEAF. Elementary interval subdivision supporting Jia page 207 and P0089 page 225.
 Fixed open windows imply bounds on longer closed windows with positive exponent
 slack. This is a general counting statement for a predicate P. -/
@@ -94,7 +131,293 @@ theorem extend_windows (P : ℕ → Prop) (a b : ℝ) (ha : 0 < a) (hab : a < b)
     (hlocal : ∀ B : ℝ, 0 < B → ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((Ioc ⌊N⌋₊ ⌊N + N ^ a⌋₊).filter P).card : ℝ) ≤ C * N ^ a / Real.log N ^ B) :
     ∀ B : ℝ, 0 < B → ∃ C X₀ : ℝ, ∀ X H : ℝ, X₀ ≤ X → X ^ b ≤ H → H ≤ X →
-      (((Icc ⌈X⌉₊ ⌊X + H⌋₊).filter P).card : ℝ) ≤ C * H / Real.log X ^ B := by sorry
+      (((Icc ⌈X⌉₊ ⌊X + H⌋₊).filter P).card : ℝ) ≤ C * H / Real.log X ^ B := by
+  intro B hB
+  obtain ⟨C, N₀, hC⟩ := hlocal B hB
+  set C₀ : ℝ := max C 0 with hC₀def
+  have hC₀nonneg : 0 ≤ C₀ := by rw [hC₀def]; exact le_max_right _ _
+  have hCC : C ≤ C₀ := by rw [hC₀def]; exact le_max_left _ _
+  have hbpos : 0 < b := lt_trans ha hab
+  -- eventual inequality log X ^ B ≤ X ^ b
+  have hlogev : ∀ᶠ X : ℝ in Filter.atTop, Real.log X ^ B ≤ X ^ b := by
+    have hbB : 0 < b / B := div_pos hbpos hB
+    have h1 : Real.log =o[Filter.atTop] (fun x : ℝ => x ^ (b / B)) :=
+      isLittleO_log_rpow_atTop hbB
+    filter_upwards [h1.eventuallyLE, Filter.eventually_gt_atTop (1 : ℝ)] with x hx hx1
+    have hx0 : (0 : ℝ) < x := lt_trans one_pos hx1
+    have hlognn : 0 ≤ Real.log x := Real.log_nonneg hx1.le
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hlognn,
+      abs_of_nonneg (Real.rpow_nonneg hx0.le _)] at hx
+    calc Real.log x ^ B ≤ (x ^ (b / B)) ^ B := Real.rpow_le_rpow hlognn hx hB.le
+      _ = x ^ b := by
+            rw [← Real.rpow_mul hx0.le]
+            congr 1
+            field_simp
+  rw [Filter.eventually_atTop] at hlogev
+  obtain ⟨X₁, hX₁⟩ := hlogev
+  set X₀ : ℝ := max (max (N₀ + 2) X₁) (max 4 (8 ^ (1 / a))) with hX₀def
+  refine ⟨25 * C₀ * 3 ^ a * 2 ^ B + 1, X₀, ?_⟩
+  intro X H hX hXb hHX
+  rw [hX₀def] at hX
+  have hX4 : 4 ≤ X :=
+    le_trans (le_trans (le_max_left (4 : ℝ) (8 ^ (1 / a)))
+      (le_max_right (max (N₀ + 2) X₁) (max 4 (8 ^ (1 / a))))) hX
+  have hX8a : 8 ^ (1 / a) ≤ X :=
+    le_trans (le_trans (le_max_right (4 : ℝ) (8 ^ (1 / a)))
+      (le_max_right (max (N₀ + 2) X₁) (max 4 (8 ^ (1 / a))))) hX
+  have hXN₀ : N₀ + 2 ≤ X :=
+    le_trans (le_trans (le_max_left (N₀ + 2) X₁)
+      (le_max_left (max (N₀ + 2) X₁) (max 4 (8 ^ (1 / a))))) hX
+  have hXX₁ : X₁ ≤ X :=
+    le_trans (le_trans (le_max_right (N₀ + 2) X₁)
+      (le_max_left (max (N₀ + 2) X₁) (max 4 (8 ^ (1 / a))))) hX
+  have hX1le : 1 ≤ X := by linarith
+  have hXpos : 0 < X := by linarith
+  have hlogXB : Real.log X ^ B ≤ X ^ b := hX₁ X hXX₁
+  have hHpos : 0 < H := lt_of_lt_of_le (Real.rpow_pos_of_pos hXpos b) hXb
+  have hH1 : 1 ≤ H := (Real.one_le_rpow hX1le hbpos.le).trans hXb
+  have hXaH : X ^ a ≤ H :=
+    (Real.rpow_le_rpow_of_exponent_le hX1le (le_of_lt hab)).trans hXb
+  have hXa8 : 8 ≤ X ^ a := by
+    have h1 : ((8 : ℝ) ^ (1 / a)) ^ a = 8 := by
+      rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 8), div_mul_cancel₀ _ (ne_of_gt ha),
+        Real.rpow_one]
+    have h2 : ((8 : ℝ) ^ (1 / a)) ^ a ≤ X ^ a :=
+      Real.rpow_le_rpow (Real.rpow_nonneg (by norm_num) _) hX8a ha.le
+    rwa [h1] at h2
+  -- the block length, the number of blocks, and the left end
+  set m : ℕ := ⌊X⌋₊ with hmdef
+  have hmle : (m : ℝ) ≤ X := by rw [hmdef]; exact Nat.floor_le hXpos.le
+  have hmgt : X - 1 < (m : ℝ) := by rw [hmdef]; linarith [Nat.lt_floor_add_one X]
+  have hmge : X / 2 ≤ (m : ℝ) := by linarith
+  set L : ℕ := ⌊X ^ a / 4⌋₊ with hLdef
+  have hLle : (L : ℝ) ≤ X ^ a / 4 := by
+    rw [hLdef]; exact Nat.floor_le (by positivity)
+  have hLgt : X ^ a / 4 - 1 < (L : ℝ) := by
+    rw [hLdef]; linarith [Nat.lt_floor_add_one (X ^ a / 4)]
+  have hL1 : 1 ≤ L := by
+    rw [hLdef]
+    apply Nat.le_floor
+    rw [Nat.cast_one]
+    linarith
+  have hLpos : 0 < L := hL1
+  have hLposR : (0 : ℝ) < (L : ℝ) := by exact_mod_cast hLpos
+  have hLne : (L : ℝ) ≠ 0 := ne_of_gt hLposR
+  have hLXa : (L : ℝ) ≤ X ^ a / 4 := hLle
+  set k : ℕ := ⌈(H + 2) / (L : ℝ)⌉₊ with hkdef
+  have hkL : H + 2 ≤ (k : ℝ) * L := by
+    have h := Nat.le_ceil ((H + 2) / (L : ℝ))
+    have h2 := (div_le_iff₀ hLposR).mp h
+    simpa only [hkdef] using h2
+  have hkub : (k : ℝ) ≤ (H + 2) / (L : ℝ) + 1 := by
+    have h0 : (0 : ℝ) ≤ (H + 2) / (L : ℝ) := by positivity
+    have h := Nat.ceil_lt_add_one h0
+    have : (k : ℝ) < (H + 2) / (L : ℝ) + 1 := by simpa only [hkdef] using h
+    linarith
+  have hk1 : 1 ≤ k := by
+    have h1 : (L : ℝ) ≤ H + 2 := by linarith [hLle, hXaH, hL1]
+    have hkne : k ≠ 0 := by
+      intro h0
+      rw [h0] at hkL
+      simp only [Nat.cast_zero, zero_mul] at hkL
+      linarith [hLposR]
+    omega
+  -- the cover
+  have hcover : (Icc ⌈X⌉₊ ⌊X + H⌋₊).filter P ⊆
+      insert ⌈X⌉₊ ((range k).biUnion (fun j =>
+        (Ioc (m + j * L) (m + (j + 1) * L)).filter P)) := by
+    intro n hn
+    rw [mem_filter, mem_Icc] at hn
+    obtain ⟨⟨hlo, hhi⟩, hP⟩ := hn
+    rw [mem_insert]
+    rcases eq_or_ne n ⌈X⌉₊ with h | h
+    · exact Or.inl h
+    · refine Or.inr ?_
+      rw [mem_biUnion]
+      have hmlt : m < n := by
+        have hmc : m ≤ ⌈X⌉₊ := Nat.floor_le_ceil X
+        omega
+      have ht2 : (((n - m - 1 : ℕ)) : ℝ) < H + 2 := by
+        have h1 : (n : ℝ) ≤ X + H :=
+          le_trans (by exact_mod_cast hhi) (Nat.floor_le (by linarith))
+        have h2 : (((n - m - 1 : ℕ)) : ℝ) = (n : ℝ) - (m : ℝ) - 1 := by
+          rw [Nat.cast_sub (by omega : 1 ≤ n - m), Nat.cast_sub (by omega : m ≤ n)]
+          push_cast
+          ring
+        rw [h2]
+        linarith
+      set j : ℕ := (n - m - 1) / L with hjdef
+      set r : ℕ := (n - m - 1) % L with hrdef
+      have htj : j * L + r = n - m - 1 := by
+        rw [hjdef, hrdef, mul_comm]
+        exact Nat.div_add_mod (n - m - 1) L
+      have hrL : r < L := by rw [hrdef]; exact Nat.mod_lt _ hLpos
+      refine ⟨j, ?_, ?_⟩
+      · rw [mem_range]
+        have hltR : (((j * L : ℕ)) : ℝ) < (k : ℝ) * L := by
+          have ht1 : (((j * L : ℕ)) : ℝ) ≤ (((n - m - 1 : ℕ)) : ℝ) := by
+            exact_mod_cast (by omega : j * L ≤ n - m - 1)
+          linarith [ht1, ht2, hkL]
+        have hlt : j * L < k * L := by exact_mod_cast hltR
+        exact (Nat.mul_lt_mul_right hLpos).mp hlt
+      · rw [mem_filter]
+        refine ⟨?_, hP⟩
+        rw [mem_Ioc]
+        constructor
+        · have h1 : m + j * L ≤ n - 1 := by omega
+          omega
+        · have h1 : n ≤ m + (j * L + L) := by omega
+          have h2 : (j + 1) * L = j * L + L := by ring
+          omega
+  have hcard1 : ((Icc ⌈X⌉₊ ⌊X + H⌋₊).filter P).card ≤
+      ((range k).biUnion (fun j =>
+        (Ioc (m + j * L) (m + (j + 1) * L)).filter P)).card + 1 :=
+    (card_le_card hcover).trans (card_insert_le _ _)
+  have hcard2 : (((range k).biUnion (fun j =>
+        (Ioc (m + j * L) (m + (j + 1) * L)).filter P)).card : ℝ) ≤
+      ∑ j ∈ range k, (((Ioc (m + j * L) (m + (j + 1) * L)).filter P).card : ℝ) := by
+    have h := card_biUnion_le (s := range k)
+      (t := fun j => (Ioc (m + j * L) (m + (j + 1) * L)).filter P)
+    exact_mod_cast h
+  have hterm : ∀ j ∈ range k, (((Ioc (m + j * L) (m + (j + 1) * L)).filter P).card : ℝ) ≤
+      C₀ * 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B := by
+    intro j hj
+    have hjk : j < k := mem_range.mp hj
+    have hjL : (j : ℝ) * L ≤ H + 2 := by
+      have hjk1 : j ≤ k - 1 := by omega
+      have h1 : ((j : ℕ) : ℝ) * L ≤ ((k - 1 : ℕ) : ℝ) * L := by
+        have : (j : ℝ) ≤ ((k - 1 : ℕ) : ℝ) := by exact_mod_cast hjk1
+        exact mul_le_mul_of_nonneg_right this hLposR.le
+      have h2 : ((k - 1 : ℕ) : ℝ) * L < H + 2 := by
+        have hku : (k : ℝ) < (H + 2) / (L : ℝ) + 1 := by
+          have h0 : (0 : ℝ) ≤ (H + 2) / (L : ℝ) := by positivity
+          have h := Nat.ceil_lt_add_one h0
+          have : (k : ℝ) < (H + 2) / (L : ℝ) + 1 := by simpa only [hkdef] using h
+          linarith
+        have h3 : (k : ℝ) - 1 < (H + 2) / (L : ℝ) := by linarith
+        have h4 : ((k - 1 : ℕ) : ℝ) = (k : ℝ) - 1 := by
+          rw [Nat.cast_sub hk1]
+          norm_num
+        rw [h4]
+        exact (lt_div_iff₀ hLposR).mp h3
+      linarith
+    have hNhi : (((m + j * L : ℕ)) : ℝ) ≤ 3 * X := by
+      have hcast : (((m + j * L : ℕ)) : ℝ) = (m : ℝ) + (j : ℝ) * L := by push_cast; ring
+      rw [hcast]
+      linarith [hmle, hjL, hHX]
+    have hNlo : X / 2 ≤ (((m + j * L : ℕ)) : ℝ) := by
+      have hcast : (((m + j * L : ℕ)) : ℝ) = (m : ℝ) + (j : ℝ) * L := by push_cast; ring
+      rw [hcast]
+      have : (0 : ℝ) ≤ (j : ℝ) * L := by positivity
+      linarith
+    have hN1 : 1 ≤ (((m + j * L : ℕ)) : ℝ) := by
+      have hcast : (((m + j * L : ℕ)) : ℝ) = (m : ℝ) + (j : ℝ) * L := by push_cast; ring
+      rw [hcast]
+      linarith [hmge, hX4]
+    have hN₀le : N₀ ≤ (((m + j * L : ℕ)) : ℝ) := by
+      have hcast : (((m + j * L : ℕ)) : ℝ) = (m : ℝ) + (j : ℝ) * L := by push_cast; ring
+      rw [hcast]
+      have : N₀ ≤ (m : ℝ) := by linarith
+      have : (0 : ℝ) ≤ (j : ℝ) * L := by positivity
+      linarith
+    have hloc := hC (((m + j * L : ℕ)) : ℝ) hN₀le
+    simp only [Nat.floor_natCast] at hloc
+    have hLpow : (L : ℝ) ≤ (((m + j * L : ℕ)) : ℝ) ^ a := by
+      have h2 : X ^ a / 4 ≤ (X / 2) ^ a := by
+        rw [Real.div_rpow hXpos.le (by norm_num)]
+        have h2a : (2 : ℝ) ^ a ≤ 4 := by
+          have h3 := Real.rpow_le_rpow_of_exponent_le (show (1 : ℝ) ≤ 2 by norm_num)
+            (by linarith : a ≤ 2)
+          norm_num at h3
+          linarith
+        rw [div_le_div_iff₀ (by norm_num) (Real.rpow_pos_of_pos (by norm_num) a)]
+        nlinarith [Real.rpow_pos_of_pos hXpos a]
+      have h3 : (X / 2) ^ a ≤ (((m + j * L : ℕ)) : ℝ) ^ a :=
+        Real.rpow_le_rpow (by positivity) (by linarith [hmge]) ha.le
+      linarith
+    have hfloor : m + (j + 1) * L ≤ ⌊(((m + j * L : ℕ)) : ℝ) +
+        (((m + j * L : ℕ)) : ℝ) ^ a⌋₊ := by
+      apply Nat.le_floor
+      have hcast : (((m + (j + 1) * L : ℕ)) : ℝ) = (((m + j * L : ℕ)) : ℝ) + (L : ℝ) := by
+        push_cast; ring
+      rw [hcast]
+      linarith
+    have hsub : (Ioc (m + j * L) (m + (j + 1) * L)).filter P ⊆
+        (Ioc (m + j * L) ⌊(((m + j * L : ℕ)) : ℝ) +
+          (((m + j * L : ℕ)) : ℝ) ^ a⌋₊).filter P := by
+      apply filter_subset_filter
+      intro n hn
+      rw [mem_Ioc] at hn ⊢
+      obtain ⟨h1, h2⟩ := hn
+      exact ⟨h1, le_trans h2 hfloor⟩
+    have hcard_le : (((Ioc (m + j * L) (m + (j + 1) * L)).filter P).card : ℝ) ≤
+        (((Ioc (m + j * L) ⌊(((m + j * L : ℕ)) : ℝ) +
+          (((m + j * L : ℕ)) : ℝ) ^ a⌋₊).filter P).card : ℝ) :=
+      Nat.cast_le.mpr (card_le_card hsub)
+    have hCC' : C * (((m + j * L : ℕ)) : ℝ) ^ a / Real.log (((m + j * L : ℕ)) : ℝ) ^ B ≤
+        C₀ * (((m + j * L : ℕ)) : ℝ) ^ a / Real.log (((m + j * L : ℕ)) : ℝ) ^ B := by
+      apply div_le_div_of_nonneg_right _ (le_of_lt ?_)
+      · exact mul_le_mul_of_nonneg_right hCC (Real.rpow_nonneg (by positivity) a)
+      · exact Real.rpow_pos_of_pos (Real.log_pos (by linarith [hN1])) B
+    have hrp := rpow_log_div_le ha hB hX1le hX4 hN1 hNlo hNhi
+    calc (((Ioc (m + j * L) (m + (j + 1) * L)).filter P).card : ℝ)
+        ≤ C * (((m + j * L : ℕ)) : ℝ) ^ a / Real.log (((m + j * L : ℕ)) : ℝ) ^ B :=
+          hcard_le.trans hloc
+      _ ≤ C₀ * (((m + j * L : ℕ)) : ℝ) ^ a / Real.log (((m + j * L : ℕ)) : ℝ) ^ B := hCC'
+      _ = C₀ * ((((m + j * L : ℕ)) : ℝ) ^ a / Real.log (((m + j * L : ℕ)) : ℝ) ^ B) := by
+          rw [mul_div_assoc]
+      _ ≤ C₀ * (3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B) :=
+          mul_le_mul_of_nonneg_left hrp hC₀nonneg
+      _ = C₀ * 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B := by
+          rw [mul_div_assoc]
+          ring
+  have hLX : X ^ a / (L : ℝ) ≤ 8 := by
+    have hXapos : 0 < X ^ a := Real.rpow_pos_of_pos hXpos a
+    have hLge : X ^ a / 8 ≤ (L : ℝ) := by linarith [hLgt, hXa8]
+    rw [div_le_iff₀ hLposR]
+    linarith
+  have hkX : (k : ℝ) * X ^ a ≤ 25 * H := by
+    have h1 : (k : ℝ) * X ^ a ≤ ((H + 2) / (L : ℝ) + 1) * X ^ a :=
+      mul_le_mul_of_nonneg_right hkub (Real.rpow_nonneg hXpos.le a)
+    have h2 : ((H + 2) / (L : ℝ) + 1) * X ^ a = (H + 2) * (X ^ a / (L : ℝ)) + X ^ a := by
+      field_simp
+    have h3 : (H + 2) * (X ^ a / (L : ℝ)) + X ^ a ≤ 25 * H := by nlinarith [hLX, hXaH, hH1]
+    linarith
+  have hlogposX : 0 < Real.log X ^ B := Real.rpow_pos_of_pos (Real.log_pos (by linarith)) B
+  have hSnonneg : 0 ≤ C₀ * 3 ^ a * 2 ^ B :=
+    mul_nonneg (mul_nonneg hC₀nonneg (Real.rpow_nonneg (by norm_num) a))
+      (Real.rpow_nonneg (by norm_num) B)
+  have hSlog : 0 ≤ C₀ * 3 ^ a * 2 ^ B / Real.log X ^ B := div_nonneg hSnonneg hlogposX.le
+  have hfinal : (1 : ℝ) ≤ H / Real.log X ^ B := by
+    rw [le_div_iff₀ hlogposX]
+    linarith
+  have hcard3 : (((Icc ⌈X⌉₊ ⌊X + H⌋₊).filter P).card : ℝ) ≤
+      1 + (k : ℝ) * (C₀ * 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B) := by
+    have h1 : (((Icc ⌈X⌉₊ ⌊X + H⌋₊).filter P).card : ℝ) ≤
+        (((range k).biUnion (fun j =>
+          (Ioc (m + j * L) (m + (j + 1) * L)).filter P)).card : ℝ) + 1 := by
+      exact_mod_cast hcard1
+    have h2 : (((range k).biUnion (fun j =>
+          (Ioc (m + j * L) (m + (j + 1) * L)).filter P)).card : ℝ) ≤
+        ∑ j ∈ range k, (C₀ * 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B) :=
+      hcard2.trans (sum_le_sum hterm)
+    have h3 : (∑ j ∈ range k, (C₀ * 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B))
+        = (k : ℝ) * (C₀ * 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B) := by
+      rw [sum_const, card_range, nsmul_eq_mul]
+    linarith [h1, h2, h3]
+  calc (((Icc ⌈X⌉₊ ⌊X + H⌋₊).filter P).card : ℝ)
+      ≤ 1 + (k : ℝ) * (C₀ * 3 ^ a * 2 ^ B * X ^ a / Real.log X ^ B) := hcard3
+    _ = 1 + ((k : ℝ) * X ^ a) * (C₀ * 3 ^ a * 2 ^ B / Real.log X ^ B) := by
+          field_simp
+    _ ≤ H / Real.log X ^ B + (25 * H) * (C₀ * 3 ^ a * 2 ^ B / Real.log X ^ B) := by
+          have ha2 : ((k : ℝ) * X ^ a) * (C₀ * 3 ^ a * 2 ^ B / Real.log X ^ B) ≤
+              (25 * H) * (C₀ * 3 ^ a * 2 ^ B / Real.log X ^ B) :=
+            mul_le_mul_of_nonneg_right hkX hSlog
+          linarith
+    _ = (25 * C₀ * 3 ^ a * 2 ^ B + 1) * H / Real.log X ^ B := by
+          field_simp
+          ring
+
 
 /-- Page 262 display 43: a positive restricted count supplies a Goldbach sum. -/
 theorem goldbach_of_representations {N Y : ℝ} {n : ℕ}
