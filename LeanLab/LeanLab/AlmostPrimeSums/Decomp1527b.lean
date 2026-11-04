@@ -1078,27 +1078,6 @@ theorem block_mainSum_relative_error (s : BoundingSieve) (Bs : List Block) (hG :
   · rw [hmain, ← hV]
     exact hdev.2.trans (mul_le_mul_of_nonneg_right hle.2.2.2 hV0)
 
-/-- LEAF. Deep. Fundamental lemma of sieve theory, `κ = 1`: given `K ≥ 0` there is `C > 0`
-such that whenever all primes of `P` are below `z`, `Ω₁(K)` holds, `z ≥ 2` and `D ≥ z^{10}`,
-there are upper and lower bound sieve weights `λ^±` with `|λ^±_d| ≤ 1`, supported on `d ∣ P`,
-`d < D`, `λ^±_1 = 1`, `Σ_{d∣n} λ⁺_d ≥ [n=1]` for all `n`,
-`Σ_{d∣n} λ⁻_d ≤ [n=1]` for `n ∣ P`, and `|Σ_{d∣P} λ^±_d g(d) − V(z)| ≤ C e^{-s} V(z)`, `s = log D/log z`.
-Iwaniec-Kowalski Lemma 6.3 and Theorem 6.9 (`D ≥ z^{9κ+1}`).
-Unit U-1527. -/
-theorem fundamental_lemma (K : ℝ) (hK : 0 ≤ K) :
-    ∃ C : ℝ, 0 < C ∧ ∀ (s : BoundingSieve) (z D : ℝ), 2 ≤ z → z ^ 10 ≤ D →
-      (∀ p ∈ s.prodPrimes.primeFactors, (p : ℝ) < z) → LinearDensity s K →
-      ∃ lp lm : ℕ → ℝ,
-        (∀ d, |lp d| ≤ 1 ∧ |lm d| ≤ 1) ∧ lp 1 = 1 ∧ lm 1 = 1 ∧
-        (∀ d, lp d ≠ 0 → d ∣ s.prodPrimes ∧ (d : ℝ) < D) ∧
-        (∀ d, lm d ≠ 0 → d ∣ s.prodPrimes ∧ (d : ℝ) < D) ∧
-        IsUpperMoebius lp ∧
-        (∀ n : ℕ, n ∣ s.prodPrimes → ∑ d ∈ n.divisors, lm d ≤ if n = 1 then 1 else 0) ∧
-        |s.mainSum lp - ∏ p ∈ s.prodPrimes.primeFactors, (1 - s.nu p)| ≤
-          C * exp (-(log D / log z)) * ∏ p ∈ s.prodPrimes.primeFactors, (1 - s.nu p) ∧
-        |s.mainSum lm - ∏ p ∈ s.prodPrimes.primeFactors, (1 - s.nu p)| ≤
-          C * exp (-(log D / log z)) * ∏ p ∈ s.prodPrimes.primeFactors, (1 - s.nu p) := by
-  sorry
 
 /-! ### Assemblies: the Jurkat-Richert linear sieve bounds, from the leaves -/
 
