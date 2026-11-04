@@ -1,0 +1,78 @@
+/-
+P0079 quantitative assembly with the positive margin explicit.
+AI wrote this Lean code. Goldbach is open.
+This file does not discharge the endpoint QUESTION.
+-/
+import LeanLab.LZPowersOfTwo.Decomp293b
+
+open Real Finset MeasureTheory Filter
+
+noncomputable section
+namespace LeanLab.LZPowersOfTwo
+
+/-- P0079 pages 4 to 5, displays 13 to 19. CONDITIONAL ON the four shared
+analytic leaves. A strictly positive margin gives a quantitative count bound.
+The margin is a hypothesis, not an OPEN leaf. -/
+theorem count_bound_at_margin293 (ν : ℝ) (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε : ℝ)
+    (hs : 2 ≤ s) (h1 : 1 < l1) (h2 : l2 < -1) (hr : 1 ≤ |l1 / l2|)
+    (hi : Irrational (l1 / l2))
+    (hc : (ν = nuTr ∧ IsTr (l1 / l2)) ∨ (ν = nuAlg ∧ IsAlg (l1 / l2)))
+    (hμ : ∀ i, μ i ≠ 0) (r1 r2 : ℚ)
+    (hr1 : (r1 : ℝ) = l1 / μ 0) (hr2 : (r2 : ℝ) = l2 / μ 1)
+    (hη : 0 < η) (hη1 : η < |l1 / r1.num|) (hη2 : η < |l2 / r2.num|)
+    (hε : 0 < ε) (hε' : ε < 1 / (8 * l1))
+    (hM : 0 < ∑ i : Fin s, |μ i|)
+    (hgap : 0 < (1 - 4 * l1 * ε) / (2 * |l1 * l2|) * η - ν ^ (s - 2) * Cq r1.den r2.den) :
+    ∃ c : ℝ, 0 < c ∧ ∀ᶠ X : ℝ in atTop,
+      c * X * (cutoff293 s μ ε X) ^ s ≤
+        η * (log X) ^ 2 * NX l1 l2 (fun i : Fin s => μ i) γ η ε X := by
+  let gap := (1 - 4 * l1 * ε) / (2 * |l1 * l2|) * η - ν ^ (s - 2) * Cq r1.den r2.den
+  have hg : 0 < gap := hgap
+  have hε1 : ε < 1 := by
+    have hd : 1 / (8 * l1) < (1 : ℝ) := (div_lt_one (by positivity)).mpr (by linarith)
+    exact hε'.trans hd
+  have Hmajor := major_lower293 s l1 l2 μ γ η ε hs h1 h2 hr hμ hη hε hε'
+  have Hminor := minor_upper293 ν s l1 l2 μ γ η ε hs h1 h2 hr hi hc hμ r1 r2
+    hr1 hr2 hη hη1 hη2 hε hε' (gap / 4) (by positivity)
+  have Htrivial := trivial_small293 s l1 l2 μ γ η ε hs (by linarith) (by linarith)
+    hμ hη hε hε1 (gap * η / 4) (by positivity)
+  refine ⟨gap * η / 2, by positivity, ?_⟩
+  filter_upwards [Hmajor, Hminor, Htrivial, eventually_ge_atTop (2 : ℝ),
+    eventually_ge_atTop ((2 * ∑ i : Fin s, |μ i|) / ε)] with X hmajor hminor htrivial hX hXM
+  obtain ⟨hint, hcount⟩ := count_integral293 s l1 l2 μ γ η ε X hη hε hX
+  have hL : 0 ≤ cutoff293 s μ ε X := cutoff_nonneg293 s μ ε X hM
+    (by simpa [mul_comm] using (div_le_iff₀ hε).mp hXM)
+  have hW : 0 ≤ X * (cutoff293 s μ ε X) ^ s := mul_nonneg (by linarith) (pow_nonneg hL _)
+  have hbound := arc_lower293 (integrand293 s l1 l2 μ γ η ε X) hint X
+    (cutoff293 s μ ε X)
+    ((1 - 4 * l1 * ε) / (2 * |l1 * l2|) * η ^ 2)
+    ((ν ^ (s - 2) * Cq r1.den r2.den + gap / 4) * η)
+    (gap * η / 4) (X * (cutoff293 s μ ε X) ^ s)
+    (by nlinarith only [hmajor]) (by nlinarith only [hminor]) (by nlinarith only [htrivial])
+  have heq : ((1 - 4 * l1 * ε) / (2 * |l1 * l2|) * η ^ 2 -
+      (ν ^ (s - 2) * Cq r1.den r2.den + gap / 4) * η - gap * η / 4) = gap * η / 2 := by
+    dsimp [gap]
+    ring
+  rw [heq] at hbound
+  nlinarith only [hbound, hcount]
+
+/-- P0079 page 4, display 13 and its consequence. CONDITIONAL ON the four
+analytic leaves. This is the quantitative conclusion at a fixed strict margin.
+It does not infer that margin from the sealed s0 formula. -/
+theorem density_at_margin293 (ν : ℝ) (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε : ℝ)
+    (hs : 2 ≤ s) (h1 : 1 < l1) (h2 : l2 < -1) (hr : 1 ≤ |l1 / l2|)
+    (hi : Irrational (l1 / l2))
+    (hc : (ν = nuTr ∧ IsTr (l1 / l2)) ∨ (ν = nuAlg ∧ IsAlg (l1 / l2)))
+    (hμ : ∀ i, μ i ≠ 0) (r1 r2 : ℚ)
+    (hr1 : (r1 : ℝ) = l1 / μ 0) (hr2 : (r2 : ℝ) = l2 / μ 1)
+    (hη : 0 < η) (hη1 : η < |l1 / r1.num|) (hη2 : η < |l2 / r2.num|)
+    (hε : 0 < ε) (hε' : ε < 1 / (8 * l1))
+    (hM : 0 < ∑ i : Fin s, |μ i|)
+    (hgap : 0 < (1 - 4 * l1 * ε) / (2 * |l1 * l2|) * η - ν ^ (s - 2) * Cq r1.den r2.den) :
+    ∃ c X0 : ℝ, 0 < c ∧ ∀ X, X0 ≤ X →
+      c * X * (log X) ^ (s - 2) ≤ NX l1 l2 (fun i : Fin s => μ i) γ η ε X := by
+  obtain ⟨c, hc', H⟩ := count_bound_at_margin293 ν s l1 l2 μ γ η ε hs h1 h2 hr hi hc hμ
+    r1 r2 hr1 hr2 hη hη1 hη2 hε hε' hM hgap
+  exact count_to_density293 s l1 l2 μ γ η ε c hs hM hη hε hc' H
+
+end LeanLab.LZPowersOfTwo
