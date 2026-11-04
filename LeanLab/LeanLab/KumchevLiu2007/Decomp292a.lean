@@ -72,7 +72,50 @@ theorem localMajorant_log_bound :
 The already proved sum_inv_sq_Ioc_le handles positive natural cutoffs. -/
 theorem reciprocal_square_tail (P : ℝ) (b : ℕ) (hP : 0 < P) :
     (∑ q ∈ Finset.Ioc ⌊P⌋₊ b, 1 / (q : ℝ) ^ 2) ≤ 2 / P := by
-  sorry
+  by_cases h : 0 < ⌊P⌋₊ ∧ ⌊P⌋₊ ≤ b
+  · rcases h with ⟨hP0, hPb⟩
+    have h1 := Task271b.sum_inv_sq_Ioc_le ⌊P⌋₊ b hP0 hPb
+    calc
+      (∑ q ∈ Finset.Ioc ⌊P⌋₊ b, 1 / (q : ℝ) ^ 2) ≤ 1 / (⌊P⌋₊ : ℝ) - 1 / (b : ℝ) := h1
+      _ ≤ 1 / (⌊P⌋₊ : ℝ) := sub_le_self _ (by positivity)
+      _ ≤ 2 / P := by
+        have hd : P < 2 * ⌊P⌋₊ := by
+          have hpfloor : 1 ≤ (⌊P⌋₊ : ℝ) := Nat.one_le_cast.mpr hP0
+          have : P < (⌊P⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one P
+          linarith
+        rw [div_le_div_iff₀ (by positivity) (by positivity)]
+        linarith
+  · push Not at h
+    by_cases hP0 : 0 < ⌊P⌋₊
+    · have hbb : b < ⌊P⌋₊ := h hP0
+      have : Finset.Ioc ⌊P⌋₊ b = ∅ := Finset.Ioc_eq_empty_of_le (le_of_lt hbb)
+      rw [this, Finset.sum_empty]
+      positivity
+    · have hP0' : ⌊P⌋₊ = 0 := by omega
+      have hp1 : P < 1 := Nat.floor_eq_zero.mp hP0'
+      by_cases hb : 0 < b
+      · have : Finset.Ioc ⌊P⌋₊ b = Finset.Ioc 0 b := by rw [hP0']
+        rw [this]
+        have h_eq : Finset.Ioc 0 b = insert 1 (Finset.Ioc 1 b) := by
+          ext x
+          simp only [Finset.mem_Ioc, Finset.mem_insert]
+          omega
+        rw [h_eq, Finset.sum_insert (by simp)]
+        have h_sum : (∑ q ∈ Finset.Ioc 1 b, 1 / (q : ℝ) ^ 2) ≤ 1 / (1 : ℝ) - 1 / (b : ℝ) := by
+          exact_mod_cast Task271b.sum_inv_sq_Ioc_le 1 b (by omega) (by omega)
+        calc
+          1 / ((1 : ℕ) : ℝ) ^ 2 + ∑ q ∈ Finset.Ioc 1 b, 1 / (q : ℝ) ^ 2 ≤ 1 + (1 / (1 : ℝ) - 1 / (b : ℝ)) := by
+            have : 1 / ((1 : ℕ) : ℝ) ^ 2 = 1 := by norm_num
+            rw [this]
+            exact add_le_add le_rfl h_sum
+          _ ≤ 2 := by linarith [show 0 ≤ 1 / (b : ℝ) by positivity]
+          _ ≤ 2 / P := by
+            rw [le_div_iff₀ hP]
+            linarith
+      · have : b = 0 := by omega
+        have : Finset.Ioc ⌊P⌋₊ b = ∅ := by rw [this, hP0']; exact Finset.Ioc_eq_empty_of_le le_rfl
+        rw [this, Finset.sum_empty]
+        positivity
 
 /-- Page 15 first display. Exact statement of Task271b.diagonal_bound.
 CONDITIONAL on the three OPEN leaves in this file. -/
