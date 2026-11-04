@@ -821,6 +821,1063 @@ theorem hasSum_g : HasSum g (1 / Cv) := by
 
 set_option maxRecDepth 1000000 in
 set_option maxHeartbeats 0 in
+/-! ### Private helpers for `gam_lt` (2.8): `Γ < 0.535`
+
+Head: `3 ≤ p ≤ 2000`, bounded prime by prime against the certified tables `lnum`
+(`10^4 log p`) and `wnum` (`10^7 log p/(p-1)^2`).
+Tail: primes above `2000`, counted in blocks of `210`. -/
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- The term bound `log p/(p-1)^2 ≤ 1.14 p^(-7/4)` for `p > 2000`. -/
+private theorem log_term_bound {p : ℕ} (hp : 2000 < p) :
+    Real.log p/((p : ℝ)-1)^2 ≤ 1.14*(p : ℝ)^(-7/4 : ℝ) := by
+  have hpR : (2001 : ℝ) ≤ p := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < p := by linarith
+  have hexp : Real.exp 4 ≤ (2000 : ℝ) := by
+    have h := pow_le_pow_left₀ (Real.exp_nonneg 1) Real.exp_one_lt_three.le 4
+    rw [← Real.exp_nat_mul] at h
+    norm_num at h
+    linarith
+  have hlog : Real.log 2000 ≤ (7.601 : ℝ) := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    calc (2000 : ℝ) ≤ ∑ k ∈ range 32, (7.601 : ℝ)^k/(k.factorial : ℝ) := by
+           norm_num [sum_range_succ]
+         _ ≤ _ := Real.sum_le_exp_of_nonneg (by norm_num) 32
+  have hroot : (6.687 : ℝ) ≤ (2000 : ℝ)^(1/4 : ℝ) := by
+    apply (pow_le_pow_iff_left₀ (by norm_num : (0 : ℝ) ≤ 6.687)
+      (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 2000) _) (by norm_num : (4 : ℕ) ≠ 0)).mp
+    rw [← Real.rpow_natCast ((2000 : ℝ)^(1/4 : ℝ)) 4,
+      ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2000)]
+    norm_num
+  have hratio : Real.log p/(p : ℝ)^(1/4 : ℝ) ≤ (1.137 : ℝ) := by
+    have hm := Real.log_div_self_rpow_antitoneOn (by norm_num : (0 : ℝ) < 1/4)
+    have hmono := hm (a := (2000 : ℝ)) (b := (p : ℝ))
+      (by simpa using hexp) (by simpa using hexp.trans (by linarith : (2000 : ℝ) ≤ p))
+      (by linarith)
+    calc _ ≤ Real.log 2000/(2000 : ℝ)^(1/4 : ℝ) := hmono
+         _ ≤ (7.601 : ℝ)/6.687 := div_le_div₀ (by positivity) hlog (by norm_num) hroot
+         _ ≤ _ := by norm_num
+  have hlogp : Real.log p ≤ 1.137*(p : ℝ)^(1/4 : ℝ) :=
+    (div_le_iff₀ (Real.rpow_pos_of_pos hp0 _)).mp hratio
+  have hd1 : (0 : ℝ) < p-1 := by linarith
+  have hden : (p : ℝ)^2 ≤ 1.0011*((p : ℝ)-1)^2 := by
+    nlinarith [sq_nonneg ((p : ℝ)-2001)]
+  have hr : (p : ℝ)^(1/4 : ℝ)/(p : ℝ)^2 = (p : ℝ)^(-7/4 : ℝ) := by
+    rw [← Real.rpow_natCast (p : ℝ) 2, ← Real.rpow_sub hp0]
+    norm_num
+  calc _ ≤ (1.137*(p : ℝ)^(1/4 : ℝ))/((p : ℝ)-1)^2 :=
+         div_le_div_of_nonneg_right hlogp (sq_nonneg _)
+       _ ≤ (1.137*1.0011)*(p : ℝ)^(1/4 : ℝ)/(p : ℝ)^2 := by
+         rw [div_le_div_iff₀ (sq_pos_of_pos hd1) (sq_pos_of_pos hp0)]
+         have h := mul_le_mul_of_nonneg_left hden
+           (mul_nonneg (by norm_num : (0 : ℝ) ≤ 1.137) (Real.rpow_nonneg hp0.le (1/4 : ℝ)))
+         nlinarith only [h]
+       _ = (1.137*1.0011)*(p : ℝ)^(-7/4 : ℝ) := by rw [mul_div_assoc,hr]
+       _ ≤ _ := mul_le_mul_of_nonneg_right (by norm_num) (Real.rpow_nonneg hp0.le _)
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- `10^4 log p`, certified for the primes `3 ≤ p ≤ 2000`. -/
+private def lnum (q : ℕ) : ℕ :=
+  (if q < 241 then
+    match q with
+      | 3 => 10987
+      | 5 => 16095
+      | 7 => 19460
+      | 11 => 23979
+      | 13 => 25650
+      | 17 => 28333
+      | 19 => 29445
+      | 23 => 31355
+      | 29 => 33673
+      | 31 => 34340
+      | 37 => 36110
+      | 41 => 37136
+      | 43 => 37613
+      | 47 => 38502
+      | 53 => 39703
+      | 59 => 40776
+      | 61 => 41109
+      | 67 => 42047
+      | 71 => 42627
+      | 73 => 42905
+      | 79 => 43695
+      | 83 => 44189
+      | 89 => 44887
+      | 97 => 45748
+      | 101 => 46152
+      | 103 => 46348
+      | 107 => 46729
+      | 109 => 46914
+      | 113 => 47274
+      | 127 => 48442
+      | 131 => 48752
+      | 137 => 49200
+      | 139 => 49345
+      | 149 => 50040
+      | 151 => 50173
+      | 157 => 50563
+      | 163 => 50938
+      | 167 => 51180
+      | 173 => 51533
+      | 179 => 51874
+      | 181 => 51985
+      | 191 => 52523
+      | 193 => 52627
+      | 197 => 52833
+      | 199 => 52934
+      | 211 => 53519
+      | 223 => 54072
+      | 227 => 54250
+      | 229 => 54338
+      | 233 => 54511
+      | 239 => 54765
+      | _ => 0
+  else (if q < 569 then
+    match q with
+      | 241 => 54848
+      | 251 => 55255
+      | 257 => 55491
+      | 263 => 55722
+      | 269 => 55948
+      | 271 => 56022
+      | 277 => 56241
+      | 281 => 56384
+      | 283 => 56455
+      | 293 => 56802
+      | 307 => 57269
+      | 311 => 57398
+      | 313 => 57463
+      | 317 => 57590
+      | 331 => 58022
+      | 337 => 58201
+      | 347 => 58494
+      | 349 => 58551
+      | 353 => 58665
+      | 359 => 58834
+      | 367 => 59054
+      | 373 => 59216
+      | 379 => 59376
+      | 383 => 59481
+      | 389 => 59636
+      | 397 => 59840
+      | 401 => 59940
+      | 409 => 60138
+      | 419 => 60379
+      | 421 => 60427
+      | 431 => 60662
+      | 433 => 60708
+      | 439 => 60845
+      | 443 => 60936
+      | 449 => 61071
+      | 457 => 61247
+      | 461 => 61334
+      | 463 => 61378
+      | 467 => 61464
+      | 479 => 61718
+      | 487 => 61883
+      | 491 => 61965
+      | 499 => 62127
+      | 503 => 62206
+      | 509 => 62325
+      | 521 => 62558
+      | 523 => 62596
+      | 541 => 62935
+      | 547 => 63045
+      | 557 => 63226
+      | 563 => 63333
+      | _ => 0
+  else (if q < 907 then
+    match q with
+      | 569 => 63439
+      | 571 => 63474
+      | 577 => 63579
+      | 587 => 63751
+      | 593 => 63852
+      | 599 => 63953
+      | 601 => 63986
+      | 607 => 64086
+      | 613 => 64184
+      | 617 => 64249
+      | 619 => 64282
+      | 631 => 64474
+      | 641 => 64631
+      | 643 => 64662
+      | 647 => 64724
+      | 653 => 64816
+      | 659 => 64908
+      | 661 => 64938
+      | 673 => 65118
+      | 677 => 65177
+      | 683 => 65265
+      | 691 => 65382
+      | 701 => 65526
+      | 709 => 65639
+      | 719 => 65779
+      | 727 => 65890
+      | 733 => 65972
+      | 739 => 66053
+      | 743 => 66107
+      | 751 => 66215
+      | 757 => 66294
+      | 761 => 66347
+      | 769 => 66451
+      | 773 => 66503
+      | 787 => 66683
+      | 797 => 66809
+      | 809 => 66958
+      | 811 => 66983
+      | 821 => 67106
+      | 823 => 67130
+      | 827 => 67179
+      | 829 => 67203
+      | 839 => 67323
+      | 853 => 67488
+      | 857 => 67535
+      | 859 => 67558
+      | 863 => 67605
+      | 877 => 67766
+      | 881 => 67811
+      | 883 => 67834
+      | 887 => 67879
+      | _ => 0
+  else (if q < 1277 then
+    match q with
+      | 907 => 68102
+      | 911 => 68146
+      | 919 => 68233
+      | 929 => 68342
+      | 937 => 68427
+      | 941 => 68470
+      | 947 => 68533
+      | 953 => 68597
+      | 967 => 68742
+      | 971 => 68784
+      | 977 => 68845
+      | 983 => 68907
+      | 991 => 68988
+      | 997 => 69048
+      | 1009 => 69168
+      | 1013 => 69207
+      | 1019 => 69266
+      | 1021 => 69286
+      | 1031 => 69383
+      | 1033 => 69403
+      | 1039 => 69461
+      | 1049 => 69556
+      | 1051 => 69575
+      | 1061 => 69670
+      | 1063 => 69689
+      | 1069 => 69745
+      | 1087 => 69912
+      | 1091 => 69949
+      | 1093 => 69967
+      | 1097 => 70004
+      | 1103 => 70058
+      | 1109 => 70113
+      | 1117 => 70185
+      | 1123 => 70238
+      | 1129 => 70291
+      | 1151 => 70484
+      | 1153 => 70502
+      | 1163 => 70588
+      | 1171 => 70657
+      | 1181 => 70742
+      | 1187 => 70792
+      | 1193 => 70843
+      | 1201 => 70910
+      | 1213 => 71009
+      | 1217 => 71042
+      | 1223 => 71091
+      | 1229 => 71140
+      | 1231 => 71156
+      | 1237 => 71205
+      | 1249 => 71301
+      | 1259 => 71381
+      | _ => 0
+  else (if q < 1621 then
+    match q with
+      | 1277 => 71523
+      | 1279 => 71539
+      | 1283 => 71570
+      | 1289 => 71617
+      | 1291 => 71632
+      | 1297 => 71679
+      | 1301 => 71709
+      | 1303 => 71725
+      | 1307 => 71755
+      | 1319 => 71847
+      | 1321 => 71862
+      | 1327 => 71907
+      | 1361 => 72160
+      | 1367 => 72204
+      | 1373 => 72248
+      | 1381 => 72306
+      | 1399 => 72436
+      | 1409 => 72507
+      | 1423 => 72606
+      | 1427 => 72634
+      | 1429 => 72648
+      | 1433 => 72676
+      | 1439 => 72718
+      | 1447 => 72773
+      | 1451 => 72801
+      | 1453 => 72814
+      | 1459 => 72856
+      | 1471 => 72937
+      | 1481 => 73005
+      | 1483 => 73019
+      | 1487 => 73046
+      | 1489 => 73059
+      | 1493 => 73086
+      | 1499 => 73126
+      | 1511 => 73206
+      | 1523 => 73285
+      | 1531 => 73337
+      | 1543 => 73415
+      | 1549 => 73454
+      | 1553 => 73480
+      | 1559 => 73518
+      | 1567 => 73570
+      | 1571 => 73595
+      | 1579 => 73646
+      | 1583 => 73671
+      | 1597 => 73759
+      | 1601 => 73784
+      | 1607 => 73822
+      | 1609 => 73834
+      | 1613 => 73859
+      | 1619 => 73896
+      | _ => 0
+  else match q with
+      | 1621 => 73908
+      | 1627 => 73945
+      | 1637 => 74007
+      | 1657 => 74128
+      | 1663 => 74164
+      | 1667 => 74188
+      | 1669 => 74200
+      | 1693 => 74343
+      | 1697 => 74367
+      | 1699 => 74378
+      | 1709 => 74437
+      | 1721 => 74507
+      | 1723 => 74519
+      | 1733 => 74577
+      | 1741 => 74623
+      | 1747 => 74657
+      | 1753 => 74691
+      | 1759 => 74726
+      | 1777 => 74827
+      | 1783 => 74861
+      | 1787 => 74883
+      | 1789 => 74895
+      | 1801 => 74961
+      | 1811 => 75017
+      | 1823 => 75083
+      | 1831 => 75127
+      | 1847 => 75214
+      | 1861 => 75289
+      | 1867 => 75321
+      | 1871 => 75343
+      | 1873 => 75353
+      | 1877 => 75375
+      | 1879 => 75385
+      | 1889 => 75439
+      | 1901 => 75502
+      | 1907 => 75533
+      | 1913 => 75565
+      | 1931 => 75658
+      | 1933 => 75669
+      | 1949 => 75751
+      | 1951 => 75761
+      | 1973 => 75874
+      | 1979 => 75904
+      | 1987 => 75944
+      | 1993 => 75974
+      | 1997 => 75995
+      | 1999 => 76005
+      | _ => 0)))))
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- `10^7 log p/(p-1)^2`, certified for the primes `3 ≤ p ≤ 2000`. -/
+private def wnum (q : ℕ) : ℕ :=
+  (if q < 241 then
+    match q with
+      | 3 => 2746750
+      | 5 => 1005938
+      | 7 => 540556
+      | 11 => 239790
+      | 13 => 178125
+      | 17 => 110676
+      | 19 => 90880
+      | 23 => 64784
+      | 29 => 42951
+      | 31 => 38156
+      | 37 => 27863
+      | 41 => 23210
+      | 43 => 21323
+      | 47 => 18196
+      | 53 => 14684
+      | 59 => 12122
+      | 61 => 11420
+      | 67 => 9653
+      | 71 => 8700
+      | 73 => 8277
+      | 79 => 7182
+      | 83 => 6572
+      | 89 => 5797
+      | 97 => 4964
+      | 101 => 4616
+      | 103 => 4455
+      | 107 => 4159
+      | 109 => 4023
+      | 113 => 3769
+      | 127 => 3052
+      | 131 => 2885
+      | 137 => 2661
+      | 139 => 2592
+      | 149 => 2285
+      | 151 => 2230
+      | 157 => 2078
+      | 163 => 1941
+      | 167 => 1858
+      | 173 => 1742
+      | 179 => 1638
+      | 181 => 1605
+      | 191 => 1455
+      | 193 => 1428
+      | 197 => 1376
+      | 199 => 1351
+      | 211 => 1214
+      | 223 => 1098
+      | 227 => 1063
+      | 229 => 1046
+      | 233 => 1013
+      | 239 => 967
+      | _ => 0
+  else (if q < 569 then
+    match q with
+      | 241 => 953
+      | 251 => 885
+      | 257 => 847
+      | 263 => 812
+      | 269 => 779
+      | 271 => 769
+      | 277 => 739
+      | 281 => 720
+      | 283 => 710
+      | 293 => 667
+      | 307 => 612
+      | 311 => 598
+      | 313 => 591
+      | 317 => 577
+      | 331 => 533
+      | 337 => 516
+      | 347 => 489
+      | 349 => 484
+      | 353 => 474
+      | 359 => 460
+      | 367 => 441
+      | 373 => 428
+      | 379 => 416
+      | 383 => 408
+      | 389 => 397
+      | 397 => 382
+      | 401 => 375
+      | 409 => 362
+      | 419 => 346
+      | 421 => 343
+      | 431 => 329
+      | 433 => 326
+      | 439 => 318
+      | 443 => 312
+      | 449 => 305
+      | 457 => 295
+      | 461 => 290
+      | 463 => 288
+      | 467 => 284
+      | 479 => 271
+      | 487 => 262
+      | 491 => 259
+      | 499 => 251
+      | 503 => 247
+      | 509 => 242
+      | 521 => 232
+      | 523 => 230
+      | 541 => 216
+      | 547 => 212
+      | 557 => 205
+      | 563 => 201
+      | _ => 0
+  else (if q < 907 then
+    match q with
+      | 569 => 197
+      | 571 => 196
+      | 577 => 192
+      | 587 => 186
+      | 593 => 183
+      | 599 => 179
+      | 601 => 178
+      | 607 => 175
+      | 613 => 172
+      | 617 => 170
+      | 619 => 169
+      | 631 => 163
+      | 641 => 158
+      | 643 => 157
+      | 647 => 156
+      | 653 => 153
+      | 659 => 150
+      | 661 => 150
+      | 673 => 145
+      | 677 => 143
+      | 683 => 141
+      | 691 => 138
+      | 701 => 134
+      | 709 => 131
+      | 719 => 128
+      | 727 => 126
+      | 733 => 124
+      | 739 => 122
+      | 743 => 121
+      | 751 => 118
+      | 757 => 116
+      | 761 => 115
+      | 769 => 113
+      | 773 => 112
+      | 787 => 108
+      | 797 => 106
+      | 809 => 103
+      | 811 => 103
+      | 821 => 100
+      | 823 => 100
+      | 827 => 99
+      | 829 => 99
+      | 839 => 96
+      | 853 => 93
+      | 857 => 93
+      | 859 => 92
+      | 863 => 91
+      | 877 => 89
+      | 881 => 88
+      | 883 => 88
+      | 887 => 87
+      | _ => 0
+  else (if q < 1277 then
+    match q with
+      | 907 => 83
+      | 911 => 83
+      | 919 => 81
+      | 929 => 80
+      | 937 => 79
+      | 941 => 78
+      | 947 => 77
+      | 953 => 76
+      | 967 => 74
+      | 971 => 74
+      | 977 => 73
+      | 983 => 72
+      | 991 => 71
+      | 997 => 70
+      | 1009 => 69
+      | 1013 => 68
+      | 1019 => 67
+      | 1021 => 67
+      | 1031 => 66
+      | 1033 => 66
+      | 1039 => 65
+      | 1049 => 64
+      | 1051 => 64
+      | 1061 => 63
+      | 1063 => 62
+      | 1069 => 62
+      | 1087 => 60
+      | 1091 => 59
+      | 1093 => 59
+      | 1097 => 59
+      | 1103 => 58
+      | 1109 => 58
+      | 1117 => 57
+      | 1123 => 56
+      | 1129 => 56
+      | 1151 => 54
+      | 1153 => 54
+      | 1163 => 53
+      | 1171 => 52
+      | 1181 => 51
+      | 1187 => 51
+      | 1193 => 50
+      | 1201 => 50
+      | 1213 => 49
+      | 1217 => 49
+      | 1223 => 48
+      | 1229 => 48
+      | 1231 => 48
+      | 1237 => 47
+      | 1249 => 46
+      | 1259 => 46
+      | _ => 0
+  else (if q < 1621 then
+    match q with
+      | 1277 => 44
+      | 1279 => 44
+      | 1283 => 44
+      | 1289 => 44
+      | 1291 => 44
+      | 1297 => 43
+      | 1301 => 43
+      | 1303 => 43
+      | 1307 => 43
+      | 1319 => 42
+      | 1321 => 42
+      | 1327 => 41
+      | 1361 => 40
+      | 1367 => 39
+      | 1373 => 39
+      | 1381 => 38
+      | 1399 => 38
+      | 1409 => 37
+      | 1423 => 36
+      | 1427 => 36
+      | 1429 => 36
+      | 1433 => 36
+      | 1439 => 36
+      | 1447 => 35
+      | 1451 => 35
+      | 1453 => 35
+      | 1459 => 35
+      | 1471 => 34
+      | 1481 => 34
+      | 1483 => 34
+      | 1487 => 34
+      | 1489 => 33
+      | 1493 => 33
+      | 1499 => 33
+      | 1511 => 33
+      | 1523 => 32
+      | 1531 => 32
+      | 1543 => 31
+      | 1549 => 31
+      | 1553 => 31
+      | 1559 => 31
+      | 1567 => 30
+      | 1571 => 30
+      | 1579 => 30
+      | 1583 => 30
+      | 1597 => 29
+      | 1601 => 29
+      | 1607 => 29
+      | 1609 => 29
+      | 1613 => 29
+      | 1619 => 29
+      | _ => 0
+  else match q with
+      | 1621 => 29
+      | 1627 => 28
+      | 1637 => 28
+      | 1657 => 28
+      | 1663 => 27
+      | 1667 => 27
+      | 1669 => 27
+      | 1693 => 26
+      | 1697 => 26
+      | 1699 => 26
+      | 1709 => 26
+      | 1721 => 26
+      | 1723 => 26
+      | 1733 => 25
+      | 1741 => 25
+      | 1747 => 25
+      | 1753 => 25
+      | 1759 => 25
+      | 1777 => 24
+      | 1783 => 24
+      | 1787 => 24
+      | 1789 => 24
+      | 1801 => 24
+      | 1811 => 23
+      | 1823 => 23
+      | 1831 => 23
+      | 1847 => 23
+      | 1861 => 22
+      | 1867 => 22
+      | 1871 => 22
+      | 1873 => 22
+      | 1877 => 22
+      | 1879 => 22
+      | 1889 => 22
+      | 1901 => 21
+      | 1907 => 21
+      | 1913 => 21
+      | 1931 => 21
+      | 1933 => 21
+      | 1949 => 20
+      | 1951 => 20
+      | 1973 => 20
+      | 1979 => 20
+      | 1987 => 20
+      | 1993 => 20
+      | 1997 => 20
+      | 1999 => 20
+      | _ => 0)))))
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- The primes `3 ≤ p ≤ 2000`. -/
+private def pset : Finset ℕ := {3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997,1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,1901,1907,1913,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999}
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem pset_ge {p : ℕ} (hp : p ∈ pset) : 3 ≤ p := by
+  fin_cases hp <;> norm_num
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- Primes through `1000` are in `pset` (this is `head_prime_table` on the main branch). -/
+private theorem complete_low : ∀ n ∈ (headPrimes.erase 2), n ∈ pset := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_1 :
+    ∀ n ∈ (Icc 1001 1100 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_2 :
+    ∀ n ∈ (Icc 1101 1200 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_3 :
+    ∀ n ∈ (Icc 1201 1300 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_4 :
+    ∀ n ∈ (Icc 1301 1400 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_5 :
+    ∀ n ∈ (Icc 1401 1500 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_6 :
+    ∀ n ∈ (Icc 1501 1600 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_7 :
+    ∀ n ∈ (Icc 1601 1700 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_8 :
+    ∀ n ∈ (Icc 1701 1800 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_9 :
+    ∀ n ∈ (Icc 1801 1900 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_10 :
+    ∀ n ∈ (Icc 1901 2000 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  decide
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem complete_high_all :
+    ∀ n ∈ (Icc 1001 2000 : Finset ℕ), n ∈ pset ∨ ∃ m ∈ Icc 2 45, m < n ∧ m ∣ n := by
+  intro n hn
+  have h1 := (mem_Icc.mp hn).1
+  have h2 := (mem_Icc.mp hn).2
+  by_cases hA : n ≤ 1100
+  · exact complete_high_1 n (mem_Icc.mpr ⟨h1, hA⟩)
+  have hA2 := Nat.not_le.mp hA
+  by_cases hB : n ≤ 1200
+  · exact complete_high_2 n (mem_Icc.mpr ⟨by omega, hB⟩)
+  have hB2 := Nat.not_le.mp hB
+  by_cases hC : n ≤ 1300
+  · exact complete_high_3 n (mem_Icc.mpr ⟨by omega, hC⟩)
+  have hC2 := Nat.not_le.mp hC
+  by_cases hD : n ≤ 1400
+  · exact complete_high_4 n (mem_Icc.mpr ⟨by omega, hD⟩)
+  have hD2 := Nat.not_le.mp hD
+  by_cases hE : n ≤ 1500
+  · exact complete_high_5 n (mem_Icc.mpr ⟨by omega, hE⟩)
+  have hE2 := Nat.not_le.mp hE
+  by_cases hF : n ≤ 1600
+  · exact complete_high_6 n (mem_Icc.mpr ⟨by omega, hF⟩)
+  have hF2 := Nat.not_le.mp hF
+  by_cases hG : n ≤ 1700
+  · exact complete_high_7 n (mem_Icc.mpr ⟨by omega, hG⟩)
+  have hG2 := Nat.not_le.mp hG
+  by_cases hH : n ≤ 1800
+  · exact complete_high_8 n (mem_Icc.mpr ⟨by omega, hH⟩)
+  have hH2 := Nat.not_le.mp hH
+  by_cases hI : n ≤ 1900
+  · exact complete_high_9 n (mem_Icc.mpr ⟨by omega, hI⟩)
+  have hI2 := Nat.not_le.mp hI
+  · exact complete_high_10 n (mem_Icc.mpr ⟨by omega, h2⟩)
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- Every prime in `(1000, 2000]` is in `pset`. -/
+private theorem complete_high {p : ℕ} (hp : p.Prime) (h1 : 1000 < p) (h2 : p ≤ 2000) : p ∈ pset := by
+  have h := complete_high_all p (mem_Icc.mpr ⟨by omega, h2⟩)
+  rcases h with h | ⟨m, hm, hmlt, hmdvd⟩
+  · exact h
+  · exfalso
+    have hm2 : 2 ≤ m := (mem_Icc.mp hm).1
+    rcases hp.eq_one_or_self_of_dvd m hmdvd with h1 | h1 <;> omega
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem mem_pset_of_prime {p : ℕ} (hp : p.Prime) (h2 : 2 < p) (hle : p ≤ 2000) :
+    p ∈ pset := by
+  by_cases h : p ≤ 1000
+  · refine complete_low p (mem_erase.mpr ⟨by rintro rfl; omega, ?_⟩)
+    rw [← head_prime_table]
+    exact Nat.mem_primesLE.mpr ⟨h, hp⟩
+  · have h2' := Nat.not_le.mp h
+    exact complete_high hp h2' hle
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem log_bound_head {p : ℕ} (hp : p ∈ pset) : Real.log p ≤ (lnum p : ℝ)/10000 := by
+  have hc : ∀ q ∈ pset, (q : ℝ) ≤ ∑ k ∈ range 30, ((lnum q : ℝ)/10000)^k/(k.factorial : ℝ) := by
+    intro q hq
+    fin_cases hq <;> norm_num [lnum, Finset.sum_range_succ]
+  have hp3 := pset_ge hp
+  have hp0 : (0:ℝ) < p := by exact_mod_cast (show 0 < p by omega)
+  rw [Real.log_le_iff_le_exp hp0]
+  calc (p : ℝ) ≤ _ := hc p hp
+    _ ≤ Real.exp ((lnum p : ℝ)/10000) := Real.sum_le_exp_of_nonneg (by positivity) 30
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem wnum_cert {p : ℕ} (hp : p ∈ pset) : lnum p * 1000 ≤ wnum p * (p-1)^2 := by
+  fin_cases hp <;> norm_num [lnum, wnum]
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem head_le : ∑ p ∈ pset, Real.log p/((p : ℝ)-1)^2 ≤ 0.53337 := by
+  have h1 : ∑ p ∈ pset, Real.log p/((p : ℝ)-1)^2 ≤
+      ∑ p ∈ pset, (lnum p : ℝ)/10000/((p : ℝ)-1)^2 := by
+    apply sum_le_sum
+    intro p hp
+    have h3 := pset_ge hp
+    have hpos : (0:ℝ) < ((p : ℝ)-1)^2 := by
+      have : (1:ℝ) < p := by exact_mod_cast (show 1 < p by omega)
+      positivity
+    exact div_le_div_of_nonneg_right (log_bound_head hp) hpos.le
+  have h2 : ∑ p ∈ pset, (lnum p : ℝ)/10000/((p : ℝ)-1)^2 ≤ (5333700 : ℝ)/10000000 := by
+    have hstep : ∑ p ∈ pset, (lnum p : ℝ)/10000/((p : ℝ)-1)^2 ≤
+        ∑ p ∈ pset, (wnum p : ℝ)/10000000 := by
+      apply sum_le_sum
+      intro p hp
+      have h3 := pset_ge hp
+      have hc := wnum_cert hp
+      have hpos : (0:ℝ) < ((p : ℝ)-1)^2 := by
+        have : (1:ℝ) < p := by exact_mod_cast (show 1 < p by omega)
+        positivity
+      have hcast : ((p-1)^2 : ℕ) = ((p:ℝ)-1)^2 := by
+        push_cast [Nat.cast_sub (by omega : 1 ≤ p)]
+        ring
+      have hcR : (lnum p : ℝ) * 1000 ≤ (wnum p : ℝ) * ((p:ℝ)-1)^2 := by
+        rw [← hcast]
+        exact_mod_cast hc
+      rw [div_div, div_le_div_iff₀ (by positivity) (by norm_num)]
+      nlinarith [hcR]
+    have hsum : (∑ p ∈ pset, wnum p : ℕ) ≤ 5333700 := by decide +kernel
+    have hsumR : (∑ p ∈ pset, (wnum p : ℝ)) ≤ 5333700 := by exact_mod_cast hsum
+    calc ∑ p ∈ pset, (lnum p : ℝ)/10000/((p : ℝ)-1)^2
+        ≤ ∑ p ∈ pset, (wnum p : ℝ)/10000000 := hstep
+      _ = (∑ p ∈ pset, (wnum p : ℝ))/10000000 := by rw [← sum_div]
+      _ ≤ _ := by rw [div_le_div_iff₀ (by norm_num) (by norm_num)]; linarith
+  linarith
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- `Σ_{k=9}^{K} k^(-7/4) ≤ (4/3)·8^(-3/4)`. -/
+private theorem rpow_tsum_le (K : ℕ) :
+    ∑ k ∈ Icc 9 K, (k : ℝ)^(-7/4 : ℝ) ≤ (4/3)*(8:ℝ)^(-3/4 : ℝ) := by
+  classical
+  have anti : AntitoneOn (fun x : ℝ => x^(-7/4 : ℝ)) (Set.Ici 8) := by
+    intro x hx y hy hxy
+    exact Real.rpow_le_rpow_of_nonpos (by linarith [Set.mem_Ici.mp hx]) hxy (by norm_num)
+  have hInt := anti.tsum_comp_add_le_integral 8
+    (integrableOn_Ioi_rpow_of_lt (by norm_num : (-7/4 : ℝ) < -1) (by norm_num))
+    (fun t ht => Real.rpow_nonneg (by have h := Set.mem_Ioi.mp ht; norm_num at h; linarith) _)
+  rw [integral_Ioi_rpow_of_lt (by norm_num : (-7/4 : ℝ) < -1) (by norm_num)] at hInt
+  have hInt2 : (∑' n : ℕ, ((n+8+1 : ℕ) : ℝ)^(-7/4 : ℝ)) ≤ (4/3)*(8:ℝ)^(-3/4 : ℝ) := by
+    refine hInt.trans_eq ?_
+    rw [show (-7/4 : ℝ) + 1 = -(3/4) by norm_num, Real.rpow_neg (by norm_num)]
+    field_simp
+    push_cast
+    rw [← Real.rpow_add (by norm_num : (0:ℝ) < 8)]
+    norm_num
+  have hsum : Summable (fun n : ℕ => (n : ℝ)^(-7/4 : ℝ)) :=
+    Real.summable_nat_rpow.mpr (by norm_num)
+  have hshift : Summable (fun n : ℕ => ((n+8+1 : ℕ) : ℝ)^(-7/4 : ℝ)) := by
+    simpa only [Nat.add_assoc] using (summable_nat_add_iff 9).mpr hsum
+  let e : ℕ → ℕ := fun k => k-9
+  have hinj : Set.InjOn e (↑(Icc 9 K) : Set ℕ) := by
+    intro k hk l hl he
+    dsimp [e] at he
+    have h1 := (mem_Icc.mp hk).1
+    have h2 := (mem_Icc.mp hl).1
+    omega
+  calc ∑ k ∈ Icc 9 K, (k : ℝ)^(-7/4 : ℝ)
+      = ∑ n ∈ (Icc 9 K).image e, ((n+8+1 : ℕ) : ℝ)^(-7/4 : ℝ) := by
+        rw [sum_image hinj]
+        apply sum_congr rfl
+        intro k hk
+        rw [show e k + 8 + 1 = k by dsimp [e]; have := (mem_Icc.mp hk).1; omega]
+    _ ≤ ∑' n : ℕ, ((n+8+1 : ℕ) : ℝ)^(-7/4 : ℝ) :=
+        hshift.sum_le_tsum _ (fun n _ => Real.rpow_nonneg (Nat.cast_nonneg _) _)
+    _ ≤ _ := hInt2
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- Primes above `2000`, counted in blocks of `210`. -/
+private theorem tail_blocks (s : Finset ℕ) (hs : ∀ p ∈ s, p.Prime ∧ 2000 < p) :
+    ∑ p ∈ s, (p : ℝ)^(-7/4 : ℝ) ≤
+      48 * (210 : ℝ)^(-7/4 : ℝ) * ((4/3)*(8:ℝ)^(-3/4 : ℝ)) := by
+  classical
+  let M := s.sup (fun p => p/210)
+  let R := (range 210).filter (fun r => r.Coprime 210)
+  let T := (Icc 9 M).product R
+  let e : ℕ → ℕ × ℕ := fun p => (p/210, p%210)
+  have hinj : Set.InjOn e (↑s : Set ℕ) := by
+    intro p hp q hq he
+    have h1 := congrArg Prod.fst he
+    have h2 := congrArg Prod.snd he
+    dsimp [e] at h1 h2
+    omega
+  have hsub : s.image e ⊆ T := by
+    intro x hx
+    obtain ⟨p,hp,rfl⟩ := mem_image.mp hx
+    obtain ⟨hprime,hp0⟩ := hs p hp
+    have hcop : p.Coprime 210 := hprime.coprime_iff_not_dvd.mpr (by
+      intro hd
+      have := Nat.le_of_dvd (by norm_num : 0 < 210) hd
+      omega)
+    have hmod : (p%210).Coprime 210 := (ZMod.coprime_mod_iff_coprime p 210).mpr hcop
+    change (p / 210, p % 210) ∈ T
+    exact mem_product.mpr ⟨mem_Icc.mpr ⟨by omega, Finset.le_sup (f := fun p => p/210) hp⟩,
+      mem_filter.mpr ⟨mem_range.mpr (Nat.mod_lt _ (by norm_num)), hmod⟩⟩
+  have hcard : R.card = 48 := by decide +kernel
+  have hrw : ∀ k ∈ Icc 9 M, ((210 * k : ℕ) : ℝ)^(-7/4 : ℝ)
+      = (210 : ℝ)^(-7/4 : ℝ) * (k : ℝ)^(-7/4 : ℝ) := by
+    intro k hk
+    have hk0 : (0:ℝ) < (k:ℝ) := by
+      have := (mem_Icc.mp hk).1
+      exact_mod_cast (show 0 < k by omega)
+    rw [Nat.cast_mul, Real.mul_rpow (by norm_num) hk0.le]
+    norm_num
+  calc ∑ p ∈ s, (p : ℝ)^(-7/4 : ℝ)
+      ≤ ∑ p ∈ s, ((210 * (p/210) : ℕ) : ℝ)^(-7/4 : ℝ) := by
+        apply sum_le_sum
+        intro p hp
+        have hp0 := (hs p hp).2
+        have hk0 : (0:ℝ) < ((210 * (p/210) : ℕ) : ℝ) := by
+          have h1 : 0 < p/210 := by omega
+          have h2 : 0 < 210 * (p/210) := by omega
+          exact_mod_cast h2
+        have hle : ((210 * (p/210) : ℕ) : ℝ) ≤ (p : ℝ) := by
+          exact_mod_cast (show 210*(p/210) ≤ p by omega)
+        exact Real.rpow_le_rpow_of_nonpos hk0 hle (by norm_num)
+    _ = ∑ x ∈ s.image e, ((210 * x.1 : ℕ) : ℝ)^(-7/4 : ℝ) := by
+        rw [sum_image hinj]
+    _ ≤ ∑ x ∈ T, ((210 * x.1 : ℕ) : ℝ)^(-7/4 : ℝ) :=
+        sum_le_sum_of_subset_of_nonneg hsub (fun x _ _ => Real.rpow_nonneg (by positivity) _)
+    _ = 48 * (210 : ℝ)^(-7/4 : ℝ) * ∑ k ∈ Icc 9 M, (k : ℝ)^(-7/4 : ℝ) := by
+        have hT : ∑ x ∈ T, ((210 * x.1 : ℕ) : ℝ)^(-7/4 : ℝ)
+            = 48 * ∑ k ∈ Icc 9 M, ((210 * k : ℕ) : ℝ)^(-7/4 : ℝ) := by
+          dsimp [T]
+          rw [sum_product]
+          simp only [sum_const, nsmul_eq_mul, hcard]
+          rw [mul_sum]
+          norm_num
+        have hM : ∑ k ∈ Icc 9 M, ((210 * k : ℕ) : ℝ)^(-7/4 : ℝ)
+            = (210 : ℝ)^(-7/4 : ℝ) * ∑ k ∈ Icc 9 M, (k : ℝ)^(-7/4 : ℝ) := by
+          rw [mul_sum]
+          exact sum_congr rfl (fun k hk => hrw k hk)
+        rw [hT, hM]
+        ring
+    _ ≤ 48 * (210 : ℝ)^(-7/4 : ℝ) * ((4/3)*(8:ℝ)^(-3/4 : ℝ)) := by
+        have h0 : (0:ℝ) ≤ 48 * (210 : ℝ)^(-7/4 : ℝ) := by positivity
+        exact mul_le_mul_of_nonneg_left (rpow_tsum_le M) h0
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+/-- Certification constants for the tail. -/
+private theorem rpow_210_le : (210 : ℝ)^(-7/4 : ℝ) ≤ 1/11441 := by
+  have hroot : (3.8 : ℝ) ≤ (210 : ℝ)^(1/4 : ℝ) := by
+    apply (pow_le_pow_iff_left₀ (by norm_num : (0 : ℝ) ≤ 3.8)
+      (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 210) _) (by norm_num : (4 : ℕ) ≠ 0)).mp
+    rw [← Real.rpow_natCast ((210 : ℝ)^(1/4 : ℝ)) 4,
+      ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 210)]
+    norm_num
+  have hrw : ((210 : ℝ)^(1/4 : ℝ))^7 = (210 : ℝ)^(7/4 : ℝ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 210)]
+    norm_num
+  have hexp : (-7/4 : ℝ) = -(7/4) := by norm_num
+  rw [hexp, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 210), inv_eq_one_div]
+  apply one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 11441)
+  calc (11441 : ℝ) ≤ (3.8 : ℝ)^7 := by norm_num
+    _ ≤ ((210 : ℝ)^(1/4 : ℝ))^7 := pow_le_pow_left₀ (by norm_num) hroot 7
+    _ = (210 : ℝ)^(7/4 : ℝ) := hrw
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem rpow_8_le : (8 : ℝ)^(-3/4 : ℝ) ≤ 1/4.75 := by
+  have hroot : (4.75 : ℝ) ≤ (8 : ℝ)^(3/4 : ℝ) := by
+    apply (pow_le_pow_iff_left₀ (by norm_num : (0 : ℝ) ≤ 4.75)
+      (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 8) _) (by norm_num : (4 : ℕ) ≠ 0)).mp
+    rw [← Real.rpow_natCast ((8 : ℝ)^(3/4 : ℝ)) 4,
+      ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 8)]
+    norm_num
+  have hexp : (-3/4 : ℝ) = -(3/4) := by norm_num
+  rw [hexp, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 8), inv_eq_one_div]
+  exact one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 4.75) hroot
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 1000000 in
+private theorem tail_const :
+    (1.14 : ℝ) * (48 * (210 : ℝ)^(-7/4 : ℝ) * ((4/3)*(8:ℝ)^(-3/4 : ℝ))) ≤ 0.00135 := by
+  have h1 := rpow_210_le
+  have h2 := rpow_8_le
+  have hmid : 48 * (210 : ℝ)^(-7/4 : ℝ) * ((4/3)*(8:ℝ)^(-3/4 : ℝ)) ≤
+      48 * (1/11441) * ((4/3)*(1/4.75)) := by
+    apply mul_le_mul
+    · exact mul_le_mul_of_nonneg_left h1 (by norm_num)
+    · exact mul_le_mul_of_nonneg_left h2 (by norm_num)
+    · positivity
+    · positivity
+  calc (1.14 : ℝ) * (48 * (210 : ℝ)^(-7/4 : ℝ) * ((4/3)*(8:ℝ)^(-3/4 : ℝ)))
+      ≤ 1.14 * (48 * (1/11441) * ((4/3)*(1/4.75))) := mul_le_mul_of_nonneg_left hmid (by norm_num)
+    _ ≤ 0.00135 := by norm_num
+
+set_option maxRecDepth 1000000 in
+set_option maxHeartbeats 0 in
 /-- LEAF. (2.8): `Γ < 0.535`. Vaughan 1977 p. 95, Lemma 1; the paper sums to `p ≤ 139` and
 bounds the tail by partial summation with `θ(u) < 1.001102u`; summing further and bounding the
 tail by `Σ_{n>M} log n/(n-1)²` also works. Unit U-1525. -/
@@ -868,7 +1925,80 @@ theorem gam_lt : Gam < 0.535 := by
          _ = (1.23*1.003)*(p : ℝ)^(-7/4 : ℝ) := by rw [mul_div_assoc,hr]
          _ ≤ _ := mul_le_mul_of_nonneg_right (by norm_num) (Real.rpow_nonneg hp0.le _)
   -- The finite logarithm head and the total power tail budget remain open.
-  sorry
+  classical
+  unfold Gam
+  have hf : ∀ i : {p : ℕ // p.Prime ∧ 2 < p}, 0 ≤ Real.log i.val/((i.val:ℝ)-1)^2 := by
+    intro i
+    have hp3 : 3 ≤ i.val := by have := i.property.1.two_le; omega
+    have h1 : (1:ℝ) < (i.val:ℝ) := by exact_mod_cast (show 1 < i.val by omega)
+    have hpos : (0:ℝ) < ((i.val:ℝ)-1)^2 := by
+      have : (0:ℝ) < (i.val:ℝ)-1 := by linarith
+      positivity
+    exact div_nonneg (Real.log_nonneg (by linarith)) hpos.le
+  have hbound : ∀ u : Finset {p : ℕ // p.Prime ∧ 2 < p},
+      ∑ i ∈ u, Real.log i.val/((i.val:ℝ)-1)^2 ≤ 0.53472 := by
+    intro s
+    have hsplit : ∑ i ∈ s, Real.log i.val/((i.val:ℝ)-1)^2
+        = ∑ i ∈ s.filter (fun i => i.val ≤ 2000), Real.log i.val/((i.val:ℝ)-1)^2
+          + ∑ i ∈ s.filter (fun i => ¬ i.val ≤ 2000), Real.log i.val/((i.val:ℝ)-1)^2 :=
+      (Finset.sum_filter_add_sum_filter_not s (fun i => i.val ≤ 2000) _).symm
+    rw [hsplit]
+    have hhead : ∑ i ∈ s.filter (fun i => i.val ≤ 2000), Real.log i.val/((i.val:ℝ)-1)^2
+        ≤ 0.53337 := by
+      have hinj : Set.InjOn (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val)
+          ↑(s.filter (fun i => i.val ≤ 2000)) := by
+        intro a _ b _ h; exact Subtype.ext h
+      have himg : ∑ i ∈ s.filter (fun i => i.val ≤ 2000), Real.log i.val/((i.val:ℝ)-1)^2
+          = ∑ p ∈ (s.filter (fun i => i.val ≤ 2000)).image
+                (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val),
+              Real.log p/((p:ℝ)-1)^2 :=
+        (Finset.sum_image (g := fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val)
+          (f := fun p : ℕ => Real.log p/((p:ℝ)-1)^2) hinj).symm
+      rw [himg]
+      have hsub : (s.filter (fun i => i.val ≤ 2000)).image
+          (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val) ⊆ pset := by
+        intro p hp
+        obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hp
+        exact mem_pset_of_prime i.property.1 i.property.2 (Finset.mem_filter.mp hi).2
+      refine le_trans (Finset.sum_le_sum_of_subset_of_nonneg hsub ?_) head_le
+      · intro p hp _
+        have h1 : (1:ℝ) < (p:ℝ) := by have := pset_ge hp; exact_mod_cast (show 1 < p by omega)
+        have hpos : (0:ℝ) < ((p:ℝ)-1)^2 := by positivity
+        exact div_nonneg (Real.log_nonneg (by linarith)) hpos.le
+    have htail : ∑ i ∈ s.filter (fun i => ¬ i.val ≤ 2000), Real.log i.val/((i.val:ℝ)-1)^2
+        ≤ 0.00135 := by
+      have hinj2 : Set.InjOn (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val)
+          ↑(s.filter (fun i => ¬ i.val ≤ 2000)) := by
+        intro a _ b _ h; exact Subtype.ext h
+      have himg : ∑ i ∈ s.filter (fun i => ¬ i.val ≤ 2000), Real.log i.val/((i.val:ℝ)-1)^2
+          = ∑ p ∈ (s.filter (fun i => ¬ i.val ≤ 2000)).image
+                (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val),
+              Real.log p/((p:ℝ)-1)^2 :=
+        (Finset.sum_image (g := fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val)
+          (f := fun p : ℕ => Real.log p/((p:ℝ)-1)^2) hinj2).symm
+      rw [himg]
+      have hS : ∀ p ∈ (s.filter (fun i => ¬ i.val ≤ 2000)).image
+          (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val), p.Prime ∧ 2000 < p := by
+        intro p hp
+        obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hp
+        have hlt : ¬ i.val ≤ 2000 := (Finset.mem_filter.mp hi).2
+        exact ⟨i.property.1, by omega⟩
+      calc ∑ p ∈ (s.filter (fun i => ¬ i.val ≤ 2000)).image
+              (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val), Real.log p/((p:ℝ)-1)^2
+          ≤ ∑ p ∈ (s.filter (fun i => ¬ i.val ≤ 2000)).image
+              (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val), 1.14 * (p : ℝ)^(-7/4 : ℝ) :=
+            Finset.sum_le_sum (fun p hp => log_term_bound (hS p hp).2)
+        _ = 1.14 * ∑ p ∈ (s.filter (fun i => ¬ i.val ≤ 2000)).image
+              (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val), (p : ℝ)^(-7/4 : ℝ) :=
+            (Finset.mul_sum _ _ _).symm
+        _ ≤ 1.14 * (48 * (210 : ℝ)^(-7/4 : ℝ) * ((4/3)*(8:ℝ)^(-3/4 : ℝ))) :=
+            mul_le_mul_of_nonneg_left
+              (tail_blocks ((s.filter (fun i => ¬ i.val ≤ 2000)).image
+                (fun i : {p : ℕ // p.Prime ∧ 2 < p} => i.val)) hS) (by norm_num)
+        _ ≤ 0.00135 := tail_const
+    linarith
+  linarith [Real.tsum_le_of_sum_le hf hbound]
+
 
 set_option maxRecDepth 1000000 in
 set_option maxHeartbeats 0 in
@@ -2271,3 +3401,5 @@ end LeanLab.SchnirelmannBounds.Decomp1525a
 #print axioms LeanLab.SchnirelmannBounds.Decomp1525a.eulerMoment_1446
 
 #print axioms LeanLab.SchnirelmannBounds.Decomp1525a.hasSum_g_log
+
+#print axioms LeanLab.SchnirelmannBounds.Decomp1525a.gam_lt
