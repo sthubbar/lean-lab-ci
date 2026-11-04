@@ -730,13 +730,980 @@ theorem route_erdos9A_infinite : Erdos9A.Infinite := by
 
 
 
+section
+
+open Finset Real
+open LeanLab.BrunGap LeanLab.SchnirelmannGoldbach LeanLab.SchnirelmannGoldbach.S1
+
+/-! ### Support for `route_lemoine_positive_density`
+
+The mean square bound `S2` of `SchnirelmannGoldbach/S2.lean` (`∑ singProd n ^ 2 ≤ C N`) is copied
+privately, `gapUpper` is restated with its constant made explicit so that it is uniform in the gap,
+and the representation count `repCnt n` of `n = p + 2 q` is bounded below and in mean square. -/
+/-! ### Copied from `SchnirelmannGoldbach/S2.lean`: the mean square of the singular product -/
+
+/-- `singProd n ≤ σ(n)/n`. -/
+private lemma singProd_le_sum_divisors (n : ℕ) (hn : n ≠ 0) :
+    singProd n ≤ ∑ d ∈ n.divisors, 1 / (d : ℝ) := by
+  classical
+  unfold singProd
+  have h1 : ∏ p ∈ n.primeFactors, (1 + 1 / (p : ℝ)) =
+      ∑ t ∈ n.primeFactors.powerset, 1 / (((∏ p ∈ t, p : ℕ)) : ℝ) := by
+    rw [show (∏ p ∈ n.primeFactors, (1 + 1 / (p : ℝ))) =
+        ∏ p ∈ n.primeFactors, (1 / (p : ℝ) + 1) by simp [add_comm], Finset.prod_add]
+    apply Finset.sum_congr rfl
+    intro t _
+    simp [Finset.prod_inv_distrib]
+  rw [h1]
+  have hinj : Set.InjOn (fun t : Finset ℕ => ∏ p ∈ t, p) (n.primeFactors.powerset : Set (Finset ℕ)) := by
+    intro t ht t' ht' h
+    simp only [coe_powerset, Set.mem_preimage, Set.mem_powerset_iff, coe_subset] at ht ht'
+    have e1 := Nat.primeFactors_prod (s := t) (fun p hp => Nat.prime_of_mem_primeFactors (ht hp))
+    have e2 := Nat.primeFactors_prod (s := t') (fun p hp => Nat.prime_of_mem_primeFactors (ht' hp))
+    simp only at h
+    rw [← e1, ← e2, h]
+  rw [← Finset.sum_image (f := fun d : ℕ => 1 / (d : ℝ)) hinj]
+  apply Finset.sum_le_sum_of_subset_of_nonneg
+  · intro d hd
+    simp only [mem_image, mem_powerset] at hd
+    obtain ⟨t, ht, rfl⟩ := hd
+    rw [Nat.mem_divisors]
+    exact ⟨(Finset.prod_dvd_prod_of_subset _ _ id ht).trans (Nat.prod_primeFactors_dvd n), hn⟩
+  · intro _ _ _; positivity
+
+/-- weight `1/(d √d)`. -/
+private noncomputable def wt (d : ℕ) : ℝ := 1 / ((d : ℝ) * √(d : ℝ))
+
+private lemma wt_nonneg (d : ℕ) : 0 ≤ wt d := by unfold wt; positivity
+
+private lemma wt_summable : Summable wt := by
+  have hs : Summable (fun n : ℕ => ((n : ℝ) ^ ((3 : ℝ) / 2))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr (by norm_num)
+  refine Summable.of_nonneg_of_le wt_nonneg (fun d => ?_) hs
+  rcases Nat.eq_zero_or_pos d with rfl | hd
+  · simp [wt]
+  · have hd' : (0 : ℝ) < d := by exact_mod_cast hd
+    have : (d : ℝ) ^ ((3 : ℝ) / 2) = (d : ℝ) * √(d : ℝ) := by
+      rw [Real.sqrt_eq_rpow, show (3 : ℝ) / 2 = 1 + 1 / 2 by norm_num, Real.rpow_add hd',
+        Real.rpow_one]
+    rw [this, wt, one_div]
+
+private lemma card_dvd_route (N d : ℕ) : (#{n ∈ Icc 1 N | d ∣ n} : ℝ) ≤ N / d := by
+  have : (Icc 1 N) = Ioc 0 N := rfl
+  rw [this, Nat.Ioc_filter_dvd_card_eq_div]
+  exact Nat.cast_div_le
+
+private lemma pair_le_aux (N d1 d2 : ℕ) (h1 : 1 ≤ d1) :
+    ∑ n ∈ Icc 1 N, (if d1 ∣ n then 1 / (d1 : ℝ) else 0) * (if d2 ∣ n then 1 / (d2 : ℝ) else 0)
+      ≤ N / ((d1 : ℝ) * d2 * d2) := by
+  have hd1 : (0 : ℝ) < d1 := by exact_mod_cast h1
+  calc ∑ n ∈ Icc 1 N, (if d1 ∣ n then 1 / (d1 : ℝ) else 0) * (if d2 ∣ n then 1 / (d2 : ℝ) else 0)
+      ≤ ∑ n ∈ Icc 1 N, 1 / (d1 : ℝ) * (if d2 ∣ n then 1 / (d2 : ℝ) else 0) := by
+        apply Finset.sum_le_sum; intro n _
+        apply mul_le_mul_of_nonneg_right
+        · split_ifs
+          · exact le_rfl
+          · positivity
+        · split_ifs <;> positivity
+    _ = 1 / (d1 : ℝ) * (1 / d2) * #{n ∈ Icc 1 N | d2 ∣ n} := by
+        rw [← Finset.mul_sum, Finset.sum_ite, Finset.sum_const_zero, add_zero, Finset.sum_const,
+          nsmul_eq_mul]; ring
+    _ ≤ 1 / (d1 : ℝ) * (1 / d2) * (N / d2) := by
+        gcongr; exact card_dvd_route N d2
+    _ = N / ((d1 : ℝ) * d2 * d2) := by field_simp
+
+private lemma wt_mul_bound (a b : ℕ) (ha : 1 ≤ a) (hab : a ≤ b) :
+    (1 : ℝ) / (a * b * b) ≤ wt a * wt b := by
+  have ha' : (1 : ℝ) ≤ a := by exact_mod_cast ha
+  have hab' : (a : ℝ) ≤ b := by exact_mod_cast hab
+  have hb' : (1 : ℝ) ≤ b := ha'.trans hab'
+  unfold wt
+  rw [div_mul_div_comm, one_mul]
+  apply one_div_le_one_div_of_le
+  · have : 0 < √(a : ℝ) := Real.sqrt_pos.mpr (by linarith)
+    have : 0 < √(b : ℝ) := Real.sqrt_pos.mpr (by linarith)
+    positivity
+  · have hs : √(a : ℝ) ≤ √(b : ℝ) := Real.sqrt_le_sqrt hab'
+    have hbb : √(b : ℝ) * √(b : ℝ) = b := Real.mul_self_sqrt (by linarith)
+    have h0 : 0 ≤ √(b : ℝ) := Real.sqrt_nonneg _
+    have hab0 : (0 : ℝ) ≤ a * b := by positivity
+    calc (a : ℝ) * √a * (b * √b) = a * b * (√a * √b) := by ring
+      _ ≤ a * b * (√b * √b) := by gcongr
+      _ = a * b * b := by rw [hbb]
+
+private lemma pair_le (N d1 d2 : ℕ) (h1 : 1 ≤ d1) (h2 : 1 ≤ d2) :
+    ∑ n ∈ Icc 1 N, (if d1 ∣ n then 1 / (d1 : ℝ) else 0) * (if d2 ∣ n then 1 / (d2 : ℝ) else 0)
+      ≤ N * (wt d1 * wt d2) := by
+  have hN : (0 : ℝ) ≤ N := Nat.cast_nonneg _
+  rcases le_total d1 d2 with h | h
+  · refine (pair_le_aux N d1 d2 h1).trans ?_
+    rw [div_eq_mul_one_div]
+    exact mul_le_mul_of_nonneg_left (wt_mul_bound d1 d2 h1 h) hN
+  · have := pair_le_aux N d2 d1 h2
+    simp_rw [mul_comm (if d2 ∣ _ then _ else _)] at this
+    refine this.trans ?_
+    rw [div_eq_mul_one_div, mul_comm (wt d1)]
+    exact mul_le_mul_of_nonneg_left (wt_mul_bound d2 d1 h2 h) hN
+
+private theorem S2_holds_route : S2 := by
+  refine ⟨(∑' d, wt d) ^ 2, fun N _ => ?_⟩
+  have key : ∀ n ∈ Icc 1 N, singProd n ^ 2 ≤
+      ∑ d1 ∈ Icc 1 N, ∑ d2 ∈ Icc 1 N,
+        (if d1 ∣ n then 1 / (d1 : ℝ) else 0) * (if d2 ∣ n then 1 / (d2 : ℝ) else 0) := by
+    intro n hn
+    rw [mem_Icc] at hn
+    have hsum : ∑ d ∈ n.divisors, 1 / (d : ℝ) =
+        ∑ d ∈ Icc 1 N, (if d ∣ n then 1 / (d : ℝ) else 0) := by
+      rw [← Finset.sum_filter]
+      apply Finset.sum_congr _ (fun _ _ => rfl)
+      ext d
+      simp only [Nat.mem_divisors, mem_filter, mem_Icc]
+      constructor
+      · rintro ⟨hd, -⟩
+        exact ⟨⟨Nat.pos_of_dvd_of_pos hd (by omega), (Nat.le_of_dvd (by omega) hd).trans hn.2⟩, hd⟩
+      · rintro ⟨-, hd⟩; exact ⟨hd, by omega⟩
+    rw [← Finset.sum_mul_sum, ← sq, ← hsum]
+    gcongr
+    · exact singProd_nonneg n
+    · exact singProd_le_sum_divisors n (by omega)
+  calc ∑ n ∈ Icc 1 N, singProd n ^ 2
+      ≤ ∑ n ∈ Icc 1 N, ∑ d1 ∈ Icc 1 N, ∑ d2 ∈ Icc 1 N,
+        (if d1 ∣ n then 1 / (d1 : ℝ) else 0) * (if d2 ∣ n then 1 / (d2 : ℝ) else 0) :=
+        Finset.sum_le_sum key
+    _ = ∑ d1 ∈ Icc 1 N, ∑ d2 ∈ Icc 1 N, ∑ n ∈ Icc 1 N,
+        (if d1 ∣ n then 1 / (d1 : ℝ) else 0) * (if d2 ∣ n then 1 / (d2 : ℝ) else 0) := by
+        rw [Finset.sum_comm]; apply Finset.sum_congr rfl; intro _ _; rw [Finset.sum_comm]
+    _ ≤ ∑ d1 ∈ Icc 1 N, ∑ d2 ∈ Icc 1 N, (N : ℝ) * (wt d1 * wt d2) := by
+        apply Finset.sum_le_sum; intro d1 hd1; apply Finset.sum_le_sum; intro d2 hd2
+        exact pair_le N d1 d2 (mem_Icc.mp hd1).1 (mem_Icc.mp hd2).1
+    _ = N * (∑ d ∈ Icc 1 N, wt d) ^ 2 := by
+        rw [sq, Finset.sum_mul_sum, Finset.mul_sum]
+        apply Finset.sum_congr rfl; intro _ _; rw [Finset.mul_sum]
+    _ ≤ N * (∑' d, wt d) ^ 2 := by
+        gcongr
+        · exact Finset.sum_nonneg (fun d _ => wt_nonneg d)
+        · exact wt_summable.sum_le_tsum _ (fun d _ => wt_nonneg d)
+    _ = (∑' d, wt d) ^ 2 * N := by ring
+
+/-! ### `gapUpper` with its constant made explicit, uniform in the gap -/
+
+/-- Brun's upper bound for prime pairs at an even gap, with the explicit constant of
+`BrunGap.gapUpper` (whose proof is copied here so that the constant does not depend on the gap). -/
+private theorem gapUniform (h N : ℕ) (hh : Even h) (hh0 : h ≠ 0) (hN : 3 ≤ N) :
+    (gapCount h N : ℝ) ≤ (128 + 5 * 17 ^ 8) * singProd h * N / Real.log N ^ 2 := by
+  have hN1 : (3 : ℝ) ≤ N := by exact_mod_cast hN
+  have hlogN : 0 < Real.log N := Real.log_pos (by linarith)
+  have hsp := one_le_singProd h
+  set S := singProd h
+  set z := √(N : ℝ) with hz
+  have hz1 : 1 < z := by
+    rw [hz, Real.lt_sqrt (by norm_num)]; linarith
+  have hb := gapCount_le h N hh hh0 hz1
+  have hlogz : Real.log z = Real.log N / 2 := Real.log_sqrt (by positivity)
+  have hlogz0 : 0 ≤ Real.log z := Real.log_nonneg hz1.le
+  have hmain : 32 * (N : ℝ) * S / Real.log z ^ 2 = 128 * S * N / Real.log N ^ 2 := by
+    rw [hlogz]; field_simp; ring
+  have hlz : Real.log z ≤ Real.log N := by rw [hlogz]; linarith
+  have hpow1 : 1 ≤ (1 + Real.log z) ^ 6 := one_le_pow₀ (by linarith)
+  have herr1 : z * (1 + Real.log z) ^ 6 + (z + 1) ≤ 5 * (z * (1 + Real.log N) ^ 6) := by
+    have : (1 + Real.log z) ^ 6 ≤ (1 + Real.log N) ^ 6 := by gcongr
+    nlinarith
+  have hpb := polylog_bound N (by linarith)
+  have herr2 : z * (1 + Real.log N) ^ 6 ≤ 17 ^ 8 * N / Real.log N ^ 2 := by
+    rw [le_div_iff₀ (by positivity)]
+    linarith
+  have herr3 : (17 : ℝ) ^ 8 * N / Real.log N ^ 2 ≤ 17 ^ 8 * S * N / Real.log N ^ 2 := by
+    apply div_le_div_of_nonneg_right _ (by positivity)
+    have : (0 : ℝ) ≤ 17 ^ 8 * N := by positivity
+    nlinarith
+  have : (128 + 5 * 17 ^ 8 : ℝ) * S * N / Real.log N ^ 2 =
+      128 * S * N / Real.log N ^ 2 + 5 * (17 ^ 8 * S * N / Real.log N ^ 2) := by ring
+  rw [this]
+  linarith
+/-! ### The representation count `n = p + 2 q` -/
+
+/-- `repSet n` is the set of primes `q` with `n - 2 q` prime, i.e. of the representations
+`n = (n - 2 q) + 2 q`. -/
+private def repSet (n : ℕ) : Finset ℕ :=
+  (range (n + 1)).filter (fun q => q.Prime ∧ (n - 2 * q).Prime)
+
+/-- The number of representations `n = p + 2 q`. -/
+private def repCnt (n : ℕ) : ℕ := (repSet n).card
+
+private lemma isLemoine_of_repCnt_pos {n : ℕ} (h : 0 < repCnt n) : IsLemoine n := by
+  obtain ⟨q, hq⟩ := card_pos.mp h
+  simp only [repSet, mem_filter, mem_range] at hq
+  obtain ⟨-, hqP, hq2P⟩ := hq
+  exact ⟨n - 2 * q, q, hq2P, hqP, by have := hq2P.two_le; omega⟩
+
+private lemma primeCounting_eq_card (m : ℕ) :
+    Nat.primeCounting m = #(Nat.primesBelow (m + 1)) := by
+  rw [Nat.primesBelow_card_eq_primeCounting']; rfl
+
+private lemma primesBelow_eq (m : ℕ) : Nat.primesBelow m = (range m).filter Nat.Prime := rfl
+
+/-- First moment: the odd primes `p ≤ N / 2` and the primes `q ≤ N / 4` give distinct
+representations of odd numbers `p + 2 q ≤ N`. -/
+private lemma first_moment (N : ℕ) (hN : 8 ≤ N) :
+    (Nat.primeCounting (N / 2) - 1) * Nat.primeCounting (N / 4) ≤
+      ∑ n ∈ (Icc 1 N).filter Odd, repCnt n := by
+  classical
+  set Pp := ((range (N / 2 + 1)).filter Nat.Prime).erase 2 with hPp
+  set Qq := (range (N / 4 + 1)).filter Nat.Prime with hQq
+  have h2mem : 2 ∈ (range (N / 2 + 1)).filter Nat.Prime := by
+    rw [mem_filter, mem_range]
+    exact ⟨by omega, Nat.prime_two⟩
+  have hPcard : Pp.card = Nat.primeCounting (N / 2) - 1 := by
+    rw [hPp, card_erase_of_mem h2mem, primeCounting_eq_card, primesBelow_eq]
+  have hQcard : Qq.card = Nat.primeCounting (N / 4) := by
+    rw [hQq, primeCounting_eq_card, primesBelow_eq]
+  have hmaps : ∀ pq ∈ Pp ×ˢ Qq,
+      (⟨pq.1 + 2 * pq.2, pq.2⟩ : Sigma fun n => ℕ) ∈
+        ((Icc 1 N).filter Odd).sigma (fun n => repSet n) := by
+    intro pq hpq
+    simp only [mem_product] at hpq
+    obtain ⟨hp, hq⟩ := hpq
+    rw [hPp] at hp
+    rw [hQq] at hq
+    simp only [mem_erase, mem_filter, mem_range] at hp hq
+    obtain ⟨hpne, hpLt, hpP⟩ := hp
+    obtain ⟨hqLt, hqP⟩ := hq
+    rw [mem_sigma, mem_filter, mem_Icc, repSet, mem_filter, mem_range]
+    dsimp only
+    have hp2 : 2 ≤ pq.1 := hpP.two_le
+    have hq2 : 2 ≤ pq.2 := hqP.two_le
+    have hpodd : Odd pq.1 := hpP.odd_of_ne_two hpne
+    obtain ⟨k, hk⟩ := hpodd
+    refine ⟨⟨⟨by omega, by omega⟩, ⟨k + pq.2, by omega⟩⟩, by omega, hqP, ?_⟩
+    have : pq.1 + 2 * pq.2 - 2 * pq.2 = pq.1 := by omega
+    rw [this]
+    exact hpP
+  have hinj : Set.InjOn (fun pq : ℕ × ℕ => (⟨pq.1 + 2 * pq.2, pq.2⟩ : Sigma fun n => ℕ))
+      ↑(Pp ×ˢ Qq) := by
+    intro a _ b _ h
+    simp only [Sigma.mk.injEq] at h
+    obtain ⟨h1, h2⟩ := h
+    have h2' : a.2 = b.2 := by simpa using h2
+    ext
+    · omega
+    · exact h2'
+  have hcard := card_le_card_of_injOn
+    (fun pq : ℕ × ℕ => (⟨pq.1 + 2 * pq.2, pq.2⟩ : Sigma fun n => ℕ)) hmaps hinj
+  rw [← hPcard, ← hQcard]
+  calc Pp.card * Qq.card = #(Pp ×ˢ Qq) := (card_product _ _).symm
+    _ ≤ #(((Icc 1 N).filter Odd).sigma (fun n => repSet n)) := hcard
+    _ = ∑ n ∈ (Icc 1 N).filter Odd, repCnt n := by rw [card_sigma]; rfl
+
+/-! ### Second moment -/
+
+private lemma repSet_facts {n q : ℕ} (h : q ∈ repSet n) :
+    q.Prime ∧ (n - 2 * q).Prime ∧ 2 * q + 2 ≤ n := by
+  simp only [repSet, mem_filter, mem_range] at h
+  exact ⟨h.2.1, h.2.2, by have := h.2.2.two_le; omega⟩
+
+private lemma mem_total_facts {N : ℕ} {x : Sigma fun n => ℕ × ℕ}
+    (h : x ∈ ((Icc 1 N).filter Odd).sigma (fun n => repSet n ×ˢ repSet n)) :
+    x.1 ≤ N ∧ 2 * x.2.1 + 2 ≤ x.1 ∧ 2 * x.2.2 + 2 ≤ x.1 ∧
+      x.2.1.Prime ∧ x.2.2.Prime ∧ (x.1 - 2 * x.2.1).Prime ∧ (x.1 - 2 * x.2.2).Prime := by
+  simp only [mem_sigma, mem_product, mem_filter, mem_Icc] at h
+  obtain ⟨⟨⟨-, hN⟩, -⟩, h1, h2⟩ := h
+  obtain ⟨h1P, h1s, h1b⟩ := repSet_facts h1
+  obtain ⟨h2P, h2s, h2b⟩ := repSet_facts h2
+  exact ⟨hN, h1b, h2b, h1P, h2P, h1s, h2s⟩
+
+/-- Second moment: counting the quadruples `p₁ + 2 q₁ = p₂ + 2 q₂ ≤ N` by the difference
+`d = |q₂ - q₁|` bounds it by the number of prime pairs at gap `d` times the number at gap `2 d`. -/
+private lemma second_moment (N : ℕ) :
+    ∑ n ∈ (Icc 1 N).filter Odd, (repCnt n) ^ 2 ≤
+      2 * ∑ d ∈ range (N + 1), gapCount d (N + 1) * gapCount (2 * d) (N + 1) := by
+  classical
+  set T := (Icc 1 N).filter Odd with hT
+  set A : ℕ → Finset ℕ := fun d => (range (N + 1)).filter (fun q => q.Prime ∧ (q + d).Prime)
+    with hA
+  set B : ℕ → Finset ℕ := fun d => (range (N + 1)).filter (fun p => p.Prime ∧ (p + 2 * d).Prime)
+    with hB
+  have hstep : ∀ n : ℕ, (repCnt n) ^ 2 = #(repSet n ×ˢ repSet n) := by
+    intro n
+    rw [repCnt, sq, card_product]
+  simp_rw [hstep]
+  rw [← card_sigma]
+  set Total := T.sigma (fun n => repSet n ×ˢ repSet n) with hTotal
+  set Target := (range (N + 1)).sigma (fun d => A d ×ˢ B d) with hTarget
+  have hsplit : Total.card =
+      (Total.filter (fun x => x.2.1 ≤ x.2.2)).card +
+      (Total.filter (fun x => ¬ x.2.1 ≤ x.2.2)).card :=
+    (card_filter_add_card_filter_not (fun x : Sigma fun n => ℕ × ℕ => x.2.1 ≤ x.2.2)).symm
+  have hL : (Total.filter (fun x => x.2.1 ≤ x.2.2)).card ≤ Target.card := by
+    refine card_le_card_of_injOn
+      (fun x : Sigma fun n => ℕ × ℕ => (⟨x.2.2 - x.2.1, (x.2.1, x.1 - 2 * x.2.2)⟩
+        : Sigma fun d => ℕ × ℕ)) ?_ ?_
+    · intro x hx
+      rw [Finset.mem_coe, hTotal, mem_filter] at hx
+      obtain ⟨hxF, hle⟩ := hx
+      obtain ⟨hxN, h2q1, h2q2, hq1P, hq2P, hq1sub, hq2sub⟩ := mem_total_facts hxF
+      simp only [Finset.mem_coe, hTarget, mem_sigma, mem_product, hA, hB, mem_filter,
+        mem_range]
+      have hkey : x.1 - 2 * x.2.2 + 2 * (x.2.2 - x.2.1) = x.1 - 2 * x.2.1 := by omega
+      refine ⟨by omega, ⟨by omega, hq1P, ?_⟩, ⟨by omega, hq2sub, ?_⟩⟩
+      · rw [Nat.add_sub_cancel' hle]; exact hq2P
+      · rw [hkey]; exact hq1sub
+    · intro a ha b hb hab
+      rw [Finset.mem_coe, mem_filter] at ha hb
+      obtain ⟨haF, hale⟩ := ha
+      obtain ⟨hbF, hble⟩ := hb
+      obtain ⟨-, h2qa1, h2qa2, -, -, hqa1sub, hqa2sub⟩ := mem_total_facts haF
+      obtain ⟨-, h2qb1, h2qb2, -, -, hqb1sub, hqb2sub⟩ := mem_total_facts hbF
+      have hab' : (⟨a.2.2 - a.2.1, (a.2.1, a.1 - 2 * a.2.2)⟩ : Sigma fun d => ℕ × ℕ) =
+          ⟨b.2.2 - b.2.1, (b.2.1, b.1 - 2 * b.2.2)⟩ := hab
+      injection hab' with h1 h2
+      injection h2 with h3 h4
+      have h5 : a.2.2 = b.2.2 := by omega
+      have h6 : a.1 = b.1 := by omega
+      exact Sigma.ext h6 (heq_of_eq (Prod.ext h3 h5))
+  have hR : (Total.filter (fun x => ¬ x.2.1 ≤ x.2.2)).card ≤ Target.card := by
+    refine card_le_card_of_injOn
+      (fun x : Sigma fun n => ℕ × ℕ => (⟨x.2.1 - x.2.2, (x.2.2, x.1 - 2 * x.2.1)⟩
+        : Sigma fun d => ℕ × ℕ)) ?_ ?_
+    · intro x hx
+      rw [Finset.mem_coe, hTotal, mem_filter] at hx
+      obtain ⟨hxF, hle⟩ := hx
+      obtain ⟨hxN, h2q1, h2q2, hq1P, hq2P, hq1sub, hq2sub⟩ := mem_total_facts hxF
+      have hlt : x.2.2 < x.2.1 := by omega
+      simp only [Finset.mem_coe, hTarget, mem_sigma, mem_product, hA, hB, mem_filter,
+        mem_range]
+      have hkey : x.1 - 2 * x.2.1 + 2 * (x.2.1 - x.2.2) = x.1 - 2 * x.2.2 := by omega
+      refine ⟨by omega, ⟨by omega, hq2P, ?_⟩, ⟨by omega, hq1sub, ?_⟩⟩
+      · rw [Nat.add_sub_cancel' hlt.le]; exact hq1P
+      · rw [hkey]; exact hq2sub
+    · intro a ha b hb hab
+      rw [Finset.mem_coe, mem_filter] at ha hb
+      obtain ⟨haF, hale⟩ := ha
+      obtain ⟨hbF, hble⟩ := hb
+      obtain ⟨-, h2qa1, h2qa2, -, -, hqa1sub, hqa2sub⟩ := mem_total_facts haF
+      obtain ⟨-, h2qb1, h2qb2, -, -, hqb1sub, hqb2sub⟩ := mem_total_facts hbF
+      have hab' : (⟨a.2.1 - a.2.2, (a.2.2, a.1 - 2 * a.2.1)⟩ : Sigma fun d => ℕ × ℕ) =
+          ⟨b.2.1 - b.2.2, (b.2.2, b.1 - 2 * b.2.1)⟩ := hab
+      injection hab' with h1 h2
+      injection h2 with h3 h4
+      have h5 : a.2.1 = b.2.1 := by omega
+      have h6 : a.1 = b.1 := by omega
+      exact Sigma.ext h6 (heq_of_eq (Prod.ext h5 h3))
+  have hTargetCard : Target.card =
+      ∑ d ∈ range (N + 1), gapCount d (N + 1) * gapCount (2 * d) (N + 1) := by
+    rw [hTarget, card_sigma]
+    exact Finset.sum_congr rfl fun d _ => by rw [card_product]; rfl
+  have hL' : #(Total.filter (fun x => x.2.1 ≤ x.2.2)) ≤
+      ∑ d ∈ range (N + 1), gapCount d (N + 1) * gapCount (2 * d) (N + 1) := by
+    rw [← hTargetCard]; exact hL
+  have hR' : #(Total.filter (fun x => ¬ x.2.1 ≤ x.2.2)) ≤
+      ∑ d ∈ range (N + 1), gapCount d (N + 1) * gapCount (2 * d) (N + 1) := by
+    rw [← hTargetCard]; exact hR
+  rw [hsplit]
+  linarith [hL', hR']
+
+/-! ### The gaps `2 d` and `d` -/
+
+/-- `log t ≤ 4 t^(1/4)`, from `log y ≤ y - 1`. -/
+private lemma lemoine_log_four_rpow (t : ℝ) (ht : 0 < t) : Real.log t ≤ 4 * t ^ (1 / 4 : ℝ) := by
+  have h1 : Real.log t = 4 * Real.log (t ^ (1 / 4 : ℝ)) := by
+    rw [Real.log_rpow ht]
+    ring
+  have h3 : (0 : ℝ) < t ^ (1 / 4 : ℝ) := Real.rpow_pos_of_pos ht _
+  have h2 : Real.log (t ^ (1 / 4 : ℝ)) ≤ t ^ (1 / 4 : ℝ) - 1 :=
+    Real.log_le_sub_one_of_pos h3
+  rw [h1]
+  linarith
+
+/-- For `t ≥ 256`, `(log t)² ≤ t`. -/
+private lemma log_sq_le_self {t : ℝ} (ht : 256 ≤ t) : Real.log t ^ 2 ≤ t := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hlog0 : 0 ≤ Real.log t := Real.log_nonneg (by linarith)
+  have h := lemoine_log_four_rpow t ht0
+  have hr : (t ^ (1 / 4 : ℝ)) ^ 2 = Real.sqrt t := by
+    rw [pow_two, ← Real.rpow_add ht0, Real.sqrt_eq_rpow]
+    norm_num
+  have h4 : (4 * t ^ (1 / 4 : ℝ)) ^ 2 = 16 * Real.sqrt t := by
+    rw [mul_pow, hr]; ring
+  have h16 : 16 ≤ Real.sqrt t := by
+    have h1 : Real.sqrt t ^ 2 = t := Real.sq_sqrt ht0.le
+    nlinarith [Real.sqrt_nonneg t]
+  have hpos4 : (0 : ℝ) ≤ 4 * t ^ (1 / 4 : ℝ) :=
+    le_of_lt (by have := Real.rpow_pos_of_pos ht0 (1 / 4 : ℝ); linarith)
+  have hsq : Real.log t ^ 2 ≤ (4 * t ^ (1 / 4 : ℝ)) ^ 2 := by nlinarith [h, hlog0, hpos4]
+  have h16t : 16 * Real.sqrt t ≤ t := by nlinarith [h16, Real.sqrt_nonneg t, Real.sq_sqrt ht0.le]
+  linarith [hsq, h4, h16t]
+
+/-- An odd gap leaves at most the pair `(2, 2 + d)`. -/
+private lemma gapCount_odd_le_one (d M : ℕ) (ho : Odd d) : gapCount d M ≤ 1 := by
+  have hd1 : 1 ≤ d := by
+    rcases Nat.eq_zero_or_pos d with rfl | h
+    · simp at ho
+    · exact h
+  have hsub : (range M).filter (fun p => p.Prime ∧ (p + d).Prime) ⊆ {2} := by
+    intro p hp
+    simp only [mem_filter, mem_range, mem_singleton] at hp ⊢
+    by_contra hne
+    have hp2 : 2 ≤ p := hp.2.1.two_le
+    have hpodd : Odd p := hp.2.1.odd_of_ne_two (by omega)
+    have heven : Even (p + d) := hpodd.add_odd ho
+    have h2eq := hp.2.2.even_iff.mp heven
+    omega
+  unfold gapCount
+  exact (card_le_card hsub).trans (by simp)
+
+/-- Uniform Brun bound for every gap `d ≥ 1`: for odd `d` the count is at most one, and
+`1 ≤ C singProd d M / log² M` once `M ≥ 256`. -/
+private lemma gapCount_le_uniform {d M : ℕ} (hd : 1 ≤ d) (hM : 256 ≤ M) :
+    (gapCount d M : ℝ) ≤ (128 + 5 * 17 ^ 8) * singProd d * M / Real.log M ^ 2 := by
+  have hM0 : (0 : ℝ) < M := by exact_mod_cast (by omega : 0 < M)
+  have h1M : (1 : ℝ) < (M : ℝ) := by exact_mod_cast (by omega : 1 < M)
+  have hlog : 0 < Real.log M ^ 2 := by
+    have := Real.log_pos h1M
+    positivity
+  have hbig : (1 : ℝ) ≤ M / Real.log M ^ 2 := by
+    rw [le_div_iff₀ hlog]
+    have h := log_sq_le_self (t := (M : ℝ)) (by exact_mod_cast hM)
+    linarith
+  have hC : (1 : ℝ) ≤ 128 + 5 * 17 ^ 8 := by norm_num
+  have hsp : (1 : ℝ) ≤ singProd d := one_le_singProd d
+  have hC' : (1 : ℝ) ≤ (128 + 5 * 17 ^ 8) * singProd d := by
+    calc (1 : ℝ) = 1 * 1 := by ring
+      _ ≤ (128 + 5 * 17 ^ 8) * singProd d :=
+          mul_le_mul hC hsp (by norm_num) (by linarith)
+  have hone : (1 : ℝ) ≤ (128 + 5 * 17 ^ 8) * singProd d * M / Real.log M ^ 2 := by
+    have h3 : (1 : ℝ) ≤ ((128 + 5 * 17 ^ 8) * singProd d) * (M / Real.log M ^ 2) := by
+      calc (1 : ℝ) = 1 * 1 := by ring
+        _ ≤ ((128 + 5 * 17 ^ 8) * singProd d) * (M / Real.log M ^ 2) :=
+            mul_le_mul hC' hbig (by norm_num) (by linarith)
+    calc (1 : ℝ) ≤ ((128 + 5 * 17 ^ 8) * singProd d) * (M / Real.log M ^ 2) := h3
+      _ = (128 + 5 * 17 ^ 8) * singProd d * M / Real.log M ^ 2 := by ring
+  rcases Nat.even_or_odd d with he | ho
+  · exact gapUniform d M he (by omega) (by omega)
+  · refine le_trans ?_ hone
+    have := gapCount_odd_le_one d M ho
+    exact_mod_cast this
+
+/-- `singProd (2 d) ≤ 3/2 · singProd d`. -/
+private lemma singProd_two_mul_le (d : ℕ) : singProd (2 * d) ≤ 3 / 2 * singProd d := by
+  rcases Nat.eq_zero_or_pos d with rfl | hd
+  · simp only [singProd, Nat.primeFactors_zero, Finset.prod_empty]
+    norm_num
+  · have hd0 : d ≠ 0 := hd.ne'
+    have hpq : (2 * d).primeFactors = insert 2 d.primeFactors := by
+      rw [Nat.primeFactors_mul (by norm_num : (2 : ℕ) ≠ 0) hd0, Nat.prime_two.primeFactors,
+        Finset.singleton_union]
+    have hmono : singProd (2 * d) = ∏ p ∈ insert 2 d.primeFactors, (1 + 1 / (p : ℝ)) := by
+      rw [singProd, hpq]
+    by_cases h2 : (2 : ℕ) ∈ d.primeFactors
+    · rw [hmono, Finset.insert_eq_of_mem h2]
+      have hp : (0 : ℝ) ≤ ∏ p ∈ d.primeFactors, (1 + 1 / (p : ℝ)) :=
+        Finset.prod_nonneg fun p _ => by positivity
+      rw [singProd]
+      linarith
+    · rw [hmono, Finset.prod_insert h2, singProd]
+      rw [show (1 : ℝ) + 1 / ((2 : ℕ) : ℝ) = 3 / 2 by norm_num]
+
+/-- `log t ≤ 8 t^(1/8)`, from `log y ≤ y - 1`. -/
+private lemma lemoine_log_eight_rpow (t : ℝ) (ht : 0 < t) : Real.log t ≤ 8 * t ^ (1 / 8 : ℝ) := by
+  have h1 : Real.log t = 8 * Real.log (t ^ (1 / 8 : ℝ)) := by
+    rw [Real.log_rpow ht]
+    ring
+  have h3 : (0 : ℝ) < t ^ (1 / 8 : ℝ) := Real.rpow_pos_of_pos ht _
+  have h2 : Real.log (t ^ (1 / 8 : ℝ)) ≤ t ^ (1 / 8 : ℝ) - 1 :=
+    Real.log_le_sub_one_of_pos h3
+  rw [h1]
+  linarith
+
+/-- `(log t)^4 ≤ t` for `t ≥ 17 · 10^6`. -/
+private lemma log_pow_four_le_self {t : ℝ} (ht : 17000000 ≤ t) : Real.log t ^ 4 ≤ t := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hlog0 : 0 ≤ Real.log t := Real.log_nonneg (by linarith)
+  have h := lemoine_log_eight_rpow t ht0
+  have hpos : (0 : ℝ) ≤ 8 * t ^ (1 / 8 : ℝ) :=
+    le_of_lt (by have := Real.rpow_pos_of_pos ht0 (1 / 8 : ℝ); linarith)
+  have hs4 : (t ^ (1 / 8 : ℝ)) ^ 2 = t ^ (1 / 4 : ℝ) := by
+    rw [pow_two, ← Real.rpow_add ht0]
+    norm_num
+  have hr : (t ^ (1 / 8 : ℝ)) ^ 4 = Real.sqrt t := by
+    have h1 : (t ^ (1 / 8 : ℝ)) ^ 4 = ((t ^ (1 / 8 : ℝ)) ^ 2) ^ 2 := by ring
+    rw [h1, hs4, pow_two, ← Real.rpow_add ht0, Real.sqrt_eq_rpow]
+    norm_num
+  have hsq2 : Real.log t ^ 2 ≤ (8 * t ^ (1 / 8 : ℝ)) ^ 2 := by nlinarith [h, hlog0, hpos]
+  have hsq : Real.log t ^ 4 ≤ (8 * t ^ (1 / 8 : ℝ)) ^ 4 := by
+    nlinarith [hsq2, hlog0, hpos]
+  have hval : (8 * t ^ (1 / 8 : ℝ)) ^ 4 = 4096 * Real.sqrt t := by
+    rw [mul_pow, hr]; norm_num
+  have h16 : 4096 ≤ Real.sqrt t := by
+    have h1 : Real.sqrt t ^ 2 = t := Real.sq_sqrt ht0.le
+    nlinarith [Real.sqrt_nonneg t]
+  have hfin : 4096 * Real.sqrt t ≤ t := by
+    nlinarith [h16, Real.sqrt_nonneg t, Real.sq_sqrt ht0.le]
+  linarith [hsq, hval, hfin]
+
+/-- The sum of the gap counts over all gaps `d ≤ N` is `O(N³ / log⁴ N)`. -/
+private lemma gap_sum_bound :
+    ∃ K : ℝ, 0 < K ∧ ∀ N : ℕ, 10 ^ 10 ≤ N →
+      ∑ d ∈ range (N + 1), (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ) ≤
+        K * (N : ℝ) ^ 3 / Real.log N ^ 4 := by
+  obtain ⟨D, hD⟩ := S2_holds_route
+  have hDpos : 0 < D := by
+    have h1 := hD 1 le_rfl
+    have h2 : (1 : ℝ) ≤ ∑ n ∈ Icc 1 1, singProd n ^ 2 := by
+      have : (Icc 1 1 : Finset ℕ) = {1} := by decide
+      rw [this, Finset.sum_singleton]
+      have : singProd 1 = 1 := by simp [singProd]
+      rw [this]; norm_num
+    have : (1:ℝ) ≤ D * 1 := le_trans h2 (by simpa using h1)
+    linarith
+  set C : ℝ := 128 + 5 * 17 ^ 8 with hCdef
+  have hCpos : 0 < C := by rw [hCdef]; norm_num
+  refine ⟨12 * C ^ 2 * D + 8, by positivity, fun N hN => ?_⟩
+  have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast (by omega : 1 ≤ N)
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hlogN : 0 < Real.log N := Real.log_pos (by exact_mod_cast (by omega : 1 < N))
+  have hlog4 : 0 < Real.log N ^ 4 := by positivity
+  have hM256 : 256 ≤ N + 1 := by omega
+  have hMbig : 17000000 ≤ (N : ℝ) := by exact_mod_cast (by norm_num; omega)
+  have hMle : ((N : ℝ) + 1) ≤ 2 * N := by linarith
+  have hlogM : Real.log N ≤ Real.log ((N : ℝ) + 1) :=
+    Real.log_le_log (by linarith) (by linarith)
+  have hlogM4 : 0 < Real.log ((N : ℝ) + 1) ^ 4 := by
+    have : 0 < Real.log ((N : ℝ) + 1) := Real.log_pos (by linarith)
+    positivity
+  -- split off `d = 0`
+  have hrange : (range (N + 1)) = insert 0 (Icc 1 N) := by
+    ext d
+    simp only [mem_range, mem_insert, mem_Icc]
+    omega
+  rw [hrange, Finset.sum_insert (by simp)]
+  -- the `d = 0` term
+  have hM0 : gapCount 0 (N + 1) ≤ N + 1 := by
+    unfold gapCount
+    calc #((range (N + 1)).filter (fun p => p.Prime ∧ (p + 0).Prime)) ≤ #(range (N + 1)) :=
+          card_le_card (filter_subset _ _)
+      _ = N + 1 := card_range _
+  have hM0' : gapCount (2 * 0) (N + 1) ≤ N + 1 := by
+    unfold gapCount
+    calc #((range (N + 1)).filter (fun p => p.Prime ∧ (p + 2 * 0).Prime)) ≤ #(range (N + 1)) :=
+          card_le_card (filter_subset _ _)
+      _ = N + 1 := card_range _
+  have hzero : (gapCount 0 (N + 1) : ℝ) * (gapCount (2 * 0) (N + 1) : ℝ) ≤
+      ((N : ℝ) + 1) ^ 2 := by
+    have h1 : (gapCount 0 (N + 1) : ℝ) ≤ (N : ℝ) + 1 := by
+      have h := hM0
+      push_cast
+      exact_mod_cast h
+    have h2 : (gapCount (2 * 0) (N + 1) : ℝ) ≤ (N : ℝ) + 1 := by
+      have h := hM0'
+      push_cast
+      exact_mod_cast h
+    calc (gapCount 0 (N + 1) : ℝ) * (gapCount (2 * 0) (N + 1) : ℝ)
+        ≤ ((N : ℝ) + 1) * ((N : ℝ) + 1) :=
+          mul_le_mul h1 h2 (Nat.cast_nonneg _) (by linarith)
+      _ = ((N : ℝ) + 1) ^ 2 := by ring
+  -- the uniform bound on each gap pair
+  have hterm : ∀ d ∈ Icc 1 N,
+      (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ) ≤
+        C ^ 2 * (singProd d * singProd (2 * d)) * ((N : ℝ) + 1) ^ 2 /
+          Real.log ((N : ℝ) + 1) ^ 4 := by
+    intro d hd
+    obtain ⟨hd1, -⟩ := mem_Icc.1 hd
+    have h1 : (gapCount d (N + 1) : ℝ) ≤ C * singProd d * ((N : ℝ) + 1) /
+        Real.log ((N : ℝ) + 1) ^ 2 := by
+      have h := gapCount_le_uniform (d := d) hd1 hM256
+      rw [← hCdef] at h
+      push_cast at h
+      exact h
+    have h2 : (gapCount (2 * d) (N + 1) : ℝ) ≤ C * singProd (2 * d) * ((N : ℝ) + 1) /
+        Real.log ((N : ℝ) + 1) ^ 2 := by
+      have h := gapCount_le_uniform (d := 2 * d) (by omega) hM256
+      rw [← hCdef] at h
+      push_cast at h
+      exact h
+    have hpos1 : (0 : ℝ) < Real.log ((N : ℝ) + 1) ^ 2 := by
+      have h0 : 0 < Real.log ((N : ℝ) + 1) := Real.log_pos (by linarith)
+      exact pow_pos h0 2
+    have hR : (0 : ℝ) ≤ C * singProd d * ((N : ℝ) + 1) / Real.log ((N : ℝ) + 1) ^ 2 := by
+      apply div_nonneg _ hpos1.le
+      have hsp := singProd_nonneg d
+      have hN1' : (0 : ℝ) ≤ (N : ℝ) + 1 := by linarith
+      exact mul_nonneg (mul_nonneg hCpos.le hsp) hN1'
+    calc (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ)
+        ≤ (C * singProd d * ((N : ℝ) + 1) / Real.log ((N : ℝ) + 1) ^ 2) *
+            (C * singProd (2 * d) * ((N : ℝ) + 1) / Real.log ((N : ℝ) + 1) ^ 2) :=
+          mul_le_mul h1 h2 (Nat.cast_nonneg _) hR
+      _ = C ^ 2 * (singProd d * singProd (2 * d)) * ((N : ℝ) + 1) ^ 2 /
+            Real.log ((N : ℝ) + 1) ^ 4 := by
+          have h0 : Real.log ((N : ℝ) + 1) ≠ 0 := by
+            have : 0 < Real.log ((N : ℝ) + 1) := Real.log_pos (by linarith)
+            exact this.ne'
+          field_simp
+  -- sum the terms
+  have hsumraw : ∑ d ∈ Icc 1 N, (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ) ≤
+      C ^ 2 * ((N : ℝ) + 1) ^ 2 / Real.log ((N : ℝ) + 1) ^ 4 * (3 / 2 * (D * N)) := by
+    have hstep1 : ∑ d ∈ Icc 1 N, (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ) ≤
+        ∑ d ∈ Icc 1 N, C ^ 2 * (singProd d * singProd (2 * d)) * ((N : ℝ) + 1) ^ 2 /
+          Real.log ((N : ℝ) + 1) ^ 4 := Finset.sum_le_sum hterm
+    have hstep2 : ∑ d ∈ Icc 1 N, C ^ 2 * (singProd d * singProd (2 * d)) * ((N : ℝ) + 1) ^ 2 /
+          Real.log ((N : ℝ) + 1) ^ 4 =
+        C ^ 2 * ((N : ℝ) + 1) ^ 2 / Real.log ((N : ℝ) + 1) ^ 4 *
+          ∑ d ∈ Icc 1 N, singProd d * singProd (2 * d) := by
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl fun d _ => by ring
+    have hstep3 : ∑ d ∈ Icc 1 N, singProd d * singProd (2 * d) ≤ 3 / 2 * (D * N) := by
+      have ha : ∑ d ∈ Icc 1 N, singProd d * singProd (2 * d) ≤
+          ∑ d ∈ Icc 1 N, 3 / 2 * singProd d ^ 2 := by
+        apply Finset.sum_le_sum
+        intro d _
+        calc singProd d * singProd (2 * d) ≤ singProd d * (3 / 2 * singProd d) :=
+              mul_le_mul_of_nonneg_left (singProd_two_mul_le d) (singProd_nonneg d)
+          _ = 3 / 2 * singProd d ^ 2 := by ring
+      have hb : ∑ d ∈ Icc 1 N, 3 / 2 * singProd d ^ 2 =
+          3 / 2 * ∑ d ∈ Icc 1 N, singProd d ^ 2 := by rw [Finset.mul_sum]
+      have hc := hD N (by omega)
+      linarith [ha, hb, hc]
+    have hposfac : (0 : ℝ) ≤ C ^ 2 * ((N : ℝ) + 1) ^ 2 / Real.log ((N : ℝ) + 1) ^ 4 := by
+      apply div_nonneg
+      · have hN1' : (0 : ℝ) ≤ (N : ℝ) + 1 := by linarith
+        exact mul_nonneg (by positivity) (by positivity)
+      · exact hlogM4.le
+    calc ∑ d ∈ Icc 1 N, (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ)
+        ≤ ∑ d ∈ Icc 1 N, C ^ 2 * (singProd d * singProd (2 * d)) * ((N : ℝ) + 1) ^ 2 /
+            Real.log ((N : ℝ) + 1) ^ 4 := hstep1
+      _ = C ^ 2 * ((N : ℝ) + 1) ^ 2 / Real.log ((N : ℝ) + 1) ^ 4 *
+            ∑ d ∈ Icc 1 N, singProd d * singProd (2 * d) := hstep2
+      _ ≤ C ^ 2 * ((N : ℝ) + 1) ^ 2 / Real.log ((N : ℝ) + 1) ^ 4 * (3 / 2 * (D * N)) :=
+          mul_le_mul_of_nonneg_left hstep3 hposfac
+  -- replace `(N+1)` by `2 N` and `log (N+1)` by `log N`
+  have hlog4N : Real.log N ^ 4 ≤ N := log_pow_four_le_self hMbig
+  have hN1' : (1 : ℝ) ≤ N := hN1
+  have hM2 : ((N : ℝ) + 1) ^ 2 ≤ 4 * N ^ 2 := by nlinarith
+  have hlog4M : Real.log N ^ 4 ≤ Real.log ((N : ℝ) + 1) ^ 4 := by
+    have h2 : Real.log N ^ 2 ≤ Real.log ((N : ℝ) + 1) ^ 2 := by
+      have := hlogN
+      nlinarith [hlogM]
+    have h3 : (0:ℝ) ≤ Real.log N ^ 2 := by positivity
+    have h4 : (0:ℝ) ≤ Real.log ((N : ℝ) + 1) ^ 2 := by positivity
+    nlinarith [h2, h3, h4]
+  have hfac : (0 : ℝ) ≤ 3 / 2 * (D * N) := by nlinarith [hDpos, hNpos]
+  have hstep1 : C ^ 2 * ((N : ℝ) + 1) ^ 2 / Real.log ((N : ℝ) + 1) ^ 4 ≤
+      C ^ 2 * (4 * N ^ 2) / Real.log N ^ 4 := by
+    rw [div_le_div_iff₀ hlogM4 hlog4]
+    nlinarith [hM2, hlog4M, hCpos, hlogM4, hlog4]
+  have hsum : ∑ d ∈ Icc 1 N, (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ) ≤
+      6 * C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4 := by
+    have hC2 : (0 : ℝ) ≤ C ^ 2 := by positivity
+    calc ∑ d ∈ Icc 1 N, (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ)
+        ≤ C ^ 2 * ((N : ℝ) + 1) ^ 2 / Real.log ((N : ℝ) + 1) ^ 4 * (3 / 2 * (D * N)) := hsumraw
+      _ ≤ (C ^ 2 * (4 * N ^ 2) / Real.log N ^ 4) * (3 / 2 * (D * N)) :=
+          mul_le_mul_of_nonneg_right hstep1 hfac
+      _ = 6 * C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4 := by
+          have h0 : Real.log N ≠ 0 := hlogN.ne'
+          field_simp
+          ring
+  have hzero' : ((N : ℝ) + 1) ^ 2 ≤ 4 * (N : ℝ) ^ 3 / Real.log N ^ 4 := by
+    rw [le_div_iff₀ hlog4]
+    nlinarith [hM2, hlog4N, hNpos]
+  have hZ : (gapCount 0 (N + 1) : ℝ) * (gapCount (2 * 0) (N + 1) : ℝ) ≤
+      4 * (N : ℝ) ^ 3 / Real.log N ^ 4 := le_trans hzero hzero'
+  have e : (12 * C ^ 2 * D + 8) * (N : ℝ) ^ 3 / Real.log N ^ 4 =
+      12 * (C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4) + 8 * ((N : ℝ) ^ 3 / Real.log N ^ 4) := by
+    ring
+  have hm : (0 : ℝ) ≤ C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4 := by
+    apply div_nonneg _ hlog4.le
+    exact mul_nonneg (mul_nonneg (by positivity) hDpos.le) (by positivity)
+  have hm2 : (0 : ℝ) ≤ (N : ℝ) ^ 3 / Real.log N ^ 4 :=
+    div_nonneg (by positivity) hlog4.le
+  have hsum12 : ∑ d ∈ Icc 1 N, (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ) ≤
+      12 * (C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4) := by
+    have h6 : 6 * (C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4) =
+        6 * C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4 := by ring
+    calc ∑ d ∈ Icc 1 N, (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ)
+        ≤ 6 * C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4 := hsum
+      _ = 6 * (C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4) := h6.symm
+      _ ≤ 12 * (C ^ 2 * D * (N : ℝ) ^ 3 / Real.log N ^ 4) := by linarith [hm]
+  have hZ8 : (gapCount 0 (N + 1) : ℝ) * (gapCount (2 * 0) (N + 1) : ℝ) ≤
+      8 * ((N : ℝ) ^ 3 / Real.log N ^ 4) := by
+    have h4 : 4 * ((N : ℝ) ^ 3 / Real.log N ^ 4) = 4 * (N : ℝ) ^ 3 / Real.log N ^ 4 := by ring
+    calc (gapCount 0 (N + 1) : ℝ) * (gapCount (2 * 0) (N + 1) : ℝ)
+        ≤ 4 * (N : ℝ) ^ 3 / Real.log N ^ 4 := hZ
+      _ = 4 * ((N : ℝ) ^ 3 / Real.log N ^ 4) := h4.symm
+      _ ≤ 8 * ((N : ℝ) ^ 3 / Real.log N ^ 4) := by linarith [hm2]
+  rw [e]
+  linarith [hsum12, hZ8]
+
+/-! ### Cauchy-Schwarz and the density -/
+
+/-- `π m ≥ 2` for `m ≥ 3`. -/
+private lemma primeCounting_two_le {m : ℕ} (hm : 3 ≤ m) : 2 ≤ Nat.primeCounting m := by
+  have hsub : ({2, 3} : Finset ℕ) ⊆ Nat.primesBelow (m + 1) := by
+    intro p hp
+    simp only [Nat.mem_primesBelow, mem_insert, mem_singleton] at hp ⊢
+    rcases hp with rfl | rfl
+    · exact ⟨by omega, Nat.prime_two⟩
+    · exact ⟨by omega, Nat.prime_three⟩
+  have h1 : Nat.primeCounting m = #(Nat.primesBelow (m + 1)) := primeCounting_eq_card m
+  rw [h1]
+  have h2 := card_le_card hsub
+  simpa using h2
+
+/-- The numbers with a representation are Lemoine numbers. -/
+private lemma card_reps_le (N : ℕ) :
+    (#((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n)) : ℝ) ≤
+      (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) := by
+  have hsub : (((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n) : Finset ℕ) : Set ℕ) ⊆
+      {n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N := by
+    intro n hn
+    simp only [Finset.coe_filter, Finset.mem_Icc, Set.mem_inter_iff, Set.mem_setOf_eq,
+      Set.mem_Iic] at hn ⊢
+    obtain ⟨⟨-, hNle⟩, hodd, hpos⟩ := hn
+    exact ⟨⟨hodd, isLemoine_of_repCnt_pos hpos⟩, hNle⟩
+  calc (#((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n)) : ℝ)
+      = ((((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n) : Finset ℕ) : Set ℕ).ncard : ℝ) := by
+        rw [Set.ncard_coe_finset]
+    _ ≤ (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) := by
+        have := Set.ncard_le_ncard hsub
+        exact_mod_cast this
+
+/-- Cauchy-Schwarz on the support of `repCnt`. -/
+private lemma cauchy_schwarz_rep (N : ℕ) :
+    (∑ n ∈ (Icc 1 N).filter Odd, (repCnt n : ℝ)) ^ 2 ≤
+      (#((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n)) : ℝ) *
+        ∑ n ∈ (Icc 1 N).filter Odd, ((repCnt n : ℝ)) ^ 2 := by
+  set T := (Icc 1 N).filter Odd with hT
+  set s := T.filter (fun n => 0 < repCnt n) with hs
+  have hsum : ∑ n ∈ T, (repCnt n : ℝ) = ∑ n ∈ s, (repCnt n : ℝ) := by
+    have key : ∑ n ∈ T.filter (fun n => 0 < repCnt n), (repCnt n : ℝ) =
+        ∑ n ∈ T, (repCnt n : ℝ) := by
+      rw [Finset.sum_filter]
+      apply Finset.sum_congr rfl
+      intro n _
+      split_ifs with h
+      · rfl
+      · simp [Nat.eq_zero_of_not_pos h]
+    rw [hs]
+    exact key.symm
+  have hs2 : ∑ n ∈ s, ((repCnt n : ℝ)) ^ 2 ≤ ∑ n ∈ T, ((repCnt n : ℝ)) ^ 2 :=
+    Finset.sum_le_sum_of_subset_of_nonneg (by rw [hs]; exact filter_subset _ _)
+      (fun _ _ _ => by positivity)
+  have hcard : s.card = #((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n)) := by
+    rw [hs, hT, Finset.filter_filter]
+  calc (∑ n ∈ T, (repCnt n : ℝ)) ^ 2
+      = (∑ n ∈ s, (repCnt n : ℝ)) ^ 2 := by rw [hsum]
+    _ ≤ (s.card : ℝ) * ∑ n ∈ s, ((repCnt n : ℝ)) ^ 2 := sq_sum_le_card_mul_sum_sq
+    _ ≤ (s.card : ℝ) * ∑ n ∈ T, ((repCnt n : ℝ)) ^ 2 := by
+        apply mul_le_mul_of_nonneg_left hs2
+        positivity
+    _ = (#((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n)) : ℝ) *
+          ∑ n ∈ T, ((repCnt n : ℝ)) ^ 2 := by rw [hcard]
+
+/-- **Positive lower density of the Lemoine numbers.** Cauchy-Schwarz: the first moment is at
+least `(π(N/2) - 1) π(N/4) ≫ N²/log²N`, the second is `O(N³/log⁴ N)`. -/
+theorem lemoine_positive_density_aux :
+    ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ, ∀ N ≥ N₀,
+      c * N ≤ (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) := by
+  obtain ⟨K, hKpos, hK⟩ := gap_sum_bound
+  obtain ⟨cpi, hcpi, m0, hpi⟩ := pi_lower
+  have hcpi4 : 0 < cpi ^ 4 / (8192 * K) := by positivity
+  refine ⟨cpi ^ 4 / (8192 * K), hcpi4, max (10 ^ 20) (4 * m0 + 8), fun N hN => ?_⟩
+  have hbig20 : 10 ^ 20 ≤ N := le_trans (le_max_left _ _) hN
+  have hm0le : 4 * m0 + 8 ≤ N := le_trans (le_max_right _ _) hN
+  have hNbig : 10 ^ 10 ≤ N := by norm_num at hbig20 ⊢; omega
+  have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast (by omega : 1 ≤ N)
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hlogN : 0 < Real.log N := Real.log_pos (by exact_mod_cast (by omega : 1 < N))
+  have hlog2 : 0 < Real.log N ^ 2 := by positivity
+  have hlog4 : 0 < Real.log N ^ 4 := by positivity
+  have hNR : (10 ^ 20 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hbig20
+  set T := (Icc 1 N).filter Odd with hT
+  -- `log N ≤ sqrt N`, so the size factors are harmless
+  have hlogsqrt : Real.log N ≤ Real.sqrt N := by
+    have hbig256 : (256 : ℝ) ≤ N := by
+      have : (256 : ℕ) ≤ N := by norm_num; omega
+      exact_mod_cast this
+    have h := log_sq_le_self (t := (N : ℝ)) hbig256
+    have h0 : 0 ≤ Real.log N := hlogN.le
+    have hs : Real.sqrt N ^ 2 = (N : ℝ) := Real.sq_sqrt hNpos.le
+    nlinarith [h, h0, Real.sqrt_nonneg N]
+  have hsqrtbig : (10000000000 : ℝ) ≤ Real.sqrt N := by
+    have hs : Real.sqrt N ^ 2 = (N : ℝ) := Real.sq_sqrt hNpos.le
+    nlinarith [Real.sqrt_nonneg N]
+  -- first moment, lower bound
+  have hm1 : (Nat.primeCounting (N / 2) - 1) * Nat.primeCounting (N / 4) ≤
+      ∑ n ∈ T, repCnt n := by
+    rw [hT]; exact first_moment N (by omega)
+  have hm1R : (((Nat.primeCounting (N / 2) - 1) * Nat.primeCounting (N / 4) : ℕ) : ℝ) ≤
+      ∑ n ∈ T, (repCnt n : ℝ) := by
+    have h := hm1
+    push_cast
+    exact_mod_cast h
+  have hpi1 : cpi * (N : ℝ) / (8 * Real.log N) ≤ ((Nat.primeCounting (N / 2) : ℕ) : ℝ) - 1 := by
+    have hm : m0 ≤ N / 2 := by omega
+    have h1 := hpi (N / 2) hm
+    have hposhalf : 0 < Real.log ((N / 2 : ℕ) : ℝ) := by
+      apply Real.log_pos
+      have h2 : (2 : ℕ) ≤ N / 2 := by omega
+      have : (2 : ℝ) ≤ ((N / 2 : ℕ) : ℝ) := by exact_mod_cast h2
+      linarith
+    have hle : ((N / 2 : ℕ) : ℝ) ≤ (N : ℝ) := by
+      have h2 : N / 2 ≤ N := Nat.div_le_self N 2
+      exact_mod_cast h2
+    have hloghalf : Real.log ((N / 2 : ℕ) : ℝ) ≤ Real.log N :=
+      Real.log_le_log (by exact_mod_cast (by omega : 0 < N / 2)) hle
+    have hN2ge : (N : ℝ) / 4 ≤ ((N / 2 : ℕ) : ℝ) := by
+      have h : N ≤ 4 * (N / 2) := by omega
+      have h' : (N : ℝ) ≤ 4 * ((N / 2 : ℕ) : ℝ) := by exact_mod_cast h
+      linarith
+    have hcN : (0 : ℝ) < cpi * (N : ℝ) := by nlinarith [hcpi, hNpos]
+    have hge : cpi * (N : ℝ) / (4 * Real.log N) ≤
+        cpi * ((N / 2 : ℕ) : ℝ) / Real.log ((N / 2 : ℕ) : ℝ) := by
+      rw [div_le_div_iff₀ (by nlinarith [hlogN]) hposhalf]
+      have hL : cpi * (N : ℝ) * Real.log ((N / 2 : ℕ) : ℝ) ≤ cpi * (N : ℝ) * Real.log N :=
+        mul_le_mul_of_nonneg_left hloghalf hcN.le
+      have hR : cpi * (N : ℝ) * Real.log N ≤ cpi * ((N / 2 : ℕ) : ℝ) * (4 * Real.log N) := by
+        have h1 : ((N : ℝ) / 4) * (4 * (cpi * Real.log N)) ≤
+            ((N / 2 : ℕ) : ℝ) * (4 * (cpi * Real.log N)) := by
+          apply mul_le_mul_of_nonneg_right hN2ge
+          nlinarith [hcpi, hlogN]
+        linarith [h1]
+      linarith [hL, hR]
+    have hle2 : cpi * (N : ℝ) / (4 * Real.log N) ≤ ((Nat.primeCounting (N / 2) : ℕ) : ℝ) :=
+      le_trans hge h1
+    have hpi2ge : (2 : ℝ) ≤ ((Nat.primeCounting (N / 2) : ℕ) : ℝ) := by
+      have h2 : 2 ≤ Nat.primeCounting (N / 2) := primeCounting_two_le (by omega)
+      exact_mod_cast h2
+    have hhalf : cpi * (N : ℝ) / (8 * Real.log N) = (cpi * (N : ℝ) / (4 * Real.log N)) / 2 := by
+      field_simp
+      ring
+    linarith [hle2, hpi2ge, hhalf]
+  have hpi2 : cpi * (N : ℝ) / (8 * Real.log N) ≤ ((Nat.primeCounting (N / 4) : ℕ) : ℝ) := by
+    have hm : m0 ≤ N / 4 := by omega
+    have h1 := hpi (N / 4) hm
+    have hpos4 : 0 < Real.log ((N / 4 : ℕ) : ℝ) := by
+      apply Real.log_pos
+      have h2 : (2 : ℕ) ≤ N / 4 := by omega
+      have : (2 : ℝ) ≤ ((N / 4 : ℕ) : ℝ) := by exact_mod_cast h2
+      linarith
+    have hle : ((N / 4 : ℕ) : ℝ) ≤ (N : ℝ) := by
+      have h2 : N / 4 ≤ N := Nat.div_le_self N 4
+      exact_mod_cast h2
+    have hlog4' : Real.log ((N / 4 : ℕ) : ℝ) ≤ Real.log N :=
+      Real.log_le_log (by exact_mod_cast (by omega : 0 < N / 4)) hle
+    have hN4ge : (N : ℝ) / 8 ≤ ((N / 4 : ℕ) : ℝ) := by
+      have h : N ≤ 8 * (N / 4) := by omega
+      have h' : (N : ℝ) ≤ 8 * ((N / 4 : ℕ) : ℝ) := by exact_mod_cast h
+      linarith
+    have hcN : (0 : ℝ) < cpi * (N : ℝ) := by nlinarith [hcpi, hNpos]
+    have hge : cpi * (N : ℝ) / (8 * Real.log N) ≤
+        cpi * ((N / 4 : ℕ) : ℝ) / Real.log ((N / 4 : ℕ) : ℝ) := by
+      rw [div_le_div_iff₀ (by nlinarith [hlogN]) hpos4]
+      have hL : cpi * (N : ℝ) * Real.log ((N / 4 : ℕ) : ℝ) ≤ cpi * (N : ℝ) * Real.log N :=
+        mul_le_mul_of_nonneg_left hlog4' hcN.le
+      have hR : cpi * (N : ℝ) * Real.log N ≤ cpi * ((N / 4 : ℕ) : ℝ) * (8 * Real.log N) := by
+        have h1 : ((N : ℝ) / 8) * (8 * (cpi * Real.log N)) ≤
+            ((N / 4 : ℕ) : ℝ) * (8 * (cpi * Real.log N)) := by
+          apply mul_le_mul_of_nonneg_right hN4ge
+          nlinarith [hcpi, hlogN]
+        linarith [h1]
+      linarith [hL, hR]
+    linarith
+  have hsum_ge : cpi ^ 2 * (N : ℝ) ^ 2 / (64 * Real.log N ^ 2) ≤
+      ∑ n ∈ T, (repCnt n : ℝ) := by
+    have hcast : ((Nat.primeCounting (N / 2) - 1 : ℕ) : ℝ) =
+        ((Nat.primeCounting (N / 2) : ℕ) : ℝ) - 1 := by
+      have h1 : 1 ≤ Nat.primeCounting (N / 2) := by
+        have h2 : 2 ≤ Nat.primeCounting (N / 2) := primeCounting_two_le (by omega)
+        omega
+      push_cast [h1]
+      ring
+    have hA1 : cpi * (N : ℝ) / (8 * Real.log N) ≤ ((Nat.primeCounting (N / 2) - 1 : ℕ) : ℝ) := by
+      rw [hcast]; exact hpi1
+    have hA2 : cpi * (N : ℝ) / (8 * Real.log N) ≤ ((Nat.primeCounting (N / 4) : ℕ) : ℝ) := hpi2
+    have hmul := mul_le_mul hA1 hA2 (by positivity) (by positivity)
+    have heq : (cpi * (N : ℝ) / (8 * Real.log N)) * (cpi * (N : ℝ) / (8 * Real.log N)) =
+        cpi ^ 2 * (N : ℝ) ^ 2 / (64 * Real.log N ^ 2) := by
+      field_simp
+      ring
+    have hprod : cpi ^ 2 * (N : ℝ) ^ 2 / (64 * Real.log N ^ 2) ≤
+        ((Nat.primeCounting (N / 2) - 1 : ℕ) : ℝ) * ((Nat.primeCounting (N / 4) : ℕ) : ℝ) := by
+      rw [← heq]
+      exact hmul
+    have hm1R' : ((Nat.primeCounting (N / 2) - 1 : ℕ) : ℝ) * ((Nat.primeCounting (N / 4) : ℕ) : ℝ) ≤
+        ∑ n ∈ T, (repCnt n : ℝ) := by
+      have h := hm1R
+      push_cast at h ⊢
+      exact h
+    linarith
+  -- second moment, upper bound
+  have hm2 : ∑ n ∈ T, ((repCnt n : ℝ)) ^ 2 ≤ 2 * (K * (N : ℝ) ^ 3 / Real.log N ^ 4) := by
+    have h2 := second_moment N
+    have hcast : ((∑ n ∈ T, (repCnt n) ^ 2 : ℕ) : ℝ) = ∑ n ∈ T, ((repCnt n : ℝ)) ^ 2 := by
+      rw [Nat.cast_sum]
+      apply Finset.sum_congr rfl
+      intro n _
+      push_cast
+      ring
+    have hK' := hK N hNbig
+    have h2c : ((∑ n ∈ T, (repCnt n) ^ 2 : ℕ) : ℝ) ≤ 2 * (K * (N : ℝ) ^ 3 / Real.log N ^ 4) := by
+      have hcast2 : ((2 * ∑ d ∈ range (N + 1), gapCount d (N + 1) * gapCount (2 * d) (N + 1) : ℕ) : ℝ)
+          = 2 * ∑ d ∈ range (N + 1), (gapCount d (N + 1) : ℝ) * (gapCount (2 * d) (N + 1) : ℝ) := by
+        push_cast
+        ring
+      have h2' : ((∑ n ∈ T, (repCnt n) ^ 2 : ℕ) : ℝ) ≤
+          ((2 * ∑ d ∈ range (N + 1), gapCount d (N + 1) * gapCount (2 * d) (N + 1) : ℕ) : ℝ) := by
+        have hh : ∑ n ∈ T, (repCnt n) ^ 2 ≤
+            2 * ∑ d ∈ range (N + 1), gapCount d (N + 1) * gapCount (2 * d) (N + 1) := by
+          rw [hT]; exact h2
+        exact_mod_cast hh
+      rw [hcast2] at h2'
+      linarith [h2', hK']
+    rw [← hcast]
+    exact h2c
+  -- Cauchy-Schwarz and the final arithmetic
+  have hCS := cauchy_schwarz_rep N
+  rw [← hT] at hCS
+  have hA := card_reps_le N
+  have hsq_ge : (cpi ^ 2 * (N : ℝ) ^ 2 / (64 * Real.log N ^ 2)) ^ 2 ≤
+      (∑ n ∈ T, (repCnt n : ℝ)) ^ 2 :=
+    pow_le_pow_left₀ (by positivity) hsum_ge 2
+  have hfinal : (cpi ^ 2 * (N : ℝ) ^ 2 / (64 * Real.log N ^ 2)) ^ 2 ≤
+      (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) *
+        (2 * (K * (N : ℝ) ^ 3 / Real.log N ^ 4)) := by
+    calc (cpi ^ 2 * (N : ℝ) ^ 2 / (64 * Real.log N ^ 2)) ^ 2
+        ≤ (∑ n ∈ T, (repCnt n : ℝ)) ^ 2 := hsq_ge
+      _ ≤ ((Icc 1 N).filter (fun n => Odd n ∧ 0 < repCnt n)).card *
+            ∑ n ∈ T, ((repCnt n : ℝ)) ^ 2 := hCS
+      _ ≤ (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) *
+            (2 * (K * (N : ℝ) ^ 3 / Real.log N ^ 4)) := by
+          apply mul_le_mul hA hm2 (by positivity) (by positivity)
+  have e1 : (cpi ^ 2 * (N : ℝ) ^ 2 / (64 * Real.log N ^ 2)) ^ 2 =
+      cpi ^ 4 * (N : ℝ) ^ 4 / (4096 * Real.log N ^ 4) := by
+    field_simp
+    ring
+  rw [e1] at hfinal
+  have hpos : 0 < 2 * (K * (N : ℝ) ^ 3 / Real.log N ^ 4) := by positivity
+  have hdiv : cpi ^ 4 * (N : ℝ) ^ 4 / (4096 * Real.log N ^ 4) /
+      (2 * (K * (N : ℝ) ^ 3 / Real.log N ^ 4)) ≤
+      (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) := by
+    rw [div_le_iff₀ hpos]
+    linarith [hfinal]
+  have heq : cpi ^ 4 * (N : ℝ) ^ 4 / (4096 * Real.log N ^ 4) /
+      (2 * (K * (N : ℝ) ^ 3 / Real.log N ^ 4)) = cpi ^ 4 / (8192 * K) * (N : ℝ) := by
+    have hKne : K ≠ 0 := hKpos.ne'
+    have hlogne : Real.log N ≠ 0 := hlogN.ne'
+    field_simp
+    ring
+  linarith [hdiv, heq]
+
+end
+
 /-- Unit U-1603, route lemma, OPEN in the lab. Plain math: the odd numbers of the form `p + 2 q`
 have positive lower density, the Lemoine twin of the lab's `S3_positive_lower_density` in
 `SchnirelmannGoldbach`. Prior art not searched. Far weaker than Lemoine's conjecture. -/
 theorem route_lemoine_positive_density :
     ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ, ∀ N ≥ N₀,
-      c * N ≤ (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) := by
-  sorry
+      c * N ≤ (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) :=
+  lemoine_positive_density_aux
 
 section
 
