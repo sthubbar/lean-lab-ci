@@ -1,6 +1,7 @@
 import LeanLab.HelfgottMajor.Decomp123
 import Mathlib.Analysis.MellinTransform
 import Mathlib.Analysis.Analytic.Order
+import Mathlib.Analysis.Meromorphic.Divisor
 
 /-!
 P0014 Proposition 4.6, pages 43 and 44, display 4.43.
@@ -34,6 +35,38 @@ noncomputable def highZeros {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
   ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
     0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}, zeroTerm χ δ x ρ.val
 
+/-- The critical-line hypothesis determines the real part of every low zero. -/
+lemma low_zero_real_part {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (T : ℝ)
+    (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
+      |s.im| ≤ T → s.re = 1 / 2)
+    (ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}) :
+    ρ.val.re = 1 / 2 :=
+  hzeros ρ.val ρ.property.1 ρ.property.2.1 ρ.property.2.2.1 ρ.property.2.2.2
+
+/-- On the critical line, a zero term has exactly the square-root x factor from page 43. -/
+lemma zeroTerm_norm_critical {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (δ x : ℝ) (hx : 0 < x) (ρ : ℂ) (hρ : ρ.re = 1 / 2) :
+    ‖zeroTerm χ δ x ρ‖ =
+      (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) *
+        ‖gaussianMellin δ ρ‖ * sqrt x := by
+  rw [zeroTerm, RCLike.norm_nsmul (K := ℂ), nsmul_eq_mul, norm_mul,
+    Complex.norm_cpow_eq_rpow_re_of_pos hx, hρ, ← sqrt_eq_rpow]
+  ring
+
+/-- Every nontrivial zero term is bounded by x times its multiplicity weighted Mellin norm. -/
+lemma zeroTerm_norm_le_x {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (δ x : ℝ) (hx : 1 ≤ x) (ρ : ℂ) (hρ : 0 < ρ.re ∧ ρ.re < 1) :
+    ‖zeroTerm χ δ x ρ‖ ≤
+      ((analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) *
+        ‖gaussianMellin δ ρ‖) * x := by
+  rw [zeroTerm, RCLike.norm_nsmul (K := ℂ), nsmul_eq_mul, norm_mul,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by linarith : 0 < x)]
+  have hp : x ^ ρ.re ≤ x := by
+    simpa only [rpow_one] using rpow_le_rpow_of_exponent_le hx hρ.2.le
+  simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hp
+    (mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _))
+
 /-- LEAF. Pages 31 to 36, displays 4.1 to 4.3 and 4.23, specialized on page 44.
 The explicit formula leaves a residue and a contour error. This does not bound either zero sum.
 The outside Landau input is Montgomery and Vaughan, Lemma 6.3.
@@ -47,12 +80,6 @@ theorem explicit_formula_remainder (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
       ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
         lowZeros χ δ x T + highZeros χ δ x T + R‖ ≤
         (log q + 6.01) * (1 + 6 * |δ|) / sqrt x := by
-  -- BLOCKED OUT OF REACH: requires the explicit formula for Dirichlet L-functions
-  -- (contour integration, Hadamard factorization, zero-free regions).
-  -- Mathlib lacks: Mellin inversion on strips, zero-density estimates,
-  -- Montgomery-Vaughan Lemma 6.3, and the quantitative zero-sum formula.
-  -- The assembly gaussian_estimate_of_components and gaussian_explicit_estimate
-  -- are already proven and only depend on these three analytic leaves.
   sorry
 
 /-- LEAF. Page 43 applies Lemma 4.4, display 4.29 on page 39, and the norms in 4.42.
@@ -66,12 +93,6 @@ theorem low_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     ‖lowZeros χ δ x T‖ ≤
       (2.337 * sqrt T * log (q * T) + 21.817 * sqrt T +
         2.85 * log q + 74.38) * sqrt x := by
-  -- BLOCKED OUT OF REACH: requires zero-density estimates for Dirichlet L-functions
-  -- and bounds on the Gaussian Mellin transform on the critical line.
-  -- Mathlib lacks: zero-counting functions N_q(T), zero-free regions,
-  -- and the Montgomery-Vaughan zero-density input.
-  -- The decomposition into very_low_mass_bound and middle_mass_bound in Decomp269b
-  -- reduces this to the quantitative Mellin sum bound hbudget, which is also open.
   sorry
 
 /-- LEAF. Pages 40 to 43, Lemma 4.5, display 4.35 and its use in Proposition 4.6.
@@ -86,13 +107,6 @@ theorem high_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
       log (q * T / (2 * π)) *
         (4.329 * exp (-0.1598 * T) +
           0.802 * |δ| * exp (-0.1065 * (T / (π * |δ|)) ^ 2)) * x := by
-  -- BLOCKED OUT OF REACH: requires exponential decay estimates for the Gaussian Mellin
-  -- transform and zero-free regions for Dirichlet L-functions above height T.
-  -- Mathlib lacks: steepest-descent estimates for the shifted Gaussian,
-  -- zero-free region bounds (e.g., Re(s) > 1 - 1/(c log(q|Im(s)|))),
-  -- and the quantitative zero-counting in dyadic annuli.
-  -- The decomposition in Decomp269c reduces this to tail_mass_integral,
-  -- exp_integral_bound, and gaussian_integral_bound, all of which are also open.
   sorry
 
 /-- LEAF. Page 44, the last arithmetic step with the existing factor 6 repair.
