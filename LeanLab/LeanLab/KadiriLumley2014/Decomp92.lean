@@ -3,8 +3,10 @@ P0059, arXiv 1407.7902v1, pages 2 and 3, equations 2.4 to 2.8.
 The central smoothing interval keeps both prime interval endpoints strict.
 AI wrote this Lean code, CODEX task92, 2026-10-26.
 -/
-import LeanLab.KadiriLumley2014.G92
+import LeanLab.KadiriLumley2014.ZeroDefinitions259
+import LeanLab.KadiriLumley2014.SmoothedFormula259
 import LeanLab.KadiriLumley2014.TableRounding
+import LeanLab.KadiriLumley2014.TableCertificates259
 import LeanLab.KadiriLumley2014.BindingRow
 import LeanLab.KadiriLumley2014.OmegaIntegral
 import LeanLab.KadiriLumley2014.WeightTail
@@ -107,11 +109,6 @@ noncomputable def tailThetaIntegral (m : ℕ) (δ u X a : ℝ) : ℝ :=
     (Chebyshev.theta (Real.exp u * (X * (1 + δ * t))) -
       Chebyshev.theta (X * (1 + δ * t))) * weight m t)
 
-/-- The enlarged Brun Titchmarsh coefficient used in page 3 equation 2.7. -/
-noncomputable def tailCoefficient (δ u X : ℝ) : ℝ :=
-  2 * (1 + δ) * (Real.exp u - 1) *
-    (Real.log (Real.exp u * X * (1 + δ)) / Real.log (X * (Real.exp u - 1))) * X
-
 /-- LEAF. Page 3 equation 2.7. The central integral is the total weighted
 average times its mass minus the two endpoint integrals. -/
 theorem central_integral_split (m : ℕ) {δ u X a : ℝ}
@@ -164,13 +161,6 @@ theorem central_positive_of_psi_margin (hCosta : CostaEstimate)
   have hmul := (div_lt_iff₀ hm).mp hdiv
   linarith
 
-
-/-- LEAF. Page 13 Table 2 and page 2 equation 2.1. Every printed smoothing
-step is positive and lies inside the small-parameter range. -/
-theorem table_small_steps : ∀ r ∈ tableTwo,
-    (0 : ℚ) < r.deltaQ ∧ r.deltaQ ≤ 0.0001 ∧
-      1 / 10 ^ 12 ≤ r.uQ ∧ r.uQ ≤ 0.0001 := by
-  decide +kernel
 
 /-- LEAF. Page 2 equation 2.1. A coarse certified bound for the exponential
 threshold used in the normalization. -/
@@ -278,55 +268,22 @@ theorem brun_titchmarsh_tail {m : ℕ} (_hm : 2 ≤ m) {δ u X a : ℝ}
   exact tail_bound_of_pointwise m hδ ((Real.exp_pos 38).le.trans hX) ha ha2
     (fun t ht => brun_titchmarsh_pointwise hδ hδ1 hu hu1 hX hgap ht)
 
-/-- The absolute zero summand from page 4 equation 2.19, with multiplicity.
-The index contains exactly the nontrivial zeros in the open critical strip. -/
-noncomputable def zeroSummand (m : ℕ) (δ u X : ℝ)
-    (ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1}) : ℝ :=
-  (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) * ‖smoothingG m δ u ρ‖ *
-    X ^ ((ρ : ℂ).re - 1)
-
-/-- The nonnegative absolute zero sum Sigma in page 4 equation 2.19.
-Summability is stated explicitly in the following analytic leaf. -/
-noncomputable def zeroError (m : ℕ) (δ u X : ℝ) : ℝ :=
-  ∑' ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1}, zeroSummand m δ u X ρ
-
-/-- Every absolute zero summand is nonnegative for nonnegative X. -/
-theorem zeroSummand_nonneg (m : ℕ) (δ u : ℝ) {X : ℝ} (hX : 0 ≤ X)
-    (ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1}) :
-    0 ≤ zeroSummand m δ u X ρ := by
-  unfold zeroSummand
-  exact mul_nonneg (mul_nonneg (by positivity) (norm_nonneg _)) (Real.rpow_nonneg hX _)
-
-/-- The absolute zero term decreases with X because every real part is below one. -/
-theorem zeroSummand_antitone (m : ℕ) (δ u : ℝ) {X0 X : ℝ}
-    (hX0 : 0 < X0) (hX : X0 ≤ X)
-    (ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1}) :
-    zeroSummand m δ u X ρ ≤ zeroSummand m δ u X0 ρ := by
-  unfold zeroSummand
-  apply mul_le_mul_of_nonneg_left
-    (Real.rpow_le_rpow_of_nonpos hX0 hX (by linarith [ρ.property.2.2]))
-  positivity
-
-/-- Page 4 after equation 2.18. Replacing X by X0 is valid for the actual
-absolute zero sum. This implication is CONDITIONAL ON summability at X0. -/
-theorem zeroError_antitone (m : ℕ) (δ u : ℝ) {X0 X : ℝ}
-    (hX0 : 0 < X0) (hX : X0 ≤ X) (hs : Summable (zeroSummand m δ u X0)) :
-    Summable (zeroSummand m δ u X) ∧ zeroError m δ u X ≤ zeroError m δ u X0 := by
-  have hsX : Summable (zeroSummand m δ u X) :=
-    Summable.of_nonneg_of_le (zeroSummand_nonneg m δ u (hX0.le.trans hX))
-      (zeroSummand_antitone m δ u hX0 hX) hs
-  exact ⟨hsX, hsX.tsum_le_tsum (zeroSummand_antitone m δ u hX0 hX) hs⟩
-
 /-- LEAF. Page 4 Lemma 2.2 and equations 2.16 to 2.19.
 The polynomial-smoothed explicit formula, its absolute zero sum and remainder.
-Lemma 2.2 cites Ramare and Saouter 2003 Lemma 4. This leaf remains unproved. -/
+Lemma 2.2 cites Ramare and Saouter 2003 Lemma 4.
+Task259 proves this leaf from the integrated explicit formula. -/
 theorem smoothed_explicit_lower {m : ℕ} (hm : 2 ≤ m) {δ u X : ℝ}
     (hδ : 0 < δ) (hδ1 : δ ≤ 0.0001) (hu : 0 < u) (hu1 : u ≤ 0.0001)
     (hX : Real.exp 38 ≤ X) :
     Summable (zeroSummand m δ u X) ∧
       (Real.exp u - 1) * X * (1 + δ / 2 - zeroError m δ u X) - u / (2 * X) ≤
         psiAverage m δ u X := by
-  sorry
+  have hm0 : 0 < m := by omega
+  have hX3 : 3 ≤ X := by linarith [Real.add_one_le_exp (38 : ℝ)]
+  have hX0 : 0 < X := by linarith
+  have hs := Task259.absolute_zero_summable hm0 hδ hu hX0
+  exact ⟨hs, Task301.psi_lower_of_explicit_identity m hδ.le hu.le hX3 hs
+    (Task259.psiAverage_explicit hm0 hδ hu (by linarith))⟩
 
 /-- LEAF. Page 9 equation 2.64 and page 13 Table 2.
 This is the remaining zero-sum and numerical budget after the explicit formula.
