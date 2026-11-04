@@ -6,6 +6,9 @@ The first family is assembled without using the old cited leaf.
 Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Task71Paper
+import LeanLab.DtRS1998.Task294Row85
+import LeanLab.DtRS1998.Task294Row80
+import LeanLab.DtRS1998.Task294Row75
 
 namespace LeanLab.DtRS1998.Decomp270a
 
@@ -55,7 +58,7 @@ theorem certificate75 :
       (List.range (10 ^ 8 / 2 + 1)).all (fun j =>
         qs.any (fun q => decide
           (q ≤ 10 ^ 75 + 2 * j ∧ (10 ^ 75 + 2 * j - q).Prime))) = true := by
-  sorry
+  exact Task294.T75.certificate
 
 /-- LEAF. P0037 Section 5.1 page 211, unnumbered interval display,
 Table 1 page 213, row 10^80. At most 206 certified primes between
@@ -67,7 +70,7 @@ theorem certificate80 :
       (List.range (10 ^ 8 / 2 + 1)).all (fun j =>
         qs.any (fun q => decide
           (q ≤ 10 ^ 80 + 2 * j ∧ (10 ^ 80 + 2 * j - q).Prime))) = true := by
-  sorry
+  exact Task294.T80.certificate
 
 /-- LEAF. P0037 Section 5.1 page 211, unnumbered interval display,
 Table 1 page 213, row 10^85. At most 203 certified primes between
@@ -79,7 +82,7 @@ theorem certificate85 :
       (List.range (10 ^ 8 / 2 + 1)).all (fun j =>
         qs.any (fun q => decide
           (q ≤ 10 ^ 85 + 2 * j ∧ (10 ^ 85 + 2 * j - q).Prime))) = true := by
-  sorry
+  exact Task294.T85.certificate
 
 /-- LEAF. P0037 Section 5.1 page 211, unnumbered interval display,
 Table 1 page 213, row 10^90. At most 209 certified primes between
