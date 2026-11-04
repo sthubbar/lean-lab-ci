@@ -1,0 +1,38 @@
+{
+  "active_modules": 195,
+  "successful_baseline_targets": 195,
+  "failed_baseline_exits": [],
+  "missing_baseline_targets": [],
+  "new_production_statements": 25,
+  "new_numeric_definitions": 3,
+  "new_clean_theorems": [
+    "LeanLab.ChenExplicit.Mertens260.twin_log_lower",
+    "LeanLab.ChenExplicit.Mertens260.reciprocal_square_tail",
+    "LeanLab.ChenExplicit.Mertens260.finite_twin_product_le",
+    "LeanLab.ChenExplicit.Mertens260.strict_product_le_inclusive",
+    "LeanLab.ChenExplicit.Mertens260.finite_twin_product_linear",
+    "LeanLab.ChenExplicit.Mertens260.remove_odd_factors_le",
+    "LeanLab.ChenExplicit.SmallCharacters260.triangle_budget_too_large",
+    "LeanLab.ChenExplicit.SmallCharacters260.small_character_cutoff_gap",
+    "LeanLab.ChenExplicit.SmallCharacters260.chen_scale_above_character_cutoff",
+    "LeanLab.ChenExplicit.D1552.V1_remove_factors",
+    "LeanLab.ChenExplicit.Inclusion260.sift_count_partition",
+    "LeanLab.ChenExplicit.Inclusion260.divPrefix_succ",
+    "LeanLab.ChenExplicit.Inclusion260.sieveTail_succ",
+    "LeanLab.ChenExplicit.Inclusion260.divPrefix_eq_product_filter",
+    "LeanLab.ChenExplicit.Inclusion260.lemma52_finite",
+    "LeanLab.ChenExplicit.Inclusion260.lemma52_prime_products"
+  ],
+  "new_cited_or_conditional_theorems": [
+    "LeanLab.ChenExplicit.Mertens260.dusart_mertens_upper",
+    "LeanLab.ChenExplicit.Mertens260.odd_sieve_product_upper",
+    "LeanLab.ChenExplicit.SmallCharacters260.yamada_nonexceptional_psi_scaled",
+    "LeanLab.ChenExplicit.SmallCharacters260.yamada_nonexceptional_psi",
+    "LeanLab.ChenExplicit.SmallCharacters260.nonprincipal_psi_scaled",
+    "LeanLab.ChenExplicit.SmallCharacters260.nonprincipal_psi_of_principal_lower"
+  ],
+  "filled_sealed_leaf": "LeanLab.ChenExplicit.D1552.eq43_V1",
+  "axiom_queries": 44,
+  "foreign_axioms": {},
+  "source_match_verdicts": 38
+}

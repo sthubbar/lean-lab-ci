@@ -4,7 +4,11 @@ T. Yamada 2015, Explicit Chen's theorem, arXiv 1511.03409v2, Section 7, proof of
 
 Codex task161 proof additions, 2026-10-28. AI wrote the Lean code.
 Six original leaves have unconditional proofs. Eq123 is CONDITIONAL ON h72.
-The remaining OPEN leaves are eq43_V1 and lemma72.
+Task260 derives eq43_V1 CONDITIONAL ON Mertens260.dusart_mertens_upper.
+The remaining OPEN leaf in this file is lemma72.
+
+Codex task260 product proof additions, 2026-11-04. AI wrote the Lean code.
+The original eq43_V1 statement is unchanged. Its cited Dusart input remains unproved.
 
 Codex task173 proof additions, 2026-10-29. AI wrote the Lean code.
 Eq125_phi has an unconditional elementary proof through a finite Euler coefficient bound.
@@ -25,6 +29,7 @@ Corrections built in, see ChenExplicit/STATEMENTS.md, U-1552 block:
 * Lemma 7.2 is stated with `Z ≥ z`; the printed `Z > z` fails at `j = 0`, where `Z = z`.
 Chen's theorem is known; binary Goldbach is OPEN.
 -/
+import LeanLab.ChenExplicit.MertensProduct260
 import LeanLab.ChenExplicit.Decomp1552a
 import LeanLab.ChenExplicit.Reductions
 import LeanLab.RieselVaughan1983.OddSums
@@ -183,13 +188,112 @@ theorem thm31_upper_applied (N q₁ : ℕ) (hE : Even N) (hN : exp (exp 36) < N)
       ∑ d ∈ Dset N q₁, |rj N ε j d| := by
   sorry
 
+/-- Finite removal of the primes dividing N and the exceptional prime.
+This is the elementary factor comparison in Yamada page 11 eqs 43 and 44. -/
+theorem V1_remove_factors (N q₁ : ℕ) (hN0 : N ≠ 0) (x : ℝ) :
+    V1 N q₁ x ≤
+      (∏ p ∈ (range ⌈x⌉₊).filter (fun p => p.Prime ∧ 2 < p),
+        (1 - 1 / ((p : ℝ) - 1))) *
+      (∏ p ∈ N.primeFactors.filter (2 < ·), ((p : ℝ) - 1) / ((p : ℝ) - 2)) *
+      (if q₁.Prime ∧ 2 < q₁ ∧ ¬ q₁ ∣ N then ((q₁ : ℝ) - 1) / ((q₁ : ℝ) - 2) else 1) := by
+  let S := (range ⌈x⌉₊).filter (fun p => p.Prime ∧ 2 < p)
+  let T := N.primeFactors.filter (2 < ·)
+  let Q : Finset ℕ := if q₁.Prime ∧ 2 < q₁ ∧ ¬ q₁ ∣ N then {q₁} else ∅
+  have hS (p : ℕ) (hp : p ∈ S) : 2 < p := (mem_filter.mp hp).2.2
+  have hT (p : ℕ) (hp : p ∈ T) : 2 < p := (mem_filter.mp hp).2
+  have hQ (p : ℕ) (hp : p ∈ Q) : 2 < p := by
+    dsimp [Q] at hp
+    split_ifs at hp with h
+    · have he : p = q₁ := mem_singleton.mp hp
+      simpa only [he] using h.2.1
+    · simp at hp
+  have hmemT (p : ℕ) (hp : p ∈ S) : p ∈ T ↔ p ∣ N := by
+    have hpr := (mem_filter.mp hp).2.1
+    simp only [T, mem_filter, Nat.mem_primeFactors]
+    exact ⟨fun h => h.1.2.1, fun hd => ⟨⟨hpr, hd, hN0⟩, hS p hp⟩⟩
+  have heq : (range ⌈x⌉₊).filter (fun p => p.Prime ∧ 2 < p ∧ ¬ p ∣ N ∧ p ≠ q₁) =
+      (S.filter (fun p => p ∉ T)).filter (fun p => p ∉ Q) := by
+    ext p
+    simp only [mem_filter]
+    constructor
+    · rintro ⟨hp, hpr, h2, hd, hq⟩
+      have hpS : p ∈ S := mem_filter.mpr ⟨hp, hpr, h2⟩
+      refine ⟨⟨hpS, fun h => hd ((hmemT p hpS).mp h)⟩, ?_⟩
+      dsimp [Q]
+      split_ifs <;> simp [hq]
+    · rintro ⟨⟨hpS, hpT⟩, hpQ⟩
+      obtain ⟨hp, hpr, h2⟩ := mem_filter.mp hpS
+      have hd : ¬ p ∣ N := fun hd => hpT ((hmemT p hpS).mpr hd)
+      refine ⟨hp, hpr, h2, hd, ?_⟩
+      intro he
+      subst p
+      have helig : q₁.Prime ∧ 2 < q₁ ∧ ¬ q₁ ∣ N := ⟨hpr, h2, hd⟩
+      exact hpQ (by simp [Q, helig])
+  have hfirst := Mertens260.remove_odd_factors_le S T hS hT
+  have hsecond := Mertens260.remove_odd_factors_le
+    (S.filter (fun p => p ∉ T)) Q (fun p hp => hS p (mem_filter.mp hp).1) hQ
+  have hprodQ : (∏ p ∈ Q, ((p : ℝ) - 1) / ((p : ℝ) - 2)) =
+      if q₁.Prime ∧ 2 < q₁ ∧ ¬ q₁ ∣ N then ((q₁ : ℝ) - 1) / ((q₁ : ℝ) - 2) else 1 := by
+    dsimp [Q]
+    split_ifs <;> simp
+  unfold V1
+  rw [heq]
+  calc
+    _ ≤ (∏ p ∈ S.filter (fun p => p ∉ T), (1 - 1 / ((p : ℝ) - 1))) *
+        ∏ p ∈ Q, ((p : ℝ) - 1) / ((p : ℝ) - 2) := hsecond
+    _ ≤ ((∏ p ∈ S, (1 - 1 / ((p : ℝ) - 1))) *
+        ∏ p ∈ T, ((p : ℝ) - 1) / ((p : ℝ) - 2)) *
+        ∏ p ∈ Q, ((p : ℝ) - 1) / ((p : ℝ) - 2) := by
+      apply mul_le_mul_of_nonneg_right hfirst
+      apply prod_nonneg
+      intro p hp
+      have hpR : (2 : ℝ) < p := by exact_mod_cast hQ p hp
+      apply div_nonneg <;> linarith
+    _ = _ := by rw [hprodQ]
+
 /-- LEAF. Unit U-1552. Yamada 2015, (43) with `θ ≤ 1`, used as (130) at `x = y`: for
 `N > exp exp 36` and admissible `q₁`, `V^(1)(y) ≤ U_N^(1)/log y · (1 + 1/(5 log² y))
-(1 + 8 log y / y)`; an explicit Mertens product bound, Rosser-Schoenfeld type. -/
+(1 + 8 log y / y)`; an explicit Mertens product bound, Rosser-Schoenfeld type.
+CONDITIONAL ON Mertens260.dusart_mertens_upper. -/
 theorem eq43_V1 (N q₁ : ℕ) (hE : Even N) (hN : exp (exp 36) < N) (hq : Adm N q₁) :
     V1 N q₁ (y3 N) ≤ U1 N q₁ / log (y3 N) * (1 + 1 / (5 * log (y3 N) ^ 2)) *
       (1 + 8 * log (y3 N) / y3 N) := by
-  sorry
+  have hNp : (0 : ℝ) < N := (exp_pos _).trans hN
+  have hN0 : N ≠ 0 := by exact_mod_cast hNp.ne'
+  have hL : exp 36 < log N := by simpa using log_lt_log (exp_pos _) hN
+  have h36 : (3600 : ℝ) < exp 36 := by
+    have h := pow_div_factorial_le_exp 36 (by norm_num : (0 : ℝ) ≤ 36) 4
+    norm_num at h
+    linarith
+  have hlog : 2 ≤ log (y3 N) := by
+    change 2 ≤ log ((N : ℝ) ^ ((1 : ℝ) / 3))
+    rw [log_rpow hNp]
+    linarith
+  have hx : 16 ≤ y3 N := by
+    have hy : 0 < y3 N := rpow_pos_of_pos hNp _
+    have hly : 1200 < log (y3 N) := by
+      change 1200 < log ((N : ℝ) ^ ((1 : ℝ) / 3))
+      rw [log_rpow hNp]
+      linarith
+    linarith [log_le_sub_one_of_pos hy]
+  have hbase := Mertens260.odd_sieve_product_upper (y3 N) hx hlog
+  have hrem := V1_remove_factors N q₁ hN0 (y3 N)
+  have hT : 0 ≤ ∏ p ∈ N.primeFactors.filter (2 < ·),
+      ((p : ℝ) - 1) / ((p : ℝ) - 2) := (one_le_oddFactor N).trans' (by norm_num)
+  have hQ : 0 ≤ (if q₁.Prime ∧ 2 < q₁ ∧ ¬ q₁ ∣ N then
+      ((q₁ : ℝ) - 1) / ((q₁ : ℝ) - 2) else 1) := by
+    split_ifs with h
+    · have hpR : (2 : ℝ) < q₁ := by exact_mod_cast h.2.1
+      apply div_nonneg <;> linarith
+    · norm_num
+  refine hrem.trans ?_
+  calc
+    _ ≤ (2 * exp (-eulerMascheroniConstant) * twinC / log (y3 N) *
+        (1 + 1 / (5 * log (y3 N) ^ 2)) * (1 + 8 * log (y3 N) / y3 N)) *
+        (∏ p ∈ N.primeFactors.filter (2 < ·), ((p : ℝ) - 1) / ((p : ℝ) - 2)) *
+        (if q₁.Prime ∧ 2 < q₁ ∧ ¬ q₁ ∣ N then ((q₁ : ℝ) - 1) / ((q₁ : ℝ) - 2) else 1) :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hbase hT) hQ
+    _ = _ := by unfold U1 U; ring
 
 /-- LEAF. Unit U-1552. Numerical step behind (118), Section 7: for `N > exp exp 36`,
 `(1 + 1/(5 log² y)) (1 + 8 log y / y) ≤ 1 + 1/(5 log y)`. -/
