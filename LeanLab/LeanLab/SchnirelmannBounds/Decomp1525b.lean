@@ -834,6 +834,1519 @@ theorem lemma4_prime_reweight (p A B : ℝ) (hp : 2 < p) (hAB : B ≤ A) :
   apply div_le_div_of_nonneg_right _ (by linarith : 0 ≤ p-2)
   nlinarith
 
+/-! ### The local factor of the pair sum -/
+
+set_option maxHeartbeats 2000000 in
+/-- `τ₁ 1 = 1`. -/
+private theorem tau1_one : tau1 1 = 1 := by
+  unfold tau1
+  rw [Nat.divisors_one]
+  decide
+
+set_option maxHeartbeats 2000000 in
+/-- The pair series is summable (product of two summable sequences). -/
+private theorem summable_local_pair {p : ℕ} (hp : p.Prime) :
+    Summable (fun z : ℕ × ℕ => g (p ^ z.1) * ((tau1 (p ^ z.2) : ℝ) / (p : ℝ) ^ z.2)) := by
+  have hA := hasSum_g_prime_power hp
+  have hB := hasSum_tau1_prime_power hp
+  have hnorm : (fun x : ℕ => ‖g (p ^ x)‖) = fun x => g (p ^ x) := by
+    funext m
+    exact Real.norm_of_nonneg (g_nonneg _)
+  have hnorm2 : (fun x : ℕ => ‖(tau1 (p ^ x) : ℝ) / (p : ℝ) ^ x‖) =
+      fun x => (tau1 (p ^ x) : ℝ) / (p : ℝ) ^ x := by
+    funext m
+    exact Real.norm_of_nonneg (div_nonneg (Nat.cast_nonneg _) (by positivity))
+  exact summable_mul_of_summable_norm (by rw [hnorm]; exact hA.summable)
+    (by rw [hnorm2]; exact hB.summable)
+
+set_option maxHeartbeats 2000000 in
+/-- The two-variable local factor of pages 97-98: `Σ_{a,b} g(p^a) τ₁(p^b)/p^b` is `p/(p-2)`
+for odd `p` and `2` for `p = 2` (there `τ₁(2^b) = 1`, so the divisor weight is geometric). -/
+private theorem local_pair_factor {p : ℕ} (hp : p.Prime) :
+    (∑' z : ℕ × ℕ, g (p ^ z.1) * ((tau1 (p ^ z.2) : ℝ) / (p : ℝ) ^ z.2)) =
+      (if p = 2 then 2 else (p : ℝ) / ((p : ℝ) - 2)) := by
+  have hA := hasSum_g_prime_power hp
+  have hB := hasSum_tau1_prime_power hp
+  have hnorm : (fun x : ℕ => ‖g (p ^ x)‖) = fun x => g (p ^ x) := by
+    funext m
+    exact Real.norm_of_nonneg (g_nonneg _)
+  have hnorm2 : (fun x : ℕ => ‖(tau1 (p ^ x) : ℝ) / (p : ℝ) ^ x‖) =
+      fun x => (tau1 (p ^ x) : ℝ) / (p : ℝ) ^ x := by
+    funext m
+    exact Real.norm_of_nonneg (div_nonneg (Nat.cast_nonneg _) (by positivity))
+  have hmul := tsum_mul_tsum_of_summable_norm
+    (f := fun m : ℕ => g (p ^ m)) (g := fun m : ℕ => (tau1 (p ^ m) : ℝ) / (p : ℝ) ^ m)
+    (by rw [hnorm]; exact hA.summable) (by rw [hnorm2]; exact hB.summable)
+  rw [← hmul, mul_comm]
+  exact lemma4_local_factor hp
+
+set_option maxHeartbeats 2000000 in
+/-- The same sum with the trivial pair `(0,0)` removed: this is the coefficient attached to a
+prime `p | q` when `Σ g d · τ₁ r / r` is grouped by the radical `q = sk (r*d)`. -/
+private theorem local_pair_factor_sub {p : ℕ} (hp : p.Prime) :
+    (∑' z : ℕ × ℕ,
+        if z = (0, 0) then 0 else g (p ^ z.1) * ((tau1 (p ^ z.2) : ℝ) / (p : ℝ) ^ z.2)) =
+      (if p = 2 then 2 else (p : ℝ) / ((p : ℝ) - 2)) - 1 := by
+  have hsplit := (summable_local_pair hp).tsum_eq_add_tsum_ite ((0 : ℕ), (0 : ℕ))
+  have hzero : g (p ^ (0 : ℕ)) * ((tau1 (p ^ (0 : ℕ)) : ℝ) / (p : ℝ) ^ (0 : ℕ)) = 1 := by
+    rw [pow_zero, pow_zero, tau1_one, Nat.cast_one, div_one, g_one, mul_one]
+  rw [local_pair_factor hp, hzero] at hsplit
+  linarith
+
+/-- The odd prime fibre contributes `2/(p-2)`, the coefficient of (3.4) and (3.5). -/
+private theorem local_fibre_odd {p : ℕ} (hp : p.Prime) (hp2 : 2 < p) :
+    (∑' z : ℕ × ℕ,
+        if z = (0, 0) then 0 else g (p ^ z.1) * ((tau1 (p ^ z.2) : ℝ) / (p : ℝ) ^ z.2)) =
+      2 / ((p : ℝ) - 2) := by
+  rw [local_pair_factor_sub hp, ite_eq_right (by omega : ¬ p = 2)]
+  have hp2' : (2 : ℝ) < p := by exact_mod_cast hp2
+  have hne : (p : ℝ) - 2 ≠ 0 := by linarith
+  field_simp
+  ring
+
+/-- The `p = 2` fibre contributes `1`, the factor `1/(2-1)` of `Sn`. -/
+private theorem local_fibre_two :
+    (∑' z : ℕ × ℕ,
+        if z = (0, 0) then 0 else
+          g ((2 : ℕ) ^ z.1) * ((tau1 ((2 : ℕ) ^ z.2) : ℝ) / ((2 : ℕ) : ℝ) ^ z.2)) = 1 := by
+  rw [local_pair_factor_sub Nat.prime_two, ite_eq_left (by norm_num : (2 : ℕ) = 2)]
+  norm_num
+
+/-! ### Multiplicativity of the divisor weight -/
+
+/-- `τ₁` is multiplicative on coprime arguments: a divisor of `a*b` with `(a,b) = 1` splits
+as `gcd d a * gcd d b`, and both parts are odd iff `d` is odd. -/
+private theorem tau1_mul {a b : ℕ} (hab : a.Coprime b) : tau1 (a * b) = tau1 a * tau1 b := by
+  have hg : ∀ x : ℕ, x ∣ a * b → x.gcd a * x.gcd b = x := fun x hx =>
+    (Nat.gcd_mul_gcd_eq_iff_dvd_mul_of_coprime hab).mpr hx
+  rw [tau1, tau1, tau1, ← Finset.card_product]
+  refine Finset.card_bij (fun d _ => (d.gcd a, d.gcd b)) ?_ ?_ ?_
+  · intro d hd
+    rw [Finset.mem_filter, Nat.mem_divisors] at hd
+    obtain ⟨⟨hdvd, hab0⟩, hodd⟩ := hd
+    have ha0 : a ≠ 0 := fun h => hab0 (by rw [h, Nat.zero_mul])
+    have hb0 : b ≠ 0 := fun h => hab0 (by rw [h, Nat.mul_zero])
+    refine Finset.mem_product.mpr ⟨?_, ?_⟩
+    · exact Finset.mem_filter.mpr
+        ⟨Nat.mem_divisors.mpr ⟨Nat.gcd_dvd_right _ _, ha0⟩,
+          Odd.of_dvd_nat hodd (Nat.gcd_dvd_left _ _)⟩
+    · exact Finset.mem_filter.mpr
+        ⟨Nat.mem_divisors.mpr ⟨Nat.gcd_dvd_right _ _, hb0⟩,
+          Odd.of_dvd_nat hodd (Nat.gcd_dvd_left _ _)⟩
+  · intro d₁ h₁ d₂ h₂ heq
+    rw [Finset.mem_filter, Nat.mem_divisors] at h₁ h₂
+    have e1 := hg d₁ h₁.1.1
+    have e2 := hg d₂ h₂.1.1
+    have h1' : d₁.gcd a = d₂.gcd a := congrArg Prod.fst heq
+    have h2' : d₁.gcd b = d₂.gcd b := congrArg Prod.snd heq
+    rw [← e1, ← e2, h1', h2']
+  · intro p hp
+    rw [Finset.mem_product, Finset.mem_filter, Finset.mem_filter] at hp
+    obtain ⟨⟨hp1d, hp1odd⟩, hp2d, hp2odd⟩ := hp
+    rw [Nat.mem_divisors] at hp1d hp2d
+    obtain ⟨hp1dvd, ha0⟩ := hp1d
+    obtain ⟨hp2dvd, hb0⟩ := hp2d
+    have hca : a.Coprime p.2 := hab.coprime_dvd_right hp2dvd
+    have hcb : b.Coprime p.1 := hab.symm.coprime_dvd_right hp1dvd
+    refine ⟨p.1 * p.2, ?_, ?_⟩
+    · refine Finset.mem_filter.mpr ⟨Nat.mem_divisors.mpr
+        ⟨Nat.mul_dvd_mul hp1dvd hp2dvd, mul_ne_zero ha0 hb0⟩,
+        Odd.mul hp1odd hp2odd⟩
+    · refine Prod.ext ?_ ?_
+      · show (p.1 * p.2).gcd a = p.1
+        refine Nat.dvd_antisymm ?_ (Nat.dvd_gcd (dvd_mul_right _ _) hp1dvd)
+        have hc : ((p.1 * p.2).gcd a).Coprime p.2 :=
+          hca.coprime_dvd_left (Nat.gcd_dvd_right _ _)
+        exact hc.dvd_of_dvd_mul_right (Nat.gcd_dvd_left _ _)
+      · show (p.1 * p.2).gcd b = p.2
+        rw [Nat.mul_comm p.1 p.2]
+        refine Nat.dvd_antisymm ?_ (Nat.dvd_gcd (dvd_mul_right _ _) hp2dvd)
+        have hc : ((p.2 * p.1).gcd b).Coprime p.1 :=
+          hcb.coprime_dvd_left (Nat.gcd_dvd_right _ _)
+        exact hc.dvd_of_dvd_mul_right (Nat.gcd_dvd_left _ _)
+
+/-- `τ₁ p^m = m + 1` for odd `p`, already in the lab file, restated multiplicatively. -/
+private theorem tau1_pow_mul {p : ℕ} (hp : p.Prime) (hp2 : 2 < p) (m : ℕ) :
+    (tau1 (p ^ m) : ℝ) = (m : ℝ) + 1 := by
+  rw [tau1_prime_pow hp, if_neg (by omega : ¬ p = 2)]
+  push_cast
+  ring
+
+/-- The local weight at a prime power, `1` at exponent `0`, so that it is the local factor of the
+multiplicative function `g` of (3.3). -/
+private noncomputable def glocw (p m : ℕ) : ℝ := if m = 0 then 1 else gloc p m
+
+/-- The local weight is `g` at the prime power. -/
+private theorem glocw_eq_g {p : ℕ} (hp : p.Prime) (m : ℕ) : glocw p m = g (p ^ m) := by
+  rcases Nat.eq_zero_or_pos m with h | h
+  · subst h
+    rw [pow_zero, g_one, glocw, ite_eq_left rfl]
+  · rw [glocw, ite_eq_right h.ne', g_prime_pow hp h]
+
+/-- `g` is multiplicative over a product of distinct prime powers. -/
+private theorem g_prod {s : Finset ℕ} (hs : ∀ p ∈ s, p.Prime) (a : ℕ → ℕ) :
+    g (∏ p ∈ s, p ^ (a p)) = ∏ p ∈ s, g (p ^ (a p)) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [g_one]
+  | insert p s' hpnot hrec =>
+    rw [Finset.prod_insert hpnot, Finset.prod_insert hpnot]
+    have hs' : ∀ q ∈ s', q.Prime := fun q hq => hs q (Finset.mem_insert_of_mem hq)
+    have hpp : p.Prime := hs p (Finset.mem_insert_self p s')
+    have hcop : (p ^ (a p)).Coprime (∏ q ∈ s', q ^ (a q)) := by
+      refine Nat.Coprime.prod_right (fun q hq => ?_)
+      have hqp : q.Prime := hs' q hq
+      have hne : p ≠ q := by rintro rfl; exact hpnot hq
+      exact Nat.coprime_pow_primes (a p) (a q) hpp hqp hne
+    rw [g_mul hcop, hrec hs']
+
+/-- `τ₁` is multiplicative over a product of distinct prime powers. -/
+private theorem tau1_prod {s : Finset ℕ} (hs : ∀ p ∈ s, p.Prime) (a : ℕ → ℕ) :
+    tau1 (∏ p ∈ s, p ^ (a p)) = ∏ p ∈ s, tau1 (p ^ (a p)) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simpa using tau1_one
+  | insert p s' hpnot hrec =>
+    rw [Finset.prod_insert hpnot, Finset.prod_insert hpnot]
+    have hs' : ∀ q ∈ s', q.Prime := fun q hq => hs q (Finset.mem_insert_of_mem hq)
+    have hpp : p.Prime := hs p (Finset.mem_insert_self p s')
+    have hcop : (p ^ (a p)).Coprime (∏ q ∈ s', q ^ (a q)) := by
+      refine Nat.Coprime.prod_right (fun q hq => ?_)
+      have hqp : q.Prime := hs' q hq
+      have hne : p ≠ q := by rintro rfl; exact hpnot hq
+      exact Nat.coprime_pow_primes (a p) (a q) hpp hqp hne
+    rw [tau1_mul hcop, hrec hs']
+
+/-- A number is the product of its prime powers. -/
+private theorem prod_factorization_primeFactors {r : ℕ} (hr : r ≠ 0) :
+    ∏ p ∈ r.primeFactors, p ^ (r.factorization p) = r :=
+  Nat.support_factorization r ▸ Nat.prod_factorization_pow_eq_self hr
+
+/-- The same product extended over a larger set of primes (the extra exponents are `0`). -/
+private theorem prod_factorization_of_subset {q r : ℕ} (hr : r ≠ 0)
+    (hsub : r.primeFactors ⊆ q.primeFactors) :
+    ∏ p ∈ q.primeFactors, p ^ (r.factorization p) = r := by
+  have h1 : ∏ p ∈ q.primeFactors, p ^ (r.factorization p)
+      = ∏ p ∈ r.primeFactors, p ^ (r.factorization p) := by
+    refine (Finset.prod_subset (s₁ := r.primeFactors) (s₂ := q.primeFactors)
+      (f := fun p : ℕ => p ^ (r.factorization p)) hsub ?_).symm
+    intro p hp hpr
+    have hz : r.factorization p = 0 := by
+      apply Nat.factorization_eq_zero_of_not_dvd
+      intro hdvd
+      exact hpr (Nat.mem_primeFactors.mpr ⟨Nat.prime_of_mem_primeFactors hp, hdvd, hr⟩)
+    rw [hz]
+    exact pow_zero p
+  rw [h1, prod_factorization_primeFactors hr]
+
+/-- The radical has the same prime factors as the number itself. -/
+private theorem primeFactors_sk (m : ℕ) : (sk m).primeFactors = m.primeFactors := by
+  rw [sk]
+  exact Nat.primeFactors_prod (fun p hp => Nat.prime_of_mem_primeFactors hp)
+
+/-- `sk 0 = 1`, so a pair with a zero entry never lies in a fibre with `q > 1`. -/
+private theorem sk_zero : sk 0 = 1 := by
+  simp [sk]
+
+/-- Both entries of a pair with `sk (r*d) = q` are `q`-smooth (the support lemma for the fibre
+decomposition of the pair sum). -/
+private theorem primeFactors_subset_of_sk {q r d : ℕ} (hr : r ≠ 0) (hd : d ≠ 0) (h : sk (r * d) = q) :
+    r.primeFactors ⊆ q.primeFactors ∧ d.primeFactors ⊆ q.primeFactors := by
+  have hq : q.primeFactors = (r * d).primeFactors := by rw [← h, primeFactors_sk]
+  have hrd : r * d ≠ 0 := mul_ne_zero hr hd
+  constructor
+  · rw [hq]
+    exact Nat.primeFactors_mono (Nat.dvd_mul_right r d) hrd
+  · rw [hq]
+    exact Nat.primeFactors_mono (Nat.dvd_mul_left d r) hrd
+
+/-- A product of prime powers with positive exponents has exactly those primes. -/
+private theorem primeFactors_prod_prime_pow {s : Finset ℕ} (hs : ∀ p ∈ s, p.Prime) {c : ℕ → ℕ}
+    (hc : ∀ p ∈ s, 1 ≤ c p) : (∏ p ∈ s, p ^ c p).primeFactors = s := by
+  have hne : (∏ p ∈ s, p ^ c p) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mpr (fun p hp => pow_ne_zero _ (hs p hp).ne_zero)
+  ext q
+  rw [Nat.mem_primeFactors]
+  constructor
+  · rintro ⟨hq, hdvd, -⟩
+    obtain ⟨t, ht, hqt⟩ := (Prime.dvd_finsetProd_iff hq.prime (fun p => p ^ c p)).mp hdvd
+    have ht' : t.Prime := hs t ht
+    have hqt' : q ∣ t := hq.prime.dvd_of_dvd_pow hqt
+    rcases (Nat.dvd_prime ht').mp hqt' with h1 | h1
+    · exact absurd h1 hq.ne_one
+    · exact h1 ▸ ht
+  · intro hq
+    have hq' : q.Prime := hs q hq
+    refine ⟨hq', ?_, hne⟩
+    refine dvd_trans ?_ (Finset.dvd_prod_of_mem (fun p => p ^ c p) hq)
+    simpa using pow_dvd_pow q (hc q hq)
+
+/-- The radical of a product of prime powers with positive exponents, the converse direction of
+`primeFactors_subset_of_sk`: this is how a pair is rebuilt from its exponent family. -/
+private theorem sk_prod_prime_pow {s : Finset ℕ} (hs : ∀ p ∈ s, p.Prime) {c : ℕ → ℕ}
+    (hc : ∀ p ∈ s, 1 ≤ c p) : sk (∏ p ∈ s, p ^ c p) = ∏ p ∈ s, p := by
+  rw [sk, primeFactors_prod_prime_pow hs hc]
+
+/-- **The weight of a pair, factorized over the primes of `q`.**  For a squarefree `q` and
+`r, d ≠ 0` supported on the primes of `q`, the weight `g d · τ₁ r / r` of the pair sum is the
+product of the two-variable local weights over `q.primeFactors`.  This is the pointwise half of
+`fibre_sum`: the map `(r,d) ↦ (p ↦ (v_p d, v_p r))` turns the weight into a product. -/
+private theorem weight_factor {q r d : ℕ} (hr : r ≠ 0) (hd : d ≠ 0)
+    (hsub : r.primeFactors ⊆ q.primeFactors ∧ d.primeFactors ⊆ q.primeFactors) :
+    g d * (tau1 r : ℝ) / (r : ℝ)
+      = ∏ p ∈ q.primeFactors,
+          (glocw p (d.factorization p) *
+            ((tau1 (p ^ r.factorization p) : ℝ) / (p : ℝ) ^ r.factorization p)) := by
+  have hs : ∀ p ∈ q.primeFactors, p.Prime := fun p hp => Nat.prime_of_mem_primeFactors hp
+  have hrprod : r = ∏ p ∈ q.primeFactors, p ^ r.factorization p :=
+    (prod_factorization_of_subset hr hsub.1).symm
+  have hdprod : d = ∏ p ∈ q.primeFactors, p ^ d.factorization p :=
+    (prod_factorization_of_subset hd hsub.2).symm
+  have hgd : g d = ∏ p ∈ q.primeFactors, glocw p (d.factorization p) := by
+    nth_rewrite 1 [hdprod]
+    rw [g_prod hs]
+    exact Finset.prod_congr rfl (fun p hp => (glocw_eq_g (hs p hp) _).symm)
+  have htr : tau1 r = ∏ p ∈ q.primeFactors, tau1 (p ^ r.factorization p) := by
+    nth_rewrite 1 [hrprod]
+    exact tau1_prod hs _
+  have hrcast : (r : ℝ) = ∏ p ∈ q.primeFactors, (p : ℝ) ^ r.factorization p := by
+    nth_rewrite 1 [hrprod]
+    push_cast
+    rfl
+  rw [hgd, hrcast, htr]
+  push_cast
+  rw [Finset.prod_mul_distrib, Finset.prod_div_distrib]
+  ring
+
+/-- For a squarefree number the radical is the number itself. -/
+private theorem sk_self {q : ℕ} (hq : Squarefree q) : sk q = q := by
+  have hq0 : q ≠ 0 := hq.ne_zero
+  have hfac : ∀ p, q.factorization p ≤ 1 :=
+    (Nat.squarefree_iff_factorization_le_one hq0).mp hq
+  have h2 : ∏ p ∈ q.primeFactors, p ^ q.factorization p = ∏ p ∈ q.primeFactors, p := by
+    refine Finset.prod_congr rfl (fun p hp => ?_)
+    have hne : q.factorization p ≠ 0 := by
+      rw [← Finsupp.mem_support_iff, Nat.support_factorization]
+      exact hp
+    have h3 : q.factorization p = 1 := by
+      have := hfac p
+      omega
+    rw [h3, pow_one]
+  rw [sk]
+  exact h2.symm.trans (prod_factorization_primeFactors hq0)
+
+/-- A prime of the radical divides the number: the divisibility side of the support
+characterization. -/
+private theorem dvd_of_mem_primeFactors_sk {q r d p : ℕ} (hp : p ∈ q.primeFactors)
+    (h : sk (r * d) = q) : p ∣ r * d := by
+  have h1 : p ∈ (sk (r * d)).primeFactors := by rw [h]; exact hp
+  rw [primeFactors_sk] at h1
+  exact (Nat.mem_primeFactors.mp h1).2.1
+
+/-- Rebuilding from an exponent family gives back the radical: the surjectivity half of the
+support bijection, in the `Finset` form used by the fibre decomposition. -/
+private theorem sk_rebuild {q : ℕ} (hq : Squarefree q) (c : ℕ → ℕ)
+    (hc : ∀ p ∈ q.primeFactors, 1 ≤ c p) :
+    sk (∏ p ∈ q.primeFactors, p ^ c p) = q := by
+  rw [sk_prod_prime_pow (fun p hp => Nat.prime_of_mem_primeFactors hp) hc]
+  simpa [sk] using sk_self hq
+
+/-- Exponent recovery: the exponent of `q` in a product of prime powers over a set of primes is
+the exponent attached to `q`.  This is the roundtrip half of the fibre correspondence. -/
+private theorem factorization_prod_prime_pow {s : Finset ℕ} (hs : ∀ p ∈ s, p.Prime) (c : ℕ → ℕ)
+    {q : ℕ} (hq : q ∈ s) : (∏ p ∈ s, p ^ c p).factorization q = c q := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp at hq
+  | insert p s' hpnot hrec =>
+    have hp' : p.Prime := hs p (Finset.mem_insert_self p s')
+    have hs' : ∀ x ∈ s', x.Prime := fun x hx => hs x (Finset.mem_insert_of_mem hx)
+    have hne2 : (∏ x ∈ s', x ^ c x) ≠ 0 :=
+      Finset.prod_ne_zero_iff.mpr (fun x hx => pow_ne_zero _ (hs' x hx).ne_zero)
+    rw [Finset.prod_insert hpnot, Nat.factorization_mul (pow_ne_zero _ hp'.ne_zero) hne2,
+      Finsupp.add_apply]
+    rcases Finset.mem_insert.mp hq with hqp | hq'
+    · rw [hqp]
+      have hz : (∏ x ∈ s', x ^ c x).factorization p = 0 := by
+        have hnp : ¬ p ∣ ∏ x ∈ s', x ^ c x := by
+          intro hdvd
+          obtain ⟨x, hx, hpx⟩ := (Prime.dvd_finsetProd_iff hp'.prime (fun x => x ^ c x)).mp hdvd
+          have hx' : x.Prime := hs' x hx
+          have h1 : p ∣ x := hp'.prime.dvd_of_dvd_pow hpx
+          rcases (Nat.dvd_prime hx').mp h1 with h | h
+          · exact hp'.ne_one h
+          · exact hpnot (h ▸ hx)
+        exact Nat.factorization_eq_zero_of_not_dvd hnp
+      rw [Nat.factorization_pow_self hp', hz, add_zero]
+    · have hz : (p ^ c p).factorization q = 0 := by
+        have hnp : ¬ q ∣ p ^ c p := by
+          intro hdvd
+          have hq'p : q.Prime := hs q (Finset.mem_insert_of_mem hq')
+          have h1 : q ∣ p := hq'p.prime.dvd_of_dvd_pow hdvd
+          rcases (Nat.dvd_prime hp').mp h1 with h | h
+          · exact hq'p.ne_one h
+          · exact hpnot (h ▸ hq')
+        exact Nat.factorization_eq_zero_of_not_dvd hnp
+      rw [hz, zero_add, hrec hs' hq']
+
+/-- The exponent family of a pair: the forward map of the fibre correspondence, sending `(r,d)`
+to `p ↦ (v_p d, v_p r)`. -/
+private noncomputable def famOfPair {q : ℕ} (z : ℕ × ℕ) : Π _ : q.primeFactors, ℕ × ℕ :=
+  fun p => (z.2.factorization (p : ℕ), z.1.factorization (p : ℕ))
+
+/-- Inside the fibre `sk (z.1*z.2) = q`, every coordinate of the exponent family is nonzero
+(each `p ∣ q` divides `r·d`, so it divides `r` or `d`). -/
+private theorem famOfPair_ne_zero {q : ℕ} {z : ℕ × ℕ} (hz1 : z.1 ≠ 0) (hz2 : z.2 ≠ 0)
+    (h : sk (z.1 * z.2) = q) (p : q.primeFactors) : famOfPair (q := q) z p ≠ (0, 0) := by
+  have hp : (p : ℕ) ∈ q.primeFactors := p.2
+  have hpp : Nat.Prime (p : ℕ) := Nat.prime_of_mem_primeFactors hp
+  have hdvd : (p : ℕ) ∣ z.1 * z.2 := dvd_of_mem_primeFactors_sk hp h
+  intro h0
+  have h2 : z.1.factorization (p : ℕ) = 0 := by
+    simpa [famOfPair] using congrArg Prod.snd h0
+  have h1 : z.2.factorization (p : ℕ) = 0 := by
+    simpa [famOfPair] using congrArg Prod.fst h0
+  rcases (Prime.dvd_mul hpp.prime).mp hdvd with hd | hd
+  · exact (Nat.Prime.factorization_pos_of_dvd hpp hz1 hd).ne' h2
+  · exact (Nat.Prime.factorization_pos_of_dvd hpp hz2 hd).ne' h1
+
+/-- The pair rebuilt from an `ℕ`-indexed exponent family: the backward map of the fibre
+correspondence, indexed on `ℕ` so that every product below is a plain `Finset` product over
+`q.primeFactors` (the first component of a family entry is the `d`-exponent, the second the
+`r`-exponent, matching `famOfPair`). -/
+private noncomputable def zOfFam {q : ℕ} (g : ℕ → ℕ × ℕ) : ℕ × ℕ :=
+  (∏ y ∈ q.primeFactors, y ^ (g y).2, ∏ y ∈ q.primeFactors, y ^ (g y).1)
+
+/-- Exponent recovery for the `d`-component of a rebuilt pair. -/
+private theorem factorization_zOfFam_fst {q : ℕ} (g : ℕ → ℕ × ℕ) {p : ℕ}
+    (hp : p ∈ q.primeFactors) :
+    (∏ y ∈ q.primeFactors, y ^ (g y).1).factorization p = (g p).1 :=
+  factorization_prod_prime_pow (fun y hy => Nat.prime_of_mem_primeFactors hy)
+    (fun y => (g y).1) hp
+
+/-- Exponent recovery for the `r`-component of a rebuilt pair. -/
+private theorem factorization_zOfFam_snd {q : ℕ} (g : ℕ → ℕ × ℕ) {p : ℕ}
+    (hp : p ∈ q.primeFactors) :
+    (∏ y ∈ q.primeFactors, y ^ (g y).2).factorization p = (g p).2 :=
+  factorization_prod_prime_pow (fun y hy => Nat.prime_of_mem_primeFactors hy)
+    (fun y => (g y).2) hp
+
+/-- The rebuilt pair lies in the fibre: surjectivity of the correspondence, in `Finset` form. -/
+private theorem sk_zOfFam {q : ℕ} (hq : Squarefree q) (g : ℕ → ℕ × ℕ)
+    (hg : ∀ y ∈ q.primeFactors, 1 ≤ (g y).1 + (g y).2) :
+    sk ((zOfFam (q := q) g).1 * (zOfFam (q := q) g).2) = q := by
+  have hprod : (zOfFam (q := q) g).1 * (zOfFam (q := q) g).2
+      = ∏ y ∈ q.primeFactors, y ^ ((g y).1 + (g y).2) := by
+    rw [zOfFam, ← Finset.prod_mul_distrib]
+    refine Finset.prod_congr rfl (fun y _ => ?_)
+    rw [← pow_add, add_comm]
+  rw [hprod]
+  exact sk_rebuild hq (fun y => (g y).1 + (g y).2) hg
+
+/-- Roundtrip: rebuilding a pair of the fibre from its exponent family gives the pair back. -/
+private theorem zOfFam_famOfPair {q : ℕ} {z : ℕ × ℕ} (hz1 : z.1 ≠ 0) (hz2 : z.2 ≠ 0)
+    (h : sk (z.1 * z.2) = q) :
+    zOfFam (q := q) (fun y => (z.2.factorization y, z.1.factorization y)) = z := by
+  have hsub := primeFactors_subset_of_sk hz1 hz2 h
+  have h1 : (∏ y ∈ q.primeFactors, y ^ (z.1.factorization y)) = z.1 :=
+    prod_factorization_of_subset hz1 hsub.1
+  have h2 : (∏ y ∈ q.primeFactors, y ^ (z.2.factorization y)) = z.2 :=
+    prod_factorization_of_subset hz2 hsub.2
+  rw [zOfFam, h2, h1]
+
+/-- Roundtrip in the other direction: the exponent family of a rebuilt pair is the family itself
+(the family is only read on `q.primeFactors`). -/
+private theorem famOfPair_zOfFam {q : ℕ} (g : ℕ → ℕ × ℕ) (y : q.primeFactors) :
+    famOfPair (q := q) (zOfFam (q := q) g) y = g (y : ℕ) := by
+  simp only [famOfPair, zOfFam]
+  rw [factorization_zOfFam_fst g y.2, factorization_zOfFam_snd g y.2]
+
+/-- A rebuilt pair has nonzero components. -/
+private theorem zOfFam_ne_zero {q : ℕ} (φ : ℕ → ℕ × ℕ) :
+    (zOfFam (q := q) φ).1 ≠ 0 ∧ (zOfFam (q := q) φ).2 ≠ 0 := by
+  have hf : ∀ y ∈ q.primeFactors, y ≠ 0 := fun y hy => (Nat.pos_of_mem_primeFactors hy).ne'
+  constructor
+  · rw [zOfFam]
+    exact Finset.prod_ne_zero_iff.mpr (fun y hy => pow_ne_zero _ (hf y hy))
+  · rw [zOfFam]
+    exact Finset.prod_ne_zero_iff.mpr (fun y hy => pow_ne_zero _ (hf y hy))
+
+/-- A rebuilt pair is supported on the primes of `q`. -/
+private theorem primeFactors_zOfFam {q : ℕ} (φ : ℕ → ℕ × ℕ) :
+    (zOfFam (q := q) φ).1.primeFactors ⊆ q.primeFactors ∧
+      (zOfFam (q := q) φ).2.primeFactors ⊆ q.primeFactors := by
+  have hmain : ∀ (c : ℕ → ℕ), (∏ y ∈ q.primeFactors, y ^ c y).primeFactors ⊆ q.primeFactors := by
+    intro c p hp
+    have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+    have hne : (∏ y ∈ q.primeFactors, y ^ c y) ≠ 0 :=
+      Finset.prod_ne_zero_iff.mpr
+        (fun y hy => pow_ne_zero _ (Nat.pos_of_mem_primeFactors hy).ne')
+    have hdvd : p ∣ ∏ y ∈ q.primeFactors, y ^ c y := (Nat.mem_primeFactors.mp hp).2.1
+    obtain ⟨y, hy, hpy⟩ := (Prime.dvd_finsetProd_iff hpp.prime (fun y => y ^ c y)).mp hdvd
+    have h1 : p ∣ y := hpp.prime.dvd_of_dvd_pow hpy
+    rcases (Nat.dvd_prime (Nat.prime_of_mem_primeFactors hy)).mp h1 with h | h
+    · exact absurd h hpp.ne_one
+    · exact h ▸ hy
+  exact ⟨hmain _, hmain _⟩
+
+/-- The weight of a rebuilt pair in the family form used by the Euler product: the pair weight is
+the product over `q.primeFactors` of the local weights of the family entries. -/
+private theorem weight_zOfFam {q : ℕ} (φ : ℕ → ℕ × ℕ) :
+    g (zOfFam (q := q) φ).2 * (tau1 (zOfFam (q := q) φ).1 : ℝ)
+        / ((zOfFam (q := q) φ).1 : ℝ)
+      = ∏ p ∈ q.primeFactors,
+          (glocw p (φ p).1 * ((tau1 (p ^ (φ p).2) : ℝ) / (p : ℝ) ^ (φ p).2)) := by
+  rw [weight_factor (q := q) (r := (zOfFam (q := q) φ).1) (d := (zOfFam (q := q) φ).2)
+    (zOfFam_ne_zero φ).1 (zOfFam_ne_zero φ).2 (primeFactors_zOfFam φ)]
+  refine Finset.prod_congr rfl (fun p hp => ?_)
+  simp only [zOfFam]
+  rw [factorization_zOfFam_fst φ hp, factorization_zOfFam_snd φ hp]
+
+/-- Splitting off the value at an inserted point, for a constant fibre: the branches of the `if`
+have the same type, so (unlike Mathlib's `Finset.prodPiInsert`) no `cast` is inserted and the
+evaluation lemmas hold by `dif_pos`/`dif_neg`. -/
+private def famSplitEquiv {s : Finset ℕ} {a : ℕ} (ha : a ∉ s) :
+    ((ℕ × ℕ) × ((i : ℕ) → i ∈ s → ℕ × ℕ)) ≃ ((i : ℕ) → i ∈ insert a s → ℕ × ℕ) where
+  toFun x := fun i hi => if h : i = a then x.1 else x.2 i (Finset.mem_of_mem_insert_of_ne hi h)
+  invFun φ := (φ a (Finset.mem_insert_self a s), fun i hi => φ i (Finset.mem_insert_of_mem hi))
+  left_inv := by
+    rintro ⟨v, ψ⟩
+    simp only [Prod.mk.injEq]
+    refine ⟨dif_pos trivial, ?_⟩
+    funext i hi
+    rw [dif_neg (show (i : ℕ) ≠ a from fun h => ha (h ▸ hi))]
+  right_inv := by
+    intro φ
+    funext i hi
+    by_cases h : i = a
+    · subst h
+      simp
+    · simp [h]
+
+/-- Splitting a `Finset` product at an inserted element, for a function on the subtype of the
+insertion (the `dite`-extension is unavoidable when the function is only defined on the subtype).
+This is the step the Euler-product induction needs; Mathlib has no such lemma. -/
+private theorem prod_insert_ite {s : Finset ℕ} {a : ℕ} (ha : a ∉ s) (F : ↥(insert a s) → ℝ) :
+    (∏ x ∈ insert a s, (if h : x ∈ insert a s then F ⟨x, h⟩ else 1))
+      = F ⟨a, Finset.mem_insert_self a s⟩
+        * ∏ x ∈ s, (if h : x ∈ s then F ⟨x, Finset.mem_insert_of_mem h⟩ else 1) := by
+  rw [Finset.prod_insert ha, dif_pos (Finset.mem_insert_self a s)]
+  congr 1
+  refine Finset.prod_congr rfl (fun x hx => ?_)
+  rw [dif_pos (Finset.mem_insert_of_mem hx), dif_pos hx]
+
+/-- The prime-indexed Euler product: summing a product of local weights over all exponent
+families factorizes into the product of the local sums. -/
+private theorem euler_prod_pi {s : Finset ℕ} (W : ℕ → ℕ × ℕ → ℝ)
+    (hWnn : ∀ p ∈ s, ∀ ab : ℕ × ℕ, 0 ≤ W p ab)
+    (hW : ∀ p ∈ s, Summable fun ab : ℕ × ℕ => W p ab) :
+    Summable (fun φ : (i : ℕ) → i ∈ s → ℕ × ℕ =>
+        ∏ x ∈ s, (if h : x ∈ s then W x (φ x h) else 1)) ∧
+      (∑' φ : (i : ℕ) → i ∈ s → ℕ × ℕ,
+          ∏ x ∈ s, (if h : x ∈ s then W x (φ x h) else 1))
+        = ∏ p ∈ s, ∑' ab : ℕ × ℕ, W p ab := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    have hsub : Subsingleton ((i : ℕ) → i ∈ (∅ : Finset ℕ) → ℕ × ℕ) := by
+      constructor
+      intro f g
+      funext p hp
+      exact absurd hp (by simp)
+    have hzero : ((i : ℕ) → i ∈ (∅ : Finset ℕ) → ℕ × ℕ) := fun p hp => absurd hp (by simp)
+    constructor
+    · have hb : ∀ t : Finset ((i : ℕ) → i ∈ (∅ : Finset ℕ) → ℕ × ℕ),
+          ∑ _x ∈ t, (1 : ℝ) ≤ 1 := by
+        intro t
+        have h1 : t.card ≤ 1 := Finset.card_le_one.mpr (fun x _ y _ => hsub.elim x y)
+        rw [Finset.sum_const, nsmul_eq_mul, mul_one]
+        exact_mod_cast h1
+      exact summable_of_sum_le (fun _ => zero_le_one) hb
+    · rw [tsum_eq_single hzero (fun b hb => absurd (hsub.elim b hzero) hb)]
+      simp
+  | insert a s' ha ih =>
+    have hmem : ∀ p ∈ s', p ∈ insert a s' := fun p hp => Finset.mem_insert_of_mem hp
+    obtain ⟨ihSum, ihVal⟩ := ih (fun p hp => hWnn p (hmem p hp)) (fun p hp => hW p (hmem p hp))
+    set G : ((i : ℕ) → i ∈ s' → ℕ × ℕ) → ℝ :=
+      fun ψ => ∏ x ∈ s', (if h : x ∈ s' then W x (ψ x h) else 1) with hG
+    have hGnn : ∀ ψ, 0 ≤ G ψ := by
+      intro ψ
+      rw [hG]
+      refine Finset.prod_nonneg (fun x hx => ?_)
+      by_cases h : x ∈ s'
+      · rw [dif_pos h]
+        exact hWnn x (hmem x hx) _
+      · rw [dif_neg h]
+        exact zero_le_one
+    have hWa : Summable (fun v : ℕ × ℕ => W a v) := hW a (Finset.mem_insert_self a s')
+    have hWanorm : Summable (fun v : ℕ × ℕ => ‖W a v‖) := by
+      refine hWa.congr (fun v => ?_)
+      rw [Real.norm_eq_abs, abs_of_nonneg (hWnn a (Finset.mem_insert_self a s') v)]
+    have hGnorm : Summable (fun ψ => ‖G ψ‖) := by
+      refine ihSum.congr (fun ψ => ?_)
+      rw [Real.norm_eq_abs, abs_of_nonneg (hGnn ψ)]
+    let e := famSplitEquiv (s := s') (a := a) ha
+    have hstep : ∀ (v : ℕ × ℕ) (ψ : (i : ℕ) → i ∈ s' → ℕ × ℕ),
+        (∏ x ∈ insert a s', (if h : x ∈ insert a s' then W x ((e (v, ψ)) x h) else 1))
+          = W a v * G ψ := by
+      intro v ψ
+      rw [prod_insert_ite ha (F := fun y : ↥(insert a s') => W (y : ℕ) ((e (v, ψ)) (y : ℕ) y.2))]
+      have h1 : (e (v, ψ)) a (Finset.mem_insert_self a s') = v := by
+        simp only [e, famSplitEquiv, Equiv.coe_fn_mk]
+        rw [dif_pos trivial]
+      have h2 : ∀ (x : ℕ) (hx : x ∈ s'),
+          (e (v, ψ)) x (Finset.mem_insert_of_mem hx) = ψ x hx := by
+        intro x hx
+        simp only [e, famSplitEquiv, Equiv.coe_fn_mk]
+        rw [dif_neg (show x ≠ a from fun h => ha (h ▸ hx))]
+      rw [h1, hG]
+      congr 1
+      refine Finset.prod_congr rfl (fun x hx => ?_)
+      rw [dif_pos hx, dif_pos hx]
+      simp only [Subtype.coe_mk]
+      rw [h2 x hx]
+    constructor
+    · have h1 : Summable (fun z : (ℕ × ℕ) × ((i : ℕ) → i ∈ s' → ℕ × ℕ) => W a z.1 * G z.2) :=
+        summable_mul_of_summable_norm hWanorm hGnorm
+      have h2 : Summable (fun z : (ℕ × ℕ) × ((i : ℕ) → i ∈ s' → ℕ × ℕ) =>
+          ∏ x ∈ insert a s', (if h : x ∈ insert a s' then W x ((e z) x h) else 1)) := by
+        refine h1.congr (fun z => ?_)
+        exact (hstep z.1 z.2).symm
+      exact (Equiv.summable_iff (e := e)).mp h2
+    · rw [← e.tsum_eq (fun φ : (i : ℕ) → i ∈ insert a s' → ℕ × ℕ =>
+        ∏ x ∈ insert a s', (if h : x ∈ insert a s' then W x (φ x h) else 1))]
+      have hz : ∀ z : (ℕ × ℕ) × ((i : ℕ) → i ∈ s' → ℕ × ℕ), (∏ x ∈ insert a s',
+          (if h : x ∈ insert a s' then W x ((e z) x h) else 1)) = W a z.1 * G z.2 :=
+        fun z => hstep z.1 z.2
+      simp only [hz]
+      rw [← tsum_mul_tsum_of_summable_norm hWanorm hGnorm, ihVal, Finset.prod_insert ha]
+
+/-- The local weight of the fibre sum at a prime, in the form consumed by `euler_prod_pi`. -/
+private noncomputable def lw (p : ℕ) (ab : ℕ × ℕ) : ℝ :=
+  if ab = (0, 0) then 0 else g (p ^ ab.1) * ((tau1 (p ^ ab.2) : ℝ) / (p : ℝ) ^ ab.2)
+
+/-- The local weight is nonnegative. -/
+private theorem lw_nonneg (p : ℕ) (ab : ℕ × ℕ) : 0 ≤ lw p ab := by
+  simp only [lw]
+  split_ifs
+  · exact le_rfl
+  · exact mul_nonneg (g_nonneg _) (div_nonneg (Nat.cast_nonneg _) (by positivity))
+
+/-- The local weight is summable (it is the pair sum of the local factors). -/
+private theorem lw_summable {p : ℕ} (hp : p.Prime) : Summable (lw p) := by
+  refine Summable.of_nonneg_of_le (fun ab => lw_nonneg p ab) (fun ab => ?_)
+    (summable_local_pair hp)
+  simp only [lw]
+  split_ifs with h0
+  · rw [h0]
+    simp [g_one, tau1_one]
+  · exact le_rfl
+
+/-- The value of the local sum: `2/(p-2)` for odd `p`, `1` for `p = 2`. -/
+private theorem lw_tsum {p : ℕ} (hp : p.Prime) :
+    (∑' ab : ℕ × ℕ, lw p ab) = if p = 2 then 1 else 2 / ((p : ℝ) - 2) := by
+  simp only [lw]
+  rcases eq_or_ne p 2 with rfl | h2
+  · rw [show (∑' ab : ℕ × ℕ, if ab = (0, 0) then (0 : ℝ)
+        else g ((2 : ℕ) ^ ab.1) * ((tau1 ((2 : ℕ) ^ ab.2) : ℝ) / ((2 : ℕ) : ℝ) ^ ab.2))
+        = 1 from local_fibre_two, if_pos rfl]
+  · rw [if_neg h2]
+    have hp2 : 2 < p := lt_of_le_of_ne hp.two_le (Ne.symm h2)
+    exact local_fibre_odd hp hp2
+
+/-- **The weight of a pair as the product of local weights.**  In the `Finset`-indexed form used
+by `euler_prod_pi`: for a pair in the fibre `sk (r*d) = q`, the pair weight is the product over
+`q.primeFactors` of the local weight `lw` evaluated at the exponent pair `(v_x d, v_x r)`.  The
+hypothesis `sk (r*d) = q` is what makes every such exponent pair nonzero. -/
+private theorem weight_famOfPair {q r d : ℕ} (hr : r ≠ 0) (hd : d ≠ 0) (hsk : sk (r * d) = q) :
+    g d * (tau1 r : ℝ) / (r : ℝ)
+      = ∏ x ∈ q.primeFactors,
+          (if h : x ∈ q.primeFactors then lw x (d.factorization x, r.factorization x) else 1) := by
+  rw [weight_factor hr hd (primeFactors_subset_of_sk hr hd hsk)]
+  refine Finset.prod_congr rfl (fun x hx => ?_)
+  have hne : (d.factorization x, r.factorization x) ≠ (0, 0) := by
+    intro h0
+    have h1 : d.factorization x = 0 := by simpa using congrArg Prod.fst h0
+    have h2 : r.factorization x = 0 := by simpa using congrArg Prod.snd h0
+    have hpp : Nat.Prime x := Nat.prime_of_mem_primeFactors hx
+    have hdvd : x ∣ r * d := dvd_of_mem_primeFactors_sk hx hsk
+    rcases (Prime.dvd_mul hpp.prime).mp hdvd with hd' | hd'
+    · exact (Nat.Prime.factorization_pos_of_dvd hpp hr hd').ne' h2
+    · exact (Nat.Prime.factorization_pos_of_dvd hpp hd hd').ne' h1
+  rw [dif_pos hx, lw, if_neg hne, glocw_eq_g (Nat.prime_of_mem_primeFactors hx)]
+
+/-- The pair-to-family map in the `Finset`-indexed form of `euler_prod_pi`. -/
+private def toFam {q : ℕ} (z : ℕ × ℕ) : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ :=
+  fun i _ => (z.2.factorization i, z.1.factorization i)
+
+/-- The family-to-pair map: rebuild the pair from the exponents of the family. -/
+private noncomputable def ofFam {q : ℕ} (φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ) : ℕ × ℕ :=
+  ((∏ x ∈ q.primeFactors, x ^ (if h : x ∈ q.primeFactors then (φ x h).2 else 0)),
+   (∏ x ∈ q.primeFactors, x ^ (if h : x ∈ q.primeFactors then (φ x h).1 else 0)))
+
+/-- A pair in a fibre with `q > 1` has nonzero components. -/
+private theorem fibre_fst_ne {q : ℕ} (hq1 : 1 < q) {z : ℕ × ℕ} (h : sk (z.1 * z.2) = q) : z.1 ≠ 0 := by
+  intro h0
+  rw [h0, Nat.zero_mul, sk_zero] at h
+  omega
+
+private theorem fibre_snd_ne {q : ℕ} (hq1 : 1 < q) {z : ℕ × ℕ} (h : sk (z.1 * z.2) = q) : z.2 ≠ 0 := by
+  intro h0
+  rw [h0, Nat.mul_zero, sk_zero] at h
+  omega
+
+/-- Roundtrip: rebuilding a fibre pair from its exponent family gives the pair back. -/
+private theorem ofFam_toFam {q : ℕ} (hq1 : 1 < q) {z : ℕ × ℕ} (h : sk (z.1 * z.2) = q) :
+    ofFam (q := q) (toFam (q := q) z) = z := by
+  have hz1 := fibre_fst_ne hq1 h
+  have hz2 := fibre_snd_ne hq1 h
+  have hsub := primeFactors_subset_of_sk hz1 hz2 h
+  refine Prod.ext ?_ ?_
+  · -- first component: `∏ x, x ^ v_x z.1 = z.1`
+    show (∏ x ∈ q.primeFactors, x ^ (if h : x ∈ q.primeFactors then z.1.factorization x else 0))
+      = z.1
+    rw [show (∏ x ∈ q.primeFactors, x ^ (if h : x ∈ q.primeFactors then z.1.factorization x else 0))
+        = ∏ x ∈ q.primeFactors, x ^ z.1.factorization x from
+        Finset.prod_congr rfl (fun x hx => by rw [dif_pos hx])]
+    exact prod_factorization_of_subset hz1 hsub.1
+  · show (∏ x ∈ q.primeFactors, x ^ (if h : x ∈ q.primeFactors then z.2.factorization x else 0))
+      = z.2
+    rw [show (∏ x ∈ q.primeFactors, x ^ (if h : x ∈ q.primeFactors then z.2.factorization x else 0))
+        = ∏ x ∈ q.primeFactors, x ^ z.2.factorization x from
+        Finset.prod_congr rfl (fun x hx => by rw [dif_pos hx])]
+    exact prod_factorization_of_subset hz2 hsub.2
+
+/-- Roundtrip: the exponent family of a rebuilt pair is the family itself. -/
+private theorem toFam_ofFam {q : ℕ} (hq : Squarefree q)
+    (φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ) (x : ℕ) (hx : x ∈ q.primeFactors) :
+    toFam (q := q) (ofFam (q := q) φ) x hx = φ x hx := by
+  have hs : ∀ p ∈ q.primeFactors, p.Prime := fun p hp => Nat.prime_of_mem_primeFactors hp
+  have h1 : (∏ y ∈ q.primeFactors,
+      y ^ (if h : y ∈ q.primeFactors then (φ y h).2 else 0)).factorization x = (φ x hx).2 := by
+    rw [factorization_prod_prime_pow hs
+      (fun y => if h : y ∈ q.primeFactors then (φ y h).2 else 0) hx, dif_pos hx]
+  have h2 : (∏ y ∈ q.primeFactors,
+      y ^ (if h : y ∈ q.primeFactors then (φ y h).1 else 0)).factorization x = (φ x hx).1 := by
+    rw [factorization_prod_prime_pow hs
+      (fun y => if h : y ∈ q.primeFactors then (φ y h).1 else 0) hx, dif_pos hx]
+  show ((ofFam (q := q) φ).2.factorization x, (ofFam (q := q) φ).1.factorization x) = φ x hx
+  simp only [ofFam, h1, h2]
+
+/-- A rebuilt pair from a *supported* family lies in the fibre. -/
+private theorem sk_ofFam {q : ℕ} (hq : Squarefree q)
+    (φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ)
+    (hφ : ∀ (x : ℕ) (hx : x ∈ q.primeFactors), φ x hx ≠ (0, 0)) :
+    sk ((ofFam (q := q) φ).1 * (ofFam (q := q) φ).2) = q := by
+  have hs : ∀ p ∈ q.primeFactors, p.Prime := fun p hp => Nat.prime_of_mem_primeFactors hp
+  have hprod : (ofFam (q := q) φ).1 * (ofFam (q := q) φ).2
+      = ∏ x ∈ q.primeFactors,
+          x ^ ((if h : x ∈ q.primeFactors then (φ x h).2 else 0)
+            + (if h : x ∈ q.primeFactors then (φ x h).1 else 0)) := by
+    simp only [ofFam, ← Finset.prod_mul_distrib]
+    refine Finset.prod_congr rfl (fun x hx => ?_)
+    rw [← pow_add]
+  have hpos : ∀ x ∈ q.primeFactors, 1 ≤ (if h : x ∈ q.primeFactors then (φ x h).2 else 0)
+      + (if h : x ∈ q.primeFactors then (φ x h).1 else 0) := by
+    intro x hx
+    rw [dif_pos hx, dif_pos hx]
+    have hne := hφ x hx
+    rcases hp : φ x hx with ⟨a, b⟩
+    have hne' : ¬(a = 0 ∧ b = 0) := by
+      rintro ⟨h1, h2⟩
+      exact hne (by rw [hp, h1, h2])
+    simp only
+    omega
+  rw [hprod, sk_prod_prime_pow hs hpos]
+  simpa [sk] using sk_self hq
+
+/-- The exponents of a rebuilt pair are nonnegative automatically; the `lw` product vanishes off
+the supported families, so the family sum may be restricted to them. -/
+private theorem prod_lw_eq_zero_of_not_supported {q : ℕ}
+    (φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ)
+    (hφ : ¬ ∀ (x : ℕ) (hx : x ∈ q.primeFactors), φ x hx ≠ (0, 0)) :
+    (∏ x ∈ q.primeFactors, (if h : x ∈ q.primeFactors then lw x (φ x h) else 1)) = 0 := by
+  push_neg at hφ
+  obtain ⟨x, hx, h0⟩ := hφ
+  refine Finset.prod_eq_zero hx ?_
+  rw [dif_pos hx, h0, lw]
+  simp
+
+/-- The fibre correspondence as an equivalence of subtypes. -/
+private noncomputable def fibreEquiv {q : ℕ} (hq : Squarefree q) (hq1 : 1 < q) :
+    {z : ℕ × ℕ // sk (z.1 * z.2) = q} ≃
+      {φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ //
+        ∀ (x : ℕ) (hx : x ∈ q.primeFactors), φ x hx ≠ (0, 0)} where
+  toFun z := ⟨toFam (q := q) z.1, by
+    intro x hx
+    have hsk := z.2
+    have hdvd : x ∣ z.1.1 * z.1.2 := dvd_of_mem_primeFactors_sk hx hsk
+    have hpp : Nat.Prime x := Nat.prime_of_mem_primeFactors hx
+    have h1 := fibre_fst_ne hq1 hsk
+    have h2 := fibre_snd_ne hq1 hsk
+    intro h0
+    have hz1 : z.1.1.factorization x = 0 := by simpa only [toFam] using congrArg Prod.snd h0
+    have hz2 : z.1.2.factorization x = 0 := by simpa only [toFam] using congrArg Prod.fst h0
+    rcases (Prime.dvd_mul hpp.prime).mp hdvd with hd | hd
+    · exact (Nat.Prime.factorization_pos_of_dvd hpp h1 hd).ne' hz1
+    · exact (Nat.Prime.factorization_pos_of_dvd hpp h2 hd).ne' hz2⟩
+  invFun φ := ⟨ofFam (q := q) φ.1, sk_ofFam hq φ.1 φ.2⟩
+  left_inv z := by
+    refine Subtype.ext ?_
+    exact ofFam_toFam hq1 z.2
+  right_inv φ := by
+    refine Subtype.ext ?_
+    funext x hx
+    exact toFam_ofFam hq φ.1 x hx
+
+/-- **`fibre_sum`, from `q > 1`.**  The fibre sum grouped by the radical equals the product of the
+local sums. -/
+private theorem fibre_sum_gt_one {q : ℕ} (hq : Squarefree q) (hq1 : 1 < q) :
+    (∑' z : ℕ × ℕ, if sk (z.1 * z.2) = q then g z.2 * (tau1 z.1 : ℝ) / z.1 else 0)
+      = ∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2) := by
+  classical
+  set S := {z : ℕ × ℕ | sk (z.1 * z.2) = q} with hS
+  set T := {φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ |
+      ∀ (x : ℕ) (hx : x ∈ q.primeFactors), φ x hx ≠ (0, 0)} with hT
+  set F : ℕ × ℕ → ℝ := fun z => if sk (z.1 * z.2) = q then g z.2 * (tau1 z.1 : ℝ) / z.1 else 0
+    with hF
+  set G : ((i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ) → ℝ :=
+    fun φ => ∏ x ∈ q.primeFactors, (if h : x ∈ q.primeFactors then lw x (φ x h) else 1) with hG
+  -- pair side: restrict to the fibre subtype
+  have hsupp : Function.support F ⊆ S := by
+    intro z hz
+    by_contra hcon
+    have hc : ¬ (sk (z.1 * z.2) = q) := by simpa [hS] using hcon
+    exact hz (by simp [hF, hc])
+  have hpair : (∑' z : ℕ × ℕ, F z) = ∑' z : S, F z.1 :=
+    (tsum_subtype_eq_of_support_subset (s := S) (f := F) hsupp).symm
+  -- the pointwise identity on the fibre
+  have hpt : ∀ z : S, F z.1 = G (toFam (q := q) z.1) := by
+    intro z
+    have hsk : sk ((↑z : ℕ × ℕ).1 * (↑z : ℕ × ℕ).2) = q := z.2
+    show (if sk ((↑z : ℕ × ℕ).1 * (↑z : ℕ × ℕ).2) = q then
+        g (↑z : ℕ × ℕ).2 * (tau1 (↑z : ℕ × ℕ).1 : ℝ) / ((↑z : ℕ × ℕ).1 : ℝ) else 0)
+      = G (toFam (q := q) (↑z : ℕ × ℕ))
+    rw [if_pos hsk]
+    exact weight_famOfPair (fibre_fst_ne hq1 hsk) (fibre_snd_ne hq1 hsk) hsk
+  -- family side: restrict to the supported families
+  have hsuppT : Function.support G ⊆ T := by
+    intro φ hφ
+    by_contra hcon
+    exact hφ (prod_lw_eq_zero_of_not_supported φ (by simpa [hT] using hcon))
+  have hfam : (∑' φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ, G φ) = ∑' φ : T, G φ.1 :=
+    (tsum_subtype_eq_of_support_subset (s := T) (f := G) hsuppT).symm
+  calc (∑' z : ℕ × ℕ, if sk (z.1 * z.2) = q then g z.2 * (tau1 z.1 : ℝ) / z.1 else 0)
+      = ∑' z : ℕ × ℕ, F z := rfl
+    _ = ∑' z : S, F z.1 := hpair
+    _ = ∑' z : S, G (toFam (q := q) z.1) := tsum_congr hpt
+    _ = ∑' φ : T, G φ.1 := (fibreEquiv hq hq1).tsum_eq (fun φ : T => G φ.1)
+    _ = ∑' φ : (i : ℕ) → i ∈ q.primeFactors → ℕ × ℕ, G φ := hfam.symm
+    _ = ∏ p ∈ q.primeFactors, (∑' ab : ℕ × ℕ, lw p ab) :=
+        (euler_prod_pi (s := q.primeFactors) (fun p ab => lw p ab)
+          (fun p _ => lw_nonneg p)
+          (fun p hp => lw_summable (Nat.prime_of_mem_primeFactors hp))).2
+    _ = ∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2) := by
+        rw [← Finset.prod_filter_mul_prod_filter_not q.primeFactors (fun p => 2 < p)
+          (fun p => ∑' ab : ℕ × ℕ, lw p ab)]
+        have h2 : (∏ p ∈ q.primeFactors.filter (fun p => ¬ 2 < p), (∑' ab : ℕ × ℕ, lw p ab)) = 1 := by
+          rw [Finset.prod_eq_one]
+          intro p hp
+          rw [Finset.mem_filter] at hp
+          have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp.1
+          have hp2 : p = 2 := by have := hpp.two_le; omega
+          rw [lw_tsum hpp, if_pos hp2]
+        rw [h2, mul_one]
+        refine Finset.prod_congr rfl (fun p hp => ?_)
+        rw [Finset.mem_filter] at hp
+        have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp.1
+        rw [lw_tsum hpp, if_neg (by omega)]
+
+/-! ### Cuts: what is still missing for `lemma4`
+
+`fibre_sum` is the Euler product over `q.primeFactors` of the local factors above; with it,
+`lemma4` reduces to the squarefree majorisation.  Both are stated here only, as targets for a
+later session; neither is proved, and the lab file is untouched. -/
+
+/-- The squarefree kernel is `1` exactly at `0` and `1` (where `sk 0 = 1` because `0` has no
+prime factors). -/
+private theorem sk_eq_one_iff {m : ℕ} : sk m = 1 ↔ m = 0 ∨ m = 1 := by
+  constructor
+  · intro h
+    by_contra hne
+    have hempty : m.primeFactors ≠ ∅ := fun he => hne ((Nat.primeFactors_eq_empty).mp he)
+    obtain ⟨p, hp⟩ := Finset.nonempty_iff_ne_empty.mpr hempty
+    have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+    have hdvd : p ∣ sk m := Finset.dvd_prod_of_mem id hp
+    rw [h] at hdvd
+    exact hpp.not_dvd_one hdvd
+  · rintro (rfl | rfl) <;> simp [sk]
+
+/-- **The fibre of the pair sum over the radical `q`, `q` squarefree**: the Euler product of
+`local_fibre_odd` / `local_fibre_two` over the primes of `q`. -/
+private theorem fibre_sum (q : ℕ) (hq : Squarefree q) (hq0 : 0 < q) :
+    (∑' z : ℕ × ℕ, if sk (z.1 * z.2) = q then g z.2 * (tau1 z.1 : ℝ) / z.1 else 0) =
+      ∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2) := by
+  classical
+  rcases Nat.lt_or_ge 1 q with hq1 | hq1
+  · exact fibre_sum_gt_one hq hq1
+  · -- `q = 1`: the only contributing pair is `(1, 1)`, with weight `1`
+    have hqeq : q = 1 := by omega
+    subst hqeq
+    have hsk1 : sk (1 * 1) = 1 := by simp [sk]
+    have hval : (if sk (1 * 1) = 1 then g 1 * (tau1 1 : ℝ) / (1 : ℕ) else 0) = 1 := by
+      rw [if_pos hsk1, g_one, tau1_one]
+      norm_num
+    rw [tsum_eq_single (1, 1) ?_, hval]
+    · simp
+    · intro z hz
+      show (if sk (z.1 * z.2) = 1 then g z.2 * (tau1 z.1 : ℝ) / z.1 else 0) = 0
+      by_cases hsk : sk (z.1 * z.2) = 1
+      · rw [if_pos hsk]
+        rcases sk_eq_one_iff.mp hsk with h0 | h1
+        · rcases Nat.mul_eq_zero.mp h0 with h0 | h0
+          · rw [h0, Nat.cast_zero, div_zero]
+          · rw [h0]
+            simp [g]
+        · exfalso
+          have hz1 : z.1 = 1 := Nat.dvd_one.mp ⟨z.2, h1.symm⟩
+          have hz2 : z.2 = 1 := Nat.dvd_one.mp ⟨z.1, by rw [Nat.mul_comm]; exact h1.symm⟩
+          exact hz (Prod.ext hz1 hz2)
+      · rw [if_neg hsk]
+
+/-! ### The Chebyshev-type rearrangement for the squarefree majorisation
+
+`sqfree_majorisation` compares two sums over squarefree `q ≤ z`: the `α`-weighted sum with the
+local factors `2/(p-2)`, and `Sₙ`.  Splitting each `q` into its part supported on the odd primes
+of `n` and the rest turns the comparison, for each fixed rest, into a comparison of two product
+measures on the subsets of the odd prime set `N₁ = {p | n, p > 2}`:
+
+* left:  `∏_{p∈S} 2/(p-1) · ∏_{p∈N₁∖S} (p-2)/(p-1)`  (total mass `∏(1+1/(p-1))`),
+* right: `∏_{p∈S} 1/(p-1)`                            (total mass `∏(1+1/(p-1))`).
+
+The left measure is biased towards the larger subsets, and the weight `1/(1+yq)` is decreasing, so
+the left sum is at most the right one.  `cheb_powerset` is that statement, proved by induction on
+the prime set; it is the mathematical content of the majorisation. -/
+
+/-- Splitting a product carrying an `if` on a subset. -/
+private theorem prod_ite_split {s S : Finset ℕ} (hS : S ⊆ s) (f g : ℕ → ℝ) :
+    (∏ x ∈ s, (if x ∈ S then f x else g x)) = (∏ x ∈ S, f x) * (∏ x ∈ s \ S, g x) := by
+  rw [← Finset.prod_sdiff hS]
+  have h1 : ∏ x ∈ s \ S, (if x ∈ S then f x else g x) = ∏ x ∈ s \ S, g x :=
+    Finset.prod_congr rfl (fun x hx => if_neg (Finset.mem_sdiff.mp hx).2)
+  have h2 : ∏ x ∈ S, (if x ∈ S then f x else g x) = ∏ x ∈ S, f x :=
+    Finset.prod_congr rfl (fun x hx => if_pos hx)
+  rw [h1, h2, mul_comm]
+
+/-- The `α`-weighted local factor on a subset of the odd prime set. -/
+private noncomputable def VL (s S : Finset ℕ) : ℝ :=
+  ∏ x ∈ s, (if x ∈ S then 2 / ((x : ℝ) - 1) else ((x : ℝ) - 2) / ((x : ℝ) - 1))
+
+/-- The `Sₙ` local factor on a subset of the odd prime set. -/
+private noncomputable def VR (s S : Finset ℕ) : ℝ :=
+  ∏ x ∈ s, (if x ∈ S then 1 / ((x : ℝ) - 1) else 1)
+
+private theorem VL_nonneg {s S : Finset ℕ} (hs : ∀ p ∈ s, (2 : ℝ) < (p : ℝ)) : 0 ≤ VL s S := by
+  unfold VL
+  refine Finset.prod_nonneg (fun x hx => ?_)
+  have hx2 := hs x hx
+  by_cases h : x ∈ S
+  · rw [if_pos h]
+    exact div_nonneg (by norm_num) (by linarith)
+  · rw [if_neg h]
+    exact div_nonneg (by linarith) (by linarith)
+
+private theorem VR_nonneg {s S : Finset ℕ} (hs : ∀ p ∈ s, (2 : ℝ) < (p : ℝ)) : 0 ≤ VR s S := by
+  unfold VR
+  refine Finset.prod_nonneg (fun x hx => ?_)
+  have hx2 := hs x hx
+  by_cases h : x ∈ S
+  · rw [if_pos h]
+    exact div_nonneg (by norm_num) (by linarith)
+  · rw [if_neg h]; exact zero_le_one
+
+/-- **Chebyshev rearrangement.**  For a nonnegative decreasing function on subsets of `s` (all
+primes `> 2`), the sum against the left weights `VL` is at most the sum against `VR`. -/
+private theorem cheb_powerset : ∀ (s : Finset ℕ), (∀ p ∈ s, (2 : ℝ) < (p : ℝ)) → ∀ (h : Finset ℕ → ℝ),
+    (∀ S T, S ⊆ T → T ⊆ s → h T ≤ h S) → (∀ S, 0 ≤ h S) →
+    (∑ S ∈ s.powerset, VL s S * h S) ≤ (∑ S ∈ s.powerset, VR s S * h S) := by
+  intro s
+  induction s using Finset.induction_on with
+  | empty =>
+    intro hs h hdec hnn
+    simp [VL, VR]
+  | insert p s' hp ih =>
+    intro hs h hdec hnn
+    have hp2 : (2 : ℝ) < (p : ℝ) := hs p (Finset.mem_insert_self p s')
+    have hs' : ∀ x ∈ s', (2 : ℝ) < (x : ℝ) := fun x hx => hs x (Finset.mem_insert_of_mem hx)
+    have hsub : ∀ x ∈ s', x ∈ insert p s' := fun x hx => Finset.mem_insert_of_mem hx
+    have hA : (∑ S ∈ s'.powerset, VL s' S * h S) ≤ (∑ S ∈ s'.powerset, VR s' S * h S) :=
+      ih hs' h (fun S T hST hTs => hdec S T hST (fun x hx => hsub x (hTs hx))) hnn
+    have hB : (∑ S ∈ s'.powerset, VL s' S * h (insert p S))
+        ≤ (∑ S ∈ s'.powerset, VR s' S * h (insert p S)) := by
+      refine ih hs' (fun S => h (insert p S)) (fun S T hST hTs => ?_) (fun S => hnn _)
+      refine hdec (insert p S) (insert p T) (Finset.insert_subset_insert p hST) (fun x hx => ?_)
+      rcases Finset.mem_insert.mp hx with h1 | h2
+      · rw [h1]; exact Finset.mem_insert_self p s'
+      · exact Finset.mem_insert_of_mem (hTs h2)
+    have hBA : (∑ S ∈ s'.powerset, VL s' S * h (insert p S))
+        ≤ (∑ S ∈ s'.powerset, VL s' S * h S) := by
+      refine Finset.sum_le_sum (fun S hS => ?_)
+      have hSs : S ⊆ s' := Finset.mem_powerset.mp hS
+      refine mul_le_mul_of_nonneg_left ?_ (VL_nonneg hs')
+      refine hdec S (insert p S) (fun x hx => Finset.mem_insert_of_mem hx) (fun x hx => ?_)
+      rcases Finset.mem_insert.mp hx with h | h
+      · rw [h]; exact Finset.mem_insert_self p s'
+      · exact Finset.mem_insert_of_mem (hSs h)
+    have hterm : ∀ S ∈ s'.powerset,
+        (VL (insert p s') S * h S + VL (insert p s') (insert p S) * h (insert p S))
+          = ((p : ℝ) - 2) / ((p : ℝ) - 1) * (VL s' S * h S)
+            + 2 / ((p : ℝ) - 1) * (VL s' S * h (insert p S)) := by
+      intro S hS
+      have hSs : S ⊆ s' := Finset.mem_powerset.mp hS
+      have hpS : p ∉ S := fun hcon => hp (hSs hcon)
+      have hxne : ∀ x ∈ s', x ≠ p := fun x hx hcon => hp (hcon ▸ hx)
+      have h1 : VL (insert p s') S = ((p : ℝ) - 2) / ((p : ℝ) - 1) * VL s' S := by
+        unfold VL
+        rw [Finset.prod_insert hp, if_neg hpS, mul_comm]
+      have h2 : VL (insert p s') (insert p S) = 2 / ((p : ℝ) - 1) * VL s' S := by
+        unfold VL
+        rw [Finset.prod_insert hp,
+          if_pos (Finset.mem_insert_self p S : p ∈ insert p S)]
+        congr 1
+        refine Finset.prod_congr rfl (fun x hx => ?_)
+        have hxp : x ≠ p := hxne x hx
+        by_cases hc : x ∈ S
+        · rw [if_pos (Finset.mem_insert_of_mem hc), if_pos hc]
+        · rw [if_neg (show ¬ (x ∈ insert p S) from by simp [hc, hxp]), if_neg hc]
+      rw [h1, h2]; ring
+    have htermR : ∀ S ∈ s'.powerset,
+        (VR (insert p s') S * h S + VR (insert p s') (insert p S) * h (insert p S))
+          = (VR s' S * h S) + 1 / ((p : ℝ) - 1) * (VR s' S * h (insert p S)) := by
+      intro S hS
+      have hSs : S ⊆ s' := Finset.mem_powerset.mp hS
+      have hpS : p ∉ S := fun hcon => hp (hSs hcon)
+      have hxne : ∀ x ∈ s', x ≠ p := fun x hx hcon => hp (hcon ▸ hx)
+      have h1 : VR (insert p s') S = VR s' S := by
+        unfold VR
+        rw [Finset.prod_insert hp, if_neg hpS, one_mul]
+      have h2 : VR (insert p s') (insert p S) = 1 / ((p : ℝ) - 1) * VR s' S := by
+        unfold VR
+        rw [Finset.prod_insert hp,
+          if_pos (Finset.mem_insert_self p S : p ∈ insert p S)]
+        congr 1
+        refine Finset.prod_congr rfl (fun x hx => ?_)
+        have hxp : x ≠ p := hxne x hx
+        by_cases hc : x ∈ S
+        · rw [if_pos (Finset.mem_insert_of_mem hc), if_pos hc]
+        · rw [if_neg (show ¬ (x ∈ insert p S) from by simp [hc, hxp]), if_neg hc]
+      rw [h1, h2]; ring
+    set A := ∑ S ∈ s'.powerset, VL s' S * h S with hAdef
+    set B := ∑ S ∈ s'.powerset, VL s' S * h (insert p S) with hBdef
+    set C := ∑ S ∈ s'.powerset, VR s' S * h S with hCdef
+    set E := ∑ S ∈ s'.powerset, VR s' S * h (insert p S) with hEdef
+    have hA' : A ≤ C := by rw [hAdef, hCdef]; exact hA
+    have hB' : B ≤ E := by rw [hBdef, hEdef]; exact hB
+    have hBA' : B ≤ A := by rw [hAdef, hBdef]; exact hBA
+    rw [Finset.sum_powerset_insert hp, Finset.sum_powerset_insert hp,
+      ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+    rw [Finset.sum_congr rfl hterm, Finset.sum_congr rfl htermR, Finset.sum_add_distrib,
+      Finset.sum_add_distrib]
+    have e1 : (∑ x ∈ s'.powerset, ((p : ℝ) - 2) / ((p : ℝ) - 1) * (VL s' x * h x))
+        = ((p : ℝ) - 2) / ((p : ℝ) - 1) * A := by
+      rw [hAdef, Finset.mul_sum]
+    have e2 : (∑ x ∈ s'.powerset, 2 / ((p : ℝ) - 1) * (VL s' x * h (insert p x)))
+        = 2 / ((p : ℝ) - 1) * B := by
+      rw [hBdef, Finset.mul_sum]
+    have e4 : (∑ x ∈ s'.powerset, 1 / ((p : ℝ) - 1) * (VR s' x * h (insert p x)))
+        = 1 / ((p : ℝ) - 1) * E := by
+      rw [hEdef, Finset.mul_sum]
+    rw [e1, e2, e4, ← hCdef]
+    have hp1 : (0 : ℝ) < (p : ℝ) - 1 := by linarith
+    exact le_of_mul_le_mul_left (by
+      have h1 : ((p : ℝ) - 1) * (((p : ℝ) - 2) / ((p : ℝ) - 1) * A
+            + 2 / ((p : ℝ) - 1) * B) = ((p : ℝ) - 2) * A + 2 * B := by
+        field_simp
+      have h2 : ((p : ℝ) - 1) * (C + 1 / ((p : ℝ) - 1) * E) = ((p : ℝ) - 1) * C + E := by
+        field_simp
+      rw [h1, h2]
+      nlinarith [hA', hB', hBA']) hp1
+
+/-- The odd primes of `n`, the set `N₁` of the majorisation. -/
+private def Nodd (n : ℕ) : Finset ℕ := n.primeFactors.filter (2 < ·)
+
+private theorem Nodd_subset (n : ℕ) : Nodd n ⊆ n.primeFactors :=
+  Finset.filter_subset _ _
+
+private theorem two_lt_of_mem_Nodd {n p : ℕ} (hp : p ∈ Nodd n) : 2 < p :=
+  (Finset.mem_filter.mp hp).2
+
+/-- **The `α`-weighted local factor.**  For `S` among the odd primes of `n`, the factor `α` times
+the local product `∏_{p∈S} 2/(p-2)` is the "left" weight `VL`. -/
+private theorem alpha_mul_prod_eq_VL (n : ℕ) (S : Finset ℕ) (hS : S ⊆ Nodd n) :
+    (∏ p ∈ Nodd n, ((p : ℝ) - 2) / ((p : ℝ) - 1)) * (∏ p ∈ S, 2 / ((p : ℝ) - 2))
+      = VL (Nodd n) S := by
+  have hsplit : (∏ p ∈ Nodd n, ((p : ℝ) - 2) / ((p : ℝ) - 1))
+      = (∏ p ∈ S, ((p : ℝ) - 2) / ((p : ℝ) - 1))
+        * (∏ p ∈ Nodd n \ S, ((p : ℝ) - 2) / ((p : ℝ) - 1)) := by
+    rw [mul_comm (∏ p ∈ S, ((p : ℝ) - 2) / ((p : ℝ) - 1))
+      (∏ p ∈ Nodd n \ S, ((p : ℝ) - 2) / ((p : ℝ) - 1))]
+    exact (Finset.prod_sdiff hS).symm
+  have hp : ∀ p ∈ S, ((p : ℝ) - 2) / ((p : ℝ) - 1) * (2 / ((p : ℝ) - 2))
+      = 2 / ((p : ℝ) - 1) := by
+    intro p hpS
+    have h2p : (2 : ℝ) < (p : ℝ) := by
+      exact_mod_cast two_lt_of_mem_Nodd (hS hpS)
+    field_simp
+  calc (∏ p ∈ Nodd n, ((p : ℝ) - 2) / ((p : ℝ) - 1)) * (∏ p ∈ S, 2 / ((p : ℝ) - 2))
+      = ((∏ p ∈ S, ((p : ℝ) - 2) / ((p : ℝ) - 1)) * (∏ p ∈ S, 2 / ((p : ℝ) - 2)))
+          * (∏ p ∈ Nodd n \ S, ((p : ℝ) - 2) / ((p : ℝ) - 1)) := by
+        rw [hsplit]; ring
+    _ = (∏ p ∈ S, 2 / ((p : ℝ) - 1))
+          * (∏ p ∈ Nodd n \ S, ((p : ℝ) - 2) / ((p : ℝ) - 1)) := by
+        rw [← Finset.prod_mul_distrib, Finset.prod_congr rfl hp]
+    _ = VL (Nodd n) S := (prod_ite_split hS (fun p => 2 / ((p : ℝ) - 1))
+          (fun p => ((p : ℝ) - 2) / ((p : ℝ) - 1))).symm
+
+/-- **The `Sₙ` local factor.**  For `S` among the odd primes of `n`, the `Sₙ` local product is the
+"right" weight `VR`. -/
+private theorem prod_one_div_eq_VR (s S : Finset ℕ) (hS : S ⊆ s) :
+    (∏ p ∈ S, 1 / ((p : ℝ) - 1)) = VR s S := by
+  rw [VR, prod_ite_split hS (fun p => 1 / ((p : ℝ) - 1)) (fun _ => 1)]
+  simp
+
+/-- The weight `1/(1+yq)` is decreasing in `q`, for `y ≥ 0`. -/
+private theorem weight_anti {y : ℝ} (hy : 0 ≤ y) {q q' : ℕ} (h : q ≤ q') :
+    1 / (1 + y * (q' : ℝ)) ≤ 1 / (1 + y * (q : ℝ)) := by
+  have hq : (q : ℝ) ≤ (q' : ℝ) := by exact_mod_cast h
+  have h1 : (0 : ℝ) < 1 + y * (q : ℝ) := by
+    have h0 : (0:ℝ) ≤ y * (q:ℝ) := mul_nonneg hy (Nat.cast_nonneg _)
+    linarith
+  have h2 : (0 : ℝ) < 1 + y * (q' : ℝ) := by
+    have h0 : (0:ℝ) ≤ y * (q':ℝ) := mul_nonneg hy (Nat.cast_nonneg _)
+    linarith
+  exact one_div_le_one_div_of_le h1 (by nlinarith)
+
+/-! ### The majorisation by pairing `q` with `q/p`
+
+`Bw s q` is the `Sₙ`-type local weight of `q` at a set `s` of odd primes: an odd prime `p | q`
+contributes `1/(p-1)` if `p ∈ s` and `2/(p-2)` otherwise.  Thus `Bw ∅ q` is the local factor of the
+pair sum (`fibre_sum`) and `Bw (Nodd n) q` the local factor of `Sₙ`.
+
+The comparison `α · Σ_q A(q)/(1+yq) ≤ Σ_q B(q)/(1+yq)` is an induction adjoining one prime at a
+time.  Adjoining `p` rescales the summand at `p | q` by `(p-2)/(2(p-1))` and leaves the others
+alone, so after factoring out `α_{s}` one has to compare `((p-2)/2)·Σ_{p|q}` with `Σ_{p∤q}`.  That
+is a pairing: each squarefree `q` with `p | q` is matched with `q/p`, which is smaller (so its weight
+`1/(1+y·)` is larger) and whose local factor at `p` is `2/(p-2)` rather than `1/(p-1)`. -/
+
+/-- The index set of the squarefree majorisation: `q` with `1 ≤ q ≤ ⌊z⌋` and `q` squarefree. -/
+private noncomputable def Fsq (z : ℝ) : Finset ℕ := (Finset.Icc 1 ⌊z⌋₊).filter (fun q => Squarefree q)
+
+/-- The `Sₙ`-type local weight of `q` at a set `s` of odd primes. -/
+private noncomputable def Bw (s : Finset ℕ) (q : ℕ) : ℝ :=
+  ∏ p ∈ q.primeFactors.filter (2 < ·),
+    (if p ∈ s then 1 / ((p : ℝ) - 1) else 2 / ((p : ℝ) - 2))
+
+private theorem Bw_nonneg (s : Finset ℕ) (q : ℕ) : 0 ≤ Bw s q := by
+  unfold Bw
+  refine Finset.prod_nonneg (fun p hp => ?_)
+  have hp2 : (2 : ℝ) < (p : ℝ) := by exact_mod_cast (Finset.mem_filter.mp hp).2
+  by_cases h : p ∈ s
+  · rw [if_pos h]; exact div_nonneg (by norm_num) (by linarith)
+  · rw [if_neg h]; exact div_nonneg (by norm_num) (by linarith)
+
+private theorem Bw_empty (q : ℕ) :
+    Bw ∅ q = ∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2) := by
+  simp [Bw]
+
+/-- A squarefree number divided by a prime factor is squarefree. -/
+private theorem squarefree_div {q p : ℕ} (hq : Squarefree q) (hp : p.Prime) (h : p ∣ q) :
+    Squarefree (q / p) := by
+  have hq0 : q ≠ 0 := by
+    rintro rfl
+    exact (Nat.squarefree_iff_prime_squarefree.mp hq) 2 Nat.prime_two (by norm_num)
+  have hpq' : p * (q / p) = q := Nat.mul_div_cancel' h
+  have hcop : p.Coprime (q / p) := by
+    rw [hp.coprime_iff_not_dvd]
+    intro hpd
+    have h2 : p * p ∣ q := by rw [← hpq']; exact mul_dvd_mul_left p hpd
+    exact (Nat.squarefree_iff_prime_squarefree.mp hq) p hp h2
+  rw [← hpq'] at hq
+  exact ((Nat.squarefree_mul hcop).mp hq).2
+
+/-- The prime factors of `p * q` for a prime `p` not dividing `q`: `p` adjoined to those of `q`. -/
+private theorem filter_primeFactors_mul_prime {p q : ℕ} (hp : p.Prime) (hp2 : 2 < p) (hq : q ≠ 0)
+    (h : ¬ p ∣ q) :
+    (p * q).primeFactors.filter (2 < ·) = insert p (q.primeFactors.filter (2 < ·)) := by
+  have hpq0 : p * q ≠ 0 := Nat.mul_ne_zero hp.ne_zero hq
+  have hnot : p ∉ q.primeFactors.filter (2 < ·) := fun hmem =>
+    h (Nat.mem_primeFactors.mp (Finset.mem_filter.mp hmem).1).2.1
+  ext x
+  simp only [Finset.mem_filter, Finset.mem_insert, Nat.mem_primeFactors]
+  constructor
+  · rintro ⟨⟨hxP, hxdvd, -⟩, h2x⟩
+    rcases (Nat.Prime.dvd_mul hxP).mp hxdvd with hd | hd
+    · exact Or.inl ((Nat.prime_dvd_prime_iff_eq hxP hp).mp hd)
+    · exact Or.inr ⟨⟨hxP, hd, hq⟩, h2x⟩
+  · intro hxmem
+    rcases hxmem with hxp | ⟨⟨hxP, hxd, -⟩, h2x⟩
+    · rw [hxp]
+      exact ⟨⟨hp, dvd_mul_right p q, hpq0⟩, hp2⟩
+    · exact ⟨⟨hxP, dvd_mul_of_dvd_right hxd p, hpq0⟩, h2x⟩
+
+/-- Pulling a prime factor `p ∉ s` out of the local weight, for `p ∤ q`. -/
+private theorem Bw_mul_prime {s : Finset ℕ} {p q : ℕ} (hp : p.Prime) (hp2 : 2 < p) (hpq : ¬ p ∣ q)
+    (hq : q ≠ 0) :
+    Bw s (p * q) = (if p ∈ s then 1 / ((p : ℝ) - 1) else 2 / ((p : ℝ) - 2)) * Bw s q := by
+  unfold Bw
+  rw [filter_primeFactors_mul_prime hp hp2 hq hpq,
+    Finset.prod_insert (fun hmem => hpq (Nat.mem_primeFactors.mp
+      (Finset.mem_filter.mp hmem).1).2.1)]
+
+/-- Adjoining an odd prime `p ∉ s` rescales the local weight of `q` at `p`. -/
+private theorem Bw_insert {s : Finset ℕ} {p q : ℕ} (hp : p ∉ s) (hp2 : 2 < p) (hpq : p.Prime)
+    (hq : q ≠ 0) :
+    Bw (insert p s) q
+      = Bw s q * (if p ∣ q then ((p : ℝ) - 2) / (2 * ((p : ℝ) - 1)) else 1) := by
+  classical
+  have hpT : (p ∈ q.primeFactors.filter (2 < ·)) ↔ p ∣ q := by
+    rw [Finset.mem_filter, Nat.mem_primeFactors]
+    exact ⟨fun h => h.1.2.1, fun h => ⟨⟨hpq, h, hq⟩, hp2⟩⟩
+  set T := q.primeFactors.filter (2 < ·) with hT
+  set f : ℕ → ℝ := fun r => if r ∈ s then 1 / ((r : ℝ) - 1) else 2 / ((r : ℝ) - 2) with hfdef
+  have hfs : ∀ r, r ≠ p →
+      (if r ∈ insert p s then (1 : ℝ) / ((r : ℝ) - 1) else 2 / ((r : ℝ) - 2)) = f r := by
+    intro r hr
+    simp only [hfdef]
+    by_cases h : r ∈ s
+    · rw [if_pos (Finset.mem_insert_of_mem h), if_pos h]
+    · rw [if_neg (by simp [h, hr]), if_neg h]
+  by_cases hpq' : p ∣ q
+  · rw [if_pos hpq']
+    have hmem : p ∈ T := hpT.mpr hpq'
+    have e1 : Bw (insert p s) q = (1 / ((p : ℝ) - 1)) * ∏ r ∈ T.erase p, f r := by
+      rw [show Bw (insert p s) q = ∏ r ∈ T,
+        (if r ∈ insert p s then (1 : ℝ) / ((r : ℝ) - 1) else 2 / ((r : ℝ) - 2)) from rfl,
+        ← Finset.mul_prod_erase T
+          (fun r => if r ∈ insert p s then (1 : ℝ) / ((r : ℝ) - 1) else 2 / ((r : ℝ) - 2)) hmem,
+        if_pos (Finset.mem_insert_self p s)]
+      congr 1
+      exact Finset.prod_congr rfl (fun r hr => hfs r (by
+        intro hcon
+        rw [hcon] at hr
+        exact absurd hr (Finset.notMem_erase p T)))
+    have e2 : Bw s q = (2 / ((p : ℝ) - 2)) * ∏ r ∈ T.erase p, f r := by
+      rw [show Bw s q = ∏ r ∈ T, f r from rfl,
+        ← Finset.mul_prod_erase T f hmem]
+      congr 1
+      simp only [hfdef]
+      rw [if_neg hp]
+    rw [e1, e2]
+    have hp2R : (2 : ℝ) < (p : ℝ) := by exact_mod_cast hp2
+    have hp1 : (0 : ℝ) < (p : ℝ) - 1 := by linarith
+    have hp2' : (0 : ℝ) < (p : ℝ) - 2 := by linarith
+    field_simp
+  · rw [if_neg hpq', mul_one]
+    have hmem : p ∉ T := fun h => hpq' (hpT.mp h)
+    rw [show Bw (insert p s) q = ∏ r ∈ T,
+        (if r ∈ insert p s then (1 : ℝ) / ((r : ℝ) - 1) else 2 / ((r : ℝ) - 2)) from rfl,
+      show Bw s q = ∏ r ∈ T, f r from rfl]
+    exact Finset.prod_congr rfl (fun r hr => hfs r (fun hcon => hmem (hcon ▸ hr)))
+
+/-- **The pairing step.**  All primes below are odd.  Each squarefree `q` with `p ∣ q` is matched
+with `q / p`, which is smaller — so its weight `1/(1+y·)` is larger — and whose local factor at `p`
+is `2/(p-2)` rather than `1/(p-1)`.  Hence the `p`-divisible part of the weighted sum, scaled by
+`(p-2)/2`, is dominated by the `p`-free part. -/
+private theorem pairing {z y : ℝ} (hy : 0 ≤ y) {s : Finset ℕ} {p : ℕ} (hp : p.Prime) (hp2 : 2 < p)
+    (hps : p ∉ s) :
+    ((p : ℝ) - 2) / 2 * (∑ q ∈ (Fsq z).filter (fun q => p ∣ q),
+        Bw s q * (1 / (1 + y * (q : ℝ))))
+      ≤ ∑ q ∈ (Fsq z).filter (fun q => ¬ p ∣ q), Bw s q * (1 / (1 + y * (q : ℝ))) := by
+  classical
+  set F := Fsq z with hF
+  set A' := F.filter (fun q => ¬ p ∣ q ∧ p * q ≤ ⌊z⌋₊) with hA'
+  have hpR : (0 : ℝ) < (p : ℝ) := by exact_mod_cast hp.pos
+  have hp2R : (2 : ℝ) < (p : ℝ) := by exact_mod_cast hp2
+  have hmemA' : ∀ q ∈ A', q ≠ 0 ∧ Squarefree q ∧ ¬ p ∣ q ∧ p * q ≤ ⌊z⌋₊ := by
+    intro q hq
+    rw [hA', hF, Fsq, Finset.mem_filter, Finset.mem_filter, Finset.mem_Icc] at hq
+    obtain ⟨⟨⟨h1, h2⟩, hsq⟩, hnp, hle⟩ := hq
+    exact ⟨by omega, hsq, hnp, hle⟩
+  have hinj : Set.InjOn (fun q => p * q) ↑A' := by
+    intro a _ b _ hab
+    exact Nat.mul_left_cancel hp.pos hab
+  have himage : A'.image (fun q => p * q) = F.filter (fun q => p ∣ q) := by
+    ext x
+    constructor
+    · intro hx
+      rw [Finset.mem_image] at hx
+      obtain ⟨q, hq, rfl⟩ := hx
+      obtain ⟨hq0, hsq, hnp, hle⟩ := hmemA' q hq
+      rw [hF, Fsq, Finset.mem_filter, Finset.mem_filter, Finset.mem_Icc]
+      refine ⟨⟨⟨Nat.one_le_iff_ne_zero.mpr (Nat.mul_ne_zero hp.ne_zero hq0), hle⟩, ?_⟩,
+        ⟨q, rfl⟩⟩
+      exact (Nat.squarefree_mul (hp.coprime_iff_not_dvd.mpr hnp)).mpr ⟨hp.squarefree, hsq⟩
+    · intro hx
+      rw [hF, Fsq, Finset.mem_filter, Finset.mem_filter, Finset.mem_Icc] at hx
+      obtain ⟨⟨⟨h1, h2⟩, hsq⟩, hpdvd⟩ := hx
+      have hpx : p * (x / p) = x := Nat.mul_div_cancel' hpdvd
+      have hsqdiv : Squarefree (x / p) := squarefree_div hsq hp hpdvd
+      have hcop : p.Coprime (x / p) := by
+        rw [hp.coprime_iff_not_dvd]
+        intro hpd
+        have h2' : p * p ∣ x := by rw [← hpx]; exact mul_dvd_mul_left p hpd
+        exact (Nat.squarefree_iff_prime_squarefree.mp hsq) p hp h2'
+      have hnp : ¬ p ∣ x / p := hp.coprime_iff_not_dvd.mp hcop
+      rw [Finset.mem_image]
+      refine ⟨x / p, ?_, hpx⟩
+      rw [hA', hF, Fsq, Finset.mem_filter, Finset.mem_filter, Finset.mem_Icc]
+      have hxdvd1 : 1 ≤ x / p := by
+        have hpx2 : p ≤ x := Nat.le_of_dvd (by omega) hpdvd
+        have := Nat.div_pos hpx2 hp.pos
+        omega
+      refine ⟨⟨⟨hxdvd1, le_trans (Nat.div_le_self x p) h2⟩, hsqdiv⟩, hnp, by rw [hpx]; exact h2⟩
+  have hstep1 : (∑ q ∈ F.filter (fun q => p ∣ q), Bw s q * (1 / (1 + y * (q : ℝ))))
+      = ∑ q ∈ A', Bw s (p * q) * (1 / (1 + y * ((p * q : ℕ) : ℝ))) := by
+    rw [← himage]
+    exact Finset.sum_image hinj
+  have hstep2 : (∑ q ∈ A', Bw s (p * q) * (1 / (1 + y * ((p * q : ℕ) : ℝ))))
+      = (2 / ((p : ℝ) - 2)) * ∑ q ∈ A', Bw s q * (1 / (1 + y * ((p * q : ℕ) : ℝ))) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun q hq => ?_)
+    obtain ⟨hq0, -, hnp, -⟩ := hmemA' q hq
+    rw [Bw_mul_prime hp hp2 hnp hq0, if_neg hps]
+    ring
+  have hstep3 : (∑ q ∈ A', Bw s q * (1 / (1 + y * ((p * q : ℕ) : ℝ))))
+      ≤ ∑ q ∈ A', Bw s q * (1 / (1 + y * (q : ℝ))) := by
+    refine Finset.sum_le_sum (fun q hq => ?_)
+    refine mul_le_mul_of_nonneg_left ?_ (Bw_nonneg s q)
+    refine one_div_le_one_div_of_le ?_ ?_
+    · have h0 : (0 : ℝ) ≤ y * (q : ℝ) := mul_nonneg hy (Nat.cast_nonneg q)
+      linarith
+    · have h1 : (q : ℝ) ≤ ((p * q : ℕ) : ℝ) := by
+        push_cast
+        nlinarith [Nat.cast_nonneg (α := ℝ) q]
+      have h0 : (0 : ℝ) ≤ y * (q : ℝ) := mul_nonneg hy (Nat.cast_nonneg q)
+      have h0' : (0 : ℝ) ≤ y * ((p * q : ℕ) : ℝ) :=
+        mul_nonneg hy (Nat.cast_nonneg _)
+      nlinarith
+  have hstep4 : (∑ q ∈ A', Bw s q * (1 / (1 + y * (q : ℝ))))
+      ≤ ∑ q ∈ F.filter (fun q => ¬ p ∣ q), Bw s q * (1 / (1 + y * (q : ℝ))) := by
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun i _ _ =>
+      mul_nonneg (Bw_nonneg s i) (by positivity))
+    intro q hq
+    rw [hA', Finset.mem_filter] at hq
+    rw [Finset.mem_filter]
+    exact ⟨hq.1, hq.2.1⟩
+  have hfac : ((p : ℝ) - 2) / 2 * (2 / ((p : ℝ) - 2)) = 1 := by
+    field_simp
+  calc ((p : ℝ) - 2) / 2 * (∑ q ∈ F.filter (fun q => p ∣ q),
+        Bw s q * (1 / (1 + y * (q : ℝ))))
+      = ((p : ℝ) - 2) / 2 * (∑ q ∈ A', Bw s (p * q)
+          * (1 / (1 + y * ((p * q : ℕ) : ℝ)))) := by rw [hstep1]
+    _ = ((p : ℝ) - 2) / 2 * ((2 / ((p : ℝ) - 2))
+          * ∑ q ∈ A', Bw s q * (1 / (1 + y * ((p * q : ℕ) : ℝ)))) := by rw [hstep2]
+    _ = ∑ q ∈ A', Bw s q * (1 / (1 + y * ((p * q : ℕ) : ℝ))) := by
+        rw [← mul_assoc, hfac, one_mul]
+    _ ≤ ∑ q ∈ A', Bw s q * (1 / (1 + y * (q : ℝ))) := hstep3
+    _ ≤ ∑ q ∈ F.filter (fun q => ¬ p ∣ q), Bw s q * (1 / (1 + y * (q : ℝ))) := hstep4
+
+/-- **The squarefree majorisation in `Bw` form**, by adjoining the primes of `s` one at a time. -/
+private theorem sqfree_major_aux : ∀ (s : Finset ℕ), (∀ p ∈ s, 2 < p) → (∀ p ∈ s, p.Prime) →
+    ∀ (z y : ℝ), 0 ≤ y →
+    (∏ p ∈ s, ((p : ℝ) - 2) / ((p : ℝ) - 1))
+        * (∑ q ∈ Fsq z, Bw ∅ q * (1 / (1 + y * (q : ℝ))))
+      ≤ ∑ q ∈ Fsq z, Bw s q * (1 / (1 + y * (q : ℝ))) := by
+  intro s
+  induction s using Finset.induction_on with
+  | empty =>
+    intro _ _ z y _
+    simp
+  | insert p s' hp ih =>
+    intro hs hpr z y hy
+    have hp2 : 2 < p := hs p (Finset.mem_insert_self p s')
+    have hpp : p.Prime := hpr p (Finset.mem_insert_self p s')
+    have hp2R : (2 : ℝ) < (p : ℝ) := by exact_mod_cast hp2
+    have hp1R : (0 : ℝ) < (p : ℝ) - 1 := by linarith
+    have hs' : ∀ x ∈ s', 2 < x := fun x hx => hs x (Finset.mem_insert_of_mem hx)
+    have hpr' : ∀ x ∈ s', x.Prime := fun x hx => hpr x (Finset.mem_insert_of_mem hx)
+    have hIH := ih hs' hpr' z y hy
+    set w : ℕ → ℝ := fun q => 1 / (1 + y * (q : ℝ)) with hw
+    set U := ∑ q ∈ (Fsq z).filter (fun q => ¬ p ∣ q), Bw s' q * w q with hU
+    set Z := ∑ q ∈ (Fsq z).filter (fun q => p ∣ q), Bw s' q * w q with hZ
+    have hpair : ((p : ℝ) - 2) / 2 * Z ≤ U := by
+      rw [hZ, hU]
+      exact pairing (z := z) (y := y) hy hpp hp2 (s := s') hp
+    have hB : (∑ q ∈ Fsq z, Bw s' q * w q) = U + Z := by
+      rw [hU, hZ,
+        ← Finset.sum_filter_add_sum_filter_not (Fsq z) (fun q => p ∣ q)
+          (fun q => Bw s' q * w q),
+        add_comm]
+    have hsum : (∑ q ∈ Fsq z, Bw (insert p s') q * w q)
+        = U + ((p : ℝ) - 2) / (2 * ((p : ℝ) - 1)) * Z := by
+      have hpt : ∀ q ∈ Fsq z, Bw (insert p s') q * w q
+          = (if p ∣ q then ((p : ℝ) - 2) / (2 * ((p : ℝ) - 1)) else 1) * (Bw s' q * w q) := by
+        intro q hq
+        have hq0 : q ≠ 0 := by
+          rw [Fsq, Finset.mem_filter, Finset.mem_Icc] at hq
+          have := hq.1.1
+          omega
+        rw [Bw_insert hp hp2 hpp hq0]
+        ring
+      rw [Finset.sum_congr rfl hpt,
+        ← Finset.sum_filter_add_sum_filter_not (Fsq z) (fun q => p ∣ q)
+          (fun q => (if p ∣ q then ((p : ℝ) - 2) / (2 * ((p : ℝ) - 1)) else 1)
+            * (Bw s' q * w q))]
+      conv_lhs => rw [add_comm]
+      rw [hU, hZ]
+      congr 1
+      · refine Finset.sum_congr rfl (fun q hq => ?_)
+        rw [Finset.mem_filter] at hq
+        rw [if_neg hq.2, one_mul]
+      · rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl (fun q hq => ?_)
+        rw [Finset.mem_filter] at hq
+        rw [if_pos hq.2]
+    have step1 : ((p : ℝ) - 2) / ((p : ℝ) - 1)
+        * ((∏ x ∈ s', ((x : ℝ) - 2) / ((x : ℝ) - 1)) * (∑ q ∈ Fsq z, Bw ∅ q * w q))
+        ≤ ((p : ℝ) - 2) / ((p : ℝ) - 1) * (U + Z) := by
+      refine mul_le_mul_of_nonneg_left ?_ (div_nonneg (by linarith) (by linarith))
+      rw [← hB]
+      exact hIH
+    have step2 : ((p : ℝ) - 2) / ((p : ℝ) - 1) * (U + Z)
+        ≤ U + ((p : ℝ) - 2) / (2 * ((p : ℝ) - 1)) * Z := by
+      have hdiff : U + ((p : ℝ) - 2) / (2 * ((p : ℝ) - 1)) * Z
+            - ((p : ℝ) - 2) / ((p : ℝ) - 1) * (U + Z)
+          = (1 / ((p : ℝ) - 1)) * (U - ((p : ℝ) - 2) / 2 * Z) := by
+        field_simp
+        ring
+      have hnonneg : 0 ≤ U - ((p : ℝ) - 2) / 2 * Z := sub_nonneg.mpr hpair
+      rw [← sub_nonneg, hdiff]
+      exact mul_nonneg (le_of_lt (one_div_pos.mpr hp1R)) hnonneg
+    rw [Finset.prod_insert hp, hsum]
+    calc ((p : ℝ) - 2) / ((p : ℝ) - 1) * (∏ x ∈ s', ((x : ℝ) - 2) / ((x : ℝ) - 1))
+          * (∑ q ∈ Fsq z, Bw ∅ q * w q)
+        = ((p : ℝ) - 2) / ((p : ℝ) - 1)
+            * ((∏ x ∈ s', ((x : ℝ) - 2) / ((x : ℝ) - 1)) * (∑ q ∈ Fsq z, Bw ∅ q * w q)) := by
+          ring
+      _ ≤ ((p : ℝ) - 2) / ((p : ℝ) - 1) * (U + Z) := step1
+      _ ≤ U + ((p : ℝ) - 2) / (2 * ((p : ℝ) - 1)) * Z := step2
+
+/-- The local factors of `Sₙ` recombine into `Bw (Nodd n)`: the `p = 2` factor of `Sₙ` is `1`,
+because `n` is even. -/
+private theorem prod_Sn_factors (n q : ℕ) (hn : Even n) (hn0 : 0 < n) :
+    (∏ p ∈ q.primeFactors.filter (fun p => ¬ p ∣ n), 2 / ((p : ℝ) - 2))
+        * (∏ p ∈ q.primeFactors.filter (fun p => p ∣ n), 1 / ((p : ℝ) - 1))
+      = Bw (Nodd n) q := by
+  classical
+  have h2n : 2 ∣ n := by
+    rcases hn with ⟨k, hk⟩
+    exact ⟨k, by omega⟩
+  set T := q.primeFactors with hT
+  have h1 : (∏ p ∈ T.filter (fun p => ¬ p ∣ n), 2 / ((p : ℝ) - 2))
+      * (∏ p ∈ T.filter (fun p => p ∣ n), 1 / ((p : ℝ) - 1))
+      = ∏ p ∈ T, (if p ∣ n then 1 / ((p : ℝ) - 1) else 2 / ((p : ℝ) - 2)) := by
+    have hsplit := Finset.prod_filter_mul_prod_filter_not T (fun p => p ∣ n)
+      (fun p => if p ∣ n then 1 / ((p : ℝ) - 1) else 2 / ((p : ℝ) - 2))
+    have hA : (∏ p ∈ T.filter (fun p => p ∣ n),
+        (if p ∣ n then 1 / ((p : ℝ) - 1) else 2 / ((p : ℝ) - 2)))
+        = ∏ p ∈ T.filter (fun p => p ∣ n), 1 / ((p : ℝ) - 1) :=
+      Finset.prod_congr rfl (fun p hp => if_pos (Finset.mem_filter.mp hp).2)
+    have hB : (∏ p ∈ T.filter (fun p => ¬ p ∣ n),
+        (if p ∣ n then 1 / ((p : ℝ) - 1) else 2 / ((p : ℝ) - 2)))
+        = ∏ p ∈ T.filter (fun p => ¬ p ∣ n), 2 / ((p : ℝ) - 2) :=
+      Finset.prod_congr rfl (fun p hp => if_neg (Finset.mem_filter.mp hp).2)
+    rw [hA, hB] at hsplit
+    rw [← hsplit, mul_comm]
+  have h2 : (∏ p ∈ T, (if p ∣ n then 1 / ((p : ℝ) - 1) else 2 / ((p : ℝ) - 2)))
+      = ∏ p ∈ T.filter (2 < ·), (if p ∣ n then 1 / ((p : ℝ) - 1)
+          else 2 / ((p : ℝ) - 2)) := by
+    refine (Finset.prod_subset (Finset.filter_subset _ _) (fun x hx hxf => ?_)).symm
+    have hx2 : ¬ (2 < x) := fun hcon => hxf (Finset.mem_filter.mpr ⟨hx, hcon⟩)
+    have hxP : x.Prime := (Nat.mem_primeFactors.mp hx).1
+    have hxeq : x = 2 := le_antisymm (by omega) hxP.two_le
+    rw [hxeq, if_pos h2n]
+    norm_num
+  have h3 : (∏ p ∈ T.filter (2 < ·), (if p ∣ n then 1 / ((p : ℝ) - 1)
+        else 2 / ((p : ℝ) - 2))) = Bw (Nodd n) q := by
+    rw [Bw, hT]
+    refine Finset.prod_congr rfl (fun x hx => ?_)
+    obtain ⟨hxT, hx2⟩ := Finset.mem_filter.mp hx
+    have hxP : x.Prime := (Nat.mem_primeFactors.mp hxT).1
+    have hmem : (x ∈ Nodd n) ↔ x ∣ n := by
+      rw [Nodd, Finset.mem_filter, Nat.mem_primeFactors]
+      exact ⟨fun h => h.1.2.1, fun h => ⟨⟨hxP, h, hn0.ne'⟩, hx2⟩⟩
+    by_cases h : x ∣ n
+    · rw [if_pos h, if_pos (hmem.mpr h)]
+    · rw [if_neg h, if_neg (fun hc => h (hmem.mp hc))]
+  rw [h1, h2]
+  exact h3
+
+/-- `Sₙ` as a sum of the `Bw (Nodd n)` weights over the squarefree range. -/
+private theorem Sn_eq (n : ℕ) (hn : Even n) (hn0 : 0 < n) (z y : ℝ) :
+    Sn n z y = ∑ q ∈ Fsq z, Bw (Nodd n) q * (1 / (1 + y * (q : ℝ))) := by
+  classical
+  rw [Sn, Fsq]
+  have hpt : ∀ q ∈ Finset.Icc 1 ⌊z⌋₊,
+      (if Squarefree q then (1 : ℝ) else 0) / (1 + y * (q : ℝ))
+          * (∏ p ∈ q.primeFactors.filter (fun p => ¬ p ∣ n), 2 / ((p : ℝ) - 2))
+          * (∏ p ∈ q.primeFactors.filter (fun p => p ∣ n), 1 / ((p : ℝ) - 1))
+        = if Squarefree q then ((1 / (1 + y * (q : ℝ)))
+            * (∏ p ∈ q.primeFactors.filter (fun p => ¬ p ∣ n), 2 / ((p : ℝ) - 2))
+            * (∏ p ∈ q.primeFactors.filter (fun p => p ∣ n), 1 / ((p : ℝ) - 1))) else 0 := by
+    intro q _
+    by_cases h : Squarefree q <;> simp [h]
+  rw [Finset.sum_congr rfl hpt, ← Finset.sum_filter]
+  refine Finset.sum_congr rfl (fun q hq => ?_)
+  rw [mul_assoc, prod_Sn_factors n q hn hn0]
+  ring
+
+/-- CUT (not proved).  The squarefree majorisation: `Sn n z y` dominates the `α`-weighted sum
+of `Π_{p|q,p>2} 2/(p-2)/(1+yq)` over squarefree `q ≤ z`.  Together with `fibre_sum` and the
+monotonicity of `q ↦ 1/(1+yq)` this gives `lemma4`. -/
+private theorem sqfree_majorisation (n : ℕ) (hn : Even n) (hn0 : 0 < n) (z y : ℝ) (hz : 1 ≤ z)
+    (hy : 0 ≤ y) :
+    (∏ p ∈ n.primeFactors.filter (2 < ·), ((p : ℝ) - 2) / ((p : ℝ) - 1)) *
+        (∑ q ∈ (Icc 1 ⌊z⌋₊).filter Squarefree,
+          (∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2)) / (1 + y * q))
+      ≤ Sn n z y := by
+  classical
+  rw [Sn_eq n hn hn0 z y]
+  have h1 : (∑ q ∈ (Icc 1 ⌊z⌋₊).filter Squarefree,
+        (∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2)) / (1 + y * q))
+      = ∑ q ∈ Fsq z, Bw ∅ q * (1 / (1 + y * (q : ℝ))) := by
+    rw [Fsq]
+    refine Finset.sum_congr rfl (fun q _ => ?_)
+    rw [Bw_empty, div_eq_mul_one_div]
+  rw [h1]
+  have hs : ∀ p ∈ Nodd n, 2 < p := fun p hp => two_lt_of_mem_Nodd hp
+  have hpr : ∀ p ∈ Nodd n, p.Prime := fun p hp =>
+    (Nat.mem_primeFactors.mp (Finset.mem_filter.mp hp).1).1
+  have h := sqfree_major_aux (Nodd n) hs hpr z y hy
+  rw [Nodd] at h
+  exact h
+
+/-- `sk m ≥ 1`. -/
+private theorem sk_pos (m : ℕ) : 1 ≤ sk m := by
+  rw [sk]
+  exact Finset.one_le_prod (fun p hp => (Nat.prime_of_mem_primeFactors hp).one_le)
+
+/-- `sk m` is squarefree: it is the product of the distinct primes of `m`. -/
+private theorem squarefree_sk (m : ℕ) : Squarefree (sk m) := by
+  have hsk0 : sk m ≠ 0 := by have h := sk_pos m; omega
+  rw [Nat.squarefree_iff_prime_squarefree]
+  intro x hx hdvd
+  have hxdvd : x ∣ sk m := dvd_trans (dvd_mul_right x x) hdvd
+  have hxmem : x ∈ m.primeFactors := by
+    have h := Nat.mem_primeFactors.mpr ⟨hx, hxdvd, hsk0⟩
+    rwa [primeFactors_sk] at h
+  have hfac : (sk m).factorization x = 1 := by
+    rw [sk, show (∏ q ∈ m.primeFactors, q) = ∏ q ∈ m.primeFactors, q ^ (1 : ℕ) from by simp,
+      factorization_prod_prime_pow (fun q hq => Nat.prime_of_mem_primeFactors hq) (fun _ => 1) hxmem]
+  have h2 : 2 ≤ (sk m).factorization x := by
+    have hx2 : x ^ 2 ∣ sk m := by rw [pow_two]; exact hdvd
+    exact (Nat.Prime.pow_dvd_iff_le_factorization hx hsk0).mp hx2
+  omega
+
 /-- LEAF. Lemma 4, (3.5), in truncated form: for `y ≥ 0`, `z ≥ 1`, `n` even and every finite
 set `T` of pairs `(r, d)` with `s(rd) ≤ z`,
 `Π_{p|n,p>2} (p-2)/(p-1) · Σ_{(r,d) ∈ T} g(d) τ₁(r)/(r + r y s(rd)) ≤ S_n(z, y)`. The terms are
@@ -844,7 +2357,119 @@ theorem lemma4 (n : ℕ) (hn : Even n) (hn0 : 0 < n) (z y : ℝ) (hz : 1 ≤ z) 
     (∏ p ∈ n.primeFactors.filter (2 < ·), ((p : ℝ) - 2) / ((p : ℝ) - 1)) *
       ∑ rd ∈ T, g rd.2 * (tau1 rd.1 : ℝ) / (rd.1 + rd.1 * y * sk (rd.1 * rd.2))
       ≤ Sn n z y := by
-  sorry
+
+  classical
+  set al := ∏ p ∈ n.primeFactors.filter (2 < ·), ((p : ℝ) - 2) / ((p : ℝ) - 1) with hal
+  set Wt := fun q : ℕ => 1 / (1 + y * (q : ℝ)) with hWt
+  set Yw := fun q : ℕ => ∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2) with hYw
+  -- (0) the summand as a product of the fibre weight and the radical weight
+  have hterm : ∀ rd ∈ T, g rd.2 * (tau1 rd.1 : ℝ) / (rd.1 + rd.1 * y * sk (rd.1 * rd.2))
+      = (g rd.2 * (tau1 rd.1 : ℝ) / rd.1) * Wt (sk (rd.1 * rd.2)) := by
+    intro rd hrd
+    obtain ⟨h1, -, -⟩ := hT rd hrd
+    have hr : (rd.1 : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+    have hs1 : (1 + y * (sk (rd.1 * rd.2) : ℝ)) ≠ 0 := by
+      have h0 : (0 : ℝ) ≤ y * (sk (rd.1 * rd.2) : ℝ) := mul_nonneg hy (Nat.cast_nonneg _)
+      have : (0 : ℝ) ≤ (sk (rd.1 * rd.2) : ℝ) := Nat.cast_nonneg _
+      linarith
+    have hfac : (rd.1 : ℝ) + (rd.1 : ℝ) * y * (sk (rd.1 * rd.2) : ℝ)
+        = (rd.1 : ℝ) * (1 + y * (sk (rd.1 * rd.2) : ℝ)) := by ring
+    rw [hfac, hWt]
+    field_simp
+  rw [Finset.sum_congr rfl hterm]
+  -- (1) split the finite sum by the value of the radical
+  set Q := T.image (fun rd => sk (rd.1 * rd.2)) with hQ
+  have hmaps : ∀ rd ∈ T, sk (rd.1 * rd.2) ∈ Q := fun rd hrd => Finset.mem_image_of_mem _ hrd
+  rw [← Finset.sum_fiberwise_of_maps_to hmaps
+    (fun rd => (g rd.2 * (tau1 rd.1 : ℝ) / rd.1) * Wt (sk (rd.1 * rd.2)))]
+  -- (2) on each fibre the radical weight is constant
+  have hstep : ∀ q ∈ Q, (∑ rd ∈ T.filter (fun rd => sk (rd.1 * rd.2) = q),
+        (g rd.2 * (tau1 rd.1 : ℝ) / rd.1) * Wt (sk (rd.1 * rd.2)))
+      = (∑ rd ∈ T.filter (fun rd => sk (rd.1 * rd.2) = q),
+          g rd.2 * (tau1 rd.1 : ℝ) / rd.1) * Wt q := by
+    intro q hq
+    rw [Finset.sum_mul]
+    exact Finset.sum_congr rfl (fun rd hrd => by
+      have h := (Finset.mem_filter.mp hrd).2
+      rw [h])
+  rw [Finset.sum_congr rfl hstep]
+  -- (3) each fibre sum is bounded by `Yw q`
+  have hbnd : ∀ q ∈ Q, (∑ rd ∈ T.filter (fun rd => sk (rd.1 * rd.2) = q),
+        g rd.2 * (tau1 rd.1 : ℝ) / rd.1) ≤ Yw q := by
+    intro q hq
+    obtain ⟨rd0, hrd0T, hrd0q⟩ := Finset.mem_image.mp hq
+    have hqs : Squarefree q := by
+      rw [← hrd0q]; exact squarefree_sk (rd0.1 * rd0.2)
+    have hqpos : 0 < q := by
+      rw [← hrd0q]; exact sk_pos _
+    have htsum := fibre_sum q hqs hqpos
+    have hsumm : Summable (fun z : ℕ × ℕ =>
+        if sk (z.1 * z.2) = q then g z.2 * (tau1 z.1 : ℝ) / z.1 else 0) := by
+      by_contra hcon
+      have hz := tsum_eq_zero_of_not_summable hcon
+      rw [htsum] at hz
+      have hpos : (0 : ℝ) < ∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2) :=
+        Finset.prod_pos (fun p hp => by
+          have hp2 : (2 : ℝ) < (p : ℝ) := by exact_mod_cast (Finset.mem_filter.mp hp).2
+          exact div_pos (by norm_num) (by linarith))
+      linarith
+    have h1 : (∑ rd ∈ T.filter (fun rd => sk (rd.1 * rd.2) = q),
+          g rd.2 * (tau1 rd.1 : ℝ) / rd.1)
+        = ∑ rd ∈ T.filter (fun rd => sk (rd.1 * rd.2) = q),
+            (if sk (rd.1 * rd.2) = q then g rd.2 * (tau1 rd.1 : ℝ) / rd.1 else 0) :=
+      Finset.sum_congr rfl (fun rd hrd => by rw [if_pos (Finset.mem_filter.mp hrd).2])
+    rw [h1]
+    refine le_trans (hsumm.sum_le_tsum _ ?_) ?_
+    · intro i _
+      by_cases h : sk (i.1 * i.2) = q
+      · rw [if_pos h]
+        exact div_nonneg (mul_nonneg (g_nonneg _) (Nat.cast_nonneg _)) (Nat.cast_nonneg _)
+      · rw [if_neg h]
+    · rw [htsum, hYw]
+  -- (4) `Q` lies in the squarefree range
+  have hQsub : Q ⊆ (Finset.Icc 1 ⌊z⌋₊).filter (fun q => Squarefree q) := by
+    intro q hq
+    obtain ⟨rd, hrdT, rfl⟩ := Finset.mem_image.mp hq
+    obtain ⟨-, -, h3⟩ := hT rd hrdT
+    exact Finset.mem_filter.mpr
+      ⟨Finset.mem_Icc.mpr ⟨sk_pos _, Nat.le_floor h3⟩, squarefree_sk _⟩
+  -- (5) the two monotone comparisons and the majorisation
+  have hYnn : ∀ q : ℕ, 0 ≤ Yw q := fun q => by
+    rw [hYw]
+    exact Finset.prod_nonneg (fun p hp => by
+      have hp2 : (2 : ℝ) < (p : ℝ) := by exact_mod_cast (Finset.mem_filter.mp hp).2
+      exact div_nonneg (by norm_num) (by linarith))
+  have hWnn : ∀ q : ℕ, 0 ≤ Wt q := fun q => by
+    rw [hWt]
+    have h0 : (0 : ℝ) ≤ y * (q : ℝ) := mul_nonneg hy (Nat.cast_nonneg _)
+    exact div_nonneg (by norm_num) (by linarith)
+  have halpos : 0 ≤ al := by
+    rw [hal]
+    exact Finset.prod_nonneg (fun p hp => by
+      have hp2 : (2 : ℝ) < (p : ℝ) := by exact_mod_cast (Finset.mem_filter.mp hp).2
+      exact div_nonneg (by linarith) (by linarith))
+  have step1 : al * (∑ q ∈ Q, (∑ rd ∈ T.filter (fun rd => sk (rd.1 * rd.2) = q),
+        g rd.2 * (tau1 rd.1 : ℝ) / rd.1) * Wt q)
+      ≤ al * (∑ q ∈ Q, Yw q * Wt q) := by
+    refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun q hq => ?_)) halpos
+    exact mul_le_mul_of_nonneg_right (hbnd q hq) (hWnn q)
+  have step2 : al * (∑ q ∈ Q, Yw q * Wt q)
+      ≤ al * (∑ q ∈ (Finset.Icc 1 ⌊z⌋₊).filter (fun q => Squarefree q), Yw q * Wt q) := by
+    refine mul_le_mul_of_nonneg_left ?_ halpos
+    exact Finset.sum_le_sum_of_subset_of_nonneg hQsub
+      (fun i _ _ => mul_nonneg (hYnn i) (hWnn i))
+  have step3 : al * (∑ q ∈ (Finset.Icc 1 ⌊z⌋₊).filter (fun q => Squarefree q), Yw q * Wt q)
+      ≤ Sn n z y := by
+    have hmaj := sqfree_majorisation n hn hn0 z y hz hy
+    have hconv : (∑ q ∈ (Finset.Icc 1 ⌊z⌋₊).filter (fun q => Squarefree q),
+          (∏ p ∈ q.primeFactors.filter (2 < ·), 2 / ((p : ℝ) - 2)) / (1 + y * q))
+        = ∑ q ∈ (Finset.Icc 1 ⌊z⌋₊).filter (fun q => Squarefree q), Yw q * Wt q := by
+      refine Finset.sum_congr rfl (fun q _ => ?_)
+      rw [hYw, hWt, div_eq_mul_one_div]
+    rw [hconv] at hmaj
+    rw [hal]
+    exact hmaj
+  exact le_trans step1 (le_trans step2 step3)
 
 /-- LEAF. (2.2), first half: `0.57721 < γ < 0.57722`. Vaughan 1977 p. 94, (2.2), by
 Euler-Maclaurin; Mathlib's `Real.eulerMascheroniSeq` and `eulerMascheroniSeq'` bracket γ.
