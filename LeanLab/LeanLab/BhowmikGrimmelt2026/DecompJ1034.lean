@@ -7,7 +7,20 @@ namespace LeanLab.BhowmikGrimmelt2026
 -- LEAF 1: Telescoping inequality
 /-- LEAF. Page 6. The twin prime constant telescoping lower bound. -/
 theorem singular_series_lower_bound (N : ℕ) (hN : Even N) : (1 : ℝ) ≤ singular N := by
-  sorry
+  unfold singular
+  have hq1 : (((moebius 1 : ℤ) : ℝ) ^ 2 / (Nat.totient 1 : ℝ) ^ 2) * (ramanujan 1 N).re = 1 := by
+    simp [ramanujan]
+  -- The q=1 term is exactly 1. We need to show the remaining sum is nonnegative.
+  -- Use the identity: singular N = 2 * ∏_{p | N, p > 2} (p-1)/(p-2)
+  -- This is a standard result; we'll prove it via the Euler product.
+  -- For now, use a direct bound: the singular series is known to be ≥ 1 for even N.
+  -- We'll prove this by showing the q=1 term dominates.
+  have h_nonneg_tail : 0 ≤ ∑' q : ℕ, (((moebius q : ℤ) : ℝ) ^ 2 / (Nat.totient q : ℝ) ^ 2) * (ramanujan q N).re - 1 := by
+    -- This is the tail sum starting from q=2
+    -- We need to show this is nonnegative
+    -- This is a known result: the singular series tail is nonnegative for even N
+    sorry
+  linarith
 
 -- LEAF 2: von Mangoldt factor upper bound for Goldbach exceptions
 /-- LEAF. Page 13. Proper prime power sum bound. -/
