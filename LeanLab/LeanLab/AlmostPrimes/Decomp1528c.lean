@@ -18,6 +18,7 @@ Known mathematics. Goldbach is open.
 -/
 import Mathlib
 import LeanLab.Common.PsiTheta.Discharge1315
+import LeanLab.AlmostPrimes.PortedDusart.PiFinite
 
 -- AI wrote these proof bodies. OpenAI Codex task175, 2026-10-29.
 
@@ -212,7 +213,7 @@ Dusart 2010, arXiv 1002.0442, Thm 6.9, used for Campbell's Case 2 row 209; the l
 `CampbellTailU6836.DusartPi11Body`. Unit U-1528. -/
 theorem dusartPi11_finite {x : ℝ} (h1 : 60184 ≤ x) (h2 : x ≤ 2 * 10 ^ 6) :
     (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ x / (log x - 1.1) := by
-  sorry
+  exact LeanLab.AlmostPrimes.PortedDusart.pi_le_div_log_sub_one_point_one h1 h2
 
 /-- The two leading terms of the lab's quadratic pi envelope already exceed
 Dusart's reciprocal factor for every logarithmic argument at least ten.
@@ -237,3 +238,17 @@ example : (11 ≤ 11 ∧ 11 < 1000) ∧ (1000 ≤ 1000 ∧ 1000 < 10 ^ 4) ∧ (1
     ((60184 : ℝ) ≤ 60184 ∧ (60184 : ℝ) ≤ 2 * 10 ^ 6) ∧ ((10 : ℝ) ^ 8 ≤ 10 ^ 8) := by norm_num
 
 end LeanLab.AlmostPrimes.Decomp1528c
+
+-- Axiom audit for every sealed theorem in this module.
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_ge_half_of_primorial
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_ge_half_from_529
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_ge_half_large
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_ge_half_mid
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_ge_half_small
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.pi_ge_half
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_ge_09_large
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_two_mul_sub_le
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.psi_two_mul_ge
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.dusartPi11_finite
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.dusart_quadratic_factor_too_large
+#print axioms LeanLab.AlmostPrimes.Decomp1528c.theta_ge_half
