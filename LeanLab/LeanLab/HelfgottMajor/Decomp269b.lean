@@ -59,6 +59,9 @@ theorem very_low_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
       |s.im| ≤ T → s.re = 1 / 2) :
     veryLowMass χ δ T ≤ 2.15581 * (0.819 * log q + 16.8) := by
+  -- BLOCKED OUT OF REACH: requires Dirichlet L-function zero-counting bound N(1, χ) ≤ 0.819 log q + 16.8
+  -- and critical line Gaussian Mellin bound ‖gaussianMellin δ ρ‖ ≤ 2.15581 from P0014 displays 4.26 and 4.42.
+  -- Mathlib lacks zero counting functions and explicit Riemann-von Mangoldt formulas for L-functions.
   sorry
 
 /-- LEAF. Pages 39 and 40, display 4.32 and the final Cauchy-Schwarz estimate.
@@ -73,6 +76,9 @@ theorem middle_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
       (sqrt Sec45.nTwo + sqrt Sec45.nLog) * sqrt T * log (q * T) +
       (17.21 * sqrt Sec45.nLog - log (2 * π * sqrt (exp 1)) * sqrt Sec45.nTwo) * sqrt T +
       2.15581 * (0.5 * log q + 17.7) := by
+  -- BLOCKED OUT OF REACH: requires Cauchy-Schwarz for sums over zeros, critical line Mellin Plancherel L2
+  -- identities for nTwo and nLog from displays 4.32 and 4.42, and zero density error integrals.
+  -- Mathlib lacks Mellin Plancherel isometry and Riemann-Stieltjes summation over zero sets.
   sorry
 
 /-- Exactly Decomp269a.low_zero_bound, assembled from the two smaller analytic ranges.
