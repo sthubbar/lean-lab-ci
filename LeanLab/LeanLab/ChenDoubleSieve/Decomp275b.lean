@@ -132,10 +132,119 @@ def integralTerms (F f ω : ℝ → ℝ) : Fin 12 → ℝ :=
     36 / 5 * fourfold ω (fun t => 1 / 2 - 2 * kappa1 - t) kappa1 (1 / 10) (fun _ => kappa2) (fun t => t * (1 - t)) +
       8 * fourfold ω (fun t => 1 / 2 - 2 * kappa1 - t) (1 / 10) kappa2 (fun _ => kappa2) id]
 
+/-- Buchstab function ω(u) for u ∈ [1, 2] -/
+def ω_1_2 (u : ℝ) : ℝ := 1 / u
+
+/-- Buchstab function ω(u) for u ∈ [2, 3] -/
+def ω_2_3 (u : ℝ) : ℝ := (1 + Real.log (u - 1)) / u
+
+/-- Buchstab function ω(u) for u ∈ [3, 4] -/
+def ω_3_4 (u : ℝ) : ℝ :=
+  (1 + Real.log 2 + ∫ t in (3 : ℝ)..u, (1 + Real.log (t - 2)) / (t - 1)) / u
+
+/-- Buchstab function ω(u) for u ∈ [4, 5] -/
+def ω_4_5 (u : ℝ) : ℝ :=
+  (4 * ω_3_4 4 + ∫ t in (4 : ℝ)..u, ω_3_4 (t - 1)) / u
+
+/-- Buchstab function ω(u) for u ∈ [5, 6] -/
+def ω_5_6 (u : ℝ) : ℝ :=
+  (5 * ω_4_5 5 + ∫ t in (5 : ℝ)..u, ω_4_5 (t - 1)) / u
+
+/-- Buchstab function ω(u) for u ∈ [6, 7] -/
+def ω_6_7 (u : ℝ) : ℝ :=
+  (6 * ω_5_6 6 + ∫ t in (6 : ℝ)..u, ω_5_6 (t - 1)) / u
+
+/-- Full Buchstab function on [1, 7] -/
+def buchstab_full (u : ℝ) : ℝ :=
+  if u ≤ 2 then ω_1_2 u
+  else if u ≤ 3 then ω_2_3 u
+  else if u ≤ 4 then ω_3_4 u
+  else if u ≤ 5 then ω_4_5 u
+  else if u ≤ 6 then ω_5_6 u
+  else ω_6_7 u
+
+/-- Linear sieve function F(u) for u ∈ (0, 2] -/
+def F_0_2 (u : ℝ) : ℝ := 2 * Real.exp Real.eulerMascheroniConstant / u
+
+/-- Linear sieve function f(u) for u ∈ (0, 2] -/
+def f_0_2 (u : ℝ) : ℝ := 0
+
+/-- Linear sieve function F(u) for u ∈ [2, 3] -/
+def F_2_3 (u : ℝ) : ℝ := 2 * Real.exp Real.eulerMascheroniConstant / u
+
+/-- Linear sieve function f(u) for u ∈ [2, 3] -/
+def f_2_3 (u : ℝ) : ℝ :=
+  2 * Real.exp Real.eulerMascheroniConstant * Real.log (u - 1) / u
+
+/-- Linear sieve function F(u) for u ∈ [3, 4] -/
+def F_3_4 (u : ℝ) : ℝ :=
+  (2 * Real.exp Real.eulerMascheroniConstant *
+    (1 + ∫ t in (2 : ℝ)..(u - 1), Real.log (t - 1) / t)) / u
+
+/-- Linear sieve function f(u) for u ∈ [3, 4] -/
+def f_3_4 (u : ℝ) : ℝ :=
+  (3 * f_2_3 3 + ∫ t in (3 : ℝ)..u, F_2_3 (t - 1)) / u
+
+/-- Linear sieve function F(u) for u ∈ [4, 5] -/
+def F_4_5 (u : ℝ) : ℝ :=
+  (4 * F_3_4 4 + ∫ t in (4 : ℝ)..u, f_3_4 (t - 1)) / u
+
+/-- Linear sieve function f(u) for u ∈ [4, 5] -/
+def f_4_5 (u : ℝ) : ℝ :=
+  (4 * f_3_4 4 + ∫ t in (4 : ℝ)..u, F_3_4 (t - 1)) / u
+
+/-- Linear sieve function F(u) for u ∈ [5, 6] -/
+def F_5_6 (u : ℝ) : ℝ :=
+  (5 * F_4_5 5 + ∫ t in (5 : ℝ)..u, f_4_5 (t - 1)) / u
+
+/-- Linear sieve function f(u) for u ∈ [5, 6] -/
+def f_5_6 (u : ℝ) : ℝ :=
+  (5 * f_4_5 5 + ∫ t in (5 : ℝ)..u, F_4_5 (t - 1)) / u
+
+/-- Full linear sieve function F on (0, 6] -/
+def F_full (u : ℝ) : ℝ :=
+  if u ≤ 2 then F_0_2 u
+  else if u ≤ 3 then F_2_3 u
+  else if u ≤ 4 then F_3_4 u
+  else if u ≤ 5 then F_4_5 u
+  else F_5_6 u
+
+/-- Full linear sieve function f on (0, 6] -/
+def f_full (u : ℝ) : ℝ :=
+  if u ≤ 2 then f_0_2 u
+  else if u ≤ 3 then f_2_3 u
+  else if u ≤ 4 then f_3_4 u
+  else if u ≤ 5 then f_4_5 u
+  else f_5_6 u
+
 /-- LEAF. Wu 2004 page 6 equation 2.6 and page 9 Lemma 2.10.
 The standard linear sieve pair and Buchstab function exist. -/
 theorem standard_functions : ∃ F f ω : ℝ → ℝ, IsLinearSieve F f ∧ IsBuchstab ω := by
-  sorry
+  use F_full, f_full, buchstab_full
+  have h₁ : IsLinearSieve F_full f_full := by
+    constructor
+    · sorry -- ContinuousOn F_full (Ioi 0)
+    constructor
+    · sorry -- ContinuousOn f_full (Ioi 0)
+    constructor
+    · sorry -- ∀ u, 0 < u → u ≤ 2 → F_full u = 2 * exp γ / u ∧ f_full u = 0
+    · sorry -- ∀ u, 2 < u → HasDerivAt ...
+  have h₂ : IsBuchstab buchstab_full := by
+    have h₂₁ : ContinuousOn buchstab_full (Set.Ici 1) := by sorry
+    have h₂₂ : ∀ u : ℝ, 1 ≤ u → u ≤ 2 → buchstab_full u = 1 / u := by
+      intro u hu1 hu2
+      dsimp only [buchstab_full, ω_1_2]
+      split_ifs <;>
+      (try { contradiction }) <;>
+      (try { linarith }) <;>
+      (try { field_simp <;> ring_nf <;> norm_num })
+      <;>
+      (try { simp_all [div_eq_mul_inv] <;> field_simp <;> ring_nf <;> norm_num })
+      <;>
+      (try { linarith })
+    have h₂₃ : ∀ u : ℝ, 2 < u → HasDerivAt (fun v : ℝ => v * buchstab_full v) (buchstab_full (u - 1)) u := by sorry
+    exact ⟨h₂₁, h₂₂, h₂₃⟩
+  exact ⟨h₁, h₂⟩
 
 /-- LEAF. Wu 2004 pages 34 to 37 equation 9.4, specialized to page 42's parameters.
 Drop the four nonnegative terms and retain the stated power remainder. -/
