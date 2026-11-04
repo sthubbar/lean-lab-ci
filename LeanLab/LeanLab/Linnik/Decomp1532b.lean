@@ -25,6 +25,7 @@ Proof additions by Codex task195 on 2026-10-31 UTC. AI wrote the Lean code.
 Binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.Linnik.Decomp1532b2
 import LeanLab.RieselVaughan1983.MuPhiSum
 import LeanLab.RieselVaughan1983.GaussImprim
 import LeanLab.PNTSieve.MertensUpper
@@ -3936,7 +3937,7 @@ theorem turan_interpolant {n M : ℕ} (hn : 0 < n) (hnM : n ≤ M)
     ∃ J : Finset (Fin n), J.Nonempty ∧ ∃ b : Fin n → ℂ,
       (∀ i, z i ^ (M + 1) * (∑ j, b j * z i ^ j.val) = if i ∈ J then 1 else 0) ∧
       (∑ j, ‖b j‖) ≤ (50 : ℝ) ^ M := by
-  sorry
+  exact LeanLab.Linnik.Decomp1532b2.turan_interpolant_finite hn hnM z hz hunit
 
 
 /-- Turan's finite lower bound used in Gallagher 1970 p.334.
@@ -5591,4 +5592,280 @@ theorem lemma6 : ∃ C : ℝ, ∀ k : ℕ, 2 ≤ k → ∃ Nk : ℕ, ∀ N : ℕ
         C * (Real.log k ^ 2 / k) * (Nat.log 2 N : ℝ) ^ (2 * k) := add_le_add ht hf
     _ = _ := by ring
 
+
+/-- Gallagher 1970 p.333 local density lemma in the uniform height box.
+The count includes multiplicities and retains the principal character height restriction. -/
+theorem primitive_local_zero_order_sum : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ χ : DirichletCharacter ℂ q, χ.IsPrimitive → ∀ t r : ℝ,
+      |t| ≤ T → (χ = 1 → 2 ≤ |t|) → 1 / Real.log T ≤ r → r ≤ 1 / 8 →
+      ∀ S : Finset ℂ, (∀ ρ ∈ S, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + Complex.I * t)‖ ≤ r) →
+      (∑ ρ ∈ S, (analyticOrderNatAt χ.LFunction ρ : ℝ)) ≤ C * r * Real.log T := by
+  obtain ⟨C, hC, hc⟩ := LeanLab.Linnik.Decomp1532b2.local_zero_order_sum_primitive
+  obtain ⟨K, hK, hk⟩ := log_Bt_le_log_height
+  refine ⟨C * (1 + K), by positivity, ?_⟩
+  intro T hT q hq hqT χ hp t r ht hχ hrlo hrhi S hS
+  have hlT : 0 < Real.log T := Real.log_pos (by linarith)
+  have hr : 0 < r := (one_div_pos.mpr hlT).trans_le hrlo
+  have hrlog : 1 ≤ r * Real.log T := (div_le_iff₀ hlT).mp hrlo
+  have hlog := hk hT hqT ht
+  have hmul := mul_le_mul_of_nonneg_left hlog hr.le
+  have h := hc q χ hp t r hχ hr hrhi S hS
+  apply h.trans
+  have hs : 1 + r * Real.log (LeanLab.PNTPort.DirichletZF.Bt q t) ≤
+      (1 + K) * r * Real.log T := by nlinarith
+  have hm := mul_le_mul_of_nonneg_left hs hC
+  nlinarith
+
+/-- Gallagher 1970 p.336 the bounded principal low height contribution.
+A fixed height of three also covers the endpoints used by the local disc argument. -/
+theorem principal_low_height_zero_count : ∃ C : ℝ, 0 ≤ C ∧ ∀ σ : ℝ, 1 / 2 ≤ σ →
+    (zeroCount (1 : DirichletCharacter ℂ 1) σ 3 : ℝ) ≤ C := by
+  obtain ⟨A, hA, h⟩ := zeroCount_le_unit_height
+  refine ⟨4 * A * Real.log 5, by positivity, ?_⟩
+  intro σ hσ
+  have hc := h 1 1 DirichletCharacter.isPrimitive_one_level_one σ 3 hσ (by norm_num)
+  convert hc using 1; norm_num
+
+end LeanLab.Linnik.Decomp1532b
+
+open Finset Complex
+namespace LeanLab.Linnik.Decomp1532b
+/-- Gallagher p.334 finite Turan applied to zeros repeated according to multiplicity. -/
+theorem weighted_turan_power_sum {ι : Type*} (S : Finset ι) (m : ι → ℕ) (z : ι → ℂ)
+    {M : ℕ} (hM : (∑ i ∈ S, m i) ≤ M)
+    (hz : ∃ i ∈ S, 0 < m i ∧ 1 ≤ ‖z i‖) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧
+      (1 / 50 : ℝ) ^ M ≤ ‖∑ i ∈ S, (m i : ℂ) * z i ^ ν‖ := by
+  classical
+  let I := (i : S) × Fin (m i)
+  let Z : I → ℂ := fun i => z i.1
+  have hcard : Fintype.card I = ∑ i ∈ S, m i := by simp [I, Fintype.card_sigma, Finset.sum_attach]
+  obtain ⟨i, hi, hm, hzi⟩ := hz
+  let i₀ : I := ⟨⟨i, hi⟩, ⟨0, hm⟩⟩
+  have hpos : 0 < Fintype.card I := Fintype.card_pos_iff.mpr ⟨i₀⟩
+  let e := Fintype.equivFin I
+  obtain ⟨ν, hν, hν', hsum⟩ := turan_power_sum_lower_bound hpos
+    (by simpa [hcard] using hM) (fun j => Z (e.symm j))
+    ⟨e i₀, by simpa [Z, i₀] using hzi⟩
+  refine ⟨ν, hν, hν', ?_⟩
+  have heq : (∑ j : Fin (Fintype.card I), Z (e.symm j) ^ ν) =
+      ∑ i ∈ S, (m i : ℂ) * z i ^ ν := by
+    calc
+      _ = ∑ i : I, Z i ^ ν := e.symm.sum_comp _
+      _ = _ := by
+        simp only [I, Z, Fintype.sum_sigma, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+        exact Finset.sum_attach S (fun i => (m i : ℂ) * z i ^ ν)
+  rwa [heq] at hsum
+end LeanLab.Linnik.Decomp1532b
+
+open Finset Complex
+namespace LeanLab.Linnik.Decomp1532b
+/-- Gallagher p.334 Turan lower bound for a finite reciprocal pole power sum. -/
+theorem reciprocal_pole_turan {ι : Type*} (S : Finset ι) (m : ι → ℕ) (ρ : ι → ℂ)
+    {M : ℕ} (hM : (∑ i ∈ S, m i) ≤ M) {r : ℝ} (hr : 0 < r) (s : ℂ)
+    (hne : ∀ i ∈ S, s - ρ i ≠ 0)
+    (hclose : ∃ i ∈ S, 0 < m i ∧ ‖s - ρ i‖ ≤ 2 * r) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧
+      1 / (100 * r) ^ ν ≤ ‖∑ i ∈ S, (m i : ℂ) / (s - ρ i) ^ ν‖ := by
+  classical
+  let z : ι → ℂ := fun i => (2 * r : ℝ) / (s - ρ i)
+  have hz : ∃ i ∈ S, 0 < m i ∧ 1 ≤ ‖z i‖ := by
+    obtain ⟨i, hi, hm, hc⟩ := hclose
+    refine ⟨i, hi, hm, ?_⟩
+    dsimp [z]
+    rw [norm_div, Complex.norm_real, Real.norm_of_nonneg (by positivity),
+      one_le_div (norm_pos_iff.mpr (hne i hi))]
+    exact hc
+  obtain ⟨ν, hν, hν', hsum⟩ := weighted_turan_power_sum S m z hM hz
+  refine ⟨ν, hν, hν', ?_⟩
+  have heq : (∑ i ∈ S, (m i : ℂ) * z i ^ ν) =
+      ((2 * r : ℝ) : ℂ) ^ ν * ∑ i ∈ S, (m i : ℂ) / (s - ρ i) ^ ν := by
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro i hi
+    dsimp [z]
+    rw [div_pow]
+    ring
+  rw [heq, norm_mul, norm_pow, Complex.norm_real, Real.norm_of_nonneg (by positivity)] at hsum
+  have hp : (1 / 50 : ℝ) ^ ν ≤ (1 / 50 : ℝ) ^ M :=
+    pow_le_pow_of_le_one (by norm_num) (by norm_num) hν.le
+  have hl := hp.trans hsum
+  have he : ((1 / 50 : ℝ) ^ ν) / (2 * r) ^ ν = 1 / (100 * r) ^ ν := by
+    have hb : (1 / 50 : ℝ) / (2 * r) = 1 / (100 * r) := by field_simp; norm_num
+    simpa only [div_pow, one_pow] using congrArg (fun x : ℝ => x ^ ν) hb
+  rw [← he]
+  exact (div_le_iff₀ (pow_pos (show 0 < 2 * r by positivity) ν)).2 (by simpa only [mul_comm] using hl)
+end LeanLab.Linnik.Decomp1532b
+
+open Finset Complex Set Metric
+open LeanLab.PNTPort.DirichletZF LeanLab.Linnik.Decomp1532b2
+namespace LeanLab.Linnik.Decomp1532b
+/-- Gallagher p.334 the large logarithmic derivative step for nonprincipal characters. -/
+theorem nonprincipal_large_logDeriv : ∃ E : ℝ, 1 ≤ E ∧
+    ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (t r : ℝ),
+      0 < r → r ≤ 1 / 1600 → 1 ≤ r * Real.log (Bt q t) →
+      (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + I * t)‖ ≤ r) →
+      ∀ M : ℕ, E * r * Real.log (Bt q t) ≤ M →
+        ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+          (k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1)) ≤
+            ‖iteratedDeriv k (logDeriv (fShift χ t)) ((r : ℂ) - 1 / 2)‖ := by
+  obtain ⟨C₀, hC₀, hcount⟩ := local_disc_order_sum_nonprincipal_all_radii
+  obtain ⟨C₁, hC₁, hexp⟩ := near_zero_logDeriv_expansion_nonprincipal
+  let E : ℝ := max 1 (max (200 * C₀) (200 * C₁))
+  have hE : 1 ≤ E := le_max_left _ _
+  refine ⟨E, hE, ?_⟩
+  intro q hq χ hχ t r hr hrl hscale hroot M hM
+  have hlog : 0 ≤ Real.log (Bt q t) := Real.log_nonneg (one_lt_Bt t).le
+  have hc : 0 < 200 * r := by positivity
+  have hcl : 200 * r ≤ 1 / 8 := by linarith
+  have hscale' : 1 ≤ (200 * r) * Real.log (Bt q t) := by nlinarith
+  let S := (zset hχ t).filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ 200 * r)
+  let m : ℂ → ℕ := fun ρ => analyticOrderNatAt (fShift χ t) ρ
+  let s : ℂ := (r : ℂ) - 1 / 2
+  have hMcount : (∑ ρ ∈ S, m ρ) ≤ M := by
+    have hc₀ : 200 * C₀ ≤ E := (le_max_left _ _).trans (le_max_right _ _)
+    have hbound := hcount q χ hχ t (200 * r) hc hscale'
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hc₀ hr.le) hlog
+    have hcast : (∑ ρ ∈ S, (m ρ : ℝ)) ≤ M := hbound.trans (by nlinarith)
+    exact_mod_cast hcast
+  have hsne : fShift χ t s ≠ 0 := by
+    apply DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ)
+    dsimp [s]
+    norm_num
+    linarith
+  have hne (ρ : ℂ) (hρ : ρ ∈ S) : s - ρ ≠ 0 := by
+    intro he
+    have hzero := (mem_zset.mp (mem_filter.mp hρ).1).2
+    exact hsne (sub_eq_zero.mp he ▸ hzero)
+  have hclose : ∃ ρ ∈ S, 0 < m ρ ∧ ‖s - ρ‖ ≤ 2 * r := by
+    obtain ⟨ρ, hρ, hd⟩ := hroot
+    let w := ρ - ((3 : ℂ) / 2 + I * t)
+    have he : w + (1 / 2 : ℂ) = ρ - (1 + I * t) := by dsimp [w]; ring
+    have hw : ‖w + (1 / 2 : ℂ)‖ ≤ r := by rwa [he]
+    have hnorm : ‖w‖ ≤ 3 / 4 := by
+      have hh := norm_sub_le (w + (1 / 2 : ℂ)) (1 / 2 : ℂ)
+      norm_num at hh
+      linarith
+    have hzero : fShift χ t w = 0 := by simpa [fShift, w] using hρ
+    have hwS : w ∈ S := mem_filter.mpr ⟨mem_zset.mpr ⟨hnorm, hzero⟩, by nlinarith⟩
+    have hf : AnalyticOnNhd ℂ (fShift χ t) univ := fun z hz => fShift_analyticAt hχ t z
+    have htop : analyticOrderAt (fShift χ t) w ≠ ⊤ :=
+      hf.analyticOrderAt_ne_top_of_isPreconnected isPreconnected_univ (mem_univ 0) (mem_univ w)
+        (by rw [analyticOrderAt_eq_zero.mpr (Or.inr (fShift_zero_ne χ t))]; simp)
+    have hm : m w ≠ 0 := by
+      simp only [m, analyticOrderNatAt, ne_eq, ENat.toNat_eq_zero, not_or]
+      exact ⟨(fShift_analyticAt hχ t w).analyticOrderAt_ne_zero.mpr hzero, htop⟩
+    refine ⟨w, hwS, Nat.pos_of_ne_zero hm, ?_⟩
+    have hh := norm_sub_le (r : ℂ) (w + (1 / 2 : ℂ))
+    have he' : s - w = (r : ℂ) - (w + (1 / 2 : ℂ)) := by dsimp [s]; ring
+    rw [he']
+    rw [Complex.norm_real, Real.norm_of_nonneg hr.le] at hh
+    linarith
+  obtain ⟨ν, hν, hν', hpole⟩ := reciprocal_pole_turan S m id hMcount hr s hne hclose
+  let k := ν - 1
+  have hν0 : 0 < ν := by omega
+  have hkν : k + 1 = ν := Nat.sub_add_cancel hν0
+  have hkM : M ≤ k := by dsimp [k]; omega
+  have hklt : k < 2 * M := by dsimp [k]; omega
+  have hMpos : 1 ≤ M := by
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hE hr.le) hlog
+    have hmreal : (1 : ℝ) ≤ M := hscale.trans (by nlinarith)
+    exact_mod_cast hmreal
+  have hk : 1 ≤ k := hMpos.trans hkM
+  have hCM : 200 * C₁ * r * Real.log (Bt q t) ≤ (k : ℝ) := by
+    have hc₁ : 200 * C₁ ≤ E := (le_max_right _ _).trans (le_max_right _ _)
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hc₁ hr.le) hlog
+    have hm : (M : ℝ) ≤ k := by exact_mod_cast hkM
+    linarith
+  have habs := reciprocal_pole_error_absorbed hr hCM
+  have herr := hexp q χ hχ t r (200 * r) hr (by linarith) hc hcl hscale' k hk
+  let F : ℂ := iteratedDeriv k (logDeriv (fShift χ t)) s
+  let P : ℂ := (-1 : ℂ) ^ k * k.factorial * ∑ ρ ∈ S, (m ρ : ℂ) / (s - ρ) ^ (k + 1)
+  have hPn : (k.factorial : ℝ) / (100 * r) ^ (k + 1) ≤ ‖P‖ := by
+    have hh := mul_le_mul_of_nonneg_left hpole (Nat.cast_nonneg k.factorial)
+    simpa [P, norm_mul, norm_pow, hkν, mul_div_assoc, div_eq_mul_inv] using hh
+  have hFn : ‖F - P‖ ≤ (k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1)) := by
+    exact herr.trans (by convert mul_le_mul_of_nonneg_left habs (Nat.cast_nonneg k.factorial) using 1 <;> ring)
+  have htriangle : ‖P‖ ≤ ‖F‖ + ‖F - P‖ := by
+    have hh := norm_add_le F (P - F)
+    rw [norm_sub_rev P F] at hh
+    simpa only [add_sub_cancel] using hh
+  refine ⟨k, hkM, hklt, ?_⟩
+  have heq : (k.factorial : ℝ) / (100 * r) ^ (k + 1) =
+      2 * ((k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1))) := by ring
+  rw [heq] at hPn
+  linarith
+end LeanLab.Linnik.Decomp1532b
+
+open Complex LSeries
+open scoped LSeries.notation
+open LeanLab.PNTPort.DirichletZF LeanLab.Linnik.Decomp1532b2
+namespace LeanLab.Linnik.Decomp1532b
+/-- Gallagher p.334 display 22 in normalized L series form for nonprincipal characters. -/
+theorem nonprincipal_series_detector : ∃ E : ℝ, 1 ≤ E ∧
+    ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (t r : ℝ),
+      0 < r → r ≤ 1 / 1600 → 1 ≤ r * Real.log (Bt q t) →
+      (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + I * t)‖ ≤ r) →
+      ∀ M : ℕ, E * r * Real.log (Bt q t) ≤ M →
+        ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+          1 / (200 * (100 : ℝ) ^ k * r) ≤
+            ‖((r ^ k / (k.factorial : ℝ) : ℝ) : ℂ) *
+              LSeries (LSeries.logMul^[k] (↗χ * ↗ArithmeticFunction.vonMangoldt))
+                (1 + r + I * t)‖ := by
+  obtain ⟨E, hE, hlarge⟩ := nonprincipal_large_logDeriv
+  refine ⟨E, hE, ?_⟩
+  intro q hq χ hχ t r hr hrl hscale hroot M hM
+  obtain ⟨k, hkM, hklt, hlarge⟩ := hlarge q χ hχ t r hr hrl hscale hroot M hM
+  refine ⟨k, hkM, hklt, ?_⟩
+  have hfun : logDeriv (fShift χ t) =
+      (fun z => logDeriv χ.LFunction (z + ((3 : ℂ) / 2 + I * t))) := by
+    funext z
+    change deriv (fun w => χ.LFunction (w + ((3 : ℂ) / 2 + I * t))) z /
+      χ.LFunction (z + ((3 : ℂ) / 2 + I * t)) = _
+    rw [deriv_comp_add_const]
+    rfl
+  rw [hfun, iteratedDeriv_comp_add_const] at hlarge
+  have hpoint : ((r : ℂ) - 1 / 2) + ((3 : ℂ) / 2 + I * t) = 1 + r + I * t := by ring
+  dsimp only at hlarge
+  rw [hpoint] at hlarge
+  have hs : 1 < (1 + (r : ℂ) + I * t).re := by norm_num; linarith
+  have he := iterated_neg_logDeriv_eq_LSeries χ k hs
+  have hneg : (fun z => -deriv χ.LFunction z / χ.LFunction z) =
+      (fun z => -logDeriv χ.LFunction z) := by funext z; simp [logDeriv_apply, neg_div]
+  rw [hneg, iteratedDeriv_fun_neg] at he
+  have hn := congrArg norm he
+  simp only [norm_neg, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul] at hn
+  rw [hn] at hlarge
+  have hnorm : ‖((r ^ k / (k.factorial : ℝ) : ℝ) : ℂ)‖ = r ^ k / (k.factorial : ℝ) := by
+    rw [Complex.norm_real, Real.norm_of_nonneg (by positivity)]
+  rw [norm_mul, hnorm]
+  have hh := mul_le_mul_of_nonneg_left hlarge
+    (show 0 ≤ r ^ k / (k.factorial : ℝ) by positivity)
+  have hf : (k.factorial : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  convert hh using 1
+  field_simp [hf, hr.ne', mul_pow, pow_succ]
+  <;> ring
+end LeanLab.Linnik.Decomp1532b
+
+open Complex LSeries
+open scoped LSeries.notation
+open LeanLab.PNTPort.DirichletZF LeanLab.Linnik.Decomp1532b2
+namespace LeanLab.Linnik.Decomp1532b
+/-- Gallagher p.334 display 22 for nonprincipal characters, with an explicit lower bound. -/
+theorem nonprincipal_poisson_detector : ∃ E : ℝ, 1 ≤ E ∧
+    ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (t r : ℝ),
+      0 < r → r ≤ 1 / 1600 → 1 ≤ r * Real.log (Bt q t) →
+      (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + I * t)‖ ≤ r) →
+      ∀ M : ℕ, E * r * Real.log (Bt q t) ≤ M →
+        ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+          1 / (200 * (100 : ℝ) ^ k * r) ≤
+            ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+              (n : ℂ) ^ (1 + I * t)) * (poissonKernel k (r * Real.log n) : ℂ)‖ := by
+  obtain ⟨E, hE, hseries⟩ := nonprincipal_series_detector
+  refine ⟨E, hE, ?_⟩
+  intro q hq χ hχ t r hr hrl hscale hroot M hM
+  obtain ⟨k, hkM, hklt, hbound⟩ := hseries q χ hχ t r hr hrl hscale hroot M hM
+  rw [normalized_log_series_eq_poisson] at hbound
+  exact ⟨k, hkM, hklt, hbound⟩
 end LeanLab.Linnik.Decomp1532b
