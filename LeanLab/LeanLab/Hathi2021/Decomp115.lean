@@ -54,7 +54,7 @@ theorem margin_pos : 0 < PairLinnik.margin101 (108238 / 10) 82 := by
 theorem logScale_pos (n : ℕ) (hn : 16 ≤ n) : 0 < logScale n := by
   have h1 : (1 : ℝ) < n := by exact_mod_cast (show 1 < n by omega)
   have hp : (0 : ℝ) < n := lt_trans zero_lt_one h1
-  have hlog : 0 < Real.log n := by exact?
+  have hlog : 0 < Real.log n := Real.log_pos h1
   have hlt : Real.log (n : ℝ) < n := by
     linarith [Real.log_le_sub_one_of_pos hp]
   unfold logScale
