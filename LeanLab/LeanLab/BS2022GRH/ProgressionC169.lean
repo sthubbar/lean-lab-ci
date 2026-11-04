@@ -1,6 +1,6 @@
 /- AI wrote this Lean code for CODEX task169.
 Elementary part of Lemma 13, journal pp. 1230 and 1231. Goldbach is open. -/
-import LeanLab.BS2022GRH.DecompC169a
+import LeanLab.BS2022GRH.ModelC233
 import LeanLab.BS2022GRH.BookkeepingC164
 
 namespace LeanLab.BS2022GRH.ProgressionC169

@@ -1,7 +1,7 @@
 /- AI wrote this Lean code for CODEX task232.
 Published analytic inputs for DecompC169b. Goldbach is open. -/
 import LeanLab.BS2022GRH.PaperInputs148
-import LeanLab.BS2022GRH.DecompC169a
+import LeanLab.BS2022GRH.ModelC233
 
 namespace LeanLab.BS2022GRH.PublishedInputs232
 open Real Finset ChenThresholdGRH

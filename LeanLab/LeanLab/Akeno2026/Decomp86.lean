@@ -2604,9 +2604,1655 @@ theorem typeII_correlation (w : ℝ → ℝ) (A B : ℕ → ℂ) (X M N β : ℝ
   simp_rw [Phase86.kernel_correlation] at hc
   simpa only [typeIISum, mul_assoc] using hc
 
+/-- Page 6 Type II localization, every derivative of the product weights has one bound
+uniform in both bounded scale parameters and the real argument. -/
+theorem typeII_product_derivatives (w : ℝ → ℝ) (hw : ContDiff ℝ ∞ w)
+    (hs : Function.support w ⊆ Set.Icc 0 1) (k : ℕ) (R : ℝ) :
+    ∃ C : ℝ, 0 < C ∧ ∀ a b x : ℝ, |a| ≤ R → |b| ≤ R →
+      ‖iteratedDeriv k (fun y : ℝ => w (a * y) * w (b * y)) x‖ ≤ C := by
+  have hc : HasCompactSupport w :=
+    HasCompactSupport.of_support_subset_isCompact isCompact_Icc hs
+  obtain ⟨B, hB, hb⟩ := hc.exists_bound_iteratedFDeriv hw k
+  let S := max 1 R
+  let K := S ^ k * B
+  have hS : 1 ≤ S := le_max_left _ _
+  have hS0 : 0 ≤ S := by linarith
+  have hK : 0 ≤ K := by positivity
+  let C := (∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ)) * K ^ 2
+  have hC : 0 ≤ C := by positivity
+  refine ⟨C + 1, by positivity, ?_⟩
+  intro a b x ha hb'
+  have hd (c : ℝ) (hcR : |c| ≤ R) (i : ℕ) (hi : i ≤ k) :
+      ‖iteratedDeriv i (fun y : ℝ => w (c * y)) x‖ ≤ K := by
+    rw [iteratedDeriv_comp_const_mul (hw.of_le (by exact_mod_cast le_top)),
+      norm_mul, Real.norm_eq_abs, abs_pow]
+    have hbase : |c| ≤ S := hcR.trans (le_max_right _ _)
+    have hp : |c| ^ i ≤ S ^ k :=
+      (pow_le_pow_left₀ (abs_nonneg _) hbase _).trans (pow_le_pow_right₀ hS hi)
+    have hb0 : ‖iteratedDeriv i w (c * x)‖ ≤ B := by
+      rw [← norm_iteratedFDeriv_eq_norm_iteratedDeriv]
+      exact hb i hi _
+    exact mul_le_mul hp hb0 (norm_nonneg _) (pow_nonneg hS0 _)
+  have hwa : ContDiff ℝ (k : ℕ) (fun y : ℝ => w (a * y)) :=
+    (hw.comp (contDiff_const.mul contDiff_id)).of_le (by exact_mod_cast le_top)
+  have hwb : ContDiff ℝ (k : ℕ) (fun y : ℝ => w (b * y)) :=
+    (hw.comp (contDiff_const.mul contDiff_id)).of_le (by exact_mod_cast le_top)
+  rw [iteratedDeriv_fun_mul hwa.contDiffAt hwb.contDiffAt]
+  calc
+    _ ≤ ∑ i ∈ Finset.range (k + 1),
+        ‖(k.choose i : ℝ) * iteratedDeriv i (fun y => w (a * y)) x *
+          iteratedDeriv (k - i) (fun y => w (b * y)) x‖ := norm_sum_le _ _
+    _ ≤ ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * K ^ 2 := by
+      apply Finset.sum_le_sum
+      intro i hi
+      have hi' : i ≤ k := by simpa using Finset.mem_range.mp hi
+      rw [norm_mul, norm_mul, Real.norm_natCast]
+      have hh := mul_le_mul (hd a ha i hi') (hd b hb' (k - i) (Nat.sub_le _ _))
+        (norm_nonneg _) hK
+      nlinarith [Nat.cast_nonneg (α := ℝ) (k.choose i),
+        mul_le_mul_of_nonneg_left hh (Nat.cast_nonneg (α := ℝ) (k.choose i))]
+    _ = C := by dsimp [C]; rw [← Finset.sum_mul]
+    _ ≤ C + 1 := by linarith
+
+open MeasureTheory
+open scoped FourierTransform
+
+/-- Pages 4 and 6, an explicit Fourier bound from a common bound for the derivatives. -/
+theorem weightFourier_decay_of_derivative_bound (w : ℝ → ℝ) (hw : ContDiff ℝ ∞ w)
+    (hs : Function.support w ⊆ Set.Icc 0 1) (k : ℕ) {B : ℝ} (hB : 0 ≤ B)
+    (hb : ∀ i ≤ k, ∀ x, ‖iteratedDeriv i w x‖ ≤ B) (t : ℝ) :
+    (1 + |t|) ^ k * ‖𝓕 (fun x => (w x : ℂ)) t‖ ≤
+      2 ^ k * (1 + ((2 * π) ^ k)⁻¹) * B := by
+  let f : ℝ → ℂ := fun x => (w x : ℂ)
+  have hf : ContDiff ℝ ∞ f := Complex.ofRealCLM.contDiff.comp hw
+  have hfs : Function.support f ⊆ Set.Icc 0 1 := by
+    intro x hx
+    apply hs
+    simpa [f] using hx
+  have hcl : tsupport f ⊆ Set.Icc 0 1 := closure_minimal hfs isClosed_Icc
+  have hds (i : ℕ) : Function.support (iteratedDeriv i f) ⊆ Set.Icc 0 1 := by
+    intro x hx
+    apply hcl
+    apply support_iteratedFDeriv_subset (𝕜 := ℝ) i
+    intro hz
+    have hn : ‖iteratedDeriv i f x‖ = 0 := by
+      rw [← norm_iteratedFDeriv_eq_norm_iteratedDeriv, hz, norm_zero]
+    exact hx (norm_eq_zero.mp hn)
+  have hdi (i : ℕ) : Integrable (iteratedDeriv i f) :=
+    (hf.continuous_iteratedDeriv i (by exact_mod_cast le_top)).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_support_subset_isCompact isCompact_Icc (hds i))
+  have hdn (i : ℕ) (hi : i ≤ k) (x : ℝ) : ‖iteratedDeriv i f x‖ ≤ B := by
+    rw [← norm_iteratedFDeriv_eq_norm_iteratedDeriv]
+    have he := Complex.ofRealLI.norm_iteratedFDeriv_comp_left (x := x) hw.contDiffAt
+      (i := i) (by exact_mod_cast le_top)
+    change ‖iteratedFDeriv ℝ i (Complex.ofRealLI ∘ w) x‖ ≤ B
+    rw [he, norm_iteratedFDeriv_eq_norm_iteratedDeriv]
+    exact hb i hi x
+  have hInt (i : ℕ) (hi : i ≤ k) : (∫ x, ‖iteratedDeriv i f x‖) ≤ B := by
+    have he : (∫ x in Set.Icc (0 : ℝ) 1, ‖iteratedDeriv i f x‖) =
+        ∫ x, ‖iteratedDeriv i f x‖ :=
+      setIntegral_eq_integral_of_forall_compl_eq_zero (fun x hx => by
+        have hz : iteratedDeriv i f x = 0 := by
+          by_contra hn
+          exact hx (hds i hn)
+        simp [hz])
+    rw [← he]
+    have hbound := norm_integral_le_of_norm_le_const
+      (μ := volume.restrict (Set.Icc (0 : ℝ) 1))
+      (f := fun x => ‖iteratedDeriv i f x‖)
+      (Filter.Eventually.of_forall (fun x => by
+        simpa using hdn i hi x))
+    calc
+      _ ≤ ‖∫ x in Set.Icc (0 : ℝ) 1, ‖iteratedDeriv i f x‖‖ := le_abs_self _
+      _ ≤ B := by simpa using hbound
+  have hdec := Real.one_add_pow_mul_norm_fourier_le (n := k)
+    (hf.of_le (by exact_mod_cast le_top)) (fun i hi => hdi i) t
+  have hdec' : (1 + |t| ^ k) * ‖𝓕 f t‖ ≤ (1 + ((2 * π) ^ k)⁻¹) * B := by
+    calc
+      _ ≤ (∫ x, ‖f x‖) + ((2 * π) ^ k)⁻¹ * ∫ x, ‖iteratedDeriv k f x‖ := hdec
+      _ ≤ B + ((2 * π) ^ k)⁻¹ * B := by
+        gcongr
+        · simpa using hInt 0 (Nat.zero_le k)
+        · exact hInt k le_rfl
+      _ = _ := by ring
+  have hp : (1 + |t|) ^ k ≤ (2 : ℝ) ^ k * (1 + |t| ^ k) := by
+    have h := add_pow_le (show (0 : ℝ) ≤ 1 by norm_num) (abs_nonneg t) k
+    simp only [one_pow] at h
+    exact h.trans (mul_le_mul_of_nonneg_right
+      (pow_le_pow_right₀ (by norm_num) (Nat.sub_le _ _)) (by positivity))
+  change (1 + |t|) ^ k * ‖𝓕 f t‖ ≤ _
+  calc
+    _ ≤ 2 ^ k * ((1 + |t| ^ k) * ‖𝓕 f t‖) := by
+      nlinarith [mul_le_mul_of_nonneg_right hp (norm_nonneg (𝓕 f t))]
+    _ ≤ 2 ^ k * ((1 + ((2 * π) ^ k)⁻¹) * B) :=
+      mul_le_mul_of_nonneg_left hdec' (by positivity)
+    _ = _ := by ring
+
+/-- Page 6 Type II localization, the product weights have one Fourier decay constant
+for every pair of scale parameters in the fixed interval from one through R. -/
+theorem typeII_product_fourier_decay (w : ℝ → ℝ) (hw : ContDiff ℝ ∞ w)
+    (hs : Function.support w ⊆ Set.Icc 0 1) (k : ℕ) (R : ℝ) :
+    ∃ C : ℝ, 0 < C ∧ ∀ a b t : ℝ, 1 ≤ a → a ≤ R → 1 ≤ b → b ≤ R →
+      (1 + |t|) ^ k * ‖Localization86.weightFourier
+        (fun y => w (a * y) * w (b * y)) t‖ ≤ C := by
+  choose C hC hbounds using fun i : ℕ => typeII_product_derivatives w hw hs i R
+  let B := ∑ i ∈ Finset.range (k + 1), C i
+  have hB : 0 ≤ B := Finset.sum_nonneg (fun i hi => (hC i).le)
+  let K := 2 ^ k * (1 + ((2 * π) ^ k)⁻¹) * B
+  refine ⟨K + 1, by dsimp [K]; positivity, ?_⟩
+  intro a b t ha haR hb hbR
+  have ha0 : 0 < a := by linarith
+  have hb0 : 0 < b := by linarith
+  let v : ℝ → ℝ := fun y => w (a * y) * w (b * y)
+  have hv : ContDiff ℝ ∞ v :=
+    (hw.comp (contDiff_const.mul contDiff_id)).mul
+      (hw.comp (contDiff_const.mul contDiff_id))
+  have hvs : Function.support v ⊆ Set.Icc 0 1 := by
+    intro y hy
+    have hwne : w (a * y) ≠ 0 := by
+      intro hz
+      exact hy (by simp [v, hz])
+    have hh := hs hwne
+    have hy0 : 0 ≤ y := nonneg_of_mul_nonneg_right hh.1 ha0
+    refine ⟨hy0, ?_⟩
+    exact (le_mul_of_one_le_left hy0 ha).trans hh.2
+  have hder (i : ℕ) (hi : i ≤ k) (y : ℝ) : ‖iteratedDeriv i v y‖ ≤ B := by
+    have hi' : i ∈ Finset.range (k + 1) := Finset.mem_range.mpr (by omega)
+    exact (hbounds i a b y (by rwa [abs_of_pos ha0]) (by rwa [abs_of_pos hb0])).trans
+      (Finset.single_le_sum (fun j hj => (hC j).le) hi')
+  have hf := weightFourier_decay_of_derivative_bound v hv hvs k hB hder t
+  have he : (𝓕 (fun x => (v x : ℂ))) t = Localization86.weightFourier v t := by
+    have hmod : Localization86.modulatedWeight v 1 0 = fun x => (v x : ℂ) := by
+      funext x
+      simp [Localization86.modulatedWeight, e]
+    rw [← hmod]
+    simpa [Localization86.weightFourier] using
+      (Localization86.fourier_modulated v (X := 1) (by norm_num) 0 t)
+  rw [he] at hf
+  exact hf.trans (by dsimp [K]; linarith)
+
+/-- Page 6 Type II localization, one cutoff constant for the whole product family. -/
+theorem typeII_product_cutoff (w : ℝ → ℝ) (hw : ContDiff ℝ ∞ w)
+    (hs : Function.support w ⊆ Set.Icc 0 1) (k : ℕ) (R : ℝ) :
+    ∃ C : ℝ, 0 < C ∧ ∀ a b Y α T : ℝ,
+      1 ≤ a → a ≤ R → 1 ≤ b → b ≤ R → 1 ≤ Y → 1 ≤ T →
+      ‖smoothSum (fun y => w (a * y) * w (b * y)) Y α‖ ≤
+        C * Y * (nearCount α (T / Y) + 1 / T ^ k) := by
+  have hfamily {ι : Type} (w : ι → ℝ → ℝ) (hw : ∀ i, ContDiff ℝ ∞ (w i))
+      (hs : ∀ i, Function.support (w i) ⊆ Set.Icc 0 1) (k : ℕ)
+      (hdec : ∃ C : ℝ, 0 < C ∧ ∀ i t, (1 + |t|) ^ (k + 2) *
+        ‖Localization86.weightFourier (w i) t‖ ≤ C) :
+      ∃ C : ℝ, 0 < C ∧ ∀ i (Y α T : ℝ), 1 ≤ Y → 1 ≤ T →
+        ‖smoothSum (w i) Y α‖ ≤ C * Y * (nearCount α (T / Y) + 1 / T ^ k) := by
+    obtain ⟨C, hC, hdec⟩ := hdec
+    obtain ⟨S, hS, hK⟩ := Kernel86.uniform_shifted_kernel
+    refine ⟨C * S, mul_pos hC hS, ?_⟩
+    intro i Y α T hY hT
+    have hY0 : 0 < Y := by linarith
+    let K : ℤ → ℝ := fun n => 1 / (1 + |(n : ℝ) - α|) ^ 2
+    let F : ℤ → ℂ := fun n => (Y : ℂ) * Localization86.weightFourier (w i) (Y * ((n : ℝ) - α))
+    let den : ℤ → ℝ := fun n => 1 + Y * |(n : ℝ) - α|
+    have hkSum : Summable K := (hK α).1
+    have hkBound : (∑' n : ℤ, K n) ≤ S := (hK α).2
+    have hden (n : ℤ) : 1 + |(n : ℝ) - α| ≤ den n := by
+      have hh := mul_le_mul_of_nonneg_right hY (abs_nonneg ((n : ℝ) - α))
+      dsimp [den]
+      linarith
+    have hbound (R : ℝ) (hR : 0 < R) (hfreq : ∀ n : ℤ, R ≤ den n) :
+        ‖smoothSum (w i) Y α‖ ≤ (C * S) * Y / R ^ k := by
+      have hmajor (n : ℤ) : ‖F n‖ ≤ (Y * C / R ^ k) * K n := by
+        have hp : R ^ k * (1 + |(n : ℝ) - α|) ^ 2 ≤ den n ^ (k + 2) := by
+          rw [pow_add]
+          exact mul_le_mul (pow_le_pow_left₀ hR.le (hfreq n) k)
+            (pow_le_pow_left₀ (by positivity) (hden n) 2) (by positivity)
+            (pow_nonneg (hR.le.trans (hfreq n)) k)
+        have hdec' : den n ^ (k + 2) *
+            ‖Localization86.weightFourier (w i) (Y * ((n : ℝ) - α))‖ ≤ C := by
+          simpa only [den, abs_mul, abs_of_pos hY0] using hdec i (Y * ((n : ℝ) - α))
+        have hh := (mul_le_mul_of_nonneg_right hp
+          (norm_nonneg (Localization86.weightFourier (w i) (Y * ((n : ℝ) - α))))).trans hdec'
+        have hv : ‖Localization86.weightFourier (w i) (Y * ((n : ℝ) - α))‖ ≤
+            C / (R ^ k * (1 + |(n : ℝ) - α|) ^ 2) := by
+          apply (le_div_iff₀ (by positivity)).mpr
+          simpa only [mul_comm] using hh
+        have hn : ‖F n‖ = Y *
+            ‖Localization86.weightFourier (w i) (Y * ((n : ℝ) - α))‖ := by
+          simp only [F, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hY0]
+        rw [hn]
+        apply (mul_le_mul_of_nonneg_left hv hY0.le).trans_eq
+        dsimp [K]
+        field_simp
+      have hns : Summable (fun n : ℤ => ‖F n‖) :=
+        Summable.of_nonneg_of_le (fun n => norm_nonneg _) hmajor (hkSum.mul_left _)
+      rw [show smoothSum (w i) Y α = ∑' n : ℤ, F n from Localization86.poisson_scaled (w i) (hw i) (hs i) Y hY0 α]
+      calc
+        _ ≤ ∑' n : ℤ, ‖F n‖ := norm_tsum_le_tsum_norm hns
+        _ ≤ ∑' n : ℤ, (Y * C / R ^ k) * K n :=
+          Summable.tsum_le_tsum hmajor hns (hkSum.mul_left _)
+        _ = (Y * C / R ^ k) * ∑' n : ℤ, K n := tsum_mul_left
+        _ ≤ (Y * C / R ^ k) * S := mul_le_mul_of_nonneg_left hkBound (by positivity)
+        _ = _ := by ring
+    by_cases hz : nearCount α (T / Y) = 0
+    · have hfar (n : ℤ) : T / Y < |(n : ℝ) - α| := by
+        by_contra! hh
+        have hb := abs_le.mp hh
+        have hm : n ∈ Finset.Icc ⌈α - T / Y⌉ ⌊α + T / Y⌋ := by
+          simp only [Finset.mem_Icc, Int.ceil_le, Int.le_floor]
+          constructor <;> linarith
+        have he : Finset.Icc ⌈α - T / Y⌉ ⌊α + T / Y⌋ = ∅ := Finset.card_eq_zero.mp hz
+        rw [he] at hm
+        exact Finset.notMem_empty n hm
+      have hh := hbound T (by linarith) (fun n => by
+        have hn := (div_lt_iff₀ hY0).mp (hfar n)
+        dsimp [den]
+        nlinarith)
+      simp only [hz, Nat.cast_zero, zero_add]
+      convert hh using 1 <;> ring
+    · have hc : (1 : ℝ) ≤ nearCount α (T / Y) := by
+        exact_mod_cast Nat.one_le_iff_ne_zero.mpr hz
+      have hh := hbound 1 zero_lt_one (fun n => by dsimp [den]; exact le_add_of_nonneg_right (mul_nonneg hY0.le (abs_nonneg _)))
+      simp only [one_pow, div_one] at hh
+      apply hh.trans
+      exact le_mul_of_one_le_right (by positivity) (by
+        have ht : 0 ≤ 1 / T ^ k := by positivity
+        linarith)
+  let I := {p : ℝ × ℝ // 1 ≤ p.1 ∧ p.1 ≤ R ∧ 1 ≤ p.2 ∧ p.2 ≤ R}
+  let F : I → ℝ → ℝ := fun p y => w (p.1.1 * y) * w (p.1.2 * y)
+  have hF (p : I) : ContDiff ℝ ∞ (F p) :=
+    (hw.comp (contDiff_const.mul contDiff_id)).mul
+      (hw.comp (contDiff_const.mul contDiff_id))
+  have hFs (p : I) : Function.support (F p) ⊆ Set.Icc 0 1 := by
+    intro y hy
+    have ha : 1 ≤ p.1.1 := p.2.1
+    have ha0 : 0 < p.1.1 := by linarith
+    have hwne : w (p.1.1 * y) ≠ 0 := by
+      intro hz
+      exact hy (by simp [F, hz])
+    have hh := hs hwne
+    have hy0 : 0 ≤ y := nonneg_of_mul_nonneg_right hh.1 ha0
+    exact ⟨hy0, (le_mul_of_one_le_left hy0 ha).trans hh.2⟩
+  obtain ⟨C₀, hC₀, hdec⟩ := typeII_product_fourier_decay w hw hs (k + 2) R
+  have hdecF : ∃ C : ℝ, 0 < C ∧ ∀ p t, (1 + |t|) ^ (k + 2) *
+      ‖Localization86.weightFourier (F p) t‖ ≤ C := by
+    refine ⟨C₀, hC₀, ?_⟩
+    intro p t
+    exact hdec p.1.1 p.1.2 t p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2
+  obtain ⟨C, hC, hb⟩ := hfamily F hF hFs k hdecF
+  refine ⟨C, hC, ?_⟩
+  intro a b Y α T ha haR hb' hbR hY hT
+  exact hb ⟨(a, b), ha, haR, hb', hbR⟩ Y α T hY hT
+
+/-- Page 6 Type II correlation after enlarging the nonnegative sum of squares.
+The inner correlation is a complete smooth sum, with no sharp dyadic cutoff. -/
+theorem typeII_extended_correlation (w : ℝ → ℝ) (A B : ℕ → ℂ) {X M : ℝ} (N β : ℝ)
+    (hX : 0 < X) (hM : 0 < M)
+    (hA : ∀ m, ‖A m‖ ≤ 1) (hB : ∀ n, ‖B n‖ ≤ 1) :
+    ‖typeIISum w A B X M N β‖ ^ 2 ≤
+      ((Finset.Ioc ⌊M⌋₊ ⌊2 * M⌋₊).card : ℝ) *
+        ∑ n₁ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊, ∑ n₂ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+          ‖smoothSum (fun y => w ((4 * M * n₁ / X) * y) *
+            w ((4 * M * n₂ / X) * y)) (4 * M) (β * ((n₁ : ℝ) - n₂))‖ := by
+  let s := Finset.Ioc ⌊M⌋₊ ⌊2 * M⌋₊
+  let t := Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊
+  let u := Finset.range (⌊4 * M⌋₊ + 1)
+  let Z : ℕ → ℕ → ℂ := fun m n =>
+    e (β * m * n) * (w ((m : ℝ) * n / X) : ℂ)
+  have hc := Cauchy86.finite_cauchy s A (fun m => ∑ n ∈ t, B n * Z m n)
+    (fun m hm => hA m)
+  have hsub : s ⊆ u := by
+    intro m hm
+    have hm' := (Finset.mem_Ioc.mp hm).2
+    have hf : ⌊2 * M⌋₊ ≤ ⌊4 * M⌋₊ := Nat.floor_mono (by linarith)
+    apply Finset.mem_range.mpr
+    omega
+  have he := Finset.sum_le_sum_of_subset_of_nonneg (f := fun m => ‖∑ n ∈ t, B n * Z m n‖ ^ 2)
+    hsub (fun m hm hnot => sq_nonneg _)
+  have hr := Correlation86.correlation_bound u t B Z (fun n hn => hB n)
+  have htotal := hc.trans (mul_le_mul_of_nonneg_left (he.trans hr)
+    (show (0 : ℝ) ≤ s.card by positivity))
+  have hkernel (n₁ n₂ : ℕ) : (∑ m ∈ u, Z m n₁ * star (Z m n₂)) =
+      smoothSum (fun y => w ((4 * M * n₁ / X) * y) *
+        w ((4 * M * n₂ / X) * y)) (4 * M) (β * ((n₁ : ℝ) - n₂)) := by
+    simp_rw [Z, Phase86.kernel_correlation]
+    have hnat := Weight86.nat_int_sum
+      (fun m : ℤ => e ((β * ((n₁ : ℝ) - n₂)) * m) *
+        (w (((m : ℝ) / (4 * M)) * (4 * M * n₁ / X)) *
+          w (((m : ℝ) / (4 * M)) * (4 * M * n₂ / X)) : ℂ))
+      (show 0 ≤ 4 * M by positivity)
+    calc
+      _ = ∑ m ∈ u, e ((β * ((n₁ : ℝ) - n₂)) * m) *
+          (w (((m : ℝ) / (4 * M)) * (4 * M * n₁ / X)) *
+            w (((m : ℝ) / (4 * M)) * (4 * M * n₂ / X)) : ℂ) := by
+        apply Finset.sum_congr rfl
+        intro m hm
+        have harg (n : ℕ) : ((m : ℝ) / (4 * M)) * (4 * M * n / X) = (m : ℝ) * n / X := by
+          field_simp
+        rw [harg n₁, harg n₂]
+        simp only [mul_assoc]
+      _ = _ := by
+        simpa only [u, Int.cast_natCast, smoothSum, Complex.ofReal_mul, mul_comm] using hnat
+  simp_rw [hkernel] at htotal
+  simpa only [typeIISum, s, t, Z, Finset.mul_sum, mul_assoc] using htotal
+
+/-- Page 6 Type II localization with a free cutoff and explicit tail.
+The constant is uniform over the scales, frequency and normalized coefficients. -/
+theorem typeII_localized (w : ℝ → ℝ) (hw : ContDiff ℝ ∞ w)
+    (hs : Function.support w ⊆ Set.Icc 0 1) (k : ℕ) :
+    ∃ C : ℝ, 0 < C ∧ ∀ X M N β T : ℝ,
+      0 < X → 0 < M → 0 < N → X / 4 ≤ M * N → M * N ≤ 4 * X →
+      1 ≤ 4 * M → 1 ≤ T → ∀ A B : ℕ → ℂ,
+      (∀ m, ‖A m‖ ≤ 1) → (∀ n, ‖B n‖ ≤ 1) →
+      ‖typeIISum w A B X M N β‖ ^ 2 ≤ C * M ^ 2 *
+        ((∑ n₁ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊, ∑ n₂ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+          (nearCount (β * ((n₁ : ℝ) - n₂)) (T / (4 * M)) : ℝ)) + 4 * N ^ 2 / T ^ k) := by
+  obtain ⟨C, hC, hb⟩ := typeII_product_cutoff w hw hs k 32
+  refine ⟨8 * C, by positivity, ?_⟩
+  intro X M N β T hX hM hN hMNlo hMNhi hY hT A B hA hB
+  let t := Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊
+  let S : ℝ := ∑ n₁ ∈ t, ∑ n₂ ∈ t,
+    (nearCount (β * ((n₁ : ℝ) - n₂)) (T / (4 * M)) : ℝ)
+  have hS : 0 ≤ S := Finset.sum_nonneg (fun i hi => Finset.sum_nonneg (fun j hj => by positivity))
+  have hparam (n : ℕ) (hn : n ∈ t) : 1 ≤ 4 * M * n / X ∧ 4 * M * n / X ≤ 32 := by
+    have hlo : N < (n : ℝ) := (Nat.floor_lt hN.le).mp (Finset.mem_Ioc.mp hn).1
+    have hhi : (n : ℝ) ≤ 2 * N := (Nat.le_floor_iff (by positivity)).mp (Finset.mem_Ioc.mp hn).2
+    constructor
+    · apply (le_div_iff₀ hX).mpr
+      nlinarith [mul_nonneg (show 0 ≤ M by positivity) (sub_nonneg.mpr hlo.le)]
+    · apply (div_le_iff₀ hX).mpr
+      nlinarith [mul_nonneg (show 0 ≤ M by positivity) (sub_nonneg.mpr hhi)]
+  have hterm (n₁ : ℕ) (h₁ : n₁ ∈ t) (n₂ : ℕ) (h₂ : n₂ ∈ t) :
+      ‖smoothSum (fun y => w ((4 * M * n₁ / X) * y) * w ((4 * M * n₂ / X) * y))
+        (4 * M) (β * ((n₁ : ℝ) - n₂))‖ ≤
+      C * (4 * M) * ((nearCount (β * ((n₁ : ℝ) - n₂)) (T / (4 * M)) : ℝ) + 1 / T ^ k) :=
+    hb _ _ _ _ _ (hparam n₁ h₁).1 (hparam n₁ h₁).2
+      (hparam n₂ h₂).1 (hparam n₂ h₂).2 hY hT
+  have hsum : (∑ n₁ ∈ t, ∑ n₂ ∈ t,
+      ‖smoothSum (fun y => w ((4 * M * n₁ / X) * y) * w ((4 * M * n₂ / X) * y))
+        (4 * M) (β * ((n₁ : ℝ) - n₂))‖) ≤
+      C * (4 * M) * (S + (t.card : ℝ) ^ 2 / T ^ k) := by
+    calc
+      _ ≤ ∑ n₁ ∈ t, ∑ n₂ ∈ t, C * (4 * M) *
+          ((nearCount (β * ((n₁ : ℝ) - n₂)) (T / (4 * M)) : ℝ) + 1 / T ^ k) :=
+        Finset.sum_le_sum (fun n₁ h₁ => Finset.sum_le_sum (fun n₂ h₂ => hterm n₁ h₁ n₂ h₂))
+      _ = _ := by
+        simp only [mul_add, Finset.sum_add_distrib, ← Finset.mul_sum,
+          Finset.sum_const, nsmul_eq_mul]
+        dsimp [S]
+        ring
+  have hcard : (t.card : ℝ) ^ 2 ≤ 4 * N ^ 2 := by
+    have hh := dyadic_card_le hN.le
+    change (t.card : ℝ) ≤ 2 * N at hh
+    nlinarith [Nat.cast_nonneg (α := ℝ) t.card]
+  have hsum' : (∑ n₁ ∈ t, ∑ n₂ ∈ t,
+      ‖smoothSum (fun y => w ((4 * M * n₁ / X) * y) * w ((4 * M * n₂ / X) * y))
+        (4 * M) (β * ((n₁ : ℝ) - n₂))‖) ≤
+      C * (4 * M) * (S + 4 * N ^ 2 / T ^ k) := by
+    apply hsum.trans
+    gcongr
+  have hc := typeII_extended_correlation w A B N β hX hM hA hB
+  calc
+    _ ≤ ((Finset.Ioc ⌊M⌋₊ ⌊2 * M⌋₊).card : ℝ) *
+        (C * (4 * M) * (S + 4 * N ^ 2 / T ^ k)) :=
+      hc.trans (mul_le_mul_of_nonneg_left hsum' (by positivity))
+    _ ≤ (2 * M) * (C * (4 * M) * (S + 4 * N ^ 2 / T ^ k)) :=
+      mul_le_mul_of_nonneg_right (dyadic_card_le hM.le) (by positivity)
+    _ = _ := by dsimp [S, t]; ring
+
+/-- Page 6 dyadic difference count with the diagonal and the scale count explicit.
+CONDITIONAL ON Counting24. -/
+theorem typeII_near_count (hcount : Counting24) (ε : ℝ) (hε : 0 < ε) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ X D N α ρ : ℝ,
+      1 ≤ X → 0 < D → D ≤ X → 1 / 2 ≤ N → N ≤ X → 0 ≤ α → α ≤ 1 → 0 < ρ →
+      ∀ (a : ℤ) (q : ℕ), 1 ≤ q → Int.gcd a q = 1 →
+        |α - (a : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2 →
+      (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+        ∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉,
+          (nearCount ((α + (b : ℝ) / d) * z) ρ : ℝ)) ≤
+        4 * D ^ 2 * (2 * ρ + 1) + C * (4 * X) ^ ε *
+          (N * D / q + ((Nat.log2 ⌊2 * N⌋₊ : ℝ) + 2) * (q * ρ * D) + ρ * N * D ^ 2) := by
+  have nearCount_positive_sum (β ρ : ℝ) (hρ : 0 ≤ ρ) (L K : ℕ) (hLK : L ≤ 2 ^ K) :
+      (∑ n ∈ Finset.Icc 1 L, (nearCount (β * n) ρ : ℝ)) ≤
+        (∑ j ∈ Finset.range K,
+          (DiophantineCount.pairCount (-β) ((2 : ℝ) ^ j) (ρ / (2 : ℝ) ^ j) : ℝ)) +
+          (DiophantineCount.pairCount (-β) (1 / 2) (2 * ρ) : ℝ) := by
+    let f : ℕ → ℝ := fun n => nearCount (β * n) ρ
+    let A := (Finset.Icc 1 L).filter (fun n => 1 < n)
+    have hcover : A ⊆ (Finset.range K).biUnion
+        (fun j => (Finset.Ioc (2 ^ j) (2 ^ (j + 1)) : Finset ℕ)) := by
+      intro n hn
+      obtain ⟨hnL, hn1⟩ := Finset.mem_filter.mp hn
+      obtain ⟨j, hjK, hjn, hnj⟩ := dyadic_block_of_le_pow K n (by omega)
+        ((Finset.mem_Icc.mp hnL).2.trans hLK)
+      exact Finset.mem_biUnion.mpr ⟨j, Finset.mem_range.mpr hjK, Finset.mem_Ioc.mpr ⟨hjn, hnj⟩⟩
+    have hdisj : (Finset.range K : Set ℕ).PairwiseDisjoint
+        (fun j => (Finset.Ioc (2 ^ j) (2 ^ (j + 1)) : Finset ℕ)) := by
+      intro a _ b _ hab
+      simp only [Function.onFun]
+      refine Finset.disjoint_left.mpr ?_
+      intro n hna hnb
+      obtain ⟨ha1, ha2⟩ := Finset.mem_Ioc.mp hna
+      obtain ⟨hb1, hb2⟩ := Finset.mem_Ioc.mp hnb
+      rcases Nat.lt_or_gt_of_ne hab with h | h
+      · have hp : 2 ^ (a + 1) ≤ 2 ^ b := Nat.pow_le_pow_right (by norm_num) h
+        omega
+      · have hp : 2 ^ (b + 1) ≤ 2 ^ a := Nat.pow_le_pow_right (by norm_num) h
+        omega
+    have hblock (j : ℕ) : (∑ n ∈ Finset.Ioc (2 ^ j) (2 ^ (j + 1)), f n) ≤
+        (DiophantineCount.pairCount (-β) ((2 : ℝ) ^ j) (ρ / (2 : ℝ) ^ j) : ℝ) := by
+      have hf1 : ⌊(2 : ℝ) ^ j⌋₊ = 2 ^ j := by
+        have hc : (2 : ℝ) ^ j = ((2 ^ j : ℕ) : ℝ) := by push_cast; rfl
+        rw [hc, Nat.floor_natCast]
+      have hf2 : ⌊2 * (2 : ℝ) ^ j⌋₊ = 2 ^ (j + 1) := by
+        have hc : (2 : ℝ) ^ (j + 1) = ((2 ^ (j + 1) : ℕ) : ℝ) := by push_cast; rfl
+        rw [show 2 * (2 : ℝ) ^ j = (2 : ℝ) ^ (j + 1) by ring, hc, Nat.floor_natCast]
+      rw [← sum_nearCount_eq_pairCount β (ρ / (2 : ℝ) ^ j) (by positivity), hf1, hf2,
+        Nat.cast_sum]
+      apply Finset.sum_le_sum
+      intro n hn
+      apply Nat.cast_le.mpr
+      apply nearCount_mono
+      have hnlo : (2 : ℝ) ^ j < n := by
+        exact_mod_cast (Finset.mem_Ioc.mp hn).1
+      rw [← mul_div_assoc]
+      apply (le_div_iff₀ (by positivity)).mpr
+      nlinarith [mul_nonneg hρ (sub_nonneg.mpr hnlo.le)]
+    have hbig : (∑ n ∈ A, f n) ≤ ∑ j ∈ Finset.range K,
+        (DiophantineCount.pairCount (-β) ((2 : ℝ) ^ j) (ρ / (2 : ℝ) ^ j) : ℝ) := by
+      calc
+        _ ≤ ∑ n ∈ (Finset.range K).biUnion
+            (fun j => (Finset.Ioc (2 ^ j) (2 ^ (j + 1)) : Finset ℕ)), f n :=
+          Finset.sum_le_sum_of_subset_of_nonneg hcover (fun n hn hnot => by dsimp [f]; positivity)
+        _ = ∑ j ∈ Finset.range K, ∑ n ∈ Finset.Ioc (2 ^ j) (2 ^ (j + 1)), f n :=
+          Finset.sum_biUnion hdisj
+        _ ≤ _ := Finset.sum_le_sum (fun j hj => hblock j)
+    have hsmall : (∑ n ∈ (Finset.Icc 1 L).filter (fun n => ¬1 < n), f n) ≤ f 1 := by
+      have hsub : (Finset.Icc 1 L).filter (fun n => ¬1 < n) ⊆ {1} := by
+        intro n hn
+        obtain ⟨hnL, hn1⟩ := Finset.mem_filter.mp hn
+        have := (Finset.mem_Icc.mp hnL).1
+        simp only [Finset.mem_singleton]
+        omega
+      simpa using Finset.sum_le_sum_of_subset_of_nonneg (f := f) hsub
+        (fun n hn hnot => by dsimp [f]; positivity)
+    have hone : f 1 ≤ (DiophantineCount.pairCount (-β) (1 / 2) (2 * ρ) : ℝ) := by
+      have hh := sum_nearCount_eq_pairCount β (2 * ρ) (M := 1 / 2) (by norm_num)
+      norm_num [show Finset.Ioc (0 : ℕ) 1 = {1} by decide] at hh
+      rw [← hh]
+      dsimp [f]
+      norm_num only [Nat.cast_one, mul_one]
+      exact_mod_cast nearCount_mono β (show ρ ≤ 2 * ρ by linarith)
+    have hsplit := Finset.sum_filter_add_sum_filter_not (Finset.Icc 1 L) (fun n => 1 < n) f
+    change (∑ n ∈ Finset.Icc 1 L, f n) ≤ _
+    rw [← hsplit]
+    exact add_le_add hbig (hsmall.trans hone)
+  have positive_near_count_residue (α D ρ : ℝ) (hρ : 0 ≤ ρ) (L K : ℕ) (hLK : L ≤ 2 ^ K) :
+      (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+        ∑ n ∈ Finset.Icc 1 L, (nearCount ((α + (b : ℝ) / d) * n) ρ : ℝ)) ≤
+        (∑ j ∈ Finset.range K,
+          (count24 α D ((2 : ℝ) ^ j) (ρ / (2 : ℝ) ^ j) : ℝ)) +
+          (count24 α D (1 / 2) (2 * ρ) : ℝ) := by
+    have hr (H δ : ℝ) : (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+        (DiophantineCount.pairCount (-(α + (b : ℝ) / d)) H δ : ℝ)) = (count24 α D H δ : ℝ) := by
+      exact_mod_cast count24_residue_convention α D H δ
+    calc
+      _ ≤ ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+          ((∑ j ∈ Finset.range K,
+            (DiophantineCount.pairCount (-(α + (b : ℝ) / d)) ((2 : ℝ) ^ j)
+              (ρ / (2 : ℝ) ^ j) : ℝ)) +
+            (DiophantineCount.pairCount (-(α + (b : ℝ) / d)) (1 / 2) (2 * ρ) : ℝ)) :=
+        Finset.sum_le_sum (fun d hd => Finset.sum_le_sum (fun b hb =>
+          nearCount_positive_sum (α + (b : ℝ) / d) ρ hρ L K hLK))
+      _ = _ := by
+        simp only [Finset.sum_add_distrib]
+        rw [hr]
+        congr 1
+        calc
+          _ = ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ j ∈ Finset.range K, ∑ b ∈ Finset.range d,
+              (DiophantineCount.pairCount (-(α + (b : ℝ) / d)) ((2 : ℝ) ^ j)
+                (ρ / (2 : ℝ) ^ j) : ℝ) := by
+            apply Finset.sum_congr rfl
+            intro d hd
+            rw [Finset.sum_comm]
+          _ = ∑ j ∈ Finset.range K, ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+              (DiophantineCount.pairCount (-(α + (b : ℝ) / d)) ((2 : ℝ) ^ j)
+                (ρ / (2 : ℝ) ^ j) : ℝ) := Finset.sum_comm
+          _ = _ := by simp_rw [hr]
+  have nearCount_symmetric_sum (β ρ : ℝ) (hρ : 0 ≤ ρ) (L : ℕ) :
+      (∑ z ∈ Finset.Icc (-(L : ℤ)) L, (nearCount (β * z) ρ : ℝ)) ≤
+        (2 * ρ + 1) + 2 * ∑ n ∈ Finset.Icc 1 L, (nearCount (β * n) ρ : ℝ) := by
+    have hneg (x : ℝ) : nearCount (-x) ρ = nearCount x ρ := by
+      unfold nearCount
+      rw [show -x - ρ = -(x + ρ) by ring, show -x + ρ = -(x - ρ) by ring,
+        Int.ceil_neg, Int.floor_neg, Int.card_Icc, Int.card_Icc]
+      congr 1
+      omega
+    let f : ℤ → ℝ := fun z => nearCount (β * z) ρ
+    have heven : f.Even := by
+      intro z
+      dsimp [f]
+      rw [Int.cast_neg, mul_neg, hneg]
+    have he := Finset.sum_Icc_of_even_eq_range heven L
+    have hset : Finset.range (L + 1) = insert 0 (Finset.Icc 1 L) := by
+      ext n
+      simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Icc]
+      omega
+    rw [hset, Finset.sum_insert (by simp)] at he
+    simp only [nsmul_eq_mul, Nat.cast_ofNat, Nat.cast_zero] at he
+    have h0 : f 0 ≤ 2 * ρ + 1 := by
+      have hh := DiophantineCount.card_integer_interval_le (a := -ρ) (b := ρ) (by linarith)
+      dsimp [f, nearCount]
+      convert hh using 1 <;> simp <;> ring
+    change (∑ z ∈ Finset.Icc (-(L : ℤ)) L, f z) ≤ _
+    calc
+      _ = f 0 + 2 * ∑ n ∈ Finset.Icc 1 L, (nearCount (β * n) ρ : ℝ) := by
+        simp only [Int.cast_natCast, f] at he
+        dsimp [f]
+        linarith [he]
+      _ ≤ _ := by linarith
+  have typeII_ascending_count_budget (hcount : Counting24) (ε : ℝ) (hε : 0 < ε) :
+      ∃ C : ℝ, 0 ≤ C ∧ ∀ X D N α ρ : ℝ,
+        1 ≤ X → 0 < D → D ≤ X → 0 < N → N ≤ X → 0 ≤ α → α ≤ 1 → 0 < ρ →
+        ∀ (a : ℤ) (q : ℕ), 1 ≤ q → Int.gcd a q = 1 →
+          |α - (a : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2 → ∀ K : ℕ, (2 : ℝ) ^ K ≤ 4 * N →
+        ((∑ j ∈ Finset.range K, (count24 α D ((2 : ℝ) ^ j) (ρ / (2 : ℝ) ^ j) : ℝ)) +
+          (count24 α D (1 / 2) (2 * ρ) : ℝ)) ≤
+        C * (4 * X) ^ ε * (N * D / q + (K + 1) * (q * ρ * D) + ρ * N * D ^ 2) := by
+    obtain ⟨C, hC, hb⟩ := hcount ε hε
+    refine ⟨4 * C, by positivity, ?_⟩
+    intro X D N α ρ hX hD hDX hN hNX hα0 hα1 hρ a q hq hc ha K hK
+    have hq0 : (0 : ℝ) < q := by exact_mod_cast (show 0 < q by omega)
+    have hterm (H : ℝ) (hH : 0 < H) (hHX : H ≤ 4 * X) :
+        (count24 α D H (ρ / H) : ℝ) ≤
+        (C * (4 * X) ^ ε) * (H * (D / q + ρ * D ^ 2) + q * ρ * D) := by
+      have hh := hb (4 * X) D H α (ρ / H) (by linarith) hD (by linarith) hH hHX
+        hα0 hα1 (by positivity) a q hq hc ha
+      apply hh.trans_eq
+      field_simp
+      ring
+    have hsum : (∑ j ∈ Finset.range K, (count24 α D ((2 : ℝ) ^ j) (ρ / (2 : ℝ) ^ j) : ℝ)) ≤
+        (C * (4 * X) ^ ε) * ((∑ j ∈ Finset.range K, (2 : ℝ) ^ j) *
+          (D / q + ρ * D ^ 2) + K * (q * ρ * D)) := by
+      calc
+        _ ≤ ∑ j ∈ Finset.range K, (C * (4 * X) ^ ε) *
+            ((2 : ℝ) ^ j * (D / q + ρ * D ^ 2) + q * ρ * D) := by
+          apply Finset.sum_le_sum
+          intro j hj
+          apply hterm _ (by positivity)
+          have hjK : j ≤ K := (Finset.mem_range.mp hj).le
+          exact (pow_le_pow_right₀ (by norm_num) hjK).trans (hK.trans (by linarith))
+        _ = _ := by
+          rw [← Finset.mul_sum, Finset.sum_add_distrib, ← Finset.sum_mul]
+          simp
+    have hcorner : (count24 α D (1 / 2) (2 * ρ) : ℝ) ≤
+        (C * (4 * X) ^ ε) * ((1 / 2) * (D / q + ρ * D ^ 2) + q * ρ * D) := by
+      convert hterm (1 / 2) (by norm_num) (by linarith) using 1 <;> ring_nf
+    have hHs : (∑ j ∈ Finset.range K, (2 : ℝ) ^ j) + 1 / 2 ≤ 4 * N := by
+      rw [sum_two_pow]
+      linarith
+    calc
+      _ ≤ (C * (4 * X) ^ ε) * (((∑ j ∈ Finset.range K, (2 : ℝ) ^ j) + 1 / 2) *
+          (D / q + ρ * D ^ 2) + (K + 1) * (q * ρ * D)) := by
+        have hh := add_le_add hsum hcorner
+        convert hh using 1 <;> push_cast <;> ring
+      _ ≤ (C * (4 * X) ^ ε) * (4 * N * (D / q + ρ * D ^ 2) + (K + 1) * (q * ρ * D)) := by
+        gcongr
+      _ ≤ _ := by
+        calc
+          _ = 4 * C * (4 * X) ^ ε *
+              (N * D / q + (K + 1) * (q * ρ * D) + ρ * N * D ^ 2) -
+              3 * (C * (4 * X) ^ ε * ((K + 1) * (q * ρ * D))) := by ring
+          _ ≤ _ := sub_le_self _ (by positivity)
+  obtain ⟨C, hC, hb⟩ := typeII_ascending_count_budget hcount ε hε
+  refine ⟨2 * C, by positivity, ?_⟩
+  intro X D N α ρ hX hD hDX hNhalf hNX hα0 hα1 hρ a q hq hc ha
+  have hN : 0 < N := by linarith
+  let L := ⌊2 * N⌋₊
+  let K := Nat.log2 L + 1
+  have hLpos : 0 < L := by
+    have hh : 1 ≤ ⌊2 * N⌋₊ := Nat.le_floor (by norm_num only [Nat.cast_one]; linarith)
+    exact hh
+  have hLK : L ≤ 2 ^ K := (lt_pow_succ_log2_nat hLpos).le
+  have hK : (2 : ℝ) ^ K ≤ 4 * N := by
+    have hpow : (2 : ℝ) ^ Nat.log2 L ≤ (L : ℝ) := by exact_mod_cast pow_log2_le_nat hLpos
+    have hL : (L : ℝ) ≤ 2 * N := Nat.floor_le (by positivity)
+    dsimp [K]
+    rw [pow_succ]
+    linarith
+  have hceil : ⌈N⌉ ≤ (L : ℤ) := by
+    by_cases hN1 : N < 1
+    · have hh : ⌈N⌉ ≤ 1 := Int.ceil_le.mpr (by norm_num only [Int.cast_one]; exact hN1.le)
+      have h1 : (1 : ℤ) ≤ L := by exact_mod_cast hLpos
+      omega
+    · have hh : 2 * N < (L : ℝ) + 1 := Nat.lt_floor_add_one (2 * N)
+      have hNr : N ≤ (L : ℝ) := by linarith
+      exact Int.ceil_le.mpr (by simpa only [Int.cast_natCast] using hNr)
+  let P : ℝ := ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+    ∑ n ∈ Finset.Icc 1 L, (nearCount ((α + (b : ℝ) / d) * n) ρ : ℝ)
+  have hP := (positive_near_count_residue α D ρ hρ.le L K hLK).trans
+    (hb X D N α ρ hX hD hDX hN hNX hα0 hα1 hρ a q hq hc ha K hK)
+  have hpoint (β : ℝ) : (∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount (β * z) ρ : ℝ)) ≤
+      (2 * ρ + 1) + 2 * ∑ n ∈ Finset.Icc 1 L, (nearCount (β * n) ρ : ℝ) := by
+    apply LE.le.trans ?_ (nearCount_symmetric_sum β ρ hρ.le L)
+    apply Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.Icc_subset_Icc (by omega) hceil)
+    intro z hz hnot
+    positivity
+  have hsum : (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+      ∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount ((α + (b : ℝ) / d) * z) ρ : ℝ)) ≤
+      (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, (d : ℝ)) * (2 * ρ + 1) + 2 * P := by
+    calc
+      _ ≤ ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+          ((2 * ρ + 1) + 2 * ∑ n ∈ Finset.Icc 1 L, (nearCount ((α + (b : ℝ) / d) * n) ρ : ℝ)) :=
+        Finset.sum_le_sum (fun d hd => Finset.sum_le_sum (fun b hb => hpoint _))
+      _ = _ := by
+        simp only [Finset.sum_add_distrib, Finset.sum_const, nsmul_eq_mul,
+          Finset.card_range, ← Finset.sum_mul, ← Finset.mul_sum]
+        dsimp [P]
+        ring
+  calc
+    _ ≤ (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, (d : ℝ)) * (2 * ρ + 1) + 2 * P := hsum
+    _ ≤ 4 * D ^ 2 * (2 * ρ + 1) + 2 *
+        (C * (4 * X) ^ ε * (N * D / q + (K + 1) * (q * ρ * D) + ρ * N * D ^ 2)) := by
+      exact add_le_add (mul_le_mul_of_nonneg_right (residue_card_le hD.le) (by positivity))
+        (mul_le_mul_of_nonneg_left hP (by norm_num))
+    _ = _ := by dsimp [K, L]; push_cast; ring
+
+set_option maxHeartbeats 2000000 in
+/-- Page 6 equation 8, scalar absorption of the explicit difference count and tail. -/
+theorem typeII_counting_budget {X M N D q T ρ A lam K : ℝ} {k : ℕ}
+    (hX : 1 ≤ X) (hM : 0 < M) (hN : 0 < N) (hD : 0 < D) (hq : 0 < q)
+    (hMN : M * N ≤ 4 * X) (hY : 1 ≤ 4 * M) (hT : 1 ≤ T)
+    (hρ : ρ = T / (4 * M)) (hA : 0 ≤ A) (hlam : 0 ≤ lam) (hK : K ≤ lam * T)
+    (htail : X ^ 2 ≤ T ^ k) :
+    M ^ 2 * (2 * N * (4 * D ^ 2 * (2 * ρ + 1) + A * T *
+      (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2)) + 16 * N ^ 2 * D ^ 2 / T ^ k) ≤
+      (1120 + A * (34 + 2 * lam)) * T ^ 3 *
+        (X ^ 2 * D / q + X * q * D + X * M * D ^ 2 + X * N * D ^ 2) := by
+  let V := X ^ 2 * D / q + X * q * D + X * M * D ^ 2 + X * N * D ^ 2
+  have hX0 : 0 < X := by linarith
+  have hT0 : 0 < T := by linarith
+  have hV : 0 ≤ V := by dsimp [V]; positivity
+  have hVa : 0 ≤ X ^ 2 * D / q := by positivity
+  have hVb : 0 ≤ X * q * D := by positivity
+  have hVc : 0 ≤ X * M * D ^ 2 := by positivity
+  have hVd : 0 ≤ X * N * D ^ 2 := by positivity
+  have hVA : X ^ 2 * D / q ≤ V := by dsimp [V]; linarith only [hVb, hVc, hVd]
+  have hVB : X * q * D ≤ V := by dsimp [V]; linarith only [hVa, hVc, hVd]
+  have hVC : X * M * D ^ 2 ≤ V := by dsimp [V]; linarith only [hVa, hVb, hVd]
+  have hVD : X * N * D ^ 2 ≤ V := by dsimp [V]; linarith only [hVa, hVb, hVc]
+  have hMN0 : 0 ≤ M * N := by positivity
+  have hMN2 : (M * N) ^ 2 ≤ 16 * X ^ 2 := by nlinarith
+  have hXM : 1 ≤ 4 * X * M := by nlinarith
+  have hXD : X * D ^ 2 ≤ 4 * V := by
+    have hh := mul_le_mul_of_nonneg_left hY (show 0 ≤ X * D ^ 2 by positivity)
+    nlinarith [hVC]
+  have hDD : D ^ 2 ≤ 4 * V := by
+    have hh := mul_le_mul_of_nonneg_right hXM (sq_nonneg D)
+    nlinarith [hVC]
+  have h1 : 8 * M ^ 2 * N * D ^ 2 ≤ 32 * V := by
+    calc
+      _ = 8 * M * (M * N) * D ^ 2 := by ring
+      _ ≤ 8 * M * (4 * X) * D ^ 2 := by gcongr
+      _ = 32 * (X * M * D ^ 2) := by ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left hVC (by norm_num)
+  have h2 : 4 * (M * N) * T * D ^ 2 ≤ 64 * T * V := by
+    calc
+      _ ≤ 4 * (4 * X) * T * D ^ 2 := by gcongr
+      _ = 16 * T * (X * D ^ 2) := by ring
+      _ ≤ 16 * T * (4 * V) := mul_le_mul_of_nonneg_left hXD (by positivity)
+      _ = _ := by ring
+  have h3 : 2 * A * T * (M * N) ^ 2 * D / q ≤ 32 * A * T * V := by
+    calc
+      _ ≤ 2 * A * T * (16 * X ^ 2) * D / q := by gcongr
+      _ = 32 * A * T * (X ^ 2 * D / q) := by ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left hVA (by positivity)
+  have h4 : (A / 2) * (M * N) * K * T ^ 2 * q * D ≤ 2 * A * lam * T ^ 3 * V := by
+    calc
+      _ = (A / 2) * (M * N) * (K * T ^ 2 * q * D) := by ring
+      _ ≤ (A / 2) * (M * N) * ((lam * T) * T ^ 2 * q * D) := by gcongr
+      _ ≤ (A / 2) * (4 * X) * ((lam * T) * T ^ 2 * q * D) := by gcongr
+      _ = 2 * A * lam * T ^ 3 * (X * q * D) := by ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left hVB (by positivity)
+  have h5 : (A / 2) * (M * N) * N * T ^ 2 * D ^ 2 ≤ 2 * A * T ^ 2 * V := by
+    calc
+      _ ≤ (A / 2) * (4 * X) * N * T ^ 2 * D ^ 2 := by gcongr
+      _ = 2 * A * T ^ 2 * (X * N * D ^ 2) := by ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left hVD (by positivity)
+  have h6 : 16 * (M * N) ^ 2 * D ^ 2 / T ^ k ≤ 1024 * V := by
+    calc
+      _ ≤ 16 * (16 * X ^ 2) * D ^ 2 / T ^ k := by gcongr
+      _ ≤ 256 * D ^ 2 := by
+        apply (div_le_iff₀ (by positivity)).mpr
+        nlinarith only [mul_le_mul_of_nonneg_right htail (show 0 ≤ 256 * D ^ 2 by positivity)]
+      _ ≤ _ := by linarith [hDD]
+  have hid : M ^ 2 * (2 * N * (4 * D ^ 2 * (2 * ρ + 1) + A * T *
+      (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2)) + 16 * N ^ 2 * D ^ 2 / T ^ k) =
+      8 * M ^ 2 * N * D ^ 2 + 4 * (M * N) * T * D ^ 2 +
+      2 * A * T * (M * N) ^ 2 * D / q + (A / 2) * (M * N) * K * T ^ 2 * q * D +
+      (A / 2) * (M * N) * N * T ^ 2 * D ^ 2 + 16 * (M * N) ^ 2 * D ^ 2 / T ^ k := by
+    rw [hρ]
+    field_simp
+    ring
+  have ht1 : 1 ≤ T ^ 3 := one_le_pow₀ hT
+  have ht2 : T ≤ T ^ 3 := by simpa using pow_le_pow_right₀ hT (show 1 ≤ 3 by decide)
+  have ht3 : T ^ 2 ≤ T ^ 3 := pow_le_pow_right₀ hT (by decide)
+  have hb0 : 1056 * V ≤ 1056 * T ^ 3 * V := by nlinarith only [mul_le_mul_of_nonneg_right ht1 hV]
+  have hb1 : (64 + 32 * A) * T * V ≤ (64 + 32 * A) * T ^ 3 * V := by gcongr
+  have hb2 : 2 * A * T ^ 2 * V ≤ 2 * A * T ^ 3 * V := by gcongr
+  rw [hid]
+  change _ ≤ (1120 + A * (34 + 2 * lam)) * T ^ 3 * V
+  linarith only [h1, h2, h3, h4, h5, h6, hb0, hb1, hb2]
+
+set_option maxHeartbeats 2000000 in
 /-- LEAF. Page 6 proof of equation 8. Cauchy Schwarz, differences and dyadic counting.
 CONDITIONAL ON equations 3 and 6. -/
-theorem typeII8 (hloc : Localization22) (hcount : Counting24) : TypeII8 := by sorry
+theorem typeII8 (hloc : Localization22) (hcount : Counting24) : TypeII8 := by
+  intro ε hε w hw hs
+  let η : ℝ := ε / 4
+  have hη : 0 < η := by dsimp [η]; positivity
+  let k : ℕ := ⌈2 / η⌉₊
+  let lam : ℝ := (2 : ℝ) ^ η / (η * Real.log 2) + 2
+  have hlam : 0 ≤ lam := by dsimp [lam]; positivity
+  obtain ⟨Cw, hCw, hcut⟩ := typeII_localized w hw hs k
+  obtain ⟨Cn, hCn, hnear⟩ := typeII_near_count hcount η hη
+  let A₀ := Cn * (4 : ℝ) ^ η
+  have hA₀ : 0 ≤ A₀ := by positivity
+  let C := Cw * (1120 + A₀ * (34 + 2 * lam))
+  have hC : 0 ≤ C := by dsimp [C]; positivity
+  refine ⟨C, hC, ?_⟩
+  intro X D M N α hX hD hDX hM hMX hN hNX hMNlo hMNhi hα0 hα1 a q hq hcop happ A B hA hB
+  have hX0 : 0 < X := by linarith
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast (show 0 < q by omega)
+  let V := X ^ 2 * D / q + X * q * D + X * M * D ^ 2 + X * N * D ^ 2
+  let R := X ^ (2 + 2 * ε) * (D / q + q * D / X + M * D ^ 2 / X + N * D ^ 2 / X)
+  have hR : 0 ≤ R := by dsimp [R]; positivity
+  have hV : 0 ≤ V := by dsimp [V]; positivity
+  rw [mul_assoc]
+  change energy (typeIISum w A B X M N) D α ≤ C * R
+  by_cases hsmallM : 2 * M < 1
+  · have hf : ⌊2 * M⌋₊ = 0 := Nat.floor_eq_zero.mpr hsmallM
+    simp only [energy, typeIISum, hf, Finset.Ioc_eq_empty_of_le (Nat.zero_le _),
+      Finset.sum_empty, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      zero_pow, Finset.sum_const_zero]
+    exact mul_nonneg hC hR
+  by_cases hsmallN : 2 * N < 1
+  · have hf : ⌊2 * N⌋₊ = 0 := Nat.floor_eq_zero.mpr hsmallN
+    simp only [energy, typeIISum, hf, Finset.Ioc_eq_empty_of_le (Nat.zero_le _),
+      Finset.sum_empty, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      zero_pow, Finset.sum_const_zero]
+    exact mul_nonneg hC hR
+  have hNhalf : 1 / 2 ≤ N := by linarith
+  have hY : 1 ≤ 4 * M := by linarith
+  let T := X ^ η
+  let ρ := T / (4 * M)
+  let K : ℝ := (Nat.log2 ⌊2 * N⌋₊ : ℝ) + 2
+  let Z : ℝ := ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+    ∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount ((α + (b : ℝ) / d) * z) ρ : ℝ)
+  have hT : 1 ≤ T := Real.one_le_rpow hX hη.le
+  have hT0 : 0 < T := lt_of_lt_of_le zero_lt_one hT
+  have hρ : 0 < ρ := by positivity
+  have hK : K ≤ lam * T := by
+    have hh := nat_log2_twoN_le (ε := 2 * η) (by positivity) hX hN hNX
+    simpa only [show 2 * η / 2 = η by ring] using hh
+  have hk : (2 : ℝ) ≤ η * k := by
+    have hh : 2 / η ≤ (k : ℝ) := Nat.le_ceil _
+    have hh' := (div_le_iff₀ hη).mp hh
+    nlinarith only [hh']
+  have htail : X ^ 2 ≤ T ^ k := by
+    calc
+      _ = X ^ (2 : ℝ) := by norm_num
+      _ ≤ X ^ (η * k) := Real.rpow_le_rpow_of_exponent_le hX hk
+      _ = T ^ k := by rw [Real.rpow_mul_natCast hX0.le]
+  have hT3 : T ^ 3 ≤ X ^ (2 * ε) := by
+    calc
+      _ = X ^ (η * (3 : ℕ)) := by rw [Real.rpow_mul_natCast hX0.le]
+      _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hX (by dsimp [η]; linarith)
+  have hcountZ : Z ≤ 4 * D ^ 2 * (2 * ρ + 1) + A₀ * T *
+      (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2) := by
+    have hh := hnear X D N α ρ hX hD hDX hNhalf hNX hα0 hα1 hρ a q hq hcop happ
+    have hpow : (4 * X) ^ η = (4 : ℝ) ^ η * T := Real.mul_rpow (by norm_num) hX0.le
+    rw [hpow] at hh
+    convert hh using 1 <;> dsimp [A₀, K, Z] <;> ring
+  have hpoint (β : ℝ) : ‖typeIISum w A B X M N β‖ ^ 2 ≤ Cw * M ^ 2 *
+      (2 * N * (∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount (β * z) ρ : ℝ)) +
+        4 * N ^ 2 / T ^ k) := by
+    have hc := hcut X M N β T hX0 hM hN hMNlo hMNhi hY hT A B hA hB
+    have hd := typeII_difference_sum hN (fun z : ℤ => (nearCount (β * z) ρ : ℝ))
+      (fun z => by positivity)
+    have hd' : (∑ n₁ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊, ∑ n₂ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+        (nearCount (β * ((n₁ : ℝ) - n₂)) ρ : ℝ)) ≤
+        2 * N * ∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount (β * z) ρ : ℝ) := by
+      simpa only [Int.cast_sub, Int.cast_natCast] using hd
+    exact hc.trans (mul_le_mul_of_nonneg_left (add_le_add hd' le_rfl) (by positivity))
+  have henergy : energy (typeIISum w A B X M N) D α ≤
+      Cw * M ^ 2 * (2 * N * Z + 16 * N ^ 2 * D ^ 2 / T ^ k) := by
+    have htailSum : (4 * N ^ 2 / T ^ k) *
+        (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, (d : ℝ)) ≤ 16 * N ^ 2 * D ^ 2 / T ^ k := by
+      apply (mul_le_mul_of_nonneg_left (residue_card_le hD.le)
+        (show 0 ≤ 4 * N ^ 2 / T ^ k by positivity)).trans_eq
+      ring
+    calc
+      _ ≤ ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d, Cw * M ^ 2 *
+          (2 * N * (∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉,
+            (nearCount ((α + (b : ℝ) / d) * z) ρ : ℝ)) + 4 * N ^ 2 / T ^ k) :=
+        Finset.sum_le_sum (fun d hd => Finset.sum_le_sum (fun b hb => hpoint _))
+      _ = Cw * M ^ 2 * (2 * N * Z + (4 * N ^ 2 / T ^ k) *
+          (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, (d : ℝ))) := by
+        simp only [mul_add, Finset.sum_add_distrib, ← Finset.mul_sum,
+          Finset.sum_const, nsmul_eq_mul, Finset.card_range, ← Finset.sum_mul]
+        dsimp [Z]
+        ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left (add_le_add le_rfl htailSum) (by positivity)
+  have hscalar := typeII_counting_budget hX hM hN hD hq0 hMNhi hY hT
+    (show ρ = T / (4 * M) from rfl) hA₀ hlam hK htail
+  have hfinal : energy (typeIISum w A B X M N) D α ≤ C * T ^ 3 * V := by
+    calc
+      _ ≤ Cw * M ^ 2 * (2 * N * (4 * D ^ 2 * (2 * ρ + 1) + A₀ * T *
+          (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2)) + 16 * N ^ 2 * D ^ 2 / T ^ k) := by
+        apply henergy.trans
+        gcongr
+      _ = Cw * (M ^ 2 * (2 * N * (4 * D ^ 2 * (2 * ρ + 1) + A₀ * T *
+          (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2)) + 16 * N ^ 2 * D ^ 2 / T ^ k)) := by ring
+      _ ≤ Cw * ((1120 + A₀ * (34 + 2 * lam)) * T ^ 3 * V) :=
+        mul_le_mul_of_nonneg_left hscalar hCw.le
+      _ = _ := by dsimp [C]; ring
+  have hRe : R = X ^ (2 * ε) * V := by
+    dsimp [R, V]
+    rw [Real.rpow_add hX0]
+    norm_num <;> field_simp <;> ring
+  calc
+    _ ≤ C * T ^ 3 * V := hfinal
+    _ ≤ C * X ^ (2 * ε) * V := by gcongr
+    _ = C * R := by rw [hRe]; ring
+
+open ArithmeticFunction
+open scoped ArithmeticFunction.Moebius ArithmeticFunction.zeta
+
+/-- Page 5 Vaughan transfer, a finite weighted convolution is exactly a bilinear sum. -/
+theorem weighted_convolution_sum (f g : ArithmeticFunction ℝ) (F : ℕ → ℂ) (N : ℕ) :
+    (∑ n ∈ Finset.Ioc 0 N, ((f * g) n : ℂ) * F n) =
+      ∑ d ∈ Finset.Ioc 0 N, ∑ m ∈ Finset.Ioc 0 (N / d),
+        (f d : ℂ) * (g m : ℂ) * F (d * m) := by
+  -- Reindexing follows Mathlib ArithmeticFunction.sum_Ioc_mul_eq_sum_prod_filter, Apache-2.0.
+  have hfiltered (f g : ArithmeticFunction ℝ) (F : ℕ → ℂ) (N : ℕ) :
+      (∑ n ∈ Finset.Ioc 0 N, ((f * g) n : ℂ) * F n) =
+        ∑ p ∈ (Finset.Ioc 0 N ×ˢ Finset.Ioc 0 N).filter (fun p : ℕ × ℕ => p.1 * p.2 ≤ N),
+          (f p.1 : ℂ) * (g p.2 : ℂ) * F (p.1 * p.2) := by
+    trans ∑ n ∈ Finset.Ioc 0 N,
+      ∑ p ∈ (Finset.Ioc 0 N ×ˢ Finset.Ioc 0 N).filter (fun p : ℕ × ℕ => p.1 * p.2 = n),
+        (f p.1 : ℂ) * (g p.2 : ℂ) * F n
+    · apply Finset.sum_congr rfl
+      intro n hn
+      rw [ArithmeticFunction.mul_apply, Complex.ofReal_sum, Finset.sum_mul]
+      simp only [Complex.ofReal_mul]
+      obtain ⟨hn0, hnN⟩ := Finset.mem_Ioc.mp hn
+      rw [Nat.divisorsAntidiagonal_eq_prod_filter_of_le hn0.ne' hnN]
+    · simp_rw [Finset.sum_filter]
+      rw [Finset.sum_comm]
+      apply Finset.sum_congr rfl
+      intro p hp
+      obtain ⟨hp1, hp2⟩ := Finset.mem_product.mp hp
+      have hp0 : 0 < p.1 * p.2 := mul_pos (Finset.mem_Ioc.mp hp1).1 (Finset.mem_Ioc.mp hp2).1
+      simp only [Finset.sum_ite_eq, Finset.mem_Ioc, hp0, true_and]
+
+  rw [hfiltered, Finset.sum_filter, Finset.sum_product]
+  apply Finset.sum_congr rfl
+  intro d hd
+  have hd0 : 0 < d := (Finset.mem_Ioc.mp hd).1
+  rw [← Finset.sum_filter]
+  have hset : (Finset.Ioc 0 N).filter (fun m => d * m ≤ N) = Finset.Ioc 0 (N / d) := by
+    ext m
+    simp only [Finset.mem_filter, Finset.mem_Ioc]
+    constructor
+    · intro hh
+      refine ⟨hh.1.1, (Nat.le_div_iff_mul_le hd0).mpr ?_⟩
+      simpa only [mul_comm] using hh.2
+    · intro hh
+      refine ⟨⟨hh.1, hh.2.trans (Nat.div_le_self _ _)⟩, ?_⟩
+      have hm := (Nat.le_div_iff_mul_le hd0).mp hh.2
+      simpa only [mul_comm] using hm
+  rw [hset]
+
+/-- Page 5 proof of Theorem 2.1, the exact four finite Vaughan terms in bilinear form. -/
+theorem vaughan_bilinear_identity (U V : ℝ) (F : ℕ → ℂ) (N : ℕ) :
+    (∑ n ∈ Finset.Ioc 0 N, (vonMangoldt n : ℂ) * F n) =
+      (∑ d ∈ Finset.Ioc 0 N, ∑ m ∈ Finset.Ioc 0 (N / d),
+        (Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U d : ℂ) *
+          (ArithmeticFunction.log m : ℂ) * F (d * m)) -
+      (∑ d ∈ Finset.Ioc 0 N, ∑ m ∈ Finset.Ioc 0 (N / d),
+        ((Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U *
+          Vaughan86.shortPart vonMangoldt V) d : ℂ) *
+          ((zeta : ArithmeticFunction ℝ) m : ℂ) * F (d * m)) +
+      (∑ n ∈ Finset.Ioc 0 N, (Vaughan86.shortPart vonMangoldt V n : ℂ) * F n) +
+      (∑ d ∈ Finset.Ioc 0 N, ∑ m ∈ Finset.Ioc 0 (N / d),
+        ((((moebius : ArithmeticFunction ℝ) - Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U) *
+          (zeta : ArithmeticFunction ℝ)) d : ℂ) *
+          ((vonMangoldt - Vaughan86.shortPart vonMangoldt V) m : ℂ) * F (d * m)) := by
+  have h := Vaughan86.vaughan_weighted_identity U V (Finset.Ioc 0 N) F
+  have he : ((moebius : ArithmeticFunction ℝ) - Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U) *
+      (vonMangoldt - Vaughan86.shortPart vonMangoldt V) * (zeta : ArithmeticFunction ℝ) =
+      (((moebius : ArithmeticFunction ℝ) - Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U) *
+        (zeta : ArithmeticFunction ℝ)) * (vonMangoldt - Vaughan86.shortPart vonMangoldt V) := by
+    ac_rfl
+  rw [he, weighted_convolution_sum, weighted_convolution_sum, weighted_convolution_sum] at h
+  exact h
+
+/-- Page 5 Vaughan decomposition, the short convolution vanishes above U times V. -/
+theorem short_mu_lambda_support {U V : ℝ} (hU : 0 ≤ U) (hV : 0 ≤ V) {n : ℕ} (hn : U * V < n) :
+    (Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U *
+      Vaughan86.shortPart vonMangoldt V) n = 0 := by
+  rw [ArithmeticFunction.mul_apply]
+  apply Finset.sum_eq_zero
+  intro p hp
+  have hpn : p.1 * p.2 = n := (Nat.mem_divisorsAntidiagonal.mp hp).1
+  by_cases h1 : (p.1 : ℝ) ≤ U
+  · by_cases h2 : (p.2 : ℝ) ≤ V
+    · have hh := mul_le_mul h1 h2 (Nat.cast_nonneg p.2) hU
+      have he : (p.1 : ℝ) * p.2 = n := by exact_mod_cast hpn
+      exfalso
+      linarith
+    · simp [Vaughan86.shortPart, h2]
+  · simp [Vaughan86.shortPart, h1]
+
+/-- Page 5 Vaughan transfer, the mean square of a finite sum costs at most its block count. -/
+theorem energy_sum_le {ι : Type*} (s : Finset ι) (F : ι → ℝ → ℂ) (D α : ℝ) :
+    energy (fun β => ∑ j ∈ s, F j β) D α ≤
+      (s.card : ℝ) * ∑ j ∈ s, energy (F j) D α := by
+  have hpoint (β : ℝ) : ‖∑ j ∈ s, F j β‖ ^ 2 ≤
+      (s.card : ℝ) * ∑ j ∈ s, ‖F j β‖ ^ 2 := by
+    simpa only [one_mul] using Cauchy86.finite_cauchy s (fun _ => (1 : ℂ))
+      (fun j => F j β) (fun j hj => by norm_num)
+  unfold energy
+  calc
+    _ ≤ ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+        ((s.card : ℝ) * ∑ j ∈ s, ‖F j (α + (b : ℝ) / d)‖ ^ 2) :=
+      Finset.sum_le_sum (fun d hd => Finset.sum_le_sum (fun b hb => hpoint _))
+    _ = _ := by
+      simp only [Finset.mul_sum]
+      calc
+        _ = ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ j ∈ s, ∑ b ∈ Finset.range d,
+            (s.card : ℝ) * ‖F j (α + (b : ℝ) / d)‖ ^ 2 := by
+          apply Finset.sum_congr rfl
+          intro d hd
+          rw [Finset.sum_comm]
+        _ = _ := Finset.sum_comm
+
+open scoped Topology
+
+/-- Page 5 Vaughan log splitting, multiplication by log preserves a smooth window away from zero. -/
+theorem window_mul_log_contDiff {w : ℝ → ℝ} (hw : ContDiff ℝ ∞ w) {c : ℝ} (hc : 0 < c)
+    (hs : Function.support w ⊆ Set.Icc c 1) :
+    ContDiff ℝ ∞ (fun x => w x * Real.log x) := by
+  apply contDiff_iff_contDiffAt.mpr
+  intro x
+  by_cases hx : x = 0
+  · subst x
+    have he : (fun y => w y * Real.log y) =ᶠ[𝓝 0] (fun _ => 0) := by
+      filter_upwards [isOpen_Iio.mem_nhds hc] with y hy
+      have hz : w y = 0 := by
+        by_contra hn
+        exact (not_le_of_gt hy) (hs hn).1
+      simp [hz]
+    exact contDiffAt_const.congr_of_eventuallyEq he
+  · exact hw.contDiffAt.mul (Real.contDiffAt_log.mpr hx)
+
+/-- Pages 5 to 6, one Fourier decay constant for a fixed smooth window
+times a bounded rescaling of the original weight, including scale zero. -/
+theorem scaled_weight_product_fourier_decay (w u : ℝ → ℝ) (hw : ContDiff ℝ ∞ w) (hu : ContDiff ℝ ∞ u)
+    (hs : Function.support w ⊆ Set.Icc 0 1) (hus : Function.support u ⊆ Set.Icc 0 1)
+    (k : ℕ) (R : ℝ) :
+    ∃ C : ℝ, 0 < C ∧ ∀ a t : ℝ, |a| ≤ R →
+      (1 + |t|) ^ k * ‖Localization86.weightFourier (fun y => w (a * y) * u y) t‖ ≤ C := by
+  have hmixder (w u : ℝ → ℝ) (hw : ContDiff ℝ ∞ w) (hu : ContDiff ℝ ∞ u)
+      (hs : Function.support w ⊆ Set.Icc 0 1) (hus : Function.support u ⊆ Set.Icc 0 1) (k : ℕ) (R : ℝ) :
+      ∃ C : ℝ, 0 < C ∧ ∀ a x : ℝ, |a| ≤ R →
+        ‖iteratedDeriv k (fun y : ℝ => w (a * y) * u y) x‖ ≤ C := by
+    have hc : HasCompactSupport w :=
+      HasCompactSupport.of_support_subset_isCompact isCompact_Icc hs
+    obtain ⟨Bw, hBw, hbw⟩ := hc.exists_bound_iteratedFDeriv hw k
+    have huc : HasCompactSupport u := HasCompactSupport.of_support_subset_isCompact isCompact_Icc hus
+    obtain ⟨Bu, hBu, hbu⟩ := huc.exists_bound_iteratedFDeriv hu k
+    let B := Bw + Bu
+    have hB : 0 ≤ B := by positivity
+    let S := max 1 R
+    let K := S ^ k * B
+    have hS : 1 ≤ S := le_max_left _ _
+    have hS0 : 0 ≤ S := by linarith
+    have hK : 0 ≤ K := by positivity
+    let C := (∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ)) * K ^ 2
+    have hC : 0 ≤ C := by positivity
+    refine ⟨C + 1, by positivity, ?_⟩
+    intro a x ha
+    have hd (c : ℝ) (hcR : |c| ≤ R) (i : ℕ) (hi : i ≤ k) :
+        ‖iteratedDeriv i (fun y : ℝ => w (c * y)) x‖ ≤ K := by
+      rw [iteratedDeriv_comp_const_mul (hw.of_le (by exact_mod_cast le_top)),
+        norm_mul, Real.norm_eq_abs, abs_pow]
+      have hbase : |c| ≤ S := hcR.trans (le_max_right _ _)
+      have hp : |c| ^ i ≤ S ^ k :=
+        (pow_le_pow_left₀ (abs_nonneg _) hbase _).trans (pow_le_pow_right₀ hS hi)
+      have hb0 : ‖iteratedDeriv i w (c * x)‖ ≤ B := by
+        rw [← norm_iteratedFDeriv_eq_norm_iteratedDeriv]
+        exact (hbw i hi _).trans (by dsimp [B]; linarith)
+      exact mul_le_mul hp hb0 (norm_nonneg _) (pow_nonneg hS0 _)
+    have hwa : ContDiff ℝ (k : ℕ) (fun y : ℝ => w (a * y)) :=
+      (hw.comp (contDiff_const.mul contDiff_id)).of_le (by exact_mod_cast le_top)
+    have hwb : ContDiff ℝ (k : ℕ) u := hu.of_le (by exact_mod_cast le_top)
+    have hdu (i : ℕ) (hi : i ≤ k) : ‖iteratedDeriv i u x‖ ≤ K := by
+      have hh : ‖iteratedDeriv i u x‖ ≤ Bu := by
+        rw [← norm_iteratedFDeriv_eq_norm_iteratedDeriv]
+        exact hbu i hi x
+      have hBK : B ≤ K := le_mul_of_one_le_left hB (one_le_pow₀ hS)
+      exact hh.trans ((show Bu ≤ B by dsimp [B]; linarith).trans hBK)
+    rw [iteratedDeriv_fun_mul hwa.contDiffAt hwb.contDiffAt]
+    calc
+      _ ≤ ∑ i ∈ Finset.range (k + 1),
+          ‖(k.choose i : ℝ) * iteratedDeriv i (fun y => w (a * y)) x *
+            iteratedDeriv (k - i) u x‖ := norm_sum_le _ _
+      _ ≤ ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * K ^ 2 := by
+        apply Finset.sum_le_sum
+        intro i hi
+        have hi' : i ≤ k := by simpa using Finset.mem_range.mp hi
+        rw [norm_mul, norm_mul, Real.norm_natCast]
+        have hh := mul_le_mul (hd a ha i hi') (hdu (k - i) (Nat.sub_le _ _))
+          (norm_nonneg _) hK
+        nlinarith [Nat.cast_nonneg (α := ℝ) (k.choose i),
+          mul_le_mul_of_nonneg_left hh (Nat.cast_nonneg (α := ℝ) (k.choose i))]
+      _ = C := by dsimp [C]; rw [← Finset.sum_mul]
+      _ ≤ C + 1 := by linarith
+  choose C hC hb using fun i : ℕ => hmixder w u hw hu hs hus i R
+  let B := ∑ i ∈ Finset.range (k + 1), C i
+  have hB : 0 ≤ B := Finset.sum_nonneg (fun i hi => (hC i).le)
+  let K := 2 ^ k * (1 + ((2 * π) ^ k)⁻¹) * B
+  refine ⟨K + 1, by dsimp [K]; positivity, ?_⟩
+  intro a t ha
+  let v : ℝ → ℝ := fun y => w (a * y) * u y
+  have hv : ContDiff ℝ ∞ v := (hw.comp (contDiff_const.mul contDiff_id)).mul hu
+  have hvs : Function.support v ⊆ Set.Icc 0 1 := by
+    intro y hy
+    apply hus
+    intro hz
+    exact hy (by simp [v, hz])
+  have hder (i : ℕ) (hi : i ≤ k) (y : ℝ) : ‖iteratedDeriv i v y‖ ≤ B :=
+    (hb i a y ha).trans (Finset.single_le_sum (fun j hj => (hC j).le)
+      (Finset.mem_range.mpr (by omega)))
+  have hf := weightFourier_decay_of_derivative_bound v hv hvs k hB hder t
+  have he : (𝓕 (fun x => (v x : ℂ))) t = Localization86.weightFourier v t := by
+    have hmod : Localization86.modulatedWeight v 1 0 = fun x => (v x : ℂ) := by
+      funext x
+      simp [Localization86.modulatedWeight, e]
+    rw [← hmod]
+    simpa [Localization86.weightFourier] using
+      (Localization86.fourier_modulated v (X := 1) (by norm_num) 0 t)
+  rw [he] at hf
+  exact hf.trans (by dsimp [K]; linarith)
+
+/-- Page 5 Vaughan Type I terms, the finite zeta convolution is a sum of fixed-weight smooth sums. -/
+theorem zeta_convolution_smoothSum (w : ℝ → ℝ) (hw : ContDiff ℝ ∞ w)
+    (hs : Function.support w ⊆ Set.Icc 0 1) (f : ArithmeticFunction ℝ)
+    {X : ℝ} (hX : 0 < X) (β : ℝ) :
+    (∑ n ∈ Finset.Ioc 0 ⌊X⌋₊,
+      (((f * (zeta : ArithmeticFunction ℝ)) n : ℝ) : ℂ) * e (β * n) * (w ((n : ℝ) / X) : ℂ)) =
+      ∑ d ∈ Finset.Ioc 0 ⌊X⌋₊, (f d : ℂ) * smoothSum w (X / d) (β * d) := by
+  have hw0 := (Weight86.weight_endpoints hw.continuous hs).1
+  have hinner (d : ℕ) (hd : d ∈ Finset.Ioc 0 ⌊X⌋₊) :
+      smoothSum w (X / d) (β * d) =
+        ∑ m ∈ Finset.Ioc 0 (⌊X⌋₊ / d), e (β * d * m) * (w ((d : ℝ) * m / X) : ℂ) := by
+    have hd0 : (0 : ℝ) < d := by exact_mod_cast (Finset.mem_Ioc.mp hd).1
+    have hY : 0 ≤ X / d := by positivity
+    have he := Weight86.nat_int_sum
+      (fun m : ℤ => e ((β * d) * m) * (w ((m : ℝ) / (X / d)) : ℂ)) hY
+    unfold smoothSum
+    rw [← he]
+    have hset : Finset.range (⌊X / d⌋₊ + 1) = insert 0 (Finset.Ioc 0 ⌊X / d⌋₊) := by
+      ext n
+      simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Ioc]
+      omega
+    rw [hset, Finset.sum_insert (by simp)]
+    simp only [Int.cast_natCast, Int.cast_zero, Nat.cast_zero, mul_zero, zero_div, hw0, Complex.ofReal_zero,
+      mul_zero, zero_add, Nat.floor_div_natCast]
+    apply Finset.sum_congr rfl
+    intro m hm
+    have harg : (m : ℝ) / (X / d) = (d : ℝ) * m / X := by field_simp
+    rw [harg]
+  have hc := weighted_convolution_sum f (zeta : ArithmeticFunction ℝ)
+    (fun n => e (β * n) * (w ((n : ℝ) / X) : ℂ)) ⌊X⌋₊
+  calc
+    _ = ∑ n ∈ Finset.Ioc 0 ⌊X⌋₊,
+        (((f * (zeta : ArithmeticFunction ℝ)) n : ℝ) : ℂ) *
+          (e (β * n) * (w ((n : ℝ) / X) : ℂ)) := by
+      apply Finset.sum_congr rfl
+      intro n hn
+      ring
+    _ = _ := hc
+    _ = _ := by
+      apply Finset.sum_congr rfl
+      intro d hd
+      rw [hinner d hd, Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro m hm
+      have hz : (zeta : ArithmeticFunction ℝ) m = 1 := by
+        rw [ArithmeticFunction.natCoe_apply,
+          ArithmeticFunction.zeta_apply_ne (by have := (Finset.mem_Ioc.mp hm).1; omega), Nat.cast_one]
+      simp only [hz, Complex.ofReal_one, mul_one, Nat.cast_mul, mul_assoc]
+
+/-- Page 5 Vaughan decomposition, exact dyadic blocks of a positive denominator range. -/
+theorem sum_dyadic_blocks (f : ℕ → ℂ) (K : ℕ) :
+    (∑ d ∈ Finset.Ioc 0 (2 ^ K), f d) =
+      ∑ j ∈ Finset.range (K + 1), ∑ d ∈ Finset.Ioc (2 ^ j / 2) (2 ^ j), f d := by
+  induction K with
+  | zero => norm_num
+  | succ K ih =>
+    rw [show K + 1 + 1 = (K + 1) + 1 by omega, Finset.sum_range_succ, ← ih]
+    have he : 2 ^ (K + 1) / 2 = 2 ^ K := by simp [pow_succ]
+    rw [he]
+    exact (Finset.sum_Ioc_consecutive f (Nat.zero_le _) (Nat.pow_le_pow_right (by norm_num) (Nat.le_succ K))).symm
+
+/-- Page 5 Vaughan transfer, the short Lambda term has a uniform elementary energy bound. -/
+theorem short_lambda_energy (w : ℝ → ℝ) (hw : ContDiff ℝ ∞ w)
+    (hs : Function.support w ⊆ Set.Icc 0 1) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ X D V α : ℝ, 0 < X → 0 ≤ D → 1 ≤ V →
+      energy (fun β => ∑ n ∈ Finset.Ioc 0 ⌊X⌋₊,
+        (Vaughan86.shortPart vonMangoldt V n : ℂ) * e (β * n) *
+          (w ((n : ℝ) / X) : ℂ)) D α ≤ C * D ^ 2 * V ^ 4 := by
+  have hc : HasCompactSupport w := HasCompactSupport.of_support_subset_isCompact isCompact_Icc hs
+  obtain ⟨B, hb⟩ := hc.exists_bound_of_continuous hw.continuous
+  let W := max B 1
+  have hW : 0 < W := lt_of_lt_of_le zero_lt_one (le_max_right _ _)
+  have hwb (x : ℝ) : ‖w x‖ ≤ W := (hb x).trans (le_max_left _ _)
+  refine ⟨4 * W ^ 2, by positivity, ?_⟩
+  intro X D V α hX hD hV
+  have hphase (t : ℝ) : ‖e t‖ = 1 := by
+    simp [e, Complex.norm_exp, Complex.mul_re, Complex.mul_im]
+  have hterm (β : ℝ) (n : ℕ) :
+      ‖(Vaughan86.shortPart vonMangoldt V n : ℂ) * e (β * n) * (w ((n : ℝ) / X) : ℂ)‖ ≤
+        if (n : ℝ) ≤ V then W * V else 0 := by
+    by_cases hnV : (n : ℝ) ≤ V
+    · have hlam : vonMangoldt n ≤ V :=
+        ArithmeticFunction.vonMangoldt_le_log.trans
+          ((show Real.log (n : ℝ) ≤ n by simpa using Real.log_natCast_le_rpow_div n (show (0 : ℝ) < 1 by norm_num)).trans hnV)
+      have hcoeff : ‖(Vaughan86.shortPart vonMangoldt V n : ℂ)‖ ≤ V := by
+        simpa [Vaughan86.shortPart, hnV, Complex.norm_real, Real.norm_eq_abs,
+          abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg] using hlam
+      rw [if_pos hnV]
+      simp only [norm_mul, hphase, mul_one]
+      have hh := mul_le_mul hcoeff (hwb ((n : ℝ) / X)) (norm_nonneg _) (show 0 ≤ V by linarith)
+      simpa only [Complex.norm_real, Real.norm_eq_abs, mul_comm] using hh
+    · simp [Vaughan86.shortPart, hnV]
+  let s := Finset.Ioc 0 ⌊X⌋₊
+  let t : Finset ℕ := s.filter (fun n : ℕ => (n : ℝ) ≤ V)
+  have hsub : t ⊆ Finset.Ioc 0 ⌊V⌋₊ := by
+    intro n hn
+    obtain ⟨hns, hnV⟩ := Finset.mem_filter.mp hn
+    exact Finset.mem_Ioc.mpr ⟨(Finset.mem_Ioc.mp hns).1, Nat.le_floor hnV⟩
+  have hcard : (t.card : ℝ) ≤ V := by
+    have hh : t.card ≤ ⌊V⌋₊ := by simpa using Finset.card_le_card hsub
+    exact (Nat.cast_le.mpr hh).trans (Nat.floor_le (by linarith))
+  have hnorm (β : ℝ) : ‖∑ n ∈ s,
+      (Vaughan86.shortPart vonMangoldt V n : ℂ) * e (β * n) * (w ((n : ℝ) / X) : ℂ)‖ ≤ W * V ^ 2 := by
+    calc
+      _ ≤ ∑ n ∈ s, ‖(Vaughan86.shortPart vonMangoldt V n : ℂ) * e (β * n) * (w ((n : ℝ) / X) : ℂ)‖ := norm_sum_le _ _
+      _ ≤ ∑ n ∈ s, if (n : ℝ) ≤ V then W * V else 0 := Finset.sum_le_sum (fun n hn => hterm β n)
+      _ = (t.card : ℝ) * (W * V) := by simp [t, Finset.sum_ite]
+      _ ≤ V * (W * V) := mul_le_mul_of_nonneg_right hcard (by positivity)
+      _ = _ := by ring
+  have he := energy_le_const (α := α)
+    (fun β => ∑ n ∈ s, (Vaughan86.shortPart vonMangoldt V n : ℂ) * e (β * n) * (w ((n : ℝ) / X) : ℂ))
+    hD (show 0 ≤ W * V ^ 2 by positivity) hnorm
+  apply he.trans_eq
+  ring
+
+set_option maxHeartbeats 2000000 in
+/-- Page 5 Vaughan transfer, dyadic Type I convolution estimate.
+CONDITIONAL ON TypeI7. -/
+theorem typeI_convolution_energy (hI : TypeI7) :
+    ∀ ε : ℝ, 0 < ε → ∀ w : ℝ → ℝ, ContDiff ℝ ∞ w →
+      Function.support w ⊆ Set.Icc 0 1 →
+      ∃ C : ℝ, 0 ≤ C ∧ ∀ X D H α : ℝ,
+        1 ≤ X → 0 < D → D ≤ X → 0 < H → H ≤ X → 0 ≤ α → α ≤ 1 →
+        ∀ (a : ℤ) (q : ℕ), 1 ≤ q → Int.gcd a q = 1 →
+          |α - (a : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2 →
+          ∀ (f : ArithmeticFunction ℝ) (B : ℝ), 0 ≤ B →
+          (∀ n, |f n| ≤ B) → (∀ n : ℕ, H < (n : ℝ) → f n = 0) →
+          energy (fun β => ∑ n ∈ Finset.Ioc 0 ⌊X⌋₊,
+            (((f * (zeta : ArithmeticFunction ℝ)) n : ℝ) : ℂ) * e (β * n) *
+              (w ((n : ℝ) / X) : ℂ)) D α ≤
+            C * (B + 1) ^ 2 * X ^ (2 + ε) * (D / q + q * D / X + H * D ^ 2 / X) := by
+  intro ε hε w hw hs
+  let η := ε / 4
+  have hη : 0 < η := by dsimp [η]; positivity
+  let lam : ℝ := (2 : ℝ) ^ η / (η * Real.log 2) + 2
+  have hlam : 0 ≤ lam := by dsimp [lam]; positivity
+  obtain ⟨Cw, hCw, hi⟩ := hI η hη w hw hs
+  let C := Cw * lam ^ 2
+  refine ⟨C, by dsimp [C]; positivity, ?_⟩
+  intro X D H α hX hD hDX hH hHX hα0 hα1 a q hq hcop happ f B hB hf hsupport
+  have hX0 : 0 < X := by linarith
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast (show 0 < q by omega)
+  have hR : 0 ≤ C * (B + 1) ^ 2 * X ^ (2 + ε) * (D / q + q * D / X + H * D ^ 2 / X) := by
+    dsimp [C]
+    positivity
+  by_cases hzero : ⌊H⌋₊ = 0
+  · have hz (β : ℝ) : (∑ n ∈ Finset.Ioc 0 ⌊X⌋₊,
+        (((f * (zeta : ArithmeticFunction ℝ)) n : ℝ) : ℂ) * e (β * n) *
+          (w ((n : ℝ) / X) : ℂ)) = 0 := by
+      rw [zeta_convolution_smoothSum w hw hs f hX0 β]
+      apply Finset.sum_eq_zero
+      intro d hd
+      have hd0 := (Finset.mem_Ioc.mp hd).1
+      have hHd : H < d := (Nat.floor_lt hH.le).mp (by rw [hzero]; omega)
+      rw [hsupport d hHd]
+      simp
+    simp only [energy, hz, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      zero_pow, Finset.sum_const_zero]
+    exact hR
+  have hNpos : 0 < ⌊H⌋₊ := Nat.pos_of_ne_zero hzero
+  let K := Nat.log2 ⌊H⌋₊ + 1
+  let J := Finset.range (K + 1)
+  let M : ℕ → ℝ := fun j => (2 : ℝ) ^ j / 2
+  let b := B + 1
+  have hb : 0 < b := by dsimp [b]; linarith
+  have hbc : (b : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt hb
+  let A : ℕ → ℂ := fun n => (f n : ℂ) / (b : ℂ)
+  have hA (n : ℕ) : ‖A n‖ ≤ 1 := by
+    dsimp [A]
+    simp only [norm_div, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hb]
+    apply (div_le_one hb).mpr
+    exact (hf n).trans (by dsimp [b]; linarith)
+  have hfd (n : ℕ) : (f n : ℂ) = (b : ℂ) * A n := by
+    dsimp [A]
+    field_simp
+  have hpower : ⌊H⌋₊ ≤ 2 ^ K := (lt_pow_succ_log2_nat hNpos).le
+  have hMmax : M K ≤ H := by
+    calc
+      _ = (2 : ℝ) ^ Nat.log2 ⌊H⌋₊ := by dsimp [M, K]; rw [pow_succ]; ring
+      _ ≤ (⌊H⌋₊ : ℝ) := by exact_mod_cast pow_log2_le_nat hNpos
+      _ ≤ H := Nat.floor_le hH.le
+  have hMj (j : ℕ) (hj : j ∈ J) : 0 < M j ∧ M j ≤ H := by
+    have hjK : j ≤ K := by have := Finset.mem_range.mp hj; omega
+    refine ⟨by dsimp [M]; positivity, ?_⟩
+    exact (div_le_div_of_nonneg_right (pow_le_pow_right₀ (by norm_num) hjK) (by norm_num)).trans hMmax
+  have hlo (j : ℕ) : ⌊M j⌋₊ = 2 ^ j / 2 := by
+    have hc : (2 : ℝ) ^ j = ((2 ^ j : ℕ) : ℝ) := by push_cast; rfl
+    dsimp [M]
+    rw [hc]
+    simpa using (Nat.floor_div_eq_div (K := ℝ) (2 ^ j) 2)
+  have hhi (j : ℕ) : ⌊2 * M j⌋₊ = 2 ^ j := by
+    have hc : (2 : ℝ) ^ j = ((2 ^ j : ℕ) : ℝ) := by push_cast; rfl
+    dsimp [M]
+    rw [show 2 * ((2 : ℝ) ^ j / 2) = (2 : ℝ) ^ j by ring, hc, Nat.floor_natCast]
+  let G : ℕ → ℝ → ℂ := fun j β => (b : ℂ) * typeISum w A X (M j) β
+  have heq : (fun β => ∑ n ∈ Finset.Ioc 0 ⌊X⌋₊,
+      (((f * (zeta : ArithmeticFunction ℝ)) n : ℝ) : ℂ) * e (β * n) *
+        (w ((n : ℝ) / X) : ℂ)) = (fun β => ∑ j ∈ J, G j β) := by
+    funext β
+    rw [zeta_convolution_smoothSum w hw hs f hX0 β]
+    let F : ℕ → ℂ := fun d => (f d : ℂ) * smoothSum w (X / d) (β * d)
+    have htrunc (L : ℕ) (hHL : ⌊H⌋₊ ≤ L) :
+        (∑ d ∈ Finset.Ioc 0 L, F d) = ∑ d ∈ Finset.Ioc 0 ⌊H⌋₊, F d := by
+      symm
+      apply Finset.sum_subset (Finset.Ioc_subset_Ioc le_rfl hHL)
+      intro d hd hnot
+      have hd0 := (Finset.mem_Ioc.mp hd).1
+      have hHd : H < d := (Nat.floor_lt hH.le).mp (by simp only [Finset.mem_Ioc] at hnot; omega)
+      simp [F, hsupport d hHd]
+    change (∑ d ∈ Finset.Ioc 0 ⌊X⌋₊, F d) = _
+    rw [htrunc _ (Nat.floor_mono hHX), ← htrunc _ hpower, sum_dyadic_blocks]
+    apply Finset.sum_congr rfl
+    intro j hj
+    dsimp [G]
+    rw [typeISum_eq_smoothSum hs A hX0, hlo, hhi, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro d hd
+    dsimp [F]
+    rw [hfd]
+    ring
+  have hscale (F : ℝ → ℂ) : energy (fun β => (b : ℂ) * F β) D α = b ^ 2 * energy F D α := by
+    simp only [energy, norm_mul, mul_pow, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hb, ← Finset.mul_sum]
+  let R := D / q + q * D / X + H * D ^ 2 / X
+  have hR0 : 0 ≤ R := by dsimp [R]; positivity
+  have hblock (j : ℕ) (hj : j ∈ J) : energy (G j) D α ≤ b ^ 2 * Cw * X ^ (2 + 2 * η) * R := by
+    obtain ⟨hm0, hmH⟩ := hMj j hj
+    have hh := hi X D (M j) α hX hD hDX hm0 (hmH.trans hHX) hα0 hα1 a q hq hcop happ A hA
+    have hbud : D / q + q * D / X + M j * D ^ 2 / X ≤ R := by
+      dsimp [R]
+      linarith only [div_le_div_of_nonneg_right
+        (mul_le_mul_of_nonneg_right hmH (sq_nonneg D)) hX0.le]
+    have hh' := hh.trans (mul_le_mul_of_nonneg_left hbud (by positivity))
+    dsimp [G]
+    rw [hscale]
+    simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hh' (sq_nonneg b)
+  have hcount : (J.card : ℝ) ≤ lam * X ^ η := by
+    have hfloor : ⌊H⌋₊ ≤ ⌊2 * H⌋₊ := Nat.floor_mono (by linarith)
+    have hlog : Nat.log2 ⌊H⌋₊ ≤ Nat.log2 ⌊2 * H⌋₊ :=
+      (Nat.le_log2 (show ⌊2 * H⌋₊ ≠ 0 by omega)).mpr ((pow_log2_le_nat hNpos).trans hfloor)
+    have hh := nat_log2_twoN_le (ε := 2 * η) (by positivity) hX hH hHX
+    have hlogR := (Nat.cast_le (α := ℝ)).mpr hlog
+    simp only [show 2 * η / 2 = η by ring] at hh
+    dsimp [J, K]
+    simp only [Finset.card_range, Nat.cast_add, Nat.cast_one]
+    linarith only [hh, hlogR]
+  have hcount2 : (J.card : ℝ) ^ 2 ≤ lam ^ 2 * (X ^ η) ^ 2 := by
+    simpa only [mul_pow] using pow_le_pow_left₀ (Nat.cast_nonneg J.card) hcount 2
+  have hsum : (∑ j ∈ J, energy (G j) D α) ≤
+      (J.card : ℝ) * (b ^ 2 * Cw * X ^ (2 + 2 * η) * R) := by
+    simpa using Finset.sum_le_sum hblock
+  rw [heq]
+  calc
+    _ ≤ (J.card : ℝ) * ∑ j ∈ J, energy (G j) D α := energy_sum_le J G D α
+    _ ≤ (J.card : ℝ) ^ 2 * (b ^ 2 * Cw * X ^ (2 + 2 * η) * R) := by
+      have hh := mul_le_mul_of_nonneg_left hsum (Nat.cast_nonneg (α := ℝ) J.card)
+      convert hh using 1 <;> ring
+    _ ≤ (lam ^ 2 * (X ^ η) ^ 2) * (b ^ 2 * Cw * X ^ (2 + 2 * η) * R) :=
+      mul_le_mul_of_nonneg_right hcount2 (by positivity)
+    _ = _ := by
+      have hp : (X ^ η) ^ 2 * X ^ (2 + 2 * η) = X ^ (2 + ε) := by
+        rw [← Real.rpow_mul_natCast hX0.le, ← Real.rpow_add hX0]
+        congr 1
+        dsimp [η]
+        ring
+      calc
+        _ = (Cw * lam ^ 2) * b ^ 2 * ((X ^ η) ^ 2 * X ^ (2 + 2 * η)) * R := by ring
+        _ = _ := by rw [hp]
+
+/-- Page 5 Vaughan transfer, the short Mobius and Lambda Type I term.
+CONDITIONAL ON TypeI7. -/
+theorem short_mu_lambda_energy (hI : TypeI7) :
+    ∀ ε : ℝ, 0 < ε → ∀ w : ℝ → ℝ, ContDiff ℝ ∞ w →
+      Function.support w ⊆ Set.Icc 0 1 →
+      ∃ C : ℝ, 0 ≤ C ∧ ∀ X D U V α : ℝ,
+        1 ≤ X → 0 < D → D ≤ X → 0 < U → 0 < V → U * V ≤ X → 0 ≤ α → α ≤ 1 →
+        ∀ (a : ℤ) (q : ℕ), 1 ≤ q → Int.gcd a q = 1 →
+          |α - (a : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2 →
+          energy (fun β => ∑ n ∈ Finset.Ioc 0 ⌊X⌋₊,
+            (((Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U *
+              Vaughan86.shortPart vonMangoldt V * (zeta : ArithmeticFunction ℝ)) n : ℝ) : ℂ) *
+              e (β * n) * (w ((n : ℝ) / X) : ℂ)) D α ≤
+            C * X ^ (2 + ε) * (D / q + q * D / X + (U * V) * D ^ 2 / X) := by
+  intro ε hε w hw hs
+  let η := ε / 4
+  have hη : 0 < η := by dsimp [η]; positivity
+  obtain ⟨C₀, hC₀, hc⟩ := typeI_convolution_energy hI (ε / 2) (by positivity) w hw hs
+  obtain ⟨C₁, hC₁, hb⟩ := short_mu_lambda_le_rpow hη
+  let C := C₀ * (C₁ + 1) ^ 2
+  refine ⟨C, by dsimp [C]; positivity, ?_⟩
+  intro X D U V α hX hD hDX hU hV hUVX hα0 hα1 a q hq hcop happ
+  have hX0 : 0 < X := by linarith
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast (show 0 < q by omega)
+  let f := Vaughan86.shortPart (moebius : ArithmeticFunction ℝ) U * Vaughan86.shortPart vonMangoldt V
+  let T := X ^ η
+  let B := C₁ * T
+  have hT : 1 ≤ T := Real.one_le_rpow hX hη.le
+  have hB : 0 ≤ B := by positivity
+  have hsupport (n : ℕ) (hn : U * V < n) : f n = 0 := short_mu_lambda_support hU.le hV.le hn
+  have hbound (n : ℕ) : |f n| ≤ B := by
+    by_cases hn : (n : ℝ) ≤ U * V
+    · exact (hb U V n).trans (mul_le_mul_of_nonneg_left
+        (Real.rpow_le_rpow (Nat.cast_nonneg _) (hn.trans hUVX) hη.le) hC₁.le)
+    · rw [hsupport n (lt_of_not_ge hn), abs_zero]
+      exact hB
+  have hBup : B + 1 ≤ (C₁ + 1) * T := by dsimp [B]; nlinarith only [hT]
+  have hBsq : (B + 1) ^ 2 ≤ (C₁ + 1) ^ 2 * T ^ 2 := by
+    simpa only [mul_pow] using pow_le_pow_left₀ (show 0 ≤ B + 1 by positivity) hBup 2
+  have he := hc X D (U * V) α hX hD hDX (mul_pos hU hV) hUVX hα0 hα1 a q hq hcop happ
+    f B hB hbound hsupport
+  calc
+    _ ≤ C₀ * (B + 1) ^ 2 * X ^ (2 + ε / 2) *
+        (D / q + q * D / X + (U * V) * D ^ 2 / X) := he
+    _ ≤ C₀ * ((C₁ + 1) ^ 2 * T ^ 2) * X ^ (2 + ε / 2) *
+        (D / q + q * D / X + (U * V) * D ^ 2 / X) := by gcongr
+    _ = _ := by
+      have hp : T ^ 2 * X ^ (2 + ε / 2) = X ^ (2 + ε) := by
+        dsimp [T]
+        rw [← Real.rpow_mul_natCast hX0.le, ← Real.rpow_add hX0]
+        congr 1
+        dsimp [η]
+        ring
+      calc
+        _ = (C₀ * (C₁ + 1) ^ 2) * (T ^ 2 * X ^ (2 + ε / 2)) *
+            (D / q + q * D / X + (U * V) * D ^ 2 / X) := by ring
+        _ = _ := by rw [hp]
+
+set_option maxHeartbeats 2000000 in
+/-- Page 5 equation 7 with separate ambient counting and smooth sum scales. -/
+theorem typeI_ambient :
+    ∀ ε : ℝ, 0 < ε → ∀ w : ℝ → ℝ, ContDiff ℝ ∞ w →
+      Function.support w ⊆ Set.Icc 0 1 →
+      ∃ C : ℝ, 0 ≤ C ∧ ∀ X Y D M α : ℝ,
+        1 ≤ X → 1 ≤ Y → Y ≤ X → 0 < D → D ≤ X → 0 < M → M ≤ Y →
+        0 ≤ α → α ≤ 1 → ∀ (a : ℤ) (q : ℕ), 1 ≤ q → Int.gcd a q = 1 →
+        |α - (a : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2 →
+        ∀ A : ℕ → ℂ, (∀ m, ‖A m‖ ≤ 1) →
+          energy (typeISum w A Y M) D α ≤
+            C * (Y ^ 2 * X ^ ε) * (D / q + q * D / Y + M * D ^ 2 / Y) := by
+  intro ε hε w hw hs
+  let η : ℝ := ε / 2
+  have hη : 0 < η := by dsimp [η]; positivity
+  let k : ℕ := ⌈2 / η⌉₊
+  obtain ⟨C₀, hC₀, htriv⟩ := typeI_trivial w hw hs
+  obtain ⟨C₁, hC₁, hcut⟩ := typeI_energy_cutoff w hw hs k
+  obtain ⟨C₂, hC₂, hcountB⟩ := (counting24 lemma23) η hη
+  let C : ℝ := C₁ * (C₂ + 2) + 8 * C₀ ^ 2
+  refine ⟨C, by dsimp [C]; positivity, ?_⟩
+  intro X Y D M α hX hY hYX hD hDX hM hMY hα0 hα1 a q hq hcop happ A hA
+  have hX0 : 0 < X := by linarith
+  have hY0 : 0 < Y := by linarith
+  have hMX : M ≤ X := hMY.trans hYX
+  let P : ℝ := X ^ η
+  let R : ℝ := Y ^ 2 * P ^ 2 * (D / q + q * D / Y + M * D ^ 2 / Y)
+  have hP : 1 ≤ P := Real.one_le_rpow hX hη.le
+  have hP0 : 0 < P := lt_of_lt_of_le zero_lt_one hP
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast (show 0 < q by omega)
+  have hR : 0 ≤ R := by dsimp [R]; positivity
+  have hpow : P ^ 2 = X ^ ε := by
+    rw [← Real.rpow_mul_natCast hX0.le]
+    congr 1
+    dsimp [η]
+    ring
+  have hRlower : Y * M * D ^ 2 ≤ R := by
+    have hp : Y ^ 2 ≤ Y ^ 2 * P ^ 2 := by
+      have hp2 : 1 ≤ P ^ 2 := one_le_pow₀ hP
+      nlinarith [mul_le_mul_of_nonneg_left hp2 (sq_nonneg Y)]
+    have hb : M * D ^ 2 / Y ≤ D / q + q * D / Y + M * D ^ 2 / Y := by
+      have hh : 0 ≤ D / (q : ℝ) := by positivity
+      have hh' : 0 ≤ (q : ℝ) * D / Y := by positivity
+      linarith
+    calc
+      _ = Y ^ 2 * (M * D ^ 2 / Y) := by field_simp <;> ring
+      _ ≤ R := mul_le_mul hp hb (by positivity) (by positivity)
+  rw [← hpow]
+  rw [mul_assoc]
+  change energy (typeISum w A Y M) D α ≤ C * R
+  by_cases hsmall : 2 * M < 1
+  · have hf : ⌊2 * M⌋₊ = 0 := Nat.floor_eq_zero.mpr hsmall
+    simp only [energy, typeISum, hf, Finset.Ioc_eq_empty_of_le (Nat.zero_le _),
+      Finset.sum_empty, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      zero_pow, Finset.sum_const_zero]
+    exact mul_nonneg (by dsimp [C]; nlinarith [sq_nonneg C₀]) hR
+  have hMhalf : 1 / 2 ≤ M := by linarith
+  by_cases hshort : 2 * M ≤ Y
+  · have hk : (2 : ℝ) ≤ η * k := by
+      have hh : 2 / η ≤ (k : ℝ) := Nat.le_ceil _
+      have hh' := (div_le_iff₀ hη).mp hh
+      nlinarith
+    have hTk : Y ^ 2 ≤ P ^ k := by
+      calc
+        _ ≤ X ^ 2 := by gcongr
+        _ = X ^ (2 : ℝ) := by norm_num
+        _ ≤ X ^ (η * k) := Real.rpow_le_rpow_of_exponent_le hX hk
+        _ = P ^ k := Real.rpow_mul_natCast hX0.le η k
+    have herr : Y ^ 2 * D ^ 2 / P ^ k ≤ 2 * R := by
+      have he : Y ^ 2 * D ^ 2 / P ^ k ≤ D ^ 2 := by
+        apply (div_le_iff₀ (pow_pos hP0 k)).mpr
+        nlinarith [mul_le_mul_of_nonneg_right hTk (sq_nonneg D)]
+      have hm : D ^ 2 ≤ 2 * (Y * M * D ^ 2) := by
+        have hxM : 1 / 2 ≤ Y * M := by nlinarith
+        nlinarith [mul_le_mul_of_nonneg_right hxM (sq_nonneg D)]
+      exact he.trans (hm.trans (by linarith))
+    have hc := hcountB X D M α (P / Y) hX hD hDX hM hMX hα0 hα1
+      (div_pos hP0 hY0) a q hq hcop happ
+    have hb := typeI_counting_budget hY0 hM hD.le hP hC₂ hq
+    have hmain : Y ^ 2 / M * (count24 α D M (P / Y) : ℝ) ≤ C₂ * R := by
+      have ht := mul_le_mul_of_nonneg_left hc (show 0 ≤ Y ^ 2 / M by positivity)
+      apply ht.trans
+      convert hb using 1 <;> dsimp [R, P] <;> ring
+    have hh := hcut Y D M α P hY0 hD hM hshort hP A hA
+    calc
+      _ ≤ C₁ * (Y ^ 2 / M * count24 α D M (P / Y) + Y ^ 2 * D ^ 2 / P ^ k) := hh
+      _ ≤ C₁ * (C₂ * R + 2 * R) :=
+        mul_le_mul_of_nonneg_left (add_le_add hmain herr) hC₁.le
+      _ = (C₁ * (C₂ + 2)) * R := by ring
+      _ ≤ C * R := mul_le_mul_of_nonneg_right (by dsimp [C]; nlinarith [sq_nonneg C₀]) hR
+  · have ht := energy_le_const (α := α) (typeISum w A Y M) hD.le
+      (show 0 ≤ C₀ * Y by positivity) (fun β => htriv Y M β hY0 hM A hA)
+    have hl : Y ^ 2 * D ^ 2 ≤ 2 * R := by
+      have hh : Y ^ 2 * D ^ 2 ≤ 2 * (Y * M * D ^ 2) := by
+        have hx : Y ≤ 2 * M := by linarith
+        have hm := mul_le_mul_of_nonneg_right hx (show 0 ≤ Y * D ^ 2 by positivity)
+        nlinarith
+      exact hh.trans (by linarith)
+    calc
+      _ ≤ 4 * D ^ 2 * (C₀ * Y) ^ 2 := ht
+      _ = (4 * C₀ ^ 2) * (Y ^ 2 * D ^ 2) := by ring
+      _ ≤ (4 * C₀ ^ 2) * (2 * R) := mul_le_mul_of_nonneg_left hl (by positivity)
+      _ = (8 * C₀ ^ 2) * R := by ring
+      _ ≤ C * R := mul_le_mul_of_nonneg_right (by dsimp [C]; nlinarith [sq_nonneg C₀]) hR
+
+
+set_option maxHeartbeats 2000000 in
+/-- Page 6 equation 8 with separate ambient counting and smooth sum scales. -/
+theorem typeII_ambient :
+    ∀ ε : ℝ, 0 < ε → ∀ w : ℝ → ℝ, ContDiff ℝ ∞ w →
+      Function.support w ⊆ Set.Icc 0 1 →
+      ∃ C : ℝ, 0 ≤ C ∧ ∀ X Y D M N α : ℝ,
+        1 ≤ X → 1 ≤ Y → Y ≤ X → 0 < D → D ≤ X →
+        0 < M → M ≤ X → 0 < N → N ≤ X →
+        Y / 4 ≤ M * N → M * N ≤ 4 * Y → 0 ≤ α → α ≤ 1 →
+        ∀ (a : ℤ) (q : ℕ), 1 ≤ q → Int.gcd a q = 1 →
+        |α - (a : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2 →
+        ∀ A B : ℕ → ℂ, (∀ m, ‖A m‖ ≤ 1) → (∀ n, ‖B n‖ ≤ 1) →
+          energy (typeIISum w A B Y M N) D α ≤
+            C * (Y ^ 2 * X ^ ε) *
+              (D / q + q * D / Y + M * D ^ 2 / Y + N * D ^ 2 / Y) := by
+  intro ε hε w hw hs
+  let η : ℝ := ε / 4
+  have hη : 0 < η := by dsimp [η]; positivity
+  let k : ℕ := ⌈2 / η⌉₊
+  let lam : ℝ := (2 : ℝ) ^ η / (η * Real.log 2) + 2
+  have hlam : 0 ≤ lam := by dsimp [lam]; positivity
+  obtain ⟨Cw, hCw, hcut⟩ := typeII_localized w hw hs k
+  obtain ⟨Cn, hCn, hnear⟩ := typeII_near_count (counting24 lemma23) η hη
+  let A₀ := Cn * (4 : ℝ) ^ η
+  have hA₀ : 0 ≤ A₀ := by positivity
+  let C := Cw * (1120 + A₀ * (34 + 2 * lam))
+  have hC : 0 ≤ C := by dsimp [C]; positivity
+  refine ⟨C, hC, ?_⟩
+  intro X Y D M N α hX hY1 hYX hD hDX hM hMX hN hNX hMNlo hMNhi hα0 hα1 a q hq hcop happ A B hA hB
+  have hX0 : 0 < X := by linarith
+  have hY0 : 0 < Y := by linarith
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast (show 0 < q by omega)
+  let V := Y ^ 2 * D / q + Y * q * D + Y * M * D ^ 2 + Y * N * D ^ 2
+  let R := Y ^ 2 * X ^ ε * (D / q + q * D / Y + M * D ^ 2 / Y + N * D ^ 2 / Y)
+  have hR : 0 ≤ R := by dsimp [R]; positivity
+  have hV : 0 ≤ V := by dsimp [V]; positivity
+  rw [mul_assoc]
+  change energy (typeIISum w A B Y M N) D α ≤ C * R
+  by_cases hsmallM : 2 * M < 1
+  · have hf : ⌊2 * M⌋₊ = 0 := Nat.floor_eq_zero.mpr hsmallM
+    simp only [energy, typeIISum, hf, Finset.Ioc_eq_empty_of_le (Nat.zero_le _),
+      Finset.sum_empty, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      zero_pow, Finset.sum_const_zero]
+    exact mul_nonneg hC hR
+  by_cases hsmallN : 2 * N < 1
+  · have hf : ⌊2 * N⌋₊ = 0 := Nat.floor_eq_zero.mpr hsmallN
+    simp only [energy, typeIISum, hf, Finset.Ioc_eq_empty_of_le (Nat.zero_le _),
+      Finset.sum_empty, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      zero_pow, Finset.sum_const_zero]
+    exact mul_nonneg hC hR
+  have hNhalf : 1 / 2 ≤ N := by linarith
+  have hY : 1 ≤ 4 * M := by linarith
+  let T := X ^ η
+  let ρ := T / (4 * M)
+  let K : ℝ := (Nat.log2 ⌊2 * N⌋₊ : ℝ) + 2
+  let Z : ℝ := ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d,
+    ∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount ((α + (b : ℝ) / d) * z) ρ : ℝ)
+  have hT : 1 ≤ T := Real.one_le_rpow hX hη.le
+  have hT0 : 0 < T := lt_of_lt_of_le zero_lt_one hT
+  have hρ : 0 < ρ := by positivity
+  have hK : K ≤ lam * T := by
+    have hh := nat_log2_twoN_le (ε := 2 * η) (by positivity) hX hN hNX
+    simpa only [show 2 * η / 2 = η by ring] using hh
+  have hk : (2 : ℝ) ≤ η * k := by
+    have hh : 2 / η ≤ (k : ℝ) := Nat.le_ceil _
+    have hh' := (div_le_iff₀ hη).mp hh
+    nlinarith only [hh']
+  have htail : Y ^ 2 ≤ T ^ k := by
+    calc
+      _ ≤ X ^ 2 := by gcongr
+      _ = X ^ (2 : ℝ) := by norm_num
+      _ ≤ X ^ (η * k) := Real.rpow_le_rpow_of_exponent_le hX hk
+      _ = T ^ k := by rw [Real.rpow_mul_natCast hX0.le]
+  have hT3 : T ^ 3 ≤ X ^ ε := by
+    calc
+      _ = X ^ (η * (3 : ℕ)) := by rw [Real.rpow_mul_natCast hX0.le]
+      _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hX (by dsimp [η]; linarith)
+  have hcountZ : Z ≤ 4 * D ^ 2 * (2 * ρ + 1) + A₀ * T *
+      (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2) := by
+    have hh := hnear X D N α ρ hX hD hDX hNhalf hNX hα0 hα1 hρ a q hq hcop happ
+    have hpow : (4 * X) ^ η = (4 : ℝ) ^ η * T := Real.mul_rpow (by norm_num) hX0.le
+    rw [hpow] at hh
+    convert hh using 1 <;> dsimp [A₀, K, Z] <;> ring
+  have hpoint (β : ℝ) : ‖typeIISum w A B Y M N β‖ ^ 2 ≤ Cw * M ^ 2 *
+      (2 * N * (∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount (β * z) ρ : ℝ)) +
+        4 * N ^ 2 / T ^ k) := by
+    have hc := hcut Y M N β T hY0 hM hN hMNlo hMNhi hY hT A B hA hB
+    have hd := typeII_difference_sum hN (fun z : ℤ => (nearCount (β * z) ρ : ℝ))
+      (fun z => by positivity)
+    have hd' : (∑ n₁ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊, ∑ n₂ ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+        (nearCount (β * ((n₁ : ℝ) - n₂)) ρ : ℝ)) ≤
+        2 * N * ∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉, (nearCount (β * z) ρ : ℝ) := by
+      simpa only [Int.cast_sub, Int.cast_natCast] using hd
+    exact hc.trans (mul_le_mul_of_nonneg_left (add_le_add hd' le_rfl) (by positivity))
+  have henergy : energy (typeIISum w A B Y M N) D α ≤
+      Cw * M ^ 2 * (2 * N * Z + 16 * N ^ 2 * D ^ 2 / T ^ k) := by
+    have htailSum : (4 * N ^ 2 / T ^ k) *
+        (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, (d : ℝ)) ≤ 16 * N ^ 2 * D ^ 2 / T ^ k := by
+      apply (mul_le_mul_of_nonneg_left (residue_card_le hD.le)
+        (show 0 ≤ 4 * N ^ 2 / T ^ k by positivity)).trans_eq
+      ring
+    calc
+      _ ≤ ∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, ∑ b ∈ Finset.range d, Cw * M ^ 2 *
+          (2 * N * (∑ z ∈ Finset.Icc (-⌈N⌉) ⌈N⌉,
+            (nearCount ((α + (b : ℝ) / d) * z) ρ : ℝ)) + 4 * N ^ 2 / T ^ k) :=
+        Finset.sum_le_sum (fun d hd => Finset.sum_le_sum (fun b hb => hpoint _))
+      _ = Cw * M ^ 2 * (2 * N * Z + (4 * N ^ 2 / T ^ k) *
+          (∑ d ∈ Finset.Ioc ⌊D⌋₊ ⌊2 * D⌋₊, (d : ℝ))) := by
+        simp only [mul_add, Finset.sum_add_distrib, ← Finset.mul_sum,
+          Finset.sum_const, nsmul_eq_mul, Finset.card_range, ← Finset.sum_mul]
+        dsimp [Z]
+        ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left (add_le_add le_rfl htailSum) (by positivity)
+  have hscalar := typeII_counting_budget hY1 hM hN hD hq0 hMNhi hY hT
+    (show ρ = T / (4 * M) from rfl) hA₀ hlam hK htail
+  have hfinal : energy (typeIISum w A B Y M N) D α ≤ C * T ^ 3 * V := by
+    calc
+      _ ≤ Cw * M ^ 2 * (2 * N * (4 * D ^ 2 * (2 * ρ + 1) + A₀ * T *
+          (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2)) + 16 * N ^ 2 * D ^ 2 / T ^ k) := by
+        apply henergy.trans
+        gcongr
+      _ = Cw * (M ^ 2 * (2 * N * (4 * D ^ 2 * (2 * ρ + 1) + A₀ * T *
+          (N * D / q + K * (q * ρ * D) + ρ * N * D ^ 2)) + 16 * N ^ 2 * D ^ 2 / T ^ k)) := by ring
+      _ ≤ Cw * ((1120 + A₀ * (34 + 2 * lam)) * T ^ 3 * V) :=
+        mul_le_mul_of_nonneg_left hscalar hCw.le
+      _ = _ := by dsimp [C]; ring
+  have hRe : R = X ^ ε * V := by
+    dsimp [R, V]
+    field_simp
+  calc
+    _ ≤ C * T ^ 3 * V := hfinal
+    _ ≤ C * X ^ ε * V := by gcongr
+    _ = C * R := by rw [hRe]; ring
+
 
 /-- LEAF. Page 5 proof of Theorem 2.1 and page 6 equation 8.
 Vaughan identity, dyadic decomposition, coefficient bounds and epsilon absorption.

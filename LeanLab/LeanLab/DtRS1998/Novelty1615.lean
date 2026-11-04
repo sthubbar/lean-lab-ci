@@ -1,4 +1,4 @@
-import Mathlib
+import LeanLab.DtRS1998.Task295Sec41Count
 
 /-!
 # DtRS1998, Novelty1615: the index 413 of Section 4.1
@@ -20,7 +20,7 @@ exactly 413. Source: Deshouillers, te Riele, Saouter 1998, published p. 210, pap
 scripts/dtrs_sec41.py. A proof needs one primality certificate per prime, as `Sec41.pratt`, and one
 factor per composite: over 30 minutes here, so it stays a named sorry. -/
 theorem sec41_prime_count : sec41Primes.card = 413 := by
-  sorry
+  simpa only [sec41Primes, Task71.primesIn] using Task295.Sec41Count.count_413
 
 /-- Vacuity instance: the interval is nonempty, its two ends are distinct. -/
 theorem sec41_interval_vacuity :
