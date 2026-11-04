@@ -27,6 +27,7 @@ AI-written Lean code, Claude, 2026-10-26. Binary Goldbach is OPEN; nothing here 
 -/
 import LeanLab.HeathBrownPuchta.Decomp1530a
 import LeanLab.HeathBrownPuchta.C2Inputs
+import LeanLab.PNTPort.StrongPNT.StrongPNT
 
 namespace LeanLab.HeathBrownPuchta.Decomp1530b
 
@@ -187,12 +188,103 @@ theorem J_expand (N : ℕ) (w : ℝ) (L : ℕ) :
 
 /-! ### Leaves: the diagonal -/
 
+/-- The prime number theorem in the form used below: for every `δ > 0`, `ψ x ≤ (1 + δ) x`
+eventually. Only the vanishing of the error term is used, not its rate. -/
+private theorem eventually_psi_le_one_add_mul (δ : ℝ) (hδ : 0 < δ) :
+    ∀ᶠ x : ℝ in atTop, Chebyshev.psi x ≤ (1 + δ) * x := by
+  obtain ⟨c, hc, hO⟩ := StrongPNT
+  -- `c * (log x)^(1/2) → ∞`, so the error factor `exp (-c * (log x)^(1/2))` tends to `0`
+  have hu : Tendsto (fun x : ℝ => c * (Real.log x) ^ ((1 : ℝ) / 2)) atTop atTop :=
+    Tendsto.const_mul_atTop hc
+      (tendsto_rpow_atTop (by norm_num) |>.comp Real.tendsto_log_atTop)
+  have hzero : Tendsto (fun x : ℝ => Real.exp (-c * (Real.log x) ^ ((1 : ℝ) / 2)))
+      atTop (nhds 0) := by
+    have h := (Real.tendsto_exp_atTop.comp hu).inv_tendsto_atTop
+    convert h using 1
+    funext x
+    simp [Real.exp_neg, neg_mul]
+  -- hence the error term is `o x`
+  have hg : (fun x : ℝ => x * Real.exp (-c * (Real.log x) ^ ((1 : ℝ) / 2)))
+      =o[atTop] fun x : ℝ => x := by
+    rw [Asymptotics.isLittleO_iff]
+    intro d hd
+    have hev : ∀ᶠ x : ℝ in atTop, Real.exp (-c * (Real.log x) ^ ((1 : ℝ) / 2)) ≤ d :=
+      hzero.eventually (Iic_mem_nhds hd)
+    filter_upwards [hev, eventually_ge_atTop (0 : ℝ)] with x hx hx0
+    have hpos : (0 : ℝ) ≤ Real.exp (-c * (Real.log x) ^ ((1 : ℝ) / 2)) := (Real.exp_pos _).le
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_of_nonneg hx0, abs_of_nonneg hpos]
+    nlinarith
+  have hfo : (ChebyshevPsi - id) =o[atTop] fun x : ℝ => x :=
+    hO.trans_isLittleO hg
+  have hb := (Asymptotics.isLittleO_iff.mp hfo) hδ
+  filter_upwards [hb, eventually_ge_atTop (0 : ℝ)] with x hx hx0
+  have hle : Chebyshev.psi x - x ≤ |Chebyshev.psi x - x| := le_abs_self _
+  have hx' : |Chebyshev.psi x - x| ≤ δ * x := by
+    simpa only [Real.norm_eq_abs, abs_of_nonneg hx0, Pi.sub_apply, ChebyshevPsi, id_eq] using hx
+  linarith
+
+/-- `#(primesIn N w) ≤ π N`: the primes of the window are primes `≤ N`. -/
+private theorem card_primesIn_le_primeCounting' (N : ℕ) (w : ℝ) :
+    (primesIn N w).card ≤ Nat.primeCounting N := by
+  rw [← Nat.primesLE_card_eq_primeCounting]
+  apply Finset.card_le_card
+  intro p hp
+  simp only [primesIn, Finset.mem_filter, Finset.mem_Icc] at hp
+  exact Nat.mem_primesLE.mpr ⟨hp.1.2, hp.2.1⟩
+
 /-- LEAF. Unit U-1530. The prime number theorem upper half on `(ϖN, N]`: for `ϖ ≥ 0` and every
 `ε > 0`, eventually `#{ϖN < p ≤ N} ≤ (1 + ε) N / log N`; Section 5, the diagonal terms of the
 proof of Lemma 8. -/
 theorem pi_upper {w : ℝ} (hw : 0 ≤ w) :
     ∀ ε > 0, ∀ᶠ N : ℕ in atTop, ((primesIn N w).card : ℝ) ≤ (1 + ε) * N / Real.log N := by
-  sorry
+  intro ε hε
+  obtain ⟨C, hCpos, hCW⟩ := Chebyshev.integral_theta_div_log_sq_isBigO.exists_pos
+  obtain ⟨δ, hδdef⟩ : ∃ δ : ℝ, δ = ε / 2 := ⟨ε / 2, rfl⟩
+  have hδ : 0 < δ := by rw [hδdef]; linarith
+  -- the integrand is `o(x / log x)`, so it is below `δ x / log x` far out
+  have hlog : ∀ᶠ x : ℝ in atTop, C / Real.log x ≤ δ := by
+    have h1 : ∀ᶠ x : ℝ in atTop, C / δ ≤ Real.log x :=
+      Real.tendsto_log_atTop.eventually (eventually_ge_atTop (C / δ))
+    filter_upwards [h1, eventually_gt_atTop (1 : ℝ)] with x hx hx1
+    have hl : 0 < Real.log x := Real.log_pos hx1
+    rw [div_le_iff₀ hl]
+    have hCe : δ * (C / δ) = C := by field_simp
+    nlinarith [hx, hδ, hCpos]
+  have key : ∀ᶠ x : ℝ in atTop,
+      (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ (1 + ε) * x / Real.log x := by
+    filter_upwards [eventually_psi_le_one_add_mul δ hδ, hCW.bound, hlog,
+      eventually_ge_atTop (2 : ℝ)] with x hψ hI hlogx hx2
+    have hl : 0 < Real.log x := Real.log_pos (by linarith)
+    rw [Chebyshev.primeCounting_eq_theta_div_log_add_integral hx2]
+    -- main term: `θ x ≤ ψ x ≤ (1 + δ) x`
+    have hmain : Chebyshev.theta x / Real.log x ≤ (1 + δ) * x / Real.log x := by
+      apply div_le_div_of_nonneg_right _ hl.le
+      exact (Chebyshev.theta_le_psi x).trans hψ
+    -- integral term: at most `C x / log² x`
+    have hint : ∫ t in (2 : ℝ)..x, Chebyshev.theta t / (t * Real.log t ^ 2)
+        ≤ C * (x / Real.log x ^ 2) := by
+      rw [Real.norm_eq_abs, Real.norm_eq_abs,
+        abs_of_nonneg (by positivity : (0 : ℝ) ≤ x / Real.log x ^ 2)] at hI
+      exact (le_abs_self _).trans hI
+    have htail : C * (x / Real.log x ^ 2) ≤ δ * (x / Real.log x) := by
+      have he : C * (x / Real.log x ^ 2) = (C / Real.log x) * (x / Real.log x) := by
+        field_simp
+      rw [he]
+      exact mul_le_mul_of_nonneg_right hlogx (by positivity)
+    have harith : (1 + δ) * x / Real.log x + δ * (x / Real.log x)
+        = (1 + ε) * x / Real.log x := by
+      have h2δ : δ + δ = ε := by rw [hδdef]; ring
+      field_simp
+      nlinarith
+    linarith [hmain, hint, htail, harith.ge]
+  have hnat : ∀ᶠ N : ℕ in atTop,
+      (Nat.primeCounting ⌊(N : ℝ)⌋₊ : ℝ) ≤ (1 + ε) * (N : ℝ) / Real.log (N : ℝ) :=
+    (tendsto_natCast_atTop_atTop (R := ℝ)).eventually key
+  filter_upwards [hnat] with N hN
+  rw [Nat.floor_natCast] at hN
+  calc ((primesIn N w).card : ℝ) ≤ (Nat.primeCounting N : ℝ) := by
+        exact_mod_cast card_primesIn_le_primeCounting' N w
+    _ ≤ (1 + ε) * N / Real.log N := hN
 
 /-- LEAF. Unit U-1530. For `N ≥ 1` and `K ≥ 1`, `L = [log(N/2K)/log 2] ≤ log N/log 2`; Section 2,
 the definition of `L`. -/
