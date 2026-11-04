@@ -32,6 +32,47 @@ theorem norm_sum_sq_split {ι : Type*} [DecidableEq ι] (s : Finset ι) (f : ι 
       congrArg Complex.re (Complex.mul_conj (f i))
   rw [h, add_comm]
 
+/-- The smooth indicator on page 4 display 11 is either zero or one. -/
+theorem smoothWeight_norm_le_one (q : ℕ) (Q : ℝ) :
+    ‖(smoothWeight q Q : ℂ)‖ ≤ 1 := by
+  classical
+  unfold smoothWeight
+  split <;> simp
+
+/-- The reciprocal square tail over a natural interval telescopes. -/
+theorem sum_inv_sq_Ioc_le (a b : ℕ) (ha : 0 < a) (hab : a ≤ b) :
+    (∑ q ∈ Finset.Ioc a b, (1 / (q : ℝ) ^ 2)) ≤
+      1 / (a : ℝ) - 1 / (b : ℝ) := by
+  induction b generalizing a with
+  | zero =>
+      omega
+  | succ b ih =>
+      rcases Nat.eq_or_lt_of_le hab with rfl | hlt
+      · simp only [Finset.Ioc_eq_empty_of_le (Nat.le_refl _), Finset.sum_empty]
+        norm_num
+      · have hab' : a ≤ b := by omega
+        have hnot : b + 1 ∉ Finset.Ioc a b := by
+          simp only [Finset.mem_Ioc]
+          omega
+        have heq : insert (b + 1) (Finset.Ioc a b) = Finset.Ioc a (b + 1) := by
+          simpa using Finset.insert_Ioc_right_eq_Ioc_succ hab'
+        rw [← heq, Finset.sum_insert hnot]
+        have hi := ih a ha hab'
+        push_cast at hi ⊢
+        have hterm : 1 / (b + 1 : ℝ) ^ 2 ≤ 1 / (b : ℝ) - 1 / (b + 1 : ℝ) := by
+          have hb_nat : 1 ≤ b := by omega
+          have hb1 : (1 : ℝ) ≤ b := by exact_mod_cast hb_nat
+          field_simp
+          nlinarith
+        calc
+          1 / (b + 1 : ℝ) ^ 2 + (∑ q ∈ Finset.Ioc a b, (1 / (q : ℝ) ^ 2))
+              ≤ 1 / (b + 1 : ℝ) ^ 2 + (1 / (a : ℝ) - 1 / (b : ℝ)) := by
+                simpa only [add_comm] using
+                  add_le_add_right hi (1 / (b + 1 : ℝ) ^ 2)
+          _ ≤ (1 / (b : ℝ) - 1 / (b + 1 : ℝ)) + (1 / (a : ℝ) - 1 / (b : ℝ)) := by
+                gcongr
+          _ = 1 / (a : ℝ) - 1 / (b + 1 : ℝ) := by ring
+
 /-- LEAF. Page 15 first display, using the coefficient bound in display 47.
 Only equal moduli occur in this diagonal sum. The smooth weights have
 absolute value at most one. The coefficient summation remains OPEN. -/
