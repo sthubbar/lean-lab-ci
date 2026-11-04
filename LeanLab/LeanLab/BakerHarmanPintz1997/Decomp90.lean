@@ -38,7 +38,7 @@ theorem abel_bound (w : ℕ → ℝ) (z : ℕ → ℂ) (n : ℕ) {B : ℝ}
         intro i hi
         rw [norm_smul, Real.norm_eq_abs, abs_of_nonpos (sub_nonpos.mpr (hanti (Nat.le_succ i))), neg_sub]
         exact mul_le_mul_of_nonneg_left (hsum (i + 1) (by have := mem_range.mp hi; omega)) (sub_nonneg.mpr (hanti (Nat.le_succ i)))
-      _ = w 0 * B := by rw [← sum_mul, sum_range_sub']; ring
+      _ = w 0 * B := by rw [← sum_mul, sum_range_sub']<;> ring
 
 /-- LEAF. Page 21, partial summation on a fixed residue class.
 The inverse square root weight converts exponent 1 - 2η to 1/2 - 2η. -/
@@ -59,7 +59,7 @@ theorem weighted_progression {N N1 η C t : ℝ} {q : ℕ} [NeZero q]
       (∑ i ∈ range k, v (a + 1 + i)) = ∑ n ∈ Ioc a (a + k), v n := by
     intro v k
     rw [← Ico_add_one_add_one_eq_Ioc, sum_Ico_eq_sum_range]
-    simp [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+    simp [Nat.add_assoc, Nat.add_comm]
   have hB : 0 ≤ C * N ^ (1 - 2 * η) := mul_nonneg hC (Real.rpow_nonneg hN.le _)
   have hpartial : ∀ k, k ≤ b - a → ‖∑ i ∈ range k, f (a + 1 + i)‖ ≤ C * N ^ (1 - 2 * η) := by
     intro k hk
@@ -99,11 +99,11 @@ theorem weighted_progression {N N1 η C t : ℝ} {q : ℕ} [NeZero q]
     dsimp [f]
     split_ifs
     · rw [Complex.ofReal_cpow (Nat.cast_nonneg n)]
-      push_cast
+
       rw [← Complex.cpow_add]
       · congr 1
         unfold half
-        push_cast
+
         ring
       · exact_mod_cast (Nat.ne_of_gt hn)
     · simp
@@ -183,7 +183,7 @@ theorem derivative_power_saving {N K C S : ℝ} (hN : 1 ≤ N) (hK : 2 ≤ K) (h
     calc
       _ = N ^ (1 : ℝ) * N ^ ((-1 / 2 : ℝ) * (1 / (2 * K - 2))) := by rw [Real.rpow_one]
       _ = N ^ (1 + (-1 / 2 : ℝ) * (1 / (2 * K - 2))) := (Real.rpow_add hN0 _ _).symm
-      _ = _ := by congr 1; field_simp; ring
+      _ = _ := by congr 1; field_simp<;> ring
   have hpow := Real.rpow_le_rpow_of_exponent_le hN hexp
   rw [hid] at hS
   nlinarith
@@ -400,7 +400,7 @@ theorem character_sum_small_frequency {N N1 t : ℝ} {q : ℕ} [NeZero q]
   let T : ℝ := |t| / (2 * Real.pi)
   have hT : 0 < T := by dsimp [T]; positivity
   have hsmall' : T * (q : ℝ) ≤ N / 2 := by
-    have heq : T * (q : ℝ) = (|t| * q) / (2 * Real.pi) := by dsimp [T]; ring
+    have heq : T * (q : ℝ) = (|t| * q) / (2 * Real.pi) := by dsimp [T]<;> ring
     rw [heq]
     apply (div_le_iff₀ (by positivity : 0 < 2 * Real.pi)).mpr
     nlinarith
@@ -616,7 +616,7 @@ theorem fgm_branch :
       exact hh.trans_eq hid
     calc
       _ ≤ N ^ (1 - ε / 4) * N ^ (-1 / 2 : ℝ) := mul_le_mul_of_nonneg_right hsqrt' (Real.rpow_nonneg hN0.le _)
-      _ = _ := by rw [← Real.rpow_add hN0]; congr 1; ring
+      _ = _ := by rw [← Real.rpow_add hN0]; congr 1<;> ring
   have hqpow : (q : ℝ) ^ 2 ≤ K ^ 2 * N ^ (ε / 8) := by
     have hqK := hq.trans (hmod x N hx hNlower)
     have hh := pow_le_pow_left₀ hq0.le hqK 2

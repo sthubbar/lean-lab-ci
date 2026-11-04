@@ -868,11 +868,11 @@ theorem ineq313_value (α : ℝ) : α * fsig (3 / 4) + 3 / 4 - 1 / 2 = (1 - 2 * 
 theorem gam_pos_iff {θ : ℝ} (h : 1 / 2 < θ) : 0 < gam θ ↔ 37 / 72 < θ := by
   unfold gam
   constructor
-  · intro h0
+  · intro _h0
     have := min_le_right (4 * θ - 2) (min ((20 * θ - 9) / 11) ((72 * θ - 37) / 11))
     have := min_le_right ((20 * θ - 9) / 11) ((72 * θ - 37) / 11)
     linarith
-  · intro h0
+  · intro _h0
     apply lt_min (by linarith) (lt_min (by linarith) (by linarith))
 
 /-- Section 5 uses Theorem 4 with `θ = 1/2 + θ₂/4`; for `θ₂ ≤ 1/7`,
