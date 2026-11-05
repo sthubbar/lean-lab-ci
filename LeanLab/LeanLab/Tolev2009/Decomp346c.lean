@@ -12,6 +12,18 @@ open LeanLab.Tolev2009 LeanLab.Tolev2009.Faithful
 open LeanLab.Tolev2009.Decomp314a LeanLab.Tolev2009.Progression346
 open LeanLab.Tolev2009.ScalarEnvelope346
 
+-- Helper lemma: for N ≥ 3, log N ≥ 1
+lemma logN_ge_one {N : ℕ} (h : (3 : ℕ) ≤ N) : (1 : ℝ) ≤ Real.log N := by
+  have h₀ : (0 : ℝ) < N := by exact_mod_cast h
+  rw [Real.le_log_iff_exp_le h₀]
+  linarith [Real.exp_one_lt_d9]
+
+-- Helper lemma: log N ^ (-A) = (log N ^ A)⁻¹ ≤ 1 for A ≥ 0 and log N ≥ 1
+lemma log_rpow_neg_le_inv {N : ℕ} {A : ℝ} (hA : 0 ≤ A) (h : (1 : ℝ) ≤ Real.log N) :
+    Real.log N ^ (-A) = (Real.log N ^ A)⁻¹ ∧ (Real.log N ^ A)⁻¹ ≤ 1 := by
+  refine' ⟨Real.rpow_neg (by positivity) (Real.log N) |>.symm, _⟩
+  exact Real.inv_le_one (Real.one_le_rpow h hA)
+
 /-- LEAF. Halupczok page 10 to 11, O3, the positive scalar rectangular mean.
 Only real theta discrepancies, totients, logarithms and natural modulus sums occur.
 There are no prime polynomials, rational phases, residue variables, signed weights
