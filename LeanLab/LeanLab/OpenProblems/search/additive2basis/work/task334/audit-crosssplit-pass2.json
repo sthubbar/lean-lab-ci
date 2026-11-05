@@ -1,0 +1,227 @@
+{
+  "batches": [
+    {
+      "batch": "task334-2000",
+      "label": "local-2-pass-2",
+      "visited": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "miss_one": 426,
+        "prefix": 214,
+        "three_step_prefix": 184
+      },
+      "source_pools": {
+        "early_archive": 426,
+        "healthy_archive": 398
+      },
+      "source_prefixes": {
+        "early_hole": 780,
+        "endpoint": 44
+      }
+    },
+    {
+      "batch": "task334-2001",
+      "label": "local-2-pass-2",
+      "visited": 822,
+      "complete": 822,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 6,
+      "scored": 4,
+      "rankings": {
+        "miss_one": 428,
+        "prefix": 196,
+        "three_step_prefix": 198
+      },
+      "source_pools": {
+        "early_archive": 428,
+        "healthy_archive": 394
+      },
+      "source_prefixes": {
+        "early_hole": 780,
+        "endpoint": 42
+      }
+    },
+    {
+      "batch": "task334-2002",
+      "label": "local-2-pass-2",
+      "visited": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 1,
+      "scored": 1,
+      "rankings": {
+        "prefix": 193,
+        "three_step_prefix": 190,
+        "miss_one": 441
+      },
+      "source_pools": {
+        "healthy_archive": 383,
+        "early_archive": 441
+      },
+      "source_prefixes": {
+        "early_hole": 767,
+        "endpoint": 57
+      }
+    },
+    {
+      "batch": "task334-2003",
+      "label": "local-2-pass-2",
+      "visited": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 2,
+      "scored": 2,
+      "rankings": {
+        "three_step_prefix": 189,
+        "miss_one": 441,
+        "prefix": 193
+      },
+      "source_pools": {
+        "healthy_archive": 382,
+        "early_archive": 441
+      },
+      "source_prefixes": {
+        "early_hole": 778,
+        "endpoint": 45
+      }
+    },
+    {
+      "batch": "task334-2004",
+      "label": "local-2-pass-2",
+      "visited": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 3,
+      "scored": 3,
+      "rankings": {
+        "three_step_prefix": 192,
+        "prefix": 207,
+        "miss_one": 425
+      },
+      "source_pools": {
+        "healthy_archive": 399,
+        "early_archive": 425
+      },
+      "source_prefixes": {
+        "early_hole": 767,
+        "endpoint": 57
+      }
+    },
+    {
+      "batch": "task334-2005",
+      "label": "local-2-pass-2",
+      "visited": 822,
+      "complete": 822,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 9,
+      "scored": 5,
+      "rankings": {
+        "miss_one": 414,
+        "three_step_prefix": 199,
+        "prefix": 209
+      },
+      "source_pools": {
+        "early_archive": 414,
+        "healthy_archive": 408
+      },
+      "source_prefixes": {
+        "early_hole": 773,
+        "endpoint": 49
+      }
+    },
+    {
+      "batch": "task334-2006",
+      "label": "local-2-pass-2",
+      "visited": 822,
+      "complete": 822,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 6,
+      "scored": 3,
+      "rankings": {
+        "miss_one": 382,
+        "prefix": 223,
+        "three_step_prefix": 217
+      },
+      "source_pools": {
+        "early_archive": 382,
+        "healthy_archive": 440
+      },
+      "source_prefixes": {
+        "early_hole": 779,
+        "endpoint": 43
+      }
+    },
+    {
+      "batch": "task334-2007",
+      "label": "local-2-pass-2",
+      "visited": 822,
+      "complete": 822,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 7,
+      "scored": 7,
+      "rankings": {
+        "miss_one": 413,
+        "prefix": 207,
+        "three_step_prefix": 202
+      },
+      "source_pools": {
+        "early_archive": 413,
+        "healthy_archive": 409
+      },
+      "source_prefixes": {
+        "early_hole": 777,
+        "endpoint": 45
+      }
+    },
+    {
+      "batch": "task334-2008",
+      "label": "local-2-pass-2",
+      "visited": 798,
+      "complete": 798,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "miss_one": 393,
+        "prefix": 210,
+        "three_step_prefix": 195
+      },
+      "source_pools": {
+        "early_archive": 393,
+        "healthy_archive": 405
+      },
+      "source_prefixes": {
+        "early_hole": 753,
+        "endpoint": 45
+      }
+    }
+  ],
+  "visited": 7381,
+  "complete": 7381,
+  "interrupted": 0,
+  "failures": 0,
+  "scored": 25,
+  "distinct": 23,
+  "BEATS": 0,
+  "BEST_generators": 10,
+  "independent_coverage": "MATCH",
+  "exact_domain_reconstruction": "MATCH",
+  "prior_attempt_overlap": 0,
+  "prior_attempt_hashes": 82439,
+  "prior_complete_hashes": 39920,
+  "judge_sources": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_artifact_bytes": 650662
+}

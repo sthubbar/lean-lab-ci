@@ -1,0 +1,11 @@
+{
+  "parents": [
+    "57f829401c72334fec812d8e8c4372bd499214ff",
+    "cb8e0c554c7cbee6931e34f4936df25178e02a27"
+  ],
+  "ledgers": {
+    "LOG.md": "both histories preserved",
+    "LeanLab/LeanLab/OpenProblems/PROGRESS.md": "both histories preserved",
+    "LeanLab/LeanLab/OpenProblems/STATEMENTS.md": "both histories preserved"
+  }
+}

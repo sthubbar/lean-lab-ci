@@ -1,0 +1,392 @@
+[
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeSequence_decomposition",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeSequence_bad_card",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeFactors_card_log",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeSequence_bad_log",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "sieve_count_transfer",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeSequence_sieve_transfer",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeSequence_reduction_instance",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeTriples",
+    "status": "definition",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "triple_divisor_card",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "triple_sum_bound",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeSequence_bounds",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "exceptional_triple_sum",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "sieve_transfer_by_exception",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "triple_sum_transfer",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeSequence_triple_transfer",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "log_ceiling_power_absorbed",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "exceptional_triple_power",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "triple_sum_eq_S4",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "pair_sqrt_iff",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "pairs_eq_upper",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "pairs_eq_cross",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "Achen_sieve_le",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeFactors_card_absorbed",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "lemma21_remainder_power",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "sifted_modulus_prime",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "sieve_modulus_prime",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "least_sifting_prime_exists",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "least_sifting_prime_unique",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "sifting_partition_card",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "buchstab_base",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "sieve_filter_divisor",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "buchstab_divisor",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "literal_delta_third_zero",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "delta_modulus_instance",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "tripleTerms",
+    "status": "definition",
+    "source_match": "MATCH under documented forced prime convention"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "deltaOne",
+    "status": "definition",
+    "source_match": "MATCH under documented forced prime convention"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "tripleTerms_nonneg",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "deltaOne_nonpos",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "primeTriples_instance",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "first_half",
+    "status": "OPEN",
+    "source_match": "MATCH under documented forced prime convention"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "second_half",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "delta_cancellation",
+    "status": "OPEN",
+    "source_match": "MATCH under documented forced prime convention"
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "weighted_sieve_power_supplied",
+    "status": "OPEN assembly",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315b.lean",
+    "name": "lower_F0",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315b.lean",
+    "name": "lower_F4",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315b.lean",
+    "name": "lower_F5",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315b.lean",
+    "name": "positive_estimates_supplied",
+    "status": "OPEN assembly",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315c.lean",
+    "name": "basic_upper",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315c.lean",
+    "name": "switched_upper",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315c.lean",
+    "name": "refined_upper",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315c.lean",
+    "name": "negative_estimates_supplied",
+    "status": "OPEN assembly",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "upper_weighted_split",
+    "status": "CONDITIONAL ON IsLinearSieve",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "F2_elementary",
+    "status": "CONDITIONAL ON IsLinearSieve",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "F3_elementary",
+    "status": "CONDITIONAL ON IsLinearSieve",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "reciprocal_head",
+    "status": "PROVED",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "F2_sub_F3",
+    "status": "CONDITIONAL ON IsLinearSieve",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "numerical_F0",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "numerical_F1",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "numerical_F2",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "numerical_F3",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "numerical_F4",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315d.lean",
+    "name": "numerical_F5",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315e.lean",
+    "name": "numerical_F13",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315e.lean",
+    "name": "numerical_F14",
+    "status": "OPEN",
+    "source_match": "MATCH as printed component or derived helper"
+  },
+  {
+    "file": "Decomp315e.lean",
+    "name": "integral_evaluation_supplied",
+    "status": "OPEN assembly",
+    "source_match": "MATCH as printed component or derived helper"
+  }
+]

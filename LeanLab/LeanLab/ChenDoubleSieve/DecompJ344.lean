@@ -11,7 +11,7 @@ namespace LeanLab.ChenDoubleSieve
 evaluated at $\kappa_1 = 1/12, \kappa_2 = 29/250, \rho = 1/4, \sigma_2 = 141/500, \sigma_1 = 41/125$
 is at least $0.83607$. -/
 theorem thm2_eval : (83607 : ℝ) / 100000 ≤ 0.83607 := by
-  sorry
+  norm_num
 
 /-- LEAF P0036 page 40 Section 10. The lower bound of $D_{1,2}(N)$ is at least
 $F(\kappa_1, \kappa_2, \rho, \sigma_2, \sigma_1) \Theta(N)$. Since $F > 0.83607 > 0.836$,
