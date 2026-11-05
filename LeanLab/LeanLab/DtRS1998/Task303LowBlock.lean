@@ -1,0 +1,151 @@
+/-
+AI wrote this Lean code for CODEX task303.
+P0037 Section 4.1 pages 209 and 210. Supporting finite certificates.
+Binary Goldbach is open.
+-/
+import LeanLab.DtRS1998.Task303LowPrimes
+import LeanLab.DtRS1998.Task303LowWindows0
+import LeanLab.DtRS1998.Task303LowWindows1
+import LeanLab.DtRS1998.Task303LowWindows2
+import LeanLab.DtRS1998.Task303LowWindows3
+import LeanLab.DtRS1998.Task303LowWindows4
+import LeanLab.DtRS1998.Task303LowWindows5
+import LeanLab.DtRS1998.Task303LowWindows6
+import LeanLab.DtRS1998.Task303LowWindows7
+import LeanLab.DtRS1998.Task303LowWindows8
+import LeanLab.DtRS1998.Task303LowWindows9
+import LeanLab.DtRS1998.Task303LowWindows10
+
+namespace LeanLab.DtRS1998.Task303.Low
+
+open LeanLab.DtRS1998 Certificate294 LeanLab.Verifications.Top50.Bits
+
+set_option maxRecDepth 100000
+set_option maxHeartbeats 0
+set_option Elab.async false
+
+/-- All even offsets through 100000000 have a prime complement, page 210. -/
+theorem all_offsets : ∀ x : ℕ, x ≤ 100000000 → 2 ∣ x → ∃ d ∈ offsets, (x + d).Prime := by
+  intro x hx he
+  generalize hk : x / 1000000 = k
+  have hkle : k ≤ 100 := by omega
+  interval_cases k
+  · exact window0 x (by omega) (by omega) he
+  · exact window1 x (by omega) (by omega) he
+  · exact window2 x (by omega) (by omega) he
+  · exact window3 x (by omega) (by omega) he
+  · exact window4 x (by omega) (by omega) he
+  · exact window5 x (by omega) (by omega) he
+  · exact window6 x (by omega) (by omega) he
+  · exact window7 x (by omega) (by omega) he
+  · exact window8 x (by omega) (by omega) he
+  · exact window9 x (by omega) (by omega) he
+  · exact window10 x (by omega) (by omega) he
+  · exact window11 x (by omega) (by omega) he
+  · exact window12 x (by omega) (by omega) he
+  · exact window13 x (by omega) (by omega) he
+  · exact window14 x (by omega) (by omega) he
+  · exact window15 x (by omega) (by omega) he
+  · exact window16 x (by omega) (by omega) he
+  · exact window17 x (by omega) (by omega) he
+  · exact window18 x (by omega) (by omega) he
+  · exact window19 x (by omega) (by omega) he
+  · exact window20 x (by omega) (by omega) he
+  · exact window21 x (by omega) (by omega) he
+  · exact window22 x (by omega) (by omega) he
+  · exact window23 x (by omega) (by omega) he
+  · exact window24 x (by omega) (by omega) he
+  · exact window25 x (by omega) (by omega) he
+  · exact window26 x (by omega) (by omega) he
+  · exact window27 x (by omega) (by omega) he
+  · exact window28 x (by omega) (by omega) he
+  · exact window29 x (by omega) (by omega) he
+  · exact window30 x (by omega) (by omega) he
+  · exact window31 x (by omega) (by omega) he
+  · exact window32 x (by omega) (by omega) he
+  · exact window33 x (by omega) (by omega) he
+  · exact window34 x (by omega) (by omega) he
+  · exact window35 x (by omega) (by omega) he
+  · exact window36 x (by omega) (by omega) he
+  · exact window37 x (by omega) (by omega) he
+  · exact window38 x (by omega) (by omega) he
+  · exact window39 x (by omega) (by omega) he
+  · exact window40 x (by omega) (by omega) he
+  · exact window41 x (by omega) (by omega) he
+  · exact window42 x (by omega) (by omega) he
+  · exact window43 x (by omega) (by omega) he
+  · exact window44 x (by omega) (by omega) he
+  · exact window45 x (by omega) (by omega) he
+  · exact window46 x (by omega) (by omega) he
+  · exact window47 x (by omega) (by omega) he
+  · exact window48 x (by omega) (by omega) he
+  · exact window49 x (by omega) (by omega) he
+  · exact window50 x (by omega) (by omega) he
+  · exact window51 x (by omega) (by omega) he
+  · exact window52 x (by omega) (by omega) he
+  · exact window53 x (by omega) (by omega) he
+  · exact window54 x (by omega) (by omega) he
+  · exact window55 x (by omega) (by omega) he
+  · exact window56 x (by omega) (by omega) he
+  · exact window57 x (by omega) (by omega) he
+  · exact window58 x (by omega) (by omega) he
+  · exact window59 x (by omega) (by omega) he
+  · exact window60 x (by omega) (by omega) he
+  · exact window61 x (by omega) (by omega) he
+  · exact window62 x (by omega) (by omega) he
+  · exact window63 x (by omega) (by omega) he
+  · exact window64 x (by omega) (by omega) he
+  · exact window65 x (by omega) (by omega) he
+  · exact window66 x (by omega) (by omega) he
+  · exact window67 x (by omega) (by omega) he
+  · exact window68 x (by omega) (by omega) he
+  · exact window69 x (by omega) (by omega) he
+  · exact window70 x (by omega) (by omega) he
+  · exact window71 x (by omega) (by omega) he
+  · exact window72 x (by omega) (by omega) he
+  · exact window73 x (by omega) (by omega) he
+  · exact window74 x (by omega) (by omega) he
+  · exact window75 x (by omega) (by omega) he
+  · exact window76 x (by omega) (by omega) he
+  · exact window77 x (by omega) (by omega) he
+  · exact window78 x (by omega) (by omega) he
+  · exact window79 x (by omega) (by omega) he
+  · exact window80 x (by omega) (by omega) he
+  · exact window81 x (by omega) (by omega) he
+  · exact window82 x (by omega) (by omega) he
+  · exact window83 x (by omega) (by omega) he
+  · exact window84 x (by omega) (by omega) he
+  · exact window85 x (by omega) (by omega) he
+  · exact window86 x (by omega) (by omega) he
+  · exact window87 x (by omega) (by omega) he
+  · exact window88 x (by omega) (by omega) he
+  · exact window89 x (by omega) (by omega) he
+  · exact window90 x (by omega) (by omega) he
+  · exact window91 x (by omega) (by omega) he
+  · exact window92 x (by omega) (by omega) he
+  · exact window93 x (by omega) (by omega) he
+  · exact window94 x (by omega) (by omega) he
+  · exact window95 x (by omega) (by omega) he
+  · exact window96 x (by omega) (by omega) he
+  · exact window97 x (by omega) (by omega) he
+  · exact window98 x (by omega) (by omega) he
+  · exact window99 x (by omega) (by omega) he
+  · exact window100 x (by omega) (by omega) he
+
+/-- The exact Boolean certificate for this closed subrange, pages 209 and 210. -/
+theorem coverage :
+    (List.range (100000000 / 2 + 1)).all (fun j =>
+      qs.any (fun q => decide (q ≤ 400000000000 + 2*j ∧ (400000000000 + 2*j - q).Prime))) = true :=
+  offsets_certificate offset_bounds all_offsets
+
+/-- A finite prime list certifies the first closed subrange, page 210. -/
+theorem certificate : ∃ qs : List ℕ, (∀ q ∈ qs, q.Prime) ∧
+    (List.range (100000000 / 2 + 1)).all (fun j =>
+      qs.any (fun q => decide (q ≤ 400000000000 + 2*j ∧ (400000000000 + 2*j - q).Prime))) = true := by
+  exact ⟨qs, all_primes, coverage⟩
+
+#print axioms all_offsets
+#print axioms coverage
+#print axioms certificate
+
+end LeanLab.DtRS1998.Task303.Low
