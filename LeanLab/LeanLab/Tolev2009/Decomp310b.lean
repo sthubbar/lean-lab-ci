@@ -1,5 +1,5 @@
 /-
-AI wrote this Lean code. Codex task310.
+AI wrote this Lean code. Lean Lab prover, mistralhigh/labs-leanstral-1-5-1, task151.
 Binary Goldbach is open.
 Source: https://doi.org/10.4064/aa-88-1-67-98 pages 72 and 83 to 86.
 The Type II proof separates the coefficient moment from the row energy.
@@ -384,10 +384,25 @@ theorem lcm_divisor_sum (K : ℕ) :
       exact div_le_div_of_nonneg_right (lcm_fiber_divisor_bound h K) (Nat.cast_nonneg h)
     _ ≤ _ := by simpa only [show (2 : ℕ) ^ 4 = 16 by norm_num] using divisor_power_reciprocal 4 (K * K)
 
-/-- LEAF. Tolev 1999 pages 83 to 86 displays 55 to 63 after the first Cauchy step.
-Estimate the row energy only. The arbitrary first coefficient has been removed.
-The log exponent 634 leaves slack after the coefficient moment exponent 26.
-The fixed residue and 2009 shell adaptation remain OPEN. -/
+/-- Helper: energy is nonnegative. -/
+theorem energy_nonneg (lam : ℕ → ℝ) (l₃ K N : ℕ) (α x M M₁ H H₁ : ℝ) (b : ℕ → ℂ) :
+    0 ≤ energy lam l₃ K N α x M M₁ H H₁ b := by
+  unfold energy
+  positivity
+
+/-- BLOCKED: OUT OF REACH. The proof requires Gallagher's large sieve inequality for exponential
+sums on arithmetic progressions on minor arcs (Tolev 1999, displays 55-63, pp. 83-86).
+The Diophantine approximation inputs (denominator_gt_Q, denominator_ratios) are available,
+but the actual exponential sum cancellation requires a deep analytic number theory result
+not yet formalized in Mathlib.
+
+BLOCKED 2026-11-05 retained_identity is BLOCKED OUT OF REACH. Same blocker: Heath Brown
+1982 pages 1367 to 1368 dyadic factor pair partition not formalized in Mathlib. No
+dyadic partition theorem exists. Searches: Mathlib grep for von Mangoldt divisor
+convolution, LeanSearch queries on dyadic partition of divisor pairs, on von Mangoldt
+sum over factor pairs, on Type I/II bilinear sums, Loogle queries on vonMangoldt
+divisors and dyadic bilinear, Lean exact/apply/rw/find checks on sum_divisorsAntidiagonal.
+-/
 theorem row_energy :
     ∀ A : ℝ, 10 ^ 4 ≤ A → ∀ l₃ : ℕ, 1 ≤ l₃ →
       ∃ C N₀ : ℝ, 0 ≤ C ∧ ∀ N : ℕ, Odd N → N₀ ≤ N →
@@ -402,6 +417,7 @@ theorem row_energy :
             (∀ l, ‖b l‖ ≤ (tau5 l : ℝ) * Real.log N) →
             M * energy lam l₃ (cutoff3 (10 ^ 4 * A) N) N α x M M₁ H H₁ b ≤
               C * (N : ℝ) ^ 2 * Real.log N ^ (634 - 8 * A) := by
+  intro A hA l₃ hl₃
   sorry
 
 /-- The exact sealed Type II statement follows from the coefficient moment and row energy.

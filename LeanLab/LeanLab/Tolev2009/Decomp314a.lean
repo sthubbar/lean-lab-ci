@@ -176,6 +176,7 @@ theorem linear_remainder_mean :
         ∀ N : ℕ, Odd N → N₀ ≤ N →
           EF (fun k l => errorTerm 1 (Qof A N) (τof A N) k l N)
             lam l₃ (10 ^ 4 * A) N ≤ C * (N : ℝ) ^ 2 * Real.log N ^ (-A) := by
+  -- BLOCKED OUT OF REACH. The exact missing input is the proved scalar degree 1 mean.
   sorry
 
 /-- LEAF. Halupczok pages 9 to 10, the O2 sum with two progression errors.
@@ -186,6 +187,7 @@ theorem quadratic_remainder_mean :
         ∀ N : ℕ, Odd N → N₀ ≤ N →
           EF (fun k l => errorTerm 2 (Qof A N) (τof A N) k l N)
             lam l₃ (10 ^ 4 * A) N ≤ C * (N : ℝ) ^ 2 * Real.log N ^ (-A) := by
+  -- BLOCKED OUT OF REACH. The exact missing input is the proved scalar degree 2 mean.
   sorry
 
 /-- LEAF. Halupczok pages 10 to 11, the O3 sum with three progression errors.
@@ -196,6 +198,7 @@ theorem cubic_remainder_mean :
         ∀ N : ℕ, Odd N → N₀ ≤ N →
           EF (fun k l => errorTerm 3 (Qof A N) (τof A N) k l N)
             lam l₃ (10 ^ 4 * A) N ≤ C * (N : ℝ) ^ 2 * Real.log N ^ (-A) := by
+  -- BLOCKED OUT OF REACH. The exact missing input is the proved scalar degree 3 mean.
   sorry
 
 /-- Exact sealed progression replacement statement.
