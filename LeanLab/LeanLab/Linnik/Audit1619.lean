@@ -14,7 +14,8 @@ route needs r small in terms of D, as Gallagher has r small. For r near 1/4 the 
 be carried by the prime powers, and nothing bounds the prime window from below. Not refuted.
 
 The repair adds r₁ depending on E, D, eta. The assembly has its own r₀, so it takes the minimum and
-its statement does not change. Proved here. `repaired_of_old` shows the repair is only a weakening.
+its statement does not change. Proved here. `repaired_of_old_form` shows the repair is only a
+weakening: the old form, carried as a hypothesis, gives the repaired one at r₁ = 1/4.
 -/
 
 namespace LeanLab.Linnik.Audit1619
@@ -40,10 +41,36 @@ def RepairedWindow : Prop :=
                   primeWindowCoefficient χ x v n‖ -
                 Decomp1532b2.poissonKernel k (r * Real.log (x ^ B)) * ‖primeDetector χ x (x ^ B) v‖
 
-/-- The repair is implied by the old leaf, at r₁ = 1/4. -/
-theorem repaired_of_old : RepairedWindow := by
+/-- `RepairedWindow` is exactly the re-cut that the repair gives
+`LeanLab.Linnik.Decomp307a.poisson_window_localization`, so the repaired leaf supplies it
+directly. The name is kept because the declaration predates the repair. -/
+theorem repaired_of_old : RepairedWindow :=
+  poisson_window_localization
+
+/-- The repair is only a weakening. The old form of the leaf is no longer a theorem, so it is
+carried as an explicit hypothesis; at `r₁ = 1 / 4` it gives `RepairedWindow`. -/
+theorem repaired_of_old_form
+    (hold : ∀ E D η : ℝ, 1 ≤ E → 1 ≤ D → 0 < η →
+      ∃ A B C c : ℝ, 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+      ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+        ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+          |v| ≤ T → 1 / Real.log T ≤ r → r ≤ 1 / 4 →
+          (∀ M : ℕ, E * r * Real.log T ≤ M →
+            ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+              η / (D ^ k * r) ≤
+                ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+                  (n : ℂ) ^ (1 + I * v)) *
+                  (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)‖) →
+          ∀ x : ℝ, T ^ A ≤ x → ∃ k : ℕ,
+            c * x ^ (-C * r) * Real.log x ^ 2 * r ≤
+              ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ B⌋₊,
+                (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) *
+                  primeWindowCoefficient χ x v n‖ -
+                Decomp1532b2.poissonKernel k (r * Real.log (x ^ B)) *
+                  ‖primeDetector χ x (x ^ B) v‖) :
+    RepairedWindow := by
   intro E D η hE hD hη
-  obtain ⟨A, B, C, c, hA, hB, hC, hc, h⟩ := poisson_window_localization E D η hE hD hη
+  obtain ⟨A, B, C, c, hA, hB, hC, hc, h⟩ := hold E D η hE hD hη
   exact ⟨1 / 4, A, B, C, c, by norm_num, hA, hB, hC, hc, h⟩
 
 /-- The sealed statement of `Decomp335b.gallagher_zero_detector_of_turan`, from the repaired leaf. -/
@@ -80,4 +107,5 @@ theorem detector_of_repaired (hw : RepairedWindow)
 end LeanLab.Linnik.Audit1619
 
 #print axioms LeanLab.Linnik.Audit1619.repaired_of_old
+#print axioms LeanLab.Linnik.Audit1619.repaired_of_old_form
 #print axioms LeanLab.Linnik.Audit1619.detector_of_repaired

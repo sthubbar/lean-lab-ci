@@ -239,9 +239,10 @@ theorem gallagher_zero_detector_of_turan
             ∫ y in x..(x ^ B), ‖primeDetector χ x y v‖ / y := by
   obtain ⟨r₀, E, D, η, hr₀, hr₀hi, hE, hD, hη, hseries⟩ :=
     LeanLab.Linnik.Decomp335a.poisson_series_detector_of_turan hpower
-  obtain ⟨A, B, C, c, hA, hB, hC, hc, hwindow⟩ :=
+  obtain ⟨r₁, A, B, C, c, hr₁, hA, hB, hC, hc, hwindow⟩ :=
     LeanLab.Linnik.Decomp307a.poisson_window_localization E D η hE hD hη
-  refine ⟨r₀, A, B, C, c, hr₀, hr₀hi, hA, hB, hC, hc, ?_⟩
+  refine ⟨min r₀ r₁, A, B, C, c, lt_min hr₀ hr₁, (min_le_left _ _).trans hr₀hi,
+    hA, hB, hC, hc, ?_⟩
   intro T hT q hq hqT χ v r hv hχ hrlo hrhi hz x hx
   have hl : 0 < Real.log T := Real.log_pos (by linarith)
   have hr : 0 < r := (one_div_pos.mpr hl).trans_le hrlo
@@ -249,8 +250,8 @@ theorem gallagher_zero_detector_of_turan
     (Real.one_le_rpow (by linarith : 1 ≤ T) (by linarith : 0 ≤ A)).trans hx
   have hxy : x ≤ x ^ B := by
     simpa using Real.rpow_le_rpow_of_exponent_le hx1 hB.le
-  obtain ⟨k, hk⟩ := hwindow T hT q hqT χ v r hv hrlo (hrhi.trans hr₀hi)
-    (hseries T hT q hqT χ v r hv hχ hrlo hrhi hz) x hx
+  obtain ⟨k, hk⟩ := hwindow T hT q hqT χ v r hv hrlo (hrhi.trans (min_le_right _ _))
+    (hseries T hT q hqT χ v r hv hχ hrlo (hrhi.trans (min_le_left _ _)) hz) x hx
   have hh := hk.trans (LeanLab.Linnik.Decomp307a.prime_poisson_partial_summation χ k v hr.le hx1 hxy)
   exact (mul_le_mul_iff_right₀ hr).mp (by simpa only [mul_comm r] using hh)
 
