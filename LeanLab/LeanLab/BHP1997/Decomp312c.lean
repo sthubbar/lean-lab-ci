@@ -81,6 +81,76 @@ def ShortApproximation (ε : ℝ) (a b : ℝ → ℕ → ℝ) : Prop :=
     (∑ k ∈ leftInterval ε x, |a x k - b x k|) ≤
       C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)
 
+/-- The reference width is positive whenever x is positive. This is the
+elementary denominator fact needed by the Perron comparison. -/
+theorem referenceWidth_pos {x : ℝ} (hx : 0 < x) : 0 < referenceWidth x := by
+  rw [referenceWidth]
+  positivity
+
+/-- For x at least 1, the reference width is at most x. This is the
+elementary size bound needed before placing the reference interval inside I1. -/
+theorem referenceWidth_le_x {x : ℝ} (hx : 1 ≤ x) : referenceWidth x ≤ x := by
+  rw [referenceWidth]
+  have hl : 0 ≤ Real.log x := Real.log_nonneg hx
+  have hp : 0 ≤ Real.log x ^ (1 / 3 : ℝ) := Real.rpow_nonneg hl _
+  have h3 : 0 ≤ 3 * Real.log x ^ (1 / 3 : ℝ) :=
+    mul_nonneg (by norm_num) hp
+  have he : -3 * Real.log x ^ (1 / 3 : ℝ) ≤ 0 := by linarith
+  have hexp : Real.exp (-3 * Real.log x ^ (1 / 3 : ℝ)) ≤ 1 := by
+    have h := Real.exp_le_exp.mpr he
+    rwa [Real.exp_zero] at h
+  simpa using mul_le_mul_of_nonneg_left hexp (zero_le_one.trans hx)
+
+/-- For x at least 3, the reference width is less than x divided by 2.
+This places every permitted window above the lower endpoint of I1. -/
+theorem referenceWidth_lt_half_x {x : ℝ} (hx : 3 ≤ x) : referenceWidth x < x / 2 := by
+  have hx0 : 0 < x := by linarith
+  have hlog1 : 1 ≤ Real.log x := by
+    apply (Real.le_log_iff_exp_le hx0).2
+    exact le_of_lt (Real.exp_one_lt_d9.trans
+      (show (2.7182818286 : ℝ) < 3 by norm_num)) |>.trans hx
+  have hL : 1 ≤ Real.log x ^ (1 / 3 : ℝ) := Real.one_le_rpow hlog1 (by norm_num)
+  have hexp1 : 2 < Real.exp 1 := by
+    exact (show (2 : ℝ) < 2.7182818283 by norm_num).trans Real.exp_one_gt_d9
+  have hsquare : 4 < (Real.exp 1) ^ 2 := by nlinarith [sq_nonneg (Real.exp 1 - 2)]
+  have hcube : 8 < (Real.exp 1) ^ 3 := by
+    nlinarith [mul_pos (by nlinarith : 0 < (Real.exp 1) ^ 2) (by nlinarith : 0 < Real.exp 1)]
+  have hexp3 : 2 < Real.exp 3 := by
+    rw [show (3 : ℝ) = 1 + 1 + 1 by norm_num, Real.exp_add, Real.exp_add]
+    nlinarith
+  have hexpneg : Real.exp (-3) < 1 / 2 := by
+    rw [Real.exp_neg]
+    have h := (inv_lt_inv₀ (Real.exp_pos 3) (by norm_num : (0 : ℝ) < 2)).2 hexp3
+    simpa using h
+  have h3L : 3 ≤ 3 * Real.log x ^ (1 / 3 : ℝ) := by
+    calc
+      3 = 3 * 1 := by norm_num
+      _ ≤ 3 * Real.log x ^ (1 / 3 : ℝ) :=
+        mul_le_mul_of_nonneg_left hL (show (0 : ℝ) ≤ 3 by norm_num)
+  have harg : -3 * Real.log x ^ (1 / 3 : ℝ) ≤ -3 := by linarith
+  have hfactor : Real.exp (-3 * Real.log x ^ (1 / 3 : ℝ)) ≤ Real.exp (-3) :=
+    Real.exp_le_exp.mpr harg
+  rw [referenceWidth]
+  have hmul := mul_lt_mul_of_pos_left (lt_of_le_of_lt hfactor hexpneg) hx0
+  have hdiv : x / 2 = x * (1 / 2) := by field_simp
+  rw [hdiv]
+  exact hmul
+
+/-- Every permitted Perron window is contained in the long interval I1 when
+x is at least 3. This is the geometric containment used by the contour step. -/
+theorem window_subset_I1 {x y : ℝ} (hx : 3 ≤ x) (hy : 0 ≤ y)
+    (hyw : y ≤ referenceWidth x) :
+    Finset.Ioc ⌊x - y⌋₊ ⌊x⌋₊ ⊆
+      Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊ := by
+  have hwidth := referenceWidth_lt_half_x hx
+  have hbounds : 0 ≤ y ∧ y ≤ referenceWidth x := ⟨hy, hyw⟩
+  have hreal : x / 2 ≤ x - y := by linarith [hbounds.1, hbounds.2, hwidth]
+  have hlo : ⌊x / 2⌋₊ ≤ ⌊x - y⌋₊ := Nat.floor_mono hreal
+  have hhi : ⌊x⌋₊ ≤ ⌊2 * x⌋₊ := Nat.floor_mono (by linarith)
+  intro k hk
+  rw [Finset.mem_Ioc] at hk ⊢
+  exact ⟨lt_of_le_of_lt hlo hk.1, le_trans hk.2 hhi⟩
+
 /-- LEAF. Pages 24 and 25, Lemma 11, displays 4.1, 4.3, 4.4 and 4.5.
 Perron comparison with the normalized I1 mean, for both signs of height.
 The finite centering error and widths below 2 use the divisor bound.
