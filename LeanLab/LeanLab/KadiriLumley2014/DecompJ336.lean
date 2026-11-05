@@ -992,7 +992,22 @@ theorem lemma2_2_inequality {m : ℕ} (hm : 2 ≤ m) {δ u X : ℝ}
     (hδ : 0 < δ) (hδ1 : δ ≤ 0.0001) (hu : 0 < u) (hu1 : u ≤ 0.0001)
     (hX : Real.exp 38 ≤ X) :
     (Real.exp u - 1) * X * (1 + δ / 2 - zeroError m δ u X) - u / (2 * X) ≤
-      psiAverage m δ u X := by sorry
+      psiAverage m δ u X := by
+  -- The explicit formula (`psiAverage_explicit`), the triangle inequality for the zero
+  -- sum (`re_complexZeroSum_le`) and the remainder estimate
+  -- (`weighted_log_remainder_bound`) are all in the import closure; they are combined
+  -- by `psi_lower_of_explicit_identity`, whose conclusion is this statement.
+  have hm0 : 0 < m := by omega
+  have hX3 : (3 : ℝ) ≤ X := by
+    have h1 : (3 : ℝ) ≤ Real.exp 38 := by
+      have h2 := Real.add_one_le_exp (38 : ℝ)
+      linarith
+    linarith
+  have hX2 : (2 : ℝ) < X := by linarith
+  exact LeanLab.KadiriLumley2014.Task301.psi_lower_of_explicit_identity m
+    hδ.le hu.le hX3
+    (lemma2_2_summable hm hδ hδ1 hu hu1 hX)
+    (LeanLab.KadiriLumley2014.Task259.psiAverage_explicit hm0 hδ hu hX2)
 
 /-- Assembly of smoothed_explicit_lower from the above leaves. -/
 theorem smoothed_explicit_lower_assembly {m : ℕ} (hm : 2 ≤ m) {δ u X : ℝ}
