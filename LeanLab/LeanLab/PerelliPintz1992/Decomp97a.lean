@@ -664,7 +664,7 @@ noncomputable def characterPolynomial (N : ℕ) {q : ℕ+} (χ : DirichletCharac
     ((ArithmeticFunction.vonMangoldt n : ℂ) * χ n - if χ = 1 then 1 else 0) *
       LeanLab.PerelliPintz1992.e ((n : ℝ) * η)
 
-/-- LEAF. Page 364, quarter radius Gallagher variant for the actual character polynomial.
+/-- Page 364, quarter radius Gallagher variant for the actual character polynomial.
 P. X. Gallagher, Invent. Math. 11, 1970, pages 329 to 339.
 The unspecified logarithmic power printed on page 364 is retained.
 The window remains two q Q and the radius is one divided by four q Q.

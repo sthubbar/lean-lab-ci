@@ -1,4 +1,6 @@
 import Mathlib
+import LeanLab.LiuWang2002.Decomp352b
+import LeanLab.LiuWang2002.Decomp352a
 
 /-!
 Task345. The three ranges in the written proof of Schoenfeld Theorem 6 star.
@@ -16,7 +18,7 @@ This leaf bounds only theta on the finite interval through 10 to the eighth.
 The cited 1962 original is inaccessible in this run. -/
 theorem theta_small (X : ℝ) (hX : 0 < X) (hSmall : X ≤ 10 ^ 8) :
     Chebyshev.theta X < 1.001093 * X := by
-  sorry
+  exact Task352.theta_small X hX hSmall
 
 /-- LEAF. Schoenfeld 1976, page 356, proof of display 5.1 star, middle range.
 The written proof uses display 9.3, the table on page 358 and the cutoffs
@@ -24,7 +26,7 @@ exp 18.43, exp 18.45 and exp 18.5. All endpoints are retained inside this
 bounded interval. This leaf contains no estimate for arbitrary large X. -/
 theorem theta_middle (X : ℝ) (hSmall : 10 ^ 8 < X) (hLarge : X < exp 18.7) :
     Chebyshev.theta X < 1.001093 * X := by
-  sorry
+  exact Task352.theta_middle X hSmall hLarge
 
 /-- LEAF. Schoenfeld 1976, page 358, table row b equal to 18.7.
 The table gives the relative psi error 1.0765 times 10 to the minus 3.
