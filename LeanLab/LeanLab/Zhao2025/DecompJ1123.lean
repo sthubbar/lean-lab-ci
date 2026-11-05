@@ -5,12 +5,16 @@ namespace LeanLab.Zhao2025.Task1123
 
 open LeanLab.Zhao2025.Task56
 
-/-- LEAF: The deep analytic bound from Maynard 2013 for exponent at least 5. -/
-theorem maynard_2013_bound (theta : ℝ) (hth : 5 ≤ theta) :
+/-- LEAF: The deep analytic bound from Maynard 2013 for exponent at least 5.
+
+REPAIRED (U-1619): constant `2 + epsilon` and the modulus threshold after `epsilon`,
+which is Zhao (1.16); the earlier constant `2` form asked one `Q` to serve every `epsilon`. -/
+theorem maynard_2013_bound (theta : ℝ) (hth : 5 ≤ theta) (epsilon : ℝ) (heps : 0 < epsilon) :
   ∃ Q : ℕ, ∀ q : ℕ, Q ≤ q → 1 ≤ q →
     ∀ a : ℕ, 1 ≤ a → a ≤ q → Nat.Coprime a q →
       (primeCountAP ((q : ℝ) ^ theta) q a : ℝ) ≤
-        2 * (q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta)) := by
+        (2 + epsilon) * (q : ℝ) ^ theta /
+          ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta)) := by
   sorry
 
 /-- LEAF: Nonnegativity of the scaling term. -/
@@ -35,26 +39,6 @@ theorem leaf2_low (theta : ℝ) (hth : 5 ≤ theta) (epsilon : ℝ)
         (2 + epsilon) * (q : ℝ) ^ theta /
           ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta)) := by
   have _ := hlow
-  obtain ⟨Q, hQ⟩ := maynard_2013_bound theta hth
-  use max Q 2
-  intro q hq hq1 a ha1 haq hcop
-  have hq2 : 2 ≤ q := le_trans (le_max_right Q 2) hq
-  have h1 := hQ q (le_trans (le_max_left Q 2) hq) hq1 a ha1 haq hcop
-  have h2 := scaling_term_nonneg q hq2 theta hth
-  have h3 : 2 * ((q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta))) ≤
-    (2 + epsilon) * ((q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta))) := by
-    apply mul_le_mul_of_nonneg_right
-    · linarith
-    · exact h2
-  have h4 : 2 * (q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta)) =
-    2 * ((q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta))) := by ring
-  have h5 : (2 + epsilon) * (q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta)) =
-    (2 + epsilon) * ((q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta))) := by ring
-  have h6 : 2 * ↑q ^ theta / (↑q.totient * Real.log (↑q ^ theta)) ≤
-    (2 + epsilon) * ↑q ^ theta / (↑q.totient * Real.log (↑q ^ theta)) := by
-    calc 2 * ↑q ^ theta / (↑q.totient * Real.log (↑q ^ theta)) = 2 * (↑q ^ theta / (↑q.totient * Real.log (↑q ^ theta))) := h4
-      _ ≤ (2 + epsilon) * (↑q ^ theta / (↑q.totient * Real.log (↑q ^ theta))) := h3
-      _ = (2 + epsilon) * ↑q ^ theta / (↑q.totient * Real.log (↑q ^ theta)) := h5.symm
-  exact le_trans h1 h6
+  exact maynard_2013_bound theta hth epsilon heps
 
 end LeanLab.Zhao2025.Task1123
