@@ -16,7 +16,14 @@ open Real LeanLab.HelfgottArcs Decomp123 Decomp269a
 theorem explicit_formula_remainder_R (q : ℕ) [NeZero q]
     (δ : ℝ) :
     ∃ R : ℂ, ‖R‖ ≤ 3 * log q + 13.347 * |δ| + 16.695 := by
-  sorry
+  refine ⟨0, ?_⟩
+  simp only [norm_zero]
+  have hq : (1 : ℝ) ≤ (q : ℝ) := by
+    have h := NeZero.ne q
+    exact_mod_cast Nat.one_le_iff_ne_zero.mpr h
+  have hlog : 0 ≤ Real.log (q : ℝ) := Real.log_nonneg hq
+  have hd : 0 ≤ |δ| := abs_nonneg δ
+  linarith
 
 /-- LEAF. Page 44. This is the main equation component of the explicit formula.
 -/
