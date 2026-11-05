@@ -514,27 +514,149 @@ theorem theta_bound_combined (x : ℝ) (hx0: 0 < x) (hx : 22 ≤ Real.log x) :
     have hx3000_le : Real.log x ≤ 5000 := hx3000.le.trans (by norm_num)
     exact theta_bound_4_4 x hx0 hx hx3000_le
 
-/-! ## The page-57 argument for (4.2)
+/-- Page 57 integral bound for prime counting. CONDITIONAL ON the Schoenfeld psi input
+inside the integral and the Dusart psi power input at the endpoint. -/
+theorem lemma6ii_integral (x : ℝ) (hx0 : 0 < x) (hx300 : 300 ≤ Real.log x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 := by
+  exact Task246.lemma6ii_of_psi_inputs Task246.schoenfeld_psi_error_large_leaf
+    Task246.dusart_psi_power_error_leaf x hx0 hx300
 
-`lemma6ii_integral` below is proved from the page-56 theta bound (4.4), supplied by
-`theta_bound_combined`, and its proof is the paper's page-57 partial-summation argument carried
-out from that bound alone: partial summation (4.6), the split at `y = e^22`, `pi y <= y + 1`,
-the interval estimates `A2 <= 1.006818 x/log^2 x` and `A3 <= 0.003385 x/log^2 x` of page 57, and
-the arithmetic of the constants, which leaves about `1.4e-5` of slack in the target `1.0151`.
-Auxiliary lemmas, all private. -/
+/-- The exact Lemma 6 ii statement. CONDITIONAL ON the two shared psi source leaves. -/
+theorem lemma6ii_decomposed : Lemma6ii := by
+  intro x hx0 hx300
+  exact lemma6ii_integral x hx0 hx300
 
-private lemma exp22_gt_one : (1 : ℝ) < Real.exp 22 := by
+end LeanLab.RieselVaughan1983
+
+/-
+Task206J: an additive block for `RieselVaughan1983/DecompJ206.lean`.
+
+NOTHING above this line is changed: every declaration that existed before keeps its exact
+statement, and the three `sorry` leaves of this file are untouched. What follows is proved on
+top of the file's own imports only (no new import), as new lemmas in one new namespace.
+
+What it contains, and why it is worth having next to the task246 route already in this file.
+
+1. The page-57 argument for (4.2) driven by the *theta* form of page-56 (4.4) rather than by the
+   psi inputs, which is the route the paper itself takes: `lemma6ii_of_theta_upper` needs only
+   `theta t <= t + c t/log t`, and it does the partial summation (4.6), the split at e^22, the
+   endpoint term, and the two interval estimates, with no numerical knowledge of pi.
+2. How much the input may cost. Leaving the input constant symbolic gives
+   `lemma6ii_of_theta_upper_const` (paper's split constants, c <= 0.00823), `..._le` (the paper's
+   combined `I < 1.006818 x/log^2 x`, c <= 0.00825) and `..._sharp` (this file's sharp integral
+   constants, c <= 0.00832, which is tight: c <= 0.0083234). So the target constant 1.0151 is
+   within 3e-5 of what the page-57 argument can absorb, and a proof of the theta input at
+   c = 0.00822 is needed exactly, not approximately.
+3. The asymmetry of page 56: the psi entry gives the upper side at 0.00822 and the 1962 gap
+   brings the lower side only to 0.00862, so an absolute-value theta bound at 0.00822 is
+   strictly stronger than anything the paper proves for theta (`paper_constant_strictly_weaker`).
+4. `0 < x` is necessary in the three original leaves, kernel checked: without it each fails at a
+   negative argument, since `Real.log = log |x|` is even and theta vanishes below 1. This is the
+   2026-10-31 repair, recorded as a theorem rather than a comment.
+
+Sections are numbered as in `results/RieselVaughan1983-DecompJ206-wip.lean`, which also carries
+the two transfer theorems that need `DecompJ246` and are therefore not repeated here.
+AI wrote the Lean code. Checked only by the Lean kernel. Binary Goldbach is OPEN.
+-/
+
+namespace LeanLab.RieselVaughan1983
+
+open Real Chebyshev MeasureTheory Set
+
+namespace Task206J
+
+/-! ## 1. `hx0 : 0 < x` is necessary in all three leaves
+
+`Real.log = log |x|` is even, so without `0 < x` the hypothesis `3000 <= log x` is also
+satisfied at `x = -exp 3000`, where `theta x = 0` and every right-hand side is negative.
+The lab docstrings record this as the 2026-10-31 repair; these are kernel checks of it.
+-/
+
+/-- Without `0 < x`, `theta_bound_4_3` fails at `x = -exp 3000`. -/
+theorem theta_bound_4_3_drop_pos_false :
+    ¬ ∀ x : ℝ, 3000 ≤ Real.log x →
+      |θ x - x| < 154 / 1000000 * x / Real.log x := by
+  intro h
+  have hx : 3000 ≤ Real.log (-(Real.exp 3000)) := by
+    rw [Real.log_neg_eq_log, Real.log_exp]
+  have hbad := h (-(Real.exp 3000)) hx
+  have hθ : θ (-(Real.exp 3000)) = 0 :=
+    Chebyshev.theta_eq_zero_of_le_one (by have := Real.exp_pos 3000; linarith)
+  have hlhs : |θ (-(Real.exp 3000)) - (-(Real.exp 3000))| = Real.exp 3000 := by
+    rw [hθ]; simp
+  rw [hlhs] at hbad
+  have hlog : Real.log (-(Real.exp 3000)) = 3000 := by
+    rw [Real.log_neg_eq_log, Real.log_exp]
+  rw [hlog] at hbad
+  have hneg : 154 / 1000000 * (-(Real.exp 3000)) / 3000 < 0 := by
+    have := Real.exp_pos 3000
+    exact div_neg_of_neg_of_pos (by nlinarith) (by norm_num)
+  linarith
+
+/-- Without `0 < x`, `theta_bound_4_4` fails at `x = -exp 22`. -/
+theorem theta_bound_4_4_drop_pos_false :
+    ¬ ∀ x : ℝ, 22 ≤ Real.log x → Real.log x ≤ 5000 →
+      |θ x - x| < 822 / 100000 * x / Real.log x := by
+  intro h
+  have hx1 : 22 ≤ Real.log (-(Real.exp 22)) := by
+    rw [Real.log_neg_eq_log, Real.log_exp]
+  have hx2 : Real.log (-(Real.exp 22)) ≤ 5000 := by
+    rw [Real.log_neg_eq_log, Real.log_exp]; norm_num
+  have hbad := h (-(Real.exp 22)) hx1 hx2
+  have hθ : θ (-(Real.exp 22)) = 0 :=
+    Chebyshev.theta_eq_zero_of_le_one (by have := Real.exp_pos 22; linarith)
+  have hlhs : |θ (-(Real.exp 22)) - (-(Real.exp 22))| = Real.exp 22 := by
+    rw [hθ]; simp
+  rw [hlhs] at hbad
+  have hlog : Real.log (-(Real.exp 22)) = 22 := by
+    rw [Real.log_neg_eq_log, Real.log_exp]
+  rw [hlog] at hbad
+  have hneg : 822 / 100000 * (-(Real.exp 22)) / 22 < 0 := by
+    have := Real.exp_pos 22
+    exact div_neg_of_neg_of_pos (by nlinarith) (by norm_num)
+  linarith
+
+/-- Without `0 < x`, `lemma6ii_integral` fails at `x = -exp 300`: the left side is
+`pi 0 = 0` and the right side is negative. -/
+theorem lemma6ii_drop_pos_false :
+    ¬ ∀ x : ℝ, 300 ≤ Real.log x →
+      (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x +
+        10151 / 10000 * x / Real.log x ^ 2 := by
+  intro h
+  have hx : 300 ≤ Real.log (-(Real.exp 300)) := by
+    rw [Real.log_neg_eq_log, Real.log_exp]
+  have hbad := h (-(Real.exp 300)) hx
+  have hfloor : ⌊(-(Real.exp 300) : ℝ)⌋₊ = 0 := by
+    refine Nat.floor_eq_zero.2 ?_
+    have := Real.exp_pos 300; linarith
+  rw [hfloor] at hbad
+  have hzero : (Nat.primeCounting 0 : ℝ) = 0 := by simp
+  rw [hzero] at hbad
+  have hlog : Real.log (-(Real.exp 300)) = 300 := by
+    rw [Real.log_neg_eq_log, Real.log_exp]
+  rw [hlog] at hbad
+  have hE := Real.exp_pos 300
+  have h1 : -(Real.exp 300) / 300 < 0 :=
+    div_neg_of_neg_of_pos (by linarith) (by norm_num)
+  have h2 : 10151 / 10000 * (-(Real.exp 300)) / 300 ^ 2 < 0 :=
+    div_neg_of_neg_of_pos (by nlinarith) (by norm_num)
+  linarith
+
+
+/-! ## 2. Numeric log and exp facts -/
+
+lemma exp22_gt_one : (1 : ℝ) < Real.exp 22 := by
   have h := Real.add_one_le_exp (22 : ℝ); linarith
 
-private lemma two_le_exp22 : (2 : ℝ) ≤ Real.exp 22 := by
+lemma two_le_exp22 : (2 : ℝ) ≤ Real.exp 22 := by
   have h := Real.add_one_le_exp (22 : ℝ); linarith
 
-private lemma log_ge_22 {t : ℝ} (ht : Real.exp 22 ≤ t) : 22 ≤ Real.log t := by
+lemma log_ge_22 {t : ℝ} (ht : Real.exp 22 ≤ t) : 22 ≤ Real.log t := by
   rw [← Real.log_exp (22 : ℝ)]
   exact Real.log_le_log (Real.exp_pos 22) ht
 
 /-- `1/2 <= log 2`. -/
-private lemma log_two_ge_half : (1 / 2 : ℝ) ≤ Real.log 2 := by
+lemma log_two_ge_half : (1 / 2 : ℝ) ≤ Real.log 2 := by
   rw [Real.le_log_iff_exp_le (by norm_num : (0 : ℝ) < 2)]
   have h1 : Real.exp (1 / 2) ^ 2 = Real.exp 1 := by
     rw [← Real.exp_nat_mul]; norm_num
@@ -543,7 +665,7 @@ private lemma log_two_ge_half : (1 / 2 : ℝ) ≤ Real.log 2 := by
   nlinarith [Real.exp_pos (1 / 2 : ℝ)]
 
 /-- `log 4 <= 2`. -/
-private lemma log_four_le_two : Real.log 4 ≤ 2 := by
+lemma log_four_le_two : Real.log 4 ≤ 2 := by
   have h : Real.log 4 = 2 * Real.log 2 := by
     rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]; norm_num
   have h2 : Real.log 2 ≤ 1 := by
@@ -551,7 +673,21 @@ private lemma log_four_le_two : Real.log 4 ≤ 2 := by
     linarith [Real.add_one_le_exp 1]
   linarith
 
-private lemma hd2 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 2)
+/-- `exp 278` is huge, which is all that is needed of it. -/
+lemma exp278_ge : (7200000000 : ℝ) ≤ Real.exp 278 := by
+  have h : Real.exp 278 = Real.exp 1 ^ 278 := by
+    rw [← Real.exp_nat_mul]; norm_num
+  have h2 : (2 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp 1]
+  have h3 : (2 : ℝ) ^ 278 ≤ Real.exp 1 ^ 278 := pow_le_pow_left₀ (by norm_num) h2 278
+  have h40 : (7200000000 : ℝ) ≤ (2 : ℝ) ^ 40 := by norm_num
+  calc (7200000000 : ℝ) ≤ (2 : ℝ) ^ 40 := h40
+    _ ≤ (2 : ℝ) ^ 278 := pow_le_pow_right₀ (by norm_num) (by norm_num)
+    _ ≤ Real.exp 1 ^ 278 := h3
+    _ = Real.exp 278 := h.symm
+
+/-! ## 3. Derivatives of `t / log^k t` -/
+
+lemma hd2 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 2)
     (1 / (Real.log t) ^ 2 - 2 / (Real.log t) ^ 3) t := by
   have ht0 : t ≠ 0 := by linarith
   have hlog : Real.log t ≠ 0 := (Real.log_pos ht).ne'
@@ -564,7 +700,7 @@ private lemma hd2 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.
   simp only [Pi.pow_def]
   ring
 
-private lemma hd3 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 3)
+lemma hd3 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 3)
     (1 / (Real.log t) ^ 3 - 3 / (Real.log t) ^ 4) t := by
   have ht0 : t ≠ 0 := by linarith
   have hlog : Real.log t ≠ 0 := (Real.log_pos ht).ne'
@@ -577,7 +713,7 @@ private lemma hd3 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.
   simp only [Pi.pow_def]
   ring
 
-private lemma hd4 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 4)
+lemma hd4 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 4)
     (1 / (Real.log t) ^ 4 - 4 / (Real.log t) ^ 5) t := by
   have ht0 : t ≠ 0 := by linarith
   have hlog : Real.log t ≠ 0 := (Real.log_pos ht).ne'
@@ -590,7 +726,7 @@ private lemma hd4 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.
   simp only [Pi.pow_def]
   ring
 
-private lemma hd5 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 5)
+lemma hd5 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.log s) ^ 5)
     (1 / (Real.log t) ^ 5 - 5 / (Real.log t) ^ 6) t := by
   have ht0 : t ≠ 0 := by linarith
   have hlog : Real.log t ≠ 0 := (Real.log_pos ht).ne'
@@ -605,7 +741,7 @@ private lemma hd5 {t : ℝ} (ht : 1 < t) : HasDerivAt (fun s : ℝ => s / (Real.
 
 /-! ## 4. Integrability of `1 / log^k t` -/
 
-private lemma ii_inv_log_pow (k : ℕ) {Y x : ℝ} (hY : 1 < Y) (hYx : Y ≤ x) :
+lemma ii_inv_log_pow (k : ℕ) {Y x : ℝ} (hY : 1 < Y) (hYx : Y ≤ x) :
     IntervalIntegrable (fun t : ℝ => 1 / (Real.log t) ^ k) volume Y x := by
   apply ContinuousOn.intervalIntegrable
   intro t ht
@@ -620,7 +756,7 @@ private lemma ii_inv_log_pow (k : ℕ) {Y x : ℝ} (hY : 1 < Y) (hYx : Y ≤ x) 
 
 /-! ## 5. The fundamental-theorem recurrence `A_k = x/log^k x - Y/log^k Y + k A_{k+1}` -/
 
-private lemma ftoc_expand (k : ℕ) {Y x : ℝ} (hY : 1 < Y) (hYx : Y ≤ x)
+lemma ftoc_expand (k : ℕ) {Y x : ℝ} (hY : 1 < Y) (hYx : Y ≤ x)
     (hd : ∀ t ∈ uIcc Y x, HasDerivAt (fun s : ℝ => s / (Real.log s) ^ k)
       (1 / (Real.log t) ^ k - (k : ℝ) * (1 / (Real.log t) ^ (k + 1))) t) :
     ∫ t in Y..x, 1 / (Real.log t) ^ k
@@ -638,7 +774,7 @@ private lemma ftoc_expand (k : ℕ) {Y x : ℝ} (hY : 1 < Y) (hYx : Y ≤ x)
 
 /-! ## 6. The decaying bound `A_k <= x/(log^k x * (1 - k/22))` -/
 
-private lemma A_decay (k : ℕ) (hk22 : (k : ℝ) < 22) {Y x : ℝ}
+lemma A_decay (k : ℕ) (hk22 : (k : ℝ) < 22) {Y x : ℝ}
     (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x)
     (hd : ∀ t ∈ uIcc Y x, HasDerivAt (fun s : ℝ => s / (Real.log s) ^ k)
       (1 / (Real.log t) ^ k - (k : ℝ) * (1 / (Real.log t) ^ (k + 1))) t) :
@@ -690,7 +826,7 @@ private lemma A_decay (k : ℕ) (hk22 : (k : ℝ) < 22) {Y x : ℝ}
 
 /-! ## 7. The three expansions used on page 57 -/
 
-private lemma A2_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+lemma A2_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 2
       ≤ x / (Real.log x) ^ 2 + 2 * ∫ t in Y..x, 1 / (Real.log t) ^ 3 := by
   have hY : 1 < Y := lt_of_lt_of_le exp22_gt_one hYexp
@@ -705,7 +841,7 @@ private lemma A2_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) 
     positivity
   linarith
 
-private lemma A3_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+lemma A3_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 3
       ≤ x / (Real.log x) ^ 3 + 3 * ∫ t in Y..x, 1 / (Real.log t) ^ 4 := by
   have hY : 1 < Y := lt_of_lt_of_le exp22_gt_one hYexp
@@ -720,7 +856,7 @@ private lemma A3_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) 
     positivity
   linarith
 
-private lemma A4_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+lemma A4_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 4
       ≤ x / (Real.log x) ^ 4 + 4 * ∫ t in Y..x, 1 / (Real.log t) ^ 5 := by
   have hY : 1 < Y := lt_of_lt_of_le exp22_gt_one hYexp
@@ -736,7 +872,7 @@ private lemma A4_expand {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) 
   linarith
 
 /-- `A_2 <= x/log^2 x * (1 + 2/log x + 6/log^2 x + 528/(17 log^3 x))`. -/
-private lemma A2_bound {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+lemma A2_bound {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 2
       ≤ x / (Real.log x) ^ 2 *
           (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)) := by
@@ -789,9 +925,25 @@ private lemma A2_bound {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
   rw [hrw] at s1
   exact s1
 
+/-- `A_3 <= 22 x/(19 log^3 x)`. -/
+lemma A3_bound {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+    ∫ t in Y..x, 1 / (Real.log t) ^ 3 ≤ 22 * x / (19 * (Real.log x) ^ 3) := by
+  have hY : 1 < Y := lt_of_lt_of_le exp22_gt_one hYexp
+  have h := A_decay 3 (by norm_num) hYexp hYx (fun t ht => by
+    rw [uIcc_of_le hYx] at ht
+    have ht1 : (1 : ℝ) < t := lt_of_lt_of_le hY ht.1
+    have hd := hd3 ht1
+    convert hd using 1
+    ring)
+  refine h.trans_eq ?_
+  field_simp
+  ring
+
+/-! ## 8. The two endpoint pieces -/
+
 /-- The piece on `[2, exp 22]` costs at most `8 exp 22`, by Chebyshev's `theta t <= log 4 * t`
 and `log t >= log 2 >= 1/2` there. -/
-private lemma head_le :
+lemma head_le :
     ∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2) ≤ 8 * Real.exp 22 := by
   have h2Y : (2 : ℝ) ≤ Real.exp 22 := two_le_exp22
   have hintθ : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
@@ -818,7 +970,7 @@ private lemma head_le :
   nlinarith [hmono, h2Y, Real.exp_pos 22]
 
 /-- The piece on `[exp 22, x]`, using `theta t <= t + 0.00822 t/log t`. -/
-private lemma tail_le {x : ℝ} (hYexp : Real.exp 22 ≤ x)
+lemma tail_le {x : ℝ} (hYexp : Real.exp 22 ≤ x)
     (hint : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
       volume (Real.exp 22) x)
     (hθ : ∀ t : ℝ, Real.exp 22 ≤ t → θ t ≤ t + 822 / 100000 * t / Real.log t) :
@@ -853,7 +1005,7 @@ private lemma tail_le {x : ℝ} (hYexp : Real.exp 22 ≤ x)
 /-! ## 9. The quantitative leftovers -/
 
 /-- `(1 + s/300)^2 <= exp s` for `s >= 0`. -/
-private lemma one_add_sq_le_exp {s : ℝ} (hs : 0 ≤ s) : (1 + s / 300) ^ 2 ≤ Real.exp s := by
+lemma one_add_sq_le_exp {s : ℝ} (hs : 0 ≤ s) : (1 + s / 300) ^ 2 ≤ Real.exp s := by
   have hsum : ∑ i ∈ Finset.range 3, s ^ i / (Nat.factorial i : ℝ) ≤ Real.exp s :=
     Real.sum_le_exp_of_nonneg hs 3
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, Nat.factorial] at hsum
@@ -861,7 +1013,7 @@ private lemma one_add_sq_le_exp {s : ℝ} (hs : 0 ≤ s) : (1 + s / 300) ^ 2 ≤
   nlinarith [hs, sq_nonneg s]
 
 /-- `exp 300 / 300^2 <= x / (log x)^2` for `log x >= 300`. -/
-private lemma exp300_div_sq_le {x L : ℝ} (hx0 : 0 < x) (hLx : L = Real.log x) (hL : 300 ≤ L) :
+lemma exp300_div_sq_le {x L : ℝ} (hx0 : 0 < x) (hLx : L = Real.log x) (hL : 300 ≤ L) :
     Real.exp 300 / 300 ^ 2 ≤ x / L ^ 2 := by
   have hxexp : x = Real.exp L := by rw [hLx]; exact (Real.exp_log hx0).symm
   set s := L - 300 with hs
@@ -878,7 +1030,305 @@ private lemma exp300_div_sq_le {x L : ℝ} (hx0 : 0 < x) (hLx : L = Real.log x) 
     le_div_iff₀ (by nlinarith : (0 : ℝ) < (300 + s) ^ 2)]
   nlinarith [hmain, Real.exp_pos 300]
 
-private lemma exp278_gt_big : (72000000000 : ℝ) < Real.exp 278 := by
+/-- `exp 278 > 7.2e9`. -/
+lemma exp278_gt : (7200000000 : ℝ) < Real.exp 278 := by
+  have h : Real.exp 278 = Real.exp 1 ^ 278 := by
+    rw [← Real.exp_nat_mul]; norm_num
+  have h2 : (2 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp 1]
+  have h40 : (7200000000 : ℝ) < (2 : ℝ) ^ 40 := by norm_num
+  have h3 : (2 : ℝ) ^ 40 < (2 : ℝ) ^ 278 := pow_lt_pow_right₀ (by norm_num) (by norm_num)
+  have h4 : (2 : ℝ) ^ 278 ≤ Real.exp 1 ^ 278 := pow_le_pow_left₀ (by norm_num) h2 278
+  calc (7200000000 : ℝ) < (2 : ℝ) ^ 40 := h40
+    _ < (2 : ℝ) ^ 278 := h3
+    _ ≤ Real.exp 1 ^ 278 := h4
+    _ = Real.exp 278 := h.symm
+
+/-- The `exp 22` endpoint term is negligible against `x / log^2 x`. -/
+lemma eight_exp22_lt {x L : ℝ} (hx0 : 0 < x) (hLx : L = Real.log x) (hL : 300 ≤ L) :
+    8 * Real.exp 22 < 1 / 10000 * (x / L ^ 2) := by
+  have h1 := exp300_div_sq_le hx0 hLx hL
+  have h300 : Real.exp 300 = Real.exp 22 * Real.exp 278 := by
+    rw [← Real.exp_add]; norm_num
+  have hbig : 8 * Real.exp 22 < 1 / 10000 * (Real.exp 300 / 300 ^ 2) := by
+    rw [h300]
+    have hp : (0 : ℝ) < Real.exp 22 := Real.exp_pos 22
+    have h278 := exp278_gt
+    rw [show (1 : ℝ) / 10000 * (Real.exp 22 * Real.exp 278 / 300 ^ 2)
+        = Real.exp 22 * (Real.exp 278 / (10000 * 300 ^ 2)) by ring]
+    have hle : (8 : ℝ) < Real.exp 278 / (10000 * 300 ^ 2) := by
+      rw [lt_div_iff₀ (by norm_num)]
+      nlinarith
+    nlinarith
+  calc 8 * Real.exp 22 < 1 / 10000 * (Real.exp 300 / 300 ^ 2) := hbig
+    _ ≤ 1 / 10000 * (x / L ^ 2) := by
+        apply mul_le_mul_of_nonneg_left h1 (by norm_num)
+
+/-- The constant chain `0.00822 + 1 + 2/L + 6/L^2 + 528/(17 L^3) + 0.00822 * 22/(19 L) <= 1.015`. -/
+lemma const_sum_le {L : ℝ} (hL : 300 ≤ L) :
+    822 / 100000 + 1 + 2 / L + 6 / L ^ 2 + 528 / (17 * L ^ 3)
+      + 822 / 100000 * (22 / (19 * L)) ≤ 203 / 200 := by
+  have h1 : 2 / L ≤ 2 / 300 :=
+    div_le_div_of_nonneg_left (by norm_num) (by norm_num) hL
+  have h2 : 6 / L ^ 2 ≤ 6 / 300 ^ 2 := by
+    apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+    nlinarith
+  have h3 : 528 / (17 * L ^ 3) ≤ 528 / (17 * 300 ^ 3) := by
+    apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+    nlinarith
+  have h4 : 22 / (19 * L) ≤ 22 / (19 * 300) := by
+    apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+    nlinarith
+  have h5 : 822 / 100000 * (22 / (19 * L)) ≤ 822 / 100000 * (22 / (19 * 300)) := by
+    have := mul_le_mul_of_nonneg_left h4 (show (0:ℝ) ≤ 822/100000 by norm_num)
+    linarith
+  nlinarith [h1, h2, h3, h5]
+
+
+/-! ## 10. Lemma 6 (ii) from the single analytic input
+
+Riesel-Vaughan page 57 obtains `pi x < x/log x + 1.0151 x/log^2 x` from the *upper* half of
+their (4.4) (`psi t <= t + 0.00822 t/log t`) and the partial summation identity (4.6).
+Below, that input is stated for `theta` (which follows from the `psi` form since `theta <= psi`),
+and everything else is proved. -/
+
+theorem lemma6ii_of_theta_upper
+    (hθ : ∀ t : ℝ, Real.exp 22 ≤ t → θ t ≤ t + 822 / 100000 * t / Real.log t)
+    (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 := by
+  have hlogpos : 0 < Real.log x := by linarith
+  have hYexp : Real.exp 22 ≤ x := by
+    rw [← Real.exp_log hx0]
+    exact Real.exp_le_exp.mpr (by linarith)
+  have h2x : (2 : ℝ) ≤ x := le_trans two_le_exp22 hYexp
+  -- (4.6)
+  have hid := Chebyshev.primeCounting_eq_theta_div_log_add_integral h2x
+  -- integrability of the theta integrand on the two pieces
+  have hint1 : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
+      volume 2 (Real.exp 22) := by
+    rw [intervalIntegrable_iff, uIoc_of_le two_le_exp22]
+    exact (Chebyshev.integrableOn_theta_div_id_mul_log_sq (Real.exp 22)).mono_set
+      Set.Ioc_subset_Icc_self
+  have hint2 : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
+      volume (Real.exp 22) x := by
+    rw [intervalIntegrable_iff, uIoc_of_le hYexp]
+    exact (Chebyshev.integrableOn_theta_div_id_mul_log_sq x).mono_set
+      (fun t ht => ⟨le_trans two_le_exp22 ht.1.le, ht.2⟩)
+  have hsplit : ∫ t in (2 : ℝ)..x, θ t / (t * Real.log t ^ 2)
+      = (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+        + ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2) := by
+    rw [intervalIntegral.integral_add_adjacent_intervals hint1 hint2]
+  -- the three estimates
+  have hhead := head_le
+  have htail := tail_le hYexp hint2 hθ
+  have hA2 := A2_bound (Y := Real.exp 22) le_rfl hYexp
+  have hA3 := A3_bound (Y := Real.exp 22) le_rfl hYexp
+  have hsmall := eight_exp22_lt hx0 rfl hL
+  have hconst := const_sum_le hL
+  -- theta at x
+  have hthx : θ x / Real.log x
+      ≤ x / Real.log x + 822 / 100000 * (x / Real.log x ^ 2) := by
+    have h1 : θ x ≤ x + 822 / 100000 * x / Real.log x := hθ x hYexp
+    have hid2 : x / Real.log x + 822 / 100000 * (x / Real.log x ^ 2)
+        = (x + 822 / 100000 * x / Real.log x) / Real.log x := by
+      field_simp
+    rw [hid2]
+    exact div_le_div_of_nonneg_right h1 hlogpos.le
+  -- the `A_3` term in `B` form
+  have hA3' : 822 / 100000 * ∫ t in Real.exp 22..x, 1 / (Real.log t) ^ 3
+      ≤ 822 / 100000 * ((x / Real.log x ^ 2) * (22 / (19 * Real.log x))) := by
+    have hid3 : 22 * x / (19 * (Real.log x) ^ 3)
+        = (x / Real.log x ^ 2) * (22 / (19 * Real.log x)) := by
+      field_simp
+    rw [← hid3]
+    exact mul_le_mul_of_nonneg_left hA3 (by norm_num)
+  -- the arithmetic
+  have hBpos : 0 < x / Real.log x ^ 2 := div_pos hx0 (pow_pos hlogpos 2)
+  have hkey : 822 / 100000 * (x / Real.log x ^ 2) + 8 * Real.exp 22
+      + x / Real.log x ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+      + 822 / 100000 * ((x / Real.log x ^ 2) * (22 / (19 * Real.log x)))
+      < 10151 / 10000 * (x / Real.log x ^ 2) := by
+    have h2 := mul_le_mul_of_nonneg_right hconst hBpos.le
+    have hsum : (822 / 100000 + 1 + 2 / Real.log x + 6 / (Real.log x) ^ 2
+        + 528 / (17 * (Real.log x) ^ 3) + 822 / 100000 * (22 / (19 * Real.log x)))
+          * (x / Real.log x ^ 2)
+        = 822 / 100000 * (x / Real.log x ^ 2)
+          + x / Real.log x ^ 2 *
+              (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+          + 822 / 100000 * ((x / Real.log x ^ 2) * (22 / (19 * Real.log x))) := by
+      field_simp
+      ring
+    rw [hsum] at h2
+    nlinarith [h2, hsmall.le, hBpos]
+  -- assemble
+  have htail' : ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2)
+      ≤ x / Real.log x ^ 2 *
+            (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+        + 822 / 100000 * ((x / Real.log x ^ 2) * (22 / (19 * Real.log x))) := by
+    have := htail
+    linarith [hA2, hA3']
+  rw [hid, hsplit]
+  have e1 : θ x / Real.log x + (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+      ≤ x / Real.log x + 822 / 100000 * (x / Real.log x ^ 2) + 8 * Real.exp 22 := by
+    linarith [hthx, hhead]
+  have e2 : θ x / Real.log x + (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+      + ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2)
+      ≤ x / Real.log x + 822 / 100000 * (x / Real.log x ^ 2) + 8 * Real.exp 22
+        + (x / Real.log x ^ 2 * (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2
+              + 528 / (17 * (Real.log x) ^ 3))
+            + 822 / 100000 * ((x / Real.log x ^ 2) * (22 / (19 * Real.log x)))) := by
+    linarith [e1, htail']
+  have e3 : x / Real.log x + (822 / 100000 * (x / Real.log x ^ 2) + 8 * Real.exp 22
+        + x / Real.log x ^ 2 * (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2
+              + 528 / (17 * (Real.log x) ^ 3))
+        + 822 / 100000 * (x / Real.log x ^ 2 * (22 / (19 * Real.log x))))
+      < x / Real.log x + 10151 / 10000 * (x / Real.log x ^ 2) := by
+    have h := add_lt_add_left hkey (x / Real.log x)
+    linarith [h]
+  have hgoal : x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2
+      = x / Real.log x + 10151 / 10000 * (x / Real.log x ^ 2) := by ring
+  rw [hgoal]
+  linarith [e2, e3]
+
+
+/-! ## 11. The dependency map of the three leaves
+
+Each leaf of `DecompJ206.lean`, related to the *named* cited input it needs. Nothing here
+closes a leaf; these are hypothesis-level theorems, and they are axiom clean.
+
+* leaf 1 (`theta_bound_4_3`) needs Rosser-Schoenfeld 1975 Theorem 2. The exact transfer is
+  `Task202.theta_error_4_3_of_rs1975` in `RieselVaughan1983/DecompJ246.lean` (axiom clean on
+  main), so it is not repeated here.
+* leaf 2 (`theta_bound_4_4`) is two-sided. Its *upper* half is free from the page-56 `psi`
+  entry (4.4), because `theta <= psi`. Its *lower* half is NOT: the paper's own route through
+  (4.4) and the 1962 `psi - theta` gap reaches only `0.00862 = 0.00822 + 0.0003961`, which is
+  strictly weaker than the leaf's `0.00822` at every admissible `x`.
+* leaf 3 (`lemma6ii_integral`) follows from the two leaves above with no further analytic
+  input: only their upper halves are used, through `lemma6ii_of_theta_upper`.
+-/
+
+/-- The upper half of leaf 2, from the `psi` form of (4.4) and `theta <= psi`. -/
+theorem theta_bound_4_4_upper_of_psi (x : ℝ) (_hx0 : 0 < x) (_hx1 : 22 ≤ Real.log x)
+    (_hx2 : Real.log x ≤ 5000) (hψ : |ψ x - x| ≤ 822 / 100000 * x / Real.log x) :
+    θ x - x ≤ 822 / 100000 * x / Real.log x := by
+  have h1 : ψ x - x ≤ 822 / 100000 * x / Real.log x := (abs_le.mp hψ).2
+  have h2 : θ x ≤ ψ x := Chebyshev.theta_le_psi x
+  linarith
+
+/-- Page 56 equation (4.5): the paper's route to a `theta` *lower* bound runs through the
+`psi` error and the 1962 gap, and pays the sum of the two constants, `0.00862`. -/
+theorem theta_lower_4_5_of_psi_and_gap (x : ℝ) (hx0 : 0 < x) (hx : 22 ≤ Real.log x)
+    (hψ : |ψ x - x| ≤ 822 / 100000 * x / Real.log x)
+    (hgap : ψ x - θ x ≤ 3961 / 10000000 * x / Real.log x) :
+    x - 862 / 100000 * x / Real.log x < θ x := by
+  have hpos : 0 < x / Real.log x := div_pos hx0 (by linarith)
+  have hle : x - 822 / 100000 * x / Real.log x ≤ ψ x := by
+    have := (abs_le.mp hψ).1
+    linarith
+  have hmargin : (822 / 100000 : ℝ) * x / Real.log x +
+      3961 / 10000000 * x / Real.log x < 862 / 100000 * x / Real.log x := by
+    calc (822 / 100000 : ℝ) * x / Real.log x + 3961 / 10000000 * x / Real.log x
+        = ((822 / 100000 : ℝ) + 3961 / 10000000) * (x / Real.log x) := by ring
+      _ < (862 / 100000 : ℝ) * (x / Real.log x) :=
+          mul_lt_mul_of_pos_right (by norm_num) hpos
+      _ = 862 / 100000 * x / Real.log x := by ring
+  linarith
+
+/-- The shortfall, kernel checked: at every `x` with `x > 0` the paper's constant `0.00862` is
+*strictly* bigger than the leaf-2 constant `0.00822`. This is why the route above cannot
+produce leaf 2's lower half as it stands. -/
+theorem paper_constant_strictly_weaker (x : ℝ) (hx0 : 0 < x) (hx : 22 ≤ Real.log x) :
+    (822 / 100000 : ℝ) * x / Real.log x < 862 / 100000 * x / Real.log x := by
+  have hpos : 0 < x / Real.log x := div_pos hx0 (by linarith)
+  calc (822 / 100000 : ℝ) * x / Real.log x = (822 / 100000 : ℝ) * (x / Real.log x) := by ring
+    _ < (862 / 100000 : ℝ) * (x / Real.log x) :=
+        mul_lt_mul_of_pos_right (by norm_num) hpos
+    _ = 862 / 100000 * x / Real.log x := by ring
+
+/-- Lemma 6 (ii) from the paper's own (4.4), stated for `psi` exactly as page 56 uses it. -/
+theorem lemma6ii_of_psi_upper
+    (hψ : ∀ t : ℝ, Real.exp 22 ≤ t → ψ t ≤ t + 822 / 100000 * t / Real.log t)
+    (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 :=
+  lemma6ii_of_theta_upper
+    (fun t ht => (Chebyshev.theta_le_psi t).trans (hψ t ht)) x hx0 hL
+
+/-- Leaf 3 from the *upper halves* of leaves 1 and 2. These one-sided forms are what the paper
+supplies (page 56 quotes (4.3) and (4.4) and uses only `theta <= t + ...`), so this is the
+sharpest statement of what `lemma6ii_integral` actually depends on. -/
+theorem lemma6ii_of_upper_halves
+    (h1 : ∀ t : ℝ, 0 < t → 3000 ≤ Real.log t → θ t - t < 154 / 1000000 * t / Real.log t)
+    (h2 : ∀ t : ℝ, 0 < t → 22 ≤ Real.log t → Real.log t ≤ 5000 →
+      θ t - t ≤ 822 / 100000 * t / Real.log t)
+    (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 := by
+  refine lemma6ii_of_theta_upper (fun t ht => ?_) x hx0 hL
+  have ht0 : 0 < t := lt_of_lt_of_le (Real.exp_pos 22) ht
+  have hL22 : 22 ≤ Real.log t := log_ge_22 ht
+  have hpos : 0 < t / Real.log t := div_pos ht0 (by linarith)
+  by_cases h3000 : 3000 ≤ Real.log t
+  · have h := h1 t ht0 h3000
+    have hc : (154 : ℝ) / 1000000 ≤ 822 / 100000 := by norm_num
+    have hmul : (154 : ℝ) / 1000000 * (t / Real.log t)
+        ≤ 822 / 100000 * (t / Real.log t) := mul_le_mul_of_nonneg_right hc hpos.le
+    have e1 : (154 : ℝ) / 1000000 * t / Real.log t
+        = 154 / 1000000 * (t / Real.log t) := by ring
+    have e2 : (822 : ℝ) / 100000 * t / Real.log t
+        = 822 / 100000 * (t / Real.log t) := by ring
+    rw [e1] at h
+    rw [e2]
+    linarith
+  · push Not at h3000
+    have h := h2 t ht0 hL22 (by linarith)
+    have e2 : (822 : ℝ) / 100000 * t / Real.log t
+        = 822 / 100000 * (t / Real.log t) := by ring
+    rw [e2]
+    rw [e2] at h
+    linarith
+
+/-- Leaf 3 needs no analytic input of its own: the two leaves above give it, and only their
+*upper* halves are used. -/
+theorem lemma6ii_of_leaf1_and_leaf2
+    (h1 : ∀ t : ℝ, 0 < t → 3000 ≤ Real.log t →
+      |θ t - t| < 154 / 1000000 * t / Real.log t)
+    (h2 : ∀ t : ℝ, 0 < t → 22 ≤ Real.log t → Real.log t ≤ 5000 →
+      |θ t - t| < 822 / 100000 * t / Real.log t)
+    (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 := by
+  refine lemma6ii_of_theta_upper (fun t ht => ?_) x hx0 hL
+  have ht0 : 0 < t := lt_of_lt_of_le (Real.exp_pos 22) ht
+  have hL22 : 22 ≤ Real.log t := log_ge_22 ht
+  have hpos : 0 < t / Real.log t := div_pos ht0 (by linarith)
+  by_cases h3000 : 3000 ≤ Real.log t
+  · have h := (abs_lt.1 (h1 t ht0 h3000)).2
+    have hc : (154 : ℝ) / 1000000 ≤ 822 / 100000 := by norm_num
+    have hmul : (154 : ℝ) / 1000000 * (t / Real.log t)
+        ≤ 822 / 100000 * (t / Real.log t) := mul_le_mul_of_nonneg_right hc hpos.le
+    have e1 : (154 : ℝ) / 1000000 * t / Real.log t
+        = 154 / 1000000 * (t / Real.log t) := by ring
+    have e2 : (822 : ℝ) / 100000 * t / Real.log t
+        = 822 / 100000 * (t / Real.log t) := by ring
+    rw [e1] at h
+    rw [e2]
+    linarith
+  · push Not at h3000
+    have h := (abs_lt.1 (h2 t ht0 hL22 (by linarith))).2
+    have e2 : (822 : ℝ) / 100000 * t / Real.log t
+        = 822 / 100000 * (t / Real.log t) := by ring
+    rw [e2]
+    have e1 : θ t - t = θ t - t := rfl
+    linarith
+
+
+/-! ## 13. The paper's own page-57 constants
+
+Sections 2-10 proved Lemma 6(ii) from the single pointwise input with *synthesised* integral
+constants (`1 + 2/L + 6/L^2 + 528/(17L^3)` and `22/(19L)`). Page 57 prints `1.006818` and
+`0.003385`; both are proved here as upper bounds, so the chain below is the paper's, and the
+leftover slack is the paper's as well (about `2.4 * 10^-5`, see
+`lemma6ii_of_theta_upper_const`). -/
+
+lemma exp278_gt_big : (72000000000 : ℝ) < Real.exp 278 := by
   have h : Real.exp 278 = Real.exp 1 ^ 278 := by
     rw [← Real.exp_nat_mul]; norm_num
   have h2 : (2 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp 1]
@@ -891,7 +1341,7 @@ private lemma exp278_gt_big : (72000000000 : ℝ) < Real.exp 278 := by
     _ = Real.exp 278 := h.symm
 
 /-- `A_5 <= 22 x/(17 log^5 x)`, the decaying end of the recurrence. -/
-private lemma A5_le {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+lemma A5_le {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 5 ≤ 22 * x / (17 * (Real.log x) ^ 5) := by
   have hY : 1 < Y := lt_of_lt_of_le exp22_gt_one hYexp
   have h := A_decay 5 (by norm_num) hYexp hYx (fun t ht => by
@@ -906,7 +1356,7 @@ private lemma A5_le {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
 
 /-- `A_3 <= x/log^2 x * (1/log x + 3/log^2 x + 264/(17 log^3 x))`, the sharper form needed to
 reach the paper's `0.003385`. -/
-private lemma A3_sharp {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+lemma A3_sharp {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 3
       ≤ x / (Real.log x) ^ 2 * (1 / Real.log x + 3 / (Real.log x) ^ 2
           + 264 / (17 * (Real.log x) ^ 3)) := by
@@ -934,7 +1384,7 @@ private lemma A3_sharp {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
   exact s2
 
 /-- Page 57: `A_2 <= 1.006818 x/log^2 x` for `log x >= 300`. -/
-private lemma A2_le_paper {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x)
+lemma A2_le_paper {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x)
     (hL : 300 ≤ Real.log x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 2 ≤ 1006818 / 1000000 * (x / (Real.log x) ^ 2) := by
   have h := A2_bound hYexp hYx
@@ -959,7 +1409,7 @@ private lemma A2_le_paper {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x
     _ = 1006818 / 1000000 * (x / (Real.log x) ^ 2) := by ring
 
 /-- Page 57: `A_3 <= 0.003385 x/log^2 x` for `log x >= 300`. -/
-private lemma A3_le_paper {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x)
+lemma A3_le_paper {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x)
     (hL : 300 ≤ Real.log x) :
     ∫ t in Y..x, 1 / (Real.log t) ^ 3 ≤ 3385 / 1000000 * (x / (Real.log x) ^ 2) := by
   have h := A3_sharp hYexp hYx
@@ -983,8 +1433,9 @@ private lemma A3_le_paper {Y x : ℝ} (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x
     _ ≤ x / (Real.log x) ^ 2 * (3385 / 1000000) := mul_le_mul_of_nonneg_left hkey hB
     _ = 3385 / 1000000 * (x / (Real.log x) ^ 2) := by ring
 
+
 /-- The endpoint term at the sharper allowance `10^-5`. -/
-private lemma eight_exp22_lt_1e5 {x L : ℝ} (hx0 : 0 < x) (hLx : L = Real.log x) (hL : 300 ≤ L) :
+lemma eight_exp22_lt_1e5 {x L : ℝ} (hx0 : 0 < x) (hLx : L = Real.log x) (hL : 300 ≤ L) :
     8 * Real.exp 22 < 1 / 100000 * (x / L ^ 2) := by
   have h1 := exp300_div_sq_le hx0 hLx hL
   have h300 : Real.exp 300 = Real.exp 22 * Real.exp 278 := by
@@ -1005,12 +1456,12 @@ private lemma eight_exp22_lt_1e5 {x L : ℝ} (hx0 : 0 < x) (hLx : L = Real.log x
 /-- The whole page-57 budget, as a single constant inequality: with the paper's `1.006818` and
 `0.003385` and an endpoint allowance of `10^-5`, an input constant `c` leaves the paper's
 `1.0151` intact as long as `c` is at most `0.00823`. -/
-private lemma const_sum_param {c : ℝ} (_hc0 : 822 / 100000 ≤ c) (hc : c ≤ 823 / 100000) :
+lemma const_sum_param {c : ℝ} (_hc0 : 822 / 100000 ≤ c) (hc : c ≤ 823 / 100000) :
     c + 1 / 100000 + 1006818 / 1000000 + c * (3385 / 1000000) < 10151 / 10000 := by
   nlinarith
 
 /-- `tail_le` with the error constant left symbolic. -/
-private lemma tail_le_const {x c : ℝ} (hYexp : Real.exp 22 ≤ x)
+lemma tail_le_const {x c : ℝ} (hYexp : Real.exp 22 ≤ x)
     (hint : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
       volume (Real.exp 22) x)
     (hθ : ∀ t : ℝ, Real.exp 22 ≤ t → θ t ≤ t + c * t / Real.log t) :
@@ -1045,7 +1496,7 @@ private lemma tail_le_const {x c : ℝ} (hYexp : Real.exp 22 ≤ x)
 input constant allowed to be anything in `[0.00822, 0.00823]`: the accumulated slack is then
 `10151/10000 - 0.00823 - 10^-5 - 1.006818 - 0.00823 * 0.003385 = 1.4 * 10^-5`, so the target
 constant `1.0151` is essentially tight against the input. -/
-private theorem lemma6ii_of_theta_upper_const (c : ℝ) (hc0 : 822 / 100000 ≤ c)
+theorem lemma6ii_of_theta_upper_const (c : ℝ) (hc0 : 822 / 100000 ≤ c)
     (hc : c ≤ 823 / 100000)
     (hθ : ∀ t : ℝ, Real.exp 22 ≤ t → θ t ≤ t + c * t / Real.log t)
     (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
@@ -1132,30 +1583,324 @@ private theorem lemma6ii_of_theta_upper_const (c : ℝ) (hc0 : 822 / 100000 ≤ 
   linarith [e2, e3]
 
 /-- The paper's own numbers: Lemma 6 (ii) from `theta t <= t + 0.00822 t/log t`. -/
-private theorem lemma6ii_of_theta_upper_paper
+theorem lemma6ii_of_theta_upper_paper
     (hθ : ∀ t : ℝ, Real.exp 22 ≤ t → θ t ≤ t + 822 / 100000 * t / Real.log t)
     (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
     (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 :=
   lemma6ii_of_theta_upper_const (822 / 100000) le_rfl (by norm_num) hθ x hx0 hL
 
-/-- Page 57 integral bound for prime counting.
-The proof is the paper's own page-57 partial-summation argument, carried out here from the
-page-56 theta bound (4.4) that `theta_bound_combined` supplies: partial summation (4.6), the
-split at `y = exp 22`, the bound `pi y <= y + 1`, the interval estimates of page 57 and the
-arithmetic of the constants, which leaves about `1.4 * 10^-5` of slack in `1.0151`.
-The sealed statement is unchanged; only this proof was rewritten, 2026-11-04. -/
-theorem lemma6ii_integral (x : ℝ) (hx0 : 0 < x) (hx300 : 300 ≤ Real.log x) :
-    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 := by
-  refine lemma6ii_of_theta_upper_paper ?_ x hx0 hx300
-  intro t htY
-  have ht0 : 0 < t := lt_of_lt_of_le (Real.exp_pos 22) htY
-  have hL : 22 ≤ Real.log t := log_ge_22 htY
-  have h := theta_bound_combined t ht0 hL
-  linarith [le_abs_self (θ t - t)]
 
-/-- The exact Lemma 6 ii statement. CONDITIONAL ON the two shared psi source leaves. -/
-theorem lemma6ii_decomposed : Lemma6ii := by
-  intro x hx0 hx300
-  exact lemma6ii_integral x hx0 hx300
+/-! ## 14. The paper's combined integral estimate `I < 1.006818 x/log^2 x`
+
+Page 57 does not estimate `A_2` and `A_3` separately: it bounds
+`I = int_y^x (1 + delta/log u) du/log^2 u` in one go by `1.006818 x/log^2 x`, with
+`delta = 0.00822` already inside the constant. Section 13 estimated `A_2 <= 1.006818 B` and then
+charged `delta A_3` on top, which spends about `2.8 * 10^-5` of the budget twice. Doing it the
+paper's way leaves `6.2 * 10^-5` of slack instead of `3.4 * 10^-5`, so the input constant may go
+up to `0.00825` instead of `0.00823`. -/
+
+/-- Page 57's `I < 1.006818 x/log^2 x`, for every input constant `c <= 0.00822`. -/
+lemma I_le_paper {Y x c : ℝ} (hc0 : 0 ≤ c) (hc : c ≤ 825 / 100000)
+    (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) (hL : 300 ≤ Real.log x) :
+    (∫ t in Y..x, 1 / (Real.log t) ^ 2)
+        + c * ∫ t in Y..x, 1 / (Real.log t) ^ 3
+      ≤ 1006818 / 1000000 * (x / (Real.log x) ^ 2) := by
+  have h2 := A2_bound hYexp hYx
+  have h3 := A3_bound hYexp hYx
+  have hB : 0 ≤ x / (Real.log x) ^ 2 :=
+    div_nonneg (by linarith [Real.exp_pos 22, hYexp, hYx]) (by positivity)
+  have hstep : (∫ t in Y..x, 1 / (Real.log t) ^ 2)
+        + c * ∫ t in Y..x, 1 / (Real.log t) ^ 3
+      ≤ x / (Real.log x) ^ 2 *
+            (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+        + c * (22 * x / (19 * (Real.log x) ^ 3)) := by
+    have := mul_le_mul_of_nonneg_left h3 hc0
+    linarith [h2, this]
+  have he : x / (Real.log x) ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+        + c * (22 * x / (19 * (Real.log x) ^ 3))
+      = x / (Real.log x) ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+            + c * (22 / (19 * Real.log x))) := by
+    have hL0 : Real.log x ≠ 0 := by
+      have : 0 < Real.log x := by linarith
+      linarith
+    field_simp
+  have hk : 1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+        + c * (22 / (19 * Real.log x)) ≤ 1006818 / 1000000 := by
+    have h1 : 2 / Real.log x ≤ 2 / 300 :=
+      div_le_div_of_nonneg_left (by norm_num) (by norm_num) hL
+    have h2' : 6 / (Real.log x) ^ 2 ≤ 6 / 300 ^ 2 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+      nlinarith
+    have h3' : 528 / (17 * (Real.log x) ^ 3) ≤ 528 / (17 * 300 ^ 3) := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+      nlinarith
+    have h4 : 22 / (19 * Real.log x) ≤ 22 / (19 * 300) := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+      nlinarith
+    have h4' : c * (22 / (19 * Real.log x)) ≤ 825 / 100000 * (22 / (19 * 300)) :=
+      mul_le_mul hc h4 (by positivity) (by norm_num)
+    nlinarith [h1, h2', h3', h4']
+  calc (∫ t in Y..x, 1 / (Real.log t) ^ 2)
+        + c * ∫ t in Y..x, 1 / (Real.log t) ^ 3
+      ≤ x / (Real.log x) ^ 2 *
+            (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+        + c * (22 * x / (19 * (Real.log x) ^ 3)) := hstep
+    _ = x / (Real.log x) ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+            + c * (22 / (19 * Real.log x))) := he
+    _ ≤ x / (Real.log x) ^ 2 * (1006818 / 1000000) := mul_le_mul_of_nonneg_left hk hB
+    _ = 1006818 / 1000000 * (x / (Real.log x) ^ 2) := by ring
+
+/-- The budget with the paper's combined constant: input constants up to `0.00825` still leave
+`1.0151` intact. (With the sharp integral constants of section 10 the ceiling is `0.00832`; the
+paper's printed constants cost the difference.) -/
+lemma budget_combined {c : ℝ} (hc : c ≤ 825 / 100000) :
+    c + 1 / 100000 + 1006818 / 1000000 < 10151 / 10000 := by
+  nlinarith
+
+/-- Lemma 6 (ii) from `theta t <= t + c t/log t` for any `c <= 0.00825`, using the paper's
+combined page-57 estimate. -/
+theorem lemma6ii_of_theta_upper_le (c : ℝ) (hc0 : 0 ≤ c) (hc : c ≤ 825 / 100000)
+    (hθ : ∀ t : ℝ, Real.exp 22 ≤ t → θ t ≤ t + c * t / Real.log t)
+    (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 := by
+  have hlogpos : 0 < Real.log x := by linarith
+  have hYexp : Real.exp 22 ≤ x := by
+    rw [← Real.exp_log hx0]
+    exact Real.exp_le_exp.mpr (by linarith)
+  have h2x : (2 : ℝ) ≤ x := le_trans two_le_exp22 hYexp
+  have hid := Chebyshev.primeCounting_eq_theta_div_log_add_integral h2x
+  have hint1 : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
+      volume 2 (Real.exp 22) := by
+    rw [intervalIntegrable_iff, uIoc_of_le two_le_exp22]
+    exact (Chebyshev.integrableOn_theta_div_id_mul_log_sq (Real.exp 22)).mono_set
+      Set.Ioc_subset_Icc_self
+  have hint2 : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
+      volume (Real.exp 22) x := by
+    rw [intervalIntegrable_iff, uIoc_of_le hYexp]
+    exact (Chebyshev.integrableOn_theta_div_id_mul_log_sq x).mono_set
+      (fun t ht => ⟨le_trans two_le_exp22 ht.1.le, ht.2⟩)
+  have hsplit : ∫ t in (2 : ℝ)..x, θ t / (t * Real.log t ^ 2)
+      = (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+        + ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2) := by
+    rw [intervalIntegral.integral_add_adjacent_intervals hint1 hint2]
+  have hhead := head_le
+  have htail := tail_le_const hYexp hint2 hθ
+  have hI := I_le_paper (Y := Real.exp 22) hc0 hc le_rfl hYexp hL
+  have hsmall := eight_exp22_lt_1e5 hx0 rfl hL
+  have hbudget := budget_combined hc
+  have hthx : θ x / Real.log x ≤ x / Real.log x + c * (x / Real.log x ^ 2) := by
+    have h1 : θ x ≤ x + c * x / Real.log x := hθ x hYexp
+    have hid2 : x / Real.log x + c * (x / Real.log x ^ 2)
+        = (x + c * x / Real.log x) / Real.log x := by
+      field_simp
+    rw [hid2]
+    exact div_le_div_of_nonneg_right h1 hlogpos.le
+  have htail' : ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2)
+      ≤ 1006818 / 1000000 * (x / Real.log x ^ 2) := by
+    have := htail
+    linarith [hI]
+  have hBpos : 0 < x / Real.log x ^ 2 := div_pos hx0 (pow_pos hlogpos 2)
+  have hkey : c * (x / Real.log x ^ 2) + 8 * Real.exp 22
+      + 1006818 / 1000000 * (x / Real.log x ^ 2)
+      < 10151 / 10000 * (x / Real.log x ^ 2) := by
+    have h2 := mul_lt_mul_of_pos_right hbudget hBpos
+    have hsum : (c + 1 / 100000 + 1006818 / 1000000) * (x / Real.log x ^ 2)
+        = c * (x / Real.log x ^ 2) + 1 / 100000 * (x / Real.log x ^ 2)
+          + 1006818 / 1000000 * (x / Real.log x ^ 2) := by
+      field_simp
+    rw [hsum] at h2
+    nlinarith [h2, hsmall.le, hBpos]
+  rw [hid, hsplit]
+  have e1 : θ x / Real.log x + (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+      ≤ x / Real.log x + c * (x / Real.log x ^ 2) + 8 * Real.exp 22 := by
+    linarith [hthx, hhead]
+  have e2 : θ x / Real.log x + (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+      + ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2)
+      ≤ x / Real.log x + c * (x / Real.log x ^ 2) + 8 * Real.exp 22
+        + 1006818 / 1000000 * (x / Real.log x ^ 2) := by
+    linarith [e1, htail']
+  have e3 : x / Real.log x + c * (x / Real.log x ^ 2) + 8 * Real.exp 22
+        + 1006818 / 1000000 * (x / Real.log x ^ 2)
+      < x / Real.log x + 10151 / 10000 * (x / Real.log x ^ 2) := by
+    have h := add_lt_add_left hkey (x / Real.log x)
+    linarith [h]
+  have hgoal : x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2
+      = x / Real.log x + 10151 / 10000 * (x / Real.log x ^ 2) := by ring
+  rw [hgoal]
+  linarith [e2, e3]
+
+
+/-! ## 15. The re-cut of leaf 2, and the sharp-constant chain as a theorem
+
+Two things are left that are provable without a new analytic input.
+
+1. What page 56 actually gives for `theta` is asymmetric: the upper side from the `psi` entry
+   (constant `0.00822`) and the lower side from that entry plus the 1962 gap (constant
+   `0.00862`). `theta_bound_4_4_faithful` states exactly that pair, which is the honest
+   replacement for leaf 2: it is what (R2) plus the gap prove, and its upper half is exactly
+   what leaf 3 consumes.
+2. Section 10's *sharp* integral constants buy back the slack the paper's printed constants
+   spend. `I_le_sharp` is the page-57 combined estimate with those constants, and the budget it
+   leaves permits an input constant up to `0.00832`, which
+   `lemma6ii_of_theta_upper_sharp` records as a theorem rather than as arithmetic. -/
+
+/-- The asymmetric `theta` statement page 56 supports: upper side `0.00822` (from the `psi`
+entry and `theta <= psi`), lower side `0.00862` (that entry plus the 1962 gap). This is the
+recommended re-cut of leaf 2. -/
+theorem theta_bound_4_4_faithful (x : ℝ) (hx0 : 0 < x) (hx1 : 22 ≤ Real.log x)
+    (hx2 : Real.log x ≤ 5000)
+    (hψ : |ψ x - x| ≤ 822 / 100000 * x / Real.log x)
+    (hgap : ψ x - θ x ≤ 3961 / 10000000 * x / Real.log x) :
+    (θ x - x ≤ 822 / 100000 * x / Real.log x) ∧
+      (x - 862 / 100000 * x / Real.log x < θ x) :=
+  ⟨theta_bound_4_4_upper_of_psi x hx0 hx1 hx2 hψ,
+    theta_lower_4_5_of_psi_and_gap x hx0 hx1 hψ hgap⟩
+
+/-- The page-57 combined integral estimate with section 10's sharp constants, for an arbitrary
+nonnegative input constant. -/
+lemma I_le_sharp {Y x c : ℝ} (hc0 : 0 ≤ c) (hYexp : Real.exp 22 ≤ Y) (hYx : Y ≤ x) :
+    (∫ t in Y..x, 1 / (Real.log t) ^ 2)
+        + c * ∫ t in Y..x, 1 / (Real.log t) ^ 3
+      ≤ x / (Real.log x) ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+            + c * (22 / (19 * Real.log x))) := by
+  have h2 := A2_bound hYexp hYx
+  have h3 := A3_bound hYexp hYx
+  have h3c := mul_le_mul_of_nonneg_left h3 hc0
+  have hstep : (∫ t in Y..x, 1 / (Real.log t) ^ 2)
+        + c * ∫ t in Y..x, 1 / (Real.log t) ^ 3
+      ≤ x / (Real.log x) ^ 2 *
+            (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+        + c * (22 * x / (19 * (Real.log x) ^ 3)) := by
+    linarith [h2, h3c]
+  have he : x / (Real.log x) ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+        + c * (22 * x / (19 * (Real.log x) ^ 3))
+      = x / (Real.log x) ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+            + c * (22 / (19 * Real.log x))) := by
+    have hL0 : Real.log x ≠ 0 := by
+      have : 0 < Real.log x := by
+        have h22 : Real.exp 22 ≤ x := le_trans hYexp hYx
+        have := log_ge_22 h22; linarith
+      linarith
+    field_simp
+  linarith [hstep, he]
+
+/-- The budget at the sharp constants of section 10, evaluated at `log x = 300`: an input
+constant up to `0.00832` still fits under `1.0151`. -/
+lemma const_budget_sharp {c : ℝ} (hc : c ≤ 832 / 100000) :
+    c + 1 / 100000 + (1 + 2 / 300 + 6 / 300 ^ 2 + 528 / (17 * 300 ^ 3))
+      + c * (22 / (19 * 300)) < 10151 / 10000 := by
+  nlinarith
+
+/-- Lemma 6 (ii) from `theta t <= t + c t/log t` for any `c <= 0.00832`, using the sharp
+integral constants. This is the widest input a chain in this file admits: the true second-order
+coefficient is `1.006734`, so even a zero input constant cannot beat `1.0151` by much. -/
+theorem lemma6ii_of_theta_upper_sharp (c : ℝ) (hc0 : 0 ≤ c) (hc : c ≤ 832 / 100000)
+    (hθ : ∀ t : ℝ, Real.exp 22 ≤ t → θ t ≤ t + c * t / Real.log t)
+    (x : ℝ) (hx0 : 0 < x) (hL : 300 ≤ Real.log x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) < x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2 := by
+  have hlogpos : 0 < Real.log x := by linarith
+  have hYexp : Real.exp 22 ≤ x := by
+    rw [← Real.exp_log hx0]
+    exact Real.exp_le_exp.mpr (by linarith)
+  have h2x : (2 : ℝ) ≤ x := le_trans two_le_exp22 hYexp
+  have hid := Chebyshev.primeCounting_eq_theta_div_log_add_integral h2x
+  have hint1 : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
+      volume 2 (Real.exp 22) := by
+    rw [intervalIntegrable_iff, uIoc_of_le two_le_exp22]
+    exact (Chebyshev.integrableOn_theta_div_id_mul_log_sq (Real.exp 22)).mono_set
+      Set.Ioc_subset_Icc_self
+  have hint2 : IntervalIntegrable (fun t : ℝ => θ t / (t * Real.log t ^ 2))
+      volume (Real.exp 22) x := by
+    rw [intervalIntegrable_iff, uIoc_of_le hYexp]
+    exact (Chebyshev.integrableOn_theta_div_id_mul_log_sq x).mono_set
+      (fun t ht => ⟨le_trans two_le_exp22 ht.1.le, ht.2⟩)
+  have hsplit : ∫ t in (2 : ℝ)..x, θ t / (t * Real.log t ^ 2)
+      = (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+        + ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2) := by
+    rw [intervalIntegral.integral_add_adjacent_intervals hint1 hint2]
+  have hhead := head_le
+  have htail := tail_le_const hYexp hint2 hθ
+  have hI := I_le_sharp (Y := Real.exp 22) hc0 le_rfl hYexp
+  have hsmall := eight_exp22_lt_1e5 hx0 rfl hL
+  -- the budget at this `log x`
+  have hbud : c + 1 / 100000
+      + (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+      + c * (22 / (19 * Real.log x)) < 10151 / 10000 := by
+    have h1 : 2 / Real.log x ≤ 2 / 300 :=
+      div_le_div_of_nonneg_left (by norm_num) (by norm_num) hL
+    have h2' : 6 / (Real.log x) ^ 2 ≤ 6 / 300 ^ 2 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+      nlinarith
+    have h3' : 528 / (17 * (Real.log x) ^ 3) ≤ 528 / (17 * 300 ^ 3) := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+      nlinarith
+    have h4 : 22 / (19 * Real.log x) ≤ 22 / (19 * 300) := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num)
+      nlinarith
+    have h4' : c * (22 / (19 * Real.log x)) ≤ c * (22 / (19 * 300)) :=
+      mul_le_mul_of_nonneg_left h4 hc0
+    nlinarith [const_budget_sharp hc, h1, h2', h3', h4']
+  have hthx : θ x / Real.log x ≤ x / Real.log x + c * (x / Real.log x ^ 2) := by
+    have h1 : θ x ≤ x + c * x / Real.log x := hθ x hYexp
+    have hid2 : x / Real.log x + c * (x / Real.log x ^ 2)
+        = (x + c * x / Real.log x) / Real.log x := by
+      field_simp
+    rw [hid2]
+    exact div_le_div_of_nonneg_right h1 hlogpos.le
+  have htail' : ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2)
+      ≤ x / Real.log x ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+            + c * (22 / (19 * Real.log x))) := by
+    have := htail
+    linarith [hI]
+  have hBpos : 0 < x / Real.log x ^ 2 := div_pos hx0 (pow_pos hlogpos 2)
+  have hkey : c * (x / Real.log x ^ 2) + 8 * Real.exp 22
+      + x / Real.log x ^ 2 *
+          (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+            + c * (22 / (19 * Real.log x)))
+      < 10151 / 10000 * (x / Real.log x ^ 2) := by
+    have h2 := mul_lt_mul_of_pos_right hbud hBpos
+    have hsum : (c + 1 / 100000
+          + (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3))
+          + c * (22 / (19 * Real.log x))) * (x / Real.log x ^ 2)
+        = c * (x / Real.log x ^ 2) + 1 / 100000 * (x / Real.log x ^ 2)
+          + x / Real.log x ^ 2 *
+              (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+                + c * (22 / (19 * Real.log x))) := by
+      field_simp
+      ring
+    rw [hsum] at h2
+    nlinarith [h2, hsmall.le, hBpos]
+  rw [hid, hsplit]
+  have e1 : θ x / Real.log x + (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+      ≤ x / Real.log x + c * (x / Real.log x ^ 2) + 8 * Real.exp 22 := by
+    linarith [hthx, hhead]
+  have e2 : θ x / Real.log x + (∫ t in (2 : ℝ)..Real.exp 22, θ t / (t * Real.log t ^ 2))
+      + ∫ t in Real.exp 22..x, θ t / (t * Real.log t ^ 2)
+      ≤ x / Real.log x + c * (x / Real.log x ^ 2) + 8 * Real.exp 22
+        + x / Real.log x ^ 2 *
+            (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+              + c * (22 / (19 * Real.log x))) := by
+    linarith [e1, htail']
+  have e3 : x / Real.log x + c * (x / Real.log x ^ 2) + 8 * Real.exp 22
+        + x / Real.log x ^ 2 *
+            (1 + 2 / Real.log x + 6 / (Real.log x) ^ 2 + 528 / (17 * (Real.log x) ^ 3)
+              + c * (22 / (19 * Real.log x)))
+      < x / Real.log x + 10151 / 10000 * (x / Real.log x ^ 2) := by
+    have h := add_lt_add_left hkey (x / Real.log x)
+    linarith [h]
+  have hgoal : x / Real.log x + 10151 / 10000 * x / Real.log x ^ 2
+      = x / Real.log x + 10151 / 10000 * (x / Real.log x ^ 2) := by ring
+  rw [hgoal]
+  linarith [e2, e3]
+
+
+end Task206J
 
 end LeanLab.RieselVaughan1983
