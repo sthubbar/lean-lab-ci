@@ -6,12 +6,12 @@ import LeanLab.BrunGap.Final
 /-!
 # OpenProblems, named route lemmas for the provers
 
-Unit U-1603, 2026-11-02. AI wrote the Lean code. Each statement below is a named route lemma with
-sorry, NOT PROVED. The sealed open problems themselves are `def`s in their own files, and
-`MOUNTAIN.md` only lists theorems with a sorry, so these rows are how the provers find this
-folder. None of these lemmas settles its open problem. Each one is expected to be true and
-weaker than the problem, and closing one is a step, not a solution. Erdős 273 has no row here:
-its target is a search winner fed to `Erdos273.statement_of_check`.
+Unit U-1603, 2026-11-02. AI wrote the Lean code. All three named route lemmas below are PROVED,
+0 sorry since gate lmerge 20261103T2314Zw. The file imports `LeanLab.BrunGap.Final`, the one import
+exception Steve granted live, filed lomos 20261103T2027Z. The sealed open problems themselves are
+`def`s in their own files. None of these lemmas settles its open problem. Each one is weaker than
+the problem, and closing one is a step, not a solution. Erdős 273 has no row here: its target is a
+search winner fed to `Erdos273.statement_of_check`.
 -/
 
 namespace LeanLab.OpenProblems
@@ -703,10 +703,13 @@ private lemma fprod_ge (N : ℕ) (hN : 11 ≤ N) : 2 ^ (2 ^ N - 1001) ≤ fprod 
   exact Nat.le_of_mul_le_mul_right (le_of_lt h5) (by positivity)
 
 
-/-- Unit U-1603, route lemma, OPEN in the lab. Plain math: infinitely many odd numbers are not a
-prime plus two powers of 2. The site's page for Erdős 9 credits this to Schinzel, and FC tags it
-solved with an outside Lean proof whose body module was not read here. A first step of Erdős 9,
-far weaker than positive upper density. -/
+/-- Unit U-1603, route lemma, PROVED, a Lean proof of a KNOWN result. Plain math: infinitely many
+odd numbers are not a prime plus two powers of 2. Credit, read 2026-11-05: erdosproblems.com/9 gives
+Crocker [Cr71] with `≫ log log N` such integers up to `N`, and Pan [Pa11] with `≫_ε N^(1-ε)`. Its
+copies disagree on Schinzel: the problem page says Erdős [Er77c] credits Schinzel, with no
+reference, and the page text served at /latex/9 does not name him. The FC page repeats the Erdős
+credit. [Cr71] and [Pa11] were not read here. FC tags it solved with an outside Lean proof whose
+body module was not read here. A first step of Erdős 9, far weaker than positive upper density. -/
 theorem route_erdos9A_infinite : Erdos9A.Infinite := by
   rw [Set.infinite_iff_exists_gt]
   intro B
@@ -1697,9 +1700,17 @@ theorem lemoine_positive_density_aux :
 
 end
 
-/-- Unit U-1603, route lemma, OPEN in the lab. Plain math: the odd numbers of the form `p + 2 q`
-have positive lower density, the Lemoine twin of the lab's `S3_positive_lower_density` in
-`SchnirelmannGoldbach`. Prior art not searched. Far weaker than Lemoine's conjecture. -/
+/-- Unit U-1603, route lemma, PROVED. Plain math: the odd numbers of the form `p + 2 q` have positive
+lower density, the Lemoine twin of the lab's `S3_positive_lower_density` in `SchnirelmannGoldbach`.
+This is a lab route lemma, NOT a transcription: the Lemoine sources in `Lemoine.lean` state the
+conjecture and a count, and no source passage for a density was found. DECISION U-1618 keeps it as
+proved text, no re-cut. Nearest prior art read: Romanov's theorem, a prime plus a power of 2, and
+Elsholtz, Luca, Planitzer, Romanov type problems, Ramanujan J. 47 (2018) 267 to 289, Theorem 2, the
+lower density of `p + 2^(2^k) + 2^q` is positive. That is another form, and the filed line's
+Weingartner and `2 q` do not match the paper. A short search found no density statement for
+`p + 2 q` itself, which is no proof that none exists, and the result is not called new. `Odd n` is
+load-bearing, since `IsLemoine 8` holds, and `Set.Iic N` keeps `ncard` honest. Far weaker than
+Lemoine's conjecture. -/
 theorem route_lemoine_positive_density :
     ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ, ∀ N ≥ N₀,
       c * N ≤ (({n : ℕ | Odd n ∧ IsLemoine n} ∩ Set.Iic N).ncard : ℝ) :=
@@ -1873,10 +1884,14 @@ private theorem cluster_count_le_of_gapUpper :
   nlinarith [hcore, hgc2, hgc4, hgc6, hKq, h40]
 end
 
-/-- Unit U-1603, route lemma, OPEN in the lab. Plain math: at most `C x / (log x)^2` cluster primes
-lie below `x`, from `prime_near_of_cluster` and a sieve bound for prime pairs with a fixed even
-difference, as in the lab's `BrunGap`. Weaker than the Blecksmith, Erdős and Selfridge bound on the
-Erdős 17 page, and it points away from infinitely many, so it bounds the problem, not solves it. -/
+/-- Unit U-1603, route lemma, PROVED, a Lean proof of a KNOWN result. Plain math: at most
+`C x / (log x)^2` cluster primes lie below `x`, from `prime_near_of_cluster` and the lab's Brun bound
+`BrunGap.gapUpper` at gaps 2, 4, 6. It is the case `A = 2` of the published bound of Blecksmith,
+Erdős and Selfridge [BES99], `≪_A x / (log x)^A` for every `A > 0`, carried by FC as
+`erdos_17.variants.upper_BES`, and Elsholtz [El03] is stronger still. `IsClusterPrime` is vacuously
+true at `p = 2`, so 2 is counted, which is harmless for an upper bound; OEIS A038133 lists the odd
+non-cluster primes, from 97. It points away from infinitely many, so it bounds the problem, not
+solves it. -/
 theorem route_cluster_count_le :
     ∃ C : ℝ, 0 < C ∧ ∀ x : ℕ, 3 ≤ x →
       (({p : ℕ | IsClusterPrime p} ∩ Set.Iic x).ncard : ℝ) ≤ C * x / Real.log x ^ 2 :=

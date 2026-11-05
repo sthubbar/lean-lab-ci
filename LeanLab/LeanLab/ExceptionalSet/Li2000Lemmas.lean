@@ -1,5 +1,5 @@
 /-
-CODEX task85 status: twelve valid original open leaves now have proofs. lemma6_i_coef is FALSE; counterexample and safe coefficient bounds proved below. The second scalar assemblies for Lemma 6 parts i to v are added. The three cited analytic inputs remain conditional.
+CODEX task85 status: twelve valid original open leaves now have proofs. Architect U-1618: lemma6_i_coef as first sealed, with 279.6, was FALSE, Audit1618.old_lemma6_i_coef_false; it now reads 279.61 and is proved. The second scalar assemblies for Lemma 6 parts i to v are added. The three cited analytic inputs remain conditional.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 /-
@@ -301,10 +301,10 @@ theorem lemma6_i_coef_safe (l : ℝ) (hl : 5 < l) :
 
 
 
-/-- A counterexample to the sealed 279.6 coefficient bound. The paper prints 279.7.
-The second conjunct is FALSE for l ∈ (5, 5.00063…); at l = 5.000001 the value ≈ 279.6012 > 279.6.
-BLOCKED: the statement is sealed and unprovable as written; see lemma6_i_coef_safe for the
-safe bound ≤ 279.61. -/
+/-- A counterexample to the 279.6 coefficient bound that `lemma6_i_coef` first carried. The paper
+prints 279.7, and never 279.6. The old second conjunct was FALSE for `l` just above 5; at
+l = 5.000001 the value ≈ 279.6013 > 279.6. Repaired by architect U-1618 to 279.61, see
+`lemma6_i_coef`. -/
 theorem lemma6_i_coef_second_counterexample : (279.6 : ℝ) <
     0.2292 * (5.000001 + 42.9) * (1.45 - 0.95 + 2 * Real.pi / 23.4) /
       (2 * 5.000001 * (1.042 - 0.95) * 0.0328) := by
@@ -316,15 +316,19 @@ theorem lemma6_i_coef_second_counterexample : (279.6 : ℝ) <
 /-- Lemma 6 (i), p. 78, the `δ₁h₁ = δ₃h₃ = π/23.4` coefficients after the bracket of `M(ϱ₀)`
 simplifies to `(h₃ - h₁) + 2π/23.4` (`lemma6_i_simplify`): for `λ > 5`,
 `0.2292(λ+42.9)(1.08-0.58+2π/23.4)/(2λ(0.669-0.58)·0.0353) ≤ 268.56` and
-`0.2292(λ+42.9)(1.45-0.95+2π/23.4)/(2λ(1.042-0.95)·0.0328) ≤ 279.6`; the values at `λ = 5` are
-`268.552` and `279.596`. Unit U-1521. -/
+`0.2292(λ+42.9)(1.45-0.95+2π/23.4)/(2λ(1.042-0.95)·0.0328) ≤ 279.61`; the values at `λ = 5` are
+`268.5568` and `279.6013`, the suprema over `λ > 5`. Unit U-1521. Repaired by architect U-1618: the
+second bound was 279.6, a slip from the wrong value 279.596, refuted by
+`Audit1618.old_lemma6_i_coef_false`. Li prints only the final `N*(α, Y) ≤ 279.7 e^{2.9λ}`, p. 78;
+279.61 is the lab's intermediate step, needed since `lemma6_i_N` must absorb the factor `1 + δ`
+below 279.7. PROVED, the same statement as `lemma6_i_coef_safe`. -/
 
 theorem lemma6_i_coef (l : ℝ) (hl : 5 < l) :
     0.2292 * (l + 42.9) * (1.08 - 0.58 + 2 * π / 23.4) / (2 * l * (0.669 - 0.58) * 0.0353)
         ≤ 268.56 ∧
       0.2292 * (l + 42.9) * (1.45 - 0.95 + 2 * π / 23.4) / (2 * l * (1.042 - 0.95) * 0.0328)
-        ≤ 279.6 := by
-  sorry
+        ≤ 279.61 :=
+  lemma6_i_coef_safe l hl
 
 /-- Lemma 6 (ii), p. 78, with `n₁ ≤ 10`, so `M(ϱ₀) ≤ (10/2)𝓛³{…}` and the coefficient is
 `10((h₃-h₁) + 2π/23.4)/(2(h₂-h₁)h₄)`: `10(1.71-0.82+2π/23.4)/(2(1.179-0.82)·0.155) ≤ 104.099`

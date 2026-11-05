@@ -164,7 +164,7 @@ theorem almost_all_primes_of_repaired131 (hm : RepairedMainJ131) (k : ℕ) (hk :
   nlinarith
 
 /-- The prime representation consequence of the decomposed main theorem.
-CONDITIONAL on major_asymptotic131. -/
+CONDITIONAL on cor42_published131 and major_arcs_combine131, U-1619. -/
 theorem almost_all_prime_representations131 (k : ℕ) (hk : 1 ≤ k) :
     ∃ K : ℝ, 0 ≤ K ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
       (((evenJ131 X).filter (fun N => primeRepresentationCount131 k X N = 0)).card : ℝ) ≤

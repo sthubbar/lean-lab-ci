@@ -8,14 +8,18 @@ Unit U-1612, run 20261103T0803Z-22341, 2026-11-03. AI wrote the Lean code. Targe
 no claim of progress. Nothing here counts as progress on Goldbach. Neither is tagged ORIGINAL: both
 have a prior statement, see the search record in the out folder, LITSEARCH-U1612-20261103.md.
 
-1. `Euler8n3Statement`: every `8n + 3`, `n ≥ 1`, is an odd square plus twice a prime. Claim of Euler
-   as cited from Pólya on primepuzzles.net Conjecture 68, read 2026-11-03, there Unresolved, and
-   MathOverflow 135608, page blocked for fetch, not worked around. POOL line 216. `n = 0` is false,
-   `not_isEuler_three`, so the sealed form has `n ≥ 1`. The pool wording omits this.
+1. `Euler8n3Statement`: every `8n + 3`, `n ≥ 1`, is an odd square plus twice a prime. Source sentence,
+   primepuzzles.net Conjecture 68, reread 2026-11-05: any integer of the form 8n + 3 can be decomposed
+   in the sum of a square and double of a prime, attributed to Euler in Pólya, Mathematics and
+   Plausible Reasoning II. Pólya was never read here, so the Euler claim rests on this one secondary
+   page. The page's own conjecture is Rodríguez's bound `x / (log N)^2 < 2`, the Euler decomposition
+   is its premise, and the page carries no Unresolved label. MathOverflow 135608, page blocked for
+   fetch, not worked around. POOL line 216. `n = 0` is false, `not_isEuler_three`, so `1 ≤ n` in the
+   sealed form is a lab repair, not a transcription. The source and pool wording omit it.
 2. `PowerfulPrimeStatement`: every powerful `N > 1` is a prime plus a powerful number. POOL line 194,
-   MathOverflow 269080, page blocked for fetch, statement taken from the pool line, status UNVERIFIED
-   from the page; three web searches found no resolution. `1` must count as powerful,
-   `not_rep_four_of_one_excluded`.
+   MathOverflow 269080, page blocked for fetch, so the wording is the pool line's and cannot be
+   checked against the page, status UNVERIFIED; three web searches found no resolution. `1` must
+   count as powerful, `not_rep_four_of_one_excluded`.
 -/
 
 namespace LeanLab.OpenProblems.State1612
@@ -86,8 +90,9 @@ theorem euB_sound {n : ℕ} (h : euB n = true) : IsEuler (8 * n + 3) := by
   obtain ⟨k, _, h1, h2⟩ := h
   exact ⟨k, _, primeB_sound h2, by omega⟩
 
-/-- A small range, for vacuity and a smoke test only. Far below what is recorded: Vantieghem on
-Conjecture 68 reports `N ≤ 10⁹`. KNOWN. -/
+/-- A small range, for vacuity and a smoke test only. Vantieghem on Conjecture 68 gives a table of
+record ratios and says no value above 1.57847 is found for `N ≤ 10⁹`. The page states this as a bound
+on the ratio, so it is not cited here as a verification of the decomposition. KNOWN. -/
 theorem euler_le_1000 : ∀ n, 1 ≤ n → n ≤ 1000 → IsEuler (8 * n + 3) := by
   have h : (List.range 1001).all (fun n => n == 0 || euB n) = true := by decide +kernel
   intro n h1 h2
@@ -101,6 +106,14 @@ attribute [local instance] Classical.propDecidable in
 /-- Number of `n ≤ X`, `n ≥ 1`, with no representation. -/
 noncomputable def euExc (X : ℕ) : ℕ :=
   ((Finset.Icc 1 X).filter fun n => ¬ IsEuler (8 * n + 3)).card
+
+/-- `euExc X` is a count of at most `X` integers, so the truncated `X - euExc X` in the density route
+reads as a count. PROVED, U-1618. -/
+theorem euExc_le (X : ℕ) : euExc X ≤ X := by
+  classical
+  unfold euExc
+  refine (Finset.card_filter_le _ _).trans ?_
+  simp
 
 /-- The sealed statement says exactly that the exception count is always zero. -/
 theorem statement_iff_euExc : Euler8n3Statement ↔ ∀ X, euExc X = 0 := by
@@ -132,7 +145,9 @@ theorem route_euler_almost_all :
 
 /-! ### 2. Powerful number as a prime plus a powerful number -/
 
-/-- `n` is powerful: every prime factor divides it at least twice. `1` counts. -/
+/-- `n` is powerful: every prime factor divides it at least twice. `1` counts. `0 < n` is built in, so
+`0` is excluded, though the plain condition holds for it. Harmless for `PowerfulPrimeStatement`: it
+has `1 < N`, and a summand `M = 0` would make `N` prime, which is not powerful. -/
 def Powerful (n : ℕ) : Prop := 0 < n ∧ ∀ p : ℕ, p.Prime → p ∣ n → p ^ 2 ∣ n
 
 /-- **OPEN, sealed.** Every powerful `N > 1` is a prime plus a powerful number. -/
@@ -303,9 +318,9 @@ lemma pellM_ge_n (n : ℕ) : pellM n ≥ n := by
   · have h := pellM_mono n
     omega
 
-/-- ROUTE, sorry, NOT PROVED. Infinitely many squares with `2m - 1` composite still work, through
-`M = 8 a²`. Plan: the Pell family `m² - 8 a² = 17`, `(5, 1) ↦ (3m + 8a, m + 3a)`, plus a periodicity
-mod a small prime to force `2m - 1` composite. Python checked the first terms only. -/
+/-- ROUTE, PROVED. Infinitely many squares with `2m - 1` composite still work, through `M = 8 a²`:
+the Pell family `m² - 8 a² = 17`, `(5, 1) ↦ (3m + 8a, m + 3a)`, plus a periodicity mod a small prime
+to force `2m - 1` composite. -/
 theorem route_powerful_nonsquare_family :
     ∀ K : ℕ, ∃ m > K, ¬ (2 * m - 1).Prime ∧ ∃ p a : ℕ, p.Prime ∧ 0 < a ∧ m ^ 2 = p + 8 * a ^ 2 := by
   intro K

@@ -77,8 +77,19 @@ theorem correlation_positive {s01 s10 s11 u0 u1 v0 v1 r : ℝ}
   have hp := mul_pos hm hr
   nlinarith
 
-/-- LEAF. Pages 1 to 4, displays 1.3 to 1.6 and the constructions in
-Sections 4 and 5. Choose sufficiently small epsilon and the four sieve
+/- Audit note, architect U-1618, from lomos 20261103T1514Z, statement unchanged. This `sieve_data` is a
+DEAD DUPLICATE per TARGETS.md: the real route is AssemblyC165.theorem1 through DecompC165b.sieve_data.
+Do not prove this copy. It is the output of the paper's argument, not Theorem 2: it drops conditions
+i to iv of Theorem 2, p. 3, displays 1.7 to 1.9, so it is weaker than Theorem 2 and says nothing
+about which sequences satisfy them. Sources read on P0069.txt: Theorem 2 p. 3, its proof Section 2
+pp. 5 to 11, Section 4 pp. 24 to 42, Section 5 from p. 43. The filed range pp. 41 to 51 is narrower
+than the paper's. The hard-coded `margin * r / 6` merges three applications of display 1.6 and hides
+two steps: the shift of A that absorbs the union of three exceptional sets, and the size condition
+log x at least 6 K / margin times max u_i v_j, with K the implied constant of 1.6. The 1/6 itself
+is sufficient, `correlation_positive` is proved. `0 ≤ p` in `pointwise_sandwich` is load-bearing:
+p = a0 = a1 = -1, q = b1 = 1, b0 = 0 breaks the conclusion without it. -/
+/-- LEAF. Theorem 2 on page 3 with Sections 4 and 5, displays 1.3 to 1.6,
+page 2 for the use of 1.6. Choose sufficiently small epsilon and the four sieve
 weights. Theorem 2 gives their three correlations outside a common small
 exceptional set. The positive scale is Y times the singular series divided
 by log x log Y. The asymptotic errors are absorbed by the fixed margin.

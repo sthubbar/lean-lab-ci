@@ -10,7 +10,8 @@ Plain math: let `A` be the set of odd integers not of the form `p + 2^k + 2^l` w
 `k, l ≥ 0`. Is the upper density of `A` positive?
 
 Source: T. F. Bloom, Erdős Problem #9, https://www.erdosproblems.com/9, fetched 2026-11-02, page
-status OPEN, latest edit 28 September 2025, marked as not resolvable by a finite computation.
+status OPEN, footer latest edit 28 September 2025, while /history/9 read 2026-11-05 has a newest
+entry of 7 April 2026, marked as not resolvable by a finite computation.
 Also Guy, Unsolved Problems in Number Theory, A19.
 
 Definition reused from google-deepmind/formal-conjectures, file

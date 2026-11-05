@@ -159,7 +159,7 @@ theorem almost_all_primes_global_of_repaired131 (hm : RepairedMainJ131) (k : ℕ
   nlinarith [mul_le_mul_of_nonneg_left hscale (Nat.cast_nonneg B : (0 : ℝ) ≤ B)]
 
 /-- The almost-all prime representation result on [1,X].
-CONDITIONAL on the single remaining major_asymptotic131 leaf. -/
+CONDITIONAL on cor42_published131 and major_arcs_combine131, U-1619. -/
 theorem almost_all_prime_representations_global131 (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
       (allPrimeExceptions131 k X).card ≤ C * (X : ℝ) ^ ((3 : ℝ) / 5) * Real.log X ^ 10 :=
