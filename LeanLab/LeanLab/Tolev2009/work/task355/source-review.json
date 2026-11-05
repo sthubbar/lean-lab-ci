@@ -1,0 +1,436 @@
+[
+  {
+    "module": "Decomp355a",
+    "kind": "def",
+    "name": "LeanLab.Tolev2009.Decomp355a.gcdWeight",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "def",
+    "name": "LeanLab.Tolev2009.Decomp355a.rawWeight",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "def",
+    "name": "LeanLab.Tolev2009.Decomp355a.primeProduct",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.ssTerm_multiplicative",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.finite_euler_bound",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.finite_euler_domination",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.local_product_bound",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.rawWeight_nonneg",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.phiProduct_pos",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.weightedCoeff_one",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.coefficientMass_pos_of_summable",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.range_sum_le_positive",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.summable_of_raw_bound",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.weighted_coeff_summable",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355a",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355a.coefficientMass_le",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.seven_product",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.factor_weight_le",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.gcd_reindex",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.reciprocal_totient_uniform",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.normalized_weight_le",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.normalized_weight_sum",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.cutoff3_le",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.EF_le_cube",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.log_budget",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355b",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355b.coefficient_mass_mean",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Decomp355c",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Decomp355c.singular_integral_error",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 11 to 12 and 18 to 19"
+  },
+  {
+    "module": "Gcd355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Gcd355.gcd_quotient_product_dvd",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Gcd355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Gcd355.gcd_lcm_identity",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Gcd355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Gcd355.exists_gcd_factors",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Gcd355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Gcd355.factors_le",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "Gcd355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Gcd355.divisor_count_four",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 18 to 19"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.coeffRes_crt_image",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.coeffRes_crt_inj",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.coeff_crt",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.linear_crt_inj",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.linear_crt_image",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.coeff_frequency_mod",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.negative_phase_mod",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "def",
+    "name": "LeanLab.Tolev2009.CRT355.numerator",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.numerator_mul",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.totient_lcm_product",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.normalization_mul",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.ssTerm_factor",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "CRT355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.CRT355.ssTerm_mul",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 12 to 16"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.unit_rawWeight",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.unit_weightedCoeff_one",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.unit_ssTerm_two",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.unit_weightedCoeff_two",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.unit_mass_lower",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.finite_euler_one",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.local_parameters",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.gcd_factors_instance",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.unit_cube_instance",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Instances355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Instances355.large_odd_instances",
+    "verdict": "MATCH",
+    "source": "The explicit definitions and source hypotheses on Halupczok pages 12 to 19 and Tolev 2009 page 3"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.coeffRes_of_dvd",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.coeff_of_dvd",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.localSum_of_dvd",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.ssTerm_norm_of_dvd",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.prime_power_moment",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.common_prime_factor",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.common_prime_product",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  },
+  {
+    "module": "Local355",
+    "kind": "theorem",
+    "name": "LeanLab.Tolev2009.Local355.naive_majorant_not_summable",
+    "verdict": "MATCH",
+    "source": "Halupczok 2008 pages 14 to 17"
+  }
+]
