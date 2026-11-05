@@ -313,6 +313,8 @@ theorem zero_count_from_integrated_detector
         C * T ^ (c * (1 - σ)) *
           (1 + (∫ y in (T ^ K)..((T ^ K) ^ B), detectorEnergy T (T ^ K) y / y) /
             Real.log T ^ 2) := by
+  -- BLOCKED OUT OF REACH: requires explicit formula, large sieve for Dirichlet characters,
+  -- and complex analysis estimates not available in the codebase.
   sorry
 
 /-- Gallagher 1970 p.336 the last two displays after display 25.
