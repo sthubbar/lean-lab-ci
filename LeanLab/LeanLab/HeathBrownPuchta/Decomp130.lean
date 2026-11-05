@@ -1,4 +1,7 @@
 import LeanLab.HeathBrownPuchta.Assembly
+import LeanLab.HeathBrownPuchta.Decomp130Elementary
+import LeanLab.HeathBrownPuchta.Decomp130C0
+import LeanLab.HeathBrownPuchta.Decomp130C2
 import LeanLab.HeathBrownPuchta.Decomp1530c
 
 /-!
@@ -18,44 +21,17 @@ open LeanLab.HeathBrownPuchta.Decomp1530b
 open LeanLab.HeathBrownPuchta.Decomp1530c
 open LeanLab.HeathBrownPuchta.Assembly
 
-/-- Paper page 14, display 23, the twin prime product. -/
-noncomputable def C0 : ℝ :=
-  ∏' p : ℕ, if p.Prime ∧ 2 < p then 1 - 1 / ((p : ℝ) - 1) ^ 2 else 1
 
-/-- Paper page 27, the chosen major arc parameter. -/
-noncomputable def P (N : ℕ) (w : ℝ) : ℝ := (N : ℝ) ^ (45 / 154 - 4 * w)
 
-/-- Paper page 3, the major arcs in the unit interval. -/
-def majorArcs (N : ℕ) (w : ℝ) : Set ℝ :=
-  {α ∈ Set.Icc (0 : ℝ) 1 | ∃ (a : ℤ) (q : ℕ), 0 < q ∧ (q : ℝ) ≤ P N w ∧
-    |α - (a : ℝ) / q| ≤ P N w / (q * N)}
 
-/-- Paper page 2, the exceptional set at the unconditional lambda. -/
-def exceptional (N : ℕ) : Set ℝ :=
-  {α ∈ Set.Icc (0 : ℝ) 1 | (863665 / 1000000 : ℝ) * Lpar N 13 ≤ ‖Tp (Lpar N 13) α‖}
 
-/-- Paper page 27, the integrand at K equal to 13. -/
-noncomputable def integrand (N : ℕ) (w α : ℝ) : ℂ :=
-  Sp N w α ^ 2 * Tp (Lpar N 13) α ^ 13 * ee (-(α * N))
 
 /-- Paper page 27, the real part of the representation integral. -/
 noncomputable def R (N : ℕ) (w : ℝ) : ℝ := (Rint N w (Lpar N 13) 13).re
 
-/-- Paper pages 20 and 28, the major arc contribution. -/
-noncomputable def maj (N : ℕ) (w : ℝ) : ℝ :=
-  ∫ α in majorArcs N w, (integrand N w α).re
 
-/-- Paper page 28, the minor arcs outside the exceptional set. -/
-noncomputable def mout (N : ℕ) (w : ℝ) : ℝ :=
-  ∫ α in (Set.Icc (0 : ℝ) 1 \ majorArcs N w) \ exceptional N, (integrand N w α).re
 
-/-- Paper page 28, the minor arcs inside the exceptional set. -/
-noncomputable def minr (N : ℕ) (w : ℝ) : ℝ :=
-  ∫ α in (Set.Icc (0 : ℝ) 1 \ majorArcs N w) ∩ exceptional N, (integrand N w α).re
 
-/-- Paper pages 20 and 28, the common scale of the three estimates. -/
-noncomputable def X (N : ℕ) : ℝ :=
-  C0 * N * (Lpar N 13 : ℝ) ^ (13 - 2) / Real.log 2 ^ 2
 
 /-- LEAF. Paper page 28, partition of the representation integral.
 This uses only integrability and the disjoint partition of the unit interval. -/
@@ -87,12 +63,6 @@ theorem integral_split (N : ℕ) (w : ℝ) :
   unfold maj mout minr
   linarith
 
-/-- LEAF. Paper pages 25 and 26, displays 40 and 41.
-The C2 bound uses Liu, Liu and Wang 1999, display 3.9, through the paper's proof.
-The C0 bound uses the finite product and telescoping tail of display 40. -/
-theorem constants : 66 / 100 ≤ C0 ∧
-    LeanLab.HeathBrownPuchta.Lemma8Const.C2 ≤ 22141 / 10000 := by
-  sorry
 
 /-- LEAF. Paper page 2, the logarithmic length gives a positive linear lower scale. -/
 theorem scale (hC0 : 0 < C0) :
@@ -109,21 +79,17 @@ theorem scale (hC0 : 0 < C0) :
   norm_num
   linarith
 
-/-- LEAF. Paper page 20, Lemma 7, used on page 28 at K equal to 13.
-The proof uses Gallagher's major arc method and the density inputs of Section 3.
-All sufficiently small positive w are allowed. -/
-theorem major_estimate : ∃ w0 > (0 : ℝ), ∀ w : ℝ, 0 < w → w ≤ w0 →
-    ∀ ε > 0, ∀ᶠ N : ℕ in atTop,
-      Even N → (27895 / 10000 * (1 - 3 * w) - ε) * X N ≤ maj N w := by
-  sorry
 
-/-- LEAF. Paper page 28, outside the exceptional set, using Lemmas 8 to 10.
-Chen's prime pair bound is cited on page 21 and remains an outside input here. -/
-theorem minor_out_estimate : ∃ w0 > (0 : ℝ), ∀ w : ℝ, 0 < w → w ≤ w0 →
-    ∀ ε > 0, ∀ᶠ N : ℕ in atTop,
-      |mout N w| ≤ (C9 (78342 / 10000) LeanLab.HeathBrownPuchta.Lemma8Const.C2 C0 w *
-        (863665 / 1000000) ^ (13 - 2) + ε) * X N := by
-  sorry
+
+/-- P0012 Lemma 1 and display 42. The formal moment certificate
+and rotation give a power saving for the actual exceptional set. -/
+theorem exceptional_decay215 : ∃ E : ℝ, 109 / 154 < E ∧
+    ∃ C > (0 : ℝ), ∀ N : ℕ, 1 ≤ N →
+      (volume (exceptional N)).toReal ≤ C * (N : ℝ) ^ (-E) := by
+  apply exceptional_decay_of_moment215
+  · rw [F_eq_Fzero (by norm_num)]
+    exact Fzero_ge_one _ _
+  · exact lemma1_E_uncond
 
 /-- LEAF. Paper pages 27 and 28, Lemma 1 with Vaughan Theorem 3.1.
 The exponent E exceeds 109/154 and is uniform in sufficiently small positive w. -/
@@ -131,7 +97,7 @@ theorem minor_in_estimate : ∃ E : ℝ, 109 / 154 < E ∧
     ∃ w0 > (0 : ℝ), ∀ w : ℝ, 0 < w → w ≤ w0 →
       ∀ δ > 0, ∃ C : ℝ, ∀ᶠ N : ℕ in atTop,
         |minr N w| ≤ C * (N : ℝ) ^ (2 * (263 / 308 + 3 * w) - E + δ) := by
-  sorry
+  exact minor_in_from_decay215 exceptional_decay215
 
 /-- The exact cited Theorem 1, paper page 1, assembled from the open analytic leaves.
 CONDITIONAL ON those leaves and the open circle identity of Decomp1530c.
