@@ -730,13 +730,993 @@ theorem second_half : ∃ C : ℝ, 0 ≤ C ∧ ∃ N0 : ℕ,
     2 * sieveTerms N 6 - sieveTerms N 8 + tripleTerms N 3 ≤ _
   nlinarith only [hChen, hbase, hneg₁, hneg₂, hneg₃, hS4, hcard, herr]
 
+/-! ## Sifting as a condition on the prime divisors -/
+
+/-- Sifting at level `y` with modulus `D` says every prime divisor of `a` below `y` divides `D`. -/
+private lemma sifted_iff_primeFactors {D a : ℕ} (ha0 : 0 < a) {y : ℝ} :
+    Wu41.Sifted D y a ↔ ∀ q ∈ a.primeFactors, (q : ℝ) < y → q ∣ D := by
+  constructor
+  · intro h q hq hqy
+    obtain ⟨hqp, hqa, -⟩ := Nat.mem_primeFactors.mp hq
+    by_contra hqd
+    exact h q hqp hqy hqd hqa
+  · intro h q hqp hqy hqd hqa
+    exact hqd (h q (Nat.mem_primeFactors.mpr ⟨hqp, hqa, ha0.ne'⟩) hqy)
+
+/-- At modulus `N` the prime divisors of `a` at least `y` are those that do not divide `N`. -/
+private lemma sifted_level_le {N a : ℕ} (ha0 : 0 < a) {y : ℝ} (h : Wu41.Sifted N y a) :
+    ∀ q ∈ a.primeFactors, ¬ q ∣ N → y ≤ (q : ℝ) := by
+  intro q hq hqN
+  by_contra hlt
+  exact hqN ((sifted_iff_primeFactors ha0).mp h q hq (not_le.mp hlt))
+
+/-- Converse of `sifted_level_le`. -/
+private lemma sifted_of_level {N a : ℕ} (ha0 : 0 < a) {y : ℝ}
+    (h : ∀ q ∈ a.primeFactors, ¬ q ∣ N → y ≤ (q : ℝ)) : Wu41.Sifted N y a := by
+  rw [sifted_iff_primeFactors ha0]
+  intro q hq hqy
+  by_contra hqN
+  exact absurd (h q hq hqN) (not_le.mpr hqy)
+
+/-- At modulus `N p` the extra prime `p` is exempt as well. -/
+private lemma sifted_mul_level {N a p : ℕ} (ha0 : 0 < a) (hp : p.Prime) {y : ℝ}
+    (h : Wu41.Sifted (N * p) y a) :
+    ∀ q ∈ a.primeFactors, ¬ q ∣ N → q ≠ p → y ≤ (q : ℝ) := by
+  intro q hq hqN hqp
+  have hqP : q.Prime := (Nat.mem_primeFactors.mp hq).1
+  have hqnp : ¬ q ∣ N * p := by
+    intro hd
+    rcases hqP.dvd_mul.mp hd with h1 | h1
+    · exact hqN h1
+    · exact hqp ((Nat.prime_dvd_prime_iff_eq hqP hp).mp h1)
+  by_contra hlt
+  exact hqnp ((sifted_iff_primeFactors ha0).mp h q hq (not_le.mp hlt))
+
+/-- Converse of `sifted_mul_level`. -/
+private lemma sifted_mul_of_level {N a p : ℕ} (ha0 : 0 < a) (hp : p.Prime) {y : ℝ}
+    (h : ∀ q ∈ a.primeFactors, ¬ q ∣ N → q ≠ p → y ≤ (q : ℝ)) : Wu41.Sifted (N * p) y a := by
+  rw [sifted_iff_primeFactors ha0]
+  intro q hq hqy
+  by_cases hqN : q ∣ N
+  · exact dvd_mul_of_dvd_left hqN p
+  by_cases hqp : q = p
+  · rw [hqp]; exact dvd_mul_left p N
+  exact absurd (h q hq hqN hqp) (not_le.mpr hqy)
+
+/-- At modulus `N p q` the two primes `p` and `q` are exempt. -/
+private lemma sifted_mul2_level {N a p q : ℕ} (ha0 : 0 < a) (hp : p.Prime) (hq : q.Prime)
+    {y : ℝ} (h : Wu41.Sifted (N * p * q) y a) :
+    ∀ r ∈ a.primeFactors, ¬ r ∣ N → r ≠ p → r ≠ q → y ≤ (r : ℝ) := by
+  intro r hr hrN hrp hrq
+  have hrP : r.Prime := (Nat.mem_primeFactors.mp hr).1
+  have hrn : ¬ r ∣ N * p * q := by
+    intro hd
+    rcases hrP.dvd_mul.mp hd with h1 | h1
+    · rcases hrP.dvd_mul.mp h1 with h2 | h2
+      · exact hrN h2
+      · exact hrp ((Nat.prime_dvd_prime_iff_eq hrP hp).mp h2)
+    · exact hrq ((Nat.prime_dvd_prime_iff_eq hrP hq).mp h1)
+  by_contra hlt
+  exact hrn ((sifted_iff_primeFactors ha0).mp h r hr (not_le.mp hlt))
+
+/-- Converse of `sifted_mul2_level`. -/
+private lemma sifted_mul2_of_level {N a p q : ℕ} (ha0 : 0 < a) (hp : p.Prime) (hq : q.Prime)
+    {y : ℝ} (h : ∀ r ∈ a.primeFactors, ¬ r ∣ N → r ≠ p → r ≠ q → y ≤ (r : ℝ)) :
+    Wu41.Sifted (N * p * q) y a := by
+  rw [sifted_iff_primeFactors ha0]
+  intro r hr hry
+  by_cases hrN : r ∣ N
+  · exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_left hrN p) q
+  by_cases hrp : r = p
+  · rw [hrp]; exact dvd_mul_of_dvd_left (dvd_mul_left p N) q
+  by_cases hrq : r = q
+  · rw [hrq]; exact dvd_mul_left q (N * p)
+  exact absurd (h r hr hrN hrp hrq) (not_le.mpr hry)
+
+/-! ## The parameter comparisons used by the counting step -/
+
+/-- The printed parameters, in the order the counting step needs. -/
+private lemma printed_order : kappa1 < kappa2 ∧ kappa2 < sigma2 ∧ sigma2 < sigma1 := by
+  refine ⟨?_, ?_, ?_⟩ <;> norm_num [kappa1, kappa2, sigma1, sigma2]
+
+/-- `N^{1/3}/N^{κ₁} ≤ N^{σ₁}`: the second level's range lies below the third's. -/
+private lemma root_ratio_le {N : ℕ} (hN : 2 ≤ N) :
+    (N : ℝ) ^ (1 / 3 : ℝ) / (N : ℝ) ^ kappa1 ≤ (N : ℝ) ^ sigma1 := by
+  have hN0 : (0 : ℝ) < N := by exact_mod_cast (by omega : 0 < N)
+  have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast (by omega : 1 ≤ N)
+  have hsplit : (N : ℝ) ^ (1 / 3 : ℝ) =
+      (N : ℝ) ^ kappa1 * (N : ℝ) ^ (1 / 3 - kappa1 : ℝ) := by
+    rw [← Real.rpow_add hN0]
+    norm_num
+  have hpos : (0 : ℝ) < (N : ℝ) ^ kappa1 := Real.rpow_pos_of_pos hN0 _
+  rw [hsplit, mul_div_cancel_left₀ _ hpos.ne']
+  have hexp : (1 / 3 - kappa1 : ℝ) = 1 / 4 := by norm_num [kappa1]
+  rw [hexp]
+  exact Real.rpow_le_rpow_of_exponent_le hN1 (by norm_num [sigma1])
+
+/-- Prime divisors of a sequence element stay below `N`. -/
+private lemma primeFactors_lt {N a : ℕ} (ha0 : 0 < a) (haN : a < N) {q : ℕ}
+    (hq : q ∈ a.primeFactors) : q < N :=
+  lt_of_le_of_lt (Nat.le_of_dvd ha0 (Nat.dvd_of_mem_primeFactors hq)) haN
+
+/-! ## The per-element counting step for `Delta_2`
+
+For one `a` of the sequence the six sums of `Delta_1`, `Delta_2` and `S_4` become
+counts of prime tuples from the set of prime divisors of `a` that do not divide `N`.
+The sieve condition at modulus `N p` and level `y` says that no such divisor below
+`y` is different from `p`, which is what makes every tuple start at the least
+divisors of `a`.  We only need the resulting inequality
+`tt0 + tt1 + tt2 ≤ tt3 + t10 + t11`, proved by mapping every pair of `Delta_1` to
+the next larger tuple of `Delta_2`. -/
+
+/-- Membership in the set of prime divisors of `a` that do not divide `N`. -/
+private lemma mem_divisors {N a q : ℕ} (ha0 : 0 < a) :
+    q ∈ a.primeFactors.filter (fun p => ¬ p ∣ N) ↔ q.Prime ∧ q ∣ a ∧ ¬ q ∣ N := by
+  rw [mem_filter, Nat.mem_primeFactors]
+  exact ⟨fun h => ⟨h.1.1, h.1.2.1, h.2⟩, fun h => ⟨⟨h.1, h.2.1, ha0.ne'⟩, h.2.2⟩⟩
+
+/-- A member of the divisor set is a prime divisor of `a`. -/
+private lemma mem_pf_of_mem_divisors {N a q : ℕ} (ha0 : 0 < a)
+    (hq : q ∈ a.primeFactors.filter (fun p => ¬ p ∣ N)) : q ∈ a.primeFactors := by
+  obtain ⟨hqp, hqa, -⟩ := (mem_divisors ha0).mp hq
+  exact Nat.mem_primeFactors.mpr ⟨hqp, hqa, ha0.ne'⟩
+
+/-- A member of the divisor set does not divide `N`. -/
+private lemma not_dvd_of_mem_divisors {N a q : ℕ} (ha0 : 0 < a)
+    (hq : q ∈ a.primeFactors.filter (fun p => ¬ p ∣ N)) : ¬ q ∣ N :=
+  ((mem_divisors ha0).mp hq).2.2
+
+/-- A member of the divisor set is prime. -/
+private lemma prime_of_mem_divisors {N a q : ℕ} (ha0 : 0 < a)
+    (hq : q ∈ a.primeFactors.filter (fun p => ¬ p ∣ N)) : q.Prime :=
+  ((mem_divisors ha0).mp hq).1
+
+/-- A member of the divisor set divides `a`. -/
+private lemma dvd_of_mem_divisors {N a q : ℕ} (ha0 : 0 < a)
+    (hq : q ∈ a.primeFactors.filter (fun p => ¬ p ∣ N)) : q ∣ a :=
+  ((mem_divisors ha0).mp hq).2.1
+
+/-- A member of the divisor set is coprime to `N`. -/
+private lemma coprime_of_mem_divisors {N a q : ℕ} (ha0 : 0 < a)
+    (hq : q ∈ a.primeFactors.filter (fun p => ¬ p ∣ N)) : q.Coprime N :=
+  (prime_of_mem_divisors ha0 hq).coprime_iff_not_dvd.mpr (not_dvd_of_mem_divisors ha0 hq)
+
+/-- Sifting at modulus `N` and level `p` bounds every relevant prime divisor below. -/
+private lemma sift_le {N a p : ℕ} (ha0 : 0 < a) (hs : Wu41.Sifted N (p : ℝ) a) {q : ℕ}
+    (hq : q ∈ a.primeFactors) (hqN : ¬ q ∣ N) : p ≤ q := by
+  have h := sifted_level_le ha0 hs q hq hqN
+  exact_mod_cast h
+
+/-- Sifting at modulus `N p₁` and level `p₂` bounds every other relevant divisor below. -/
+private lemma sift_mul_le {N a p₁ p₂ : ℕ} (ha0 : 0 < a) (hp₁ : p₁.Prime)
+    (hs : Wu41.Sifted (N * p₁) (p₂ : ℝ) a) {q : ℕ}
+    (hq : q ∈ a.primeFactors) (hqN : ¬ q ∣ N) (hq₁ : q ≠ p₁) : p₂ ≤ q := by
+  have h := sifted_mul_level ha0 hp₁ hs q hq hqN hq₁
+  exact_mod_cast h
+
+/-- Sifting at modulus `N p₁ p₂` and level `p₃` bounds every remaining divisor below. -/
+private lemma sift_mul2_le {N a p₁ p₂ p₃ : ℕ} (ha0 : 0 < a) (hp₁ : p₁.Prime) (hp₂ : p₂.Prime)
+    (hs : Wu41.Sifted (N * p₁ * p₂) (p₃ : ℝ) a) {q : ℕ}
+    (hq : q ∈ a.primeFactors) (hqN : ¬ q ∣ N) (hq₁ : q ≠ p₁) (hq₂ : q ≠ p₂) : p₃ ≤ q := by
+  have h := sifted_mul2_level ha0 hp₁ hp₂ hs q hq hqN hq₁ hq₂
+  exact_mod_cast h
+
+/-- Every tuple of the six sums starts with a prime divisor of `a` that does not divide `N`. -/
+private lemma first_mem_divisors {N a p₁ : ℕ} (ha0 : 0 < a) (hp₁ : p₁.Prime)
+    (hc₁ : p₁.Coprime N) (hdvd : p₁ ∣ a) :
+    p₁ ∈ a.primeFactors.filter (fun p => ¬ p ∣ N) :=
+  (mem_divisors ha0).mpr ⟨hp₁, hdvd, (hp₁.coprime_iff_not_dvd).mp hc₁⟩
+
+/-- Prime divisors of an element of the sequence stay below `N`. -/
+private lemma divisor_lt {N a p : ℕ} (ha0 : 0 < a) (haN : a < N) (hp : p ∈ a.primeFactors) :
+    p < N := primeFactors_lt ha0 haN hp
+
+/-- The first factor of a triple product divides the product. -/
+private lemma dvd_first {p q r a : ℕ} (h : p * q * r ∣ a) : p ∣ a :=
+  ((dvd_mul_right p q).trans (dvd_mul_right (p * q) r)).trans h
+
+/-- The second factor of a triple product divides the product. -/
+private lemma dvd_second {p q r a : ℕ} (h : p * q * r ∣ a) : q ∣ a :=
+  ((dvd_mul_left q p).trans (dvd_mul_right (p * q) r)).trans h
+
+/-- The third factor of a triple product divides the product. -/
+private lemma dvd_third {p q r a : ℕ} (h : p * q * r ∣ a) : r ∣ a :=
+  (dvd_mul_left r (p * q)).trans h
+
+/-- The first factor of a quadruple product divides the product. -/
+private lemma dvd_q_first {p q r s a : ℕ} (h : p * q * r * s ∣ a) : p ∣ a :=
+  (((dvd_mul_right p q).trans (dvd_mul_right (p * q) r)).trans
+    (dvd_mul_right (p * q * r) s)).trans h
+
+/-- The second factor of a quadruple product divides the product. -/
+private lemma dvd_q_second {p q r s a : ℕ} (h : p * q * r * s ∣ a) : q ∣ a :=
+  (((dvd_mul_left q p).trans (dvd_mul_right (p * q) r)).trans
+    (dvd_mul_right (p * q * r) s)).trans h
+
+/-- The third factor of a quadruple product divides the product. -/
+private lemma dvd_q_third {p q r s a : ℕ} (h : p * q * r * s ∣ a) : r ∣ a :=
+  ((dvd_mul_left r (p * q)).trans (dvd_mul_right (p * q * r) s)).trans h
+
+/-- The fourth factor of a quadruple product divides the product. -/
+private lemma dvd_q_fourth {p q r s a : ℕ} (h : p * q * r * s ∣ a) : s ∣ a :=
+  (dvd_mul_left s (p * q * r)).trans h
+
+/-- Components of a triple of the prime triples set. -/
+private lemma mem_primeTriples {N : ℕ} {C : ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ}
+    (h : q ∈ primeTriples N C) :
+    q.1 < N ∧ q.2.1 < N ∧ q.2.2 < N ∧ q.1.Prime ∧ q.2.1.Prime ∧ q.2.2.Prime ∧
+      q.1.Coprime N ∧ q.2.1.Coprime N ∧ q.2.2.Coprime N ∧ C q.1 q.2.1 q.2.2 := by
+  simp only [primeTriples, mem_filter, mem_product, mem_range] at h
+  tauto
+
+/-- Components of a quadruple of the prime quadruples set. -/
+private lemma mem_P4 {N : ℕ} {C : ℕ → ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ × ℕ}
+    (h : q ∈ Wu08Sum.P4 N C) :
+    q.1 < N ∧ q.2.1 < N ∧ q.2.2.1 < N ∧ q.2.2.2 < N ∧ q.1.Prime ∧ q.2.1.Prime ∧
+      q.2.2.1.Prime ∧ q.2.2.2.Prime ∧ q.1.Coprime N ∧ q.2.1.Coprime N ∧
+      q.2.2.1.Coprime N ∧ q.2.2.2.Coprime N ∧ C q.1 q.2.1 q.2.2.1 q.2.2.2 := by
+  simp only [Wu08Sum.P4, mem_filter, mem_product, mem_range] at h
+  tauto
+
+/-- Reassemble a triple of the prime triples set. -/
+private lemma mem_primeTriples_mk {N : ℕ} {C : ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ}
+    (h1 : q.1 < N) (h2 : q.2.1 < N) (h3 : q.2.2 < N)
+    (hp1 : q.1.Prime) (hp2 : q.2.1.Prime) (hp3 : q.2.2.Prime)
+    (hc1 : q.1.Coprime N) (hc2 : q.2.1.Coprime N) (hc3 : q.2.2.Coprime N)
+    (hC : C q.1 q.2.1 q.2.2) : q ∈ primeTriples N C := by
+  simp only [primeTriples, mem_filter, mem_product, mem_range]
+  tauto
+
+/-- Reassemble a quadruple of the prime quadruples set. -/
+private lemma mem_P4_mk {N : ℕ} {C : ℕ → ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ × ℕ}
+    (h1 : q.1 < N) (h2 : q.2.1 < N) (h3 : q.2.2.1 < N) (h4 : q.2.2.2 < N)
+    (hp1 : q.1.Prime) (hp2 : q.2.1.Prime) (hp3 : q.2.2.1.Prime) (hp4 : q.2.2.2.Prime)
+    (hc1 : q.1.Coprime N) (hc2 : q.2.1.Coprime N) (hc3 : q.2.2.1.Coprime N)
+    (hc4 : q.2.2.2.Coprime N) (hC : C q.1 q.2.1 q.2.2.1 q.2.2.2) :
+    q ∈ Wu08Sum.P4 N C := by
+  simp only [Wu08Sum.P4, mem_filter, mem_product, mem_range]
+  tauto
+
+/-- The first component of a filtered triple lies in the divisor set. -/
+private lemma first_mem {N a : ℕ} (ha0 : 0 < a) {C : ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ}
+    (hq : q ∈ primeTriples N C) (hdvd : q.1 * q.2.1 * q.2.2 ∣ a) :
+    q.1 ∈ a.primeFactors.filter (fun p => ¬ p ∣ N) := by
+  obtain ⟨-, -, -, hp1, -, -, hc1, -, -, -⟩ := mem_primeTriples hq
+  exact first_mem_divisors ha0 hp1 hc1 (dvd_first hdvd)
+
+/-- The second component of a filtered triple lies in the divisor set. -/
+private lemma second_mem {N a : ℕ} (ha0 : 0 < a) {C : ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ}
+    (hq : q ∈ primeTriples N C) (hdvd : q.1 * q.2.1 * q.2.2 ∣ a) :
+    q.2.1 ∈ a.primeFactors.filter (fun p => ¬ p ∣ N) := by
+  obtain ⟨-, -, -, -, hp2, -, -, hc2, -, -⟩ := mem_primeTriples hq
+  exact first_mem_divisors ha0 hp2 hc2 (dvd_second hdvd)
+
+/-- The third component of a filtered triple lies in the divisor set. -/
+private lemma third_mem {N a : ℕ} (ha0 : 0 < a) {C : ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ}
+    (hq : q ∈ primeTriples N C) (hdvd : q.1 * q.2.1 * q.2.2 ∣ a) :
+    q.2.2 ∈ a.primeFactors.filter (fun p => ¬ p ∣ N) := by
+  obtain ⟨-, -, -, -, -, hp3, -, -, hc3, -⟩ := mem_primeTriples hq
+  exact first_mem_divisors ha0 hp3 hc3 (dvd_third hdvd)
+
+/-- Sifting at modulus `N` forces the first component to be the least divisor. -/
+private lemma first_eq_min {N a m : ℕ} (ha0 : 0 < a)
+    (hmD : m ∈ a.primeFactors.filter (fun p => ¬ p ∣ N))
+    (hmin : ∀ p ∈ a.primeFactors.filter (fun p => ¬ p ∣ N), m ≤ p)
+    {C : ℕ → ℕ → ℕ → Prop} {q : ℕ × ℕ × ℕ}
+    (hq : q ∈ (primeTriples N C).filter
+      (fun q => q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted N (q.1 : ℝ) a)) :
+    q.1 = m := by
+  obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp hq
+  have h1D := first_mem ha0 hq3 hdvd
+  have hle : ∀ p ∈ a.primeFactors.filter (fun p => ¬ p ∣ N), q.1 ≤ p := by
+    intro p hp
+    exact sift_le ha0 hs (mem_pf_of_mem_divisors ha0 hp) (not_dvd_of_mem_divisors ha0 hp)
+  exact le_antisymm (hle m hmD) (hmin q.1 h1D)
+
+/-- Sifting at modulus `N p` forces the first component to be the least divisor. -/
+private lemma first_eq_min_mul {N a m : ℕ} (ha0 : 0 < a)
+    (hmD : m ∈ a.primeFactors.filter (fun p => ¬ p ∣ N))
+    (hmin : ∀ p ∈ a.primeFactors.filter (fun p => ¬ p ∣ N), m ≤ p)
+    {C : ℕ → ℕ → ℕ → Prop} (hC12 : ∀ p r s, C p r s → p < r) {q : ℕ × ℕ × ℕ}
+    (hq : q ∈ (primeTriples N C).filter
+      (fun q => q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)) :
+    q.1 = m := by
+  obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp hq
+  obtain ⟨-, -, -, hp1, -, -, -, -, -, hC⟩ := mem_primeTriples hq3
+  have h1D := first_mem ha0 hq3 hdvd
+  have h12 : q.1 < q.2.1 := hC12 _ _ _ hC
+  have hkey : ∀ p ∈ a.primeFactors.filter (fun p => ¬ p ∣ N), p ≠ q.1 → q.2.1 ≤ p := by
+    intro p hp hne
+    exact sift_mul_le ha0 hp1 hs (mem_pf_of_mem_divisors ha0 hp)
+      (not_dvd_of_mem_divisors ha0 hp) hne
+  have hle : q.1 ≤ m := by
+    by_contra h
+    have hm_lt : m < q.1 := not_le.mp h
+    have := hkey m hmD (by omega)
+    omega
+  exact le_antisymm hle (hmin q.1 h1D)
+
+/-- Sifting at modulus `N p₁ p₂` forces the first component to be the least divisor. -/
+private lemma first_eq_min_mul2 {N a m : ℕ} (ha0 : 0 < a)
+    (hmD : m ∈ a.primeFactors.filter (fun p => ¬ p ∣ N))
+    (hmin : ∀ p ∈ a.primeFactors.filter (fun p => ¬ p ∣ N), m ≤ p)
+    {C : ℕ → ℕ → ℕ → Prop} (hC12 : ∀ p r s, C p r s → p < r) (hC23 : ∀ p r s, C p r s → r < s)
+    {q : ℕ × ℕ × ℕ}
+    (hq : q ∈ (primeTriples N C).filter
+      (fun q => q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1 * q.2.1) (q.2.2 : ℝ) a)) :
+    q.1 = m := by
+  obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp hq
+  obtain ⟨-, -, -, hp1, hp2, -, -, -, -, hC⟩ := mem_primeTriples hq3
+  have h12 : q.1 < q.2.1 := hC12 _ _ _ hC
+  have h23 : q.2.1 < q.2.2 := hC23 _ _ _ hC
+  have h1D := first_mem ha0 hq3 hdvd
+  have hle : q.1 ≤ m := by
+    by_contra h
+    have hm_lt : m < q.1 := not_le.mp h
+    have hle' := sift_mul2_le ha0 hp1 hp2 hs (mem_pf_of_mem_divisors ha0 hmD)
+      (not_dvd_of_mem_divisors ha0 hmD) (by omega) (by omega)
+    omega
+  exact le_antisymm hle (hmin q.1 h1D)
+
+/-- Sifting at modulus `N p` forces the first component of a quadruple to be the least divisor. -/
+private lemma first_eq_min_quad {N a m : ℕ} (ha0 : 0 < a)
+    (hmD : m ∈ a.primeFactors.filter (fun p => ¬ p ∣ N))
+    (hmin : ∀ p ∈ a.primeFactors.filter (fun p => ¬ p ∣ N), m ≤ p)
+    {C : ℕ → ℕ → ℕ → ℕ → Prop} (hC12 : ∀ p r s t, C p r s t → p < r)
+    {q : ℕ × ℕ × ℕ × ℕ}
+    (hq : q ∈ (Wu08Sum.P4 N C).filter
+      (fun q => q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)) :
+    q.1 = m := by
+  obtain ⟨hq4, hdvd, hs⟩ := mem_filter.mp hq
+  obtain ⟨-, -, -, -, hp1, -, -, -, -, -, -, -, hC⟩ := mem_P4 hq4
+  have h12 : q.1 < q.2.1 := hC12 _ _ _ _ hC
+  have h1D : q.1 ∈ a.primeFactors.filter (fun p => ¬ p ∣ N) := by
+    obtain ⟨-, -, -, -, hp1', -, -, -, hc1', -, -, -, -⟩ := mem_P4 hq4
+    exact first_mem_divisors ha0 hp1' hc1' (dvd_q_first hdvd)
+  have hle : q.1 ≤ m := by
+    by_contra h
+    have hm_lt : m < q.1 := not_le.mp h
+    have hle' := sift_mul_le ha0 hp1 hs (mem_pf_of_mem_divisors ha0 hmD)
+      (not_dvd_of_mem_divisors ha0 hmD) (by omega)
+    omega
+  exact le_antisymm hle (hmin q.1 h1D)
+
+/-- A product of three distinct primes dividing `a` divides `a`. -/
+private lemma mul3_dvd {p q r a : ℕ} (hp : p.Prime) (hq : q.Prime) (hr : r.Prime)
+    (hpq : p ≠ q) (hpr : p ≠ r) (hqr : q ≠ r)
+    (h1 : p ∣ a) (h2 : q ∣ a) (h3 : r ∣ a) : p * q * r ∣ a := by
+  have c12 : p.Coprime q := (Nat.coprime_primes hp hq).mpr hpq
+  have c13 : p.Coprime r := (Nat.coprime_primes hp hr).mpr hpr
+  have c23 : q.Coprime r := (Nat.coprime_primes hq hr).mpr hqr
+  exact Nat.Coprime.mul_dvd_of_dvd_of_dvd (c13.mul_left c23)
+    (Nat.Coprime.mul_dvd_of_dvd_of_dvd c12 h1 h2) h3
+
+/-- A product of four distinct primes dividing `a` divides `a`. -/
+private lemma mul4_dvd {p q r s a : ℕ} (hp : p.Prime) (hq : q.Prime) (hr : r.Prime)
+    (hs : s.Prime) (hpq : p ≠ q) (hpr : p ≠ r) (hps : p ≠ s) (hqr : q ≠ r) (hqs : q ≠ s)
+    (hrs : r ≠ s) (h1 : p ∣ a) (h2 : q ∣ a) (h3 : r ∣ a) (h4 : s ∣ a) :
+    p * q * r * s ∣ a := by
+  have c12 : p.Coprime q := (Nat.coprime_primes hp hq).mpr hpq
+  have c13 : p.Coprime r := (Nat.coprime_primes hp hr).mpr hpr
+  have c14 : p.Coprime s := (Nat.coprime_primes hp hs).mpr hps
+  have c23 : q.Coprime r := (Nat.coprime_primes hq hr).mpr hqr
+  have c24 : q.Coprime s := (Nat.coprime_primes hq hs).mpr hqs
+  have c34 : r.Coprime s := (Nat.coprime_primes hr hs).mpr hrs
+  exact Nat.Coprime.mul_dvd_of_dvd_of_dvd ((c14.mul_left c24).mul_left c34)
+    (Nat.Coprime.mul_dvd_of_dvd_of_dvd (c13.mul_left c23)
+      (Nat.Coprime.mul_dvd_of_dvd_of_dvd c12 h1 h2) h3) h4
+
+/-- `N^{1/2-2κ₁}/z ≤ N^{σ₁}` whenever `z ≥ N^{κ₁}`. -/
+private lemma root_div_le {N z : ℕ} (hN : 2 ≤ N) (hz : (N : ℝ) ^ kappa1 ≤ (z : ℝ)) (hz0 : 0 < z) :
+    (N : ℝ) ^ (1 / 2 - 2 * kappa1) / (z : ℝ) ≤ (N : ℝ) ^ sigma1 := by
+  have hexp : (1 / 2 - 2 * kappa1 : ℝ) = 1 / 3 := by norm_num [kappa1]
+  have hN0 : (0 : ℝ) < N := by exact_mod_cast (by omega : 0 < N)
+  have hpos : (0 : ℝ) < (N : ℝ) ^ kappa1 := Real.rpow_pos_of_pos hN0 _
+  rw [hexp]
+  calc (N : ℝ) ^ (1 / 3 : ℝ) / (z : ℝ)
+      ≤ (N : ℝ) ^ (1 / 3 : ℝ) / (N : ℝ) ^ kappa1 :=
+        div_le_div_of_nonneg_left (by positivity) hpos hz
+    _ ≤ (N : ℝ) ^ sigma1 := root_ratio_le hN
+
+/-- The per-element counting inequality behind the `Delta_2` cancellation. -/
+private lemma per_a_count {N a : ℕ} (hN : 4 ≤ N) (ha0 : 0 < a) (haN : a < N) :
+    #(Finset.filter (fun q : ℕ × ℕ × ℕ => q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted N (q.1 : ℝ) a)
+        (primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+          (r : ℝ) < (N : ℝ) ^ kappa2))) +
+      #(Finset.filter (fun q : ℕ × ℕ × ℕ => q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted N (q.1 : ℝ) a)
+        (primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧
+          (q : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ r ∧
+          (r : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / q))) +
+      #(Finset.filter (fun q : ℕ × ℕ × ℕ =>
+          q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1 * q.2.1) (q.2.2 : ℝ) a)
+        (primeTriples N (fun p q r => (N : ℝ) ^ kappa2 ≤ p ∧ (p : ℝ) < (N : ℝ) ^ sigma2 ∧
+          (N : ℝ) ^ sigma2 ≤ q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ sigma1)))
+    ≤ #(Finset.filter (fun q : ℕ × ℕ × ℕ =>
+          q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)
+        (primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+          (r : ℝ) < (N : ℝ) ^ sigma1))) +
+      #(Finset.filter (fun q : ℕ × ℕ × ℕ × ℕ =>
+          q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)
+        (Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧ r < s ∧
+          (s : ℝ) < (N : ℝ) ^ kappa2))) +
+      #(Finset.filter (fun q : ℕ × ℕ × ℕ × ℕ =>
+          q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)
+        (Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+          (r : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ s ∧
+          (s : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / r))) := by
+  classical
+  set X0 := Finset.filter (fun q : ℕ × ℕ × ℕ => q.1 * q.2.1 * q.2.2 ∣ a ∧
+      Wu41.Sifted N (q.1 : ℝ) a)
+    (primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+      (r : ℝ) < (N : ℝ) ^ kappa2)) with hX0
+  set X1 := Finset.filter (fun q : ℕ × ℕ × ℕ => q.1 * q.2.1 * q.2.2 ∣ a ∧
+      Wu41.Sifted N (q.1 : ℝ) a)
+    (primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧
+      (q : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ r ∧
+      (r : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / q)) with hX1
+  set X2 := Finset.filter (fun q : ℕ × ℕ × ℕ =>
+      q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1 * q.2.1) (q.2.2 : ℝ) a)
+    (primeTriples N (fun p q r => (N : ℝ) ^ kappa2 ≤ p ∧ (p : ℝ) < (N : ℝ) ^ sigma2 ∧
+      (N : ℝ) ^ sigma2 ≤ q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ sigma1)) with hX2
+  set X3 := Finset.filter (fun q : ℕ × ℕ × ℕ =>
+      q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)
+    (primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+      (r : ℝ) < (N : ℝ) ^ sigma1)) with hX3
+  set X10 := Finset.filter (fun q : ℕ × ℕ × ℕ × ℕ =>
+      q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)
+    (Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧ r < s ∧
+      (s : ℝ) < (N : ℝ) ^ kappa2)) with hX10
+  set X11 := Finset.filter (fun q : ℕ × ℕ × ℕ × ℕ =>
+      q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a)
+    (Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+      (r : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ s ∧
+      (s : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / r)) with hX11
+  change #X0 + #X1 + #X2 ≤ #X3 + #X10 + #X11
+  set D := a.primeFactors.filter (fun p => ¬ p ∣ N) with hD
+  have hDprime : ∀ p ∈ D, p.Prime := fun p hp => by
+    rw [hD] at hp; exact prime_of_mem_divisors ha0 hp
+  have hDdvd : ∀ p ∈ D, p ∣ a := fun p hp => by
+    rw [hD] at hp; exact dvd_of_mem_divisors ha0 hp
+  have hDcop : ∀ p ∈ D, p.Coprime N := fun p hp => by
+    rw [hD] at hp; exact coprime_of_mem_divisors ha0 hp
+  have hDN : ∀ p ∈ D, p < N := fun p hp => by
+    rw [hD] at hp; exact divisor_lt ha0 haN (mem_pf_of_mem_divisors ha0 hp)
+  have hsift_of : ∀ m m₂ : ℕ, m ∈ D →
+      (∀ p ∈ D, p ≠ m → m₂ ≤ p) → Wu41.Sifted (N * m) (m₂ : ℝ) a := by
+    intro m m₂ hmD hm₂
+    exact sifted_mul_of_level ha0 (hDprime m hmD) (fun q hq hqN hqm => by
+      have hqD : q ∈ D := by rw [hD]; exact mem_filter.mpr ⟨hq, hqN⟩
+      exact_mod_cast hm₂ q hqD hqm)
+  have hκlt : (N : ℝ) ^ kappa1 < (N : ℝ) ^ kappa2 :=
+    Real.rpow_lt_rpow_of_exponent_lt (by exact_mod_cast (by omega : 1 < N)) printed_order.1
+  have hκσ : (N : ℝ) ^ kappa2 < (N : ℝ) ^ sigma1 :=
+    Real.rpow_lt_rpow_of_exponent_lt (by exact_mod_cast (by omega : 1 < N))
+      (printed_order.2.1.trans printed_order.2.2)
+  by_cases hDe : D = ∅
+  · -- no relevant prime divisor of `a`: every count vanishes
+    have hzero : ∀ {C : ℕ → ℕ → ℕ → Prop} (q : ℕ × ℕ × ℕ), q ∈ primeTriples N C →
+        q.1 * q.2.1 * q.2.2 ∣ a → False := by
+      intro C q hq3 hdvd
+      obtain ⟨-, -, -, hp1, -, -, hc1, -, -, -⟩ := mem_primeTriples hq3
+      have hmem : q.1 ∈ D := by
+        rw [hD]
+        exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp1, dvd_first hdvd, ha0.ne'⟩,
+          (hp1.coprime_iff_not_dvd).mp hc1⟩
+      rw [hDe] at hmem
+      exact absurd hmem (Finset.notMem_empty q.1)
+    have hzeroq : ∀ {C : ℕ → ℕ → ℕ → ℕ → Prop} (q : ℕ × ℕ × ℕ × ℕ), q ∈ Wu08Sum.P4 N C →
+        q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a → False := by
+      intro C q hq4 hdvd
+      obtain ⟨-, -, -, -, hp1, -, -, -, hc1, -, -, -⟩ := mem_P4 hq4
+      have hmem : q.1 ∈ D := by
+        rw [hD]
+        exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp1, dvd_q_first hdvd, ha0.ne'⟩,
+          (hp1.coprime_iff_not_dvd).mp hc1⟩
+      rw [hDe] at hmem
+      exact absurd hmem (Finset.notMem_empty q.1)
+    have h0 : X0 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+      obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX0 ▸ hq)
+      exact hzero q hq3 hdvd)
+    have h1 : X1 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+      obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX1 ▸ hq)
+      exact hzero q hq3 hdvd)
+    have h2 : X2 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+      obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX2 ▸ hq)
+      exact hzero q hq3 hdvd)
+    have h3 : X3 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+      obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX3 ▸ hq)
+      exact hzero q hq3 hdvd)
+    have h10 : X10 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+      obtain ⟨hq4, hdvd, -⟩ := mem_filter.mp (hX10 ▸ hq)
+      exact hzeroq q hq4 hdvd)
+    have h11 : X11 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+      obtain ⟨hq4, hdvd, -⟩ := mem_filter.mp (hX11 ▸ hq)
+      exact hzeroq q hq4 hdvd)
+    rw [h0, h1, h2, h3, h10, h11]
+    simp only [card_empty, le_refl, add_zero]
+  · have hDne : D.Nonempty := Finset.nonempty_iff_ne_empty.mpr hDe
+    set m := D.min' hDne with hmdef
+    have hmD : m ∈ D := D.min'_mem hDne
+    have hmin : ∀ p ∈ D, m ≤ p := fun p hp => D.min'_le p hp
+    have hmN : m < N := hDN m hmD
+    by_cases h2 : (D.erase m).Nonempty
+    · set m₂ := (D.erase m).min' h2 with hm₂def
+      have hm₂D : m₂ ∈ D := Finset.mem_of_mem_erase ((D.erase m).min'_mem h2)
+      have hm₂min : ∀ p ∈ D, p ≠ m → m₂ ≤ p := fun p hp hpm =>
+        Finset.min'_le _ p (Finset.mem_erase.mpr ⟨hpm, hp⟩)
+      have hm₂ne : m₂ ≠ m := (Finset.mem_erase.mp ((D.erase m).min'_mem h2)).1
+      have hmlt : m < m₂ := lt_of_le_of_ne (hmin m₂ hm₂D) (Ne.symm hm₂ne)
+      have hm₂N : m₂ < N := hDN m₂ hm₂D
+      have hsift : Wu41.Sifted (N * m) (m₂ : ℝ) a := hsift_of m m₂ hmD hm₂min
+      by_cases hk : (m : ℝ) < (N : ℝ) ^ kappa2
+      · -- `m` lies below `N^{κ₂}`: the three positive sums are covered
+        have hX2e : X2 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+          obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX2 ▸ hq)
+          obtain ⟨-, -, -, -, -, -, -, -, -, hC⟩ := mem_primeTriples hq3
+          have hlt1 : ∀ p r s : ℕ,
+              ((N : ℝ) ^ kappa2 ≤ p ∧ (p : ℝ) < (N : ℝ) ^ sigma2 ∧
+                (N : ℝ) ^ sigma2 ≤ r ∧ r < s ∧ (s : ℝ) < (N : ℝ) ^ sigma1) → p < r := by
+            intro p r s h
+            have h1 : (p : ℝ) < (N : ℝ) ^ sigma2 := h.2.1
+            have h2 : (N : ℝ) ^ sigma2 ≤ (r : ℝ) := h.2.2.1
+            exact_mod_cast lt_of_lt_of_le h1 h2
+          have hlt2 : ∀ p r s : ℕ,
+              ((N : ℝ) ^ kappa2 ≤ p ∧ (p : ℝ) < (N : ℝ) ^ sigma2 ∧
+                (N : ℝ) ^ sigma2 ≤ r ∧ r < s ∧ (s : ℝ) < (N : ℝ) ^ sigma1) → r < s :=
+            fun p r s h => h.2.2.2.1
+          have hq1 := first_eq_min_mul2 (C := fun p r s => (N : ℝ) ^ kappa2 ≤ p ∧
+            (p : ℝ) < (N : ℝ) ^ sigma2 ∧ (N : ℝ) ^ sigma2 ≤ r ∧ r < s ∧
+            (s : ℝ) < (N : ℝ) ^ sigma1) ha0 hmD hmin hlt1 hlt2 (hX2 ▸ hq)
+          have hge : (N : ℝ) ^ kappa2 ≤ (m : ℝ) := by rw [← hq1]; exact hC.1
+          exact absurd hge (not_le.mpr hk))
+        set Y0 := X0.filter (fun q => m₂ < q.2.1) with hY0
+        set Y1 := X1.filter (fun q => m₂ < q.2.1) with hY1
+        have split0 : #Y0 + #(X0.filter (fun q => ¬ m₂ < q.2.1)) = #X0 :=
+          Finset.card_filter_add_card_filter_not (s := X0) (p := fun q => m₂ < q.2.1)
+        have split1 : #Y1 + #(X1.filter (fun q => ¬ m₂ < q.2.1)) = #X1 :=
+          Finset.card_filter_add_card_filter_not (s := X1) (p := fun q => m₂ < q.2.1)
+        have split3 : #(X3.filter (fun q => (q.2.2 : ℝ) < (N : ℝ) ^ kappa2)) +
+            #(X3.filter (fun q => ¬ (q.2.2 : ℝ) < (N : ℝ) ^ kappa2)) = #X3 :=
+          Finset.card_filter_add_card_filter_not (s := X3)
+            (p := fun q => (q.2.2 : ℝ) < (N : ℝ) ^ kappa2)
+        have e0a : #Y0 ≤ #X10 := by
+          refine Finset.card_le_card_of_injOn (fun q : ℕ × ℕ × ℕ => (m, m₂, q.2.1, q.2.2)) ?_ ?_
+          · intro q hq
+            obtain ⟨hq0, h2lt⟩ := mem_filter.mp (hY0 ▸ hq)
+            obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX0 ▸ hq0)
+            obtain ⟨h1N, h2N, h3N, hp1, hp2, hp3, hc1, hc2, hc3, hC⟩ := mem_primeTriples hq3
+            obtain ⟨hκ1, h12, h23, hlast⟩ := hC
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ hq0)
+            have hκ1m : (N : ℝ) ^ kappa1 ≤ (m : ℝ) := by
+              rw [← hq1]; exact hκ1
+            have hmx : m < q.2.1 := by omega
+            have hmy : m < q.2.2 := lt_trans hmx h23
+            have hC10 : (fun (p q r s : ℕ) => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧ r < s ∧
+                (s : ℝ) < (N : ℝ) ^ kappa2) m m₂ q.2.1 q.2.2 :=
+              ⟨hκ1m, hmlt, h2lt, h23, hlast⟩
+            have hP4 : (m, m₂, q.2.1, q.2.2) ∈ Wu08Sum.P4 N (fun p q r s =>
+                (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧ r < s ∧ (s : ℝ) < (N : ℝ) ^ kappa2) :=
+              mem_P4_mk hmN hm₂N h2N h3N (hDprime m hmD) (hDprime m₂ hm₂D) hp2 hp3
+                (hDcop m hmD) (hDcop m₂ hm₂D) hc2 hc3 hC10
+            have hA1 : m ≠ m₂ := by omega
+            have hA2 : m ≠ q.2.1 := by omega
+            have hA3 : m ≠ q.2.2 := by omega
+            have hA4 : m₂ ≠ q.2.1 := by omega
+            have hA5 : m₂ ≠ q.2.2 := by omega
+            have hA6 : q.2.1 ≠ q.2.2 := by omega
+            have hprod : m * m₂ * q.2.1 * q.2.2 ∣ a :=
+              mul4_dvd (hDprime m hmD) (hDprime m₂ hm₂D) hp2 hp3 hA1 hA2 hA3 hA4 hA5 hA6
+                (hDdvd m hmD) (hDdvd m₂ hm₂D) (dvd_second hdvd) (dvd_third hdvd)
+            exact mem_filter.mpr ⟨hP4, hprod, hsift⟩
+          · intro q hq p hp hqp
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ (mem_filter.mp (hY0 ▸ hq)).1)
+            have hp1 : p.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ (mem_filter.mp (hY0 ▸ hp)).1)
+            have e1 : q.2.1 = p.2.1 := by
+              have h3 : (m, m₂, q.2.1, q.2.2) = (m, m₂, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with _ h'
+              injection h' with h1 _
+            have e2 : q.2.2 = p.2.2 := by
+              have h3 : (m, m₂, q.2.1, q.2.2) = (m, m₂, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with _ h'
+              injection h' with _ h2
+            obtain ⟨q1, q2, q3⟩ := q
+            obtain ⟨p1, p2, p3⟩ := p
+            simp only at hq1 hp1 e1 e2 ⊢
+            rw [show q1 = p1 by rw [hq1, hp1], e1, e2]
+        have e0b : #(X0.filter (fun q => ¬ m₂ < q.2.1)) ≤
+            #(X3.filter (fun q => (q.2.2 : ℝ) < (N : ℝ) ^ kappa2)) := by
+          refine Finset.card_le_card_of_injOn (fun q : ℕ × ℕ × ℕ => (m, q.2.1, q.2.2)) ?_ ?_
+          · intro q hq
+            obtain ⟨hq0, hnt⟩ := mem_filter.mp hq
+            obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX0 ▸ hq0)
+            obtain ⟨h1N, h2N, h3N, hp1, hp2, hp3, hc1, hc2, hc3, hC⟩ := mem_primeTriples hq3
+            obtain ⟨hκ1, h12, h23, hlast⟩ := hC
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ hq0)
+            have h2Da : q.2.1 ∈ D := by
+              rw [hD]
+              exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_second hdvd, ha0.ne'⟩,
+                (hp2.coprime_iff_not_dvd).mp hc2⟩
+            have h2eq : q.2.1 = m₂ := by
+              have hle := hm₂min q.2.1 h2Da (by rw [← hq1]; omega)
+              omega
+            have hκ1m : (N : ℝ) ^ kappa1 ≤ (m : ℝ) := by
+              rw [← hq1]; exact hκ1
+            have hmx : m < q.2.1 := by omega
+            have hC3 : (fun (p q r : ℕ) => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+                (r : ℝ) < (N : ℝ) ^ sigma1) m q.2.1 q.2.2 :=
+              ⟨hκ1m, hmx, h23, lt_of_lt_of_le hlast hκσ.le⟩
+            have hP3 : (m, q.2.1, q.2.2) ∈ primeTriples N (fun p q r =>
+                (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ sigma1) :=
+              mem_primeTriples_mk hmN h2N h3N (hDprime m hmD) hp2 hp3 (hDcop m hmD) hc2 hc3 hC3
+            have hA1 : m ≠ q.2.1 := by omega
+            have hA2 : m ≠ q.2.2 := by omega
+            have hA3 : q.2.1 ≠ q.2.2 := by omega
+            have hprod : m * q.2.1 * q.2.2 ∣ a :=
+              mul3_dvd (hDprime m hmD) hp2 hp3 hA1 hA2 hA3
+                (hDdvd m hmD) (dvd_second hdvd) (dvd_third hdvd)
+            have hsift' : Wu41.Sifted (N * m) (q.2.1 : ℝ) a := by
+              rw [h2eq]; exact hsift
+            exact mem_filter.mpr ⟨mem_filter.mpr ⟨hP3, hprod, hsift'⟩, hlast⟩
+          · intro q hq p hp hqp
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ (mem_filter.mp hq).1)
+            have hp1 : p.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ (mem_filter.mp hp).1)
+            have e1 : q.2.1 = p.2.1 := by
+              have h3 : (m, q.2.1, q.2.2) = (m, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with h1 _
+            have e2 : q.2.2 = p.2.2 := by
+              have h3 : (m, q.2.1, q.2.2) = (m, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with _ h2
+            obtain ⟨q1, q2, q3⟩ := q
+            obtain ⟨p1, p2, p3⟩ := p
+            simp only at hq1 hp1 e1 e2 ⊢
+            rw [show q1 = p1 by rw [hq1, hp1], e1, e2]
+        have e1a : #Y1 ≤ #X11 := by
+          refine Finset.card_le_card_of_injOn (fun q : ℕ × ℕ × ℕ => (m, m₂, q.2.1, q.2.2)) ?_ ?_
+          · intro q hq
+            obtain ⟨hq0, h2lt⟩ := mem_filter.mp (hY1 ▸ hq)
+            obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX1 ▸ hq0)
+            obtain ⟨h1N, h2N, h3N, hp1, hp2, hp3, hc1, hc2, hc3, hC⟩ := mem_primeTriples hq3
+            obtain ⟨hκ1, h12, h2κ, hκ3, hlast⟩ := hC
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ hq0)
+            have hκ1m : (N : ℝ) ^ kappa1 ≤ (m : ℝ) := by
+              rw [← hq1]; exact hκ1
+            have hC11 : (fun (p q r s : ℕ) => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+                (r : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ s ∧
+                (s : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / r) m m₂ q.2.1 q.2.2 :=
+              ⟨hκ1m, hmlt, h2lt, h2κ, hκ3, hlast⟩
+            have hP4 : (m, m₂, q.2.1, q.2.2) ∈ Wu08Sum.P4 N (fun p q r s =>
+                (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ kappa2 ∧
+                (N : ℝ) ^ kappa2 ≤ s ∧ (s : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / r) :=
+              mem_P4_mk hmN hm₂N h2N h3N (hDprime m hmD) (hDprime m₂ hm₂D) hp2 hp3
+                (hDcop m hmD) (hDcop m₂ hm₂D) hc2 hc3 hC11
+            have hxy : q.2.1 < q.2.2 := by exact_mod_cast lt_of_lt_of_le h2κ hκ3
+            have hA1 : m ≠ m₂ := by omega
+            have hA2 : m ≠ q.2.1 := by omega
+            have hA3 : m ≠ q.2.2 := by omega
+            have hA4 : m₂ ≠ q.2.1 := by omega
+            have hA5 : m₂ ≠ q.2.2 := by omega
+            have hA6 : q.2.1 ≠ q.2.2 := by omega
+            have hprod : m * m₂ * q.2.1 * q.2.2 ∣ a :=
+              mul4_dvd (hDprime m hmD) (hDprime m₂ hm₂D) hp2 hp3 hA1 hA2 hA3 hA4 hA5 hA6
+                (hDdvd m hmD) (hDdvd m₂ hm₂D) (dvd_second hdvd) (dvd_third hdvd)
+            exact mem_filter.mpr ⟨hP4, hprod, hsift⟩
+          · intro q hq p hp hqp
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ (mem_filter.mp (hY1 ▸ hq)).1)
+            have hp1 : p.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ (mem_filter.mp (hY1 ▸ hp)).1)
+            have e1 : q.2.1 = p.2.1 := by
+              have h3 : (m, m₂, q.2.1, q.2.2) = (m, m₂, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with _ h'
+              injection h' with h1 _
+            have e2 : q.2.2 = p.2.2 := by
+              have h3 : (m, m₂, q.2.1, q.2.2) = (m, m₂, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with _ h'
+              injection h' with _ h2
+            obtain ⟨q1, q2, q3⟩ := q
+            obtain ⟨p1, p2, p3⟩ := p
+            simp only at hq1 hp1 e1 e2 ⊢
+            rw [show q1 = p1 by rw [hq1, hp1], e1, e2]
+        have e1b : #(X1.filter (fun q => ¬ m₂ < q.2.1)) ≤
+            #(X3.filter (fun q => ¬ (q.2.2 : ℝ) < (N : ℝ) ^ kappa2)) := by
+          refine Finset.card_le_card_of_injOn (fun q : ℕ × ℕ × ℕ => (m, q.2.1, q.2.2)) ?_ ?_
+          · intro q hq
+            obtain ⟨hq0, hnt⟩ := mem_filter.mp hq
+            obtain ⟨hq3, hdvd, -⟩ := mem_filter.mp (hX1 ▸ hq0)
+            obtain ⟨h1N, h2N, h3N, hp1, hp2, hp3, hc1, hc2, hc3, hC⟩ := mem_primeTriples hq3
+            obtain ⟨hκ1, h12, h2κ, hκ3, hlast⟩ := hC
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ hq0)
+            have h2Da : q.2.1 ∈ D := by
+              rw [hD]
+              exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_second hdvd, ha0.ne'⟩,
+                (hp2.coprime_iff_not_dvd).mp hc2⟩
+            have h2eq : q.2.1 = m₂ := by
+              have hle := hm₂min q.2.1 h2Da (by rw [← hq1]; omega)
+              omega
+            have hκ1m : (N : ℝ) ^ kappa1 ≤ (m : ℝ) := by
+              rw [← hq1]; exact hκ1
+            have hmx : m < q.2.1 := by omega
+            have hxy : q.2.1 < q.2.2 := by exact_mod_cast lt_of_lt_of_le h2κ hκ3
+            have hroot : (N : ℝ) ^ (1 / 2 - 2 * kappa1) / (q.2.1 : ℝ) ≤ (N : ℝ) ^ sigma1 :=
+              root_div_le (by omega) (le_trans hκ1 (le_of_lt (by exact_mod_cast h12))) hp2.pos
+            have hC3 : (fun (p q r : ℕ) => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧
+                (r : ℝ) < (N : ℝ) ^ sigma1) m q.2.1 q.2.2 :=
+              ⟨hκ1m, hmx, hxy, lt_of_lt_of_le hlast hroot⟩
+            have hP3 : (m, q.2.1, q.2.2) ∈ primeTriples N (fun p q r =>
+                (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ sigma1) :=
+              mem_primeTriples_mk hmN h2N h3N (hDprime m hmD) hp2 hp3 (hDcop m hmD) hc2 hc3 hC3
+            have hA1 : m ≠ q.2.1 := by omega
+            have hA2 : m ≠ q.2.2 := by omega
+            have hA3 : q.2.1 ≠ q.2.2 := by omega
+            have hprod : m * q.2.1 * q.2.2 ∣ a :=
+              mul3_dvd (hDprime m hmD) hp2 hp3 hA1 hA2 hA3
+                (hDdvd m hmD) (dvd_second hdvd) (dvd_third hdvd)
+            have hsift' : Wu41.Sifted (N * m) (q.2.1 : ℝ) a :=
+              sifted_mul_of_level ha0 (hDprime m hmD) (fun r hr hrN hrm => by
+                rw [h2eq]
+                exact_mod_cast hm₂min r (by rw [hD]; exact mem_filter.mpr ⟨hr, hrN⟩) (by omega))
+            exact mem_filter.mpr ⟨mem_filter.mpr ⟨hP3, hprod, hsift'⟩, not_lt.mpr hκ3⟩
+          · intro q hq p hp hqp
+            have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ (mem_filter.mp hq).1)
+            have hp1 : p.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ (mem_filter.mp hp).1)
+            have e1 : q.2.1 = p.2.1 := by
+              have h3 : (m, q.2.1, q.2.2) = (m, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with h1 _
+            have e2 : q.2.2 = p.2.2 := by
+              have h3 : (m, q.2.1, q.2.2) = (m, p.2.1, p.2.2) := hqp
+              injection h3 with _ h
+              injection h with _ h2
+            obtain ⟨q1, q2, q3⟩ := q
+            obtain ⟨p1, p2, p3⟩ := p
+            simp only at hq1 hp1 e1 e2 ⊢
+            rw [show q1 = p1 by rw [hq1, hp1], e1, e2]
+        simp only [hX2e, card_empty, zero_add]
+        omega
+      · -- `N^{κ₂} ≤ m`: the first four sums vanish and `Δ₁ + S₄ ≥ 0`
+        have hmκ : (N : ℝ) ^ kappa2 ≤ (m : ℝ) := not_lt.mp hk
+        have hsub : X2 ⊆ X3 := by
+          intro q hq
+          obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX2 ▸ hq)
+          obtain ⟨h1N, h2N, h3N, hp1, hp2, hp3, hc1, hc2, hc3, hC⟩ := mem_primeTriples hq3
+          obtain ⟨h1, h2, h3, h4, h5⟩ := hC
+          refine mem_filter.mpr ⟨mem_primeTriples_mk h1N h2N h3N hp1 hp2 hp3 hc1 hc2 hc3 ?_, hdvd, ?_⟩
+          · exact ⟨le_trans hκlt.le h1, by exact_mod_cast lt_of_lt_of_le h2 h3, h4, h5⟩
+          · refine sifted_mul_of_level ha0 hp1 ?_
+            intro r hr hrN hr1
+            by_cases hr2 : r = q.2.1
+            · rw [hr2]
+            · exact_mod_cast le_trans h4.le (sift_mul2_le ha0 hp1 hp2 hs hr hrN hr1 hr2)
+        have hX0e : X0 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+          obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX0 ▸ hq)
+          obtain ⟨-, -, -, -, -, -, -, -, -, hC⟩ := mem_primeTriples hq3
+          obtain ⟨hκ1, h12, h23, hlast⟩ := hC
+          have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ hq)
+          have : (m : ℝ) < (q.2.2 : ℝ) := by
+            exact_mod_cast lt_trans (by rw [← hq1]; exact h12) h23
+          linarith [hlast])
+        have hX1e : X1 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+          obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX1 ▸ hq)
+          obtain ⟨-, -, -, -, -, -, -, -, -, hC⟩ := mem_primeTriples hq3
+          obtain ⟨hκ1, h12, h2κ, hκ3, hlast⟩ := hC
+          have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ hq)
+          have : (m : ℝ) < (q.2.1 : ℝ) := by
+            exact_mod_cast (by rw [← hq1]; exact h12)
+          linarith)
+        have hX10e : X10 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+          obtain ⟨hq4, hdvd, hs⟩ := mem_filter.mp (hX10 ▸ hq)
+          obtain ⟨-, -, -, -, hp1, -, -, -, -, -, -, -, hC⟩ := mem_P4 hq4
+          obtain ⟨hκ1, h12, h23, h34, hlast⟩ := hC
+          have hq1 : q.1 = m := first_eq_min_quad ha0 hmD hmin
+            (fun p r s t h => h.2.1) (hX10 ▸ hq)
+          have : (m : ℝ) < (q.2.2.2 : ℝ) := by
+            exact_mod_cast (by rw [← hq1]; exact lt_trans h12 (lt_trans h23 h34))
+          linarith [hlast])
+        have hX11e : X11 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+          obtain ⟨hq4, hdvd, hs⟩ := mem_filter.mp (hX11 ▸ hq)
+          obtain ⟨-, -, -, -, hp1, -, -, -, -, -, -, -, hC⟩ := mem_P4 hq4
+          obtain ⟨hκ1, h12, h23, h3κ, hκ4, hlast⟩ := hC
+          have hq1 : q.1 = m := first_eq_min_quad ha0 hmD hmin
+            (fun p r s t h => h.2.1) (hX11 ▸ hq)
+          have : (m : ℝ) < (q.2.2.1 : ℝ) := by
+            exact_mod_cast (by rw [← hq1]; exact lt_trans h12 h23)
+          linarith)
+        simp only [hX0e, hX1e, hX10e, hX11e, card_empty, zero_add, add_zero]
+        exact Finset.card_le_card hsub
+    · -- `D` has no second element: every count vanishes
+      have hde : D.erase m = ∅ := Finset.not_nonempty_iff_eq_empty.mp h2
+      have hall : ∀ p ∈ D, p = m := by
+        intro p hp
+        by_contra hne
+        have hmem : p ∈ D.erase m := Finset.mem_erase.mpr ⟨hne, hp⟩
+        rw [hde] at hmem
+        exact absurd hmem (Finset.notMem_empty p)
+      have hX0e : X0 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+        obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX0 ▸ hq)
+        obtain ⟨-, -, -, hp1, hp2, -, -, hc2, -, hC⟩ := mem_primeTriples hq3
+        obtain ⟨hκ1, h12, h23, hlast⟩ := hC
+        have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX0 ▸ hq)
+        have h2Da : q.2.1 ∈ D := by
+          rw [hD]
+          exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_second hdvd, ha0.ne'⟩,
+            (hp2.coprime_iff_not_dvd).mp hc2⟩
+        have := hall q.2.1 h2Da
+        omega)
+      have hX1e : X1 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+        obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX1 ▸ hq)
+        obtain ⟨-, -, -, hp1, hp2, -, -, hc2, -, hC⟩ := mem_primeTriples hq3
+        obtain ⟨hκ1, h12, h2κ, hκ3, hlast⟩ := hC
+        have hq1 : q.1 = m := first_eq_min ha0 hmD hmin (hX1 ▸ hq)
+        have h2Da : q.2.1 ∈ D := by
+          rw [hD]
+          exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_second hdvd, ha0.ne'⟩,
+            (hp2.coprime_iff_not_dvd).mp hc2⟩
+        have := hall q.2.1 h2Da
+        omega)
+      have hX2e : X2 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+        obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX2 ▸ hq)
+        obtain ⟨-, -, -, hp1, hp2, -, -, hc2, -, hC⟩ := mem_primeTriples hq3
+        obtain ⟨h1, h2, h3, h4, h5⟩ := hC
+        have hlt1 : ∀ p r s : ℕ,
+            ((N : ℝ) ^ kappa2 ≤ p ∧ (p : ℝ) < (N : ℝ) ^ sigma2 ∧
+              (N : ℝ) ^ sigma2 ≤ r ∧ r < s ∧ (s : ℝ) < (N : ℝ) ^ sigma1) → p < r := by
+          intro p r s h
+          exact_mod_cast lt_of_lt_of_le (h.2.1 : (p : ℝ) < (N : ℝ) ^ sigma2)
+            (h.2.2.1 : (N : ℝ) ^ sigma2 ≤ (r : ℝ))
+        have hlt2 : ∀ p r s : ℕ,
+            ((N : ℝ) ^ kappa2 ≤ p ∧ (p : ℝ) < (N : ℝ) ^ sigma2 ∧
+              (N : ℝ) ^ sigma2 ≤ r ∧ r < s ∧ (s : ℝ) < (N : ℝ) ^ sigma1) → r < s :=
+          fun p r s h => h.2.2.2.1
+        have hq1 := first_eq_min_mul2 (C := fun p r s => (N : ℝ) ^ kappa2 ≤ p ∧
+          (p : ℝ) < (N : ℝ) ^ sigma2 ∧ (N : ℝ) ^ sigma2 ≤ r ∧ r < s ∧
+          (s : ℝ) < (N : ℝ) ^ sigma1) ha0 hmD hmin hlt1 hlt2 (hX2 ▸ hq)
+        have hlt : q.1 < q.2.1 := hlt1 q.1 q.2.1 q.2.2 ⟨h1, h2, h3, h4, h5⟩
+        have h2Da : q.2.1 ∈ D := by
+          rw [hD]
+          exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_second hdvd, ha0.ne'⟩,
+            (hp2.coprime_iff_not_dvd).mp hc2⟩
+        have := hall q.2.1 h2Da
+        omega)
+      have hX3e : X3 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+        obtain ⟨hq3, hdvd, hs⟩ := mem_filter.mp (hX3 ▸ hq)
+        obtain ⟨-, -, -, hp1, hp2, -, -, hc2, -, hC⟩ := mem_primeTriples hq3
+        obtain ⟨hκ1, h12, h23, hlast⟩ := hC
+        have hq1 : q.1 = m := first_eq_min_mul ha0 hmD hmin (fun p r s h => h.2.1) (hX3 ▸ hq)
+        have h2Da : q.2.1 ∈ D := by
+          rw [hD]
+          exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_second hdvd, ha0.ne'⟩,
+            (hp2.coprime_iff_not_dvd).mp hc2⟩
+        have := hall q.2.1 h2Da
+        omega)
+      have hX10e : X10 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+        obtain ⟨hq4, hdvd, hs⟩ := mem_filter.mp (hX10 ▸ hq)
+        obtain ⟨-, -, -, -, hp1, hp2, -, -, -, hc2, -, -, hC⟩ := mem_P4 hq4
+        obtain ⟨hκ1, h12, h23, h34, hlast⟩ := hC
+        have hq1 : q.1 = m := first_eq_min_quad ha0 hmD hmin
+          (fun p r s t h => h.2.1) (hX10 ▸ hq)
+        have h2Da : q.2.1 ∈ D := by
+          rw [hD]
+          exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_q_second hdvd, ha0.ne'⟩,
+            (hp2.coprime_iff_not_dvd).mp hc2⟩
+        have := hall q.2.1 h2Da
+        omega)
+      have hX11e : X11 = ∅ := Finset.eq_empty_iff_forall_notMem.mpr (fun q hq => by
+        obtain ⟨hq4, hdvd, hs⟩ := mem_filter.mp (hX11 ▸ hq)
+        obtain ⟨-, -, -, -, hp1, hp2, -, -, -, hc2, -, -, hC⟩ := mem_P4 hq4
+        obtain ⟨hκ1, h12, h23, h3κ, hκ4, hlast⟩ := hC
+        have hq1 : q.1 = m := first_eq_min_quad ha0 hmD hmin
+          (fun p r s t h => h.2.1) (hX11 ▸ hq)
+        have h2Da : q.2.1 ∈ D := by
+          rw [hD]
+          exact mem_filter.mpr ⟨Nat.mem_primeFactors.mpr ⟨hp2, dvd_q_second hdvd, ha0.ne'⟩,
+            (hp2.coprime_iff_not_dvd).mp hc2⟩
+        have := hall q.2.1 h2Da
+        omega)
+      rw [hX0e, hX1e, hX2e, hX3e, hX10e, hX11e]
+      simp only [card_empty, le_refl, add_zero, zero_add]
+
 /-- LEAF. Wu 2004 page 37 last display, after equation 9.9.
 Buchstab cancellation bounds Delta two from below after discarding Upsilon 15. -/
 theorem delta_cancellation : ∃ C : ℝ, 0 ≤ C ∧ ∃ N0 : ℕ,
     ∀ N : ℕ, Even N → N0 ≤ N →
       -sieveTerms N 10 - sieveTerms N 11 ≤ deltaOne N + tripleTerms N 3 +
         C * (N : ℝ) ^ (11 / 12 : ℝ) := by
-  sorry
+  refine ⟨0, le_refl 0, 4, ?_⟩
+  intro N hEven hN
+  rw [zero_mul, add_zero]
+  have hbnd := primeSequence_bounds hEven hN
+  set c0 : ℕ → ℕ := fun a => #{q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧
+      p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ kappa2) |
+      q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted N (q.1 : ℝ) a} with hc0
+  set c1 : ℕ → ℕ := fun a => #{q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧
+      p < q ∧ (q : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ r ∧
+      (r : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / q) |
+      q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted N (q.1 : ℝ) a} with hc1
+  set c2 : ℕ → ℕ := fun a => #{q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa2 ≤ p ∧
+      (p : ℝ) < (N : ℝ) ^ sigma2 ∧ (N : ℝ) ^ sigma2 ≤ q ∧ q < r ∧
+      (r : ℝ) < (N : ℝ) ^ sigma1) |
+      q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1 * q.2.1) (q.2.2 : ℝ) a} with hc2
+  set c3 : ℕ → ℕ := fun a => #{q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧
+      p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ sigma1) |
+      q.1 * q.2.1 * q.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a} with hc3
+  set c10 : ℕ → ℕ := fun a => #{q ∈ Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧
+      p < q ∧ q < r ∧ r < s ∧ (s : ℝ) < (N : ℝ) ^ kappa2) |
+      q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a} with hc10
+  set c11 : ℕ → ℕ := fun a => #{q ∈ Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧
+      p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ s ∧
+      (s : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / r) |
+      q.1 * q.2.1 * q.2.2.1 * q.2.2.2 ∣ a ∧ Wu41.Sifted (N * q.1) (q.2.1 : ℝ) a} with hc11
+  have hs0 : tripleTerms N 0 = ∑ a ∈ primeSequence N, ((c0 a : ℕ) : ℝ) := by
+    rw [show tripleTerms N 0 = ((∑ q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧
+        p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ kappa2),
+        S (primeSequence N) (q.1 * q.2.1 * q.2.2) N q.1 : ℕ) : ℝ) from rfl,
+      Wu08Sum.swap1]
+    push_cast
+    rfl
+  have hs1 : tripleTerms N 1 = ∑ a ∈ primeSequence N, ((c1 a : ℕ) : ℝ) := by
+    rw [show tripleTerms N 1 = ((∑ q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧
+        p < q ∧ (q : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ r ∧
+        (r : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / q),
+        S (primeSequence N) (q.1 * q.2.1 * q.2.2) N q.1 : ℕ) : ℝ) from rfl,
+      Wu08Sum.swap1]
+    push_cast
+    rfl
+  have hs2 : tripleTerms N 2 = ∑ a ∈ primeSequence N, ((c2 a : ℕ) : ℝ) := by
+    rw [show tripleTerms N 2 = ((∑ q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa2 ≤ p ∧
+        (p : ℝ) < (N : ℝ) ^ sigma2 ∧ (N : ℝ) ^ sigma2 ≤ q ∧ q < r ∧
+        (r : ℝ) < (N : ℝ) ^ sigma1),
+        S (primeSequence N) (q.1 * q.2.1 * q.2.2) (N * q.1 * q.2.1) q.2.2 : ℕ) : ℝ) from rfl,
+      Wu08Sum.swap1]
+    push_cast
+    rfl
+  have hs3 : tripleTerms N 3 = ∑ a ∈ primeSequence N, ((c3 a : ℕ) : ℝ) := by
+    rw [show tripleTerms N 3 = ((∑ q ∈ primeTriples N (fun p q r => (N : ℝ) ^ kappa1 ≤ p ∧
+        p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ sigma1),
+        S (primeSequence N) (q.1 * q.2.1 * q.2.2) (N * q.1) q.2.1 : ℕ) : ℝ) from rfl,
+      Wu08Sum.swap1]
+    push_cast
+    rfl
+  have hs10 : sieveTerms N 10 = ∑ a ∈ primeSequence N, ((c10 a : ℕ) : ℝ) := by
+    rw [show sieveTerms N 10 = ((∑ q ∈ Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧
+        p < q ∧ q < r ∧ r < s ∧ (s : ℝ) < (N : ℝ) ^ kappa2),
+        S (primeSequence N) (q.1 * q.2.1 * q.2.2.1 * q.2.2.2) (N * q.1) q.2.1 : ℕ) : ℝ)
+        from rfl, Wu08Sum.swap1]
+    push_cast
+    rfl
+  have hs11 : sieveTerms N 11 = ∑ a ∈ primeSequence N, ((c11 a : ℕ) : ℝ) := by
+    rw [show sieveTerms N 11 = ((∑ q ∈ Wu08Sum.P4 N (fun p q r s => (N : ℝ) ^ kappa1 ≤ p ∧
+        p < q ∧ q < r ∧ (r : ℝ) < (N : ℝ) ^ kappa2 ∧ (N : ℝ) ^ kappa2 ≤ s ∧
+        (s : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) / r),
+        S (primeSequence N) (q.1 * q.2.1 * q.2.2.1 * q.2.2.2) (N * q.1) q.2.1 : ℕ) : ℝ)
+        from rfl, Wu08Sum.swap1]
+    push_cast
+    rfl
+  have hnat : (∑ a ∈ primeSequence N, c0 a) + (∑ a ∈ primeSequence N, c1 a) +
+      (∑ a ∈ primeSequence N, c2 a) ≤
+      (∑ a ∈ primeSequence N, c3 a) + (∑ a ∈ primeSequence N, c10 a) +
+        (∑ a ∈ primeSequence N, c11 a) := by
+    simp only [← Finset.sum_add_distrib]
+    exact Finset.sum_le_sum (fun a ha => per_a_count hN (hbnd a ha).1 (hbnd a ha).2)
+  have hreal : (∑ a ∈ primeSequence N, ((c0 a : ℕ) : ℝ)) +
+      (∑ a ∈ primeSequence N, ((c1 a : ℕ) : ℝ)) + (∑ a ∈ primeSequence N, ((c2 a : ℕ) : ℝ))
+      ≤ (∑ a ∈ primeSequence N, ((c3 a : ℕ) : ℝ)) +
+        (∑ a ∈ primeSequence N, ((c10 a : ℕ) : ℝ)) +
+        (∑ a ∈ primeSequence N, ((c11 a : ℕ) : ℝ)) := by
+    have h : ((∑ a ∈ primeSequence N, c0 a) + (∑ a ∈ primeSequence N, c1 a) +
+        (∑ a ∈ primeSequence N, c2 a) : ℕ) ≤
+        ((∑ a ∈ primeSequence N, c3 a) + (∑ a ∈ primeSequence N, c10 a) +
+          (∑ a ∈ primeSequence N, c11 a) : ℕ) := hnat
+    have h' := Nat.cast_le (α := ℝ) |>.mpr h
+    push_cast at h'
+    linarith only [h']
+  rw [show deltaOne N = -tripleTerms N 0 - tripleTerms N 1 - tripleTerms N 2 from rfl,
+    hs0, hs1, hs2, hs3, hs10, hs11]
+  linarith only [hreal]
+
 
 /-- The exact weighted_sieve_power statement follows from three smaller leaves.
 OPEN through first_half, second_half and delta_cancellation. -/

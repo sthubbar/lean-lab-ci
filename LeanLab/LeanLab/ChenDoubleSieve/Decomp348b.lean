@@ -30,6 +30,8 @@ def lowerIntegral4 (f : ℝ → ℝ) : ℝ :=
 def main4 (f : ℝ → ℝ) (B : ℝ) (N : ℕ) : ℝ :=
   (N : ℝ) / log N * lowerDensity N * lowerSum4 f B N
 
+-- FREE-nv-minimax task169 attempt: the direct IsLinearSieve projections for both leaves were tried and failed because the hypothesis has no such fields.
+
 /-- LEAF. Wu 2004 page 39 equation 10.5, application of Lemmas 2.2 and 2.3.
 This estimates only the count by its finite prime sum main term.
 The replacement of li N by N over log N is included in the normalized error. -/
