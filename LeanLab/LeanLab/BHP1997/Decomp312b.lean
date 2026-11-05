@@ -14,7 +14,17 @@ Lemma 28 and the final density computation. Supply the upper sifted family
 at one fixed positive divisor exponent, together with an auxiliary
 Möbius-truncated family, both mean values 4.1, its I1 density and a
 small absolute difference on I. The discarded domains and multiplicities remain part of this
-input. No short-window Perron transfer is asserted. OPEN. -/
+input. No short-window Perron transfer is asserted. OPEN.
+Choose the existential auxiliary family b with a smooth weight that tapers
+at x/2 and 2x before applying MeanValue41. Keep the weight equal to 1 on
+I and I1 for all sufficiently large x. This preserves the local approximation
+and reference density while removing the sharp endpoint terms.
+Gate QUESTION: positive density with a sharp cutoff at either endpoint
+fails printed 4.1 for the principal character at q = 1. The same principal
+character obstruction affects the printed Lemma 10 step bounding the
+supremum norm of L. The existential choice of b permits this taper, so that
+obstruction does not rule out this supply leaf. Constructing b and proving
+all its estimates remain OPEN. -/
 theorem upper_mean_value_supply (h4 : Thm4.Theorem4Paper) :
     ∃ B0 η : ℝ, 0 < B0 ∧ 0 < η ∧ ∀ ε : ℝ, 0 < ε → ε < η →
       ∃ (u1 : ℝ) (c1 b : ℝ → ℕ → ℝ),

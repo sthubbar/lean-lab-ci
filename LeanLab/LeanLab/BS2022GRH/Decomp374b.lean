@@ -1,0 +1,74 @@
+/- AI wrote this Lean code for CODEX task374. Goldbach is open.
+The single endpoint, boundary correction and scalar comparison on journal p. 1224.
+https://doi.org/10.1007/s11139-024-00866-x -/
+import LeanLab.BS2022GRH.Decomp148a
+import LeanLab.BS2022GRH.Prefix374
+
+namespace LeanLab.BS2022GRH.Decomp374b
+open Real Finset Classical ChenThresholdGRH Decomp148a
+noncomputable section
+
+/-- The character sum over primes up to a real endpoint, journal p. 1224. -/
+def primePrefix (x : ℝ) {r : ℕ} (χ : DirichletCharacter ℂ r) : ℂ :=
+  ∑ p ∈ (range (⌊x⌋₊ + 1)).filter (fun p => p.Prime), χ p
+
+/-- LEAF. Journal p. 1224, the endpoint application of Lemma 3 before display 13.
+Use Ernvall Hytonen and Palojarvi Theorem 1, arXiv 2003.01925 p. 2,
+and cancellation of a nonprincipal character over the reduced residues.
+This estimates one endpoint, not a prime interval.
+CONDITIONAL ON the existing progression_at_endpoint input. The finite residue reduction is proved. -/
+theorem prefix_bound (hG : GRH) (x : ℝ) (r : ℕ)
+    (hx : 25 ≤ x) (hr : 3 ≤ r) (hrx : (r : ℝ) ≤ √x)
+    (χ : DirichletCharacter ℂ r) (hχ : χ ≠ 1) :
+    ‖primePrefix x χ‖ ≤ r.totient * (qG x * √x * log x) := by
+  apply Prefix374.norm_sum_of_residue_errors _ r (by omega) χ hχ
+  intro a ha
+  have har : a % r = a := Nat.mod_eq_of_lt (mem_range.mp (mem_filter.mp ha).1)
+  have hp := DecompC164a.progression_at_endpoint hG r a x hr hrx (mem_filter.mp ha).2
+  simpa only [filter_filter, har] using hp
+
+/-- LEAF. Journal p. 1224, the endpoint correction E before display 13.
+Each of the two possible prime endpoints contributes at most one.
+This finite correction has no GRH or progression estimate. -/
+theorem interval_boundary (Y Z : ℝ) (r : ℕ)
+    (hZ : 25 ≤ Z) (hZY : Z < Y) (χ : DirichletCharacter ℂ r) :
+    ‖(∑ p ∈ pRange Y Z, χ p) - (primePrefix Y χ - primePrefix Z χ)‖ ≤ 2 := by
+  sorry
+
+/-- LEAF. Journal p. 1224, the last scalar comparison before display 13.
+The whole error envelope increases on this ray. Antitonicity of qG alone is insufficient. -/
+theorem error_envelope_mono (Y Z : ℝ) (hZ : 25 ≤ Z) (hZY : Z < Y) :
+    qG Z * √Z * log Z ≤ qG Y * √Y * log Y := by
+  sorry
+
+/-- Exact statement of Decomp148b.prime_character_bound from the three smaller steps.
+CONDITIONAL ON prefix_bound, interval_boundary and error_envelope_mono. -/
+theorem prime_character_bound (hG : GRH) (Y Z : ℝ) (r : ℕ)
+    (hZ : 25 ≤ Z) (hZY : Z < Y) (hr : 3 ≤ r) (hrZ : (r : ℝ) ≤ √Z)
+    (χ : DirichletCharacter ℂ r) (hχ : χ ≠ 1) :
+    ‖∑ p ∈ pRange Y Z, χ p‖ ≤ 2 * r.totient * (1 + qG Y * √Y * log Y) := by
+  have hy : 25 ≤ Y := hZ.trans hZY.le
+  have hY := prefix_bound hG Y r hy hr (hrZ.trans (sqrt_le_sqrt hZY.le)) χ hχ
+  have hZ' := prefix_bound hG Z r hZ hr hrZ χ hχ
+  have hm := error_envelope_mono Y Z hZ hZY
+  have he := interval_boundary Y Z r hZ hZY χ
+  have ht := norm_sub_le (primePrefix Y χ) (primePrefix Z χ)
+  have hi := norm_add_le
+    ((∑ p ∈ pRange Y Z, χ p) - (primePrefix Y χ - primePrefix Z χ))
+    (primePrefix Y χ - primePrefix Z χ)
+  rw [sub_add_cancel] at hi
+  have hφ : (1 : ℝ) ≤ r.totient := by
+    exact_mod_cast Nat.totient_pos.mpr (by omega : 0 < r)
+  have hm' := mul_le_mul_of_nonneg_left hm (by positivity : (0 : ℝ) ≤ r.totient)
+  calc
+    _ ≤ 2 + r.totient * (qG Y * √Y * log Y) +
+        r.totient * (qG Z * √Z * log Z) := by linarith
+    _ ≤ 2 * r.totient * (1 + qG Y * √Y * log Y) := by nlinarith
+
+end
+end LeanLab.BS2022GRH.Decomp374b
+
+#print axioms LeanLab.BS2022GRH.Decomp374b.prefix_bound
+#print axioms LeanLab.BS2022GRH.Decomp374b.interval_boundary
+#print axioms LeanLab.BS2022GRH.Decomp374b.error_envelope_mono
+#print axioms LeanLab.BS2022GRH.Decomp374b.prime_character_bound
