@@ -388,6 +388,17 @@ theorem tail_mass_integral (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
       0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}, mellinMassTerm χ δ ρ.val) ≤
       4.226 * (expTailIntegral q T + gaussianTailIntegral q δ T) := by
+  -- BLOCKED OUT OF REACH: this is the zero-count reduction of Lemma 4.5 (pages 40-42).
+  -- It requires bounding a sum over Dirichlet L-function zeros above height T by an
+  -- integral of the zero density countDensity. The hzeros hypothesis only constrains
+  -- zeros up to height T (on the critical line); zeros above T are unconstrained.
+  -- Mathlib lacks: (1) Riemann-von Mangoldt zero-counting N_q(T) ≤ C·T·log(qT),
+  -- (2) explicit formula for Dirichlet L-functions, (3) Stieltjes integral bounds
+  -- relating tsum over zeros to ∫ countDensity. Searches run: LeanSearch, Loogle,
+  -- local grep for zero count, tsum_le_integral, sum_zeros_le, countDensity in all
+  -- LeanLab files; found only Zeros269.low_zero_terms_summable (finite support for
+  -- zeros up to T) and high_zero_bound_of_mellin_sum (consumes this output).
+  -- No zero-counting theorem exists in Mathlib or the repo.
   sorry
 
 /-- LEAF. Page 41, display 4.36. This estimates only the exponential integral. -/
@@ -402,6 +413,20 @@ theorem gaussian_integral_bound (q : ℕ) [NeZero q] (δ T : ℝ) (hδ : δ ≠ 
     gaussianTailIntegral q δ T ≤
       0.18787 * |δ| * log (q * T / (2 * π)) *
         exp (-0.1065 * (T / (π * |δ|)) ^ 2) := by
+  -- BLOCKED OUT OF REACH: the pointwise Gaussian-to-exponential comparison
+  -- exp(-a*(t/s)^2) ≤ exp(-a*(T/s)^2) * exp(-lam*(t-T)) with lam = 2*a*T/s^2
+  -- gives a majorant whose integral bound A/lam + B/lam^2 needs to satisfy
+  -- A/lam + B/lam^2 ≤ 0.18787*|δ|*L. Numerical verification (100k random samples
+  -- with L=log(qT/2π), q≥1, T≥max(4π²|δ|,100)) shows this holds, but a rigorous
+  -- Lean proof requires either: (a) the Mills ratio bound
+  -- ∫_x^∞ exp(-c*u²) du ≤ exp(-c*x²)/(2cx) proved in Lean, or
+  -- (b) clearing denominators and using nlinarith with π bounds on the
+  -- resulting polynomial. Searches run: LeanSearch, Loogle, local Mathlib grep
+  -- for gaussian integral tail bounds; found integral_gaussian_Ioi (exact
+  -- from 0, not tail) and integrableOn_Ioi_exp_neg_mul_sq. No Mills tail
+  -- bound exists in Mathlib. The polynomial approach fails because nlinarith
+  -- cannot handle π; manual π-bound substitution leaves a margin too tight
+  -- for the available numeric tools.
   sorry
 
 /-- Exactly Decomp269a.high_zero_bound, from the three smaller analytic leaves.
