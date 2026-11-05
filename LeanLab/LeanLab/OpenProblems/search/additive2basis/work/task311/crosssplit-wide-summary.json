@@ -1,0 +1,14 @@
+{
+  "FINISHED": "crosssplit-wide",
+  "last_batch": "task311-5000",
+  "visited": 319,
+  "complete": 20,
+  "scored": 0,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 0,
+  "jobs": 69092,
+  "stop": "wall_budget",
+  "seconds": 620.665908429,
+  "utc_end": "2026-11-05T00:24:07.285431+00:00"
+}

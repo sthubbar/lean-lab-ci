@@ -1,0 +1,14 @@
+{
+  "FINISHED": "crosssplit-local",
+  "last_batch": "task311-2007",
+  "visited": 6261,
+  "complete": 6261,
+  "scored": 13,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 0,
+  "jobs": 69092,
+  "stop": "wall_budget",
+  "seconds": 700.105774314,
+  "utc_end": "2026-11-04T23:46:57.262800+00:00"
+}

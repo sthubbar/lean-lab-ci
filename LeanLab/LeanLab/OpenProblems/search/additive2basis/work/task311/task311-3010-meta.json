@@ -1,0 +1,25 @@
+{
+  "arguments": {
+    "label": "residue-local",
+    "first_batch": 3000,
+    "radius": 48,
+    "steps": 3,
+    "seconds": 2.0,
+    "budget": 700.0,
+    "cap": 1,
+    "low": 18,
+    "high": 120,
+    "seed": 3311,
+    "topology": "residue3",
+    "transfer": true,
+    "stream": false,
+    "centered": false,
+    "lazy": true,
+    "dual": false,
+    "source": "both"
+  },
+  "utc_start": "2026-11-04T23:46:59.102752+00:00",
+  "jobs": 198754,
+  "C_sha256": "f0df378ea4e270536e21d1d80cd71a584e10068dface42c0d5592e63489129c1",
+  "Python_sha256": "77c2146d6b480a7d9845ae6c875f7f68f19136063ac9104f900bcdc8328bf43e"
+}

@@ -1,0 +1,14 @@
+{
+  "FINISHED": "thirds-local",
+  "last_batch": "task311-1015",
+  "visited": 13083,
+  "complete": 13083,
+  "scored": 182,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 12948,
+  "jobs": 36440,
+  "stop": "wall_budget",
+  "seconds": 700.235656687,
+  "utc_end": "2026-11-04T23:35:15.414928+00:00"
+}

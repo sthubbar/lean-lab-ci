@@ -1,0 +1,25 @@
+{
+  "arguments": {
+    "label": "crosssplit-wide",
+    "first_batch": 5000,
+    "radius": 192,
+    "steps": 8,
+    "seconds": 2.0,
+    "budget": 619.1643488407135,
+    "cap": 0,
+    "low": 18,
+    "high": 120,
+    "seed": 5311,
+    "topology": "crosssplit",
+    "transfer": true,
+    "stream": false,
+    "centered": false,
+    "lazy": true,
+    "dual": false,
+    "source": "both"
+  },
+  "utc_start": "2026-11-05T00:13:44.990198+00:00",
+  "jobs": 69092,
+  "C_sha256": "f0df378ea4e270536e21d1d80cd71a584e10068dface42c0d5592e63489129c1",
+  "Python_sha256": "e2106a74d7c5cde9ad496b9518b4704d40fc85f9fbb18fb5a154d5630a6acdfc"
+}

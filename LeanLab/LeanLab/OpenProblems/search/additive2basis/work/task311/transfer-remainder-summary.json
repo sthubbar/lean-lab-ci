@@ -1,0 +1,14 @@
+{
+  "FINISHED": "transfer-remainder",
+  "last_batch": "task311-15",
+  "visited": 12301,
+  "complete": 12301,
+  "scored": 99,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 11893,
+  "jobs": 24194,
+  "stop": "all_jobs",
+  "seconds": 469.890298098,
+  "utc_end": "2026-11-04T23:23:10.409292+00:00"
+}

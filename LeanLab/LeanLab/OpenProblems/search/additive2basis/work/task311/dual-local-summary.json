@@ -1,0 +1,14 @@
+{
+  "FINISHED": "dual-local",
+  "last_batch": "task311-4001",
+  "visited": 1123,
+  "complete": 982,
+  "scored": 0,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 0,
+  "jobs": 44184,
+  "stop": "wall_budget",
+  "seconds": 900.7711944989996,
+  "utc_end": "2026-11-05T00:13:43.762937+00:00"
+}
