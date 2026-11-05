@@ -1,0 +1,112 @@
+{
+  "batches": [
+    {
+      "batch": "task356-4000",
+      "label": "local-1-pass-4",
+      "visited": 823,
+      "complete": 823,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 2,
+      "scored": 2,
+      "rankings": {
+        "miss_one": 413,
+        "three_step_prefix": 216,
+        "prefix": 194
+      },
+      "source_pools": {
+        "early_archive": 413,
+        "healthy_archive": 410
+      },
+      "source_prefixes": {
+        "early_hole": 780,
+        "endpoint": 43
+      }
+    },
+    {
+      "batch": "task356-4001",
+      "label": "local-1-pass-4",
+      "visited": 822,
+      "complete": 822,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 4,
+      "scored": 4,
+      "rankings": {
+        "miss_one": 416,
+        "three_step_prefix": 199,
+        "prefix": 207
+      },
+      "source_pools": {
+        "early_archive": 416,
+        "healthy_archive": 406
+      },
+      "source_prefixes": {
+        "early_hole": 775,
+        "endpoint": 47
+      }
+    },
+    {
+      "batch": "task356-4002",
+      "label": "local-1-pass-4",
+      "visited": 824,
+      "complete": 824,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 1,
+      "scored": 1,
+      "rankings": {
+        "prefix": 179,
+        "miss_one": 434,
+        "three_step_prefix": 211
+      },
+      "source_pools": {
+        "healthy_archive": 390,
+        "early_archive": 434
+      },
+      "source_prefixes": {
+        "early_hole": 772,
+        "endpoint": 52
+      }
+    },
+    {
+      "batch": "task356-4003",
+      "label": "local-1-pass-4",
+      "visited": 205,
+      "complete": 205,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "miss_one": 107,
+        "prefix": 51,
+        "three_step_prefix": 47
+      },
+      "source_pools": {
+        "early_archive": 107,
+        "healthy_archive": 98
+      },
+      "source_prefixes": {
+        "early_hole": 197,
+        "endpoint": 8
+      }
+    }
+  ],
+  "visited": 2674,
+  "complete": 2674,
+  "interrupted": 0,
+  "failures": 0,
+  "scored": 7,
+  "distinct": 7,
+  "BEATS": 0,
+  "BEST_generators": 10,
+  "independent_coverage": "MATCH",
+  "exact_domain_reconstruction": "MATCH",
+  "prior_attempt_overlap": 0,
+  "prior_attempt_hashes": 183901,
+  "prior_complete_hashes": 181829,
+  "judge_sources": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_artifact_bytes": 650743
+}
