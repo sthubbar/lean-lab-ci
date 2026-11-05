@@ -2806,13 +2806,27 @@ The single actual integral coefficient satisfies its printed lower bound. -/
 theorem numerical_F4 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) :
     0.697375 ≤ integralTerms F f ω 4 := by
-  sorry
+  have hF4 := F4_elementary (F := F) (f := f) h ω
+  rw [hF4]
+  have h₁ : (0.697375 : ℝ) ≤ (48 : ℝ) * ∫ t in (1/12 : ℝ)..(41/125 : ℝ), (∫ u in t..(41/125 : ℝ), Real.log (5 - 12 * t - 12 * u) / ((6 - 12 * t - 12 * u) * u)) / t := by
+    sorry
+  norm_num at h₁ ⊢
+  <;> simp_all [kappa1, kappa2]
+  <;> norm_num at *
+  <;> linarith
 
 /-- LEAF. Wu 2004 page 42 final numerical display, F5.
 The single actual integral coefficient satisfies its printed lower bound. -/
 theorem numerical_F5 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) :
     2.118119 ≤ integralTerms F f ω 5 := by
-  sorry
+  have hF5 := F5_elementary (F := F) (f := f) h ω
+  rw [hF5]
+  have h₁ : (2.118119 : ℝ) ≤ (48 : ℝ) * ∫ t in (1/12 : ℝ)..(41/125 : ℝ), (∫ u in (41/125 : ℝ)..(1/3 - t : ℝ), Real.log (5 - 12 * t - 12 * u) / ((6 - 12 * t - 12 * u) * u)) / t := by
+    sorry
+  norm_num at h₁ ⊢
+  <;> simp_all [kappa1, kappa2]
+  <;> norm_num at *
+  <;> linarith
 
 end LeanLab.ChenDoubleSieve.Task315
