@@ -72,11 +72,22 @@ theorem assembly_321_3 :
   refine ⟨Sg', hSg1, ?_⟩
   exact leaf_main_term_bound_exists_C_3 ε ε0 c H0 C X0 H X P0 P Sg' hHyp hP1 hP2 hSg1
 
-/-- LEAF arXiv:1804.05561v1 display 10.27: the truncated tail error is bounded -/
+/- REPAIRED 2026-11-05 lomos 20261105T1214Z: `1 ≤ P` added, the only change of statement in this
+file. The former form assumed only `P ≤ P0`, and `DecompJ665.truncation_leaf281_false` (also
+`DecompJ281Audit.leaf_truncation_error_false`) is a kernel-checked negation of it: at the level
+`P = 0` the exceptional set `excSet H (√X) 0 X` is the pole alone, whose `Nat.lcm pole.r pole.r`
+is `1 > P`, so the truncated sum vanishes at every cutoff `U`, the full sum keeps the pole term,
+and the right hand side `C' * (Sing m * X * log U / √U)` tends to zero as `U → ∞`, so no constant
+exists. The lower bound `1 ≤ P` is the paper's own requirement that the pole pair survive the
+`[r₁, r₂] ≤ P` restriction (`DecompJ281.pole_lcm_retained`), and `assembly_322_3` supplies it at
+`P = P0`, which lies in `[P0 X^{-ε}, P0]` once `X ≥ 1` because `Thm1Hyp` gives `1 ≤ P0`. The leaf
+itself stays OPEN: display 10.27 needs the mass of the discarded pairs, which is not in Mathlib. -/
+/-- LEAF arXiv:1804.05561v1 display 10.27: the truncated tail error is bounded, at arc levels
+`1 ≤ P ≤ P0` -/
 theorem leaf_truncation_error_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-      Thm1Hyp ε H0 X0 H X P0 → P ≤ P0 →
+      Thm1Hyp ε H0 X0 H X P0 → 1 ≤ P → P ≤ P0 →
       (excSet H (Real.sqrt X) P X).Finite →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
         Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
@@ -113,9 +124,16 @@ theorem assembly_322_3 :
     ⟨le_trans (le_max_left H0a H0b) hH0, hHlog, hXa, hP01, hP0X⟩
   have hHB : Thm1Hyp ε H0b X0b H X P0 :=
     ⟨le_trans (le_max_right H0a H0b) hH0, hHlog, hXb, hP01, hP0X⟩
-  obtain ⟨P, hP1, hP2, hFin⟩ := leaf_P_exists_3 hHA
-  obtain ⟨Sg', hSg⟩ := leaf_singular_series_converges_3 H X P
-  refine ⟨P, hP1, hP2, hFin, Sg', hSg, ?_⟩
+  -- the level `P = P0` lies in `[P0 X^{-ε}, P0]`, and it is at least `1`, as the repaired
+  -- truncation leaf requires and `Thm1Hyp` supplies
+  have hX1 : (1 : ℝ) ≤ X := by linarith
+  have hlow : P0 * X ^ (-ε) ≤ P0 := by
+    have hx : X ^ (-ε) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos hX1 (by linarith)
+    calc P0 * X ^ (-ε) ≤ P0 * 1 := mul_le_mul_of_nonneg_left hx (by linarith)
+      _ = P0 := mul_one P0
+  have hFin : (excSet H (Real.sqrt X) P0 X).Finite := excSet_finite H (Real.sqrt X) P0 X
+  obtain ⟨Sg', hSg⟩ := leaf_singular_series_converges_3 H X P0
+  refine ⟨P0, hlow, le_rfl, hFin, Sg', hSg, ?_⟩
   intro m hm
   have hmX : (m : ℝ) ≤ X := by linarith [hm.2]
   have hmpos : 0 < m := by
@@ -126,9 +144,9 @@ theorem assembly_322_3 :
     rw [show (2 : ℝ) = Real.sqrt 4 by
       rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
     exact Real.sqrt_le_sqrt hX4
-  have hb1 := leaf_main_term_bound_exists_C_3 ε (min ε1 ε2) c H0a Ca X0a H X P0 P Sg' hHA hP1
-    hP2 hSg m hmX hmpos
-  have hb2 := hC'.2 H X P0 P (Real.sqrt X) Sg' m hHB hP2 hFin hSg hm.1 hm.2 hU2
+  have hb1 := leaf_main_term_bound_exists_C_3 ε (min ε1 ε2) c H0a Ca X0a H X P0 P0 Sg' hHA
+    hlow le_rfl hSg m hmX hmpos
+  have hb2 := hC'.2 H X P0 P0 (Real.sqrt X) Sg' m hHB hP01 le_rfl hFin hSg hm.1 hm.2 hU2
   exact le_trans (norm_sub_le_norm_sub_add_norm_sub _ _ _) (add_le_add hb1 hb2)
 
 end LeanLab.Pintz2021.DecompJ834
