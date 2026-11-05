@@ -5,6 +5,10 @@ AI wrote the Lean code. Codex task307. Goldbach is open.
 Source https://gdz.sub.uni-goettingen.de/download/pdf/PPN356556735_0011/LOG_0035.pdf
 -/
 import LeanLab.Linnik.Decomp1532b
+-- ONE IMPORT EXCEPTION: closes Decomp307a.poisson_series_detector_of_turan from the proved
+-- LeanLab.Linnik.Decomp335a.poisson_series_detector_of_turan (statement byte-identical).
+-- Decomp335a and its only new dependency Decomp335c have 0 sorry; no cycle.
+import LeanLab.Linnik.Decomp335a
 
 open Finset MeasureTheory Complex
 open scoped Classical
@@ -312,17 +316,23 @@ theorem poisson_series_detector_of_turan
             η / (D ^ k * r) ≤
               ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
                 (n : ℂ) ^ (1 + I * v)) * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)‖ := by
-  sorry
+  exact LeanLab.Linnik.Decomp335a.poisson_series_detector_of_turan hpower
 
-/-- LEAF. Gallagher 1970 p.335 display 23 and the endpoint estimate below it.
+/-- LEAF, REPAIRED (U-1619, omos_tick 20261105T0144Z; changes only this statement).
+Gallagher 1970 p.335 display 23 and the endpoint estimate below it.
 Localization of a supplied dyadic Poisson series lower bound to a finite prime sum.
-The endpoint term is subtracted before partial summation. No zero is assumed here. -/
+The endpoint term is subtracted before partial summation. No zero is assumed here.
+REPAIR: `r` is bounded by a constant `r₁` chosen together with `A, B, C, c`. The old form allowed
+`r ≤ 1/4` for every `D`, but this p.335 route removes the prime square terms by taking `k` about
+`E r log T`, which needs `r log D` bounded (here `r ≤ r₁`), not `r ≤ 1/4`. See
+`Linnik/Audit1619`. `gallagher_zero_detector_of_turan` below keeps its statement and takes
+`min r₀ r₁`. -/
 theorem poisson_window_localization :
     ∀ E D η : ℝ, 1 ≤ E → 1 ≤ D → 0 < η →
-      ∃ A B C c : ℝ, 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+      ∃ r₁ A B C c : ℝ, 0 < r₁ ∧ 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
       ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
         ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
-          |v| ≤ T → 1 / Real.log T ≤ r → r ≤ 1 / 4 →
+          |v| ≤ T → 1 / Real.log T ≤ r → r ≤ r₁ →
           (∀ M : ℕ, E * r * Real.log T ≤ M →
             ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
               η / (D ^ k * r) ≤
@@ -366,9 +376,10 @@ theorem gallagher_zero_detector_of_turan
             ∫ y in x..(x ^ B), ‖primeDetector χ x y v‖ / y := by
   obtain ⟨r₀, E, D, η, hr₀, hr₀hi, hE, hD, hη, hseries⟩ :=
     poisson_series_detector_of_turan hpower
-  obtain ⟨A, B, C, c, hA, hB, hC, hc, hwindow⟩ :=
+  obtain ⟨r₁, A, B, C, c, hr₁, hA, hB, hC, hc, hwindow⟩ :=
     poisson_window_localization E D η hE hD hη
-  refine ⟨r₀, A, B, C, c, hr₀, hr₀hi, hA, hB, hC, hc, ?_⟩
+  refine ⟨min r₀ r₁, A, B, C, c, lt_min hr₀ hr₁, (min_le_left _ _).trans hr₀hi,
+    hA, hB, hC, hc, ?_⟩
   intro T hT q hq hqT χ v r hv hχ hrlo hrhi hz x hx
   have hl : 0 < Real.log T := Real.log_pos (by linarith)
   have hr : 0 < r := (one_div_pos.mpr hl).trans_le hrlo
@@ -376,8 +387,8 @@ theorem gallagher_zero_detector_of_turan
     (Real.one_le_rpow (by linarith : 1 ≤ T) (by linarith : 0 ≤ A)).trans hx
   have hxy : x ≤ x ^ B := by
     simpa using Real.rpow_le_rpow_of_exponent_le hx1 hB.le
-  obtain ⟨k, hk⟩ := hwindow T hT q hqT χ v r hv hrlo (hrhi.trans hr₀hi)
-    (hseries T hT q hqT χ v r hv hχ hrlo hrhi hz) x hx
+  obtain ⟨k, hk⟩ := hwindow T hT q hqT χ v r hv hrlo (hrhi.trans (min_le_right _ _))
+    (hseries T hT q hqT χ v r hv hχ hrlo (hrhi.trans (min_le_left _ _)) hz) x hx
   have hh := hk.trans (prime_poisson_partial_summation χ k v hr.le hx1 hxy)
   exact (mul_le_mul_iff_right₀ hr).mp (by simpa only [mul_comm r] using hh)
 
