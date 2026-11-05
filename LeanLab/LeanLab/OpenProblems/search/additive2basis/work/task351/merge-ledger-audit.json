@@ -1,0 +1,23 @@
+{
+  "LOG.md": {
+    "both_histories_preserved": true,
+    "line_counts": [
+      3973,
+      3978
+    ]
+  },
+  "LeanLab/LeanLab/OpenProblems/PROGRESS.md": {
+    "both_histories_preserved": true,
+    "line_counts": [
+      691,
+      661
+    ]
+  },
+  "LeanLab/LeanLab/OpenProblems/STATEMENTS.md": {
+    "both_histories_preserved": true,
+    "line_counts": [
+      245,
+      245
+    ]
+  }
+}
