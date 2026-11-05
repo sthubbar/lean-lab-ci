@@ -96,6 +96,39 @@ theorem assembly_322_3 :
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
           ∀ m : ℕ, X / 4 ≤ m ∧ (m : ℝ) ≤ X / 2 →
             ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P (Real.sqrt X) m‖ ≤
-              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) + C' * (Sing m * X * Real.log (Real.sqrt X) / (Real.sqrt (Real.sqrt X))) := by sorry
+              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) + C' * (Sing m * X * Real.log (Real.sqrt X) / (Real.sqrt (Real.sqrt X))) := by
+  obtain ⟨ε1, hε1, h1⟩ := leaf_constants_exist_3
+  obtain ⟨ε2, hε2, h2⟩ := leaf_truncation_error_3
+  refine ⟨min ε1 ε2, lt_min hε1 hε2, ?_⟩
+  intro ε hε hεlt
+  obtain ⟨c, H0a, Ca, X0a, hc⟩ := h1 ε hε (lt_of_lt_of_le hεlt (min_le_left ε1 ε2))
+  obtain ⟨H0b, C', X0b, hC'⟩ := h2 ε hε (lt_of_lt_of_le hεlt (min_le_right ε1 ε2))
+  refine ⟨c, max H0a H0b, Ca, C', max (max X0a X0b) 4, hc, ?_⟩
+  intro H X P0 hHyp
+  obtain ⟨hH0, hHlog, hX0, hP01, hP0X⟩ := hHyp
+  have hXa : X0a ≤ X := le_trans (le_trans (le_max_left X0a X0b) (le_max_left _ 4)) hX0
+  have hXb : X0b ≤ X := le_trans (le_trans (le_max_right X0a X0b) (le_max_left _ 4)) hX0
+  have hX4 : (4 : ℝ) ≤ X := le_trans (le_max_right _ 4) hX0
+  have hHA : Thm1Hyp ε H0a X0a H X P0 :=
+    ⟨le_trans (le_max_left H0a H0b) hH0, hHlog, hXa, hP01, hP0X⟩
+  have hHB : Thm1Hyp ε H0b X0b H X P0 :=
+    ⟨le_trans (le_max_right H0a H0b) hH0, hHlog, hXb, hP01, hP0X⟩
+  obtain ⟨P, hP1, hP2, hFin⟩ := leaf_P_exists_3 hHA
+  obtain ⟨Sg', hSg⟩ := leaf_singular_series_converges_3 H X P
+  refine ⟨P, hP1, hP2, hFin, Sg', hSg, ?_⟩
+  intro m hm
+  have hmX : (m : ℝ) ≤ X := by linarith [hm.2]
+  have hmpos : 0 < m := by
+    have h1m : (1 : ℝ) ≤ (m : ℝ) := by linarith [hm.1]
+    have : (0 : ℝ) < (m : ℝ) := lt_of_lt_of_le zero_lt_one h1m
+    exact_mod_cast this
+  have hU2 : (2 : ℝ) ≤ Real.sqrt X := by
+    rw [show (2 : ℝ) = Real.sqrt 4 by
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
+    exact Real.sqrt_le_sqrt hX4
+  have hb1 := leaf_main_term_bound_exists_C_3 ε (min ε1 ε2) c H0a Ca X0a H X P0 P Sg' hHA hP1
+    hP2 hSg m hmX hmpos
+  have hb2 := hC'.2 H X P0 P (Real.sqrt X) Sg' m hHB hP2 hFin hSg hm.1 hm.2 hU2
+  exact le_trans (norm_sub_le_norm_sub_add_norm_sub _ _ _) (add_le_add hb1 hb2)
 
 end LeanLab.Pintz2021.DecompJ834
