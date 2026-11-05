@@ -45,6 +45,30 @@ theorem leaf_weighted_mean (F : ℤ[X]) (hF : Admissible F)
         C * H * (remainderMass F c N H B +
           Real.sqrt (N * Real.log N * remainderMass F c N H B)) +
         C * H * N * Real.log N ^ (-A) := by
+  -- ATTEMPT 1 of 3: use the proved mean square input of Theorem 1 on this window.
+  -- The Lean error of our own attempt was
+  --   Application type mismatch: The argument hH has type
+  --     N ^ (1 / (6 * ↑F.natDegree) + ε) ≤ H
+  --   but is expected to have type
+  --     N ^ (1 / (3 * ↑F.natDegree) + ε / 2) ≤ H
+  --   in the application hK N H hNK hH
+  -- so the mean square input stops at windows of length N ^ (1 / (3k) + ε / 2)
+  -- while this leaf starts at N ^ (1 / (6k) + ε).
+  -- ATTEMPT 2 of 3: dominate the error with the remainder mass term. The trivial
+  -- bound |R m| ≤ m (log m) ^ 2 together with abs_sing_le_cube gives a left hand
+  -- side of size C H N (log N) ^ 2, so this route needs
+  --   remainderMass F c N H B ≥ c N (log N) ^ 2
+  -- which needs the Chebyshev level estimate sum over n ≤ M of n Λ n ≥ c M ^ 2 log M.
+  -- Mathlib only has Chebyshev.psi_ge and Chebyshev.theta_ge with theta n ≥ c n,
+  -- so the peak of the character remainder gives at best a mass of order N.
+  -- ATTEMPT 3 of 3: use the circle method expansion of the paper with the
+  -- remainderMass and square root terms of equations 26 to 28. No such identity
+  -- exists in this repository and the character input it needs is open.
+  -- BLOCKED: OUT OF REACH. Missing result: the character expansion of the window
+  -- sum of R (Fv F n).toNat - (Fv F n) * Sing (Fv F n).toNat with the error split
+  -- into C H remainderMass, C H sqrt (N log N remainderMass) and C H N log ^ (-A),
+  -- as in Perelli 1996 pages 486 and 487 equations 26 to 28, together with a
+  -- Chebyshev level lower bound for the von Mangoldt weighted moment.
   sorry
 
 
@@ -624,6 +648,32 @@ theorem leaf_remainder_mean (F : ℤ[X]) (hF : Admissible F)
       N ^ (1 / (6 * (F.natDegree : ℝ)) + ε) ≤ H →
       H ≤ N ^ (1 / (F.natDegree : ℝ) - ε) →
       remainderMass F c N H B ≤ C * N * Real.log N ^ (-2 * A - 1) := by
+  -- ATTEMPT 1 of 3: use the published character remainder input of this paper,
+  -- which is Decomp88.leaf_character of pages 484 and 485 equations 18 to 25.
+  -- The Lean error of our own attempt was
+  --   Application type mismatch: The argument hH has type
+  --     N ^ (1 / (6 * ↑F.natDegree) + ε) ≤ H
+  --   but is expected to have type
+  --     N ^ (1 / (3 * ↑F.natDegree) + ε / 2) ≤ H
+  --   in the application hrem N H hNN' hH
+  -- The same input also uses the radius 1 / (q * fareyOrder F N H B) and an
+  -- interval integral, while this leaf uses the radius 1 / (q * meanOrder F N H B)
+  -- and a set integral over Set.Icc, so it cannot be applied term by term.
+  -- ATTEMPT 2 of 3: bound the character remainder pointwise. From
+  -- ArithmeticFunction.vonMangoldt_le_log and Kernel.norm_T_le one gets
+  --   norm (characterRemainder M q a η) ≤ (M + 1) log (M + 1) + (M + 1)
+  -- and summing the arc lengths gives a mass of order
+  --   N ^ 2 (log N) ^ 2 (log N) ^ (2 B) / H ^ k
+  -- which is larger than the target N log ^ (-2 A - 1) N by a factor of N.
+  -- ATTEMPT 3 of 3: use Parseval over a full period. The period mass is
+  -- sum over n ≤ M of (Λ n - 1) ^ 2, and Mathlib has no lower bound of the
+  -- needed size for it, while the arc interval is much shorter than the period.
+  -- BLOCKED: OUT OF REACH. Missing result: a uniform bound of
+  --   (integral over |η| ≤ 1 / (q * meanOrder F N H B)) of
+  --     norm (characterRemainder ⌊c * N⌋₊ q a η) ^ 2
+  --   by C N log ^ (-B) N for every q ≤ log N ^ B and every a coprime to q,
+  -- which is the input of Perelli 1996 pages 484 and 485 equations 18 to 25.
+  -- That input is Decomp88.leaf_character and it is open in this repository.
   sorry
 
 /-- The exact existing prime mean target from the three smaller leaves.
