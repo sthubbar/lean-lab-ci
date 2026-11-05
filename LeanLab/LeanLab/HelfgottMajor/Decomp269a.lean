@@ -54,6 +54,7 @@ theorem explicit_formula_remainder (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
   -- The assembly gaussian_estimate_of_components and gaussian_explicit_estimate
   -- are already proven and only depend on these three analytic leaves.
   sorry
+BLOCKED explicit_formula_remainder: requires explicit formula for Dirichlet L-functions (contour integration, Hadamard factorization, zero-free regions); Mathlib lacks Mellin inversion on strips, zero-density estimates, Montgomery-Vaughan Lemma 6.3.
 
 /-- LEAF. Page 43 applies Lemma 4.4, display 4.29 on page 39, and the norms in 4.42.
 This bounds only zeros up to T on the critical line.
