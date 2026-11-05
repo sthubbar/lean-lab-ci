@@ -321,6 +321,28 @@ theorem prime_power_and_initial_segment :
     _ = _ := by ring
 
 
+/-- The exact divisor identity for the von Mangoldt polynomial.
+Mathlib gives it from the divisor convolution of log and the Moebius function.
+This is the algebraic input for the dyadic factor pair split of the retained identity. -/
+theorem vonMangoldt_moebius_log_divisor (n : ℕ) :
+    (ArithmeticFunction.vonMangoldt n : ℝ) =
+      ∑ d ∈ n.divisors, (ArithmeticFunction.moebius d : ℝ) * Real.log ↑(n / d) := by
+  have h := congrArg (fun f : ArithmeticFunction ℝ => f n)
+    ArithmeticFunction.log_mul_moebius_eq_vonMangoldt
+  rw [ArithmeticFunction.mul_apply] at h
+  calc
+    (ArithmeticFunction.vonMangoldt n : ℝ) =
+        ∑ x ∈ n.divisorsAntidiagonal, ArithmeticFunction.log x.1 *
+          (ArithmeticFunction.moebius x.2 : ℝ) := h.symm
+    _ = ∑ x ∈ n.divisorsAntidiagonal, (ArithmeticFunction.moebius x.2 : ℝ) * Real.log x.1 := by
+          apply sum_congr rfl
+          intro x hx
+          rw [mul_comm]
+          simp only [ArithmeticFunction.log_apply]
+    _ = ∑ d ∈ n.divisors, (ArithmeticFunction.moebius d : ℝ) * Real.log ↑(n / d) := by
+          rw [Nat.sum_divisorsAntidiagonal'
+            (fun i j => (ArithmeticFunction.moebius j : ℝ) * Real.log i)]
+
 /-- LEAF. Tolev 1999 page 71 Lemma 4 and page 82 displays 53 and 54.
 Heath Brown 1982 pages 1367 to 1368 displays 6 to 8 give the written proof.
 This is an exact finite identity for the retained von Mangoldt polynomial.
