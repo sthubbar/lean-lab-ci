@@ -13,12 +13,477 @@ open scoped BigOperators
 noncomputable def localMajorant (q : ℕ) : ℝ :=
   ∏ p ∈ q.primeFactors, (1 + 6 / (p : ℝ))
 
+/-! ### Towards `A2_coprime_mul`: the coefficient as a double unit-sum -/
+
+/-- The additive character `ee` turns sums into products. -/
+private lemma ee_add_292a (s t : ℝ) : U1534.ee s * U1534.ee t = U1534.ee (s + t) := by
+  unfold U1534.ee
+  rw [← Complex.exp_add]
+  congr 1
+  push_cast
+  ring
+
+/-- The classical Ramanujan-sum form: `∑_a gaussS q a · e(-a n/q)` is a double sum over
+units `(x, a)` of `e(a (x² - n)/q)`. -/
+private lemma A2_pair_form (n q : ℕ) (hq : 0 < q) :
+    (∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+        U1534.gaussS q a * U1534.ee (-(((a * n : ℕ) : ℝ) / (q : ℝ))))
+      = ∑ x ∈ (Finset.range q).filter (fun x => Nat.Coprime x q),
+          ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+            U1534.ee (((((a : ℤ) * ((x : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ)) := by
+  classical
+  set S : Finset ℕ := (Finset.range q).filter (fun a => Nat.Coprime a q) with hS
+  have hstep : ∀ a ∈ S,
+      U1534.gaussS q a * U1534.ee (-(((a * n : ℕ) : ℝ) / (q : ℝ)))
+        = ∑ x ∈ S, U1534.ee (((((a : ℤ) * ((x : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ)) := by
+    intro a ha
+    unfold U1534.gaussS
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl ?_
+    intro x hx
+    have harg : ((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ) + (-(((a * n : ℕ) : ℝ) / (q : ℝ)))
+        = ((((a : ℤ) * ((x : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ) := by
+      push_cast
+      ring
+    rw [← harg, ee_add_292a]
+  calc (∑ a ∈ S, U1534.gaussS q a * U1534.ee (-(((a * n : ℕ) : ℝ) / (q : ℝ))))
+      = ∑ a ∈ S, ∑ x ∈ S, U1534.ee (((((a : ℤ) * ((x : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ)) :=
+        Finset.sum_congr rfl hstep
+    _ = ∑ x ∈ S, ∑ a ∈ S, U1534.ee (((((a : ℤ) * ((x : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ)) :=
+        Finset.sum_comm
+
+/-- `ee` at a rational with denominator `q` is the standard additive character on `ZMod q`. -/
+private lemma ee_eq_stdAddChar_292a (q : ℕ) [NeZero q] (j : ℤ) :
+    U1534.ee ((j : ℝ) / (q : ℝ)) = ZMod.stdAddChar (N := q) (j : ZMod q) := by
+  rw [ZMod.stdAddChar_coe]
+  unfold U1534.ee
+  congr 1
+  push_cast
+  ring
+
+/-- Reindexing a sum over the unit residues of `q` as a sum over the units of `ZMod q`. -/
+private lemma sum_units_eq_sum_zmod_units (q : ℕ) [NeZero q] (g : ℕ → ℂ) :
+    (∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q), g a)
+      = ∑ y ∈ (Finset.univ : Finset (ZMod q)).filter (fun y => IsUnit y), g y.val := by
+  classical
+  refine Finset.sum_bij (fun (a : ℕ) _ => (a : ZMod q)) ?_ ?_ ?_ ?_
+  · intro a ha
+    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_univ, true_and] at ha ⊢
+    rw [ZMod.isUnit_iff_coprime]
+    exact ha.2
+  · intro a1 ha1 a2 ha2 heq
+    simp only [Finset.mem_filter, Finset.mem_range] at ha1 ha2
+    have h := congrArg ZMod.val heq
+    rwa [ZMod.val_natCast_of_lt ha1.1, ZMod.val_natCast_of_lt ha2.1] at h
+  · intro y hy
+    refine ⟨y.val, ?_, ZMod.natCast_zmod_val y⟩
+    simp only [Finset.mem_filter, Finset.mem_range]
+    refine ⟨ZMod.val_lt y, ?_⟩
+    have hy' : IsUnit y := (Finset.mem_filter.mp hy).2
+    rw [← ZMod.natCast_zmod_val y, ZMod.isUnit_iff_coprime] at hy'
+    exact hy'
+  · intro a ha
+    simp only [Finset.mem_filter, Finset.mem_range] at ha
+    rw [ZMod.val_natCast_of_lt ha.1]
+
+/-- The single-modulus character form of a unit sum. -/
+private lemma ee_unit_char_292a (n q : ℕ) [NeZero q] :
+    (∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+        U1534.ee ((((a * n : ℕ) : ℝ) / (q : ℝ))))
+      = ∑ y ∈ (Finset.univ : Finset (ZMod q)).filter (fun y => IsUnit y),
+          ZMod.stdAddChar (N := q) ((n : ZMod q) * y) := by
+  classical
+  rw [sum_units_eq_sum_zmod_units q (fun a => U1534.ee ((((a * n : ℕ) : ℝ) / (q : ℝ))))]
+  refine Finset.sum_congr rfl ?_
+  intro y _
+  have h := ee_eq_stdAddChar_292a q ((y.val : ℤ) * (n : ℤ))
+  have hc : ((y.val * n : ℕ) : ℝ) = ((((y.val : ℤ) * (n : ℤ)) : ℤ) : ℝ) := by push_cast; ring
+  rw [hc, h]
+  congr 1
+  push_cast
+  rw [ZMod.natCast_zmod_val]
+  ring
+
+
+/-- The standard additive character splits across a coprime factorisation, with the
+Bezout twist `gcdB` on the first factor and `gcdA` on the second. -/
+private lemma stdAddChar_crt_split (q1 q2 : ℕ) [NeZero q1] [NeZero q2] [NeZero (q1 * q2)]
+    (hcop : q1.Coprime q2) (k : ℤ) :
+    ZMod.stdAddChar (N := q1 * q2) (k : ZMod (q1 * q2))
+      = ZMod.stdAddChar (N := q1) ((k : ZMod q1) * ((Nat.gcdB q1 q2 : ℤ) : ZMod q1))
+        * ZMod.stdAddChar (N := q2) ((k : ZMod q2) * ((Nat.gcdA q1 q2 : ℤ) : ZMod q2)) := by
+  rw [ZMod.stdAddChar_coe]
+  have hm1 : ((k : ZMod q1) * ((Nat.gcdB q1 q2 : ℤ) : ZMod q1))
+      = (((k * Nat.gcdB q1 q2 : ℤ)) : ZMod q1) := by push_cast; ring
+  have hm2 : ((k : ZMod q2) * ((Nat.gcdA q1 q2 : ℤ) : ZMod q2))
+      = (((k * Nat.gcdA q1 q2 : ℤ)) : ZMod q2) := by push_cast; ring
+  rw [hm1, hm2, ZMod.stdAddChar_coe, ZMod.stdAddChar_coe, ← Complex.exp_add]
+  congr 1
+  have hbez : ((q1 : ℤ)) * Nat.gcdA q1 q2 + ((q2 : ℤ)) * Nat.gcdB q1 q2 = 1 := by
+    have h := Nat.gcd_eq_gcd_ab q1 q2
+    rw [hcop.gcd_eq_one] at h
+    push_cast at h
+    linarith
+  have hbezC : ((q1 : ℕ) : ℂ) * ((Nat.gcdA q1 q2 : ℤ) : ℂ)
+      + ((q2 : ℕ) : ℂ) * ((Nat.gcdB q1 q2 : ℤ) : ℂ) = 1 := by
+    exact_mod_cast hbez
+  have hq1n : (((q1 : ℕ)) : ℂ) ≠ 0 := by
+    have h : 0 < q1 := NeZero.pos q1
+    exact_mod_cast h.ne'
+  have hq2n : (((q2 : ℕ)) : ℂ) ≠ 0 := by
+    have h : 0 < q2 := NeZero.pos q2
+    exact_mod_cast h.ne'
+  push_cast
+  field_simp
+  linear_combination (-(↑k : ℂ)) * hbezC
+
+/-- The CRT character splitting for an arbitrary residue class. -/
+private lemma stdAddChar_crt_split' (q1 q2 : ℕ) [NeZero q1] [NeZero q2] [NeZero (q1 * q2)]
+    (hcop : q1.Coprime q2) (w : ZMod (q1 * q2)) :
+    ZMod.stdAddChar (N := q1 * q2) w
+      = ZMod.stdAddChar (N := q1) ((ZMod.cast w : ZMod q1) * ((Nat.gcdB q1 q2 : ℤ) : ZMod q1))
+        * ZMod.stdAddChar (N := q2) ((ZMod.cast w : ZMod q2) * ((Nat.gcdA q1 q2 : ℤ) : ZMod q2)) := by
+  have hwz : (((w.val : ℤ)) : ZMod (q1 * q2)) = w := by
+    rw [Int.cast_natCast]
+    exact ZMod.natCast_zmod_val w
+  rw [← hwz, stdAddChar_crt_split q1 q2 hcop (w.val : ℤ)]
+  have e1 : (ZMod.cast (((w.val : ℤ)) : ZMod (q1 * q2)) : ZMod q1)
+      = (((w.val : ℤ)) : ZMod q1) := by
+    rw [show (((w.val : ℤ)) : ZMod (q1 * q2)) = ((w.val : ℕ) : ZMod (q1 * q2)) by rw [Int.cast_natCast]]
+    rw [ZMod.cast_natCast (R := ZMod q1) (dvd_mul_right q1 q2) w.val]
+    exact (Int.cast_natCast w.val).symm
+  have e2 : (ZMod.cast (((w.val : ℤ)) : ZMod (q1 * q2)) : ZMod q2)
+      = (((w.val : ℤ)) : ZMod q2) := by
+    rw [show (((w.val : ℤ)) : ZMod (q1 * q2)) = ((w.val : ℕ) : ZMod (q1 * q2)) by rw [Int.cast_natCast]]
+    rw [ZMod.cast_natCast (R := ZMod q2) (dvd_mul_left q2 q1) w.val]
+    exact (Int.cast_natCast w.val).symm
+  rw [e1, e2]
+
+/-- The pair form of the coefficient, as a double sum of `ZMod` characters. -/
+private lemma pair_form_zmod (n q : ℕ) [NeZero q] :
+    (∑ x ∈ (Finset.range q).filter (fun x => Nat.Coprime x q),
+        ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+          U1534.ee (((((a : ℤ) * ((x : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ)))
+      = ∑ y ∈ (Finset.univ : Finset (ZMod q)).filter (fun y => IsUnit y),
+          ∑ z ∈ (Finset.univ : Finset (ZMod q)).filter (fun z => IsUnit z),
+            ZMod.stdAddChar (N := q) (z * (y * y - (n : ZMod q))) := by
+  classical
+  rw [sum_units_eq_sum_zmod_units q
+    (fun x => ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+      U1534.ee (((((a : ℤ) * ((x : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ)))]
+  refine Finset.sum_congr rfl ?_
+  intro y _
+  rw [sum_units_eq_sum_zmod_units q
+    (fun a => U1534.ee (((((a : ℤ) * ((y.val : ℤ) ^ 2 - (n : ℤ))) : ℤ) : ℝ) / (q : ℝ)))]
+  refine Finset.sum_congr rfl ?_
+  intro z _
+  have h := ee_eq_stdAddChar_292a q (((z.val : ℤ) * ((y.val : ℤ) ^ 2 - (n : ℤ))))
+  rw [h]
+  congr 1
+  push_cast
+  rw [ZMod.natCast_zmod_val z, ZMod.natCast_zmod_val y]
+  ring
+
+
+/-- Multiplication by a unit permutes the unit residues. -/
+private lemma sum_units_mul_shift (q : ℕ) [NeZero q] (u : ZMod q) (hu : IsUnit u)
+    (G : ZMod q → ℂ) :
+    (∑ z ∈ (Finset.univ : Finset (ZMod q)).filter (fun z => IsUnit z), G (z * u))
+      = ∑ z ∈ (Finset.univ : Finset (ZMod q)).filter (fun z => IsUnit z), G z := by
+  classical
+  obtain ⟨v, hv⟩ := hu.exists_right_inv
+  have hvu : v * u = 1 := by rw [mul_comm]; exact hv
+  have hvU : IsUnit v := isUnit_iff_exists.mpr ⟨u, hvu, hv⟩
+  refine Finset.sum_bij (fun (z : ZMod q) _ => z * u) ?_ ?_ ?_ ?_
+  · intro z hz
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hz ⊢
+    exact hz.mul hu
+  · intro z1 hz1 z2 hz2 heq
+    have h : z1 * u * v = z2 * u * v := by rw [heq]
+    rwa [mul_assoc, mul_assoc, hv, mul_one, mul_one] at h
+  · intro z hz
+    refine ⟨z * v, ?_, ?_⟩
+    · simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hz ⊢
+      exact hz.mul hvU
+    · rw [mul_assoc, hvu, mul_one]
+  · intro z hz
+    rfl
+
+/-- The Bezout coefficient `gcdB` is a unit modulo `q1` when `q1` and `q2` are coprime. -/
+private lemma gcdB_isUnit (q1 q2 : ℕ) [NeZero q1] (hcop : q1.Coprime q2) :
+    IsUnit (((Nat.gcdB q1 q2 : ℤ)) : ZMod q1) := by
+  have hbez : ((q1 : ℤ)) * Nat.gcdA q1 q2 + ((q2 : ℤ)) * Nat.gcdB q1 q2 = 1 := by
+    have h := Nat.gcd_eq_gcd_ab q1 q2
+    rw [hcop.gcd_eq_one] at h
+    push_cast at h
+    linarith
+  have h0 : (((q1 : ℤ)) : ZMod q1) = 0 := by push_cast; exact ZMod.natCast_self q1
+  have hcast : ((q2 : ℤ) : ZMod q1) * ((Nat.gcdB q1 q2 : ℤ) : ZMod q1) = 1 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod q1)) hbez
+    push_cast at h
+    simpa [h0] using h
+  exact isUnit_iff_exists.mpr ⟨((q2 : ℤ) : ZMod q1), by rwa [mul_comm], hcast⟩
+
+/-- The Bezout coefficient `gcdA` is a unit modulo `q2` when `q1` and `q2` are coprime. -/
+private lemma gcdA_isUnit (q1 q2 : ℕ) [NeZero q2] (hcop : q1.Coprime q2) :
+    IsUnit (((Nat.gcdA q1 q2 : ℤ)) : ZMod q2) := by
+  have hbez : ((q1 : ℤ)) * Nat.gcdA q1 q2 + ((q2 : ℤ)) * Nat.gcdB q1 q2 = 1 := by
+    have h := Nat.gcd_eq_gcd_ab q1 q2
+    rw [hcop.gcd_eq_one] at h
+    push_cast at h
+    linarith
+  have h0 : (((q2 : ℤ)) : ZMod q2) = 0 := by push_cast; exact ZMod.natCast_self q2
+  have hcast : ((q1 : ℤ) : ZMod q2) * ((Nat.gcdA q1 q2 : ℤ) : ZMod q2) = 1 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod q2)) hbez
+    push_cast at h
+    simpa [h0] using h
+  exact isUnit_iff_exists.mpr ⟨((q1 : ℤ) : ZMod q2), by rwa [mul_comm], hcast⟩
+
+/-- Transporting a double unit-sum along the CRT equivalence. -/
+private lemma sum_units_crt_transport (q1 q2 : ℕ) [NeZero q1] [NeZero q2] [NeZero (q1 * q2)]
+    (hcop : q1.Coprime q2) (G : ZMod (q1 * q2) → ZMod (q1 * q2) → ℂ) :
+    (∑ y ∈ (Finset.univ : Finset (ZMod (q1 * q2))).filter (fun y => IsUnit y),
+        ∑ z ∈ (Finset.univ : Finset (ZMod (q1 * q2))).filter (fun z => IsUnit z), G y z)
+      = ∑ p ∈ (Finset.univ : Finset (ZMod q1 × ZMod q2)).filter (fun p => IsUnit p),
+          ∑ r ∈ (Finset.univ : Finset (ZMod q1 × ZMod q2)).filter (fun r => IsUnit r),
+            G ((ZMod.chineseRemainder hcop).symm p) ((ZMod.chineseRemainder hcop).symm r) := by
+  classical
+  set e := ZMod.chineseRemainder hcop with he
+  have hmem : ∀ p : ZMod q1 × ZMod q2, IsUnit p → IsUnit (e.symm p) := fun p hp =>
+    IsUnit.map (e.symm : ZMod q1 × ZMod q2 →+* ZMod (q1 * q2)) hp
+  have hmem' : ∀ p : ZMod (q1 * q2), IsUnit p → IsUnit (e p) := fun p hp =>
+    IsUnit.map (e : ZMod (q1 * q2) →+* ZMod q1 × ZMod q2) hp
+  have hinner : ∀ y : ZMod (q1 * q2),
+      (∑ z ∈ (Finset.univ : Finset (ZMod (q1 * q2))).filter (fun z => IsUnit z), G y z)
+        = ∑ r ∈ (Finset.univ : Finset (ZMod q1 × ZMod q2)).filter (fun r => IsUnit r),
+            G y (e.symm r) := by
+    intro y
+    refine Finset.sum_bij (fun (z : ZMod (q1 * q2)) _ => e z) ?_ ?_ ?_ ?_
+    · intro z hz
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hz ⊢
+      exact hmem' z hz
+    · intro z1 hz1 z2 hz2 heq
+      exact e.injective heq
+    · intro r hr
+      refine ⟨e.symm r, ?_, by simp⟩
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hr ⊢
+      exact hmem r hr
+    · intro z hz
+      simp only [RingEquiv.symm_apply_apply]
+  simp only [hinner]
+  refine Finset.sum_bij (fun (y : ZMod (q1 * q2)) _ => e y) ?_ ?_ ?_ ?_
+  · intro y hy
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hy ⊢
+    exact hmem' y hy
+  · intro y1 hy1 y2 hy2 heq
+    exact e.injective heq
+  · intro p hp
+    refine ⟨e.symm p, ?_, by simp⟩
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+    exact hmem p hp
+  · intro y hy
+    simp only [RingEquiv.symm_apply_apply]
+
+/-- First component of the CRT inverse is the cast to `ZMod q1`. -/
+private lemma cast_crt_symm_fst (q1 q2 : ℕ) [NeZero q1] [NeZero q2] [NeZero (q1 * q2)]
+    (hcop : q1.Coprime q2) (p : ZMod q1 × ZMod q2) :
+    (ZMod.cast ((ZMod.chineseRemainder hcop).symm p) : ZMod q1) = p.1 := by
+  have h : ZMod.chineseRemainder hcop ((ZMod.chineseRemainder hcop).symm p) = p :=
+    RingEquiv.apply_symm_apply _ _
+  have h1 := congrArg Prod.fst h
+  rw [← h1]
+  simp [ZMod.chineseRemainder, ZMod.castHom_apply]
+
+/-- Second component of the CRT inverse is the cast to `ZMod q2`. -/
+private lemma cast_crt_symm_snd (q1 q2 : ℕ) [NeZero q1] [NeZero q2] [NeZero (q1 * q2)]
+    (hcop : q1.Coprime q2) (p : ZMod q1 × ZMod q2) :
+    (ZMod.cast ((ZMod.chineseRemainder hcop).symm p) : ZMod q2) = p.2 := by
+  have h : ZMod.chineseRemainder hcop ((ZMod.chineseRemainder hcop).symm p) = p :=
+    RingEquiv.apply_symm_apply _ _
+  have h1 := congrArg Prod.snd h
+  rw [← h1]
+  simp [ZMod.chineseRemainder, ZMod.castHom_apply]
+
+
+/-- A quadruple sum of outer products is the product of the two double sums. -/
+private lemma quadruple_sum_mul {α β : Type*} (F1 : Finset α) (F2 : Finset β)
+    (A : α → α → ℂ) (B : β → β → ℂ) :
+    (∑ p1 ∈ F1, ∑ p2 ∈ F2, ∑ r1 ∈ F1, ∑ r2 ∈ F2, A p1 r1 * B p2 r2)
+      = (∑ p1 ∈ F1, ∑ r1 ∈ F1, A p1 r1) * (∑ p2 ∈ F2, ∑ r2 ∈ F2, B p2 r2) := by
+  rw [Finset.sum_mul_sum F1 F2 (fun p1 => ∑ r1 ∈ F1, A p1 r1)
+    (fun p2 => ∑ r2 ∈ F2, B p2 r2)]
+  refine Finset.sum_congr rfl ?_
+  intro p1 _
+  refine Finset.sum_congr rfl ?_
+  intro p2 _
+  rw [Finset.sum_mul_sum]
+
+/-- The pointwise CRT factorisation of one summand, with the Bezout twist. -/
+private lemma V_term_factor (n q1 q2 : ℕ) [NeZero q1] [NeZero q2] [NeZero (q1 * q2)]
+    (hcop : q1.Coprime q2) (p1 : ZMod q1) (p2 : ZMod q2) (r1 : ZMod q1) (r2 : ZMod q2) :
+    ZMod.stdAddChar (N := q1 * q2)
+        ((ZMod.chineseRemainder hcop).symm (r1, r2)
+          * ((ZMod.chineseRemainder hcop).symm (p1, p2)
+              * (ZMod.chineseRemainder hcop).symm (p1, p2) - (n : ZMod (q1 * q2))))
+      = ZMod.stdAddChar (N := q1)
+          (((Nat.gcdB q1 q2 : ℤ) : ZMod q1) * (r1 * (p1 * p1 - (n : ZMod q1))))
+        * ZMod.stdAddChar (N := q2)
+          (((Nat.gcdA q1 q2 : ℤ) : ZMod q2) * (r2 * (p2 * p2 - (n : ZMod q2)))) := by
+  have hd1 : q1 ∣ q1 * q2 := dvd_mul_right q1 q2
+  have hd2 : q2 ∣ q1 * q2 := dvd_mul_left q2 q1
+  have hn1 : (ZMod.cast ((n : ℕ) : ZMod (q1 * q2)) : ZMod q1) = ((n : ℕ) : ZMod q1) :=
+    ZMod.cast_natCast (R := ZMod q1) hd1 n
+  have hn2 : (ZMod.cast ((n : ℕ) : ZMod (q1 * q2)) : ZMod q2) = ((n : ℕ) : ZMod q2) :=
+    ZMod.cast_natCast (R := ZMod q2) hd2 n
+  have hcw1 : (ZMod.cast ((ZMod.chineseRemainder hcop).symm (r1, r2)
+      * ((ZMod.chineseRemainder hcop).symm (p1, p2)
+          * (ZMod.chineseRemainder hcop).symm (p1, p2) - (n : ZMod (q1 * q2)))) : ZMod q1)
+      = r1 * (p1 * p1 - (n : ZMod q1)) := by
+    rw [ZMod.cast_mul hd1, ZMod.cast_sub hd1, ZMod.cast_mul hd1, hn1]
+    simp only [cast_crt_symm_fst, Prod.fst, Prod.snd]
+  have hcw2 : (ZMod.cast ((ZMod.chineseRemainder hcop).symm (r1, r2)
+      * ((ZMod.chineseRemainder hcop).symm (p1, p2)
+          * (ZMod.chineseRemainder hcop).symm (p1, p2) - (n : ZMod (q1 * q2)))) : ZMod q2)
+      = r2 * (p2 * p2 - (n : ZMod q2)) := by
+    rw [ZMod.cast_mul hd2, ZMod.cast_sub hd2, ZMod.cast_mul hd2, hn2]
+    simp only [cast_crt_symm_snd, Prod.fst, Prod.snd]
+  rw [stdAddChar_crt_split' q1 q2 hcop
+    ((ZMod.chineseRemainder hcop).symm (r1, r2)
+      * ((ZMod.chineseRemainder hcop).symm (p1, p2)
+          * (ZMod.chineseRemainder hcop).symm (p1, p2) - (n : ZMod (q1 * q2)))), hcw1, hcw2]
+  rw [mul_comm (r1 * (p1 * p1 - (n : ZMod q1))) (((Nat.gcdB q1 q2 : ℤ) : ZMod q1)),
+    mul_comm (r2 * (p2 * p2 - (n : ZMod q2))) (((Nat.gcdA q1 q2 : ℤ) : ZMod q2))]
+
+/-- The multiplicative splitting of the unit double sum across a coprime factorisation. -/
+private lemma V_coprime_mul (n q1 q2 : ℕ) [NeZero q1] [NeZero q2] [NeZero (q1 * q2)]
+    (hcop : q1.Coprime q2) :
+    (∑ y ∈ (Finset.univ : Finset (ZMod (q1 * q2))).filter (fun y => IsUnit y),
+        ∑ z ∈ (Finset.univ : Finset (ZMod (q1 * q2))).filter (fun z => IsUnit z),
+          ZMod.stdAddChar (N := q1 * q2) (z * (y * y - (n : ZMod (q1 * q2)))))
+      = (∑ y ∈ (Finset.univ : Finset (ZMod q1)).filter (fun y => IsUnit y),
+          ∑ z ∈ (Finset.univ : Finset (ZMod q1)).filter (fun z => IsUnit z),
+            ZMod.stdAddChar (N := q1) (z * (y * y - (n : ZMod q1))))
+        * (∑ y ∈ (Finset.univ : Finset (ZMod q2)).filter (fun y => IsUnit y),
+          ∑ z ∈ (Finset.univ : Finset (ZMod q2)).filter (fun z => IsUnit z),
+            ZMod.stdAddChar (N := q2) (z * (y * y - (n : ZMod q2)))) := by
+  classical
+  set F1 : Finset (ZMod q1) := Finset.univ.filter (fun a => IsUnit a) with hF1
+  set F2 : Finset (ZMod q2) := Finset.univ.filter (fun a => IsUnit a) with hF2
+  have hF' : (Finset.univ.filter (fun p : ZMod q1 × ZMod q2 => IsUnit p)) = F1 ×ˢ F2 := by
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_product, hF1, hF2]
+    exact Prod.isUnit_iff
+  -- strip the Bezout twist from each of the two right-hand factors
+  have hkey1 : (∑ p1 ∈ F1, ∑ r1 ∈ F1,
+        ZMod.stdAddChar (N := q1) (r1 * (p1 * p1 - (n : ZMod q1))))
+      = ∑ p1 ∈ F1, ∑ r1 ∈ F1, ZMod.stdAddChar (N := q1)
+          (((Nat.gcdB q1 q2 : ℤ) : ZMod q1) * (r1 * (p1 * p1 - (n : ZMod q1)))) := by
+    refine Finset.sum_congr rfl (fun p1 _ => ?_)
+    have h := sum_units_mul_shift q1 (((Nat.gcdB q1 q2 : ℤ) : ZMod q1))
+      (gcdB_isUnit q1 q2 hcop)
+      (fun z => ZMod.stdAddChar (N := q1) (z * (p1 * p1 - (n : ZMod q1))))
+    rw [← h]
+    refine Finset.sum_congr rfl (fun z _ => ?_)
+    congr 1
+    ring
+  have hkey2 : (∑ p2 ∈ F2, ∑ r2 ∈ F2,
+        ZMod.stdAddChar (N := q2) (r2 * (p2 * p2 - (n : ZMod q2))))
+      = ∑ p2 ∈ F2, ∑ r2 ∈ F2, ZMod.stdAddChar (N := q2)
+          (((Nat.gcdA q1 q2 : ℤ) : ZMod q2) * (r2 * (p2 * p2 - (n : ZMod q2)))) := by
+    refine Finset.sum_congr rfl (fun p2 _ => ?_)
+    have h := sum_units_mul_shift q2 (((Nat.gcdA q1 q2 : ℤ) : ZMod q2))
+      (gcdA_isUnit q1 q2 hcop)
+      (fun z => ZMod.stdAddChar (N := q2) (z * (p2 * p2 - (n : ZMod q2))))
+    rw [← h]
+    refine Finset.sum_congr rfl (fun z _ => ?_)
+    congr 1
+    ring
+  rw [hkey1, hkey2]
+  clear hkey1 hkey2
+  rw [sum_units_crt_transport q1 q2 hcop
+    (fun y z => ZMod.stdAddChar (N := q1 * q2) (z * (y * y - (n : ZMod (q1 * q2)))))]
+  rw [hF']
+  have hmix : (∑ p ∈ F1 ×ˢ F2, ∑ r ∈ F1 ×ˢ F2,
+        ZMod.stdAddChar (N := q1 * q2)
+          ((ZMod.chineseRemainder hcop).symm r
+            * ((ZMod.chineseRemainder hcop).symm p
+                * (ZMod.chineseRemainder hcop).symm p - (n : ZMod (q1 * q2)))))
+      = ∑ p1 ∈ F1, ∑ p2 ∈ F2, ∑ r1 ∈ F1, ∑ r2 ∈ F2,
+          ZMod.stdAddChar (N := q1 * q2)
+            ((ZMod.chineseRemainder hcop).symm (r1, r2)
+              * ((ZMod.chineseRemainder hcop).symm (p1, p2)
+                  * (ZMod.chineseRemainder hcop).symm (p1, p2) - (n : ZMod (q1 * q2)))) := by
+    rw [Finset.sum_product]
+    refine Finset.sum_congr rfl (fun p1 _ => Finset.sum_congr rfl (fun p2 _ => ?_))
+    rw [Finset.sum_product]
+  rw [hmix]
+  clear hmix
+  have hstep : (∑ p1 ∈ F1, ∑ p2 ∈ F2, ∑ r1 ∈ F1, ∑ r2 ∈ F2,
+        ZMod.stdAddChar (N := q1 * q2)
+          ((ZMod.chineseRemainder hcop).symm (r1, r2)
+            * ((ZMod.chineseRemainder hcop).symm (p1, p2)
+                * (ZMod.chineseRemainder hcop).symm (p1, p2) - (n : ZMod (q1 * q2)))))
+      = ∑ p1 ∈ F1, ∑ p2 ∈ F2, ∑ r1 ∈ F1, ∑ r2 ∈ F2,
+          ZMod.stdAddChar (N := q1)
+              (((Nat.gcdB q1 q2 : ℤ) : ZMod q1) * (r1 * (p1 * p1 - (n : ZMod q1))))
+            * ZMod.stdAddChar (N := q2)
+              (((Nat.gcdA q1 q2 : ℤ) : ZMod q2) * (r2 * (p2 * p2 - (n : ZMod q2)))) := by
+    refine Finset.sum_congr rfl (fun p1 _ => Finset.sum_congr rfl (fun p2 _ =>
+      Finset.sum_congr rfl (fun r1 _ => Finset.sum_congr rfl (fun r2 _ => ?_))))
+    exact V_term_factor n q1 q2 hcop p1 p2 r1 r2
+  rw [hstep, quadruple_sum_mul F1 F2
+    (fun p1 r1 => ZMod.stdAddChar (N := q1)
+      (((Nat.gcdB q1 q2 : ℤ) : ZMod q1) * (r1 * (p1 * p1 - (n : ZMod q1)))))
+    (fun p2 r2 => ZMod.stdAddChar (N := q2)
+      (((Nat.gcdA q1 q2 : ℤ) : ZMod q2) * (r2 * (p2 * p2 - (n : ZMod q2)))))]
+
+/-- The coefficient sum equals the `ZMod` unit double sum (the `V` of `V_coprime_mul`). -/
+private lemma A2_sum_eq_V (n q : ℕ) (hq : 0 < q) [NeZero q] :
+    (∑ p ∈ (Finset.range q).filter (fun p => Nat.Coprime p q),
+        U1534.gaussS q p * U1534.ee (-(((p * n : ℕ) : ℝ)) / (q : ℝ)))
+      = ∑ y ∈ (Finset.univ : Finset (ZMod q)).filter (fun y => IsUnit y),
+          ∑ z ∈ (Finset.univ : Finset (ZMod q)).filter (fun z => IsUnit z),
+            ZMod.stdAddChar (N := q) (z * (y * y - (n : ZMod q))) := by
+  simp only [neg_div]
+  exact (A2_pair_form n q hq).trans (pair_form_zmod n q)
+
+/-- `A2` vanishes at the modulus `0`. -/
+private lemma A2_zero_292a (n : ℕ) : U1534.A2 n 0 = 0 := by
+  simp [U1534.A2]
+
 /-- LEAF. Page 13 property i, cited from Schwarz Sections 2 and 3.
 The Chinese remainder theorem factors A2 at coprime moduli. This is the
 algebraic input to display 47, without any estimate or summation. -/
 theorem A2_coprime_mul (n a b : ℕ) (hab : a.Coprime b) :
     U1534.A2 n (a * b) = U1534.A2 n a * U1534.A2 n b := by
-  sorry
+
+  rcases Nat.eq_zero_or_pos a with rfl | hapos
+  · have hb : b = 1 := (Nat.coprime_zero_left b).mp hab
+    subst hb
+    rw [zero_mul, A2_zero_292a, U1534.A2_one, mul_one]
+  rcases Nat.eq_zero_or_pos b with rfl | hbpos
+  · have ha : a = 1 := (Nat.coprime_zero_right a).mp hab
+    subst ha
+    rw [mul_zero, A2_zero_292a, U1534.A2_one, one_mul]
+  by_cases ha1 : a = 1
+  · subst ha1
+    rw [one_mul, U1534.A2_one, one_mul]
+  by_cases hb1 : b = 1
+  · subst hb1
+    rw [mul_one, U1534.A2_one, mul_one]
+  haveI : NeZero a := ⟨Nat.pos_iff_ne_zero.mp hapos⟩
+  haveI : NeZero b := ⟨Nat.pos_iff_ne_zero.mp hbpos⟩
+  have hab0 : a * b ≠ 0 := Nat.mul_ne_zero (NeZero.ne a) (NeZero.ne b)
+  haveI : NeZero (a * b) := ⟨hab0⟩
+  have hmulpos : 0 < a * b := Nat.pos_of_ne_zero hab0
+  rw [U1534.A2, U1534.A2, U1534.A2, A2_sum_eq_V n (a * b) hmulpos,
+    A2_sum_eq_V n a hapos, A2_sum_eq_V n b hbpos,
+    V_coprime_mul n a b hab,
+    ArithmeticFunction.isMultiplicative_moebius.map_mul_of_coprime hab,
+    Nat.totient_mul hab]
+  push_cast
+  ring
+
 
 /-- Page 14 displays 46 and 47. Reuse the proved prime coefficient bound. -/
 theorem prime_coefficient_bound (p : ℕ) [Fact p.Prime] (n : ℕ) :
