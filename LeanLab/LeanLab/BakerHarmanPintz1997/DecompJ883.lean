@@ -380,7 +380,7 @@ private lemma hasDerivAt_psi_gen {μ t : ℝ} {y : ℝ} (hy : 0 < y) (hq : μ + 
   have hq' := hasDerivAt_phase'_gen (μ := μ) (t := t) hy
   exact hA.div hq' hq
 
-private lemma psi'_val {μ t y : ℝ} (hy : 0 < y) (hq : μ + t / y ≠ 0) :
+private lemma psi'_val {μ t y : ℝ} (hy : 0 < y) (_hq : μ + t / y ≠ 0) :
     (((-(5/2) * y ^ (-7/2 : ℝ)) * (μ + t / y) - y ^ (-5/2 : ℝ) * (-(t / y ^ 2)))
         / (μ + t / y) ^ 2)
       = -(5/2) * y ^ (-7/2 : ℝ) / (μ + t / y)
@@ -768,7 +768,7 @@ private lemma summable_one_div_sq_int : Summable fun n : ℤ => (1 / (n : ℝ) ^
 
 set_option maxHeartbeats 1000000 in
 private lemma integral_B2_fourier {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) {c : ℂ}
-    (hre : c.re = -1 / 2) (hc2 : c - 2 ≠ 0) :
+    (hre : c.re = -1 / 2) (_hc2 : c - 2 ≠ 0) :
     ∫ y in a..b, ((bernoulliFun 2 (Int.fract y) : ℝ) : ℂ) * (c * (c - 1) * (y : ℂ) ^ (c - 2))
       = (1 / (2 * (Real.pi : ℂ) ^ 2)) * ∑' n : ℤ,
           ∫ y in a..b, (1 / (n : ℂ) ^ 2) *
