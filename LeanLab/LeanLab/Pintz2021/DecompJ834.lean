@@ -24,9 +24,10 @@ open Finset LeanLab.PNTPort.LargeSieve
 
 /-! ### Helper lemmas for `leaf_singular_series_converges_3`
 
-All of this is new in this session: the Möbius decomposition of the coefficient sum, the bound
-`‖τ_q(ind χ)‖² = conductor`, the twisted Ramanujan bound `‖c_ψ(m)‖ ≤ √r σ(m)`, and the
-`q^{-3/2}(1+log q)^2` majorant.  Nothing here changes a statement of the file. -/
+All new in this session: the Möbius decomposition of the coefficient sum, the bound
+`‖τ_q(ind χ)‖² = conductor` at every level, the twisted Ramanujan bound `‖c_ψ(m)‖ ≤ √r σ(m)`, the
+`q^{-3/2}(1+log q)^2` majorant, and the resulting size bound `norm_Sg'_le` on the singular series.
+No statement of the file is changed. -/
 
 noncomputable section
 
@@ -945,16 +946,6 @@ theorem totient_ge_log_two_mul_div {n : ℕ} (hn : 1 ≤ n) :
     nlinarith [hk1, hnpos, hlog2]
   exact hstep.trans hφ
 
-/-! ### The repaired truncation leaf reduced to the discarded-pair mass
-
-`DecompJ665.actual_truncation_error_le_mass` already says the truncation error is at most `X` times
-the multiplicity and series weighted mass of the pairs that `Truncation168.retainedPairs` discards.
-What is left for `leaf_truncation_error_3` is the estimate of that mass by
-`C' * Sing m * X * log U / sqrt U`.  The statement below is exactly that estimate, and the theorem
-after it derives the repaired leaf from it, so the analytic content is visible in one place. -/
-
-attribute [local instance] Classical.propDecidable
-
 
 /-! ### The induced lift and its inverse -/
 
@@ -1239,6 +1230,51 @@ theorem isPrimitive_of_mem_excSet {H U P X : ℝ} {z : ExcPair} (hz : z ∈ excS
   · subst h
     exact DirichletCharacter.isPrimitive_one_level_one
   · exact h.2.1
+
+
+
+/-! ### The size of the singular series
+
+`leaf_truncation_error_3` compares the main term with its truncation on the pairs that the
+`[r₁,r₂] ≤ P`, `|Im ϱ| ≤ U` cutoffs discard, so it needs the size of `𝔖'` on those pairs.  The
+coefficient bound of the previous section gives it: the partial sums are bounded by the converging
+majorant, uniformly in the cutoff `Q`. -/
+
+/-- **The singular series is bounded by the coefficient majorant.** -/
+theorem norm_Sg'_le (z w : ExcPair) (hz : z.χ.IsPrimitive) (hw : w.χ.IsPrimitive)
+    (m : ℕ) (hm : 0 < m) (Sg' : ExcPair → ExcPair → ℕ → ℂ)
+    (hconv : Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) :
+    ‖Sg' z w m‖ ≤
+      ((∑ e ∈ m.divisors, (e : ℝ)) * (Real.sqrt ((Nat.lcm z.r w.r : ℕ) : ℝ)) ^ 3 /
+        (Real.log 2) ^ 2) *
+        (∑' q : ℕ, (q : ℝ) ^ (-(3 / 2 : ℝ)) * (1 + Real.log (q : ℝ)) ^ 2) := by
+  have hA0 : (0 : ℝ) ≤ (∑ e ∈ m.divisors, (e : ℝ)) *
+      (Real.sqrt ((Nat.lcm z.r w.r : ℕ) : ℝ)) ^ 3 / (Real.log 2) ^ 2 := by
+    have := Real.sqrt_nonneg ((Nat.lcm z.r w.r : ℕ) : ℝ)
+    positivity
+  refine le_of_tendsto' hconv.norm ?_
+  intro Q
+  have hfun : singPartialPrime z w m Q = ∑ q ∈ Finset.Icc 1 Q,
+      (if Nat.lcm z.r w.r ∣ q then cCoefPrime z w q m else 0) := by
+    rw [singPartialPrime, ← Finset.sum_filter]
+  rw [hfun]
+  have hstep : ‖∑ q ∈ Finset.Icc 1 Q,
+        (if Nat.lcm z.r w.r ∣ q then cCoefPrime z w q m else 0)‖
+      ≤ ∑ q ∈ Finset.Icc 1 Q, ((∑ e ∈ m.divisors, (e : ℝ)) *
+          (Real.sqrt ((Nat.lcm z.r w.r : ℕ) : ℝ)) ^ 3 / (Real.log 2) ^ 2) *
+            ((q : ℝ) ^ (-(3 / 2 : ℝ)) * (1 + Real.log (q : ℝ)) ^ 2) := by
+    refine le_trans (norm_sum_le _ _) (Finset.sum_le_sum fun q hq => ?_)
+    have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq).1
+    by_cases hd : Nat.lcm z.r w.r ∣ q
+    · rw [ite_eq_left hd]
+      exact norm_cCoefPrime_le z w hz hw m hm q hq1 hd
+    · rw [ite_eq_right hd, norm_zero]
+      exact mul_nonneg hA0 (by positivity)
+  refine le_trans hstep ?_
+  rw [← Finset.mul_sum]
+  refine mul_le_mul_of_nonneg_left ?_ hA0
+  exact Summable.sum_le_tsum (Finset.Icc 1 Q) (fun q _ => by positivity)
+    summable_nat_rpow_mul_one_add_log_sq
 
 end
 
