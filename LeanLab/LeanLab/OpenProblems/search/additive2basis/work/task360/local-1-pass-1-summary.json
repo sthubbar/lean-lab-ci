@@ -1,0 +1,14 @@
+{
+  "FINISHED": "local-1-pass-1",
+  "last_batch": "task360-1009",
+  "visited": 7974,
+  "complete": 7960,
+  "scored": 30,
+  "invalid": 0,
+  "resources": 0,
+  "skipped": 67517,
+  "jobs": 198754,
+  "stop": "wall_budget",
+  "seconds": 900.0526755630001,
+  "utc_end": "2026-11-05T12:29:50.480619+00:00"
+}

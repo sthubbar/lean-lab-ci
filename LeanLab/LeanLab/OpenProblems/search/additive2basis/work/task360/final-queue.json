@@ -1,0 +1,70 @@
+{
+  "families": [
+    {
+      "topology": "thirds",
+      "dual": false,
+      "radius": 24,
+      "steps": 3,
+      "cap": 1,
+      "seed": 1311,
+      "job_slots": 36440,
+      "empty_domains": 0,
+      "unique_domains": 36440,
+      "complete": 36440,
+      "unvisited": 0,
+      "attempted_unresolved": 0,
+      "unresolved_timeouts": 0,
+      "unresolved_failures": 0
+    },
+    {
+      "topology": "crosssplit",
+      "dual": false,
+      "radius": 48,
+      "steps": 3,
+      "cap": 1,
+      "seed": 2311,
+      "job_slots": 69092,
+      "empty_domains": 0,
+      "unique_domains": 69092,
+      "complete": 69091,
+      "unvisited": 0,
+      "attempted_unresolved": 1,
+      "unresolved_timeouts": 1,
+      "unresolved_failures": 0
+    },
+    {
+      "topology": "residue3",
+      "dual": false,
+      "radius": 48,
+      "steps": 3,
+      "cap": 1,
+      "seed": 3311,
+      "job_slots": 198754,
+      "empty_domains": 0,
+      "unique_domains": 198754,
+      "complete": 86529,
+      "unvisited": 112133,
+      "attempted_unresolved": 92,
+      "unresolved_timeouts": 92,
+      "unresolved_failures": 0
+    },
+    {
+      "topology": "thirds",
+      "dual": true,
+      "radius": 96,
+      "steps": 6,
+      "cap": 0,
+      "seed": 4311,
+      "job_slots": 44184,
+      "empty_domains": 0,
+      "unique_domains": 44184,
+      "complete": 6697,
+      "unvisited": 36509,
+      "attempted_unresolved": 978,
+      "unresolved_timeouts": 978,
+      "unresolved_failures": 0
+    }
+  ],
+  "timeout_exclusion": false,
+  "scope": "the four task311 local finite queues only"
+}

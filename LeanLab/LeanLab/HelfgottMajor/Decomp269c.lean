@@ -374,6 +374,546 @@ private theorem exp_integral_bound_aux (q : ℕ) [NeZero q] (T : ℝ) (hT : 100 
         nlinarith [this]
 
 
+/-! ## Shifting improper integrals to the origin -/
+
+private theorem integral_Ioi_shift (f : ℝ → ℝ) (hf : Continuous f) (T : ℝ) :
+    ∫ t in Set.Ioi T, f (t - T) = ∫ s in Set.Ioi (0 : ℝ), f s := by
+  have hiff : ∀ t : ℝ, (0 : ℝ) < t + (-T) ↔ T < t := by
+    intro t; constructor <;> intro h <;> linarith
+  have hpt : (fun t : ℝ => (Set.Ioi (0 : ℝ)).indicator f (t + (-T)))
+      = fun t : ℝ => (Set.Ioi T).indicator (fun t => f (t - T)) t := by
+    funext t
+    by_cases ht : T < t
+    · have h1 : (0 : ℝ) < t + (-T) := (hiff t).mpr ht
+      simp [Set.indicator, ht, h1, sub_eq_add_neg]
+    · have h1 : ¬ (0 : ℝ) < t + (-T) := fun h => ht ((hiff t).mp h)
+      simp [Set.indicator, ht, h1, sub_eq_add_neg]
+  have hfm : StronglyMeasurable ((Set.Ioi (0 : ℝ)).indicator f) :=
+    (hf.measurable.indicator measurableSet_Ioi).stronglyMeasurable
+  have hmap := integral_map_of_stronglyMeasurable (μ := volume)
+    (φ := fun x : ℝ => x + (-T)) (by fun_prop : Measurable (fun x : ℝ => x + (-T))) hfm
+  rw [(inferInstance : Measure.IsAddRightInvariant (volume : Measure ℝ)).map_add_right_eq_self (-T)]
+    at hmap
+  calc ∫ t in Set.Ioi T, f (t - T)
+      = ∫ t, (Set.Ioi T).indicator (fun t => f (t - T)) t := by
+        rw [integral_indicator measurableSet_Ioi]
+    _ = ∫ t, (Set.Ioi (0 : ℝ)).indicator f (t + (-T)) := by rw [hpt]
+    _ = ∫ s, (Set.Ioi (0 : ℝ)).indicator f s := hmap.symm
+    _ = ∫ s in Set.Ioi (0 : ℝ), f s := by rw [integral_indicator measurableSet_Ioi]
+
+private theorem integrableOn_shift (f : ℝ → ℝ) (hf : Continuous f) (T : ℝ) :
+    IntegrableOn (fun t => f (t - T)) (Set.Ioi T) ↔ IntegrableOn f (Set.Ioi (0 : ℝ)) := by
+  have hiff : ∀ t : ℝ, (0 : ℝ) < t + (-T) ↔ T < t := by
+    intro t; constructor <;> intro h <;> linarith
+  have hpt : (fun t : ℝ => (Set.Ioi (0 : ℝ)).indicator f (t + (-T)))
+      =ᵐ[volume] fun t : ℝ => (Set.Ioi T).indicator (fun t => f (t - T)) t := by
+    filter_upwards with t
+    by_cases ht : T < t
+    · have h1 : (0 : ℝ) < t + (-T) := (hiff t).mpr ht
+      simp [Set.indicator, ht, h1, sub_eq_add_neg]
+    · have h1 : ¬ (0 : ℝ) < t + (-T) := fun h => ht ((hiff t).mp h)
+      simp [Set.indicator, ht, h1, sub_eq_add_neg]
+  have hfm : AEStronglyMeasurable ((Set.Ioi (0 : ℝ)).indicator f)
+      (Measure.map (fun x : ℝ => x + (-T)) volume) := by
+    rw [(inferInstance : Measure.IsAddRightInvariant (volume : Measure ℝ)).map_add_right_eq_self (-T)]
+    exact (hf.measurable.indicator measurableSet_Ioi).aestronglyMeasurable
+  rw [← integrable_indicator_iff (f := fun t => f (t - T)) measurableSet_Ioi,
+      ← integrable_indicator_iff (f := f) measurableSet_Ioi]
+  have hmap := integrable_map_measure (μ := volume) (f := fun x : ℝ => x + (-T))
+    (g := (Set.Ioi (0 : ℝ)).indicator f) hfm
+    (by fun_prop : AEMeasurable (fun x : ℝ => x + (-T)) volume)
+  rw [(inferInstance : Measure.IsAddRightInvariant (volume : Measure ℝ)).map_add_right_eq_self (-T)]
+    at hmap
+  rw [← integrable_congr hpt]
+  exact hmap.symm
+
+/-! ## Power times exponential, shifted -/
+
+private theorem integral_Ioi_pow_exp_neg_mul_sub (lam T : ℝ) (hlam : 0 < lam) (k : ℕ) :
+    ∫ t in Set.Ioi T, (t - T)^k * Real.exp (-lam * (t - T)) = k.factorial / lam^(k+1) := by
+  have hcont : Continuous (fun s : ℝ => s^k * Real.exp (-lam*s)) := by fun_prop
+  rw [integral_Ioi_shift (fun s : ℝ => s^k * Real.exp (-lam*s)) hcont T]
+  have h1 := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := (k:ℝ)+1) (r := lam)
+    (by positivity) hlam
+  have hexp : (k:ℝ)+1-1 = (k:ℝ) := by ring
+  rw [hexp] at h1
+  have hsimp : ∫ s in Set.Ioi (0:ℝ), s^k * Real.exp (-lam*s)
+      = ∫ s in Set.Ioi (0:ℝ), s^(k:ℝ) * Real.exp (-(lam*s)) := by
+    apply setIntegral_congr_fun measurableSet_Ioi
+    intro s hs
+    simp [Real.rpow_natCast]
+  rw [hsimp, h1]
+  have hgamma : Real.Gamma ((k:ℝ)+1) = (k.factorial : ℝ) := Real.Gamma_nat_eq_factorial k
+  rw [hgamma]
+  rw [show (1:ℝ)/lam = lam⁻¹ by ring, Real.inv_rpow (le_of_lt hlam)]
+  rw [show (lam:ℝ) ^ ((k:ℝ)+1) = lam ^ (k+1) by
+    rw [show ((k:ℝ)+1) = ((k+1:ℕ) : ℝ) by push_cast; ring, Real.rpow_natCast]]
+  rw [div_eq_mul_inv]
+  ring
+
+private theorem integrableOn_pow_exp_neg_mul_sub (lam T : ℝ) (hlam : 0 < lam) (k : ℕ) :
+    IntegrableOn (fun t : ℝ => (t - T)^k * Real.exp (-lam * (t - T))) (Set.Ioi T) := by
+  have hcont : Continuous (fun s : ℝ => s^k * Real.exp (-lam*s)) := by fun_prop
+  rw [integrableOn_shift (fun s : ℝ => s^k * Real.exp (-lam*s)) hcont T]
+  have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := (k:ℝ)) (b := lam)
+    (by have hk : (0:ℝ) ≤ (k:ℝ) := Nat.cast_nonneg k; linarith) (by norm_num) hlam
+  refine h.congr_fun ?_ measurableSet_Ioi
+  intro s hs
+  simp [Real.rpow_one, Real.rpow_natCast]
+
+/-! ## The scalar inequality `exp (-y) ≤ 1 - y + y²/2` -/
+
+private theorem exp_neg_le_one_sub_add_sq (y : ℝ) (hy : 0 ≤ y) :
+    Real.exp (-y) ≤ 1 - y + y^2/2 := by
+  have hderiv : ∀ x : ℝ, HasDerivAt (fun y : ℝ => 1 - y + y^2/2 - Real.exp (-y))
+      (-1 + x + Real.exp (-x)) x := by
+    intro x
+    have h1 : HasDerivAt (fun y : ℝ => (1:ℝ) - y) (-1) x := by
+      simpa using (hasDerivAt_id x).const_sub 1
+    have h2 : HasDerivAt (fun y : ℝ => y^2/2) x x := by
+      have h := (hasDerivAt_pow 2 x).div_const 2
+      convert h using 1
+      ring
+    have h3 : HasDerivAt (fun y : ℝ => Real.exp (-y)) (-Real.exp (-x)) x := by
+      have h := (hasDerivAt_neg x).exp
+      convert h using 1
+      ring
+    have h := (h1.add h2).sub h3
+    convert h using 1
+    ring
+  have hmono : MonotoneOn (fun y : ℝ => 1 - y + y^2/2 - Real.exp (-y)) (Set.Ici 0) := by
+    apply monotoneOn_of_deriv_nonneg (convex_Ici 0)
+    · fun_prop
+    · fun_prop
+    · intro x hx
+      rw [(hderiv x).deriv]
+      have := Real.add_one_le_exp (-x)
+      linarith
+  have h := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hy) hy
+  simpa using h
+
+/-! ## The Gaussian factor, split at `T` -/
+
+private theorem gaussian_exp_le (δ T t : ℝ) (hδ : δ ≠ 0) (ht : T < t) :
+    Real.exp (-0.1065 * (t / (π * |δ|)) ^ 2) ≤
+      Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) *
+        Real.exp (-(2 * 0.1065 * T / (π * |δ|) ^ 2) * (t - T)) *
+        (1 - 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 +
+          0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4)) := by
+  have hdabs : (0:ℝ) < |δ| := abs_pos.mpr hδ
+  have hd : (0:ℝ) < π * |δ| := by positivity
+  have hy : (0:ℝ) ≤ 0.1065 * (t - T)^2 / (π * |δ|)^2 := by positivity
+  have hineq := exp_neg_le_one_sub_add_sq (0.1065 * (t - T)^2 / (π * |δ|)^2) hy
+  have hexp : Real.exp (-0.1065 * (t / (π * |δ|)) ^ 2)
+      = Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) *
+        Real.exp (-(2 * 0.1065 * T / (π * |δ|) ^ 2) * (t - T)) *
+        Real.exp (-(0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2)) := by
+    rw [← Real.exp_add, ← Real.exp_add]
+    congr 1
+    field_simp
+    ring
+  rw [hexp]
+  have hpos1 : (0:ℝ) < Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) := Real.exp_pos _
+  have hpos2 : (0:ℝ) < Real.exp (-(2 * 0.1065 * T / (π * |δ|) ^ 2) * (t - T)) := Real.exp_pos _
+  have hmul := mul_le_mul_of_nonneg_left hineq (le_of_lt (mul_pos hpos1 hpos2))
+  calc Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) *
+        Real.exp (-(2 * 0.1065 * T / (π * |δ|) ^ 2) * (t - T)) *
+        Real.exp (-(0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2))
+      = (Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) *
+        Real.exp (-(2 * 0.1065 * T / (π * |δ|) ^ 2) * (t - T))) *
+        Real.exp (-(0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2)) := by ring
+    _ ≤ (Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) *
+        Real.exp (-(2 * 0.1065 * T / (π * |δ|) ^ 2) * (t - T))) *
+        (1 - 0.1065 * (t - T)^2 / (π * |δ|)^2 + (0.1065 * (t - T)^2 / (π * |δ|)^2)^2/2) := hmul
+    _ = Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) *
+        Real.exp (-(2 * 0.1065 * T / (π * |δ|) ^ 2) * (t - T)) *
+        (1 - 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 +
+          0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4)) := by ring
+
+/-! ## The six-term combination of `(t-T)^k exp (-lam (t-T))` -/
+
+private theorem gaussian_combo_integrable (lam T : ℝ) (hlam : 0 < lam) (k : Fin 6 → ℝ) :
+    IntegrableOn (fun t => ∑ i : Fin 6, k i * ((t - T) ^ (i : ℕ) * Real.exp (-lam * (t - T))))
+      (Set.Ioi T) := by
+  have h : ∀ i : Fin 6, IntegrableOn
+      (fun t => k i * ((t - T) ^ (i : ℕ) * Real.exp (-lam * (t - T)))) (Set.Ioi T) :=
+    fun i => (integrableOn_pow_exp_neg_mul_sub lam T hlam (i : ℕ)).const_mul (k i)
+  exact integrable_finsetSum (Finset.univ : Finset (Fin 6)) (fun i _ => h i)
+
+private theorem gaussian_combo_integral (lam T : ℝ) (hlam : 0 < lam) (k : Fin 6 → ℝ) :
+    ∫ t in Set.Ioi T, ∑ i : Fin 6, k i * ((t - T) ^ (i : ℕ) * Real.exp (-lam * (t - T)))
+      = ∑ i : Fin 6, k i * (((i : ℕ).factorial : ℝ) / lam ^ ((i : ℕ) + 1)) := by
+  rw [integral_finsetSum]
+  · apply Finset.sum_congr rfl
+    intro i _
+    rw [integral_const_mul, integral_Ioi_pow_exp_neg_mul_sub lam T hlam (i : ℕ)]
+  · intro i _
+    exact (integrableOn_pow_exp_neg_mul_sub lam T hlam (i : ℕ)).const_mul (k i)
+
+/-! ## The arithmetic core of the Gaussian bound -/
+
+/-! ## The numeric core of the Gaussian bound -/
+
+set_option maxHeartbeats 1600000 in
+/-- The numeric core of the Gaussian bound, in the `X` form. -/
+private theorem gaussian_numeric (X d0 T Lt : ℝ) (hd : 0 < d0) (hT : 100 ≤ T)
+    (hXge : 4 * π ≤ X) (hTX : T = π * d0 * X) (hLt : 2.7672 ≤ Lt) :
+    Lt * d0 / (4 * 0.1065 * X) + 1 / (8 * 0.1065 * X ^ 2) + d0 / (8 * 0.1065 ^ 2 * X ^ 3)
+      - Lt * d0 / (8 * 0.1065 ^ 2 * X ^ 3) - 3 * d0 / (16 * 0.1065 ^ 3 * X ^ 5)
+      + 3 * Lt * d0 / (16 * 0.1065 ^ 3 * X ^ 5) + 3 / (32 * 0.1065 ^ 3 * X ^ 6)
+      + 15 * d0 / (32 * 0.1065 ^ 4 * X ^ 7) ≤ 0.18787 * d0 * Lt := by
+  have hXpos : 0 < X := by nlinarith [hXge, Real.pi_gt_d6]
+  have hLtpos : 0 < Lt := by linarith
+  have hdLt : 0 < d0 * Lt := by positivity
+  have hXbig : (12.566 : ℝ) ≤ X := by nlinarith [hXge, Real.pi_gt_d6]
+  have hXL : (12.566 : ℝ) * 2.7672 ≤ X * Lt := by nlinarith [hXbig, hLt]
+  have hLtinv : 1 / Lt ≤ 1 / 2.7672 := one_div_le_one_div_of_le (by norm_num) hLt
+  have hd0inv : 1 / d0 ≤ π * X / 100 := by
+    rw [div_le_iff₀ hd]; nlinarith [hTX, hT]
+  suffices hPhi : 1 / (4 * 0.1065 * X) + 1 / (8 * 0.1065 * X ^ 2 * d0 * Lt)
+      - 1 / (8 * 0.1065 ^ 2 * X ^ 3) + 1 / (8 * 0.1065 ^ 2 * X ^ 3 * Lt)
+      - 3 / (16 * 0.1065 ^ 3 * X ^ 5 * Lt) + 3 / (16 * 0.1065 ^ 3 * X ^ 5)
+      + 3 / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt)
+      + 15 / (32 * 0.1065 ^ 4 * X ^ 7 * Lt) ≤ (0.18787 : ℝ) by
+    have hq : (Lt * d0 / (4 * 0.1065 * X) + 1 / (8 * 0.1065 * X ^ 2) + d0 / (8 * 0.1065 ^ 2 * X ^ 3)
+        - Lt * d0 / (8 * 0.1065 ^ 2 * X ^ 3) - 3 * d0 / (16 * 0.1065 ^ 3 * X ^ 5)
+        + 3 * Lt * d0 / (16 * 0.1065 ^ 3 * X ^ 5) + 3 / (32 * 0.1065 ^ 3 * X ^ 6)
+        + 15 * d0 / (32 * 0.1065 ^ 4 * X ^ 7)) / (d0 * Lt)
+        = 1 / (4 * 0.1065 * X) + 1 / (8 * 0.1065 * X ^ 2 * d0 * Lt)
+          - 1 / (8 * 0.1065 ^ 2 * X ^ 3) + 1 / (8 * 0.1065 ^ 2 * X ^ 3 * Lt)
+          - 3 / (16 * 0.1065 ^ 3 * X ^ 5 * Lt) + 3 / (16 * 0.1065 ^ 3 * X ^ 5)
+          + 3 / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt)
+          + 15 / (32 * 0.1065 ^ 4 * X ^ 7 * Lt) := by
+      field_simp
+      ring
+    rw [← hq] at hPhi
+    have h2 := (div_le_iff₀ hdLt).1 hPhi
+    calc Lt * d0 / (4 * 0.1065 * X) + 1 / (8 * 0.1065 * X ^ 2) + d0 / (8 * 0.1065 ^ 2 * X ^ 3)
+        - Lt * d0 / (8 * 0.1065 ^ 2 * X ^ 3) - 3 * d0 / (16 * 0.1065 ^ 3 * X ^ 5)
+        + 3 * Lt * d0 / (16 * 0.1065 ^ 3 * X ^ 5) + 3 / (32 * 0.1065 ^ 3 * X ^ 6)
+        + 15 * d0 / (32 * 0.1065 ^ 4 * X ^ 7) ≤ 0.18787 * (d0 * Lt) := h2
+      _ = 0.18787 * d0 * Lt := by ring
+  by_cases hcase : X ≤ 13
+  · have hX3 : X ^ 3 ≤ 13 ^ 3 := pow_le_pow_left₀ (by linarith) hcase 3
+    have hX5 : (12.566 : ℝ) ^ 5 ≤ X ^ 5 := pow_le_pow_left₀ (by norm_num) hXbig 5
+    have hX7 : (12.566 : ℝ) ^ 7 ≤ X ^ 7 := pow_le_pow_left₀ (by norm_num) hXbig 7
+    have hX3L : (12.566 : ℝ) ^ 3 * 2.7672 ≤ X ^ 3 * Lt := by
+      have h3 : (12.566 : ℝ) ^ 3 ≤ X ^ 3 := pow_le_pow_left₀ (by norm_num) hXbig 3
+      nlinarith only [h3, hLt, pow_pos hXpos 3]
+    have hX5L : (12.566 : ℝ) ^ 5 * 2.7672 ≤ X ^ 5 * Lt :=
+      mul_le_mul hX5 hLt (by norm_num) (pow_pos hXpos 5).le
+    have hX7L : (12.566 : ℝ) ^ 7 * 2.7672 ≤ X ^ 7 * Lt :=
+      mul_le_mul hX7 hLt (by norm_num) (pow_pos hXpos 7).le
+    have t1 : 1 / (4 * 0.1065 * X) ≤ (0.186808 : ℝ) := by
+      have h1 : 1 / (4 * 0.1065 * X) ≤ 1 / (4 * 0.1065 * 12.566) := by
+        apply one_div_le_one_div_of_le (a := 4 * 0.1065 * 12.566) (by norm_num)
+        nlinarith only [hXbig]
+      have h2 : 1 / (4 * 0.1065 * 12.566) ≤ (0.186808 : ℝ) := by norm_num
+      exact h1.trans h2
+    have t2 : 1 / (8 * 0.1065 * X ^ 2 * d0 * Lt) ≤ (0.001061 : ℝ) := by
+      have ha : 1 / (8 * 0.1065 * X ^ 2 * d0 * Lt) ≤ π / (800 * 0.1065 * X * Lt) := by
+        rw [show (1:ℝ) / (8 * 0.1065 * X ^ 2 * d0 * Lt)
+            = (1 / d0) * (1 / (8 * 0.1065 * X ^ 2 * Lt)) by field_simp; try ring]
+        have hpos2 : (0:ℝ) < 1 / (8 * 0.1065 * X ^ 2 * Lt) := by positivity
+        calc (1 / d0) * (1 / (8 * 0.1065 * X ^ 2 * Lt))
+            ≤ (π * X / 100) * (1 / (8 * 0.1065 * X ^ 2 * Lt)) :=
+              mul_le_mul_of_nonneg_right hd0inv hpos2.le
+          _ = π / (800 * 0.1065 * X * Lt) := by field_simp; try ring
+      have hb : π / (800 * 0.1065 * X * Lt) ≤ 3.141593 / (800 * 0.1065 * 12.566 * 2.7672) := by
+        have h1 : π / (800 * 0.1065 * X * Lt) ≤ 3.141593 / (800 * 0.1065 * X * Lt) := by
+          gcongr
+          exact le_of_lt Real.pi_lt_d6
+        have h2 : 3.141593 / (800 * 0.1065 * X * Lt)
+            ≤ 3.141593 / (800 * 0.1065 * 12.566 * 2.7672) := by
+          apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+          nlinarith only [hXL]
+        exact h1.trans h2
+      have hc : 3.141593 / (800 * 0.1065 * 12.566 * 2.7672) ≤ (0.001061 : ℝ) := by norm_num
+      linarith only [ha, hb, hc]
+    have t3a : -(1 / (8 * 0.1065 ^ 2 * X ^ 3)) ≤ -(0.0050162 : ℝ) := by
+      have ha : (0.0050162 : ℝ) ≤ 1 / (8 * 0.1065 ^ 2 * X ^ 3) := by
+        have h1 : 1 / (8 * 0.1065 ^ 2 * 13 ^ 3) ≤ 1 / (8 * 0.1065 ^ 2 * X ^ 3) := by
+          apply one_div_le_one_div_of_le (a := 8 * 0.1065 ^ 2 * X ^ 3) (by positivity)
+          nlinarith only [hX3]
+        have h2 : (0.0050162 : ℝ) ≤ 1 / (8 * 0.1065 ^ 2 * 13 ^ 3) := by norm_num
+        exact h2.trans h1
+      linarith only [ha]
+    have t3b : 1 / (8 * 0.1065 ^ 2 * X ^ 3 * Lt) ≤ (0.0020072 : ℝ) := by
+      have h1 : 1 / (8 * 0.1065 ^ 2 * X ^ 3 * Lt)
+          ≤ 1 / (8 * 0.1065 ^ 2 * 12.566 ^ 3 * 2.7672) := by
+        apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+        nlinarith only [hX3L]
+      have h2 : 1 / (8 * 0.1065 ^ 2 * 12.566 ^ 3 * 2.7672) ≤ (0.0020072 : ℝ) := by norm_num
+      exact h1.trans h2
+    have t4 : -(3 / (16 * 0.1065 ^ 3 * X ^ 5 * Lt)) ≤ 0 := by
+      have hpos : (0:ℝ) ≤ 3 / (16 * 0.1065 ^ 3 * X ^ 5 * Lt) := by positivity
+      linarith only [hpos]
+    have t5 : 3 / (16 * 0.1065 ^ 3 * X ^ 5) ≤ (0.0004955 : ℝ) := by
+      have h1 : 3 / (16 * 0.1065 ^ 3 * X ^ 5) ≤ 3 / (16 * 0.1065 ^ 3 * 12.566 ^ 5) := by
+        apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+        nlinarith only [hX5]
+      have h2 : 3 / (16 * 0.1065 ^ 3 * 12.566 ^ 5) ≤ (0.0004955 : ℝ) := by norm_num
+      exact h1.trans h2
+    have t6 : 3 / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt) ≤ (0.0000029 : ℝ) := by
+      have ha : 3 / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt)
+          ≤ 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt) := by
+        rw [show (3:ℝ) / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt)
+            = (1 / d0) * (3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt)) by field_simp; try ring]
+        have hpos2 : (0:ℝ) < 3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt) := by positivity
+        calc (1 / d0) * (3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt))
+            ≤ (π * X / 100) * (3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt)) :=
+              mul_le_mul_of_nonneg_right hd0inv hpos2.le
+          _ = 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt) := by field_simp; try ring
+      have hb : 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt)
+          ≤ 3 * 3.141593 / (3200 * 0.1065 ^ 3 * 12.566 ^ 5 * 2.7672) := by
+        have h1 : 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt)
+            ≤ 3 * 3.141593 / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt) := by
+          gcongr
+          linarith only [Real.pi_lt_d6]
+        have h2 : 3 * 3.141593 / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt)
+            ≤ 3 * 3.141593 / (3200 * 0.1065 ^ 3 * 12.566 ^ 5 * 2.7672) := by
+          apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+          nlinarith only [hX5L]
+        exact h1.trans h2
+      have hc : 3 * 3.141593 / (3200 * 0.1065 ^ 3 * 12.566 ^ 5 * 2.7672) ≤ (0.0000029 : ℝ) := by
+        norm_num
+      linarith only [ha, hb, hc]
+    have t7 : 15 / (32 * 0.1065 ^ 4 * X ^ 7 * Lt) ≤ (0.0000267 : ℝ) := by
+      have h1 : 15 / (32 * 0.1065 ^ 4 * X ^ 7 * Lt)
+          ≤ 15 / (32 * 0.1065 ^ 4 * 12.566 ^ 7 * 2.7672) := by
+        apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+        nlinarith only [hX7L]
+      have h2 : 15 / (32 * 0.1065 ^ 4 * 12.566 ^ 7 * 2.7672) ≤ (0.0000267 : ℝ) := by norm_num
+      exact h1.trans h2
+    linarith only [t1, t2, t3a, t3b, t4, t5, t6, t7]
+  · push_neg at hcase
+    have hX5 : 13 ^ 5 ≤ X ^ 5 := pow_le_pow_left₀ (by norm_num) hcase.le 5
+    have hX7 : 13 ^ 7 ≤ X ^ 7 := pow_le_pow_left₀ (by norm_num) hcase.le 7
+    have hX3L : (12.566 : ℝ) ^ 3 * 2.7672 ≤ X ^ 3 * Lt := by
+      have h3 : (12.566 : ℝ) ^ 3 ≤ X ^ 3 := pow_le_pow_left₀ (by norm_num) hXbig 3
+      nlinarith only [h3, hLt, pow_pos hXpos 3]
+    have hX5L : 13 ^ 5 * 2.7672 ≤ X ^ 5 * Lt :=
+      mul_le_mul hX5 hLt (by norm_num) (pow_pos hXpos 5).le
+    have hX7L : 13 ^ 7 * 2.7672 ≤ X ^ 7 * Lt :=
+      mul_le_mul hX7 hLt (by norm_num) (pow_pos hXpos 7).le
+    have t1 : 1 / (4 * 0.1065 * X) ≤ (0.1805707 : ℝ) := by
+      have h1 : 1 / (4 * 0.1065 * X) ≤ 1 / (4 * 0.1065 * 13) := by
+        apply one_div_le_one_div_of_le (a := 4 * 0.1065 * 13) (by norm_num)
+        nlinarith only [hcase]
+      have h2 : 1 / (4 * 0.1065 * 13) ≤ (0.1805707 : ℝ) := by norm_num
+      exact h1.trans h2
+    have t2 : 1 / (8 * 0.1065 * X ^ 2 * d0 * Lt) ≤ (0.0010251 : ℝ) := by
+      have ha : 1 / (8 * 0.1065 * X ^ 2 * d0 * Lt) ≤ π / (800 * 0.1065 * X * Lt) := by
+        rw [show (1:ℝ) / (8 * 0.1065 * X ^ 2 * d0 * Lt)
+            = (1 / d0) * (1 / (8 * 0.1065 * X ^ 2 * Lt)) by field_simp; try ring]
+        have hpos2 : (0:ℝ) < 1 / (8 * 0.1065 * X ^ 2 * Lt) := by positivity
+        calc (1 / d0) * (1 / (8 * 0.1065 * X ^ 2 * Lt))
+            ≤ (π * X / 100) * (1 / (8 * 0.1065 * X ^ 2 * Lt)) :=
+              mul_le_mul_of_nonneg_right hd0inv hpos2.le
+          _ = π / (800 * 0.1065 * X * Lt) := by field_simp; try ring
+      have hb : π / (800 * 0.1065 * X * Lt) ≤ 3.141593 / (800 * 0.1065 * 13 * 2.7672) := by
+        have h1 : π / (800 * 0.1065 * X * Lt) ≤ 3.141593 / (800 * 0.1065 * X * Lt) := by
+          gcongr
+          exact le_of_lt Real.pi_lt_d6
+        have h2 : 3.141593 / (800 * 0.1065 * X * Lt)
+            ≤ 3.141593 / (800 * 0.1065 * 13 * 2.7672) := by
+          apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+          nlinarith only [hcase.le, hLt]
+        exact h1.trans h2
+      have hc : 3.141593 / (800 * 0.1065 * 13 * 2.7672) ≤ (0.0010251 : ℝ) := by norm_num
+      linarith only [ha, hb, hc]
+    have t3a : -(1 / (8 * 0.1065 ^ 2 * X ^ 3)) ≤ 0 := by
+      have h : (0:ℝ) ≤ 1 / (8 * 0.1065 ^ 2 * X ^ 3) := by positivity
+      linarith only [h]
+    have t3b : 1 / (8 * 0.1065 ^ 2 * X ^ 3 * Lt) ≤ (0.0020072 : ℝ) := by
+      have h1 : 1 / (8 * 0.1065 ^ 2 * X ^ 3 * Lt)
+          ≤ 1 / (8 * 0.1065 ^ 2 * 12.566 ^ 3 * 2.7672) := by
+        apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+        nlinarith only [hX3L]
+      have h2 : 1 / (8 * 0.1065 ^ 2 * 12.566 ^ 3 * 2.7672) ≤ (0.0020072 : ℝ) := by norm_num
+      exact h1.trans h2
+    have t4 : -(3 / (16 * 0.1065 ^ 3 * X ^ 5 * Lt)) ≤ 0 := by
+      have hpos : (0:ℝ) ≤ 3 / (16 * 0.1065 ^ 3 * X ^ 5 * Lt) := by positivity
+      linarith only [hpos]
+    have t5 : 3 / (16 * 0.1065 ^ 3 * X ^ 5) ≤ (0.0004181 : ℝ) := by
+      have h1 : 3 / (16 * 0.1065 ^ 3 * X ^ 5) ≤ 3 / (16 * 0.1065 ^ 3 * 13 ^ 5) := by
+        apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+        nlinarith only [hX5]
+      have h2 : 3 / (16 * 0.1065 ^ 3 * 13 ^ 5) ≤ (0.0004181 : ℝ) := by norm_num
+      exact h1.trans h2
+    have t6 : 3 / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt) ≤ (0.0000025 : ℝ) := by
+      have ha : 3 / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt)
+          ≤ 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt) := by
+        rw [show (3:ℝ) / (32 * 0.1065 ^ 3 * X ^ 6 * d0 * Lt)
+            = (1 / d0) * (3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt)) by field_simp; try ring]
+        have hpos2 : (0:ℝ) < 3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt) := by positivity
+        calc (1 / d0) * (3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt))
+            ≤ (π * X / 100) * (3 / (32 * 0.1065 ^ 3 * X ^ 6 * Lt)) :=
+              mul_le_mul_of_nonneg_right hd0inv hpos2.le
+          _ = 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt) := by field_simp; try ring
+      have hb : 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt)
+          ≤ 3 * 3.141593 / (3200 * 0.1065 ^ 3 * 13 ^ 5 * 2.7672) := by
+        have h1 : 3 * π / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt)
+            ≤ 3 * 3.141593 / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt) := by
+          gcongr
+          linarith only [Real.pi_lt_d6]
+        have h2 : 3 * 3.141593 / (3200 * 0.1065 ^ 3 * X ^ 5 * Lt)
+            ≤ 3 * 3.141593 / (3200 * 0.1065 ^ 3 * 13 ^ 5 * 2.7672) := by
+          apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+          nlinarith only [hX5L]
+        exact h1.trans h2
+      have hc : 3 * 3.141593 / (3200 * 0.1065 ^ 3 * 13 ^ 5 * 2.7672) ≤ (0.0000025 : ℝ) := by
+        norm_num
+      linarith only [ha, hb, hc]
+    have t7 : 15 / (32 * 0.1065 ^ 4 * X ^ 7 * Lt) ≤ (0.0000210 : ℝ) := by
+      have h1 : 15 / (32 * 0.1065 ^ 4 * X ^ 7 * Lt)
+          ≤ 15 / (32 * 0.1065 ^ 4 * 13 ^ 7 * 2.7672) := by
+        apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+        nlinarith only [hX7L]
+      have h2 : 15 / (32 * 0.1065 ^ 4 * 13 ^ 7 * 2.7672) ≤ (0.0000210 : ℝ) := by norm_num
+      exact h1.trans h2
+    linarith only [t1, t2, t3a, t3b, t4, t5, t6, t7]
+
+/-! ## The Gaussian tail integral, display 4.37 to 4.41 -/
+
+set_option maxHeartbeats 1600000 in
+private theorem gaussian_integral_bound_aux (q : ℕ) [NeZero q] (δ T : ℝ) (hδ : δ ≠ 0)
+    (hT : max (4 * π ^ 2 * |δ|) 100 ≤ T) :
+    gaussianTailIntegral q δ T ≤
+      0.18787 * |δ| * log ((q : ℝ) * T / (2 * π)) *
+        Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) := by
+  classical
+  have hT100 : 100 ≤ T := (le_max_right _ _).trans hT
+  have hT4 : 4 * π ^ 2 * |δ| ≤ T := (le_max_left _ _).trans hT
+  have hT0 : 0 < T := by linarith
+  have hd0 : (0:ℝ) < |δ| := abs_pos.mpr hδ
+  have hb : (0:ℝ) < 0.1065 := by norm_num
+  have hLc : (0:ℝ) < π * |δ| := by positivity
+  set Lt : ℝ := log ((q : ℝ) * T / (2 * π)) with hLtdef
+  have hLtlow : (2.7672 : ℝ) ≤ Lt := by
+    rw [hLtdef]; exact log_qt_lower q T hT100
+  set lam : ℝ := 2 * 0.1065 * T / (π * |δ|) ^ 2 with hlamdef
+  have hlampos : 0 < lam := by rw [hlamdef]; positivity
+  set s0 : ℝ := 1 / lam with hs0def
+  have hs0eq : s0 = (π * |δ|) ^ 2 / (2 * 0.1065 * T) := by
+    rw [hs0def, hlamdef]; field_simp; try ring
+  set X : ℝ := T / (π * |δ|) with hXdef
+  have hXpos : 0 < X := by rw [hXdef]; positivity
+  have hTX : T = π * |δ| * X := by rw [hXdef]; field_simp
+  have hXge : 4 * π ≤ X := by
+    rw [hXdef, le_div_iff₀ hLc]
+    nlinarith only [hT4]
+  set k : Fin 6 → ℝ := ![(1 / (2 * π)) * Lt + 1 / (4 * T), (1 / (2 * π)) / T,
+      -(((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 / (π * |δ|) ^ 2)),
+      -(((1 / (2 * π)) / T) * (0.1065 / (π * |δ|) ^ 2)),
+      ((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4)),
+      ((1 / (2 * π)) / T) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4))] with hk
+  set g : ℝ → ℝ := fun t => Real.exp (-0.1065 * X ^ 2) *
+      ∑ i : Fin 6, k i * ((t - T) ^ (i : ℕ) * Real.exp (-lam * (t - T))) with hg
+  have hgint : IntegrableOn g (Set.Ioi T) := by
+    rw [hg]
+    exact (gaussian_combo_integrable lam T hlampos k).const_mul _
+  have hval : ∫ t in Set.Ioi T, g t = Real.exp (-0.1065 * X ^ 2) *
+      (((1 / (2 * π)) * Lt + 1 / (4 * T)) * s0 + (1 / (2 * π * T)) * s0 ^ 2
+       - (((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 / (π * |δ|) ^ 2)) * (2 * s0 ^ 3)
+       - ((1 / (2 * π * T)) * (0.1065 / (π * |δ|) ^ 2)) * (6 * s0 ^ 4)
+       + (((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4))) * (24 * s0 ^ 5)
+       + ((1 / (2 * π * T)) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4))) * (120 * s0 ^ 6)) := by
+    rw [hg, integral_const_mul, gaussian_combo_integral lam T hlampos k]
+    congr 1
+    simp only [Fin.sum_univ_six, hk]
+    simp
+    rw [hs0def]
+    norm_num
+    field_simp
+    try ring
+  have hf_nonneg : ((0 : ℝ → ℝ)) ≤ᵐ[volume.restrict (Set.Ioi T)]
+      (fun t => Real.exp (-0.1065 * (t / (π * |δ|)) ^ 2) * countDensity q t) := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+    exact mul_nonneg (Real.exp_pos _).le (countDensity_nonneg q T t hT100 ht)
+  have hle : (fun t => Real.exp (-0.1065 * (t / (π * |δ|)) ^ 2) * countDensity q t)
+      ≤ᵐ[volume.restrict (Set.Ioi T)] g := by
+    rw [hg]
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+    have hexp0 := gaussian_exp_le δ T t hδ ht
+    have hexp : Real.exp (-0.1065 * (t / (π * |δ|)) ^ 2) ≤
+        Real.exp (-0.1065 * X ^ 2) * Real.exp (-lam * (t - T)) *
+          (1 - 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 +
+            0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4)) := by
+      rw [hXdef, hlamdef]
+      exact hexp0
+    have hcd := countDensity_le_linear q T t hT100 ht
+    -- the polynomial factor is nonnegative
+    have hpoly : (0:ℝ) ≤ 1 - 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 +
+        0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4) := by
+      have hy : (0:ℝ) ≤ 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 := by positivity
+      have h := exp_neg_le_one_sub_add_sq (0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2) hy
+      have hy2 : (0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2) ^ 2 / 2
+          = 0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4) := by
+        field_simp; try ring
+      rw [hy2] at h
+      have h2 : (0:ℝ) < Real.exp (-(0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2)) := Real.exp_pos _
+      linarith only [h, h2]
+    have hE2 : (0:ℝ) ≤ Real.exp (-0.1065 * X ^ 2) * Real.exp (-lam * (t - T)) *
+        (1 - 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 +
+          0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4)) := by
+      have h1 : (0:ℝ) < Real.exp (-0.1065 * X ^ 2) := Real.exp_pos _
+      have h2 : (0:ℝ) < Real.exp (-lam * (t - T)) := Real.exp_pos _
+      exact mul_nonneg (mul_nonneg h1.le h2.le) hpoly
+    have hcdN := countDensity_nonneg q T t hT100 ht
+    have hstep : Real.exp (-0.1065 * (t / (π * |δ|)) ^ 2) * countDensity q t
+        ≤ (Real.exp (-0.1065 * X ^ 2) * Real.exp (-lam * (t - T)) *
+            (1 - 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 +
+              0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4))) *
+            ((1 / (2 * π)) * log ((q : ℝ) * T / (2 * π)) +
+              (1 / (2 * π)) / T * (t - T) + 1 / (4 * T)) :=
+      mul_le_mul hexp hcd hcdN hE2
+    have hident : (∑ i : Fin 6, k i * ((t - T) ^ (i : ℕ) * Real.exp (-lam * (t - T))))
+        = Real.exp (-lam * (t - T)) *
+            (1 - 0.1065 * (t - T) ^ 2 / (π * |δ|) ^ 2 +
+              0.1065 ^ 2 * (t - T) ^ 4 / (2 * (π * |δ|) ^ 4)) *
+            ((1 / (2 * π)) * Lt + (1 / (2 * π)) / T * (t - T) + 1 / (4 * T)) := by
+      set e := Real.exp (-lam * (t - T)) with he
+      rw [Fin.sum_univ_six, hk]
+      simp
+      try ring
+    refine hstep.trans (le_of_eq ?_)
+    rw [hident]
+    ring
+  have hnum := gaussian_numeric X |δ| T Lt hd0 hT100 hXge hTX hLtlow
+  have hmain : gaussianTailIntegral q δ T ≤ ∫ t in Set.Ioi T, g t := by
+    rw [gaussianTailIntegral, if_neg hδ]
+    exact integral_mono_of_nonneg (μ := volume.restrict (Set.Ioi T)) hf_nonneg hgint hle
+  calc gaussianTailIntegral q δ T ≤ ∫ t in Set.Ioi T, g t := hmain
+    _ = Real.exp (-0.1065 * X ^ 2) *
+        (((1 / (2 * π)) * Lt + 1 / (4 * T)) * s0 + (1 / (2 * π * T)) * s0 ^ 2
+         - (((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 / (π * |δ|) ^ 2)) * (2 * s0 ^ 3)
+         - ((1 / (2 * π * T)) * (0.1065 / (π * |δ|) ^ 2)) * (6 * s0 ^ 4)
+         + (((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4))) * (24 * s0 ^ 5)
+         + ((1 / (2 * π * T)) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4))) * (120 * s0 ^ 6)) := hval
+    _ ≤ Real.exp (-0.1065 * X ^ 2) * (0.18787 * |δ| * Lt) := by
+        apply mul_le_mul_of_nonneg_left _ (Real.exp_pos _).le
+        have hconv : ((1 / (2 * π)) * Lt + 1 / (4 * T)) * s0 + (1 / (2 * π * T)) * s0 ^ 2
+            - (((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 / (π * |δ|) ^ 2)) * (2 * s0 ^ 3)
+            - ((1 / (2 * π * T)) * (0.1065 / (π * |δ|) ^ 2)) * (6 * s0 ^ 4)
+            + (((1 / (2 * π)) * Lt + 1 / (4 * T)) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4))) * (24 * s0 ^ 5)
+            + ((1 / (2 * π * T)) * (0.1065 ^ 2 / (2 * (π * |δ|) ^ 4))) * (120 * s0 ^ 6)
+            = Lt * |δ| / (4 * 0.1065 * X) + 1 / (8 * 0.1065 * X ^ 2)
+              + |δ| / (8 * 0.1065 ^ 2 * X ^ 3)
+              - Lt * |δ| / (8 * 0.1065 ^ 2 * X ^ 3) - 3 * |δ| / (16 * 0.1065 ^ 3 * X ^ 5)
+              + 3 * Lt * |δ| / (16 * 0.1065 ^ 3 * X ^ 5) + 3 / (32 * 0.1065 ^ 3 * X ^ 6)
+              + 15 * |δ| / (32 * 0.1065 ^ 4 * X ^ 7) - 1 / (16 * 0.1065 ^ 2 * X ^ 4) := by
+          rw [hs0eq, hXdef]
+          field_simp
+          ring
+        rw [hconv]
+        have hdrop2 : (0:ℝ) ≤ 1 / (16 * 0.1065 ^ 2 * X ^ 4) := by positivity
+        linarith only [hnum, hdrop2]
+    _ = 0.18787 * |δ| * log ((q : ℝ) * T / (2 * π)) *
+        Real.exp (-0.1065 * (T / (π * |δ|)) ^ 2) := by
+        rw [hLtdef, hXdef]; ring
+
+
 /-- LEAF. Page 41, displays 4.33 to 4.35 and Corollary 3.2.
 The decay envelope gives absolute convergence as well as the Mellin mass bound.
 Replacing the piecewise envelope by the sum of its two nonnegative branches enlarges it.
@@ -413,21 +953,7 @@ theorem gaussian_integral_bound (q : ℕ) [NeZero q] (δ T : ℝ) (hδ : δ ≠ 
     gaussianTailIntegral q δ T ≤
       0.18787 * |δ| * log (q * T / (2 * π)) *
         exp (-0.1065 * (T / (π * |δ|)) ^ 2) := by
-  -- BLOCKED OUT OF REACH: the pointwise Gaussian-to-exponential comparison
-  -- exp(-a*(t/s)^2) ≤ exp(-a*(T/s)^2) * exp(-lam*(t-T)) with lam = 2*a*T/s^2
-  -- gives a majorant whose integral bound A/lam + B/lam^2 needs to satisfy
-  -- A/lam + B/lam^2 ≤ 0.18787*|δ|*L. Numerical verification (100k random samples
-  -- with L=log(qT/2π), q≥1, T≥max(4π²|δ|,100)) shows this holds, but a rigorous
-  -- Lean proof requires either: (a) the Mills ratio bound
-  -- ∫_x^∞ exp(-c*u²) du ≤ exp(-c*x²)/(2cx) proved in Lean, or
-  -- (b) clearing denominators and using nlinarith with π bounds on the
-  -- resulting polynomial. Searches run: LeanSearch, Loogle, local Mathlib grep
-  -- for gaussian integral tail bounds; found integral_gaussian_Ioi (exact
-  -- from 0, not tail) and integrableOn_Ioi_exp_neg_mul_sq. No Mills tail
-  -- bound exists in Mathlib. The polynomial approach fails because nlinarith
-  -- cannot handle π; manual π-bound substitution leaves a margin too tight
-  -- for the available numeric tools.
-  sorry
+  exact gaussian_integral_bound_aux q δ T hδ hT
 
 /-- Exactly Decomp269a.high_zero_bound, from the three smaller analytic leaves.
 The proof has no sorry of its own. The zero shift is handled without dividing by the shift.

@@ -1,0 +1,43 @@
+{
+  "batches": [
+    {
+      "batch": "task360-1000",
+      "label": "local-1-pass-1",
+      "visited": 519,
+      "complete": 518,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 3,
+      "scored": 2,
+      "rankings": {
+        "prefix": 249,
+        "three_step_prefix": 194,
+        "miss_one": 76
+      },
+      "source_pools": {
+        "healthy_archive": 443,
+        "early_archive": 76
+      },
+      "source_prefixes": {
+        "early_hole": 467,
+        "endpoint": 52
+      }
+    }
+  ],
+  "visited": 519,
+  "complete": 518,
+  "interrupted": 1,
+  "failures": 0,
+  "scored": 2,
+  "distinct": 2,
+  "BEATS": 0,
+  "BEST_generators": 10,
+  "independent_coverage": "MATCH",
+  "exact_domain_reconstruction": "MATCH",
+  "prior_attempt_overlap": 0,
+  "prior_attempt_hashes": 214377,
+  "prior_complete_hashes": 212152,
+  "judge_sources": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_artifact_bytes": 415476
+}
