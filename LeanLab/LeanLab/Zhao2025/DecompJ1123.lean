@@ -1,5 +1,6 @@
 import Mathlib
 import LeanLab.Zhao2025.PaperTheorem14
+import LeanLab.PNTSieve.BrunTitchmarshAPCor
 
 namespace LeanLab.Zhao2025.Task1123
 
@@ -11,7 +12,40 @@ theorem maynard_2013_bound (theta : ℝ) (hth : 5 ≤ theta) :
     ∀ a : ℕ, 1 ≤ a → a ≤ q → Nat.Coprime a q →
       (primeCountAP ((q : ℝ) ^ theta) q a : ℝ) ≤
         2 * (q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta)) := by
-  sorry
+  obtain ⟨X0, hX0, hBT⟩ := LeanLab.PNTSieve.BrunTitchmarshAP.brunTitchmarsh_classical
+  refine ⟨max 2 ⌈X0⌉₊, ?_⟩
+  intro q hq hq1 a ha1 haq hcop
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast (by omega : 0 < q)
+  have hX0' : X0 ≤ (q : ℝ) ^ theta / q := by
+    have h1 : X0 ≤ max 2 ⌈X0⌉₊ := le_max_right _ _
+    have h2 : max 2 ⌈X0⌉₊ ≤ q := hq
+    have h3 : X0 ≤ ⌈X0⌉₊ := Nat.le_ceil _
+    have h4 : (q : ℝ) ^ theta / q ≥ q := by
+      rw [div_le_iff₀ hq0]
+      have h5 : (q : ℝ) ^ theta ≥ (q : ℝ) ^ 1 :=
+        Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast (show 1 ≤ q by omega)) (by linarith)
+      simpa using h5
+    linarith
+  have hBT' := hBT q a (by omega : 0 < q) ((q : ℝ) ^ theta) hX0'
+  have hset : (Finset.range (⌊(q : ℝ) ^ theta⌋₊ + 1)).filter
+      (fun p => Nat.Prime p ∧ p % q = a % q) =
+      (Finset.Icc 1 ⌊(q : ℝ) ^ theta⌋₊).filter (fun p => Nat.Prime p ∧ p % q = a % q) := by
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_Icc]
+    constructor
+    · rintro ⟨hp, hprime, hmod⟩
+      exact ⟨⟨hprime.one_lt.le, by omega⟩, hprime, hmod⟩
+    · rintro ⟨⟨_, hp⟩, hprime, hmod⟩
+      exact ⟨by omega, hprime, hmod⟩
+  have hcast : (primeCountAP ((q : ℝ) ^ theta) q a : ℝ) ≤
+      3 * (q : ℝ) ^ theta / ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta / q)) := by
+    calc (primeCountAP ((q : ℝ) ^ theta) q a : ℝ)
+        = (((Finset.Icc 1 ⌊(q : ℝ) ^ theta⌋₊).filter
+            (fun p => p.Prime ∧ p % q = a % q)).card : ℝ) := by
+          rw [primeCountAP, hset]; rfl
+      _ ≤ 3 * (q : ℝ) ^ theta /
+          ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta / q)) := hBT'
+  exact hcast
 
 /-- LEAF: Nonnegativity of the scaling term. -/
 theorem scaling_term_nonneg (q : ℕ) (hq : 2 ≤ q) (theta : ℝ) (hth : 5 ≤ theta) :
