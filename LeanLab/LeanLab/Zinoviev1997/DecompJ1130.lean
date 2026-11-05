@@ -11,7 +11,7 @@ def nontrivZeros {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) : Set ℂ 
 theorem hadamard_product_L_function_bound {q : ℕ} [NeZero q] (hq : 3 ≤ q)
     (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (T : ℝ) (A : ℝ) :
     ∑ ρ ∈ (∅ : Finset ℂ), (1 / ((2 : ℂ) + T * I - ρ)).re ≤ 0 := by
-  sorry
+  simp
 
 /-- LEAF. Logarithmic derivative of L bound from Hadamard factorization. -/
 theorem logarithmic_derivative_L_bound {q : ℕ} [NeZero q] (hq : 3 ≤ q)
