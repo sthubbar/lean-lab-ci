@@ -1,0 +1,129 @@
+{
+  "base": "51f790891d383c9d3abde590d4cc556682eff3ab",
+  "original_file_byte_identical": true,
+  "supply_statement_byte_identical": true,
+  "declarations": [
+    {
+      "name": "Decomp386a.suffix_card_error",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386a.suffix_average_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386a.finite_centering_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386a.center_from_continuous_comparison",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.criticalPolynomial",
+      "kind": "def"
+    },
+    {
+      "name": "Decomp386b.windowContour",
+      "kind": "def"
+    },
+    {
+      "name": "Decomp386b.lowCenter",
+      "kind": "def"
+    },
+    {
+      "name": "Decomp386b.truncated_perron_window",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.criticalPolynomial_continuous",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.windowKernel_continuous",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.low_height_remainder_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.low_height_of_log_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.divisor_sum_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.polynomial_bound_nonpositive",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.divisor_log_bound_nonpositive",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.polynomial_bound_le_one",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.divisor_log_bound_le_one",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.low_height_comparison_le_one",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.divisor_polynomial_log_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.low_height_comparison",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.low_height_comparison_nonpositive",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.high_height_comparison",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.twisted_coefficient_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.small_power_low_height_obstruction",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386b.perron_window_comparison",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386c.perron_kernel_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386c.two_tail_norm_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386c.eventually_low_height_le_power",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386c.perron_kernel_first_order_bound",
+      "kind": "theorem"
+    },
+    {
+      "name": "Decomp386c.eventually_log_power_le_low_height",
+      "kind": "theorem"
+    }
+  ],
+  "count": 30,
+  "new_direct_sorries": 2
+}

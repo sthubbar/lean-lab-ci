@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Real.rpow_add.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Analysis.SpecialFunctions.Pow.Real", "name": "Real.rpow_add", "type": " {x : \u211d} (hx : 0 < x) (y z : \u211d) : x ^ (y + z) = x ^ y * x ^ z"}]}

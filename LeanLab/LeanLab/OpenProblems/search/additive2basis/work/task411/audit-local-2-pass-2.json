@@ -1,0 +1,43 @@
+{
+  "batches": [
+    {
+      "batch": "task411-2000",
+      "label": "local-2-pass-2",
+      "visited": 800,
+      "complete": 617,
+      "interrupted": 183,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "prefix": 332,
+        "three_step_prefix": 311,
+        "miss_one": 157
+      },
+      "source_pools": {
+        "healthy_archive": 643,
+        "early_archive": 157
+      },
+      "source_prefixes": {
+        "early_hole": 744,
+        "endpoint": 56
+      }
+    }
+  ],
+  "visited": 800,
+  "complete": 617,
+  "interrupted": 183,
+  "failures": 0,
+  "scored": 0,
+  "distinct": 0,
+  "BEATS": 0,
+  "BEST_generators": 10,
+  "independent_coverage": "MATCH",
+  "exact_domain_reconstruction": "MATCH",
+  "prior_attempt_overlap": 0,
+  "prior_attempt_hashes": 275299,
+  "prior_complete_hashes": 272038,
+  "judge_sources": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_artifact_bytes": 650790
+}

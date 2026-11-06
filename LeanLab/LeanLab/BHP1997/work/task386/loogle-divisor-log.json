@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Real.log and Nat.divisors.\n", "heartbeats": 1, "hits": [{"doc": null, "module": "Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt", "name": "ArithmeticFunction.vonMangoldt_sum", "type": " {n : \u2115} : \u2211 i \u2208 n.divisors, ArithmeticFunction.vonMangoldt i = Real.log \u2191n"}]}
