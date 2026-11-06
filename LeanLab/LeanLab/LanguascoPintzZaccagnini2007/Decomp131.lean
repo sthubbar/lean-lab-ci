@@ -1,4 +1,5 @@
 import LeanLab.LanguascoPintzZaccagnini2007.DecompJ218
+import LeanLab.LanguascoPintzZaccagnini2007.Decomp383a
 
 namespace LeanLab.LPZ2007
 
@@ -653,12 +654,14 @@ theorem repaired_main_of_narrow1619
 /-- Assembly of the repaired cited conclusion. Unit U-1619 applied the two parameter route of
 U-1617 section 4: display 25 is proved on the narrow window, where every shift stays in the printed
 J(X), and the N near 2X/3 pass to Y = 9X/10 by `Rpp_transfer1619`.
-CONDITIONAL on `cor42_published131`, CITED, and `major_arcs_combine131`, OPEN, only.
+CONDITIONAL on `cor42_published131`, CITED, only. U-1626 replaced the sealed leaf
+`major_arcs_combine131` here by `major_arcs_combine_supply383`, the identical statement proved
+in Decomp383a, which imports DecompJ218 and so cannot fill the leaf in place.
 `cor42_window_extension131` is no longer used. There is no sorry in this assembly. -/
 theorem repaired_mainJ131 : RepairedMainJ131 :=
   repaired_main_of_narrow1619 (narrow_count1619
     (fun k hk ε hε => major_asymptotic_narrow1619 cor42_published131
-      major_arcs_combine131 k hk ε hε))
+      major_arcs_combine_supply383 k hk ε hε))
 
 end
 

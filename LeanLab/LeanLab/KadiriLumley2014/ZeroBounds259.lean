@@ -41,10 +41,14 @@ noncomputable def zeroS4 (m : ℕ) (c1 c2 c3 : ℝ) : ℝ :=
   (c1 * (1 + 1 / (m : ℝ)) + c2 * Real.log 30610000000 / 30610000000 +
     (c3 + c2 / (m + 1)) / 30610000000) / 30610000000 ^ m
 
-/-- S5 from equation 2.44. The zero-free constant is the published 5.69693. -/
+/-- S5 from page 7 display 2.44, repaired by U-1626. The print has R0 over 2 log X0, copied from
+Faber Kadiri arXiv 1310.6374 page 10 display 2.30. There J_m is written as z over 2m times K1,
+but K1 carries a factor one half, so the substitution gives z over m times K1. The correct
+second term has R0 over log X0, twice the print. DECISION U-1626, see Audit1626.
+The zero-free constant is the published 5.69693. -/
 noncomputable def zeroS5 (X : ℝ) (m : ℕ) (c1 c2 c3 : ℝ) : ℝ :=
   (c1 + c2 * Real.log 30610000000 / 30610000000 + c3 / 30610000000 +
-    (c1 + c2 / 30610000000) * 5.69693 / (2 * Real.log X) *
+    (c1 + c2 / 30610000000) * 5.69693 / Real.log X *
       (Real.log 30610000000) ^ 2 /
         (((m : ℝ) * 5.69693 / Real.log X) * (Real.log 30610000000) ^ 2 - 1)) /
     30610000000 ^ m

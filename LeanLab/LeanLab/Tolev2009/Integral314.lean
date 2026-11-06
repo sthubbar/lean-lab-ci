@@ -4,7 +4,7 @@ Binary Goldbach is open.
 Source: Halupczok 2008 page 11, the finite geometric singular integral.
 The unit interval identity retains the exact lattice endpoint correction.
 -/
-import LeanLab.Tolev2009.Decomp314a
+import LeanLab.Tolev2009.Base314a
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 open Finset Real MeasureTheory
