@@ -1,4 +1,12 @@
 /-
+DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on far_positive_sup357.
+Reason: far_positive_sup357 is a pointwise strengthening with no source. It fails at the
+peak of equation 2.3 at 1 over 3 m. Audit1622.not_farSup_of_peak proves this, CONDITIONAL on
+the named input FarPeak1622, which needs primes in progressions to modulus 3 m.
+Live route: outer_to_kernels376 in Decomp376f, and its re-cut in SPLIT1622_mellin.
+Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
+-/
+/-
 Split of the positive outer-interval Mellin square estimate `mellin_positive_far357`
 into smaller steps. Nothing here changes a statement: `mellin_positive_far357_split`
 repeats the target statement character for character and proves it from the four

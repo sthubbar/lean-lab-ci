@@ -87,7 +87,11 @@ theorem energy_antitone_epsilon {N : ℕ} (hN : 1 ≤ N) {ε ε' : ℝ} (hε : �
 
 /-- LEAF. Equation 27, p. 364, with the supremum replaced by an upper bound E.
 The missing proof includes the Farey split, the character expansion and Gallagher's lemma,
-P. X. Gallagher, Invent. Math. 11, 1970, pp. 329 to 339. -/
+P. X. Gallagher, Invent. Math. 11, 1970, pp. 329 to 339.
+QUESTION U-1624, 2026-11-06. Off the live route. The printed Gallagher line uses window 2 q Q at
+radius `1 / (q Q)`, past the kernel zero at `1 / (2 q Q)`, so no proof of this form is available.
+The statement follows from Estimate7 and is not refuted. The live route is
+`Decomp1624.reduction27A` with `Decomp1624.energy_decayA`. Statement unchanged. -/
 theorem reduction27 :
     ∃ ε₁ : ℝ, 0 < ε₁ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∀ A : ℝ, 0 < A →
       ∃ C c N₀ : ℝ, 0 < C ∧ 0 < c ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ,
@@ -101,7 +105,12 @@ theorem reduction27 :
 has every logarithmic saving. The missing proof includes 28 and 31 to 55.
 Outside inputs are Davenport Ch. 19, Saffari and Vaughan Lemmas 5 and 6,
 Montgomery Ch. 12, and Prachar Ch. 8 with the lower Siegel gap needed on p. 372.
-The open sign question in ZeroFreeInputs remains separate. -/
+The open sign question in ZeroFreeInputs remains separate.
+QUESTION U-1624, 2026-11-06. Off the live route. The clipped W keeps a fixed end at N. At q near Q
+the printed comparison W with W tilde on p. 365 does not follow, and this leaf asks a pointwise
+bound at N for moduli near the square root of N that the x average of p. 365 does not give. True
+on GRH by a size count, not refuted. The live route is `Decomp1624.energy_decayA`.
+Statement unchanged. -/
 theorem energy_decay :
     ∀ ε : ℝ, 0 < ε → ε < 1 / 12 → ∀ D : ℝ, 0 < D →
       ∃ C N₀ : ℝ, 0 < C ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ, 0 ≤ ξ → ξ ≤ 1 →

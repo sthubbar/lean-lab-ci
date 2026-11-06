@@ -1,4 +1,10 @@
 /-
+DEAD SPLIT, U-1624, 2026-11-06. Leaves 2 and 3 below are the sealed `Lemma1MeanSquare` with one
+parameter hypothesis added, see `Audit1624.split_qt_of_target` and `Audit1624.split_F_of_target`,
+and the assembly does not use leaf 1. The split is an equivalence and reduces nothing.
+Nothing imports this file. The live route is the CITED leaf `DecompC165c.hybrid_mean_square`,
+behind `AssemblyC165.theorem1`. Kept as text of record.
+
 Split of `hybrid_mean_square` in LeanLab.BHP1997.DecompC165c into leaves.
 
 The square sum over well-spaced time and character pairs (page 11, display 3.3,

@@ -1,4 +1,13 @@
 /-
+DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on any leaf in this file.
+Reason: the conclusion of local_prime_mass357 is false. At q equal to 2 and a equal to 1 the
+arc about 1/2 carries mass above N over log cubed N, far above the allowed bound.
+Audit1622.not_leafLocalMass states this, build pending at the return of U-1622. Equation 9.1 of P0093 is used
+only for q above Q equal to N to one tenth, and this leaf dropped that condition.
+Live route: doubled_system_mass376 in Decomp376c, and its re-cut in SPLIT1622_exceptional.
+Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
+-/
+/-
 Split of the exceptional prime mass estimate used by the binary Goldbach circle
 method. The sealed target exceptional_prime_mass357 stays untouched in
 Decomp357c; this file states the smaller steps it is assembled from and proves

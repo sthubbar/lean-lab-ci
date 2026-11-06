@@ -1,4 +1,13 @@
 /-
+DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on major_error_remainder357.
+Reason: for k at least 3 the term C N over log N is below epsilon over 2 times scale, so
+major_error_remainder357 is the parent relabelled. Its two other leaves are real analysis.
+The parameter tau equal to N to the 1/7 in majorArcs280 is correct: pages 165 and 166 of the
+original scan print it. The translation P0093.txt misreads it as N to the 1/2.
+Live route: major_expansion_remainder376 in Decomp376d, and its re-cut in SPLIT1622_major.
+Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
+-/
+/-
 Split of `major_to_truncated357` into three steps.  The target statement is
 kept exactly as it stands in `Decomp357b`; `major_to_truncated357_split` below
 states it character for character and derives it from the three OPEN leaves.

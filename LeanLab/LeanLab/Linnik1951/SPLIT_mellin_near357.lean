@@ -1,4 +1,13 @@
 /-
+DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on the two pointwise leaves here.
+Reason: near_positive_sup357 is a pointwise sup bound stronger than mellin_near357, which it
+implies, and it has no source: page 158 bounds U by N ln cubed N over square root of q tau,
+not by square root of N over q. Audit1622.near_negative_of_positive derives the negative
+leaf from the positive one. The split reduces nothing. Its truth stays undecided.
+Live route: central_pointwise376 in Decomp376b, and its re-cut in SPLIT1622_mellin.
+Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
+-/
+/-
 Split of the central-interval Mellin square estimate `mellin_near357` into four
 steps. Nothing here changes the statement: `mellin_near357_split` states it
 character for character and proves it from the four OPEN leaves below, which

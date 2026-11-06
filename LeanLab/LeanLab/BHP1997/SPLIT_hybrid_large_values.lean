@@ -1,4 +1,11 @@
 /-
+DEAD SPLIT, U-1624, 2026-11-06. Both branches below follow from the sealed `Lemma1LargeValues`
+with constant 2 C, see `Audit1624.split_second_branch_of_target` and
+`Audit1624.split_third_branch_of_target`, and they imply it, so the split is an equivalence and
+reduces nothing. The regime of the second branch is not empty: a n = 1, q = 1, T = 3 and F large
+meets it. Nothing imports this file. The live route is the CITED leaf
+`DecompC165c.hybrid_large_values`, behind `AssemblyC165.theorem1`. Kept as text of record.
+
 Split of the large values step, display 3.4 of the Section 3 mean value input, whose single leaf
 is `hybrid_large_values` in DecompC165c. The one estimate is cut into the two moment branches it
 is built from: the second moment branch, used where the squared energy summand dominates, and the
