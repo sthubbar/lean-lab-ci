@@ -953,7 +953,13 @@ page 53 deleted integral. The numerical bound for this integral is proved
 separately. The functional moment estimates, Buchstab identity, prime number
 asymptotic and the NormalizationC165 input estimates remain OPEN.
 U-1609 dropped `1 ≤ v1`, which display 1.5 does not print. `v0 ≤ v1` now comes from
-`right_density_mono`. -/
+`right_density_mono`.
+The clean Buchstab witness is available in Task308.buchstab_model_exists.
+Task387.short_distribution_of_variable_log_center supplies a conditional
+logarithmic normalization from actual variable-center character estimates.
+It does not prove those estimates for the raw page 53 coefficient.
+The normalized coefficient construction and its centered moment bounds
+remain OPEN. No statement of this leaf is changed. -/
 theorem upper_short_weight_analytic
     (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :
     ∃ ω : ℝ → ℝ,
