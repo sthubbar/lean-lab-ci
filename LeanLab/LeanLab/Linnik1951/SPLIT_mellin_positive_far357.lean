@@ -20,7 +20,13 @@ theorem far_integral_le_sup_length357 {q : ℕ} (χ : DirichletCharacter ℂ q) 
     (M u v : ℝ) (hN : 1 ≤ N) (huv : u ≤ v)
     (hM : ∀ α : ℝ, α ∈ Set.Icc u v → ‖characterPrime280 χ N α‖ ^ 2 ≤ M) :
     (∫ α in u..v, ‖characterPrime280 χ N α‖ ^ 2) ≤ M * (v - u) := by
-  sorry
+  have hi : IntervalIntegrable (fun α : ℝ => ‖characterPrime280 χ N α‖ ^ 2)
+      MeasureTheory.volume u v :=
+    ((continuous_character_prime357 χ N hN).norm.pow 2).intervalIntegrable u v
+  calc
+    _ ≤ ∫ _α in u..v, M :=
+      intervalIntegral.integral_mono_on huv hi intervalIntegrable_const hM
+    _ = _ := by rw [intervalIntegral.integral_const, smul_eq_mul]; ring
 
 /-- LEAF. Step 2 of 4: the pointwise bound on the outer positive interval. There
 is a fixed positive constant C such that for every large N, every modulus q with
@@ -46,7 +52,50 @@ threshold. -/
 theorem far_left_endpoint_le_right357 (N : ℕ) (hN : 8 ≤ N) :
     ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
       4 / (N : ℝ) ≤ 1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  intro q hq hqt
+  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (by omega : 0 < N)
+  have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (by omega : 0 < q)
+  have hτpos : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
+  -- 4 at most N to the five sevenths
+  have h5 : (4 : ℝ) ≤ (N : ℝ) ^ (5 / 7 : ℝ) := by
+    have h8R : (8 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+    have hpow : (4 : ℝ) ^ 7 ≤ (N : ℝ) ^ 5 := by
+      have h1 : (8 : ℝ) ^ 5 ≤ (N : ℝ) ^ 5 := pow_le_pow_left₀ (by norm_num) h8R 5
+      norm_num at h1 ⊢
+      linarith
+    have hle := Real.rpow_le_rpow (by positivity : (0 : ℝ) ≤ (4 : ℝ) ^ 7) hpow
+      (by norm_num : (0 : ℝ) ≤ 1 / 7)
+    have h4 : ((4 : ℝ) ^ ((7 : ℕ) : ℝ)) ^ (1 / 7 : ℝ) = 4 := by
+      rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 4)]
+      rw [show (((7 : ℕ) : ℝ)) * (1 / 7 : ℝ) = 1 by norm_num, Real.rpow_one]
+    have hN5 : ((N : ℝ) ^ ((5 : ℕ) : ℝ)) ^ (1 / 7 : ℝ) = (N : ℝ) ^ (5 / 7 : ℝ) := by
+      rw [← Real.rpow_mul (le_of_lt hNpos)]
+      norm_num
+    rwa [← Real.rpow_natCast (4 : ℝ) 7, ← Real.rpow_natCast (N : ℝ) 5, h4, hN5] at hle
+  have hstep1 : (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤ (N : ℝ) ^ (2 / 7 : ℝ) := by
+    have hqτ : (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤
+        (N : ℝ) ^ (1 / 7 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) :=
+      mul_le_mul_of_nonneg_right hqt hτpos.le
+    have h2 : (N : ℝ) ^ (1 / 7 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) = (N : ℝ) ^ (2 / 7 : ℝ) := by
+      rw [← Real.rpow_add hNpos]
+      norm_num
+    linarith
+  have hstep2 : (4 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) ≤ (N : ℝ) := by
+    have hm : (4 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) ≤
+        (N : ℝ) ^ (5 / 7 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) :=
+      mul_le_mul_of_nonneg_right h5 (Real.rpow_pos_of_pos hNpos _).le
+    have he : (N : ℝ) ^ (5 / 7 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) = (N : ℝ) := by
+      rw [← Real.rpow_add hNpos]
+      norm_num
+    linarith
+  have hmul : (4 : ℝ) * ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤ (N : ℝ) := by
+    have h4q : (4 : ℝ) * ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤
+        4 * (N : ℝ) ^ (2 / 7 : ℝ) :=
+      mul_le_mul_of_nonneg_left hstep1 (by norm_num)
+    linarith
+  have hqτpos : (0 : ℝ) < (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) := mul_pos hqpos hτpos
+  rw [div_le_iff₀ hNpos, one_div_mul_eq_div, le_div_iff₀ hqτpos]
+  exact hmul
 
 /-- LEAF. Step 4 of 4: the length of the outer positive interval. For every N and
 every modulus q at least one, the length 1 over q times N to the one seventh minus
@@ -55,7 +104,8 @@ last step, which discards the left endpoint contribution. -/
 theorem far_length_le_inverse357 (N q : ℕ) (hq : 1 ≤ q) :
     1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) - 4 / (N : ℝ) ≤
       1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  have h : (0 : ℝ) ≤ 4 / (N : ℝ) := by positivity
+  linarith
 
 /-- Assembly of `mellin_positive_far357` from the four leaves above: the assembly
 reads the pointwise constant C as the final constant B, checks that the outer
