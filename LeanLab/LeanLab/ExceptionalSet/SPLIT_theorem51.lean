@@ -25,6 +25,8 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.ExceptionalSet.BhowmikGrimmelt2026
 import LeanLab.ExceptionalSet.MVConditional
 import LeanLab.ExceptionalSet.MVEstermann
+import LeanLab.ExceptionalSet.MVMajorFinal
+import LeanLab.PNTPort.Vinogradov.MajorArcUncond
 -- The one import added by the proving run: Vaughan's Theorem 3.1 (Vaughan, Hardy-Littlewood
 -- Method, Thm 3.1) in the dft form `VinogradovDFT`, PROVED in the lab as
 -- `vinogradovDFT_proved`, axiom-clean. Needed by LEAF 2 on the minor arcs.
@@ -49,7 +51,83 @@ theorem major_arc_count_power :
               ‖majorPart (logPrimes x) (minorArcs x ((x : ℝ) ^ ((1 : ℝ) / 10)))
                 (n : ZMod (Mx x))‖ ≤ (Mx x : ℝ) * x / 4)).card : ℕ) : ℝ)
           ≤ C * (x : ℝ) ^ θ := by
-  sorry
+  refine ⟨19 / 20, 4 * Real.exp 16 * Real.sqrt 2, 1024, by norm_num, by norm_num, by positivity,
+    by norm_num, ?_⟩
+  intro x hx
+  have hx0n : 0 < x := by omega
+  have hx1 : 1 ≤ x := by omega
+  have hx7 : 7 ≤ x := by omega
+  have hx0 : (0 : ℝ) < x := by exact_mod_cast hx0n
+  have hx1r : (1 : ℝ) ≤ x := by exact_mod_cast hx1
+  set Q : ℝ := (x : ℝ) ^ ((1 : ℝ) / 10) with hQdef
+  have hQ0 : 0 < Q := Real.rpow_pos_of_pos hx0 _
+  have hQ1 : 1 ≤ Q := Real.one_le_rpow hx1r (by norm_num)
+  have hQ2 : (2 : ℝ) ≤ Q := by
+    rw [hQdef]
+    have hx1024 : (1024 : ℝ) ≤ x := by exact_mod_cast hx
+    have e : (1024 : ℝ) = (2 : ℝ) ^ (10 : ℝ) := by norm_num
+    rw [e] at hx1024
+    have h := Real.rpow_le_rpow (by norm_num) hx1024 (by norm_num : (0 : ℝ) ≤ 1 / 10)
+    rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)] at h
+    norm_num at h
+    exact h
+  have hQM : 2 * Q ^ 3 < Mx x := by
+    have h1 : Q ^ 3 = (x : ℝ) ^ ((3 : ℝ) / 10) := by
+      rw [hQdef, ← Real.rpow_natCast Q 3, ← Real.rpow_mul hx0.le]; norm_num
+    have h2 : (x : ℝ) ^ ((3 : ℝ) / 10) ≤ x :=
+      Real.rpow_le_self_of_one_le hx1r (by norm_num)
+    have hM : (Mx x : ℝ) = 2 * x + 1 := by unfold Mx; push_cast; ring
+    rw [h1, hM]; push_cast; linarith
+  have hP2 : 2 ≤ ⌊Q⌋₊ := Nat.le_floor (by exact_mod_cast hQ2)
+  have hP0 : 0 < ⌊Q⌋₊ := by omega
+  set T : ℝ := Real.sqrt ⌊Q⌋₊ / (4 * Real.exp 8) with hTdef
+  have hT0 : 0 < T := by rw [hTdef]; positivity
+  have hsing : Real.exp 8 * T / Real.sqrt ⌊Q⌋₊ ≤ 1 / 4 := by
+    have hs : Real.sqrt ⌊Q⌋₊ ≠ 0 := ne_of_gt (Real.sqrt_pos.2 (by exact_mod_cast hP0))
+    have heq : Real.exp 8 * (Real.sqrt ⌊Q⌋₊ / (4 * Real.exp 8)) / Real.sqrt ⌊Q⌋₊ = 1 / 4 := by
+      field_simp
+    rw [hTdef, heq]
+  -- DEEP ANALYTIC INPUT (zero density at level `Q = x^(1/10)`), not available in the lab:
+  -- the major arc asymptotic for every `q ≤ ⌊x^(1/10)⌋₊` with error small enough that
+  -- `errMV x Q E ≤ Mx x * x / 16`. The lab's only unconditional input `major_arc`
+  -- (Siegel-Walfisz) covers `q ≤ (log x)^A` only, and `errMV_le`'s condition
+  -- `6768 * Q^5 * L^2 ≤ √x` fails at `Q = x^(1/10)`.
+  have hdeep : ∃ E : ℝ,
+      (∀ q ∈ Icc 1 ⌊Q⌋₊, ∀ a' : ℤ, IsCoprime a' (q : ℤ) → ∀ β : ℝ,
+        ‖LeanLab.PNTPort.Vinogradov.S x (a' / q + β) -
+            (ArithmeticFunction.moebius q : ℂ) / q.totient *
+              LeanLab.PNTPort.Vinogradov.V x β‖ ≤ E * (1 + 2 * π * |β| * x)) ∧
+      MVMajor.errMV x Q E ≤ (Mx x : ℝ) * x / 16 := by
+    sorry
+  obtain ⟨E, hmaj, hErr⟩ := hdeep
+  have hcount := MVMajor.card_major_small_le hQ1 hQM hx7 hmaj hErr hP2 hT0 hsing
+  have hfloor : Q / 2 ≤ (⌊Q⌋₊ : ℝ) := LeanLab.PNTPort.Vinogradov.floor_ge_half hQ1
+  have hsqrt : (x : ℝ) ^ ((1 : ℝ) / 20) / Real.sqrt 2 ≤ Real.sqrt ⌊Q⌋₊ := by
+    have h1 : Real.sqrt (x ^ ((1 : ℝ) / 10) / 2) ≤ Real.sqrt ⌊Q⌋₊ := by
+      rw [← hQdef]; exact Real.sqrt_le_sqrt hfloor
+    rw [Real.sqrt_div' _ (by norm_num : (0 : ℝ) ≤ 2), Real.sqrt_eq_rpow] at h1
+    have h2 : ((x : ℝ) ^ ((1 : ℝ) / 10)) ^ ((1 : ℝ) / 2) = (x : ℝ) ^ ((1 : ℝ) / 20) := by
+      rw [← Real.rpow_mul hx0.le]; norm_num
+    rw [h2] at h1
+    exact h1
+  have hs : 0 < Real.sqrt ⌊Q⌋₊ := Real.sqrt_pos.2 (by exact_mod_cast hP0)
+  have hc : 0 < (x : ℝ) ^ ((1 : ℝ) / 20) / Real.sqrt 2 := by positivity
+  have e1 : Real.exp 8 * (x : ℝ) / T = 4 * Real.exp 16 * x / Real.sqrt ⌊Q⌋₊ := by
+    rw [hTdef]; field_simp; ring
+  have e2 : 4 * Real.exp 16 * x / Real.sqrt ⌊Q⌋₊
+      ≤ 4 * Real.exp 16 * x / ((x : ℝ) ^ ((1 : ℝ) / 20) / Real.sqrt 2) :=
+    div_le_div_of_nonneg_left (by positivity) hs hsqrt
+  have e3 : 4 * Real.exp 16 * x / ((x : ℝ) ^ ((1 : ℝ) / 20) / Real.sqrt 2)
+      = 4 * Real.exp 16 * Real.sqrt 2 * (x : ℝ) ^ (19 / 20 : ℝ) := by
+    have h : (x : ℝ) = (x : ℝ) ^ (1 : ℝ) := (Real.rpow_one _).symm
+    rw [h, ← Real.rpow_sub hx0]; field_simp; ring
+  calc ((((Finset.Icc (x / 2 + 1) x).filter (fun n : ℕ => Even n ∧
+            ‖majorPart (logPrimes x) (minorArcs x Q) (n : ZMod (Mx x))‖
+              ≤ (Mx x : ℝ) * x / 4)).card : ℕ) : ℝ)
+      ≤ Real.exp 8 * (x : ℝ) / T := hcount
+    _ = 4 * Real.exp 16 * x / Real.sqrt ⌊Q⌋₊ := e1
+    _ ≤ 4 * Real.exp 16 * x / ((x : ℝ) ^ ((1 : ℝ) / 20) / Real.sqrt 2) := e2
+    _ = 4 * Real.exp 16 * Real.sqrt 2 * (x : ℝ) ^ (19 / 20 : ℝ) := e3
 
 /-- Vaughan's Theorem 3.1 on the minor arcs at `Q = x^(1/10)`: a minor arc point has a rational
 approximation with denominator in `(x^(1/10), M x / x^(1/10)]`, so the exponential sum over the
