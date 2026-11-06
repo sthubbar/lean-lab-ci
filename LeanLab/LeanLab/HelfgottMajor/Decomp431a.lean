@@ -58,9 +58,54 @@ theorem middle_mass_signed_split {q : ℕ} [NeZero q] (χ : DirichletCharacter �
     · have ha : |ρ.val.im| ≤ 1 := abs_le.mpr ⟨by linarith, by linarith⟩
       simp [Set.indicator, hp, hn, ha]
 
+/-- The signed range is empty when T ≤ 1.
+This gives the trivial zero case of the raw sampling bound. -/
+theorem positive_sampling_raw_empty {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (δ T : ℝ) (hT : T ≤ 1) (hlarge : 2 * π * exp 2 ≤ (q : ℝ) * T) :
+    positiveMass χ δ T = 0 := by
+  have hT' : ∀ ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, ¬ (1 < ρ.val.im) := by
+    intro ρ
+    have hmem := ρ.property.2.2.2
+    intro hlt
+    have : 1 < |ρ.val.im| := by
+      have hpos : 0 ≤ ρ.val.im := by linarith
+      rw [abs_of_nonneg hpos]
+      exact hlt
+    linarith
+  unfold positiveMass
+  apply tsum_eq_zero_of_not_nonempty
+  intro ρ
+  simp [Set.indicator, hT' ρ]
+
+/-- The signed range is empty when T ≤ 1.
+This gives the trivial zero case of the raw sampling bound. -/
+theorem negative_sampling_raw_empty {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (δ T : ℝ) (hT : T ≤ 1) (hlarge : 2 * π * exp 2 ≤ (q : ℝ) * T) :
+    negativeMass χ δ T = 0 := by
+  have hT' : ∀ ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, ¬ (ρ.val.im < -1) := by
+    intro ρ
+    have hmem := ρ.property.2.2.2
+    intro hlt
+    have : 1 ≤ |ρ.val.im| := by
+      have hneg : ρ.val.im ≤ 0 := by linarith
+      rw [abs_of_nonpos hneg]
+      linarith
+    linarith
+  unfold negativeMass
+  apply tsum_eq_zero_of_not_nonempty
+  intro ρ
+  simp [Set.indicator, hT' ρ]
+
 /-- LEAF. Book pages 433 and 434, display 16.26 before the scalar weight estimates.
 Only the positive signed zero samples are bounded. Both scalar weight integrals remain explicit.
 The continuous cutoff justification remains a source QUESTION.
+
+BLOCKED OUT OF REACH: requires the "continuous cutoff" lemma that relates
+∑_{ρ: 1<ρ.im≤T} mellinMassTerm to the integral ∫₁^T (log term)² dt.
+This is the analytic crux of display 16.26. No per-zero bound lemma exists in the codebase
+to bypass it.
 -/
 theorem positive_sampling_raw (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
@@ -74,11 +119,25 @@ theorem positive_sampling_raw (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ 
         sqrt (∫ t in (1 : ℝ)..T, (0.15 * log ((q : ℝ) * t) + 3.389) ^ 2) +
       ‖gaussianMellin δ ((1 / 2 : ℂ) + Complex.I)‖ *
         (0.15 * log (q : ℝ) + 3.389) := by
-  sorry
+  by_cases hT' : T ≤ 1
+  · have hzero := positive_sampling_raw_empty q χ δ T hT' hlarge
+    have hRHS_nonneg : 0 ≤ sqrt (lineEnergy δ 1) / (2 * π) *
+        sqrt (∫ t in (1 : ℝ)..T, log ((q : ℝ) * t / (2 * π)) ^ 2) +
+      sqrt (derivativeEnergy δ 1) *
+        sqrt (∫ t in (1 : ℝ)..T, (0.15 * log ((q : ℝ) * t) + 3.389) ^ 2) +
+      ‖gaussianMellin δ ((1 / 2 : ℂ) + Complex.I)‖ *
+        (0.15 * log (q : ℝ) + 3.389) := by
+      positivity
+    linarith
+  · -- T > 1: the signed range may be nonempty
+    -- The analytic estimate requires the "continuous cutoff" step
+    sorry
 
 /-- LEAF. Book pages 433 and 434, display 16.26 before the scalar weight estimates.
 Only the negative signed zero samples are bounded. Both scalar weight integrals remain explicit.
 The continuous cutoff justification remains a source QUESTION.
+
+BLOCKED OUT OF REACH: same bridge lemma needed as positive_sampling_raw, sign-flipped.
 -/
 theorem negative_sampling_raw (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
@@ -92,7 +151,18 @@ theorem negative_sampling_raw (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ 
         sqrt (∫ t in (1 : ℝ)..T, (0.15 * log ((q : ℝ) * t) + 3.389) ^ 2) +
       ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖ *
         (0.15 * log (q : ℝ) + 3.389) := by
-  sorry
+  by_cases hT' : T ≤ 1
+  · have hzero := negative_sampling_raw_empty q χ δ T hT' hlarge
+    have hRHS_nonneg : 0 ≤ sqrt (lineEnergy δ (-1)) / (2 * π) *
+        sqrt (∫ t in (1 : ℝ)..T, log ((q : ℝ) * t / (2 * π)) ^ 2) +
+      sqrt (derivativeEnergy δ (-1)) *
+        sqrt (∫ t in (1 : ℝ)..T, (0.15 * log ((q : ℝ) * t) + 3.389) ^ 2) +
+      ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖ *
+        (0.15 * log (q : ℝ) + 3.389) := by
+      positivity
+    linarith
+  · -- T > 1: the signed range may be nonempty
+    sorry
 
 /-- LEAF. Book pages 433 and 434, display 16.26.
 The positive half of the zero sampling estimate, before summing the two signs.
