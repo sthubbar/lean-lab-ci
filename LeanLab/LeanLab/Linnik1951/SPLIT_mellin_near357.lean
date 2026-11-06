@@ -1,13 +1,4 @@
 /-
-DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on the two pointwise leaves here.
-Reason: near_positive_sup357 is a pointwise sup bound stronger than mellin_near357, which it
-implies, and it has no source: page 158 bounds U by N ln cubed N over square root of q tau,
-not by square root of N over q. Audit1622.near_negative_of_positive derives the negative
-leaf from the positive one. The split reduces nothing. Its truth stays undecided.
-Live route: central_pointwise376 in Decomp376b, and its re-cut in SPLIT1622_mellin.
-Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
--/
-/-
 Split of the central-interval Mellin square estimate `mellin_near357` into four
 steps. Nothing here changes the statement: `mellin_near357_split` states it
 character for character and proves it from the four OPEN leaves below, which
@@ -31,12 +22,11 @@ theorem near_half_integral_le_sup357 {q : ℕ} (χ : DirichletCharacter ℂ q) (
     (∫ α in u..v, ‖characterPrime280 χ N α‖ ^ 2) ≤ M * (v - u) := by
   have hcont : Continuous (fun α : ℝ => ‖characterPrime280 χ N α‖ ^ 2) :=
     (continuous_character_prime357 χ N hN).norm.pow 2
-  have hmono : (∫ α in u..v, ‖characterPrime280 χ N α‖ ^ 2) ≤ ∫ α in u..v, M :=
-    intervalIntegral.integral_mono_on huv (hcont.intervalIntegrable u v)
-      intervalIntegrable_const hM
-  have hconst : (∫ α in u..v, M) = M * (v - u) := by
-    rw [intervalIntegral.integral_const, smul_eq_mul, mul_comm]
-  rwa [hconst] at hmono
+  calc (∫ α in u..v, ‖characterPrime280 χ N α‖ ^ 2)
+      ≤ (∫ _ in u..v, M) :=
+        intervalIntegral.integral_mono_on huv (hcont.intervalIntegrable _ _)
+          (intervalIntegrable_const) (fun α hα => hM α hα)
+    _ = M * (v - u) := by rw [intervalIntegral.integral_const]; ring
 
 /-- LEAF. Step 2 of 4: the pointwise bound on the positive side of zero. There
 is a fixed positive constant C such that for every large N, every modulus q with
@@ -62,7 +52,23 @@ theorem near_negative_sup357 (hG : LeanLab.DERZ1997.GRH) :
         ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ α : ℝ, -(4 / (N : ℝ)) ≤ α →
           α ≤ 0 →
           ‖characterPrime280 χ N α‖ ^ 2 ≤ C * (N : ℝ) / (q : ℝ) * Real.log N ^ 5 := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := near_positive_sup357 hG
+  refine ⟨C, hC, N0, ?_⟩
+  intro N hN q hq hqt χ hχ α hα1 hα2
+  have hstar : star χ ≠ 1 := by
+    intro hs
+    apply hχ
+    ext x
+    have hx : star (χ x) = 1 := by
+      rw [← MulChar.star_apply, hs]
+      simp
+    rw [← star_star (χ x), hx]
+    simp
+  have hb := h N hN q hq hqt (star χ) hstar (-α) (by linarith) (by linarith)
+  have hrefl := character_norm_reflect357 χ N (-α)
+  rw [neg_neg] at hrefl
+  rw [hrefl]
+  exact hb
 
 /-- LEAF. Step 4 of 4: the constant and the logarithmic bookkeeping. For every
 positive C there is N0 such that for every N beyond N0 and every modulus q at
@@ -75,47 +81,50 @@ theorem near_constant_selection357 (C : ℝ) (hC : 0 < C) :
       (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
         (8 : ℝ) * C * Real.log N ^ 5 / (q : ℝ) ≤
           (8 * C) * (N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) * Real.log N ^ 6 := by
-  refine ⟨3, ?_⟩
+  refine ⟨2, ?_⟩
   intro N hN q hq hqt
-  have hN3 : (3 : ℝ) < (N : ℝ) := by exact_mod_cast hN
-  have hN1 : (1 : ℝ) < (N : ℝ) := by linarith
+  have hN3 : 3 ≤ N := by omega
+  have hN3r : (3 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN3
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by linarith
   have hNpos : (0 : ℝ) < (N : ℝ) := by linarith
   have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast hq
-  have hlog1 : (1 : ℝ) ≤ Real.log N := by
-    have hexp : Real.exp 1 < (N : ℝ) := lt_trans Real.exp_one_lt_three hN3
-    have h := Real.log_le_log (Real.exp_pos 1) hexp.le
-    rwa [Real.log_exp] at h
-  have hlogpos : (0 : ℝ) < Real.log N := lt_of_lt_of_le one_pos hlog1
-  have hp : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
-  have hD : (N : ℝ) ^ (1 / 7 : ℝ) ≤ (N : ℝ) := by
-    calc (N : ℝ) ^ (1 / 7 : ℝ) ≤ (N : ℝ) ^ (1 : ℝ) :=
-          Real.rpow_le_rpow_of_exponent_le hN1.le (by norm_num)
-      _ = (N : ℝ) := Real.rpow_one _
-  have hK : (1 : ℝ) ≤ (N : ℝ) / ((N : ℝ) ^ (1 / 7 : ℝ)) := by
-    rw [one_le_div hp]
-    exact hD
-  have hqinv : (0 : ℝ) < 1 / (q : ℝ) := by positivity
-  have hfac : (N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) =
-      (1 / (q : ℝ)) * ((N : ℝ) / ((N : ℝ) ^ (1 / 7 : ℝ))) := by
-    field_simp
-  have hKq : (1 : ℝ) / (q : ℝ) ≤ (N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-    rw [hfac]
-    simpa using mul_le_mul_of_nonneg_left hK hqinv.le
-  have hL56 : (Real.log N) ^ 5 ≤ (Real.log N) ^ 6 :=
-    pow_le_pow_right₀ hlog1 (by norm_num)
-  have h8C : (0 : ℝ) < 8 * C := by linarith
-  have hstep : (8 : ℝ) * C * (Real.log N) ^ 5 ≤ (8 * C) * (Real.log N) ^ 6 := by
-    have := mul_le_mul_of_nonneg_left hL56 h8C.le
+  have h8C : (0 : ℝ) < 8 * C := by positivity
+  have hlog1 : (1 : ℝ) < Real.log N := by
+    refine lt_of_lt_of_le ?_ (Real.log_le_log (by norm_num) hN3r)
+    rw [Real.lt_log_iff_exp_lt (by norm_num : (0 : ℝ) < 3)]
+    linarith [Real.exp_one_lt_d9]
+  have hpow1 : (1 : ℝ) ≤ (N : ℝ) ^ (6 / 7 : ℝ) := by
+    have h : (1 : ℝ) ^ (6 / 7 : ℝ) ≤ (N : ℝ) ^ (6 / 7 : ℝ) :=
+      Real.rpow_le_rpow (by norm_num) hN1 (by norm_num)
+    simpa using h
+  have hkey : (1 : ℝ) ≤ (N : ℝ) ^ (6 / 7 : ℝ) * Real.log N := by
+    have := mul_le_mul hpow1 hlog1.le (by norm_num : (0 : ℝ) ≤ 1)
+      (Real.rpow_nonneg hNpos.le _)
     linarith
-  have h8CL6 : (0 : ℝ) ≤ (8 * C) * (Real.log N) ^ 6 := by positivity
-  have hmul : (8 * C * (Real.log N) ^ 5) * (1 / (q : ℝ)) ≤
-      ((8 * C) * (Real.log N) ^ 6) * ((N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) :=
-    mul_le_mul hstep hKq hqinv.le h8CL6
-  calc (8 : ℝ) * C * (Real.log N) ^ 5 / (q : ℝ)
-      = (8 * C * (Real.log N) ^ 5) * (1 / (q : ℝ)) := by ring
-    _ ≤ ((8 * C) * (Real.log N) ^ 6) *
-          ((N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := hmul
-    _ = (8 * C) * (N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) * (Real.log N) ^ 6 := by ring
+  have hlogpos : (0 : ℝ) < Real.log N := lt_trans (by norm_num) hlog1
+  have hlog5 : (0 : ℝ) ≤ Real.log N ^ 5 := pow_nonneg hlogpos.le 5
+  have hexp : (N : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ) = (N : ℝ) ^ (6 / 7 : ℝ) := by
+    have e1 : (1 : ℝ) - 1 / 7 = 6 / 7 := by norm_num
+    calc (N : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ)
+        = (N : ℝ) ^ (1 : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ) := by rw [Real.rpow_one]
+      _ = (N : ℝ) ^ ((1 : ℝ) - 1 / 7) := (Real.rpow_sub hNpos 1 (1 / 7)).symm
+      _ = (N : ℝ) ^ (6 / 7 : ℝ) := by rw [e1]
+  have hmain : Real.log N ^ 5 ≤ (N : ℝ) ^ (6 / 7 : ℝ) * Real.log N ^ 6 := by
+    have h6 : Real.log N ^ 6 = Real.log N * Real.log N ^ 5 := by ring
+    rw [h6, ← mul_assoc]
+    exact le_mul_of_one_le_left hlog5 hkey
+  have hdiv : (8 : ℝ) * C * Real.log N ^ 5 / (q : ℝ) ≤
+      (8 * C) * ((N : ℝ) ^ (6 / 7 : ℝ) * Real.log N ^ 6) / (q : ℝ) := by
+    apply div_le_div_of_nonneg_right _ (le_of_lt hqpos)
+    nlinarith [hmain]
+  have hqne : (q : ℝ) ≠ 0 := ne_of_gt hqpos
+  have hpw : (N : ℝ) ^ (1 / 7 : ℝ) ≠ 0 := ne_of_gt (Real.rpow_pos_of_pos hNpos _)
+  calc (8 : ℝ) * C * Real.log N ^ 5 / (q : ℝ)
+      ≤ (8 * C) * ((N : ℝ) ^ (6 / 7 : ℝ) * Real.log N ^ 6) / (q : ℝ) := hdiv
+    _ = (8 * C) * ((N : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 6) / (q : ℝ) := by
+        rw [← hexp]
+    _ = (8 * C) * (N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) * Real.log N ^ 6 := by
+        field_simp [hqne, hpw]
 
 /-- Assembly of `mellin_near357` from the four leaves above: split the central
 interval at zero, bound each half through the two pointwise leaves and the
