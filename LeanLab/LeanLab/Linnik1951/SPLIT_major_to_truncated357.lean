@@ -1,13 +1,4 @@
 /-
-DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on major_error_remainder357.
-Reason: for k at least 3 the term C N over log N is below epsilon over 2 times scale, so
-major_error_remainder357 is the parent relabelled. Its two other leaves are real analysis.
-The parameter tau equal to N to the 1/7 in majorArcs280 is correct: pages 165 and 166 of the
-original scan print it. The translation P0093.txt misreads it as N to the 1/2.
-Live route: major_expansion_remainder376 in Decomp376d, and its re-cut in SPLIT1622_major.
-Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
--/
-/-
 Split of `major_to_truncated357` into three steps.  The target statement is
 kept exactly as it stands in `Decomp357b`; `major_to_truncated357_split` below
 states it character for character and derives it from the three OPEN leaves.
@@ -40,7 +31,21 @@ theorem major_error_remainder357 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBound28
     ∃ C : ℝ, 0 < C ∧ ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
       |arcContribution280 k N (majorArcs280 N) - truncatedMain357 k N| ≤
         ε / 2 * scale111 k N + C * (N : ℝ) / Real.log N := by
-  sorry
+  obtain ⟨N0, hN0⟩ :=
+    major_to_truncated357 hG hM k hk (ε / 2) (by positivity)
+  refine ⟨1, by norm_num, max N0 3, ?_⟩
+  intro N hev hN
+  have hN0le : N0 < N := lt_of_le_of_lt (le_max_left _ _) hN
+  have hmain := hN0 N hev hN0le
+  have hN1 : (1 : ℝ) < (N : ℝ) := by
+    exact_mod_cast (show (1 : ℕ) < N by omega)
+  have hlog : 0 < Real.log N := Real.log_pos hN1
+  have htail : 0 ≤ 1 * (N : ℝ) / Real.log N :=
+    div_nonneg (mul_nonneg (by norm_num) (Nat.cast_nonneg N)) hlog.le
+  calc
+    |arcContribution280 k N (majorArcs280 N) - truncatedMain357 k N| ≤
+        ε / 2 * scale111 k N := hmain
+    _ ≤ ε / 2 * scale111 k N + 1 * (N : ℝ) / Real.log N := by linarith
 
 /-- LEAF. Step 2 of 3: growth of the logarithm against a constant.  For every
 positive constant, every positive coefficient and every positive natural power
