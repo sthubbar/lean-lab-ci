@@ -1,0 +1,302 @@
+[
+  [
+    "Counting385",
+    "error",
+    "P0029 page 13 before 3.8",
+    "Even index error, with the documented extension at other indices"
+  ],
+  [
+    "Counting385",
+    "powerBound_of_one_le",
+    "P0029 page 9 Theorem 3.1",
+    "Auxiliary trivial count range"
+  ],
+  [
+    "Counting385",
+    "count_from_energy",
+    "P0029 page 13 after 3.8",
+    "Finite Chebyshev with positive level"
+  ],
+  [
+    "Counting385",
+    "window_from_energy",
+    "P0029 page 13 after 3.8",
+    "Even window restriction and exponent subtraction by two"
+  ],
+  [
+    "PrimePowers385",
+    "weight_le_log",
+    "P0029 page 4 weighted count",
+    "Auxiliary von Mangoldt bound from Mathlib"
+  ],
+  [
+    "PrimePowers385",
+    "r2_le_nonprime_mass",
+    "P0029 page 4 weighted count",
+    "At least one nonprime index in every contributing pair"
+  ],
+  [
+    "PrimePowers385",
+    "nonprime_mass_eq",
+    "P0029 page 4 weighted count",
+    "Mathlib Chebyshev identity for the proper prime power mass"
+  ],
+  [
+    "PrimePowers385",
+    "r2_le_sqrt_log_sq",
+    "P0029 page 4 and page 13",
+    "Auxiliary explicit bound for the ignored prime powers"
+  ],
+  [
+    "PrimePowers385",
+    "prime_power_eventually_small",
+    "P0029 page 13 after 3.8",
+    "Auxiliary vanishing prime power ratio using C0 positive"
+  ],
+  [
+    "Bridge385",
+    "error_large_at_exception",
+    "P0029 page 13 after 3.8",
+    "Uses the even Euler product extension and is applied only to even indices"
+  ],
+  [
+    "Bridge385",
+    "powerBound_of_even_energy",
+    "P0029 page 13 after 3.8",
+    "Explicit conditional energy premise and positive dyadic exponent"
+  ],
+  [
+    "Decomp385a",
+    "leaf_mean_square",
+    "P0029 page 13 display 3.8",
+    "Even indices and the sublinear epsilon range"
+  ],
+  [
+    "Decomp385a",
+    "leaf_small_eps_supplied",
+    "P0029 page 9 Theorem 3.1",
+    "Exact sealed small epsilon type with analytic dependency retained"
+  ],
+  [
+    "Decomp385a",
+    "theorem31_supplied",
+    "P0029 page 9 Theorem 3.1",
+    "Exact Theorem31 type with analytic dependency retained"
+  ],
+  [
+    "RoughEnergy385",
+    "singular_le_linear",
+    "P0029 page 6 display 2.10",
+    "Auxiliary upper bound for the existing even Euler product"
+  ],
+  [
+    "RoughEnergy385",
+    "weighted_count_le_cubic",
+    "P0029 page 4 weighted count",
+    "Auxiliary finite polynomial bound"
+  ],
+  [
+    "RoughEnergy385",
+    "error_le_cubic",
+    "P0029 page 13 error definition",
+    "Auxiliary bound for the documented even product extension"
+  ],
+  [
+    "RoughEnergy385",
+    "rough_even_energy",
+    "P0029 page 13 error definition",
+    "Auxiliary seventh power energy bound, not display 3.8"
+  ],
+  [
+    "RoughEnergy385",
+    "coarse_energy_instance",
+    "P0029 page 13 error definition",
+    "Actual energy input at exponent five, with no sublinear claim"
+  ],
+  [
+    "Gauss385",
+    "gauss_norm_sq_le",
+    "P0029 page 11 display 3.6",
+    "Arbitrary characters, squared form"
+  ],
+  [
+    "Gauss385",
+    "gauss_norm_le_sqrt",
+    "P0029 page 11 display 3.6",
+    "Arbitrary characters, square root form"
+  ],
+  [
+    "Gauss385",
+    "gauss_pair_norm_sq_le",
+    "P0029 page 11 display 3.6 and P0095 page 2379 display 63",
+    "Product of the two Gauss factors"
+  ],
+  [
+    "Gauss385",
+    "kernel_pair_mean_le",
+    "P0095 pages 2366 and 2379 displays 31 and 63",
+    "One modulus factor only, not display 86"
+  ],
+  [
+    "KernelTail385",
+    "kernel_sine_difference",
+    "P0082 page 356 display 3",
+    "Algebraic form at nonzero frequency"
+  ],
+  [
+    "KernelTail385",
+    "kernel_abs_le_inverse_square",
+    "P0082 page 357 display 4",
+    "Explicit inverse square bound at nonzero frequency"
+  ],
+  [
+    "KernelTail385",
+    "kernel_abs_le_two_sub",
+    "P0082 page 357 display 4",
+    "Explicit uniform bound including zero"
+  ],
+  [
+    "KernelTail385",
+    "kernel_abs_le_min",
+    "P0082 page 357 display 4",
+    "Absolute constant two and the zero convention stated"
+  ],
+  [
+    "KernelTail385",
+    "block_kernel_norm_le",
+    "P0082 page 365 before display 24",
+    "Absolute kernel integral mass on a unit interval from the explicit mass premise"
+  ],
+  [
+    "PrimeEnergy385",
+    "prime_energy",
+    "P0082 pages 357 and 365",
+    "Exact finite prime coefficient energy by integer Fourier orthogonality"
+  ],
+  [
+    "PrimeEnergy385",
+    "prime_energy_shift",
+    "P0082 page 365 before display 24",
+    "Periodicity transports the exact energy to every real unit interval"
+  ],
+  [
+    "PrimeEnergy385",
+    "prime_energy_le",
+    "P0082 page 365 before display 24",
+    "Explicit Chebyshev log 4 constant in the prime sum mass bound"
+  ],
+  [
+    "PrimeEnergy385",
+    "prime_kernel_block_le",
+    "P0082 page 365 before display 24",
+    "The weighted absolute prime integral bound, uniform in the real phase frequency"
+  ],
+  [
+    "TailPartition385",
+    "hasSum_Ioi_blocks",
+    "P0082 page 365 before display 24",
+    "The exact half line partition with its summability witness"
+  ],
+  [
+    "TailPartition385",
+    "integral_Ioi_eq_tsum_blocks",
+    "P0082 page 365 before display 24",
+    "The corresponding infinite sum equality"
+  ],
+  [
+    "TailPartition385",
+    "reciprocal_square_tail",
+    "P0082 page 365 before display 24",
+    "Integral test gives the explicit inverse square tail"
+  ],
+  [
+    "TailPartition385",
+    "integral_Ioi_le_of_blocks",
+    "P0082 page 365 before display 24",
+    "Summable block comparison gives the half line upper bound"
+  ],
+  [
+    "PrimeTail385",
+    "integrand",
+    "P0082 page 365 display 24",
+    "The prime square kernel phase from display 6"
+  ],
+  [
+    "PrimeTail385",
+    "norm_integrand_neg",
+    "P0082 page 365 display 24",
+    "Reflection preserves the absolute integrand"
+  ],
+  [
+    "PrimeTail385",
+    "positive_tail_le",
+    "P0082 page 365 display 24",
+    "Unit interval sum above the integer cutoff"
+  ],
+  [
+    "PrimeTail385",
+    "outside_nat_tail_le",
+    "P0082 page 365 display 24",
+    "Both tails by conjugation symmetry"
+  ],
+  [
+    "PrimeTail385",
+    "outside_real_tail_le",
+    "P0082 page 365 display 24",
+    "Real cutoff via the floor and an explicit constant"
+  ],
+  [
+    "PrimeTail385",
+    "truncation_error_le",
+    "P0082 page 365 display 24",
+    "Restriction to any set and the absolute tail"
+  ],
+  [
+    "TailParameters385",
+    "eventually_tail_factor",
+    "P0082 pages 354, 355, 357, 359 and 365 display 24",
+    "Larger logarithmic power dominates the logarithm and slower exponential"
+  ],
+  [
+    "TailParameters385",
+    "tail_parameters_eventually",
+    "P0082 pages 354, 355, 357, 359 and 365 display 24",
+    "Exact source parameters put the explicit tail below the half threshold"
+  ],
+  [
+    "TailSupply385",
+    "leaf_tail_supplied",
+    "P0082 page 365 display 24",
+    "Exact original tail leaf supplied by clean absolute tail and parameter estimates"
+  ],
+  [
+    "Moment385",
+    "moment_gram",
+    "P0082 pages 365 and 366 displays 25 to 27",
+    "Exact finite squared integral expansion as a product measure Gram integral"
+  ],
+  [
+    "Moment385",
+    "moment_le_absolute_gram",
+    "P0082 pages 365 and 366 displays 25 to 27",
+    "Real part and norm integral comparison"
+  ],
+  [
+    "Moment385",
+    "truncated_moment_le_absolute_gram",
+    "P0082 pages 365 and 366 displays 25 to 27",
+    "Apply the absolute Gram comparison to the exact truncated minor arcs"
+  ],
+  [
+    "Parity385",
+    "odd_full_period_zero",
+    "P0082 page 366 display 28",
+    "Two odd primes have even sum, so every odd Fourier coefficient vanishes"
+  ],
+  [
+    "Parity385",
+    "odd_major_eq_neg_minor",
+    "P0082 page 366 display 28",
+    "Split the zero full coefficient into the unit major and minor coefficients"
+  ]
+]
