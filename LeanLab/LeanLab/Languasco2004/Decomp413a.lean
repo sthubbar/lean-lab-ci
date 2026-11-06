@@ -817,6 +817,71 @@ theorem kernel_from_local :
         have h0 : (0:ℝ) ≤ H ^ 2 * V := by positivity
         nlinarith
 
+/-! ### Support lemmas for the remaining minor-arc leaves -/
+
+/-- The cap is worth at least one: for `1 ≤ H` the kernel is bounded below by `1`. -/
+private lemma one_le_kernel' {H : ℝ} (hH : 1 ≤ H) (x : ℝ) : 1 ≤ kernel H x := by
+  unfold kernel
+  by_cases hx : x = (round x : ℤ)
+  · rw [if_pos hx]; exact hH
+  · rw [if_neg hx]
+    refine le_min hH ?_
+    have hpos : 0 < |x - (round x : ℤ)| := abs_pos.mpr (sub_ne_zero.mpr hx)
+    have h2 : |x - (round x : ℤ)| ≤ 1 := by linarith [abs_sub_round x]
+    rw [← one_div]
+    exact (one_le_div hpos).mpr h2
+
+/-- Each local mass is at most the whole unweighted mass of the minor domain. -/
+private lemma localMass_le_mass' (N Y H B ξ : ℝ) :
+    localMass N Y H B ξ ≤ ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 := by
+  rw [localMass]
+  exact setIntegral_mono_set
+    ((integrable_second' Y H).mono_set (fun x hx => minorDomain_subset_period N Y H B hx))
+    (Filter.Eventually.of_forall fun _ => sq_nonneg _)
+    (Filter.Eventually.of_forall fun x hx => hx.1)
+
+/-- Since the squared kernel is worth at least one, the squared kernel mass
+dominates the whole unweighted mass of the minor domain. -/
+private lemma mass_le_kernelMass' (N Y H B ξ : ℝ) (hH : 1 ≤ H) :
+    ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 ≤ kernelMass N Y H B ξ := by
+  rw [kernelMass]
+  have hInt : IntegrableOn
+      (fun α : ℝ => ‖secondSum Y α‖ ^ 2 * kernel H (2 * (α - ξ)) ^ 2)
+      (minorDomain N Y H B) volume :=
+    (integrable_kernelMass' Y H ξ (by linarith)).mono_set
+      (fun x hx => minorDomain_subset_period N Y H B hx)
+  refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun _ => sq_nonneg _) hInt ?_
+  refine Filter.Eventually.of_forall fun α => ?_
+  have h1 : (1:ℝ) ≤ kernel H (2 * (α - ξ)) := one_le_kernel' hH _
+  have h2 : (1:ℝ) ≤ kernel H (2 * (α - ξ)) ^ 2 := by nlinarith
+  nlinarith [sq_nonneg ‖secondSum Y α‖]
+
+/-- A uniform local-mass bound furnishes the uniform kernel-mass bound `K` that
+`coefficient_energy` takes as a hypothesis. -/
+private lemma kernelMass_bounded_of_local' (N Y H B V : ℝ) (hH : 1 ≤ H) (hV : 0 ≤ V)
+    (hloc : ∀ ξ : ℝ, localMass N Y H B ξ ≤ V) :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ ξ : ℝ, kernelMass N Y H B ξ ≤ K := by
+  obtain ⟨D, hDpos, hD⟩ := kernel_from_local
+  refine ⟨D * H ^ 2 * V, ?_, fun ξ => hD N Y H B V hH hV hloc ξ⟩
+  exact mul_nonneg (mul_nonneg (le_of_lt hDpos) (sq_nonneg H)) hV
+
+/-- The bookkeeping that the two remaining leaves share: a uniform local-mass bound
+bounds every local mass, the whole unweighted minor-domain mass, and furnishes the
+uniform kernel-mass bound `K` that `coefficient_energy` takes as a hypothesis. It
+does not supply the mean-square estimate that `local_mass_bound` asserts, nor the
+coefficient-to-kernel comparison that `coefficient_energy` asserts. -/
+private lemma minor_mass_bookkeeping' (N Y H B V : ℝ) (hH : 1 ≤ H) (hV : 0 ≤ V)
+    (hloc : ∀ ξ : ℝ, localMass N Y H B ξ ≤ V) :
+    ∃ K : ℝ, 0 ≤ K ∧ (∀ ξ : ℝ, localMass N Y H B ξ ≤ K) ∧
+      (∀ ξ : ℝ, ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 ≤ K) ∧
+      (∀ ξ : ℝ, kernelMass N Y H B ξ ≤ K) := by
+  obtain ⟨K, hK0, hK⟩ := kernelMass_bounded_of_local' N Y H B V hH hV hloc
+  have hmass : ∀ ξ : ℝ, ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 ≤ K := by
+    intro ξ
+    exact le_trans (mass_le_kernelMass' N Y H B ξ hH) (hK ξ)
+  exact ⟨K, hK0, fun ξ => le_trans (localMass_le_mass' N Y H B ξ) (hmass ξ), hmass,
+    fun ξ => hK ξ⟩
+
 /-- LEAF. Page 44 display 3, after Cauchy Schwarz, Parseval and
 Brun Titchmarsh. Squaring removes the square root and supremum.
 Only the Fourier coefficient to kernel comparison is asserted.
