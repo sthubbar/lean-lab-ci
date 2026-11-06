@@ -237,6 +237,16 @@ def repair_ok(base, f, short, changed):
     if stale: return False, "it is named in files the branch leaves unchanged, so their parents would not be rebuilt: " + ", ".join(stale[:4])
     return True, f"OPEN LEAF at BASE, users {len(users)} all rebuilt by check_branch"
 
+# 9. DUPLICATE REMOVAL, lmerge 20261106T1323Z, FOR lmerge from lcodex 1158Z: a theorem added to an imported file by putfile left the same
+#    full name in the importing file, which breaks the build, and rule 1 failed the deletion that fixes it, codex/task441 euExc_le in EulerDensity.
+#    A removal goes to SEAL REVIEW, never PASS, only when a file the old file directly imports holds the same kind, full name and statement at HEAD.
+def imported_copy(old, k, s):
+    for m in re.finditer(r"^\s*(?:public\s+)?import\s+(LeanLab\.\S+)", old, re.M):
+        p = "LeanLab/" + m.group(1).replace(".", "/") + ".lean"
+        rc, t = sh(f"git show HEAD:'{p}'")
+        if rc == 0 and decls(t).get(k) == s: return p
+    return None
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else sh("git merge-base HEAD origin/main")[1].strip()
     if not base:
@@ -244,7 +254,7 @@ def main():
     _, files = sh(f"git diff --name-only {base} HEAD -- '*.lean'")
     fails = reviews = 0
     A, B, where = {}, {}, {}
-    FA, FB = {}, {}
+    FA, FB, src = {}, {}, {}
     _, every = sh(f"git diff --name-only {base} HEAD")
     for t in [x for x in every.split() if TRUST.match(x)]:
         print(f"REVIEW trust file changed: {t}"); reviews += 1
@@ -253,7 +263,8 @@ def main():
     for f in [x for x in files.split() if x]:
         rc_old, old = sh(f"git show {base}:'{f}'")
         rc_new, new = sh(f"git show HEAD:'{f}'")
-        if rc_old == 0: A.update(decls(old)); FA.update(bodies(old))
+        if rc_old == 0:
+            d0 = decls(old); A.update(d0); FA.update(bodies(old)); src.update({k: old for k in d0})
         if rc_new == 0:
             d = decls(new); B.update(d); where.update({k: f for k in d}); FB.update(bodies(new))
             sealed = {k[0].split(".")[-1] for k in decls(old)} if rc_old == 0 else set()
@@ -264,7 +275,9 @@ def main():
     allow = repair_allow(); repairs = 0
     for k, s in A.items():
         if k not in B:
-            print(f"FAIL removed {k[1]} {k[0]}"); fails += 1
+            p = imported_copy(src[k], k, s) if k[1] in ("theorem", "lemma") else None
+            if p: print(f"REVIEW removed duplicate {k[1]} {k[0]}, the same statement stays in imported {p}: {s[:300]}"); reviews += 1
+            else: print(f"FAIL removed {k[1]} {k[0]}"); fails += 1
         elif B[k] != s and allow and k[1] in ("theorem", "lemma") and (where[k], k[0].split(".")[-1]) in allow:
             ok, why = repair_ok(base, where[k], k[0].split(".")[-1], [x for x in files.split() if x])
             if ok: print(f"REPAIR changed leaf {k[1]} {k[0]} in {where[k]}, listed in REPAIR_ALLOW.tsv on main; {why}\n  was: {s[:300]}\n  now: {B[k][:300]}"); repairs += 1

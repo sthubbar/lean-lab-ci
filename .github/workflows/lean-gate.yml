@@ -4,6 +4,7 @@
 # Every push to an agent branch gets a build, check_branch.sh and seal_check.py, run by GitHub, not by any agent,
 # so the result is a check the agent cannot fake. lean-merge reads the check status instead of building itself.
 # main is built once a night to refresh the shared cache of compiled lab modules, so branch builds stay incremental.
+# Split by folder across jobs 20261106T1323Z by lean-merge, see the nightly job below.
 # Fixed 2026-10-26 by lean-merge with Steve live: run 40241400738 hit the 120 minute job limit in the main build,
 # and the cache save ran as the cancelled post step, so nothing was kept. Now the save is its own step that runs
 # even after a failed or timed out build, so every run keeps its compiled modules and the next one resumes;
@@ -33,6 +34,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' || inputs.branch != '' }}
 jobs:
   gate:
+    if: github.ref != 'refs/heads/main' || inputs.branch
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
@@ -51,20 +53,7 @@ jobs:
             lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-
       - name: Lean and Mathlib cache
         run: bash scripts/agent_setup.sh
-      - name: Nightly main build, refreshes the shared cache
-        if: github.ref == 'refs/heads/main' && !inputs.branch
-        run: |
-          set -o pipefail
-          cd LeanLab && export PATH="$HOME/.elan/bin:$PATH"
-          timeout 19200 lake build 2>&1 | tail -60
-      - name: Save compiled lab modules, even after a failed or timed out build
-        if: always() && github.ref == 'refs/heads/main' && !inputs.branch
-        uses: actions/cache/save@v4
-        with:
-          path: LeanLab/.lake/build
-          key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-${{ github.run_id }}
       - name: Gate check of the branch
-        if: github.ref != 'refs/heads/main' || inputs.branch
         env:
           BR: ${{ inputs.branch || github.ref_name }}
         run: |
@@ -101,3 +90,58 @@ jobs:
           path: ${{ runner.temp }}/gate/
           if-no-files-found: ignore
           retention-days: 14
+  # lmerge 20261106T1323Z, FOR lmerge from lrefresh 1153Z: the one-job main build was killed 1.5 to 3 h in every night from 10-28, exit 143, runner shutdown
+  # signal, tail -60 hid the output, and the cache save was skipped. Now 10 jobs by folder, at most 5 at once so branch runs keep slots; scripts/ci_nightly.py
+  # builds every folder, streams each result, and the nightly-report job names the first failing folder. No main build is dispatched; the cron runs it.
+  nightly:
+    if: github.ref == 'refs/heads/main' && !inputs.branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        g: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL; df -h /
+      - name: Restore compiled lab modules
+        uses: actions/cache/restore@v4
+        with:
+          path: LeanLab/.lake/build
+          key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-g${{ matrix.g }}-${{ github.run_id }}
+          restore-keys: |
+            lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-g${{ matrix.g }}-
+      - name: Lean and Mathlib cache
+        run: bash scripts/agent_setup.sh
+      - name: Build this group folder by folder
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          python3 scripts/ci_nightly.py group ${{ matrix.g }} 10 "$RUNNER_TEMP/nightly"
+      - name: Save compiled lab modules, even after a failed or timed out build
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: LeanLab/.lake/build
+          key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-g${{ matrix.g }}-${{ github.run_id }}
+      - name: Keep the group result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-g${{ matrix.g }}
+          path: ${{ runner.temp }}/nightly/
+          if-no-files-found: ignore
+          retention-days: 14
+  nightly-report:
+    needs: nightly
+    if: always() && github.ref == 'refs/heads/main' && !inputs.branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/results
+      - name: Name the first failing folder
+        run: python3 scripts/ci_nightly.py report "$RUNNER_TEMP/results" 10 | tee -a "$GITHUB_STEP_SUMMARY"
+        shell: bash -eo pipefail {0}
