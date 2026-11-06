@@ -1,0 +1,50 @@
+{
+  "base": "97f30fa40",
+  "original_modules": 163,
+  "direct_pass": 90,
+  "dependency_only_pass": 53,
+  "unverified": [
+    "LeanLab.BHP1997.AssemblyC165",
+    "LeanLab.BHP1997.Audit1609",
+    "LeanLab.BHP1997.AxiomsTask165",
+    "LeanLab.BHP1997.Certificate312Rows_51",
+    "LeanLab.BHP1997.Certificate312Rows_52",
+    "LeanLab.BHP1997.Certificate312Rows_53",
+    "LeanLab.BHP1997.Certificate312Rows_54",
+    "LeanLab.BHP1997.Certificate312Rows_55",
+    "LeanLab.BHP1997.Certificate312Rows_56",
+    "LeanLab.BHP1997.Certificate312Rows_57",
+    "LeanLab.BHP1997.Certificate312Rows_58",
+    "LeanLab.BHP1997.Certificate312Rows_59",
+    "LeanLab.BHP1997.Certificate312Rows_60",
+    "LeanLab.BHP1997.Certificate312Rows_61",
+    "LeanLab.BHP1997.Certificate312Rows_62",
+    "LeanLab.BHP1997.Certificate312Rows_63",
+    "LeanLab.BHP1997.Certificate312Total",
+    "LeanLab.BHP1997.DecompC165b",
+    "LeanLab.BHP1997.DecompC165d",
+    "LeanLab.BHP1997.InstancesC165"
+  ],
+  "nonzero_requests": [
+    {
+      "module": "LeanLab.BHP1997.Thm2Sing",
+      "result": 124,
+      "end": "Fri Nov  6 04:50:00 UTC 2026",
+      "phase": "independent"
+    }
+  ],
+  "incomplete_requests": [
+    {
+      "module": "LeanLab.BHP1997.AssemblyC165",
+      "start": "2026-11-06T03:11:04Z",
+      "result": null,
+      "phase": "original"
+    },
+    {
+      "module": "LeanLab.BHP1997.AssemblyC165",
+      "start": "2026-11-06T03:22:56Z",
+      "result": null,
+      "phase": "original"
+    }
+  ]
+}
