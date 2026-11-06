@@ -2,6 +2,8 @@ import LeanLab.ChenDoubleSieve.Decomp315d
 import LeanLab.ChenDoubleSieve.Decomp275e
 import LeanLab.ChenDoubleSieve.Decomp275f
 import LeanLab.ChenDoubleSieve.Decomp275g
+import LeanLab.ChenDoubleSieve.Decomp350b
+import LeanLab.ChenDoubleSieve.Decomp350c
 
 /-!
 Supply split for Wu 2004 Section 10.
@@ -19,15 +21,15 @@ open Wu04Functional (IsLinearSieve IsBuchstab)
 The actual fourfold Buchstab integral satisfies its printed upper bound. -/
 theorem numerical_F13 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) :
-    integralTerms F f ω 10 ≤ 0.023310 := by
-  sorry
+    integralTerms F f ω 10 ≤ 0.023310 :=
+  Task350.numerical_F13_supplied F f ω h hω
 
 /-- LEAF. Wu 2004 page 42 final numerical display, F14.
 The actual fourfold Buchstab integral satisfies its printed upper bound. -/
 theorem numerical_F14 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) :
-    integralTerms F f ω 11 ≤ 0.182860 := by
-  sorry
+    integralTerms F f ω 11 ≤ 0.182860 :=
+  Task350.numerical_F14_supplied F f ω h hω
 
 /-- The exact integral_evaluation statement follows from eight smaller leaves
 and the four existing certified logarithmic coefficients. OPEN through those eight leaves. -/
