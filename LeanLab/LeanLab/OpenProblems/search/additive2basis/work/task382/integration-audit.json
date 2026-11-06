@@ -1,0 +1,19 @@
+{
+  "merged_saved_result_audit": "MATCH",
+  "immutable_inputs": {
+    "prior_batches": {
+      "checked": 1312,
+      "changed": []
+    },
+    "judge_sources": {
+      "checked": 3,
+      "changed": []
+    },
+    "Lean_files": {
+      "checked": 24,
+      "changed": []
+    }
+  },
+  "source_statement_MATCH": "not applicable; zero statements added",
+  "base": "890100841add756f02fbb2d73bfb10f3a6f82727"
+}

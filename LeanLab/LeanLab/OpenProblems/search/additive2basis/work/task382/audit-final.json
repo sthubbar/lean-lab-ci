@@ -1,0 +1,641 @@
+{
+  "batches": [
+    {
+      "batch": "task382-1000",
+      "label": "local-1-pass-1",
+      "visited": 817,
+      "complete": 817,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 11,
+      "scored": 5,
+      "rankings": {
+        "three_step_prefix": 323,
+        "prefix": 398,
+        "miss_one": 96
+      },
+      "source_pools": {
+        "healthy_archive": 721,
+        "early_archive": 96
+      },
+      "source_prefixes": {
+        "early_hole": 778,
+        "endpoint": 39
+      }
+    },
+    {
+      "batch": "task382-1001",
+      "label": "local-1-pass-1",
+      "visited": 818,
+      "complete": 818,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 3,
+      "scored": 2,
+      "rankings": {
+        "prefix": 402,
+        "three_step_prefix": 330,
+        "miss_one": 86
+      },
+      "source_pools": {
+        "healthy_archive": 732,
+        "early_archive": 86
+      },
+      "source_prefixes": {
+        "endpoint": 53,
+        "early_hole": 765
+      }
+    },
+    {
+      "batch": "task382-1002",
+      "label": "local-1-pass-1",
+      "visited": 818,
+      "complete": 817,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 8,
+      "scored": 2,
+      "rankings": {
+        "prefix": 397,
+        "three_step_prefix": 315,
+        "miss_one": 106
+      },
+      "source_pools": {
+        "healthy_archive": 712,
+        "early_archive": 106
+      },
+      "source_prefixes": {
+        "early_hole": 758,
+        "endpoint": 60
+      }
+    },
+    {
+      "batch": "task382-1003",
+      "label": "local-1-pass-1",
+      "visited": 817,
+      "complete": 814,
+      "interrupted": 3,
+      "failures": 0,
+      "exact_checks": 11,
+      "scored": 3,
+      "rankings": {
+        "three_step_prefix": 322,
+        "prefix": 400,
+        "miss_one": 95
+      },
+      "source_pools": {
+        "healthy_archive": 722,
+        "early_archive": 95
+      },
+      "source_prefixes": {
+        "early_hole": 766,
+        "endpoint": 51
+      }
+    },
+    {
+      "batch": "task382-1004",
+      "label": "local-1-pass-1",
+      "visited": 818,
+      "complete": 817,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 2,
+      "scored": 2,
+      "rankings": {
+        "miss_one": 97,
+        "three_step_prefix": 318,
+        "prefix": 403
+      },
+      "source_pools": {
+        "early_archive": 97,
+        "healthy_archive": 721
+      },
+      "source_prefixes": {
+        "early_hole": 763,
+        "endpoint": 55
+      }
+    },
+    {
+      "batch": "task382-1005",
+      "label": "local-1-pass-1",
+      "visited": 817,
+      "complete": 817,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 10,
+      "scored": 4,
+      "rankings": {
+        "miss_one": 113,
+        "three_step_prefix": 338,
+        "prefix": 366
+      },
+      "source_pools": {
+        "early_archive": 113,
+        "healthy_archive": 704
+      },
+      "source_prefixes": {
+        "early_hole": 762,
+        "endpoint": 55
+      }
+    },
+    {
+      "batch": "task382-1006",
+      "label": "local-1-pass-1",
+      "visited": 818,
+      "complete": 818,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "prefix": 389,
+        "three_step_prefix": 332,
+        "miss_one": 97
+      },
+      "source_pools": {
+        "healthy_archive": 721,
+        "early_archive": 97
+      },
+      "source_prefixes": {
+        "early_hole": 771,
+        "endpoint": 47
+      }
+    },
+    {
+      "batch": "task382-1007",
+      "label": "local-1-pass-1",
+      "visited": 818,
+      "complete": 817,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 14,
+      "scored": 3,
+      "rankings": {
+        "three_step_prefix": 293,
+        "prefix": 409,
+        "miss_one": 116
+      },
+      "source_pools": {
+        "healthy_archive": 702,
+        "early_archive": 116
+      },
+      "source_prefixes": {
+        "early_hole": 763,
+        "endpoint": 55
+      }
+    },
+    {
+      "batch": "task382-1008",
+      "label": "local-1-pass-1",
+      "visited": 817,
+      "complete": 816,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 5,
+      "scored": 4,
+      "rankings": {
+        "prefix": 391,
+        "three_step_prefix": 333,
+        "miss_one": 93
+      },
+      "source_pools": {
+        "healthy_archive": 724,
+        "early_archive": 93
+      },
+      "source_prefixes": {
+        "early_hole": 765,
+        "endpoint": 52
+      }
+    },
+    {
+      "batch": "task382-1009",
+      "label": "local-1-pass-1",
+      "visited": 393,
+      "complete": 392,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 4,
+      "scored": 2,
+      "rankings": {
+        "prefix": 183,
+        "three_step_prefix": 166,
+        "miss_one": 44
+      },
+      "source_pools": {
+        "healthy_archive": 349,
+        "early_archive": 44
+      },
+      "source_prefixes": {
+        "early_hole": 364,
+        "endpoint": 29
+      }
+    },
+    {
+      "batch": "task382-2000",
+      "label": "local-2-pass-2",
+      "visited": 824,
+      "complete": 672,
+      "interrupted": 152,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "three_step_prefix": 298,
+        "miss_one": 183,
+        "prefix": 343
+      },
+      "source_pools": {
+        "healthy_archive": 641,
+        "early_archive": 183
+      },
+      "source_prefixes": {
+        "early_hole": 784,
+        "endpoint": 40
+      }
+    },
+    {
+      "batch": "task382-2001",
+      "label": "local-2-pass-2",
+      "visited": 136,
+      "complete": 117,
+      "interrupted": 19,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "three_step_prefix": 54,
+        "prefix": 55,
+        "miss_one": 27
+      },
+      "source_pools": {
+        "healthy_archive": 109,
+        "early_archive": 27
+      },
+      "source_prefixes": {
+        "early_hole": 123,
+        "endpoint": 13
+      }
+    },
+    {
+      "batch": "task382-3000",
+      "label": "local-1-pass-3",
+      "visited": 818,
+      "complete": 816,
+      "interrupted": 2,
+      "failures": 0,
+      "exact_checks": 13,
+      "scored": 5,
+      "rankings": {
+        "three_step_prefix": 308,
+        "prefix": 417,
+        "miss_one": 93
+      },
+      "source_pools": {
+        "healthy_archive": 725,
+        "early_archive": 93
+      },
+      "source_prefixes": {
+        "early_hole": 738,
+        "endpoint": 80
+      }
+    },
+    {
+      "batch": "task382-3001",
+      "label": "local-1-pass-3",
+      "visited": 817,
+      "complete": 815,
+      "interrupted": 2,
+      "failures": 0,
+      "exact_checks": 6,
+      "scored": 3,
+      "rankings": {
+        "miss_one": 99,
+        "prefix": 389,
+        "three_step_prefix": 329
+      },
+      "source_pools": {
+        "early_archive": 99,
+        "healthy_archive": 718
+      },
+      "source_prefixes": {
+        "early_hole": 765,
+        "endpoint": 52
+      }
+    },
+    {
+      "batch": "task382-3002",
+      "label": "local-1-pass-3",
+      "visited": 818,
+      "complete": 816,
+      "interrupted": 2,
+      "failures": 0,
+      "exact_checks": 8,
+      "scored": 3,
+      "rankings": {
+        "prefix": 388,
+        "miss_one": 104,
+        "three_step_prefix": 326
+      },
+      "source_pools": {
+        "healthy_archive": 714,
+        "early_archive": 104
+      },
+      "source_prefixes": {
+        "early_hole": 759,
+        "endpoint": 59
+      }
+    },
+    {
+      "batch": "task382-3003",
+      "label": "local-1-pass-3",
+      "visited": 818,
+      "complete": 818,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "three_step_prefix": 324,
+        "miss_one": 76,
+        "prefix": 418
+      },
+      "source_pools": {
+        "healthy_archive": 742,
+        "early_archive": 76
+      },
+      "source_prefixes": {
+        "early_hole": 764,
+        "endpoint": 54
+      }
+    },
+    {
+      "batch": "task382-3004",
+      "label": "local-1-pass-3",
+      "visited": 818,
+      "complete": 816,
+      "interrupted": 2,
+      "failures": 0,
+      "exact_checks": 1,
+      "scored": 1,
+      "rankings": {
+        "three_step_prefix": 324,
+        "prefix": 383,
+        "miss_one": 111
+      },
+      "source_pools": {
+        "healthy_archive": 707,
+        "early_archive": 111
+      },
+      "source_prefixes": {
+        "early_hole": 771,
+        "endpoint": 47
+      }
+    },
+    {
+      "batch": "task382-3005",
+      "label": "local-1-pass-3",
+      "visited": 818,
+      "complete": 817,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 2,
+      "scored": 2,
+      "rankings": {
+        "three_step_prefix": 298,
+        "prefix": 420,
+        "miss_one": 100
+      },
+      "source_pools": {
+        "healthy_archive": 718,
+        "early_archive": 100
+      },
+      "source_prefixes": {
+        "early_hole": 763,
+        "endpoint": 55
+      }
+    },
+    {
+      "batch": "task382-3006",
+      "label": "local-1-pass-3",
+      "visited": 817,
+      "complete": 817,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 5,
+      "scored": 4,
+      "rankings": {
+        "prefix": 379,
+        "three_step_prefix": 346,
+        "miss_one": 92
+      },
+      "source_pools": {
+        "healthy_archive": 725,
+        "early_archive": 92
+      },
+      "source_prefixes": {
+        "early_hole": 765,
+        "endpoint": 52
+      }
+    },
+    {
+      "batch": "task382-3007",
+      "label": "local-1-pass-3",
+      "visited": 818,
+      "complete": 817,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 4,
+      "scored": 1,
+      "rankings": {
+        "prefix": 382,
+        "miss_one": 85,
+        "three_step_prefix": 351
+      },
+      "source_pools": {
+        "healthy_archive": 733,
+        "early_archive": 85
+      },
+      "source_prefixes": {
+        "early_hole": 767,
+        "endpoint": 51
+      }
+    },
+    {
+      "batch": "task382-3008",
+      "label": "local-1-pass-3",
+      "visited": 817,
+      "complete": 817,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 3,
+      "scored": 3,
+      "rankings": {
+        "three_step_prefix": 333,
+        "prefix": 391,
+        "miss_one": 93
+      },
+      "source_pools": {
+        "healthy_archive": 724,
+        "early_archive": 93
+      },
+      "source_prefixes": {
+        "early_hole": 761,
+        "endpoint": 56
+      }
+    },
+    {
+      "batch": "task382-3009",
+      "label": "local-1-pass-3",
+      "visited": 663,
+      "complete": 662,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 4,
+      "scored": 3,
+      "rankings": {
+        "three_step_prefix": 271,
+        "prefix": 311,
+        "miss_one": 81
+      },
+      "source_pools": {
+        "healthy_archive": 582,
+        "early_archive": 81
+      },
+      "source_prefixes": {
+        "early_hole": 617,
+        "endpoint": 46
+      }
+    },
+    {
+      "batch": "task382-4000",
+      "label": "local-2-pass-4",
+      "visited": 824,
+      "complete": 650,
+      "interrupted": 174,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "three_step_prefix": 298,
+        "prefix": 350,
+        "miss_one": 176
+      },
+      "source_pools": {
+        "healthy_archive": 648,
+        "early_archive": 176
+      },
+      "source_prefixes": {
+        "early_hole": 749,
+        "endpoint": 75
+      }
+    },
+    {
+      "batch": "task382-4001",
+      "label": "local-2-pass-4",
+      "visited": 29,
+      "complete": 23,
+      "interrupted": 6,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "three_step_prefix": 9,
+        "miss_one": 4,
+        "prefix": 16
+      },
+      "source_pools": {
+        "healthy_archive": 25,
+        "early_archive": 4
+      },
+      "source_prefixes": {
+        "early_hole": 25,
+        "endpoint": 4
+      }
+    },
+    {
+      "batch": "task382-5000",
+      "label": "local-1-pass-5",
+      "visited": 817,
+      "complete": 816,
+      "interrupted": 1,
+      "failures": 0,
+      "exact_checks": 12,
+      "scored": 6,
+      "rankings": {
+        "prefix": 370,
+        "three_step_prefix": 347,
+        "miss_one": 100
+      },
+      "source_pools": {
+        "healthy_archive": 717,
+        "early_archive": 100
+      },
+      "source_prefixes": {
+        "early_hole": 773,
+        "endpoint": 44
+      }
+    },
+    {
+      "batch": "task382-5001",
+      "label": "local-1-pass-5",
+      "visited": 817,
+      "complete": 817,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 7,
+      "scored": 3,
+      "rankings": {
+        "prefix": 384,
+        "three_step_prefix": 345,
+        "miss_one": 88
+      },
+      "source_pools": {
+        "healthy_archive": 729,
+        "early_archive": 88
+      },
+      "source_prefixes": {
+        "endpoint": 55,
+        "early_hole": 762
+      }
+    },
+    {
+      "batch": "task382-5002",
+      "label": "local-1-pass-5",
+      "visited": 785,
+      "complete": 785,
+      "interrupted": 0,
+      "failures": 0,
+      "exact_checks": 6,
+      "scored": 2,
+      "rankings": {
+        "three_step_prefix": 305,
+        "prefix": 403,
+        "miss_one": 77
+      },
+      "source_pools": {
+        "healthy_archive": 708,
+        "early_archive": 77
+      },
+      "source_prefixes": {
+        "early_hole": 724,
+        "endpoint": 61
+      }
+    }
+  ],
+  "visited": 20005,
+  "complete": 19634,
+  "interrupted": 371,
+  "failures": 0,
+  "scored": 63,
+  "distinct": 52,
+  "BEATS": 0,
+  "BEST_generators": 10,
+  "independent_coverage": "MATCH",
+  "exact_domain_reconstruction": "MATCH",
+  "prior_attempt_overlap": 0,
+  "prior_attempt_hashes": 235278,
+  "prior_complete_hashes": 232740,
+  "judge_sources": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_artifact_bytes": 650781
+}

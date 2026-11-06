@@ -1,0 +1,18 @@
+[
+  {
+    "file": "MobiusOddResonant325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "odd_resonant_reindex325",
+    "math": "For positive odd q, the reciprocal Mobius sum through M on odd multiples of q equals the sum over odd multiplier indices through the integer quotient of M by q of mu of q n divided by q n.",
+    "page": "23 equation 3.40",
+    "instance": "q = 3 and M = 61"
+  },
+  {
+    "file": "MobiusOddResonant325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "odd_resonant_mobius_bound325",
+    "math": "For every positive q, the reciprocal Mobius sum through M restricted to odd multiples of q has absolute value at most inverse q. Even q gives an empty sum.",
+    "page": "23 equation 3.40",
+    "instance": "q = 3 and q = 6 with M = 61"
+  }
+]

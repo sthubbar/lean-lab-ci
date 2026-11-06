@@ -1,0 +1,274 @@
+[
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "partial_summation_bound325",
+    "math": "If every initial partial sum of z through N has norm at most B, the norm of the sum of w times z is at most B times the absolute final weight plus its discrete total variation.",
+    "page": "23",
+    "instance": "w = 1, z = 1, N = 8 and B = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "unimodal_variation_bound325",
+    "math": "For nonnegative weights with a peak at p below N, increasing before p and decreasing after p, the absolute final weight plus discrete variation is at most twice the weight at p.",
+    "page": "7 and 23",
+    "instance": "w = 1, N = 8 and p = 0"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "unimodal_partial_sum_bound325",
+    "math": "For those unimodal weights and nonnegative B bounding every partial sum of z through N, the weighted sum norm is at most twice B times the peak weight.",
+    "page": "23",
+    "instance": "w = 1, z = 1, N = 8, p = 0 and B = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "weighted_phase_variation325",
+    "math": "At positive nearest integer distance d of alpha, weighted interval phases have norm at most the endpoint plus variation times the minimum of N and one over twice d.",
+    "page": "10 and 23",
+    "instance": "w = 1, alpha = 1/4, M = 3 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "unimodal_phase_bound325",
+    "math": "For a nonnegative unimodal weight and positive nearest integer distance d, the interval phase norm is at most twice the peak times the minimum of N and one over twice d.",
+    "page": "10 and 23",
+    "instance": "w = 1, alpha = 1/4, M = 3, N = 8 and p = 0"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2_monotone_left325",
+    "math": "Eta2 is nondecreasing on the whole interval up to one half, including its zero extension.",
+    "page": "3 equation 1.4",
+    "instance": "a = 1/4 and b = 1/2"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2_antitone_right325",
+    "math": "Eta2 is nonincreasing on the whole interval from one half onward, including its zero extension.",
+    "page": "3 equation 1.4",
+    "instance": "a = 1/2 and b = 1"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2_between325",
+    "math": "For a at most b at most c, eta2 at b is at least the smaller of eta2 at a and eta2 at c.",
+    "page": "3 equation 1.4",
+    "instance": "a = 1/4, b = 1/2 and c = 1"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "sampled_weight_phase_bound325",
+    "math": "Let w be nonnegative and bounded by H, with every middle value at least the smaller endpoint value. For nondecreasing samples t and positive nearest integer distance d, the weighted interval phase norm is at most twice H times the minimum of N and one over twice d.",
+    "page": "23",
+    "instance": "w = 1, t = 0, H = 1, alpha = 1/4, M = 3 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2_sampled_phase_bound325",
+    "math": "For nondecreasing samples t and positive nearest integer distance d, the eta2 weighted interval phase norm is at most eight log 2 times the minimum of N and one over twice d.",
+    "page": "7, 10 and 23",
+    "instance": "t = 1/2, alpha = 1/4, M = 3 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2rho_monotone_left325",
+    "math": "For rho at least four, eta2rho is nondecreasing up to one half.",
+    "page": "7 equation 2.6 and 23",
+    "instance": "rho = 4, a = 1/4 and b = 1/2"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2rho_antitone_right325",
+    "math": "For rho at least four, eta2rho is nonincreasing from one half onward.",
+    "page": "7 equation 2.6 and 23",
+    "instance": "rho = 4, a = 1/2 and b = 1"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2rho_between325",
+    "math": "For rho at least four and a at most b at most c, eta2rho at b is at least the smaller endpoint value.",
+    "page": "7 equation 2.6",
+    "instance": "rho = 4, a = 1/4, b = 1/2 and c = 1"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2rho_sampled_phase_bound325",
+    "math": "For rho at least four, nondecreasing samples t and positive nearest integer distance d, the logarithmic weighted phase norm is at most eight log 2 times log rho times the minimum of N and one over twice d.",
+    "page": "7 and 23",
+    "instance": "rho = 4, t = 1/2, alpha = 1/4, M = 3 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "odd_phase_norm325",
+    "math": "Removing the constant unit phase from the first N odd phases leaves a consecutive phase sum with doubled frequency and the same norm.",
+    "page": "21 equation 3.35",
+    "instance": "w = 1, alpha = 1/8 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "odd_eta2_phase_bound325",
+    "math": "For nonnegative s and positive nearest integer distance d of twice alpha, the first N odd eta2 weighted phases have norm at most eight log 2 times the minimum of N and one over twice d.",
+    "page": "21 equation 3.35",
+    "instance": "s = 1/8, alpha = 1/8 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "odd_log_eta2_phase_bound325",
+    "math": "For positive m and x at least four m, let d be the positive nearest integer distance of twice alpha m. The first N odd phases weighted by log n times eta2 of mn over x have norm at most eight log 2 times log of x over m times the minimum of N and one over twice d.",
+    "page": "23",
+    "instance": "x = 16, m = 1, alpha = 1/8 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "eta2_sampled_length_bound325",
+    "math": "For arbitrary real samples and frequencies, the eta2 weighted interval phase norm is at most four log 2 times N.",
+    "page": "3 and 21",
+    "instance": "t = 1/2, alpha = 0, M = 3 and N = 8"
+  },
+  {
+    "file": "TypeIPartial325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "minor_odd_eta2_block325",
+    "math": "Under MinorHyp, let s lie in q consecutive natural numbers below Q over two. The sum over s of the norms of N odd eta2 weighted phases is at most eight log 2 times the minimum of the cardinality of s times N and N plus twice q times one plus log q. The exceptional residue is included.",
+    "page": "10 to 13 and 21",
+    "instance": "Vacuity119.main_parameters, s = {0,1}, M = 0 and N = 8"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprimeMu_multiplicative",
+    "math": "The Mobius function restricted to integers coprime to q is multiplicative.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprimeMu_zeta_prime_pow",
+    "math": "The divisor transform of the restricted Mobius function at p to the power k plus one is one if p divides q and zero otherwise, for prime p.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6, p = 5 and k = 2"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprimeMu_zeta_values",
+    "math": "At every natural integer the divisor transform of the restricted Mobius function is zero or one.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6 and n = 10"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprimeMu_abs",
+    "math": "Every restricted Mobius coefficient has absolute value at most one.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6 and n = 5"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprimeMu_zeta_zero_of_coprime",
+    "math": "The divisor transform vanishes at each integer other than one that is coprime to q.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6 and n = 5"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprimeMu_complement_bound",
+    "math": "At every integer other than one, the divisor transform plus the absolute restricted coefficient is at most one.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6 and n = 5"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprimeMu_floor_sum",
+    "math": "The sum of the divisor transform through N equals the sum of the restricted coefficients times the integer quotient of N by the index.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6 and N = 10"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "reciprocal_floor_identity",
+    "math": "N times the reciprocal weighted sum of f through N equals its floor weighted sum plus its remainder weighted sum divided by the index.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "f n = n and N = 10"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprime_mobius_reciprocal_bound",
+    "math": "For every natural q and N, the absolute reciprocal sum of restricted Mobius coefficients from one through N is at most one.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "q = 6 and N = 10"
+  },
+  {
+    "file": "Mobius325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "granville_ramare_10_2",
+    "math": "For every real x and natural q, the absolute sum of the quotients mu n divided by n from one through floor x with n coprime to q is at most one. Real endpoints below one give an empty sum.",
+    "page": "GR96 preprint 42 Lemma 10.2 and Helfgott 7 equation 2.7",
+    "instance": "x = 10 and q = 6"
+  },
+  {
+    "file": "Approximation325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "first_approximation_endpoint325",
+    "math": "At x = 2.16e20, alpha = 1/54000000000000, a = 1, q = 27000000000000 and delta = 0 satisfy MinorHyp and the strict large denominator condition.",
+    "page": "3 and 70",
+    "instance": "The displayed point satisfies every hypothesis jointly"
+  },
+  {
+    "file": "Approximation325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "reset_disjunction_counterexample325",
+    "math": "For that alpha, numerator zero, denominator one and delta = 8000000 give a valid reset approximation with Q = x to the two thirds divided by 500 square root 6. Neither q greater than y nor absolute delta q greater than eight y holds. The latter is equality.",
+    "page": "70",
+    "instance": "x = 2.16e20 and the displayed two approximations"
+  },
+  {
+    "file": "Approximation325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "parameter_product325",
+    "math": "For positive x, U times V equals 500 square root 6 divided by three times x to the two thirds.",
+    "page": "70",
+    "instance": "x = 16"
+  },
+  {
+    "file": "Approximation325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "parameter_product_exceeds_short_range325",
+    "math": "For positive x, the product U V exceeds half of the original Q. The short block estimate alone does not cover the full coefficient range.",
+    "page": "70 and 10 to 13",
+    "instance": "x = 16"
+  },
+  {
+    "file": "Approximation325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "first_denominator_exceeds_reset325",
+    "math": "At x = 2.16e20, the reset Q is strictly below the valid first denominator 27000000000000.",
+    "page": "70",
+    "instance": "The displayed threshold point"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "file": "MobiusResonant325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "moebius_multiple_factor325",
+    "math": "For all q and n, mu of q times n equals mu q times the Mobius coefficient restricted to indices coprime to q. The common prime case vanishes.",
+    "page": "23 equation 3.40",
+    "instance": "q = 6 with n = 5 and n = 3"
+  },
+  {
+    "file": "MobiusResonant325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "moebius_multiples_reciprocal_bound325",
+    "math": "For positive q, the absolute reciprocal Mobius sum at q times each integer from one through N is at most inverse q.",
+    "page": "23 equation 3.40",
+    "instance": "q = 6 and N = 10"
+  },
+  {
+    "file": "MobiusResonant325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "moebius_multiples_reindex325",
+    "math": "For positive q, the reciprocal Mobius sum through M restricted to multiples of q equals the sum indexed by integers from one through M divided by q of mu of q n over q n.",
+    "page": "23 equation 3.40",
+    "instance": "q = 6 and M = 61"
+  },
+  {
+    "file": "MobiusResonant325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "resonant_mobius_reciprocal_bound325",
+    "math": "For positive q, the absolute reciprocal Mobius sum through M restricted to multiples of q is at most inverse q.",
+    "page": "23 equation 3.40",
+    "instance": "q = 6 and M = 61"
+  },
+  {
+    "file": "MobiusResonant325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "odd_moebius_multiples_reciprocal_bound325",
+    "math": "For positive q, the reciprocal Mobius sum at q times the odd integers through N has absolute value at most inverse q.",
+    "page": "23 equation 3.40",
+    "instance": "q = 3 and N = 10"
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "file": "MobiusLog325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "antitone_variation325",
+    "math": "For decreasing weights with a nonnegative final weight, the absolute final weight plus the discrete variation equals the initial weight.",
+    "page": "23",
+    "instance": "w = 1 and N = 8"
+  },
+  {
+    "file": "MobiusLog325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "antitone_weighted_bound325",
+    "math": "If all partial sums of z through N have norm at most B, a decreasing weight with nonnegative final value bounds the weighted norm by B times its initial weight.",
+    "page": "23",
+    "instance": "w = 1, z = 1, N = 8 and B = 8"
+  },
+  {
+    "file": "MobiusLog325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "coprime_mobius_log_weight_bound325",
+    "math": "For N at least one, the absolute sum of restricted mu n divided by n times log of N divided by n from one through N is at most log N. This is a weaker derived envelope than equation 2.10.",
+    "page": "7 equations 2.7 and 2.10 and 23 equation 3.40",
+    "instance": "q = 6 and N = 10"
+  },
+  {
+    "file": "MobiusLog325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "log_envelope_exceeds_cited_budget325",
+    "math": "At q = 1 and N = 4, the elementary log N envelope exceeds 1.00303 q over phi q. This compares upper bounds and asserts no failure of the cited estimate.",
+    "page": "7 equation 2.10",
+    "instance": "q = 1 and N = 4"
+  },
+  {
+    "file": "MobiusLog325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "odd_coprime_mobius_bound325",
+    "math": "The absolute reciprocal Mobius sum through floor x with odd indices coprime to q is at most one.",
+    "page": "7 equation 2.7 and 23 equation 3.40",
+    "instance": "x = 10 and q = 3"
+  },
+  {
+    "file": "MobiusLog325",
+    "ns": "LeanLab.HelfgottArcs.Mobius325",
+    "name": "odd_coprime_mobius_log_bound325",
+    "math": "For N at least one, the odd coprime reciprocal Mobius sum with log of N over the index has absolute value at most log N.",
+    "page": "23 equation 3.40",
+    "instance": "q = 3 and N = 10"
+  },
+  {
+    "file": "ResetInterior325",
+    "ns": "LeanLab.HelfgottArcs.Decomp119",
+    "name": "reset_strict_interior_counterexample325",
+    "math": "At x = 2.16e20, take q = 27000000000000, a = 1, delta = -1/10000000 and alpha = 1/54000000000000 minus 1 over twice x times 10000000. MinorHyp and the large denominator condition hold. The reset numerator zero, denominator one and delta = 8000000 minus 1/10000000 are also valid. The reset denominator is strictly below y and absolute delta q is strictly below eight y.",
+    "page": "3 and 70",
+    "instance": "The displayed rational point satisfies every listed restriction jointly"
+  }
+]
