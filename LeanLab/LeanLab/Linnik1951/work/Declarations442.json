@@ -1,0 +1,659 @@
+[
+  {
+    "module": "Decomp442a",
+    "kind": "noncomputable def",
+    "name": "mellinKernel442",
+    "twin": true,
+    "status": "DATA",
+    "source": "Page 156 equation 4.1.",
+    "instance": "N equal to four, alpha and t equal to zero give a positive real base and positive real Gamma argument.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442a",
+    "kind": "theorem",
+    "name": "central_kernel_mass442",
+    "twin": true,
+    "status": "OPEN",
+    "source": "Pages 157 and 158 Gamma decay argument and central estimate before 4.8.",
+    "instance": "Alpha zero belongs to every central interval. The integrand at t zero is positive for every N greater than one. Thus the kernel is not identically zero. OPEN.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442a",
+    "kind": "theorem",
+    "name": "mellin_kernel_domination442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 156 equation 4.1 and the norm integral inequality.",
+    "instance": "N four, B0 one and M constantly one satisfy the line bound by lineBound_one442. The kernel integrability is the explicit analytic hypothesis.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442a",
+    "kind": "theorem",
+    "name": "sqrt_scale442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 158 central radius enlargement before 4.8.",
+    "instance": "N and R equal four give equality two.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442a",
+    "kind": "theorem",
+    "name": "lemma2_central_decomposed442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 158 before equation 4.8.",
+    "instance": "N four, R one and M constantly one meet the numerical and coefficient conditions. The eventual threshold and OPEN kernel input remain explicit. CONDITIONAL.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442a",
+    "kind": "theorem",
+    "name": "lineBound_one442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 156 hypothesis 4.1.",
+    "instance": "The witness is explicitly M constantly one. Its norm is one and log of four times absolute t plus two is greater than one.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442a",
+    "kind": "theorem",
+    "name": "central_pointwise_decomposed442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 158 central bound before 4.8 and page 159 equation 5.1.",
+    "instance": "Alpha zero and modulus three satisfy the phase and modulus restrictions for sufficiently large N. The GRH and transfer inputs remain cited. CONDITIONAL on the two named analytic leaves.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442b",
+    "kind": "theorem",
+    "name": "abstract_outer_kernels442",
+    "twin": true,
+    "status": "OPEN",
+    "source": "Page 157 equation 4.3 and page 158 equations 4.4 through 4.6.",
+    "instance": "M constantly one at N four has a certified line bound. For every N above the threshold, M constantly zero also satisfies the line bound and its integral vanishes. R one is admissible for N at least one. OPEN.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442b",
+    "kind": "theorem",
+    "name": "difference_kernel_lower442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 158 kernel following equation 4.6, elementary lower comparison used to absorb transfer error.",
+    "instance": "T one is admissible and the integrand is strictly positive throughout the box.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442b",
+    "kind": "theorem",
+    "name": "outer_to_kernels_decomposed442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Pages 158 and 159 equations 4.4 through 5.1.",
+    "instance": "q three and sufficiently large N satisfy the numerical modulus bounds. No GRH witness is claimed. CONDITIONAL on the two named analytic inputs.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442b",
+    "kind": "theorem",
+    "name": "lemma2_outer_decomposed442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 158 equation 4.7 and its frequency radius substitution.",
+    "instance": "R one and the constant one coefficient give admissible nonzero data for every N at least three. The eventual threshold remains explicit. CONDITIONAL only on abstract_outer_kernels442.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442c",
+    "kind": "theorem",
+    "name": "rational_pointwise_characters442",
+    "twin": true,
+    "status": "OPEN",
+    "source": "Page 155 equation 2.3, page 156 Gauss bound and page 160 unit character orthogonality before 5.4.",
+    "instance": "N one, q two and z zero give one reduced residue and a nonzero principal damped prime sum. OPEN.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442c",
+    "kind": "theorem",
+    "name": "rational_system_integral442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 166 definition of F_q and finite interval summation in 9.3.",
+    "instance": "q two, tau four and the constant one function give the interval from one quarter to three quarters. Both integrals equal one half. OPEN.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Decomp442c",
+    "kind": "theorem",
+    "name": "doubled_system_characters_decomposed442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Pages 155 and 160 character expansion and page 166 doubled system integration.",
+    "instance": "N one, q two and tau four have a nonempty arc of length one half. Both smaller inputs remain explicit OPEN leaves. CONDITIONAL.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "series_square_integral442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 full period step before 5.3 and page 162 Parseval 7.4.",
+    "instance": "A coefficient equal to one at frequency zero and zero elsewhere gives equality one.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "character_coefficients_summable442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 definition preceding 5.1 and the full period estimate.",
+    "instance": "N one and the principal character modulo one are admissible. The prime two coefficient is positive.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "character_series_nat442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 character prime sum preceding 5.1.",
+    "instance": "N one and alpha zero retain the positive prime two term for the principal character modulo one.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "character_full_mass442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 before 5.3, weakening the trivial full period prime bound by discarding primality.",
+    "instance": "N one and the principal character modulo one have nonzero mass, since the prime two coefficient is positive.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "character_periodic442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 character prime series and the full period comparison before 5.3.",
+    "instance": "The prime two term is unchanged after adding one to alpha. N one and the principal character modulo one are admissible.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "character_local_mass442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 local to full period comparison before 5.3.",
+    "instance": "N one, radius one half and the principal character modulo one have a whole period and nonzero mass.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "principal_full_mass_pos442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 full period step before 5.3. The prime two Fourier coefficient gives a strictly positive squared summand in Parseval.",
+    "instance": "N one is an explicit nonzero instance. The theorem also applies for every larger N.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "principal_mass_proved442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 159 before 5.3, weaker full period bound used by SPLIT1622_exceptional.",
+    "instance": "N one, q one and radius one half satisfy all hypotheses and have nonzero mass.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Principal442",
+    "kind": "theorem",
+    "name": "totient_sqrt_lower_proved442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 166 after 9.3 and the proved Perelli1996 Totient bound.",
+    "instance": "q one gives one at most two.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Instances442",
+    "kind": "theorem",
+    "name": "mellin_kernel_norm_pos442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 156 equation 4.1. The positive real part excludes a zero base and Gamma poles.",
+    "instance": "N four, alpha and t zero give a nonzero kernel. The theorem also applies to every larger N.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Instances442",
+    "kind": "theorem",
+    "name": "lineBound_one_large442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 156 hypothesis 4.1.",
+    "instance": "For every threshold choose N above both that threshold and three. This gives a nonzero coefficient witness within the eventual parameter range of both new analytic leaves.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Gamma442",
+    "kind": "theorem",
+    "name": "gamma_absolute_decay442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 157 Gamma asymptotic before 4.4, from the proved PNTPort Gamma strip estimate and conjugation.",
+    "instance": "s equal to one lies in the strip and Gamma one is one.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Gamma442",
+    "kind": "theorem",
+    "name": "gamma_mellin_line442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 157 contour kernel before 4.4.",
+    "instance": "N three and t zero meet the hypotheses and give a positive real Gamma value. The bound also applies to every large N.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Mixed442",
+    "kind": "theorem",
+    "name": "mixed_character_mass442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 159 equation 5.3. This weakens its log power six because the elementary principal bound discards the prime counting saving.",
+    "instance": "Modulus three and every sufficiently large N satisfy the numerical conditions. The Mellin bound and nonprincipal character remain explicit hypotheses. CONDITIONAL on MellinBound280.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Products442",
+    "kind": "theorem",
+    "name": "prime_factor_card_log442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.6, elementary product growth ingredient.",
+    "instance": "n two gives equality log two.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Products442",
+    "kind": "theorem",
+    "name": "small_prime_product442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.6, using the proved PNTSieve Mertens density bound.",
+    "instance": "Y three and the singleton prime three give the positive factor two.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Products442",
+    "kind": "theorem",
+    "name": "large_prime_product442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.6, large prime factor count ingredient.",
+    "instance": "n five, Y three and the singleton prime five give factor four thirds.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Products442",
+    "kind": "theorem",
+    "name": "odd_prime_product_log_cutoff442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equations 10.6 and 10.7, combining the two cutoff products.",
+    "instance": "n two and Y three give the empty odd product one. The preceding two theorems have nonempty instances.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Uniform442",
+    "kind": "theorem",
+    "name": "log_ceiling_bound442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.7, elementary cutoff calculation.",
+    "instance": "x three has ceiling three and a positive right side.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Uniform442",
+    "kind": "theorem",
+    "name": "singular_log_quarter442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equations 10.6 and 10.7, corrected growth bound derived from the proved Mertens product estimate.",
+    "instance": "Residual two and N thirty two meet the hypotheses. The product is positive by one_le_singularSeries111.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Uniform442",
+    "kind": "theorem",
+    "name": "tail_coefficient_le_one442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.5, absorption of the already proved uniform tail.",
+    "instance": "D one holds at every N at least one.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Uniform442",
+    "kind": "theorem",
+    "name": "truncated_log_quarter442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.7, using the corrected product growth and the clean singular tail.",
+    "instance": "Residual two and arbitrarily large N meet the residual restrictions. The modulus one term of the truncated series is one.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Weights442",
+    "kind": "theorem",
+    "name": "relative_weight_small442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.7, elementary split at square root N.",
+    "instance": "C and epsilon one and residual two meet the fixed hypotheses for every sufficiently large N.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Weights442",
+    "kind": "theorem",
+    "name": "truncated_relative_weight442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.7, using the proved coefficient growth bound.",
+    "instance": "Residual two is positive and even and lies below every sufficiently large N.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Relative442",
+    "kind": "theorem",
+    "name": "major_relative_negligible_proved442",
+    "twin": true,
+    "status": "PROVED",
+    "source": "Page 168 equation 10.7. The proof uses a Mertens split, the residual weight comparison and the existing logarithmic tuple count.",
+    "instance": "k three and epsilon one meet the fixed hypotheses. At N eight, the exponent tuple with all entries one has residual two and shows that the sum is not defined from an empty support in general.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Assembly442",
+    "kind": "theorem",
+    "name": "major_to_truncated442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 168 equation 10.7.",
+    "instance": "k three and epsilon one satisfy the fixed numerical conditions. GRH and Mellin remain explicit cited hypotheses. CONDITIONAL.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Assembly442",
+    "kind": "theorem",
+    "name": "major_error442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 168 equations 10.6 and 10.7.",
+    "instance": "k three and epsilon one are admissible. GRH, Mellin and the local expansion remain cited. CONDITIONAL.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Assembly442",
+    "kind": "theorem",
+    "name": "error_bound442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 168 after 10.7.",
+    "instance": "k three is admissible. Ten has the representation two plus two plus two plus two plus two. GRH remains cited. CONDITIONAL.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  },
+  {
+    "module": "Assembly442",
+    "kind": "theorem",
+    "name": "linnik1951_decomposed442",
+    "twin": true,
+    "status": "CONDITIONAL",
+    "source": "Page 154 theorem and pages 168 and 169 conclusion.",
+    "instance": "Eight equals three plus three plus two. No witness to GRH or the eventual universal conclusion is claimed. CONDITIONAL on the four remaining analytic inputs.",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "comparison": "MATCH"
+  }
+]
