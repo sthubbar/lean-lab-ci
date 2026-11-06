@@ -1,0 +1,27 @@
+{
+  "arguments": {
+    "label": "local-1-pass-5",
+    "first_batch": 5000,
+    "radius": 48,
+    "steps": 3,
+    "seconds": 2.0,
+    "budget": 263.80371543900037,
+    "cap": 1,
+    "low": 18,
+    "high": 120,
+    "seed": 3311,
+    "topology": "residue3",
+    "transfer": true,
+    "stream": false,
+    "centered": false,
+    "lazy": true,
+    "dual": false,
+    "source": "both"
+  },
+  "utc_start": "2026-11-06T10:11:04.761081+00:00",
+  "jobs": 198754,
+  "C_sha256": "f0df378ea4e270536e21d1d80cd71a584e10068dface42c0d5592e63489129c1",
+  "skip_policy": "completed domains and all prior attempted three-run domains; timeouts remain unresolved",
+  "Python_sha256": "2df09a3635d16059fe0d63573dbf083144635db22406abd9fd191099ed21b963",
+  "prior_skipped_hashes": 347173
+}
