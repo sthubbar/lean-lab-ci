@@ -33,7 +33,88 @@ theorem mean_square_pointwise (a : ℕ → ℂ) (c1 c2 F : ℝ) {q : ℕ}
     (hc1 : 0 < c1) (hc2 : c1 < c2) (hF : 0 < F) :
     ‖Thm4.dirPoly a c1 c2 F χ (Thm4.half t)‖ ^ 2 ≤
       (((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * energy a c1 c2 F) := by
-  sorry
+  -- Unfold definitions
+  have hdir : Thm4.dirPoly a c1 c2 F χ (Thm4.half t) =
+      ∑ n ∈ (Finset.range (⌊c2 * F⌋₊ + 1)).filter
+        (fun n : ℕ => c1 * F < n ∧ (n : ℝ) < c2 * F),
+        a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t)) := rfl
+  have henergy : energy a c1 c2 F =
+      ∑ n ∈ (Finset.range (⌊c2 * F⌋₊ + 1)).filter
+        (fun n : ℕ => c1 * F < n ∧ (n : ℝ) < c2 * F), ‖a n‖ ^ 2 / (n : ℝ) := rfl
+  rw [hdir]
+  let I := (Finset.range (⌊c2 * F⌋₊ + 1)).filter
+    (fun n : ℕ => c1 * F < n ∧ (n : ℝ) < c2 * F)
+  -- Per-term norm bound: ‖a n * χ n / n^{-1/2-it}‖² ≤ ‖a n‖² / n
+  have h_term_sq_bound (n : ℕ) (hn : n ∈ I) :
+      ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2 ≤ ‖a n‖ ^ 2 / (n : ℝ) := by
+    rcases Finset.mem_filter.mp hn with ⟨hn_range, ⟨h_lt1, h_lt2⟩⟩
+    have hn_pos : n ≠ 0 := by
+      intro hzero; subst hzero
+      have : (0 : ℝ) < c1 * F := mul_pos hc1 hF
+      linarith
+    have h_char_le_one : ‖χ (n : ZMod q)‖ ≤ 1 := by
+      have := DirichletCharacter.norm_apply_le_one χ (n : ZMod q)
+      simpa using this
+    have h_norm_cpow : ‖((n : ℂ) ^ (Thm4.half t))‖ = (n : ℝ) ^ ((Thm4.half t).re) := by
+      have hbase : (n : ℂ) ≠ 0 := by exact_mod_cast hn_pos
+      rw [Complex.norm_cpow_of_ne_zero hbase]
+      rfl
+    have h_half_re : (Thm4.half t).re = (1/2 : ℝ) := rfl
+    rw [h_norm_cpow, h_half_re]
+    calc
+      ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2 =
+          (‖a n * χ (n : ZMod q)‖ * ‖((n : ℂ) ^ (Thm4.half t))‖⁻¹) ^ 2 := by
+        rw [norm_div]
+      _ = ‖a n * χ (n : ZMod q)‖ ^ 2 * (‖((n : ℂ) ^ (Thm4.half t))‖⁻¹) ^ 2 := by ring
+      _ ≤ (‖a n‖ * ‖χ (n : ZMod q)‖) ^ 2 * (‖((n : ℂ) ^ (Thm4.half t))‖⁻¹) ^ 2 := by
+        gcongr
+        exact norm_mul _ _
+      _ ≤ (‖a n‖ * 1) ^ 2 * (‖((n : ℂ) ^ (Thm4.half t))‖⁻¹) ^ 2 := by gcongr
+      _ = ‖a n‖ ^ 2 * (‖((n : ℂ) ^ (Thm4.half t))‖⁻¹) ^ 2 := by ring
+      _ = ‖a n‖ ^ 2 * (((n : ℝ) ^ (1/2 : ℝ))⁻¹) ^ 2 := by
+        rw [h_norm_cpow, h_half_re]
+      _ = ‖a n‖ ^ 2 * ((n : ℝ) ^ (-1/2 : ℝ)) := by
+        rw [← Real.rpow_neg (Nat.cast_nonneg n), show (-1/2 : ℝ) = -((1/2 : ℝ)) by ring]
+        simp [Real.rpow_neg (Nat.cast_nonneg n)]
+      _ = ‖a n‖ ^ 2 / (n : ℝ) := by
+        rw [Real.rpow_neg (Nat.cast_nonneg n), div_eq_mul_inv]
+  -- Cauchy-Schwarz: ‖∑ z_n‖² ≤ |I| * ∑ ‖z_n‖²
+  have h_cauchy : ‖∑ n ∈ I, a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2 ≤
+      (I.card : ℝ) * (∑ n ∈ I, ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2) := by
+    calc
+      ‖∑ n ∈ I, a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2 ≤
+          (∑ n ∈ I, ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖) ^ 2 := by
+        have h := norm_sum_le (fun n => a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))) I
+        nlinarith [sq_nonneg _]
+      _ = (∑ n ∈ I, ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ * 1) ^ 2 := by simp
+      _ ≤ (∑ n ∈ I, (‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖) ^ 2) * (∑ n ∈ I, (1 : ℝ) ^ 2) :=
+        Finset.sum_mul_sq_le_sq_mul_sq (fun n => ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖)
+          (fun _ => 1) (fun n _ => norm_nonneg _) (fun _ _ => by norm_num)
+      _ = (∑ n ∈ I, ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2) * (I.card : ℝ) := by simp
+      _ = (I.card : ℝ) * (∑ n ∈ I, ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2) := by ring
+  -- Bound the index set cardinality
+  have h_card_bound : (I.card : ℝ) ≤ ((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) := by
+    have h_card_nat : I.card ≤ (Finset.range (⌊c2 * F⌋₊ + 1)).card :=
+      Finset.card_le_card (Finset.filter_subset _ _)
+    have h_range_card : (Finset.range (⌊c2 * F⌋₊ + 1)).card = ⌊c2 * F⌋₊ + 1 :=
+      Finset.card_range _
+    have : (I.card : ℝ) ≤ (⌊c2 * F⌋₊ + 1 : ℕ) := by
+      exact_mod_cast (h_card_nat.trans_eq h_range_card)
+    simpa [Nat.cast_add, Nat.cast_one] using this
+  -- Combine all bounds
+  calc
+    ‖∑ n ∈ I, a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2
+        ≤ (I.card : ℝ) * (∑ n ∈ I, ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2) := h_cauchy
+    _ ≤ ((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * (∑ n ∈ I, ‖a n * χ (n : ZMod q) / ((n : ℂ) ^ (Thm4.half t))‖ ^ 2) := by
+      gcongr
+    _ ≤ ((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * (∑ n ∈ I, (‖a n‖ ^ 2 / (n : ℝ))) := by
+      gcongr
+      apply Finset.sum_le_sum
+      intro n hn
+      exact h_term_sq_bound n hn
+    _ = (((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * energy a c1 c2 F) := by
+      rw [henergy]
+      ring
 
 /-- LEAF 2 of 3. The regime `F ≤ q * T`, where the character-and-time count dominates the
 bracket: the square sum over the well-spaced set is at most a constant times `log x` times
@@ -48,15 +129,17 @@ theorem mean_square_qt_dominant :
           (∑ p ∈ S, ‖Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)‖ ^ 2) ≤
             C * Real.log x * ((q : ℝ) * T + F) * energy a c1 c2 F := by
   intro B c1 c2 hc1 hc2
+  -- Obtain the sealed mean square bound from DecompC165c
   obtain ⟨C, hC, hm⟩ := LeanLab.BHP1997.DecompC165c.hybrid_mean_square B c1 c2 hc1 hc2
   refine ⟨C, hC, ?_⟩
   intro x F T q S a ha hx hF hFx hT hTx hq hqx hFqT hS hSt
+  -- Apply the sealed bound, ignoring the extra hypothesis hFqT
   exact hm x F T q S a ha hx hF hFx hT hTx hq hqx hS hSt
 
 /-- LEAF 3 of 3. The regime `q * T ≤ F`, where the polynomial length dominates the bracket:
 the square sum over the well-spaced set is at most a constant times `log x` times
-`q * T + F` times the energy. This is the short-counting half of the split; it is the sealed
-statement with the additional hypothesis `q * T ≤ F`. -/
+`q * T + F` times the energy. This is the short-counting half of the split; it is the
+sealed statement with the additional hypothesis `q * T ≤ F`. -/
 theorem mean_square_F_dominant :
     ∀ B c1 c2 : ℝ, 0 < c1 → c1 < c2 → ∃ C : ℝ, 0 < C ∧
       ∀ x F T : ℝ, ∀ q : ℕ, ∀ S : Finset (ℝ × DirichletCharacter ℂ q),
@@ -66,9 +149,11 @@ theorem mean_square_F_dominant :
           (∑ p ∈ S, ‖Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)‖ ^ 2) ≤
             C * Real.log x * ((q : ℝ) * T + F) * energy a c1 c2 F := by
   intro B c1 c2 hc1 hc2
+  -- Obtain the sealed mean square bound from DecompC165c
   obtain ⟨C, hC, hm⟩ := LeanLab.BHP1997.DecompC165c.hybrid_mean_square B c1 c2 hc1 hc2
   refine ⟨C, hC, ?_⟩
   intro x F T q S a ha hx hF hFx hT hTx hq hqx hqTF hS hSt
+  -- Apply the sealed bound, ignoring the extra hypothesis hqTF
   exact hm x F T q S a ha hx hF hFx hT hTx hq hqx hS hSt
 
 /-- The normalized coefficient energy of page 11 is a sum of squares divided by a natural
