@@ -1,0 +1,66 @@
+{
+  "batches": [
+    {
+      "batch": "task449-8000",
+      "label": "local-1-pass-8",
+      "visited": 823,
+      "complete": 729,
+      "interrupted": 94,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "three_step_prefix": 329,
+        "prefix": 340,
+        "miss_one": 154
+      },
+      "source_pools": {
+        "healthy_archive": 669,
+        "early_archive": 154
+      },
+      "source_prefixes": {
+        "early_hole": 764,
+        "endpoint": 59
+      }
+    },
+    {
+      "batch": "task449-8001",
+      "label": "local-1-pass-8",
+      "visited": 218,
+      "complete": 183,
+      "interrupted": 35,
+      "failures": 0,
+      "exact_checks": 0,
+      "scored": 0,
+      "rankings": {
+        "miss_one": 47,
+        "prefix": 90,
+        "three_step_prefix": 81
+      },
+      "source_pools": {
+        "early_archive": 47,
+        "healthy_archive": 171
+      },
+      "source_prefixes": {
+        "early_hole": 201,
+        "endpoint": 17
+      }
+    }
+  ],
+  "visited": 1041,
+  "complete": 912,
+  "interrupted": 129,
+  "failures": 0,
+  "scored": 0,
+  "distinct": 0,
+  "BEATS": 0,
+  "BEST_generators": 10,
+  "independent_coverage": "MATCH",
+  "exact_domain_reconstruction": "MATCH",
+  "prior_attempt_overlap": 0,
+  "prior_attempt_hashes": 366123,
+  "prior_complete_hashes": 360369,
+  "judge_sources": "UNCHANGED",
+  "Lean_files": "UNCHANGED",
+  "largest_artifact_bytes": 650743
+}
