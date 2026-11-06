@@ -37,7 +37,25 @@ theorem large_values_second_branch :
         (∀ p ∈ S, V ≤ ‖Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)‖) →
         energy a c1 c2 F ^ 2 * ((q : ℝ) * T) ≤ V ^ 4 →
         (S.card : ℝ) ≤ C * Real.log x ^ 2 * (energy a c1 c2 F * F / V ^ 2) := by
-  sorry
+  intro B c1 c2 hc1 hc2
+  obtain ⟨C, hC, hb⟩ := hybrid_large_values B c1 c2 hc1 hc2
+  refine ⟨2 * C, by positivity, ?_⟩
+  intro x F T V q S a ha hx hF hFx hT hTx hq hqx hV hs ht hp hreg
+  have hE : 0 ≤ energy a c1 c2 F := by
+    apply Finset.sum_nonneg; intro n _; positivity
+  have hF0 : 0 ≤ F := by linarith
+  have hkey : energy a c1 c2 F ^ 3 * F * (q : ℝ) * T / V ^ 6 ≤
+      energy a c1 c2 F * F / V ^ 2 := by
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+    have := mul_le_mul_of_nonneg_left hreg
+      (show 0 ≤ energy a c1 c2 F * F * V ^ 2 by positivity)
+    nlinarith
+  have hb' := hb x F T V q S a ha hx hF hFx hT hTx hq hqx hV hs ht hp
+  have hC' : 0 ≤ C * Real.log x ^ 2 := by positivity
+  calc (S.card : ℝ) ≤ _ := hb'
+    _ ≤ C * Real.log x ^ 2 * (energy a c1 c2 F * F / V ^ 2 + energy a c1 c2 F * F / V ^ 2) :=
+        mul_le_mul_of_nonneg_left (by linarith) hC'
+    _ = _ := by ring
 
 /-- LEAF. Step 2 of the split, the third moment branch of the large values estimate. The
 cardinality is charged to the cubic energy summand alone, and only under the complementary regime
@@ -53,7 +71,26 @@ theorem large_values_third_branch :
         V ^ 4 ≤ energy a c1 c2 F ^ 2 * ((q : ℝ) * T) →
         (S.card : ℝ) ≤
           C * Real.log x ^ 2 * (energy a c1 c2 F ^ 3 * F * (q : ℝ) * T / V ^ 6) := by
-  sorry
+  intro B c1 c2 hc1 hc2
+  obtain ⟨C, hC, hb⟩ := hybrid_large_values B c1 c2 hc1 hc2
+  refine ⟨2 * C, by positivity, ?_⟩
+  intro x F T V q S a ha hx hF hFx hT hTx hq hqx hV hs ht hp hreg
+  have hE : 0 ≤ energy a c1 c2 F := by
+    apply Finset.sum_nonneg; intro n _; positivity
+  have hF0 : 0 ≤ F := by linarith
+  have hkey : energy a c1 c2 F * F / V ^ 2 ≤
+      energy a c1 c2 F ^ 3 * F * (q : ℝ) * T / V ^ 6 := by
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+    have := mul_le_mul_of_nonneg_left hreg
+      (show 0 ≤ energy a c1 c2 F * F * V ^ 2 by positivity)
+    nlinarith
+  have hb' := hb x F T V q S a ha hx hF hFx hT hTx hq hqx hV hs ht hp
+  have hC' : 0 ≤ C * Real.log x ^ 2 := by positivity
+  calc (S.card : ℝ) ≤ _ := hb'
+    _ ≤ C * Real.log x ^ 2 * (energy a c1 c2 F ^ 3 * F * (q : ℝ) * T / V ^ 6 +
+          energy a c1 c2 F ^ 3 * F * (q : ℝ) * T / V ^ 6) :=
+        mul_le_mul_of_nonneg_left (by linarith) hC'
+    _ = _ := by ring
 
 /-- Step 3 of the split, the elementary bookkeeping: whichever regime of the pair holds, the
 branch that applies charges the cardinality to a summand of the printed sum, and the summands are
