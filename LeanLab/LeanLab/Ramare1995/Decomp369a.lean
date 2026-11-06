@@ -7,6 +7,7 @@ The two open inputs concern two primes and one prime separately. Neither restate
 AI wrote the Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.Ramare1995.Greedy
+import LeanLab.RamareSaouter2003.Statements
 
 namespace LeanLab.Ramare1995.Decomp369a
 open LeanLab LeanLab.SchnirelmannConstant LeanLab.Ramare1995.Section9
@@ -55,14 +56,33 @@ This is a finite input to the descent, not the six prime conclusion. -/
 theorem finite_goldbach : EvenGoldbachUpTo (2 * 10 ^ 10) := by
   sorry
 
+/-- The published Theorem 3 of Ramaré and Saouter 2003 in its real form gives the bounded
+natural number input. The conversion and the range restriction are PROVED here: the lower
+bound 2 * 10 ^ 10 - 3 = 19999999997 lies above the published threshold 10726905041, and the
+upper bound hu is not needed because Theorem 3 holds for all larger real x. -/
+theorem bounded_prime_interval_of_theorem3
+    (hT3 : ∀ x : ℝ, 10726905041 < x →
+      ∃ p : ℕ, p.Prime ∧ x * (1 - 1 / 28314000) < p ∧ (p : ℝ) ≤ x)
+    (y : ℕ) (hy : 2 * 10 ^ 10 - 3 < y) (hu : y ≤ 4 * 10 ^ 32) :
+    ∃ p : ℕ, p.Prime ∧ p ≤ y ∧ 28314000 * (y - p) < y := by
+  have hbig : 10726905041 < y := by omega
+  exact LeanLab.RamareSaouter2003.rsShortIntervals_of hT3 y hbig
+
 /-- LEAF. Bounded interval input for the greedy argument on Ramaré 1995 p. 704.
 Ramaré and Saouter 2003 Theorem 3 p. 13 supplies this restricted natural number form.
 The display is x times 1 minus 1 divided by 28314000, strictly below a prime at most x.
-Only 2 times 10^10 minus 3 less than y at most 4 times 10^32 is needed here. -/
+Only 2 times 10^10 minus 3 less than y at most 4 times 10^32 is needed here.
+The single missing piece is the cited theorem itself; see PROGRESS.md BLOCKED. -/
 theorem bounded_prime_interval (y : ℕ) (hy : 2 * 10 ^ 10 - 3 < y)
     (hu : y ≤ 4 * 10 ^ 32) :
     ∃ p : ℕ, p.Prime ∧ p ≤ y ∧ 28314000 * (y - p) < y := by
-  sorry
+  have hT3 : ∀ x : ℝ, 10726905041 < x →
+      ∃ p : ℕ, p.Prime ∧ x * (1 - 1 / 28314000) < p ∧ (p : ℝ) ≤ x :=
+    -- CITED. Ramaré and Saouter 2003, Theorem 3, p. 13. The lab proves the bridge
+    -- rsShortIntervals_of and reduces Theorem 3 to cited inputs in Theorem3Smooth.lean
+    -- theorem3_of_chain and Lemma1Rosser.lean theorem3_of_rosser.
+    sorry
+  exact bounded_prime_interval_of_theorem3 hT3 y hy hu
 
 /-- Supply assembly of the exact lower leaf statement.
 CONDITIONAL ON finite_goldbach and bounded_prime_interval. No sorry of its own. -/
