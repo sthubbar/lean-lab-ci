@@ -1,0 +1,20 @@
+{
+  "time": "2026-11-06 10:42:01.370777+00:00",
+  "already_passed_targets": [
+    "LeanLab.BHP1997.DecompC165c"
+  ],
+  "commands": [
+    [
+      "/workspace/.leanlab-tools/elan/toolchains/leanprover--lean4---v4.35.0/bin/lake",
+      "build",
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    [
+      "git",
+      "diff",
+      "--exit-code",
+      "HEAD"
+    ]
+  ],
+  "reason": "All 105 distinct independent requests passed. Retire the legacy duplicate tail after the follow-up pass."
+}

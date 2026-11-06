@@ -1,0 +1,170 @@
+[
+  {
+    "file": "Decomp132.lean",
+    "name": "sieve_data",
+    "line": 98,
+    "mentions": 14
+  },
+  {
+    "file": "Decomp132b.lean",
+    "name": "perron_input",
+    "line": 20,
+    "mentions": 8
+  },
+  {
+    "file": "DecompC165c.lean",
+    "name": "dyadic_mean_value",
+    "line": 67,
+    "mentions": 7
+  },
+  {
+    "file": "Decomp312c.lean",
+    "name": "perron_window_comparison",
+    "line": 159,
+    "mentions": 6
+  },
+  {
+    "file": "Decomp386b.lean",
+    "name": "truncated_perron_window",
+    "line": 38,
+    "mentions": 5
+  },
+  {
+    "file": "Decomp386b.lean",
+    "name": "divisor_polynomial_log_bound",
+    "line": 456,
+    "mentions": 5
+  },
+  {
+    "file": "DecompC165c.lean",
+    "name": "hybrid_mean_square",
+    "line": 38,
+    "mentions": 5
+  },
+  {
+    "file": "Decomp414a.lean",
+    "name": "first_dominant",
+    "line": 109,
+    "mentions": 4
+  },
+  {
+    "file": "DecompC165c.lean",
+    "name": "hybrid_large_values",
+    "line": 45,
+    "mentions": 4
+  },
+  {
+    "file": "Decomp414a.lean",
+    "name": "both_dominant",
+    "line": 54,
+    "mentions": 3
+  },
+  {
+    "file": "Decomp437a.lean",
+    "name": "dominant_square_moment",
+    "line": 18,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165a.lean",
+    "name": "all_character_fourth_moment",
+    "line": 25,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165a.lean",
+    "name": "rademacher_convexity",
+    "line": 31,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165a.lean",
+    "name": "regularized_perron_bound",
+    "line": 1066,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165b.lean",
+    "name": "section2_circle_method",
+    "line": 85,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165b.lean",
+    "name": "section4_lower_sifted_data",
+    "line": 738,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165b.lean",
+    "name": "section4_upper_sifted_data",
+    "line": 762,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165c.lean",
+    "name": "energy_log_bound",
+    "line": 58,
+    "mentions": 3
+  },
+  {
+    "file": "DecompC165d.lean",
+    "name": "lower_short_weight_analytic",
+    "line": 29,
+    "mentions": 3
+  },
+  {
+    "file": "SPLIT_hybrid_mean_square.lean",
+    "name": "mean_square_pointwise",
+    "line": 25,
+    "mentions": 3
+  },
+  {
+    "file": "Decomp312a.lean",
+    "name": "lower_mean_value_supply",
+    "line": 729,
+    "mentions": 2
+  },
+  {
+    "file": "Decomp312b.lean",
+    "name": "upper_mean_value_supply",
+    "line": 28,
+    "mentions": 2
+  },
+  {
+    "file": "Decomp414a.lean",
+    "name": "neither_dominant",
+    "line": 81,
+    "mentions": 2
+  },
+  {
+    "file": "DecompC165dBase312.lean",
+    "name": "upper_short_weight_analytic",
+    "line": 963,
+    "mentions": 2
+  },
+  {
+    "file": "SPLIT_hybrid_large_values.lean",
+    "name": "large_values_second_branch",
+    "line": 24,
+    "mentions": 2
+  },
+  {
+    "file": "SPLIT_hybrid_large_values.lean",
+    "name": "large_values_third_branch",
+    "line": 39,
+    "mentions": 2
+  },
+  {
+    "file": "SPLIT_hybrid_mean_square.lean",
+    "name": "mean_square_qt_dominant",
+    "line": 36,
+    "mentions": 2
+  },
+  {
+    "file": "SPLIT_hybrid_mean_square.lean",
+    "name": "mean_square_F_dominant",
+    "line": 50,
+    "mentions": 2
+  }
+]

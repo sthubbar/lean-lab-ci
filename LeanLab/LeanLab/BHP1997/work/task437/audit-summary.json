@@ -1,0 +1,383 @@
+{
+  "exit": 0,
+  "declarations": 30,
+  "theorems": 29,
+  "clean_theorems": 22,
+  "open_or_dependent": 7,
+  "headers": [
+    {
+      "target": "SPLIT_hybrid_mean_square.lean:mean_square_pointwise",
+      "supply": "Decomp437b.lean:mean_square_pointwise",
+      "identical": true
+    },
+    {
+      "target": "Decomp414a.lean:both_dominant",
+      "supply": "Decomp437a.lean:both_dominant",
+      "identical": true
+    },
+    {
+      "target": "Decomp414a.lean:neither_dominant",
+      "supply": "Decomp437f.lean:neither_dominant",
+      "identical": true
+    },
+    {
+      "target": "Decomp414a.lean:first_dominant",
+      "supply": "Decomp437h.lean:first_dominant",
+      "identical": true
+    },
+    {
+      "target": "Decomp414a.lean:second_dominant",
+      "supply": "Decomp437h.lean:second_dominant",
+      "identical": true
+    },
+    {
+      "target": "DecompC165c.lean:dyadic_mean_value",
+      "supply": "Decomp437g.lean:dyadic_mean_value",
+      "identical": true
+    },
+    {
+      "target": "DecompC165c.lean:section3_mean_values",
+      "supply": "Decomp437g.lean:section3_mean_values",
+      "identical": true
+    }
+  ],
+  "rows": [
+    {
+      "module": "Decomp437a",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437a.dominant_square_moment",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437a",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437a.pair_of_square_bounds",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437a",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437a.triple_of_pair_bound",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437a",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437a.both_dominant",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437b",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437b.mean_square_pointwise",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437c",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437c.dominance_power_eq_max",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437c",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437c.dominant_value_fourth",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437c",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437c.square_sum_of_dyadic_cells",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437c",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437c.square_sum_of_cardinal_bound",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437c",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437c.dominant_dyadic_square_bound",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437d",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437d.energy_log_uniform",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437d",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437d.quadratic_level_count",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437d",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437d.energy_cubic_log_bound",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437e",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437e.dominant_square_moment",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437f",
+      "kind": "def",
+      "name": "LeanLab.BHP1997.Decomp437f.thirdNormPart",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437f",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437f.sum_third_parts",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437f",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437f.nondominant_scale_lt",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437f",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437f.power_saving_with_log",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437f",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437f.neither_small_third",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437f",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437f.neither_large_third",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext",
+        "sorryAx"
+      ],
+      "clean": false
+    },
+    {
+      "module": "Decomp437f",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437f.neither_dominant",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext",
+        "sorryAx"
+      ],
+      "clean": false
+    },
+    {
+      "module": "Decomp437g",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437g.case2_supnorm_obstruction",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437g",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437g.dyadic_mean_value",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext",
+        "sorryAx"
+      ],
+      "clean": false
+    },
+    {
+      "module": "Decomp437g",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437g.section3_mean_values",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext",
+        "sorryAx"
+      ],
+      "clean": false
+    },
+    {
+      "module": "Decomp437h",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437h.first_small_third",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437h",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437h.first_large_third",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext",
+        "sorryAx"
+      ],
+      "clean": false
+    },
+    {
+      "module": "Decomp437h",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437h.first_dominant",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext",
+        "sorryAx"
+      ],
+      "clean": false
+    },
+    {
+      "module": "Decomp437h",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437h.second_dominant",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext",
+        "sorryAx"
+      ],
+      "clean": false
+    },
+    {
+      "module": "Decomp437i",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437i.truncated_power_energy_log",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    },
+    {
+      "module": "Decomp437i",
+      "kind": "theorem",
+      "name": "LeanLab.BHP1997.Decomp437i.power_level_log_bound",
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "clean": true
+    }
+  ]
+}
