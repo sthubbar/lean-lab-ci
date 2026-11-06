@@ -28,10 +28,15 @@ def plan(n):
         t = min(range(n), key=lambda i: (g[i][0], i)); g[t][0] += sum(s for s, _ in m[f]); g[t][1].append(f)
     return m, [sorted(x[1]) for x in g]
 def heartbeat():
+    # lmerge 20261106T2114Z: sample memory every 5 s and print the minimum each minute, so a spike before a runner death shows
+    lo = None; k = 0
     while True:
-        time.sleep(300)
-        a = re.search(r"MemAvailable:\s+(\d+)", open("/proc/meminfo").read()); d = os.statvfs("/")
-        say(f"NIGHTLY HEARTBEAT mem_free_mb {int(a.group(1)) >> 10 if a else -1} disk_free_gb {d.f_bavail * d.f_frsize >> 30} load {os.getloadavg()[0]:.1f}")
+        time.sleep(5); k += 1
+        a = re.search(r"MemAvailable:\s+(\d+)", open("/proc/meminfo").read()); v = int(a.group(1)) >> 10 if a else -1
+        lo = v if lo is None or v < lo else lo
+        if k % 12: continue
+        d = os.statvfs("/")
+        say(f"NIGHTLY HEARTBEAT mem_free_mb {v} min_1m {lo} disk_free_gb {d.f_bavail * d.f_frsize >> 30} load {os.getloadavg()[0]:.1f}"); lo = None
 def lake(mods, env=None):
     # lake build takes the modules of one folder; no line is hidden except the per-module success lines
     p = subprocess.Popen(["lake", "build"] + mods, cwd="LeanLab", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace", env=env)
