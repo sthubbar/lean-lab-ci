@@ -41,7 +41,17 @@ supplies the pointwise hypothesis of step 3. -/
 theorem log_power_dominates357 (C δ : ℝ) (hC : 0 < C) (hδ : 0 < δ)
     (p : ℕ) (hp : 0 < p) :
     ∃ N0 : ℕ, ∀ N : ℕ, N0 < N → C ≤ δ * Real.log N ^ p := by
-  sorry
+  have hlog : Filter.Tendsto (fun N : ℕ => Real.log N) Filter.atTop Filter.atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hpow : Filter.Tendsto (fun x : ℝ => x ^ p) Filter.atTop Filter.atTop :=
+    Filter.tendsto_pow_atTop (by omega)
+  have hmain : Filter.Tendsto (fun N : ℕ => Real.log N ^ p) Filter.atTop Filter.atTop :=
+    hpow.comp hlog
+  obtain ⟨N0, hN0⟩ := Filter.eventually_atTop.1 (hmain.eventually_ge_atTop (C / δ))
+  refine ⟨N0, fun N hN => ?_⟩
+  have h1 : C / δ ≤ Real.log N ^ p := hN0 N (le_of_lt hN)
+  rw [div_le_iff₀ hδ] at h1
+  linarith
 
 /-- LEAF. Step 3 of 3: the algebraic bookkeeping.  At a point N at least three,
 a bound of the constant by a suitable positive multiple of the logarithm to the
@@ -54,7 +64,23 @@ theorem major_absorption_algebra357 {k : ℕ} (hk : 3 ≤ k) (N : ℕ) (hN : 3 �
     {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
     (h : C ≤ ε / 2 * Real.log N ^ (k - 1) / Real.log 2 ^ (k - 2)) :
     C * (N : ℝ) / Real.log N ≤ ε / 2 * scale111 k N := by
-  sorry
+  have hN1 : (1 : ℝ) < (N : ℝ) := by
+    have : (1 : ℕ) < N := by omega
+    exact_mod_cast this
+  have hL : 0 < Real.log N := Real.log_pos hN1
+  have hNpos : (0 : ℝ) < (N : ℝ) := by linarith
+  have hkey : C / Real.log N ≤ ε / 2 * (Real.log N / Real.log 2) ^ (k - 2) := by
+    rw [div_le_iff₀ hL]
+    calc C ≤ ε / 2 * Real.log N ^ (k - 1) / Real.log 2 ^ (k - 2) := h
+      _ = ε / 2 * (Real.log N / Real.log 2) ^ (k - 2) * Real.log N := by
+          have hk2 : k - 1 = (k - 2) + 1 := by omega
+          rw [hk2, pow_succ, div_pow]
+          ring
+  have hmul := mul_le_mul_of_nonneg_right hkey hNpos.le
+  unfold scale111
+  calc C * (N : ℝ) / Real.log N = C / Real.log N * (N : ℝ) := by ring
+    _ ≤ ε / 2 * (Real.log N / Real.log 2) ^ (k - 2) * (N : ℝ) := hmul
+    _ = ε / 2 * ((N : ℝ) * (Real.log N / Real.log 2) ^ (k - 2)) := by ring
 
 /-- Assembly of `major_to_truncated357` from the three leaves above: take the
 constant and the threshold of step 1, feed the constant into the growth of the
