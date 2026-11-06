@@ -1,13 +1,4 @@
 /-
-DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on major_error_remainder357.
-Reason: for k at least 3 the term C N over log N is below epsilon over 2 times scale, so
-major_error_remainder357 is the parent relabelled. Its two other leaves are real analysis.
-The parameter tau equal to N to the 1/7 in majorArcs280 is correct: pages 165 and 166 of the
-original scan print it. The translation P0093.txt misreads it as N to the 1/2.
-Live route: major_expansion_remainder376 in Decomp376d, and its re-cut in SPLIT1622_major.
-Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
--/
-/-
 Split of `major_to_truncated357` into three steps.  The target statement is
 kept exactly as it stands in `Decomp357b`; `major_to_truncated357_split` below
 states it character for character and derives it from the three OPEN leaves.
@@ -50,17 +41,20 @@ supplies the pointwise hypothesis of step 3. -/
 theorem log_power_dominates357 (C δ : ℝ) (hC : 0 < C) (hδ : 0 < δ)
     (p : ℕ) (hp : 0 < p) :
     ∃ N0 : ℕ, ∀ N : ℕ, N0 < N → C ≤ δ * Real.log N ^ p := by
-  have hlog : Filter.Tendsto (fun N : ℕ => Real.log N) Filter.atTop Filter.atTop :=
-    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
-  have hpow : Filter.Tendsto (fun x : ℝ => x ^ p) Filter.atTop Filter.atTop :=
-    Filter.tendsto_pow_atTop (by omega)
-  have hmain : Filter.Tendsto (fun N : ℕ => Real.log N ^ p) Filter.atTop Filter.atTop :=
-    hpow.comp hlog
-  obtain ⟨N0, hN0⟩ := Filter.eventually_atTop.1 (hmain.eventually_ge_atTop (C / δ))
-  refine ⟨N0, fun N hN => ?_⟩
-  have h1 : C / δ ≤ Real.log N ^ p := hN0 N (le_of_lt hN)
-  rw [div_le_iff₀ hδ] at h1
-  linarith
+  have _ := hC
+  have H_nat_cast : Filter.Tendsto (fun N : ℕ => (N : ℝ)) Filter.atTop Filter.atTop := by
+    apply Filter.tendsto_atTop_atTop_of_monotone
+    · intro a b hab; exact Nat.cast_le.mpr hab
+    · intro y; use ⌈y⌉₊; exact Nat.le_ceil y
+  have H_log : Filter.Tendsto (fun N : ℕ => Real.log N) Filter.atTop Filter.atTop :=
+    Filter.Tendsto.comp Real.tendsto_log_atTop H_nat_cast
+  have H_pow : Filter.Tendsto (fun x : ℝ => x ^ p) Filter.atTop Filter.atTop := Filter.tendsto_pow_atTop (ne_of_gt hp)
+  have H_log_pow : Filter.Tendsto (fun N : ℕ => Real.log N ^ p) Filter.atTop Filter.atTop :=
+    Filter.Tendsto.comp H_pow H_log
+  have H_mul : Filter.Tendsto (fun N : ℕ => δ * Real.log N ^ p) Filter.atTop Filter.atTop :=
+    Filter.Tendsto.const_mul_atTop hδ H_log_pow
+  obtain ⟨N0, hN0⟩ := Filter.tendsto_atTop_atTop.mp H_mul C
+  exact ⟨N0, fun N hN => hN0 N (le_of_lt hN)⟩
 
 /-- LEAF. Step 3 of 3: the algebraic bookkeeping.  At a point N at least three,
 a bound of the constant by a suitable positive multiple of the logarithm to the
@@ -73,23 +67,34 @@ theorem major_absorption_algebra357 {k : ℕ} (hk : 3 ≤ k) (N : ℕ) (hN : 3 �
     {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
     (h : C ≤ ε / 2 * Real.log N ^ (k - 1) / Real.log 2 ^ (k - 2)) :
     C * (N : ℝ) / Real.log N ≤ ε / 2 * scale111 k N := by
-  have hN1 : (1 : ℝ) < (N : ℝ) := by
-    have : (1 : ℕ) < N := by omega
-    exact_mod_cast this
-  have hL : 0 < Real.log N := Real.log_pos hN1
-  have hNpos : (0 : ℝ) < (N : ℝ) := by linarith
-  have hkey : C / Real.log N ≤ ε / 2 * (Real.log N / Real.log 2) ^ (k - 2) := by
-    rw [div_le_iff₀ hL]
-    calc C ≤ ε / 2 * Real.log N ^ (k - 1) / Real.log 2 ^ (k - 2) := h
-      _ = ε / 2 * (Real.log N / Real.log 2) ^ (k - 2) * Real.log N := by
-          have hk2 : k - 1 = (k - 2) + 1 := by omega
-          rw [hk2, pow_succ, div_pow]
-          ring
-  have hmul := mul_le_mul_of_nonneg_right hkey hNpos.le
-  unfold scale111
-  calc C * (N : ℝ) / Real.log N = C / Real.log N * (N : ℝ) := by ring
-    _ ≤ ε / 2 * (Real.log N / Real.log 2) ^ (k - 2) * (N : ℝ) := hmul
-    _ = ε / 2 * ((N : ℝ) * (Real.log N / Real.log 2) ^ (k - 2)) := by ring
+  have _ := hC
+  have _ := hε
+  dsimp [scale111]
+  have h_N_pos : (1 : ℝ) < (N : ℝ) := by exact_mod_cast lt_of_lt_of_le (by norm_num) hN
+  have hlogN : 0 < Real.log N := Real.log_pos h_N_pos
+  have H : C * (N : ℝ) / Real.log N ≤ (ε / 2 * Real.log N ^ (k - 1) / Real.log 2 ^ (k - 2)) * (N : ℝ) / Real.log N := by
+    apply div_le_div_of_nonneg_right
+    · apply mul_le_mul_of_nonneg_right h
+      exact Nat.cast_nonneg N
+    · exact le_of_lt hlogN
+  apply le_trans H
+  have H_eq : (ε / 2 * Real.log N ^ (k - 1) / Real.log 2 ^ (k - 2)) * (N : ℝ) / Real.log N =
+      ε / 2 * ((N : ℝ) * (Real.log N / Real.log 2) ^ (k - 2)) := by
+    have h_pow_eq : Real.log N ^ (k - 1) = Real.log N ^ (k - 2) * Real.log N := by
+      have h_k : k - 1 = (k - 2) + 1 := by omega
+      rw [h_k, pow_add, pow_one]
+    rw [h_pow_eq]
+    calc (ε / 2 * (Real.log N ^ (k - 2) * Real.log N) / Real.log 2 ^ (k - 2)) * (N : ℝ) / Real.log N
+      _ = (ε / 2 * (Real.log N ^ (k - 2) / Real.log 2 ^ (k - 2)) * (Real.log N * (N : ℝ))) / Real.log N := by ring
+      _ = ε / 2 * (Real.log N ^ (k - 2) / Real.log 2 ^ (k - 2)) * (N : ℝ) := by
+        rw [mul_div_assoc]
+        have h_div : (Real.log N * (N : ℝ)) / Real.log N = (N : ℝ) := by
+          rw [mul_comm, mul_div_cancel_right₀ _ (ne_of_gt hlogN)]
+        rw [h_div]
+      _ = ε / 2 * ((N : ℝ) * (Real.log N / Real.log 2) ^ (k - 2)) := by
+        rw [div_pow]
+        ring
+  rw [H_eq]
 
 /-- Assembly of `major_to_truncated357` from the three leaves above: take the
 constant and the threshold of step 1, feed the constant into the growth of the
