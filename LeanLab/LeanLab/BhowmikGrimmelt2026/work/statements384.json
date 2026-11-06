@@ -1,0 +1,164 @@
+[
+  [
+    "convolution_defect_le384",
+    "If zero is at most g k at most f k at most B for every k through N, the ordered f convolution minus the ordered g convolution is at most twice B times the sum of f minus g through N",
+    "Page 4, derived finite sum helper",
+    "N zero, f constant one, g constant zero and bound one"
+  ],
+  [
+    "primeR2_384",
+    "The ordered prime representation count weighted by the product of the two prime logarithms",
+    "Page 4 before display 2.1",
+    "N four has value log two squared"
+  ],
+  [
+    "primeR2_eq_convolution384",
+    "The weighted prime count equals the convolution of the prime part of von Mangoldt",
+    "Page 4 before display 2.1",
+    "N four"
+  ],
+  [
+    "primeR2_zero_of_not_goldbach384",
+    "The weighted prime count is zero when N is not a sum of two primes",
+    "Pages 4 and 9, derived interpretation",
+    "N two is not a sum of two primes"
+  ],
+  [
+    "nonprime_mass_eq384",
+    "The sum of von Mangoldt over the nonprime inputs through N equals psi N minus theta N",
+    "Page 4, derived identity from Mathlib Chebyshev",
+    "N six includes the nonzero contribution at four"
+  ],
+  [
+    "r2_sub_primeR2_le384",
+    "For N at least one, the omitted higher prime power contribution is at most twice log N times the difference between psi N and theta N",
+    "Page 4, derived bound",
+    "N six has error twice log two squared"
+  ],
+  [
+    "primeR2_bounds384",
+    "The weighted prime count is nonnegative and at most r2 N",
+    "Page 4, derived comparison",
+    "N six gives strict upper inequality"
+  ],
+  [
+    "primeR2_pos_iff384",
+    "The weighted prime count is positive exactly when N is a sum of two primes",
+    "Pages 4 and 9, derived interpretation",
+    "N four equals two plus two"
+  ],
+  [
+    "r2_sub_primeR2_sqrt_log_sq384",
+    "For N at least one, the omitted contribution is at most four times square root N times log N squared",
+    "Page 4, derived bound from Mathlib Chebyshev",
+    "N six has positive omitted contribution"
+  ],
+  [
+    "r2_exception_sqrt_log_sq384",
+    "For N at least one with no prime pair, r2 N is at most four times square root N times log N squared",
+    "Pages 4 and 13, derived implication",
+    "N two satisfies every hypothesis"
+  ],
+  [
+    "r2_sub_primeR2_isBigO384",
+    "The omitted contribution is big O of square root N times log N squared along the natural numbers",
+    "Page 4, derived asymptotic bound",
+    "The fixed functions defined in the statement, with positive error at N six"
+  ],
+  [
+    "prime_power_error_sqrt_log384",
+    "There is a positive uniform constant bounding the omitted contribution by square root N times log N for every N at least one",
+    "Page 4, derived stronger bound from Chebyshev.psi_sub_theta_le_mul_sqrt",
+    "N six with the positive constant supplied by the theorem"
+  ],
+  [
+    "sqrt_mul_log_sq_isLittleO384",
+    "Square root N times log N squared is little o of N along the natural numbers",
+    "Page 4, derived growth helper",
+    "The fixed natural input sequence"
+  ],
+  [
+    "r2_sub_primeR2_isLittleO384",
+    "The omitted higher prime power contribution is little o of N",
+    "Page 4, derived error estimate",
+    "The actual r2 and primeR2 sequences, with positive error at N six"
+  ],
+  [
+    "normalized_prime_power_error384",
+    "For any normalizing function eventually at least one, the omitted contribution divided by N times that function tends to zero",
+    "Page 4 and page 7 Conjecture 2.1, derived normalization helper",
+    "The normalizing function constant one"
+  ],
+  [
+    "normalized_prime_count_limit_iff384",
+    "The normalized r2 count tends to any fixed real L exactly when the normalized weighted prime count does, under the explicit eventual lower bound for the normalizer",
+    "Page 4 and page 7 Conjecture 2.1, derived equivalence",
+    "Normalizer constant one and L one. The equivalence asserts neither limit"
+  ],
+  [
+    "prime_power_error_three_halves384",
+    "For N at least sixteen, the omitted contribution is at most three halves times square root N times log N cubed, with a real exponent one half",
+    "Page 4, derived bound. The survey prints no such constant",
+    "N sixteen"
+  ],
+  [
+    "log_le_quarter_power384",
+    "For N at least two to the twenty fourth, log N is at most seventeen over sixty four times N to the real power one quarter",
+    "Pages 4 and 13, derived growth helper",
+    "N two to the twenty fourth"
+  ],
+  [
+    "prime_power_budget_le_third384",
+    "For N at least two to the twenty fourth, four times square root N times log N squared is at most N divided by three",
+    "Pages 4 and 13, derived numerical inequality",
+    "N two to the twenty fourth"
+  ],
+  [
+    "prime_power_error_le_third384",
+    "For N at least two to the twenty fourth, the omitted higher prime power contribution is at most N divided by three",
+    "Pages 4 and 13, derived error bound",
+    "N two to the twenty fourth"
+  ],
+  [
+    "representation_error_comparison384",
+    "For N at least two to the twenty fourth, N times the difference between singular N and one third is at most the absolute representation error plus the weighted prime count",
+    "Page 13, derived comparison retaining the omitted contribution",
+    "N two to the twenty fourth. No exception or singular lower bound is assumed"
+  ],
+  [
+    "sqrt_budget_not_polylog384",
+    "No real constant and starting index make four times square root N times log N squared at most that constant times log N cubed for all later natural N",
+    "Page 4, a derived comparison test. This is not a claim about r2 or a paper error",
+    "Constant one and starting index two have the explicit counterexample N two to the sixty fourth"
+  ],
+  [
+    "primeCount384",
+    "The number of ordered representations of N as a sum of two primes, without logarithmic weights",
+    "Page 2, the unnumbered definition of r2 prime",
+    "N four has count one and N five has two ordered prime pairs"
+  ],
+  [
+    "primeCount_pos_iff384",
+    "The unweighted prime count is positive exactly when N is a sum of two primes",
+    "Page 2, the sentence after the definition",
+    "N four is two plus two"
+  ],
+  [
+    "primeCount_zero_iff384",
+    "The unweighted prime count is zero exactly when N is not a sum of two primes",
+    "Pages 1 and 2, exceptional set and prime count definitions",
+    "N two has count zero and is not a sum of two primes"
+  ],
+  [
+    "primeR2_eq_sum_primes384",
+    "The weighted prime count is the sum of logarithm products over exactly the ordered prime pairs counted by primeCount",
+    "Pages 2 and 4, prime count and logarithmic weights",
+    "N six has the single prime pair three plus three"
+  ],
+  [
+    "primeR2_count_bounds384",
+    "For N at least one, log two squared times the unweighted count is at most the weighted count, which is at most log N squared times the unweighted count",
+    "Pages 2 and 4, derived finite weight comparisons",
+    "N six has count one and positive weight log three squared"
+  ]
+]

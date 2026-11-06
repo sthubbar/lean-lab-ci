@@ -1,0 +1,5 @@
+{
+  "target": "DecompJ1153.inv_im_sum_bound",
+  "replacement": "Decomp388a.inv_im_sum_bound",
+  "header_character_for_character": true
+}

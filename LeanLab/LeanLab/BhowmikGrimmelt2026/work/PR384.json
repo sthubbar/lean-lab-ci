@@ -1,0 +1,6 @@
+{
+  "title": "CODEX task384: BhowmikGrimmelt2026",
+  "head": "codex/task384",
+  "base": "main",
+  "body": "The sealed singular lower bound is already refuted at N zero by the existing clean theorem. The second leaf uses natural exponent zero. Page 13 supplies no written proof of the resulting logarithm only bound. DecompJ1034 stays byte identical to main.\n\nThis change proves the omitted higher prime power error bounds from page 4. They include a uniform square root times logarithm bound, little o of N, and a budget of N divided by three for N at least two to the twenty fourth. It also defines the ordered unweighted prime count from page 2 and proves its finite logarithmic weight comparisons. The negative budget test concerns the two upper bounds and asserts no paper error.\n\nValidation: 25 PROVED theorems and two numeric definitions with committed builds and complete clean axiom reports. All 77 original active modules and ten historical source targets built. All 27 twins are MATCH with concrete instances. No cited analytic input is added. Sorry delta is zero. Neither Hardy Littlewood limit is asserted.\n\n```text\nRESULT PASS  CODEX-task384  folder BhowmikGrimmelt2026  base 838ec2675\nSEAL PASS\n```\n\nZero FAIL lines and zero WARN lines.\n\nAI wrote the Lean code. Goldbach is open.\n"
+}

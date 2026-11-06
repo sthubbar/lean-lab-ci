@@ -1,0 +1,569 @@
+[
+  {
+    "name": "LeanLab.Perelli1996.Decomp400a.R_eq_encA",
+    "kind": "theorem",
+    "header": "theorem R_eq_encA (m : \u2115) : R m = EncA.R m ",
+    "source_comment": "/-- Page 477. Both encodings use the same von Mangoldt convolution. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400a.delta_eq_err",
+    "kind": "theorem",
+    "header": "theorem delta_eq_err (F : \u2124[X]) (n : \u2115) (hn : 0 \u2264 Fv F n) :\n    Delta F n = EncA.err F n ",
+    "source_comment": "/-- Page 478. The two errors agree whenever the polynomial value is nonnegative. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400a.eventually_delta_eq_err",
+    "kind": "theorem",
+    "header": "theorem eventually_delta_eq_err (F : \u2124[X]) (hF : Admissible F) :\n    \u2203 N\u2080 : \u211d, 3 \u2264 N\u2080 \u2227 \u2200 N H : \u211d, N\u2080 \u2264 N \u2192 0 \u2264 H \u2192\n      H \u2264 N ^ (1 / (F.natDegree : \u211d)) \u2192\n      \u2200 n \u2208 win F N H, Delta F n = EncA.err F n ",
+    "source_comment": "/-- Page 480 before equation 1. For large N the errors agree on the whole window. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400a.theorem1_encA_of",
+    "kind": "theorem",
+    "header": "theorem theorem1_encA_of (h : Theorem1) (F : \u2124[X]) : EncA.Theorem1 F ",
+    "source_comment": "/-- Page 478 Theorem 1. The existing current input implies encoding A's exact statement.\nCONDITIONAL ON the explicit current Theorem 1 input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400a.theorem1_of_encA",
+    "kind": "theorem",
+    "header": "theorem theorem1_of_encA (h : \u2200 F : \u2124[X], EncA.Theorem1 F) : Theorem1 ",
+    "source_comment": "/-- Page 478 Theorem 1. All encoding A inputs imply the exact current statement.\nCONDITIONAL ON the explicit family of encoding A inputs. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400a.theorem1",
+    "kind": "theorem",
+    "header": "theorem theorem1 (F : \u2124[X]) : EncA.Theorem1 F ",
+    "source_comment": "/-- Page 478 Theorem 1. This bridge uses the existing decomposition.\nCONDITIONAL ON its named analytic leaves. The assembly adds no sorry. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400a.corollary1b",
+    "kind": "theorem",
+    "header": "theorem corollary1b (F : \u2124[X]) : EncA.Corollary1b F ",
+    "source_comment": "/-- Page 478 Corollary 1. The existing proof applies through the Theorem 1 bridge.\nCONDITIONAL ON the named analytic leaves of Decomp88. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400b.rho_eq_encA",
+    "kind": "theorem",
+    "header": "theorem rho_eq_encA (F : \u2124[X]) (d : \u2115) :\n    (Roots.rootResidues F d).card = EncA.rhoF F d ",
+    "source_comment": "/-- Page 478. The root representatives in both encodings are identical. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400b.averageConstant_eq",
+    "kind": "theorem",
+    "header": "theorem averageConstant_eq (F : \u2124[X]) : Section3.averageConstant F = EncA.CF F ",
+    "source_comment": "/-- Page 479. Both encodings give the same constant C of F. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400b.theorem2_encA_of",
+    "kind": "theorem",
+    "header": "theorem theorem2_encA_of (F : \u2124[X]) (h : Section3.Theorem2 F) : EncA.Theorem2 F ",
+    "source_comment": "/-- Page 479 Theorem 2. The current statement implies encoding A's exact statement.\nCONDITIONAL ON the explicit current Theorem 2 input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400b.theorem2_of_encA",
+    "kind": "theorem",
+    "header": "theorem theorem2_of_encA (F : \u2124[X]) (h : EncA.Theorem2 F) : Section3.Theorem2 F ",
+    "source_comment": "/-- Page 479 Theorem 2. Encoding A implies the exact current statement.\nCONDITIONAL ON the explicit encoding A input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400b.theorem2",
+    "kind": "theorem",
+    "header": "theorem theorem2 (F : \u2124[X]) : EncA.Theorem2 F ",
+    "source_comment": "/-- Page 479 Theorem 2. Use the existing prime mean decomposition through the bridge.\nCONDITIONAL ON the principal and singular tail leaves of Decomp400e,\nthe existing character remainder input and the higher degree Weyl input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400b.corollary2",
+    "kind": "theorem",
+    "header": "theorem corollary2 (F : \u2124[X]) : EncA.Corollary2 F ",
+    "source_comment": "/-- Page 479 Corollary 2. Use its existing proof and the bridged Theorem 2.\nCONDITIONAL ON the principal and singular tail leaves of Decomp400e,\nthe existing character remainder input and the higher degree Weyl input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400c.ramanujanSum_squarefree",
+    "kind": "theorem",
+    "header": "theorem ramanujanSum_squarefree (q m : \u2115) (hq : Squarefree q) :\n    ramanujanSum q m = ((Nat.gcd q m).totient : \u2102) *\n      (ArithmeticFunction.moebius (q / Nat.gcd q m) : \u2102) ",
+    "source_comment": "/-- Page 481. On squarefree moduli the Ramanujan sum factors at the common divisor. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400c.ramanujanSum_squarefree_formula",
+    "kind": "theorem",
+    "header": "theorem ramanujanSum_squarefree_formula (q m : \u2115) (hq : Squarefree q) :\n    ramanujanSum q m = ((q.totient : \u211d) *\n      (ArithmeticFunction.moebius (q / Nat.gcd q m) : \u211d) /\n        (q / Nat.gcd q m).totient : \u2102) ",
+    "source_comment": "/-- Page 481. The printed totient and Mobius formula holds on every squarefree modulus. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400c.moebius_sq_mul_ramanujanSum",
+    "kind": "theorem",
+    "header": "theorem moebius_sq_mul_ramanujanSum (q m : \u2115) :\n    (ArithmeticFunction.moebius q : \u2102) ^ 2 * ramanujanSum q m =\n      (ArithmeticFunction.moebius q : \u2102) ^ 2 *\n        ((q.totient : \u211d) * (ArithmeticFunction.moebius (q / Nat.gcd q m) : \u211d) /\n          (q / Nat.gcd q m).totient : \u2102) ",
+    "source_comment": "/-- Page 481 equation 3. The printed formula holds after the Mobius squared coefficient,\nfor every modulus, including nonsquarefree moduli. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400d.polynomialKernel_eq",
+    "kind": "theorem",
+    "header": "theorem polynomialKernel_eq (F : \u2124[X]) (N H \u03b1 : \u211d) :\n    Section2.polynomialKernel F N H \u03b1 = EncA.Kexp F N H \u03b1 ",
+    "source_comment": "/-- Page 480. Both encodings use the same polynomial exponential kernel. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400d.norm_polynomialKernel_le",
+    "kind": "theorem",
+    "header": "theorem norm_polynomialKernel_le (F : \u2124[X]) (N H \u03b1 : \u211d)\n    (hN : 0 \u2264 N) (hH : 0 \u2264 H) :\n    \u2016Section2.polynomialKernel F N H \u03b1\u2016 \u2264 H + 1 ",
+    "source_comment": "/-- Page 480. The kernel norm is bounded by H plus one on a nonnegative window. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400d.weylLemma_encA_of",
+    "kind": "theorem",
+    "header": "theorem weylLemma_encA_of (F : \u2124[X]) (hW : Section2.WeylLemma F) : EncA.WeylLemma F ",
+    "source_comment": "/-- Page 482 named Lemma. The large N Weyl input implies encoding A's exact statement.\nThe bounded initial range uses only the trivial kernel bound.\nCONDITIONAL ON the explicit current Weyl input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400d.weylLemma",
+    "kind": "theorem",
+    "header": "theorem weylLemma (F : \u2124[X]) : EncA.WeylLemma F ",
+    "source_comment": "/-- Page 482 named Lemma. Encoding A uses the existing Weyl decomposition.\nCONDITIONAL ON the named higher degree analytic leaf. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400d.weylLemma_of_natDegree_one",
+    "kind": "theorem",
+    "header": "theorem weylLemma_of_natDegree_one (F : \u2124[X]) (hdeg : F.natDegree = 1) :\n    EncA.WeylLemma F ",
+    "source_comment": "/-- Page 482 named Lemma. Encoding A's complete degree one case has no cited input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.meanMajorArcs",
+    "kind": "def",
+    "header": "def meanMajorArcs (F : \u2124[X]) (N H B : \u211d) : Set \u211d ",
+    "source_comment": "/-- Page 486 before equation 26. Periodic enclosing arcs of radius one over q Q.\nThese contain the printed Farey cells and are the domains of the remainder mass. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": []
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.majorPrimeMean",
+    "kind": "def",
+    "header": "def majorPrimeMean (F : \u2124[X]) (M : \u2115) (N H B : \u211d) : \u211d ",
+    "source_comment": "/-- Page 486 equation 26. Real part of the major arc prime mean integral. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": []
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.truncatedWeightedMean",
+    "kind": "def",
+    "header": "def truncatedWeightedMean (F : \u2124[X]) (N H B : \u211d) : \u211d ",
+    "source_comment": "/-- Pages 486 and 487 equations 27 and 28. The truncated singular mean.\nThe Ramanujan sum at a negative integer equals its value at that integer's absolute value.\nThe cutoff hypotheses in the leaves ensure nonnegative polynomial values. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": []
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.leaf_minor_mean",
+    "kind": "theorem",
+    "header": "theorem leaf_minor_mean (F : \u2124[X]) (hF : Admissible F)\n    (hW : Section2.WeylLemma F) (A \u03b5 : \u211d) (hA : 0 < A) (h\u03b5 : 0 < \u03b5) :\n    \u2203 B\u2080 : \u211d, 0 < B\u2080 \u2227 \u2200 B : \u211d, B\u2080 \u2264 B \u2192 \u2200 c : \u211d, 0 < c \u2192\n      \u2203 C N\u2080 : \u211d, 0 < C \u2227 3 \u2264 N\u2080 \u2227 \u2200 N H : \u211d, N\u2080 \u2264 N \u2192\n      N ^ (1 / (6 * (F.natDegree : \u211d)) + \u03b5) \u2264 H \u2192\n      H \u2264 N ^ (1 / (F.natDegree : \u211d) - \u03b5) \u2192\n      (\u2200 n \u2208 win F N H, 0 \u2264 Fv F n \u2227 (Fv F n).toNat \u2264 \u230ac * N\u230b\u208a) \u2192\n      |(\u2211 n \u2208 win F N H, R (Fv F n).toNat) -\n        majorPrimeMean F \u230ac * N\u230b\u208a N H B| \u2264 C * H * N * Real.log N ^ (-A) ",
+    "source_comment": "/-- LEAF. Page 486 equation 26. Parseval and the secondary Weyl decay discard the minor arcs.\nThis is only the comparison with the major integral, before the character expansion.\nThe period from zero to one is the periodic form of the printed shifted period. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.leaf_principal_mean",
+    "kind": "theorem",
+    "header": "theorem leaf_principal_mean (F : \u2124[X]) (hF : Admissible F)\n    (A \u03b5 B c : \u211d) (hA : 0 < A) (h\u03b5 : 0 < \u03b5) (hB : 0 < B) (hc : 0 < c) :\n    \u2203 C N\u2080 : \u211d, 0 < C \u2227 3 \u2264 N\u2080 \u2227 \u2200 N H : \u211d, N\u2080 \u2264 N \u2192\n      N ^ (1 / (6 * (F.natDegree : \u211d)) + \u03b5) \u2264 H \u2192\n      H \u2264 N ^ (1 / (F.natDegree : \u211d) - \u03b5) \u2192\n      (\u2200 n \u2208 win F N H, 0 \u2264 Fv F n \u2227 (Fv F n).toNat \u2264 \u230ac * N\u230b\u208a) \u2192\n      |majorPrimeMean F \u230ac * N\u230b\u208a N H B - truncatedWeightedMean F N H B| \u2264\n        C * H * (remainderMass F c N H B +\n          Real.sqrt (N * Real.log N * remainderMass F c N H B)) +\n        C * H * N * Real.log N ^ (-A) ",
+    "source_comment": "/-- LEAF. Page 486 equation 27. Insert the principal kernel and keep the remainder mass.\nCauchy Schwarz gives the square root term. The enclosing arc variant includes\nthe principal kernel tail correction at the Farey cell endpoints.\nThis leaf does not discard the minor arcs\nor replace the finite Ramanujan sum by the full singular series. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.leaf_singular_tail",
+    "kind": "theorem",
+    "header": "theorem leaf_singular_tail (F : \u2124[X]) (hF : Admissible F)\n    (A \u03b5 : \u211d) (hA : 0 < A) (h\u03b5 : 0 < \u03b5) :\n    \u2203 B\u2080 : \u211d, 0 < B\u2080 \u2227 \u2200 B : \u211d, B\u2080 \u2264 B \u2192\n      \u2203 C N\u2080 : \u211d, 0 < C \u2227 3 \u2264 N\u2080 \u2227 \u2200 N H : \u211d, N\u2080 \u2264 N \u2192\n      N ^ (1 / (6 * (F.natDegree : \u211d)) + \u03b5) \u2264 H \u2192\n      H \u2264 N ^ (1 / (F.natDegree : \u211d) - \u03b5) \u2192\n      |truncatedWeightedMean F N H B -\n        \u2211 n \u2208 win F N H, (Fv F n : \u211d) * Sing (Fv F n).toNat| \u2264\n          C * H * N * Real.log N ^ (-A) ",
+    "source_comment": "/-- LEAF. Page 487 equation 28, by the tail argument of page 481 equations 3 and 4.\nOnly the finite singular series is replaced by the full singular series here. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.leaf_weighted_mean",
+    "kind": "theorem",
+    "header": "theorem leaf_weighted_mean (F : \u2124[X]) (hF : Admissible F)\n    (A \u03b5 : \u211d) (hA : 0 < A) (h\u03b5 : 0 < \u03b5) :\n    \u2203 B c C N\u2080 : \u211d, 0 < B \u2227 0 < c \u2227 0 < C \u2227 3 \u2264 N\u2080 \u2227\n      \u2200 N H : \u211d, N\u2080 \u2264 N \u2192\n      N ^ (1 / (6 * (F.natDegree : \u211d)) + \u03b5) \u2264 H \u2192\n      H \u2264 N ^ (1 / (F.natDegree : \u211d) - \u03b5) \u2192\n      |(\u2211 n \u2208 win F N H, R (Fv F n).toNat) -\n        \u2211 n \u2208 win F N H, (Fv F n : \u211d) * Sing (Fv F n).toNat| \u2264\n        C * H * (remainderMass F c N H B +\n          Real.sqrt (N * Real.log N * remainderMass F c N H B)) +\n        C * H * N * Real.log N ^ (-A) ",
+    "source_comment": "/-- Pages 486 and 487 equations 26 through 28. The exact existing weighted mean target.\nCONDITIONAL ON the three smaller leaves and the existing Weyl input.\nThe assembly has no sorry of its own. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Decomp400e.leaf_prime_mean_estimate",
+    "kind": "theorem",
+    "header": "theorem leaf_prime_mean_estimate (F : \u2124[X]) (hF : Admissible F) :\n    \u2200 A \u03b5 : \u211d, 0 < A \u2192 0 < \u03b5 \u2192 \u2203 C N\u2080 : \u211d,\n      \u2200 N H : \u211d, N\u2080 \u2264 N \u2192 N ^ (1 / (6 * (F.natDegree : \u211d)) + \u03b5) \u2264 H \u2192\n        H \u2264 N ^ (1 / (F.natDegree : \u211d) - \u03b5) \u2192\n        |(\u2211 n \u2208 win F N H, R (Fv F n).toNat) -\n          (F.leadingCoeff : \u211d) * N * \u2211 n \u2208 win F N H, Sing (Fv F n).toNat| \u2264\n            C * H * N * Real.log N ^ (-A) ",
+    "source_comment": "/-- Pages 487 and 489 equations 30, 32 and 37. Reuse the existing error absorption\nwith the newly split weighted mean. CONDITIONAL ON its OPEN leaves,\nthe existing character remainder input and the higher degree Weyl input. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "enclosing rational arcs and zero to one period",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Ramanujan400.ramanujanSum_prime_power_formula",
+    "kind": "theorem",
+    "header": "theorem ramanujanSum_prime_power_formula (p e m : \u2115) (hp : p.Prime) :\n    ramanujanSum (p ^ (e + 1)) m =\n      ((p ^ (e + 1)).totient : \u2102) *\n        (ArithmeticFunction.moebius (p ^ (e + 1) / Nat.gcd (p ^ (e + 1)) m) : \u2102) /\n        ((p ^ (e + 1) / Nat.gcd (p ^ (e + 1)) m).totient : \u2102) ",
+    "source_comment": "/-- Page 481. The displayed totient and Mobius formula at a positive prime power. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Ramanujan400.ramanujanSum_formula",
+    "kind": "theorem",
+    "header": "theorem ramanujanSum_formula (q m : \u2115) (hq : 0 < q) :\n    ramanujanSum q m = (q.totient : \u2102) *\n      (ArithmeticFunction.moebius (q / Nat.gcd q m) : \u2102) /\n        ((q / Nat.gcd q m).totient : \u2102) ",
+    "source_comment": "/-- Page 481. The printed Ramanujan sum formula for every positive modulus. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Ramanujan400.norm_ramanujanSum_le",
+    "kind": "theorem",
+    "header": "theorem norm_ramanujanSum_le (q m : \u2115) (hq : 0 < q) :\n    \u2016ramanujanSum q m\u2016 \u2264 (q.totient : \u211d) / (q / Nat.gcd q m).totient ",
+    "source_comment": "/-- Page 481 equation 3. The Ramanujan norm is bounded by the totient quotient. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Ramanujan400.norm_weighted_ramanujanSum_le",
+    "kind": "theorem",
+    "header": "theorem norm_weighted_ramanujanSum_le (q m : \u2115) (hq : 0 < q) :\n    \u2016((ArithmeticFunction.moebius q : \u2102) ^ 2 / (q.totient : \u2102) ^ 2) * ramanujanSum q m\u2016 \u2264\n      1 / ((q.totient : \u211d) * (q / Nat.gcd q m).totient) ",
+    "source_comment": "/-- Page 481 equation 3. Each Mobius weighted coefficient has the printed totient majorant. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt",
+    "kind": "def",
+    "header": "def ramanujanSumInt (q : \u2115) (m : \u2124) : \u2102 ",
+    "source_comment": "/-- Page 481. The Ramanujan sum for an integer frequency. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": []
+  },
+  {
+    "name": "LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt_natCast",
+    "kind": "theorem",
+    "header": "theorem ramanujanSumInt_natCast (q m : \u2115) :\n    ramanujanSumInt q (m : \u2124) = Ramanujan103.ramanujanSum q m ",
+    "source_comment": "/-- Page 481. Natural frequencies agree with the existing sum. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt_neg",
+    "kind": "theorem",
+    "header": "theorem ramanujanSumInt_neg (q : \u2115) (m : \u2124) :\n    ramanujanSumInt q (-m) = conj (ramanujanSumInt q m) ",
+    "source_comment": "/-- Page 481. Reversing a frequency conjugates its Ramanujan sum. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt_formula",
+    "kind": "theorem",
+    "header": "theorem ramanujanSumInt_formula (q : \u2115) (m : \u2124) (hq : 0 < q) :\n    ramanujanSumInt q m = (q.totient : \u2102) *\n      (ArithmeticFunction.moebius (q / Nat.gcd q m.natAbs) : \u2102) /\n        ((q / Nat.gcd q m.natAbs).totient : \u2102) ",
+    "source_comment": "/-- Page 481. The printed Ramanujan formula for every integer frequency. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt_eq_natAbs",
+    "kind": "theorem",
+    "header": "theorem ramanujanSumInt_eq_natAbs (q : \u2115) (m : \u2124) (hq : 0 < q) :\n    ramanujanSumInt q m = Ramanujan103.ramanujanSum q m.natAbs ",
+    "source_comment": "/-- Page 481 equation 3. Signed frequencies have the same value as their absolute value. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Totient400.divisor_totient_ratio_le",
+    "kind": "theorem",
+    "header": "theorem divisor_totient_ratio_le (d n : \u2115) (hn : 0 < n) (hd : d \u2223 n) :\n    (d : \u211d) / d.totient \u2264 (n : \u211d) / n.totient ",
+    "source_comment": "/-- Page 481 equation 3. The ratio n over phi n increases under divisibility. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Totient400.sum_divisors_ratio_le",
+    "kind": "theorem",
+    "header": "theorem sum_divisors_ratio_le (n : \u2115) (hn : 0 < n) :\n    (\u2211 d \u2208 n.divisors, (d : \u211d) / d.totient) \u2264\n      (n : \u211d) * n.divisors.card / n.totient ",
+    "source_comment": "/-- Page 481 equation 3, final inequality for the divisor sum. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "explicit bridge or displayed formula",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.Perelli1996.Totient400.norm_coefficient_sum_le",
+    "kind": "theorem",
+    "header": "theorem norm_coefficient_sum_le (s : Finset \u2115) (m : \u2124) (hs : \u2200 q \u2208 s, 0 < q) :\n    \u2016\u2211 q \u2208 s, ((ArithmeticFunction.moebius q : \u2102) ^ 2 / (q.totient : \u2102) ^ 2) *\n      RamanujanInt400.ramanujanSumInt q m\u2016 \u2264\n      \u2211 q \u2208 s, 1 / ((q.totient : \u211d) * (q / Nat.gcd q m.natAbs).totient) ",
+    "source_comment": "/-- Page 481 equation 3. Finite coefficient sums obey the printed totient majorant.\nNo convergence claim for an infinite tail is included in this finite identity. -/",
+    "source_url": "https://doi.org/10.4171/RMI/205",
+    "audit": "MATCH",
+    "variant": "finite coefficient sum",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  }
+]

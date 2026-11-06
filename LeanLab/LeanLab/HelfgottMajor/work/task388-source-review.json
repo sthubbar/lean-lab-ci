@@ -1,0 +1,438 @@
+[
+  {
+    "declaration": "LeanLab.HelfgottMajor.Inverse388.reciprocal_sum_le_of_count",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.zeroWeight",
+    "kind": "def",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "status": "definition"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.zeroCount",
+    "kind": "def",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "status": "definition"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.zero_weight_finite_support",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.zero_count_explicit_upper",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN dependent"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.zero_count_upper",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN dependent"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.count_one_arithmetic",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.inverse_sum_of_count",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.sqrt_quadratic_budget",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.nTwo_le_nLog",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.log_gaussian_coefficient_le_three",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.five_norms_le_height_coefficient",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.inv_im_sum_bound_of_count",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Decomp388a.inv_im_sum_bound",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "38 to 40 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN dependent"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Gaussian388.inv_im_sum_nonneg",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Gaussian388.gaussian_moment_sum_nonneg",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Gaussian388.inv_im_sum_eq_zero",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Gaussian388.gaussian_moment_sum_eq_zero",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Gaussian388.gaussian_moment_sum_bound_at_one",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Gaussian388.gaussian_half_moment",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Gaussian388.mellin_norm_le_gamma_quarter",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Mellin388.mellin_eq_exp_integral",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "8",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Mellin388.mellin_eq_fourier",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "8",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Mellin388.log_pullback_square_integral",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "8",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.Mellin388.mellin_plancherel_of_schwartz",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "8",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.HalfMoment388.quarticPolynomial",
+    "kind": "def",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "status": "definition"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.HalfMoment388.quartic_exp_upper",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.HalfMoment388.quartic_tail",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.HalfMoment388.quartic_polynomial_integral",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.HalfMoment388.half_moment_eq_quartic",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.HalfMoment388.gamma_quarter_bound",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  },
+  {
+    "declaration": "LeanLab.HelfgottMajor.HalfMoment388.mellin_norm_le_decimal",
+    "kind": "theorem",
+    "source": "https://arxiv.org/abs/1305.2897v4",
+    "pages": "39 and 43",
+    "review": "MATCH",
+    "role": "paper statement or derived helper with the explicit STATEMENTS.md twin",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED"
+  }
+]
