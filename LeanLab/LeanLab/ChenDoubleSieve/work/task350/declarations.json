@@ -1,0 +1,482 @@
+[
+  {
+    "file": "Decomp350a.lean",
+    "kind": "theorem",
+    "name": "buchstab_nonneg"
+  },
+  {
+    "file": "Decomp350a.lean",
+    "kind": "theorem",
+    "name": "propagate_upper_from"
+  },
+  {
+    "file": "Decomp350a.lean",
+    "kind": "theorem",
+    "name": "buchstab_four_to_four_half"
+  },
+  {
+    "file": "Decomp350a.lean",
+    "kind": "theorem",
+    "name": "buchstab_compact_upper"
+  },
+  {
+    "file": "Decomp350a.lean",
+    "kind": "theorem",
+    "name": "buchstab_tail_upper"
+  },
+  {
+    "file": "Decomp350a.lean",
+    "kind": "theorem",
+    "name": "interval_integral_le_of_nonneg"
+  },
+  {
+    "file": "Decomp350a.lean",
+    "kind": "def",
+    "name": "logMajorant"
+  },
+  {
+    "file": "Decomp350a.lean",
+    "kind": "theorem",
+    "name": "fourfold_le_logMajorant"
+  },
+  {
+    "file": "Decomp350b.lean",
+    "kind": "theorem",
+    "name": "fourfold13_upper"
+  },
+  {
+    "file": "Decomp350b.lean",
+    "kind": "theorem",
+    "name": "elementary_F13_upper"
+  },
+  {
+    "file": "Decomp350b.lean",
+    "kind": "theorem",
+    "name": "logarithmic_F13_upper"
+  },
+  {
+    "file": "Decomp350b.lean",
+    "kind": "theorem",
+    "name": "numerical_F13_supplied"
+  },
+  {
+    "file": "Decomp350c.lean",
+    "kind": "theorem",
+    "name": "fourfold14_upper"
+  },
+  {
+    "file": "Decomp350c.lean",
+    "kind": "theorem",
+    "name": "elementary_F14_upper"
+  },
+  {
+    "file": "Decomp350c.lean",
+    "kind": "theorem",
+    "name": "logarithmic_F14_upper"
+  },
+  {
+    "file": "Decomp350c.lean",
+    "kind": "theorem",
+    "name": "numerical_F14_supplied"
+  },
+  {
+    "file": "Decomp350d.lean",
+    "kind": "theorem",
+    "name": "integral_log_ratio_div"
+  },
+  {
+    "file": "Decomp350d.lean",
+    "kind": "theorem",
+    "name": "integral_log_ratio_sq_div_sq"
+  },
+  {
+    "file": "Decomp350d.lean",
+    "kind": "theorem",
+    "name": "logMajorant13_eq"
+  },
+  {
+    "file": "Decomp350e.lean",
+    "kind": "theorem",
+    "name": "reciprocal_triangle"
+  },
+  {
+    "file": "Decomp350e.lean",
+    "kind": "def",
+    "name": "twofoldMajorant"
+  },
+  {
+    "file": "Decomp350e.lean",
+    "kind": "theorem",
+    "name": "logMajorant_eq_twofold"
+  },
+  {
+    "file": "Decomp350f.lean",
+    "kind": "def",
+    "name": "upperJPanel"
+  },
+  {
+    "file": "Decomp350f.lean",
+    "kind": "theorem",
+    "name": "upperJPanel_sum"
+  },
+  {
+    "file": "Decomp350f.lean",
+    "kind": "theorem",
+    "name": "J_two_three_upper"
+  },
+  {
+    "file": "Decomp350f.lean",
+    "kind": "theorem",
+    "name": "buchstab_four_formula"
+  },
+  {
+    "file": "Decomp350f.lean",
+    "kind": "theorem",
+    "name": "buchstab_four_upper"
+  },
+  {
+    "file": "Decomp350f.lean",
+    "kind": "theorem",
+    "name": "buchstab_lower_five_halves_three"
+  },
+  {
+    "file": "Decomp350f.lean",
+    "kind": "theorem",
+    "name": "buchstab_seven_halves_to_four"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "def",
+    "name": "logTaylor13"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "logTaylor13_bounds"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "F13_kernel_upper"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "def",
+    "name": "primitive13First"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "def",
+    "name": "primitive13Second"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "primitive13First_deriv"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "primitive13Second_deriv"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "def",
+    "name": "endpoint13"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "endpoint13_certificate"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "endpoint13_upper"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "polynomial_F13_endpoint"
+  },
+  {
+    "file": "Decomp350g.lean",
+    "kind": "theorem",
+    "name": "F13_elementary_upper_clean"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "logConstant14"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "logConstant14_eq"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "logConstant14_upper"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "reciprocal14"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "reciprocal14_upper"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "reciprocalOne14"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "reciprocalOne14_upper"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "logPolynomial14"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "logPolynomial14_upper"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "F14_log_nonneg"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "innerPrimitive14"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "innerPolynomial14"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "innerPrimitive14_deriv"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "primitive14First"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "primitive14Second"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "primitive14First_deriv"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "primitive14Second_deriv"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "def",
+    "name": "endpoint14"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "endpoint14_upper"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "innerPolynomial14_integral"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "polynomial14_endpoint"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "twofold14_polynomial_upper"
+  },
+  {
+    "file": "Decomp350h.lean",
+    "kind": "theorem",
+    "name": "F14_elementary_upper_clean"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailLogConstant"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailInitial"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailConstants_eq"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailConstants_upper"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailLogPoly"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailLogPoly_upper"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailReciprocal"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailReciprocal_upper"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailDerivativePoly"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailDerivativePoly_nonneg"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailPrimitive"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailPrimitive_deriv"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailNumerator"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailNumerator_integral"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailNumerator_nonneg"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailReciprocalV"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailReciprocalV_upper"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailOmegaPoly"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailOmegaPrimitive"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailOmegaPrimitive_deriv"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailBudget"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "def",
+    "name": "tailBernsteinRow"
+  },
+  {
+    "file": "Decomp350i.lean",
+    "kind": "theorem",
+    "name": "tailBernsteinRow_nonneg"
+  },
+  {
+    "file": "Decomp350j.lean",
+    "kind": "theorem",
+    "name": "tailBernstein_identity0"
+  },
+  {
+    "file": "Decomp350j.lean",
+    "kind": "theorem",
+    "name": "tailBernstein_identity1"
+  },
+  {
+    "file": "Decomp350j.lean",
+    "kind": "theorem",
+    "name": "tailBernstein_identity2"
+  },
+  {
+    "file": "Decomp350j.lean",
+    "kind": "theorem",
+    "name": "tailBernstein_identity3"
+  },
+  {
+    "file": "Decomp350j.lean",
+    "kind": "theorem",
+    "name": "tailBudget_le"
+  },
+  {
+    "file": "Decomp350k.lean",
+    "kind": "theorem",
+    "name": "tailNumerator_upper"
+  },
+  {
+    "file": "Decomp350k.lean",
+    "kind": "theorem",
+    "name": "tailOmegaPoly_upper"
+  },
+  {
+    "file": "Decomp350k.lean",
+    "kind": "theorem",
+    "name": "tailBudget_upper"
+  },
+  {
+    "file": "Decomp350k.lean",
+    "kind": "theorem",
+    "name": "buchstab_four_to_four_half_clean"
+  }
+]
