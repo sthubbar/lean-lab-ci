@@ -47,7 +47,11 @@ theorem mean_square_qt_dominant :
         F ≤ (q : ℝ) * T → Thm4.WellSpaced S → (∀ p ∈ S, |p.1| ≤ T) →
           (∑ p ∈ S, ‖Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)‖ ^ 2) ≤
             C * Real.log x * ((q : ℝ) * T + F) * energy a c1 c2 F := by
-  sorry
+  intro B c1 c2 hc1 hc2
+  obtain ⟨C, hC, hm⟩ := LeanLab.BHP1997.DecompC165c.hybrid_mean_square B c1 c2 hc1 hc2
+  refine ⟨C, hC, ?_⟩
+  intro x F T q S a ha hx hF hFx hT hTx hq hqx hFqT hS hSt
+  exact hm x F T q S a ha hx hF hFx hT hTx hq hqx hS hSt
 
 /-- LEAF 3 of 3. The regime `q * T ≤ F`, where the polynomial length dominates the bracket:
 the square sum over the well-spaced set is at most a constant times `log x` times
@@ -61,7 +65,11 @@ theorem mean_square_F_dominant :
         (q : ℝ) * T ≤ F → Thm4.WellSpaced S → (∀ p ∈ S, |p.1| ≤ T) →
           (∑ p ∈ S, ‖Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)‖ ^ 2) ≤
             C * Real.log x * ((q : ℝ) * T + F) * energy a c1 c2 F := by
-  sorry
+  intro B c1 c2 hc1 hc2
+  obtain ⟨C, hC, hm⟩ := LeanLab.BHP1997.DecompC165c.hybrid_mean_square B c1 c2 hc1 hc2
+  refine ⟨C, hC, ?_⟩
+  intro x F T q S a ha hx hF hFx hT hTx hq hqx hqTF hS hSt
+  exact hm x F T q S a ha hx hF hFx hT hTx hq hqx hS hSt
 
 /-- The normalized coefficient energy of page 11 is a sum of squares divided by a natural
 number, hence nonnegative. Used to compare the two regime constants. -/
