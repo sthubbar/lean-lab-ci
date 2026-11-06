@@ -16,7 +16,7 @@ theorem large_d_bound : ∑' d, seriesTerm (d + 7) ≤ 0.4378 := by
 /-- LEAF shift. -/
 theorem tsum_eq_sum_add_tsum_shift :
     ∑' d, seriesTerm d = ∑ d ∈ range 7, seriesTerm d + ∑' d, seriesTerm (d + 7) := by
-  sorry
+  exact (Summable.sum_add_tsum_nat_add 7 lemma61_proved).symm
 
 theorem lpz_lemma61_bound_assembly : Lemma61Bound := by
   rw [Lemma61Bound, tsum_eq_sum_add_tsum_shift]
