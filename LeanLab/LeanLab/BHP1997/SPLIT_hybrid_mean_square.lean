@@ -27,7 +27,84 @@ theorem mean_square_pointwise (a : ℕ → ℂ) (c1 c2 F : ℝ) {q : ℕ}
     (hc1 : 0 < c1) (hc2 : c1 < c2) (hF : 0 < F) :
     ‖Thm4.dirPoly a c1 c2 F χ (Thm4.half t)‖ ^ 2 ≤
       (((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * energy a c1 c2 F) := by
-  sorry
+  have hF0 : 0 < F := hF
+  have hc2F : 0 ≤ c2 * F := by nlinarith
+  let S := (Finset.range (⌊c2 * F⌋₊ + 1)).filter (fun n : ℕ => c1 * F < n ∧ (n : ℝ) < c2 * F)
+  have hS_card : (S.card : ℝ) ≤ ((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) := by
+    have hcard : S.card ≤ ⌊c2 * F⌋₊ + 1 :=
+      (Finset.card_le_card (Finset.filter_subset _ _)).trans_eq (Finset.card_range _)
+    exact mod_cast hcard
+  have hdirPoly : Thm4.dirPoly a c1 c2 F χ (Thm4.half t) =
+      ∑ n ∈ S, a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t := by
+    rw [Thm4.dirPoly]
+    congr
+    ext n
+    simp [S]
+  rw [hdirPoly]
+  have h_cauchy : ‖∑ n ∈ S, a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2 ≤
+      (S.card : ℝ) * (∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2) := by
+    calc
+      ‖∑ n ∈ S, a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2 ≤
+          (∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖) ^ 2 := by
+        rw [norm_sum_le]
+      _ ≤ (S.card : ℝ) * (∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2) := by
+        have h := Finset.sum_mul_sq_le_sq_mul_sq
+          (fun n => ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖) S
+        simpa [Finset.sum_const_nsmul, smul_eq_mul] using h
+  have h_term_bound : ∀ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2 ≤
+      ‖a n‖ ^ 2 / (n : ℝ) := by
+    intro n hn
+    obtain ⟨hn1, hn2⟩ := (Finset.mem_filter.mp hn).2
+    have hnpos : 0 < n := by
+      have : 0 < c1 * F := mul_pos hc1 hF0
+      have hn0 : 0 < (n : ℝ) := by linarith
+      exact_mod_cast hn0
+    have hnpos' : 0 < (n : ℝ) := by exact_mod_cast hnpos
+    have hχ : ‖χ (n : ZMod q)‖ ≤ 1 := χ.norm_le_one _
+    have hpow : ‖(n : ℂ) ^ Thm4.half t‖ = (n : ℝ) ^ (1/2 : ℝ) := by
+      rw [Complex.norm_natCast_cpow_of_pos hnpos]
+      have hre : (Thm4.half t).re = (1/2 : ℝ) := by simp [Thm4.half]
+      rw [hre]
+    calc
+      ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2
+          = (‖a n * χ (n : ZMod q)‖ / ‖(n : ℂ) ^ Thm4.half t‖) ^ 2 := by rw [norm_div]
+      _ = ‖a n * χ (n : ZMod q)‖ ^ 2 / ‖(n : ℂ) ^ Thm4.half t‖ ^ 2 := by ring
+      _ = (‖a n‖ * ‖χ (n : ZMod q)‖) ^ 2 / ((n : ℝ) ^ (1/2 : ℝ)) ^ 2 := by
+        rw [norm_mul, hpow]
+      _ = (‖a n‖ ^ 2 * ‖χ (n : ZMod q)‖ ^ 2) / ((n : ℝ) ^ (1/2 : ℝ)) ^ 2 := by ring
+      _ ≤ (‖a n‖ ^ 2 * 1 ^ 2) / ((n : ℝ) ^ (1/2 : ℝ)) ^ 2 := by
+        gcongr
+        exact hχ
+      _ = ‖a n‖ ^ 2 / ((n : ℝ) ^ (1/2 : ℝ)) ^ 2 := by ring
+      _ = ‖a n‖ ^ 2 / (n : ℝ) := by
+        rw [← Real.rpow_mul hnpos'.le, show (1/2 : ℝ) * 2 = 1 by ring, Real.rpow_one]
+  have h_sum_bound : (∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2) ≤
+      energy a c1 c2 F := by
+    unfold energy
+    apply Finset.sum_le_sum_of_subset_of_nonneg
+    · intro n hn
+      rw [Finset.mem_filter]
+      have hnpos : 0 < (n : ℝ) := by
+        obtain ⟨hn1, hn2⟩ := (Finset.mem_filter.mp hn).2
+        have : 0 < c1 * F := mul_pos hc1 hF0
+        have hn0 : 0 < (n : ℝ) := by linarith
+        exact hn0
+      have hnpos' : 0 < (n : ℝ) := by exact_mod_cast (Nat.zero_le n)
+      have h_lt : (n : ℝ) < c2 * F := (Finset.mem_filter.mp hn).2.2
+      have h_gt : c1 * F < n := (Finset.mem_filter.mp hn).2.1
+      have h_floor : n < ⌊c2 * F⌋₊ + 1 := by
+        apply Nat.lt_succ_of_le
+        exact Nat.le_floor h_lt.le
+      exact ⟨Finset.mem_range.mpr h_floor, h_gt, h_lt⟩
+    · intro n hn
+      positivity
+  calc
+    ‖∑ n ∈ S, a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2
+        ≤ (S.card : ℝ) * (∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ Thm4.half t‖ ^ 2) := h_cauchy
+    _ ≤ (S.card : ℝ) * energy a c1 c2 F := by
+      gcongr
+    _ ≤ ((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * energy a c1 c2 F := by
+      gcongr
 
 /-- LEAF 2 of 3. The regime `F ≤ q * T`, where the character-and-time count dominates the
 bracket: the square sum over the well-spaced set is at most a constant times `log x` times
