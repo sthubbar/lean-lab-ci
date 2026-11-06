@@ -4860,6 +4860,2592 @@ theorem gallagher_hybrid_mean_value : ∃ C : ℝ, 0 < C ∧
   exact hybrid_mean_value_bound Q N hQ a hT
 
 
+section PortTuran
+open Finset Complex
+
+
+/-- Gallagher p.334 finite Turan applied to zeros repeated according to multiplicity. -/
+private theorem pT_weighted_turan_power_sum {ι : Type*} (S : Finset ι) (m : ι → ℕ) (z : ι → ℂ)
+    {M : ℕ} (hM : (∑ i ∈ S, m i) ≤ M)
+    (hz : ∃ i ∈ S, 0 < m i ∧ 1 ≤ ‖z i‖) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧
+      (1 / 50 : ℝ) ^ M ≤ ‖∑ i ∈ S, (m i : ℂ) * z i ^ ν‖ := by
+  classical
+  let I := (i : S) × Fin (m i)
+  let Z : I → ℂ := fun i => z i.1
+  have hcard : Fintype.card I = ∑ i ∈ S, m i := by simp [I, Fintype.card_sigma, Finset.sum_attach]
+  obtain ⟨i, hi, hm, hzi⟩ := hz
+  let i₀ : I := ⟨⟨i, hi⟩, ⟨0, hm⟩⟩
+  have hpos : 0 < Fintype.card I := Fintype.card_pos_iff.mpr ⟨i₀⟩
+  let e := Fintype.equivFin I
+  obtain ⟨ν, hν, hν', hsum⟩ := turan_power_sum_lower_bound hpos
+    (by simpa [hcard] using hM) (fun j => Z (e.symm j))
+    ⟨e i₀, by simpa [Z, i₀] using hzi⟩
+  refine ⟨ν, hν, hν', ?_⟩
+  have heq : (∑ j : Fin (Fintype.card I), Z (e.symm j) ^ ν) =
+      ∑ i ∈ S, (m i : ℂ) * z i ^ ν := by
+    calc
+      _ = ∑ i : I, Z i ^ ν := e.symm.sum_comp _
+      _ = _ := by
+        simp only [I, Z, Fintype.sum_sigma, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+        exact Finset.sum_attach S (fun i => (m i : ℂ) * z i ^ ν)
+  rwa [heq] at hsum
+
+/-- Gallagher p.334 Turan lower bound for a finite reciprocal pole power sum. -/
+private theorem pT_reciprocal_pole_turan {ι : Type*} (S : Finset ι) (m : ι → ℕ) (ρ : ι → ℂ)
+    {M : ℕ} (hM : (∑ i ∈ S, m i) ≤ M) {r : ℝ} (hr : 0 < r) (s : ℂ)
+    (hne : ∀ i ∈ S, s - ρ i ≠ 0)
+    (hclose : ∃ i ∈ S, 0 < m i ∧ ‖s - ρ i‖ ≤ 2 * r) :
+    ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧
+      1 / (100 * r) ^ ν ≤ ‖∑ i ∈ S, (m i : ℂ) / (s - ρ i) ^ ν‖ := by
+  classical
+  let z : ι → ℂ := fun i => (2 * r : ℝ) / (s - ρ i)
+  have hz : ∃ i ∈ S, 0 < m i ∧ 1 ≤ ‖z i‖ := by
+    obtain ⟨i, hi, hm, hc⟩ := hclose
+    refine ⟨i, hi, hm, ?_⟩
+    dsimp [z]
+    rw [norm_div, Complex.norm_real, Real.norm_of_nonneg (by positivity),
+      one_le_div (norm_pos_iff.mpr (hne i hi))]
+    exact hc
+  obtain ⟨ν, hν, hν', hsum⟩ := pT_weighted_turan_power_sum S m z hM hz
+  refine ⟨ν, hν, hν', ?_⟩
+  have heq : (∑ i ∈ S, (m i : ℂ) * z i ^ ν) =
+      ((2 * r : ℝ) : ℂ) ^ ν * ∑ i ∈ S, (m i : ℂ) / (s - ρ i) ^ ν := by
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro i hi
+    dsimp [z]
+    rw [div_pow]
+    ring
+  rw [heq, norm_mul, norm_pow, Complex.norm_real, Real.norm_of_nonneg (by positivity)] at hsum
+  have hp : (1 / 50 : ℝ) ^ ν ≤ (1 / 50 : ℝ) ^ M :=
+    pow_le_pow_of_le_one (by norm_num) (by norm_num) hν.le
+  have hl := hp.trans hsum
+  have he : ((1 / 50 : ℝ) ^ ν) / (2 * r) ^ ν = 1 / (100 * r) ^ ν := by
+    have hb : (1 / 50 : ℝ) / (2 * r) = 1 / (100 * r) := by field_simp; norm_num
+    simpa only [div_pow, one_pow] using congrArg (fun x : ℝ => x ^ ν) hb
+  rw [← he]
+  exact (div_le_iff₀ (pow_pos (show 0 < 2 * r by positivity) ν)).2 (by simpa only [mul_comm] using hl)
+
+section PortpC
+
+open Finset Complex Set Metric
+open scoped Classical
+open LeanLab.PNTPort.DirichletZF LeanLab.Linnik.Decomp1532b2
+
+/-- Gallagher pp.333 and 334 local multiplicity bound in the global height scale.
+The additive one in the local count is absorbed by r log T at least one.
+No lower bound on r log of B q t is imposed. -/
+private theorem pC_local_disc_order_sum_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (t r : ℝ),
+        |t| ≤ T → 0 < r → 1 ≤ r * Real.log T →
+        (∑ ρ ∈ (zset hχ t).filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ r),
+          (analyticOrderNatAt (fShift χ t) ρ : ℝ)) ≤ C * r * Real.log T := by
+  obtain ⟨C₀, hC₀, hsmall⟩ := local_disc_order_sum_nonprincipal_add_one
+  obtain ⟨K, hK, hheight⟩ := log_Bt_le_log_height
+  let C : ℝ := max (C₀ * (1 + K)) (8 * K / Real.log (10 / 9))
+  have hlog : 0 < Real.log (10 / 9 : ℝ) := Real.log_pos (by norm_num)
+  have hC : 0 ≤ C := (by positivity : 0 ≤ C₀ * (1 + K)).trans (le_max_left _ _)
+  refine ⟨C, hC, ?_⟩
+  intro T hT q hq hqT χ hχ t r ht hr hscale
+  have hL : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  have hB := hheight hT hqT ht
+  by_cases hrl : r ≤ 1 / 8
+  · have hcount := hsmall q χ hχ t r hr hrl
+    have h1 : 1 + r * Real.log (Bt q t) ≤ (1 + K) * (r * Real.log T) := by
+      have hh := mul_le_mul_of_nonneg_left hB hr.le
+      nlinarith
+    have h2 := mul_le_mul_of_nonneg_left h1 hC₀
+    have h3 := mul_le_mul_of_nonneg_right (le_max_left (C₀ * (1 + K)) (8 * K / Real.log (10 / 9)))
+      (mul_nonneg hr.le hL)
+    exact hcount.trans (h2.trans (by dsimp [C]; nlinarith))
+  · have htotal := zero_count_le hχ t
+    have hsub : (∑ ρ ∈ (zset hχ t).filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ r),
+        (analyticOrderNatAt (fShift χ t) ρ : ℝ)) ≤
+        ∑ ρ ∈ zset hχ t, (analyticOrderNatAt (fShift χ t) ρ : ℝ) :=
+      sum_le_sum_of_subset_of_nonneg (filter_subset _ _) (fun _ _ _ => Nat.cast_nonneg _)
+    apply hsub.trans (htotal.trans ?_)
+    have hCr : K / Real.log (10 / 9 : ℝ) ≤ C * r := by
+      have hcle : 8 * K / Real.log (10 / 9 : ℝ) ≤ C := le_max_right _ _
+      have hr8 : 1 / 8 ≤ r := le_of_not_ge hrl
+      have hh := mul_le_mul_of_nonneg_left hr8 (by positivity : 0 ≤ 8 * K / Real.log (10 / 9 : ℝ))
+      have hh' := mul_le_mul_of_nonneg_right hcle hr.le
+      have he : (8 * K / Real.log (10 / 9 : ℝ)) * (1 / 8) = K / Real.log (10 / 9 : ℝ) := by ring
+      rw [he] at hh
+      exact hh.trans hh'
+    calc
+      Real.log (Bt q t) / Real.log (10 / 9) ≤ (K * Real.log T) / Real.log (10 / 9) :=
+        div_le_div_of_nonneg_right hB hlog.le
+      _ ≤ C * r * Real.log T := by
+        have hh := mul_le_mul_of_nonneg_right hCr hL
+        convert hh using 1 <;> ring
+
+/-- Gallagher p.334 the far zero power tail in the global height scale. -/
+private theorem pC_far_zero_pole_power_sum_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T → ∀ (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (t r cutoff : ℝ),
+      |t| ≤ T → 0 ≤ r → 0 < cutoff → 1 ≤ cutoff * Real.log T → ∀ k : ℕ, 1 ≤ k →
+      ‖∑ ρ ∈ (zset hχ t).filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖),
+        (analyticOrderNatAt (fShift χ t) ρ : ℂ) / ((r : ℂ) - 1 / 2 - ρ) ^ (k + 1)‖ ≤
+          C * Real.log T / cutoff ^ k := by
+  obtain ⟨C₀, hC₀, hlocal⟩ := pC_local_disc_order_sum_global
+  refine ⟨4 * C₀, by positivity, ?_⟩
+  intro T hT q hq hqT χ hχ t r cutoff ht hr hcutoff hscale k hk
+  let S := (zset hχ t).filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖)
+  let w : ℂ → ℝ := fun ρ => analyticOrderNatAt (fShift χ t) ρ
+  let R : ℂ → ℝ := fun ρ => ‖ρ + (1 / 2 : ℂ)‖
+  have hlog : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  have hmass (u : ℝ) (hu : cutoff ≤ u) : (∑ ρ ∈ S.filter (fun ρ => R ρ ≤ u), w ρ) ≤
+      (C₀ * Real.log T) * u := by
+    have hsub : S.filter (fun ρ => R ρ ≤ u) ⊆ (zset hχ t).filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ u) := by
+      intro ρ hρ
+      obtain ⟨hρS, hρR⟩ := mem_filter.mp hρ
+      exact mem_filter.mpr ⟨(mem_filter.mp hρS).1, hρR⟩
+    have hsc : 1 ≤ u * Real.log T := hscale.trans (mul_le_mul_of_nonneg_right hu hlog)
+    have h := (sum_le_sum_of_subset_of_nonneg hsub (fun ρ hρ hρ' => Nat.cast_nonneg _)).trans
+      (hlocal T hT q hqT χ hχ t u ht (hcutoff.trans_le hu) hsc)
+    convert h using 1 <;> ring
+  have htail := finite_dyadic_reciprocal_tail S w R (mul_nonneg hC₀ hlog) hcutoff
+    (fun ρ hρ => Nat.cast_nonneg _) (fun ρ hρ => (mem_filter.mp hρ).2.le) hmass hk
+  calc
+    _ ≤ ∑ ρ ∈ S, ‖(analyticOrderNatAt (fShift χ t) ρ : ℂ) /
+        ((r : ℂ) - 1 / 2 - ρ) ^ (k + 1)‖ := norm_sum_le _ _
+    _ ≤ ∑ ρ ∈ S, w ρ / R ρ ^ (k + 1) := by
+      apply sum_le_sum
+      intro ρ hρ
+      have hρz := (mem_zset.mp (mem_filter.mp hρ).1).2
+      have hre : (ρ + (1 / 2 : ℂ)).re ≤ 0 := by
+        have hreal : (ρ + ((3 : ℂ) / 2 + I * t)).re < 1 := by
+          by_contra h
+          exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ) (not_lt.mp h) hρz
+        norm_num at hreal ⊢
+        linarith
+      have hdist : R ρ ≤ ‖(r : ℂ) - 1 / 2 - ρ‖ := by
+        have h := norm_shift_right_ge hre hr
+        convert h using 1 <;> congr 1 <;> ring
+      have hRpos : 0 < R ρ := hcutoff.trans (mem_filter.mp hρ).2
+      rw [norm_div, norm_pow, Complex.norm_natCast]
+      exact div_le_div_of_nonneg_left (Nat.cast_nonneg _) (pow_pos hRpos _)
+        (pow_le_pow_left₀ hRpos.le hdist _)
+    _ ≤ _ := by convert htail using 1 <;> ring
+
+/-- Gallagher p.334 display 21 in the global height scale for nonprincipal characters. -/
+private theorem pC_near_zero_logDeriv_expansion_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T → ∀ (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (t r cutoff : ℝ),
+      |t| ≤ T → 0 < r → r ≤ 1 / 8 → 0 < cutoff → cutoff ≤ 1 / 8 →
+      1 ≤ cutoff * Real.log T → ∀ k : ℕ, 1 ≤ k →
+      ‖iteratedDeriv k (logDeriv (fShift χ t)) ((r : ℂ) - 1 / 2) -
+        (-1 : ℂ) ^ k * k.factorial *
+          ∑ ρ ∈ (zset hχ t).filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff),
+            (analyticOrderNatAt (fShift χ t) ρ : ℂ) / ((r : ℂ) - 1 / 2 - ρ) ^ (k + 1)‖ ≤
+        (k.factorial : ℝ) * C * Real.log T / cutoff ^ k := by
+  obtain ⟨C₀, hC₀, htail⟩ := pC_far_zero_pole_power_sum_global
+  obtain ⟨K, hK, hheight⟩ := log_Bt_le_log_height
+  refine ⟨K0 * K + C₀, by have := K0_pos; positivity, ?_⟩
+  intro T hT q hq hqT χ hχ t r cutoff ht hr hrl hc hcl hscale k hk
+  let z : ℂ := (r : ℂ) - 1 / 2
+  let a : ℂ := (-1 : ℂ) ^ k * k.factorial
+  let f : ℂ → ℂ := fShift χ t
+  let P : ℂ → ℂ := fun ρ => (analyticOrderNatAt f ρ : ℂ) / (z - ρ) ^ (k + 1)
+  let S := zset hχ t
+  have hz : ‖z‖ ≤ 1 / 2 := by
+    have he : z = ((r - 1 / 2 : ℝ) : ℂ) := by push_cast; rfl
+    rw [he, Complex.norm_real, Real.norm_eq_abs, abs_le]
+    constructor <;> linarith
+  have hne : f z ≠ 0 := by
+    apply DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ)
+    dsimp [z]
+    norm_num
+    linarith
+  have hfull := iterated_logDeriv_pole_expansion_bound hχ t k hz hne
+  have hlogBt : 0 ≤ Real.log (Bt q t) := Real.log_nonneg (one_lt_Bt t).le
+  have hfull' := hfull.trans (show _ ≤ (k.factorial : ℝ) * K0 * (K * Real.log T) * 8 ^ k by
+    have hh := mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_left (hheight hT hqT ht)
+        (mul_nonneg (Nat.cast_nonneg k.factorial) K0_pos.le))
+      (pow_nonneg (by norm_num : (0 : ℝ) ≤ 8) k)
+    convert hh using 1 <;> ring)
+  have hfar := htail T hT q hqT χ hχ t r cutoff ht hr.le hc hscale k hk
+  have hsplit : (∑ ρ ∈ S, P ρ) =
+      (∑ ρ ∈ S.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff), P ρ) +
+      (∑ ρ ∈ S.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖), P ρ) := by
+    simpa only [not_le] using (sum_filter_add_sum_filter_not S (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff) P).symm
+  have ha : ‖a‖ = (k.factorial : ℝ) := by simp [a, norm_pow]
+  have hlog : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  have hp : (8 : ℝ) ^ k ≤ 1 / cutoff ^ k := by
+    apply (le_div_iff₀ (pow_pos hc k)).2
+    rw [← mul_pow]
+    exact pow_le_one₀ (by positivity) (by linarith)
+  have htriangle : ‖iteratedDeriv k (logDeriv f) z -
+      a * ∑ ρ ∈ S.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff), P ρ‖ ≤
+      ‖iteratedDeriv k (logDeriv f) z - a * ∑ ρ ∈ S, P ρ‖ +
+        (k.factorial : ℝ) * ‖∑ ρ ∈ S.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖), P ρ‖ := by
+    rw [← ha, ← norm_mul]
+    convert norm_add_le (iteratedDeriv k (logDeriv f) z - a * ∑ ρ ∈ S, P ρ)
+      (a * ∑ ρ ∈ S.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖), P ρ) using 1
+    congr 1
+    rw [hsplit]
+    ring
+  apply htriangle.trans
+  have hb := add_le_add hfull' (mul_le_mul_of_nonneg_left hfar (Nat.cast_nonneg k.factorial))
+  apply hb.trans
+  have hh := mul_le_mul_of_nonneg_left hp
+    (mul_nonneg (Nat.cast_nonneg k.factorial) (mul_nonneg (mul_nonneg K0_pos.le hK.le) hlog))
+  convert add_le_add_right hh ((k.factorial : ℝ) * (C₀ * Real.log T / cutoff ^ k)) using 1 <;> ring
+
+/-- Gallagher p.334 the nonprincipal large derivative in the global height scale.
+This includes local logarithmic scales below one. -/
+private theorem pC_nonprincipal_large_logDeriv_global : ∃ E : ℝ, 1 ≤ E ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T → ∀ (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (t r : ℝ),
+      |t| ≤ T → 0 < r → r ≤ 1 / 1600 → 1 ≤ r * Real.log T →
+      (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + I * t)‖ ≤ r) →
+      ∀ M : ℕ, E * r * Real.log T ≤ M →
+        ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+          (k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1)) ≤
+            ‖iteratedDeriv k (logDeriv (fShift χ t)) ((r : ℂ) - 1 / 2)‖ := by
+  obtain ⟨C₀, hC₀, hcount⟩ := pC_local_disc_order_sum_global
+  obtain ⟨C₁, hC₁, hexp⟩ := pC_near_zero_logDeriv_expansion_global
+  let E : ℝ := max 1 (max (200 * C₀) (200 * C₁))
+  have hE : 1 ≤ E := le_max_left _ _
+  refine ⟨E, hE, ?_⟩
+  intro T hT q hq hqT χ hχ t r ht hr hrl hscale hroot M hM
+  have hlog : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  have hc : 0 < 200 * r := by positivity
+  have hcl : 200 * r ≤ 1 / 8 := by linarith
+  have hscale' : 1 ≤ (200 * r) * Real.log T := by nlinarith
+  let S := (zset hχ t).filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ 200 * r)
+  let m : ℂ → ℕ := fun ρ => analyticOrderNatAt (fShift χ t) ρ
+  let s : ℂ := (r : ℂ) - 1 / 2
+  have hMcount : (∑ ρ ∈ S, m ρ) ≤ M := by
+    have hc₀ : 200 * C₀ ≤ E := (le_max_left _ _).trans (le_max_right _ _)
+    have hbound := hcount T hT q hqT χ hχ t (200 * r) ht hc hscale'
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hc₀ hr.le) hlog
+    have hcast : (∑ ρ ∈ S, (m ρ : ℝ)) ≤ M := hbound.trans (by nlinarith)
+    exact_mod_cast hcast
+  have hsne : fShift χ t s ≠ 0 := by
+    apply DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ)
+    dsimp [s]
+    norm_num
+    linarith
+  have hne (ρ : ℂ) (hρ : ρ ∈ S) : s - ρ ≠ 0 := by
+    intro he
+    have hzero := (mem_zset.mp (mem_filter.mp hρ).1).2
+    exact hsne (sub_eq_zero.mp he ▸ hzero)
+  have hclose : ∃ ρ ∈ S, 0 < m ρ ∧ ‖s - ρ‖ ≤ 2 * r := by
+    obtain ⟨ρ, hρ, hd⟩ := hroot
+    let w := ρ - ((3 : ℂ) / 2 + I * t)
+    have he : w + (1 / 2 : ℂ) = ρ - (1 + I * t) := by dsimp [w]; ring
+    have hw : ‖w + (1 / 2 : ℂ)‖ ≤ r := by rwa [he]
+    have hnorm : ‖w‖ ≤ 3 / 4 := by
+      have hh := norm_sub_le (w + (1 / 2 : ℂ)) (1 / 2 : ℂ)
+      norm_num at hh
+      linarith
+    have hzero : fShift χ t w = 0 := by simpa [fShift, w] using hρ
+    have hwS : w ∈ S := mem_filter.mpr ⟨mem_zset.mpr ⟨hnorm, hzero⟩, by nlinarith⟩
+    have hf : AnalyticOnNhd ℂ (fShift χ t) univ := fun z hz => fShift_analyticAt hχ t z
+    have htop : analyticOrderAt (fShift χ t) w ≠ ⊤ :=
+      hf.analyticOrderAt_ne_top_of_isPreconnected isPreconnected_univ (mem_univ 0) (mem_univ w)
+        (by rw [analyticOrderAt_eq_zero.mpr (Or.inr (fShift_zero_ne χ t))]; simp)
+    have hm : m w ≠ 0 := by
+      simp only [m, analyticOrderNatAt, ne_eq, ENat.toNat_eq_zero, not_or]
+      exact ⟨(fShift_analyticAt hχ t w).analyticOrderAt_ne_zero.mpr hzero, htop⟩
+    refine ⟨w, hwS, Nat.pos_of_ne_zero hm, ?_⟩
+    have hh := norm_sub_le (r : ℂ) (w + (1 / 2 : ℂ))
+    have he' : s - w = (r : ℂ) - (w + (1 / 2 : ℂ)) := by dsimp [s]; ring
+    rw [he']
+    rw [Complex.norm_real, Real.norm_of_nonneg hr.le] at hh
+    linarith
+  obtain ⟨ν, hν, hν', hpole⟩ := pT_reciprocal_pole_turan S m id hMcount hr s hne hclose
+  let k := ν - 1
+  have hν0 : 0 < ν := by omega
+  have hkν : k + 1 = ν := Nat.sub_add_cancel hν0
+  have hkM : M ≤ k := by dsimp [k]; omega
+  have hklt : k < 2 * M := by dsimp [k]; omega
+  have hMpos : 1 ≤ M := by
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hE hr.le) hlog
+    have hmreal : (1 : ℝ) ≤ M := hscale.trans (by nlinarith)
+    exact_mod_cast hmreal
+  have hk : 1 ≤ k := hMpos.trans hkM
+  have hCM : 200 * C₁ * r * Real.log T ≤ (k : ℝ) := by
+    have hc₁ : 200 * C₁ ≤ E := (le_max_right _ _).trans (le_max_right _ _)
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hc₁ hr.le) hlog
+    have hm : (M : ℝ) ≤ k := by exact_mod_cast hkM
+    linarith
+  have habs := reciprocal_pole_error_absorbed hr hCM
+  have herr := hexp T hT q hqT χ hχ t r (200 * r) ht hr (by linarith) hc hcl hscale' k hk
+  let F : ℂ := iteratedDeriv k (logDeriv (fShift χ t)) s
+  let P : ℂ := (-1 : ℂ) ^ k * k.factorial * ∑ ρ ∈ S, (m ρ : ℂ) / (s - ρ) ^ (k + 1)
+  have hPn : (k.factorial : ℝ) / (100 * r) ^ (k + 1) ≤ ‖P‖ := by
+    have hh := mul_le_mul_of_nonneg_left hpole (Nat.cast_nonneg k.factorial)
+    simpa [P, norm_mul, norm_pow, hkν, mul_div_assoc, div_eq_mul_inv] using hh
+  have hFn : ‖F - P‖ ≤ (k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1)) := by
+    exact herr.trans (by convert mul_le_mul_of_nonneg_left habs (Nat.cast_nonneg k.factorial) using 1 <;> ring)
+  have htriangle : ‖P‖ ≤ ‖F‖ + ‖F - P‖ := by
+    have hh := norm_add_le F (P - F)
+    rw [norm_sub_rev P F] at hh
+    simpa only [add_sub_cancel] using hh
+  refine ⟨k, hkM, hklt, ?_⟩
+  have heq : (k.factorial : ℝ) / (100 * r) ^ (k + 1) =
+      2 * ((k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1))) := by ring
+  rw [heq] at hPn
+  linarith
+
+/-- Gallagher p.334 principal Euler factor auxiliary. The sum of the
+logarithms of the distinct prime divisors is at most the modulus logarithm. -/
+private theorem pC_sum_log_primeFactors_le (q : ℕ) [NeZero q] :
+    (∑ p ∈ q.primeFactors, Real.log p) ≤ Real.log q := by
+  have hp (p : ℕ) (hp : p ∈ q.primeFactors) : 0 < (p : ℝ) := by
+    exact_mod_cast (Nat.prime_of_mem_primeFactors hp).pos
+  rw [← Real.log_prod (fun p hp' => (hp p hp').ne')]
+  apply Real.log_le_log (prod_pos hp)
+  rw [← Nat.cast_prod]
+  exact_mod_cast Nat.le_of_dvd (Nat.pos_of_ne_zero (NeZero.ne q)) (Nat.prod_primeFactors_dvd q)
+
+/-- Gallagher p.334 principal Euler factor auxiliary. Every Euler power
+has norm at most three quarters in the half plane of real part at least one half. -/
+private theorem pC_norm_prime_cpow_neg_le {p : ℕ} (hp : p.Prime) {s : ℂ} (hs : 1 / 2 ≤ s.re) :
+    ‖(p : ℂ) ^ (-s)‖ ≤ 3 / 4 := by
+  have hp0 : 0 < (p : ℝ) := by exact_mod_cast hp.pos
+  have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hp.two_le
+  rw [Complex.norm_natCast_cpow_of_pos hp.pos, Complex.neg_re]
+  calc
+    (p : ℝ) ^ (-s.re) ≤ (p : ℝ) ^ (-(1 / 2 : ℝ)) :=
+      Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+    _ = 1 / Real.sqrt p := by rw [Real.rpow_neg hp0.le, ← Real.sqrt_eq_rpow, one_div]
+    _ ≤ 3 / 4 := by
+      have hs0 : 0 < Real.sqrt p := Real.sqrt_pos.mpr hp0
+      have hs2 := Real.sq_sqrt hp0.le
+      have hsnn := Real.sqrt_nonneg (p : ℝ)
+      apply (div_le_iff₀ hs0).mpr
+      nlinarith
+
+/-- Gallagher p.334 principal Euler factor auxiliary. The finite Euler
+logarithmic derivative correction has norm at most three log q on real part
+at least one half. The identity with L prime over L is a separate step. -/
+private theorem pC_norm_euler_log_correction_le (q : ℕ) [NeZero q] {s : ℂ} (hs : 1 / 2 ≤ s.re) :
+    ‖∑ p ∈ q.primeFactors,
+      (Real.log p : ℂ) * (p : ℂ) ^ (-s) / (1 - (p : ℂ) ^ (-s))‖ ≤ 3 * Real.log q := by
+  calc
+    _ ≤ ∑ p ∈ q.primeFactors,
+        ‖(Real.log p : ℂ) * (p : ℂ) ^ (-s) / (1 - (p : ℂ) ^ (-s))‖ := norm_sum_le _ _
+    _ ≤ ∑ p ∈ q.primeFactors, 3 * Real.log p := by
+      apply sum_le_sum
+      intro p hp
+      have hpp := Nat.prime_of_mem_primeFactors hp
+      have hz := pC_norm_prime_cpow_neg_le hpp hs
+      have hden : (1 / 4 : ℝ) ≤ ‖1 - (p : ℂ) ^ (-s)‖ := by
+        have hh := norm_sub_norm_le (1 : ℂ) ((p : ℂ) ^ (-s))
+        norm_num only [norm_one] at hh
+        linarith
+      have hlog := Real.log_natCast_nonneg p
+      rw [norm_div, norm_mul, Complex.norm_real, Real.norm_of_nonneg hlog]
+      calc
+        Real.log p * ‖(p : ℂ) ^ (-s)‖ / ‖1 - (p : ℂ) ^ (-s)‖ ≤
+            (Real.log p * (3 / 4)) / (1 / 4) := by
+          apply div_le_div₀ (by positivity)
+            (mul_le_mul_of_nonneg_left hz hlog) (by norm_num) hden
+        _ = 3 * Real.log p := by ring
+    _ = 3 * ∑ p ∈ q.primeFactors, Real.log p := (mul_sum ..).symm
+    _ ≤ _ := mul_le_mul_of_nonneg_left (pC_sum_log_primeFactors_le q) (by norm_num)
+
+/-- Gallagher p.334 principal Euler correction is analytic on the
+closed half plane of real part at least one half. -/
+private theorem pC_analyticAt_euler_log_correction (q : ℕ) {s : ℂ} (hs : 1 / 2 ≤ s.re) :
+    AnalyticAt ℂ (fun z : ℂ => ∑ p ∈ q.primeFactors,
+      (Real.log p : ℂ) * (p : ℂ) ^ (-z) / (1 - (p : ℂ) ^ (-z))) s := by
+  apply Finset.analyticAt_fun_sum
+  intro p hp
+  have hpp := Nat.prime_of_mem_primeFactors hp
+  have hpn : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hpp.ne_zero
+  have hpow : AnalyticAt ℂ (fun z : ℂ => (p : ℂ) ^ (-z)) s := by
+    simp_rw [Complex.cpow_def_of_ne_zero hpn]
+    fun_prop
+  have hne : 1 - (p : ℂ) ^ (-s) ≠ 0 := by
+    have hz := pC_norm_prime_cpow_neg_le hpp hs
+    intro he
+    have hone : (p : ℂ) ^ (-s) = 1 := (sub_eq_zero.mp he).symm
+    rw [hone, norm_one] at hz
+    norm_num at hz
+  exact (analyticAt_const.mul hpow).div (analyticAt_const.sub hpow) hne
+
+/-- Gallagher p.334 differentiated principal Euler error auxiliary.
+At every point of real part at least one, the kth derivative of the finite
+Euler logarithmic correction is bounded by three k factorial log q times four to the k.
+The identity with the principal logarithmic derivative remains separate. -/
+private theorem pC_iteratedDeriv_euler_log_correction_le (q : ℕ) [NeZero q]
+    (k : ℕ) {s : ℂ} (hs : 1 ≤ s.re) :
+    ‖iteratedDeriv k (fun z : ℂ => ∑ p ∈ q.primeFactors,
+      (Real.log p : ℂ) * (p : ℂ) ^ (-z) / (1 - (p : ℂ) ^ (-z))) s‖ ≤
+      (k.factorial : ℝ) * (3 * Real.log q) * 4 ^ k := by
+  let f : ℂ → ℂ := fun z => ∑ p ∈ q.primeFactors,
+    (Real.log p : ℂ) * (p : ℂ) ^ (-z) / (1 - (p : ℂ) ^ (-z))
+  have hhalf {z : ℂ} (hz : ‖z - s‖ ≤ 1 / 4) : 1 / 2 ≤ z.re := by
+    have hh := (Complex.abs_re_le_norm (z - s)).trans hz
+    rw [Complex.sub_re, abs_le] at hh
+    linarith [hh.1]
+  have hdc : DiffContOnCl ℂ f (ball s (1 / 4)) := by
+    apply DifferentiableOn.diffContOnCl
+    rw [closure_ball s (by norm_num : (1 / 4 : ℝ) ≠ 0)]
+    intro z hz
+    have hn : ‖z - s‖ ≤ 1 / 4 := by simpa [mem_closedBall, dist_eq_norm] using hz
+    exact (pC_analyticAt_euler_log_correction q (hhalf hn)).differentiableAt.differentiableWithinAt
+  have hh := Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le k
+    (by norm_num : (0 : ℝ) < 1 / 4) hdc (C := 3 * Real.log q) (by
+      intro z hz
+      have hn : ‖z - s‖ = 1 / 4 := by simpa [mem_sphere, dist_eq_norm] using hz
+      exact pC_norm_euler_log_correction_le q (hhalf hn.le))
+  simpa only [one_div, inv_pow, div_inv_eq_mul] using hh
+
+/-- Gallagher p.334 principal logarithmic derivative identity.
+Away from the pole and the zeta zeros in the right half plane, the
+principal logarithmic derivative is the zeta logarithmic derivative plus
+the finite Euler correction bounded above. -/
+private theorem pC_principal_logDeriv_eq_zeta_add_euler (q : ℕ) [NeZero q]
+    {s : ℂ} (hs : 1 / 2 ≤ s.re) (hsne : s ≠ 1) (hzeta : riemannZeta s ≠ 0) :
+    logDeriv (1 : DirichletCharacter ℂ q).LFunction s = logDeriv riemannZeta s +
+      ∑ p ∈ q.primeFactors,
+        (Real.log p : ℂ) * (p : ℂ) ^ (-s) / (1 - (p : ℂ) ^ (-s)) := by
+  let P : ℂ → ℂ := fun z => ∏ p ∈ q.primeFactors, (1 - (p : ℂ) ^ (-z))
+  have hfactor (p : ℕ) (hp : p ∈ q.primeFactors) : 1 - (p : ℂ) ^ (-s) ≠ 0 := by
+    have hz := pC_norm_prime_cpow_neg_le (Nat.prime_of_mem_primeFactors hp) hs
+    intro he
+    have hone : (p : ℂ) ^ (-s) = 1 := (sub_eq_zero.mp he).symm
+    rw [hone, norm_one] at hz
+    norm_num at hz
+  have hderiv (p : ℕ) (hp : p ∈ q.primeFactors) :
+      HasDerivAt (fun z : ℂ => 1 - (p : ℂ) ^ (-z))
+        ((Real.log p : ℂ) * (p : ℂ) ^ (-s)) s := by
+    have hp0 := (Nat.prime_of_mem_primeFactors hp).pos
+    have hpn : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.ne_of_gt hp0)
+    have hh := ((hasDerivAt_id s).neg.const_cpow (.inl hpn)).const_sub 1
+    have hlog : Complex.log (p : ℂ) = (Real.log p : ℂ) := by
+      rw [← Complex.ofReal_natCast, Complex.ofReal_log (by positivity : (0 : ℝ) ≤ p)]
+    simpa only [Pi.neg_apply, id_eq, hlog, mul_neg, mul_one, neg_neg, neg_one_mul, one_mul, mul_comm] using hh
+  have hP : P s ≠ 0 := prod_ne_zero_iff.mpr hfactor
+  have hPd : DifferentiableAt ℂ P s :=
+    DifferentiableAt.fun_finsetProd (fun p hp => (hderiv p hp).differentiableAt)
+  have heq : (1 : DirichletCharacter ℂ q).LFunction =ᶠ[nhds s]
+      (fun z => P z * riemannZeta z) := by
+    filter_upwards [isOpen_ne.mem_nhds hsne] with z hz
+    exact DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta hz
+  calc
+    logDeriv (1 : DirichletCharacter ℂ q).LFunction s = logDeriv P s + logDeriv riemannZeta s := by
+      rw [(logDeriv_congr_nhds heq).self_of_nhds,
+        logDeriv_fun_mul s hP hzeta hPd (analyticAt_riemannZeta hsne).differentiableAt]
+    _ = _ := by
+      dsimp only [P]
+      rw [logDeriv_fun_prod hfactor (fun p hp => (hderiv p hp).differentiableAt), add_comm]
+      congr 1
+      apply sum_congr rfl
+      intro p hp
+      rw [logDeriv_apply, (hderiv p hp).deriv]
+
+/-- Gallagher pp.333 and 334 principal ambient multiplicity bound.
+The finite zeta zero window has total multiplicity at most C log T.
+The height exclusion is retained. -/
+private theorem pC_zeta_window_order_sum_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T t : ℝ, 2 ≤ T → 2 ≤ |t| → |t| ≤ T →
+      ∀ hfin : (ZeroWindow t).Finite,
+        (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ)) ≤ C * Real.log T := by
+  obtain ⟨A, hA, hnorm⟩ := norm_logDeriv_right_halfplane
+  obtain ⟨K, hK, herr⟩ := SumBoundI
+  refine ⟨4 * (2 + A) + 2 * K, by positivity, ?_⟩
+  intro T t hT ht htT hfin
+  let s : ℂ := 1 + (1 / 2 : ℝ) + I * t
+  let F : ℂ := deriv riemannZeta s / riemannZeta s
+  let V : ℂ := ∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℂ) / (s - ρ)
+  have hkey : ‖F - V‖ ≤ K * Real.log |t| := herr (1 / 2) (by constructor <;> norm_num) t ht hfin
+  have hF : ‖F‖ ≤ 2 + A := by
+    simpa [F, s, DirichletCharacter.LFunction_modOne_eq] using
+      hnorm 1 1 t (1 / 2) (by constructor <;> norm_num)
+  have hV : V.re ≤ 2 + A + K * Real.log |t| := by
+    calc
+      V.re ≤ ‖V‖ := Complex.re_le_norm _
+      _ = ‖F - (F - V)‖ := by congr 1; ring
+      _ ≤ ‖F‖ + ‖F - V‖ := norm_sub_le _ _
+      _ ≤ _ := add_le_add hF hkey
+  have hnear (ρ : ℂ) (hρ : ρ ∈ hfin.toFinset) :
+      (analyticOrderNatAt riemannZeta ρ : ℝ) / 2 ≤
+        ((analyticOrderNatAt riemannZeta ρ : ℂ) / (s - ρ)).re := by
+    have hp := (Set.Finite.mem_toFinset hfin).mp hρ
+    have hre : 1 / 2 ≤ (s - ρ).re := by
+      have hrho : ρ.re < 1 := lt_of_not_ge (fun h => riemannZeta_ne_zero_of_one_le_re h hp.1)
+      dsimp [s]
+      norm_num
+      linarith
+    have hn : ‖s - ρ‖ ≤ 3 / 4 := by
+      rw [norm_sub_rev]
+      simpa only [s, show (1 : ℂ) + (1 / 2 : ℝ) = 3 / 2 by norm_num] using hp.2
+    have hsq : Complex.normSq (s - ρ) ≤ (3 / 4 : ℝ) ^ 2 := by
+      rw [Complex.normSq_eq_norm_sq]
+      nlinarith [norm_nonneg (s - ρ)]
+    have hsqpos : 0 < Complex.normSq (s - ρ) := by
+      rw [Complex.normSq_apply]
+      nlinarith [sq_nonneg (s - ρ).im]
+    simp only [Complex.div_re, Complex.natCast_re, Complex.natCast_im, zero_mul, zero_div, add_zero]
+    apply (le_div_iff₀ hsqpos).mpr
+    have hm : 0 ≤ (analyticOrderNatAt riemannZeta ρ : ℝ) := Nat.cast_nonneg _
+    have hlow := mul_le_mul_of_nonneg_left hre hm
+    have hupp := mul_le_mul_of_nonneg_left hsq (div_nonneg hm (by norm_num : (0 : ℝ) ≤ 2))
+    nlinarith
+  have hsum : (∑ ρ ∈ hfin.toFinset, (analyticOrderNatAt riemannZeta ρ : ℝ)) / 2 ≤ V.re := by
+    dsimp only [V]
+    rw [Complex.re_sum, sum_div]
+    exact sum_le_sum hnear
+  have hlog : Real.log |t| ≤ Real.log T := Real.log_le_log (by linarith) htT
+  have hhalf : (1 / 2 : ℝ) ≤ Real.log T := by
+    have hh := Real.log_le_log (by norm_num : (0 : ℝ) < 2) hT
+    linarith [Real.log_two_gt_d9]
+  have hmass := mul_le_mul_of_nonneg_left hlog hK.le
+  have hconst := mul_le_mul_of_nonneg_left hhalf (show 0 ≤ 2 * (2 + A) by linarith)
+  nlinarith
+
+/-- Gallagher pp.333 and 334 principal local density in the global height scale.
+The bound is valid for every radius in the fixed ambient zeta window. -/
+private theorem pC_zeta_disc_order_sum_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T t r : ℝ, 2 ≤ T → 2 ≤ |t| → |t| ≤ T → 0 < r → 1 ≤ r * Real.log T →
+      ∀ hfin : (ZeroWindow t).Finite,
+        (∑ ρ ∈ hfin.toFinset.filter (fun ρ => ‖ρ - (1 + I * t)‖ ≤ r),
+          (analyticOrderNatAt riemannZeta ρ : ℝ)) ≤ C * r * Real.log T := by
+  obtain ⟨C₀, hC₀, hsmall⟩ := local_disc_order_sum_zeta_add_one
+  obtain ⟨C₁, hC₁, htotal⟩ := pC_zeta_window_order_sum_global
+  let C : ℝ := max (2 * C₀) (8 * C₁)
+  refine ⟨C, (by positivity : 0 ≤ 2 * C₀).trans (le_max_left _ _), ?_⟩
+  intro T t r hT ht htT hr hscale hfin
+  have hL : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  by_cases hrl : r ≤ 1 / 8
+  · have hs := hsmall t r ht hr hrl hfin
+    have hlogs := Real.log_le_log (by linarith : 0 < |t|) htT
+    have h1 := mul_le_mul_of_nonneg_left hlogs hr.le
+    have h2 := mul_le_mul_of_nonneg_left (show 1 + r * Real.log |t| ≤ 2 * (r * Real.log T) by nlinarith) hC₀
+    have h3 := mul_le_mul_of_nonneg_right (le_max_left (2 * C₀) (8 * C₁)) (mul_nonneg hr.le hL)
+    dsimp only [C]
+    nlinarith
+  · have hsub := sum_le_sum_of_subset_of_nonneg
+      (filter_subset (fun ρ => ‖ρ - (1 + I * t)‖ ≤ r) hfin.toFinset)
+      (fun ρ _ _ => (Nat.cast_nonneg (analyticOrderNatAt riemannZeta ρ) : (0 : ℝ) ≤ _))
+    have hs := htotal T t hT ht htT hfin
+    have hcoeff : C₁ ≤ C * r := by
+      have hh := mul_le_mul_of_nonneg_left (show 1 / 8 ≤ r by linarith) (show 0 ≤ 8 * C₁ by positivity)
+      have hh' := mul_le_mul_of_nonneg_right (le_max_right (2 * C₀) (8 * C₁)) hr.le
+      dsimp only [C]
+      nlinarith
+    exact hsub.trans (hs.trans (by convert mul_le_mul_of_nonneg_right hcoeff hL using 1 <;> ring))
+
+/-- Gallagher p.334 the global principal local count in shifted coordinates.
+The statement applies to any finite set of zeros in the fixed ambient disc. -/
+private theorem pC_zeta_shift_local_order_sum_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T t r : ℝ, 2 ≤ T → 2 ≤ |t| → |t| ≤ T → 0 < r → 1 ≤ r * Real.log T →
+      ∀ S : Finset ℂ,
+        (∀ ρ ∈ S, riemannZeta (ρ + 3 / 2 + I * t) = 0 ∧ ‖ρ‖ ≤ 3 / 4) →
+        (∑ ρ ∈ S.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ r),
+          (analyticOrderNatAt (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t)) ρ : ℝ)) ≤
+            C * r * Real.log T := by
+  obtain ⟨C, hC, hcount⟩ := pC_zeta_disc_order_sum_global
+  refine ⟨C, hC, ?_⟩
+  intro T t r hT ht htT hr hscale S hS
+  let c : ℂ := 3 / 2 + I * t
+  let V := S.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ r)
+  let U := V.image (fun ρ => ρ + c)
+  let hfin := ZeroWindowFinite ht
+  have hsub : U ⊆ hfin.toFinset.filter (fun ρ => ‖ρ - (1 + I * t)‖ ≤ r) := by
+    intro z hz
+    obtain ⟨ρ, hρ, rfl⟩ := mem_image.mp hz
+    obtain ⟨hρS, hρnear⟩ := mem_filter.mp hρ
+    apply mem_filter.mpr
+    constructor
+    · apply (Set.Finite.mem_toFinset hfin).mpr
+      constructor
+      · simpa [c, add_assoc] using (hS ρ hρS).1
+      · simpa [c] using (hS ρ hρS).2
+    · have he : ρ + c - (1 + I * t) = ρ + 1 / 2 := by dsimp [c]; ring
+      rwa [he]
+  have hord (ρ : ℂ) :
+      analyticOrderNatAt (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t)) ρ =
+        analyticOrderNatAt riemannZeta (ρ + c) := by
+    have hf : (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t)) =
+        (fun w : ℂ => riemannZeta (w + c)) := by
+      funext w
+      dsimp [c]
+      congr 1
+      ring
+    rw [hf, analyticOrderNatAt_fun_comp_add_right]
+  have heq : (∑ ρ ∈ V,
+      (analyticOrderNatAt (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t)) ρ : ℝ)) =
+        ∑ z ∈ U, (analyticOrderNatAt riemannZeta z : ℝ) := by
+    dsimp only [U]
+    rw [sum_image (fun a ha b hb h => by exact add_right_cancel h)]
+    simp only [hord]
+  change (∑ ρ ∈ V, _) ≤ _
+  rw [heq]
+  exact (sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => Nat.cast_nonneg _)).trans
+    (hcount T t r hT ht htT hr hscale hfin)
+
+/-- Gallagher p.334 the principal far zero power tail in the global height scale. -/
+private theorem pC_zeta_far_zero_pole_power_sum_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T t r cutoff : ℝ, 2 ≤ T → 2 ≤ |t| → |t| ≤ T →
+      0 ≤ r → 0 < cutoff → 1 ≤ cutoff * Real.log T → ∀ k : ℕ, 1 ≤ k →
+      ∀ S₀ : Finset ℂ,
+        (∀ ρ ∈ S₀, riemannZeta (ρ + 3 / 2 + I * t) = 0 ∧ ‖ρ‖ ≤ 3 / 4) →
+        ‖∑ ρ ∈ S₀.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖),
+          (analyticOrderNatAt (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t)) ρ : ℂ) /
+            ((r : ℂ) - 1 / 2 - ρ) ^ (k + 1)‖ ≤ C * Real.log T / cutoff ^ k := by
+  obtain ⟨C₀, hC₀, hlocal⟩ := pC_zeta_shift_local_order_sum_global
+  refine ⟨4 * C₀, by positivity, ?_⟩
+  intro T t r cutoff hT ht htT hr hcutoff hscale k hk S₀ hS
+  let f : ℂ → ℂ := fun w => riemannZeta (w + 3 / 2 + I * t)
+  let S := S₀.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖)
+  let w : ℂ → ℝ := fun ρ => analyticOrderNatAt f ρ
+  let R : ℂ → ℝ := fun ρ => ‖ρ + (1 / 2 : ℂ)‖
+  have hlog : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  have hmass (u : ℝ) (hu : cutoff ≤ u) : (∑ ρ ∈ S.filter (fun ρ => R ρ ≤ u), w ρ) ≤
+      (C₀ * Real.log T) * u := by
+    have hsub : S.filter (fun ρ => R ρ ≤ u) ⊆ S₀.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ u) := by
+      intro ρ hρ
+      obtain ⟨hρS, hρR⟩ := mem_filter.mp hρ
+      exact mem_filter.mpr ⟨(mem_filter.mp hρS).1, hρR⟩
+    have hsc : 1 ≤ u * Real.log T := hscale.trans (mul_le_mul_of_nonneg_right hu hlog)
+    have hh := (sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => Nat.cast_nonneg _)).trans
+      (hlocal T t u hT ht htT (hcutoff.trans_le hu) hsc S₀ hS)
+    convert hh using 1 <;> ring
+  have htail := finite_dyadic_reciprocal_tail S w R (mul_nonneg hC₀ hlog) hcutoff
+    (fun _ _ => Nat.cast_nonneg _) (fun _ hρ => (mem_filter.mp hρ).2.le) hmass hk
+  calc
+    _ ≤ ∑ ρ ∈ S, ‖(analyticOrderNatAt f ρ : ℂ) /
+        ((r : ℂ) - 1 / 2 - ρ) ^ (k + 1)‖ := norm_sum_le _ _
+    _ ≤ ∑ ρ ∈ S, w ρ / R ρ ^ (k + 1) := by
+      apply sum_le_sum
+      intro ρ hρ
+      have hρz := (hS ρ (mem_filter.mp hρ).1).1
+      have hre : (ρ + (1 / 2 : ℂ)).re ≤ 0 := by
+        have hreal : (ρ + 3 / 2 + I * t).re < 1 :=
+          lt_of_not_ge (fun h => riemannZeta_ne_zero_of_one_le_re h hρz)
+        norm_num at hreal ⊢
+        linarith
+      have hdist : R ρ ≤ ‖(r : ℂ) - 1 / 2 - ρ‖ := by
+        have hh := norm_shift_right_ge hre hr
+        convert hh using 1 <;> congr 1 <;> ring
+      have hRpos : 0 < R ρ := hcutoff.trans (mem_filter.mp hρ).2
+      rw [norm_div, norm_pow, Complex.norm_natCast]
+      exact div_le_div_of_nonneg_left (Nat.cast_nonneg _) (pow_pos hRpos _)
+        (pow_le_pow_left₀ hRpos.le hdist _)
+    _ ≤ _ := by convert htail using 1 <;> ring
+
+/-- Gallagher p.334 display 21 in the global height scale for zeta.
+The principal height exclusion is retained. -/
+private theorem pC_zeta_near_zero_logDeriv_expansion_global : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ T t r cutoff : ℝ, 2 ≤ T → 2 ≤ |t| → |t| ≤ T →
+      0 < r → r ≤ 1 / 8 → 0 < cutoff → cutoff ≤ 1 / 8 →
+      1 ≤ cutoff * Real.log T →
+      ∀ hfin : (SetOfZeros 1 (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t))).Finite,
+      ∀ k : ℕ, 1 ≤ k →
+      ‖iteratedDeriv k (logDeriv (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t))) ((r : ℂ) - 1 / 2) -
+        (-1 : ℂ) ^ k * k.factorial *
+          ∑ ρ ∈ ((finiteSetOfZeros_mono (by norm_num : (3 / 4 : ℝ) < 1) hfin).toFinset).filter
+              (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff),
+            (analyticOrderNatAt (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t)) ρ : ℂ) /
+              ((r : ℂ) - 1 / 2 - ρ) ^ (k + 1)‖ ≤
+        (k.factorial : ℝ) * C * Real.log T / cutoff ^ k := by
+  obtain ⟨C₀, hC₀, htail⟩ := pC_zeta_far_zero_pole_power_sum_global
+  obtain ⟨A, hA, hfullbound⟩ := iterated_zeta_logDeriv_pole_expansion_bound
+  refine ⟨A + C₀, by positivity, ?_⟩
+  intro T t r cutoff hT ht htT hr hrl hc hcl hscale hfin k hk
+  let z : ℂ := (r : ℂ) - 1 / 2
+  let a : ℂ := (-1 : ℂ) ^ k * k.factorial
+  let f : ℂ → ℂ := fun w => riemannZeta (w + 3 / 2 + I * t)
+  let P : ℂ → ℂ := fun ρ => (analyticOrderNatAt f ρ : ℂ) / (z - ρ) ^ (k + 1)
+  let S := (finiteSetOfZeros_mono (by norm_num : (3 / 4 : ℝ) < 1) hfin).toFinset
+  have hS : ∀ ρ ∈ S, riemannZeta (ρ + 3 / 2 + I * t) = 0 ∧ ‖ρ‖ ≤ 3 / 4 := by
+    intro ρ hρ
+    have hh := (Set.Finite.mem_toFinset _).mp hρ
+    exact ⟨hh.2, hh.1⟩
+  have hz : ‖z‖ ≤ 1 / 2 := by
+    have he : z = ((r - 1 / 2 : ℝ) : ℂ) := by push_cast; rfl
+    rw [he, Complex.norm_real, Real.norm_eq_abs, abs_le]
+    constructor <;> linarith
+  have hne : f z ≠ 0 := by
+    apply riemannZeta_ne_zero_of_one_lt_re
+    dsimp [z]
+    norm_num
+    linarith
+  have hfull := hfullbound t ht hfin k z hz hne
+  have hfull' := hfull.trans (show _ ≤ (k.factorial : ℝ) * A * Real.log T * 8 ^ k by
+    have hh := mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_left (Real.log_le_log (by linarith : 0 < |t|) htT)
+        (mul_nonneg (Nat.cast_nonneg k.factorial) hA.le))
+      (pow_nonneg (by norm_num : (0 : ℝ) ≤ 8) k)
+    convert hh using 1 <;> ring)
+  have hfar := htail T t r cutoff hT ht htT hr.le hc hscale k hk S hS
+  have hsplit : (∑ ρ ∈ S, P ρ) =
+      (∑ ρ ∈ S.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff), P ρ) +
+      (∑ ρ ∈ S.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖), P ρ) := by
+    simpa only [not_le] using (sum_filter_add_sum_filter_not S (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff) P).symm
+  have ha : ‖a‖ = (k.factorial : ℝ) := by simp [a, norm_pow]
+  have hlog : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  have hp : (8 : ℝ) ^ k ≤ 1 / cutoff ^ k := by
+    apply (le_div_iff₀ (pow_pos hc k)).2
+    rw [← mul_pow]
+    exact pow_le_one₀ (by positivity) (by linarith)
+  have htriangle : ‖iteratedDeriv k (logDeriv f) z -
+      a * ∑ ρ ∈ S.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ cutoff), P ρ‖ ≤
+      ‖iteratedDeriv k (logDeriv f) z - a * ∑ ρ ∈ S, P ρ‖ +
+        (k.factorial : ℝ) * ‖∑ ρ ∈ S.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖), P ρ‖ := by
+    rw [← ha, ← norm_mul]
+    convert norm_add_le (iteratedDeriv k (logDeriv f) z - a * ∑ ρ ∈ S, P ρ)
+      (a * ∑ ρ ∈ S.filter (fun ρ => cutoff < ‖ρ + (1 / 2 : ℂ)‖), P ρ) using 1
+    congr 1
+    rw [hsplit]
+    ring
+  apply htriangle.trans
+  have hb := add_le_add hfull' (mul_le_mul_of_nonneg_left hfar (Nat.cast_nonneg k.factorial))
+  apply hb.trans
+  have hh := mul_le_mul_of_nonneg_left hp
+    (mul_nonneg (Nat.cast_nonneg k.factorial) (mul_nonneg hA.le hlog))
+  convert add_le_add_right hh ((k.factorial : ℝ) * (C₀ * Real.log T / cutoff ^ k)) using 1 <;> ring
+
+
+/-- Gallagher p.334 the principal zeta large derivative in the global height scale.
+The height exclusion is retained and there are no character Euler factors in this step. -/
+private theorem pC_zeta_large_logDeriv_global : ∃ E : ℝ, 1 ≤ E ∧
+    ∀ T t r : ℝ, 2 ≤ T → 2 ≤ |t| → |t| ≤ T →
+      0 < r → r ≤ 1 / 1600 → 1 ≤ r * Real.log T →
+      (∃ ρ : ℂ, riemannZeta ρ = 0 ∧ ‖ρ - (1 + I * t)‖ ≤ r) →
+      ∀ M : ℕ, E * r * Real.log T ≤ M →
+        ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+          (k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1)) ≤
+            ‖iteratedDeriv k (logDeriv (fun w : ℂ => riemannZeta (w + 3 / 2 + I * t)))
+              ((r : ℂ) - 1 / 2)‖ := by
+  obtain ⟨C₀, hC₀, hcount⟩ := pC_zeta_shift_local_order_sum_global
+  obtain ⟨C₁, hC₁, hexp⟩ := pC_zeta_near_zero_logDeriv_expansion_global
+  let E : ℝ := max 1 (max (200 * C₀) (200 * C₁))
+  have hE : 1 ≤ E := le_max_left _ _
+  refine ⟨E, hE, ?_⟩
+  intro T t r hT ht htT hr hrl hscale hroot M hM
+  have hlog : 0 ≤ Real.log T := Real.log_nonneg (by linarith)
+  have hc : 0 < 200 * r := by positivity
+  have hcl : 200 * r ≤ 1 / 8 := by linarith
+  have hscale' : 1 ≤ (200 * r) * Real.log T := by nlinarith
+  let f : ℂ → ℂ := fun w => riemannZeta (w + 3 / 2 + I * t)
+  let hfin := ZetaShiftFiniteZeros ht (f := f) rfl
+  let S₀ := (finiteSetOfZeros_mono (by norm_num : (3 / 4 : ℝ) < 1) hfin).toFinset
+  have hS₀ : ∀ ρ ∈ S₀, riemannZeta (ρ + 3 / 2 + I * t) = 0 ∧ ‖ρ‖ ≤ 3 / 4 := by
+    intro ρ hρ
+    have hh := (Set.Finite.mem_toFinset _).mp hρ
+    exact ⟨hh.2, hh.1⟩
+  let S := S₀.filter (fun ρ => ‖ρ + (1 / 2 : ℂ)‖ ≤ 200 * r)
+  let m : ℂ → ℕ := fun ρ => analyticOrderNatAt f ρ
+  let s : ℂ := (r : ℂ) - 1 / 2
+  have hMcount : (∑ ρ ∈ S, m ρ) ≤ M := by
+    have hc₀ : 200 * C₀ ≤ E := (le_max_left _ _).trans (le_max_right _ _)
+    have hbound := hcount T t (200 * r) hT ht htT hc hscale' S₀ hS₀
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hc₀ hr.le) hlog
+    have hcast : (∑ ρ ∈ S, (m ρ : ℝ)) ≤ M := hbound.trans (by nlinarith)
+    exact_mod_cast hcast
+  have hsne : f s ≠ 0 := by
+    apply riemannZeta_ne_zero_of_one_lt_re
+    dsimp [s]
+    norm_num
+    linarith
+  have hne (ρ : ℂ) (hρ : ρ ∈ S) : s - ρ ≠ 0 := by
+    intro he
+    have hzero := (hS₀ ρ (mem_filter.mp hρ).1).1
+    exact hsne (sub_eq_zero.mp he ▸ hzero)
+  have hclose : ∃ ρ ∈ S, 0 < m ρ ∧ ‖s - ρ‖ ≤ 2 * r := by
+    obtain ⟨ρ, hρ, hd⟩ := hroot
+    let w := ρ - ((3 : ℂ) / 2 + I * t)
+    have he : w + (1 / 2 : ℂ) = ρ - (1 + I * t) := by dsimp [w]; ring
+    have hw : ‖w + (1 / 2 : ℂ)‖ ≤ r := by rwa [he]
+    have hnorm : ‖w‖ ≤ 3 / 4 := by
+      have hh := norm_sub_le (w + (1 / 2 : ℂ)) (1 / 2 : ℂ)
+      norm_num at hh
+      linarith
+    have hew : w + 3 / 2 + I * t = ρ := by dsimp [w]; ring
+    have hzero : f w = 0 := by simpa only [f, hew] using hρ
+    have hwS : w ∈ S := mem_filter.mpr ⟨(Set.Finite.mem_toFinset _).mpr ⟨hnorm, hzero⟩, by nlinarith⟩
+    have hf : AnalyticOnNhd ℂ f (closedBall (0 : ℂ) 1) := by
+      intro u hu
+      have hnormu : ‖u‖ ≤ 1 := by simpa [mem_closedBall, dist_zero_right] using hu
+      have hsne' : u + 3 / 2 + I * (t : ℂ) ≠ 1 := by
+        intro he'
+        have hi := congrArg Complex.im he'
+        simp only [add_im, div_ofNat_im, im_ofNat, zero_div, mul_im, I_re, ofReal_im,
+          mul_zero, I_im, ofReal_re, one_mul, zero_add, one_im] at hi
+        have habs := Complex.abs_im_le_norm u
+        have hh : u.im = -t := by linarith
+        rw [hh, abs_neg] at habs
+        linarith
+      exact AnalyticAt.fun_comp (analyticAt_riemannZeta hsne')
+        ((analyticAt_id.fun_add analyticAt_const).fun_add analyticAt_const)
+    have h0 : f 0 ≠ 0 := by
+      dsimp [f]
+      exact riemannZeta_ne_zero_of_one_lt_re (by norm_num)
+    have hwball : w ∈ closedBall (0 : ℂ) 1 := by
+      simp only [mem_closedBall, dist_zero_right]
+      linarith
+    have htop : analyticOrderAt f w ≠ ⊤ :=
+      hf.analyticOrderAt_ne_top_of_isPreconnected Metric.isPreconnected_closedBall
+        (show (0 : ℂ) ∈ closedBall (0 : ℂ) 1 by simp) hwball
+        (by rw [analyticOrderAt_eq_zero.mpr (Or.inr h0)]; simp)
+    have hm : m w ≠ 0 := by
+      simp only [m, analyticOrderNatAt, ne_eq, ENat.toNat_eq_zero, not_or]
+      exact ⟨(hf w hwball).analyticOrderAt_ne_zero.mpr hzero, htop⟩
+    refine ⟨w, hwS, Nat.pos_of_ne_zero hm, ?_⟩
+    have hh := norm_sub_le (r : ℂ) (w + (1 / 2 : ℂ))
+    have he' : s - w = (r : ℂ) - (w + (1 / 2 : ℂ)) := by dsimp [s]; ring
+    rw [he']
+    rw [Complex.norm_real, Real.norm_of_nonneg hr.le] at hh
+    linarith
+  obtain ⟨ν, hν, hν', hpole⟩ := pT_reciprocal_pole_turan S m id hMcount hr s hne hclose
+  let k := ν - 1
+  have hν0 : 0 < ν := by omega
+  have hkν : k + 1 = ν := Nat.sub_add_cancel hν0
+  have hkM : M ≤ k := by dsimp [k]; omega
+  have hklt : k < 2 * M := by dsimp [k]; omega
+  have hMpos : 1 ≤ M := by
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hE hr.le) hlog
+    have hmreal : (1 : ℝ) ≤ M := hscale.trans (by nlinarith)
+    exact_mod_cast hmreal
+  have hk : 1 ≤ k := hMpos.trans hkM
+  have hCM : 200 * C₁ * r * Real.log T ≤ (k : ℝ) := by
+    have hc₁ : 200 * C₁ ≤ E := (le_max_right _ _).trans (le_max_right _ _)
+    have hh := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hc₁ hr.le) hlog
+    have hm : (M : ℝ) ≤ k := by exact_mod_cast hkM
+    linarith
+  have habs := reciprocal_pole_error_absorbed hr hCM
+  have herr := hexp T t r (200 * r) hT ht htT hr (by linarith) hc hcl hscale' hfin k hk
+  let F : ℂ := iteratedDeriv k (logDeriv (f)) s
+  let P : ℂ := (-1 : ℂ) ^ k * k.factorial * ∑ ρ ∈ S, (m ρ : ℂ) / (s - ρ) ^ (k + 1)
+  have hPn : (k.factorial : ℝ) / (100 * r) ^ (k + 1) ≤ ‖P‖ := by
+    have hh := mul_le_mul_of_nonneg_left hpole (Nat.cast_nonneg k.factorial)
+    simpa [P, norm_mul, norm_pow, hkν, mul_div_assoc, div_eq_mul_inv] using hh
+  have hFn : ‖F - P‖ ≤ (k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1)) := by
+    exact herr.trans (by convert mul_le_mul_of_nonneg_left habs (Nat.cast_nonneg k.factorial) using 1 <;> ring)
+  have htriangle : ‖P‖ ≤ ‖F‖ + ‖F - P‖ := by
+    have hh := norm_add_le F (P - F)
+    rw [norm_sub_rev P F] at hh
+    simpa only [add_sub_cancel] using hh
+  refine ⟨k, hkM, hklt, ?_⟩
+  have heq : (k.factorial : ℝ) / (100 * r) ^ (k + 1) =
+      2 * ((k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1))) := by ring
+  rw [heq] at hPn
+  linarith
+
+end PortpC
+
+section PortpA
+
+open Complex MeasureTheory Finset
+open scoped Classical LSeries.notation
+open LeanLab.Linnik.Decomp1532b2
+
+/-- Gallagher p.334 display 22. The arithmetic series norm is exactly the
+normalized logarithmic derivative norm in the right half plane. -/
+private theorem pA_poisson_norm_eq_derivative_norm {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (k : ℕ) {r : ℝ} (hr : 0 < r) (v : ℝ) :
+    ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+      (n : ℂ) ^ (1 + I * v)) * (poissonKernel k (r * Real.log n) : ℂ)‖ =
+      (r ^ k / (k.factorial : ℝ)) *
+        ‖iteratedDeriv k (fun z => -deriv χ.LFunction z / χ.LFunction z)
+          (1 + r + I * v)‖ := by
+  rw [← normalized_log_series_eq_poisson]
+  have hs : 1 < (1 + (r : ℂ) + I * v).re := by simp; linarith
+  rw [iterated_neg_logDeriv_eq_LSeries χ k hs]
+  simp only [norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
+  rw [Complex.norm_real, Real.norm_of_nonneg (by positivity)]
+
+/-- Gallagher p.334 display 22. A derivative lower bound supplies the
+arithmetic lower bound by an exact identity. No zero premise is needed. -/
+private theorem pA_poisson_lower_of_derivative_lower {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (k : ℕ) {r D η : ℝ} (hr : 0 < r) (hD : 0 < D) (v : ℝ)
+    (h : η * (k.factorial : ℝ) / (D ^ k * r ^ (k + 1)) ≤
+      ‖iteratedDeriv k (fun z => -deriv χ.LFunction z / χ.LFunction z)
+        (1 + r + I * v)‖) :
+    η / (D ^ k * r) ≤
+      ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+        (n : ℂ) ^ (1 + I * v)) * (poissonKernel k (r * Real.log n) : ℂ)‖ := by
+  rw [pA_poisson_norm_eq_derivative_norm χ k hr v]
+  have hh := mul_le_mul_of_nonneg_left h
+    (show 0 ≤ r ^ k / (k.factorial : ℝ) by positivity)
+  convert hh using 1
+  simp only [pow_succ]
+  field_simp
+  <;> ring
+
+/-- Gallagher p.334 translating the shifted logarithmic derivative back to
+minus L prime over L preserves the norm of every derivative. -/
+private theorem pA_shifted_logDeriv_norm_eq {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (k : ℕ) (r v : ℝ) :
+    ‖iteratedDeriv k (logDeriv (LeanLab.PNTPort.DirichletZF.fShift χ v)) ((r : ℂ) - 1 / 2)‖ =
+      ‖iteratedDeriv k (fun z => -deriv χ.LFunction z / χ.LFunction z) (1 + r + I * v)‖ := by
+  have hfun : logDeriv (LeanLab.PNTPort.DirichletZF.fShift χ v) =
+      (fun z => logDeriv χ.LFunction (z + ((3 : ℂ) / 2 + I * v))) := by
+    funext z
+    change deriv (fun w => χ.LFunction (w + ((3 : ℂ) / 2 + I * v))) z /
+      χ.LFunction (z + ((3 : ℂ) / 2 + I * v)) = _
+    rw [deriv_comp_add_const]
+    rfl
+  rw [hfun, iteratedDeriv_comp_add_const]
+  have hpoint : ((r : ℂ) - 1 / 2) + ((3 : ℂ) / 2 + I * v) = 1 + r + I * v := by ring
+  dsimp only
+  rw [hpoint]
+  have hneg : (fun z => -deriv χ.LFunction z / χ.LFunction z) =
+      (fun z => -logDeriv χ.LFunction z) := by funext z; simp [logDeriv_apply, neg_div]
+  rw [hneg, iteratedDeriv_fun_neg, norm_neg]
+
+/-- Gallagher p.334 display 22 for every nonprincipal character in the global
+height scale. This includes local logarithmic scales below one. -/
+private theorem pA_nonprincipal_poisson_global : ∃ E : ℝ, 1 ≤ E ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ (χ : DirichletCharacter ℂ q), χ ≠ 1 → ∀ v r : ℝ,
+        |v| ≤ T → 0 < r → r ≤ 1 / 1600 → 1 ≤ r * Real.log T →
+        (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + I * v)‖ ≤ r) →
+        ∀ M : ℕ, E * r * Real.log T ≤ M →
+          ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+            (1 / 200 : ℝ) / ((100 : ℝ) ^ k * r) ≤
+              ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+                (n : ℂ) ^ (1 + I * v)) * (poissonKernel k (r * Real.log n) : ℂ)‖ := by
+  obtain ⟨E, hE, hlarge⟩ := pC_nonprincipal_large_logDeriv_global
+  refine ⟨E, hE, ?_⟩
+  intro T hT q hq hqT χ hχ v r hv hr hrhi hscale hz M hM
+  obtain ⟨k, hklo, hkhi, hk⟩ := hlarge T hT q hqT χ hχ v r hv hr hrhi hscale hz M hM
+  rw [pA_shifted_logDeriv_norm_eq] at hk
+  refine ⟨k, hklo, hkhi, pA_poisson_lower_of_derivative_lower χ k hr (by norm_num) v ?_⟩
+  convert hk using 1
+  simp only [mul_pow, pow_succ]
+  field_simp
+  <;> ring
+
+/-- Gallagher 1970 p.334 display 21 and the derivative lower bound
+immediately before display 22, restricted to principal characters.
+There is no arithmetic series, smoothing kernel, finite window or integral.
+The height exclusion and the differentiated finite Euler factors are retained. -/
+private theorem pA_principal_large_logarithmic_derivative :
+    ∃ r₀ E D η : ℝ,
+    0 < r₀ ∧ r₀ ≤ 1 / 4 ∧ 1 ≤ E ∧ 1 ≤ D ∧ 0 < η ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ χ : DirichletCharacter ℂ q, χ = 1 → ∀ v r : ℝ,
+        |v| ≤ T → 2 ≤ |v| → 1 / Real.log T ≤ r → r ≤ r₀ →
+        (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + v * Complex.I)‖ ≤ r) →
+        ∀ M : ℕ, E * r * Real.log T ≤ M →
+          ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+            η * (k.factorial : ℝ) / (D ^ k * r ^ (k + 1)) ≤
+              ‖iteratedDeriv k (fun z => -deriv χ.LFunction z / χ.LFunction z)
+                (1 + r + I * v)‖ := by
+  obtain ⟨Eζ, hEζ, hzetaLarge⟩ := pC_zeta_large_logDeriv_global
+  refine ⟨1 / 1600, max Eζ 1200, 100, 1 / 400,
+    by norm_num, by norm_num, hEζ.trans (le_max_left _ _), by norm_num, by norm_num, ?_⟩
+  intro T hT q hq hqT χ hχ v r hv hvlo hrlo hrhi hz M hM
+  subst χ
+  have hlog : 0 < Real.log T := Real.log_pos (by linarith)
+  have hr : 0 < r := (one_div_pos.mpr hlog).trans_le hrlo
+  have hscale : 1 ≤ r * Real.log T := by
+    have hh := mul_le_mul_of_nonneg_right hrlo hlog.le
+    have he : (1 / Real.log T) * Real.log T = 1 := by field_simp
+    rwa [he] at hh
+  have hMζ : Eζ * r * Real.log T ≤ M := by
+    have hh := mul_le_mul_of_nonneg_right (le_max_left Eζ 1200) (mul_nonneg hr.le hlog.le)
+    nlinarith
+  have hroot : ∃ ρ : ℂ, riemannZeta ρ = 0 ∧ ‖ρ - (1 + I * v)‖ ≤ r := by
+    obtain ⟨ρ, hρ, hnear⟩ := hz
+    have hreabs := (Complex.abs_re_le_norm (ρ - (1 + v * I))).trans hnear
+    have himabs := (Complex.abs_im_le_norm (ρ - (1 + v * I))).trans hnear
+    have hre : 1 / 2 ≤ ρ.re := by
+      norm_num at hreabs
+      have hh := (abs_le.mp hreabs).1
+      linarith
+    have hρne : ρ ≠ 1 := by
+      intro he
+      rw [he] at himabs
+      norm_num at himabs
+      linarith
+    have hprod : (∏ p ∈ q.primeFactors, (1 - (p : ℂ) ^ (-ρ))) ≠ 0 := by
+      apply prod_ne_zero_iff.mpr
+      intro p hp
+      have hnorm := pC_norm_prime_cpow_neg_le (Nat.prime_of_mem_primeFactors hp) hre
+      intro he
+      have hone : (p : ℂ) ^ (-ρ) = 1 := (sub_eq_zero.mp he).symm
+      rw [hone, norm_one] at hnorm
+      norm_num at hnorm
+    change DirichletCharacter.LFunctionTrivChar q ρ = 0 at hρ
+    rw [DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta hρne] at hρ
+    have hζ : riemannZeta ρ = 0 := (mul_eq_zero.mp hρ).resolve_left hprod
+    exact ⟨ρ, hζ, by simpa only [mul_comm (v : ℂ) I] using hnear⟩
+  obtain ⟨k, hklo, hkhi, hkζ⟩ := hzetaLarge T v r hT hvlo hv hr hrhi hscale hroot M hMζ
+  let s : ℂ := 1 + r + I * v
+  let e : ℂ → ℂ := fun z => ∑ p ∈ q.primeFactors,
+    (Real.log p : ℂ) * (p : ℂ) ^ (-z) / (1 - (p : ℂ) ^ (-z))
+  have hs : 1 < s.re := by dsimp [s]; norm_num; linarith
+  have hsne : s ≠ 1 := by intro he; rw [he] at hs; norm_num at hs
+  have heζ :
+      ‖iteratedDeriv k (logDeriv (fun w : ℂ => riemannZeta (w + 3 / 2 + I * v))) ((r : ℂ) - 1 / 2)‖ =
+        ‖iteratedDeriv k (fun z => -deriv riemannZeta z / riemannZeta z) s‖ := by
+    have hh := pA_shifted_logDeriv_norm_eq (1 : DirichletCharacter ℂ 1) k r v
+    have hshift : LeanLab.PNTPort.DirichletZF.fShift (1 : DirichletCharacter ℂ 1) v =
+        (fun w : ℂ => riemannZeta (w + 3 / 2 + I * v)) := by
+      funext w
+      change (1 : DirichletCharacter ℂ 1).LFunction (w + ((3 : ℂ) / 2 + I * v)) = _
+      rw [DirichletCharacter.LFunction_modOne_eq]
+      congr 1
+      ring
+    rw [hshift] at hh
+    simpa only [DirichletCharacter.LFunction_modOne_eq, s] using hh
+  rw [heζ] at hkζ
+  have heq : (fun z => -deriv (1 : DirichletCharacter ℂ q).LFunction z /
+      (1 : DirichletCharacter ℂ q).LFunction z) =ᶠ[nhds s]
+        (fun z => -deriv riemannZeta z / riemannZeta z - e z) := by
+    filter_upwards [(isOpen_lt continuous_const Complex.continuous_re).mem_nhds hs] with z hz
+    have hzne : z ≠ 1 := by intro he; rw [he] at hz; norm_num at hz
+    have hh := pC_principal_logDeriv_eq_zeta_add_euler q
+      (by linarith : 1 / 2 ≤ z.re) hzne (riemannZeta_ne_zero_of_one_lt_re hz)
+    simpa only [e, logDeriv_apply, neg_add, neg_div, sub_eq_add_neg] using congrArg (fun w : ℂ => -w) hh
+  have hζan : AnalyticAt ℂ (fun z => -deriv riemannZeta z / riemannZeta z) s :=
+    ((analyticAt_riemannZeta hsne).deriv.neg).div (analyticAt_riemannZeta hsne)
+      (riemannZeta_ne_zero_of_one_lt_re hs)
+  have hean : AnalyticAt ℂ e s :=
+    pC_analyticAt_euler_log_correction q (by linarith)
+  have hder := heq.iteratedDeriv_eq k
+  rw [iteratedDeriv_fun_sub hζan.contDiffAt hean.contDiffAt] at hder
+  have hEuler := pC_iteratedDeriv_euler_log_correction_le q k
+    (s := s) hs.le
+  have hlogq : Real.log q ≤ Real.log T :=
+    Real.log_le_log (by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)) hqT
+  have hErr : ‖iteratedDeriv k e s‖ ≤ (k.factorial : ℝ) * 3 * Real.log T * 4 ^ k := by
+    apply hEuler.trans
+    have hh := mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_left hlogq (show 0 ≤ (k.factorial : ℝ) * 3 by positivity))
+      (pow_nonneg (by norm_num : (0 : ℝ) ≤ 4) k)
+    convert hh using 1 <;> ring
+  have h1200 : 1200 * r * Real.log T ≤ (k : ℝ) := by
+    have hh := mul_le_mul_of_nonneg_right (le_max_right Eζ 1200) (mul_nonneg hr.le hlog.le)
+    have hk : (M : ℝ) ≤ k := by exact_mod_cast hklo
+    nlinarith
+  have habs := reciprocal_pole_error_absorbed (C := 6) (massLog := Real.log T) hr
+    (show 200 * 6 * r * Real.log T ≤ (k : ℝ) by nlinarith)
+  have hp : (4 : ℝ) ^ k ≤ 1 / (200 * r) ^ k := by
+    apply (le_div_iff₀ (pow_pos (by positivity : 0 < 200 * r) k)).mpr
+    rw [← mul_pow]
+    exact pow_le_one₀ (by positivity) (by linarith)
+  have hquarter : ‖iteratedDeriv k e s‖ ≤ (k.factorial : ℝ) / (4 * (100 * r) ^ (k + 1)) := by
+    apply hErr.trans
+    have hh := mul_le_mul_of_nonneg_left hp (show 0 ≤ (k.factorial : ℝ) * 3 * Real.log T by positivity)
+    apply hh.trans
+    convert mul_le_mul_of_nonneg_left habs (show 0 ≤ (k.factorial : ℝ) / 2 by positivity) using 1 <;> ring
+  have htri : ‖iteratedDeriv k (fun z => -deriv riemannZeta z / riemannZeta z) s‖ ≤
+      ‖iteratedDeriv k (fun z => -deriv (1 : DirichletCharacter ℂ q).LFunction z /
+        (1 : DirichletCharacter ℂ q).LFunction z) s‖ + ‖iteratedDeriv k e s‖ := by
+    calc
+      _ = ‖iteratedDeriv k (fun z => -deriv (1 : DirichletCharacter ℂ q).LFunction z /
+          (1 : DirichletCharacter ℂ q).LFunction z) s + iteratedDeriv k e s‖ := by
+            rw [hder, sub_add_cancel]
+      _ ≤ _ := norm_add_le _ _
+  have htarget : (k.factorial : ℝ) / (4 * (100 * r) ^ (k + 1)) ≤
+      ‖iteratedDeriv k (fun z => -deriv (1 : DirichletCharacter ℂ q).LFunction z /
+        (1 : DirichletCharacter ℂ q).LFunction z) s‖ := by
+    have he : (k.factorial : ℝ) / (2 * (100 * r) ^ (k + 1)) =
+        2 * ((k.factorial : ℝ) / (4 * (100 * r) ^ (k + 1))) := by ring
+    rw [he] at hkζ
+    linarith
+  refine ⟨k, hklo, hkhi, ?_⟩
+  convert htarget using 1
+  simp only [mul_pow, pow_succ]
+  field_simp
+  <;> ring
+
+/-- Gallagher p.334 monotonicity of the detector constants.
+The numerator decreases and the exponential denominator increases. -/
+private theorem pA_detector_constant_mono {η η' D D' r : ℝ} (k : ℕ)
+    (hη : η ≤ η') (hη' : 0 ≤ η') (hD : 1 ≤ D) (hDD' : D ≤ D') (hr : 0 < r) :
+    η / (D' ^ k * r) ≤ η' / (D ^ k * r) := by
+  have hD0 : 0 < D := by linarith
+  have hD'0 : 0 < D' := hD0.trans_le hDD'
+  calc
+    η / (D' ^ k * r) ≤ η' / (D' ^ k * r) :=
+      div_le_div_of_nonneg_right hη (by positivity)
+    _ ≤ η' / (D ^ k * r) :=
+      div_le_div_of_nonneg_left hη' (by positivity)
+        (mul_le_mul_of_nonneg_right (pow_le_pow_left₀ hD0.le hDD' k) hr.le)
+
+/-- Gallagher p.334 display 22. Exact sealed series statement assembled from
+the principal derivative estimate and the global nonprincipal detector. -/
+private theorem pA_poisson_series_detector_of_turan
+    (hpower : ∀ n M : ℕ, 0 < n → n ≤ M → ∀ z : Fin n → ℂ, (∃ i, 1 ≤ ‖z i‖) →
+      ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧ (1 / 50 : ℝ) ^ M ≤ ‖∑ i, z i ^ ν‖) :
+    ∃ r₀ E D η : ℝ,
+    0 < r₀ ∧ r₀ ≤ 1 / 4 ∧ 1 ≤ E ∧ 1 ≤ D ∧ 0 < η ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+        |v| ≤ T → (χ = 1 → 2 ≤ |v|) → 1 / Real.log T ≤ r → r ≤ r₀ →
+        (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + v * Complex.I)‖ ≤ r) →
+        ∀ M : ℕ, E * r * Real.log T ≤ M →
+          ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+            η / (D ^ k * r) ≤
+              ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+                (n : ℂ) ^ (1 + I * v)) * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)‖ := by
+  obtain ⟨rₚ, Eₚ, Dₚ, ηₚ, hrₚ, hrₚhi, hEₚ, hDₚ, hηₚ, hprincipal⟩ :=
+    pA_principal_large_logarithmic_derivative
+  obtain ⟨Eₙ, hEₙ, hnonprincipal⟩ := pA_nonprincipal_poisson_global
+  refine ⟨min rₚ (1 / 1600), max Eₚ Eₙ, max Dₚ 100, min ηₚ (1 / 200),
+    lt_min hrₚ (by norm_num), (min_le_left _ _).trans hrₚhi,
+    hEₚ.trans (le_max_left _ _), hDₚ.trans (le_max_left _ _),
+    lt_min hηₚ (by norm_num), ?_⟩
+  intro T hT q hq hqT χ v r hv hχ hrlo hrhi hz M hM
+  have hlog : 0 < Real.log T := Real.log_pos (by linarith)
+  have hr : 0 < r := (one_div_pos.mpr hlog).trans_le hrlo
+  have hscale : 1 ≤ r * Real.log T := by
+    have hh := mul_le_mul_of_nonneg_right hrlo hlog.le
+    have he : (1 / Real.log T) * Real.log T = 1 := by field_simp
+    rwa [he] at hh
+  have hMp : Eₚ * r * Real.log T ≤ M := by
+    have hh := mul_le_mul_of_nonneg_right (le_max_left Eₚ Eₙ) (mul_nonneg hr.le hlog.le)
+    nlinarith
+  have hMn : Eₙ * r * Real.log T ≤ M := by
+    have hh := mul_le_mul_of_nonneg_right (le_max_right Eₚ Eₙ) (mul_nonneg hr.le hlog.le)
+    nlinarith
+  by_cases hp : χ = 1
+  · obtain ⟨k, hklo, hkhi, hk⟩ := hprincipal T hT q hqT χ hp v r hv (hχ hp) hrlo
+      (hrhi.trans (min_le_left _ _)) hz M hMp
+    refine ⟨k, hklo, hkhi, ?_⟩
+    exact (pA_detector_constant_mono k (min_le_left _ _) hηₚ.le hDₚ (le_max_left _ _) hr).trans
+      (pA_poisson_lower_of_derivative_lower χ k hr (by linarith) v hk)
+  · have hz' : ∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + I * v)‖ ≤ r := by
+      simpa only [mul_comm (v : ℂ) I] using hz
+    obtain ⟨k, hklo, hkhi, hk⟩ := hnonprincipal T hT q hqT χ hp v r hv hr
+      (hrhi.trans (min_le_right _ _)) hscale hz' M hMn
+    refine ⟨k, hklo, hkhi, ?_⟩
+    exact (pA_detector_constant_mono k (min_le_right _ _) (by norm_num) (by norm_num : (1 : ℝ) ≤ 100)
+      (le_max_right _ _) hr).trans hk
+
+end PortpA
+
+section PortpW
+
+open Finset MeasureTheory Complex
+open scoped Classical
+open LeanLab.Linnik.Decomp1532b2
+
+/-- Gallagher p.335 the smoothing kernel is smooth on the real line. -/
+private theorem pW_contDiff_poissonKernel (k : ℕ) : ContDiff ℝ 2 (Decomp1532b2.poissonKernel k) := by
+  unfold Decomp1532b2.poissonKernel
+  fun_prop
+
+/-- Gallagher p.335 chain rule for the logarithmic smoothing kernel. -/
+private theorem pW_poisson_log_hasDerivAt (k : ℕ) (r : ℝ) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (fun u : ℝ => (Decomp1532b2.poissonKernel k (r * Real.log u) : ℂ))
+      ((deriv (Decomp1532b2.poissonKernel k) (r * Real.log t) * (r / t) : ℝ) : ℂ) t := by
+  have hk : DifferentiableAt ℝ (Decomp1532b2.poissonKernel k) (r * Real.log t) :=
+    ((pW_contDiff_poissonKernel k).differentiable (by norm_num)).differentiableAt
+  convert (hk.hasDerivAt.comp t ((Real.hasDerivAt_log ht.ne').const_mul r)).ofReal_comp using 1 <;> congr 1
+
+/-- Gallagher p.335 the logarithmic smoothing derivative is bounded by r over t. -/
+private theorem pW_norm_deriv_poisson_log_le (k : ℕ) {r t : ℝ} (hr : 0 ≤ r) (ht : 1 ≤ t) :
+    ‖deriv (fun u : ℝ => (Decomp1532b2.poissonKernel k (r * Real.log u) : ℂ)) t‖ ≤ r / t := by
+  have ht0 : 0 < t := by linarith
+  rw [(pW_poisson_log_hasDerivAt k r ht0).deriv, Complex.norm_real, Real.norm_eq_abs, abs_mul,
+    abs_of_nonneg (div_nonneg hr ht0.le)]
+  simpa using mul_le_mul_of_nonneg_right
+    (abs_deriv_poissonKernel_le_one k (mul_nonneg hr (Real.log_nonneg ht)))
+    (div_nonneg hr ht0.le)
+
+/-- Gallagher p.335 integrability of the smoothing derivative on a positive interval. -/
+private theorem pW_integrableOn_deriv_poisson_log (k : ℕ) (r : ℝ) {x y : ℝ} (hx : 0 < x) :
+    IntegrableOn (deriv (fun u : ℝ => (Decomp1532b2.poissonKernel k (r * Real.log u) : ℂ)))
+      (Set.Icc x y) := by
+  have hl : ContDiffOn ℝ 2 Real.log (Set.Ioi 0) :=
+    Real.contDiffOn_log.mono (by intro t ht; simpa using ht.ne')
+  have hp : ContDiffOn ℝ 2 (fun u : ℝ => Decomp1532b2.poissonKernel k (r * Real.log u)) (Set.Ioi 0) :=
+    (pW_contDiff_poissonKernel k).comp_contDiffOn (contDiffOn_const.mul hl)
+  have hc : ContDiffOn ℝ 2 (fun u : ℝ => (Decomp1532b2.poissonKernel k (r * Real.log u) : ℂ)) (Set.Ioi 0) :=
+    Complex.ofRealCLM.contDiff.comp_contDiffOn hp
+  exact ((hc.continuousOn_deriv_of_isOpen isOpen_Ioi (by norm_num)).mono
+    (by intro t ht; exact hx.trans_le ht.1)).integrableOn_Icc
+
+/-- Gallagher p.335 the supported partial sum norm divided by height is integrable. -/
+private theorem pW_integrableOn_partial_sum_norm_div (a : ℕ → ℂ) {x y : ℝ} (hx : 0 < x) :
+    IntegrableOn (fun t : ℝ => ‖∑ n ∈ Icc 0 ⌊t⌋₊, a n‖ / t) (Set.Icc x y) := by
+  have hi : IntegrableOn (fun t : ℝ => ((1 / t : ℝ) : ℂ)) (Set.Icc x y) := by
+    exact (Complex.continuous_ofReal.comp_continuousOn
+      (continuousOn_const.div continuousOn_id (by intro t ht; exact (hx.trans_le ht.1).ne'))).integrableOn_Icc
+  have hh : IntegrableOn (fun t : ℝ => ‖((1 / t : ℝ) : ℂ) * ∑ n ∈ Icc 0 ⌊t⌋₊, a n‖)
+      (Set.Icc x y) := (integrableOn_mul_sum_Icc (m := 0) a hx.le hi).norm
+  apply hh.congr_fun _ measurableSet_Icc
+  intro t ht
+  dsimp only
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (one_div_pos.mpr (hx.trans_le ht.1))]
+  ring
+
+/-- Gallagher p.335 partial summation with its endpoint term retained.
+This calculus statement has no zero or character hypothesis. -/
+private theorem pW_poisson_partial_summation_bound (a : ℕ → ℂ) (k : ℕ) {r x y : ℝ}
+    (hr : 0 ≤ r) (hx : 1 ≤ x) (hxy : x ≤ y)
+    (ha : ∀ n ≤ ⌊x⌋₊, a n = 0) :
+    ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊y⌋₊, (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) * a n‖ -
+        Decomp1532b2.poissonKernel k (r * Real.log y) * ‖∑ n ∈ Icc 0 ⌊y⌋₊, a n‖ ≤
+      r * ∫ t in x..y, ‖∑ n ∈ Icc 0 ⌊t⌋₊, a n‖ / t := by
+  have hx0 : 0 < x := by linarith
+  have hh := detector_partial_summation_lower a
+    (fun t : ℝ => (Decomp1532b2.poissonKernel k (r * Real.log t) : ℂ)) hx0 hxy ha
+    (fun t ht => (pW_poisson_log_hasDerivAt k r (hx0.trans_le ht.1)).differentiableAt)
+    (pW_integrableOn_deriv_poisson_log k r hx0)
+    (show ‖(Decomp1532b2.poissonKernel k (r * Real.log y) : ℂ)‖ ≤ Decomp1532b2.poissonKernel k (r * Real.log y) by
+      rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg
+        (poissonKernel_nonneg k (mul_nonneg hr (Real.log_nonneg (hx.trans hxy))))])
+    (fun t ht => pW_norm_deriv_poisson_log_le k hr (hx.trans ht.1.le))
+    ((pW_integrableOn_partial_sum_norm_div a hx0).mono_set Set.Ioc_subset_Icc_self)
+    (le_refl _)
+  rw [intervalIntegral.integral_of_le hxy]
+  linarith
+
+
+/-- Gallagher p.333 the supported coefficient sum is exactly the prime detector. -/
+private theorem pW_sum_primeWindowCoefficient {q : ℕ} (χ : DirichletCharacter ℂ q)
+    (x y v : ℝ) :
+    (∑ n ∈ Icc 0 ⌊y⌋₊, (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n) = primeDetector χ x y v := by
+  classical
+  have hset : (Icc 0 ⌊y⌋₊).filter (fun n => ⌊x⌋₊ < n ∧ n.Prime)
+      = (Ioc ⌊x⌋₊ ⌊y⌋₊).filter Nat.Prime := by
+    ext n
+    simp only [mem_filter, mem_Icc, mem_Ioc]
+    constructor
+    · rintro ⟨⟨-, hu⟩, hl, hp⟩
+      exact ⟨⟨hl, hu⟩, hp⟩
+    · rintro ⟨⟨hl, hu⟩, hp⟩
+      exact ⟨⟨Nat.zero_le _, hu⟩, hl, hp⟩
+  rw [primeDetector]
+  dsimp only
+  rw [← Finset.sum_filter, hset]
+
+/-- Gallagher p.335 the full von Mangoldt reciprocal mass has logarithmic size. -/
+private theorem pW_mangoldt_reciprocal_sum_le_log : ∃ C : ℝ, 0 ≤ C ∧ ∀ x : ℝ, 1 ≤ x →
+    (∑ n ∈ Icc 1 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n / (n : ℝ)) ≤ Real.log x + C := by
+  obtain ⟨C, hC, htail⟩ := prime_power_reciprocal_tail
+  refine ⟨C + 7, by positivity, ?_⟩
+  have hnat (N : ℕ) (hN : 1 ≤ N) :
+      (∑ n ∈ Icc 1 N, ArithmeticFunction.vonMangoldt n / (n : ℝ)) ≤ Real.log N + (C + 7) := by
+    have hp : (∑ n ∈ (Icc 1 N).filter Nat.Prime,
+        ArithmeticFunction.vonMangoldt n / (n : ℝ)) = LeanLab.PNTSieve.Mertens.C N := by
+      simp only [sum_filter, LeanLab.PNTSieve.Mertens.C, LeanLab.PNTSieve.Mertens.c]
+      apply sum_congr rfl
+      intro n hn
+      by_cases hnp : n.Prime <;> simp [hnp, ArithmeticFunction.vonMangoldt_apply_prime]
+    have hn : (∑ n ∈ (Icc 1 N).filter (fun n => ¬n.Prime),
+        ArithmeticFunction.vonMangoldt n / (n : ℝ)) =
+        ∑ n ∈ (Ioc 1 N).filter (fun n => ¬n.Prime), ArithmeticFunction.vonMangoldt n / (n : ℝ) := by
+      symm
+      apply sum_subset
+      · intro n hn
+        obtain ⟨hn, hnp⟩ := mem_filter.mp hn
+        exact mem_filter.mpr ⟨mem_Icc.mpr ⟨(mem_Ioc.mp hn).1.le, (mem_Ioc.mp hn).2⟩, hnp⟩
+      · intro n hn hnot
+        obtain ⟨hn, hnp⟩ := mem_filter.mp hn
+        have hnlo : 1 ≤ n := (mem_Icc.mp hn).1
+        have hn1 : n = 1 := by
+          by_contra hne
+          exact hnot (mem_filter.mpr ⟨mem_Ioc.mpr ⟨by omega, (mem_Icc.mp hn).2⟩, hnp⟩)
+        subst n
+        simp
+    have ht := htail 1 (N : ℝ) (by norm_num) (by exact_mod_cast hN)
+    norm_num only [Nat.floor_one, Nat.floor_natCast, Real.sqrt_one, div_one] at ht
+    rw [← sum_filter_add_sum_filter_not (Icc 1 N) Nat.Prime
+      (fun n => ArithmeticFunction.vonMangoldt n / (n : ℝ)), hp, hn]
+    linarith [LeanLab.PNTSieve.Mertens.C_le N hN]
+  intro x hx
+  have hN : 1 ≤ ⌊x⌋₊ := (Nat.one_le_floor_iff _).mpr hx
+  have hlog : Real.log ⌊x⌋₊ ≤ Real.log x :=
+    Real.log_le_log (by exact_mod_cast (by omega : 0 < ⌊x⌋₊)) (Nat.floor_le (by linarith))
+  exact (hnat ⌊x⌋₊ hN).trans (by linarith)
+
+/-- Gallagher p.335 the finite small Poisson tail, with a von Mangoldt majorant. -/
+private theorem pW_poisson_small_cutoff_norm : ∃ C : ℝ, 0 ≤ C ∧ ∀ D : ℝ, 0 < D →
+    ∃ B₁ : ℝ, 0 < B₁ ∧ ∀ (a : ℕ → ℂ) (k : ℕ) (r x : ℝ),
+      0 ≤ r → 1 ≤ x → r * Real.log x ≤ B₁ * k →
+      (∀ n ∈ Icc 1 ⌊x⌋₊, ‖a n‖ ≤ ArithmeticFunction.vonMangoldt n / (n : ℝ)) →
+      ‖∑ n ∈ Icc 1 ⌊x⌋₊, a n * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)‖ ≤
+        (1 / (2 * D)) ^ k * (Real.log x + C) := by
+  obtain ⟨C, hC, hmass⟩ := pW_mangoldt_reciprocal_sum_le_log
+  refine ⟨C, hC, ?_⟩
+  intro D hD
+  obtain ⟨B₁, hB₁, htail⟩ := poissonKernel_small_tail D hD
+  refine ⟨B₁, hB₁, ?_⟩
+  intro a k r x hr hx hscale ha
+  calc
+    _ ≤ ∑ n ∈ Icc 1 ⌊x⌋₊,
+        ‖a n * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)‖ := norm_sum_le _ _
+    _ ≤ ∑ n ∈ Icc 1 ⌊x⌋₊,
+        (ArithmeticFunction.vonMangoldt n / (n : ℝ)) * (1 / (2 * D)) ^ k := by
+      apply sum_le_sum
+      intro n hn
+      have hn0 : (0 : ℝ) < n := by exact_mod_cast (mem_Icc.mp hn).1
+      have hnx : (n : ℝ) ≤ x :=
+        (show (n : ℝ) ≤ ⌊x⌋₊ by exact_mod_cast (mem_Icc.mp hn).2).trans
+          (Nat.floor_le (by linarith))
+      have hu : 0 ≤ r * Real.log n := mul_nonneg hr (Real.log_natCast_nonneg n)
+      have hscale' : r * Real.log n ≤ B₁ * k :=
+        (mul_le_mul_of_nonneg_left (Real.log_le_log hn0 hnx) hr).trans hscale
+      rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (poissonKernel_nonneg k hu)]
+      exact mul_le_mul (ha n hn) (htail k _ hu hscale') (poissonKernel_nonneg k hu)
+        (div_nonneg ArithmeticFunction.vonMangoldt_nonneg (Nat.cast_nonneg n))
+    _ = (1 / (2 * D)) ^ k *
+        ∑ n ∈ Icc 1 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n / (n : ℝ) := by
+      rw [mul_sum]
+      apply sum_congr rfl
+      intro n hn
+      ring
+    _ ≤ _ := mul_le_mul_of_nonneg_left (hmass x hx) (by positivity)
+
+/-- Gallagher p.335 the positive real Dirichlet series majorant for the upper tail. -/
+private theorem pW_mangoldt_rpow_series_bound : ∃ A : ℝ, 1 ≤ A ∧ ∀ d : ℝ, 0 < d → d < 1 →
+    Summable (fun n : ℕ => ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + d)) ∧
+      (∑' n : ℕ, ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + d)) ≤ 1 / d + A := by
+  obtain ⟨A, hA, hbound⟩ := _root_.ShiftZeroBound
+  refine ⟨A, hA, ?_⟩
+  intro d hd hd1
+  have hs : 1 < ((1 + d : ℝ) : ℂ).re := by simp; linarith
+  have hm := ArithmeticFunction.LSeriesSummable_vonMangoldt hs
+  have he (n : ℕ) :
+      (LSeries.term (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) ((1 + d : ℝ) : ℂ) n).re =
+        ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + d) := by
+    by_cases hn : n = 0
+    · subst n
+      simp
+    have hn0 : (0 : ℝ) < n := by exact_mod_cast Nat.pos_of_ne_zero hn
+    have hcp : (n : ℂ) ^ ((1 + d : ℝ) : ℂ) = (((n : ℝ) ^ (1 + d) : ℝ) : ℂ) := by
+      rw [← Complex.ofReal_natCast, Complex.ofReal_cpow hn0.le]
+    rw [LSeries.term_of_ne_zero hn, hcp, ← Complex.ofReal_div, Complex.ofReal_re]
+  have hsum : Summable (fun n : ℕ => ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + d)) :=
+    (Complex.reCLM.summable hm).congr he
+  refine ⟨hsum, ?_⟩
+  have ht : (∑' n : ℕ, ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + d)) =
+      (LSeries (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) ((1 + d : ℝ) : ℂ)).re := by
+    rw [LSeries, Complex.re_tsum hm]
+    exact tsum_congr (fun n => (he n).symm)
+  rw [ht, ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs]
+  simpa only [Complex.ofReal_add, Complex.ofReal_one, neg_div, neg_re] using hbound d ⟨hd, hd1⟩
+
+/-- Gallagher p.335 the infinite upper Poisson tail, with absolute convergence. -/
+private theorem pW_poisson_large_cutoff_norm : ∃ C : ℝ, 0 ≤ C ∧ ∀ D : ℝ, 0 < D →
+    ∃ B₂ : ℝ, 0 < B₂ ∧ ∀ (a : ℕ → ℂ) (k : ℕ) (r x : ℝ),
+      0 < r → r ≤ 1 → 1 ≤ x → B₂ * k ≤ r * Real.log x →
+      (∀ n : ℕ, ‖a n‖ ≤ ArithmeticFunction.vonMangoldt n / (n : ℝ)) →
+      Summable (fun n : ℕ => if x < (n : ℝ) then
+        a n * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) else 0) ∧
+      ‖∑' n : ℕ, if x < (n : ℝ) then
+        a n * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) else 0‖ ≤
+        (1 / (2 * D)) ^ k * ((C : ℝ) / r) := by
+  obtain ⟨A, hA, hseries⟩ := pW_mangoldt_rpow_series_bound
+  have hA0 : 0 ≤ A := by linarith
+  refine ⟨A + 2, by positivity, ?_⟩
+  intro D hD
+  obtain ⟨B₂, hB₂, htail⟩ := poissonKernel_large_tail D hD
+  refine ⟨B₂, hB₂, ?_⟩
+  intro a k r x hr hr1 hx hscale ha
+  obtain ⟨hsum, hmass⟩ := hseries (r / 2) (by positivity) (by linarith)
+  have hmass' : (∑' n : ℕ, ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + r / 2)) ≤
+      (A + 2) / r := by
+    have he : 1 / (r / 2) = 2 / r := by ring
+    rw [he] at hmass
+    apply hmass.trans
+    apply (le_div_iff₀ hr).mpr
+    rw [add_mul, div_mul_cancel₀ _ hr.ne']
+    nlinarith [mul_le_mul_of_nonneg_left hr1 hA0]
+  let b : ℕ → ℝ := fun n => (1 / (2 * D)) ^ k *
+    (ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + r / 2))
+  have hb : Summable b := hsum.mul_left _
+  have hnorm (n : ℕ) : ‖if x < (n : ℝ) then
+      a n * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) else 0‖ ≤ b n := by
+    dsimp only [b]
+    split_ifs with hnx
+    · have hn0 : (0 : ℝ) < n := by linarith
+      have hu : 0 ≤ r * Real.log n := mul_nonneg hr.le (Real.log_nonneg (by linarith))
+      have hscale' : B₂ * k ≤ r * Real.log n :=
+        hscale.trans (mul_le_mul_of_nonneg_left (Real.log_le_log (by linarith) hnx.le) hr.le)
+      have he : (ArithmeticFunction.vonMangoldt n / (n : ℝ)) * Real.exp (-(r * Real.log n) / 2) =
+          ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + r / 2) := by
+        rw [Real.rpow_add hn0, Real.rpow_one, Real.rpow_def_of_pos hn0]
+        rw [show -(r * Real.log n) / 2 = -(Real.log n * (r / 2)) by ring, Real.exp_neg]
+        simp only [div_eq_mul_inv, mul_inv_rev]
+        ring
+      rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (poissonKernel_nonneg k hu)]
+      calc
+        _ ≤ (ArithmeticFunction.vonMangoldt n / (n : ℝ)) *
+            ((1 / (2 * D)) ^ k * Real.exp (-(r * Real.log n) / 2)) :=
+          mul_le_mul (ha n) (htail k _ hu hscale') (poissonKernel_nonneg k hu)
+            (div_nonneg ArithmeticFunction.vonMangoldt_nonneg (Nat.cast_nonneg n))
+        _ = _ := by rw [mul_left_comm, he]
+    · rw [norm_zero]
+      positivity
+  have hf := hb.of_norm_bounded hnorm
+  refine ⟨hf, ?_⟩
+  calc
+    _ ≤ ∑' n : ℕ, b n := (norm_tsum_le_tsum_norm hf.norm).trans (hf.norm.tsum_le_tsum hnorm hb)
+    _ = (1 / (2 * D)) ^ k *
+        ∑' n : ℕ, ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ (1 + r / 2) := tsum_mul_left
+    _ ≤ _ := mul_le_mul_of_nonneg_left hmass' (by positivity)
+
+/-- Gallagher p.334 principal Euler factors add no zeros in the positive half plane. -/
+private theorem pW_principal_zero_iff_zeta (q : ℕ) [NeZero q] {s : ℂ}
+    (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    (1 : DirichletCharacter ℂ q).LFunction s = 0 ↔ riemannZeta s = 0 := by
+  change DirichletCharacter.LFunctionTrivChar q s = 0 ↔ _
+  rw [DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta hs1]
+  have hprod : (∏ p ∈ q.primeFactors, (1 - (p : ℂ) ^ (-s))) ≠ 0 := by
+    apply prod_ne_zero_iff.mpr
+    intro p hp
+    have hpp := Nat.prime_of_mem_primeFactors hp
+    have hp1 : (1 : ℝ) < p := by exact_mod_cast hpp.one_lt
+    have hlt : ‖(p : ℂ) ^ (-s)‖ < 1 := by
+      rw [Complex.norm_natCast_cpow_of_pos hpp.pos, Complex.neg_re]
+      exact Real.rpow_lt_one_of_one_lt_of_neg hp1 (by linarith)
+    intro he
+    have hpone : (p : ℂ) ^ (-s) = 1 := (sub_eq_zero.mp he).symm
+    rw [hpone, norm_one] at hlt
+    exact (lt_irrefl (1 : ℝ)) hlt
+  simp only [mul_eq_zero, hprod, false_or]
+
+
+set_option maxHeartbeats 4000000
+
+/-- The `n`-th factor `χ n · n^{-I v}` has norm at most one, so the prime power removal applies. -/
+private theorem pW_norm_chi_cpow_le_one {q : ℕ} (χ : DirichletCharacter ℂ q) (v : ℝ) (n : ℕ) :
+    ‖χ n * (n : ℂ) ^ (-(I * v))‖ ≤ 1 := by
+  have hχ : ‖χ n‖ ≤ 1 := DirichletCharacter.norm_le_one χ n
+  have hn : ‖(n : ℂ) ^ (-(I * v))‖ ≤ 1 := by
+    rcases eq_or_ne n 0 with h | h
+    · subst h
+      by_cases hv : v = 0
+      · subst hv; simp
+      · have hz : (-(I * (v : ℂ))) ≠ 0 := by
+          simp [Complex.ext_iff, hv]
+        rw [Nat.cast_zero, Complex.zero_cpow hz]
+        simp
+    · have hpos : 0 < n := Nat.pos_of_ne_zero h
+      rw [Complex.norm_natCast_cpow_of_pos hpos]
+      simp
+  rw [norm_mul]
+  exact mul_le_one₀ hχ (norm_nonneg _) hn
+
+/-- `n ^ (-(1 + I v)) = n ^ (-(I v)) / n`, the bridge between the leaf's series term and the
+coefficient shape of `poisson_weighted_prime_power_removal`. -/
+private theorem pW_cpow_neg_one_add {n : ℕ} (hn : n ≠ 0) (v : ℝ) :
+    (n : ℂ) ^ (-(1 + I * v)) = (n : ℂ) ^ (-(I * v)) / (n : ℂ) := by
+  have hnc : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  have h1 : (-(1 + I * v) : ℂ) = (-(I * v)) + (-1) := by
+    push_cast
+    ring
+  rw [h1, Complex.cpow_add _ _ hnc, Complex.cpow_neg_one, div_eq_mul_inv]
+
+/-- The leaf's series term, written with the coefficient `χ n · n^{-I v}` that the prime power
+removal of `Decomp1532b2` consumes. -/
+private theorem pW_seriesTerm_eq {q : ℕ} (χ : DirichletCharacter ℂ q) (v r : ℝ) (k : ℕ) {n : ℕ}
+    (hn : n ≠ 0) :
+    (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) / (n : ℂ) ^ (1 + I * v)) *
+        (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)
+      = (χ n * (n : ℂ) ^ (-(I * v))) *
+        (((ArithmeticFunction.vonMangoldt n / (n : ℝ)) *
+          Decomp1532b2.poissonKernel k (r * Real.log n) : ℝ) : ℂ) := by
+  have hne : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  rw [div_eq_mul_inv, ← Complex.cpow_neg, pW_cpow_neg_one_add hn v]
+  push_cast
+  field_simp
+
+/-- The full Poisson series of the leaf is summable, given the tail bound. -/
+private theorem pW_summable_series {q : ℕ} (χ : DirichletCharacter ℂ q) (v r : ℝ) (k : ℕ)
+    {x' : ℝ} (hx' : 1 ≤ x')
+    (htail : Summable (fun n : ℕ => if x' < (n : ℝ) then
+      (χ n * (n : ℂ) ^ (-(I * v))) *
+        (((ArithmeticFunction.vonMangoldt n / (n : ℝ)) *
+          Decomp1532b2.poissonKernel k (r * Real.log n) : ℝ) : ℂ) else 0)) :
+    Summable (fun n : ℕ => (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) / (n : ℂ) ^ (1 + I * v)) *
+      (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)) := by
+  let F : ℕ → ℂ := fun n =>
+    (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) / (n : ℂ) ^ (1 + I * v)) *
+      (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)
+  let G : ℕ → ℂ := fun n => if x' < (n : ℝ) then
+      (χ n * (n : ℂ) ^ (-(I * v))) *
+        (((ArithmeticFunction.vonMangoldt n / (n : ℝ)) *
+          Decomp1532b2.poissonKernel k (r * Real.log n) : ℝ) : ℂ) else 0
+  have htail' : Summable G := htail
+  have hgs : Summable (fun n : ℕ => G (n + (⌊x'⌋₊ + 1))) :=
+    (summable_nat_add_iff _).mpr htail'
+  have hfs : Summable (fun n : ℕ => F (n + (⌊x'⌋₊ + 1))) := by
+    refine hgs.congr (fun n => ?_)
+    have hne : n + (⌊x'⌋₊ + 1) ≠ 0 := by omega
+    have hlt : x' < ((n + (⌊x'⌋₊ + 1) : ℕ) : ℝ) := by
+      have h1 : x' < (⌊x'⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one x'
+      have h2 : (⌊x'⌋₊ : ℝ) + 1 ≤ ((n + (⌊x'⌋₊ + 1) : ℕ) : ℝ) := by
+        push_cast
+        have : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+        linarith
+      linarith
+    show G (n + (⌊x'⌋₊ + 1)) = F (n + (⌊x'⌋₊ + 1))
+    dsimp only [G, F]
+    rw [if_pos hlt, pW_seriesTerm_eq χ v r k hne]
+  exact (summable_nat_add_iff _).mp hfs
+
+/-- The three way split of the leaf's full series: below `⌊x⌋`, the window, and above `⌊y⌋`. -/
+private theorem pW_tsum_three_split {q : ℕ} (χ : DirichletCharacter ℂ q) (v r : ℝ) (k : ℕ)
+    {x y : ℝ} (hx : 1 ≤ x) (hxy : x ≤ y) :
+    ∀ (F : ℕ → ℂ),
+      (∀ n : ℕ, F n = (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+          (n : ℂ) ^ (1 + I * v)) *
+          (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)) →
+      Summable F →
+      (∑' n : ℕ, F n)
+        = (∑ n ∈ Icc 0 ⌊x⌋₊, F n) + (∑ n ∈ Ioc ⌊x⌋₊ ⌊y⌋₊, F n)
+          + ∑' n : ℕ, (if ⌊y⌋₊ < n then F n else 0) := by
+  have hfy : ⌊x⌋₊ ≤ ⌊y⌋₊ := Nat.floor_mono hxy
+  intro F hF hsum
+  have hh : Summable (fun n : ℕ => if n ≤ ⌊y⌋₊ then F n else 0) :=
+    summable_of_ne_finset_zero (s := Icc 0 ⌊y⌋₊) (fun b hb => by
+      rw [if_neg]
+      intro hle
+      exact hb (mem_Icc.mpr ⟨Nat.zero_le b, hle⟩))
+  have hfg : F = fun n => (if n ≤ ⌊y⌋₊ then F n else 0)
+      + (if ⌊y⌋₊ < n then F n else 0) := by
+    funext n
+    by_cases h : n ≤ ⌊y⌋₊
+    · rw [if_pos h, if_neg (by omega), add_zero]
+    · rw [if_neg h, if_pos (by omega), zero_add]
+  have hg : Summable (fun n : ℕ => if ⌊y⌋₊ < n then F n else 0) := by
+    refine (hsum.sub hh).congr (fun n => ?_)
+    show F n - (if n ≤ ⌊y⌋₊ then F n else 0) = (if ⌊y⌋₊ < n then F n else 0)
+    by_cases h : n ≤ ⌊y⌋₊
+    · rw [if_pos h, if_neg (by omega), sub_self]
+    · rw [if_neg h, if_pos (by omega), sub_zero]
+  have htsum : (∑' n : ℕ, (if n ≤ ⌊y⌋₊ then F n else 0)) = ∑ n ∈ Icc 0 ⌊y⌋₊, F n := by
+    rw [tsum_eq_sum (s := Icc 0 ⌊y⌋₊)]
+    · apply sum_congr rfl
+      intro b hb
+      rw [if_pos (mem_Icc.mp hb).2]
+    · intro b hb
+      rw [if_neg]
+      intro hle
+      exact hb (mem_Icc.mpr ⟨Nat.zero_le b, hle⟩)
+  have hset : Icc 0 ⌊y⌋₊ = Icc 0 ⌊x⌋₊ ∪ Ioc ⌊x⌋₊ ⌊y⌋₊ := by
+    ext n
+    simp only [mem_Icc, mem_Ioc, mem_union]
+    omega
+  have hdisj : Disjoint (Icc 0 ⌊x⌋₊) (Ioc ⌊x⌋₊ ⌊y⌋₊) := by
+    rw [Finset.disjoint_left]
+    intro a ha hb
+    simp only [mem_Icc] at ha
+    simp only [mem_Ioc] at hb
+    omega
+  have hset' : (∑ n ∈ Icc 0 ⌊y⌋₊, F n)
+      = (∑ n ∈ Icc 0 ⌊x⌋₊, F n) + (∑ n ∈ Ioc ⌊x⌋₊ ⌊y⌋₊, F n) := by
+    rw [hset, sum_union hdisj]
+  conv_lhs => rw [hfg]
+  rw [Summable.tsum_add hh hg, htsum, hset']
+
+/-- The prime detector has at most logarithmic mass. -/
+private theorem pW_detector_norm_le :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (q : ℕ) (χ : DirichletCharacter ℂ q) (x y v : ℝ), 1 ≤ x → x ≤ y →
+      ‖primeDetector χ x y v‖ ≤ Real.log y + C := by
+  obtain ⟨C, hC, hmass⟩ := pW_mangoldt_reciprocal_sum_le_log
+  refine ⟨C, hC, fun q χ x y v hx hxy => ?_⟩
+  have hx1 : 1 ≤ ⌊x⌋₊ := (Nat.one_le_floor_iff x).mpr hx
+  have hsub : (Ioc ⌊x⌋₊ ⌊y⌋₊).filter Nat.Prime ⊆ Icc 1 ⌊y⌋₊ := by
+    intro n hn
+    obtain ⟨hnw, hnp⟩ := mem_filter.mp hn
+    exact mem_Icc.mpr ⟨by have := (mem_Ioc.mp hnw).1; omega, (mem_Ioc.mp hnw).2⟩
+  unfold primeDetector
+  calc ‖∑ p ∈ (Ioc ⌊x⌋₊ ⌊y⌋₊).filter Nat.Prime,
+        (Real.log p / (p : ℝ) : ℂ) * χ p * Complex.exp (-((Real.log p * v : ℝ) : ℂ) * I)‖
+      ≤ ∑ p ∈ (Ioc ⌊x⌋₊ ⌊y⌋₊).filter Nat.Prime,
+          ‖(Real.log p / (p : ℝ) : ℂ) * χ p * Complex.exp (-((Real.log p * v : ℝ) : ℂ) * I)‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ p ∈ (Ioc ⌊x⌋₊ ⌊y⌋₊).filter Nat.Prime,
+          ArithmeticFunction.vonMangoldt p / (p : ℝ) := by
+        apply sum_le_sum
+        intro p hp
+        have hpp : Nat.Prime p := (mem_filter.mp hp).2
+        have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
+        have hlog : (0 : ℝ) ≤ Real.log p := Real.log_natCast_nonneg p
+        rw [norm_mul, norm_mul, ← Complex.ofReal_div, Complex.norm_real, Real.norm_eq_abs,
+          abs_of_nonneg (div_nonneg hlog hp0.le), ArithmeticFunction.vonMangoldt_apply_prime hpp]
+        have hre : (-((Real.log p * v : ℝ) : ℂ) * I).re = 0 := by
+          rw [Complex.mul_re, Complex.neg_re, Complex.neg_im, Complex.ofReal_re,
+            Complex.ofReal_im, Complex.I_re, Complex.I_im]
+          ring
+        have hexp : ‖Complex.exp (-((Real.log p * v : ℝ) : ℂ) * I)‖ = 1 := by
+          rw [Complex.norm_exp, hre, Real.exp_zero]
+        rw [hexp, mul_one]
+        calc Real.log ↑p / ↑p * ‖χ p‖ ≤ Real.log ↑p / ↑p * 1 := by
+              exact mul_le_mul_of_nonneg_left (DirichletCharacter.norm_le_one χ (p : ZMod q))
+                (div_nonneg hlog hp0.le)
+          _ = Real.log ↑p / ↑p := mul_one _
+    _ ≤ ∑ n ∈ Icc 1 ⌊y⌋₊, ArithmeticFunction.vonMangoldt n / (n : ℝ) := by
+        refine Finset.sum_le_sum_of_subset_of_nonneg hsub (fun i hi1 hi2 => ?_)
+        exact div_nonneg ArithmeticFunction.vonMangoldt_nonneg (Nat.cast_nonneg i)
+    _ ≤ Real.log y + C := hmass y (by linarith)
+
+/-- The window sum of the prime window coefficient is the prime detector. -/
+private theorem pW_sum_windowCoefficient {q : ℕ} (χ : DirichletCharacter ℂ q) (x y v : ℝ) :
+    (∑ n ∈ Ioc ⌊x⌋₊ ⌊y⌋₊, (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n) = primeDetector χ x y v := by
+  classical
+  unfold primeDetector
+  rw [sum_filter]
+  apply sum_congr rfl
+  intro n hn
+  have hlt : ⌊x⌋₊ < n := (mem_Ioc.mp hn).1
+  by_cases hnp : n.Prime
+  · simp [hlt, hnp]
+  · simp [hnp]
+
+/-- Absorption: for `k ≥ t / B₁` the kernel decay `(1/2)^k` beats any linear growth `t + S`,
+uniformly for `t` past an explicit threshold. No smallness of `B₁` is needed. -/
+private theorem pW_absorption {η B1 S : ℝ} (hη : 0 < η) (hB1 : 0 < B1) (hS : 0 ≤ S) :
+    ∃ A : ℝ, 1 ≤ A ∧ ∀ t : ℝ, A ≤ t → ∀ k : ℕ, t ≤ B1 * k →
+      (1 / 2 : ℝ) ^ k * (t + S) ≤ η / 8 := by
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hlog2h : (1 / 2 : ℝ) ≤ Real.log 2 := by nlinarith [Real.log_two_gt_d9]
+  refine ⟨16 + 16 * S + 4 * Real.sqrt S + 128 * B1 ^ 2 + 8 * B1 * Real.sqrt S +
+      max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) + 1, ?_, ?_⟩
+  · have h1 : (0:ℝ) ≤ 16 * S := by linarith
+    have h2 : (0:ℝ) ≤ 4 * Real.sqrt S := by positivity
+    have h3 : (0:ℝ) ≤ 128 * B1 ^ 2 := by positivity
+    have h4 : (0:ℝ) ≤ 8 * B1 * Real.sqrt S := by positivity
+    have h5 : (0:ℝ) ≤ max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) := le_max_left _ _
+    linarith
+  intro t ht k hk
+  have hA1 : 8 ≤ t := by
+    have h1 : (0:ℝ) ≤ 16 * S := by linarith
+    have h2 : (0:ℝ) ≤ 4 * Real.sqrt S := by positivity
+    have h3 : (0:ℝ) ≤ 128 * B1 ^ 2 := by positivity
+    have h4 : (0:ℝ) ≤ 8 * B1 * Real.sqrt S := by positivity
+    have h5 : (0:ℝ) ≤ max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) := le_max_left _ _
+    linarith
+  have hAS : 16 * S ≤ t := by
+    have h2 : (0:ℝ) ≤ 4 * Real.sqrt S := by positivity
+    have h3 : (0:ℝ) ≤ 128 * B1 ^ 2 := by positivity
+    have h4 : (0:ℝ) ≤ 8 * B1 * Real.sqrt S := by positivity
+    have h5 : (0:ℝ) ≤ max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) := le_max_left _ _
+    linarith
+  have hAsqrt : 4 * Real.sqrt S ≤ t := by
+    have h1 : (0:ℝ) ≤ 16 * S := by linarith
+    have h3 : (0:ℝ) ≤ 128 * B1 ^ 2 := by positivity
+    have h4 : (0:ℝ) ≤ 8 * B1 * Real.sqrt S := by positivity
+    have h5 : (0:ℝ) ≤ max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) := le_max_left _ _
+    linarith
+  have hAB1 : 128 * B1 ^ 2 ≤ t := by
+    have h1 : (0:ℝ) ≤ 16 * S := by linarith
+    have h2 : (0:ℝ) ≤ 4 * Real.sqrt S := by positivity
+    have h4 : (0:ℝ) ≤ 8 * B1 * Real.sqrt S := by positivity
+    have h5 : (0:ℝ) ≤ max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) := le_max_left _ _
+    linarith
+  have hAB1S : 8 * B1 * Real.sqrt S ≤ t := by
+    have h1 : (0:ℝ) ≤ 16 * S := by linarith
+    have h2 : (0:ℝ) ≤ 4 * Real.sqrt S := by positivity
+    have h3 : (0:ℝ) ≤ 128 * B1 ^ 2 := by positivity
+    have h5 : (0:ℝ) ≤ max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) := le_max_left _ _
+    linarith
+  have hAlog : 2 * Real.log (8 / η) * B1 / Real.log 2 ≤ t := by
+    have h1 : (0:ℝ) ≤ 16 * S := by linarith
+    have h2 : (0:ℝ) ≤ 4 * Real.sqrt S := by positivity
+    have h3 : (0:ℝ) ≤ 128 * B1 ^ 2 := by positivity
+    have h4 : (0:ℝ) ≤ 8 * B1 * Real.sqrt S := by positivity
+    have h5 : 2 * Real.log (8 / η) * B1 / Real.log 2 ≤
+        max 0 (2 * Real.log (8 / η) * B1 / Real.log 2) := le_max_right _ _
+    linarith
+  have hpow : (1 / 2 : ℝ) ^ k = Real.exp (-((k : ℝ) * Real.log 2)) := by
+    have h1 : (1 / 2 : ℝ) = Real.exp (Real.log (1 / 2)) := (Real.exp_log (by norm_num)).symm
+    rw [h1, ← Real.exp_nat_mul]
+    congr 1
+    rw [Real.log_div (by norm_num) (by norm_num), Real.log_one]
+    push_cast
+    ring
+  have hkB : t / B1 ≤ (k : ℝ) := by
+    rw [div_le_iff₀ hB1]
+    simpa [mul_comm] using hk
+  have hexp : Real.exp (-((k : ℝ) * Real.log 2)) ≤ Real.exp (-(t / B1 * Real.log 2)) := by
+    apply Real.exp_le_exp.mpr
+    nlinarith
+  rw [hpow]
+  refine le_trans (mul_le_mul_of_nonneg_right hexp (by linarith : (0:ℝ) ≤ t + S)) ?_
+  have hsplit : Real.exp (-(t / B1 * Real.log 2)) * (t + S)
+      = Real.exp (-(t / B1 * Real.log 2) / 2)
+        * (Real.exp (-(t / B1 * Real.log 2) / 2) * (t + S)) := by
+    rw [← mul_assoc, ← Real.exp_add]
+    congr 2
+    ring
+  rw [hsplit]
+  have hc1 : Real.exp (-(t / B1 * Real.log 2) / 2) ≤ η / 8 := by
+    rw [show η / 8 = Real.exp (Real.log (η / 8)) from (Real.exp_log (by positivity)).symm]
+    apply Real.exp_le_exp.mpr
+    have hb : Real.log (η / 8) = -Real.log (8 / η) := by
+      rw [Real.log_div hη.ne' (by norm_num), Real.log_div (by norm_num) hη.ne']
+      ring
+    rw [hb]
+    have hstep : t * (Real.log 2 / B1) ≥ 2 * Real.log (8 / η) := by
+      have hpos : 0 < Real.log 2 / B1 := by positivity
+      have heq : 2 * Real.log (8 / η) * B1 / Real.log 2 * (Real.log 2 / B1) =
+          2 * Real.log (8 / η) := by
+        field_simp
+      calc 2 * Real.log (8 / η)
+          = (2 * Real.log (8 / η) * B1 / Real.log 2) * (Real.log 2 / B1) := heq.symm
+        _ ≤ t * (Real.log 2 / B1) := mul_le_mul_of_nonneg_right hAlog hpos.le
+    have hrew : -(t / B1 * Real.log 2) / 2 = -(t * (Real.log 2 / B1)) / 2 := by
+      field_simp
+    rw [hrew]
+    linarith
+  have hc2 : Real.exp (-(t / B1 * Real.log 2) / 2) * (t + S) ≤ 1 := by
+    have hcpos : 0 < Real.log 2 / B1 := by positivity
+    have hquad : (t / B1 * Real.log 2 / 2) ^ 2 / 2 ≤ Real.exp (t / B1 * Real.log 2 / 2) := by
+      have h := Real.pow_div_factorial_le_exp (t / B1 * Real.log 2 / 2) (by positivity) 2
+      simpa using h
+    have hbig : t + S ≤ (t / B1 * Real.log 2 / 2) ^ 2 / 2 := by
+      -- `t ≤ c²t²/8` and `2S ≤ c²t²/8`, with `c = log2 / B1`
+      have hconv : (t / B1 * Real.log 2 / 2) ^ 2 / 2 = (t * (Real.log 2 / B1)) ^ 2 / 8 := by
+        field_simp
+        ring
+      rw [hconv]
+      have hB1sq : B1 ^ 2 * (Real.log 2 / B1) ^ 2 = (Real.log 2) ^ 2 := by
+        field_simp
+      have hcoef : (0:ℝ) ≤ (Real.log 2 / B1) ^ 2 := by positivity
+      have hct : 16 ≤ t * (Real.log 2 / B1) ^ 2 := by
+        have h4 := mul_le_mul_of_nonneg_right hAB1 hcoef
+        rw [mul_assoc, hB1sq] at h4
+        have h5 : 4 * (Real.log 2) ^ 2 ≥ 1 := by nlinarith [hlog2h]
+        nlinarith
+      have hcS : 16 * S ≤ t ^ 2 * (Real.log 2 / B1) ^ 2 := by
+        have h5 : 4 * Real.sqrt S ≤ t * (Real.log 2 / B1) := by
+          have h9 : (0:ℝ) < Real.log 2 / B1 := hcpos
+          have h11 : 8 * B1 * Real.sqrt S * (Real.log 2 / B1) ≤ t * (Real.log 2 / B1) :=
+            mul_le_mul_of_nonneg_right hAB1S h9.le
+          have h12 : 8 * B1 * Real.sqrt S * (Real.log 2 / B1) =
+              8 * Real.sqrt S * Real.log 2 := by
+            field_simp
+          have h13 : 4 * Real.sqrt S ≤ 8 * Real.sqrt S * Real.log 2 := by
+            have h14 : (0:ℝ) ≤ Real.sqrt S := Real.sqrt_nonneg S
+            nlinarith [hlog2h]
+          linarith
+        have h9 : (0:ℝ) ≤ 4 * Real.sqrt S := by positivity
+        have h11 : (4 * Real.sqrt S) ^ 2 ≤ (t * (Real.log 2 / B1)) ^ 2 :=
+          pow_le_pow_left₀ h9 h5 2
+        have h12 : (4 * Real.sqrt S) ^ 2 = 16 * S := by
+          rw [mul_pow, Real.sq_sqrt hS]; norm_num
+        rw [h12, mul_pow] at h11
+        exact h11
+      have htpos : (0:ℝ) < t := by linarith
+      have hsq : t ^ 2 * (Real.log 2 / B1) ^ 2 = t * (t * (Real.log 2 / B1) ^ 2) := by ring
+      have hgt : 8 * t ≤ t ^ 2 * (Real.log 2 / B1) ^ 2 := by
+        rw [hsq]
+        have := mul_le_mul_of_nonneg_left hct htpos.le
+        linarith
+      rw [mul_pow]
+      nlinarith [hgt, hcS]
+    have hexp3 : Real.exp (-(t / B1 * Real.log 2) / 2)
+        = (Real.exp (t / B1 * Real.log 2 / 2))⁻¹ := by
+      rw [← Real.exp_neg]
+      congr 1
+      ring
+    rw [hexp3, inv_mul_le_iff₀ (Real.exp_pos _), mul_one]
+    exact hbig.trans hquad
+  exact le_trans (mul_le_mul hc1 hc2 (by positivity) (by positivity)) (by norm_num)
+
+/-- The floor threshold and the real threshold agree at natural numbers. -/
+private theorem pW_floor_lt_iff {y : ℝ} {n : ℕ} (hy : 0 ≤ y) : y < (n : ℝ) ↔ ⌊y⌋₊ < n := by
+  constructor
+  · intro h
+    by_contra hcon
+    push_neg at hcon
+    have h1 : y < (⌊y⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one y
+    have h2 : (n : ℝ) ≤ ⌊y⌋₊ := by exact_mod_cast hcon
+    have h3 : (⌊y⌋₊ : ℝ) ≤ y := Nat.floor_le hy
+    linarith
+  · intro h
+    have h1 : (⌊y⌋₊ : ℝ) + 1 ≤ (n : ℝ) := by
+      exact_mod_cast Nat.succ_le_of_lt h
+    have h2 : y < (⌊y⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one y
+    linarith
+
+
+
+/-! ## Numeric lemmas for the assembly
+
+Each of these has a small goal on purpose: the previous pass died of elaboration cost when the
+whole assembly's numeric goal was attacked at once. `set_option maxHeartbeats` is inherited from
+the head of this file. -/
+
+/-- The kernel decay `(1/2)^k` against `D ^ k` with a `1 / r` in the tail term. -/
+private theorem pW_kernel_engine1 {D η r Z : ℝ} (hD : 0 < D) (hr : 0 < r) (hη : 0 < η) (k : ℕ)
+    (h : (1 / 2 : ℝ) ^ k * Z ≤ η / 8) :
+    (1 / (2 * D)) ^ k * (Z / r) ≤ η / (8 * (D ^ k * r)) := by
+  have hb : (1:ℝ) / (2 * D) = (1 / 2) * (1 / D) := by field_simp
+  have hZ : (0:ℝ) ≤ (1 / D) ^ k := by positivity
+  have h1 : (1 / 2) ^ k * Z * r⁻¹ * (1 / D) ^ k ≤ η / 8 * r⁻¹ * (1 / D) ^ k := by
+    apply mul_le_mul_of_nonneg_right _ hZ
+    exact mul_le_mul_of_nonneg_right h (by positivity)
+  have hgoal : (1 / (2 * D)) ^ k * (Z / r) = (1 / 2) ^ k * Z * r⁻¹ * (1 / D) ^ k := by
+    rw [hb, mul_pow, div_eq_mul_inv]
+    ring
+  have h2 : η / 8 * r⁻¹ * (1 / D) ^ k = η / (8 * (D ^ k * r)) := by
+    rw [one_div, inv_pow]
+    field_simp
+  rw [hgoal]
+  exact h1.trans h2.le
+
+/-- The kernel decay against `D ^ k` with no `1 / r` factor. -/
+private theorem pW_kernel_engine2 {D η r Z : ℝ} (hD : 0 < D) (hr : 0 < r) (hr2 : r ≤ 2) (hη : 0 < η)
+    (k : ℕ) (h : (1 / 2 : ℝ) ^ k * Z ≤ η / 16) :
+    (1 / (2 * D)) ^ k * Z ≤ η / (8 * (D ^ k * r)) := by
+  have hb : (1:ℝ) / (2 * D) = (1 / 2) * (1 / D) := by field_simp
+  have hZ : (0:ℝ) ≤ (1 / D) ^ k := by positivity
+  have h1 : (1 / 2) ^ k * Z * (1 / D) ^ k ≤ η / 16 * (1 / D) ^ k :=
+    mul_le_mul_of_nonneg_right h hZ
+  have hgoal : (1 / (2 * D)) ^ k * Z = (1 / 2) ^ k * Z * (1 / D) ^ k := by
+    rw [hb, mul_pow]; ring
+  have h2 : η / 16 * (1 / D) ^ k ≤ η / (8 * (D ^ k * r)) := by
+    have h3 : η / 16 ≤ η / (8 * r) := by
+      rw [div_le_div_iff₀ (by norm_num) (by linarith)]
+      nlinarith
+    have h4 : η / 16 * (1 / D) ^ k ≤ η / (8 * r) * (1 / D) ^ k :=
+      mul_le_mul_of_nonneg_right h3 hZ
+    have h5 : η / (8 * r) * (1 / D) ^ k = η / (8 * (D ^ k * r)) := by
+      rw [one_div, inv_pow]
+      field_simp
+    linarith
+  rw [hgoal]
+  exact h1.trans h2
+
+/-- The kernel decay against `D ^ k` in the `1 / r` shape needed by the small part. -/
+private theorem pW_kernel_engine3 {D η r Z : ℝ} (hD : 0 < D) (hr : 0 < r) (hη : 0 < η) (k : ℕ)
+    (h : (1 / 2 : ℝ) ^ k * Z ≤ η / (8 * r)) :
+    (1 / (2 * D)) ^ k * Z ≤ η / (8 * (D ^ k * r)) := by
+  have hb : (1:ℝ) / (2 * D) = (1 / 2) * (1 / D) := by field_simp
+  have hZ : (0:ℝ) ≤ (1 / D) ^ k := by positivity
+  have h1 : (1 / 2) ^ k * Z * (1 / D) ^ k ≤ η / (8 * r) * (1 / D) ^ k :=
+    mul_le_mul_of_nonneg_right h hZ
+  have hgoal : (1 / (2 * D)) ^ k * Z = (1 / 2) ^ k * Z * (1 / D) ^ k := by
+    rw [hb, mul_pow]; ring
+  have h2 : η / (8 * r) * (1 / D) ^ k = η / (8 * (D ^ k * r)) := by
+    rw [one_div, inv_pow]
+    field_simp
+  rw [hgoal]
+  exact h1.trans h2.le
+
+/-- `D ^ k` against an exponential once `k log D` is bounded. -/
+private theorem pW_pow_le_exp_of_log {D : ℝ} (hD : 0 < D) (k : ℕ) {X : ℝ}
+    (h : (k : ℝ) * Real.log D ≤ X) : D ^ k ≤ Real.exp X := by
+  have h1 : D ^ k = Real.exp ((k : ℝ) * Real.log D) := by
+    rw [Real.exp_nat_mul, Real.exp_log hD]
+  rw [h1]
+  exact Real.exp_le_exp.mpr h
+
+/-- `t ^ 2` against the exponential once `t` is past `8` and the rate is at least one. -/
+private theorem pW_sq_le_exp {Cc t : ℝ} (hCc : 1 ≤ Cc) (ht : 8 ≤ t) :
+    t ^ 2 ≤ 32 * Real.exp (Cc * t / 2) := by
+  have h1 : (0:ℝ) ≤ Cc * t / 2 := by nlinarith
+  have h2 := Real.pow_div_factorial_le_exp (Cc * t / 2) h1 2
+  have h3 : (0:ℝ) ≤ t := by linarith
+  have h4 : t / 2 ≤ Cc * t / 2 := by nlinarith
+  have h5 : (t / 2) ^ 2 / 2 ≤ (Cc * t / 2) ^ 2 / 2 := by
+    have h6 : (0:ℝ) ≤ t / 2 := by linarith
+    nlinarith
+  have h7 : t ^ 2 ≤ 32 * ((t / 2) ^ 2 / 2) := by nlinarith
+  have h8 : 32 * ((t / 2) ^ 2 / 2) ≤ 32 * ((Cc * t / 2) ^ 2 / 2) := by linarith
+  linarith [h2, h7, h8]
+
+/-- `k log D ≤ Cc t / 2`: the index bound `k ≤ 2 t (Mx + 1)` against `Cc`. -/
+private theorem pW_k_logD_le {k t Ld Mx Cc logD : ℝ} (h : k ≤ 2 * t * (Mx + 1)) (ht : 1 ≤ t)
+    (hlogD : logD ≤ Ld) (hlogD0 : 0 ≤ logD) (hLd0 : 0 ≤ Ld) (hMx1 : 1 ≤ Mx)
+    (hCc : Cc = 8 * Ld * (Mx + 1) + 1) : k * logD ≤ Cc * t / 2 := by
+  have h1 : k * logD ≤ (2 * t * (Mx + 1)) * Ld := by
+    have h2 : (0:ℝ) ≤ logD := hlogD0
+    have h3 : (0:ℝ) ≤ 2 * t * (Mx + 1) := by nlinarith
+    nlinarith
+  have h4 : Cc * t / 2 = (4 * Ld * (Mx + 1) + 1 / 2) * t := by
+    rw [hCc]; ring
+  have h5 : (0:ℝ) ≤ t := by linarith
+  have h6 : (0:ℝ) ≤ Ld * (Mx + 1) := by positivity
+  rw [h4]
+  nlinarith
+
+/-- `Lb * k ≤ Bc * t`: the large cutoff scale against `Bc`. -/
+private theorem pW_lb_k_le {k t Lb Mx Bc : ℝ} (h : k ≤ 2 * t * (Mx + 1)) (ht : 1 ≤ t) (hLb0 : 0 ≤ Lb)
+    (hMx1 : 1 ≤ Mx) (hBc : Bc = 16 + 32 * Lb * (Mx + 1)) : Lb * k ≤ Bc * t := by
+  have h1 : (0:ℝ) ≤ t := by linarith
+  have h2 : (0:ℝ) ≤ Lb * (Mx + 1) := by positivity
+  rw [hBc]
+  nlinarith
+
+/-- The scaled final comparison: `e ^ (-(Cc t)) t ^ 2 D ^ k ≤ 32`. -/
+private theorem pW_final_scaled {Cc t Dk : ℝ} (hDk : Dk ≤ Real.exp (Cc * t / 2))
+    (ht2 : t ^ 2 ≤ 32 * Real.exp (Cc * t / 2)) :
+    Real.exp (-(Cc * t)) * t ^ 2 * Dk ≤ 32 := by
+  have h5 : (0:ℝ) ≤ Real.exp (-(Cc * t)) * t ^ 2 := by positivity
+  have h4 : Real.exp (-(Cc * t)) * t ^ 2 * Dk ≤ Real.exp (-(Cc * t)) * t ^ 2 *
+      Real.exp (Cc * t / 2) := mul_le_mul_of_nonneg_left hDk h5
+  refine h4.trans ?_
+  have heq : Real.exp (-(Cc * t)) * t ^ 2 * Real.exp (Cc * t / 2)
+      = (Real.exp (-(Cc * t)) * Real.exp (Cc * t / 2)) * t ^ 2 := by ring
+  rw [heq]
+  have h2 : Real.exp (-(Cc * t)) * Real.exp (Cc * t / 2) = Real.exp (-(Cc * t / 2)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [h2]
+  have h7 : (0:ℝ) ≤ Real.exp (-(Cc * t / 2)) := (Real.exp_pos _).le
+  have h8 := mul_le_mul_of_nonneg_left ht2 h7
+  have h9 : Real.exp (-(Cc * t / 2)) * (32 * Real.exp (Cc * t / 2)) = 32 := by
+    have h10 : Real.exp (-(Cc * t / 2)) * Real.exp (Cc * t / 2) = 1 := by
+      rw [← Real.exp_add]
+      have h11 : -(Cc * t / 2) + Cc * t / 2 = 0 := by ring
+      rw [h11, Real.exp_zero]
+    calc Real.exp (-(Cc * t / 2)) * (32 * Real.exp (Cc * t / 2))
+        = 32 * (Real.exp (-(Cc * t / 2)) * Real.exp (Cc * t / 2)) := by ring
+      _ = 32 := by rw [h10]; ring
+  linarith [h8, h9]
+
+/-- The division step: the scaled comparison gives the leaf's target term. -/
+private theorem pW_final_div {η Cc t Dk r c Lg xs : ℝ} (hη : 0 < η) (hr : 0 < r) (hcc : c = η / 64)
+    (ht : t = r * Lg) (hxs : xs = Real.exp (-(Cc * t))) (hDk : 0 < Dk)
+    (hscaled : Real.exp (-(Cc * t)) * t ^ 2 * Dk ≤ 32) :
+    c * xs * Lg ^ 2 * r ≤ η / (2 * (Dk * r)) := by
+  have h2 : Real.exp (-(Cc * t)) * t ^ 2 ≤ 32 / Dk := by
+    rw [le_div_iff₀ hDk]
+    linarith
+  have h1 : η / 64 * Real.exp (-(Cc * t)) * Lg ^ 2 * r
+      = η / 64 * (Real.exp (-(Cc * t)) * t ^ 2) / r := by
+    rw [ht]
+    field_simp
+  rw [hcc, hxs, h1]
+  have h4 : η / 64 * (Real.exp (-(Cc * t)) * t ^ 2) / r ≤ η / 64 * (32 / Dk) / r := by
+    apply div_le_div_of_nonneg_right _ hr.le
+    exact mul_le_mul_of_nonneg_left h2 (by positivity)
+  refine h4.trans ?_
+  field_simp
+  norm_num
+
+/-- The leaf's series term at a prime above the window threshold is the window coefficient. -/
+private theorem pW_seriesTerm_eq_coefficient {q : ℕ} (χ : DirichletCharacter ℂ q) (x v r : ℝ) (k : ℕ)
+    {n : ℕ} (hn : n.Prime) (hk : ⌊x⌋₊ < n) :
+    (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) / (n : ℂ) ^ (1 + I * v)) *
+        (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)
+      = (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) * (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n := by
+  have hn0 : (0:ℝ) < n := by exact_mod_cast hn.pos
+  have hnc : (n : ℂ) ≠ 0 := by exact_mod_cast hn.ne_zero
+  have hlog : Complex.log (n : ℂ) = ((Real.log n : ℝ) : ℂ) := by
+    rw [← Complex.ofReal_natCast, Complex.ofReal_log (le_of_lt hn0)]
+  have hpow : (n : ℂ) ^ (1 + I * v) =
+      (n : ℂ) * Complex.exp (((Real.log n * v : ℝ) : ℂ) * I) := by
+    rw [Complex.cpow_add _ _ hnc, Complex.cpow_one, Complex.cpow_def_of_ne_zero hnc, hlog]
+    congr 2
+    push_cast
+    ring
+  have hinv : (Complex.exp (((Real.log n * v : ℝ) : ℂ) * I))⁻¹ =
+      Complex.exp (-(((Real.log n * v : ℝ) : ℂ) * I)) := by
+    rw [← Complex.exp_neg]
+  have hΛ : (ArithmeticFunction.vonMangoldt n : ℂ) = (Real.log n : ℂ) := by
+    rw [ArithmeticFunction.vonMangoldt_apply_prime hn]
+  rw [hpow, hΛ, div_eq_mul_inv, mul_inv, hinv]
+  dsimp only
+  rw [if_pos ⟨hk, hn⟩]
+  push_cast
+  field_simp
+
+/-- A norm lower bound for a difference. -/
+private theorem pW_norm_sub_ge (a b : ℂ) : ‖a‖ - ‖b‖ ≤ ‖a - b‖ :=
+  (le_abs_self (‖a‖ - ‖b‖)).trans (abs_norm_sub_norm_le a b)
+
+
+
+/-- Lower bound for the fourth of four pieces from an additive decomposition. -/
+private theorem pW_norm_three_lower (a b c d : ℂ) (h : a = b + c + d) : ‖a‖ - ‖b‖ - ‖c‖ ≤ ‖d‖ := by
+  have h1 : d = a - b - c := by rw [h]; abel
+  have h2 : ‖a - b - c‖ ≥ ‖a - b‖ - ‖c‖ := pW_norm_sub_ge _ _
+  have h3 : ‖a - b‖ ≥ ‖a‖ - ‖b‖ := pW_norm_sub_ge _ _
+  rw [h1]
+  linarith
+
+/-- The closing arithmetic of the leaf: nine comparisons give the target term. -/
+private theorem pW_chain_arith {η Dk r X Lx C1 C2 C0 Bc C3 sq Sn An Pn Wn Wc Ep : ℝ}
+    (hr : 0 < r) (hDk : 0 < Dk) (hsq : 0 < sq)
+    (h1 : η / (Dk * r) ≤ Sn) (h2 : Sn - An - Pn ≤ Wn) (h3 : Wn - C3 / sq ≤ Wc)
+    (h4 : An ≤ X * (Lx + C1)) (h5 : Pn ≤ X * (C2 / r)) (h6 : Ep ≤ X * (Bc * Lx + C0))
+    (h7 : X * (Lx + C1) ≤ η / (8 * (Dk * r)))
+    (h8 : X * (C2 / r) ≤ η / (8 * (Dk * r)))
+    (h9 : X * (Bc * Lx + C0) ≤ η / (8 * (Dk * r)))
+    (h10 : C3 / sq ≤ η / (8 * (Dk * r))) :
+    η / (2 * (Dk * r)) ≤ Wc - Ep := by
+  have hbr : η / (8 * (Dk * r)) = η / (Dk * r) / 8 := by
+    field_simp
+  rw [hbr] at h7 h8 h9 h10
+  have h11 : η / (2 * (Dk * r)) = η / (Dk * r) / 2 := by
+    field_simp
+  rw [h11]
+  linarith
+
+/-- The small part: shifting the sum from `Icc 1` to `Icc 0` costs nothing when `A 0 = 0`. -/
+private theorem pW_small_part_le {D x C1 : ℝ} {k : ℕ} (A : ℕ → ℂ) (K : ℕ → ℂ) (hA0 : A 0 = 0)
+    (h : ‖∑ n ∈ Icc 1 ⌊x⌋₊, A n * K n‖ ≤ (1 / (2 * D)) ^ k * (Real.log x + C1)) :
+    ‖∑ n ∈ Icc 0 ⌊x⌋₊, A n * K n‖ ≤ (1 / (2 * D)) ^ k * (Real.log x + C1) := by
+  have hset : Icc 0 ⌊x⌋₊ = insert 0 (Icc 1 ⌊x⌋₊) := by
+    ext n
+    simp only [mem_Icc, mem_insert]
+    omega
+  rw [hset, sum_insert (by simp), hA0, zero_mul, zero_add]
+  exact h
+
+/-- The tail part: the floor and real thresholds agree, so the tail bound transfers. -/
+private theorem pW_tail_part_le {D x C2 Bc r0 : ℝ} {k : ℕ} (A : ℕ → ℂ) (K : ℕ → ℂ)
+    (hx : 0 ≤ x ^ Bc)
+    (h : ‖∑' n : ℕ, (if x ^ Bc < (n : ℝ) then A n * K n else 0)‖ ≤
+      (1 / (2 * D)) ^ k * (C2 / r0)) :
+    ‖∑' n : ℕ, (if ⌊x ^ Bc⌋₊ < n then A n * K n else 0)‖ ≤
+      (1 / (2 * D)) ^ k * (C2 / r0) := by
+  have hiff : ∀ n : ℕ, (x ^ Bc < (n : ℝ)) ↔ (⌊x ^ Bc⌋₊ < n) := fun n => pW_floor_lt_iff hx
+  have hcongr : (∑' n : ℕ, (if ⌊x ^ Bc⌋₊ < n then A n * K n else 0))
+      = ∑' n : ℕ, (if x ^ Bc < (n : ℝ) then A n * K n else 0) := by
+    apply tsum_congr
+    intro n
+    by_cases hh : ⌊x ^ Bc⌋₊ < n
+    · simp only [if_pos hh, if_pos ((hiff n).mpr hh)]
+    · simp only [if_neg hh, if_neg (fun h2 => hh ((hiff n).mp h2))]
+  rw [hcongr]
+  exact h
+
+/-- The von Mangoldt coefficient of the leaf's series is majorised by `Λ n / n`. -/
+private theorem pW_norm_series_coef {q : ℕ} (χ : DirichletCharacter ℂ q) (v : ℝ) (n : ℕ) :
+    ‖χ n * (ArithmeticFunction.vonMangoldt n : ℂ) / (n : ℂ) ^ (1 + I * v)‖ ≤
+      ArithmeticFunction.vonMangoldt n / (n : ℝ) := by
+  rcases eq_or_ne n 0 with hh | hh
+  · subst hh
+    simp
+  · have hpos : 0 < n := Nat.pos_of_ne_zero hh
+    have hΛ : (0:ℝ) ≤ ArithmeticFunction.vonMangoldt n := ArithmeticFunction.vonMangoldt_nonneg
+    have hnorm : ‖(n : ℂ) ^ (1 + I * v)‖ = (n : ℝ) := by
+      rw [Complex.norm_natCast_cpow_of_pos hpos]; simp
+    have hχ : ‖χ n‖ ≤ 1 := DirichletCharacter.norm_le_one χ n
+    have hn0 : (0:ℝ) < n := by exact_mod_cast hpos
+    have h1 : ‖χ n * (ArithmeticFunction.vonMangoldt n : ℂ) / (n : ℂ) ^ (1 + I * v)‖
+        = ‖χ n‖ * ArithmeticFunction.vonMangoldt n / (n : ℝ) := by
+      rw [norm_div, norm_mul, hnorm, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hΛ]
+    rw [h1]
+    exact div_le_div_of_nonneg_right (mul_le_of_le_one_left hΛ hχ) hn0.le
+
+/-- The endpoint kernel is below the `k`-th kernel decay once its argument is past `Bk k`. -/
+private theorem pW_kernel_endpoint_le {D Bk r y : ℝ} (hD : 0 < D) (hBk : 0 < Bk)
+    (htail : ∀ k : ℕ, ∀ u : ℝ, 0 ≤ u → Bk * k ≤ u →
+      Decomp1532b2.poissonKernel k u ≤ (1 / (2 * D)) ^ k * Real.exp (-u / 2))
+    {k : ℕ} (hy : 0 ≤ r * Real.log y) (h : Bk * k ≤ r * Real.log y) :
+    Decomp1532b2.poissonKernel k (r * Real.log y) ≤ (1 / (2 * D)) ^ k := by
+  have h1 := htail k _ hy h
+  have h2 : Real.exp (-(r * Real.log y) / 2) ≤ 1 := by
+    rw [Real.exp_le_one_iff]
+    linarith
+  have h3 := mul_le_mul_of_nonneg_left h2 (by positivity : (0:ℝ) ≤ (1 / (2 * D)) ^ k)
+  linarith [h1, h3]
+
+/-- The endpoint term, from the kernel decay and the detector mass. -/
+private theorem pW_endpoint_bound {D Kd Ly C0 : ℝ} {k : ℕ} (hD : 0 < D) (hKd : 0 ≤ Kd)
+    (hk : Decomp1532b2.poissonKernel k Ly ≤ (1 / (2 * D)) ^ k) (hd : Kd ≤ Ly + C0) :
+    Decomp1532b2.poissonKernel k Ly * Kd ≤ (1 / (2 * D)) ^ k * (Ly + C0) :=
+  mul_le_mul hk hd hKd (by positivity)
+
+/-- The prime power step: the window sum is within `C3 / sqrt x` of the von Mangoldt sum. -/
+private theorem pW_pp_bound {C3 sq : ℝ} (Ww Wc : ℂ) (hpp : ‖Ww - Wc‖ ≤ C3 / sq) :
+    ‖Ww‖ - C3 / sq ≤ ‖Wc‖ := by
+  have h := pW_norm_sub_ge Ww Wc
+  linarith
+
+/-- `8 C₃ r ≤ η` from the `r₁` bound. -/
+private theorem pW_eight_C3_r_le {C3 r η : ℝ} (hC3 : 0 ≤ C3) (hr : 0 < r) (hr3 : r ≤ η / (8 * C3 + 1)) :
+    8 * C3 * r ≤ η := by
+  have h3C : (0:ℝ) < 8 * C3 + 1 := by linarith
+  have h2 : r * (8 * C3 + 1) ≤ η := by
+    have h := mul_le_mul_of_nonneg_right hr3 h3C.le
+    have h4 : (η / (8 * C3 + 1)) * (8 * C3 + 1) = η := by field_simp
+    linarith [h, h4]
+  have h5 : 8 * C3 * r ≤ r * (8 * C3 + 1) := by
+    have h7 : 8 * C3 * r = r * (8 * C3) := by ring
+    rw [h7]
+    exact mul_le_mul_of_nonneg_left (by linarith) hr.le
+  linarith [h2, h5]
+
+/-- `8 C₃ D^k r ≤ η √x` from `D^k ≤ √x` and `8 C₃ r ≤ η`. -/
+private theorem pW_pp_scaled {C3 Dk r η s : ℝ} (hC3 : 0 ≤ C3) (hr : 0 ≤ r) (h8 : 8 * C3 * r ≤ η)
+    (hDk : Dk ≤ s) (hs0 : 0 ≤ s) : 8 * C3 * Dk * r ≤ η * s := by
+  have h1 : 8 * C3 * Dk ≤ 8 * C3 * s :=
+    mul_le_mul_of_nonneg_left hDk (by linarith)
+  have h2 : 8 * C3 * Dk * r ≤ 8 * C3 * s * r := mul_le_mul_of_nonneg_right h1 hr
+  have h3 : 8 * C3 * s * r = (8 * C3 * r) * s := by ring
+  have h4 : (8 * C3 * r) * s ≤ η * s := mul_le_mul_of_nonneg_right h8 hs0
+  linarith [h2, h3, h4]
+
+/-- The prime power term against the main term. -/
+private theorem pW_pp_div {C3 Dk r η s : ℝ} (hs : 0 < s) (hDk : 0 < Dk) (hr : 0 < r)
+    (h : 8 * C3 * Dk * r ≤ η * s) : C3 / s ≤ η / (8 * (Dk * r)) := by
+  have h8D : (0:ℝ) < 8 * (Dk * r) := by
+    have h1 : (0:ℝ) < Dk * r := mul_pos hDk hr
+    linarith
+  rw [div_le_div_iff₀ hs h8D]
+  nlinarith [h]
+
+/-- The prime power comparison of the assembly, in one step (this is where the closing `nlinarith`
+used to time out). -/
+private theorem pW_pp_comparison {C3 Dk r η s : ℝ} (hC3 : 0 ≤ C3) (hs : 0 < s) (hDk : 0 < Dk)
+    (hr : 0 < r) (hr3 : r ≤ η / (8 * C3 + 1)) (hDkle : Dk ≤ s) :
+    C3 / s ≤ η / (8 * (Dk * r)) := by
+  refine pW_pp_div hs hDk hr ?_
+  exact pW_pp_scaled hC3 hr.le (pW_eight_C3_r_le hC3 hr hr3) hDkle hs.le
+
+/-- `k log D ≤ (log x)/4` from `Cc r ≤ 1/2`. -/
+private theorem pW_k_logD_quarter {k D Cc r x : ℝ} (hCcrmul : Cc * r ≤ 1 / 2) (hlogx : 0 ≤ Real.log x)
+    (hkD : k * Real.log D ≤ Cc * (r * Real.log x) / 2) : k * Real.log D ≤ Real.log x / 4 := by
+  have h1 : Cc * (r * Real.log x) = (Cc * r) * Real.log x := by ring
+  have h2 : (Cc * r) * Real.log x ≤ (1 / 2) * Real.log x :=
+    mul_le_mul_of_nonneg_right hCcrmul hlogx
+  linarith [hkD, h1, h2]
+
+/-- `D ^ k ≤ √x` from `k log D ≤ (log x)/4`. -/
+private theorem pW_Dk_le_sqrt {D x : ℝ} (hD : 0 < D) (hx : 1 ≤ x) {k : ℕ}
+    (h : (k : ℝ) * Real.log D ≤ Real.log x / 4) : D ^ k ≤ Real.sqrt x := by
+  have h1 : D ^ k ≤ Real.exp (Real.log x / 4) := pW_pow_le_exp_of_log hD k h
+  have h2 : Real.exp (Real.log x / 4) ≤ Real.sqrt x := by
+    have h3 : Real.sqrt x = Real.exp (Real.log x / 2) := by
+      rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos (by linarith : (0:ℝ) < x)]
+      congr 1
+      ring
+    rw [h3]
+    exact Real.exp_le_exp.mpr (by linarith [Real.log_nonneg hx])
+  linarith
+
+/-- The small-part comparison: the `r`-rescaling and the kernel engine in one step. -/
+private theorem pW_comp_small {D η r Lx C1 : ℝ} (hD : 0 < D) (hr : 0 < r) (hr1 : r ≤ 1) (hη : 0 < η)
+    {k : ℕ} (hL : 0 ≤ Lx) (hC1 : 0 ≤ C1) (h : (1 / 2 : ℝ) ^ k * (r * Lx + C1) ≤ η / 8) :
+    (1 / (2 * D)) ^ k * (Lx + C1) ≤ η / (8 * (D ^ k * r)) := by
+  apply pW_kernel_engine3 hD hr hη k
+  have h5 : Lx * r ≤ Lx := by nlinarith
+  have h3 : (Lx + C1) * r ≤ r * Lx + C1 := by nlinarith [h5, hC1]
+  have h2 : (1 / 2 : ℝ) ^ k * (Lx + C1) * r ≤ (1 / 2 : ℝ) ^ k * (r * Lx + C1) := by
+    have h6 : (0:ℝ) ≤ (1 / 2 : ℝ) ^ k := by positivity
+    calc (1 / 2 : ℝ) ^ k * (Lx + C1) * r = (1 / 2 : ℝ) ^ k * ((Lx + C1) * r) := by ring
+      _ ≤ (1 / 2 : ℝ) ^ k * (r * Lx + C1) := mul_le_mul_of_nonneg_left h3 h6
+  have h4 : (1 / 2 : ℝ) ^ k * (Lx + C1) * r ≤ η / 8 := h2.trans h
+  rw [le_div_iff₀ (by linarith : (0:ℝ) < 8 * r)]
+  linarith
+
+/-- The tail comparison. -/
+private theorem pW_comp_tail {D η r Lx C2 : ℝ} (hD : 0 < D) (hr : 0 < r) (hη : 0 < η) {k : ℕ}
+    (hL : 0 ≤ Lx) (h : (1 / 2 : ℝ) ^ k * (r * Lx + C2) ≤ η / 8) :
+    (1 / (2 * D)) ^ k * (C2 / r) ≤ η / (8 * (D ^ k * r)) := by
+  apply pW_kernel_engine1 hD hr hη k
+  have h4 : (0:ℝ) ≤ r * Lx := mul_nonneg hr.le hL
+  have h3 : C2 ≤ r * Lx + C2 := by linarith
+  exact (mul_le_mul_of_nonneg_left h3 (by positivity : (0:ℝ) ≤ (1 / 2 : ℝ) ^ k)).trans h
+
+/-- The endpoint comparison. -/
+private theorem pW_comp_endpoint {D η r Lx C0 Bc : ℝ} (hD : 0 < D) (hr : 0 < r) (hr1 : r ≤ 1)
+    (hη : 0 < η) {k : ℕ} (hL : 0 ≤ Lx) (hBc : 1 ≤ Bc) (hC0 : 0 ≤ C0)
+    (h : (1 / 2 : ℝ) ^ k * (r * Lx + C0) ≤ η / (8 * Bc)) :
+    (1 / (2 * D)) ^ k * (Bc * Lx + C0) ≤ η / (8 * (D ^ k * r)) := by
+  apply pW_kernel_engine3 hD hr hη k
+  have h5 : Bc * (r * Lx + C0) = Bc * (r * Lx) + Bc * C0 := by ring
+  have h6 : (Bc * Lx + C0) * r ≤ Bc * (r * Lx + C0) := by
+    have h7 : (Bc * Lx + C0) * r = Bc * (Lx * r) + C0 * r := by ring
+    have h8 : Bc * (Lx * r) = Bc * (r * Lx) := by ring
+    have h9 : C0 * r ≤ Bc * C0 := by
+      have h10 : C0 * r ≤ C0 * Bc := mul_le_mul_of_nonneg_left (le_trans hr1 hBc) hC0
+      linarith
+    have h12 : Bc * (r * Lx) + Bc * C0 = Bc * (r * Lx + C0) := by ring
+    linarith [h7, h8, h9, h12]
+  have h4 : (1 / 2 : ℝ) ^ k * (Bc * Lx + C0) * r ≤
+      Bc * ((1 / 2 : ℝ) ^ k * (r * Lx + C0)) := by
+    have h10 : (0:ℝ) ≤ (1 / 2 : ℝ) ^ k := by positivity
+    calc (1 / 2 : ℝ) ^ k * (Bc * Lx + C0) * r
+        = (1 / 2 : ℝ) ^ k * ((Bc * Lx + C0) * r) := by ring
+      _ ≤ (1 / 2 : ℝ) ^ k * (Bc * (r * Lx + C0)) := mul_le_mul_of_nonneg_left h6 h10
+      _ = Bc * ((1 / 2 : ℝ) ^ k * (r * Lx + C0)) := by ring
+  have h11 : Bc * ((1 / 2 : ℝ) ^ k * (r * Lx + C0)) ≤ Bc * (η / (8 * Bc)) :=
+    mul_le_mul_of_nonneg_left h (by linarith)
+  have h12 : Bc * (η / (8 * Bc)) = η / 8 := by field_simp
+  have h13 : (1 / 2 : ℝ) ^ k * (Bc * Lx + C0) * r ≤ η / 8 := by
+    linarith [h4, h11, h12]
+  rw [le_div_iff₀ (by linarith : (0:ℝ) < 8 * r)]
+  linarith
+
+private theorem pW_poisson_window_localization_proof :
+    ∀ E D η : ℝ, 1 ≤ E → 1 ≤ D → 0 < η →
+      ∃ r₁ A B C c : ℝ, 0 < r₁ ∧ 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+      ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+        ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+          |v| ≤ T → 1 / Real.log T ≤ r → r ≤ r₁ →
+          (∀ M : ℕ, E * r * Real.log T ≤ M →
+            ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+              η / (D ^ k * r) ≤
+                ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+                  (n : ℂ) ^ (1 + I * v)) *
+                  (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)‖) →
+          ∀ x : ℝ, T ^ A ≤ x → ∃ k : ℕ,
+            c * x ^ (-C * r) * Real.log x ^ 2 * r ≤
+              ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ B⌋₊,
+                (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) *
+                  (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n‖ -
+                Decomp1532b2.poissonKernel k (r * Real.log (x ^ B)) *
+                  ‖primeDetector χ x (x ^ B) v‖ := by
+  intro E D η hE hD hη
+  obtain ⟨C1, hC1, hsmall⟩ := pW_poisson_small_cutoff_norm
+  obtain ⟨C2, hC2, hlarge⟩ := pW_poisson_large_cutoff_norm
+  obtain ⟨C3, hC3, hpp⟩ := Decomp1532b2.poisson_weighted_prime_power_removal
+  obtain ⟨C0, hC0, hdet⟩ := pW_detector_norm_le
+  have hD0 : (0:ℝ) < D := by linarith
+  obtain ⟨Bk, hBk, hBktail⟩ := poissonKernel_large_tail D hD0
+  obtain ⟨Bs, hBs, hsmallB⟩ := hsmall D hD0
+  obtain ⟨Bl, hBl, hlargeB⟩ := hlarge D hD0
+  set Bcx : ℝ := 16 + 32 * (Bl + Bk) * (1 / Bs + E + 2 + 1) with hBcx
+  set Ccx : ℝ := 8 * (max (Real.log D) 0) * (1 / Bs + E + 2 + 1) + 1 with hCcx
+  have hBcaux : (0:ℝ) ≤ 32 * (Bl + Bk) * (1 / Bs + E + 2 + 1) := by positivity
+  have hBcpos : (0:ℝ) ≤ Bcx := by rw [hBcx]; linarith
+  have hBc1 : (1:ℝ) ≤ Bcx := by rw [hBcx]; linarith
+  have hBc2 : (2:ℝ) ≤ Bcx := by linarith
+  have hBcne : Bcx ≠ 0 := by linarith
+  have hCcp : (0:ℝ) < Ccx := by rw [hCcx]; positivity
+  have hCc1 : (1:ℝ) ≤ Ccx := by
+    rw [hCcx]
+    have h1 : (0:ℝ) ≤ 8 * (max (Real.log D) 0) * (1 / Bs + E + 2 + 1) := by positivity
+    linarith
+  obtain ⟨Aabs1, hAabs1b, hAabs1⟩ := pW_absorption (η := η) (B1 := Bs) (S := C1) hη hBs hC1
+  obtain ⟨Aabs2, hAabs2b, hAabs2⟩ := pW_absorption (η := η) (B1 := Bs) (S := C2) hη hBs hC2
+  obtain ⟨Aabs3, hAabs3b, hAabs3⟩ := pW_absorption (η := η / Bcx) (B1 := Bs) (S := C0)
+    (by positivity) hBs hC0
+  refine ⟨1 / (4 + 2 * Ccx + (8 * C3 + 1) / η),
+    Aabs1 + Aabs2 + Aabs3 + 8 + 1, Bcx, Ccx, η / 64, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · have h1 : (0:ℝ) < 4 + 2 * Ccx + (8 * C3 + 1) / η := by positivity
+    positivity
+  · linarith
+  · linarith
+  · linarith
+  · positivity
+  intro T hT q hq hqT χ v r hv hrlo hrhi hseries x hx
+  have hlT : 0 < Real.log T := Real.log_pos (by linarith)
+  have hr : 0 < r := (one_div_pos.mpr hlT).trans_le hrlo
+  have hrq : 1 ≤ r * Real.log T := by
+    have h3 := mul_le_mul_of_nonneg_right hrlo hlT.le
+    have h4 : (1 / Real.log T) * Real.log T = 1 := by field_simp
+    linarith
+  have hK0 : (0:ℝ) < (8 * C3 + 1) / η := by
+    have h1 : (0:ℝ) < 8 * C3 + 1 := by linarith
+    positivity
+  have hsum3 : (0:ℝ) < 4 + 2 * Ccx + (8 * C3 + 1) / η := by linarith
+  have hr1 : r ≤ 1 := by
+    have h2 : r ≤ 1 / (4 + 2 * Ccx + (8 * C3 + 1) / η) := hrhi
+    have h3 : (1:ℝ) / (4 + 2 * Ccx + (8 * C3 + 1) / η) ≤ 1 / 4 := by
+      rw [div_le_div_iff₀ hsum3 (by norm_num)]
+      linarith [hK0.le, hCcp.le]
+    linarith
+  have hrCc : r ≤ 1 / (2 * Ccx) := by
+    have h2 : r ≤ 1 / (4 + 2 * Ccx + (8 * C3 + 1) / η) := hrhi
+    have h3 : (1:ℝ) / (4 + 2 * Ccx + (8 * C3 + 1) / η) ≤ 1 / (2 * Ccx) := by
+      rw [div_le_div_iff₀ hsum3 (by linarith)]
+      linarith [hK0.le]
+    linarith
+  have hrC3 : r ≤ η / (8 * C3 + 1) := by
+    have h2 : r ≤ 1 / (4 + 2 * Ccx + (8 * C3 + 1) / η) := hrhi
+    have h3 : (1:ℝ) / (4 + 2 * Ccx + (8 * C3 + 1) / η) ≤ η / (8 * C3 + 1) := by
+      rw [div_le_div_iff₀ hsum3 (by linarith)]
+      have h4 : (8 * C3 + 1) / η * η = 8 * C3 + 1 := by field_simp
+      nlinarith [h4, hK0, hCcp, hη]
+    linarith
+  have hxT : 1 ≤ T := by linarith
+  have hx1 : 1 ≤ x := by
+    have h1 : (1:ℝ) ≤ T ^ (Aabs1 + Aabs2 + Aabs3 + 8 + 1) := Real.one_le_rpow hxT (by linarith)
+    linarith
+  have hlogx : 0 ≤ Real.log x := Real.log_nonneg hx1
+  have hlogTle : Real.log T ≤ Real.log x := by
+    have h1 : T ≤ x := by
+      calc T = T ^ (1:ℝ) := (Real.rpow_one T).symm
+        _ ≤ T ^ (Aabs1 + Aabs2 + Aabs3 + 8 + 1) :=
+            Real.rpow_le_rpow_of_exponent_le hxT (by linarith)
+        _ ≤ x := hx
+    exact Real.log_le_log (by linarith) h1
+  have ht1 : 1 ≤ r * Real.log x := hrq.trans (mul_le_mul_of_nonneg_left hlogTle hr.le)
+  have hA_le_t : Aabs1 + Aabs2 + Aabs3 + 8 + 1 ≤ r * Real.log x := by
+    have h1 : Real.log (T ^ (Aabs1 + Aabs2 + Aabs3 + 8 + 1)) ≤ Real.log x :=
+      Real.log_le_log (by positivity) hx
+    have h2 : Real.log (T ^ (Aabs1 + Aabs2 + Aabs3 + 8 + 1))
+        = (Aabs1 + Aabs2 + Aabs3 + 8 + 1) * Real.log T :=
+      Real.log_rpow (by linarith : (0:ℝ) < T) _
+    rw [h2] at h1
+    have h3 : r * ((Aabs1 + Aabs2 + Aabs3 + 8 + 1) * Real.log T) ≤ r * Real.log x :=
+      mul_le_mul_of_nonneg_left h1 hr.le
+    have h4 : (1:ℝ) ≤ r * Real.log T := hrq
+    have h5 : (0:ℝ) ≤ r * Real.log T := le_trans (by norm_num) h4
+    nlinarith [h3, h4, h5]
+  have hA1t : Aabs1 ≤ r * Real.log x := by linarith [hAabs1b, hAabs2b, hAabs3b, hA_le_t]
+  have hA2t : Aabs2 ≤ r * Real.log x := by linarith [hAabs1b, hAabs2b, hAabs3b, hA_le_t]
+  have hA3t : Aabs3 ≤ r * Real.log x := by linarith [hAabs1b, hAabs2b, hAabs3b, hA_le_t]
+  set M : ℕ := ⌈max (r * Real.log x / Bs) (E * r * Real.log T)⌉₊ with hM
+  have hMcast : (M : ℝ) = (⌈max (r * Real.log x / Bs) (E * r * Real.log T)⌉₊ : ℝ) := by rw [hM]
+  have hMceil : max (r * Real.log x / Bs) (E * r * Real.log T) ≤ (M : ℝ) := by
+    have h := Nat.le_ceil (max (r * Real.log x / Bs) (E * r * Real.log T))
+    linarith [hMcast]
+  obtain ⟨k, hMk, hk2M, hser⟩ := hseries M ((le_max_right _ _).trans hMceil)
+  have hkM : (M : ℝ) ≤ (k : ℝ) := by exact_mod_cast hMk
+  have hkup : (k : ℝ) ≤ 2 * max (r * Real.log x / Bs) (E * r * Real.log T) + 2 := by
+    have h6 : (⌈max (r * Real.log x / Bs) (E * r * Real.log T)⌉₊ : ℝ) ≤
+        max (r * Real.log x / Bs) (E * r * Real.log T) + 1 :=
+      (Nat.ceil_lt_add_one (le_trans (by positivity) (le_max_left _ _))).le
+    have h7 : ((k : ℕ) : ℝ) < 2 * ((M : ℕ) : ℝ) := by exact_mod_cast hk2M
+    linarith [hMcast]
+  have hmax : max (r * Real.log x / Bs) (E * r * Real.log T) ≤
+      (r * Real.log x) * (1 / Bs + E + 2) := by
+    apply max_le
+    · have h4 : r * Real.log x / Bs = (r * Real.log x) * (1 / Bs) := by ring
+      rw [h4]
+      have h5 : (0:ℝ) ≤ r * Real.log x := by positivity
+      have h6 : (0:ℝ) ≤ r * Real.log x * E := by positivity
+      nlinarith [h5, h6]
+    · have h6 : (0:ℝ) ≤ r * Real.log x * (1 / Bs) := by positivity
+      have h7 : (0:ℝ) ≤ r * Real.log x := by positivity
+      have h8 : r * Real.log T ≤ r * Real.log x := mul_le_mul_of_nonneg_left hlogTle hr.le
+      nlinarith [h6, h8]
+  have hkt : (k : ℝ) ≤ 2 * (r * Real.log x) * (1 / Bs + E + 2 + 1) := by
+    have h1 : (0:ℝ) ≤ r * Real.log x := by positivity
+    have h2 : (0:ℝ) ≤ r * Real.log x * (1 / Bs + E + 2) := by positivity
+    nlinarith [hkup, hmax, h1, ht1]
+  have hsm : r * Real.log x ≤ Bs * (k : ℝ) := by
+    have h2 : r * Real.log x / Bs ≤ (k : ℝ) :=
+      (le_trans (le_max_left _ _) hMceil).trans hkM
+    rw [div_le_iff₀ hBs] at h2
+    linarith
+  have hMx1 : (1:ℝ) ≤ 1 / Bs + E + 2 := by
+    have h1 : (0:ℝ) < 1 / Bs := by positivity
+    linarith
+  have hkD : (k : ℝ) * Real.log D ≤ Ccx * (r * Real.log x) / 2 :=
+    pW_k_logD_le (k := (k : ℝ)) (t := r * Real.log x) (Ld := max (Real.log D) 0)
+      (Mx := 1 / Bs + E + 2) (Cc := Ccx) (logD := Real.log D) hkt ht1
+      (le_max_left (Real.log D) 0) (Real.log_nonneg hD) (le_max_right (Real.log D) 0) hMx1 hCcx.symm
+  have hLb_k : (Bl + Bk) * (k : ℝ) ≤ Bcx * (r * Real.log x) :=
+    pW_lb_k_le (k := (k : ℝ)) (t := r * Real.log x) (Lb := Bl + Bk) (Mx := 1 / Bs + E + 2)
+      (Bc := Bcx) hkt ht1 (by linarith) hMx1 hBcx.symm
+  have hy1 : 1 ≤ x ^ Bcx := Real.one_le_rpow hx1 (by linarith)
+  have hxy : x ≤ x ^ Bcx := by
+    simpa using Real.rpow_le_rpow_of_exponent_le hx1 hBc1
+  have hlogy : Real.log (x ^ Bcx) = Bcx * Real.log x := Real.log_rpow (by linarith) Bcx
+  have hlgB : (Bl + Bk) * (k : ℝ) ≤ r * Real.log (x ^ Bcx) := by
+    have h6 : r * Real.log (x ^ Bcx) = r * Bcx * Real.log x := by rw [hlogy]; ring
+    have h5 : r * Bcx * Real.log x = Bcx * (r * Real.log x) := by ring
+    rw [h6, h5]
+    exact hLb_k
+  let Acoef : ℕ → ℂ := fun n =>
+    χ n * (ArithmeticFunction.vonMangoldt n : ℂ) / (n : ℂ) ^ (1 + I * v)
+  let Kk : ℕ → ℂ := fun n => (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)
+  have hAnorm : ∀ n : ℕ, ‖Acoef n‖ ≤ ArithmeticFunction.vonMangoldt n / (n : ℝ) :=
+    fun n => pW_norm_series_coef χ v n
+  have hAcoef0 : Acoef 0 = 0 := by
+    dsimp only [Acoef]
+    simp
+  have hsmall' : ‖∑ n ∈ Icc 1 ⌊x⌋₊, Acoef n * Kk n‖ ≤
+      (1 / (2 * D)) ^ k * (Real.log x + C1) :=
+    hsmallB Acoef k r x hr.le hx1 hsm (fun n _ => hAnorm n)
+  have hAb : ‖∑ n ∈ Icc 0 ⌊x⌋₊, Acoef n * Kk n‖ ≤
+      (1 / (2 * D)) ^ k * (Real.log x + C1) :=
+    pW_small_part_le Acoef Kk hAcoef0 hsmall'
+  have hlg : Bl * (k : ℝ) ≤ r * Real.log (x ^ Bcx) := by
+    have hk0 : (0:ℝ) ≤ (k : ℝ) := by positivity
+    have h1 : Bl * (k : ℝ) ≤ (Bl + Bk) * (k : ℝ) := by nlinarith [hBl.le, hBk.le, hk0]
+    linarith [hlgB, h1]
+  obtain ⟨hsumtail, htailb⟩ := hlargeB Acoef k r (x ^ Bcx) hr hr1 hy1 hlg hAnorm
+  have hPb : ‖∑' n : ℕ, (if ⌊x ^ Bcx⌋₊ < n then Acoef n * Kk n else 0)‖ ≤
+      (1 / (2 * D)) ^ k * (C2 / r) :=
+    pW_tail_part_le (Bc := Bcx) Acoef Kk (by positivity) htailb
+  have htail'' : Summable (fun n : ℕ => if x ^ Bcx < (n : ℝ) then
+      (χ n * (n : ℂ) ^ (-(I * v))) *
+        (((ArithmeticFunction.vonMangoldt n / (n : ℝ)) *
+          Decomp1532b2.poissonKernel k (r * Real.log n) : ℝ) : ℂ) else 0) := by
+    refine hsumtail.congr (fun n => ?_)
+    by_cases hh : x ^ Bcx < (n : ℝ)
+    · rw [if_pos hh, if_pos hh]
+      by_cases hn : n = 0
+      · subst hn
+        simp [Acoef, Kk, Complex.zero_cpow]
+      · exact pW_seriesTerm_eq χ v r k hn
+    · rw [if_neg hh, if_neg hh]
+  have hsumF : Summable (fun n : ℕ => Acoef n * Kk n) :=
+    pW_summable_series χ v r k hy1 htail''
+  have hsplit := pW_tsum_three_split χ v r k hx1 hxy (fun n => Acoef n * Kk n)
+    (fun n => rfl) hsumF
+  have hWrel : ‖∑' n : ℕ, Acoef n * Kk n‖ - ‖∑ n ∈ Icc 0 ⌊x⌋₊, Acoef n * Kk n‖ -
+      ‖∑' n : ℕ, (if ⌊x ^ Bcx⌋₊ < n then Acoef n * Kk n else 0)‖ ≤
+      ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊, Acoef n * Kk n‖ := by
+    refine pW_norm_three_lower _ _ _ _ ?_
+    rw [hsplit]
+    abel
+  let aa : ℕ → ℂ := fun n => χ n * (n : ℂ) ^ (-(I * v))
+  let Wc : ℂ := ∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊, Kk n * (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n
+  let Ep : ℝ := Decomp1532b2.poissonKernel k (r * Real.log (x ^ Bcx)) *
+    ‖primeDetector χ x (x ^ Bcx) v‖
+  have hppw := hpp x (x ^ Bcx) r hx1 hxy hr.le k aa (fun n => pW_norm_chi_cpow_le_one χ v n)
+  have hS1 : (∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊, aa n *
+      (((ArithmeticFunction.vonMangoldt n / (n : ℝ)) *
+        Decomp1532b2.poissonKernel k (r * Real.log n) : ℝ) : ℂ))
+      = ∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊, Acoef n * Kk n := by
+    apply Finset.sum_congr rfl
+    intro n hn
+    have hn0 : n ≠ 0 := by
+      have h2 := (mem_Ioc.mp hn).1
+      omega
+    exact (pW_seriesTerm_eq χ v r k hn0).symm
+  have hS2 : (∑ n ∈ (Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊).filter Nat.Prime, aa n *
+      (((Real.log n / (n : ℝ)) * Decomp1532b2.poissonKernel k (r * Real.log n) : ℝ) : ℂ))
+      = Wc := by
+    show _ = ∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊, Kk n * (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n
+    rw [sum_filter]
+    apply Finset.sum_congr rfl
+    intro n hn
+    by_cases hnp : n.Prime
+    · rw [if_pos hnp]
+      have hlt : ⌊x⌋₊ < n := (mem_Ioc.mp hn).1
+      have h1 := pW_seriesTerm_eq_coefficient χ x v r k hnp hlt
+      have h2 := pW_seriesTerm_eq χ v r k hnp.ne_zero
+      rw [ArithmeticFunction.vonMangoldt_apply_prime hnp] at h1 h2
+      exact h2.symm.trans h1
+    · rw [if_neg hnp]
+      simp [hnp]
+  have hPw : ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊, Acoef n * Kk n‖ - C3 / Real.sqrt x ≤ ‖Wc‖ := by
+    rw [← hS1, ← hS2]
+    exact pW_pp_bound _ _ hppw
+  have hBk_le : Bk * (k : ℝ) ≤ r * Real.log (x ^ Bcx) := by
+    have hk0 : (0:ℝ) ≤ (k : ℝ) := by positivity
+    have h1 : Bk * (k : ℝ) ≤ (Bl + Bk) * (k : ℝ) := by nlinarith [hBl.le, hBk.le, hk0]
+    linarith [hlgB, h1]
+  have hkend := pW_kernel_endpoint_le hD0 hBk hBktail (k := k) (r := r)
+    (y := x ^ Bcx) (mul_nonneg hr.le (Real.log_nonneg hy1)) hBk_le
+  have hdetb := hdet q χ x (x ^ Bcx) v hx1 hxy
+  have hEp : Ep ≤ (1 / (2 * D)) ^ k * (Bcx * Real.log x + C0) := by
+    show Decomp1532b2.poissonKernel k (r * Real.log (x ^ Bcx)) *
+      ‖primeDetector χ x (x ^ Bcx) v‖ ≤ _
+    have h2 : Decomp1532b2.poissonKernel k (r * Real.log (x ^ Bcx)) *
+        ‖primeDetector χ x (x ^ Bcx) v‖ ≤
+        (1 / (2 * D)) ^ k * (Real.log (x ^ Bcx) + C0) :=
+      mul_le_mul hkend hdetb (norm_nonneg _) (by positivity)
+    have h3 : Real.log (x ^ Bcx) + C0 ≤ Bcx * Real.log x + C0 := by rw [hlogy]
+    exact h2.trans (mul_le_mul_of_nonneg_left h3 (by positivity))
+  have hDkpos : (0:ℝ) < D ^ k := pow_pos hD0 k
+  have hsqx : (0:ℝ) < Real.sqrt x := Real.sqrt_pos.mpr (by linarith)
+  have h8r : (0:ℝ) < 8 * r := by linarith
+  have hcomp1 := pW_comp_small (D := D) (η := η) (r := r) (Lx := Real.log x) (C1 := C1)
+    hD0 hr hr1 hη (k := k) hlogx hC1 (hAabs1 (r * Real.log x) hA1t k hsm)
+  have hcomp2 := pW_comp_tail (D := D) (η := η) (r := r) (Lx := Real.log x) (C2 := C2)
+    hD0 hr hη (k := k) hlogx (hAabs2 (r * Real.log x) hA2t k hsm)
+  have h3abs : (1 / 2 : ℝ) ^ k * (r * Real.log x + C0) ≤ η / (8 * Bcx) := by
+    have h1 := hAabs3 (r * Real.log x) hA3t k hsm
+    have h2 : η / Bcx / 8 = η / (8 * Bcx) := by field_simp
+    rw [h2] at h1
+    exact h1
+  have hcomp3 := pW_comp_endpoint (D := D) (η := η) (r := r) (Lx := Real.log x) (C0 := C0)
+    (Bc := Bcx) hD0 hr hr1 hη (k := k) hlogx hBc1 hC0 h3abs
+  have hCcrmul : Ccx * r ≤ 1 / 2 := by
+    have h2 := mul_le_mul_of_nonneg_right hrCc hCcp.le
+    have h3 : (1 / (2 * Ccx)) * Ccx = 1 / 2 := by field_simp
+    rw [mul_comm Ccx r]
+    linarith [h2, h3]
+  have hkD4 : (k : ℝ) * Real.log D ≤ Real.log x / 4 :=
+    pW_k_logD_quarter hCcrmul hlogx hkD
+  have hDk_le : D ^ k ≤ Real.sqrt x := pW_Dk_le_sqrt hD0 hx1 hkD4
+  have hcomp4 := pW_pp_comparison (C3 := C3) (Dk := D ^ k) (r := r) (η := η)
+    (s := Real.sqrt x) hC3 hsqx hDkpos hr hrC3 hDk_le
+  have ht8 : (8:ℝ) ≤ r * Real.log x := by
+    have h1 : (0:ℝ) ≤ Aabs1 := by linarith
+    linarith [hA_le_t]
+  have hDkexp : D ^ k ≤ Real.exp (Ccx * (r * Real.log x) / 2) :=
+    pW_pow_le_exp_of_log hD0 k (by linarith [hkD])
+  have hscaled : Real.exp (-(Ccx * (r * Real.log x))) * (r * Real.log x) ^ 2 * D ^ k ≤ 32 :=
+    pW_final_scaled hDkexp (pW_sq_le_exp hCc1 ht8)
+  have hxs : x ^ (-Ccx * r) = Real.exp (-(Ccx * (r * Real.log x))) := by
+    rw [Real.rpow_def_of_pos (by linarith : (0:ℝ) < x)]
+    congr 1
+    ring
+  have hfin : η / 64 * x ^ (-Ccx * r) * Real.log x ^ 2 * r ≤ η / (2 * (D ^ k * r)) :=
+    pW_final_div hη hr rfl (by ring) hxs hDkpos hscaled
+  exact ⟨k, hfin.trans (pW_chain_arith (Dk := D ^ k) (r := r) (X := (1 / (2 * D)) ^ k)
+    (Lx := Real.log x) (C1 := C1) (C2 := C2) (C0 := C0) (Bc := Bcx) (C3 := C3)
+    (sq := Real.sqrt x) (Sn := ‖∑' n : ℕ, Acoef n * Kk n‖)
+    (An := ‖∑ n ∈ Icc 0 ⌊x⌋₊, Acoef n * Kk n‖)
+    (Pn := ‖∑' n : ℕ, (if ⌊x ^ Bcx⌋₊ < n then Acoef n * Kk n else 0)‖)
+    (Wn := ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ Bcx⌋₊, Acoef n * Kk n‖)
+    (Wc := ‖Wc‖) (Ep := Ep) hr hDkpos hsqx hser hWrel hPw hAb hPb hEp
+    hcomp1 hcomp2 hcomp3 hcomp4)⟩
+
+/-- LEAF, REPAIRED (U-1619, omos_tick 20261105T0144Z; changes only this statement).
+Gallagher 1970 p.335 display 23 and the endpoint estimate below it.
+Localization of a supplied dyadic Poisson series lower bound to a finite prime sum.
+The endpoint term is subtracted before partial summation. No zero is assumed here.
+REPAIR: `r` is bounded by a constant `r₁` chosen together with `A, B, C, c`. The old form allowed
+`r ≤ 1/4` for every `D`, but this p.335 route removes the prime square terms by taking `k` about
+`E r log T`, which needs `r log D` bounded (here `r ≤ r₁`), not `r ≤ 1/4`. See
+`Linnik/Audit1619`. `pW_gallagher_zero_detector_of_turan` below keeps its statement and takes
+`min r₀ r₁`. -/
+private theorem pW_poisson_window_localization :
+    ∀ E D η : ℝ, 1 ≤ E → 1 ≤ D → 0 < η →
+      ∃ r₁ A B C c : ℝ, 0 < r₁ ∧ 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+      ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+        ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+          |v| ≤ T → 1 / Real.log T ≤ r → r ≤ r₁ →
+          (∀ M : ℕ, E * r * Real.log T ≤ M →
+            ∃ k : ℕ, M ≤ k ∧ k < 2 * M ∧
+              η / (D ^ k * r) ≤
+                ‖∑' n : ℕ, (χ n * (ArithmeticFunction.vonMangoldt n : ℂ) /
+                  (n : ℂ) ^ (1 + I * v)) * (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ)‖) →
+          ∀ x : ℝ, T ^ A ≤ x → ∃ k : ℕ,
+            c * x ^ (-C * r) * Real.log x ^ 2 * r ≤
+              ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊x ^ B⌋₊,
+                (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) * (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n‖ -
+                Decomp1532b2.poissonKernel k (r * Real.log (x ^ B)) * ‖primeDetector χ x (x ^ B) v‖ := by
+  exact pW_poisson_window_localization_proof
+
+/-- Gallagher 1970 p.335 the calculus bound for the finite prime window.
+The arithmetic lower bound and its zero hypothesis are absent. -/
+private theorem pW_prime_poisson_partial_summation {q : ℕ} (χ : DirichletCharacter ℂ q)
+    (k : ℕ) {r x y : ℝ} (v : ℝ) (hr : 0 ≤ r) (hx : 1 ≤ x) (hxy : x ≤ y) :
+    ‖∑ n ∈ Ioc ⌊x⌋₊ ⌊y⌋₊,
+        (Decomp1532b2.poissonKernel k (r * Real.log n) : ℂ) * (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n‖ -
+        Decomp1532b2.poissonKernel k (r * Real.log y) * ‖primeDetector χ x y v‖ ≤
+      r * ∫ t in x..y, ‖primeDetector χ x t v‖ / t := by
+  have ha : ∀ n ≤ ⌊x⌋₊, (fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0) n = 0 := by
+    intro n hn
+    simp [not_lt.mpr hn]
+  simpa only [pW_sum_primeWindowCoefficient] using
+    pW_poisson_partial_summation_bound ((fun m => if ⌊x⌋₊ < m ∧ m.Prime then (Real.log m / (m : ℝ) : ℂ) * χ m * Complex.exp (-((Real.log m * v : ℝ) : ℂ) * I) else 0)) k hr hx hxy ha
+
+/-- Gallagher 1970 Theorem 5 display 20.
+Exact sealed detector statement assembled from the two smaller arithmetic leaves.
+CONDITIONAL ON those leaves. This theorem has no proof hole of its own. -/
+private theorem pW_gallagher_zero_detector_of_turan
+    (hpower : ∀ n M : ℕ, 0 < n → n ≤ M → ∀ z : Fin n → ℂ, (∃ i, 1 ≤ ‖z i‖) →
+      ∃ ν : ℕ, M < ν ∧ ν ≤ 2 * M ∧ (1 / 50 : ℝ) ^ M ≤ ‖∑ i, z i ^ ν‖) :
+    ∃ r₀ A B C c : ℝ,
+    0 < r₀ ∧ r₀ ≤ 1 / 4 ∧ 1 ≤ A ∧ 1 < B ∧ 0 < C ∧ 0 < c ∧
+    ∀ T : ℝ, 2 ≤ T → ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ T →
+      ∀ χ : DirichletCharacter ℂ q, ∀ v r : ℝ,
+        |v| ≤ T → (χ = 1 → 2 ≤ |v|) → 1 / Real.log T ≤ r → r ≤ r₀ →
+        (∃ ρ : ℂ, χ.LFunction ρ = 0 ∧ ‖ρ - (1 + v * Complex.I)‖ ≤ r) →
+        ∀ x : ℝ, T ^ A ≤ x →
+          c * x ^ (-C * r) * Real.log x ^ 2 ≤
+            ∫ y in x..(x ^ B), ‖primeDetector χ x y v‖ / y := by
+  obtain ⟨r₀, E, D, η, hr₀, hr₀hi, hE, hD, hη, hseries⟩ :=
+    pA_poisson_series_detector_of_turan hpower
+  obtain ⟨r₁, A, B, C, c, hr₁, hA, hB, hC, hc, hwindow⟩ :=
+    pW_poisson_window_localization E D η hE hD hη
+  refine ⟨min r₀ r₁, A, B, C, c, lt_min hr₀ hr₁, (min_le_left _ _).trans hr₀hi,
+    hA, hB, hC, hc, ?_⟩
+  intro T hT q hq hqT χ v r hv hχ hrlo hrhi hz x hx
+  have hl : 0 < Real.log T := Real.log_pos (by linarith)
+  have hr : 0 < r := (one_div_pos.mpr hl).trans_le hrlo
+  have hx1 : 1 ≤ x :=
+    (Real.one_le_rpow (by linarith : 1 ≤ T) (by linarith : 0 ≤ A)).trans hx
+  have hxy : x ≤ x ^ B := by
+    simpa using Real.rpow_le_rpow_of_exponent_le hx1 hB.le
+  obtain ⟨k, hk⟩ := hwindow T hT q hqT χ v r hv hrlo (hrhi.trans (min_le_right _ _))
+    (hseries T hT q hqT χ v r hv hχ hrlo (hrhi.trans (min_le_left _ _)) hz) x hx
+  have hh := hk.trans (pW_prime_poisson_partial_summation χ k v hr.le hx1 hxy)
+  exact (mul_le_mul_iff_right₀ hr).mp (by simpa only [mul_comm r] using hh)
+
+end PortpW
+
+end PortTuran
+
+
 /-- LEAF. Gallagher 1970 pp.333 to 335, Theorem 5 display 20.
 CONDITIONAL ON the finite Turan power bound. The remaining proof is the analytic
 logarithmic derivative expansion, its tail estimate, prime power removal and partial summation.
@@ -4876,7 +7462,7 @@ theorem gallagher_zero_detector_of_turan
         ∀ x : ℝ, T ^ A ≤ x →
           c * x ^ (-C * r) * Real.log x ^ 2 ≤
             ∫ y in x..(x ^ B), ‖primeDetector χ x y v‖ / y := by
-  sorry
+  exact pW_gallagher_zero_detector_of_turan hpower
 
 
 /-- Gallagher 1970 p.333 Theorem 5 display 20.
