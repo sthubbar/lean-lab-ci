@@ -1,0 +1,404 @@
+[
+  {
+    "file": "Decomp366a.lean",
+    "kind": "theorem",
+    "name": "rawRemainder4_nonneg",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366a.lean",
+    "kind": "theorem",
+    "name": "pair_linear_sieve_with_remainder",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366a.lean",
+    "kind": "theorem",
+    "name": "pair_remainder_log_cubic",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366a.lean",
+    "kind": "theorem",
+    "name": "main4_lower_supplied",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366b.lean",
+    "kind": "theorem",
+    "name": "continuous_prime_triangle",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366b.lean",
+    "kind": "theorem",
+    "name": "lower_kernel_continuous",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366b.lean",
+    "kind": "theorem",
+    "name": "reciprocalFullSum4_zero_tendsto",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366b.lean",
+    "kind": "theorem",
+    "name": "lowerSum4_tendsto_supplied",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366c.lean",
+    "kind": "theorem",
+    "name": "fullPairs4_mass_bounded",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366c.lean",
+    "kind": "theorem",
+    "name": "reciprocalFullSum4_shift_small",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366c.lean",
+    "kind": "theorem",
+    "name": "lowerSum4_of_zero_loss",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "symmetric_pair_sum",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "def",
+    "name": "primeBand4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "fullPairs4_as_triangle",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "primeBand4_mass_bounded",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "primeBand4_diagonal_le",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "primeBand4_diagonal_tendsto",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "fullPairs4_mass_formula",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "fullPairs4_mass_of_band",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "fullPairs4_instance",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366d.lean",
+    "kind": "theorem",
+    "name": "lowerPairs4_instance",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "def",
+    "name": "lowerTotientMass4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "theorem",
+    "name": "lowerTotientMass4_nonneg",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "theorem",
+    "name": "lowerTotientMass4_le",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "theorem",
+    "name": "lowerTotientMass4_bounded",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "theorem",
+    "name": "lowerSum4_bounded",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "def",
+    "name": "liMain4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "theorem",
+    "name": "liMain4_difference",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366e.lean",
+    "kind": "theorem",
+    "name": "liMain4_error_absorbed",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366f.lean",
+    "kind": "theorem",
+    "name": "reciprocal_endpoint_difference",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366f.lean",
+    "kind": "theorem",
+    "name": "prime_interval_endpoint_difference",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366f.lean",
+    "kind": "theorem",
+    "name": "primeBand4_mass_error",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366f.lean",
+    "kind": "theorem",
+    "name": "primeBand4_mass_tendsto",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366f.lean",
+    "kind": "theorem",
+    "name": "fullPairs4_mass_tendsto",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366g.lean",
+    "kind": "theorem",
+    "name": "fullPairs4_product_sharp",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366g.lean",
+    "kind": "theorem",
+    "name": "lowerLevel4_window",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366g.lean",
+    "kind": "theorem",
+    "name": "pair_sieveLevel_admissible",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366g.lean",
+    "kind": "theorem",
+    "name": "rawRemainder4_AP",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366g.lean",
+    "kind": "theorem",
+    "name": "one_mem_pairModuli4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366g.lean",
+    "kind": "theorem",
+    "name": "pairModuli4_instance",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "def",
+    "name": "pairModuli4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "def",
+    "name": "rawRemainder4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "def",
+    "name": "candidatePairs4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "theorem",
+    "name": "candidatePairs4_card",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "theorem",
+    "name": "pairModuli4_product_mem",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "theorem",
+    "name": "pair_mem_candidatePairs4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "def",
+    "name": "pairTriples4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "def",
+    "name": "tripleModulus4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "theorem",
+    "name": "tripleModulus4_mem",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "theorem",
+    "name": "tripleModulus4_fiber_card",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "theorem",
+    "name": "rawRemainder4_le_single",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366h.lean",
+    "kind": "theorem",
+    "name": "pair_remainder_of_single",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366i.lean",
+    "kind": "def",
+    "name": "kernel4",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366i.lean",
+    "kind": "theorem",
+    "name": "mem_fullPairs4_triangle",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366i.lean",
+    "kind": "theorem",
+    "name": "reciprocalFullSum4_zero_coordinates",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366i.lean",
+    "kind": "theorem",
+    "name": "kernel4_continuousOn",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366i.lean",
+    "kind": "theorem",
+    "name": "kernel4_uniformContinuousOn",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366i.lean",
+    "kind": "theorem",
+    "name": "kernel4_integrableOn_triangle",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366i.lean",
+    "kind": "theorem",
+    "name": "lowerIntegral4_kernel",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366j.lean",
+    "kind": "theorem",
+    "name": "reciprocal_triangle_integral",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366j.lean",
+    "kind": "theorem",
+    "name": "reciprocal_triangle_const",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366j.lean",
+    "kind": "theorem",
+    "name": "lowerIntegral4_const",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366j.lean",
+    "kind": "theorem",
+    "name": "constant_prime_triangle_tendsto",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366k.lean",
+    "kind": "theorem",
+    "name": "lowerSum4_const_error",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366k.lean",
+    "kind": "theorem",
+    "name": "reciprocalFullSum4_const_tendsto",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366k.lean",
+    "kind": "theorem",
+    "name": "lowerSum4_const_tendsto",
+    "review": "MATCH"
+  },
+  {
+    "file": "Decomp366k.lean",
+    "kind": "theorem",
+    "name": "lowerPairs4_eventually_nonempty",
+    "review": "MATCH"
+  }
+]

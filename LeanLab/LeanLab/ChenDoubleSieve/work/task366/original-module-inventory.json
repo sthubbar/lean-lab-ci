@@ -1,0 +1,2502 @@
+[
+  {
+    "file": "BuchstabBounds.lean",
+    "lines": 120,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": [
+      "C",
+      "log_recip_C",
+      "one_add_log_le",
+      "formula_two_three",
+      "bound_two_three",
+      "propagate_upper",
+      "buchstab_le_567144"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "BuchstabSharp.lean",
+    "lines": 41,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabBounds"
+    ],
+    "declarations": [
+      "upper_of_log",
+      "sharp_log_certificate",
+      "buchstab_le_5671433"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "BuchstabTail.lean",
+    "lines": 99,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabSharp"
+    ],
+    "declarations": [
+      "propagate_upper_from_three",
+      "log_two_le_694",
+      "bound_three_four",
+      "buchstab_le_566"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275a.lean",
+    "lines": 26,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": [
+      "thm2_eval_checked",
+      "printed_combination",
+      "printed_margin"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275b.lean",
+    "lines": 695,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275a",
+      "LeanLab.ChenDoubleSieve.Decomp275d",
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Sum"
+    ],
+    "declarations": [
+      "primeSequence",
+      "kappa1",
+      "kappa2",
+      "sigma1",
+      "sigma2",
+      "parameters_admissible",
+      "fourfold13_argument",
+      "fourfold14_argument",
+      "weighted",
+      "sieveTerms",
+      "fourfold",
+      "integralTerms",
+      "standard_functions",
+      "weighted_sieve_power",
+      "weighted_sieve",
+      "positive_estimates",
+      "negative_estimates",
+      "integral_evaluation",
+      "weighted_comparison",
+      "thm2_analytic_link_checked"
+    ],
+    "sorry_lines": [
+      604,
+      628,
+      637,
+      644
+    ]
+  },
+  {
+    "file": "Decomp275c.lean",
+    "lines": 15,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": [
+      "wu2004_thm2_checked"
+    ],
+    "sorry_lines": [
+      11
+    ]
+  },
+  {
+    "file": "Decomp275d.lean",
+    "lines": 64,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": [
+      "log_sq_littleO_power",
+      "power_remainder_absorbed"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275e.lean",
+    "lines": 91,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.JCertificate"
+    ],
+    "declarations": [
+      "nodeQ",
+      "upperCell",
+      "J_upper_partition",
+      "F7_certificate",
+      "F8_certificate",
+      "F7_upper",
+      "F8_upper"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275f.lean",
+    "lines": 96,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275e",
+      "LeanLab.ChenDoubleSieve.KCertificate"
+    ],
+    "declarations": [
+      "kNodeQ",
+      "kUpperCell",
+      "F10_certificate",
+      "F10_K_upper",
+      "F10_substitution",
+      "F10_upper"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275g.lean",
+    "lines": 210,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275f"
+    ],
+    "declarations": [
+      "roundedKCell",
+      "K_rounded_partition",
+      "squarePrimitive",
+      "squarePrimitive_deriv",
+      "square_integrable",
+      "square_integral_eq",
+      "squareUpperQ",
+      "square_upper",
+      "earlyNodeQ",
+      "lateNodeQ",
+      "F9_partition_parameters",
+      "F9_certificate",
+      "F9_early_substitution",
+      "F9_late_substitution",
+      "F9_upper"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275h.lean",
+    "lines": 159,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": [
+      "linear_upper_three",
+      "linear_lower_four",
+      "F4_argument_range",
+      "F5_argument_range",
+      "linear_upper_five",
+      "linear_lower_six"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275i.lean",
+    "lines": 142,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275h"
+    ],
+    "declarations": [
+      "F0_elementary",
+      "F1_elementary",
+      "F4_elementary",
+      "F5_elementary"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp275j.lean",
+    "lines": 48,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.Lemma42"
+    ],
+    "declarations": [
+      "literal_quadruple_zero",
+      "modulus_convention_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp315a.lean",
+    "lines": 1737,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21Chen",
+      "LeanLab.ChenDoubleSieve.Decomp275j"
+    ],
+    "declarations": [
+      "primeSequence_decomposition",
+      "primeSequence_bad_card",
+      "primeFactors_card_log",
+      "primeSequence_bad_log",
+      "sieve_count_transfer",
+      "primeSequence_sieve_transfer",
+      "primeSequence_reduction_instance",
+      "primeTriples",
+      "triple_divisor_card",
+      "triple_sum_bound",
+      "primeSequence_bounds",
+      "exceptional_triple_sum",
+      "sieve_transfer_by_exception",
+      "triple_sum_transfer",
+      "primeSequence_triple_transfer",
+      "log_ceiling_power_absorbed",
+      "exceptional_triple_power",
+      "triple_sum_eq_S4",
+      "pair_sqrt_iff",
+      "pairs_eq_upper",
+      "pairs_eq_cross",
+      "Achen_sieve_le",
+      "primeFactors_card_absorbed",
+      "lemma21_remainder_power",
+      "sifted_modulus_prime",
+      "sieve_modulus_prime",
+      "least_sifting_prime_exists",
+      "least_sifting_prime_unique",
+      "sifting_partition_card",
+      "buchstab_base",
+      "sieve_filter_divisor",
+      "buchstab_divisor",
+      "literal_delta_third_zero",
+      "delta_modulus_instance",
+      "tripleTerms",
+      "deltaOne",
+      "tripleTerms_nonneg",
+      "deltaOne_nonpos",
+      "primeTriples_instance",
+      "first_half",
+      "second_half",
+      "delta_cancellation",
+      "weighted_sieve_power_supplied"
+    ],
+    "sorry_lines": [
+      657
+    ]
+  },
+  {
+    "file": "Decomp315b.lean",
+    "lines": 55,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": [
+      "lower_F0",
+      "lower_F4",
+      "lower_F5",
+      "positive_estimates_supplied"
+    ],
+    "sorry_lines": [
+      21,
+      29,
+      37
+    ]
+  },
+  {
+    "file": "Decomp315c.lean",
+    "lines": 63,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": [
+      "basic_upper",
+      "switched_upper",
+      "refined_upper",
+      "negative_estimates_supplied"
+    ],
+    "sorry_lines": [
+      22,
+      31,
+      40
+    ]
+  },
+  {
+    "file": "Decomp315d.lean",
+    "lines": 2818,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275i"
+    ],
+    "declarations": [
+      "upper_weighted_split",
+      "F2_elementary",
+      "F3_elementary",
+      "reciprocal_head",
+      "F2_sub_F3",
+      "numerical_F0",
+      "numerical_F1_aux",
+      "numerical_F1",
+      "numerical_F2",
+      "numerical_F3",
+      "numerical_F4",
+      "numerical_F5"
+    ],
+    "sorry_lines": [
+      2809,
+      2816
+    ]
+  },
+  {
+    "file": "Decomp315e.lean",
+    "lines": 52,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp315d",
+      "LeanLab.ChenDoubleSieve.Decomp275e",
+      "LeanLab.ChenDoubleSieve.Decomp275f",
+      "LeanLab.ChenDoubleSieve.Decomp275g"
+    ],
+    "declarations": [
+      "numerical_F13",
+      "numerical_F14",
+      "integral_evaluation_supplied"
+    ],
+    "sorry_lines": [
+      23,
+      30
+    ]
+  },
+  {
+    "file": "Decomp348a.lean",
+    "lines": 853,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.Section3",
+      "LeanLab.BS2022GRH.PortedMertens"
+    ],
+    "declarations": [
+      "evenAtTop",
+      "lowerDensity",
+      "scaledDensity",
+      "lowerLevel",
+      "main0",
+      "lowerLevel_one",
+      "lowerLevel_one_tendsto",
+      "main0_ratio",
+      "scaledDensity_tendsto",
+      "main0_lower",
+      "main0_tendsto",
+      "lower_of_main",
+      "lower_F0_supplied"
+    ],
+    "sorry_lines": [
+      801
+    ]
+  },
+  {
+    "file": "Decomp348b.lean",
+    "lines": 86,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348a"
+    ],
+    "declarations": [
+      "lowerPairs4",
+      "lowerSum4",
+      "lowerIntegral4",
+      "main4",
+      "main4_lower",
+      "lowerSum4_tendsto",
+      "main4_ratio",
+      "main4_tendsto",
+      "lower_F4_supplied"
+    ],
+    "sorry_lines": [
+      42,
+      50
+    ]
+  },
+  {
+    "file": "Decomp348c.lean",
+    "lines": 86,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348a"
+    ],
+    "declarations": [
+      "lowerPairs5",
+      "lowerSum5",
+      "lowerIntegral5",
+      "main5",
+      "main5_lower",
+      "lowerSum5_tendsto",
+      "main5_ratio",
+      "main5_tendsto",
+      "lower_F5_supplied"
+    ],
+    "sorry_lines": [
+      42,
+      50
+    ]
+  },
+  {
+    "file": "Decomp348d.lean",
+    "lines": 214,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348b",
+      "LeanLab.ChenDoubleSieve.Decomp348c",
+      "LeanLab.ChenDoubleSieve.Decomp315a"
+    ],
+    "declarations": [
+      "evenAtTop_neBot",
+      "lowerDensity_pos",
+      "lowerDensity_le_one",
+      "scaledDensity_pos",
+      "reciprocal_sum_le",
+      "exceptional_reciprocal_sum",
+      "pairMass",
+      "badPairs",
+      "pairMass_product",
+      "pairMass_mono",
+      "badPairs_eq",
+      "badPairs_mass_le",
+      "large_prime_divisor_card",
+      "exceptional_reciprocal_sum_sharp"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348e.lean",
+    "lines": 96,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348d"
+    ],
+    "declarations": [
+      "badPairs_mass_sharp",
+      "coprimality_bound_tendsto",
+      "badPairs_mass_small",
+      "badPairs_count_error"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348f.lean",
+    "lines": 91,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348e"
+    ],
+    "declarations": [
+      "reciprocal_totient_pair",
+      "weighted_coprimality_error",
+      "weighted_coprimality_error_small"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348g.lean",
+    "lines": 78,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348f"
+    ],
+    "declarations": [
+      "lowerLevel_divisor",
+      "lowerLevel_window",
+      "lower_values_bounded"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348h.lean",
+    "lines": 170,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348g"
+    ],
+    "declarations": [
+      "lowerPrimeBand",
+      "fullPairs4",
+      "fullPairs5",
+      "fullSum4",
+      "fullSum5",
+      "lowerPrimeBand_range",
+      "lowerPairs4_eq_filter",
+      "lowerPairs5_eq_filter",
+      "fullPairs4_primes",
+      "fullPairs5_primes",
+      "fullPairs4_subset",
+      "fullPairs5_subset",
+      "fullPairs4_product",
+      "fullPairs5_product",
+      "lowerSum4_coprimality",
+      "lowerSum5_coprimality"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348i.lean",
+    "lines": 63,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348h"
+    ],
+    "declarations": [
+      "lowerSum4_of_full",
+      "lowerSum5_of_full",
+      "positive_estimates_supplied"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348j.lean",
+    "lines": 55,
+    "imports": [
+      "LeanLab.ChenPrimeExceptional.Task101PowerCutoffs",
+      "LeanLab.ChenDoubleSieve.Decomp348i"
+    ],
+    "declarations": [
+      "powerPrimeMass",
+      "powerPrimeMass_tendsto"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348k.lean",
+    "lines": 119,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348h"
+    ],
+    "declarations": [
+      "reciprocal_shift_error",
+      "reciprocal_totient_pair_error",
+      "totient_sum_error",
+      "pairMass_le_log_square",
+      "totient_bound_tendsto"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348l.lean",
+    "lines": 161,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348k"
+    ],
+    "declarations": [
+      "totient_sum_error_small",
+      "reciprocalFullSum4",
+      "fullSum4_totient_error",
+      "lowerSum4_reciprocal_error",
+      "reciprocalFullSum5",
+      "fullSum5_totient_error",
+      "lowerSum5_reciprocal_error",
+      "lowerSum4_of_reciprocal",
+      "lowerSum5_of_reciprocal"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348m.lean",
+    "lines": 82,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348k"
+    ],
+    "declarations": [
+      "tailCorrection",
+      "tailCorrection_one_le",
+      "tailCorrection_card",
+      "tailCorrection_le",
+      "tailCorrection_tendsto"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348n.lean",
+    "lines": 123,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348m"
+    ],
+    "declarations": [
+      "baseDensity",
+      "smallCorrection",
+      "oddFactor_partition",
+      "density_good_set",
+      "density_bad_set",
+      "lowerDensity_factor",
+      "density_factor_identity",
+      "scaledDensity_factor",
+      "scaledDensity_of_base"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348o.lean",
+    "lines": 57,
+    "imports": [
+      "LeanLab.AlmostPrimeSums.Decomp1527c",
+      "LeanLab.ChenDoubleSieve.Decomp348n"
+    ],
+    "declarations": [
+      "baseDensity_tendsto",
+      "scaledDensity_supplied"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348p.lean",
+    "lines": 114,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348o"
+    ],
+    "declarations": [
+      "main0_tendsto",
+      "main4_tendsto",
+      "main5_tendsto",
+      "lower_F0",
+      "lower_F4",
+      "lower_F5",
+      "positive_estimates_supplied"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp348v.lean",
+    "lines": 47,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348n",
+      "LeanLab.ChenDoubleSieve.Decomp348l",
+      "LeanLab.ChenDoubleSieve.Decomp348j"
+    ],
+    "declarations": [
+      "pair_instance_cutoffs",
+      "function_hypotheses_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350a.lean",
+    "lines": 257,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.BuchstabTail",
+      "LeanLab.ChenDoubleSieve.Decomp350f",
+      "LeanLab.ChenDoubleSieve.Decomp350k"
+    ],
+    "declarations": [
+      "buchstab_nonneg",
+      "propagate_upper_from",
+      "buchstab_four_to_four_half",
+      "buchstab_compact_upper",
+      "buchstab_tail_upper",
+      "interval_integral_le_of_nonneg",
+      "logMajorant",
+      "fourfold_le_logMajorant"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350b.lean",
+    "lines": 87,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350g"
+    ],
+    "declarations": [
+      "fourfold13_upper",
+      "elementary_F13_upper",
+      "logarithmic_F13_upper",
+      "numerical_F13_supplied"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350c.lean",
+    "lines": 98,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350h"
+    ],
+    "declarations": [
+      "fourfold14_upper",
+      "elementary_F14_upper",
+      "logarithmic_F14_upper",
+      "numerical_F14_supplied"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350d.lean",
+    "lines": 120,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350a"
+    ],
+    "declarations": [
+      "integral_log_ratio_div",
+      "integral_log_ratio_sq_div_sq",
+      "logMajorant13_eq"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350e.lean",
+    "lines": 111,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350a"
+    ],
+    "declarations": [
+      "reciprocal_triangle",
+      "twofoldMajorant",
+      "logMajorant_eq_twofold"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350f.lean",
+    "lines": 155,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.BuchstabBounds",
+      "LeanLab.ChenDoubleSieve.JPanelArithmetic",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate",
+      "Mathlib.Analysis.Convex.SpecificFunctions.Basic"
+    ],
+    "declarations": [
+      "upperJPanel",
+      "upperJPanel_sum",
+      "J_two_three_upper",
+      "buchstab_four_formula",
+      "buchstab_four_upper",
+      "buchstab_lower_five_halves_three",
+      "buchstab_seven_halves_to_four"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350g.lean",
+    "lines": 262,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350d",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": [
+      "logTaylor13",
+      "logTaylor13_bounds",
+      "F13_kernel_upper",
+      "primitive13First",
+      "primitive13Second",
+      "primitive13First_deriv",
+      "primitive13Second_deriv",
+      "endpoint13",
+      "endpoint13_certificate",
+      "endpoint13_upper",
+      "polynomial_F13_endpoint",
+      "F13_elementary_upper_clean"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350h.lean",
+    "lines": 305,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350e",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": [
+      "logConstant14",
+      "logConstant14_eq",
+      "logConstant14_upper",
+      "reciprocal14",
+      "reciprocal14_upper",
+      "reciprocalOne14",
+      "reciprocalOne14_upper",
+      "logPolynomial14",
+      "logPolynomial14_upper",
+      "F14_log_nonneg",
+      "innerPrimitive14",
+      "innerPolynomial14",
+      "innerPrimitive14_deriv",
+      "primitive14First",
+      "primitive14Second",
+      "primitive14First_deriv",
+      "primitive14Second_deriv",
+      "endpoint14",
+      "endpoint14_upper",
+      "innerPolynomial14_integral",
+      "polynomial14_endpoint",
+      "twofold14_polynomial_upper",
+      "F14_elementary_upper_clean"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350i.lean",
+    "lines": 197,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350f",
+      "Mathlib.Analysis.SpecialFunctions.Bernstein"
+    ],
+    "declarations": [
+      "tailLogConstant",
+      "tailInitial",
+      "tailConstants_eq",
+      "tailConstants_upper",
+      "tailLogPoly",
+      "tailLogPoly_upper",
+      "tailReciprocal",
+      "tailReciprocal_upper",
+      "tailDerivativePoly",
+      "tailDerivativePoly_nonneg",
+      "tailPrimitive",
+      "tailPrimitive_deriv",
+      "tailNumerator",
+      "tailNumerator_integral",
+      "tailNumerator_nonneg",
+      "tailReciprocalV",
+      "tailReciprocalV_upper",
+      "tailOmegaPoly",
+      "tailOmegaPrimitive",
+      "tailOmegaPrimitive_deriv",
+      "tailBudget",
+      "tailBernsteinRow",
+      "tailBernsteinRow_nonneg"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350j.lean",
+    "lines": 96,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350i"
+    ],
+    "declarations": [
+      "tailBernstein_identity0",
+      "tailBernstein_identity1",
+      "tailBernstein_identity2",
+      "tailBernstein_identity3",
+      "tailBudget_le"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp350k.lean",
+    "lines": 111,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350j"
+    ],
+    "declarations": [
+      "tailNumerator_upper",
+      "tailOmegaPoly_upper",
+      "tailBudget_upper",
+      "buchstab_four_to_four_half_clean"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363a.lean",
+    "lines": 70,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348o"
+    ],
+    "declarations": [
+      "scaledDensity_supplied",
+      "density_scale_ratio",
+      "density_scale_bounded",
+      "log_cubic_absorbed"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363b.lean",
+    "lines": 94,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363c"
+    ],
+    "declarations": [
+      "sieveLevel",
+      "remainderModuli",
+      "rawRemainder",
+      "rawRemainder_nonneg",
+      "linear_sieve_with_remainder",
+      "remainder_log_cubic",
+      "main0_lower_supplied"
+    ],
+    "sorry_lines": [
+      47,
+      55,
+      59
+    ]
+  },
+  {
+    "file": "Decomp363c.lean",
+    "lines": 167,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363a",
+      "LeanLab.ChenDoubleSieve.Decomp348p"
+    ],
+    "declarations": [
+      "inv_log_pow_integrable",
+      "li_integral_remainder",
+      "li_relative_error",
+      "li_ratio_tendsto",
+      "liMain0",
+      "liMain0_ratio",
+      "li_density_scale_tendsto",
+      "li_density_scale_bounded",
+      "liMain0_error_tendsto",
+      "liMain0_error_absorbed"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363d.lean",
+    "lines": 130,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363b"
+    ],
+    "declarations": [
+      "primeSequence_divisor_card",
+      "rawRemainder_AP",
+      "sieveLevel_antitone",
+      "remainderModuli_antitone",
+      "rawRemainder_antitone",
+      "one_mem_remainderModuli",
+      "remainderModuli_instance",
+      "weighted_remainder_bound",
+      "rows_remainder_bound"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363e.lean",
+    "lines": 80,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363d"
+    ],
+    "declarations": [
+      "sieveLevel_eventually_admissible",
+      "CN_two_pow",
+      "log_squared_not_absorbed"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363f.lean",
+    "lines": 100,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363e"
+    ],
+    "declarations": [
+      "localDensity",
+      "localDensity_pos",
+      "localDensity_split",
+      "localDensity_ratio",
+      "localDensity_ratio_le",
+      "localDensity_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363g.lean",
+    "lines": 213,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363f"
+    ],
+    "declarations": [
+      "shifted_factor_log_error",
+      "oddEulerBlock",
+      "oddEulerBlock_pos",
+      "oddEulerBlock_log_error",
+      "oddEulerBlock_log_ratio_error",
+      "oddEulerBlock_inv_le",
+      "oddEulerBlock_dimension",
+      "PS_nat_successors",
+      "localDensity_nat_dimension"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363h.lean",
+    "lines": 182,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363g"
+    ],
+    "declarations": [
+      "strictCutoff",
+      "strictCutoff_bounds",
+      "strictCutoff_mono",
+      "localDensity_ceil",
+      "localDensity_strictCutoff",
+      "cutoff_log_bounds",
+      "dimension_factor_shift",
+      "localDensity_real_dimension_above_three",
+      "localDensity_below_three",
+      "localDensity_dimension"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp363i.lean",
+    "lines": 44,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363h"
+    ],
+    "declarations": [
+      "local_weight_bounds",
+      "localDensity_totient"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367a.lean",
+    "lines": 90,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367e",
+      "LeanLab.ChenDoubleSieve.Decomp363b",
+      "LeanLab.ChenDoubleSieve.Decomp348c"
+    ],
+    "declarations": [
+      "pairModuli5",
+      "rawRemainder5",
+      "rawRemainder5_nonneg",
+      "pair_linear_sieve_with_remainder",
+      "pair_remainder_log_cubic",
+      "main5_lower_supplied"
+    ],
+    "sorry_lines": [
+      46,
+      54
+    ]
+  },
+  {
+    "file": "Decomp367b.lean",
+    "lines": 77,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348j",
+      "LeanLab.ChenDoubleSieve.Decomp348l"
+    ],
+    "declarations": [
+      "prime_rectangle_mass_tendsto",
+      "lowerPrimeBand_subset_power",
+      "lowerPrimeBand_mass_bounded",
+      "fullPairs5_mass_bounded"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367c.lean",
+    "lines": 121,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367b"
+    ],
+    "declarations": [
+      "lowerLevel_shift",
+      "lowerLevel_zero_window",
+      "lower_values_shift_small",
+      "reciprocalFullSum5_shift_small",
+      "lowerSum5_of_zero_loss"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367d.lean",
+    "lines": 136,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367c",
+      "LeanLab.ChenDoubleSieve.Decomp348v"
+    ],
+    "declarations": [
+      "power_cutoff_le_iff",
+      "lt_power_cutoff_iff",
+      "crossing_cutoff_iff",
+      "lowerLevel_zero_coordinates",
+      "mem_fullPairs5_coordinates",
+      "fullPairs5_instance",
+      "lowerPairs5_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367e.lean",
+    "lines": 120,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367b",
+      "LeanLab.ChenDoubleSieve.Decomp363c"
+    ],
+    "declarations": [
+      "lowerTotientMass5",
+      "lowerTotientMass5_nonneg",
+      "lowerTotientMass5_le",
+      "lowerTotientMass5_bounded",
+      "lowerSum5_bounded",
+      "liMain5",
+      "liMain5_difference",
+      "liMain5_error_absorbed"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367f.lean",
+    "lines": 57,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367a",
+      "LeanLab.ChenDoubleSieve.Decomp363d"
+    ],
+    "declarations": [
+      "rawRemainder5_AP",
+      "pairModuli5_antitone",
+      "rawRemainder5_antitone",
+      "one_mem_pairModuli5",
+      "pairModuli5_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367g.lean",
+    "lines": 106,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367d"
+    ],
+    "declarations": [
+      "kernel5",
+      "mem_fullPairs5_triangle",
+      "reciprocalFullSum5_zero_coordinates",
+      "kernel5_continuousOn",
+      "kernel5_uniformContinuousOn",
+      "lowerIntegral5_kernel"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367h.lean",
+    "lines": 75,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367b"
+    ],
+    "declarations": [
+      "powerPrimeMass_mono",
+      "powerPrimeMass_moving_upper"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367i.lean",
+    "lines": 117,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367f"
+    ],
+    "declarations": [
+      "candidatePairs5",
+      "candidatePairs5_card",
+      "pairModuli5_product_mem",
+      "pair_mem_candidatePairs5",
+      "pairModuli5_actual_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367j.lean",
+    "lines": 94,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367i"
+    ],
+    "declarations": [
+      "pairTriples5",
+      "tripleModulus5",
+      "tripleModulus5_mem",
+      "tripleModulus5_fiber_card",
+      "rawRemainder5_le_single"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Decomp367k.lean",
+    "lines": 90,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367j"
+    ],
+    "declarations": [
+      "sieveLevel_le_self",
+      "pair_remainder_of_single",
+      "pair_remainder_supplied",
+      "main5_lower_from_single"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "DecompJ344.lean",
+    "lines": 26,
+    "imports": [
+      "Mathlib",
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": [
+      "thm2_eval",
+      "thm2_analytic_link",
+      "wu2004_thm2_decomp"
+    ],
+    "sorry_lines": [
+      20
+    ]
+  },
+  {
+    "file": "Discretization.lean",
+    "lines": 141,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Table1Algebra"
+    ],
+    "declarations": [
+      "panel_lower",
+      "partition_lower",
+      "node",
+      "node_bounds",
+      "node_eq_grid",
+      "table_partition_lower",
+      "TableInputs",
+      "correction_of_functional"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "EndpointIntegrals.lean",
+    "lines": 66,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements"
+    ],
+    "declarations": [
+      "domain_diagonal",
+      "buchstabIntegral_diagonal",
+      "buchstabSup_diagonal",
+      "I1_diagonal",
+      "Psi1_three",
+      "table1_last_Psi1_bound"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "FiniteLowerInstance.lean",
+    "lines": 50,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.NormalizerPositive"
+    ],
+    "declarations": [
+      "zero_hkn_finite",
+      "lower_supremum_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "FunctionalStatements.lean",
+    "lines": 176,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Section3",
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": [
+      "Params",
+      "alpha",
+      "Admissible3",
+      "Admissible4",
+      "ind",
+      "Xi1",
+      "Xi2",
+      "domain",
+      "buchstabIntegral",
+      "buchstabSup",
+      "I1",
+      "I2",
+      "J",
+      "K",
+      "Psi1",
+      "Psi2",
+      "Proposition3",
+      "Proposition4",
+      "IsLinearSieve",
+      "IsBuchstab",
+      "RepresentsCorrections",
+      "tableParams",
+      "tableParams_admissible",
+      "grid",
+      "tablePsi",
+      "tableSp",
+      "Table1PsiBounds"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "I1Bounds.lean",
+    "lines": 122,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabBounds",
+      "LeanLab.ChenDoubleSieve.XiKernelBounds",
+      "LeanLab.ChenDoubleSieve.ReducedIntegral"
+    ],
+    "declarations": [
+      "domain_isCompact",
+      "reciprocal",
+      "reciprocalIntegral",
+      "denominator_pos",
+      "reciprocal_integrable",
+      "I1_integrable",
+      "I1_integral_le",
+      "I1_le",
+      "ReciprocalReduction",
+      "I1_le_reduced"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "I1Numerics.lean",
+    "lines": 58,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Reduction",
+      "LeanLab.ChenDoubleSieve.ReducedCertificate"
+    ],
+    "declarations": [
+      "numerical_parameters",
+      "upperI1",
+      "upperI1_certificate",
+      "I1_table_upper"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "I1Reduction.lean",
+    "lines": 133,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Bounds"
+    ],
+    "declarations": [
+      "integral_middle",
+      "domain_middle",
+      "reciprocal_box",
+      "reciprocal_reduction"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "I1Sharp.lean",
+    "lines": 75,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Numerics",
+      "LeanLab.ChenDoubleSieve.BuchstabSharp"
+    ],
+    "declarations": [
+      "I1_integral_le_sharp",
+      "I1_le_sharp",
+      "upperI1Sharp",
+      "upperI1Sharp_certificate",
+      "I1_table_upper_sharp"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "I1Tail.lean",
+    "lines": 90,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Sharp",
+      "LeanLab.ChenDoubleSieve.BuchstabTail"
+    ],
+    "declarations": [
+      "I1_argument_ge_three",
+      "I1_integral_tail",
+      "I1_le_tail"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "I1TailNumerics.lean",
+    "lines": 78,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Tail",
+      "LeanLab.ChenDoubleSieve.ReducedCertificate"
+    ],
+    "declarations": [
+      "subVolumeLo",
+      "upperI1Tail",
+      "tail_parameters",
+      "subVolume_certificate",
+      "subVolume_lower",
+      "upperI1Tail_certificate",
+      "I1_table_upper_tail"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "I2Range.lean",
+    "lines": 46,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabBounds"
+    ],
+    "declarations": [
+      "ZeroBelowOne",
+      "extended_buchstab_le_one",
+      "last_I2_range_witness"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "JCertificate.lean",
+    "lines": 149,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.JPanelArithmetic",
+      "LeanLab.ChenDoubleSieve.ReducedCertificate"
+    ],
+    "declarations": [
+      "down",
+      "up",
+      "down_le",
+      "le_up",
+      "nodeQ",
+      "lowerPanelQ",
+      "upperPanelQ",
+      "lowerCell",
+      "upperCell",
+      "lowerJ",
+      "upperJ",
+      "parameters",
+      "J_sum_row0",
+      "J_sum_row1",
+      "J_sum_row2",
+      "J_sum_row3",
+      "J_sum_row4",
+      "J_sum_certificate",
+      "J_table_bounds"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "JPanelArithmetic.lean",
+    "lines": 89,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.LogIntegralPanels"
+    ],
+    "declarations": [
+      "logLower_nonneg",
+      "logUpper_nonneg",
+      "JLower",
+      "JUpper",
+      "J_panel_arithmetic",
+      "J_integrable",
+      "J_partition_arithmetic"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "KCertificate.lean",
+    "lines": 126,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.KPanelArithmetic",
+      "LeanLab.ChenDoubleSieve.JCertificate"
+    ],
+    "declarations": [
+      "leftQ",
+      "rightQ",
+      "nodeQ",
+      "wLowerQ",
+      "wUpperQ",
+      "lowerPanelQ",
+      "upperPanelQ",
+      "lowerCell",
+      "upperCell",
+      "lowerK",
+      "upperK",
+      "parameters",
+      "K_sum_row0",
+      "K_sum_row1",
+      "K_sum_row2",
+      "K_sum_row3",
+      "K_sum_row4",
+      "K_sum_certificate",
+      "K_table_bounds"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "KPanelArithmetic.lean",
+    "lines": 84,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.KPanels",
+      "LeanLab.ChenDoubleSieve.JPanelArithmetic"
+    ],
+    "declarations": [
+      "KWLower",
+      "KWUpper",
+      "KLower",
+      "KUpper",
+      "K_panel_arithmetic",
+      "K_partition_arithmetic"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "KPanels.lean",
+    "lines": 122,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.LogIntegralPanels"
+    ],
+    "declarations": [
+      "reflected_moments",
+      "K_weight_continuous",
+      "K_moments",
+      "K_integrable",
+      "K_panel"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Lemma41.lean",
+    "lines": 298,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "Sifted",
+      "S",
+      "PS",
+      "triples",
+      "\u03a9\u2081",
+      "\u03a9\u2082",
+      "\u03a9\u2083",
+      "Err",
+      "S_eq_sum",
+      "sifted_mono",
+      "mem_PS",
+      "coprime_of_prime_not_dvd",
+      "pointwise",
+      "lemma41_nat",
+      "lemma41_exact",
+      "lemma41_weighted",
+      "PS_ex",
+      "sifted_ex_w",
+      "sifted_ex_z",
+      "example_tight",
+      "err_needed"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Lemma41Err.lean",
+    "lines": 97,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41"
+    ],
+    "declarations": [
+      "card_dvd_le",
+      "S_le_card_dvd",
+      "err_le",
+      "lemma41_explicit"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Lemma41Uk.lean",
+    "lines": 194,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41Err"
+    ],
+    "declarations": [
+      "Pset",
+      "mem_Pset",
+      "Tset",
+      "card_Pset_le",
+      "sum_inv_Pset_le",
+      "card_primeFactors_prod_le",
+      "sum_inv_T_le",
+      "card_T_le",
+      "T_prime",
+      "lemma41_Uk"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Lemma42.lean",
+    "lines": 645,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41",
+      "LeanLab.ChenDoubleSieve.Lemma42Comb",
+      "LeanLab.ChenDoubleSieve.Lemma42Arith"
+    ],
+    "declarations": [
+      "tuples",
+      "G",
+      "yPrev",
+      "\u0393\u2081",
+      "\u0393\u2082",
+      "\u0393\u2083",
+      "\u0393\u2084",
+      "\u0393\u2085",
+      "\u0393\u2086",
+      "\u0393\u2087",
+      "\u0393\u2088",
+      "\u0393\u2089",
+      "\u0393\u2081\u2080",
+      "\u0393\u2081\u2081",
+      "\u0393\u2081\u2082",
+      "\u0393\u2081\u2083",
+      "\u0393\u2081\u2084",
+      "\u0393\u2081\u2085",
+      "\u0393\u2081\u2086",
+      "\u0393\u2081\u2087",
+      "\u0393\u2081\u2088",
+      "\u0393\u2081\u2089",
+      "\u0393\u2082\u2080",
+      "\u0393\u2082\u2081",
+      "literal_zero",
+      "cnt",
+      "G_eq",
+      "Rset",
+      "mem_Rset",
+      "valid_of",
+      "Rset_ge",
+      "Rset_lt",
+      "Nc_w",
+      "Nc_z",
+      "prefix_bound",
+      "pair_mem",
+      "pair_inj",
+      "pair_valid",
+      "two_mul_card_lt_pairs",
+      "between_card",
+      "gamma5_bound",
+      "gamma6_bound",
+      "eCnt",
+      "single_bound",
+      "pointwise",
+      "lemma42_nat",
+      "tuples_ex"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Lemma42Arith.lean",
+    "lines": 74,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "lemma42_arith"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Lemma42Comb.lean",
+    "lines": 129,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "Nc",
+      "mem_iff_exists",
+      "filter_lt_ord",
+      "card_lt_ord",
+      "card_le_ord",
+      "ord_lt_iff",
+      "le_ord_iff",
+      "Nc_mono",
+      "Nc_le_card",
+      "tail_count"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Lemma42Uk.lean",
+    "lines": 125,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41Uk",
+      "LeanLab.ChenDoubleSieve.Lemma42"
+    ],
+    "declarations": [
+      "sum_rem_le",
+      "err_T_le",
+      "rhs42",
+      "lhs42",
+      "lemma42_Uk"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "LogIntegralPanels.lean",
+    "lines": 119,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": [
+      "log_affine_slopes",
+      "weighted_linear_bounds",
+      "reciprocal_moments",
+      "J_panel"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "NormalizerPositive.lean",
+    "lines": 60,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.TupleInstance",
+      "LeanLab.ChenDoubleSieve.Section3Supremum"
+    ],
+    "declarations": [
+      "li_positive",
+      "theta_summand_positive",
+      "Theta_positive",
+      "Theta_positive_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "ParityBlind.lean",
+    "lines": 118,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21"
+    ],
+    "declarations": [
+      "cS0",
+      "cS1",
+      "cS2",
+      "cS3",
+      "cS4",
+      "weight",
+      "counts_zero_of_large",
+      "sifted_of_large",
+      "weight_prime",
+      "weight_semiprime"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "PowerRemainder.lean",
+    "lines": 74,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma42Uk"
+    ],
+    "declarations": [
+      "div_rpow",
+      "remainder_two_powers",
+      "remainder_power_saving",
+      "eta_bounds",
+      "remainder_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "PrintedPsi1.lean",
+    "lines": 56,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1TailNumerics",
+      "LeanLab.ChenDoubleSieve.KCertificate"
+    ],
+    "declarations": [
+      "printedPsi1",
+      "printedPsi1_certificate",
+      "printedPsi1_bounds",
+      "table1_Psi1_bounds"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Psi1Numerics.lean",
+    "lines": 44,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Numerics",
+      "LeanLab.ChenDoubleSieve.KCertificate"
+    ],
+    "declarations": [
+      "lowerPsi",
+      "lowerPsi_certificate",
+      "Psi1_table_lower"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "ReducedCertificate.lean",
+    "lines": 71,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.ReducedIntegral",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": [
+      "tableS",
+      "tableSp",
+      "volumeLo",
+      "volumeHi",
+      "lowerVolumeQ",
+      "upperVolumeQ",
+      "reduced_certificate",
+      "reducedTable_bounds"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "ReducedIntegral.lean",
+    "lines": 92,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": [
+      "reducedVolume",
+      "primitive",
+      "primitive_deriv",
+      "reducedVolume_eq",
+      "reducedVolume_parameters",
+      "reducedVolume_nonneg"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Section3.lean",
+    "lines": 214,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41Uk",
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": [
+      "Q",
+      "W",
+      "UkData",
+      "A",
+      "modulus",
+      "Phi",
+      "li",
+      "Theta",
+      "normalized",
+      "UpperCandidate",
+      "LowerCandidate",
+      "Hkn",
+      "hkn",
+      "Hk",
+      "hk",
+      "H",
+      "h",
+      "upperCandidate_threshold",
+      "lowerCandidate_threshold",
+      "Hkn_mono_threshold",
+      "hkn_mono_threshold",
+      "empty_UkData",
+      "empty_UkData_instance",
+      "Hkn_tendsto",
+      "hkn_tendsto",
+      "UkData_succ",
+      "Hkn_antitone_k",
+      "hkn_antitone_k",
+      "Hk_tendsto",
+      "hk_tendsto"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Section3Supremum.lean",
+    "lines": 77,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Section3"
+    ],
+    "declarations": [
+      "upper_at_sup",
+      "lower_at_sup",
+      "zero_lower_candidate"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Section7Algebra.lean",
+    "lines": 79,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": [
+      "mulVec_mono",
+      "section7_comparison",
+      "printed_constant_slack",
+      "printed_constant_of_bound",
+      "theorem1_of_sieve",
+      "printed_constant_instance",
+      "comparison_instance"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "SelbergUpper.lean",
+    "lines": 223,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements",
+      "LeanLab.SchnirelmannGoldbach.S1.Final",
+      "LeanLab.ChenExplicit.TwinCNumeric"
+    ],
+    "declarations": [
+      "D_eq_r",
+      "oddFactor_ge_one",
+      "singProd_le_oddFactor",
+      "goldbachUpper_1200",
+      "goldbachUpper_77"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "SigmaCertificate.lean",
+    "lines": 125,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": [
+      "logLowerQ",
+      "logUpperQ",
+      "gridQ",
+      "lowerTable",
+      "upperTable",
+      "lowerQ",
+      "upperQ",
+      "endpoint_certificate",
+      "sum_certificate",
+      "sigma_3_5_4_bounds",
+      "sigma_denominator_bounds",
+      "sigma_denominator_ne_zero"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "SigmaIntegral.lean",
+    "lines": 132,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "sigma",
+      "sigma0",
+      "logLower",
+      "logUpper",
+      "log_bounds",
+      "sigma_integrable",
+      "integrand_antitone",
+      "sigma_panel",
+      "sigma_partition"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "SigmaKernel.lean",
+    "lines": 100,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": [
+      "sigma_nonneg",
+      "sigma_mono_c",
+      "sigma_mono_right",
+      "sigma_diagonal_mono",
+      "sigma0_nonneg",
+      "sigma0_mono",
+      "sigma0_one",
+      "sigma0_three_bounds",
+      "sigma0_bounds"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Statements.lean",
+    "lines": 200,
+    "imports": [
+      "Mathlib",
+      "LeanLab.ChenExplicit.Reductions"
+    ],
+    "declarations": [
+      "D",
+      "D12",
+      "oddFactor",
+      "CN",
+      "\u0398",
+      "\u03c02",
+      "\u03c012",
+      "PiX",
+      "D12short",
+      "\u03c012short",
+      "\u039e",
+      "PiShort",
+      "GoldbachUpper",
+      "ChenLower",
+      "TwinUpper",
+      "TwinChenLower",
+      "Wu2004Thm5",
+      "wu2004_thm1",
+      "wu2004_thm2",
+      "wu2004_thm3",
+      "wu2004_thm4",
+      "wu2004_thm5",
+      "wu2008",
+      "chen1978_quoted",
+      "oddFactor_one_le",
+      "CN_pos",
+      "\u0398_nonneg",
+      "\u0398_pos",
+      "PiX_nonneg",
+      "goldbachUpper_mono",
+      "chenLower_mono",
+      "twinUpper_mono",
+      "twinChenLower_mono",
+      "chen1978_of_wu",
+      "wu2004_thm2_of_wu2008",
+      "D_le_D12",
+      "chenLower_of_goldbachLower",
+      "chenAbove_of_chenLower",
+      "chen_of_wu2004"
+    ],
+    "sorry_lines": [
+      7,
+      89,
+      91,
+      93,
+      95,
+      97,
+      99,
+      101,
+      103
+    ]
+  },
+  {
+    "file": "Table1Algebra.lean",
+    "lines": 122,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.Section7Algebra"
+    ],
+    "declarations": [
+      "dual_lower_bound",
+      "candidateMatrixQ",
+      "printedBQ",
+      "dualQ",
+      "dual_certificate",
+      "correction_of_discrete",
+      "discrete_of_entrywise",
+      "discrete_instance",
+      "tableKernel",
+      "integralMatrix",
+      "IntegralMatrixBound"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "TableInputsBridge.lean",
+    "lines": 80,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Xi2Signs",
+      "LeanLab.ChenDoubleSieve.PrintedPsi1",
+      "LeanLab.ChenDoubleSieve.Table1Algebra"
+    ],
+    "declarations": [
+      "tableKernel_nonnegative",
+      "functional_rows"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "TupleInstance.lean",
+    "lines": 124,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.TupleLevel",
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": [
+      "witnessEps",
+      "witnessEps_bounds",
+      "nonempty_UkData_instance",
+      "witness_tuple_mem",
+      "positiveEps",
+      "positiveEps_bounds",
+      "positive_delta_instance",
+      "positive_tuple_mem"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "TupleLevel.lean",
+    "lines": 78,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Section3",
+      "LeanLab.ChenDoubleSieve.PowerRemainder"
+    ],
+    "declarations": [
+      "endpoint_product_level",
+      "tuple_modulus_le",
+      "residual_level_ge_W",
+      "residual_tenth_power"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "TuplePowerSaving.lean",
+    "lines": 53,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.TupleLevel"
+    ],
+    "declarations": [
+      "endpoint_product_le_Q",
+      "residual_power_ge",
+      "tuple_power_remainder"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "TwinInstance.lean",
+    "lines": 60,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma42Uk"
+    ],
+    "declarations": [
+      "Btwin",
+      "Btwin_sub",
+      "twin_lemma41",
+      "twin_lemma42"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "TwinUpperLink.lean",
+    "lines": 58,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements",
+      "LeanLab.Brun1919.Final"
+    ],
+    "declarations": [
+      "pi2_eq_twinCount",
+      "twinUpper_exists"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma21.lean",
+    "lines": 360,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41"
+    ],
+    "declarations": [
+      "pairs",
+      "triples",
+      "S\u2081",
+      "S\u2082",
+      "S\u2083",
+      "S\u2084",
+      "D12",
+      "Esq",
+      "prime_dvd_not_dvd_N",
+      "not_dvd_mul_of",
+      "triple_p1",
+      "triple_p2",
+      "c4_bound",
+      "three_le_cardFactors",
+      "pointwise",
+      "lemma21_nat",
+      "pairs_ex"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma21Chen.lean",
+    "lines": 60,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21Err",
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": [
+      "Achen",
+      "Achen_spec",
+      "D12_Achen_le",
+      "lemma21_chen"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma21Err.lean",
+    "lines": 137,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21",
+      "LeanLab.ChenDoubleSieve.Lemma41Err"
+    ],
+    "declarations": [
+      "sum_inv_sq_Ico",
+      "sum_inv_sq_le",
+      "Esq_le",
+      "lemma21_explicit"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma22Err.lean",
+    "lines": 161,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Sum"
+    ],
+    "declarations": [
+      "sum_inv_sq_le",
+      "sum_inv_sq_le'",
+      "Esq_le",
+      "lemma22_explicit",
+      "wuA",
+      "wuA_ok",
+      "lemma22_wuA"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma22Fixed.lean",
+    "lines": 437,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "D",
+      "k1",
+      "k2",
+      "em",
+      "e13",
+      "pairsLT",
+      "low2",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7",
+      "U8",
+      "U9",
+      "quads",
+      "U10",
+      "U11",
+      "rhs",
+      "lhs",
+      "pairsLT_insert_min",
+      "exists_min_split",
+      "exists_two_least",
+      "exists_three_least",
+      "sum3_le",
+      "one_le_card_of_mem",
+      "two_le_card_of_mem",
+      "three_le_card_of_mem",
+      "Aset",
+      "Bset",
+      "U6_eq",
+      "U5_eq",
+      "U4_ge",
+      "U4_le_U3",
+      "nn",
+      "pointwise",
+      "pointwise_cfg"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma22Gap.lean",
+    "lines": 107,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "D",
+      "k1",
+      "k2",
+      "e13",
+      "em",
+      "e2m",
+      "units",
+      "sift",
+      "prs",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7",
+      "U8",
+      "U9",
+      "trs",
+      "U10",
+      "U11",
+      "rhs",
+      "lhs",
+      "printedTop",
+      "fullTop",
+      "cfg",
+      "cfg_units",
+      "config_ok",
+      "printed_fails",
+      "corrected_holds",
+      "range_strict"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma22Int.lean",
+    "lines": 386,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Real"
+    ],
+    "declarations": [
+      "lowP",
+      "I2",
+      "I3",
+      "I4",
+      "I5",
+      "I6",
+      "I7",
+      "I8",
+      "I9",
+      "I10",
+      "I11",
+      "rhsI",
+      "lhsI",
+      "card_filter_image",
+      "card_filter_image2",
+      "card_filter_image4",
+      "ex",
+      "logN_pos",
+      "x_lt_iff",
+      "x_le_iff",
+      "x_eq_iff",
+      "lt_rpow_iff",
+      "rpow_le_iff",
+      "mul_sq_lt_iff",
+      "le_mul_mul_sq_iff",
+      "ex_injOn",
+      "pos_of_mem",
+      "injP",
+      "lowP_iff",
+      "I2_eq",
+      "I3_eq",
+      "I4_eq",
+      "I5_eq",
+      "I6_eq",
+      "I7_eq",
+      "I8_eq",
+      "I9_eq",
+      "I10_eq",
+      "I11_eq",
+      "cardFactors_of_squarefree",
+      "pointwise_omega",
+      "pointwise_int",
+      "pointwise_wu",
+      "vacuity"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma22Parity.lean",
+    "lines": 104,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Real"
+    ],
+    "declarations": [
+      "consts",
+      "rhs_prime",
+      "rhs_semiprime"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma22Real.lean",
+    "lines": 439,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "wk1",
+      "wk2",
+      "em",
+      "e13",
+      "Admissible",
+      "wu_admissible",
+      "pairsLT",
+      "low2",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7",
+      "U8",
+      "U9",
+      "quads",
+      "U10",
+      "U11",
+      "rhs",
+      "lhs",
+      "pairsLT_insert_min",
+      "exists_min_split",
+      "exists_two_least",
+      "exists_three_least",
+      "sum3_le",
+      "one_le_card_of_mem",
+      "two_le_card_of_mem",
+      "three_le_card_of_mem",
+      "Aset",
+      "Bset",
+      "U6_eq",
+      "U5_eq",
+      "U4_ge",
+      "U4_le_U3",
+      "nn",
+      "pointwise"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Wu2008Lemma22Sum.lean",
+    "lines": 451,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41",
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Int"
+    ],
+    "declarations": [
+      "P2",
+      "P4",
+      "Y1",
+      "Y2",
+      "Y3",
+      "Y4",
+      "C5",
+      "Y5",
+      "C6",
+      "Y6",
+      "C7",
+      "Y7",
+      "C8",
+      "Y8",
+      "C9",
+      "Y9",
+      "C10",
+      "Y10",
+      "C11",
+      "Y11",
+      "D12",
+      "Esq",
+      "mem_pf",
+      "pf_lt",
+      "pf_cop",
+      "prime_dvd_not_dvd_N",
+      "sifted_iff",
+      "sifted_lowP",
+      "sifted_nine",
+      "pair_bridge",
+      "quad_bridge",
+      "single_bridge",
+      "swap1",
+      "D12_eq",
+      "Esq_eq",
+      "per_a",
+      "lemma22_sum",
+      "lemma22_sum_wu",
+      "vacuity_sum"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "Xi2Signs.lean",
+    "lines": 93,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.XiKernelBounds"
+    ],
+    "declarations": [
+      "supported_log_nonneg",
+      "tableXi2_parameters",
+      "tableXi2_log_signs",
+      "Xi2_table_nonneg"
+    ],
+    "sorry_lines": []
+  },
+  {
+    "file": "XiKernelBounds.lean",
+    "lines": 85,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.SigmaKernel"
+    ],
+    "declarations": [
+      "Xi1_nonneg",
+      "tableSp_admissible",
+      "I1_argument_ge_two"
+    ],
+    "sorry_lines": []
+  }
+]
