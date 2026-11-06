@@ -709,6 +709,36 @@ theorem approximation_of_band_sum {ε : ℝ} (M N z γ : ℝ → ℝ)
         (hγ x ((le_max_right _ _).trans hx)))
     _ ≤ _ := hC x ((le_max_left _ _).trans hx)
 
+/-- Pages 26, 27 and 41, an elementary consequence of the supply leaf.
+The absolute approximation on I and the pointwise prime minorant force the
+auxiliary family b to have at most the prime count of I, up to the saved
+error. AGY task26. This records why lower_mean_value_supply needs a prime
+number theorem in the short interval I. CONDITIONAL on the two hypotheses. -/
+theorem supply_mass_le_primes {ε : ℝ} {c0 b : ℝ → ℕ → ℝ}
+    (happ : ShortApproximation ε (section4SiftedFamily c0) b) {X : ℝ}
+    (hlo : ∀ x : ℝ, X ≤ x →
+      ∀ k ∈ leftInterval ε x, section4SiftedFamily c0 x k ≤ Decomp132.primeWeight k) :
+    ∀ A : ℝ, 0 < A → ∃ C X' : ℝ, ∀ x : ℝ, X' ≤ x →
+      (∑ k ∈ leftInterval ε x, b x k) ≤
+        (∑ k ∈ leftInterval ε x, Decomp132.primeWeight k) +
+          C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
+  intro A hA
+  obtain ⟨C, Xa, hC⟩ := happ A hA
+  refine ⟨C, max X Xa, ?_⟩
+  intro x hx
+  have h1 := hC x ((le_max_right _ _).trans hx)
+  have h2 := hlo x ((le_max_left _ _).trans hx)
+  have h3 : (∑ k ∈ leftInterval ε x, b x k) ≤
+      ∑ k ∈ leftInterval ε x, (Decomp132.primeWeight k +
+        |section4SiftedFamily c0 x k - b x k|) := by
+    apply Finset.sum_le_sum
+    intro k hk
+    have := h2 k hk
+    have := neg_abs_le (section4SiftedFamily c0 x k - b x k)
+    linarith
+  rw [Finset.sum_add_distrib] at h3
+  linarith
+
 /-- LEAF. Pages 26 to 41, displays 4.7, 4.24 and 4.25, and the
 Siegel Walfisz reference-interval calculation on page 33. Supply the lower
 sifted family at one fixed positive divisor exponent and its auxiliary
