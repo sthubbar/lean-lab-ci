@@ -7,6 +7,9 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp247a
 import LeanLab.BhowmikGrimmelt2026.TotientRatio247
+import LeanLab.BhowmikGrimmelt2026.GaussReduction443
+import LeanLab.BhowmikGrimmelt2026.InducedGauss443
+import LeanLab.PNTPort.LargeSieve.Multiplicative
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -73,7 +76,57 @@ theorem twisted_fiber_bound436 {r q : ℕ} [NeZero r] [NeZero q]
     ‖cChi (DirichletCharacter.changeLevel hd χ) N‖ ≤
       (Nat.totient q : ℝ) / (Nat.totient (q / Nat.gcd q N.natAbs) : ℝ) *
         Real.sqrt r := by
-  sorry
+  let m := q / Nat.gcd q N.natAbs
+  let g := Nat.gcd q N.natAbs
+  have hmpos : 0 < m := by
+    dsimp [m]
+    exact Nat.div_pos (Nat.gcd_le_left N.natAbs
+      (Nat.pos_of_ne_zero (NeZero.ne q)))
+      (Nat.gcd_pos_of_pos_left N.natAbs (Nat.pos_of_ne_zero (NeZero.ne q)))
+  haveI : NeZero m := ⟨hmpos.ne'⟩
+  have hmq : m ∣ q := by
+    dsimp [m]
+    exact Nat.div_dvd_of_dvd (Nat.gcd_dvd_left q N.natAbs)
+  have hgN : (g : ℤ) ∣ N := by
+    dsimp [g]
+    exact Int.natCast_dvd.mpr (Nat.gcd_dvd_right q N.natAbs)
+  have hq : q = m * g := by
+    dsimp [m, g]
+    rw [Nat.mul_comm, Nat.div_mul_cancel (Nat.gcd_dvd_left q N.natAbs)]
+  have hN : (g : ℤ) * (N / (g : ℤ)) = N := Int.mul_ediv_cancel' hgN
+  let ψ := DirichletCharacter.changeLevel hgood χ
+  have he := cChi_factor443 ψ hmq g hq (N / (g : ℤ))
+  rw [← DirichletCharacter.changeLevel_trans χ hgood hmq] at he
+  rw [hN] at he
+  have hnorm : ‖cChi (DirichletCharacter.changeLevel hd χ) N‖ =
+      (Nat.totient q : ℝ) / (Nat.totient m : ℝ) *
+        ‖cChi ψ (N / (g : ℤ))‖ := by
+    rw [he, norm_mul, norm_div, Complex.norm_natCast, Complex.norm_natCast]
+  have hunit : IsUnit ((N / (g : ℤ) : ℤ) : ZMod m) := by
+    have hgpos : 0 < Nat.gcd q N.natAbs := Nat.gcd_pos_of_pos_left _
+      (Nat.pos_of_ne_zero (NeZero.ne q))
+    have h := Int.gcd_ediv_gcd_ediv_gcd (i := (q : ℤ)) (j := N) (by
+      simpa only [Int.gcd_eq_natAbs_gcd_natAbs, Int.natAbs_natCast] using hgpos)
+    rw [ZMod.coe_int_isUnit_iff_isCoprime, Int.isCoprime_iff_gcd_eq_one]
+    simpa only [Int.gcd_eq_natAbs_gcd_natAbs, Int.natAbs_natCast, ← Int.natCast_ediv] using h
+  have hunitnorm : ‖cChi ψ (N / (g : ℤ))‖ = ‖cChi ψ 1‖ := by
+    rw [cChi_int_gauss436, ← hunit.unit_spec, gaussSum_mulShift_eq, norm_mul,
+      DirichletCharacter.unit_norm_eq_one, one_mul, cChi_int_gauss436]
+    simp
+  have hlift : ‖cChi ψ 1‖ ≤ ‖cChi χ 1‖ := by
+    simpa only [cChi_int_gauss436, Int.cast_one, AddChar.mulShift_one] using
+      gaussSum_lift_norm443 χ hgood
+  have hprimitive : ‖cChi χ 1‖ ≤ Real.sqrt r := by
+    have hnorm : ‖gaussSum χ (ZMod.stdAddChar (N := r))‖ = Real.sqrt r := by
+      rw [← LeanLab.PNTPort.LargeSieve.normSq_gaussSum_of_isPrimitive hχ,
+        Real.sqrt_sq (norm_nonneg _)]
+    rw [cChi_int_gauss436, gaussSum_mulShift_of_isPrimitive _ hχ, norm_mul, hnorm]
+    simp
+  have hψ : ‖cChi ψ (N / (g : ℤ))‖ ≤ Real.sqrt r := by
+    rw [hunitnorm]
+    exact hlift.trans hprimitive
+  rw [hnorm]
+  exact mul_le_mul_of_nonneg_left hψ (by positivity)
 
 /-- The positive frequency bound follows by the two residue fiber alternatives.
 Source: Pintz page 20 display 7.13 and the totient quotient in display 4.3.
