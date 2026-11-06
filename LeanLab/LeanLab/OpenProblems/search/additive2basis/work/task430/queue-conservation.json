@@ -1,0 +1,46 @@
+[
+  {
+    "topology": "thirds",
+    "dual": false,
+    "labelled_visits": 0,
+    "shared_domain_credits": 0,
+    "remaining_unvisited": 0,
+    "unresolved_timeouts": 0,
+    "conservation": "MATCH"
+  },
+  {
+    "topology": "crosssplit",
+    "dual": false,
+    "labelled_visits": 0,
+    "shared_domain_credits": 0,
+    "remaining_unvisited": 0,
+    "unresolved_timeouts": 1,
+    "conservation": "MATCH"
+  },
+  {
+    "topology": "residue3",
+    "dual": false,
+    "visited": 18249,
+    "complete": 18230,
+    "timeouts": 19,
+    "failures": 0,
+    "labelled_visits": 18249,
+    "shared_domain_credits": 0,
+    "remaining_unvisited": 27538,
+    "unresolved_timeouts": 277,
+    "conservation": "MATCH"
+  },
+  {
+    "topology": "thirds",
+    "dual": true,
+    "visited": 1987,
+    "complete": 1695,
+    "timeouts": 292,
+    "failures": 0,
+    "labelled_visits": 1987,
+    "shared_domain_credits": 0,
+    "remaining_unvisited": 27223,
+    "unresolved_timeouts": 2598,
+    "conservation": "MATCH"
+  }
+]
