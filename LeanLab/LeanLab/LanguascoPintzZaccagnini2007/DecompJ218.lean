@@ -443,6 +443,184 @@ def Cor42OnWindow131 (W : ℕ → Finset ℕ) : Prop :=
           |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
         (∀ n ∈ W X, |binaryMajor131 X n P| ≤ A * n * Sing n)
 
+
+/-! ### The window `[X/2, X]` against `J(X) = [2X/3, X]`
+
+`cor42_window_extension131` asks for Corollary 4.2 on `evenWindow131 X` from the same statement on
+`evenJ131 X`. The two windows differ in exactly the strip `X/2 ≤ n < 2X/3`, and the data `P`, `E` of
+the corollary are chosen inside `∀ X`, so the `J(X)` form controls nothing on that strip at the same
+`P`. The lemmas below make that precise: `evenWindow131` is `evenJ131` together with the strip, a
+bound on a window splits into its `J`-part and its strip part *at the same data*, and consequently
+the extension follows from the strip input. `Cor42OnWindow131` is monotone in the window, so the
+pair (`cor42_published131`, `cor42_window_extension131`) is equivalent to the single window
+statement. -/
+
+/-- `J(X) ⊆ [X/2, X]`. -/
+private lemma evenJ_subset_window131 (X : ℕ) : evenJ131 X ⊆ evenWindow131 X := by
+  intro n hn
+  obtain ⟨h1, h2, h3⟩ := mem_filter.mp hn
+  obtain ⟨h4, h5⟩ := mem_Icc.mp h1
+  refine mem_filter.mpr ⟨mem_Icc.mpr ⟨h4, h5⟩, h2, ?_⟩
+  have h6 : 2 * (X : ℝ) / 3 ≤ (n : ℝ) := h3
+  have h7 : (0 : ℝ) ≤ (X : ℝ) := Nat.cast_nonneg X
+  linarith
+
+/-- Outside `J(X)`, a point of the window lies in the strip `n < 2X/3`. -/
+private lemma mem_window_not_J131 {X n : ℕ} (h : n ∈ evenWindow131 X) (hJ : n ∉ evenJ131 X) :
+    2 * (X : ℝ) / 3 > n := by
+  obtain ⟨h1, h2, h3⟩ := mem_filter.mp h
+  by_contra hcon
+  push_neg at hcon
+  exact hJ (mem_filter.mpr ⟨h1, h2, hcon⟩)
+
+/-- Conversely, a point of the window in the strip is outside `J(X)`. -/
+private lemma mem_strip_not_J131 {X n : ℕ} (h : evenWindow131 X) (hn : 2 * (X : ℝ) / 3 > n) :
+    n ∉ evenJ131 X := by
+  intro hJ
+  obtain ⟨-, -, h3⟩ := mem_filter.mp hJ
+  linarith
+
+/-- The window is `J(X)` together with the strip `X/2 ≤ n < 2X/3`. -/
+private lemma window_eq_J_union_strip131 (X : ℕ) :
+    evenWindow131 X = evenJ131 X ∪ (evenWindow131 X).filter (fun n => 2 * (X : ℝ) / 3 > n) := by
+  ext n
+  constructor
+  · intro h
+    by_cases hJ : n ∈ evenJ131 X
+    · exact mem_union.mpr (Or.inl hJ)
+    · exact mem_union.mpr (Or.inr (mem_filter.mpr ⟨h, mem_window_not_J131 h hJ⟩))
+  · intro h
+    rcases mem_union.mp h with hJ | hs
+    · exact evenJ_subset_window131 X hJ
+    · exact (mem_filter.mp hs).1
+
+/-- The strengthening is not vacuous: at `X = 12` the even integer `6` lies in the window and
+outside `J(12) = {8, 10, 12}`. -/
+private lemma strip_witness131 : (6 : ℕ) ∈ evenWindow131 12 ∧ (6 : ℕ) ∉ evenJ131 12 := by
+  constructor
+  · refine mem_filter.mpr ⟨mem_Icc.mpr ⟨by norm_num, by norm_num⟩, ⟨3, rfl⟩, ?_⟩
+    norm_num
+  · intro h
+    obtain ⟨-, -, h3⟩ := mem_filter.mp h
+    norm_num at h3
+
+/-- A bound holding on a window splits into its `J(X)` part and its strip part. -/
+private lemma forall_mem_window_iff131 (X : ℕ) (φ : ℕ → Prop) :
+    (∀ n ∈ evenWindow131 X, φ n) ↔
+      ((∀ n ∈ evenJ131 X, φ n) ∧
+        (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n → φ n)) := by
+  constructor
+  · intro h
+    exact ⟨fun n hn => h n (evenJ_subset_window131 X hn), fun n hn _ => h n hn⟩
+  · rintro ⟨h1, h2⟩ n hn
+    by_cases hJ : n ∈ evenJ131 X
+    · exact h1 n hJ
+    · exact h2 n hn (mem_window_not_J131 hn hJ)
+
+/-- `Cor42OnWindow131` is monotone in the window: a bound on a larger window gives one on a
+smaller one. -/
+private lemma Cor42OnWindow_mono131 {W₁ W₂ : ℕ → Finset ℕ} (h : ∀ X, W₁ X ⊆ W₂ X)
+    (hW : Cor42OnWindow131 W₂) : Cor42OnWindow131 W₁ := by
+  intro η hη
+  obtain ⟨K₁, Cstar, c, A, h1, h2', h3, X₀, hX₀⟩ := hW η hη
+  refine ⟨K₁, Cstar, c, A, h1, h2', h3, X₀, fun X hX => ?_⟩
+  obtain ⟨P, E, hP, hE, hrel, hup⟩ := hX₀ X hX
+  exact ⟨P, E, hP, hE, fun n hn => hrel n (h X hn), fun n hn => hup n (h X hn)⟩
+
+/-- The window form implies the `J(X)` form of Corollary 4.2 with the same constants. -/
+private lemma cor42_J_of_window131 (h : Cor42OnWindow131 evenWindow131) :
+    Cor42OnWindow131 evenJ131 :=
+  Cor42OnWindow_mono131 (fun X => evenJ_subset_window131 X) h
+
+/-- **The strip input of `cor42_window_extension131`.** Displays 11 and 12 for the integers of
+`[X/2, 2X/3)` alone, with the constants, the admissible `P` and the exceptional set `E` exactly as
+in `Cor42OnWindow131`. This is the missing input of the leaf: no argument from the `J(X)` form
+reaches these `n` at the same `P`, because `binaryMajor131 X n P` depends on `X` through
+`primeSum131 X` and `majorArcs131 X P`. The statement is the leaf's conclusion with the window
+bounds split into their `J` and strip parts. -/
+private theorem cor42_strip_input_iff131 :
+    (∀ η : ℝ, 0 < η →
+      ∃ (K₁ Cstar : ℕ) (c A : ℝ), 0 < Cstar ∧ 0 < c ∧ 0 ≤ A ∧
+        ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+          ∃ (P : ℝ) (E : Finset ℕ), AdmissibleP131 X P ∧ ExceptionalModuli131 K₁ c X E ∧
+            (∀ n ∈ evenJ131 X, Nonexceptional131 Cstar E n →
+              |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
+            (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n → Nonexceptional131 Cstar E n →
+              |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
+            (∀ n ∈ evenJ131 X, |binaryMajor131 X n P| ≤ A * n * Sing n) ∧
+            (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n →
+              |binaryMajor131 X n P| ≤ A * n * Sing n)) ↔
+    Cor42OnWindow131 evenWindow131 := by
+  constructor
+  · intro hs η hη
+    obtain ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, hX₀⟩ := hs η hη
+    refine ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, fun X hX => ?_⟩
+    obtain ⟨P, E, hP, hE, hrelJ, hrelS, hupJ, hupS⟩ := hX₀ X hX
+    refine ⟨P, E, hP, hE, ?_, ?_⟩
+    · exact (forall_mem_window_iff131 X
+        (fun n => Nonexceptional131 Cstar E n →
+          |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n)).mpr ⟨hrelJ, hrelS⟩
+    · exact (forall_mem_window_iff131 X
+        (fun n => |binaryMajor131 X n P| ≤ A * n * Sing n)).mpr ⟨hupJ, hupS⟩
+  · intro hb η hη
+    obtain ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, hX₀⟩ := hb η hη
+    refine ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, fun X hX => ?_⟩
+    obtain ⟨P, E, hP, hE, hrel, hup⟩ := hX₀ X hX
+    obtain ⟨hrelJ, hrelS⟩ := (forall_mem_window_iff131 X
+      (fun n => Nonexceptional131 Cstar E n →
+        |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n)).mp hrel
+    obtain ⟨hupJ, hupS⟩ := (forall_mem_window_iff131 X
+      (fun n => |binaryMajor131 X n P| ≤ A * n * Sing n)).mp hup
+    exact ⟨P, E, hP, hE, hrelJ, hrelS, hupJ, hupS⟩
+
+/-- **`cor42_window_extension131` from the strip input.** A reduction, not a proof of the leaf: the
+strip input is not in this file's closure, and it is not a consequence of `cor42_published131`
+either, since that statement fixes `P` and `E` only on `J(X)`. -/
+private theorem cor42_window_extension_of_strip131
+    (hs : ∀ η : ℝ, 0 < η →
+      ∃ (K₁ Cstar : ℕ) (c A : ℝ), 0 < Cstar ∧ 0 < c ∧ 0 ≤ A ∧
+        ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+          ∃ (P : ℝ) (E : Finset ℕ), AdmissibleP131 X P ∧ ExceptionalModuli131 K₁ c X E ∧
+            (∀ n ∈ evenJ131 X, Nonexceptional131 Cstar E n →
+              |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
+            (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n → Nonexceptional131 Cstar E n →
+              |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
+            (∀ n ∈ evenJ131 X, |binaryMajor131 X n P| ≤ A * n * Sing n) ∧
+            (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n →
+              |binaryMajor131 X n P| ≤ A * n * Sing n)) :
+    Cor42OnWindow131 evenJ131 → Cor42OnWindow131 evenWindow131 :=
+  fun _ => cor42_strip_input_iff131.mp hs
+
+
+/-- **The window extension from a bound transfer.** `cor42_window_extension131` follows from an
+input that never has to produce the data `P`, `E`: it only has to carry a bound already known on
+`J(X)` across to the strip `X/2 ≤ n < 2X/3` *for the same* `P` and `E`. That is the analytic step
+Lemma 4.1 of P0045 would give (an explicit formula for `R_M` valid for `n` of size `X`, not only
+for `n ≥ 2X/3`), and it is strictly weaker than the leaf's conclusion. -/
+private theorem cor42_window_extension_of_transfer131
+    (hrel : ∀ (X : ℕ) (P : ℝ) (E : Finset ℕ) (Cstar : ℕ) (η : ℝ),
+      (∀ n ∈ evenJ131 X, Nonexceptional131 Cstar E n →
+        |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) →
+      (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n → Nonexceptional131 Cstar E n →
+        |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n))
+    (hup : ∀ (X : ℕ) (P : ℝ) (E : Finset ℕ) (A : ℝ),
+      (∀ n ∈ evenJ131 X, |binaryMajor131 X n P| ≤ A * n * Sing n) →
+      (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n →
+        |binaryMajor131 X n P| ≤ A * n * Sing n)) :
+    Cor42OnWindow131 evenJ131 → Cor42OnWindow131 evenWindow131 := by
+  intro hJ η hη
+  obtain ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, hX₀⟩ := hJ η hη
+  refine ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, fun X hX => ?_⟩
+  obtain ⟨P, E, hP, hE, hrelJ, hupJ⟩ := hX₀ X hX
+  refine ⟨P, E, hP, hE, ?_, ?_⟩
+  · exact (forall_mem_window_iff131 X
+      (fun n => Nonexceptional131 Cstar E n →
+        |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n)).mpr
+      ⟨hrelJ, hrel X P E Cstar η hrelJ⟩
+  · exact (forall_mem_window_iff131 X
+      (fun n => |binaryMajor131 X n P| ≤ A * n * Sing n)).mpr
+      ⟨hupJ, hup X P E A hupJ⟩
+
 /-- LEAF, CITED. Published Corollary 4.2 with Lemma 4.1 of P0045, page 6, for the binary integral
 R_M of display 4 on exactly J(X) = [2X/3, X]. E is the exceptional moduli, display 9 is
 `Nonexceptional131`, display 10 bounds `oddRad131`, P is chosen by the statement, page 3.
