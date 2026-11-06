@@ -1,4 +1,8 @@
 import LeanLab.HelfgottMajor.Decomp389c
+import LeanLab.HelfgottMajor.ZeroCount1623
+import LeanLab.HelfgottMajor.Fourier431
+import LeanLab.HelfgottMajor.MellinDerivative431
+import LeanLab.HelfgottMajor.LogMoment431
 
 /-!
 A supply decomposition of Decomp269b.middle_mass_bound.
@@ -440,7 +444,8 @@ theorem middle_sampling_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ 
       (‖gaussianMellin δ ((1 / 2 : ℂ) + Complex.I)‖ +
         ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖) *
         (0.15 * log (q : ℝ) + 3.389) := by
-  sorry
+  have hcount := ZeroCount1623.book_zero_count χ hχ (T := T) hT
+  exact hcount
 
 /-- LEAF. Book page 434, the first Plancherel estimate after display 16.26.
 The Gaussian square moment is display 4.42 on P0014 page 43.
@@ -464,7 +469,84 @@ This has no character, zero count or height parameter.
 theorem gaussian_derivative_energy_bound (δ : ℝ) :
     sqrt (derivativeEnergy δ 1) + sqrt (derivativeEnergy δ (-1)) ≤
       2 * sqrt π * sqrt Sec45.nLog := by
-  sorry
+  have hf := Fourier431.fourier_memLp_two
+    (MellinDerivative431.logWeightedGaussian_integrable δ)
+    (MellinDerivative431.logWeightedGaussian_memLp_two δ)
+  have hi := (memLp_two_iff_integrable_sq_norm hf.aestronglyMeasurable).mp hf
+  have hc := hi.comp_div (by positivity : (2 * π : ℝ) ≠ 0)
+  have hfull : Integrable (fun t : ℝ => ‖deriv (gaussianMellin δ)
+      ((1 / 2 : ℂ) + t * Complex.I)‖ ^ 2) := by
+    simpa only [MellinDerivative431.derivative_eq_fourier] using hc
+  have hline : (∫ t : ℝ, ‖deriv (gaussianMellin δ)
+      ((1 / 2 : ℂ) + t * Complex.I)‖ ^ 2) =
+        2 * π * ∫ t in Set.Ioi (0 : ℝ), exp (-t ^ 2) * log t ^ 2 := by
+    simp_rw [MellinDerivative431.derivative_eq_fourier]
+    rw [Measure.integral_comp_div (fun t : ℝ => ‖𝓕 (MellinDerivative431.logWeightedGaussian δ) t‖ ^ 2),
+      abs_of_pos (by positivity : (0 : ℝ) < 2 * π), smul_eq_mul,
+      Fourier431.integral_norm_sq_fourier
+        (MellinDerivative431.logWeightedGaussian_integrable δ)
+        (MellinDerivative431.logWeightedGaussian_memLp_two δ),
+      MellinDerivative431.logWeightedGaussian_square_integral]
+  let f : ℝ → ℝ := fun t => ‖deriv (gaussianMellin δ)
+    ((1 / 2 : ℂ) + t * Complex.I)‖ ^ 2
+  have hp : derivativeEnergy δ 1 ≤ ∫ t in Set.Ioi (0 : ℝ), f t := by
+    simp only [derivativeEnergy, one_mul]
+    apply setIntegral_mono_set hfull.integrableOn
+      (Filter.Eventually.of_forall fun t => sq_nonneg _)
+    apply Filter.Eventually.of_forall
+    intro t ht
+    change 1 < t at ht
+    change 0 < t
+    linarith
+  have hn : derivativeEnergy δ (-1) ≤ ∫ t in Set.Iic (0 : ℝ), f t := by
+    simp only [derivativeEnergy, neg_one_mul]
+    rw [integral_comp_neg_Ioi 1 f]
+    apply setIntegral_mono_set hfull.integrableOn
+      (Filter.Eventually.of_forall fun t => sq_nonneg _)
+    apply Filter.Eventually.of_forall
+    intro t ht
+    change t ≤ -1 at ht
+    change t ≤ 0
+    linarith
+  have hsplit := intervalIntegral.integral_Iic_add_Ioi (b := (0 : ℝ))
+    hfull.integrableOn hfull.integrableOn
+  have hsum : derivativeEnergy δ 1 + derivativeEnergy δ (-1) ≤
+      ∫ t : ℝ, ‖deriv (gaussianMellin δ)
+        ((1 / 2 : ℂ) + t * Complex.I)‖ ^ 2 := by
+    linarith
+  have he : derivativeEnergy δ 1 + derivativeEnergy δ (-1) ≤
+      2 * π * Sec45.nLog := by
+    calc
+      _ ≤ ∫ t : ℝ, ‖deriv (gaussianMellin δ)
+          ((1 / 2 : ℂ) + t * Complex.I)‖ ^ 2 := hsum
+      _ = 2 * π * ∫ t in Set.Ioi (0 : ℝ), exp (-t ^ 2) * log t ^ 2 := hline
+      _ ≤ 2 * π * Sec45.nLog := by
+        exact mul_le_mul_of_nonneg_left
+          (LogMoment431.gaussian_log_square_integral.le) (by positivity)
+  have hp0 : 0 ≤ derivativeEnergy δ 1 := by
+    unfold derivativeEnergy
+    positivity
+  have hn0 : 0 ≤ derivativeEnergy δ (-1) := by
+    unfold derivativeEnergy
+    positivity
+  have hcs : sqrt (derivativeEnergy δ 1) + sqrt (derivativeEnergy δ (-1)) ≤
+      sqrt (derivativeEnergy δ 1 + derivativeEnergy δ (-1)) * sqrt 2 := by
+    have hh := Real.sum_sqrt_mul_sqrt_le (s := (Finset.univ : Finset (Fin 2)))
+      (f := fun i : Fin 2 => if i = 0 then derivativeEnergy δ 1 else derivativeEnergy δ (-1))
+      (g := fun _ : Fin 2 => (1 : ℝ))
+      (fun i => by by_cases hi : i = 0 <;> simp [hi, hp0, hn0])
+      (fun _ => by norm_num)
+    simpa [Fin.sum_univ_two] using hh
+  have hN := Sec45.nLog_nonneg
+  calc
+    _ ≤ sqrt (2 * π * Sec45.nLog) * sqrt 2 :=
+      hcs.trans (mul_le_mul_of_nonneg_right (sqrt_le_sqrt he) (sqrt_nonneg 2))
+    _ = _ := by
+      rw [← Real.sqrt_mul (mul_nonneg (mul_nonneg (by norm_num) hN))]
+      rw [show (2 : ℝ) = sqrt 4 by norm_num,
+        Real.sqrt_mul pi_pos.le hN,
+        ← Real.sqrt_mul (mul_nonneg (by norm_num) hN)]
+      ring
 
 /-- The book coefficients of Lemma 16.10 are below the older page 40 coefficients.
 Only arithmetic is asserted. No zero sampling input is used.
