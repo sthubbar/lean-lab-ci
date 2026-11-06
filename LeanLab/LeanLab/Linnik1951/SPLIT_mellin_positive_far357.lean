@@ -1,12 +1,4 @@
 /-
-DEAD SPLIT. Unit U-1622, 2026-11-06. Do not work on far_positive_sup357.
-Reason: far_positive_sup357 is a pointwise strengthening with no source. It fails at the
-peak of equation 2.3 at 1 over 3 m. Audit1622.not_farSup_of_peak proves this, CONDITIONAL on
-the named input FarPeak1622, which needs primes in progressions to modulus 3 m.
-Live route: outer_to_kernels376 in Decomp376f, and its re-cut in SPLIT1622_mellin.
-Statements below are unchanged. This file is not on the route of linnik1951_decomposed412.
--/
-/-
 Split of the positive outer-interval Mellin square estimate `mellin_positive_far357`
 into smaller steps. Nothing here changes a statement: `mellin_positive_far357_split`
 repeats the target statement character for character and proves it from the four
@@ -60,50 +52,36 @@ threshold. -/
 theorem far_left_endpoint_le_right357 (N : ℕ) (hN : 8 ≤ N) :
     ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
       4 / (N : ℝ) ≤ 1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  intro q hq hqt
-  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (by omega : 0 < N)
-  have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (by omega : 0 < q)
-  have hτpos : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
-  -- 4 at most N to the five sevenths
-  have h5 : (4 : ℝ) ≤ (N : ℝ) ^ (5 / 7 : ℝ) := by
-    have h8R : (8 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
-    have hpow : (4 : ℝ) ^ 7 ≤ (N : ℝ) ^ 5 := by
-      have h1 : (8 : ℝ) ^ 5 ≤ (N : ℝ) ^ 5 := pow_le_pow_left₀ (by norm_num) h8R 5
-      norm_num at h1 ⊢
-      linarith
-    have hle := Real.rpow_le_rpow (by positivity : (0 : ℝ) ≤ (4 : ℝ) ^ 7) hpow
-      (by norm_num : (0 : ℝ) ≤ 1 / 7)
-    have h4 : ((4 : ℝ) ^ ((7 : ℕ) : ℝ)) ^ (1 / 7 : ℝ) = 4 := by
-      rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 4)]
-      rw [show (((7 : ℕ) : ℝ)) * (1 / 7 : ℝ) = 1 by norm_num, Real.rpow_one]
-    have hN5 : ((N : ℝ) ^ ((5 : ℕ) : ℝ)) ^ (1 / 7 : ℝ) = (N : ℝ) ^ (5 / 7 : ℝ) := by
-      rw [← Real.rpow_mul (le_of_lt hNpos)]
+  intro q hq hqN
+  have hN_pos : (0:ℝ) < N := by positivity
+  have hq_pos : (0:ℝ) < q := by positivity
+  rw [div_le_div_iff₀ hN_pos (by positivity)]
+  calc
+    4 * ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤ 4 * ((N : ℝ) ^ (1 / 7 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
+      gcongr
+    _ = 4 * ((N : ℝ) ^ (1 / 7 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by ring
+    _ = 4 * (N : ℝ) ^ (2 / 7 : ℝ) := by
+      rw [← Real.rpow_add hN_pos]
       norm_num
-    rwa [← Real.rpow_natCast (4 : ℝ) 7, ← Real.rpow_natCast (N : ℝ) 5, h4, hN5] at hle
-  have hstep1 : (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤ (N : ℝ) ^ (2 / 7 : ℝ) := by
-    have hqτ : (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤
-        (N : ℝ) ^ (1 / 7 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) :=
-      mul_le_mul_of_nonneg_right hqt hτpos.le
-    have h2 : (N : ℝ) ^ (1 / 7 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) = (N : ℝ) ^ (2 / 7 : ℝ) := by
-      rw [← Real.rpow_add hNpos]
-      norm_num
-    linarith
-  have hstep2 : (4 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) ≤ (N : ℝ) := by
-    have hm : (4 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) ≤
-        (N : ℝ) ^ (5 / 7 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) :=
-      mul_le_mul_of_nonneg_right h5 (Real.rpow_pos_of_pos hNpos _).le
-    have he : (N : ℝ) ^ (5 / 7 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) = (N : ℝ) := by
-      rw [← Real.rpow_add hNpos]
-      norm_num
-    linarith
-  have hmul : (4 : ℝ) * ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤ (N : ℝ) := by
-    have h4q : (4 : ℝ) * ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤
-        4 * (N : ℝ) ^ (2 / 7 : ℝ) :=
-      mul_le_mul_of_nonneg_left hstep1 (by norm_num)
-    linarith
-  have hqτpos : (0 : ℝ) < (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) := mul_pos hqpos hτpos
-  rw [div_le_iff₀ hNpos, one_div_mul_eq_div, le_div_iff₀ hqτpos]
-  exact hmul
+    _ ≤ 1 * N := by
+      rw [one_mul]
+      have h1 : (4 : ℝ) ≤ (8 : ℝ) ^ (5 / 7 : ℝ) := by
+        have h_pow : (4 : ℝ) ^ (7 : ℝ) ≤ ((8 : ℝ) ^ (5 / 7 : ℝ)) ^ (7 : ℝ) := by
+          rw [←Real.rpow_mul (by norm_num)]
+          norm_num
+        rw [←Real.rpow_le_rpow_iff (by norm_num) (by positivity) (show (0:ℝ) < 7 by norm_num)]
+        exact h_pow
+      have h2 : (8 : ℝ) ^ (5 / 7 : ℝ) ≤ (N : ℝ) ^ (5 / 7 : ℝ) := by
+        apply Real.rpow_le_rpow (by positivity) (by exact_mod_cast hN) (by norm_num)
+      have h3 : (4 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) ≤ (N : ℝ) ^ (5 / 7 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) := by
+        gcongr
+        exact h1.trans h2
+      calc
+        4 * (N : ℝ) ^ (2 / 7 : ℝ) ≤ (N : ℝ) ^ (5 / 7 : ℝ) * (N : ℝ) ^ (2 / 7 : ℝ) := h3
+        _ = (N : ℝ) ^ (1 : ℝ) := by
+          rw [←Real.rpow_add hN_pos]
+          norm_num
+        _ = (N : ℝ) := by rw [Real.rpow_one]
 
 /-- LEAF. Step 4 of 4: the length of the outer positive interval. For every N and
 every modulus q at least one, the length 1 over q times N to the one seventh minus
@@ -112,7 +90,7 @@ last step, which discards the left endpoint contribution. -/
 theorem far_length_le_inverse357 (N q : ℕ) (hq : 1 ≤ q) :
     1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) - 4 / (N : ℝ) ≤
       1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  have h : (0 : ℝ) ≤ 4 / (N : ℝ) := by positivity
+  have : (0 : ℝ) ≤ 4 / (N : ℝ) := by positivity
   linarith
 
 /-- Assembly of `mellin_positive_far357` from the four leaves above: the assembly
