@@ -405,6 +405,238 @@ theorem logarithmic_decay (C D A : ℝ) :
     ring
   simpa only [hp, neg_one_mul, mul_assoc] using he
 
+private lemma tau_eq_card (n : ℕ) : tau n = (n.divisors.card : ℝ) := by
+  simp only [tau, ArithmeticFunction.sigma_zero_apply]
+
+private lemma tau_nonneg (n : ℕ) : 0 ≤ tau n := by
+  rw [tau_eq_card]; positivity
+
+private lemma tau_zero : tau 0 = 0 := by
+  rw [tau_eq_card]; simp
+
+private lemma one_le_tau {n : ℕ} (hn : 1 ≤ n) : 1 ≤ tau n := by
+  rw [tau_eq_card]
+  have hd : 1 ∈ n.divisors := Nat.one_mem_divisors.mpr (by omega)
+  have hc : 1 ≤ n.divisors.card := Finset.card_pos.mpr ⟨1, hd⟩
+  exact_mod_cast hc
+
+private lemma tau_eq_sum_one (n : ℕ) : tau n = ∑ _d ∈ n.divisors, (1 : ℝ) := by
+  rw [tau_eq_card, Finset.card_eq_sum_ones]
+  simp only [Nat.cast_sum, Nat.cast_one]
+
+private lemma card_divisors_mul_le (a b : ℕ) :
+    (a * b).divisors.card ≤ a.divisors.card * b.divisors.card := by
+  rcases eq_or_ne a 0 with rfl | ha
+  · simp
+  rcases eq_or_ne b 0 with rfl | hb
+  · simp
+  have hab : a * b ≠ 0 := mul_ne_zero ha hb
+  have hsub : a.primeFactors ⊆ (a * b).primeFactors := by
+    intro p hp
+    rw [Nat.mem_primeFactors] at hp ⊢
+    exact ⟨hp.1, dvd_mul_of_dvd_left hp.2.1 b, hab⟩
+  have hA : ∏ p ∈ (a * b).primeFactors, (a.factorization p + 1)
+      = ∏ p ∈ a.primeFactors, (a.factorization p + 1) := by
+    refine (Finset.prod_subset hsub ?_).symm
+    intro p hpab hpa
+    rw [Nat.mem_primeFactors] at hpab
+    have hpd : ¬ p ∣ a := fun h => hpa (Nat.mem_primeFactors.mpr ⟨hpab.1, h, ha⟩)
+    rw [Nat.factorization_eq_zero_of_not_dvd hpd]
+    rfl
+  have hsub' : b.primeFactors ⊆ (a * b).primeFactors := by
+    intro p hp
+    rw [Nat.mem_primeFactors] at hp ⊢
+    exact ⟨hp.1, dvd_mul_of_dvd_right hp.2.1 a, hab⟩
+  have hB : ∏ p ∈ (a * b).primeFactors, (b.factorization p + 1)
+      = ∏ p ∈ b.primeFactors, (b.factorization p + 1) := by
+    refine (Finset.prod_subset hsub' ?_).symm
+    intro p hpab hpb
+    rw [Nat.mem_primeFactors] at hpab
+    have hpd : ¬ p ∣ b := fun h => hpb (Nat.mem_primeFactors.mpr ⟨hpab.1, h, hb⟩)
+    rw [Nat.factorization_eq_zero_of_not_dvd hpd]
+    rfl
+  calc (a * b).divisors.card
+      = (a * b).primeFactors.prod ((a * b).factorization · + 1) := Nat.card_divisors hab
+    _ = (a * b).primeFactors.prod
+          (fun p => a.factorization p + b.factorization p + 1) := by
+        refine Finset.prod_congr rfl fun p _ => ?_
+        rw [Nat.factorization_mul ha hb]
+        simp
+    _ ≤ (a * b).primeFactors.prod
+          (fun p => (a.factorization p + 1) * (b.factorization p + 1)) := by
+        refine Finset.prod_le_prod fun p _ => ?_
+        have h : (a.factorization p + 1) * (b.factorization p + 1)
+            = a.factorization p * b.factorization p + a.factorization p
+              + b.factorization p + 1 := by ring
+        omega
+    _ = (∏ p ∈ (a * b).primeFactors, (a.factorization p + 1))
+          * ∏ p ∈ (a * b).primeFactors, (b.factorization p + 1) := Finset.prod_mul_distrib
+    _ = a.divisors.card * b.divisors.card := by
+        rw [hA, hB, Nat.card_divisors ha, Nat.card_divisors hb]
+
+private lemma tau_mul_le (a b : ℕ) : tau (a * b) ≤ tau a * tau b := by
+  rw [tau_eq_card, tau_eq_card, tau_eq_card, ← Nat.cast_mul]
+  exact_mod_cast card_divisors_mul_le a b
+
+private lemma inv_sum_Ioc_le (N : ℕ) : ∑ n ∈ Ioc 0 N, ((n : ℝ))⁻¹ ≤ 1 + Real.log N := by
+  have hI : Ioc 0 N = Icc 1 N := by
+    ext x; simp only [mem_Ioc, mem_Icc]; omega
+  rw [hI]
+  have hcast : ∑ i ∈ Icc 1 N, ((i : ℝ))⁻¹ = ((harmonic N : ℚ) : ℝ) := by
+    rw [harmonic_eq_sum_Icc]
+    simp only [Rat.cast_sum, Rat.cast_inv, Rat.cast_natCast]
+  rw [hcast]
+  exact harmonic_le_one_add_log N
+
+private lemma sum_divisors_mul_swap (f : ℕ → ℝ) (hf : f 0 = 0) (N : ℕ) :
+    ∑ n ∈ Ioc 0 N, ∑ d ∈ n.divisors, f d * f (n / d)
+      = ∑ n ∈ Ioc 0 N, f n * ∑ m ∈ Ioc 0 (N / n), f m := by
+  let F : ArithmeticFunction ℝ := ⟨f, hf⟩
+  have h2 : ∀ n : ℕ, (F * F) n = ∑ d ∈ n.divisors, f d * f (n / d) := by
+    intro n
+    rw [ArithmeticFunction.mul_apply]
+    exact Nat.sum_divisorsAntidiagonal (fun i j => F i * F j)
+  calc ∑ n ∈ Ioc 0 N, ∑ d ∈ n.divisors, f d * f (n / d)
+      = ∑ n ∈ Ioc 0 N, (F * F) n := by
+        refine Finset.sum_congr rfl fun n _ => ?_
+        exact (h2 n).symm
+    _ = ∑ n ∈ Ioc 0 N, f n * ∑ m ∈ Ioc 0 (N / n), f m := by
+        rw [ArithmeticFunction.sum_Ioc_mul_eq_sum_sum]
+        rfl
+
+private lemma one_add_log_nonneg (N : ℕ) : 0 ≤ 1 + Real.log N := by
+  rcases Nat.eq_zero_or_pos N with hN | hN
+  · rw [hN]; simp
+  · have h1 : (1:ℝ) ≤ (N:ℝ) := by exact_mod_cast hN
+    have : 0 ≤ Real.log N := Real.log_nonneg h1
+    linarith
+
+private lemma tau_pow_div_nonneg (m n : ℕ) : 0 ≤ tau n ^ m / (n : ℝ) :=
+  div_nonneg (pow_nonneg (tau_nonneg n) m) (Nat.cast_nonneg n)
+
+private lemma S_one (N : ℕ) :
+    ∑ n ∈ Ioc 0 N, tau n ^ 1 / n ≤ (1 + Real.log N) ^ 2 := by
+  have hEq : ∑ n ∈ Ioc 0 N, tau n ^ 1 / n
+      = ∑ n ∈ Ioc 0 N, ∑ d ∈ n.divisors, ((d : ℝ))⁻¹ * ((((n / d : ℕ)) : ℝ))⁻¹ := by
+    refine Finset.sum_congr rfl fun n hn => ?_
+    rw [pow_one, tau_eq_sum_one, Finset.sum_div]
+    refine Finset.sum_congr rfl fun d hd => ?_
+    have hdvd : d ∣ n := Nat.dvd_of_mem_divisors hd
+    rw [one_div, ← mul_inv]
+    congr 1
+    rw [← Nat.cast_mul, Nat.mul_div_cancel' hdvd]
+  rw [hEq, sum_divisors_mul_swap (fun n : ℕ => ((n : ℝ))⁻¹) (by simp) N]
+  have hterm : ∀ n ∈ Ioc 0 N,
+      ((n : ℝ))⁻¹ * ∑ m ∈ Ioc 0 (N / n), ((m : ℝ))⁻¹
+        ≤ ((n : ℝ))⁻¹ * (1 + Real.log N) := by
+    intro n hn
+    have hn0 : 0 ≤ ((n : ℝ))⁻¹ := by positivity
+    have hsub : Ioc 0 (N / n) ⊆ Ioc 0 N := by
+      intro x hx
+      simp only [mem_Ioc] at hx ⊢
+      exact ⟨hx.1, hx.2.trans (Nat.div_le_self N n)⟩
+    have hmono : ∑ m ∈ Ioc 0 (N / n), ((m : ℝ))⁻¹ ≤ ∑ m ∈ Ioc 0 N, ((m : ℝ))⁻¹ :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsub
+        (fun x _ _ => by positivity : ∀ x ∈ Ioc 0 N, x ∉ Ioc 0 (N / n) → 0 ≤ ((x : ℝ))⁻¹)
+    exact mul_le_mul_of_nonneg_left (hmono.trans (inv_sum_Ioc_le N)) hn0
+  calc ∑ n ∈ Ioc 0 N, ((n : ℝ))⁻¹ * ∑ m ∈ Ioc 0 (N / n), ((m : ℝ))⁻¹
+      ≤ ∑ n ∈ Ioc 0 N, ((n : ℝ))⁻¹ * (1 + Real.log N) := Finset.sum_le_sum hterm
+    _ = (∑ n ∈ Ioc 0 N, ((n : ℝ))⁻¹) * (1 + Real.log N) := by rw [Finset.sum_mul]
+    _ ≤ (1 + Real.log N) * (1 + Real.log N) :=
+        mul_le_mul_of_nonneg_right (inv_sum_Ioc_le N) (one_add_log_nonneg N)
+    _ = (1 + Real.log N) ^ 2 := by ring
+
+set_option maxHeartbeats 1000000 in
+private lemma S_succ (m : ℕ) (_hm : 1 ≤ m) (N : ℕ) :
+    ∑ n ∈ Ioc 0 N, tau n ^ (m + 1) / n
+      ≤ (∑ n ∈ Ioc 0 N, tau n ^ m / n) ^ 2 := by
+  have hstep : ∑ n ∈ Ioc 0 N, tau n ^ (m + 1) / n
+      ≤ ∑ n ∈ Ioc 0 N, ∑ d ∈ n.divisors,
+          (tau d ^ m / d) * (tau (n / d) ^ m / ((((n / d : ℕ)) : ℝ))) := by
+    refine Finset.sum_le_sum fun n hn => ?_
+    simp only [mem_Ioc] at hn
+    have hn0 : (0 : ℝ) < n := by exact_mod_cast hn.1
+    have h1 : tau n ^ (m + 1) / (n : ℝ) = ∑ _d ∈ n.divisors, tau n ^ m / (n : ℝ) := by
+      rw [Finset.sum_const, nsmul_eq_mul, tau_eq_card, pow_succ]
+      ring
+    rw [h1]
+    refine Finset.sum_le_sum fun d hd => ?_
+    have hdvd : d ∣ n := Nat.dvd_of_mem_divisors hd
+    have hd0 : (0 : ℝ) < d := by
+      have := Nat.pos_of_mem_divisors hd
+      exact_mod_cast this
+    have htaule : tau n ≤ tau d * tau (n / d) := by
+      have h := tau_mul_le d (n / d)
+      rwa [Nat.mul_div_cancel' hdvd] at h
+    have hpow : tau n ^ m ≤ (tau d * tau (n / d)) ^ m :=
+      pow_le_pow_left₀ (tau_nonneg n) htaule m
+    have hD : (d : ℝ) * (((n / d : ℕ)) : ℝ) = (n : ℝ) := by
+      rw [← Nat.cast_mul, Nat.mul_div_cancel' hdvd]
+    have hqne : ((((n / d : ℕ)) : ℝ)) ≠ 0 := by
+      have hpos : 0 < n / d :=
+        Nat.div_pos (Nat.le_of_dvd (by omega) hdvd) (Nat.pos_of_mem_divisors hd)
+      exact_mod_cast hpos.ne'
+    have hdne : (d : ℝ) ≠ 0 := ne_of_gt hd0
+    have hnne : (n : ℝ) ≠ 0 := ne_of_gt hn0
+    have hdiv : tau n ^ m / (n : ℝ) ≤ (tau d * tau (n / d)) ^ m / (n : ℝ) :=
+      mul_le_mul_of_nonneg_right hpow (by positivity : (0:ℝ) ≤ ((n : ℝ))⁻¹)
+    refine hdiv.trans (le_of_eq ?_)
+    rw [mul_pow, ← hD]
+    field_simp
+  rw [sum_divisors_mul_swap (fun n => tau n ^ m / (n : ℝ))
+    (by simp only [tau_zero]; simp) N] at hstep
+  refine hstep.trans ?_
+  have hf : ∀ n : ℕ, 0 ≤ tau n ^ m / (n : ℝ) := fun n => tau_pow_div_nonneg m n
+  have hinner : ∀ n ∈ Ioc 0 N,
+      ∑ x ∈ Ioc 0 (N / n), tau x ^ m / (x : ℝ) ≤ ∑ x ∈ Ioc 0 N, tau x ^ m / (x : ℝ) := by
+    intro n hn
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun x _ _ => hf x)
+    intro x hx
+    simp only [mem_Ioc] at hx ⊢
+    exact ⟨hx.1, hx.2.trans (Nat.div_le_self N n)⟩
+  calc ∑ n ∈ Ioc 0 N, tau n ^ m / (n : ℝ) * ∑ x ∈ Ioc 0 (N / n), tau x ^ m / (x : ℝ)
+      ≤ ∑ n ∈ Ioc 0 N, tau n ^ m / (n : ℝ) * ∑ x ∈ Ioc 0 N, tau x ^ m / (x : ℝ) := by
+        refine Finset.sum_le_sum fun n hn => ?_
+        exact mul_le_mul_of_nonneg_left (hinner n hn) (hf n)
+    _ = (∑ n ∈ Ioc 0 N, tau n ^ m / (n : ℝ)) * ∑ x ∈ Ioc 0 N, tau x ^ m / (x : ℝ) := by
+        rw [Finset.sum_mul]
+    _ = (∑ n ∈ Ioc 0 N, tau n ^ m / (n : ℝ)) ^ 2 := by ring
+
+set_option maxHeartbeats 1000000 in
+private lemma S_le (N : ℕ) (m : ℕ) (hm : 1 ≤ m) :
+    ∑ n ∈ Ioc 0 N, tau n ^ m / n ≤ (1 + Real.log N) ^ (2 ^ m) := by
+  induction m, hm using Nat.le_induction with
+  | base => simpa using S_one N
+  | succ m hm ih =>
+      refine (S_succ m hm N).trans ?_
+      have h2 : (∑ n ∈ Ioc 0 N, tau n ^ m / n) ^ 2
+          ≤ ((1 + Real.log N) ^ 2 ^ m) ^ 2 :=
+        pow_le_pow_left₀ (Finset.sum_nonneg fun n _ => tau_pow_div_nonneg m n) ih 2
+      refine h2.trans (le_of_eq ?_)
+      rw [← pow_mul]
+      congr 1
+
+private lemma moment_le (m : ℕ) (hm : 1 ≤ m) (N : ℕ) :
+    ∑ k ∈ Ioc 0 N, tau k ^ m ≤ N * (1 + Real.log N) ^ (2 ^ m) := by
+  calc ∑ k ∈ Ioc 0 N, tau k ^ m
+      = ∑ k ∈ Ioc 0 N, (tau k ^ m / (k : ℝ)) * (k : ℝ) := by
+        refine Finset.sum_congr rfl fun k hk => ?_
+        simp only [mem_Ioc] at hk
+        have hk0 : (k : ℝ) ≠ 0 := by
+          have : 0 < k := hk.1
+          exact_mod_cast this.ne'
+        field_simp
+    _ ≤ ∑ k ∈ Ioc 0 N, (tau k ^ m / (k : ℝ)) * (N : ℝ) := by
+        refine Finset.sum_le_sum fun k hk => ?_
+        simp only [mem_Ioc] at hk
+        have hk0 : (0 : ℝ) ≤ tau k ^ m / (k : ℝ) := tau_pow_div_nonneg m k
+        have hkN : (k : ℝ) ≤ (N : ℝ) := by exact_mod_cast hk.2
+        exact mul_le_mul_of_nonneg_left hkN hk0
+    _ = (∑ k ∈ Ioc 0 N, tau k ^ m / (k : ℝ)) * (N : ℝ) := by rw [Finset.sum_mul]
+    _ ≤ (1 + Real.log N) ^ (2 ^ m) * (N : ℝ) :=
+        mul_le_mul_of_nonneg_right (S_le N m hm) (Nat.cast_nonneg N)
+    _ = (N : ℝ) * (1 + Real.log N) ^ (2 ^ m) := by ring
+
 /-- LEAF. OPEN. Page 25, the divisor mean estimate underlying the coefficient envelope.
 Reference 10 page 1372 uses its Lemma 2 to obtain the logarithmic envelope.
 This is the elementary real divisor moment consequence. It has no characters,
@@ -413,7 +645,37 @@ theorem divisor_moment (B : ℝ) :
     ∃ D : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∀ N : ℕ, 1 ≤ N →
       (∑ k ∈ Finset.Icc 1 N, tau k ^ B) ≤
         C * N * (1 + Real.log N) ^ D := by
-  sorry
+
+  have hI : ∀ N : ℕ, Finset.Icc 1 N = Ioc 0 N := by
+    intro N; ext x; simp only [mem_Icc, mem_Ioc]; omega
+  rcases lt_or_ge 0 B with hB | hB
+  · obtain ⟨m, hm1, hmB⟩ : ∃ m : ℕ, 1 ≤ m ∧ B ≤ (m : ℝ) :=
+      ⟨⌈B⌉₊, Nat.one_le_ceil_iff.mpr hB, Nat.le_ceil B⟩
+    refine ⟨2 ^ m, 1, one_pos.le, fun N hN => ?_⟩
+    have hb : ∀ k ∈ Ioc 0 N, tau k ^ B ≤ tau k ^ m := by
+      intro k hk
+      simp only [mem_Ioc] at hk
+      have h1 : (1 : ℝ) ≤ tau k := one_le_tau (by omega)
+      calc tau k ^ B ≤ tau k ^ (m : ℝ) := Real.rpow_le_rpow_of_exponent_le h1 hmB
+        _ = tau k ^ m := Real.rpow_natCast (tau k) m
+    calc ∑ k ∈ Finset.Icc 1 N, tau k ^ B = ∑ k ∈ Ioc 0 N, tau k ^ B := by rw [hI N]
+      _ ≤ ∑ k ∈ Ioc 0 N, tau k ^ m := Finset.sum_le_sum hb
+      _ ≤ (N : ℝ) * (1 + Real.log N) ^ (2 ^ m) := moment_le m hm1 N
+      _ = 1 * (N : ℝ) * (1 + Real.log N) ^ (2 ^ m) := by ring
+  · refine ⟨0, 1, one_pos.le, fun N hN => ?_⟩
+    have hb : ∀ k ∈ Ioc 0 N, tau k ^ B ≤ 1 := by
+      intro k hk
+      simp only [mem_Ioc] at hk
+      have h1 : (1 : ℝ) ≤ tau k := one_le_tau (by omega)
+      have h2 := Real.rpow_le_rpow_of_nonpos (by norm_num : (0:ℝ) < 1) h1 hB
+      simpa using h2
+    calc ∑ k ∈ Finset.Icc 1 N, tau k ^ B = ∑ k ∈ Ioc 0 N, tau k ^ B := by rw [hI N]
+      _ ≤ ∑ _k ∈ Ioc 0 N, (1 : ℝ) := Finset.sum_le_sum hb
+      _ = (N : ℝ) := by
+          rw [Finset.sum_const, nsmul_eq_mul, ← hI N, Nat.card_Icc]
+          simp
+      _ ≤ 1 * (N : ℝ) * (1 + Real.log N) ^ 0 := by
+          simp only [pow_zero, mul_one, one_mul, le_refl]
 
 /-- LEAF. Page 25, unnumbered coefficient envelope before the kernel display.
 Reference 10 page 1372 derives the corresponding envelope from its divisor mean
