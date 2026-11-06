@@ -450,6 +450,260 @@ theorem low_height_comparison_le_one (B : ℝ) (hB : B ≤ 1) (a : ℝ → ℕ �
   obtain ⟨C, D, X, hC, hD, hF⟩ := divisor_log_bound_le_one B hB a ha
   exact low_height_of_log_bound a C D X hC hD hF
 
+private theorem card_divisors_mul_le (a b : ℕ) :
+    (a * b).divisors.card ≤ a.divisors.card * b.divisors.card := by
+  rw [Nat.divisors_mul]
+  exact Finset.card_mul_le
+
+private theorem divisor_pow_succ_le (r n : ℕ) :
+    (n.divisors.card : ℝ) ^ (r + 1) ≤
+      ∑ d ∈ n.divisors, (d.divisors.card : ℝ) ^ r * ((n / d).divisors.card : ℝ) ^ r := by
+  classical
+  calc
+    _ = ∑ d ∈ n.divisors, (n.divisors.card : ℝ) ^ r := by
+      simp [pow_succ, mul_comm]
+    _ ≤ _ := by
+      apply Finset.sum_le_sum
+      intro d hd
+      have hdn := Nat.dvd_of_mem_divisors hd
+      have hτ : n.divisors.card ≤ d.divisors.card * (n / d).divisors.card := by
+        calc
+          _ = (d * (n / d)).divisors.card := by rw [Nat.mul_div_cancel' hdn]
+          _ ≤ _ := card_divisors_mul_le d (n / d)
+      have hτR : (n.divisors.card : ℝ) ≤
+          (d.divisors.card : ℝ) * ((n / d).divisors.card : ℝ) := by
+        exact_mod_cast hτ
+      simpa only [mul_pow] using
+        pow_le_pow_left₀ (by positivity : (0 : ℝ) ≤ n.divisors.card) hτR r
+
+private theorem divisor_harmonic_recurrence (r M : ℕ) :
+    (∑ n ∈ Finset.Icc 1 M, (n.divisors.card : ℝ) ^ (r + 1) / n) ≤
+      (∑ n ∈ Finset.Icc 1 M, (n.divisors.card : ℝ) ^ r / n) ^ 2 := by
+  classical
+  let s := (Finset.Icc 1 M).sigma (fun n => n.divisors)
+  let t := (Finset.Icc 1 M) ×ˢ (Finset.Icc 1 M)
+  let e : (Σ _ : ℕ, ℕ) → ℕ × ℕ := fun p => (p.2, p.1 / p.2)
+  have hmul : ∀ p ∈ s, p.2 * (p.1 / p.2) = p.1 := by
+    intro p hp
+    exact Nat.mul_div_cancel' (Nat.dvd_of_mem_divisors (Finset.mem_sigma.mp hp).2)
+  have hinj : Set.InjOn e (s : Set (Σ _ : ℕ, ℕ)) := by
+    intro p hp q hq he
+    have hd : p.2 = q.2 := congrArg Prod.fst he
+    have hquot : p.1 / p.2 = q.1 / q.2 := congrArg Prod.snd he
+    have hn : p.1 = q.1 := by
+      calc
+        p.1 = p.2 * (p.1 / p.2) := (hmul p hp).symm
+        _ = q.2 * (q.1 / q.2) := by rw [hquot, hd]
+        _ = q.1 := hmul q hq
+    exact Sigma.ext hn (heq_of_eq hd)
+  have hmap : Finset.image e s ⊆ t := by
+    intro q hq
+    obtain ⟨p, hp, rfl⟩ := Finset.mem_image.mp hq
+    have hn := Finset.mem_Icc.mp (Finset.mem_sigma.mp hp).1
+    have hd := (Finset.mem_sigma.mp hp).2
+    have hqpos : 1 ≤ p.1 / p.2 := by
+      apply Nat.one_le_iff_ne_zero.mpr
+      intro he
+      have hh := hmul p hp
+      rw [he, mul_zero] at hh
+      omega
+    exact Finset.mem_product.mpr ⟨Finset.mem_Icc.mpr
+      ⟨Nat.pos_of_mem_divisors hd, (Nat.divisor_le hd).trans hn.2⟩,
+      Finset.mem_Icc.mpr ⟨hqpos, (Nat.div_le_self _ _).trans hn.2⟩⟩
+  have hsum : (∑ p ∈ s, (p.2.divisors.card : ℝ) ^ r * ((p.1 / p.2).divisors.card : ℝ) ^ r / p.1) ≤
+      ∑ p ∈ t, ((p.1.divisors.card : ℝ) ^ r / p.1) * ((p.2.divisors.card : ℝ) ^ r / p.2) := by
+    apply Finset.sum_le_sum_of_injOn e hinj hmap
+    · intro p hp
+      dsimp only [e]
+      rw [div_mul_div_comm, ← Nat.cast_mul, hmul p hp]
+    · intro p hp hn
+      positivity
+  calc
+    (∑ n ∈ Finset.Icc 1 M, (n.divisors.card : ℝ) ^ (r + 1) / n)
+        ≤ ∑ n ∈ Finset.Icc 1 M,
+            (∑ d ∈ n.divisors, (d.divisors.card : ℝ) ^ r *
+              ((n / d).divisors.card : ℝ) ^ r) / n := by
+      apply Finset.sum_le_sum
+      intro n hn
+      exact div_le_div_of_nonneg_right (divisor_pow_succ_le r n) (Nat.cast_nonneg _)
+    _ = ∑ p ∈ s, (p.2.divisors.card : ℝ) ^ r * ((p.1 / p.2).divisors.card : ℝ) ^ r / p.1 := by
+      simp_rw [Finset.sum_div]
+      exact Finset.sum_sigma' _ _ _
+    _ ≤ _ := hsum
+    _ = (∑ n ∈ Finset.Icc 1 M, (n.divisors.card : ℝ) ^ r / n) ^ 2 := by
+      rw [Finset.sum_product]
+      simp_rw [← Finset.mul_sum, ← Finset.sum_mul]
+      ring
+
+private theorem divisor_harmonic_log_bound (r M : ℕ) :
+    (∑ n ∈ Finset.Icc 1 M, (n.divisors.card : ℝ) ^ r / n) ≤ (1 + Real.log M) ^ (2 ^ r) := by
+  induction r with
+  | zero =>
+    simpa only [pow_zero, pow_one, one_div,
+      harmonic_eq_sum_Icc, Rat.cast_sum, Rat.cast_inv, Rat.cast_natCast] using
+      harmonic_le_one_add_log M
+  | succ r ih =>
+    apply (divisor_harmonic_recurrence r M).trans
+    calc
+      (∑ n ∈ Finset.Icc 1 M, (n.divisors.card : ℝ) ^ r / n) ^ 2 ≤
+          ((1 + Real.log M) ^ (2 ^ r)) ^ 2 :=
+        pow_le_pow_left₀ (by positivity) ih 2
+      _ = _ := by rw [← pow_mul, pow_succ]
+
+set_option maxHeartbeats 4000000 in
+/-- For divisor exponent above one, the polynomial is bounded by a fixed power of
+`log x` after the `x ^ (1/2)` factor.  The exponent is `2 ^ ⌈B⌉`. -/
+private theorem polynomial_bound_of_harmonic_moment {B : ℝ} (hB : 1 < B) (a : ℝ → ℕ → ℝ)
+    {C₀ : ℝ} (ha : ∀ x k, |a x k| ≤ C₀ * ((k.divisors.card : ℕ) : ℝ) ^ B)
+    {x : ℝ} (hx : 3 ≤ x) {q : ℕ} (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    ‖criticalPolynomial a x t χ‖ ≤
+      (2 ^ (1 / 2 : ℝ) * |C₀| * 3 ^ (2 ^ ⌈B⌉₊)) * x ^ (1 / 2 : ℝ) *
+        Real.log x ^ ((2 ^ ⌈B⌉₊ : ℕ) : ℝ) := by
+  have hx0 : 0 < x := by linarith
+  have hC0 : (0 : ℝ) ≤ |C₀| := abs_nonneg C₀
+  obtain ⟨r, hr⟩ : ∃ r : ℕ, r = ⌈B⌉₊ := ⟨⌈B⌉₊, rfl⟩
+  rw [← hr]
+  have hrB : B ≤ (r : ℝ) := by rw [hr]; exact Nat.le_ceil B
+  have hr1 : 1 ≤ r := by rw [hr]; exact Nat.one_le_ceil_iff.mpr (by linarith)
+  have hlx : 1 ≤ Real.log x := by
+    rw [Real.le_log_iff_exp_le hx0]
+    exact le_trans Real.exp_one_lt_d9.le (by linarith)
+  have hlx0 : 0 ≤ Real.log x := le_trans (by norm_num) hlx
+  obtain ⟨N, hN⟩ : ∃ N : ℕ, N = ⌊2 * x⌋₊ := ⟨⌊2 * x⌋₊, rfl⟩
+  have hNx : (N : ℝ) ≤ 2 * x := by rw [hN]; exact Nat.floor_le (by linarith)
+  have hN1 : 1 ≤ N := by rw [hN]; exact Nat.le_floor (by push_cast; linarith)
+  have hNpos : (0 : ℝ) < (N : ℝ) := by
+    rw [hN]
+    exact_mod_cast Nat.pos_of_ne_zero (by
+      intro h
+      have := Nat.floor_eq_zero.mp h
+      linarith)
+  -- per-term bound
+  have hterm : ∀ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+      ‖(a x k : ℂ) * χ (k : ZMod q) / (k : ℂ) ^ Thm4.half t‖ ≤
+        |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ r / (k : ℝ) ^ (1 / 2 : ℝ) := by
+    intro k hk
+    obtain ⟨hkl, hku⟩ := Finset.mem_Ioc.mp hk
+    have hk0 : k ≠ 0 := by omega
+    have hkpos : 0 < (k : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hk0
+    have hdiv1 : 1 ≤ ((k.divisors.card : ℕ) : ℝ) := by
+      have h : 1 ≤ k.divisors.card :=
+        Finset.card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr hk0⟩
+      exact_mod_cast h
+    have hpow0 : (0 : ℝ) ≤ ((k.divisors.card : ℕ) : ℝ) ^ B := Real.rpow_nonneg (by positivity) _
+    have hpowB : ((k.divisors.card : ℕ) : ℝ) ^ B ≤ ((k.divisors.card : ℕ) : ℝ) ^ r := by
+      rw [← Real.rpow_natCast (((k.divisors.card : ℕ) : ℝ)) r]
+      exact Real.rpow_le_rpow_of_exponent_le hdiv1 hrB
+    have hcoeff : |a x k| ≤ |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ r := by
+      have h1 : |a x k| ≤ C₀ * ((k.divisors.card : ℕ) : ℝ) ^ B := ha x k
+      have h2 : C₀ * ((k.divisors.card : ℕ) : ℝ) ^ B ≤
+          |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ B :=
+        mul_le_mul_of_nonneg_right (le_abs_self C₀) hpow0
+      have h3 : |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ B ≤
+          |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ r :=
+        mul_le_mul_of_nonneg_left hpowB hC0
+      exact h1.trans (h2.trans h3)
+    have htwist : ‖(a x k : ℂ) * χ (k : ZMod q)‖ ≤
+        |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ r := by
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+      refine (mul_le_of_le_one_right (abs_nonneg _) (DirichletCharacter.norm_le_one χ _)).trans hcoeff
+    have hre : (Thm4.half t).re = (1 / 2 : ℝ) := by simp [Thm4.half]
+    rw [norm_div, Complex.norm_natCast_cpow_of_pos (Nat.pos_of_ne_zero hk0), hre]
+    exact div_le_div_of_nonneg_right htwist (Real.rpow_nonneg hkpos.le _)
+  -- sum over the support, then over `Icc 1 N`
+  have hsub : Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊ ⊆ Finset.Icc 1 N := by
+    intro k hk
+    obtain ⟨hkl, hku⟩ := Finset.mem_Ioc.mp hk
+    exact Finset.mem_Icc.mpr ⟨by omega, by rw [hN]; exact hku⟩
+  have hmoment : (∑ k ∈ Finset.Icc 1 N, ((k.divisors.card : ℕ) : ℝ) ^ r / k) ≤
+      (1 + Real.log N) ^ (2 ^ r) := divisor_harmonic_log_bound r N
+  have hsplit : ∀ k ∈ Finset.Icc 1 N,
+      ((k.divisors.card : ℕ) : ℝ) ^ r / (k : ℝ) ^ (1 / 2 : ℝ) =
+        (((k.divisors.card : ℕ) : ℝ) ^ r / k) * (k : ℝ) ^ (1 / 2 : ℝ) := by
+    intro k hk
+    have hk0 : k ≠ 0 := by have := (Finset.mem_Icc.mp hk).1; omega
+    have hkpos : 0 < (k : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hk0
+    have hdiv : (k : ℝ) ^ (1 / 2 : ℝ) / (k : ℝ) = (k : ℝ) ^ (-(1 / 2) : ℝ) := by
+      rw [div_eq_mul_inv, ← Real.rpow_neg_one, ← Real.rpow_add hkpos]
+      norm_num
+    calc ((k.divisors.card : ℕ) : ℝ) ^ r / (k : ℝ) ^ (1 / 2 : ℝ)
+        = ((k.divisors.card : ℕ) : ℝ) ^ r * ((k : ℝ) ^ (1 / 2 : ℝ) / (k : ℝ)) := by
+          rw [hdiv, Real.rpow_neg hkpos.le, div_eq_mul_inv]
+      _ = (((k.divisors.card : ℕ) : ℝ) ^ r / k) * (k : ℝ) ^ (1 / 2 : ℝ) := by
+          field_simp
+  have hlog3 : 1 + Real.log (N : ℝ) ≤ 3 * Real.log x := by
+    have h1 : Real.log (N : ℝ) ≤ Real.log (2 * x) := Real.log_le_log hNpos hNx
+    have h2 : Real.log (2 * x) = Real.log 2 + Real.log x := Real.log_mul (by norm_num) hx0.ne'
+    have h3 : Real.log 2 ≤ Real.log x := Real.log_le_log (by norm_num) (by linarith)
+    linarith
+  have hbase : (1 + Real.log (N : ℝ)) ^ (2 ^ r) ≤ 3 ^ (2 ^ r) * Real.log x ^ (2 ^ r) := by
+    have hb0 : 0 ≤ 1 + Real.log (N : ℝ) := by
+      have hln : 0 ≤ Real.log (N : ℝ) := Real.log_nonneg (by exact_mod_cast hN1)
+      linarith
+    calc (1 + Real.log (N : ℝ)) ^ (2 ^ r) ≤ (3 * Real.log x) ^ (2 ^ r) :=
+          pow_le_pow_left₀ hb0 hlog3 _
+      _ = 3 ^ (2 ^ r) * Real.log x ^ (2 ^ r) := mul_pow _ _ _
+  have hNsqrt : (N : ℝ) ^ (1 / 2 : ℝ) ≤ (2 * x) ^ (1 / 2 : ℝ) :=
+    Real.rpow_le_rpow (Nat.cast_nonneg _) hNx (by norm_num)
+  have h2x : (2 * x) ^ (1 / 2 : ℝ) = 2 ^ (1 / 2 : ℝ) * x ^ (1 / 2 : ℝ) :=
+    Real.mul_rpow (by norm_num) hx0.le
+  have hlogx : Real.log x ^ (2 ^ r) = Real.log x ^ ((2 ^ r : ℕ) : ℝ) := by
+    rw [Real.rpow_natCast]
+  unfold criticalPolynomial
+  calc
+    ‖∑ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+        (a x k : ℂ) * χ (k : ZMod q) / (k : ℂ) ^ Thm4.half t‖
+        ≤ ∑ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+            ‖(a x k : ℂ) * χ (k : ZMod q) / (k : ℂ) ^ Thm4.half t‖ := norm_sum_le _ _
+    _ ≤ ∑ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+          |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ r / (k : ℝ) ^ (1 / 2 : ℝ) :=
+      Finset.sum_le_sum hterm
+    _ ≤ ∑ k ∈ Finset.Icc 1 N,
+          |C₀| * ((k.divisors.card : ℕ) : ℝ) ^ r / (k : ℝ) ^ (1 / 2 : ℝ) :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsub (fun k _ _ => by
+        exact div_nonneg (mul_nonneg hC0 (by positivity)) (Real.rpow_nonneg (Nat.cast_nonneg k) _))
+    _ = ∑ k ∈ Finset.Icc 1 N,
+          |C₀| * (((k.divisors.card : ℕ) : ℝ) ^ r / (k : ℝ) ^ (1 / 2 : ℝ)) :=
+      Finset.sum_congr rfl (fun k _ => by rw [mul_div_assoc])
+    _ = |C₀| * ∑ k ∈ Finset.Icc 1 N,
+          (((k.divisors.card : ℕ) : ℝ) ^ r / (k : ℝ) ^ (1 / 2 : ℝ)) := by
+      rw [Finset.mul_sum]
+    _ = |C₀| * ∑ k ∈ Finset.Icc 1 N,
+          (((k.divisors.card : ℕ) : ℝ) ^ r / k) * (k : ℝ) ^ (1 / 2 : ℝ) := by
+      congr 1
+      exact Finset.sum_congr rfl (fun k hk => hsplit k hk)
+    _ ≤ |C₀| * ∑ k ∈ Finset.Icc 1 N,
+          (((k.divisors.card : ℕ) : ℝ) ^ r / k) * (N : ℝ) ^ (1 / 2 : ℝ) := by
+      refine mul_le_mul_of_nonneg_left ?_ hC0
+      apply Finset.sum_le_sum
+      intro k hk
+      have hk0 : k ≠ 0 := by have := (Finset.mem_Icc.mp hk).1; omega
+      have hkpos : 0 < (k : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hk0
+      have hkN : (k : ℝ) ≤ (N : ℝ) := by
+        exact_mod_cast (Finset.mem_Icc.mp hk).2
+      have hfrac : 0 ≤ ((k.divisors.card : ℕ) : ℝ) ^ r / k :=
+        div_nonneg (by positivity) (Nat.cast_nonneg k)
+      exact mul_le_mul_of_nonneg_left
+        (Real.rpow_le_rpow hkpos.le hkN (by norm_num)) hfrac
+    _ = |C₀| * (N : ℝ) ^ (1 / 2 : ℝ) *
+          ∑ k ∈ Finset.Icc 1 N, ((k.divisors.card : ℕ) : ℝ) ^ r / k := by
+      rw [← Finset.sum_mul]
+      ring
+    _ ≤ |C₀| * (2 * x) ^ (1 / 2 : ℝ) * (1 + Real.log (N : ℝ)) ^ (2 ^ r) := by
+      have hA : (0 : ℝ) ≤ |C₀| * (2 * x) ^ (1 / 2 : ℝ) :=
+        mul_nonneg hC0 (Real.rpow_nonneg (by linarith) _)
+      have hS : (0 : ℝ) ≤ ∑ k ∈ Finset.Icc 1 N,
+          ((k.divisors.card : ℕ) : ℝ) ^ r / k :=
+        Finset.sum_nonneg (fun k _ => div_nonneg (by positivity) (Nat.cast_nonneg k))
+      exact mul_le_mul (mul_le_mul_of_nonneg_left hNsqrt hC0) hmoment hS hA
+    _ ≤ |C₀| * (2 * x) ^ (1 / 2 : ℝ) * (3 ^ (2 ^ r) * Real.log x ^ (2 ^ r)) := by
+      exact mul_le_mul_of_nonneg_left hbase
+        (mul_nonneg hC0 (Real.rpow_nonneg (by linarith) _))
+    _ = (2 ^ (1 / 2 : ℝ) * |C₀| * 3 ^ (2 ^ r)) * x ^ (1 / 2 : ℝ) *
+          Real.log x ^ ((2 ^ r : ℕ) : ℝ) := by
+      rw [h2x, hlogx]
+      ring
+
 /-- LEAF. Page 25, the displayed bound on F between 4.3 and 4.4.
 Only a logarithmic divisor moment bound on the finite polynomial is required.
 There is no contour, window comparison or mean value conclusion. -/
@@ -460,7 +714,11 @@ theorem divisor_polynomial_log_bound (B : ℝ) (a : ℝ → ℕ → ℝ)
       ‖criticalPolynomial a x t χ‖ ≤ C * x ^ (1 / 2 : ℝ) * Real.log x ^ D := by
   by_cases hB : B ≤ 1
   · exact divisor_log_bound_le_one B hB a ha
-  · sorry
+  · obtain ⟨C₀, hC₀⟩ := ha
+    refine ⟨2 ^ (1 / 2 : ℝ) * |C₀| * 3 ^ (2 ^ ⌈B⌉₊), ((2 ^ ⌈B⌉₊ : ℕ) : ℝ), 3,
+      by positivity, by positivity, ?_⟩
+    intro x hx q _ χ t
+    exact polynomial_bound_of_harmonic_moment (not_le.mp hB) a hC₀ hx χ t
 
 /-- Page 25, display 4.4.
 Only the low height Taylor error is required. The divisor bound supplies
