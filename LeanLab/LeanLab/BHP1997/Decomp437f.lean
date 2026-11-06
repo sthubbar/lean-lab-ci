@@ -176,6 +176,19 @@ theorem neither_small_third (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValu
     _ ≤ H * (R * X ^ (1 / 2 : ℝ) * Real.log x ^ (-A)) := mul_le_mul_of_nonneg_left hsave hH.le
     _ = _ := by ring
 
+/-- Page 13, the exponent calculation for one large-third-factor cell in Case 2 ii.
+This is the sharp power saving used by the sixth polynomial power bound. -/
+theorem large_third_cell_exponent {θ ε m n l σ₁ σ₂ σ₃ s : ℝ}
+    (hε : 0 < ε) (hm : 0 ≤ m) (hn : 0 ≤ n) (hl : 0 ≤ l)
+    (hsum : m + n + l = 1) (h37 : l < gam θ - ε)
+    (hM : s ≤ 1 - θ + m * Thm4.f σ₁)
+    (hN : s ≤ 1 - θ + n * Thm4.f σ₂)
+    (hL : s ≤ max (3 * l * (2 - 2 * σ₃))
+      (1 - θ + 3 * l * (4 - 6 * σ₃))) :
+    s + m * (σ₁ - 1 / 2) + n * (σ₂ - 1 / 2) + l * (σ₃ - 1 / 2) <
+      1 / 2 - ε / 72 :=
+  DecompC165c.case2_cell_exponent hε hm hn hl hsum h37 hM hN hL
+
 /-- LEAF. Page 13, Case 2 ii, display 3.13 and the two following bounds.
 Only the part above the third norm threshold remains. Apply the sixth
 polynomial power bound and its two interpolation weights. OPEN.
