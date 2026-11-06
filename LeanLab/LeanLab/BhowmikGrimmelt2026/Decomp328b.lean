@@ -152,7 +152,70 @@ theorem minor_bare_family328 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ)
       ∑ N ∈ Finset.Icc 1 X, ‖minorBare328 ϕ X N ϑ‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
           (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  classical
+  obtain ⟨C, hC, hbound⟩ := smoothed_family_bound261 hϕ
+  have hlog2pos : 0 < Real.log (2 : ℝ) := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  have hlog2pow4 : 0 < (Real.log (2 : ℝ)) ^ 4 := pow_pos hlog2pos 4
+  refine ⟨C / (Real.log (2 : ℝ)) ^ 4, by positivity, ?_⟩
+  intro X hX
+  have hX1 : (1 : ℝ) ≤ X := by exact_mod_cast (by omega : 1 ≤ X)
+  have hlogX : 0 ≤ Real.log (X : ℝ) := Real.log_natCast_nonneg X
+  have hlogXpos : 0 < Real.log (X : ℝ) := by
+    refine lt_of_lt_of_le ?_ (Real.log_le_log ?_ hX1)
+    · exact Real.log_pos (by norm_num : (1 : ℝ) < 2)
+    · norm_num
+  have hlog_le : Real.log (X : ℝ) ≤ Real.log (X : ℝ) ^ 5 / (Real.log (2 : ℝ)) ^ 4 := by
+    have hhalf : (1 / 2 : ℝ) ≤ Real.log X := by
+      have hh := Real.log_le_log (by norm_num : (0 : ℝ) < 2) hX1
+      have hlog2gt : (1 / 2 : ℝ) < Real.log (2 : ℝ) := by
+        have := Real.log_two_gt_d9
+        linarith
+      linarith
+    have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1 / 2) hhalf 4
+    have hh := mul_le_mul_of_nonneg_right hp hlogX
+    have hpos : 0 < (Real.log (2 : ℝ)) ^ 4 := hlog2pow4
+    calc
+      Real.log (X : ℝ) = Real.log (X : ℝ) * 1 := by ring
+      _ ≤ Real.log (X : ℝ) * ((Real.log (X : ℝ)) ^ 4 / (Real.log (2 : ℝ)) ^ 4) := by
+        refine mul_le_mul_of_nonneg_left ?_ hlogX
+        have hdiv : 1 ≤ (Real.log (X : ℝ)) ^ 4 / (Real.log (2 : ℝ)) ^ 4 := by
+          refine (one_le_div ?_).mpr hp
+          exact hlog2pow4
+        exact hdiv
+      _ = Real.log (X : ℝ) ^ 5 / (Real.log (2 : ℝ)) ^ 4 := by ring
+  have hbound' := hbound X hX (fun α => if MajorArc X ((X : ℝ) ^ ϑ) α then (0 : ℂ) else 1)
+    (measurable_const.ite (measurableSet_majorArc84 X ((X : ℝ) ^ ϑ)) measurable_const)
+    1 (by norm_num) (by
+      intro α
+      by_cases hm : MajorArc X ((X : ℝ) ^ ϑ) α
+      · simp [hm]
+      · simp [hm])
+  have heq (N : ℕ) :
+      (∫ α in (0 : ℝ)..1, Sphi ϕ N α ^ 2 *
+        (if MajorArc X ((X : ℝ) ^ ϑ) α then (0 : ℂ) else 1) * ee (-(N * α))) =
+      minorBare328 ϕ X N ϑ := by
+    apply intervalIntegral.integral_congr
+    intro α hα
+    by_cases hm : MajorArc X ((X : ℝ) ^ ϑ) α
+    · simp [minorBare328, hm]
+    · simp [minorBare328, hm]
+  simp_rw [heq] at hbound'
+  have hR : (X : ℝ) ^ ϑ ≥ 1 := Real.one_le_rpow hX1 hϑ.le
+  have hRpos : 0 < (X : ℝ) ^ ϑ := Real.rpow_pos_of_pos (by exact_mod_cast (by omega : 0 < X)) ϑ
+  have hcoeff : 1 ≤ ((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ) := by
+    have h1 : 0 ≤ ((X : ℝ) ^ ϑ)⁻¹ := inv_nonneg.mpr hR
+    have h2 : 0 ≤ (X : ℝ) ^ (-(2 / 5) : ℝ) := by positivity
+    nlinarith
+  calc
+    ∑ N ∈ Finset.Icc 1 X, ‖minorBare328 ϕ X N ϑ‖ ^ 2 ≤
+      C * (X : ℝ) ^ 3 * Real.log (X : ℝ) := hbound'
+    _ ≤ C * (X : ℝ) ^ 3 * (Real.log (X : ℝ) ^ 5 / (Real.log (2 : ℝ)) ^ 4) :=
+      mul_le_mul_of_nonneg_left hlog_le (by positivity)
+    _ = (C / (Real.log (2 : ℝ)) ^ 4) * (X : ℝ) ^ 3 * Real.log (X : ℝ) ^ 5 := by ring
+    _ ≤ (C / (Real.log (2 : ℝ)) ^ 4) * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
+        (X : ℝ) ^ 3 * Real.log (X : ℝ) ^ 5 := by
+      gcongr
+      exact hcoeff
 
 /-- LEAF. Page 27, the bounded bRhat multiplier step in the minor part of 7.8.
 OPEN weighted coefficient estimate. The bare coefficient is removed.
@@ -164,6 +227,17 @@ theorem minor_weighted_family328 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsM
       ∑ N ∈ Finset.Icc 1 X, ‖minorWeighted328 ϕ G X N ϑ η‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
           (X : ℝ) ^ 3 * Real.log X ^ 5 := by
+  classical
+  obtain ⟨C, hC, hbound⟩ := smoothed_family_bound261 hϕ
+  have hlog2pos : 0 < Real.log (2 : ℝ) := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  have hlog2pow4 : 0 < (Real.log (2 : ℝ)) ^ 4 := pow_pos hlog2pos 4
+  -- Get a uniform bound for bRhat from GThat_bound
+  obtain ⟨D, hD, hGT⟩ := GThat_bound hG.supp hG.smooth (1 : ℝ)
+  have hbRhat_bound (α : ℝ) : ‖bRhat G ((X : ℝ) ^ ϑ) (fun q => η * X * q / (X : ℝ) ^ ϑ) α‖ ≤ 2 * D := by
+    -- We need to show this bound holds for all α, not just those in the major arc
+    -- The GThat_bound gives us a bound for T ≥ 1
+    -- We need to relate bRhat to GThat
+    sorry
   sorry
 
 /-- Exact minor_family150 statement assembled from the bare and weighted pieces.
