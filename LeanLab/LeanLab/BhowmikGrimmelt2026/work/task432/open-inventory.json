@@ -1,0 +1,200 @@
+[
+  {
+    "file": "Decomp150a.lean",
+    "name": "zeroBound_lower150",
+    "header": "theorem zeroBound_lower150 {\u0398 : \u211d} (hZ : ZeroBound \u0398) : 1 / 2 \u2264 \u0398 ",
+    "line": 16
+  },
+  {
+    "file": "Decomp150a.lean",
+    "name": "mean_square150",
+    "header": "theorem mean_square150 : MeanSquare38 ",
+    "line": 21
+  },
+  {
+    "file": "Decomp150b.lean",
+    "name": "mv_no_siegel150",
+    "header": "theorem mv_no_siegel150 (h52 : Prop52) (hGallagher : GallagherStandard) :\n    \u2203 \u03d1\u2080 : \u211d, 0 < \u03d1\u2080 \u2227 \u2200 \u03d1 : \u211d, 0 < \u03d1 \u2192 \u03d1 < \u03d1\u2080 \u2192 \u03d1 < 1 / 5 \u2192\n      \u2203 C X\u2080 : \u211d, \u2200 X : \u211d, 2 \u2264 X \u2192 X\u2080 \u2264 X \u2192\n        (\u00ac \u2203 (r : \u2115) (_ : NeZero r) (\u03c7 : DirichletCharacter \u2102 r) (\u03b2 : \u211d),\n          SiegelZero (X ^ \u03d1) r \u03c7 \u03b2) \u2192\n        (Edy X : \u211d) \u2264 C * X ^ (1 - \u03d1 / 2) ",
+    "line": 16
+  },
+  {
+    "file": "Decomp150b.lean",
+    "name": "mv_siegel150",
+    "header": "theorem mv_siegel150 (h52 : Prop52) (hGallagher : GallagherStandard) :\n    \u2203 \u03d1\u2080 : \u211d, 0 < \u03d1\u2080 \u2227 \u2200 \u03d1 : \u211d, 0 < \u03d1 \u2192 \u03d1 < \u03d1\u2080 \u2192 \u03d1 < 1 / 5 \u2192\n      \u2203 C X\u2080 : \u211d, \u2200 X : \u211d, 2 \u2264 X \u2192 X\u2080 \u2264 X \u2192\n        (\u2203 (r : \u2115) (_ : NeZero r) (\u03c7 : DirichletCharacter \u2102 r) (\u03b2 : \u211d),\n          SiegelZero (X ^ \u03d1) r \u03c7 \u03b2) \u2192\n        (Edy X : \u211d) \u2264 C * X ^ (1 - \u03d1 / 2) ",
+    "line": 29
+  },
+  {
+    "file": "Decomp150c.lean",
+    "name": "linnik_weighted_gap150",
+    "header": "theorem linnik_weighted_gap150 : \u2203 L C : \u211d, 0 < C \u2227\n    \u2200 q : \u2115, 2 \u2264 q \u2192 \u2200 a : \u2115, Nat.Coprime a q \u2192 \u2203 X : \u2115,\n      (X : \u211d) \u2264 C * (q : \u211d) ^ L \u2227\n      (\u2211 n \u2208 (Finset.Icc 1 X).filter (fun n => n % q = a % q), vonMangoldt n) >\n      \u2211 n \u2208 (Finset.Icc 1 X).filter (fun n => n % q = a % q \u2227 \u00ac n.Prime),\n        vonMangoldt n ",
+    "line": 16
+  },
+  {
+    "file": "Decomp150d.lean",
+    "name": "major_family150",
+    "header": "theorem major_family150 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016majorError150 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 102
+  },
+  {
+    "file": "Decomp150d.lean",
+    "name": "minor_family150",
+    "header": "theorem minor_family150 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorError150 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 113
+  },
+  {
+    "file": "Decomp247a.lean",
+    "name": "aqZero247_totient_bound",
+    "header": "theorem aqZero247_totient_bound {r\u2081 r\u2082 : \u2115} [NeZero r\u2081] [NeZero r\u2082]\n    (\u03c7\u2081 : DirichletCharacter \u2102 r\u2081) (\u03c7\u2082 : DirichletCharacter \u2102 r\u2082)\n    (h\u03c7\u2081 : \u03c7\u2081.IsPrimitive) (h\u03c7\u2082 : \u03c7\u2082.IsPrimitive) (N : \u2124) (hN : 1 \u2264 N) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 q : \u2115, 0 < q \u2192\n      \u2016aqZero247 \u03c7\u2081 \u03c7\u2082 N q\u2016 \u2264 C * (1 / (Nat.totient q : \u211d) ^ 2) ",
+    "line": 47
+  },
+  {
+    "file": "Decomp247a.lean",
+    "name": "aqZero247_smooth_expansion",
+    "header": "theorem aqZero247_smooth_expansion {r\u2081 r\u2082 : \u2115} [NeZero r\u2081] [NeZero r\u2082]\n    (\u03c7\u2081 : DirichletCharacter \u2102 r\u2081) (\u03c7\u2082 : DirichletCharacter \u2102 r\u2082)\n    (h\u03c7\u2081 : \u03c7\u2081.IsPrimitive) (h\u03c7\u2082 : \u03c7\u2082.IsPrimitive)\n    (\u03c8\u2081 : \u2200 p : \u2115, DirichletCharacter \u2102 (compLevel r\u2081 p))\n    (\u03c8\u2082 : \u2200 p : \u2115, DirichletCharacter \u2102 (compLevel r\u2082 p))\n    (h\u2081 : IsPrimeComponents \u03c7\u2081 \u03c8\u2081) (h\u2082 : IsPrimeComponents \u03c7\u2082 \u03c8\u2082)\n    (N : \u2124) (hN : 1 \u2264 N) (X : \u2115) (hX\u2081 : r\u2081 < X) (hX\u2082 : r\u2082 < X) :\n    \u220f p \u2208 (Finset.range X).filter Nat.Prime, eulerFactorGen (\u03c8\u2081 p) (\u03c8\u2082 p) N p =\n      \u2211' q : X.smoothNumbers, aqZero247 \u03c7\u2081 \u03c7\u2082 N q ",
+    "line": 86
+  },
+  {
+    "file": "Decomp328a.lean",
+    "name": "major_tail_family328",
+    "header": "theorem major_tail_family328 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016majorTail328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 504
+  },
+  {
+    "file": "Decomp328b.lean",
+    "name": "minor_bare_family328",
+    "header": "theorem minor_bare_family328 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 149
+  },
+  {
+    "file": "Decomp328b.lean",
+    "name": "minor_weighted_family328",
+    "header": "theorem minor_weighted_family328 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 160
+  },
+  {
+    "file": "Decomp405a.lean",
+    "name": "continuous_tail_family405",
+    "header": "theorem continuous_tail_family405 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016continuousTail405 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 284
+  },
+  {
+    "file": "Decomp405b.lean",
+    "name": "continuous_weighted_family405",
+    "header": "theorem continuous_weighted_family405 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016continuousWeighted405 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 106
+  },
+  {
+    "file": "Decomp432a.lean",
+    "name": "off_rational_family432",
+    "header": "theorem off_rational_family432 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 \u03b7 < (X : \u211d) ^ (\u03d1 - 1 / 2) \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016offRational432 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5 ",
+    "line": 292
+  },
+  {
+    "file": "DecompJ1034.lean",
+    "name": "singular_series_lower_bound",
+    "header": "theorem singular_series_lower_bound (N : \u2115) (hN : Even N) : (1 : \u211d) \u2264 singular N ",
+    "line": 9
+  },
+  {
+    "file": "DecompJ1034.lean",
+    "name": "r2_prime_power_bound",
+    "header": "theorem r2_prime_power_bound (N : \u2115) (hN : Even N) (h_not_G : \u00ac IsGoldbachSum N) :\n  r2 N \u2264 3/2 * (N : \u211d)^(1/2) * (Real.log (N : \u211d))^3 ",
+    "line": 14
+  },
+  {
+    "file": "DecompJ249.lean",
+    "name": "euler_gen_eq",
+    "header": "theorem euler_gen_eq {r\u2081 r\u2082 : \u2115} [NeZero r\u2081] [NeZero r\u2082]\n    (\u03c7\u2081 : DirichletCharacter \u2102 r\u2081) (\u03c7\u2082 : DirichletCharacter \u2102 r\u2082)\n    (h\u03c7\u2081 : \u03c7\u2081.IsPrimitive) (h\u03c7\u2082 : \u03c7\u2082.IsPrimitive)\n    (\u03c8\u2081 : \u2200 p : \u2115, DirichletCharacter \u2102 (compLevel r\u2081 p))\n    (\u03c8\u2082 : \u2200 p : \u2115, DirichletCharacter \u2102 (compLevel r\u2082 p))\n    (h\u2081 : IsPrimeComponents \u03c7\u2081 \u03c8\u2081) (h\u2082 : IsPrimeComponents \u03c7\u2082 \u03c8\u2082) (N : \u2124) (hN : 1 \u2264 N) :\n    Tendsto (fun X : \u2115 => \u220f p \u2208 (Finset.range X).filter Nat.Prime, eulerFactorGen (\u03c8\u2081 p) (\u03c8\u2082 p) N p)\n      atTop (\ud835\udcdd (genSing \u03c7\u2081 \u03c7\u2082 N)) ",
+    "line": 661
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem31",
+    "header": "theorem theorem31 : Theorem31 ",
+    "line": 85
+  },
+  {
+    "file": "Statements.lean",
+    "name": "meanSquare38",
+    "header": "theorem meanSquare38 : MeanSquare38 ",
+    "line": 93
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem51",
+    "header": "theorem theorem51 : PowerSaving ",
+    "line": 108
+  },
+  {
+    "file": "Statements.lean",
+    "name": "prop52",
+    "header": "theorem prop52 : Prop52 ",
+    "line": 147
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem61",
+    "header": "theorem theorem61 : Theorem61 ",
+    "line": 178
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem62",
+    "header": "theorem theorem62 : Theorem62 ",
+    "line": 198
+  },
+  {
+    "file": "Statements.lean",
+    "name": "bound65",
+    "header": "theorem bound65 : Bound65 ",
+    "line": 232
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem63",
+    "header": "theorem theorem63 : Theorem63 ",
+    "line": 270
+  },
+  {
+    "file": "Statements.lean",
+    "name": "lemma73",
+    "header": "theorem lemma73 : Lemma73 ",
+    "line": 341
+  },
+  {
+    "file": "Statements.lean",
+    "name": "lemma74",
+    "header": "theorem lemma74 : Lemma74 ",
+    "line": 366
+  },
+  {
+    "file": "Statements.lean",
+    "name": "lemma76",
+    "header": "theorem lemma76 : Lemma76 ",
+    "line": 391
+  },
+  {
+    "file": "Statements.lean",
+    "name": "prop75",
+    "header": "theorem prop75 : Prop75 ",
+    "line": 427
+  },
+  {
+    "file": "Statements.lean",
+    "name": "facts81",
+    "header": "theorem facts81 : Facts81 ",
+    "line": 441
+  },
+  {
+    "file": "Statements.lean",
+    "name": "prop81",
+    "header": "theorem prop81 : Prop81 ",
+    "line": 461
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem82",
+    "header": "theorem theorem82 : Theorem82 ",
+    "line": 477
+  }
+]

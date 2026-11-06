@@ -1,0 +1,90 @@
+{
+  "initial_base": "39be8e39d",
+  "active_count": 86,
+  "active_failures": [],
+  "historical_module_lookups": [
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261028-stale-PC-Decomp107",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261028-stale-PC-Statements",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261102-stale-PC-Decomp150a",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261102-stale-PC-Decomp150d",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261105-stale-PC-Decomp107",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261105-stale-PC-Decomp150a",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261105-stale-PC-DecompJ1034",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261105-stale-PC-DecompJ249",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.20261105-stale-PC-Statements",
+      1
+    ],
+    [
+      "LeanLab.BhowmikGrimmelt2026.old.Statements-pre-20261019T1204Z-858",
+      1
+    ]
+  ],
+  "historical_source_targets": [
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261028-stale-PC-Decomp107.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261028-stale-PC-Statements.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261102-stale-PC-Decomp150a.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261102-stale-PC-Decomp150d.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261105-stale-PC-Decomp107.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261105-stale-PC-Decomp150a.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261105-stale-PC-DecompJ1034.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261105-stale-PC-DecompJ249.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/20261105-stale-PC-Statements.lean",
+      0
+    ],
+    [
+      "LeanLab/BhowmikGrimmelt2026/old/Statements-pre-20261019T1204Z-858.lean",
+      0
+    ]
+  ],
+  "source_target_failures": []
+}

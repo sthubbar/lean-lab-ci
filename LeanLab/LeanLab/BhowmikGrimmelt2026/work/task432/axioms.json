@@ -1,0 +1,132 @@
+[
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.tail_absorption_large_eta432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.major_tail_large_eta432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.nearContinuous432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.nearContinuous_eq432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.measurable_nearContinuous432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.central_alias_multiplier432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.centralAliasMultiplier432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.measurable_centralAliasMultiplier432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.centralAlias432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.central_alias_family432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.offRational432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.continuousTail_integrable432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.centralAlias_integrable432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.offRational_eq_integral432",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.off_rational_family432",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "name": "LeanLab.BhowmikGrimmelt2026.major_tail_supply432",
+    "axioms": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  }
+]

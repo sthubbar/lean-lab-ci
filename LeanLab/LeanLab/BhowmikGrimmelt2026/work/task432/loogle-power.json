@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Real.rpow_le_rpow_of_nonpos.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Analysis.SpecialFunctions.Pow.Real", "name": "Real.rpow_le_rpow_of_nonpos", "type": " {x y z : \u211d} (hx : 0 < x) (hxy : x \u2264 y) (hz : z \u2264 0) : y ^ z \u2264 x ^ z"}]}

@@ -1,0 +1,253 @@
+{
+  "lean_exit": 0,
+  "declarations": [
+    {
+      "name": "tail_absorption_large_eta432",
+      "kind": "theorem",
+      "module": "TailRange432",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "major_tail_large_eta432",
+      "kind": "theorem",
+      "module": "TailRange432",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "tail_absorption_power432",
+      "kind": "theorem",
+      "module": "TailPower432",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "major_tail_power_eta432",
+      "kind": "theorem",
+      "module": "TailPower432",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "nearContinuous432",
+      "kind": "def",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "nearContinuous_eq432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "measurable_nearContinuous432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "central_alias_multiplier432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "centralAliasMultiplier432",
+      "kind": "def",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "measurable_centralAliasMultiplier432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "centralAlias432",
+      "kind": "def",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "central_alias_family432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "offRational432",
+      "kind": "def",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "continuousTail_integrable432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "centralAlias_integrable432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "offRational_eq_integral432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "off_rational_family432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": false
+    },
+    {
+      "name": "major_tail_supply432",
+      "kind": "theorem",
+      "module": "Decomp432a",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": false
+    },
+    {
+      "name": "centeredFourier_add_int432",
+      "kind": "theorem",
+      "module": "OffRational432",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "nearContinuous_canonical432",
+      "kind": "theorem",
+      "module": "OffRational432",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    },
+    {
+      "name": "continuous_off_sum432",
+      "kind": "theorem",
+      "module": "OffRational432",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "clean": true
+    }
+  ],
+  "count": 21,
+  "clean_theorems": 15,
+  "clean_numeric_defs": 4,
+  "pending": [
+    "off_rational_family432",
+    "major_tail_supply432"
+  ],
+  "exact_target_header": true,
+  "changed_original_lean_files": [],
+  "source_hashes": {
+    "TailRange432": "549181a812cc4bcebe26fb489a7b740b8afc3a763d289a04010bb460ad0b5805",
+    "TailPower432": "bddf2cd72dc06d985b30fbd6bb46f25f602a59f486dba956606caa55306197e2",
+    "Decomp432a": "04a0d97d73dc3dbefeed8daf7fae38395fa2f9aee18a6e8a46e006d687510afd",
+    "OffRational432": "54b1afb34b40663bf04dbcacbea840ed5b095f9c53bc48d45ab09df85f2ae2f5"
+  }
+}
