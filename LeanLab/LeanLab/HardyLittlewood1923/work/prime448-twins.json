@@ -1,0 +1,72 @@
+[
+  [
+    "properWeight",
+    "keep von Mangoldt only at proper prime powers",
+    "m equal to 4 gives log two"
+  ],
+  [
+    "properWeight_nonneg",
+    "the proper prime power coefficient is nonnegative",
+    "m equal to 4"
+  ],
+  [
+    "properWeight_le",
+    "the proper prime power coefficient is bounded by von Mangoldt",
+    "m equal to 4 gives equality"
+  ],
+  [
+    "proper_partial_identity",
+    "the partial proper prime power mass equals Chebyshev psi minus theta",
+    "M equal to 4 gives the term log two"
+  ],
+  [
+    "proper_partial_bound",
+    "the partial proper prime power mass is at most a fixed constant times square root M",
+    "M equal to 4"
+  ],
+  [
+    "proper_mass_summable",
+    "positive radial damping makes the proper prime power mass summable",
+    "n equal to 4"
+  ],
+  [
+    "proper_block",
+    "each length n block has a linear times exponential envelope with square root n",
+    "n equal to 4 and block zero"
+  ],
+  [
+    "proper_mass_bound",
+    "the full damped proper prime power mass is at most a fixed constant times square root n",
+    "n equal to 4 has a positive term at four"
+  ],
+  [
+    "prime_phase",
+    "the rational angular shift is exactly the standard additive character times the unshifted exponential",
+    "n equal to 4, q equal to 2, p equal to 1 and m equal to 2"
+  ],
+  [
+    "phase_norm",
+    "the standard additive phase has norm one",
+    "q equal to 2 and p and m equal to 1"
+  ],
+  [
+    "unit_phase_summable",
+    "the unit restricted exponential von Mangoldt series is summable",
+    "n equal to 4 and q equal to 2"
+  ],
+  [
+    "prime_unit_coeff_bound",
+    "the coefficient difference is bounded by the proper and bad prime power coefficients",
+    "q equal to 2 and m equal to 4"
+  ],
+  [
+    "prime_unit_series_bound",
+    "the actual prime to unit series difference is bounded by the two damped masses",
+    "n equal to 4, q equal to 2, p equal to 1 and theta zero"
+  ],
+  [
+    "prime_unit_correction",
+    "the exact original prime to unit correction has logarithmic exponent one with no OPEN input",
+    "n equal to 4, q equal to 2, p equal to 1 and theta zero"
+  ]
+]

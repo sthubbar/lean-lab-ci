@@ -14,12 +14,6 @@ consequences of the sealed exception count, rather than quoted analytic results.
 
 namespace LeanLab.OpenProblems.State1612
 
-/-- The exception count cannot exceed the number of indices tested. -/
-theorem euExc_le (X : ℕ) : euExc X ≤ X := by
-  classical
-  unfold euExc
-  simpa using (Finset.card_filter_le (Finset.Icc 1 X) (fun n => ¬ IsEuler (8 * n + 3)))
-
 /-- Subtracting exceptions counts exactly the represented indices from one through X. -/
 theorem represented_count_eq (X : ℕ) :
     X - euExc X = ({n : ℕ | IsEuler (8 * n + 3)} ∩ Set.Icc 1 X).ncard := by
@@ -66,7 +60,6 @@ theorem positive_density_of_almost_all {E : ℕ → ℕ} (hle : ∀ X, E X ≤ X
 
 end LeanLab.OpenProblems.State1612
 
-#print axioms LeanLab.OpenProblems.State1612.euExc_le
 #print axioms LeanLab.OpenProblems.State1612.represented_count_eq
 #print axioms LeanLab.OpenProblems.State1612.isEuler_of_four_mul_add_one_prime
 #print axioms LeanLab.OpenProblems.State1612.euler_represented_infinite
