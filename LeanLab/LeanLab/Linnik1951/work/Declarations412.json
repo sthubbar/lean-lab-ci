@@ -1,0 +1,222 @@
+[
+  {
+    "name": "exceptional_error412",
+    "kind": "theorem",
+    "file": "Assembly412.lean"
+  },
+  {
+    "name": "error_bound412",
+    "kind": "theorem",
+    "file": "Assembly412.lean"
+  },
+  {
+    "name": "linnik1951_decomposed412",
+    "kind": "theorem",
+    "file": "Assembly412.lean"
+  },
+  {
+    "name": "exceptional_system_cover412",
+    "kind": "theorem",
+    "file": "Cover412.lean"
+  },
+  {
+    "name": "exceptional_prime_mass412",
+    "kind": "theorem",
+    "file": "Cover412.lean"
+  },
+  {
+    "name": "large_value_measure412",
+    "kind": "theorem",
+    "file": "Decomp412a.lean"
+  },
+  {
+    "name": "large_value_stability412",
+    "kind": "theorem",
+    "file": "Decomp412a.lean"
+  },
+  {
+    "name": "log_le_small_power412",
+    "kind": "theorem",
+    "file": "Decomp412a.lean"
+  },
+  {
+    "name": "large_value_intervals_decomposed412",
+    "kind": "theorem",
+    "file": "Decomp412a.lean"
+  },
+  {
+    "name": "finite_large_value_measure412",
+    "kind": "theorem",
+    "file": "Decomp412b.lean"
+  },
+  {
+    "name": "large_value_measure_proved412",
+    "kind": "theorem",
+    "file": "Decomp412b.lean"
+  },
+  {
+    "name": "nearIntegerIndices412",
+    "kind": "def",
+    "file": "Decomp412c.lean"
+  },
+  {
+    "name": "near_indices_zero412",
+    "kind": "theorem",
+    "file": "Decomp412c.lean"
+  },
+  {
+    "name": "finite_phase_concentration412",
+    "kind": "theorem",
+    "file": "Decomp412c.lean"
+  },
+  {
+    "name": "binary_entropy_measure412",
+    "kind": "theorem",
+    "file": "Decomp412c.lean"
+  },
+  {
+    "name": "dyadic_measure_scale412",
+    "kind": "theorem",
+    "file": "Decomp412c.lean"
+  },
+  {
+    "name": "finite_large_value_measure_decomposed412",
+    "kind": "theorem",
+    "file": "Decomp412c.lean"
+  },
+  {
+    "name": "near_phase_digit_equal412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "changes_le_bad_indices412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "changes_fraction_bound412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "concentrated_word_mem412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "binary_cells_measure412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "binary_unit_measure_le_words412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "near_indices_int_shift412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "binary_word_card_bound412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "binary_unit_measure_explicit412",
+    "kind": "theorem",
+    "file": "EntropyBridge412.lean"
+  },
+  {
+    "name": "near_half_integral_proved412",
+    "kind": "theorem",
+    "file": "Fresh412.lean"
+  },
+  {
+    "name": "near_constant_selection_proved412",
+    "kind": "theorem",
+    "file": "Fresh412.lean"
+  },
+  {
+    "name": "power_trunc_two412",
+    "kind": "theorem",
+    "file": "Instances412.lean"
+  },
+  {
+    "name": "near_indices_interval412",
+    "kind": "theorem",
+    "file": "Instances412.lean"
+  },
+  {
+    "name": "binary_set_positive_measure412",
+    "kind": "theorem",
+    "file": "Instances412.lean"
+  },
+  {
+    "name": "finite_large_value_zero412",
+    "kind": "theorem",
+    "file": "Instances412.lean"
+  },
+  {
+    "name": "interval_packing412",
+    "kind": "theorem",
+    "file": "Packing412.lean"
+  },
+  {
+    "name": "phase_difference412",
+    "kind": "theorem",
+    "file": "Shift412.lean"
+  },
+  {
+    "name": "power_shift_bound412",
+    "kind": "theorem",
+    "file": "Shift412.lean"
+  },
+  {
+    "name": "power_zero_lower412",
+    "kind": "theorem",
+    "file": "Shift412.lean"
+  },
+  {
+    "name": "large_value_stability_proved412",
+    "kind": "theorem",
+    "file": "Shift412.lean"
+  },
+  {
+    "name": "weighted_power_summable412",
+    "kind": "theorem",
+    "file": "Stability412.lean"
+  },
+  {
+    "name": "weighted_power_bound412",
+    "kind": "theorem",
+    "file": "Stability412.lean"
+  },
+  {
+    "name": "powerTrunc412",
+    "kind": "def",
+    "file": "Truncation412.lean"
+  },
+  {
+    "name": "power_trunc_error412",
+    "kind": "theorem",
+    "file": "Truncation412.lean"
+  },
+  {
+    "name": "power_trunc_zero_lower412",
+    "kind": "theorem",
+    "file": "Truncation412.lean"
+  },
+  {
+    "name": "large_value_to_trunc412",
+    "kind": "theorem",
+    "file": "Truncation412.lean"
+  },
+  {
+    "name": "near_negative_sup_decomposed412",
+    "kind": "theorem",
+    "file": "Fresh412.lean"
+  }
+]
