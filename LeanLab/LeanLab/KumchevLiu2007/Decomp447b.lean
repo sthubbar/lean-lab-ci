@@ -5,6 +5,7 @@ The finite moment and the real parameter absorption are separate leaves.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Decomp447c
+import LeanLab.KumchevLiu2007.Rankin447
 
 namespace LeanLab.KumchevLiu2007.Task447b
 

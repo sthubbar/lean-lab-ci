@@ -4,7 +4,7 @@ Source https://arxiv.org/abs/0801.0130 page 14 below display 50.
 The local factor is the geometric series for one weight 64 per distinct prime.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.Rankin447
+import LeanLab.KumchevLiu2007.Decomp438d
 import Mathlib.NumberTheory.EulerProduct.Basic
 
 namespace LeanLab.KumchevLiu2007.SmoothEuler447

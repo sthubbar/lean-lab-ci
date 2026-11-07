@@ -3,7 +3,7 @@ Uniform numerical Euler product bound for the weighted smooth moment.
 Source https://arxiv.org/abs/0801.0130 page 14 below display 50.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.Rankin447
+
 import LeanLab.PNTSieve.MertensUpper
 
 namespace LeanLab.KumchevLiu2007.EulerProduct447

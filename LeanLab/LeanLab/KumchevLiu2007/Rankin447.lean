@@ -3,7 +3,7 @@ Real parameter supply for the weighted smooth tail.
 Source https://arxiv.org/abs/0801.0130 page 14 below display 50.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.Decomp438j
+import Mathlib
 
 namespace LeanLab.KumchevLiu2007.Rankin447
 open Real
