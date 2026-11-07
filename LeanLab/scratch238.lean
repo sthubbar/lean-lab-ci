@@ -1,0 +1,9 @@
+import LeanLab.RamareSaouter2003.Decomp419b
+open MeromorphicOn
+#check @MeromorphicOn.divisor_nonneg_iff_analyticOnNhd
+#check @AnalyticOnNhd.divisor_nonneg
+#check @Function.locallyFinsuppWithin.finiteSupport
+#check @MeromorphicOn.divisor_apply
+#check @finsum_nonneg
+#check @finsum_mem_le_finsum_mem
+#check @sum_le_finsum

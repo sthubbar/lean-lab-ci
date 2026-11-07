@@ -131,6 +131,81 @@ theorem paired_log_weight (a b : ℝ) (ha : 0 < a) (hb : 0 < b)
     Real.log_div (by norm_num : (1.32 : ℝ) ≠ 0) hb.ne']
   linarith
 
+/-- Backlund p. 360, the single-zero weight. Every zero of the powered function
+within distance 3/4 of the centre carries weight at least q = log of 4r/3,
+r = 1.32, in the Jensen zero mass. With S empty this gives zero mass at least 0. -/
+theorem zeroMass_ge_sum (T : ℝ) (hT : 1400 ≤ T) (N : ℕ) (hG : poweredZeta T N 0 ≠ 0)
+    (S : Finset ℂ) (hS : ∀ z ∈ S, ‖z‖ ≤ 3 / 4) :
+    Real.log (4 * 1.32 / 3) *
+        ∑ z ∈ S, (MeromorphicOn.divisor (poweredZeta T N)
+          (Metric.closedBall 0 |(1.32 : ℝ)|) z : ℝ) ≤ zeroMass T N := by
+  classical
+  set U : Set ℂ := Metric.closedBall 0 |(1.32 : ℝ)| with hU
+  set D := MeromorphicOn.divisor (poweredZeta T N) U with hD
+  have hA : AnalyticOnNhd ℂ (poweredZeta T N) U := powered_analytic T hT N
+  have hnn : ∀ z, (0 : ℝ) ≤ (D z : ℝ) := fun z => by
+    exact_mod_cast MeromorphicOn.AnalyticOnNhd.divisor_nonneg hA z
+  have h132 : |(1.32 : ℝ)| = 1.32 := abs_of_pos (by norm_num)
+  have h0U : (0 : ℂ) ∈ U := by
+    rw [hU, Metric.mem_closedBall, dist_self]
+    exact abs_nonneg _
+  have hD0 : D 0 = 0 := by
+    rw [hD, MeromorphicOn.AnalyticOnNhd.divisor_apply hA h0U, ((hA 0 h0U).analyticOrderAt_eq_zero).mpr hG]
+    simp
+  set g : ℂ → ℝ := fun z => (D z : ℝ) * Real.log (1.32 * ‖(0 : ℂ) - z‖⁻¹) with hg
+  have hsupp : ∀ z, D z ≠ 0 → ‖z‖ ≤ 1.32 := by
+    intro z hz
+    have hzU : z ∈ U := D.supportWithinDomain hz
+    rw [hU, Metric.mem_closedBall, dist_zero_right, h132] at hzU
+    exact hzU
+  have hgnn : ∀ z, 0 ≤ g z := by
+    intro z
+    by_cases hz : D z = 0
+    · simp only [g, hz, Int.cast_zero, zero_mul, le_refl]
+    · apply mul_nonneg (hnn z)
+      have hn := hsupp z hz
+      rw [zero_sub, norm_neg]
+      rcases (norm_nonneg z).eq_or_lt with h0 | hpos
+      · rw [← h0, inv_zero, mul_zero, Real.log_zero]
+      · apply Real.log_nonneg
+        rw [← div_eq_mul_inv, le_div_iff₀ hpos, one_mul]
+        exact hn
+  have hle : ∀ z ∈ S, Real.log (4 * 1.32 / 3) * (D z : ℝ) ≤ g z := by
+    intro z hzS
+    by_cases hz0 : z = 0
+    · rw [hz0]
+      simp only [g, hD0, Int.cast_zero, mul_zero, zero_mul, le_refl]
+    · have hpos : 0 < ‖z‖ := norm_pos_iff.mpr hz0
+      have hz34 := hS z hzS
+      rw [mul_comm]
+      apply mul_le_mul_of_nonneg_left _ (hnn z)
+      apply Real.log_le_log (by norm_num)
+      rw [zero_sub, norm_neg, ← div_eq_mul_inv, le_div_iff₀ hpos]
+      linarith
+  have hfin : D.support.Finite := D.finiteSupport (isCompact_closedBall 0 _)
+  have hgs : Function.support g ⊆ ((S ∪ hfin.toFinset : Finset ℂ) : Set ℂ) := by
+    intro z hz
+    rw [Finset.coe_union, Set.Finite.coe_toFinset]
+    right
+    intro h
+    apply hz
+    simp only [g, h, Int.cast_zero, zero_mul]
+  have hsum : zeroMass T N = ∑ z ∈ S ∪ hfin.toFinset, g z :=
+    finsum_eq_sum_of_support_subset g hgs
+  calc Real.log (4 * 1.32 / 3) * ∑ z ∈ S, (D z : ℝ)
+      = ∑ z ∈ S, Real.log (4 * 1.32 / 3) * (D z : ℝ) := Finset.mul_sum _ _ _
+    _ ≤ ∑ z ∈ S, g z := Finset.sum_le_sum hle
+    _ ≤ ∑ z ∈ S ∪ hfin.toFinset, g z :=
+        Finset.sum_le_sum_of_subset_of_nonneg Finset.subset_union_left
+          (fun z _ _ => hgnn z)
+    _ = zeroMass T N := hsum.symm
+
+/-- Corollary of zeroMass_ge_sum with S empty: the zero mass is nonnegative. -/
+theorem zeroMass_nonneg (T : ℝ) (hT : 1400 ≤ T) (N : ℕ) (hG : poweredZeta T N 0 ≠ 0) :
+    0 ≤ zeroMass T N := by
+  have h := zeroMass_ge_sum T hT N hG ∅ (fun z hz => absurd hz (Finset.notMem_empty z))
+  simpa using h
+
 /-- LEAF. Rosser pp. 223 and 224, Backlund pp. 354 to 360, displays 44 to 48.
 The argument principle and paired real zeros bound the actual count error
 by the weighted zero mass. There is no circle integral in this leaf.
@@ -180,3 +255,5 @@ end LeanLab.RamareSaouter2003.Decomp419b
 #print axioms LeanLab.RamareSaouter2003.Decomp419b.powered_jensen_count
 
 #print axioms LeanLab.RamareSaouter2003.Decomp419b.paired_log_weight
+#print axioms LeanLab.RamareSaouter2003.Decomp419b.zeroMass_ge_sum
+#print axioms LeanLab.RamareSaouter2003.Decomp419b.zeroMass_nonneg
