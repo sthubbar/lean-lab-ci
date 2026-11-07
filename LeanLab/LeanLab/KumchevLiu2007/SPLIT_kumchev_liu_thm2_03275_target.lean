@@ -18,7 +18,9 @@ Section 5 with the second sieve parameter left at `0.595` rather than raised to 
 Step 4 is the analytic input; the assembly below is purely bookkeeping over it and is where the
 exceptions are covered by the union of the two bad sets.
 
-The leaves carry `sorry`; the assembly `kumchev_liu_thm2_03275_target_split` has none.
+The leaves are `theta_exponent_03275`, `rpow_range_transfer` and `saving_beats_constant`, all
+proved by elementary means, and `sieve_inputs_03275`, the analytic input, which carries `sorry`;
+the assembly `kumchev_liu_thm2_03275_target_split` has none.
 AI-written Lean code. Checked only by the Lean kernel. Binary Goldbach is open.
 -/
 
@@ -31,20 +33,30 @@ the second sieve exponent at `0.595 - 2 ε` instead of `3/5 - 2 ε`, the product
 below `0.3275`, so the smaller exponent is all that the sharper parameter buys. -/
 theorem theta_exponent_03275 {ε : ℝ} (hε : 0 < ε) :
     (55 / 100 + ε) * (595 / 1000 - 2 * ε) < 3275 / 10000 := by
-  sorry
+  nlinarith [sq_nonneg ε]
 
 /-- LEAF. Step 2 of the split: the range transfer. For a base `X ≥ 1` a smaller exponent gives a
 smaller power, so the hypothesis `X^c ≤ H` of the sieve input at `c = θ₁ θ₂` follows from the
 hypothesis `X^(0.3275) ≤ H` used by the target. -/
 theorem rpow_range_transfer {X θ c H : ℝ} (hX : 1 ≤ X) (hθc : θ ≤ c) (hH : X ^ c ≤ H) :
-    X ^ θ ≤ H := by
-  sorry
+    X ^ θ ≤ H :=
+  le_trans (Real.rpow_le_rpow_of_exponent_le hX hθc) hH
 
 /-- LEAF. Step 3 of the split: a saving `L^(δ - 1)` with `δ < 1` beats any fixed constant, so the
 secondary error term is at most a twentieth of the main term once `log X` exceeds a threshold. -/
 theorem saving_beats_constant (K δ : ℝ) (hδ : δ < 1) :
     ∃ L0 : ℝ, 0 < L0 ∧ ∀ L : ℝ, L0 ≤ L → K * L ^ (δ - 1) ≤ 1 / 20 := by
-  sorry
+  have hy : Filter.Tendsto (fun L : ℝ => L ^ (δ - 1)) Filter.atTop (nhds 0) := by
+    have h := tendsto_rpow_neg_atTop (y := 1 - δ) (by linarith)
+    simpa [neg_sub] using h
+  have hK2 : Filter.Tendsto (fun L : ℝ => K * L ^ (δ - 1)) Filter.atTop (nhds 0) := by
+    have h := (tendsto_const_nhds (x := K)).mul hy
+    simpa using h
+  have hev : ∀ᶠ L : ℝ in Filter.atTop, K * L ^ (δ - 1) ≤ 1 / 20 :=
+    hK2.eventually (Iic_mem_nhds (by norm_num : (0 : ℝ) < 1 / 20))
+  obtain ⟨L0, hL0⟩ := Filter.eventually_atTop.mp hev
+  exact ⟨max L0 1, lt_of_lt_of_le one_pos (le_max_right _ _),
+    fun L hL => hL0 L (le_of_max_le_left hL)⟩
 
 /-- LEAF. Step 4 of the split: the circle method output of Section 5 for this exponent, with the
 second parameter at `0.595 - 2 ε`. Outside a first bad set the main term is positive and at least
