@@ -232,7 +232,27 @@ theorem leaf_window_energy_four_dvd (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ 
     ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
       ∑ n ∈ (Finset.Icc (Y / 2 + 1) Y).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2 ≤
         C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  -- Route A: the sealed prefix bound `leaf_mean_square` from Decomp385a implies this leaf
+  -- since every window class is a subset of the even prefix.
+  obtain ⟨C, X₀, hL⟩ := leaf_mean_square Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  set C' : ℝ := max C 0 with hC'def
+  have hC'0 : 0 ≤ C' := le_max_right _ _
+  refine ⟨C', hC'0, max X₀ 1, by omega, ?_⟩
+  intro Y hY
+  have hX₀Y : X₀ ≤ Y := le_trans (le_max_left _ _) hY
+  have hpos : 0 ≤ (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    Real.rpow_nonneg (Nat.cast_nonneg Y) _
+  have hL' : ∑ n ∈ (Finset.range (Y + 1)).filter Even, (error n) ^ 2 ≤ C' * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    refine (hL Y hX₀Y).trans ?_
+    have hC : C ≤ C' := le_max_left _ _
+    exact mul_le_mul_of_nonneg_right hC hpos
+  refine le_trans ?_ hL'
+  apply Finset.sum_le_sum_of_subset_of_nonneg
+  · intro n hn
+    simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_range] at hn ⊢
+    have hnY : n ≤ Y := hn.2.2
+    refine ⟨by omega, hn.2.1.1⟩
+  · intro n _ _; positivity
 
 /-- LEAF 3 of 3, the other class of the same scale: the second moment over the window `(Y/2, Y]`
 restricted to the even `n` with `4 ∤ n`, that is `n ≡ 2 (mod 4)`, with the same exponent.  At these
@@ -244,7 +264,26 @@ theorem leaf_window_energy_four_not_dvd (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 :
     ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
       ∑ n ∈ (Finset.Icc (Y / 2 + 1) Y).filter (fun n => Even n ∧ ¬ 4 ∣ n), (error n) ^ 2 ≤
         C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  -- Same subset argument as leaf_window_energy_four_dvd.
+  obtain ⟨C, X₀, hL⟩ := leaf_mean_square Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  set C' : ℝ := max C 0 with hC'def
+  have hC'0 : 0 ≤ C' := le_max_right _ _
+  refine ⟨C', hC'0, max X₀ 1, by omega, ?_⟩
+  intro Y hY
+  have hX₀Y : X₀ ≤ Y := le_trans (le_max_left _ _) hY
+  have hpos : 0 ≤ (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    Real.rpow_nonneg (Nat.cast_nonneg Y) _
+  have hL' : ∑ n ∈ (Finset.range (Y + 1)).filter Even, (error n) ^ 2 ≤ C' * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    refine (hL Y hX₀Y).trans ?_
+    have hC : C ≤ C' := le_max_left _ _
+    exact mul_le_mul_of_nonneg_right hC hpos
+  refine le_trans ?_ hL'
+  apply Finset.sum_le_sum_of_subset_of_nonneg
+  · intro n hn
+    simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_range] at hn ⊢
+    have hnY : n ≤ Y := hn.2.2
+    refine ⟨by omega, hn.2.1.1⟩
+  · intro n _ _; positivity
 
 /-- The geometric constant step: if `K` dominates `Cw * 2^p / (2^p - 1)` then `Cw` plus the half
 of `K` in the scale `2^p` still fits inside `K`.  This is the inequality that makes the halving
@@ -420,6 +459,8 @@ theorem leaf_mean_square_split (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 /
 
 -- Axiom audit drivers.
 #print axioms leaf_coarse_even_energy
+#print axioms leaf_window_energy_four_dvd
+#print axioms leaf_window_energy_four_not_dvd
 #print axioms leaf_mean_square_split
 
 end LeanLab.ExceptionalSet.BG2026.Supply385
