@@ -33,7 +33,61 @@ theorem mean_square_pointwise (a : ℕ → ℂ) (c1 c2 F : ℝ) {q : ℕ}
     (hc1 : 0 < c1) (hc2 : c1 < c2) (hF : 0 < F) :
     ‖Thm4.dirPoly a c1 c2 F χ (Thm4.half t)‖ ^ 2 ≤
       (((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * energy a c1 c2 F) := by
-  sorry
+  classical
+  have hre : (Thm4.half t).re = 1 / 2 := by simp [Thm4.half]
+  unfold Thm4.dirPoly energy
+  set S : Finset ℕ := (Finset.range (⌊c2 * F⌋₊ + 1)).filter
+      (fun n : ℕ => c1 * F < n ∧ (n : ℝ) < c2 * F) with hS
+  -- the modulus of a single term, uniformly in `n` (no positivity needed: `0 ^ s = 0` for `s ≠ 0`)
+  have hnorm : ∀ n : ℕ, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ =
+      ‖a n‖ * ‖χ (n : ZMod q)‖ / (n : ℝ) ^ ((1 : ℝ) / 2) := by
+    intro n
+    rw [norm_div, norm_mul, Complex.norm_natCast_cpow_of_re_ne_zero n (by rw [hre]; norm_num), hre]
+  -- the Cauchy-Schwarz comparison term by term
+  have hterm : ∀ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ ^ 2 ≤
+      ‖a n‖ ^ 2 / (n : ℝ) := by
+    intro n _
+    have hd : (0 : ℝ) ≤ (n : ℝ) ^ ((1 : ℝ) / 2) := Real.rpow_nonneg (Nat.cast_nonneg n) _
+    have hd2 : (n : ℝ) ^ ((1 : ℝ) / 2) * (n : ℝ) ^ ((1 : ℝ) / 2) = (n : ℝ) := by
+      rcases Nat.eq_zero_or_pos n with h0 | h0
+      · simp [h0]
+      · rw [← Real.rpow_add (by exact_mod_cast h0),
+          show (1 : ℝ) / 2 + 1 / 2 = 1 by norm_num, Real.rpow_one]
+    have hχ : ‖χ (n : ZMod q)‖ ≤ 1 := DirichletCharacter.norm_le_one (F := ℂ) χ (n : ZMod q)
+    have hle : ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ ≤
+        ‖a n‖ / (n : ℝ) ^ ((1 : ℝ) / 2) := by
+      rw [hnorm n]
+      exact div_le_div_of_nonneg_right
+        (by simpa using mul_le_mul_of_nonneg_left hχ (norm_nonneg (a n))) hd
+    calc ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ ^ 2
+        ≤ (‖a n‖ / (n : ℝ) ^ ((1 : ℝ) / 2)) ^ 2 :=
+          pow_le_pow_left₀ (norm_nonneg _) hle 2
+      _ = ‖a n‖ ^ 2 / (n : ℝ) := by
+          rw [div_pow, show ((n : ℝ) ^ ((1 : ℝ) / 2)) ^ 2 = (n : ℝ) by
+            rw [pow_two]; exact hd2]
+  -- Cauchy-Schwarz on the finset of terms
+  have hCS : ‖∑ n ∈ S, a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ ^ 2 ≤
+      (S.card : ℝ) * ∑ n ∈ S, ‖a n‖ ^ 2 / (n : ℝ) := by
+    have h1 : ‖∑ n ∈ S, a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ ≤
+        ∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ := norm_sum_le _ _
+    have h2 : (∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖) ^ 2 ≤
+        (S.card : ℝ) * ∑ n ∈ S, ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ ^ 2 := by
+      have h := Finset.sum_mul_sq_le_sq_mul_sq (s := S) (f := fun _ : ℕ => (1 : ℝ))
+        (g := fun n : ℕ => ‖a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖)
+      simpa using h
+    refine le_trans (pow_le_pow_left₀ (norm_nonneg _) h1 2) (le_trans h2 ?_)
+    exact mul_le_mul_of_nonneg_left (Finset.sum_le_sum hterm) (Nat.cast_nonneg _)
+  -- the count of terms and nonnegativity of the energy
+  have hcardNat : S.card ≤ ⌊c2 * F⌋₊ + 1 := by
+    have hsub : S ⊆ Finset.range (⌊c2 * F⌋₊ + 1) := by
+      rw [hS]; exact Finset.filter_subset _ _
+    simpa using Finset.card_le_card hsub
+  have hE : 0 ≤ ∑ n ∈ S, ‖a n‖ ^ 2 / (n : ℝ) :=
+    Finset.sum_nonneg (fun n _ => div_nonneg (by positivity) (Nat.cast_nonneg n))
+  calc ‖∑ n ∈ S, a n * χ (n : ZMod q) / (n : ℂ) ^ (Thm4.half t)‖ ^ 2
+      ≤ (S.card : ℝ) * ∑ n ∈ S, ‖a n‖ ^ 2 / (n : ℝ) := hCS
+    _ ≤ ((⌊c2 * F⌋₊ + 1 : ℕ) : ℝ) * ∑ n ∈ S, ‖a n‖ ^ 2 / (n : ℝ) :=
+        mul_le_mul_of_nonneg_right (by exact_mod_cast hcardNat) hE
 
 /-- LEAF 2 of 3. The regime `F ≤ q * T`, where the character-and-time count dominates the
 bracket: the square sum over the well-spaced set is at most a constant times `log x` times
