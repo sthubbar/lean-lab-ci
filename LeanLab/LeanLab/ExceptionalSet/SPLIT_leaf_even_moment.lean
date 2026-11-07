@@ -37,13 +37,16 @@ theorem leaf_even_moment_block_split (γ δ κ : ℝ) (N : ℕ) :
         + (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter
             (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2)),
           ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) := by
-  classical
-  rw [← Finset.sum_filter_add_sum_filter_not
-        ((Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)))
-        (fun n : ℕ => 2 * n ≤ N + (N + 1) / 2)]
+  rw [← sum_filter_add_sum_filter_not ((Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n))) (fun n => 2 * n ≤ N + (N + 1) / 2)]
   congr 1
-  · rw [Finset.filter_filter]
-  · rw [Finset.filter_filter]
+  · congr 1
+    ext x
+    simp only [mem_filter]
+    tauto
+  · congr 1
+    ext x
+    simp only [mem_filter]
+    tauto
 
 /-- LEAF. Step of the proof: the second moment estimate of the even branch on
 the lower half of the index range, that is on the even `n` of the half window
@@ -58,7 +61,25 @@ theorem leaf_even_moment_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 (fun n : ℕ => Even (nu γ n) ∧ 2 * n ≤ N + (N + 1) / 2),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  have H := LeanLab.ExceptionalSet.Decomp371c.leaf_even_moment γ h1 h2
+  rcases H with ⟨δ₀, hδ₀, Hδ⟩
+  refine ⟨δ₀, hδ₀, fun δ hδ1 hδ2 => ?_⟩
+  rcases Hδ δ hδ1 hδ2 with ⟨κ₀, hκ₀, Hκ⟩
+  refine ⟨κ₀, hκ₀, fun κ hκ1 hκ2 => ?_⟩
+  rcases Hκ κ hκ1 hκ2 with ⟨B, hB, N₀, HN₀⟩
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have H3 := HN₀ N hN
+  have H4 : (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter
+                (fun n : ℕ => Even (nu γ n) ∧ 2 * n ≤ N + (N + 1) / 2),
+            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤ (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) := by
+    apply sum_le_sum_of_subset_of_nonneg
+    · intro x
+      simp only [mem_filter]
+      tauto
+    · intro x _ _
+      positivity
+  linarith
 
 /-- LEAF. Step of the proof: the second moment estimate of the even branch on
 the upper half of the index range, that is on the even `n` of the half window
@@ -73,7 +94,25 @@ theorem leaf_even_moment_upper (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  have H := LeanLab.ExceptionalSet.Decomp371c.leaf_even_moment γ h1 h2
+  rcases H with ⟨δ₀, hδ₀, Hδ⟩
+  refine ⟨δ₀, hδ₀, fun δ hδ1 hδ2 => ?_⟩
+  rcases Hδ δ hδ1 hδ2 with ⟨κ₀, hκ₀, Hκ⟩
+  refine ⟨κ₀, hκ₀, fun κ hκ1 hκ2 => ?_⟩
+  rcases Hκ κ hκ1 hκ2 with ⟨B, hB, N₀, HN₀⟩
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have H3 := HN₀ N hN
+  have H4 : (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter
+                (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2)),
+            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤ (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) := by
+    apply sum_le_sum_of_subset_of_nonneg
+    · intro x
+      simp only [mem_filter]
+      tauto
+    · intro x _ _
+      positivity
+  linarith
 
 /-- Assembly.  The exact statement of `leaf_even_moment`, from the range
 dissection and the two half range second moment estimates.  The caps are the
