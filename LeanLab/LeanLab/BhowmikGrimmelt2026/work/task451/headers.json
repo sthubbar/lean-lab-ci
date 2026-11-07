@@ -1,0 +1,290 @@
+[
+  {
+    "file": "Decomp451a.lean",
+    "kind": "theorem",
+    "name": "log_le_sixteen_log5_451",
+    "header": "theorem log_le_sixteen_log5_451 {X : \u2115} (hX : 2 \u2264 X) :\n    Real.log (X : \u211d) \u2264 16 * Real.log X ^ 5 "
+  },
+  {
+    "file": "Decomp451a.lean",
+    "kind": "theorem",
+    "name": "minor_bare_single_log1_451",
+    "header": "theorem minor_bare_single_log1_451 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (\u03d1 : \u211d) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 (X : \u211d) ^ \u03d1 < 2 \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X "
+  },
+  {
+    "file": "Decomp451a.lean",
+    "kind": "theorem",
+    "name": "minor_bare_single_denominator451",
+    "header": "theorem minor_bare_single_denominator451 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (\u03d1 : \u211d) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 (X : \u211d) ^ \u03d1 < 2 \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "Decomp451a.lean",
+    "kind": "theorem",
+    "name": "minor_bare_multi_denominator451",
+    "header": "theorem minor_bare_multi_denominator451 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "Decomp451a.lean",
+    "kind": "theorem",
+    "name": "minor_bare_supply451",
+    "header": "theorem minor_bare_supply451 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "Decomp451b.lean",
+    "kind": "theorem",
+    "name": "minor_full_single_denominator451",
+    "header": "theorem minor_full_single_denominator451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 (X : \u211d) ^ \u03d1 < 2 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorError150 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "Decomp451b.lean",
+    "kind": "theorem",
+    "name": "minor_weighted_single_denominator451",
+    "header": "theorem minor_weighted_single_denominator451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 (X : \u211d) ^ \u03d1 < 2 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "Decomp451b.lean",
+    "kind": "theorem",
+    "name": "minor_weighted_multi_denominator451",
+    "header": "theorem minor_weighted_multi_denominator451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "Decomp451b.lean",
+    "kind": "theorem",
+    "name": "minor_weighted_supply451",
+    "header": "theorem minor_weighted_supply451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "def",
+    "name": "nonprimeSphi451",
+    "header": "noncomputable def nonprimeSphi451 (\u03d5 : \u211d \u2192 \u211d) (N : \u2115) (\u03b1 : \u211d) : \u2102 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "def",
+    "name": "primeSphi451",
+    "header": "noncomputable def primeSphi451 (\u03d5 : \u211d \u2192 \u211d) (N : \u2115) (\u03b1 : \u211d) : \u2102 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "Sphi_prime_split451",
+    "header": "theorem Sphi_prime_split451 (\u03d5 : \u211d \u2192 \u211d) (N : \u2115) (\u03b1 : \u211d) :\n    Sphi \u03d5 N \u03b1 = primeSphi451 \u03d5 N \u03b1 + nonprimeSphi451 \u03d5 N \u03b1 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "continuous_prime_parts451",
+    "header": "theorem continuous_prime_parts451 (\u03d5 : \u211d \u2192 \u211d) (N : \u2115) :\n    Continuous (primeSphi451 \u03d5 N) \u2227 Continuous (nonprimeSphi451 \u03d5 N) "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "nonprime_energy451",
+    "header": "theorem nonprime_energy451 (N : \u2115) (hN : 1 \u2264 N) :\n    (\u2211 n \u2208 Finset.range (N + 1),\n      (vonMangoldt n - if n.Prime then vonMangoldt n else 0) ^ 2) \u2264\n        2 * Real.sqrt N * Real.log N ^ 2 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "nonprime_smoothed_energy451",
+    "header": "theorem nonprime_smoothed_energy451 {\u03d5 : \u211d \u2192 \u211d} {M : \u211d} (hM : 0 \u2264 M)\n    (hbound : \u2200 x, |\u03d5 x| \u2264 M) (N : \u2115) (hN : 1 \u2264 N) :\n    (\u222b \u03b1 in (0 : \u211d)..1, \u2016nonprimeSphi451 \u03d5 N \u03b1\u2016 ^ 2) \u2264\n      2 * M ^ 2 * Real.sqrt N * Real.log N ^ 2 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "product_coefficient_energy451",
+    "header": "theorem product_coefficient_energy451 {f g : \u211d \u2192 \u2102} (hf : Continuous f)\n    (hg : Continuous g) (W : \u211d \u2192 \u2102) (hW : \u2200 \u03b1, \u2016W \u03b1\u2016 \u2264 1) :\n    \u2016\u222b \u03b1 in (0 : \u211d)..1, f \u03b1 * g \u03b1 * W \u03b1\u2016 ^ 2 \u2264\n      (\u222b \u03b1 in (0 : \u211d)..1, \u2016f \u03b1\u2016 ^ 2) * (\u222b \u03b1 in (0 : \u211d)..1, \u2016g \u03b1\u2016 ^ 2) "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "prime_plus_full_energy451",
+    "header": "theorem prime_plus_full_energy451 {\u03d5 : \u211d \u2192 \u211d} {M : \u211d} (hM : 0 \u2264 M)\n    (hbound : \u2200 x, |\u03d5 x| \u2264 M) (N : \u2115) :\n    (\u222b \u03b1 in (0 : \u211d)..1, \u2016Sphi \u03d5 N \u03b1 + primeSphi451 \u03d5 N \u03b1\u2016 ^ 2) \u2264\n      24 * M ^ 2 * N * Real.log N "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "prime_power_coefficient_defect451",
+    "header": "theorem prime_power_coefficient_defect451 {\u03d5 : \u211d \u2192 \u211d} {M : \u211d} (hM : 0 \u2264 M)\n    (hbound : \u2200 x, |\u03d5 x| \u2264 M) (N : \u2115) (hN : 1 \u2264 N)\n    (W : \u211d \u2192 \u2102) (hW : \u2200 \u03b1, \u2016W \u03b1\u2016 \u2264 1) :\n    \u2016\u222b \u03b1 in (0 : \u211d)..1, (Sphi \u03d5 N \u03b1 ^ 2 - primeSphi451 \u03d5 N \u03b1 ^ 2) * W \u03b1\u2016 ^ 2 \u2264\n      48 * M ^ 4 * N * Real.sqrt N * Real.log N ^ 3 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "prime_power_family_defect451",
+    "header": "theorem prime_power_family_defect451 {\u03d5 : \u211d \u2192 \u211d} {M : \u211d} (hM : 0 \u2264 M)\n    (hbound : \u2200 x, |\u03d5 x| \u2264 M) {X : \u2115} (hX : 2 \u2264 X)\n    (W : \u2115 \u2192 \u211d \u2192 \u2102) (hW : \u2200 N \u03b1, \u2016W N \u03b1\u2016 \u2264 1) :\n    (\u2211 N \u2208 Finset.Icc 1 X,\n      \u2016\u222b \u03b1 in (0 : \u211d)..1, (Sphi \u03d5 N \u03b1 ^ 2 - primeSphi451 \u03d5 N \u03b1 ^ 2) * W N \u03b1\u2016 ^ 2) \u2264\n        48 * M ^ 4 * (X : \u211d) ^ 2 * Real.sqrt X * Real.log X ^ 3 "
+  },
+  {
+    "file": "PrimePowerMinor451.lean",
+    "kind": "theorem",
+    "name": "prime_power_family_log5_451",
+    "header": "theorem prime_power_family_log5_451 {\u03d5 : \u211d \u2192 \u211d} {M : \u211d} (hM : 0 \u2264 M)\n    (hbound : \u2200 x, |\u03d5 x| \u2264 M) {X : \u2115} (hX : 2 \u2264 X)\n    (W : \u2115 \u2192 \u211d \u2192 \u2102) (hW : \u2200 N \u03b1, \u2016W N \u03b1\u2016 \u2264 1) :\n    (\u2211 N \u2208 Finset.Icc 1 X,\n      \u2016\u222b \u03b1 in (0 : \u211d)..1, (Sphi \u03d5 N \u03b1 ^ 2 - primeSphi451 \u03d5 N \u03b1 ^ 2) * W N \u03b1\u2016 ^ 2) \u2264\n        192 * M ^ 4 * (X : \u211d) ^ (13 / 5 : \u211d) * Real.log X ^ 5 "
+  },
+  {
+    "file": "PrimeMinorReduction451.lean",
+    "kind": "def",
+    "name": "minorPrime451",
+    "header": "noncomputable def minorPrime451 (\u03d5 : \u211d \u2192 \u211d) (X N : \u2115) (\u03d1 : \u211d) : \u2102 "
+  },
+  {
+    "file": "PrimeMinorReduction451.lean",
+    "kind": "theorem",
+    "name": "minorBare_sub_prime451",
+    "header": "theorem minorBare_sub_prime451 (\u03d5 : \u211d \u2192 \u211d) (X N : \u2115) (\u03d1 : \u211d) :\n    minorBare328 \u03d5 X N \u03d1 - minorPrime451 \u03d5 X N \u03d1 =\n      \u222b \u03b1 in (0 : \u211d)..1, (Sphi \u03d5 N \u03b1 ^ 2 - primeSphi451 \u03d5 N \u03b1 ^ 2) *\n        {\u03b1 | \u00ac MajorArc X ((X : \u211d) ^ \u03d1) \u03b1}.indicator\n          (fun \u03b1 => ee (-(N * \u03b1))) \u03b1 "
+  },
+  {
+    "file": "PrimeMinorReduction451.lean",
+    "kind": "theorem",
+    "name": "minor_prime_defect_family451",
+    "header": "theorem minor_prime_defect_family451 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (\u03d1 : \u211d) :\n    \u2203 D : \u211d, 0 \u2264 D \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1 - minorPrime451 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        D * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "PrimeMinorReduction451.lean",
+    "kind": "theorem",
+    "name": "minor_bare_prime_iff451",
+    "header": "theorem minor_bare_prime_iff451 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (\u03d1 : \u211d) :\n    (\u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5) \u2194\n    (\u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorPrime451 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5) "
+  },
+  {
+    "file": "WeightedPrimeDefect451.lean",
+    "kind": "theorem",
+    "name": "prime_power_family_bounded451",
+    "header": "theorem prime_power_family_bounded451 {\u03d5 : \u211d \u2192 \u211d} {M B : \u211d} (hM : 0 \u2264 M)\n    (hbound : \u2200 x, |\u03d5 x| \u2264 M) (hB : 0 \u2264 B) {X : \u2115} (hX : 2 \u2264 X)\n    (W : \u2115 \u2192 \u211d \u2192 \u2102) (hW : \u2200 N \u03b1, \u2016W N \u03b1\u2016 \u2264 B) :\n    (\u2211 N \u2208 Finset.Icc 1 X,\n      \u2016\u222b \u03b1 in (0 : \u211d)..1, (Sphi \u03d5 N \u03b1 ^ 2 - primeSphi451 \u03d5 N \u03b1 ^ 2) * W N \u03b1\u2016 ^ 2) \u2264\n        48 * M ^ 4 * B ^ 2 * (X : \u211d) ^ 2 * Real.sqrt X * Real.log X ^ 3 "
+  },
+  {
+    "file": "WeightedPrimeDefect451.lean",
+    "kind": "theorem",
+    "name": "minor_weight_polynomial451",
+    "header": "theorem minor_weight_polynomial451 {G : \u211d \u2192 \u211d} (hG : IsMajorWeight G) :\n    \u2203 D : \u211d, 0 < D \u2227 \u2200 X : \u2115, \u2200 R \u03b7 : \u211d, 1 \u2264 R \u2192 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * R ^ 2 \u2264 \u03b7 * X \u2192 \u2200 \u03b1 : \u211d, \u00ac MajorArc X R \u03b1 \u2192\n        \u2016bRhat G R (fun q => \u03b7 * X * q / R) \u03b1\u2016 \u2264 D * R ^ 2 "
+  },
+  {
+    "file": "WeightedPrimeDefect451.lean",
+    "kind": "theorem",
+    "name": "weighted_defect_power451",
+    "header": "theorem weighted_defect_power451 {x \u03d1 : \u211d} (hx : 1 \u2264 x) (h\u03d1 : \u03d1 \u2264 1 / 10) :\n    (x ^ \u03d1) ^ 4 * x ^ 2 * Real.sqrt x \u2264 (x ^ \u03d1)\u207b\u00b9 * x ^ 3 "
+  },
+  {
+    "file": "WeightedPrimeDefect451.lean",
+    "kind": "def",
+    "name": "minorPrimeWeighted451",
+    "header": "noncomputable def minorPrimeWeighted451 (\u03d5 G : \u211d \u2192 \u211d) (X N : \u2115) (\u03d1 \u03b7 : \u211d) : \u2102 "
+  },
+  {
+    "file": "WeightedPrimeDefect451.lean",
+    "kind": "theorem",
+    "name": "minorWeighted_sub_prime451",
+    "header": "theorem minorWeighted_sub_prime451 {G : \u211d \u2192 \u211d} (hG : IsMajorWeight G)\n    (\u03d5 : \u211d \u2192 \u211d) {X : \u2115} (hX : 2 \u2264 X) (N : \u2115) (\u03d1 : \u211d)\n    {\u03b7 : \u211d} (h\u03b7 : 0 < \u03b7) :\n    minorWeighted328 \u03d5 G X N \u03d1 \u03b7 - minorPrimeWeighted451 \u03d5 G X N \u03d1 \u03b7 =\n      \u222b \u03b1 in (0 : \u211d)..1, (Sphi \u03d5 N \u03b1 ^ 2 - primeSphi451 \u03d5 N \u03b1 ^ 2) *\n        {\u03b1 | \u00ac MajorArc X ((X : \u211d) ^ \u03d1) \u03b1}.indicator\n          (fun \u03b1 => -bRhat G ((X : \u211d) ^ \u03d1)\n            (fun q => \u03b7 * X * q / (X : \u211d) ^ \u03d1) \u03b1 * ee (-(N * \u03b1))) \u03b1 "
+  },
+  {
+    "file": "WeightedPrimeDefect451.lean",
+    "kind": "theorem",
+    "name": "weighted_prime_defect_family451",
+    "header": "theorem weighted_prime_defect_family451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 \u2264 \u03d1) (h\u03d1' : \u03d1 \u2264 1 / 10) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7 - minorPrimeWeighted451 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n          C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n            (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "WeightedPrimeDefect451.lean",
+    "kind": "theorem",
+    "name": "minor_weighted_prime_iff451",
+    "header": "theorem minor_weighted_prime_iff451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 \u2264 \u03d1) (h\u03d1' : \u03d1 \u2264 1 / 10) :\n    (\u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5) \u2194\n    (\u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorPrimeWeighted451 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5) "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "theorem",
+    "name": "separated_card451",
+    "header": "theorem separated_card451 {\u03b9 : Type*} [DecidableEq \u03b9] (s : Finset \u03b9) (f : \u03b9 \u2192 \u211d)\n    (D c : \u211d) (K : \u2115)\n    (hsep : \u2200 i \u2208 s, \u2200 j \u2208 s, i \u2260 j \u2192 1 \u2264 |D * (f i - f j)|)\n    (hclose : \u2200 i \u2208 s, |D * (f i - c)| \u2264 K) :\n    s.card \u2264 2 * K + 1 "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "def",
+    "name": "pairCenter451",
+    "header": "noncomputable def pairCenter451 (\u03b1 : \u211d) (p : \u03a3 _ : \u2115, \u2115) : \u211d "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "theorem",
+    "name": "pairCenter_dist451",
+    "header": "theorem pairCenter_dist451 (\u03b1 : \u211d) (p : \u03a3 _ : \u2115, \u2115) :\n    |\u03b1 - pairCenter451 \u03b1 p| = intDist (\u03b1 - p.2 / p.1) "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "theorem",
+    "name": "pairCenter_separated451",
+    "header": "theorem pairCenter_separated451 {M : \u2115} {R \u03b1 : \u211d} (hR : 0 < R)\n    (hMR : (M : \u211d) \u2264 R) {p r : \u03a3 _ : \u2115, \u2115}\n    (hp : p \u2208 reducedPairs M) (hr : r \u2208 reducedPairs M) (hne : p \u2260 r) :\n    1 \u2264 |R ^ 2 * (pairCenter451 \u03b1 p - pairCenter451 \u03b1 r)| "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "theorem",
+    "name": "near_pair_denominator_sum451",
+    "header": "theorem near_pair_denominator_sum451 {M : \u2115} {R L \u03b1 : \u211d} (hR : 0 < R)\n    {p r : \u03a3 _ : \u2115, \u2115} (hp : p \u2208 reducedPairs M) (hr : r \u2208 reducedPairs M)\n    (hne : p \u2260 r)\n    (hpnear : R * p.1 * intDist (\u03b1 - p.2 / p.1) \u2264 L)\n    (hrnear : R * r.1 * intDist (\u03b1 - r.2 / r.1) \u2264 L) :\n    R \u2264 L * ((p.1 : \u211d) + r.1) "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "def",
+    "name": "nearPairs451",
+    "header": "noncomputable def nearPairs451 (R \u03b1 : \u211d) (K : \u2115) : Finset (\u03a3 _ : \u2115, \u2115) "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "theorem",
+    "name": "nearPairs_small_card451",
+    "header": "theorem nearPairs_small_card451 {R \u03b1 : \u211d} (hR : 0 < R) {K : \u2115} (hK : 1 \u2264 K) :\n    ((nearPairs451 R \u03b1 K).filter (fun p => (p.1 : \u211d) < R / (2 * K))).card \u2264 1 "
+  },
+  {
+    "file": "FareyCount451.lean",
+    "kind": "theorem",
+    "name": "nearPairs_card451",
+    "header": "theorem nearPairs_card451 {R \u03b1 : \u211d} (hR : 1 \u2264 R) {K : \u2115} (hK : 1 \u2264 K) :\n    (nearPairs451 R \u03b1 K).card \u2264 4 * K ^ 2 + 2 "
+  },
+  {
+    "file": "UniformMinorWeight451.lean",
+    "kind": "theorem",
+    "name": "weighted_pair_kernel451",
+    "header": "theorem weighted_pair_kernel451 {R : \u211d} (hR : 1 \u2264 R) (\u03b1 : \u211d) :\n    (\u2211 p \u2208 reducedPairs \u230aR\u230b\u208a,\n      (1 + R * p.1 * intDist (\u03b1 - p.2 / p.1)) ^ (-(4 : \u211d))) \u2264\n        6 * \u2211' n : \u2115, ((n : \u211d) + 1) ^ (-(2 : \u211d)) "
+  },
+  {
+    "file": "UniformMinorWeight451.lean",
+    "kind": "theorem",
+    "name": "scaledPairSum_uniform451",
+    "header": "theorem scaledPairSum_uniform451 {G : \u211d \u2192 \u211d} (hG : IsMajorWeight G) :\n    \u2203 D : \u211d, 0 < D \u2227 \u2200 R K \u03b1 : \u211d, 1 \u2264 R \u2192 1 \u2264 K \u2192\n      \u2016scaledPairSum G R K \u03b1\u2016 \u2264 D "
+  },
+  {
+    "file": "UniformMinorWeight451.lean",
+    "kind": "theorem",
+    "name": "bRhat_uniform451",
+    "header": "theorem bRhat_uniform451 {G : \u211d \u2192 \u211d} (hG : IsMajorWeight G) :\n    \u2203 D : \u211d, 0 < D \u2227 \u2200 X : \u2115, \u2200 R \u03b7 : \u211d, 1 \u2264 R \u2192 0 < \u03b7 \u2192\n      10 * R ^ 2 \u2264 \u03b7 * X \u2192 \u2200 \u03b1 : \u211d,\n        \u2016bRhat G R (fun q => \u03b7 * X * q / R) \u03b1\u2016 \u2264 D "
+  },
+  {
+    "file": "WeightedPrimeReduction451.lean",
+    "kind": "theorem",
+    "name": "prime_power_bounded_log5_451",
+    "header": "theorem prime_power_bounded_log5_451 {\u03d5 : \u211d \u2192 \u211d} {M B : \u211d} (hM : 0 \u2264 M)\n    (hbound : \u2200 x, |\u03d5 x| \u2264 M) (hB : 0 \u2264 B) {X : \u2115} (hX : 2 \u2264 X)\n    (W : \u2115 \u2192 \u211d \u2192 \u2102) (hW : \u2200 N \u03b1, \u2016W N \u03b1\u2016 \u2264 B) :\n    (\u2211 N \u2208 Finset.Icc 1 X,\n      \u2016\u222b \u03b1 in (0 : \u211d)..1, (Sphi \u03d5 N \u03b1 ^ 2 - primeSphi451 \u03d5 N \u03b1 ^ 2) * W N \u03b1\u2016 ^ 2) \u2264\n        192 * M ^ 4 * B ^ 2 * (X : \u211d) ^ (13 / 5 : \u211d) * Real.log X ^ 5 "
+  },
+  {
+    "file": "WeightedPrimeReduction451.lean",
+    "kind": "theorem",
+    "name": "weighted_prime_defect_uniform451",
+    "header": "theorem weighted_prime_defect_uniform451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 \u2264 \u03d1) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7 - minorPrimeWeighted451 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n          C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n            (X : \u211d) ^ 3 * Real.log X ^ 5 "
+  },
+  {
+    "file": "WeightedPrimeReduction451.lean",
+    "kind": "theorem",
+    "name": "minor_weighted_prime_uniform_iff451",
+    "header": "theorem minor_weighted_prime_uniform_iff451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 \u2264 \u03d1) :\n    (\u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5) \u2194\n    (\u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorPrimeWeighted451 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5) "
+  },
+  {
+    "file": "MinorUniform451.lean",
+    "kind": "theorem",
+    "name": "minor_budget_identity451",
+    "header": "theorem minor_budget_identity451 {x : \u211d} (hx : 0 < x) (R : \u211d) :\n    (x ^ 2 / R + x ^ (8 / 5 : \u211d)) * x =\n      (R\u207b\u00b9 + x ^ (-(2 / 5) : \u211d)) * x ^ 3 "
+  },
+  {
+    "file": "MinorUniform451.lean",
+    "kind": "theorem",
+    "name": "minor_weighted_log9_uniform451",
+    "header": "theorem minor_weighted_log9_uniform451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 9 "
+  },
+  {
+    "file": "MinorUniform451.lean",
+    "kind": "theorem",
+    "name": "minor_family_log9_uniform451",
+    "header": "theorem minor_family_log9_uniform451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorError150 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 9 "
+  }
+]
