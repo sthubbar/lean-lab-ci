@@ -177,7 +177,27 @@ numerical Buchstab integral bound is assumed or concluded here. -/
 theorem harman_fourier_reference_input (θ : ℝ) (hθ : 11 / 20 < θ) (hθ1 : θ < 1) :
     ∀ η : ℝ, 0 < η → ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
       Hyp1 θ x (Task379.referenceMean x) η (Task361.harmanMajorant x) := by
-  sorry
+  intro η hη
+  obtain ⟨αp, hp, hb, hmean⟩ := harman_reference_mean_enveloped
+  obtain ⟨X₁, hX₁⟩ :=
+    Task379.harman_fourier_of_reference_mean θ hθ hθ1 αp hmean (η / 2) (by linarith)
+  obtain ⟨X₂, hX₂⟩ := hmean (η / 8) (by linarith)
+  obtain ⟨X₃, hX₃⟩ := eventual_wheel_le_rpow θ (by linarith)
+  refine ⟨max X₁ (max X₂ X₃), ?_⟩
+  intro x hx
+  have hx₁ := (le_max_left X₁ (max X₂ X₃)).trans hx
+  have hx₂ := (le_max_left X₂ X₃).trans ((le_max_right X₁ (max X₂ X₃)).trans hx)
+  have hx₃ := (le_max_right X₂ X₃).trans ((le_max_right X₁ (max X₂ X₃)).trans hx)
+  obtain ⟨hxe, hw⟩ := hX₃ x hx₃
+  have hx1 : 1 < x := lt_of_lt_of_le (by linarith [Real.exp_one_gt_d9]) hxe
+  have hchange := hyp1_change_mean (β := Task379.referenceMean x) hx1 hw
+    (hX₁ x hx₁)
+  have herr : 4 * |αp - Task379.referenceMean x| ≤ η / 2 := by
+    have h := hX₂ x hx₂
+    have h' : |αp - Task379.referenceMean x| ≤ η / 8 := by
+      simpa [abs_sub_comm] using h
+    nlinarith
+  exact hyp1_mono_error hx1 (by linarith) hchange
 
 /-- The exact existing Fourier transfer statement from the reference mean estimate.
 MMS page 12 last normalization step. The limiting mean hypothesis stays explicit.
