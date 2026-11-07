@@ -3356,6 +3356,393 @@ private lemma panel_low (p q c d a r eB lA lB mlA : ℚ) (na nb nc : ℕ)
       have hpos : 0 ≤ Real.log (5 - 12 * x) * ((eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ))) *
           (1 / (x * (6 - 12 * x))) := mul_nonneg (mul_nonneg hfA hfBx) hfC
       exact le_trans hzero hpos
+private lemma panel_up (p q c d a r eB lA lB : ℚ) (na nb nc : ℕ)
+    (hpq : p ≤ q) (hpc : p ≤ c) (hcq : c ≤ q)
+    (hp16 : 1 / 6 ≤ p) (hq3 : q ≤ 1 / 3)
+    (hd0 : 0 ≤ d) (hdp : c - p ≤ d) (hdq : q - c ≤ d)
+    (hGA1 : 1 ≤ 5 - 12 * c) (hGB : 0 < c - a) (hr0 : 0 < r) (hap : a < p)
+    (hdist : d ≤ (c - a) / 2) (hdist2 : d ≤ c / 2) (hdist3 : 12 * d ≤ (5 - 12 * c) / 2)
+    (huA : Real.log ((((5 - 12 * c : ℚ)) : ℝ)) ≤ (lA : ℝ))
+    (huB : 0 ≤ (eB : ℝ) * ((lB : ℝ) - Real.log ((((c - a) / r : ℚ)) : ℝ)))
+    (heB : eB = 1 ∨ eB = -1)
+    (hfB : ∀ x ∈ Set.Icc (p : ℝ) (q : ℝ), 0 ≤ (eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ)))
+    (hnc : 1 ≤ nc)
+    (htail : (1 / 6) / (c : ℝ) * (((d : ℝ) / (c : ℝ)) ^ (nc + 1) / (1 - (d : ℝ) / (c : ℝ)))
+        + 2 / (6 - 12 * (c : ℝ)) *
+            (((12 * (d : ℝ)) / (6 - 12 * (c : ℝ))) ^ (nc + 1) /
+              (1 - 12 * (d : ℝ) / (6 - 12 * (c : ℝ)))) ≤ 1 / 10) :
+    (∫ x in (p : ℝ)..(q : ℝ),
+        Real.log (5 - 12 * x) * ((eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ))) /
+          ((6 - 12 * x) * x))
+      ≤ ∑ l ∈ range (nc + 1), ∑ j ∈ range (nb + 1), ∑ i ∈ range (na + 1),
+        (((if i = 0 then lA + 2 * ((12*d)/(5 - 12*c))^(na+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/(5-12*c))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then eB*lB + 2 * (d/(c - a))^(nb+1) else eB * (-1 : ℚ)^(j-1) * ((1:ℚ)/(c - a))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/c + 2/(6 - 12*c) + ((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) else (1:ℚ)/6 * (-1 : ℚ)^l / c^(l+1) + (2/(6-12*c)) * ((12:ℚ)/(6-12*c))^l) : ℚ) : ℝ) *
+          ((((q : ℝ) - (c : ℝ)) ^ (i + j + l + 1) - ((p : ℝ) - (c : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  have hpqR : (p : ℝ) ≤ (q : ℝ) := by exact_mod_cast hpq
+  have hp16R : (1 : ℝ) / 6 ≤ (p : ℝ) := by
+    have h : ((1 / 6 : ℚ) : ℝ) ≤ ((p : ℚ) : ℝ) := by exact_mod_cast hp16
+    simpa using h
+  have hq3R : (q : ℝ) ≤ 1 / 3 := by
+    have h : ((q : ℚ) : ℝ) ≤ ((1 / 3 : ℚ) : ℝ) := by exact_mod_cast hq3
+    simpa using h
+  have hpcR : (p : ℝ) ≤ (c : ℝ) := by exact_mod_cast hpc
+  have hcqR : (c : ℝ) ≤ (q : ℝ) := by exact_mod_cast hcq
+  have hc13 : (c : ℝ) ≤ 1 / 3 := le_trans hcqR hq3R
+  have hp0R : (0 : ℝ) < (p : ℝ) := by linarith
+  have hc0 : (0 : ℝ) < (c : ℝ) := by linarith
+  have hd0R : (0 : ℝ) ≤ (d : ℝ) := by exact_mod_cast hd0
+  have hdpR : (c : ℝ) - (p : ℝ) ≤ (d : ℝ) := by exact_mod_cast hdp
+  have hdqR : (q : ℝ) - (c : ℝ) ≤ (d : ℝ) := by exact_mod_cast hdq
+  have hGA1R : (1 : ℝ) ≤ 5 - 12 * (c : ℝ) := by
+    have h : ((1 : ℚ) : ℝ) ≤ ((5 - 12 * c : ℚ) : ℝ) := by exact_mod_cast hGA1
+    simpa using h
+  have hGA0 : (0 : ℝ) < 5 - 12 * (c : ℝ) := by linarith
+  have hGB0 : (0 : ℝ) < (c : ℝ) - (a : ℝ) := by
+    have h : ((0 : ℚ) : ℝ) < ((c - a : ℚ) : ℝ) := by exact_mod_cast hGB
+    simpa using h
+  have hGC0 : (0 : ℝ) < 6 - 12 * (c : ℝ) := by linarith
+  have hr0R : (0 : ℝ) < (r : ℝ) := by
+    have h : ((0 : ℚ) : ℝ) < ((r : ℚ) : ℝ) := by exact_mod_cast hr0
+    simpa using h
+  have hapR : (a : ℝ) < (p : ℝ) := by
+    have h : ((a : ℚ) : ℝ) < ((p : ℚ) : ℝ) := by exact_mod_cast hap
+    simpa using h
+  have hdistR : (d : ℝ) ≤ ((c : ℝ) - (a : ℝ)) / 2 := by
+    have h : ((d : ℚ) : ℝ) ≤ (((c - a) / 2 : ℚ) : ℝ) := by exact_mod_cast hdist
+    simpa using h
+  have hdist2R : (d : ℝ) ≤ (c : ℝ) / 2 := by
+    have h : ((d : ℚ) : ℝ) ≤ ((c / 2 : ℚ) : ℝ) := by exact_mod_cast hdist2
+    simpa using h
+  have hdist3R : 12 * (d : ℝ) ≤ (5 - 12 * (c : ℝ)) / 2 := by
+    have h : ((12 * d : ℚ) : ℝ) ≤ (((5 - 12 * c) / 2 : ℚ) : ℝ) := by exact_mod_cast hdist3
+    simpa using h
+  set A : ℕ → ℝ := fun i => (((if i = 0 then lA + 2 * ((12*d)/(5 - 12*c))^(na+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/(5-12*c))^i / (i:ℚ)) : ℚ) : ℝ) with hAc
+  set B : ℕ → ℝ := fun j => (((if j = 0 then eB*lB + 2 * (d/(c - a))^(nb+1) else eB * (-1 : ℚ)^(j-1) * ((1:ℚ)/(c - a))^j / (j:ℚ)) : ℚ) : ℝ) with hBc
+  set C : ℕ → ℝ := fun l => (((if l = 0 then (1:ℚ)/6/c + 2/(6 - 12*c) + ((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) else (1:ℚ)/6 * (-1 : ℚ)^l / c^(l+1) + (2/(6-12*c)) * ((12:ℚ)/(6-12*c))^l) : ℚ) : ℝ) with hCc
+  have hrow : (∑ l ∈ range (nc + 1), ∑ j ∈ range (nb + 1), ∑ i ∈ range (na + 1),
+        (((if i = 0 then lA + 2 * ((12*d)/(5 - 12*c))^(na+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/(5-12*c))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then eB*lB + 2 * (d/(c - a))^(nb+1) else eB * (-1 : ℚ)^(j-1) * ((1:ℚ)/(c - a))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/c + 2/(6 - 12*c) + ((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) else (1:ℚ)/6 * (-1 : ℚ)^l / c^(l+1) + (2/(6-12*c)) * ((12:ℚ)/(6-12*c))^l) : ℚ) : ℝ) *
+          ((((q : ℝ) - (c : ℝ)) ^ (i + j + l + 1) - ((p : ℝ) - (c : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      = ∑ l ∈ range (nc + 1), ∑ j ∈ range (nb + 1), ∑ i ∈ range (na + 1),
+          A i * B j * C l *
+            ((((q : ℝ) - (c : ℝ)) ^ (i + j + l + 1) - ((p : ℝ) - (c : ℝ)) ^ (i + j + l + 1)) /
+              ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+    simp only [hAc, hBc, hCc]
+  rw [hrow, ← iprod3_c (p : ℝ) (q : ℝ) (c : ℝ) hpqR A B C (na + 1) (nb + 1) (nc + 1)]
+  refine intervalIntegral.integral_mono_on hpqR ?_ ?_ ?_
+  · apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hpqR]
+    apply ContinuousOn.div
+    · apply ContinuousOn.mul
+      · exact ContinuousOn.log (by fun_prop) (fun x hx => by linarith [hx.2, hq3R])
+      · apply ContinuousOn.mul continuousOn_const
+        exact ContinuousOn.log (by fun_prop)
+          (fun x hx => ne_of_gt (div_pos (by linarith [hx.1, hapR]) hr0R))
+    · exact (by fun_prop : ContinuousOn (fun x : ℝ => (6 - 12 * x) * x) (Set.Icc (p:ℝ) (q:ℝ)))
+    · intro x hx
+      have h1 : (6 : ℝ) - 12 * x ≠ 0 := by
+        have hp : (0 : ℝ) < 6 - 12 * x := by linarith [hx.2, hq3R]
+        linarith
+      have h2 : x ≠ 0 := by linarith [hx.1, hp16R]
+      exact mul_ne_zero h1 h2
+  · exact (by fun_prop : Continuous fun x : ℝ =>
+      (∑ i ∈ range (na + 1), A i * (x - (c : ℝ)) ^ i) *
+        (∑ j ∈ range (nb + 1), B j * (x - (c : ℝ)) ^ j) *
+        (∑ l ∈ range (nc + 1), C l * (x - (c : ℝ)) ^ l)).intervalIntegrable _ _
+  · intro x hx
+    rw [Set.mem_Icc] at hx
+    obtain ⟨hxp, hxq⟩ := hx
+    set t : ℝ := x - (c : ℝ) with htdef
+    have ht_lo : -((d : ℝ)) ≤ t := by rw [htdef]; linarith
+    have ht_hi : t ≤ (d : ℝ) := by rw [htdef]; linarith
+    have htabs : |t| ≤ (d : ℝ) := abs_le.mpr ⟨ht_lo, ht_hi⟩
+    have hx16 : (1 : ℝ) / 6 ≤ x := le_trans hp16R hxp
+    have hx13 : x ≤ 1 / 3 := le_trans hxq hq3R
+    have hx0' : (0 : ℝ) < x := by linarith
+    set sA : ℝ := -(12 * t) / (5 - 12 * (c : ℝ)) with hsA
+    set sB : ℝ := t / ((c : ℝ) - (a : ℝ)) with hsB
+    have hsAabs : |sA| ≤ 12 * (d : ℝ) / (5 - 12 * (c : ℝ)) := by
+      have h1 : |sA| = 12 * |t| / (5 - 12 * (c : ℝ)) := by
+        rw [hsA, abs_div, abs_of_pos hGA0, abs_neg, abs_mul,
+          abs_of_pos (by norm_num : (0:ℝ) < 12)]
+      rw [h1]
+      exact div_le_div_of_nonneg_right (by linarith [htabs]) hGA0.le
+    have hsA12 : |sA| ≤ 1 / 2 := by
+      have h2 : 12 * (d : ℝ) / (5 - 12 * (c : ℝ)) ≤ 1 / 2 := by
+        rw [div_le_iff₀ hGA0]; linarith
+      linarith
+    have hsBabs : |sB| ≤ (d : ℝ) / ((c : ℝ) - (a : ℝ)) := by
+      rw [hsB, abs_div, abs_of_pos hGB0]
+      exact div_le_div_of_nonneg_right htabs hGB0.le
+    have hsB12 : |sB| ≤ 1 / 2 := by
+      have h2 : (d : ℝ) / ((c : ℝ) - (a : ℝ)) ≤ 1 / 2 := by
+        rw [div_le_iff₀ hGB0]; linarith
+      linarith
+    have h1sA : (0 : ℝ) < 1 + sA := by
+      have := neg_abs_le sA; linarith
+    have h1sB : (0 : ℝ) < 1 + sB := by
+      have := neg_abs_le sB; linarith
+    have hlog5 : (5 - 12 * (c : ℝ)) * (1 + sA) = 5 - 12 * x := by
+      rw [hsA, htdef]; field_simp; ring
+    have hlogA : Real.log (5 - 12 * x)
+        = Real.log (5 - 12 * (c : ℝ)) + Real.log (1 + sA) := by
+      rw [← hlog5, Real.log_mul (ne_of_gt hGA0) (ne_of_gt h1sA)]
+    have hxA : x - (a : ℝ) = ((c : ℝ) - (a : ℝ)) * (1 + sB) := by
+      rw [hsB, htdef]; field_simp; ring
+    have hlogB : Real.log ((x - (a : ℝ)) / (r : ℝ))
+        = Real.log (((c : ℝ) - (a : ℝ)) / (r : ℝ)) + Real.log (1 + sB) := by
+      rw [show (x - (a:ℝ))/(r:ℝ) = (((c:ℝ)-(a:ℝ))/(r:ℝ)) * (1 + sB) by rw [hxA]; ring,
+        Real.log_mul (by positivity) (ne_of_gt h1sB)]
+    have hA0 : A 0 = (lA : ℝ) + 2 * ((12 * (d : ℝ)) / (5 - 12 * (c : ℝ))) ^ (na + 1) := by
+      simp only [hAc, ↓reduceIte]
+      push_cast
+      ring
+    have hAstep : ∀ i : ℕ, A (i + 1)
+        = (-1 : ℝ) ^ i * (-(12 : ℝ) / (5 - 12 * (c : ℝ))) ^ (i + 1) / ((i : ℝ) + 1) := by
+      intro i
+      simp only [hAc]
+      rw [if_neg (by omega : i + 1 ≠ 0), Nat.succ_sub_one]
+      push_cast
+      ring
+    have hAsum : (∑ i ∈ range na, A (i + 1) * t ^ (i + 1))
+        = ∑ i ∈ range na, (-1 : ℝ) ^ i * sA ^ (i + 1) / ((i : ℝ) + 1) := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [hAstep i]
+      have e1 : (-(12 : ℝ) / (5 - 12 * (c : ℝ))) ^ (i + 1) * t ^ (i + 1) = sA ^ (i + 1) := by
+        rw [← mul_pow, show (-(12 : ℝ) / (5 - 12 * (c : ℝ))) * t = sA by rw [hsA]; ring]
+      calc (-1 : ℝ) ^ i * (-(12 : ℝ) / (5 - 12 * (c : ℝ))) ^ (i + 1) / ((i : ℝ) + 1) * t ^ (i + 1)
+          = (-1 : ℝ) ^ i * ((-(12 : ℝ) / (5 - 12 * (c : ℝ))) ^ (i + 1) * t ^ (i + 1)) /
+              ((i : ℝ) + 1) := by ring
+        _ = (-1 : ℝ) ^ i * sA ^ (i + 1) / ((i : ℝ) + 1) := by rw [e1]
+    have hArow : (∑ i ∈ range (na + 1), A i * t ^ i)
+        = ((lA : ℝ) + 2 * ((12 * (d : ℝ)) / (5 - 12 * (c : ℝ))) ^ (na + 1))
+          + ∑ i ∈ range na, (-1 : ℝ) ^ i * sA ^ (i + 1) / ((i : ℝ) + 1) := by
+      rw [Finset.sum_range_succ', hA0, pow_zero, mul_one, hAsum, add_comm]
+    have hAge : Real.log (5 - 12 * x) ≤ ∑ i ∈ range (na + 1), A i * t ^ i := by
+      rw [hArow, hlogA]
+      have hle := slog_le hsA12 na
+      have hpow : |sA| ^ (na + 1) ≤ (12 * (d : ℝ) / (5 - 12 * (c : ℝ))) ^ (na + 1) :=
+        pow_le_pow_left₀ (abs_nonneg sA) hsAabs (na + 1)
+      have huA' : Real.log (5 - 12 * (c : ℝ)) ≤ (lA : ℝ) := by
+        have hcast : ((((5 - 12 * c : ℚ)) : ℝ)) = 5 - 12 * (c : ℝ) := by
+          push_cast
+          ring
+        rwa [hcast] at huA
+      linarith [hle, hpow, huA']
+    have hB0 : B 0 = (eB : ℝ) * (lB : ℝ) + 2 * ((d : ℝ) / ((c : ℝ) - (a : ℝ))) ^ (nb + 1) := by
+      simp only [hBc, ↓reduceIte]
+      push_cast
+      ring
+    have hBstep : ∀ j : ℕ, B (j + 1)
+        = (eB : ℝ) * (-1 : ℝ) ^ j * (1 / ((c : ℝ) - (a : ℝ))) ^ (j + 1) / ((j : ℝ) + 1) := by
+      intro j
+      simp only [hBc]
+      rw [if_neg (by omega : j + 1 ≠ 0), Nat.succ_sub_one]
+      push_cast
+      ring
+    have hBsum : (∑ j ∈ range nb, B (j + 1) * t ^ (j + 1))
+        = (eB : ℝ) * ∑ j ∈ range nb, (-1 : ℝ) ^ j * sB ^ (j + 1) / ((j : ℝ) + 1) := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      rw [hBstep j]
+      have e1 : (1 / ((c : ℝ) - (a : ℝ))) ^ (j + 1) * t ^ (j + 1) = sB ^ (j + 1) := by
+        rw [← mul_pow, show (1 / ((c : ℝ) - (a : ℝ))) * t = sB by rw [hsB]; ring]
+      calc (eB : ℝ) * (-1 : ℝ) ^ j * (1 / ((c : ℝ) - (a : ℝ))) ^ (j + 1) / ((j : ℝ) + 1) * t ^ (j + 1)
+          = (eB : ℝ) * ((-1 : ℝ) ^ j * ((1 / ((c : ℝ) - (a : ℝ))) ^ (j + 1) * t ^ (j + 1))) /
+              ((j : ℝ) + 1) := by ring
+        _ = (eB : ℝ) * ((-1 : ℝ) ^ j * sB ^ (j + 1)) / ((j : ℝ) + 1) := by rw [e1]
+        _ = (eB : ℝ) * ((-1 : ℝ) ^ j * sB ^ (j + 1) / ((j : ℝ) + 1)) := by ring
+    have hBrow : (∑ j ∈ range (nb + 1), B j * t ^ j)
+        = ((eB : ℝ) * (lB : ℝ) + 2 * ((d : ℝ) / ((c : ℝ) - (a : ℝ))) ^ (nb + 1))
+          + (eB : ℝ) * ∑ j ∈ range nb, (-1 : ℝ) ^ j * sB ^ (j + 1) / ((j : ℝ) + 1) := by
+      rw [Finset.sum_range_succ', hB0, pow_zero, mul_one, hBsum, add_comm]
+    have heB1 : |(eB : ℝ)| = 1 := by
+      rcases heB with h | h <;> rw [h] <;> norm_num
+    have hgeB := slog_ge hsB12 nb
+    have hleB := slog_le hsB12 nb
+    have hBge : (eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ)) ≤ ∑ j ∈ range (nb + 1), B j * t ^ j := by
+      rw [hBrow, hlogB]
+      have hpow : |sB| ^ (nb + 1) ≤ ((d : ℝ) / ((c : ℝ) - (a : ℝ))) ^ (nb + 1) :=
+        pow_le_pow_left₀ (abs_nonneg sB) hsBabs (nb + 1)
+      have hcastB : ((((c - a) / r : ℚ)) : ℝ) = ((c : ℝ) - (a : ℝ)) / (r : ℝ) := by
+        push_cast
+        ring
+      have huB' : 0 ≤ (eB : ℝ) * ((lB : ℝ) - Real.log (((c : ℝ) - (a : ℝ)) / (r : ℝ))) := by
+        rw [← hcastB]
+        exact huB
+      have hlb : (eB : ℝ) * Real.log (((c : ℝ) - (a : ℝ)) / (r : ℝ)) ≤ (eB : ℝ) * (lB : ℝ) := by
+        linarith [huB']
+      have herr : (eB : ℝ) * Real.log (1 + sB)
+          ≤ (eB : ℝ) * (∑ j ∈ range nb, (-1 : ℝ) ^ j * sB ^ (j + 1) / ((j : ℝ) + 1))
+            + 2 * ((d : ℝ) / ((c : ℝ) - (a : ℝ))) ^ (nb + 1) := by
+        rcases heB with h | h
+        · rw [h]
+          push_cast
+          linarith [hleB, hpow]
+        · rw [h]
+          push_cast
+          linarith [hgeB, hpow]
+      linarith [hlb, herr]
+    have hC0 : C 0 = (1/6 : ℝ) * (1 / (c : ℝ)) + 2 / (6 - 12 * (c : ℝ)) + ((((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) : ℚ) : ℝ) := by
+      simp only [hCc, ↓reduceIte]
+      push_cast
+      ring_nf
+    have hCstep : ∀ l : ℕ, C (l + 1)
+        = (1/6 : ℝ) * (-1 : ℝ) ^ (l + 1) / ((c : ℝ) ^ (l + 1) * (c : ℝ))
+          + (2 / (6 - 12 * (c : ℝ))) * (12 / (6 - 12 * (c : ℝ))) ^ (l + 1) := by
+      intro l
+      simp only [hCc]
+      rw [if_neg (by omega : l + 1 ≠ 0)]
+      push_cast
+      rw [pow_succ]
+      ring
+    have hCsumL : (∑ l ∈ range nc, C (l + 1) * t ^ (l + 1))
+        = ∑ l ∈ range nc, ((1/6 : ℝ) * (1 / (c : ℝ)) * (-(t / (c : ℝ))) ^ (l + 1)
+            + (2 / (6 - 12 * (c : ℝ))) * (12 * t / (6 - 12 * (c : ℝ))) ^ (l + 1)) := by
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      rw [hCstep l, add_mul]
+      have e1 : (1/6 : ℝ) * (-1 : ℝ) ^ (l + 1) / ((c : ℝ) ^ (l + 1) * (c : ℝ)) * t ^ (l + 1)
+          = (1/6 : ℝ) * (1 / (c : ℝ)) * (-(t / (c : ℝ))) ^ (l + 1) := by
+        rw [neg_div_pow]
+        ring
+      have e2 : (2 / (6 - 12 * (c : ℝ))) * (12 / (6 - 12 * (c : ℝ))) ^ (l + 1) * t ^ (l + 1)
+          = (2 / (6 - 12 * (c : ℝ))) * (12 * t / (6 - 12 * (c : ℝ))) ^ (l + 1) := by
+        calc (2 / (6 - 12 * (c : ℝ))) * (12 / (6 - 12 * (c : ℝ))) ^ (l + 1) * t ^ (l + 1)
+            = (2 / (6 - 12 * (c : ℝ))) *
+                ((12 / (6 - 12 * (c : ℝ))) ^ (l + 1) * t ^ (l + 1)) := by ring
+          _ = (2 / (6 - 12 * (c : ℝ))) * (12 * t / (6 - 12 * (c : ℝ))) ^ (l + 1) := by
+              rw [mul_div_pow]
+      rw [e1, e2]
+    have hCpeel : (∑ l ∈ range (nc + 1), C l * t ^ l)
+        = ((1/6 : ℝ) * (1 / (c : ℝ)) + 2 / (6 - 12 * (c : ℝ)) + ((((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) : ℚ) : ℝ))
+          + ∑ l ∈ range nc, ((1/6 : ℝ) * (1 / (c : ℝ)) * (-(t / (c : ℝ))) ^ (l + 1)
+              + (2 / (6 - 12 * (c : ℝ))) * (12 * t / (6 - 12 * (c : ℝ))) ^ (l + 1)) := by
+      have hp1 : (∑ l ∈ range (nc + 1), C l * t ^ l)
+          = C 0 + ∑ l ∈ range nc, C (l + 1) * t ^ (l + 1) := by
+        rw [Finset.sum_range_succ', pow_zero, mul_one, add_comm]
+      rw [hp1, hC0, hCsumL, Finset.sum_add_distrib]
+    have hCcomb : (∑ l ∈ range (nc + 1), C l * t ^ l)
+        = (1/6 : ℝ) * (1 / (c : ℝ)) * (∑ l ∈ range (nc + 1), (-(t / (c : ℝ))) ^ l)
+          + (2 / (6 - 12 * (c : ℝ))) *
+              (∑ l ∈ range (nc + 1), (12 * t / (6 - 12 * (c : ℝ))) ^ l)
+          + ((((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) : ℚ) : ℝ) := by
+      have hd : (∑ l ∈ range nc, ((1/6 : ℝ) * (1 / (c : ℝ)) * (-(t / (c : ℝ))) ^ (l + 1)
+              + (2 / (6 - 12 * (c : ℝ))) * (12 * t / (6 - 12 * (c : ℝ))) ^ (l + 1)))
+          = (1/6 : ℝ) * (1 / (c : ℝ)) * (∑ l ∈ range nc, (-(t / (c : ℝ))) ^ (l + 1))
+            + (2 / (6 - 12 * (c : ℝ))) * (∑ l ∈ range nc, (12 * t / (6 - 12 * (c : ℝ))) ^ (l + 1)) := by
+        rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
+      have g1 : (∑ l ∈ range (nc + 1), (-(t / (c : ℝ))) ^ l)
+          = 1 + ∑ l ∈ range nc, (-(t / (c : ℝ))) ^ (l + 1) := by
+        rw [Finset.sum_range_succ', pow_zero, add_comm]
+      have g2 : (∑ l ∈ range (nc + 1), (12 * t / (6 - 12 * (c : ℝ))) ^ l)
+          = 1 + ∑ l ∈ range nc, (12 * t / (6 - 12 * (c : ℝ))) ^ (l + 1) := by
+        rw [Finset.sum_range_succ', pow_zero, add_comm]
+      rw [hCpeel, hd, g1, g2]
+      ring
+    have hu1 : |-(t / (c : ℝ))| ≤ (d : ℝ) / (c : ℝ) := by
+      rw [abs_neg, abs_div, abs_of_pos hc0]
+      exact div_le_div_of_nonneg_right htabs hc0.le
+    have hu2 : |12 * t / (6 - 12 * (c : ℝ))| ≤ 12 * (d : ℝ) / (6 - 12 * (c : ℝ)) := by
+      have h1 : |12 * t / (6 - 12 * (c : ℝ))| = 12 * |t| / (6 - 12 * (c : ℝ)) := by
+        rw [abs_div, abs_mul, abs_of_pos hGC0, abs_of_pos (by norm_num : (0:ℝ) < 12)]
+      rw [h1]
+      exact div_le_div_of_nonneg_right (by linarith [htabs]) hGC0.le
+    have hρ1 : (d : ℝ) / (c : ℝ) < 1 := by
+      rw [div_lt_one hc0]; linarith
+    have hρ2 : 12 * (d : ℝ) / (6 - 12 * (c : ℝ)) < 1 := by
+      rw [div_lt_one hGC0]; linarith [hGA1R]
+    have hg1 := geom_abs (u := -(t / (c : ℝ))) (ρ := (d : ℝ) / (c : ℝ))
+      (div_nonneg hd0R hc0.le) hρ1 hu1 (nc + 1)
+    have hg2 := geom_abs (u := 12 * t / (6 - 12 * (c : ℝ))) (ρ := 12 * (d : ℝ) / (6 - 12 * (c : ℝ)))
+      (div_nonneg (mul_nonneg (by norm_num) hd0R) hGC0.le) hρ2 hu2 (nc + 1)
+    have hxg1 : (1 : ℝ) / (1 - -(t / (c : ℝ))) = (c : ℝ) / x := by
+      have h1 : (1 : ℝ) - -(t / (c : ℝ)) = x / (c : ℝ) := by
+        rw [htdef]
+        have hcne : (c : ℝ) ≠ 0 := ne_of_gt hc0
+        field_simp <;> ring
+      rw [h1, one_div_div]
+    have hxg2 : (1 : ℝ) / (1 - 12 * t / (6 - 12 * (c : ℝ)))
+        = (6 - 12 * (c : ℝ)) / (6 - 12 * x) := by
+      have h1 : (1 : ℝ) - 12 * t / (6 - 12 * (c : ℝ)) = (6 - 12 * x) / (6 - 12 * (c : ℝ)) := by
+        rw [htdef]
+        have h1ne : (6 - 12 * (c : ℝ)) ≠ 0 := ne_of_gt hGC0
+        field_simp <;> ring
+      rw [h1, one_div_div]
+    have hc1 : (0 : ℝ) ≤ (1/6 : ℝ) * (1 / (c : ℝ)) :=
+      mul_nonneg (by norm_num) (le_of_lt (one_div_pos.mpr hc0))
+    have hc2 : (0 : ℝ) ≤ 2 / (6 - 12 * (c : ℝ)) := div_nonneg (by norm_num) hGC0.le
+    have htailR : ((((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) : ℚ) : ℝ) ≤ 1 / 10 := by
+      have h := htail
+      push_cast at h ⊢
+      linarith
+    have hA1 : (1/6 : ℝ) * (1 / (c : ℝ)) * (1 / (1 - -(t / (c : ℝ)))) = (1/6) * (1/x) := by
+      rw [hxg1, one_div_c_cancel (ne_of_gt hc0) (ne_of_gt hx0')]
+    have hA2 : (2 / (6 - 12 * (c : ℝ))) * (1 / (1 - 12 * t / (6 - 12 * (c : ℝ))))
+        = 2 * (1 / (6 - 12 * x)) := by
+      rw [hxg2, six_c_cancel (ne_of_gt hGC0) (by
+        have h : (0:ℝ) < 6 - 12 * x := by linarith
+        linarith)]
+    have hpf : (1/6 : ℝ) * (1/x) + 2 * (1 / (6 - 12 * x)) = 1 / (x * (6 - 12 * x)) := by
+      rw [six_one_div_mul (ne_of_gt hx0') (by
+        have h : (0:ℝ) < 6 - 12 * x := by linarith
+        linarith)]
+    have hTQcast : ((((1:ℚ)/6/c * ((d/c)^(nc+1)/(1 - d/c)) + 2/(6 - 12*c) * ((12*d/(6 - 12*c))^(nc+1)/(1 - 12*d/(6 - 12*c)))) : ℚ) : ℝ)
+        = (1/6 : ℝ) * (1 / (c : ℝ)) * (((d : ℝ) / (c : ℝ)) ^ (nc + 1) / (1 - (d : ℝ) / (c : ℝ)))
+          + (2 / (6 - 12 * (c : ℝ))) * (((12 * (d : ℝ)) / (6 - 12 * (c : ℝ))) ^ (nc + 1) /
+              (1 - 12 * (d : ℝ) / (6 - 12 * (c : ℝ)))) := by
+      push_cast
+      ring
+    have hS1up : (∑ l ∈ range (nc + 1), (-(t / (c : ℝ))) ^ l)
+        ≤ (1 / (1 - -(t / (c : ℝ))))
+          + ((d : ℝ) / (c : ℝ)) ^ (nc + 1) / (1 - (d : ℝ) / (c : ℝ)) := by
+      have h := (abs_le.mp hg1).2; linarith
+    have hS2up : (∑ l ∈ range (nc + 1), (12 * t / (6 - 12 * (c : ℝ))) ^ l)
+        ≤ (1 / (1 - 12 * t / (6 - 12 * (c : ℝ))))
+          + (12 * (d : ℝ) / (6 - 12 * (c : ℝ))) ^ (nc + 1) /
+              (1 - 12 * (d : ℝ) / (6 - 12 * (c : ℝ))) := by
+      have h := (abs_le.mp hg2).2; linarith
+    have hS1lo : (1 / (1 - -(t / (c : ℝ))))
+          - ((d : ℝ) / (c : ℝ)) ^ (nc + 1) / (1 - (d : ℝ) / (c : ℝ))
+        ≤ (∑ l ∈ range (nc + 1), (-(t / (c : ℝ))) ^ l) := by
+      have h := (abs_le.mp hg1).1; linarith
+    have hS2lo : (1 / (1 - 12 * t / (6 - 12 * (c : ℝ))))
+          - (12 * (d : ℝ) / (6 - 12 * (c : ℝ))) ^ (nc + 1) /
+              (1 - 12 * (d : ℝ) / (6 - 12 * (c : ℝ)))
+        ≤ (∑ l ∈ range (nc + 1), (12 * t / (6 - 12 * (c : ℝ))) ^ l) := by
+      have h := (abs_le.mp hg2).1; linarith
+    have hCge : 1 / (x * (6 - 12 * x)) ≤ ∑ l ∈ range (nc + 1), C l * t ^ l := by
+      rw [hCcomb]
+      have hm1 := mul_le_mul_of_nonneg_left hS1lo hc1
+      have hm2 := mul_le_mul_of_nonneg_left hS2lo hc2
+      linarith [hm1, hm2, hA1, hA2, hpf, htailR, hTQcast]
+    have hfA : 0 ≤ Real.log (5 - 12 * x) := by
+      apply Real.log_nonneg
+      linarith
+    have hfBx : 0 ≤ (eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ)) := hfB x ⟨hxp, hxq⟩
+    have hfC : 0 ≤ 1 / (x * (6 - 12 * x)) := by
+      have hden : (0 : ℝ) < x * (6 - 12 * x) := mul_pos hx0' (by linarith)
+      exact le_of_lt (one_div_pos.mpr hden)
+    have hAp : 0 ≤ ∑ i ∈ range (na + 1), A i * t ^ i := le_trans hfA hAge
+    have hBp : 0 ≤ ∑ j ∈ range (nb + 1), B j * t ^ j := le_trans hfBx hBge
+    have hCp : 0 ≤ ∑ l ∈ range (nc + 1), C l * t ^ l := le_trans hfC hCge
+    have hkey : Real.log (5 - 12 * x) * ((eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ))) /
+          ((6 - 12 * x) * x)
+        = Real.log (5 - 12 * x) * ((eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ))) *
+            (1 / (x * (6 - 12 * x))) := by
+      rw [div_eq_mul_inv, div_eq_mul_inv]
+      ring_nf
+    rw [hkey]
+    have t1 : Real.log (5 - 12 * x) * ((eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ)))
+        ≤ (∑ i ∈ range (na + 1), A i * t ^ i) * (∑ j ∈ range (nb + 1), B j * t ^ j) :=
+      mul_le_mul hAge hBge hfBx hAp
+    have t2 : Real.log (5 - 12 * x) * ((eB : ℝ) * Real.log ((x - (a : ℝ)) / (r : ℝ))) *
+          (1 / (x * (6 - 12 * x)))
+        ≤ (∑ i ∈ range (na + 1), A i * t ^ i) * (∑ j ∈ range (nb + 1), B j * t ^ j) *
+            (∑ l ∈ range (nc + 1), C l * t ^ l) :=
+      mul_le_mul t1 hCge hfC (mul_nonneg hAp hBp)
+    exact t2
+
+
 private lemma int_one_div_mul_sub {σ p q : ℝ} (hp : 0 < p) (hpq : p ≤ q) (hq : q < σ) :
     (∫ u in p..q, 1 / (u * (σ - u))) =
       (Real.log (q / (σ - q)) - Real.log (p / (σ - p))) / σ := by
@@ -5495,6 +5882,2813 @@ private lemma F4B_split :
   rw [← intervalIntegral.integral_add_adjacent_intervals F4B_ii0 F4B_ii1]
 
 
+/-! ### F5 pieces -/
+
+private lemma F5b_ii : IntervalIntegrable
+    (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+    volume ((299:ℚ)/1500) ((29:ℚ)/125) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.div
+  · apply ContinuousOn.mul
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · apply ContinuousOn.mul continuousOn_const
+      apply ContinuousOn.log (by fun_prop)
+      intro x hx
+      have h := hx.1; push_cast at h
+      exact ne_of_gt (div_pos (by linarith) (by norm_num))
+  · exact (by fun_prop : ContinuousOn (fun x : ℝ => (6 - 12*x)*x) (Set.Icc ((299:ℚ)/1500) ((29:ℚ)/125)))
+  · intro x hx
+    have h1 : (0:ℝ) < 6 - 12*x := by have h := hx.2; push_cast at h; linarith
+    have h2 : (0:ℝ) < x := by have h := hx.1; push_cast at h; linarith
+    exact ne_of_gt (mul_pos h1 h2)
+
+private lemma F5b_p0 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((1843:ℚ)/9000) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_p1 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1843:ℚ)/9000) ((473:ℚ)/2250) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_p2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((473:ℚ)/2250) ((647:ℚ)/3000) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_p3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((647:ℚ)/3000) ((199:ℚ)/900) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_p4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((199:ℚ)/900) ((2039:ℚ)/9000) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_p5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((2039:ℚ)/9000) ((29:ℚ)/125) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_cum2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((473:ℚ)/2250) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_cum3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((647:ℚ)/3000) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_cum4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((199:ℚ)/900) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_cum5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((2039:ℚ)/9000) :=
+  ii_mono F5b_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5b_split :
+    (∫ x in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      = ((((((∫ x in ((299:ℚ)/1500)..((1843:ℚ)/9000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) + (∫ x in ((1843:ℚ)/9000)..((473:ℚ)/2250), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((473:ℚ)/2250)..((647:ℚ)/3000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((647:ℚ)/3000)..((199:ℚ)/900), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((199:ℚ)/900)..((2039:ℚ)/9000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((2039:ℚ)/9000)..((29:ℚ)/125), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) := by
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5b_cum5 F5b_p5]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5b_cum4 F5b_p4]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5b_cum3 F5b_p3]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5b_cum2 F5b_p2]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5b_p0 F5b_p1]
+
+private lemma F5b_iiD : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+    volume ((299:ℚ)/1500) ((29:ℚ)/125) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div (continuousOn_id.sub continuousOn_const) continuousOn_const
+        intro x hx
+        exact ne_of_gt (by norm_num [kappa1])
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        simp only [kappa1]
+        exact ne_of_gt (div_pos (by linarith) (by linarith))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5b_form :
+    (∫ s in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+      = (∫ s in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*s) * (((1 : ℚ) : ℝ) * Real.log ((s - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*s)*s)) := by
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le (by push_cast; norm_num)] at hs
+  have hs0 : (0:ℝ) < s := by have h := hs.1; push_cast at h; linarith
+  have hs6 : (0:ℝ) < 6 - 12*s := by have h := hs.2; push_cast at h; linarith
+  have hsk : (0:ℝ) < s - kappa1 := by
+    rw [kappa1]
+    have h := hs.1
+    push_cast at h
+    norm_num at h ⊢
+    linarith
+  simp only [kappa1] at hsk ⊢
+  push_cast at hsk ⊢
+  field_simp
+  try ring
+
+private lemma F5b_pan0 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3637:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3637:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3637:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3637:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3637:ℚ)/18000) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) - (((1:ℚ)/6/((3637:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3637:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3637:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3637:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3637:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3637:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((299:ℚ)/1500) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((299:ℚ)/1500) : ℚ) : ℝ)..((((1843:ℚ)/9000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((299:ℚ)/1500)) (q := ((1843:ℚ)/9000)) (c := ((3637:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1843:ℚ)/9000))) - 1) / ((((5:ℚ) - 12*((1843:ℚ)/9000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3637:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((3637:ℚ)/18000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3637:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((3637:ℚ)/18000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((3637:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((3637:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((3637:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((3637:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1843:ℚ)/9000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1843:ℚ)/9000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3637:ℚ)/18000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1843:ℚ)/9000))) - 1) / ((((5:ℚ) - 12*((1843:ℚ)/9000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5b_pan0_cert : (((315229853:ℚ)/125000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3637:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3637:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3637:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3637:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((3637:ℚ)/18000) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) - (((1:ℚ)/6/((3637:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3637:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3637:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3637:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3637:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3637:ℚ)/18000))))^l)) *
+      ((((((1843:ℚ)/9000)) - (((3637:ℚ)/18000))) ^ (i + j + l + 1) - ((((299:ℚ)/1500)) - (((3637:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5b_pan0_certR : ((((315229853:ℚ)/125000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3637:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3637:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3637:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3637:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3637:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3637:ℚ)/18000) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) - (((1:ℚ)/6/((3637:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3637:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3637:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3637:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3637:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3637:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((299:ℚ)/1500) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5b_pan0_cert
+  exact_mod_cast h
+
+
+private lemma F5b_pan1 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((83:ℚ)/400))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((83:ℚ)/400)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((83:ℚ)/400)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((83:ℚ)/400)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((83:ℚ)/400) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) - (((1:ℚ)/6/((83:ℚ)/400) * ((((((49:ℚ)/18000) / ((83:ℚ)/400))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((83:ℚ)/400))))) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((83:ℚ)/400)^(l+1) + (2/(((6:ℚ) - 12*((83:ℚ)/400)))) * ((12:ℚ)/(((6:ℚ) - 12*((83:ℚ)/400))))^l) : ℚ) : ℝ) *
+          (((((((473:ℚ)/2250) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((1843:ℚ)/9000) : ℚ) : ℝ)..((((473:ℚ)/2250) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((1843:ℚ)/9000)) (q := ((473:ℚ)/2250)) (c := ((83:ℚ)/400)) (d := ((49:ℚ)/18000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((473:ℚ)/2250))) - 1) / ((((5:ℚ) - 12*((473:ℚ)/2250))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((83:ℚ)/400)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((83:ℚ)/400)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((83:ℚ)/400)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((83:ℚ)/400)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((83:ℚ)/400))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((83:ℚ)/400))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((83:ℚ)/400))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((83:ℚ)/400))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((473:ℚ)/2250)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((473:ℚ)/2250)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((83:ℚ)/400))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((473:ℚ)/2250))) - 1) / ((((5:ℚ) - 12*((473:ℚ)/2250))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5b_pan1_cert : (((1370985319:ℚ)/500000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((83:ℚ)/400))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((83:ℚ)/400)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((83:ℚ)/400)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((83:ℚ)/400)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((83:ℚ)/400) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) - (((1:ℚ)/6/((83:ℚ)/400) * ((((((49:ℚ)/18000) / ((83:ℚ)/400))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((83:ℚ)/400))))) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((83:ℚ)/400)^(l+1) + (2/(((6:ℚ) - 12*((83:ℚ)/400)))) * ((12:ℚ)/(((6:ℚ) - 12*((83:ℚ)/400))))^l)) *
+      ((((((473:ℚ)/2250)) - (((83:ℚ)/400))) ^ (i + j + l + 1) - ((((1843:ℚ)/9000)) - (((83:ℚ)/400))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5b_pan1_certR : ((((1370985319:ℚ)/500000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((83:ℚ)/400))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((83:ℚ)/400)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((83:ℚ)/400)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((83:ℚ)/400)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((83:ℚ)/400)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((83:ℚ)/400) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) - (((1:ℚ)/6/((83:ℚ)/400) * ((((((49:ℚ)/18000) / ((83:ℚ)/400))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((83:ℚ)/400))))) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((83:ℚ)/400)^(l+1) + (2/(((6:ℚ) - 12*((83:ℚ)/400)))) * ((12:ℚ)/(((6:ℚ) - 12*((83:ℚ)/400))))^l) : ℚ) : ℝ) *
+          (((((((473:ℚ)/2250) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5b_pan1_cert
+  exact_mod_cast h
+
+
+private lemma F5b_pan2 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3833:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3833:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3833:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3833:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3833:ℚ)/18000) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) - (((1:ℚ)/6/((3833:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3833:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3833:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3833:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3833:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3833:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((473:ℚ)/2250) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((473:ℚ)/2250) : ℚ) : ℝ)..((((647:ℚ)/3000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((473:ℚ)/2250)) (q := ((647:ℚ)/3000)) (c := ((3833:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((647:ℚ)/3000))) - 1) / ((((5:ℚ) - 12*((647:ℚ)/3000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3833:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((3833:ℚ)/18000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3833:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((3833:ℚ)/18000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((3833:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((3833:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((3833:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((3833:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((647:ℚ)/3000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((647:ℚ)/3000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3833:ℚ)/18000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((647:ℚ)/3000))) - 1) / ((((5:ℚ) - 12*((647:ℚ)/3000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5b_pan2_cert : (((2929304607:ℚ)/1000000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3833:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3833:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3833:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3833:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((3833:ℚ)/18000) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) - (((1:ℚ)/6/((3833:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3833:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3833:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3833:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3833:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3833:ℚ)/18000))))^l)) *
+      ((((((647:ℚ)/3000)) - (((3833:ℚ)/18000))) ^ (i + j + l + 1) - ((((473:ℚ)/2250)) - (((3833:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5b_pan2_certR : ((((2929304607:ℚ)/1000000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3833:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3833:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3833:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3833:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3833:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3833:ℚ)/18000) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) - (((1:ℚ)/6/((3833:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3833:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3833:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3833:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3833:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3833:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((473:ℚ)/2250) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5b_pan2_cert
+  exact_mod_cast h
+
+
+private lemma F5b_pan3 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3931:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3931:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3931:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3931:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3931:ℚ)/18000) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) - (((1:ℚ)/6/((3931:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3931:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3931:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3931:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3931:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3931:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((199:ℚ)/900) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((647:ℚ)/3000) : ℚ) : ℝ)..((((199:ℚ)/900) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((647:ℚ)/3000)) (q := ((199:ℚ)/900)) (c := ((3931:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((199:ℚ)/900))) - 1) / ((((5:ℚ) - 12*((199:ℚ)/900))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3931:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((3931:ℚ)/18000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3931:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((3931:ℚ)/18000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((3931:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((3931:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((3931:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((3931:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((199:ℚ)/900)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((199:ℚ)/900)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3931:ℚ)/18000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((199:ℚ)/900))) - 1) / ((((5:ℚ) - 12*((199:ℚ)/900))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5b_pan3_cert : (((1543219931:ℚ)/500000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3931:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3931:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3931:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3931:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((3931:ℚ)/18000) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) - (((1:ℚ)/6/((3931:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3931:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3931:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3931:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3931:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3931:ℚ)/18000))))^l)) *
+      ((((((199:ℚ)/900)) - (((3931:ℚ)/18000))) ^ (i + j + l + 1) - ((((647:ℚ)/3000)) - (((3931:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5b_pan3_certR : ((((1543219931:ℚ)/500000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3931:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3931:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((3931:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((3931:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3931:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3931:ℚ)/18000) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) - (((1:ℚ)/6/((3931:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3931:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3931:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3931:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3931:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3931:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((199:ℚ)/900) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5b_pan3_cert
+  exact_mod_cast h
+
+
+private lemma F5b_pan4 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((1343:ℚ)/6000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1343:ℚ)/6000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((1343:ℚ)/6000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1343:ℚ)/6000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1343:ℚ)/6000) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) - (((1:ℚ)/6/((1343:ℚ)/6000) * ((((((49:ℚ)/18000) / ((1343:ℚ)/6000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((1343:ℚ)/6000))))) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1343:ℚ)/6000)^(l+1) + (2/(((6:ℚ) - 12*((1343:ℚ)/6000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1343:ℚ)/6000))))^l) : ℚ) : ℝ) *
+          (((((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((199:ℚ)/900) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((199:ℚ)/900) : ℚ) : ℝ)..((((2039:ℚ)/9000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((199:ℚ)/900)) (q := ((2039:ℚ)/9000)) (c := ((1343:ℚ)/6000)) (d := ((49:ℚ)/18000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2039:ℚ)/9000))) - 1) / ((((5:ℚ) - 12*((2039:ℚ)/9000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1343:ℚ)/6000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1343:ℚ)/6000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1343:ℚ)/6000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1343:ℚ)/6000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((1343:ℚ)/6000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((1343:ℚ)/6000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((1343:ℚ)/6000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((1343:ℚ)/6000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((2039:ℚ)/9000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((2039:ℚ)/9000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((1343:ℚ)/6000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2039:ℚ)/9000))) - 1) / ((((5:ℚ) - 12*((2039:ℚ)/9000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5b_pan4_cert : (((1607745867:ℚ)/500000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((1343:ℚ)/6000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1343:ℚ)/6000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((1343:ℚ)/6000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1343:ℚ)/6000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((1343:ℚ)/6000) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) - (((1:ℚ)/6/((1343:ℚ)/6000) * ((((((49:ℚ)/18000) / ((1343:ℚ)/6000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((1343:ℚ)/6000))))) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1343:ℚ)/6000)^(l+1) + (2/(((6:ℚ) - 12*((1343:ℚ)/6000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1343:ℚ)/6000))))^l)) *
+      ((((((2039:ℚ)/9000)) - (((1343:ℚ)/6000))) ^ (i + j + l + 1) - ((((199:ℚ)/900)) - (((1343:ℚ)/6000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5b_pan4_certR : ((((1607745867:ℚ)/500000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((1343:ℚ)/6000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1343:ℚ)/6000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1343:ℚ)/6000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((1343:ℚ)/6000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1343:ℚ)/6000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1343:ℚ)/6000) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) - (((1:ℚ)/6/((1343:ℚ)/6000) * ((((((49:ℚ)/18000) / ((1343:ℚ)/6000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((1343:ℚ)/6000))))) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1343:ℚ)/6000)^(l+1) + (2/(((6:ℚ) - 12*((1343:ℚ)/6000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1343:ℚ)/6000))))^l) : ℚ) : ℝ) *
+          (((((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((199:ℚ)/900) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5b_pan4_cert
+  exact_mod_cast h
+
+
+private lemma F5b_pan5 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((4127:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4127:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((4127:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4127:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4127:ℚ)/18000) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) - (((1:ℚ)/6/((4127:ℚ)/18000) * ((((((49:ℚ)/18000) / ((4127:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((4127:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4127:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((4127:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4127:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((29:ℚ)/125) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((2039:ℚ)/9000) : ℚ) : ℝ)..((((29:ℚ)/125) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((2039:ℚ)/9000)) (q := ((29:ℚ)/125)) (c := ((4127:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((29:ℚ)/125))) - 1) / ((((5:ℚ) - 12*((29:ℚ)/125))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4127:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((4127:ℚ)/18000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4127:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((4127:ℚ)/18000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((4127:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((4127:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((4127:ℚ)/18000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((4127:ℚ)/18000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((29:ℚ)/125)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((29:ℚ)/125)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((4127:ℚ)/18000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((29:ℚ)/125))) - 1) / ((((5:ℚ) - 12*((29:ℚ)/125))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5b_pan5_cert : (((1659076777:ℚ)/500000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((4127:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4127:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((4127:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4127:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((4127:ℚ)/18000) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) - (((1:ℚ)/6/((4127:ℚ)/18000) * ((((((49:ℚ)/18000) / ((4127:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((4127:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4127:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((4127:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4127:ℚ)/18000))))^l)) *
+      ((((((29:ℚ)/125)) - (((4127:ℚ)/18000))) ^ (i + j + l + 1) - ((((2039:ℚ)/9000)) - (((4127:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5b_pan5_certR : ((((1659076777:ℚ)/500000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((4127:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4127:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4127:ℚ)/18000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((49:ℚ)/18000) / ((((4127:ℚ)/18000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4127:ℚ)/18000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4127:ℚ)/18000) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) - (((1:ℚ)/6/((4127:ℚ)/18000) * ((((((49:ℚ)/18000) / ((4127:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((4127:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4127:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((4127:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4127:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((29:ℚ)/125) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5b_pan5_cert
+  exact_mod_cast h
+
+
+private lemma F5b_bound : ((((17813199219:ℚ)/1000000000000) : ℚ) : ℝ) ≤ ∫ s in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s) := by
+  rw [F5b_form, F5b_split]
+  have b0 := F5b_pan0
+  have c0 := F5b_pan0_certR
+  have b1 := F5b_pan1
+  have c1 := F5b_pan1_certR
+  have b2 := F5b_pan2
+  have c2 := F5b_pan2_certR
+  have b3 := F5b_pan3
+  have c3 := F5b_pan3_certR
+  have b4 := F5b_pan4
+  have c4 := F5b_pan4_certR
+  have b5 := F5b_pan5
+  have c5 := F5b_pan5_certR
+  linarith [b0, c0, b1, c1, b2, c2, b3, c3, b4, c4, b5, c5]
+
+private lemma F5P1_ii : IntervalIntegrable
+    (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+    volume ((299:ℚ)/1500) ((29:ℚ)/125) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.div
+  · apply ContinuousOn.mul
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · apply ContinuousOn.mul continuousOn_const
+      apply ContinuousOn.log (by fun_prop)
+      intro x hx
+      have h := hx.1; push_cast at h
+      exact ne_of_gt (div_pos (by linarith) (by norm_num))
+  · exact (by fun_prop : ContinuousOn (fun x : ℝ => (6 - 12*x)*x) (Set.Icc ((299:ℚ)/1500) ((29:ℚ)/125)))
+  · intro x hx
+    have h1 : (0:ℝ) < 6 - 12*x := by have h := hx.2; push_cast at h; linarith
+    have h2 : (0:ℝ) < x := by have h := hx.1; push_cast at h; linarith
+    exact ne_of_gt (mul_pos h1 h2)
+
+private lemma F5P1_p0 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((1843:ℚ)/9000) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_p1 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1843:ℚ)/9000) ((473:ℚ)/2250) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_p2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((473:ℚ)/2250) ((647:ℚ)/3000) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_p3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((647:ℚ)/3000) ((199:ℚ)/900) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_p4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((199:ℚ)/900) ((2039:ℚ)/9000) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_p5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((2039:ℚ)/9000) ((29:ℚ)/125) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_cum2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((473:ℚ)/2250) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_cum3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((647:ℚ)/3000) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_cum4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((199:ℚ)/900) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_cum5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((299:ℚ)/1500) ((2039:ℚ)/9000) :=
+  ii_mono F5P1_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5P1_split :
+    (∫ x in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      = ((((((∫ x in ((299:ℚ)/1500)..((1843:ℚ)/9000), Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) + (∫ x in ((1843:ℚ)/9000)..((473:ℚ)/2250), Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((473:ℚ)/2250)..((647:ℚ)/3000), Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((647:ℚ)/3000)..((199:ℚ)/900), Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((199:ℚ)/900)..((2039:ℚ)/9000), Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((2039:ℚ)/9000)..((29:ℚ)/125), Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) := by
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5P1_cum5 F5P1_p5]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5P1_cum4 F5P1_p4]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5P1_cum3 F5P1_p3]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5P1_cum2 F5P1_p2]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5P1_p0 F5P1_p1]
+
+private lemma F5P1_iiD : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log (kappa2 / (s - kappa2)) / s))
+    volume ((299:ℚ)/1500) ((29:ℚ)/125) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div continuousOn_const (continuousOn_id.sub continuousOn_const)
+        intro x hx
+        have h := hx.1
+        push_cast at h
+        have hk : kappa2 < x := by rw [kappa2]; linarith
+        exact ne_of_gt (sub_pos.mpr hk)
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        simp only [kappa2]
+        exact ne_of_gt (div_pos (by linarith) (by linarith))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5P1_form :
+    (∫ s in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log (kappa2 / (s - kappa2)) / s))
+      = (∫ s in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*s) * (((-1 : ℚ) : ℝ) * Real.log ((s - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*s)*s)) := by
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le (by push_cast; norm_num)] at hs
+  have hs0 : (0:ℝ) < s := by have h := hs.1; push_cast at h; linarith
+  have hs6 : (0:ℝ) < 6 - 12*s := by have h := hs.2; push_cast at h; linarith
+  have hsk : (0:ℝ) < s - kappa2 := by
+    rw [kappa2]
+    have h := hs.1
+    push_cast at h
+    norm_num at h ⊢
+    linarith
+  simp only [kappa2] at hsk ⊢
+  push_cast at hsk ⊢
+  rw [Real.log_div (by norm_num : ((29:ℝ)/250) ≠ 0) (ne_of_gt hsk),
+    Real.log_div (ne_of_gt hsk) (by norm_num : ((29:ℝ)/250) ≠ 0)]
+  field_simp
+  try ring
+
+private lemma F5P1_pan0 :
+    (∫ x in ((((299:ℚ)/1500) : ℚ) : ℝ)..((((1843:ℚ)/9000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3637:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3637:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3637:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3637:ℚ)/18000) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) + (((1:ℚ)/6/((3637:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3637:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3637:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3637:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3637:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3637:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((299:ℚ)/1500) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((299:ℚ)/1500)) (q := ((1843:ℚ)/9000)) (c := ((3637:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := -1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ 2))) (lB := (-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3637:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((3637:ℚ)/18000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ)) (by norm_num)).2
+    simp only [Rat.cast_neg] at ⊢
+    rw [rat_logUpper_cast 40 (((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ)]
+    have e : ((((((((3637:ℚ)/18000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) = (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ))⁻¹ := by push_cast; norm_num
+    rw [e, Real.log_inv]
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) ≤ 1 := by
+      rw [div_le_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.2]
+    have h2 : (0:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      apply div_nonneg _ (by norm_num)
+      push_cast
+      linarith [hx.1]
+    have h3 := Real.log_nonpos h2 h1
+    push_cast at h3 ⊢
+    linarith [h3])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5P1_pan0_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3637:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3637:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3637:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((3637:ℚ)/18000) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) + (((1:ℚ)/6/((3637:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3637:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3637:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3637:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3637:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3637:ℚ)/18000))))^l)) *
+      ((((((1843:ℚ)/9000)) - (((3637:ℚ)/18000))) ^ (i + j + l + 1) - ((((299:ℚ)/1500)) - (((3637:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((17051183:ℚ)/8000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5P1_pan0_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3637:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3637:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3637:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3637:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3637:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3637:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3637:ℚ)/18000) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) + (((1:ℚ)/6/((3637:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3637:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3637:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3637:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3637:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3637:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3637:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3637:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((299:ℚ)/1500) : ℚ) : ℝ) - ((((3637:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((17051183:ℚ)/8000000000) : ℚ) : ℝ) := by
+  have h := F5P1_pan0_cert
+  exact_mod_cast h
+
+
+private lemma F5P1_pan1 :
+    (∫ x in ((((1843:ℚ)/9000) : ℚ) : ℝ)..((((473:ℚ)/2250) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((83:ℚ)/400))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((83:ℚ)/400)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((83:ℚ)/400)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((83:ℚ)/400)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((83:ℚ)/400) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) + (((1:ℚ)/6/((83:ℚ)/400) * ((((((49:ℚ)/18000) / ((83:ℚ)/400))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((83:ℚ)/400))))) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((83:ℚ)/400)^(l+1) + (2/(((6:ℚ) - 12*((83:ℚ)/400)))) * ((12:ℚ)/(((6:ℚ) - 12*((83:ℚ)/400))))^l) : ℚ) : ℝ) *
+          (((((((473:ℚ)/2250) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((1843:ℚ)/9000)) (q := ((473:ℚ)/2250)) (c := ((83:ℚ)/400)) (d := ((49:ℚ)/18000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := -1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ 2))) (lB := (-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((83:ℚ)/400)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((83:ℚ)/400)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250)))) : ℚ) : ℝ)) (by norm_num)).2
+    simp only [Rat.cast_neg] at ⊢
+    rw [rat_logUpper_cast 40 (((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250)))) : ℚ)]
+    have e : ((((((((83:ℚ)/400)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) = (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250)))) : ℚ) : ℝ))⁻¹ := by push_cast; norm_num
+    rw [e, Real.log_inv]
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) ≤ 1 := by
+      rw [div_le_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.2]
+    have h2 : (0:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      apply div_nonneg _ (by norm_num)
+      push_cast
+      linarith [hx.1]
+    have h3 := Real.log_nonpos h2 h1
+    push_cast at h3 ⊢
+    linarith [h3])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5P1_pan1_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((83:ℚ)/400))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((83:ℚ)/400)))^i / (i:ℚ))) * ((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((83:ℚ)/400)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((83:ℚ)/400)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((83:ℚ)/400) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) + (((1:ℚ)/6/((83:ℚ)/400) * ((((((49:ℚ)/18000) / ((83:ℚ)/400))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((83:ℚ)/400))))) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((83:ℚ)/400)^(l+1) + (2/(((6:ℚ) - 12*((83:ℚ)/400)))) * ((12:ℚ)/(((6:ℚ) - 12*((83:ℚ)/400))))^l)) *
+      ((((((473:ℚ)/2250)) - (((83:ℚ)/400))) ^ (i + j + l + 1) - ((((1843:ℚ)/9000)) - (((83:ℚ)/400))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((8172183:ℚ)/5000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5P1_pan1_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((83:ℚ)/400))) - 1) / ((((5:ℚ) - 12*((83:ℚ)/400))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((83:ℚ)/400))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((83:ℚ)/400)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((83:ℚ)/400)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((83:ℚ)/400)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((83:ℚ)/400)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((83:ℚ)/400) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) + (((1:ℚ)/6/((83:ℚ)/400) * ((((((49:ℚ)/18000) / ((83:ℚ)/400))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((83:ℚ)/400))))) + 2/(((6:ℚ) - 12*((83:ℚ)/400))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((83:ℚ)/400)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((83:ℚ)/400)^(l+1) + (2/(((6:ℚ) - 12*((83:ℚ)/400)))) * ((12:ℚ)/(((6:ℚ) - 12*((83:ℚ)/400))))^l) : ℚ) : ℝ) *
+          (((((((473:ℚ)/2250) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1843:ℚ)/9000) : ℚ) : ℝ) - ((((83:ℚ)/400) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((8172183:ℚ)/5000000000) : ℚ) : ℝ) := by
+  have h := F5P1_pan1_cert
+  exact_mod_cast h
+
+
+private lemma F5P1_pan2 :
+    (∫ x in ((((473:ℚ)/2250) : ℚ) : ℝ)..((((647:ℚ)/3000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3833:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3833:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3833:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3833:ℚ)/18000) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) + (((1:ℚ)/6/((3833:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3833:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3833:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3833:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3833:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3833:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((473:ℚ)/2250) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((473:ℚ)/2250)) (q := ((647:ℚ)/3000)) (c := ((3833:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := -1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ 2))) (lB := (-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3833:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((3833:ℚ)/18000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ)) (by norm_num)).2
+    simp only [Rat.cast_neg] at ⊢
+    rw [rat_logUpper_cast 40 (((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ)]
+    have e : ((((((((3833:ℚ)/18000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) = (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ))⁻¹ := by push_cast; norm_num
+    rw [e, Real.log_inv]
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) ≤ 1 := by
+      rw [div_le_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.2]
+    have h2 : (0:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      apply div_nonneg _ (by norm_num)
+      push_cast
+      linarith [hx.1]
+    have h3 := Real.log_nonpos h2 h1
+    push_cast at h3 ⊢
+    linarith [h3])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5P1_pan2_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3833:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3833:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3833:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((3833:ℚ)/18000) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) + (((1:ℚ)/6/((3833:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3833:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3833:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3833:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3833:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3833:ℚ)/18000))))^l)) *
+      ((((((647:ℚ)/3000)) - (((3833:ℚ)/18000))) ^ (i + j + l + 1) - ((((473:ℚ)/2250)) - (((3833:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((596340963:ℚ)/500000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5P1_pan2_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3833:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3833:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3833:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3833:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3833:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3833:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3833:ℚ)/18000) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) + (((1:ℚ)/6/((3833:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3833:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3833:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3833:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3833:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3833:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3833:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3833:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((473:ℚ)/2250) : ℚ) : ℝ) - ((((3833:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((596340963:ℚ)/500000000000) : ℚ) : ℝ) := by
+  have h := F5P1_pan2_cert
+  exact_mod_cast h
+
+
+private lemma F5P1_pan3 :
+    (∫ x in ((((647:ℚ)/3000) : ℚ) : ℝ)..((((199:ℚ)/900) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3931:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3931:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3931:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3931:ℚ)/18000) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) + (((1:ℚ)/6/((3931:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3931:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3931:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3931:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3931:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3931:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((199:ℚ)/900) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((647:ℚ)/3000)) (q := ((199:ℚ)/900)) (c := ((3931:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := -1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ 2))) (lB := (-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3931:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((3931:ℚ)/18000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ)) (by norm_num)).2
+    simp only [Rat.cast_neg] at ⊢
+    rw [rat_logUpper_cast 40 (((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ)]
+    have e : ((((((((3931:ℚ)/18000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) = (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ))⁻¹ := by push_cast; norm_num
+    rw [e, Real.log_inv]
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) ≤ 1 := by
+      rw [div_le_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.2]
+    have h2 : (0:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      apply div_nonneg _ (by norm_num)
+      push_cast
+      linarith [hx.1]
+    have h3 := Real.log_nonpos h2 h1
+    push_cast at h3 ⊢
+    linarith [h3])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5P1_pan3_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3931:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3931:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3931:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((3931:ℚ)/18000) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) + (((1:ℚ)/6/((3931:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3931:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3931:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3931:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3931:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3931:ℚ)/18000))))^l)) *
+      ((((((199:ℚ)/900)) - (((3931:ℚ)/18000))) ^ (i + j + l + 1) - ((((647:ℚ)/3000)) - (((3931:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((199990993:ℚ)/250000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5P1_pan3_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((3931:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((3931:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((3931:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((3931:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((3931:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((3931:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((3931:ℚ)/18000) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) + (((1:ℚ)/6/((3931:ℚ)/18000) * ((((((49:ℚ)/18000) / ((3931:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((3931:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((3931:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((3931:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((3931:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((3931:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((3931:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((199:ℚ)/900) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((647:ℚ)/3000) : ℚ) : ℝ) - ((((3931:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((199990993:ℚ)/250000000000) : ℚ) : ℝ) := by
+  have h := F5P1_pan3_cert
+  exact_mod_cast h
+
+
+private lemma F5P1_pan4 :
+    (∫ x in ((((199:ℚ)/900) : ℚ) : ℝ)..((((2039:ℚ)/9000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((1343:ℚ)/6000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1343:ℚ)/6000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1343:ℚ)/6000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1343:ℚ)/6000) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) + (((1:ℚ)/6/((1343:ℚ)/6000) * ((((((49:ℚ)/18000) / ((1343:ℚ)/6000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((1343:ℚ)/6000))))) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1343:ℚ)/6000)^(l+1) + (2/(((6:ℚ) - 12*((1343:ℚ)/6000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1343:ℚ)/6000))))^l) : ℚ) : ℝ) *
+          (((((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((199:ℚ)/900) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((199:ℚ)/900)) (q := ((2039:ℚ)/9000)) (c := ((1343:ℚ)/6000)) (d := ((49:ℚ)/18000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := -1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ 2))) (lB := (-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1343:ℚ)/6000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((1343:ℚ)/6000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250)))) : ℚ) : ℝ)) (by norm_num)).2
+    simp only [Rat.cast_neg] at ⊢
+    rw [rat_logUpper_cast 40 (((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250)))) : ℚ)]
+    have e : ((((((((1343:ℚ)/6000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) = (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250)))) : ℚ) : ℝ))⁻¹ := by push_cast; norm_num
+    rw [e, Real.log_inv]
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) ≤ 1 := by
+      rw [div_le_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.2]
+    have h2 : (0:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      apply div_nonneg _ (by norm_num)
+      push_cast
+      linarith [hx.1]
+    have h3 := Real.log_nonpos h2 h1
+    push_cast at h3 ⊢
+    linarith [h3])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5P1_pan4_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((1343:ℚ)/6000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1343:ℚ)/6000)))^i / (i:ℚ))) * ((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1343:ℚ)/6000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((1343:ℚ)/6000) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) + (((1:ℚ)/6/((1343:ℚ)/6000) * ((((((49:ℚ)/18000) / ((1343:ℚ)/6000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((1343:ℚ)/6000))))) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1343:ℚ)/6000)^(l+1) + (2/(((6:ℚ) - 12*((1343:ℚ)/6000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1343:ℚ)/6000))))^l)) *
+      ((((((2039:ℚ)/9000)) - (((1343:ℚ)/6000))) ^ (i + j + l + 1) - ((((199:ℚ)/900)) - (((1343:ℚ)/6000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((112798451:ℚ)/250000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5P1_pan4_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1343:ℚ)/6000))) - 1) / ((((5:ℚ) - 12*((1343:ℚ)/6000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((1343:ℚ)/6000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1343:ℚ)/6000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((1343:ℚ)/6000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1343:ℚ)/6000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1343:ℚ)/6000) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) + (((1:ℚ)/6/((1343:ℚ)/6000) * ((((((49:ℚ)/18000) / ((1343:ℚ)/6000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((1343:ℚ)/6000))))) + 2/(((6:ℚ) - 12*((1343:ℚ)/6000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((1343:ℚ)/6000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1343:ℚ)/6000)^(l+1) + (2/(((6:ℚ) - 12*((1343:ℚ)/6000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1343:ℚ)/6000))))^l) : ℚ) : ℝ) *
+          (((((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((199:ℚ)/900) : ℚ) : ℝ) - ((((1343:ℚ)/6000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((112798451:ℚ)/250000000000) : ℚ) : ℝ) := by
+  have h := F5P1_pan4_cert
+  exact_mod_cast h
+
+
+private lemma F5P1_pan5 :
+    (∫ x in ((((2039:ℚ)/9000) : ℚ) : ℝ)..((((29:ℚ)/125) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((-1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((4127:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4127:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4127:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4127:ℚ)/18000) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) + (((1:ℚ)/6/((4127:ℚ)/18000) * ((((((49:ℚ)/18000) / ((4127:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((4127:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4127:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((4127:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4127:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((29:ℚ)/125) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((2039:ℚ)/9000)) (q := ((29:ℚ)/125)) (c := ((4127:ℚ)/18000)) (d := ((49:ℚ)/18000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := -1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ 2))) (lB := (-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4127:ℚ)/18000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((4127:ℚ)/18000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ)) (by norm_num)).2
+    simp only [Rat.cast_neg] at ⊢
+    rw [rat_logUpper_cast 40 (((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ)]
+    have e : ((((((((4127:ℚ)/18000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) = (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250)))) : ℚ) : ℝ))⁻¹ := by push_cast; norm_num
+    rw [e, Real.log_inv]
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) ≤ 1 := by
+      rw [div_le_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.2]
+    have h2 : (0:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      apply div_nonneg _ (by norm_num)
+      push_cast
+      linarith [hx.1]
+    have h3 := Real.log_nonpos h2 h1
+    push_cast at h3 ⊢
+    linarith [h3])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5P1_pan5_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((4127:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4127:ℚ)/18000)))^i / (i:ℚ))) * ((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4127:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((4127:ℚ)/18000) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) + (((1:ℚ)/6/((4127:ℚ)/18000) * ((((((49:ℚ)/18000) / ((4127:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((4127:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4127:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((4127:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4127:ℚ)/18000))))^l)) *
+      ((((((29:ℚ)/125)) - (((4127:ℚ)/18000))) ^ (i + j + l + 1) - ((((2039:ℚ)/9000)) - (((4127:ℚ)/18000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((5686657:ℚ)/40000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5P1_pan5_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4127:ℚ)/18000))) - 1) / ((((5:ℚ) - 12*((4127:ℚ)/18000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((49:ℚ)/18000)) / ((5:ℚ) - 12*((4127:ℚ)/18000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4127:ℚ)/18000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then -1*((-((2 * (∑ j ∈ range 40, ((((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ (2 * 40 + 1) / (1 - (((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) - 1) / ((((((29:ℚ)/250)) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250))))) + 1)) ^ 2)))) + 2 * ((((49:ℚ)/18000) / ((((4127:ℚ)/18000)) - (((29:ℚ)/250)))))^(6+1) else -1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4127:ℚ)/18000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4127:ℚ)/18000) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) + (((1:ℚ)/6/((4127:ℚ)/18000) * ((((((49:ℚ)/18000) / ((4127:ℚ)/18000))))^(6+1)/(1 - ((((49:ℚ)/18000) / ((4127:ℚ)/18000))))) + 2/(((6:ℚ) - 12*((4127:ℚ)/18000))) * ((((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))^(6+1)/(1 - ((((12:ℚ)*((49:ℚ)/18000)) / ((6:ℚ) - 12*((4127:ℚ)/18000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4127:ℚ)/18000)^(l+1) + (2/(((6:ℚ) - 12*((4127:ℚ)/18000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4127:ℚ)/18000))))^l) : ℚ) : ℝ) *
+          (((((((29:ℚ)/125) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2039:ℚ)/9000) : ℚ) : ℝ) - ((((4127:ℚ)/18000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((5686657:ℚ)/40000000000) : ℚ) : ℝ) := by
+  have h := F5P1_pan5_cert
+  exact_mod_cast h
+
+
+private lemma F5P1_bound : (∫ s in ((299:ℚ)/1500)..((29:ℚ)/125), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log (kappa2 / (s - kappa2)) / s)) ≤ ((((3175920301:ℚ)/500000000000) : ℚ) : ℝ) := by
+  rw [F5P1_form, F5P1_split]
+  have b0 := F5P1_pan0
+  have c0 := F5P1_pan0_certR
+  have b1 := F5P1_pan1
+  have c1 := F5P1_pan1_certR
+  have b2 := F5P1_pan2
+  have c2 := F5P1_pan2_certR
+  have b3 := F5P1_pan3
+  have c3 := F5P1_pan3_certR
+  have b4 := F5P1_pan4
+  have c4 := F5P1_pan4_certR
+  have b5 := F5P1_pan5
+  have c5 := F5P1_pan5_certR
+  linarith [b0, c0, b1, c1, b2, c2, b3, c3, b4, c4, b5, c5]
+
+private lemma F5d_ii : IntervalIntegrable
+    (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+    volume ((29:ℚ)/125) ((999997:ℚ)/3000000) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.div
+  · apply ContinuousOn.mul
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · apply ContinuousOn.mul continuousOn_const
+      apply ContinuousOn.log (by fun_prop)
+      intro x hx
+      have h := hx.1; push_cast at h
+      exact ne_of_gt (div_pos (by linarith) (by norm_num))
+  · exact (by fun_prop : ContinuousOn (fun x : ℝ => (6 - 12*x)*x) (Set.Icc ((29:ℚ)/125) ((999997:ℚ)/3000000)))
+  · intro x hx
+    have h1 : (0:ℝ) < 6 - 12*x := by have h := hx.2; push_cast at h; linarith
+    have h2 : (0:ℝ) < x := by have h := hx.1; push_cast at h; linarith
+    exact ne_of_gt (mul_pos h1 h2)
+
+private lemma F5d_p0 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((5871997:ℚ)/24000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_p1 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((5871997:ℚ)/24000000) ((3087997:ℚ)/12000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_p2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((3087997:ℚ)/12000000) ((2159997:ℚ)/8000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_p3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((2159997:ℚ)/8000000) ((1695997:ℚ)/6000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_p4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1695997:ℚ)/6000000) ((1417597:ℚ)/4800000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_p5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1417597:ℚ)/4800000) ((1231997:ℚ)/4000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_p6 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1231997:ℚ)/4000000) ((7695979:ℚ)/24000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_p7 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((7695979:ℚ)/24000000) ((999997:ℚ)/3000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_cum2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((3087997:ℚ)/12000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_cum3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((2159997:ℚ)/8000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_cum4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((1695997:ℚ)/6000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_cum5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((1417597:ℚ)/4800000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_cum6 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((1231997:ℚ)/4000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_cum7 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((7695979:ℚ)/24000000) :=
+  ii_mono F5d_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5d_split :
+    (∫ x in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      = ((((((((∫ x in ((29:ℚ)/125)..((5871997:ℚ)/24000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x)) + (∫ x in ((5871997:ℚ)/24000000)..((3087997:ℚ)/12000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((3087997:ℚ)/12000000)..((2159997:ℚ)/8000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((2159997:ℚ)/8000000)..((1695997:ℚ)/6000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((1695997:ℚ)/6000000)..((1417597:ℚ)/4800000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((1417597:ℚ)/4800000)..((1231997:ℚ)/4000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((1231997:ℚ)/4000000)..((7695979:ℚ)/24000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((7695979:ℚ)/24000000)..((999997:ℚ)/3000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x))) := by
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5d_cum7 F5d_p7]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5d_cum6 F5d_p6]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5d_cum5 F5d_p5]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5d_cum4 F5d_p4]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5d_cum3 F5d_p3]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5d_cum2 F5d_p2]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5d_p0 F5d_p1]
+
+private lemma F5d_iiD : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+    volume ((29:ℚ)/125) ((999997:ℚ)/3000000) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div (continuousOn_id.sub continuousOn_const) continuousOn_const
+        intro x hx
+        exact ne_of_gt (by norm_num [kappa1])
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        simp only [kappa1]
+        exact ne_of_gt (div_pos (by linarith) (by linarith))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5d_form :
+    (∫ s in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+      = (∫ s in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*s) * (((1 : ℚ) : ℝ) * Real.log ((s - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*s)*s)) := by
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le (by push_cast; norm_num)] at hs
+  have hs0 : (0:ℝ) < s := by have h := hs.1; push_cast at h; linarith
+  have hs6 : (0:ℝ) < 6 - 12*s := by have h := hs.2; push_cast at h; linarith
+  have hsk : (0:ℝ) < s - kappa1 := by
+    rw [kappa1]
+    have h := hs.1
+    push_cast at h
+    norm_num at h ⊢
+    linarith
+  simp only [kappa1] at hsk ⊢
+  push_cast at hsk ⊢
+  field_simp
+  try ring
+
+private lemma F5d_pan0 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((11439997:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((11439997:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((11439997:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((11439997:ℚ)/48000000) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) - (((1:ℚ)/6/((11439997:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((11439997:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((11439997:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((11439997:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((29:ℚ)/125) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((29:ℚ)/125) : ℚ) : ℝ)..((((5871997:ℚ)/24000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((29:ℚ)/125)) (q := ((5871997:ℚ)/24000000)) (c := ((11439997:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((5871997:ℚ)/24000000))) - 1) / ((((5:ℚ) - 12*((5871997:ℚ)/24000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((11439997:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((11439997:ℚ)/48000000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((11439997:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((11439997:ℚ)/48000000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((5871997:ℚ)/24000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((5871997:ℚ)/24000000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((11439997:ℚ)/48000000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((5871997:ℚ)/24000000))) - 1) / ((((5:ℚ) - 12*((5871997:ℚ)/24000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan0_cert : (((3989415821:ℚ)/500000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((11439997:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((11439997:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((11439997:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((11439997:ℚ)/48000000) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) - (((1:ℚ)/6/((11439997:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((11439997:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((11439997:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((11439997:ℚ)/48000000))))^l)) *
+      ((((((5871997:ℚ)/24000000)) - (((11439997:ℚ)/48000000))) ^ (i + j + l + 1) - ((((29:ℚ)/125)) - (((11439997:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan0_certR : ((((3989415821:ℚ)/500000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((11439997:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((11439997:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((11439997:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((11439997:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((11439997:ℚ)/48000000) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) - (((1:ℚ)/6/((11439997:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((11439997:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((11439997:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((11439997:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((29:ℚ)/125) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan0_cert
+  exact_mod_cast h
+
+
+private lemma F5d_pan1 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4015997:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4015997:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((4015997:ℚ)/16000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4015997:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) - (((1:ℚ)/6/((4015997:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4015997:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4015997:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4015997:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((5871997:ℚ)/24000000) : ℚ) : ℝ)..((((3087997:ℚ)/12000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((5871997:ℚ)/24000000)) (q := ((3087997:ℚ)/12000000)) (c := ((4015997:ℚ)/16000000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3087997:ℚ)/12000000))) - 1) / ((((5:ℚ) - 12*((3087997:ℚ)/12000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4015997:ℚ)/16000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((4015997:ℚ)/16000000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4015997:ℚ)/16000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((4015997:ℚ)/16000000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((3087997:ℚ)/12000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((3087997:ℚ)/12000000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4015997:ℚ)/16000000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((3087997:ℚ)/12000000))) - 1) / ((((5:ℚ) - 12*((3087997:ℚ)/12000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan1_cert : (((8101297997:ℚ)/1000000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4015997:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4015997:ℚ)/16000000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((4015997:ℚ)/16000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((4015997:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) - (((1:ℚ)/6/((4015997:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4015997:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4015997:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4015997:ℚ)/16000000))))^l)) *
+      ((((((3087997:ℚ)/12000000)) - (((4015997:ℚ)/16000000))) ^ (i + j + l + 1) - ((((5871997:ℚ)/24000000)) - (((4015997:ℚ)/16000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan1_certR : ((((8101297997:ℚ)/1000000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4015997:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4015997:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((4015997:ℚ)/16000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4015997:ℚ)/16000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4015997:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) - (((1:ℚ)/6/((4015997:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4015997:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4015997:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4015997:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan1_cert
+  exact_mod_cast h
+
+
+private lemma F5d_pan2 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((2531197:ℚ)/9600000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((2531197:ℚ)/9600000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((2531197:ℚ)/9600000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((2531197:ℚ)/9600000) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) - (((1:ℚ)/6/((2531197:ℚ)/9600000) * ((((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((2531197:ℚ)/9600000)^(l+1) + (2/(((6:ℚ) - 12*((2531197:ℚ)/9600000)))) * ((12:ℚ)/(((6:ℚ) - 12*((2531197:ℚ)/9600000))))^l) : ℚ) : ℝ) *
+          (((((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((3087997:ℚ)/12000000) : ℚ) : ℝ)..((((2159997:ℚ)/8000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((3087997:ℚ)/12000000)) (q := ((2159997:ℚ)/8000000)) (c := ((2531197:ℚ)/9600000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2159997:ℚ)/8000000))) - 1) / ((((5:ℚ) - 12*((2159997:ℚ)/8000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((2531197:ℚ)/9600000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((2531197:ℚ)/9600000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((2531197:ℚ)/9600000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((2531197:ℚ)/9600000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((2159997:ℚ)/8000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((2159997:ℚ)/8000000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((2531197:ℚ)/9600000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2159997:ℚ)/8000000))) - 1) / ((((5:ℚ) - 12*((2159997:ℚ)/8000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan2_cert : (((7932619367:ℚ)/1000000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((2531197:ℚ)/9600000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((2531197:ℚ)/9600000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((2531197:ℚ)/9600000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((2531197:ℚ)/9600000) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) - (((1:ℚ)/6/((2531197:ℚ)/9600000) * ((((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((2531197:ℚ)/9600000)^(l+1) + (2/(((6:ℚ) - 12*((2531197:ℚ)/9600000)))) * ((12:ℚ)/(((6:ℚ) - 12*((2531197:ℚ)/9600000))))^l)) *
+      ((((((2159997:ℚ)/8000000)) - (((2531197:ℚ)/9600000))) ^ (i + j + l + 1) - ((((3087997:ℚ)/12000000)) - (((2531197:ℚ)/9600000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan2_certR : ((((7932619367:ℚ)/1000000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((2531197:ℚ)/9600000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((2531197:ℚ)/9600000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((2531197:ℚ)/9600000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((2531197:ℚ)/9600000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((2531197:ℚ)/9600000) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) - (((1:ℚ)/6/((2531197:ℚ)/9600000) * ((((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((2531197:ℚ)/9600000)^(l+1) + (2/(((6:ℚ) - 12*((2531197:ℚ)/9600000)))) * ((12:ℚ)/(((6:ℚ) - 12*((2531197:ℚ)/9600000))))^l) : ℚ) : ℝ) *
+          (((((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan2_cert
+  exact_mod_cast h
+
+
+private lemma F5d_pan3 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((13263979:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((13263979:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((13263979:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((13263979:ℚ)/48000000) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) - (((1:ℚ)/6/((13263979:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((13263979:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((13263979:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((13263979:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((2159997:ℚ)/8000000) : ℚ) : ℝ)..((((1695997:ℚ)/6000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((2159997:ℚ)/8000000)) (q := ((1695997:ℚ)/6000000)) (c := ((13263979:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1695997:ℚ)/6000000))) - 1) / ((((5:ℚ) - 12*((1695997:ℚ)/6000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((13263979:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((13263979:ℚ)/48000000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((13263979:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((13263979:ℚ)/48000000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1695997:ℚ)/6000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1695997:ℚ)/6000000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((13263979:ℚ)/48000000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1695997:ℚ)/6000000))) - 1) / ((((5:ℚ) - 12*((1695997:ℚ)/6000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan3_cert : (((7461324771:ℚ)/1000000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((13263979:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((13263979:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((13263979:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((13263979:ℚ)/48000000) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) - (((1:ℚ)/6/((13263979:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((13263979:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((13263979:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((13263979:ℚ)/48000000))))^l)) *
+      ((((((1695997:ℚ)/6000000)) - (((13263979:ℚ)/48000000))) ^ (i + j + l + 1) - ((((2159997:ℚ)/8000000)) - (((13263979:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan3_certR : ((((7461324771:ℚ)/1000000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((13263979:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((13263979:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((13263979:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((13263979:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((13263979:ℚ)/48000000) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) - (((1:ℚ)/6/((13263979:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((13263979:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((13263979:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((13263979:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan3_cert
+  exact_mod_cast h
+
+
+private lemma F5d_pan4 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4623991:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4623991:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((4623991:ℚ)/16000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4623991:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) - (((1:ℚ)/6/((4623991:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4623991:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4623991:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4623991:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((1695997:ℚ)/6000000) : ℚ) : ℝ)..((((1417597:ℚ)/4800000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((1695997:ℚ)/6000000)) (q := ((1417597:ℚ)/4800000)) (c := ((4623991:ℚ)/16000000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1417597:ℚ)/4800000))) - 1) / ((((5:ℚ) - 12*((1417597:ℚ)/4800000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4623991:ℚ)/16000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((4623991:ℚ)/16000000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4623991:ℚ)/16000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((4623991:ℚ)/16000000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1417597:ℚ)/4800000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1417597:ℚ)/4800000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4623991:ℚ)/16000000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1417597:ℚ)/4800000))) - 1) / ((((5:ℚ) - 12*((1417597:ℚ)/4800000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan4_cert : (((1663628187:ℚ)/250000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4623991:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4623991:ℚ)/16000000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((4623991:ℚ)/16000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((4623991:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) - (((1:ℚ)/6/((4623991:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4623991:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4623991:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4623991:ℚ)/16000000))))^l)) *
+      ((((((1417597:ℚ)/4800000)) - (((4623991:ℚ)/16000000))) ^ (i + j + l + 1) - ((((1695997:ℚ)/6000000)) - (((4623991:ℚ)/16000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan4_certR : ((((1663628187:ℚ)/250000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4623991:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4623991:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((4623991:ℚ)/16000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4623991:ℚ)/16000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4623991:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) - (((1:ℚ)/6/((4623991:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4623991:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4623991:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4623991:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan4_cert
+  exact_mod_cast h
+
+
+private lemma F5d_pan5 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((14479967:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((14479967:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((14479967:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((14479967:ℚ)/48000000) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) - (((1:ℚ)/6/((14479967:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((14479967:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((14479967:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((14479967:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((1417597:ℚ)/4800000) : ℚ) : ℝ)..((((1231997:ℚ)/4000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((1417597:ℚ)/4800000)) (q := ((1231997:ℚ)/4000000)) (c := ((14479967:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1231997:ℚ)/4000000))) - 1) / ((((5:ℚ) - 12*((1231997:ℚ)/4000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((14479967:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((14479967:ℚ)/48000000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((14479967:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((14479967:ℚ)/48000000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1231997:ℚ)/4000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1231997:ℚ)/4000000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((14479967:ℚ)/48000000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1231997:ℚ)/4000000))) - 1) / ((((5:ℚ) - 12*((1231997:ℚ)/4000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan5_cert : (((5452921769:ℚ)/1000000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((14479967:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((14479967:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((14479967:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((14479967:ℚ)/48000000) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) - (((1:ℚ)/6/((14479967:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((14479967:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((14479967:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((14479967:ℚ)/48000000))))^l)) *
+      ((((((1231997:ℚ)/4000000)) - (((14479967:ℚ)/48000000))) ^ (i + j + l + 1) - ((((1417597:ℚ)/4800000)) - (((14479967:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan5_certR : ((((5452921769:ℚ)/1000000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((14479967:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((14479967:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((14479967:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((14479967:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((14479967:ℚ)/48000000) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) - (((1:ℚ)/6/((14479967:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((14479967:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((14479967:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((14479967:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan5_cert
+  exact_mod_cast h
+
+
+private lemma F5d_pan6 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((15087961:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((15087961:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((15087961:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((15087961:ℚ)/48000000) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) - (((1:ℚ)/6/((15087961:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((15087961:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((15087961:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((15087961:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((1231997:ℚ)/4000000) : ℚ) : ℝ)..((((7695979:ℚ)/24000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((1231997:ℚ)/4000000)) (q := ((7695979:ℚ)/24000000)) (c := ((15087961:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((7695979:ℚ)/24000000))) - 1) / ((((5:ℚ) - 12*((7695979:ℚ)/24000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((15087961:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((15087961:ℚ)/48000000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((15087961:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((15087961:ℚ)/48000000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((7695979:ℚ)/24000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((7695979:ℚ)/24000000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((15087961:ℚ)/48000000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((7695979:ℚ)/24000000))) - 1) / ((((5:ℚ) - 12*((7695979:ℚ)/24000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan6_cert : (((376129909:ℚ)/100000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((15087961:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((15087961:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((15087961:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((15087961:ℚ)/48000000) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) - (((1:ℚ)/6/((15087961:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((15087961:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((15087961:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((15087961:ℚ)/48000000))))^l)) *
+      ((((((7695979:ℚ)/24000000)) - (((15087961:ℚ)/48000000))) ^ (i + j + l + 1) - ((((1231997:ℚ)/4000000)) - (((15087961:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan6_certR : ((((376129909:ℚ)/100000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((15087961:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((15087961:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((15087961:ℚ)/48000000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((15087961:ℚ)/48000000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((15087961:ℚ)/48000000) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) - (((1:ℚ)/6/((15087961:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((15087961:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((15087961:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((15087961:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan6_cert
+  exact_mod_cast h
+
+
+private lemma F5d_pan7 :
+    (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((1046397:ℚ)/3200000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1046397:ℚ)/3200000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((1046397:ℚ)/3200000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1046397:ℚ)/3200000) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) - (((1:ℚ)/6/((1046397:ℚ)/3200000) * ((((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1046397:ℚ)/3200000)^(l+1) + (2/(((6:ℚ) - 12*((1046397:ℚ)/3200000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1046397:ℚ)/3200000))))^l) : ℚ) : ℝ) *
+          (((((((999997:ℚ)/3000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)))
+      ≤ ∫ x in ((((7695979:ℚ)/24000000) : ℚ) : ℝ)..((((999997:ℚ)/3000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ))) / ((6 - 12*x)*x) := by
+  exact panel_low (p := ((7695979:ℚ)/24000000)) (q := ((999997:ℚ)/3000000)) (c := ((1046397:ℚ)/3200000)) (d := ((303997:ℚ)/48000000)) (a := ((1:ℚ)/12)) (r := ((1:ℚ)/12)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (lB := (2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (mlA := (2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((999997:ℚ)/3000000))) - 1) / ((((5:ℚ) - 12*((999997:ℚ)/3000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1046397:ℚ)/3200000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1046397:ℚ)/3200000)) : ℚ)
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1046397:ℚ)/3200000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [Wu04Integral.logUpper, Wu04Integral.logLower] at hb
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((1046397:ℚ)/3200000)) : ℚ)
+    have hz : (2:ℝ) * ((((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) : ℚ)) : ℝ) + 1)) ^ (2*40+1) / (1 - ((((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) : ℚ)) : ℝ) - 1) / (((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) : ℚ)) : ℝ) + 1)) ^ 2) ≤ 1/1000000 := by
+      push_cast
+      norm_num
+    push_cast at hb hc1 ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((999997:ℚ)/3000000)) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 (((5:ℚ) - 12*((999997:ℚ)/3000000)) : ℚ)
+    linarith)
+      (by decide +kernel)
+      (by
+    have hq : (4 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((1046397:ℚ)/3200000))))^(6+1) + 1/1000000 : ℚ) ≤ ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((999997:ℚ)/3000000))) - 1) / ((((5:ℚ) - 12*((999997:ℚ)/3000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) : ℚ) := by decide +kernel
+    have hcast := (Rat.cast_le (K := ℝ)).mpr hq
+    push_cast at hcast ⊢
+    linarith)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ) : ℝ)) (by norm_num)).1
+    have hc1 := rat_logLower_cast' 40 ((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12))) : ℚ)
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((1:ℚ)/12) : ℚ) : ℝ)) / ((((1:ℚ)/12) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5d_pan7_cert : (((1430954541:ℚ)/1000000000000) : ℚ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((1046397:ℚ)/3200000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1046397:ℚ)/3200000)))^i / (i:ℚ))) * ((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((1046397:ℚ)/3200000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((1046397:ℚ)/3200000) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) - (((1:ℚ)/6/((1046397:ℚ)/3200000) * ((((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1046397:ℚ)/3200000)^(l+1) + (2/(((6:ℚ) - 12*((1046397:ℚ)/3200000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1046397:ℚ)/3200000))))^l)) *
+      ((((((999997:ℚ)/3000000)) - (((1046397:ℚ)/3200000))) ^ (i + j + l + 1) - ((((7695979:ℚ)/24000000)) - (((1046397:ℚ)/3200000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) := by
+  decide +kernel
+
+private lemma F5d_pan7_certR : ((((1430954541:ℚ)/1000000000000) : ℚ) : ℝ) ≤ (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, ((((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((1046397:ℚ)/3200000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1046397:ℚ)/3200000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*((2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))) / (((1:ℚ)/12)))) + 1)) ^ (2 * j + 1) / (2 * j + 1))))) - 2 * ((((303997:ℚ)/48000000) / ((((1046397:ℚ)/3200000)) - (((1:ℚ)/12)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1046397:ℚ)/3200000)) - (((1:ℚ)/12))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1046397:ℚ)/3200000) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) - (((1:ℚ)/6/((1046397:ℚ)/3200000) * ((((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1046397:ℚ)/3200000)^(l+1) + (2/(((6:ℚ) - 12*((1046397:ℚ)/3200000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1046397:ℚ)/3200000))))^l) : ℚ) : ℝ) *
+          (((((((999997:ℚ)/3000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) := by
+  have h := F5d_pan7_cert
+  exact_mod_cast h
+
+
+private lemma F5d_bound : ((((1950950477:ℚ)/40000000000) : ℚ) : ℝ) ≤ ∫ s in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s) := by
+  rw [F5d_form, F5d_split]
+  have b0 := F5d_pan0
+  have c0 := F5d_pan0_certR
+  have b1 := F5d_pan1
+  have c1 := F5d_pan1_certR
+  have b2 := F5d_pan2
+  have c2 := F5d_pan2_certR
+  have b3 := F5d_pan3
+  have c3 := F5d_pan3_certR
+  have b4 := F5d_pan4
+  have c4 := F5d_pan4_certR
+  have b5 := F5d_pan5
+  have c5 := F5d_pan5_certR
+  have b6 := F5d_pan6
+  have c6 := F5d_pan6_certR
+  have b7 := F5d_pan7
+  have c7 := F5d_pan7_certR
+  linarith [b0, c0, b1, c1, b2, c2, b3, c3, b4, c4, b5, c5, b6, c6, b7, c7]
+
+private lemma F5G_ii : IntervalIntegrable
+    (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+    volume ((29:ℚ)/125) ((999997:ℚ)/3000000) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.div
+  · apply ContinuousOn.mul
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · apply ContinuousOn.mul continuousOn_const
+      apply ContinuousOn.log (by fun_prop)
+      intro x hx
+      have h := hx.1; push_cast at h
+      exact ne_of_gt (div_pos (by linarith) (by norm_num))
+  · exact (by fun_prop : ContinuousOn (fun x : ℝ => (6 - 12*x)*x) (Set.Icc ((29:ℚ)/125) ((999997:ℚ)/3000000)))
+  · intro x hx
+    have h1 : (0:ℝ) < 6 - 12*x := by have h := hx.2; push_cast at h; linarith
+    have h2 : (0:ℝ) < x := by have h := hx.1; push_cast at h; linarith
+    exact ne_of_gt (mul_pos h1 h2)
+
+private lemma F5G_p0 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((5871997:ℚ)/24000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_p1 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((5871997:ℚ)/24000000) ((3087997:ℚ)/12000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_p2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((3087997:ℚ)/12000000) ((2159997:ℚ)/8000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_p3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((2159997:ℚ)/8000000) ((1695997:ℚ)/6000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_p4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1695997:ℚ)/6000000) ((1417597:ℚ)/4800000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_p5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1417597:ℚ)/4800000) ((1231997:ℚ)/4000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_p6 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((1231997:ℚ)/4000000) ((7695979:ℚ)/24000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_p7 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((7695979:ℚ)/24000000) ((999997:ℚ)/3000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_cum2 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((3087997:ℚ)/12000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_cum3 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((2159997:ℚ)/8000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_cum4 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((1695997:ℚ)/6000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_cum5 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((1417597:ℚ)/4800000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_cum6 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((1231997:ℚ)/4000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_cum7 : IntervalIntegrable (fun x : ℝ => Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) volume ((29:ℚ)/125) ((7695979:ℚ)/24000000) :=
+  ii_mono F5G_ii (by push_cast; norm_num) (by push_cast; norm_num) (by push_cast; norm_num)
+
+private lemma F5G_split :
+    (∫ x in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      = ((((((((∫ x in ((29:ℚ)/125)..((5871997:ℚ)/24000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x)) + (∫ x in ((5871997:ℚ)/24000000)..((3087997:ℚ)/12000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((3087997:ℚ)/12000000)..((2159997:ℚ)/8000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((2159997:ℚ)/8000000)..((1695997:ℚ)/6000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((1695997:ℚ)/6000000)..((1417597:ℚ)/4800000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((1417597:ℚ)/4800000)..((1231997:ℚ)/4000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((1231997:ℚ)/4000000)..((7695979:ℚ)/24000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) + (∫ x in ((7695979:ℚ)/24000000)..((999997:ℚ)/3000000), Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))) := by
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5G_cum7 F5G_p7]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5G_cum6 F5G_p6]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5G_cum5 F5G_p5]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5G_cum4 F5G_p4]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5G_cum3 F5G_p3]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5G_cum2 F5G_p2]
+  try rw [← intervalIntegral.integral_add_adjacent_intervals F5G_p0 F5G_p1]
+
+private lemma F5G_iiD : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+    volume ((29:ℚ)/125) ((999997:ℚ)/3000000) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div (continuousOn_id.sub continuousOn_const) continuousOn_const
+        intro x hx
+        exact ne_of_gt (by norm_num [kappa2])
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        simp only [kappa2]
+        exact ne_of_gt (div_pos (by linarith) (by linarith))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5G_form :
+    (∫ s in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+      = (∫ s in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*s) * (((1 : ℚ) : ℝ) * Real.log ((s - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*s)*s)) := by
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le (by push_cast; norm_num)] at hs
+  have hs0 : (0:ℝ) < s := by have h := hs.1; push_cast at h; linarith
+  have hs6 : (0:ℝ) < 6 - 12*s := by have h := hs.2; push_cast at h; linarith
+  have hsk : (0:ℝ) < s - kappa2 := by
+    rw [kappa2]
+    have h := hs.1
+    push_cast at h
+    norm_num at h ⊢
+    linarith
+  simp only [kappa2] at hsk ⊢
+  push_cast at hsk ⊢
+  field_simp
+  try ring
+
+private lemma F5G_pan0 :
+    (∫ x in ((((29:ℚ)/125) : ℚ) : ℝ)..((((5871997:ℚ)/24000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((11439997:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((11439997:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((11439997:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((11439997:ℚ)/48000000) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) + (((1:ℚ)/6/((11439997:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((11439997:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((11439997:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((11439997:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((29:ℚ)/125) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((29:ℚ)/125)) (q := ((5871997:ℚ)/24000000)) (c := ((11439997:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((11439997:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((11439997:ℚ)/48000000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan0_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((11439997:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((11439997:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((11439997:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((11439997:ℚ)/48000000) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) + (((1:ℚ)/6/((11439997:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((11439997:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((11439997:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((11439997:ℚ)/48000000))))^l)) *
+      ((((((5871997:ℚ)/24000000)) - (((11439997:ℚ)/48000000))) ^ (i + j + l + 1) - ((((29:ℚ)/125)) - (((11439997:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((333923331:ℚ)/500000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan0_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((11439997:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((11439997:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((11439997:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((11439997:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((11439997:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((11439997:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((11439997:ℚ)/48000000) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) + (((1:ℚ)/6/((11439997:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((11439997:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((11439997:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((11439997:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((11439997:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((11439997:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((11439997:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((29:ℚ)/125) : ℚ) : ℝ) - ((((11439997:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((333923331:ℚ)/500000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan0_cert
+  exact_mod_cast h
+
+
+private lemma F5G_pan1 :
+    (∫ x in ((((5871997:ℚ)/24000000) : ℚ) : ℝ)..((((3087997:ℚ)/12000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4015997:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4015997:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((4015997:ℚ)/16000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4015997:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) + (((1:ℚ)/6/((4015997:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4015997:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4015997:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4015997:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((5871997:ℚ)/24000000)) (q := ((3087997:ℚ)/12000000)) (c := ((4015997:ℚ)/16000000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4015997:ℚ)/16000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((4015997:ℚ)/16000000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan1_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4015997:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4015997:ℚ)/16000000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((4015997:ℚ)/16000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((4015997:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) + (((1:ℚ)/6/((4015997:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4015997:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4015997:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4015997:ℚ)/16000000))))^l)) *
+      ((((((3087997:ℚ)/12000000)) - (((4015997:ℚ)/16000000))) ^ (i + j + l + 1) - ((((5871997:ℚ)/24000000)) - (((4015997:ℚ)/16000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((1745690179:ℚ)/1000000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan1_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4015997:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4015997:ℚ)/16000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4015997:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4015997:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((4015997:ℚ)/16000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4015997:ℚ)/16000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4015997:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) + (((1:ℚ)/6/((4015997:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4015997:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4015997:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4015997:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4015997:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4015997:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4015997:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((5871997:ℚ)/24000000) : ℚ) : ℝ) - ((((4015997:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((1745690179:ℚ)/1000000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan1_cert
+  exact_mod_cast h
+
+
+private lemma F5G_pan2 :
+    (∫ x in ((((3087997:ℚ)/12000000) : ℚ) : ℝ)..((((2159997:ℚ)/8000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((2531197:ℚ)/9600000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((2531197:ℚ)/9600000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((2531197:ℚ)/9600000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((2531197:ℚ)/9600000) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) + (((1:ℚ)/6/((2531197:ℚ)/9600000) * ((((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((2531197:ℚ)/9600000)^(l+1) + (2/(((6:ℚ) - 12*((2531197:ℚ)/9600000)))) * ((12:ℚ)/(((6:ℚ) - 12*((2531197:ℚ)/9600000))))^l) : ℚ) : ℝ) *
+          (((((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((3087997:ℚ)/12000000)) (q := ((2159997:ℚ)/8000000)) (c := ((2531197:ℚ)/9600000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((2531197:ℚ)/9600000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((2531197:ℚ)/9600000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan2_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((2531197:ℚ)/9600000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((2531197:ℚ)/9600000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((2531197:ℚ)/9600000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((2531197:ℚ)/9600000) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) + (((1:ℚ)/6/((2531197:ℚ)/9600000) * ((((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((2531197:ℚ)/9600000)^(l+1) + (2/(((6:ℚ) - 12*((2531197:ℚ)/9600000)))) * ((12:ℚ)/(((6:ℚ) - 12*((2531197:ℚ)/9600000))))^l)) *
+      ((((((2159997:ℚ)/8000000)) - (((2531197:ℚ)/9600000))) ^ (i + j + l + 1) - ((((3087997:ℚ)/12000000)) - (((2531197:ℚ)/9600000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((1235305131:ℚ)/500000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan2_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((2531197:ℚ)/9600000))) - 1) / ((((5:ℚ) - 12*((2531197:ℚ)/9600000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((2531197:ℚ)/9600000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((2531197:ℚ)/9600000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((2531197:ℚ)/9600000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((2531197:ℚ)/9600000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((2531197:ℚ)/9600000) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) + (((1:ℚ)/6/((2531197:ℚ)/9600000) * ((((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((2531197:ℚ)/9600000))))) + 2/(((6:ℚ) - 12*((2531197:ℚ)/9600000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((2531197:ℚ)/9600000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((2531197:ℚ)/9600000)^(l+1) + (2/(((6:ℚ) - 12*((2531197:ℚ)/9600000)))) * ((12:ℚ)/(((6:ℚ) - 12*((2531197:ℚ)/9600000))))^l) : ℚ) : ℝ) *
+          (((((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((3087997:ℚ)/12000000) : ℚ) : ℝ) - ((((2531197:ℚ)/9600000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((1235305131:ℚ)/500000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan2_cert
+  exact_mod_cast h
+
+
+private lemma F5G_pan3 :
+    (∫ x in ((((2159997:ℚ)/8000000) : ℚ) : ℝ)..((((1695997:ℚ)/6000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((13263979:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((13263979:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((13263979:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((13263979:ℚ)/48000000) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) + (((1:ℚ)/6/((13263979:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((13263979:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((13263979:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((13263979:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((2159997:ℚ)/8000000)) (q := ((1695997:ℚ)/6000000)) (c := ((13263979:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((13263979:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((13263979:ℚ)/48000000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan3_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((13263979:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((13263979:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((13263979:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((13263979:ℚ)/48000000) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) + (((1:ℚ)/6/((13263979:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((13263979:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((13263979:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((13263979:ℚ)/48000000))))^l)) *
+      ((((((1695997:ℚ)/6000000)) - (((13263979:ℚ)/48000000))) ^ (i + j + l + 1) - ((((2159997:ℚ)/8000000)) - (((13263979:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((2867312449:ℚ)/1000000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan3_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((13263979:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((13263979:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((13263979:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((13263979:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((13263979:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((13263979:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((13263979:ℚ)/48000000) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) + (((1:ℚ)/6/((13263979:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((13263979:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((13263979:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((13263979:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((13263979:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((13263979:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((13263979:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((2159997:ℚ)/8000000) : ℚ) : ℝ) - ((((13263979:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((2867312449:ℚ)/1000000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan3_cert
+  exact_mod_cast h
+
+
+private lemma F5G_pan4 :
+    (∫ x in ((((1695997:ℚ)/6000000) : ℚ) : ℝ)..((((1417597:ℚ)/4800000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4623991:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4623991:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((4623991:ℚ)/16000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4623991:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) + (((1:ℚ)/6/((4623991:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4623991:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4623991:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4623991:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((1695997:ℚ)/6000000)) (q := ((1417597:ℚ)/4800000)) (c := ((4623991:ℚ)/16000000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((4623991:ℚ)/16000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((4623991:ℚ)/16000000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan4_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4623991:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4623991:ℚ)/16000000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((4623991:ℚ)/16000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((4623991:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) + (((1:ℚ)/6/((4623991:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4623991:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4623991:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4623991:ℚ)/16000000))))^l)) *
+      ((((((1417597:ℚ)/4800000)) - (((4623991:ℚ)/16000000))) ^ (i + j + l + 1) - ((((1695997:ℚ)/6000000)) - (((4623991:ℚ)/16000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((58738577:ℚ)/20000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan4_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((4623991:ℚ)/16000000))) - 1) / ((((5:ℚ) - 12*((4623991:ℚ)/16000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((4623991:ℚ)/16000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((4623991:ℚ)/16000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((4623991:ℚ)/16000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((4623991:ℚ)/16000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((4623991:ℚ)/16000000) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) + (((1:ℚ)/6/((4623991:ℚ)/16000000) * ((((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((4623991:ℚ)/16000000))))) + 2/(((6:ℚ) - 12*((4623991:ℚ)/16000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((4623991:ℚ)/16000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((4623991:ℚ)/16000000)^(l+1) + (2/(((6:ℚ) - 12*((4623991:ℚ)/16000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((4623991:ℚ)/16000000))))^l) : ℚ) : ℝ) *
+          (((((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1695997:ℚ)/6000000) : ℚ) : ℝ) - ((((4623991:ℚ)/16000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((58738577:ℚ)/20000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan4_cert
+  exact_mod_cast h
+
+
+private lemma F5G_pan5 :
+    (∫ x in ((((1417597:ℚ)/4800000) : ℚ) : ℝ)..((((1231997:ℚ)/4000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((14479967:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((14479967:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((14479967:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((14479967:ℚ)/48000000) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) + (((1:ℚ)/6/((14479967:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((14479967:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((14479967:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((14479967:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((1417597:ℚ)/4800000)) (q := ((1231997:ℚ)/4000000)) (c := ((14479967:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((14479967:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((14479967:ℚ)/48000000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan5_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((14479967:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((14479967:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((14479967:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((14479967:ℚ)/48000000) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) + (((1:ℚ)/6/((14479967:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((14479967:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((14479967:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((14479967:ℚ)/48000000))))^l)) *
+      ((((((1231997:ℚ)/4000000)) - (((14479967:ℚ)/48000000))) ^ (i + j + l + 1) - ((((1417597:ℚ)/4800000)) - (((14479967:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((2656136337:ℚ)/1000000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan5_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((14479967:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((14479967:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((14479967:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((14479967:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((14479967:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((14479967:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((14479967:ℚ)/48000000) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) + (((1:ℚ)/6/((14479967:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((14479967:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((14479967:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((14479967:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((14479967:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((14479967:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((14479967:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1417597:ℚ)/4800000) : ℚ) : ℝ) - ((((14479967:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((2656136337:ℚ)/1000000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan5_cert
+  exact_mod_cast h
+
+
+private lemma F5G_pan6 :
+    (∫ x in ((((1231997:ℚ)/4000000) : ℚ) : ℝ)..((((7695979:ℚ)/24000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((15087961:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((15087961:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((15087961:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((15087961:ℚ)/48000000) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) + (((1:ℚ)/6/((15087961:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((15087961:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((15087961:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((15087961:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((1231997:ℚ)/4000000)) (q := ((7695979:ℚ)/24000000)) (c := ((15087961:ℚ)/48000000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((15087961:ℚ)/48000000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((15087961:ℚ)/48000000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan6_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((15087961:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((15087961:ℚ)/48000000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((15087961:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((15087961:ℚ)/48000000) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) + (((1:ℚ)/6/((15087961:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((15087961:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((15087961:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((15087961:ℚ)/48000000))))^l)) *
+      ((((((7695979:ℚ)/24000000)) - (((15087961:ℚ)/48000000))) ^ (i + j + l + 1) - ((((1231997:ℚ)/4000000)) - (((15087961:ℚ)/48000000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((19720517:ℚ)/10000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan6_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((15087961:ℚ)/48000000))) - 1) / ((((5:ℚ) - 12*((15087961:ℚ)/48000000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((15087961:ℚ)/48000000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((15087961:ℚ)/48000000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((15087961:ℚ)/48000000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((15087961:ℚ)/48000000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((15087961:ℚ)/48000000) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) + (((1:ℚ)/6/((15087961:ℚ)/48000000) * ((((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((15087961:ℚ)/48000000))))) + 2/(((6:ℚ) - 12*((15087961:ℚ)/48000000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((15087961:ℚ)/48000000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((15087961:ℚ)/48000000)^(l+1) + (2/(((6:ℚ) - 12*((15087961:ℚ)/48000000)))) * ((12:ℚ)/(((6:ℚ) - 12*((15087961:ℚ)/48000000))))^l) : ℚ) : ℝ) *
+          (((((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((1231997:ℚ)/4000000) : ℚ) : ℝ) - ((((15087961:ℚ)/48000000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((19720517:ℚ)/10000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan6_cert
+  exact_mod_cast h
+
+
+private lemma F5G_pan7 :
+    (∫ x in ((((7695979:ℚ)/24000000) : ℚ) : ℝ)..((((999997:ℚ)/3000000) : ℚ) : ℝ),
+          Real.log (5 - 12*x) * (((1 : ℚ) : ℝ) * Real.log ((x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ))) / ((6 - 12*x)*x))
+      ≤ ∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((1046397:ℚ)/3200000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1046397:ℚ)/3200000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((1046397:ℚ)/3200000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1046397:ℚ)/3200000) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) + (((1:ℚ)/6/((1046397:ℚ)/3200000) * ((((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1046397:ℚ)/3200000)^(l+1) + (2/(((6:ℚ) - 12*((1046397:ℚ)/3200000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1046397:ℚ)/3200000))))^l) : ℚ) : ℝ) *
+          (((((((999997:ℚ)/3000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1)) := by
+  exact panel_up (p := ((7695979:ℚ)/24000000)) (q := ((999997:ℚ)/3000000)) (c := ((1046397:ℚ)/3200000)) (d := ((303997:ℚ)/48000000)) (a := ((29:ℚ)/250)) (r := ((29:ℚ)/250)) (eB := 1)
+    (lA := (2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ 2))) (lB := ((2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) (na := 6) (nb := 6) (nc := 6)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := ((((5:ℚ) - 12*((1046397:ℚ)/3200000)) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 (((5:ℚ) - 12*((1046397:ℚ)/3200000)) : ℚ)] at ⊢
+    exact hb)
+      (by
+    have hb := (Wu04Integral.log_bounds 40 (y := (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ) : ℝ)) (by norm_num)).2
+    rw [rat_logUpper_cast 40 ((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250))) : ℚ)] at ⊢
+    linarith)
+      (by norm_num)
+      (by
+    intro x hx
+    rw [Set.mem_Icc] at hx
+    have h1 : (1:ℝ) ≤ (x - ((((29:ℚ)/250) : ℚ) : ℝ)) / ((((29:ℚ)/250) : ℚ) : ℝ) := by
+      rw [le_div_iff₀ (by norm_num)]
+      push_cast
+      linarith [hx.1]
+    have h2 := Real.log_nonneg h1
+    push_cast at h2 ⊢
+    linarith [h2])
+      (by norm_num)
+      (by push_cast; norm_num)
+
+private theorem F5G_pan7_cert : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+      ((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((1046397:ℚ)/3200000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1046397:ℚ)/3200000)))^i / (i:ℚ))) * ((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((1046397:ℚ)/3200000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))))^j / (j:ℚ))) * ((if l = 0 then (1:ℚ)/6/((1046397:ℚ)/3200000) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) + (((1:ℚ)/6/((1046397:ℚ)/3200000) * ((((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1046397:ℚ)/3200000)^(l+1) + (2/(((6:ℚ) - 12*((1046397:ℚ)/3200000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1046397:ℚ)/3200000))))^l)) *
+      ((((((999997:ℚ)/3000000)) - (((1046397:ℚ)/3200000))) ^ (i + j + l + 1) - ((((7695979:ℚ)/24000000)) - (((1046397:ℚ)/3200000))) ^ (i + j + l + 1)) / ((i:ℚ) + (j:ℚ) + (l:ℚ) + 1))) ≤ (((395527907:ℚ)/500000000000) : ℚ) := by
+  decide +kernel
+
+private lemma F5G_pan7_certR : (∑ l ∈ range 7, ∑ j ∈ range 7, ∑ i ∈ range 7,
+        (((if i = 0 then ((2 * (∑ j ∈ range 40, (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * j + 1) / (2 * j + 1)) + 2 * (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ (2 * 40 + 1) / (1 - (((((5:ℚ) - 12*((1046397:ℚ)/3200000))) - 1) / ((((5:ℚ) - 12*((1046397:ℚ)/3200000))) + 1)) ^ 2))) + 2 * ((((12:ℚ)*((303997:ℚ)/48000000)) / ((5:ℚ) - 12*((1046397:ℚ)/3200000))))^(6+1) else (-1 : ℚ)^(i-1) * (-(12:ℚ)/((5:ℚ) - 12*((1046397:ℚ)/3200000)))^i / (i:ℚ)) : ℚ) : ℝ) * (((if j = 0 then 1*(((2 * (∑ j ∈ range 40, (((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * j + 1) / (2 * j + 1)))) + 2 * ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ (2 * 40 + 1) / (1 - ((((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) - 1) / (((((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))) / (((29:ℚ)/250)))) + 1)) ^ 2))) + 2 * ((((303997:ℚ)/48000000) / ((((1046397:ℚ)/3200000)) - (((29:ℚ)/250)))))^(6+1) else 1 * (-1 : ℚ)^(j-1) * ((1:ℚ)/((((1046397:ℚ)/3200000)) - (((29:ℚ)/250))))^j / (j:ℚ)) : ℚ) : ℝ) * (((if l = 0 then (1:ℚ)/6/((1046397:ℚ)/3200000) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) + (((1:ℚ)/6/((1046397:ℚ)/3200000) * ((((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))^(6+1)/(1 - ((((303997:ℚ)/48000000) / ((1046397:ℚ)/3200000))))) + 2/(((6:ℚ) - 12*((1046397:ℚ)/3200000))) * ((((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))^(6+1)/(1 - ((((12:ℚ)*((303997:ℚ)/48000000)) / ((6:ℚ) - 12*((1046397:ℚ)/3200000)))))))) else (1:ℚ)/6 * (-1 : ℚ)^l / ((1046397:ℚ)/3200000)^(l+1) + (2/(((6:ℚ) - 12*((1046397:ℚ)/3200000)))) * ((12:ℚ)/(((6:ℚ) - 12*((1046397:ℚ)/3200000))))^l) : ℚ) : ℝ) *
+          (((((((999997:ℚ)/3000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1) - (((((7695979:ℚ)/24000000) : ℚ) : ℝ) - ((((1046397:ℚ)/3200000) : ℚ) : ℝ)) ^ (i + j + l + 1)) /
+            ((i : ℝ) + (j : ℝ) + (l : ℝ) + 1))) ≤ ((((395527907:ℚ)/500000000000) : ℚ) : ℝ) := by
+  have h := F5G_pan7_cert
+  exact_mod_cast h
+
+
+private lemma F5G_bound : (∫ s in ((29:ℚ)/125)..((999997:ℚ)/3000000), Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s)) ≤ ((((16107632253:ℚ)/1000000000000) : ℚ) : ℝ) := by
+  rw [F5G_form, F5G_split]
+  have b0 := F5G_pan0
+  have c0 := F5G_pan0_certR
+  have b1 := F5G_pan1
+  have c1 := F5G_pan1_certR
+  have b2 := F5G_pan2
+  have c2 := F5G_pan2_certR
+  have b3 := F5G_pan3
+  have c3 := F5G_pan3_certR
+  have b4 := F5G_pan4
+  have c4 := F5G_pan4_certR
+  have b5 := F5G_pan5
+  have c5 := F5G_pan5_certR
+  have b6 := F5G_pan6
+  have c6 := F5G_pan6_certR
+  have b7 := F5G_pan7
+  have c7 := F5G_pan7_certR
+  linarith [b0, c0, b1, c1, b2, c2, b3, c3, b4, c4, b5, c5, b6, c6, b7, c7]
+
+/-! ### F5 assembly -/
+
+private lemma F5_L2n_ii : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+    volume (((299:ℚ)/1500) : ℝ) (((29:ℚ)/125) : ℝ) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div (continuousOn_id.sub continuousOn_const) continuousOn_const
+        intro x hx
+        exact ne_of_gt (by norm_num [kappa2])
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        have hk : kappa2 < x := by rw [kappa2]; linarith
+        exact ne_of_gt (div_pos (sub_pos.mpr hk) (by norm_num [kappa2]))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5_sl_d_ii : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+    volume (((999997:ℚ)/3000000) : ℝ) (((1:ℚ)/3) : ℝ) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div (continuousOn_id.sub continuousOn_const) continuousOn_const
+        intro x hx
+        exact ne_of_gt (by norm_num [kappa1])
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        simp only [kappa1]
+        exact ne_of_gt (by linarith)
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5_sl_G_ii : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+    volume (((999997:ℚ)/3000000) : ℝ) (((1:ℚ)/3) : ℝ) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div (continuousOn_id.sub continuousOn_const) continuousOn_const
+        intro x hx
+        exact ne_of_gt (by norm_num [kappa2])
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        have hk : kappa2 < x := by rw [kappa2]; linarith
+        exact ne_of_gt (div_pos (sub_pos.mpr hk) (by norm_num [kappa2]))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+
+private lemma F5_d_sliver : (0:ℝ) ≤
+    ∫ s in (((999997:ℚ)/3000000) : ℝ)..(((1:ℚ)/3) : ℝ),
+      Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s) := by
+  apply intervalIntegral.integral_nonneg (by push_cast; norm_num)
+  intro s hs
+  rw [Set.mem_Icc] at hs
+  have hs1 : (1/12 : ℝ) ≤ s := by push_cast at hs; linarith [hs.1]
+  have hs2 : s ≤ 1/3 := by push_cast at hs; linarith [hs.2]
+  have hs0 : (0:ℝ) < s := by linarith
+  have h6 : (0:ℝ) < 6 - 12*s := by linarith
+  have hlog : 0 ≤ Real.log (5 - 12*s) := by
+    apply Real.log_nonneg
+    linarith
+  have hratio : 0 ≤ Real.log ((s - kappa1) / kappa1) := by
+    apply Real.log_nonneg
+    rw [le_div_iff₀ (by norm_num [kappa1])]
+    rw [kappa1]
+    linarith
+  apply mul_nonneg
+  · exact div_nonneg hlog (le_of_lt h6)
+  · exact div_nonneg hratio (le_of_lt hs0)
+
+private lemma F5_G_sliver :
+    (∫ s in (((999997:ℚ)/3000000) : ℝ)..(((1:ℚ)/3) : ℝ),
+      Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+      ≤ 24 * (1/1000000)^2 := by
+  have hbound : ∀ s ∈ Set.Icc (((999997:ℚ)/3000000) : ℝ) (((1:ℚ)/3) : ℝ),
+      Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s)
+        ≤ 24 * ((1/3:ℝ) - s) := by
+    intro s hs
+    rw [Set.mem_Icc] at hs
+    have hs1 : ((999997:ℚ)/3000000 : ℝ) ≤ s := hs.1
+    have hs2 : s ≤ 1/3 := by push_cast at hs ⊢; linarith [hs.2]
+    have hs0 : (0:ℝ) < s := by push_cast at hs1 ⊢; linarith
+    have h6 : (0:ℝ) < 6 - 12*s := by linarith
+    have hsk : (0:ℝ) < s - 29/250 := by push_cast at hs1 ⊢; linarith
+    have hlog : Real.log (5 - 12*s) ≤ 12 * ((1/3:ℝ) - s) := by
+      rw [show 5 - 12*s = 1 + 12*((1/3:ℝ) - s) from by ring]
+      have hpos : (0:ℝ) < 1 + 12*((1/3:ℝ) - s) := by linarith
+      have h := Real.log_le_sub_one_of_pos hpos
+      linarith
+    have hlog0 : 0 ≤ Real.log (5 - 12*s) := by
+      apply Real.log_nonneg
+      linarith
+    have hratio0 : 0 ≤ Real.log ((s - 29/250) / (29/250)) := by
+      apply Real.log_nonneg
+      rw [le_div_iff₀ (by norm_num)]
+      linarith
+    have hratio1 : Real.log ((s - 29/250) / (29/250)) ≤ 1 := by
+      have hle : (s - 29/250) / (29/250) ≤ 2 := by
+        rw [div_le_iff₀ (by norm_num)]
+        linarith
+      have hpos2 : (0:ℝ) < (s - 29/250) / (29/250) := by
+        apply div_pos _ (by norm_num); linarith
+      have h := Real.log_le_sub_one_of_pos hpos2
+      linarith
+    have h1 : Real.log (5 - 12*s) / (6 - 12*s) ≤ 6 * ((1/3:ℝ) - s) := by
+      rw [div_le_iff₀ h6]
+      nlinarith [hlog]
+    have h1n : 0 ≤ Real.log (5 - 12*s) / (6 - 12*s) := div_nonneg hlog0 (le_of_lt h6)
+    have h2 : Real.log ((s - 29/250) / (29/250)) / s ≤ 4 := by
+      rw [div_le_iff₀ hs0]
+      nlinarith [hratio1, hs1]
+    have h2n : 0 ≤ Real.log ((s - 29/250) / (29/250)) / s := div_nonneg hratio0 (le_of_lt hs0)
+    have hnn : (0:ℝ) ≤ 6 * ((1/3:ℝ) - s) := by linarith
+    calc Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - 29/250) / (29/250)) / s)
+        ≤ (6 * ((1/3:ℝ) - s)) * (Real.log ((s - 29/250) / (29/250)) / s) :=
+          mul_le_mul_of_nonneg_right h1 h2n
+      _ ≤ (6 * ((1/3:ℝ) - s)) * 4 := mul_le_mul_of_nonneg_left h2 hnn
+      _ = 24 * ((1/3:ℝ) - s) := by ring
+  have hmono : (∫ s in (((999997:ℚ)/3000000) : ℝ)..(((1:ℚ)/3) : ℝ),
+      Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+      ≤ ∫ s in (((999997:ℚ)/3000000) : ℝ)..(((1:ℚ)/3) : ℝ), (24 * (1/1000000) : ℝ) := by
+    refine intervalIntegral.integral_mono_on (by push_cast; norm_num) F5_sl_G_ii ?_ ?_
+    · exact (by fun_prop : Continuous fun s : ℝ => (24 * (1/1000000) : ℝ)).intervalIntegrable _ _
+    · intro x hx
+      have h := hbound x hx
+      rw [Set.mem_Icc] at hx
+      have hx1 : ((999997:ℚ)/3000000 : ℝ) ≤ x := hx.1
+      have hd : (1/3:ℝ) - x ≤ 1/1000000 := by push_cast at hx1 ⊢; linarith
+      linarith
+  have hval : (∫ s in (((999997:ℚ)/3000000) : ℝ)..(((1:ℚ)/3) : ℝ), (24 * (1/1000000) : ℝ))
+      = 24 * (1/1000000) * (((1:ℚ)/3 : ℝ) - ((999997:ℚ)/3000000 : ℝ)) := by
+    rw [intervalIntegral.integral_const]
+    ring
+  have hlen : (((1:ℚ)/3 : ℝ) - ((999997:ℚ)/3000000 : ℝ)) = 1/1000000 := by norm_num
+  rw [hlen] at hval
+  linarith [hmono, hval]
+
+
+private lemma F5_cG_ii : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log (kappa2 / (s - kappa2)) / s))
+    volume (((29:ℚ)/125) : ℝ) (((1:ℚ)/3) : ℝ) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div continuousOn_const (continuousOn_id.sub continuousOn_const)
+        intro x hx
+        have h := hx.1
+        push_cast at h
+        have hk : kappa2 < x := by rw [kappa2]; linarith
+        exact ne_of_gt (sub_pos.mpr hk)
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        have hk : kappa2 < x := by rw [kappa2]; linarith
+        exact ne_of_gt (div_pos (by norm_num [kappa2]) (sub_pos.mpr hk))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5_d_full : IntervalIntegrable
+    (fun s : ℝ => Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+    volume (((29:ℚ)/125) : ℝ) (((1:ℚ)/3) : ℝ) := by
+  apply ContinuousOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by push_cast; norm_num)]
+  apply ContinuousOn.mul
+  · apply ContinuousOn.div
+    · exact ContinuousOn.log (by fun_prop) (fun x hx => by
+        have h := hx.2; push_cast at h; linarith)
+    · exact (by fun_prop : Continuous fun x : ℝ => 6 - 12*x).continuousOn
+    · intro x hx
+      have h := hx.2; push_cast at h; linarith
+  · apply ContinuousOn.div
+    · apply ContinuousOn.log
+      · apply ContinuousOn.div (continuousOn_id.sub continuousOn_const) continuousOn_const
+        intro x hx
+        exact ne_of_gt (by norm_num [kappa1])
+      · intro x hx
+        have h := hx.1
+        push_cast at h
+        have hk : kappa1 < x := by rw [kappa1]; linarith
+        exact ne_of_gt (div_pos (sub_pos.mpr hk) (by norm_num [kappa1]))
+    · exact continuousOn_id
+    · intro x hx
+      have h := hx.1; push_cast at h; linarith
+
+private lemma F5_negG : (∫ s in (((29:ℚ)/125) : ℝ)..(((1:ℚ)/3) : ℝ),
+        Real.log (5 - 12*s) / (6 - 12*s) * (Real.log (kappa2 / (s - kappa2)) / s))
+      = -(∫ s in (((29:ℚ)/125) : ℝ)..(((1:ℚ)/3) : ℝ),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s)) := by
+  rw [← intervalIntegral.integral_neg]
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le (by push_cast; norm_num)] at hs
+  have hs1 : (0:ℝ) < s - kappa2 := by
+    simp only [kappa2]; push_cast at hs; linarith [hs.1]
+  have hk : (0:ℝ) < kappa2 := by norm_num [kappa2]
+  simp only [kappa2] at hs1 hk ⊢
+  rw [Real.log_div (by norm_num) (ne_of_gt hs1), Real.log_div (ne_of_gt hs1) (by norm_num)]
+  ring
+
+private lemma F5_leaf_aux (F f ω : ℝ → ℝ) (h : IsLinearSieve F f) (hω : IsBuchstab ω) :
+    2.118119 ≤ integralTerms F f ω 5 := by
+  rw [F5_sigma F f ω h]
+  have hI1 : (∫ s in (kappa1 + kappa2)..(2 * kappa2),
+        Real.log (5 - 12*s) / (6 - 12*s) *
+          (Real.log ((s - kappa2) / kappa2) / s + Real.log ((s - kappa1) / kappa1) / s))
+      = (∫ s in (kappa1 + kappa2)..(2 * kappa2),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+        + (∫ s in (kappa1 + kappa2)..(2 * kappa2),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s)) := by
+    rw [show (kappa1 + kappa2 : ℝ) = ((299:ℚ)/1500 : ℝ) from by norm_num [kappa1, kappa2],
+      show (2 * kappa2 : ℝ) = ((29:ℚ)/125 : ℝ) from by norm_num [kappa2]]
+    rw [← intervalIntegral.integral_add F5_L2n_ii F5b_iiD]
+    apply intervalIntegral.integral_congr
+    intro s _
+    ring
+  have hI2 : (∫ s in (2 * kappa2)..(1/3),
+        Real.log (5 - 12*s) / (6 - 12*s) *
+          (Real.log (kappa2 / (s - kappa2)) / s + Real.log ((s - kappa1) / kappa1) / s))
+      = (∫ s in (2 * kappa2)..(1/3),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log (kappa2 / (s - kappa2)) / s))
+        + (∫ s in (2 * kappa2)..(1/3),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s)) := by
+    rw [show (2 * kappa2 : ℝ) = ((29:ℚ)/125 : ℝ) from by norm_num [kappa2],
+      show (1/3 : ℝ) = ((1:ℚ)/3 : ℝ) from by norm_num]
+    rw [← intervalIntegral.integral_add F5_cG_ii F5_d_full]
+    apply intervalIntegral.integral_congr
+    intro s _
+    ring
+  rw [hI1, hI2]
+  have hA : (kappa1 + kappa2 : ℝ) = ((299:ℚ)/1500 : ℝ) := by norm_num [kappa1, kappa2]
+  have hB : (2 * kappa2 : ℝ) = ((29:ℚ)/125 : ℝ) := by norm_num [kappa2]
+  rw [hA, hB]
+  have hneg : (∫ s in (((299:ℚ)/1500) : ℝ)..(((29:ℚ)/125) : ℝ),
+        Real.log (5 - 12*s) / (6 - 12*s) * (Real.log (kappa2 / (s - kappa2)) / s))
+      = -(∫ s in (((299:ℚ)/1500) : ℝ)..(((29:ℚ)/125) : ℝ),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s)) := by
+    rw [← intervalIntegral.integral_neg]
+    apply intervalIntegral.integral_congr
+    intro s hs
+    rw [Set.uIcc_of_le (by push_cast; norm_num)] at hs
+    have h1 : (0:ℝ) < s - 29/250 := by push_cast at hs; linarith [hs.1]
+    simp only [kappa2]
+    rw [Real.log_div (by norm_num : ((29:ℝ)/250) ≠ 0) (ne_of_gt h1),
+      Real.log_div (ne_of_gt h1) (by norm_num : ((29:ℝ)/250) ≠ 0)]
+    ring
+  have hsplit_d : (∫ s in (((29:ℚ)/125) : ℝ)..(((1:ℚ)/3) : ℝ),
+        Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+      = (∫ s in (((29:ℚ)/125) : ℝ)..(((999997:ℚ)/3000000) : ℝ),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s))
+        + (∫ s in (((999997:ℚ)/3000000) : ℝ)..(((1:ℚ)/3) : ℝ),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa1) / kappa1) / s)) :=
+    (intervalIntegral.integral_add_adjacent_intervals F5d_iiD F5_sl_d_ii).symm
+  have hsplit_G : (∫ s in (((29:ℚ)/125) : ℝ)..(((1:ℚ)/3) : ℝ),
+        Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+      = (∫ s in (((29:ℚ)/125) : ℝ)..(((999997:ℚ)/3000000) : ℝ),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s))
+        + (∫ s in (((999997:ℚ)/3000000) : ℝ)..(((1:ℚ)/3) : ℝ),
+          Real.log (5 - 12*s) / (6 - 12*s) * (Real.log ((s - kappa2) / kappa2) / s)) :=
+    (intervalIntegral.integral_add_adjacent_intervals F5G_iiD F5_sl_G_ii).symm
+  have hb := F5b_bound
+  have hP := F5P1_bound
+  have hd := F5d_bound
+  have hG := F5G_bound
+  have hsl_d := F5_d_sliver
+  have hsl_G := F5_G_sliver
+  have hconst : (2118119/1000000 : ℝ) ≤ 48 * (((17813199219/1000000000000 : ℚ) : ℝ) - ((3175920301/500000000000 : ℚ) : ℝ) + ((1950950477/40000000000 : ℚ) : ℝ) - ((16107632253/1000000000000 : ℚ) : ℝ) - 24 * (1/1000000)^2) := by
+    norm_num
+  linarith [hb, hP, hd, hG, hsl_d, hsl_G, hneg, hsplit_d, hsplit_G, hconst, F5_negG]
 private lemma F4_consts : ((697375 / 1000000 : ℚ) : ℝ) ≤ 48 * (((70032747/250000000000) : ℚ) + ((396107859/500000000000) : ℚ) + ((619640949/500000000000) : ℚ) + ((1629574479/1000000000000) : ℚ) + ((984933229/500000000000) : ℚ) + ((2265746597/1000000000000) : ℚ) + ((106569871/50000000000) : ℚ) + ((408609069/250000000000) : ℚ) + ((1192681691/1000000000000) : ℚ) + ((3999819/5000000000) : ℚ) + ((112798419/250000000000) : ℚ) + ((17770791/125000000000) : ℚ) : ℚ) := by
   push_cast
   norm_num
@@ -5570,6 +8764,6 @@ The single actual integral coefficient satisfies its printed lower bound. -/
 theorem numerical_F5 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) :
     2.118119 ≤ integralTerms F f ω 5 := by
-  sorry
+  exact F5_leaf_aux F f ω h hω
 
 end LeanLab.ChenDoubleSieve.Task315
