@@ -20,9 +20,1221 @@ theorem lemma5_phi : PaperInputs148.Lemma5PhiJ := by
 theorem lemma1_schoenfeld : PaperInputs148.Lemma1J := by
   sorry
 
+/-! ### Private development for `lemma4_robin` (Robin Theorem 11)
+
+`k log k ≤ log P_k` for `k ≥ 52` from the elementary count `π x ≤ x/3 + 5`, and the
+finite range `13 ≤ k ≤ 51` by `k^k ≤ P_k`.  No statement, definition or import is
+changed; every declaration below is private and used only by `lemma4_robin`. -/
+
+set_option maxRecDepth 200000
+set_option maxHeartbeats 8000000
+
+/-! ### A modulus-6 count of the primes -/
+
+/-- At most `N/6 + 1` integers below `N` lie in one fixed residue mod 6. -/
+private lemma card_mod_six_le (N r : ℕ) :
+    ((Finset.range N).filter (fun n => n % 6 = r)).card ≤ N / 6 + 1 := by
+  set S := (Finset.range N).filter (fun n => n % 6 = r) with hS
+  have hmap : ∀ a ∈ S, a / 6 ∈ Finset.range (N / 6 + 1) := by
+    intro a ha
+    simp only [hS, Finset.mem_filter, Finset.mem_range] at ha
+    simp only [Finset.mem_range]
+    have h : a / 6 ≤ N / 6 := Nat.div_le_div_right (le_of_lt ha.1)
+    omega
+  have hinj : ∀ a ∈ S, ∀ b ∈ S, a / 6 = b / 6 → a = b := by
+    intro a ha b hb hab
+    simp only [hS, Finset.mem_filter] at ha hb
+    have h1 : a = 6 * (a / 6) + a % 6 := (Nat.div_add_mod a 6).symm
+    have h2 : b = 6 * (b / 6) + b % 6 := (Nat.div_add_mod b 6).symm
+    rw [h1, h2, ha.2, hb.2, hab]
+  have h := Finset.card_le_card_of_injOn (fun n : ℕ => n / 6)
+    (fun a ha => hmap a ha) (fun a ha b hb hab => hinj a ha b hb hab)
+  simpa using h
+
+/-- A prime bigger than `3` is `1` or `5` modulo `6`. -/
+private lemma prime_mod_six {p : ℕ} (hp : p.Prime) (h3 : 3 < p) :
+    p % 6 = 1 ∨ p % 6 = 5 := by
+  have hp2 : p ≠ 2 := by omega
+  have hodd : p % 2 = 1 := by
+    rcases hp.eq_two_or_odd with h | h
+    · omega
+    · simpa [Nat.odd_iff] using h
+  have hp3 : p ≠ 3 := by omega
+  have h3dvd : ¬ (3 ∣ p) := by
+    intro h
+    rcases (Nat.dvd_prime hp).mp h with h1 | h1
+    · omega
+    · omega
+  have hmod : (p % 6) % 2 = 1 := by
+    rw [Nat.mod_mod_of_dvd p (by norm_num : 2 ∣ 6)]
+    exact hodd
+  have hmod3 : (p % 6) % 3 ≠ 0 := by
+    rw [Nat.mod_mod_of_dvd p (by norm_num : 3 ∣ 6)]
+    intro h
+    exact h3dvd (Nat.dvd_of_mod_eq_zero h)
+  have hlt : p % 6 < 6 := Nat.mod_lt _ (by norm_num)
+  omega
+
+/-- `π x ≤ x/3 + 5` for `x ≥ 6`. -/
+private lemma pi_le_third {x : ℝ} (hx : 6 ≤ x) :
+    ((Nat.primeCounting ⌊x⌋₊ : ℕ) : ℝ) ≤ x / 3 + 5 := by
+  set N := ⌊x⌋₊ with hN
+  have hN6 : 6 ≤ N := by
+    have h : ⌊(6:ℝ)⌋₊ ≤ ⌊x⌋₊ := Nat.floor_mono hx
+    simpa using h
+  have hNx : (N : ℝ) ≤ x := Nat.floor_le (by linarith)
+  set S := Nat.primesLE N with hSdef
+  have hScard : (Nat.primeCounting N : ℕ) = S.card := (Nat.primesLE_card_eq_primeCounting N).symm
+  have hsplit : S.card = (S.filter (fun p => p ≤ 3)).card
+      + (S.filter (fun p => ¬ p ≤ 3)).card := by
+    have h := Finset.card_filter_add_card_filter_not (s := S) (p := fun p => p ≤ 3)
+    omega
+  have hsmall : (S.filter (fun p => p ≤ 3)).card ≤ 2 := by
+    have hsub : S.filter (fun p => p ≤ 3) ⊆ ({2, 3} : Finset ℕ) := by
+      intro p hp
+      rw [Finset.mem_filter, Nat.mem_primesLE] at hp
+      obtain ⟨⟨-, hpp⟩, hp3⟩ := hp
+      rw [Finset.mem_insert, Finset.mem_singleton]
+      have h2 : 2 ≤ p := hpp.two_le
+      interval_cases p
+      · exact Or.inl rfl
+      · exact Or.inr rfl
+    have h := Finset.card_le_card hsub
+    simpa using h
+  have hbig : (S.filter (fun p => ¬ p ≤ 3)).card
+      ≤ ((N+1)/6 + 1) + ((N+1)/6 + 1) := by
+    have hsub : S.filter (fun p => ¬ p ≤ 3) ⊆
+        ((Finset.range (N+1)).filter (fun n => n % 6 = 1)) ∪
+        ((Finset.range (N+1)).filter (fun n => n % 6 = 5)) := by
+      intro p hp
+      rw [Finset.mem_filter, Nat.mem_primesLE] at hp
+      obtain ⟨⟨hpN, hpp⟩, hp3⟩ := hp
+      simp only [not_le] at hp3
+      have hmod := prime_mod_six hpp hp3
+      have hpN' : p < N + 1 := by omega
+      rcases hmod with h | h
+      · refine Finset.mem_union.mpr (Or.inl ?_)
+        simp only [Finset.mem_filter, Finset.mem_range]
+        exact ⟨hpN', h⟩
+      · refine Finset.mem_union.mpr (Or.inr ?_)
+        simp only [Finset.mem_filter, Finset.mem_range]
+        exact ⟨hpN', h⟩
+    have h1 := Finset.card_le_card hsub
+    have h2 := Finset.card_union_le ((Finset.range (N+1)).filter (fun n => n % 6 = 1))
+      ((Finset.range (N+1)).filter (fun n => n % 6 = 5))
+    have h3 := card_mod_six_le (N+1) 1
+    have h4 := card_mod_six_le (N+1) 5
+    omega
+  have hfin : (Nat.primeCounting N : ℕ) ≤ 2 + (((N+1)/6 + 1) + ((N+1)/6 + 1)) := by omega
+  have hcast : ((Nat.primeCounting N : ℕ) : ℝ)
+      ≤ 2 + (((((N+1)/6 : ℕ)) : ℝ) + 1 + ((((N+1)/6 : ℕ)) : ℝ) + 1) := by
+    exact_mod_cast hfin
+  have hdiv : (((N+1)/6 : ℕ) : ℝ) ≤ ((N:ℝ)+1)/6 := by
+    have h : ((N+1)/6 : ℕ) * 6 ≤ N + 1 := Nat.div_mul_le_self (N+1) 6
+    have h' : (((N+1)/6 : ℕ) : ℝ) * 6 ≤ (N:ℝ) + 1 := by exact_mod_cast h
+    linarith
+  have hgoal : ((Nat.primeCounting N : ℕ) : ℝ) ≤ x/3 + 5 := by nlinarith
+  calc ((Nat.primeCounting ⌊x⌋₊ : ℕ) : ℝ) = ((Nat.primeCounting N : ℕ) : ℝ) := by rw [hN]
+    _ ≤ x/3 + 5 := hgoal
+
+/-! ### The `n`-th prime -/
+
+private lemma nth_prime_prime (i : ℕ) : (Nat.nth Nat.Prime i).Prime :=
+  Nat.nth_mem i (fun hf => absurd hf Nat.infinite_setOfPred_prime)
+
+private lemma count_primes_nth (i : ℕ) : Nat.count Nat.Prime (Nat.nth Nat.Prime i) = i :=
+  Nat.count_nth_of_infinite Nat.infinite_setOfPred_prime i
+
+private lemma nth_prime_count (n i : ℕ) (h : Nat.Prime n) (hc : Nat.count Nat.Prime n = i) :
+    Nat.nth Nat.Prime i = n := by
+  have := Nat.nth_count (p := Nat.Prime) h
+  rwa [hc] at this
+
+private lemma nth_prime_0 : Nat.nth Nat.Prime 0 = 2 := nth_prime_count 2 0 (by norm_num) (by decide)
+private lemma nth_prime_1 : Nat.nth Nat.Prime 1 = 3 := nth_prime_count 3 1 (by norm_num) (by decide)
+private lemma nth_prime_2 : Nat.nth Nat.Prime 2 = 5 := nth_prime_count 5 2 (by norm_num) (by decide)
+private lemma nth_prime_3 : Nat.nth Nat.Prime 3 = 7 := nth_prime_count 7 3 (by norm_num) (by decide)
+private lemma nth_prime_4 : Nat.nth Nat.Prime 4 = 11 := nth_prime_count 11 4 (by norm_num) (by decide)
+private lemma nth_prime_5 : Nat.nth Nat.Prime 5 = 13 := nth_prime_count 13 5 (by norm_num) (by decide)
+private lemma nth_prime_6 : Nat.nth Nat.Prime 6 = 17 := nth_prime_count 17 6 (by norm_num) (by decide)
+private lemma nth_prime_7 : Nat.nth Nat.Prime 7 = 19 := nth_prime_count 19 7 (by norm_num) (by decide)
+private lemma nth_prime_8 : Nat.nth Nat.Prime 8 = 23 := nth_prime_count 23 8 (by norm_num) (by decide)
+private lemma nth_prime_9 : Nat.nth Nat.Prime 9 = 29 := nth_prime_count 29 9 (by norm_num) (by decide)
+private lemma nth_prime_10 : Nat.nth Nat.Prime 10 = 31 := nth_prime_count 31 10 (by norm_num) (by decide)
+private lemma nth_prime_11 : Nat.nth Nat.Prime 11 = 37 := nth_prime_count 37 11 (by norm_num) (by decide)
+private lemma nth_prime_12 : Nat.nth Nat.Prime 12 = 41 := nth_prime_count 41 12 (by norm_num) (by decide)
+private lemma nth_prime_13 : Nat.nth Nat.Prime 13 = 43 := nth_prime_count 43 13 (by norm_num) (by decide)
+private lemma nth_prime_14 : Nat.nth Nat.Prime 14 = 47 := nth_prime_count 47 14 (by norm_num) (by decide)
+private lemma nth_prime_15 : Nat.nth Nat.Prime 15 = 53 := nth_prime_count 53 15 (by norm_num) (by decide)
+private lemma nth_prime_16 : Nat.nth Nat.Prime 16 = 59 := nth_prime_count 59 16 (by norm_num) (by decide)
+private lemma nth_prime_17 : Nat.nth Nat.Prime 17 = 61 := nth_prime_count 61 17 (by norm_num) (by decide)
+private lemma nth_prime_18 : Nat.nth Nat.Prime 18 = 67 := nth_prime_count 67 18 (by norm_num) (by decide)
+private lemma nth_prime_19 : Nat.nth Nat.Prime 19 = 71 := nth_prime_count 71 19 (by norm_num) (by decide)
+private lemma nth_prime_20 : Nat.nth Nat.Prime 20 = 73 := nth_prime_count 73 20 (by norm_num) (by decide)
+private lemma nth_prime_21 : Nat.nth Nat.Prime 21 = 79 := nth_prime_count 79 21 (by norm_num) (by decide)
+private lemma nth_prime_22 : Nat.nth Nat.Prime 22 = 83 := nth_prime_count 83 22 (by norm_num) (by decide)
+private lemma nth_prime_23 : Nat.nth Nat.Prime 23 = 89 := nth_prime_count 89 23 (by norm_num) (by decide)
+private lemma nth_prime_24 : Nat.nth Nat.Prime 24 = 97 := nth_prime_count 97 24 (by norm_num) (by decide)
+private lemma nth_prime_25 : Nat.nth Nat.Prime 25 = 101 := nth_prime_count 101 25 (by norm_num) (by decide)
+private lemma nth_prime_26 : Nat.nth Nat.Prime 26 = 103 := nth_prime_count 103 26 (by norm_num) (by decide)
+private lemma nth_prime_27 : Nat.nth Nat.Prime 27 = 107 := nth_prime_count 107 27 (by norm_num) (by decide)
+private lemma nth_prime_28 : Nat.nth Nat.Prime 28 = 109 := nth_prime_count 109 28 (by norm_num) (by decide)
+private lemma nth_prime_29 : Nat.nth Nat.Prime 29 = 113 := nth_prime_count 113 29 (by norm_num) (by decide)
+private lemma nth_prime_30 : Nat.nth Nat.Prime 30 = 127 := nth_prime_count 127 30 (by norm_num) (by decide)
+private lemma nth_prime_31 : Nat.nth Nat.Prime 31 = 131 := nth_prime_count 131 31 (by norm_num) (by decide)
+private lemma nth_prime_32 : Nat.nth Nat.Prime 32 = 137 := nth_prime_count 137 32 (by norm_num) (by decide)
+private lemma nth_prime_33 : Nat.nth Nat.Prime 33 = 139 := nth_prime_count 139 33 (by norm_num) (by decide)
+private lemma nth_prime_34 : Nat.nth Nat.Prime 34 = 149 := nth_prime_count 149 34 (by norm_num) (by decide)
+private lemma nth_prime_35 : Nat.nth Nat.Prime 35 = 151 := nth_prime_count 151 35 (by norm_num) (by decide)
+private lemma nth_prime_36 : Nat.nth Nat.Prime 36 = 157 := nth_prime_count 157 36 (by norm_num) (by decide)
+private lemma nth_prime_37 : Nat.nth Nat.Prime 37 = 163 := nth_prime_count 163 37 (by norm_num) (by decide)
+private lemma nth_prime_38 : Nat.nth Nat.Prime 38 = 167 := nth_prime_count 167 38 (by norm_num) (by decide)
+private lemma nth_prime_39 : Nat.nth Nat.Prime 39 = 173 := nth_prime_count 173 39 (by norm_num) (by decide)
+private lemma nth_prime_40 : Nat.nth Nat.Prime 40 = 179 := nth_prime_count 179 40 (by norm_num) (by decide)
+private lemma nth_prime_41 : Nat.nth Nat.Prime 41 = 181 := nth_prime_count 181 41 (by norm_num) (by decide)
+private lemma nth_prime_42 : Nat.nth Nat.Prime 42 = 191 := nth_prime_count 191 42 (by norm_num) (by decide)
+private lemma nth_prime_43 : Nat.nth Nat.Prime 43 = 193 := nth_prime_count 193 43 (by norm_num) (by decide)
+private lemma nth_prime_44 : Nat.nth Nat.Prime 44 = 197 := nth_prime_count 197 44 (by norm_num) (by decide)
+private lemma nth_prime_45 : Nat.nth Nat.Prime 45 = 199 := nth_prime_count 199 45 (by norm_num) (by decide)
+private lemma nth_prime_46 : Nat.nth Nat.Prime 46 = 211 := nth_prime_count 211 46 (by norm_num) (by decide)
+private lemma nth_prime_47 : Nat.nth Nat.Prime 47 = 223 := nth_prime_count 223 47 (by norm_num) (by decide)
+private lemma nth_prime_48 : Nat.nth Nat.Prime 48 = 227 := nth_prime_count 227 48 (by norm_num) (by decide)
+private lemma nth_prime_49 : Nat.nth Nat.Prime 49 = 229 := nth_prime_count 229 49 (by norm_num) (by decide)
+private lemma nth_prime_50 : Nat.nth Nat.Prime 50 = 233 := nth_prime_count 233 50 (by norm_num) (by decide)
+private lemma nth_prime_51 : Nat.nth Nat.Prime 51 = 239 := nth_prime_count 239 51 (by norm_num) (by decide)
+
+
+
+private lemma primorial_succ (k : ℕ) :
+    (∏ i ∈ Finset.range (k+1), Nat.nth Nat.Prime i) = (∏ i ∈ Finset.range k, Nat.nth Nat.Prime i) * Nat.nth Nat.Prime k := by
+  simp only [Finset.prod_range_succ]
+
+private lemma two_le_primorial (k : ℕ) : 2 ^ k ≤ (∏ i ∈ Finset.range k, Nat.nth Nat.Prime i) := by
+  have h2 : ∀ i ∈ Finset.range k, 2 ≤ Nat.nth Nat.Prime i :=
+    fun i _ => (nth_prime_prime i).two_le
+  calc 2 ^ k = ∏ _i ∈ Finset.range k, 2 := by simp
+    _ ≤ ∏ i ∈ Finset.range k, Nat.nth Nat.Prime i := Finset.prod_le_prod h2
+
+
+/-- Every `k`-element set of primes has product at least `(∏ i ∈ Finset.range k, Nat.nth Nat.Prime i)`. -/
+private lemma primorial_le_prod_aux (n : ℕ) :
+    ∀ (S : Finset ℕ), S.card = n → (∀ p ∈ S, p.Prime) → (∏ i ∈ Finset.range S.card, Nat.nth Nat.Prime i) ≤ ∏ p ∈ S, p := by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    intro S hcard hS
+    subst hcard
+    rcases Finset.eq_empty_or_nonempty S with rfl | hne
+    · simp
+    · set M := S.max' hne with hM
+      have hMS : M ∈ S := Finset.max'_mem S hne
+      have hcard' : (S.erase M).card = S.card - 1 := Finset.card_erase_of_mem hMS
+      have hSe : ∀ p ∈ S.erase M, p.Prime := fun p hp => hS p (Finset.mem_of_mem_erase hp)
+      have hpos : 0 < S.card := Finset.card_pos.mpr hne
+      have ih' : (∏ i ∈ Finset.range (S.erase M).card, Nat.nth Nat.Prime i) ≤ ∏ p ∈ S.erase M, p :=
+        ih (S.erase M).card (by omega) (S.erase M) rfl hSe
+      rw [hcard'] at ih'
+      have hMge : Nat.nth Nat.Prime (S.card - 1) ≤ M := by
+        by_contra hlt
+        push_neg at hlt
+        have hsub : S ⊆ (Finset.range (Nat.nth Nat.Prime (S.card - 1))).filter Nat.Prime := by
+          intro p hp
+          simp only [Finset.mem_filter, Finset.mem_range]
+          refine ⟨lt_of_le_of_lt ?_ hlt, hS p hp⟩
+          rw [hM]
+          exact Finset.le_max' S p hp
+        have hc1 : S.card ≤ ((Finset.range (Nat.nth Nat.Prime (S.card - 1))).filter
+            Nat.Prime).card := Finset.card_le_card hsub
+        have hc2 : ((Finset.range (Nat.nth Nat.Prime (S.card - 1))).filter Nat.Prime).card
+            = S.card - 1 := by
+          rw [← Nat.count_eq_card_filter_range, count_primes_nth]
+        omega
+      have hnot : M ∉ S.erase M := by simp
+      have hprod : ∏ p ∈ S, p = (∏ p ∈ S.erase M, p) * M := by
+        conv_lhs => rw [← Finset.insert_erase hMS]
+        rw [Finset.prod_insert hnot]
+        exact mul_comm M (∏ p ∈ S.erase M, p)
+      have hsplit : (∏ i ∈ Finset.range S.card, Nat.nth Nat.Prime i)
+          = (∏ i ∈ Finset.range (S.card - 1), Nat.nth Nat.Prime i) * Nat.nth Nat.Prime (S.card - 1) := by
+        conv_lhs => rw [show S.card = (S.card - 1) + 1 by omega]
+        exact primorial_succ (S.card - 1)
+      rw [hprod, hsplit]
+      exact mul_le_mul ih' (by rw [hM]; exact hMge) (by positivity) (by positivity)
+
+private lemma primorial_le_prod (S : Finset ℕ) (hS : ∀ p ∈ S, p.Prime) :
+    (∏ i ∈ Finset.range S.card, Nat.nth Nat.Prime i) ≤ ∏ p ∈ S, p :=
+  primorial_le_prod_aux S.card S rfl hS
+
+/-- `(∏ i ∈ Finset.range (ω n), Nat.nth Nat.Prime i) ≤ n` for `n ≠ 0`. -/
+private lemma primorial_card_primeFactors_le {n : ℕ} (hn : n ≠ 0) :
+    (∏ i ∈ Finset.range n.primeFactors.card, Nat.nth Nat.Prime i) ≤ n := by
+  have h1 : (∏ i ∈ Finset.range n.primeFactors.card, Nat.nth Nat.Prime i) ≤ ∏ p ∈ n.primeFactors, p :=
+    primorial_le_prod _ (fun p hp => (Nat.mem_primeFactors.mp hp).1)
+  have h2 : ∏ p ∈ n.primeFactors, p ∣ n := Nat.prod_primeFactors_dvd n
+  have h3 : ∏ p ∈ n.primeFactors, p ≤ n := Nat.le_of_dvd (Nat.pos_of_ne_zero hn) h2
+  linarith
+
+
+/-- `log log x / log x ≤ 1/e` for `x > 1`. -/
+private lemma loglog_div_log_le_inv_e {x : ℝ} (hx : 1 < x) :
+    Real.log (Real.log x) / Real.log x ≤ 1 / Real.exp 1 := by
+  have hlog : 0 < Real.log x := Real.log_pos hx
+  have h2 : Real.log (Real.log x) ≤ Real.log x / Real.exp 1 := by
+    have h3 : Real.log (Real.log x) ≤ Real.exp (Real.log (Real.log x) - 1) := by
+      have h4 := Real.add_one_le_exp (Real.log (Real.log x) - 1)
+      linarith
+    have h5 : Real.exp (Real.log (Real.log x) - 1) = Real.log x / Real.exp 1 := by
+      rw [Real.exp_sub, Real.exp_log hlog]
+    linarith
+  rw [div_le_iff₀ hlog]
+  have h6 : Real.log x / Real.exp 1 = (1 / Real.exp 1) * Real.log x := by ring
+  linarith [h6 ▸ h2]
+
+/-- `x ↦ log log x / log x` is antitone on `[e^e, ∞)`. -/
+private lemma loglog_div_log_antitone :
+    AntitoneOn (fun x : ℝ => Real.log (Real.log x) / Real.log x)
+      (Set.Ici (Real.exp (Real.exp 1))) := by
+  have hE1 : (1:ℝ) < Real.exp 1 := by
+    have := Real.add_one_le_exp (1:ℝ); linarith
+  have hEE : (1:ℝ) < Real.exp (Real.exp 1) := by
+    calc (1:ℝ) < Real.exp 1 := hE1
+      _ ≤ Real.exp (Real.exp 1) := Real.exp_le_exp.mpr hE1.le
+  have hlogx : ContinuousOn (fun x : ℝ => Real.log x) (Set.Ici (Real.exp (Real.exp 1))) := by
+    apply Real.continuousOn_log.mono
+    intro x hx
+    have hx1 : (1:ℝ) < x := lt_of_lt_of_le hEE hx
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+    linarith
+  have hloglog : ContinuousOn (fun x : ℝ => Real.log (Real.log x))
+      (Set.Ici (Real.exp (Real.exp 1))) := by
+    apply ContinuousOn.log hlogx
+    intro x hx
+    have hx1 : (1:ℝ) < x := lt_of_lt_of_le hEE hx
+    exact ne_of_gt (Real.log_pos hx1)
+  have hcont : ContinuousOn (fun x : ℝ => Real.log (Real.log x) / Real.log x)
+      (Set.Ici (Real.exp (Real.exp 1))) := by
+    apply ContinuousOn.div hloglog hlogx
+    intro x hx
+    have hx1 : (1:ℝ) < x := lt_of_lt_of_le hEE hx
+    exact ne_of_gt (Real.log_pos hx1)
+  have hdiff : DifferentiableOn ℝ (fun x : ℝ => Real.log (Real.log x) / Real.log x)
+      (interior (Set.Ici (Real.exp (Real.exp 1)))) := by
+    intro x hx
+    rw [interior_Ici] at hx
+    have hx1 : (1:ℝ) < x := lt_of_lt_of_le hEE hx.le
+    have hlx : 0 < Real.log x := Real.log_pos hx1
+    have h1 : HasDerivAt (fun y : ℝ => Real.log y) x⁻¹ x := hasDerivAt_log (by linarith)
+    have h2 : HasDerivAt (fun y : ℝ => Real.log (Real.log y))
+        (x⁻¹ / Real.log x) x := h1.log (ne_of_gt hlx)
+    exact (h2.div h1 (ne_of_gt hlx)).differentiableAt.differentiableWithinAt
+  refine antitoneOn_of_deriv_nonpos (convex_Ici _) hcont hdiff (fun x hx => ?_)
+  rw [interior_Ici] at hx
+  have hx1 : (1:ℝ) < x := lt_of_lt_of_le hEE hx.le
+  have hlx : 0 < Real.log x := Real.log_pos hx1
+  have hloglog1 : (1:ℝ) ≤ Real.log (Real.log x) := by
+    have h2 : Real.exp 1 ≤ Real.log x := by
+      have h := Real.log_le_log (Real.exp_pos (Real.exp 1)) hx.le
+      rwa [Real.log_exp] at h
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log (Real.log x) := Real.log_le_log (Real.exp_pos 1) h2
+  have h1 : HasDerivAt (fun y : ℝ => Real.log y) x⁻¹ x := hasDerivAt_log (by linarith)
+  have h2 : HasDerivAt (fun y : ℝ => Real.log (Real.log y)) (x⁻¹ / Real.log x) x :=
+    h1.log (ne_of_gt hlx)
+  have h3 : HasDerivAt (fun y : ℝ => Real.log (Real.log y) / Real.log y)
+      ((x⁻¹ / Real.log x * Real.log x - Real.log (Real.log x) * x⁻¹) / (Real.log x)^2) x :=
+    h2.div h1 (ne_of_gt hlx)
+  rw [h3.deriv]
+  have heq : (x⁻¹ / Real.log x * Real.log x - Real.log (Real.log x) * x⁻¹) / (Real.log x)^2
+      = (1 - Real.log (Real.log x)) / (x * (Real.log x)^2) := by
+    field_simp
+    try ring
+  rw [heq]
+  have hden : (0:ℝ) < x * (Real.log x)^2 := by positivity
+  apply div_nonpos_of_nonpos_of_nonneg _ hden.le
+  linarith
+
+/-- `e^e ≤ 16`. -/
+private lemma exp_exp_one_le_sixteen : Real.exp (Real.exp 1) ≤ 16 := by
+  have h1 : Real.exp 1 ≤ 2.72 := by
+    have := Real.exp_one_lt_d9; linarith
+  have h2 : Real.exp (Real.exp 1) ≤ Real.exp 2.72 := Real.exp_le_exp.mpr h1
+  have h3 : Real.exp 2.72 ≤ Real.exp (Real.log 16) := by
+    apply Real.exp_le_exp.mpr
+    have h4 : Real.log 16 = 4 * Real.log 2 := by
+      rw [show (16:ℝ) = 2^4 by norm_num, Real.log_pow]; push_cast; ring
+    rw [h4]
+    have h5 := Real.log_two_gt_d9
+    linarith
+  have h6 : Real.exp (Real.log 16) = 16 := Real.exp_log (by norm_num)
+  linarith [h2, h3]
+
+/-- The (∏ i ∈ Finset.range bound, Nat.nth Nat.Prime i) at `k ≥ 4` gives `e^e ≤ (∏ i ∈ Finset.range k, Nat.nth Nat.Prime i)`. -/
+private lemma exp_exp_one_le_primorial {k : ℕ} (hk : 4 ≤ k) :
+    Real.exp (Real.exp 1) ≤ ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i) : ℝ) := by
+  have h1 : Real.exp (Real.exp 1) ≤ 16 := exp_exp_one_le_sixteen
+  have h2 : (16:ℕ) ≤ (∏ i ∈ Finset.range k, Nat.nth Nat.Prime i) := by
+    have h3 : (16:ℕ) = 2^4 := by norm_num
+    rw [h3]
+    exact le_trans (Nat.pow_le_pow_right (by norm_num) hk) (two_le_primorial k)
+  have h4 : (16:ℝ) ≤ ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i) : ℝ) := by exact_mod_cast h2
+  linarith
+
+/-! ### The first primes and the first primorials -/
+
+private lemma primorial_four : (∏ i ∈ Finset.range 4, Nat.nth Nat.Prime i) = 210 := by
+  simp only [Finset.prod_range_succ, Finset.prod_range_zero,
+    nth_prime_0, nth_prime_1, nth_prime_2, nth_prime_3]
+  norm_num
+private lemma primorial_five : (∏ i ∈ Finset.range 5, Nat.nth Nat.Prime i) = 2310 := by
+  rw [show (5:ℕ) = 4+1 by norm_num, primorial_succ, primorial_four, nth_prime_4]
+private lemma primorial_six : (∏ i ∈ Finset.range 6, Nat.nth Nat.Prime i) = 30030 := by
+  rw [show (6:ℕ) = 5+1 by norm_num, primorial_succ, primorial_five, nth_prime_5]
+private lemma primorial_seven : (∏ i ∈ Finset.range 7, Nat.nth Nat.Prime i) = 510510 := by
+  rw [show (7:ℕ) = 6+1 by norm_num, primorial_succ, primorial_six, nth_prime_6]
+private lemma primorial_eight : (∏ i ∈ Finset.range 8, Nat.nth Nat.Prime i) = 9699690 := by
+  rw [show (8:ℕ) = 7+1 by norm_num, primorial_succ, primorial_seven, nth_prime_7]
+private lemma primorial_nine : (∏ i ∈ Finset.range 9, Nat.nth Nat.Prime i) = 223092870 := by
+  rw [show (9:ℕ) = 8+1 by norm_num, primorial_succ, primorial_eight, nth_prime_8]
+
+
+/-! ### Rigorous bounds for `exp` and `log` -/
+
+/-- `exp m ≤ 2.7182818286^m` for natural `m`. -/
+private lemma exp_nat_le (m : ℕ) : Real.exp (m:ℝ) ≤ 2.7182818286^m := by
+  have h1 : Real.exp ((m:ℕ):ℝ) = Real.exp 1 ^ m := by
+    rw [show ((m:ℕ):ℝ) = (m:ℝ) * 1 by ring, Real.exp_nat_mul]
+  rw [h1]
+  exact pow_le_pow_left₀ (le_of_lt (Real.exp_pos 1)) (le_of_lt Real.exp_one_lt_d9) m
+
+/-- `2.7182818283^m ≤ exp m` for natural `m`. -/
+private lemma exp_nat_ge (m : ℕ) : 2.7182818283^m ≤ Real.exp (m:ℝ) := by
+  have h1 : Real.exp ((m:ℕ):ℝ) = Real.exp 1 ^ m := by
+    rw [show ((m:ℕ):ℝ) = (m:ℝ) * 1 by ring, Real.exp_nat_mul]
+  rw [h1]
+  exact pow_le_pow_left₀ (by norm_num) (le_of_lt Real.exp_one_gt_d9) m
+
+/-- Taylor upper bound for `exp` on `[0,1]`, 12 terms, error `10⁻⁸`. -/
+private lemma exp_frac_le {f : ℝ} (h0 : 0 ≤ f) (h1 : f ≤ 1) :
+    Real.exp f ≤ (∑ m ∈ Finset.range 12, f^m/(m.factorial : ℝ)) + 1/10^8 := by
+  have habs : |f| ≤ 1 := by rw [abs_of_nonneg h0]; exact h1
+  have hb := Real.exp_bound (x := f) habs (n := 12) (by norm_num)
+  have herr : |f|^12 * ((13:ℝ) / ((Nat.factorial 12 : ℝ) * 12)) ≤ 1/10^8 := by
+    have h2 : |f|^12 ≤ 1 := by
+      have := pow_le_pow_left₀ (abs_nonneg f) habs 12
+      simpa using this
+    have h3 : (0:ℝ) ≤ (13:ℝ) / ((Nat.factorial 12 : ℝ) * 12) := by positivity
+    calc |f|^12 * ((13:ℝ) / ((Nat.factorial 12 : ℝ) * 12))
+        ≤ 1 * ((13:ℝ) / ((Nat.factorial 12 : ℝ) * 12)) := by
+          exact mul_le_mul_of_nonneg_right h2 h3
+      _ ≤ 1/10^8 := by norm_num
+  have h4 := abs_le.mp hb
+  linarith [h4.2, herr]
+
+/-! ### `L ↦ log L / L` is antitone on `[e, ∞)` -/
+
+
+private lemma log_div_self_antitone :
+    AntitoneOn (fun L : ℝ => Real.log L / L) (Set.Ici (Real.exp 1)) := by
+  have he : (1:ℝ) < Real.exp 1 := by
+    have h := Real.add_one_le_exp (1:ℝ); linarith
+  have hcont : ContinuousOn (fun L : ℝ => Real.log L / L) (Set.Ici (Real.exp 1)) := by
+    refine ContinuousOn.div ?_ continuousOn_id ?_
+    · apply Real.continuousOn_log.mono
+      intro x hx
+      have hx1 : (1:ℝ) < x := lt_of_lt_of_le he hx
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+      linarith
+    · intro x hx
+      exact ne_of_gt (lt_of_lt_of_le (Real.exp_pos 1) hx)
+  have hdiff : DifferentiableOn ℝ (fun L : ℝ => Real.log L / L)
+      (interior (Set.Ici (Real.exp 1))) := by
+    intro L hL
+    rw [interior_Ici] at hL
+    have hLpos : (0:ℝ) < L := lt_trans (Real.exp_pos 1) hL
+    have h1 : HasDerivAt (fun y : ℝ => Real.log y) L⁻¹ L := hasDerivAt_log (ne_of_gt hLpos)
+    have h2 : HasDerivAt (fun y : ℝ => y) 1 L := hasDerivAt_id L
+    exact (h1.div h2 (ne_of_gt hLpos)).differentiableAt.differentiableWithinAt
+  refine antitoneOn_of_deriv_nonpos (convex_Ici _) hcont hdiff (fun L hL => ?_)
+  rw [interior_Ici] at hL
+  have hLpos : (0:ℝ) < L := lt_trans (Real.exp_pos 1) hL
+  have h1 : HasDerivAt (fun y : ℝ => Real.log y) L⁻¹ L := hasDerivAt_log (ne_of_gt hLpos)
+  have h2 : HasDerivAt (fun y : ℝ => y) 1 L := hasDerivAt_id L
+  have h3 : HasDerivAt (fun y : ℝ => Real.log y / y) ((L⁻¹ * L - Real.log L * 1)/L^2) L :=
+    h1.div h2 (ne_of_gt hLpos)
+  rw [h3.deriv]
+  have heq : (L⁻¹ * L - Real.log L * 1)/L^2 = (1 - Real.log L)/L^2 := by
+    field_simp
+    try ring
+  rw [heq]
+  have hlog : 1 ≤ Real.log L := by
+    have h4 : Real.exp 1 ≤ L := le_of_lt hL
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log L := Real.log_le_log (Real.exp_pos 1) h4
+  apply div_nonpos_of_nonpos_of_nonneg _ (by positivity)
+  linarith
+
+/-- If `exp c ≤ P` and `log c ≤ d` then the Robin ratio at `P` is at most `k·d/c`. -/
+private lemma robin_ratio_le {k : ℕ} {P c d : ℝ} (hexp : Real.exp c ≤ P) (hce : Real.exp 1 ≤ c)
+    (hlogc : Real.log c ≤ d) :
+    (k:ℝ) * (Real.log (Real.log P) / Real.log P) ≤ (k:ℝ) * (d / c) := by
+  have hcpos : (0:ℝ) < c := lt_of_lt_of_le (Real.exp_pos 1) hce
+  have hlogP : c ≤ Real.log P := by
+    have h1 : Real.log (Real.exp c) ≤ Real.log P := Real.log_le_log (Real.exp_pos c) hexp
+    rwa [Real.log_exp] at h1
+  have hPge : Real.exp 1 ≤ Real.log P := le_trans hce hlogP
+  have hanti := log_div_self_antitone hce hPge hlogP
+  have h1 : Real.log (Real.log P) / Real.log P ≤ d / c := by
+    refine le_trans hanti ?_
+    exact div_le_div_of_nonneg_right hlogc hcpos.le
+  exact mul_le_mul_of_nonneg_left h1 (by positivity)
+
+
+/-- `exp (m + f) ≤ P` for `0 ≤ f ≤ 1` from a rational check. -/
+
+private lemma exp_add_frac_le {m : ℕ} {f : ℝ} (h0 : 0 ≤ f) (h1 : f ≤ 1) {P : ℕ}
+    (h : 2.7182818286^m * ((∑ i ∈ Finset.range 12, f^i/(i.factorial : ℝ)) + 1/10^8)
+      ≤ (P:ℝ)) :
+    Real.exp ((m:ℝ) + f) ≤ (P:ℝ) := by
+  rw [Real.exp_add]
+  have h1' : Real.exp (m:ℝ) ≤ 2.7182818286^m := exp_nat_le m
+  have h2' : Real.exp f ≤ (∑ i ∈ Finset.range 12, f^i/(i.factorial : ℝ)) + 1/10^8 :=
+    exp_frac_le h0 h1
+  calc Real.exp (m:ℝ) * Real.exp f
+      ≤ 2.7182818286^m * ((∑ i ∈ Finset.range 12, f^i/(i.factorial : ℝ)) + 1/10^8) :=
+        mul_le_mul h1' h2' (by linarith [Real.exp_pos f]) (by positivity)
+    _ ≤ (P:ℝ) := h
+
+/-- `c ≤ exp (m + f)` for `0 ≤ f` from a rational check. -/
+private lemma le_exp_add_frac {m : ℕ} {f : ℝ} (h0 : 0 ≤ f) {c : ℝ}
+    (h : c ≤ 2.7182818283^m * (∑ i ∈ Finset.range 12, f^i/(i.factorial : ℝ))) :
+    c ≤ Real.exp ((m:ℝ) + f) := by
+  rw [Real.exp_add]
+  have h1' : (2.7182818283:ℝ)^m ≤ Real.exp (m:ℝ) := exp_nat_ge m
+  have h2' : (∑ i ∈ Finset.range 12, f^i/(i.factorial : ℝ)) ≤ Real.exp f :=
+    Real.sum_le_exp_of_nonneg h0 12
+  have h3 : (0:ℝ) ≤ (∑ i ∈ Finset.range 12, f^i/(i.factorial : ℝ)) := by positivity
+  calc c ≤ 2.7182818283^m * (∑ i ∈ Finset.range 12, f^i/(i.factorial : ℝ)) := h
+    _ ≤ Real.exp (m:ℝ) * Real.exp f :=
+        mul_le_mul h1' h2' h3 (by linarith [Real.exp_pos (m:ℝ)])
+
+/-! ### The six (∏ i ∈ Finset.range instances, Nat.nth Nat.Prime i) -/
+
+
+private theorem robin_four :
+    (4:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range 4, (Nat.nth Nat.Prime i : ℝ))) / Real.log (∏ i ∈ Finset.range 4, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 4, (Nat.nth Nat.Prime i : ℝ)) = 210 := by
+    have h := primorial_four
+    have h' : (((∏ i ∈ Finset.range 4, Nat.nth Nat.Prime i) : ℕ) : ℝ) = ((210:ℕ):ℝ) :=
+      by rw [h]
+    simpa using h'
+  rw [hP]
+  have hexp : Real.exp 5 ≤ (210:ℝ) := by
+    refine le_trans (exp_nat_le 5) ?_
+    norm_num
+  have hc : Real.exp 1 ≤ (5:ℝ) := by
+    have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (5:ℝ) ≤ 1.61 := by
+    have h := Real.log_five_lt_d9; linarith
+  have h := robin_ratio_le (k := 4) hexp hc hlogc
+  have h2 : (4:ℝ) * ((1.61:ℝ)/5) < 1.3841 := by norm_num
+  linarith
+
+private theorem robin_five :
+    (5:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range 5, (Nat.nth Nat.Prime i : ℝ))) / Real.log (∏ i ∈ Finset.range 5, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 5, (Nat.nth Nat.Prime i : ℝ)) = 2310 := by
+    have h := primorial_five
+    have h' : (((∏ i ∈ Finset.range 5, Nat.nth Nat.Prime i) : ℕ) : ℝ) = ((2310:ℕ):ℝ) :=
+      by rw [h]
+    simpa using h'
+  rw [hP]
+  have hexp : Real.exp (72/10 : ℝ) ≤ (2310:ℝ) := by
+    have hsplit : Real.exp (72/10 : ℝ) = Real.exp 7 * Real.exp (2/10 : ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp 7 ≤ 2.7182818286^7 := exp_nat_le 7
+    have h2 : Real.exp (2/10 : ℝ) ≤ 1.2215 := by
+      refine le_trans (exp_frac_le (f := 2/10) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 7 * Real.exp (2/10 : ℝ) ≤ 2.7182818286^7 * 1.2215 := by
+          exact mul_le_mul h1 h2 (by linarith [Real.exp_pos (2/10:ℝ)])
+            (by positivity)
+      _ ≤ 2310 := by norm_num
+  have hc : Real.exp 1 ≤ (72/10:ℝ) := by
+    have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (72/10:ℝ) ≤ 1.9740810269 := by
+    have h2 := Real.log_two_lt_d9
+    have h3 := Real.log_three_lt_d9
+    have h5 := Real.log_five_gt_d9
+    have hrw : Real.log (72/10:ℝ) = 2 * Real.log 2 + 2 * Real.log 3 - Real.log 5 := by
+      have e1 : (72/10:ℝ) = 36/5 := by norm_num
+      rw [e1, Real.log_div (by norm_num) (by norm_num)]
+      have e2 : Real.log (36:ℝ) = 2 * Real.log 6 := by
+        rw [show (36:ℝ) = 6^2 by norm_num, Real.log_pow]; push_cast; ring
+      have e3 : Real.log (6:ℝ) = Real.log 2 + Real.log 3 := by
+        rw [show (6:ℝ) = 2*3 by norm_num, Real.log_mul (by norm_num) (by norm_num)]
+      linarith
+    rw [hrw]
+    linarith
+  have h := robin_ratio_le (k := 5) hexp hc hlogc
+  have h2 : (5:ℝ) * ((1.9740810269:ℝ)/(72/10)) < 1.3841 := by norm_num
+  linarith
+
+private theorem robin_six :
+    (6:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range 6, (Nat.nth Nat.Prime i : ℝ))) / Real.log (∏ i ∈ Finset.range 6, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 6, (Nat.nth Nat.Prime i : ℝ)) = 30030 := by
+    have h := primorial_six
+    have h' : (((∏ i ∈ Finset.range 6, Nat.nth Nat.Prime i) : ℕ) : ℝ) = ((30030:ℕ):ℝ) :=
+      by rw [h]
+    simpa using h'
+  rw [hP]
+  have hexp : Real.exp 10 ≤ (30030:ℝ) := by
+    refine le_trans (exp_nat_le 10) ?_
+    norm_num
+  have hc : Real.exp 1 ≤ (10:ℝ) := by
+    have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (10:ℝ) ≤ 2.3025850934 := by
+    have h2 := Real.log_two_lt_d9
+    have h5 := Real.log_five_lt_d9
+    have hrw : Real.log (10:ℝ) = Real.log 2 + Real.log 5 := by
+      rw [show (10:ℝ) = 2*5 by norm_num, Real.log_mul (by norm_num) (by norm_num)]
+    rw [hrw]; linarith
+  have h := robin_ratio_le (k := 6) hexp hc hlogc
+  have h2 : (6:ℝ) * ((2.3025850934:ℝ)/10) < 1.3841 := by norm_num
+  linarith
+
+private theorem robin_seven :
+    (7:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range 7, (Nat.nth Nat.Prime i : ℝ))) / Real.log (∏ i ∈ Finset.range 7, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 7, (Nat.nth Nat.Prime i : ℝ)) = 510510 := by
+    have h := primorial_seven
+    have h' : (((∏ i ∈ Finset.range 7, Nat.nth Nat.Prime i) : ℕ) : ℝ) = ((510510:ℕ):ℝ) :=
+      by rw [h]
+    simpa using h'
+  rw [hP]
+  have hexp : Real.exp (1296/100 : ℝ) ≤ (510510:ℝ) := by
+    have hsplit : Real.exp (1296/100 : ℝ) = Real.exp 12 * Real.exp (96/100 : ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp 12 ≤ 2.7182818286^12 := exp_nat_le 12
+    have h2 : Real.exp (96/100 : ℝ) ≤ 2.6117 := by
+      refine le_trans (exp_frac_le (f := 96/100) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 12 * Real.exp (96/100 : ℝ) ≤ 2.7182818286^12 * 2.6117 := by
+          exact mul_le_mul h1 h2 (by linarith [Real.exp_pos (96/100:ℝ)]) (by positivity)
+      _ ≤ 510510 := by norm_num
+  have hc : Real.exp 1 ≤ (1296/100:ℝ) := by
+    have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (1296/100:ℝ) ≤ 2.5618676922 := by
+    have h2 := Real.log_two_lt_d9
+    have h3 := Real.log_three_lt_d9
+    have h5 := Real.log_five_gt_d9
+    have hrw : Real.log (1296/100:ℝ) = 4 * Real.log 6 - 2 * Real.log 10 := by
+      have e1 : (1296/100:ℝ) = 6^4 / 10^2 := by norm_num
+      rw [e1, Real.log_div (by norm_num) (by norm_num), Real.log_pow, Real.log_pow]
+      push_cast
+      ring
+    have e6 : Real.log (6:ℝ) = Real.log 2 + Real.log 3 := by
+      rw [show (6:ℝ) = 2*3 by norm_num, Real.log_mul (by norm_num) (by norm_num)]
+    have e10 : Real.log (10:ℝ) = Real.log 2 + Real.log 5 := by
+      rw [show (10:ℝ) = 2*5 by norm_num, Real.log_mul (by norm_num) (by norm_num)]
+    rw [hrw, e6, e10]
+    linarith
+  have h := robin_ratio_le (k := 7) hexp hc hlogc
+  have h2 : (7:ℝ) * ((2.5618676922:ℝ)/(1296/100)) < 1.3841 := by norm_num
+  linarith
+
+private theorem robin_eight :
+    (8:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range 8, (Nat.nth Nat.Prime i : ℝ))) / Real.log (∏ i ∈ Finset.range 8, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 8, (Nat.nth Nat.Prime i : ℝ)) = 9699690 := by
+    have h := primorial_eight
+    have h' : (((∏ i ∈ Finset.range 8, Nat.nth Nat.Prime i) : ℕ) : ℝ) = ((9699690:ℕ):ℝ) :=
+      by rw [h]
+    simpa using h'
+  rw [hP]
+  have hexp : Real.exp (1605/100 : ℝ) ≤ (9699690:ℝ) := by
+    have hsplit : Real.exp (1605/100 : ℝ) = Real.exp 16 * Real.exp (5/100 : ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp 16 ≤ 2.7182818286^16 := exp_nat_le 16
+    have h2 : Real.exp (5/100 : ℝ) ≤ 1.0513 := by
+      refine le_trans (exp_frac_le (f := 5/100) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 16 * Real.exp (5/100 : ℝ) ≤ 2.7182818286^16 * 1.0513 := by
+          exact mul_le_mul h1 h2 (by linarith [Real.exp_pos (5/100:ℝ)]) (by positivity)
+      _ ≤ 9699690 := by norm_num
+  have hc : Real.exp 1 ≤ (1605/100:ℝ) := by
+    have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (1605/100:ℝ) ≤ 2.776 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    have hsplit : Real.exp (2.776 : ℝ) = Real.exp 2 * Real.exp (0.776 : ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : (2.7182818283:ℝ)^2 ≤ Real.exp 2 := exp_nat_ge 2
+    have h2 : (∑ m ∈ Finset.range 12, ((0.776:ℝ)^m/(m.factorial : ℝ)))
+        ≤ Real.exp (0.776 : ℝ) := Real.sum_le_exp_of_nonneg (by norm_num) 12
+    have h3 : (2.7182818283:ℝ)^2 * (∑ m ∈ Finset.range 12, ((0.776:ℝ)^m/(m.factorial : ℝ)))
+        ≥ 1605/100 := by norm_num
+    calc (1605/100 : ℝ) ≤ (2.7182818283:ℝ)^2 *
+          (∑ m ∈ Finset.range 12, ((0.776:ℝ)^m/(m.factorial : ℝ))) := by linarith
+      _ ≤ Real.exp 2 * Real.exp (0.776 : ℝ) := by
+          exact mul_le_mul h1 h2 (by positivity) (by linarith [Real.exp_pos (2:ℝ)])
+  have h := robin_ratio_le (k := 8) hexp hc hlogc
+  have h2 : (8:ℝ) * ((2.776:ℝ)/(1605/100)) < 1.3841 := by norm_num
+  linarith
+
+private theorem robin_nine :
+    (9:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range 9, (Nat.nth Nat.Prime i : ℝ))) / Real.log (∏ i ∈ Finset.range 9, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 9, (Nat.nth Nat.Prime i : ℝ)) = 223092870 := by
+    have h := primorial_nine
+    have h' : (((∏ i ∈ Finset.range 9, Nat.nth Nat.Prime i) : ℕ) : ℝ) = ((223092870:ℕ):ℝ) :=
+      by rw [h]
+    simpa using h'
+  rw [hP]
+  have hexp : Real.exp (19222/1000 : ℝ) ≤ (223092870:ℝ) := by
+    have hsplit : Real.exp (19222/1000 : ℝ) = Real.exp 19 * Real.exp (222/1000 : ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp 19 ≤ 2.7182818286^19 := exp_nat_le 19
+    have h2 : Real.exp (222/1000 : ℝ) ≤ 1.2486 := by
+      refine le_trans (exp_frac_le (f := 222/1000) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 19 * Real.exp (222/1000 : ℝ) ≤ 2.7182818286^19 * 1.2486 := by
+          exact mul_le_mul h1 h2 (by linarith [Real.exp_pos (222/1000:ℝ)]) (by positivity)
+      _ ≤ 223092870 := by norm_num
+  have hc : Real.exp 1 ≤ (19222/1000:ℝ) := by
+    have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (19222/1000:ℝ) ≤ 2.9561 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    have hsplit : Real.exp (2.9561 : ℝ) = Real.exp 2 * Real.exp (0.9561 : ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : (2.7182818283:ℝ)^2 ≤ Real.exp 2 := exp_nat_ge 2
+    have h2 : (∑ m ∈ Finset.range 12, ((0.9561:ℝ)^m/(m.factorial : ℝ)))
+        ≤ Real.exp (0.9561 : ℝ) := Real.sum_le_exp_of_nonneg (by norm_num) 12
+    have h3 : (2.7182818283:ℝ)^2 *
+        (∑ m ∈ Finset.range 12, ((0.9561:ℝ)^m/(m.factorial : ℝ))) ≥ 19222/1000 := by
+      norm_num
+    calc (19222/1000 : ℝ) ≤ (2.7182818283:ℝ)^2 *
+          (∑ m ∈ Finset.range 12, ((0.9561:ℝ)^m/(m.factorial : ℝ))) := by linarith
+      _ ≤ Real.exp 2 * Real.exp (0.9561 : ℝ) := by
+          exact mul_le_mul h1 h2 (by positivity) (by linarith [Real.exp_pos (2:ℝ)])
+  have h := robin_ratio_le (k := 9) hexp hc hlogc
+  have h2 : (9:ℝ) * ((2.9561:ℝ)/(19222/1000)) < 1.3841 := by norm_num
+  linarith
+
+
+/-- **Reduction of `lemma4_robin` (Robin Theorem 11), bounded form.**
+If `k·log log P_k/log P_k < 1.3841` for `4 ≤ k ≤ K`, then every `n ≥ 3` with `ω n ≤ K`
+satisfies `ω(n) < 1.3841·log n/log log n`.  Only two inputs about `n` are used:
+`n ≥ P_{ω(n)}` and the monotonicity of `log log x/log x` beyond `eᵉ`. -/
+private theorem robin_of_primorial_le (K : ℕ)
+    (hP : ∀ k : ℕ, 4 ≤ k → k ≤ K →
+      (k : ℝ) * (Real.log (Real.log ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i) : ℝ)) / Real.log ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i) : ℝ))
+        < 1.3841) :
+    ∀ n : ℕ, 3 ≤ n → n.primeFactors.card ≤ K →
+      (n.primeFactors.card : ℝ) < 1.3841 * Real.log n / Real.log (Real.log n) := by
+  intro n hn hK
+  have hn0 : n ≠ 0 := by omega
+  have hn1 : (1:ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < n)
+  have hlog : 0 < Real.log (n:ℝ) := Real.log_pos hn1
+  have hexp1 : (1:ℝ) < Real.log (n:ℝ) := by
+    have h2 : Real.exp 1 < (n:ℝ) := by
+      have h3 : (2.72 : ℝ) < (n:ℝ) := by
+        have h4 : (3:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
+        linarith
+      linarith [Real.exp_one_lt_d9]
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ < Real.log (n:ℝ) := Real.log_lt_log (Real.exp_pos 1) h2
+  have hloglog : 0 < Real.log (Real.log (n:ℝ)) := Real.log_pos hexp1
+  have hratio_nonneg : (0:ℝ) ≤ Real.log (Real.log (n:ℝ)) / Real.log (n:ℝ) := by positivity
+  have key : (n.primeFactors.card : ℝ) *
+      (Real.log (Real.log (n:ℝ)) / Real.log (n:ℝ)) < 1.3841 := by
+    by_cases hk3 : n.primeFactors.card ≤ 3
+    · have h2 : Real.log (Real.log (n:ℝ)) / Real.log (n:ℝ) ≤ 1 / Real.exp 1 :=
+        loglog_div_log_le_inv_e hn1
+      have h3 : (n.primeFactors.card : ℝ) ≤ 3 := by exact_mod_cast hk3
+      have h4 : (3:ℝ) * (1 / Real.exp 1) < 1.3841 := by
+        have h5 : Real.exp 1 > 2.7 := by linarith [Real.exp_one_gt_d9]
+        have h6 : (1:ℝ) / Real.exp 1 < 1 / 2.7 := by
+          apply one_div_lt_one_div_of_lt (by norm_num : (0:ℝ) < 2.7) h5
+        nlinarith
+      nlinarith [h2, h3, h4, hratio_nonneg]
+    · push_neg at hk3
+      have hk4 : 4 ≤ n.primeFactors.card := hk3
+      have hprim : (∏ i ∈ Finset.range n.primeFactors.card, Nat.nth Nat.Prime i) ≤ n := primorial_card_primeFactors_le hn0
+      have hbig : Real.exp (Real.exp 1) ≤ ((∏ i ∈ Finset.range n.primeFactors.card, Nat.nth Nat.Prime i) : ℝ) :=
+        exp_exp_one_le_primorial hk4
+      have hnmem : (n:ℝ) ∈ Set.Ici (Real.exp (Real.exp 1)) := by
+        refine le_trans hbig ?_
+        exact_mod_cast hprim
+      have hanti := loglog_div_log_antitone hbig hnmem (by exact_mod_cast hprim)
+      have hPk := hP n.primeFactors.card hk4 hK
+      have hkpos : (0:ℝ) ≤ (n.primeFactors.card : ℝ) := by positivity
+      nlinarith [hanti, hPk, hkpos, hratio_nonneg]
+  rw [lt_div_iff₀ hloglog]
+  have he : (n.primeFactors.card : ℝ) *
+        (Real.log (Real.log (n:ℝ)) / Real.log (n:ℝ)) * Real.log (n:ℝ)
+      = (n.primeFactors.card : ℝ) * Real.log (Real.log (n:ℝ)) := by
+    field_simp
+  nlinarith [key, hlog, he]
+
+
+
+/-! ### `π` of the `n`-th prime and a lower bound for it -/
+
+private lemma pi_nth (n : ℕ) : Nat.primeCounting (Nat.nth Nat.Prime n) = n + 1 := by
+  rw [Nat.primeCounting_eq_primeCounting'_succ]
+  show Nat.count Nat.Prime (Nat.nth Nat.Prime n + 1) = n + 1
+  rw [Nat.count_succ, count_primes_nth]
+  simp [nth_prime_prime n]
+
+/-- `3 (n - 4) ≤ nth Prime n`. -/
+private lemma nth_lower (n : ℕ) (hn : 5 ≤ n) :
+    (3:ℝ) * ((n:ℝ) - 4) ≤ (Nat.nth Nat.Prime n : ℝ) := by
+  have h2 : (6:ℕ) ≤ Nat.nth Nat.Prime n := by
+    have h1 : n + 2 ≤ Nat.nth Nat.Prime n := Nat.add_two_le_nth_prime n
+    omega
+  have h6 : (6:ℝ) ≤ (Nat.nth Nat.Prime n : ℝ) := by exact_mod_cast h2
+  have h3 := pi_le_third (x := (Nat.nth Nat.Prime n : ℝ)) h6
+  rw [Nat.floor_natCast] at h3
+  have h4 : ((Nat.primeCounting (Nat.nth Nat.Prime n) : ℕ) : ℝ) = (n:ℝ) + 1 := by
+    rw [pi_nth]; push_cast; ring
+  rw [h4] at h3
+  linarith
+
+/-- `log 10 > 2.3024`. -/
+private lemma log_ten_gt : (2.3024 : ℝ) < Real.log 10 := by
+  have h1 : Real.log (1024:ℝ) = 10 * Real.log 2 := by
+    rw [show (1024:ℝ) = 2^10 by norm_num, Real.log_pow]; norm_num
+  have h2 : Real.log (1000:ℝ) = 3 * Real.log 10 := by
+    rw [show (1000:ℝ) = 10^3 by norm_num, Real.log_pow]; norm_num
+  have h3 : Real.log (1024:ℝ) = Real.log 1000 + Real.log (1024/1000) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num)]; norm_num
+  have h4 : Real.log (1024/1000:ℝ) ≤ 1024/1000 - 1 := Real.log_le_sub_one_of_pos (by norm_num)
+  have h5 := Real.log_two_gt_d9
+  linarith
+
+/-- `log` of the product of the first `k` primes. -/
+private lemma log_prod_primes (k : ℕ) :
+    Real.log ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i : ℕ) : ℝ)
+      = ∑ i ∈ Finset.range k, Real.log (Nat.nth Nat.Prime i : ℝ) := by
+  have hne : ∀ i ∈ Finset.range k, ((Nat.nth Nat.Prime i : ℕ) : ℝ) ≠ 0 := by
+    intro i _
+    have := (nth_prime_prime i).pos
+    positivity
+  have h1 : ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i : ℕ) : ℝ)
+      = ∏ i ∈ Finset.range k, ((Nat.nth Nat.Prime i : ℕ) : ℝ) := by push_cast; ring
+  rw [h1, Real.log_prod hne]
+
+/-- `log P_52 ≥ 221`. -/
+private lemma base52 : (221:ℝ) ≤ ∑ i ∈ Finset.range 52, Real.log (Nat.nth Nat.Prime i : ℝ) := by
+  have hP : (10:ℕ)^96 ≤ ∏ i ∈ Finset.range 52, Nat.nth Nat.Prime i := by
+    simp only [Finset.prod_range_succ, Finset.prod_range_zero, nth_prime_0, nth_prime_1,
+      nth_prime_2, nth_prime_3, nth_prime_4, nth_prime_5, nth_prime_6, nth_prime_7,
+      nth_prime_8, nth_prime_9, nth_prime_10, nth_prime_11, nth_prime_12, nth_prime_13,
+      nth_prime_14, nth_prime_15, nth_prime_16, nth_prime_17, nth_prime_18, nth_prime_19,
+      nth_prime_20, nth_prime_21, nth_prime_22, nth_prime_23, nth_prime_24, nth_prime_25,
+      nth_prime_26, nth_prime_27, nth_prime_28, nth_prime_29, nth_prime_30, nth_prime_31,
+      nth_prime_32, nth_prime_33, nth_prime_34, nth_prime_35, nth_prime_36, nth_prime_37,
+      nth_prime_38, nth_prime_39, nth_prime_40, nth_prime_41, nth_prime_42, nth_prime_43,
+      nth_prime_44, nth_prime_45, nth_prime_46, nth_prime_47, nth_prime_48, nth_prime_49,
+      nth_prime_50, nth_prime_51]
+    norm_num
+  have hcast : (((10:ℕ)^96 : ℕ) : ℝ)
+      ≤ ((∏ i ∈ Finset.range 52, Nat.nth Nat.Prime i : ℕ) : ℝ) := by exact_mod_cast hP
+  have hlog := Real.log_le_log (by positivity) hcast
+  have h96 : Real.log ((((10:ℕ)^96 : ℕ) : ℝ)) = 96 * Real.log 10 := by
+    rw [Nat.cast_pow, Nat.cast_ofNat, Real.log_pow]; push_cast; ring
+  rw [h96] at hlog
+  rw [← log_prod_primes 52]
+  have h10 := log_ten_gt
+  linarith
+
+/-- The `k`-fold logarithmic bound: `k log k` against `(k-5) log (k-5)`. -/
+private lemma key_log1 {k : ℝ} (hk : 52 ≤ k) :
+    k * Real.log k ≤ (k - 5) * Real.log (k - 5) + 5 * Real.log k + 5.6 := by
+  have h5 : (0:ℝ) < k - 5 := by linarith
+  have hk0 : (0:ℝ) < k := by linarith
+  have h1 : Real.log k = Real.log (k - 5) + Real.log (k/(k-5)) := by
+    rw [← Real.log_mul (ne_of_gt h5) (by positivity)]
+    congr 1
+    field_simp
+  have h2 : Real.log (k/(k-5)) ≤ k/(k-5) - 1 := Real.log_le_sub_one_of_pos (by positivity)
+  have h3 : k/(k-5) - 1 = 5/(k-5) := by field_simp; ring
+  have h4 : 5/(k-5) ≤ 5/47 :=
+    div_le_div_of_nonneg_left (by norm_num) (by norm_num) (by linarith)
+  have hmul : k * Real.log k ≤ k * Real.log (k - 5) + k * (5/(k-5)) := by
+    have hb : Real.log k ≤ Real.log (k-5) + 5/(k-5) := by linarith
+    calc k * Real.log k ≤ k * (Real.log (k-5) + 5/(k-5)) :=
+          mul_le_mul_of_nonneg_left hb hk0.le
+      _ = k * Real.log (k - 5) + k * (5/(k-5)) := by ring
+  have hkq : k * (5/(k-5)) ≤ 5 + 25/47 := by
+    have h : k * (5/(k-5)) = 5 + 25/(k-5) := by field_simp; ring
+    rw [h]
+    have h6 : 25/(k-5) ≤ 25/47 :=
+      div_le_div_of_nonneg_left (by norm_num) (by norm_num) (by linarith)
+    linarith
+  have hsplit : k * Real.log (k - 5) = (k - 5) * Real.log (k - 5) + 5 * Real.log (k - 5) := by
+    ring
+  have hmono : Real.log (k - 5) ≤ Real.log k := Real.log_le_log h5 (by linarith)
+  nlinarith [hmul, hkq, hsplit, hmono, hk0]
+
+/-- Concavity bound for `log k` at `k = 52`. -/
+private lemma key_log2 {k : ℝ} (hk : 52 ≤ k) :
+    5 * Real.log k ≤ 5 * Real.log 52 + 5 * ((k - 52)/52) := by
+  have h1 : Real.log k = Real.log 52 + Real.log (k/52) := by
+    rw [← Real.log_mul (by norm_num) (by positivity)]
+    congr 1
+    field_simp
+  have h2 : Real.log (k/52) ≤ k/52 - 1 := Real.log_le_sub_one_of_pos (by positivity)
+  have h3 : k/52 - 1 = (k - 52)/52 := by rw [div_sub_one (by norm_num)]
+  linarith
+
+
+private lemma log47_le : Real.log 47 ≤ 3.851 := by
+  have h1 : Real.log 48 = 4 * Real.log 2 + Real.log 3 := by
+    rw [show (48:ℝ) = 2^4 * 3 by norm_num, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow]
+    push_cast; ring
+  have h2 : Real.log 47 = Real.log 48 + Real.log (47/48) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num)]; norm_num
+  have h3 : Real.log (47/48) ≤ 47/48 - 1 := Real.log_le_sub_one_of_pos (by norm_num)
+  have h4 := Real.log_two_lt_d9
+  have h5 := Real.log_three_lt_d9
+  linarith
+
+private lemma log52_le : Real.log 52 ≤ 3.96 := by
+  have h1 : Real.log 52 = 2 * Real.log 2 + Real.log 13 := by
+    rw [show (52:ℝ) = 2^2 * 13 by norm_num, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow]
+    push_cast; ring
+  have h2 : Real.log 13 = Real.log 12 + Real.log (13/12) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num)]; norm_num
+  have h3 : Real.log 12 = 2 * Real.log 2 + Real.log 3 := by
+    rw [show (12:ℝ) = 2^2 * 3 by norm_num, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow]
+    push_cast; ring
+  have h4 : Real.log (13/12) ≤ 13/12 - 1 := Real.log_le_sub_one_of_pos (by norm_num)
+  have h5 := Real.log_two_lt_d9
+  have h6 := Real.log_three_lt_d9
+  linarith
+
+/-- The integral comparison `∫_{47}^{k-5} log ≤ Σ_{j<k-52} log (j+48)`. -/
+private lemma integral_le_sum (k : ℕ) (hk : 52 ≤ k) :
+    ∫ t in (47:ℝ)..((k:ℝ) - 5), Real.log t
+      ≤ ∑ j ∈ Finset.range (k - 52), Real.log ((j:ℝ) + 48) := by
+  have h := MonotoneOn.integral_le_sum_Ico (f := Real.log) (a := 47) (b := k - 5)
+      (by omega) (Real.strictMonoOn_log.monotoneOn.mono (by
+    intro x hx
+    exact Set.mem_Ioi.mpr (lt_of_lt_of_le (by norm_num) hx.1)))
+  have hcast : ((k - 5 : ℕ) : ℝ) = (k:ℝ) - 5 := by
+    have h5 : (5:ℕ) ≤ k := by omega
+    push_cast [h5]; ring
+  rw [hcast] at h
+  have h2 : ∑ x ∈ Finset.Ico 47 (k - 5), Real.log ((x:ℝ) + 1)
+      = ∑ j ∈ Finset.range (k - 52), Real.log ((j:ℝ) + 48) := by
+    rw [show k - 5 = 47 + (k - 52) by omega, Finset.sum_Ico_eq_sum_range]
+    rw [show 47 + (k - 52) - 47 = k - 52 by omega]
+    apply Finset.sum_congr rfl
+    intro j _
+    congr 1
+    push_cast
+    ring
+  simp only [Nat.cast_add, Nat.cast_one] at h
+  rw [h2] at h
+  exact h
+
+/-- The tail: `k log k ≤ log P_k` for `k ≥ 52`. -/
+private lemma tail_ge (k : ℕ) (hk : 52 ≤ k) :
+    (k:ℝ) * Real.log (k:ℝ)
+      ≤ Real.log ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i : ℕ) : ℝ) := by
+  have hlog := log_prod_primes k
+  have hsplit : (∑ i ∈ Finset.range k, Real.log (Nat.nth Nat.Prime i : ℝ))
+      = (∑ i ∈ Finset.range 52, Real.log (Nat.nth Nat.Prime i : ℝ))
+        + ∑ j ∈ Finset.range (k - 52), Real.log (Nat.nth Nat.Prime (52 + j) : ℝ) := by
+    conv_lhs => rw [show k = 52 + (k - 52) by omega]
+    rw [Finset.sum_range_add]
+  set B := ∑ i ∈ Finset.range 52, Real.log (Nat.nth Nat.Prime i : ℝ) with hB
+  have hBge : (221:ℝ) ≤ B := base52
+  have hterm : ∀ j ∈ Finset.range (k - 52),
+      Real.log 3 + Real.log ((j:ℝ) + 48) ≤ Real.log (Nat.nth Nat.Prime (52 + j) : ℝ) := by
+    intro j hj
+    have h1 : (3:ℝ) * ((j:ℝ) + 48) ≤ (Nat.nth Nat.Prime (52 + j) : ℝ) := by
+      have h2 := nth_lower (52 + j) (by omega)
+      have h3 : ((52 + j : ℕ) : ℝ) - 4 = (j:ℝ) + 48 := by push_cast; ring
+      linarith
+    have h4 : (0:ℝ) < 3 * ((j:ℝ) + 48) := by positivity
+    have h5 : Real.log (3 * ((j:ℝ) + 48)) ≤ Real.log (Nat.nth Nat.Prime (52 + j) : ℝ) :=
+      Real.log_le_log h4 h1
+    rw [Real.log_mul (by norm_num) (by positivity)] at h5
+    linarith
+  have hsumge : ((k - 52 : ℕ) : ℝ) * Real.log 3
+      + ∑ j ∈ Finset.range (k - 52), Real.log ((j:ℝ) + 48)
+      ≤ ∑ j ∈ Finset.range (k - 52), Real.log (Nat.nth Nat.Prime (52 + j) : ℝ) := by
+    have h1 := Finset.sum_le_sum hterm
+    rw [Finset.sum_add_distrib, Finset.sum_const, Finset.card_range] at h1
+    simpa using h1
+  have hInt := integral_le_sum k hk
+  have hIval : ∫ t in (47:ℝ)..((k:ℝ) - 5), Real.log t
+      = ((k:ℝ) - 5) * Real.log ((k:ℝ) - 5) - 47 * Real.log 47 - ((k:ℝ) - 5) + 47 :=
+    integral_log
+  have hk52 : ((k - 52 : ℕ) : ℝ) = (k:ℝ) - 52 := by
+    have h : (52:ℕ) ≤ k := by omega
+    push_cast [h]; ring
+  have hK1 := key_log1 (k := (k:ℝ)) (by exact_mod_cast hk)
+  have hK2 := key_log2 (k := (k:ℝ)) (by exact_mod_cast hk)
+  have h47 := log47_le
+  have h52 := log52_le
+  have h3 := Real.log_three_gt_d9
+  have hmul : ((k:ℝ) - 52) * 1.0986 ≤ ((k:ℝ) - 52) * Real.log 3 :=
+    mul_le_mul_of_nonneg_left (le_of_lt (lt_trans (by norm_num) h3)) (by linarith)
+  have key : (k:ℝ) * Real.log (k:ℝ) ≤ B + ((k:ℝ) - 52) * Real.log 3
+      + (((k:ℝ) - 5) * Real.log ((k:ℝ) - 5) - 47 * Real.log 47 - ((k:ℝ) - 5) + 47) := by
+    linarith only [hK1, hK2, hBge, h47, h52, hmul]
+  calc (k:ℝ) * Real.log (k:ℝ)
+      ≤ B + ((k:ℝ) - 52) * Real.log 3
+        + (((k:ℝ) - 5) * Real.log ((k:ℝ) - 5) - 47 * Real.log 47 - ((k:ℝ) - 5) + 47) := key
+    _ = B + ((k:ℝ) - 52) * Real.log 3 + ∫ t in (47:ℝ)..((k:ℝ) - 5), Real.log t := by
+        rw [hIval]
+    _ ≤ B + ((k:ℝ) - 52) * Real.log 3
+        + ∑ j ∈ Finset.range (k - 52), Real.log ((j:ℝ) + 48) := by linarith only [hInt]
+    _ ≤ B + ∑ j ∈ Finset.range (k - 52), Real.log (Nat.nth Nat.Prime (52 + j) : ℝ) := by
+        have hcast2 : ((k - 52 : ℕ) : ℝ) * Real.log 3 = ((k:ℝ) - 52) * Real.log 3 := by
+          rw [hk52]
+        linarith only [hsumge, hcast2]
+    _ = Real.log ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i : ℕ) : ℝ) := by
+        rw [hlog, hsplit]
+
+
+
+/-! ### The finite range `13 ≤ k ≤ 51` -/
+
+private lemma head_pow (k : ℕ) (h13 : 13 ≤ k) (h51 : k ≤ 51) :
+    k ^ k ≤ ∏ i ∈ Finset.range k, Nat.nth Nat.Prime i := by
+  interval_cases k <;>
+    (simp only [Finset.prod_range_succ, Finset.prod_range_zero, nth_prime_0, nth_prime_1, nth_prime_2, nth_prime_3, nth_prime_4, nth_prime_5, nth_prime_6, nth_prime_7, nth_prime_8, nth_prime_9, nth_prime_10, nth_prime_11, nth_prime_12, nth_prime_13, nth_prime_14, nth_prime_15, nth_prime_16, nth_prime_17, nth_prime_18, nth_prime_19, nth_prime_20, nth_prime_21, nth_prime_22, nth_prime_23, nth_prime_24, nth_prime_25, nth_prime_26, nth_prime_27, nth_prime_28, nth_prime_29, nth_prime_30, nth_prime_31, nth_prime_32, nth_prime_33, nth_prime_34, nth_prime_35, nth_prime_36, nth_prime_37, nth_prime_38, nth_prime_39, nth_prime_40, nth_prime_41, nth_prime_42, nth_prime_43, nth_prime_44, nth_prime_45, nth_prime_46, nth_prime_47, nth_prime_48, nth_prime_49, nth_prime_50]; norm_num)
+
+/-- `k log k ≤ log P_k` for `k ≥ 13`. -/
+private lemma htail (k : ℕ) (hk : 13 ≤ k) :
+    (k:ℝ) * Real.log (k:ℝ)
+      ≤ Real.log ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i : ℕ) : ℝ) := by
+  by_cases h : k ≤ 51
+  · have hp := head_pow k hk h
+    have hcast : (((k:ℕ)^k : ℕ) : ℝ)
+        ≤ ((∏ i ∈ Finset.range k, Nat.nth Nat.Prime i : ℕ) : ℝ) := by exact_mod_cast hp
+    have hpos : (0:ℝ) < (((k:ℕ)^k : ℕ) : ℝ) := by
+      have h0 : (0:ℕ) < k ^ k := pow_pos (by omega) k
+      exact_mod_cast h0
+    have hlog := Real.log_le_log hpos hcast
+    have hpow : Real.log ((((k:ℕ)^k : ℕ) : ℝ)) = (k:ℝ) * Real.log (k:ℝ) := by
+      rw [Nat.cast_pow, Real.log_pow]
+    rw [hpow] at hlog
+    exact hlog
+  · push_neg at h
+    exact tail_ge k (by omega)
+
+/-! ### The Robin ratio for `k ≥ 13` -/
+
+private lemma log_thirteen_ge : (2.5:ℝ) ≤ Real.log 13 := by
+  have hexp : Real.exp (2.5:ℝ) ≤ 13 := by
+    have hsplit : Real.exp (2.5:ℝ) = Real.exp 2 * Real.exp (0.5:ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp 2 ≤ 2.7182818286^2 := exp_nat_le 2
+    have h2 : Real.exp (0.5:ℝ) ≤ 1.6488 := by
+      refine le_trans (exp_frac_le (f := 0.5) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 2 * Real.exp (0.5:ℝ) ≤ 2.7182818286^2 * 1.6488 :=
+          mul_le_mul h1 h2 (by linarith [Real.exp_pos (0.5:ℝ)]) (by positivity)
+      _ ≤ 13 := by norm_num
+  have h := Real.log_le_log (Real.exp_pos (2.5:ℝ)) hexp
+  rwa [Real.log_exp] at h
+
+private lemma ratio_high (k : ℕ) (hk : 13 ≤ k) :
+    (k:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range k, (Nat.nth Nat.Prime i : ℝ)))
+      / Real.log (∏ i ∈ Finset.range k, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  set P := (∏ i ∈ Finset.range k, (Nat.nth Nat.Prime i : ℝ)) with hP
+  have hA : (k:ℝ) * Real.log (k:ℝ) ≤ Real.log P := by
+    rw [hP]; simpa using htail k hk
+  have hk13 : (13:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+  have hkpos : (0:ℝ) < (k:ℝ) := by linarith
+  have hk1 : (1:ℝ) < (k:ℝ) := by linarith
+  have hlogk : (1:ℝ) < Real.log (k:ℝ) := by
+    have h2 : Real.exp 1 < (k:ℝ) := by
+      have h3 : (2.72:ℝ) < (k:ℝ) := by linarith
+      linarith [Real.exp_one_lt_d9]
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ < Real.log (k:ℝ) := Real.log_lt_log (Real.exp_pos 1) h2
+  have hlog13 : (2.5:ℝ) ≤ Real.log (k:ℝ) :=
+    le_trans log_thirteen_ge (Real.log_le_log (by norm_num) hk13)
+  have hAe : Real.exp 1 ≤ (k:ℝ) * Real.log (k:ℝ) := by
+    have h : (13:ℝ) * 2.5 ≤ (k:ℝ) * Real.log (k:ℝ) :=
+      mul_le_mul hk13 hlog13 (by norm_num) hkpos.le
+    linarith [Real.exp_one_lt_d9]
+  have hPge : Real.exp 1 ≤ Real.log P := le_trans hAe hA
+  have hanti := log_div_self_antitone hAe hPge hA
+  have hstep : (k:ℝ) * (Real.log (Real.log P) / Real.log P)
+      ≤ (k:ℝ) * (Real.log ((k:ℝ) * Real.log (k:ℝ)) / ((k:ℝ) * Real.log (k:ℝ))) :=
+    mul_le_mul_of_nonneg_left hanti hkpos.le
+  have hval : (k:ℝ) * (Real.log ((k:ℝ) * Real.log (k:ℝ)) / ((k:ℝ) * Real.log (k:ℝ)))
+      = 1 + Real.log (Real.log (k:ℝ)) / Real.log (k:ℝ) := by
+    have h1 : Real.log ((k:ℝ) * Real.log (k:ℝ))
+        = Real.log (k:ℝ) + Real.log (Real.log (k:ℝ)) := by
+      rw [Real.log_mul (ne_of_gt hkpos) (ne_of_gt (Real.log_pos hk1))]
+    rw [h1]
+    field_simp
+  have hle := loglog_div_log_le_inv_e hk1
+  have he : (1:ℝ) + 1/Real.exp 1 < 1.3841 := by
+    have h2 : (2.7:ℝ) < Real.exp 1 := by linarith [Real.exp_one_gt_d9]
+    have h3 : (1:ℝ)/Real.exp 1 ≤ 1/2.7 :=
+      div_le_div_of_nonneg_left (by norm_num) (by norm_num) h2.le
+    have h4 : (1:ℝ) + 1/2.7 < 1.3841 := by norm_num
+    linarith
+  calc (k:ℝ) * (Real.log (Real.log P) / Real.log P)
+      ≤ (k:ℝ) * (Real.log ((k:ℝ) * Real.log (k:ℝ)) / ((k:ℝ) * Real.log (k:ℝ))) := hstep
+    _ = 1 + Real.log (Real.log (k:ℝ)) / Real.log (k:ℝ) := hval
+    _ ≤ 1 + 1/Real.exp 1 := by linarith
+    _ < 1.3841 := he
+
+
+
+/-- The Robin ratio at `k = 10` (where `k^k > P_k`). -/
+private lemma ratio_10 :
+    (10:ℝ) * (Real.log (Real.log ((∏ i ∈ Finset.range 10, Nat.nth Nat.Prime i : ℝ)))
+      / Real.log (∏ i ∈ Finset.range 10, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 10, (Nat.nth Nat.Prime i : ℝ)) = 6469693230 := by
+    simp only [Finset.prod_range_succ, Finset.prod_range_zero, nth_prime_0, nth_prime_1, nth_prime_2, nth_prime_3, nth_prime_4, nth_prime_5, nth_prime_6, nth_prime_7, nth_prime_8, nth_prime_9, nth_prime_10, nth_prime_11]
+    norm_num
+  rw [hP]
+  have hexp : Real.exp (22.58:ℝ) ≤ (6469693230:ℝ) := by
+    have hsplit : Real.exp (22.58:ℝ) = Real.exp 22 * Real.exp (0.58:ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp (22:ℝ) ≤ 2.7182818286^22 := exp_nat_le 22
+    have h2 : Real.exp (0.58:ℝ) ≤ 1.7861 := by
+      refine le_trans (exp_frac_le (f := 0.58) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 22 * Real.exp (0.58:ℝ) ≤ 2.7182818286^22 * 1.7861 :=
+          mul_le_mul h1 h2 (by linarith [Real.exp_pos (0.58:ℝ)]) (by positivity)
+      _ ≤ 6469693230 := by norm_num
+  have hc : Real.exp 1 ≤ (22.58:ℝ) := by have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (22.58:ℝ) ≤ 3.1202 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    have hsplit : Real.exp (3.1202:ℝ) = Real.exp 3 * Real.exp (0.1202:ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : (2.7182818283:ℝ)^3 ≤ Real.exp 3 := exp_nat_ge 3
+    have h2 : (∑ m ∈ Finset.range 12, ((0.1202:ℝ)^m/(m.factorial : ℝ)))
+        ≤ Real.exp (0.1202:ℝ) := Real.sum_le_exp_of_nonneg (by norm_num) 12
+    have h3 : (2.7182818283:ℝ)^3 *
+        (∑ m ∈ Finset.range 12, ((0.1202:ℝ)^m/(m.factorial : ℝ))) ≥ (22.58:ℝ) := by norm_num
+    calc (22.58:ℝ) ≤ _ := by linarith
+      _ ≤ Real.exp 3 * Real.exp (0.1202:ℝ) :=
+          mul_le_mul h1 h2 (by positivity) (by linarith [Real.exp_pos (3:ℝ)])
+  have h := robin_ratio_le (k := 10) hexp hc hlogc
+  have h2 : (10:ℝ) * ((3.1202:ℝ)/(22.58:ℝ)) < 1.3841 := by norm_num
+  linarith
+
+/-- The Robin ratio at `k = 11` (where `k^k > P_k`). -/
+private lemma ratio_11 :
+    (11:ℝ) * (Real.log (Real.log ((∏ i ∈ Finset.range 11, Nat.nth Nat.Prime i : ℝ)))
+      / Real.log (∏ i ∈ Finset.range 11, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 11, (Nat.nth Nat.Prime i : ℝ)) = 200560490130 := by
+    simp only [Finset.prod_range_succ, Finset.prod_range_zero, nth_prime_0, nth_prime_1, nth_prime_2, nth_prime_3, nth_prime_4, nth_prime_5, nth_prime_6, nth_prime_7, nth_prime_8, nth_prime_9, nth_prime_10, nth_prime_11]
+    norm_num
+  rw [hP]
+  have hexp : Real.exp (25.9:ℝ) ≤ (200560490130:ℝ) := by
+    have hsplit : Real.exp (25.9:ℝ) = Real.exp 25 * Real.exp (0.9:ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp (25:ℝ) ≤ 2.7182818286^25 := exp_nat_le 25
+    have h2 : Real.exp (0.9:ℝ) ≤ 2.4597 := by
+      refine le_trans (exp_frac_le (f := 0.9) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 25 * Real.exp (0.9:ℝ) ≤ 2.7182818286^25 * 2.4597 :=
+          mul_le_mul h1 h2 (by linarith [Real.exp_pos (0.9:ℝ)]) (by positivity)
+      _ ≤ 200560490130 := by norm_num
+  have hc : Real.exp 1 ≤ (25.9:ℝ) := by have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (25.9:ℝ) ≤ 3.2565 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    have hsplit : Real.exp (3.2565:ℝ) = Real.exp 3 * Real.exp (0.2565:ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : (2.7182818283:ℝ)^3 ≤ Real.exp 3 := exp_nat_ge 3
+    have h2 : (∑ m ∈ Finset.range 12, ((0.2565:ℝ)^m/(m.factorial : ℝ)))
+        ≤ Real.exp (0.2565:ℝ) := Real.sum_le_exp_of_nonneg (by norm_num) 12
+    have h3 : (2.7182818283:ℝ)^3 *
+        (∑ m ∈ Finset.range 12, ((0.2565:ℝ)^m/(m.factorial : ℝ))) ≥ (25.9:ℝ) := by norm_num
+    calc (25.9:ℝ) ≤ _ := by linarith
+      _ ≤ Real.exp 3 * Real.exp (0.2565:ℝ) :=
+          mul_le_mul h1 h2 (by positivity) (by linarith [Real.exp_pos (3:ℝ)])
+  have h := robin_ratio_le (k := 11) hexp hc hlogc
+  have h2 : (11:ℝ) * ((3.2565:ℝ)/(25.9:ℝ)) < 1.3841 := by norm_num
+  linarith
+
+/-- The Robin ratio at `k = 12` (where `k^k > P_k`). -/
+private lemma ratio_12 :
+    (12:ℝ) * (Real.log (Real.log ((∏ i ∈ Finset.range 12, Nat.nth Nat.Prime i : ℝ)))
+      / Real.log (∏ i ∈ Finset.range 12, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  have hP : (∏ i ∈ Finset.range 12, (Nat.nth Nat.Prime i : ℝ)) = 7420738134810 := by
+    simp only [Finset.prod_range_succ, Finset.prod_range_zero, nth_prime_0, nth_prime_1, nth_prime_2, nth_prime_3, nth_prime_4, nth_prime_5, nth_prime_6, nth_prime_7, nth_prime_8, nth_prime_9, nth_prime_10, nth_prime_11]
+    norm_num
+  rw [hP]
+  have hexp : Real.exp (29.5:ℝ) ≤ (7420738134810:ℝ) := by
+    have hsplit : Real.exp (29.5:ℝ) = Real.exp 29 * Real.exp (0.5:ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : Real.exp (29:ℝ) ≤ 2.7182818286^29 := exp_nat_le 29
+    have h2 : Real.exp (0.5:ℝ) ≤ 1.6488 := by
+      refine le_trans (exp_frac_le (f := 0.5) (by norm_num) (by norm_num)) ?_
+      norm_num
+    calc Real.exp 29 * Real.exp (0.5:ℝ) ≤ 2.7182818286^29 * 1.6488 :=
+          mul_le_mul h1 h2 (by linarith [Real.exp_pos (0.5:ℝ)]) (by positivity)
+      _ ≤ 7420738134810 := by norm_num
+  have hc : Real.exp 1 ≤ (29.5:ℝ) := by have h := Real.exp_one_lt_d9; linarith
+  have hlogc : Real.log (29.5:ℝ) ≤ 3.39 := by
+    rw [Real.log_le_iff_le_exp (by norm_num)]
+    have hsplit : Real.exp (3.39:ℝ) = Real.exp 3 * Real.exp (0.39:ℝ) := by
+      rw [← Real.exp_add]; norm_num
+    rw [hsplit]
+    have h1 : (2.7182818283:ℝ)^3 ≤ Real.exp 3 := exp_nat_ge 3
+    have h2 : (∑ m ∈ Finset.range 12, ((0.39:ℝ)^m/(m.factorial : ℝ)))
+        ≤ Real.exp (0.39:ℝ) := Real.sum_le_exp_of_nonneg (by norm_num) 12
+    have h3 : (2.7182818283:ℝ)^3 *
+        (∑ m ∈ Finset.range 12, ((0.39:ℝ)^m/(m.factorial : ℝ))) ≥ (29.5:ℝ) := by norm_num
+    calc (29.5:ℝ) ≤ _ := by linarith
+      _ ≤ Real.exp 3 * Real.exp (0.39:ℝ) :=
+          mul_le_mul h1 h2 (by positivity) (by linarith [Real.exp_pos (3:ℝ)])
+  have h := robin_ratio_le (k := 12) hexp hc hlogc
+  have h2 : (12:ℝ) * ((3.39:ℝ)/(29.5:ℝ)) < 1.3841 := by norm_num
+  linarith
+
+private lemma ratio_all (k : ℕ) (hk : 4 ≤ k) :
+    (k:ℝ) * (Real.log (Real.log (∏ i ∈ Finset.range k, (Nat.nth Nat.Prime i : ℝ)))
+      / Real.log (∏ i ∈ Finset.range k, (Nat.nth Nat.Prime i : ℝ))) < 1.3841 := by
+  by_cases h9 : k ≤ 9
+  · interval_cases k
+    · exact robin_four
+    · exact robin_five
+    · exact robin_six
+    · exact robin_seven
+    · exact robin_eight
+    · exact robin_nine
+  · push_neg at h9
+    by_cases h12 : k ≤ 12
+    · interval_cases k
+      · exact ratio_10
+      · exact ratio_11
+      · exact ratio_12
+    · push_neg at h12
+      exact ratio_high k (by omega)
+
+/-- Robin Theorem 11, journal Lemma 4. -/
+private theorem robin_all (n : ℕ) (hn : 3 ≤ n) :
+    (n.primeFactors.card : ℝ) < 1.3841 * Real.log n / Real.log (Real.log n) :=
+  robin_of_primorial_le n.primeFactors.card (fun k hk _ => ratio_all k hk) n hn le_rfl
+
 /-- LEAF. Robin Theorem 11, journal Lemma 4 p. 1216. -/
-theorem lemma4_robin : PaperInputs148.Lemma4J := by
-  sorry
+theorem lemma4_robin : PaperInputs148.Lemma4J :=
+  robin_all
 
 /-- LEAF. Rosser and Schoenfeld 1962 Theorem 18, journal Lemma 2 p. 1215. -/
 theorem lemma2_theta : PaperInputs148.Lemma2J := by
