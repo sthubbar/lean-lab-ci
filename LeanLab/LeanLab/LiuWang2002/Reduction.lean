@@ -36,7 +36,7 @@ theorem isTernarySum_of_Icount_pos (N : ℕ) (h : 0 < Icount N) : IsTernarySum N
   have hz : Icount N = 0 := by
     unfold Icount
     refine Finset.sum_eq_zero fun a _ => Finset.sum_eq_zero fun b _ => ?_
-    rw [if_neg]
+    rw [ite_eq_right]
     rintro ⟨hab, ha, hb, hc, -⟩
     exact hno ⟨a, b, N - a - b, ha, hb, hc, by omega⟩
   linarith
