@@ -654,6 +654,1463 @@ theorem euler_sing_eq (N : ℕ) (hN : 1 ≤ N) :
   simpa only [singular, eulerFactorSing, Nat.primesBelow] using h
 
 
+/-! ### Leaf 3: the Euler product for the generalised singular series
+
+The bricks below prove the leaf `euler_gen_eq` further down: the finite CRT multiplicativity of the
+coefficient `Aq`, its level factorisation, the summability of the resulting multiplicative
+function, and the identification of `genSing` with a constant times that sum.
+
+A first section repeats, under names ending in `_early`, the few private lemmas of this file that
+are stated BELOW the leaf and are therefore not yet in scope above it. -/
+
+/-! ### copies of later private lemmas (renamed), for use above the leaf -/
+
+private lemma ee_val_eq_stdAddChar_early {q : ℕ} [NeZero q] (m : ZMod q) :
+    ee ((m.val : ℝ) / q) = ZMod.stdAddChar m := by
+  rw [ZMod.stdAddChar_apply, ZMod.toCircle_apply]
+  simp only [ee]
+  congr 1
+  push_cast
+  ring
+
+private lemma tauConj_eq_sum_stdAddChar_early {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) :
+    tauConj χ = ∑ m : ZMod q, starRingEnd ℂ (χ m) * ZMod.stdAddChar m := by
+  simp only [tauConj, ee_val_eq_stdAddChar_early]
+
+/-- `Aq` vanishes when the modulus is not a common multiple of the two levels. -/
+private lemma Aq_eq_zero_of_dvd_ne_early {r₁ r₂ : ℕ} (χ₁ : DirichletCharacter ℂ r₁)
+    (χ₂ : DirichletCharacter ℂ r₂) (N : ℤ) {q : ℕ} [NeZero q]
+    (h : ¬ (r₁ ∣ q ∧ r₂ ∣ q)) : Aq χ₁ χ₂ N q = 0 := by
+  unfold Aq
+  rw [dif_neg h]
+
+/-- The Gauss sum of a character lifted from level `p ^ a` to `p ^ k`, `a < k` and `k ≥ 2`,
+vanishes: the shift `m ↦ m + p ^ (k - 1)` is Ψ-invariant but multiplies `e(m / p ^ k)` by
+`e(1/p) ≠ 1`. (`k = 1` is genuinely excluded: the trivial character mod `1` lifted to mod `p` has
+Gauss sum `-1`.) -/
+private theorem tauConj_changeLevel_pow_eq_zero_early {p a k : ℕ} (hp : p.Prime) (hak : a < k)
+    (hk2 : 2 ≤ k) [NeZero (p ^ k)] (χ : DirichletCharacter ℂ (p ^ a)) :
+    tauConj (DirichletCharacter.changeLevel (Nat.pow_dvd_pow p hak.le) χ) = 0 := by
+  haveI : NeZero (p ^ k) := ⟨pow_ne_zero k hp.ne_zero⟩
+  haveI : NeZero (p ^ a) := ⟨pow_ne_zero a hp.ne_zero⟩
+  set Ψ := DirichletCharacter.changeLevel (Nat.pow_dvd_pow p hak.le) χ with hΨ
+  set d : ZMod (p ^ k) := ((p ^ (k - 1) : ℕ) : ZMod (p ^ k)) with hd
+  have hdvd : p ^ a ∣ p ^ (k - 1) := Nat.pow_dvd_pow p (by omega)
+  have hd0 : d ≠ 0 := by
+    rw [hd, Ne, ZMod.natCast_eq_zero_iff]
+    intro h
+    have h1 : p ^ k ≤ p ^ (k - 1) := Nat.le_of_dvd (pow_pos hp.pos (k - 1)) h
+    have h2 : k ≤ k - 1 := (Nat.pow_le_pow_iff_right hp.two_le).mp h1
+    omega
+  have hcastd : ZMod.castHom (Nat.pow_dvd_pow p hak.le) (ZMod (p ^ a)) d = 0 := by
+    rw [hd, map_natCast, ZMod.natCast_eq_zero_iff]
+    exact hdvd
+  have hnil : IsNilpotent d := by
+    refine ⟨2, ?_⟩
+    rw [hd, ← Nat.cast_pow, ZMod.natCast_eq_zero_iff, ← pow_mul]
+    exact pow_dvd_pow _ (by omega)
+  have hunit : ∀ m : ZMod (p ^ k), IsUnit (m + d) ↔ IsUnit m := by
+    intro m
+    constructor
+    · intro h
+      have := hnil.neg.isUnit_add_left_of_commute h (Commute.all _ _)
+      simpa using this
+    · intro h
+      exact hnil.isUnit_add_left_of_commute h (Commute.all _ _)
+  have hΨd : ∀ m : ZMod (p ^ k), Ψ (m + d) = Ψ m := by
+    intro m
+    by_cases h : IsUnit m
+    · obtain ⟨u, rfl⟩ := h
+      obtain ⟨v, hv⟩ := (hunit (u : ZMod (p ^ k))).mpr u.isUnit
+      rw [← hv, hΨ,
+        ← MulChar.coe_toUnitHom (DirichletCharacter.changeLevel (Nat.pow_dvd_pow p hak.le) χ) v,
+        ← MulChar.coe_toUnitHom (DirichletCharacter.changeLevel (Nat.pow_dvd_pow p hak.le) χ) u,
+        DirichletCharacter.changeLevel_toUnitHom]
+      congr 1
+      simp only [MonoidHom.comp_apply]
+      congr 1
+      refine Units.ext ?_
+      rw [ZMod.unitsMap_val, ZMod.unitsMap_val]
+      rw [show (↑v : ZMod (p ^ k)) = (↑u : ZMod (p ^ k)) + d from hv]
+      change ZMod.castHom (Nat.pow_dvd_pow p hak.le) (ZMod (p ^ a)) ((↑u : ZMod (p ^ k)) + d)
+        = ZMod.castHom (Nat.pow_dvd_pow p hak.le) (ZMod (p ^ a)) (↑u : ZMod (p ^ k))
+      rw [map_add, hcastd, add_zero]
+    · rw [MulChar.map_nonunit _ h, MulChar.map_nonunit _ (fun h' => h ((hunit m).mp h'))]
+  have hs : ZMod.stdAddChar (N := p ^ k) d ≠ 1 := by
+    intro h
+    have h1 : ZMod.stdAddChar (N := p ^ k) d = ZMod.stdAddChar (N := p ^ k) 0 := by
+      rw [h, AddChar.map_zero_eq_one]
+    exact hd0 (ZMod.injective_stdAddChar h1)
+  have hshift : tauConj Ψ = tauConj Ψ * ZMod.stdAddChar d := by
+    rw [tauConj_eq_sum_stdAddChar_early, Finset.sum_mul, ← Equiv.sum_comp (Equiv.addRight d)]
+    refine Finset.sum_congr rfl fun m _ => ?_
+    rw [Equiv.coe_addRight, hΨd m, AddChar.map_add_eq_mul]
+    ring
+  have hzero : tauConj Ψ * (1 - ZMod.stdAddChar d) = 0 := by
+    rw [mul_sub, mul_one, ← hshift, sub_self]
+  rcases mul_eq_zero.mp hzero with h | h
+  · exact h
+  · exact absurd (sub_eq_zero.mp h).symm hs
+
+/-- The Gauss sum of the lift of a character of level `r` to level `p ^ k` (`r ∣ p ^ k`,
+`r < p ^ k`, `k ≥ 2`) vanishes. -/
+private theorem tauConj_changeLevel_eq_zero_of_lt_early {p k r : ℕ} (hp : p.Prime) (hk2 : 2 ≤ k)
+    [NeZero (p ^ k)] (hr : r ∣ p ^ k) (hlt : r < p ^ k) (χ : DirichletCharacter ℂ r) :
+    tauConj (DirichletCharacter.changeLevel hr χ) = 0 := by
+  obtain ⟨a, hak, rfl⟩ := (Nat.dvd_prime_pow hp).mp hr
+  have hak' : a < k := (Nat.pow_lt_pow_iff_right hp.one_lt).mp hlt
+  exact tauConj_changeLevel_pow_eq_zero_early hp hak' hk2 χ
+
+/-- `Aq` is symmetric in its two characters. -/
+private lemma Aq_comm_early {r₁ r₂ : ℕ} (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂)
+    (N : ℤ) (q : ℕ) [NeZero q] : Aq χ₁ χ₂ N q = Aq χ₂ χ₁ N q := by
+  unfold Aq
+  by_cases h : r₁ ∣ q ∧ r₂ ∣ q
+  · rw [dif_pos h, dif_pos ⟨h.2, h.1⟩]
+    have hmul : DirichletCharacter.changeLevel h.1 χ₁ * DirichletCharacter.changeLevel h.2 χ₂
+        = DirichletCharacter.changeLevel h.2 χ₂ * DirichletCharacter.changeLevel h.1 χ₁ :=
+      mul_comm _ _
+    rw [hmul]
+    ring
+  · rw [dif_neg h, dif_neg (fun h' => h ⟨h'.2, h'.1⟩)]
+
+/-- For `k ≥ 2` the term of the generalised Euler factor at `p ^ k` vanishes unless the first
+character has level exactly `p ^ k`: the Gauss sum of a strictly lower lift is zero. -/
+private theorem Aq_pow_eq_zero_of_ne_level_early {p k r₁ r₂ : ℕ} (hp : p.Prime) (hk2 : 2 ≤ k)
+    [NeZero (p ^ k)] (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂) (N : ℤ)
+    (h : r₁ ≠ p ^ k) :
+    @Aq r₁ r₂ χ₁ χ₂ N (p ^ k) _ = 0 := by
+  unfold Aq
+  by_cases hboth : r₁ ∣ p ^ k ∧ r₂ ∣ p ^ k
+  · rw [dif_pos hboth]
+    have hlt : r₁ < p ^ k := lt_of_le_of_ne (Nat.le_of_dvd (pow_pos hp.pos k) hboth.1) h
+    rw [tauConj_changeLevel_eq_zero_of_lt_early hp hk2 hboth.1 hlt χ₁]
+    simp
+  · rw [dif_neg hboth]
+
+/-- The mirrored version of the vanishing of the lifted Gauss sum. -/
+private theorem Aq_pow_eq_zero_of_ne_level_right_early {p k r₁ r₂ : ℕ} (hp : p.Prime) (hk2 : 2 ≤ k)
+    [NeZero (p ^ k)] (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂) (N : ℤ)
+    (h : r₂ ≠ p ^ k) : @Aq r₁ r₂ χ₁ χ₂ N (p ^ k) _ = 0 := by
+  rw [Aq_comm_early]
+  exact Aq_pow_eq_zero_of_ne_level_early hp hk2 χ₂ χ₁ N h
+
+/-- The trivial character mod `1` has Gauss sum `1`. -/
+private lemma tauConj_one_level_one'_early : tauConj (1 : DirichletCharacter ℂ 1) = 1 := by
+  unfold tauConj
+  rw [Fintype.sum_subsingleton _ (0 : ZMod 1)]
+  have h : (1 : DirichletCharacter ℂ 1) 0 = 1 := by
+    have : (0 : ZMod 1) = 1 := Subsingleton.elim _ _
+    rw [this, map_one]
+  simp [h, ZMod.val_zero, ee_zero]
+
+private lemma cChi_one_level_one'_early (N : ℤ) : cChi (1 : DirichletCharacter ℂ 1) N = 1 := by
+  unfold cChi
+  rw [Fintype.sum_subsingleton _ (0 : ZMod 1)]
+  have h : (1 : DirichletCharacter ℂ 1) 0 = 1 := by
+    have : (0 : ZMod 1) = 1 := Subsingleton.elim _ _
+    rw [this, map_one]
+  simp [h, ZMod.val_zero, ee_zero]
+
+/-- `Aq` at `r₁ = r₂ = 1` and modulus `q`. -/
+private lemma Aq_one_one_early (N : ℤ) (q : ℕ) [NeZero q] :
+    Aq (1 : DirichletCharacter ℂ 1) (1 : DirichletCharacter ℂ 1) N q
+      = tauConj (1 : DirichletCharacter ℂ q) * tauConj (1 : DirichletCharacter ℂ q)
+          * cChi (1 : DirichletCharacter ℂ q) N / (Nat.totient q : ℂ) ^ 2 := by
+  unfold Aq
+  rw [dif_pos ⟨one_dvd q, one_dvd q⟩]
+  simp only [DirichletCharacter.changeLevel_one, one_mul]
+
+/-- The twisted Ramanujan sum of the trivial character is the Ramanujan sum. -/
+private lemma cChi_one_eq_ramanujan_early (q : ℕ) [NeZero q] (N : ℤ) :
+    cChi (1 : DirichletCharacter ℂ q) N = ramanujan q N := by
+  have hL : cChi (1 : DirichletCharacter ℂ q) N
+      = ∑ a ∈ (Finset.univ.filter (fun a : ZMod q => IsUnit a)),
+          ee ((a.val : ℝ) * (N : ℝ) / q) := by
+    rw [cChi]
+    rw [show (∑ a : ZMod q, (1 : DirichletCharacter ℂ q) a * ee ((a.val : ℝ) * (N : ℝ) / q))
+        = ∑ a : ZMod q, (if IsUnit a then ee ((a.val : ℝ) * (N : ℝ) / q) else 0) from by
+      refine Finset.sum_congr rfl fun a _ => ?_
+      by_cases h : IsUnit a
+      · rw [if_pos h, MulChar.one_apply h, one_mul]
+      · rw [if_neg h, MulChar.map_nonunit _ h, zero_mul]]
+    rw [← Finset.sum_filter]
+  rw [hL, ramanujan]
+  refine Finset.sum_bij (fun a _ => a.val) ?_ ?_ ?_ ?_
+  · intro a ha
+    rw [Finset.mem_filter] at ha ⊢
+    refine ⟨Finset.mem_range.mpr (ZMod.val_lt a), ?_⟩
+    rw [← ZMod.natCast_zmod_val a] at ha
+    exact (ZMod.isUnit_iff_coprime a.val q).mp ha.2
+  · intro a₁ ha₁ a₂ ha₂ heq
+    rw [← ZMod.natCast_zmod_val a₁, ← ZMod.natCast_zmod_val a₂, heq]
+  · intro b hb
+    rw [Finset.mem_filter, Finset.mem_range] at hb
+    refine ⟨(b : ZMod q), ?_, ?_⟩
+    · rw [Finset.mem_filter]
+      refine ⟨Finset.mem_univ _, ?_⟩
+      rw [ZMod.isUnit_iff_coprime]
+      exact hb.2
+    · rw [ZMod.val_natCast, Nat.mod_eq_of_lt hb.1]
+  · intro a _
+    rfl
+
+private lemma ramanujan_eq_divisor_sum_early {q : ℕ} (hq : 1 ≤ q) (n : ℤ) :
+    ramanujan q n = ∑ d ∈ (Nat.gcd q n.natAbs).divisors,
+      (d : ℂ) * ((ArithmeticFunction.moebius (q / d) : ℤ) : ℂ) := by
+  unfold ramanujan
+  rw [Nat.gcd_comm q n.natAbs]
+  rw [Finset.sum_filter]
+  have step1 : ∀ r ∈ Finset.range q,
+      (if Nat.Coprime r q then ee ((r : ℝ) * (n : ℝ) / q) else 0) =
+      ∑ d ∈ (Nat.gcd r q).divisors, (((ArithmeticFunction.moebius d : ℤ) : ℂ) * ee ((r : ℝ) * (n : ℝ) / q)) := by
+    intro r _
+    rw [← Finset.sum_mul, sum_moebius_divisors]
+    simp only [Nat.Coprime]
+    split_ifs <;> simp
+  rw [Finset.sum_congr rfl step1]
+  rw [Finset.sum_comm' (t' := q.divisors)
+    (s' := fun d => (Finset.range q).filter (fun r => d ∣ r))]
+  · have step2 : ∀ d ∈ q.divisors, ∑ r ∈ (Finset.range q).filter (fun r => d ∣ r),
+        (((ArithmeticFunction.moebius d : ℤ) : ℂ) * ee ((r : ℝ) * (n : ℝ) / q)) =
+        ((ArithmeticFunction.moebius d : ℤ) : ℂ) * (if (((q / d : ℕ) : ℤ)) ∣ n then ((q / d : ℕ) : ℂ) else 0) := by
+      intro d hd
+      have hdq : d ∣ q := Nat.dvd_of_mem_divisors hd
+      have hd0 : 0 < d := Nat.pos_of_mem_divisors hd
+      have hqd : 0 < q / d := Nat.div_pos (Nat.le_of_dvd (by omega) hdq) hd0
+      rw [← Finset.mul_sum, ← sum_ee_mul_div n hqd]
+      congr 1
+      refine Finset.sum_nbij' (fun r => r / d) (fun s => d * s) ?_ ?_ ?_ ?_ ?_
+      · intro r hr
+        rw [Finset.mem_filter, Finset.mem_range] at hr
+        rw [Finset.mem_range]
+        exact Nat.div_lt_div_of_lt_of_dvd hdq hr.1
+      · intro s hs
+        rw [Finset.mem_range] at hs
+        rw [Finset.mem_filter, Finset.mem_range]
+        refine ⟨?_, dvd_mul_right d s⟩
+        have := Nat.mul_lt_mul_of_pos_left hs hd0
+        rwa [Nat.mul_div_cancel' hdq] at this
+      · intro r hr
+        rw [Finset.mem_filter] at hr
+        exact Nat.mul_div_cancel' hr.2
+      · intro s _; exact Nat.mul_div_cancel_left s hd0
+      · intro r hr
+        rw [Finset.mem_filter] at hr
+        obtain ⟨s, rfl⟩ := hr.2
+        rw [Nat.mul_div_cancel_left s hd0, Nat.cast_div hdq (by exact_mod_cast hd0.ne')]
+        congr 1
+        push_cast
+        field_simp
+    rw [Finset.sum_congr rfl step2]
+    rw [← Finset.sum_filter_add_sum_filter_not q.divisors (fun d => (((q / d : ℕ) : ℤ)) ∣ n)]
+    rw [Finset.sum_eq_zero (s := q.divisors.filter (fun d => ¬ (((q / d : ℕ) : ℤ)) ∣ n))
+      (fun d hd => by rw [Finset.mem_filter] at hd; rw [if_neg hd.2, mul_zero]), add_zero]
+    refine Finset.sum_nbij' (fun d => q / d) (fun e => q / e) ?_ ?_ ?_ ?_ ?_
+    · intro d hd
+      rw [Finset.mem_filter, Nat.mem_divisors] at hd
+      rw [Nat.mem_divisors]
+      refine ⟨Nat.dvd_gcd (Int.natCast_dvd.mp hd.2) (Nat.div_dvd_of_dvd hd.1.1), ?_⟩
+      exact (Nat.gcd_pos_of_pos_right n.natAbs (by omega)).ne'
+    · intro e he
+      rw [Nat.mem_divisors] at he
+      have heq : e ∣ q := (Nat.dvd_gcd_iff.1 he.1).2
+      have hen : e ∣ n.natAbs := (Nat.dvd_gcd_iff.1 he.1).1
+      have he0 : 0 < e := Nat.pos_of_dvd_of_pos heq (by omega)
+      rw [Finset.mem_filter, Nat.mem_divisors]
+      refine ⟨⟨Nat.div_dvd_of_dvd heq, by omega⟩, ?_⟩
+      rw [Nat.div_div_self heq (by omega)]; exact Int.natCast_dvd.mpr hen
+    · intro d hd
+      rw [Finset.mem_filter, Nat.mem_divisors] at hd
+      exact Nat.div_div_self hd.1.1 (by omega)
+    · intro e he
+      rw [Nat.mem_divisors] at he
+      exact Nat.div_div_self (Nat.dvd_gcd_iff.1 he.1).2 (by omega)
+    · intro d hd
+      rw [Finset.mem_filter, Nat.mem_divisors] at hd
+      rw [if_pos hd.2, Nat.div_div_self hd.1.1 (by omega)]
+      ring
+  · intro r d
+    simp only [Finset.mem_range, Nat.mem_divisors, Finset.mem_filter, Nat.dvd_gcd_iff, ne_eq,
+      Nat.gcd_eq_zero_iff]
+    constructor
+    · rintro ⟨h1, ⟨h2, h3⟩, h4⟩; exact ⟨⟨h1, h2⟩, h3, by omega⟩
+    · rintro ⟨⟨h1, h2⟩, h3, h4⟩; exact ⟨h1, ⟨h2, h3⟩, by omega⟩
+
+/-- The Ramanujan sum is a real number. -/
+private lemma ramanujan_eq_ofReal_re_early {q : ℕ} (hq : 1 ≤ q) (n : ℤ) :
+    ramanujan q n = ((ramanujan q n).re : ℂ) := by
+  set S : ℝ := ∑ d ∈ (Nat.gcd q n.natAbs).divisors,
+    (d : ℝ) * ((ArithmeticFunction.moebius (q / d) : ℤ) : ℝ) with hS
+  have h1 : ramanujan q n = (S : ℂ) := by
+    rw [ramanujan_eq_divisor_sum_early hq n, hS, Complex.ofReal_sum]
+    refine Finset.sum_congr rfl fun d _ => ?_
+    push_cast
+    ring
+  have h2 : (ramanujan q n).re = S := by rw [h1, Complex.ofReal_re]
+  rw [h1, Complex.ofReal_re]
+
+/-! ### Leaf 3, bricks: the two-factor CRT splitting of `Aq`
+
+Everything below is finite and derived: the additive phase splits through the Chinese remainder
+decomposition with explicit Bezout frequencies, the twisted sums split, and the unit frequency
+corrections cancel between the two Gauss sums and the Ramanujan-type factor. The end point is
+`Aq_crt`, multiplicativity of `Aq` in the modulus for coprime levels. -/
+
+private lemma tauConj_eq_cChi_inv (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) :
+    tauConj χ = cChi χ⁻¹ 1 := by
+  unfold tauConj cChi
+  apply Finset.sum_congr rfl
+  intro a ha
+  rw [show (starRingEnd ℂ) (χ a) = star (χ a) from rfl, MulChar.star_apply']
+  simp
+
+private lemma cChi_eq_gaussSum_shift {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (N : ℤ) :
+    cChi χ N = gaussSum χ ((ZMod.stdAddChar (N := q)).mulShift (N : ZMod q)) := by
+  unfold cChi gaussSum
+  apply Finset.sum_congr rfl
+  intro a ha
+  congr 1
+  rw [AddChar.mulShift_apply]
+  have he : (N : ZMod q) * a = ((N * (a.val : ℤ) : ℤ) : ZMod q) := by simp
+  rw [he, ZMod.stdAddChar_coe]
+  unfold ee
+  congr 1
+  push_cast
+  ring
+
+private lemma gaussSum_eq_sum_units {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (ψ : AddChar (ZMod q) ℂ) :
+    gaussSum χ ψ = ∑ a : (ZMod q)ˣ, χ a * ψ a := by
+  classical
+  unfold gaussSum
+  symm
+  apply Fintype.sum_of_injective (fun a : (ZMod q)ˣ => (a : ZMod q))
+    Units.val_injective (fun a => χ a * ψ a) (fun a => χ a * ψ a) ?_ (fun _ => rfl)
+  intro a ha
+  rw [MulChar.map_nonunit χ (fun hu => ha ⟨hu.unit, hu.unit_spec⟩), zero_mul]
+
+private lemma crt_phase {m n : ℕ} [NeZero m] [NeZero n] [NeZero (m * n)]
+    (A B : ℤ) (hAB : A * m + B * n = 1) (a : ZMod (m * n)) :
+    ZMod.stdAddChar a =
+      ZMod.stdAddChar ((B : ZMod m) * (ZMod.castHom (Nat.dvd_mul_right m n) (ZMod m) a)) *
+      ZMod.stdAddChar ((A : ZMod n) * (ZMod.castHom (Nat.dvd_mul_left n m) (ZMod n) a)) := by
+  have hm : (m : ℂ) ≠ 0 := by exact_mod_cast NeZero.ne m
+  have hn : (n : ℂ) ≠ 0 := by exact_mod_cast NeZero.ne n
+  have hab : (A : ℂ) / n + (B : ℂ) / m = 1 / ((m : ℂ) * n) := by
+    have h : (A : ℂ) * m + (B : ℂ) * n = 1 := by exact_mod_cast hAB
+    field_simp
+    linear_combination h
+  have hc₁ : ZMod.castHom (Nat.dvd_mul_right m n) (ZMod m) a = (a.val : ZMod m) := by
+    rw [← ZMod.natCast_zmod_val a]
+    simp
+  have hc₂ : ZMod.castHom (Nat.dvd_mul_left n m) (ZMod n) a = (a.val : ZMod n) := by
+    rw [← ZMod.natCast_zmod_val a]
+    simp
+  rw [hc₁, hc₂,
+    show (B : ZMod m) * (a.val : ZMod m) = ((B * (a.val : ℤ) : ℤ) : ZMod m) by push_cast; rfl,
+    show (A : ZMod n) * (a.val : ZMod n) = ((A * (a.val : ℤ) : ℤ) : ZMod n) by push_cast; rfl]
+  conv_lhs => rw [← ZMod.natCast_zmod_val a]
+  rw [show ((a.val : ℕ) : ZMod (m * n)) = ((a.val : ℤ) : ZMod (m * n)) by simp,
+    ZMod.stdAddChar_coe, ZMod.stdAddChar_coe, ZMod.stdAddChar_coe, ← Complex.exp_add]
+  congr 1
+  push_cast
+  calc
+    _ = (2 * (Real.pi : ℂ) * Complex.I * (a.val : ℂ)) *
+        ((A : ℂ) / n + (B : ℂ) / m) := by rw [hab]; ring
+    _ = _ := by ring
+
+private lemma unit_crt_sum {m n : ℕ} [NeZero m] [NeZero n] [NeZero (m * n)]
+    (hcop : m.Coprime n) (F : (ZMod m)ˣ → ℂ) (G : (ZMod n)ˣ → ℂ) :
+    (∑ a : (ZMod (m * n))ˣ,
+      F (ZMod.unitsMap (Nat.dvd_mul_right m n) a) *
+      G (ZMod.unitsMap (Nat.dvd_mul_left n m) a)) =
+        (∑ u : (ZMod m)ˣ, F u) * ∑ v : (ZMod n)ˣ, G v := by
+  let e := (Units.mapEquiv (ZMod.chineseRemainder hcop).toMulEquiv).trans MulEquiv.prodUnits
+  have he (a : (ZMod (m * n))ˣ) : e a =
+      (ZMod.unitsMap (Nat.dvd_mul_right m n) a,
+        ZMod.unitsMap (Nat.dvd_mul_left n m) a) := by
+    apply Prod.ext <;> apply Units.ext
+    · change (ZMod.cast (a : ZMod (m * n)) : ZMod m × ZMod n).1 =
+        (ZMod.cast (a : ZMod (m * n)) : ZMod m)
+      exact Prod.fst_zmod_cast _
+    · change (ZMod.cast (a : ZMod (m * n)) : ZMod m × ZMod n).2 =
+        (ZMod.cast (a : ZMod (m * n)) : ZMod n)
+      exact Prod.snd_zmod_cast _
+  calc
+    _ = ∑ a : (ZMod (m * n))ˣ, F (e a).1 * G (e a).2 := by simp only [he]
+    _ = ∑ uv : (ZMod m)ˣ × (ZMod n)ˣ, F uv.1 * G uv.2 :=
+      Equiv.sum_comp e.toEquiv (fun uv : (ZMod m)ˣ × (ZMod n)ˣ => F uv.1 * G uv.2)
+    _ = _ := by rw [Fintype.sum_prod_type, Finset.sum_mul]; simp_rw [← Finset.mul_sum]
+
+private lemma cChi_crt_shift {m n : ℕ} [NeZero m] [NeZero n] [NeZero (m * n)]
+    (hcop : m.Coprime n) (χ : DirichletCharacter ℂ m) (ψ : DirichletCharacter ℂ n)
+    (A B : ℤ) (hAB : A * m + B * n = 1) (N : ℤ) :
+    cChi (DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) χ *
+        DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) ψ) N =
+      cChi χ (B * N) * cChi ψ (A * N) := by
+  rw [cChi_eq_gaussSum_shift, cChi_eq_gaussSum_shift, cChi_eq_gaussSum_shift,
+    gaussSum_eq_sum_units, gaussSum_eq_sum_units, gaussSum_eq_sum_units]
+  simp only [AddChar.mulShift_apply, Int.cast_mul]
+  have ht (a : (ZMod (m * n))ˣ) :
+      (DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) χ *
+          DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) ψ) a *
+          ZMod.stdAddChar ((N : ZMod (m * n)) * (a : ZMod (m * n))) =
+        (χ (ZMod.unitsMap (Nat.dvd_mul_right m n) a) *
+          ZMod.stdAddChar (((B : ZMod m) * (N : ZMod m)) *
+            (ZMod.unitsMap (Nat.dvd_mul_right m n) a : ZMod m))) *
+        (ψ (ZMod.unitsMap (Nat.dvd_mul_left n m) a) *
+          ZMod.stdAddChar (((A : ZMod n) * (N : ZMod n)) *
+            (ZMod.unitsMap (Nat.dvd_mul_left n m) a : ZMod n))) := by
+    rw [MulChar.mul_apply, DirichletCharacter.changeLevel_eq_cast_of_dvd,
+      DirichletCharacter.changeLevel_eq_cast_of_dvd,
+      crt_phase A B hAB ((N : ZMod (m * n)) * (a : ZMod (m * n)))]
+    simp only [map_mul, map_intCast, ZMod.castHom_apply, ZMod.unitsMap_val, mul_assoc]
+    ring
+  simp_rw [ht]
+  exact unit_crt_sum hcop
+    (fun a => χ a * ZMod.stdAddChar (((B : ZMod m) * (N : ZMod m)) * (a : ZMod m)))
+    (fun a => ψ a * ZMod.stdAddChar (((A : ZMod n) * (N : ZMod n)) * (a : ZMod n)))
+
+private lemma cChi_mul_unit {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (M N : ℤ) (hM : IsUnit (M : ZMod q)) :
+    cChi χ (M * N) = χ⁻¹ (M : ZMod q) * cChi χ N := by
+  rw [cChi_eq_gaussSum_shift, cChi_eq_gaussSum_shift]
+  have he : (ZMod.stdAddChar (N := q)).mulShift ((M * N : ℤ) : ZMod q) =
+      ((ZMod.stdAddChar (N := q)).mulShift (N : ZMod q)).mulShift hM.unit := by
+    ext a
+    simp only [AddChar.mulShift_apply, IsUnit.unit_spec, Int.cast_mul]
+    congr 1
+    ring
+  rw [he, gaussSum_mulShift_eq, IsUnit.unit_spec]
+
+private lemma coefficient_phase_cancel {q : ℕ} [NeZero q]
+    (χ₁ χ₂ : DirichletCharacter ℂ q) (M N : ℤ) (hM : IsUnit (M : ZMod q)) :
+    cChi χ₁⁻¹ M * cChi χ₂⁻¹ M * cChi (χ₁ * χ₂) (M * N) =
+      tauConj χ₁ * tauConj χ₂ * cChi (χ₁ * χ₂) N := by
+  have h₁ : χ₁ (M : ZMod q) * χ₁⁻¹ (M : ZMod q) = 1 := by
+    rw [← MulChar.mul_apply, mul_inv_cancel, MulChar.one_apply hM]
+  have h₂ : χ₂ (M : ZMod q) * χ₂⁻¹ (M : ZMod q) = 1 := by
+    rw [← MulChar.mul_apply, mul_inv_cancel, MulChar.one_apply hM]
+  have he₁ := cChi_mul_unit χ₁⁻¹ M 1 hM
+  have he₂ := cChi_mul_unit χ₂⁻¹ M 1 hM
+  simp only [mul_one, inv_inv] at he₁ he₂
+  rw [he₁, he₂, cChi_mul_unit (χ₁ * χ₂) M N hM,
+    tauConj_eq_cChi_inv, tauConj_eq_cChi_inv]
+  simp only [mul_inv_rev, MulChar.mul_apply]
+  calc
+    _ = (χ₁ (M : ZMod q) * χ₁⁻¹ (M : ZMod q)) *
+        (χ₂ (M : ZMod q) * χ₂⁻¹ (M : ZMod q)) *
+        (cChi χ₁⁻¹ 1 * cChi χ₂⁻¹ 1 * cChi (χ₁ * χ₂) N) := by ring
+    _ = _ := by rw [h₁, h₂, one_mul, one_mul]
+
+/-- **Two-factor splitting of `Aq`.** For coprime levels `m, n` the coefficient at modulus
+`m * n` of the CRT product of a character of `m` and a character of `n` is the product of the
+coefficients. This is the finite content of the Euler product for `genSing`. -/
+private theorem Aq_crt {m n : ℕ} [NeZero m] [NeZero n] [NeZero (m * n)]
+    (hcop : m.Coprime n) (χ₁ χ₂ : DirichletCharacter ℂ m)
+    (ψ₁ ψ₂ : DirichletCharacter ℂ n) (N : ℤ) :
+    Aq (DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) χ₁ *
+        DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) ψ₁)
+      (DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) χ₂ *
+        DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) ψ₂) N (m * n) =
+      Aq χ₁ χ₂ N m * Aq ψ₁ ψ₂ N n := by
+  let A := (m : ℤ).gcdA n
+  let B := (m : ℤ).gcdB n
+  have hAB : A * m + B * n = 1 := by
+    have h := Int.gcd_eq_gcd_ab (m : ℤ) (n : ℤ)
+    rw [Int.gcd_natCast_natCast, hcop.gcd_eq_one] at h
+    dsimp [A, B]
+    linear_combination -h
+  have hAeq : (A : ZMod n) * (m : ZMod n) = 1 := by
+    have h := congrArg (Int.castRingHom (ZMod n)) hAB
+    simpa using h
+  have hBeq : (B : ZMod m) * (n : ZMod m) = 1 := by
+    have h := congrArg (Int.castRingHom (ZMod m)) hAB
+    simpa using h
+  have hA : IsUnit (A : ZMod n) :=
+    ⟨⟨A, m, hAeq, by simpa only [mul_comm] using hAeq⟩, rfl⟩
+  have hB : IsUnit (B : ZMod m) :=
+    ⟨⟨B, n, hBeq, by simpa only [mul_comm] using hBeq⟩, rfl⟩
+  have ht (χ : DirichletCharacter ℂ m) (ψ : DirichletCharacter ℂ n) :
+      tauConj (DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) χ *
+        DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) ψ) =
+        cChi χ⁻¹ B * cChi ψ⁻¹ A := by
+    rw [tauConj_eq_cChi_inv]
+    simpa only [map_inv, mul_inv_rev, mul_one, mul_comm] using
+      cChi_crt_shift hcop χ⁻¹ ψ⁻¹ A B hAB 1
+  have hprod :
+      (DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) χ₁ *
+          DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) ψ₁) *
+        (DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) χ₂ *
+          DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) ψ₂) =
+      DirichletCharacter.changeLevel (Nat.dvd_mul_right m n) (χ₁ * χ₂) *
+        DirichletCharacter.changeLevel (Nat.dvd_mul_left n m) (ψ₁ * ψ₂) := by
+    simp only [map_mul]
+    ac_rfl
+  have hc := cChi_crt_shift hcop (χ₁ * χ₂) (ψ₁ * ψ₂) A B hAB N
+  have hnum :
+      (cChi χ₁⁻¹ B * cChi ψ₁⁻¹ A) * (cChi χ₂⁻¹ B * cChi ψ₂⁻¹ A) *
+        (cChi (χ₁ * χ₂) (B * N) * cChi (ψ₁ * ψ₂) (A * N)) =
+        (tauConj χ₁ * tauConj χ₂ * cChi (χ₁ * χ₂) N) *
+          (tauConj ψ₁ * tauConj ψ₂ * cChi (ψ₁ * ψ₂) N) := by
+    calc
+      _ = (cChi χ₁⁻¹ B * cChi χ₂⁻¹ B * cChi (χ₁ * χ₂) (B * N)) *
+          (cChi ψ₁⁻¹ A * cChi ψ₂⁻¹ A * cChi (ψ₁ * ψ₂) (A * N)) := by ring
+      _ = _ := by rw [coefficient_phase_cancel χ₁ χ₂ B N hB,
+        coefficient_phase_cancel ψ₁ ψ₂ A N hA]
+  simp only [Aq, dif_pos (show m * n ∣ m * n ∧ m * n ∣ m * n from ⟨dvd_refl _, dvd_refl _⟩),
+    dif_pos (show m ∣ m ∧ m ∣ m from ⟨dvd_refl _, dvd_refl _⟩),
+    dif_pos (show n ∣ n ∧ n ∣ n from ⟨dvd_refl _, dvd_refl _⟩),
+    DirichletCharacter.changeLevel_self]
+  rw [ht, ht, hprod, hc, hnum, Nat.totient_mul hcop, Nat.cast_mul, mul_pow]
+  exact mul_div_mul_comm _ _ _ _
+
+/-! ### Multiplicativity of `Aq` over prime-power levels -/
+
+private lemma changeLevel_irrel {r q : ℕ} (h h' : r ∣ q) (χ : DirichletCharacter ℂ r) :
+    DirichletCharacter.changeLevel h χ = DirichletCharacter.changeLevel h' χ := by
+  have : h = h' := Subsingleton.elim _ _
+  rw [this]
+
+private lemma Aq_inst_irrel {r₁ r₂ q : ℕ} (χ₁ : DirichletCharacter ℂ r₁)
+    (χ₂ : DirichletCharacter ℂ r₂) (N : ℤ) (i i' : NeZero q) :
+    @Aq r₁ r₂ χ₁ χ₂ N q i = @Aq r₁ r₂ χ₁ χ₂ N q i' := by
+  have h : i = i' := Subsingleton.elim _ _
+  rw [h]
+
+/-- `Aq` of the two trivial characters at modulus one. -/
+private lemma Aq_at_one_1 (N : ℤ) :
+    Aq (1 : DirichletCharacter ℂ 1) (1 : DirichletCharacter ℂ 1) N 1 = 1 := by
+  have hval : ∀ m : ZMod 1, ((m.val : ℝ)) = 0 := by
+    intro m
+    have h := ZMod.val_lt m
+    have h0 : m.val = 0 := by omega
+    simp [h0]
+  have hone : ∀ m : ZMod 1, (1 : DirichletCharacter ℂ 1) m = 1 := by
+    intro m
+    rw [Subsingleton.elim m 1, map_one]
+  unfold Aq
+  rw [dif_pos ⟨one_dvd 1, one_dvd 1⟩]
+  simp only [DirichletCharacter.changeLevel_one, one_mul, Nat.totient_one, Nat.cast_one, one_pow]
+  simp [tauConj, cChi, hval, hone, ee_zero]
+
+/-- `Aq` at a modulus depends on the characters only through their lifts to that modulus. -/
+private lemma Aq_changeLevel {d q : ℕ} [NeZero d] [NeZero q] (hd : d ∣ q)
+    (χ₁ χ₂ : DirichletCharacter ℂ d) (N : ℤ) :
+    Aq (DirichletCharacter.changeLevel hd χ₁) (DirichletCharacter.changeLevel hd χ₂) N q
+      = Aq χ₁ χ₂ N q := by
+  unfold Aq
+  rw [dif_pos (show q ∣ q ∧ q ∣ q from ⟨dvd_refl q, dvd_refl q⟩),
+    dif_pos (show d ∣ q ∧ d ∣ q from ⟨hd, hd⟩),
+    DirichletCharacter.changeLevel_self, DirichletCharacter.changeLevel_self]
+
+/-- **Multiplicativity of `Aq` over a finite set of pairwise coprime levels.** When the modulus
+`n` is the product of the levels `L p` over a finite set `s` of pairwise coprime indices and the
+two characters are the products of their components at those levels, the coefficient `Aq` is the
+product of the local coefficients. -/
+private theorem Aq_prod_changeLevel (L : ℕ → ℕ) (hL : ∀ p, L p ≠ 0)
+    (θ₁ θ₂ : ∀ p : ℕ, DirichletCharacter ℂ (L p)) (N : ℤ) :
+    ∀ (s : Finset ℕ), (∀ a ∈ s, ∀ b ∈ s, a ≠ b → Nat.Coprime (L a) (L b)) →
+      ∀ (n : ℕ) (hn0 : n ≠ 0), n = ∏ p ∈ s, L p →
+      @Aq n n (∏ p ∈ s, if h : L p ∣ n then DirichletCharacter.changeLevel h (θ₁ p) else 1)
+              (∏ p ∈ s, if h : L p ∣ n then DirichletCharacter.changeLevel h (θ₂ p) else 1)
+              N n ⟨hn0⟩
+        = ∏ p ∈ s, @Aq (L p) (L p) (θ₁ p) (θ₂ p) N (L p) ⟨hL p⟩ := by
+  intro s
+  induction s using Finset.induction with
+  | empty =>
+    intro hs n hn0 hn
+    have hn1 : n = 1 := by simpa using hn
+    subst hn1
+    simp only [Finset.prod_empty]
+    exact Aq_at_one_1 N
+  | insert a t hat ih =>
+    intro hs n hn0 hn
+    rw [Finset.prod_insert hat] at hn
+    have hLat : L a ≠ 0 := hL a
+    have hLp : ∏ p ∈ t, L p ≠ 0 := Finset.prod_ne_zero_iff.mpr fun p hp => hL p
+    have hst : ∀ p ∈ t, ∀ q ∈ t, p ≠ q → Nat.Coprime (L p) (L q) :=
+      fun p hp q hq => hs p (Finset.mem_insert_of_mem hp) q (Finset.mem_insert_of_mem hq)
+    have hcop : Nat.Coprime (L a) (∏ p ∈ t, L p) :=
+      Nat.Coprime.prod_right fun p hp =>
+        hs a (Finset.mem_insert_self a t) p (Finset.mem_insert_of_mem hp)
+          (fun h => hat (h ▸ hp))
+    have hdel : L a ∣ n := ⟨∏ p ∈ t, L p, hn⟩
+    have hdeR : ∏ p ∈ t, L p ∣ n := ⟨L a, by rw [hn]; ring⟩
+    -- the obvious fact, used to keep the rewriting below readable
+    have hP0 : L a * ∏ p ∈ t, L p ≠ 0 := mul_ne_zero hLat hLp
+    have key : ∀ (θ : ∀ p : ℕ, DirichletCharacter ℂ (L p)),
+        (∏ p ∈ insert a t, if h : L p ∣ n then
+            DirichletCharacter.changeLevel h (θ p) else 1)
+          = DirichletCharacter.changeLevel hdel (θ a) *
+            DirichletCharacter.changeLevel hdeR
+              (∏ p ∈ t, if h : L p ∣ (∏ p ∈ t, L p) then
+                DirichletCharacter.changeLevel h (θ p) else 1) := by
+      intro θ
+      rw [Finset.prod_insert hat, dif_pos hdel]
+      have hfac : ∀ p ∈ t,
+          (if h : L p ∣ n then DirichletCharacter.changeLevel h (θ p) else 1)
+            = DirichletCharacter.changeLevel hdeR
+                (if h : L p ∣ (∏ p ∈ t, L p) then
+                  DirichletCharacter.changeLevel h (θ p) else 1) := by
+        intro p hp
+        have hdiv : L p ∣ ∏ p ∈ t, L p := Finset.dvd_prod_of_mem _ hp
+        have hpn : L p ∣ n := dvd_trans hdiv hdeR
+        rw [dif_pos hpn, dif_pos hdiv, ← DirichletCharacter.changeLevel_trans]
+      rw [Finset.prod_congr rfl hfac, ← map_prod]
+    subst hn
+    rw [key θ₁, key θ₂, Finset.prod_insert hat]
+    rw [@Aq_crt (L a) (∏ p ∈ t, L p) ⟨hLat⟩ ⟨hLp⟩ ⟨hP0⟩ hcop (θ₁ a) (θ₂ a)
+      (∏ p ∈ t, if h : L p ∣ (∏ p ∈ t, L p) then
+        DirichletCharacter.changeLevel h (θ₁ p) else 1)
+      (∏ p ∈ t, if h : L p ∣ (∏ p ∈ t, L p) then
+        DirichletCharacter.changeLevel h (θ₂ p) else 1) N]
+    rw [ih hst (∏ p ∈ t, L p) hLp rfl]
+
+/-! ### The level factorisation of `Aq` -/
+
+private lemma Aq_changeLevel_2 {d₁ d₂ q : ℕ} [NeZero d₁] [NeZero d₂] [NeZero q]
+    (h₁ : d₁ ∣ q) (h₂ : d₂ ∣ q) (χ₁ : DirichletCharacter ℂ d₁) (χ₂ : DirichletCharacter ℂ d₂)
+    (N : ℤ) :
+    Aq (DirichletCharacter.changeLevel h₁ χ₁) (DirichletCharacter.changeLevel h₂ χ₂) N q
+      = Aq χ₁ χ₂ N q := by
+  unfold Aq
+  rw [dif_pos (show q ∣ q ∧ q ∣ q from ⟨dvd_refl q, dvd_refl q⟩),
+    dif_pos (show d₁ ∣ q ∧ d₂ ∣ q from ⟨h₁, h₂⟩),
+    DirichletCharacter.changeLevel_self, DirichletCharacter.changeLevel_self]
+
+private lemma pow_factorization_ne_zero (q p : ℕ) : p ^ q.factorization p ≠ 0 := by
+  rcases p with _ | _ | p
+  · have h : q.factorization 0 = 0 := Nat.factorization_eq_zero_of_not_prime q (by decide)
+    rw [h]; simp
+  · have h : q.factorization 1 = 0 := Nat.factorization_eq_zero_of_not_prime q (by decide)
+    rw [h]; simp
+  · exact pow_ne_zero _ (by omega)
+
+private lemma compLevel_dvd_pow_factorization {r q p : ℕ} [NeZero r] [NeZero q] (hrq : r ∣ q) :
+    compLevel r p ∣ p ^ q.factorization p := by
+  unfold compLevel
+  by_cases hp : p.Prime
+  · have hle : r.factorization p ≤ q.factorization p :=
+      (Nat.factorization_le_iff_dvd (NeZero.ne r) (NeZero.ne q)).mpr hrq p
+    exact Nat.pow_dvd_pow p hle
+  · rw [Nat.factorization_eq_zero_of_not_prime r hp, pow_zero]
+    exact one_dvd _
+
+private lemma coprime_pow_of_ne {p l : ℕ} (hp : p.Prime) (hl : l.Prime) (hne : p ≠ l)
+    (a b : ℕ) : Nat.Coprime (p ^ a) (l ^ b) :=
+  (Nat.Coprime.pow_left _ ((Nat.coprime_primes hp hl).mpr hne)).pow_right _
+
+/-- The lift of a character `mod r` to a multiple `q` of `r` is the product of the lifts of its
+prime-power components. -/
+private theorem changeLevel_eq_prod_primeComponents {r : ℕ} [NeZero r] {q : ℕ} [NeZero q]
+    (hrq : r ∣ q) (χ : DirichletCharacter ℂ r)
+    (ψ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r p)) (h : IsPrimeComponents χ ψ) :
+    DirichletCharacter.changeLevel hrq χ
+      = ∏ p ∈ q.primeFactors,
+          DirichletCharacter.changeLevel (dvd_trans (compLevel_dvd r p) hrq) (ψ p) := by
+  classical
+  refine MulChar.ext ?_
+  intro u
+  obtain ⟨v, hv⟩ := u.isUnit
+  have hL : (DirichletCharacter.changeLevel hrq χ) ((u : ZMod q))
+      = χ (((u : ZMod q).val : ℕ) : ZMod r) := by
+    rw [← MulChar.coe_toUnitHom, DirichletCharacter.changeLevel_toUnitHom,
+      MonoidHom.comp_apply, MulChar.coe_toUnitHom, ZMod.unitsMap_val, ZMod.cast_eq_val]
+  have hstep : ∀ p : ℕ,
+      (DirichletCharacter.changeLevel (dvd_trans (compLevel_dvd r p) hrq) (ψ p)) ((u : ZMod q))
+        = ψ p (((u : ZMod q).val : ℕ) : ZMod (compLevel r p)) := by
+    intro p
+    rw [← MulChar.coe_toUnitHom, DirichletCharacter.changeLevel_toUnitHom,
+      MonoidHom.comp_apply, MulChar.coe_toUnitHom, ZMod.unitsMap_val, ZMod.cast_eq_val]
+  have hR : (∏ p ∈ q.primeFactors,
+      DirichletCharacter.changeLevel (dvd_trans (compLevel_dvd r p) hrq) (ψ p)) ((u : ZMod q))
+      = ∏ p ∈ q.primeFactors, ψ p (((u : ZMod q).val : ℕ) : ZMod (compLevel r p)) := by
+    induction q.primeFactors using Finset.induction_on with
+    | empty => simp
+    | insert p s hps ih =>
+        rw [Finset.prod_insert hps, Finset.prod_insert hps, MulChar.mul_apply, ih, hstep p]
+  have hcop : Nat.Coprime ((u : ZMod q).val) r := by
+    have h1 : Nat.Coprime ((u : ZMod q).val) q := by
+      rw [← ZMod.isUnit_iff_coprime, ZMod.natCast_zmod_val]
+      exact u.isUnit
+    exact h1.coprime_dvd_right hrq
+  have hχ := h.2 ((u : ZMod q).val) hcop
+  rw [hL, hR, hχ]
+  refine Finset.prod_subset ?_ ?_
+  · intro p hp
+    exact Nat.mem_primeFactors.mpr ⟨Nat.prime_of_mem_primeFactors hp,
+      (Nat.dvd_of_mem_primeFactors hp).trans hrq, NeZero.ne q⟩
+  · intro p hpq hpr
+    have hpp : p.Prime := Nat.prime_of_mem_primeFactors hpq
+    have hnd : ¬ p ∣ r := fun hd => hpr (Nat.mem_primeFactors.mpr ⟨hpp, hd, NeZero.ne r⟩)
+    have hfac : r.factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hnd
+    have hm1 : compLevel r p = 1 := by
+      unfold compLevel
+      rw [hfac, pow_zero]
+    have htriv : ψ p = 1 := DirichletCharacter.level_one' (ψ p) hm1
+    rw [htriv, hm1]
+    have : (((u : ZMod q).val : ℕ) : ZMod 1) = 1 := Subsingleton.elim _ _
+    rw [this, map_one]
+
+/-- **The level factorisation of `Aq`.** For a modulus `q` that is a common multiple of the two
+levels, the coefficient is the product of the local coefficients at the prime powers of `q`, taken
+with the prime-power components of the two characters. -/
+private theorem Aq_factorization {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂)
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p))
+    (h₁ : IsPrimeComponents χ₁ ψ₁) (h₂ : IsPrimeComponents χ₂ ψ₂) (N : ℤ)
+    (q : ℕ) [NeZero q] (h₁q : r₁ ∣ q) (h₂q : r₂ ∣ q) :
+    Aq χ₁ χ₂ N q
+      = ∏ p ∈ q.primeFactors,
+          @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N (p ^ q.factorization p)
+            ⟨pow_factorization_ne_zero q p⟩ := by
+  classical
+  have hne : q ≠ 0 := NeZero.ne q
+  rw [← Aq_changeLevel_2 h₁q h₂q χ₁ χ₂ N,
+    changeLevel_eq_prod_primeComponents h₁q χ₁ ψ₁ h₁,
+    changeLevel_eq_prod_primeComponents h₂q χ₂ ψ₂ h₂]
+  have hfac : ∀ (r : ℕ) [NeZero r] (hrq : r ∣ q)
+      (ψ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r p)),
+      (∏ p ∈ q.primeFactors,
+          DirichletCharacter.changeLevel (dvd_trans (compLevel_dvd r p) hrq) (ψ p))
+        = ∏ p ∈ q.primeFactors,
+            (if h : p ^ q.factorization p ∣ q then
+              DirichletCharacter.changeLevel h
+                (if h' : compLevel r p ∣ p ^ q.factorization p then
+                  DirichletCharacter.changeLevel h' (ψ p) else 1) else 1) := by
+    intro r _ hrq ψ
+    refine Finset.prod_congr (s₁ := q.primeFactors) (s₂ := q.primeFactors)
+      (M := DirichletCharacter ℂ q) rfl ?_
+    intro p hp
+    have hpq : p ^ q.factorization p ∣ q := by
+      conv_rhs => rw [show q = ∏ l ∈ q.primeFactors, l ^ q.factorization l from
+        Nat.prod_primeFactors_pow_factorization hne]
+      exact Finset.dvd_prod_of_mem (f := fun l => l ^ q.factorization l) hp
+    have hcp : compLevel r p ∣ p ^ q.factorization p := compLevel_dvd_pow_factorization hrq
+    rw [dif_pos hpq, dif_pos hcp, ← DirichletCharacter.changeLevel_trans]
+  rw [hfac r₁ h₁q ψ₁, hfac r₂ h₂q ψ₂]
+  rw [Aq_prod_changeLevel (fun p => p ^ q.factorization p) (pow_factorization_ne_zero q)
+    (fun p => (if h' : compLevel r₁ p ∣ p ^ q.factorization p then
+        DirichletCharacter.changeLevel h' (ψ₁ p) else 1 : DirichletCharacter ℂ (p ^ q.factorization p)))
+    (fun p => (if h' : compLevel r₂ p ∣ p ^ q.factorization p then
+        DirichletCharacter.changeLevel h' (ψ₂ p) else 1 : DirichletCharacter ℂ (p ^ q.factorization p)))
+    N q.primeFactors
+    (fun a ha b hb hab => coprime_pow_of_ne (Nat.prime_of_mem_primeFactors ha)
+      (Nat.prime_of_mem_primeFactors hb) hab _ _) q hne
+    (Nat.prod_primeFactors_pow_factorization hne)]
+  refine Finset.prod_congr (s₁ := q.primeFactors) (s₂ := q.primeFactors)
+    (M := ℂ) rfl ?_
+  intro p hp
+  rw [dif_pos (compLevel_dvd_pow_factorization h₁q),
+    dif_pos (compLevel_dvd_pow_factorization h₂q)]
+  exact Aq_changeLevel_2 (compLevel_dvd_pow_factorization h₁q)
+    (compLevel_dvd_pow_factorization h₂q) (ψ₁ p) (ψ₂ p) N
+
+/-! ### Support of the local coefficients -/
+
+private lemma compLevel_ne_pow_of_ne {r p k : ℕ} (hp : p.Prime) (h : r.factorization p ≠ k) :
+    compLevel r p ≠ p ^ k := by
+  unfold compLevel
+  intro hc
+  exact h (Nat.pow_right_injective hp.two_le hc)
+
+private lemma factorization_lcm {r₁ r₂ p : ℕ} [NeZero r₁] [NeZero r₂] :
+    (r₁.lcm r₂).factorization p = max (r₁.factorization p) (r₂.factorization p) := by
+  rw [Nat.factorization_lcm (NeZero.ne r₁) (NeZero.ne r₂), Finsupp.sup_apply]
+
+private theorem compLevel_ne_pow_or {r₁ r₂ p k : ℕ} [NeZero r₁] [NeZero r₂] (hp : p.Prime)
+    (hk : k ≠ (r₁.lcm r₂).factorization p) :
+    compLevel r₁ p ≠ p ^ k ∨ compLevel r₂ p ≠ p ^ k := by
+  have h1 : r₁.factorization p ≤ (r₁.lcm r₂).factorization p := by
+    rw [factorization_lcm]; exact le_max_left _ _
+  have h2 : r₂.factorization p ≤ (r₁.lcm r₂).factorization p := by
+    rw [factorization_lcm]; exact le_max_right _ _
+  rcases lt_or_gt_of_ne hk with hlt | hgt
+  · rcases le_total (r₁.factorization p) (r₂.factorization p) with hle | hge
+    · right
+      have hfac : (r₁.lcm r₂).factorization p = r₂.factorization p := by
+        rw [factorization_lcm, max_eq_right hle]
+      exact compLevel_ne_pow_of_ne hp (by omega)
+    · left
+      have hfac : (r₁.lcm r₂).factorization p = r₁.factorization p := by
+        rw [factorization_lcm, max_eq_left hge]
+      exact compLevel_ne_pow_of_ne hp (by omega)
+  · left
+    exact compLevel_ne_pow_of_ne hp (by omega)
+
+/-- For `k ≥ 2` the local coefficient at `p ^ k` vanishes unless both prime-power levels are
+exactly `p ^ k`. -/
+private theorem Aq_pow_local_eq_zero {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂] {p k : ℕ} (hp : p.Prime)
+    (hk2 : 2 ≤ k) (hne : compLevel r₁ p ≠ p ^ k ∨ compLevel r₂ p ≠ p ^ k)
+    (ψ₁ : DirichletCharacter ℂ (compLevel r₁ p)) (ψ₂ : DirichletCharacter ℂ (compLevel r₂ p))
+    (N : ℤ) :
+    @Aq (compLevel r₁ p) (compLevel r₂ p) ψ₁ ψ₂ N (p ^ k) ⟨pow_ne_zero k hp.ne_zero⟩ = 0 := by
+  haveI : NeZero (p ^ k) := ⟨pow_ne_zero k hp.ne_zero⟩
+  rw [Aq_inst_irrel ψ₁ ψ₂ N ⟨pow_ne_zero k hp.ne_zero⟩ (inferInstance : NeZero (p ^ k))]
+  rcases hne with h | h
+  · exact Aq_pow_eq_zero_of_ne_level_early hp hk2 ψ₁ ψ₂ N h
+  · exact Aq_pow_eq_zero_of_ne_level_right_early hp hk2 ψ₁ ψ₂ N h
+
+/-- **The local Euler factor at a prime dividing the lcm of the levels is a single term.** -/
+private theorem eulerFactorGen_local {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂] {p : ℕ} (hp : p.Prime)
+    (hL : (r₁.lcm r₂).factorization p ≠ 0)
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (N : ℤ) :
+    eulerFactorGen (ψ₁ p) (ψ₂ p) N p
+      = @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N (p ^ (r₁.lcm r₂).factorization p)
+          ⟨pow_factorization_ne_zero (r₁.lcm r₂) p⟩ := by
+  classical
+  have hne : ∀ k : ℕ, p ^ k ≠ 0 := fun k => pow_ne_zero k hp.ne_zero
+  have hterm : ∀ k : ℕ,
+      (if h : p ^ k = 0 then 0 else @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N (p ^ k)
+        ⟨h⟩)
+        = @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N (p ^ k)
+            ⟨pow_ne_zero k hp.ne_zero⟩ := by
+    intro k
+    rw [dif_neg (hne k)]
+  unfold eulerFactorGen
+  simp only [hterm]
+  have hvanish : ∀ k : ℕ, k ≠ (r₁.lcm r₂).factorization p →
+      @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N (p ^ k)
+        ⟨pow_ne_zero k hp.ne_zero⟩ = 0 := by
+    intro k hk
+    haveI : NeZero (p ^ k) := ⟨pow_ne_zero k hp.ne_zero⟩
+    rcases Nat.lt_or_ge k 2 with hk1 | hk2
+    · rcases lt_or_gt_of_ne hk with hlt | hgt
+      · -- some component has level `p ^ a` with `a > k`, so it does not divide `p ^ k`
+        rcases le_total (r₁.factorization p) (r₂.factorization p) with hle | hge
+        · have hfac : r₂.factorization p = (r₁.lcm r₂).factorization p := by
+            rw [factorization_lcm, max_eq_right hle]
+          refine Aq_eq_zero_of_dvd_ne_early _ _ N (fun hc => ?_)
+          have h2 : p ^ (r₂.factorization p) ∣ p ^ k := by
+            simpa [compLevel, hfac] using hc.2
+          have := (Nat.pow_le_pow_iff_right hp.two_le).mp (Nat.le_of_dvd (pow_pos hp.pos k) h2)
+          omega
+        · have hfac : r₁.factorization p = (r₁.lcm r₂).factorization p := by
+            rw [factorization_lcm, max_eq_left hge]
+          refine Aq_eq_zero_of_dvd_ne_early _ _ N (fun hc => ?_)
+          have h1 : p ^ (r₁.factorization p) ∣ p ^ k := by
+            simpa [compLevel, hfac] using hc.1
+          have := (Nat.pow_le_pow_iff_right hp.two_le).mp (Nat.le_of_dvd (pow_pos hp.pos k) h1)
+          omega
+      · exact Aq_pow_local_eq_zero hp (by omega)
+          (compLevel_ne_pow_or hp (by omega)) (ψ₁ p) (ψ₂ p) N
+    · exact Aq_pow_local_eq_zero hp hk2 (compLevel_ne_pow_or hp (by omega)) (ψ₁ p) (ψ₂ p) N
+  rw [tsum_eq_single ((r₁.lcm r₂).factorization p) hvanish]
+
+/-! ### The multiplicative auxiliary function -/
+
+/-- The local coefficient depends on its level only through the exponent. -/
+private lemma Aq_pow_congr {r₁ r₂ p : ℕ} (ψ₁ : DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : DirichletCharacter ℂ (compLevel r₂ p)) (N : ℤ) {a b : ℕ} (h : a = b)
+    (i : NeZero (p ^ a)) (i' : NeZero (p ^ b)) :
+    @Aq (compLevel r₁ p) (compLevel r₂ p) ψ₁ ψ₂ N (p ^ a) i
+      = @Aq (compLevel r₁ p) (compLevel r₂ p) ψ₁ ψ₂ N (p ^ b) i' := by
+  subst h
+  exact Aq_inst_irrel _ _ N i i'
+
+/-- The coefficient at a common multiple `L * m` of the two levels splits off the local factors at
+the primes of `L`, leaving a multiplicative function of `m`. -/
+private theorem Aq_lcm_mul {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂)
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p))
+    (h₁ : IsPrimeComponents χ₁ ψ₁) (h₂ : IsPrimeComponents χ₂ ψ₂) (N : ℤ)
+    {m : ℕ} (hm : m ≠ 0) (hLm : r₁.lcm r₂ * m ≠ 0) (hcop : Nat.Coprime m (r₁.lcm r₂)) :
+    @Aq r₁ r₂ χ₁ χ₂ N (r₁.lcm r₂ * m) ⟨hLm⟩
+      = (∏ p ∈ (r₁.lcm r₂).primeFactors,
+            @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N
+              (p ^ (r₁.lcm r₂).factorization p)
+              ⟨pow_factorization_ne_zero (r₁.lcm r₂) p⟩)
+        * ∏ p ∈ m.primeFactors,
+            @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N
+              (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩ := by
+  classical
+  have hL0 : r₁.lcm r₂ ≠ 0 := Nat.lcm_ne_zero (NeZero.ne r₁) (NeZero.ne r₂)
+  haveI : NeZero (r₁.lcm r₂ * m) := ⟨hLm⟩
+  rw [Aq_factorization χ₁ χ₂ ψ₁ ψ₂ h₁ h₂ N (r₁.lcm r₂ * m)
+    (dvd_trans (Nat.dvd_lcm_left r₁ r₂) (dvd_mul_right _ _))
+    (dvd_trans (Nat.dvd_lcm_right r₁ r₂) (dvd_mul_right _ _))]
+  have hmul : ∀ p, (r₁.lcm r₂ * m).factorization p
+      = (r₁.lcm r₂).factorization p + m.factorization p := fun p => by
+    rw [Nat.factorization_mul hL0 hm]
+    rfl
+  rw [Nat.primeFactors_mul hL0 hm, Finset.prod_union hcop.symm.disjoint_primeFactors]
+  congr 1
+  · refine Finset.prod_congr rfl fun p hp => ?_
+    have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+    have hpL : p ∣ r₁.lcm r₂ := Nat.dvd_of_mem_primeFactors hp
+    have hpm : m.factorization p = 0 := by
+      refine Nat.factorization_eq_zero_of_not_dvd (fun hd => ?_)
+      exact Nat.not_coprime_of_dvd_of_dvd hpp.one_lt hd hpL hcop
+    exact Aq_pow_congr (ψ₁ p) (ψ₂ p) N (by rw [hmul p, hpm, add_zero]) _ _
+  · refine Finset.prod_congr rfl fun p hp => ?_
+    have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+    have hpm : p ∣ m := Nat.dvd_of_mem_primeFactors hp
+    have hpL : (r₁.lcm r₂).factorization p = 0 := by
+      refine Nat.factorization_eq_zero_of_not_dvd (fun hd => ?_)
+      exact Nat.not_coprime_of_dvd_of_dvd hpp.one_lt hpm hd hcop
+    exact Aq_pow_congr (ψ₁ p) (ψ₂ p) N (by rw [hmul p, hpL, zero_add]) _ _
+
+/-- Away from the structure of `L` the coefficient at `L * m` vanishes as soon as `m` shares a
+prime with the lcm of the levels. -/
+private theorem Aq_lcm_mul_eq_zero {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂)
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p))
+    (h₁ : IsPrimeComponents χ₁ ψ₁) (h₂ : IsPrimeComponents χ₂ ψ₂) (N : ℤ)
+    {m : ℕ} (hm : m ≠ 0) (hLm : r₁.lcm r₂ * m ≠ 0) (hcop : ¬ Nat.Coprime m (r₁.lcm r₂)) :
+    @Aq r₁ r₂ χ₁ χ₂ N (r₁.lcm r₂ * m) ⟨hLm⟩ = 0 := by
+  classical
+  have hL0 : r₁.lcm r₂ ≠ 0 := Nat.lcm_ne_zero (NeZero.ne r₁) (NeZero.ne r₂)
+  haveI : NeZero (r₁.lcm r₂ * m) := ⟨hLm⟩
+  rw [Aq_factorization χ₁ χ₂ ψ₁ ψ₂ h₁ h₂ N (r₁.lcm r₂ * m)
+    (dvd_trans (Nat.dvd_lcm_left r₁ r₂) (dvd_mul_right _ _))
+    (dvd_trans (Nat.dvd_lcm_right r₁ r₂) (dvd_mul_right _ _))]
+  have hg : Nat.gcd m (r₁.lcm r₂) ≠ 1 := fun h =>
+    hcop (Nat.coprime_iff_gcd_eq_one.mpr h)
+  obtain ⟨p, hpp, hpd⟩ := (Nat.gcd m (r₁.lcm r₂)).exists_prime_and_dvd hg
+  have hpm : p ∣ m := hpd.trans (Nat.gcd_dvd_left m (r₁.lcm r₂))
+  have hpL : p ∣ r₁.lcm r₂ := hpd.trans (Nat.gcd_dvd_right m (r₁.lcm r₂))
+  refine Finset.prod_eq_zero
+    (i := p) (Nat.mem_primeFactors.mpr ⟨hpp, dvd_mul_of_dvd_left hpL m, hLm⟩) ?_
+  have hmul : (r₁.lcm r₂ * m).factorization p
+      = (r₁.lcm r₂).factorization p + m.factorization p := by
+    rw [Nat.factorization_mul hL0 hm]
+    rfl
+  have hvL : 0 < (r₁.lcm r₂).factorization p :=
+    Nat.Prime.factorization_pos_of_dvd hpp hL0 hpL
+  have hvm : 0 < m.factorization p := Nat.Prime.factorization_pos_of_dvd hpp hm hpm
+  have hk2 : 2 ≤ (r₁.lcm r₂ * m).factorization p := by omega
+  exact Aq_pow_local_eq_zero hpp hk2 (compLevel_ne_pow_or hpp (by omega)) (ψ₁ p) (ψ₂ p) N
+
+/-! ### The multiplicative function is multiplicative -/
+
+private theorem lcm_mul_ne_zero {r₁ r₂ m : ℕ} [NeZero r₁] [NeZero r₂] (hm : m ≠ 0) :
+    r₁.lcm r₂ * m ≠ 0 :=
+  mul_ne_zero (Nat.lcm_ne_zero (NeZero.ne r₁) (NeZero.ne r₂)) hm
+
+/-- The auxiliary multiplicative function `H(m) = ∏_{p | m} A_p(m)`, zero off the numbers coprime
+to the lcm of the two levels. -/
+private theorem aux_mul {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (N : ℤ)
+    {m n : ℕ} (hcop : Nat.Coprime m n) :
+    (if m * n = 0 ∨ ¬ Nat.Coprime (m * n) (r₁.lcm r₂) then 0 else
+        ∏ p ∈ (m * n).primeFactors,
+          @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N
+            (p ^ (m * n).factorization p) ⟨pow_factorization_ne_zero (m * n) p⟩)
+      = (if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+          ∏ p ∈ m.primeFactors,
+            @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N
+              (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩)
+        * (if n = 0 ∨ ¬ Nat.Coprime n (r₁.lcm r₂) then 0 else
+          ∏ p ∈ n.primeFactors,
+            @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N
+              (p ^ n.factorization p) ⟨pow_factorization_ne_zero n p⟩) := by
+  classical
+  rcases eq_zero_or_neZero m with hm | hm
+  · subst hm
+    simp
+  rcases eq_zero_or_neZero n with hn | hn
+  · subst hn
+    simp
+  have hm0 : m ≠ 0 := NeZero.ne m
+  have hn0 : n ≠ 0 := NeZero.ne n
+  have hmn0 : m * n ≠ 0 := mul_ne_zero hm0 hn0
+  by_cases hcm : Nat.Coprime m (r₁.lcm r₂)
+  · by_cases hcn : Nat.Coprime n (r₁.lcm r₂)
+    · have hcmn : Nat.Coprime (m * n) (r₁.lcm r₂) := hcm.mul_left hcn
+      have h1 : ¬ (m * n = 0 ∨ ¬ Nat.Coprime (m * n) (r₁.lcm r₂)) :=
+        fun h => h.elim hmn0 (fun h' => h' hcmn)
+      have h2 : ¬ (m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂)) :=
+        fun h => h.elim hm0 (fun h' => h' hcm)
+      have h3 : ¬ (n = 0 ∨ ¬ Nat.Coprime n (r₁.lcm r₂)) :=
+        fun h => h.elim hn0 (fun h' => h' hcn)
+      rw [if_neg h1, if_neg h2, if_neg h3,
+        Nat.primeFactors_mul hm0 hn0, Finset.prod_union hcop.disjoint_primeFactors]
+      congr 1
+      · refine Finset.prod_congr rfl fun p hp => ?_
+        have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+        have hpm : p ∣ m := Nat.dvd_of_mem_primeFactors hp
+        have hpn : n.factorization p = 0 := by
+          refine Nat.factorization_eq_zero_of_not_dvd (fun hd => ?_)
+          exact Nat.not_coprime_of_dvd_of_dvd hpp.one_lt hpm hd hcop
+        have hfac : (m * n).factorization p = m.factorization p + n.factorization p := by
+          rw [Nat.factorization_mul hm0 hn0]; rfl
+        exact Aq_pow_congr (ψ₁ p) (ψ₂ p) N (by rw [hfac, hpn, add_zero]) _ _
+      · refine Finset.prod_congr rfl fun p hp => ?_
+        have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+        have hpn : p ∣ n := Nat.dvd_of_mem_primeFactors hp
+        have hpm : m.factorization p = 0 := by
+          refine Nat.factorization_eq_zero_of_not_dvd (fun hd => ?_)
+          exact Nat.not_coprime_of_dvd_of_dvd hpp.one_lt hpn hd hcop.symm
+        have hfac : (m * n).factorization p = m.factorization p + n.factorization p := by
+          rw [Nat.factorization_mul hm0 hn0]; rfl
+        exact Aq_pow_congr (ψ₁ p) (ψ₂ p) N (by rw [hfac, hpm, zero_add]) _ _
+    · have hnm : ¬ Nat.Coprime (m * n) (r₁.lcm r₂) := fun h =>
+        hcn (Nat.Coprime.coprime_dvd_left (dvd_mul_left n m) h)
+      rw [if_pos (Or.inr hnm), if_pos (Or.inr hcn), mul_zero]
+  · have hnm : ¬ Nat.Coprime (m * n) (r₁.lcm r₂) := fun h =>
+      hcm (Nat.Coprime.coprime_dvd_left (dvd_mul_right m n) h)
+    rw [if_pos (Or.inr hnm), if_pos (Or.inr hcm), zero_mul]
+
+/-! ### The coefficient at multiples of `L` and the trivial-character reduction -/
+
+private lemma isPrimitive_level_one {n : ℕ} (hn : n = 1) (χ : DirichletCharacter ℂ n) :
+    χ.IsPrimitive := by
+  subst hn
+  rw [DirichletCharacter.level_one χ]
+  exact DirichletCharacter.isPrimitive_one_level_one
+
+private lemma isPrimeComponents_one_aux :
+    IsPrimeComponents (1 : DirichletCharacter ℂ 1) (fun _ => 1) := by
+  refine ⟨fun p => isPrimitive_level_one (by simp [compLevel]) _, fun a _ => ?_⟩
+  have : (a : ZMod 1) = 1 := Subsingleton.elim _ _
+  simp [this]
+
+private lemma Aq_trivial_of_level_one {d₁ d₂ : ℕ} (h₁ : d₁ = 1) (h₂ : d₂ = 1)
+    (ψ₁ : DirichletCharacter ℂ d₁) (ψ₂ : DirichletCharacter ℂ d₂) (M : ℤ) (q : ℕ) [NeZero q] :
+    @Aq d₁ d₂ ψ₁ ψ₂ M q ‹NeZero q› = @Aq 1 1 (1 : DirichletCharacter ℂ 1)
+      (1 : DirichletCharacter ℂ 1) M q ‹NeZero q› := by
+  subst h₁
+  subst h₂
+  have e₁ : ψ₁ = 1 := DirichletCharacter.level_one' ψ₁ rfl
+  have e₂ : ψ₂ = 1 := DirichletCharacter.level_one' ψ₂ rfl
+  rw [e₁, e₂]
+
+private lemma compLevel_one (p : ℕ) : compLevel 1 p = 1 := by simp [compLevel]
+
+/-- The local coefficient at a prime power of exponent zero is one. -/
+private lemma Aq_of_exp_zero {r₁ r₂ p : ℕ} (h₁ : compLevel r₁ p = 1) (h₂ : compLevel r₂ p = 1)
+    (ψ₁ : DirichletCharacter ℂ (compLevel r₁ p)) (ψ₂ : DirichletCharacter ℂ (compLevel r₂ p))
+    (M : ℤ) {a : ℕ} (ha : a = 0) (i : NeZero (p ^ a)) :
+    @Aq (compLevel r₁ p) (compLevel r₂ p) ψ₁ ψ₂ M (p ^ a) i = 1 := by
+  subst ha
+  exact (Aq_trivial_of_level_one h₁ h₂ ψ₁ ψ₂ M 1).trans (Aq_at_one_1 M)
+
+/-- On the numbers coprime to `L` the auxiliary function is the coefficient of the two trivial
+characters. -/
+private theorem aux_eq_one_one {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (N : ℤ)
+    {m : ℕ} [NeZero m] (hcop : Nat.Coprime m (r₁.lcm r₂)) :
+    (∏ p ∈ m.primeFactors,
+        @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N
+          (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩)
+      = Aq (1 : DirichletCharacter ℂ 1) (1 : DirichletCharacter ℂ 1) N m := by
+  classical
+  rw [Aq_factorization (1 : DirichletCharacter ℂ 1) (1 : DirichletCharacter ℂ 1)
+    (fun _ => 1) (fun _ => 1) isPrimeComponents_one_aux isPrimeComponents_one_aux N m
+    (one_dvd m) (one_dvd m)]
+  refine Finset.prod_congr rfl fun p hp => ?_
+  have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+  have hpm : p ∣ m := Nat.dvd_of_mem_primeFactors hp
+  have hpL : ¬ p ∣ r₁.lcm r₂ := by
+    intro hd
+    exact Nat.not_coprime_of_dvd_of_dvd hpp.one_lt hpm hd hcop
+  have h1 : compLevel r₁ p = 1 := by
+    unfold compLevel
+    rw [Nat.factorization_eq_zero_of_not_dvd (fun hd => hpL (hd.trans (Nat.dvd_lcm_left _ _))),
+      pow_zero]
+  have h2 : compLevel r₂ p = 1 := by
+    unfold compLevel
+    rw [Nat.factorization_eq_zero_of_not_dvd (fun hd => hpL (hd.trans (Nat.dvd_lcm_right _ _))),
+      pow_zero]
+  exact (Aq_trivial_of_level_one h1 h2 (ψ₁ p) (ψ₂ p) N (p ^ m.factorization p)).trans
+    (Aq_trivial_of_level_one (compLevel_one p) (compLevel_one p)
+      (1 : DirichletCharacter ℂ (compLevel 1 p)) (1 : DirichletCharacter ℂ (compLevel 1 p))
+      N (p ^ m.factorization p)).symm
+
+/-- The auxiliary function is dominated by the coefficient of the two trivial characters. -/
+private theorem aux_norm_le {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (N : ℤ)
+    {m : ℕ} [NeZero m] :
+    ‖(if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+        ∏ p ∈ m.primeFactors,
+          @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) N
+            (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩)‖
+      ≤ ‖Aq (1 : DirichletCharacter ℂ 1) (1 : DirichletCharacter ℂ 1) N m‖ := by
+  classical
+  have hm0 : m ≠ 0 := NeZero.ne m
+  by_cases hcop : Nat.Coprime m (r₁.lcm r₂)
+  · rw [if_neg (fun h => h.elim hm0 (fun h' => h' hcop)),
+      aux_eq_one_one ψ₁ ψ₂ N hcop]
+  · rw [if_pos (Or.inr hcop), norm_zero]
+    exact norm_nonneg _
+
+/-! ### The bound for summability -/
+
+private theorem tauConj_one_eq_moebius (q : ℕ) [NeZero q] (hq : 1 ≤ q) :
+    tauConj (1 : DirichletCharacter ℂ q) = ((ArithmeticFunction.moebius q : ℤ) : ℂ) := by
+  have h1 : tauConj (1 : DirichletCharacter ℂ q) = cChi (1 : DirichletCharacter ℂ q) 1 := by
+    unfold tauConj cChi
+    refine Finset.sum_congr rfl fun m _ => ?_
+    have h2 : (starRingEnd ℂ) ((1 : DirichletCharacter ℂ q) m)
+        = (1 : DirichletCharacter ℂ q) m := by
+      by_cases hm : IsUnit m
+      · rw [MulChar.one_apply hm]; simp
+      · rw [MulChar.map_nonunit _ hm]; simp
+    rw [h2]
+    congr 2
+    push_cast
+    ring
+  rw [h1, cChi_one_eq_ramanujan_early, ramanujan_eq_divisor_sum_early hq 1, Int.natAbs_one,
+    Nat.gcd_one_right, Nat.divisors_one, Finset.sum_singleton, Nat.div_one]
+  norm_num
+
+private theorem norm_Aq_one_one_le {N : ℕ} (hN : 1 ≤ N) {m : ℕ} [NeZero m] :
+    ‖Aq (1 : DirichletCharacter ℂ 1) (1 : DirichletCharacter ℂ 1) (N : ℤ) m‖
+      ≤ (∑ d ∈ N.divisors, (d : ℝ)) / (Nat.totient m : ℝ) ^ 2 := by
+  have hm1 : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr (NeZero.ne m)
+  have hφ : (0 : ℝ) < (Nat.totient m : ℝ) := by
+    exact_mod_cast Nat.totient_pos.mpr (NeZero.pos m)
+  have hmu : ‖((ArithmeticFunction.moebius m : ℤ) : ℂ)‖ ≤ 1 := by
+    rw [Complex.norm_intCast]
+    exact_mod_cast ArithmeticFunction.abs_moebius_le_one (n := m)
+  have hc : ‖cChi (1 : DirichletCharacter ℂ m) (N : ℤ)‖ ≤ ∑ d ∈ N.divisors, (d : ℝ) := by
+    rw [cChi_one_eq_ramanujan_early, ramanujan_eq_ofReal_re_early hm1, Complex.norm_real,
+      Real.norm_eq_abs]
+    exact card_ramanujan_re_le N hN m
+  rw [Aq_one_one_early, tauConj_one_eq_moebius m hm1, norm_div, norm_mul, norm_mul]
+  have hden : ‖(Nat.totient m : ℂ) ^ 2‖ = (Nat.totient m : ℝ) ^ 2 := by
+    rw [norm_pow, Complex.norm_natCast]
+  rw [hden]
+  refine div_le_div_of_nonneg_right ?_ (by positivity)
+  calc ‖((ArithmeticFunction.moebius m : ℤ) : ℂ)‖ *
+        ‖((ArithmeticFunction.moebius m : ℤ) : ℂ)‖ *
+        ‖cChi (1 : DirichletCharacter ℂ m) (N : ℤ)‖
+      ≤ 1 * 1 * (∑ d ∈ N.divisors, (d : ℝ)) := by
+        refine mul_le_mul (mul_le_mul hmu hmu (norm_nonneg _) (by norm_num)) hc
+          (norm_nonneg _) (by positivity)
+    _ = _ := by ring
+
+/-- The auxiliary function is summable. -/
+private theorem summable_aux {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (N : ℕ) (hN : 1 ≤ N) :
+    Summable (fun m : ℕ => ‖(if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+        ∏ p ∈ m.primeFactors,
+          @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) (N : ℤ)
+            (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩)‖) := by
+  classical
+  set B : ℝ := ∑ d ∈ N.divisors, (d : ℝ) with hB
+  have hB0 : 0 ≤ B := Finset.sum_nonneg fun d _ => Nat.cast_nonneg d
+  have hs : Summable (fun m : ℕ => B * (7 * (m : ℝ) ^ (-(7 : ℝ) / 4))) :=
+    ((Real.summable_nat_rpow.mpr (by norm_num : (-(7 : ℝ) / 4) < -1)).mul_left 7).mul_left B
+  refine Summable.of_norm_bounded hs (fun m => ?_)
+  rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+  rcases eq_zero_or_neZero m with hm | hm
+  · subst hm
+    simp
+  · have hm1 : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr (NeZero.ne m)
+    have hφ : (0 : ℝ) < (Nat.totient m : ℝ) := by
+      exact_mod_cast Nat.totient_pos.mpr (NeZero.pos m)
+    have h1 : ‖(if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+        ∏ p ∈ m.primeFactors,
+          @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) (N : ℤ)
+            (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩)‖
+        ≤ B / (Nat.totient m : ℝ) ^ 2 := by
+      refine (aux_norm_le ψ₁ ψ₂ (N : ℤ)).trans ?_
+      exact norm_Aq_one_one_le hN
+    have h2 : B / (Nat.totient m : ℝ) ^ 2 ≤ B * (7 * (m : ℝ) ^ (-(7 : ℝ) / 4)) := by
+      rw [div_eq_mul_inv]
+      refine mul_le_mul_of_nonneg_left ?_ hB0
+      rw [← one_div]
+      exact LeanLab.Zinoviev1997.inv_totient_sq_seven m (NeZero.pos m)
+    linarith
+
+/-! ### The local factor versus the multiplicative function -/
+
+private lemma aux_pow_of_dvd {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (M : ℤ)
+    {p : ℕ} (hp : p.Prime) (hpL : p ∣ r₁.lcm r₂) (k : ℕ) (hk : k ≠ 0) :
+    (if p ^ k = 0 ∨ ¬ Nat.Coprime (p ^ k) (r₁.lcm r₂) then 0 else
+        ∏ l ∈ (p ^ k).primeFactors,
+          @Aq (compLevel r₁ l) (compLevel r₂ l) (ψ₁ l) (ψ₂ l) M
+            (l ^ (p ^ k).factorization l) ⟨pow_factorization_ne_zero (p ^ k) l⟩) = 0 := by
+  classical
+  have hL0 : r₁.lcm r₂ ≠ 0 := Nat.lcm_ne_zero (NeZero.ne r₁) (NeZero.ne r₂)
+  have hne : ¬ Nat.Coprime (p ^ k) (r₁.lcm r₂) := by
+    intro hc
+    have hd : p ∣ Nat.gcd (p ^ k) (r₁.lcm r₂) :=
+      Nat.dvd_gcd (dvd_pow_self p hk) hpL
+    rw [hc.gcd_eq_one] at hd
+    exact hp.not_dvd_one hd
+  rw [if_pos (Or.inr hne)]
+
+private lemma aux_one {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (M : ℤ) :
+    (if 1 = 0 ∨ ¬ Nat.Coprime 1 (r₁.lcm r₂) then 0 else
+        ∏ l ∈ (1 : ℕ).primeFactors,
+          @Aq (compLevel r₁ l) (compLevel r₂ l) (ψ₁ l) (ψ₂ l) M
+            (l ^ (1 : ℕ).factorization l) ⟨pow_factorization_ne_zero 1 l⟩) = 1 := by
+  have h : ¬ (1 = 0 ∨ ¬ Nat.Coprime 1 (r₁.lcm r₂)) := by
+    intro h
+    rcases h with h | h
+    · exact one_ne_zero h
+    · exact h (Nat.coprime_one_left _)
+  rw [if_neg h, Nat.primeFactors_one, Finset.prod_empty]
+
+/-- At a prime not dividing `L` the auxiliary function reproduces the local coefficient term by
+term. -/
+private lemma aux_prime_pow {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p)) (M : ℤ)
+    {p k : ℕ} (hp : p.Prime) (hpL : ¬ p ∣ r₁.lcm r₂) (hk : k ≠ 0) :
+    (if p ^ k = 0 ∨ ¬ Nat.Coprime (p ^ k) (r₁.lcm r₂) then 0 else
+        ∏ l ∈ (p ^ k).primeFactors,
+          @Aq (compLevel r₁ l) (compLevel r₂ l) (ψ₁ l) (ψ₂ l) M
+            (l ^ (p ^ k).factorization l) ⟨pow_factorization_ne_zero (p ^ k) l⟩)
+      = @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) M (p ^ k)
+          ⟨pow_ne_zero k hp.ne_zero⟩ := by
+  classical
+  have hL0 : r₁.lcm r₂ ≠ 0 := Nat.lcm_ne_zero (NeZero.ne r₁) (NeZero.ne r₂)
+  have hcop : Nat.Coprime (p ^ k) (r₁.lcm r₂) :=
+    (hp.coprime_iff_not_dvd.mpr hpL).pow_left k
+  rw [if_neg (fun h => h.elim (pow_ne_zero k hp.ne_zero) (fun h' => h' hcop))]
+  have hpf : (p ^ k).primeFactors = {p} := Nat.primeFactors_prime_pow hk hp
+  rw [hpf, Finset.prod_singleton]
+  exact Aq_pow_congr (ψ₁ p) (ψ₂ p) M (Nat.factorization_pow_self hp) _ _
+
+/-! ### `genSing` as a constant times the auxiliary sum -/
+
+private theorem Aq_lcm_dvd {r₁ r₂ : ℕ} (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂)
+    (N : ℤ) {q : ℕ} [NeZero q] (h : Aq χ₁ χ₂ N q ≠ 0) : r₁.lcm r₂ ∣ q := by
+  by_contra hL
+  refine h ?_
+  unfold Aq
+  rw [dif_neg]
+  rintro ⟨hd₁, hd₂⟩
+  exact hL (Nat.lcm_dvd hd₁ hd₂)
+
+/-- **`genSing` is the constant `C` times the auxiliary sum.** The coefficient `Aq` lives on the
+multiples of `L = lcm r₁ r₂`, where it is `C` times a multiplicative function of the cofactor. -/
+private theorem genSing_eq {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂)
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p))
+    (h₁ : IsPrimeComponents χ₁ ψ₁) (h₂ : IsPrimeComponents χ₂ ψ₂) (M : ℤ)
+    (hH : Summable (fun m : ℕ => if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+        ∏ p ∈ m.primeFactors,
+          @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) M
+            (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩)) :
+    genSing χ₁ χ₂ M
+      = (∏ p ∈ (r₁.lcm r₂).primeFactors,
+          @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) M
+            (p ^ (r₁.lcm r₂).factorization p) ⟨pow_factorization_ne_zero (r₁.lcm r₂) p⟩)
+        * ∑' m : ℕ, (if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+            ∏ p ∈ m.primeFactors,
+              @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) M
+                (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩) := by
+  classical
+  have hL0 : r₁.lcm r₂ ≠ 0 := Nat.lcm_ne_zero (NeZero.ne r₁) (NeZero.ne r₂)
+  let H : ℕ → ℂ := fun m => if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+      ∏ p ∈ m.primeFactors,
+        @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) M
+          (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩
+  let C : ℂ := ∏ p ∈ (r₁.lcm r₂).primeFactors,
+        @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) M
+          (p ^ (r₁.lcm r₂).factorization p) ⟨pow_factorization_ne_zero (r₁.lcm r₂) p⟩
+  have hH' : Summable H := hH
+  change genSing χ₁ χ₂ M = C * ∑' m, H m
+  -- the coefficient at `L * m`
+  have hpt : ∀ m : ℕ,
+      (if h : r₁.lcm r₂ * m = 0 then 0 else @Aq r₁ r₂ χ₁ χ₂ M (r₁.lcm r₂ * m) ⟨h⟩)
+        = C * H m := by
+    intro m
+    rcases eq_zero_or_neZero m with hm | hm
+    · subst hm
+      simp [C, H]
+    · have hm0 : m ≠ 0 := NeZero.ne m
+      have hLm : r₁.lcm r₂ * m ≠ 0 := lcm_mul_ne_zero hm0
+      rw [dif_neg hLm]
+      by_cases hcop : Nat.Coprime m (r₁.lcm r₂)
+      · have hcond : ¬ (m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂)) :=
+          fun h => h.elim hm0 (fun h' => h' hcop)
+        rw [show H m = ∏ p ∈ m.primeFactors,
+            @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) M
+              (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩ from by simp [H, hcond]]
+        exact Aq_lcm_mul χ₁ χ₂ ψ₁ ψ₂ h₁ h₂ M hm0 hLm hcop
+      · rw [show H m = 0 from by simp [H, hcop], mul_zero]
+        exact Aq_lcm_mul_eq_zero χ₁ χ₂ ψ₁ ψ₂ h₁ h₂ M hm0 hLm hcop
+  -- the shifted series
+  have hshift : HasSum (fun m : ℕ =>
+      if h : r₁.lcm r₂ * m = 0 then 0 else @Aq r₁ r₂ χ₁ χ₂ M (r₁.lcm r₂ * m) ⟨h⟩)
+      (C * ∑' m, H m) :=
+    (hH'.hasSum.mul_left C).congr_fun (fun m => hpt m)
+  -- the coefficient extended by zero at `0`
+  set F : ℕ → ℂ := fun q => if h : q = 0 then 0 else @Aq r₁ r₂ χ₁ χ₂ M q ⟨h⟩ with hF
+  have hFsum : HasSum F (C * ∑' m, H m) := by
+    refine (hasSum_iff_hasSum_of_ne_zero_bij (a := C * ∑' m, H m) (f := F)
+      (g := fun m : ℕ => if h : r₁.lcm r₂ * m = 0 then 0 else
+        @Aq r₁ r₂ χ₁ χ₂ M (r₁.lcm r₂ * m) ⟨h⟩)
+      (fun x => r₁.lcm r₂ * (x : ℕ))
+      (fun x y hxy => by
+        simp only at hxy
+        exact Subtype.ext (Nat.eq_of_mul_eq_mul_left (Nat.pos_of_ne_zero hL0) hxy))
+      (fun q hq => by
+        simp only [hF, Function.mem_support] at hq
+        have hq0 : q ≠ 0 := fun h => hq (by simp [h])
+        haveI : NeZero q := ⟨hq0⟩
+        have hAq : Aq χ₁ χ₂ M q ≠ 0 := fun h => hq (by rw [dif_neg hq0]; exact h)
+        have hdvd : r₁.lcm r₂ ∣ q := Aq_lcm_dvd χ₁ χ₂ M hAq
+        obtain ⟨x, rfl⟩ := hdvd
+        have hx0 : x ≠ 0 := fun hx => hq0 (by rw [hx, mul_zero])
+        refine ⟨⟨x, ?_⟩, rfl⟩
+        simp only [Function.mem_support]
+        rw [dif_neg (lcm_mul_ne_zero hx0)]
+        exact hAq)
+      (fun x => rfl)).mpr hshift
+  -- `genSing` is the series of `F`
+  have hgen : genSing χ₁ χ₂ M = ∑' q : ℕ, F (q + 1) := by
+    rw [genSing]
+    refine tsum_congr fun q => ?_
+    have hq : q + 1 ≠ 0 := by omega
+    show Aq χ₁ χ₂ M (q + 1) = if h : q + 1 = 0 then 0 else @Aq r₁ r₂ χ₁ χ₂ M (q + 1) ⟨h⟩
+    rw [dif_neg hq]
+  have hshift_eq : (∑' q : ℕ, F (q + 1)) = ∑' q : ℕ, F q := by
+    rw [hFsum.summable.tsum_eq_zero_add]
+    simp [hF]
+  rw [hgen, hshift_eq, hFsum.tsum_eq]
+
+/-- LEAF page 23 (proof). -/
+private theorem euler_gen_eq_proof {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
+    (χ₁ : DirichletCharacter ℂ r₁) (χ₂ : DirichletCharacter ℂ r₂)
+    (hχ₁ : χ₁.IsPrimitive) (hχ₂ : χ₂.IsPrimitive)
+    (ψ₁ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₁ p))
+    (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p))
+    (h₁ : IsPrimeComponents χ₁ ψ₁) (h₂ : IsPrimeComponents χ₂ ψ₂) (N : ℤ) (hN : 1 ≤ N) :
+    Tendsto (fun X : ℕ => ∏ p ∈ (Finset.range X).filter Nat.Prime,
+      eulerFactorGen (ψ₁ p) (ψ₂ p) N p) atTop (𝓝 (genSing χ₁ χ₂ N)) := by
+  classical
+  have hN0 : (0 : ℤ) ≤ N := le_trans (by norm_num) hN
+  set M : ℕ := N.toNat with hMdef
+  have hM : (M : ℤ) = N := Int.toNat_of_nonneg hN0
+  have hM1 : 1 ≤ M := by
+    have h : (1 : ℤ) ≤ (M : ℤ) := by rw [hM]; exact hN
+    omega
+  rw [← hM]
+  have hL0 : r₁.lcm r₂ ≠ 0 := Nat.lcm_ne_zero (NeZero.ne r₁) (NeZero.ne r₂)
+  let c : ℕ → ℂ := fun p => @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) (M : ℤ)
+      (p ^ (r₁.lcm r₂).factorization p) ⟨pow_factorization_ne_zero (r₁.lcm r₂) p⟩
+  let H : ℕ → ℂ := fun m => if m = 0 ∨ ¬ Nat.Coprime m (r₁.lcm r₂) then 0 else
+      ∏ p ∈ m.primeFactors,
+        @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) (M : ℤ)
+          (p ^ m.factorization p) ⟨pow_factorization_ne_zero m p⟩
+  have hHnorm : Summable (fun m => ‖H m‖) := by
+    simpa only [H] using summable_aux ψ₁ ψ₂ M hM1
+  have hHsum : Summable H := hHnorm.of_norm
+  have hH0 : H 0 = 0 := by simp [H]
+  have hH1 : H 1 = 1 := by simpa [H] using aux_one ψ₁ ψ₂ (M : ℤ)
+  have hHmul : ∀ {m n : ℕ}, Nat.Coprime m n → H (m * n) = H m * H n := by
+    intro m n hmn
+    simpa only [H] using aux_mul ψ₁ ψ₂ (M : ℤ) hmn
+  -- the Euler product for the multiplicative function
+  have hEuler : Tendsto (fun X : ℕ =>
+      ∏ p ∈ (Finset.range X).filter Nat.Prime, (∑' k : ℕ, H (p ^ k))) atTop (𝓝 (∑' m, H m)) := by
+    have hpt : ∀ X : ℕ, (∏ p ∈ (Finset.range X).filter Nat.Prime, (∑' k : ℕ, H (p ^ k)))
+        = ∑' m : X.smoothNumbers, H m := fun X =>
+      EulerProduct.prod_primesBelow_tsum_eq_tsum_smoothNumbers hH1 hHmul hHnorm X
+    rw [show (fun X : ℕ => ∏ p ∈ (Finset.range X).filter Nat.Prime, (∑' k : ℕ, H (p ^ k)))
+        = (fun X : ℕ => ∑' m : X.smoothNumbers, H m) from funext hpt]
+    rw [Metric.tendsto_atTop]
+    intro ε hε
+    obtain ⟨N₀, hN₀⟩ := EulerProduct.norm_tsum_smoothNumbers_sub_tsum_lt hHsum hH0 hε
+    exact ⟨N₀, fun X hX => by rw [dist_eq_norm, norm_sub_rev]; exact hN₀ X hX⟩
+  -- the local factor is the constant `c p` times the local sum of `H`
+  have hpoint : ∀ p : ℕ, p.Prime →
+      eulerFactorGen (ψ₁ p) (ψ₂ p) (M : ℤ) p = c p * ∑' k : ℕ, H (p ^ k) := by
+    intro p hp
+    by_cases hpL : p ∣ r₁.lcm r₂
+    · have hfac : (r₁.lcm r₂).factorization p ≠ 0 :=
+        (Nat.Prime.factorization_pos_of_dvd hp hL0 hpL).ne'
+      have hefg : eulerFactorGen (ψ₁ p) (ψ₂ p) (M : ℤ) p = c p :=
+        eulerFactorGen_local hp hfac ψ₁ ψ₂ (M : ℤ)
+      have hsum : (∑' k : ℕ, H (p ^ k)) = 1 := by
+        rw [tsum_eq_single 0]
+        · simpa using hH1
+        · intro k hk
+          simpa only [H] using aux_pow_of_dvd ψ₁ ψ₂ (M : ℤ) hp hpL k hk
+      rw [hefg, hsum, mul_one]
+    · have hcomp₁ : compLevel r₁ p = 1 := by
+        unfold compLevel
+        rw [Nat.factorization_eq_zero_of_not_dvd (fun hd => hpL (hd.trans (Nat.dvd_lcm_left _ _))),
+          pow_zero]
+      have hcomp₂ : compLevel r₂ p = 1 := by
+        unfold compLevel
+        rw [Nat.factorization_eq_zero_of_not_dvd (fun hd => hpL (hd.trans (Nat.dvd_lcm_right _ _))),
+          pow_zero]
+      have hc1 : c p = 1 := by
+        have hv : (r₁.lcm r₂).factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hpL
+        show @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) (M : ℤ)
+          (p ^ (r₁.lcm r₂).factorization p) ⟨pow_factorization_ne_zero (r₁.lcm r₂) p⟩ = 1
+        exact Aq_of_exp_zero hcomp₁ hcomp₂ (ψ₁ p) (ψ₂ p) (M : ℤ) hv _
+      rw [hc1, one_mul]
+      unfold eulerFactorGen
+      refine tsum_congr fun k => ?_
+      rcases eq_or_ne k 0 with hk | hk
+      · subst hk
+        rw [dif_neg (pow_ne_zero 0 hp.ne_zero)]
+        have hH1' : H (p ^ 0) = 1 := by simpa using hH1
+        rw [hH1']
+        simpa only [pow_zero] using
+          (Aq_trivial_of_level_one hcomp₁ hcomp₂ (ψ₁ p) (ψ₂ p) (M : ℤ) 1).trans
+            (Aq_at_one_1 (M : ℤ))
+      · rw [dif_neg (pow_ne_zero k hp.ne_zero)]
+        exact (aux_prime_pow ψ₁ ψ₂ (M : ℤ) hp hpL hk).symm
+  -- the finite products split
+  have hprod : ∀ X : ℕ,
+      (∏ p ∈ (Finset.range X).filter Nat.Prime, eulerFactorGen (ψ₁ p) (ψ₂ p) (M : ℤ) p)
+        = (∏ p ∈ (Finset.range X).filter Nat.Prime, c p)
+          * ∏ p ∈ (Finset.range X).filter Nat.Prime, (∑' k : ℕ, H (p ^ k)) := by
+    intro X
+    rw [← Finset.prod_mul_distrib]
+    exact Finset.prod_congr rfl fun p hp => hpoint p (Finset.mem_filter.mp hp).2
+  -- the constant product stabilises
+  have hC : ∀ᶠ X : ℕ in atTop, (∏ p ∈ (r₁.lcm r₂).primeFactors, c p)
+      = (∏ p ∈ (Finset.range X).filter Nat.Prime, c p) := by
+    refine eventually_atTop.mpr ⟨r₁.lcm r₂ + 1, fun X hX => ?_⟩
+    refine Finset.prod_subset ?_ ?_
+    · intro p hp
+      have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+      have hd : p ∣ r₁.lcm r₂ := Nat.dvd_of_mem_primeFactors hp
+      have hpos : 0 < r₁.lcm r₂ := Nat.pos_of_ne_zero hL0
+      have hle : p ≤ r₁.lcm r₂ := Nat.le_of_dvd hpos hd
+      exact Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (by omega), hpp⟩
+    · intro p hpX hpL
+      have hpp : p.Prime := (Finset.mem_filter.mp hpX).2
+      have hpnd : ¬ p ∣ r₁.lcm r₂ := fun hd =>
+        hpL (Nat.mem_primeFactors.mpr ⟨hpp, hd, hL0⟩)
+      have hcomp₁ : compLevel r₁ p = 1 := by
+        unfold compLevel
+        rw [Nat.factorization_eq_zero_of_not_dvd (fun hd => hpnd (hd.trans (Nat.dvd_lcm_left _ _))),
+          pow_zero]
+      have hcomp₂ : compLevel r₂ p = 1 := by
+        unfold compLevel
+        rw [Nat.factorization_eq_zero_of_not_dvd (fun hd => hpnd (hd.trans (Nat.dvd_lcm_right _ _))),
+          pow_zero]
+      have hv : (r₁.lcm r₂).factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hpnd
+      show @Aq (compLevel r₁ p) (compLevel r₂ p) (ψ₁ p) (ψ₂ p) (M : ℤ)
+        (p ^ (r₁.lcm r₂).factorization p) ⟨pow_factorization_ne_zero (r₁.lcm r₂) p⟩ = 1
+      exact Aq_of_exp_zero hcomp₁ hcomp₂ (ψ₁ p) (ψ₂ p) (M : ℤ) hv _
+  have hmain : Tendsto (fun X : ℕ =>
+      ∏ p ∈ (Finset.range X).filter Nat.Prime, eulerFactorGen (ψ₁ p) (ψ₂ p) (M : ℤ) p) atTop
+      (𝓝 ((∏ p ∈ (r₁.lcm r₂).primeFactors, c p) * ∑' m, H m)) := by
+    have h1 := hEuler.const_mul (∏ p ∈ (r₁.lcm r₂).primeFactors, c p)
+    refine h1.congr' ?_
+    filter_upwards [hC] with X hX
+    rw [hprod X, ← hX]
+  rw [genSing_eq χ₁ χ₂ ψ₁ ψ₂ h₁ h₂ (M : ℤ) hHsum]
+  exact hmain
+
 /-- LEAF page 23. The generalized singular series of primitive `χ₁, χ₂` converges to the product
 of the Euler factors of their prime power components. `1 ≤ N` alone does not repair the old form:
 `eulerFactorGen χ₁ χ₂` vanishes at every prime `p` unless `r₁, r₂` are powers of `p`, see
@@ -665,8 +2122,8 @@ theorem euler_gen_eq {r₁ r₂ : ℕ} [NeZero r₁] [NeZero r₂]
     (ψ₂ : ∀ p : ℕ, DirichletCharacter ℂ (compLevel r₂ p))
     (h₁ : IsPrimeComponents χ₁ ψ₁) (h₂ : IsPrimeComponents χ₂ ψ₂) (N : ℤ) (hN : 1 ≤ N) :
     Tendsto (fun X : ℕ => ∏ p ∈ (Finset.range X).filter Nat.Prime, eulerFactorGen (ψ₁ p) (ψ₂ p) N p)
-      atTop (𝓝 (genSing χ₁ χ₂ N)) := by
-  sorry
+      atTop (𝓝 (genSing χ₁ χ₂ N)) :=
+  euler_gen_eq_proof χ₁ χ₂ hχ₁ hχ₂ ψ₁ ψ₂ h₁ h₂ N hN
 
 /-! ### Leaf 4: `local_bound` — the lifted Gauss sums vanish -/
 
