@@ -8,9 +8,12 @@ import LeanLab.HelfgottArcs.MajorAssembly
 namespace LeanLab.HelfgottArcs.DecompJ521
 open Real
 
-/-- LEAF. Page 57, the intermediate analytic estimate for Theorem 1.2. -/
+/-- LEAF. Page 57, the intermediate analytic estimate for Theorem 1.2.
+REPAIRED 2026-11-06: the hypothesis `χ.IsPrimitive` was added. Without it the statement is
+FALSE at `q = 299993` with `χ` principal: the pole of `L'/L` at `s = 1` is present but
+`MajorShape` subtracts a main term only when `q = 1`. -/
 theorem major_1_2_leaf (hG : HelfgottInput) (x : ℝ) (hx : 10 ^ 8 ≤ x) (q : ℕ) [NeZero q]
-    (hq : q ≤ 300000) (χ : DirichletCharacter ℂ q) (δ : ℝ)
+    (hq : q ≤ 300000) (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (δ : ℝ)
     (hδ : |δ| ≤ 4 * 300000 / q) :
     MajorShape etaT2 χ δ x
       (4.269e-14 / q +
@@ -24,6 +27,6 @@ theorem major_1_2_assembled (hG : HelfgottInput) (x : ℝ) (hx : 10 ^ 8 ≤ x) (
     (hq : q ≤ 300000) (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (δ : ℝ)
     (hδ : |δ| ≤ 4 * 300000 / q) :
     MajorShape etaT2 χ δ x (4.269e-14 / q + 1 / √x * (276600 / √q + 56)) :=
-  major_1_2_of_error_terms x hx q hq χ δ hδ (major_1_2_leaf hG x hx q hq χ δ hδ)
+  major_1_2_of_error_terms x hx q hq χ δ hδ (major_1_2_leaf hG x hx q hq χ hχ δ hδ)
 
 end LeanLab.HelfgottArcs.DecompJ521
