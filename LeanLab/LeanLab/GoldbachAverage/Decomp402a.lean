@@ -1,8 +1,7 @@
 import LeanLab.GoldbachAverage.MovingIntegrability402
-import LeanLab.ExceptionalSet.WindowParseval264
+import LeanLab.ExceptionalSet.TriangleKernel264
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Sinc
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
-import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 Goldston and Yang, arXiv 1601.06902v1 page 4 eqs. 4.1 and 4.2.
@@ -13,8 +12,267 @@ AI wrote this Lean code. Goldbach is open.
 
 noncomputable section
 namespace LeanLab.GoldbachAverage.Decomp402a
-open MeasureTheory Set Filter FourierTransform
+open MeasureTheory Set Filter
 open Decomp287b
+open scoped FourierTransform
+
+section PlancherelHelpers
+
+/-- The moving sum as a series of translated interval indicators, GY page 4 eq. 4.1. -/
+private theorem movingSum_eq_indicator_tsum (a : ℕ → ℂ) (h x : ℝ) :
+    movingSum a x h =
+      ∑' n : ℕ, (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) x := by
+  unfold movingSum
+  apply tsum_congr
+  intro n
+  have hw : x < (n : ℝ) ∧ (n : ℝ) ≤ x + h ↔ x ∈ Ico ((n : ℝ) - h) n := by
+    simp only [Set.mem_Ico]
+    constructor <;> rintro ⟨h1, h2⟩ <;> constructor <;> linarith
+  by_cases hx : x ∈ Ico ((n : ℝ) - h) n
+  · rw [if_pos (hw.mpr hx), indicator_of_mem hx]
+  · rw [if_neg (hw.not.mpr hx), indicator_of_notMem hx]
+
+/-- Absolute summability makes the moving sum integrable: total mass at most `h` times the
+coefficient mass.  Same majorant as `MovingIntegrability402.moving_square_integrable_proved`. -/
+private theorem integrable_movingSum (a : ℕ → ℂ) (ha : Summable (fun n => ‖a n‖))
+    (h : ℝ) (hh : 0 < h) : Integrable (fun x : ℝ => movingSum a x h) := by
+  classical
+  let u : ℕ → ℝ → ℝ := fun n => (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => ‖a n‖)
+  let M : ℝ → ℝ := fun x => ∑' n, u n x
+  have hu0 (n : ℕ) (x : ℝ) : 0 ≤ u n x := by
+    simp only [u, Set.indicator_apply]
+    split_ifs <;> positivity
+  have hub (n : ℕ) (x : ℝ) : u n x ≤ ‖a n‖ := by
+    simp only [u, Set.indicator_apply]
+    split_ifs <;> simp
+  have hus (x : ℝ) : Summable (fun n => u n x) :=
+    Summable.of_nonneg_of_le (fun n => hu0 n x) (fun n => hub n x) ha
+  have hum (n : ℕ) : Measurable (u n) := measurable_const.indicator measurableSet_Ico
+  have hM : Measurable M := Measurable.tsum hum
+  have hM0 (x : ℝ) : 0 ≤ M x := tsum_nonneg (fun n => hu0 n x)
+  have hiM : Integrable M := by
+    refine ⟨hM.aestronglyMeasurable, ?_⟩
+    rw [hasFiniteIntegral_iff_ofReal (Eventually.of_forall hM0)]
+    have hconv (x : ℝ) : ENNReal.ofReal (M x) = ∑' n, ENNReal.ofReal (u n x) :=
+      ENNReal.ofReal_tsum_of_nonneg (fun n => hu0 n x) (hus x)
+    simp_rw [hconv]
+    rw [lintegral_tsum (fun n => ((hum n).ennreal_ofReal).aemeasurable)]
+    have hterm (n : ℕ) : (∫⁻ x : ℝ, ENNReal.ofReal (u n x)) =
+        ENNReal.ofReal ‖a n‖ * ENNReal.ofReal h := by
+      have he : (fun x => ENNReal.ofReal (u n x)) =
+          (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => ENNReal.ofReal ‖a n‖) := by
+        funext x
+        simp only [u, Set.indicator_apply]
+        split_ifs <;> simp_all
+      rw [he, lintegral_indicator_const measurableSet_Ico, Real.volume_Ico]
+      congr 2
+      ring
+    simp_rw [hterm]
+    rw [ENNReal.tsum_mul_right, ← ENNReal.ofReal_tsum_of_nonneg (fun n => norm_nonneg (a n)) ha]
+    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top ENNReal.ofReal_lt_top
+  have hn (x : ℝ) : ‖movingSum a x h‖ ≤ M x := by
+    rw [movingSum_eq_indicator_tsum]
+    have hsum : Summable (fun (n : ℕ) => ‖(Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) x‖) := by
+      refine Summable.of_nonneg_of_le (fun n => norm_nonneg _) (fun (n : ℕ) => ?_) ha
+      simp only [Set.indicator_apply]
+      split_ifs <;> simp
+    calc ‖∑' n : ℕ, (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) x‖
+        ≤ ∑' n : ℕ, ‖(Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) x‖ :=
+          norm_tsum_le_tsum_norm hsum
+      _ = M x := by
+          apply tsum_congr
+          intro n
+          simp only [u, Set.indicator_apply]
+          split_ifs <;> simp_all
+  exact hiM.mono' (MovingIntegrability402.movingSum_measurable a h).aestronglyMeasurable
+    (Eventually.of_forall hn)
+
+/-- The character integrated over one window: `∫_b^c e(-αx) = (e(-αc) - e(-αb)) / (-2πiα)`. -/
+private theorem integral_char_window (α : ℝ) (hα : α ≠ 0) (b c : ℝ) :
+    ∫ x in b..c, Complex.exp (((-2 * Real.pi * α * x : ℝ) : ℂ) * Complex.I) =
+      (Complex.exp (((-2 * Real.pi * α * c : ℝ) : ℂ) * Complex.I) -
+        Complex.exp (((-2 * Real.pi * α * b : ℝ) : ℂ) * Complex.I)) /
+        (((-2 * Real.pi * α : ℝ) : ℂ) * Complex.I) := by
+  have hcR : (-2 * Real.pi * α : ℝ) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero (by norm_num) Real.pi_ne_zero) hα
+  have hc : (((-2 * Real.pi * α : ℝ)) : ℂ) * Complex.I ≠ 0 :=
+    mul_ne_zero (by exact_mod_cast hcR) Complex.I_ne_zero
+  have hpt : ∀ x : ℝ, Complex.exp (((-2 * Real.pi * α * x : ℝ) : ℂ) * Complex.I) =
+      Complex.exp (((((-2 * Real.pi * α : ℝ)) : ℂ) * Complex.I) * (x : ℂ)) := by
+    intro x
+    congr 1
+    push_cast
+    ring
+  simp_rw [hpt]
+  exact integral_exp_mul_complex hc
+
+/-- The algebraic identity turning the window difference into the kernel times the `n`-th
+character: `(e(-αn) - e(-α(n-h)))/(-2πiα) = e(-αn) (1 - e(αh))/(-2πiα)`. -/
+private theorem window_kernel_algebra (α h : ℝ) (hα : α ≠ 0) (n : ℕ) :
+    (Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I) -
+        Complex.exp (((-2 * Real.pi * α * ((n : ℝ) - h) : ℝ) : ℂ) * Complex.I)) /
+        (((-2 * Real.pi * α : ℝ) : ℂ) * Complex.I) =
+      Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I) *
+        ((1 - Complex.exp ((2 * Real.pi * α * h : ℝ) * Complex.I)) /
+          (-2 * Real.pi * α * Complex.I)) := by
+  have hcR : (-2 * Real.pi * α : ℝ) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero (by norm_num) Real.pi_ne_zero) hα
+  have hc : (((-2 * Real.pi * α : ℝ)) : ℂ) * Complex.I ≠ 0 :=
+    mul_ne_zero (by exact_mod_cast hcR) Complex.I_ne_zero
+  have hc2 : (-2 * Real.pi * α * Complex.I : ℂ) ≠ 0 := by
+    rw [show (-2 * Real.pi * α * Complex.I : ℂ) = (((-2 * Real.pi * α : ℝ)) : ℂ) * Complex.I
+      from by push_cast; ring]
+    exact hc
+  have e1 : Complex.exp (((-2 * Real.pi * α * ((n : ℝ) - h) : ℝ) : ℂ) * Complex.I) =
+      Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I) *
+        Complex.exp ((2 * Real.pi * α * h : ℝ) * Complex.I) := by
+    rw [← Complex.exp_add]
+    congr 1
+    push_cast
+    ring
+  have e2 : (((-2 * Real.pi * α : ℝ)) : ℂ) * Complex.I = -2 * Real.pi * α * Complex.I := by
+    push_cast
+    ring
+  rw [e1, e2]
+  field_simp <;> ring
+
+/-- GY page 4 eq. 4.1: the Fourier transform of the moving sum is the window kernel times
+the coefficient series at `-α`. -/
+private theorem fourier_movingSum_ne (a : ℕ → ℂ) (ha : Summable (fun n => ‖a n‖))
+    (h : ℝ) (hh : 0 < h) {α : ℝ} (hα : α ≠ 0) :
+    𝓕 (fun x : ℝ => movingSum a x h) α =
+      ((1 - Complex.exp ((2 * Real.pi * α * h : ℝ) * Complex.I)) /
+        (-2 * Real.pi * α * Complex.I)) *
+      ∑' n : ℕ, a n * Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I) := by
+  classical
+  have hcont : Continuous fun v : ℝ =>
+      Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) :=
+    Complex.continuous_exp.comp (by fun_prop)
+  have hnormexp (v : ℝ) :
+      ‖Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I)‖ = 1 :=
+    Complex.norm_exp_ofReal_mul_I _
+  have hFint (n : ℕ) : Integrable ((Ico ((n : ℝ) - h) (n : ℝ)).indicator
+      (fun _ => a n)) :=
+    memLp_one_iff_integrable.mp (memLp_indicator_const (μ := volume) 1 measurableSet_Ico.nullMeasurableSet
+      (a n) (Or.inr (by simp)))
+  have hmeas (n : ℕ) : AEStronglyMeasurable (fun v : ℝ =>
+      Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v) :=
+    hcont.aestronglyMeasurable.mul
+      (measurable_const.indicator measurableSet_Ico).aestronglyMeasurable
+  have hint (n : ℕ) : Integrable (fun v : ℝ =>
+      Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v) := by
+    refine Integrable.mono' (hFint n).norm (hmeas n) (Eventually.of_forall fun v => ?_)
+    rw [norm_mul, hnormexp, one_mul]
+  have hintval (n : ℕ) : (∫ v : ℝ, ‖Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+      (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v‖) = ‖a n‖ * h := by
+    have he : (fun v : ℝ => ‖Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v‖) =
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => ‖a n‖) := by
+      funext v
+      rw [norm_mul, hnormexp, one_mul]
+      by_cases hv : v ∈ Ico ((n : ℝ) - h) (n : ℝ)
+      · rw [Set.indicator_of_mem hv, Set.indicator_of_mem hv]
+      · rw [Set.indicator_of_notMem hv, Set.indicator_of_notMem hv]
+        simp
+    rw [he, integral_indicator_const ‖a n‖ measurableSet_Ico, measureReal_def, Real.volume_Ico,
+      show (n : ℝ) - ((n : ℝ) - h) = h from by ring, ENNReal.toReal_ofReal hh.le,
+      smul_eq_mul]
+    ring
+  have hsumint : Summable (fun n : ℕ => ∫ v : ℝ,
+      ‖Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v‖) := by
+    simpa only [hintval] using ha.mul_right h
+  have hpt (v : ℝ) : (∑' n : ℕ, Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v) =
+      Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) * movingSum a v h := by
+    rw [movingSum_eq_indicator_tsum]
+    exact (tsum_mul_left (f := fun n : ℕ =>
+      (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v)
+      (a := Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I)))
+  have hswap := hasSum_integral_of_summable_integral_norm hint hsumint
+  have hInt : (∫ v : ℝ, Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+      movingSum a v h) =
+      ∑' n : ℕ, ∫ v : ℝ, Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v := by
+    rw [show (∫ v : ℝ, Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        movingSum a v h) =
+        ∫ v : ℝ, ∑' n : ℕ, Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+          (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v from by
+      apply integral_congr_ae
+      filter_upwards with v
+      exact (hpt v).symm]
+    exact hswap.tsum_eq.symm
+  have hterm (n : ℕ) : (∫ v : ℝ,
+      Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v) =
+      Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I) *
+        ((1 - Complex.exp ((2 * Real.pi * α * h : ℝ) * Complex.I)) /
+          (-2 * Real.pi * α * Complex.I)) * a n := by
+    have hsupp : (fun v : ℝ => Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) *
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun _ => a n) v) =
+        (Ico ((n : ℝ) - h) (n : ℝ)).indicator (fun v =>
+          Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) * a n) := by
+      funext v
+      by_cases hv : v ∈ Ico ((n : ℝ) - h) (n : ℝ)
+      · rw [Set.indicator_of_mem hv, Set.indicator_of_mem hv]
+      · rw [Set.indicator_of_notMem hv, Set.indicator_of_notMem hv]
+        simp
+    rw [hsupp, integral_indicator measurableSet_Ico, integral_Ico_eq_integral_Ioc,
+      ← intervalIntegral.integral_of_le (show (n : ℝ) - h ≤ (n : ℝ) by linarith),
+      intervalIntegral.integral_mul_const, integral_char_window α hα,
+      window_kernel_algebra α h hα n]
+  rw [Real.fourier_real_eq_integral_exp_smul]
+  have hexp' (v : ℝ) : Complex.exp ((↑(-2 * Real.pi * v * α) : ℂ) * Complex.I) =
+      Complex.exp (((-2 * Real.pi * α * v : ℝ) : ℂ) * Complex.I) := by
+    congr 1
+    push_cast
+    ring
+  simp only [hexp', smul_eq_mul]
+  rw [hInt]
+  simp_rw [hterm]
+  rw [show (fun n : ℕ => Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I) *
+        ((1 - Complex.exp ((2 * Real.pi * α * h : ℝ) * Complex.I)) /
+          (-2 * Real.pi * α * Complex.I)) * a n) =
+      (fun n : ℕ => ((1 - Complex.exp ((2 * Real.pi * α * h : ℝ) * Complex.I)) /
+          (-2 * Real.pi * α * Complex.I)) *
+        (a n * Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I)))
+      from funext fun n => by ring]
+  rw [tsum_mul_left]
+
+/-- GY page 4 eq. 4.1: the modulus of the moving-sum transform is the sinc kernel times the
+modulus of the coefficient series. -/
+private theorem fourier_movingSum_norm_ne (a : ℕ → ℂ) (ha : Summable (fun n => ‖a n‖))
+    (h : ℝ) (hh : 0 < h) {α : ℝ} (hα : α ≠ 0) :
+    ‖𝓕 (fun x : ℝ => movingSum a x h) α‖ =
+      h * |Real.sinc (Real.pi * h * α)| * ‖fourierSeries a (-α)‖ := by
+  rw [fourier_movingSum_ne a ha h hh hα, norm_mul, LeanLab.ExceptionalSet.WindowParseval264.kernel_norm h α]
+  have hser : ‖∑' n : ℕ,
+      a n * Complex.exp (((-2 * Real.pi * α * (n : ℝ) : ℝ) : ℂ) * Complex.I)‖
+      = ‖fourierSeries a (-α)‖ := by
+    congr 1
+    rw [fourierSeries]
+    apply tsum_congr
+    intro n
+    unfold eAdd
+    congr 1
+    push_cast
+    ring
+  rw [hser]
+  have hsinc : h * |Real.sinc (Real.pi * h * α)| =
+      |Real.sin (Real.pi * α * h)| / (Real.pi * |α|) := by
+    have harg : Real.pi * h * α = Real.pi * α * h := by ring
+    rw [harg]
+    have hpa : Real.pi * α * h ≠ 0 :=
+      mul_ne_zero (mul_ne_zero Real.pi_ne_zero hα) (ne_of_gt hh)
+    have hαa : (0 : ℝ) < |α| := abs_pos.mpr hα
+    rw [Real.sinc_of_ne_zero hpa, abs_div, abs_mul, abs_mul, abs_of_pos Real.pi_pos,
+      abs_of_pos hh]
+    field_simp
+  rw [hsinc]
+
+end PlancherelHelpers
 
 /-- The coefficient series in GY page 4 Section 4 is continuous by uniform convergence. -/
 theorem fourierSeries_continuous (a : ℕ → ℂ)
@@ -62,202 +320,6 @@ theorem moving_square_integrable (a : ℕ → ℂ)
     Integrable (fun x : ℝ => ‖movingSum a x h‖ ^ 2) := by
   exact MovingIntegrability402.moving_square_integrable_proved a ha h hh
 
-/-- GY page 4 before eq. 4.1, absolute summability gives an integrable moving sum.
-Tonelli bounds its norm by the sum of translated coefficient norms. -/
-theorem movingSum_integrable (a : ℕ → ℂ)
-    (ha : Summable (fun n => ‖a n‖)) (h : ℝ) (hh : 0 < h) :
-    Integrable (fun x : ℝ => movingSum a x h) := by
-  classical
-  let u : ℕ → ℝ → ℝ := fun n => (Ico ((n : ℝ) - h) n).indicator (fun _ => ‖a n‖)
-  let v : ℕ → ℝ → ℂ := fun n => (Ico ((n : ℝ) - h) n).indicator (fun _ => a n)
-  let M : ℝ → ℝ := fun x => ∑' n, u n x
-  let A : ℝ := ∑' n, ‖a n‖
-  have hu0 (n : ℕ) (x : ℝ) : 0 ≤ u n x := by
-    simp only [u, Set.indicator_apply]
-    split_ifs <;> positivity
-  have hub (n : ℕ) (x : ℝ) : u n x ≤ ‖a n‖ := by
-    simp only [u, Set.indicator_apply]
-    split_ifs <;> simp
-  have hus (x : ℝ) : Summable (fun n => u n x) :=
-    Summable.of_nonneg_of_le (fun n => hu0 n x) (fun n => hub n x) ha
-  have hum (n : ℕ) : Measurable (u n) := measurable_const.indicator measurableSet_Ico
-  have hM : Measurable M := Measurable.tsum hum
-  have hM0 (x : ℝ) : 0 ≤ M x := tsum_nonneg (fun n => hu0 n x)
-  have hMA (x : ℝ) : M x ≤ A := (hus x).tsum_le_tsum (fun n => hub n x) ha
-  have hiM : Integrable M := by
-    refine ⟨hM.aestronglyMeasurable, ?_⟩
-    rw [hasFiniteIntegral_iff_ofReal (Eventually.of_forall hM0)]
-    have hconv (x : ℝ) : ENNReal.ofReal (M x) = ∑' n, ENNReal.ofReal (u n x) :=
-      ENNReal.ofReal_tsum_of_nonneg (fun n => hu0 n x) (hus x)
-    simp_rw [hconv]
-    rw [lintegral_tsum (fun n => ((hum n).ennreal_ofReal).aemeasurable)]
-    have hterm (n : ℕ) : (∫⁻ x : ℝ, ENNReal.ofReal (u n x)) =
-        ENNReal.ofReal ‖a n‖ * ENNReal.ofReal h := by
-      have he : (fun x => ENNReal.ofReal (u n x)) =
-          (Ico ((n : ℝ) - h) n).indicator (fun _ => ENNReal.ofReal ‖a n‖) := by
-        funext x
-        simp only [u, Set.indicator_apply]
-        split_ifs <;> simp_all
-      rw [he, lintegral_indicator_const measurableSet_Ico, Real.volume_Ico]
-      congr 2
-      ring
-    simp_rw [hterm]
-    rw [ENNReal.tsum_mul_right, ← ENNReal.ofReal_tsum_of_nonneg (fun n => norm_nonneg (a n)) ha]
-    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top ENNReal.ofReal_lt_top
-  have hvnorm (n : ℕ) (x : ℝ) : ‖v n x‖ = u n x := by
-    simp only [u, v, Set.indicator_apply]
-    split_ifs <;> simp_all
-  have hvm (n : ℕ) : Measurable (v n) := measurable_const.indicator measurableSet_Ico
-  have hv : Measurable (fun x => ∑' n, v n x) := Measurable.tsum hvm
-  have heq (x : ℝ) : movingSum a x h = ∑' n, v n x := by
-    apply tsum_congr
-    intro n
-    have hw : x < (n : ℝ) ∧ (n : ℝ) ≤ x + h ↔
-        x ∈ Ico ((n : ℝ) - h) n := by
-      simp only [Set.mem_Ico]
-      constructor <;> rintro ⟨h1, h2⟩ <;> constructor <;> linarith
-    dsimp only [v]
-    by_cases hx : x ∈ Ico ((n : ℝ) - h) n
-    · rw [if_pos (hw.mpr hx), indicator_of_mem hx]
-    · rw [if_neg (hw.not.mpr hx), indicator_of_notMem hx]
-  have hms : Measurable (movingSum a · h) := by
-    convert hv using 1
-    funext x
-    exact heq x
-  have hn (x : ℝ) : ‖movingSum a x h‖ ≤ M x := by
-    rw [heq]
-    have hs : Summable (fun n => ‖v n x‖) := by simpa only [hvnorm] using hus x
-    simpa only [hvnorm] using norm_tsum_le_tsum_norm hs
-  exact hiM.mono' hms.aestronglyMeasurable (Eventually.of_forall hn)
-
-/-- GY page 4 definition of C, written as a series of translated interval indicators. -/
-theorem movingSum_eq_indicators (a : ℕ → ℂ) (h x : ℝ) :
-    movingSum a x h = ∑' n : ℕ,
-      (Ico ((n : ℝ) - h) n).indicator (fun _ : ℝ => a n) x := by
-  apply tsum_congr
-  intro n
-  have hw : x < (n : ℝ) ∧ (n : ℝ) ≤ x + h ↔ x ∈ Ico ((n : ℝ) - h) n := by
-    simp only [mem_Ico]
-    constructor <;> rintro ⟨h1, h2⟩ <;> constructor <;> linarith
-  by_cases hx : x ∈ Ico ((n : ℝ) - h) n
-  · rw [if_pos (hw.mpr hx), indicator_of_mem hx]
-  · rw [if_neg (hw.not.mpr hx), indicator_of_notMem hx]
-
-/-- GY page 4 eq. 4.1, one coefficient has L1 mass h times its absolute value. -/
-theorem indicator_norm_integral (n : ℕ) (z : ℂ) (h : ℝ) (hh : 0 ≤ h) :
-    (∫ x : ℝ, ‖(Ico ((n : ℝ) - h) n).indicator (fun _ : ℝ => z) x‖) = h * ‖z‖ := by
-  simp_rw [norm_indicator_eq_indicator_norm]
-  rw [integral_indicator measurableSet_Ico]
-  simp [measureReal_def, Real.volume_Ico, hh, mul_comm]
-
-/-- LEAF. GY page 4 eq. 4.1, termwise Fourier integration of the moving window.
-The interval transform is elementary. Absolute coefficient summability justifies the interchange.
-This leaf contains no Plancherel or square integral assertion. -/
-theorem movingSum_fourier (a : ℕ → ℂ) (ha : Summable (fun n => ‖a n‖))
-    (h : ℝ) (hh : 0 < h) (t : ℝ) (ht : t ≠ 0) :
-    𝓕 (fun x : ℝ => movingSum a x h) t =
-      ((1 - Complex.exp ((2 * Real.pi * t * h : ℝ) * Complex.I)) /
-        (-2 * Real.pi * t * Complex.I)) * fourierSeries a (-t) := by
-  classical
-  let v : ℕ → ℝ → ℂ := fun n =>
-    (Ico ((n : ℝ) - h) n).indicator (fun _ : ℝ => a n)
-  let E : ℝ → ℂ := fun x => Complex.exp (↑(-2 * Real.pi * x * t) * Complex.I)
-  let F : ℕ → ℝ → ℂ := fun n x => E x * v n x
-  have hE (x : ℝ) : ‖E x‖ = 1 := by
-    simp [E, Complex.norm_exp]
-  have hv (n : ℕ) : Integrable (v n) :=
-    memLp_one_iff_integrable.mp (memLp_indicator_const 1 measurableSet_Ico.nullMeasurableSet
-      (a n) (Or.inr (by simp)))
-  have hFn (n : ℕ) (x : ℝ) : ‖F n x‖ = ‖v n x‖ := by
-    simp only [F, norm_mul, hE, one_mul]
-  have hF (n : ℕ) : Integrable (F n) := by
-    apply (hv n).norm.mono'
-    · exact ((by fun_prop : Continuous E).measurable.mul
-        (measurable_const.indicator measurableSet_Ico)).aestronglyMeasurable
-    · exact Eventually.of_forall (fun x => (hFn n x).le)
-  have hmass (n : ℕ) : (∫ x : ℝ, ‖F n x‖) = h * ‖a n‖ := by
-    simp_rw [hFn]
-    exact indicator_norm_integral n (a n) h hh.le
-  have hsum : Summable (fun n => ∫ x : ℝ, ‖F n x‖) := by
-    simp_rw [hmass]
-    exact ha.mul_left h
-  have hinter : 𝓕 (fun x : ℝ => movingSum a x h) t =
-      ∑' n : ℕ, 𝓕 (v n) t := by
-    simp only [Real.fourier_real_eq_integral_exp_smul, smul_eq_mul]
-    change (∫ x : ℝ, E x * movingSum a x h) = ∑' n : ℕ, ∫ x : ℝ, F n x
-    simp_rw [movingSum_eq_indicators, ← tsum_mul_left]
-    exact (integral_tsum_of_summable_integral_norm hF hsum).symm
-  have hterm (n : ℕ) : 𝓕 (v n) t =
-      ((1 - Complex.exp ((2 * Real.pi * t * h : ℝ) * Complex.I)) /
-        (-2 * Real.pi * t * Complex.I)) * (a n * eAdd (-t * n)) := by
-    have hw := LeanLab.ExceptionalSet.WindowParseval264.fourier_window
-      {(n : ℤ)} (fun _ => a n) hh.le ht
-    have he : LeanLab.ExceptionalSet.WindowParseval264.window {(n : ℤ)} (fun _ => a n) h =
-        v n := by
-      funext x
-      simp [LeanLab.ExceptionalSet.WindowParseval264.window, v]
-    rw [he] at hw
-    simp only [Finset.sum_singleton, Int.cast_natCast] at hw
-    have hp : Complex.exp ((-2 * Real.pi * t * Complex.I) * (n : ℝ)) = eAdd (-t * n) := by
-      unfold eAdd
-      congr 1
-      push_cast
-      ring
-    rw [hp] at hw
-    exact hw
-  rw [hinter]
-  simp_rw [hterm]
-  rw [tsum_mul_left]
-  rfl
-
-/-- GY page 4 eq. 4.1, integral Plancherel reused from the proved lab bridge. -/
-theorem movingSum_parseval (a : ℕ → ℂ) (ha : Summable (fun n => ‖a n‖))
-    (h : ℝ) (hh : 0 < h) :
-    Integrable (fun t : ℝ => ‖𝓕 (fun x : ℝ => movingSum a x h) t‖ ^ 2) ∧
-    (∫ t : ℝ, ‖𝓕 (fun x : ℝ => movingSum a x h) t‖ ^ 2) =
-      ∫ x : ℝ, ‖movingSum a x h‖ ^ 2 := by
-  have h1 := movingSum_integrable a ha h hh
-  have h2 := MovingIntegrability402.movingSum_memLp a ha h hh
-  have hf := LeanLab.ExceptionalSet.WindowParseval264.fourierIntegral_memLp _ h1 h2
-  exact ⟨(memLp_two_iff_integrable_sq_norm hf.aestronglyMeasurable).mp hf,
-    LeanLab.ExceptionalSet.WindowParseval264.integral_norm_sq_fourier _ h1 h2⟩
-
-/-- GY page 4 eq. 4.1, the square of the interval kernel is h squared times sinc squared. -/
-theorem kernel_sinc_square (h t : ℝ) (ht : t ≠ 0) :
-    ‖(1 - Complex.exp ((2 * Real.pi * t * h : ℝ) * Complex.I)) /
-      (-2 * Real.pi * t * Complex.I)‖ ^ 2 = h ^ 2 * Real.sinc (Real.pi * t * h) ^ 2 := by
-  rw [LeanLab.ExceptionalSet.WindowParseval264.kernel_norm]
-  by_cases hh : h = 0
-  · simp [hh]
-  rw [Real.sinc_of_ne_zero (mul_ne_zero (mul_ne_zero Real.pi_ne_zero ht) hh),
-    div_pow, sq_abs, mul_pow, sq_abs]
-  field_simp
-  <;> ring
-
-/-- The exact moving_plancherel target from GY page 4 eq. 4.1.
-The Fourier evaluation and the already proved lab Plancherel theorem are independent steps. -/
-theorem moving_plancherel_proved (a : ℕ → ℂ)
-    (ha : Summable (fun n => ‖a n‖)) (h : ℝ) (hh : 0 < h)
-    (hi : Integrable (fun x : ℝ => ‖movingSum a x h‖ ^ 2)) :
-    Integrable (fun α : ℝ => Real.sinc (Real.pi * h * α) ^ 2 *
-      ‖fourierSeries a α‖ ^ 2) ∧
-    (∫ α : ℝ, Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a α‖ ^ 2) =
-      (∫ x : ℝ, ‖movingSum a x h‖ ^ 2) / h ^ 2 := by
-  obtain ⟨hF, he⟩ := movingSum_parseval a ha h hh
-  have heval : (fun t : ℝ => ‖𝓕 (fun x : ℝ => movingSum a x h) (-t)‖ ^ 2 / h ^ 2) =ᵐ[volume]
-      (fun t : ℝ => Real.sinc (Real.pi * h * t) ^ 2 * ‖fourierSeries a t‖ ^ 2) := by
-    have hn : ∀ᵐ t : ℝ, t ≠ 0 := by rw [ae_iff]; simp
-    filter_upwards [hn] with t ht
-    rw [movingSum_fourier a ha h hh (-t) (neg_ne_zero.mpr ht), norm_mul, mul_pow,
-      kernel_sinc_square h (-t) (neg_ne_zero.mpr ht), neg_neg]
-    have hs : Real.pi * (-t) * h = -(Real.pi * h * t) := by ring
-    rw [hs, Real.sinc_neg]
-    field_simp
-  refine ⟨(hF.comp_neg.div_const (h ^ 2)).congr heval, ?_⟩
-  rw [← integral_congr_ae heval, integral_div]
-  have href := integral_neg_eq_self (fun t : ℝ => ‖𝓕 (fun x : ℝ => movingSum a x h) t‖ ^ 2)
-  rw [href, he]
-
 /-- LEAF. GY page 4 eq. 4.1 and page 5 eq. 4.3, the Plancherel identity.
 Translate the centered window by half its width and multiply by h squared.
 The sinc weighted Fourier square is integrable. Endpoint choices agree almost everywhere.
@@ -269,7 +331,55 @@ theorem moving_plancherel (a : ℕ → ℂ)
       ‖fourierSeries a α‖ ^ 2) ∧
     (∫ α : ℝ, Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a α‖ ^ 2) =
       (∫ x : ℝ, ‖movingSum a x h‖ ^ 2) / h ^ 2 := by
-  exact moving_plancherel_proved a ha h hh hi
+  have hmem : MemLp (fun x : ℝ => movingSum a x h) 2 :=
+    (memLp_two_iff_integrable_sq_norm (MovingIntegrability402.movingSum_measurable a h).aestronglyMeasurable).mpr
+      hi
+  have hI1 : Integrable (fun x : ℝ => movingSum a x h) := integrable_movingSum a ha h hh
+  have hpl := LeanLab.ExceptionalSet.WindowParseval264.integral_norm_sq_fourier (fun x : ℝ => movingSum a x h) hI1 hmem
+  have hFmem : MemLp (𝓕 (fun x : ℝ => movingSum a x h)) 2 :=
+    LeanLab.ExceptionalSet.WindowParseval264.fourierIntegral_memLp (fun x : ℝ => movingSum a x h) hI1 hmem
+  have hFsq : Integrable (fun α : ℝ => ‖𝓕 (fun x : ℝ => movingSum a x h) α‖ ^ 2) :=
+    (memLp_two_iff_integrable_sq_norm hFmem.aestronglyMeasurable).mp hFmem
+  have hae : (fun α : ℝ => Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2)
+      =ᵐ[volume] (fun α : ℝ => ‖𝓕 (fun x : ℝ => movingSum a x h) α‖ ^ 2 / h ^ 2) := by
+    filter_upwards [show ∀ᵐ α : ℝ, α ≠ 0 from by rw [ae_iff]; simp] with α hα
+    have hn := fourier_movingSum_norm_ne a ha h hh hα
+    have hsq : (h * |Real.sinc (Real.pi * h * α)| * ‖fourierSeries a (-α)‖) ^ 2 / h ^ 2
+        = Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2 := by
+      rw [mul_pow, mul_pow, sq_abs, div_eq_iff (pow_ne_zero 2 (ne_of_gt hh))]
+      ring
+    rw [hn, hsq]
+  have hIntH : Integrable (fun α : ℝ =>
+      Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2) :=
+    (hFsq.div_const (h ^ 2)).congr hae.symm
+  have hneg : (fun α : ℝ => Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2) =
+      fun α : ℝ => (fun β : ℝ => Real.sinc (Real.pi * h * β) ^ 2 *
+        ‖fourierSeries a β‖ ^ 2) (-α) := by
+    funext α
+    show Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2
+      = Real.sinc (Real.pi * h * -α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2
+    rw [show Real.pi * h * -α = -(Real.pi * h * α) from by ring, Real.sinc_neg]
+  have hIntG : Integrable (fun α : ℝ =>
+      Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a α‖ ^ 2) := by
+    rw [hneg] at hIntH
+    simpa only [neg_neg] using hIntH.comp_neg
+  refine ⟨hIntG, ?_⟩
+  have hGH : (∫ α : ℝ, Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a α‖ ^ 2) =
+      ∫ α : ℝ, Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2 := by
+    rw [← integral_neg_eq_self (fun β : ℝ => Real.sinc (Real.pi * h * β) ^ 2 *
+      ‖fourierSeries a β‖ ^ 2)]
+    refine integral_congr_ae (Eventually.of_forall fun α => ?_)
+    show Real.sinc (Real.pi * h * -α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2
+      = Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2
+    rw [show Real.pi * h * -α = -(Real.pi * h * α) from by ring, Real.sinc_neg]
+  rw [hGH]
+  calc (∫ α : ℝ, Real.sinc (Real.pi * h * α) ^ 2 * ‖fourierSeries a (-α)‖ ^ 2)
+      = ∫ α : ℝ, ‖𝓕 (fun x : ℝ => movingSum a x h) α‖ ^ 2 / h ^ 2 :=
+        (integral_congr_ae hae.symm).symm
+    _ = (∫ α : ℝ, ‖𝓕 (fun x : ℝ => movingSum a x h) α‖ ^ 2) / h ^ 2 := by
+        simp only [div_eq_mul_inv, integral_mul_const]
+    _ = (∫ x : ℝ, ‖movingSum a x h‖ ^ 2) / h ^ 2 := by rw [hpl]
+
 
 /-- The exact continuous_gallagher target follows from the two smaller leaves.
 CONDITIONAL ON moving_plancherel. -/
