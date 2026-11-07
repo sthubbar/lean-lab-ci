@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Decomp389c
+import LeanLab.HelfgottMajor.LogMoment431
 
 /-!
 A supply decomposition of Decomp269b.middle_mass_bound.
@@ -457,6 +458,298 @@ theorem gaussian_line_energy_bound (δ : ℝ) :
   rw [h1, h2]
   exact sqrt_add_sqrt_le_of_sum (by positivity) (by positivity) hsum
 
+open Filter Asymptotics
+
+/-- The Gaussian-character integrand of `gaussianMellin`, as a function of one variable. -/
+private lemma gauss_cont (δ : ℝ) :
+    Continuous (fun x : ℝ => ((exp (-x ^ 2 / 2) : ℂ) * e (δ * x))) := by
+  unfold e
+  fun_prop
+
+/-- Super-polynomial decay of the Gaussian at infinity. -/
+private lemma gauss_isBigO_top (δ : ℝ) :
+    (fun x : ℝ => ((exp (-x ^ 2 / 2) : ℂ) * e (δ * x))) =O[Filter.atTop]
+      (fun x : ℝ => x ^ (-(1 : ℝ))) := by
+  have h1 : (fun x : ℝ => Real.exp (-x ^ 2 / 2)) =o[Filter.atTop]
+      (fun x : ℝ => Real.exp (-x)) := by
+    refine (exp_neg_mul_sq_isLittleO_exp_neg (b := 1 / 2) (by norm_num)).congr' ?_ ?_
+    · filter_upwards with x
+      congr 1
+      ring
+    · filter_upwards with x
+      rfl
+  have h2 : (fun x : ℝ => Real.exp (-x)) =o[Filter.atTop] (fun x : ℝ => x ^ (-(1 : ℝ))) := by
+    simpa only [one_mul, neg_mul] using
+      isLittleO_exp_neg_mul_rpow_atTop (by norm_num : (0 : ℝ) < 1) (-1)
+  have h3 := (h1.trans h2).isBigO
+  rw [← isBigO_norm_left]
+  refine h3.congr' (Filter.Eventually.of_forall fun x => ?_)
+    (Filter.Eventually.of_forall fun x => rfl)
+  exact (gauss_norm δ x).symm
+
+/-- Boundedness of the Gaussian-character integrand at the origin. -/
+private lemma gauss_isBigO_bot (δ : ℝ) {b : ℝ} (hb : 0 < b) :
+    (fun x : ℝ => ((exp (-x ^ 2 / 2) : ℂ) * e (δ * x))) =O[nhdsWithin 0 (Set.Ioi 0)]
+      (fun x : ℝ => x ^ (-b)) := by
+  refine Asymptotics.IsBigO.of_bound 1 ?_
+  have hmem : Set.Iio (1 : ℝ) ∈ nhdsWithin (0 : ℝ) (Set.Ioi 0) :=
+    nhdsWithin_le_nhds (isOpen_Iio.mem_nhds (by norm_num : (0 : ℝ) ∈ Set.Iio 1))
+  filter_upwards [hmem, self_mem_nhdsWithin] with x hx1 hx
+  simp only [gauss_norm, Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hx (-b)),
+    one_mul]
+  refine le_trans (Real.exp_le_one_iff.mpr ?_)
+    (Real.one_le_rpow_of_pos_of_le_one_of_nonpos hx (le_of_lt hx1) (by linarith))
+  have := sq_nonneg x
+  nlinarith
+
+/-- Differentiation under the Mellin integral for the Gaussian-character integrand. -/
+private lemma gauss_mellin_hasDerivAt (δ : ℝ) {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1) :
+    HasDerivAt (gaussianMellin δ)
+      (mellin (fun x : ℝ => (Real.log x : ℂ) * ((exp (-x ^ 2 / 2) : ℂ) * e (δ * x))) s) s := by
+  have hfc : LocallyIntegrableOn (fun x : ℝ => ((exp (-x ^ 2 / 2) : ℂ) * e (δ * x)))
+      (Set.Ioi 0) :=
+    (gauss_cont δ).locallyIntegrable.locallyIntegrableOn _
+  exact (mellin_hasDerivAt_of_isBigO_rpow hfc (gauss_isBigO_top δ) hs1
+    (gauss_isBigO_bot δ (by linarith : (0:ℝ) < s.re / 2)) (by linarith)).2
+
+/-- The log-coordinate profile of the derivative of the Gaussian Mellin transform. -/
+private lemma weighted_cont (δ : ℝ) :
+    Continuous (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) := by
+  unfold e
+  fun_prop
+
+/-- The Mellin transform of the log-weighted Gaussian-character integrand on the critical line is
+the Fourier integral of its log-coordinate transform. -/
+private lemma mellin_log_eq_fourier (δ t : ℝ) :
+    mellin (fun x : ℝ => (Real.log x : ℂ) * ((exp (-x ^ 2 / 2) : ℂ) * e (δ * x)))
+        ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)
+      = 𝓕 (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+          ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) (-(t / (2 * π))) := by
+  rw [mellin, fourier_eq']
+  rw [← Real.range_exp, ← Set.image_univ]
+  rw [integral_image_eq_integral_abs_deriv_smul MeasurableSet.univ
+    (fun x _ => (hasDerivAt_exp x).hasDerivWithinAt)
+    (fun x _ y _ hxy => Real.exp_injective hxy)]
+  rw [setIntegral_univ]
+  apply integral_congr_ae
+  filter_upwards with u
+  rw [smul_eq_mul, RCLike.real_smul_eq_coe_mul, smul_eq_mul, Complex.ofReal_exp,
+    Complex.cpow_def_of_ne_zero (Complex.exp_ne_zero _),
+    Complex.log_exp (by rw [Complex.ofReal_im]; linarith [Real.pi_pos])
+      (by rw [Complex.ofReal_im]; linarith [Real.pi_pos]), Complex.ofReal_exp, Real.log_exp]
+  simp only [inner_apply, Complex.ofReal_mul, Complex.ofReal_neg, Complex.ofReal_ofNat,
+    abs_of_pos (exp_pos u)]
+  set G : ℂ := (exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u) with hGdef
+  set s : ℂ := (1 / 2 : ℂ) + (t : ℝ) * Complex.I with hsdef
+  have hL : ((exp u : ℝ) : ℂ) * (Complex.exp ((u : ℂ) * (s - 1)) * G)
+      = Complex.exp ((u : ℂ) * s) * G := by
+    rw [Complex.ofReal_exp, ← mul_assoc, ← Complex.exp_add]
+    congr 2
+    ring
+  have hR : Complex.exp ((-2 : ℂ) * (π : ℂ) * ((u : ℂ) * -((t : ℝ) / (2 * π) : ℝ)) * Complex.I) *
+      (((exp (u / 2) : ℝ) : ℂ) * G)
+      = Complex.exp ((u : ℂ) * s) * G := by
+    rw [← mul_assoc, Complex.ofReal_exp, ← Complex.exp_add]
+    congr 2
+    push_cast
+    field_simp
+    ring
+  simp only [← Complex.ofReal_exp]
+  calc ((exp u : ℝ) : ℂ) * (Complex.exp ((u : ℂ) * (s - 1)) * ((u : ℂ) * G))
+      = (u : ℂ) * (((exp u : ℝ) : ℂ) * (Complex.exp ((u : ℂ) * (s - 1)) * G)) := by ring
+    _ = (u : ℂ) * (Complex.exp ((u : ℂ) * s) * G) := by rw [hL]
+    _ = (u : ℂ) * (Complex.exp ((-2 : ℂ) * (π : ℂ) *
+          ((u : ℂ) * -((t : ℝ) / (2 * π) : ℝ)) * Complex.I) * (((exp (u / 2) : ℝ) : ℂ) * G)) := by
+        rw [hR]
+    _ = Complex.exp ((-2 : ℂ) * (π : ℂ) * ((u : ℂ) * -((t : ℝ) / (2 * π) : ℝ)) * Complex.I) *
+          ((u : ℂ) * (((exp (u / 2) : ℝ) : ℂ) * G)) := by ring
+
+/-- Pointwise norm of the log-coordinate derivative profile. -/
+private lemma weighted_norm (δ : ℝ) (u : ℝ) :
+    ‖(u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))‖
+      = |u| * (exp (u / 2) * exp (-(exp u) ^ 2 / 2)) := by
+  rw [norm_mul, log_norm, Complex.norm_real, Real.norm_eq_abs]
+
+/-- Pointwise square norm of the log-coordinate derivative profile. -/
+private lemma weighted_norm_sq (δ : ℝ) (u : ℝ) :
+    ‖(u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))‖ ^ 2
+      = u ^ 2 * (exp u * exp (-(exp u) ^ 2)) := by
+  rw [weighted_norm, mul_pow, mul_pow, sq_abs]
+  congr 1
+  have h1 : exp (u / 2) ^ 2 = exp u := by
+    rw [sq, ← Real.exp_add]; congr 1; ring
+  have h2 : exp (-(exp u) ^ 2 / 2) ^ 2 = exp (-(exp u) ^ 2) := by
+    rw [sq, ← Real.exp_add]; congr 1; ring
+  rw [h1, h2]
+
+/-- The log-coordinate derivative profile is dominated by a decaying exponential. -/
+private lemma weighted_le (δ : ℝ) (u : ℝ) :
+    ‖(u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))‖ ≤
+      4 * exp (-(1 / 4 : ℝ) * |u|) := by
+  rw [weighted_norm]
+  have h1 : exp (u / 2) * exp (-(exp u) ^ 2 / 2) ≤ exp (-|u| / 2) := by
+    rw [← log_norm]
+    exact log_le_exp_abs δ u
+  refine (mul_le_mul_of_nonneg_left h1 (abs_nonneg u)).trans ?_
+  have hexp : 1 + |u| / 4 ≤ exp (|u| / 4) := by
+    linarith [Real.add_one_le_exp (|u| / 4)]
+  have hkey : |u| * exp (-|u| / 4) ≤ 4 := by
+    have hp := exp_pos (-|u| / 4)
+    have h4 : (1 + |u| / 4) * exp (-|u| / 4) ≤ 1 := by
+      have h5 := mul_le_mul_of_nonneg_right hexp (le_of_lt hp)
+      rw [← Real.exp_add, show |u| / 4 + -|u| / 4 = 0 by ring, Real.exp_zero] at h5
+      exact h5
+    nlinarith [h4, hp, abs_nonneg u]
+  have hmul : exp (-|u| / 2) = exp (-|u| / 4) * exp (-|u| / 4) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hp := exp_pos (-|u| / 4)
+  rw [hmul, show -(1 / 4 : ℝ) * |u| = -|u| / 4 by ring]
+  nlinarith [hkey, hp]
+
+/-- The log-coordinate derivative profile is integrable. -/
+private lemma weighted_integrable (δ : ℝ) :
+    Integrable (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) := by
+  refine Integrable.mono' ((integrable_exp_neg_abs_mul (c := 1 / 4) (by norm_num)).const_mul 4)
+    (weighted_cont δ).aestronglyMeasurable ?_
+  filter_upwards with u
+  exact weighted_le δ u
+
+/-- The log-coordinate derivative profile lies in `L2`. -/
+private lemma weighted_memLp (δ : ℝ) :
+    MemLp (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) 2 := by
+  have hcont : Continuous (fun u : ℝ => 4 * exp (-(1 / 4 : ℝ) * |u|)) := by fun_prop
+  have hg : MemLp (fun u : ℝ => 4 * exp (-(1 / 4 : ℝ) * |u|)) 2 := by
+    rw [memLp_two_iff_integrable_sq_norm hcont.aestronglyMeasurable]
+    have heq : (fun u : ℝ => ‖4 * exp (-(1 / 4 : ℝ) * |u|)‖ ^ 2)
+        = fun u : ℝ => 16 * exp (-(1 / 2 : ℝ) * |u|) := by
+      funext u
+      have hp : (0:ℝ) < 4 * exp (-(1 / 4 : ℝ) * |u|) := by positivity
+      rw [Real.norm_eq_abs, abs_of_pos hp, mul_pow, show (4:ℝ) ^ 2 = 16 by norm_num,
+        show exp (-(1 / 4 : ℝ) * |u|) ^ 2 = exp (-(1 / 2 : ℝ) * |u|) by
+          rw [sq, ← Real.exp_add]; congr 1; ring]
+    rw [heq]
+    exact (integrable_exp_neg_abs_mul (c := 1 / 2) (by norm_num)).const_mul 16
+  refine MemLp.mono' hg (weighted_cont δ).aestronglyMeasurable ?_
+  filter_upwards with u
+  exact weighted_le δ u
+
+/-- The `L2` mass of the log-coordinate derivative profile is the log squared Gaussian moment. -/
+private lemma weighted_sq_integral (δ : ℝ) :
+    ∫ u : ℝ, ‖(u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))‖ ^ 2 = Sec45.nLog := by
+  have himg : ∫ x in Set.Ioi (0 : ℝ), Real.exp (-x ^ 2) * Real.log x ^ 2
+      = ∫ u : ℝ, exp u • (Real.exp (-(exp u) ^ 2) * Real.log (exp u) ^ 2) := by
+    rw [← Real.range_exp, ← Set.image_univ]
+    rw [integral_image_eq_integral_abs_deriv_smul MeasurableSet.univ
+      (fun x _ => (hasDerivAt_exp x).hasDerivWithinAt)
+      (fun x _ y _ hxy => Real.exp_injective hxy)]
+    simp only [abs_of_pos (exp_pos _), setIntegral_univ]
+  rw [show (∫ u : ℝ, ‖(u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))‖ ^ 2)
+      = ∫ u : ℝ, exp u • (Real.exp (-(exp u) ^ 2) * Real.log (exp u) ^ 2) from by
+    apply integral_congr_ae
+    filter_upwards with u
+    rw [weighted_norm_sq, Real.log_exp, smul_eq_mul]
+    ring]
+  rw [← himg]
+  exact LeanLab.HelfgottMajor.LogMoment431.gaussian_log_square_integral
+
+/-- The Fourier profile of the derivative has integrable square. -/
+private lemma integrable_fourier_sq_weighted (δ : ℝ) :
+    Integrable (fun ξ : ℝ => ‖𝓕 (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) ξ‖ ^ 2) := by
+  have h2 := weighted_memLp δ
+  have hmem : MemLp ((𝓕 (h2.toLp (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u))))) : Lp ℂ 2 volume) : ℝ → ℂ) 2 := Lp.memLp _
+  have hint : Integrable (fun ξ : ℝ =>
+      ‖(𝓕 (h2.toLp (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+        ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u))))) : Lp ℂ 2 volume) ξ‖ ^ 2) :=
+    (memLp_two_iff_integrable_sq_norm (Lp.aestronglyMeasurable _)).mp hmem
+  refine hint.congr ?_
+  filter_upwards [wip_fourierIntegral_ae_eq (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+    ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) (weighted_integrable δ)
+    (weighted_memLp δ)] with ξ hξ
+  rw [hξ]
+
+/-- The Fourier side square integral of the derivative profile. -/
+private lemma fourier_sq_integral_weighted (δ : ℝ) :
+    ∫ y : ℝ, ‖𝓕 (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) y‖ ^ 2 = Sec45.nLog := by
+  rw [wip_integral_norm_sq_fourier (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+    ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) (weighted_integrable δ) (weighted_memLp δ)]
+  exact weighted_sq_integral δ
+
+/-- The pointwise critical-line identity for the derivative. -/
+private lemma deriv_mellin_sq_pointwise (δ t : ℝ) :
+    ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2
+      = ‖𝓕 (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+          ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) (-(1 / (2 * π)) * t)‖ ^ 2 := by
+  have hre : ((1 / 2 : ℂ) + (t : ℝ) * Complex.I).re = (1 / 2 : ℝ) := by simp
+  rw [(gauss_mellin_hasDerivAt δ (s := (1 / 2 : ℂ) + (t : ℝ) * Complex.I)
+      (by rw [hre]; norm_num) (by rw [hre]; norm_num)).deriv, mellin_log_eq_fourier δ t]
+  have harg : -(t / (2 * π)) = -(1 / (2 * π)) * t := by field_simp
+  rw [harg]
+
+/-- The derivative of the Gaussian Mellin transform has integrable square on the critical line. -/
+private lemma integrable_deriv_mellin_sq (δ : ℝ) :
+    Integrable (fun t : ℝ =>
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2) := by
+  have hR : (-(1 / (2 * π)) : ℝ) ≠ 0 := by
+    have : (0:ℝ) < 1 / (2 * π) := by positivity
+    intro h; linarith [neg_eq_zero.mp h]
+  have h : Integrable (fun t : ℝ => ‖𝓕 (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+      ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) (-(1 / (2 * π)) * t)‖ ^ 2) :=
+    (integrable_comp_mul_left_iff (fun ξ : ℝ => ‖𝓕 (fun u : ℝ => (u : ℂ) *
+      ((exp (u / 2) : ℂ) * ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) ξ‖ ^ 2) hR).mpr
+      (integrable_fourier_sq_weighted δ)
+  refine h.congr ?_
+  filter_upwards with t
+  exact (deriv_mellin_sq_pointwise δ t).symm
+
+/-- Differentiated Mellin Plancherel on the whole critical line. -/
+private lemma integral_deriv_mellin_sq (δ : ℝ) :
+    ∫ t : ℝ, ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2
+      = 2 * π * Sec45.nLog := by
+  rw [show (∫ t : ℝ, ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2)
+      = ∫ t : ℝ, ‖𝓕 (fun u : ℝ => (u : ℂ) * ((exp (u / 2) : ℂ) *
+          ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) (-(1 / (2 * π)) * t)‖ ^ 2 from by
+    apply integral_congr_ae
+    filter_upwards with t
+    exact deriv_mellin_sq_pointwise δ t]
+  rw [Measure.integral_comp_mul_left (fun y : ℝ => ‖𝓕 (fun u : ℝ => (u : ℂ) *
+    ((exp (u / 2) : ℂ) * ((exp (-(exp u) ^ 2 / 2) : ℂ) * e (δ * exp u)))) y‖ ^ 2)]
+  rw [fourier_sq_integral_weighted δ]
+  have hcoef : |(-(1 / (2 * π)) : ℝ)⁻¹| = 2 * π := by
+    rw [inv_neg, inv_div, div_one, abs_neg, abs_of_pos (by positivity : (0:ℝ) < 2 * π)]
+  rw [hcoef, smul_eq_mul]
+
+/-- The square-root splitting with an upper bound on the total mass. -/
+private lemma sqrt_add_sqrt_le_of_le {A B : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B)
+    (h : A + B ≤ 2 * π * Sec45.nLog) :
+    sqrt A + sqrt B ≤ 2 * sqrt π * sqrt Sec45.nLog := by
+  have hsA : sqrt A ^ 2 = A := sq_sqrt hA
+  have hsB : sqrt B ^ 2 = B := sq_sqrt hB
+  have hsπ : sqrt π ^ 2 = π := sq_sqrt pi_pos.le
+  have hsN : sqrt Sec45.nLog ^ 2 = Sec45.nLog := sq_sqrt Sec45.nLog_nonneg
+  have hsq : (sqrt A + sqrt B) ^ 2 = A + B + 2 * (sqrt A * sqrt B) := by
+    rw [sq]; linarith
+  have hprod : 2 * (sqrt A * sqrt B) ≤ A + B := by
+    nlinarith [sq_nonneg (sqrt A - sqrt B)]
+  have hR : (2 * sqrt π * sqrt Sec45.nLog) ^ 2 = 4 * π * Sec45.nLog := by
+    nlinarith [hsπ, hsN]
+  have hkey : (sqrt A + sqrt B) ^ 2 ≤ (2 * sqrt π * sqrt Sec45.nLog) ^ 2 := by
+    rw [hsq, hR]; linarith
+  have h0 : 0 ≤ sqrt A + sqrt B := by positivity
+  have h2 : 0 ≤ 2 * sqrt π * sqrt Sec45.nLog := by positivity
+  nlinarith [hkey, h0, h2, sq_nonneg (sqrt A + sqrt B - 2 * sqrt π * sqrt Sec45.nLog),
+    mul_nonneg h0 h2]
+
 /-- LEAF. Book page 434, the differentiated Mellin Plancherel estimate.
 The Gaussian log squared moment is display 4.42 on P0014 page 43.
 This has no character, zero count or height parameter.
@@ -464,7 +757,78 @@ This has no character, zero count or height parameter.
 theorem gaussian_derivative_energy_bound (δ : ℝ) :
     sqrt (derivativeEnergy δ 1) + sqrt (derivativeEnergy δ (-1)) ≤
       2 * sqrt π * sqrt Sec45.nLog := by
-  sorry
+  have hA : derivativeEnergy δ 1 = ∫ t in Set.Ioi (1 : ℝ),
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2 := by
+    apply setIntegral_congr_fun measurableSet_Ioi
+    intro t _
+    simp only [one_mul]
+  have himg : Neg.neg '' (Set.Ioi (1 : ℝ)) = Set.Iio (-1 : ℝ) := by
+    ext x
+    simp only [Set.mem_image, Set.mem_Ioi, Set.mem_Iio]
+    constructor
+    · rintro ⟨y, hy, rfl⟩; linarith
+    · intro hx; exact ⟨-x, by linarith, by ring⟩
+  have hsub : ∫ t in Set.Ioi (1 : ℝ),
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + ((-t) : ℝ) * Complex.I)‖ ^ 2
+      = ∫ t in Set.Iio (-1 : ℝ),
+        ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2 := by
+    rw [← himg]
+    rw [integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi
+      (fun x _ => (hasDerivAt_neg x).hasDerivWithinAt)
+      (fun x _ y _ hxy => neg_injective hxy)]
+    simp
+  have hB : derivativeEnergy δ (-1) = ∫ t in Set.Iio (-1 : ℝ),
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2 := by
+    rw [show derivativeEnergy δ (-1) = ∫ t in Set.Ioi (1 : ℝ),
+        ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + ((-t) : ℝ) * Complex.I)‖ ^ 2 from by
+      apply setIntegral_congr_fun measurableSet_Ioi
+      intro t _
+      simp only [neg_one_mul]]
+    exact hsub
+  have hInt : Integrable (fun t : ℝ =>
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2) :=
+    integrable_deriv_mellin_sq δ
+  have hsplit : (∫ t in Set.Ioi (1 : ℝ),
+        ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2)
+      + (∫ t in (Set.Ioi (1 : ℝ))ᶜ,
+        ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2)
+      = ∫ t : ℝ, ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2 :=
+    integral_add_compl (μ := volume) measurableSet_Ioi hInt
+  rw [Set.compl_Ioi] at hsplit
+  have hmono : ∫ t in Set.Iio (-1 : ℝ),
+        ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2
+      ≤ ∫ t in Set.Iic (1 : ℝ),
+        ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2 := by
+    refine setIntegral_mono_set hInt.integrableOn ?_ ?_
+    · filter_upwards with t using (by positivity)
+    · filter_upwards with t ht
+      simp only [Set.mem_Iio, Set.mem_Iic] at ht ⊢
+      linarith
+  have hFint : ∫ t : ℝ,
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2
+      = 2 * π * Sec45.nLog := integral_deriv_mellin_sq δ
+  have hsum : derivativeEnergy δ 1 + derivativeEnergy δ (-1) ≤ 2 * π * Sec45.nLog := by
+    calc derivativeEnergy δ 1 + derivativeEnergy δ (-1)
+        = (∫ t in Set.Ioi (1 : ℝ),
+            ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2)
+          + (∫ t in Set.Iio (-1 : ℝ),
+            ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2) := by
+          rw [hA, hB]
+      _ ≤ (∫ t in Set.Ioi (1 : ℝ),
+            ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2)
+          + (∫ t in Set.Iic (1 : ℝ),
+            ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2) :=
+          add_le_add (le_refl _) hmono
+      _ = ∫ t : ℝ,
+            ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ^ 2 := hsplit
+      _ = 2 * π * Sec45.nLog := hFint
+  have hAnn : 0 ≤ derivativeEnergy δ 1 := by
+    rw [hA]
+    exact setIntegral_nonneg measurableSet_Ioi (fun t _ => by positivity)
+  have hBnn : 0 ≤ derivativeEnergy δ (-1) := by
+    rw [hB]
+    exact setIntegral_nonneg measurableSet_Iio (fun t _ => by positivity)
+  exact sqrt_add_sqrt_le_of_le hAnn hBnn hsum
 
 /-- The book coefficients of Lemma 16.10 are below the older page 40 coefficients.
 Only arithmetic is asserted. No zero sampling input is used.
