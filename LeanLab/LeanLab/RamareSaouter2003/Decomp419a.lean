@@ -455,24 +455,24 @@ private lemma log_zeta_chord {a b θ : ℝ} (ha : 1 < a) (hab : a ≤ b) (hθ0 :
     have h3 := Real.log_le_log hpos (key.trans hB)
     simpa using h3
   -- 0 < θ < 1
-  set σ : ℝ := (1 - θ) * a + θ * b with hσdef
+  set σ : ℝ := (1 - θ) * a + θ * b with hσval
   have hσ1 : 1 < σ := by
-    have : σ = a + θ * (b - a) := by rw [hσdef]; ring
+    have : σ = a + θ * (b - a) := by rw [hσval]; ring
     rw [this]; nlinarith
   have hstep : ‖riemannZeta (σ : ℂ)‖ ≤ ∑' n : ℕ, (n : ℝ) ^ (-σ) := zeta_norm_le_tsum σ hσ1
   have hposσ : (0 : ℝ) < ‖riemannZeta (σ : ℂ)‖ :=
     norm_pos_iff.mpr (riemannZeta_ne_zero_of_one_lt_re (by simpa using hσ1))
-  set p : ℝ := 1 / (1 - θ) with hpdef
-  set q : ℝ := 1 / θ with hqdef
-  have hp0 : 0 < p := by rw [hpdef]; positivity
-  have hq0 : 0 < q := by rw [hqdef]; positivity
+  set p : ℝ := 1 / (1 - θ) with hpeq
+  set q : ℝ := 1 / θ with hqeq
+  have hp0 : 0 < p := by rw [hpeq]; positivity
+  have hq0 : 0 < q := by rw [hqeq]; positivity
   have hinv : p⁻¹ + q⁻¹ = 1 := by
-    rw [hpdef, hqdef]
+    rw [hpeq, hqeq]
     field_simp
     ring
   have hpq : p.HolderConjugate q := ⟨by simpa using hinv, hp0, hq0⟩
-  set f : ℕ → ℝ := fun n => (n : ℝ) ^ ((-a) * (1 - θ)) with hfdef
-  set g : ℕ → ℝ := fun n => (n : ℝ) ^ ((-b) * θ) with hgdef
+  set f : ℕ → ℝ := fun n => (n : ℝ) ^ ((-a) * (1 - θ)) with hfeq
+  set g : ℕ → ℝ := fun n => (n : ℝ) ^ ((-b) * θ) with hgeq
   have hf0 : ∀ n, 0 ≤ f n := fun n => by positivity
   have hg0 : ∀ n, 0 ≤ g n := fun n => by positivity
   have hfp : ∀ n : ℕ, f n ^ p = (n : ℝ) ^ (-a) := by
@@ -484,10 +484,10 @@ private lemma log_zeta_chord {a b θ : ℝ} (ha : 1 < a) (hab : a ≤ b) (hθ0 :
         · linarith
         · linarith
       have e2 : (-a) ≠ 0 := by linarith
-      simp only [hfdef, Nat.cast_zero, Real.zero_rpow e1, Real.zero_rpow e2, Real.zero_rpow (ne_of_gt hp0)]
+      simp only [hfeq, Nat.cast_zero, Real.zero_rpow e1, Real.zero_rpow e2, Real.zero_rpow (ne_of_gt hp0)]
     · have hn0 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
       have hnp : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
-      rw [hfdef, ← Real.rpow_mul hn0, hpdef]
+      rw [hfeq, ← Real.rpow_mul hn0, hpeq]
       have : (-a) * (1 - θ) * (1 / (1 - θ)) = -a := by field_simp
       rw [this]
   have hgq : ∀ n : ℕ, g n ^ q = (n : ℝ) ^ (-b) := by
@@ -499,10 +499,10 @@ private lemma log_zeta_chord {a b θ : ℝ} (ha : 1 < a) (hab : a ≤ b) (hθ0 :
         · linarith
         · linarith
       have e2 : (-b) ≠ 0 := by linarith
-      simp only [hgdef, Nat.cast_zero, Real.zero_rpow e1, Real.zero_rpow e2, Real.zero_rpow (ne_of_gt hq0)]
+      simp only [hgeq, Nat.cast_zero, Real.zero_rpow e1, Real.zero_rpow e2, Real.zero_rpow (ne_of_gt hq0)]
     · have hn0 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
       have hnp : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
-      rw [hgdef, ← Real.rpow_mul hn0, hqdef]
+      rw [hgeq, ← Real.rpow_mul hn0, hqeq]
       have : (-b) * θ * (1 / θ) = -b := by field_simp
       rw [this]
   have hfg : ∀ n : ℕ, f n * g n = (n : ℝ) ^ (-σ) := by
@@ -519,11 +519,11 @@ private lemma log_zeta_chord {a b θ : ℝ} (ha : 1 < a) (hab : a ≤ b) (hθ0 :
         · linarith
       have e3 : (-σ) ≠ 0 := by
         intro hh; rw [neg_eq_zero] at hh; linarith
-      simp only [hfdef, hgdef, Nat.cast_zero, Real.zero_rpow e1, Real.zero_rpow e2,
+      simp only [hfeq, hgeq, Nat.cast_zero, Real.zero_rpow e1, Real.zero_rpow e2,
         Real.zero_rpow e3, mul_zero]
     · have hnp : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
-      rw [hfdef, hgdef, ← Real.rpow_add hnp]
-      have : (-a) * (1 - θ) + (-b) * θ = -σ := by rw [hσdef]; ring
+      rw [hfeq, hgeq, ← Real.rpow_add hnp]
+      have : (-a) * (1 - θ) + (-b) * θ = -σ := by rw [hσval]; ring
       rw [this]
   have hsum_a : Summable fun n : ℕ => f n ^ p := by
     have h : Summable fun n : ℕ => (n : ℝ) ^ (-a) := Real.summable_nat_rpow.2 (by linarith)
@@ -542,8 +542,8 @@ private lemma log_zeta_chord {a b θ : ℝ} (ha : 1 < a) (hab : a ≤ b) (hθ0 :
     rw [hE]
     exact Real.rpow_le_rpow hB0 hB (by positivity)
   have hmul := mul_le_mul hpa hpb (by positivity) (by positivity)
-  have hp1 : Ua ^ (1 / p) = Ua ^ (1 - θ) := by rw [hpdef, one_div_one_div]
-  have hq1 : Ub ^ (1 / q) = Ub ^ θ := by rw [hqdef, one_div_one_div]
+  have hp1 : Ua ^ (1 / p) = Ua ^ (1 - θ) := by rw [hpeq, one_div_one_div]
+  have hq1 : Ub ^ (1 / q) = Ub ^ θ := by rw [hqeq, one_div_one_div]
   rw [hp1, hq1] at hmul
   have hfin : ∑' n : ℕ, (n : ℝ) ^ (-σ) ≤ Ua ^ (1 - θ) * Ub ^ θ := hholder.trans hmul
   have hlog : Real.log (∑' n : ℕ, (n : ℝ) ^ (-σ)) ≤
@@ -2535,6 +2535,119 @@ private lemma envelope_core {T : ℝ} (hT : 1400 ≤ T)
     linarith only [hzl, hLT, hLLT]
   linarith only [key1, key2]
 
+
+
+
+/-! ### The branch-one case of `zeta_circle_bound`
+
+Where `5/4 ≤ 5/4 + 1.32 cos φ` the envelope is `log ‖ζ (5/4 + 1.32 cos φ)‖`, and the leaf's
+inequality there is the Dirichlet domination `‖ζ (σ + iτ)‖ ≤ Σ n ^ (-σ) = ‖ζ σ‖`.  That case is
+proved here; the remaining branches of the leaf (Backlund displays 54, 56, 77) need explicit
+zeta growth on a vertical line with constant one, which Mathlib 4.35 does not have, so
+`zeta_circle_bound` itself stays open.
+-/
+
+
+/-- The Dirichlet series dominates the zeta modulus on `Re > 1`. -/
+private lemma zeta_norm_le_tsum_re (s : ℂ) (hs : 1 < s.re) :
+    ‖riemannZeta s‖ ≤ ∑' n : ℕ, (n : ℝ) ^ (-s.re) := by
+  have hs0 : s ≠ 0 := by
+    intro h
+    rw [h] at hs
+    simp only [Complex.zero_re] at hs
+    linarith
+  have hterm : ∀ n : ℕ, ‖(1 : ℂ) / (n : ℂ) ^ s‖ = (n : ℝ) ^ (-s.re) := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn
+      have h0 : ((0 : ℂ)) ^ s = 0 := Complex.zero_cpow (x := s) hs0
+      simp [h0, Real.zero_rpow (x := -s.re) (by linarith)]
+    · have hn' : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+      rw [norm_div, norm_one, Complex.norm_natCast_cpow_of_pos hn, one_div, Real.rpow_neg hn']
+  have hsummable : Summable fun n : ℕ => ‖(1 : ℂ) / (n : ℂ) ^ s‖ := by
+    have h : Summable fun n : ℕ => (n : ℝ) ^ (-s.re) := Real.summable_nat_rpow.2 (by linarith)
+    exact h.congr (fun n => (hterm n).symm)
+  calc ‖riemannZeta s‖ = ‖∑' n : ℕ, (1 : ℂ) / (n : ℂ) ^ s‖ := by
+        rw [zeta_eq_tsum_one_div_nat_cpow hs]
+    _ ≤ ∑' n : ℕ, ‖(1 : ℂ) / (n : ℂ) ^ s‖ := norm_tsum_le_tsum_norm hsummable
+    _ = ∑' n : ℕ, (n : ℝ) ^ (-s.re) := tsum_congr hterm
+
+/-- For real `σ > 1`, the real part of `ζ σ` is the Dirichlet series. -/
+private lemma zeta_re_eq_tsum (σ : ℝ) (hσ : 1 < σ) :
+    (riemannZeta (Complex.ofReal σ)).re = ∑' n : ℕ, (n : ℝ) ^ (-σ) := by
+  have hre : 1 < (Complex.ofReal σ).re := by
+    simp only [Complex.ofReal_re]; exact hσ
+  have hsumm : Summable fun n : ℕ => (1:ℂ)/(n:ℂ)^(Complex.ofReal σ) :=
+    Complex.summable_one_div_nat_cpow.mpr hre
+  rw [zeta_eq_tsum_one_div_nat_cpow hre, Complex.re_tsum hsumm]
+  refine tsum_congr (fun n => ?_)
+  rcases Nat.eq_zero_or_pos n with hn | hn
+  · subst hn
+    have h0 : ((0:ℂ))^(Complex.ofReal σ) = 0 :=
+      Complex.zero_cpow (x := Complex.ofReal σ) (by
+        rw [Complex.ofReal_ne_zero]; linarith)
+    simp only [Nat.cast_zero, h0, div_zero, Complex.zero_re,
+      Real.zero_rpow (x := -σ) (by linarith)]
+  · have hn' : (0:ℝ) < (n:ℝ) := by exact_mod_cast hn
+    have h1 : ((n:ℂ))^(Complex.ofReal σ) = Complex.ofReal ((n:ℝ)^σ) := by
+      have := (Complex.ofReal_cpow (x := (n:ℝ)) (le_of_lt hn') σ).symm
+      simpa using this
+    rw [h1, one_div, ← Complex.ofReal_inv, Complex.ofReal_re, Real.rpow_neg (le_of_lt hn')]
+
+/-- For real `σ > 1`, `‖ζ σ‖` is exactly the Dirichlet series. -/
+private lemma zeta_norm_ofReal_eq_tsum (σ : ℝ) (hσ : 1 < σ) :
+    ‖riemannZeta (Complex.ofReal σ)‖ = ∑' n : ℕ, (n : ℝ) ^ (-σ) := by
+  refine le_antisymm (zeta_norm_le_tsum_re _ (by simpa using hσ)) ?_
+  calc ∑' n : ℕ, (n : ℝ) ^ (-σ) = (riemannZeta (Complex.ofReal σ)).re :=
+        (zeta_re_eq_tsum σ hσ).symm
+    _ ≤ ‖riemannZeta (Complex.ofReal σ)‖ := Complex.re_le_norm _
+
+/-- The Dirichlet series at `σ > 1` is at least one. -/
+private lemma one_le_tsum_rpow {σ : ℝ} (hσ : 1 < σ) : (1:ℝ) ≤ ∑' n : ℕ, (n : ℝ) ^ (-σ) := by
+  have hsumm : Summable fun n : ℕ => (n : ℝ) ^ (-σ) := Real.summable_nat_rpow.2 (by linarith)
+  have h := hsumm.sum_le_tsum ({1} : Finset ℕ) (fun i hi => by positivity)
+  simpa using h
+
+/-- Branch one of `zeta_circle_bound`: where the envelope is `log ‖ζ (5/4 + 1.32 cos φ)‖`,
+the point of the circle obeys the leaf's bound. -/
+private lemma zeta_circle_branch1 (T φ : ℝ) (hσ : (5:ℝ)/4 ≤ 5/4 + 1.32 * Real.cos φ) :
+    ‖riemannZeta ((1.32:ℂ) * Complex.exp (φ * Complex.I) + 5/4 + T * Complex.I)‖ ≤
+      Real.exp (logEnvelope T φ) := by
+  have hσ1 : (1:ℝ) < 5/4 + 1.32 * Real.cos φ := by linarith
+  have hpt : (1.32:ℂ) * Complex.exp (φ * Complex.I) + 5/4 + T * Complex.I =
+      Complex.ofReal (5/4 + 1.32 * Real.cos φ) +
+        Complex.ofReal (T + 1.32 * Real.sin φ) * Complex.I := by
+    rw [Complex.exp_ofReal_mul_I]
+    push_cast
+    ring
+  rw [hpt]
+  have hre : (Complex.ofReal (5/4 + 1.32 * Real.cos φ) +
+      Complex.ofReal (T + 1.32 * Real.sin φ) * Complex.I).re = 5/4 + 1.32 * Real.cos φ := by
+    simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.I_re, Complex.I_im, mul_one, mul_zero, sub_zero, add_zero]
+  have hser : ‖riemannZeta (Complex.ofReal (5/4 + 1.32 * Real.cos φ) +
+      Complex.ofReal (T + 1.32 * Real.sin φ) * Complex.I)‖ ≤
+      ∑' n : ℕ, (n : ℝ) ^ (-(5/4 + 1.32 * Real.cos φ)) := by
+    have h := zeta_norm_le_tsum_re (Complex.ofReal (5/4 + 1.32 * Real.cos φ) +
+      Complex.ofReal (T + 1.32 * Real.sin φ) * Complex.I) (by rw [hre]; linarith)
+    rw [hre] at h
+    exact h
+  have heq : ∑' n : ℕ, (n : ℝ) ^ (-(5/4 + 1.32 * Real.cos φ)) =
+      ‖riemannZeta (Complex.ofReal (5/4 + 1.32 * Real.cos φ))‖ :=
+    (zeta_norm_ofReal_eq_tsum _ hσ1).symm
+  have henv : logEnvelope T φ = Real.log (max 1 ‖riemannZeta (Complex.ofReal (5/4 + 1.32 * Real.cos φ))‖) := by
+    unfold logEnvelope
+    dsimp only
+    rw [max_eq_right hσ, if_pos hσ]
+  rw [henv]
+  have hpos : (0:ℝ) < max 1 ‖riemannZeta (Complex.ofReal (5/4 + 1.32 * Real.cos φ))‖ :=
+    lt_of_lt_of_le zero_lt_one (le_max_left _ _)
+  rw [Real.exp_log hpos]
+  calc ‖riemannZeta (Complex.ofReal (5/4 + 1.32 * Real.cos φ) +
+        Complex.ofReal (T + 1.32 * Real.sin φ) * Complex.I)‖
+      ≤ ∑' n : ℕ, (n : ℝ) ^ (-(5/4 + 1.32 * Real.cos φ)) := hser
+    _ = ‖riemannZeta (Complex.ofReal (5/4 + 1.32 * Real.cos φ))‖ := heq
+    _ ≤ max 1 ‖riemannZeta (Complex.ofReal (5/4 + 1.32 * Real.cos φ))‖ := le_max_right _ _
 
 
 /-- LEAF. Rosser p. 224, the bounds on G from Backlund pp. 361 to 369.
