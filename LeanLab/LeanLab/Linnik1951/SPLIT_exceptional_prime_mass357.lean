@@ -59,6 +59,48 @@ theorem local_prime_mass357 (hG : LeanLab.DERZ1997.GRH) :
           B * (N : ℝ) / ((q : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ))) * Real.log (N : ℝ) ^ 13 := by
   sorry
 
+/-- The measure theory core: for a nonnegative continuous `f`, the mass over a set covered by
+finitely many closed arcs is at most the sum of the masses of the arcs. -/
+private theorem cover_sum_bound_wip (f : ℝ → ℝ) (hf : Continuous f) (hfn : ∀ x, 0 ≤ f x)
+    (s : Set ℝ) (hs : MeasurableSet s) (hsb : s ⊆ Set.Icc 0 1)
+    (F : Finset (ℕ × ℤ)) (lo hi : ℕ × ℤ → ℝ)
+    (hsub : s ⊆ ⋃ p ∈ F, Set.Icc (lo p) (hi p)) :
+    (∫ x in s, f x) ≤ ∑ p ∈ F, ∫ x in Set.Icc (lo p) (hi p), f x := by
+  have hpoint : ∀ x : ℝ, s.indicator f x ≤ ∑ p ∈ F, (Set.Icc (lo p) (hi p)).indicator f x := by
+    intro x
+    by_cases hx : x ∈ s
+    · have hex : ∃ p ∈ F, x ∈ Set.Icc (lo p) (hi p) := by
+        simpa only [Set.mem_iUnion, exists_prop] using hsub hx
+      obtain ⟨p, hpF, hpI⟩ := hex
+      have hnonneg : ∀ q ∈ F, 0 ≤ (Set.Icc (lo q) (hi q)).indicator f x := by
+        intro q _
+        by_cases h : x ∈ Set.Icc (lo q) (hi q)
+        · rw [Set.indicator_of_mem h]; exact hfn x
+        · rw [Set.indicator_of_notMem h]
+      have hsingle := Finset.single_le_sum
+        (f := fun q => (Set.Icc (lo q) (hi q)).indicator f x) hnonneg hpF
+      rw [Set.indicator_of_mem hpI] at hsingle
+      rw [Set.indicator_of_mem hx]
+      exact hsingle
+    · rw [Set.indicator_of_notMem hx]
+      exact Finset.sum_nonneg (fun q _ => by
+        by_cases h : x ∈ Set.Icc (lo q) (hi q)
+        · rw [Set.indicator_of_mem h]; exact hfn x
+        · rw [Set.indicator_of_notMem h])
+  have hIntS : Integrable (s.indicator f) := by
+    rw [integrable_indicator_iff hs]
+    exact hf.integrableOn_Icc.mono_set hsb
+  have hIntP : ∀ p ∈ F, Integrable ((Set.Icc (lo p) (hi p)).indicator f) := by
+    intro p _
+    rw [integrable_indicator_iff measurableSet_Icc]
+    exact hf.integrableOn_Icc
+  have hIntSum : Integrable (fun x => ∑ p ∈ F, (Set.Icc (lo p) (hi p)).indicator f x) :=
+    integrable_finsetSum F hIntP
+  have hmono := integral_mono hIntS hIntSum hpoint
+  rw [integral_indicator hs, integral_finset_sum F hIntP] at hmono
+  refine hmono.trans (le_of_eq ?_)
+  exact Finset.sum_congr rfl (fun p _ => integral_indicator measurableSet_Icc)
+
 /-- LEAF. Step 3 of the exceptional set analysis: the finite cover sum. The square
 mean of the prime series over a set contained in the union of finitely many closed
 arcs is at most the sum over those arcs of the square mean on the arc, so a
@@ -79,7 +121,91 @@ theorem cover_mass_summation357 (N : ℕ) (η : ℝ) (F : Finset (ℕ × ℤ)) (
     (∫ α in exceptionalArcs280 N η, ‖primeFourier111 N α‖ ^ 2) ≤
       B * (N : ℝ) ^ (1 - (1 / 7 : ℝ)) * Real.log (N : ℝ) ^ 13 *
         (∑ p ∈ F, 1 / (p.1 : ℝ)) := by
-  sorry
+  by_cases hN1 : 1 ≤ N
+  · have hNpos : (0 : ℝ) < (N : ℝ) := by
+      have h0 : (0 : ℝ) < (N : ℕ) := by exact_mod_cast (by omega : 0 < N)
+      exact_mod_cast h0
+    have hcont : Continuous (fun α : ℝ => ‖primeFourier111 N α‖ ^ 2) :=
+      (continuous_prime_fourier111 N hN1).norm.pow 2
+    have hbound := cover_sum_bound_wip (fun α => ‖primeFourier111 N α‖ ^ 2) hcont
+      (fun α => by positivity) (exceptionalArcs280 N η)
+      (measurable_exceptional357 N hN1 η) (fun α hα => hα.1) F
+      (fun p => (p.2 : ℝ) / (p.1 : ℝ) - 1 / ((p.1 : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ))))
+      (fun p => (p.2 : ℝ) / (p.1 : ℝ) + 1 / ((p.1 : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ))))
+      hcover
+    have hsum : (∑ p ∈ F,
+        ∫ α in Set.Icc ((p.2 : ℝ) / (p.1 : ℝ) - 1 / ((p.1 : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ))))
+          ((p.2 : ℝ) / (p.1 : ℝ) + 1 / ((p.1 : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ)))),
+          ‖primeFourier111 N α‖ ^ 2) ≤
+        ∑ p ∈ F, B * (N : ℝ) / ((p.1 : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ))) *
+          Real.log (N : ℝ) ^ 13 :=
+      Finset.sum_le_sum (fun p hp => harc p hp)
+    have halg : (∑ p ∈ F, B * (N : ℝ) / ((p.1 : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ))) *
+        Real.log (N : ℝ) ^ 13) =
+        B * (N : ℝ) ^ (1 - (1 / 7 : ℝ)) * Real.log (N : ℝ) ^ 13 *
+          (∑ p ∈ F, 1 / (p.1 : ℝ)) := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun p hp => ?_)
+      have hq1 : (1 : ℝ) ≤ (p.1 : ℝ) := by exact_mod_cast hq p hp
+      have hppos : (0 : ℝ) < (p.1 : ℝ) := by linarith
+      have hτpos : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
+      have hsubr : (N : ℝ) ^ (1 - (1 / 7 : ℝ)) = (N : ℝ) / ((N : ℝ) ^ (1 / 7 : ℝ)) := by
+        rw [Real.rpow_sub hNpos, Real.rpow_one]
+      rw [hsubr]
+      field_simp
+      try ring
+    exact hbound.trans (hsum.trans (le_of_eq halg))
+  · -- the degenerate case N = 0
+    have hN0 : N = 0 := by omega
+    subst hN0
+    have hexp1 : ∀ m : ℕ,
+        Real.exp (-(((2 ^ (m + 1) : ℕ) : ℝ)) / ((0 : ℕ) : ℝ)) = 1 := by
+      intro m
+      have hden : (-(((2 ^ (m + 1) : ℕ) : ℝ))) / ((0 : ℕ) : ℝ) = 0 := by simp
+      rw [hden, Real.exp_zero]
+    have hzero : ∀ α : ℝ, powerFourier111 0 α = 0 := by
+      intro α
+      have hnot : ¬ Summable (fun m : ℕ =>
+          (Real.exp (-(((2 ^ (m + 1) : ℕ) : ℝ)) / ((0 : ℕ) : ℝ)) : ℂ) *
+            Complex.exp ((-(2 * Real.pi * α * ((2 ^ (m + 1) : ℕ) : ℝ)) : ℝ) * Complex.I)) := by
+        intro h
+        have h2 : Tendsto (fun m : ℕ =>
+            ‖(Real.exp (-(((2 ^ (m + 1) : ℕ) : ℝ)) / ((0 : ℕ) : ℝ)) : ℂ) *
+              Complex.exp ((-(2 * Real.pi * α * ((2 ^ (m + 1) : ℕ) : ℝ)) : ℝ) * Complex.I)‖)
+            atTop (𝓝 0) := by
+          simpa using h.tendsto_atTop_zero.norm
+        have hterm : ∀ m : ℕ,
+            ‖(Real.exp (-(((2 ^ (m + 1) : ℕ) : ℝ)) / ((0 : ℕ) : ℝ)) : ℂ) *
+              Complex.exp ((-(2 * Real.pi * α * ((2 ^ (m + 1) : ℕ) : ℝ)) : ℝ) * Complex.I)‖ = 1 := by
+          intro m
+          rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, hexp1 m]
+          simp
+        have h3 : Tendsto (fun m : ℕ =>
+            ‖(Real.exp (-(((2 ^ (m + 1) : ℕ) : ℝ)) / ((0 : ℕ) : ℝ)) : ℂ) *
+              Complex.exp ((-(2 * Real.pi * α * ((2 ^ (m + 1) : ℕ) : ℝ)) : ℝ) * Complex.I)‖)
+            atTop (𝓝 1) := by
+          have hconst : (fun m : ℕ =>
+              ‖(Real.exp (-(((2 ^ (m + 1) : ℕ) : ℝ)) / ((0 : ℕ) : ℝ)) : ℂ) *
+                Complex.exp ((-(2 * Real.pi * α * ((2 ^ (m + 1) : ℕ) : ℝ)) : ℝ) * Complex.I)‖) =
+              fun _ => (1 : ℝ) := funext hterm
+          rw [hconst]
+          exact tendsto_const_nhds
+        have h01 := tendsto_nhds_unique h2 h3
+        norm_num at h01
+      unfold powerFourier111
+      exact tsum_eq_zero_of_not_summable hnot
+    have hempty : exceptionalArcs280 0 η = ∅ := by
+      have hsub0 : exceptionalArcs280 0 η ⊆ ∅ := by
+        intro α hα
+        have h2 := hα.2.2
+        rw [hzero 0, hzero α, norm_zero, mul_zero] at h2
+        exact absurd h2 (lt_irrefl 0)
+      exact Set.Subset.antisymm hsub0 (Set.empty_subset _)
+    have hrhs : B * ((0 : ℕ) : ℝ) ^ (1 - (1 / 7 : ℝ)) * Real.log ((0 : ℕ) : ℝ) ^ 13 *
+        (∑ p ∈ F, 1 / (p.1 : ℝ)) = 0 := by
+      norm_num [Real.zero_rpow, Real.log_zero]
+    rw [hempty, hrhs]
+    simp
 
 /-- LEAF. Step 4 of the exceptional set analysis: the logarithm is absorbed by the
 saving. Beyond some point a fixed power of the logarithm of N is at most N to the
@@ -88,7 +214,46 @@ numeric inequality about the real logarithm and a real power. -/
 theorem log_power_absorption357 :
     ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
       Real.log (N : ℝ) ^ 13 ≤ (N : ℝ) ^ (1 / 40 : ℝ) := by
-  sorry
+  refine ⟨560 ^ 7280, ?_⟩
+  intro N hN
+  have hNge : 560 ^ 7280 ≤ N := le_of_lt hN
+  have hpos : 0 < 560 ^ 7280 := by positivity
+  have hN1n : 1 ≤ N := by omega
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN1n
+  have hNpos : (0 : ℝ) < (N : ℝ) := by linarith
+  have hlog : Real.log (N : ℝ) ≤ 560 * (N : ℝ) ^ (1 / 560 : ℝ) := by
+    have h := Real.log_le_rpow_div (x := (N : ℝ)) (ε := (1 / 560 : ℝ)) hNpos.le
+      (by norm_num)
+    rwa [show (N : ℝ) ^ (1 / 560 : ℝ) / (1 / 560 : ℝ) = 560 * (N : ℝ) ^ (1 / 560 : ℝ) by
+      field_simp] at h
+  have hlog0 : (0 : ℝ) ≤ Real.log (N : ℝ) := Real.log_nonneg hN1
+  have h13 : Real.log (N : ℝ) ^ 13 ≤ (560 * (N : ℝ) ^ (1 / 560 : ℝ)) ^ 13 :=
+    pow_le_pow_left₀ hlog0 hlog 13
+  have hexp : (560 * (N : ℝ) ^ (1 / 560 : ℝ)) ^ 13 =
+      (560 : ℝ) ^ 13 * (N : ℝ) ^ (13 / 560 : ℝ) := by
+    rw [mul_pow]
+    congr 1
+    rw [← Real.rpow_natCast ((N : ℝ) ^ (1 / 560 : ℝ)) 13,
+      ← Real.rpow_mul (le_of_lt hNpos),
+      show ((1 / 560 : ℝ) * ((13 : ℕ) : ℝ)) = (13 / 560 : ℝ) by norm_num]
+  have hNbig : (560 : ℝ) ^ 13 ≤ (N : ℝ) ^ (1 / 560 : ℝ) := by
+    have h7280 : (560 : ℝ) ^ 7280 ≤ (N : ℝ) := by
+      calc (560 : ℝ) ^ 7280 = ((560 ^ 7280 : ℕ) : ℝ) := by push_cast; norm_num
+        _ ≤ (N : ℝ) := by exact_mod_cast hNge
+    calc (560 : ℝ) ^ 13 = ((560 : ℝ) ^ 7280) ^ (1 / 560 : ℝ) := by
+          rw [← Real.rpow_natCast (560 : ℝ) 7280,
+            ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 560),
+            show (((7280 : ℕ) : ℝ) * (1 / 560 : ℝ)) = ((13 : ℕ) : ℝ) by norm_num,
+            Real.rpow_natCast]
+      _ ≤ (N : ℝ) ^ (1 / 560 : ℝ) :=
+          Real.rpow_le_rpow (by norm_num) h7280 (by norm_num)
+  calc Real.log (N : ℝ) ^ 13 ≤ (560 * (N : ℝ) ^ (1 / 560 : ℝ)) ^ 13 := h13
+    _ = (560 : ℝ) ^ 13 * (N : ℝ) ^ (13 / 560 : ℝ) := hexp
+    _ ≤ (N : ℝ) ^ (1 / 560 : ℝ) * (N : ℝ) ^ (13 / 560 : ℝ) :=
+        mul_le_mul_of_nonneg_right hNbig (Real.rpow_nonneg hNpos.le _)
+    _ = (N : ℝ) ^ (1 / 40 : ℝ) := by
+        rw [← Real.rpow_add hNpos]
+        norm_num
 
 /-- The target assembled from the four leaves above. -/
 theorem exceptional_prime_mass357_split (hG : LeanLab.DERZ1997.GRH) :
