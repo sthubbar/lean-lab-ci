@@ -1169,6 +1169,896 @@ private lemma correction_nonpos_of_im_sq_le {z : ℂ} (hz : (1 / 4 : ℝ) ≤ z.
   have hone := neg_one_div_two_mul_re_nonpos hz
   linarith
 
+
+open scoped Topology
+
+
+/-! ### Geometric series form of the Planck factor -/
+
+private lemma hasSum_pow_succ_geo {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) :
+    HasSum (fun n : ℕ => r ^ (n + 1)) (r / (1 - r)) := by
+  have h := (hasSum_geometric_of_lt_one h0 h1).mul_left r
+  have h2 : (fun n : ℕ => r * r ^ n) = (fun n : ℕ => r ^ (n + 1)) := by
+    funext n
+    rw [pow_succ']
+  rw [h2] at h
+  simpa only [div_eq_mul_inv] using h
+
+private lemma inv_exp_sub_one_tsum {u : ℝ} (hu : 0 < u) :
+    1 / (Real.exp (2 * Real.pi * u) - 1)
+      = ∑' n : ℕ, Real.exp (-(2 * Real.pi * u)) ^ (n + 1) := by
+  have hx : 0 < 2 * Real.pi * u := by positivity
+  have hxe : 1 < Real.exp (2 * Real.pi * u) := Real.one_lt_exp_iff.mpr hx
+  have h1 : Real.exp (-(2 * Real.pi * u)) < 1 := by
+    rw [Real.exp_neg]
+    exact inv_lt_one_of_one_lt₀ hxe
+  have h := hasSum_pow_succ_geo (Real.exp_pos _).le h1
+  rw [h.tsum_eq, Real.exp_neg]
+  have hE : Real.exp (2 * Real.pi * u) - 1 ≠ 0 := by
+    have := hxe
+    linarith
+  have hE' : 1 - (Real.exp (2 * Real.pi * u))⁻¹ ≠ 0 := by
+    have h2 : (Real.exp (2 * Real.pi * u))⁻¹ < 1 := inv_lt_one_of_one_lt₀ hxe
+    linarith
+  field_simp
+
+private lemma hasSum_shifted_zeta_two :
+    HasSum (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1) ^ 2) (Real.pi ^ 2 / 6) := by
+  have h0 : HasSum (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2)
+      (Real.pi ^ 2 / 6 + ∑ i ∈ Finset.range 1, (1 : ℝ) / (i : ℝ) ^ 2) := by
+    simpa using hasSum_zeta_two
+  have h := (hasSum_nat_add_iff 1).mpr h0
+  simpa only [Nat.cast_add, Nat.cast_one] using h
+
+private lemma hasSum_shifted_zeta_four :
+    HasSum (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1) ^ 4) (Real.pi ^ 4 / 90) := by
+  have h0 : HasSum (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 4)
+      (Real.pi ^ 4 / 90 + ∑ i ∈ Finset.range 1, (1 : ℝ) / (i : ℝ) ^ 4) := by
+    simpa using hasSum_zeta_four
+  have h := (hasSum_nat_add_iff 1).mpr h0
+  simpa only [Nat.cast_add, Nat.cast_one] using h
+
+/-! ### The two moments -/
+
+private lemma integral_term_one (l : ℝ) (hl : 0 < l) :
+    (∫ u : ℝ in Set.Ioi 0, 2 * (u * Real.exp (-(l * u)))) = 2 / l ^ 2 := by
+  rw [integral_const_mul]
+  have hg : Real.Gamma 2 = 1 := by
+    have h := Real.Gamma_nat_eq_factorial 1
+    rw [show ((1 : ℕ) : ℝ) + 1 = 2 by norm_num] at h
+    rw [h]
+    norm_num
+  have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 2) (r := l) (by norm_num) hl
+  have h' : (∫ u : ℝ in Set.Ioi 0, u * Real.exp (-(l * u))) = 1 / l ^ 2 := by
+    trans ∫ t : ℝ in Set.Ioi 0, t ^ ((2 : ℝ) - 1) * Real.exp (-(l * t))
+    · refine setIntegral_congr_fun measurableSet_Ioi ?_
+      intro u _
+      norm_num
+    · rw [h, hg, mul_one]
+      simp [div_pow]
+  rw [h']
+  ring
+
+private lemma integrableOn_term_one (l : ℝ) (hl : 0 < l) :
+    IntegrableOn (fun u : ℝ => 2 * (u * Real.exp (-(l * u)))) (Set.Ioi 0) := by
+  have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (1 : ℝ)) (b := l)
+    (by norm_num) (by norm_num) hl
+  have h' : IntegrableOn (fun u : ℝ => u * Real.exp (-(l * u))) (Set.Ioi 0) := by
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro u _
+    norm_num
+  exact h'.const_mul 2
+
+private lemma integral_term_three (l : ℝ) (hl : 0 < l) :
+    (∫ u : ℝ in Set.Ioi 0, 2 * (u ^ 3 * Real.exp (-(l * u)))) = 12 / l ^ 4 := by
+  rw [integral_const_mul]
+  have hg : Real.Gamma 4 = 6 := by
+    have h := Real.Gamma_nat_eq_factorial 3
+    rw [show ((3 : ℕ) : ℝ) + 1 = 4 by norm_num] at h
+    rw [h]
+    norm_num
+  have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 4) (r := l) (by norm_num) hl
+  have h' : (∫ u : ℝ in Set.Ioi 0, u ^ 3 * Real.exp (-(l * u))) = 6 / l ^ 4 := by
+    trans ∫ t : ℝ in Set.Ioi 0, t ^ ((4 : ℝ) - 1) * Real.exp (-(l * t))
+    · refine setIntegral_congr_fun measurableSet_Ioi ?_
+      intro u _
+      norm_num
+    · rw [h, hg]
+      simp
+      ring_nf
+  rw [h']
+  ring
+
+private lemma integrableOn_term_three (l : ℝ) (hl : 0 < l) :
+    IntegrableOn (fun u : ℝ => 2 * (u ^ 3 * Real.exp (-(l * u)))) (Set.Ioi 0) := by
+  have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (3 : ℝ)) (b := l)
+    (by norm_num) (by norm_num) hl
+  have h' : IntegrableOn (fun u : ℝ => u ^ 3 * Real.exp (-(l * u))) (Set.Ioi 0) := by
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro u _
+    norm_num
+  exact h'.const_mul 2
+
+/-! ### Integrability and value of `∫ 2u/(e^{2πu}-1)` -/
+
+private lemma summable_integral_norm_term_one :
+    Summable (fun n : ℕ => ∫ u : ℝ in Set.Ioi 0,
+      ‖2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))‖) := by
+  refine (hasSum_shifted_zeta_two.mul_left (1 / (2 * Real.pi ^ 2))).summable.congr (fun n => ?_)
+  have hp : 0 < 2 * Real.pi * ((n : ℝ) + 1) := by positivity
+  have hnorm_eq : (∫ u : ℝ in Set.Ioi 0,
+      ‖2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))‖)
+      = ∫ u : ℝ in Set.Ioi 0, 2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u))) := by
+    refine integral_congr_ae ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    refine Real.norm_of_nonneg ?_
+    have hu0 : 0 < u := hu
+    positivity
+  rw [hnorm_eq, integral_term_one _ hp]
+  field_simp
+
+private lemma integral_two_mul_div_exp_sub_one :
+    (∫ u : ℝ in Set.Ioi 0, 2 * u / (Real.exp (2 * Real.pi * u) - 1)) = 1 / 12 := by
+  have hFint : ∀ n : ℕ, Integrable (fun u : ℝ =>
+      2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))
+      ) (volume.restrict (Set.Ioi 0)) := by
+    intro n
+    exact integrableOn_term_one _ (by positivity)
+  have hsum := hasSum_integral_of_summable_integral_norm hFint
+    summable_integral_norm_term_one
+  have hval : HasSum (fun n : ℕ => ∫ u : ℝ in Set.Ioi 0,
+      2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))) (1 / 12) := by
+    have hv : (1 / (2 * Real.pi ^ 2)) * (Real.pi ^ 2 / 6) = 1 / 12 := by
+      field_simp; norm_num
+    rw [← hv]
+    have hh := hasSum_shifted_zeta_two.mul_left (1 / (2 * Real.pi ^ 2))
+    refine hh.congr_fun (fun n => ?_)
+    have hp : 0 < 2 * Real.pi * ((n : ℝ) + 1) := by positivity
+    rw [integral_term_one _ hp]
+    field_simp
+  have heval : (∫ u : ℝ in Set.Ioi 0, ∑' n : ℕ,
+      2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))) = 1 / 12 :=
+    hsum.unique hval
+  rw [← heval]
+  refine integral_congr_ae ?_
+  filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+  have hterm_eq : ∀ n : ℕ, 2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))
+      = 2 * (u * Real.exp (-(2 * Real.pi * u)) ^ (n + 1)) := by
+    intro n
+    rw [← Real.exp_nat_mul]
+    congr 2
+    push_cast
+    ring
+  have hmul : (∑' n : ℕ, 2 * (u * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))
+      ) = 2 * u * ∑' n : ℕ, Real.exp (-(2 * Real.pi * u)) ^ (n + 1) := by
+    trans ∑' n : ℕ, 2 * (u * Real.exp (-(2 * Real.pi * u)) ^ (n + 1))
+    · exact tsum_congr hterm_eq
+    rw [tsum_mul_left, tsum_mul_left]
+    ring
+  rw [hmul, div_eq_mul_inv]
+  congr 1
+  rw [inv_eq_one_div]
+  exact inv_exp_sub_one_tsum hu
+
+/-! ### Integrability and value of `∫ 2u³/(e^{2πu}-1)` -/
+
+private lemma summable_integral_norm_term_three :
+    Summable (fun n : ℕ => ∫ u : ℝ in Set.Ioi 0,
+      ‖2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))‖) := by
+  refine (hasSum_shifted_zeta_four.mul_left (3 / (4 * Real.pi ^ 4))).summable.congr (fun n => ?_)
+  have hp : 0 < 2 * Real.pi * ((n : ℝ) + 1) := by positivity
+  have hnorm_eq : (∫ u : ℝ in Set.Ioi 0,
+      ‖2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))‖)
+      = ∫ u : ℝ in Set.Ioi 0,
+        2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u))) := by
+    refine integral_congr_ae ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    refine Real.norm_of_nonneg ?_
+    have hu0 : 0 < u := hu
+    positivity
+  rw [hnorm_eq, integral_term_three _ hp]
+  field_simp; norm_num
+
+private lemma integral_two_mul_cube_div_exp_sub_one :
+    (∫ u : ℝ in Set.Ioi 0, 2 * u ^ 3 / (Real.exp (2 * Real.pi * u) - 1)) = 1 / 120 := by
+  have hFint : ∀ n : ℕ, Integrable (fun u : ℝ =>
+      2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))
+      ) (volume.restrict (Set.Ioi 0)) := by
+    intro n
+    exact integrableOn_term_three _ (by positivity)
+  have hsum := hasSum_integral_of_summable_integral_norm hFint
+    summable_integral_norm_term_three
+  have hval : HasSum (fun n : ℕ => ∫ u : ℝ in Set.Ioi 0,
+      2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))) (1 / 120) := by
+    have hv : (3 / (4 * Real.pi ^ 4)) * (Real.pi ^ 4 / 90) = 1 / 120 := by
+      field_simp; norm_num
+    rw [← hv]
+    have hh := hasSum_shifted_zeta_four.mul_left (3 / (4 * Real.pi ^ 4))
+    refine hh.congr_fun (fun n => ?_)
+    have hp : 0 < 2 * Real.pi * ((n : ℝ) + 1) := by positivity
+    rw [integral_term_three _ hp]
+    field_simp; norm_num
+  have heval : (∫ u : ℝ in Set.Ioi 0, ∑' n : ℕ,
+      2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))) = 1 / 120 :=
+    hsum.unique hval
+  rw [← heval]
+  refine integral_congr_ae ?_
+  filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+  have hterm_eq : ∀ n : ℕ, 2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))
+      = 2 * (u ^ 3 * Real.exp (-(2 * Real.pi * u)) ^ (n + 1)) := by
+    intro n
+    rw [← Real.exp_nat_mul]
+    congr 2
+    push_cast
+    ring
+  have hmul : (∑' n : ℕ, 2 * (u ^ 3 * Real.exp (-(2 * Real.pi * ((n : ℝ) + 1) * u)))
+      ) = 2 * u ^ 3 * ∑' n : ℕ, Real.exp (-(2 * Real.pi * u)) ^ (n + 1) := by
+    trans ∑' n : ℕ, 2 * (u ^ 3 * Real.exp (-(2 * Real.pi * u)) ^ (n + 1))
+    · exact tsum_congr hterm_eq
+    rw [tsum_mul_left, tsum_mul_left]
+    ring
+  rw [hmul, div_eq_mul_inv]
+  congr 1
+  rw [inv_eq_one_div]
+  exact inv_exp_sub_one_tsum hu
+
+/-! ### Integrability of the Planck weights and an exponential tail bound -/
+
+private lemma mul_exp_neg_le {c : ℝ} (hc : 0 < c) {u : ℝ} (hu : 0 < u) :
+    u * Real.exp (-(c * u)) ≤ 1 / (c * Real.exp 1) := by
+  have hv0 : 0 < c * u := mul_pos hc hu
+  have h1 : Real.log (c * u) ≤ c * u - 1 := Real.log_le_sub_one_of_pos hv0
+  have h3 : Real.exp (Real.log (c * u) - c * u) ≤ Real.exp (-1) :=
+    Real.exp_le_exp.mpr (by linarith)
+  rw [Real.exp_sub, Real.exp_log hv0] at h3
+  have hthis : u * Real.exp (-(c * u)) = (1 / c) * ((c * u) * Real.exp (-(c * u))) := by
+    field_simp
+  rw [hthis]
+  calc (1 / c) * ((c * u) * Real.exp (-(c * u)))
+      ≤ (1 / c) * Real.exp (-1) := by
+        apply mul_le_mul_of_nonneg_left _ (by positivity)
+        simpa [div_eq_mul_inv, Real.exp_neg] using h3
+    _ = 1 / (c * Real.exp 1) := by
+        rw [Real.exp_neg]
+        field_simp
+
+private lemma exp_two_pi_sub_one_ge_half {u : ℝ} (hu : 1 ≤ u) :
+    Real.exp (2 * Real.pi * u) / 2 ≤ Real.exp (2 * Real.pi * u) - 1 := by
+  have h2 : 2 ≤ Real.exp (2 * Real.pi * u) := by
+    calc (2 : ℝ) ≤ Real.exp 1 := Real.exp_one_gt_two.le
+      _ ≤ Real.exp (2 * Real.pi * u) := Real.exp_le_exp.mpr (by nlinarith [Real.pi_gt_three])
+  linarith
+
+private lemma exp_two_pi_pos {u : ℝ} (hu : 0 < u) :
+    0 < Real.exp (2 * Real.pi * u) - 1 := by
+  have h : Real.exp 0 < Real.exp (2 * Real.pi * u) :=
+    Real.exp_lt_exp.mpr (by nlinarith [Real.pi_pos])
+  simpa using h
+
+private lemma planck_weight_integrableOn :
+    IntegrableOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1)) (Set.Ioi 0) := by
+  have hcont : ContinuousOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+      (Set.Ioi 0) := by
+    apply ContinuousOn.div
+    · fun_prop
+    · fun_prop
+    · intro u hu
+      exact ne_of_gt (exp_two_pi_pos hu)
+  have hlow : IntegrableOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+      (Set.Ioc 0 1) := by
+    refine IntegrableOn.of_bound (μ := volume) (s := Set.Ioc 0 1) measure_Ioc_lt_top
+      ((hcont.mono Set.Ioc_subset_Ioi_self).aestronglyMeasurable measurableSet_Ioc)
+      (1 / Real.pi) ?_
+    rw [ae_restrict_iff' measurableSet_Ioc]
+    refine Filter.Eventually.of_forall (fun u hu => ?_)
+    have hu0 : 0 < u := hu.1
+    have hE := exp_two_pi_pos hu0
+    rw [Real.norm_eq_abs, abs_of_pos (div_pos (by positivity) hE)]
+    have hb : 2 * Real.pi * u ≤ Real.exp (2 * Real.pi * u) - 1 := by
+      have := Real.add_one_le_exp (2 * Real.pi * u)
+      linarith
+    have hpos : 0 < 2 * Real.pi * u := by positivity
+    have hstep : 2 * u / (Real.exp (2 * Real.pi * u) - 1) ≤ 2 * u / (2 * Real.pi * u) :=
+      div_le_div_of_nonneg_left (by positivity) hpos hb
+    have hval : 2 * u / (2 * Real.pi * u) = 1 / Real.pi := by
+      field_simp
+    rw [← hval]
+    exact hstep
+  have hhigh : IntegrableOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+      (Set.Ioi 1) := by
+    have hmaj : IntegrableOn (fun u : ℝ => 4 * (u * Real.exp (-(2 * Real.pi * u))))
+        (Set.Ioi 1) := by
+      have h0 : IntegrableOn (fun u : ℝ => 2 * (u * Real.exp (-(2 * Real.pi * u))))
+          (Set.Ioi 0) := integrableOn_term_one (2 * Real.pi) (by positivity)
+      have h2 : IntegrableOn (fun u : ℝ => 2 * (u * Real.exp (-(2 * Real.pi * u)))
+          + 2 * (u * Real.exp (-(2 * Real.pi * u)))) (Set.Ioi 0) := h0.add h0
+      refine (h2.mono_set (Set.Ioi_subset_Ioi (by norm_num))).congr_fun ?_ measurableSet_Ioi
+      intro u _
+      ring
+    refine Integrable.mono' hmaj
+      ((hcont.mono (Set.Ioi_subset_Ioi (by norm_num))).aestronglyMeasurable measurableSet_Ioi) ?_
+    rw [ae_restrict_iff' measurableSet_Ioi]
+    refine Filter.Eventually.of_forall (fun u hu => ?_)
+    have hu1 : 1 ≤ u := hu.le
+    have hu0 : 0 < u := by linarith
+    have hE := exp_two_pi_pos hu0
+    rw [Real.norm_eq_abs, abs_of_pos (div_pos (by positivity) hE)]
+    have hhalf := exp_two_pi_sub_one_ge_half hu1
+    have hstep : 2 * u / (Real.exp (2 * Real.pi * u) - 1)
+        ≤ 2 * u / (Real.exp (2 * Real.pi * u) / 2) :=
+      div_le_div_of_nonneg_left (by positivity) (by positivity) hhalf
+    have hval : 2 * u / (Real.exp (2 * Real.pi * u) / 2)
+        = 4 * (u * Real.exp (-(2 * Real.pi * u))) := by
+      rw [Real.exp_neg]
+      field_simp
+      ring
+    rw [← hval]
+    exact hstep
+  have hsplit : Set.Ioc (0 : ℝ) 1 ∪ Set.Ioi 1 = Set.Ioi 0 :=
+    Set.Ioc_union_Ioi_eq_Ioi (by norm_num)
+  rw [← hsplit]
+  exact hlow.union hhigh
+
+private lemma planck_weight_le_exp {u : ℝ} (hu : 1 ≤ u) :
+    2 * u / (Real.exp (2 * Real.pi * u) - 1)
+      ≤ 8 / (Real.pi * Real.exp 1) * Real.exp (-(3 * Real.pi / 2) * u) := by
+  have hu0 : 0 < u := by linarith
+  have hE := exp_two_pi_pos hu0
+  have hhalf := exp_two_pi_sub_one_ge_half hu
+  have hstep : 2 * u / (Real.exp (2 * Real.pi * u) - 1)
+      ≤ 2 * u / (Real.exp (2 * Real.pi * u) / 2) :=
+    div_le_div_of_nonneg_left (by positivity) (by positivity) hhalf
+  have hval : 2 * u / (Real.exp (2 * Real.pi * u) / 2)
+      = 4 * u * Real.exp (-(2 * Real.pi * u)) := by
+    rw [Real.exp_neg]
+    field_simp
+    ring
+  rw [hval] at hstep
+  have hmax := mul_exp_neg_le (by positivity : (0 : ℝ) < Real.pi / 2) hu0
+  have hb : 4 * u * Real.exp (-(2 * Real.pi * u))
+      = 4 * (u * Real.exp (-(Real.pi / 2 * u))) * Real.exp (-(3 * Real.pi / 2) * u) := by
+    rw [show -(2 * Real.pi * u) = -(Real.pi / 2 * u) + (-(3 * Real.pi / 2) * u) by ring,
+      Real.exp_add]
+    ring
+  refine hstep.trans ?_
+  rw [hb]
+  have hb2 : 4 * (u * Real.exp (-(Real.pi / 2 * u)))
+      ≤ 8 / (Real.pi * Real.exp 1) := by
+    have h4 := mul_le_mul_of_nonneg_left hmax (show (0 : ℝ) ≤ 4 by norm_num)
+    have h2' : 4 * (1 / (Real.pi / 2 * Real.exp 1)) = 8 / (Real.pi * Real.exp 1) := by
+      field_simp; ring
+    exact h4.trans_eq h2'
+  exact mul_le_mul_of_nonneg_right hb2 (Real.exp_pos (-(3 * Real.pi / 2) * u)).le
+
+private lemma integral_tail_planck_le {T : ℝ} (hT : 1 ≤ T) :
+    (∫ u : ℝ in Set.Ioi T, 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+      ≤ 16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)) := by
+  have harg : -(3 * Real.pi / 2) < 0 := by nlinarith [Real.pi_pos]
+  have hminor : IntegrableOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+      (Set.Ioi T) := planck_weight_integrableOn.mono_set (Set.Ioi_subset_Ioi (by linarith))
+  have hmaj : IntegrableOn
+      (fun u : ℝ => 8 / (Real.pi * Real.exp 1) * Real.exp (-(3 * Real.pi / 2) * u))
+      (Set.Ioi T) := (integrableOn_exp_mul_Ioi harg T).const_mul _
+  have hmono := integral_mono_ae hminor hmaj (by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    exact planck_weight_le_exp (le_trans hT hu.le))
+  have heval : (∫ u : ℝ in Set.Ioi T,
+      8 / (Real.pi * Real.exp 1) * Real.exp (-(3 * Real.pi / 2) * u))
+      = 16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)) := by
+    rw [integral_const_mul, integral_exp_mul_Ioi harg T]
+    field_simp
+    ring
+  rw [heval] at hmono
+  exact hmono
+
+
+/-! ### Pointwise comparison of the Binet kernel with the Planck weight -/
+
+private lemma binetKernel_le_planck_inner (z : ℂ) {d u : ℝ}
+    (hd : d = |z.im| ^ 2 - z.re ^ 2) (hu : 0 < u) (huT : 2 * u ^ 2 ≤ d) :
+    binetKernel z u ≤ 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2) := by
+  have hdu : 0 < d - u ^ 2 := by nlinarith
+  have hDd : u ^ 2 + z.re ^ 2 - z.im ^ 2 = -(d - u ^ 2) := by
+    rw [hd, sq_abs]; ring
+  have hE : 0 < Real.exp (2 * Real.pi * u) - 1 := exp_two_pi_pos hu
+  have hDne : u ^ 2 + z.re ^ 2 - z.im ^ 2 ≠ 0 := by rw [hDd]; linarith
+  have hM : 0 < (u ^ 2 + z.re ^ 2 - z.im ^ 2) ^ 2 + 4 * z.re ^ 2 * z.im ^ 2 := by
+    have h1 : 0 < (u ^ 2 + z.re ^ 2 - z.im ^ 2) ^ 2 := by
+      have h2 := abs_pos.mpr hDne
+      nlinarith [sq_abs (u ^ 2 + z.re ^ 2 - z.im ^ 2)]
+    have h2 : 0 ≤ 4 * z.re ^ 2 * z.im ^ 2 := by positivity
+    linarith
+  unfold binetKernel
+  rw [show 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2)
+      = 2 * u / ((Real.exp (2 * Real.pi * u) - 1) * (d - u ^ 2)) from by rw [div_div]]
+  rw [div_le_div_iff₀ (mul_pos hM hE) (mul_pos hE hdu)]
+  have hlhs : -(2 * u * (u ^ 2 + z.re ^ 2 - z.im ^ 2)) *
+      ((Real.exp (2 * Real.pi * u) - 1) * (d - u ^ 2))
+      = 2 * u * ((d - u ^ 2) ^ 2 * (Real.exp (2 * Real.pi * u) - 1)) := by
+    rw [hDd]; ring
+  have hrhs : 2 * u * (((u ^ 2 + z.re ^ 2 - z.im ^ 2) ^ 2 + 4 * z.re ^ 2 * z.im ^ 2) *
+      (Real.exp (2 * Real.pi * u) - 1))
+      = 2 * u * (((d - u ^ 2) ^ 2 + 4 * z.re ^ 2 * z.im ^ 2) *
+        (Real.exp (2 * Real.pi * u) - 1)) := by
+    rw [hDd]
+    ring
+  rw [hlhs, hrhs]
+  apply mul_le_mul_of_nonneg_left _ (by positivity : (0 : ℝ) ≤ 2 * u)
+  apply mul_le_mul_of_nonneg_right _ hE.le
+  nlinarith [sq_nonneg z.re, sq_nonneg z.im]
+
+private lemma binetKernel_le_planck_outer (z : ℂ) (hz : (1 / 4 : ℝ) ≤ z.re)
+    (hzy : z.re ^ 2 < z.im ^ 2) {u : ℝ} (hu : 0 < u) :
+    binetKernel z u ≤ 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (4 * z.re * |z.im|) := by
+  have hzpos : 0 < z.re := by linarith
+  have hb2 : z.re ^ 2 < |z.im| ^ 2 := by nlinarith [sq_abs z.im]
+  have hbpos : 0 < |z.im| := by nlinarith [hb2, abs_nonneg z.im, sq_nonneg z.re]
+  have hden : 0 < 4 * z.re * |z.im| := by positivity
+  have hE : 0 < Real.exp (2 * Real.pi * u) - 1 := exp_two_pi_pos hu
+  have hmesq : z.im ^ 2 = |z.im| ^ 2 := (sq_abs z.im).symm
+  have hM : 0 < (u ^ 2 + z.re ^ 2 - z.im ^ 2) ^ 2 + 4 * z.re ^ 2 * z.im ^ 2 := by
+    have h2 : 0 < 4 * z.re ^ 2 * z.im ^ 2 := by
+      rw [hmesq]; positivity
+    nlinarith [sq_nonneg (u ^ 2 + z.re ^ 2 - z.im ^ 2)]
+  unfold binetKernel
+  rw [show 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (4 * z.re * |z.im|)
+      = 2 * u / ((Real.exp (2 * Real.pi * u) - 1) * (4 * z.re * |z.im|)) from by rw [div_div]]
+  rw [div_le_div_iff₀ (mul_pos hM hE) (mul_pos hE hden)]
+  have hlhs : -(2 * u * (u ^ 2 + z.re ^ 2 - z.im ^ 2)) *
+      ((Real.exp (2 * Real.pi * u) - 1) * (4 * z.re * |z.im|))
+      = 2 * u * (Real.exp (2 * Real.pi * u) - 1) *
+        (-(u ^ 2 + z.re ^ 2 - z.im ^ 2) * (4 * z.re * |z.im|)) := by ring
+  have hrhs : 2 * u * (((u ^ 2 + z.re ^ 2 - z.im ^ 2) ^ 2 + 4 * z.re ^ 2 * z.im ^ 2) *
+      (Real.exp (2 * Real.pi * u) - 1))
+      = 2 * u * (Real.exp (2 * Real.pi * u) - 1) *
+        ((u ^ 2 + z.re ^ 2 - z.im ^ 2) ^ 2 + 4 * z.re ^ 2 * z.im ^ 2) := by ring
+  rw [hlhs, hrhs]
+  apply mul_le_mul_of_nonneg_left _ (by positivity : (0 : ℝ) ≤ 2 * u * (Real.exp (2 * Real.pi * u) - 1))
+  nlinarith [sq_nonneg (u ^ 2 + z.re ^ 2 - z.im ^ 2 + 2 * z.re * |z.im|), hmesq]
+
+
+
+private lemma planck_weight_sq_integrableOn :
+    IntegrableOn (fun u : ℝ => u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1)))
+      (Set.Ioi 0) := by
+  have hcont : ContinuousOn
+      (fun u : ℝ => u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) (Set.Ioi 0) := by
+    apply ContinuousOn.mul (by fun_prop)
+    apply ContinuousOn.div
+    · fun_prop
+    · fun_prop
+    · intro u hu
+      exact ne_of_gt (exp_two_pi_pos hu)
+  have hlow : IntegrableOn
+      (fun u : ℝ => u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) (Set.Ioc 0 1) := by
+    refine IntegrableOn.of_bound (μ := volume) (s := Set.Ioc 0 1) measure_Ioc_lt_top
+      ((hcont.mono Set.Ioc_subset_Ioi_self).aestronglyMeasurable measurableSet_Ioc)
+      (1 / Real.pi) ?_
+    rw [ae_restrict_iff' measurableSet_Ioc]
+    refine Filter.Eventually.of_forall (fun u hu => ?_)
+    have hu0 : 0 < u := hu.1
+    have hu1 : u ≤ 1 := hu.2
+    have hE := exp_two_pi_pos hu0
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    have hb : 2 * Real.pi * u ≤ Real.exp (2 * Real.pi * u) - 1 := by
+      have := Real.add_one_le_exp (2 * Real.pi * u)
+      linarith
+    have hpos : 0 < 2 * Real.pi * u := by positivity
+    have hstep : u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))
+        ≤ u ^ 2 * (2 * u / (2 * Real.pi * u)) := by
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      exact div_le_div_of_nonneg_left (by positivity) hpos hb
+    have hval : u ^ 2 * (2 * u / (2 * Real.pi * u)) = u ^ 2 / Real.pi := by
+      field_simp
+    have hfin : u ^ 2 / Real.pi ≤ 1 / Real.pi := by
+      apply div_le_div_of_nonneg_right _ (le_of_lt Real.pi_pos)
+      nlinarith
+    calc u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))
+        ≤ u ^ 2 * (2 * u / (2 * Real.pi * u)) := hstep
+      _ = u ^ 2 / Real.pi := hval
+      _ ≤ 1 / Real.pi := hfin
+  have hhigh : IntegrableOn
+      (fun u : ℝ => u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) (Set.Ioi 1) := by
+    have hmaj : IntegrableOn (fun u : ℝ => 4 * (u ^ 3 * Real.exp (-(2 * Real.pi * u))))
+        (Set.Ioi 1) := by
+      have h0 : IntegrableOn (fun u : ℝ => 2 * (u ^ 3 * Real.exp (-(2 * Real.pi * u))))
+          (Set.Ioi 0) := integrableOn_term_three (2 * Real.pi) (by positivity)
+      have h2 : IntegrableOn (fun u : ℝ => 2 * (u ^ 3 * Real.exp (-(2 * Real.pi * u)))
+          + 2 * (u ^ 3 * Real.exp (-(2 * Real.pi * u)))) (Set.Ioi 0) := h0.add h0
+      refine (h2.mono_set (Set.Ioi_subset_Ioi (by norm_num))).congr_fun ?_ measurableSet_Ioi
+      intro u _
+      ring
+    refine Integrable.mono' hmaj
+      ((hcont.mono (Set.Ioi_subset_Ioi (by norm_num))).aestronglyMeasurable measurableSet_Ioi) ?_
+    rw [ae_restrict_iff' measurableSet_Ioi]
+    refine Filter.Eventually.of_forall (fun u hu => ?_)
+    have hu1 : 1 ≤ u := hu.le
+    have hu0 : 0 < u := by linarith
+    have hE := exp_two_pi_pos hu0
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    have hhalf := exp_two_pi_sub_one_ge_half hu1
+    have hstep : u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))
+        ≤ u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) / 2)) := by
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      exact div_le_div_of_nonneg_left (by positivity) (by positivity) hhalf
+    have hval : u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) / 2))
+        = 4 * (u ^ 3 * Real.exp (-(2 * Real.pi * u))) := by
+      rw [Real.exp_neg]
+      field_simp
+      ring
+    rw [← hval]
+    exact hstep
+  have hsplit : Set.Ioc (0 : ℝ) 1 ∪ Set.Ioi 1 = Set.Ioi 0 :=
+    Set.Ioc_union_Ioi_eq_Ioi (by norm_num)
+  rw [← hsplit]
+  exact hlow.union hhigh
+
+private lemma planck_inner_integrable {d T : ℝ} (hd : 0 < d) (hT : 0 < T)
+    (hT2 : 2 * T ^ 2 = d) :
+    IntegrableOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2))
+      (Set.Ioc 0 T) := by
+  have hcont : ContinuousOn
+      (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2)) (Set.Ioc 0 T) := by
+    apply ContinuousOn.div
+    · apply ContinuousOn.div
+      · fun_prop
+      · fun_prop
+      · intro u hu
+        exact ne_of_gt (exp_two_pi_pos hu.1)
+    · fun_prop
+    · intro u hu
+      have hu2 : u ^ 2 ≤ d / 2 := by nlinarith [hu.1, hu.2, hT2]
+      have : 0 < d - u ^ 2 := by linarith
+      exact ne_of_gt this
+  refine IntegrableOn.of_bound (μ := volume) (s := Set.Ioc 0 T) measure_Ioc_lt_top
+    (hcont.aestronglyMeasurable measurableSet_Ioc) (2 / (Real.pi * d)) ?_
+  rw [ae_restrict_iff' measurableSet_Ioc]
+  refine Filter.Eventually.of_forall (fun u hu => ?_)
+  have hu0 : 0 < u := hu.1
+  have hu2 : u ^ 2 ≤ d / 2 := by nlinarith [hu.2, hT2]
+  have hdu : 0 < d - u ^ 2 := by linarith
+  have hE := exp_two_pi_pos hu0
+  have hw : 2 * u / (Real.exp (2 * Real.pi * u) - 1) ≤ 1 / Real.pi := by
+    have hb : 2 * Real.pi * u ≤ Real.exp (2 * Real.pi * u) - 1 := by
+      have := Real.add_one_le_exp (2 * Real.pi * u)
+      linarith
+    have hpos : 0 < 2 * Real.pi * u := by positivity
+    have hstep := div_le_div_of_nonneg_left (by positivity : (0 : ℝ) ≤ 2 * u) hpos hb
+    have hval : 2 * u / (2 * Real.pi * u) = 1 / Real.pi := by field_simp
+    calc 2 * u / (Real.exp (2 * Real.pi * u) - 1) ≤ 2 * u / (2 * Real.pi * u) := hstep
+      _ = 1 / Real.pi := hval
+  rw [Real.norm_eq_abs, abs_of_pos (div_pos (by positivity) hdu)]
+  calc 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2)
+      ≤ (1 / Real.pi) / (d - u ^ 2) := div_le_div_of_nonneg_right hw hdu.le
+    _ ≤ (1 / Real.pi) / (d / 2) := by
+        apply div_le_div_of_nonneg_left (by positivity) (by positivity)
+        linarith
+    _ = 2 / (Real.pi * d) := by
+        field_simp
+
+private lemma integral_Ioc_planck_split_le {d T : ℝ} (hd : 0 < d) (hT : 0 < T)
+    (hT2 : 2 * T ^ 2 = d) :
+    (∫ u : ℝ in Set.Ioc 0 T, 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2))
+      ≤ 1 / (12 * d) + 1 / (60 * d ^ 2) := by
+  have hw : IntegrableOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+      (Set.Ioc 0 T) := planck_weight_integrableOn.mono_set Set.Ioc_subset_Ioi_self
+  have hw2 : IntegrableOn
+      (fun u : ℝ => u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) (Set.Ioc 0 T) :=
+    planck_weight_sq_integrableOn.mono_set Set.Ioc_subset_Ioi_self
+  have h1 : IntegrableOn
+      (fun u : ℝ => (1 / d) * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) (Set.Ioc 0 T) :=
+    hw.const_mul _
+  have h2 : IntegrableOn
+      (fun u : ℝ => (2 / d ^ 2) * (u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))))
+      (Set.Ioc 0 T) := hw2.const_mul _
+  have hg : IntegrableOn
+      (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2)) (Set.Ioc 0 T) :=
+    planck_inner_integrable hd hT hT2
+  have hpt : ∀ u ∈ Set.Ioc (0 : ℝ) T,
+      2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2)
+        ≤ (1 / d) * (2 * u / (Real.exp (2 * Real.pi * u) - 1))
+          + (2 / d ^ 2) * (u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) := by
+    intro u hu
+    have hu0 : 0 < u := hu.1
+    have hu2 : u ^ 2 ≤ d / 2 := by nlinarith [hu.2, hT2]
+    have hdu : 0 < d - u ^ 2 := by nlinarith
+    have hwpos : 0 ≤ 2 * u / (Real.exp (2 * Real.pi * u) - 1) :=
+      div_nonneg (by positivity) (le_of_lt (exp_two_pi_pos hu0))
+    have hkey : 1 / (d - u ^ 2) ≤ 1 / d + 2 * u ^ 2 / d ^ 2 := by
+      have hy : u ^ 2 / d ≤ 1 / 2 := by
+        rw [div_le_iff₀ hd]
+        linarith
+      rw [div_add_div _ _ (ne_of_gt hd) (ne_of_gt (pow_pos hd 2))]
+      rw [div_le_div_iff₀ hdu (by positivity)]
+      nlinarith [mul_nonneg (sq_nonneg u) (by linarith : (0:ℝ) ≤ d - 2 * u ^ 2),
+        mul_pos hd hd, sq_nonneg (d - u ^ 2)]
+    calc 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2)
+        = (2 * u / (Real.exp (2 * Real.pi * u) - 1)) * (1 / (d - u ^ 2)) := by
+          rw [div_eq_mul_one_div]
+      _ ≤ (2 * u / (Real.exp (2 * Real.pi * u) - 1)) * (1 / d + 2 * u ^ 2 / d ^ 2) :=
+          mul_le_mul_of_nonneg_left hkey hwpos
+      _ = (1 / d) * (2 * u / (Real.exp (2 * Real.pi * u) - 1))
+          + (2 / d ^ 2) * (u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) := by ring
+  have hsum_int :
+      (∫ u : ℝ in Set.Ioc 0 T, ((1 / d) * (2 * u / (Real.exp (2 * Real.pi * u) - 1))
+        + (2 / d ^ 2) * (u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1)))))
+        = (1 / d) * (∫ u : ℝ in Set.Ioc 0 T, 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+          + (2 / d ^ 2) * (∫ u : ℝ in Set.Ioc 0 T,
+              u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) := by
+    rw [integral_add h1 h2, integral_const_mul, integral_const_mul]
+  have hstep1 : (∫ u : ℝ in Set.Ioc 0 T,
+        2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2))
+      ≤ (1 / d) * (∫ u : ℝ in Set.Ioc 0 T, 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+        + (2 / d ^ 2) * (∫ u : ℝ in Set.Ioc 0 T,
+            u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) := by
+    rw [← hsum_int]
+    exact integral_mono_ae hg (h1.add h2) (by
+      filter_upwards [ae_restrict_mem measurableSet_Ioc] with u hu
+      exact hpt u hu)
+  have hA : (∫ u : ℝ in Set.Ioc 0 T, 2 * u / (Real.exp (2 * Real.pi * u) - 1)) ≤ 1 / 12 := by
+    have hsplit := setIntegral_union
+      (f := fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+      Set.Ioc_disjoint_Ioi_same measurableSet_Ioi
+      (planck_weight_integrableOn.mono_set Set.Ioc_subset_Ioi_self)
+      (planck_weight_integrableOn.mono_set (Set.Ioi_subset_Ioi hT.le))
+    rw [Set.Ioc_union_Ioi_eq_Ioi hT.le] at hsplit
+    have hnonneg : 0 ≤ ∫ u : ℝ in Set.Ioi T, 2 * u / (Real.exp (2 * Real.pi * u) - 1) := by
+      apply integral_nonneg_of_ae
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+      have hu0 : 0 < u := lt_trans hT hu
+      exact div_nonneg (by positivity) (le_of_lt (exp_two_pi_pos hu0))
+    linarith [hsplit, integral_two_mul_div_exp_sub_one]
+  have hB : (∫ u : ℝ in Set.Ioc 0 T,
+        u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) ≤ 1 / 120 := by
+    have hval : (∫ u : ℝ in Set.Ioi 0,
+        u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1))) = 1 / 120 := by
+      rw [← integral_two_mul_cube_div_exp_sub_one]
+      refine integral_congr_ae ?_
+      filter_upwards with u
+      ring
+    have hsplit := setIntegral_union
+      (f := fun u : ℝ => u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1)))
+      Set.Ioc_disjoint_Ioi_same measurableSet_Ioi
+      (planck_weight_sq_integrableOn.mono_set Set.Ioc_subset_Ioi_self)
+      (planck_weight_sq_integrableOn.mono_set (Set.Ioi_subset_Ioi hT.le))
+    rw [Set.Ioc_union_Ioi_eq_Ioi hT.le] at hsplit
+    have hnonneg : 0 ≤ ∫ u : ℝ in Set.Ioi T,
+        u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1)) := by
+      apply integral_nonneg_of_ae
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+      have hu0 : 0 < u := lt_trans hT hu
+      exact mul_nonneg (sq_nonneg u)
+        (div_nonneg (by positivity) (le_of_lt (exp_two_pi_pos hu0)))
+    rw [hval] at hsplit
+    linarith [hsplit]
+  refine hstep1.trans ?_
+  have hstep2 : (1 / d) * (∫ u : ℝ in Set.Ioc 0 T, 2 * u / (Real.exp (2 * Real.pi * u) - 1))
+        + (2 / d ^ 2) * (∫ u : ℝ in Set.Ioc 0 T,
+            u ^ 2 * (2 * u / (Real.exp (2 * Real.pi * u) - 1)))
+      ≤ (1 / d) * (1 / 12) + (2 / d ^ 2) * (1 / 120) := by
+    apply add_le_add
+    · exact mul_le_mul_of_nonneg_left hA (by positivity)
+    · exact mul_le_mul_of_nonneg_left hB (by positivity)
+  have heq : (1 / d) * (1 / 12) + (2 / d ^ 2) * (1 / 120) = 1 / (12 * d) + 1 / (60 * d ^ 2) := by
+    field_simp
+    ring
+  linarith [hstep1, hstep2, heq]
+
+private lemma binetRemainder_small_split (z : ℂ) (hz : (1 / 4 : ℝ) ≤ z.re)
+    (hzy : z.re ^ 2 < z.im ^ 2) {T : ℝ} (hT1 : 1 ≤ T)
+    (hT2 : 2 * T ^ 2 = |z.im| ^ 2 - z.re ^ 2) :
+    binetRemainder z
+      ≤ 1 / (12 * (|z.im| ^ 2 - z.re ^ 2)) + 1 / (60 * (|z.im| ^ 2 - z.re ^ 2) ^ 2) +
+        1 / (4 * z.re * |z.im|) *
+          (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2))) := by
+  have hzpos : 0 < z.re := by linarith
+  have hb2 : z.re ^ 2 < |z.im| ^ 2 := by nlinarith [sq_abs z.im]
+  have hbpos : 0 < |z.im| := by nlinarith [hb2, abs_nonneg z.im, sq_nonneg z.re]
+  have hdpos : 0 < |z.im| ^ 2 - z.re ^ 2 := by linarith
+  have hTpos : 0 < T := by linarith
+  set d := |z.im| ^ 2 - z.re ^ 2 with hdd
+  have hd2T : 2 * T ^ 2 = d := by rw [hdd]; exact hT2
+  have hker : IntegrableOn (binetKernel z) (Set.Ioi 0) := integrableOn_binetKernel z hz
+  have hsplit := setIntegral_union (f := binetKernel z) Set.Ioc_disjoint_Ioi_same
+    measurableSet_Ioi (hker.mono_set Set.Ioc_subset_Ioi_self)
+    (hker.mono_set (Set.Ioi_subset_Ioi hTpos.le))
+  rw [Set.Ioc_union_Ioi_eq_Ioi hTpos.le] at hsplit
+  rw [binetRemainder, hsplit]
+  have hgb : IntegrableOn (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2))
+      (Set.Ioc 0 T) := by
+    refine planck_inner_integrable ?_ hTpos hd2T
+    rw [hdd]; linarith
+  have h1 : (∫ u : ℝ in Set.Ioc 0 T, binetKernel z u)
+      ≤ ∫ u : ℝ in Set.Ioc 0 T, 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2) := by
+    refine integral_mono_ae (hker.mono_set Set.Ioc_subset_Ioi_self) hgb ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with u hu
+    have hTu : (0:ℝ) ≤ T - u := by linarith [hu.2]
+    have hTu2 : (0:ℝ) ≤ T + u := by linarith [hu.1]
+    exact binetKernel_le_planck_inner z hdd hu.1
+      (by nlinarith [mul_nonneg hTu hTu2, hd2T])
+  have hga : IntegrableOn
+      (fun u : ℝ => 2 * u / (Real.exp (2 * Real.pi * u) - 1) / (4 * z.re * |z.im|))
+      (Set.Ioi T) := by
+    have hbase : IntegrableOn
+        (fun u : ℝ => (1 / (4 * z.re * |z.im|)) *
+          (2 * u / (Real.exp (2 * Real.pi * u) - 1))) (Set.Ioi T) :=
+      (planck_weight_integrableOn.mono_set (Set.Ioi_subset_Ioi hTpos.le)).const_mul _
+    refine hbase.congr_fun ?_ measurableSet_Ioi
+    intro u _
+    ring
+  have h2 : (∫ u : ℝ in Set.Ioi T, binetKernel z u)
+      ≤ ∫ u : ℝ in Set.Ioi T,
+          2 * u / (Real.exp (2 * Real.pi * u) - 1) / (4 * z.re * |z.im|) := by
+    refine integral_mono_ae (hker.mono_set (Set.Ioi_subset_Ioi hTpos.le)) hga ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    exact binetKernel_le_planck_outer z hz hzy (lt_trans hTpos hu)
+  have h3 : (∫ u : ℝ in Set.Ioc 0 T,
+        2 * u / (Real.exp (2 * Real.pi * u) - 1) / (d - u ^ 2))
+      ≤ 1 / (12 * d) + 1 / (60 * d ^ 2) :=
+    integral_Ioc_planck_split_le (by rw [hdd]; linarith) hTpos hd2T
+  have h4 : (∫ u : ℝ in Set.Ioi T,
+        2 * u / (Real.exp (2 * Real.pi * u) - 1) / (4 * z.re * |z.im|))
+      ≤ 1 / (4 * z.re * |z.im|) *
+          (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2))) := by
+    have heq : (∫ u : ℝ in Set.Ioi T,
+          2 * u / (Real.exp (2 * Real.pi * u) - 1) / (4 * z.re * |z.im|))
+        = (1 / (4 * z.re * |z.im|)) *
+          (∫ u : ℝ in Set.Ioi T, 2 * u / (Real.exp (2 * Real.pi * u) - 1)) := by
+      rw [← integral_const_mul]
+      refine integral_congr_ae ?_
+      filter_upwards with u
+      ring
+    rw [heq]
+    exact mul_le_mul_of_nonneg_left (integral_tail_planck_le hT1) (by positivity)
+  linarith [h1, h2, h3, h4]
+
+private lemma tail_const_le :
+    4 * (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi / 2))) ≤ 1 / 50 := by
+  have he54 : (54 : ℝ) ≤ Real.exp (3 * Real.pi / 2) := by
+    have h1 : Real.exp (4 : ℝ) ≤ Real.exp (3 * Real.pi / 2) :=
+      Real.exp_le_exp.mpr (by nlinarith [Real.pi_gt_three])
+    have h2 : (54 : ℝ) ≤ Real.exp 4 := by
+      have he : Real.exp (4 : ℝ) = (Real.exp 1) ^ 4 := by
+        have h := Real.exp_nat_mul (1 : ℝ) 4
+        simpa using h
+      rw [he]
+      calc (54 : ℝ) ≤ (2.7182818283 : ℝ) ^ 4 := by norm_num
+        _ ≤ (Real.exp 1) ^ 4 := pow_le_pow_left₀ (by norm_num) Real.exp_one_gt_d9.le 4
+    linarith
+  have hprod : 3200 ≤ 3 * Real.pi ^ 2 * Real.exp 1 * Real.exp (3 * Real.pi / 2) := by
+    have hpi : (9 : ℝ) < Real.pi ^ 2 := by nlinarith [Real.pi_gt_three, Real.pi_pos]
+    have he : (2.7 : ℝ) < Real.exp 1 := lt_trans (by norm_num) Real.exp_one_gt_d9
+    have h1 : 3 * (9:ℝ) ≤ 3 * Real.pi ^ 2 := by linarith
+    have h2 : (2.7:ℝ) ≤ Real.exp 1 := le_of_lt he
+    have h3 : (3 * 9 * 2.7) ≤ 3 * Real.pi ^ 2 * Real.exp 1 := by
+      calc (3 * 9 * 2.7 : ℝ) = (3 * 9) * 2.7 := by ring
+        _ ≤ (3 * Real.pi ^ 2) * Real.exp 1 := mul_le_mul h1 h2 (by norm_num) (by positivity)
+    have h4 : (3 * 9 * 2.7) * 54 ≤ (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (3 * Real.pi / 2) :=
+      mul_le_mul h3 he54 (by norm_num) (by positivity)
+    norm_num at h4
+    linarith
+  have hpos : 0 < Real.exp (-(3 * Real.pi / 2)) := Real.exp_pos _
+  have hpos2 : 0 < Real.exp (3 * Real.pi / 2) := Real.exp_pos _
+  have hone : Real.exp (3 * Real.pi / 2) * Real.exp (-(3 * Real.pi / 2)) = 1 := by
+    rw [← Real.exp_add]
+    norm_num
+  have hmul : 3200 * Real.exp (-(3 * Real.pi / 2))
+      ≤ 3 * Real.pi ^ 2 * Real.exp 1 * Real.exp (3 * Real.pi / 2) * Real.exp (-(3 * Real.pi / 2)) :=
+    mul_le_mul_of_nonneg_right hprod (le_of_lt hpos)
+  rw [mul_assoc, hone, mul_one] at hmul
+  have key : 4 * (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi / 2)))
+      = 64 * Real.exp (-(3 * Real.pi / 2)) / (3 * Real.pi ^ 2 * Real.exp 1) := by
+    field_simp
+    ring
+  rw [key]
+  rw [div_le_iff₀ (by positivity)]
+  nlinarith [hmul, hpos]
+
+private lemma small_correction_algebra_crude (z : ℂ) (hz : (1 / 4 : ℝ) ≤ z.re)
+    (hzy : z.re ^ 2 < z.im ^ 2) (hsmall : ‖z‖ ^ 2 ≤ 24 * z.re ^ 2 * |z.im|) :
+    1 / (48 * z.re * |z.im|) ≤ z.re / (2 * ‖z‖ ^ 2) := by
+  have ha : 0 < z.re := by linarith
+  have hb2 : z.re ^ 2 < |z.im| ^ 2 := by nlinarith [sq_abs z.im]
+  have hb : 0 < |z.im| := by nlinarith [hb2, abs_nonneg z.im, sq_nonneg z.re]
+  have hS2 : ‖z‖ ^ 2 = z.re ^ 2 + |z.im| ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sq_abs]; ring
+  have hS : 0 < ‖z‖ ^ 2 := by rw [hS2]; positivity
+  rw [div_le_div_iff₀ (by positivity) (by positivity)]
+  nlinarith [hsmall]
+
+private lemma small_case_facts (z : ℂ) (hz : (1 / 4 : ℝ) ≤ z.re)
+    (hzy : z.re ^ 2 < z.im ^ 2) (hbig : 24 * z.re ^ 2 * |z.im| < ‖z‖ ^ 2) :
+    33 * z.re ^ 2 < |z.im| ^ 2 ∧ 2 ≤ |z.im| ^ 2 - z.re ^ 2 := by
+  have ha : 0 < z.re := by linarith
+  have hb2 : z.re ^ 2 < |z.im| ^ 2 := by nlinarith [sq_abs z.im]
+  have hb : 0 < |z.im| := by nlinarith [hb2, abs_nonneg z.im, sq_nonneg z.re]
+  have hS2 : ‖z‖ ^ 2 = z.re ^ 2 + |z.im| ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sq_abs]; ring
+  have h6ab : 6 * z.re * |z.im| < z.re ^ 2 + |z.im| ^ 2 := by
+    have h6a : 6 * z.re ≤ 24 * z.re ^ 2 := by nlinarith
+    have hstep : 6 * z.re * |z.im| ≤ 24 * z.re ^ 2 * |z.im| :=
+      mul_le_mul_of_nonneg_right h6a (le_of_lt hb)
+    linarith [hbig, hS2]
+  have hsq : 8 * z.re ^ 2 < (|z.im| - 3 * z.re) ^ 2 := by nlinarith
+  have hb58 : 5.8 * z.re < |z.im| := by
+    by_contra hc
+    push_neg at hc
+    have hba : z.re < |z.im| := by nlinarith [hb2, ha]
+    have hp1 : 0 ≤ 2.8 * z.re - (|z.im| - 3 * z.re) := by linarith
+    have hp2 : 0 ≤ (|z.im| - 3 * z.re) + 2.8 * z.re := by linarith
+    nlinarith [mul_nonneg hp1 hp2, hsq, ha]
+  have hb2big : 33 * z.re ^ 2 < |z.im| ^ 2 := by nlinarith
+  exact ⟨hb2big, by nlinarith⟩
+
+private lemma small_correction_algebra (z : ℂ) (hz : (1 / 4 : ℝ) ≤ z.re)
+    (hzy : z.re ^ 2 < z.im ^ 2) (hn : ‖z‖ < 4)
+    (hb2big : 33 * z.re ^ 2 < |z.im| ^ 2) (hd2 : 2 ≤ |z.im| ^ 2 - z.re ^ 2)
+    {T : ℝ} (hT1 : 1 ≤ T) (hT2 : 2 * T ^ 2 = |z.im| ^ 2 - z.re ^ 2) :
+    1 / (12 * (|z.im| ^ 2 - z.re ^ 2)) + 1 / (60 * (|z.im| ^ 2 - z.re ^ 2) ^ 2) +
+        1 / (4 * z.re * |z.im|) *
+          (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)))
+      ≤ z.re / (2 * ‖z‖ ^ 2) := by
+  have ha : 0 < z.re := by linarith
+  have hb2 : z.re ^ 2 < |z.im| ^ 2 := by nlinarith [sq_abs z.im]
+  have hb : 0 < |z.im| := by nlinarith [hb2, abs_nonneg z.im, sq_nonneg z.re]
+  have hS2 : ‖z‖ ^ 2 = z.re ^ 2 + |z.im| ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sq_abs]; ring
+  have hb4 : |z.im| < 4 := by nlinarith [norm_nonneg z, hS2, hn]
+  set d := |z.im| ^ 2 - z.re ^ 2 with hdd
+  have hd : 0 < d := by rw [hdd]; linarith
+  have hd2' : 2 ≤ d := by rw [hdd]; exact hd2
+  have hd4 : d / (4 * z.re * |z.im|) ≤ 4 := by
+    rw [div_le_iff₀ (by positivity)]
+    nlinarith [hdd, hb4, ha, hb, hz, mul_pos ha hb]
+  have hexp : Real.exp (-(3 * Real.pi * T / 2)) ≤ Real.exp (-(3 * Real.pi / 2)) :=
+    Real.exp_le_exp.mpr (by nlinarith [hT1, Real.pi_pos])
+  have hK : 0 < 16 / (3 * Real.pi ^ 2 * Real.exp 1) := by positivity
+  have hKpos : 0 < 16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi / 2)) := by positivity
+  have hB : 1 / 12 + 1 / (60 * d) + d * (1 / (4 * z.re * |z.im|)) *
+      (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)))
+      ≤ 1 / 12 + 1 / 120 + 1 / 50 := by
+    have e1 : 1 / (60 * d) ≤ 1 / 120 := by
+      rw [div_le_div_iff₀ (by positivity) (by norm_num)]
+      linarith [hd2']
+    have e2 : d * (1 / (4 * z.re * |z.im|)) *
+        (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2))) ≤ 1 / 50 := by
+      have step1 : (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)))
+          ≤ 16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi / 2)) :=
+        mul_le_mul_of_nonneg_left hexp (le_of_lt hK)
+      have hstep2 : d * (1 / (4 * z.re * |z.im|)) *
+          (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)))
+          ≤ 4 * (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi / 2))) := by
+        have h1 : d * (1 / (4 * z.re * |z.im|)) ≤ 4 := by
+          calc d * (1 / (4 * z.re * |z.im|)) = d / (4 * z.re * |z.im|) := by rw [mul_one_div]
+            _ ≤ 4 := hd4
+        calc d * (1 / (4 * z.re * |z.im|)) *
+            (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)))
+            ≤ 4 * (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2))) := by
+              apply mul_le_mul_of_nonneg_right h1 (by positivity)
+          _ ≤ 4 * (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi / 2))) :=
+              mul_le_mul_of_nonneg_left step1 (by norm_num)
+      exact hstep2.trans tail_const_le
+    linarith
+  have hC : 1 / 12 + 1 / 120 + 1 / 50 ≤ z.re * d / (2 * ‖z‖ ^ 2) := by
+    have hS : 0 < ‖z‖ ^ 2 := by rw [hS2]; positivity
+    rw [le_div_iff₀ (by positivity)]
+    nlinarith [hb2big, ha, hS2, hdd]
+  have hEeq : 1 / (12 * d) + 1 / (60 * d ^ 2) + 1 / (4 * z.re * |z.im|) *
+      (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)))
+      = (1 / d) * (1 / 12 + 1 / (60 * d) + d * (1 / (4 * z.re * |z.im|)) *
+        (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2)))) := by
+    field_simp
+  rw [hEeq]
+  calc (1 / d) * (1 / 12 + 1 / (60 * d) + d * (1 / (4 * z.re * |z.im|)) *
+        (16 / (3 * Real.pi ^ 2 * Real.exp 1) * Real.exp (-(3 * Real.pi * T / 2))))
+      ≤ (1 / d) * (1 / 12 + 1 / 120 + 1 / 50) :=
+        mul_le_mul_of_nonneg_left hB (by positivity)
+    _ ≤ (1 / d) * (z.re * d / (2 * ‖z‖ ^ 2)) :=
+        mul_le_mul_of_nonneg_left hC (by positivity)
+    _ = z.re / (2 * ‖z‖ ^ 2) := by
+        field_simp
+
+
 /-- LEAF. Chandee Appendix page 12, first display and definition of I.
 The cited formula is Ahlfors page 202. Integrability is explicit.
 There is no sign estimate for the remainder in this leaf. -/
@@ -1214,7 +2104,53 @@ the stated numerical verification. That input remains OPEN. The initial
 sign argument handles the remaining imaginary parts. -/
 theorem small_correction (z : ℂ) (hz : (1 / 4 : ℝ) ≤ z.re) (hn : ‖z‖ < 4) :
     -(1 / (2 * z)).re + binetRemainder z ≤ 0 := by
-  sorry
+  by_cases hzy : z.re ^ 2 < z.im ^ 2
+  · have hzpos : 0 < z.re := by linarith
+    have hb2 : z.re ^ 2 < |z.im| ^ 2 := by nlinarith [sq_abs z.im]
+    have hbpos : 0 < |z.im| := by nlinarith [hb2, abs_nonneg z.im, sq_nonneg z.re]
+    rw [neg_one_div_two_mul_re_eq]
+    by_cases hcase : ‖z‖ ^ 2 ≤ 24 * z.re ^ 2 * |z.im|
+    · have hcrude : binetRemainder z ≤ 1 / (48 * z.re * |z.im|) := by
+        have hker : IntegrableOn (binetKernel z) (Set.Ioi 0) := integrableOn_binetKernel z hz
+        have hmaj : IntegrableOn
+            (fun u : ℝ => (1 / (4 * z.re * |z.im|)) *
+              (2 * u / (Real.exp (2 * Real.pi * u) - 1))) (Set.Ioi 0) :=
+          planck_weight_integrableOn.const_mul _
+        rw [binetRemainder]
+        have hstep : (∫ u : ℝ in Set.Ioi 0, binetKernel z u)
+            ≤ ∫ u : ℝ in Set.Ioi 0, (1 / (4 * z.re * |z.im|)) *
+                (2 * u / (Real.exp (2 * Real.pi * u) - 1)) := by
+          refine integral_mono_ae hker hmaj ?_
+          filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+          refine (binetKernel_le_planck_outer z hz hzy hu).trans_eq ?_
+          ring
+        have hmul := hstep.trans_eq (by
+          rw [integral_const_mul, integral_two_mul_div_exp_sub_one])
+        have heq : (1 / (4 * z.re * |z.im|)) * (1 / 12) = 1 / (48 * z.re * |z.im|) := by
+          field_simp
+          ring
+        linarith [hmul, heq]
+      have halg := small_correction_algebra_crude z hz hzy hcase
+      have key : binetRemainder z ≤ z.re / (2 * ‖z‖ ^ 2) := le_trans hcrude halg
+      have hneg : -z.re / (2 * ‖z‖ ^ 2) = -(z.re / (2 * ‖z‖ ^ 2)) := by ring
+      linarith [key, hneg]
+    · push_neg at hcase
+      have hfacts := small_case_facts z hz hzy hcase
+      set T := Real.sqrt ((|z.im| ^ 2 - z.re ^ 2) / 2) with hT
+      have hT1 : 1 ≤ T := by
+        rw [hT]
+        have h2 : (1 : ℝ) ≤ (|z.im| ^ 2 - z.re ^ 2) / 2 := by linarith [hfacts.2]
+        calc (1 : ℝ) = Real.sqrt 1 := by rw [Real.sqrt_one]
+          _ ≤ Real.sqrt ((|z.im| ^ 2 - z.re ^ 2) / 2) := Real.sqrt_le_sqrt h2
+      have hT2 : 2 * T ^ 2 = |z.im| ^ 2 - z.re ^ 2 := by
+        rw [hT, Real.sq_sqrt (by linarith [hfacts.2])]
+        ring
+      have hsp := binetRemainder_small_split z hz hzy hT1 hT2
+      have halg := small_correction_algebra z hz hzy hn hfacts.1 hfacts.2 hT1 hT2
+      have key : binetRemainder z ≤ z.re / (2 * ‖z‖ ^ 2) := le_trans hsp halg
+      have hneg : -z.re / (2 * ‖z‖ ^ 2) = -(z.re / (2 * ‖z‖ ^ 2)) := by ring
+      linarith [key, hneg]
+  · exact correction_nonpos_of_im_sq_le hz (le_of_not_gt hzy)
 
 /-- Chandee Lemma 2.3 from its three smaller Appendix inputs.
 CONDITIONAL ON the Binet identity and the two remainder regions. -/
