@@ -41,97 +41,55 @@ theorem rational_cover1622 (q : ℕ) [NeZero q] (τ : ℝ) (hq : 2 ≤ q) (hτ :
     arcSystem111 q τ ∩ Set.Icc 0 1 ⊆
       ⋃ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
         Set.Icc ((a : ℝ) / q - 2 / ((q : ℝ) * τ)) ((a : ℝ) / q + 2 / ((q : ℝ) * τ)) := by
-  rintro x ⟨⟨r, hrden, hrδ⟩, hx0, hx1⟩
-  have hqR : (2 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
-  have hqpos : (0 : ℝ) < (q : ℝ) := by linarith
-  have hRle : 2 / ((q : ℝ) * τ) ≤ 1 / (2 * (q : ℝ)) := by
-    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+  classical
+  have hqp : (0 : ℝ) < q := by exact_mod_cast (show 0 < q by omega)
+  have hτp : 0 < τ := by linarith
+  let δ : ℝ := 2 / ((q : ℝ) * τ)
+  have hδp : 0 < δ := by positivity
+  have hδq : δ * (q : ℝ) ≤ 1 / 2 := by
+    have he : δ * (q : ℝ) = 2 / τ := by dsimp [δ]; field_simp
+    rw [he]
+    apply (div_le_iff₀ hτp).mpr
+    linarith
+  intro x hx
+  obtain ⟨r, hrq, hrx⟩ := hx.1
+  have hcast : (r : ℝ) = (r.num : ℝ) / (q : ℝ) := by rw [Rat.cast_def, hrq]
+  have hnum : (r : ℝ) * (q : ℝ) = r.num := by rw [hcast]; field_simp
+  change |x - (r : ℝ)| ≤ δ at hrx
+  have hab := abs_le.mp hrx
+  have hlo : -(δ : ℝ) ≤ (r : ℝ) := by change -δ ≤ (r : ℝ); linarith [hx.2.1]
+  have hhi : (r : ℝ) ≤ 1 + δ := by change (r : ℝ) ≤ 1 + δ; linarith [hx.2.2]
+  have hnlo : (-1 : ℝ) < (r.num : ℝ) := by
+    have hh := mul_le_mul_of_nonneg_right hlo hqp.le
     nlinarith
-  rw [abs_le] at hrδ
-  obtain ⟨hrlo, hrhi⟩ := hrδ
-  have hrcq : (r : ℝ) = (r.num : ℝ) / (q : ℝ) := by
-    rw [Rat.cast_def, hrden]
-  have hcop : r.num.natAbs.Coprime q := by
-    have h := r.reduced
-    rwa [hrden] at h
-  have hnum_nonneg : 0 ≤ r.num := by
-    by_contra hneg
-    push_neg at hneg
-    have hle : (r.num : ℝ) ≤ -1 := by
-      have : r.num ≤ -1 := by omega
-      exact_mod_cast this
-    have hrle : (r : ℝ) ≤ -1 / (q : ℝ) := by
-      rw [hrcq, div_le_div_iff₀ hqpos hqpos]
-      nlinarith
-    have hxle : x ≤ -1 / (q : ℝ) + 1 / (2 * (q : ℝ)) := by linarith
-    have hneg' : -1 / (q : ℝ) + 1 / (2 * (q : ℝ)) < 0 := by
-      have hsplit : -1 / (q : ℝ) + 1 / (2 * (q : ℝ)) = -(1 / (2 * (q : ℝ))) := by
-        field_simp
-        ring
-      rw [hsplit]
-      have : (0 : ℝ) < 1 / (2 * (q : ℝ)) := by positivity
-      linarith
-    linarith
-  have hnum_lt : r.num < (q : ℤ) := by
-    by_contra hge
-    push_neg at hge
-    have hne : r.num ≠ (q : ℤ) := by
-      intro he
-      have hnat : r.num.natAbs = q := by
-        rw [he]
-        exact Int.natAbs_natCast q
-      rw [hnat] at hcop
-      have hq1 : q = 1 := Nat.coprime_self q |>.mp hcop
-      omega
-    have hge' : (q : ℤ) + 1 ≤ r.num := by omega
-    have hcastZ : ((q : ℤ) : ℝ) + 1 ≤ (r.num : ℝ) := by exact_mod_cast hge'
-    have hcast : (q : ℝ) + 1 ≤ (r.num : ℝ) := by
-      have hqZ : ((q : ℤ) : ℝ) = (q : ℝ) := by push_cast; ring
-      linarith
-    have hrbig : 1 + 1 / (q : ℝ) ≤ (r : ℝ) := by
-      rw [hrcq, le_div_iff₀ hqpos]
-      have hmul : (1 + 1 / (q : ℝ)) * (q : ℝ) = (q : ℝ) + 1 := by
-        field_simp
-      rw [hmul]
-      exact hcast
-    have hxge : 1 + 1 / (2 * (q : ℝ)) ≤ x := by
-      have hsplit : (1 : ℝ) + 1 / (q : ℝ) - 1 / (2 * (q : ℝ)) = 1 + 1 / (2 * (q : ℝ)) := by
-        field_simp
-        ring
-      linarith
-    have : (1 : ℝ) < 1 + 1 / (2 * (q : ℝ)) := by
-      have : (0 : ℝ) < 1 / (2 * (q : ℝ)) := by positivity
-      linarith
-    linarith
-  set a := r.num.toNat with hadef
-  have hanum : (a : ℤ) = r.num := Int.toNat_of_nonneg hnum_nonneg
+  have hnhi : (r.num : ℝ) < (q : ℝ) + 1 := by
+    have hh := mul_le_mul_of_nonneg_right hhi hqp.le
+    nlinarith
+  have hnloZ : (-1 : ℤ) < r.num := by exact_mod_cast hnlo
+  have hnhiZ : r.num < (q : ℤ) + 1 := by exact_mod_cast hnhi
+  have hn0 : 0 ≤ r.num := by omega
+  let a := r.num.toNat
+  have hae : (a : ℤ) = r.num := Int.toNat_of_nonneg hn0
+  have haR : (a : ℝ) = (r.num : ℝ) := by exact_mod_cast hae
+  have hared : a.Coprime q := by
+    have hh := r.reduced
+    rw [hrq, ← hae] at hh
+    simpa only [Int.natAbs_natCast] using hh
+  have hale : a ≤ q := by omega
   have halt : a < q := by
-    have h' : (a : ℤ) < (q : ℤ) := by rw [hanum]; exact hnum_lt
-    exact_mod_cast h'
-  have hcopa : Nat.Coprime a q := by
-    have hna : r.num.natAbs = a := by
-      rw [hadef]
-      have h1 : ((r.num.natAbs : ℕ) : ℤ) = r.num := Int.natAbs_of_nonneg hnum_nonneg
-      have h2 : ((r.num.toNat : ℕ) : ℤ) = r.num := Int.toNat_of_nonneg hnum_nonneg
-      exact_mod_cast h1.trans h2.symm
-    rwa [hna] at hcop
-  have hcasta : (a : ℝ) = (r.num : ℝ) := by
-    have : (a : ℝ) = ((a : ℤ) : ℝ) := by push_cast; ring
-    rw [this, hanum]
-  have hmem : a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q) := by
-    simp only [Finset.mem_filter, Finset.mem_range]
-    exact ⟨halt, hcopa⟩
-  have hxI : x ∈ Set.Icc ((a : ℝ) / q - 2 / ((q : ℝ) * τ))
-      ((a : ℝ) / q + 2 / ((q : ℝ) * τ)) := by
-    have e1 : (a : ℝ) / q - 2 / ((q : ℝ) * τ) = (r : ℝ) - 2 / ((q : ℝ) * τ) := by
-      rw [hcasta, hrcq]
-    have e2 : (a : ℝ) / q + 2 / ((q : ℝ) * τ) = (r : ℝ) + 2 / ((q : ℝ) * τ) := by
-      rw [hcasta, hrcq]
-    rw [Set.mem_Icc, e1, e2]
-    constructor <;> linarith
-  simp only [Set.mem_iUnion, exists_prop]
-  exact ⟨a, hmem, hxI⟩
-
+    by_contra hn
+    have he : a = q := by omega
+    rw [he] at hared
+    have hh : q = 1 := by simpa [Nat.Coprime] using hared
+    omega
+  have haS : a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q) :=
+    Finset.mem_filter.mpr ⟨Finset.mem_range.mpr halt, hared⟩
+  apply Set.mem_iUnion₂.mpr
+  refine ⟨a, haS, ?_⟩
+  change (a : ℝ) / q - δ ≤ x ∧ x ≤ (a : ℝ) / q + δ
+  rw [← haR] at hcast
+  rw [hcast] at hab
+  constructor <;> linarith [hab.1, hab.2]
 
 /-- LEAF. The integral step of the geometry. For a nonnegative continuous function and a
 cover of the clipped arc system by the doubled intervals of the reduced residues, the
