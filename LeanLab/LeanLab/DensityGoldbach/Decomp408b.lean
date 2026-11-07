@@ -1130,6 +1130,604 @@ theorem local_profile (δ : ℝ) (hδ : 0 < δ) (hδsmall : δ ≤ 1 / 8)
   · exact hN3 n hn3
   · exact hN4 n hn4
 
+section Lifting408b
+
+open LeanLab.DensityGoldbach (IsSum3 unitsMod P)
+open LeanLab.DensityGoldbach.U1446 (hatE avg lpHat nuW fA)
+open LeanLab.DensityGoldbach.Profiles408 (halfProfile primeProfile oddRepresentative)
+open scoped Classical
+
+/-- A congruence modulo `M` together with `0 < a < b + M` and `b ≤ M` forces `a = b`. -/
+lemma eq_of_modEq_of_bounds {M a b : ℕ} (hM : 0 < M) (h : a ≡ b [MOD M]) (hb : b ≤ M)
+    (ha0 : 0 < a) (ha : a < b + M) : a = b := by
+  have hmod : a % M = b % M := h
+  rcases lt_or_eq_of_le hb with hlt | heq
+  · have hb' : b % M = b := Nat.mod_eq_of_lt hlt
+    have ha' : a % M = b := by rw [hb'] at hmod; exact hmod
+    have hdiv := Nat.div_add_mod a M
+    rw [ha'] at hdiv
+    have hlt2 : M * (a / M) < M * 1 := by rw [mul_one]; omega
+    have h1 : a / M = 0 := by
+      rcases Nat.eq_zero_or_pos (a / M) with h0 | h0
+      · exact h0
+      · exfalso
+        have := Nat.mul_lt_mul_left hM |>.mp hlt2
+        omega
+    rw [h1, mul_zero, zero_add] at hdiv
+    exact hdiv.symm
+  · have hmod0 : a % M = 0 := by rw [heq, Nat.mod_self] at hmod; exact hmod
+    obtain ⟨k, hk⟩ := Nat.dvd_of_mod_eq_zero hmod0
+    have hkpos : 0 < k := by rcases k with _ | k'; omega; omega
+    have ha' : a < M * 2 := by rw [heq] at ha; omega
+    have hlt2 : M * k < M * 2 := by rw [← hk]; exact ha' 
+    have hk2 : k < 2 := (Nat.mul_lt_mul_left hM).mp hlt2
+    have hk1 : k = 1 := by omega
+    rw [hk, hk1, mul_one, heq]
+
+/-- Sum of the three integers `W * nᵢ.val + bᵢ`, reduced modulo `N`, is `W * s + Σbᵢ`
+when `n₁ + n₂ + n₃ = s` in `ZMod N`. -/
+lemma three_sum_cast (W b₁ b₂ b₃ s : ℕ) {N : ℕ} [NeZero N] (n₁ n₂ n₃ : ZMod N)
+    (hsum : n₁ + n₂ + n₃ = (s : ZMod N)) :
+    (((W * n₁.val + b₁) + (W * n₂.val + b₂) + (W * n₃.val + b₃) : ℕ) : ZMod N)
+      = ((W * s + (b₁ + b₂ + b₃) : ℕ) : ZMod N) := by
+  push_cast
+  simp only [ZMod.natCast_zmod_val]
+  rw [← hsum]
+  ring
+
+/-- The same sum reduced modulo `W`. -/
+lemma three_sum_modW (W b₁ b₂ b₃ : ℕ) {N : ℕ} [NeZero N] (n₁ n₂ n₃ : ZMod N) :
+    ((W * n₁.val + b₁) + (W * n₂.val + b₂) + (W * n₃.val + b₃)) ≡
+      (b₁ + b₂ + b₃) [MOD W] := by
+  have h : (W * n₁.val + b₁) + (W * n₂.val + b₂) + (W * n₃.val + b₃) =
+      (b₁ + b₂ + b₃) + W * (n₁.val + n₂.val + n₃.val) := by ring
+  rw [h, Nat.ModEq]
+  exact Nat.add_mul_mod_self_left _ _ _
+
+/-- The odd representatives of a triple summing to `n` modulo `m = z#/2` sum to `n`
+modulo `z#`. -/
+lemma oddRep_sum_modW {z m n : ℕ} [NeZero m] (hz : 3 ≤ z) (hm : primorial z = 2 * m)
+    (hn : Odd n) (b₁ b₂ b₃ : ZMod m) (hb : (n : ZMod m) = b₁ + b₂ + b₃) :
+    (oddRepresentative m b₁ + oddRepresentative m b₂ + oddRepresentative m b₃) ≡ n
+      [MOD primorial z] := by
+  have hoddm : Odd m := odd_of_w hz hm
+  obtain ⟨-, hodd1, hmod1, -⟩ := oddRep_props hz hm b₁
+  obtain ⟨-, hodd2, hmod2, -⟩ := oddRep_props hz hm b₂
+  obtain ⟨-, hodd3, hmod3, -⟩ := oddRep_props hz hm b₃
+  -- congruence modulo `m`
+  have hcast : ((b₁.val + b₂.val + b₃.val : ℕ) : ZMod m) = (n : ZMod m) := by
+    push_cast
+    simp only [ZMod.natCast_zmod_val]
+    exact hb.symm
+  have hm1 : (b₁.val + b₂.val + b₃.val) ≡ n [MOD m] := ZMod.natCast_eq_natCast_iff _ _ _ |>.1 hcast
+  have hrep1 : oddRepresentative m b₁ ≡ b₁.val [MOD m] := by
+    rw [Nat.ModEq, hmod1, Nat.mod_eq_of_lt (ZMod.val_lt b₁)]
+  have hrep2 : oddRepresentative m b₂ ≡ b₂.val [MOD m] := by
+    rw [Nat.ModEq, hmod2, Nat.mod_eq_of_lt (ZMod.val_lt b₂)]
+  have hrep3 : oddRepresentative m b₃ ≡ b₃.val [MOD m] := by
+    rw [Nat.ModEq, hmod3, Nat.mod_eq_of_lt (ZMod.val_lt b₃)]
+  have hsum : (oddRepresentative m b₁ + oddRepresentative m b₂ + oddRepresentative m b₃) ≡
+      n [MOD m] := ((hrep1.add hrep2).add hrep3).trans hm1
+  -- congruence modulo `2`
+  have hpar : (oddRepresentative m b₁ + oddRepresentative m b₂ + oddRepresentative m b₃) ≡
+      n [MOD 2] := by
+    have h2 : (oddRepresentative m b₁ + oddRepresentative m b₂ + oddRepresentative m b₃) % 2 = 1 := by
+      have : Odd (oddRepresentative m b₁ + oddRepresentative m b₂ + oddRepresentative m b₃) :=
+        (hodd1.add_odd hodd2).add_odd hodd3
+      exact Nat.odd_iff.1 this
+    rw [Nat.ModEq, h2, Nat.odd_iff.1 hn]
+  -- combine
+  have hcop : Nat.Coprime m 2 := (Nat.coprime_two_left.mpr hoddm).symm
+  have := (Nat.modEq_and_modEq_iff_modEq_mul hcop).1 ⟨hsum, hpar⟩
+  rwa [show m * 2 = primorial z by omega] at this
+
+/-- The end of the lifting argument: three primes in `A 0`, `A 1`, `A 2` whose sum is congruent
+to `n` modulo `z# * N`, each below `Xc`, with `3 * Xc < 2 * n` and `n ≤ z# * N`, sum to `n`. -/
+lemma IsSum3_of_congruent {z N n Xc : ℕ} [NeZero N] {A : Fin 3 → Set ℕ} {p₀ p₁ p₂ : ℕ}
+    (hWN : n ≤ primorial z * N) (hXc : 3 * Xc < 2 * n)
+    (b1 : p₀ ≤ Xc) (b2 : p₁ ≤ Xc) (b3 : p₂ ≤ Xc)
+    (h0 : p₀ ∈ A 0) (h1 : p₁ ∈ A 1) (h2 : p₂ ∈ A 2)
+    (hpos : 0 < p₀) (hcong : p₀ + p₁ + p₂ ≡ n [MOD primorial z * N]) :
+    IsSum3 (A 0) (A 1) (A 2) n := by
+  have hM : 0 < primorial z * N := by
+    have := primorial_pos z
+    have : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+    positivity
+  have hlt : p₀ + p₁ + p₂ < 2 * n := by omega
+  have heq : p₀ + p₁ + p₂ = n :=
+    eq_of_modEq_of_bounds hM hcong hWN (by omega) (by omega)
+  exact ⟨p₀, h0, p₁, h1, p₂, h2, by omega⟩
+
+
+/-! ## Profile layer: positive profile gives mass to the class -/
+
+/-- From a positive profile the class log sum over the cutoff is at least `δ n / (12 φ(W))`. -/
+lemma class_sum_lower {A : Set ℕ} {z n : ℕ} {δ : ℝ} {m : ℕ} [NeZero m] {b : ZMod m}
+    (hn : 0 < n) (h : 0 < halfProfile A z n δ m b) :
+    δ * (n : ℝ) / (12 * ((primorial z).totient : ℝ)) <
+      ∑ p ∈ (range (n + 1)).filter (fun p => p ∈ A ∧
+        p % primorial z = (oddRepresentative m b) % primorial z ∧ 3 * p < 2 * n), Real.log p := by
+  set S : ℝ := ∑ p ∈ (range (n + 1)).filter (fun p => p ∈ A ∧
+      p % primorial z = (oddRepresentative m b) % primorial z ∧ 3 * p < 2 * n), Real.log p
+  set φ : ℝ := ((primorial z).totient : ℝ)
+  have hW : 0 < primorial z := primorial_pos z
+  have hφ : 0 < φ := by
+    simp only [φ]; exact_mod_cast Nat.totient_pos.2 hW
+  have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
+  have hmax : 0 < max ((3 * φ / (2 * (n : ℝ))) * S - (δ / 8)) 0 := by
+    rw [halfProfile, primeProfile] at h
+    simpa only [φ, S] using h
+  have hX : 0 < (3 * φ / (2 * (n : ℝ))) * S - (δ / 8) := by
+    rcases lt_max_iff.1 hmax with h' | h'
+    · exact h'
+    · linarith
+  have hX2 : δ / 8 < (3 * φ / (2 * (n : ℝ))) * S := by linarith
+  have hpos : (0 : ℝ) < 2 * (n : ℝ) / (3 * φ) := by positivity
+  have hstep := mul_lt_mul_of_pos_right hX2 hpos
+  have e2 : ((3 * φ / (2 * (n : ℝ))) * S) * (2 * (n : ℝ) / (3 * φ)) = S := by
+    field_simp
+  have e1 : (δ / 8) * (2 * (n : ℝ) / (3 * φ)) = δ * (n : ℝ) / (12 * φ) := by
+    field_simp
+    ring
+  rw [e2, e1] at hstep
+  exact hstep
+
+
+/-- The profile cutoff `3 p < 2 n` is the truncation at `(2 n - 1) / 3`. -/
+lemma profile_sum_eq (A : Set ℕ) (hA : A ⊆ P) {z n : ℕ} (hn : 0 < n) (b : ℕ) :
+    (∑ p ∈ (range (n + 1)).filter (fun p => p ∈ A ∧
+        p % primorial z = b % primorial z ∧ 3 * p < 2 * n), Real.log p) =
+      ∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A ∧ p.Prime ∧
+        p % primorial z = b % primorial z), Real.log p := by
+  apply Finset.sum_congr _ (fun _ _ => rfl)
+  ext p
+  simp only [mem_filter, mem_range]
+  constructor
+  · rintro ⟨h1, h2, h3, h4⟩
+    refine ⟨?_, h2, show Nat.Prime p from hA h2, h3⟩
+    have hle : p * 3 ≤ 2 * n - 1 := by omega
+    have hstep : p ≤ (2 * n - 1) / 3 := (Nat.le_div_iff_mul_le (by norm_num : 0 < 3)).2 hle
+    omega
+  · rintro ⟨h1, h2, h3, h4⟩
+    have hstep : p ≤ (2 * n - 1) / 3 := by omega
+    have hle : p * 3 ≤ 2 * n - 1 := (Nat.le_div_iff_mul_le (by norm_num : 0 < 3)).1 hstep
+    exact ⟨by omega, h2, h4, by omega⟩
+
+/-- The mass of the truncated class weight is `(φ(W)/W)` times the class log sum. -/
+lemma sum_fA_eq (A : Set ℕ) (hA : A ⊆ P) {z n N : ℕ} (hn : 0 < n) [NeZero N] (b : ℕ)
+    (hb : b < primorial z) (hX : (2 * n - 1) / 3 < primorial z * N) :
+    ∑ x : ZMod N, fA A (primorial z) b ((2 * n - 1) / 3) N x =
+      ((primorial z).totient : ℝ) / (primorial z) *
+        ∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A ∧ p.Prime ∧
+          p % primorial z = b % primorial z), Real.log p := by
+  have hW : 0 < primorial z := primorial_pos z
+  have hN : (N : ℝ) ≠ 0 := by
+    have : N ≠ 0 := NeZero.ne N
+    exact_mod_cast this
+  have h1 : (N : ℝ) * avg N (fA A (primorial z) b ((2 * n - 1) / 3) N) =
+      ∑ x : ZMod N, fA A (primorial z) b ((2 * n - 1) / 3) N x := by
+    unfold avg
+    field_simp
+  rw [← h1, LeanLab.DensityGoldbach.U1446.avg_fA A hA (primorial z) b ((2 * n - 1) / 3) N hb hX]
+  field_simp
+
+/-- The profile is monotone in the density parameter. -/
+lemma profile_mono_le {A : Set ℕ} {z n : ℕ} {δ δ' : ℝ} {m : ℕ} [NeZero m] {b : ZMod m}
+    (h : δ' ≤ δ) : halfProfile A z n δ m b ≤ halfProfile A z n δ' m b := by
+  simp only [halfProfile, primeProfile]
+  exact max_le_max (by linarith) le_rfl
+
+/-- A positive profile equals its `max` expression. -/
+lemma profile_eq_of_pos {A : Set ℕ} {z n : ℕ} {δ : ℝ} {m : ℕ} [NeZero m] {b : ZMod m}
+    (h : 0 < halfProfile A z n δ m b) :
+    halfProfile A z n δ m b = (3 * ((primorial z).totient : ℝ) / (2 * (n : ℝ))) *
+      (∑ p ∈ (range (n + 1)).filter (fun p => p ∈ A ∧
+        p % primorial z = (oddRepresentative m b) % primorial z ∧ 3 * p < 2 * n),
+        Real.log p) - δ / 8 := by
+  have h' : 0 < max ((3 * ((primorial z).totient : ℝ) / (2 * (n : ℝ))) *
+      (∑ p ∈ (range (n + 1)).filter (fun p => p ∈ A ∧
+        p % primorial z = (oddRepresentative m b) % primorial z ∧ 3 * p < 2 * n),
+        Real.log p) - δ / 8) 0 := by
+    rw [halfProfile, primeProfile] at h; exact h
+  rw [halfProfile, primeProfile, max_eq_left (le_of_lt (lt_max_iff.1 h' |>.resolve_right (by linarith)))]
+
+/-! ## Arithmetic core of the mass bounds -/
+
+/-- A single class mass is at least `d / 24`. -/
+lemma mass_lower {d φ S W N n : ℝ} (hd : 0 < d) (hd1 : d ≤ 1) (hφ : 0 < φ) (hW : 0 < W)
+    (hN : 0 < N) (hWN : W * N ≤ (1 + d / 8) * n) (hS : d * n / (12 * φ) < S) :
+    d / 24 ≤ φ / (W * N) * S := by
+  have hWN0 : 0 < W * N := mul_pos hW hN
+  have h1 : φ / (W * N) * (d * n / (12 * φ)) < φ / (W * N) * S :=
+    mul_lt_mul_of_pos_left hS (by positivity)
+  have h2 : φ / (W * N) * (d * n / (12 * φ)) = d / 12 * (n / (W * N)) := by
+    field_simp
+  rw [h2] at h1
+  have h4 : 1 / (1 + d / 8) ≤ n / (W * N) := by
+    rw [div_le_div_iff₀ (by positivity) hWN0]
+    nlinarith [hWN]
+  have h5 : d / 12 * (1 / (1 + d / 8)) ≤ d / 12 * (n / (W * N)) :=
+    mul_le_mul_of_nonneg_left h4 (by positivity)
+  have h6 : d / 24 ≤ d / 12 * (1 / (1 + d / 8)) := by
+    rw [mul_one_div, le_div_iff₀ (by positivity)]
+    nlinarith [hd, hd1]
+  linarith [h1, h5, h6]
+
+/-- The total mass exceeds `1` by at least `d / 24`. -/
+lemma total_lower {d φ S W N n : ℝ} (hd : 0 < d) (hd1 : d ≤ 1) (hφ : 0 < φ) (hW : 0 < W)
+    (hN : 0 < N) (hn : 0 < n) (hWN : W * N ≤ (1 + d / 8) * n)
+    (hS : 3 / 2 + 3 * d / 8 < (3 * φ / (2 * n)) * S) :
+    d / 24 ≤ φ / (W * N) * S - 1 := by
+  have hWN0 : 0 < W * N := mul_pos hW hN
+  have hconv : (3 / 2 + 3 * d / 8) * (2 * n / (3 * φ)) < S := by
+    have h := mul_lt_mul_of_pos_right hS (by positivity : (0 : ℝ) < 2 * n / (3 * φ))
+    have e2 : (3 * φ / (2 * n) * S) * (2 * n / (3 * φ)) = S := by
+      field_simp
+    rw [e2] at h
+    exact h
+  have hval : (3 / 2 + 3 * d / 8) * (2 * n / (3 * φ)) = n * (1 + d / 4) / φ := by
+    field_simp
+    ring
+  rw [hval] at hconv
+  have h1 : φ / (W * N) * (n * (1 + d / 4) / φ) < φ / (W * N) * S :=
+    mul_lt_mul_of_pos_left hconv (by positivity)
+  have h2 : φ / (W * N) * (n * (1 + d / 4) / φ) = (1 + d / 4) * (n / (W * N)) := by
+    field_simp
+  rw [h2] at h1
+  have h4 : 1 / (1 + d / 8) ≤ n / (W * N) := by
+    rw [div_le_div_iff₀ (by positivity) hWN0]
+    nlinarith [hWN]
+  have h5 : (1 + d / 4) * (1 / (1 + d / 8)) ≤ (1 + d / 4) * (n / (W * N)) :=
+    mul_le_mul_of_nonneg_left h4 (by positivity)
+  have h6 : d / 24 ≤ (1 + d / 4) * (1 / (1 + d / 8)) - 1 := by
+    rw [mul_one_div, div_sub_one (by positivity), le_div_iff₀ (by positivity)]
+    nlinarith [hd, hd1]
+  linarith [h1, h5, h6]
+
+
+/-! ## The lifting step -/
+
+/-- A positive truncated class weight puts `W * n.val + b` in `A` below `X`. -/
+lemma fA_pos_of_pos {A : Set ℕ} {W b X N : ℕ} [NeZero N] {x : ZMod N}
+    (h : 0 < fA A W b X N x) : W * x.val + b ∈ A ∧ W * x.val + b ≤ X := by
+  unfold fA at h
+  split_ifs at h with hc
+  · exact hc
+  · exact absurd h (lt_irrefl 0)
+
+/-- Shao's local lifting step, from the transference principle and the restriction
+estimate at the exponent `5/2`. -/
+theorem weighted_lifting_mixed_proof (H : AlsetriProp41) (R : U1488.Green66p (5 / 2))
+    (δ : ℝ) (hδ : 0 < δ) :
+    ∃ z₀ : ℕ, 3 ≤ z₀ ∧ ∀ z : ℕ, z₀ ≤ z → ∀ A : Fin 3 → Set ℕ, (∀ i, A i ⊆ P) →
+      ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → Odd n → ∀ m : ℕ, ∀ [NeZero m],
+        m = primorial z / 2 → ∀ b₁ ∈ unitsMod m, ∀ b₂ ∈ unitsMod m, ∀ b₃ ∈ unitsMod m,
+        (n : ZMod m) = b₁ + b₂ + b₃ →
+        0 < halfProfile (A 0) z n δ m b₁ →
+        0 < halfProfile (A 1) z n δ m b₂ →
+        0 < halfProfile (A 2) z n δ m b₃ →
+        3 / 2 < halfProfile (A 0) z n δ m b₁ + halfProfile (A 1) z n δ m b₂ +
+          halfProfile (A 2) z n δ m b₃ →
+        IsSum3 (A 0) (A 1) (A 2) n := by
+  set d : ℝ := min δ 1 with hddef
+  have hd : 0 < d := lt_min hδ one_pos
+  have hdd : d ≤ δ := min_le_left _ _
+  have hd1 : d ≤ 1 := min_le_right _ _
+  obtain ⟨C, hC, zR, hR⟩ := R
+  obtain ⟨c, hc, hH⟩ := H (d / 24) (by positivity)
+  obtain ⟨η, hη, NH, hH1⟩ := hH (5 / 2) (by norm_num) (by norm_num) (max C 1)
+    (lt_of_lt_of_le hC (le_max_left _ _))
+  obtain ⟨zG, hG⟩ := LeanLab.DensityGoldbach.U1446.nu_fourier
+    LeanLab.DensityGoldbach.U1484.green62 η hη
+  obtain ⟨YP, hYP⟩ := LeanLab.DensityGoldbach.U1446.exists_prime_between (d / 8)
+    (by positivity) (by linarith : d / 8 ≤ 1)
+  refine ⟨max (max zR zG) 3, le_max_right _ _, ?_⟩
+  intro z hz A hA
+  have hz3 : 3 ≤ z := le_trans (le_max_right _ _) hz
+  have hzR : zR ≤ z := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hz
+  have hzG : zG ≤ z := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hz
+  have hW : 0 < primorial z := primorial_pos z
+  have hWr : (0 : ℝ) < (primorial z : ℝ) := by exact_mod_cast hW
+  have hφ : (0 : ℝ) < ((primorial z).totient : ℝ) := by
+    exact_mod_cast Nat.totient_pos.2 hW
+  -- thresholds, uniform over the finitely many classes `b < z#`
+  have hNGex : ∀ b : ℕ, ∃ N₀ : ℕ, b < primorial z → Nat.Coprime b (primorial z) →
+      ∀ N : ℕ, ∀ [NeZero N], N.Prime → N₀ ≤ N → ∀ r : ZMod N,
+        ‖hatE N (nuW (primorial z) b N) r - (if r = 0 then 1 else 0)‖ ≤ η := by
+    intro b
+    by_cases hb : b < primorial z ∧ Nat.Coprime b (primorial z)
+    · obtain ⟨N₀, hN₀⟩ := hG z hzG b hb.1 hb.2
+      exact ⟨N₀, fun _ _ => hN₀⟩
+    · exact ⟨0, fun h1 h2 => absurd ⟨h1, h2⟩ hb⟩
+  choose NG hNG using hNGex
+  have hNRex : ∀ b : ℕ, ∃ N₀ : ℕ, b < primorial z → Nat.Coprime b (primorial z) →
+      ∀ N : ℕ, ∀ [NeZero N], N.Prime → N₀ ≤ N → ∀ (f : ZMod N → ℝ),
+        (∀ n, 0 ≤ f n ∧ f n ≤ nuW (primorial z) b N n) → lpHat N (5 / 2) f ≤ C := by
+    intro b
+    by_cases hb : b < primorial z ∧ Nat.Coprime b (primorial z)
+    · obtain ⟨N₀, hN₀⟩ := hR z hzR b hb.1 hb.2
+      exact ⟨N₀, fun _ _ => hN₀⟩
+    · exact ⟨0, fun h1 h2 => absurd ⟨h1, h2⟩ hb⟩
+  choose NR hNR using hNRex
+  set K : ℕ := max (max (max NH (Finset.sup (range (primorial z)) NG))
+    (Finset.sup (range (primorial z)) NR)) 1 with hKdef
+  have hsupG : Finset.sup (range (primorial z)) NG ≤ K := by
+    rw [hKdef]
+    exact le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) (le_max_left _ _)
+  have hsupR : Finset.sup (range (primorial z)) NR ≤ K := by
+    rw [hKdef]
+    exact le_trans (le_max_right _ _) (le_max_left _ _)
+  have hNHK : NH ≤ K := by
+    rw [hKdef]
+    exact le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) (le_max_left _ _)
+  have hK1 : 1 ≤ K := by rw [hKdef]; exact le_max_right _ _
+  refine ⟨⌈(max YP 0 + (K : ℝ)) * ((primorial z : ℝ) + 1)⌉₊ + ((z + 1) * primorial z + 2), ?_⟩
+  intro n hn hodd m inst hm b₁ hb₁ b₂ hb₂ b₃ hb₃ hnb hp₁ hp₂ hp₃ hsum3
+  -- large-`n` consequences
+  have hceil : ((⌈(max YP 0 + (K : ℝ)) * ((primorial z : ℝ) + 1)⌉₊ : ℕ) : ℝ) ≤ (n : ℝ) := by
+    have h1 : ⌈(max YP 0 + (K : ℝ)) * ((primorial z : ℝ) + 1)⌉₊ ≤ n := by omega
+    exact_mod_cast h1
+  have hbig : (max YP 0 + (K : ℝ)) * ((primorial z : ℝ) + 1) ≤ (n : ℝ) :=
+    le_trans (Nat.le_ceil _) hceil
+  have hzw : ((z + 1) * primorial z : ℕ) + 2 ≤ n := by omega
+  have hn1 : 1 ≤ n := by omega
+  have hnpos : 0 < n := by omega
+  have hnr : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hnpos
+  have hY0 : (0 : ℝ) ≤ max YP 0 := le_max_right _ _
+  have hK0 : (0 : ℝ) ≤ (K : ℝ) := by positivity
+  -- the prime of the window
+  have hyP : YP ≤ (n : ℝ) / (primorial z) := by
+    rw [le_div_iff₀ hWr]
+    nlinarith [hbig, le_max_left YP (0 : ℝ), hWr, hY0, hK0]
+  obtain ⟨N, hNp, hNlow, hNhigh⟩ := hYP _ hyP
+  have hNpos : 0 < N := hNp.pos
+  haveI : NeZero N := ⟨hNpos.ne'⟩
+  haveI : Fact N.Prime := ⟨hNp⟩
+  have hNr : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hNpos
+  have hnWN : n ≤ primorial z * N := by
+    have h1 : (n : ℝ) ≤ (primorial z : ℝ) * N := by
+      rw [div_le_iff₀ hWr] at hNlow
+      linarith
+    exact_mod_cast h1
+  have hWNle : (primorial z : ℝ) * N ≤ (1 + d / 8) * (n : ℝ) := by
+    have h2 : (primorial z : ℝ) * ((n : ℝ) / (primorial z : ℝ)) = (n : ℝ) := by
+      field_simp
+    nlinarith [hNhigh, hWr, h2]
+  have hNK : K ≤ N := by
+    have h1 : (K : ℝ) ≤ (n : ℝ) / (primorial z) := by
+      rw [le_div_iff₀ hWr]
+      nlinarith [hbig, hY0, hK0, hWr]
+    have := le_trans h1 hNlow
+    exact_mod_cast this
+  have hzN : z < N := by
+    have h1 : ((z + 1) * primorial z : ℕ) ≤ n := by omega
+    have h2 : ((z + 1) * (primorial z) : ℕ) ≤ primorial z * N := le_trans h1 hnWN
+    have h3 : z + 1 ≤ N := by
+      rcases Nat.eq_zero_or_pos (primorial z) with h0 | h0
+      · rw [h0] at h2; omega
+      · exact Nat.le_of_mul_le_mul_left (by simpa only [mul_comm] using h2) h0
+    omega
+  have hNdvd : ¬ N ∣ primorial z := by
+    intro hd
+    have := (Nat.Prime.dvd_primorial_iff hNp).1 hd
+    omega
+  have hcopWN : Nat.Coprime (primorial z) N := by
+    rw [Nat.coprime_comm, Nat.Prime.coprime_iff_not_dvd hNp]
+    exact hNdvd
+  -- bookkeeping
+  set bb : Fin 3 → ZMod m := ![b₁, b₂, b₃] with hbbdef
+  have hbb0 : bb 0 = b₁ := by simp [hbbdef]
+  have hbb1 : bb 1 = b₂ := by simp [hbbdef]
+  have hbb2 : bb 2 = b₃ := by simp [hbbdef]
+  have hposδ : ∀ i, 0 < halfProfile (A i) z n δ m (bb i) := by
+    intro i
+    fin_cases i
+    · simpa [hbb0] using hp₁
+    · simpa [hbb1] using hp₂
+    · simpa [hbb2] using hp₃
+  have hposd : ∀ i, 0 < halfProfile (A i) z n d m (bb i) := fun i =>
+    lt_of_lt_of_le (hposδ i) (profile_mono_le hdd)
+  have hsumd : 3 / 2 < ∑ i : Fin 3, halfProfile (A i) z n d m (bb i) := by
+    rw [Fin.sum_univ_three]
+    exact lt_of_lt_of_le (by simpa only [hbb0, hbb1, hbb2] using hsum3)
+      (add_le_add (add_le_add (profile_mono_le hdd) (profile_mono_le hdd)) (profile_mono_le hdd))
+  have hunits : ∀ i, IsUnit (bb i) := by
+    intro i
+    fin_cases i
+    · simpa [hbb0, unitsMod] using hb₁
+    · simpa [hbb1, unitsMod] using hb₂
+    · simpa [hbb2, unitsMod] using hb₃
+  have hW2m : primorial z = 2 * m := by
+    have h2 : 2 ∣ primorial z := prime_dvd_primorial Nat.prime_two (by omega)
+    omega
+  set bp : Fin 3 → ℕ := fun i => oddRepresentative m (bb i) with hbpdef
+  have hbplt : ∀ i, bp i < primorial z := by
+    intro i
+    exact (oddRep_props hz3 hW2m (bb i)).1
+  have hbpcop : ∀ i, Nat.Coprime (bp i) (primorial z) := fun i =>
+    oddRep_coprime hz3 hW2m (bb i) (hunits i)
+  have hnb' : (n : ZMod m) = bb 0 + bb 1 + bb 2 := by
+    simpa only [hbb0, hbb1, hbb2] using hnb
+  -- the two weight families on `ZMod N`
+  set ν : Fin 3 → ZMod N → ℝ := fun i x => nuW (primorial z) (bp i) N x / N with hνdef
+  set fv : Fin 3 → ZMod N → ℝ := fun i x =>
+    fA (A i) (primorial z) (bp i) ((2 * n - 1) / 3) N x / N with hfvdef
+  have hνapp : ∀ i x, ν i x = nuW (primorial z) (bp i) N x / N := fun i x => by rw [hνdef]
+  have hfvapp : ∀ i x, fv i x =
+      fA (A i) (primorial z) (bp i) ((2 * n - 1) / 3) N x / N := fun i x => by rw [hfvdef]
+  have hXci : (2 * n - 1) / 3 < primorial z * N := by
+    have h1 : (2 * n - 1) / 3 < n := by
+      rw [Nat.div_lt_iff_lt_mul (by norm_num : 0 < 3)]
+      omega
+    exact lt_of_lt_of_le h1 hnWN
+  -- (4.1)
+  have hbound : ∀ i x, 0 ≤ fv i x ∧ fv i x ≤ ν i x := by
+    intro i x
+    rw [hfvapp, hνapp]
+    refine ⟨div_nonneg (LeanLab.DensityGoldbach.U1446.fA_nonneg _ _ _ _ _ _) (by positivity), ?_⟩
+    exact div_le_div_of_nonneg_right
+      (LeanLab.DensityGoldbach.U1446.fA_le_nuW (A i) (hA i) _ _ _ _ _) (by positivity)
+  -- class log sums
+  have hS : ∀ i, d * (n : ℝ) / (12 * ((primorial z).totient : ℝ)) <
+      ∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A i ∧ p.Prime ∧
+        p % primorial z = (bp i) % primorial z), Real.log p := by
+    intro i
+    refine lt_of_lt_of_le (class_sum_lower hnpos (hposd i)) (le_of_eq ?_)
+    exact profile_sum_eq (A i) (hA i) hnpos (bp i)
+  -- (4.2a)
+  have hmassGe : ∀ i, d / 24 ≤ ∑ x : ZMod N, fv i x := by
+    intro i
+    have h1 : ∑ x : ZMod N, fv i x = ((primorial z).totient : ℝ) / (primorial z * N) *
+        (∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A i ∧ p.Prime ∧
+          p % primorial z = (bp i) % primorial z), Real.log p) := by
+      simp only [hfvdef]
+      rw [← Finset.sum_div, sum_fA_eq (A i) (hA i) hnpos (bp i) (hbplt i) hXci]
+      field_simp
+    rw [h1]
+    exact mass_lower hd hd1 hφ hWr hNr hWNle (hS i)
+  -- (4.2b)
+  have htotGe : d / 24 ≤ (∑ i : Fin 3, ∑ x : ZMod N, fv i x) - 1 := by
+    set S : ℝ := ∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A 0 ∧ p.Prime ∧
+      p % primorial z = (bp 0) % primorial z), Real.log p +
+      ∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A 1 ∧ p.Prime ∧
+        p % primorial z = (bp 1) % primorial z), Real.log p +
+      ∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A 2 ∧ p.Prime ∧
+        p % primorial z = (bp 2) % primorial z), Real.log p with hSdef
+    have hprof : ∀ i, halfProfile (A i) z n d m (bb i) =
+        (3 * ((primorial z).totient : ℝ) / (2 * (n : ℝ))) *
+          (∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A i ∧ p.Prime ∧
+            p % primorial z = (bp i) % primorial z), Real.log p) - d / 8 := by
+      intro i
+      refine (profile_eq_of_pos (hposd i)).trans ?_
+      rw [profile_sum_eq (A i) (hA i) hnpos (bp i)]
+    have hsum3' : 3 / 2 + 3 * d / 8 < (3 * ((primorial z).totient : ℝ) / (2 * (n : ℝ))) * S := by
+      have hpe : ∑ i : Fin 3, halfProfile (A i) z n d m (bb i) =
+          (3 * ((primorial z).totient : ℝ) / (2 * (n : ℝ))) * S - 3 * (d / 8) := by
+        rw [hSdef, Fin.sum_univ_three, hprof 0, hprof 1, hprof 2]
+        ring
+      rw [hpe] at hsumd
+      linarith
+    have hmtot : ∑ i : Fin 3, ∑ x : ZMod N, fv i x =
+        ((primorial z).totient : ℝ) / (primorial z * N) * S := by
+      have h1 : ∀ i, ∑ x : ZMod N, fv i x = ((primorial z).totient : ℝ) / (primorial z * N) *
+          (∑ p ∈ (range ((2 * n - 1) / 3 + 1)).filter (fun p => p ∈ A i ∧ p.Prime ∧
+            p % primorial z = (bp i) % primorial z), Real.log p) := by
+        intro i
+        simp only [hfvdef]
+        rw [← Finset.sum_div, sum_fA_eq (A i) (hA i) hnpos (bp i) (hbplt i) hXci]
+        field_simp
+      rw [Finset.sum_congr rfl fun i _ => h1 i, Fin.sum_univ_three, hSdef]
+      ring
+    rw [hmtot]
+    exact total_lower hd hd1 hφ hWr hNr hnr hWNle hsum3'
+  -- (4.3)
+  have hfourier : ∀ i (r : ZMod N),
+      ‖fourierZN N (ν i) r - (if r = 0 then 1 else 0)‖ ≤ η := by
+    intro i r
+    have hle : NG (bp i) ≤ N := by
+      refine le_trans (le_trans (Finset.le_sup (f := NG) (mem_range.2 (hbplt i))) hsupG) hNK
+    have h := hNG (bp i) (hbplt i) (hbpcop i) N hNp hle (-r)
+    rw [hνdef, LeanLab.DensityGoldbach.Smoothing408.probability_transform]
+    simpa only [neg_eq_zero] using h
+  -- (4.4)
+  have hnorm : ∀ i, (∑ r : ZMod N, ‖fourierZN N (fv i) r‖ ^ (5 / 2 : ℝ)) ^
+      (1 / (5 / 2 : ℝ)) ≤ max C 1 := by
+    intro i
+    have hle : NR (bp i) ≤ N := by
+      refine le_trans (le_trans (Finset.le_sup (f := NR) (mem_range.2 (hbplt i))) hsupR) hNK
+    have h1 : lpHat N (5 / 2) (fun x => fA (A i) (primorial z) (bp i) ((2 * n - 1) / 3) N x) ≤ C :=
+      hNR (bp i) (hbplt i) (hbpcop i) N hNp hle _
+        (fun x => ⟨LeanLab.DensityGoldbach.U1446.fA_nonneg _ _ _ _ _ _,
+          LeanLab.DensityGoldbach.U1446.fA_le_nuW (A i) (hA i) _ _ _ _ _⟩)
+    rw [← LeanLab.DensityGoldbach.Smoothing408.scaled_norm]
+    have heq : lpHat N (5 / 2) (fun x => (N : ℝ) * fv i x) =
+        lpHat N (5 / 2) (fun x => fA (A i) (primorial z) (bp i) ((2 * n - 1) / 3) N x) := by
+      congr 1
+      funext x
+      rw [hfvapp]
+      field_simp
+    rw [heq]
+    exact le_trans h1 (le_max_left _ _)
+  -- apply the transference principle at the residue `x₀`
+  have hconv0 := hH1 N hNp (le_trans hNHK hNK) ν fv hbound hmassGe
+    (by simpa only [Fin.sum_univ_three] using htotGe) hfourier hnorm
+  set x₀ : ZMod N := ((n : ZMod N) - ((bp 0 + bp 1 + bp 2 : ℕ) : ZMod N)) /
+    (primorial z : ZMod N) with hxdef
+  have hWne : (primorial z : ZMod N) ≠ 0 := by
+    intro h0
+    have hval : (primorial z) % N = 0 := by
+      have := congrArg ZMod.val h0
+      simpa only [ZMod.val_natCast, ZMod.val_zero] using this
+    exact hNdvd (Nat.dvd_of_mod_eq_zero hval)
+  have hx₀ : (primorial z : ZMod N) * x₀ =
+      (n : ZMod N) - ((bp 0 + bp 1 + bp 2 : ℕ) : ZMod N) := by
+    rw [hxdef]
+    field_simp
+  have hconvx := hconv0 x₀
+  have hcN : 0 < c / (N : ℝ) := by positivity
+  have hexY : ∃ y : ZMod N, 0 < ∑ z : ZMod N, fv 0 y * fv 1 z * fv 2 (x₀ - y - z) := by
+    by_contra hcon
+    push_neg at hcon
+    have hle : ∑ y : ZMod N, ∑ z : ZMod N, fv 0 y * fv 1 z * fv 2 (x₀ - y - z) ≤ 0 :=
+      Finset.sum_nonpos fun y _ => hcon y
+    linarith
+  obtain ⟨y0, hy0⟩ := hexY
+  have hexZ : ∃ z : ZMod N, 0 < fv 0 y0 * fv 1 z * fv 2 (x₀ - y0 - z) := by
+    by_contra hcon
+    push_neg at hcon
+    have hle : ∑ z : ZMod N, fv 0 y0 * fv 1 z * fv 2 (x₀ - y0 - z) ≤ 0 :=
+      Finset.sum_nonpos fun z _ => hcon z
+    linarith
+  obtain ⟨z0, hz0⟩ := hexZ
+  set w0 : ZMod N := x₀ - y0 - z0 with hwdef
+  have hwval : fv 2 (x₀ - y0 - z0) = fv 2 w0 := by rw [hwdef]
+  rw [hwval] at hz0
+  have hf0 : 0 < fv 0 y0 :=
+    pos_of_mul_pos_left (pos_of_mul_pos_left hz0 (hbound 2 w0).1) (hbound 1 z0).1
+  have hf1 : 0 < fv 1 z0 :=
+    pos_of_mul_pos_right (pos_of_mul_pos_left hz0 (hbound 2 w0).1) (hbound 0 y0).1
+  have hf2 : 0 < fv 2 w0 := pos_of_mul_pos_right hz0 (mul_pos hf0 hf1).le
+  have hfa : ∀ i (x : ZMod N), 0 < fv i x → 0 < fA (A i) (primorial z) (bp i) ((2 * n - 1) / 3) N x := by
+    intro i x h
+    rw [hfvapp i x] at h
+    rcases div_pos_iff.1 h with h' | h'
+    · exact h'.1
+    · linarith [h'.2]
+  have hm0 := fA_pos_of_pos (x := y0) (hfa 0 y0 hf0)
+  have hm1 := fA_pos_of_pos (x := z0) (hfa 1 z0 hf1)
+  have hm2 := fA_pos_of_pos (x := w0) (hfa 2 w0 hf2)
+  -- the triple and its congruence
+  have hsum' : y0 + z0 + w0 = (x₀.val : ZMod N) := by
+    rw [ZMod.natCast_zmod_val]
+    simp only [hwdef]
+    abel
+  have hcast := three_sum_cast (primorial z) (bp 0) (bp 1) (bp 2) x₀.val y0 z0 w0 hsum'
+  have hcast2 : (((primorial z * x₀.val + (bp 0 + bp 1 + bp 2) : ℕ)) : ZMod N) = (n : ZMod N) := by
+    push_cast
+    rw [ZMod.natCast_zmod_val, hx₀]
+    push_cast
+    ring
+  have hcongN : ((primorial z * y0.val + bp 0) + (primorial z * z0.val + bp 1) +
+      (primorial z * w0.val + bp 2)) ≡ n [MOD N] := by
+    refine ZMod.natCast_eq_natCast_iff _ _ N |>.1 ?_
+    exact hcast.trans hcast2
+  have hcongW : ((primorial z * y0.val + bp 0) + (primorial z * z0.val + bp 1) +
+      (primorial z * w0.val + bp 2)) ≡ n [MOD primorial z] := by
+    have h1 := three_sum_modW (primorial z) (bp 0) (bp 1) (bp 2) y0 z0 w0
+    have h2 : (bp 0 + bp 1 + bp 2) ≡ n [MOD primorial z] := by
+      simpa only [hbpdef] using oddRep_sum_modW hz3 hW2m hodd (bb 0) (bb 1) (bb 2) hnb'
+    exact h1.trans h2
+  have hcong : ((primorial z * y0.val + bp 0) + (primorial z * z0.val + bp 1) +
+      (primorial z * w0.val + bp 2)) ≡ n [MOD primorial z * N] :=
+    (Nat.modEq_and_modEq_iff_modEq_mul hcopWN).1 ⟨hcongW, hcongN⟩
+  -- conclude
+  have hp0pos : 0 < primorial z * y0.val + bp 0 := (hA 0 hm0.1).pos
+  refine IsSum3_of_congruent hnWN ?_ hm0.2 hm1.2 hm2.2 hm0.1 hm1.1 hm2.1 hp0pos hcong
+  have h3 : 3 * ((2 * n - 1) / 3) ≤ 2 * n - 1 := Nat.mul_div_le _ _
+  omega
+
+end Lifting408b
+
 /-- LEAF. Li and Pan math/0701240v3 pages 8 to 12, Sections 3 and 4,
 and Shao pages 16 to 17 after equation 30. The three set version of the
 explicit profile lifting. All three mass margins and Fourier bounds enter
@@ -1146,7 +1744,7 @@ theorem weighted_lifting_mixed (H : AlsetriProp41) (R : U1488.Green66p (5 / 2))
         3 / 2 < Profiles408.halfProfile (A 0) z n δ m b₁ +
           Profiles408.halfProfile (A 1) z n δ m b₂ + Profiles408.halfProfile (A 2) z n δ m b₃ →
         IsSum3 (A 0) (A 1) (A 2) n := by
-  sorry
+  exact weighted_lifting_mixed_proof H R δ hδ
 
 /-- LEAF. Shao pages 16 to 17, after equation 30 through Lemmas 4.5 and 4.6.
 Given the transference principle and the restriction estimate, an admissible
