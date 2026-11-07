@@ -838,6 +838,438 @@ theorem density_power_tail {m : ℕ} {σ c1 c2 c3 : ℝ}
   field_simp
   <;> ring
 
+private lemma hasDerivAt_rpow_neg {ν t : ℝ} (ht : 0 < t) :
+    HasDerivAt (fun s : ℝ => s ^ (-ν)) (-ν * t ^ (-ν - 1)) t :=
+  Real.hasDerivAt_rpow_const (x := t) (p := -ν) (Or.inl ht.ne')
+
+private lemma rpow_primitive_hasDerivAt {ν c1 c2 c3 : ℝ} (hν : 1 < ν) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (fun s : ℝ => (c1 * s + c2 * Real.log s + c3) * s ^ (-ν)
+        + c1 / (ν - 1) * s ^ (1 - ν) + c2 / ν * s ^ (-ν))
+      (-(ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))) t := by
+  have hν1 : ν - 1 ≠ 0 := by linarith
+  have hν0 : ν ≠ 0 := by linarith
+  have hB : HasDerivAt (fun s : ℝ => c1 * s + c2 * Real.log s + c3) (c1 + c2 / t) t := by
+    convert (((hasDerivAt_id t).const_mul c1).add
+      ((Real.hasDerivAt_log ht.ne').const_mul c2)).add_const c3 using 1
+    · ext x
+      simp only [Pi.add_apply, id_eq]
+    · ring
+  have h1 : HasDerivAt (fun s : ℝ => (c1 * s + c2 * Real.log s + c3) * s ^ (-ν))
+      ((c1 + c2 / t) * t ^ (-ν) + (c1 * t + c2 * Real.log t + c3) * (-ν * t ^ (-ν - 1))) t :=
+    hB.mul (hasDerivAt_rpow_neg ht)
+  have h2 : HasDerivAt (fun s : ℝ => c1 / (ν - 1) * s ^ (1 - ν))
+      (c1 / (ν - 1) * ((1 - ν) * t ^ (-ν))) t := by
+    have hbase := (hasDerivAt_rpow_neg (ν := ν - 1) ht).const_mul (c1 / (ν - 1))
+    convert hbase using 1
+    · ext s
+      congr 1
+      ring
+    · ring
+  have h3 : HasDerivAt (fun s : ℝ => c2 / ν * s ^ (-ν))
+      (c2 / ν * (-ν * t ^ (-ν - 1))) t :=
+    (hasDerivAt_rpow_neg ht).const_mul _
+  refine (h1.add h2).add h3 |>.congr_deriv ?_
+  have e1 : t ^ (ν + 1) * t ^ (-ν) = t := by
+    rw [← Real.rpow_add ht]
+    rw [show ν + 1 + -ν = (1 : ℝ) by ring, Real.rpow_one]
+  have e2 : t ^ (ν + 1) * t ^ (-ν - 1) = 1 := by
+    rw [← Real.rpow_add ht]
+    rw [show ν + 1 + (-ν - 1) = (0 : ℝ) by ring, Real.rpow_zero]
+  have t1 : t ^ (ν + 1) * ((c1 + c2 / t) * t ^ (-ν)) = c1 * t + c2 := by
+    rw [show t ^ (ν + 1) * ((c1 + c2 / t) * t ^ (-ν))
+        = (c1 + c2 / t) * (t ^ (ν + 1) * t ^ (-ν)) by ring, e1]
+    field_simp
+  have t2 : t ^ (ν + 1) * ((c1 * t + c2 * Real.log t + c3) * (-ν * t ^ (-ν - 1)))
+      = -ν * (c1 * t + c2 * Real.log t + c3) := by
+    rw [show t ^ (ν + 1) * ((c1 * t + c2 * Real.log t + c3) * (-ν * t ^ (-ν - 1)))
+        = ((c1 * t + c2 * Real.log t + c3) * (-ν)) * (t ^ (ν + 1) * t ^ (-ν - 1)) by ring, e2]
+    ring
+  have t3 : t ^ (ν + 1) * (c1 / (ν - 1) * ((1 - ν) * t ^ (-ν))) = -c1 * t := by
+    rw [show t ^ (ν + 1) * (c1 / (ν - 1) * ((1 - ν) * t ^ (-ν)))
+        = (c1 / (ν - 1) * (1 - ν)) * (t ^ (ν + 1) * t ^ (-ν)) by ring, e1]
+    field_simp
+    ring
+  have t4 : t ^ (ν + 1) * (c2 / ν * (-ν * t ^ (-ν - 1))) = -c2 := by
+    rw [show t ^ (ν + 1) * (c2 / ν * (-ν * t ^ (-ν - 1)))
+        = (c2 / ν * (-ν)) * (t ^ (ν + 1) * t ^ (-ν - 1)) by ring, e2]
+    field_simp
+  have t5 : t ^ (ν + 1) * -(ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))
+      = -(ν * (c1 * t + c2 * Real.log t + c3)) := by
+    rw [show t ^ (ν + 1) * -(ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))
+        = -(ν * (c1 * t + c2 * Real.log t + c3) * (t ^ (ν + 1) / t ^ (ν + 1))) by ring]
+    rw [div_self (Real.rpow_pos_of_pos ht _).ne', mul_one]
+  have hsum : t ^ (ν + 1) * ((c1 + c2 / t) * t ^ (-ν)
+      + (c1 * t + c2 * Real.log t + c3) * (-ν * t ^ (-ν - 1))
+      + c1 / (ν - 1) * ((1 - ν) * t ^ (-ν))
+      + c2 / ν * (-ν * t ^ (-ν - 1))) = -(ν * (c1 * t + c2 * Real.log t + c3)) := by
+    rw [mul_add, mul_add, mul_add, t1, t2, t3, t4]
+    ring
+  have hpow : t ^ (ν + 1) ≠ 0 := (Real.rpow_pos_of_pos ht _).ne'
+  refine mul_left_cancel₀ hpow ?_
+  rw [hsum]
+  exact t5.symm
+
+private lemma rpow_primitive_integral {ν c1 c2 c3 H V : ℝ} (hν : 1 < ν) (hH : 0 < H) (hHV : H ≤ V) :
+    (∫ t in H..V, ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1)) =
+      ((c1 * H + c2 * Real.log H + c3) * H ^ (-ν) + c1 / (ν - 1) * H ^ (1 - ν)
+        + c2 / ν * H ^ (-ν))
+      - ((c1 * V + c2 * Real.log V + c3) * V ^ (-ν) + c1 / (ν - 1) * V ^ (1 - ν)
+        + c2 / ν * V ^ (-ν)) := by
+  have hcont : ContinuousOn (fun t : ℝ => ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))
+      (Icc H V) := by
+    have hpoly : ContinuousOn (fun t : ℝ => c1 * t + c2 * Real.log t + c3) (Icc H V) := by
+      fun_prop (disch := intro t ht; exact (hH.trans_le ht.1).ne')
+    have hden : ContinuousOn (fun t : ℝ => t ^ (ν + 1)) (Icc H V) :=
+      continuousOn_id.rpow_const (fun t ht => Or.inl (hH.trans_le ht.1).ne')
+    exact (continuousOn_const.mul hpoly).div hden
+      (fun t ht => (Real.rpow_pos_of_pos (hH.trans_le ht.1) _).ne')
+  have hi : IntervalIntegrable (fun t : ℝ => ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))
+      volume H V :=
+    hcont.intervalIntegrable_of_Icc hHV
+  have h := intervalIntegral.integral_eq_sub_of_hasDerivAt
+    (f := fun t => -((c1 * t + c2 * Real.log t + c3) * t ^ (-ν) + c1 / (ν - 1) * t ^ (1 - ν)
+      + c2 / ν * t ^ (-ν)))
+    (f' := fun t => ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))
+    (fun t ht => by
+      rw [uIcc_of_le hHV] at ht
+      convert (rpow_primitive_hasDerivAt (c1 := c1) (c2 := c2) (c3 := c3) hν
+        (hH.trans_le ht.1)).neg using 1
+      · ring) hi
+  linarith
+
+private lemma rpow_neg_exp_eq_inv {t : ℝ} (ht : 0 < t) (ν : ℝ) :
+    t ^ (-ν - 1) = (t ^ (ν + 1))⁻¹ := by
+  rw [← Real.rpow_neg (le_of_lt ht)]
+  congr 1
+  ring
+
+private theorem density_rpow_partial_bound {ν H V σ c1 c2 c3 : ℝ} (hν : 1 < ν)
+    (hH : 0 < H) (hHV : H ≤ V) (hσ : 1 / 2 < σ) (hRH : VerifiedHeight H)
+    (hDensity : ∀ t ∈ Icc H V, densityCount σ t ≤ c1 * t + c2 * Real.log t + c3)
+    (hc1 : 0 ≤ c1) (hc2 : 0 ≤ c2) :
+    positiveZeroSum (fun ρ => if σ < ρ.re ∧ ρ.im < V then ρ.im ^ (-ν) else 0) ≤
+      (c1 * H + c2 * Real.log H + c3) * H ^ (-ν) + c1 / (ν - 1) * H ^ (1 - ν)
+        + c2 / ν * H ^ (-ν) := by
+  classical
+  have hν0 : 0 < ν := by linarith
+  have hνne : ν ≠ 0 := by linarith
+  have hν1 : ν - 1 ≠ 0 := by linarith
+  have hφ'd : ∀ t ∈ Icc H V, HasDerivAt (fun s : ℝ => s ^ (-ν)) (-ν * t ^ (-ν - 1)) t :=
+    fun t ht => hasDerivAt_rpow_neg (hH.trans_le ht.1)
+  have hφ'c : ContinuousOn (fun t : ℝ => -ν * t ^ (-ν - 1)) (Icc H V) := by
+    have hp : ContinuousOn (fun t : ℝ => t ^ (-ν - 1)) (Icc H V) :=
+      continuousOn_id.rpow_const (fun t ht => Or.inl (hH.trans_le ht.1).ne')
+    exact continuousOn_const.mul hp
+  have hi : IntervalIntegrable (fun t : ℝ => -ν * t ^ (-ν - 1)) volume H V :=
+    hφ'c.intervalIntegrable_of_Icc hHV
+  have hW := density_partial_summation (H := H) (V := V) (σ := σ) hHV hσ hRH hφ'd hi
+  have hNint : IntervalIntegrable (fun t : ℝ => densityCount σ t * (-ν * t ^ (-ν - 1)))
+      volume H V := densityCount_mul_integrable hHV hi
+  have hEcont : ContinuousOn (fun t : ℝ => (c1 * t + c2 * Real.log t + c3)
+      * (-ν * t ^ (-ν - 1))) (Icc H V) := by
+    have hpoly : ContinuousOn (fun t : ℝ => c1 * t + c2 * Real.log t + c3) (Icc H V) := by
+      fun_prop (disch := intro t ht; exact (hH.trans_le ht.1).ne')
+    exact hpoly.mul hφ'c
+  have hEint : IntervalIntegrable (fun t : ℝ => (c1 * t + c2 * Real.log t + c3)
+      * (-ν * t ^ (-ν - 1))) volume H V :=
+    hEcont.intervalIntegrable_of_Icc hHV
+  have hφ'np : ∀ t ∈ Icc H V, -ν * t ^ (-ν - 1) ≤ 0 := by
+    intro t ht
+    have hp : 0 < t ^ (-ν - 1) := Real.rpow_pos_of_pos (hH.trans_le ht.1) _
+    nlinarith
+  have hmono : (∫ t in H..V, (c1 * t + c2 * Real.log t + c3) * (-ν * t ^ (-ν - 1)))
+      ≤ ∫ t in H..V, densityCount σ t * (-ν * t ^ (-ν - 1)) := by
+    apply intervalIntegral.integral_mono_on hHV hEint hNint
+    intro t ht
+    have h1 := hDensity t ht
+    have h2 := hφ'np t ht
+    have h3 : 0 ≤ (c1 * t + c2 * Real.log t + c3) - densityCount σ t := by linarith
+    nlinarith [mul_nonpos_of_nonneg_of_nonpos h3 h2]
+  have hB : 0 ≤ c1 * V + c2 * Real.log V + c3 := by
+    have hN : 0 ≤ densityCount σ V := by
+      unfold densityCount positiveZeroSum
+      apply tsum_nonneg
+      intro ρ
+      split_ifs <;> positivity
+    exact hN.trans (hDensity V ⟨hHV, le_rfl⟩)
+  have hV0 : 0 < V := lt_of_lt_of_le hH hHV
+  have hφV : 0 ≤ V ^ (-ν) := le_of_lt (Real.rpow_pos_of_pos hV0 _)
+  have h1 : V ^ (-ν) * densityCount σ V ≤ V ^ (-ν) * (c1 * V + c2 * Real.log V + c3) :=
+    mul_le_mul_of_nonneg_left (hDensity V ⟨hHV, le_rfl⟩) hφV
+  have hP1 : ContinuousOn (fun t : ℝ => ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))
+      (Icc H V) := by
+    have hpoly : ContinuousOn (fun t : ℝ => c1 * t + c2 * Real.log t + c3) (Icc H V) := by
+      fun_prop (disch := intro t ht; exact (hH.trans_le ht.1).ne')
+    have hden : ContinuousOn (fun t : ℝ => t ^ (ν + 1)) (Icc H V) :=
+      continuousOn_id.rpow_const (fun t ht => Or.inl (hH.trans_le ht.1).ne')
+    exact (continuousOn_const.mul hpoly).div hden
+      (fun t ht => (Real.rpow_pos_of_pos (hH.trans_le ht.1) _).ne')
+  have hPint : IntervalIntegrable (fun t : ℝ => ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1))
+      volume H V := hP1.intervalIntegrable_of_Icc hHV
+  have hEq : (∫ t in H..V, (c1 * t + c2 * Real.log t + c3) * (-ν * t ^ (-ν - 1)))
+      = -(∫ t in H..V, ν * (c1 * t + c2 * Real.log t + c3) / t ^ (ν + 1)) := by
+    rw [← intervalIntegral.integral_neg]
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [uIcc_of_le hHV] at ht
+    have ht0 : 0 < t := hH.trans_le ht.1
+    dsimp only
+    rw [rpow_neg_exp_eq_inv ht0]
+    have hne : t ^ (ν + 1) ≠ 0 := (Real.rpow_pos_of_pos ht0 _).ne'
+    field_simp
+  have hPval := rpow_primitive_integral (c1 := c1) (c2 := c2) (c3 := c3) hν hH hHV
+  have hPV : (c1 * V + c2 * Real.log V + c3) * V ^ (-ν) ≤
+      (c1 * V + c2 * Real.log V + c3) * V ^ (-ν) + c1 / (ν - 1) * V ^ (1 - ν)
+        + c2 / ν * V ^ (-ν) := by
+    have h1' : 0 ≤ c1 / (ν - 1) * V ^ (1 - ν) := by
+      have : 0 < ν - 1 := by linarith
+      positivity
+    have h2' : 0 ≤ c2 / ν * V ^ (-ν) := by positivity
+    linarith
+  have hsteps : -(∫ t in H..V, densityCount σ t * (-ν * t ^ (-ν - 1))) ≤
+      (c1 * H + c2 * Real.log H + c3) * H ^ (-ν) + c1 / (ν - 1) * H ^ (1 - ν)
+        + c2 / ν * H ^ (-ν)
+      - ((c1 * V + c2 * Real.log V + c3) * V ^ (-ν) + c1 / (ν - 1) * V ^ (1 - ν)
+        + c2 / ν * V ^ (-ν)) := by
+    have hh := hmono
+    rw [hEq, hPval] at hh
+    linarith
+  rw [hW]
+  linarith [h1, hsteps, hPV]
+
+private theorem density_rpow_finite_bound {ν H σ c1 c2 c3 : ℝ} (hν : 1 < ν)
+    (hH : 0 < H) (hσ : 1 / 2 < σ) (hRH : VerifiedHeight H)
+    (hDensity : ∀ t, H ≤ t → densityCount σ t ≤ c1 * t + c2 * Real.log t + c3)
+    (hc1 : 0 ≤ c1) (hc2 : 0 ≤ c2)
+    (s : Finset {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1}) :
+    ∑ ρ ∈ s, (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+      (if H < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re then (ρ : ℂ).im ^ (-ν) else 0) else 0) ≤
+      (c1 * H + c2 * Real.log H + c3) * H ^ (-ν) + c1 / (ν - 1) * H ^ (1 - ν)
+        + c2 / ν * H ^ (-ν) := by
+  classical
+  have hB : 0 ≤ c1 * H + c2 * Real.log H + c3 := by
+    have hN : 0 ≤ densityCount σ H := by
+      unfold densityCount positiveZeroSum
+      apply tsum_nonneg
+      intro ρ
+      split_ifs <;> positivity
+    exact hN.trans (hDensity H le_rfl)
+  let V : ℝ := H + (∑ ρ ∈ s, |(ρ : ℂ).im|) + 1
+  have hHV : H ≤ V := by
+    dsimp [V]
+    linarith [Finset.sum_nonneg (fun ρ (_ : ρ ∈ s) => abs_nonneg (ρ : ℂ).im)]
+  have hmemV : ∀ ρ ∈ s, (ρ : ℂ).im < V := by
+    intro ρ hρ
+    have hle := Finset.single_le_sum (fun i (_ : i ∈ s) => abs_nonneg (i : ℂ).im) hρ
+    have habs := le_abs_self (ρ : ℂ).im
+    dsimp [V]
+    linarith
+  let g := fun ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1} =>
+    if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+      (if σ < (ρ : ℂ).re ∧ (ρ : ℂ).im < V then (ρ : ℂ).im ^ (-ν) else 0) else 0
+  have hg : Summable g := summable_bounded_positive_zero_family V
+    (fun ρ => if σ < ρ.re ∧ ρ.im < V then ρ.im ^ (-ν) else 0)
+    (fun ρ hρ => ite_eq_right (by intro h; linarith [h.2]))
+  have hgn : ∀ ρ, 0 ≤ g ρ := by
+    intro ρ
+    dsimp [g]
+    split_ifs with hp h
+    · exact mul_nonneg (by positivity) (le_of_lt (Real.rpow_pos_of_pos (by exact hp) _))
+    · simp
+    · rfl
+  calc
+    _ ≤ ∑ ρ ∈ s, g ρ := by
+      apply Finset.sum_le_sum
+      intro ρ hρ
+      dsimp [g]
+      by_cases hp : 0 < (ρ : ℂ).im
+      · simp only [ite_eq_left hp]
+        by_cases h : H < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re
+        · simp [h, hmemV ρ hρ]
+        · simp only [ite_eq_right h, mul_zero]
+          exact (hgn ρ).trans_eq (by simp [g, hp])
+      · simp [hp]
+    _ ≤ ∑' ρ, g ρ := hg.sum_le_tsum s (fun ρ _ => hgn ρ)
+    _ ≤ _ := density_rpow_partial_bound hν hH hHV hσ hRH
+      (fun t ht => hDensity t ht.1) hc1 hc2
+
+private theorem density_rpow_tail_bound {ν H σ c1 c2 c3 : ℝ} (hν : 1 < ν)
+    (hH : 0 < H) (hσ : 1 / 2 < σ) (hRH : VerifiedHeight H)
+    (hDensity : ∀ t, H ≤ t → densityCount σ t ≤ c1 * t + c2 * Real.log t + c3)
+    (hc1 : 0 ≤ c1) (hc2 : 0 ≤ c2) :
+    positiveZeroSum (fun ρ => if H < ρ.im ∧ σ < ρ.re then ρ.im ^ (-ν) else 0) ≤
+      (c1 * H + c2 * Real.log H + c3) * H ^ (-ν) + c1 / (ν - 1) * H ^ (1 - ν)
+        + c2 / ν * H ^ (-ν) := by
+  have h1p : 0 < ν - 1 := by linarith
+  have hB : 0 ≤ c1 * H + c2 * Real.log H + c3 := by
+    have hN : 0 ≤ densityCount σ H := by
+      unfold densityCount positiveZeroSum
+      apply tsum_nonneg
+      intro ρ
+      split_ifs <;> positivity
+    exact hN.trans (hDensity H le_rfl)
+  have hF : 0 ≤ (c1 * H + c2 * Real.log H + c3) * H ^ (-ν) + c1 / (ν - 1) * H ^ (1 - ν)
+      + c2 / ν * H ^ (-ν) := by
+    have h1 : 0 ≤ (c1 * H + c2 * Real.log H + c3) * H ^ (-ν) :=
+      mul_nonneg hB (le_of_lt (Real.rpow_pos_of_pos hH _))
+    have h2 : 0 ≤ c1 / (ν - 1) * H ^ (1 - ν) :=
+      mul_nonneg (div_nonneg hc1 (le_of_lt h1p)) (le_of_lt (Real.rpow_pos_of_pos hH _))
+    have h3 : 0 ≤ c2 / ν * H ^ (-ν) :=
+      mul_nonneg (div_nonneg hc2 (by linarith)) (le_of_lt (Real.rpow_pos_of_pos hH _))
+    linarith
+  unfold positiveZeroSum
+  exact tsum_le_of_sum_le' hF
+    (fun s => density_rpow_finite_bound hν hH hσ hRH hDensity hc1 hc2 s)
+
+private lemma rpow_weight_le {X t : ℝ} (hX : 10 < X) (ht : 30610000000 ≤ t) :
+    X ^ (-1 / (5.69693 * Real.log t)) ≤
+      X ^ (-1 / (5.69693 * Real.log 30610000000)) *
+        (t / 30610000000) ^ (Real.log X / (5.69693 * (Real.log 30610000000) ^ 2)) := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hH0 : (0 : ℝ) < 30610000000 := by norm_num
+  have ht0 : (0 : ℝ) < t := lt_of_lt_of_le hH0 ht
+  have hL : (0 : ℝ) < Real.log 30610000000 := Real.log_pos (by norm_num)
+  have hLt : (0 : ℝ) < Real.log t := Real.log_pos (by linarith)
+  have hLle : Real.log 30610000000 ≤ Real.log t := Real.log_le_log hH0 ht
+  have hW0 : (0 : ℝ) < X ^ (-1 / (5.69693 * Real.log 30610000000)) :=
+    Real.rpow_pos_of_pos hX0 _
+  have hV0 : (0 : ℝ) < (t / 30610000000) ^ (Real.log X / (5.69693 * (Real.log 30610000000) ^ 2)) :=
+    Real.rpow_pos_of_pos (div_pos ht0 hH0) _
+  refine (Real.log_le_log_iff (Real.rpow_pos_of_pos hX0 _) (mul_pos hW0 hV0)).mp ?_
+  rw [Real.log_rpow hX0, Real.log_mul (ne_of_gt hW0) (ne_of_gt hV0), Real.log_rpow hX0,
+    Real.log_rpow (div_pos ht0 hH0), Real.log_div ht0.ne' hH0.ne']
+  have hc : (0 : ℝ) < Real.log X := Real.log_pos (by linarith)
+  have hkey : (1 : ℝ) / Real.log 30610000000 - 1 / Real.log t
+      = (Real.log t - Real.log 30610000000) / (Real.log 30610000000 * Real.log t) := by
+    field_simp
+  have hkey2 : (Real.log t - Real.log 30610000000) / (Real.log 30610000000 * Real.log t)
+      ≤ (Real.log t - Real.log 30610000000) / (Real.log 30610000000) ^ 2 := by
+    apply div_le_div_of_nonneg_left (by linarith)
+    · positivity
+    · nlinarith
+  have hstep : (1 : ℝ) / Real.log 30610000000 - 1 / Real.log t
+      ≤ (Real.log t - Real.log 30610000000) / (Real.log 30610000000) ^ 2 :=
+    hkey.trans_le hkey2
+  have hmul := mul_le_mul_of_nonneg_left hstep (le_of_lt (by positivity : (0 : ℝ) < Real.log X / 5.69693))
+  field_simp at hmul ⊢
+  linarith [hmul]
+
+private lemma s5_bracket_factor {X : ℝ} (hX : 10 < X) {m : ℕ} (hm : 2 ≤ m)
+    (hlog : Real.log X < 5.69693 * m * (Real.log 30610000000) ^ 2) :
+    5.69693 / Real.log X * (Real.log 30610000000) ^ 2 /
+        (((m : ℝ) * 5.69693 / Real.log X) * (Real.log 30610000000) ^ 2 - 1)
+      = 1 / ((m : ℝ) - Real.log X / (5.69693 * (Real.log 30610000000) ^ 2)) := by
+  have hc : (0 : ℝ) < Real.log X := Real.log_pos (by linarith)
+  have hL : (0 : ℝ) < Real.log 30610000000 := Real.log_pos (by norm_num)
+  have hm2 : (2 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
+  have hden : 1 < ((m : ℝ) * 5.69693 / Real.log X) * (Real.log 30610000000) ^ 2 := by
+    rw [div_mul_eq_mul_div, lt_div_iff₀ hc]
+    nlinarith [hlog]
+  have hden0 : ((m : ℝ) * 5.69693 / Real.log X) * (Real.log 30610000000) ^ 2 - 1 ≠ 0 :=
+    ne_of_gt (by linarith)
+  have hsub0 : (m : ℝ) - Real.log X / (5.69693 * (Real.log 30610000000) ^ 2) ≠ 0 := by
+    intro h
+    have h' : Real.log X = (m : ℝ) * 5.69693 * (Real.log 30610000000) ^ 2 := by
+      field_simp at h
+      linarith [h]
+    nlinarith [hlog, h']
+  field_simp
+
+private lemma rpow_closed_form_le_zeroS5 {X : ℝ} {m : ℕ} {c1 c2 c3 d ν : ℝ}
+    (hX : 10 < X) (hm : 2 ≤ m)
+    (hlog : Real.log X < 5.69693 * m * (Real.log 30610000000) ^ 2)
+    (hc2 : 0 ≤ c2)
+    (hd : d = Real.log X / (5.69693 * (Real.log 30610000000) ^ 2))
+    (hν : ν = (m : ℝ) + 1 - d) :
+    30610000000 ^ (-d) * ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3)
+        * 30610000000 ^ (-ν) + c1 / (ν - 1) * 30610000000 ^ (1 - ν)
+        + c2 / ν * 30610000000 ^ (-ν)) ≤ zeroS5 X m c1 c2 c3 := by
+  have hH0 : (0 : ℝ) < 30610000000 := by norm_num
+  have hm2 : (2 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
+  have hdm : d < (m : ℝ) := by
+    rw [hd, div_lt_iff₀ (by positivity)]
+    nlinarith [hlog]
+  have hν1 : 1 < ν := by rw [hν]; linarith
+  have hHm : (0 : ℝ) < 30610000000 ^ m := by positivity
+  have e1 : (30610000000 : ℝ) ^ m * ((30610000000 : ℝ) ^ (-d) * (30610000000 : ℝ) ^ (-ν))
+      = ((30610000000 : ℝ))⁻¹ := by
+    rw [← Real.rpow_natCast, ← Real.rpow_add hH0, ← Real.rpow_add hH0]
+    rw [show ((m : ℝ) + (-d + -ν)) = (-1 : ℝ) by push_cast; linarith [hν], Real.rpow_neg_one]
+  have e2 : (30610000000 : ℝ) ^ m * ((30610000000 : ℝ) ^ (-d) * (30610000000 : ℝ) ^ (1 - ν)) = 1 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_add hH0, ← Real.rpow_add hH0]
+    rw [show ((m : ℝ) + (-d + (1 - ν))) = (0 : ℝ) by push_cast; linarith [hν], Real.rpow_zero]
+  have tA : 30610000000 ^ m * (30610000000 ^ (-d) *
+        ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)))
+      = (c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * (30610000000 : ℝ)⁻¹ := by
+    rw [show 30610000000 ^ m * (30610000000 ^ (-d) *
+        ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)))
+        = (c1 * 30610000000 + c2 * Real.log 30610000000 + c3)
+          * (30610000000 ^ m * (30610000000 ^ (-d) * 30610000000 ^ (-ν))) by ring, e1]
+  have tB : 30610000000 ^ m * (30610000000 ^ (-d) * (c1 / (ν - 1) * 30610000000 ^ (1 - ν)))
+      = c1 / (ν - 1) := by
+    rw [show 30610000000 ^ m * (30610000000 ^ (-d) * (c1 / (ν - 1) * 30610000000 ^ (1 - ν)))
+        = (c1 / (ν - 1)) * (30610000000 ^ m * (30610000000 ^ (-d)
+          * 30610000000 ^ (1 - ν))) by ring, e2]
+    ring
+  have tC : 30610000000 ^ m * (30610000000 ^ (-d) * (c2 / ν * 30610000000 ^ (-ν)))
+      = c2 / ν * (30610000000 : ℝ)⁻¹ := by
+    rw [show 30610000000 ^ m * (30610000000 ^ (-d) * (c2 / ν * 30610000000 ^ (-ν)))
+        = (c2 / ν) * (30610000000 ^ m * (30610000000 ^ (-d) * 30610000000 ^ (-ν))) by ring, e1]
+  have hL : 30610000000 ^ m * (30610000000 ^ (-d) *
+        ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)
+          + c1 / (ν - 1) * 30610000000 ^ (1 - ν) + c2 / ν * 30610000000 ^ (-ν)))
+      = c1 + (c2 * Real.log 30610000000 + c3) / 30610000000 + c1 / (ν - 1)
+        + c2 / (ν * 30610000000) := by
+    rw [mul_add, mul_add]
+    rw [show 30610000000 ^ m * (30610000000 ^ (-d) *
+        ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)
+          + c1 / (ν - 1) * 30610000000 ^ (1 - ν)))
+        = 30610000000 ^ m * (30610000000 ^ (-d)
+            * ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)))
+          + 30610000000 ^ m * (30610000000 ^ (-d) * (c1 / (ν - 1) * 30610000000 ^ (1 - ν)))
+        by ring]
+    rw [tA, tB, tC]
+    have hHne : (30610000000 : ℝ) ≠ 0 := ne_of_gt hH0
+    field_simp
+    ring
+  have hνm : ν - 1 = (m : ℝ) - d := by rw [hν]; ring
+  have hbr : c1 + (c2 * Real.log 30610000000 + c3) / 30610000000 + c1 / (ν - 1)
+        + c2 / (ν * 30610000000)
+      ≤ c1 + c2 * Real.log 30610000000 / 30610000000 + c3 / 30610000000
+        + (c1 + c2 / 30610000000) * (1 / ((m : ℝ) - d)) := by
+    have h1 : c1 / (ν - 1) = c1 / ((m : ℝ) - d) := by rw [hνm]
+    have h2 : c2 / (ν * 30610000000) ≤ c2 / (((m : ℝ) - d) * 30610000000) := by
+      apply div_le_div_of_nonneg_left hc2
+      · have hm0 : (0 : ℝ) < (m : ℝ) - d := by linarith
+        positivity
+      · have hle : (m : ℝ) - d ≤ ν := by rw [hν]; linarith
+        nlinarith [hH0]
+    rw [h1]
+    rw [show (c1 + c2 / 30610000000) * (1 / ((m : ℝ) - d))
+        = c1 / ((m : ℝ) - d) + c2 / (((m : ℝ) - d) * 30610000000) by
+      field_simp]
+    linarith
+  have hZeq : zeroS5 X m c1 c2 c3 =
+      (c1 + c2 * Real.log 30610000000 / 30610000000 + c3 / 30610000000
+        + (c1 + c2 / 30610000000) * (1 / ((m : ℝ) - d))) / 30610000000 ^ m := by
+    rw [zeroS5, hd]
+    rw [show c1 + c2 * Real.log 30610000000 / 30610000000 + c3 / 30610000000
+        + (c1 + c2 / 30610000000) * 5.69693 / Real.log X * (Real.log 30610000000) ^ 2 /
+          (((m : ℝ) * 5.69693 / Real.log X) * (Real.log 30610000000) ^ 2 - 1)
+        = c1 + c2 * Real.log 30610000000 / 30610000000 + c3 / 30610000000
+          + (c1 + c2 / 30610000000) * (5.69693 / Real.log X * (Real.log 30610000000) ^ 2 /
+            (((m : ℝ) * 5.69693 / Real.log X) * (Real.log 30610000000) ^ 2 - 1)) by ring]
+    rw [s5_bracket_factor hX hm hlog]
+  rw [hZeq, le_div_iff₀ hHm]
+  rw [show 30610000000 ^ (-d) * ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3)
+        * 30610000000 ^ (-ν) + c1 / (ν - 1) * 30610000000 ^ (1 - ν)
+        + c2 / ν * 30610000000 ^ (-ν)) * 30610000000 ^ m
+      = 30610000000 ^ m * (30610000000 ^ (-d) * ((c1 * 30610000000
+        + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)
+        + c1 / (ν - 1) * 30610000000 ^ (1 - ν) + c2 / ν * 30610000000 ^ (-ν))) by ring]
+  rw [hL]
+  exact hbr
+
 /-- LEAF. Page 7 display 2.49. Source 4, arXiv 1310.6374 pages 9 and 10,
 Lemma 2.7 and displays 2.26 to 2.30. Integrate the density count against the
 weighted reciprocal power, then bound its remaining integral as in display 2.29.
@@ -850,7 +1282,120 @@ theorem density_weighted_tail {m : ℕ} {X σ c1 c2 c3 : ℝ}
     positiveZeroSum (fun ρ => if 30610000000 < ρ.im ∧ σ < ρ.re then
       X ^ (-1 / (5.69693 * Real.log ρ.im)) / ρ.im ^ (m + 1) else 0) ≤
       zeroS5 X m c1 c2 c3 * X ^ (-1 / (5.69693 * Real.log 30610000000)) := by
-  sorry
+  set d : ℝ := Real.log X / (5.69693 * (Real.log 30610000000) ^ 2) with hd
+  set ν : ℝ := (m : ℝ) + 1 - d with hν
+  have hH0 : (0 : ℝ) < 30610000000 := by norm_num
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hdm : d < (m : ℝ) := by
+    rw [hd, div_lt_iff₀ (by positivity)]
+    nlinarith [hlog]
+  have hν1 : 1 < ν := by rw [hν]; linarith
+  have hσ' : 1 / 2 < σ := by linarith
+  have hk : (0 : ℝ) < X ^ (-1 / (5.69693 * Real.log 30610000000)) := Real.rpow_pos_of_pos hX0 _
+  have hHd : (0 : ℝ) < 30610000000 ^ (-d) := Real.rpow_pos_of_pos hH0 _
+  have hterm : ∀ ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1},
+      (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+        (if 30610000000 < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re then
+          X ^ (-1 / (5.69693 * Real.log (ρ : ℂ).im)) / (ρ : ℂ).im ^ (m + 1) else 0) else 0)
+      ≤ (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+        (X ^ (-1 / (5.69693 * Real.log 30610000000)) * (30610000000 ^ (-d) *
+          (if 30610000000 < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re then (ρ : ℂ).im ^ (-ν)
+            else 0))) else 0) := by
+    intro ρ
+    by_cases hp : 0 < (ρ : ℂ).im
+    · rw [if_pos hp, if_pos hp]
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      by_cases hc : 30610000000 < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re
+      · rw [if_pos hc, if_pos hc]
+        have ht0 : (0 : ℝ) < (ρ : ℂ).im := hp
+        have hw := rpow_weight_le hX (le_of_lt hc.1)
+        have hd1 : ((ρ : ℂ).im / 30610000000) ^ d
+            = (ρ : ℂ).im ^ d * (30610000000 : ℝ) ^ (-d) := by
+          rw [Real.div_rpow (le_of_lt ht0) (le_of_lt hH0), Real.rpow_neg (le_of_lt hH0)]
+          ring
+        have hdiv2 : (ρ : ℂ).im ^ d / (ρ : ℂ).im ^ (m + 1) = (ρ : ℂ).im ^ (-ν) := by
+          rw [← Real.rpow_natCast (x := (ρ : ℂ).im) (n := m + 1), ← Real.rpow_sub ht0]
+          congr 1
+          rw [hν]
+          push_cast
+          ring
+        calc X ^ (-1 / (5.69693 * Real.log (ρ : ℂ).im)) / (ρ : ℂ).im ^ (m + 1)
+            ≤ (X ^ (-1 / (5.69693 * Real.log 30610000000))
+                * ((ρ : ℂ).im / 30610000000) ^ d) / (ρ : ℂ).im ^ (m + 1) :=
+              div_le_div_of_nonneg_right hw (by positivity)
+          _ = X ^ (-1 / (5.69693 * Real.log 30610000000)) * (30610000000 : ℝ) ^ (-d)
+                * ((ρ : ℂ).im ^ d / (ρ : ℂ).im ^ (m + 1)) := by
+              rw [hd1]; ring
+          _ = X ^ (-1 / (5.69693 * Real.log 30610000000)) * (30610000000 : ℝ) ^ (-d)
+                * (ρ : ℂ).im ^ (-ν) := by rw [hdiv2]
+          _ = X ^ (-1 / (5.69693 * Real.log 30610000000))
+                * (30610000000 ^ (-d) * (ρ : ℂ).im ^ (-ν)) := by ring
+      · rw [if_neg hc, if_neg hc, mul_zero, mul_zero]
+    · rw [if_neg hp, if_neg hp]
+  have hPH : 0 ≤ (c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)
+      + c1 / (ν - 1) * 30610000000 ^ (1 - ν) + c2 / ν * 30610000000 ^ (-ν) := by
+    have hB : 0 ≤ c1 * 30610000000 + c2 * Real.log 30610000000 + c3 := by
+      have hN : 0 ≤ densityCount σ 30610000000 := by
+        unfold densityCount positiveZeroSum
+        apply tsum_nonneg
+        intro ρ
+        split_ifs <;> positivity
+      exact hN.trans (hDensity 30610000000 le_rfl)
+    have h1 : 0 ≤ (c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν) :=
+      mul_nonneg hB (le_of_lt (Real.rpow_pos_of_pos hH0 _))
+    have h2 : 0 ≤ c1 / (ν - 1) * 30610000000 ^ (1 - ν) :=
+      mul_nonneg (div_nonneg hc1 (by linarith)) (le_of_lt (Real.rpow_pos_of_pos hH0 _))
+    have h3 : 0 ≤ c2 / ν * 30610000000 ^ (-ν) :=
+      mul_nonneg (div_nonneg hc2 (by linarith)) (le_of_lt (Real.rpow_pos_of_pos hH0 _))
+    linarith
+  unfold positiveZeroSum
+  refine (tsum_le_of_sum_le' (a₂ := X ^ (-1 / (5.69693 * Real.log 30610000000))
+      * (30610000000 ^ (-d) * ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3)
+        * 30610000000 ^ (-ν) + c1 / (ν - 1) * 30610000000 ^ (1 - ν)
+        + c2 / ν * 30610000000 ^ (-ν))))
+    (by positivity) ?_).trans ?_
+  · intro s
+    calc ∑ ρ ∈ s, (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+          (if 30610000000 < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re then
+            X ^ (-1 / (5.69693 * Real.log (ρ : ℂ).im)) / (ρ : ℂ).im ^ (m + 1) else 0) else 0)
+        ≤ ∑ ρ ∈ s, (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+          (X ^ (-1 / (5.69693 * Real.log 30610000000)) * (30610000000 ^ (-d) *
+            (if 30610000000 < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re then (ρ : ℂ).im ^ (-ν)
+              else 0))) else 0) := Finset.sum_le_sum (fun ρ _ => hterm ρ)
+      _ = X ^ (-1 / (5.69693 * Real.log 30610000000)) * (30610000000 ^ (-d) *
+            ∑ ρ ∈ s, (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+              (if 30610000000 < (ρ : ℂ).im ∧ σ < (ρ : ℂ).re then (ρ : ℂ).im ^ (-ν)
+                else 0) else 0)) := by
+          rw [Finset.mul_sum, Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro ρ _
+          by_cases hp : 0 < (ρ : ℂ).im
+          · simp only [if_pos hp]
+            ring
+          · simp only [if_neg hp]
+            ring
+      _ ≤ X ^ (-1 / (5.69693 * Real.log 30610000000)) * (30610000000 ^ (-d) *
+            ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3) * 30610000000 ^ (-ν)
+              + c1 / (ν - 1) * 30610000000 ^ (1 - ν) + c2 / ν * 30610000000 ^ (-ν))) := by
+          apply mul_le_mul_of_nonneg_left _
+            (le_of_lt (Real.rpow_pos_of_pos hX0 _))
+          apply mul_le_mul_of_nonneg_left _
+            (le_of_lt (Real.rpow_pos_of_pos hH0 _))
+          exact density_rpow_finite_bound hν1 hH0 hσ' hRH
+            (fun t ht => hDensity t ht) hc1 hc2 s
+  · have hcl := rpow_closed_form_le_zeroS5 (m := m) (c1 := c1) (c3 := c3) (ν := ν) (d := d) hX hm hlog hc2 hd hν
+    calc X ^ (-1 / (5.69693 * Real.log 30610000000))
+          * (30610000000 ^ (-d) * ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3)
+            * 30610000000 ^ (-ν) + c1 / (ν - 1) * 30610000000 ^ (1 - ν)
+            + c2 / ν * 30610000000 ^ (-ν)))
+        = X ^ (-1 / (5.69693 * Real.log 30610000000))
+            * (30610000000 ^ (-d) * ((c1 * 30610000000 + c2 * Real.log 30610000000 + c3)
+              * 30610000000 ^ (-ν) + c1 / (ν - 1) * 30610000000 ^ (1 - ν)
+              + c2 / ν * 30610000000 ^ (-ν))) := rfl
+      _ ≤ X ^ (-1 / (5.69693 * Real.log 30610000000)) * zeroS5 X m c1 c2 c3 :=
+          mul_le_mul_of_nonneg_left hcl (le_of_lt hk)
+      _ = zeroS5 X m c1 c2 c3 * X ^ (-1 / (5.69693 * Real.log 30610000000)) := by ring
+
 
 /-- Page 7 Lemma 2.5. Exact statement of Task259.lemma2_5_positive assembled
 from its five strictly smaller estimates. CONDITIONAL ON the five OPEN leaves. -/
