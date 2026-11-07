@@ -34,6 +34,151 @@ namespace LeanLab.ExceptionalSet.BG2026.Supply385
 
 open Finset Real
 
+/-- `(log x)^2 ≤ 4 x` for `x ≥ 1`, from `log x = 2 log √x ≤ 2 √x`. -/
+private lemma log_sq_le_four_mul {x : ℝ} (hx : 1 ≤ x) : Real.log x ^ 2 ≤ 4 * x := by
+  have hx0 : 0 < x := lt_of_lt_of_le zero_lt_one hx
+  have hs : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx0
+  have hsub := Real.log_le_sub_one_of_pos hs
+  rw [Real.log_sqrt hx0.le] at hsub
+  have h1 : Real.log x ≤ 2 * Real.sqrt x := by linarith
+  have h0 : 0 ≤ Real.log x := Real.log_nonneg hx
+  have hs0 : 0 ≤ Real.sqrt x := Real.sqrt_nonneg x
+  have h2 : Real.log x * Real.log x ≤ (2 * Real.sqrt x) * (2 * Real.sqrt x) :=
+    mul_le_mul h1 h1 h0 (by linarith)
+  have h3 : (2 * Real.sqrt x) * (2 * Real.sqrt x) = 4 * x := by
+    have : Real.sqrt x * Real.sqrt x = x := Real.mul_self_sqrt hx0.le
+    nlinarith [this]
+  nlinarith [h2, h3]
+
+/-- Each factor of the singular series at a prime `p > 2` is at most `p`. -/
+private lemma one_add_inv_two_le {p : ℕ} (hp : 2 < p) : 1 + 1 / ((p : ℝ) - 2) ≤ (p : ℝ) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hpos : 0 < (p : ℝ) - 2 := by linarith
+  have hq : 0 < (p : ℝ) := by linarith
+  have hkey : 1 / ((p : ℝ) - 2) ≤ (p : ℝ) - 1 := by
+    rw [div_le_iff₀ hpos]
+    nlinarith [mul_nonneg hq.le (show (0 : ℝ) ≤ (p : ℝ) - 3 by linarith)]
+  linarith
+
+/-- The product of the prime factors of `n > 0` over a subcollection is at most `n`. -/
+private lemma prod_filter_primeFactors_le {n : ℕ} (hn : 1 ≤ n) :
+    ∏ p ∈ n.primeFactors.filter (fun p => 2 < p), (p : ℝ) ≤ (n : ℝ) := by
+  have hnpos : 0 < n := by omega
+  have hsub : n.primeFactors.filter (fun p => 2 < p) ⊆ n.primeFactors :=
+    Finset.filter_subset _ _
+  have h1 : (∏ p ∈ n.primeFactors.filter (fun p => 2 < p), p) ∣ ∏ p ∈ n.primeFactors, p :=
+    Finset.prod_dvd_prod_of_subset _ _ _ hsub
+  have h2 : (∏ p ∈ n.primeFactors, p) ∣ n := Nat.prod_primeFactors_dvd n
+  have h3 : (∏ p ∈ n.primeFactors.filter (fun p => 2 < p), p) ≤ n :=
+    Nat.le_of_dvd hnpos (h1.trans h2)
+  calc ∏ p ∈ n.primeFactors.filter (fun p => 2 < p), (p : ℝ)
+      = ((∏ p ∈ n.primeFactors.filter (fun p => 2 < p), p : ℕ) : ℝ) := by push_cast; rfl
+    _ ≤ (n : ℝ) := by exact_mod_cast h3
+
+/-- `𝔖(n) ≤ 2 C₀ n` for `n ≥ 1`: the Euler product is bounded by the primes themselves. -/
+private lemma Sing_le {n : ℕ} (hn : 1 ≤ n) : Sing n ≤ 2 * C0 * (n : ℝ) := by
+  have hC0 : (0 : ℝ) ≤ C0 := le_of_lt C0_pos
+  have hnonneg : ∀ p ∈ n.primeFactors.filter (fun p => 2 < p),
+      (0 : ℝ) ≤ 1 + 1 / ((p : ℝ) - 2) := by
+    intro p hp
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by
+      exact_mod_cast (Finset.mem_filter.mp hp).2
+    have : 0 < (p : ℝ) - 2 := by linarith
+    positivity
+  have hfac : ∀ p ∈ n.primeFactors.filter (fun p => 2 < p),
+      (1 + 1 / ((p : ℝ) - 2)) ≤ (p : ℝ) := by
+    intro p hp
+    exact one_add_inv_two_le (Finset.mem_filter.mp hp).2
+  have hprod : ∏ p ∈ n.primeFactors.filter (fun p => 2 < p), (1 + 1 / ((p : ℝ) - 2))
+      ≤ (n : ℝ) :=
+    (Finset.prod_le_prod₀ hnonneg hfac).trans (prod_filter_primeFactors_le hn)
+  show 2 * C0 * ∏ p ∈ n.primeFactors.filter (fun p => 2 < p),
+      (1 + 1 / ((p : ℝ) - 2)) ≤ 2 * C0 * (n : ℝ)
+  exact mul_le_mul_of_nonneg_left hprod (by linarith)
+
+/-- `r₂ n ≤ 8 n²` for `n ≥ 1`: every term is at most `(log n)^2` and there are `n+1` of them. -/
+private lemma r2_le {n : ℕ} (hn : 1 ≤ n) : r2 n ≤ 8 * (n : ℝ) ^ 2 := by
+  have hnR : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+  have hlogn : 0 ≤ Real.log (n : ℝ) := Real.log_nonneg hnR
+  have hlogsq : Real.log (n : ℝ) ^ 2 ≤ 4 * (n : ℝ) := log_sq_le_four_mul hnR
+  have hterm : ∀ m ∈ Finset.range (n + 1),
+      ArithmeticFunction.vonMangoldt m * ArithmeticFunction.vonMangoldt (n - m)
+        ≤ Real.log (n : ℝ) * Real.log (n : ℝ) := by
+    intro m hm
+    have hmn : m ≤ n := by
+      have := Finset.mem_range.mp hm
+      omega
+    have h1 : ArithmeticFunction.vonMangoldt m ≤ Real.log (n : ℝ) := by
+      have hv := ArithmeticFunction.vonMangoldt_le_log (n := m)
+      rcases Nat.eq_zero_or_pos m with h0 | h0
+      · rw [h0] at hv ⊢
+        simpa using hlogn
+      · have hmono : Real.log (m : ℝ) ≤ Real.log (n : ℝ) :=
+          Real.log_le_log (by exact_mod_cast h0) (by exact_mod_cast hmn)
+        linarith
+    have h2 : ArithmeticFunction.vonMangoldt (n - m) ≤ Real.log (n : ℝ) := by
+      have hv := ArithmeticFunction.vonMangoldt_le_log (n := n - m)
+      rcases Nat.eq_zero_or_pos (n - m) with h0 | h0
+      · rw [h0] at hv ⊢
+        simpa using hlogn
+      · have hmono : Real.log ((n - m : ℕ) : ℝ) ≤ Real.log (n : ℝ) :=
+          Real.log_le_log (by exact_mod_cast h0) (by exact_mod_cast Nat.sub_le n m)
+        linarith
+    exact mul_le_mul h1 h2 ArithmeticFunction.vonMangoldt_nonneg hlogn
+  have hsum : r2 n ≤ ∑ m ∈ Finset.range (n + 1),
+      Real.log (n : ℝ) * Real.log (n : ℝ) := Finset.sum_le_sum hterm
+  have hval : ∑ m ∈ Finset.range (n + 1), Real.log (n : ℝ) * Real.log (n : ℝ)
+      = ((n : ℝ) + 1) * (Real.log (n : ℝ) * Real.log (n : ℝ)) := by
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    push_cast
+    ring
+  have hstep : ((n : ℝ) + 1) * (Real.log (n : ℝ) * Real.log (n : ℝ)) ≤ 8 * (n : ℝ) ^ 2 := by
+    have h1 : ((n : ℝ) + 1) ≤ 2 * (n : ℝ) := by linarith
+    have h2 : (0 : ℝ) ≤ Real.log (n : ℝ) * Real.log (n : ℝ) := mul_nonneg hlogn hlogn
+    have h3 := mul_le_mul_of_nonneg_right h1 h2
+    have h4 : (2 * (n : ℝ)) * (Real.log (n : ℝ) * Real.log (n : ℝ)) ≤
+        (2 * (n : ℝ)) * (4 * (n : ℝ)) :=
+      mul_le_mul_of_nonneg_left (by linarith) (by linarith)
+    nlinarith [h3, h4]
+  linarith [hsum, hval, hstep]
+
+/-- Pointwise square bound: `(error n)^2 ≤ (8 + 2 C₀)^2 n^4`, with the case `n = 0` giving `0`. -/
+private lemma error_sq_le (n : ℕ) : (error n) ^ 2 ≤ (8 + 2 * C0) ^ 2 * (n : ℝ) ^ 4 := by
+  have hC0 : (0 : ℝ) ≤ C0 := le_of_lt C0_pos
+  rcases Nat.eq_zero_or_pos n with h0 | h0
+  · have hv0 : ArithmeticFunction.vonMangoldt 0 = 0 :=
+      ArithmeticFunction.vonMangoldt_eq_zero_iff.mpr not_isPrimePow_zero
+    have hr2 : r2 0 = 0 := by
+      simp [r2, hv0]
+    rw [h0]
+    simp [error, hr2]
+  · have hn : 1 ≤ n := h0
+    have hnR : (0 : ℝ) ≤ (n : ℝ) := by positivity
+    have hr2 : 0 ≤ r2 n := by
+      unfold r2
+      exact Finset.sum_nonneg (fun m _ =>
+        mul_nonneg ArithmeticFunction.vonMangoldt_nonneg ArithmeticFunction.vonMangoldt_nonneg)
+    have hSing0 : 0 ≤ Sing n := le_of_lt (Sing_pos n)
+    have hr2le : r2 n ≤ 8 * (n : ℝ) ^ 2 := r2_le hn
+    have hSingle : (n : ℝ) * Sing n ≤ 2 * C0 * (n : ℝ) ^ 2 := by
+      have := Sing_le hn
+      nlinarith [hnR]
+    have habs : |error n| ≤ (8 + 2 * C0) * (n : ℝ) ^ 2 := by
+      have h1 : error n ≤ (8 + 2 * C0) * (n : ℝ) ^ 2 := by
+        unfold error
+        nlinarith
+      have h2 : -((8 + 2 * C0) * (n : ℝ) ^ 2) ≤ error n := by
+        unfold error
+        nlinarith
+      exact abs_le.mpr ⟨h2, h1⟩
+    have hsq : |error n| ^ 2 ≤ ((8 + 2 * C0) * (n : ℝ) ^ 2) ^ 2 := by
+      have h0' : (0 : ℝ) ≤ |error n| := abs_nonneg _
+      have h1' : (0 : ℝ) ≤ (8 + 2 * C0) * (n : ℝ) ^ 2 := by positivity
+      nlinarith [habs, h0', h1']
+    rw [sq_abs] at hsq
+    calc (error n) ^ 2 ≤ ((8 + 2 * C0) * (n : ℝ) ^ 2) ^ 2 := hsq
+      _ = (8 + 2 * C0) ^ 2 * (n : ℝ) ^ 4 := by ring
+
 /-- LEAF 1 of 3, the coarse step: the unconditional second moment bound with exponent `5` for the
 whole even prefix.  This is the whole-prefix statement with an exponent far above the analytic one,
 so no zero-free region is involved: a pointwise polynomial size for `error` and the number of
@@ -41,7 +186,41 @@ terms suffice.  It is the start of the induction in the assembly. -/
 theorem leaf_coarse_even_energy :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 1 ≤ X →
       ∑ n ∈ (Finset.range (X + 1)).filter Even, (error n) ^ 2 ≤ C * (X : ℝ) ^ 5 := by
-  sorry
+  refine ⟨2 * (8 + 2 * C0) ^ 2, by positivity, ?_⟩
+  intro X hX
+  have hXR : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+  have hterm : ∀ n ∈ (Finset.range (X + 1)).filter Even,
+      (error n) ^ 2 ≤ (8 + 2 * C0) ^ 2 * (X : ℝ) ^ 4 := by
+    intro n hn
+    have hnX : n ≤ X := by
+      have := Finset.mem_range.mp (Finset.mem_filter.mp hn).1
+      omega
+    have hnR : (n : ℝ) ≤ (X : ℝ) := by exact_mod_cast hnX
+    have h4 : (n : ℝ) ^ 4 ≤ (X : ℝ) ^ 4 := by
+      have h0 : (0 : ℝ) ≤ (n : ℝ) := by positivity
+      exact pow_le_pow_left₀ h0 hnR 4
+    exact (error_sq_le n).trans (mul_le_mul_of_nonneg_left h4 (by positivity))
+  have hcard : (((Finset.range (X + 1)).filter Even).card : ℝ) ≤ (X : ℝ) + 1 := by
+    have h1 : ((Finset.range (X + 1)).filter Even).card ≤ X + 1 := by
+      have := Finset.card_filter_le (Finset.range (X + 1)) Even
+      simpa using this
+    have : (((Finset.range (X + 1)).filter Even).card : ℝ) ≤ ((X + 1 : ℕ) : ℝ) := by
+      exact_mod_cast h1
+    push_cast at this
+    linarith
+  have hX1 : (X : ℝ) + 1 ≤ 2 * (X : ℝ) := by linarith
+  calc ∑ n ∈ (Finset.range (X + 1)).filter Even, (error n) ^ 2
+      ≤ ∑ n ∈ (Finset.range (X + 1)).filter Even, (8 + 2 * C0) ^ 2 * (X : ℝ) ^ 4 :=
+        Finset.sum_le_sum hterm
+    _ = (((Finset.range (X + 1)).filter Even).card : ℝ) * ((8 + 2 * C0) ^ 2 * (X : ℝ) ^ 4) := by
+        rw [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ ((X : ℝ) + 1) * ((8 + 2 * C0) ^ 2 * (X : ℝ) ^ 4) := by
+        have h0 : (0 : ℝ) ≤ (8 + 2 * C0) ^ 2 * (X : ℝ) ^ 4 := by positivity
+        exact mul_le_mul_of_nonneg_right hcard h0
+    _ ≤ 2 * (8 + 2 * C0) ^ 2 * (X : ℝ) ^ 5 := by
+        have h0 : (0 : ℝ) ≤ (8 + 2 * C0) ^ 2 * (X : ℝ) ^ 4 := by positivity
+        have h3 := mul_le_mul_of_nonneg_right hX1 h0
+        nlinarith [h3]
 
 /-- LEAF 2 of 3, one scale of the analytic step, on the even indices divisible by `4`: some
 nonnegative `C` bounds the second moment over the window `(Y/2, Y]` restricted to the even `n`
@@ -239,7 +418,8 @@ theorem leaf_mean_square_split (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 /
         _ ≤ K * (X : ℝ) ^ p := mul_le_mul_of_nonneg_right hstep hXp
   exact key
 
--- Axiom audit driver for the assembly.
+-- Axiom audit drivers.
+#print axioms leaf_coarse_even_energy
 #print axioms leaf_mean_square_split
 
 end LeanLab.ExceptionalSet.BG2026.Supply385
