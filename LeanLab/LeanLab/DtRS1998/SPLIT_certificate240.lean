@@ -1,4 +1,7 @@
 /-
+OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+The claim below that each leaf is strictly easier than the whole statement is wrong: the covering count is a maximum over the index range and barely shrinks with its length, so a quarter of the range with a quarter of the budget is strictly harder. No route file imports this file. No leaf docstring starts with LEAF any more; scripts/mountain.py reads each leaf as CITED, not OPEN, so the leaves are off MOUNTAIN, and the BLOCKED FALSE line for them in the folder PROGRESS.md keeps them off WORK_LADDER.
+
 Split of certificate240 into four quarter-block finite coverage leaves.
 
 The whole statement asks for one list of at most 228 primes q with
@@ -31,7 +34,8 @@ namespace LeanLab.DtRS1998.Decomp270b
 
 open LeanLab Task71.Paper Decomp270a
 
-/-- LEAF. Quarter one of the split index domain: for every index j below
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Quarter one of the split index domain: for every index j below
 125000001 the offset 10 ^ 240 + 2 * j is covered by one list of at most 57
 primes. This is the prime list together with the finite offset check for the
 first quarter of the index domain, carrying a quarter of the total length
@@ -43,7 +47,8 @@ theorem leaf_quarter_first :
           (q ≤ 10 ^ 240 + 2 * j ∧ (10 ^ 240 + 2 * j - q).Prime)) = true) := by
   sorry
 
-/-- LEAF. Quarter two of the split index domain: for every index j with
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Quarter two of the split index domain: for every index j with
 125000001 <= j < 250000001 the offset 10 ^ 240 + 2 * j is covered by one
 list of at most 57 primes. This is the prime list together with the finite
 offset check for the second quarter of the index domain, with a quarter of
@@ -55,7 +60,8 @@ theorem leaf_quarter_second :
           (q ≤ 10 ^ 240 + 2 * j ∧ (10 ^ 240 + 2 * j - q).Prime)) = true) := by
   sorry
 
-/-- LEAF. Quarter three of the split index domain: for every index j with
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Quarter three of the split index domain: for every index j with
 250000001 <= j < 375000001 the offset 10 ^ 240 + 2 * j is covered by one
 list of at most 57 primes. This is the prime list together with the finite
 offset check for the third quarter of the index domain, with a quarter of
@@ -67,7 +73,8 @@ theorem leaf_quarter_third :
           (q ≤ 10 ^ 240 + 2 * j ∧ (10 ^ 240 + 2 * j - q).Prime)) = true) := by
   sorry
 
-/-- LEAF. Quarter four of the split index domain: for every index j with
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Quarter four of the split index domain: for every index j with
 375000001 <= j < 500000001 the offset 10 ^ 240 + 2 * j is covered by one
 list of at most 57 primes. This is the prime list together with the finite
 offset check for the last quarter of the index domain, with a quarter of

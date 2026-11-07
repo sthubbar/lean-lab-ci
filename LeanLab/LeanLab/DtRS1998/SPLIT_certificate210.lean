@@ -1,4 +1,7 @@
 /-
+OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+The claim below that each leaf is strictly easier than the whole statement is wrong: the covering count is a maximum over the index range and barely shrinks with its length, so a quarter of the range with a quarter of the budget is strictly harder. No route file imports this file. No leaf docstring starts with LEAF any more; scripts/mountain.py reads each leaf as CITED, not OPEN, so the leaves are off MOUNTAIN, and the BLOCKED FALSE line for them in the folder PROGRESS.md keeps them off WORK_LADDER.
+
 Split of `certificate210` of `LeanLab.DtRS1998.Decomp270b` into four block-wise
 finite coverage leaves.
 
@@ -36,7 +39,8 @@ namespace LeanLab.DtRS1998.Decomp270b
 
 open LeanLab Task71.Paper Decomp270a
 
-/-- LEAF. Block one of the split index domain, the step "cover the first quarter
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Block one of the split index domain, the step "cover the first quarter
 of the offsets": the even offsets `10 ^ 210 + 2 * j` for `0 ≤ j ≤ 125000000` are
 all reached by one list of at most 56 primes, each of them at most the offset it
 reaches.  This is the prime list and the finite offset check for the first block,
@@ -47,7 +51,8 @@ theorem leaf_block_one :
         ∃ q ∈ qs, q ≤ 10 ^ 210 + 2 * j ∧ (10 ^ 210 + 2 * j - q).Prime := by
   sorry
 
-/-- LEAF. Block two of the split index domain, the step "cover the second
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Block two of the split index domain, the step "cover the second
 quarter of the offsets": the even offsets `10 ^ 210 + 2 * j` for
 `125000000 ≤ j ≤ 250000000` are all reached by one list of at most 56 primes, each
 of them at most the offset it reaches.  This is the prime list and the finite
@@ -58,7 +63,8 @@ theorem leaf_block_two :
         ∃ q ∈ qs, q ≤ 10 ^ 210 + 2 * j ∧ (10 ^ 210 + 2 * j - q).Prime := by
   sorry
 
-/-- LEAF. Block three of the split index domain, the step "cover the third
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Block three of the split index domain, the step "cover the third
 quarter of the offsets": the even offsets `10 ^ 210 + 2 * j` for
 `250000000 ≤ j ≤ 375000000` are all reached by one list of at most 55 primes, each
 of them at most the offset it reaches.  This is the prime list and the finite
@@ -69,7 +75,8 @@ theorem leaf_block_three :
         ∃ q ∈ qs, q ≤ 10 ^ 210 + 2 * j ∧ (10 ^ 210 + 2 * j - q).Prime := by
   sorry
 
-/-- LEAF. Block four of the split index domain, the step "cover the last quarter
+/-- OFF ROUTE, U-1628 20261107T1621Z-20490: budget split is not implied by the source, audits measure each piece false; parent certificate stays the cited leaf.
+Retired leaf text: Block four of the split index domain, the step "cover the last quarter
 of the offsets": the even offsets `10 ^ 210 + 2 * j` for
 `375000000 ≤ j ≤ 500000000` are all reached by one list of at most 55 primes, each
 of them at most the offset it reaches.  This is the prime list and the finite
