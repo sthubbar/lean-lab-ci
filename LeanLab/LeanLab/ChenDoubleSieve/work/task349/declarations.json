@@ -1,0 +1,1467 @@
+[
+  {
+    "file": "Decomp349a.lean",
+    "name": "basicEndpoint",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "basicSifting",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "basicMain",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "basic_finite_upper",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "basic_main_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "upper_of_main",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "finite_upper_threshold",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "basic_upper_supplied",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "page 39 equations 10.3 and 10.4",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-a-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switchedPairs",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switchedSum",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switchedMain",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switched_finite_upper",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switched_sum_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switchedMain_ratio",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switched_integral_independent",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "pair_remaining_log_pos",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switchedPairs_properties",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switchedSum_nonneg",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switchedMain_nonneg",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "switched_upper_supplied",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "pages 40 and 41 equations 10.6 to 10.11",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-b-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedWeight",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedPairs",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedQuads",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "quadProduct",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedSum",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedMain",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refined_finite_upper",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refined_sum_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedMain_ratio",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedCoordinateWeight",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedWeight_coordinates",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedWeight_bounds",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refinedCoordinateWeight_boundary",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "quad_buchstab_coordinates",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refined_buchstab_argument",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "refined_upper_supplied",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "status": "OPEN",
+    "source": "page 41 equation 10.12",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-c-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "upper_values_bounded",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "upper_values_shift_small",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "basicSifting_fixed",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "basic_fixed_prime_range",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "basic_fixed_values_shift_small",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "refinedQuads_instance",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "log_weighted_power_absorbed",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "switched_errors_absorbed",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "switched_remaining_log_lower",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349d.lean",
+    "name": "refinedCoordinateWeight_continuous",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 39 to 41 equations 10.3 to 10.12 derived preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-d-axioms.txt"
+  },
+  {
+    "file": "Decomp349e.lean",
+    "name": "basicUpperSum",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equation 10.4 derived finite loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-e-axioms.txt"
+  },
+  {
+    "file": "Decomp349e.lean",
+    "name": "basicMain_fixed",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.4 derived finite loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-e-axioms.txt"
+  },
+  {
+    "file": "Decomp349e.lean",
+    "name": "basicMain_fixed_ratio",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.4 derived finite loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-e-axioms.txt"
+  },
+  {
+    "file": "Decomp349e.lean",
+    "name": "basic_fixed_band_subset",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.4 derived finite loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-e-axioms.txt"
+  },
+  {
+    "file": "Decomp349e.lean",
+    "name": "basic_fixed_mass_bounded",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.4 derived finite loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-e-axioms.txt"
+  },
+  {
+    "file": "Decomp349e.lean",
+    "name": "basicUpperSum_shift_small",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "page 39 equation 10.4 derived finite loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-e-axioms.txt"
+  },
+  {
+    "file": "Decomp349f.lean",
+    "name": "squarefree_totient_sum_le_product",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 40 before equation 10.8 derived common factor input",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-f-axioms.txt"
+  },
+  {
+    "file": "Decomp349f.lean",
+    "name": "prime_totient_product_le_density",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 40 before equation 10.8 derived common factor input",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-f-axioms.txt"
+  },
+  {
+    "file": "Decomp349f.lean",
+    "name": "prime_totient_product_log_bounded",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 40 before equation 10.8 derived common factor input",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-f-axioms.txt"
+  },
+  {
+    "file": "Decomp349f.lean",
+    "name": "squarefree_totient_sum_log_bounded",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 40 before equation 10.8 derived common factor input",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-f-axioms.txt"
+  },
+  {
+    "file": "Decomp349g.lean",
+    "name": "tail_integral_square",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived weighted prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-g-axioms.txt"
+  },
+  {
+    "file": "Decomp349g.lean",
+    "name": "weightedPrimeSum",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equation 10.3 derived weighted prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-g-axioms.txt"
+  },
+  {
+    "file": "Decomp349g.lean",
+    "name": "weightedPrimeSum_diagonal_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived weighted prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-g-axioms.txt"
+  },
+  {
+    "file": "Decomp349g.lean",
+    "name": "weighted_triangle_integral_square",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived weighted prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-g-axioms.txt"
+  },
+  {
+    "file": "Decomp349g.lean",
+    "name": "weightedPrimeSum_square_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived weighted prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-g-axioms.txt"
+  },
+  {
+    "file": "Decomp349g.lean",
+    "name": "weightedPrimeSum_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived weighted prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-g-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "primeBand4_coordinates",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "primeBand4_weight_bounded",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "upperBand_eq_filter",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "weightedTotientPrimeSum",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "weightedCoprimeTotientPrimeSum",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "weightedTotientPrimeSum_error",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "weightedTotientPrimeSum_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "weightedCoprimeTotientPrimeSum_error",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349h.lean",
+    "name": "weightedCoprimeTotientPrimeSum_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived actual prime averaging",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-h-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variableTail",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variableSmall",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variable_partition",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variableTail_one_le",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variableTail_le",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variable_good_set",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variable_bad_set",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "ordinaryDensity_product",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "ordinaryDensity_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variableDensity_factor",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variableDensity_tail_factor",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349i.lean",
+    "name": "variableDensity_normalization",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "pages 38 and 39 before equation 10.3 derived variable density factorization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-i-axioms.txt"
+  },
+  {
+    "file": "Decomp349j.lean",
+    "name": "variableDensity_uniform",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived uniform Mertens normalization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-j-axioms.txt"
+  },
+  {
+    "file": "Decomp349j.lean",
+    "name": "variableDensity_sequence",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived uniform Mertens normalization",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-j-axioms.txt"
+  },
+  {
+    "file": "Decomp349k.lean",
+    "name": "variableLevel",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equation 10.3 derived variable level loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-k-axioms.txt"
+  },
+  {
+    "file": "Decomp349k.lean",
+    "name": "variableLevel_relation",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived variable level loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-k-axioms.txt"
+  },
+  {
+    "file": "Decomp349k.lean",
+    "name": "variableLevel_zero",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived variable level loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-k-axioms.txt"
+  },
+  {
+    "file": "Decomp349k.lean",
+    "name": "variableLevel_zero_range",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived variable level loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-k-axioms.txt"
+  },
+  {
+    "file": "Decomp349k.lean",
+    "name": "variableLevel_shift_le",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived variable level loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-k-axioms.txt"
+  },
+  {
+    "file": "Decomp349k.lean",
+    "name": "variable_values_shift_small",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "page 39 equation 10.3 derived variable level loss removal",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-k-axioms.txt"
+  },
+  {
+    "file": "Decomp349l.lean",
+    "name": "variableKernel",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 39 equation 10.3 derived finite main term preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-l-axioms.txt"
+  },
+  {
+    "file": "Decomp349l.lean",
+    "name": "variable_argument_range",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived finite main term preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-l-axioms.txt"
+  },
+  {
+    "file": "Decomp349l.lean",
+    "name": "variableKernel_continuous",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "page 39 equation 10.3 derived finite main term preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-l-axioms.txt"
+  },
+  {
+    "file": "Decomp349l.lean",
+    "name": "basicMain_variable_ratio",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived finite main term preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-l-axioms.txt"
+  },
+  {
+    "file": "Decomp349l.lean",
+    "name": "variable_mass_bounded",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 derived finite main term preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-l-axioms.txt"
+  },
+  {
+    "file": "Decomp349l.lean",
+    "name": "variable_values_bounded",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "page 39 equation 10.3 derived finite main term preparation",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-l-axioms.txt"
+  },
+  {
+    "file": "Decomp349m.lean",
+    "name": "basicMain_variable_approx",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "page 39 equation 10.3 exact first finite main term limit",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-m-axioms.txt"
+  },
+  {
+    "file": "Decomp349m.lean",
+    "name": "basicMain_variable_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "page 39 equation 10.3 exact first finite main term limit",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-m-axioms.txt"
+  },
+  {
+    "file": "Decomp349n.lean",
+    "name": "variableKernel_integral",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 39 equation 10.3 exact printed coefficient substitution",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-n-axioms.txt"
+  },
+  {
+    "file": "Decomp349n.lean",
+    "name": "basic_main_one_tendsto",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "CONDITIONAL",
+    "source": "page 39 equation 10.3 exact printed coefficient substitution",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-n-axioms.txt"
+  },
+  {
+    "file": "Decomp349o.lean",
+    "name": "commonFactorMajorant",
+    "kind": "def",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "DEFINITION",
+    "source": "page 40 before equation 10.8 derived reduced common factor majorant",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-o-axioms.txt"
+  },
+  {
+    "file": "Decomp349o.lean",
+    "name": "commonFactorMajorant_bound",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 40 before equation 10.8 derived reduced common factor majorant",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-o-axioms.txt"
+  },
+  {
+    "file": "Decomp349o.lean",
+    "name": "commonFactorMajorant_absorbed",
+    "kind": "theorem",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "PROVED",
+    "source": "page 40 before equation 10.8 derived reduced common factor majorant",
+    "verdict": "MATCH",
+    "axiom_log": "build/task349-o-axioms.txt"
+  }
+]
