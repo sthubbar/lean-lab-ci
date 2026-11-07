@@ -37,6 +37,8 @@ theorem summed_sieve_application (h : LevelBV) :
       Even N → N₀ ≤ N →
       (sumSAq N ((N : ℝ) ^ ((1 : ℝ) / 8)) ((N : ℝ) ^ ((1 : ℝ) / 3)) : ℝ) / 2
         ≤ summedMain N B + C * sieveError N := by
+  -- The attempted conversion from the normalized upper bound failed with a type mismatch.
+  -- See PROGRESS.md for the exact error and the missing analytic bridge.
   sorry
 
 /-- The normalized summed main term has coefficient log six once the prime
