@@ -37,7 +37,13 @@ theorem leaf_even_moment_block_split (γ δ κ : ℝ) (N : ℕ) :
         + (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter
             (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2)),
           ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) := by
-  sorry
+  classical
+  rw [← Finset.sum_filter_add_sum_filter_not
+        ((Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)))
+        (fun n : ℕ => 2 * n ≤ N + (N + 1) / 2)]
+  congr 1
+  · rw [Finset.filter_filter]
+  · rw [Finset.filter_filter]
 
 /-- LEAF. Step of the proof: the second moment estimate of the even branch on
 the lower half of the index range, that is on the even `n` of the half window
