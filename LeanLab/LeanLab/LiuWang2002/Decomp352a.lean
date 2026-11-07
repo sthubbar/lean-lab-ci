@@ -1,4 +1,5 @@
 import LeanLab.LiuWang2002.ScanCert352
+import LeanLab.LiuWang2002.Decomp368a
 
 /-!
 Supply split of the finite theta leaf in Decomp345c.
@@ -20,7 +21,7 @@ theorem primorial_block_a (n : ℕ) (hn : 64 < n) (hn' : n ≤ 10000) :
 second finite block. This does not include either adjacent block. -/
 theorem primorial_block_b (n : ℕ) (hn : 10000 < n) (hn' : n ≤ 1000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.LiuWang2002.Task368.primorial_block_b n hn hn'
 
 /-- LEAF. Page 356, display 5.1 star, derived integer certificate for the
 last finite block through 100000000. Smaller blocks are separate inputs. -/
