@@ -39,7 +39,21 @@ theorem split_leaf_sphi_minor_log2 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) :
       ∀ (N : ℕ), N ≤ X → ∀ α : ℝ, ¬ MajorArc X R α →
         ‖Sphi ϕ N α‖ ≤ C * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) *
           Real.log X ^ 2 := by
-  sorry
+  obtain ⟨L, hL⟩ := ContDiff.lipschitzWith_of_hasCompactSupport hϕ.compact hϕ.smooth (by simp)
+  obtain ⟨C₀, hC₀, h₀⟩ := split_leaf_ssum_minor_log2
+  refine ⟨(L : ℝ) * C₀, mul_nonneg (by positivity) hC₀, ?_⟩
+  intro X hX R hR1 hRX N hNX α hm
+  have hB : (0 : ℝ) ≤ C₀ * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) *
+      Real.log X ^ 2 := mul_nonneg (mul_nonneg hC₀ (by positivity)) (by positivity)
+  have hpart : ∀ m ≤ N, ‖Ssum m α‖ ≤
+      C₀ * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) * Real.log X ^ 2 :=
+    fun m hm' => h₀ X hX R hR1 hRX m (hm'.trans hNX) α hm
+  calc
+    ‖Sphi ϕ N α‖ ≤ (L : ℝ) * (C₀ * ((X : ℝ) / Real.sqrt R +
+        (X : ℝ) ^ (4 / 5 : ℝ)) * Real.log X ^ 2) :=
+      Sphi_of_partial_bound261 hϕ hL hB hpart
+    _ = ((L : ℝ) * C₀) * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) *
+        Real.log X ^ 2 := by ring
 
 /-- LEAF. The power bookkeeping identity: at `R = X ^ ϑ` the power part of the logarithm
 power nine estimate, namely `(X^2/R + X^(8/5)) * X`, is exactly the target power part
@@ -47,16 +61,17 @@ power nine estimate, namely `(X^2/R + X^(8/5)) * X`, is exactly the target power
 theorem split_leaf_power_identity (X : ℕ) (hX : 2 ≤ X) (ϑ : ℝ) :
     ((X : ℝ) ^ 2 / (X : ℝ) ^ ϑ + (X : ℝ) ^ (8 / 5 : ℝ)) * (X : ℝ) =
       (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 := by
-  have hX0 : (0 : ℝ) < X := by
-    have : (2 : ℝ) ≤ X := by exact_mod_cast hX
-    linarith
-  have h1 : (X : ℝ) ^ (8 / 5 : ℝ) * (X : ℝ) = (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 := by
-    have e1 : (X : ℝ) ^ (8 / 5 : ℝ) * (X : ℝ) = (X : ℝ) ^ ((8 / 5 : ℝ) + 1) := by
-      rw [Real.rpow_add hX0, Real.rpow_one]
-    have e2 : (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 = (X : ℝ) ^ ((-(2 / 5) : ℝ) + 3) := by
-      rw [Real.rpow_add hX0, show (3 : ℝ) = ((3 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
-    rw [e1, e2]; norm_num
-  rw [add_mul, add_mul, h1]
+  have hXp : (0 : ℝ) < (X : ℝ) := by exact_mod_cast (by omega : 0 < X)
+  have h1 : (X : ℝ) ^ (8 / 5 : ℝ) * (X : ℝ) = (X : ℝ) ^ (13 / 5 : ℝ) := by
+    have h := Real.rpow_add hXp (8 / 5 : ℝ) (1 : ℝ)
+    rw [show (8 / 5 : ℝ) + 1 = 13 / 5 by norm_num, Real.rpow_one] at h
+    exact h.symm
+  have h2 : (X : ℝ) ^ 3 * (X : ℝ) ^ (-(2 / 5) : ℝ) = (X : ℝ) ^ (13 / 5 : ℝ) := by
+    rw [← Real.rpow_natCast (X : ℝ) 3]
+    have h := Real.rpow_add hXp (3 : ℝ) (-(2 / 5) : ℝ)
+    rw [show (3 : ℝ) + -(2 / 5) = 13 / 5 by norm_num] at h
+    exact h.symm
+  rw [div_eq_mul_inv, add_mul, h1, ← h2]
   ring
 
 /-- The bare minor family has the printed power budget with logarithm power five, assembled
