@@ -159,4 +159,3 @@ theorem negative_sampling_raw_split (q : ℕ) [NeZero q] (χ : DirichletCharacte
     (negative_mass_bottom_le q χ hχ δ T hT hlarge hzeros)
 
 end LeanLab.HelfgottMajor.Decomp431a
-
