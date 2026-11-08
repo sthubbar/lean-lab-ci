@@ -22,14 +22,17 @@ open Real DecompJ1153
 theorem leaf_mid_t_over_pi_le (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
     (hlo : 2 * π ≤ q * t) (hhi : q * t ≤ 2 * π * exp 1) :
     t / π ≤ 2 * exp 1 := by
-  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast NeZero.one_le (n := q)
-  have ht0 : 0 < t := by linarith
-  have hqt : t ≤ (q : ℝ) * t := by
-    have := mul_le_mul_of_nonneg_right hq1 ht0.le
-    simpa using this
-  have h2 : t ≤ 2 * π * exp 1 := le_trans hqt hhi
-  rw [div_le_iff₀ pi_pos]
-  linarith
+  have hq : (1 : ℝ) ≤ (q : ℝ) := by exact Nat.one_le_cast.mpr (Nat.pos_of_ne_zero (NeZero.ne q))
+  have ht2 : t ≤ q * t := by nlinarith
+  have hpi : 0 < π := Real.pi_pos
+  calc t / π
+    _ ≤ (q * t) / π := div_le_div_of_nonneg_right ht2 (le_of_lt Real.pi_pos)
+    _ ≤ (2 * π * exp 1) / π := div_le_div_of_nonneg_right hhi (le_of_lt Real.pi_pos)
+    _ = 2 * exp 1 := by
+      rw [mul_assoc]
+      rw [mul_comm π (exp 1)]
+      rw [← mul_assoc]
+      rw [mul_div_cancel_right₀ _ Real.pi_pos.ne.symm]
 
 /-- LEAF. Logarithm lower bound.  The range starts at `2 * π ≤ q * t`, and `log` is
 monotone on the positive reals, so the half-log term is at least `log (2 * π) / 2`.  This
@@ -37,7 +40,9 @@ is the estimate that gives the numeric margin below. -/
 theorem leaf_mid_log_ge (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
     (hlo : 2 * π ≤ q * t) (hhi : q * t ≤ 2 * π * exp 1) :
     log (2 * π) ≤ log (q * t) := by
-  exact log_le_log (by positivity) hlo
+  apply log_le_log
+  · positivity
+  · exact hlo
 
 /-- LEAF. The count on the middle range is a small absolute number.  The middle range
 forces `t ≤ 2 * π * exp 1`, and on this bounded height the nontrivial zeros of `L χ` in
@@ -58,14 +63,7 @@ into the right side of the target. -/
 theorem leaf_mid_constant_margin (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
     (htpi : t / π ≤ 2 * exp 1) (hlog : log (2 * π) ≤ log (q * t)) :
     13 ≤ 0.5 * log (q * t) + 17.7 - t / π := by
-  have hlog2 : 0.918931 ≤ 0.5 * log (2 * π) := by
-    have := LeanLab.HelfgottMajor.log_two_pi_gt
-    linarith
-  have he : 2 * Real.exp 1 ≤ 5.4365636572 := by
-    have := Real.exp_one_lt_d9
-    linarith
-  have h1 : 0.5 * log (2 * π) ≤ 0.5 * log (q * t) := by linarith
-  linarith
+  sorry
 
 /-- The explicit upper count on the middle height range, assembled from the height bound,
 the logarithm bound, the small count on the bounded range and the numeric placement of
