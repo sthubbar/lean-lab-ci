@@ -1466,6 +1466,12 @@ theorem theorem31_decomposed150 : Theorem31 := by
   have he : (3 / 2 + 2 * Θ + ε - 2 : ℝ) = 2 * Θ - 1 / 2 + ε := by ring
   rwa [he] at h
 
+/-- Positive even integers have singular series at least one.
+Source: P0029 page 6 display 2.10. This exposes the existing private Euler product proof. -/
+theorem singular_ge_one461 (N : ℕ) (hEven : Even N) (hN : 0 < N) :
+    (1 : ℝ) ≤ singular N := by
+  exact one_le_singular N (by omega) hEven
+
 end LeanLab.BhowmikGrimmelt2026
 
 set_option format.width 1000
@@ -1475,3 +1481,5 @@ set_option format.width 1000
 #print axioms LeanLab.BhowmikGrimmelt2026.exceptional_gap150
 #print axioms LeanLab.BhowmikGrimmelt2026.moment_to_count150
 #print axioms LeanLab.BhowmikGrimmelt2026.theorem31_decomposed150
+
+#print axioms LeanLab.BhowmikGrimmelt2026.singular_ge_one461

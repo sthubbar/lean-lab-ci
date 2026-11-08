@@ -18,6 +18,7 @@ term, and the absence of zeros at or beyond one.  Everything else is proved here
 AI wrote the Lean code.  Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Statements
+import LeanLab.BhowmikGrimmelt2026.Decomp150a
 import LeanLab.BhowmikGrimmelt2026.Counting107
 import LeanLab.BhowmikGrimmelt2026.Section8Steps107
 
@@ -33,7 +34,8 @@ attribute [local instance] Classical.propDecidable
 /-- LEAF. Step 1: on even arguments the singular series is at least `1/2`, so the main term
 `𝔖(N)·N` of the analytic formula of Section 8 dominates its three error terms. -/
 theorem leaf_singular_lower (N : ℕ) (hEven : Even N) (h2 : 2 ≤ N) : (1 / 2 : ℝ) ≤ singular N := by
-  sorry
+  exact (by norm_num : (1 / 2 : ℝ) ≤ 1).trans
+    (singular_ge_one461 N hEven (by omega))
 
 private theorem norm_ofReal_eq_abs' (x : ℝ) : ‖(x : ℂ)‖ = |x| := by
   simpa using RCLike.norm_ofReal (K := ℂ) x

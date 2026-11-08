@@ -77,7 +77,23 @@ theorem leaf_off_central_alias_family432 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (
       10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X →
       ∑ N ∈ Finset.Icc 1 X, ‖centralAlias432 ϕ G X N ϑ η‖ ^ 2 ≤
         C * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  obtain ⟨C, hC, hb⟩ := central_alias_family432 hϕ hG ϑ hϑ
+  refine ⟨16 * C, by positivity, ?_⟩
+  intro X hX hR η hη hη1 hsmall hscale
+  have hlog := Real.log_natCast_nonneg X
+  have hhalf : (1 / 2 : ℝ) ≤ Real.log X := by
+    have hh := Real.log_le_log (by norm_num : (0 : ℝ) < 2)
+      (show (2 : ℝ) ≤ X by exact_mod_cast hX)
+    linarith [Real.log_two_gt_d9]
+  have hlog5 : Real.log (X : ℝ) ≤ 16 * Real.log X ^ 5 := by
+    have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1 / 2) hhalf 4
+    have hh := mul_le_mul_of_nonneg_right hp hlog
+    norm_num at hh
+    nlinarith only [hh]
+  have hh := hb X hX η hη hη1 hscale
+  have hup := mul_le_mul_of_nonneg_left hlog5
+    (by positivity : 0 ≤ C * η ^ 4 * (X : ℝ) ^ 3)
+  nlinarith only [hh, hup]
 
 /-- The split assembly: the exact sealed statement of `off_rational_family432`, proved
 from the three leaves above through the coefficient triangle inequality and no sorry. -/

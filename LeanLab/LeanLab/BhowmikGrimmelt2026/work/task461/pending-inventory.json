@@ -1,0 +1,322 @@
+[
+  {
+    "file": "Decomp150a.lean",
+    "name": "zeroBound_lower150",
+    "statement": "theorem zeroBound_lower150 {\u0398 : \u211d} (hZ : ZeroBound \u0398) : 1 / 2 \u2264 \u0398"
+  },
+  {
+    "file": "Decomp150a.lean",
+    "name": "mean_square150",
+    "statement": "theorem mean_square150 : MeanSquare38"
+  },
+  {
+    "file": "Decomp150b.lean",
+    "name": "mv_no_siegel150",
+    "statement": "theorem mv_no_siegel150 (h52 : Prop52) (hGallagher : GallagherStandard) :\n    \u2203 \u03d1\u2080 : \u211d, 0 < \u03d1\u2080 \u2227 \u2200 \u03d1 : \u211d, 0 < \u03d1 \u2192 \u03d1 < \u03d1\u2080 \u2192 \u03d1 < 1 / 5 \u2192\n      \u2203 C X\u2080 : \u211d, \u2200 X : \u211d, 2 \u2264 X \u2192 X\u2080 \u2264 X \u2192\n        (\u00ac \u2203 (r : \u2115) (_ : NeZero r) (\u03c7 : DirichletCharacter \u2102 r) (\u03b2 : \u211d),\n          SiegelZero (X ^ \u03d1) r \u03c7 \u03b2) \u2192\n        (Edy X : \u211d) \u2264 C * X ^ (1 - \u03d1 / 2)"
+  },
+  {
+    "file": "Decomp150b.lean",
+    "name": "mv_siegel150",
+    "statement": "theorem mv_siegel150 (h52 : Prop52) (hGallagher : GallagherStandard) :\n    \u2203 \u03d1\u2080 : \u211d, 0 < \u03d1\u2080 \u2227 \u2200 \u03d1 : \u211d, 0 < \u03d1 \u2192 \u03d1 < \u03d1\u2080 \u2192 \u03d1 < 1 / 5 \u2192\n      \u2203 C X\u2080 : \u211d, \u2200 X : \u211d, 2 \u2264 X \u2192 X\u2080 \u2264 X \u2192\n        (\u2203 (r : \u2115) (_ : NeZero r) (\u03c7 : DirichletCharacter \u2102 r) (\u03b2 : \u211d),\n          SiegelZero (X ^ \u03d1) r \u03c7 \u03b2) \u2192\n        (Edy X : \u211d) \u2264 C * X ^ (1 - \u03d1 / 2)"
+  },
+  {
+    "file": "Decomp150c.lean",
+    "name": "linnik_weighted_gap150",
+    "statement": "theorem linnik_weighted_gap150 : \u2203 L C : \u211d, 0 < C \u2227\n    \u2200 q : \u2115, 2 \u2264 q \u2192 \u2200 a : \u2115, Nat.Coprime a q \u2192 \u2203 X : \u2115,\n      (X : \u211d) \u2264 C * (q : \u211d) ^ L \u2227\n      (\u2211 n \u2208 (Finset.Icc 1 X).filter (fun n => n % q = a % q), vonMangoldt n) >\n      \u2211 n \u2208 (Finset.Icc 1 X).filter (fun n => n % q = a % q \u2227 \u00ac n.Prime),\n        vonMangoldt n"
+  },
+  {
+    "file": "Decomp150d.lean",
+    "name": "major_family150",
+    "statement": "theorem major_family150 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016majorError150 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp150d.lean",
+    "name": "minor_family150",
+    "statement": "theorem minor_family150 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorError150 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp247a.lean",
+    "name": "aqZero247_totient_bound",
+    "statement": "theorem aqZero247_totient_bound {r\u2081 r\u2082 : \u2115} [NeZero r\u2081] [NeZero r\u2082]\n    (\u03c7\u2081 : DirichletCharacter \u2102 r\u2081) (\u03c7\u2082 : DirichletCharacter \u2102 r\u2082)\n    (h\u03c7\u2081 : \u03c7\u2081.IsPrimitive) (h\u03c7\u2082 : \u03c7\u2082.IsPrimitive) (N : \u2124) (hN : 1 \u2264 N) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 q : \u2115, 0 < q \u2192\n      \u2016aqZero247 \u03c7\u2081 \u03c7\u2082 N q\u2016 \u2264 C * (1 / (Nat.totient q : \u211d) ^ 2)"
+  },
+  {
+    "file": "Decomp247a.lean",
+    "name": "aqZero247_smooth_expansion",
+    "statement": "theorem aqZero247_smooth_expansion {r\u2081 r\u2082 : \u2115} [NeZero r\u2081] [NeZero r\u2082]\n    (\u03c7\u2081 : DirichletCharacter \u2102 r\u2081) (\u03c7\u2082 : DirichletCharacter \u2102 r\u2082)\n    (h\u03c7\u2081 : \u03c7\u2081.IsPrimitive) (h\u03c7\u2082 : \u03c7\u2082.IsPrimitive)\n    (\u03c8\u2081 : \u2200 p : \u2115, DirichletCharacter \u2102 (compLevel r\u2081 p))\n    (\u03c8\u2082 : \u2200 p : \u2115, DirichletCharacter \u2102 (compLevel r\u2082 p))\n    (h\u2081 : IsPrimeComponents \u03c7\u2081 \u03c8\u2081) (h\u2082 : IsPrimeComponents \u03c7\u2082 \u03c8\u2082)\n    (N : \u2124) (hN : 1 \u2264 N) (X : \u2115) (hX\u2081 : r\u2081 < X) (hX\u2082 : r\u2082 < X) :\n    \u220f p \u2208 (Finset.range X).filter Nat.Prime, eulerFactorGen (\u03c8\u2081 p) (\u03c8\u2082 p) N p =\n      \u2211' q : X.smoothNumbers, aqZero247 \u03c7\u2081 \u03c7\u2082 N q"
+  },
+  {
+    "file": "Decomp328a.lean",
+    "name": "major_tail_family328",
+    "statement": "theorem major_tail_family328 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016majorTail328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp328b.lean",
+    "name": "minor_bare_family328",
+    "statement": "theorem minor_bare_family328 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp328b.lean",
+    "name": "minor_weighted_family328",
+    "statement": "theorem minor_weighted_family328 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp405a.lean",
+    "name": "continuous_tail_family405",
+    "statement": "theorem continuous_tail_family405 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016continuousTail405 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp405b.lean",
+    "name": "continuous_weighted_family405",
+    "statement": "theorem continuous_weighted_family405 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016continuousWeighted405 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp432a.lean",
+    "name": "off_rational_family432",
+    "statement": "theorem off_rational_family432 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 \u03b7 < (X : \u211d) ^ (\u03d1 - 1 / 2) \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016offRational432 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp451a.lean",
+    "name": "minor_bare_multi_denominator451",
+    "statement": "theorem minor_bare_multi_denominator451 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorBare328 \u03d5 X N \u03d1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp451b.lean",
+    "name": "minor_weighted_multi_denominator451",
+    "statement": "theorem minor_weighted_multi_denominator451 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5)\n    (hG : IsMajorWeight G) (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016minorWeighted328 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "Decomp461a.lean",
+    "name": "large_denominator_family461",
+    "statement": "theorem large_denominator_family461 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 \u03b7 < (X : \u211d) ^ (\u03d1 - 1 / 2) \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016offRational432 \u03d5 G X N \u03d1 \u03b7 - smallDenCoefficient461 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "DecompJ1034.lean",
+    "name": "r2_prime_power_bound",
+    "statement": "theorem r2_prime_power_bound (N : \u2115) (hN : Even N) (h_not_G : \u00ac IsGoldbachSum N) :\n  r2 N \u2264 3/2 * (N : \u211d)^(1/2) * (Real.log (N : \u211d))^3"
+  },
+  {
+    "file": "SPLIT_continuous_tail_family405.lean",
+    "name": "leaf_other_arcs405",
+    "statement": "theorem leaf_other_arcs405 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016\u222b \u03b1 in (0 : \u211d)..1,\n          ({\u03b1 : \u211d | MajorArc X ((X : \u211d) ^ \u03d1) \u03b1} \u2229\n            {\u03b1 : \u211d | |\u03b1 - ((round \u03b1 : \u2124) : \u211d)| \u2264 (X : \u211d) ^ \u03d1 / (X : \u211d)}\u1d9c).indicator\n            (fun \u03b1 => Sphi \u03d5 N \u03b1 ^ 2 *\n              (nearTransform328 G X ((X : \u211d) ^ \u03d1) \u03b7 \u03b1 -\n                continuousModel405 G ((X : \u211d) ^ \u03d1)\n                  (fun q => \u03b7 * X * q / (X : \u211d) ^ \u03d1) \u03b1) * ee (-(N * \u03b1))) \u03b1\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "SPLIT_continuous_weighted_family405.lean",
+    "name": "leaf_bRhat_minor_family405",
+    "statement": "theorem leaf_bRhat_minor_family405 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016\u222b \u03b1 in (0 : \u211d)..1, {\u03b1 | \u00ac MajorArc X ((X : \u211d) ^ \u03d1) \u03b1}.indicator\n          (fun \u03b1 => Sphi \u03d5 N \u03b1 ^ 2 *\n            bRhat G ((X : \u211d) ^ \u03d1) (fun q => \u03b7 * X * q / (X : \u211d) ^ \u03d1) \u03b1 *\n            ee (-(N * \u03b1))) \u03b1\u2016 ^ 2 \u2264\n        C * (((X : \u211d) ^ \u03d1)\u207b\u00b9 + (X : \u211d) ^ (-(2 / 5) : \u211d)) *\n          (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "SPLIT_facts81.lean",
+    "name": "facts81_saving",
+    "statement": "theorem facts81_saving :\n    \u2203 K : \u211d, \u2200 (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r), \u03c7.IsPrimitive \u2192 IsRealChar \u03c7 \u2192\n      \u2200 N : \u2115, Even N \u2192 2 \u2264 N \u2192\n        \u2016genSing chi1 \u03c7 N\u2016 \u2264 K * \u2016genSing chi1 chi1 N\u2016 * r / (Nat.totient r : \u211d) ^ 2"
+  },
+  {
+    "file": "SPLIT_facts81.lean",
+    "name": "facts81_diag",
+    "statement": "theorem facts81_diag (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r) (hprim : \u03c7.IsPrimitive)\n    (hreal : IsRealChar \u03c7) (N : \u2115) (hEven : Even N) (hN2 : 2 \u2264 N) (hdvd : r \u2223 N) :\n    genSing \u03c7 \u03c7 N = \u03c7 (-1) * genSing chi1 chi1 N"
+  },
+  {
+    "file": "SPLIT_lemma74.lean",
+    "name": "leaf_mellin_decay74",
+    "statement": "theorem leaf_mellin_decay74 (M : \u2115 \u2192 \u211d) (S : \u211d) (\u03a8 : \u211d \u2192 \u211d) (hS : 1 \u2264 S)\n    (hsm : ContDiff \u211d ((\u22a4 : \u2115\u221e) : WithTop \u2115\u221e) \u03a8) (hcs : HasCompactSupport \u03a8)\n    (hsupp : tsupport \u03a8 \u2286 Set.Ioi S) (hb : \u2200 k x, |iteratedDeriv k \u03a8 x| \u2264 M k)\n    (k : \u2115) (\u03c3 t : \u211d) (h\u03c3 : \u03c3 + (k : \u211d) \u2264 -1) :\n    \u2016mellinR \u03a8 ((\u03c3 : \u2102) + (t : \u2102) * Complex.I)\u2016 \u2264\n      ((2 : \u211d) ^ k * M k) * S ^ \u03c3 / (1 + |t|) ^ k"
+  },
+  {
+    "file": "SPLIT_lemma74.lean",
+    "name": "leaf_contour_shift74",
+    "statement": "theorem leaf_contour_shift74 (B T : \u211d) (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r)\n    (M : \u2115 \u2192 \u211d) (S : \u211d) (\u03a8 : \u211d \u2192 \u211d) (hB : 0 < B) (hT : 0 < T)\n    (hS : 1 \u2264 S) (hsm : ContDiff \u211d ((\u22a4 : \u2115\u221e) : WithTop \u2115\u221e) \u03a8)\n      (hcs : HasCompactSupport \u03a8) (hsupp : tsupport \u03a8 \u2286 Set.Ioi S)\n      (hb : \u2200 k x, |iteratedDeriv k \u03a8 x| \u2264 M k)\n    (h\u03c7 : \u03c7.IsPrimitive) :\n    \u2211' n : \u2115, (vonMangoldt n : \u2102) * \u03c7 n * (\u03a8 n : \u2102) -\n      (if \u03c7 = 1 then \u222b t in Set.Ioi (0 : \u211d), (\u03a8 t : \u2102) else 0) +\n      (\u2211' \u03c1 : {\u03c1 : \u2102 // DirichletCharacter.LFunction \u03c7 \u03c1 = 0 \u2227 -B < \u03c1.re \u2227 |\u03c1.im| \u2264 T}, (mult \u03c7 \u03c1 : \u2102) * mellinR \u03a8 \u03c1) =\n    (1 / (2 * Real.pi)) * (\u222b t in (-T)..T, (-(logDeriv (DirichletCharacter.LFunction \u03c7))) (((-B : \u211d) : \u2102) + (t : \u2102) * Complex.I) * mellinR \u03a8 (((-B : \u211d) : \u2102) + (t : \u2102) * Complex.I)) +\n      (1 / (2 * Real.pi * Complex.I)) * (\u222b \u03c3 in (-B)..(2 : \u211d), (( -(logDeriv (DirichletCharacter.LFunction \u03c7))) ((\u03c3 : \u2102) + (T : \u2102) * Complex.I) * mellinR \u03a8 ((\u03c3 : \u2102) + (T : \u2102) * Complex.I) + ( -(logDeriv (DirichletCharacter.LFunction \u03c7))) ((\u03c3 : \u2102) - (T : \u2102) * Complex.I) * mellinR \u03a8 ((\u03c3 : \u2102) - (T : \u2102) * Complex.I)))"
+  },
+  {
+    "file": "SPLIT_lemma74.lean",
+    "name": "leaf_vertical_remainder74",
+    "statement": "theorem leaf_vertical_remainder74 (M : \u2115 \u2192 \u211d) (B T : \u211d) (hB : 0 < B) (hT : 0 < T) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227\n      \u2200 (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r), \u03c7.IsPrimitive \u2192\n        \u2200 (S : \u211d) (\u03a8 : \u211d \u2192 \u211d), 1 \u2264 S \u2192 ContDiff \u211d ((\u22a4 : \u2115\u221e) : WithTop \u2115\u221e) \u03a8 \u2192 HasCompactSupport \u03a8 \u2192 tsupport \u03a8 \u2286 Set.Ioi S \u2192\n        (\u2200 k x, |iteratedDeriv k \u03a8 x| \u2264 M k) \u2192\n        \u2016(1 / (2 * Real.pi)) * (\u222b t in (-T)..T, (-(logDeriv (DirichletCharacter.LFunction \u03c7))) (((-B : \u211d) : \u2102) + (t : \u2102) * Complex.I) * mellinR \u03a8 (((-B : \u211d) : \u2102) + (t : \u2102) * Complex.I))\u2016 \u2264 C * S ^ (-B)"
+  },
+  {
+    "file": "SPLIT_lemma74.lean",
+    "name": "leaf_horizontal_remainder74",
+    "statement": "theorem leaf_horizontal_remainder74 (M : \u2115 \u2192 \u211d) (B T : \u211d) (hB : 0 < B) (hT : 0 < T) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227\n      \u2200 (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r), \u03c7.IsPrimitive \u2192\n        \u2200 (S : \u211d) (\u03a8 : \u211d \u2192 \u211d), 1 \u2264 S \u2192 ContDiff \u211d ((\u22a4 : \u2115\u221e) : WithTop \u2115\u221e) \u03a8 \u2192 HasCompactSupport \u03a8 \u2192 tsupport \u03a8 \u2286 Set.Ioi S \u2192\n        (\u2200 k x, |iteratedDeriv k \u03a8 x| \u2264 M k) \u2192\n        \u2016(1 / (2 * Real.pi * Complex.I)) * (\u222b \u03c3 in (-B)..(2 : \u211d), (( -(logDeriv (DirichletCharacter.LFunction \u03c7))) ((\u03c3 : \u2102) + (T : \u2102) * Complex.I) * mellinR \u03a8 ((\u03c3 : \u2102) + (T : \u2102) * Complex.I) + ( -(logDeriv (DirichletCharacter.LFunction \u03c7))) ((\u03c3 : \u2102) - (T : \u2102) * Complex.I) * mellinR \u03a8 ((\u03c3 : \u2102) - (T : \u2102) * Complex.I)))\u2016 \u2264 C * S ^ (-B)"
+  },
+  {
+    "file": "SPLIT_lemma74.lean",
+    "name": "leaf_zero_tail74",
+    "statement": "theorem leaf_zero_tail74 (M : \u2115 \u2192 \u211d) (B T : \u211d) (hB : 0 < B) (hT : 0 < T) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227\n      \u2200 (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r), \u03c7.IsPrimitive \u2192\n        \u2200 (S : \u211d) (\u03a8 : \u211d \u2192 \u211d), 1 \u2264 S \u2192 ContDiff \u211d ((\u22a4 : \u2115\u221e) : WithTop \u2115\u221e) \u03a8 \u2192 HasCompactSupport \u03a8 \u2192 tsupport \u03a8 \u2286 Set.Ioi S \u2192\n        (\u2200 k x, |iteratedDeriv k \u03a8 x| \u2264 M k) \u2192\n        \u2016(\u2211' \u03c1 : {\u03c1 : \u2102 // DirichletCharacter.LFunction \u03c7 \u03c1 = 0}, (mult \u03c7 \u03c1 : \u2102) * mellinR \u03a8 \u03c1) -\n            (\u2211' \u03c1 : {\u03c1 : \u2102 // DirichletCharacter.LFunction \u03c7 \u03c1 = 0 \u2227 -B < \u03c1.re \u2227 |\u03c1.im| \u2264 T}, (mult \u03c7 \u03c1 : \u2102) * mellinR \u03a8 \u03c1)\u2016 \u2264 C * S ^ (-B)"
+  },
+  {
+    "file": "SPLIT_linnik_weighted_gap150.lean",
+    "name": "leaf_ap_mass_lower",
+    "statement": "theorem leaf_ap_mass_lower (L C : \u211d) (hL : 6 \u2264 L) (hC : 1 \u2264 C)\n    (q : \u2115) (hq : 2 \u2264 q) (a : \u2115) (ha : Nat.Coprime a q) :\n    (\u2211 n \u2208 (Finset.Icc 1 (Nat.floor (C * (q : \u211d) ^ L))).filter (fun n => n % q = a % q),\n        vonMangoldt n)\n      \u2265 (1 / 100) * (Nat.floor (C * (q : \u211d) ^ L) : \u211d) / (q : \u211d)"
+  },
+  {
+    "file": "SPLIT_meanSquare38.lean",
+    "name": "meanSquare38_theta_lower",
+    "statement": "theorem meanSquare38_theta_lower {\u0398 : \u211d} (hZ : ZeroBound \u0398) : 1 / 2 \u2264 \u0398"
+  },
+  {
+    "file": "SPLIT_meanSquare38.lean",
+    "name": "meanSquare38_even_energy",
+    "statement": "theorem meanSquare38_even_energy (\u0398 : \u211d) (h\u0398 : \u0398 < 3 / 4) (hZ : ZeroBound \u0398) :\n    \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 C : \u211d, \u2200 X : \u2115, 1 \u2264 X \u2192\n      \u2211 N \u2208 (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2 \u2264\n        C * (X : \u211d) ^ (3 / 2 + 2 * \u0398 + \u03b5)"
+  },
+  {
+    "file": "SPLIT_mean_square150.lean",
+    "name": "mean_square150_theta_ge_half",
+    "statement": "theorem mean_square150_theta_ge_half {\u0398 : \u211d} (hZ : ZeroBound \u0398) : 1 / 2 \u2264 \u0398"
+  },
+  {
+    "file": "SPLIT_mean_square150.lean",
+    "name": "mean_square150_even_second_moment",
+    "statement": "theorem mean_square150_even_second_moment (\u0398 : \u211d) (h\u0398 : \u0398 < 3 / 4) (hZ : ZeroBound \u0398) :\n    \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 C : \u211d, \u2200 X : \u2115, 1 \u2264 X \u2192\n      \u2211 N \u2208 (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2 \u2264\n        C * (X : \u211d) ^ (3 / 2 + 2 * \u0398 + \u03b5)"
+  },
+  {
+    "file": "SPLIT_minor_bare_family328.lean",
+    "name": "split_leaf_ssum_minor_log2",
+    "statement": "theorem split_leaf_ssum_minor_log2 :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 (X : \u2115), 2 \u2264 X \u2192 \u2200 R : \u211d, 1 \u2264 R \u2192 R \u2264 X \u2192\n      \u2200 (m : \u2115), m \u2264 X \u2192 \u2200 \u03b1 : \u211d, \u00ac MajorArc X R \u03b1 \u2192\n        \u2016Ssum m \u03b1\u2016 \u2264 C * ((X : \u211d) / Real.sqrt R + (X : \u211d) ^ (4 / 5 : \u211d)) *\n          Real.log X ^ 2"
+  },
+  {
+    "file": "SPLIT_minor_bare_family328.lean",
+    "name": "split_leaf_sphi_minor_log2",
+    "statement": "theorem split_leaf_sphi_minor_log2 {\u03d5 : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 (X : \u2115), 2 \u2264 X \u2192 \u2200 R : \u211d, 1 \u2264 R \u2192 R \u2264 X \u2192\n      \u2200 (N : \u2115), N \u2264 X \u2192 \u2200 \u03b1 : \u211d, \u00ac MajorArc X R \u03b1 \u2192\n        \u2016Sphi \u03d5 N \u03b1\u2016 \u2264 C * ((X : \u211d) / Real.sqrt R + (X : \u211d) ^ (4 / 5 : \u211d)) *\n          Real.log X ^ 2"
+  },
+  {
+    "file": "SPLIT_mv_siegel150.lean",
+    "name": "siegel_count150",
+    "statement": "theorem siegel_count150 (hGallagher : GallagherStandard) :\n    \u2203 C : \u211d, 0 < C \u2227\n      \u2200 (X \u03d1 : \u211d), 2 \u2264 X \u2192 0 < \u03d1 \u2192 \u03d1 < 1 / 5 \u2192\n        \u2200 (r\u2080 : \u2115) [NeZero r\u2080] (\u03c7\u2080 : DirichletCharacter \u2102 r\u2080) (\u03b2 : \u211d),\n          SiegelZero (X ^ \u03d1) r\u2080 \u03c7\u2080 \u03b2 \u2192\n          (Edy X : \u211d) \u2264 C * primSum (X ^ \u03d1)           (fun r _ \u03c7 => intervalMax \u230aX\u230b\u208a (X ^ \u03d1)\n                (fun n => (vonMangoldt n : \u2102) * \u03c7 n -\n                    @ite \u2102 (\u03c7 = 1) (Classical.propDecidable (\u03c7 = 1)) 1 0 +\n                  @ite \u2102 (r = r\u2080 \u2227 HEq \u03c7 \u03c7\u2080)\n                    (Classical.propDecidable (r = r\u2080 \u2227 HEq \u03c7 \u03c7\u2080)) ((n : \u2102) ^ ((\u03b2 : \u2102) - 1)) 0))"
+  },
+  {
+    "file": "SPLIT_off_rational_family432.lean",
+    "name": "leaf_off_continuous_tail_family432",
+    "statement": "theorem leaf_off_continuous_tail_family432 {\u03d5 G : \u211d \u2192 \u211d} (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d1 : 0 < \u03d1) (h\u03d1' : \u03d1 < 1 / 2) :\n    \u2203 C : \u211d, 0 \u2264 C \u2227 \u2200 X : \u2115, 2 \u2264 X \u2192 2 \u2264 (X : \u211d) ^ \u03d1 \u2192\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u03b7 \u2264 1 \u2192 \u03b7 < (X : \u211d) ^ (\u03d1 - 1 / 2) \u2192\n      10 * ((X : \u211d) ^ \u03d1) ^ 2 \u2264 \u03b7 * X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X, \u2016continuousTail405 \u03d5 G X N \u03d1 \u03b7\u2016 ^ 2 \u2264\n        C * \u03b7 ^ 4 * (X : \u211d) ^ 3 * Real.log X ^ 5"
+  },
+  {
+    "file": "SPLIT_prop52.lean",
+    "name": "leaf_no_siegel_zero_part",
+    "statement": "theorem leaf_no_siegel_zero_part :\n    \u2203 c C : \u211d, 0 < c \u2227 \u2200 (N : \u2115) (R : \u211d),\n      2 \u2264 Real.exp (Real.sqrt (Real.log N)) \u2192\n      Real.exp (Real.sqrt (Real.log N)) \u2264 R \u2192 R \u2264 N \u2192\n      (\u00ac \u2203 (r : \u2115) (_ : NeZero r) (\u03c7 : DirichletCharacter \u2102 r) (\u03b2 : \u211d),\n        SiegelZero R r \u03c7 \u03b2) \u2192\n      primSum R (fun _ _ \u03c7 => intervalMax N R\n        (fun n => (vonMangoldt n : \u2102) * \u03c7 n - if \u03c7 = 1 then 1 else 0)) \u2264\n        C * Real.exp (-c * Real.log N / Real.log R)"
+  },
+  {
+    "file": "SPLIT_prop52.lean",
+    "name": "leaf_siegel_zero_part",
+    "statement": "theorem leaf_siegel_zero_part :\n    \u2203 c C : \u211d, 0 < c \u2227 \u2200 (N : \u2115) (R : \u211d),\n      2 \u2264 Real.exp (Real.sqrt (Real.log N)) \u2192\n      Real.exp (Real.sqrt (Real.log N)) \u2264 R \u2192 R \u2264 N \u2192\n      \u2200 (r\u2080 : \u2115) [NeZero r\u2080] (\u03c7\u2080 : DirichletCharacter \u2102 r\u2080) (\u03b2 : \u211d),\n        SiegelZero R r\u2080 \u03c7\u2080 \u03b2 \u2192\n      primSum R (fun r _ \u03c7 => intervalMax N R\n        (fun n => (vonMangoldt n : \u2102) * \u03c7 n - (if \u03c7 = 1 then 1 else 0) +\n          (if r = r\u2080 \u2227 HEq \u03c7 \u03c7\u2080 then (n : \u2102) ^ ((\u03b2 : \u2102) - 1) else 0))) \u2264\n        C * (1 - \u03b2) * Real.log N * Real.exp (-c * Real.log N / Real.log R)"
+  },
+  {
+    "file": "SPLIT_prop75.lean",
+    "name": "leaf_rphi_major",
+    "statement": "theorem leaf_rphi_major (\u03d5 G : \u211d \u2192 \u211d) (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d10 : 0 < \u03d1) (h\u03d1 : \u03d1 < 4 / 9) :\n    \u2203 C : \u211d, \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016(rphi \u03d5 N : \u2102) -\n          \u222b \u03b1 in (0 : \u211d)..1, Sphi \u03d5 N \u03b1 ^ 2 *\n            bRhat G ((X : \u211d) ^ \u03d1)\n              (fun q => ((X : \u211d) ^ \u03d1) ^ (-(1 / 4) : \u211d) * X * q / (X : \u211d) ^ \u03d1) \u03b1 *\n            ee (-(N * \u03b1))\u2016 ^ 2 \u2264\n        C * ((X : \u211d) ^ (3 - \u03d1) + (X : \u211d) ^ (13 / 5 : \u211d)) * Real.log X ^ 5"
+  },
+  {
+    "file": "SPLIT_prop75.lean",
+    "name": "leaf_main_and_single_zero",
+    "statement": "theorem leaf_main_and_single_zero (\u03d5 G : \u211d \u2192 \u211d) (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d10 : 0 < \u03d1) (h\u03d1 : \u03d1 < 4 / 9) :\n    \u2203 C : \u211d, \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016(\u222b \u03b1 in (0 : \u211d)..1, Sphi \u03d5 N \u03b1 ^ 2 *\n            bRhat G ((X : \u211d) ^ \u03d1)\n              (fun q => ((X : \u211d) ^ \u03d1) ^ (-(1 / 4) : \u211d) * X * q / (X : \u211d) ^ \u03d1) \u03b1 *\n            ee (-(N * \u03b1))) - N * singular N -\n          Mterm \u03d5 G N ((X : \u211d) ^ \u03d1)\n            (fun q => ((X : \u211d) ^ \u03d1) ^ (-(1 / 4) : \u211d) * X * q / (X : \u211d) ^ \u03d1)\u2016 ^ 2 \u2264\n        C * ((X : \u211d) ^ (3 - \u03d1) + (X : \u211d) ^ (13 / 5 : \u211d)) * Real.log X ^ 5"
+  },
+  {
+    "file": "SPLIT_prop75.lean",
+    "name": "leaf_zero_pair",
+    "statement": "theorem leaf_zero_pair (\u03d5 G : \u211d \u2192 \u211d) (h\u03d5 : IsPhi \u03d5) (hG : IsMajorWeight G)\n    (\u03d1 : \u211d) (h\u03d10 : 0 < \u03d1) (h\u03d1 : \u03d1 < 4 / 9) :\n    \u2203 C : \u211d, \u2200 X : \u2115, 2 \u2264 X \u2192\n      \u2211 N \u2208 Finset.Icc 1 X,\n        \u2016Zterm \u03d5 G N ((X : \u211d) ^ \u03d1)\n            (fun q => ((X : \u211d) ^ \u03d1) ^ (-(1 / 4) : \u211d) * X * q / (X : \u211d) ^ \u03d1)\u2016 ^ 2 \u2264\n        C * ((X : \u211d) ^ (3 - \u03d1) + (X : \u211d) ^ (13 / 5 : \u211d)) * Real.log X ^ 5"
+  },
+  {
+    "file": "SPLIT_prop81.lean",
+    "name": "leaf_count_main",
+    "statement": "theorem leaf_count_main (\u03d1 : \u211d) (h\u03d1 : 2 / 5 \u2264 \u03d1) (h\u03d1' : \u03d1 < 4 / 9) (\u03b5 : \u211d) (h\u03b5 : 0 < \u03b5) :\n    \u2203 C\u03b5 : \u211d, \u2200 (X : \u211d), 2 \u2264 X \u2192 \u2200 (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r) (\u03b4 : \u211d),\n      \u03c7.IsPrimitive \u2192 IsRealChar \u03c7 \u2192 (r : \u211d) \u2264 X ^ \u03d1 \u2192 0 < \u03b4 \u2192 \u03b4 < (1 / 2) / Real.log X \u2192\n      DirichletCharacter.LFunction \u03c7 ((1 - \u03b4 : \u211d) : \u2102) = 0 \u2192\n      (((((Finset.Icc \u2308X / 2\u2309\u208a \u230aX\u230b\u208a)).filter (fun N : \u2115 => Even N \u2227 \u00ac \u2016(r2 N : \u2102) - singular N * N\u2016 \u2264\n            (4 : \u211d) * (singular N * X * (\u03b4 * Real.log X) ^ ((1 : \u211d) / 10) +\n                singular N * N * r / (Nat.totient r : \u211d) ^ 2 +\n                  X ^ (1 - (1 : \u211d) / 10)) / 2)).card : \u2115) : \u211d) \u2264\n        C\u03b5 * X ^ (3 / 5 + \u03b5)"
+  },
+  {
+    "file": "SPLIT_prop81.lean",
+    "name": "leaf_count_second",
+    "statement": "theorem leaf_count_second (\u03d1 : \u211d) (h\u03d1 : 2 / 5 \u2264 \u03d1) (h\u03d1' : \u03d1 < 4 / 9) (\u03b5 : \u211d) (h\u03b5 : 0 < \u03b5) :\n    \u2203 C\u03b5 : \u211d, \u2200 (X : \u211d), 2 \u2264 X \u2192 \u2200 (r : \u2115) [NeZero r] (\u03c7 : DirichletCharacter \u2102 r) (\u03b4 : \u211d),\n      \u03c7.IsPrimitive \u2192 IsRealChar \u03c7 \u2192 (r : \u211d) \u2264 X ^ \u03d1 \u2192 0 < \u03b4 \u2192 \u03b4 < (1 / 2) / Real.log X \u2192\n      DirichletCharacter.LFunction \u03c7 ((1 - \u03b4 : \u211d) : \u2102) = 0 \u2192\n      (((((Finset.Icc \u2308X / 2\u2309\u208a \u230aX\u230b\u208a)).filter (fun N : \u2115 => Even N \u2227 \u00ac \u2016genSing \u03c7 \u03c7 N * betaC ((1 - \u03b4 : \u211d) : \u2102) ((1 - \u03b4 : \u211d) : \u2102) *\n                (N : \u2102) ^ (2 * ((1 - \u03b4 : \u211d) : \u2102) - 1)\u2016 \u2264\n            (4 : \u211d) * (singular N * X * (\u03b4 * Real.log X) ^ ((1 : \u211d) / 10) +\n                singular N * N * r / (Nat.totient r : \u211d) ^ 2 +\n                  X ^ (1 - (1 : \u211d) / 10)) / 2)).card : \u2115) : \u211d) \u2264\n        C\u03b5 * X ^ (3 / 5 + \u03b5)"
+  },
+  {
+    "file": "SPLIT_r2_prime_power_bound.lean",
+    "name": "leaf_first_entry_not_prime_mass",
+    "statement": "theorem leaf_first_entry_not_prime_mass (N : \u2115) (hN : Even N) (h_not_G : \u00ac IsGoldbachSum N) :\n    (\u2211 x \u2208 (Finset.HasAntidiagonal.antidiagonal N : Finset (\u2115 \u00d7 \u2115)),\n      (if \u00ac x.1.Prime then\n        ArithmeticFunction.vonMangoldt x.1 * ArithmeticFunction.vonMangoldt x.2 else 0))\n      \u2264 3/4 * ((N : \u211d)^(1/2) * (Real.log (N : \u211d))^3)"
+  },
+  {
+    "file": "SPLIT_r2_prime_power_bound.lean",
+    "name": "leaf_second_entry_not_prime_mass",
+    "statement": "theorem leaf_second_entry_not_prime_mass (N : \u2115) (hN : Even N) (h_not_G : \u00ac IsGoldbachSum N) :\n    (\u2211 x \u2208 (Finset.HasAntidiagonal.antidiagonal N : Finset (\u2115 \u00d7 \u2115)),\n      (if x.1.Prime then\n        (if \u00ac x.2.Prime then\n          ArithmeticFunction.vonMangoldt x.1 * ArithmeticFunction.vonMangoldt x.2 else 0)\n        else 0))\n      \u2264 3/4 * ((N : \u211d)^(1/2) * (Real.log (N : \u211d))^3)"
+  },
+  {
+    "file": "SPLIT_theorem82.lean",
+    "name": "leaf_singular_lower",
+    "statement": "theorem leaf_singular_lower (N : \u2115) (hEven : Even N) (h2 : 2 \u2264 N) : (1 / 2 : \u211d) \u2264 singular N"
+  },
+  {
+    "file": "SPLIT_theorem82.lean",
+    "name": "leaf_kappa_between",
+    "statement": "theorem leaf_kappa_between (N : \u2115) (hN : 2 \u2264 N) {\u03b2 : \u211d} (h\u03b2 : 3 / 4 \u2264 \u03b2) (h\u03b2' : \u03b2 \u2264 1) :\n    (betaC (\u03b2 : \u2102) (\u03b2 : \u2102)).im = 0 \u2227\n      1 - 8 * (1 - \u03b2) * Real.log N \u2264 (betaC (\u03b2 : \u2102) (\u03b2 : \u2102)).re * (N : \u211d) ^ (2 * \u03b2 - 2) \u2227\n      (betaC (\u03b2 : \u2102) (\u03b2 : \u2102)).re * (N : \u211d) ^ (2 * \u03b2 - 2) \u2264 1 + 8 * (1 - \u03b2) * Real.log N"
+  },
+  {
+    "file": "SPLIT_theorem82.lean",
+    "name": "leaf_error_domination",
+    "statement": "theorem leaf_error_domination (\u03b4 : \u211d) (h\u03b4 : 0 < \u03b4) (h\u03b41 : \u03b4 < 1) (C c' \u03b5\u2080 h : \u211d)\n    (hc' : 0 < c') (h\u03b5\u2080 : 0 < \u03b5\u2080) (hh : 0 < h) :\n    \u2203 c : \u211d, 0 < c \u2227 c < h \u2227 c \u2264 \u03b4 / 32 \u2227 \u2200 A : \u211d, 5 / 2 < A \u2192 \u2203 r\u2080 : \u2115, \u2200 r : \u2115, r\u2080 \u2264 r \u2192\n      \u2200 (N : \u2115) (e : \u211d), 0 \u2264 e \u2192 e * Real.log ((r : \u211d) ^ A) \u2264 c \u2192\n        N \u2208 Finset.Icc \u2308(r : \u211d) ^ A / 2\u2309\u208a \u230a(r : \u211d) ^ A\u230b\u208a \u2192 Even N \u2192\n          C * (singular N * (r : \u211d) ^ A * ((e * Real.log ((r : \u211d) ^ A)) ^ c') +\n                singular N * N * (r : \u211d) / (Nat.totient r : \u211d) ^ 2 +\n                ((r : \u211d) ^ A) ^ (1 - \u03b5\u2080)) \u2264 (\u03b4 / 4) * (singular N * N)"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem31",
+    "statement": "theorem theorem31 : Theorem31"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "meanSquare38",
+    "statement": "theorem meanSquare38 : MeanSquare38"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem51",
+    "statement": "theorem theorem51 : PowerSaving"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "prop52",
+    "statement": "theorem prop52 : Prop52"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem61",
+    "statement": "theorem theorem61 : Theorem61"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem62",
+    "statement": "theorem theorem62 : Theorem62"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "bound65",
+    "statement": "theorem bound65 : Bound65"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem63",
+    "statement": "theorem theorem63 : Theorem63"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "lemma73",
+    "statement": "theorem lemma73 : Lemma73"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "lemma74",
+    "statement": "theorem lemma74 : Lemma74"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "lemma76",
+    "statement": "theorem lemma76 : Lemma76"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "prop75",
+    "statement": "theorem prop75 : Prop75"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "facts81",
+    "statement": "theorem facts81 : Facts81"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "prop81",
+    "statement": "theorem prop81 : Prop81"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "theorem82",
+    "statement": "theorem theorem82 : Theorem82"
+  }
+]

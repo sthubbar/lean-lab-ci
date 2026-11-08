@@ -12,6 +12,7 @@ the witness of the polynomial scale.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp150c
+import LeanLab.BhowmikGrimmelt2026.Decomp384b
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -28,7 +29,38 @@ where the two sides are comparable. -/
 theorem leaf_nonprime_mass_upper (q a X : ℕ) :
     (∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime), vonMangoldt n)
       ≤ 4 * Real.sqrt (X : ℝ) * Real.log ((X : ℝ) + 2) := by
-  sorry
+  classical
+  by_cases hX : X = 0
+  · subst X
+    simp
+  have hX1 : 1 ≤ X := by omega
+  have hXp : (0 : ℝ) < X := by exact_mod_cast (by omega : 0 < X)
+  have hsub : (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime) ⊆
+      Finset.range (X + 1) := by
+    intro n hn
+    exact Finset.mem_range.mpr (by have hh := (Finset.mem_Icc.mp (Finset.mem_filter.mp hn).1).2; omega)
+  have hm : (∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime), vonMangoldt n) ≤
+      Chebyshev.psi X - Chebyshev.theta X := by
+    rw [← nonprime_mass_eq384]
+    calc
+      _ = ∑ n ∈ (Finset.Icc 1 X).filter (fun n => n % q = a % q ∧ ¬ n.Prime),
+          (vonMangoldt n - if n.Prime then vonMangoldt n else 0) := by
+        apply Finset.sum_congr rfl
+        intro n hn
+        simp only [(Finset.mem_filter.mp hn).2.2, ite_false, sub_zero]
+      _ ≤ _ := Finset.sum_le_sum_of_subset_of_nonneg hsub (fun n _ _ => by
+        by_cases hp : n.Prime
+        · simp only [hp, ite_true, sub_self, le_refl]
+        · simpa only [hp, ite_false, sub_zero] using (vonMangoldt_nonneg (n := n)))
+  have hb := Chebyshev.psi_sub_theta_le (show (1 : ℝ) ≤ X by exact_mod_cast hX1)
+  have hlog := Real.log_le_log hXp (show (X : ℝ) ≤ X + 2 by linarith)
+  have hlogp : 0 ≤ Real.log ((X : ℝ) + 2) := Real.log_nonneg (by have hx := Nat.cast_nonneg (α := ℝ) X; linarith)
+  calc
+    _ ≤ Chebyshev.psi X - Chebyshev.theta X := hm
+    _ ≤ 2 * Real.sqrt X * Real.log X := hb
+    _ ≤ 2 * Real.sqrt X * Real.log ((X : ℝ) + 2) :=
+      mul_le_mul_of_nonneg_left hlog (by positivity)
+    _ ≤ _ := by nlinarith [mul_nonneg (Real.sqrt_nonneg (X : ℝ)) hlogp]
 
 /-! ### Leaf 2: the mass of a whole residue class -/
 
@@ -162,3 +194,5 @@ end LeanLab.BhowmikGrimmelt2026
 set_option format.width 1000
 
 #print axioms LeanLab.BhowmikGrimmelt2026.linnik_weighted_gap150_split
+
+#print axioms LeanLab.BhowmikGrimmelt2026.leaf_nonprime_mass_upper
