@@ -36,7 +36,10 @@ singular term from the expansion at a small residual. It holds for every residua
 most three, including zero. -/
 theorem smallResidual_convolution_empty1622 {n : ℕ} (hn : n ≤ 3) :
     logConvolution1622 n = 0 := by
-  sorry
+  have : Finset.Icc 2 (n - 2) = ∅ := by
+    rw [Finset.Icc_eq_empty_iff]
+    omega
+  rw [logConvolution1622, this, Finset.sum_empty]
 
 /-- LEAF. The core error at a small residual, for a modulus of at least two. Over the
 interval of length two over N around each rational centre, the sum over the reduced
