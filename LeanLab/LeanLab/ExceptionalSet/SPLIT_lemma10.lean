@@ -28,7 +28,12 @@ theorem leaf_sum_large_N :
       ∃ B c : ℝ, 0 < B ∧ 0 < c ∧ ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N → ∀ (f : ℝ → ℝ) (k : ℕ),
         KClass N θ Θ Θ₀ δ f k →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  obtain ⟨B, c, hB, hc, hbound⟩ :=
+    lemma10 θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  refine ⟨B, c, hB, hc, 1, ?_⟩
+  intro N hN f k hK
+  exact hbound N (by omega) f k hK
 
 /-- LEAF 2 of the split of `lemma10`: the number of terms of the sum.  Every term has
 modulus one, so the sum has modulus at most the cardinality of `(N, 2N]`, which is `N`.

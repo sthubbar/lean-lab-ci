@@ -873,7 +873,7 @@ def Display5PlainExpansion : Prop :=
 /-- PROVED reduction, reproducing the worker result of 20261103T0714Z: the plain form implies
 `major_arc_remainder_bound`, with `c = 1` and `C = 0`. This is one way only. The plain form is
 STRONGER than Gallagher's Theorem 3 p.127 and display (5) p.138, both of which keep `e^{-c/θ}`,
-so this reduction does not remove the density input; see `display5_plain_expansion`. -/
+so this reduction does not remove the density input. Unused by the assembly since U-1625. -/
 theorem major_arc_remainder_bound_of_plain (h : Display5PlainExpansion) :
     ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
     ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∀ k : ℕ, 2 ≤ k → ∀ δ : ℝ, 0 < δ →
@@ -892,26 +892,26 @@ theorem major_arc_remainder_bound_of_plain (h : Display5PlainExpansion) :
   refine ⟨1, 0, θ₀, one_pos, hθ₀, fun θ hθ hθ₀' k hk δ hδ => ?_⟩
   simpa using h θ hθ hθ₀' k hk δ hδ
 
-/-- LEAF, OPEN. The plain expansion, Gallagher 1975 p.138, the display before (5), with the
-`e^{-c/θ}` term removed. It is stronger than what Gallagher prints.
-Route: Pintz and Ruzsa 2020 P0035 Theorem 2 display (2.19), error `O(N e^{-cH})` with `H`
-free, Corollary 1 displays (2.25) and (2.26), the remark (2.32), and Lemma 1 display (2.34)
-for the thin set of bad differences. Gaps to fill on that route: P0035 takes `P` in a window
-`[P₀ N^{-ε₀}, P₀]`, here `P = N^θ` exactly; it weights primes by `log p` on `(N₁, N]`, here
-weight one on `[1, N]`; (2.25) needs `|h| ≤ εN/4`, here `|dif x|` reaches about `k N`.
-Not a Bombieri Vinogradov consequence: P0029 Proposition 5.2 and the comment after it say the
-saving is only `exp(-c log N / log R)` and cannot absorb any logarithmic loss, and (2.15) uses a
-density theorem. A log free zero density estimate is needed here. -/
-theorem display5_plain_expansion : Display5PlainExpansion := by
-  sorry
+/- RETIRED 2026-11-06 architect 20261106T0803Z-25677 U-1625, kept as text.
+`theorem display5_plain_expansion : Display5PlainExpansion`, OPEN LEAF of U-1610. Gallagher prints no
+such statement: his error keeps `e^{-c/θ}` at every frequency, Theorem 3 p.127, and in display 5
+p.138. It is not refuted. `major_arc_remainder_bound` does not need it, so the leaf is dropped. -/
 
-/-- ASSEMBLY, CONDITIONAL ON `display5_plain_expansion`. Gallagher 1975 p.127 Theorem 3 and p.138
-nonzero correlation error before display 5. The statement is unchanged. A direct proof with
-`C e^{-c/θ}` kept, on Gallagher's own route, may replace this proof body and would drop the
-stronger leaf. The averaging uses Lemmas 8, 9 and 10 on pp.136 and 137 and the exceptional
-conductor bound on p.127. Lemma 6 is not part of this input.
-External inputs include Gallagher 1970 Inventiones 11 pp.329 to 339 and Montgomery and
-Vaughan 1975 Acta Arithmetica 27 pp.353 to 370. -/
+/-- LEAF, OPEN, CITED. Gallagher 1975 P0094 p.138, the sum over nonzero `n` before display 5.
+Theorem 3 p.127 bounds each frequency by `O(N L⁻² n/φ(n) (τ(n) log P/P + e^{-c/θ} + E(n)))`,
+with `E(n) = r φ((n,r))/φ²(r)` present only for an exceptional conductor `r ≤ P`, relative to
+`T = P⁵`. Lemma 8 p.136 gives `∑ r_{k,k}(n) n/φ(n) ≪ L^{2k}`, and Lemma 10 p.136 gives the average
+of `E` at most `L^{2k}/(log r)^{1/3}`, which is below `δ L^{2k}` for large `N` since
+`log r ≫ log log N` p.127. The term `τ(n) log P/P` is below `(kN)^ε log P/P`, which tends to zero
+for `ε < θ`. That is this statement, with `C e^{-c/θ}` kept and `δ` free.
+DECISION 2026-11-06 architect 20261106T0803Z-25677 U-1625: this statement is unchanged and is a
+leaf again, replacing `display5_plain_expansion`, the form with `C = 0`, which is stronger than
+the printed source and which no written proof supplies; compare task262 routes one to three.
+Twin: for theta small, k at least 2, delta positive and large N, the nonzero correlation error is
+at most the main size times C exp of minus c over theta plus delta.
+Instance: `Audit1625.major_arc_remainder_instance`.
+External inputs of Theorem 3 include Gallagher 1970 Inventiones 11 pp.329 to 339 and Montgomery
+and Vaughan 1975 Acta Arithmetica 27 pp.353 to 370. Lemma 6 is not part of this input. -/
 theorem major_arc_remainder_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
     ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∀ k : ℕ, 2 ≤ k → ∀ δ : ℝ, 0 < δ →
       ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
@@ -924,8 +924,8 @@ theorem major_arc_remainder_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) *
-            (C * Real.exp (-c / θ) + δ) :=
-  major_arc_remainder_bound_of_plain display5_plain_expansion
+            (C * Real.exp (-c / θ) + δ) := by
+  sorry
 
 /-- ASSEMBLY. CONDITIONAL ON weighted_singSeries_main_bound and major_arc_remainder_bound. Gallagher 1975 p.138 nonzero contribution before display 5. -/
 theorem major_arc_nonzero_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧ ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ →

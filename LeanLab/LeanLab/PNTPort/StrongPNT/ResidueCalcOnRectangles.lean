@@ -6,11 +6,13 @@ import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.Complex.Convex
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 import Mathlib.Analysis.Meromorphic.NormalForm
 import LeanLab.PNTPort.StrongPNT.Rectangle
 import LeanLab.PNTPort.StrongPNT.Tactic.AdditiveCombination
 
-open Complex BigOperators Nat Classical Real Topology Filter
+open Complex hiding arctan
+open BigOperators Nat Classical Real Topology Filter
 open Set MeasureTheory intervalIntegral Asymptotics
 
 open scoped Interval
