@@ -1,0 +1,37 @@
+[
+  {
+    "name": "product_integrable_supplied",
+    "code": "/-- P0082 page 356, exact generic Lemma 1 input from the proved convergence estimate.\nNo admitted analytic input is used. -/\ntheorem product_integrable_supplied (h K : \u211d \u2192 \u2102) (hper : Function.Periodic h 1)\n    (hh : IntervalIntegrable h volume 0 1) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : \u2200 \u03b1 : \u211d, 1 < |\u03b1| \u2192 ftR K \u03b1 = 0) :\n    Integrable (fun \u03b1 : \u211d => h \u03b1 * K \u03b1) := by\n  exact Decomp450b.product_integrable_of_translate_norm h K hper hh hcont\n    (Decomp464i.leaf_translate_norm_supplied K hK hcont hsupp\n      \u27e8Set.Icc 0 1, isCompact_Icc\u27e9)\n",
+    "twin": "For every periodic h integrable over one period and every continuous integrable bandlimited K, their product h times K is integrable on the full real line.",
+    "instance": "Take h constantly one and the nonzero paper kernel with Delta 1/8. All hypotheses hold and the product is the kernel itself.",
+    "source": "P0082 page 356 proof of Lemma 1. Exact original target statement."
+  },
+  {
+    "name": "fold_supplied",
+    "code": "/-- P0082 page 356, exact generic Lemma 1 input from the proved convergence estimate.\nNo admitted analytic input is used. -/\ntheorem fold_supplied (h K : \u211d \u2192 \u2102) (hper : Function.Periodic h 1)\n    (hh : IntervalIntegrable h volume 0 1) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : \u2200 \u03b1 : \u211d, 1 < |\u03b1| \u2192 ftR K \u03b1 = 0) (v : \u211d) :\n    (\u222b \u03b1, h \u03b1 * K \u03b1 * eC (-(\u03b1 * v))) =\n      \u222b \u03b1 in (0 : \u211d)..1,\n        h \u03b1 * (\u2211' n : \u2124, K (\u03b1 + n) * eC (-((\u03b1 + n) * v))) := by\n  apply Decomp404b.fold_of_integrable h K hper v\n  have he : Continuous (fun \u03b1 : \u211d => eC (-(\u03b1 * v))) := by unfold eC; fun_prop\n  exact (product_integrable_supplied h K hper hh hK hcont hsupp).mul_bdd\n    he.aestronglyMeasurable (Filter.Eventually.of_forall (fun \u03b1 => (U1539.norm_eC _).le))\n",
+    "twin": "The full modulated product integral equals its one period integral against the periodized modulated kernel under the original Lemma 1 hypotheses.",
+    "instance": "Take h constantly one, K the paper kernel with Delta 1/8 and v 1/2.",
+    "source": "P0082 page 356 proof of Lemma 1. Exact original target statement."
+  },
+  {
+    "name": "poisson_summation_supplied",
+    "code": "/-- P0082 page 356, exact generic Lemma 1 input from the proved convergence estimate.\nNo admitted analytic input is used. -/\ntheorem poisson_summation_supplied (K : \u211d \u2192 \u2102) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : \u2200 \u03b1 : \u211d, 1 < |\u03b1| \u2192 ftR K \u03b1 = 0) (v \u03b1 : \u211d) :\n    (\u2211' n : \u2124, K (\u03b1 + n) * eC (-((\u03b1 + n) * v))) =\n      \u2211' m : \u2124, eC (\u03b1 * (m : \u211d)) * ftR K (v + (m : \u211d)) := by\n  exact Decomp450a.summation_of_translate_norm K hK hcont hsupp\n    (Decomp464i.leaf_translate_norm_supplied K hK hcont hsupp) v \u03b1\n",
+    "twin": "For every continuous integrable bandlimited K, its modulated integer translate series equals the phased Fourier transform series at v plus the integer shifts. No additional convergence hypothesis is assumed.",
+    "instance": "Take the nonzero paper kernel at Delta 1/8, v 1/2 and alpha zero.",
+    "source": "P0082 page 356 proof of Lemma 1. Exact original target statement."
+  },
+  {
+    "name": "poisson_supplied",
+    "code": "/-- P0082 page 356, exact generic Lemma 1 input from the proved convergence estimate.\nNo admitted analytic input is used. -/\ntheorem poisson_supplied (K : \u211d \u2192 \u2102) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : \u2200 \u03b1 : \u211d, 1 < |\u03b1| \u2192 ftR K \u03b1 = 0) (v \u03b1 : \u211d) :\n    (\u2211' n : \u2124, K (\u03b1 + n) * eC (-((\u03b1 + n) * v))) =\n      eC (-(\u03b1 * (\u230av\u230b : \u211d))) * ftR K (Int.fract v) +\n        eC (-(\u03b1 * ((\u230av\u230b + 1 : \u2124) : \u211d))) * ftR K (Int.fract v - 1) := by\n  rw [poisson_summation_supplied K hK hcont hsupp v \u03b1,\n    Decomp371d.leaf_poisson_collapse_split K hK hcont hsupp v \u03b1]\n",
+    "twin": "The generic modulated translate series equals exactly the two adjacent Fourier terms in the printed Poisson display. This proof uses the four completed assigned collapse leaves.",
+    "instance": "The nonzero paper kernel at Delta 1/8, v 1/2 and alpha zero gives two surviving transform terms equal to one.",
+    "source": "P0082 page 356 proof of Lemma 1. Exact original target statement."
+  },
+  {
+    "name": "lemma1_supplied",
+    "code": "/-- P0082 page 356 Lemma 1, exact original paper statement.\nThe fold and Poisson inputs are supplied by clean proofs in this file. -/\ntheorem lemma1_supplied : LeanLab.ExceptionalSet.U1539.Lemma1 := by\n  intro h K hper hh hK hcont hsupp v\n  have hg0 : IntervalIntegrable (fun \u03b1 : \u211d => h \u03b1 * eC (-(\u03b1 * (\u230av\u230b : \u211d)))) volume 0 1 := by\n    apply hh.mul_continuousOn\n    unfold eC\n    fun_prop\n  have hg1 : IntervalIntegrable (fun \u03b1 : \u211d => h \u03b1 * eC (-(\u03b1 * ((\u230av\u230b + 1 : \u2124) : \u211d)))) volume 0 1 := by\n    apply hh.mul_continuousOn\n    unfold eC\n    fun_prop\n  calc\n    _ = \u222b \u03b1 in (0 : \u211d)..1,\n        (h \u03b1 * eC (-(\u03b1 * (\u230av\u230b : \u211d)))) * ftR K (Int.fract v) +\n          (h \u03b1 * eC (-(\u03b1 * ((\u230av\u230b + 1 : \u2124) : \u211d)))) * ftR K (Int.fract v - 1) := by\n      rw [fold_supplied h K hper hh hK hcont hsupp v]\n      apply intervalIntegral.integral_congr\n      intro \u03b1 h\u03b1\n      dsimp only\n      rw [poisson_supplied K hK hcont hsupp v \u03b1]\n      ring\n    _ = _ := by\n      rw [intervalIntegral.integral_add\n        (hg0.mul_const (ftR K (Int.fract v)))\n        (hg1.mul_const (ftR K (Int.fract v - 1))),\n        intervalIntegral.integral_mul_const, intervalIntegral.integral_mul_const]\n      unfold hcheck\n      ring\n",
+    "twin": "For a function h of period one integrable over one period and a continuous integrable kernel K with Fourier transform supported in the closed unit interval, the full modulated integral equals the two adjacent Fourier values of K times the corresponding Fourier coefficients of h. This is exactly U1539.Lemma1.",
+    "instance": "Take h constantly one and the nonzero paper kernel with Delta 1/8. At v zero the integral equals one. At v 1/2 both sides equal one.",
+    "source": "P0082 page 356 Lemma 1 and its complete written proof."
+  }
+]

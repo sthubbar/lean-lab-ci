@@ -1,0 +1,30 @@
+[
+  {
+    "name": "leaf_ftR_continuous",
+    "code": "/-- P0082 page 356, continuity at the boundary frequencies in the Poisson display.\nExact clean companion for the open endpoint leaf. -/\ntheorem leaf_ftR_continuous (K : \u211d \u2192 \u2102) (hK : Integrable K) : Continuous (ftR K) := by\n  have hct : Continuous (FourierTransform.fourier K) :=\n    VectorFourier.fourierIntegral_continuous Real.continuous_fourierChar\n      (L := inner\u2097 \u211d) continuous_inner hK\n  have he : ftR K = FourierTransform.fourier K :=\n    funext (Decomp404b.ftR_eq_fourier K)\n  rw [he]\n  exact hct\n",
+    "twin": "The Fourier transform of an integrable complex function on the real line is continuous in frequency.",
+    "instance": "The nonzero Kfun kernel with Delta 1/8 is integrable by Decomp371d.kernel_instance.",
+    "source": "P0082 page 356 Fourier support and Poisson display."
+  },
+  {
+    "name": "leaf_rescale_tendsto",
+    "code": "/-- P0082 page 356, continuity at the boundary frequencies in the Poisson display.\nExact clean companion for the open endpoint leaf. -/\ntheorem leaf_rescale_tendsto (\u03be : \u211d) :\n    Filter.Tendsto (fun n : \u2115 => \u03be * (1 + (1 : \u211d) / ((n : \u211d) + 1))) Filter.atTop (nhds \u03be) := by\n  simpa only [add_zero, mul_one] using\n    (tendsto_const_nhds (x := \u03be)).mul\n      ((tendsto_const_nhds (x := (1 : \u211d))).add\n        (tendsto_one_div_add_atTop_nhds_zero_nat (\ud835\udd5c := \u211d)))\n",
+    "twin": "For every real xi, the sequence xi times one plus the reciprocal of n plus one tends to xi.",
+    "instance": "Take xi one. The sequence one plus the reciprocal of n plus one tends to one.",
+    "source": "P0082 page 356 Fourier support and Poisson display."
+  },
+  {
+    "name": "leaf_rescale_abs_gt_one",
+    "code": "/-- P0082 page 356, continuity at the boundary frequencies in the Poisson display.\nExact clean companion for the open endpoint leaf. -/\ntheorem leaf_rescale_abs_gt_one (\u03be : \u211d) (h\u03be : 1 \u2264 |\u03be|) (n : \u2115) :\n    1 < |\u03be * (1 + (1 : \u211d) / ((n : \u211d) + 1))| := by\n  have hp : 0 < (1 : \u211d) / ((n : \u211d) + 1) := by positivity\n  rw [abs_mul, abs_of_pos (by linarith : 0 < 1 + (1 : \u211d) / ((n : \u211d) + 1))]\n  nlinarith\n",
+    "twin": "If the absolute value of xi is at least one, each of those rescaled frequencies has absolute value strictly greater than one.",
+    "instance": "Take xi one and n zero. The rescaled frequency is two.",
+    "source": "P0082 page 356 Fourier support and Poisson display."
+  },
+  {
+    "name": "leaf_eq_zero_of_tendsto",
+    "code": "/-- P0082 page 356, continuity at the boundary frequencies in the Poisson display.\nExact clean companion for the open endpoint leaf. -/\ntheorem leaf_eq_zero_of_tendsto {f : \u211d \u2192 \u2102} {u : \u2115 \u2192 \u211d} {\u03be : \u211d}\n    (hf : Continuous f) (hu : Filter.Tendsto u Filter.atTop (nhds \u03be)) (h0 : \u2200 n : \u2115, f (u n) = 0) :\n    f \u03be = 0 := by\n  have hlim : Filter.Tendsto (fun _ : \u2115 => (0 : \u2102)) Filter.atTop (nhds (f \u03be)) := by\n    simpa only [Function.comp_def, h0] using (hf.continuousAt.tendsto.comp hu)\n  exact tendsto_nhds_unique hlim tendsto_const_nhds\n",
+    "twin": "A continuous complex function that is zero along a sequence tending to xi is zero at xi.",
+    "instance": "Take f of x equal to the real x as a complex number, xi zero and the sequence constantly zero. This function is not identically zero.",
+    "source": "P0082 page 356 Fourier support and Poisson display."
+  }
+]

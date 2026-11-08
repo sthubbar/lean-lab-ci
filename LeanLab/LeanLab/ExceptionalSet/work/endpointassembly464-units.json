@@ -1,0 +1,9 @@
+[
+  {
+    "name": "leaf_poisson_endpoint_split",
+    "code": "/-- P0082 page 356, exact original split statement from the completed companions. -/\ntheorem leaf_poisson_endpoint_split (K : \u211d \u2192 \u2102) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : \u2200 \u03b1 : \u211d, 1 < |\u03b1| \u2192 ftR K \u03b1 = 0) :\n    \u2200 \u03be : \u211d, 1 \u2264 |\u03be| \u2192 ftR K \u03be = 0 := by\n  intro \u03be h\u03be\n  refine leaf_eq_zero_of_tendsto (f := ftR K) (u := fun n : \u2115 => \u03be * (1 + (1 : \u211d) / ((n : \u211d) + 1)))\n    (leaf_ftR_continuous K hK) (leaf_rescale_tendsto \u03be) ?_\n  intro n\n  exact hsupp _ (leaf_rescale_abs_gt_one \u03be h\u03be n)\n",
+    "twin": "An integrable continuous kernel with Fourier transform supported in the closed unit interval has zero transform at all frequencies of absolute value at least one. This assembly uses the four completed endpoint companions.",
+    "instance": "The nonzero paper kernel with Delta 1/8 and frequencies one and minus one.",
+    "source": "P0082 page 356 Poisson display."
+  }
+]

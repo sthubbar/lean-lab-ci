@@ -30,9 +30,9 @@ theorem leaf_collapse_index_vanishes (K : ℝ → ℂ) (hK : Integrable K) (hcon
     (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v α : ℝ) :
     ∀ m : ℤ, m ≠ -⌊v⌋ → m ≠ -(⌊v⌋ + 1) →
       eC (α * (m : ℝ)) * ftR K (v + (m : ℝ)) = 0 := by
-  intro m hm1 hm2
-  have h1 := leaf_poisson_index v m hm1 hm2
-  rw [leaf_poisson_endpoint K hK hcont hsupp _ h1, mul_zero]
+  intro m hm₀ hm₁
+  rw [leaf_poisson_endpoint K hK hcont hsupp _ (leaf_poisson_index v m hm₀ hm₁),
+    mul_zero]
 
 /-- LEAF. Collapse step for a two-point series: a `ℤ`-indexed series over `ℂ` whose terms
 vanish off two distinct indices `a` and `b` equals `F a + F b`. This is the step that turns the
@@ -40,27 +40,18 @@ vanishing of the tail into a finite sum. -/
 theorem leaf_collapse_tsum_pair (F : ℤ → ℂ) (a b : ℤ) (hab : a ≠ b)
     (h : ∀ m : ℤ, m ≠ a → m ≠ b → F m = 0) :
     (∑' m : ℤ, F m) = F a + F b := by
-  have hzero : ∀ m : ℤ, m ∉ ({a, b} : Finset ℤ) → F m = 0 := by
+  have hzero : ∀ m ∉ ({a, b} : Finset ℤ), F m = 0 := by
     intro m hm
-    have hm1 : m ≠ a := by intro h0; exact hm (by simp [h0])
-    have hm2 : m ≠ b := by intro h0; exact hm (by simp [h0])
-    exact h m hm1 hm2
-  rw [tsum_eq_sum hzero]
-  exact Finset.sum_pair hab
+    simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hm
+    exact h m hm.1 hm.2
+  rw [tsum_eq_sum hzero, Finset.sum_pair hab]
 
 /-- LEAF. First surviving term: at the shift `-⌊v⌋` the frequency is exactly `Int.fract v` and
 the phase is `-(α * ⌊v⌋)`, so the term is the first term of the right-hand side. -/
 theorem leaf_collapse_term_floor (K : ℝ → ℂ) (v α : ℝ) :
     eC (α * ((-⌊v⌋ : ℤ) : ℝ)) * ftR K (v + ((-⌊v⌋ : ℤ) : ℝ)) =
       eC (-(α * (⌊v⌋ : ℝ))) * ftR K (Int.fract v) := by
-  have e1 : v + ((-⌊v⌋ : ℤ) : ℝ) = Int.fract v := by
-    have hfr : (⌊v⌋ : ℝ) + Int.fract v = v := Int.floor_add_fract v
-    push_cast
-    linarith
-  have p1 : α * ((-⌊v⌋ : ℤ) : ℝ) = -(α * (⌊v⌋ : ℝ)) := by
-    push_cast
-    ring
-  rw [e1, p1]
+  simp only [Int.cast_neg, mul_neg, Int.fract, sub_eq_add_neg]
 
 /-- LEAF. Second surviving term: at the shift `-(⌊v⌋ + 1)` the frequency is exactly
 `Int.fract v - 1` and the phase is `-(α * (⌊v⌋ + 1))`, so the term is the second term of the
@@ -68,14 +59,10 @@ right-hand side. -/
 theorem leaf_collapse_term_succ (K : ℝ → ℂ) (v α : ℝ) :
     eC (α * ((-(⌊v⌋ + 1) : ℤ) : ℝ)) * ftR K (v + ((-(⌊v⌋ + 1) : ℤ) : ℝ)) =
       eC (-(α * ((⌊v⌋ + 1 : ℤ) : ℝ))) * ftR K (Int.fract v - 1) := by
-  have e2 : v + ((-(⌊v⌋ + 1) : ℤ) : ℝ) = Int.fract v - 1 := by
-    have hfr : (⌊v⌋ : ℝ) + Int.fract v = v := Int.floor_add_fract v
-    push_cast
-    linarith
-  have p2 : α * ((-(⌊v⌋ + 1) : ℤ) : ℝ) = -(α * ((⌊v⌋ + 1 : ℤ) : ℝ)) := by
-    push_cast
+  have hfreq : v + ((-(⌊v⌋ + 1) : ℤ) : ℝ) = Int.fract v - 1 := by
+    simp only [Int.cast_neg, Int.cast_add, Int.cast_one, Int.fract]
     ring
-  rw [e2, p2]
+  rw [hfreq, Int.cast_neg, mul_neg]
 
 /-- Assembly: the sealed statement, from the four leaves above. The two integer shifts
 `-⌊v⌋` and `-(⌊v⌋ + 1)` are distinct, so the collapse step applies, and the two surviving

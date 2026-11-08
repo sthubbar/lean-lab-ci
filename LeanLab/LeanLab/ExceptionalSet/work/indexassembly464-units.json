@@ -1,0 +1,9 @@
+[
+  {
+    "name": "leaf_poisson_index_split",
+    "code": "/-- P0082 page 356, exact original split statement from the completed companions. -/\ntheorem leaf_poisson_index_split (v : \u211d) :\n    \u2200 m : \u2124, m \u2260 -\u230av\u230b \u2192 m \u2260 -(\u230av\u230b + 1) \u2192 1 \u2264 |v + (m : \u211d)| := by\n  intro m hm hm'\n  rw [leaf_poisson_index_shift v m]\n  have h0 : m + \u230av\u230b \u2260 0 := leaf_poisson_index_ne_zero v m hm\n  have h1 : m + \u230av\u230b \u2260 -1 := leaf_poisson_index_ne_neg_one v m hm'\n  rcases leaf_poisson_index_dichotomy (m + \u230av\u230b) h0 h1 with hk | hk\n  \u00b7 exact leaf_poisson_index_upper v (m + \u230av\u230b) hk\n  \u00b7 exact leaf_poisson_index_lower v (m + \u230av\u230b) hk\n",
+    "twin": "For every integer shift other than the two adjacent shifts, the translated frequency has absolute value at least one. This assembly uses the six completed index companions.",
+    "instance": "Take v 1/2 and m one or minus two to exercise both branches.",
+    "source": "P0082 page 356 Poisson display."
+  }
+]

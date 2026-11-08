@@ -1,0 +1,30 @@
+[
+  {
+    "name": "leaf_exponent_mono",
+    "code": "/-- P0082 page 371, scalar auxiliary for merging two ranges of orders. The cancellation input remains cited.\nExact clean companion for an elementary open leaf. -/\ntheorem leaf_exponent_mono (cA c : \u211d) (hc : 0 < c) (hcA : c \u2264 cA) (N : \u2115) (hN : 1 \u2264 N)\n    (k : \u2115) (hk : 0 < k) :\n    (N : \u211d) ^ (1 - cA / (k : \u211d) ^ 2) \u2264 (N : \u211d) ^ (1 - c / (k : \u211d) ^ 2) := by\n  apply Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast hN)\n  have hdiv := div_le_div_of_nonneg_right hcA (sq_nonneg (k : \u211d))\n  linarith\n",
+    "twin": "For a natural base N at least one, reducing the positive gain c in the exponent one minus c over k squared increases the real power.",
+    "instance": "Take N one, k one and c equal to cA equal to one. Both powers are one.",
+    "source": "P0082 page 371, scalar auxiliary for merging two ranges of orders. The cancellation input remains cited."
+  },
+  {
+    "name": "leaf_odd_upper_window_split",
+    "code": "/-- P0082 page 367 display 30, finite interval bookkeeping auxiliary. These midpoint choices belong to the formal split.\nExact clean companion for an elementary open leaf. -/\ntheorem leaf_odd_upper_window_split (N : \u2115) (hN : 100 \u2264 N) :\n    Finset.Icc ((N + 1) / 2 + N / 4 + 1) N =\n      Finset.Icc ((N + 1) / 2 + N / 4 + 1)\n          (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2) \u222a\n        Finset.Icc (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2 + 1) N := by\n  ext n\n  simp only [Finset.mem_Icc, Finset.mem_union]\n  omega\n",
+    "twin": "For N at least one hundred, the artificial upper odd moment window is the union of its two consecutive halves.",
+    "instance": "At N one hundred the window from 76 to 100 is the union of the intervals from 76 to 88 and from 89 to 100.",
+    "source": "P0082 page 367 display 30, finite interval bookkeeping auxiliary. These midpoint choices belong to the formal split."
+  },
+  {
+    "name": "leaf_odd_upper_window_disjoint",
+    "code": "/-- P0082 page 367 display 30, finite interval bookkeeping auxiliary.\nExact clean companion for an elementary open leaf. -/\ntheorem leaf_odd_upper_window_disjoint (\u03b3 : \u211d) (N : \u2115) :\n    Disjoint\n      ((Finset.Icc ((N + 1) / 2 + N / 4 + 1)\n          (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2)).filter\n        (fun n : \u2115 => Odd (nu \u03b3 n)))\n      ((Finset.Icc (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2 + 1) N).filter\n        (fun n : \u2115 => Odd (nu \u03b3 n))) := by\n  apply Finset.disjoint_left.mpr\n  intro n hn hn'\n  simp only [Finset.mem_filter, Finset.mem_Icc] at hn hn'\n  omega\n",
+    "twin": "The odd index filters of the two consecutive halves are disjoint for every N and gamma.",
+    "instance": "At N one hundred the two unfiltered halves are nonempty and disjoint. The assertion holds for gamma 5/4.",
+    "source": "P0082 page 367 display 30, finite interval bookkeeping auxiliary."
+  },
+  {
+    "name": "leaf_odd_moment_add_const",
+    "code": "/-- P0082 page 367 display 30, scalar auxiliary for adding two window bounds.\nExact clean companion for an elementary open leaf. -/\ntheorem leaf_odd_moment_add_const (M x y A B : \u211d) (hM : 0 \u2264 M)\n    (hx : x \u2264 A * M) (hy : y \u2264 B * M) : x + y \u2264 (A + B + 1) * M := by\n  nlinarith\n",
+    "twin": "If x is at most A times M and y is at most B times M, with M nonnegative, their sum is at most A plus B plus one times M.",
+    "instance": "Take M one, x one, y one and A and B both one. The conclusion is two at most three.",
+    "source": "P0082 page 367 display 30, scalar auxiliary for adding two window bounds."
+  }
+]

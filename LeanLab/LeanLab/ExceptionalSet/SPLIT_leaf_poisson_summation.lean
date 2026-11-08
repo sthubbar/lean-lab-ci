@@ -1,4 +1,6 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_poisson
+import LeanLab.ExceptionalSet.Decomp462a
+import LeanLab.ExceptionalSet.Decomp462e
 
 /-!
 Split of the sealed statement `leaf_poisson_summation` of
@@ -58,7 +60,8 @@ interval, the periodization is a finite trigonometric sum in the base point, hen
 theorem leaf_summation_continuous (K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)
     (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v : ℝ) :
     Continuous (fun x : ℝ => ∑' n : ℤ, K (x + n) * eC (-((x + n) * v))) := by
-  sorry
+  exact Decomp462a.continuous_of_translate_norm K hcont
+    (Decomp462e.translate_norm_supplied K hK hcont hsupp) v
 
 /-- LEAF. Fourier coefficient step: the `m`-th Fourier coefficient of the periodization, taken
 over one period, is the transform of `K` at the shifted frequency `v + m`. The period is folded
@@ -70,7 +73,8 @@ theorem leaf_summation_fourier_coeff (K : ℝ → ℂ) (hK : Integrable K) (hcon
     (∫ x in (0 : ℝ)..1,
         (∑' n : ℤ, K (x + n) * eC (-((x + n) * v))) * eC (-(x * (m : ℝ)))) =
       ftR K (v + (m : ℝ)) := by
-  sorry
+  exact Decomp462a.fourier_coeff_of_translate_norm K hcont
+    (Decomp462e.translate_norm_supplied K hK hcont hsupp) v m
 
 /-- LEAF. Support step: every integer shift other than the two nearest to `-v` puts the
 frequency `v + m` at distance at least one from the origin, and the transform of `K` vanishes
@@ -80,7 +84,8 @@ continuity of the transform instead. -/
 theorem leaf_summation_coefficient_vanishes (K : ℝ → ℂ) (hK : Integrable K)
     (hcont : Continuous K) (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v : ℝ) :
     ∀ m : ℤ, m ≠ -⌊v⌋ → m ≠ -(⌊v⌋ + 1) → ftR K (v + (m : ℝ)) = 0 := by
-  sorry
+  intro m hm₁ hm₂
+  exact leaf_poisson_endpoint K hK hcont hsupp _ (leaf_poisson_index v m hm₁ hm₂)
 
 /-- LEAF. Fourier series step: a continuous 1-periodic function whose Fourier coefficients,
 integrated over one period, vanish off two distinct integer frequencies `a` and `b` is equal to
@@ -91,7 +96,41 @@ theorem leaf_summation_fourier_series (F : ℝ → ℂ) (hper : Function.Periodi
     (hfin : ∀ m : ℤ, m ≠ a → m ≠ b →
       (∫ x in (0 : ℝ)..1, F x * eC (-(x * (m : ℝ)))) = 0) (α : ℝ) :
     F α = ∑' m : ℤ, eC (α * (m : ℝ)) * ∫ x in (0 : ℝ)..1, F x * eC (-(x * (m : ℝ))) := by
-  sorry
+  let G : C(UnitAddCircle, ℂ) := ⟨hper.lift, continuous_coinduced_dom.mpr hcont⟩
+  have hphase (m : ℤ) (x : ℝ) : fourier (T := 1) m (x : UnitAddCircle) =
+      eC (x * (m : ℝ)) := by
+    rw [fourier_coe_apply]
+    unfold eC
+    simp only [Complex.ofReal_one, div_one]
+    congr 1
+    push_cast
+    ring
+  have hcoeff (m : ℤ) : fourierCoeff G m =
+      ∫ x in (0 : ℝ)..1, F x * eC (-(x * (m : ℝ))) := by
+    rw [fourierCoeff_eq_intervalIntegral _ m 0]
+    simp only [div_one, one_smul, zero_add]
+    apply intervalIntegral.integral_congr
+    intro x hx
+    dsimp only
+    rw [hphase]
+    simp only [G, ContinuousMap.coe_mk, Function.Periodic.lift_coe, smul_eq_mul]
+    rw [mul_comm]
+    congr 2
+    push_cast
+    ring
+  have hs : Summable (fourierCoeff G) := by
+    apply summable_of_ne_finset_zero (s := {a, b})
+    intro m hm
+    rw [hcoeff]
+    apply hfin m
+    · intro he; exact hm (by simp [he])
+    · intro he; exact hm (by simp [he])
+  have hsum := (has_pointwise_sum_fourier_series_of_summable hs (α : UnitAddCircle)).tsum_eq.symm
+  change G (α : UnitAddCircle) = _
+  rw [hsum]
+  apply tsum_congr
+  intro m
+  rw [hcoeff, hphase, smul_eq_mul, mul_comm]
 
 /-- Assembly: the sealed statement, from the five leaves above. The periodization is 1-periodic
 and continuous, its coefficients vanish off the two shifts `-⌊v⌋` and `-(⌊v⌋ + 1)`, so it is the

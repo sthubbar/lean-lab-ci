@@ -1,0 +1,23 @@
+[
+  {
+    "name": "leaf_summation_periodic",
+    "code": "/-- P0082 page 356 Poisson display, elementary periodization and Fourier series step.\nExact clean companion for the corresponding open summation leaf. -/\ntheorem leaf_summation_periodic (K : \u211d \u2192 \u2102) (v : \u211d) :\n    Function.Periodic (fun x : \u211d => \u2211' n : \u2124, K (x + n) * eC (-((x + n) * v))) 1 := by\n  intro x\n  convert (Equiv.addRight (1 : \u2124)).tsum_eq\n    (fun n : \u2124 => K (x + n) * eC (-((x + n) * v))) using 1\n  apply tsum_congr\n  intro n\n  simp only [Equiv.coe_addRight, Int.cast_add, Int.cast_one]\n  have he : x + 1 + (n : \u211d) = x + ((n : \u211d) + 1) := by ring\n  rw [he]\n",
+    "twin": "For any complex kernel and any real modulation, its pointwise integer periodization is periodic with period one. This holds also when a series is not summable, since integer reindexing preserves that property.",
+    "instance": "Take the nonzero paper kernel, v 1/2 and x zero. The same period identity holds at every x.",
+    "source": "P0082 page 356 Poisson display."
+  },
+  {
+    "name": "leaf_summation_coefficient_vanishes",
+    "code": "/-- P0082 page 356 Poisson display, elementary periodization and Fourier series step.\nExact clean companion for the corresponding open summation leaf. -/\ntheorem leaf_summation_coefficient_vanishes (K : \u211d \u2192 \u2102) (hK : Integrable K)\n    (hcont : Continuous K) (hsupp : \u2200 \u03b1 : \u211d, 1 < |\u03b1| \u2192 ftR K \u03b1 = 0) (v : \u211d) :\n    \u2200 m : \u2124, m \u2260 -\u230av\u230b \u2192 m \u2260 -(\u230av\u230b + 1) \u2192 ftR K (v + (m : \u211d)) = 0 := by\n  intro m hm\u2080 hm\u2081\n  exact Decomp371d.leaf_poisson_endpoint K hK hcont hsupp _\n    (Decomp371d.leaf_poisson_index v m hm\u2080 hm\u2081)\n",
+    "twin": "For an integrable continuous bandlimited kernel, the transform at v plus m is zero except at the two adjacent shifts minus floor v and minus floor v minus one.",
+    "instance": "Use Kfun with Delta 1/8, v 1/2 and m one. The frequency 3/2 lies outside the support.",
+    "source": "P0082 page 356 Poisson display."
+  },
+  {
+    "name": "leaf_summation_fourier_series",
+    "code": "/-- P0082 page 356, finite Fourier series reconstruction. -/\ntheorem leaf_summation_fourier_series (F : \u211d \u2192 \u2102) (hper : Function.Periodic F 1)\n    (hcont : Continuous F) (a b : \u2124) (hab : a \u2260 b)\n    (hfin : \u2200 m : \u2124, m \u2260 a \u2192 m \u2260 b \u2192\n      (\u222b x in (0 : \u211d)..1, F x * eC (-(x * (m : \u211d)))) = 0) (\u03b1 : \u211d) :\n    F \u03b1 = \u2211' m : \u2124, eC (\u03b1 * (m : \u211d)) * \u222b x in (0 : \u211d)..1, F x * eC (-(x * (m : \u211d))) := by\n  let f : C(UnitAddCircle, \u2102) :=\n    \u27e8hper.lift, continuous_coinduced_dom.mpr hcont\u27e9\n  have hc (m : \u2124) : fourierCoeff f m =\n      \u222b x in (0 : \u211d)..1, F x * eC (-(x * (m : \u211d))) := by\n    rw [fourierCoeff_eq_intervalIntegral _ m 0]\n    simp only [div_one, one_smul, zero_add, f, ContinuousMap.coe_mk,\n      Function.Periodic.lift_coe, smul_eq_mul]\n    apply intervalIntegral.integral_congr\n    intro x hx\n    dsimp only\n    rw [fourier_coe_apply]\n    unfold eC\n    rw [mul_comm]\n    congr 1\n    congr 1\n    push_cast\n    ring\n  have hs : Summable (fourierCoeff f) := by\n    apply summable_of_ne_finset_zero (s := {a, b})\n    intro m hm\n    rw [hc]\n    simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hm\n    exact hfin m hm.1 hm.2\n  have hp := (has_pointwise_sum_fourier_series_of_summable hs\n    (\u03b1 : UnitAddCircle)).tsum_eq.symm\n  have hval : f (\u03b1 : UnitAddCircle) = F \u03b1 := by\n    simp only [f, ContinuousMap.coe_mk, Function.Periodic.lift_coe]\n  rw [hval] at hp\n  rw [hp]\n  apply tsum_congr\n  intro m\n  rw [hc, smul_eq_mul, mul_comm]\n  congr 1\n  rw [fourier_coe_apply]\n  unfold eC\n  congr 1\n  push_cast\n  ring\n",
+    "twin": "A continuous function of period one with Fourier coefficients zero outside two distinct integer frequencies equals its Fourier series at every real point.",
+    "instance": "Take F constantly one, a zero and b one. The zero frequency coefficient is one and every other coefficient is zero.",
+    "source": "P0082 page 356 Poisson display."
+  }
+]

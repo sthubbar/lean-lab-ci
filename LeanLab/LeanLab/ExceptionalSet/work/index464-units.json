@@ -1,0 +1,44 @@
+[
+  {
+    "name": "leaf_poisson_index_shift",
+    "code": "/-- P0082 page 356, adjacent frequency reduction in the Poisson display.\nExact clean companion for the open index leaf. -/\ntheorem leaf_poisson_index_shift (v : \u211d) (m : \u2124) :\n    v + (m : \u211d) = Int.fract v + ((m + \u230av\u230b : \u2124) : \u211d) := by\n  simp only [Int.fract, Int.cast_add]\n  ring\n",
+    "twin": "An integer translate v plus m is fract v plus the integer m plus floor v.",
+    "instance": "Take v equal to minus 1/2 and m one. Both expressions are 1/2.",
+    "source": "P0082 page 356 Poisson display."
+  },
+  {
+    "name": "leaf_poisson_index_ne_zero",
+    "code": "/-- P0082 page 356, adjacent frequency reduction in the Poisson display.\nExact clean companion for the open index leaf. -/\ntheorem leaf_poisson_index_ne_zero (v : \u211d) (m : \u2124) (hm : m \u2260 -\u230av\u230b) :\n    m + \u230av\u230b \u2260 0 := by\n  omega\n",
+    "twin": "Excluding m equal to minus floor v excludes m plus floor v equal to zero.",
+    "instance": "Take v 1/2 and m one. The shifted integer is one.",
+    "source": "P0082 page 356 Poisson display."
+  },
+  {
+    "name": "leaf_poisson_index_ne_neg_one",
+    "code": "/-- P0082 page 356, adjacent frequency reduction in the Poisson display.\nExact clean companion for the open index leaf. -/\ntheorem leaf_poisson_index_ne_neg_one (v : \u211d) (m : \u2124) (hm : m \u2260 -(\u230av\u230b + 1)) :\n    m + \u230av\u230b \u2260 -1 := by\n  omega\n",
+    "twin": "Excluding m equal to minus the successor of floor v excludes m plus floor v equal to minus one.",
+    "instance": "Take v 1/2 and m one. The shifted integer is one.",
+    "source": "P0082 page 356 Poisson display."
+  },
+  {
+    "name": "leaf_poisson_index_dichotomy",
+    "code": "/-- P0082 page 356, adjacent frequency reduction in the Poisson display.\nExact clean companion for the open index leaf. -/\ntheorem leaf_poisson_index_dichotomy (k : \u2124) (h0 : k \u2260 0) (h1 : k \u2260 -1) :\n    1 \u2264 k \u2228 k \u2264 -2 := by\n  omega\n",
+    "twin": "An integer other than zero and minus one is at least one or at most minus two.",
+    "instance": "Take k one for the first branch and k minus two for the second.",
+    "source": "P0082 page 356 Poisson display."
+  },
+  {
+    "name": "leaf_poisson_index_upper",
+    "code": "/-- P0082 page 356, adjacent frequency reduction in the Poisson display.\nExact clean companion for the open index leaf. -/\ntheorem leaf_poisson_index_upper (v : \u211d) (k : \u2124) (hk : 1 \u2264 k) :\n    1 \u2264 |Int.fract v + (k : \u211d)| := by\n  have hk' : (1 : \u211d) \u2264 (k : \u211d) := by exact_mod_cast hk\n  exact (by linarith [Int.fract_nonneg v] : (1 : \u211d) \u2264 Int.fract v + (k : \u211d)).trans\n    (le_abs_self _)\n",
+    "twin": "Adding an integer at least one to a fractional part has absolute value at least one.",
+    "instance": "Take v 1/2 and k one. The absolute value is 3/2.",
+    "source": "P0082 page 356 Poisson display."
+  },
+  {
+    "name": "leaf_poisson_index_lower",
+    "code": "/-- P0082 page 356, adjacent frequency reduction in the Poisson display.\nExact clean companion for the open index leaf. -/\ntheorem leaf_poisson_index_lower (v : \u211d) (k : \u2124) (hk : k \u2264 -2) :\n    1 \u2264 |Int.fract v + (k : \u211d)| := by\n  have hk' : (k : \u211d) \u2264 -2 := by exact_mod_cast hk\n  have hneg : Int.fract v + (k : \u211d) \u2264 -1 := by linarith [Int.fract_lt_one v]\n  calc (1 : \u211d) \u2264 -(Int.fract v + (k : \u211d)) := by linarith\n    _ \u2264 |Int.fract v + (k : \u211d)| := neg_le_abs _\n",
+    "twin": "Adding an integer at most minus two to a fractional part has absolute value at least one.",
+    "instance": "Take v 1/2 and k minus two. The absolute value is 3/2.",
+    "source": "P0082 page 356 Poisson display."
+  }
+]
