@@ -47,7 +47,10 @@ steps 1 and 2 are multiplied by this weight in the assembly, so its sign is need
 before the two of them are added. -/
 theorem near_sup357_weight_nonneg357 {N : ℕ} (hN : 1 ≤ N) {q : ℕ} (hq : 1 ≤ q) :
     (0 : ℝ) ≤ (N : ℝ) / (q : ℝ) * Real.log N ^ 5 := by
-  sorry
+  have hNr : (0 : ℝ) ≤ (N : ℝ) := by positivity
+  have hqr : (0 : ℝ) < (q : ℝ) := by exact_mod_cast hq
+  have hlog : (0 : ℝ) ≤ Real.log N := Real.log_nonneg (by exact_mod_cast hN)
+  exact mul_nonneg (div_nonneg hNr hqr.le) (pow_nonneg hlog 5)
 
 /-- LEAF. Step 4 of 4: the permitted phase range is short. For N at least one and a
 phase alpha between 0 and 4 over N, the scaled phase 4 alpha N is at most 16. The
@@ -56,7 +59,18 @@ carries no character information. -/
 theorem near_sup357_phase_length357 {N : ℕ} (hN : 1 ≤ N) {α : ℝ} (hα0 : 0 ≤ α)
     (hαu : α ≤ 4 / (N : ℝ)) :
     4 * α * (N : ℝ) ≤ 16 := by
-  sorry
+  have hNr : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have h1 : 4 * α ≤ 16 / (N : ℝ) := by
+    have h4 : 4 * α ≤ 4 * (4 / (N : ℝ)) := by linarith
+    have heq : 4 * (4 / (N : ℝ)) = 16 / (N : ℝ) := by
+      rw [← mul_div_assoc]
+      norm_num
+    linarith
+  have h2 : 4 * α * (N : ℝ) ≤ (16 / (N : ℝ)) * (N : ℝ) :=
+    mul_le_mul_of_nonneg_right h1 hNr.le
+  have h3 : (16 / (N : ℝ)) * (N : ℝ) = 16 := by
+    rw [div_mul_cancel₀ _ (ne_of_gt hNr)]
+  linarith
 
 /-- Private helper for the assembly: the square of a norm is at most twice the square
 of the norm at a chosen point plus twice the square of the norm of the difference. -/
