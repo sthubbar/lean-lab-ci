@@ -47,7 +47,14 @@ theorem leaf_height_domination (γ : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ < 3 / 2
 triangle step `|h| ≤ 2|α| + 2|α - h/2|` closes against LEAF 2's domination. -/
 theorem leaf_gap_unit (γ : ℝ) (δ : ℝ) (hδ₀ : 0 < δ) (hδ₁ : δ ≤ 1)
     (N : ℕ) (hN : 3 ≤ N) : F γ N ^ (δ - 1) ≤ 1 := by
-  sorry
+  have hN3 : (3 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hlt : (1 : ℝ) < (N : ℝ) := lt_of_lt_of_le (by norm_num) hN3
+  have hlog : 0 < Real.log (N : ℝ) := Real.log_pos hlt
+  have hF : 1 ≤ F γ N := by
+    unfold F
+    rw [Real.one_le_exp_iff]
+    exact Real.rpow_nonneg hlog.le γ
+  exact Real.rpow_le_one_of_one_le_of_nonpos hF (by linarith)
 
 /-! ### Assembly -/
 
