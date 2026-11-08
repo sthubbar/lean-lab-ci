@@ -20,7 +20,9 @@ LEAF 1, and sums the block bound over the dyadic halvings. The two exponents fit
 LEAF 2 says nothing about `E`, and with a window exponent above `0.904` their product would
 exceed `0.914`.
 
-Every leaf is OPEN. The assembly `li_split` has no sorry and does not use `li`.
+LEAF 2, `leaf_cover_count`, is PROVED. LEAF 1, `leaf_window_count`, is OPEN: it is the
+analytic density input of the paper, not available in Mathlib 4.35. The assembly `li_split`
+has no sorry and does not use `li`, but it inherits `sorryAx` through LEAF 1.
 Checked only by the Lean kernel. Binary Goldbach itself is OPEN; this is the almost-all bound.
 -/
 import LeanLab.ExceptionalSet.Statements
@@ -42,6 +44,16 @@ theorem leaf_window_count :
         ≤ C * (N : ℝ) ^ (0.903 : ℝ) := by
   sorry
 
+/-- `y / y^{0.99} = y^{0.01}` for `y > 0`: the step that turns the `Y^{0.99}` of the cover
+count into the exponent `0.01`. Helper for `leaf_cover_count`. -/
+private lemma rpow_step {y : ℝ} (hy : 0 < y) :
+    y / y ^ (0.99 : ℝ) = y ^ (0.01 : ℝ) := by
+  have h : y ^ (0.99 : ℝ) * y ^ (0.01 : ℝ) = y := by
+    rw [← Real.rpow_add hy]
+    norm_num
+  rw [div_eq_iff (ne_of_gt (Real.rpow_pos_of_pos hy _))]
+  linarith [h]
+
 /-- LEAF 2 of 2, the cover count: for `Y ≥ 2` the dyadic block `(Y/2, Y]` is covered by the
 `Y / r + 1` windows of radius `r = ⌊(Y/2)^{0.99}⌋` centred at `Y/2 + j r`, `j < Y/r + 1`,
 and that number of windows is at most `C Y^{0.01}`. An estimate on `⌊·⌋₊` and powers only,
@@ -50,7 +62,83 @@ theorem leaf_cover_count :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ Y : ℕ, 2 ≤ Y →
       ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99 : ℝ))⌋₊ + 1 : ℕ) : ℝ)
         ≤ C * (Y : ℝ) ^ (0.01 : ℝ) := by
-  sorry
+  refine ⟨10, by norm_num, ?_⟩
+  intro Y hY
+  have hY1 : (1 : ℝ) ≤ (Y : ℝ) := by
+    have h : (1 : ℕ) ≤ Y := by omega
+    exact_mod_cast h
+  have hYpos : (0 : ℝ) < (Y : ℝ) := by linarith
+  set r : ℕ := ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99 : ℝ))⌋₊ with hr
+  set t : ℝ := (((Y / 2 : ℕ) : ℝ)) ^ (0.99 : ℝ) with ht
+  have hr1 : 1 ≤ r := by
+    rw [hr, Nat.one_le_floor_iff]
+    have h1 : (1 : ℝ) ≤ ((Y / 2 : ℕ) : ℝ) := by
+      have : (1 : ℕ) ≤ Y / 2 := by omega
+      exact_mod_cast this
+    exact Real.one_le_rpow h1 (by norm_num)
+  have htpos : 0 < t := by
+    rw [ht]
+    have h1 : (0 : ℝ) < ((Y / 2 : ℕ) : ℝ) := by
+      have : (0 : ℕ) < Y / 2 := by omega
+      exact_mod_cast this
+    exact Real.rpow_pos_of_pos h1 _
+  -- t ≤ r + 1 ≤ 2 r
+  have htr : t / 2 ≤ (r : ℝ) := by
+    have h1 : t ≤ (r : ℝ) + 1 := by
+      rw [ht, hr]
+      exact (Nat.lt_floor_add_one _).le
+    have h2 : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr1
+    linarith
+  -- lower bound on t: (Y/4)^0.99 ≤ t
+  have hbase : ((Y : ℝ) / 4) ≤ ((Y / 2 : ℕ) : ℝ) := by
+    have heq : 2 * (Y / 2) + Y % 2 = Y := Nat.div_add_mod Y 2
+    have hmod : Y % 2 ≤ 1 := Nat.le_of_lt_succ (Nat.mod_lt Y (by norm_num))
+    have hhalf : 1 ≤ Y / 2 := by omega
+    have h4 : Y ≤ 4 * (Y / 2) := by omega
+    have h4' : (Y : ℝ) ≤ 4 * ((Y / 2 : ℕ) : ℝ) := by exact_mod_cast h4
+    linarith
+  have hquarter : (0 : ℝ) < (Y : ℝ) / 4 := by linarith
+  have htlow : ((Y : ℝ) / 4) ^ (0.99 : ℝ) ≤ t := by
+    rw [ht]
+    exact Real.rpow_le_rpow hquarter.le hbase (by norm_num)
+  -- 4^0.99 ≤ 4
+  have h4pow : (4 : ℝ) ^ (0.99 : ℝ) ≤ 4 := by
+    have h := Real.rpow_le_rpow_of_exponent_le (by norm_num : (1 : ℝ) ≤ 4) (by norm_num : (0.99 : ℝ) ≤ 1)
+    simpa using h
+  -- key: Y / t ≤ 8 Y^0.01 ... work through 2Y/t
+  have hkey : (Y : ℝ) / (t / 2) ≤ 8 * (Y : ℝ) ^ (0.01 : ℝ) := by
+    have ht2 : (0 : ℝ) < t / 2 := by linarith
+    -- 2Y/t ≤ 2Y/((Y^0.99)/4) = 8 Y / Y^0.99 = 8 Y^0.01
+    have hq : (0 : ℝ) < ((Y : ℝ) ^ (0.99 : ℝ)) / 4 := by
+      have := Real.rpow_pos_of_pos hYpos (0.99 : ℝ)
+      linarith
+    have h1 : (Y : ℝ) / (t / 2) ≤ (Y : ℝ) / (((Y : ℝ) ^ (0.99 : ℝ)) / 4 / 2) := by
+      apply div_le_div_of_nonneg_left hYpos.le _ _
+      · linarith [hq]
+      · have : ((Y : ℝ) ^ (0.99 : ℝ)) / 4 ≤ t := by
+          refine le_trans ?_ htlow
+          have h4pos : (0 : ℝ) < (4 : ℝ) ^ (0.99 : ℝ) := Real.rpow_pos_of_pos (by norm_num) _
+          rw [Real.div_rpow hYpos.le (by norm_num : (0 : ℝ) ≤ 4)]
+          exact div_le_div_of_nonneg_left (Real.rpow_nonneg hYpos.le _) h4pos h4pow
+        linarith
+    have h2 : (Y : ℝ) / (((Y : ℝ) ^ (0.99 : ℝ)) / 4 / 2)
+        = 8 * ((Y : ℝ) / (Y : ℝ) ^ (0.99 : ℝ)) := by
+      field_simp
+      ring
+    rw [h2, rpow_step hYpos] at h1
+    exact h1
+  have hcast : ((Y / r : ℕ) : ℝ) ≤ (Y : ℝ) / (r : ℝ) := Nat.cast_div_le
+  have hdiv : (Y : ℝ) / (r : ℝ) ≤ (Y : ℝ) / (t / 2) := by
+    apply div_le_div_of_nonneg_left hYpos.le _ _
+    · linarith
+    · exact htr
+  have hone : (1 : ℝ) ≤ (Y : ℝ) ^ (0.01 : ℝ) := Real.one_le_rpow hY1 (by norm_num)
+  push_cast
+  calc ((Y / r : ℕ) : ℝ) + 1 ≤ (Y : ℝ) / (r : ℝ) + 1 := by linarith
+    _ ≤ (Y : ℝ) / (t / 2) + 1 := by linarith
+    _ ≤ 8 * (Y : ℝ) ^ (0.01 : ℝ) + 1 := by linarith
+    _ ≤ 10 * (Y : ℝ) ^ (0.01 : ℝ) := by linarith
+
 
 /-! ### The exceptions up to `x` split at `x/2` -/
 
