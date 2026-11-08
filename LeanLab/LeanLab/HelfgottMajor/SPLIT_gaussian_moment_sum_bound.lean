@@ -20,10 +20,9 @@ open Real LeanLab.HelfgottArcs Decomp269a Decomp269b
 closed forms `Sec45.nTwo` and `Sec45.nLog`, are nonnegative: both are square integrals of a
 norm, and the height `T` is at least one, so `sqrt T` is defined and positive. -/
 theorem leaf_plancherel_constants_nonneg : 0 ≤ Sec45.nTwo ∧ 0 ≤ Sec45.nLog := by
-  constructor
-  · unfold Sec45.nTwo
-    positivity
-  · exact Sec45.nLog_nonneg
+  refine ⟨?_, Sec45.nLog_nonneg⟩
+  unfold Sec45.nTwo
+  positivity
 
 /-- LEAF. Moment sum step.  Every zero in the middle range has `1 < |im| ≤ T`, its
 multiplicity is a nonnegative natural number, and the squared Mellin norm is nonnegative, so
@@ -34,11 +33,6 @@ sum.  This is the analytic content of the bound. -/
 theorem leaf_moment_plancherel_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (δ T : ℝ) (hT : 1 ≤ T) :
     gaussianMomentSum χ δ T ≤ (Sec45.nTwo + Sec45.nLog) * T := by
-  -- BLOCKED OUT OF REACH. The missing result is a discrete sampling inequality for
-  -- Dirichlet L function zeros that converts the continuous Gaussian Mellin energies
-  -- into the weighted zero sum in this statement. Mathlib has no such inequality.
-  -- Own attempt error: linarith failed to find a contradiction at the missing bound
-  -- from multiplicity times squared Mellin norm to Sec45.nTwo plus Sec45.nLog.
   sorry
 
 /-- LEAF. Elementary square root step: for nonnegative `a`, `b` and `T`, the square root of
@@ -46,22 +40,13 @@ theorem leaf_moment_plancherel_bound (q : ℕ) [NeZero q] (χ : DirichletCharact
 terms.  Nothing about the sizes of `a` and `b` is used beyond nonnegativity. -/
 theorem leaf_sqrt_sum_le (a b T : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) (hT : 0 ≤ T) :
     sqrt (a + b) * sqrt T ≤ sqrt a * sqrt T + sqrt b * sqrt T := by
-  have hprod : 0 ≤ sqrt a * sqrt b :=
-    mul_nonneg (Real.sqrt_nonneg a) (Real.sqrt_nonneg b)
-  have hsq : (sqrt a + sqrt b) ^ 2 = a + b + 2 * sqrt a * sqrt b := by
-    rw [add_sq, Real.sq_sqrt ha, Real.sq_sqrt hb]
-    ring
-  have hle : a + b ≤ (sqrt a + sqrt b) ^ 2 := by
-    nlinarith [hprod]
-  have hsum0 : 0 ≤ sqrt a + sqrt b :=
-    add_nonneg (Real.sqrt_nonneg a) (Real.sqrt_nonneg b)
-  have hroot : sqrt (a + b) ≤ sqrt ((sqrt a + sqrt b) ^ 2) :=
-    Real.sqrt_le_sqrt hle
-  have hsqrt : sqrt (a + b) ≤ sqrt a + sqrt b := by
-    rw [Real.sqrt_sq hsum0] at hroot
-    exact hroot
-  simpa [add_mul] using
-    mul_le_mul_of_nonneg_right hsqrt (Real.sqrt_nonneg T)
+  have hab : a + b ≤ (sqrt a + sqrt b) ^ 2 := by
+    nlinarith [Real.sq_sqrt ha, Real.sq_sqrt hb, Real.sqrt_nonneg a, Real.sqrt_nonneg b]
+  have h0 : (0 : ℝ) ≤ sqrt a + sqrt b := by positivity
+  have h1 : sqrt (a + b) ≤ sqrt a + sqrt b := (Real.sqrt_le_left h0).mpr hab
+  calc sqrt (a + b) * sqrt T ≤ (sqrt a + sqrt b) * sqrt T :=
+        mul_le_mul_of_nonneg_right h1 (Real.sqrt_nonneg T)
+    _ = sqrt a * sqrt T + sqrt b * sqrt T := by ring
 
 /-- Assembly of the split: the moment sum is at most `(nTwo + nLog) * T` and the square root
 of that is at most the sum of the two square root terms. -/
