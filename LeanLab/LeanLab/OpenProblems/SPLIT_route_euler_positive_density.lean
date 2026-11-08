@@ -57,7 +57,32 @@ theorem leaf_representation_multiplicity :
       (∀ n : ℕ, R n = ((Finset.range (4 * n + 2)).filter
           (fun k => (4 * n + 1 - 2 * k * (k + 1)).Prime)).card) ∧
       ∀ n : ℕ, 1 ≤ n → (R n ≠ 0 ↔ IsEuler (8 * n + 3)) := by
-  sorry
+  classical
+  refine ⟨fun n => ((Finset.range (4 * n + 2)).filter
+      (fun k => (4 * n + 1 - 2 * k * (k + 1)).Prime)).card, fun n => rfl, ?_⟩
+  intro n _
+  rw [isEuler_iff_triangular]
+  constructor
+  · intro hR
+    obtain ⟨k, hk⟩ := Finset.card_pos.mp (Nat.pos_of_ne_zero hR)
+    rw [Finset.mem_filter, Finset.mem_range] at hk
+    obtain ⟨-, hkprime⟩ := hk
+    have h2 := hkprime.two_le
+    have hle : 2 * k * (k + 1) ≤ 4 * n + 1 := by omega
+    exact ⟨k, 4 * n + 1 - 2 * k * (k + 1), hkprime, by omega⟩
+  · rintro ⟨k, p, hp, he⟩
+    refine Finset.card_ne_zero.mpr ⟨k, ?_⟩
+    rw [Finset.mem_filter, Finset.mem_range]
+    have hp2 := hp.two_le
+    have hbb : 2 * k * (k + 1) = 2 * (k * (k + 1)) := by ring
+    have hsmall : k * (k + 1) ≤ 2 * n := by omega
+    have hkk : k ≤ k * (k + 1) := by
+      calc k = k * 1 := (Nat.mul_one k).symm
+        _ ≤ k * (k + 1) := Nat.mul_le_mul_left k (by omega)
+    refine ⟨by omega, ?_⟩
+    have heq : 4 * n + 1 - 2 * k * (k + 1) = p := by omega
+    rw [heq]
+    exact hp
 
 /-- LEAF 2, the first moment.  For a multiplicity `R` that is nonzero exactly on the representable
 values, the total multiplicity over those `n ≤ X` is at least `a * X * sqrt X / log X` for a fixed
@@ -86,6 +111,60 @@ theorem leaf_second_moment_card (R : ℕ → ℕ)
         ≤ b * (X : ℝ) ^ 2 / (Real.log (X : ℝ)) ^ 2 := by
   sorry
 
+/-- The algebra of the density step, isolated from the two moment inputs: Gauss's inequality
+`(sum R) ^ 2 ≤ #A * (sum R ^ 2)` turns the two estimates into `a ^ 2 / b` times `X`, and the two
+powers of the logarithm cancel. -/
+private lemma cs_density_algebra {X a b L S T C : ℝ} (ha : 0 < a) (hb : 0 < b)
+    (hX : 0 < X) (hL : 0 < L) (hC : 0 ≤ C)
+    (hCS : S ^ 2 ≤ C * T) (hS : a * X * Real.sqrt X / L ≤ S)
+    (hT : T ≤ b * X ^ 2 / L ^ 2) : a ^ 2 / b * X ≤ C := by
+  have hApos : 0 < a * X * Real.sqrt X / L := by
+    have h1 : 0 < a * X := mul_pos ha hX
+    have h2 : 0 < a * X * Real.sqrt X := mul_pos h1 (Real.sqrt_pos.mpr hX)
+    exact div_pos h2 hL
+  have hsq : Real.sqrt X ^ 2 = X := Real.sq_sqrt (le_of_lt hX)
+  have hA2 : (a * X * Real.sqrt X / L) ^ 2 ≤ S ^ 2 :=
+    pow_le_pow_left₀ (le_of_lt hApos) hS 2
+  have hCT : 0 < C * T := lt_of_lt_of_le (pow_pos hApos 2) (hA2.trans hCS)
+  have hTpos : 0 < T := pos_of_mul_pos_right hCT hC
+  have hCB : (a * X * Real.sqrt X / L) ^ 2 ≤ C * (b * X ^ 2 / L ^ 2) :=
+    hA2.trans (hCS.trans (mul_le_mul_of_nonneg_left hT hC))
+  have hL2 : 0 < L ^ 2 := pow_pos hL 2
+  have hL2ne : L ^ 2 ≠ 0 := ne_of_gt hL2
+  have hmul := mul_le_mul_of_nonneg_right hCB (le_of_lt hL2)
+  have hlhs : (a * X * Real.sqrt X / L) ^ 2 * L ^ 2 = a ^ 2 * X ^ 3 := by
+    rw [div_pow, div_mul_cancel₀ _ hL2ne, mul_pow, mul_pow, hsq]
+    ring
+  have hrhs : C * (b * X ^ 2 / L ^ 2) * L ^ 2 = C * b * X ^ 2 := by
+    rw [mul_assoc, div_mul_cancel₀ _ hL2ne]
+    ring
+  rw [hlhs, hrhs] at hmul
+  have hX2 : 0 < X ^ 2 := pow_pos hX 2
+  have hstep : a ^ 2 * X * X ^ 2 ≤ (C * b) * X ^ 2 := by nlinarith [hmul]
+  have hfin : a ^ 2 * X ≤ C * b := le_of_mul_le_mul_right hstep hX2
+  calc a ^ 2 / b * X = a ^ 2 * X / b := by ring
+    _ ≤ C := (div_le_iff₀ hb).mpr (by linarith)
+
+/-- The density step with the moments stated for an abstract family of finsets, so that the two
+moment inputs enter exactly as they are given. -/
+private theorem cs_density_of_moments (R : ℕ → ℕ) (s : ℕ → Finset ℕ) (a b : ℝ)
+    (ha : 0 < a) (hb : 0 < b)
+    (hfirst : ∀ᶠ X : ℕ in Filter.atTop,
+      a * (X : ℝ) * Real.sqrt (X : ℝ) / Real.log (X : ℝ) ≤ (s X).sum (fun n => (R n : ℝ)))
+    (hsecond : ∀ᶠ X : ℕ in Filter.atTop,
+      (s X).sum (fun n => (R n : ℝ) ^ 2) ≤ b * (X : ℝ) ^ 2 / (Real.log (X : ℝ)) ^ 2) :
+    ∃ c : ℝ, 0 < c ∧ ∀ᶠ X : ℕ in Filter.atTop, c * X ≤ ((s X).card : ℝ) := by
+  classical
+  refine ⟨a ^ 2 / b, by positivity, ?_⟩
+  filter_upwards [hfirst, hsecond, Filter.eventually_ge_atTop 2] with X h1 h2 hX
+  have hX0 : (0 : ℝ) < (X : ℝ) := by
+    have : (0 : ℕ) < X := by omega
+    exact_mod_cast this
+  have hL : 0 < Real.log (X : ℝ) := Real.log_pos (by exact_mod_cast hX)
+  have hC : (0 : ℝ) ≤ ((s X).card : ℝ) := Nat.cast_nonneg _
+  have hCS := sq_sum_le_card_mul_sum_sq (s := s X) (f := fun n => (R n : ℝ))
+  exact cs_density_algebra ha hb hX0 hL hC hCS h1 h2
+
 /-- LEAF 4, Cauchy-Schwarz.  Given a multiplicity `R` that is nonzero exactly on the representable
 values, and the first and second moment estimates of LEAF 2 and LEAF 3 with constants `a` and `b`,
 there is `c > 0` with `c * X ≤ #A X` for all large `X`.  On `A X` the multiplicity is at least
@@ -105,15 +184,23 @@ theorem leaf_cauchy_schwarz_density (R : ℕ → ℕ)
           (fun n => (R n : ℝ) ^ 2)
         ≤ b * (X : ℝ) ^ 2 / (Real.log (X : ℝ)) ^ 2) :
     ∃ c : ℝ, 0 < c ∧ ∀ᶠ X : ℕ in Filter.atTop,
-      c * X ≤ (((Finset.Icc 1 X).filter (fun n => IsEuler (8 * n + 3))).card : ℝ) := by
-  sorry
+      c * X ≤ (((Finset.Icc 1 X).filter (fun n => IsEuler (8 * n + 3))).card : ℝ) :=
+  cs_density_of_moments R (fun X => (Finset.Icc 1 X).filter (fun n => IsEuler (8 * n + 3)))
+    a b ha hb hfirst hsecond
 
 /-- LEAF 5, the complement identity.  The representable count inside `[1, X]` is `X - euExc X`:
 the interval has `X` elements and `euExc X` counts the rest of it.  No estimate, and no
 hypothesis.  At `X = 0` both sides are `0`. -/
 theorem leaf_card_eq_complement (X : ℕ) :
     ((Finset.Icc 1 X).filter (fun n => IsEuler (8 * n + 3))).card = X - euExc X := by
-  sorry
+  classical
+  have h := Finset.card_filter_add_card_filter_not (s := Finset.Icc 1 X)
+    (p := fun n => IsEuler (8 * n + 3))
+  have hcard : (Finset.Icc 1 X).card = X := by
+    rw [Nat.card_Icc]
+    omega
+  unfold euExc
+  omega
 
 /-- The sealed statement of `route_euler_positive_density`, assembled from the five leaves above
 with no use of the route theorem itself. -/
