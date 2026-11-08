@@ -83,8 +83,14 @@ theorem leaf_range_logs (N : ℕ) (R : ℝ)
     (hN : 2 ≤ Real.exp (Real.sqrt (Real.log N)))
     (hR : Real.exp (Real.sqrt (Real.log N)) ≤ R) :
     0 < Real.log R ∧ 0 ≤ Real.log N := by
-  have h2R : (2 : ℝ) ≤ R := le_trans hN hR
-  exact ⟨Real.log_pos (by linarith), Real.log_natCast_nonneg N⟩
+  have hlogN : 0 < Real.log N := by
+    by_contra hcon
+    push Not at hcon
+    have hzero : Real.sqrt (Real.log N) = 0 := Real.sqrt_eq_zero'.mpr hcon
+    rw [hzero, Real.exp_zero] at hN
+    linarith
+  have hR1 : (1 : ℝ) < R := by linarith
+  exact ⟨Real.log_pos hR1, hlogN.le⟩
 
 /-- LEAF 4 of 4. The bookkeeping that lets one pair `(c, C)` serve both parts of the
 proposition: for a fixed exponent `t / s ≥ 0`, lowering the saving constant from `c₁` to
@@ -96,19 +102,20 @@ theorem leaf_saving_mono {c c₁ C C' t s : ℝ}
     (hc : 0 < c) (hc₁ : c ≤ c₁) (ht : 0 ≤ t) (hs : 0 < s)
     (hCC : C ≤ C') (hC' : 0 ≤ C') :
     C * Real.exp (-c₁ * t / s) ≤ C' * Real.exp (-c * t / s) := by
+  have hts : 0 ≤ t / s := div_nonneg ht hs.le
   have hexp : Real.exp (-c₁ * t / s) ≤ Real.exp (-c * t / s) := by
-    apply Real.exp_le_exp.mpr
-    apply div_le_div_of_nonneg_right _ hs.le
-    nlinarith
-  have ha : 0 < Real.exp (-c₁ * t / s) := Real.exp_pos _
-  have hb : 0 < Real.exp (-c * t / s) := Real.exp_pos _
-  by_cases hC : 0 ≤ C
-  · calc C * Real.exp (-c₁ * t / s) ≤ C' * Real.exp (-c₁ * t / s) :=
-          mul_le_mul_of_nonneg_right hCC ha.le
-      _ ≤ C' * Real.exp (-c * t / s) := mul_le_mul_of_nonneg_left hexp hC'
-  · have h1 : C * Real.exp (-c₁ * t / s) ≤ 0 := by nlinarith
-    have h2 : 0 ≤ C' * Real.exp (-c * t / s) := mul_nonneg hC' hb.le
+    rw [Real.exp_le_exp]
+    have h : c * (t / s) ≤ c₁ * (t / s) := mul_le_mul_of_nonneg_right hc₁ hts
+    have e1 : -c₁ * t / s = -(c₁ * (t / s)) := by
+      rw [mul_div_assoc, neg_mul]
+    have e2 : -c * t / s = -(c * (t / s)) := by
+      rw [mul_div_assoc, neg_mul]
+    rw [e1, e2]
     linarith
+  calc C * Real.exp (-c₁ * t / s)
+      ≤ C' * Real.exp (-c₁ * t / s) :=
+        mul_le_mul_of_nonneg_right hCC (Real.exp_pos _).le
+    _ ≤ C' * Real.exp (-c * t / s) := mul_le_mul_of_nonneg_left hexp hC'
 
 /-- `Prop52`, assembled from the four leaves: the two parts of the proposition at their own
 pairs `(c₁, C₁)` and `(c₂, C₂)` (leaves 1 and 2), the pair `(min c₁ c₂, max C₁ C₂)` that
