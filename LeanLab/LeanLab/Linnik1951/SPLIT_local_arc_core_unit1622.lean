@@ -66,6 +66,59 @@ theorem local_arc_core_unit_integral1622 (hG : LeanLab.DERZ1997.GRH) (hM : Melli
             (1 / (N : ℝ) ^ (1 / 7 : ℝ) + 1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
   sorry
 
+/-- The elementary lower bound for the convolution at the unit modulus.  Every
+summand with `2 <= m <= n - 2` is at least `1 / (Real.log n)^2`, and there are
+`n - 3` such summands. -/
+private theorem logConvolution_unit_lower1622 (n : ℕ) (hn : 4 ≤ n) :
+    ((n - 3 : ℕ) : ℝ) / Real.log n ^ 2 ≤ logConvolution1622 n := by
+  have hn2 : 2 ≤ n := by omega
+  have hL : 0 < Real.log n := Real.log_pos (by exact_mod_cast (by omega : 1 < n))
+  have hterm : ∀ m ∈ Finset.Icc 2 (n - 2),
+      (1 : ℝ) / Real.log n ^ 2 ≤
+        1 / (Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ)) := by
+    intro m hm
+    rw [Finset.mem_Icc] at hm
+    have hm2 : (2 : ℝ) ≤ m := by exact_mod_cast hm.1
+    have hmn : m ≤ n - 2 := hm.2
+    have hnm2 : (2 : ℝ) ≤ (n - m : ℕ) := by
+      have hmn2 : (2 : ℕ) ≤ n - m := by omega
+      exact_mod_cast hmn2
+    have hmlog : 0 < Real.log (m : ℝ) := Real.log_pos (by exact_mod_cast (by omega : 1 < m))
+    have hnmlog : 0 < Real.log ((n - m : ℕ) : ℝ) :=
+      Real.log_pos (by exact_mod_cast (by omega : 1 < n - m))
+    have hmm : (m : ℝ) ≤ n := by
+      exact_mod_cast (by omega)
+    have hnm : ((n - m : ℕ) : ℝ) ≤ n := by
+      exact_mod_cast (by omega)
+    have hmlog_le : Real.log (m : ℝ) ≤ Real.log n :=
+      Real.log_le_log hL hmm
+    have hnmlog_le : Real.log ((n - m : ℕ) : ℝ) ≤ Real.log n :=
+      Real.log_le_log hL hnm
+    have hprod : Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ) ≤ Real.log n ^ 2 := by
+      nlinarith [mul_le_mul hmlog_le hnmlog_le (le_of_lt hnmlog) (le_of_lt hL)]
+    have hprodpos : 0 < Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ) :=
+      mul_pos hmlog hnmlog
+    have hsqpos : 0 < Real.log n ^ 2 := sq_pos_of_pos hL
+    exact (div_le_div₀ hprod hprodpos hsqpos (by rfl)).2 hprod
+  have hcard : ((Finset.Icc 2 (n - 2)).card : ℝ) = (n : ℝ) - 3 := by
+    have h1 : (Finset.Icc 2 (n - 2)).card = n - 3 := by
+      rw [Nat.card_Icc]
+      omega
+    rw [h1, Nat.cast_sub (show 3 ≤ n by omega)]
+    norm_num
+  calc
+    ((n - 3 : ℕ) : ℝ) / Real.log n ^ 2 =
+        ((Finset.Icc 2 (n - 2)).card : ℝ) * ((1 : ℝ) / Real.log n ^ 2) := by
+      rw [hcard]
+      ring
+    _ ≤ ∑ m ∈ Finset.Icc 2 (n - 2), ((1 : ℝ) / Real.log n ^ 2) :=
+      Finset.sum_le_sum (fun m hm => le_rfl)
+    _ ≤ ∑ m ∈ Finset.Icc 2 (n - 2),
+        1 / (Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ)) :=
+      Finset.sum_le_sum hterm
+    _ = logConvolution1622 n := by
+      rfl
+
 /-- LEAF. The size of the target main term at the unit modulus. The exponentially
 damped convolution of the residual, with the damping of minus the residual over N, is
 at most a constant times N log N to the thirteenth times the sum of the two errors.

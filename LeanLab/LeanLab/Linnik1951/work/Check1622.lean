@@ -1,0 +1,25 @@
+import LeanLab.Linnik1951.SPLIT_arc_local_expansion1622
+
+#check Real.rpow_mul
+#check Real.rpow_add
+#check Real.rpow_le_rpow_left
+#check Real.rpow_lt_rpow
+#check Real.rpow_inv_natCast
+#check Real.rpow_natCast
+#check Real.rpow_one
+#check Real.rpow_pos_of_pos
+#check Real.sqrt_rpow
+#check Real.sqrt_le_sqrt
+#check Real.sqrt_sq_eq_abs
+#check exists_nat_gt
+#check Real.tendsto_rpow_atTop
+#check Filter.Tendsto
+#check Real.exp_one_lt_d9
+#check Complex.norm_real
+#check Complex.norm_ofReal
+#check Int.toNat_of_nonneg
+#check Real.log_le_log
+#check Real.log_pos
+#check power_saving_negligible357
+#check Real.log_natCast
+#check Real.rpow_natCast
