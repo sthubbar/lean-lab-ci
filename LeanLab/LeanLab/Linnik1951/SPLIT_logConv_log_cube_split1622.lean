@@ -20,14 +20,15 @@ greater than 1, so log n is positive and in particular nonzero. This is the only
 arithmetic input of the target; without it both denominators could vanish. -/
 theorem logConv_log_cube_pos1622 (n : ℕ) (hn : 2 ≤ n) :
     0 < Real.log (n : ℝ) := by
-  sorry
+  apply Real.log_pos
+  exact_mod_cast (show (1 : ℕ) < n by omega)
 
 /-- LEAF. Pure algebra, exponent step: a cube is a square times the base, for
 every real number and with no hypothesis at all. This is the step that opens the
 denominator of the target. -/
 theorem logConv_log_cube_pow1622 (x : ℝ) :
     x ^ 3 = x ^ 2 * x := by
-  sorry
+  ring
 
 /-- LEAF. Pure algebra, division step: dividing by a square times the base is
 the same as dividing by the square and then by the base, for every numerator and
@@ -35,7 +36,7 @@ every nonzero denominator. This is the step that produces the factor
 1 / log n of the target. -/
 theorem logConv_log_cube_div1622 (a x : ℝ) (hx : x ≠ 0) :
     a / (x ^ 2 * x) = (a / x ^ 2) * (1 / x) := by
-  sorry
+  field_simp [hx]
 
 /-- The target statement of the parent file, assembled from the leaves above
 with no remaining gap: rewrite the cube as a square times the base, then split
