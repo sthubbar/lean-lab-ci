@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Decomp389c
+import LeanLab.HelfgottMajor.ZeroCount1623
 
 /-!
 # Split of `strip_zero_count` (`HelfgottMajor/Decomp389c`)
@@ -29,6 +30,14 @@ them. A cut by the height of the zero, rather than by the size of `T`, does not 
 at height `2` the count already grows like `(2/π) log q`, while the budget of the target
 spends `T/π * log (qT)` plus `0.5 * log (qT)` on `log q`, so the two ranges would have to
 share that `0.5` in a ratio fixed by the true asymptotics, with no room to spare.
+The leaves are supplied by the shared zero count file `HelfgottMajor/ZeroCount1623`, unit
+U-1623. The summability leaf is unconditional: the strip zeros up to height `T` form a
+finite set, so the multiplicity family is a finite sum. The three range leaves are
+CONDITIONAL ON the cited book zero count `ZeroCount1623.book_zero_count`, which is the open
+leaf of that file. The shared count holds for every height at least one, so the range
+hypotheses of the three leaves are not needed for the bound.
+
+AI wrote this Lean code. Binary Goldbach is open.
 -/
 
 namespace LeanLab.HelfgottMajor.Decomp389c
@@ -43,50 +52,7 @@ theorem strip_count_summable (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q
     (hχ : χ.IsPrimitive) (T : ℝ) (hT : 1 ≤ T) :
     Summable (stripCountTerm χ T) := by
   classical
-  have finite_zeros : ∀ (f : ℂ → ℂ), Differentiable ℂ f → (∃ z, f z ≠ 0) →
-      {z : ℂ | ‖z‖ ≤ |T| + 2 ∧ f z = 0}.Finite := by
-    intro f hf ⟨w, hw⟩
-    have ha : AnalyticOnNhd ℂ f Set.univ := fun z _ => hf.analyticAt z
-    have hd : f ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℂ := by
-      simpa [Filter.codiscrete] using ha.preimage_zero_mem_codiscreteWithin hw (Set.mem_univ w)
-        isConnected_univ
-    have hclosed : IsClosed (f ⁻¹' {0}) := isClosed_singleton.preimage hf.continuous
-    have hdiscrete : IsDiscrete (f ⁻¹' {0}) := by
-      simpa using (mem_codiscrete'.mp hd).2
-    have hcompact := (isCompact_closedBall (0 : ℂ) (|T| + 2)).inter_right hclosed
-    have hfinite := hcompact.finite (hdiscrete.mono Set.inter_subset_right)
-    convert hfinite using 1
-    ext z
-    simp [Metric.mem_closedBall, dist_zero_right]
-  have hb : ∀ z : ℂ, DirichletCharacter.LFunction χ z = 0 → 0 < z.re → z.re < 1 → |z.im| ≤ T →
-      ‖z‖ ≤ |T| + 2 := by
-    rintro z - h1 h2 h3
-    have ht : |z.im| ≤ |T| := h3.trans (le_abs_self T)
-    have hr : |z.re| ≤ 1 := by rw [abs_of_pos h1]; exact h2.le
-    exact (Complex.norm_le_abs_re_add_abs_im z).trans (by linarith)
-  have hfin : {z : ℂ | DirichletCharacter.LFunction χ z = 0 ∧ 0 < z.re ∧ z.re < 1 ∧
-      |z.im| ≤ T}.Finite := by
-    by_cases hχ1 : χ = 1
-    · subst hχ1
-      have hf := finite_zeros (DirichletCharacter.LFunctionTrivChar₁ q)
-        (DirichletCharacter.differentiable_LFunctionTrivChar₁ q)
-        ⟨1, DirichletCharacter.LFunctionTrivChar₁_apply_one_ne_zero q⟩
-      apply hf.subset
-      rintro z ⟨hz, h1, h2, h3⟩
-      refine ⟨hb z hz h1 h2 h3, ?_⟩
-      have hz1 : z ≠ 1 := by
-        rintro rfl
-        norm_num at h2
-      rw [DirichletCharacter.LFunctionTrivChar₁, Function.update_of_ne hz1]
-      exact mul_eq_zero_of_right _ hz
-    · have hf := finite_zeros (DirichletCharacter.LFunction χ)
-        (DirichletCharacter.differentiable_LFunction hχ1)
-        ⟨2, DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ1) (by norm_num)⟩
-      exact hf.subset fun z hz => ⟨hb z hz.1 hz.2.1 hz.2.2.1 hz.2.2.2, hz.1⟩
-  have hfiniteSub : Finite {z : ℂ // DirichletCharacter.LFunction χ z = 0 ∧ 0 < z.re ∧
-      z.re < 1 ∧ |z.im| ≤ T} := hfin.to_subtype
-  haveI := hfiniteSub
-  exact Summable.of_finite
+  exact LeanLab.HelfgottMajor.ZeroCount1623.summable_zeroIdx χ T (stripCountTerm (q := q) χ T)
 
 /-- LEAF. Short height range, `1 ≤ T ≤ 2`. On this range `qT / (2πe) ≤ 2q / (2πe)`, so the
 leading term `T/π * log (qT / (2πe))` is at most `T/π` in size and the inequality rests on
@@ -99,7 +65,8 @@ theorem strip_count_short_height (q : ℕ) [NeZero q] (χ : DirichletCharacter �
     (∑' ρ, stripCountTerm χ T ρ) ≤
       T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
         0.5 * log ((q : ℝ) * T) + 17.7 := by
-  sorry
+  have h := LeanLab.HelfgottMajor.ZeroCount1623.strip_count χ hχ T hT
+  exact h
 
 /-- LEAF. Bounded band, `2 ≤ T` and `q * T ≤ 2πe`. The band bounds the conductor by
 `q ≤ 2πe / T ≤ πe < 8.6` while the height is at most `2πe`, so only finitely many zeros of
@@ -113,7 +80,8 @@ theorem strip_count_band (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (∑' ρ, stripCountTerm χ T ρ) ≤
       T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
         0.5 * log ((q : ℝ) * T) + 17.7 := by
-  sorry
+  have h := LeanLab.HelfgottMajor.ZeroCount1623.strip_count χ hχ T hT
+  exact h
 
 /-- LEAF. Main range, `2 ≤ T` and `2πe ≤ q * T`. Here the argument principle for the
 completed `L`-function applies: the Stirling estimate for the `Γ`-factor contributes
@@ -127,7 +95,8 @@ theorem strip_count_main_range (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ
     (∑' ρ, stripCountTerm χ T ρ) ≤
       T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
         0.5 * log ((q : ℝ) * T) + 17.7 := by
-  sorry
+  have h := LeanLab.HelfgottMajor.ZeroCount1623.strip_count χ hχ T hT
+  exact h
 
 /-- Assembly: the target statement follows from the four leaves. The count is summable by
 `strip_count_summable`, and the inequality holds on the short height range, on the band
