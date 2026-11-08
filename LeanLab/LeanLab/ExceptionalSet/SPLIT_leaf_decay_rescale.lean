@@ -48,20 +48,19 @@ theorem leaf_log_half_quarter (a : ℝ) (ha0 : 0 < a) (ha1 : a < 1) :
     rw [h, Real.log_pow]
     norm_num
   have hlogmono : Real.log (64 : ℝ) ≤ Real.log (N : ℝ) :=
-    Real.log_le_log (by norm_num) hN64
-  have hLpos : 0 < Real.log (N : ℝ) := Real.log_pos hN1
-  have hquarter : Real.log (N : ℝ) - Real.log 4 ≥ (1 / 4) * Real.log (N : ℝ) := by
-    rw [hlog64] at hlogmono
-    linarith
-  -- the integer half of `N` is at least `N / 4`
+    Real.log_le_log (by linarith) hN64
+  have hLpos : (0 : ℝ) < Real.log (N : ℝ) := by
+    calc (0 : ℝ) < 3 * Real.log 4 := by positivity
+      _ = Real.log 64 := hlog64.symm
+      _ ≤ Real.log (N : ℝ) := hlogmono
+  have hM : (N / 2 : ℕ) * 2 + N % 2 = N := by omega
+  have h' : ((N / 2 * 2 + N % 2 : ℕ) : ℝ) = (N : ℝ) := by rw [hM]
   have hmod : ((N % 2 : ℕ) : ℝ) ≤ 1 := by
     have h : N % 2 ≤ 1 := by
       have := Nat.mod_lt N (by norm_num : 0 < 2)
       omega
     exact_mod_cast h
   have hdecomp : (N : ℝ) = 2 * ((N / 2 : ℕ) : ℝ) + ((N % 2 : ℕ) : ℝ) := by
-    have h : N / 2 * 2 + N % 2 = N := by omega
-    have h' : ((N / 2 * 2 + N % 2 : ℕ) : ℝ) = (N : ℝ) := by rw [h]
     push_cast at h'
     linarith
   have hbase : (N : ℝ) / 4 ≤ ((N / 2 : ℕ) : ℝ) := by
@@ -72,7 +71,7 @@ theorem leaf_log_half_quarter (a : ℝ) (ha0 : 0 < a) (ha1 : a < 1) :
     Real.log_le_log hbasepos hbase
   have hlogdiv : Real.log ((N : ℝ) / 4) = Real.log (N : ℝ) - Real.log 4 :=
     Real.log_div (ne_of_gt hNpos) (by norm_num)
-  have hM : Real.log (N : ℝ) / 4 ≤ Real.log ((N / 2 : ℕ) : ℝ) := by
+  have hM_le : Real.log (N : ℝ) / 4 ≤ Real.log ((N / 2 : ℕ) : ℝ) := by
     rw [hlogdiv] at hlogM
     linarith
   have hLa : (0 : ℝ) ≤ Real.log (N : ℝ) ^ a := Real.rpow_nonneg (le_of_lt hLpos) a
@@ -89,7 +88,7 @@ theorem leaf_log_half_quarter (a : ℝ) (ha0 : 0 < a) (ha1 : a < 1) :
         rw [Real.mul_rpow (le_of_lt hLpos) (by norm_num : (0 : ℝ) ≤ 1 / 4)]
     _ = (Real.log (N : ℝ) / 4) ^ a := by ring_nf
     _ ≤ Real.log ((N / 2 : ℕ) : ℝ) ^ a :=
-        Real.rpow_le_rpow (by linarith) hM (le_of_lt ha0)
+        Real.rpow_le_rpow (by linarith) hM_le (le_of_lt ha0)
 
 /-- LEAF. The dyadic decay at the integer half of `N` is at most the decay recorded at
 `N` with the exponent `η / 4`.  This is the previous leaf carried through the monotonicity
@@ -102,7 +101,7 @@ theorem leaf_exp_decay_quarter (γ η : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) (h�
   have ha0 : (0 : ℝ) < 3 - 2 * γ := by linarith
   have ha1 : 3 - 2 * γ < 1 := by linarith
   have h := leaf_log_half_quarter (3 - 2 * γ) ha0 ha1 N hN
-  have h2 := mul_le_mul_of_nonneg_left h (le_of_lt hη)
+  have hm2 := mul_le_mul_of_nonneg_left h (le_of_lt hη)
   rw [Real.exp_le_exp]
   linarith
 
@@ -119,7 +118,7 @@ theorem leaf_calE_kappa_comparison (γ η κ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 /
   have hκ' : (3 / 2) * κ ≤ η / 4 := by linarith
   have hmono : -(η / 4) * Real.log (N : ℝ) ^ (3 - 2 * γ) ≤
       -(3 / 2) * (κ * Real.log (N : ℝ) ^ (3 - 2 * γ)) := by
-    have h3 := mul_le_mul_of_nonneg_right hκ' hpow
+    have hm3 := mul_le_mul_of_nonneg_right hκ' hpow
     linarith
   calc Real.exp (-(η / 4) * Real.log (N : ℝ) ^ (3 - 2 * γ))
       ≤ Real.exp (-(3 / 2) * (κ * Real.log (N : ℝ) ^ (3 - 2 * γ))) :=
@@ -200,24 +199,24 @@ theorem leaf_arith_bookkeeping (B : ℝ) (N : ℕ) (e Y : ℝ) (hB : 0 < B) (he 
       norm_num at hNY
     · exact_mod_cast h
   have hYpos : (0 : ℝ) < Y := by
-    have h1 : (0 : ℝ) < (N : ℝ) * Y := lt_of_lt_of_le zero_lt_one hNY
-    rcases mul_pos_iff.mp h1 with ⟨-, h⟩ | ⟨h, -⟩
-    · exact h
+    have hm1 : (0 : ℝ) < (N : ℝ) * Y := lt_of_lt_of_le zero_lt_one hNY
+    rcases mul_pos_iff.mp hm1 with ⟨-, hm⟩ | ⟨hm, -⟩
+    · exact hm
     · linarith
   have hdiv : ((N / 2 : ℕ) : ℝ) ≤ (N : ℝ) := by
     have h : N / 2 ≤ N := Nat.div_le_self N 2
     exact_mod_cast h
   have hnn : (0 : ℝ) ≤ B * ((N / 2 : ℕ) : ℝ) := by positivity
-  have h1 : B * ((N / 2 : ℕ) : ℝ) * e ≤ B * ((N / 2 : ℕ) : ℝ) * Y :=
+  have h1' : B * ((N / 2 : ℕ) : ℝ) * e ≤ B * ((N / 2 : ℕ) : ℝ) * Y :=
     mul_le_mul_of_nonneg_left he hnn
-  have h2 : B * ((N / 2 : ℕ) : ℝ) * Y ≤ B * (N : ℝ) * Y := by
+  have h2' : B * ((N / 2 : ℕ) : ℝ) * Y ≤ B * (N : ℝ) * Y := by
     have hBnn : (0 : ℝ) ≤ B * Y := le_of_lt (mul_pos hB hYpos)
     nlinarith [hdiv, hBnn]
   have h3 : 2 ≤ (B + 2) * ((N : ℝ) * Y) := by
     have hB2 : (0 : ℝ) ≤ B + 2 := by linarith
     have h := mul_le_mul_of_nonneg_left hNY hB2
     linarith
-  nlinarith [h1, h2, h3]
+  nlinarith [h1', h2', h3]
 
 /-- Assembly of the rescaling step from the five leaves: take `C = 2 * B + 2` and `N₀`
 beyond `64` and the threshold of the growth leaf, then chain the decay comparison, the
