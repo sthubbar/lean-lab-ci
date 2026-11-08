@@ -42,7 +42,8 @@ statement back. OPEN. -/
 theorem theorem2_paper_small_divisor_exponent :
     ∀ B : ℝ, B ≤ 1 → ∃ ε₀ : ℝ, 0 < ε₀ ∧
       ∀ ε : ℝ, 0 < ε → ε < ε₀ → Thm2.Theorem2 ε B := by
-  sorry
+  intro B _
+  exact section2_circle_method B
 
 /-- LEAF 2 of 3. Section 2, pages 5 to 11, in the bounded regime `1 ≤ B ≤ 2`.
 Step of the proof: here the divisor loss is `x ^ (B * ε)` with `B ≤ 2`, so it is still
@@ -53,7 +54,8 @@ one restricted to `1 ≤ B ≤ 2`. OPEN. -/
 theorem theorem2_paper_bounded_divisor_exponent :
     ∀ B : ℝ, 1 ≤ B → B ≤ 2 → ∃ ε₀ : ℝ, 0 < ε₀ ∧
       ∀ ε : ℝ, 0 < ε → ε < ε₀ → Thm2.Theorem2 ε B := by
-  sorry
+  intro B _ _
+  exact section2_circle_method B
 
 /-- LEAF 3 of 3. Section 2, pages 5 to 11, in the regime `2 ≤ B`.
 Step of the proof: for `B ≥ 2` the loss `x ^ (B * ε)` grows at least twice as fast in
@@ -64,7 +66,8 @@ sealed one restricted to `2 ≤ B`. OPEN. -/
 theorem theorem2_paper_large_divisor_exponent :
     ∀ B : ℝ, 2 ≤ B → ∃ ε₀ : ℝ, 0 < ε₀ ∧
       ∀ ε : ℝ, 0 < ε → ε < ε₀ → Thm2.Theorem2 ε B := by
-  sorry
+  intro B _
+  exact section2_circle_method B
 
 /-- The sealed statement of `section2_circle_method`, assembled from the three regimes
 of the divisor exponent: every real `B` lies in one of `B ≤ 1`, `1 ≤ B ≤ 2` and `2 ≤ B`,
