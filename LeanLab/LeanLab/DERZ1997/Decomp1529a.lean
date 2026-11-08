@@ -23,6 +23,7 @@ import LeanLab.PNTPort.DirichletZF.SiegelSigns
 import LeanLab.Routes.Decomp1551c
 import LeanLab.PNTPort.ZetaZeros.Sym
 import LeanLab.DERZ1997.Statements
+import LeanLab.HelfgottMajor.ZeroCount1623
 
 namespace LeanLab.DERZ1997.Decomp1529a
 open Complex Filter Topology MeasureTheory Set
@@ -801,7 +802,14 @@ theorem primitive_zero_count193 {q : ℕ} [NeZero q] (χ : DirichletCharacter �
     |(∑ ρ ∈ hfin.toFinset, (LMult χ ρ : ℝ)) -
       T / Real.pi * Real.log (q * T / (2 * Real.pi * Real.exp 1))| ≤
         0.5 * Real.log (q * T) + 17.7 := by
-  sorry
+  have h := LeanLab.HelfgottMajor.ZeroCount1623.arxiv_zero_count χ hχ hT
+  have hsum : (∑ ρ ∈ hfin.toFinset, (LMult χ ρ : ℝ)) =
+      ∑ ρ ∈ (LeanLab.HelfgottMajor.ZeroCount1623.stripZeros_finite χ T).toFinset,
+        (LeanLab.HelfgottMajor.ZeroCount1623.mult χ ρ : ℝ) := by
+    apply Finset.sum_congr _ (fun ρ _ => rfl)
+    ext ρ
+    simp [LZeros, LeanLab.HelfgottMajor.ZeroCount1623.stripZeros]
+  rwa [hsum]
 
 /-- LEAF. Zero count for `L(s, χ)`: for `T ≥ 1`, the zeros in the open strip with `|γ| ≤ T`,
 counted with multiplicity, number at most `(T/π) log(qT) + 2 log(q(T + 2)) + 20`.
