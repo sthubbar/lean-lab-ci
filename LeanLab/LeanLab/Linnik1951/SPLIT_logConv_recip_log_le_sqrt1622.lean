@@ -21,28 +21,36 @@ numeric base point of the lower bound for the logarithm; it is a single explicit
 constant inequality and carries no variable. -/
 theorem logConv_recip_leaf_log_1000_ge_one1622 :
     (1 : ℝ) ≤ Real.log (1000 : ℝ) := by
-  sorry
+  have h1 : Real.exp 1 ≤ 1000 := by
+    have h2 : Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+    linarith
+  rw [← Real.log_exp 1]
+  exact Real.log_le_log (Real.exp_pos 1) h1
 
 /-- LEAF. The monotonicity step: for n at least 10^3 the logarithm of n is at
 least the logarithm of 10^3. The logarithm is increasing on the positive reals and
 both arguments are positive. -/
 theorem logConv_recip_leaf_log_mono1622 (n : ℕ) (hn : 1000 ≤ n) :
     Real.log (1000 : ℝ) ≤ Real.log (n : ℝ) := by
-  sorry
+  apply Real.log_le_log
+  · norm_num
+  · exact_mod_cast hn
 
 /-- LEAF. The square root step: for a real x at least one, the square root of x is
 at most x. Squaring both sides over the nonnegative reals turns this into x at most
 x^2, which holds from x at least one. -/
 theorem logConv_recip_leaf_sqrt_le_self1622 (x : ℝ) (hx : 1 ≤ x) :
     Real.sqrt x ≤ x := by
-  sorry
+  have h1 : 0 ≤ x := by linarith
+  have h3 : 0 ≤ Real.sqrt x := Real.sqrt_nonneg x
+  nlinarith [Real.mul_self_sqrt h1]
 
 /-- LEAF. The reciprocal step: on positive reals the map y ↦ 1 / y reverses order,
 so a at most b gives 1 / b at most 1 / a. This is the step that turns the square
 root comparison into the comparison of the two relative weights. -/
 theorem logConv_recip_leaf_one_div_le_one_div1622 (a b : ℝ) (ha : 0 < a) (hab : a ≤ b) :
     1 / b ≤ 1 / a := by
-  sorry
+  apply one_div_le_one_div_of_le ha hab
 
 /-- The parent statement, assembled from the leaves above with no remaining gap:
 the logarithm of n is at least one, its square root lies between one and the
