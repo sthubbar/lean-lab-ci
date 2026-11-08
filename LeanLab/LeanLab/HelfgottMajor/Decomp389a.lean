@@ -1,5 +1,6 @@
 import LeanLab.HelfgottMajor.Decomp269b
 import LeanLab.HelfgottMajor.HalfMoment389
+import LeanLab.HelfgottMajor.ZeroCount1623
 
 /-!
 P0014 Lemma 4.4, page 39, very low zeros.
@@ -25,7 +26,8 @@ theorem very_low_zero_count (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (T : ℝ) (hT : 1 ≤ T) :
     Summable (veryLowCountTerm χ T) ∧
       (∑' ρ, veryLowCountTerm χ T ρ) ≤ 0.819 * log q + 16.8 := by
-  sorry
+  exact ⟨ZeroCount1623.summable_zeroIdx χ T (veryLowCountTerm χ T),
+    ZeroCount1623.very_low_count χ hχ T hT⟩
 
 /-- Page 43, display 4.42, the scalar Gaussian half moment numerical bound.
 This has no zero sum, character, shift or height parameter.
