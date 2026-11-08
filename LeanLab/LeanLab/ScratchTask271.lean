@@ -1,0 +1,11 @@
+import LeanLab.Linnik1951.Decomp442c
+#check Finset.sum_inv
+#check Finset.sum_bij
+#check MulChar.inv
+#check MulChar.inv_apply
+#check MulChar.inv_involutive
+#check MulChar.ext
+#check ZMod.isUnit_iff_coprime
+#check Complex.sq_norm
+#check Complex.normSq_eq_norm_sq
+#check RCLike.norm_sq_eq_abs
