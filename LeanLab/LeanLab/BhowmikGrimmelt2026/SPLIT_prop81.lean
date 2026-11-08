@@ -88,11 +88,11 @@ summand. -/
 theorem leaf_half_split {x y : ℂ} {T : ℝ} (h : ¬ ‖x - y‖ ≤ T) :
     ¬ ‖x‖ ≤ T / 2 ∨ ¬ ‖y‖ ≤ T / 2 := by
   by_contra hc
-  push_neg at hc
-  apply h
-  calc ‖x - y‖ ≤ ‖x‖ + ‖y‖ := norm_sub_le x y
-    _ ≤ T / 2 + T / 2 := add_le_add hc.1 hc.2
-    _ = T := by ring
+  push Not at hc
+  obtain ⟨hx, hy⟩ := hc
+  exact h (calc ‖x - y‖ ≤ ‖x‖ + ‖y‖ := norm_sub_le x y
+      _ ≤ T / 2 + T / 2 := add_le_add hx hy
+      _ = T := by ring)
 
 /-- `Prop81`, assembled from the three leaves and nothing else. The four constants are
 `h = 1/2`, `c' = 1/10`, `ε₀ = 1/10`, `C = 4`; for an admissible `N` the deviation from the sum
