@@ -55,7 +55,11 @@ theorem leaf_both_prime_part_vanishes (N : ℕ) (h_not_G : ¬ IsGoldbachSum N) :
     (∑ x ∈ (Finset.HasAntidiagonal.antidiagonal N : Finset (ℕ × ℕ)),
       (if x.1.Prime ∧ x.2.Prime then
         ArithmeticFunction.vonMangoldt x.1 * ArithmeticFunction.vonMangoldt x.2 else 0)) = 0 := by
-  sorry
+  apply Finset.sum_eq_zero
+  intro x hx
+  rw [if_neg]
+  rintro ⟨h1, h2⟩
+  exact h_not_G ⟨x.1, x.2, h1, h2, Finset.HasAntidiagonal.mem_antidiagonal.mp hx⟩
 
 /-- LEAF. Step 2 of the proof: the mass carried by the pairs whose first entry is not prime — that
 is, since `Λ` vanishes off the prime powers, whose first entry is a proper prime power — is at most

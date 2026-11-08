@@ -1,4 +1,7 @@
 /-
+OFF ROUTE, U-1633 20261108T0415Z-4325: budget split is not implied by the source; the covering count is a maximum over the index range, so a sub-range with a matching fraction of the budget is a strengthening; parent certificate stays the cited leaf.
+Any claim below that a leaf is easier than the whole statement is wrong: the covering count barely shrinks with the length of the range, the same defect that OMOS audits and the U-1628 reduced-size greedy reproduction measured in the sibling rows SPLIT_certificate210 and 240; this row was not measured itself. No file in the DtRS1998 folder imports this file. No leaf docstring starts with LEAF any more.
+
 Split of LeanLab/DtRS1998/Decomp270b, theorem certificate220.
 
 The theorem asks for one finite object: a list of at most 222 primes such that
@@ -44,7 +47,8 @@ private theorem cover_append220 (B N N1 : ℕ) (hN : N1 ≤ N) (q1 q2 : List ℕ
   · exact Or.inl (h1 j h)
   · exact Or.inr (h2 j h)
 
-/-- LEAF. Step 1 of the proof, the lower half of the offset range: a list of at
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Step 1 of the proof, the lower half of the offset range: a list of at
 most 111 primes such that for every `j` in `List.range (10 ^ 9 / 4 + 1)`, i.e.
 for every `j ≤ 10 ^ 9 / 4`, one member `q` of the list satisfies
 `q ≤ 10 ^ 220 + 2 * j` and `10 ^ 220 + 2 * j - q` is prime.  The primality of
@@ -58,7 +62,8 @@ theorem certificate220_lower_half :
           (q ≤ 10 ^ 220 + 2 * j ∧ (10 ^ 220 + 2 * j - q).Prime))) = true := by
   sorry
 
-/-- LEAF. Step 2 of the proof, the upper half of the offset range: a list of at
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Step 2 of the proof, the upper half of the offset range: a list of at
 most 111 primes that covers every offset of `List.range (10 ^ 9 / 2 + 1)` left
 after the first `10 ^ 9 / 4 + 1` are dropped, that is every `j` with
 `10 ^ 9 / 4 < j ≤ 10 ^ 9 / 2`, in the same sense as the lower half.  No

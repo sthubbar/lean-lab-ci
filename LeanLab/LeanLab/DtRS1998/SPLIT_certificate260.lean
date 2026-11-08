@@ -1,4 +1,7 @@
 /-
+OFF ROUTE, U-1633 20261108T0415Z-4325: budget split is not implied by the source; the covering count is a maximum over the index range, so a sub-range with a matching fraction of the budget is a strengthening; parent certificate stays the cited leaf.
+Any claim below that a leaf is easier than the whole statement is wrong: the covering count barely shrinks with the length of the range, the same defect that OMOS audits and the U-1628 reduced-size greedy reproduction measured in the sibling rows SPLIT_certificate210 and 240; this row was not measured itself. No file in the DtRS1998 folder imports this file. No leaf docstring starts with LEAF any more.
+
 Split of the sealed statement certificate260 into three open leaves plus one
 assembly theorem.
 
@@ -30,7 +33,8 @@ private theorem any_append_right {f : ℕ → Bool} {l₁ l₂ : List ℕ}
   obtain ⟨x, hx, hfx⟩ := List.any_eq_true.mp h
   exact List.any_eq_true.mpr ⟨x, List.mem_append_right l₁ hx, hfx⟩
 
-/-- LEAF. Step one of three of the finite offset check: the low block of the
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Step one of three of the finite offset check: the low block of the
 offsets. At most 75 primes, each prime and each a smaller summand, already
 cover every even offset 10 ^ 260 + 2 * j with 0 <= j <= 166666666. -/
 theorem leaf_cover_low :
@@ -41,7 +45,8 @@ theorem leaf_cover_low :
           (q ≤ 10 ^ 260 + 2 * j ∧ (10 ^ 260 + 2 * j - q).Prime)) = true := by
   sorry
 
-/-- LEAF. Step two of three of the finite offset check: the middle block of the
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Step two of three of the finite offset check: the middle block of the
 offsets. At most 75 primes cover every even offset 10 ^ 260 + 2 * j with
 166666667 <= j <= 333333333. -/
 theorem leaf_cover_mid :
@@ -52,7 +57,8 @@ theorem leaf_cover_mid :
           (q ≤ 10 ^ 260 + 2 * j ∧ (10 ^ 260 + 2 * j - q).Prime)) = true := by
   sorry
 
-/-- LEAF. Step three of three of the finite offset check: the high block of the
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Step three of three of the finite offset check: the high block of the
 offsets, which contains the last one at j = 500000000. At most 76 primes cover
 every even offset 10 ^ 260 + 2 * j with 333333334 <= j <= 500000000. -/
 theorem leaf_cover_high :

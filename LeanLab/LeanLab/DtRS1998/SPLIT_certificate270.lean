@@ -1,4 +1,7 @@
 /-
+OFF ROUTE, U-1633 20261108T0415Z-4325: budget split is not implied by the source; the covering count is a maximum over the index range, so a sub-range with a matching fraction of the budget is a strengthening; parent certificate stays the cited leaf.
+Any claim below that a leaf is easier than the whole statement is wrong: the covering count barely shrinks with the length of the range, the same defect that OMOS audits and the U-1628 reduced-size greedy reproduction measured in the sibling rows SPLIT_certificate210 and 240; this row was not measured itself. No file in the DtRS1998 folder imports this file. No leaf docstring starts with LEAF any more.
+
 AI wrote this Lean code for the split of certificate270.
 The interval certificate at 10^270 is cut into four quarter ranges of the
 even offsets. Each quarter carries its own prime list, and the budget of
@@ -11,7 +14,8 @@ namespace LeanLab.DtRS1998.Decomp270c
 
 open LeanLab Task71.Paper Decomp270a
 
-/-- LEAF. First quarter of the offset range. There is a list of at most 56
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: First quarter of the offset range. There is a list of at most 56
 primes such that every even number `10 ^ 270 + 2 * j` with `j ≤ 125000000`
 has a member `q` of the list with `q ≤ 10 ^ 270 + 2 * j` and the difference
 `10 ^ 270 + 2 * j - q` prime. No ordering of the list is assumed. -/
@@ -23,7 +27,8 @@ theorem cover_quarter_one :
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
   sorry
 
-/-- LEAF. Second quarter of the offset range. There is a list of at most 56
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Second quarter of the offset range. There is a list of at most 56
 primes such that every even number `10 ^ 270 + 2 * j` with
 `125000001 ≤ j ≤ 250000000` has a member `q` of the list with
 `q ≤ 10 ^ 270 + 2 * j` and the difference prime. No ordering of the list
@@ -36,7 +41,8 @@ theorem cover_quarter_two :
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
   sorry
 
-/-- LEAF. Third quarter of the offset range. There is a list of at most 56
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Third quarter of the offset range. There is a list of at most 56
 primes such that every even number `10 ^ 270 + 2 * j` with
 `250000001 ≤ j ≤ 375000000` has a member `q` of the list with
 `q ≤ 10 ^ 270 + 2 * j` and the difference prime. No ordering of the list
@@ -49,7 +55,8 @@ theorem cover_quarter_three :
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
   sorry
 
-/-- LEAF. Fourth quarter of the offset range. There is a list of at most 55
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Fourth quarter of the offset range. There is a list of at most 55
 primes such that every even number `10 ^ 270 + 2 * j` with
 `375000001 ≤ j ≤ 500000000` has a member `q` of the list with
 `q ≤ 10 ^ 270 + 2 * j` and the difference prime. No ordering of the list

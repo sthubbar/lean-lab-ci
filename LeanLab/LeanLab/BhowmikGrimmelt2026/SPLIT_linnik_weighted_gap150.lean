@@ -57,7 +57,59 @@ theorem leaf_scale_margin :
     ∃ L C : ℝ, 6 ≤ L ∧ 1 ≤ C ∧ ∀ q : ℕ, 2 ≤ q →
       400 * (q : ℝ) * Real.log ((Nat.floor (C * (q : ℝ) ^ L) : ℝ) + 2)
         < Real.sqrt (Nat.floor (C * (q : ℝ) ^ L) : ℝ) := by
-  sorry
+  have he1 : (2 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp (1 : ℝ)]
+  have hE : (2 : ℝ) ^ 40 ≤ Real.exp 40 := by
+    have h := pow_le_pow_left₀ (by norm_num) he1 40
+    rw [← Real.exp_nat_mul] at h
+    norm_num at h ⊢
+    exact h
+  have hE1 : (1 : ℝ) ≤ Real.exp 40 := by
+    have : (1 : ℝ) ≤ 2 ^ 40 := by norm_num
+    linarith
+  refine ⟨6, Real.exp 40, le_rfl, hE1, fun q hq => ?_⟩
+  set Q : ℝ := (q : ℝ) with hQdef
+  have hQ2 : (2 : ℝ) ≤ Q := by rw [hQdef]; exact_mod_cast hq
+  have hQ0 : (0 : ℝ) < Q := by linarith
+  have hpow : Q ^ (6 : ℝ) = Q ^ 6 := by
+    rw [show (6 : ℝ) = ((6 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+  rw [hpow]
+  set y : ℝ := Real.exp 40 * Q ^ 6 with hydef
+  set M : ℝ := ((Nat.floor y : ℕ) : ℝ) with hMdef
+  have hQsq : (4 : ℝ) ≤ Q ^ 2 := by nlinarith
+  have hQ4 : (16 : ℝ) ≤ Q ^ 4 := by
+    have e : Q ^ 4 = Q ^ 2 * Q ^ 2 := by ring
+    rw [e]; nlinarith
+  have hQ6 : 4 * Q ^ 4 ≤ Q ^ 6 := by
+    have e : Q ^ 6 = Q ^ 4 * Q ^ 2 := by ring
+    rw [e]; nlinarith
+  have hy0 : 0 ≤ y := by positivity
+  have hyb : 4 * 2 ^ 40 * Q ^ 4 ≤ y := by
+    rw [hydef]
+    have : (2 : ℝ) ^ 40 * (4 * Q ^ 4) ≤ Real.exp 40 * Q ^ 6 :=
+      mul_le_mul hE hQ6 (by positivity) (by positivity)
+    linarith
+  have hMle : M ≤ y := Nat.floor_le hy0
+  have hMgt : y - 1 < M := by
+    have := Nat.lt_floor_add_one y; rw [hMdef]; linarith
+  have hM0 : 0 ≤ M := by rw [hMdef]; positivity
+  -- log (M + 2) ≤ 27 Q
+  have hy2 : 2 ≤ y := by nlinarith
+  have hlogM : Real.log (M + 2) ≤ Real.log (2 * y) :=
+    Real.log_le_log (by linarith) (by linarith)
+  have hlog2y : Real.log (2 * y) = Real.log 2 + 40 + 6 * Real.log Q := by
+    rw [hydef, Real.log_mul (by norm_num) (by positivity), Real.log_mul (by positivity) (by positivity),
+      Real.log_exp, Real.log_pow]
+    push_cast; ring
+  have hl2 : Real.log 2 ≤ 1 := by have := Real.log_two_lt_d9; linarith
+  have hlQ : Real.log Q ≤ Q - 1 := Real.log_le_sub_one_of_pos hQ0
+  have hlog27 : Real.log (M + 2) ≤ 27 * Q := by linarith
+  have hlhs : 400 * Q * Real.log (M + 2) ≤ 10800 * Q ^ 2 := by
+    have := mul_le_mul_of_nonneg_left hlog27 (by positivity : (0 : ℝ) ≤ 400 * Q)
+    nlinarith
+  have hsq : 10800 * Q ^ 2 < Real.sqrt M := by
+    rw [Real.lt_sqrt (by positivity)]
+    nlinarith
+  linarith
 
 /-! ### Assembly -/
 

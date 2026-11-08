@@ -1,4 +1,7 @@
 /-
+OFF ROUTE, U-1633 20261108T0415Z-4325: budget split is not implied by the source; the covering count is a maximum over the index range, so a sub-range with a matching fraction of the budget is a strengthening; parent certificate stays the cited leaf.
+Any claim below that a leaf is easier than the whole statement is wrong: the covering count barely shrinks with the length of the range, the same defect that OMOS audits and the U-1628 reduced-size greedy reproduction measured in the sibling rows SPLIT_certificate210 and 240; this row was not measured itself. No file in the DtRS1998 folder imports this file. No leaf docstring starts with LEAF any more.
+
 Split of certificate280 into four block-wise finite coverage leaves.
 
 The whole statement asks for a list of at most 225 primes q with
@@ -30,7 +33,8 @@ namespace LeanLab.DtRS1998.Decomp270c
 
 open LeanLab Task71.Paper Decomp270a
 
-/-- LEAF. Block one of the split index range: the offsets 10^280 + 2 * j
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Block one of the split index range: the offsets 10^280 + 2 * j
 for 0 <= j < 125000001 are covered by one list of at most 56 primes. This
 is the prime list and the finite offset check for the first quarter of the
 index domain, with a quarter of the total length budget. -/
@@ -41,7 +45,8 @@ theorem leaf_block_one :
           (q ≤ 10 ^ 280 + 2 * j ∧ (10 ^ 280 + 2 * j - q).Prime))) = true := by
   sorry
 
-/-- LEAF. Block two of the split index range: the offsets 10^280 + 2 * j
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Block two of the split index range: the offsets 10^280 + 2 * j
 for 125000001 <= j < 250000001 are covered by one list of at most 56
 primes, written here with the block offset as the variable i. This is the
 prime list and the finite offset check for the second quarter of the index
@@ -54,7 +59,8 @@ theorem leaf_block_two :
             (10 ^ 280 + 2 * (125000001 + i) - q).Prime))) = true := by
   sorry
 
-/-- LEAF. Block three of the split index range: the offsets 10^280 + 2 * j
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Block three of the split index range: the offsets 10^280 + 2 * j
 for 250000001 <= j < 375000001 are covered by one list of at most 56
 primes, written here with the block offset as the variable i. This is the
 prime list and the finite offset check for the third quarter of the index
@@ -67,7 +73,8 @@ theorem leaf_block_three :
             (10 ^ 280 + 2 * (250000001 + i) - q).Prime))) = true := by
   sorry
 
-/-- LEAF. Block four of the split index range: the offsets 10^280 + 2 * j
+/-- OFF ROUTE, U-1633 20261108T0415Z-4325: budget split over a sub-range of a covering maximum is a strengthening, not implied by the source; parent certificate stays the cited leaf.
+Retired leaf text: Block four of the split index range: the offsets 10^280 + 2 * j
 for 375000001 <= j < 500000001 are covered by one list of at most 56
 primes, written here with the block offset as the variable i. This is the
 prime list and the finite offset check for the last quarter of the index

@@ -27,7 +27,23 @@ theorem leaf_off_eta_range_arithmetic432 {ϑ : ℝ} (hϑ : 0 < ϑ)
     (hscale : 10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X) :
     (10 : ℝ) ≤ X ∧ (X : ℝ) ^ ϑ ≤ X ∧ 1 ≤ Real.log X ∧
       Real.log X ≤ 16 * Real.log X ^ 5 := by
-  sorry
+  have hX2 : (2 : ℝ) ≤ X := by exact_mod_cast hX
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hXϑ1 : 1 ≤ (X : ℝ) ^ ϑ := Real.one_le_rpow (by linarith) hϑ.le
+  have hsq : (X : ℝ) ^ ϑ ≤ ((X : ℝ) ^ ϑ) ^ 2 := by nlinarith
+  have hηX : η * X ≤ X := by nlinarith
+  have h10 : (10 : ℝ) ≤ X := by nlinarith
+  have hXϑ : (X : ℝ) ^ ϑ ≤ X := by nlinarith
+  have hlog : 1 ≤ Real.log X := by
+    have he : Real.exp 1 ≤ X := by
+      have := Real.exp_one_lt_d9; linarith
+    calc (1 : ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log X := Real.log_le_log (Real.exp_pos 1) he
+  refine ⟨h10, hXϑ, hlog, ?_⟩
+  have h5 : Real.log X ≤ Real.log X ^ 5 := by
+    calc Real.log X = Real.log X ^ 1 := (pow_one _).symm
+      _ ≤ Real.log X ^ 5 := pow_le_pow_right₀ hlog (by norm_num)
+  linarith
 
 /-- LEAF. The continuous off rational family has the logarithm power five moment bound.
 

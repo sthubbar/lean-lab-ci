@@ -47,7 +47,17 @@ power nine estimate, namely `(X^2/R + X^(8/5)) * X`, is exactly the target power
 theorem split_leaf_power_identity (X : ℕ) (hX : 2 ≤ X) (ϑ : ℝ) :
     ((X : ℝ) ^ 2 / (X : ℝ) ^ ϑ + (X : ℝ) ^ (8 / 5 : ℝ)) * (X : ℝ) =
       (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 := by
-  sorry
+  have hX0 : (0 : ℝ) < X := by
+    have : (2 : ℝ) ≤ X := by exact_mod_cast hX
+    linarith
+  have h1 : (X : ℝ) ^ (8 / 5 : ℝ) * (X : ℝ) = (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 := by
+    have e1 : (X : ℝ) ^ (8 / 5 : ℝ) * (X : ℝ) = (X : ℝ) ^ ((8 / 5 : ℝ) + 1) := by
+      rw [Real.rpow_add hX0, Real.rpow_one]
+    have e2 : (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 = (X : ℝ) ^ ((-(2 / 5) : ℝ) + 3) := by
+      rw [Real.rpow_add hX0, show (3 : ℝ) = ((3 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+    rw [e1, e2]; norm_num
+  rw [add_mul, add_mul, h1]
+  ring
 
 /-- The bare minor family has the printed power budget with logarithm power five, assembled
 from the three leaves above and the fixed scale family second moment. -/

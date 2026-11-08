@@ -20,6 +20,7 @@ odd `N`; (3) the second moment of `r2` over the odd `N ≤ X` is bounded by a co
 AI wrote the Lean code.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp150a
+import LeanLab.BhowmikGrimmelt2026.SPLIT_meanSquare38
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -38,8 +39,8 @@ two counts the representations of `N` as a sum of two units modulo two; at an od
 summands would have to be odd, whose sum is even, so that local count is zero and the whole
 series `Σ_q μ(q)² c_q(N) / φ(q)²` vanishes.  This is the step that removes the main term
 `N * singular N` from `E2 N` at an odd `N`. -/
-theorem mean_square150_odd_singular (N : ℕ) (hN : Odd N) : singular N = 0 := by
-  sorry
+theorem mean_square150_odd_singular (N : ℕ) (hN : Odd N) : singular N = 0 :=
+  meanSquare38_odd_singular N hN
 
 /-- LEAF. Step 3, the second moment over the odd `N`.  At an odd `N` a summand of `N` which is a
 prime power is either odd or a power of two, and exactly one of the two summands is even, so
@@ -49,8 +50,8 @@ therefore costs a constant times `X ^ 2`.  The constant is chosen positive, and 
 genuinely a bound: at `X = 1` the sum is `(r2 1) ^ 2 = 0`. -/
 theorem mean_square150_odd_second_moment :
     ∃ C : ℝ, 0 < C ∧ ∀ X : ℕ, 1 ≤ X →
-      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Odd N), (r2 N) ^ 2 ≤ C * (X : ℝ) ^ 2 := by
-  sorry
+      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Odd N), (r2 N) ^ 2 ≤ C * (X : ℝ) ^ 2 :=
+  meanSquare38_odd_energy
 
 /-- LEAF. Step 4, the second moment over the even `N`: this is the analytic core, for the `N`
 that carry a main term.  The circle method writes `r2` on the major arcs, where the zero-free
