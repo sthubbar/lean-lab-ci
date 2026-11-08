@@ -18,6 +18,25 @@ import LeanLab.AlmostPrimes.Statements
 
 namespace LeanLab.AlmostPrimes
 
+/-! ### Helpers -/
+
+/-- The factors of `n ≠ 0` are primes, hence at least `2`, so their product is at least `2`
+to the power of their count: `2 ^ Ω n ≤ n`. -/
+private theorem two_pow_bigOmega_le {m : ℕ} (hm : m ≠ 0) : 2 ^ bigOmega m ≤ m := by
+  have h := List.pow_length_le_prod (m.primeFactorsList) 2
+    fun p hp => (Nat.prime_of_mem_primeFactorsList hp).two_le
+  rw [Nat.prod_primeFactorsList hm] at h
+  simpa [bigOmega] using h
+
+/-- `Ω m ≤ k` for `m ≤ 2 ^ k`: a number of size at most `2 ^ k` has at most `k` prime factors
+counted with multiplicity. -/
+private theorem bigOmega_le_of_le_pow_two {m k : ℕ} (hm : m ≤ 2 ^ k) : bigOmega m ≤ k := by
+  rcases Nat.eq_zero_or_pos m with h0 | hpos
+  · subst h0
+    simp [bigOmega]
+  · have h := two_pow_bigOmega_le hpos.ne'
+    exact (Nat.pow_le_pow_iff_right (by norm_num : (1 : ℕ) < 2)).mp (le_trans h hm)
+
 /-! ### Leaves -/
 
 /-- LEAF: the bottom of the range, the step that takes the summand `a = 1`. For `2 ≤ N ≤ 2^40 + 1`
@@ -25,7 +44,10 @@ the split `N = 1 + (N - 1)` has `N - 1 ≤ 2^40`, and `Ω(N - 1) ≤ 40` because
 `Ω(m)` primes is at least `2 ^ Ω(m)`. -/
 theorem leaf_one_plus_small (N : ℕ) (hN : 2 ≤ N) (hsmall : N ≤ 2 ^ 40 + 1) :
     TwoAlmostPrimes 40 N := by
-  sorry
+  have hpos : 0 < N - 1 := by omega
+  refine ⟨1, N - 1, Nat.one_pos, hpos, by omega, ?_⟩
+  rw [Nat.one_mul]
+  exact bigOmega_le_of_le_pow_two (by omega)
 
 /-- LEAF: the even half of the finite range above `2^40 + 1` and up to `4 * 10 ^ 18`. This is the
 part of the range covered by the prime gap table together with the finite sieve check. -/
