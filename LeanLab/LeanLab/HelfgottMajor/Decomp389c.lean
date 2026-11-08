@@ -1,5 +1,6 @@
 import LeanLab.HelfgottMajor.Decomp389a
 import LeanLab.HelfgottMajor.BookP1617
+import LeanLab.HelfgottMajor.ZeroCount1623
 
 /-!
 Small qT in the middle range of P0014 Lemma 4.4, pages 38 to 40.
@@ -19,14 +20,16 @@ noncomputable def stripCountTerm {q : ℕ} [NeZero q] (χ : DirichletCharacter �
 
 /-- LEAF. Page 38, displays 4.25 and 4.26, the upper side of the classical count formula.
 This counts all strip zeros up to T and estimates no Mellin value.
--/
+REPAIRED 2026-11-06: proved from `ZeroCount1623.strip_count`, CONDITIONAL ON
+`ZeroCount1623.book_zero_count`, the shared book count of display 3.95. -/
 theorem strip_zero_count (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (T : ℝ) (hT : 1 ≤ T) :
     Summable (stripCountTerm χ T) ∧
       (∑' ρ, stripCountTerm χ T ρ) ≤
         T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
-          0.5 * log ((q : ℝ) * T) + 17.7 := by
-  sorry
+          0.5 * log ((q : ℝ) * T) + 17.7 :=
+  ⟨ZeroCount1623.summable_zeroIdx χ T (stripCountTerm χ T),
+    ZeroCount1623.strip_count χ hχ T hT⟩
 
 /-- The critical line half moment bounds the middle mass by the total multiplicity count.
 CONDITIONAL ON hzeros and the supplied count summability. Pages 39 and 40, display 4.30.
