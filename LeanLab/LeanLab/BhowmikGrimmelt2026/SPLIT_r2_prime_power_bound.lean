@@ -11,10 +11,10 @@ Two facts carry the split:
   is prime while the second is not. Each of those two masses is bounded by three quarters of the
   right-hand side; twice three quarters is the factor `3/2` of the statement.
 
-Note on the exponent in the statement: `(N : ℝ)^(1/2)` is `HPow.hPow` with a **`ℕ`** exponent, so
-`(1 : ℕ) / 2 = 0` and the factor is `(N : ℝ) ^ 0 = 1`. Leaves 2 and 3 are therefore stated with
-the same exponent, and nothing in this file depends on `√N` versus `1` beyond the shape of the
-right-hand side.
+Note on the exponent: REPAIRED 20261108 STATEFIX arch20261108T1030Z. The exponent was the literal
+`1/2`, natural division with value 0, so the factor was 1. It is now the real one half, as in
+`r2_prime_power_bound` of DecompJ1034, and leaves 2 and 3 carry the same real exponent. The assembly
+does not depend on the exponent beyond the shape of the right hand side.
 -/
 import LeanLab.BhowmikGrimmelt2026.DecompJ1034
 
@@ -69,7 +69,7 @@ theorem leaf_first_entry_not_prime_mass (N : ℕ) (hN : Even N) (h_not_G : ¬ Is
     (∑ x ∈ (Finset.HasAntidiagonal.antidiagonal N : Finset (ℕ × ℕ)),
       (if ¬ x.1.Prime then
         ArithmeticFunction.vonMangoldt x.1 * ArithmeticFunction.vonMangoldt x.2 else 0))
-      ≤ 3/4 * ((N : ℝ)^(1/2) * (Real.log (N : ℝ))^3) := by
+      ≤ 3/4 * ((N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3) := by
   sorry
 
 /-- LEAF. Step 3 of the proof: the mass carried by the pairs whose first entry is prime while the
@@ -83,7 +83,7 @@ theorem leaf_second_entry_not_prime_mass (N : ℕ) (hN : Even N) (h_not_G : ¬ I
         (if ¬ x.2.Prime then
           ArithmeticFunction.vonMangoldt x.1 * ArithmeticFunction.vonMangoldt x.2 else 0)
         else 0))
-      ≤ 3/4 * ((N : ℝ)^(1/2) * (Real.log (N : ℝ))^3) := by
+      ≤ 3/4 * ((N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3) := by
   sorry
 
 /-! ## The assembly -/
@@ -92,9 +92,9 @@ theorem leaf_second_entry_not_prime_mass (N : ℕ) (hN : Even N) (h_not_G : ¬ I
 sits in leaves 2 and 3; the assembly is the case distinction of `r2_three_parts` and the vanishing
 of leaf 1. -/
 theorem r2_prime_power_bound_split (N : ℕ) (hN : Even N) (h_not_G : ¬ IsGoldbachSum N) :
-   r2 N ≤ 3/2 * (N : ℝ)^(1/2) * (Real.log (N : ℝ))^3 := by
-  have hu : 3/2 * (N : ℝ)^(1/2) * (Real.log (N : ℝ))^3
-      = 3/2 * ((N : ℝ)^(1/2) * (Real.log (N : ℝ))^3) := by ring
+   r2 N ≤ 3/2 * (N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3 := by
+  have hu : 3/2 * (N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3
+      = 3/2 * ((N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3) := by ring
   have h1 := leaf_both_prime_part_vanishes N h_not_G
   have h2 := leaf_first_entry_not_prime_mass N hN h_not_G
   have h3 := leaf_second_entry_not_prime_mass N hN h_not_G

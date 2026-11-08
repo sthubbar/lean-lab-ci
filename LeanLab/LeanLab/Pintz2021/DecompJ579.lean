@@ -326,18 +326,23 @@ DECISION 2026-11-08 architect 20261108T0450Z U-1634: the U-1634 shape of `State1
 `X₀` is chosen after it, Pin1 display 2.8 and the remark after Pin1 display 2.12; the range is
 `X^ε L^A ≤ P₀`, Pin1 display 1.8, and `H ≤ (log X)/2` is gone. `ε0 ≤ 1/5` so that the range is
 inhabited for every `ε < ε0`, `State1581.thm1Hyp_inhabited`. The old form was false at `P₀ = 1`,
-`H = (log X)/2` by hand, PROGRESS.md U-1634. -/
+`H = (log X)/2` by hand, PROGRESS.md U-1634.
+DECISION 2026-11-08 architect arch20261108T1030Z PMT: two weakenings to match P0054 page 188
+Theorem 1, read from the page image. The level `P` is now existential in `[P₀X^{-ε}, P₀]`, after
+`P₀`, as the theorem says one can choose such a `P`; the former form asserted the bound at every
+`P` of the interval. The second error term is `X^{1-ε}`, the `O_ε(X^{1-ε})` of display 2.21; the
+former `X^{1-ε₀}` with `ε < ε₀` is smaller for `X ≥ 1`, so it claimed more than the paper. -/
 theorem leaf_main_term_bound :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ε0 ≤ 1 / 5 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ,
-      ∀ X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-      Thm1Hyp ε A X0 X P0 →
-      P0 * X ^ (-ε) ≤ P → P ≤ P0 →
+      ∀ X P0 : ℝ, Thm1Hyp ε A X0 X P0 →
+      ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
+      ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
         Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
       ∀ m : ℕ, 0 < m → (m : ℝ) ≤ X →
         ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
-          C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) := by sorry
+          C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε)) := by sorry
 
 /-! ### The zero frequency instance of `assembly_221`
 
@@ -433,7 +438,10 @@ private theorem sing_error_nonneg {m : ℕ} {X ε0 c H : ℝ} (hX : 0 ≤ X) :
 
 /-- Assembly theorem for P0054 page 8 display 2.21, proved directly from the leaves. Its
 convergence clause asks `0 < m` since 2026-10-31, matching DecompJ281.leaf_221.
-DECISION 2026-11-08 U-1634: the quantifier shape of `State1581.Theorem1_220`, U-1634 form. -/
+DECISION 2026-11-08 U-1634: the quantifier shape of `State1581.Theorem1_220`, U-1634 form.
+DECISION 2026-11-08 architect arch20261108T1030Z PMT: error term `X^{1-ε}` as in
+`State1581.Theorem1_220` and P0054 page 188, following the repaired leaf; `P` is the level the leaf
+chooses, finiteness comes from `excSet_finite`. -/
 theorem assembly_221 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
@@ -445,19 +453,18 @@ theorem assembly_221 :
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
           ∀ m : ℕ, (m : ℝ) ≤ X →
             ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
-              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) := by
-  obtain ⟨ε0, hε0, hle, h1⟩ := leaf_main_term_bound
+              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε)) := by
+  obtain ⟨ε0, hε0, -, h1⟩ := leaf_main_term_bound
   refine ⟨ε0, hε0, ?_⟩
   intro ε hε hε0'
-  have hε49 : ε < 4 / 9 := by linarith
   obtain ⟨c, C, A, H0, hc, hA, hH⟩ := h1 ε hε hε0'
   refine ⟨c, max C 1, A, H0, hc, hA, ?_⟩
   intro H hH0
   obtain ⟨X0, hC⟩ := hH H hH0
   refine ⟨X0, ?_⟩
   intro X P0 hHyp
-  obtain ⟨P, hP1, hP2, hFin⟩ := leaf_P_exists (H := H) hε hε49 hHyp
-  refine ⟨P, hP1, hP2, hFin, ?_⟩
+  obtain ⟨P, hP1, hP2, hCP⟩ := hC X P0 hHyp
+  refine ⟨P, hP1, hP2, excSet_finite H (Real.sqrt X) P X, ?_⟩
   obtain ⟨Sg, hSg⟩ := leaf_singular_series_converges H X P
   let A : ℂ := R1majPrime ε X P 0
   let K : ℂ := WeightedKernelsTask08.weightedKernel (X1 ε X) X 1 1 0 true
@@ -496,10 +503,11 @@ theorem assembly_221 :
           mainTermPrime (excSet H (Real.sqrt X) P X) Sg ε X m := by
         simp only [mainTermPrime, Sg', if_neg hm]
       rw [hmain]
-      refine le_trans (hC X P0 P Sg hHyp hP1 hP2 hSg m hm0 hmX) ?_
+      refine le_trans (hCP Sg hSg m hm0 hmX) ?_
       exact mul_le_mul_of_nonneg_right (le_max_left _ _) (sing_error_nonneg hX0)
 
 end
 end LeanLab.Pintz2021.DecompJ579
 
 #print axioms LeanLab.Pintz2021.DecompJ579.assembly_221
+

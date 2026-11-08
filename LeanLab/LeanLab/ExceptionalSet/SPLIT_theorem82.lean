@@ -49,6 +49,68 @@ theorem leaf_expansion_off_exceptional_set :
             r2 N = (1 + (χ (-1)).re * b) * (Sing N * N) + E := by
   sorry
 
+/-- The even multiples of `r` in `[X/2, X]` number at least `X/(4r) - 1`: the map
+`k ↦ 2rk` is injective and lands in `evenMult r X` for `k ∈ [⌈X/(4r)⌉, ⌊X/(2r)⌋]`. -/
+private theorem evenMult_card_ge (r : ℕ) (hr : 1 ≤ r) (X : ℝ) (hX : 0 ≤ X) :
+    X / (4 * (r : ℝ)) - 1 ≤ ((evenMult r X).card : ℝ) := by
+  have hr0 : (0 : ℝ) < (r : ℝ) := by exact_mod_cast hr
+  set c : ℕ := ⌈X / (4 * (r : ℝ))⌉₊ with hcv
+  set d : ℕ := ⌊X / (2 * (r : ℝ))⌋₊ with hdv
+  have hX2 : (0:ℝ) ≤ X / (2 * (r:ℝ)) := by positivity
+  have hX4 : (0:ℝ) ≤ X / (4 * (r:ℝ)) := by positivity
+  have hquarter : X / (4 * (r:ℝ)) ≤ X / (2 * (r:ℝ)) := by
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+    exact mul_le_mul_of_nonneg_left (by linarith) hX
+  have hinj : Function.Injective (fun k : ℕ => 2 * r * k) := by
+    intro a b hab
+    exact Nat.eq_of_mul_eq_mul_left (by omega : 0 < 2 * r) hab
+  have hsub : (Finset.Icc c d).image (fun k => 2 * r * k) ⊆ evenMult r X := by
+    intro N hN
+    simp only [Finset.mem_image, Finset.mem_Icc] at hN
+    obtain ⟨k, ⟨hkc, hkd⟩, rfl⟩ := hN
+    simp only [evenMult, Finset.mem_filter, Finset.mem_Icc]
+    have hc' : X / (4 * (r:ℝ)) ≤ (c:ℝ) := Nat.le_ceil _
+    have hck : (c:ℝ) ≤ (k:ℝ) := by exact_mod_cast hkc
+    have hd'' : (d:ℝ) ≤ X / (2*(r:ℝ)) := Nat.floor_le hX2
+    have hkd' : (k:ℝ) ≤ (d:ℝ) := by exact_mod_cast hkd
+    refine ⟨⟨?_, ?_⟩, ?_, ?_⟩
+    · rw [Nat.ceil_le]
+      have hkey : X / 2 ≤ 2 * (r:ℝ) * (k:ℝ) := by
+        have h : X / 2 = 2 * (r:ℝ) * (X / (4 * (r:ℝ))) := by field_simp <;> ring
+        rw [h]
+        have hmono : (r:ℝ) * (X / (4 * (r:ℝ))) ≤ (r:ℝ) * (k:ℝ) :=
+          mul_le_mul_of_nonneg_left (le_trans hc' hck) hr0.le
+        nlinarith
+      simpa using hkey
+    · refine Nat.le_floor ?_
+      have hkk : (k:ℝ) ≤ X / (2*(r:ℝ)) := le_trans hkd' hd''
+      have hkey : (2:ℝ) * (r:ℝ) * (k:ℝ) ≤ X := by
+        have h : (2:ℝ)*(r:ℝ)*(X / (2*(r:ℝ))) = X := by field_simp <;> ring
+        calc (2:ℝ)*(r:ℝ)*(k:ℝ) ≤ (2:ℝ)*(r:ℝ)*(X/(2*(r:ℝ))) :=
+              mul_le_mul_of_nonneg_left hkk (by positivity)
+          _ = X := h
+      simpa using hkey
+    · exact ⟨r * k, by ring⟩
+    · exact ⟨2 * k, by ring⟩
+  have hcard := Finset.card_le_card hsub
+  rw [Finset.card_image_of_injective _ hinj, Nat.card_Icc] at hcard
+  have hdc : c ≤ d + 1 := by
+    refine Nat.ceil_le.mpr ?_
+    have hlt : X / (4 * (r:ℝ)) < (d:ℝ) + 1 := by
+      have hfr : X / (2*(r:ℝ)) < (d:ℝ) + 1 := Nat.lt_floor_add_one _
+      linarith
+    simpa [Nat.cast_add, Nat.cast_one] using hlt.le
+  have hcast : ((d + 1 - c : ℕ) : ℝ) = (d:ℝ) + 1 - (c:ℝ) := by
+    rw [Nat.cast_sub hdc, Nat.cast_add, Nat.cast_one]
+  have hcardR : ((d + 1 - c : ℕ) : ℝ) ≤ ((evenMult r X).card : ℝ) := by exact_mod_cast hcard
+  rw [hcast] at hcardR
+  have hlt : (d:ℝ) + 1 - (c:ℝ) > X / (4 * (r:ℝ)) - 1 := by
+    have hd' : X / (2*(r:ℝ)) < (d:ℝ) + 1 := Nat.lt_floor_add_one _
+    have hc' : (c:ℝ) < X / (4*(r:ℝ)) + 1 := Nat.ceil_lt_add_one hX4
+    have hrx : X / (2*(r:ℝ)) = 2 * (X / (4*(r:ℝ))) := by field_simp <;> ring
+    linarith
+  linarith
+
 /-- LEAF 2 of 2, the counting step: for `X = r ^ A` with `A > 5/2` and `r` large, the even
 multiples of `r` in `[X/2, X]` outnumber `2 X^{3/5}`.
 
@@ -61,7 +123,63 @@ asserted here. -/
 theorem leaf_even_multiples_dominate_exceptions :
     ∀ A : ℝ, 5 / 2 < A → ∃ r0 : ℕ, ∀ (r : ℕ) [NeZero r], r0 ≤ r →
       2 * (((r : ℝ) ^ A) ^ (3 / 5 : ℝ)) < ((evenMult r ((r : ℝ) ^ A)).card : ℝ) := by
-  sorry
+
+  intro A hA
+  have he : 0 < 2 / 5 * A - 1 := by linarith
+  have hA0 : 0 < A := by linarith
+  obtain ⟨m, hm⟩ := exists_nat_gt ((16 : ℝ) ^ (1 / (2 / 5 * A - 1)))
+  refine ⟨max m 2, ?_⟩
+  intro r _ hr
+  have hr2 : 2 ≤ r := le_trans (le_max_right _ _) hr
+  have hrm : m ≤ r := le_trans (le_max_left _ _) hr
+  have hr0 : (0 : ℝ) < (r : ℝ) := by positivity
+  have hr1 : (1 : ℝ) ≤ (r : ℝ) := by
+    have : (1:ℝ) ≤ 2 := by norm_num
+    calc (1:ℝ) ≤ 2 := this
+      _ ≤ (r:ℝ) := by exact_mod_cast hr2
+  -- the key growth fact: `r^(2A/5-1) > 16`
+  have hpow : (16 : ℝ) < (r : ℝ) ^ (2 / 5 * A - 1) := by
+    have hle : ((m : ℝ)) ≤ (r : ℝ) := by exact_mod_cast hrm
+    have hcancel : ((16 : ℝ) ^ (1 / (2 / 5 * A - 1))) ^ (2 / 5 * A - 1) = 16 := by
+      rw [← Real.rpow_mul (by norm_num : (0:ℝ) ≤ 16)]
+      have h1 : 1 / (2 / 5 * A - 1) * (2 / 5 * A - 1) = 1 := by
+        rw [one_div, inv_mul_cancel₀ (ne_of_gt he)]
+      rw [h1, Real.rpow_one]
+    have hstep : ((16 : ℝ) ^ (1 / (2 / 5 * A - 1))) ^ (2 / 5 * A - 1)
+        < (r : ℝ) ^ (2 / 5 * A - 1) :=
+      Real.rpow_lt_rpow (by positivity) (lt_of_lt_of_le hm hle) he
+    rw [hcancel] at hstep
+    exact hstep
+  -- `u = r^(3A/5) ≥ 1`
+  have hu1 : (1:ℝ) ≤ (r : ℝ) ^ (A * (3 / 5)) :=
+    Real.one_le_rpow hr1 (by nlinarith)
+  have hu0 : (0:ℝ) < (r : ℝ) ^ (A * (3 / 5)) := lt_of_lt_of_le zero_lt_one hu1
+  -- `r^(A-1) = u * r^(2A/5-1)`
+  have hV : (r : ℝ) ^ (A - 1) = (r : ℝ) ^ (A * (3 / 5)) * (r : ℝ) ^ (2 / 5 * A - 1) := by
+    rw [← Real.rpow_add hr0]
+    congr 1
+    ring
+  have hVbig : 8 * (r : ℝ) ^ (A * (3 / 5)) + 4 < (r : ℝ) ^ (A - 1) := by
+    have hvu : 16 * (r : ℝ) ^ (A * (3 / 5))
+        < (r : ℝ) ^ (A * (3 / 5)) * (r : ℝ) ^ (2 / 5 * A - 1) := by
+      rw [mul_comm ((r : ℝ) ^ (A * (3 / 5)))]
+      exact mul_lt_mul_of_pos_right hpow hu0
+    rw [← hV] at hvu
+    nlinarith [hvu, hu1]
+  -- `(r^A)^(3/5) = u`
+  have hX35 : ((r : ℝ) ^ A) ^ (3 / 5 : ℝ) = (r : ℝ) ^ (A * (3 / 5)) := by
+    rw [← Real.rpow_mul hr0.le]
+  -- `r^A / (4r) = r^(A-1) / 4`
+  have hXAr : (r : ℝ) ^ A = (r : ℝ) ^ (A - 1) * (r : ℝ) := by
+    nth_rewrite 1 [show A = (A - 1) + 1 by ring]
+    rw [Real.rpow_add hr0, Real.rpow_one]
+  have hXdiv : (r : ℝ) ^ A / (4 * (r : ℝ)) = (r : ℝ) ^ (A - 1) / 4 := by
+    rw [hXAr, mul_div_mul_right _ _ (ne_of_gt hr0)]
+  have hXpos : (0:ℝ) < (r : ℝ) ^ A := Real.rpow_pos_of_pos hr0 A
+  have hcard := evenMult_card_ge r (by omega) ((r : ℝ) ^ A) hXpos.le
+  rw [hXdiv] at hcard
+  rw [hX35]
+  linarith
 
 /-- `theorem82` of `LeanLab.ExceptionalSet.BhowmikGrimmelt2026`, assembled from the two leaves:
 the exceptional set of LEAF 1 and the two extra multiples of LEAF 2 leave an even multiple `N` of

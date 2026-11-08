@@ -116,7 +116,10 @@ DECISION 2026-11-08 architect 20261108T0450Z U-1634: the quantifier shape of
 `X₀`; range `X^ε L^A ≤ P₀ ≤ X^{4/9-ε}`; `H ≤ (log X)/2` dropped. Source Pin1 displays 1.8, 2.8 and
 the remark after 2.12. The U-1625 form was false at `P₀ = 1`, `H = (log X)/2` by hand. `1 ≤ P` now
 also follows from the range, as `P ≥ P₀X^{-ε} ≥ L^A ≥ 1` for `X ≥ 3`. Instance of the range:
-`State1581.thm1Hyp_inhabited`. -/
+`State1581.thm1Hyp_inhabited`.
+DECISION 2026-11-08 architect arch20261108T1030Z PMT: second error term `X^{1-ε}`, the
+`O_ε(X^{1-ε})` of display 2.21, P0054 page 188 Theorem 1, read from the page image; the former
+`X^{1-ε₀}` with `ε < ε₀` is smaller for `X ≥ 1`, so it claimed more than the paper. -/
 theorem leaf_221 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
@@ -128,7 +131,7 @@ theorem leaf_221 :
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
           ∀ m : ℕ, (m : ℝ) ≤ X →
             ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
-              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) := by sorry
+              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε)) := by sorry
 
 
 /-- LEAF P0054 page 8 display 2.22: The difference between the full and truncated main terms is
@@ -204,7 +207,9 @@ theorem leaf_triangle_inequality {H X P U ε ε0 c C C' : ℝ} {m : ℕ} {Sg' : 
 clause, now `0 < m` as in leaf_221; the proof takes `X₀` at least 4 so that `U = √X ≥ 2`.
 Statement unchanged by U-1625 2026-11-06; only the proof passes the new `1 ≤ P` of `leaf_221`
 to the repaired `leaf_truncation_error`.
-DECISION 2026-11-08 U-1634: the quantifier shape of `State1581.Theorem1_220`, U-1634 form. -/
+DECISION 2026-11-08 U-1634: the quantifier shape of `State1581.Theorem1_220`, U-1634 form.
+DECISION 2026-11-08 architect arch20261108T1030Z PMT: error term `X^{1-ε}` as in `leaf_221`,
+`State1581.Theorem1_220` and P0054 page 188. -/
 theorem assembly_222 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
@@ -216,7 +221,7 @@ theorem assembly_222 :
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
           ∀ m : ℕ, X / 4 ≤ m ∧ (m : ℝ) ≤ X / 2 →
             ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P (Real.sqrt X) m‖ ≤
-              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0) + Sing m * X * Real.log (Real.sqrt X) / (X ^ (1/4 : ℝ))) := by
+              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε) + Sing m * X * Real.log (Real.sqrt X) / (X ^ (1/4 : ℝ))) := by
   obtain ⟨ε1, hε1, h1⟩ := leaf_221
   obtain ⟨ε2, hε2, h2⟩ := leaf_truncation_error
   refine ⟨min ε1 ε2, lt_min hε1 hε2, ?_⟩
@@ -242,23 +247,8 @@ theorem assembly_222 :
     rw [show (2 : ℝ) = Real.sqrt 4 by
       rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
     exact Real.sqrt_le_sqrt hX4
-  have hb1' := hSg2 m (by linarith [hm.2])
+  have hb1 := hSg2 m (by linarith [hm.2])
   have hX1 : (1 : ℝ) ≤ X := by linarith
-  have ha1 : 0 < Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε1) :=
-    add_pos_of_nonneg_of_pos
-      (mul_nonneg (mul_nonneg (Applications.Sing_pos m).le (by linarith)) (Real.exp_pos _).le)
-      (Real.rpow_pos_of_pos (by linarith) _)
-  have hC0 : 0 ≤ C := by
-    by_contra hneg
-    have : C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε1)) < 0 :=
-      mul_neg_of_neg_of_pos (lt_of_not_ge hneg) ha1
-    linarith [norm_nonneg (R1majPrime ε X P m -
-      mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m)]
-  have hpow : X ^ (1 - ε1) ≤ X ^ (1 - min ε1 ε2) :=
-    Real.rpow_le_rpow_of_exponent_le hX1 (by linarith [min_le_left ε1 ε2])
-  have hb1 : ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
-      C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - min ε1 ε2)) :=
-    le_trans hb1' (mul_le_mul_of_nonneg_left (by linarith) hC0)
   have hb2 := hBX X P0 P (Real.sqrt X) Sg' m hHB hP11 hP1 hP2 hFin hSg1 hm.1 hm.2 hU2 le_rfl
   exact leaf_triangle_inequality hb1 hb2 rfl (by linarith)
 
@@ -274,3 +264,4 @@ end LeanLab.Pintz2021.DecompJ281
 #print axioms LeanLab.Pintz2021.DecompJ281.leaf_triangle_inequality
 
 #print axioms LeanLab.Pintz2021.DecompJ281.assembly_222
+

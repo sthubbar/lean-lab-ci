@@ -177,10 +177,19 @@ theorem middle_mass_cauchy_schwarz (q : ℕ) [NeZero q] (χ : DirichletCharacter
   exact hcs
 
 
-/-- LEAF. Page 43, display 4.42. Plancherel L2 identities yielding nTwo and nLog bounds. -/
+/-- LEAF. Pages 38 to 40, Lemma 4.3 with display 4.26, and page 43, display 4.42.
+Partial summation against the zero count of display 4.26 turns the zero sum into an integral
+of t times the squared Mellin norm against log of qt over 2 pi, which Plancherel bounds by
+nTwo times T log qT, plus count error terms of the same order. The factor sqrt of log qT is
+needed: the zero count to height T grows like T log qT, so the old right side with no log
+fails for large q at T = 2 and for q = 1 near T = 3.3e8. Restated by architect
+arch20261108T1030Z, which also added the primitive and critical line hypotheses of Lemma 4.4. -/
 theorem gaussian_moment_sum_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
-    (δ T : ℝ) (hT : 1 ≤ T) :
-    sqrt (gaussianMomentSum χ δ T) ≤ sqrt Sec45.nTwo * sqrt T + sqrt Sec45.nLog * sqrt T := by
+    (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
+    (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
+      |s.im| ≤ T → s.re = 1 / 2) :
+    sqrt (gaussianMomentSum χ δ T) ≤
+      (sqrt Sec45.nTwo * sqrt T + sqrt Sec45.nLog * sqrt T) * sqrt (log (q * T)) := by
   sorry
 
 /-- LEAF. Page 40. Riemann-Stieltjes zero count error integrals. -/
@@ -194,7 +203,31 @@ theorem inv_im_sum_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
       2.15581 * (0.5 * log q + 17.7) := by
   sorry
 
-/-- Assembly. Exactly Decomp269b.middle_mass_bound. -/
+/-- What the two leaves give together: the Cauchy Schwarz product with the restated Gaussian
+moment leaf. CONDITIONAL ON gaussian_moment_sum_bound. This is the left side of
+inv_im_sum_bound times sqrt of log qT, so the leaves miss middle_mass_bound by exactly
+that factor. -/
+theorem middle_mass_le_of_leaves (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
+    (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
+      |s.im| ≤ T → s.re = 1 / 2) :
+    middleMass χ δ T ≤
+      sqrt (invImSum χ T) * (sqrt Sec45.nTwo * sqrt T + sqrt Sec45.nLog * sqrt T) *
+        sqrt (log (q * T)) := by
+  have h1 := middle_mass_cauchy_schwarz q χ δ T hT
+  have h2 := gaussian_moment_sum_bound q χ hχ δ T hT hzeros
+  have h4 := mul_le_mul_of_nonneg_left h2 (sqrt_nonneg (invImSum χ T))
+  calc middleMass χ δ T ≤ sqrt (invImSum χ T) * sqrt (gaussianMomentSum χ δ T) := h1
+    _ ≤ _ := h4
+    _ = _ := by ring
+
+/-- Assembly target, exactly Decomp269b.middle_mass_bound. BLOCKED GAP, architect
+arch20261108T1030Z: after the restatement of gaussian_moment_sum_bound the leaves give only
+middle_mass_le_of_leaves, a factor sqrt of log qT above what inv_im_sum_bound controls. The
+gap is in the split itself: for q = 1, by the zero density and stationary phase, invImSum is
+near log T squared over 2 pi and the worst Gaussian moment near 0.313 T log T, so the Cauchy
+Schwarz product passes this right side once log T is about 130. The paper on pages 39 and 40
+applies Cauchy Schwarz to integrals after partial summation, not to the zero sum. -/
 theorem middle_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
     (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
@@ -203,11 +236,6 @@ theorem middle_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
       (sqrt Sec45.nTwo + sqrt Sec45.nLog) * sqrt T * log (q * T) +
       (17.21 * sqrt Sec45.nLog - log (2 * π * sqrt (exp 1)) * sqrt Sec45.nTwo) * sqrt T +
       2.15581 * (0.5 * log q + 17.7) := by
-  have h1 := middle_mass_cauchy_schwarz q χ δ T hT
-  have h2 := gaussian_moment_sum_bound q χ δ T hT
-  have h3 := inv_im_sum_bound q χ hχ T hT hzeros
-  have h_sqrt_nonneg : 0 ≤ sqrt (invImSum χ T) := sqrt_nonneg _
-  have h4 := mul_le_mul_of_nonneg_left h2 h_sqrt_nonneg
-  linarith
+  sorry
 
 end LeanLab.HelfgottMajor.DecompJ1153

@@ -35,6 +35,175 @@ attribute [local instance] Classical.propDecidable
 theorem leaf_singular_lower (N : ℕ) (hEven : Even N) (h2 : 2 ≤ N) : (1 / 2 : ℝ) ≤ singular N := by
   sorry
 
+private theorem norm_ofReal_eq_abs' (x : ℝ) : ‖(x : ℂ)‖ = |x| := by
+  simpa using RCLike.norm_ofReal (K := ℂ) x
+
+private theorem cpow_kernel_eq (β : ℝ) {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x ≤ 1) :
+    ((x : ℂ) ^ ((β : ℂ) - 1)) * ((1 : ℂ) - (x : ℂ)) ^ ((β : ℂ) - 1)
+      = (((x * (1 - x)) ^ (β - 1) : ℝ) : ℂ) := by
+  have hcast : ((β : ℂ) - 1) = ((β - 1 : ℝ) : ℂ) := by push_cast; ring
+  have hsub : (1 : ℂ) - (x : ℂ) = ((1 - x : ℝ) : ℂ) := by push_cast; ring
+  have h1x : (0 : ℝ) ≤ 1 - x := by linarith
+  rw [hcast, hsub, ← Complex.ofReal_cpow hx1 (β - 1),
+    ← Complex.ofReal_cpow h1x (β - 1), ← Complex.ofReal_mul, Real.mul_rpow hx1 h1x]
+
+private theorem norm_kernel_eq (β : ℝ) {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x ≤ 1) :
+    ‖(x : ℂ) ^ ((β : ℂ) - 1) * ((1 : ℂ) - (x : ℂ)) ^ ((β : ℂ) - 1)‖
+      = (x * (1 - x)) ^ (β - 1) := by
+  rw [cpow_kernel_eq β hx1 hx2, norm_ofReal_eq_abs']
+  exact abs_of_nonneg (Real.rpow_nonneg (by nlinarith) _)
+
+private theorem intervalIntegrable_kernel {β : ℝ} (hβ0 : 0 < β) :
+    IntervalIntegrable (fun x : ℝ => (x * (1 - x)) ^ (β - 1)) volume 0 1 := by
+  have hu : 0 < ((β : ℂ)).re := by simpa using hβ0
+  have hc : IntervalIntegrable
+      (fun x : ℝ => (x : ℂ) ^ ((β : ℂ) - 1) * ((1 : ℂ) - (x : ℂ)) ^ ((β : ℂ) - 1))
+      volume 0 1 := Complex.betaIntegral_convergent hu hu
+  refine hc.norm.congr_uIoo ?_
+  intro x hx
+  simp only [Set.uIoo_of_le (by norm_num : (0 : ℝ) ≤ 1), Set.mem_Ioo] at hx
+  exact norm_kernel_eq β hx.1.le hx.2.le
+
+private theorem betaC_eq_integral {β : ℝ} (hβ0 : 0 < β) :
+    betaC (β : ℂ) (β : ℂ) = (((∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) : ℝ) : ℂ) := by
+  have hu : 0 < ((β : ℂ)).re := by simpa using hβ0
+  have h1 : betaC (β : ℂ) (β : ℂ) = Complex.betaIntegral (β : ℂ) (β : ℂ) := by
+    rw [betaC, ← Complex.betaIntegral_eq_Gamma_mul_div (β : ℂ) (β : ℂ) hu hu]
+  have hcongr : ∫ x in (0 : ℝ)..1, ((x : ℂ) ^ ((β : ℂ) - 1) * ((1 : ℂ) - (x : ℂ)) ^ ((β : ℂ) - 1))
+      = ∫ x in (0 : ℝ)..1, (((x * (1 - x)) ^ (β - 1) : ℝ) : ℂ) := by
+    refine intervalIntegral.integral_congr fun x hx => ?_
+    rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at hx
+    exact cpow_kernel_eq β hx.1 hx.2
+  rw [h1, Complex.betaIntegral, hcongr, intervalIntegral.integral_ofReal]
+
+/-! ## Bounds for the real beta integral -/
+
+private theorem one_le_beta_integral {β : ℝ} (hβ4 : 3 / 4 ≤ β) (hβ1 : β ≤ 1) :
+    1 ≤ ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) := by
+  have hβ0 : 0 < β := by linarith
+  have hint := intervalIntegrable_kernel (β := β) hβ0
+  have hconst : IntervalIntegrable (fun _ : ℝ => (1 : ℝ)) volume 0 1 := intervalIntegrable_const
+  have hmono := intervalIntegral.integral_mono_on_of_le_Ioo (μ := volume)
+    (f := fun _ : ℝ => (1 : ℝ)) (g := fun x : ℝ => (x * (1 - x)) ^ (β - 1))
+    (a := 0) (b := 1) (by norm_num) hconst hint ?_
+  · simpa using hmono
+  · intro x hx
+    have hx0 : 0 < x * (1 - x) := by nlinarith [hx.1, hx.2]
+    have hxle : x * (1 - x) ≤ 1 := by nlinarith [hx.1, hx.2]
+    exact Real.one_le_rpow_of_pos_of_le_one_of_nonpos hx0 hxle (by linarith)
+
+private theorem half_integral_le {β : ℝ} (hβ0 : 0 < β) (hβ1 : β ≤ 1) :
+    ∫ x in (0 : ℝ)..(1 / 2), ((x * (1 - x)) ^ (β - 1) : ℝ) ≤ (2 : ℝ) ^ (1 - 2 * β) / β := by
+  have hint := intervalIntegrable_kernel (β := β) hβ0
+  have hsub : IntervalIntegrable (fun x : ℝ => (x * (1 - x)) ^ (β - 1)) volume 0 (1 / 2) :=
+    hint.mono_set (by
+      intro y hy
+      simp only [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1 / 2),
+        Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1), Set.mem_Icc] at hy ⊢
+      constructor <;> linarith [hy.1, hy.2])
+  have hg : IntervalIntegrable (fun x : ℝ => (2 : ℝ) ^ (1 - β) * x ^ (β - 1)) volume 0 (1 / 2) := by
+    refine IntervalIntegrable.const_mul ?_ _
+    exact intervalIntegral.intervalIntegrable_rpow' (by linarith : (-1 : ℝ) < β - 1)
+  have hmono := intervalIntegral.integral_mono_on_of_le_Ioo (μ := volume)
+    (f := fun x : ℝ => (x * (1 - x)) ^ (β - 1))
+    (g := fun x : ℝ => (2 : ℝ) ^ (1 - β) * x ^ (β - 1))
+    (a := 0) (b := 1 / 2) (by norm_num) hsub hg ?_
+  · have hval : ∫ x in (0 : ℝ)..(1 / 2), (x : ℝ) ^ (β - 1)
+        = ((1 / 2 : ℝ) ^ β - 0 ^ β) / β := by
+      simpa only [show β - 1 + 1 = β by ring] using
+        integral_rpow (a := (0 : ℝ)) (b := (1 / 2 : ℝ)) (r := β - 1)
+          (Or.inl (by linarith : (-1 : ℝ) < β - 1))
+    have hmaj : ∫ x in (0 : ℝ)..(1 / 2), (2 : ℝ) ^ (1 - β) * x ^ (β - 1)
+        = (2 : ℝ) ^ (1 - β) * (((1 / 2 : ℝ) ^ β - 0 ^ β) / β) := by
+      rw [intervalIntegral.integral_const_mul, hval]
+    have hzero : (0 : ℝ) ^ β = 0 := Real.zero_rpow (by linarith : β ≠ 0)
+    have hhalf : (1 / 2 : ℝ) ^ β = (2 : ℝ) ^ (-β) := by
+      rw [Real.div_rpow (by norm_num) (by norm_num : (0 : ℝ) ≤ 2), Real.one_rpow, div_eq_mul_inv,
+        ← Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2), one_mul]
+    have hcomb : (2 : ℝ) ^ (1 - β) * ((2 : ℝ) ^ (-β) / β) = (2 : ℝ) ^ (1 - 2 * β) / β := by
+      rw [← mul_div_assoc, ← Real.rpow_add (by norm_num : (0 : ℝ) < 2),
+        show 1 - β + -β = 1 - 2 * β by ring]
+    have hmaj2 : ∫ x in (0 : ℝ)..(1 / 2), (2 : ℝ) ^ (1 - β) * x ^ (β - 1)
+        = (2 : ℝ) ^ (1 - 2 * β) / β := by
+      rw [hmaj, hzero, sub_zero, hhalf, hcomb]
+    rw [hmaj2] at hmono
+    exact hmono
+  · intro x hx
+    have hx1 : (0 : ℝ) < x := hx.1
+    have hx2 : x ≤ 1 / 2 := le_of_lt hx.2
+    have hle : x / 2 ≤ x * (1 - x) := by nlinarith
+    have hstep : (x * (1 - x)) ^ (β - 1) ≤ (x / 2) ^ (β - 1) :=
+      Real.rpow_le_rpow_of_nonpos (by linarith : (0 : ℝ) < x / 2) hle (by linarith)
+    have hdiv : (x / 2) ^ (β - 1) = (2 : ℝ) ^ (1 - β) * x ^ (β - 1) := by
+      rw [Real.div_rpow hx1.le (by norm_num : (0 : ℝ) ≤ 2), div_eq_mul_inv,
+        ← Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2), show -(β - 1) = 1 - β by ring]
+      ring
+    linarith [hstep, hdiv]
+
+private theorem beta_integral_le {β : ℝ} (hβ4 : 3 / 4 ≤ β) (hβ1 : β ≤ 1) :
+    ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) ≤ (2 : ℝ) ^ (2 - 2 * β) / β := by
+  have hβ0 : 0 < β := by linarith
+  have hint := intervalIntegrable_kernel (β := β) hβ0
+  have hhalf1 : IntervalIntegrable (fun x : ℝ => (x * (1 - x)) ^ (β - 1)) volume 0 (1 / 2) :=
+    hint.mono_set (by
+      intro y hy
+      simp only [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1 / 2),
+        Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1), Set.mem_Icc] at hy ⊢
+      constructor <;> linarith [hy.1, hy.2])
+  have hhalf2 : IntervalIntegrable (fun x : ℝ => (x * (1 - x)) ^ (β - 1)) volume (1 / 2) 1 :=
+    hint.mono_set (by
+      intro y hy
+      simp only [Set.uIcc_of_le (by norm_num : (1 / 2 : ℝ) ≤ 1),
+        Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1), Set.mem_Icc] at hy ⊢
+      constructor <;> linarith [hy.1, hy.2])
+  have hadd : (∫ x in (0 : ℝ)..(1 / 2), ((x * (1 - x)) ^ (β - 1) : ℝ))
+      + (∫ x in (1 / 2 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ))
+      = ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) :=
+    intervalIntegral.integral_add_adjacent_intervals hhalf1 hhalf2
+  have hsym : (∫ x in (1 / 2 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ))
+      = ∫ x in (0 : ℝ)..(1 / 2), ((x * (1 - x)) ^ (β - 1) : ℝ) := by
+    have hcomp := intervalIntegral.integral_comp_sub_left
+      (a := (1 / 2 : ℝ)) (b := 1) (f := fun x : ℝ => ((x * (1 - x)) ^ (β - 1) : ℝ)) 1
+    have hcongr : (∫ x in (1 / 2 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ))
+        = ∫ x in (1 / 2 : ℝ)..1, (((1 - x) * (1 - (1 - x))) ^ (β - 1) : ℝ) := by
+      refine intervalIntegral.integral_congr fun x hx => ?_
+      rw [Set.uIcc_of_le (by norm_num : (1 / 2 : ℝ) ≤ 1)] at hx
+      have : (1 - x) * (1 - (1 - x)) = x * (1 - x) := by ring
+      rw [this]
+    rw [hcongr, hcomp]
+    norm_num
+  have hhalf := half_integral_le hβ0 hβ1
+  have h2 : (2 : ℝ) ^ (2 - 2 * β) / β = 2 * ((2 : ℝ) ^ (1 - 2 * β) / β) := by
+    rw [show 2 - 2 * β = 1 - 2 * β + 1 by ring,
+      Real.rpow_add (by norm_num : (0 : ℝ) < 2), Real.rpow_one]
+    ring
+  rw [← hadd, hsym, h2]
+  linarith [hhalf]
+
+/-! ## The elementary exponential bound and the leaf -/
+
+private theorem four_rpow_le {u : ℝ} (hu0 : 0 ≤ u) (hu4 : u ≤ 1 / 4) :
+    (2 : ℝ) ^ (2 * u) ≤ 1 + 3 * u := by
+  have h2 : (2 : ℝ) ^ (2 * u) = Real.exp (2 * u * Real.log 2) := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
+    ring_nf
+  have hy0 : 0 ≤ 2 * u * Real.log 2 := by
+    have hL : 0 ≤ Real.log 2 := Real.log_nonneg (by norm_num)
+    nlinarith
+  have hy1 : |2 * u * Real.log 2| ≤ 1 := by
+    have hL : Real.log 2 ≤ 0.6931471808 := Real.log_two_lt_d9.le
+    rw [abs_of_nonneg hy0]
+    nlinarith
+  have hstep : Real.exp (2 * u * Real.log 2) - 1 ≤ 2 * (2 * u * Real.log 2) := by
+    have h1 : Real.exp (2 * u * Real.log 2) - 1 ≤ |Real.exp (2 * u * Real.log 2) - 1| :=
+      le_abs_self _
+    have hb := Real.abs_exp_sub_one_le (x := 2 * u * Real.log 2) hy1
+    rw [abs_of_nonneg hy0] at hb
+    linarith [h1, hb]
+  have hLt : Real.log 2 ≤ 0.6931471808 := Real.log_two_lt_d9.le
+  rw [h2]
+  nlinarith [hstep, hu0, hLt]
+
 /-- LEAF. Step 2: at a real zero `β` with `3/4 ≤ β ≤ 1` the beta factor is real and the
 combination `βC(β,β)·N^(2β-2)` differs from one by at most `8·(1-β)·log N` on either side.
 This is the factor that turns the formula's main term into `𝔖(N)·N·(1 + χ(-1))`. -/
@@ -42,7 +211,82 @@ theorem leaf_kappa_between (N : ℕ) (hN : 2 ≤ N) {β : ℝ} (hβ : 3 / 4 ≤ 
     (betaC (β : ℂ) (β : ℂ)).im = 0 ∧
       1 - 8 * (1 - β) * Real.log N ≤ (betaC (β : ℂ) (β : ℂ)).re * (N : ℝ) ^ (2 * β - 2) ∧
       (betaC (β : ℂ) (β : ℂ)).re * (N : ℝ) ^ (2 * β - 2) ≤ 1 + 8 * (1 - β) * Real.log N := by
-  sorry
+  have hβ0 : 0 < β := by linarith
+  have heq := betaC_eq_integral (β := β) hβ0
+  have hre : (betaC (β : ℂ) (β : ℂ)).re
+      = ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) := by
+    rw [heq]
+    exact Complex.ofReal_re _
+  have him : (betaC (β : ℂ) (β : ℂ)).im = 0 := by
+    rw [heq]
+    exact Complex.ofReal_im _
+  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (by omega : 0 < N)
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (by omega : 1 ≤ N)
+  have hN2 : (2 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  set u : ℝ := 1 - β with hu
+  have hu0 : 0 ≤ u := by rw [hu]; linarith
+  have hu4 : u ≤ 1 / 4 := by rw [hu]; linarith
+  have hβu : β = 1 - u := by rw [hu]; ring
+  rw [hre]
+  refine ⟨him, ?_, ?_⟩
+  · -- lower bound
+    have h1 : (1 : ℝ) ≤ ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) :=
+      one_le_beta_integral hβ hβ'
+    have hpow_nonneg : (0 : ℝ) ≤ (N : ℝ) ^ (2 * β - 2) := Real.rpow_nonneg hNpos.le _
+    have hpow_ge : 1 - 2 * u * Real.log N ≤ (N : ℝ) ^ (2 * β - 2) := by
+      rw [Real.rpow_def_of_pos hNpos]
+      have hexp : Real.log ((N : ℝ)) * (2 * β - 2) = -(2 * u * Real.log N) := by rw [hu]; ring
+      rw [hexp]
+      have h := Real.add_one_le_exp (-(2 * u * Real.log N))
+      linarith [h]
+    have hmul : (1 : ℝ) * (N : ℝ) ^ (2 * β - 2)
+        ≤ (∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) * (N : ℝ) ^ (2 * β - 2) :=
+      mul_le_mul_of_nonneg_right h1 hpow_nonneg
+    have hmul' : (N : ℝ) ^ (2 * β - 2)
+        ≤ (∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) * (N : ℝ) ^ (2 * β - 2) := by
+      simpa using hmul
+    have huLog : 0 ≤ u * Real.log N := mul_nonneg hu0 (Real.log_nonneg hN1)
+    have : 1 - 8 * u * Real.log N ≤ 1 - 2 * u * Real.log N := by linarith
+    calc 1 - 8 * (1 - β) * Real.log N = 1 - 8 * u * Real.log N := by rw [hu]
+      _ ≤ (N : ℝ) ^ (2 * β - 2) := le_trans this hpow_ge
+      _ ≤ (∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) * (N : ℝ) ^ (2 * β - 2) := hmul'
+  · -- upper bound
+    have hup : ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) ≤ (2 : ℝ) ^ (2 * u) / β := by
+      have h := beta_integral_le hβ hβ'
+      have he : (2 : ℝ) ^ (2 * u) = (2 : ℝ) ^ (2 - 2 * β) := by rw [hu]; ring_nf
+      rw [he]
+      exact h
+    have hB1 : (1 : ℝ) ≤ ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) :=
+      one_le_beta_integral hβ hβ'
+    have hpow_le : (N : ℝ) ^ (2 * β - 2) ≤ 1 := by
+      refine Real.rpow_le_one_of_one_le_of_nonpos hN1 ?_
+      linarith
+    have hmaj : (2 : ℝ) ^ (2 * u) / β ≤ 1 + 8 * u * Real.log N := by
+      have hexp := four_rpow_le hu0 hu4
+      have hlogN : Real.log 2 ≤ Real.log N := Real.log_le_log (by norm_num) hN2
+      have hLb : (0.6931471803 : ℝ) ≤ Real.log 2 := Real.log_two_gt_d9.le
+      have hLt : Real.log 2 ≤ 0.6931471808 := Real.log_two_lt_d9.le
+      have hprod : 0 ≤ (Real.log N - 0.6931471803) * (1 / 4 - u) :=
+        mul_nonneg (by linarith) (by linarith)
+      have key : 1 + 3 * u ≤ β * (1 + 8 * u * Real.log N) := by
+        rw [hβu]
+        nlinarith [hprod, hu0, hu4, hLb, hlogN]
+      calc (2 : ℝ) ^ (2 * u) / β
+          ≤ (1 + 3 * u) / β := div_le_div_of_nonneg_right hexp hβ0.le
+        _ ≤ (β * (1 + 8 * u * Real.log N)) / β := div_le_div_of_nonneg_right key hβ0.le
+        _ = 1 + 8 * u * Real.log N := by field_simp
+    have hle : (∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) * (N : ℝ) ^ (2 * β - 2)
+        ≤ (∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) * 1 :=
+      mul_le_mul_of_nonneg_left hpow_le (by linarith)
+    have hle' : (∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) * (N : ℝ) ^ (2 * β - 2)
+        ≤ ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) := by
+      simpa using hle
+    calc (∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ)) * (N : ℝ) ^ (2 * β - 2)
+        ≤ ∫ x in (0 : ℝ)..1, ((x * (1 - x)) ^ (β - 1) : ℝ) := hle'
+      _ ≤ (2 : ℝ) ^ (2 * u) / β := hup
+      _ ≤ 1 + 8 * u * Real.log N := hmaj
+      _ = 1 + 8 * (1 - β) * Real.log N := by rw [hu]
+
 
 /-- LEAF. Step 3: the three error terms of the analytic formula — the `X`-term carrying
 `(e·log X)^c'`, the conductor term `𝔖(N)·N·r/φ(r)^2` and the minor term `X^(1-ε₀)` — are in
@@ -62,7 +306,14 @@ theorem leaf_error_domination (δ : ℝ) (hδ : 0 < δ) (hδ1 : δ < 1) (C c' ε
 L-function at or beyond one, so only the range `1 - c/log X < β < 1` needs the counting step. -/
 theorem leaf_LFunction_ne_zero_ge_one {r : ℕ} [NeZero r] (hr : 2 ≤ r) (χ : DirichletCharacter ℂ r)
     (hχ : χ.IsPrimitive) {β : ℝ} (hβ : 1 ≤ β) : DirichletCharacter.LFunction χ (β : ℂ) ≠ 0 := by
-  sorry
+  have hχne : χ ≠ 1 := by
+    intro h1
+    have hc : χ.conductor = 1 := (DirichletCharacter.eq_one_iff_conductor_eq_one).mp h1
+    rw [DirichletCharacter.isPrimitive_def] at hχ
+    omega
+  refine DirichletCharacter.LFunction_ne_zero_of_one_le_re (s := (β : ℂ)) χ (Or.inl hχne) ?_
+  simpa using hβ
+
 
 /-! ## Private steps of the assembly -/
 

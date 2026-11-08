@@ -46,7 +46,23 @@ power of `log x` is at most `x^{1/2}`. One inequality on the real logarithm, wit
 in it; it is what allows the exponent `1/2` in the assembly. -/
 theorem log_four_le_sqrt :
     ∃ X0 : ℕ, ∀ x : ℕ, X0 ≤ x → Real.log x ^ 4 ≤ (x : ℝ) ^ ((1 : ℝ) / 2) := by
-  sorry
+  -- `(log t)^4 = o(t^(1/2))` at `+∞`: `log = o(t^(1/8))`, and `(1/8) * 4 = 1/2`.
+  have hlit : (fun t : ℝ => Real.log t ^ 4) =o[Filter.atTop]
+      fun t : ℝ => t ^ ((1 : ℝ) / 2) := by
+    have h0 := isLittleO_log_rpow_rpow_atTop (r := ((4 : ℕ) : ℝ)) (s := (1 : ℝ) / 2)
+      (by norm_num)
+    simpa only [Real.rpow_natCast] using h0
+  -- hence eventually `(log t)^4 ≤ t^(1/2)`, by the little-o estimate against itself.
+  have hev : ∀ᶠ t : ℝ in Filter.atTop, Real.log t ^ 4 ≤ t ^ ((1 : ℝ) / 2) := by
+    filter_upwards [hlit.eventuallyLE, Filter.eventually_gt_atTop (0 : ℝ)] with t ht ht0
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (by positivity),
+      abs_of_pos (Real.rpow_pos_of_pos ht0 _)] at ht
+    exact ht
+  obtain ⟨a, ha⟩ := Filter.eventually_atTop.mp hev
+  refine ⟨Nat.ceil a, fun x hx => ha (x : ℝ) ?_⟩
+  have h1 : a ≤ (Nat.ceil a : ℝ) := Nat.le_ceil a
+  have h2 : ((Nat.ceil a : ℕ) : ℝ) ≤ (x : ℝ) := by exact_mod_cast hx
+  linarith
 
 /-- LEAF 3 of 3, the division step that carries the constant through: if `C ≥ 0`, `x > 0` and
 `L^4 ≤ x^{1/2}`, then `C x / L^4 ≤ C x^{1/2}`. The hypothesis `L^4 ≤ x^{1/2}` already forces

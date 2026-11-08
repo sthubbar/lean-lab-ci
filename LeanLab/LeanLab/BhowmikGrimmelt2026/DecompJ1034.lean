@@ -313,15 +313,22 @@ theorem singular_series_lower_bound (N : ℕ) (hN : Even N) (hNpos : 0 < N) :
   singular_ge_one hN hNpos
 
 -- LEAF 2: von Mangoldt factor upper bound for Goldbach exceptions
-/-- LEAF. Page 13. Proper prime power sum bound. -/
+/-- LEAF. Page 13. Proper prime power sum bound.
+REPAIRED 20261108 STATEFIX arch20261108T1030Z: the exponent was the literal `1/2`, which elaborates
+as natural division with value 0, so the old bound was three halves of `log N ^ 3` with no square
+root, a far stronger claim than the square root prime power budget of P0029 pages 3 and 13. The
+exponent is now the real one half, written as in `prime_power_error_three_halves384` of Decomp384d. -/
 theorem r2_prime_power_bound (N : ℕ) (hN : Even N) (h_not_G : ¬ IsGoldbachSum N) :
-  r2 N ≤ 3/2 * (N : ℝ)^(1/2) * (Real.log (N : ℝ))^3 := by
+  r2 N ≤ 3/2 * (N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3 := by
   sorry
 
 -- LEAF 3: Asymptotic inequality
-/-- LEAF. Page 13. Size comparison for large N. -/
+/-- LEAF. Page 13. Size comparison for large N.
+REPAIRED 20261108 STATEFIX arch20261108T1030Z: the real exponent one half replaces the natural
+literal `1/2`, matching `r2_prime_power_bound`. The proof uses that log x over the sixth root of x
+decreases above exp 6, with value 30 log 2 over 32, below 2/3, at 2^30. -/
 theorem r2_bound_le_half_N (N : ℕ) (hN : 2^30 ≤ N) :
-  3/2 * (N : ℝ)^(1/2) * (Real.log (N : ℝ))^3 ≤ 1/2 * N := by
+  3/2 * (N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3 ≤ 1/2 * N := by
   have hNpos : (0 : ℝ) < (N : ℝ) := by
     have h0 : (0 : ℕ) < N := by
       have h1 : (0 : ℕ) < 2^30 := by norm_num
@@ -332,40 +339,47 @@ theorem r2_bound_le_half_N (N : ℕ) (hN : 2^30 ≤ N) :
       have h2 : (1 : ℕ) ≤ 2^30 := by norm_num
       omega
     exact_mod_cast h1
-  -- the exponent `1/2` in the statement is `ℕ`-division, so it is `0`
-  have hexp : (N : ℝ) ^ ((1 : ℕ) / 2) = 1 := by norm_num
-  rw [hexp, mul_one]
-  -- `log N ≤ 6 N^(1/6)`
-  have hlog : Real.log (N : ℝ) ≤ 6 * (N : ℝ) ^ ((1:ℝ)/6) := by
-    have h := Real.log_le_rpow_div (le_of_lt hNpos) (by norm_num : (0:ℝ) < 1/6)
-    calc Real.log (N : ℝ) ≤ (N : ℝ) ^ ((1:ℝ)/6) / (1/6) := h
-      _ = 6 * (N : ℝ) ^ ((1:ℝ)/6) := by
-            rw [div_eq_mul_inv, show ((1:ℝ)/6)⁻¹ = 6 by norm_num, mul_comm]
+  have hbasepos : (0 : ℝ) < ((2 ^ 30 : ℕ) : ℝ) := by positivity
+  have hlogbase : Real.log (((2 ^ 30 : ℕ) : ℝ)) = 30 * Real.log 2 := by
+    rw [Nat.cast_pow, Nat.cast_ofNat, Real.log_pow]
+    norm_num
+  have hbaseexp : Real.exp ((1 / 6 : ℝ)⁻¹) ≤ ((2 ^ 30 : ℕ) : ℝ) := by
+    apply (Real.le_log_iff_exp_le hbasepos).mp
+    rw [hlogbase]
+    norm_num
+    linarith [Real.log_two_gt_d9]
+  have hNR : ((2 ^ 30 : ℕ) : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hmono := Real.log_div_self_rpow_antitoneOn (by norm_num : (0 : ℝ) < 1 / 6)
+    hbaseexp (hbaseexp.trans hNR) hNR
+  have hroot : (((2 ^ 30 : ℕ) : ℝ)) ^ ((1 : ℝ) / 6) = 32 := by
+    rw [show (((2 ^ 30 : ℕ) : ℝ)) = (32 : ℝ) ^ 6 by norm_num]
+    simpa only [one_div, Nat.cast_ofNat] using Real.pow_rpow_inv_natCast (x := (32 : ℝ))
+      (n := 6) (by norm_num) (by norm_num : (6 : ℕ) ≠ 0)
+  dsimp only at hmono
+  rw [hroot, hlogbase] at hmono
+  have hb : 30 * Real.log 2 / 32 ≤ (2 / 3 : ℝ) := by
+    linarith [Real.log_two_lt_d9]
+  have hpos6 : 0 < (N : ℝ) ^ ((1 : ℝ) / 6) := Real.rpow_pos_of_pos hNpos _
+  have hlog : Real.log (N : ℝ) ≤ 2 / 3 * (N : ℝ) ^ ((1 : ℝ) / 6) :=
+    (div_le_iff₀ hpos6).mp (hmono.trans hb)
   have hlog0 : 0 ≤ Real.log (N : ℝ) := Real.log_nonneg hN1
-  -- so `(log N)^3 ≤ 216 √N`
-  have hcube : (Real.log (N : ℝ))^3 ≤ 216 * Real.sqrt (N : ℝ) := by
-    have h1 : (Real.log (N : ℝ))^3 ≤ (6 * (N : ℝ) ^ ((1:ℝ)/6))^3 :=
-      pow_le_pow_left₀ hlog0 hlog 3
-    have h2 : (6 * (N : ℝ) ^ ((1:ℝ)/6))^3 = 216 * Real.sqrt (N : ℝ) := by
-      rw [Real.sqrt_eq_rpow, mul_pow]
-      norm_num
-      rw [← Real.rpow_natCast ((N : ℝ) ^ ((1:ℝ)/6)) 3,
-        ← Real.rpow_mul (le_of_lt hNpos)]
-      norm_num
-    linarith
-  -- and `648 √N ≤ N`
-  have hsqrt : (32768 : ℝ) ≤ Real.sqrt (N : ℝ) := by
-    have h : Real.sqrt ((32768:ℝ)^2) ≤ Real.sqrt (N : ℝ) := by
-      apply Real.sqrt_le_sqrt
-      have : ((32768:ℝ)^2) = ((2:ℕ)^30 : ℝ) := by norm_num
-      rw [this]
-      exact_mod_cast hN
-    rwa [Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 32768)] at h
-  have hkey : 648 * Real.sqrt (N : ℝ) ≤ (N : ℝ) := by
-    have hsq : Real.sqrt (N : ℝ) * Real.sqrt (N : ℝ) = (N : ℝ) :=
-      Real.mul_self_sqrt (le_of_lt hNpos)
-    nlinarith [Real.sqrt_nonneg (N : ℝ)]
-  nlinarith [Real.sqrt_nonneg (N : ℝ)]
+  have hcube := pow_le_pow_left₀ hlog0 hlog 3
+  have hroot2 : ((N : ℝ) ^ ((1 : ℝ) / 6)) ^ 3 = (N : ℝ) ^ ((1 : ℝ) / 2) := by
+    rw [← Real.rpow_natCast ((N : ℝ) ^ ((1 : ℝ) / 6)) 3, ← Real.rpow_mul (le_of_lt hNpos)]
+    norm_num
+  rw [mul_pow, hroot2] at hcube
+  have hsq : (N : ℝ) ^ ((1 : ℝ) / 2) * (N : ℝ) ^ ((1 : ℝ) / 2) = (N : ℝ) := by
+    rw [← Real.rpow_add hNpos]
+    norm_num
+  have hs0 : 0 ≤ (N : ℝ) ^ ((1 : ℝ) / 2) := le_of_lt (Real.rpow_pos_of_pos hNpos _)
+  have hmul := mul_le_mul_of_nonneg_left hcube
+    (show 0 ≤ 3 / 2 * (N : ℝ) ^ ((1 : ℝ) / 2) by positivity)
+  have hfin : 3 / 2 * (N : ℝ) ^ ((1 : ℝ) / 2) * ((2 / 3 : ℝ) ^ 3 * (N : ℝ) ^ ((1 : ℝ) / 2))
+      = 4 / 9 * (N : ℝ) := by
+    rw [show 3 / 2 * (N : ℝ) ^ ((1 : ℝ) / 2) * ((2 / 3 : ℝ) ^ 3 * (N : ℝ) ^ ((1 : ℝ) / 2))
+      = 4 / 9 * ((N : ℝ) ^ ((1 : ℝ) / 2) * (N : ℝ) ^ ((1 : ℝ) / 2)) by ring, hsq]
+  rw [hfin] at hmul
+  linarith
 
 theorem exceptional_gap150_j1034 : ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ,
     ∀ N : ℕ, N₀ ≤ N → Even N → ¬ IsGoldbachSum N → c * N ≤ |E2 N| := by
@@ -375,8 +389,10 @@ theorem exceptional_gap150_j1034 : ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ,
   have h1 : 1 ≤ singular N := singular_series_lower_bound N hEven (by
     have h0 : (0:ℕ) < 2^30 := by norm_num
     omega)
-  have h2 : r2 N ≤ 3/2 * (N : ℝ)^(1/2) * (Real.log (N : ℝ))^3 := r2_prime_power_bound N hEven hNotG
-  have h3 : 3/2 * (N : ℝ)^(1/2) * (Real.log (N : ℝ))^3 ≤ 1/2 * N := r2_bound_le_half_N N hN
+  have h2 : r2 N ≤ 3/2 * (N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3 :=
+    r2_prime_power_bound N hEven hNotG
+  have h3 : 3/2 * (N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3 ≤ 1/2 * N :=
+    r2_bound_le_half_N N hN
   have h4 : r2 N ≤ 1/2 * N := le_trans h2 h3
   unfold E2
   have h5 : (N : ℝ) * singular N ≥ N := by
