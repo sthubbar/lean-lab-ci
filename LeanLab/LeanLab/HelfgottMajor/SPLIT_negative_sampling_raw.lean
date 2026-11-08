@@ -39,20 +39,19 @@ theorem negative_mass_eq_signed_line_sum (q : ℕ) [NeZero q] (χ : DirichletCha
         Set.indicator {ρ | ρ.val.im < -1}
           (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
             ‖gaussianMellin δ ((1 / 2 : ℂ) + (ρ.val.im : ℝ) * Complex.I)‖) ρ := by
-  classical
   unfold negativeMass
-  refine tsum_congr (fun ρ => ?_)
-  have hz := hzeros ρ.val ρ.property.1 ρ.property.2.1 ρ.property.2.2.1 ρ.property.2.2.2
-  have hρeq : ρ.val = (1 / 2 : ℂ) + (ρ.val.im : ℝ) * Complex.I := by
-    refine Complex.ext ?_ ?_
-    · simpa using hz
-    · simp
-  rw [Set.indicator_apply, Set.indicator_apply]
-  split_ifs with hh
-  · rw [mellinMassTerm]
-    exact congrArg (fun z => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
-      ‖gaussianMellin δ z‖) hρeq
-  · rfl
+  apply tsum_congr
+  intro ρ
+  by_cases h : ρ.val.im < -1
+  · have hz := hzeros ρ.val ρ.property.1 ρ.property.2.1 ρ.property.2.2.1 ρ.property.2.2.2
+    have hρeq : ρ.val = (1 / 2 : ℂ) + (ρ.val.im : ℝ) * Complex.I := by
+      apply Complex.ext <;> simp [hz]
+    simp [Set.indicator, h, mellinMassTerm]
+    left
+    congr 2
+    rw [hρeq]
+    norm_num
+  · simp [Set.indicator, h]
 
 /-- LEAF 2 of 3. The bulk of the negative half: the zeros of height at most minus three
 halves and at least minus `T`. The two Cauchy Schwarz comparisons against the negative line
@@ -159,4 +158,3 @@ theorem negative_sampling_raw_split (q : ℕ) [NeZero q] (χ : DirichletCharacte
     (negative_mass_bottom_le q χ hχ δ T hT hlarge hzeros)
 
 end LeanLab.HelfgottMajor.Decomp431a
-
