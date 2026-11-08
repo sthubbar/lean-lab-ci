@@ -30,38 +30,46 @@ integer `m + ⌊v⌋`. This is the only place where the floor decomposition of `
 and it is one rearrangement of `Int.floor_add_fract`. -/
 theorem leaf_poisson_index_shift (v : ℝ) (m : ℤ) :
     v + (m : ℝ) = Int.fract v + ((m + ⌊v⌋ : ℤ) : ℝ) := by
-  sorry
+  calc v + (m : ℝ) = (⌊v⌋ : ℝ) + Int.fract v + (m : ℝ) := by nth_rw 1 [← Int.floor_add_fract v]
+    _ = Int.fract v + ((m + ⌊v⌋ : ℤ) : ℝ) := by push_cast; ring
 
 /-- LEAF. First forbidden shift: if `m ≠ -⌊v⌋` then the shifted integer `m + ⌊v⌋` is not
 zero. One step of integer arithmetic, with no analysis. -/
 theorem leaf_poisson_index_ne_zero (v : ℝ) (m : ℤ) (hm : m ≠ -⌊v⌋) :
     m + ⌊v⌋ ≠ 0 := by
-  sorry
+  omega
 
 /-- LEAF. Second forbidden shift: if `m ≠ -(⌊v⌋ + 1)` then the shifted integer `m + ⌊v⌋` is
 not `-1`. One step of integer arithmetic, with no analysis. -/
 theorem leaf_poisson_index_ne_neg_one (v : ℝ) (m : ℤ) (hm : m ≠ -(⌊v⌋ + 1)) :
     m + ⌊v⌋ ≠ -1 := by
-  sorry
+  omega
 
 /-- LEAF. Dichotomy: an integer which is neither `0` nor `-1` is at least `1` or at most
 `-2`. A case distinction on `1 ≤ k`, with no real numbers involved. -/
 theorem leaf_poisson_index_dichotomy (k : ℤ) (h0 : k ≠ 0) (h1 : k ≠ -1) :
     1 ≤ k ∨ k ≤ -2 := by
-  sorry
+  omega
 
 /-- LEAF. Upper range estimate: for an integer `k ≥ 1`, the point `fract v + k` is at
 distance at least `1` from the origin, because `fract v ≥ 0`. -/
 theorem leaf_poisson_index_upper (v : ℝ) (k : ℤ) (hk : 1 ≤ k) :
     1 ≤ |Int.fract v + (k : ℝ)| := by
-  sorry
+  have h1 : 0 ≤ Int.fract v := Int.fract_nonneg v
+  have h2 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
+  have h3 : 1 ≤ Int.fract v + (k : ℝ) := by linarith
+  exact le_trans h3 (le_abs_self _)
 
 /-- LEAF. Lower range estimate: for an integer `k ≤ -2`, the point `fract v + k` is at most
 `-1`, hence again at distance at least `1` from the origin; this is where `fract v < 1` is
 used. -/
 theorem leaf_poisson_index_lower (v : ℝ) (k : ℤ) (hk : k ≤ -2) :
     1 ≤ |Int.fract v + (k : ℝ)| := by
-  sorry
+  have h1 : Int.fract v < 1 := Int.fract_lt_one v
+  have h2 : (k : ℝ) ≤ -2 := by exact_mod_cast hk
+  have h3 : Int.fract v + (k : ℝ) ≤ -1 := by linarith
+  have h5 : 1 ≤ -(Int.fract v + (k : ℝ)) := by linarith
+  exact le_trans h5 (neg_le_abs _)
 
 /-- Assembly: the sealed statement, from the shift identity, the two forbidden-shift
 translations, the integer dichotomy and the two one-sided estimates. -/
