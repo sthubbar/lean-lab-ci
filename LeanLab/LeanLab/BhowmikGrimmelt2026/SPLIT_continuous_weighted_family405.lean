@@ -51,7 +51,56 @@ theorem leaf_alias_remainder_family405 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG
             ee (-(N * α))) α‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
           (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  obtain ⟨C, hC, hf⟩ := alias_on_family405 hϕ hG ϑ hϑ (1 / 5) (by norm_num)
+  refine ⟨C, hC, fun X hX η hη hη1 hscale => ?_⟩
+  have hXp : (0 : ℝ) < (X : ℝ) := by exact_mod_cast (by omega : 0 < X)
+  have hX1 : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast (by omega : 1 ≤ X)
+  -- the scale hypothesis with `η ≤ 1` forces `X ≥ 10`, hence `log X ≥ 1`
+  have hR1 : (1 : ℝ) ≤ (X : ℝ) ^ ϑ := Real.one_le_rpow hX1 hϑ.le
+  have hsq : (1 : ℝ) ≤ ((X : ℝ) ^ ϑ) ^ 2 := by nlinarith
+  have h10 : (10 : ℝ) ≤ (X : ℝ) := by nlinarith [mul_le_mul_of_nonneg_right hη1 hXp.le]
+  have hexp : Real.exp 1 ≤ (X : ℝ) := by
+    have := Real.exp_one_lt_d9
+    linarith
+  have hlog1 : (1 : ℝ) ≤ Real.log (X : ℝ) := (Real.le_log_iff_exp_le hXp).mpr hexp
+  have hlog0 : (0 : ℝ) ≤ Real.log (X : ℝ) := le_trans (by norm_num) hlog1
+  have hlog5 : Real.log (X : ℝ) ≤ Real.log (X : ℝ) ^ 5 :=
+    le_self_pow₀ hlog1 (by norm_num)
+  -- the leaf integrand is `aliasOn405` on the minor arc set
+  have hsum : (∑ N ∈ Finset.Icc 1 X,
+        ‖∫ α in (0 : ℝ)..1, {α | ¬ MajorArc X ((X : ℝ) ^ ϑ) α}.indicator
+          (fun α => Sphi ϕ N α ^ 2 *
+            (continuousModel405 G ((X : ℝ) ^ ϑ)
+                (fun q => η * X * q / (X : ℝ) ^ ϑ) α -
+              bRhat G ((X : ℝ) ^ ϑ) (fun q => η * X * q / (X : ℝ) ^ ϑ) α) *
+            ee (-(N * α))) α‖ ^ 2) =
+      ∑ N ∈ Finset.Icc 1 X,
+        ‖aliasOn405 ϕ G X N ϑ η {α | ¬ MajorArc X ((X : ℝ) ^ ϑ) α}‖ ^ 2 := by
+    apply Finset.sum_congr rfl
+    intro N _
+    simp only [aliasOn405]
+  rw [hsum]
+  have h := hf X hX η hη hscale {α | ¬ MajorArc X ((X : ℝ) ^ ϑ) α}
+    (measurableSet_majorArc84 X ((X : ℝ) ^ ϑ)).compl
+  have hpow : ((X : ℝ) ^ (-(1 / 5) : ℝ)) ^ 2 = (X : ℝ) ^ (-(2 / 5) : ℝ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hXp.le]
+    norm_num
+  rw [hpow] at h
+  have hinv : (0 : ℝ) ≤ ((X : ℝ) ^ ϑ)⁻¹ := (inv_pos.mpr (Real.rpow_pos_of_pos hXp ϑ)).le
+  have hleA : (X : ℝ) ^ (-(2 / 5) : ℝ) ≤ ((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ) :=
+    le_add_of_nonneg_left hinv
+  have hX3 : (0 : ℝ) ≤ (X : ℝ) ^ 3 := by positivity
+  have hnn : (0 : ℝ) ≤ C * (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 := by positivity
+  have step1 : C * (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 * Real.log (X : ℝ) ≤
+      C * (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 * Real.log (X : ℝ) ^ 5 :=
+    mul_le_mul_of_nonneg_left hlog5 hnn
+  have step2 : C * (X : ℝ) ^ (-(2 / 5) : ℝ) * (X : ℝ) ^ 3 * Real.log (X : ℝ) ^ 5 ≤
+      C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 *
+        Real.log (X : ℝ) ^ 5 := by
+    apply mul_le_mul_of_nonneg_right _ (pow_nonneg hlog0 5)
+    apply mul_le_mul_of_nonneg_right _ hX3
+    exact mul_le_mul_of_nonneg_left hleA hC
+  exact h.trans (step1.trans step2)
 
 /-- The weighted minor family estimate, assembled from the two leaves: the discrete weight
 part and its alias remainder are the two summands of the exact integral form, and the
