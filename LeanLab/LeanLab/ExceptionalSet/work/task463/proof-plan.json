@@ -1,0 +1,38 @@
+[
+  {
+    "name": "leaf_poisson_index_shift",
+    "body": "  push_cast\n  linarith [Int.floor_add_fract v]\n",
+    "twin": "For every real v and integer m, v plus m equals the fractional part of v plus the integer m plus floor v.",
+    "instance": "v equal to minus three halves and m equal to three give three halves on both sides."
+  },
+  {
+    "name": "leaf_poisson_index_ne_zero",
+    "body": "  exact fun h => hm (add_eq_zero_iff_eq_neg.mp h)\n",
+    "twin": "If m differs from minus floor v, then m plus floor v is nonzero.",
+    "instance": "v equal to one half and m equal to one give shifted integer one."
+  },
+  {
+    "name": "leaf_poisson_index_ne_neg_one",
+    "body": "  omega\n",
+    "twin": "If m differs from minus the sum of floor v and one, then m plus floor v differs from minus one.",
+    "instance": "v equal to one half and m equal to one give shifted integer one."
+  },
+  {
+    "name": "leaf_poisson_index_dichotomy",
+    "body": "  omega\n",
+    "twin": "Every integer other than zero and minus one is at least one or at most minus two.",
+    "instance": "The integer one satisfies the first branch. Minus two satisfies the second branch."
+  },
+  {
+    "name": "leaf_poisson_index_upper",
+    "body": "  have hkR : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk\n  exact (by linarith [Int.fract_nonneg v] : (1 : ℝ) ≤ Int.fract v + (k : ℝ)).trans\n    (le_abs_self _)\n",
+    "twin": "For every real v and integer k at least one, the absolute value of fractional part v plus k is at least one.",
+    "instance": "v equal to zero and k equal to one give equality."
+  },
+  {
+    "name": "leaf_poisson_index_lower",
+    "body": "  have hkR : (k : ℝ) ≤ -2 := by exact_mod_cast hk\n  have hneg : Int.fract v + (k : ℝ) < -1 := by linarith [Int.fract_lt_one v]\n  exact (by linarith : (1 : ℝ) ≤ -(Int.fract v + (k : ℝ))).trans (neg_le_abs _)\n",
+    "twin": "For every real v and integer k at most minus two, the absolute value of fractional part v plus k is at least one.",
+    "instance": "v equal to one half and k equal to minus two give absolute value three halves."
+  }
+]

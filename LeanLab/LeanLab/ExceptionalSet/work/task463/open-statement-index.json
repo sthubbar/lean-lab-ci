@@ -1,0 +1,762 @@
+[
+  {
+    "file": "BhowmikGrimmelt2026",
+    "name": "theorem31",
+    "statement": ": Theorem31",
+    "syntactic_clean_candidates": [
+      "Decomp385a.theorem31_supplied",
+      "DecompJ1140.theorem31_assembly"
+    ]
+  },
+  {
+    "file": "BhowmikGrimmelt2026",
+    "name": "theorem51",
+    "statement": ": PowerSaving",
+    "syntactic_clean_candidates": [
+      "PowerSaving428.theorem51_supplied",
+      "SPLIT_theorem51.theorem51_split"
+    ]
+  },
+  {
+    "file": "BhowmikGrimmelt2026",
+    "name": "prop64_E",
+    "statement": ": EventuallyBelow 0.72",
+    "syntactic_clean_candidates": [
+      "DecompJ1129.prop64_E"
+    ]
+  },
+  {
+    "file": "BhowmikGrimmelt2026",
+    "name": "theorem82",
+    "statement": ": Theorem82",
+    "syntactic_clean_candidates": [
+      "SPLIT_theorem82.theorem82_split"
+    ]
+  },
+  {
+    "file": "BrudernPerelli1998",
+    "name": "brudernPerelli",
+    "statement": ": Theorem1",
+    "syntactic_clean_candidates": [
+      "DecompJ200.brudernPerelli_assembly"
+    ]
+  },
+  {
+    "file": "ChenPrimes",
+    "name": "grimmeltTeravainen",
+    "statement": ": GT11",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "Decomp371a",
+    "name": "leaf_coefficient_lower",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (((window γ N).filter (fun n : ℕ =>\n            (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +\n              R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <\n                c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤\n            B * N * calE γ κ N ^ (-(1 / 12 : ℝ))",
+    "syntactic_clean_candidates": [
+      "Decomp446a.coefficient_lower_assembly"
+    ]
+  },
+  {
+    "file": "Decomp371a",
+    "name": "leaf_fractional_boundary",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        (((window γ N).filter (fun n : ℕ =>\n          Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨\n            1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤\n          B * N * calE γ κ N ^ (-(1 / 8 : ℝ))",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_fractional_boundary.leaf_fractional_boundary_split"
+    ]
+  },
+  {
+    "file": "Decomp371a",
+    "name": "leaf_major_identity",
+    "statement": "(γ δ κ : ℝ) (N n : ℕ)\n    (hΔ : 0 < calE γ κ N ^ (-(1 / 8 : ℝ)))\n    (hΔ1 : calE γ κ N ^ (-(1 / 8 : ℝ)) < 1)\n    (hleft : calE γ κ N ^ (-(1 / 8 : ℝ)) ≤ Int.fract (F γ n))\n    (hright : Int.fract (F γ n) ≤ 1 - calE γ κ N ^ (-(1 / 8 : ℝ))) :\n    majorInt γ δ κ N n =\n      R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +\n        R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)",
+    "syntactic_clean_candidates": [
+      "Decomp404a.major_identity"
+    ]
+  },
+  {
+    "file": "Decomp371b",
+    "name": "leaf_tail",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)\n    (δ κ : ℝ) (hδ : 0 < δ) (hκ : 0 < κ) :\n    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ n : ℕ,\n      ‖minorInt γ δ κ N n - truncatedMinor γ δ κ N n‖ ≤\n        F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) / 2",
+    "syntactic_clean_candidates": [
+      "Decomp404c.tail_assembly",
+      "TailSupply385.leaf_tail_supplied"
+    ]
+  },
+  {
+    "file": "Decomp371b",
+    "name": "leaf_truncated_moment",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ window γ N, ‖truncatedMinor γ δ κ N n‖ ^ 2) ≤\n            B * N * F γ N ^ 2 * calE γ κ N ^ (-(3 / 4 : ℝ))",
+    "syntactic_clean_candidates": [
+      "Decomp404e.truncated_moment_assembly",
+      "Decomp428e.truncated_moment_assembly",
+      "MomentSupply446.truncated_moment_supplied"
+    ]
+  },
+  {
+    "file": "Decomp371c",
+    "name": "leaf_even_moment",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤\n              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_even_moment.leaf_even_moment_split"
+    ]
+  },
+  {
+    "file": "Decomp371c",
+    "name": "leaf_odd_moment",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤\n              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_odd_moment.leaf_odd_moment_split"
+    ]
+  },
+  {
+    "file": "Decomp371d",
+    "name": "leaf_fold",
+    "statement": "(h K : ℝ → ℂ) (hper : Function.Periodic h 1)\n    (hh : IntervalIntegrable h volume 0 1) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v : ℝ) :\n    (∫ α, h α * K α * eC (-(α * v))) =\n      ∫ α in (0 : ℝ)..1,\n        h α * (∑' n : ℤ, K (α + n) * eC (-((α + n) * v)))",
+    "syntactic_clean_candidates": [
+      "Decomp446b.fold_assembly",
+      "Decomp450b.fold_assembly"
+    ]
+  },
+  {
+    "file": "Decomp371d",
+    "name": "leaf_poisson",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v α : ℝ) :\n    (∑' n : ℤ, K (α + n) * eC (-((α + n) * v))) =\n      eC (-(α * (⌊v⌋ : ℝ))) * ftR K (Int.fract v) +\n        eC (-(α * ((⌊v⌋ + 1 : ℤ) : ℝ))) * ftR K (Int.fract v - 1)",
+    "syntactic_clean_candidates": [
+      "Decomp450a.poisson_assembly",
+      "SPLIT_leaf_poisson.leaf_poisson_split"
+    ]
+  },
+  {
+    "file": "Decomp385a",
+    "name": "leaf_mean_square",
+    "statement": "(Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4)\n    (hZF : ZeroFreeBeyond Θ) (ε : ℝ) (hε : 0 < ε) (hsublinear : ε < 3 / 2 - 2 * Θ) :\n    ∃ C : ℝ, ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →\n      ∑ n ∈ (range (X + 1)).filter Even, (error n) ^ 2 ≤\n        C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε)",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_mean_square.leaf_mean_square_split"
+    ]
+  },
+  {
+    "file": "Decomp404c",
+    "name": "leaf_tail_integral",
+    "statement": ": ∃ C : ℝ, 0 < C ∧\n    ∀ P X Δ v : ℝ, 2 ≤ P → 2 ≤ X → 0 < Δ → Δ < 1 / 4 →\n      ‖(∫ α in (majorArcs P X)ᶜ,\n          Sp P X α ^ 2 * (Kfun Δ α : ℂ) * eC (-(α * v))) -\n        (∫ α in (majorArcs P X)ᶜ ∩ Set.Icc (-P) P,\n          Sp P X α ^ 2 * (Kfun Δ α : ℂ) * eC (-(α * v)))‖ ≤\n            C * X * Real.log X ^ 2 / (Δ * P)",
+    "syntactic_clean_candidates": [
+      "Decomp428b.leaf_tail_integral_supplied"
+    ]
+  },
+  {
+    "file": "Decomp404e",
+    "name": "leaf_moment_split",
+    "statement": "(γ δ κ : ℝ) (N : ℕ) :\n    (∑ n ∈ Finset.Ioc (N / 2) N, ‖truncatedMinor γ δ κ N n‖ ^ 2) ≤\n      farMoment γ δ κ N + nearMoment γ δ κ N",
+    "syntactic_clean_candidates": [
+      "MomentSplit428.leaf_moment_split_supplied"
+    ]
+  },
+  {
+    "file": "Decomp404e",
+    "name": "leaf_far_moment",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          farMoment γ δ κ N ≤\n            B * N * F γ N ^ 2 * Real.log (F γ N) ^ 2 * calE γ κ N ^ (-1 : ℝ)",
+    "syntactic_clean_candidates": [
+      "Decomp428d.far_moment_assembly",
+      "MomentSupply446.far_moment_supplied"
+    ]
+  },
+  {
+    "file": "Decomp404e",
+    "name": "leaf_near_moment",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∀ κ : ℝ, 0 < κ → ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        nearMoment γ δ κ N ≤ B * N * F γ N ^ (2 - 2 * δ)",
+    "syntactic_clean_candidates": [
+      "Decomp428c.near_moment_assembly",
+      "MomentSupply446.near_moment_supplied"
+    ]
+  },
+  {
+    "file": "Decomp428c",
+    "name": "leaf_minor_sup",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        ∀ β ∈ truncatedDomain (F γ N ^ (6 * δ)) (F γ N),\n          ‖Sp (F γ N ^ (6 * δ)) (F γ N) β‖ ^ 2 ≤\n            C * F γ N ^ (2 - 6 * δ) * Real.log (F γ N) ^ 8",
+    "syntactic_clean_candidates": [
+      "MinorSup446.leaf_minor_sup_supplied"
+    ]
+  },
+  {
+    "file": "Decomp428c",
+    "name": "leaf_weighted_energy",
+    "statement": ": ∃ C : ℝ, 0 < C ∧\n    ∀ P X Δ : ℝ, 0 < P → 2 ≤ X → 0 < Δ → Δ < 1 →\n      (∫ α in truncatedDomain P X, ‖Sp P X α ^ 2 * (Kfun Δ α : ℂ)‖) ≤\n        C * X * Real.log X / Δ",
+    "syntactic_clean_candidates": [
+      "Energy446.leaf_weighted_energy_supplied"
+    ]
+  },
+  {
+    "file": "Decomp428c",
+    "name": "leaf_localization",
+    "statement": "(γ δ κ : ℝ) (N : ℕ) (U : ℝ)\n    (hU : 0 ≤ U) (hΔ : calE γ κ N ^ (-(1 / 8 : ℝ)) < 1)\n    (hsup : ∀ β ∈ truncatedDomain (F γ N ^ (6 * δ)) (F γ N),\n      ‖Sp (F γ N ^ (6 * δ)) (F γ N) β‖ ^ 2 ≤ U) :\n    nearMoment γ δ κ N ≤\n      4 * N * F γ N ^ (3 * δ - 1) * U *\n        (∫ α in truncatedDomain (F γ N ^ (6 * δ)) (F γ N),\n          ‖Sp (F γ N ^ (6 * δ)) (F γ N) α ^ 2 *\n            (Kfun (calE γ κ N ^ (-(1 / 8 : ℝ))) α : ℂ)‖)",
+    "syntactic_clean_candidates": [
+      "Localization446.leaf_localization_supplied"
+    ]
+  },
+  {
+    "file": "Decomp428d",
+    "name": "leaf_far_phase",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          ∀ t : ℝ, F γ N ^ (3 * δ - 1) < |t| → |t| ≤ 2 * F γ N ^ (6 * δ) →\n            ‖phaseSum γ N t‖ ≤ C * N * calE γ κ N ^ (-(3 / 2 : ℝ))",
+    "syntactic_clean_candidates": [
+      "Decomp446c.far_phase_assembly",
+      "Decomp450e.far_phase_supplied"
+    ]
+  },
+  {
+    "file": "Decomp428d",
+    "name": "leaf_far_localization",
+    "statement": "(γ δ κ : ℝ) (N : ℕ) (V : ℝ) (hV : 0 ≤ V)\n    (hΔ : calE γ κ N ^ (-(1 / 8 : ℝ)) < 1)\n    (hphase : ∀ α ∈ truncatedDomain (F γ N ^ (6 * δ)) (F γ N),\n      ∀ β ∈ truncatedDomain (F γ N ^ (6 * δ)) (F γ N),\n        F γ N ^ (3 * δ - 1) < |α - β| → ‖phaseSum γ N (β - α)‖ ≤ V) :\n    farMoment γ δ κ N ≤ V *\n      (∫ α in truncatedDomain (F γ N ^ (6 * δ)) (F γ N),\n        ‖Sp (F γ N ^ (6 * δ)) (F γ N) α ^ 2 *\n          (Kfun (calE γ κ N ^ (-(1 / 8 : ℝ))) α : ℂ)‖) ^ 2",
+    "syntactic_clean_candidates": [
+      "Localization446.leaf_far_localization_supplied"
+    ]
+  },
+  {
+    "file": "Decomp446a",
+    "name": "leaf_even_coefficient_lower",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (((window γ N).filter (fun n : ℕ =>\n            (R1 (F γ N ^ (6 * δ)) (F γ N) (evenAdjacent γ n)).re <\n              c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤\n                B * N * calE γ κ N ^ (-(1 / 12 : ℝ))",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_even_coefficient_lower.leaf_even_coefficient_lower_split"
+    ]
+  },
+  {
+    "file": "Decomp446b",
+    "name": "leaf_product_integrable",
+    "statement": "(h K : ℝ → ℂ) (hper : Function.Periodic h 1)\n    (hh : IntervalIntegrable h volume 0 1) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) :\n    Integrable (fun α : ℝ => h α * K α)",
+    "syntactic_clean_candidates": [
+      "Decomp450b.product_integrable_assembly",
+      "SPLIT_leaf_product_integrable.leaf_product_integrable_split"
+    ]
+  },
+  {
+    "file": "Decomp446c",
+    "name": "leaf_frequency_range",
+    "statement": "(γ δ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)\n    (hδ : 0 < δ) (hδsmall : δ < min ((γ - 1) / 24) (1 / 12)) :\n    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ t : ℝ,\n      F γ N ^ (3 * δ - 1) < |t| → |t| ≤ 2 * F γ N ^ (6 * δ) →\n        F γ (2 * (N / 2 : ℕ)) ^ (-(1 - 2 * δ)) ≤ |t| ∧\n          |t| ≤ F γ (N / 2 : ℕ) ^ (12 * δ)",
+    "syntactic_clean_candidates": [
+      "Decomp450e.frequency_range_supplied",
+      "SPLIT_leaf_frequency_range.leaf_frequency_range_split"
+    ]
+  },
+  {
+    "file": "Decomp446c",
+    "name": "leaf_decay_rescale",
+    "statement": "(γ η B : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)\n    (hη : 0 < η) (hB : 0 < B) :\n    ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, ∀ κ : ℝ, 0 < κ → κ ≤ η / 6 →\n      ∀ N : ℕ, N₀ ≤ N →\n        B * (N / 2 : ℕ) * Real.exp (-η * Real.log (N / 2 : ℕ) ^ (3 - 2 * γ)) + 2 ≤\n          C * N * calE γ κ N ^ (-(3 / 2 : ℝ))",
+    "syntactic_clean_candidates": [
+      "Decomp450c.decay_rescale_supplied",
+      "SPLIT_leaf_decay_rescale.leaf_decay_rescale_split"
+    ]
+  },
+  {
+    "file": "Decomp450a",
+    "name": "leaf_translate_norm",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ ξ : ℝ, 1 < |ξ| → ftR K ξ = 0) :\n    ∀ S : TopologicalSpace.Compacts ℝ,\n      Summable (fun n : ℤ =>\n        ‖((⟨K, hcont⟩ : C(ℝ, ℂ)).comp (ContinuousMap.addRight (n : ℝ))).restrict S‖)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "DecompJ1140",
+    "name": "leaf_small_eps",
+    "statement": "(Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4) (hZF : ZeroFreeBeyond Θ)\n    (ε : ℝ) (hε0 : 0 < ε) (hε1 : ε < 1 / 2) : PowerBound (2 * Θ - 1 / 2 + ε)",
+    "syntactic_clean_candidates": [
+      "Decomp385a.leaf_small_eps_supplied"
+    ]
+  },
+  {
+    "file": "DecompJ200",
+    "name": "leaf_minor_bound",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ → ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        (Eγ_minor_block γ δ κ N : ℝ) ≤ B * N * calE γ κ N ^ (-(1 / 12 : ℝ))",
+    "syntactic_clean_candidates": [
+      "Assembly446.minor_bound_supplied",
+      "Decomp371b.minor_bound_assembly",
+      "Decomp404d.minor_bound_assembly"
+    ]
+  },
+  {
+    "file": "DecompJ200",
+    "name": "leaf_major_bound",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ → ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        (Eγ_major_block γ δ κ c₀ N : ℝ) ≤ B * N * calE γ κ N ^ (-(1 / 12 : ℝ))",
+    "syntactic_clean_candidates": [
+      "Assembly446.major_bound_supplied",
+      "Decomp371a.major_bound_assembly",
+      "Decomp404a.major_bound_assembly"
+    ]
+  },
+  {
+    "file": "Li2000Lemmas",
+    "name": "lemma2_cited",
+    "statement": ": ∃ ε : ℝ, 0 < ε ∧ ∃ Y0 : ℝ, ∀ Y : ℝ, Y0 ≤ Y →\n    let Z : Set ((q : ℕ+) × DirichletCharacter ℂ (q : ℕ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "Li2000Lemmas",
+    "name": "lemma8_cited",
+    "statement": ": ∀ ε : ℝ, 0 < ε → ∃ D0 : ℝ, ∀ (q : ℕ) [NeZero q]\n    (χ₁ χ : DirichletCharacter ℂ q) (δ₁ δ γ : ℝ),\n    χ₁ ≠ 1 → χ₁ ^ 2 = 1 → DirichletCharacter.LFunction χ₁ (1 - δ₁ : ℝ) = 0 →\n    DirichletCharacter.LFunction χ ⟨1 - δ, γ⟩ = 0 → δ < 1 / 6 → 1 - δ ≤ 1 - δ₁ →\n    D0 ≤ (q : ℝ) * (|γ| + 1) →\n    (2 / 3 - ε) * (1 - 6 * δ) * ((q : ℝ) * (|γ| + 1)) ^ (-(3 / 2 + ε) * δ / (1 - 6 * δ)) /\n      Real.log ((q : ℝ) * (|γ| + 1)) ≤ δ₁",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "Li2000Lemmas",
+    "name": "lemma7_cited",
+    "statement": ": ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →\n    ∃ C X0 : ℝ, ∀ x : ℝ, X0 ≤ x →\n      (((Finset.Iic ⌊x⌋₊).filter (fun n : ℕ => (1 - ε) * x ≤ (n : ℝ) ∧\n          0.5 * x ^ (1 - (10 : ℝ)⁻¹ ^ 5 * 0.0862) < ‖D2 x 0.0862 n‖)).card : ℝ)\n        ≤ C * x ^ (1 - (1 - (10 : ℝ)⁻¹ ^ 4) * 0.0862)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "Pintz2021",
+    "name": "perelliPintz",
+    "statement": ": Theorem5",
+    "syntactic_clean_candidates": [
+      "SPLIT_perelliPintz.perelliPintz_split"
+    ]
+  },
+  {
+    "file": "SPLIT_leaf_even_coefficient_lower",
+    "name": "leaf_even_coefficient_lower_even_index",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          ((((window γ N).filter (fun n : ℕ => Even (nu γ n))).filter (fun n : ℕ =>\n            (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re <\n              c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤\n                B * N * calE γ κ N ^ (-(1 / 12 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_even_coefficient_lower",
+    "name": "leaf_even_coefficient_lower_odd_index",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          ((((window γ N).filter (fun n : ℕ => ¬ Even (nu γ n))).filter (fun n : ℕ =>\n            (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <\n              c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤\n                B * N * calE γ κ N ^ (-(1 / 12 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_even_moment",
+    "name": "leaf_even_moment_lower",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter\n                (fun n : ℕ => Even (nu γ n) ∧ 2 * n ≤ N + (N + 1) / 2),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤\n              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_even_moment",
+    "name": "leaf_even_moment_upper",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter\n                (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2)),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤\n              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_fractional_boundary",
+    "name": "leaf_boundary_outer_low",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        (((window γ N).filter (fun n : ℕ =>\n          Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)).card : ℝ) ≤\n          B * N * calE γ κ N ^ (-(1 / 8 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_fractional_boundary",
+    "name": "leaf_boundary_inner_low",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        (((window γ N).filter (fun n : ℕ =>\n          calE γ κ N ^ (-(1 / 8 : ℝ)) / 2 ≤ Int.fract (F γ n) ∧\n            Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)))).card : ℝ) ≤\n          B * N * calE γ κ N ^ (-(1 / 8 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_fractional_boundary",
+    "name": "leaf_boundary_inner_high",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        (((window γ N).filter (fun n : ℕ =>\n          1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n) ∧\n            Int.fract (F γ n) ≤ 1 - calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)).card : ℝ) ≤\n          B * N * calE γ κ N ^ (-(1 / 8 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_fractional_boundary",
+    "name": "leaf_boundary_outer_high",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        (((window γ N).filter (fun n : ℕ =>\n          1 - calE γ κ N ^ (-(1 / 8 : ℝ)) / 2 < Int.fract (F γ n))).card : ℝ) ≤\n          B * N * calE γ κ N ^ (-(1 / 8 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_mean_square",
+    "name": "leaf_window_energy_four_dvd",
+    "statement": "(Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4)\n    (hZF : ZeroFreeBeyond Θ) (ε : ℝ) (hε : 0 < ε) (hsublinear : ε < 3 / 2 - 2 * Θ) :\n    ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →\n      ∑ n ∈ (Finset.Icc (Y / 2 + 1) Y).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2 ≤\n        C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_mean_square",
+    "name": "leaf_window_energy_four_not_dvd",
+    "statement": "(Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4)\n    (hZF : ZeroFreeBeyond Θ) (ε : ℝ) (hε : 0 < ε) (hsublinear : ε < 3 / 2 - 2 * Θ) :\n    ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →\n      ∑ n ∈ (Finset.Icc (Y / 2 + 1) Y).filter (fun n => Even n ∧ ¬ 4 ∣ n), (error n) ^ 2 ≤\n        C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_odd_moment",
+    "name": "leaf_odd_moment_lower",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4)).filter\n              (fun n : ℕ => Odd (nu γ n)),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤\n              B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_odd_moment",
+    "name": "leaf_odd_moment_upper",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2 + N / 4 + 1) N).filter\n              (fun n : ℕ => Odd (nu γ n)),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤\n              B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson",
+    "name": "leaf_poisson_summation",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v α : ℝ) :\n    (∑' n : ℤ, K (α + n) * eC (-((α + n) * v))) =\n      ∑' m : ℤ, eC (α * (m : ℝ)) * ftR K (v + (m : ℝ))",
+    "syntactic_clean_candidates": [
+      "Decomp450a.summation_assembly",
+      "SPLIT_leaf_poisson_summation.leaf_poisson_summation_split"
+    ]
+  },
+  {
+    "file": "SPLIT_leaf_poisson_collapse",
+    "name": "leaf_collapse_index_vanishes",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v α : ℝ) :\n    ∀ m : ℤ, m ≠ -⌊v⌋ → m ≠ -(⌊v⌋ + 1) →\n      eC (α * (m : ℝ)) * ftR K (v + (m : ℝ)) = 0",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_collapse",
+    "name": "leaf_collapse_tsum_pair",
+    "statement": "(F : ℤ → ℂ) (a b : ℤ) (hab : a ≠ b)\n    (h : ∀ m : ℤ, m ≠ a → m ≠ b → F m = 0) :\n    (∑' m : ℤ, F m) = F a + F b",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_collapse",
+    "name": "leaf_collapse_term_floor",
+    "statement": "(K : ℝ → ℂ) (v α : ℝ) :\n    eC (α * ((-⌊v⌋ : ℤ) : ℝ)) * ftR K (v + ((-⌊v⌋ : ℤ) : ℝ)) =\n      eC (-(α * (⌊v⌋ : ℝ))) * ftR K (Int.fract v)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_collapse",
+    "name": "leaf_collapse_term_succ",
+    "statement": "(K : ℝ → ℂ) (v α : ℝ) :\n    eC (α * ((-(⌊v⌋ + 1) : ℤ) : ℝ)) * ftR K (v + ((-(⌊v⌋ + 1) : ℤ) : ℝ)) =\n      eC (-(α * ((⌊v⌋ + 1 : ℤ) : ℝ))) * ftR K (Int.fract v - 1)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_endpoint",
+    "name": "leaf_ftR_continuous",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) : Continuous (ftR K)",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_poisson.continuous_ftR"
+    ]
+  },
+  {
+    "file": "SPLIT_leaf_poisson_endpoint",
+    "name": "leaf_rescale_tendsto",
+    "statement": "(ξ : ℝ) :\n    Filter.Tendsto (fun n : ℕ => ξ * (1 + (1 : ℝ) / ((n : ℝ) + 1))) Filter.atTop (nhds ξ)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_endpoint",
+    "name": "leaf_rescale_abs_gt_one",
+    "statement": "(ξ : ℝ) (hξ : 1 ≤ |ξ|) (n : ℕ) :\n    1 < |ξ * (1 + (1 : ℝ) / ((n : ℝ) + 1))|",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_endpoint",
+    "name": "leaf_eq_zero_of_tendsto",
+    "statement": "{f : ℝ → ℂ} {u : ℕ → ℝ} {ξ : ℝ}\n    (hf : Continuous f) (hu : Filter.Tendsto u Filter.atTop (nhds ξ)) (h0 : ∀ n : ℕ, f (u n) = 0) :\n    f ξ = 0",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_index",
+    "name": "leaf_poisson_index_shift",
+    "statement": "(v : ℝ) (m : ℤ) :\n    v + (m : ℝ) = Int.fract v + ((m + ⌊v⌋ : ℤ) : ℝ)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_index",
+    "name": "leaf_poisson_index_ne_zero",
+    "statement": "(v : ℝ) (m : ℤ) (hm : m ≠ -⌊v⌋) :\n    m + ⌊v⌋ ≠ 0",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_index",
+    "name": "leaf_poisson_index_ne_neg_one",
+    "statement": "(v : ℝ) (m : ℤ) (hm : m ≠ -(⌊v⌋ + 1)) :\n    m + ⌊v⌋ ≠ -1",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_index",
+    "name": "leaf_poisson_index_dichotomy",
+    "statement": "(k : ℤ) (h0 : k ≠ 0) (h1 : k ≠ -1) :\n    1 ≤ k ∨ k ≤ -2",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_index",
+    "name": "leaf_poisson_index_upper",
+    "statement": "(v : ℝ) (k : ℤ) (hk : 1 ≤ k) :\n    1 ≤ |Int.fract v + (k : ℝ)|",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_index",
+    "name": "leaf_poisson_index_lower",
+    "statement": "(v : ℝ) (k : ℤ) (hk : k ≤ -2) :\n    1 ≤ |Int.fract v + (k : ℝ)|",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_summation",
+    "name": "leaf_summation_periodic",
+    "statement": "(K : ℝ → ℂ) (v : ℝ) :\n    Function.Periodic (fun x : ℝ => ∑' n : ℤ, K (x + n) * eC (-((x + n) * v))) 1",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_summation",
+    "name": "leaf_summation_continuous",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v : ℝ) :\n    Continuous (fun x : ℝ => ∑' n : ℤ, K (x + n) * eC (-((x + n) * v)))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_summation",
+    "name": "leaf_summation_fourier_coeff",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v : ℝ) (m : ℤ) :\n    (∫ x in (0 : ℝ)..1,\n        (∑' n : ℤ, K (x + n) * eC (-((x + n) * v))) * eC (-(x * (m : ℝ)))) =\n      ftR K (v + (m : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_summation",
+    "name": "leaf_summation_coefficient_vanishes",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K)\n    (hcont : Continuous K) (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v : ℝ) :\n    ∀ m : ℤ, m ≠ -⌊v⌋ → m ≠ -(⌊v⌋ + 1) → ftR K (v + (m : ℝ)) = 0",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_poisson_summation",
+    "name": "leaf_summation_fourier_series",
+    "statement": "(F : ℝ → ℂ) (hper : Function.Periodic F 1)\n    (hcont : Continuous F) (a b : ℤ) (hab : a ≠ b)\n    (hfin : ∀ m : ℤ, m ≠ a → m ≠ b →\n      (∫ x in (0 : ℝ)..1, F x * eC (-(x * (m : ℝ)))) = 0) (α : ℝ) :\n    F α = ∑' m : ℤ, eC (α * (m : ℝ)) * ∫ x in (0 : ℝ)..1, F x * eC (-(x * (m : ℝ)))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_leaf_product_integrable",
+    "name": "leaf_kernel_sup_summable",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) :\n    (∑' n : ℤ, ⨆ t ∈ Set.Ioc (n : ℝ) ((n : ℝ) + 1), ENNReal.ofReal ‖K t‖) ≠ ⊤",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma1",
+    "name": "leaf_modulated_product_integrable",
+    "statement": "(h K : ℝ → ℂ) (hper : Function.Periodic h 1)\n    (hh : IntervalIntegrable h volume 0 1) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v : ℝ) :\n    Integrable (fun α : ℝ => h α * K α * eC (-(α * v)))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma1",
+    "name": "leaf_fold",
+    "statement": "(h K : ℝ → ℂ) (hper : Function.Periodic h 1) (v : ℝ)\n    (hg : Integrable (fun α : ℝ => h α * K α * eC (-(α * v)))) :\n    (∫ α, h α * K α * eC (-(α * v))) =\n      ∫ α in (0 : ℝ)..1, h α * (∑' n : ℤ, K (α + n) * eC (-((α + n) * v)))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma1",
+    "name": "leaf_poisson",
+    "statement": "(K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K)\n    (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (v α : ℝ) :\n    (∑' n : ℤ, K (α + n) * eC (-((α + n) * v))) =\n      eC (-(α * (⌊v⌋ : ℝ))) * ftR K (Int.fract v) +\n        eC (-(α * ((⌊v⌋ + 1 : ℤ) : ℝ))) * ftR K (Int.fract v - 1)",
+    "syntactic_clean_candidates": [
+      "Decomp450a.poisson_assembly",
+      "SPLIT_leaf_poisson.leaf_poisson_split"
+    ]
+  },
+  {
+    "file": "SPLIT_lemma4",
+    "name": "leaf_fejer_majorant",
+    "statement": "(γ α z₁ z₂ : ℝ) (N H : ℕ)\n    (hz₂ : 0 ≤ z₂) (hz1 : z₂ < z₁) (hz₁ : z₁ ≤ 1) :\n    |(((Finset.Ioc (N / 2) N).filter (fun n : ℕ =>\n        z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁)).card : ℝ)\n      - (z₁ - z₂) * N / 2| ≤\n    4 * N / ((H : ℝ) + 1) +\n      4 * N * ∑ h ∈ Finset.Icc 1 H,\n        ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ / ((h : ℝ) + 1)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma4",
+    "name": "leaf_exp_sum_bound",
+    "statement": ":\n    ∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∀ C : ℝ, 0 < C → C < γ - 1 →\n      ∃ κ B : ℝ, 0 < κ ∧ 0 < B ∧ ∀ N : ℕ, 1 ≤ N → ∀ α : ℝ,\n        F γ N ^ (-(1 / 2 : ℝ)) < |α| → |α| ≤ 1 → ∀ h : ℕ, 1 ≤ h →\n        (h : ℝ) ≤ F γ N ^ C →\n        ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ ≤\n          B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma4",
+    "name": "leaf_absorption",
+    "statement": ":\n    ∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∀ κ₁ B₁ : ℝ, 0 < κ₁ → 0 < B₁ →\n      ∃ κ B : ℝ, 0 < κ ∧ 1 ≤ B ∧ ∀ N : ℕ, 3 ≤ N →\n        4 * N / ((Nat.ceil (Real.log N) : ℝ) + 1) +\n          4 * N * (B₁ * N * Real.exp (-κ₁ * Real.log N ^ (3 - 2 * γ))\n            * ∑ h ∈ Finset.Icc 1 (Nat.ceil (Real.log N)), 1 / ((h : ℝ) + 1))\n          ≤ B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma6",
+    "name": "leaf_even_moment",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤\n              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_even_moment.leaf_even_moment_split"
+    ]
+  },
+  {
+    "file": "SPLIT_lemma6",
+    "name": "leaf_odd_moment",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),\n            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤\n              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))",
+    "syntactic_clean_candidates": [
+      "SPLIT_leaf_odd_moment.leaf_odd_moment_split"
+    ]
+  },
+  {
+    "file": "SPLIT_lemma8",
+    "name": "leaf_major_identity",
+    "statement": "(γ δ κ : ℝ) (N n : ℕ)\n    (hΔ : 0 < calE γ κ N ^ (-(1 / 8 : ℝ)))\n    (hΔ1 : calE γ κ N ^ (-(1 / 8 : ℝ)) < 1)\n    (hleft : calE γ κ N ^ (-(1 / 8 : ℝ)) ≤ Int.fract (F γ n))\n    (hright : Int.fract (F γ n) ≤ 1 - calE γ κ N ^ (-(1 / 8 : ℝ))) :\n    (∫ α in majorArcs (F γ N ^ (6 * δ)) (F γ N),\n        Sp (F γ N ^ (6 * δ)) (F γ N) α ^ 2 * (Kfun (calE γ κ N ^ (-(1 / 8 : ℝ))) α : ℂ)\n          * eC (-(α * F γ n))).re =\n      (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +\n        R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma8",
+    "name": "leaf_coefficient_lower",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n        ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n          ((((Finset.range (2 * N + 1)).filter (fun n : ℕ =>\n              F γ N / 2 < nu γ n ∧ (nu γ n : ℝ) ≤ F γ N)).filter (fun n : ℕ =>\n                (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +\n                  R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <\n                    c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤\n            B * N * calE γ κ N ^ (-(1 / 12 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma8",
+    "name": "leaf_fractional_boundary",
+    "statement": "(γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :\n    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →\n      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →\n        ((((Finset.range (2 * N + 1)).filter (fun n : ℕ =>\n            F γ N / 2 < nu γ n ∧ (nu γ n : ℝ) ≤ F γ N)).filter (fun n : ℕ =>\n              Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨\n                1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤\n          B * N * calE γ κ N ^ (-(1 / 8 : ℝ))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma9",
+    "name": "leaf_gap_core",
+    "statement": ":\n    ∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →\n      ∃ κ : ℝ, 0 < κ ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ α : ℝ,\n        |α| ≤ F γ N ^ δ → N * calE γ κ N ^ (-(1 / 3 : ℝ)) < ‖Phie γ N α‖ →\n        ∃ h : ℤ, |α - h / 2| ≤ F γ N ^ (δ - 1)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lemma9",
+    "name": "leaf_height_domination",
+    "statement": "(γ : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ < 3 / 2)\n    (δ κ : ℝ) (hδ : 0 < δ) (hκ : 0 < κ) :\n    ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N → 2 * F γ N ^ δ + 2 ≤ calE γ κ N ^ (2 / 3 : ℝ)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_li",
+    "name": "leaf_window_count",
+    "statement": ":\n    ∃ (C : ℝ) (N0 : ℕ), 0 ≤ C ∧ 1 ≤ N0 ∧ ∀ N : ℕ, N0 ≤ N →\n      (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)\n            (N + ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)).filter\n          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ)\n        ≤ C * (N : ℝ) ^ (0.903 : ℝ)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_lu",
+    "name": "leaf_window_count",
+    "statement": ":\n    ∃ (C : ℝ) (N0 : ℕ), 0 ≤ C ∧ 1 ≤ N0 ∧ ∀ N : ℕ, N0 ≤ N →\n      (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)\n            (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter\n          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ)\n        ≤ C * (N : ℝ) ^ (0.8787026 : ℝ)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_major_arc_count_power",
+    "name": "count_log_saving_enlarged",
+    "statement": ":\n    ∀ A : ℝ, 0 < A → ∃ (C : ℝ) (X0 : ℕ), 0 ≤ C ∧ 1 ≤ X0 ∧\n      ∀ x : ℕ, X0 ≤ x →\n        ((((Finset.Icc (x / 2 + 1) x).filter (fun n : ℕ => Even n ∧\n              ‖majorPart (logPrimes x) (minorArcs x ((x : ℝ) ^ ((1 : ℝ) / 10)))\n                (n : ZMod (Mx x))‖ ≤ (Mx x : ℝ) * x / 4)).card : ℕ) : ℝ)\n          ≤ C * (x : ℝ) / Real.log x ^ A",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_major_arc_count_power",
+    "name": "log_four_le_sqrt",
+    "statement": ":\n    ∃ X0 : ℕ, ∀ x : ℕ, X0 ≤ x → Real.log x ^ 4 ≤ (x : ℝ) ^ ((1 : ℝ) / 2)",
+    "syntactic_clean_candidates": [
+      "Decomp450d.log_four_le_sqrt_supplied"
+    ]
+  },
+  {
+    "file": "SPLIT_major_arc_count_power",
+    "name": "div_log_saving_le_sqrt",
+    "statement": ":\n    ∀ C x L : ℝ, 0 ≤ C → 0 < x → L ^ 4 ≤ x ^ ((1 : ℝ) / 2) →\n      C * x / L ^ 4 ≤ C * x ^ ((1 : ℝ) / 2)",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_perelliPintz",
+    "name": "leaf_block_even",
+    "statement": "(ε : ℝ) (hε : 0 < ε) :\n    ∃ C : ℝ, 0 ≤ C ∧ ∀ j : ℕ,\n      (((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter\n          (fun n => Even n ∧ ¬ IsGoldbachSum (2 * n ^ 2))).card : ℝ)\n        ≤ C * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_perelliPintz",
+    "name": "leaf_block_odd",
+    "statement": "(ε : ℝ) (hε : 0 < ε) :\n    ∃ C : ℝ, 0 ≤ C ∧ ∀ j : ℕ,\n      (((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter\n          (fun n => Odd n ∧ ¬ IsGoldbachSum (2 * n ^ 2))).card : ℝ)\n        ≤ C * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε))",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_theorem51",
+    "name": "major_arc_count_power",
+    "statement": ":\n    ∃ (θ C : ℝ) (X0 : ℕ), 0 < θ ∧ θ < 1 ∧ 0 ≤ C ∧ 1 ≤ X0 ∧\n      ∀ x : ℕ, X0 ≤ x →\n        ((((Finset.Icc (x / 2 + 1) x).filter (fun n : ℕ => Even n ∧\n              ‖majorPart (logPrimes x) (minorArcs x ((x : ℝ) ^ ((1 : ℝ) / 10)))\n                (n : ZMod (Mx x))‖ ≤ (Mx x : ℝ) * x / 4)).card : ℕ) : ℝ)\n          ≤ C * (x : ℝ) ^ θ",
+    "syntactic_clean_candidates": [
+      "SPLIT_major_arc_count_power.major_arc_count_power_split"
+    ]
+  },
+  {
+    "file": "SPLIT_theorem82",
+    "name": "leaf_expansion_off_exceptional_set",
+    "statement": ":\n    ∀ δ : ℝ, 0 < δ → δ < 1 → ∃ c : ℝ, 0 < c ∧ ∀ A : ℝ, 5 / 2 < A → ∃ r0 : ℕ,\n      ∀ (r : ℕ) [NeZero r], r0 ≤ r → ∀ χ : DirichletCharacter ℂ r, χ.IsPrimitive →\n        (∀ a, (χ a).im = 0) →\n        (∃ β : ℝ, 1 - c / Real.log ((r : ℝ) ^ A) < β ∧ β < 1 ∧\n          DirichletCharacter.LFunction χ β = 0) →\n        ∃ B : Finset ℕ, (B.card : ℝ) ≤ ((r : ℝ) ^ A) ^ (3 / 5 : ℝ) ∧\n          ∀ N ∈ evenMult r ((r : ℝ) ^ A), N ∉ B → ∃ b E : ℝ, |b - 1| < 3 * δ / 4 ∧\n            |E| ≤ δ / 4 * (Sing N * N) ∧\n            r2 N = (1 + (χ (-1)).re * b) * (Sing N * N) + E",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "SPLIT_theorem82",
+    "name": "leaf_even_multiples_dominate_exceptions",
+    "statement": ":\n    ∀ A : ℝ, 5 / 2 < A → ∃ r0 : ℕ, ∀ (r : ℕ) [NeZero r], r0 ≤ r →\n      2 * (((r : ℝ) ^ A) ^ (3 / 5 : ℝ)) < ((evenMult r ((r : ℝ) ^ A)).card : ℝ)",
+    "syntactic_clean_candidates": [
+      "Decomp450h.even_multiples_dominate_supplied"
+    ]
+  },
+  {
+    "file": "State1539",
+    "name": "theorem2",
+    "statement": ": Theorem2",
+    "syntactic_clean_candidates": [
+      "State1539.theorem2_via_karacuba"
+    ]
+  },
+  {
+    "file": "State1539",
+    "name": "lemma10",
+    "statement": ": Lemma10",
+    "syntactic_clean_candidates": [
+      "SPLIT_lemma10.lemma10_split"
+    ]
+  },
+  {
+    "file": "State1539",
+    "name": "lemma1",
+    "statement": ": Lemma1",
+    "syntactic_clean_candidates": [
+      "SPLIT_lemma1.lemma1_split"
+    ]
+  },
+  {
+    "file": "State1539",
+    "name": "lemma4",
+    "statement": ": Lemma4",
+    "syntactic_clean_candidates": [
+      "SPLIT_lemma4.lemma4_split"
+    ]
+  },
+  {
+    "file": "State1539",
+    "name": "lemma6",
+    "statement": ": Lemma6",
+    "syntactic_clean_candidates": [
+      "SPLIT_lemma6.lemma6_split"
+    ]
+  },
+  {
+    "file": "State1539",
+    "name": "lemma7",
+    "statement": ": Lemma7",
+    "syntactic_clean_candidates": []
+  },
+  {
+    "file": "State1539",
+    "name": "lemma8",
+    "statement": ": Lemma8",
+    "syntactic_clean_candidates": [
+      "SPLIT_lemma8.lemma8_split"
+    ]
+  },
+  {
+    "file": "State1539",
+    "name": "lemma9",
+    "statement": ": Lemma9",
+    "syntactic_clean_candidates": [
+      "SPLIT_lemma9.lemma9_split"
+    ]
+  },
+  {
+    "file": "Statements",
+    "name": "montgomeryVaughan",
+    "statement": ": PowerSaving",
+    "syntactic_clean_candidates": [
+      "PowerSaving428.theorem51_supplied",
+      "SPLIT_theorem51.theorem51_split"
+    ]
+  },
+  {
+    "file": "Statements",
+    "name": "li",
+    "statement": ": PowerBound 0.914",
+    "syntactic_clean_candidates": [
+      "SPLIT_li.li_split"
+    ]
+  },
+  {
+    "file": "Statements",
+    "name": "lu",
+    "statement": ": PowerBound 0.879",
+    "syntactic_clean_candidates": [
+      "SPLIT_lu.lu_split"
+    ]
+  },
+  {
+    "file": "Statements",
+    "name": "pintz",
+    "statement": ": EventuallyBelow 0.72",
+    "syntactic_clean_candidates": [
+      "DecompJ1129.prop64_E"
+    ]
+  },
+  {
+    "file": "Statements",
+    "name": "zhao",
+    "statement": ": PowerBound (7 / 10)",
+    "syntactic_clean_candidates": [
+      "DecompJ1129.leaf_zhao_applies"
+    ]
+  }
+]
