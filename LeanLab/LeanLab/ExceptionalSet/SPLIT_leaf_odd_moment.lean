@@ -29,8 +29,8 @@ open LeanLab.ExceptionalSet.DecompJ200
 /-- LEAF. Parity step of the odd branch: on the integer `ν_n = ⌊F(γ,n)⌋`, failing to be even is the
 same as being odd. This is what lets the window filter `¬ Even (ν_n)` of the statement be read as
 the odd branch `Odd (ν_n)` that the analytic estimates are stated for. -/
-theorem leaf_odd_parity (γ : ℝ) (n : ℕ) : ¬ Even (nu γ n) ↔ Odd (nu γ n) :=
-  Int.not_even_iff_odd
+theorem leaf_odd_parity (γ : ℝ) (n : ℕ) : ¬ Even (nu γ n) ↔ Odd (nu γ n) := by
+  exact Int.not_even_iff_odd
 
 /-- LEAF. Odd second moment, lower piece: the sum of `‖R₁(ν_n)‖²` over the odd members of the
 window from its lower endpoint `⌊(N+1)/2⌋` up to the quarter point `⌊(N+1)/2⌋ + ⌊N/4⌋`. Same
