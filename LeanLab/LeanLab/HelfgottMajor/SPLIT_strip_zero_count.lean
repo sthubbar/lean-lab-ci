@@ -42,7 +42,51 @@ target and asserts no bound at all. -/
 theorem strip_count_summable (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (T : ℝ) (hT : 1 ≤ T) :
     Summable (stripCountTerm χ T) := by
-  sorry
+  classical
+  have finite_zeros : ∀ (f : ℂ → ℂ), Differentiable ℂ f → (∃ z, f z ≠ 0) →
+      {z : ℂ | ‖z‖ ≤ |T| + 2 ∧ f z = 0}.Finite := by
+    intro f hf ⟨w, hw⟩
+    have ha : AnalyticOnNhd ℂ f Set.univ := fun z _ => hf.analyticAt z
+    have hd : f ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℂ := by
+      simpa [Filter.codiscrete] using ha.preimage_zero_mem_codiscreteWithin hw (Set.mem_univ w)
+        isConnected_univ
+    have hclosed : IsClosed (f ⁻¹' {0}) := isClosed_singleton.preimage hf.continuous
+    have hdiscrete : IsDiscrete (f ⁻¹' {0}) := by
+      simpa using (mem_codiscrete'.mp hd).2
+    have hcompact := (isCompact_closedBall (0 : ℂ) (|T| + 2)).inter_right hclosed
+    have hfinite := hcompact.finite (hdiscrete.mono Set.inter_subset_right)
+    convert hfinite using 1
+    ext z
+    simp [Metric.mem_closedBall, dist_zero_right]
+  have hb : ∀ z : ℂ, DirichletCharacter.LFunction χ z = 0 → 0 < z.re → z.re < 1 → |z.im| ≤ T →
+      ‖z‖ ≤ |T| + 2 := by
+    rintro z - h1 h2 h3
+    have ht : |z.im| ≤ |T| := h3.trans (le_abs_self T)
+    have hr : |z.re| ≤ 1 := by rw [abs_of_pos h1]; exact h2.le
+    exact (Complex.norm_le_abs_re_add_abs_im z).trans (by linarith)
+  have hfin : {z : ℂ | DirichletCharacter.LFunction χ z = 0 ∧ 0 < z.re ∧ z.re < 1 ∧
+      |z.im| ≤ T}.Finite := by
+    by_cases hχ1 : χ = 1
+    · subst hχ1
+      have hf := finite_zeros (DirichletCharacter.LFunctionTrivChar₁ q)
+        (DirichletCharacter.differentiable_LFunctionTrivChar₁ q)
+        ⟨1, DirichletCharacter.LFunctionTrivChar₁_apply_one_ne_zero q⟩
+      apply hf.subset
+      rintro z ⟨hz, h1, h2, h3⟩
+      refine ⟨hb z hz h1 h2 h3, ?_⟩
+      have hz1 : z ≠ 1 := by
+        rintro rfl
+        norm_num at h2
+      rw [DirichletCharacter.LFunctionTrivChar₁, Function.update_of_ne hz1]
+      exact mul_eq_zero_of_right _ hz
+    · have hf := finite_zeros (DirichletCharacter.LFunction χ)
+        (DirichletCharacter.differentiable_LFunction hχ1)
+        ⟨2, DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ1) (by norm_num)⟩
+      exact hf.subset fun z hz => ⟨hb z hz.1 hz.2.1 hz.2.2.1 hz.2.2.2, hz.1⟩
+  have hfiniteSub : Finite {z : ℂ // DirichletCharacter.LFunction χ z = 0 ∧ 0 < z.re ∧
+      z.re < 1 ∧ |z.im| ≤ T} := hfin.to_subtype
+  haveI := hfiniteSub
+  exact Summable.of_finite
 
 /-- LEAF. Short height range, `1 ≤ T ≤ 2`. On this range `qT / (2πe) ≤ 2q / (2πe)`, so the
 leading term `T/π * log (qT / (2πe))` is at most `T/π` in size and the inequality rests on

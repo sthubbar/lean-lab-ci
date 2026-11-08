@@ -367,7 +367,7 @@ theorem r2_bound_le_half_N (N : ℕ) (hN : 2^30 ≤ N) :
     nlinarith [Real.sqrt_nonneg (N : ℝ)]
   nlinarith [Real.sqrt_nonneg (N : ℝ)]
 
-theorem exceptional_gap150 : ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ,
+theorem exceptional_gap150_j1034 : ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ,
     ∀ N : ℕ, N₀ ≤ N → Even N → ¬ IsGoldbachSum N → c * N ≤ |E2 N| := by
   use 1 / 2
   refine ⟨by norm_num, 2^30, ?_⟩
