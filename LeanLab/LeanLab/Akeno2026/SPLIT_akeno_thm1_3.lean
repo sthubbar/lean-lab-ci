@@ -70,13 +70,91 @@ theorem leaf_small_range_bound (X₀ : ℝ) (_hX₀ : 2 ≤ X₀) (A : ℝ) (hA 
     _ ≤ X * (Real.log X₀ ^ A / Real.log X ^ A) := mul_le_mul_of_nonneg_left hratio hX0
     _ = Real.log X₀ ^ A * X / Real.log X ^ A := by ring
 
+/-- Auxiliary bound for leaf 2: the function `u ↦ c u^A e^{-u^{1/100}}` is bounded above on the
+half line `[log 2, ∞)`. It tends to `0` at infinity, because `u^A` grows slower than
+`e^{u^{1/100}}`, and it is continuous, so it is bounded on `[log 2, M]` by the extreme value
+theorem and by `1` beyond `M`. -/
+private theorem leaf_exp_decay_aux (c A : ℝ) (hA : 0 < A) :
+    ∃ B : ℝ, 0 < B ∧ ∀ u : ℝ, Real.log 2 ≤ u →
+      c * u ^ A * Real.exp (-(u ^ ((1 : ℝ) / 100))) ≤ B := by
+  have hcont : Continuous fun u : ℝ => c * u ^ A * Real.exp (-(u ^ ((1 : ℝ) / 100))) := by
+    refine (continuous_const.mul (Real.continuous_rpow_const hA.le)).mul ?_
+    exact Real.continuous_exp.comp (continuous_neg.comp (Real.continuous_rpow_const (by norm_num)))
+  have htend : Filter.Tendsto (fun u : ℝ => c * u ^ A * Real.exp (-(u ^ ((1 : ℝ) / 100))))
+      Filter.atTop (nhds 0) := by
+    have hsub : Filter.Tendsto (fun u : ℝ => u ^ ((1 : ℝ) / 100)) Filter.atTop Filter.atTop :=
+      tendsto_rpow_atTop (by norm_num)
+    have hbase : Filter.Tendsto
+        (fun x : ℝ => c * (x ^ (100 * A) * Real.exp (-1 * x))) Filter.atTop (nhds 0) := by
+      have h := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (100 * A) 1
+        (one_pos : (0 : ℝ) < 1)).const_mul c
+      simpa using h
+    refine (hbase.comp hsub).congr' ?_
+    filter_upwards [Filter.eventually_ge_atTop (0 : ℝ)] with u hu
+    simp only [Function.comp_apply]
+    have hrw : (u ^ ((1 : ℝ) / 100)) ^ (100 * A) = u ^ A := by
+      rw [← Real.rpow_mul hu]
+      have : (1 : ℝ) / 100 * (100 * A) = A := by ring
+      rw [this]
+    rw [hrw]
+    ring
+  obtain ⟨M, hM⟩ : ∃ M : ℝ, ∀ u : ℝ, M ≤ u →
+      c * u ^ A * Real.exp (-(u ^ ((1 : ℝ) / 100))) ≤ 1 := by
+    have h := htend.eventually (eventually_le_nhds (zero_lt_one : (0 : ℝ) < 1))
+    rwa [Filter.eventually_atTop] at h
+  obtain ⟨u₀, -, hu₀max⟩ := isCompact_Icc.exists_isMaxOn
+    (Set.nonempty_Icc.2 (le_max_right M (Real.log 2))) hcont.continuousOn
+  refine ⟨max 1 (c * u₀ ^ A * Real.exp (-(u₀ ^ ((1 : ℝ) / 100)))) + 1, ?_, ?_⟩
+  · have h1 : (1 : ℝ) ≤ max 1 (c * u₀ ^ A * Real.exp (-(u₀ ^ ((1 : ℝ) / 100)))) := le_max_left _ _
+    linarith
+  · intro u hu
+    rcases le_total u (max M (Real.log 2)) with hle | hgt
+    · have hmem : u ∈ Set.Icc (Real.log 2) (max M (Real.log 2)) := ⟨hu, hle⟩
+      have h1 : c * u ^ A * Real.exp (-(u ^ ((1 : ℝ) / 100))) ≤
+          c * u₀ ^ A * Real.exp (-(u₀ ^ ((1 : ℝ) / 100))) := hu₀max hmem
+      have h2 : c * u₀ ^ A * Real.exp (-(u₀ ^ ((1 : ℝ) / 100))) ≤
+          max 1 (c * u₀ ^ A * Real.exp (-(u₀ ^ ((1 : ℝ) / 100)))) := le_max_right _ _
+      linarith
+    · have hMu : M ≤ u := le_trans (le_max_left M (Real.log 2)) hgt
+      have h1 := hM u hMu
+      have h2 : (1 : ℝ) ≤ max 1 (c * u₀ ^ A * Real.exp (-(u₀ ^ ((1 : ℝ) / 100)))) := le_max_left _ _
+      linarith
+
 /-- LEAF 2 of 4, the real-variable half: for a fixed `A > 0` and a nonnegative constant `c`, the
 decaying factor `e^{-(log t)^{1/100}}` beats every power of the logarithm, so
 `c t e^{-(log t)^{1/100}} ≤ C t (log t)^{-A}` for all `t ≥ 2` with one constant `C > 0`. -/
 theorem leaf_exp_decay_dominates_log_powers (c A : ℝ) (hA : 0 < A) (hc : 0 ≤ c) :
     ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 2 ≤ t →
       c * t * Real.exp (-(Real.log t) ^ ((1 : ℝ) / 100)) ≤ C * t / Real.log t ^ A := by
-  sorry
+  obtain ⟨B, hBpos, hB⟩ := leaf_exp_decay_aux c A hA
+  refine ⟨B, hBpos, ?_⟩
+  intro t ht
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hu : Real.log 2 ≤ Real.log t := Real.log_le_log (by norm_num) ht
+  have hupos : 0 < Real.log t := lt_of_lt_of_le hlog2 hu
+  have htu : Real.exp (Real.log t) = t := Real.exp_log (by linarith)
+  have key : ∀ u : ℝ, Real.log 2 ≤ u →
+      c * Real.exp u * Real.exp (-(u ^ ((1 : ℝ) / 100))) ≤ B * Real.exp u / u ^ A := by
+    intro u hu'
+    have hupos' : 0 < u := lt_of_lt_of_le hlog2 hu'
+    have hPu : (0 : ℝ) < u ^ A := Real.rpow_pos_of_pos hupos' A
+    have hgu := hB u hu'
+    have h := mul_le_mul_of_nonneg_right hgu
+      (le_of_lt (div_pos (Real.exp_pos u) hPu))
+    calc c * Real.exp u * Real.exp (-(u ^ ((1 : ℝ) / 100)))
+        = c * u ^ A * Real.exp (-(u ^ ((1 : ℝ) / 100))) * (Real.exp u / u ^ A) := by
+          field_simp
+      _ ≤ B * (Real.exp u / u ^ A) := h
+      _ = B * Real.exp u / u ^ A := by ring
+  have h1 : c * t * Real.exp (-(Real.log t) ^ ((1 : ℝ) / 100))
+      = c * Real.exp (Real.log t) * Real.exp (-(Real.log t) ^ ((1 : ℝ) / 100)) := by
+    rw [← htu, Real.log_exp]
+  have h3 : B * Real.exp (Real.log t) / Real.log t ^ A = B * t / Real.log t ^ A := by
+    rw [htu]
+  calc c * t * Real.exp (-(Real.log t) ^ ((1 : ℝ) / 100))
+      = c * Real.exp (Real.log t) * Real.exp (-(Real.log t) ^ ((1 : ℝ) / 100)) := h1
+    _ ≤ B * Real.exp (Real.log t) / Real.log t ^ A := key (Real.log t) hu
+    _ = B * t / Real.log t ^ A := h3
 
 /-- LEAF 1 of 4, the analytic half: from some threshold `X₀ ≥ 2` on, the integers `N` in the
 window `(X/2, X]` divisible by `6` which are not a sum of two primes `p₁ + p₂` with
