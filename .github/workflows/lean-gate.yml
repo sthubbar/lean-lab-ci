@@ -51,8 +51,25 @@ jobs:
           key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-${{ github.run_id }}
           restore-keys: |
             lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-
+      # lmerge 20261108T1030Z: GitHub release downloads gave 504 from about 09:00Z 11-08, elan never installed, every build said lake: not found
+      # and the gate REJECTED 21 good branches. The toolchain is now cached, setup retries with a pinned elan, and a missing lake prints GATE CI: INFRA.
+      - name: Cache the Lean toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: elan-${{ hashFiles('LeanLab/lean-toolchain') }}
       - name: Lean and Mathlib cache
-        run: bash scripts/agent_setup.sh
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          for i in 1 2 3 4 5; do
+            if ! command -v elan >/dev/null 2>&1; then
+              curl -sSfL --retry 3 -o "$RUNNER_TEMP/elan.tar.gz" https://github.com/leanprover/elan/releases/download/v4.1.2/elan-x86_64-unknown-linux-gnu.tar.gz && tar xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP" && "$RUNNER_TEMP/elan-init" -y --default-toolchain none >/dev/null || true
+            fi
+            bash scripts/agent_setup.sh
+            if (cd LeanLab && lake --version) >/dev/null 2>&1; then echo "toolchain ok on try $i"; break; fi
+            echo "toolchain missing after try $i"; sleep $((i * 40))
+          done
+          (cd LeanLab && lake --version) >/dev/null 2>&1 || { echo "GATE CI: INFRA toolchain download failed"; exit 1; }
       - name: Gate check of the branch
         env:
           BR: ${{ inputs.branch || github.ref_name }}
@@ -113,8 +130,25 @@ jobs:
           key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-g${{ matrix.g }}-${{ github.run_id }}
           restore-keys: |
             lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-g${{ matrix.g }}-
+      # lmerge 20261108T1030Z: GitHub release downloads gave 504 from about 09:00Z 11-08, elan never installed, every build said lake: not found
+      # and the gate REJECTED 21 good branches. The toolchain is now cached, setup retries with a pinned elan, and a missing lake prints GATE CI: INFRA.
+      - name: Cache the Lean toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: elan-${{ hashFiles('LeanLab/lean-toolchain') }}
       - name: Lean and Mathlib cache
-        run: bash scripts/agent_setup.sh
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          for i in 1 2 3 4 5; do
+            if ! command -v elan >/dev/null 2>&1; then
+              curl -sSfL --retry 3 -o "$RUNNER_TEMP/elan.tar.gz" https://github.com/leanprover/elan/releases/download/v4.1.2/elan-x86_64-unknown-linux-gnu.tar.gz && tar xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP" && "$RUNNER_TEMP/elan-init" -y --default-toolchain none >/dev/null || true
+            fi
+            bash scripts/agent_setup.sh
+            if (cd LeanLab && lake --version) >/dev/null 2>&1; then echo "toolchain ok on try $i"; break; fi
+            echo "toolchain missing after try $i"; sleep $((i * 40))
+          done
+          (cd LeanLab && lake --version) >/dev/null 2>&1 || { echo "GATE CI: INFRA toolchain download failed"; exit 1; }
       - name: Build this group folder by folder
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
