@@ -43,111 +43,91 @@ theorem leaf_window_count :
         ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := by
   sorry
 
-/-- For `a ≥ 1` its `Nat.floor` is at least `a / 2`. -/
-private theorem half_le_floor {a : ℝ} (ha : 1 ≤ a) : a / 2 ≤ (⌊a⌋₊ : ℝ) := by
-  rcases lt_or_ge a 2 with h2 | h2
-  · have hfloor : 1 ≤ ⌊a⌋₊ := (Nat.one_le_floor_iff a).mpr ha
-    have h1 : (1 : ℝ) ≤ (⌊a⌋₊ : ℝ) := by exact_mod_cast hfloor
-    linarith
-  · have h := Nat.lt_floor_add_one a
-    linarith
-
-/-- LEAF 2, proved: the number of windows covering `(Y/2, Y]` is at most `10 Y^{0.00021}`.
-The radius is `r = ⌊(Y/2)^{0.99979}⌋ ≥ Y^{0.99979}/8`, so `Y / r ≤ 8 Y^{0.00021}`, and the
-extra `+ 1` costs at most one more `Y^{0.00021}` since `Y ≥ 2`. -/
-private theorem cover_count_aux (Y : ℕ) (hY : 2 ≤ Y) :
-    ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ + 1 : ℕ) : ℝ)
-      ≤ 10 * (Y : ℝ) ^ (0.00021 : ℝ) := by
-  classical
-  have hYpos : (0 : ℝ) < (Y : ℝ) := by
-    have : (0 : ℕ) < Y := by omega
-    exact_mod_cast this
-  have hY1 : (1 : ℝ) ≤ (Y : ℝ) := by
-    have : (1 : ℕ) ≤ Y := by omega
-    exact_mod_cast this
-  -- the radius is at least `Y^{0.99979} / 8`
-  have hrad : (Y : ℝ) ^ (0.99979 : ℝ) / 8
-      ≤ (⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℝ) := by
-    have hb1 : (1 : ℝ) ≤ ((Y / 2 : ℕ) : ℝ) := by
-      have : (1 : ℕ) ≤ Y / 2 := by omega
-      exact_mod_cast this
-    have hy4 : (Y : ℝ) / 4 ≤ ((Y / 2 : ℕ) : ℝ) := by
-      have h : Y ≤ 4 * (Y / 2) := by omega
-      have : (Y : ℝ) ≤ 4 * ((Y / 2 : ℕ) : ℝ) := by exact_mod_cast h
-      linarith
-    have hhalf := half_le_floor (a := ((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))
-      (Real.one_le_rpow hb1 (by norm_num))
-    have hpow4 : (Y : ℝ) ^ (0.99979 : ℝ) / 4
-        ≤ ((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ) := by
-      have hmono : ((Y : ℝ) / 4) ^ (0.99979 : ℝ)
-          ≤ ((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ) :=
-        Real.rpow_le_rpow (by positivity) hy4 (by norm_num)
-      have h4le : (4 : ℝ) ^ (0.99979 : ℝ) ≤ 4 := by
-        calc (4 : ℝ) ^ (0.99979 : ℝ) ≤ (4 : ℝ) ^ (1 : ℝ) :=
-              Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
-          _ = 4 := Real.rpow_one 4
-      have h4pos : (0 : ℝ) < (4 : ℝ) ^ (0.99979 : ℝ) := Real.rpow_pos_of_pos (by norm_num) _
-      have hYp : (0 : ℝ) ≤ (Y : ℝ) ^ (0.99979 : ℝ) := Real.rpow_nonneg hYpos.le _
-      have hinv : 1 / (4 : ℝ) ≤ 1 / ((4 : ℝ) ^ (0.99979 : ℝ)) :=
-        one_div_le_one_div_of_le h4pos h4le
-      have hsplit : (Y : ℝ) ^ (0.99979 : ℝ) / 4
-          ≤ ((Y : ℝ) / 4) ^ (0.99979 : ℝ) := by
-        rw [Real.div_rpow hYpos.le (by norm_num : (0 : ℝ) ≤ 4)]
-        calc (Y : ℝ) ^ (0.99979 : ℝ) / 4
-            = (Y : ℝ) ^ (0.99979 : ℝ) * (1 / 4) := by ring
-          _ ≤ (Y : ℝ) ^ (0.99979 : ℝ) * (1 / (4 : ℝ) ^ (0.99979 : ℝ)) :=
-              mul_le_mul_of_nonneg_left hinv hYp
-          _ = (Y : ℝ) ^ (0.99979 : ℝ) / (4 : ℝ) ^ (0.99979 : ℝ) := by ring
-      linarith
-    linarith
-  have hrpos : (0 : ℝ) < (⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℝ) := by
-    have h8 : (0 : ℝ) < (Y : ℝ) ^ (0.99979 : ℝ) / 8 := by
-      have := Real.rpow_pos_of_pos hYpos (0.99979 : ℝ)
-      linarith
-    linarith
-  have hYp8 : (0 : ℝ) < (Y : ℝ) ^ (0.99979 : ℝ) / 8 := by
-    have := Real.rpow_pos_of_pos hYpos (0.99979 : ℝ)
-    linarith
-  -- `Y / r ≤ Y / (Y^p / 8) = 8 Y^{0.00021}`
-  have hKr : ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℕ) : ℝ)
-      ≤ 8 * (Y : ℝ) ^ (0.00021 : ℝ) := by
-    have hcast : ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℕ) : ℝ)
-        ≤ (Y : ℝ) / (⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℝ) := Nat.cast_div_le
-    have hmono : (Y : ℝ) / (⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℝ)
-        ≤ (Y : ℝ) / ((Y : ℝ) ^ (0.99979 : ℝ) / 8) :=
-      div_le_div_of_nonneg_left hYpos.le hYp8 hrad
-    have hYp : (0 : ℝ) < (Y : ℝ) ^ (0.99979 : ℝ) := Real.rpow_pos_of_pos hYpos _
-    have hsub : (Y : ℝ) ^ ((1 : ℝ) - 0.99979)
-        = (Y : ℝ) ^ (1 : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ) := Real.rpow_sub hYpos 1 0.99979
-    rw [Real.rpow_one] at hsub
-    have hexp : ((1 : ℝ) - 0.99979) = (0.00021 : ℝ) := by norm_num
-    rw [hexp] at hsub
-    have hdiv : (Y : ℝ) / ((Y : ℝ) ^ (0.99979 : ℝ) / 8)
-        = 8 * ((Y : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ)) := by
-      field_simp
-    calc ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℕ) : ℝ)
-        ≤ (Y : ℝ) / (⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℝ) := hcast
-      _ ≤ (Y : ℝ) / ((Y : ℝ) ^ (0.99979 : ℝ) / 8) := hmono
-      _ = 8 * ((Y : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ)) := hdiv
-      _ = 8 * (Y : ℝ) ^ (0.00021 : ℝ) := by rw [← hsub]
-  have hYq : (1 : ℝ) ≤ (Y : ℝ) ^ (0.00021 : ℝ) := Real.one_le_rpow hY1 (by norm_num)
-  have hsplit : ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ + 1 : ℕ) : ℝ)
-      = ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ : ℕ) : ℝ) + 1 := by
-    push_cast
-    ring
-  rw [hsplit]
-  have hq0 : (0 : ℝ) ≤ (Y : ℝ) ^ (0.00021 : ℝ) := Real.rpow_nonneg hYpos.le _
-  linarith
-
 /-- LEAF 2 of 2, the cover count: for `Y ≥ 2` the dyadic block `(Y/2, Y]` is covered by the
 `Y / r + 1` windows of radius `r = ⌊(Y/2)^{0.99979}⌋` centred at `Y/2 + j r`, `j < Y/r + 1`,
 and that number of windows is at most `C Y^{0.00021}`. An estimate on `⌊·⌋₊` and powers only,
 with no reference to `E`. -/
+lemma floor_rpow_bound (x : ℝ) (h1 : 1 ≤ x) : x / 2 ≤ (⌊x⌋₊ : ℝ) := by
+  by_cases h2 : x < 2
+  · have h_fl : 1 ≤ ⌊x⌋₊ := by exact Nat.le_floor (by exact_mod_cast h1)
+    calc x / 2 ≤ 2 / 2 := by linarith
+      _ = 1 := by norm_num
+      _ ≤ (⌊x⌋₊ : ℝ) := by exact_mod_cast h_fl
+  · have h3 : x - 1 ≤ (⌊x⌋₊ : ℝ) := by exact Nat.sub_one_lt_floor x |>.le
+    have h4 : 2 ≤ x := not_lt.mp h2
+    linarith
+
 theorem leaf_cover_count :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ Y : ℕ, 2 ≤ Y →
       ((Y / ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ + 1 : ℕ) : ℝ)
-        ≤ C * (Y : ℝ) ^ (0.00021 : ℝ) :=
-  ⟨10, by norm_num, cover_count_aux⟩
+        ≤ C * (Y : ℝ) ^ (0.00021 : ℝ) := by
+  use 10
+  constructor
+  · norm_num
+  · intro Y hY
+    have hY2 : (1 : ℝ) ≤ (Y / 2 : ℕ) := by
+      have : 1 ≤ Y / 2 := by omega
+      exact_mod_cast this
+    have hY3 : (Y : ℝ) / 3 ≤ ((Y / 2 : ℕ) : ℝ) := by
+      have h1 : Y ≤ 3 * (Y / 2) := by omega
+      have h2 : (Y : ℝ) ≤ 3 * ((Y / 2 : ℕ) : ℝ) := by exact_mod_cast h1
+      linarith
+    have hx1 : (1 : ℝ) ≤ ((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ) := Real.one_le_rpow hY2 (by norm_num)
+    set r : ℕ := ⌊(((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ))⌋₊ with hr
+    have hr_bound := floor_rpow_bound (((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ)) hx1
+    rw [← hr] at hr_bound
+    have hYpos : (0 : ℝ) < Y := by
+      have : 0 < Y := by omega
+      exact_mod_cast this
+    have hYpos_eq : 0 ≤ (Y : ℝ) := by positivity
+    have hY3pos : (0 : ℝ) ≤ (Y : ℝ) / 3 := by positivity
+    have hrpos : (0 : ℝ) < r := by
+      calc (0 : ℝ) < 1 / 2 := by norm_num
+        _ ≤ ((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ) / 2 := by linarith
+        _ ≤ r := hr_bound
+    have hrpow1 : ((Y : ℝ) / 3) ^ (0.99979 : ℝ) ≤ ((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ) := by
+      apply Real.rpow_le_rpow hY3pos hY3 (by norm_num)
+    have h3pos : (0 : ℝ) ≤ 3 := by norm_num
+    have hrpow2 : ((Y : ℝ) / 3) ^ (0.99979 : ℝ) = (Y : ℝ) ^ (0.99979 : ℝ) / (3 : ℝ) ^ (0.99979 : ℝ) := by
+      exact Real.div_rpow hYpos_eq h3pos (0.99979 : ℝ)
+    have hrpow3 : (Y : ℝ) / ((Y : ℝ) / 3) ^ (0.99979 : ℝ) = (Y : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ) * (3 : ℝ) ^ (0.99979 : ℝ) := by
+      rw [hrpow2]
+      have : (Y : ℝ) / ((Y : ℝ) ^ (0.99979 : ℝ) / (3 : ℝ) ^ (0.99979 : ℝ)) = (Y : ℝ) * (3 : ℝ) ^ (0.99979 : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ) := div_div_eq_mul_div _ _ _
+      rw [this]
+      ring
+    have hrpow4 : (Y : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ) = (Y : ℝ) ^ (0.00021 : ℝ) := by
+      calc (Y : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ) = (Y : ℝ) ^ (1 : ℝ) / (Y : ℝ) ^ (0.99979 : ℝ) := by rw [Real.rpow_one]
+        _ = (Y : ℝ) ^ ((1 : ℝ) - 0.99979) := (Real.rpow_sub hYpos (1 : ℝ) (0.99979 : ℝ)).symm
+        _ = (Y : ℝ) ^ (0.00021 : ℝ) := by norm_num
+    have h_yr : (Y : ℝ) / r ≤ 2 * (3 : ℝ) ^ (0.99979 : ℝ) * (Y : ℝ) ^ (0.00021 : ℝ) := by
+      calc (Y : ℝ) / r ≤ (Y : ℝ) / (((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ) / 2) := by
+            apply div_le_div_of_nonneg_left hYpos_eq (by positivity) hr_bound
+        _ = 2 * ((Y : ℝ) / ((Y / 2 : ℕ) : ℝ) ^ (0.99979 : ℝ)) := by ring
+        _ ≤ 2 * ((Y : ℝ) / ((Y : ℝ) / 3) ^ (0.99979 : ℝ)) := by
+            apply mul_le_mul_of_nonneg_left _ (by norm_num)
+            apply div_le_div_of_nonneg_left (by positivity)
+            · apply Real.rpow_pos_of_pos
+              linarith
+            · exact hrpow1
+        _ = 2 * ((Y : ℝ) ^ (0.00021 : ℝ) * (3 : ℝ) ^ (0.99979 : ℝ)) := by rw [hrpow3, hrpow4]
+        _ = 2 * (3 : ℝ) ^ (0.99979 : ℝ) * (Y : ℝ) ^ (0.00021 : ℝ) := by ring
+    have hy21 : (1 : ℝ) ≤ (Y : ℝ) ^ (0.00021 : ℝ) := by
+      have : (1 : ℝ) ≤ (Y : ℝ) := by
+        have hY1 : 1 ≤ Y := by omega
+        exact_mod_cast hY1
+      exact Real.one_le_rpow this (by norm_num)
+    calc ((Y / r + 1 : ℕ) : ℝ) = ((Y / r : ℕ) : ℝ) + 1 := by push_cast; rfl
+      _ ≤ (Y : ℝ) / r + 1 := by
+          have hdiv : ((Y / r : ℕ) : ℝ) ≤ (Y : ℝ) / r := by exact_mod_cast Nat.cast_div_le
+          linarith
+      _ ≤ 2 * (3 : ℝ) ^ (0.99979 : ℝ) * (Y : ℝ) ^ (0.00021 : ℝ) + (Y : ℝ) ^ (0.00021 : ℝ) := by linarith
+      _ = (2 * (3 : ℝ) ^ (0.99979 : ℝ) + 1) * (Y : ℝ) ^ (0.00021 : ℝ) := by ring
+      _ ≤ 10 * (Y : ℝ) ^ (0.00021 : ℝ) := by
+          apply mul_le_mul_of_nonneg_right _ (by positivity)
+          have : (3 : ℝ) ^ (0.99979 : ℝ) ≤ (3 : ℝ) ^ (1 : ℝ) := by
+            apply Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+          have : (3 : ℝ) ^ (1 : ℝ) = 3 := by norm_num
+          linarith
 
 /-! ### The exceptions up to `x` split at `x/2` -/
 
