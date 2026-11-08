@@ -32,7 +32,18 @@ theorem leaf_moment_parity (γ δ : ℝ) (N : ℕ) :
           ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2)
         + (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
           ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) := by
-  sorry
+  classical
+  rw [← Finset.sum_filter_add_sum_filter_not (s := Finset.Icc ((N + 1) / 2) N)
+    (p := fun n : ℕ => Even (nu γ n))]
+  congr 1
+  · refine Finset.sum_congr rfl (fun n hn => ?_)
+    have he : Even (nu γ n) := (Finset.mem_filter.mp hn).2
+    have hodd : ¬ Odd (nu γ n) := Int.not_odd_iff_even.mpr he
+    simp only [nuOdd, hodd, ite_false]
+  · refine Finset.sum_congr rfl (fun n hn => ?_)
+    have hne : ¬ Even (nu γ n) := (Finset.mem_filter.mp hn).2
+    have hodd : Odd (nu γ n) := Int.not_even_iff_odd.mp hne
+    simp only [nuOdd, hodd, ite_true]
 
 /-- LEAF. Step of the proof, the even branch: display 29. For `1 < γ < 3/2` the
 second moment of the adjacent coefficient `R₁(ν_n + 1)` over the even `ν_n` of the
@@ -73,7 +84,16 @@ filtered set is empty, so no hypothesis is vacuous. -/
 theorem leaf_count_of_moment (s : Finset ℕ) (g : ℕ → ℝ) (T A : ℝ) (hT : 0 < T)
     (hmoment : (∑ n ∈ s, g n ^ 2) ≤ A) :
     (((s.filter (fun n => T < g n)).card : ℝ) * T ^ 2) ≤ A := by
-  sorry
+  classical
+  have hcard : (((s.filter (fun n => T < g n)).card : ℝ) * T ^ 2)
+      = ∑ n ∈ s.filter (fun n => T < g n), T ^ 2 := by
+    rw [Finset.sum_const, nsmul_eq_mul]
+  rw [hcard]
+  refine (Finset.sum_le_sum (fun n hn => ?_)).trans
+    ((Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+      (fun i _ _ => sq_nonneg (g i))).trans hmoment)
+  have h : T < g n := (Finset.mem_filter.mp hn).2
+  nlinarith
 
 /-! ### Assembly -/
 
@@ -151,3 +171,5 @@ theorem lemma6_split : Lemma6 := by
 end LeanLab.ExceptionalSet.U1539
 
 #print axioms LeanLab.ExceptionalSet.U1539.lemma6_split
+#print axioms LeanLab.ExceptionalSet.U1539.leaf_moment_parity
+#print axioms LeanLab.ExceptionalSet.U1539.leaf_count_of_moment
