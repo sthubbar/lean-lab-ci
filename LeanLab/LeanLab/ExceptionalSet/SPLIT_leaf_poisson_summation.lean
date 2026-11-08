@@ -37,7 +37,19 @@ open LeanLab.ExceptionalSet.U1539 (eC ftR hcheck)
 `eC (-((x + n) * v))` moves with the shift because it is a function of `x + n`. -/
 theorem leaf_summation_periodic (K : ℝ → ℂ) (v : ℝ) :
     Function.Periodic (fun x : ℝ => ∑' n : ℤ, K (x + n) * eC (-((x + n) * v))) 1 := by
-  sorry
+  intro x
+  dsimp only
+  let equiv := Equiv.addRight (1:ℤ)
+  have h_eq : (fun (n : ℤ) => K (x + 1 + ↑n) * eC (-((x + 1 + ↑n) * v))) =
+              (fun (n : ℤ) => K (x + ↑(equiv n)) * eC (-((x + ↑(equiv n)) * v))) := by
+    ext n
+    congr 2
+    · change x + 1 + (n : ℝ) = x + ((n + 1 : ℤ) : ℝ)
+      push_cast; ring
+    · change -((x + 1 + (n : ℝ)) * v) = -((x + ((n + 1 : ℤ) : ℝ)) * v)
+      push_cast; ring
+  rw [h_eq]
+  exact (Equiv.tsum_eq equiv (fun (n:ℤ) => K (x + ↑n) * eC (-((x + ↑n) * v))))
 
 /-- LEAF. Continuity step: the periodization of the modulated kernel is continuous on the real
 line, as a function of the base point. This is where integrability and continuity of `K` and the
