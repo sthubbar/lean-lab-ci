@@ -22,14 +22,10 @@ open Real DecompJ1153
 theorem leaf_mid_t_over_pi_le (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
     (hlo : 2 * π ≤ q * t) (hhi : q * t ≤ 2 * π * exp 1) :
     t / π ≤ 2 * exp 1 := by
-  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast NeZero.one_le (n := q)
-  have ht0 : 0 < t := by linarith
-  have hqt : t ≤ (q : ℝ) * t := by
-    have := mul_le_mul_of_nonneg_right hq1 ht0.le
-    simpa using this
-  have h2 : t ≤ 2 * π * exp 1 := le_trans hqt hhi
-  rw [div_le_iff₀ pi_pos]
-  linarith
+  have hq : (1 : ℝ) ≤ q := by exact_mod_cast NeZero.pos q
+  have hmul := mul_le_mul_of_nonneg_right hq (by linarith : (0 : ℝ) ≤ t)
+  apply (div_le_iff₀ pi_pos).mpr
+  nlinarith
 
 /-- LEAF. Logarithm lower bound.  The range starts at `2 * π ≤ q * t`, and `log` is
 monotone on the positive reals, so the half-log term is at least `log (2 * π) / 2`.  This
@@ -58,14 +54,7 @@ into the right side of the target. -/
 theorem leaf_mid_constant_margin (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
     (htpi : t / π ≤ 2 * exp 1) (hlog : log (2 * π) ≤ log (q * t)) :
     13 ≤ 0.5 * log (q * t) + 17.7 - t / π := by
-  have hlog2 : 0.918931 ≤ 0.5 * log (2 * π) := by
-    have := LeanLab.HelfgottMajor.log_two_pi_gt
-    linarith
-  have he : 2 * Real.exp 1 ≤ 5.4365636572 := by
-    have := Real.exp_one_lt_d9
-    linarith
-  have h1 : 0.5 * log (2 * π) ≤ 0.5 * log (q * t) := by linarith
-  linarith
+  linarith [LeanLab.HelfgottMajor.log_two_pi_gt, exp_one_lt_d9]
 
 /-- The explicit upper count on the middle height range, assembled from the height bound,
 the logarithm bound, the small count on the bounded range and the numeric placement of
