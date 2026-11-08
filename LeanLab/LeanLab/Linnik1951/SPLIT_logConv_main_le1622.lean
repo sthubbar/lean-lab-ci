@@ -29,14 +29,51 @@ positive and both at most log n. This is the step that turns a count of the inde
 lower bound for the whole sum. -/
 theorem logConv_main_term_lower1622 (n m : ℕ) (hn : 4 ≤ n) (hm : m ∈ Finset.Icc 2 (n - 2)) :
     1 / Real.log (n : ℝ) ^ 2 ≤ 1 / (Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ)) := by
-  sorry
+  have hm1 : 2 ≤ m := by exact (Finset.mem_Icc.mp hm).1
+  have hm2 : m ≤ n - 2 := by exact (Finset.mem_Icc.mp hm).2
+  have H1 : 2 ≤ ((m : ℕ) : ℝ) := by exact_mod_cast hm1
+  have H2 : 2 ≤ ((n - m : ℕ) : ℝ) := by exact_mod_cast (show 2 ≤ n - m by omega)
+  have H3 : (m : ℝ) ≤ (n : ℝ) := by exact_mod_cast (show m ≤ n by omega)
+  have H4 : ((n - m : ℕ) : ℝ) ≤ (n : ℝ) := by exact_mod_cast (show n - m ≤ n by omega)
+  have H1_pos : 0 < (m : ℝ) := by linarith
+  have H2_pos : 0 < ((n - m : ℕ) : ℝ) := by linarith
+  have H5 : Real.log (m : ℝ) ≤ Real.log (n : ℝ) := by apply Real.log_le_log H1_pos H3
+  have H6 : Real.log ((n - m : ℕ) : ℝ) ≤ Real.log (n : ℝ) := by apply Real.log_le_log H2_pos H4
+  have H7 : 0 < Real.log (m : ℝ) := by apply Real.log_pos; linarith
+  have H8 : 0 < Real.log ((n - m : ℕ) : ℝ) := by apply Real.log_pos; linarith
+  have H9 : Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ) ≤ Real.log (n : ℝ) ^ 2 := by nlinarith
+  have H10 : 0 < Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ) := by positivity
+  exact one_div_le_one_div_of_le H10 H9
 
 /-- LEAF. Endpoint surplus: for n at least 16 the logarithm of n is at least 4 log 2, so the
 single summand at m = 2, namely 1 / (log 2 * log (n - 2)), is at least 4 / (log n)^2. This is
 the step that pays the three units of 1 / (log n)^2 by which the index count falls short of n. -/
 theorem logConv_main_endpoint1622 (n : ℕ) (hn : 16 ≤ n) :
     4 / Real.log (n : ℝ) ^ 2 ≤ 1 / (Real.log 2 * Real.log ((n - 2 : ℕ) : ℝ)) := by
-  sorry
+  have h1 : 2 ≤ ((n - 2 : ℕ) : ℝ) := by exact_mod_cast (show 2 ≤ n - 2 by omega)
+  have h2 : ((n - 2 : ℕ) : ℝ) ≤ (n : ℝ) := by exact_mod_cast (show n - 2 ≤ n by omega)
+  have hn_pos : 0 < (n : ℝ) := by exact_mod_cast (show 0 < n by omega)
+  have h1_pos : 0 < ((n - 2 : ℕ) : ℝ) := by linarith
+  have H1 : Real.log ((n - 2 : ℕ) : ℝ) ≤ Real.log (n : ℝ) := Real.log_le_log h1_pos h2
+  have H2 : 4 * Real.log 2 ≤ Real.log (n : ℝ) := by
+    calc
+      4 * Real.log 2 = (4:ℝ) * Real.log 2 := by norm_cast
+      _ = Real.log (2 ^ (4:ℝ)) := by
+        exact (Real.log_rpow (show (0:ℝ) < 2 by norm_num) (4:ℝ)).symm
+      _ = Real.log 16 := by norm_num
+      _ ≤ Real.log (n : ℝ) := by
+        apply Real.log_le_log (by norm_num) (by exact_mod_cast hn)
+  have H3 : 0 < Real.log 2 := by apply Real.log_pos; norm_num
+  have H4 : 0 < Real.log ((n - 2 : ℕ) : ℝ) := by apply Real.log_pos; linarith
+  have H5 : Real.log 2 * Real.log ((n - 2 : ℕ) : ℝ) ≤ (Real.log (n : ℝ) / 4) * Real.log (n : ℝ) := by
+    nlinarith
+  have H6 : (Real.log (n : ℝ) / 4) * Real.log (n : ℝ) = Real.log (n : ℝ) ^ 2 / 4 := by ring
+  have H7 : Real.log 2 * Real.log ((n - 2 : ℕ) : ℝ) ≤ Real.log (n : ℝ) ^ 2 / 4 := by linarith
+  have H8 : 0 < Real.log 2 * Real.log ((n - 2 : ℕ) : ℝ) := by positivity
+  have H9 := one_div_le_one_div_of_le H8 H7
+  calc
+    4 / Real.log (n : ℝ) ^ 2 = 1 / (Real.log (n : ℝ) ^ 2 / 4) := by ring
+    _ ≤ 1 / (Real.log 2 * Real.log ((n - 2 : ℕ) : ℝ)) := H9
 
 /-- The target statement of the parent file, assembled from the three leaves above with no
 remaining gap: the finite range 4 <= n <= 16, and the half line 16 <= n where the index count
