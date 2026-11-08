@@ -28,7 +28,7 @@ theorem leaf_constants_exist :
 
 /-- REFUTED, `P_leaf_false` below. Repaired in `DecompJ579.leaf_P_exists`. Do not prove this.
 LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
-theorem leaf_P_exists {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp ε H0 X0 H X P0) :
+theorem leaf_P_exists {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp_v2 ε H0 X0 H X P0) :
   ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧ (excSet H (Real.sqrt X) P X).Finite := by sorry
 
 /-- REFUTED, `singular_series_leaf_false` below, false at `m = 0`. Repaired in `DecompJ579.leaf_singular_series_converges`. Do not prove this.
@@ -51,7 +51,7 @@ private theorem pole_prime_zero_no_limit (s : ℂ) :
 /-- LEAF arXiv:1804.05561v1 display 10.25: the main term error is bounded by a constant C depending only on ε -/
 theorem leaf_main_term_bound_exists_C (ε ε0 c H0 C X0 : ℝ) :
   ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-    Thm1Hyp ε H0 X0 H X P0 →
+    Thm1Hyp_v2 ε H0 X0 H X P0 →
     P0 * X ^ (-ε) ≤ P → P ≤ P0 →
     (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ,
       Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
@@ -68,7 +68,7 @@ theorem leaf_main_term_bound_exists_C (ε ε0 c H0 C X0 : ℝ) :
 /-- Assembly theorem for P0054 page 8 display 2.21, proved directly from the leaves. -/
 theorem assembly_221 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -99,7 +99,7 @@ theorem singular_series_leaf_false (H X P : ℝ) :
     (hconv pole (pole_mem_excSet _ _ _ _) pole (pole_mem_excSet _ _ _ _) 0)
 
 /-- The parameter predicate permits a negative epsilon with an empty P interval. -/
-theorem negative_epsilon_hyp : Thm1Hyp (-1) 0 0 0 4 1 := by
+theorem negative_epsilon_hyp : Thm1Hyp_v2 (-1) 0 0 0 4 1 := by
   refine ⟨le_refl _, ?_, by norm_num, le_refl _, ?_⟩
   · exact div_nonneg (Real.log_nonneg (by norm_num)) (by norm_num)
   · exact Real.one_le_rpow (by norm_num) (by norm_num)
@@ -114,7 +114,7 @@ theorem negative_epsilon_no_P :
 
 /-- The full universally quantified P leaf is false as stated. -/
 theorem P_leaf_false :
-    ¬ (∀ {ε H0 X0 H X P0 : ℝ}, Thm1Hyp ε H0 X0 H X P0 →
+    ¬ (∀ {ε H0 X0 H X P0 : ℝ}, Thm1Hyp_v2 ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite) := by
   intro h
@@ -535,7 +535,7 @@ theorem zero_kernel_ne_zero_of_large_scale {ε X : ℝ} (hX : 4 ≤ X)
 /-- Every allowed positive epsilon admits arbitrarily thresholded level one parameters with nonzero zero kernel. -/
 theorem level_one_large_hyp {ε : ℝ} (hε : 0 < ε) (hε4 : ε < 4 / 9)
     (H0 X0 : ℝ) :
-    ∃ H X : ℝ, Thm1Hyp ε H0 X0 H X 1 ∧ 4 ≤ X ∧
+    ∃ H X : ℝ, Thm1Hyp_v2 ε H0 X0 H X 1 ∧ 4 ≤ X ∧
       (1 : ℝ) * X ^ (-ε) ≤ 1 ∧
       WeightedKernelsTask08.weightedKernel (X1 ε X) X 1 1 0 true ≠ 0 := by
   let H := max H0 0
@@ -568,7 +568,7 @@ theorem level_one_large_hyp {ε : ℝ} (hε : 0 < ε) (hε4 : ε < 4 / 9)
 /-- The exact repaired task579 main bound is false because its supplied value at zero is unrestricted. -/
 theorem main_term_leaf579_false : ¬ (∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-      Thm1Hyp ε H0 X0 H X P0 →
+      Thm1Hyp_v2 ε H0 X0 H X P0 →
       P0 * X ^ (-ε) ≤ P → P ≤ P0 →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
         Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
@@ -712,7 +712,7 @@ theorem positive_even_kernel_in_range {ε X : ℝ} (hX : 16 ≤ X) (hp : 4 ≤ X
 /-- The paper parameter range has arbitrarily thresholded scales suitable for the tail audit. -/
 theorem level_one_tail_hyp {ε : ℝ} (hε : 0 < ε) (hε4 : ε < 4 / 9)
     (H0 X0 : ℝ) :
-    ∃ H X : ℝ, Thm1Hyp ε H0 X0 H X 1 ∧ 16 ≤ X ∧ 4 ≤ X ^ ε := by
+    ∃ H X : ℝ, Thm1Hyp_v2 ε H0 X0 H X 1 ∧ 16 ≤ X ∧ 4 ≤ X ^ ε := by
   let H := max H0 0
   let T := max (2 * H) (max (Real.log (max X0 16)) (Real.log 4 / ε))
   let X := Real.exp T
@@ -741,7 +741,7 @@ theorem level_one_tail_hyp {ε : ℝ} (hε : 0 < ε) (hε4 : ε < 4 / 9)
 /-- The literal repaired task281 tail leaf is false because it permits P zero. -/
 theorem truncation_leaf281_false : ¬ (∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-      Thm1Hyp ε H0 X0 H X P0 → P ≤ P0 →
+      Thm1Hyp_v2 ε H0 X0 H X P0 → P ≤ P0 →
       (excSet H (Real.sqrt X) P X).Finite →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
         Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →

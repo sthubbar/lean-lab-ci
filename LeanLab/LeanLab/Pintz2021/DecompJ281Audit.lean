@@ -33,7 +33,7 @@ theorem leaf_truncation_error_false :
     ¬ (∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
       ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ,
         ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-        Thm1Hyp ε H0 X0 H X P0 → P ≤ P0 →
+        Thm1Hyp_v2 ε H0 X0 H X P0 → P ≤ P0 →
         (excSet H (Real.sqrt X) P X).Finite →
         (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ,
           0 < n → Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →

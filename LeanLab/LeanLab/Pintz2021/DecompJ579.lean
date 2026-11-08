@@ -22,7 +22,7 @@ noncomputable section
 /-
 RETIRED 2026-10-31 architect PC 20261031T2333Z-383, kept as text. Two leaves of the task579 split:
 `leaf_constants_exist : ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 → ∃ c H0 X0 : ℝ, 0 < c`
-and `leaf_main_term_bound_exists_C (ε ε0 c H0 X0 : ℝ) : ∃ C : ℝ, ∀ H X P0 P Sg', Thm1Hyp ε H0 X0 H X P0 →
+and `leaf_main_term_bound_exists_C (ε ε0 c H0 X0 : ℝ) : ∃ C : ℝ, ∀ H X P0 P Sg', Thm1Hyp_v2 ε H0 X0 H X P0 →
 P0 * X ^ (-ε) ≤ P → P ≤ P0 → (convergence of every pair series at every m : ℕ) → ∀ m : ℕ, m ≤ X →
 ‖R1majPrime ε X P m - mainTermPrime E Sg' ε X m‖ ≤ C * (Sing m * X * exp (-(c * H)) + X ^ (1 - ε0))`.
 The second was vacuous: its convergence hypothesis includes m = 0, where the pole series diverges,
@@ -137,36 +137,30 @@ section Leaf
 
 variable {ε H0 X0 H X P0 : ℝ}
 
-private theorem rpow_neg_le_one {ε H0 X0 H X P0 : ℝ} (hε : 0 < ε) (hε' : ε < 4 / 9)
-    (hHyp : Thm1Hyp ε H0 X0 H X P0) : X ^ (-ε) ≤ 1 := by
-  obtain ⟨-, -, -, hP0, hP0'⟩ := hHyp
-  have hθpos : 0 < 4 / 9 - ε := by linarith
-  have hXθ : (1 : ℝ) ≤ X ^ (4 / 9 - ε) := le_trans hP0 hP0'
-  have h1 : (1 : ℝ) ≤ |X ^ (4 / 9 - ε)| := by
-    rw [abs_of_pos (by linarith : (0 : ℝ) < X ^ (4 / 9 - ε))]
-    exact hXθ
-  have h2 : |X ^ (4 / 9 - ε)| ≤ |X| ^ (4 / 9 - ε) := Real.abs_rpow_le_abs_rpow X _
-  have h3 : (1 : ℝ) ^ (4 / 9 - ε) ≤ |X| ^ (4 / 9 - ε) := by
-    rw [Real.one_rpow]
-    exact le_trans h1 h2
-  have habs : 1 ≤ |X| :=
-    (Real.rpow_le_rpow_iff (by norm_num) (abs_nonneg X) hθpos).mp h3
-  have h4 : |X| ^ (-ε) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos habs (by linarith)
-  have h5 : |X ^ (-ε)| ≤ |X| ^ (-ε) := Real.abs_rpow_le_abs_rpow X (-ε)
-  exact (abs_le.mp (le_trans h5 h4)).2
+private theorem rpow_neg_le_one {ε A X0 X P0 : ℝ} (hε : 0 < ε)
+    (hHyp : Thm1Hyp ε A X0 X P0) : X ^ (-ε) ≤ 1 := by
+  obtain ⟨-, hX3, -, -⟩ := hHyp
+  exact Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by linarith)
+
+/-- Under the U-1634 range `P₀` is positive: `X^ε L^A > 0` for `X ≥ 3`. -/
+private theorem P0_pos {ε A X0 X P0 : ℝ} (hHyp : Thm1Hyp ε A X0 X P0) : 0 < P0 := by
+  obtain ⟨-, hX3, hlow, -⟩ := hHyp
+  have hX : 0 < X := by linarith
+  have hL : 0 < Real.log X := Real.log_pos (by linarith)
+  exact lt_of_lt_of_le (mul_pos (Real.rpow_pos_of_pos hX ε) (Real.rpow_pos_of_pos hL A)) hlow
 
 end Leaf
 
 /-- LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists DECISION U-1614: `0 < ε < 4/9` added, Theorem 1 takes `ε` small, p. 8. The old form is false at
 `ε = -1`, `DecompJ665.P_leaf_false`, and at `ε = 1`, `Audit1614.old_leaf_P_exists_large_eps_false`. -/
-theorem leaf_P_exists {ε H0 X0 H X P0 : ℝ} (hε : 0 < ε) (hε' : ε < 4 / 9)
-    (hHyp : Thm1Hyp ε H0 X0 H X P0) :
+theorem leaf_P_exists {ε A X0 H X P0 : ℝ} (hε : 0 < ε) (hε' : ε < 4 / 9)
+    (hHyp : Thm1Hyp ε A X0 X P0) :
   ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧ (excSet H (Real.sqrt X) P X).Finite := by
-  have hx : X ^ (-ε) ≤ 1 := rpow_neg_le_one hε hε' hHyp
-  obtain ⟨-, -, -, hP0, -⟩ := hHyp
+  have hx : X ^ (-ε) ≤ 1 := rpow_neg_le_one hε hHyp
+  have hP0 : 0 < P0 := P0_pos hHyp
   refine ⟨P0, ?_, le_rfl, excSet_finite H (Real.sqrt X) P0 X⟩
   calc P0 * X ^ (-ε) ≤ P0 * 1 :=
-        mul_le_mul_of_nonneg_left hx (le_trans zero_le_one hP0)
+        mul_le_mul_of_nonneg_left hx hP0.le
     _ = P0 := mul_one P0
 
 /-- LEAF arXiv:1804.05561v1 display 9.16: the singular series converges at every positive
@@ -326,11 +320,18 @@ private theorem leaf_singular_series_converges_of_summable (H X P : ℝ)
 O_ε(X^{1-ε₀})` for the actual series, with `ε₀` and `c_ε` existential as in Theorem 1.
 DECISION 2026-10-31 architect PC 20261031T2333Z-383, replaces two retired leaves above. 
 DECISION U-1614: `ε0 ≤ 1/4` added, a smaller `ε0` only weakens the claim for `X ≥ 1`; it discharges
-`ε < 4/9` in `leaf_P_exists` without changing `assembly_221`. -/
+`ε < 4/9` in `leaf_P_exists` without changing `assembly_221`.
+DECISION 2026-11-08 architect 20261108T0450Z U-1634: the U-1634 shape of `State1581.Theorem1_220`.
+`c, C` are existential before `H`, with an exponent `A ≥ 0`; `H ≥ H₀` is a fixed constant and
+`X₀` is chosen after it, Pin1 display 2.8 and the remark after Pin1 display 2.12; the range is
+`X^ε L^A ≤ P₀`, Pin1 display 1.8, and `H ≤ (log X)/2` is gone. `ε0 ≤ 1/5` so that the range is
+inhabited for every `ε < ε0`, `State1581.thm1Hyp_inhabited`. The old form was false at `P₀ = 1`,
+`H = (log X)/2` by hand, PROGRESS.md U-1634. -/
 theorem leaf_main_term_bound :
-  ∃ ε0 : ℝ, 0 < ε0 ∧ ε0 ≤ 1 / 4 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-      Thm1Hyp ε H0 X0 H X P0 →
+  ∃ ε0 : ℝ, 0 < ε0 ∧ ε0 ≤ 1 / 5 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+    ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ,
+      ∀ X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
+      Thm1Hyp ε A X0 X P0 →
       P0 * X ^ (-ε) ≤ P → P ≤ P0 →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
         Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
@@ -431,10 +432,12 @@ private theorem sing_error_nonneg {m : ℕ} {X ε0 c H : ℝ} (hX : 0 ≤ X) :
     (Real.rpow_nonneg hX _)
 
 /-- Assembly theorem for P0054 page 8 display 2.21, proved directly from the leaves. Its
-convergence clause asks `0 < m` since 2026-10-31, matching DecompJ281.leaf_221. -/
+convergence clause asks `0 < m` since 2026-10-31, matching DecompJ281.leaf_221.
+DECISION 2026-11-08 U-1634: the quantifier shape of `State1581.Theorem1_220`, U-1634 form. -/
 theorem assembly_221 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
+      Thm1Hyp ε A X0 X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -447,10 +450,13 @@ theorem assembly_221 :
   refine ⟨ε0, hε0, ?_⟩
   intro ε hε hε0'
   have hε49 : ε < 4 / 9 := by linarith
-  obtain ⟨c, H0, C, X0, hc, hC⟩ := h1 ε hε hε0'
-  refine ⟨c, H0, max C 1, X0, hc, ?_⟩
-  intro H X P0 hHyp
-  obtain ⟨P, hP1, hP2, hFin⟩ := leaf_P_exists hε hε49 hHyp
+  obtain ⟨c, C, A, H0, hc, hA, hH⟩ := h1 ε hε hε0'
+  refine ⟨c, max C 1, A, H0, hc, hA, ?_⟩
+  intro H hH0
+  obtain ⟨X0, hC⟩ := hH H hH0
+  refine ⟨X0, ?_⟩
+  intro X P0 hHyp
+  obtain ⟨P, hP1, hP2, hFin⟩ := leaf_P_exists (H := H) hε hε49 hHyp
   refine ⟨P, hP1, hP2, hFin, ?_⟩
   obtain ⟨Sg, hSg⟩ := leaf_singular_series_converges H X P
   let A : ℂ := R1majPrime ε X P 0
@@ -490,7 +496,7 @@ theorem assembly_221 :
           mainTermPrime (excSet H (Real.sqrt X) P X) Sg ε X m := by
         simp only [mainTermPrime, Sg', if_neg hm]
       rw [hmain]
-      refine le_trans (hC H X P0 P Sg hHyp hP1 hP2 hSg m hm0 hmX) ?_
+      refine le_trans (hC X P0 P Sg hHyp hP1 hP2 hSg m hm0 hmX) ?_
       exact mul_le_mul_of_nonneg_right (le_max_left _ _) (sing_error_nonneg hX0)
 
 end

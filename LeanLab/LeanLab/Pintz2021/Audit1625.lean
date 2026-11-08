@@ -15,7 +15,7 @@ open LeanLab.Pintz2021.State1581 LeanLab.Pintz2021.DecompJ281 LeanLab.Pintz2021.
 
 /-- The repaired range of `leaf_221` is met above every threshold, at `P₀ = P = 1`. -/
 theorem leaf_221_range_instance {ε : ℝ} (hε : 0 < ε) (hε4 : ε < 4 / 9) (H0 X0 : ℝ) :
-    ∃ H X P0 P : ℝ, Thm1Hyp ε H0 X0 H X P0 ∧ 1 ≤ P ∧ P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 := by
+    ∃ H X P0 P : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 ∧ 1 ≤ P ∧ P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 := by
   obtain ⟨H, X, hHyp, hX, -⟩ := level_one_tail_hyp hε hε4 H0 X0
   have hx : X ^ (-ε) ≤ 1 :=
     Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by linarith)
@@ -25,7 +25,7 @@ theorem leaf_221_range_instance {ε : ℝ} (hε : 0 < ε) (hε4 : ε < 4 / 9) (H
 at `P₀ = P = 1`, `U = 2` and a positive even `m`, with the actual series of level one. -/
 theorem leaf_truncation_range_instance {ε : ℝ} (hε : 0 < ε) (hε4 : ε < 4 / 9) (H0 X0 : ℝ) :
     ∃ (H X P0 P U : ℝ) (Sg' : ExcPair → ExcPair → ℕ → ℂ) (m : ℕ),
-      Thm1Hyp ε H0 X0 H X P0 ∧ 1 ≤ P ∧ P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
+      Thm1Hyp_v2 ε H0 X0 H X P0 ∧ 1 ≤ P ∧ P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
       (excSet H (Real.sqrt X) P X).Finite ∧
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
         Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) ∧

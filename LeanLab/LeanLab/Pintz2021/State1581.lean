@@ -110,12 +110,15 @@ def mainTerm (E : Set ExcPair) (Sg : ExcPair → ExcPair → ℕ → ℂ) (ε X 
 
 /-! ### Theorem 1, display (2.20), page 8 -/
 
-/-- The range of the parameters of Theorem 1: `H₀ ≤ H ≤ (log X)/2`, `X ≥ X₀`,
+/-- RETIRED U-1634 architect 20261108T0450Z, kept as a record of the 2026-10-31 sealed range,
+used by the audits that refute old leaves. The old range: `H₀ ≤ H ≤ (log X)/2`, `X ≥ X₀`,
 `1 ≤ P₀ ≤ X^{4/9-ε}`. The upper bound on `H` is a conservative restriction, see STATEMENTS.md. -/
-def Thm1Hyp (ε H0 X0 H X P0 : ℝ) : Prop :=
+def Thm1Hyp_v2 (ε H0 X0 H X P0 : ℝ) : Prop :=
   H0 ≤ H ∧ H ≤ Real.log X / 2 ∧ X0 ≤ X ∧ 1 ≤ P0 ∧ P0 ≤ X ^ (4 / 9 - ε)
 
-/-- **Theorem 1**, (2.20), CITED from Pin1. For every sufficiently small `ε > 0` there are
+/-- RETIRED U-1634 architect 20261108T0450Z: the 2026-10-31 sealed form of Theorem 1, kept as a
+record. False at `P₀ = 1`, `H = (log X)/2` by hand, see PROGRESS.md U-1634.
+**Theorem 1**, (2.20), CITED from Pin1. For every sufficiently small `ε > 0` there are
 `c_ε > 0` and constants such that for `P₀ ≤ X^{4/9-ε}` one can choose `P ∈ [P₀X^{-ε}, P₀]` with:
 `E = E(H, √X)` at level `P` is finite, every generalized singular series of (2.5) converges at every
 positive frequency `m`, and
@@ -125,9 +128,41 @@ for all `m ≤ X`
 -- Audit168.sealed_target_false proved the old clause false at `m = 0`, where the pole series
 -- diverges; the paper uses Goldbach and prime difference frequencies only. Old form kept as
 -- Audit168.Theorem1_220_v1.
+def Theorem1_220_v2 : Prop :=
+  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 →
+      ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
+        (excSet H (Real.sqrt X) P X).Finite ∧
+        ∃ Sg : ExcPair → ExcPair → ℕ → ℂ,
+          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
+            Tendsto (singPartial z w m) atTop (𝓝 (Sg z w m))) ∧
+          ∀ m : ℕ, (m : ℝ) ≤ X →
+            ‖R1maj ε X P m - mainTerm (excSet H (Real.sqrt X) P X) Sg ε X m‖ ≤
+              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε))
+
+/-- The range of the parameters of Theorem 1, U-1634 shape: `X ≥ X₀`, `X ≥ 3`,
+`X^ε L^A ≤ P₀ ≤ X^{4/9-ε}` with `L = log X`. `H` is no longer here: it is a fixed constant
+chosen before `X₀`, Pin1 display 2.8 and the remark after Pin1 display 2.12. The lower bound
+gives `L^A ≤ P` for every `P ∈ [P₀X^{-ε}, P₀]`, the range `L^c ≤ P` of Pin1 display 1.8.
+`3 ≤ X` only weakens the theorem, since `X₀` is existential, and makes `L ≥ 1`. -/
+def Thm1Hyp (ε A X0 X P0 : ℝ) : Prop :=
+  X0 ≤ X ∧ 3 ≤ X ∧ X ^ ε * Real.log X ^ A ≤ P0 ∧ P0 ≤ X ^ (4 / 9 - ε)
+
+/-- **Theorem 1**, (2.20), CITED from Pin1 Theorem 1, display 2.10. U-1634 shape: for small
+`ε > 0` there are `c, C > 0` in the `O_ε`, an exponent `A ≥ 0` and `H₀` such that for every
+fixed `H ≥ H₀` there is `X₀` with: for `X ≥ X₀` and `X^ε L^A ≤ P₀ ≤ X^{4/9-ε}` one can choose
+`P ∈ [P₀X^{-ε}, P₀]` with `E = E(H, √X)` finite, every series of (2.5) convergent at positive
+frequencies, and for all `m ≤ X`
+`R₁(m) = ∑_{i,j ∈ E} A(ϱᵢ)A(ϱⱼ) 𝔖(χᵢ,χⱼ,m) I(ϱᵢ,ϱⱼ,m) + O_ε(𝔖(m) X e^{-c_ε H}) + O_ε(X^{1-ε})`.
+`c` and `C` precede `H`, as the `O_ε` of Pin1 display 2.10 depends on `ε` only; `X₀` follows
+`H`. -/
+-- DECISION 2026-11-08 architect 20261108T0450Z U-1634: `H` is quantified after `ε` and before
+-- `X₀`, `H ≤ (log X)/2` is dropped, `1 ≤ P₀` becomes `X^ε L^A ≤ P₀` with `A` existential.
+-- Old form `Theorem1_220_v2`, false at `P₀ = 1`, `H = (log X)/2` by hand.
 def Theorem1_220 : Prop :=
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
+      Thm1Hyp ε A X0 X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg : ExcPair → ExcPair → ℕ → ℂ,
@@ -178,8 +213,8 @@ theorem mult_pole : mult pole = 1 := by simp [mult]
 
 /-- The hypotheses of Theorem 1 hold together: for every `ε ∈ (0, 4/9)` and all constants
 `H₀, X₀` there are `H, X, P₀` with `Thm1Hyp`, and the interval `[P₀X^{-ε}, P₀]` is nonempty. -/
-theorem thm1Hyp_inhabited {ε : ℝ} (hε : 0 < ε) (hε' : ε < 4 / 9) (H0 X0 : ℝ) :
-    ∃ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 ∧ P0 * X ^ (-ε) ≤ P0 := by
+theorem thm1Hyp_v2_inhabited {ε : ℝ} (hε : 0 < ε) (hε' : ε < 4 / 9) (H0 X0 : ℝ) :
+    ∃ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 ∧ P0 * X ^ (-ε) ≤ P0 := by
   set H := max H0 0 with hH
   set X := max (max X0 1) (Real.exp (2 * H)) with hX
   have hX1 : 1 ≤ X := le_trans (le_max_right X0 1) (le_max_left _ _)
@@ -192,6 +227,38 @@ theorem thm1Hyp_inhabited {ε : ℝ} (hε : 0 < ε) (hε' : ε < 4 / 9) (H0 X0 :
   · exact Real.one_le_rpow hX1 (by linarith)
   · have : X ^ (-ε) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos hX1 (by linarith)
     linarith
+
+/-- U-1634 vacuity instance: the new range of Theorem 1 holds above every `X₀`, for every
+`ε ∈ (0, 2/9)` and every exponent `A`, at `P₀ = X^{4/9-ε}`, since `L^A ≤ X^{4/9-2ε}` for large `X`.
+The interval `[P₀X^{-ε}, P₀]` is nonempty and its left end is at least `L^A`. -/
+theorem thm1Hyp_inhabited {ε : ℝ} (hε : 0 < ε) (hε' : ε < 2 / 9) (A X0 : ℝ) :
+    ∃ X P0 : ℝ, Thm1Hyp ε A X0 X P0 ∧ P0 * X ^ (-ε) ≤ P0 ∧
+      Real.log X ^ A ≤ P0 * X ^ (-ε) := by
+  have hδ : 0 < 4 / 9 - 2 * ε := by linarith
+  have ho := (isLittleO_log_rpow_rpow_atTop A hδ).bound one_pos
+  obtain ⟨X, hX, hX0, hX3⟩ :=
+    (ho.and ((eventually_ge_atTop X0).and (eventually_ge_atTop 3))).exists
+  have hXpos : 0 < X := by linarith
+  have hlog : 0 ≤ Real.log X := Real.log_nonneg (by linarith)
+  have hLA : Real.log X ^ A ≤ X ^ (4 / 9 - 2 * ε) := by
+    have h1 := hX
+    rw [one_mul, Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (Real.rpow_nonneg hlog _), abs_of_pos (Real.rpow_pos_of_pos hXpos _)] at h1
+    exact h1
+  have hsplit : X ^ (4 / 9 - ε) = X ^ ε * X ^ (4 / 9 - 2 * ε) := by
+    rw [← Real.rpow_add hXpos]; ring_nf
+  have hXe : 0 < X ^ ε := Real.rpow_pos_of_pos hXpos ε
+  have hlow : X ^ ε * Real.log X ^ A ≤ X ^ (4 / 9 - ε) := by
+    rw [hsplit]; exact mul_le_mul_of_nonneg_left hLA hXe.le
+  have hneg : X ^ (-ε) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by linarith)
+  have hP0 : 0 < X ^ (4 / 9 - ε) := Real.rpow_pos_of_pos hXpos _
+  refine ⟨X, X ^ (4 / 9 - ε), ⟨hX0, hX3, hlow, le_rfl⟩, ?_, ?_⟩
+  · calc X ^ (4 / 9 - ε) * X ^ (-ε) ≤ X ^ (4 / 9 - ε) * 1 :=
+          mul_le_mul_of_nonneg_left hneg hP0.le
+      _ = _ := mul_one _
+  · have hmul : X ^ (4 / 9 - ε) * X ^ (-ε) = X ^ (4 / 9 - 2 * ε) := by
+      rw [← Real.rpow_add hXpos]; ring_nf
+    rw [hmul]; exact hLA
 
 /-- The parameter range of Theorem 2 is inhabited above every `X₀`: `q = 1` and `X > X₀`. -/
 theorem thm2_range_inhabited (X0 : ℝ) :
@@ -225,6 +292,7 @@ end LeanLab.Pintz2021.State1581
 #print axioms LeanLab.Pintz2021.State1581.pole_mem_excSet
 #print axioms LeanLab.Pintz2021.State1581.Asign_pole
 #print axioms LeanLab.Pintz2021.State1581.mult_pole
+#print axioms LeanLab.Pintz2021.State1581.thm1Hyp_v2_inhabited
 #print axioms LeanLab.Pintz2021.State1581.thm1Hyp_inhabited
 #print axioms LeanLab.Pintz2021.State1581.thm2_range_inhabited
 #print axioms LeanLab.Pintz2021.State1581.noSiegel_of_GRH

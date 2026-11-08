@@ -798,13 +798,746 @@ theorem leaf337_two_switching :
         (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
   sorry
 
+private theorem bsc_blk_sum (L : ℝ) (hL : 0 < L) (t : ℕ → ℝ) (ht : Monotone t) (h2 : log 2 ≤ t 0 * L)
+    (f : ℝ → ℝ) (M : ℕ → ℝ) (K : ℕ)
+    (hM : ∀ j < K, ∀ v, t j < v → v ≤ t (j+1) → f v ≤ M j) (hM0 : ∀ j < K, 0 ≤ M j) :
+    ∑ q ∈ Ioc ⌊exp (t 0 * L)⌋₊ ⌊exp (t K * L)⌋₊, (if q.Prime then f (log q / L) / q else 0) ≤
+      ∑ j ∈ range K, M j * (log (t (j+1) / t j) + 4 / (t j * L)) := by
+  induction K with
+  | zero => simp
+  | succ K ih =>
+    rw [sum_range_succ]
+    have hmon : ∀ a b : ℕ, a ≤ b → ⌊exp (t a * L)⌋₊ ≤ ⌊exp (t b * L)⌋₊ := fun a b hab =>
+      Nat.floor_le_floor (exp_le_exp.mpr (mul_le_mul_of_nonneg_right (ht hab) hL.le))
+    rw [← sum_Ioc_consecutive _ (hmon 0 K (Nat.zero_le _)) (hmon K (K+1) (Nat.le_succ _))]
+    have ih' := ih (fun j hj v h1 h3 => hM j (by omega) v h1 h3) (fun j hj => hM0 j (by omega))
+    have hy2 : (2 : ℝ) ≤ exp (t K * L) := by
+      have : log 2 ≤ t K * L := h2.trans (mul_le_mul_of_nonneg_right (ht (Nat.zero_le _)) hL.le)
+      calc (2:ℝ) = exp (log 2) := (exp_log (by norm_num)).symm
+        _ ≤ _ := exp_le_exp.mpr this
+    have hyx : exp (t K * L) ≤ exp (t (K+1) * L) :=
+      exp_le_exp.mpr (mul_le_mul_of_nonneg_right (ht (Nat.le_succ _)) hL.le)
+    have hmert := LeanLab.AlmostPrimes.Decomp1528b.mertens2_block hy2 hyx
+    have hupper := (abs_le.mp hmert).2
+    have htK : 0 < t K * L := lt_of_lt_of_le (log_pos (by norm_num)) (h2.trans
+      (mul_le_mul_of_nonneg_right (ht (Nat.zero_le _)) hL.le))
+    have htK0 : 0 < t K := pos_of_mul_pos_left htK hL.le
+    have htK1 : 0 < t (K+1) := lt_of_lt_of_le htK0 (ht (Nat.le_succ _))
+    have hll : log (log (exp (t (K+1) * L))) - log (log (exp (t K * L))) = log (t (K+1) / t K) := by
+      rw [log_exp, log_exp, log_mul htK1.ne' hL.ne', log_mul htK0.ne' hL.ne', log_div htK1.ne' htK0.ne']
+      ring
+    rw [hll, log_exp] at hupper
+    have hblock : ∑ q ∈ Ioc ⌊exp (t K * L)⌋₊ ⌊exp (t (K+1) * L)⌋₊,
+        (if q.Prime then f (log q / L) / q else 0) ≤
+        M K * ∑ p ∈ (Ioc ⌊exp (t K * L)⌋₊ ⌊exp (t (K+1) * L)⌋₊).filter Nat.Prime, (1 : ℝ) / p := by
+      rw [sum_filter, mul_sum]
+      apply sum_le_sum
+      intro q hq
+      split_ifs with hp
+      · have hq1 := (mem_Ioc.mp hq).1
+        have hq2 := (mem_Ioc.mp hq).2
+        have hy : exp (t K * L) < q := (Nat.floor_lt (exp_pos _).le).mp hq1
+        have hx : (q : ℝ) ≤ exp (t (K+1) * L) := (Nat.le_floor_iff (exp_pos _).le).mp hq2
+        have hqpos : (0 : ℝ) < q := lt_trans (exp_pos _) hy
+        have hv1 : t K < log q / L := by
+          rw [lt_div_iff₀ hL]
+          have := log_lt_log (exp_pos _) hy
+          rwa [log_exp] at this
+        have hv2 : log q / L ≤ t (K+1) := by
+          rw [div_le_iff₀ hL]
+          have := log_le_log hqpos hx
+          rwa [log_exp] at this
+        have hfv := hM K (Nat.lt_succ_self K) _ hv1 hv2
+        rw [mul_one_div]
+        exact div_le_div_of_nonneg_right hfv hqpos.le
+      · simp
+    have hM0K := hM0 K (Nat.lt_succ_self K)
+    have := mul_le_mul_of_nonneg_left hupper hM0K
+    linarith
+
+private theorem bsc_riem (t : ℕ → ℝ) (K : ℕ) (Δ : ℝ) (f : ℝ → ℝ) (m : ℕ → ℝ)
+    (ht : ∀ j < K, t j ≤ t (j+1)) (ht0 : ∀ j < K, 0 < t j)
+    (hΔ : ∀ j < K, log (t (j+1) / t j) = Δ)
+    (hm : ∀ j < K, ∀ u ∈ Set.Icc (t j) (t (j+1)), m j ≤ f u)
+    (hint : ∀ j < K, IntervalIntegrable (fun u => f u / u) MeasureTheory.volume (t j) (t (j+1))) :
+    ∑ j ∈ range K, m j * Δ ≤ ∫ u in (t 0)..(t K), f u / u := by
+  rw [← intervalIntegral.sum_integral_adjacent_intervals hint]
+  apply sum_le_sum
+  intro j hj
+  have hj' := mem_range.mp hj
+  have h0 := ht0 j hj'
+  have h1 : 0 < t (j+1) := lt_of_lt_of_le h0 (ht j hj')
+  have heq : m j * Δ = ∫ u in (t j)..(t (j+1)), m j / u := by
+    simp only [div_eq_mul_inv]
+    rw [intervalIntegral.integral_const_mul, integral_inv_of_pos h0 h1, hΔ j hj']
+  rw [heq]
+  apply intervalIntegral.integral_mono_on (ht j hj')
+  · apply ContinuousOn.intervalIntegrable
+    apply ContinuousOn.div continuousOn_const continuousOn_id
+    intro u hu
+    rw [Set.uIcc_of_le (ht j hj')] at hu
+    exact (lt_of_lt_of_le h0 hu.1).ne'
+  · exact hint j hj'
+  · intro u hu
+    exact div_le_div_of_nonneg_right (hm j hj' u hu) (lt_of_lt_of_le h0 hu.1).le
+
+private theorem bsc_geo_part (α β : ℝ) (K : ℕ) (hK : 0 < K) (hα : 0 < α) (hαβ : α ≤ β) :
+    let Δ := log (β / α) / K
+    let t : ℕ → ℝ := fun j => α * exp (j * Δ)
+    0 ≤ Δ ∧ Monotone t ∧ t 0 = α ∧ t K = β ∧ (∀ j, log (t (j+1) / t j) = Δ) := by
+  intro Δ t
+  have hΔ0 : 0 ≤ Δ := div_nonneg (log_nonneg ((one_le_div hα).mpr hαβ)) (Nat.cast_nonneg _)
+  refine ⟨hΔ0, ?_, ?_, ?_, ?_⟩
+  · intro a b hab
+    apply mul_le_mul_of_nonneg_left _ hα.le
+    apply exp_le_exp.mpr
+    exact mul_le_mul_of_nonneg_right (by exact_mod_cast hab) hΔ0
+  · simp [t]
+  · simp only [t, Δ]
+    rw [mul_div_cancel₀ _ (by exact_mod_cast hK.ne' : (K:ℝ) ≠ 0), exp_log (div_pos (by linarith) hα)]
+    field_simp
+  · intro j
+    simp only [t]
+    rw [mul_div_mul_left _ _ hα.ne', ← exp_sub, log_exp]
+    push_cast; ring
+
+private theorem bsc_fint (α β : ℝ) (hα : 0 < α) (hαβ : α ≤ β) (f : ℝ → ℝ)
+    (h1 : IntervalIntegrable f MeasureTheory.volume α β) :
+    IntervalIntegrable (fun u => f u / u) MeasureTheory.volume α β := by
+  simp only [div_eq_mul_inv]
+  apply h1.mul_continuousOn
+  apply ContinuousOn.inv₀ continuousOn_id
+  intro u hu; rw [Set.uIcc_of_le hαβ] at hu; exact (lt_of_lt_of_le hα hu.1).ne'
+
+private theorem bsc_mono_sum (L α β : ℝ) (K : ℕ) (hK : 0 < K) (hL : 0 < L) (hα : 0 < α) (hαβ : α ≤ β)
+    (h2 : log 2 ≤ α * L) (f : ℝ → ℝ) (hf : MonotoneOn f (Set.Icc α β))
+    (hf0 : ∀ v ∈ Set.Icc α β, 0 ≤ f v) :
+    ∑ q ∈ Ioc ⌊exp (α * L)⌋₊ ⌊exp (β * L)⌋₊, (if q.Prime then f (log q / L) / q else 0) ≤
+      (∫ u in α..β, f u / u) + (f β - f α) * (log (β / α) / K) + K * f β * (4 / (α * L)) := by
+  obtain ⟨hΔ0, ht, ht0, htK, hratio⟩ := bsc_geo_part α β K hK hα hαβ
+  set Δ := log (β / α) / K with hΔdef
+  set t : ℕ → ℝ := fun j => α * exp (j * Δ) with htdef
+  have htα : ∀ j, α ≤ t j := fun j => ht0 ▸ ht (Nat.zero_le j)
+  have htβ : ∀ j ≤ K, t j ≤ β := fun j hj => htK ▸ ht hj
+  have htpos : ∀ j, 0 < t j := fun j => lt_of_lt_of_le hα (htα j)
+  have hb := bsc_blk_sum L hL t ht (by rw [ht0]; exact h2) f (fun j => f (t (j+1))) K
+    (fun j hj v h1 h3 => hf ⟨(htα j).trans h1.le, h3.trans (htβ (j+1) hj)⟩ ⟨htα _, htβ _ hj⟩ h3)
+    (fun j hj => hf0 _ ⟨htα _, htβ _ hj⟩)
+  rw [ht0, htK] at hb
+  beta_reduce at hb
+  refine hb.trans ?_
+  have hfi : IntervalIntegrable (fun u => f u / u) MeasureTheory.volume α β := by
+    apply bsc_fint α β hα hαβ
+    apply MonotoneOn.intervalIntegrable; rwa [Set.uIcc_of_le hαβ]
+  have hint : ∀ j < K, IntervalIntegrable (fun u => f u / u) MeasureTheory.volume (t j) (t (j+1)) := by
+    intro j hj
+    apply hfi.mono_set
+    rw [Set.uIcc_of_le hαβ, Set.uIcc_of_le (ht (Nat.le_succ j))]
+    exact Set.Icc_subset_Icc (htα j) (htβ _ hj)
+  have hr := bsc_riem t K Δ f (fun j => f (t j)) (fun j _ => ht (Nat.le_succ j)) (fun j _ => htpos j)
+    (fun j _ => hratio j)
+    (fun j hj u hu => hf ⟨htα _, htβ _ hj.le⟩ ⟨(htα j).trans hu.1, hu.2.trans (htβ _ hj)⟩ hu.1) hint
+  rw [ht0, htK] at hr
+  beta_reduce at hr
+  have htel : ∑ j ∈ range K, (f (t (j+1)) - f (t j)) = f β - f α := by
+    rw [sum_range_sub (fun j => f (t j)), htK, ht0]
+  have herr : ∑ j ∈ range K, f (t (j+1)) * (4 / (t j * L)) ≤ K * f β * (4 / (α * L)) := by
+    have : ∀ j ∈ range K, f (t (j+1)) * (4 / (t j * L)) ≤ f β * (4 / (α * L)) := by
+      intro j hj
+      have hj' := mem_range.mp hj
+      apply mul_le_mul
+      · exact hf ⟨htα _, htβ _ hj'⟩ ⟨hαβ, le_rfl⟩ (htβ _ hj')
+      · exact div_le_div_of_nonneg_left (by norm_num) (mul_pos hα hL)
+          (mul_le_mul_of_nonneg_right (htα j) hL.le)
+      · exact (div_pos (by norm_num) (mul_pos (htpos j) hL)).le
+      · exact hf0 β ⟨hαβ, le_rfl⟩
+    calc _ ≤ ∑ j ∈ range K, f β * (4 / (α * L)) := sum_le_sum this
+      _ = _ := by rw [sum_const, card_range, nsmul_eq_mul]; ring
+  have hsplit : ∑ j ∈ range K, f (t (j+1)) * (log (t (j+1) / t j) + 4 / (t j * L)) =
+      ∑ j ∈ range K, f (t j) * Δ + (∑ j ∈ range K, (f (t (j+1)) - f (t j))) * Δ +
+      ∑ j ∈ range K, f (t (j+1)) * (4 / (t j * L)) := by
+    rw [sum_mul, ← sum_add_distrib, ← sum_add_distrib]
+    apply sum_congr rfl; intro j _; rw [hratio j]; ring
+  rw [hsplit, htel]
+  linarith
+
+private theorem bsc_anti_sum (L α β : ℝ) (K : ℕ) (hK : 0 < K) (hL : 0 < L) (hα : 0 < α) (hαβ : α ≤ β)
+    (h2 : log 2 ≤ α * L) (f : ℝ → ℝ) (hf : AntitoneOn f (Set.Icc α β))
+    (hf0 : ∀ v ∈ Set.Icc α β, 0 ≤ f v) :
+    ∑ q ∈ Ioc ⌊exp (α * L)⌋₊ ⌊exp (β * L)⌋₊, (if q.Prime then f (log q / L) / q else 0) ≤
+      (∫ u in α..β, f u / u) + (f α - f β) * (log (β / α) / K) + K * f α * (4 / (α * L)) := by
+  obtain ⟨hΔ0, ht, ht0, htK, hratio⟩ := bsc_geo_part α β K hK hα hαβ
+  set Δ := log (β / α) / K with hΔdef
+  set t : ℕ → ℝ := fun j => α * exp (j * Δ) with htdef
+  have htα : ∀ j, α ≤ t j := fun j => ht0 ▸ ht (Nat.zero_le j)
+  have htβ : ∀ j ≤ K, t j ≤ β := fun j hj => htK ▸ ht hj
+  have htpos : ∀ j, 0 < t j := fun j => lt_of_lt_of_le hα (htα j)
+  have hb := bsc_blk_sum L hL t ht (by rw [ht0]; exact h2) f (fun j => f (t j)) K
+    (fun j hj v h1 h3 => hf ⟨htα _, htβ _ hj.le⟩ ⟨(htα j).trans h1.le, h3.trans (htβ (j+1) hj)⟩ h1.le)
+    (fun j hj => hf0 _ ⟨htα _, htβ _ hj.le⟩)
+  rw [ht0, htK] at hb
+  beta_reduce at hb
+  refine hb.trans ?_
+  have hfi : IntervalIntegrable (fun u => f u / u) MeasureTheory.volume α β := by
+    apply bsc_fint α β hα hαβ
+    apply AntitoneOn.intervalIntegrable; rwa [Set.uIcc_of_le hαβ]
+  have hint : ∀ j < K, IntervalIntegrable (fun u => f u / u) MeasureTheory.volume (t j) (t (j+1)) := by
+    intro j hj
+    apply hfi.mono_set
+    rw [Set.uIcc_of_le hαβ, Set.uIcc_of_le (ht (Nat.le_succ j))]
+    exact Set.Icc_subset_Icc (htα j) (htβ _ hj)
+  have hr := bsc_riem t K Δ f (fun j => f (t (j+1))) (fun j _ => ht (Nat.le_succ j)) (fun j _ => htpos j)
+    (fun j _ => hratio j)
+    (fun j hj u hu => hf ⟨(htα j).trans hu.1, hu.2.trans (htβ _ hj)⟩ ⟨htα _, htβ _ hj⟩ hu.2) hint
+  rw [ht0, htK] at hr
+  beta_reduce at hr
+  have htel : ∑ j ∈ range K, (f (t j) - f (t (j+1))) = f α - f β := by
+    have := sum_range_sub (fun j => f (t j)) K
+    rw [htK, ht0] at this
+    rw [← neg_sub (f β), ← this, ← sum_neg_distrib]
+    apply sum_congr rfl; intro j _; ring
+  have herr : ∑ j ∈ range K, f (t j) * (4 / (t j * L)) ≤ K * f α * (4 / (α * L)) := by
+    have : ∀ j ∈ range K, f (t j) * (4 / (t j * L)) ≤ f α * (4 / (α * L)) := by
+      intro j hj
+      have hj' := mem_range.mp hj
+      apply mul_le_mul
+      · exact hf ⟨le_rfl, hαβ⟩ ⟨htα _, htβ _ hj'.le⟩ (htα j)
+      · exact div_le_div_of_nonneg_left (by norm_num) (mul_pos hα hL)
+          (mul_le_mul_of_nonneg_right (htα j) hL.le)
+      · exact (div_pos (by norm_num) (mul_pos (htpos j) hL)).le
+      · exact hf0 α ⟨le_rfl, hαβ⟩
+    calc _ ≤ ∑ j ∈ range K, f α * (4 / (α * L)) := sum_le_sum this
+      _ = _ := by rw [sum_const, card_range, nsmul_eq_mul]; ring
+  have hsplit : ∑ j ∈ range K, f (t j) * (log (t (j+1) / t j) + 4 / (t j * L)) =
+      ∑ j ∈ range K, f (t (j+1)) * Δ + (∑ j ∈ range K, (f (t j) - f (t (j+1)))) * Δ +
+      ∑ j ∈ range K, f (t j) * (4 / (t j * L)) := by
+    rw [sum_mul, ← sum_add_distrib, ← sum_add_distrib]
+    apply sum_congr rfl; intro j _; rw [hratio j]; ring
+  rw [hsplit, htel]
+  linarith
+
+private theorem bsc_bdry (S : Finset ℕ) (y x B : ℝ) (g : ℕ → ℝ) (hy : 0 ≤ y) (hB : 0 ≤ B)
+    (hS : ∀ q ∈ S, q.Prime ∧ y ≤ q ∧ (q : ℝ) ≤ x)
+    (hg0 : ∀ q : ℕ, q.Prime → y ≤ q → (q : ℝ) ≤ x → 0 ≤ g q)
+    (hgB : ∀ q ∈ S, g q ≤ B) :
+    ∑ q ∈ S, g q ≤ ∑ q ∈ Ioc ⌊y⌋₊ ⌊x⌋₊, (if q.Prime then g q else 0) + B := by
+  rw [← sum_filter_add_sum_filter_not S (fun q => q ≤ ⌊y⌋₊)]
+  have h1 : ∑ q ∈ S.filter (fun q => q ≤ ⌊y⌋₊), g q ≤ B := by
+    have key : ∀ c ∈ S.filter (fun q => q ≤ ⌊y⌋₊), c = ⌊y⌋₊ := by
+      intro c hc
+      obtain ⟨hcS, hcy⟩ := mem_filter.mp hc
+      have h1 : (c : ℝ) ≤ ⌊y⌋₊ := by exact_mod_cast hcy
+      have h2 : (⌊y⌋₊ : ℝ) ≤ y := Nat.floor_le hy
+      have h3 := (hS c hcS).2.1
+      have : (c : ℝ) = ⌊y⌋₊ := le_antisymm h1 (h2.trans h3)
+      exact_mod_cast this
+    have hc : (S.filter (fun q => q ≤ ⌊y⌋₊)).card ≤ 1 := by
+      apply card_le_one.mpr
+      intro a ha b hb
+      rw [key a ha, key b hb]
+    calc _ ≤ ∑ q ∈ S.filter (fun q => q ≤ ⌊y⌋₊), B :=
+          sum_le_sum (fun q hq => hgB q (mem_filter.mp hq).1)
+      _ = (S.filter (fun q => q ≤ ⌊y⌋₊)).card * B := by rw [sum_const, nsmul_eq_mul]
+      _ ≤ 1 * B := mul_le_mul_of_nonneg_right (by exact_mod_cast hc) hB
+      _ = B := one_mul B
+  have h2 : ∑ q ∈ S.filter (fun q => ¬ q ≤ ⌊y⌋₊), g q ≤
+      ∑ q ∈ Ioc ⌊y⌋₊ ⌊x⌋₊, (if q.Prime then g q else 0) := by
+    rw [← sum_filter]
+    apply sum_le_sum_of_subset_of_nonneg
+    · intro q hq
+      obtain ⟨hqS, hqy⟩ := mem_filter.mp hq
+      obtain ⟨hp, _, hqx⟩ := hS q hqS
+      have hx : 0 ≤ x := le_trans (Nat.cast_nonneg q) hqx
+      exact mem_filter.mpr ⟨mem_Ioc.mpr ⟨by omega, Nat.le_floor hqx⟩, hp⟩
+    · intro q hq _
+      obtain ⟨hq1, hp⟩ := mem_filter.mp hq
+      have hlt := (mem_Ioc.mp hq1)
+      have hx : 0 ≤ x := by
+        by_contra hneg
+        push_neg at hneg
+        rw [Nat.floor_of_nonpos hneg.le] at hlt
+        omega
+      exact hg0 q hp ((Nat.floor_lt hy).mp hlt.1).le ((Nat.le_floor_iff hx).mp hlt.2)
+  linarith
+
+private theorem bsc_inner_int (a α : ℝ) (hα : 0 < α) (h : 2 * α ≤ a) :
+    ∫ v in α..(a / 2), (1 / (a - v)) / v = log ((a - α) / α) / a := by
+  have ha : 0 < a := by linarith
+  have hsub : ∀ v ∈ Set.uIcc α (a / 2), 0 < v ∧ 0 < a - v := by
+    intro v hv
+    rw [Set.uIcc_of_le (by linarith)] at hv
+    exact ⟨by linarith [hv.1], by linarith [hv.2]⟩
+  have hderiv : ∀ v ∈ Set.uIcc α (a / 2),
+      HasDerivAt (fun v => (log v - log (a - v)) / a) ((1 / (a - v)) / v) v := by
+    intro v hv
+    obtain ⟨h1, h2⟩ := hsub v hv
+    have d1 := hasDerivAt_log h1.ne'
+    have d2 : HasDerivAt (fun v => log (a - v)) ((a - v)⁻¹ * (-1)) v := by
+      have := ((hasDerivAt_id v).const_sub a)
+      exact (hasDerivAt_log h2.ne').comp v (by simpa using this)
+    convert (d1.sub d2).div_const a using 1
+    field_simp
+    ring
+  have hcont : ContinuousOn (fun v => (1 / (a - v)) / v) (Set.uIcc α (a / 2)) := by
+    apply ContinuousOn.div (ContinuousOn.div continuousOn_const (by fun_prop) ?_) continuousOn_id
+    · intro v hv; exact (hsub v hv).1.ne'
+    · intro v hv; exact (hsub v hv).2.ne'
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv (hcont.intervalIntegrable)]
+  have e1 : a - a / 2 = a / 2 := by ring
+  rw [e1, sub_self, zero_div, zero_sub, ← neg_div, neg_sub, log_div (by linarith) hα.ne']
+
+private theorem bsc_logratio_mono {a b : ℝ} (ha : 1 ≤ a) (hab : a ≤ b) (hb : b ≤ 2) :
+    log a / (a + 1) ≤ log b / (b + 1) := by
+  have ha0 : 0 < a := by linarith
+  have hb0 : 0 < b := by linarith
+  rw [div_le_div_iff₀ (by linarith) (by linarith)]
+  have hl1 : log a ≤ a - 1 := log_le_sub_one_of_pos ha0
+  have hl0 : 0 ≤ log a := log_nonneg ha
+  have hlr : 1 - a / b ≤ log (b / a) := by
+    have := one_sub_inv_le_log_of_pos (div_pos hb0 ha0)
+    rwa [inv_div] at this
+  rw [log_div hb0.ne' ha0.ne'] at hlr
+  have hq : (b - a) / b ≤ log b - log a := by
+    have : 1 - a / b = (b - a) / b := by field_simp
+    linarith
+  have hq' : (b - a) ≤ (log b - log a) * b := by
+    rwa [div_le_iff₀ hb0] at hq
+  -- need log a * (b + 1) ≤ log b * (a + 1), i.e. log a * (b - a) ≤ (log b - log a) * (a + 1)
+  have hla : log a * b ≤ a + 1 := by nlinarith
+  have hdiff : 0 ≤ log b - log a := by nlinarith
+  nlinarith [mul_le_mul_of_nonneg_left hq' hdiff, mul_nonneg hdiff hl0]
+
+/-- The inner weight 1/(1 - u - v) of the mixed pair sum. -/
+private def bsc_f2 (u v : ℝ) : ℝ := 1 / (1 - u - v)
+
+/-- The inner integral of the mixed pair sum, in closed form. -/
+private def bsc_G2 (u : ℝ) : ℝ := log ((1 - u - 100 / 329) / (100 / 329)) / (1 - u)
+
+private lemma bsc_exp_rpow (N : ℕ) (hN : 0 < N) (c : ℝ) : (N : ℝ) ^ c = exp (c * log N) := by
+  rw [rpow_def_of_pos (by exact_mod_cast hN), mul_comm]
+
+private lemma bsc_z1 (N : ℕ) (hN : 0 < N) : z1 N = exp (1 / 11 * log N) := by
+  show (N : ℝ) ^ (1 / 11 : ℝ) = _
+  exact bsc_exp_rpow N hN _
+
+private lemma bsc_z2 (N : ℕ) (hN : 0 < N) : z2 N = exp (100 / 329 * log N) := by
+  show (N : ℝ) ^ (1 / 3.29 : ℝ) = _
+  rw [bsc_exp_rpow N hN]; norm_num
+
+private lemma bsc_lo {L a q : ℝ} (hL : 0 < L) (h : exp (a * L) ≤ q) : a ≤ log q / L := by
+  rw [le_div_iff₀ hL]
+  have := log_le_log (exp_pos _) h
+  rwa [log_exp] at this
+
+private lemma bsc_hi {L b q : ℝ} (hL : 0 < L) (hq : 0 < q) (h : q ≤ exp (b * L)) :
+    log q / L ≤ b := by
+  rw [div_le_iff₀ hL]
+  have := log_le_log hq h
+  rwa [log_exp] at this
+
+private lemma bsc_hi' {L b q : ℝ} (hL : 0 < L) (hq : 0 < q) (h : q < exp (b * L)) :
+    log q / L < b := by
+  rw [div_lt_iff₀ hL]
+  have := log_lt_log hq h
+  rwa [log_exp] at this
+
+private lemma bsc_N_pos (N : ℕ) (hL : 0 < log (N : ℝ)) : 0 < N := by
+  rcases Nat.eq_zero_or_pos N with h | h
+  · subst h; simp at hL
+  · exact h
+
+private lemma bsc_exp_gt (c L : ℝ) : c * L < exp (c * L) := by
+  linarith [add_one_le_exp (c * L)]
+
+private lemma bsc_G2_bounds (u : ℝ) (h1 : 1 / 11 ≤ u) (h2 : u ≤ 100 / 329) :
+    0 ≤ bsc_G2 u ∧ bsc_G2 u ≤ 2 := by
+  unfold bsc_G2
+  have hw1 : 1 ≤ (1 - u - 100 / 329) / (100 / 329) := by
+    rw [le_div_iff₀ (by norm_num)]; linarith
+  have hw2 : (1 - u - 100 / 329) / (100 / 329) ≤ 2 := by
+    rw [div_le_iff₀ (by norm_num)]; linarith
+  have hl0 := log_nonneg hw1
+  have hl1 : log ((1 - u - 100 / 329) / (100 / 329)) ≤ 1 := by
+    have := log_le_sub_one_of_pos (show 0 < (1 - u - 100 / 329) / (100 / 329) by linarith)
+    linarith
+  have hd : 0 < 1 - u := by linarith
+  refine ⟨div_nonneg hl0 hd.le, ?_⟩
+  rw [div_le_iff₀ hd]; linarith
+
+private lemma bsc_G2_anti : AntitoneOn bsc_G2 (Set.Icc (1 / 11) (100 / 329)) := by
+  intro a ha b hb hab
+  have key : ∀ u, u ≤ 100 / 329 → bsc_G2 u =
+      log ((1 - u - 100 / 329) / (100 / 329)) / ((1 - u - 100 / 329) / (100 / 329) + 1) *
+        (329 / 100) := by
+    intro u hu
+    unfold bsc_G2
+    have h1 : (1 - u - 100 / 329) / (100 / 329) + 1 = (1 - u) * (329 / 100) := by ring
+    rw [h1]
+    have hd : (1 - u) ≠ 0 := by intro h; linarith
+    field_simp
+  rw [key a ha.2, key b hb.2]
+  apply mul_le_mul_of_nonneg_right _ (by norm_num)
+  apply bsc_logratio_mono
+  · rw [le_div_iff₀ (by norm_num)]; linarith [hb.2]
+  · apply div_le_div_of_nonneg_right _ (by norm_num); linarith
+  · rw [div_le_iff₀ (by norm_num)]; linarith [ha.1]
+
+/-- The mixed pair region splits as an outer prime sum of inner prime sums. -/
+private lemma bsc_two_split (N : ℕ) (hN : 2 ≤ N) :
+    log N * ∑ b ∈ switchedPairs118 N,
+      1 / ((b.1 * b.2 : ℕ) * log ((N : ℝ) / (b.1 * b.2 : ℕ))) ≤
+    ∑ p ∈ (range (N + 1)).filter (fun p : ℕ => p.Prime ∧ z1 N ≤ p ∧ (p : ℝ) < z2 N),
+      (1 / (p : ℝ)) * ∑ q ∈ (range (N + 1)).filter
+        (fun q : ℕ => q.Prime ∧ z2 N ≤ q ∧ (q : ℝ) < ((N : ℝ) / p) ^ (1 / 2 : ℝ)),
+        bsc_f2 (log p / log N) (log q / log N) / q := by
+  have hNr : (1 : ℝ) < N := by exact_mod_cast (show 1 < N by omega)
+  have hL : 0 < log (N : ℝ) := log_pos hNr
+  -- the term identity and positivity
+  have hterm : ∀ p q : ℕ, p.Prime → q.Prime → (q : ℝ) < ((N : ℝ) / p) ^ (1 / 2 : ℝ) →
+      (p : ℝ) < N →
+      log N * (1 / ((p * q : ℕ) * log ((N : ℝ) / (p * q : ℕ)))) =
+        (1 / (p : ℝ)) * (bsc_f2 (log p / log N) (log q / log N) / q) ∧
+      0 ≤ (1 / (p : ℝ)) * (bsc_f2 (log p / log N) (log q / log N) / q) := by
+    intro p q hp hq hqr hpN
+    have hp0 : (0 : ℝ) < p := by exact_mod_cast hp.pos
+    have hq0 : (0 : ℝ) < q := by exact_mod_cast hq.pos
+    have hNp : 0 < (N : ℝ) / p := div_pos (by linarith) hp0
+    rw [← sqrt_eq_rpow, lt_sqrt hq0.le] at hqr
+    have hpq : (p : ℝ) * q < N := by
+      have h1 := (lt_div_iff₀ hp0).mp hqr
+      have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq.one_lt.le
+      nlinarith
+    have hlog : log ((N : ℝ) / (p * q)) = log N - log p - log q := by
+      rw [log_div (by linarith) (by positivity), log_mul hp0.ne' hq0.ne']; ring
+    have hpos : 0 < log N - log p - log q := by
+      rw [← hlog]; apply log_pos; rw [one_lt_div (by positivity)]; exact hpq
+    have hden : 1 - log p / log N - log q / log N = (log N - log p - log q) / log N := by
+      field_simp
+    unfold bsc_f2
+    rw [hden]
+    push_cast
+    rw [hlog]
+    constructor
+    · field_simp
+    · have : 0 < (log N - log p - log q) / log N := div_pos hpos hL
+      positivity
+  unfold switchedPairs118
+  rw [sum_filter, Finset.product_eq_sprod, sum_product, mul_sum, sum_filter]
+  apply sum_le_sum
+  intro p hp
+  split_ifs with hpc
+  · rw [mul_sum, mul_sum, sum_filter]
+    apply sum_le_sum
+    intro q hq
+    by_cases h1 : (p.Prime ∧ q.Prime ∧ z1 N ≤ (p : ℝ) ∧ (p : ℝ) < z2 N ∧
+        z2 N ≤ (q : ℝ) ∧ (q : ℝ) < ((N : ℝ) / (p : ℝ)) ^ (1 / 2 : ℝ) ∧ Nat.Coprime (p * q) N)
+    · have h2 : q.Prime ∧ z2 N ≤ q ∧ (q : ℝ) < ((N : ℝ) / p) ^ (1 / 2 : ℝ) :=
+        ⟨h1.2.1, h1.2.2.2.2.1, h1.2.2.2.2.2.1⟩
+      have hz2N : z2 N < N := by
+        show (N : ℝ) ^ (1 / 3.29 : ℝ) < N
+        simpa using rpow_lt_rpow_of_exponent_lt hNr (by norm_num : (1 / 3.29 : ℝ) < 1)
+      have hpN : (p : ℝ) < N := h1.2.2.2.1.trans hz2N
+      rw [if_pos h1, if_pos h2]
+      exact le_of_eq (hterm p q h1.1 h1.2.1 h1.2.2.2.2.2.1 hpN).1
+    · rw [if_neg h1]
+      split_ifs with h2
+      · have hz2N : z2 N < N := by
+          show (N : ℝ) ^ (1 / 3.29 : ℝ) < N
+          simpa using rpow_lt_rpow_of_exponent_lt hNr (by norm_num : (1 / 3.29 : ℝ) < 1)
+        rw [mul_zero]
+        exact (hterm p q hpc.1 h2.1 h2.2.2 (hpc.2.2.trans hz2N)).2
+      · simp
+  · rw [mul_sum]
+    apply le_of_eq
+    apply sum_eq_zero
+    intro q _
+    rw [if_neg]
+    · simp
+    · intro h
+      exact hpc ⟨h.1, h.2.2.1, h.2.2.2.1⟩
+
+/-- The inner prime sum of the mixed region for one outer prime. -/
+private lemma bsc_two_inner (N : ℕ) (hL70 : 70 ≤ log (N : ℝ)) (K : ℕ) (hK : 0 < K) (p : ℕ)
+    (hp : p.Prime) (hp1 : z1 N ≤ p) (hp2 : (p : ℝ) < z2 N) :
+    ∑ q ∈ (range (N + 1)).filter
+        (fun q : ℕ => q.Prime ∧ z2 N ≤ q ∧ (q : ℝ) < ((N : ℝ) / p) ^ (1 / 2 : ℝ)),
+      bsc_f2 (log p / log N) (log q / log N) / q ≤
+      bsc_G2 (log p / log N) + (3 / K + 40 * K / log N + 10 / log N) := by
+  set L := log (N : ℝ) with hLdef
+  have hL : 0 < L := by linarith
+  have hN0 : 0 < N := bsc_N_pos N hL
+  have hp0 : (0 : ℝ) < p := by exact_mod_cast hp.pos
+  rw [bsc_z1 N hN0] at hp1
+  rw [bsc_z2 N hN0] at hp2
+  set u := log p / L with hu
+  have hu1 : 1 / 11 ≤ u := bsc_lo hL hp1
+  have hu2 : u < 100 / 329 := bsc_hi' hL hp0 hp2
+  have huL : u * L = log p := by rw [hu]; field_simp
+  set β := (1 - u) / 2 with hβ
+  have hroot : ((N : ℝ) / p) ^ (1 / 2 : ℝ) = exp (β * L) := by
+    rw [rpow_def_of_pos (div_pos (by exact_mod_cast hN0) hp0), log_div (by positivity) hp0.ne',
+      ← huL, hβ]
+    congr 1; ring
+  have hαβ : (100 / 329 : ℝ) ≤ β := by rw [hβ]; linarith
+  have hKr : (0 : ℝ) < K := by exact_mod_cast hK
+  -- the weight on the closed range
+  have hfpos : ∀ v, v ≤ β → (1 - u) / 2 ≤ 1 - u - v := by intro v hv; rw [hβ] at hv; linarith
+  have hf3 : ∀ v, v ≤ β → bsc_f2 u v ≤ 3 := by
+    intro v hv
+    have := hfpos v hv
+    unfold bsc_f2
+    rw [div_le_iff₀ (by linarith)]; linarith
+  have hf0 : ∀ v, v ≤ β → 0 ≤ bsc_f2 u v := by
+    intro v hv
+    have := hfpos v hv
+    unfold bsc_f2
+    exact (div_pos one_pos (by linarith)).le
+  have hb := bsc_bdry ((range (N + 1)).filter
+        (fun q : ℕ => q.Prime ∧ exp (100 / 329 * L) ≤ q ∧ (q : ℝ) < exp (β * L)))
+    (exp (100 / 329 * L)) (exp (β * L)) (3 / exp (100 / 329 * L))
+    (fun q => bsc_f2 u (log q / L) / q) (exp_pos _).le (by positivity)
+    (fun q hq => by
+      obtain ⟨_, h1, h2, h3⟩ := mem_filter.mp hq
+      exact ⟨h1, h2, h3.le⟩)
+    (fun q _ hq1 hq2 => by
+      have hq0 : (0 : ℝ) < q := lt_of_lt_of_le (exp_pos _) hq1
+      exact div_nonneg (hf0 _ (bsc_hi hL hq0 hq2)) hq0.le)
+    (fun q hq => by
+      obtain ⟨_, _, h2, h3⟩ := mem_filter.mp hq
+      have hq0 : (0 : ℝ) < q := lt_of_lt_of_le (exp_pos _) h2
+      calc bsc_f2 u (log q / L) / q ≤ 3 / q :=
+            div_le_div_of_nonneg_right (hf3 _ (bsc_hi hL hq0 h3.le)) hq0.le
+        _ ≤ _ := div_le_div_of_nonneg_left (by norm_num) (exp_pos _) h2)
+  have hlog2 : log 2 ≤ 100 / 329 * L := by
+    have := log_two_lt_d9; linarith
+  have hmono : MonotoneOn (bsc_f2 u) (Set.Icc (100 / 329) β) := by
+    intro a ha b hb hab
+    have h1 := hfpos a ha.2
+    have h2 := hfpos b hb.2
+    unfold bsc_f2
+    exact one_div_le_one_div_of_le (by linarith) (by linarith)
+  have hm := bsc_mono_sum L (100 / 329) β K hK hL (by norm_num) hαβ hlog2 (bsc_f2 u) hmono
+    (fun v hv => hf0 v hv.2)
+  have hint : ∫ v in (100 / 329 : ℝ)..β, bsc_f2 u v / v = bsc_G2 u := by
+    unfold bsc_f2 bsc_G2
+    rw [hβ]
+    exact bsc_inner_int (1 - u) (100 / 329) (by norm_num) (by linarith)
+  rw [hint] at hm
+  -- the error terms
+  have hratio : log (β / (100 / 329)) / K ≤ 1 / K := by
+    apply div_le_div_of_nonneg_right _ hKr.le
+    have := log_le_sub_one_of_pos (show 0 < β / (100 / 329) by positivity)
+    have : β / (100 / 329) ≤ 2 := by rw [div_le_iff₀ (by norm_num)]; rw [hβ]; linarith
+    linarith
+  have hratio0 : 0 ≤ log (β / (100 / 329)) / K :=
+    div_nonneg (log_nonneg (by rw [le_div_iff₀ (by norm_num)]; linarith)) hKr.le
+  have hdiff : (bsc_f2 u β - bsc_f2 u (100 / 329)) * (log (β / (100 / 329)) / K) ≤ 3 / K := by
+    have h1 : bsc_f2 u β - bsc_f2 u (100 / 329) ≤ 3 := by
+      linarith [hf3 β le_rfl, hf0 (100 / 329) hαβ]
+    have h0 : 0 ≤ bsc_f2 u β - bsc_f2 u (100 / 329) := by
+      linarith [hmono ⟨le_rfl, hαβ⟩ ⟨hαβ, le_rfl⟩ hαβ]
+    calc _ ≤ 3 * (1 / (K : ℝ)) := mul_le_mul h1 hratio hratio0 (by norm_num)
+      _ = 3 / (K : ℝ) := by ring
+  have hlast : (K : ℝ) * bsc_f2 u β * (4 / (100 / 329 * L)) ≤ 40 * K / L := by
+    have := hf3 β le_rfl
+    have h0 := hf0 β le_rfl
+    calc (K : ℝ) * bsc_f2 u β * (4 / (100 / 329 * L)) ≤ K * 3 * (4 / (100 / 329 * L)) := by
+          apply mul_le_mul_of_nonneg_right _ (by positivity)
+          exact mul_le_mul_of_nonneg_left this hKr.le
+      _ = 39.48 * K / L := by field_simp; ring
+      _ ≤ 40 * K / L := by
+          apply div_le_div_of_nonneg_right _ hL.le; nlinarith
+  have hbd : 3 / exp (100 / 329 * L) ≤ 10 / L := by
+    have := bsc_exp_gt (100 / 329) L
+    calc 3 / exp (100 / 329 * L) ≤ 3 / (100 / 329 * L) :=
+          div_le_div_of_nonneg_left (by norm_num) (by positivity) this.le
+      _ = 9.87 / L := by field_simp; ring
+      _ ≤ 10 / L := div_le_div_of_nonneg_right (by norm_num) hL.le
+  have hset : (range (N + 1)).filter
+        (fun q : ℕ => q.Prime ∧ z2 N ≤ q ∧ (q : ℝ) < ((N : ℝ) / p) ^ (1 / 2 : ℝ)) =
+      (range (N + 1)).filter
+        (fun q : ℕ => q.Prime ∧ exp (100 / 329 * L) ≤ q ∧ (q : ℝ) < exp (β * L)) := by
+    rw [hroot, bsc_z2 N hN0]
+  rw [hset]
+  linarith
+
+/-- The outer prime sum of the mixed region against its integral. -/
+private lemma bsc_two_outer (N : ℕ) (hL70 : 70 ≤ log (N : ℝ)) (K : ℕ) (hK : 0 < K) :
+    ∑ p ∈ (range (N + 1)).filter (fun p : ℕ => p.Prime ∧ z1 N ≤ p ∧ (p : ℝ) < z2 N),
+      (1 / (p : ℝ)) * ∑ q ∈ (range (N + 1)).filter
+        (fun q : ℕ => q.Prime ∧ z2 N ≤ q ∧ (q : ℝ) < ((N : ℝ) / p) ^ (1 / 2 : ℝ)),
+        bsc_f2 (log p / log N) (log q / log N) / q ≤
+      (∫ u in (1 / 11 : ℝ)..(100 / 329), bsc_G2 u / u) +
+        (11 / K + 168 * K / log N + 42 / log N) := by
+  have hL : 0 < log (N : ℝ) := by linarith
+  have hN0 : 0 < N := bsc_N_pos N hL
+  have hKr : (0 : ℝ) < K := by exact_mod_cast hK
+  set E1 : ℝ := 3 / K + 40 * K / log N + 10 / log N with hE1
+  have hE10 : 0 ≤ E1 := by positivity
+  set P1 := (range (N + 1)).filter (fun p : ℕ => p.Prime ∧ z1 N ≤ p ∧ (p : ℝ) < z2 N) with hP1
+  have hstep : ∑ p ∈ P1, (1 / (p : ℝ)) * ∑ q ∈ (range (N + 1)).filter
+        (fun q : ℕ => q.Prime ∧ z2 N ≤ q ∧ (q : ℝ) < ((N : ℝ) / p) ^ (1 / 2 : ℝ)),
+        bsc_f2 (log p / log N) (log q / log N) / q ≤
+      ∑ p ∈ P1, bsc_G2 (log p / log N) / p + E1 * ∑ p ∈ P1, (1 / (p : ℝ)) := by
+    rw [mul_sum, ← sum_add_distrib]
+    apply sum_le_sum
+    intro p hp
+    obtain ⟨_, hpp, hp1, hp2⟩ := mem_filter.mp hp
+    have h := bsc_two_inner N hL70 K hK p hpp hp1 hp2
+    have hp0 : (0 : ℝ) ≤ 1 / (p : ℝ) := by positivity
+    calc _ ≤ (1 / (p : ℝ)) * (bsc_G2 (log p / log N) + E1) := mul_le_mul_of_nonneg_left h hp0
+      _ = _ := by ring
+  have hP1' : P1 = (range (N + 1)).filter (fun p : ℕ => p.Prime ∧ exp (1 / 11 * log N) ≤ p ∧
+      (p : ℝ) < exp (100 / 329 * log N)) := by
+    rw [hP1, bsc_z1 N hN0, bsc_z2 N hN0]
+  have hS : ∀ p ∈ P1, p.Prime ∧ exp (1 / 11 * log N) ≤ (p : ℝ) ∧
+      (p : ℝ) ≤ exp (100 / 329 * log N) := by
+    intro p hp
+    rw [hP1'] at hp
+    obtain ⟨_, h1, h2, h3⟩ := mem_filter.mp hp
+    exact ⟨h1, h2, h3.le⟩
+  have hlog2 : log 2 ≤ 1 / 11 * log N := by
+    have := log_two_lt_d9; linarith
+  have hbd1 : 1 / exp (1 / 11 * log N) ≤ 11 / log N := by
+    have := bsc_exp_gt (1 / 11) (log N)
+    calc 1 / exp (1 / 11 * log N) ≤ 1 / (1 / 11 * log N) :=
+          div_le_div_of_nonneg_left (by norm_num) (by positivity) this.le
+      _ = 11 / log N := by field_simp
+  -- the reciprocal mass
+  have hrec : ∑ p ∈ P1, (1 / (p : ℝ)) ≤ 2 := by
+    have hb := bsc_bdry P1 (exp (1 / 11 * log N)) (exp (100 / 329 * log N))
+      (1 / exp (1 / 11 * log N)) (fun p => 1 / (p : ℝ)) (exp_pos _).le (by positivity) hS
+      (fun q _ _ _ => by positivity)
+      (fun q hq => div_le_div_of_nonneg_left (by norm_num) (exp_pos _) (hS q hq).2.1)
+    have hm := bsc_mono_sum (log N) (1 / 11) (100 / 329) 1 one_pos hL (by norm_num) (by norm_num)
+      hlog2 (fun _ => (1 : ℝ)) (fun _ _ _ _ _ => le_rfl) (fun _ _ => zero_le_one)
+    beta_reduce at hm
+    rw [integral_one_div_of_pos (by norm_num) (by norm_num)] at hm
+    have hlb : log ((100 / 329 : ℝ) / (1 / 11)) ≤ 1.2070078 := by
+      rw [show (100 / 329 : ℝ) / (1 / 11) = 1100 / 329 by norm_num]; exact log_ba_le
+    have h44 : (((1 : ℕ) : ℝ)) * 1 * (4 / (1 / 11 * log N)) = 44 / log N := by
+      field_simp; ring
+    rw [h44] at hm
+    have h55 : 44 / log N + 11 / log N ≤ 0.79 := by
+      rw [← add_div, div_le_iff₀ hL]; linarith
+    linarith
+  -- the main outer sum
+  have hmain : ∑ p ∈ P1, bsc_G2 (log p / log N) / p ≤
+      (∫ u in (1 / 11 : ℝ)..(100 / 329), bsc_G2 u / u) + 5 / K + 88 * K / log N +
+        22 / log N := by
+    have hb := bsc_bdry P1 (exp (1 / 11 * log N)) (exp (100 / 329 * log N))
+      (2 / exp (1 / 11 * log N)) (fun p => bsc_G2 (log p / log N) / p) (exp_pos _).le
+      (by positivity) hS
+      (fun q _ hq1 hq2 => by
+        have hq0 : (0 : ℝ) < q := lt_of_lt_of_le (exp_pos _) hq1
+        exact div_nonneg (bsc_G2_bounds _ (bsc_lo hL hq1) (bsc_hi hL hq0 hq2)).1 hq0.le)
+      (fun q hq => by
+        obtain ⟨_, hq1, hq2⟩ := hS q hq
+        have hq0 : (0 : ℝ) < q := lt_of_lt_of_le (exp_pos _) hq1
+        have hG := (bsc_G2_bounds _ (bsc_lo hL hq1) (bsc_hi hL hq0 hq2)).2
+        calc bsc_G2 (log q / log N) / q ≤ 2 / q := div_le_div_of_nonneg_right hG hq0.le
+          _ ≤ _ := div_le_div_of_nonneg_left (by norm_num) (exp_pos _) hq1)
+    have ha := bsc_anti_sum (log N) (1 / 11) (100 / 329) K hK hL (by norm_num) (by norm_num)
+      hlog2 bsc_G2 bsc_G2_anti (fun v hv => (bsc_G2_bounds v hv.1 hv.2).1)
+    have hG1 := bsc_G2_bounds (1 / 11) le_rfl (by norm_num)
+    have hG2 := bsc_G2_bounds (100 / 329) (by norm_num) le_rfl
+    have hlr : log ((100 / 329 : ℝ) / (1 / 11)) / K ≤ 2.4 / K := by
+      apply div_le_div_of_nonneg_right _ hKr.le
+      have := log_le_sub_one_of_pos (show (0 : ℝ) < (100 / 329) / (1 / 11) by norm_num)
+      norm_num at this ⊢; linarith
+    have hlr0 : 0 ≤ log ((100 / 329 : ℝ) / (1 / 11)) / K :=
+      div_nonneg (log_nonneg (by norm_num)) hKr.le
+    have hd1 : (bsc_G2 (1 / 11) - bsc_G2 (100 / 329)) * (log ((100 / 329 : ℝ) / (1 / 11)) / K)
+        ≤ 5 / K := by
+      calc _ ≤ 2 * (2.4 / (K : ℝ)) := mul_le_mul (by linarith) hlr hlr0 (by norm_num)
+        _ ≤ 5 / (K : ℝ) := by rw [← mul_div_assoc]; exact div_le_div_of_nonneg_right (by norm_num) hKr.le
+    have hd2 : (K : ℝ) * bsc_G2 (1 / 11) * (4 / (1 / 11 * log N)) ≤ 88 * K / log N := by
+      calc (K : ℝ) * bsc_G2 (1 / 11) * (4 / (1 / 11 * log N)) ≤ K * 2 * (4 / (1 / 11 * log N)) := by
+            apply mul_le_mul_of_nonneg_right _ (by positivity)
+            exact mul_le_mul_of_nonneg_left hG1.2 hKr.le
+        _ = 88 * K / log N := by field_simp; ring
+    have hbd2 : 2 / exp (1 / 11 * log N) ≤ 22 / log N := by
+      have : 2 / exp (1 / 11 * log N) = 2 * (1 / exp (1 / 11 * log N)) := by ring
+      rw [this]
+      calc _ ≤ 2 * (11 / log N) := mul_le_mul_of_nonneg_left hbd1 (by norm_num)
+        _ = 22 / log N := by ring
+    linarith
+  refine hstep.trans ?_
+  have hE : E1 * ∑ p ∈ P1, (1 / (p : ℝ)) ≤ E1 * 2 := mul_le_mul_of_nonneg_left hrec hE10
+  have hE2 : E1 * 2 = 6 / K + 80 * K / log N + 20 / log N := by rw [hE1]; ring
+  have h11 : 5 / (K : ℝ) + 6 / K = 11 / K := by ring
+  have h168 : 88 * (K : ℝ) / log N + 80 * K / log N = 168 * K / log N := by ring
+  have h42 : 22 / log N + 20 / log N = 42 / log N := by ring
+  linarith
+
+private lemma bsc_two_integral :
+    (∫ u in (1 / 11 : ℝ)..(100 / 329), bsc_G2 u / u) =
+      ∫ t in (2.29 : ℝ)..10, log (2.29 - 3.29 / (t + 1)) / t := by
+  rw [change_var]
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le (by norm_num)] at hs
+  obtain ⟨h1, h2⟩ := hs
+  have hs0 : s ≠ 0 := by intro h; rw [h] at h1; norm_num at h1
+  have hs1 : 1 - s ≠ 0 := by intro h; linarith
+  unfold bsc_G2
+  have hw : (1 - s - 100 / 329) / (100 / 329) = 2.29 - 3.29 * s := by
+    norm_num; ring
+  simp only
+  rw [hw]
+  field_simp
+  ring
+
 /-- LEAF. Page 604 display 4.13, prime pair partial summation after the Li replacement.
 This contains no switched count or short interval prime error. The pair region
 still excludes factors of N, so the assertion is an upper limit with every reserve. -/
 theorem leaf337_two_pair_sum :
     ∀ δ : ℝ, 0 < δ → ∃ N0 : ℕ, ∀ N : ℕ, N0 ≤ N →
       sieveTwoPairSum337 N ≤ sieveTwoCoefficient337 + δ := by
-  sorry
+  intro δ hδ
+  set c : ℝ := 8 / (2 * (0.95 : ℝ) - 1) with hc
+  have hc0 : 0 < c := by norm_num [hc]
+  have hc9 : c ≤ 9 := by norm_num [hc]
+  set K : ℕ := ⌈200 / δ⌉₊ + 1 with hKdef
+  have hK : 0 < K := Nat.succ_pos _
+  have hKr : (200 / δ : ℝ) ≤ K := by
+    rw [hKdef]; push_cast; linarith [Nat.le_ceil (200 / δ)]
+  set L0 : ℝ := 70 + 18 * (168 * K + 42) / δ with hL0
+  refine ⟨⌈exp L0⌉₊ + 2, fun N hN => ?_⟩
+  have hNe : exp L0 ≤ (N : ℝ) := by
+    have := Nat.le_ceil (exp L0)
+    have h2 : ((⌈exp L0⌉₊ + 2 : ℕ) : ℝ) ≤ N := by exact_mod_cast hN
+    push_cast at h2; linarith
+  have hN2 : 2 ≤ N := by omega
+  have hLL : L0 ≤ log N := by
+    have := log_le_log (exp_pos _) hNe; rwa [log_exp] at this
+  have hq0 : 0 ≤ 18 * (168 * (K : ℝ) + 42) / δ := by positivity
+  have hL70 : 70 ≤ log (N : ℝ) := by linarith
+  have hL : 0 < log (N : ℝ) := by linarith
+  have hmain := (bsc_two_split N hN2).trans (bsc_two_outer N hL70 K hK)
+  unfold sieveTwoPairSum337 sieveTwoCoefficient337
+  rw [← hc, ← bsc_two_integral, mul_assoc]
+  have herr : c * (11 / K + 168 * K / log N + 42 / log N) ≤ δ := by
+    have hKpos : (0 : ℝ) < K := by exact_mod_cast hK
+    have hKd : 200 ≤ (K : ℝ) * δ := by rwa [div_le_iff₀ hδ] at hKr
+    have e1 : 11 / (K : ℝ) ≤ 11 * δ / 200 := by
+      rw [div_le_iff₀ hKpos]; nlinarith
+    have e2 : 168 * K / log N + 42 / log N ≤ δ / 18 := by
+      rw [← add_div, div_le_iff₀ hL]
+      have h3 : 18 * (168 * (K : ℝ) + 42) / δ ≤ log N := by linarith
+      rw [div_le_iff₀ hδ] at h3
+      nlinarith
+    have hpos : 0 ≤ 11 / (K : ℝ) + 168 * K / log N + 42 / log N := by positivity
+    calc c * (11 / K + 168 * K / log N + 42 / log N) ≤
+          9 * (11 / K + 168 * K / log N + 42 / log N) := mul_le_mul_of_nonneg_right hc9 hpos
+      _ ≤ 9 * (11 * δ / 200 + δ / 18) := by nlinarith
+      _ ≤ δ := by nlinarith
+  have h4 := mul_le_mul_of_nonneg_left hmain hc0.le
+  have h5 : c * ((∫ u in (1 / 11 : ℝ)..(100 / 329), bsc_G2 u / u) +
+      (11 / K + 168 * K / log N + 42 / log N)) =
+      c * (∫ u in (1 / 11 : ℝ)..(100 / 329), bsc_G2 u / u) +
+      c * (11 / K + 168 * K / log N + 42 / log N) := by ring
+  linarith
 
 /-- The exact sealed second upper leaf follows from the two smaller analytic steps.
 CONDITIONAL ON leaf337_two_switching and leaf337_two_pair_sum. -/
@@ -831,3 +1564,4 @@ theorem sieve_two_supply337 :
 #print axioms sieve_two_supply337
 
 end LeanLab.Cai2002
+

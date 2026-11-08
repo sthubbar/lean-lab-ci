@@ -121,7 +121,7 @@ theorem triangle_leaf_false :
 /-- The exact existing untruncated prime leaf is false at zero frequency. -/
 theorem untruncated_leaf_false :
     ¬ (∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -136,7 +136,7 @@ theorem untruncated_leaf_false :
   have hε0' : ε < ε0 := lt_of_le_of_lt (min_le_left _ _) (by linarith)
   have hε4 : ε < 4 / 9 := lt_of_le_of_lt (min_le_right _ _) (by norm_num)
   obtain ⟨c, H0, C, X0, hc, hdata⟩ := h ε hε hε0'
-  obtain ⟨H, X, P0, hHyp, _⟩ := thm1Hyp_inhabited hε hε4 H0 X0
+  obtain ⟨H, X, P0, hHyp, _⟩ := thm1Hyp_v2_inhabited hε hε4 H0 X0
   obtain ⟨P, _, _, _, Sg, hconv, _⟩ := hdata H X P0 hHyp
   exact prime_zero_no_limit (Sg pole pole 0)
     (hconv pole (pole_mem_excSet _ _ _ _) pole (pole_mem_excSet _ _ _ _) 0)

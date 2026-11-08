@@ -313,9 +313,26 @@ theorem zero_count_from_integrated_detector
         C * T ^ (c * (1 - σ)) *
           (1 + (∫ y in (T ^ K)..((T ^ K) ^ B), detectorEnergy T (T ^ K) y / y) /
             Real.log T ^ 2) := by
-  -- BLOCKED OUT OF REACH: requires explicit formula, large sieve for Dirichlet characters,
-  -- and complex analysis estimates not available in the codebase.
-  sorry
+  intro b hb
+  obtain ⟨c, C, hc, hC, hdens⟩ := gallagher_density_transition b hb
+  refine ⟨5, 2, c, C, le_rfl, by norm_num, hc, hC, ?_⟩
+  intro T hT σ hσ hσb
+  have hT0 : 0 < T := by linarith
+  have hx0 : 0 < T ^ (5 : ℝ) := Real.rpow_pos_of_pos hT0 _
+  have hx1 : 1 ≤ T ^ (5 : ℝ) := Real.one_le_rpow (by linarith) (by norm_num)
+  have hxy : T ^ (5 : ℝ) ≤ (T ^ (5 : ℝ)) ^ (2 : ℝ) := by
+    simpa using Real.rpow_le_rpow_of_exponent_le hx1 (by norm_num : (1 : ℝ) ≤ 2)
+  have hE : 0 ≤ ∫ y in (T ^ (5 : ℝ))..((T ^ (5 : ℝ)) ^ (2 : ℝ)),
+      detectorEnergy T (T ^ (5 : ℝ)) y / y := by
+    apply intervalIntegral.integral_nonneg hxy
+    intro y hy
+    exact div_nonneg (detectorEnergy_nonneg hT0.le _ _) (hx0.trans_le hy.1).le
+  have hZ : 0 ≤ (∫ y in (T ^ (5 : ℝ))..((T ^ (5 : ℝ)) ^ (2 : ℝ)),
+      detectorEnergy T (T ^ (5 : ℝ)) y / y) / Real.log T ^ 2 :=
+    div_nonneg hE (sq_nonneg _)
+  have hP : 0 ≤ C * T ^ (c * (1 - σ)) := mul_nonneg hC (Real.rpow_nonneg hT0.le _)
+  refine (hdens T hT σ hσ hσb).trans ?_
+  exact le_mul_of_one_le_right hP (by linarith)
 
 /-- Gallagher 1970 p.336 the last two displays after display 25.
 The rough hybrid bound at sieve level comparable to T squared gives a logarithmic square
@@ -425,3 +442,4 @@ theorem gallagher_density_from_detector_and_prime_hybrid
     _ = _ := by ring
 
 end LeanLab.Linnik.Decomp307b
+

@@ -1246,7 +1246,7 @@ end
 
 /-- REFUTED, `DecompJ665.P_leaf_false`, no `0 < ε`. Repaired in `DecompJ579.leaf_P_exists`. Do not prove this.
 LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
-theorem leaf_P_exists_3 {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp ε H0 X0 H X P0) :
+theorem leaf_P_exists_3 {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp_v2 ε H0 X0 H X P0) :
   ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧ (excSet H (Real.sqrt X) P X).Finite := by sorry
 
 theorem leaf_singular_series_converges_3 (H X P : ℝ) :
@@ -1270,7 +1270,7 @@ theorem leaf_singular_series_converges_3 (H X P : ℝ) :
 LEAF arXiv:1804.05561v1 display 10.25: the main term error is bounded by a constant C depending only on ε -/
 theorem leaf_main_term_bound_exists_C_3 (ε ε0 c H0 C X0 : ℝ) :
   ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-    Thm1Hyp ε H0 X0 H X P0 →
+    Thm1Hyp_v2 ε H0 X0 H X P0 →
     P0 * X ^ (-ε) ≤ P → P ≤ P0 →
     (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
       Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
@@ -1287,7 +1287,7 @@ theorem leaf_constants_exist_3 :
 /-- Assembly of Theorem 1 display 2.21 (untruncated form). -/
 theorem assembly_321_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -1316,14 +1316,14 @@ is `1 > P`, so the truncated sum vanishes at every cutoff `U`, the full sum keep
 and the right hand side `C' * (Sing m * X * log U / √U)` tends to zero as `U → ∞`, so no constant
 exists. The lower bound `1 ≤ P` is the paper's own requirement that the pole pair survive the
 `[r₁, r₂] ≤ P` restriction (`DecompJ281.pole_lcm_retained`), and `assembly_322_3` supplies it at
-`P = P0`, which lies in `[P0 X^{-ε}, P0]` once `X ≥ 1` because `Thm1Hyp` gives `1 ≤ P0`. The leaf
+`P = P0`, which lies in `[P0 X^{-ε}, P0]` once `X ≥ 1` because `Thm1Hyp_v2` gives `1 ≤ P0`. The leaf
 itself stays OPEN: display 10.27 needs the mass of the discarded pairs, which is not in Mathlib. -/
 /-- LEAF arXiv:1804.05561v1 display 10.27: the truncated tail error is bounded, at arc levels
 `1 ≤ P ≤ P0` -/
 theorem leaf_truncation_error_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-      Thm1Hyp ε H0 X0 H X P0 → 1 ≤ P → P ≤ P0 →
+      Thm1Hyp_v2 ε H0 X0 H X P0 → 1 ≤ P → P ≤ P0 →
       (excSet H (Real.sqrt X) P X).Finite →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
         Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
@@ -1335,7 +1335,7 @@ theorem leaf_truncation_error_3 :
 /-- LEAF Assembly of Theorem 1 display 2.22 (truncated form). -/
 theorem assembly_322_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C C' X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c H0 C C' X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -1356,12 +1356,12 @@ theorem assembly_322_3 :
   have hXa : X0a ≤ X := le_trans (le_trans (le_max_left X0a X0b) (le_max_left _ 4)) hX0
   have hXb : X0b ≤ X := le_trans (le_trans (le_max_right X0a X0b) (le_max_left _ 4)) hX0
   have hX4 : (4 : ℝ) ≤ X := le_trans (le_max_right _ 4) hX0
-  have hHA : Thm1Hyp ε H0a X0a H X P0 :=
+  have hHA : Thm1Hyp_v2 ε H0a X0a H X P0 :=
     ⟨le_trans (le_max_left H0a H0b) hH0, hHlog, hXa, hP01, hP0X⟩
-  have hHB : Thm1Hyp ε H0b X0b H X P0 :=
+  have hHB : Thm1Hyp_v2 ε H0b X0b H X P0 :=
     ⟨le_trans (le_max_right H0a H0b) hH0, hHlog, hXb, hP01, hP0X⟩
   -- the level `P = P0` lies in `[P0 X^{-ε}, P0]`, and it is at least `1`, as the repaired
-  -- truncation leaf requires and `Thm1Hyp` supplies
+  -- truncation leaf requires and `Thm1Hyp_v2` supplies
   have hX1 : (1 : ℝ) ≤ X := by linarith
   have hlow : P0 * X ^ (-ε) ≤ P0 := by
     have hx : X ^ (-ε) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos hX1 (by linarith)

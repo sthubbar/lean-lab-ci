@@ -110,10 +110,17 @@ Source P0054 page 2 display 1.2 fixes `2 ≤ P ≤ √X` for every arc level, Pi
 `L^c ≤ P`, so the printed Theorem 1 supplies this bound. Without it the pole fails the lcm
 restriction in `assembly_222`, as `DecompJ281Audit.leaf_truncation_error_false` shows.
 Twin: for small positive epsilon, some level P at least 1 inside the interval from P0 X to the
-minus epsilon up to P0 satisfies display 2.21. Instance: `Audit1625.leaf_221_range_instance`. -/
+minus epsilon up to P0 satisfies display 2.21. Instance: `Audit1625.leaf_221_range_instance`, for the U-1625 range.
+DECISION 2026-11-08 architect 20261108T0450Z U-1634: the quantifier shape of
+`State1581.Theorem1_220`, U-1634 form: `c, C, A ≥ 0, H₀` existential, then a fixed `H ≥ H₀`, then
+`X₀`; range `X^ε L^A ≤ P₀ ≤ X^{4/9-ε}`; `H ≤ (log X)/2` dropped. Source Pin1 displays 1.8, 2.8 and
+the remark after 2.12. The U-1625 form was false at `P₀ = 1`, `H = (log X)/2` by hand. `1 ≤ P` now
+also follows from the range, as `P ≥ P₀X^{-ε} ≥ L^A ≥ 1` for `X ≥ 3`. Instance of the range:
+`State1581.thm1Hyp_inhabited`. -/
 theorem leaf_221 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
+      Thm1Hyp ε A X0 X P0 →
       ∃ P : ℝ, 1 ≤ P ∧ P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -141,11 +148,16 @@ dropped, so it forced their sum to vanish exactly, which the source never claims
 P0054 page 8 display 2.22 uses a bounded cutoff, and `assembly_222` uses `U = √X`.
 Twin: for the level P at least 1 in the source interval and U from 2 to the square root of X, the
 full and truncated main terms differ by at most C' Sing m X log U over the square root of U.
-Instance: `Audit1625.leaf_truncation_range_instance`. -/
+Instance: `Audit1625.leaf_truncation_range_instance`, for the U-1625 range.
+DECISION 2026-11-08 architect 20261108T0450Z U-1634: carried to the U-1634 range. For every
+exponent `A` there are `C' > 0` and `H₀`, then a fixed `H ≥ H₀` and `X₀`; `C'` precedes `H` as the
+`O` of Pin1 display 2.12 carries no subscript. Taking every `A` is what `assembly_222` needs, it
+receives `A` from `leaf_221`. -/
 theorem leaf_truncation_error :
-  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-      Thm1Hyp ε H0 X0 H X P0 → 1 ≤ P → P0 * X ^ (-ε) ≤ P → P ≤ P0 →
+  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 → ∀ A : ℝ,
+    ∃ C' H0 : ℝ, 0 < C' ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ,
+      ∀ X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
+      Thm1Hyp ε A X0 X P0 → 1 ≤ P → P0 * X ^ (-ε) ≤ P → P ≤ P0 →
       (excSet H (Real.sqrt X) P X).Finite →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
         Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
@@ -191,10 +203,12 @@ theorem leaf_triangle_inequality {H X P U ε ε0 c C C' : ℝ} {m : ℕ} {Sg' : 
 /-- Assembly theorem for 2.22, proved from the leaves. Changed 2026-10-31 only in its convergence
 clause, now `0 < m` as in leaf_221; the proof takes `X₀` at least 4 so that `U = √X ≥ 2`.
 Statement unchanged by U-1625 2026-11-06; only the proof passes the new `1 ≤ P` of `leaf_221`
-to the repaired `leaf_truncation_error`. -/
+to the repaired `leaf_truncation_error`.
+DECISION 2026-11-08 U-1634: the quantifier shape of `State1581.Theorem1_220`, U-1634 form. -/
 theorem assembly_222 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
+    ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
+      Thm1Hyp ε A X0 X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -207,19 +221,21 @@ theorem assembly_222 :
   obtain ⟨ε2, hε2, h2⟩ := leaf_truncation_error
   refine ⟨min ε1 ε2, lt_min hε1 hε2, ?_⟩
   intro ε hε hεlt
-  obtain ⟨c, H0, C, X0, hc, hA⟩ := h1 ε hε (lt_of_lt_of_le hεlt (min_le_left _ _))
-  obtain ⟨H0', C', X0', hC', hB⟩ := h2 ε hε (lt_of_lt_of_le hεlt (min_le_right _ _))
-  refine ⟨c, max H0 H0', max C C', max (max X0 X0') 4, hc, ?_⟩
-  intro H X P0 hHyp
-  obtain ⟨hH0, hHlog, hX0, hP01, hP0X⟩ := hHyp
+  obtain ⟨c, C, A, H0, hc, hA0, hA⟩ := h1 ε hε (lt_of_lt_of_le hεlt (min_le_left _ _))
+  obtain ⟨C', H0', hC', hB⟩ := h2 ε hε (lt_of_lt_of_le hεlt (min_le_right _ _)) A
+  refine ⟨c, max C C', A, max H0 H0', hc, hA0, ?_⟩
+  intro H hH
+  obtain ⟨X0, hAX⟩ := hA H (le_trans (le_max_left _ _) hH)
+  obtain ⟨X0', hBX⟩ := hB H (le_trans (le_max_right _ _) hH)
+  refine ⟨max (max X0 X0') 4, ?_⟩
+  intro X P0 hHyp
+  obtain ⟨hX0, hX3, hlow, hP0X⟩ := hHyp
   have hXa : X0 ≤ X := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hX0
   have hXb : X0' ≤ X := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hX0
   have hX4 : (4 : ℝ) ≤ X := le_trans (le_max_right _ _) hX0
-  have hHA : Thm1Hyp ε H0 X0 H X P0 :=
-    ⟨le_trans (le_max_left _ _) hH0, hHlog, hXa, hP01, hP0X⟩
-  have hHB : Thm1Hyp ε H0' X0' H X P0 :=
-    ⟨le_trans (le_max_right _ _) hH0, hHlog, hXb, hP01, hP0X⟩
-  obtain ⟨P, hP11, hP1, hP2, hFin, Sg', hSg1, hSg2⟩ := hA H X P0 hHA
+  have hHA : Thm1Hyp ε A X0 X P0 := ⟨hXa, hX3, hlow, hP0X⟩
+  have hHB : Thm1Hyp ε A X0' X P0 := ⟨hXb, hX3, hlow, hP0X⟩
+  obtain ⟨P, hP11, hP1, hP2, hFin, Sg', hSg1, hSg2⟩ := hAX X P0 hHA
   refine ⟨P, hP1, hP2, hFin, Sg', hSg1, ?_⟩
   intro m hm
   have hU2 : (2 : ℝ) ≤ Real.sqrt X := by
@@ -243,7 +259,7 @@ theorem assembly_222 :
   have hb1 : ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
       C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - min ε1 ε2)) :=
     le_trans hb1' (mul_le_mul_of_nonneg_left (by linarith) hC0)
-  have hb2 := hB H X P0 P (Real.sqrt X) Sg' m hHB hP11 hP1 hP2 hFin hSg1 hm.1 hm.2 hU2 le_rfl
+  have hb2 := hBX X P0 P (Real.sqrt X) Sg' m hHB hP11 hP1 hP2 hFin hSg1 hm.1 hm.2 hU2 le_rfl
   exact leaf_triangle_inequality hb1 hb2 rfl (by linarith)
 
 end

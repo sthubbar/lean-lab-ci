@@ -26,14 +26,14 @@ open LeanLab.Pintz2021.DecompJ665
 namespace LeanLab.Pintz2021.Audit1614
 
 /-- The old `leaf_P_exists` is false also for positive `ε`: `ε = 1`, `X = 1/2`, `P₀ = 1`, `H = -1` make
-`Thm1Hyp` true, and `P₀ X^{-ε} = 2 > P₀`. So `ε < 4/9` is needed, not only `0 < ε`. -/
+`Thm1Hyp_v2` true, and `P₀ X^{-ε} = 2 > P₀`. So `ε < 4/9` is needed, not only `0 < ε`. -/
 theorem old_leaf_P_exists_large_eps_false :
-    ¬ ∀ {ε H0 X0 H X P0 : ℝ}, 0 < ε → Thm1Hyp ε H0 X0 H X P0 →
+    ¬ ∀ {ε H0 X0 H X P0 : ℝ}, 0 < ε → Thm1Hyp_v2 ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧ (excSet H (Real.sqrt X) P X).Finite := by
   intro h
   have hl : Real.log (1 / 2 : ℝ) = - Real.log 2 := by
     rw [one_div, Real.log_inv]
-  have hyp : Thm1Hyp 1 (-1) 0 (-1) (1 / 2) 1 := by
+  have hyp : Thm1Hyp_v2 1 (-1) 0 (-1) (1 / 2) 1 := by
     refine ⟨le_rfl, ?_, by norm_num, le_rfl, ?_⟩
     · rw [hl]; linarith [Real.log_two_lt_d9]
     · exact Real.one_le_rpow_of_pos_of_le_one_of_nonpos (by norm_num) (by norm_num) (by norm_num)
@@ -50,7 +50,7 @@ theorem old_leaf_main_term_bound_exists_C_false_of_converges
       ∀ z ∈ excSet 0 (Real.sqrt 4) 1 4, ∀ w ∈ excSet 0 (Real.sqrt 4) 1 4, ∀ m : ℕ, 0 < m →
         Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) :
     ¬ ∀ (ε ε0 c H0 C X0 : ℝ), ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-      Thm1Hyp ε H0 X0 H X P0 → P0 * X ^ (-ε) ≤ P → P ≤ P0 →
+      Thm1Hyp_v2 ε H0 X0 H X P0 → P0 * X ^ (-ε) ≤ P → P ≤ P0 →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
         Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
       ∀ m : ℕ, (m : ℝ) ≤ X → 0 < m →
@@ -58,7 +58,7 @@ theorem old_leaf_main_term_bound_exists_C_false_of_converges
           C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε0)) := by
   intro h
   obtain ⟨Sg', hSg⟩ := hc
-  have hyp : Thm1Hyp 0 0 0 0 4 1 := by
+  have hyp : Thm1Hyp_v2 0 0 0 0 4 1 := by
     refine ⟨le_rfl, ?_, by norm_num, le_rfl, ?_⟩
     · exact div_nonneg (Real.log_nonneg (by norm_num)) (by norm_num)
     · exact Real.one_le_rpow (by norm_num) (by norm_num)
