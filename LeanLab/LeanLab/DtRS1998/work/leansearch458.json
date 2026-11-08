@@ -1,0 +1,14 @@
+{
+  "service": "LeanSearch",
+  "query": "testBit of bitwise OR and right shift of natural numbers",
+  "result_names": [
+    "Int.testBit_lor",
+    "Nat.testBit_lor"
+  ],
+  "locally_verified_declarations": [
+    "Nat.testBit_or",
+    "Nat.testBit_shiftRight",
+    "Nat.or_assoc"
+  ],
+  "raw_response": "/tmp/leansearch458.json"
+}
