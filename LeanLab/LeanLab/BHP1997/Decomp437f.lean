@@ -26,7 +26,7 @@ theorem sum_third_parts {ι : Type*} (S : Finset ι) (f : ι → ℂ) (L : ℝ) 
 theorem nondominant_scale_lt {Q F : ℝ} (hF : 1 < F) {z : ℂ}
     (hz : dominanceFlag Q F z = false) : F < Q := by
   have hh : ¬Q ≤ F ^ Thm4.c (1 / 2 + Real.log ‖z‖ / Real.log F) := of_decide_eq_false hz
-  rw [dominance_power_eq_max hF] at hh
+  rw [Decomp437c.dominance_power_eq_max hF] at hh
   exact lt_of_not_ge (fun h => hh (h.trans (le_max_left _ _)))
 
 /-- Page 13, the Case 2 power saving absorbs a fixed positive logarithmic loss.
@@ -85,7 +85,7 @@ theorem neither_small_third (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValu
   refine ⟨1, by norm_num, ?_⟩
   intro ε hε hεη c₁ c₂ hc₁ hc₂ Kfun A hA
   obtain ⟨Cm, hCm, hm⟩ := hmean B c₁ c₂ hc₁ hc₂
-  obtain ⟨Ce, K0, hCe, hK0, he⟩ := energy_log_uniform henergy B c₁ c₂ hc₁ hc₂
+  obtain ⟨Ce, K0, hCe, hK0, he⟩ := Decomp437d.energy_log_uniform henergy B c₁ c₂ hc₁ hc₂
   let H := 2 * Cm * Ce
   let R := ((ε / 4) / (A + (K0 + 1))) ^ (-(A + (K0 + 1)))
   have hH : 0 < H := by dsimp [H]; positivity
@@ -203,7 +203,7 @@ theorem neither_large_third (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValu
       (X ^ (1 - α₁ - α₂)) false, ‖dirPoly a c₁ c₂ (X ^ α₁) p.2 (half p.1) * dirPoly b c₁ c₂ (X ^ α₂) p.2 (half p.1) *
       dirPoly e c₁ c₂ (X ^ (1 - α₁ - α₂)) p.2 (half p.1)‖ ≤
       C * X ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
-  sorry
+  exact Decomp414a.neither_large_third hmean hlarge henergy
 
 /-- Page 13, exact original Case 2 statement assembled from its two written branches.
 CONDITIONAL on the two smaller branches and the original inputs. -/
