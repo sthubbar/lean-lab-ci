@@ -12,6 +12,7 @@ so it carries no `sorry` of its own. The leaves are open work items.
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.SPLIT_lemma1
+import LeanLab.ExceptionalSet.State1539Data264
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -31,7 +32,10 @@ theorem leaf_periodic_translate (h K : ℝ → ℂ) (hper : Function.Periodic h 
     (n : ℤ) :
     h (α + n) * K (α + n) * eC (-((α + n) * v)) =
       h α * (K (α + n) * eC (-((α + n) * v))) := by
-  sorry
+  have H : h (α + n) = h α := by
+    have : (n : ℝ) = n • (1 : ℝ) := by simp
+    rw [this, hper.zsmul]
+  rw [H, mul_assoc]
 
 /-- LEAF. Step 2 of the proof, one term of the fold: the integral of `f` over the unit
 interval translated to `n` equals the integral over the fixed interval `[0,1]` of the
@@ -41,7 +45,12 @@ is an identity of the same integral, and at `n = -1` the translated interval is 
 which is the corresponding instance. -/
 theorem leaf_translate_interval (f : ℝ → ℂ) (n : ℤ) :
     (∫ α in (n : ℝ)..((n : ℝ) + 1), f α) = ∫ α in (0 : ℝ)..1, f (α + n) := by
-  sorry
+  have : ∫ α in (0 : ℝ)..1, f (α + n) = ∫ α in (0 + (n : ℝ))..(1 + (n : ℝ)), f α := by
+    exact intervalIntegral.integral_comp_add_right f (n : ℝ)
+  rw [this]
+  congr 1
+  · ring
+  · ring
 
 /-- LEAF. Step 3 of the proof, the fold of the real line: the integral of an integrable
 function over the whole line is the sum over the integers of its integrals over the unit
@@ -51,7 +60,35 @@ over the line into a series; it uses no periodicity and no kernel, and it holds 
 zero function with both sides `0`. -/
 theorem leaf_partition (f : ℝ → ℂ) (hf : Integrable f) :
     (∫ α, f α) = ∑' n : ℤ, ∫ α in (n : ℝ)..((n : ℝ) + 1), f α := by
-  sorry
+  have H : (∫ α, f α) = ∫ α in Set.univ, f α := by
+    exact setIntegral_univ.symm
+  rw [H, ← iUnion_Ioc_intCast ℝ]
+  have hd : Pairwise (Function.onFun (AEDisjoint volume) (fun n : ℤ => Set.Ioc (n : ℝ) ((n : ℝ) + 1))) := by
+    intro i j hij
+    have : Disjoint (Set.Ioc (i : ℝ) (i + 1)) (Set.Ioc (j : ℝ) (j + 1)) := by
+      apply Set.disjoint_left.mpr
+      rintro x ⟨_, h2⟩ ⟨h3, _⟩
+      have : (i : ℝ) + 1 ≤ (j : ℝ) ∨ (j : ℝ) + 1 ≤ (i : ℝ) := by
+        rcases lt_trichotomy i j with h | h | h
+        · left; exact_mod_cast h
+        · exfalso; exact hij h
+        · right; exact_mod_cast h
+      cases this with
+      | inl h => linarith
+      | inr h => linarith
+    exact this.aedisjoint
+  have hn : ∀ n : ℤ, NullMeasurableSet (Set.Ioc (n : ℝ) ((n : ℝ) + 1)) volume := by
+    intro n
+    exact nullMeasurableSet_Ioc
+  have hi : IntegrableOn f (⋃ n : ℤ, Set.Ioc (n : ℝ) ((n : ℝ) + 1)) := by
+    rw [iUnion_Ioc_intCast ℝ]
+    exact hf.integrableOn
+  have hint := hasSum_integral_iUnion_ae hn hd hi
+  rw [← hint.tsum_eq]
+  congr 1
+  ext n
+  rw [intervalIntegral.integral_of_le]
+  linarith
 
 /-- LEAF. Step 4 of the proof, each translate is interval integrable on one period: a
 translate of an integrable function is integrable on the whole line, hence interval
@@ -60,7 +97,9 @@ alone; it is a consequence of integrability and involves no sum and no value of 
 integral. -/
 theorem leaf_translate_intervalIntegrable (f : ℝ → ℂ) (hf : Integrable f) (n : ℤ) :
     IntervalIntegrable (fun α : ℝ => f (α + n)) volume 0 1 := by
-  sorry
+  have H : Integrable (fun α : ℝ => f (α + n)) := by
+    apply Integrable.comp_add_right hf (n : ℝ)
+  exact H.intervalIntegrable
 
 /-- LEAF. Step 5 of the proof, the translated norms are summable: for an integrable `f`
 the series over the integers of `∫ α in (0,1), ‖f (α + n)‖` converges, with sum the
@@ -69,7 +108,44 @@ termwise integration, in `ℓ¹` form, and it is where the absolute convergence 
 lives. For the zero function every term is `0` and the series converges. -/
 theorem leaf_shift_norm_summable (f : ℝ → ℂ) (hf : Integrable f) :
     Summable (fun n : ℤ => ∫ α in (0 : ℝ)..1, ‖f (α + n)‖) := by
-  sorry
+  have h1 : (fun n : ℤ => ∫ α in (0 : ℝ)..1, ‖f (α + n)‖) = (fun n : ℤ => ∫ α in (n : ℝ)..((n : ℝ) + 1), ‖f α‖) := by
+    ext n
+    have : ∫ α in (0 : ℝ)..1, ‖f (α + n)‖ = ∫ α in (0 + (n : ℝ))..(1 + (n : ℝ)), ‖f α‖ := by
+      exact intervalIntegral.integral_comp_add_right (fun x => ‖f x‖) (n : ℝ)
+    rw [this]
+    congr 1
+    · ring
+    · ring
+  rw [h1]
+  have h_int : Integrable (fun α => ‖f α‖) := hf.norm
+  have hn : ∀ n : ℤ, NullMeasurableSet (Set.Ioc (n : ℝ) ((n : ℝ) + 1)) volume := by
+    intro n
+    exact nullMeasurableSet_Ioc
+  have hd : Pairwise (Function.onFun (AEDisjoint volume) (fun n : ℤ => Set.Ioc (n : ℝ) ((n : ℝ) + 1))) := by
+    intro i j hij
+    have : Disjoint (Set.Ioc (i : ℝ) (i + 1)) (Set.Ioc (j : ℝ) (j + 1)) := by
+      apply Set.disjoint_left.mpr
+      rintro x ⟨_, h2⟩ ⟨h3, _⟩
+      have : (i : ℝ) + 1 ≤ (j : ℝ) ∨ (j : ℝ) + 1 ≤ (i : ℝ) := by
+        rcases lt_trichotomy i j with h | h | h
+        · left; exact_mod_cast h
+        · exfalso; exact hij h
+        · right; exact_mod_cast h
+      cases this with
+      | inl h => linarith
+      | inr h => linarith
+    exact this.aedisjoint
+  have hi : IntegrableOn (fun α => ‖f α‖) (⋃ n : ℤ, Set.Ioc (n : ℝ) ((n : ℝ) + 1)) := by
+    rw [iUnion_Ioc_intCast ℝ]
+    exact h_int.integrableOn
+  have hint := hasSum_integral_iUnion_ae hn hd hi
+  have hint_sum := hint.summable
+  have H : (fun n : ℤ => ∫ α in (n : ℝ)..((n : ℝ) + 1), ‖f α‖) = (fun n : ℤ => ∫ α in Set.Ioc (n : ℝ) ((n : ℝ) + 1), ‖f α‖) := by
+    ext n
+    rw [intervalIntegral.integral_of_le]
+    linarith
+  rw [H]
+  exact hint_sum
 
 /-- LEAF. Step 6 of the proof, the termwise integration: if every translate of `f` is
 interval integrable on `[0,1]` and the integrals of the translated norms are summable,
@@ -81,7 +157,47 @@ theorem leaf_interval_tsum_integral (f : ℝ → ℂ)
     (hsum : Summable (fun n : ℤ => ∫ α in (0 : ℝ)..1, ‖f (α + n)‖)) :
     (∫ α in (0 : ℝ)..1, ∑' n : ℤ, f (α + n)) =
       ∑' n : ℤ, ∫ α in (0 : ℝ)..1, f (α + n) := by
-  sorry
+  have H : (∫ α in Set.Ioc 0 1, ∑' n : ℤ, f (α + n)) = ∑' n : ℤ, ∫ α in Set.Ioc 0 1, f (α + n) := by
+    apply integral_tsum
+    · intro i
+      have h1 := hint i
+      have h2 := h1.1
+      exact h2.aestronglyMeasurable
+    · have h_pos : ∀ n : ℤ, 0 ≤ ∫ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖ := by
+        intro n
+        apply integral_nonneg
+        intro x
+        exact norm_nonneg _
+      have h_sum2 : Summable (fun n : ℤ => ∫ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖) := by
+        have H_hsum : (fun n : ℤ => ∫ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖) = (fun n : ℤ => ∫ α in (0 : ℝ)..1, ‖f (α + n)‖) := by
+          ext n
+          rw [intervalIntegral.integral_of_le]
+          linarith
+        rw [H_hsum]
+        exact hsum
+      have h_sum3 := ENNReal.ofReal_tsum_of_nonneg h_pos h_sum2
+      have h_top : ENNReal.ofReal (∑' n : ℤ, ∫ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖) ≠ ⊤ := ENNReal.ofReal_ne_top
+      rw [h_sum3] at h_top
+      have H_eq : ∀ n : ℤ, ENNReal.ofReal (∫ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖) = ∫⁻ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖ₑ := by
+        intro n
+        apply ofReal_integral_norm_eq_lintegral_enorm
+        have h1 := hint n
+        exact h1.1
+      have h_top2 : (∑' n : ℤ, ∫⁻ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖ₑ) ≠ ⊤ := by
+        have : (fun n : ℤ => ENNReal.ofReal (∫ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖)) = (fun n : ℤ => ∫⁻ α in Set.Ioc (0 : ℝ) (1 : ℝ), ‖f (α + n)‖ₑ) := by
+          ext n
+          exact H_eq n
+        rw [← this]
+        exact h_top
+      exact h_top2
+  have h1 : (∫ α in (0 : ℝ)..1, ∑' n : ℤ, f (α + n)) = ∫ α in Set.Ioc 0 1, ∑' n : ℤ, f (α + n) := by
+    rw [intervalIntegral.integral_of_le]
+    linarith
+  have h2 : (fun n : ℤ => ∫ α in (0 : ℝ)..1, f (α + n)) = (fun n : ℤ => ∫ α in Set.Ioc 0 1, f (α + n)) := by
+    ext n
+    rw [intervalIntegral.integral_of_le]
+    linarith
+  rw [h1, h2, H]
 
 /-! ### Assembly -/
 
