@@ -47,6 +47,7 @@ theorem leaf_odd_moment_upper_half_low (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2
               B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
   sorry
 
+
 /-- LEAF. Step of the proof: the upper half of the window, the indices from `b + 1` up to `N`, where
 `b = a + (N - a)/2` is the midpoint of the window. The same second moment bound as the target, over
 that half only. Again the target's inequality over a subset of the target's index set, hence
@@ -63,6 +64,7 @@ theorem leaf_odd_moment_upper_half_high (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 
               B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
   sorry
 
+
 /-- LEAF. Step of the proof: the window is the union of its two halves. For every `N ≥ 100` the
 upper endpoint of the lower half and the lower endpoint of the upper half meet without a gap, and
 the midpoint `a + (N - a)/2` does not pass `N`, so the two closed intervals `Icc a b` and
@@ -72,7 +74,10 @@ theorem leaf_odd_upper_window_split (N : ℕ) (hN : 100 ≤ N) :
       Finset.Icc ((N + 1) / 2 + N / 4 + 1)
           (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2) ∪
         Finset.Icc (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2 + 1) N := by
-  sorry
+  ext x
+  simp only [Finset.mem_union, Finset.mem_Icc]
+  omega
+
 
 /-- LEAF. Step of the proof: the two halves do not meet. A natural number cannot be both at most the
 midpoint `a + (N - a)/2` and at least `a + (N - a)/2 + 1`, whatever the parity of `N` is, so the
@@ -85,7 +90,11 @@ theorem leaf_odd_upper_window_disjoint (γ : ℝ) (N : ℕ) :
         (fun n : ℕ => Odd (nu γ n)))
       ((Finset.Icc (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2 + 1) N).filter
         (fun n : ℕ => Odd (nu γ n))) := by
-  sorry
+  rw [Finset.disjoint_left]
+  intro a ha hb
+  simp only [Finset.mem_filter, Finset.mem_Icc] at ha hb
+  omega
+
 
 /-- LEAF. Step of the proof: two upper bounds with one common right-hand factor can be added, at the
 price of one extra unit in the constant. If `x ≤ A · M` and `y ≤ B · M` with `M ≥ 0`, then
@@ -94,7 +103,10 @@ no positivity of `A` or `B` is needed, and the estimate also holds for negative 
 and reads `0 ≤ M` when all of them are `0`. -/
 theorem leaf_odd_moment_add_const (M x y A B : ℝ) (hM : 0 ≤ M)
     (hx : x ≤ A * M) (hy : y ≤ B * M) : x + y ≤ (A + B + 1) * M := by
-  sorry
+  calc x + y ≤ A * M + B * M := add_le_add hx hy
+       _ = (A + B) * M := by ring
+       _ ≤ (A + B + 1) * M := by nlinarith [hM]
+
 
 /-- Assembly. The statement of `leaf_odd_moment_upper` of `SPLIT_leaf_odd_moment.lean`, from the five
 steps: the caps on `δ` and `κ` are the smaller of the two pairs, the constant is `B₁ + B₂ + 1`, the
