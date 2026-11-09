@@ -404,6 +404,40 @@ theorem leaf_thresholds :
   intro B ε _ hε hεη
   exact ⟨hε, le_of_lt hεη⟩
 
+/-- Any density `v0` satisfying the Buchstab ledger inequality of `leaf_centered_character_mean_value`
+on `(0, 1/10^8]` is strictly greater than `0.05`. Consequently `v0 > 0`, which rules out
+any non-positive witness such as `b0 = 0` via `DecompC165b.right_density_mono`. -/
+theorem leaf_lower_density_gt
+    {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε v0 : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1/10^8)
+    (hv0 : 1 - lowerTwoDeletedIntegral ω ε - lowerFourDeletedIntegral ω ε ≤ v0) :
+    0.05 < v0 :=
+  lower_density_of_e2_bound hω hz (le_of_lt hε) hε8
+    (lower_two_integral_bound hω hz (le_of_lt hε) hε8) hv0
+
+/-- Obstruction to a non-positive short-interval weight in `leaf_centered_character_mean_value`:
+no coefficient family `b0` that is eventually non-positive on `rightInterval ε x` can satisfy both
+the Buchstab density ledger and `RightConditions ε B v0 b0`. -/
+theorem leaf_nonpos_weight_obstruction
+    {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {B ε v0 : ℝ} (hB : 0 ≤ B) (hε : 0 < ε) (hε8 : ε ≤ 1/10^8)
+    {b0 : ℝ → ℕ → ℝ}
+    (hv0 : 1 - lowerTwoDeletedIntegral ω ε - lowerFourDeletedIntegral ω ε ≤ v0)
+    (hrc : RightConditions ε B v0 b0)
+    (hnonpos : ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ m ∈ rightInterval ε x, b0 x m ≤ 0) :
+    False := by
+  have hv0_gt : 0.05 < v0 := leaf_lower_density_gt hω hz hε hε8 hv0
+  have hε55 : ε < 9 / 20 := by linarith
+  have hrc0 : RightConditions ε B 0 (fun _ _ => 0) :=
+    InstancesC165.right_conditions_zero hB
+  have hv0_le : v0 ≤ 0 :=
+    DecompC165b.right_density_mono (by linarith) hε55 hrc hrc0 hnonpos
+  linarith
+
 /-- LEAF 3 of 4. Step: build the normalised short coefficient. For a Buchstab weight with the
 zero extension, a divisor exponent `B` and a cutoff `ε` in `(0, 1/10^8]`, there are a density
 `v0` and a family `b0` such that `v0` is at least one minus the two discarded integrals, the
