@@ -27,12 +27,7 @@ theorem leaf_very_low_zero_count (q : ℕ) [NeZero q] (χ : DirichletCharacter �
     (hχ : χ.IsPrimitive) (T : ℝ) (hT : 1 ≤ T) :
     Summable (veryLowCountTerm χ T) ∧
       (∑' ρ, veryLowCountTerm χ T ρ) ≤ 0.819 * log q + 16.8 := by
-  -- BLOCKED OUT OF REACH: the exact missing input is the Rosser and McCurley explicit
-  -- Dirichlet L function zero count from P0014 displays 4.25 and 4.26. Mathlib has no
-  -- corresponding counting theorem. The repository leaf Decomp388a.zero_count_explicit_upper
-  -- still has sorryAx. Lean error from the attempted reduction: Tactic rewrite failed:
-  -- Did not find an occurrence of the pattern ∑' (x : ↑A), ?f ↑x.
-  sorry
+  exact Decomp389a.very_low_zero_count q χ hχ T hT
 
 /-- The target theorem very_low_mass_bound. -/
 theorem very_low_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)

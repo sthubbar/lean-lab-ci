@@ -54,7 +54,12 @@ hypothesis is not vacuous. -/
 theorem leaf_exponent_mono (cA c : ℝ) (hc : 0 < c) (hcA : c ≤ cA) (N : ℕ) (hN : 1 ≤ N)
     (k : ℕ) (hk : 0 < k) :
     (N : ℝ) ^ (1 - cA / (k : ℝ) ^ 2) ≤ (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  have hN_real : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hk_pos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast hk
+  have hk2_pos : (0 : ℝ) < (k : ℝ) ^ 2 := sq_pos_of_pos hk_pos
+  apply Real.rpow_le_rpow_of_exponent_le hN_real
+  have h1 : c / (k : ℝ) ^ 2 ≤ cA / (k : ℝ) ^ 2 := div_le_div_of_nonneg_right hcA (le_of_lt hk2_pos)
+  linarith
 
 /-! ### Assembly -/
 
