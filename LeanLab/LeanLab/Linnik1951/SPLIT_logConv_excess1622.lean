@@ -23,7 +23,35 @@ log m minus log (n - m) is nonnegative. This is the step that lets the shift be
 weight summed over the range without a sign condition. -/
 theorem logConv_shift_nonneg1622 (n m : ℕ) (hm : m ∈ Finset.Icc 2 (n - 2)) :
     0 ≤ 2 * Real.log (n : ℝ) - (Real.log m + Real.log (n - m : ℕ)) := by
-  sorry
+  have hm1 : 2 ≤ m := (Finset.mem_Icc.mp hm).1
+  have hm2 : m ≤ n - 2 := (Finset.mem_Icc.mp hm).2
+  have hm_lt_n : m < n := by omega
+  have h_pos_m : (0 : ℝ) < m := by exact_mod_cast (show 0 < m by omega)
+  have h_pos_nm : (0 : ℝ) < (n - m : ℕ) := by exact_mod_cast (show 0 < n - m by omega)
+  have h_pos_n : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
+  rw [sub_nonneg]
+  have h_log_add : Real.log m + Real.log (n - m : ℕ) = Real.log (m * (n - m : ℕ)) := by
+    exact (Real.log_mul (ne_of_gt h_pos_m) (ne_of_gt h_pos_nm)).symm
+  rw [h_log_add]
+  have h_log_pow : 2 * Real.log (n : ℝ) = Real.log ((n : ℝ) ^ 2) := by
+    have h1 : 2 * Real.log (n : ℝ) = Real.log (n : ℝ) + Real.log (n : ℝ) := by ring
+    rw [h1]
+    have h2 : (n : ℝ) ^ 2 = (n : ℝ) * (n : ℝ) := by ring
+    rw [h2]
+    exact (Real.log_mul (ne_of_gt h_pos_n) (ne_of_gt h_pos_n)).symm
+  rw [h_log_pow]
+  apply Real.log_le_log
+  · positivity
+  · have : (m : ℝ) * (n - m : ℕ) = (m * (n - m) : ℕ) := by push_cast; rfl
+    rw [this]
+    push_cast
+    have h_ineq : m * (n - m) ≤ n ^ 2 := by
+      calc m * (n - m) ≤ n * n := by
+            have h1 : m ≤ n := by omega
+            have h2 : n - m ≤ n := by omega
+            exact Nat.mul_le_mul h1 h2
+        _ = n ^ 2 := by ring
+    exact_mod_cast h_ineq
 
 /-- LEAF. Total of the shift: summed over the whole range 2 <= m <= n - 2 the shift
 2 log n - log m - log (n - m) is at most a constant times n. The shift is the
