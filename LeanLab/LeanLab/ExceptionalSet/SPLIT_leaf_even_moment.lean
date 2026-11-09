@@ -58,7 +58,26 @@ theorem leaf_even_moment_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 (fun n : ℕ => Even (nu γ n) ∧ 2 * n ≤ N + (N + 1) / 2),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hparent⟩ := LeanLab.ExceptionalSet.Decomp371c.leaf_even_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδlt => ?_⟩
+  obtain ⟨κ₀, hκ₀, hparent⟩ := hparent δ hδ hδlt
+  refine ⟨κ₀, hκ₀, fun κ hκ hκle => ?_⟩
+  obtain ⟨B, hB, N₀, hparent⟩ := hparent κ hκ hκle
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hparent' := hparent N hN
+  have hsub : (Finset.Icc ((N + 1) / 2) N).filter
+        (fun n : ℕ => Even (nu γ n) ∧ 2 * n ≤ N + (N + 1) / 2)
+      ⊆ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)) := by
+    intro x hx
+    rw [Finset.mem_filter] at hx ⊢
+    exact ⟨hx.1, hx.2.1⟩
+  have hsum : (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter
+        (fun n : ℕ => Even (nu γ n) ∧ 2 * n ≤ N + (N + 1) / 2),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2)
+      ≤ (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) :=
+    Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => sq_nonneg _)
+  exact hsum.trans hparent'
 
 /-- LEAF. Step of the proof: the second moment estimate of the even branch on
 the upper half of the index range, that is on the even `n` of the half window
@@ -73,7 +92,26 @@ theorem leaf_even_moment_upper (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hparent⟩ := LeanLab.ExceptionalSet.Decomp371c.leaf_even_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδlt => ?_⟩
+  obtain ⟨κ₀, hκ₀, hparent⟩ := hparent δ hδ hδlt
+  refine ⟨κ₀, hκ₀, fun κ hκ hκle => ?_⟩
+  obtain ⟨B, hB, N₀, hparent⟩ := hparent κ hκ hκle
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hparent' := hparent N hN
+  have hsub : (Finset.Icc ((N + 1) / 2) N).filter
+        (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2))
+      ⊆ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)) := by
+    intro x hx
+    rw [Finset.mem_filter] at hx ⊢
+    exact ⟨hx.1, hx.2.1⟩
+  have hsum : (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter
+        (fun n : ℕ => Even (nu γ n) ∧ ¬ (2 * n ≤ N + (N + 1) / 2)),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2)
+      ≤ (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) :=
+    Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => sq_nonneg _)
+  exact hsum.trans hparent'
 
 /-- Assembly.  The exact statement of `leaf_even_moment`, from the range
 dissection and the two half range second moment estimates.  The caps are the
