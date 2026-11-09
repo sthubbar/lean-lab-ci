@@ -31,7 +31,11 @@ theorem leaf_bound_k3 :
       ∃ B c : ℝ, 0 < B ∧ 0 < c ∧ ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N → ∀ (f : ℝ → ℝ) (k : ℕ),
         k ≤ 3 → KClass N θ Θ Θ₀ δ f k →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  obtain ⟨B, c, hB, hc, hbound⟩ := lemma10 θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  refine ⟨B, c, hB, hc, 1, ?_⟩
+  intro N hN f k hk3 hK
+  exact hbound N (by omega) f k hK
 
 /-- LEAF 2 of the split of `leaf_sum_large_N`: the estimate on the orders `k ≥ 4`.  As in
 LEAF 1 the constants may depend on the range of `k`, here the higher orders, and the
@@ -42,7 +46,11 @@ theorem leaf_bound_k_large :
       ∃ B c : ℝ, 0 < B ∧ 0 < c ∧ ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N → ∀ (f : ℝ → ℝ) (k : ℕ),
         4 ≤ k → KClass N θ Θ Θ₀ δ f k →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  obtain ⟨B, c, hB, hc, hbound⟩ := lemma10 θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  refine ⟨B, c, hB, hc, 1, ?_⟩
+  intro N hN f k hk4 hK
+  exact hbound N (by omega) f k hK
 
 /-- LEAF 3 of the split of `leaf_sum_large_N`: the comparison of the two powers that lets
 the two ranges share one pair `(B, c)`.  Since `N ≥ 1`, `N^x` is nondecreasing in `x`, and
