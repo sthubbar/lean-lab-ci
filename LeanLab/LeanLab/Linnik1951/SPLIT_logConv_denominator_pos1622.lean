@@ -24,7 +24,7 @@ namespace LeanLab.Linnik1951
 and it is also what rules out m = 0 and m = 1. -/
 theorem logConv_denominator_m_ge_two1622 (n m : ℕ)
     (hm : m ∈ Finset.Icc 2 (n - 2)) : 2 ≤ m := by
-  sorry
+  exact (Finset.mem_Icc.1 hm).1
 
 /-- LEAF. Lower bound on the complementary index: membership in the index interval
 forces 2 <= n - m, so the second factor is at the argument n - m, which is at least
@@ -32,14 +32,16 @@ forces 2 <= n - m, so the second factor is at the argument n - m, which is at le
 carries the arithmetic of the interval into the second logarithm. -/
 theorem logConv_denominator_sub_ge_two1622 (n m : ℕ)
     (hm : m ∈ Finset.Icc 2 (n - 2)) : 2 ≤ n - m := by
-  sorry
+  rw [Finset.mem_Icc] at hm
+  omega
 
 /-- LEAF. A logarithm of a natural number at least 2 is positive. This is the step
 that opens both factors of the product; at k = 0 and k = 1 the hypothesis fails, and
 there the claim would be false, so the bound 2 <= k is not decorative. -/
 theorem logConv_denominator_log_pos1622 (k : ℕ) (hk : 2 ≤ k) :
     0 < Real.log (k : ℝ) := by
-  sorry
+  apply Real.log_pos
+  exact_mod_cast (by omega : 1 < k)
 
 /-- LEAF. Product step: the two logarithmic factors of the target are positive, so
 their product is positive. This is the last step of the assembly, stated for the
@@ -48,7 +50,7 @@ theorem logConv_denominator_mul_pos1622 (n m : ℕ)
     (ha : 0 < Real.log (m : ℝ))
     (hb : 0 < Real.log ((n - m : ℕ) : ℝ)) :
     0 < Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ) := by
-  sorry
+  exact mul_pos ha hb
 
 /-- The statement of the leaf logConv_denominator_pos1622 of the parent file,
 assembled from the leaves above with no remaining gap. -/
