@@ -20,7 +20,21 @@ statement and no size estimate. -/
 theorem lnL_ne_zero_on_line1622 (hG : LeanLab.DERZ1997.GRH) :
     ∀ N : ℕ, 1 < N → ∀ (q : ℕ) [NeZero q], ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
       ∀ t : ℝ, DirichletCharacter.LFunction χ (mellinLine1622 N t) ≠ 0 := by
-  sorry
+  intro N hN q _ χ hχ t hzero
+  have hNreal : (1 : ℝ) < N := by exact_mod_cast hN
+  have hlog : 0 < Real.log (N : ℝ) := Real.log_pos hNreal
+  have hre : (mellinLine1622 N t).re = 1 / 2 + 1 / Real.log (N : ℝ) := by
+    simp only [mellinLine1622, Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im,
+      Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  have hgt : 1 / 2 < (mellinLine1622 N t).re := by
+    rw [hre]
+    have hone : 0 < 1 / Real.log (N : ℝ) := one_div_pos.mpr hlog
+    linarith
+  rcases lt_or_ge (mellinLine1622 N t).re 1 with hlt | hge
+  · have hhalf := hG q χ (mellinLine1622 N t) hzero (by linarith) hlt
+    linarith [hgt]
+  · exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ) hge hzero
 
 /-- LEAF. Continuity step. The logarithm of the L-function of a nonprincipal character,
 followed along the line, is continuous in the height as soon as it is nowhere zero
