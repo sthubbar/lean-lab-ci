@@ -1,0 +1,722 @@
+{
+  "summary": {
+    "statements": 39,
+    "theorems": 36,
+    "PROVED": 32,
+    "CONDITIONAL": 3,
+    "OPEN": 1,
+    "data": 3,
+    "MATCH": 39,
+    "MISMATCH": 0,
+    "clean_axiom_reports": 34,
+    "sorry_axiom_reports": 2,
+    "instance_examples": 31,
+    "exact_target_header": true,
+    "all_existing_lean_bytes_preserved": true,
+    "base": "e387754de3912dbfd509fd1f1bf4e2bc1d636513"
+  },
+  "statements": [
+    {
+      "name": "InverseTotient320.correction",
+      "kind": "def",
+      "status": "data",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": null,
+      "header": "def correction (n : \u2115) : \u211d "
+    },
+    {
+      "name": "InverseTotient320.correction_one",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem correction_one : correction 1 = 1 "
+    },
+    {
+      "name": "InverseTotient320.correction_nonsquarefree",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem correction_nonsquarefree {n : \u2115} (hn : \u00ac Squarefree n) : correction n = 0 "
+    },
+    {
+      "name": "InverseTotient320.correction_prime",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem correction_prime {p : \u2115} (hp : p.Prime) :\n    correction p = ((p : \u211d) / ((p : \u211d) - 1)) ^ 2 - 1 "
+    },
+    {
+      "name": "InverseTotient320.correction_nonneg",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem correction_nonneg (n : \u2115) : 0 \u2264 correction n "
+    },
+    {
+      "name": "InverseTotient320.correction_mul",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem correction_mul {m n : \u2115} (hcop : Nat.Coprime m n) :\n    correction (m * n) = correction m * correction n "
+    },
+    {
+      "name": "InverseTotient320.sum_correction",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem sum_correction (n : \u2115) (hn : 0 < n) :\n    (\u2211 d \u2208 n.divisors, correction d) = ((n : \u211d) / n.totient) ^ 2 "
+    },
+    {
+      "name": "InverseTotient320.correction_prime_le",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem correction_prime_le {p : \u2115} (hp : p.Prime) :\n    correction p \u2264 6 / (p : \u211d) "
+    },
+    {
+      "name": "InverseTotient320.correction_power_bound",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem correction_power_bound :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 n : \u2115, 0 < n \u2192 correction n \u2264 C * (n : \u211d) ^ (-1 / 2 : \u211d) "
+    },
+    {
+      "name": "InverseTotient320.summable_correction_div",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem summable_correction_div : Summable (fun n : \u2115 => correction n / n) "
+    },
+    {
+      "name": "InverseTotient320.reciprocal_sq_tail",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem reciprocal_sq_tail (x : \u211d) (hx : 0 < x) (s : Finset \u2115)\n    (hs : \u2200 r \u2208 s, x < (r : \u211d)) :\n    (\u2211 r \u2208 s, 1 / (r : \u211d) ^ 2) \u2264 2 / x "
+    },
+    {
+      "name": "InverseTotient320.inverse_totient_sq_tail",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem inverse_totient_sq_tail :\n    \u2203 K : \u211d, 0 < K \u2227 \u2200 P : \u211d, 0 < P \u2192 \u2200 s : Finset \u2115,\n      (\u2200 n \u2208 s, 0 < n \u2227 P < (n : \u211d)) \u2192\n      (\u2211 n \u2208 s, 1 / (n.totient : \u211d) ^ 2) \u2264 K / P "
+    },
+    {
+      "name": "Tail320.finite_totient_tail",
+      "kind": "theorem",
+      "status": "CONDITIONAL",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem finite_totient_tail (m : \u2115) (hm : 0 < m) (P K : \u211d) (hP : 0 < P)\n    (hK : \u2200 x : \u211d, 0 < x \u2192 \u2200 t : Finset \u2115,\n      (\u2200 r \u2208 t, 0 < r \u2227 x < (r : \u211d)) \u2192\n      (\u2211 r \u2208 t, 1 / (r.totient : \u211d) ^ 2) \u2264 K / x)\n    (s : Finset \u2115) (hs : \u2200 q \u2208 s, 0 < q \u2227 P < (q : \u211d)) :\n    (\u2211 q \u2208 s, 1 / ((q.totient : \u211d) * (q / Nat.gcd q m).totient)) \u2264\n      K / P * ((m : \u211d) * m.divisors.card / m.totient) "
+    },
+    {
+      "name": "Tail320.finite_ramanujan_tail",
+      "kind": "theorem",
+      "status": "CONDITIONAL",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem finite_ramanujan_tail (m : \u2115) (hm : 0 < m) (P K : \u211d) (hP : 0 < P)\n    (hK : \u2200 x : \u211d, 0 < x \u2192 \u2200 t : Finset \u2115,\n      (\u2200 r \u2208 t, 0 < r \u2227 x < (r : \u211d)) \u2192\n      (\u2211 r \u2208 t, 1 / (r.totient : \u211d) ^ 2) \u2264 K / x)\n    (s : Finset \u2115) (hs : \u2200 q \u2208 s, 0 < q \u2227 P < (q : \u211d)) :\n    \u2016\u2211 q \u2208 s, ((ArithmeticFunction.moebius q : \u2102) ^ 2 / (q.totient : \u2102) ^ 2) *\n      RamanujanInt400.ramanujanSumInt q (-(m : \u2124))\u2016 \u2264\n      K / P * ((m : \u211d) * m.divisors.card / m.totient) "
+    },
+    {
+      "name": "Series320.coefficient",
+      "kind": "def",
+      "status": "data",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": null,
+      "header": "def coefficient (m q : \u2115) : \u2102 "
+    },
+    {
+      "name": "Series320.coefficient_zero",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem coefficient_zero (m : \u2115) : coefficient m 0 = 0 "
+    },
+    {
+      "name": "Series320.coefficient_one",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem coefficient_one (m : \u2115) : coefficient m 1 = 1 "
+    },
+    {
+      "name": "Series320.coefficient_mul",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem coefficient_mul (m q r : \u2115) (hcop : Nat.Coprime q r) :\n    coefficient m (q * r) = coefficient m q * coefficient m r "
+    },
+    {
+      "name": "Series320.coefficient_nonsquarefree",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem coefficient_nonsquarefree (m q : \u2115) (hq : \u00ac Squarefree q) : coefficient m q = 0 "
+    },
+    {
+      "name": "Series320.coefficient_prime",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem coefficient_prime (m p : \u2115) (hp : p.Prime) :\n    1 + coefficient m p = (singF m \u27e8p, hp\u27e9 : \u2102) "
+    },
+    {
+      "name": "Series320.sum_norm_tail",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem sum_norm_tail (m : \u2115) (hm : 0 < m) :\n    \u2203 K : \u211d, 0 < K \u2227 \u2200 P : \u211d, 0 < P \u2192 \u2200 s : Finset \u2115,\n      (\u2200 q \u2208 s, 0 < q \u2227 P < (q : \u211d)) \u2192\n      (\u2211 q \u2208 s, \u2016coefficient m q\u2016) \u2264\n        K / P * ((m : \u211d) * m.divisors.card / m.totient) "
+    },
+    {
+      "name": "Series320.summable_norm_coefficient",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem summable_norm_coefficient (m : \u2115) (hm : 0 < m) :\n    Summable (fun q : \u2115 => \u2016coefficient m q\u2016) "
+    },
+    {
+      "name": "Series320.tsum_coefficient",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem tsum_coefficient (m : \u2115) (hm : 0 < m) :\n    (\u2211' q : \u2115, coefficient m q) = (Sing m : \u2102) "
+    },
+    {
+      "name": "Series320.partial_tail",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem partial_tail :\n    \u2203 K : \u211d, 0 < K \u2227 \u2200 m : \u2115, 0 < m \u2192 \u2200 P : \u211d, 1 \u2264 P \u2192\n      \u2016(Sing m : \u2102) - \u2211 q \u2208 Icc 1 \u230aP\u230b\u208a, coefficient m q\u2016 \u2264\n        K * ((m : \u211d) * m.divisors.card / m.totient) / P "
+    },
+    {
+      "name": "Decomp320a.singularPartial",
+      "kind": "def",
+      "status": "data",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        480,
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": null,
+      "header": "def singularPartial (m : \u2115) (P : \u211d) : \u2102 "
+    },
+    {
+      "name": "Decomp320a.window_pos",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        480,
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem window_pos (F : \u2124[X]) (hF : Admissible F) :\n    \u2203 N\u2080 : \u211d, 3 \u2264 N\u2080 \u2227 \u2200 N H : \u211d, N\u2080 \u2264 N \u2192 \u2200 n \u2208 win F N H,\n      0 < (Fv F n).toNat "
+    },
+    {
+      "name": "Decomp320a.leaf_finite_major",
+      "kind": "theorem",
+      "status": "OPEN",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        480,
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem leaf_finite_major (F : \u2124[X]) (hF : Admissible F)\n    (c : \u211d) (hc : 0 < c) (A \u03b5 B : \u211d) (hA : 0 < A) (h\u03b5 : 0 < \u03b5) (hB : 0 < B) :\n    \u2203 C N\u2080 : \u211d, 0 < C \u2227 3 \u2264 N\u2080 \u2227 \u2200 N H : \u211d, N\u2080 \u2264 N \u2192\n      N ^ (1 / (3 * (F.natDegree : \u211d)) + \u03b5) \u2264 H \u2192\n      H \u2264 N ^ (1 / (F.natDegree : \u211d)) \u2192\n      (\u2200 n \u2208 win F N H, 0 \u2264 Fv F n \u2227 (Fv F n).toNat \u2264 \u230ac * N\u230b\u208a) \u2192\n      \u2200 n \u2208 win F N H,\n      \u2016(\u222b \u03b1 in Set.Icc 0 1 \u2229 majorArcs N B,\n          coefficientIntegrand \u230ac * N\u230b\u208a (Fv F n).toNat \u03b1) -\n        (Fv F n : \u2102) * singularPartial (Fv F n).toNat (Real.log N ^ B)\u2016 \u2264\n        C * N * (Real.log N ^ (1 - B) + Real.log N ^ (-A / 2)) "
+    },
+    {
+      "name": "Decomp320a.leaf_singular_tail",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        480,
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem leaf_singular_tail :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 m : \u2115, 0 < m \u2192 \u2200 P : \u211d, 1 \u2264 P \u2192\n      \u2016(Sing m : \u2102) - singularPartial m P\u2016 \u2264\n        C * ((m : \u211d) * m.divisors.card / m.totient) / P "
+    },
+    {
+      "name": "Decomp320a.leaf_major_pointwise",
+      "kind": "theorem",
+      "status": "CONDITIONAL",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        480,
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem leaf_major_pointwise (F : \u2124[X]) (hF : Admissible F)\n    (c : \u211d) (hc : 0 < c) (A \u03b5 B : \u211d) (hA : 0 < A) (h\u03b5 : 0 < \u03b5) (hB : 0 < B) :\n    \u2203 C N\u2080 : \u211d, 0 < C \u2227 3 \u2264 N\u2080 \u2227 \u2200 N H : \u211d, N\u2080 \u2264 N \u2192\n      N ^ (1 / (3 * (F.natDegree : \u211d)) + \u03b5) \u2264 H \u2192\n      H \u2264 N ^ (1 / (F.natDegree : \u211d)) \u2192\n      (\u2200 n \u2208 win F N H, 0 \u2264 Fv F n \u2227 (Fv F n).toNat \u2264 \u230ac * N\u230b\u208a) \u2192\n      \u2200 n \u2208 win F N H,\n      \u2016(\u222b \u03b1 in Set.Icc 0 1 \u2229 majorArcs N B,\n          coefficientIntegrand \u230ac * N\u230b\u208a (Fv F n).toNat \u03b1) -\n        ((Fv F n : \u211d) * Sing (Fv F n).toNat : \u2102)\u2016 ^ 2 \u2264\n        C * N ^ 2 * (Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 +\n          Real.log N ^ (-A)) "
+    },
+    {
+      "name": "Principal320.full_coefficient",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481,
+        486
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem full_coefficient (M m : \u2115) (hm : m \u2264 M) :\n    (\u222b \u03b1 in Set.Icc (0 : \u211d) 1,\n      Kernel.T 0 (M + 1) \u03b1 ^ 2 * Kernel.e (-(m : \u211d) * \u03b1)) = (m + 1 : \u2102) "
+    },
+    {
+      "name": "PrincipalTail320.centered_coefficient",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481,
+        486
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem centered_coefficient (M m : \u2115) (hm : m \u2264 M) :\n    (\u222b \u03b1 in (-1 / 2 : \u211d)..(1 / 2 : \u211d),\n      Kernel.T 0 (M + 1) \u03b1 ^ 2 * Kernel.e (-(m : \u211d) * \u03b1)) = (m + 1 : \u2102) "
+    },
+    {
+      "name": "PrincipalTail320.central_coefficient_error",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481,
+        486
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem central_coefficient_error (M m : \u2115) (hm : m \u2264 M) (\u03b4 : \u211d)\n    (h\u03b4 : 0 < \u03b4) (hhalf : \u03b4 \u2264 1 / 2) :\n    \u2016(\u222b \u03b1 in (-\u03b4)..\u03b4, Kernel.T 0 (M + 1) \u03b1 ^ 2 * Kernel.e (-(m : \u211d) * \u03b1)) - (m : \u2102)\u2016 \u2264\n      1 + 1 / (2 * \u03b4) "
+    },
+    {
+      "name": "TotientRatio320.ratio_eq_product",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem ratio_eq_product (n : \u2115) (hn : 0 < n) :\n    (n : \u211d) / n.totient = \u220f p \u2208 n.primeFactors, (p : \u211d) / ((p : \u211d) - 1) "
+    },
+    {
+      "name": "TotientRatio320.ratio_le_log",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem ratio_le_log (n : \u2115) (hn : 0 < n) :\n    (n : \u211d) / n.totient \u2264 2 * (1 + Real.log n) "
+    },
+    {
+      "name": "Absolute320.summable_prime_envelope",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem summable_prime_envelope :\n    Summable (fun p : Nat.Primes => 1 / ((p.1 : \u211d) - 1) ^ 2) "
+    },
+    {
+      "name": "Absolute320.sum_norm_le_ratio",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem sum_norm_le_ratio :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 m : \u2115, 0 < m \u2192\n      (\u2211' q : \u2115, \u2016Series320.coefficient m q\u2016) \u2264 C * ((m : \u211d) / m.totient) "
+    },
+    {
+      "name": "Absolute320.sum_norm_le_log",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem sum_norm_le_log :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 m : \u2115, 0 < m \u2192\n      (\u2211' q : \u2115, \u2016Series320.coefficient m q\u2016) \u2264 C * (1 + Real.log m) "
+    },
+    {
+      "name": "PrincipalModel320.finite_model_error",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481,
+        486
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem finite_model_error :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 m M : \u2115, 0 < m \u2192 m \u2264 M \u2192 \u2200 s : Finset \u2115,\n      \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 \u2264 1 / 2 \u2192\n      \u2016(\u2211 q \u2208 s, Series320.coefficient m q) *\n          (\u222b \u03b1 in (-\u03b4)..\u03b4, Kernel.T 0 (M + 1) \u03b1 ^ 2 * Kernel.e (-(m : \u211d) * \u03b1)) -\n        (m : \u2102) * (\u2211 q \u2208 s, Series320.coefficient m q)\u2016 \u2264\n        C * (1 + Real.log m) * (1 + 1 / (2 * \u03b4)) "
+    },
+    {
+      "name": "PrincipalModel320.finite_model_error_scaled",
+      "kind": "theorem",
+      "status": "PROVED",
+      "source": "https://doi.org/10.4171/RMI/205",
+      "pages": [
+        481,
+        486
+      ],
+      "variant": "Explicit derived arithmetic or inclusive endpoint variant as recorded in STATEMENTS.md",
+      "review": "MATCH",
+      "twin": true,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "header": "theorem finite_model_error_scaled (c : \u211d) (hc : 0 < c) :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 N P : \u211d, Real.exp 1 \u2264 N \u2192 0 < P \u2192 P / N \u2264 1 / 2 \u2192\n      \u2200 m M : \u2115, 0 < m \u2192 m \u2264 M \u2192 (m : \u211d) \u2264 c * N \u2192 \u2200 s : Finset \u2115,\n      \u2016(\u2211 q \u2208 s, Series320.coefficient m q) *\n          (\u222b \u03b1 in (-(P / N))..(P / N), Kernel.T 0 (M + 1) \u03b1 ^ 2 * Kernel.e (-(m : \u211d) * \u03b1)) -\n        (m : \u2102) * (\u2211 q \u2208 s, Series320.coefficient m q)\u2016 \u2264\n        C * N * Real.log N / P "
+    }
+  ]
+}

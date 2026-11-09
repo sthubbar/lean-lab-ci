@@ -1,0 +1,1188 @@
+[
+  {
+    "file": "ArcCounting88.lean",
+    "lines": 48,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "short_interval_meets_at_most_two"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Average88.lean",
+    "lines": 258,
+    "imports": [
+      "LeanLab.Perelli1996.SingularDivisor88",
+      "LeanLab.Perelli1996.WeightedCounting",
+      "LeanLab.Perelli1996.WeightedEuler",
+      "LeanLab.Perelli1996.Tails88",
+      "LeanLab.Perelli1996.Decomp88"
+    ],
+    "declarations": [
+      "sing_odd_zero",
+      "sing_divisor_indicator",
+      "finite_singular_count",
+      "singular_count_error",
+      "singularAverage"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "B/Cor1b.lean",
+    "lines": 147,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.B.Links",
+      "LeanLab.Perelli1996.B.Sing",
+      "LeanLab.Perelli1996.B.RBound"
+    ],
+    "declarations": [
+      "poly_lower",
+      "rpow_k",
+      "cor1b_of_cor1a",
+      "cor1b_of",
+      "vacuity_X"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "B/Definitions.lean",
+    "lines": 83,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach"
+    ],
+    "declarations": [
+      "R",
+      "Sing",
+      "Fv",
+      "Delta",
+      "win",
+      "Admissible",
+      "Theorem1",
+      "Cor1a",
+      "rho",
+      "AF",
+      "Cor1b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "B/Links.lean",
+    "lines": 212,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.B.Definitions"
+    ],
+    "declarations": [
+      "cor1a_of",
+      "card_parity_even_len",
+      "card_parity",
+      "even_Fv_iff",
+      "rho_two",
+      "card_AF"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "B/RBound.lean",
+    "lines": 182,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.B.Definitions"
+    ],
+    "declarations": [
+      "PP",
+      "card_PP_le",
+      "log_nat_mono",
+      "R_eq",
+      "R_le_of_not_goldbach",
+      "natLog_le",
+      "pp_bound_le",
+      "R_le_quarter"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "B/Sing.lean",
+    "lines": 160,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.B.Definitions"
+    ],
+    "declarations": [
+      "singF",
+      "sing_eq",
+      "inv_sub_one_sq_le",
+      "sing_multipliable",
+      "tele",
+      "prod_ge_half",
+      "partial_ge_one",
+      "one_le_sing"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "B/Statements.lean",
+    "lines": 18,
+    "imports": [
+      "LeanLab.Perelli1996.B.Definitions",
+      "LeanLab.Perelli1996.B.Cor1b",
+      "LeanLab.Perelli1996.Decomp88"
+    ],
+    "declarations": [
+      "perelli_theorem1",
+      "perelli_cor1b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Cor1b.lean",
+    "lines": 146,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.Links",
+      "LeanLab.Perelli1996.Sing",
+      "LeanLab.Perelli1996.RBound"
+    ],
+    "declarations": [
+      "poly_lower",
+      "rpow_k",
+      "cor1b_of_cor1a",
+      "cor1b_of",
+      "vacuity_X"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Cor2.lean",
+    "lines": 396,
+    "imports": [
+      "LeanLab.Perelli1996.Merge"
+    ],
+    "declarations": [
+      "tprod_ge_one",
+      "CF_ge",
+      "CF_pos",
+      "Q",
+      "card_Q_le",
+      "R_bad_le",
+      "gB",
+      "R_bad_le_g",
+      "gB_mono",
+      "gB_nonneg",
+      "R_bad_le_gX",
+      "gB_small",
+      "card_nRange_le",
+      "poly_upper",
+      "corollary2_of_theorem2",
+      "vacuity_cor2"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Counting.lean",
+    "lines": 152,
+    "imports": [
+      "LeanLab.Perelli1996.Roots"
+    ],
+    "declarations": [
+      "periodic_count_error",
+      "root_periodic",
+      "root_count_error",
+      "rootWindow",
+      "root_window_error"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Decomp103.lean",
+    "lines": 1087,
+    "imports": [
+      "LeanLab.Perelli1996.Definitions103",
+      "LeanLab.Perelli1996.Parseval103",
+      "LeanLab.Perelli1996.Farey103"
+    ],
+    "declarations": [
+      "majorWeight",
+      "leaf_major_pointwise",
+      "leaf_nair_mean",
+      "card_win_le",
+      "major",
+      "kernelMoment",
+      "shortMass",
+      "localMass_nonneg",
+      "shortMass_nonneg",
+      "leaf_parseval",
+      "wl_weyl_decay",
+      "wl_inv_H",
+      "wl_order_bounds",
+      "shortMass_bddAbove'",
+      "le_shortMass",
+      "integral_iUnion_finset_le",
+      "wl_weyl_secondary",
+      "leaf_weyl_localization",
+      "leaf_farey_cover",
+      "minor"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "Decomp103b.lean",
+    "lines": 1362,
+    "imports": [
+      "LeanLab.Perelli1996.VaughanInput",
+      "LeanLab.Perelli1996.Linear88",
+      "LeanLab.Perelli1996.Divisor103"
+    ],
+    "declarations": [
+      "linearEnvelope",
+      "divisorCost",
+      "linearEnvelope_nonneg",
+      "divisorCost_nonneg",
+      "linearEnvelope_le",
+      "norm_T_le_linearEnvelope",
+      "divisorCost_partition",
+      "leaf_differencing",
+      "heavyCost_le",
+      "leaf_heavy",
+      "linearEnvelope_le_int",
+      "divisorCost_le_int_sum",
+      "leaf_light_of_recip_sum",
+      "d_le_abs_sub",
+      "d_le_half",
+      "d_neg",
+      "d_triangle",
+      "d_add_ge",
+      "d_sub_ge_int",
+      "d_sep_nat",
+      "card_sep_real",
+      "phase_sep",
+      "card_dist_block",
+      "geom_two",
+      "two_pow_half_pow",
+      "half_pow_anti",
+      "sum_capped_dyadic",
+      "block_sum",
+      "recip_sum",
+      "leaf_light",
+      "lightCost_trivial",
+      "lightCost_of_large_factor",
+      "lightCost_large_denominator",
+      "lightCost_denominator_one",
+      "linearEnvelope_scaled_rational",
+      "lightCost_scaled_rational",
+      "weyl"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "Decomp289a.lean",
+    "lines": 742,
+    "imports": [
+      "LeanLab.Perelli1996.DecompJ228",
+      "LeanLab.Perelli1996.Definitions103"
+    ],
+    "declarations": [
+      "meanOrder",
+      "remainderMass",
+      "remainderMass_nonneg",
+      "leaf_weighted_mean",
+      "sum_divisors_inv_le",
+      "abs_sing_le_cube",
+      "window_bound",
+      "win_card_le",
+      "log_growth",
+      "leaf_leading_term",
+      "leaf_remainder_mean",
+      "leaf_prime_mean_estimate"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "Decomp320a.lean",
+    "lines": 167,
+    "imports": [
+      "LeanLab.Perelli1996.Decomp103",
+      "LeanLab.Perelli1996.RamanujanInt400",
+      "LeanLab.Perelli1996.Cor1b"
+    ],
+    "declarations": [
+      "singularPartial",
+      "window_pos",
+      "leaf_finite_major",
+      "leaf_singular_tail",
+      "leaf_major_pointwise"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "Decomp400a.lean",
+    "lines": 90,
+    "imports": [
+      "LeanLab.Perelli1996.Decomp88",
+      "LeanLab.Perelli1996.Merge"
+    ],
+    "declarations": [
+      "R_eq_encA",
+      "delta_eq_err",
+      "eventually_delta_eq_err",
+      "theorem1_encA_of",
+      "theorem1_of_encA",
+      "theorem1",
+      "corollary1b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Decomp400b.lean",
+    "lines": 73,
+    "imports": [
+      "LeanLab.Perelli1996.Decomp400a",
+      "LeanLab.Perelli1996.Decomp400e",
+      "LeanLab.Perelli1996.Cor2"
+    ],
+    "declarations": [
+      "rho_eq_encA",
+      "averageConstant_eq",
+      "theorem2_encA_of",
+      "theorem2_of_encA",
+      "theorem2",
+      "corollary2"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Decomp400c.lean",
+    "lines": 66,
+    "imports": [
+      "LeanLab.Perelli1996.Ramanujan103"
+    ],
+    "declarations": [
+      "ramanujanSum_squarefree",
+      "ramanujanSum_squarefree_formula",
+      "moebius_sq_mul_ramanujanSum"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Decomp400d.lean",
+    "lines": 102,
+    "imports": [
+      "LeanLab.Perelli1996.Decomp400a"
+    ],
+    "declarations": [
+      "polynomialKernel_eq",
+      "norm_polynomialKernel_le",
+      "weylLemma_encA_of",
+      "weylLemma",
+      "weylLemma_of_natDegree_one"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Decomp400e.lean",
+    "lines": 369,
+    "imports": [
+      "LeanLab.Perelli1996.Decomp289a",
+      "LeanLab.Perelli1996.Ramanujan103",
+      "LeanLab.Perelli1996.Localization103"
+    ],
+    "declarations": [
+      "meanMajorArcs",
+      "majorPrimeMean",
+      "truncatedWeightedMean",
+      "leaf_minor_mean",
+      "leaf_principal_mean",
+      "leaf_singular_tail",
+      "leaf_weighted_mean",
+      "leaf_prime_mean_estimate"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "Decomp88.lean",
+    "lines": 506,
+    "imports": [
+      "LeanLab.Perelli1996.Section2",
+      "LeanLab.Perelli1996.Kernel17",
+      "LeanLab.Perelli1996.Farey",
+      "LeanLab.Perelli1996.LocalBounds88",
+      "LeanLab.Perelli1996.Linear88",
+      "LeanLab.Perelli1996.Decomp103",
+      "LeanLab.Perelli1996.Decomp103b"
+    ],
+    "declarations": [
+      "arc_parameters",
+      "leaf_cutoff",
+      "leaf_fourier",
+      "leaf_split",
+      "leaf_major",
+      "leaf_weyl",
+      "leaf_minor_reduction",
+      "leaf_character",
+      "leaf_local_mass",
+      "theorem1"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "DecompJ228.lean",
+    "lines": 36,
+    "imports": [
+      "LeanLab.Perelli1996.Mean103",
+      "LeanLab.Perelli1996.Average88"
+    ],
+    "declarations": [
+      "leaf_prime_mean_estimate",
+      "theorem2"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "DecompJ614.lean",
+    "lines": 7,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [],
+    "sorries": 0
+  },
+  {
+    "file": "Definitions103.lean",
+    "lines": 59,
+    "imports": [
+      "LeanLab.Perelli1996.Section2"
+    ],
+    "declarations": [
+      "primeSum",
+      "majorArcs",
+      "minorArcs",
+      "coefficientIntegrand",
+      "majorError",
+      "minorError",
+      "fareyOrder",
+      "puncturedArc",
+      "localMass",
+      "characterRemainder"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Definitions88.lean",
+    "lines": 81,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach",
+      "LeanLab.Perelli1996.B.Cor1b"
+    ],
+    "declarations": [
+      "R",
+      "Sing",
+      "Fv",
+      "Delta",
+      "win",
+      "Admissible",
+      "Theorem1",
+      "Cor1a",
+      "rho",
+      "AF",
+      "Cor1b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Divisor103.lean",
+    "lines": 229,
+    "imports": [
+      "LeanLab.Perelli1996.VaughanInput"
+    ],
+    "declarations": [
+      "weightedDivisor",
+      "weightedDivisor_nonneg",
+      "weightedDivisor_one",
+      "weightedDivisor_succ",
+      "weightedDivisor_one_sum",
+      "convolution_sum_le",
+      "weightedDivisor_sum_le",
+      "divisor_first_moment_harmonic",
+      "divisor_first_moment",
+      "divisorCount_prime_pow",
+      "multichoose_step",
+      "multichoose_sq_le",
+      "divisorCount_sq_le",
+      "divisorSecondMoment"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "DivisorFactor.lean",
+    "lines": 52,
+    "imports": [
+      "LeanLab.Perelli1996.Section3"
+    ],
+    "declarations": [
+      "sum_arithmeticFactor"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "EulerConvergence.lean",
+    "lines": 109,
+    "imports": [
+      "LeanLab.Perelli1996.Section3",
+      "LeanLab.ChenExplicit.Reductions"
+    ],
+    "declarations": [
+      "prime_roots_le_degree",
+      "primeRootTerm",
+      "summable_primeRootTerm",
+      "average_product_multipliable",
+      "averageConstant_pos"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "FactorBound.lean",
+    "lines": 117,
+    "imports": [
+      "LeanLab.Perelli1996.Section3",
+      "LeanLab.Perelli1996.B.Sing"
+    ],
+    "declarations": [
+      "product_p_sub_two",
+      "arithmeticFactor_le",
+      "arithmeticFactor_le_log_sq"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Farey.lean",
+    "lines": 44,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "rational_separation",
+      "bounded_denominator_separation"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Farey103.lean",
+    "lines": 174,
+    "imports": [
+      "LeanLab.Perelli1996.Definitions103"
+    ],
+    "declarations": [
+      "dirichlet_real_order",
+      "two_interval_subcover",
+      "rational_two_cover",
+      "integral_two_cover",
+      "primeSum_norm_le",
+      "punctured_moment_le",
+      "localMass_bddAbove"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "InverseTotient320.lean",
+    "lines": 327,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "correction",
+      "correction_one",
+      "correction_nonsquarefree",
+      "correction_prime",
+      "correction_nonneg",
+      "correction_mul",
+      "sum_correction",
+      "correction_prime_le",
+      "correction_power_bound",
+      "summable_correction_div",
+      "reciprocal_sq_tail",
+      "inverse_totient_sq_tail"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Kernel.lean",
+    "lines": 200,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "e",
+      "T",
+      "norm_T_le",
+      "norm_T_le_inv",
+      "norm_T_le_min",
+      "integral_norm_T_sq_tail",
+      "integral_norm_T_sq_two_tails",
+      "integral_norm_T_sq_le_two_mul"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Kernel17.lean",
+    "lines": 64,
+    "imports": [
+      "LeanLab.Perelli1996.Kernel",
+      "LeanLab.Perelli1996.Totient"
+    ],
+    "declarations": [
+      "large_modulus",
+      "small_modulus",
+      "kernelMass",
+      "kernel17"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Linear88.lean",
+    "lines": 268,
+    "imports": [
+      "LeanLab.Perelli1996.Section2",
+      "LeanLab.Perelli1996.Farey"
+    ],
+    "declarations": [
+      "norm_T_le_rational",
+      "weyl_X",
+      "norm_T_le_scaled_rational",
+      "weyl_affine",
+      "weyl_of_natDegree_one"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Links.lean",
+    "lines": 211,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.Statements"
+    ],
+    "declarations": [
+      "cor1a_of",
+      "card_parity_even_len",
+      "card_parity",
+      "even_Fv_iff",
+      "rho_two",
+      "card_AF"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LocalBounds88.lean",
+    "lines": 135,
+    "imports": [
+      "LeanLab.Perelli1996.Kernel17"
+    ],
+    "declarations": [
+      "kernel_subset",
+      "translate_setIntegral",
+      "second_moment_subset"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Localization103.lean",
+    "lines": 139,
+    "imports": [
+      "LeanLab.Perelli1996.Decomp88",
+      "LeanLab.Perelli1996.Farey103"
+    ],
+    "declarations": [
+      "weyl_decay_of_denominator_bounds",
+      "weyl_decay_exponent_nonneg",
+      "reciprocal_H_le_log",
+      "weyl_decay_secondary_minor"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Mean103.lean",
+    "lines": 102,
+    "imports": [
+      "LeanLab.Perelli1996.Average88"
+    ],
+    "declarations": [
+      "power_error_log_saving",
+      "theorem2_of_prime_mean"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Merge.lean",
+    "lines": 142,
+    "imports": [
+      "LeanLab.Perelli1996.StatementsA",
+      "LeanLab.Perelli1996.B.Cor1b"
+    ],
+    "declarations": [
+      "sing_eq_B",
+      "R_eq_B",
+      "Fn_eq",
+      "corollary1b_of_corollary1a",
+      "corollary1b_of_theorem1",
+      "perelli54_of_theorem1",
+      "vacuity_merge"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Parseval103.lean",
+    "lines": 230,
+    "imports": [
+      "LeanLab.Perelli1996.Definitions103"
+    ],
+    "declarations": [
+      "conj_e",
+      "e_add",
+      "quadratic_identity",
+      "quadratic_le",
+      "integral_e_int",
+      "integral_norm_sum_sq",
+      "prime_second_moment",
+      "prime_second_moment_scaled"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "RBound.lean",
+    "lines": 181,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.Statements"
+    ],
+    "declarations": [
+      "PP",
+      "card_PP_le",
+      "log_nat_mono",
+      "R_eq",
+      "R_le_of_not_goldbach",
+      "natLog_le",
+      "pp_bound_le",
+      "R_le_quarter"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Ramanujan103.lean",
+    "lines": 287,
+    "imports": [
+      "LeanLab.Perelli1996.Parseval103"
+    ],
+    "declarations": [
+      "ramanujanSum",
+      "e_div_eq_one_iff",
+      "e_nat",
+      "e_div_mul",
+      "complete_sum",
+      "ramanujanSum_prime",
+      "ramanujanSum_prime_formula",
+      "ramanujanSum_prime_pow",
+      "coprime_indicator",
+      "multiples_sum",
+      "ramanujanSum_divisor_expansion",
+      "ramanujanSum_coprime",
+      "ramanujanSum_dvd",
+      "ramanujanSum_mul"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Ramanujan400.lean",
+    "lines": 136,
+    "imports": [
+      "LeanLab.Perelli1996.Decomp400c"
+    ],
+    "declarations": [
+      "ramanujanSum_prime_power_formula",
+      "ramanujanSum_formula",
+      "norm_ramanujanSum_le",
+      "norm_weighted_ramanujanSum_le"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "RamanujanInt400.lean",
+    "lines": 56,
+    "imports": [
+      "LeanLab.Perelli1996.Ramanujan400"
+    ],
+    "declarations": [
+      "ramanujanSumInt",
+      "ramanujanSumInt_natCast",
+      "ramanujanSumInt_neg",
+      "ramanujanSumInt_formula",
+      "ramanujanSumInt_eq_natAbs"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "RootCRT.lean",
+    "lines": 63,
+    "imports": [
+      "LeanLab.Perelli1996.Roots"
+    ],
+    "declarations": [
+      "root_count_mul"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Roots.lean",
+    "lines": 110,
+    "imports": [
+      "LeanLab.Perelli1996.Statements"
+    ],
+    "declarations": [
+      "rootResidues",
+      "PrintedRootGrowth",
+      "card_rootResidues_eq_rho",
+      "square_roots_lower",
+      "not_printedRootGrowth_square",
+      "squarefree_square_roots"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Section2.lean",
+    "lines": 78,
+    "imports": [
+      "LeanLab.Perelli1996.Definitions88",
+      "LeanLab.Perelli1996.Kernel"
+    ],
+    "declarations": [
+      "polynomialKernel",
+      "weylExponent",
+      "WeylLemma",
+      "parameter_choice",
+      "heavy_weight_cutoff"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Section3.lean",
+    "lines": 111,
+    "imports": [
+      "LeanLab.Perelli1996.Roots",
+      "LeanLab.ChenExplicit.Statements"
+    ],
+    "declarations": [
+      "singularConstant",
+      "averageConstant",
+      "Theorem2",
+      "arithmeticFactor",
+      "SingularAverage",
+      "arithmeticFactor_one",
+      "arithmeticFactor_even",
+      "arithmeticFactor_nonsquarefree",
+      "arithmeticFactor_prime",
+      "arithmeticFactor_mul",
+      "arithmeticFactor_nonneg"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Sing.lean",
+    "lines": 159,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.Statements"
+    ],
+    "declarations": [
+      "singF",
+      "sing_eq",
+      "inv_sub_one_sq_le",
+      "sing_multipliable",
+      "tele",
+      "prod_ge_half",
+      "partial_ge_one",
+      "one_le_sing"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "SingularDivisor88.lean",
+    "lines": 112,
+    "imports": [
+      "LeanLab.Perelli1996.DivisorFactor",
+      "LeanLab.Perelli1996.Sing",
+      "LeanLab.Perelli1996.Triad22"
+    ],
+    "declarations": [
+      "sing_two_eq_constant",
+      "sing_even_divisor_sum"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "SquarefreeGrowth.lean",
+    "lines": 95,
+    "imports": [
+      "LeanLab.Perelli1996.RootCRT",
+      "LeanLab.Perelli1996.EulerConvergence"
+    ],
+    "declarations": [
+      "SquarefreeRootGrowth",
+      "squarefreeRootGrowth"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Statements.lean",
+    "lines": 21,
+    "imports": [
+      "LeanLab.Perelli1996.Definitions88",
+      "LeanLab.Perelli1996.Decomp88"
+    ],
+    "declarations": [
+      "perelli_theorem1",
+      "perelli_cor1b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "StatementsA.lean",
+    "lines": 726,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach",
+      "LeanLab.ExceptionalSet.Statements",
+      "LeanLab.ExceptionalSet.Pintz2021",
+      "LeanLab.PerelliPintz1992.Statements",
+      "LeanLab.ChenExplicit.Reductions"
+    ],
+    "declarations": [
+      "Sing",
+      "SingConst",
+      "rhoF",
+      "Fn",
+      "deg",
+      "Admissible",
+      "nRange",
+      "err",
+      "CF",
+      "Theorem1",
+      "theorem1",
+      "excCount",
+      "Corollary1a",
+      "goldExc",
+      "Corollary1b",
+      "corollary1b",
+      "Corollary1bShort",
+      "corollary1bShort",
+      "Theorem2",
+      "theorem2",
+      "Corollary2",
+      "corollary2",
+      "Kexp",
+      "WeylLemma",
+      "weylLemma",
+      "excCount_mul_le_of_sum",
+      "corollary1a_of_theorem1",
+      "corollary1a",
+      "excCount_mono",
+      "goldExc_mono",
+      "Sing_odd",
+      "SingConst_pos",
+      "sing_factor",
+      "rhoF_le",
+      "rhoF_one",
+      "rhoF_two",
+      "two_dvd_eval_iff",
+      "pair_count",
+      "card_AF_even",
+      "card_AF_bounds",
+      "F2",
+      "F2_natDegree",
+      "F2_leadingCoeff",
+      "F2_admissible",
+      "F2_eval",
+      "F2_Fn",
+      "F2_rho",
+      "badCount",
+      "EPoly_le_split",
+      "DyadicLog",
+      "polyLog_of_dyadic",
+      "log_rpow_le_self",
+      "dyadic_of_corollary1b",
+      "polyLog_of_corollary1b",
+      "perelli54",
+      "exp9_log",
+      "exp9_q",
+      "exp10",
+      "exp13",
+      "exp25_base",
+      "exp25",
+      "exp25_value",
+      "huxley_threshold1",
+      "huxley_threshold2",
+      "exp26",
+      "exp32",
+      "ranges_order",
+      "ranges_nonempty",
+      "exp22_question",
+      "goldExc_F2_eq_zero_of_binaryGoldbach",
+      "perelli54_two_both"
+    ],
+    "sorries": 6
+  },
+  {
+    "file": "Tail320.lean",
+    "lines": 105,
+    "imports": [
+      "LeanLab.Perelli1996.Totient400"
+    ],
+    "declarations": [
+      "finite_totient_tail",
+      "finite_ramanujan_tail"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Tails88.lean",
+    "lines": 104,
+    "imports": [
+      "LeanLab.Perelli1996.WeightedPower",
+      "LeanLab.Perelli1996.WeightedConvergence"
+    ],
+    "declarations": [
+      "weighted_roots_partial_bound",
+      "weighted_roots_tail_bound"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Totient.lean",
+    "lines": 61,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "totient_sq_lower_aux",
+      "le_two_totient_sq"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Totient400.lean",
+    "lines": 65,
+    "imports": [
+      "LeanLab.Perelli1996.RamanujanInt400"
+    ],
+    "declarations": [
+      "divisor_totient_ratio_le",
+      "sum_divisors_ratio_le",
+      "norm_coefficient_sum_le"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Triad17.lean",
+    "lines": 152,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.Statements",
+      "LeanLab.Perelli1996.B.Sing",
+      "LeanLab.ChenExplicit.Statements",
+      "LeanLab.ChenExplicit.Reductions"
+    ],
+    "declarations": [
+      "le_singF",
+      "nonneg_singF",
+      "triad17_pos",
+      "triad17_main"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "Triad22.lean",
+    "lines": 157,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Perelli1996.Statements",
+      "LeanLab.Perelli1996.Sing"
+    ],
+    "declarations": [
+      "twinC_factor",
+      "twinC_multipliable",
+      "partial_twinC_ge_half",
+      "twinC_pos",
+      "triad22_pos",
+      "partial_main",
+      "triad22_main"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "VaughanInput.lean",
+    "lines": 35,
+    "imports": [
+      "LeanLab.Perelli1996.Section2"
+    ],
+    "declarations": [
+      "divisorCount",
+      "DivisorSecondMoment",
+      "divisorSecondMoment_one"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "WeightedConvergence.lean",
+    "lines": 69,
+    "imports": [
+      "LeanLab.Perelli1996.SquarefreeGrowth",
+      "LeanLab.Perelli1996.FactorBound"
+    ],
+    "declarations": [
+      "arithmeticFactor_le_rpow",
+      "summable_weighted_roots"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "WeightedCounting.lean",
+    "lines": 83,
+    "imports": [
+      "LeanLab.Perelli1996.Counting",
+      "LeanLab.Perelli1996.Section3",
+      "LeanLab.Perelli1996.RootCRT"
+    ],
+    "declarations": [
+      "weighted_root_count_two",
+      "finite_weighted_count_error"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "WeightedEuler.lean",
+    "lines": 86,
+    "imports": [
+      "LeanLab.Perelli1996.WeightedConvergence"
+    ],
+    "declarations": [
+      "weighted_roots_eulerProduct",
+      "weighted_roots_eulerProduct_odd"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "WeightedPower.lean",
+    "lines": 72,
+    "imports": [
+      "LeanLab.Perelli1996.FactorBound",
+      "LeanLab.Perelli1996.SquarefreeGrowth"
+    ],
+    "declarations": [
+      "arithmeticFactor_le_rpow_of_pos",
+      "weighted_roots_power_bound"
+    ],
+    "sorries": 0
+  }
+]
