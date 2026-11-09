@@ -70,7 +70,16 @@ dominates the bound with the larger decay rate and the smaller constant, the fac
 theorem leaf_decay_merge (κ κ' B B' X : ℝ) (N : ℕ)
     (hκ : 0 < κ) (hκ' : κ ≤ κ') (hB : 0 < B) (hB' : B ≤ B') (hX : 0 ≤ X) :
     B * N * Real.exp (-κ' * X) ≤ B' * N * Real.exp (-κ * X) := by
-  sorry
+  have h1 : -κ' * X ≤ -κ * X := mul_le_mul_of_nonneg_right (neg_le_neg hκ') hX
+  have h2 : Real.exp (-κ' * X) ≤ Real.exp (-κ * X) := Real.exp_le_exp.mpr h1
+  have h3 : 0 ≤ Real.exp (-κ' * X) := (Real.exp_pos (-κ' * X)).le
+  have h4 : 0 ≤ Real.exp (-κ * X) := (Real.exp_pos (-κ * X)).le
+  have h5 : (N : ℝ) ≥ 0 := Nat.cast_nonneg N
+  have p1 : B * N * Real.exp (-κ' * X) ≤ B * N * Real.exp (-κ * X) := by
+    gcongr
+  have p2 : B * N * Real.exp (-κ * X) ≤ B' * N * Real.exp (-κ * X) := by
+    gcongr
+  linarith
 
 /-! ### Assembly -/
 
