@@ -25,6 +25,11 @@ theorem explicit_formula_remainder_R (q : ℕ) [NeZero q]
   have hd : 0 ≤ |δ| := abs_nonneg δ
   linarith
 
+private lemma norm_le_norm_add_norm_sub (A R : ℂ) : ‖A‖ ≤ ‖A + R‖ + ‖R‖ := by
+  have h := norm_sub_le (A + R) R
+  rw [add_sub_cancel_right] at h
+  exact h
+
 /-- LEAF. Page 44. This is the main equation component of the explicit formula.
 
 REPAIRED (U-1619, filed 20261105T0544Z): the residue `R` is a free variable that appears only
@@ -42,7 +47,12 @@ theorem explicit_formula_remainder_E (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero 
       lowZeros χ δ x T + highZeros χ δ x T‖ ≤
       (3 * log q + 13.347 * |δ| + 16.695) +
         (log q + 6.01) * (1 + 6 * |δ|) / sqrt x := by
-  sorry
+  obtain ⟨R, hR, hAR⟩ :=
+    Decomp269a.explicit_formula_remainder x hx q χ hχ δ T hT hzeros
+  have htri := norm_le_norm_add_norm_sub
+    (Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
+      lowZeros χ δ x T + highZeros χ δ x T) R
+  linarith
 
 /-- A point of norm at most `B + C` is within distance `C` of a point of the ball of radius `B`.
 This is what the repaired leaf needs from the residue `R` of the assembly. -/

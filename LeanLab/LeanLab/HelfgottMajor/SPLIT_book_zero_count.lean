@@ -42,6 +42,71 @@ open scoped ComplexConjugate LSeries.notation
 
 variable {q : ℕ} [NeZero q]
 
+/-- AGY task37 helper. The book count is a nonnegative weighted multiplicity sum. -/
+lemma bookCount_nonneg_agy37 (χ : DirichletCharacter ℂ q) (T : ℝ) : 0 ≤ bookCount χ T := by
+  unfold bookCount
+  refine Finset.sum_nonneg fun ρ _ => mul_nonneg ?_ (Nat.cast_nonneg _)
+  unfold halfWeight
+  split_ifs <;> norm_num
+
+/-- AGY task37 helper. On `1 ≤ q * T` the error is at least `3.389`. -/
+lemma bookError_ge_agy37 {T : ℝ} (hT : 1 ≤ T) : (3.389 : ℝ) ≤ bookError q T := by
+  unfold bookError
+  have hq : (1 : ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have h1 : (1 : ℝ) ≤ (q : ℝ) * T := by nlinarith
+  have := Real.log_nonneg h1
+  linarith
+
+/-- AGY task37 helper. In the band `q * T ≤ 2πe` the main term lies in `[-1, 0]`.
+Put `x = qT / (2π)`; then `bookMain = x / q * (log x - 1)` and `x * (1 - log x) ≤ 1`
+since `log x ≥ 1 - 1 / x`. -/
+lemma bookMain_band_agy37 {T : ℝ} (hT : 1 ≤ T)
+    (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
+    -1 ≤ bookMain q T ∧ bookMain q T ≤ 0 := by
+  have hq : (1 : ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hpi := Real.pi_pos
+  have he := Real.exp_pos 1
+  have hqT : 0 < (q : ℝ) * T := by positivity
+  set x := (q : ℝ) * T / (2 * Real.pi) with hx
+  have hxpos : 0 < x := by positivity
+  have hlog : Real.log ((q : ℝ) * T / (2 * Real.pi * Real.exp 1)) = Real.log x - 1 := by
+    rw [hx, show 2 * Real.pi * Real.exp 1 = (2 * Real.pi) * Real.exp 1 by ring,
+      ← div_div, Real.log_div (by positivity) he.ne', Real.log_exp]
+  have hlogle : Real.log x - 1 ≤ 0 := by
+    rw [← hlog]
+    apply Real.log_nonpos (by positivity)
+    rw [div_le_one (by positivity)]; exact hband
+  have hT' : T / (2 * Real.pi) = x / q := by
+    rw [hx]; field_simp
+  unfold bookMain
+  rw [hlog, hT']
+  refine ⟨?_, mul_nonpos_of_nonneg_of_nonpos (by positivity) hlogle⟩
+  -- `log x ≥ 1 - 1/x`
+  have hl : 1 - 1 / x ≤ Real.log x := by
+    have := Real.add_one_le_exp (-Real.log x)
+    rw [Real.exp_neg, Real.exp_log hxpos] at this
+    have : 1 / x = x⁻¹ := one_div x
+    linarith
+  have h1 : x * (1 - Real.log x) ≤ 1 := by
+    have : x * (1 / x) = 1 := by field_simp
+    nlinarith
+  have h2 : x * (1 - Real.log x) / q ≤ 1 := by
+    rw [div_le_one (by positivity)]; linarith
+  have h3 : x / q * (Real.log x - 1) = -(x * (1 - Real.log x) / q) := by ring
+  rw [h3]; linarith
+
+/-- AGY task37 helper, CONDITIONAL ON a count bound: in the band `q * T ≤ 2πe`, a bound
+`bookCount χ T ≤ 2.389` on the zeros below height `T` gives the band leaf. The count bound itself
+needs zeros of explicit `L`-functions below height `2πe`, which is not available. -/
+lemma book_zero_count_band_of_count_le_agy37 (χ : DirichletCharacter ℂ q) {T : ℝ}
+    (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1)
+    (hcount : bookCount χ T ≤ 2.389) :
+    |bookCount χ T - bookMain q T| ≤ bookError q T := by
+  obtain ⟨h1, h2⟩ := bookMain_band_agy37 (q := q) hT hband
+  have h3 := bookError_ge_agy37 (q := q) hT
+  have h4 := bookCount_nonneg_agy37 χ T
+  rw [abs_le]; constructor <;> linarith
+
 /-- LEAF. Bounded band, `q * T ≤ 2πe`. The band bounds the conductor and the height at once,
 `q ≤ 2πe` and `T ≤ 2πe`, since `q ≥ 1` and `T ≥ 1`; only zeros of `L(·,χ)` below the fixed
 height `2πe` and inside the open unit strip are counted, so the count is a bounded absolute
