@@ -43,7 +43,34 @@ theorem leaf_odd_moment_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               (fun n : ℕ => Odd (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
-  sorry
+  classical
+  obtain ⟨δ₀, hδ₀, h⟩ := leaf_odd_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδs => ?_⟩
+  obtain ⟨κ₀, hκ₀, h⟩ := h δ hδ hδs
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := h κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hfull := hN₀ N hN
+  have hfilter_eq : (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4)).filter (fun n : ℕ => Odd (nu γ n))
+      = (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4)).filter (fun n : ℕ => ¬ Even (nu γ n)) := by
+    apply Finset.filter_congr
+    intro n hn
+    exact (leaf_odd_parity γ n).symm
+  rw [hfilter_eq]
+  have hsubset : (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4)).filter (fun n : ℕ => ¬ Even (nu γ n))
+      ⊆ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)) := by
+    intro x hx
+    simp only [Finset.mem_filter, Finset.mem_Icc] at hx ⊢
+    rcases hx with ⟨⟨hlo, hhi⟩, hpar⟩
+    exact ⟨⟨hlo, by omega⟩, hpar⟩
+  calc
+    (∑ n ∈ (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4)).filter (fun n : ℕ => ¬ Even (nu γ n)),
+      ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2)
+    ≤ (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
+      ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsubset (fun i hi hni => sq_nonneg _)
+    _ ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := hfull
+    _ = B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by ring
 
 /-- LEAF. Odd second moment, upper piece: the sum of `‖R₁(ν_n)‖²` over the odd members of the
 window from the quarter point `⌊(N+1)/2⌋ + ⌊N/4⌋ + 1` up to the upper endpoint `N`. Same eventual
@@ -56,7 +83,34 @@ theorem leaf_odd_moment_upper (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               (fun n : ℕ => Odd (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
-  sorry
+  classical
+  obtain ⟨δ₀, hδ₀, h⟩ := leaf_odd_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδs => ?_⟩
+  obtain ⟨κ₀, hκ₀, h⟩ := h δ hδ hδs
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := h κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hfull := hN₀ N hN
+  have hfilter_eq : (Finset.Icc ((N + 1) / 2 + N / 4 + 1) N).filter (fun n : ℕ => Odd (nu γ n))
+      = (Finset.Icc ((N + 1) / 2 + N / 4 + 1) N).filter (fun n : ℕ => ¬ Even (nu γ n)) := by
+    apply Finset.filter_congr
+    intro n hn
+    exact (leaf_odd_parity γ n).symm
+  rw [hfilter_eq]
+  have hsubset : (Finset.Icc ((N + 1) / 2 + N / 4 + 1) N).filter (fun n : ℕ => ¬ Even (nu γ n))
+      ⊆ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)) := by
+    intro x hx
+    simp only [Finset.mem_filter, Finset.mem_Icc] at hx ⊢
+    rcases hx with ⟨⟨hlo, hhi⟩, hpar⟩
+    exact ⟨⟨by omega, hhi⟩, hpar⟩
+  calc
+    (∑ n ∈ (Finset.Icc ((N + 1) / 2 + N / 4 + 1) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
+      ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2)
+    ≤ (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
+      ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsubset (fun i hi hni => sq_nonneg _)
+    _ ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := hfull
+    _ = B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by ring
 
 /-- Assembly. The odd second moment of the floor window follows from its two pieces: the parity step
 turns `¬ Even (ν_n)` into `Odd (ν_n)`, the window is identified with the union of the two pieces (its
