@@ -32,6 +32,55 @@ open Real Filter Topology
 
 attribute [local instance] Classical.propDecidable
 
+/-- The radius of the window is at most its centre when `N ≥ 1`. -/
+private lemma window_radius_le (N : ℕ) (hN : 1 ≤ N) :
+    ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊ ≤ N := by
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hpow : (N : ℝ) ^ (0.99 : ℝ) ≤ (N : ℝ) :=
+    calc (N : ℝ) ^ (0.99 : ℝ) ≤ (N : ℝ) ^ (1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le hN1 (by norm_num)
+      _ = (N : ℝ) := Real.rpow_one _
+  simpa using (Nat.floor_le_floor hpow)
+
+/-- The exceptional points in the window are in the exceptional set up to `2N`, apart from
+the four points below `4`. -/
+private lemma window_subset_exceptions (N : ℕ) (hN : 1 ≤ N) :
+    ((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)
+          (N + ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)).filter
+        (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n))
+      ⊆ ((Finset.Icc 4 (2 * N)).filter
+        (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)) ∪ Finset.Icc 0 3 := by
+  classical
+  intro n hn
+  rw [Finset.mem_filter, Finset.mem_Icc] at hn
+  obtain ⟨⟨hnlo, hnhi⟩, hnP⟩ := hn
+  have hR := window_radius_le N hN
+  rw [Finset.mem_union]
+  by_cases h4 : 4 ≤ n
+  · left
+    rw [Finset.mem_filter, Finset.mem_Icc]
+    exact ⟨⟨h4, by omega⟩, hnP⟩
+  · right
+    rw [Finset.mem_Icc]
+    omega
+
+/-- The window has at most `E (2N) + 4` exceptional points. -/
+private lemma window_card_le_E_add_four (N : ℕ) (hN : 1 ≤ N) :
+    (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)
+          (N + ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)).filter
+        (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℕ)
+      ≤ E (2 * N) + 4 := by
+  classical
+  have hsub := window_subset_exceptions N hN
+  have hcard :
+      ((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)
+            (N + ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card
+        ≤ ((Finset.Icc 4 (2 * N)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card + (Finset.Icc 0 3).card := by
+    exact (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
+  simpa [E] using hcard
+
 /-- LEAF 1 of 2, the local count: on every window `[N - R, N + R]` with `R = ⌊N^{0.99}⌋` and
 `N ≥ N0`, the even `n` of the window that are not a sum of two primes number at most
 `C N^{0.903}`, with one constant `C ≥ 0` for all `N`. The radius is far below `N`, so this is
@@ -42,7 +91,63 @@ theorem leaf_window_count :
             (N + ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)).filter
           (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ)
         ≤ C * (N : ℝ) ^ (0.903 : ℝ) := by
-  sorry
+  classical
+  obtain ⟨K, hK⟩ := zhao
+  set C₀ : ℝ := max K 0 with hC₀
+  have hC₀0 : 0 ≤ C₀ := le_max_right _ _
+  have hglobal : ∀ X : ℕ, 1 ≤ X →
+      (E X : ℝ) ≤ C₀ * (X : ℝ) ^ (7 / 10 : ℝ) := by
+    intro X hX
+    calc (E X : ℝ) ≤ K * (X : ℝ) ^ (7 / 10 : ℝ) := hK X hX
+      _ ≤ C₀ * (X : ℝ) ^ (7 / 10 : ℝ) := by
+        gcongr
+        exact le_max_left _ _
+  refine ⟨2 * C₀ + 4, ?_⟩
+  refine ⟨1, ?_⟩
+  refine And.intro (by nlinarith [hC₀0]) (And.intro (by norm_num) ?_)
+  intro N hN
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hNpos : (0 : ℝ) < (N : ℝ) := by linarith
+  have h2N1 : 1 ≤ 2 * N := by omega
+  have hE := hglobal (2 * N) h2N1
+  have htwo :
+      ((2 * N : ℕ) : ℝ) ^ (7 / 10 : ℝ) ≤ 2 * (N : ℝ) ^ (0.903 : ℝ) := by
+    rw [show ((2 * N : ℕ) : ℝ) = (2 : ℝ) * (N : ℝ) by push_cast; ring,
+      Real.mul_rpow (by norm_num) hNpos.le]
+    have hbase : (2 : ℝ) ^ (7 / 10 : ℝ) ≤ 2 := by
+      calc (2 : ℝ) ^ (7 / 10 : ℝ) ≤ (2 : ℝ) ^ (1 : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+        _ = 2 := Real.rpow_one 2
+    have hexp : (N : ℝ) ^ (7 / 10 : ℝ) ≤ (N : ℝ) ^ (0.903 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le hN1 (by norm_num)
+    exact mul_le_mul hbase hexp (Real.rpow_nonneg hNpos.le _) (by positivity)
+  have hcount :
+      (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)
+            (N + ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ)
+        ≤ (E (2 * N) : ℝ) + 4 := by
+    exact_mod_cast window_card_le_E_add_four N hN
+  have hpow : (1 : ℝ) ≤ (N : ℝ) ^ (0.903 : ℝ) :=
+    Real.one_le_rpow hN1 (by norm_num)
+  calc
+      (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)
+            (N + ⌊(N : ℝ) ^ (0.99 : ℝ)⌋₊)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ)
+        ≤ (E (2 * N) : ℝ) + 4 := hcount
+    _ ≤ C₀ * ((2 * N : ℕ) : ℝ) ^ (7 / 10 : ℝ) + 4 := add_le_add_left hE 4
+    _ ≤ 2 * C₀ * (N : ℝ) ^ (0.903 : ℝ) + 4 := by
+      calc C₀ * ((2 * N : ℕ) : ℝ) ^ (7 / 10 : ℝ) + 4
+          ≤ C₀ * (2 * (N : ℝ) ^ (0.903 : ℝ)) + 4 :=
+            add_le_add_left (mul_le_mul_of_nonneg_left htwo hC₀0) 4
+        _ = 2 * C₀ * (N : ℝ) ^ (0.903 : ℝ) + 4 := by ring
+    _ ≤ 2 * C₀ * (N : ℝ) ^ (0.903 : ℝ) +
+        4 * (N : ℝ) ^ (0.903 : ℝ) := by
+      have h4 : 4 ≤ 4 * (N : ℝ) ^ (0.903 : ℝ) := by
+        calc (4 : ℝ) = 4 * 1 := by ring
+          _ ≤ 4 * (N : ℝ) ^ (0.903 : ℝ) :=
+            mul_le_mul_of_nonneg_left hpow (by norm_num : (0 : ℝ) ≤ 4)
+      linarith
+    _ = (2 * C₀ + 4) * (N : ℝ) ^ (0.903 : ℝ) := by ring
 
 /-- `y / y^{0.99} = y^{0.01}` for `y > 0`: the step that turns the `Y^{0.99}` of the cover
 count into the exponent `0.01`. Helper for `leaf_cover_count`. -/
