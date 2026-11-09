@@ -1,4 +1,5 @@
 import LeanLab.LanguascoPerelli1996.Decomp108
+import LeanLab.LanguascoPerelli1996.Decomp318a
 
 /-!
 P0071 pages 354 and 355, the written proof of Lemma 2.
@@ -185,7 +186,7 @@ theorem band_derivative_mass :
           (∫ v in (-1 : ℝ)..1,
             ‖deriv (fun t : ℝ => zSum (X * Real.exp t) U T q a) v‖ ^ 2) ≤
               C * T ^ 2 * M := by
-  sorry
+  exact Decomp318a.band_derivative_mass_decomposed
 
 /-- Page 355 display 13, with exactly the statement of variation_control.
 CONDITIONAL ON band_variation_cauchy_schwarz and band_derivative_mass. -/

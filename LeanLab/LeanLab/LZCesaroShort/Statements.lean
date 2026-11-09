@@ -453,9 +453,7 @@ theorem exists_R_pos_short (h1 : Theorem1) (h5 : Sec5RH) :
   exact ⟨n, hn, primePow_sum_of_R_pos hR⟩
 
 
-/-- Cited input restored exactly from main. It remains unproved. -/
-theorem lz_theorem1 : RiemannHypothesis → Theorem1 := by sorry
-
-theorem lz_theorem2b : RiemannHypothesis → Theorem2b := by sorry
+/- The exact sealed lz_theorem1 and lz_theorem2b declarations move to LegacyResolved245.lean.
+They remain conditional on the unresolved legacy leaves and RH. -/
 
 end LeanLab.LZCesaroShort

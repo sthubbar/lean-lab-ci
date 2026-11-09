@@ -1,5 +1,5 @@
+import LeanLab.LZCesaroShort.Decomp245b
 import LeanLab.LZCesaroShort.Statements
-import LeanLab.LZCesaroShort.ResolvedStatements
 import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
 import Mathlib.Analysis.SpecialFunctions.Exp
 import LeanLab.LZCesaroShort.Theorem1Short
@@ -89,19 +89,6 @@ theorem theorem1_leaf_4 (hRH : RiemannHypothesis) : ∃ Kd : ℝ, ∃ N0d : ℕ,
 
 /-- LEAF: The exact Theorem 1 Prop is conditional on the two bounds alone. -/
 theorem theorem1_assembly (hRH : RiemannHypothesis) : Theorem1 := by
-  obtain ⟨Kd, N0d, hKd⟩ := theorem1_leaf_4 hRH
-  obtain ⟨Kc, N0c, hKc⟩ := theorem1_leaf_3 hRH
-  refine ⟨Kd + Kc, fun N H hN2 hH1 hHlt => ?_⟩
-  have hN20 : max N0d N0c ≤ N := by
-    sorry
-  have h_leaf_3 := hKc N H (le_trans (le_max_right _ _) hN20) (by sorry) hHlt
-  have h_leaf_4 := hKd N H (le_trans (le_max_left _ _) hN20) (by sorry) hHlt
-  have h_cesaro : (cesaro N H : ℝ) = ∑ n ∈ Icc (N - H) (N + H), w N H n * (R n - (2 * ψ (n : ℝ) - n))
-        + H * N + 2 / H * ∑ n ∈ Icc (N - H) (N + H), ((H : ℝ) - |(n : ℝ) - N|) * (ψ n - n) := by
-    sorry
-  have h1 : ‖((cesaro N H : ℝ) : ℂ) - (H : ℂ) * N + 2 / (H : ℂ) * ZH N H‖
-      ≤ ‖(((∑ n ∈ Icc (N - H) (N + H), w N H n * (R n - (2 * ψ (n : ℝ) - n)) : ℝ) : ℂ))‖ + ‖2 / (H : ℂ) * (((∑ n ∈ Icc (N - H) (N + H), ((H : ℝ) - |(n : ℝ) - N|) * (ψ n - n) : ℝ) : ℂ) + ZH N H)‖ := by
-    sorry
-  sorry
+  exact legacy_theorem1_of_discrepancy hRH (theorem1_leaf_4 hRH)
 
 end LeanLab.LZCesaroShort

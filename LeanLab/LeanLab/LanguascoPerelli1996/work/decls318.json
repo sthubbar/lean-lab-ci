@@ -1,0 +1,241 @@
+{
+  "new": [
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Decomp318a.band_prefix_representation",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Decomp318a.even_moment_mass",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Decomp318a.local_derivative_mass_le",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Decomp318a.band_derivative_mass_decomposed",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Decomp318b.variation_cauchy",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Decomp318b.band_variation_control",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Interpolation318.mass",
+      "kind": "def",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Interpolation318.mass_nonneg",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Interpolation318.kernel_interpolation",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Interpolation318.mass_interpolation_identity",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Interpolation318.mass_interpolation",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Interpolation318.mass_first_le",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318.lambda_le_two_sqrt",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318.lambda_mul_le",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318.damping_difference_le",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318.geometric_denominator_bound",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318.geometric_moments_bound",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318b.lambda_weighted_sum_bound",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318b.dampedSum_difference_le",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318b.dampedSum_adjacent_le",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318c.principal_parameter_difference_le",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318c.dampedError_adjacent_le",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Parameter318c.estimate25_mod_one_real",
+      "kind": "theorem",
+      "source": "P0071 page 360 display 25, derived"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Partial318.norm_sum_sq_le",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Partial318.mass_sum_le",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Partial318.mass_congr",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Partial318.mass_neg",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Partial318.monotone_mass_le",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Signed318.signed_mass_values",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Signed318.signed_prefix_mass_le",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Signed318.signed_contraction_false",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Vacuity318.prefix_mass_bound_exists",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    },
+    {
+      "name": "LeanLab.LanguascoPerelli1996.Vacuity318.correlation_bound_exists",
+      "kind": "theorem",
+      "source": "P0071 pages 349, 354 and 355, derived or direct"
+    }
+  ],
+  "all_theorems": [
+    "LeanLab.LanguascoPerelli1996.Decomp108.local_mass_control",
+    "LeanLab.LanguascoPerelli1996.Decomp108.endpoint_control",
+    "LeanLab.LanguascoPerelli1996.Decomp108.variation_control",
+    "LeanLab.LanguascoPerelli1996.Decomp108.large_height_square",
+    "LeanLab.LanguascoPerelli1996.Decomp108.small_height_control",
+    "LeanLab.LanguascoPerelli1996.Decomp108.square_to_rpow",
+    "LeanLab.LanguascoPerelli1996.Decomp108.lemma2_decomposed",
+    "LeanLab.LanguascoPerelli1996.Decomp108.lemma2_of_decomposed",
+    "LeanLab.LanguascoPerelli1996.Decomp274a.band_variation_cauchy_schwarz",
+    "LeanLab.LanguascoPerelli1996.Decomp274a.band_derivative_mass",
+    "LeanLab.LanguascoPerelli1996.Decomp274a.variation_control_decomposed",
+    "LeanLab.LanguascoPerelli1996.Decomp318a.band_prefix_representation",
+    "LeanLab.LanguascoPerelli1996.Decomp318a.even_moment_mass",
+    "LeanLab.LanguascoPerelli1996.Decomp318a.local_derivative_mass_le",
+    "LeanLab.LanguascoPerelli1996.Decomp318a.band_derivative_mass_decomposed",
+    "LeanLab.LanguascoPerelli1996.Decomp318b.variation_cauchy",
+    "LeanLab.LanguascoPerelli1996.Decomp318b.band_variation_control",
+    "LeanLab.LanguascoPerelli1996.Interpolation318.mass",
+    "LeanLab.LanguascoPerelli1996.Interpolation318.mass_nonneg",
+    "LeanLab.LanguascoPerelli1996.Interpolation318.kernel_interpolation",
+    "LeanLab.LanguascoPerelli1996.Interpolation318.mass_interpolation_identity",
+    "LeanLab.LanguascoPerelli1996.Interpolation318.mass_interpolation",
+    "LeanLab.LanguascoPerelli1996.Interpolation318.mass_first_le",
+    "LeanLab.LanguascoPerelli1996.lemma2",
+    "LeanLab.LanguascoPerelli1996.Parameter318.lambda_le_two_sqrt",
+    "LeanLab.LanguascoPerelli1996.Parameter318.lambda_mul_le",
+    "LeanLab.LanguascoPerelli1996.Parameter318.damping_difference_le",
+    "LeanLab.LanguascoPerelli1996.Parameter318.geometric_denominator_bound",
+    "LeanLab.LanguascoPerelli1996.Parameter318.geometric_moments_bound",
+    "LeanLab.LanguascoPerelli1996.Parameter318b.lambda_weighted_sum_bound",
+    "LeanLab.LanguascoPerelli1996.Parameter318b.dampedSum_difference_le",
+    "LeanLab.LanguascoPerelli1996.Parameter318b.dampedSum_adjacent_le",
+    "LeanLab.LanguascoPerelli1996.Parameter318c.principal_parameter_difference_le",
+    "LeanLab.LanguascoPerelli1996.Parameter318c.dampedError_adjacent_le",
+    "LeanLab.LanguascoPerelli1996.Parameter318c.estimate25_mod_one_real",
+    "LeanLab.LanguascoPerelli1996.Partial318.norm_sum_sq_le",
+    "LeanLab.LanguascoPerelli1996.Partial318.mass_sum_le",
+    "LeanLab.LanguascoPerelli1996.Partial318.mass_congr",
+    "LeanLab.LanguascoPerelli1996.Partial318.mass_neg",
+    "LeanLab.LanguascoPerelli1996.Partial318.monotone_mass_le",
+    "LeanLab.LanguascoPerelli1996.Signed318.signed_mass_values",
+    "LeanLab.LanguascoPerelli1996.Signed318.signed_prefix_mass_le",
+    "LeanLab.LanguascoPerelli1996.Signed318.signed_contraction_false",
+    "LeanLab.LanguascoPerelli1996.theorem1",
+    "LeanLab.LanguascoPerelli1996.estimate3",
+    "LeanLab.LanguascoPerelli1996.theorem2",
+    "LeanLab.LanguascoPerelli1996.theorem3",
+    "LeanLab.LanguascoPerelli1996.hardyLittlewood",
+    "LeanLab.LanguascoPerelli1996.theorem4",
+    "LeanLab.LanguascoPerelli1996.lemma2_hyps_satisfiable",
+    "LeanLab.LanguascoPerelli1996.four_Q_sq",
+    "LeanLab.LanguascoPerelli1996.Q_range",
+    "LeanLab.LanguascoPerelli1996.shortBound_of_theorems",
+    "LeanLab.LanguascoPerelli1996.EH_subdivide",
+    "LeanLab.LanguascoPerelli1996.dyadicBound_of_shortBound",
+    "LeanLab.LanguascoPerelli1996.corollary1",
+    "LeanLab.LanguascoPerelli1996.E_le_half",
+    "LeanLab.LanguascoPerelli1996.powerBound_of_dyadic",
+    "LeanLab.LanguascoPerelli1996.powerBound_of_dyadicBound",
+    "LeanLab.LanguascoPerelli1996.lab_powerBound_of_GMC",
+    "LeanLab.LanguascoPerelli1996.lab_powerBound_of_theorems",
+    "LeanLab.LanguascoPerelli1996.lab_HL",
+    "LeanLab.LanguascoPerelli1996.beats_HL_iff",
+    "LeanLab.LanguascoPerelli1996.beats_zhao_iff",
+    "LeanLab.LanguascoPerelli1996.extreme_case",
+    "LeanLab.LanguascoPerelli1996.zhao_of_theorems",
+    "LeanLab.LanguascoPerelli1996.eps_of_theorems_half",
+    "LeanLab.LanguascoPerelli1996.chain_of_GMC",
+    "LeanLab.LanguascoPerelli1996.Vacuity318.prefix_mass_bound_exists",
+    "LeanLab.LanguascoPerelli1996.Vacuity318.correlation_bound_exists"
+  ]
+}

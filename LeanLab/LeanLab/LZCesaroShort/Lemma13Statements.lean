@@ -46,7 +46,7 @@ def Lemma3 : Prop :=
 The unused sorry declaration lz_lemma3 is retired. The exact Lemma3 Prop is unchanged. -/
 
 
-/-- Cited input restored exactly from main. It remains unproved. -/
-theorem lz_lemma3 : Lemma3 := by sorry
+/- The exact sealed lz_lemma3 declaration now lives in Lemma3Resolved245.lean.
+Its unconditional proof imports DecompJ209 without creating an import cycle. -/
 
 end LeanLab.LZCesaroShort

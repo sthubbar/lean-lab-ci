@@ -214,9 +214,6 @@ def Lemma2 : Prop :=
         ‖zSum X U T q a‖ ≤ K * T ^ (1 / 2 : ℝ) * M ^ (1 / 2 : ℝ)
 
 
-/-- CITED. Lemma 2, Section 3, p. 354, with `T ≥ 1`. A conditional assembly is
-`Decomp108.lemma2_of_decomposed`, CONDITIONAL ON `Decomp108.variation_control`. -/
-theorem lemma2 : Lemma2 := by sorry
 
 /-- Vacuity instance for the amended Lemma 2: the hypotheses
 `0 < X`, `0 ≤ U`, `U < T`, `1 ≤ T`, `Nat.Coprime a q` hold at `X = 1, U = 0, T = 1, q = 1, a = 1`. -/

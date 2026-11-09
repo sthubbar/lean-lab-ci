@@ -1,4 +1,5 @@
 import LeanLab.LanguascoPerelli1996.Mass108
+import LeanLab.LanguascoPerelli1996.Decomp318b
 
 /-!
 P0071 Lemma 2, pages 354 and 355. Decomposition by CODEX task108.
@@ -59,7 +60,7 @@ theorem variation_control :
       ∀ (q : ℕ) [NeZero q] (a : ℕ), Nat.Coprime a q → ∀ M : ℝ,
         (∀ u, U ≤ u → u ≤ T → ‖F X u q a‖ ≤ M) →
           (∫ v in (-1 : ℝ)..1, |deriv (energy X U T q a) v|) ≤ B * T * M := by
-  sorry
+  exact Decomp318b.band_variation_control
 
 /-- LEAF. Page 355, assembly of displays 12 and 13 for T at least one. -/
 theorem large_height_square {z : ℂ} {A B T M E FT FU : ℝ}
@@ -129,3 +130,4 @@ end LeanLab.LanguascoPerelli1996.Decomp108
 #print axioms LeanLab.LanguascoPerelli1996.Decomp108.lemma2_of_decomposed
 #print axioms LeanLab.LanguascoPerelli1996.Decomp108.lemma2_decomposed
 #print axioms LeanLab.LanguascoPerelli1996.Decomp108.small_height_control
+#print axioms LeanLab.LanguascoPerelli1996.Decomp108.variation_control

@@ -119,7 +119,15 @@ also follows from the range, as `P ≥ P₀X^{-ε} ≥ L^A ≥ 1` for `X ≥ 3`.
 `State1581.thm1Hyp_inhabited`.
 DECISION 2026-11-08 architect arch20261108T1030Z PMT: second error term `X^{1-ε}`, the
 `O_ε(X^{1-ε})` of display 2.21, P0054 page 188 Theorem 1, read from the page image; the former
-`X^{1-ε₀}` with `ε < ε₀` is smaller for `X ≥ 1`, so it claimed more than the paper. -/
+`X^{1-ε₀}` with `ε < ε₀` is smaller for `X ≥ 1`, so it claimed more than the paper.
+DECISION 2026-11-09 architect 20261109T0802Z-9291 U-1637: the conclusion also gives display 2.22
+at the chosen `P`: for `m ∈ [X/4, X/2]` and `2 ≤ U ≤ √X` the full and truncated main terms differ
+by at most `C 𝔖(m) X log U / √U`. P0054 page 188 Theorem 1 lists 2.22 among the properties of the
+chosen `P`, and Pin1 arXiv 1804.05561v1 Theorem 1 page 9 states 2.12 the same way; its proof,
+Pin1 pages 33 to 37 displays 10.5, 10.6, 10.12, 10.21 and 10.24, uses the gap condition 10.6 of
+the chosen `P`, both to drop the zeros of 10.7 and to drop the moduli `q ≥ P`. So 2.22 is not
+sourced at every `P` in `[P₀X^{-ε}, P₀]`, and the former universal `leaf_truncation_error` is now a
+corollary of this leaf. -/
 theorem leaf_221 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
@@ -129,9 +137,13 @@ theorem leaf_221 :
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
           (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
             Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) ∧
-          ∀ m : ℕ, (m : ℝ) ≤ X →
+          (∀ m : ℕ, (m : ℝ) ≤ X →
             ‖R1majPrime ε X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m‖ ≤
-              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε)) := by sorry
+              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε))) ∧
+          ∀ m : ℕ, ∀ U : ℝ, X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U → U ≤ Real.sqrt X →
+            ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
+              mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
+              C * (Sing m * X * Real.log U / Real.sqrt U) := by sorry
 
 
 /-- LEAF P0054 page 8 display 2.22: The difference between the full and truncated main terms is
@@ -155,19 +167,33 @@ Instance: `Audit1625.leaf_truncation_range_instance`, for the U-1625 range.
 DECISION 2026-11-08 architect 20261108T0450Z U-1634: carried to the U-1634 range. For every
 exponent `A` there are `C' > 0` and `H₀`, then a fixed `H ≥ H₀` and `X₀`; `C'` precedes `H` as the
 `O` of Pin1 display 2.12 carries no subscript. Taking every `A` is what `assembly_222` needs, it
-receives `A` from `leaf_221`. -/
+receives `A` from `leaf_221`.
+DECISION 2026-11-09 architect 20261109T0802Z-9291 U-1637: `P` is no longer universal. P0054
+page 188 Theorem 1 and Pin1 page 9 Theorem 1 give display 2.22, Pin1 2.12, only at the chosen `P`
+of Pin1 displays 10.5 and 10.6, and the proof of 2.12 uses 10.6. The bound is now a clause of
+`leaf_221`, and this theorem is its projection, with `P`, `A` and the series `Sg'` existential as
+there and one constant. No longer a leaf: PROVED from `leaf_221`, so CONDITIONAL on it. -/
 theorem leaf_truncation_error :
-  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 → ∀ A : ℝ,
-    ∃ C' H0 : ℝ, 0 < C' ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ,
-      ∀ X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-      Thm1Hyp ε A X0 X P0 → 1 ≤ P → P0 * X ^ (-ε) ≤ P → P ≤ P0 →
-      (excSet H (Real.sqrt X) P X).Finite →
-      (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
-        Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
-      X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U → U ≤ Real.sqrt X →
-      ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
-        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
-      C' * (Sing m * X * Real.log U / Real.sqrt U) := by sorry
+  ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+    ∃ C' A H0 : ℝ, 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
+      Thm1Hyp ε A X0 X P0 →
+      ∃ P : ℝ, 1 ≤ P ∧ P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
+        (excSet H (Real.sqrt X) P X).Finite ∧
+        ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
+          (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
+            Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) ∧
+          ∀ m : ℕ, ∀ U : ℝ, X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U → U ≤ Real.sqrt X →
+            ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
+              mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
+              C' * (Sing m * X * Real.log U / Real.sqrt U) := by
+  obtain ⟨ε0, hε0, h⟩ := leaf_221
+  refine ⟨ε0, hε0, fun ε hε hεlt => ?_⟩
+  obtain ⟨c, C, A, H0, -, hA0, hA⟩ := h ε hε hεlt
+  refine ⟨C, A, H0, hA0, fun H hH => ?_⟩
+  obtain ⟨X0, hX⟩ := hA H hH
+  refine ⟨X0, fun X P0 hHyp => ?_⟩
+  obtain ⟨P, hP1, hPl, hPu, hFin, Sg', hSg, -, hT⟩ := hX X P0 hHyp
+  exact ⟨P, hP1, hPl, hPu, hFin, Sg', hSg, hT⟩
 
 /-- LEAF P0054 page 8 display 2.22: The combined error bound is derived from the main term bound and the truncation bound via triangle inequality.
 DECISION 2026-10-31 architect PC 20261031T2333Z-383: takes `1 ≤ X`, so `log U ≥ 0`;
@@ -209,7 +235,9 @@ Statement unchanged by U-1625 2026-11-06; only the proof passes the new `1 ≤ P
 to the repaired `leaf_truncation_error`.
 DECISION 2026-11-08 U-1634: the quantifier shape of `State1581.Theorem1_220`, U-1634 form.
 DECISION 2026-11-08 architect arch20261108T1030Z PMT: error term `X^{1-ε}` as in `leaf_221`,
-`State1581.Theorem1_220` and P0054 page 188. -/
+`State1581.Theorem1_220` and P0054 page 188.
+DECISION 2026-11-09 architect 20261109T0802Z-9291 U-1637: statement unchanged; the proof takes
+both bounds from the one chosen `P` of `leaf_221`, which now carries display 2.22. -/
 theorem assembly_222 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ c C A H0 : ℝ, 0 < c ∧ 0 ≤ A ∧ ∀ H : ℝ, H0 ≤ H → ∃ X0 : ℝ, ∀ X P0 : ℝ,
@@ -223,24 +251,19 @@ theorem assembly_222 :
             ‖R1majPrime ε X P m - mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P (Real.sqrt X) m‖ ≤
               C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - ε) + Sing m * X * Real.log (Real.sqrt X) / (X ^ (1/4 : ℝ))) := by
   obtain ⟨ε1, hε1, h1⟩ := leaf_221
-  obtain ⟨ε2, hε2, h2⟩ := leaf_truncation_error
-  refine ⟨min ε1 ε2, lt_min hε1 hε2, ?_⟩
+  refine ⟨ε1, hε1, ?_⟩
   intro ε hε hεlt
-  obtain ⟨c, C, A, H0, hc, hA0, hA⟩ := h1 ε hε (lt_of_lt_of_le hεlt (min_le_left _ _))
-  obtain ⟨C', H0', hC', hB⟩ := h2 ε hε (lt_of_lt_of_le hεlt (min_le_right _ _)) A
-  refine ⟨c, max C C', A, max H0 H0', hc, hA0, ?_⟩
+  obtain ⟨c, C, A, H0, hc, hA0, hA⟩ := h1 ε hε hεlt
+  refine ⟨c, max C C, A, H0, hc, hA0, ?_⟩
   intro H hH
-  obtain ⟨X0, hAX⟩ := hA H (le_trans (le_max_left _ _) hH)
-  obtain ⟨X0', hBX⟩ := hB H (le_trans (le_max_right _ _) hH)
-  refine ⟨max (max X0 X0') 4, ?_⟩
+  obtain ⟨X0, hAX⟩ := hA H hH
+  refine ⟨max X0 4, ?_⟩
   intro X P0 hHyp
   obtain ⟨hX0, hX3, hlow, hP0X⟩ := hHyp
-  have hXa : X0 ≤ X := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hX0
-  have hXb : X0' ≤ X := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hX0
+  have hXa : X0 ≤ X := le_trans (le_max_left _ _) hX0
   have hX4 : (4 : ℝ) ≤ X := le_trans (le_max_right _ _) hX0
   have hHA : Thm1Hyp ε A X0 X P0 := ⟨hXa, hX3, hlow, hP0X⟩
-  have hHB : Thm1Hyp ε A X0' X P0 := ⟨hXb, hX3, hlow, hP0X⟩
-  obtain ⟨P, hP11, hP1, hP2, hFin, Sg', hSg1, hSg2⟩ := hAX X P0 hHA
+  obtain ⟨P, -, hP1, hP2, hFin, Sg', hSg1, hSg2, hSg3⟩ := hAX X P0 hHA
   refine ⟨P, hP1, hP2, hFin, Sg', hSg1, ?_⟩
   intro m hm
   have hU2 : (2 : ℝ) ≤ Real.sqrt X := by
@@ -248,8 +271,7 @@ theorem assembly_222 :
       rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
     exact Real.sqrt_le_sqrt hX4
   have hb1 := hSg2 m (by linarith [hm.2])
-  have hX1 : (1 : ℝ) ≤ X := by linarith
-  have hb2 := hBX X P0 P (Real.sqrt X) Sg' m hHB hP11 hP1 hP2 hFin hSg1 hm.1 hm.2 hU2 le_rfl
+  have hb2 := hSg3 m (Real.sqrt X) hm.1 hm.2 hU2 le_rfl
   exact leaf_triangle_inequality hb1 hb2 rfl (by linarith)
 
 end
@@ -264,4 +286,7 @@ end LeanLab.Pintz2021.DecompJ281
 #print axioms LeanLab.Pintz2021.DecompJ281.leaf_triangle_inequality
 
 #print axioms LeanLab.Pintz2021.DecompJ281.assembly_222
+
+#print axioms LeanLab.Pintz2021.DecompJ281.leaf_truncation_error
+
 

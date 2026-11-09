@@ -33,7 +33,26 @@ theorem leaf_odd_moment_lower_first_half (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 /
               (fun n : ℕ => Odd (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
-  sorry
+  obtain ⟨δa, hδa, ha⟩ := leaf_odd_moment_lower γ h1 h2
+  use δa, hδa
+  intro δ hδ hδs
+  obtain ⟨κa, hκa, ha⟩ := ha δ hδ hδs
+  use κa, hκa
+  intro κ hκ hκs
+  obtain ⟨B, hB, N0, hN0⟩ := ha κ hκ hκs
+  use B, hB, N0
+  intro N hN
+  have H := hN0 N hN
+  have sub : Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 8) ⊆ Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4) := by
+    intro x hx
+    rw [Finset.mem_Icc] at *
+    omega
+  have sub_filter : (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 8)).filter (fun n : ℕ => Odd (nu γ n)) ⊆ (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4)).filter (fun n : ℕ => Odd (nu γ n)) := by
+    apply Finset.filter_subset_filter _ sub
+  apply le_trans _ H
+  apply Finset.sum_le_sum_of_subset_of_nonneg sub_filter
+  intro i hi h_not_in
+  positivity
 
 /-- LEAF. Second half of the odd second moment over the lower window: the sum of `‖R₁(ν_n)‖²` over
 the odd members of the remainder `Icc (⌊(N+1)/2⌋ + ⌊N/8⌋ + 1) (⌊(N+1)/2⌋ + ⌊N/4⌋)`, eventually at
@@ -48,7 +67,26 @@ theorem leaf_odd_moment_lower_second_half (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 
               (fun n : ℕ => Odd (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
-  sorry
+  obtain ⟨δa, hδa, ha⟩ := leaf_odd_moment_lower γ h1 h2
+  use δa, hδa
+  intro δ hδ hδs
+  obtain ⟨κa, hκa, ha⟩ := ha δ hδ hδs
+  use κa, hκa
+  intro κ hκ hκs
+  obtain ⟨B, hB, N0, hN0⟩ := ha κ hκ hκs
+  use B, hB, N0
+  intro N hN
+  have H := hN0 N hN
+  have sub : Finset.Icc ((N + 1) / 2 + N / 8 + 1) ((N + 1) / 2 + N / 4) ⊆ Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4) := by
+    intro x hx
+    rw [Finset.mem_Icc] at *
+    omega
+  have sub_filter : (Finset.Icc ((N + 1) / 2 + N / 8 + 1) ((N + 1) / 2 + N / 4)).filter (fun n : ℕ => Odd (nu γ n)) ⊆ (Finset.Icc ((N + 1) / 2) ((N + 1) / 2 + N / 4)).filter (fun n : ℕ => Odd (nu γ n)) := by
+    apply Finset.filter_subset_filter _ sub
+  apply le_trans _ H
+  apply Finset.sum_le_sum_of_subset_of_nonneg sub_filter
+  intro i hi h_not_in
+  positivity
 
 /-- Assembly. The lower odd second moment of the floor window follows from its two halves: the
 window `Icc ⌊(N+1)/2⌋ (⌊(N+1)/2⌋+⌊N/4⌋)` is the union of `Icc ⌊(N+1)/2⌋ (⌊(N+1)/2⌋+⌊N/8⌋)` and

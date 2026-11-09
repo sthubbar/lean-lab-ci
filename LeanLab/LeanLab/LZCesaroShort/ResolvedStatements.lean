@@ -1,3 +1,5 @@
+import LeanLab.LZCesaroShort.Lemma3Resolved245
+import LeanLab.LZCesaroShort.LegacyResolved245
 import LeanLab.LZCesaroShort.Theorem1PProved
 import LeanLab.LZCesaroShort.Lemma6Proof
 
@@ -10,7 +12,9 @@ Lemma 7 and Lemma 8 are unconditional.
 Theorems 1 and 2, Lemma 1 and Section 5 are conditional on RH only.
 The legacy Props Theorem1 and Theorem2b keep their original types.
 They are lab misreadings and are not asserted here.
-Lemma3 remains a cited Prop with no unconditional proof in this folder.
+Lemma3 is proved unconditionally in Lemma3Resolved245.
+The relocated legacy names are exported through LegacyResolved245.
+They remain conditional on the unresolved legacy leaves and RH.
 -/
 
 namespace LeanLab.LZCesaroShort
