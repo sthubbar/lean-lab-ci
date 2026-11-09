@@ -21,6 +21,7 @@ touched: `rational_pointwise_characters1622_split` restates it character for cha
 and proves it from the three leaves without using the target theorem.
 -/
 import LeanLab.Linnik1951.SPLIT_doubled_system_characters1622
+import LeanLab.Linnik1951.SPLIT_rational_pointwise_characters442
 
 namespace LeanLab.Linnik1951
 
@@ -44,7 +45,7 @@ theorem prime_class_split1622 (N q : ℕ) (hN : 1 ≤ N) (hq : 2 ≤ q) (z : ℝ
         (∑' p : Nat.Primes, if ((p : ℕ) % q = b) then
           ((Real.exp (-(((p : ℕ) : ℝ) / N)) : ℂ) *
             Complex.exp ((-(2 * Real.pi * z * ((p : ℕ) : ℝ)) : ℝ) * Complex.I)) else 0)) := by
-  sorry
+  exact prime_class_split442 N q hN hq z a
 
 /-- LEAF. Step 2 of 3, unit orthogonality with the Gauss numbers. On the cosets coprime to
 the modulus the coset phases form the character table up to Gauss numbers, so the sum over
@@ -66,7 +67,7 @@ theorem unit_character_orthogonality1622 (N q : ℕ) [NeZero q] (hN : 1 ≤ N) (
         (‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ ^ 2 +
             (q : ℝ) * ∑ χ ∈ univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1),
               ‖characterPrime280 χ N z‖ ^ 2) := by
-  sorry
+  exact unit_character_orthogonality442 N q hN hq z
 
 /-- LEAF. Step 3 of 3, the mass of the residue cosets that are not coprime to the modulus.
 A prime in such a coset is divisible by the greatest common divisor of that coset and the
@@ -84,7 +85,7 @@ theorem prime_divisor_class_mass1622 (N q : ℕ) (hN : 1 ≤ N) (hq : 2 ≤ q) (
             ((Real.exp (-(((p : ℕ) : ℝ) / N)) : ℂ) *
               Complex.exp ((-(2 * Real.pi * z * ((p : ℕ) : ℝ)) : ℝ) * Complex.I)) else 0)‖ ^ 2) ≤
       (q.totient : ℝ) * (2 * Real.log q) ^ 2 := by
-  sorry
+  exact prime_divisor_class_mass442 N q hN hq z
 
 /-- The pointwise finite character estimate, from the three layers below it. The splitting
 identity writes each prime series as a unit part plus a non unit part, the square of a sum
