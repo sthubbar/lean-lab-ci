@@ -23,35 +23,24 @@ log m minus log (n - m) is nonnegative. This is the step that lets the shift be
 weight summed over the range without a sign condition. -/
 theorem logConv_shift_nonneg1622 (n m : ℕ) (hm : m ∈ Finset.Icc 2 (n - 2)) :
     0 ≤ 2 * Real.log (n : ℝ) - (Real.log m + Real.log (n - m : ℕ)) := by
-  have hm1 : 2 ≤ m := (Finset.mem_Icc.mp hm).1
-  have hm2 : m ≤ n - 2 := (Finset.mem_Icc.mp hm).2
-  have hm_lt_n : m < n := by omega
-  have h_pos_m : (0 : ℝ) < m := by exact_mod_cast (show 0 < m by omega)
-  have h_pos_nm : (0 : ℝ) < (n - m : ℕ) := by exact_mod_cast (show 0 < n - m by omega)
-  have h_pos_n : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
-  rw [sub_nonneg]
-  have h_log_add : Real.log m + Real.log (n - m : ℕ) = Real.log (m * (n - m : ℕ)) := by
-    exact (Real.log_mul (ne_of_gt h_pos_m) (ne_of_gt h_pos_nm)).symm
-  rw [h_log_add]
-  have h_log_pow : 2 * Real.log (n : ℝ) = Real.log ((n : ℝ) ^ 2) := by
-    have h1 : 2 * Real.log (n : ℝ) = Real.log (n : ℝ) + Real.log (n : ℝ) := by ring
-    rw [h1]
-    have h2 : (n : ℝ) ^ 2 = (n : ℝ) * (n : ℝ) := by ring
-    rw [h2]
-    exact (Real.log_mul (ne_of_gt h_pos_n) (ne_of_gt h_pos_n)).symm
-  rw [h_log_pow]
-  apply Real.log_le_log
-  · positivity
-  · have : (m : ℝ) * (n - m : ℕ) = (m * (n - m) : ℕ) := by push_cast; rfl
-    rw [this]
-    push_cast
-    have h_ineq : m * (n - m) ≤ n ^ 2 := by
-      calc m * (n - m) ≤ n * n := by
-            have h1 : m ≤ n := by omega
-            have h2 : n - m ≤ n := by omega
-            exact Nat.mul_le_mul h1 h2
-        _ = n ^ 2 := by ring
-    exact_mod_cast h_ineq
+  rw [Finset.mem_Icc] at hm
+  obtain ⟨hm2, hmn⟩ := hm
+  have hm_pos : (0 : ℝ) < (m : ℝ) := by exact_mod_cast (by omega : 0 < m)
+  have hnm_pos : (0 : ℝ) < ((n - m : ℕ) : ℝ) := by
+    have : 0 < n - m := by omega
+    exact_mod_cast this
+  have hn_pos : (0 : ℝ) < (n : ℝ) := by
+    have : 0 < n := by omega
+    exact_mod_cast this
+  have hprod_le : (m : ℝ) * ((n - m : ℕ) : ℝ) ≤ (n : ℝ) ^ 2 := by
+    have h1 : (m : ℝ) ≤ (n : ℝ) := by exact_mod_cast (by omega : m ≤ n)
+    have h2 : ((n - m : ℕ) : ℝ) ≤ (n : ℝ) := by
+      exact_mod_cast (by omega : n - m ≤ n)
+    nlinarith
+  have hlog_prod : Real.log ((m : ℝ) * ((n - m : ℕ) : ℝ)) ≤ Real.log ((n : ℝ) ^ 2) :=
+    Real.log_le_log (mul_pos hm_pos hnm_pos) hprod_le
+  rw [Real.log_mul hm_pos.ne' hnm_pos.ne', Real.log_pow, Nat.cast_ofNat] at hlog_prod
+  linarith
 
 /-- LEAF. Total of the shift: summed over the whole range 2 <= m <= n - 2 the shift
 2 log n - log m - log (n - m) is at most a constant times n. The shift is the
@@ -72,7 +61,49 @@ the shift 2 L - u - v at most L / 2, the reciprocal product 1 / (u v) is at most
 theorem logConv_term_majorant1622 (u v L : ℝ) (hu : 0 < u) (hv : 0 < v) (hL : 0 < L)
     (hsum : u + v ≤ 2 * L) (hshift : 2 * L - (u + v) ≤ L / 2) :
     1 / (u * v) ≤ 1 / L ^ 2 + (2 / L ^ 3) * (2 * L - (u + v)) := by
-  sorry
+  set s := 2 * L - (u + v) with hs
+  have hs_nonneg : 0 ≤ s := by rw [hs]; linarith
+  have hs_le : s ≤ L / 2 := hshift
+  have huv : u + v = 2 * L - s := by rw [hs]; ring
+  have h_amgm : 4 * (u * v) ≤ (u + v) ^ 2 := by
+    have h := sq_nonneg (u - v)
+    nlinarith
+  have hpos_uv : 0 < u * v := mul_pos hu hv
+  have hpos_sq : 0 < (2 * L - s) ^ 2 := by
+    have hpos : 0 < 2 * L - s := by rw [← huv]; linarith
+    positivity
+  have h1 : 1 / (u * v) ≤ 4 / ((2 * L - s) ^ 2) := by
+    rw [div_le_div_iff₀ hpos_uv hpos_sq]
+    nlinarith
+  have h2 : 4 / ((2 * L - s) ^ 2) ≤ 1 / L ^ 2 + (2 / L ^ 3) * s := by
+    have hLpos : 0 < L := hL
+    have h_denom : 0 < L ^ 3 * (2 * L - s) ^ 2 := by positivity
+    rw [div_le_div_iff₀ hpos_sq (by positivity : 0 < L ^ 2 * L + 2 * L * s)]
+    -- after cross-multiplying: 4 * (L^2 * L + 2 * L * s) ≤ (L^2 + 2*s*L) * (2L-s)^2 ... let me use a cleaner approach
+    have hkey : 4 * L ^ 3 ≤ (L + 2 * s) * (2 * L - s) ^ 2 := by
+      have ht : s / L ≤ 1 / 2 := by
+        rw [div_le_iff₀ hL]
+        linarith
+      have ht_nonneg : 0 ≤ s / L := div_nonneg hs_nonneg hL.le
+      have h_poly : 0 ≤ (s / L) * (4 - 7 * (s / L) + 2 * (s / L) ^ 2) := by
+        have h_quad : 0 ≤ 4 - 7 * (s / L) + 2 * (s / L) ^ 2 := by
+          nlinarith
+        exact mul_nonneg ht_nonneg h_quad
+      have h_eq : (L + 2 * s) * (2 * L - s) ^ 2 - 4 * L ^ 3 = L ^ 3 * ((s / L) * (4 - 7 * (s / L) + 2 * (s / L) ^ 2)) := by
+        field_simp
+        ring
+      nlinarith
+    have h_eq1 : 1 / L ^ 2 + (2 / L ^ 3) * s = (L + 2 * s) / L ^ 3 := by
+      field_simp
+      ring
+    have h_eq2 : 4 / ((2 * L - s) ^ 2) = (4 * L ^ 3) / (L ^ 3 * (2 * L - s) ^ 2) := by
+      field_simp
+      ring
+    rw [h_eq1, h_eq2]
+    rw [div_le_div_iff₀ (by positivity : 0 < L ^ 3) h_denom]
+    nlinarith
+  rw [hs] at h1
+  linarith [h1, h2]
 
 /-- LEAF. Small shift in the middle of the range: for n at least 10^3 and for an
 index m with 2 sqrt n <= m <= n - 2 sqrt n the product m (n - m) is at least
