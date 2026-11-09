@@ -24,6 +24,10 @@ rewrites of library facts, so nothing but the four leaves is assumed.
 AI wrote the Lean code.  The leaves are open; the assembly is proved.
 -/
 import LeanLab.ExceptionalSet.SPLIT_lemma4
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -34,24 +38,55 @@ open LeanLab.ExceptionalSet.BrudernPerelli1998 (F)
 /-- LEAF. Step 1, the lower bound on the logarithm: for every `N ≥ 3` the real logarithm of
 `N` is at least `1`, since `3 > e` and `log` is monotone. -/
 theorem leaf_log_ge_one (N : ℕ) (hN : 3 ≤ N) : 1 ≤ Real.log N := by
-  sorry
+  have : Real.exp 1 ≤ (N : ℝ) := by
+    calc Real.exp 1 ≤ 3 := le_of_lt Real.exp_one_lt_three
+      _ ≤ N := by exact_mod_cast hN
+  exact (Real.le_log_iff_exp_le (by positivity)).mpr this
 
 /-- LEAF. Step 2, the ceiling of a number that is at least `1` is at least `1`. -/
 theorem leaf_ceil_ge_one (x : ℝ) (hx : 1 ≤ x) : (1 : ℝ) ≤ (Nat.ceil x : ℝ) := by
-  sorry
+  calc (1 : ℝ) ≤ x := hx
+    _ ≤ (Nat.ceil x : ℝ) := Nat.le_ceil x
 
 /-- LEAF. Step 3, the ceiling is at most twice the number once the number is at least `1`:
 `⌈t⌉ < t + 1 ≤ 2t` for `t ≥ 1`. -/
 theorem leaf_ceil_le_two_log (N : ℕ) (hN : 1 ≤ Real.log N) :
     (Nat.ceil (Real.log N) : ℝ) ≤ 2 * Real.log N := by
-  sorry
+  have h1 : (Nat.ceil (Real.log N) : ℝ) < Real.log N + 1 := Nat.ceil_lt_add_one (by positivity)
+  linarith
 
 /-- LEAF. Step 4, the growth comparison: for `1 < γ` and every `C > 0`, past a threshold,
 twice the logarithm is at most `C` times its `γ`-th power.  Here `(log N)^{γ-1}` grows
 without bound, so this is the whole content of the regime at large `N`. -/
 theorem leaf_two_log_le_rpow (γ : ℝ) (hγ : 1 < γ) (C : ℝ) (hC : 0 < C) :
     ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → 2 * Real.log N ≤ C * Real.log N ^ γ := by
-  sorry
+  have h1 : Filter.Tendsto (fun x : ℝ ↦ x ^ (γ - 1)) Filter.atTop Filter.atTop :=
+    tendsto_rpow_atTop (by linarith)
+  have h2 : Filter.Tendsto (fun x : ℝ ↦ C * x ^ (γ - 1)) Filter.atTop Filter.atTop :=
+    Filter.Tendsto.const_mul_atTop hC h1
+  obtain ⟨M, hM⟩ := Filter.tendsto_atTop_atTop.mp h2 2
+  have h3 : Filter.Tendsto (fun n : ℕ ↦ Real.log n) Filter.atTop Filter.atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  obtain ⟨N₀, hN₀⟩ := Filter.tendsto_atTop_atTop.mp h3 (max M 1)
+  use N₀
+  intro N hN
+  have hlog_ge : max M 1 ≤ Real.log N := hN₀ N hN
+  have hlog_M : M ≤ Real.log N := le_trans (le_max_left _ _) hlog_ge
+  have hlog_pos : 0 < Real.log N := by
+    calc 0 < 1 := zero_lt_one
+      _ ≤ max M 1 := le_max_right _ _
+      _ ≤ Real.log N := hlog_ge
+  have h4 := hM (Real.log N) hlog_M
+  have h5 : 2 * Real.log N ≤ (C * Real.log N ^ (γ - 1)) * Real.log N := by
+    nlinarith
+  have h6 : Real.log N ^ (γ - 1) * Real.log N = Real.log N ^ γ := by
+    have : Real.log N = Real.log N ^ (1 : ℝ) := (Real.rpow_one _).symm
+    nth_rw 2 [this]
+    rw [← Real.rpow_add hlog_pos]
+    ring_nf
+  calc 2 * Real.log N ≤ (C * Real.log N ^ (γ - 1)) * Real.log N := h5
+    _ = C * (Real.log N ^ (γ - 1) * Real.log N) := mul_assoc _ _ _
+    _ = C * Real.log N ^ γ := by rw [h6]
 
 /-! ### Assembly -/
 
