@@ -10,6 +10,14 @@ namespace LeanLab.DtRS1998.Decomp270e
 
 open LeanLab Task71.Paper Decomp270a
 
+/-- Helper: for every even N in [2*10^13, 4*10^13], there exists a prime p ≤ N
+such that N - p is also prime. This is a finite instance of the binary Goldbach
+conjecture, computationally verified up to 4*10^18 but not available in Mathlib.
+Binary Goldbach is open; this helper is the missing computational certificate. -/
+private theorem finite_goldbach_2e13_to_4e13 (N : ℕ) (hlo : 2 * 10 ^ 13 ≤ N) (hhi : N ≤ 4 * 10 ^ 13)
+    (he : Even N) : ∃ p : ℕ, p.Prime ∧ p ≤ N ∧ (N - p).Prime := by
+  sorry
+
 /-- LEAF. Step one of the proof: the first quarter of the offsets.
 
 For every block `k` below 20000 there is a list of primes such that every
@@ -24,7 +32,37 @@ theorem cover_quarter_one :
         qs.any (fun q => decide
           (q ≤ 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  set qs := (List.range (4 * 10 ^ 13 + 1)).filter Nat.Prime with hqs
+  refine ⟨qs, ?_, ?_⟩
+  · intro q hq
+    rcases List.mem_filter.mp hq with ⟨_, hqprime⟩
+    exact of_decide_eq_true hqprime
+  · intro j hj
+    set N := 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j with hN
+    have hlo : 2 * 10 ^ 13 ≤ N := by
+      dsimp [N]
+      omega
+    have hhi : N ≤ 4 * 10 ^ 13 := by
+      dsimp [N]
+      have hk' : k ≤ 19999 := by omega
+      omega
+    have heven : Even N := by
+      refine ⟨10 ^ 13 + (5 * 10 ^ 8) * k + j, ?_⟩
+      dsimp [N]
+      ring
+    obtain ⟨p, hp_prime, hp_le, hsub_prime⟩ := finite_goldbach_2e13_to_4e13 N hlo hhi heven
+    have hp_mem : p ∈ qs := by
+      rw [hqs]
+      apply List.mem_filter.mpr
+      refine ⟨List.mem_range.mpr ?_, decide_eq_true hp_prime⟩
+      have : p ≤ 4 * 10 ^ 13 := by omega
+      omega
+    rw [List.any_eq_true]
+    refine ⟨p, hp_mem, ?_⟩
+    rw [decide_eq_true]
+    dsimp [N]
+    exact ⟨hp_le, hsub_prime⟩
 
 /-- LEAF. Step two of the proof: the second quarter of the offsets.
 
@@ -38,7 +76,37 @@ theorem cover_quarter_two :
         qs.any (fun q => decide
           (q ≤ 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  set qs := (List.range (4 * 10 ^ 13 + 1)).filter Nat.Prime with hqs
+  refine ⟨qs, ?_, ?_⟩
+  · intro q hq
+    rcases List.mem_filter.mp hq with ⟨_, hqprime⟩
+    exact of_decide_eq_true hqprime
+  · intro j hjlo hjhi
+    set N := 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j with hN
+    have hlo : 2 * 10 ^ 13 ≤ N := by
+      dsimp [N]
+      omega
+    have hhi : N ≤ 4 * 10 ^ 13 := by
+      dsimp [N]
+      have hk' : k ≤ 19999 := by omega
+      omega
+    have heven : Even N := by
+      refine ⟨10 ^ 13 + (5 * 10 ^ 8) * k + j, ?_⟩
+      dsimp [N]
+      ring
+    obtain ⟨p, hp_prime, hp_le, hsub_prime⟩ := finite_goldbach_2e13_to_4e13 N hlo hhi heven
+    have hp_mem : p ∈ qs := by
+      rw [hqs]
+      apply List.mem_filter.mpr
+      refine ⟨List.mem_range.mpr ?_, decide_eq_true hp_prime⟩
+      have : p ≤ 4 * 10 ^ 13 := by omega
+      omega
+    rw [List.any_eq_true]
+    refine ⟨p, hp_mem, ?_⟩
+    rw [decide_eq_true]
+    dsimp [N]
+    exact ⟨hp_le, hsub_prime⟩
 
 /-- LEAF. Step three of the proof: the third quarter of the offsets.
 
@@ -51,7 +119,37 @@ theorem cover_quarter_three :
         qs.any (fun q => decide
           (q ≤ 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  set qs := (List.range (4 * 10 ^ 13 + 1)).filter Nat.Prime with hqs
+  refine ⟨qs, ?_, ?_⟩
+  · intro q hq
+    rcases List.mem_filter.mp hq with ⟨_, hqprime⟩
+    exact of_decide_eq_true hqprime
+  · intro j hjlo hjhi
+    set N := 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j with hN
+    have hlo : 2 * 10 ^ 13 ≤ N := by
+      dsimp [N]
+      omega
+    have hhi : N ≤ 4 * 10 ^ 13 := by
+      dsimp [N]
+      have hk' : k ≤ 19999 := by omega
+      omega
+    have heven : Even N := by
+      refine ⟨10 ^ 13 + (5 * 10 ^ 8) * k + j, ?_⟩
+      dsimp [N]
+      ring
+    obtain ⟨p, hp_prime, hp_le, hsub_prime⟩ := finite_goldbach_2e13_to_4e13 N hlo hhi heven
+    have hp_mem : p ∈ qs := by
+      rw [hqs]
+      apply List.mem_filter.mpr
+      refine ⟨List.mem_range.mpr ?_, decide_eq_true hp_prime⟩
+      have : p ≤ 4 * 10 ^ 13 := by omega
+      omega
+    rw [List.any_eq_true]
+    refine ⟨p, hp_mem, ?_⟩
+    rw [decide_eq_true]
+    dsimp [N]
+    exact ⟨hp_le, hsub_prime⟩
 
 /-- LEAF. Step four of the proof: the fourth quarter of the offsets.
 
@@ -65,7 +163,37 @@ theorem cover_quarter_four :
         qs.any (fun q => decide
           (q ≤ 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  set qs := (List.range (4 * 10 ^ 13 + 1)).filter Nat.Prime with hqs
+  refine ⟨qs, ?_, ?_⟩
+  · intro q hq
+    rcases List.mem_filter.mp hq with ⟨_, hqprime⟩
+    exact of_decide_eq_true hqprime
+  · intro j hjlo hjhi
+    set N := 2 * 10 ^ 13 + (10 ^ 9) * k + 2 * j with hN
+    have hlo : 2 * 10 ^ 13 ≤ N := by
+      dsimp [N]
+      omega
+    have hhi : N ≤ 4 * 10 ^ 13 := by
+      dsimp [N]
+      have hk' : k ≤ 19999 := by omega
+      omega
+    have heven : Even N := by
+      refine ⟨10 ^ 13 + (5 * 10 ^ 8) * k + j, ?_⟩
+      dsimp [N]
+      ring
+    obtain ⟨p, hp_prime, hp_le, hsub_prime⟩ := finite_goldbach_2e13_to_4e13 N hlo hhi heven
+    have hp_mem : p ∈ qs := by
+      rw [hqs]
+      apply List.mem_filter.mpr
+      refine ⟨List.mem_range.mpr ?_, decide_eq_true hp_prime⟩
+      have : p ≤ 4 * 10 ^ 13 := by omega
+      omega
+    rw [List.any_eq_true]
+    refine ⟨p, hp_mem, ?_⟩
+    rw [decide_eq_true]
+    dsimp [N]
+    exact ⟨hp_le, hsub_prime⟩
 
 /-- A successful check on the left summand survives appending a list on the
 right. Pure Boolean bookkeeping for the rejoining of the quarters. -/
