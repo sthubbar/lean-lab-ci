@@ -6,7 +6,7 @@ kernel: a divisor `F` of `p - 1` with `(F + 1) ^ 2 > p`, `F` a product of listed
 primes, and the witness conditions checked by `decide +kernel` on a binary modular
 power. The primes of `F` are certified in the same file, below the prime that uses
 them, or by trial division when they are below `10 ^ 7`.
-Of the eight leaves below, 7 are certified prime here by Pocklington chains checked by the kernel, and 1 remain OPEN.
+All eight leaves below are certified prime here by Pocklington chains checked by the kernel.
 Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Decomp395a
@@ -11415,6 +11415,656 @@ private theorem pk398 : (9999999999999999999999999999999999999999999999999999999
     · exact hg2
     · exact hg3
 
+/-! ### Certificates for the remaining two candidates -/
+
+/-- `88131787` is prime, by a Pocklington certificate with witness `3`. -/
+private theorem pk399 : (88131787 : ℕ).Prime := by
+  have hnum : (88131787 - 1) % (([(2, 1), (3, 1), (1087, 1), (13513, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      88131787 < ((([(2, 1), (3, 1), (1087, 1), (13513, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 3 (88131787 - 1) 88131787 = 1 % 88131787 ∧
+      Nat.gcd ((pm 300 3 ((88131787 - 1) / 2) 88131787 + 88131787 - 1) % 88131787) 88131787 = 1 ∧
+      Nat.gcd ((pm 300 3 ((88131787 - 1) / 3) 88131787 + 88131787 - 1) % 88131787) 88131787 = 1 ∧
+      Nat.gcd ((pm 300 3 ((88131787 - 1) / 1087) 88131787 + 88131787 - 1) % 88131787) 88131787 = 1 ∧
+      Nat.gcd ((pm 300 3 ((88131787 - 1) / 13513) 88131787 + 88131787 - 1) % 88131787) 88131787 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4⟩ := hnum
+  refine pk_pock 88131787 3 300 [(2, 1), (3, 1), (1087, 1), (13513, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+
+/-- `267335933` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk400 : (267335933 : ℕ).Prime := by
+  have hnum : (267335933 - 1) % (([(2, 2), (433, 1), (154351, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      267335933 < ((([(2, 2), (433, 1), (154351, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (267335933 - 1) 267335933 = 1 % 267335933 ∧
+      Nat.gcd ((pm 300 2 ((267335933 - 1) / 2) 267335933 + 267335933 - 1) % 267335933) 267335933 = 1 ∧
+      Nat.gcd ((pm 300 2 ((267335933 - 1) / 433) 267335933 + 267335933 - 1) % 267335933) 267335933 = 1 ∧
+      Nat.gcd ((pm 300 2 ((267335933 - 1) / 154351) 267335933 + 267335933 - 1) % 267335933) 267335933 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3⟩ := hnum
+  refine pk_pock 267335933 2 300 [(2, 2), (433, 1), (154351, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+
+/-- `899205863` is prime, by a Pocklington certificate with witness `5`. -/
+private theorem pk401 : (899205863 : ℕ).Prime := by
+  have hnum : (899205863 - 1) % (([(2, 1), (103, 1), (113, 1), (38629, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      899205863 < ((([(2, 1), (103, 1), (113, 1), (38629, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 5 (899205863 - 1) 899205863 = 1 % 899205863 ∧
+      Nat.gcd ((pm 300 5 ((899205863 - 1) / 2) 899205863 + 899205863 - 1) % 899205863) 899205863 = 1 ∧
+      Nat.gcd ((pm 300 5 ((899205863 - 1) / 103) 899205863 + 899205863 - 1) % 899205863) 899205863 = 1 ∧
+      Nat.gcd ((pm 300 5 ((899205863 - 1) / 113) 899205863 + 899205863 - 1) % 899205863) 899205863 = 1 ∧
+      Nat.gcd ((pm 300 5 ((899205863 - 1) / 38629) 899205863 + 899205863 - 1) % 899205863) 899205863 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4⟩ := hnum
+  refine pk_pock 899205863 5 300 [(2, 1), (103, 1), (113, 1), (38629, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+
+/-- `5419667053` is prime, by a Pocklington certificate with witness `5`. -/
+private theorem pk402 : (5419667053 : ℕ).Prime := by
+  have hnum : (5419667053 - 1) % (([(2, 2), (3, 2), (5701, 1), (26407, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      5419667053 < ((([(2, 2), (3, 2), (5701, 1), (26407, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 5 (5419667053 - 1) 5419667053 = 1 % 5419667053 ∧
+      Nat.gcd ((pm 300 5 ((5419667053 - 1) / 2) 5419667053 + 5419667053 - 1) % 5419667053) 5419667053 = 1 ∧
+      Nat.gcd ((pm 300 5 ((5419667053 - 1) / 3) 5419667053 + 5419667053 - 1) % 5419667053) 5419667053 = 1 ∧
+      Nat.gcd ((pm 300 5 ((5419667053 - 1) / 5701) 5419667053 + 5419667053 - 1) % 5419667053) 5419667053 = 1 ∧
+      Nat.gcd ((pm 300 5 ((5419667053 - 1) / 26407) 5419667053 + 5419667053 - 1) % 5419667053) 5419667053 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4⟩ := hnum
+  refine pk_pock 5419667053 5 300 [(2, 2), (3, 2), (5701, 1), (26407, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+
+/-- `2611293826153` is prime, by a Pocklington certificate with witness `5`. -/
+private theorem pk403 : (2611293826153 : ℕ).Prime := by
+  have hnum : (2611293826153 - 1) % (([(2, 3), (3, 1), (11, 2), (899205863, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      2611293826153 < ((([(2, 3), (3, 1), (11, 2), (899205863, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 5 (2611293826153 - 1) 2611293826153 = 1 % 2611293826153 ∧
+      Nat.gcd ((pm 300 5 ((2611293826153 - 1) / 2) 2611293826153 + 2611293826153 - 1) % 2611293826153) 2611293826153 = 1 ∧
+      Nat.gcd ((pm 300 5 ((2611293826153 - 1) / 3) 2611293826153 + 2611293826153 - 1) % 2611293826153) 2611293826153 = 1 ∧
+      Nat.gcd ((pm 300 5 ((2611293826153 - 1) / 11) 2611293826153 + 2611293826153 - 1) % 2611293826153) 2611293826153 = 1 ∧
+      Nat.gcd ((pm 300 5 ((2611293826153 - 1) / 899205863) 2611293826153 + 2611293826153 - 1) % 2611293826153) 2611293826153 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4⟩ := hnum
+  refine pk_pock 2611293826153 5 300 [(2, 3), (3, 1), (11, 2), (899205863, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk401
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+
+/-- `39153780219769` is prime, by a Pocklington certificate with witness `7`. -/
+private theorem pk404 : (39153780219769 : ℕ).Prime := by
+  have hnum : (39153780219769 - 1) % (([(2, 3), (3, 1), (107, 1), (173, 1), (88131787, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      39153780219769 < ((([(2, 3), (3, 1), (107, 1), (173, 1), (88131787, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 7 (39153780219769 - 1) 39153780219769 = 1 % 39153780219769 ∧
+      Nat.gcd ((pm 300 7 ((39153780219769 - 1) / 2) 39153780219769 + 39153780219769 - 1) % 39153780219769) 39153780219769 = 1 ∧
+      Nat.gcd ((pm 300 7 ((39153780219769 - 1) / 3) 39153780219769 + 39153780219769 - 1) % 39153780219769) 39153780219769 = 1 ∧
+      Nat.gcd ((pm 300 7 ((39153780219769 - 1) / 107) 39153780219769 + 39153780219769 - 1) % 39153780219769) 39153780219769 = 1 ∧
+      Nat.gcd ((pm 300 7 ((39153780219769 - 1) / 173) 39153780219769 + 39153780219769 - 1) % 39153780219769) 39153780219769 = 1 ∧
+      Nat.gcd ((pm 300 7 ((39153780219769 - 1) / 88131787) 39153780219769 + 39153780219769 - 1) % 39153780219769) 39153780219769 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5⟩ := hnum
+  refine pk_pock 39153780219769 7 300 [(2, 3), (3, 1), (107, 1), (173, 1), (88131787, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk399
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+
+/-- `48720904445519` is prime, by a Pocklington certificate with witness `11`. -/
+private theorem pk405 : (48720904445519 : ℕ).Prime := by
+  have hnum : (48720904445519 - 1) % (([(2, 1), (293, 1), (311, 1), (267335933, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      48720904445519 < ((([(2, 1), (293, 1), (311, 1), (267335933, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 11 (48720904445519 - 1) 48720904445519 = 1 % 48720904445519 ∧
+      Nat.gcd ((pm 300 11 ((48720904445519 - 1) / 2) 48720904445519 + 48720904445519 - 1) % 48720904445519) 48720904445519 = 1 ∧
+      Nat.gcd ((pm 300 11 ((48720904445519 - 1) / 293) 48720904445519 + 48720904445519 - 1) % 48720904445519) 48720904445519 = 1 ∧
+      Nat.gcd ((pm 300 11 ((48720904445519 - 1) / 311) 48720904445519 + 48720904445519 - 1) % 48720904445519) 48720904445519 = 1 ∧
+      Nat.gcd ((pm 300 11 ((48720904445519 - 1) / 267335933) 48720904445519 + 48720904445519 - 1) % 48720904445519) 48720904445519 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4⟩ := hnum
+  refine pk_pock 48720904445519 11 300 [(2, 1), (293, 1), (311, 1), (267335933, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk400
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+
+/-- `1178885962045307` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk406 : (1178885962045307 : ℕ).Prime := by
+  have hnum : (1178885962045307 - 1) % (([(2, 1), (127, 1), (3475427, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      1178885962045307 < ((([(2, 1), (127, 1), (3475427, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (1178885962045307 - 1) 1178885962045307 = 1 % 1178885962045307 ∧
+      Nat.gcd ((pm 300 2 ((1178885962045307 - 1) / 2) 1178885962045307 + 1178885962045307 - 1) % 1178885962045307) 1178885962045307 = 1 ∧
+      Nat.gcd ((pm 300 2 ((1178885962045307 - 1) / 127) 1178885962045307 + 1178885962045307 - 1) % 1178885962045307) 1178885962045307 = 1 ∧
+      Nat.gcd ((pm 300 2 ((1178885962045307 - 1) / 3475427) 1178885962045307 + 1178885962045307 - 1) % 1178885962045307) 1178885962045307 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3⟩ := hnum
+  refine pk_pock 1178885962045307 2 300 [(2, 1), (127, 1), (3475427, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+
+/-- `645605840402763109` is prime, by a Pocklington certificate with witness `6`. -/
+private theorem pk407 : (645605840402763109 : ℕ).Prime := by
+  have hnum : (645605840402763109 - 1) % (([(2, 2), (3, 1), (11, 1), (1873, 1), (2611293826153, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      645605840402763109 < ((([(2, 2), (3, 1), (11, 1), (1873, 1), (2611293826153, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 6 (645605840402763109 - 1) 645605840402763109 = 1 % 645605840402763109 ∧
+      Nat.gcd ((pm 300 6 ((645605840402763109 - 1) / 2) 645605840402763109 + 645605840402763109 - 1) % 645605840402763109) 645605840402763109 = 1 ∧
+      Nat.gcd ((pm 300 6 ((645605840402763109 - 1) / 3) 645605840402763109 + 645605840402763109 - 1) % 645605840402763109) 645605840402763109 = 1 ∧
+      Nat.gcd ((pm 300 6 ((645605840402763109 - 1) / 11) 645605840402763109 + 645605840402763109 - 1) % 645605840402763109) 645605840402763109 = 1 ∧
+      Nat.gcd ((pm 300 6 ((645605840402763109 - 1) / 1873) 645605840402763109 + 645605840402763109 - 1) % 645605840402763109) 645605840402763109 = 1 ∧
+      Nat.gcd ((pm 300 6 ((645605840402763109 - 1) / 2611293826153) 645605840402763109 + 645605840402763109 - 1) % 645605840402763109) 645605840402763109 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5⟩ := hnum
+  refine pk_pock 645605840402763109 6 300 [(2, 2), (3, 1), (11, 1), (1873, 1), (2611293826153, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk403
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+
+/-- `7909392953035937827` is prime, by a Pocklington certificate with witness `3`. -/
+private theorem pk408 : (7909392953035937827 : ℕ).Prime := by
+  have hnum : (7909392953035937827 - 1) % (([(2, 1), (3, 2), (29, 1), (277, 1), (10093, 1), (5419667053, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      7909392953035937827 < ((([(2, 1), (3, 2), (29, 1), (277, 1), (10093, 1), (5419667053, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 3 (7909392953035937827 - 1) 7909392953035937827 = 1 % 7909392953035937827 ∧
+      Nat.gcd ((pm 300 3 ((7909392953035937827 - 1) / 2) 7909392953035937827 + 7909392953035937827 - 1) % 7909392953035937827) 7909392953035937827 = 1 ∧
+      Nat.gcd ((pm 300 3 ((7909392953035937827 - 1) / 3) 7909392953035937827 + 7909392953035937827 - 1) % 7909392953035937827) 7909392953035937827 = 1 ∧
+      Nat.gcd ((pm 300 3 ((7909392953035937827 - 1) / 29) 7909392953035937827 + 7909392953035937827 - 1) % 7909392953035937827) 7909392953035937827 = 1 ∧
+      Nat.gcd ((pm 300 3 ((7909392953035937827 - 1) / 277) 7909392953035937827 + 7909392953035937827 - 1) % 7909392953035937827) 7909392953035937827 = 1 ∧
+      Nat.gcd ((pm 300 3 ((7909392953035937827 - 1) / 10093) 7909392953035937827 + 7909392953035937827 - 1) % 7909392953035937827) 7909392953035937827 = 1 ∧
+      Nat.gcd ((pm 300 3 ((7909392953035937827 - 1) / 5419667053) 7909392953035937827 + 7909392953035937827 - 1) % 7909392953035937827) 7909392953035937827 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5, hg6⟩ := hnum
+  refine pk_pock 7909392953035937827 3 300 [(2, 1), (3, 2), (29, 1), (277, 1), (10093, 1), (5419667053, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk402
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+    · exact hg6
+
+/-- `4733926872943830274463` is prime, by a Pocklington certificate with witness `5`. -/
+private theorem pk409 : (4733926872943830274463 : ℕ).Prime := by
+  have hnum : (4733926872943830274463 - 1) % (([(2, 1), (39153780219769, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      4733926872943830274463 < ((([(2, 1), (39153780219769, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 5 (4733926872943830274463 - 1) 4733926872943830274463 = 1 % 4733926872943830274463 ∧
+      Nat.gcd ((pm 300 5 ((4733926872943830274463 - 1) / 2) 4733926872943830274463 + 4733926872943830274463 - 1) % 4733926872943830274463) 4733926872943830274463 = 1 ∧
+      Nat.gcd ((pm 300 5 ((4733926872943830274463 - 1) / 39153780219769) 4733926872943830274463 + 4733926872943830274463 - 1) % 4733926872943830274463) 4733926872943830274463 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2⟩ := hnum
+  refine pk_pock 4733926872943830274463 5 300 [(2, 1), (39153780219769, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact pk404
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl
+    · exact hg1
+    · exact hg2
+
+/-- `10949435310255546726709` is prime, by a Pocklington certificate with witness `6`. -/
+private theorem pk410 : (10949435310255546726709 : ℕ).Prime := by
+  have hnum : (10949435310255546726709 - 1) % (([(2, 2), (3, 1), (3769, 1), (4969, 1), (48720904445519, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      10949435310255546726709 < ((([(2, 2), (3, 1), (3769, 1), (4969, 1), (48720904445519, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 6 (10949435310255546726709 - 1) 10949435310255546726709 = 1 % 10949435310255546726709 ∧
+      Nat.gcd ((pm 300 6 ((10949435310255546726709 - 1) / 2) 10949435310255546726709 + 10949435310255546726709 - 1) % 10949435310255546726709) 10949435310255546726709 = 1 ∧
+      Nat.gcd ((pm 300 6 ((10949435310255546726709 - 1) / 3) 10949435310255546726709 + 10949435310255546726709 - 1) % 10949435310255546726709) 10949435310255546726709 = 1 ∧
+      Nat.gcd ((pm 300 6 ((10949435310255546726709 - 1) / 3769) 10949435310255546726709 + 10949435310255546726709 - 1) % 10949435310255546726709) 10949435310255546726709 = 1 ∧
+      Nat.gcd ((pm 300 6 ((10949435310255546726709 - 1) / 4969) 10949435310255546726709 + 10949435310255546726709 - 1) % 10949435310255546726709) 10949435310255546726709 = 1 ∧
+      Nat.gcd ((pm 300 6 ((10949435310255546726709 - 1) / 48720904445519) 10949435310255546726709 + 10949435310255546726709 - 1) % 10949435310255546726709) 10949435310255546726709 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5⟩ := hnum
+  refine pk_pock 10949435310255546726709 6 300 [(2, 2), (3, 1), (3769, 1), (4969, 1), (48720904445519, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk405
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+
+/-- `43797741241022186906837` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk411 : (43797741241022186906837 : ℕ).Prime := by
+  have hnum : (43797741241022186906837 - 1) % (([(2, 2), (10949435310255546726709, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      43797741241022186906837 < ((([(2, 2), (10949435310255546726709, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (43797741241022186906837 - 1) 43797741241022186906837 = 1 % 43797741241022186906837 ∧
+      Nat.gcd ((pm 300 2 ((43797741241022186906837 - 1) / 2) 43797741241022186906837 + 43797741241022186906837 - 1) % 43797741241022186906837) 43797741241022186906837 = 1 ∧
+      Nat.gcd ((pm 300 2 ((43797741241022186906837 - 1) / 10949435310255546726709) 43797741241022186906837 + 43797741241022186906837 - 1) % 43797741241022186906837) 43797741241022186906837 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2⟩ := hnum
+  refine pk_pock 43797741241022186906837 2 300 [(2, 2), (10949435310255546726709, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact pk410
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl
+    · exact hg1
+    · exact hg2
+
+/-- `3463766228298820332423439` is prime, by a Pocklington certificate with witness `3`. -/
+private theorem pk412 : (3463766228298820332423439 : ℕ).Prime := by
+  have hnum : (3463766228298820332423439 - 1) % (([(2, 1), (3, 2), (1571, 1), (103903, 1), (1178885962045307, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      3463766228298820332423439 < ((([(2, 1), (3, 2), (1571, 1), (103903, 1), (1178885962045307, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 3 (3463766228298820332423439 - 1) 3463766228298820332423439 = 1 % 3463766228298820332423439 ∧
+      Nat.gcd ((pm 300 3 ((3463766228298820332423439 - 1) / 2) 3463766228298820332423439 + 3463766228298820332423439 - 1) % 3463766228298820332423439) 3463766228298820332423439 = 1 ∧
+      Nat.gcd ((pm 300 3 ((3463766228298820332423439 - 1) / 3) 3463766228298820332423439 + 3463766228298820332423439 - 1) % 3463766228298820332423439) 3463766228298820332423439 = 1 ∧
+      Nat.gcd ((pm 300 3 ((3463766228298820332423439 - 1) / 1571) 3463766228298820332423439 + 3463766228298820332423439 - 1) % 3463766228298820332423439) 3463766228298820332423439 = 1 ∧
+      Nat.gcd ((pm 300 3 ((3463766228298820332423439 - 1) / 103903) 3463766228298820332423439 + 3463766228298820332423439 - 1) % 3463766228298820332423439) 3463766228298820332423439 = 1 ∧
+      Nat.gcd ((pm 300 3 ((3463766228298820332423439 - 1) / 1178885962045307) 3463766228298820332423439 + 3463766228298820332423439 - 1) % 3463766228298820332423439) 3463766228298820332423439 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5⟩ := hnum
+  refine pk_pock 3463766228298820332423439 3 300 [(2, 1), (3, 2), (1571, 1), (103903, 1), (1178885962045307, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk406
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+
+/-- `407143802576542249485956753` is prime, by a Pocklington certificate with witness `3`. -/
+private theorem pk413 : (407143802576542249485956753 : ℕ).Prime := by
+  have hnum : (407143802576542249485956753 - 1) % (([(2, 4), (7, 1), (83, 1), (43797741241022186906837, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      407143802576542249485956753 < ((([(2, 4), (7, 1), (83, 1), (43797741241022186906837, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 3 (407143802576542249485956753 - 1) 407143802576542249485956753 = 1 % 407143802576542249485956753 ∧
+      Nat.gcd ((pm 300 3 ((407143802576542249485956753 - 1) / 2) 407143802576542249485956753 + 407143802576542249485956753 - 1) % 407143802576542249485956753) 407143802576542249485956753 = 1 ∧
+      Nat.gcd ((pm 300 3 ((407143802576542249485956753 - 1) / 7) 407143802576542249485956753 + 407143802576542249485956753 - 1) % 407143802576542249485956753) 407143802576542249485956753 = 1 ∧
+      Nat.gcd ((pm 300 3 ((407143802576542249485956753 - 1) / 83) 407143802576542249485956753 + 407143802576542249485956753 - 1) % 407143802576542249485956753) 407143802576542249485956753 = 1 ∧
+      Nat.gcd ((pm 300 3 ((407143802576542249485956753 - 1) / 43797741241022186906837) 407143802576542249485956753 + 407143802576542249485956753 - 1) % 407143802576542249485956753) 407143802576542249485956753 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4⟩ := hnum
+  refine pk_pock 407143802576542249485956753 3 300 [(2, 4), (7, 1), (83, 1), (43797741241022186906837, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk411
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+
+/-- `16885628503385759230699961481451` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk414 : (16885628503385759230699961481451 : ℕ).Prime := by
+  have hnum : (16885628503385759230699961481451 - 1) % (([(2, 1), (3, 1), (5, 2), (284737, 1), (612371, 1), (645605840402763109, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      16885628503385759230699961481451 < ((([(2, 1), (3, 1), (5, 2), (284737, 1), (612371, 1), (645605840402763109, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (16885628503385759230699961481451 - 1) 16885628503385759230699961481451 = 1 % 16885628503385759230699961481451 ∧
+      Nat.gcd ((pm 300 2 ((16885628503385759230699961481451 - 1) / 2) 16885628503385759230699961481451 + 16885628503385759230699961481451 - 1) % 16885628503385759230699961481451) 16885628503385759230699961481451 = 1 ∧
+      Nat.gcd ((pm 300 2 ((16885628503385759230699961481451 - 1) / 3) 16885628503385759230699961481451 + 16885628503385759230699961481451 - 1) % 16885628503385759230699961481451) 16885628503385759230699961481451 = 1 ∧
+      Nat.gcd ((pm 300 2 ((16885628503385759230699961481451 - 1) / 5) 16885628503385759230699961481451 + 16885628503385759230699961481451 - 1) % 16885628503385759230699961481451) 16885628503385759230699961481451 = 1 ∧
+      Nat.gcd ((pm 300 2 ((16885628503385759230699961481451 - 1) / 284737) 16885628503385759230699961481451 + 16885628503385759230699961481451 - 1) % 16885628503385759230699961481451) 16885628503385759230699961481451 = 1 ∧
+      Nat.gcd ((pm 300 2 ((16885628503385759230699961481451 - 1) / 612371) 16885628503385759230699961481451 + 16885628503385759230699961481451 - 1) % 16885628503385759230699961481451) 16885628503385759230699961481451 = 1 ∧
+      Nat.gcd ((pm 300 2 ((16885628503385759230699961481451 - 1) / 645605840402763109) 16885628503385759230699961481451 + 16885628503385759230699961481451 - 1) % 16885628503385759230699961481451) 16885628503385759230699961481451 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5, hg6⟩ := hnum
+  refine pk_pock 16885628503385759230699961481451 2 300 [(2, 1), (3, 1), (5, 2), (284737, 1), (612371, 1), (645605840402763109, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk407
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+    · exact hg6
+
+/-- `144434263964028363005143158126751` is prime, by a Pocklington certificate with witness `15`. -/
+private theorem pk415 : (144434263964028363005143158126751 : ℕ).Prime := by
+  have hnum : (144434263964028363005143158126751 - 1) % (([(2, 1), (3, 1), (5, 3), (11, 1), (43, 1), (407143802576542249485956753, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      144434263964028363005143158126751 < ((([(2, 1), (3, 1), (5, 3), (11, 1), (43, 1), (407143802576542249485956753, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 15 (144434263964028363005143158126751 - 1) 144434263964028363005143158126751 = 1 % 144434263964028363005143158126751 ∧
+      Nat.gcd ((pm 300 15 ((144434263964028363005143158126751 - 1) / 2) 144434263964028363005143158126751 + 144434263964028363005143158126751 - 1) % 144434263964028363005143158126751) 144434263964028363005143158126751 = 1 ∧
+      Nat.gcd ((pm 300 15 ((144434263964028363005143158126751 - 1) / 3) 144434263964028363005143158126751 + 144434263964028363005143158126751 - 1) % 144434263964028363005143158126751) 144434263964028363005143158126751 = 1 ∧
+      Nat.gcd ((pm 300 15 ((144434263964028363005143158126751 - 1) / 5) 144434263964028363005143158126751 + 144434263964028363005143158126751 - 1) % 144434263964028363005143158126751) 144434263964028363005143158126751 = 1 ∧
+      Nat.gcd ((pm 300 15 ((144434263964028363005143158126751 - 1) / 11) 144434263964028363005143158126751 + 144434263964028363005143158126751 - 1) % 144434263964028363005143158126751) 144434263964028363005143158126751 = 1 ∧
+      Nat.gcd ((pm 300 15 ((144434263964028363005143158126751 - 1) / 43) 144434263964028363005143158126751 + 144434263964028363005143158126751 - 1) % 144434263964028363005143158126751) 144434263964028363005143158126751 = 1 ∧
+      Nat.gcd ((pm 300 15 ((144434263964028363005143158126751 - 1) / 407143802576542249485956753) 144434263964028363005143158126751 + 144434263964028363005143158126751 - 1) % 144434263964028363005143158126751) 144434263964028363005143158126751 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5, hg6⟩ := hnum
+  refine pk_pock 144434263964028363005143158126751 15 300 [(2, 1), (3, 1), (5, 3), (11, 1), (43, 1), (407143802576542249485956753, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk413
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+    · exact hg6
+
+/-- `2466741223578678762045843274201067013715211` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk416 : (2466741223578678762045843274201067013715211 : ℕ).Prime := by
+  have hnum : (2466741223578678762045843274201067013715211 - 1) % (([(2, 1), (5, 1), (7, 1), (919, 1), (1759, 1), (3463766228298820332423439, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      2466741223578678762045843274201067013715211 < ((([(2, 1), (5, 1), (7, 1), (919, 1), (1759, 1), (3463766228298820332423439, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (2466741223578678762045843274201067013715211 - 1) 2466741223578678762045843274201067013715211 = 1 % 2466741223578678762045843274201067013715211 ∧
+      Nat.gcd ((pm 300 2 ((2466741223578678762045843274201067013715211 - 1) / 2) 2466741223578678762045843274201067013715211 + 2466741223578678762045843274201067013715211 - 1) % 2466741223578678762045843274201067013715211) 2466741223578678762045843274201067013715211 = 1 ∧
+      Nat.gcd ((pm 300 2 ((2466741223578678762045843274201067013715211 - 1) / 5) 2466741223578678762045843274201067013715211 + 2466741223578678762045843274201067013715211 - 1) % 2466741223578678762045843274201067013715211) 2466741223578678762045843274201067013715211 = 1 ∧
+      Nat.gcd ((pm 300 2 ((2466741223578678762045843274201067013715211 - 1) / 7) 2466741223578678762045843274201067013715211 + 2466741223578678762045843274201067013715211 - 1) % 2466741223578678762045843274201067013715211) 2466741223578678762045843274201067013715211 = 1 ∧
+      Nat.gcd ((pm 300 2 ((2466741223578678762045843274201067013715211 - 1) / 919) 2466741223578678762045843274201067013715211 + 2466741223578678762045843274201067013715211 - 1) % 2466741223578678762045843274201067013715211) 2466741223578678762045843274201067013715211 = 1 ∧
+      Nat.gcd ((pm 300 2 ((2466741223578678762045843274201067013715211 - 1) / 1759) 2466741223578678762045843274201067013715211 + 2466741223578678762045843274201067013715211 - 1) % 2466741223578678762045843274201067013715211) 2466741223578678762045843274201067013715211 = 1 ∧
+      Nat.gcd ((pm 300 2 ((2466741223578678762045843274201067013715211 - 1) / 3463766228298820332423439) 2466741223578678762045843274201067013715211 + 2466741223578678762045843274201067013715211 - 1) % 2466741223578678762045843274201067013715211) 2466741223578678762045843274201067013715211 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5, hg6⟩ := hnum
+  refine pk_pock 2466741223578678762045843274201067013715211 2 300 [(2, 1), (5, 1), (7, 1), (919, 1), (1759, 1), (3463766228298820332423439, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk412
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+    · exact hg6
+
+/-- `4643040499394667728367869838392018120277221` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk417 : (4643040499394667728367869838392018120277221 : ℕ).Prime := by
+  have hnum : (4643040499394667728367869838392018120277221 - 1) % (([(2, 2), (5, 1), (19, 1), (607, 1), (139367, 1), (144434263964028363005143158126751, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      4643040499394667728367869838392018120277221 < ((([(2, 2), (5, 1), (19, 1), (607, 1), (139367, 1), (144434263964028363005143158126751, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (4643040499394667728367869838392018120277221 - 1) 4643040499394667728367869838392018120277221 = 1 % 4643040499394667728367869838392018120277221 ∧
+      Nat.gcd ((pm 300 2 ((4643040499394667728367869838392018120277221 - 1) / 2) 4643040499394667728367869838392018120277221 + 4643040499394667728367869838392018120277221 - 1) % 4643040499394667728367869838392018120277221) 4643040499394667728367869838392018120277221 = 1 ∧
+      Nat.gcd ((pm 300 2 ((4643040499394667728367869838392018120277221 - 1) / 5) 4643040499394667728367869838392018120277221 + 4643040499394667728367869838392018120277221 - 1) % 4643040499394667728367869838392018120277221) 4643040499394667728367869838392018120277221 = 1 ∧
+      Nat.gcd ((pm 300 2 ((4643040499394667728367869838392018120277221 - 1) / 19) 4643040499394667728367869838392018120277221 + 4643040499394667728367869838392018120277221 - 1) % 4643040499394667728367869838392018120277221) 4643040499394667728367869838392018120277221 = 1 ∧
+      Nat.gcd ((pm 300 2 ((4643040499394667728367869838392018120277221 - 1) / 607) 4643040499394667728367869838392018120277221 + 4643040499394667728367869838392018120277221 - 1) % 4643040499394667728367869838392018120277221) 4643040499394667728367869838392018120277221 = 1 ∧
+      Nat.gcd ((pm 300 2 ((4643040499394667728367869838392018120277221 - 1) / 139367) 4643040499394667728367869838392018120277221 + 4643040499394667728367869838392018120277221 - 1) % 4643040499394667728367869838392018120277221) 4643040499394667728367869838392018120277221 = 1 ∧
+      Nat.gcd ((pm 300 2 ((4643040499394667728367869838392018120277221 - 1) / 144434263964028363005143158126751) 4643040499394667728367869838392018120277221 + 4643040499394667728367869838392018120277221 - 1) % 4643040499394667728367869838392018120277221) 4643040499394667728367869838392018120277221 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5, hg6⟩ := hnum
+  refine pk_pock 4643040499394667728367869838392018120277221 2 300 [(2, 2), (5, 1), (19, 1), (607, 1), (139367, 1), (144434263964028363005143158126751, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk415
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+    · exact hg6
+
+/-- `4933482447157357524091686548402134027430423` is prime, by a Pocklington certificate with witness `5`. -/
+private theorem pk418 : (4933482447157357524091686548402134027430423 : ℕ).Prime := by
+  have hnum : (4933482447157357524091686548402134027430423 - 1) % (([(2, 1), (2466741223578678762045843274201067013715211, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      4933482447157357524091686548402134027430423 < ((([(2, 1), (2466741223578678762045843274201067013715211, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 5 (4933482447157357524091686548402134027430423 - 1) 4933482447157357524091686548402134027430423 = 1 % 4933482447157357524091686548402134027430423 ∧
+      Nat.gcd ((pm 300 5 ((4933482447157357524091686548402134027430423 - 1) / 2) 4933482447157357524091686548402134027430423 + 4933482447157357524091686548402134027430423 - 1) % 4933482447157357524091686548402134027430423) 4933482447157357524091686548402134027430423 = 1 ∧
+      Nat.gcd ((pm 300 5 ((4933482447157357524091686548402134027430423 - 1) / 2466741223578678762045843274201067013715211) 4933482447157357524091686548402134027430423 + 4933482447157357524091686548402134027430423 - 1) % 4933482447157357524091686548402134027430423) 4933482447157357524091686548402134027430423 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2⟩ := hnum
+  refine pk_pock 4933482447157357524091686548402134027430423 5 300 [(2, 1), (2466741223578678762045843274201067013715211, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact pk416
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl
+    · exact hg1
+    · exact hg2
+
+/-- `1184439181283052277785704020664379405638913904266156695051` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk419 : (1184439181283052277785704020664379405638913904266156695051 : ℕ).Prime := by
+  have hnum : (1184439181283052277785704020664379405638913904266156695051 - 1) % (([(2, 1), (5, 2), (11, 1), (7909392953035937827, 1), (4733926872943830274463, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      1184439181283052277785704020664379405638913904266156695051 < ((([(2, 1), (5, 2), (11, 1), (7909392953035937827, 1), (4733926872943830274463, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (1184439181283052277785704020664379405638913904266156695051 - 1) 1184439181283052277785704020664379405638913904266156695051 = 1 % 1184439181283052277785704020664379405638913904266156695051 ∧
+      Nat.gcd ((pm 300 2 ((1184439181283052277785704020664379405638913904266156695051 - 1) / 2) 1184439181283052277785704020664379405638913904266156695051 + 1184439181283052277785704020664379405638913904266156695051 - 1) % 1184439181283052277785704020664379405638913904266156695051) 1184439181283052277785704020664379405638913904266156695051 = 1 ∧
+      Nat.gcd ((pm 300 2 ((1184439181283052277785704020664379405638913904266156695051 - 1) / 5) 1184439181283052277785704020664379405638913904266156695051 + 1184439181283052277785704020664379405638913904266156695051 - 1) % 1184439181283052277785704020664379405638913904266156695051) 1184439181283052277785704020664379405638913904266156695051 = 1 ∧
+      Nat.gcd ((pm 300 2 ((1184439181283052277785704020664379405638913904266156695051 - 1) / 11) 1184439181283052277785704020664379405638913904266156695051 + 1184439181283052277785704020664379405638913904266156695051 - 1) % 1184439181283052277785704020664379405638913904266156695051) 1184439181283052277785704020664379405638913904266156695051 = 1 ∧
+      Nat.gcd ((pm 300 2 ((1184439181283052277785704020664379405638913904266156695051 - 1) / 7909392953035937827) 1184439181283052277785704020664379405638913904266156695051 + 1184439181283052277785704020664379405638913904266156695051 - 1) % 1184439181283052277785704020664379405638913904266156695051) 1184439181283052277785704020664379405638913904266156695051 = 1 ∧
+      Nat.gcd ((pm 300 2 ((1184439181283052277785704020664379405638913904266156695051 - 1) / 4733926872943830274463) 1184439181283052277785704020664379405638913904266156695051 + 1184439181283052277785704020664379405638913904266156695051 - 1) % 1184439181283052277785704020664379405638913904266156695051) 1184439181283052277785704020664379405638913904266156695051 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5⟩ := hnum
+  refine pk_pock 1184439181283052277785704020664379405638913904266156695051 2 300 [(2, 1), (5, 2), (11, 1), (7909392953035937827, 1), (4733926872943830274463, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk408
+    · exact pk409
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+
+/-- `999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849` is prime, by a Pocklington certificate with witness `7`. -/
+private theorem pk420 : (999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 : ℕ).Prime := by
+  have hnum : (999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) % (([(2, 3), (3, 1), (17, 1), (107, 1), (4643040499394667728367869838392018120277221, 1), (4933482447157357524091686548402134027430423, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 < ((([(2, 3), (3, 1), (17, 1), (107, 1), (4643040499394667728367869838392018120277221, 1), (4933482447157357524091686548402134027430423, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 7 (999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 = 1 % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 ∧
+      Nat.gcd ((pm 300 7 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) / 2) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 = 1 ∧
+      Nat.gcd ((pm 300 7 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) / 3) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 = 1 ∧
+      Nat.gcd ((pm 300 7 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) / 17) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 = 1 ∧
+      Nat.gcd ((pm 300 7 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) / 107) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 = 1 ∧
+      Nat.gcd ((pm 300 7 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) / 4643040499394667728367869838392018120277221) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 = 1 ∧
+      Nat.gcd ((pm 300 7 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) / 4933482447157357524091686548402134027430423) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4, hg5, hg6⟩ := hnum
+  refine pk_pock 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849 7 300 [(2, 3), (3, 1), (17, 1), (107, 1), (4643040499394667728367869838392018120277221, 1), (4933482447157357524091686548402134027430423, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk417
+    · exact pk418
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+    · exact hg5
+    · exact hg6
+
+/-- `999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051` is prime, by a Pocklington certificate with witness `2`. -/
+private theorem pk421 : (999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 : ℕ).Prime := by
+  have hnum : (999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) % (([(2, 1), (5, 2), (16885628503385759230699961481451, 1), (1184439181283052277785704020664379405638913904266156695051, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod = 0 ∧
+      999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 < ((([(2, 1), (5, 2), (16885628503385759230699961481451, 1), (1184439181283052277785704020664379405638913904266156695051, 1)] : List (ℕ × ℕ)).map (fun x => x.1 ^ x.2)).prod + 1) ^ 2 ∧
+      pm 300 2 (999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 = 1 % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 ∧
+      Nat.gcd ((pm 300 2 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) / 2) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 = 1 ∧
+      Nat.gcd ((pm 300 2 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) / 5) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 = 1 ∧
+      Nat.gcd ((pm 300 2 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) / 16885628503385759230699961481451) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 = 1 ∧
+      Nat.gcd ((pm 300 2 ((999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) / 1184439181283052277785704020664379405638913904266156695051) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 + 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 - 1) % 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051) 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 = 1 := by
+    decide +kernel
+  obtain ⟨hFd, hbig, hpow, hg1, hg2, hg3, hg4⟩ := hnum
+  refine pk_pock 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051 2 300 [(2, 1), (5, 2), (16885628503385759230699961481451, 1), (1184439181283052277785704020664379405638913904266156695051, 1)] (by decide +kernel) (by decide +kernel) hFd hbig ?_ hpow ?_
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact primeB_sound (by decide +kernel)
+    · exact primeB_sound (by decide +kernel)
+    · exact pk414
+    · exact pk419
+  · intro x hx
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    · exact hg1
+    · exact hg2
+    · exact hg3
+    · exact hg4
+
 /-! ### The eight windows -/
 /-- LEAF. First step of the proof of batch 1: the first window of eight
 positions of batch 1, namely positions 65 through 72 of the fixed row 90
@@ -11458,14 +12108,22 @@ theorem batch1_part1_prime : ∀ q ∈ (qs.drop 72).take 8, q.Prime := by
 /-- LEAF. Third step of the proof of batch 1: the third window of eight
 positions of batch 1, namely positions 81 through 88, consists of primes.
 This is the window `(qs.drop 80).take 8`. The finite primality obligations of
-these eight candidates stay OPEN. -/
-theorem batch1_part2_prime : ∀ q ∈ (qs.drop 80).take 8, q.Prime := by
-  sorry
-
-/-- LEAF. Fourth step of the proof of batch 1: the fourth window of eight
-positions of batch 1, namely positions 89 through 96, consists of primes.
-This is the window `(qs.drop 88).take 8`. The finite primality obligations of
 these eight candidates are certified prime by the Pocklington chains proved in this file. -/
+theorem batch1_part2_prime : ∀ q ∈ (qs.drop 80).take 8, q.Prime := by
+  have hlist : (qs.drop 80).take 8 = [999999999999999999999999999999999999999999999999999999999999999999999999999999999999949849, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949951, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950009, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950051, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950777, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999950921, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999951059, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999951133] := by decide +kernel
+  intro q hq
+  rw [hlist] at hq
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hq
+  rcases hq with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · exact pk420
+  · exact pk294
+  · exact pk288
+  · exact pk421
+  · exact pk283
+  · exact pk278
+  · exact pk272
+  · exact pk267
+
 theorem batch1_part3_prime : ∀ q ∈ (qs.drop 88).take 8, q.Prime := by
   have hlist : (qs.drop 88).take 8 = [999999999999999999999999999999999999999999999999999999999999999999999999999999999999951409, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999951569, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999951893, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999952277, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999952781, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999953159, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999953413, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999953479] := by decide +kernel
   intro q hq
