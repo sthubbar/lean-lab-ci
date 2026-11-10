@@ -85,7 +85,24 @@ theorem leaf_odd_moment_upper_half_high (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 
               (fun n : ℕ => Odd (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * (N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hparent⟩ := leaf_odd_moment_upper γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδlt => ?_⟩
+  obtain ⟨κ₀, hκ₀, hparent⟩ := hparent δ hδ hδlt
+  refine ⟨κ₀, hκ₀, fun κ hκ hκle => ?_⟩
+  obtain ⟨B, hB, N₀, hparent⟩ := hparent κ hκ hκle
+  refine ⟨B, hB, max N₀ 2, fun N hN => ?_⟩
+  have hN₀ : N₀ ≤ N := (le_max_left N₀ 2).trans hN
+  have hN2 : 2 ≤ N := (le_max_right N₀ 2).trans hN
+  have H := hparent N hN₀
+  have hsub : Finset.Icc (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2 + 1) N ⊆
+      Finset.Icc ((N + 1) / 2 + N / 4 + 1) N := by
+    exact Finset.Icc_subset_Icc (by omega) le_rfl
+  have hsub_filter : (Finset.Icc (((N + 1) / 2 + N / 4 + 1) + (N - ((N + 1) / 2 + N / 4 + 1)) / 2 + 1) N).filter
+        (fun n : ℕ => Odd (nu γ n)) ⊆
+      (Finset.Icc ((N + 1) / 2 + N / 4 + 1) N).filter
+        (fun n : ℕ => Odd (nu γ n)) := by
+    exact Finset.filter_subset_filter _ hsub
+  exact (Finset.sum_le_sum_of_subset_of_nonneg hsub_filter (fun _ _ _ => sq_nonneg _)).trans H
 
 
 /-- LEAF. Step of the proof: the window is the union of its two halves. For every `N ≥ 100` the

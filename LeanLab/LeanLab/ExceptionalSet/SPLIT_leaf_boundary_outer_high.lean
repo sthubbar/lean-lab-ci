@@ -74,7 +74,21 @@ theorem leaf_outer_high_lower_band_upper_indices (γ : ℝ) (h1 : 1 < γ) (h2 : 
           N < n ∧ 1 - calE γ κ N ^ (-(1 / 8 : ℝ)) / 2 < Int.fract (F γ n) ∧
             Int.fract (F γ n) ≤ 1 - 1 / 4 * calE γ κ N ^ (-(1 / 8 : ℝ)))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  refine ⟨1, by positivity, fun κ hκ hκ1 => ⟨1, by positivity, 8, fun N hN => ?_⟩⟩
+  have h_empty : (window γ N).filter (fun n : ℕ => N < n ∧ 1 - calE γ κ N ^ (-(1 / 8 : ℝ)) / 2 < Int.fract (F γ n) ∧ Int.fract (F γ n) ≤ 1 - 1 / 4 * calE γ κ N ^ (-(1 / 8 : ℝ))) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro n hn
+    rintro ⟨hlt, -⟩
+    have hle : n ≤ N := window_upper γ h1 N hN n hn
+    omega
+  rw [h_empty, Finset.card_empty]
+  push_cast
+  have h_pos : 0 ≤ 1 * (N : ℝ) * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
+    apply mul_nonneg
+    · positivity
+    · apply Real.rpow_nonneg
+      exact (Real.exp_pos _).le
+  exact h_pos
 
 /-- LEAF. Step 4 of the split: the upper piece of the half band, on the indices `N < n`. It counts
 the window indices with `N < n` and `1 - Δ / 4 < {F γ n}`, where
@@ -87,7 +101,21 @@ theorem leaf_outer_high_upper_band_upper_indices (γ : ℝ) (h1 : 1 < γ) (h2 : 
         (((window γ N).filter (fun n : ℕ =>
           N < n ∧ 1 - 1 / 4 * calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  refine ⟨1, by positivity, fun κ hκ hκ1 => ⟨1, by positivity, 8, fun N hN => ?_⟩⟩
+  have h_empty : (window γ N).filter (fun n : ℕ => N < n ∧ 1 - 1 / 4 * calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n)) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro n hn
+    rintro ⟨hlt, -⟩
+    have hle : n ≤ N := window_upper γ h1 N hN n hn
+    omega
+  rw [h_empty, Finset.card_empty]
+  push_cast
+  have h_pos : 0 ≤ 1 * (N : ℝ) * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
+    apply mul_nonneg
+    · positivity
+    · apply Real.rpow_nonneg
+      exact (Real.exp_pos _).le
+  exact h_pos
 
 /-- Assembly. The half band estimate follows from the four piece estimates: the half band is
 covered by the two midpoint pieces crossed with the two index ranges, cardinalities are
