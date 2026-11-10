@@ -20,6 +20,7 @@ import LeanLab.Linnik.Decomp1532b
 import LeanLab.Linnik.Gallagher1975Lemma2
 import LeanLab.Romanov.GallagherBridge
 import LeanLab.ExceptionalSet.MVMajorSing
+import LeanLab.Common.CircleOrth
 
 namespace LeanLab.Linnik.Decomp1532c
 
@@ -850,6 +851,184 @@ theorem major_arc_remainder_le_fiber_sum (k L N : ℕ) (P : ℝ) (E : ℤ → �
   rw [← sum_sub_distrib]
   refine (abs_sum_le_sum_abs _ _).trans (sum_le_sum fun x hx => ?_)
   exact hE _ (mem_filter.mp hx).2
+
+/-- Gallagher 1975 p.127, Fourier display 1 and the definition of J in Theorem 3.
+Elementary support consequence. If the absolute shift exceeds N, the sum J of reciprocal log products over integer pairs in the interval from 2 to N is zero.
+AI wrote the Lean code. Goldbach is open. -/
+theorem Jn_eq_zero_of_large_shift (N : ℕ) (n : ℤ) (hn : (N : ℝ) < |(n : ℝ)|) :
+    LeanLab.Linnik.Decomp1532b.Jn N n = 0 := by
+  classical
+  unfold LeanLab.Linnik.Decomp1532b.Jn
+  apply sum_eq_zero
+  intro m hm
+  obtain ⟨hm, heq⟩ := mem_filter.mp hm
+  obtain ⟨hm₁, hm₂⟩ := mem_product.mp hm
+  obtain ⟨_, hm₁⟩ := mem_Ioc.mp hm₁
+  obtain ⟨_, hm₂⟩ := mem_Ioc.mp hm₂
+  have hni : -(N : ℤ) ≤ n ∧ n ≤ (N : ℤ) := by omega
+  have hnr : -(N : ℝ) ≤ (n : ℝ) ∧ (n : ℝ) ≤ (N : ℝ) := by
+    exact_mod_cast hni
+  have := abs_le.mpr hnr
+  linarith
+
+/-- Gallagher 1975 p.127, Fourier display 1 and the definition of J in Theorem 3.
+Elementary support consequence. If the absolute integer shift exceeds N, the full unit interval integral of the squared prime exponential sum times the real additive character is zero.
+AI wrote the Lean code. Goldbach is open. -/
+theorem prime_correlation_full_zero_of_large_shift (N : ℕ) (n : ℤ)
+    (hn : (N : ℝ) < |(n : ℝ)|) :
+    (∫ α in Set.Icc (0 : ℝ) 1, ‖Sg N α‖ ^ 2 *
+      (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) = 0 := by
+  let A := primesLe N
+  have hA : ∀ a ∈ A, a ≤ N := by
+    intro a ha
+    exact Nat.le_of_lt_succ (Finset.mem_range.mp (Finset.mem_filter.mp ha).1)
+  change (∫ α in Set.Icc (0 : ℝ) 1,
+    ‖LeanLab.Linnik.LiLiuLemma43.SA A (fun _ => 1) α‖ ^ 2 *
+      (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) = 0
+  have he (α : ℝ) : (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re =
+      Real.cos (2 * Real.pi * (n : ℝ) * α) := by
+    unfold LeanLab.PNTPort.LargeSieve.e
+    rw [mul_comm, Complex.exp_ofReal_mul_I_re]
+    congr 1
+    ring
+  simp_rw [he]
+  have hnorm (α : ℝ) : ‖LeanLab.Linnik.LiLiuLemma43.SA A (fun _ => 1) α‖ ^ 2 =
+      ∑ a ∈ A, ∑ b ∈ A, Real.cos (2 * Real.pi * ((a : ℝ) - b) * α) := by
+    simpa only [one_mul, Complex.ofReal_one] using LeanLab.Linnik.LiLiuDisplay37.normSq_expand A (fun _ => 1) α
+  simp_rw [hnorm]
+  rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le zero_le_one]
+  simp_rw [sum_mul]
+  rw [intervalIntegral.integral_finsetSum]
+  · apply sum_eq_zero
+    intro a ha
+    rw [intervalIntegral.integral_finsetSum]
+    · apply sum_eq_zero
+      intro b hb
+      have hna : a ≤ N := hA a ha
+      have hnb : b ≤ N := hA b hb
+      have hnot : ∀ s : ℤ, - (N : ℤ) ≤ s → s ≤ N → s ≠ n := by
+        intro s hs₁ hs₂ heq
+        subst s
+        have hnr : -(N : ℝ) ≤ (n : ℝ) ∧ (n : ℝ) ≤ (N : ℝ) := by
+          exact_mod_cast (show -(N : ℤ) ≤ n ∧ n ≤ N from ⟨hs₁, hs₂⟩)
+        linarith [abs_le.mpr hnr]
+      have hplus : (a : ℤ) - b + n ≠ 0 := by
+        intro hz
+        exact hnot ((b : ℤ) - a) (by omega) (by omega) (by omega)
+      have hminus : (a : ℤ) - b - n ≠ 0 := by
+        intro hz
+        exact hnot ((a : ℤ) - b) (by omega) (by omega) (by omega)
+      have heq : (fun α : ℝ => Real.cos (2 * Real.pi * ((a : ℝ) - b) * α) *
+          Real.cos (2 * Real.pi * (n : ℝ) * α)) =
+        (fun α => (Real.cos (2 * Real.pi * (((a : ℤ) - b + n : ℤ) : ℝ) * α) +
+          Real.cos (2 * Real.pi * (((a : ℤ) - b - n : ℤ) : ℝ) * α)) / 2) := by
+        funext α
+        push_cast
+        rw [show 2 * Real.pi * ((a : ℝ) - b + n) * α =
+            2 * Real.pi * ((a : ℝ) - b) * α + 2 * Real.pi * n * α by ring,
+          show 2 * Real.pi * ((a : ℝ) - b - n) * α =
+            2 * Real.pi * ((a : ℝ) - b) * α - 2 * Real.pi * n * α by ring,
+          Real.cos_add, Real.cos_sub]
+        ring
+      rw [heq, intervalIntegral.integral_div,
+        intervalIntegral.integral_add (Continuous.intervalIntegrable (by fun_prop) _ _) (Continuous.intervalIntegrable (by fun_prop) _ _),
+        LeanLab.Linnik.U1426ChainWire.integral_cos_int, LeanLab.Linnik.U1426ChainWire.integral_cos_int, if_neg hplus, if_neg hminus]
+      norm_num
+    · intro b hb
+      exact (by fun_prop : Continuous (fun α : ℝ =>
+        Real.cos (2 * Real.pi * ((a : ℝ) - b) * α) * Real.cos (2 * Real.pi * n * α))).intervalIntegrable _ _
+  · intro a ha
+    apply Continuous.intervalIntegrable
+    fun_prop
+
+/-- Gallagher 1975 p.127, Fourier display 1 and the definition of J in Theorem 3.
+Elementary support consequence. If the absolute integer shift exceeds N, its major arc correlation equals the negative correlation over the complement of those arcs in the unit interval.
+AI wrote the Lean code. Goldbach is open. -/
+theorem major_correlation_eq_neg_minor_of_large_shift (N : ℕ) (P : ℝ) (n : ℤ)
+    (hn : (N : ℝ) < |(n : ℝ)|) :
+    (∫ α in majorArcs N P, ‖Sg N α‖ ^ 2 *
+      (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) =
+      -(∫ α in Set.Icc (0 : ℝ) 1 \ majorArcs N P, ‖Sg N α‖ ^ 2 *
+        (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) := by
+  let f : ℝ → ℝ := fun α => ‖Sg N α‖ ^ 2 *
+    (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re
+  have he : Continuous (fun α : ℝ =>
+      (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) := by
+    unfold LeanLab.PNTPort.LargeSieve.e
+    fun_prop
+  have hf : Continuous f := ((LeanLab.Linnik.U7206.continuous_Sg N).norm.pow 2).mul he
+  have hi : IntegrableOn f (Set.Icc (0 : ℝ) 1) := hf.integrableOn_Icc
+  have hsplit := integral_inter_add_sdiff (measurableSet_majorArcs N P) hi
+  rw [Set.inter_eq_right.mpr (show majorArcs N P ⊆ Set.Icc (0 : ℝ) 1 from fun _ h => h.1)] at hsplit
+  have hzero : (∫ α in Set.Icc (0 : ℝ) 1, f α) = 0 :=
+    prime_correlation_full_zero_of_large_shift N n hn
+  rw [hzero] at hsplit
+  change (∫ α in majorArcs N P, f α) = -(∫ α in Set.Icc (0 : ℝ) 1 \ majorArcs N P, f α)
+  linarith
+
+/-- Gallagher 1975 p.127 display 1. The prime difference representation count equals
+its complex Fourier integral over the full unit interval. Ordered pairs are counted.
+AI wrote the Lean code. Goldbach is open. -/
+theorem prime_pair_fourier_identity (N : ℕ) (n : ℤ) :
+    (∫ α in Set.Icc (0 : ℝ) 1, ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) *
+      LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)) =
+      ((#{x ∈ primesLe N ×ˢ primesLe N | (x.1 : ℤ) - x.2 = n} : ℕ) : ℂ) := by
+  classical
+  let A := primesLe N
+  have he (x : ℝ) : LeanLab.PNTPort.LargeSieve.e x = LeanLab.CircleOrth.ee x := by
+    exact LeanLab.Linnik.U1434Lemma21.e_eq_eC x
+  have hnorm (α : ℝ) : ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) =
+      Sg N α * (starRingEnd ℂ) (Sg N α) := by
+    rw [Complex.mul_conj']
+    push_cast
+    rfl
+  have hexp (α : ℝ) : ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) *
+      LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α) =
+      ∑ p ∈ A, ∑ q ∈ A,
+        LeanLab.PNTPort.LargeSieve.e ((((p : ℤ) - q + n : ℤ) : ℝ) * α) := by
+    rw [hnorm]
+    simp only [Sg, LeanLab.Linnik.LiLiuLemma43.SA, one_mul, map_sum]
+    rw [Finset.sum_mul_sum, Finset.sum_mul]
+    apply sum_congr rfl
+    intro p hp
+    rw [Finset.sum_mul]
+    apply sum_congr rfl
+    intro q hq
+    rw [← LeanLab.PNTPort.LargeSieve.e_neg,
+      ← LeanLab.PNTPort.LargeSieve.e_add, ← LeanLab.PNTPort.LargeSieve.e_add]
+    congr 1
+    push_cast
+    ring
+  rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le zero_le_one]
+  simp_rw [hexp, he]
+  rw [intervalIntegral.integral_finsetSum]
+  · have hsum : (∑ p ∈ A, ∑ q ∈ A,
+        if (p : ℤ) - q + n = 0 then (1 : ℂ) else 0) =
+        ∑ p ∈ A, ∑ q ∈ A, if (p : ℤ) - q = n then (1 : ℂ) else 0 := by
+      rw [Finset.sum_comm]
+      apply sum_congr rfl
+      intro p hp
+      apply sum_congr rfl
+      intro q hq
+      have hh : ((q : ℤ) - p + n = 0) ↔ ((p : ℤ) - q = n) := by omega
+      simp only [hh]
+    have hinner : ∀ p ∈ A, (∫ α in (0 : ℝ)..1, ∑ q ∈ A,
+        LeanLab.CircleOrth.ee ((((p : ℤ) - q + n : ℤ) : ℝ) * α)) =
+        ∑ q ∈ A, if (p : ℤ) - q + n = 0 then (1 : ℂ) else 0 := by
+      intro p hp
+      rw [intervalIntegral.integral_finsetSum]
+      · exact sum_congr rfl (fun q _ => LeanLab.CircleOrth.integral_ee_int _)
+      · intro q hq
+        exact (LeanLab.CircleOrth.continuous_ee.comp
+          (continuous_const.mul continuous_id)).intervalIntegrable _ _
+    rw [sum_congr rfl hinner]
+    rw [hsum]
+    simp only [Finset.card_filter, Nat.cast_sum, Nat.cast_ite, Nat.cast_one, Nat.cast_zero,
+      Finset.sum_product, A]
+  · intro p hp
+    apply Continuous.intervalIntegrable
+    exact continuous_finsetSum _ (fun q _ => LeanLab.CircleOrth.continuous_ee.comp
+      (continuous_const.mul continuous_id))
 
 /-- The plain form of the nonzero correlation error before Gallagher 1975 p.138 display (5): the
 same averaged error as `major_arc_remainder_bound`, with no `e^{-c/θ}` term. For each fixed
