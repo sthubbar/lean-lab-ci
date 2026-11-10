@@ -31,8 +31,8 @@ open LeanLab.Linnik LeanLab.DERZ1997
 
 A power `2 ^ e` splits into two copies of `2 ^ (e - 1)`; a sum of powers of two can therefore be
 refined one term at a time while keeping its value, up to `M / 2` terms; and a list of exponents of
-length `K` gives the `Fin K`-indexed family that `LowBitsRep` asks for. Nothing here changes a
-statement or a definition of the lab. -/
+length `K` gives the `Fin K`-indexed family that `LowBitsRep` asks for. Nothing here touches any
+statement, import or other declaration of the lab. -/
 
 /-- `2 ^ e` is two copies of `2 ^ (e - 1)` when `1 ≤ e`. -/
 private lemma two_pow_split {e : ℕ} (he : 1 ≤ e) : 2 ^ e = 2 ^ (e - 1) + 2 ^ (e - 1) := by
