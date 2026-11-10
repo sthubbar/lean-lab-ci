@@ -7,6 +7,7 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.BHP1997.Sifted312
 import LeanLab.BHP1997.DecompC165a
 import LeanLab.BHP1997.DecompC165c
+import LeanLab.BHP1997.Decomp414a
 import LeanLab.BHP1997.DecompC165d
 import LeanLab.BHP1997.Decomp132
 import LeanLab.BHP1997.Thm2Sing
@@ -88,7 +89,8 @@ theorem section2_circle_method : Thm2.Theorem2Paper := by
 /-- LEAF. Section 3, pages 11 to 21, Theorem 4 and its mean value lemmas.
 Reuse the proved exponent lemmas. The finer analytic leaves are in DecompC165c. CONDITIONAL. -/
 theorem section3_mean_values : Thm4.Theorem4Paper := by
-  exact DecompC165c.section3_mean_values
+  exact Decomp414a.dyadic_mean_value DecompC165c.hybrid_mean_square
+    DecompC165c.hybrid_large_values DecompC165c.energy_log_bound
 
 section Task217Numerics
 set_option maxRecDepth 10000
@@ -2190,5 +2192,90 @@ theorem sieve_data :
       ⟨fun k hk => ⟨hs0 x (le_trans (le_max_left _ _) hx) k hk,
         hs1 x (le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hx) k hk⟩,
        hsb x (le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hx)⟩⟩
+
+
+/-- Pages 25 to 27. Sifting a prime indicator removes exactly the primes
+below the cutoff. This is an indicator identity and asserts no distribution estimate. -/
+theorem sifted_prime_indicator (k z : ℕ) :
+    primeWeight k * siftedWeight k z = if z ≤ k then primeWeight k else 0 := by
+  by_cases hk : k.Prime
+  · simp [primeWeight, siftedWeight, hk, hk.ne_one]
+  · simp [primeWeight, hk]
+
+/-- Pages 1 and 25 to 27. On the long interval the prime coefficient family
+survives the sieve cutoff for all sufficiently large x. The condition epsilon
+less than 9 over 20 ensures that the long interval stays away from zero. -/
+theorem prime_sifted_eventually_on_left {ε : ℝ} (hε : ε < 9 / 20) :
+    ∀ᶠ x : ℝ in Filter.atTop, ∀ k ∈ leftInterval ε x,
+      section4SiftedFamily (fun _ k => primeWeight k) x k = primeWeight k := by
+  have hδ : 0 < 1 - (11 / 20 + ε) := by linarith
+  have hy : ∀ᶠ x : ℝ in Filter.atTop,
+      x ^ (-(1 - (11 / 20 + ε))) < (1 / 4 : ℝ) :=
+    (tendsto_rpow_neg_atTop hδ).eventually (eventually_lt_nhds (by norm_num))
+  have hs : ∀ᶠ x : ℝ in Filter.atTop, x ^ (-(1 / 2 : ℝ)) < (1 / 4 : ℝ) :=
+    (tendsto_rpow_neg_atTop (by norm_num : (0 : ℝ) < 1 / 2)).eventually
+      (eventually_lt_nhds (by norm_num))
+  filter_upwards [hy, hs, sieve_threshold_le_fixed_power (by norm_num : (0 : ℝ) < 1 / 2),
+    Filter.eventually_gt_atTop (0 : ℝ)] with x hy hs hc hx
+  have hey : x ^ (-(1 - (11 / 20 + ε))) = x ^ (11 / 20 + ε) / x := by
+    rw [show -(1 - (11 / 20 + ε)) = (11 / 20 + ε) - 1 by ring,
+      Real.rpow_sub_one hx.ne']
+  have hes : x ^ (-(1 / 2 : ℝ)) = x ^ (1 / 2 : ℝ) / x := by
+    rw [show -(1 / 2 : ℝ) = (1 / 2 : ℝ) - 1 by norm_num, Real.rpow_sub_one hx.ne']
+  rw [hey, div_lt_iff₀ hx] at hy
+  rw [hes, div_lt_iff₀ hx] at hs
+  intro k hk
+  have hkx : x - 2 * x ^ (11 / 20 + ε) < (k : ℝ) :=
+    Nat.lt_of_floor_lt (Finset.mem_Ioc.mp hk).1
+  have hcut : Real.exp (Real.log x ^ (9 / 10 : ℝ)) ≤ (k : ℝ) := by linarith
+  have hceil : ⌈Real.exp (Real.log x ^ (9 / 10 : ℝ))⌉₊ ≤ k := Nat.ceil_le.mpr hcut
+  change primeWeight k * siftedWeight k _ = primeWeight k
+  rw [sifted_prime_indicator, ite_eq_left hceil]
+
+
+/-- Page 3, display 1.9. Diagnostic for the prefix triangle method.
+Its cubic Y scale cannot fit the required scale even with Q replaced by
+the larger value Y to one sixteenth and any fixed logarithmic allowance.
+This refutes that bound comparison, not the exceptional moment statement. -/
+theorem prefix_triangle_scale_not_log_absorbable (A : ℝ) :
+    ¬ ∃ C : ℝ, ∀ Y : ℝ, 2 ≤ Y →
+      Y ^ (3 : ℕ) ≤ C * (Y ^ (1 / 16 : ℝ)) ^ 2 * Y * Real.log Y ^ A := by
+  rintro ⟨C, hC⟩
+  apply DecompC165c.positive_power_not_log_bounded (by norm_num : (0 : ℝ) < 15 / 8) A
+  refine ⟨C, fun Y hY => ?_⟩
+  have hy : 0 < Y := by linarith
+  have hs : (Y ^ (1 / 16 : ℝ)) ^ 2 = Y ^ (1 / 8 : ℝ) := by
+    rw [← Real.rpow_mul_natCast hy.le]
+    norm_num
+  have he : Y ^ (15 / 8 : ℝ) * ((Y ^ (1 / 16 : ℝ)) ^ 2 * Y) = Y ^ (3 : ℕ) := by
+    rw [hs]
+    calc
+      _ = Y ^ (15 / 8 : ℝ) * (Y ^ (1 / 8 : ℝ) * Y ^ (1 : ℝ)) := by rw [Real.rpow_one]
+      _ = Y ^ ((15 / 8 : ℝ) + (1 / 8 + 1)) := by rw [Real.rpow_add hy, Real.rpow_add hy]
+      _ = _ := by norm_num
+  have hh := hC Y hY
+  rw [← he] at hh
+  have hp : 0 < (Y ^ (1 / 16 : ℝ)) ^ 2 * Y := by positivity
+  apply (mul_le_mul_iff_right₀ hp).mp
+  convert hh using 1 <;> ring
+
+
+/-- Page 3, the definition of Q. The integer cutoff is no greater than
+Y to one sixteenth whenever Y is at least one. This is the conservative
+comparison used in the prefix triangle scale diagnostic. -/
+theorem sieveQ_le_sixteenth_power {ε x : ℝ} (hY : 1 ≤ x ^ (11 / 20 + ε)) :
+    (sieveQ ε x : ℝ) ≤ (x ^ (11 / 20 + ε)) ^ (1 / 16 : ℝ) := by
+  have hY0 : 0 ≤ x ^ (11 / 20 + ε) := by linarith
+  unfold sieveQ
+  calc
+    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) / 2 :=
+      Nat.floor_le (by positivity)
+    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) :=
+      div_le_self (by positivity) (by norm_num)
+    _ = (x ^ (11 / 20 + ε)) ^ ((1 / 16 : ℝ) - 1 / 10 ^ 5) := by
+      rw [← Real.rpow_mul hY0]
+      congr 1
+      norm_num
+    _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hY (by norm_num)
 
 end LeanLab.BHP1997.DecompC165b
