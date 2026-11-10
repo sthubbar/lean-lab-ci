@@ -1,0 +1,482 @@
+[
+  {
+    "target": "error_bound111",
+    "target_module": "Decomp111",
+    "supply": "error_bound_refined376",
+    "supply_module": "Assembly376"
+  },
+  {
+    "target": "error_bound111",
+    "target_module": "Decomp111",
+    "supply": "error_bound412",
+    "supply_module": "Assembly412"
+  },
+  {
+    "target": "error_bound111",
+    "target_module": "Decomp111",
+    "supply": "error_bound435",
+    "supply_module": "Assembly435"
+  },
+  {
+    "target": "error_bound111",
+    "target_module": "Decomp111",
+    "supply": "error_bound442",
+    "supply_module": "Assembly442"
+  },
+  {
+    "target": "error_bound111",
+    "target_module": "Decomp111",
+    "supply": "error_bound_decomposed280",
+    "supply_module": "Decomp280b"
+  },
+  {
+    "target": "error_bound111",
+    "target_module": "Decomp111",
+    "supply": "error_bound_refined357",
+    "supply_module": "Decomp357m"
+  },
+  {
+    "target": "grouped_summable280",
+    "target_module": "Decomp280a",
+    "supply": "grouped_summable_proved357",
+    "supply_module": "Decomp357e"
+  },
+  {
+    "target": "product_grouped280",
+    "target_module": "Decomp280a",
+    "supply": "product_grouped_proved357",
+    "supply_module": "Decomp357f"
+  },
+  {
+    "target": "negative_series_coefficient280",
+    "target_module": "Decomp280a",
+    "supply": "negative_series_coefficient_proved357",
+    "supply_module": "Decomp357g"
+  },
+  {
+    "target": "mellin_bound280",
+    "target_module": "Decomp280b",
+    "supply": "mellin_bound_refined376",
+    "supply_module": "Assembly376"
+  },
+  {
+    "target": "mellin_bound280",
+    "target_module": "Decomp280b",
+    "supply": "mellin_bound_decomposed357",
+    "supply_module": "Decomp357a"
+  },
+  {
+    "target": "major_error280",
+    "target_module": "Decomp280b",
+    "supply": "major_error_refined376",
+    "supply_module": "Assembly376"
+  },
+  {
+    "target": "major_error280",
+    "target_module": "Decomp280b",
+    "supply": "major_error442",
+    "supply_module": "Assembly442"
+  },
+  {
+    "target": "major_error280",
+    "target_module": "Decomp280b",
+    "supply": "major_error_decomposed357",
+    "supply_module": "Decomp357b"
+  },
+  {
+    "target": "exceptional_error280",
+    "target_module": "Decomp280b",
+    "supply": "exceptional_error_refined376",
+    "supply_module": "Assembly376"
+  },
+  {
+    "target": "exceptional_error280",
+    "target_module": "Decomp280b",
+    "supply": "exceptional_error412",
+    "supply_module": "Assembly412"
+  },
+  {
+    "target": "exceptional_error280",
+    "target_module": "Decomp280b",
+    "supply": "exceptional_error435",
+    "supply_module": "Assembly435"
+  },
+  {
+    "target": "exceptional_error280",
+    "target_module": "Decomp280b",
+    "supply": "exceptional_error_decomposed357",
+    "supply_module": "Decomp357c"
+  },
+  {
+    "target": "minor_error280",
+    "target_module": "Decomp280b",
+    "supply": "minor_error_proved357",
+    "supply_module": "Decomp357j"
+  },
+  {
+    "target": "circle_partition280",
+    "target_module": "Decomp280b",
+    "supply": "circle_partition_proved435",
+    "supply_module": "Circle435"
+  },
+  {
+    "target": "circle_partition280",
+    "target_module": "Decomp280b",
+    "supply": "circle_partition_decomposed357",
+    "supply_module": "Decomp357d"
+  },
+  {
+    "target": "mellin_near357",
+    "target_module": "Decomp357a",
+    "supply": "mellin_near_decomposed376",
+    "supply_module": "Decomp376b"
+  },
+  {
+    "target": "mellin_near357",
+    "target_module": "Decomp357a",
+    "supply": "mellin_near357_split",
+    "supply_module": "SPLIT_mellin_near357"
+  },
+  {
+    "target": "mellin_positive_far357",
+    "target_module": "Decomp357a",
+    "supply": "mellin_positive_far_decomposed376",
+    "supply_module": "Decomp376f"
+  },
+  {
+    "target": "mellin_positive_far357",
+    "target_module": "Decomp357a",
+    "supply": "mellin_positive_far357_split",
+    "supply_module": "SPLIT_mellin_positive_far357"
+  },
+  {
+    "target": "major_to_truncated357",
+    "target_module": "Decomp357b",
+    "supply": "major_to_truncated442",
+    "supply_module": "Assembly442"
+  },
+  {
+    "target": "major_to_truncated357",
+    "target_module": "Decomp357b",
+    "supply": "major_to_truncated_decomposed376",
+    "supply_module": "Decomp376d"
+  },
+  {
+    "target": "major_to_truncated357",
+    "target_module": "Decomp357b",
+    "supply": "major_to_truncated357_split",
+    "supply_module": "SPLIT_major_to_truncated357"
+  },
+  {
+    "target": "exceptional_prime_mass357",
+    "target_module": "Decomp357c",
+    "supply": "exceptional_prime_mass412",
+    "supply_module": "Cover412"
+  },
+  {
+    "target": "exceptional_prime_mass357",
+    "target_module": "Decomp357c",
+    "supply": "exceptional_prime_mass435",
+    "supply_module": "Cover435"
+  },
+  {
+    "target": "exceptional_prime_mass357",
+    "target_module": "Decomp357c",
+    "supply": "exceptional_prime_mass_decomposed376",
+    "supply_module": "Decomp376c"
+  },
+  {
+    "target": "exceptional_prime_mass357",
+    "target_module": "Decomp357c",
+    "supply": "exceptional_prime_mass357_split",
+    "supply_module": "SPLIT_exceptional_prime_mass357"
+  },
+  {
+    "target": "count_circle_coefficient357",
+    "target_module": "Decomp357d",
+    "supply": "count_circle_coefficient_proved435",
+    "supply_module": "Circle435"
+  },
+  {
+    "target": "count_circle_coefficient357",
+    "target_module": "Decomp357d",
+    "supply": "count_circle_coefficient357_split",
+    "supply_module": "SPLIT_count_circle_coefficient357"
+  },
+  {
+    "target": "singular_tail357",
+    "target_module": "Decomp357l",
+    "supply": "singular_tail_decomposed376",
+    "supply_module": "Decomp376a"
+  },
+  {
+    "target": "singular_tail357",
+    "target_module": "Decomp357l",
+    "supply": "singular_tail357_split",
+    "supply_module": "SPLIT_singular_tail357"
+  },
+  {
+    "target": "central_pointwise376",
+    "target_module": "Decomp376b",
+    "supply": "central_pointwise_decomposed442",
+    "supply_module": "Decomp442a"
+  },
+  {
+    "target": "doubled_system_mass376",
+    "target_module": "Decomp376c",
+    "supply": "doubled_system_mass_decomposed435",
+    "supply_module": "Decomp435b"
+  },
+  {
+    "target": "major_relative_negligible376",
+    "target_module": "Decomp376d",
+    "supply": "major_relative_negligible_proved442",
+    "supply_module": "Relative442"
+  },
+  {
+    "target": "large_value_intervals376",
+    "target_module": "Decomp376e",
+    "supply": "large_value_intervals_decomposed412",
+    "supply_module": "Decomp412a"
+  },
+  {
+    "target": "large_value_intervals376",
+    "target_module": "Decomp376e",
+    "supply": "large_value_intervals_proved439",
+    "supply_module": "Geometry439"
+  },
+  {
+    "target": "large_value_intervals376",
+    "target_module": "Decomp376e",
+    "supply": "large_value_intervals435",
+    "supply_module": "Measure435"
+  },
+  {
+    "target": "outer_to_kernels376",
+    "target_module": "Decomp376f",
+    "supply": "outer_to_kernels_decomposed442",
+    "supply_module": "Decomp442b"
+  },
+  {
+    "target": "finite_phase_concentration412",
+    "target_module": "Decomp412c",
+    "supply": "finite_phase_concentration_proved439",
+    "supply_module": "Concentration439"
+  },
+  {
+    "target": "finite_phase_concentration412",
+    "target_module": "Decomp412c",
+    "supply": "finite_phase_concentration_decomposed435",
+    "supply_module": "Decomp435a"
+  },
+  {
+    "target": "binary_entropy_measure412",
+    "target_module": "Decomp412c",
+    "supply": "binary_entropy_measure_proved435",
+    "supply_module": "Entropy435"
+  },
+  {
+    "target": "binary_entropy_measure412",
+    "target_module": "Decomp412c",
+    "supply": "binary_entropy_measure_proved439",
+    "supply_module": "Entropy439"
+  },
+  {
+    "target": "doubled_system_expansion435",
+    "target_module": "Decomp435b",
+    "supply": "doubled_system_expansion435_split",
+    "supply_module": "SPLIT_doubled_system_expansion435"
+  },
+  {
+    "target": "central_kernel_mass442",
+    "target_module": "Decomp442a",
+    "supply": "central_kernel_mass442_split",
+    "supply_module": "SPLIT_central_kernel_mass442"
+  },
+  {
+    "target": "abstract_outer_kernels442",
+    "target_module": "Decomp442b",
+    "supply": "abstract_outer_kernels442_split",
+    "supply_module": "SPLIT_abstract_outer_kernels442"
+  },
+  {
+    "target": "rational_pointwise_characters442",
+    "target_module": "Decomp442c",
+    "supply": "rational_pointwise_characters1622",
+    "supply_module": "SPLIT_doubled_system_characters1622"
+  },
+  {
+    "target": "rational_pointwise_characters442",
+    "target_module": "Decomp442c",
+    "supply": "rational_pointwise_characters1622_split",
+    "supply_module": "SPLIT_rational_pointwise_characters1622"
+  },
+  {
+    "target": "rational_pointwise_characters442",
+    "target_module": "Decomp442c",
+    "supply": "rational_pointwise_characters442_split",
+    "supply_module": "SPLIT_rational_pointwise_characters442"
+  },
+  {
+    "target": "linnik_low_bits",
+    "target_module": "Novelty1620",
+    "supply": "linnik_low_bits_split",
+    "supply_module": "SPLIT_linnik_low_bits"
+  },
+  {
+    "target": "doubled_system_characters1622",
+    "target_module": "SPLIT1622_exceptional",
+    "supply": "doubled_system_characters_decomposed442",
+    "supply_module": "Decomp442c"
+  },
+  {
+    "target": "doubled_system_characters1622",
+    "target_module": "SPLIT1622_exceptional",
+    "supply": "doubled_system_characters1622_split",
+    "supply_module": "SPLIT_doubled_system_characters1622"
+  },
+  {
+    "target": "doubled_system_characters1622",
+    "target_module": "SPLIT1622_exceptional",
+    "supply": "doubled_system_characters435",
+    "supply_module": "SPLIT_doubled_system_expansion435"
+  },
+  {
+    "target": "principal_mass1622",
+    "target_module": "SPLIT1622_exceptional",
+    "supply": "principal_mass_proved442",
+    "supply_module": "Principal442"
+  },
+  {
+    "target": "principal_mass1622",
+    "target_module": "SPLIT1622_exceptional",
+    "supply": "principal_mass435",
+    "supply_module": "SPLIT_doubled_system_expansion435"
+  },
+  {
+    "target": "principal_mass1622",
+    "target_module": "SPLIT1622_exceptional",
+    "supply": "principal_mass435_split",
+    "supply_module": "SPLIT_principal_mass435"
+  },
+  {
+    "target": "totient_sqrt_lower1622",
+    "target_module": "SPLIT1622_exceptional",
+    "supply": "totient_sqrt_lower_proved442",
+    "supply_module": "Principal442"
+  },
+  {
+    "target": "log_convolution_estimate1622",
+    "target_module": "SPLIT1622_major",
+    "supply": "log_convolution_estimate1622_split",
+    "supply_module": "SPLIT_log_convolution_estimate1622"
+  },
+  {
+    "target": "arc_local_expansion1622",
+    "target_module": "SPLIT1622_major",
+    "supply": "arc_local_expansion1622_split",
+    "supply_module": "SPLIT_arc_local_expansion1622"
+  },
+  {
+    "target": "mellin_transfer1622",
+    "target_module": "SPLIT1622_mellin",
+    "supply": "mellin_transfer1622_split",
+    "supply_module": "SPLIT_mellin_transfer1622"
+  },
+  {
+    "target": "lemma2_central1622",
+    "target_module": "SPLIT1622_mellin",
+    "supply": "lemma2_central_decomposed442",
+    "supply_module": "Decomp442a"
+  },
+  {
+    "target": "lemma2_outer1622",
+    "target_module": "SPLIT1622_mellin",
+    "supply": "lemma2_outer_decomposed442",
+    "supply_module": "Decomp442b"
+  },
+  {
+    "target": "outer_kernel_mass_bound442",
+    "target_module": "SPLIT_abstract_outer_kernels442",
+    "supply": "outer_kernel_mass_bound442_split",
+    "supply_module": "SPLIT_outer_kernel_mass_bound442"
+  },
+  {
+    "target": "local_arc_shoulder1622",
+    "target_module": "SPLIT_arc_local_expansion1622",
+    "supply": "local_arc_shoulder1622_split",
+    "supply_module": "SPLIT_local_arc_shoulder1622"
+  },
+  {
+    "target": "local_arc_core_unit1622",
+    "target_module": "SPLIT_arc_local_expansion1622",
+    "supply": "local_arc_core_unit1622_split",
+    "supply_module": "SPLIT_local_arc_core_unit1622"
+  },
+  {
+    "target": "local_arc_small_residual1622",
+    "target_module": "SPLIT_arc_local_expansion1622",
+    "supply": "local_arc_small_residual1622_split",
+    "supply_module": "SPLIT_local_arc_small_residual1622"
+  },
+  {
+    "target": "doubled_system_characters435",
+    "target_module": "SPLIT_doubled_system_expansion435",
+    "supply": "doubled_system_characters_decomposed442",
+    "supply_module": "Decomp442c"
+  },
+  {
+    "target": "doubled_system_characters435",
+    "target_module": "SPLIT_doubled_system_expansion435",
+    "supply": "doubled_system_characters1622",
+    "supply_module": "SPLIT1622_exceptional"
+  },
+  {
+    "target": "doubled_system_characters435",
+    "target_module": "SPLIT_doubled_system_expansion435",
+    "supply": "doubled_system_characters1622_split",
+    "supply_module": "SPLIT_doubled_system_characters1622"
+  },
+  {
+    "target": "major_error_remainder357",
+    "target_module": "SPLIT_major_to_truncated357",
+    "supply": "major_error_remainder_decomposed435",
+    "supply_module": "FreshMajor435"
+  },
+  {
+    "target": "near_positive_sup357",
+    "target_module": "SPLIT_mellin_near357",
+    "supply": "near_positive_sup357_split",
+    "supply_module": "SPLIT_near_positive_sup357"
+  },
+  {
+    "target": "near_negative_sup357",
+    "target_module": "SPLIT_mellin_near357",
+    "supply": "near_negative_sup_decomposed412",
+    "supply_module": "Fresh412"
+  },
+  {
+    "target": "lineBound_lnL1622",
+    "target_module": "SPLIT_mellin_transfer1622",
+    "supply": "lineBound_lnL1622_split",
+    "supply_module": "SPLIT_lineBound_lnL1622"
+  },
+  {
+    "target": "mellin_lnL_expansion1622",
+    "target_module": "SPLIT_mellin_transfer1622",
+    "supply": "mellin_lnL_expansion1622_split",
+    "supply_module": "SPLIT_mellin_lnL_expansion1622"
+  },
+  {
+    "target": "fourier_coefficient111",
+    "target_module": "SecondMoment111",
+    "supply": "fourier_coefficient_decomposed280",
+    "supply_module": "Decomp280a"
+  },
+  {
+    "target": "fourier_coefficient111",
+    "target_module": "SecondMoment111",
+    "supply": "fourier_coefficient_proved357",
+    "supply_module": "Decomp357g"
+  }
+]
