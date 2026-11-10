@@ -84,12 +84,18 @@ theorem leaf_representation_multiplicity :
     rw [heq]
     exact hp
 
-/-- LEAF 2, the first moment.  For a multiplicity `R` that is nonzero exactly on the representable
-values, the total multiplicity over those `n ≤ X` is at least `a * X * sqrt X / log X` for a fixed
-`a > 0`, for all large `X`.  For each `k` with `2k(k+1) ≤ X` the primes of the form
-`4n + 1 - 2k(k+1)` are a fixed fraction of `X / log X`, and there are about `sqrt X` of those `k`;
-the count here is over pairs, so it does not yet see how the pairs are spread over the values. -/
+/-- LEAF 2, the first moment.  REPAIRED: as first written this leaf quantified over every `R`
+whose vanishing set is the representable set, and that is false — the indicator of the representable
+set meets the hypothesis with first moment `#A X ≤ X`, below `a * X * sqrt X / log X` for every
+`a > 0`.  The hypothesis `hRdef` pins `R` to the cardinality of LEAF 1, which is what the assembly
+gets from LEAF 1 and passes here; with it the leaf states a prime count.  The total multiplicity over
+the representable `n ≤ X` is at least `a * X * sqrt X / log X` for a fixed `a > 0`, for all large
+`X`.  For each `k` with `2k(k+1) ≤ X` the primes of the form `4n + 1 - 2k(k+1)` are a fixed fraction
+of `X / log X`, and there are about `sqrt X` of those `k`; the count here is over pairs, so it does
+not yet see how the pairs are spread over the values. -/
 theorem leaf_first_moment_card (R : ℕ → ℕ)
+    (hRdef : ∀ n : ℕ, R n = ((Finset.range (4 * n + 2)).filter
+        (fun k => (4 * n + 1 - 2 * k * (k + 1)).Prime)).card)
     (hR : ∀ n : ℕ, 1 ≤ n → (R n ≠ 0 ↔ IsEuler (8 * n + 3))) :
     ∃ a : ℝ, 0 < a ∧ ∀ᶠ X : ℕ in Filter.atTop,
       a * (X : ℝ) * Real.sqrt (X : ℝ) / Real.log (X : ℝ) ≤
@@ -206,8 +212,8 @@ theorem leaf_card_eq_complement (X : ℕ) :
 with no use of the route theorem itself. -/
 theorem route_euler_positive_density_split :
     ∃ c : ℝ, 0 < c ∧ ∀ᶠ X : ℕ in Filter.atTop, c * X ≤ ((X - euExc X : ℕ) : ℝ) := by
-  obtain ⟨R, -, hR⟩ := leaf_representation_multiplicity
-  obtain ⟨a, ha, hfirst⟩ := leaf_first_moment_card R hR
+  obtain ⟨R, hRdef, hR⟩ := leaf_representation_multiplicity
+  obtain ⟨a, ha, hfirst⟩ := leaf_first_moment_card R hRdef hR
   obtain ⟨b, hb, hsecond⟩ := leaf_second_moment_card R hR
   obtain ⟨c, hc, hcard⟩ := leaf_cauchy_schwarz_density R hR a b ha hb hfirst hsecond
   refine ⟨c, hc, ?_⟩
