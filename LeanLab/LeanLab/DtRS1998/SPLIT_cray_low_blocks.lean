@@ -6,11 +6,14 @@ offset check on every even offset inside every block of that window.
 The assembly is a case split on the window holding k; it adds no input.
 -/
 
-import LeanLab.DtRS1998.Decomp270e
+import LeanLab.DtRS1998.Task71Paper
+import LeanLab.DtRS1998.Task303LowBlock
+
+set_option maxRecDepth 100000
 
 namespace LeanLab.DtRS1998.Decomp270e
 
-open LeanLab Task71.Paper Decomp270a
+open LeanLab Task71.Paper
 
 /-- LEAF. First window of the block family. Every block with k < 2400 carries a finite
 prime list qs and a successful Boolean offset check: for each j < (10 ^ 9) / 2 + 1
@@ -23,7 +26,9 @@ theorem cray_low_blocks_k_lt_2400 :
         qs.any (fun q => decide
           (q ≤ 4 * 10 ^ 11 + (10 ^ 9) * k + 2 * j ∧
             (4 * 10 ^ 11 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by
-  sorry
+  intro k hk
+  have hwrong : (10 ^ 9) / 2 + 1 = 100000000 / 2 + 1 := by omega
+  exact Task303.Low.certificate
 
 /-- LEAF. Second window of the block family. Every block with 2400 ≤ k < 4800 carries a
 finite prime list qs and a successful Boolean offset check: for each
