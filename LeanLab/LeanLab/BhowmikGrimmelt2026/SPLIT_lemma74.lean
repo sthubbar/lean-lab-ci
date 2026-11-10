@@ -943,6 +943,7 @@ theorem leaf_mellin_decay74 (M : ℕ → ℝ) (S : ℝ) (Ψ : ℝ → ℝ) (hS :
     (k : ℕ) (σ t : ℝ) (hσ : σ + (k : ℝ) ≤ -1) :
     ‖mellinR Ψ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ ≤
       ((2 : ℝ) ^ k * M k) * S ^ σ / (1 + |t|) ^ k := by
+  -- BLOCKED FALSE. The checked in-file theorem not_leaf_mellin_decay74_statement469 is a counterexample.
   sorry
 
 /-! ## The contour shift -/
@@ -967,6 +968,7 @@ theorem leaf_contour_shift74 (B T : ℝ) (r : ℕ) [NeZero r] (χ : DirichletCha
       (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ -B < ρ.re ∧ |ρ.im| ≤ T}, (mult χ ρ : ℂ) * mellinR Ψ ρ) =
     (1 / (2 * Real.pi)) * (∫ t in (-T)..T, (-(logDeriv (DirichletCharacter.LFunction χ))) (((-B : ℝ) : ℂ) + (t : ℂ) * Complex.I) * mellinR Ψ (((-B : ℝ) : ℂ) + (t : ℂ) * Complex.I)) +
       (1 / (2 * Real.pi * Complex.I)) * (∫ σ in (-B)..(2 : ℝ), (( -(logDeriv (DirichletCharacter.LFunction χ))) ((σ : ℂ) + (T : ℂ) * Complex.I) * mellinR Ψ ((σ : ℂ) + (T : ℂ) * Complex.I) + ( -(logDeriv (DirichletCharacter.LFunction χ))) ((σ : ℂ) - (T : ℂ) * Complex.I) * mellinR Ψ ((σ : ℂ) - (T : ℂ) * Complex.I))) := by
+  -- BLOCKED OUT OF REACH. Mathlib has no meromorphic rectangle residue theorem with zero and pole residues.
   sorry
 
 /-! ## The two boundary bounds -/
@@ -985,6 +987,7 @@ theorem leaf_vertical_remainder74 (M : ℕ → ℝ) (B T : ℝ) (hB : 0 < B) (hT
         ∀ (S : ℝ) (Ψ : ℝ → ℝ), 1 ≤ S → ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) Ψ → HasCompactSupport Ψ → tsupport Ψ ⊆ Set.Ioi S →
         (∀ k x, |iteratedDeriv k Ψ x| ≤ M k) →
         ‖(1 / (2 * Real.pi)) * (∫ t in (-T)..T, (-(logDeriv (DirichletCharacter.LFunction χ))) (((-B : ℝ) : ℂ) + (t : ℂ) * Complex.I) * mellinR Ψ (((-B : ℝ) : ℂ) + (t : ℂ) * Complex.I))‖ ≤ C * S ^ (-B) := by
+  -- BLOCKED OUT OF REACH. Mathlib has no conductor-uniform logarithmic derivative bound on this line.
   sorry
 
 /-- LEAF. The two horizontal pieces contribute at most a constant times `S ^ (-B)`.
@@ -1001,6 +1004,7 @@ theorem leaf_horizontal_remainder74 (M : ℕ → ℝ) (B T : ℝ) (hB : 0 < B) (
         ∀ (S : ℝ) (Ψ : ℝ → ℝ), 1 ≤ S → ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) Ψ → HasCompactSupport Ψ → tsupport Ψ ⊆ Set.Ioi S →
         (∀ k x, |iteratedDeriv k Ψ x| ≤ M k) →
         ‖(1 / (2 * Real.pi * Complex.I)) * (∫ σ in (-B)..(2 : ℝ), (( -(logDeriv (DirichletCharacter.LFunction χ))) ((σ : ℂ) + (T : ℂ) * Complex.I) * mellinR Ψ ((σ : ℂ) + (T : ℂ) * Complex.I) + ( -(logDeriv (DirichletCharacter.LFunction χ))) ((σ : ℂ) - (T : ℂ) * Complex.I) * mellinR Ψ ((σ : ℂ) - (T : ℂ) * Complex.I)))‖ ≤ C * S ^ (-B) := by
+  -- BLOCKED OUT OF REACH. The horizontal Mellin scale is not S to the power minus B.
   sorry
 
 /-! ## What the truncation leaves out -/
@@ -1021,6 +1025,7 @@ theorem leaf_zero_tail74 (M : ℕ → ℝ) (B T : ℝ) (hB : 0 < B) (hT : 0 < T)
         (∀ k x, |iteratedDeriv k Ψ x| ≤ M k) →
         ‖(∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0}, (mult χ ρ : ℂ) * mellinR Ψ ρ) -
             (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ -B < ρ.re ∧ |ρ.im| ≤ T}, (mult χ ρ : ℂ) * mellinR Ψ ρ)‖ ≤ C * S ^ (-B) := by
+  -- BLOCKED OUT OF REACH. Summability and a high zero counting estimate are absent from Mathlib.
   sorry
 
 /-! ## The assembly -/
