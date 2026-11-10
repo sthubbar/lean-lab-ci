@@ -26,7 +26,30 @@ theorem minor_weighted_full_multi_leaf451 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ)
       ∑ N ∈ Finset.Icc 1 X, ‖minorError150 ϕ G X N ϑ η‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
           (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  obtain ⟨C₁, hC₁, h₁⟩ :=
+    minor_weighted_multi_denominator451 hϕ hG ϑ hϑ hϑ'
+  obtain ⟨C₂, hC₂, h₂⟩ :=
+    minor_bare_multi_denominator451 hϕ ϑ hϑ hϑ'
+  refine ⟨2 * (C₁ + C₂), by positivity, ?_⟩
+  intro X hX hR2 η hη hη1 hscale
+  have hs := coefficient_split328 (Finset.Icc 1 X)
+    (fun N => minorError150 ϕ G X N ϑ η)
+    (fun N => minorWeighted328 ϕ G X N ϑ η)
+  have hsub : ∀ N ∈ Finset.Icc 1 X,
+      minorError150 ϕ G X N ϑ η - minorWeighted328 ϕ G X N ϑ η =
+        minorBare328 ϕ X N ϑ := by
+    intro N _
+    simp only [minorWeighted328]
+    ring
+  have hsq : (∑ N ∈ Finset.Icc 1 X,
+        ‖minorError150 ϕ G X N ϑ η - minorWeighted328 ϕ G X N ϑ η‖ ^ 2) =
+      ∑ N ∈ Finset.Icc 1 X, ‖minorBare328 ϕ X N ϑ‖ ^ 2 := by
+    apply Finset.sum_congr rfl
+    intro N hN
+    rw [hsub N hN]
+  have hA := h₁ X hX hR2 η hη hη1 hscale
+  have hB := h₂ X hX hR2
+  nlinarith only [hs, hsq, hA, hB]
 
 /-- LEAF. The bare restricted step on the same scale range.
 For admissible phi and fixed theta strictly between zero and one half, one
@@ -40,7 +63,7 @@ theorem minor_weighted_bare_multi_leaf451 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ)
       ∑ N ∈ Finset.Icc 1 X, ‖minorBare328 ϕ X N ϑ‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
           (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  exact minor_bare_multi_denominator451 hϕ ϑ hϑ hϑ'
 
 /-! ## The square split, proved -/
 
