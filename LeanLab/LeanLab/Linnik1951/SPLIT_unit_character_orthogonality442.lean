@@ -20,6 +20,7 @@ Leaves 1 to 4 record these four steps. The theorem
 the leaves without using the original theorem.
 -/
 import LeanLab.Linnik1951.SPLIT_rational_pointwise_characters442
+import LeanLab.Linnik1951.Supply470
 
 namespace LeanLab.Linnik1951
 
@@ -35,7 +36,7 @@ the series over primes is an identity and no estimate is involved. -/
 theorem character_coset_expansion442 (N q : ℕ) [NeZero q] (hN : 1 ≤ N) (hq : 2 ≤ q)
     (z : ℝ) (χ : DirichletCharacter ℂ q) :
     characterPrime280 χ N z = ∑ b ∈ (range q).filter (fun b => Nat.Coprime b q), χ b * (∑' p : Nat.Primes, if ((p : ℕ) % q = b) then ((Real.exp (-(((p : ℕ) : ℝ) / N)) : ℂ) * Complex.exp ((-(2 * Real.pi * z * ((p : ℕ) : ℝ)) : ℝ) * Complex.I)) else 0) := by
-  sorry
+  exact character_coset_expansion470 N q hN z χ
 
 /-- LEAF. Step 2 of 4: the orthogonality identity of the reduced residue classes
 with the Gauss numbers. Expanding each coset series in the character table of
@@ -49,7 +50,15 @@ and no estimate on a prime sum enters, those are the next two leaves. -/
 theorem coset_orthogonality442 (N q : ℕ) [NeZero q] (hN : 1 ≤ N) (hq : 2 ≤ q) (z : ℝ) :
     (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q), ‖∑ b ∈ (range q).filter (fun b => Nat.Coprime b q), Complex.exp ((-(2 * Real.pi * (((a : ℝ) * (b : ℝ)) / (q : ℝ))) : ℝ) * Complex.I) * (∑' p : Nat.Primes, if ((p : ℕ) % q = b) then ((Real.exp (-(((p : ℕ) : ℝ) / N)) : ℂ) * Complex.exp ((-(2 * Real.pi * z * ((p : ℕ) : ℝ)) : ℝ) * Complex.I)) else 0)‖ ^ 2) =
       1 / (q.totient : ℝ) * (‖∑ c ∈ (range q).filter (fun c => Nat.Coprime c q), ((1 : DirichletCharacter ℂ q) c) * Complex.exp (((2 * Real.pi * ((c : ℝ) / (q : ℝ))) : ℝ) * Complex.I)‖ ^ 2 * ‖∑ b ∈ (range q).filter (fun b => Nat.Coprime b q), ((1 : DirichletCharacter ℂ q) b) * (∑' p : Nat.Primes, if ((p : ℕ) % q = b) then ((Real.exp (-(((p : ℕ) : ℝ) / N)) : ℂ) * Complex.exp ((-(2 * Real.pi * z * ((p : ℕ) : ℝ)) : ℝ) * Complex.I)) else 0)‖ ^ 2 + ∑ χ ∈ univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1), ‖∑ c ∈ (range q).filter (fun c => Nat.Coprime c q), χ c * Complex.exp (((2 * Real.pi * ((c : ℝ) / (q : ℝ))) : ℝ) * Complex.I)‖ ^ 2 * ‖∑ b ∈ (range q).filter (fun b => Nat.Coprime b q), χ b * (∑' p : Nat.Primes, if ((p : ℕ) % q = b) then ((Real.exp (-(((p : ℕ) : ℝ) / N)) : ℂ) * Complex.exp ((-(2 * Real.pi * z * ((p : ℕ) : ℝ)) : ℝ) * Complex.I)) else 0)‖ ^ 2) := by
-  sorry
+  classical
+  rw [residue_transform_energy470]
+  congr 1
+  have hf : (univ.erase (1 : DirichletCharacter ℂ q)) =
+      univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1) := by
+    ext χ
+    simp [eq_comm]
+  rw [← hf]
+  exact (Finset.add_sum_erase _ _ (Finset.mem_univ (1 : DirichletCharacter ℂ q))).symm
 
 /-- LEAF. Step 3 of 4: the principal Gauss number has modulus at most one. It
 is the sum of the unit phases, that is the Ramanujan sum of the reduced
@@ -58,7 +67,7 @@ of the modulus, so its modulus is one at a squarefree modulus and zero
 otherwise, in particular at most one. -/
 theorem gauss_principal442 (q : ℕ) [NeZero q] (hq : 2 ≤ q) :
     ‖∑ c ∈ (range q).filter (fun c => Nat.Coprime c q), ((1 : DirichletCharacter ℂ q) c) * Complex.exp (((2 * Real.pi * ((c : ℝ) / (q : ℝ))) : ℝ) * Complex.I)‖ ^ 2 ≤ 1 := by
-  sorry
+  exact residue_gauss_principal470 q
 
 /-- LEAF. Step 4 of 4: every non principal Gauss number has squared modulus at
 most the modulus. The unit phases summed against a non principal character
@@ -68,7 +77,7 @@ the conductor and at most the modulus. -/
 theorem gauss_nonprincipal442 (q : ℕ) [NeZero q] (hq : 2 ≤ q)
     (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) :
     ‖∑ c ∈ (range q).filter (fun c => Nat.Coprime c q), χ c * Complex.exp (((2 * Real.pi * ((c : ℝ) / (q : ℝ))) : ℝ) * Complex.I)‖ ^ 2 ≤ (q : ℝ) := by
-  sorry
+  exact residue_gauss_sq_le470 q χ
 
 /-- Assembly of `unit_character_orthogonality442` from the four leaves: the
 orthogonality identity, the two modulus bounds on the Gauss numbers and the
@@ -107,3 +116,11 @@ theorem unit_character_orthogonality442_split (N q : ℕ) [NeZero q] (hN : 1 ≤
 end LeanLab.Linnik1951
 
 #print axioms LeanLab.Linnik1951.unit_character_orthogonality442_split
+
+#print axioms LeanLab.Linnik1951.character_coset_expansion442
+
+#print axioms LeanLab.Linnik1951.coset_orthogonality442
+
+#print axioms LeanLab.Linnik1951.gauss_principal442
+
+#print axioms LeanLab.Linnik1951.gauss_nonprincipal442
