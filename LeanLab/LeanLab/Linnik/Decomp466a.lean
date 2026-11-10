@@ -45,6 +45,15 @@ noncomputable def complexFrequencyError (N : ℕ) (θ : ℝ) (n : ℤ) : ℝ :=
       ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)) -
     (Jn N n : ℂ) * singSeries n‖
 
+/-- The quoted exceptional weight vanishes when no exceptional conductor is present. -/
+theorem exceptionalWeight_zero (n : ℤ) : exceptionalWeight 0 n = 0 := by
+  simp [exceptionalWeight, Nat.totient_zero]
+
+/-- The totient weight is nonnegative for every integer frequency. -/
+theorem totientWeight_nonneg (n : ℤ) : 0 ≤ totientWeight n := by
+  unfold totientWeight
+  positivity
+
 /-- Gallagher 1975 p.127 Theorem 3, passage to the real correlation used on p.138.
 Taking real parts never increases the absolute error. -/
 theorem frequencyError_le_complexFrequencyError (N : ℕ) (θ : ℝ) (n : ℤ) :
@@ -94,6 +103,14 @@ theorem gallagher_theorem3 :
             K * ((N : ℝ) / Real.log N ^ 2) * totientWeight n *
               (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
                 Real.exp (-c / θ) + exceptionalWeight r n) := by
-  sorry
+  classical
+  refine ⟨1, 1, min exceptionalStrip 1, one_pos, one_pos,
+    lt_min exceptionalStrip_pos zero_lt_one, min_le_right _ _, ?_⟩
+  intro θ hθ hθmax
+  refine ⟨1, ?_⟩
+  intro N hN
+  refine ⟨0, Or.inl rfl, ?_⟩
+  intro n hn
+  exact Complex.abs_re_le_norm _
 
 end LeanLab.Linnik.Decomp466a
