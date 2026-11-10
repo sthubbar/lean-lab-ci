@@ -32,7 +32,7 @@ below one half: the functional equation puts a zero of the Riemann zeta function
 This is the step that later makes `2 ≤ 3 / 2 + 2 * Θ + ε` for every `ε > 0`, and hence lets the
 `X ^ 2` bound on the odd `N` be absorbed into the target exponent. -/
 theorem mean_square150_theta_ge_half {Θ : ℝ} (hZ : ZeroBound Θ) : 1 / 2 ≤ Θ := by
-  sorry
+  exact meanSquare38_theta_lower hZ
 
 /-- LEAF. Step 2, the odd `N`: the singular series vanishes there.  The local factor at the prime
 two counts the representations of `N` as a sum of two units modulo two; at an odd `N` the two
@@ -64,7 +64,7 @@ theorem mean_square150_even_second_moment (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : Ze
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
       ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2 ≤
         C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  exact meanSquare38_even_energy Θ hΘ hZ
 
 /-- The mean square estimate, assembled from the four leaves.  Split the sum over `N ≤ X` into
 the even and the odd `N`; on the odd `N` the main term drops out by Step 2, so that half becomes
