@@ -290,6 +290,241 @@ theorem leaf_kappa_between (N : ℕ) (hN : 2 ≤ N) {β : ℝ} (hβ : 3 / 4 ≤ 
       _ = 1 + 8 * (1 - β) * Real.log N := by rw [hu]
 
 
+private lemma prod_one_sub_inv_ge (S : Finset ℕ) (hS : ∀ p ∈ S, p.Prime) :
+    (1 : ℝ) / ((S.card : ℝ) + 1) ≤ ∏ p ∈ S, (1 - ((p : ℝ))⁻¹) := by
+  classical
+  revert hS
+  refine Finset.induction_on_max_value (id : ℕ → ℕ) S ?_ ?_
+  · intro _
+    simp
+  · intro a s ha_notin hle ih hS
+    have ha_prime : a.Prime := hS a (Finset.mem_insert_self a s)
+    have hs_prime : ∀ p ∈ s, p.Prime := fun p hp => hS p (Finset.mem_insert_of_mem hp)
+    have hih : (1 : ℝ) / ((s.card : ℝ) + 1) ≤ ∏ p ∈ s, (1 - ((p : ℝ))⁻¹) := ih hs_prime
+    rw [Finset.prod_insert ha_notin, Finset.card_insert_of_notMem ha_notin, Nat.cast_add,
+      Nat.cast_one]
+    have hgoal : (1 : ℝ) / ((s.card : ℝ) + 1 + 1) = 1 / ((s.card : ℝ) + 2) := by
+      congr 1
+      ring
+    rw [hgoal]
+    have ha2 : 2 ≤ a := ha_prime.two_le
+    have hsub : s ⊆ Finset.Icc 2 (a - 1) := by
+      intro x hx
+      have hx1 : 2 ≤ x := (hs_prime x hx).two_le
+      have hx2 : x ≤ a := hle x hx
+      have hx3 : x ≠ a := fun h => ha_notin (h ▸ hx)
+      simp only [Finset.mem_Icc]
+      omega
+    have hcard : s.card ≤ a - 2 := by
+      have h1 := Finset.card_le_card hsub
+      rwa [Nat.card_Icc] at h1
+    have hja : (s.card : ℝ) + 2 ≤ (a : ℝ) := by
+      have h1 : s.card + 2 ≤ a := by omega
+      exact_mod_cast h1
+    have hapos : (0 : ℝ) < (a : ℝ) := by
+      have : (2 : ℝ) ≤ (a : ℝ) := by exact_mod_cast ha2
+      linarith
+    have hjpos : (0 : ℝ) < (s.card : ℝ) + 2 := by positivity
+    have hnonneg : (0 : ℝ) ≤ 1 - ((a : ℝ))⁻¹ := by
+      have : ((a : ℝ))⁻¹ ≤ 1 := by
+        rw [inv_le_one₀ hapos]
+        linarith
+      linarith
+    have h1a : ((s.card : ℝ) + 1) / ((s.card : ℝ) + 2) ≤ 1 - ((a : ℝ))⁻¹ := by
+      have h : (0 : ℝ) ≤ (1 - ((a : ℝ))⁻¹) - ((s.card : ℝ) + 1) / ((s.card : ℝ) + 2) := by
+        rw [show (1 : ℝ) - ((a : ℝ))⁻¹ - ((s.card : ℝ) + 1) / ((s.card : ℝ) + 2)
+            = ((a : ℝ) - ((s.card : ℝ) + 2)) / ((a : ℝ) * ((s.card : ℝ) + 2)) by
+          field_simp
+          ring]
+        exact div_nonneg (by linarith) (by positivity)
+      linarith
+    have hstep : 1 / ((s.card : ℝ) + 2)
+        ≤ (1 - ((a : ℝ))⁻¹) * (1 / ((s.card : ℝ) + 1)) := by
+      have heq : ((s.card : ℝ) + 1) / ((s.card : ℝ) + 2) * (1 / ((s.card : ℝ) + 1))
+          = 1 / ((s.card : ℝ) + 2) := by
+        field_simp
+      rw [← heq]
+      exact mul_le_mul_of_nonneg_right h1a (by positivity)
+    calc (1 : ℝ) / ((s.card : ℝ) + 2)
+        ≤ (1 - ((a : ℝ))⁻¹) * (1 / ((s.card : ℝ) + 1)) := hstep
+      _ ≤ (1 - ((a : ℝ))⁻¹) * ∏ p ∈ s, (1 - ((p : ℝ))⁻¹) :=
+          mul_le_mul_of_nonneg_left hih hnonneg
+
+private lemma totient_cast_prod (n : ℕ) (_hn : n ≠ 0) :
+    ((Nat.totient n : ℝ)) = (n : ℝ) * ∏ p ∈ n.primeFactors, (1 - ((p : ℝ))⁻¹) := by
+  have hq := Nat.totient_eq_mul_prod_factors n
+  have h := congrArg (fun q : ℚ => (q : ℝ)) hq
+  push_cast at h
+  simpa using h
+
+private lemma card_primeFactors_le_log (n : ℕ) (hn : n ≠ 0) :
+    (n.primeFactors.card : ℝ) ≤ Real.log (n : ℝ) / Real.log 2 := by
+  have hprod : ∏ p ∈ n.primeFactors, p ∣ n := Nat.prod_primeFactors_dvd n
+  have hle : ∏ p ∈ n.primeFactors, p ≤ n :=
+    Nat.le_of_dvd (Nat.pos_of_ne_zero hn) hprod
+  have h2k : 2 ^ n.primeFactors.card ≤ ∏ p ∈ n.primeFactors, p := by
+    have hstep : ∏ p ∈ n.primeFactors, 2 ≤ ∏ p ∈ n.primeFactors, p := by
+      exact Finset.prod_le_prod (fun p hp => (Nat.prime_of_mem_primeFactors hp).two_le)
+    simpa using hstep
+  have hcast : (2 : ℝ) ^ n.primeFactors.card ≤ (n : ℝ) := by
+    have h1 : ((2 ^ n.primeFactors.card : ℕ) : ℝ) ≤ (n : ℝ) := by exact_mod_cast h2k.trans hle
+    simpa using h1
+  have hlog : (n.primeFactors.card : ℝ) * Real.log 2 ≤ Real.log (n : ℝ) := by
+    have h1 : Real.log ((2 : ℝ) ^ n.primeFactors.card) ≤ Real.log (n : ℝ) :=
+      Real.log_le_log (by positivity) hcast
+    rwa [Real.log_pow] at h1
+  exact (le_div_iff₀ (Real.log_pos (by norm_num))).mpr hlog
+
+private lemma log_two_gt_half : (1 / 2 : ℝ) ≤ Real.log 2 := by
+  have := Real.log_two_gt_d9
+  linarith
+
+private lemma one_add_logb_sq_le (x : ℝ) (hx : 1 ≤ x) :
+    (1 + Real.log x / Real.log 2) ^ 2 ≤ 81 * Real.sqrt x := by
+  have hx0 : 0 < x := by linarith
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hq0 : (0 : ℝ) ≤ x ^ (1 / 4 : ℝ) := Real.rpow_nonneg hx0.le _
+  have hlogx : Real.log x ≤ 4 * x ^ (1 / 4 : ℝ) := by
+    have h1 := Real.log_le_rpow_div hx0.le (show (0 : ℝ) < 1 / 4 by norm_num)
+    have h2 : x ^ (1 / 4 : ℝ) / (1 / 4) = 4 * x ^ (1 / 4 : ℝ) := by
+      field_simp
+    rwa [h2] at h1
+  have hlogb : Real.log x / Real.log 2 ≤ 8 * x ^ (1 / 4 : ℝ) := by
+    rw [div_le_iff₀ hlog2]
+    nlinarith [hlogx, log_two_gt_half, hq0]
+  have hq1 : (1 : ℝ) ≤ x ^ (1 / 4 : ℝ) := Real.one_le_rpow hx (by norm_num)
+  have hle9 : 1 + Real.log x / Real.log 2 ≤ 9 * x ^ (1 / 4 : ℝ) := by linarith
+  have hnonneg : (0 : ℝ) ≤ 1 + Real.log x / Real.log 2 := by
+    have h1 : 0 ≤ Real.log x := Real.log_nonneg hx
+    positivity
+  have h1 := pow_le_pow_left₀ hnonneg hle9 2
+  have hsq : (9 * x ^ (1 / 4 : ℝ)) ^ 2 = 81 * Real.sqrt x := by
+    have h1 : (x ^ (1 / 4 : ℝ)) ^ 2 = x ^ (1 / 2 : ℝ) := by
+      rw [← Real.rpow_two, ← Real.rpow_mul hx0.le]
+      norm_num
+    have h2 : x ^ (1 / 2 : ℝ) = Real.sqrt x := (Real.sqrt_eq_rpow x).symm
+    rw [mul_pow, h1, h2]
+    norm_num
+  rwa [hsq] at h1
+
+private lemma totient_sq_growth (n : ℕ) (hn : 1 ≤ n) (t : ℝ) (ht : 0 ≤ t)
+    (hnt : (81 * t) ^ 2 ≤ (n : ℝ)) : t * (n : ℝ) ≤ ((Nat.totient n : ℝ)) ^ 2 := by
+  have hn0 : n ≠ 0 := by omega
+  have hnpos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
+  have hprod := prod_one_sub_inv_ge n.primeFactors
+    (fun p hp => Nat.prime_of_mem_primeFactors hp)
+  have htot := totient_cast_prod n hn0
+  have hge : (n : ℝ) / ((n.primeFactors.card : ℝ) + 1) ≤ (Nat.totient n : ℝ) := by
+    rw [htot, div_eq_mul_one_div]
+    exact mul_le_mul_of_nonneg_left hprod hnpos.le
+  have hk : (n.primeFactors.card : ℝ) ≤ Real.log (n : ℝ) / Real.log 2 :=
+    card_primeFactors_le_log n hn0
+  have hlogb := one_add_logb_sq_le (n : ℝ) (by exact_mod_cast hn)
+  have hk0 : (0 : ℝ) ≤ (n.primeFactors.card : ℝ) := by positivity
+  have hsq : ((n.primeFactors.card : ℝ) + 1) ^ 2 ≤ 81 * Real.sqrt (n : ℝ) := by nlinarith
+  have hden : (0 : ℝ) < ((n.primeFactors.card : ℝ) + 1) ^ 2 := by positivity
+  have hsn : (0 : ℝ) < Real.sqrt (n : ℝ) := Real.sqrt_pos.mpr hnpos
+  have hstep1 : (n : ℝ) ^ 2 / (81 * Real.sqrt (n : ℝ))
+      ≤ (n : ℝ) ^ 2 / ((n.primeFactors.card : ℝ) + 1) ^ 2 := by
+    exact div_le_div_of_nonneg_left (by positivity) hden hsq
+  have hstep2 : ((n : ℝ) / ((n.primeFactors.card : ℝ) + 1)) ^ 2
+      ≤ ((Nat.totient n : ℝ)) ^ 2 := pow_le_pow_left₀ (by positivity) hge 2
+  have hdiv : ((n : ℝ) / ((n.primeFactors.card : ℝ) + 1)) ^ 2
+      = (n : ℝ) ^ 2 / ((n.primeFactors.card : ℝ) + 1) ^ 2 := div_pow ..
+  rw [hdiv] at hstep2
+  have hroot : (n : ℝ) * Real.sqrt (n : ℝ) / 81
+      = (n : ℝ) ^ 2 / (81 * Real.sqrt (n : ℝ)) := by
+    field_simp
+    rw [Real.sq_sqrt hnpos.le]
+  have hsqt : 81 * t ≤ Real.sqrt (n : ℝ) := by
+    have h1 : Real.sqrt ((81 * t) ^ 2) ≤ Real.sqrt (n : ℝ) := Real.sqrt_le_sqrt hnt
+    rwa [Real.sqrt_sq (by positivity : (0 : ℝ) ≤ 81 * t)] at h1
+  have hlast : t * (n : ℝ) ≤ (n : ℝ) * Real.sqrt (n : ℝ) / 81 := by
+    have h1 : (n : ℝ) * (81 * t) ≤ (n : ℝ) * Real.sqrt (n : ℝ) :=
+      mul_le_mul_of_nonneg_left hsqt hnpos.le
+    have h2 : t * (n : ℝ) = (n : ℝ) * (81 * t) / 81 := by field_simp
+    rw [h2]
+    exact div_le_div_of_nonneg_right h1 (by norm_num)
+  rw [← hroot] at hstep1
+  linarith [hstep1, hstep2, hlast]
+
+private lemma exists_nat_rpow_ge (K : ℝ) (hK : 0 ≤ K) {s : ℝ} (hs : 0 < s) :
+    ∃ r₀ : ℕ, ∀ r : ℕ, r₀ ≤ r → K ≤ (r : ℝ) ^ s := by
+  obtain ⟨m, hm⟩ := exists_nat_gt (1 / s)
+  have hm0 : 0 < m := by
+    have h1 : 0 < 1 / s := by positivity
+    have h2 : (0 : ℝ) < (m : ℝ) := lt_trans h1 hm
+    exact_mod_cast h2
+  have hmpos : (0 : ℝ) < (m : ℝ) := by exact_mod_cast hm0
+  have hle : 1 / (m : ℝ) ≤ s := by
+    rw [div_le_iff₀ hmpos]
+    have h1 : 1 / s < (m : ℝ) := hm
+    rw [div_lt_iff₀ hs] at h1
+    linarith
+  refine ⟨max 1 ⌈K ^ m⌉₊, ?_⟩
+  intro r hr
+  have hr1 : (1 : ℝ) ≤ (r : ℝ) := by
+    have h1 : 1 ≤ r := le_trans (le_max_left _ _) hr
+    exact_mod_cast h1
+  have hKceil : K ^ m ≤ (r : ℝ) := by
+    have h1 : ⌈K ^ m⌉₊ ≤ r := le_trans (le_max_right _ _) hr
+    exact (Nat.le_ceil (K ^ m)).trans (by exact_mod_cast h1)
+  have hKpow : K = (K ^ m : ℝ) ^ (1 / (m : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hK, mul_one_div,
+      div_self (ne_of_gt hmpos), Real.rpow_one]
+  rw [hKpow]
+  calc (K ^ m : ℝ) ^ (1 / (m : ℝ)) ≤ (r : ℝ) ^ (1 / (m : ℝ)) :=
+        Real.rpow_le_rpow (by positivity) hKceil (by positivity)
+    _ ≤ (r : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le hr1 hle
+
+/-- The scalar rearrangement behind term 1 of the counting leaf. -/
+private lemma err_scalar1 {C δ S N : ℝ} (hC : C ≠ 0) :
+    C * (S * (2 * N) * (δ / (24 * C))) = (δ / 12) * (S * N) := by
+  field_simp
+  ring
+
+/-- The scalar rearrangement behind term 2 of the counting leaf. -/
+private lemma err_scalar2 {C δ S N : ℝ} (hC : C ≠ 0) :
+    C * (S * N * (δ / (12 * C))) = (δ / 12) * (S * N) := by
+  field_simp
+
+/-- The scalar rearrangement behind term 3 of the counting leaf. -/
+private lemma err_scalar3 {C δ X : ℝ} (hC : C ≠ 0) (hδ : δ ≠ 0) :
+    C * (X / (48 * C / δ)) = δ * X / 48 := by
+  field_simp
+
+/-- `δ·X/48 = (δ/12)·(X/4)`. -/
+private lemma err_scalar4 (δ X : ℝ) : δ * X / 48 = (δ / 12) * (X / 4) := by
+  ring
+
+/-- The facts about `r`, `N` that the counting leaf uses, from `r ≥ 1`, `A > 0` and the
+dyadic membership `N ∈ Icc ⌈X/2⌉₊ ⌊X⌋₊` with `X = r^A`. -/
+private theorem leaf_setup {A e : ℝ} {r N : ℕ} (hr1 : 1 ≤ r) (hA0 : 0 < A) (_he : 0 ≤ e)
+    (hN : N ∈ Finset.Icc ⌈(r : ℝ) ^ A / 2⌉₊ ⌊(r : ℝ) ^ A⌋₊) (hEven : Even N) :
+    (1 : ℝ) ≤ (r : ℝ) ∧ (0 : ℝ) < (r : ℝ) ^ A ∧ (N : ℝ) ≤ (r : ℝ) ^ A ∧
+      (r : ℝ) ^ A ≤ 2 * (N : ℝ) ∧ 2 ≤ N ∧ (1 / 2 : ℝ) ≤ singular N ∧
+      (0 : ℝ) ≤ Real.log ((r : ℝ) ^ A) := by
+  have hr1' : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr1
+  have hrA1 : (1 : ℝ) ≤ (r : ℝ) ^ A := Real.one_le_rpow hr1' hA0.le
+  have hrA0 : (0 : ℝ) < (r : ℝ) ^ A := lt_of_lt_of_le zero_lt_one hrA1
+  have hmem := Finset.mem_Icc.mp hN
+  have hN1 : 1 ≤ N := by
+    have h1 : 1 ≤ ⌈(r : ℝ) ^ A / 2⌉₊ := by
+      rw [Nat.one_le_ceil_iff]
+      linarith
+    omega
+  have hN2 : 2 ≤ N := by
+    obtain ⟨j, hj⟩ := hEven
+    omega
+  have hNrA : (N : ℝ) ≤ (r : ℝ) ^ A := by
+    have h1 : (N : ℝ) ≤ (⌊(r : ℝ) ^ A⌋₊ : ℝ) := by exact_mod_cast hmem.2
+    exact h1.trans (Nat.floor_le hrA0.le)
+  have hrAN : (r : ℝ) ^ A ≤ 2 * (N : ℝ) := by
+    have h1 : (r : ℝ) ^ A / 2 ≤ (⌈(r : ℝ) ^ A / 2⌉₊ : ℝ) := Nat.le_ceil _
+    have h2 : (⌈(r : ℝ) ^ A / 2⌉₊ : ℝ) ≤ (N : ℝ) := by exact_mod_cast hmem.1
+    linarith
+  exact ⟨hr1', hrA0, hNrA, hrAN, hN2, leaf_singular_lower N hEven hN2, Real.log_nonneg hrA1⟩
+
 /-- LEAF. Step 3: the three error terms of the analytic formula — the `X`-term carrying
 `(e·log X)^c'`, the conductor term `𝔖(N)·N·r/φ(r)^2` and the minor term `X^(1-ε₀)` — are in
 total at most `(δ/4)·𝔖(N)·N` on the dyadic interval, once the conductor is large enough.
@@ -302,7 +537,147 @@ theorem leaf_error_domination (δ : ℝ) (hδ : 0 < δ) (hδ1 : δ < 1) (C c' ε
           C * (singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c') +
                 singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2 +
                 ((r : ℝ) ^ A) ^ (1 - ε₀)) ≤ (δ / 4) * (singular N * N) := by
-  sorry
+  rcases le_or_gt C 0 with hC | hC
+  · -- `C ≤ 0`: the left side is nonpositive
+    refine ⟨min (h / 2) (δ / 32), lt_min (by linarith) (by linarith), ?_, min_le_right _ _, ?_⟩
+    · exact lt_of_le_of_lt (min_le_left _ _) (by linarith)
+    · intro A hA
+      refine ⟨1, ?_⟩
+      intro r hr N e he hec hN hEven
+      obtain ⟨hR1, hrA0, hNrA, hrAN, hN2, hS, hlog0⟩ :=
+        leaf_setup (A := A) (e := e) (r := r) (N := N) (by omega) (by linarith) he hN hEven
+      have hS0 : (0 : ℝ) ≤ singular N := by linarith
+      have hN0 : (0 : ℝ) ≤ (N : ℝ) := by positivity
+      have hq0 : (0 : ℝ) ≤ (e * Real.log ((r : ℝ) ^ A)) ^ c' :=
+        Real.rpow_nonneg (mul_nonneg he hlog0) _
+      have hX0 : (0 : ℝ) ≤ singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c') +
+          singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2 +
+            ((r : ℝ) ^ A) ^ (1 - ε₀) := by
+        have h1 : (0 : ℝ) ≤ singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c') :=
+          mul_nonneg (mul_nonneg hS0 hrA0.le) hq0
+        have h2 : (0 : ℝ) ≤ singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2 :=
+          div_nonneg (mul_nonneg (mul_nonneg hS0 hN0) (by linarith : (0:ℝ) ≤ (r:ℝ)))
+            (by positivity)
+        have h3 : (0 : ℝ) ≤ ((r : ℝ) ^ A) ^ (1 - ε₀) := Real.rpow_nonneg hrA0.le _
+        linarith
+      have hSN : (0 : ℝ) ≤ singular N * N := mul_nonneg hS0 hN0
+      have h1 : C * (singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c') +
+          singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2 +
+            ((r : ℝ) ^ A) ^ (1 - ε₀)) ≤ 0 :=
+        mul_nonpos_of_nonpos_of_nonneg hC hX0
+      have h2 : (0 : ℝ) ≤ (δ / 4) * (singular N * N) := mul_nonneg (by linarith) hSN
+      linarith
+  · -- `C > 0`
+    have hqpos : 0 < δ / (24 * C) := by positivity
+    set c₀ : ℝ := min (min (h / 2) (δ / 32)) (min 1 ((δ / (24 * C)) ^ (1 / c'))) with hc₀
+    have hc₀0 : 0 < c₀ := by
+      rw [hc₀]
+      exact lt_min (lt_min (by linarith) (by linarith))
+        (lt_min one_pos (Real.rpow_pos_of_pos hqpos _))
+    have hc₀1 : c₀ ≤ 1 := (min_le_right _ _).trans (min_le_left _ _)
+    have hc₀x : c₀ ≤ (δ / (24 * C)) ^ (1 / c') := (min_le_right _ _).trans (min_le_right _ _)
+    have hcc : c₀ ^ c' ≤ δ / (24 * C) := by
+      have hx : ((δ / (24 * C)) ^ (1 / c')) ^ c' = δ / (24 * C) := by
+        rw [← Real.rpow_mul (le_of_lt hqpos)]
+        rw [one_div_mul_cancel (ne_of_gt hc'), Real.rpow_one]
+      calc c₀ ^ c' ≤ ((δ / (24 * C)) ^ (1 / c')) ^ c' := Real.rpow_le_rpow hc₀0.le hc₀x hc'.le
+        _ = δ / (24 * C) := hx
+    refine ⟨c₀, hc₀0, ?_, (min_le_left _ _).trans (min_le_right _ _), ?_⟩
+    · exact lt_of_le_of_lt ((min_le_left _ _).trans (min_le_left _ _)) (by linarith)
+    · intro A hA
+      have hA0 : 0 < A := by linarith
+      have hs : 0 < A * ε₀ := by positivity
+      obtain ⟨rK, hrK⟩ := exists_nat_rpow_ge (48 * C / δ) (by positivity) hs
+      refine ⟨max (max rK 1) ⌈(81 * (12 * C / δ)) ^ 2⌉₊, ?_⟩
+      intro r hr N e he hec hN hEven
+      have hrKle : rK ≤ r :=
+        le_trans (le_trans (le_max_left rK 1) (le_max_left (max rK 1) _)) hr
+      have h1le : 1 ≤ r :=
+        le_trans (le_trans (le_max_right rK 1) (le_max_left (max rK 1) _)) hr
+      have hceil : ⌈(81 * (12 * C / δ)) ^ 2⌉₊ ≤ r := le_trans (le_max_right _ _) hr
+      obtain ⟨hR1, hrA0, hNrA, hrAN, hN2, hS, hlog0⟩ :=
+        leaf_setup (A := A) (e := e) (r := r) (N := N) h1le hA0 he hN hEven
+      have hRpos : (0 : ℝ) < (r : ℝ) := by linarith
+      have hS0 : (0 : ℝ) ≤ singular N := by linarith
+      have hN0 : (0 : ℝ) ≤ (N : ℝ) := by positivity
+      have hSN : (0 : ℝ) ≤ singular N * N := mul_nonneg hS0 hN0
+      have hphi2 : (0 : ℝ) < (Nat.totient r : ℝ) ^ 2 := by
+        have h1 : 0 < Nat.totient r := Nat.totient_pos.mpr (by omega)
+        have h2 : (0 : ℝ) < (Nat.totient r : ℝ) := by exact_mod_cast h1
+        positivity
+      -- the analytic input `e·log X ≤ c₀` and the choice of `c₀`
+      have hq0 : (0 : ℝ) ≤ e * Real.log ((r : ℝ) ^ A) := mul_nonneg he hlog0
+      have hq0' : (0 : ℝ) ≤ (e * Real.log ((r : ℝ) ^ A)) ^ c' := Real.rpow_nonneg hq0 _
+      have hqle : (e * Real.log ((r : ℝ) ^ A)) ^ c' ≤ δ / (24 * C) :=
+        (Real.rpow_le_rpow hq0 hec hc'.le).trans hcc
+      -- term 1: `C·𝔖(N)·X·(e·log X)^c'`
+      have hT1 : C * (singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c'))
+          ≤ (δ / 12) * (singular N * N) := by
+        have ha : (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c')
+            ≤ (2 * (N : ℝ)) * (δ / (24 * C)) :=
+          mul_le_mul hrAN hqle hq0' (by positivity)
+        have h1 : singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c')
+            ≤ singular N * (2 * (N : ℝ)) * (δ / (24 * C)) := by
+          calc singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c')
+              = singular N * ((r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c')) := by ring
+            _ ≤ singular N * ((2 * (N : ℝ)) * (δ / (24 * C))) := mul_le_mul_of_nonneg_left ha hS0
+            _ = singular N * (2 * (N : ℝ)) * (δ / (24 * C)) := by ring
+        calc C * (singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c'))
+            ≤ C * (singular N * (2 * (N : ℝ)) * (δ / (24 * C))) :=
+              mul_le_mul_of_nonneg_left h1 hC.le
+          _ = (δ / 12) * (singular N * N) :=
+              err_scalar1 (ne_of_gt hC)
+      -- term 2: `C·𝔖(N)·N·r/φ(r)^2`
+      have htot := totient_sq_growth r (by omega) (12 * C / δ) (by positivity)
+        ((Nat.le_ceil _).trans (by exact_mod_cast hceil))
+      have hrho : (r : ℝ) / (Nat.totient r : ℝ) ^ 2 ≤ δ / (12 * C) := by
+        rw [div_le_iff₀ hphi2]
+        have ht1 : (δ / (12 * C)) * (12 * C / δ) = 1 := by field_simp
+        have h1 : (δ / (12 * C)) * ((12 * C / δ) * (r : ℝ))
+            ≤ (δ / (12 * C)) * (Nat.totient r : ℝ) ^ 2 :=
+          mul_le_mul_of_nonneg_left htot (by positivity)
+        have h2 : (δ / (12 * C)) * ((12 * C / δ) * (r : ℝ)) = (r : ℝ) := by
+          rw [← mul_assoc, ht1, one_mul]
+        linarith [h1, h2]
+      have hT2 : C * (singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2)
+          ≤ (δ / 12) * (singular N * N) := by
+        have h1 : singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2
+            ≤ singular N * N * (δ / (12 * C)) := by
+          rw [mul_div_assoc]
+          exact mul_le_mul_of_nonneg_left hrho hSN
+        calc C * (singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2)
+            ≤ C * (singular N * N * (δ / (12 * C))) := mul_le_mul_of_nonneg_left h1 hC.le
+          _ = (δ / 12) * (singular N * N) :=
+              err_scalar2 (ne_of_gt hC)
+      -- term 3: `C·X^(1-ε₀)`
+      have hrs : 48 * C / δ ≤ ((r : ℝ) ^ A) ^ ε₀ := by
+        rw [← Real.rpow_mul hRpos.le]
+        exact hrK r hrKle
+      have hpow : ((r : ℝ) ^ A) ^ (1 - ε₀) = (r : ℝ) ^ A / ((r : ℝ) ^ A) ^ ε₀ := by
+        rw [Real.rpow_sub hrA0, Real.rpow_one]
+      have h3a : ((r : ℝ) ^ A) ^ (1 - ε₀) ≤ (r : ℝ) ^ A / (48 * C / δ) := by
+        rw [hpow]
+        exact div_le_div_of_nonneg_left hrA0.le (by positivity) hrs
+      have h3b : C * ((r : ℝ) ^ A / (48 * C / δ)) = δ * (r : ℝ) ^ A / 48 :=
+        err_scalar3 (ne_of_gt hC) (ne_of_gt hδ)
+      have hSN' : (r : ℝ) ^ A / 4 ≤ singular N * (N : ℝ) := by
+        have h1 := mul_le_mul hS hrAN (le_of_lt hrA0) (by linarith : (0 : ℝ) ≤ singular N)
+        nlinarith [h1]
+      have hT3 : C * ((r : ℝ) ^ A) ^ (1 - ε₀) ≤ (δ / 12) * (singular N * N) := by
+        calc C * ((r : ℝ) ^ A) ^ (1 - ε₀) ≤ C * ((r : ℝ) ^ A / (48 * C / δ)) :=
+              mul_le_mul_of_nonneg_left h3a hC.le
+          _ = δ * (r : ℝ) ^ A / 48 := h3b
+          _ = (δ / 12) * ((r : ℝ) ^ A / 4) := err_scalar4 δ _
+          _ ≤ (δ / 12) * (singular N * N) :=
+              mul_le_mul_of_nonneg_left hSN' (by linarith)
+      have hsplit : C * (singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c') +
+            singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2 + ((r : ℝ) ^ A) ^ (1 - ε₀))
+          = C * (singular N * (r : ℝ) ^ A * ((e * Real.log ((r : ℝ) ^ A)) ^ c'))
+            + C * (singular N * N * (r : ℝ) / (Nat.totient r : ℝ) ^ 2)
+            + C * (((r : ℝ) ^ A) ^ (1 - ε₀)) := by ring
+      rw [hsplit]
+      have hthree : 3 * ((δ / 12) * (singular N * N)) = (δ / 4) * (singular N * N) := by ring
+      linarith [hT1, hT2, hT3, hthree]
 
 /-- LEAF. Step 4: a primitive character of conductor at least two has no zero of its
 L-function at or beyond one, so only the range `1 - c/log X < β < 1` needs the counting step. -/
