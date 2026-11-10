@@ -10,6 +10,7 @@ third leaf collects the arithmetic consequences of the hypothesis set that any w
 on the first leaf needs.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp432a
+import LeanLab.BhowmikGrimmelt2026.SPLIT_continuous_tail_family405
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -61,7 +62,8 @@ theorem leaf_off_continuous_tail_family432 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ)
       10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X →
       ∑ N ∈ Finset.Icc 1 X, ‖continuousTail405 ϕ G X N ϑ η‖ ^ 2 ≤
         C * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  obtain ⟨C, hC, h⟩ := continuous_tail_family405_split hϕ hG ϑ hϑ hϑ'
+  exact ⟨C, hC, fun X hX _ η hη hη1 _ hscale ↦ h X hX η hη hη1 hscale⟩
 
 /-- LEAF. The selected central alias family has the logarithm power five moment bound.
 
