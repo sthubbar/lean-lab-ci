@@ -1,0 +1,43 @@
+[
+  {
+    "query": "LeanSearch norm bound",
+    "url": "https://leansearch.net/search",
+    "exit": 0,
+    "names": [
+      [
+        "tendsto_norm_atTop_iff_cobounded"
+      ],
+      [
+        "tendsto_norm_cobounded_atTop"
+      ],
+      [
+        "tendsto_norm_atTop_iff_cobounded'"
+      ],
+      [
+        "Asymptotics",
+        "isBigO_atTop_iff_eventually_exists_pos"
+      ],
+      [
+        "Asymptotics",
+        "IsBigO",
+        "norm_left"
+      ]
+    ]
+  },
+  {
+    "query": "Loogle norm_sub_le",
+    "url": "https://loogle.lean-lang.org/json?q=norm_sub_le",
+    "exit": 0,
+    "names": [
+      "norm_sub_le"
+    ]
+  },
+  {
+    "query": "Loogle div_le_self",
+    "url": "https://loogle.lean-lang.org/json?q=div_le_self",
+    "exit": 0,
+    "names": [
+      "div_le_self"
+    ]
+  }
+]

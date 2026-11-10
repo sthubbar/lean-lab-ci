@@ -1,0 +1,45 @@
+[
+  {
+    "query": "task472-digamma-loogle.json",
+    "names": [
+      "Complex.digamma",
+      "Complex.digamma_one",
+      "Complex.digamma_zero",
+      "Complex.meromorphic_digamma",
+      "Complex.digamma_def",
+      "Complex.digamma_nat_add_one",
+      "Complex.digamma_apply_add_one",
+      "Complex.digamma_one_sub",
+      "Complex.digamma_apply_add_nat",
+      "Complex.digamma_one_half",
+      "Complex.digamma_two_mul",
+      "HasDerivAt.logDeriv_Gamma",
+      "logDeriv_riemannZeta_one_sub"
+    ]
+  },
+  {
+    "query": "task472-digamma-leansearch.json",
+    "names": [
+      [
+        "Real",
+        "Gamma_three_div_two_lt_one"
+      ],
+      [
+        "Complex",
+        "log_re"
+      ],
+      [
+        "Real",
+        "Gamma"
+      ],
+      [
+        "Real",
+        "convexOn_log_Gamma"
+      ],
+      [
+        "Complex",
+        "log_ofReal_re"
+      ]
+    ]
+  }
+]

@@ -1,0 +1,122 @@
+{
+  "LFunction_ne_zero_right471": {
+    "twin": "Under GRH every nonprincipal Dirichlet L function is nonzero strictly right of one half.",
+    "instance": "q three and s two are allowed. GRH stays an explicit hypothesis.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "mellinLine_re_gt_half471": {
+    "twin": "For N greater than one every point on the shifted line has real part greater than one half.",
+    "instance": "N two and height zero.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "continuous_mellinLine471": {
+    "twin": "The shifted Mellin line is continuous in height for every natural N.",
+    "instance": "N two.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "continuous_LFunction_line471": {
+    "twin": "The nonprincipal L function restricted to the shifted line is continuous.",
+    "instance": "N two and a nonprincipal character modulo three.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "continuous_log_norm_line471": {
+    "twin": "The real logarithm of the modulus is continuous on every nonvanishing shifted line.",
+    "instance": "N two and a nonprincipal character modulo three. Mathlib nonvanishing applies since the real part exceeds one.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "continuous_lnL_of_slitPlane471": {
+    "twin": "The principal logarithm along the line is continuous when every image point lies in the slit plane.",
+    "instance": "N two and the nonprincipal character modulo four. Its odd supported series stays inside the unit disk about one. No universal slit plane claim is asserted.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "norm_log_le_log_norm_add_pi471": {
+    "twin": "The principal logarithm norm is at most the absolute real logarithm of the modulus plus pi.",
+    "instance": "z one.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "norm_LFunction_sub_one471": {
+    "twin": "At real part two every Dirichlet L function is within three quarters of one.",
+    "instance": "The principal character modulo one and s two. The norm difference is pi squared over six minus one.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "norm_lnL_anchor471": {
+    "twin": "At real part two the principal logarithm of every Dirichlet L function has norm at most two.",
+    "instance": "The principal character modulo one and s two.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "log_ball471": {
+    "twin": "A nonvanishing holomorphic function on a positive radius disk has a holomorphic logarithm normalized by the principal value at the center.",
+    "instance": "f is the exponential, the center is zero and the radius is one. The normalized logarithm is z.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "norm_lnL_disk471": {
+    "twin": "A positive upper bound M for the real logarithm of the modulus on a disk and an anchor logarithm bound A give the Borel Caratheodory norm bound plus pi for the principal logarithm.",
+    "instance": "f is the exponential on the unit disk, M two, A zero and z zero.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "lnL_pointwise_of_strip_upper471": {
+    "twin": "Under GRH and the explicit strip upper estimate with coefficient A, log N at least two gives the principal logarithm bound with coefficient twelve A plus eighteen plus pi, uniformly in height and q at most the seventh root of N.",
+    "instance": "The strip estimate holds with A two by LFunction_strip_log_upper471. N is three to the seventh power and q is three. GRH stays an explicit hypothesis.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "lnL_growth_of_strip_upper471": {
+    "twin": "Under GRH and the strip upper estimate, one positive coefficient and one natural threshold give the cubic logarithmic bound for all heights.",
+    "instance": "The strip estimate has coefficient two. The proof chooses threshold max of one and the ceiling of exp two. GRH is not witnessed.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "character_partial_sum_bound471": {
+    "twin": "For every nonprincipal character modulo q, each partial sum from one through n has norm at most q.",
+    "instance": "A nonprincipal character modulo three and n three give a complete period with sum zero.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "bounded_mellin_differentiable471": {
+    "twin": "For a measurable real variable coefficient bounded by nonnegative Q on x greater than one, its Mellin integral against x to negative s minus one is holomorphic for positive real part of s.",
+    "instance": "P constantly one and Q one. At s one the integral is one.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "LFunction_eq_partial_integral471": {
+    "twin": "For a nonprincipal character and positive real part of s, L equals s times the integral from one to infinity of its partial character sum through floor x times x to negative s minus one.",
+    "instance": "A nonprincipal character modulo three and s two.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "norm_LFunction_of_partial_integral471": {
+    "twin": "The displayed integral identity and partial sums bounded by q imply norm L at most norm s times q divided by real part s.",
+    "instance": "A nonprincipal character modulo three and s two. Both premises are proved in this file.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "log_LFunction_upper_of_norm471": {
+    "twin": "On the closed strip from one half through four, the integral norm bound implies real log modulus at most twice log of q times absolute height plus three.",
+    "instance": "A nonprincipal character modulo three and s two. The norm premise follows from the proved integral identity.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "LFunction_strip_log_upper471": {
+    "twin": "There is an absolute positive coefficient for the one sided logarithmic modulus upper bound on the closed strip from one half through four, for every nonprincipal character.",
+    "instance": "The proof supplies coefficient two. A nonprincipal character modulo three and s two meet the parameters.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "principal_log_exp_discontinuous471": {
+    "twin": "The principal logarithm of exp of i t is not continuous at t equal to pi. This audits the claimed nonvanishing justification and does not refute the exact L function leaf.",
+    "instance": "The exponential is entire and is never zero. At pi the two logarithm limits differ by two pi i.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "exists_continuous_log_path471": {
+    "twin": "A nonvanishing real path with a continuous derivative has a continuous logarithm, normalized at zero by the principal logarithm there.",
+    "instance": "f and its derivative are exp t. The continuous logarithm is t.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "exists_continuous_lnL_line471": {
+    "twin": "For a nonprincipal character, nonvanishing on the shifted line gives some continuous logarithm there, normalized at height zero. It need not be the principal logarithm at other heights.",
+    "instance": "N two and a nonprincipal character modulo three. Its line lies to the right of one, so Mathlib gives nonvanishing without GRH.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "continuous_norm_log471": {
+    "twin": "The norm of the principal logarithm along any nonvanishing continuous path is continuous, including at branch cut crossings.",
+    "instance": "f is exp of i t. Its principal logarithm jumps at pi but its norm is continuous there.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  },
+  "intervalIntegrable_lnL_line471": {
+    "twin": "The principal logarithm of the nonprincipal L function on a nonvanishing shifted line is integrable over every compact height interval.",
+    "instance": "N two, a nonprincipal character modulo three and the height interval from zero to one. Nonvanishing follows from Mathlib to the right of one.",
+    "source": "Standard bridge for P0093 page 159 Section 5. The line itself is on page 156 Lemma 2."
+  }
+}

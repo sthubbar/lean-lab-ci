@@ -1,0 +1,25 @@
+{
+  "query": "odd primitive L nonzero at zero",
+  "names": [
+    [
+      "ZMod",
+      "LFunction_apply_zero_of_even"
+    ],
+    [
+      "DirichletCharacter",
+      "LFunction_ne_zero_of_re_eq_one"
+    ],
+    [
+      "DirichletCharacter",
+      "LFunction_apply_one_ne_zero"
+    ],
+    [
+      "DirichletCharacter",
+      "LFunction_ne_zero_of_one_le_re"
+    ],
+    [
+      "ZMod",
+      "completedLFunction_zero"
+    ]
+  ]
+}

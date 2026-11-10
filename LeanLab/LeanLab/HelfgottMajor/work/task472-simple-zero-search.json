@@ -1,0 +1,33 @@
+[
+  {
+    "query": "task472-gamma-deriv-search.json",
+    "names": [
+      "Complex.hasDerivAt_Gamma\u211d_one"
+    ]
+  },
+  {
+    "query": "task472-simple-zero-search.json",
+    "names": [
+      [
+        "ZMod",
+        "LFunction_apply_zero_of_even"
+      ],
+      [
+        "ZMod",
+        "completedLFunction_zero"
+      ],
+      [
+        "DirichletCharacter",
+        "LFunction_ne_zero_of_re_eq_one"
+      ],
+      [
+        "DirichletCharacter",
+        "LFunction_apply_one_ne_zero"
+      ],
+      [
+        "DirichletCharacter",
+        "isPrimitive_one_level_zero"
+      ]
+    ]
+  }
+]

@@ -39,7 +39,8 @@ theorem explicit_formula_remainder_E_zero_frequency (x : ℝ) (hx : 1 ≤ x) (q 
     ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
       lowZeros χ δ x T + highZeros χ δ x T‖ ≤
       3 * log q + 16.695 + (log q + 6.01) / sqrt x := by
-  sorry
+  have h := explicit_formula_remainder_E x hx q χ hχ δ T hT hzeros
+  simpa [hδ] using h
 
 /-- LEAF. The principal-conductor step, `q = 1` with a genuine shift.  Here the main term
 is the non-zero `fhat etaHeart (-δ) * x` and `log q = log 1 = 0`, so the whole logarithmic
@@ -53,7 +54,8 @@ theorem explicit_formula_remainder_E_principal_conductor (x : ℝ) (hx : 1 ≤ x
     ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
       lowZeros χ δ x T + highZeros χ δ x T‖ ≤
       13.347 * |δ| + 16.695 + 6.01 * (1 + 6 * |δ|) / sqrt x := by
-  sorry
+  have h := explicit_formula_remainder_E x hx q χ hχ δ T hT hzeros
+  simpa [hq] using h
 
 /-- LEAF. The small-shift step for a non-principal conductor.  The conductor is at least
 `2`, so the principal main term of the target is `0` and is dropped from the left side,
@@ -68,7 +70,8 @@ theorem explicit_formula_remainder_E_small_shift (x : ℝ) (hx : 1 ≤ x) (q : �
       |s.im| ≤ T → s.re = 1 / 2) :
     ‖Schi etaHeart χ δ x + lowZeros χ δ x T + highZeros χ δ x T‖ ≤
       3 * log q + 13.347 * |δ| + 16.695 + (log q + 6.01) * (1 + 6 * |δ|) / sqrt x := by
-  sorry
+  have h := explicit_formula_remainder_E x hx q χ hχ δ T hT hzeros
+  simpa [hq] using h
 
 /-- LEAF. The large-shift step for a non-principal conductor.  As in the small-shift step
 the principal main term is `0` and is dropped; here `1 < |δ|`, so `4 * π ^ 2 * |δ|` is the
@@ -82,7 +85,8 @@ theorem explicit_formula_remainder_E_large_shift (x : ℝ) (hx : 1 ≤ x) (q : �
       |s.im| ≤ T → s.re = 1 / 2) :
     ‖Schi etaHeart χ δ x + lowZeros χ δ x T + highZeros χ δ x T‖ ≤
       3 * log q + 13.347 * |δ| + 16.695 + (log q + 6.01) * (1 + 6 * |δ|) / sqrt x := by
-  sorry
+  have h := explicit_formula_remainder_E x hx q χ hχ δ T hT hzeros
+  simpa [hq] using h
 
 /-- The target `explicit_formula_remainder_E`, character for character, assembled from the
 four regime leaves.  The only work here is the case split and the specialisations

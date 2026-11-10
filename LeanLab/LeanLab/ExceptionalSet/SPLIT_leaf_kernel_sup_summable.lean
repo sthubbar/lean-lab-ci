@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_product_integrable
+import LeanLab.ExceptionalSet.Decomp462e
 
 /-!
 Split of the kernel step of the generic Fourier fold: for an integrable continuous
@@ -36,7 +37,7 @@ theorem leaf_split_bump_exists :
             (∀ y : ℝ,
               (∑' n : ℤ, ⨆ t ∈ Set.Ioc (n : ℝ) ((n : ℝ) + 1),
                 ENNReal.ofReal ‖φ (t - y)‖) ≤ C) := by
-  sorry
+  exact Decomp462d.split_bump_exists_supplied
 
 /-- LEAF. Step 2 of the proof: the convolution identity. Convolving the kernel with a
 smoothing factor whose Fourier transform equals one on the closed interval from `-1`
@@ -46,7 +47,7 @@ theorem leaf_split_conv_eq (K : ℝ → ℂ) (hK : Integrable K) (hcont : Contin
     (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) (φ : ℝ → ℂ) (hφ : Integrable φ)
     (hφhat : ∀ α : ℝ, |α| ≤ 1 → ftR φ α = 1) :
     ∀ t : ℝ, (∫ y : ℝ, φ (t - y) * K y) = K t := by
-  sorry
+  exact Decomp462b.split_conv_eq_supplied K hK hcont hsupp φ hφ hφhat
 
 /-- LEAF. Step 3 of the proof: the bound on one unit interval. The supremum of the
 norm of the kernel over the unit interval starting at the integer `n` is at most the
@@ -60,7 +61,7 @@ theorem leaf_split_interval_sup_le (K : ℝ → ℂ) (hK : Integrable K) (hcont 
       ∫⁻ y : ℝ,
         (⨆ t ∈ Set.Ioc (n : ℝ) ((n : ℝ) + 1), ENNReal.ofReal ‖φ (t - y)‖) *
           ENNReal.ofReal ‖K y‖ := by
-  sorry
+  exact Decomp462c.split_interval_sup_le_supplied K hK hcont hsupp φ hφ hφhat n
 
 /-- LEAF. Step 4 of the proof: the sum over the intervals of the interval integrals is
 at most the integral of the summed weights. This is the exchange of a sum over the
@@ -74,7 +75,7 @@ theorem leaf_split_tsum_integral_le (K : ℝ → ℂ) (φ : ℝ → ℂ) :
       ∫⁻ y : ℝ,
         (∑' n : ℤ, ⨆ t ∈ Set.Ioc (n : ℝ) ((n : ℝ) + 1), ENNReal.ofReal ‖φ (t - y)‖) *
           ENNReal.ofReal ‖K y‖ := by
-  sorry
+  exact Decomp462c.split_tsum_integral_le_supplied K φ
 
 /-- Assembly. The weights of the four steps above: the smoothing factor of step 1,
 the convolution identity of step 2, the single interval bound of step 3 and the

@@ -14,7 +14,13 @@ leaves, all at the same concrete data as the parent: `M = 2x + 1`, `Φ(j) = log 
   `0 < x` and `L^4 ≤ x^{1/2}`.
 
 The assembly `major_arc_count_power_split` takes the exponent `θ = 1/2`, chains the three, and
-has no sorry; it does not use `major_arc_count_power`. Every leaf is OPEN.
+has no sorry; it does not use `major_arc_count_power`.
+
+OFF ROUTE, architect 2026-11-10: this split cannot work. LEAF 3 is false, refuted below by
+`div_log_saving_le_sqrt_false` at `C = 1`, `x = 4`, `L = 1`. From `L^4 ≤ x^{1/2}` one gets
+`C x / L^4 ≥ C x^{1/2}`, the reverse of LEAF 3, so a log saving never yields a power saving
+this way. LEAF 1 and LEAF 3 are no longer leaves; provers leave this file alone, and the parent
+`major_arc_count_power` needs a power saving from its own source.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.SPLIT_theorem51
@@ -26,7 +32,8 @@ open LeanLab.ExceptionalSet.MV
 
 noncomputable section
 
-/-- LEAF 1 of 3, the count itself at the enlarged level `Q = x^{1/10}`, with a log saving
+/-- OFF ROUTE, architect 2026-11-10, was LEAF 1 of 3: the split's LEAF 3 is false, see the header.
+The count itself at the enlarged level `Q = x^{1/10}`, with a log saving
 instead of a power saving: for every real `A > 0` there are a nonnegative constant `C` and
 `X0 ≥ 1` such that for all `x ≥ X0` at most `C x / (log x)^A` of the even `n` in the window
 `(x/2, x]` have major arc part of modulus at most `M x / 4`. This is the half where the arcs
@@ -64,7 +71,8 @@ theorem log_four_le_sqrt :
   have h2 : ((Nat.ceil a : ℕ) : ℝ) ≤ (x : ℝ) := by exact_mod_cast hx
   linarith
 
-/-- LEAF 3 of 3, the division step that carries the constant through: if `C ≥ 0`, `x > 0` and
+/-- OFF ROUTE, FALSE, architect 2026-11-10, was LEAF 3 of 3, refuted by `div_log_saving_le_sqrt_false`.
+The division step that carries the constant through: if `C ≥ 0`, `x > 0` and
 `L^4 ≤ x^{1/2}`, then `C x / L^4 ≤ C x^{1/2}`. The hypothesis `L^4 ≤ x^{1/2}` already forces
 `L ≠ 0`, so `L = 0` is not a case of this leaf; `x = 1` is, with `L^4 = 1`, and there the two
 sides agree. -/
@@ -98,6 +106,21 @@ theorem major_arc_count_power_split :
   rw [Real.rpow_natCast] at hb
   have hlog := div_log_saving_le_sqrt C₁ (x : ℝ) (Real.log x) hC₁ hxpos (h₂ x hx2)
   exact le_trans hb hlog
+
+/-- LEAF 3 is false: at `C = 1`, `x = 4`, `L = 1` its hypotheses hold, `1 ≤ 4^{1/2} = 2`, and
+its conclusion reads `4 ≤ 2`. The true direction is `C x^{1/2} ≤ C x / L^4` when `0 < L`. -/
+theorem div_log_saving_le_sqrt_false :
+    ¬ (∀ C x L : ℝ, 0 ≤ C → 0 < x → L ^ 4 ≤ x ^ ((1 : ℝ) / 2) →
+      C * x / L ^ 4 ≤ C * x ^ ((1 : ℝ) / 2)) := by
+  intro h
+  have h4 : (4 : ℝ) ^ ((1 : ℝ) / 2) = 2 := by
+    rw [← Real.sqrt_eq_rpow, show (4 : ℝ) = 2 ^ 2 by norm_num]
+    exact Real.sqrt_sq (by norm_num)
+  have hc := h 1 4 1 (by norm_num) (by norm_num) (by rw [h4]; norm_num)
+  rw [h4] at hc
+  norm_num at hc
+
+#print axioms div_log_saving_le_sqrt_false
 
 -- Axiom audit driver for the assembly.
 #print axioms major_arc_count_power_split

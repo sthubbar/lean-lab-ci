@@ -7,6 +7,7 @@ has no sorry and does not use lineBound_lnL1622.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.SPLIT_mellin_transfer1622
+import LeanLab.Linnik1951.Supply471
 
 namespace LeanLab.Linnik1951
 
@@ -20,7 +21,10 @@ statement and no size estimate. -/
 theorem lnL_ne_zero_on_line1622 (hG : LeanLab.DERZ1997.GRH) :
     ∀ N : ℕ, 1 < N → ∀ (q : ℕ) [NeZero q], ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
       ∀ t : ℝ, DirichletCharacter.LFunction χ (mellinLine1622 N t) ≠ 0 := by
-  sorry
+  unfold LeanLab.DERZ1997.GRH at hG
+  intro N hN q hq χ hχ t
+  exact LFunction_ne_zero_right471 hG q χ hχ (mellinLine1622 N t)
+    (mellinLine_re_gt_half471 N hN t)
 
 /-- LEAF. Continuity step. The logarithm of the L-function of a nonprincipal character,
 followed along the line, is continuous in the height as soon as it is nowhere zero
@@ -44,7 +48,11 @@ theorem lnL_growth_bounded_height1622 (hG : LeanLab.DERZ1997.GRH) :
         ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ t : ℝ, |t| ≤ 2 →
           ‖Complex.log (DirichletCharacter.LFunction χ (mellinLine1622 N t))‖ ≤
             B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3 := by
-  sorry
+  unfold LeanLab.DERZ1997.GRH at hG
+  obtain ⟨B, hB, N0, h⟩ := lnL_growth_of_strip_upper471 hG LFunction_strip_log_upper471
+  refine ⟨B, hB, N0, ?_⟩
+  intro N hN q hqi hq hqN χ hχ t hheight
+  exact h N hN q hq hqN χ hχ t
 
 /-- LEAF. Size step, short height. Under the hypothesis on the zeros, the logarithm of
 the L-function on the line is at most a constant times ln cubed of N times the sum of
@@ -57,7 +65,11 @@ theorem lnL_growth_short_height1622 (hG : LeanLab.DERZ1997.GRH) :
         ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ t : ℝ, 2 ≤ |t| → |t| ≤ (N : ℝ) →
           ‖Complex.log (DirichletCharacter.LFunction χ (mellinLine1622 N t))‖ ≤
             B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3 := by
-  sorry
+  unfold LeanLab.DERZ1997.GRH at hG
+  obtain ⟨B, hB, N0, h⟩ := lnL_growth_of_strip_upper471 hG LFunction_strip_log_upper471
+  refine ⟨B, hB, N0, ?_⟩
+  intro N hN q hqi hq hqN χ hχ t hheight hupper
+  exact h N hN q hq hqN χ hχ t
 
 /-- LEAF. Size step, tall height. Under the hypothesis on the zeros, the logarithm of
 the L-function on the line is at most a constant times ln cubed of N times the sum of
@@ -70,7 +82,11 @@ theorem lnL_growth_tall_height1622 (hG : LeanLab.DERZ1997.GRH) :
         ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ t : ℝ, (N : ℝ) ≤ |t| →
           ‖Complex.log (DirichletCharacter.LFunction χ (mellinLine1622 N t))‖ ≤
             B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3 := by
-  sorry
+  unfold LeanLab.DERZ1997.GRH at hG
+  obtain ⟨B, hB, N0, h⟩ := lnL_growth_of_strip_upper471 hG LFunction_strip_log_upper471
+  refine ⟨B, hB, N0, ?_⟩
+  intro N hN q hqi hq hqN χ hχ t hheight
+  exact h N hN q hq hqN χ hχ t
 
 /-- The five leaves together give the line bound of the logarithm of the L-function:
 the line meets no zero, so the logarithm is continuous there, and the three height
