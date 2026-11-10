@@ -2,6 +2,7 @@
 Recovered from the recorded write commands. Fresh checks are required.
 Journal Lemma 8, small conductors. Goldbach is open. -/
 import LeanLab.BS2022GRH.Decomp148a
+import LeanLab.BS2022GRH.Decomp374b
 namespace LeanLab.BS2022GRH.Decomp148b
 open Real Finset Classical ChenThresholdGRH Decomp148a
 /-- LEAF. GRH prime-character estimate, p. 1224 before display 13.
@@ -11,7 +12,7 @@ theorem prime_character_bound (hG : GRH) (Y Z : ℝ) (r : ℕ)
     (hZ : 25 ≤ Z) (hZY : Z < Y) (hr : 3 ≤ r) (hrZ : (r : ℝ) ≤ √Z)
     (χ : DirichletCharacter ℂ r) (hχ : χ ≠ 1) :
     ‖∑ p ∈ pRange Y Z, χ p‖ ≤ 2 * r.totient * (1 + qG Y * √Y * log Y) := by
-  sorry
+  exact Decomp374b.prime_character_bound hG Y Z r hZ hZY hr hrZ χ hχ
 /-- LEAF. Small conductors, display 13 p. 1224.
 Use prime_character_bound, Robin's Lemma 4 and the weighted totient estimate of Lemma 5.
 CITED inputs are Robin 1983 Theorem 11 and Ramare 2019 Theorem 3.1. -/

@@ -3,6 +3,7 @@ Supply the running remainder estimate and its large A endpoint reduction.
 Journal pp. 1240 and 1241, displays 32 and 33.
 https://doi.org/10.1007/s11139-024-00866-x -/
 import LeanLab.BS2022GRH.Decomp339a
+import LeanLab.BS2022GRH.EndpointCompare332
 
 namespace LeanLab.BS2022GRH.Decomp339b
 open Real Finset Classical ChenThresholdGRH DecompC164c Decomp339a
@@ -69,7 +70,7 @@ theorem error_at_threshold (α A u X₂ N ε₁ : ℝ)
     (hA : 0 < A) (hAge : 4 ≤ A) (hc : Cond25 α A u X₂)
     (hX : exp (exp 10) ≤ X₂) (hN : X₂ ≤ N) :
     errorBracket A N ε₁ ≤ errorBracket A X₂ ε₁ := by
-  sorry
+  exact EndpointCompare332.error_at_threshold α A u X₂ N ε₁ hε hε1 hα hα1 hA hAge hc hX hN
 
 /-- The exact running endpoint form of the remainder estimate in display 33.
 CONDITIONAL ON the two task339a scalar leaves and existing Lemmas 4, 5 and 8.

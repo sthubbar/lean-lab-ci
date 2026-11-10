@@ -3,6 +3,7 @@ Journal Theorem 7, pp. 1234 to 1241. Goldbach is open. -/
 import LeanLab.BS2022GRH.SliceModel236
 import LeanLab.BS2022GRH.SliceSieveAssembly236
 import LeanLab.BS2022GRH.MassAssembly236
+import LeanLab.BS2022GRH.Decomp332b
 namespace LeanLab.BS2022GRH.DecompC164c
 open Real Finset Classical ChenThresholdGRH
 noncomputable section
@@ -45,7 +46,11 @@ theorem remainder_bound (α A u X₂ ε₁ : ℝ) (n : ℕ) (hG : GRH)
     (hA : 0 < A) (hc : Cond25 α A u X₂) (hX : exp (exp 10) ≤ X₂)
     (hn : X₂ ≤ (n : ℝ)) (hev : Even n) :
     remainder n A ε₁ ≤ UNfull n * n / log n ^ 2 * errorBracket A X₂ ε₁ := by
-  sorry
+  by_cases hA4 : 4 ≤ A
+  · exact Decomp332b.remainder_bound_large_A DecompC164a.lemma3J
+      PublishedInputs232.lemma4_robin PublishedInputs232.lemma5_phi
+      α A u X₂ ε₁ n hG hε₁ hε₁1 hα hα1 hA hA4 hc hX hn hev
+  · sorry
 /-- The sealed bracket is the sum of its main and error parts. -/
 theorem bracket_split (α A ε C₁ X₂ ε₁ : ℝ) :
     B7J α A ε C₁ X₂ ε₁ = mainBracket α ε C₁ X₂ ε₁ + errorBracket A X₂ ε₁ := by

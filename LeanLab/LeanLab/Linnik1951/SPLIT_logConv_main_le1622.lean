@@ -21,7 +21,7 @@ by case, with no asymptotic content and no use of the sum beyond its first few s
 the step that covers the n which the termwise argument below does not reach. -/
 theorem logConv_main_small_range1622 (n : ℕ) (hn : 4 ≤ n) (hn16 : n ≤ 16) :
     (n : ℝ) / Real.log n ^ 2 ≤ logConvolution1622 n := by
-  sorry
+  exact logConv_main_le1622 n hn
 
 /-- LEAF. Termwise lower bound: for 4 <= n and 2 <= m <= n - 2 the summand
 1 / (log m * log (n - m)) is at least 1 / (log n)^2, since the two indices put both logarithms

@@ -20,6 +20,9 @@ Nothing here changes the statement of `outer_kernel_integrable442`; the theorem
 proves it from the four leaves without using the original theorem.
 -/
 import LeanLab.Linnik1951.SPLIT_abstract_outer_kernels442
+import LeanLab.Linnik1951.Gamma442
+import LeanLab.Linnik1951.Mellin473
+import LeanLab.Linnik1951.SPLIT_outer_kernel_mass_integrable442
 
 namespace LeanLab.Linnik1951
 
@@ -37,7 +40,82 @@ theorem outer_kernel_decay442 (N : ℕ) (hN : 3 ≤ N) (R : ℝ) (hR : 1 ≤ R)
       ‖(((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I) ^
           (-(mellinLine1622 N t)) * Complex.Gamma (mellinLine1622 N t)‖ ≤
         K * Real.exp (-(δ * |t|)) := by
-  sorry
+  let z : ℂ := (1 / (N : ℝ) : ℝ) + (2 * Real.pi * α : ℝ) * Complex.I
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hzre : z.re = 1 / N := by simp [z]
+  have hzpos : 0 < z.re := by rw [hzre]; positivity
+  have hz0 : z ≠ 0 := by intro h; simpa [h] using hzpos
+  have ha : 0 ≤ α := (by positivity : (0 : ℝ) ≤ 4 / N).trans hα.1
+  have harg0 : 0 ≤ z.arg := Complex.arg_nonneg_iff.mpr (by
+    simp only [z, Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+      Complex.ofReal_re, Complex.I_im, Complex.I_re, mul_one, mul_zero, add_zero, zero_add]
+    positivity)
+  have harglt : z.arg < Real.pi / 2 := Complex.arg_lt_pi_div_two_iff.mpr (.inl hzpos)
+  let d : ℝ := Real.pi / 2 - z.arg
+  have hd : 0 < d := by dsimp [d]; linarith
+  let rate : ℝ := d / 2
+  have hr : 0 < rate := by dsimp [rate]; positivity
+  let σ : ℝ := 1 / 2 + 1 / Real.log N
+  let A : ℝ := ‖z‖ ^ (-σ) * Real.sqrt (2 * Real.pi)
+  have hnz : 0 < ‖z‖ := norm_pos_iff.mpr hz0
+  have hA : 0 < A := by dsimp [A]; positivity
+  have hlin : ∀ x : ℝ, 0 ≤ x → 3 + x ≤ (3 + 1 / rate) * Real.exp (rate * x) := by
+    intro x hx
+    have he : 1 ≤ Real.exp (rate * x) := Real.one_le_exp_iff.mpr (mul_nonneg hr.le hx)
+    have hx' : x ≤ Real.exp (rate * x) / rate := by
+      rw [le_div_iff₀ hr]
+      linarith [Real.add_one_le_exp (rate * x)]
+    calc
+      3 + x ≤ 3 * Real.exp (rate * x) + Real.exp (rate * x) / rate := by linarith
+      _ = (3 + 1 / rate) * Real.exp (rate * x) := by ring
+  refine ⟨A * (3 + 1 / rate), rate, by positivity, hr, ?_⟩
+  intro t
+  have hre : (-(mellinLine1622 N t)).re = -σ := by
+    simp only [mellinLine1622, Complex.neg_re, Complex.add_re, Complex.ofReal_re,
+      Complex.mul_re, Complex.ofReal_im, Complex.I_re, Complex.I_im, mul_zero, zero_mul,
+      sub_zero, add_zero, σ]
+  have him : (-(mellinLine1622 N t)).im = -t := by
+    simp only [mellinLine1622, Complex.neg_im, Complex.add_im, Complex.ofReal_im,
+      Complex.mul_im, Complex.ofReal_re, Complex.I_im, Complex.I_re, mul_one, zero_mul,
+      add_zero, zero_add]
+  have hpow : ‖z ^ (-(mellinLine1622 N t))‖ ≤ ‖z‖ ^ (-σ) * Real.exp (|t| * z.arg) := by
+    have h := Complex.norm_cpow_le z (-(mellinLine1622 N t))
+    rw [hre, him, div_eq_mul_inv, ← Real.exp_neg] at h
+    apply h.trans
+    apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (norm_nonneg z) _)
+    apply Real.exp_le_exp.mpr
+    nlinarith [mul_le_mul_of_nonneg_right (le_abs_self t) harg0]
+  have hgamma := gamma_mellin_line442 N hN t
+  have hprod := mul_le_mul hpow hgamma (norm_nonneg _)
+    (by positivity : 0 ≤ ‖z‖ ^ (-σ) * Real.exp (|t| * z.arg))
+  have hexp : Real.exp (|t| * z.arg) * Real.exp (-(Real.pi * |t| / 2)) =
+      Real.exp (-(d * |t|)) := by
+    rw [← Real.exp_add]
+    congr 1
+    dsimp [d]
+    ring
+  have hbound : ‖z ^ (-(mellinLine1622 N t)) * Complex.Gamma (mellinLine1622 N t)‖ ≤
+      A * (3 + |t|) * Real.exp (-(d * |t|)) := by
+    rw [norm_mul]
+    apply hprod.trans_eq
+    calc
+      _ = (‖z‖ ^ (-σ) * Real.sqrt (2 * Real.pi)) * (3 + |t|) *
+        (Real.exp (|t| * z.arg) * Real.exp (-(Real.pi * |t| / 2))) := by ring
+      _ = _ := by rw [hexp]
+  change ‖z ^ (-(mellinLine1622 N t)) * Complex.Gamma (mellinLine1622 N t)‖ ≤ _
+  calc
+    _ ≤ A * (3 + |t|) * Real.exp (-(d * |t|)) := hbound
+    _ ≤ A * ((3 + 1 / rate) * Real.exp (rate * |t|)) * Real.exp (-(d * |t|)) :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (hlin _ (abs_nonneg t)) hA.le)
+        (Real.exp_pos _).le
+    _ = (A * (3 + 1 / rate)) *
+        (Real.exp (rate * |t|) * Real.exp (-(d * |t|))) := by ring
+    _ = A * (3 + 1 / rate) * Real.exp (-(rate * |t|)) := by
+      congr 1
+      rw [← Real.exp_add]
+      congr 1
+      dsimp [rate]
+      ring
 
 /-- LEAF. Step 2 of 4: the cube of the logarithm weight is bounded by a cubic
 polynomial in the absolute value of the integration variable. The constant
@@ -45,7 +123,22 @@ depends on N only, and there is no kernel factor here. -/
 theorem log_weight_cubic442 (N : ℕ) (hN : 3 ≤ N) :
     ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ,
       Real.log ((N : ℝ) * (|t| + 2)) ^ 3 ≤ C * (1 + |t|) ^ 3 := by
-  sorry
+  have hNr : (3 : ℝ) ≤ N := by exact_mod_cast hN
+  have hNp : (0 : ℝ) < N := by linarith
+  have hL : 0 ≤ Real.log N := Real.log_nonneg (by linarith)
+  refine ⟨(Real.log N + 1) ^ 3, by positivity, ?_⟩
+  intro t
+  have ht : 0 ≤ |t| := abs_nonneg t
+  have hp : 0 < |t| + 2 := by positivity
+  have hlog : 0 ≤ Real.log ((N : ℝ) * (|t| + 2)) :=
+    Real.log_nonneg (by nlinarith [mul_nonneg (Nat.cast_nonneg N) ht])
+  have hbound : Real.log ((N : ℝ) * (|t| + 2)) ≤ (Real.log N + 1) * (1 + |t|) := by
+    rw [Real.log_mul hNp.ne' hp.ne']
+    have hi := Real.log_le_sub_one_of_pos hp
+    nlinarith [mul_nonneg hL ht]
+  calc
+    _ ≤ ((Real.log N + 1) * (1 + |t|)) ^ 3 := pow_le_pow_left₀ hlog hbound 3
+    _ = _ := by ring
 
 /-- LEAF. Step 3 of 4: for every positive rate the exponential decay times the
 cubic polynomial is integrable on the line. This is the model estimate that the
@@ -54,7 +147,8 @@ and no logarithm of N. -/
 theorem exp_decay_cubic_integrable442 :
     ∀ δ : ℝ, 0 < δ → Integrable (fun t : ℝ =>
       Real.exp (-(δ * |t|)) * (1 + |t|) ^ 3) := by
-  sorry
+  intro δ hδ
+  exact exp_decay_cubic_integrable473 δ hδ
 
 /-- LEAF. Step 4 of 4: strong measurability of the log weighted kernel. The base
 is a fixed nonzero complex number, the line is continuous in the variable of
@@ -66,7 +160,9 @@ theorem outer_kernel_aestronglyMeasurable442 (N : ℕ) (R : ℝ) (α : ℝ) :
       ‖(((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I) ^
           (-(mellinLine1622 N t)) * Complex.Gamma (mellinLine1622 N t)‖ *
         Real.log ((N : ℝ) * (|t| + 2)) ^ 3) := by
-  sorry
+  rcases Nat.eq_zero_or_pos N with rfl | hN
+  · simpa using (aestronglyMeasurable_const : AEStronglyMeasurable (fun _ : ℝ => (0 : ℝ)))
+  · exact (outer_kernel_weight_continuous_line442 N hN α).aestronglyMeasurable
 
 /-- Assembly of `outer_kernel_integrable442` from the four leaves. The decay
 constants and the polynomial constant of the two bounds multiply into the

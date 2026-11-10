@@ -2,6 +2,7 @@
 Published analytic inputs for DecompC169b. Goldbach is open. -/
 import LeanLab.BS2022GRH.PaperInputs148
 import LeanLab.BS2022GRH.ModelC233
+import LeanLab.BS2022GRH.Theta332
 
 namespace LeanLab.BS2022GRH.PublishedInputs232
 open Real Finset ChenThresholdGRH
@@ -1238,7 +1239,7 @@ theorem lemma4_robin : PaperInputs148.Lemma4J :=
 
 /-- LEAF. Rosser and Schoenfeld 1962 Theorem 18, journal Lemma 2 p. 1215. -/
 theorem lemma2_theta : PaperInputs148.Lemma2J := by
-  sorry
+  exact Theta332.theta_of_buthe ThetaInputs224.theta_buthe_1e19
 
 /-- LEAF. Weighted reciprocal prime sum, journal p. 1234 first display.
 Bordignon and Starichkova apply reference 7 Lemma 1 part ii and evaluate the integral. -/

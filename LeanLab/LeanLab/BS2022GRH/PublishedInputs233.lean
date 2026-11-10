@@ -2,6 +2,7 @@
 The product guard gap in Theorem 5, journal p. 1229. Goldbach is open. -/
 import LeanLab.BS2022GRH.ModelC233
 import LeanLab.BS2022GRH.DecompC169c
+import LeanLab.BS2022GRH.Decomp410a
 
 namespace LeanLab.BS2022GRH.PublishedInputs233
 open Real Finset ChenThresholdGRH
@@ -95,6 +96,8 @@ The printed journal UN omits that factor, as recorded in U7154UN. -/
 theorem density_lower (n : ℕ) (hG : GRH) (hn : (4e18 : ℝ) ≤ n) (hev : Even n) :
     8 * UNfull n / log n * (1 - 0.62 * log n / (n : ℝ) ^ (1 / 16 : ℝ)) ≤
       DecompC169a.density n := by
-  sorry
+  exact Decomp410a.density_lower n hG hn hev
 
 end LeanLab.BS2022GRH.PublishedInputs233
+
+#print axioms LeanLab.BS2022GRH.PublishedInputs233.density_lower

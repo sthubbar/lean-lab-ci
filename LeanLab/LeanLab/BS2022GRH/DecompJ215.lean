@@ -8,6 +8,7 @@ import LeanLab.BS2022GRH.Params
 import LeanLab.BS2022GRH.U7154UN
 import LeanLab.BS2022GRH.Decomp138b
 import LeanLab.DERZ1997.Statements
+import LeanLab.BS2022GRH.Decomp333a
 
 open Real
 
@@ -51,10 +52,13 @@ lemma leaf_comb (α A u ε C₁ C₂ X₂ : ℝ) (n : ℕ)
         - ε * C₂ * (3 * exp (8 * α - 2) / (4 - 8 * α)))
     - 1 / 8 * (1 - 0.62 * log X₂ / X₂ ^ (1 / 16 : ℝ))⁻¹ * LeanLab.BS2022GRH.ChenThresholdGRH.invTw * LeanLab.BS2022GRH.ChenThresholdGRH.cGJ X₂ / log (n:ℝ) ^ (A - 2)) :
   8 * (LeanLab.BS2022GRH.UNfull n * n / log n ^ 2) * LeanLab.BS2022GRH.ChenThresholdGRH.B5J α A ε C₂ X₂ n < (LeanLab.BS2022GRH.U7153.SA n : ℝ) := by
-  sorry
+  exact LeanLab.BS2022GRH.Decomp333a.leaf_comb α A u ε C₁ C₂ X₂ n
+    hGRH hSieve hC₁ hC₂ heps hε0 hε1 halpha1 halpha2 hA hCond hX2X hX2N hev heq
 
 /-- **Theorem 5**, p. 1228: S(A, ℙ, z) > 8 U_N N/log² N · B5. -/
 theorem thm5J_assembly : LeanLab.BS2022GRH.ChenThresholdGRH.Thm5J := by
   intro α A u ε C₁ C₂ X₂ n hGRH hSieve hC₁ hC₂ heps hε0 hε1 halpha1 halpha2 hA hCond hX2X hX2N hev
   apply leaf_comb α A u ε C₁ C₂ X₂ n hGRH hSieve hC₁ hC₂ heps hε0 hε1 halpha1 halpha2 hA hCond hX2X hX2N hev
   exact leaf2_bracket α A ε C₂ X₂ n
+
+#print axioms leaf_comb
