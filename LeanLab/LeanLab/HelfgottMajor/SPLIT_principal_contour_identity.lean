@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Decomp457a
+import Mathlib.NumberTheory.LSeries.DirichletContinuation
 
 /-!
 Split of `principal_contour_identity` in `Decomp457a.lean`.
@@ -106,7 +107,14 @@ theorem principal_contour_conductor_one (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZe
           continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
           (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I) =
       principalContour δ x := by
-  sorry
+  subst hq
+  unfold principalContour
+  congr 1
+  congr
+  funext t
+  congr 2
+  have h_triv : χ = 1 := Subsingleton.elim χ 1
+  rw [h_triv, DirichletCharacter.LFunction_modOne_eq]
 
 /-- The conductor one contour identity, assembled from the four steps above by rewriting
 and ring only.  The target statement is unchanged; the assembly has no sorry of its own

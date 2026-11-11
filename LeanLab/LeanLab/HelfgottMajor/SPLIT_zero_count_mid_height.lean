@@ -39,6 +39,51 @@ theorem leaf_mid_log_ge (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
     log (2 * π) ≤ log (q * t) := by
   exact log_le_log (by positivity) hlo
 
+/-- AGY task42 helper. On the middle range the height is at most `2 * π * exp 1` and the
+conductor is at most `17`. -/
+lemma mid_range_bounds_agy42 (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
+    (hhi : (q : ℝ) * t ≤ 2 * π * exp 1) :
+    t ≤ 2 * π * exp 1 ∧ q ≤ 17 := by
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast NeZero.one_le (n := q)
+  have ht0 : 0 ≤ t := by linarith
+  have hqt : t ≤ (q : ℝ) * t := by
+    simpa using mul_le_mul_of_nonneg_right hq1 ht0
+  have hq0 : 0 ≤ (q : ℝ) := by linarith
+  have hq_le : (q : ℝ) ≤ (q : ℝ) * t := by
+    simpa using mul_le_mul_of_nonneg_left ht hq0
+  have h2pi_e : 2 * π * exp 1 < 18 := by
+    have hpi : π < 3.1416 := pi_lt_d4
+    have he : exp 1 < 2.7182818286 := exp_one_lt_d9
+    have he0 : 0 < exp 1 := exp_pos 1
+    nlinarith
+  have hq18 : (q : ℝ) < (18 : ℕ) := by
+    push_cast
+    linarith
+  have hq_lt : q < 18 := Nat.cast_lt.mp hq18
+  exact ⟨le_trans hqt hhi, Nat.le_of_lt_succ hq_lt⟩
+
+/-- AGY task42 helper, CONDITIONAL ON the explicit upper count `zero_count_explicit_upper`:
+in the middle range `2 * π ≤ q * t ≤ 2 * π * exp 1`, a bound of the form
+`zeroCount χ t ≤ (t / π) * log (q * t / (2 * π * exp 1)) + 13` implies `zeroCount χ t ≤ 13`
+because the logarithmic ratio is at most `1` and its logarithm is nonpositive. -/
+lemma leaf_mid_zero_count_small_of_main_add_13_agy42 (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (t : ℝ) (ht : 1 ≤ t)
+    (hlo : 2 * π ≤ (q : ℝ) * t) (hhi : (q : ℝ) * t ≤ 2 * π * exp 1)
+    (hbound : zeroCount χ t ≤ (t / π) * log ((q : ℝ) * t / (2 * π * exp 1)) + 13) :
+    zeroCount χ t ≤ 13 := by
+  have ht0 : 0 ≤ t := by linarith
+  have htp : 0 ≤ t / π := div_nonneg ht0 pi_pos.le
+  have hpos : 0 < (q : ℝ) * t / (2 * π * exp 1) := by
+    have : 0 < (q : ℝ) * t := lt_of_lt_of_le (by positivity) hlo
+    exact div_pos this (by positivity)
+  have hle1 : (q : ℝ) * t / (2 * π * exp 1) ≤ 1 :=
+    (div_le_one (by positivity)).mpr hhi
+  have hlog : log ((q : ℝ) * t / (2 * π * exp 1)) ≤ 0 :=
+    log_nonpos hpos.le hle1
+  have hmain : (t / π) * log ((q : ℝ) * t / (2 * π * exp 1)) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos htp hlog
+  linarith
+
 /-- LEAF. The count on the middle range is a small absolute number.  The middle range
 forces `t ≤ 2 * π * exp 1`, and on this bounded height the nontrivial zeros of `L χ` in
 the critical strip, counted with the analytic multiplicity, number at most `13`.  This is
