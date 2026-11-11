@@ -1,0 +1,23 @@
+{
+  "expected_count": 741,
+  "record_count": 741,
+  "missing": [],
+  "with_sorry": [
+    "LeanLab.Tolev2009.Decomp286a.progression_replacement",
+    "LeanLab.Tolev2009.Decomp286a.major_arc_leaf",
+    "LeanLab.Tolev2009.Decomp286b.prime_decomposition",
+    "LeanLab.Tolev2009.Decomp286b.minor_arc_sup_leaf",
+    "LeanLab.Tolev2009.Decomp310c.retained_identity",
+    "LeanLab.Tolev2009.Decomp310c.prime_decomposition",
+    "LeanLab.Tolev2009.Decomp83.major_arc_leaf",
+    "LeanLab.Tolev2009.Decomp83.minor_arc_sup_leaf",
+    "LeanLab.Tolev2009.Decomp83.published_assembly",
+    "LeanLab.Tolev2009.Decomp83.legacy_assembly",
+    "LeanLab.Tolev2009.Reps.the_theorem",
+    "LeanLab.Tolev2009.Reps.leaf_error_part_average",
+    "LeanLab.Tolev2009.Reps.leaf_main_part_average",
+    "LeanLab.Tolev2009.Reps.the_theorem_split",
+    "LeanLab.Tolev2009.the_theorem"
+  ],
+  "foreign_except_sorry": []
+}

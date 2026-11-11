@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning ArithmeticFunction.mul_apply.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.NumberTheory.ArithmeticFunction.Defs", "name": "ArithmeticFunction.mul_apply", "type": " {R : Type u_1} [Semiring R] {f g : ArithmeticFunction R} {n : \u2115} : (f * g) n = \u2211 x \u2208 n.divisorsAntidiagonal, f x.1 * g x.2"}]}

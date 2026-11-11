@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Real.rpow_le_rpow_of_exponent_le.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Analysis.SpecialFunctions.Pow.Real", "name": "Real.rpow_le_rpow_of_exponent_le", "type": " {x y z : \u211d} (hx : 1 \u2264 x) (hyz : y \u2264 z) : x ^ y \u2264 x ^ z"}]}

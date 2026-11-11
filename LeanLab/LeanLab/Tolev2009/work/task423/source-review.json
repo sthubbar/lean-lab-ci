@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Decomp423a.progression_replacement",
+    "verdict": "MATCH",
+    "kind": "exact supply",
+    "source": "Halupczok 2008 pages 8 to 12 and 18 to 19; Tolev 2009 pages 1 to 4"
+  },
+  {
+    "name": "Decomp423a.singular_integral_error",
+    "verdict": "MATCH",
+    "kind": "exact supply",
+    "source": "Halupczok 2008 pages 8 to 12 and 18 to 19; Tolev 2009 pages 1 to 4"
+  },
+  {
+    "name": "Decomp423a.singular_series_tail",
+    "verdict": "MATCH",
+    "kind": "exact supply",
+    "source": "Halupczok 2008 pages 8 to 12 and 18 to 19; Tolev 2009 pages 1 to 4"
+  },
+  {
+    "name": "Decomp423a.simultaneous_error_bounds",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Halupczok 2008 pages 8 to 12 and 18 to 19; Tolev 2009 pages 1 to 4"
+  },
+  {
+    "name": "Decomp423a.nonempty_major_arc_regime",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Halupczok 2008 pages 8 to 12 and 18 to 19; Tolev 2009 pages 1 to 4"
+  },
+  {
+    "name": "Convolution423.prime_box_mass",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Tolev 2009 page 1 count and page 4 centered error; Mathlib Chebyshev bounds"
+  },
+  {
+    "name": "Convolution423.theta_linear_lower",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Tolev 2009 page 1 count and page 4 centered error; Mathlib Chebyshev bounds"
+  },
+  {
+    "name": "Convolution423.interval_prime_mass",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Tolev 2009 page 1 count and page 4 centered error; Mathlib Chebyshev bounds"
+  },
+  {
+    "name": "Convolution423.interval_representation_mass",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Tolev 2009 page 1 count and page 4 centered error; Mathlib Chebyshev bounds"
+  },
+  {
+    "name": "Convolution423.uncentered_count_no_log_saving",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Tolev 2009 page 1 count and page 4 centered error; Mathlib Chebyshev bounds"
+  },
+  {
+    "name": "SplitAudit423.unit_entry_le_EF",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Tolev 2009 page 1 count and page 4 centered error; Mathlib Chebyshev bounds"
+  },
+  {
+    "name": "SplitAudit423.not_leaf_error_part_average",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Tolev 2009 page 1 count and page 4 centered error; Mathlib Chebyshev bounds"
+  },
+  {
+    "name": "RetainedBudget423.grouping_scales",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Heath Brown 1982 page 1367 displays 6 and 7; Tolev 1999 page 82"
+  },
+  {
+    "name": "RetainedBudget423.identity_k3",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Heath Brown 1982 page 1367 displays 6 and 7; Tolev 1999 page 82"
+  },
+  {
+    "name": "RetainedBudget423.convolution_vanish",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Heath Brown 1982 page 1367 displays 6 and 7; Tolev 1999 page 82"
+  },
+  {
+    "name": "RetainedBudget423.convolution_cube_vanish",
+    "verdict": "MATCH",
+    "kind": "derived helper or formalization audit",
+    "source": "Heath Brown 1982 page 1367 displays 6 and 7; Tolev 1999 page 82"
+  }
+]

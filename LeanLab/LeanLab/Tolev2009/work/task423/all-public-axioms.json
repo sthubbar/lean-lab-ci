@@ -1,0 +1,6727 @@
+{
+  "expected_count": 741,
+  "record_count": 741,
+  "missing": [],
+  "with_sorry": [
+    "LeanLab.Tolev2009.Decomp286a.progression_replacement",
+    "LeanLab.Tolev2009.Decomp286a.major_arc_leaf",
+    "LeanLab.Tolev2009.Decomp286b.prime_decomposition",
+    "LeanLab.Tolev2009.Decomp286b.minor_arc_sup_leaf",
+    "LeanLab.Tolev2009.Decomp310c.retained_identity",
+    "LeanLab.Tolev2009.Decomp310c.prime_decomposition",
+    "LeanLab.Tolev2009.Decomp83.major_arc_leaf",
+    "LeanLab.Tolev2009.Decomp83.minor_arc_sup_leaf",
+    "LeanLab.Tolev2009.Decomp83.published_assembly",
+    "LeanLab.Tolev2009.Decomp83.legacy_assembly",
+    "LeanLab.Tolev2009.Reps.the_theorem",
+    "LeanLab.Tolev2009.Reps.leaf_error_part_average",
+    "LeanLab.Tolev2009.Reps.leaf_main_part_average",
+    "LeanLab.Tolev2009.Reps.the_theorem_split",
+    "LeanLab.Tolev2009.the_theorem"
+  ],
+  "foreign_except_sorry": [],
+  "records": [
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.arc_membership_scaled",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.overlap_cross_product",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.reduced_arcs_disjoint",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.arc_subset_unit",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.arcIndices",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.majorArcs_eq_union",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.arc_family_disjoint",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.majorArcs_subset_unit",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ArcGeometry314.integral_majorArcs",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.approx",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.residual",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.homogeneous",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.errorTerm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.homogeneous_expansion",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.continuous_geometric",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.continuous_error_integrand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.local_arc_expansion",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.major_arc_regime",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.rational_arc_expansion",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.display17_sets",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.scale",
+      "axioms": [
+        "propext"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.scale_pos",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.block_card",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.scale_le_mem",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.scale_le_N",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.W",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.W0",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.Ws",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.W_split",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.display17_blocks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BlockEstimates.E2_bound_without_display10",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BoundaryAudit.one_not_mem_nat_block",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BoundaryAudit.singleton_weight_block",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.BoundaryAudit.singleton_weight_initial",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.coeffRes_crt_image",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.coeffRes_crt_inj",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.coeff_crt",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.linear_crt_inj",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.linear_crt_image",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.coeff_frequency_mod",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.negative_phase_mod",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.numerator",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.numerator_mul",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.totient_lcm_product",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.normalization_mul",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.ssTerm_factor",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CRT355.ssTerm_mul",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Caps341.phaseCap_neg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Caps341.phaseCap_distance",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Caps341.phaseCap_product",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CoefficientMoment314.reciprocal_moment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CoefficientMoment314.reciprocal_moment_log",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CoefficientMoment314.seven_reciprocal_moments",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.CoefficientMoment314.seven_moments_log_budget",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.geometric",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.arcIntegral",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.model",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.truncatedMain",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.model_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.truncatedMain_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.progression_replacement",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.singular_integral_error",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.singular_series_tail",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286a.major_arc_leaf",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.tau5",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.bilinear",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.tau5_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.bilinear_nonzero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.typeI_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.typeII_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.prime_decomposition",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp286b.minor_arc_sup_leaf",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.row",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.bilinear_eq_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.bilinear_norm_le_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.logarithmic_row_by_parts",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.progression_phase_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.divisor_power_reciprocal",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.constant_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.logarithmic_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310a.typeI_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.energy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.bilinear_sq_le_energy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.energy_eq_correlations",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.denominator_gt_Q",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.denominator_ratios",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.zeta_power_reciprocal",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.zeta_power_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.multichoose_mul_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.zeta_power_prime_pow",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.tau5_sq_le_zeta25",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.coefficient_mass",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.lcm_fiber_divisor_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.lcm_divisor_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.energy_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.row_energy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310b.typeII_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.retainedMangoldt",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.prime_power_mass_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.prime_power_mass_cutoff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.Kfun_add_prime_powers",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.prefix_weight_mass",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.prefix_mangoldt_mass",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.initial_segment_mass_cutoff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.prime_power_and_initial_segment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.vonMangoldt_moebius_log_divisor",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.retained_identity",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp310c.prime_decomposition",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.linear_remainder_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.quadratic_remainder_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.cubic_remainder_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314a.progression_replacement",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.phiProduct",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.weightedCoeff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coefficientMass",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.phiProduct_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.weightedCoeff_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coefficientMass_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.EF_dominate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coeffRes_crt_image_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coeffRes_crt_inj_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coeff_crt_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.linear_crt_inj_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.linear_crt_image_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coeff_frequency_mod_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.negative_phase_mod_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.numerator_mul_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.totient_lcm_product_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.normalization_mul_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.ssTerm_factor_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.ssTerm_mul_tr",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.reciprocal_moment_cm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.reciprocal_moment_log_cm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.seven_reciprocal_moments_cm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.seven_moments_log_budget_cm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.gcd_quotient_product_dvd_gd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.gcd_lcm_identity_gd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.exists_gcd_factors_gd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.factors_le_gd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.divisor_count_four_gd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.ssTerm_multiplicative",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.finite_euler_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.finite_euler_domination",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.range_sum_le_positive",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.summable_of_raw_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coefficientMass_le_a",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.seven_product_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.factor_weight_le_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.gcd_reindex_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.reciprocal_totient_uniform_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.normalized_weight_le_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.normalized_weight_sum_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.cutoff3_le_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.EF_le_cube_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.log_budget_b",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.weighted_coeff_summable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.coefficient_mass_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.geometric_integral_error",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.truncatedMain_as_re",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.finite_integral_difference",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.finite_second_moment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.finite_integral_contraction",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.logarithmic_absorption",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.mean_of_mass_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.integral_cutoff_regime",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314b.singular_integral_error",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314c.first_moment_tail",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314c.scalar_series_tail",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp314c.singular_series_tail",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.progression",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.phaseCap",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.phaseCap_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.distance_comparison",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.row_eq_progressions",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.row_norm_le_progressions",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.row_norm_le_phase",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.logarithmic_row_norm_le_prefix",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.progression_affine",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.progression_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.logarithmic_row_norm_le_phase",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.convolution_reduction",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.zeta6_sq_le_zeta36_nat",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.zeta6_sq_le_zeta36",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.zeta6_sq_reciprocal",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.phaseCap_le_count",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.weighted_phase_cauchy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.rectangle_phase_sq_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.phaseCap_le_G_add_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.phaseCap_sum_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.integer_denominator_gt_Q",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.minor_arc_reduced_approximation",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.eventual_minor_arc_parameters",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.shell_product_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.phase_mass_from_approx",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.rectangle_phase_of_mass",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.phase_average",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.constant_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336a.logarithmic_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp336c.typeI_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.indices",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.atom",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.correlation",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.diagonal",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.offDiagonal",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.row_eq_atoms",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.energy_eq_gram",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.diagonal_add_offDiagonal",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.energy_le_correlations",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.correlation_eq_phase",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.correlation_diagonal",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.diagonal_independent",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341a.scalar_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341b.diagonal_power_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341b.harmonic_endpoint",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341b.eventual_diagonal_parameters",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341b.diagonal_shell_parameters",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341b.diagonal_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341c.finite_offDiagonal_reduction",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341c.offDiagonal_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp341c.row_energy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346a.linear_scalar_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346a.linear_prefix_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346a.linear_remainder_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346b.quadratic_scalar_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346b.quadratic_prefix_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346b.quadratic_remainder_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.cutoff3_le_cutoff_local",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.triple_sum_mul",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.inner_sum_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.scalarArc_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.scalarMean_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.theta_sum_mono",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.prod_three_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.mean_le_cube",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.rpow_pow_local",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.rpow_mul_rpow_local",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.arith_two_terms",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.log_le_log_Q_local",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.sum_c_cube_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.sum_T_cube_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.add_cube_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.cubic_scalar_mean_proof",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.cubic_scalar_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.cubic_prefix_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp346c.cubic_remainder_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.gcdWeight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.rawWeight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.primeProduct",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.ssTerm_multiplicative",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.finite_euler_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.finite_euler_domination",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.local_product_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.rawWeight_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.phiProduct_pos",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.weightedCoeff_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.coefficientMass_pos_of_summable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.range_sum_le_positive",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.summable_of_raw_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.weighted_coeff_summable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355a.coefficientMass_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.seven_product",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.factor_weight_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.gcd_reindex",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.reciprocal_totient_uniform",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.normalized_weight_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.normalized_weight_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.cutoff3_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.EF_le_cube",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.log_budget",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355b.coefficient_mass_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp355c.singular_integral_error",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp83.Estar_congr_admissible",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp83.theorem_transfer_admissible",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp83.major_arc_leaf",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp83.minor_arc_sup_leaf",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp83.published_assembly",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp83.legacy_transfer",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Decomp83.legacy_assembly",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Diagonal341.unweighted_lcm_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Diagonal341.diagonal_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Diagonal341.diagonal_le_separated",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Diagonal341.tau5_square_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Diagonal341.diagonal_finite_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Discrepancy346.thetaError",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Discrepancy346.thetaError_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Discrepancy346.thetaError_term_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Discrepancy346.thetaError_attained",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Discrepancy346.thetaError_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Discrepancy346.prefix_identity",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Display15.pairs",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Display15.w",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Display15.pairs_card_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Display15.w_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Display15.w_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Display15.display15",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Display15.second_congruence",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.norm_ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.conj_ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.measurable_ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.mul",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.const",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.comp",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.indicator",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.conj",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Bdd.normSq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.integrable_of_bdd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.\u03bcI",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Kfun",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Km",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Ihat",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.U",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Kc",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.nSet",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.primeSet",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Sexp_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.measurable_Sexp",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.continuous_Kfun",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.measurable_Km",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.bdd_Sexp",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.bdd_Km",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.integral_ee_\u03bcI",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.mul",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.conj",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.comp",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.const",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.normSq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.integrable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.integrable_normSq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.mb_Sexp",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.mb_Km",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.sq_norm_eq_mul_conj",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.U_eq_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.sum_norm_le_sqrt",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Fsum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.display14",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.G",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.G_neg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.mb_G",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.sq_norm_Ihat",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.kernel_expand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.sum_sq_norm_Ihat",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.fejer_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.expand_S",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.expand_G",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.nq",
+      "axioms": [],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.mq",
+      "axioms": [],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.count_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.log_mem_primeSet",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.T1_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.card_primeSet_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.pair_sum_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.lower_fejer",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.display16_strong",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.display16",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.mb_integrand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.MB.indicator",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.sum_lam_Rm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.innerF_Rm_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Vblk",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Wblk",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Wzero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Wstar",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Wblk_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Wzero_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Wstar_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Vblk_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.display17_strong",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.display17",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.E2_bound_of_displays",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays14to16.Kc_lam_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.Display12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.norm_Kc_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.Wzero_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.Sexp_periodic",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.Kfun_periodic",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.Kfun_mass_shift",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.minor_mass_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.display19_scales",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.display19",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.Kc_fourierCoeffOn",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.Kc_bessel",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.nonzeroSet",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.divisorCount",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.DivisorFourthMoment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.divisor_filter_card_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.starSum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.starSum_regroup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.divisor_pair_sum_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.starSum_cauchy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.fourth_mass_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.display20_sets",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Displays19to20.display20",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.divisor_expand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.sum_multiples_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.Hn_mono",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.reciprocal_step",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.moment_step",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.reciprocal_cube",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.fourth_moment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.fourth_moment_log",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.signed_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.DivisorMoment.signed_fourth_moment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.block",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.sum_blocks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.rectangle_cover",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.V",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.V_succ_succ",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.rectangle_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.block_count_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.dyadicConstant",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.display10",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.exists_max_block",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.cutoff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.cutoff3",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.cutoff_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Dyadic.E2_display10",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.liftRes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.localSum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.ssTerm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.singSeries",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.MainTheorem",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.ee_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.liftRes_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.ssTerm_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.liftRes_eq_empty",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.singSeries_eq_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.singSeries_mod",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.ssTerm_classical",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.Sexp",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.integrand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.majorArcs",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.measurableSet_majorArcs",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.RM",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.Rm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.ee_add",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.ee_int",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.continuous_ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.integral_ee",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.continuous_Sexp",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.continuous_integrand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.integral_integrand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.R_eq_RM_add_Rm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.innerF",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.EF",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.Estar_eq_EF",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.Qof",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.\u03c4of",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.E1",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.E2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.iSup2_le_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.le_iSup2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.innerF_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.innerF_add_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.EF_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.EF_add_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.Estar_le_E1_add_E2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.BoundE1",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.BoundE2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.mainTheorem_of_E1_E2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.rpow_sq_half",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.Wstar_bookkeeping",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Faithful.E2_bookkeeping",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FinalReduction.Sup12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FinalReduction.display12_of_sup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FinalReduction.E2_bound_of_sup12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FinalReduction.Sup12Uniform",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FinalReduction.display12Uniform_of_sup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FinalReduction.boundE2_of_sup12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FinalReduction.mainTheorem_of_display9_sup12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FixedWeights83.delta_mod",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FixedWeights83.fixedError",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FixedWeights83.fixedError_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.FixedWeights83.fixed_weights_of_main",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Gcd355.gcd_quotient_product_dvd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Gcd355.gcd_lcm_identity",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Gcd355.exists_gcd_factors",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Gcd355.factors_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Gcd355.divisor_count_four",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.rational_minor_point",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.eventual_nonvacuity_parameters",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.minor_arc_instances",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.unit_weight_eq_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.terminal_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.terminal_majorants",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.nonzero_row_instances",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.minor_shift_resonance",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances336.row_cancelled_phase",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances341.one_le_tau5",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances341.indicator_energy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances341.cubic_scales",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances341.nonzero_minor_arc_energy",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.unit_rawWeight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.unit_weightedCoeff_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.unit_ssTerm_two",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.unit_weightedCoeff_two",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.unit_mass_lower",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.finite_euler_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.local_parameters",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.gcd_factors_instance",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.unit_cube_instance",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Instances355.large_odd_instances",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.geometric_cube_expand",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.full_geometric_integral",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.positive_triple_inner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.positive_triple_middle",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.full_integral_lattice_count",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.positive_triple_recurrence",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.full_integral_closed",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.full_integral_endpoint_error",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.geometric_mul_sub",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.phase_increment_lower",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.geometric_norm_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.geometric_cube_norm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.positive_tail_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.geometric_truncation_tail",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Integral314.geometric_integral_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.finite_mass",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.weight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.Kfun_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.weight_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.weight_le_divisors",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.coefficient_mass_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.mass_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.display12_L2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.cutoff3_sq_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.L2Bound.display12_L2_cutoff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmAverage346.linear_lcm_average",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmAverage346.product_lcm_average",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.fiberCount",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.fiberCount_le_divisors",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.fiberMoment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.fiberMoment_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.linear_fiber_weight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.quadratic_fiber_weight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.cubic_fiber_weight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.sum_lcm_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.sum_lcm_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.weighted_lcm_sum_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.divisor_ratio_moment_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.LcmMultiplicity346.lcm_product_sum_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level346.lcm_below_theta_level",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level346.third_cutoff_le_first",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level346.first_cutoff_lcm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level346.third_cutoff_lcm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level49336.cutoff3_le_level49",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level49336.shell_product_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level49336.phase_average",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level49336.constant_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level49336.logarithmic_rows",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Level49336.typeI_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.coeffRes_of_dvd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.coeff_of_dvd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.localSum_of_dvd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.ssTerm_norm_of_dvd",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.prime_power_moment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.common_prime_factor",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.common_prime_product",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Local355.naive_majorant_not_summable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MajorArc341.progression_replacement",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MajorArc341.singular_series_tail",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MajorArc341.major_arc_leaf",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MinorArcBound.divisorFourthMoment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MinorArcBound.W0_eq_Wzero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MinorArcBound.display20_of_display12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MinorArcBound.E2_bound_of_display12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MinorArcBound.Display12Uniform",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MinorArcBound.boundE2_of_display12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.MinorArcBound.mainTheorem_of_displays9_12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Nonvacuity.unitWeight",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Nonvacuity.unitWeight_bounded",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Nonvacuity.majorArcs_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Nonvacuity.Rm_zero_Q",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Nonvacuity.singleton_block_pos",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Nonvacuity.log_seven_ge_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Nonvacuity.display12_nonzero_instance",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.OffDiagonal341.divisorPhase",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.OffDiagonal341.divisorPhase_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.OffDiagonal341.divisorPhase_sq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.OffDiagonal341.phase_mass_four",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.OffDiagonal341.divisorPhase_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.OffDiagonal341.phase_product_endpoint",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Product341.lcm_sum_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Product341.divisor_product_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.mainCoeff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.atom",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.prefixError",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.ee_increment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.phase_sum_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.prefixError_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.prefix_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.positive_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.residual_eq_sum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.residual_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.positivePart",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.positivePart_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.homogeneous_norm_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.geometric_norm_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.approx_norm_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.residual_radius_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.arcEnvelope",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.errorEnvelope",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.arcEnvelope_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.errorEnvelope_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.abs_le_radius",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.local_error_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.errorTerm_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progression346.error_mean_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progressions341.correlation_affine",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progressions341.correlation_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Progressions341.correlation_diagonal_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.PublishedTheorem.Estar_eq_publishedSeries",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.PublishedTheorem.published_of_main",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.PublishedTheorem.publishedTheorem_of_display9_sup12",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.QuantitativeBV346.large_conductor_fixed",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.QuantitativeBV346.bv_fixed_of",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.QuantitativeBV346.bvMax_fixed_eventually_of",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.QuantitativeBV346.bvMax_fixed_of",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.QuantitativeBV346.theta_fixed_of",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.QuantitativeBV346.theta_fixed",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.mod_mem_liftRes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.phase_eq_lifted",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.Sexp_eq_Icc",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.lifted_theta_identity",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.badPrimeSum",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.rational_prime_decomposition",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.rational_prefix_identity",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.bad_prime_not_coprime_q",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.badPrimeSum_norm_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.badPrimeSum_prefix_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.prefix_norm_le_theta",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalCRT346.prefixError_le_theta",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalPrefix346.mainCoeff_eq_lifted",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalPrefix346.lifted_card_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalPrefix346.mainCoeff_norm_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalPrefix346.mainCoeff_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalPrefix346.Sexp_zero_eq_theta",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalPrefix346.prefixError_one_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.RationalPrefix346.prefixError_one_mean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reduction341.prime_decomposition_of_retained",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reduction341.minor_arc_sup_of_retained",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reduction341.published_theorem_of_retained",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.R",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.SSeries",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.M",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.\u0394",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.residues",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.inner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.Estar",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.TheTheorem",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.the_theorem",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.R_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.rep_of_R_pos",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.R_pos_of_rep",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.local_condition",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.R_eq_zero_of_not_local",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.inner_sum_indicator",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.indicator_bounded",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.leaf_error_part_average",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.leaf_main_part_average",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.leaf_estar_le_parts",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Reps.the_theorem_split",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.mainProfile",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.errorProfile",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.positivePart_mono",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.mainProfile_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.errorProfile_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.main_profile_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.error_profile_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.scalarArc",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.scalarEnvelope",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.scalarArc_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.scalarEnvelope_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.arcEnvelope_le_scalar",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.errorEnvelope_le_scalar",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.EF_independent_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.scalarMean",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.ScalarEnvelope346.prefix_mean_le_scalar",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.coeffRes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.coeff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.coprime_modEq",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.ee_rat_mod",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.liftRes_projection",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.liftRes_projection_inj",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.localSum_eq_coeff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.coeffPaper",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.coeffPaper_eq_coeff",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.halupczokTerm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.ssTerm_eq_halupczokTerm",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.halupczokSeries",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SeriesIdentification.singSeries_eq_halupczokSeries",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Shifted341.distance_sum_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Shifted341.shifted_square_bound",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.R",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SSeries",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.M",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.\u0394",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.residues",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.inner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Estar",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.TheTheorem",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.the_theorem",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": [
+        "sorryAx"
+      ]
+    },
+    {
+      "name": "LeanLab.Tolev2009.R_nonneg",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.rep_of_R_pos",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.R_pos_of_rep",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.local_condition",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.R_eq_zero_of_not_local",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.inner_sum_indicator",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.indicator_bounded",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SupremumAudit.coarse_sup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SupremumAudit.coarse_exponent_gap",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.SupremumAudit.coarse_bound_not_absorbable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.sum_union_le_real",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.sum_biUnion_le_real",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.Ioc_subset_biUnion_Ioc_nat",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.sum_Ioc_le_sum_biUnion",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.sum_sum_Ioc_le_max_Vblk",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.Icc_eq_insert_Ioc",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.sum_Icc_eq_add_sum_Ioc",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.sum_sum_Icc_le_Ioc_add",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.triad02_main",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.Triad02.triad02_instance",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.TypeII341.typeII_estimate",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.Supported",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.RealWellFactorable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.zero_wellFactorable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.wellFactorable_bounded",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.wellFactorable_supported",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.unit_wellFactorable",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.level49",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.Estar49",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.WellFactorableExtension",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.Estar49_zero",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.level49_floor_sq_le",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    },
+    {
+      "name": "LeanLab.Tolev2009.WellFactorable.wellFactorable_L2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "other_axioms": []
+    }
+  ]
+}

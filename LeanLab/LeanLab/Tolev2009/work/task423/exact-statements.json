@@ -1,0 +1,17 @@
+[
+  {
+    "name": "progression_replacement",
+    "exact_statement": true,
+    "sha256": "4ece2e9acfc00075a2693bd965e7769cb9e212bdc5e528352e2d728016e15439"
+  },
+  {
+    "name": "singular_integral_error",
+    "exact_statement": true,
+    "sha256": "34a15e2ff83db8f74d97c2d4fa019d682f68b2b4a2a12b732354e65dedfc4d96"
+  },
+  {
+    "name": "singular_series_tail",
+    "exact_statement": true,
+    "sha256": "e550839e27623253b6ff2087c01b8fc3a417f81f927e7b9ac9cbfd821b528fc1"
+  }
+]

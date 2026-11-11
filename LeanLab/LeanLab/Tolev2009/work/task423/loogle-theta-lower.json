@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Chebyshev.theta_ge.\n", "heartbeats": 0, "hits": [{"doc": "The Chebyshev lower bound for `\u03b8`.", "module": "Mathlib.NumberTheory.Chebyshev", "name": "Chebyshev.theta_ge", "type": " (n : \u2115) : \u2191n * Real.log 2 - Real.log (\u2191n + 1) - 2 * \u221a\u2191n * Real.log \u2191n \u2264 Chebyshev.theta \u2191n"}]}
