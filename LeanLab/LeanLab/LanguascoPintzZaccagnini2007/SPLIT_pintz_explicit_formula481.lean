@@ -51,7 +51,33 @@ theorem leaf_admissible_zero_family481 :
           (∀ i, i ≠ 0 → z i ∈ zeroBox481 X H T P) ∧
           (∀ w, ((univ.filter (fun i => i ≠ 0 ∧ z i = w)).card : ℕ) ≤
             analyticOrderNatAt (Lfun481 w.2.1) w.2.2) := by
-  sorry
+  refine ⟨1, 1, le_rfl, le_rfl, ?_⟩
+  intro H T hH hT
+  refine ⟨1, fun X hX => ?_⟩
+  have hX1 : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+  refine ⟨(X : ℝ) ^ ((2 : ℝ) / 5), ⟨le_rfl, ?_⟩, 0, fun _ => ⟨1, 1, 1⟩, rfl, rfl, ?_, ?_⟩
+  · exact Real.rpow_le_rpow_of_exponent_le hX1 (by norm_num)
+  · intro i hi
+    have hi0 : i = 0 := by
+      apply Fin.ext
+      have := i.isLt
+      omega
+    exact absurd hi0 hi
+  · intro w
+    have hcard :
+        (univ.filter (fun i : Fin (0 + 1) =>
+          i ≠ 0 ∧ (fun _ => (⟨1, 1, 1⟩ : Σ r : ℕ, DirichletCharacter ℂ r × ℂ)) i = w)).card = 0 := by
+      rw [Finset.card_eq_zero]
+      refine Finset.eq_empty_iff_forall_notMem.2 ?_
+      intro i hi
+      simp only [mem_filter, mem_univ, true_and] at hi
+      have hi0 : i = 0 := by
+        apply Fin.ext
+        have := i.isLt
+        omega
+      exact hi.1 hi0
+    rw [hcard]
+    exact Nat.zero_le _
 
 /-- LEAF. The coefficient step: for any finite indexed zero family and any epsilon clause
 `0 < ε → ε < ε₀ → Cε ε > 0` there are generalised singular series coefficients with the three
