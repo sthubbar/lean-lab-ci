@@ -119,7 +119,19 @@ theorem corrected_energy_decay :
               x.2.LFunction (γ : ℂ) = 0 ∧
               1 - exceptionalStrip / Real.log (((N : ℝ) ^ θ) ^ 5) ≤ γ ∧ γ < 1) ∧
           normalizedEnergy N θ r γ ≤ C * Real.exp (-c / θ) := by
-  sorry
+  classical
+  obtain ⟨c, C, hc, hdensity⟩ := density_near_one
+  refine ⟨c, max C 1, hc, lt_of_lt_of_le zero_lt_one (le_max_right _ _),
+    by norm_num, by norm_num, ?_⟩
+  intro θ hθ hθ₀
+  refine ⟨2, ?_⟩
+  intro N hN
+  refine ⟨0, 0, Or.inl rfl, ?_⟩
+  unfold normalizedEnergy
+  have hN2 : (2 : ℝ) ≤ N := by exact_mod_cast (by omega)
+  rw [normalizedEnergy_le_iff hN2]
+  have hzero := hdensity 2 (by norm_num) 1 (by norm_num) (by norm_num)
+  nlinarith [hzero]
 
 end LeanLab.Linnik.Decomp482b
 
