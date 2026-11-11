@@ -130,6 +130,54 @@ theorem leaf_level_sum_exception_bound (A : ℝ) (hA : 0 < A) :
     (fun N _ hN => le_trans hN hC₂) X)) (le_trans (hC X hX) hC₁)
 
 
+/-! ### Helpers for LEAF 2: the zero weights make the level-sum hypothesis vacuous -/
+
+/-- With the zero weights the remainder R_{d,l}(N) vanishes. -/
+theorem akeno_Rdl_zero (X : ℝ) (N d : ℕ) (l : ℤ) : Rdl 0 0 X N d l = 0 := by
+  unfold Rdl
+  simp
+
+/-- With the zero weights the supremum of the remainders is zero. -/
+theorem akeno_supR_zero (X : ℝ) (N d : ℕ) : supR 0 0 X N d = 0 := by
+  unfold supR
+  apply le_antisymm
+  · refine Finset.sup_le ?_
+    intro l hl
+    rw [akeno_Rdl_zero]
+    simp
+  · exact bot_le
+
+/-- With the zero weights the level sum vanishes, so the level-sum hypothesis of LEAF 2
+carries no content for the zero weights. -/
+theorem akeno_levelSum_zero (θ : ℝ) (k : ℕ) (X : ℝ) (N : ℕ) :
+    levelSum θ k 0 0 X N = 0 := by
+  unfold levelSum
+  apply Finset.sum_eq_zero
+  intro d hd
+  simp [akeno_supR_zero]
+
+/-- Any statement of the weighted-sieve transfer of the shape of LEAF 2, applied to the zero
+weights, gives binary Goldbach for every sufficiently large even integer, since the zero
+weights make the level sum zero, so the level-sum hypothesis then holds for every N. -/
+theorem leaf_sieve_transfer_zero_weight_goldbach
+    (hzero : ∃ X₀ : ℝ, 3 ≤ X₀ ∧ ∀ X : ℝ, X₀ ≤ X → ∀ N : ℕ, Even N → X / 2 < (N : ℝ) →
+      (N : ℝ) ≤ X → levelSum 0.1635 2 0 0 X N ≤ X / Real.log X ^ (2 : ℝ) → DiffForm 4 N) :
+    ∃ X₀ : ℝ, 3 ≤ X₀ ∧ ∀ N : ℕ, Even N → X₀ ≤ (N : ℝ) → IsGoldbachSum N := by
+  obtain ⟨X₀, hX₀3, h⟩ := hzero
+  refine ⟨X₀, hX₀3, ?_⟩
+  intro N hEven hN
+  have hN3 : (3 : ℝ) ≤ (N : ℝ) := le_trans hX₀3 hN
+  have hN0 : (0 : ℝ) < (N : ℝ) := by linarith
+  have hN1 : (1 : ℝ) < (N : ℝ) := by linarith
+  have hlog : 0 < Real.log (N : ℝ) := Real.log_pos hN1
+  have hlevel : levelSum 0.1635 2 0 0 (N : ℝ) N = 0 := akeno_levelSum_zero _ _ _ _
+  have hbound : levelSum 0.1635 2 0 0 (N : ℝ) N ≤ (N : ℝ) / Real.log (N : ℝ) ^ (2 : ℝ) := by
+    rw [hlevel]
+    have hpow : (0 : ℝ) < Real.log (N : ℝ) ^ (2 : ℝ) := Real.rpow_pos_of_pos hlog 2
+    exact div_nonneg (le_of_lt hN0) (le_of_lt hpow)
+  have hd := h (N : ℝ) hN N hEven (by linarith) le_rfl hbound
+  exact isGoldbachSum_of_diffForm hd
+
 /-- LEAF 2 of the split. The second step: the weighted sieve of Proposition 4.4, at
 `s = 33.5` and `t = 9.5`. For any two smooth weights supported in `[1/2, 1]` there is a
 height beyond which every even `N ∈ (X/2, X]` whose weighted level sum is at most
@@ -139,6 +187,23 @@ theorem leaf_sieve_transfer (w₁ w₂ : ℝ → ℝ) (hw₁ : SmoothWeight (1 /
     (hw₂ : SmoothWeight (1 / 2) w₂) :
     ∃ X₀ : ℝ, 3 ≤ X₀ ∧ ∀ X : ℝ, X₀ ≤ X → ∀ N : ℕ, Even N → X / 2 < (N : ℝ) →
       (N : ℝ) ≤ X → levelSum 0.1635 2 w₁ w₂ X N ≤ X / Real.log X ^ (2 : ℝ) → DiffForm 4 N := by
+  -- BLOCKED, OUT OF REACH, 2026-11-11. The exact missing result is Proposition 4.4 of
+  -- Akeno 2026, arXiv 2606.29559, at theta = 0.1635, s = 33.5 and t = 9.5, which the lab
+  -- has never formalized. The attempt to apply it, namely
+  --   exact akeno_prop4_4 33.5 9.5 (by norm_num) (by norm_num) w₁ w₂ hw₁ hw₂
+  -- fails with the Lean error Unknown identifier akeno_prop4_4, reported at line 193
+  -- of this file in the attempt run.
+  -- The same unknown identifier error comes from #check for akeno_prop_4_4, prop44,
+  -- prop4_4, weightedSieve, akeno_weighted_sieve, akeno_sieve_transfer, sieve_transfer,
+  -- weighted_sieve_transfer, Prop44, M_k and Mk. Mathlib has no such result: LeanSearch
+  -- for a weighted sieve transfer from a level of distribution returns only
+  -- Mathlib.NumberTheory.SelbergSieve, the generic sieve framework, and no Goldbach
+  -- theorem. The paper states Proposition 4.4 as an almost all statement over N given
+  -- M_k of F, theta and s positive, not as a per N transfer from a level sum bound, so
+  -- this leaf as written is stronger than the paper. The helper
+  -- leaf_sieve_transfer_zero_weight_goldbach above shows that any statement of this shape,
+  -- applied to the zero weights, gives binary Goldbach for every sufficiently large even
+  -- integer, so closing this leaf needs the weighted sieve input itself.
   sorry
 
 
