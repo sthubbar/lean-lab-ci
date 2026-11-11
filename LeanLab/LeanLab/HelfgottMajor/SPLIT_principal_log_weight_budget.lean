@@ -20,11 +20,38 @@ the square root. No prime sum, no zero sum and no scale appears in either step.
 namespace LeanLab.HelfgottMajor.Decomp457b
 open Real MeasureTheory Contour457
 
+/-- The short range comparison from a uniform pointwise square bound. -/
+private theorem principal_log_weight_sq_short_of_pointwise
+    (hpoint : ∀ t : ℝ, |t| ≤ 2 → ‖principalLogWeight t‖ ^ 2 ≤ 5) :
+    (∫ t in {t : ℝ | |t| ≤ 2}, ‖principalLogWeight t‖ ^ 2) ≤ 20 := by
+  classical
+  have hset : ({t : ℝ | |t| ≤ 2} : Set ℝ) = Set.Icc (-2) 2 := by
+    ext t
+    simp only [Set.mem_ofPred_eq, Set.mem_Icc, abs_le]
+  have hmeas : MeasurableSet ({t : ℝ | |t| ≤ 2} : Set ℝ) := by
+    rw [hset]
+    exact measurableSet_Icc
+  have hint : Integrable (fun t : ℝ => ‖principalLogWeight t‖ ^ 2) :=
+    MemLp.integrable_norm_pow LogWeight457.principal_log_weight_memLp_two (by norm_num)
+  have hconst : IntegrableOn (fun _ : ℝ => (5 : ℝ))
+      ({t : ℝ | |t| ≤ 2} : Set ℝ) volume := by
+    rw [hset]
+    exact integrableOn_const measure_Icc_lt_top.ne
+  have hmono := MeasureTheory.setIntegral_mono_on hint.integrableOn hconst hmeas
+    (fun t ht => hpoint t ht)
+  rw [hset, setIntegral_const] at hmono
+  rw [Real.volume_real_Icc_of_le (by norm_num), smul_eq_mul] at hmono
+  norm_num at hmono ⊢
+  rw [← hset] at hmono
+  exact hmono
+
 /-- LEAF. The short range step: the square energy of the logarithmic derivative weight
 over `|t| ≤ 2` is at most twenty. This is the piece where the weight is largest and the
 interval is short, and it carries the whole numerical size of the small range. -/
 theorem principal_log_weight_sq_short :
     (∫ t in {t : ℝ | |t| ≤ 2}, ‖principalLogWeight t‖ ^ 2) ≤ 20 := by
+  apply principal_log_weight_sq_short_of_pointwise
+  intro t ht
   sorry
 
 /-- LEAF. The long range step: the square energy of the logarithmic derivative weight
