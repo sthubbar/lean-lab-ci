@@ -1,80 +1,16 @@
 /-
 Gallagher 1975 P0094 p.127 Theorem 3.
-The exponential error is retained. The exceptional conductor is shared by all frequencies.
-The fixed positive exceptional strip is chosen from the proved Page and conductor bounds.
+The sealed definitions and helpers moved identically to Decomp482a.
+The character expansion is proved. The proof uses two smaller analytic leaves.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.Linnik.Decomp1532b
+import LeanLab.Linnik.Decomp482c
 
 namespace LeanLab.Linnik.Decomp466a
 
 open Finset MeasureTheory
 open LeanLab.Linnik.Decomp1532b (majorArcs Jn singSeries excSet)
 open LeanLab.Linnik.U7204 (Sg)
-
-/-- The fixed positive exceptional strip constant of Gallagher 1975 p.127.
-Choose it small enough for the proved reality and conductor growth estimates. -/
-noncomputable def exceptionalStrip : ℝ :=
-  min (Classical.choose LeanLab.Linnik.Decomp1532b.exceptional_conductor_log_growth)
-    (min (Classical.choose LeanLab.Linnik.Decomp1532b.page_real)
-      (Classical.choose LeanLab.Linnik.Decomp1532b.page_subsingleton))
-
-/-- Gallagher 1975 p.127. The fixed exceptional strip has positive width parameter. -/
-theorem exceptionalStrip_pos : 0 < exceptionalStrip := by
-  exact lt_min (Classical.choose_spec LeanLab.Linnik.Decomp1532b.exceptional_conductor_log_growth).1
-    (lt_min (Classical.choose_spec LeanLab.Linnik.Decomp1532b.page_real).1
-      (Classical.choose_spec LeanLab.Linnik.Decomp1532b.page_subsingleton).1)
-
-/-- The weight |n| over phi of |n| in Gallagher 1975 p.127 Theorem 3. -/
-noncomputable def totientWeight (n : ℤ) : ℝ :=
-  (n.natAbs : ℝ) / n.natAbs.totient
-
-/-- The quoted exceptional weight in Gallagher 1975 p.127 Theorem 3.
-At r zero the weight is zero, encoding absence of the quoted term. -/
-noncomputable def exceptionalWeight (r : ℕ) (n : ℤ) : ℝ :=
-  (r : ℝ) * (Nat.gcd r n.natAbs).totient / (r.totient : ℝ) ^ 2
-
-/-- The absolute frequency error in Gallagher 1975 p.127 Theorem 3. -/
-noncomputable def frequencyError (N : ℕ) (θ : ℝ) (n : ℤ) : ℝ :=
-  |(∫ α in majorArcs N ((N : ℝ) ^ θ), ‖Sg N α‖ ^ 2 *
-    (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) - Jn N n * (singSeries n).re|
-
-/-- The complex absolute error printed in Gallagher 1975 p.127 Theorem 3. -/
-noncomputable def complexFrequencyError (N : ℕ) (θ : ℝ) (n : ℤ) : ℝ :=
-  ‖(∫ α in majorArcs N ((N : ℝ) ^ θ),
-      ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)) -
-    (Jn N n : ℂ) * singSeries n‖
-
-/-- Gallagher 1975 p.127 Theorem 3, passage to the real correlation used on p.138.
-Taking real parts never increases the absolute error. -/
-theorem frequencyError_le_complexFrequencyError (N : ℕ) (θ : ℝ) (n : ℤ) :
-    frequencyError N θ n ≤ complexFrequencyError N θ n := by
-  let f : ℝ → ℂ := fun α => ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) *
-    LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)
-  have hs := LeanLab.Linnik.U7206.continuous_Sg N
-  have hf : Continuous f := by
-    dsimp [f]
-    unfold LeanLab.PNTPort.LargeSieve.e
-    fun_prop
-  have hi : IntegrableOn f (majorArcs N ((N : ℝ) ^ θ)) :=
-    hf.integrableOn_Icc.mono_set (fun _ h => h.1)
-  have hre : (∫ α in majorArcs N ((N : ℝ) ^ θ), f α).re =
-      ∫ α in majorArcs N ((N : ℝ) ^ θ), ‖Sg N α‖ ^ 2 *
-        (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re := by
-    have h := (integral_re hi).symm
-    change (∫ α in majorArcs N ((N : ℝ) ^ θ), f α).re =
-      ∫ α in majorArcs N ((N : ℝ) ^ θ), (f α).re at h
-    simpa only [f, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
-      zero_mul, sub_zero] using h
-  have heq : ((∫ α in majorArcs N ((N : ℝ) ^ θ), f α) -
-      (Jn N n : ℂ) * singSeries n).re =
-      (∫ α in majorArcs N ((N : ℝ) ^ θ), ‖Sg N α‖ ^ 2 *
-        (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) - Jn N n * (singSeries n).re := by
-    rw [Complex.sub_re, hre]
-    simp
-  unfold frequencyError complexFrequencyError
-  rw [← heq]
-  exact Complex.abs_re_le_norm _
 
 /-- LEAF. Gallagher 1975 P0094 p.127 Theorem 3, unnumbered display.
 The error is O of N over log squared N times the totient weight times the sum of
@@ -94,6 +30,6 @@ theorem gallagher_theorem3 :
             K * ((N : ℝ) / Real.log N ^ 2) * totientWeight n *
               (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
                 Real.exp (-c / θ) + exceptionalWeight r n) := by
-  sorry
+  exact LeanLab.Linnik.Decomp482c.gallagher_theorem3_split
 
 end LeanLab.Linnik.Decomp466a
