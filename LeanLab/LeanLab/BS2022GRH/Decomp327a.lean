@@ -123,6 +123,881 @@ theorem delay_partial_sums (s : ℝ) (N : ℕ) :
         1 - 2 * exp eulerMascheroniConstant * log (s - 1) / s) := by
   sorry
 
+/-! ## The descending list of a prime set -/
+
+/-- Inserting a new least element appends it to the descending list. -/
+private theorem sort_insert_min (T : Finset ℕ) (p : ℕ) (hp : p ∉ T)
+    (hlt : ∀ q ∈ T, p < q) :
+    (insert p T).sort (· ≥ ·) = T.sort (· ≥ ·) ++ [p] := by
+  have hpair : (T.sort (· ≥ ·) ++ [p]).Pairwise (· ≥ ·) := by
+    rw [List.pairwise_append]
+    refine ⟨Finset.pairwise_sort T (· ≥ ·), by simp, ?_⟩
+    intro a ha b hb
+    simp only [List.mem_singleton] at hb
+    subst hb
+    exact (hlt a ((Finset.mem_sort (· ≥ ·)).mp ha)).le
+  have hnd : (T.sort (· ≥ ·) ++ [p]).Nodup := by
+    rw [List.nodup_append]
+    refine ⟨Finset.sort_nodup T (· ≥ ·), by simp, ?_⟩
+    intro a ha b hb
+    simp only [List.mem_singleton] at hb
+    subst hb
+    exact (hlt a ((Finset.mem_sort (· ≥ ·)).mp ha)).ne.symm
+  have hto : (T.sort (· ≥ ·) ++ [p]).toFinset = insert p T := by
+    rw [List.toFinset_append, Finset.sort_toFinset]
+    simp
+  have h := (List.toFinset_sort (· ≥ ·) hnd).mpr hpair
+  rwa [hto] at h
+
+/-- The product of the descending list is the product over the set. -/
+private theorem prod_sort (T : Finset ℕ) :
+    (T.sort (· ≥ ·)).prod = ∏ p ∈ T, p :=
+  (Finset.sort_perm_toList T (· ≥ ·)).prod_eq.trans (Finset.prod_toList T)
+
+/-- Earlier entries of the descending list survive appending a smaller element. -/
+private theorem getD_append_lt (L : List ℕ) (p k : ℕ) (hk : k < L.length) :
+    (L ++ [p]).getD k 0 = L.getD k 0 := by
+  rw [List.getD_eq_getElem?_getD, List.getD_eq_getElem?_getD,
+    List.getElem?_append_left hk]
+
+/-- The last entry of the extended descending list is the new element. -/
+private theorem getD_append_length (L : List ℕ) (p : ℕ) :
+    (L ++ [p]).getD L.length 0 = p := by
+  rw [List.getD_eq_getElem?_getD, List.getElem?_append_right (Nat.le_refl _)]
+  simp
+
+/-- Prefix products survive appending a smaller element. -/
+private theorem prod_take_append (L : List ℕ) (p k : ℕ) (hk : k ≤ L.length) :
+    ((L ++ [p]).take k).prod = (L.take k).prod := by
+  rw [List.take_append_of_le_length hk]
+
+/-- Appending an element multiplies the list product. -/
+private theorem prod_append_eq (L : List ℕ) (p : ℕ) :
+    (L ++ [p]).prod = L.prod * p := by
+  rw [List.prod_append]
+  simp
+
+/-- The last entry of the descending list is a member of the set. -/
+private theorem getD_last_mem (T : Finset ℕ) (n : ℕ) (hn : 0 < n) (hc : T.card = n) :
+    (T.sort (· ≥ ·)).getD (n - 1) 0 ∈ T := by
+  have hlen : (T.sort (· ≥ ·)).length = n := by
+    rw [Finset.length_sort, hc]
+  have hidx : n - 1 < (T.sort (· ≥ ·)).length := by omega
+  rw [List.getD_eq_getElem (T.sort (· ≥ ·)) 0 hidx]
+  exact (Finset.mem_sort (· ≥ ·)).mp (List.getElem_mem hidx)
+
+/-! ## The Rosser weight of a set of distinct primes -/
+
+/-- The Rosser weight of a set of distinct primes is its Moebius sign exactly
+when every parity-selected cube test passes. -/
+private theorem rosserWeight_prime_set (T : Finset ℕ) (D : ℝ) (b : Bool)
+    (hprime : ∀ q ∈ T, q.Prime) :
+    LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D b (∏ q ∈ T, q) =
+      if (∀ k < T.card, (b = true ↔ k % 2 = 0) →
+        ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+          ((((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3) < D)
+      then (-1 : ℝ) ^ T.card else 0 := by
+  have hs := prime_subset_squarefree T hprime
+  have hmu := moebius_prime_subset T hprime
+  have hpf := Nat.primeFactors_prod hprime
+  unfold LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight
+  simp only [hs, true_and, LeanLab.AlmostPrimeSums.Decomp1527b.decPrimes, hpf,
+    Finset.length_sort, hmu]
+
+/-- Adding a new least prime to a set of distinct primes, upper weight. -/
+private theorem rosserWeight_mul_min_true (T : Finset ℕ) (D : ℝ) (p : ℕ)
+    (hp : p ∉ T) (hlt : ∀ q ∈ T, p < q) (hprime : ∀ q ∈ T, q.Prime)
+    (hpp : p.Prime) :
+    LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true ((∏ q ∈ T, q) * p) =
+      if (T.card % 2 = 0 → ((∏ q ∈ T, q : ℕ) : ℝ) * (p : ℝ) ^ 3 < D)
+        then -LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ q ∈ T, q)
+        else 0 := by
+  have hd := prime_subset_squarefree T hprime
+  have hmin : ∀ q ∈ (∏ q ∈ T, q).primeFactors, p < q := by
+    rw [Nat.primeFactors_prod hprime]
+    exact hlt
+  rw [LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight_mul_smallest D true hd hpp hmin]
+  simp only [LeanLab.AlmostPrimeSums.Decomp1527b.decPrimes, Nat.primeFactors_prod hprime,
+    Finset.length_sort, true_iff]
+
+/-- Adding a new least prime to a set of distinct primes, lower weight. -/
+private theorem rosserWeight_mul_min_false (T : Finset ℕ) (D : ℝ) (p : ℕ)
+    (hp : p ∉ T) (hlt : ∀ q ∈ T, p < q) (hprime : ∀ q ∈ T, q.Prime)
+    (hpp : p.Prime) :
+    LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false ((∏ q ∈ T, q) * p) =
+      if (¬(T.card % 2 = 0) → ((∏ q ∈ T, q : ℕ) : ℝ) * (p : ℝ) ^ 3 < D)
+        then -LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ q ∈ T, q)
+        else 0 := by
+  have hd := prime_subset_squarefree T hprime
+  have hmin : ∀ q ∈ (∏ q ∈ T, q).primeFactors, p < q := by
+    rw [Nat.primeFactors_prod hprime]
+    exact hlt
+  rw [LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight_mul_smallest D false hd hpp hmin]
+  simp only [LeanLab.AlmostPrimeSums.Decomp1527b.decPrimes, Nat.primeFactors_prod hprime,
+    Finset.length_sort, Bool.false_eq_true, false_iff]
+
+/-- A shifted Euler product splits off the new least prime. -/
+private theorem prod_filter_lt_insert (T : Finset ℕ) (g : ℕ → ℝ) (p m : ℕ)
+    (hp : p ∉ T) (hpm : p < m) :
+    ∏ q ∈ (insert p T).filter (fun q => q < m), (1 - g q) =
+      (1 - g p) * ∏ q ∈ T.filter (fun q => q < m), (1 - g q) := by
+  rw [Finset.filter_insert, if_pos hpm, Finset.prod_insert]
+  intro h
+  rw [Finset.mem_filter] at h
+  exact hp h.1
+
+/-- The stopping predicate of the enlarged set is the predicate on the smaller
+set with the last cube test moved to the new least prime. -/
+private theorem stopPred_insert (T : Finset ℕ) (D : ℝ) (p n : ℕ)
+    (hp : p ∉ T) (hlt : ∀ q ∈ T, p < q) :
+    (0 < n ∧ (insert p T).card = n ∧
+        D ≤ ((∏ q ∈ insert p T, q : ℕ) : ℝ) *
+          (((((insert p T).sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2) ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          (((((insert p T).sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((((insert p T).sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3) < D)
+      ↔ (0 < n ∧ T.card = n - 1 ∧
+        D ≤ ((∏ q ∈ T, q : ℕ) : ℝ) * (p : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            ((((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3) < D) := by
+  have hsort := sort_insert_min T p hp hlt
+  rw [hsort]
+  have hprod : ((∏ q ∈ insert p T, q : ℕ) : ℝ) = ((∏ q ∈ T, q : ℕ) : ℝ) * (p : ℝ) := by
+    rw [Finset.prod_insert hp]
+    push_cast
+    ring
+  have hcard : (insert p T).card = T.card + 1 := Finset.card_insert_of_notMem hp
+  have hget : ∀ m : ℕ, T.card = m - 1 →
+      ((T.sort (· ≥ ·) ++ [p]).getD (m - 1) 0) = p := by
+    intro m hm
+    rw [show m - 1 = (T.sort (· ≥ ·)).length from by
+      rw [Finset.length_sort]
+      omega]
+    exact getD_append_length (T.sort (· ≥ ·)) p
+  have hDterm : ∀ m : ℕ, T.card = m - 1 →
+      ((∏ q ∈ insert p T, q : ℕ) : ℝ) *
+        ((((T.sort (· ≥ ·) ++ [p]).getD (m - 1) 0 : ℕ) : ℝ) ^ 2) =
+        ((∏ q ∈ T, q : ℕ) : ℝ) * (p : ℝ) ^ 3 := by
+    intro m hm
+    rw [hprod, hget m hm]
+    ring
+  constructor
+  · rintro ⟨h0, hc, hD, hk⟩
+    have hn : T.card = n - 1 := by omega
+    refine ⟨h0, hn, ?_, ?_⟩
+    · rw [hDterm n hn] at hD
+      exact hD
+    · intro k hk' hpar
+      have hkr : k < (T.sort (· ≥ ·)).length := by
+        rw [Finset.length_sort]
+        omega
+      have hkle : k ≤ (T.sort (· ≥ ·)).length := le_of_lt hkr
+      have h1 := hk k hk' hpar
+      rwa [prod_take_append (T.sort (· ≥ ·)) p k hkle,
+        getD_append_lt (T.sort (· ≥ ·)) p k hkr] at h1
+  · rintro ⟨h0, hc, hD, hk⟩
+    refine ⟨h0, by omega, ?_, ?_⟩
+    · rw [hDterm n hc]
+      exact hD
+    · intro k hk' hpar
+      have hkr : k < (T.sort (· ≥ ·)).length := by
+        rw [Finset.length_sort]
+        omega
+      have hkle : k ≤ (T.sort (· ≥ ·)).length := le_of_lt hkr
+      have h1 := hk k hk' hpar
+      rwa [prod_take_append (T.sort (· ≥ ·)) p k hkle,
+        getD_append_lt (T.sort (· ≥ ·)) p k hkr]
+
+/-- A stopping term beyond the size of the finite prime set is zero. -/
+private theorem stoppZero (S : Finset ℕ) (D : ℝ) (g : ℕ → ℝ)
+    (n : ℕ) (hn : S.card < n) : stoppingTerm S D g n = 0 := by
+  unfold stoppingTerm
+  apply sum_eq_zero
+  intro T hT
+  obtain ⟨hTS, _, hcard, _⟩ := mem_filter.mp hT
+  have := card_le_card (mem_powerset.mp hTS)
+  omega
+
+/-- Every stopping term of the empty prime set vanishes. -/
+private theorem stopp_empty (D : ℝ) (g : ℕ → ℝ) : ∀ n, stoppingTerm ∅ D g n = 0
+  | 0 => by simp [stoppingTerm]
+  | (k + 1) => stoppZero ∅ D g (k + 1) (by simp)
+
+/-- The Rosser weight at one is one. -/
+private theorem rosserWeight_one (D : ℝ) (b : Bool) : LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D b 1 = 1 := by
+  have h0 : LeanLab.AlmostPrimeSums.Decomp1527b.decPrimes 1 = [] := by
+    simp [LeanLab.AlmostPrimeSums.Decomp1527b.decPrimes]
+  unfold LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight
+  rw [h0]
+  simp
+
+/-- The stopping term of the enlarged prime set splits into the inherited
+part and the newly stopped sets. -/
+private theorem stoppingTerm_insert (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r n : ℕ)
+    (hp : r ∉ T) (hlt : ∀ q ∈ T, r < q) :
+    stoppingTerm (insert r T) D g n =
+      (1 - g r) * stoppingTerm T D g n +
+        g r * (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) := by
+  have hU : (∑ T' ∈ T.powerset, (if (0 < n ∧ T'.card = n ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (((T'.sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+        then (∏ p ∈ T', g p) * ∏ p ∈ (insert r T).filter (fun p => p < (T'.sort (· ≥ ·)).getD (n - 1) 0), (1 - g p) else 0)) =
+      ∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (((U.sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p) * ∏ p ∈ (insert r T).filter (fun p => p < (T'.sort (· ≥ ·)).getD (n - 1) 0), (1 - g p) := by
+    simp only [Finset.sum_filter]
+  have h1 : (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (((U.sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p) * ∏ p ∈ (insert r T).filter (fun p => p < (T'.sort (· ≥ ·)).getD (n - 1) 0), (1 - g p)) =
+      (1 - g r) * (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (((U.sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p) * ∏ p ∈ T.filter (fun p => p < (T'.sort (· ≥ ·)).getD (n - 1) 0), (1 - g p)) := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro T' hT'
+    have hP : (0 < n ∧ T'.card = n ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (((T'.sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) := (Finset.mem_filter.mp hT').2
+    have hsub := Finset.mem_powerset.mp (Finset.mem_filter.mp hT').1
+    have hm : (T'.sort (· ≥ ·)).getD (n - 1) 0 ∈ T' := getD_last_mem T' n hP.1 hP.2.1
+    have hrm : r < (T'.sort (· ≥ ·)).getD (n - 1) 0 := hlt _ (hsub hm)
+    rw [prod_filter_lt_insert T g r ((T'.sort (· ≥ ·)).getD (n - 1) 0) hp hrm]
+    ring
+  have hU2 : (∑ T' ∈ T.powerset, (if (0 < n ∧ (insert r T').card = n ∧
+        D ≤ ((∏ p ∈ (insert r T'), p : ℕ) : ℝ) * ((((insert r T').sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          (((((insert r T').sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            ((((insert r T').sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ (insert r T'), g p) * ∏ p ∈ (insert r T).filter (fun p => p < ((insert r T').sort (· ≥ ·)).getD (n - 1) 0), (1 - g p) else 0)) =
+      ∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ (insert r U).card = n ∧
+        D ≤ ((∏ p ∈ (insert r U), p : ℕ) : ℝ) * ((((insert r U).sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          (((((insert r U).sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            ((((insert r U).sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ (insert r T'), g p) * ∏ p ∈ (insert r T).filter (fun p => p < ((insert r T').sort (· ≥ ·)).getD (n - 1) 0), (1 - g p) := by
+    simp only [Finset.sum_filter]
+  have hfil : T.powerset.filter (fun U => 0 < n ∧ (insert r U).card = n ∧
+        D ≤ ((∏ p ∈ (insert r U), p : ℕ) : ℝ) * ((((insert r U).sort (· ≥ ·)).getD (n - 1) 0 : ℕ) : ℝ) ^ 2 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          (((((insert r U).sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            ((((insert r U).sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) =
+      T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) := by
+    apply Finset.filter_congr
+    intro U hU
+    exact stopPred_insert U D r n (Finset.notMem_of_mem_powerset_of_notMem hU hp)
+      (fun q hq => hlt q (Finset.mem_powerset.mp hU hq))
+  have h2 : (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ (insert r T'), g p) * ∏ p ∈ (insert r T).filter (fun p => p < ((insert r T').sort (· ≥ ·)).getD (n - 1) 0), (1 - g p)) =
+      g r * (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro T' hT'
+    have hP : (0 < n ∧ T'.card = n - 1 ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) := (Finset.mem_filter.mp hT').2
+    have hsub := Finset.mem_powerset.mp (Finset.mem_filter.mp hT').1
+    have hpr : r ∉ T' := Finset.notMem_of_mem_powerset_of_notMem (Finset.mem_filter.mp hT').1 hp
+    have hge : ((insert r T').sort (· ≥ ·)).getD (n - 1) 0 = r := by
+      rw [sort_insert_min T' r hpr (fun q hq => hlt q (hsub hq))]
+      rw [show n - 1 = (T'.sort (· ≥ ·)).length from by
+        rw [Finset.length_sort]; omega]
+      exact getD_append_length (T'.sort (· ≥ ·)) r
+    have hf : (insert r T).filter
+        (fun p => p < ((insert r T').sort (· ≥ ·)).getD (n - 1) 0) = ∅ := by
+      rw [hge, Finset.filter_eq_empty_iff]
+      intro p hp'
+      rw [Finset.mem_insert] at hp'
+      rcases hp' with rfl | hp'
+      · exact not_lt.mpr le_rfl
+      · exact not_lt.mpr (le_of_lt (hlt p hp'))
+    rw [hf, Finset.prod_empty, mul_one, Finset.prod_insert hpr]
+    try ring
+  unfold stoppingTerm
+  conv_lhs => rw [Finset.sum_filter]
+  rw [Finset.sum_powerset_insert hp, hU, hU2, hfil, h1, h2]
+
+/-- The upper Rosser weight of a set of distinct primes. -/
+private theorem rosserWeight_prime_set_true (T : Finset ℕ) (D : ℝ)
+    (hprime : ∀ q ∈ T, q.Prime) :
+    LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T, p) =
+      if (∀ k < T.card, k % 2 = 0 → ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      then (-1 : ℝ) ^ T.card else 0 := by
+  rw [rosserWeight_prime_set T D true hprime]
+  simp
+
+/-- The lower Rosser weight of a set of distinct primes. -/
+private theorem rosserWeight_prime_set_false (T : Finset ℕ) (D : ℝ)
+    (hprime : ∀ q ∈ T, q.Prime) :
+    LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T, p) =
+      if (∀ k < T.card, ¬(k % 2 = 0) → ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      then (-1 : ℝ) ^ T.card else 0 := by
+  rw [rosserWeight_prime_set T D false hprime]
+  simp
+
+/-- The signed weight of one prime set splits over a new least prime,
+upper case. -/
+private theorem summand_upper (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r : ℕ)
+    (hp : r ∉ T) (hlt : ∀ q ∈ T, r < q) (hprime : ∀ q ∈ T, q.Prime)
+    (hpp : r.Prime) :
+    (∏ p ∈ T, g p) * (LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T, p) +
+          g r * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true ((∏ p ∈ T, p) * r)) =
+      (1 - g r) * ((∏ p ∈ T, g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T, p)) +
+        g r * (if (T.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T.card, k % 2 = 0 →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T, g p) else 0) := by
+  rw [rosserWeight_mul_min_true T D r hp hlt hprime hpp,
+    rosserWeight_prime_set_true T D hprime]
+  by_cases hc : T.card % 2 = 0
+  · by_cases ht : ((∏ p ∈ T, p : ℕ) : ℝ) * (r : ℝ) ^ 3 < D
+    · by_cases hP : (∀ k < T.card, k % 2 = 0 →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      · rw [if_pos hP, if_pos (fun _ => ht),
+          if_neg (fun h => absurd h.2.1 (not_le_of_gt ht))]
+        have hone : (-1 : ℝ) ^ T.card = 1 := by
+          rw [neg_one_pow_eq_pow_mod_two, hc, pow_zero]
+        rw [hone]
+        ring
+      · rw [if_neg hP, if_pos (fun _ => ht),
+          if_neg (fun h => absurd h.2.2 hP)]
+        ring
+    · by_cases hP : (∀ k < T.card, k % 2 = 0 →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      · rw [if_pos hP, if_neg (fun h => absurd (h hc) ht),
+          if_pos ⟨hc, not_lt.mp ht, hP⟩]
+        have hone : (-1 : ℝ) ^ T.card = 1 := by
+          rw [neg_one_pow_eq_pow_mod_two, hc, pow_zero]
+        rw [hone]
+        ring
+      · rw [if_neg hP, if_neg (fun h => absurd (h hc) ht),
+          if_neg (fun h => absurd h.2.2 hP)]
+        ring
+  · by_cases hP : (∀ k < T.card, k % 2 = 0 →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+    · rw [if_pos hP, if_pos (fun h => absurd h hc),
+        if_neg (fun h => absurd h.1 hc)]
+      ring
+    · rw [if_neg hP, if_pos (fun h => absurd h hc),
+        if_neg (fun h => absurd h.1 hc)]
+      ring
+
+/-- The signed weight of one prime set splits over a new least prime,
+lower case. -/
+private theorem summand_lower (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r : ℕ)
+    (hp : r ∉ T) (hlt : ∀ q ∈ T, r < q) (hprime : ∀ q ∈ T, q.Prime)
+    (hpp : r.Prime) :
+    (∏ p ∈ T, g p) * (LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T, p) +
+          g r * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false ((∏ p ∈ T, p) * r)) =
+      (1 - g r) * ((∏ p ∈ T, g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T, p)) +
+        g r * (if (¬(T.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T.card, ¬(k % 2 = 0) →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then -(∏ p ∈ T, g p) else 0) := by
+  rw [rosserWeight_mul_min_false T D r hp hlt hprime hpp,
+    rosserWeight_prime_set_false T D hprime]
+  by_cases hc : T.card % 2 = 0
+  · by_cases hP : (∀ k < T.card, ¬(k % 2 = 0) →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+    · rw [if_pos hP, if_pos (fun h => absurd hc h),
+        if_neg (fun h => absurd hc h.1)]
+      ring
+    · rw [if_neg hP, if_pos (fun h => absurd hc h),
+        if_neg (fun h => absurd hc h.1)]
+      ring
+  · by_cases ht : ((∏ p ∈ T, p : ℕ) : ℝ) * (r : ℝ) ^ 3 < D
+    · by_cases hP : (∀ k < T.card, ¬(k % 2 = 0) →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      · rw [if_pos hP, if_pos (fun _ => ht),
+          if_neg (fun h => absurd h.2.1 (not_le_of_gt ht))]
+        have hneg : (-1 : ℝ) ^ T.card = -1 := by
+          rw [neg_one_pow_eq_pow_mod_two]
+          rw [show T.card % 2 = 1 by omega]
+          norm_num
+        rw [hneg]
+        ring
+      · rw [if_neg hP, if_pos (fun _ => ht),
+          if_neg (fun h => absurd h.2.2 hP)]
+        ring
+    · by_cases hP : (∀ k < T.card, ¬(k % 2 = 0) →
+          ((((T.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      · rw [if_pos hP, if_neg (fun h => absurd (h hc) ht),
+          if_pos ⟨hc, not_lt.mp ht, hP⟩]
+        have hneg : (-1 : ℝ) ^ T.card = -1 := by
+          rw [neg_one_pow_eq_pow_mod_two]
+          rw [show T.card % 2 = 1 by omega]
+          norm_num
+        rw [hneg]
+        ring
+      · rw [if_neg hP, if_neg (fun h => absurd (h hc) ht),
+          if_neg (fun h => absurd h.2.2 hP)]
+        ring
+
+/-- Sums of the newly stopped sets, upper parity. -/
+private theorem extra_upper_sum (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r : ℕ) :
+    (∑ n ∈ range (T.card + 4), (if n % 2 = 1 then
+      (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0))
+      = ∑ T' ∈ T.powerset, (if (T'.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, k % 2 = 0 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+  have key1 : (∑ n ∈ range (T.card + 4), (if n % 2 = 1 then
+      (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0))
+      = ∑ n ∈ range (T.card + 4), ∑ T' ∈ T.powerset,
+          (if n % 2 = 1 ∧ (0 < n ∧ T'.card = n - 1 ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+    apply Finset.sum_congr rfl
+    intro n hn
+    by_cases ho : n % 2 = 1
+    · rw [if_pos ho, Finset.sum_filter]
+      apply Finset.sum_congr rfl
+      intro T' _
+      by_cases hq : (0 < n ∧ T'.card = n - 1 ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      · rw [if_pos hq, if_pos ⟨ho, hq⟩]
+      · rw [if_neg hq, if_neg (fun h => hq h.2)]
+    · rw [if_neg ho]
+      symm
+      apply Finset.sum_eq_zero
+      intro T' _
+      rw [if_neg (fun h => ho h.1)]
+  rw [key1, Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro T' hT'
+  have hle : T'.card ≤ T.card := Finset.card_le_card (Finset.mem_powerset.mp hT')
+  refine (Finset.sum_eq_single (T'.card + 1) ?_ ?_).trans ?_
+  · intro n hn hne
+    rw [if_neg]
+    rintro ⟨-, hP⟩
+    exact hne (by omega)
+  · intro hmem
+    rw [Finset.mem_range] at hmem
+    omega
+  by_cases hc : T'.card % 2 = 0
+  · have hodd : (T'.card + 1) % 2 = 1 := by omega
+    by_cases hb : ((T'.card + 1) % 2 = 1 ∧ (0 < (T'.card + 1) ∧ T'.card = (T'.card + 1) - 1 ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < (T'.card + 1) - 1, k % 2 = ((T'.card + 1) - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D))
+    · rw [if_pos hb, if_pos (show (T'.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, k % 2 = 0 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) from
+        ⟨hc, hb.2.2.2.1, fun k hk hk2 => hb.2.2.2.2 k (by omega) (by omega)⟩)]
+    · rw [if_neg hb, if_neg (show ¬(T'.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, k % 2 = 0 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) from fun hEU =>
+        hb ⟨hodd, ⟨by omega, by omega, hEU.2.1,
+          fun k hk hk2 => hEU.2.2 k (by omega) (by omega)⟩⟩)]
+  · have hodd : ¬((T'.card + 1) % 2 = 1) := by omega
+    rw [if_neg (fun h => hodd h.1), if_neg (fun hEU => hc hEU.1)]
+
+/-- Sums of the newly stopped sets, lower parity. -/
+private theorem extra_lower_sum (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r : ℕ) :
+    (∑ n ∈ range (T.card + 4), (if 0 < n ∧ n % 2 = 0 then
+      (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0))
+      = ∑ T' ∈ T.powerset, (if (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+  have key1 : (∑ n ∈ range (T.card + 4), (if 0 < n ∧ n % 2 = 0 then
+      (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0))
+      = ∑ n ∈ range (T.card + 4), ∑ T' ∈ T.powerset,
+          (if 0 < n ∧ n % 2 = 0 ∧ (0 < n ∧ T'.card = n - 1 ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+    apply Finset.sum_congr rfl
+    intro n hn
+    by_cases ho : 0 < n ∧ n % 2 = 0
+    · rw [if_pos ho, Finset.sum_filter]
+      apply Finset.sum_congr rfl
+      intro T' _
+      by_cases hq : (0 < n ∧ T'.card = n - 1 ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+      · rw [if_pos hq, if_pos ⟨ho.1, ho.2, hq⟩]
+      · rw [if_neg hq, if_neg (fun h => hq h.2.2)]
+    · rw [if_neg ho]
+      symm
+      apply Finset.sum_eq_zero
+      intro T' _
+      rw [if_neg (fun h => ho ⟨h.1, h.2.1⟩)]
+  rw [key1, Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro T' hT'
+  have hle : T'.card ≤ T.card := Finset.card_le_card (Finset.mem_powerset.mp hT')
+  refine (Finset.sum_eq_single (T'.card + 1) ?_ ?_).trans ?_
+  · intro n hn hne
+    rw [if_neg]
+    rintro ⟨-, -, hP⟩
+    exact hne (by omega)
+  · intro hmem
+    rw [Finset.mem_range] at hmem
+    omega
+  by_cases hc : T'.card % 2 = 0
+  · have hodd : ¬(0 < T'.card + 1 ∧ (T'.card + 1) % 2 = 0) := by omega
+    rw [if_neg (fun h => hodd ⟨h.1, h.2.1⟩), if_neg (fun hEU => hEU.1 hc)]
+  · by_cases hb : (0 < T'.card + 1 ∧ (T'.card + 1) % 2 = 0 ∧ (0 < (T'.card + 1) ∧ T'.card = (T'.card + 1) - 1 ∧
+        D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < (T'.card + 1) - 1, k % 2 = ((T'.card + 1) - 1) % 2 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D))
+    · rw [if_pos hb, if_pos (show (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) from
+        ⟨hc, hb.2.2.2.2.1, fun k hk hk2 => hb.2.2.2.2.2 k (by omega) (by omega)⟩)]
+    · rw [if_neg hb, if_neg (show ¬(¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) from fun hEL =>
+        hb ⟨by omega, by omega, ⟨by omega, by omega, hEL.2.1,
+          fun k hk hk2 => hEL.2.2 k (by omega) (by omega)⟩⟩)]
+
+/-- One summand of the odd stopping sum after adding a least prime. -/
+private theorem stopp_summand_split (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r n : ℕ)
+    (hp : r ∉ T) (hlt : ∀ q ∈ T, r < q) :
+    (if n % 2 = 1 then stoppingTerm (insert r T) D g n else 0) =
+      (1 - g r) * (if n % 2 = 1 then stoppingTerm T D g n else 0) +
+        g r * (if n % 2 = 1 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0) := by
+  by_cases h : n % 2 = 1
+  · rw [if_pos h, if_pos h, if_pos h, stoppingTerm_insert T D g r n hp hlt]
+    try ring
+  · rw [if_neg h, if_neg h, if_neg h]
+    try ring
+
+/-- One summand of the even stopping sum after adding a least prime. -/
+private theorem stopp_summand_split' (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r n : ℕ)
+    (hp : r ∉ T) (hlt : ∀ q ∈ T, r < q) :
+    (if 0 < n ∧ n % 2 = 0 then stoppingTerm (insert r T) D g n else 0) =
+      (1 - g r) * (if 0 < n ∧ n % 2 = 0 then stoppingTerm T D g n else 0) +
+        g r * (if 0 < n ∧ n % 2 = 0 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0) := by
+  by_cases h : 0 < n ∧ n % 2 = 0
+  · rw [if_pos h, if_pos h, if_pos h, stoppingTerm_insert T D g r n hp hlt]
+    try ring
+  · rw [if_neg h, if_neg h, if_neg h]
+    try ring
+
+/-- The Rosser prime model is a signed sum over the prime subsets. -/
+private theorem model_powerset (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (b : Bool) :
+    rosserPrimeModel T ∅ D b g =
+      ∑ T' ∈ T.powerset, (∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D b (∏ p ∈ T', p) := by
+  unfold rosserPrimeModel
+  apply Finset.sum_congr rfl
+  intro T' hT'
+  simp only [Finset.inter_empty, Finset.card_empty, pow_zero, Finset.sdiff_empty, one_mul]
+  ring
+
+/-- Adding a new least prime to the Rosser prime model. -/
+private theorem model_insert (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) (r : ℕ) (b : Bool)
+    (hp : r ∉ T) :
+    rosserPrimeModel (insert r T) ∅ D b g =
+      ∑ T' ∈ T.powerset, (∏ p ∈ T', g p) *
+        (LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D b (∏ p ∈ T', p) + g r * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D b ((∏ p ∈ T', p) * r)) := by
+  rw [model_powerset, Finset.sum_powerset_insert hp, ← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro T' hT'
+  have hpr : r ∉ T' := Finset.notMem_of_mem_powerset_of_notMem hT' hp
+  have hpc : r * (∏ p ∈ T', p) = (∏ p ∈ T', p) * r := Nat.mul_comm _ _
+  rw [Finset.prod_insert hpr, Finset.prod_insert hpr, hpc]
+  ring
+
+/-- The odd stopping sum can be shortened beyond the size of the prime set. -/
+private theorem stopp_range_trim (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) :
+    ∀ j : ℕ, T.card < j →
+    (∑ n ∈ range (j + 1), (if n % 2 = 1 then stoppingTerm T D g n else 0)) =
+      ∑ n ∈ range j, (if n % 2 = 1 then stoppingTerm T D g n else 0) := by
+  intro j hj
+  rw [Finset.sum_range_succ, stoppZero T D g j hj]
+  try simp
+
+/-- The even stopping sum can be shortened beyond the size of the prime set. -/
+private theorem stopp_range_trim' (T : Finset ℕ) (D : ℝ) (g : ℕ → ℝ) :
+    ∀ j : ℕ, T.card < j →
+    (∑ n ∈ range (j + 1), (if 0 < n ∧ n % 2 = 0 then stoppingTerm T D g n else 0)) =
+      ∑ n ∈ range j, (if 0 < n ∧ n % 2 = 0 then stoppingTerm T D g n else 0) := by
+  intro j hj
+  rw [Finset.sum_range_succ, stoppZero T D g j hj]
+  try simp
+
+/-- The finite stopping expansion of both ordinary Rosser models,
+by induction on the least prime. -/
+private theorem stopping_expansion_aux (D : ℝ) (g : ℕ → ℝ) :
+    ∀ T : Finset ℕ, (∀ p ∈ T, p.Prime) → (rosserPrimeModel T ∅ D true g = (∏ p ∈ T, (1 - g p)) +
+        ∑ n ∈ range (T.card + 3), (if n % 2 = 1 then stoppingTerm T D g n else 0)) ∧
+      (rosserPrimeModel T ∅ D false g = (∏ p ∈ T, (1 - g p)) -
+        ∑ n ∈ range (T.card + 3), (if 0 < n ∧ n % 2 = 0 then stoppingTerm T D g n else 0)) := by
+  intro T
+  induction T using Finset.induction_on_min with
+  | empty =>
+    intro _
+    constructor
+    · rw [model_powerset, Finset.powerset_empty, Finset.sum_singleton, Finset.prod_empty,
+        Finset.prod_empty, one_mul, rosserWeight_one, Finset.prod_empty]
+      simp [stopp_empty]
+    · rw [model_powerset, Finset.powerset_empty, Finset.sum_singleton, Finset.prod_empty,
+        Finset.prod_empty, one_mul, rosserWeight_one, Finset.prod_empty]
+      simp [stopp_empty]
+  | insert r T hlt ih =>
+    intro hS
+    have hpr : r ∉ T := fun h => absurd (hlt r h) (lt_irrefl r)
+    have hprimeT : ∀ q ∈ T, q.Prime := fun q hq => hS q (Finset.mem_insert_of_mem hq)
+    have hrt : r.Prime := hS r (Finset.mem_insert_self r T)
+    have hcard : (insert r T).card = T.card + 1 := Finset.card_insert_of_notMem hpr
+    obtain ⟨ihU, ihL⟩ := ih hprimeT
+    constructor
+    · have hpt : ∀ T' ∈ T.powerset, (∏ p ∈ T', g p) *
+            (LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T', p) + g r * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true ((∏ p ∈ T', p) * r)) =
+          (1 - g r) * ((∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T', p)) +
+            g r * (if (T'.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, k % 2 = 0 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+        intro T' hT'
+        exact summand_upper T' D g r (Finset.notMem_of_mem_powerset_of_notMem hT' hpr)
+          (fun q hq => hlt q (Finset.mem_powerset.mp hT' hq))
+          (fun q hq => hprimeT q (Finset.mem_powerset.mp hT' hq)) hrt
+      have hL : rosserPrimeModel (insert r T) ∅ D true g =
+          (1 - g r) * rosserPrimeModel T ∅ D true g +
+            g r * ∑ T' ∈ T.powerset, (if (T'.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, k % 2 = 0 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+        rw [model_insert T D g r true hpr, Finset.sum_congr rfl hpt, Finset.sum_add_distrib]
+        have e1 : (∑ T' ∈ T.powerset,
+              (1 - g r) * ((∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T', p))) =
+            (1 - g r) * ∑ T' ∈ T.powerset, (∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T', p) := by
+          rw [Finset.mul_sum]
+        have e2 : (∑ T' ∈ T.powerset, g r * (if (T'.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, k % 2 = 0 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0)) =
+            g r * ∑ T' ∈ T.powerset, (if (T'.card % 2 = 0 ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, k % 2 = 0 →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+          rw [Finset.mul_sum]
+        rw [e1, e2, show (∑ T' ∈ T.powerset, (∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D true (∏ p ∈ T', p)) =
+          rosserPrimeModel T ∅ D true g from (model_powerset T D g true).symm]
+        try ring
+      have hR : (∏ p ∈ insert r T, (1 - g p)) +
+            ∑ n ∈ range ((insert r T).card + 3),
+              (if n % 2 = 1 then stoppingTerm (insert r T) D g n else 0) =
+          (1 - g r) * ((∏ p ∈ T, (1 - g p)) +
+              ∑ n ∈ range (T.card + 3), (if n % 2 = 1 then stoppingTerm T D g n else 0)) +
+            g r * ∑ n ∈ range (T.card + 4),
+              (if n % 2 = 1 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0) := by
+        rw [Finset.prod_insert hpr,
+          show (insert r T).card + 3 = T.card + 4 from by rw [hcard]]
+        rw [Finset.sum_congr rfl (fun n _ => stopp_summand_split T D g r n hpr hlt),
+          Finset.sum_add_distrib]
+        have e1 : (∑ n ∈ range (T.card + 4),
+              (1 - g r) * (if n % 2 = 1 then stoppingTerm T D g n else 0)) =
+            (1 - g r) * ∑ n ∈ range (T.card + 4),
+              (if n % 2 = 1 then stoppingTerm T D g n else 0) := by
+          rw [Finset.mul_sum]
+        have e2 : (∑ n ∈ range (T.card + 4),
+              g r * (if n % 2 = 1 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0)) =
+            g r * ∑ n ∈ range (T.card + 4),
+              (if n % 2 = 1 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0) := by
+          rw [Finset.mul_sum]
+        rw [e1, e2, stopp_range_trim T D g (T.card + 3) (by omega)]
+        try ring
+      rw [hL, hR, ihU, extra_upper_sum T D g r]
+      try ring
+    · have hpt : ∀ T' ∈ T.powerset, (∏ p ∈ T', g p) *
+            (LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T', p) + g r * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false ((∏ p ∈ T', p) * r)) =
+          (1 - g r) * ((∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T', p)) +
+            g r * (if (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then -(∏ p ∈ T', g p) else 0) := by
+        intro T' hT'
+        exact summand_lower T' D g r (Finset.notMem_of_mem_powerset_of_notMem hT' hpr)
+          (fun q hq => hlt q (Finset.mem_powerset.mp hT' hq))
+          (fun q hq => hprimeT q (Finset.mem_powerset.mp hT' hq)) hrt
+      have hneg : (∑ T' ∈ T.powerset, (if (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then -(∏ p ∈ T', g p) else 0)) =
+          -∑ T' ∈ T.powerset, (if (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+        rw [← Finset.sum_neg_distrib]
+        apply Finset.sum_congr rfl
+        intro T' _
+        by_cases h : (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D)
+        · rw [if_pos h, if_pos h]
+          try ring
+        · rw [if_neg h, if_neg h]
+          try ring
+      have hL : rosserPrimeModel (insert r T) ∅ D false g =
+          (1 - g r) * rosserPrimeModel T ∅ D false g -
+            g r * ∑ T' ∈ T.powerset, (if (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then (∏ p ∈ T', g p) else 0) := by
+        rw [model_insert T D g r false hpr, Finset.sum_congr rfl hpt, Finset.sum_add_distrib]
+        have e1 : (∑ T' ∈ T.powerset,
+              (1 - g r) * ((∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T', p))) =
+            (1 - g r) * ∑ T' ∈ T.powerset, (∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T', p) := by
+          rw [Finset.mul_sum]
+        have e2 : (∑ T' ∈ T.powerset, g r * (if (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then -(∏ p ∈ T', g p) else 0)) =
+            g r * ∑ T' ∈ T.powerset, (if (¬(T'.card % 2 = 0) ∧
+            D ≤ ((∏ p ∈ T', p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+            ∀ k < T'.card, ¬(k % 2 = 0) →
+          ((((T'.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+              (((T'.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D) then -(∏ p ∈ T', g p) else 0) := by
+          rw [Finset.mul_sum]
+        rw [e1, e2, hneg,
+          show (∑ T' ∈ T.powerset, (∏ p ∈ T', g p) * LeanLab.AlmostPrimeSums.Decomp1527b.rosserWeight D false (∏ p ∈ T', p)) =
+            rosserPrimeModel T ∅ D false g from (model_powerset T D g false).symm]
+        try ring
+      have hR : (∏ p ∈ insert r T, (1 - g p)) -
+            ∑ n ∈ range ((insert r T).card + 3),
+              (if 0 < n ∧ n % 2 = 0 then stoppingTerm (insert r T) D g n else 0) =
+          (1 - g r) * ((∏ p ∈ T, (1 - g p)) -
+              ∑ n ∈ range (T.card + 3),
+                (if 0 < n ∧ n % 2 = 0 then stoppingTerm T D g n else 0)) -
+            g r * ∑ n ∈ range (T.card + 4),
+              (if 0 < n ∧ n % 2 = 0 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0) := by
+        rw [Finset.prod_insert hpr,
+          show (insert r T).card + 3 = T.card + 4 from by rw [hcard]]
+        rw [Finset.sum_congr rfl (fun n _ => stopp_summand_split' T D g r n hpr hlt),
+          Finset.sum_add_distrib]
+        have e1 : (∑ n ∈ range (T.card + 4),
+              (1 - g r) * (if 0 < n ∧ n % 2 = 0 then stoppingTerm T D g n else 0)) =
+            (1 - g r) * ∑ n ∈ range (T.card + 4),
+              (if 0 < n ∧ n % 2 = 0 then stoppingTerm T D g n else 0) := by
+          rw [Finset.mul_sum]
+        have e2 : (∑ n ∈ range (T.card + 4),
+              g r * (if 0 < n ∧ n % 2 = 0 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0)) =
+            g r * ∑ n ∈ range (T.card + 4),
+              (if 0 < n ∧ n % 2 = 0 then (∑ T' ∈ T.powerset.filter (fun U => 0 < n ∧ U.card = n - 1 ∧
+        D ≤ ((∏ p ∈ U, p : ℕ) : ℝ) * (r : ℝ) ^ 3 ∧
+        ∀ k < n - 1, k % 2 = (n - 1) % 2 →
+          ((((U.sort (· ≥ ·)).take k).prod : ℕ) : ℝ) *
+            (((U.sort (· ≥ ·)).getD k 0 : ℕ) : ℝ) ^ 3 < D), (∏ p ∈ T', g p)) else 0) := by
+          rw [Finset.mul_sum]
+        rw [e1, e2, stopp_range_trim' T D g (T.card + 3) (by omega)]
+        try ring
+      rw [hL, hR, ihL, extra_lower_sum T D g r]
+      try ring
+
 /-- LEAF. Finite stopping expansion of both ordinary Rosser models.
 BJS p. 14 Proposition 13 proof, citing Nathanson Lemma 9.3.
 This is a finite polynomial identity. It has no dimension premise, delay
@@ -132,8 +1007,8 @@ theorem stopping_expansion (S : Finset ℕ) (D : ℝ) (g : ℕ → ℝ)
     (rosserPrimeModel S ∅ D true g = (∏ p ∈ S, (1 - g p)) +
       ∑ n ∈ range (S.card + 3), if n % 2 = 1 then stoppingTerm S D g n else 0) ∧
     (rosserPrimeModel S ∅ D false g = (∏ p ∈ S, (1 - g p)) -
-      ∑ n ∈ range (S.card + 3), if 0 < n ∧ n % 2 = 0 then stoppingTerm S D g n else 0) := by
-  sorry
+      ∑ n ∈ range (S.card + 3), if 0 < n ∧ n % 2 = 0 then stoppingTerm S D g n else 0) :=
+  stopping_expansion_aux D g S hS
 
 /-- The first stopping term is a single prime sum with a cube cutoff.
 BJS p. 10 display 28 specialized to n equal to one. -/
