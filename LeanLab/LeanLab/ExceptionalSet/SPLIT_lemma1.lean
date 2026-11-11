@@ -10,6 +10,7 @@ so it carries no `sorry` of its own. Each leaf carries exactly one step.
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.SPLIT_leaf_poisson
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -861,7 +862,7 @@ theorem leaf_poisson (K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K
     (∑' n : ℤ, K (α + n) * eC (-((α + n) * v))) =
       eC (-(α * (⌊v⌋ : ℝ))) * ftR K (Int.fract v) +
         eC (-(α * ((⌊v⌋ + 1 : ℤ) : ℝ))) * ftR K (Int.fract v - 1) := by
-  sorry
+  exact Decomp371d.leaf_poisson_split K hK hcont hsupp v α
 
 /-! ### Assembly -/
 
