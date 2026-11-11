@@ -42,7 +42,12 @@ input on its own. It asserts nothing about the major arc coefficient, about the 
 about the gcd condition, and it holds with `r = 1` since `F(γ,N) ≥ 1`. -/
 theorem leaf_conductor_in_range (γ δ : ℝ) (hδ : 0 < δ) (N : ℕ) (hN : 1 ≤ N) :
     ∃ r : ℕ, 1 ≤ r ∧ (r : ℝ) ≤ F γ N ^ (6 * δ) := by
-  sorry
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hlog : 0 ≤ Real.log (N : ℝ) := Real.log_nonneg hN1
+  have hpow : 0 ≤ Real.log (N : ℝ) ^ γ := Real.rpow_nonneg hlog γ
+  have hF : 1 ≤ F γ (N : ℝ) := Real.one_le_exp hpow
+  have h6 : 0 ≤ 6 * δ := by linarith
+  exact ⟨1, le_refl 1, by simpa using Real.one_le_rpow hF h6⟩
 
 /-- LEAF. Small conductor case of the pointwise lower bound: for one conductor `r` in the allowed
 range whose value is at most the cap `ℰ^(1/7)`, the real part of the major arc coefficient at every
