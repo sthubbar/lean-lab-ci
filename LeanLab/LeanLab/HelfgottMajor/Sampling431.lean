@@ -62,7 +62,7 @@ theorem hasDerivAt_log_weight_primitive (a b q t : ℝ) (hq : 0 < q) (ht : 0 < t
   · rfl
   · simp only [Function.comp_apply, Pi.add_apply, Pi.sub_apply, Pi.pow_apply, id_eq]
     field_simp
-    <;> ring
+    ; ring
 
 /-- Exact integral of the squared logarithmic weight from height 1 to T.
 Source book page 434, the two elementary weight integrals in the sampling proof.

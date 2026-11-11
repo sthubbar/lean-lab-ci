@@ -32,7 +32,7 @@ theorem etaHeart_half_norm :
     intro t ht
     change 0 < t at ht
     dsimp only
-    rw [etaHeart, if_pos ht, abs_of_pos (exp_pos _), sqrt_eq_rpow, div_eq_mul_inv,
+    rw [etaHeart, ite_eq_left ht, abs_of_pos (exp_pos _), sqrt_eq_rpow, div_eq_mul_inv,
       ← rpow_neg ht.le]
     rw [show (1 / 2 : ℝ) - 1 = -(1 / 2) by norm_num]
     ring
@@ -94,7 +94,7 @@ theorem etaHeart_sqrt_norm :
     intro t ht
     change 0 < t at ht
     dsimp only
-    rw [etaHeart, if_pos ht, abs_of_pos (exp_pos _), sqrt_eq_rpow]
+    rw [etaHeart, ite_eq_left ht, abs_of_pos (exp_pos _), sqrt_eq_rpow]
     ring
   rw [heq]
   exact WeightedMoment389.gaussian_half_power_bound
