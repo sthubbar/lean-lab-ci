@@ -19,7 +19,7 @@ theorem prime_batch2_cut_lengths :
     ((offsets.drop 142).take 18).length = 18 ∧
     (((offsets.drop 142).drop 18).take 18).length = 18 ∧
     ((offsets.drop 142).drop 54).length = 17 := by
-  sorry
+  decide +kernel
 
 /-- LEAF. First sub-window of the third offset window: certify the primality of
 10^300 - a for the 18 offsets a in positions 1 through 18 of that window. -/
