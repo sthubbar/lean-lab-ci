@@ -20,8 +20,14 @@ count `excCount ≤ ⌊X⌋`, and the two are glued by the real-variable compari
   bound, with the single constant `(log X₀)^A`.
 * LEAF 4, the count itself: `excCount` never exceeds `⌊X⌋`, which is what leaf 3 uses.
 
-Leaves 3 and 4 are proved here; leaves 1 and 2 are open. `akeno_thm1_3_split` is proved from
-the four leaves with no `sorry` and does not use the sealed statement.
+Leaves 2, 3 and 4 are proved here; leaf 1 is open. `akeno_thm1_3_split` is proved from
+the four leaves with no direct `sorry` and does not use the sealed statement.
+
+The comparison lemmas below show why logarithmic savings alone do not supply leaf 1.
+The slower envelope `X exp(-(log X)^{1/200})` has every logarithmic saving but exceeds
+every constant multiple of the requested envelope at arbitrarily large `X`.
+Taking its natural floor gives the same obstruction for natural-valued counts below
+the trivial floor bound. These comparisons do not give an estimate for `excCount`.
 -/
 import LeanLab.Akeno2026.Statements
 
@@ -156,10 +162,136 @@ theorem leaf_exp_decay_dominates_log_powers (c A : ℝ) (hA : 0 < A) (hc : 0 ≤
     _ ≤ B * Real.exp (Real.log t) / Real.log t ^ A := key (Real.log t) hu
     _ = B * t / Real.log t ^ A := h3
 
+/-- The slower envelope still has every logarithmic saving. This is a real-variable
+comparison, not an exceptional-set estimate. -/
+theorem leaf_slower_exp_decay_log_powers320 (A : ℝ) (hA : 0 < A) :
+    ∃ C : ℝ, 0 < C ∧ ∀ X : ℝ, 2 ≤ X →
+      X * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 200)) ≤ C * X / Real.log X ^ A := by
+  obtain ⟨B, hBpos, hB⟩ := leaf_exp_decay_aux 1 (2 * A) (by linarith)
+  refine ⟨B, hBpos, ?_⟩
+  intro X hX
+  have hlog2pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hlog2le : Real.log 2 ≤ 1 := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)
+    linarith
+  have hlogle : Real.log 2 ≤ Real.log X := Real.log_le_log (by norm_num) hX
+  have hlogpos : 0 < Real.log X := lt_of_lt_of_le hlog2pos hlogle
+  have hu : Real.log 2 ≤ Real.sqrt (Real.log X) := by
+    nlinarith [Real.sq_sqrt hlogpos.le, Real.sqrt_nonneg (Real.log X)]
+  have hpow : Real.sqrt (Real.log X) ^ (2 * A) = Real.log X ^ A := by
+    rw [← Real.rpow_div_two_eq_sqrt (2 * A) hlogpos.le]
+    congr 1
+    ring
+  have hdecay : Real.sqrt (Real.log X) ^ ((1 : ℝ) / 100) =
+      Real.log X ^ ((1 : ℝ) / 200) := by
+    rw [← Real.rpow_div_two_eq_sqrt ((1 : ℝ) / 100) hlogpos.le]
+    norm_num
+  have hb := hB (Real.sqrt (Real.log X)) hu
+  rw [hpow, hdecay, one_mul] at hb
+  apply (le_div_iff₀ (Real.rpow_pos_of_pos hlogpos A)).2
+  calc
+    X * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 200)) * Real.log X ^ A =
+        (Real.log X ^ A * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 200))) * X := by ring
+    _ ≤ B * X := mul_le_mul_of_nonneg_right hb (by linarith)
+
+/-- No constant and threshold compare the slower envelope to the one in leaf 1.
+This does not assert that the actual exceptional count is as large as either envelope. -/
+theorem leaf_slower_exp_decay_not_bounded320 (C X₀ : ℝ) :
+    ∃ X : ℝ, 2 ≤ X ∧ X₀ ≤ X ∧
+      C * X * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 100)) <
+        X * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 200)) := by
+  have hsmall : Filter.Tendsto (fun X : ℝ => Real.log X ^ ((1 : ℝ) / 200))
+      Filter.atTop Filter.atTop :=
+    (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 200)).comp Real.tendsto_log_atTop
+  have hsq (X : ℝ) (hX : 2 ≤ X) :
+      (Real.log X ^ ((1 : ℝ) / 200)) ^ 2 = Real.log X ^ ((1 : ℝ) / 100) := by
+    have hlog : 0 ≤ Real.log X := Real.log_nonneg (by linarith)
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hlog]
+    norm_num
+  have hexponent : Filter.Tendsto
+      (fun X : ℝ => Real.log X ^ ((1 : ℝ) / 100) - Real.log X ^ ((1 : ℝ) / 200))
+      Filter.atTop Filter.atTop := by
+    refine Filter.tendsto_atTop_mono' _ ?_ hsmall
+    filter_upwards [hsmall.eventually_ge_atTop 2, Filter.eventually_ge_atTop (2 : ℝ)] with X hu hX
+    nlinarith [hsq X hX]
+  have hratio := Real.tendsto_exp_atTop.comp hexponent
+  obtain ⟨X, hX, hC⟩ :=
+    ((Filter.eventually_ge_atTop (max 2 X₀)).and (hratio.eventually_gt_atTop C)).exists
+  have hX2 : 2 ≤ X := le_trans (le_max_left _ _) hX
+  refine ⟨X, hX2, le_trans (le_max_right _ _) hX, ?_⟩
+  have hmul := mul_lt_mul_of_pos_right hC
+    (Real.exp_pos (-(Real.log X) ^ ((1 : ℝ) / 100)))
+  have heq :
+      Real.exp (Real.log X ^ ((1 : ℝ) / 100) - Real.log X ^ ((1 : ℝ) / 200)) *
+          Real.exp (-(Real.log X) ^ ((1 : ℝ) / 100)) =
+        Real.exp (-(Real.log X) ^ ((1 : ℝ) / 200)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  simp only [Function.comp_apply, heq] at hmul
+  convert mul_lt_mul_of_pos_left hmul (by linarith : 0 < X) using 1
+  ring
+
+/-- Even a natural-valued count below the trivial floor bound can have every logarithmic
+saving without the stretched exponential saving of leaf 1. The witness is the floor of the
+slower envelope, not the actual product-form exceptional count. -/
+theorem leaf_log_savings_insufficient320 :
+    ∃ E : ℝ → ℕ,
+      (∀ X : ℝ, 2 ≤ X → E X ≤ ⌊X⌋₊) ∧
+      (∀ A : ℝ, 0 < A → ∃ C : ℝ, 0 < C ∧ ∀ X : ℝ, 2 ≤ X →
+        (E X : ℝ) ≤ C * X / Real.log X ^ A) ∧
+      ¬ (∃ C X₀ : ℝ, 0 ≤ C ∧ 2 ≤ X₀ ∧ ∀ X : ℝ, X₀ ≤ X →
+        (E X : ℝ) ≤ C * X * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 100))) := by
+  let f : ℝ → ℝ := fun X => X * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 200))
+  have hf_nonneg (X : ℝ) (hX : 2 ≤ X) : 0 ≤ f X := by
+    dsimp [f]
+    positivity
+  have hf_le (X : ℝ) (hX : 2 ≤ X) : f X ≤ X := by
+    have hlog : 0 ≤ Real.log X := Real.log_nonneg (by linarith)
+    have hexp : Real.exp (-(Real.log X) ^ ((1 : ℝ) / 200)) ≤ 1 :=
+      Real.exp_le_one_iff.2 (neg_nonpos.2 (Real.rpow_nonneg hlog _))
+    simpa [f] using mul_le_mul_of_nonneg_left hexp (by linarith : 0 ≤ X)
+  have hf_top : Filter.Tendsto f Filter.atTop Filter.atTop := by
+    have hhalf : Filter.Tendsto (fun X : ℝ => Real.log X / 2) Filter.atTop Filter.atTop :=
+      Real.tendsto_log_atTop.atTop_div_const (by norm_num)
+    have hdiff : Filter.Tendsto
+        (fun X : ℝ => Real.log X - Real.log X ^ ((1 : ℝ) / 200))
+        Filter.atTop Filter.atTop := by
+      refine Filter.tendsto_atTop_mono' _ ?_ hhalf
+      filter_upwards [Real.tendsto_log_atTop.eventually_ge_atTop 4] with X hX
+      have hlog : 0 ≤ Real.log X := by linarith
+      have hsmall : Real.log X ^ ((1 : ℝ) / 200) ≤ Real.sqrt (Real.log X) := by
+        rw [Real.sqrt_eq_rpow]
+        exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
+      nlinarith [Real.sq_sqrt hlog, Real.sqrt_nonneg (Real.log X)]
+    refine (Real.tendsto_exp_atTop.comp hdiff).congr' ?_
+    filter_upwards [Filter.eventually_ge_atTop (2 : ℝ)] with X hX
+    have hpos : 0 < X := by linarith
+    simp only [Function.comp_apply, f, Real.exp_sub, Real.exp_neg, Real.exp_log hpos,
+      div_eq_mul_inv]
+  refine ⟨fun X => ⌊f X⌋₊, ?_, ?_, ?_⟩
+  · intro X hX
+    exact Nat.floor_mono (hf_le X hX)
+  · intro A hA
+    obtain ⟨C, hC, hbound⟩ := leaf_slower_exp_decay_log_powers320 A hA
+    exact ⟨C, hC, fun X hX => le_trans (Nat.floor_le (hf_nonneg X hX)) (hbound X hX)⟩
+  · rintro ⟨C, X₀, -, -, hbound⟩
+    obtain ⟨M, hM⟩ := Filter.eventually_atTop.1 (hf_top.eventually_ge_atTop 2)
+    obtain ⟨X, hX2, hXmax, hlt⟩ :=
+      leaf_slower_exp_decay_not_bounded320 (2 * C) (max M X₀)
+    have hf2 : 2 ≤ f X := hM X (le_trans (le_max_left _ _) hXmax)
+    have hlower : f X / 2 ≤ (⌊f X⌋₊ : ℝ) := by
+      linarith [Nat.lt_floor_add_one (f X)]
+    have hupper := hbound X (le_trans (le_max_right _ _) hXmax)
+    change 2 * C * X * Real.exp (-(Real.log X) ^ ((1 : ℝ) / 100)) < f X at hlt
+    linarith
+
 /-- LEAF 1 of 4, the analytic half: from some threshold `X₀ ≥ 2` on, the integers `N` in the
 window `(X/2, X]` divisible by `6` which are not a sum of two primes `p₁ + p₂` with
-`2 p₁ p₂ + 1` in `P₁₃` number at most `C X e^{-(log X)^{1/100}}`. This is the product form
-estimate of the weighted sieve; no uniformity in `A` is asked of it. -/
+`2 p₁ p₂ + 1` in `P₁₃` number at most `C X e^{-(log X)^{1/100}}`. This asks for a weighted
+sieve estimate stronger than the logarithmic exceptional rate stated in the paper's
+Lemma 4.6 and Theorem 1.3. Lemma 4.5 has this exponential exceptional rate for a different
+quadratic-character condition. No uniformity in `A` is asked of this leaf. -/
 theorem leaf_sieve_exception_decay :
     ∃ (C X₀ : ℝ), 0 ≤ C ∧ 2 ≤ X₀ ∧ ∀ X : ℝ, X₀ ≤ X →
       (excCount (fun N => 6 ∣ N) (ProdForm 13) X : ℝ) ≤

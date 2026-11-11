@@ -386,12 +386,435 @@ theorem norm_S_le (η : ℝ → ℝ) (h_diff : ContDiff ℝ 1 η) (h_supp : Func
   rw [hval, hsupp]
 
 
+/-! ### Elementary facts about the cutoff -/
+
+/-- A continuous cutoff supported in `[0,1]` vanishes at `1`. -/
+private lemma eta_one_eq_zero (η : ℝ → ℝ) (h_cont : Continuous η)
+    (h_supp : Function.support η ⊆ Set.Icc (0:ℝ) 1) : η 1 = 0 := by
+  have h2 : Filter.Tendsto η (nhdsWithin (1:ℝ) (Set.Ioi 1)) (nhds 0) := by
+    have h_eq : ∀ᶠ x_1 in nhdsWithin (1:ℝ) (Set.Ioi 1), (fun _ => (0:ℝ)) x_1 = η x_1 := by
+      apply Filter.eventually_iff_exists_mem.mpr
+      use Set.Ioi 1
+      constructor
+      · exact self_mem_nhdsWithin
+      · intro x_1 hx_1
+        have : x_1 ∉ Set.Icc (0:ℝ) 1 := by
+          intro h
+          have hx_gt : x_1 > 1 := hx_1
+          have hx_le : x_1 ≤ 1 := h.2
+          linarith
+        have : x_1 ∉ Function.support η := fun h => this (h_supp h)
+        exact (not_not.mp this).symm
+    exact Filter.Tendsto.congr' h_eq tendsto_const_nhds
+  have h3 : Filter.Tendsto η (nhdsWithin (1:ℝ) (Set.Ioi 1)) (nhds (η 1)) :=
+    h_cont.tendsto 1 |>.mono_left nhdsWithin_le_nhds
+  exact tendsto_nhds_unique h3 h2
+
+/-- For `y > 0` the cutoff `1_{[0,1]}(n/y)` is the indicator of `n ≤ y`. -/
+private lemma one_Icc_div_eq (n : ℕ) {y : ℝ} (hy : 0 < y) :
+    one_Icc ((n : ℝ) / y) = if (n : ℝ) ≤ y then 1 else 0 := by
+  by_cases h : (n : ℝ) ≤ y
+  · have hmem : (n : ℝ) / y ∈ Set.Icc (0:ℝ) 1 :=
+      ⟨div_nonneg (Nat.cast_nonneg n) hy.le, by rw [div_le_one hy]; exact h⟩
+    simp [one_Icc, hmem, h]
+  · have hmem : (n : ℝ) / y ∉ Set.Icc (0:ℝ) 1 := by
+      intro hh
+      exact h ((div_le_one hy).mp hh.2)
+    simp [one_Icc, hmem, h]
+
+/-! ### The truncated sum as a step function -/
+
+/-- The truncated sum with truncation `N` at argument `y > 0`, as a finite sum of indicators
+of `n ≤ y`. -/
+private lemma S_trunc_repr (q N : ℕ) {y α : ℝ} (hy : 0 < y) :
+    S one_Icc q N y α =
+      ∑ n ∈ range N,
+        (((ArithmeticFunction.vonMangoldt n : ℝ) * (if Nat.Coprime n q then 1 else 0) *
+            (if (n : ℝ) ≤ y then 1 else 0) : ℝ) : ℂ) *
+          Complex.exp (2 * π * Complex.I * α * (n : ℂ)) := by
+  unfold LeanLab.Tao2012.Cor48.S
+  refine sum_congr rfl fun n _ => ?_
+  rw [one_Icc_div_eq n hy]
+
+/-- If the truncation point is at most `y`, every term of the step representation survives. -/
+private lemma S_trunc_step (q N : ℕ) {y α : ℝ} (hy : 0 < y) (hNy : (N : ℝ) ≤ y) :
+    S one_Icc q N y α =
+      ∑ n ∈ range N,
+        (((ArithmeticFunction.vonMangoldt n : ℝ) * (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+          Complex.exp (2 * π * Complex.I * α * (n : ℂ)) := by
+  rw [S_trunc_repr q N hy]
+  refine sum_congr rfl fun n hn => ?_
+  simp only [mem_range] at hn
+  have hny : (n : ℝ) ≤ y := le_trans (by exact_mod_cast hn.le) hNy
+  rw [ite_eq_left hny, mul_one]
+
+/-- If the truncation point exceeds `⌊y⌋₊`, the terms from `⌊y⌋₊ + 1` on vanish. -/
+private lemma S_trunc_trim (q N : ℕ) {y α : ℝ} (hy : 0 < y) (hN : ⌊y⌋₊ + 1 ≤ N) :
+    S one_Icc q N y α =
+      ∑ n ∈ range (⌊y⌋₊ + 1),
+        (((ArithmeticFunction.vonMangoldt n : ℝ) * (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+          Complex.exp (2 * π * Complex.I * α * (n : ℂ)) := by
+  rw [S_trunc_repr q N hy]
+  have hsub : range (⌊y⌋₊ + 1) ⊆ range N := by
+    intro k hk
+    simp only [mem_range] at hk ⊢
+    omega
+  rw [← Finset.sum_subset hsub]
+  · refine sum_congr rfl fun n hn => ?_
+    simp only [mem_range] at hn
+    have hny : (n : ℝ) ≤ y := by
+      have h1 : ((n : ℕ) : ℝ) ≤ (⌊y⌋₊ : ℝ) := by exact_mod_cast (Nat.le_of_lt_succ hn)
+      have h2 : (⌊y⌋₊ : ℝ) ≤ y := Nat.floor_le hy.le
+      linarith
+    rw [ite_eq_left hny, mul_one]
+  · intro n hn hn2
+    simp only [mem_range] at hn hn2
+    have hge : ⌊y⌋₊ + 1 ≤ n := by omega
+    have hny : ¬ ((n : ℝ) ≤ y) := by
+      have h2 : y < (⌊y⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one y
+      have h3 : (⌊y⌋₊ : ℝ) + 1 ≤ (n : ℝ) := by exact_mod_cast hge
+      linarith
+    rw [ite_eq_right hny]
+    simp
+
+/-- Norm bound for the `N`-truncated sum at a positive argument. -/
+private lemma S_trunc_norm_le (q N : ℕ) (α : ℝ) {y : ℝ} (hy : 0 < y) :
+    ‖S one_Icc q N y α‖ ≤
+      ∑ n ∈ range N,
+        |ArithmeticFunction.vonMangoldt n * (if Nat.Coprime n q then 1 else 0)| := by
+  have hexp : ∀ n : ℕ, ‖Complex.exp (2 * π * Complex.I * α * (n : ℂ))‖ = 1 := by
+    intro n
+    have h1 : Complex.exp (2 * π * Complex.I * α * (n : ℂ))
+        = Complex.exp (((2 * π * α * n : ℝ)) * Complex.I) := by
+      congr 1
+      push_cast
+      ring
+    rw [h1, Complex.norm_exp_ofReal_mul_I]
+  rw [S_trunc_repr q N hy]
+  refine (norm_sum_le _ _).trans (sum_le_sum fun n _ => ?_)
+  have hit : |(if (n : ℝ) ≤ y then (1 : ℝ) else 0)| ≤ 1 := by
+    by_cases hp : (n : ℝ) ≤ y <;> simp [hp]
+  calc ‖(((ArithmeticFunction.vonMangoldt n : ℝ) *
+            (if Nat.Coprime n q then 1 else 0) *
+              (if (n : ℝ) ≤ y then 1 else 0) : ℝ) : ℂ) *
+            Complex.exp (2 * π * Complex.I * α * (n : ℂ))‖
+      = |ArithmeticFunction.vonMangoldt n * (if Nat.Coprime n q then 1 else 0) *
+          (if (n : ℝ) ≤ y then 1 else 0)| := by
+        rw [norm_mul, hexp n, mul_one]
+        exact RCLike.norm_ofReal _
+    _ = |ArithmeticFunction.vonMangoldt n * (if Nat.Coprime n q then 1 else 0)| *
+          |(if (n : ℝ) ≤ y then (1 : ℝ) else 0)| := by rw [abs_mul]
+    _ ≤ |ArithmeticFunction.vonMangoldt n * (if Nat.Coprime n q then 1 else 0)| * 1 :=
+        mul_le_mul_of_nonneg_left hit (abs_nonneg _)
+    _ = _ := mul_one _
+
+/-! ### The pointwise domination of the re-cut -/
+
+/-- The supremum over `[0,x]` of the `⌊y'⌋₊`-truncated sums dominates the `⌊x⌋₊`-truncated sum
+at every `y ∈ (0,x]`.  The two differ only in the choice of the truncation point: for
+`m = ⌊y⌋₊ < ⌊x⌋₊` the matching point is `m+1`, and for `m = ⌊x⌋₊` it is `x`. -/
+private lemma S_trunc_le_sup (q : ℕ) (x α : ℝ) (hx : 1 ≤ x) {y : ℝ} (hy0 : 0 < y) (hyx : y ≤ x) :
+    ‖S one_Icc q ⌊x⌋₊ y α‖ ≤ ⨆ y' ∈ Set.Icc (0:ℝ) x, ‖S one_Icc q ⌊y'⌋₊ y' α‖ := by
+  have hx0 : (0:ℝ) < x := lt_of_lt_of_le zero_lt_one hx
+  have hC : (0:ℝ) ≤ ∑ n ∈ range (⌊x⌋₊),
+      |ArithmeticFunction.vonMangoldt n * (if Nat.Coprime n q then 1 else 0)| :=
+    sum_nonneg fun n _ => abs_nonneg _
+  have hBdd : BddAbove (Set.range fun y' : ℝ =>
+      ⨆ (_ : y' ∈ Set.Icc (0:ℝ) x), ‖S one_Icc q ⌊y'⌋₊ y' α‖) := by
+    refine ⟨∑ n ∈ range (⌊x⌋₊),
+      |ArithmeticFunction.vonMangoldt n * (if Nat.Coprime n q then 1 else 0)|, ?_⟩
+    rintro _ ⟨y', rfl⟩
+    by_cases hy' : y' ∈ Set.Icc (0:ℝ) x
+    · haveI : Nonempty (y' ∈ Set.Icc (0:ℝ) x) := ⟨hy'⟩
+      refine ciSup_le fun _ => ?_
+      have hy'x : ⌊y'⌋₊ ≤ ⌊x⌋₊ := Nat.floor_mono hy'.2
+      rcases hy'.1.eq_or_lt with h | h
+      · subst h
+        have h0 : S one_Icc q ⌊(0:ℝ)⌋₊ 0 α = 0 := by
+          simp [LeanLab.Tao2012.Cor48.S]
+        rw [h0, norm_zero]
+        exact hC
+      · refine (S_trunc_norm_le q ⌊y'⌋₊ α h).trans ?_
+        exact Finset.sum_le_sum_of_subset_of_nonneg
+          (fun k hk => by simp only [mem_range] at hk ⊢; exact lt_of_lt_of_le hk hy'x)
+          (fun _ _ _ => abs_nonneg _)
+    · show (⨆ (_ : y' ∈ Set.Icc (0:ℝ) x), ‖S one_Icc q ⌊y'⌋₊ y' α‖) ≤ _
+      have h0 : (⨆ (_ : y' ∈ Set.Icc (0:ℝ) x), ‖S one_Icc q ⌊y'⌋₊ y' α‖) = 0 := by
+        haveI : IsEmpty (y' ∈ Set.Icc (0:ℝ) x) := ⟨fun hh => hy' hh⟩
+        rw [iSup_of_empty', Real.sSup_empty]
+      rw [h0]
+      exact hC
+  set m := ⌊y⌋₊ with hm
+  have hmy : (m : ℝ) ≤ y := Nat.floor_le hy0.le
+  have hmx : m ≤ ⌊x⌋₊ := Nat.floor_mono hyx
+  obtain ⟨y', hy'mem, heq⟩ :
+      ∃ y' ∈ Set.Icc (0:ℝ) x, ‖S one_Icc q ⌊x⌋₊ y α‖ = ‖S one_Icc q ⌊y'⌋₊ y' α‖ := by
+    by_cases hcase : m + 1 ≤ ⌊x⌋₊
+    · refine ⟨((m + 1 : ℕ) : ℝ), ⟨by positivity, ?_⟩, ?_⟩
+      · have h2 : ((m + 1 : ℕ) : ℝ) ≤ ((⌊x⌋₊ : ℕ) : ℝ) := by exact_mod_cast hcase
+        have h3 : ((⌊x⌋₊ : ℕ) : ℝ) ≤ x := Nat.floor_le hx0.le
+        linarith
+      · rw [Nat.floor_natCast]
+        have h1 : S one_Icc q ⌊x⌋₊ y α =
+            ∑ n ∈ range (m + 1),
+              (((ArithmeticFunction.vonMangoldt n : ℝ) *
+                (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+                Complex.exp (2 * π * Complex.I * α * (n : ℂ)) := by
+          have htrim := S_trunc_trim (α := α) q ⌊x⌋₊ hy0 hcase
+          rw [← hm] at htrim
+          exact htrim
+        have h2 : S one_Icc q (m + 1) ((m + 1 : ℕ) : ℝ) α =
+            ∑ n ∈ range (m + 1),
+              (((ArithmeticFunction.vonMangoldt n : ℝ) *
+                (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+                Complex.exp (2 * π * Complex.I * α * (n : ℂ)) :=
+          S_trunc_step q (m + 1) (by positivity) le_rfl
+        rw [h1, h2]
+    · have hmx' : m = ⌊x⌋₊ := le_antisymm hmx (by omega)
+      refine ⟨x, ⟨hx0.le, le_refl x⟩, ?_⟩
+      have h1 : S one_Icc q ⌊x⌋₊ y α =
+          ∑ n ∈ range (⌊x⌋₊),
+            (((ArithmeticFunction.vonMangoldt n : ℝ) *
+              (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+              Complex.exp (2 * π * Complex.I * α * (n : ℂ)) :=
+        S_trunc_step q ⌊x⌋₊ hy0 (by rw [← hmx']; exact hmy)
+      have h2 : S one_Icc q ⌊x⌋₊ x α =
+          ∑ n ∈ range (⌊x⌋₊),
+            (((ArithmeticFunction.vonMangoldt n : ℝ) *
+              (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+              Complex.exp (2 * π * Complex.I * α * (n : ℂ)) :=
+        S_trunc_step q ⌊x⌋₊ hx0 (Nat.floor_le hx0.le)
+      rw [h1, h2]
+  rw [heq]
+  have hinner : ‖S one_Icc q ⌊y'⌋₊ y' α‖ ≤
+      ⨆ (_ : y' ∈ Set.Icc (0:ℝ) x), ‖S one_Icc q ⌊y'⌋₊ y' α‖ := by
+    haveI : Nonempty (y' ∈ Set.Icc (0:ℝ) x) := ⟨hy'mem⟩
+    refine le_ciSup (f := fun _ : (y' ∈ Set.Icc (0:ℝ) x) => ‖S one_Icc q ⌊y'⌋₊ y' α‖) ?_ hy'mem
+    exact ⟨‖S one_Icc q ⌊y'⌋₊ y' α‖, by rintro _ ⟨hh, rfl⟩; exact le_rfl⟩
+  exact hinner.trans (le_ciSup hBdd y')
+
+/-! ### The corrected summation-by-parts identity -/
+
+/-- Integrating against the indicator of `n ≤ y` over `(0,x]` gives the integral over `(n,x]`. -/
+private lemma integral_mul_indicator (f : ℝ → ℂ) {n : ℕ} {x : ℝ} (hn : (n : ℝ) ≤ x) :
+    ∫ y in (0:ℝ)..x, f y * (if (n : ℝ) ≤ y then (1 : ℂ) else 0) = ∫ y in (n : ℝ)..x, f y := by
+  have h0 : (0:ℝ) ≤ x := le_trans (Nat.cast_nonneg n) hn
+  have hfun : ∀ y : ℝ, f y * (if (n : ℝ) ≤ y then (1 : ℂ) else 0)
+      = (Set.Ici (n : ℝ)).indicator f y := by
+    intro y
+    by_cases h : (n : ℝ) ≤ y
+    · rw [ite_eq_left h, mul_one, Set.indicator_of_mem (Set.mem_Ici.mpr h)]
+    · rw [ite_eq_right h, mul_zero, Set.indicator_of_notMem (by simpa using h)]
+  simp_rw [hfun]
+  rw [intervalIntegral.integral_of_le h0, intervalIntegral.integral_of_le hn,
+    MeasureTheory.setIntegral_indicator measurableSet_Ici]
+  have hae_ne : ∀ᵐ y : ℝ ∂volume, y ≠ (n : ℝ) := by
+    simp [MeasureTheory.ae_iff, MeasureTheory.measure_singleton]
+  have hset : Set.Ioc (0:ℝ) x ∩ Set.Ici (n : ℝ) =ᵐ[volume] Set.Ioc (n : ℝ) x := by
+    filter_upwards [hae_ne] with y hy
+    by_cases h : y ∈ Set.Ioc (0:ℝ) x ∩ Set.Ici (n : ℝ)
+    · have hmem : y ∈ Set.Ioc (n : ℝ) x := by
+        simp only [Set.mem_inter_iff, Set.mem_Ioc, Set.mem_Ici] at h ⊢
+        exact ⟨lt_of_le_of_ne h.2 (Ne.symm hy), h.1.2⟩
+      simp only [h, hmem]
+    · have hmem : y ∉ Set.Ioc (n : ℝ) x := by
+        simp only [Set.mem_inter_iff, Set.mem_Ioc, Set.mem_Ici] at h ⊢
+        rintro ⟨h1, h2⟩
+        exact h ⟨⟨lt_of_le_of_lt (Nat.cast_nonneg n) h1, h2⟩, h1.le⟩
+      simp only [h, hmem]
+  rw [MeasureTheory.setIntegral_congr_set (s := Set.Ioc (0:ℝ) x ∩ Set.Ici (n : ℝ))
+    (t := Set.Ioc (n : ℝ) x) hset]
+
+/-- A step times a continuous function is interval integrable. -/
+private lemma intervalIntegrable_step_mul (f : ℝ → ℂ) (hf : Continuous f) (A : ℂ) (n : ℕ) (x : ℝ) :
+    IntervalIntegrable (fun y : ℝ => A * (f y * (if (n : ℝ) ≤ y then (1 : ℂ) else 0)))
+      volume (0:ℝ) x := by
+  have hit : ∀ y : ℝ, ‖(if (n : ℝ) ≤ y then (1 : ℂ) else 0)‖ ≤ 1 := by
+    intro y
+    by_cases h : (n : ℝ) ≤ y
+    · rw [ite_eq_left h]
+      norm_num
+    · rw [ite_eq_right h]
+      norm_num
+  refine IntervalIntegrable.mono_fun' (g := fun y : ℝ => ‖A‖ * ‖f y‖) ?_ ?_ ?_
+  · exact (hf.norm.const_mul _).intervalIntegrable 0 x
+  · have hm : Measurable fun y : ℝ => (if (n : ℝ) ≤ y then (1 : ℂ) else 0) :=
+      Measurable.ite (measurableSet_le measurable_const measurable_id) measurable_const
+        measurable_const
+    exact (measurable_const.mul (hf.measurable.mul hm)).aestronglyMeasurable
+  · filter_upwards with y
+    rw [norm_mul, norm_mul]
+    exact mul_le_mul_of_nonneg_left (mul_le_of_le_one_right (norm_nonneg _) (hit y))
+      (norm_nonneg _)
+
+/-- One step of the substitution: the integral of `η'(y/x)` against the indicator of `n ≤ y`. -/
+private lemma integral_step_eq (η : ℝ → ℝ) (h_diff : ContDiff ℝ 1 η)
+    (h_supp : Function.support η ⊆ Set.Icc (0:ℝ) 1)
+    {x : ℝ} (hx : 1 ≤ x) {n : ℕ} (hn : (n : ℝ) ≤ x) :
+    ∫ y in (0:ℝ)..x, ((deriv η (y / x) : ℝ) : ℂ) * (if (n : ℝ) ≤ y then (1 : ℂ) else 0)
+      = - (x : ℂ) * ((η ((n : ℝ) / x) : ℝ) : ℂ) := by
+  have hx0 : (0:ℝ) < x := lt_of_lt_of_le zero_lt_one hx
+  have hxne : (x : ℝ) ≠ 0 := ne_of_gt hx0
+  rw [integral_mul_indicator _ hn, intervalIntegral.integral_ofReal]
+  have hI : (∫ y in (n:ℝ)..x, deriv η (y / x)) = -x * η ((n : ℝ) / x) := by
+    rw [LeanLab.Tao2012.DecompJ223.eta_eq_integral η h_diff h_supp x hx n hn]
+    field_simp
+  rw [hI]
+  push_cast
+  ring
+
+/-- **The corrected leaf**: the summation-by-parts identity with the inner truncation `⌊x⌋₊`,
+which is the one that matches the outer truncation. -/
+private theorem S_eq_integral_fixed (η : ℝ → ℝ) (h_diff : ContDiff ℝ 1 η)
+    (h_supp : Function.support η ⊆ Set.Icc (0:ℝ) 1)
+    (q : ℕ) (x α : ℝ) (hx : 1 ≤ x) :
+    S η q ⌊x⌋₊ x α =
+      - (1 / x) * ∫ y in (0:ℝ)..x, ((deriv η (y / x) : ℝ) : ℂ) * S one_Icc q ⌊x⌋₊ y α := by
+  have hx0 : (0:ℝ) < x := lt_of_lt_of_le zero_lt_one hx
+  have hxne : (x : ℝ) ≠ 0 := ne_of_gt hx0
+  have hcxn : (x : ℂ) ≠ 0 := by exact_mod_cast hxne
+  have hdc : Continuous fun y : ℝ => ((deriv η (y / x) : ℝ) : ℂ) :=
+    Complex.continuous_ofReal.comp
+      ((h_diff.continuous_deriv (by decide)).comp (continuous_id.div_const x))
+  -- (1) expand the inner sum into its steps, almost everywhere on `(0,x]`
+  have hae : ∫ y in (0:ℝ)..x, ((deriv η (y / x) : ℝ) : ℂ) * S one_Icc q ⌊x⌋₊ y α
+      = ∫ y in (0:ℝ)..x, ∑ n ∈ range ⌊x⌋₊,
+          ((((ArithmeticFunction.vonMangoldt n : ℝ) * (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+              Complex.exp (2 * π * Complex.I * α * (n : ℂ))) *
+            (((deriv η (y / x) : ℝ) : ℂ) * (if (n : ℝ) ≤ y then (1 : ℂ) else 0)) := by
+    refine intervalIntegral.integral_congr_ae (μ := volume) (a := 0) (b := x) ?_
+    filter_upwards with y hy
+    rw [Set.uIoc_of_le hx0.le] at hy
+    rw [S_trunc_repr q ⌊x⌋₊ hy.1, Finset.mul_sum]
+    refine sum_congr rfl fun n _ => ?_
+    by_cases hny : (n : ℝ) ≤ y
+    · rw [ite_eq_left hny, ite_eq_left hny]
+      push_cast
+      ring
+    · rw [ite_eq_right hny, ite_eq_right hny]
+      push_cast
+      ring
+  rw [hae, intervalIntegral.integral_finsetSum (fun n _ =>
+    intervalIntegrable_step_mul (fun y : ℝ => ((deriv η (y / x) : ℝ) : ℂ)) hdc _ n x)]
+  -- (2) the left side as the same finite sum
+  have hL : S η q ⌊x⌋₊ x α = ∑ n ∈ range ⌊x⌋₊,
+      (((ArithmeticFunction.vonMangoldt n : ℝ) * (if Nat.Coprime n q then 1 else 0) : ℝ) : ℂ) *
+        ((η ((n : ℝ) / x) : ℝ) : ℂ) * Complex.exp (2 * π * Complex.I * α * (n : ℂ)) := by
+    unfold LeanLab.Tao2012.Cor48.S
+    refine sum_congr rfl fun n _ => ?_
+    push_cast
+    ring
+  rw [hL, Finset.mul_sum]
+  refine sum_congr rfl fun n hn => ?_
+  simp only [mem_range] at hn
+  have hnx : (n : ℝ) ≤ x := by
+    have h1 : ((n + 1 : ℕ) : ℝ) ≤ (⌊x⌋₊ : ℝ) := by exact_mod_cast (Nat.succ_le_of_lt hn)
+    have h2 : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le hx0.le
+    push_cast at h1
+    linarith
+  rw [intervalIntegral.integral_const_mul, integral_step_eq η h_diff h_supp hx hnx]
+  field_simp
+
 /-- CITED. Tao 2012, page 16, Lemma 4.2, summation by parts for the smoothed prime sum.
 Assembled from its leaves with no sorry. -/
 theorem lemma4_2 (η : ℝ → ℝ) (h_diff : ContDiff ℝ 1 η) (h_supp : Function.support η ⊆ Set.Icc 0 1)
     (q : ℕ) (hq : 1 ≤ q) (x : ℝ) (hx : 1 ≤ x) (α : ℝ) :
       ‖S η q ⌊x⌋₊ x α‖ ≤ (∫ t, |deriv η t|) * ⨆ y ∈ Set.Icc 0 x, ‖S one_Icc q ⌊y⌋₊ y α‖ := by
-  rw [S_eq_integral η h_diff h_supp q x α hx]
-  exact norm_S_le η h_diff h_supp q x α hx
+  rw [S_eq_integral_fixed η h_diff h_supp q x α hx]
+  have hx0 : (0:ℝ) < x := lt_of_lt_of_le zero_lt_one hx
+  have hxne : (x : ℝ) ≠ 0 := ne_of_gt hx0
+  have hdc : Continuous fun y : ℝ => deriv η (y / x) :=
+    (h_diff.continuous_deriv (by decide)).comp (continuous_id.div_const x)
+  have hfc : Continuous fun y : ℝ => ((deriv η (y / x) : ℝ) : ℂ) :=
+    Complex.continuous_ofReal.comp hdc
+  set M := ⨆ y ∈ Set.Icc (0:ℝ) x, ‖S one_Icc q ⌊y⌋₊ y α‖ with hM
+  set Bsum : ℝ := ∑ n ∈ range (⌊x⌋₊),
+    |ArithmeticFunction.vonMangoldt n * (if Nat.Coprime n q then 1 else 0)| with hBsumval
+  have hBsum : (0:ℝ) ≤ Bsum := by
+    rw [hBsumval]
+    exact sum_nonneg fun n _ => abs_nonneg _
+  set G : ℝ → ℂ := fun y => ∑ n ∈ range (⌊x⌋₊),
+    (((ArithmeticFunction.vonMangoldt n : ℝ) * (if Nat.Coprime n q then 1 else 0) *
+      (if (n : ℝ) ≤ y then 1 else 0) : ℝ) : ℂ) *
+      Complex.exp (2 * π * Complex.I * α * (n : ℂ)) with hG
+  have hGs : ∀ {y : ℝ}, 0 < y → G y = S one_Icc q ⌊x⌋₊ y α := fun hy =>
+    (S_trunc_repr (α := α) q ⌊x⌋₊ hy).symm
+  have hGmeas : Measurable G := by
+    rw [hG]
+    refine Finset.measurable_sum _ fun n _ => ?_
+    refine Measurable.mul_const ?_ _
+    exact Complex.measurable_ofReal.comp
+      (measurable_const.mul (Measurable.ite (measurableSet_le measurable_const measurable_id)
+        measurable_const measurable_const))
+  have hIntG : IntervalIntegrable (fun y : ℝ => ((deriv η (y / x) : ℝ) : ℂ) * G y)
+      volume (0:ℝ) x := by
+    refine IntervalIntegrable.mono_fun' (g := fun y : ℝ => ‖deriv η (y / x)‖ * Bsum) ?_ ?_ ?_
+    · rw [hBsumval]
+      exact (hdc.norm.mul_const _).intervalIntegrable 0 x
+    · exact (Measurable.mul hfc.measurable hGmeas).aestronglyMeasurable
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_uIoc] with y hy
+      rw [Set.uIoc_of_le hx0.le] at hy
+      have hcast : ‖((deriv η (y / x) : ℝ) : ℂ)‖ = |deriv η (y / x)| :=
+        RCLike.norm_ofReal _
+      rw [norm_mul, hcast, Real.norm_eq_abs, hGs hy.1]
+      refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+      have := S_trunc_norm_le q ⌊x⌋₊ α hy.1
+      rw [hBsumval]
+      exact this
+  have hInt : IntervalIntegrable
+      (fun y : ℝ => ((deriv η (y / x) : ℝ) : ℂ) * S one_Icc q ⌊x⌋₊ y α) volume (0:ℝ) x := by
+    refine hIntG.congr_ae ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_uIoc] with y hy
+    rw [Set.uIoc_of_le hx0.le] at hy
+    rw [hGs hy.1]
+  have hmaj : IntervalIntegrable (fun y : ℝ => ‖deriv η (y / x)‖ * M) volume (0:ℝ) x :=
+    (hdc.norm.mul_const M).intervalIntegrable 0 x
+  have hmono : ∫ y in (0:ℝ)..x, ‖((deriv η (y / x) : ℝ) : ℂ) * S one_Icc q ⌊x⌋₊ y α‖
+      ≤ ∫ y in (0:ℝ)..x, ‖deriv η (y / x)‖ * M := by
+    refine intervalIntegral.integral_mono_on_of_le_Ioo hx0.le hInt.norm hmaj ?_
+    intro y hy
+    have hcast : ‖((deriv η (y / x) : ℝ) : ℂ)‖ = |deriv η (y / x)| := RCLike.norm_ofReal _
+    rw [norm_mul, hcast, Real.norm_eq_abs]
+    refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+    rw [hM]
+    exact S_trunc_le_sup q x α hx hy.1 hy.2.le
+  have hsubst : ∫ y in (0:ℝ)..x, ‖deriv η (y / x)‖ * M
+      = x * ((∫ t in (0:ℝ)..1, |deriv η t|) * M) := by
+    rw [intervalIntegral.integral_mul_const]
+    simp only [Real.norm_eq_abs]
+    rw [intervalIntegral.integral_comp_div (f := fun t : ℝ => |deriv η t|) hxne]
+    simp only [zero_div, div_self hxne, smul_eq_mul]
+    ring
+  have hsupp : ∫ t in (0:ℝ)..1, |deriv η t| = ∫ t, |deriv η t| := by
+    have e1 : ∫ t in (0:ℝ)..1, |deriv η t| = ∫ t in Set.Ioc (0:ℝ) 1, |deriv η t| :=
+      intervalIntegral.integral_of_le (by norm_num)
+    have e2 : ∫ t in Set.Ioc (0:ℝ) 1, |deriv η t| = ∫ t in Set.Icc (0:ℝ) 1, |deriv η t| :=
+      (MeasureTheory.integral_Icc_eq_integral_Ioc).symm
+    have e3 : ∫ t in Set.Icc (0:ℝ) 1, |deriv η t| = ∫ t, |deriv η t| :=
+      MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero
+        (fun t ht => by rw [deriv_eq_zero_off η h_diff h_supp ht]; simp)
+    rw [e1, e2, e3]
+  have hnormK : ‖((1 : ℂ) / (x : ℂ))‖ = 1 / x := by
+    rw [norm_div, norm_one]
+    have hcast : ‖((x : ℝ) : ℂ)‖ = |x| := RCLike.norm_ofReal _
+    rw [hcast, abs_of_pos hx0]
+  have hstep1 : ‖- ((1 : ℂ) / (x : ℂ)) * ∫ y in (0:ℝ)..x,
+        ((deriv η (y / x) : ℝ) : ℂ) * S one_Icc q ⌊x⌋₊ y α‖
+      = (1 / x) * ‖∫ y in (0:ℝ)..x,
+          ((deriv η (y / x) : ℝ) : ℂ) * S one_Icc q ⌊x⌋₊ y α‖ := by
+    rw [norm_mul, norm_neg, hnormK]
+  rw [hstep1]
+  have hpos : (0:ℝ) < 1 / x := by positivity
+  have hnormint : ‖∫ y in (0:ℝ)..x, ((deriv η (y / x) : ℝ) : ℂ) * S one_Icc q ⌊x⌋₊ y α‖
+      ≤ ∫ y in (0:ℝ)..x, ‖deriv η (y / x)‖ * M :=
+    (intervalIntegral.norm_integral_le_integral_norm hx0.le).trans hmono
+  refine (mul_le_mul_of_nonneg_left hnormint hpos.le).trans ?_
+  rw [hsubst]
+  have hval : (1 / x) * (x * ((∫ t in (0:ℝ)..1, |deriv η t|) * M))
+      = (∫ t in (0:ℝ)..1, |deriv η t|) * M := by
+    rw [show (1 / x : ℝ) * (x * ((∫ t in (0:ℝ)..1, |deriv η t|) * M))
+        = ((1 / x) * x) * ((∫ t in (0:ℝ)..1, |deriv η t|) * M) by ring]
+    rw [one_div, inv_mul_cancel₀ hxne, one_mul]
+  rw [hval, hsupp]
 
 end LeanLab.Tao2012.DecompJ223

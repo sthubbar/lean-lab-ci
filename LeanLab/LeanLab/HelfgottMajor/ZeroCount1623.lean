@@ -238,15 +238,15 @@ lemma two_sided_split (χ : DirichletCharacter ℂ q) {T : ℝ} (hT : 0 < T)
   have h2 : -ρ.im ≠ T := fun h => hne (by rw [abs_of_nonpos (by linarith [hT]), h])
   rcases lt_trichotomy ρ.im 0 with h | h | h
   · have h3 : ¬ 0 ≤ ρ.im := not_le.mpr h
-    rw [if_neg h3, if_pos h.le, zero_add, halfWeight,
-      if_neg (not_or.mpr ⟨neg_ne_zero.mpr h.ne, h2⟩), one_mul]
+    rw [ite_eq_right h3, ite_eq_left h.le, zero_add, halfWeight,
+      ite_eq_right (not_or.mpr ⟨neg_ne_zero.mpr h.ne, h2⟩), one_mul]
   · have a : halfWeight T 0 = 1 / 2 := by simp [halfWeight]
     have b : halfWeight T (-0) = 1 / 2 := by simp [halfWeight]
-    rw [h, if_pos le_rfl, if_pos le_rfl, a, b]
+    rw [h, ite_eq_left le_rfl, ite_eq_left le_rfl, a, b]
     ring
   · have h3 : ¬ ρ.im ≤ 0 := not_le.mpr h
-    rw [if_pos h.le, if_neg h3, add_zero, halfWeight,
-      if_neg (not_or.mpr ⟨h.ne', h1⟩), one_mul]
+    rw [ite_eq_left h.le, ite_eq_right h3, add_zero, halfWeight,
+      ite_eq_right (not_or.mpr ⟨h.ne', h1⟩), one_mul]
 
 lemma exists_gap (χ : DirichletCharacter ℂ q) (T : ℝ) :
     ∃ ε > 0, ∀ t, T < t → t < T + ε → stripZeros χ t = stripZeros χ T := by
@@ -429,7 +429,7 @@ theorem very_low_count (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (T
     apply Finset.sum_congr rfl
     intro ρ hρ
     unfold lowTerm
-    rw [if_pos ((stripZeros_finite χ 1).mem_toFinset.mp hρ).2.2.2]
+    rw [ite_eq_left ((stripZeros_finite χ 1).mem_toFinset.mp hρ).2.2.2]
   have hreduce : (∑' ρ : ZeroIdx χ T, Set.indicator {ρ : ZeroIdx χ T | |ρ.val.im| ≤ 1}
       (fun ρ => (mult χ ρ.val : ℝ)) ρ) =
       ∑ ρ ∈ (stripZeros_finite χ 1).toFinset, (mult χ ρ : ℝ) :=

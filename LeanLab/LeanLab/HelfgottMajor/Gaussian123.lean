@@ -28,7 +28,7 @@ theorem gaussian_term_norm_bound {q : ℕ} (χ : DirichletCharacter ℂ q) (δ x
   have hphase : ‖e (δ * n / x)‖ = 1 := by
     simp [e, Complex.norm_exp, Complex.mul_re]
   have hweight : ‖(etaHeart (n / x) : ℂ)‖ = exp (-((n : ℝ) / x) ^ 2 / 2) := by
-    rw [etaHeart, if_pos (div_pos hn hx), Complex.norm_real, Real.norm_eq_abs,
+    rw [etaHeart, ite_eq_left (div_pos hn hx), Complex.norm_real, Real.norm_eq_abs,
       abs_of_pos (exp_pos _)]
   have hexp : exp (-((n : ℝ) / x) ^ 2 / 2) ≤
       exp (-(1 / (2 * x ^ 2)) * (n : ℝ)) := by
@@ -227,7 +227,7 @@ theorem t2_summable {q : ℕ} (χ : DirichletCharacter ℂ q) (δ x : ℝ) (hx :
   · simp [hn0]
   have hn : 0 < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn0
   have hxc : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
-  simp only [etaHeart, etaT2, if_pos (div_pos hn hx)]
+  simp only [etaHeart, etaT2, ite_eq_left (div_pos hn hx)]
   push_cast
   field_simp
 

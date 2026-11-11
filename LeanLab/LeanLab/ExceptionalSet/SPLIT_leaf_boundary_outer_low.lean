@@ -67,7 +67,18 @@ theorem leaf_outer_low_low_band_upper_indices (γ : ℝ) (h1 : 1 < γ) (h2 : γ 
         (((window γ N).filter (fun n : ℕ =>
           N < n ∧ Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 4)).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  refine ⟨1, by norm_num, fun κ _ _ => ⟨1, by norm_num, 8, fun N hN => ?_⟩⟩
+  have hempty : ((window γ N).filter (fun n : ℕ =>
+      N < n ∧ Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 4)) = ∅ := by
+    apply Finset.filter_eq_empty_iff.mpr
+    intro n hn hbad
+    exact (not_lt_of_ge (window_upper γ h1 N hN n hn)) hbad.1
+  rw [hempty]
+  simp only [Finset.card_empty, Nat.cast_zero, one_mul]
+  refine mul_nonneg (Nat.cast_nonneg N) ?_
+  unfold calE
+  exact (Real.rpow_pos_of_pos (Real.exp_pos _) _).le
 
 /-- LEAF. Step 4 of the split: the upper piece of the band, on the indices `N < n`. It counts the
 window indices with `N < n` and `Δ / 4 ≤ {F γ n} < Δ / 2`, where
@@ -81,7 +92,19 @@ theorem leaf_outer_low_high_band_upper_indices (γ : ℝ) (h1 : 1 < γ) (h2 : γ
           N < n ∧ calE γ κ N ^ (-(1 / 8 : ℝ)) / 4 ≤ Int.fract (F γ n) ∧
             Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  refine ⟨1, by norm_num, fun κ _ _ => ⟨1, by norm_num, 8, fun N hN => ?_⟩⟩
+  have hempty : ((window γ N).filter (fun n : ℕ =>
+      N < n ∧ calE γ κ N ^ (-(1 / 8 : ℝ)) / 4 ≤ Int.fract (F γ n) ∧
+        Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)) = ∅ := by
+    apply Finset.filter_eq_empty_iff.mpr
+    intro n hn hbad
+    exact (not_lt_of_ge (window_upper γ h1 N hN n hn)) hbad.1
+  rw [hempty]
+  simp only [Finset.card_empty, Nat.cast_zero, one_mul]
+  refine mul_nonneg (Nat.cast_nonneg N) ?_
+  unfold calE
+  exact (Real.rpow_pos_of_pos (Real.exp_pos _) _).le
 
 /-- Assembly. The band estimate follows from the four piece estimates: the band is covered by the
 two quarter pieces crossed with the two index ranges, cardinalities are subadditive over that
