@@ -36,6 +36,21 @@ theorem leaf_error_part_average :
                     (fun k₃ => Nat.Coprime k₃ l₃),
                   lam k₃ * R ![k₁, k₂, k₃] ![l₁, l₂, l₃] N|)
           ≤ C * (N : ℝ) ^ 2 * Real.log N ^ (-A) := by
+  intro A hA
+  refine ⟨1, 0, ?_⟩
+  intro l₃ hl₃
+  refine ⟨1, 3, ?_⟩
+  intro lam hlam N hodd hN
+  -- Attempt, 2026-11-11: the summand with `k₁ = k₂ = 1` and `k₃ = 1` contains the
+  -- total weighted count of prime triples summing to `N`.
+  have htotal : R ![1, 1, 1] ![0, 0, l₃] N =
+      ∑ p ∈ (range (N + 1) ×ˢ range (N + 1) ×ˢ range (N + 1)).filter
+        (fun p => p.1.Prime ∧ p.2.1.Prime ∧ p.2.2.Prime ∧ p.1 + p.2.1 + p.2.2 = N),
+        Real.log p.1 * Real.log p.2.1 * Real.log p.2.2 := by
+    simp [R]
+  have hbig : (N : ℝ) ^ 3 * (Real.log (N + 1)) ^ 3
+      ≤ C * (N : ℝ) ^ 2 * Real.log N ^ (-A) := by
+    nlinarith
   sorry
 
 /-- LEAF The averaging step for the explicit main term `M = N^2 S / (2 phi k1 phi k2 phi k3)`:
@@ -53,6 +68,16 @@ theorem leaf_main_part_average :
                     (fun k₃ => Nat.Coprime k₃ l₃),
                   lam k₃ * M halupczokS ![k₁, k₂, k₃] ![l₁, l₂, l₃] N|)
           ≤ C * (N : ℝ) ^ 2 * Real.log N ^ (-A) := by
+  intro A hA B hB l₃ hl₃
+  refine ⟨1, 3, ?_⟩
+  intro lam hlam N hodd hN
+  -- Attempt, 2026-11-11: the summand with `k₁ = k₂ = 1` and `k₃ = 1` is
+  -- `N ^ 2 * halupczokS ![1,1,1] ![0,0,l₃] N / 2`, and `halupczokS` is opaque.
+  have hterm : M halupczokS ![1, 1, 1] ![0, 0, l₃] N =
+      (N : ℝ) ^ 2 * halupczokS ![1, 1, 1] ![0, 0, l₃] N / 2 := by
+    simp [M]
+  have hzero : halupczokS ![1, 1, 1] ![0, 0, l₃] N = 0 := by
+    rfl
   sorry
 
 /-! ### Private helpers for the reduction below -/
