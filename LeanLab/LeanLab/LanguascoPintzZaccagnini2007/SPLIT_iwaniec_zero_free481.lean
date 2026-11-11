@@ -21,7 +21,75 @@ denominator of the region is at least one, so the edge one minus its reciprocal 
 nonnegative and strictly below one. -/
 theorem iwaniec_denom_ge_one481 (r : ℕ) (hr : 1 ≤ r) (t : ℝ) :
     (1 : ℝ) ≤ iwaniecDenom481 r t := by
-  sorry
+  dsimp [iwaniecDenom481]
+  have h1 : 1 ≤ (oddRad131 r : ℝ) := by
+    have h_pos : 1 ≤ oddRad131 r := by
+      dsimp [oddRad131]
+      apply Nat.one_le_of_lt
+      apply Finset.prod_pos
+      intro p hp
+      rw [Finset.mem_filter] at hp
+      omega
+    exact_mod_cast h_pos
+
+  have h2 : 2 ≤ 2 * (oddRad131 r : ℝ) := by linarith
+  have h3 : Real.log 2 ≤ Real.log (2 * (oddRad131 r : ℝ)) := by
+    apply Real.log_le_log (by norm_num) h2
+
+  have hl_base : 2 ≤ (r : ℝ) * (|t| + 2) := by
+    have hr_re : 1 ≤ (r : ℝ) := by exact_mod_cast hr
+    have ht : 0 ≤ |t| := abs_nonneg t
+    nlinarith
+  have hlog2 : Real.log 2 ≤ Real.log ((r : ℝ) * (|t| + 2)) := by
+    apply Real.log_le_log (by norm_num) hl_base
+
+  have h_log2_pos : 0 < Real.log 2 := by
+    apply Real.log_pos (by norm_num)
+
+  have hl2_pos : 0 ≤ Real.log ((r : ℝ) * (|t| + 2)) * Real.log (2 * Real.log ((r : ℝ) * (|t| + 2))) := by
+    have hl_pos : 0 ≤ Real.log ((r : ℝ) * (|t| + 2)) := le_of_lt (lt_of_lt_of_le h_log2_pos hlog2)
+    have hl2_inner_pos : 0 ≤ Real.log (2 * Real.log ((r : ℝ) * (|t| + 2))) := by
+      apply Real.log_nonneg
+      have hl_inner_2 : 2 * Real.log 2 ≤ 2 * Real.log ((r : ℝ) * (|t| + 2)) := by nlinarith
+      have he : Real.exp 1 < 4 := by
+        calc
+          Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+          _ ≤ 4 := by norm_num
+      have log2_ge : (1/2 : ℝ) ≤ Real.log 2 := by
+        have he2 : Real.exp (1/2 : ℝ) * Real.exp (1/2 : ℝ) ≤ 2 * 2 := by
+          rw [← Real.exp_add]
+          norm_num
+          exact le_of_lt he
+        have he3 : Real.exp (1/2 : ℝ) ≤ 2 := by
+          nlinarith [Real.exp_pos (1/2 : ℝ)]
+        have he4 := Real.log_le_log (Real.exp_pos _) he3
+        rw [Real.log_exp] at he4
+        exact he4
+      have : (1 : ℝ) ≤ 2 * Real.log 2 := by nlinarith [log2_ge]
+      linarith
+    positivity
+  have hpow_pos : 0 ≤ (Real.log ((r : ℝ) * (|t| + 2)) * Real.log (2 * Real.log ((r : ℝ) * (|t| + 2)))) ^ (3/4 : ℝ) := by
+    apply Real.rpow_nonneg
+    exact hl2_pos
+
+  have hl_final : (1 : ℝ) ≤ 4 * 10^4 * Real.log 2 := by
+    have he : Real.exp 1 < 4 := by
+      calc
+        Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+        _ ≤ 4 := by norm_num
+    have log2_ge : (1/2 : ℝ) ≤ Real.log 2 := by
+      have he2 : Real.exp (1/2 : ℝ) * Real.exp (1/2 : ℝ) ≤ 2 * 2 := by
+        rw [← Real.exp_add]
+        norm_num
+        exact le_of_lt he
+      have he3 : Real.exp (1/2 : ℝ) ≤ 2 := by
+        nlinarith [Real.exp_pos (1/2 : ℝ)]
+      have he4 := Real.log_le_log (Real.exp_pos _) he3
+      rw [Real.log_exp] at he4
+      exact he4
+    nlinarith [log2_ge]
+
+  linarith
 
 /-- LEAF. Step two, the half plane at real part one and above: a nonreal primitive
 character does not vanish there, independently of the region denominator. -/
