@@ -3,7 +3,7 @@ Gallagher 1975 pp.128 through 132 displays 3 through 17.
 The arithmetic major arc reduction is separated from the character energy estimate.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.Linnik.Decomp482b
+import LeanLab.Linnik.Decomp486b
 
 namespace LeanLab.Linnik.Decomp482c
 
@@ -15,7 +15,8 @@ open LeanLab.Linnik.Decomp482b
 open LeanLab.Linnik.Decomp1532b (excSet)
 open LeanLab.Linnik.U7204 (Sg)
 
-/-- LEAF. Gallagher 1975 p.131 display 13 and pp.131 and 132 displays 15 through 17.
+/-- ASSEMBLY. CONDITIONAL ON the two Decomp486b arithmetic cases.
+Gallagher 1975 p.131 display 13 and pp.131 and 132 displays 15 through 17.
 From the rational arc character expansion derive the frequency error in terms
 of corrected character energy and the exceptional conductor coefficient.
 The energy decay estimate in display 14 is not assumed here.
@@ -39,7 +40,7 @@ theorem major_arc_energy_bound
               (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
                 (1 + normalizedEnergy N θ r γ) * normalizedEnergy N θ r γ +
                 exceptionalWeight r n) := by
-  sorry
+  exact LeanLab.Linnik.Decomp486b.major_arc_energy_bound_split hExpansion
 
 /-- Gallagher 1975 p.131 combining displays 13 and 14.
 The quadratic normalized energy has the same exponential decay. -/

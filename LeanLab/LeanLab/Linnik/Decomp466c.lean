@@ -2,11 +2,11 @@
 Gallagher 1975 P0094 p.138 before display 5.
 Averaging Theorem 3 with the proved Lemmas 8 and 10.
 CONDITIONAL ON Decomp466a.gallagher_theorem3.
-The sealed Decomp1532c file is unchanged for reviewer wiring.
+The shared fiber estimate keeps this module below Decomp1532c.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.Decomp466b
-import LeanLab.Linnik.Decomp1532c
+import LeanLab.Linnik.Decomp486a
 
 namespace LeanLab.Linnik.Decomp466c
 

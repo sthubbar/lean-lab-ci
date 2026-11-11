@@ -21,6 +21,7 @@ import LeanLab.Linnik.Gallagher1975Lemma2
 import LeanLab.Romanov.GallagherBridge
 import LeanLab.ExceptionalSet.MVMajorSing
 import LeanLab.Common.CircleOrth
+import LeanLab.Linnik.Decomp466c
 
 namespace LeanLab.Linnik.Decomp1532c
 
@@ -831,27 +832,6 @@ theorem weighted_singSeries_main_bound : ∃ K : ℝ, ∀ k : ℕ, 2 ≤ k →
          mul_le_mul_of_nonneg_left hprod (by dsimp [B, p, l]; positivity)
        _ = _ := by dsimp [B, p, l, y]; ring
 
-/-- Gallagher 1975 p.138 before display 5. Auxiliary fiberwise reduction: the remainder is at
-most the sum over nonzero differences of the per frequency error of Theorem 3. -/
-theorem major_arc_remainder_le_fiber_sum (k L N : ℕ) (P : ℝ) (E : ℤ → ℝ)
-    (hE : ∀ n : ℤ, n ≠ 0 → |(∫ α in majorArcs N P, ‖Sg N α‖ ^ 2 *
-        (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re) -
-        LeanLab.Linnik.Decomp1532b.Jn N n *
-          (LeanLab.Linnik.Decomp1532b.singSeries n).re| ≤ E n) :
-    |(∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with
-        LeanLab.Linnik.Decomp1532a.dif x ≠ 0, ∫ α in majorArcs N P,
-          ‖Sg N α‖ ^ 2 *
-            (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) -
-      (∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with
-        LeanLab.Linnik.Decomp1532a.dif x ≠ 0,
-          LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
-            (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
-      ∑ x : LeanLab.Linnik.Decomp1532a.pairs k L with
-        LeanLab.Linnik.Decomp1532a.dif x ≠ 0, E (LeanLab.Linnik.Decomp1532a.dif x) := by
-  rw [← sum_sub_distrib]
-  refine (abs_sum_le_sum_abs _ _).trans (sum_le_sum fun x hx => ?_)
-  exact hE _ (mem_filter.mp hx).2
-
 /-- Gallagher 1975 p.127, Fourier display 1 and the definition of J in Theorem 3.
 Elementary support consequence. If the absolute shift exceeds N, the sum J of reciprocal log products over integer pairs in the interval from 2 to N is zero.
 AI wrote the Lean code. Goldbach is open. -/
@@ -1076,7 +1056,8 @@ theorem major_arc_remainder_bound_of_plain (h : Display5PlainExpansion) :
 such statement: his error keeps `e^{-c/θ}` at every frequency, Theorem 3 p.127, and in display 5
 p.138. It is not refuted. `major_arc_remainder_bound` does not need it, so the leaf is dropped. -/
 
-/-- LEAF, OPEN, CITED. Gallagher 1975 P0094 p.138, the sum over nonzero `n` before display 5.
+/-- ASSEMBLY. CONDITIONAL ON the four Decomp486 analytic cases through Theorem 3.
+Gallagher 1975 P0094 p.138, the sum over nonzero `n` before display 5.
 Theorem 3 p.127 bounds each frequency by `O(N L⁻² n/φ(n) (τ(n) log P/P + e^{-c/θ} + E(n)))`,
 with `E(n) = r φ((n,r))/φ²(r)` present only for an exceptional conductor `r ≤ P`, relative to
 `T = P⁵`. Lemma 8 p.136 gives `∑ r_{k,k}(n) n/φ(n) ≪ L^{2k}`, and Lemma 10 p.136 gives the average
@@ -1104,7 +1085,7 @@ theorem major_arc_remainder_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) *
             (C * Real.exp (-c / θ) + δ) := by
-  sorry
+  exact LeanLab.Linnik.Decomp466c.major_arc_remainder_bound_split
 
 /-- ASSEMBLY. CONDITIONAL ON weighted_singSeries_main_bound and major_arc_remainder_bound. Gallagher 1975 p.138 nonzero contribution before display 5. -/
 theorem major_arc_nonzero_bound : ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < θ₀ ∧ ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ →
