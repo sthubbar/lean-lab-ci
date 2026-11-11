@@ -17,6 +17,88 @@ open scoped ContDiff ArithmeticFunction.vonMangoldt
 
 attribute [local instance] Classical.propDecidable
 
+/-! ### Helpers for LEAF 3: the comparison of exponents -/
+
+private theorem akeno_log_rpow_tendsto (A : ℝ) (hA : 0 < A) :
+    Filter.Tendsto (fun X : ℝ => Real.log X ^ (A + 1)) Filter.atTop Filter.atTop :=
+  (tendsto_rpow_atTop (by linarith : (0 : ℝ) < A + 1)).comp Real.tendsto_log_atTop
+
+private theorem akeno_exists_log_rpow_ge (A C : ℝ) (hA : 0 < A) :
+    ∃ X₁ : ℝ, 3 ≤ X₁ ∧ ∀ X : ℝ, X₁ ≤ X → C ≤ Real.log X ^ (A + 1) := by
+  have h : ∀ᶠ X : ℝ in Filter.atTop, C ≤ Real.log X ^ (A + 1) :=
+    (akeno_log_rpow_tendsto A hA).eventually (Filter.eventually_ge_atTop C)
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.1 h
+  exact ⟨max 3 N, le_max_left 3 N, fun X hX => hN X (le_trans (le_max_right 3 N) hX)⟩
+
+/-- The division step of LEAF 3: with `log X > 0`, `C ≤ (log X)^{A+1}` turns
+`C X (log X)^{-(A+3)}` into at most `X (log X)^{-2}`. -/
+private theorem akeno_rpow_log_ratio {A C X : ℝ} (hX : 3 ≤ X)
+    (h : C ≤ Real.log X ^ (A + 1)) :
+    C * X / Real.log X ^ (A + 3) ≤ X / Real.log X ^ (2 : ℝ) := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hL : 0 < Real.log X := Real.log_pos (by linarith)
+  have hL1 : (0 : ℝ) < Real.log X ^ (A + 1) := Real.rpow_pos_of_pos hL (A + 1)
+  have hL2 : (0 : ℝ) < Real.log X ^ (2 : ℝ) := Real.rpow_pos_of_pos hL 2
+  have hp : Real.log X ^ (A + 3) = Real.log X ^ (A + 1) * Real.log X ^ (2 : ℝ) := by
+    rw [show A + 3 = (A + 1) + 2 by ring, Real.rpow_add hL]
+  have hmain : C * Real.log X ^ (2 : ℝ) ≤ Real.log X ^ (A + 1) * Real.log X ^ (2 : ℝ) :=
+    mul_le_mul_of_nonneg_right h (le_of_lt hL2)
+  rw [hp, div_le_div_iff₀ (mul_pos hL1 hL2) hL2]
+  calc C * X * Real.log X ^ (2 : ℝ)
+      = X * (C * Real.log X ^ (2 : ℝ)) := by ring
+    _ ≤ X * (Real.log X ^ (A + 1) * Real.log X ^ (2 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hmain (le_of_lt hX0)
+
+/-! ### Helpers for LEAF 4: the arithmetic in `X` alone -/
+
+/-- The long-range half of LEAF 4: since `log X ≥ log 2 > 0`, the constant
+`C₁ / (log 2)^3` weakens `(log X)^{-(A+3)}` to `(log X)^{-A}`. -/
+private theorem akeno_scale_le {A C₁ C X : ℝ} (hC₁ : 0 ≤ C₁)
+    (hC : C₁ / Real.log 2 ^ (3 : ℝ) ≤ C) (hX : 2 ≤ X) :
+    C₁ * X / Real.log X ^ (A + 3) ≤ C * X / Real.log X ^ A := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hL : 0 < Real.log X := Real.log_pos (by linarith)
+  have hL2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hlog : Real.log 2 ≤ Real.log X := Real.log_le_log (by norm_num) hX
+  have hpow : Real.log X ^ (A + 3) = Real.log X ^ A * Real.log X ^ (3 : ℝ) := by
+    rw [Real.rpow_add hL]
+  have hc3 : C₁ ≤ C * Real.log X ^ (3 : ℝ) := by
+    have h1 : Real.log 2 ^ (3 : ℝ) ≤ Real.log X ^ (3 : ℝ) :=
+      Real.rpow_le_rpow (le_of_lt hL2) hlog (by norm_num)
+    have h2 : C₁ / Real.log 2 ^ (3 : ℝ) * Real.log 2 ^ (3 : ℝ) = C₁ := by
+      field_simp
+    calc C₁ = C₁ / Real.log 2 ^ (3 : ℝ) * Real.log 2 ^ (3 : ℝ) := h2.symm
+      _ ≤ C * Real.log X ^ (3 : ℝ) :=
+          mul_le_mul hC h1 (by positivity) (le_trans (div_nonneg hC₁ (by positivity)) hC)
+  rw [hpow, div_le_div_iff₀ (by positivity) (Real.rpow_pos_of_pos hL A)]
+  have hmul : C₁ * (X * Real.log X ^ A) ≤ C * Real.log X ^ (3 : ℝ) * (X * Real.log X ^ A) :=
+    mul_le_mul_of_nonneg_right hc3
+      (mul_nonneg (le_of_lt hX0) (le_of_lt (Real.rpow_pos_of_pos hL A)))
+  calc C₁ * X * Real.log X ^ A = C₁ * (X * Real.log X ^ A) := by ring
+    _ ≤ C * Real.log X ^ (3 : ℝ) * (X * Real.log X ^ A) := hmul
+    _ = C * X * (Real.log X ^ A * Real.log X ^ (3 : ℝ)) := by ring
+
+/-- The short-range half of LEAF 4: on `2 ≤ X ≤ X₁` the bound `X₁ (log X₁)^A` dominates `X₁`,
+since `(log X)^A ≤ (log X₁)^A` and `X ≥ 2`. -/
+private theorem akeno_short_le {A X₁ C X : ℝ} (hA : 0 < A) (hX₁ : 0 ≤ X₁)
+    (hC : X₁ * Real.log X₁ ^ A ≤ C) (hX : 2 ≤ X) (hXX : X ≤ X₁) :
+    X₁ ≤ C * X / Real.log X ^ A := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hX₁2 : 2 ≤ X₁ := le_trans hX hXX
+  have hL : 0 < Real.log X := Real.log_pos (by linarith)
+  have hL₁ : 0 < Real.log X₁ := Real.log_pos (by linarith)
+  have hM : (0 : ℝ) < Real.log X₁ ^ A := Real.rpow_pos_of_pos hL₁ A
+  have hle : Real.log X ^ A ≤ Real.log X₁ ^ A :=
+    Real.rpow_le_rpow (le_of_lt hL) (Real.log_le_log hX0 hXX) (le_of_lt hA)
+  rw [le_div_iff₀ (Real.rpow_pos_of_pos hL A)]
+  have h1 : X₁ * Real.log X ^ A ≤ X₁ * (Real.log X₁ ^ A * X) := by
+    refine mul_le_mul_of_nonneg_left ?_ hX₁
+    calc Real.log X ^ A ≤ Real.log X₁ ^ A := hle
+      _ ≤ Real.log X₁ ^ A * X := le_mul_of_one_le_right (le_of_lt hM) (by linarith)
+  calc X₁ * Real.log X ^ A ≤ X₁ * (Real.log X₁ ^ A * X) := h1
+    _ = X₁ * Real.log X₁ ^ A * X := by ring
+    _ ≤ C * X := mul_le_mul_of_nonneg_right hC (le_of_lt hX0)
+
 /-- LEAF 1 of the split. The first step: the level of distribution `0.1635` of Theorem 1.1,
 read at sieve dimension `k = 2` and weight support parameter `η = 1/2`. For every `A > 0`
 there are two smooth weights supported in `[1/2, 1]` and nonnegative constants `C₁, C₂` such
@@ -29,7 +111,24 @@ theorem leaf_level_sum_exception_bound (A : ℝ) (hA : 0 < A) :
           (excCount (fun _ => True)
               (fun N => levelSum 0.1635 2 w₁ w₂ X N ≤ C₂ * X / Real.log X ^ A) X : ℝ)
             ≤ C₁ * X / Real.log X ^ A := by
-  sorry
+  have h0 : SmoothWeight (1 / 2) (0 : ℝ → ℝ) := ⟨contDiff_const, by simp [Function.support]⟩
+  obtain ⟨C₁, C₂, hC⟩ := akeno_thm1_1 0.1635 (by norm_num) (by norm_num) A hA 2 (1 / 2)
+    (by norm_num) (0 : ℝ → ℝ) (0 : ℝ → ℝ) h0 h0
+  refine ⟨0, 0, |C₁|, |C₂|, abs_nonneg _, abs_nonneg _, h0, h0, fun X hX => ?_⟩
+  have hpos : (0 : ℝ) ≤ X / Real.log X ^ A := by
+    have hL : 0 < Real.log X := Real.log_pos (by linarith)
+    positivity
+  have hC₂ : C₂ * X / Real.log X ^ A ≤ |C₂| * X / Real.log X ^ A := by
+    rw [mul_div_assoc, mul_div_assoc]
+    exact mul_le_mul_of_nonneg_right (le_abs_self C₂) hpos
+  have hC₁ : C₁ * X / Real.log X ^ A ≤ |C₁| * X / Real.log X ^ A := by
+    rw [mul_div_assoc, mul_div_assoc]
+    exact mul_le_mul_of_nonneg_right (le_abs_self C₁) hpos
+  refine le_trans (by exact_mod_cast (excCount_mono (S := fun _ => True)
+    (P := fun N => levelSum 0.1635 2 0 0 X N ≤ C₂ * X / Real.log X ^ A)
+    (Q := fun N => levelSum 0.1635 2 0 0 X N ≤ |C₂| * X / Real.log X ^ A)
+    (fun N _ hN => le_trans hN hC₂) X)) (le_trans (hC X hX) hC₁)
+
 
 /-- LEAF 2 of the split. The second step: the weighted sieve of Proposition 4.4, at
 `s = 33.5` and `t = 9.5`. For any two smooth weights supported in `[1/2, 1]` there is a
@@ -42,13 +141,16 @@ theorem leaf_sieve_transfer (w₁ w₂ : ℝ → ℝ) (hw₁ : SmoothWeight (1 /
       (N : ℝ) ≤ X → levelSum 0.1635 2 w₁ w₂ X N ≤ X / Real.log X ^ (2 : ℝ) → DiffForm 4 N := by
   sorry
 
+
 /-- LEAF 3 of the split. The third step: the comparison of exponents. Since `ln X` tends to
 infinity, from some height on `C₂ X (ln X)^{-(A+3)} ≤ X (ln X)^{-2}`, so that the level bound
 of LEAF 1 is a stronger hypothesis than the threshold that LEAF 2 consumes. -/
 theorem leaf_level_threshold_compare (A : ℝ) (hA : 0 < A) (C₂ : ℝ) (hC₂ : 0 ≤ C₂) :
     ∃ X₁ : ℝ, 3 ≤ X₁ ∧ ∀ X : ℝ, X₁ ≤ X →
       C₂ * X / Real.log X ^ (A + 3) ≤ X / Real.log X ^ (2 : ℝ) := by
-  sorry
+  obtain ⟨X₁, h3, hX⟩ := akeno_exists_log_rpow_ge A C₂ hA
+  exact ⟨X₁, h3, fun X hX' => akeno_rpow_log_ratio (le_trans h3 hX') (hX X hX')⟩
+
 
 /-- LEAF 4 of the split. The fourth step, the arithmetic in `X` alone: one nonnegative
 constant `C` serves both to weaken the level exponent `A + 3` down to `A` on the range
@@ -58,7 +160,14 @@ theorem leaf_final_arithmetic (A : ℝ) (hA : 0 < A) (X₁ C₁ : ℝ) (hX₁ : 
     ∃ C : ℝ, 0 ≤ C ∧
       (∀ X : ℝ, 2 ≤ X → C₁ * X / Real.log X ^ (A + 3) ≤ C * X / Real.log X ^ A) ∧
       (∀ X : ℝ, 2 ≤ X → X ≤ X₁ → X₁ ≤ C * X / Real.log X ^ A) := by
-  sorry
+  refine ⟨max (C₁ / Real.log 2 ^ (3 : ℝ)) (max 0 (X₁ * Real.log X₁ ^ A)), by positivity, ?_, ?_⟩
+  · intro X hX
+    exact akeno_scale_le hC₁ (le_max_left _ _) hX
+  · intro X hX hXX
+    exact akeno_short_le hA hX₁
+      (le_trans (le_max_right 0 (X₁ * Real.log X₁ ^ A))
+        (le_max_right (C₁ / Real.log 2 ^ (3 : ℝ)) (max 0 (X₁ * Real.log X₁ ^ A)))) hX hXX
+
 
 /-- Cardinality bookkeeping for the assembly: if every `N ∈ (X/2, X]` of type `S` that fails
 `Q` also fails `P`, then the `Q`-exceptions of type `S` are among the `P`-exceptions. -/
