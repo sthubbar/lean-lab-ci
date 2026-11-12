@@ -16,7 +16,8 @@ open LeanLab.Linnik.Decomp466a LeanLab.Linnik.Decomp482a LeanLab.Linnik.Decomp48
 open LeanLab.Linnik.Decomp1532b (majorArcs Jn singSeries ramanujanSum)
 open LeanLab.Linnik.U7204 (Sg)
 
-/-- LEAF. Gallagher 1975 p.128 display 3, Gallagher's own derivation from the first
+/-- LEAF, OFF ROUTE: superseded by `major_arc_pair_expansion_of_steps` in Display3.lean, the same
+statement PROVED. Gallagher 1975 p.128 display 3, Gallagher's own derivation from the first
 character expansion of p.128 and S(alpha) at most a constant times N over log N:
 the major arc integral equals the sum of J_n(chi, chi') over primitive chi, chi' to
 conductors at most P, up to O(P^(5/2)). The expansion is the proved hypothesis shape. -/
@@ -48,7 +49,8 @@ theorem induced_cn_bound {q : ℕ} (hq : 1 ≤ q) (χ : DirichletCharacter ℂ q
         Nat.Coprime (q / Nat.gcd q n.natAbs / χ.conductor) χ.conductor) := by
   sorry
 
-/-- LEAF. Gallagher 1975 p.129 display 7 with its printed proof from display 5:
+/-- LEAF, OFF ROUTE: superseded by `pair_weight_bound_of_cited` in Display7.lean, the same
+statement proved from the CITED-LEFT display 5. Gallagher 1975 p.129 display 7 with its printed proof from display 5:
 C_n(chi, chi') is at most a constant times n/phi(n), uniformly in the primitive
 characters and in P. -/
 theorem pair_weight_bound :
@@ -56,7 +58,8 @@ theorem pair_weight_bound :
       x.2.IsPrimitive → y.2.IsPrimitive → pairWeight P n x y ≤ K * totientWeight n := by
   sorry
 
-/-- LEAF. Gallagher 1975 p.130 display 9, Gallagher's own derivation: partial summation
+/-- LEAF, OFF ROUTE: superseded by `principal_arc_integral_of_steps` in Display9.lean, the same
+statement PROVED. Gallagher 1975 p.130 display 9, Gallagher's own derivation: partial summation
 for T, the full period integral of |T|^2 e(n beta) equal to J(n), and J(n) at most
 J(0) asymptotic to N/log^2 N give, for q at most P,
 I_{n,q}(1, 1) equal to J(n) plus O(q Q L^(-2) + N^(1/2) L^(-1) ||R|| + ||R||^2). -/

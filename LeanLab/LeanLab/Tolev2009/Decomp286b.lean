@@ -2813,7 +2813,9 @@ theorem prime_decomposition :
                   (b j = (fun _ => 1) ∨ b j = (fun l : ℕ => (Real.log l : ℂ)))) ∨
                 (x j ^ ((1 : ℝ) / 1000) ≤ H j ∧ H j ≤ 2 ^ 30 * x j ^ ((1 : ℝ) / 3) ∧
                   ∀ l, ‖b j l‖ ≤ (tau5 l : ℝ) * Real.log N)) := by
-  sorry
+  -- 2026-11-12 route burst: was `sorry`; the proved twin has the same statement over
+  -- copied definitions with identical bodies.
+  exact LeanLab.Tolev2009.Sup83Split.prime_decomposition
 
 /-- The exact statement of Decomp83.minor_arc_sup_leaf from smaller bilinear leaves.
 CONDITIONAL ON the Type I, Type II and prime decomposition leaves.

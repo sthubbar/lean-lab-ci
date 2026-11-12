@@ -1,0 +1,22 @@
+[
+  "Decomp492b.norm_sum_smul_sq_le_gram",
+  "Decomp492b.exists_phase",
+  "Decomp492b.halasz_inequality",
+  "Decomp492b.weighted_halasz",
+  "Decomp492b.card_le_of_local_intervals",
+  "Decomp492b.count_le_of_quadratic_bound",
+  "Decomp492b.huxley_cut_scale",
+  "Decomp492b.huxley_cut_identity",
+  "Decomp492b.huxley_subdivision",
+  "Decomp492b.hybrid_halasz_gram",
+  "Decomp492b.extra_log_cut_identity",
+  "Decomp492b.extra_log_not_absorbable",
+  "Decomp492a.character_eq_primitive_mask",
+  "Decomp492a.coeffBound_coprime_mask",
+  "Decomp492a.energy_coprime_mask_le",
+  "Decomp492a.dirPoly_eq_primitive_mask",
+  "Decomp492a.dirPoly_eq_zero_of_energy_eq_zero",
+  "Decomp492a.large_values_empty_of_zero_energy",
+  "Decomp492a.conductor_primitive_injective",
+  "Decomp492a.square_sum_eq_primitive"
+]

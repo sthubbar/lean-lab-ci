@@ -1,0 +1,9 @@
+{
+  "axiom_reports": 20,
+  "all_clean": true,
+  "original_active_passed": 196,
+  "original_active_first_pass_timeouts": 30,
+  "archived_unknown_targets": 23,
+  "incoming_module": "LeanLab.BHP1997.Section2MeanSquare",
+  "incoming_exit": 0
+}

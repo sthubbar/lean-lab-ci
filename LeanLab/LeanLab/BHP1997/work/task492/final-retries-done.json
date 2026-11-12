@@ -1,0 +1,215 @@
+{
+  "expected": 219,
+  "requests": [
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_14",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 24.402,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_15",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 31.726,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_16",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 35.53,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_18",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 41.037,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_19",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 43.486,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_20",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 47.866,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_21",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 49.286,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Certificate312Rows_22",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 52.105,
+      "stage": "pre-total-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp414a",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 91.967,
+      "stage": "dependency-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Audit1624",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 100.419,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Axioms132",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 8.403,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp308a",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.232,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp437a",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.276,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp437c",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.379,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp437d",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.077,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp437e",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 3.975,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp437f",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.075,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp437g",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 88.485,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Decomp437h",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.076,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.DecompC165c",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.176,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.DecompC165dBase312",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 173.635,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.SPLIT_leaf_exceptional_set_moment",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 76.352,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.SPLIT_lower_short_weight_analytic",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.327,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.SPLIT_section2_circle_method",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 7.943,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.AssemblyC165",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 8.692,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.Audit1609",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 8.693,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.AxiomsTask165",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 8.144,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.DecompC165b",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.48,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.DecompC165d",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.176,
+      "stage": "final-baseline-retry"
+    },
+    {
+      "module": "LeanLab.BHP1997.InstancesC165",
+      "exit": 0,
+      "timeout": false,
+      "seconds": 4.577,
+      "stage": "final-baseline-retry"
+    }
+  ]
+}

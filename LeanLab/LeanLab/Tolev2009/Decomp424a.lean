@@ -608,7 +608,9 @@ theorem grouped_annular_decomposition :
                 (b j = (fun _ => 1) ∨ b j = (fun l : ℕ => (Real.log l : ℂ)))) ∨
               (x ^ ((1 : ℝ) / 1000) ≤ H j ∧ H j ≤ 2 ^ 30 * x ^ ((1 : ℝ) / 3) ∧
                 ∀ l, ‖b j l‖ ≤ (tau5 l : ℝ) * Real.log N)) := by
-  sorry
+  -- 2026-11-12 route burst: was `sorry`; the proved twin has the same statement over
+  -- copied definitions with identical bodies.
+  exact LeanLab.Tolev2009.Sup83Split.grouped_annular_decomposition
 
 /-- The annular von Mangoldt identity follows from the explicit polynomial grouping.
 CONDITIONAL ON grouped_annular_decomposition. The coefficient identity is proved. -/

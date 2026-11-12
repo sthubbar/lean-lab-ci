@@ -1,0 +1,59 @@
+{
+  "new_declarations": [
+    "LeanLab.BHP1997.Decomp492a.character_eq_primitive_mask",
+    "LeanLab.BHP1997.Decomp492a.coeffBound_coprime_mask",
+    "LeanLab.BHP1997.Decomp492a.energy_coprime_mask_le",
+    "LeanLab.BHP1997.Decomp492a.dirPoly_eq_primitive_mask",
+    "LeanLab.BHP1997.Decomp492a.dirPoly_eq_zero_of_energy_eq_zero",
+    "LeanLab.BHP1997.Decomp492a.large_values_empty_of_zero_energy",
+    "LeanLab.BHP1997.Decomp492a.conductor_primitive_injective",
+    "LeanLab.BHP1997.Decomp492a.square_sum_eq_primitive",
+    "LeanLab.BHP1997.Decomp492b.norm_sum_smul_sq_le_gram",
+    "LeanLab.BHP1997.Decomp492b.exists_phase",
+    "LeanLab.BHP1997.Decomp492b.halasz_inequality",
+    "LeanLab.BHP1997.Decomp492b.weighted_halasz",
+    "LeanLab.BHP1997.Decomp492b.card_le_of_local_intervals",
+    "LeanLab.BHP1997.Decomp492b.count_le_of_quadratic_bound",
+    "LeanLab.BHP1997.Decomp492b.huxley_cut_scale",
+    "LeanLab.BHP1997.Decomp492b.huxley_cut_identity",
+    "LeanLab.BHP1997.Decomp492b.huxley_subdivision",
+    "LeanLab.BHP1997.Decomp492b.hybrid_halasz_gram",
+    "LeanLab.BHP1997.Decomp492b.extra_log_cut_identity",
+    "LeanLab.BHP1997.Decomp492b.extra_log_not_absorbable"
+  ],
+  "new_count": 20,
+  "new_admissions": 0,
+  "new_forbidden_declarations": [],
+  "twins": {
+    "LeanLab.BHP1997.Decomp492a.character_eq_primitive_mask": true,
+    "LeanLab.BHP1997.Decomp492a.coeffBound_coprime_mask": true,
+    "LeanLab.BHP1997.Decomp492a.energy_coprime_mask_le": true,
+    "LeanLab.BHP1997.Decomp492a.dirPoly_eq_primitive_mask": true,
+    "LeanLab.BHP1997.Decomp492a.dirPoly_eq_zero_of_energy_eq_zero": true,
+    "LeanLab.BHP1997.Decomp492a.large_values_empty_of_zero_energy": true,
+    "LeanLab.BHP1997.Decomp492a.conductor_primitive_injective": true,
+    "LeanLab.BHP1997.Decomp492a.square_sum_eq_primitive": true,
+    "LeanLab.BHP1997.Decomp492b.norm_sum_smul_sq_le_gram": true,
+    "LeanLab.BHP1997.Decomp492b.exists_phase": true,
+    "LeanLab.BHP1997.Decomp492b.halasz_inequality": true,
+    "LeanLab.BHP1997.Decomp492b.weighted_halasz": true,
+    "LeanLab.BHP1997.Decomp492b.card_le_of_local_intervals": true,
+    "LeanLab.BHP1997.Decomp492b.count_le_of_quadratic_bound": true,
+    "LeanLab.BHP1997.Decomp492b.huxley_cut_scale": true,
+    "LeanLab.BHP1997.Decomp492b.huxley_cut_identity": true,
+    "LeanLab.BHP1997.Decomp492b.huxley_subdivision": true,
+    "LeanLab.BHP1997.Decomp492b.hybrid_halasz_gram": true,
+    "LeanLab.BHP1997.Decomp492b.extra_log_cut_identity": true,
+    "LeanLab.BHP1997.Decomp492b.extra_log_not_absorbable": true
+  },
+  "unchanged_original_sources": {
+    "MeanSquareC165.lean": {
+      "identical": true,
+      "sha256": "0c467650cd2d817e93dd79e4e9bc71680631205559fae116a661ff441d817439"
+    },
+    "DecompC165c.lean": {
+      "identical": true,
+      "sha256": "f5996bb984c5be60956484f6030f5e73f1299a0a739e1f7462b8809a4958df1d"
+    }
+  }
+}

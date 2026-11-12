@@ -1,0 +1,154 @@
+{
+  "reviewed_source_images": [
+    "papers/P0069-original.pdf printed pages 11 and 12",
+    "Göttingen university volume scan PDF pages 174 and 175, Huxley printed pages 165 and 166"
+  ],
+  "source_doi": [
+    "https://doi.org/10.1017/CBO9780511526091",
+    "https://doi.org/10.1007/BF01418933"
+  ],
+  "rows": [
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.character_eq_primitive_mask",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.coeffBound_coprime_mask",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.energy_coprime_mask_le",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.dirPoly_eq_primitive_mask",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.dirPoly_eq_zero_of_energy_eq_zero",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.large_values_empty_of_zero_energy",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.conductor_primitive_injective",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492a.square_sum_eq_primitive",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, displays 3.1, 3.3 and 3.4",
+      "basis": "Auxiliary algebra for the exact polynomial and energy definitions. The original modulus is retained in every coefficient mask.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.norm_sum_smul_sq_le_gram",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 165, display 2.5",
+      "basis": "Finite Hilbert space or matrix generalization of the printed finite inequality. No analytic weight selection or spacing estimate is inferred.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.exists_phase",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 165, display 2.5",
+      "basis": "Finite Hilbert space or matrix generalization of the printed finite inequality. No analytic weight selection or spacing estimate is inferred.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.halasz_inequality",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 165, display 2.5",
+      "basis": "Finite Hilbert space or matrix generalization of the printed finite inequality. No analytic weight selection or spacing estimate is inferred.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.weighted_halasz",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 165, display 2.5",
+      "basis": "Finite Hilbert space or matrix generalization of the printed finite inequality. No analytic weight selection or spacing estimate is inferred.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.card_le_of_local_intervals",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 166, displays 2.7 through 2.9",
+      "basis": "Auxiliary finite subdivision and explicit algebra. The interval has total length 2T. Constants 2 and 16 are lab constants. The local analytic premise remains explicit.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.count_le_of_quadratic_bound",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 166, displays 2.7 through 2.9",
+      "basis": "Auxiliary finite subdivision and explicit algebra. The interval has total length 2T. Constants 2 and 16 are lab constants. The local analytic premise remains explicit.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.huxley_cut_scale",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 166, displays 2.7 through 2.9",
+      "basis": "Auxiliary finite subdivision and explicit algebra. The interval has total length 2T. Constants 2 and 16 are lab constants. The local analytic premise remains explicit.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.huxley_cut_identity",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 166, displays 2.7 through 2.9",
+      "basis": "Auxiliary finite subdivision and explicit algebra. The interval has total length 2T. Constants 2 and 16 are lab constants. The local analytic premise remains explicit.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.huxley_subdivision",
+      "verdict": "MATCH",
+      "source": "Huxley printed page 166, displays 2.7 through 2.9",
+      "basis": "Auxiliary finite subdivision and explicit algebra. The interval has total length 2T. Constants 2 and 16 are lab constants. The local analytic premise remains explicit.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.hybrid_halasz_gram",
+      "verdict": "MATCH",
+      "source": "BHP printed pages 11 and 12, display 3.4, and Huxley printed page 165, display 2.5",
+      "basis": "The finite matrix inequality is specialized to the exact BHP polynomial. Its coefficient square sum is exactly G. The actual analytic Gram estimate remains absent.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.extra_log_cut_identity",
+      "verdict": "MATCH",
+      "source": "BHP printed page 12 preliminary display and Huxley printed page 166, display 2.9",
+      "basis": "Auxiliary diagnostic for a weaker direct cut. It states no failure of a paper theorem.",
+      "twin_present": true
+    },
+    {
+      "declaration": "LeanLab.BHP1997.Decomp492b.extra_log_not_absorbable",
+      "verdict": "MATCH",
+      "source": "BHP printed page 12 preliminary display and Huxley printed page 166, display 2.9",
+      "basis": "Auxiliary diagnostic for a weaker direct cut. It states no failure of a paper theorem.",
+      "twin_present": true
+    }
+  ],
+  "exact_book_statements_not_added": true,
+  "limits": "Montgomery chapters 1, 6 and 8 were not accessible. No MATCH is claimed for unadded exact Montgomery leaf statements."
+}

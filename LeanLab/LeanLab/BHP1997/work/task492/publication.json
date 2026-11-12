@@ -1,0 +1,17 @@
+{
+  "start": "2026-11-12T18:05:24Z",
+  "end": "2026-11-12T20:07:24Z",
+  "branch": "codex/task492",
+  "url": "https://github.com/sthubbar/lean-lab/pull/1789",
+  "number": 1789,
+  "seal": "SEAL PASS",
+  "branch_check": "RESULT PASS  CODEX-task492  folder BHP1997  base 4db11d52e",
+  "fail_warn_lines": [],
+  "original_active_modules_built": 196,
+  "new_clean_axiom_reports": 20,
+  "sorry_delta": 0,
+  "citation_walls_open": [
+    "hybrid_mean_square",
+    "hybrid_large_values"
+  ]
+}

@@ -1,0 +1,1944 @@
+[
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AssemblyC165.lean",
+    "lines": 39,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Audit1609.lean",
+    "lines": 66,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165d",
+      "LeanLab.BHP1997.InstancesC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Audit1624.lean",
+    "lines": 493,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.MeanSquareC165",
+      "LeanLab.BHP1997.Decomp387e"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Axioms132.lean",
+    "lines": 44,
+    "imports": [
+      "LeanLab.BHP1997.Characters132",
+      "LeanLab.BHP1997.Cover132",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Decomp132b",
+      "LeanLab.BHP1997.Instances132",
+      "LeanLab.BHP1997.MeanValue132",
+      "LeanLab.BHP1997.Range132",
+      "LeanLab.BHP1997.Spacing132",
+      "LeanLab.BHP1997.Thm3III132"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14.lean",
+    "lines": 33,
+    "imports": [
+      "LeanLab.BHP1997.Thm4Exponents"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14aa.lean",
+    "lines": 4,
+    "imports": [
+      "LeanLab.BHP1997.Lemma29"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14b.lean",
+    "lines": 4,
+    "imports": [
+      "LeanLab.BHP1997.Thm4Statement",
+      "LeanLab.BHP1997.Thm2Statement"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14c.lean",
+    "lines": 9,
+    "imports": [
+      "LeanLab.BHP1997.Lemma2Exponents",
+      "LeanLab.BHP1997.Thm2Statement"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14d.lean",
+    "lines": 12,
+    "imports": [
+      "LeanLab.BHP1997.Lemma3Exponents"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14e.lean",
+    "lines": 11,
+    "imports": [
+      "LeanLab.BHP1997.Lemma4Exponents"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14f.lean",
+    "lines": 8,
+    "imports": [
+      "LeanLab.BHP1997.Lemma6"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14g.lean",
+    "lines": 7,
+    "imports": [
+      "LeanLab.BHP1997.Lemma10"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14h.lean",
+    "lines": 5,
+    "imports": [
+      "LeanLab.BHP1997.Thm2Sing"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14i.lean",
+    "lines": 7,
+    "imports": [
+      "LeanLab.BHP1997.Lemma11_12"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14j.lean",
+    "lines": 8,
+    "imports": [
+      "LeanLab.BHP1997.Lemma13_14"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14k.lean",
+    "lines": 7,
+    "imports": [
+      "LeanLab.BHP1997.Lemma15_16"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14l.lean",
+    "lines": 17,
+    "imports": [
+      "LeanLab.BHP1997.Lemma17_20"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14m.lean",
+    "lines": 6,
+    "imports": [
+      "LeanLab.BHP1997.Lemma22"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14n.lean",
+    "lines": 7,
+    "imports": [
+      "LeanLab.BHP1997.Lemma23"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14o.lean",
+    "lines": 3,
+    "imports": [
+      "LeanLab.BHP1997.Lemma24"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14p.lean",
+    "lines": 4,
+    "imports": [
+      "LeanLab.BHP1997.Lemma25"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14q.lean",
+    "lines": 8,
+    "imports": [
+      "LeanLab.BHP1997.Lemma26_27"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14r.lean",
+    "lines": 8,
+    "imports": [
+      "LeanLab.BHP1997.Lemma28"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14s.lean",
+    "lines": 5,
+    "imports": [
+      "LeanLab.BHP1997.Lemma31"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14t.lean",
+    "lines": 7,
+    "imports": [
+      "LeanLab.BHP1997.Lemma32"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14u.lean",
+    "lines": 8,
+    "imports": [
+      "LeanLab.BHP1997.Lemma33"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14v.lean",
+    "lines": 10,
+    "imports": [
+      "LeanLab.BHP1997.Lemma35"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14w.lean",
+    "lines": 6,
+    "imports": [
+      "LeanLab.BHP1997.Lemma30"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14x.lean",
+    "lines": 3,
+    "imports": [
+      "LeanLab.BHP1997.Lemma34"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14y.lean",
+    "lines": 4,
+    "imports": [
+      "LeanLab.BHP1997.Lemma9"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsCloud14z.lean",
+    "lines": 9,
+    "imports": [
+      "LeanLab.BHP1997.Lemma5"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/AxiomsTask165.lean",
+    "lines": 64,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.KernelC165",
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.MeanSquareC165",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.DecompC165d",
+      "LeanLab.BHP1997.DecompC165b",
+      "LeanLab.BHP1997.InstancesC165",
+      "LeanLab.BHP1997.NormalizationC165",
+      "LeanLab.BHP1997.TrivialC165",
+      "LeanLab.BHP1997.SieveMarginsC165",
+      "LeanLab.BHP1997.AssemblyC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/BuchstabIdentity308.lean",
+    "lines": 76,
+    "imports": [
+      "LeanLab.BHP1997.Rough308"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_00.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_01.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_02.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_03.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_04.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_05.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_06.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_07.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_08.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_09.lean",
+    "lines": 595,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_10.lean",
+    "lines": 580,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_11.lean",
+    "lines": 475,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_12.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_13.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_14.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_15.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_16.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_17.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_18.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_19.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_20.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_21.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_22.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_23.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_24.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_25.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_26.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_27.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_28.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_29.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_30.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_31.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_32.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_33.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_34.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_35.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_36.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_37.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_38.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_39.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_40.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_41.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_42.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_43.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_44.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_45.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_46.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_47.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_48.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_49.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_50.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_51.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_52.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_53.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_54.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_55.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_56.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_57.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_58.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_59.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_60.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_61.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_62.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Rows_63.lean",
+    "lines": 275,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Support"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Support.lean",
+    "lines": 28,
+    "imports": [
+      "LeanLab.BHP1997.Grid490"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Certificate312Total.lean",
+    "lines": 466,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Rows_00",
+      "LeanLab.BHP1997.Certificate312Rows_01",
+      "LeanLab.BHP1997.Certificate312Rows_02",
+      "LeanLab.BHP1997.Certificate312Rows_03",
+      "LeanLab.BHP1997.Certificate312Rows_04",
+      "LeanLab.BHP1997.Certificate312Rows_05",
+      "LeanLab.BHP1997.Certificate312Rows_06",
+      "LeanLab.BHP1997.Certificate312Rows_07",
+      "LeanLab.BHP1997.Certificate312Rows_08",
+      "LeanLab.BHP1997.Certificate312Rows_09",
+      "LeanLab.BHP1997.Certificate312Rows_10",
+      "LeanLab.BHP1997.Certificate312Rows_11",
+      "LeanLab.BHP1997.Certificate312Rows_12",
+      "LeanLab.BHP1997.Certificate312Rows_13",
+      "LeanLab.BHP1997.Certificate312Rows_14",
+      "LeanLab.BHP1997.Certificate312Rows_15",
+      "LeanLab.BHP1997.Certificate312Rows_16",
+      "LeanLab.BHP1997.Certificate312Rows_17",
+      "LeanLab.BHP1997.Certificate312Rows_18",
+      "LeanLab.BHP1997.Certificate312Rows_19",
+      "LeanLab.BHP1997.Certificate312Rows_20",
+      "LeanLab.BHP1997.Certificate312Rows_21",
+      "LeanLab.BHP1997.Certificate312Rows_22",
+      "LeanLab.BHP1997.Certificate312Rows_23",
+      "LeanLab.BHP1997.Certificate312Rows_24",
+      "LeanLab.BHP1997.Certificate312Rows_25",
+      "LeanLab.BHP1997.Certificate312Rows_26",
+      "LeanLab.BHP1997.Certificate312Rows_27",
+      "LeanLab.BHP1997.Certificate312Rows_28",
+      "LeanLab.BHP1997.Certificate312Rows_29",
+      "LeanLab.BHP1997.Certificate312Rows_30",
+      "LeanLab.BHP1997.Certificate312Rows_31",
+      "LeanLab.BHP1997.Certificate312Rows_32",
+      "LeanLab.BHP1997.Certificate312Rows_33",
+      "LeanLab.BHP1997.Certificate312Rows_34",
+      "LeanLab.BHP1997.Certificate312Rows_35",
+      "LeanLab.BHP1997.Certificate312Rows_36",
+      "LeanLab.BHP1997.Certificate312Rows_37",
+      "LeanLab.BHP1997.Certificate312Rows_38",
+      "LeanLab.BHP1997.Certificate312Rows_39",
+      "LeanLab.BHP1997.Certificate312Rows_40",
+      "LeanLab.BHP1997.Certificate312Rows_41",
+      "LeanLab.BHP1997.Certificate312Rows_42",
+      "LeanLab.BHP1997.Certificate312Rows_43",
+      "LeanLab.BHP1997.Certificate312Rows_44",
+      "LeanLab.BHP1997.Certificate312Rows_45",
+      "LeanLab.BHP1997.Certificate312Rows_46",
+      "LeanLab.BHP1997.Certificate312Rows_47",
+      "LeanLab.BHP1997.Certificate312Rows_48",
+      "LeanLab.BHP1997.Certificate312Rows_49",
+      "LeanLab.BHP1997.Certificate312Rows_50",
+      "LeanLab.BHP1997.Certificate312Rows_51",
+      "LeanLab.BHP1997.Certificate312Rows_52",
+      "LeanLab.BHP1997.Certificate312Rows_53",
+      "LeanLab.BHP1997.Certificate312Rows_54",
+      "LeanLab.BHP1997.Certificate312Rows_55",
+      "LeanLab.BHP1997.Certificate312Rows_56",
+      "LeanLab.BHP1997.Certificate312Rows_57",
+      "LeanLab.BHP1997.Certificate312Rows_58",
+      "LeanLab.BHP1997.Certificate312Rows_59",
+      "LeanLab.BHP1997.Certificate312Rows_60",
+      "LeanLab.BHP1997.Certificate312Rows_61",
+      "LeanLab.BHP1997.Certificate312Rows_62",
+      "LeanLab.BHP1997.Certificate312Rows_63"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Characters132.lean",
+    "lines": 82,
+    "imports": [
+      "LeanLab.BHP1997.Statements"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Cover132.lean",
+    "lines": 125,
+    "imports": [
+      "LeanLab.BHP1997.Statements"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp132.lean",
+    "lines": 209,
+    "imports": [
+      "LeanLab.BHP1997.Cover132"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp132b.lean",
+    "lines": 107,
+    "imports": [
+      "LeanLab.BHP1997.MeanValue132",
+      "LeanLab.BHP1997.Lemma9"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp308a.lean",
+    "lines": 39,
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.I2Range"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp312a.lean",
+    "lines": 800,
+    "imports": [
+      "LeanLab.BHP1997.Sifted312",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Decomp312c"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp312b.lean",
+    "lines": 69,
+    "imports": [
+      "LeanLab.BHP1997.Decomp312a"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp312c.lean",
+    "lines": 3373,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.Thm4Statement",
+      "LeanLab.PNTPort.ExplicitPsi1.Residues"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp386a.lean",
+    "lines": 127,
+    "imports": [
+      "LeanLab.BHP1997.Decomp312c"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp386b.lean",
+    "lines": 2652,
+    "imports": [
+      "LeanLab.BHP1997.Decomp386c",
+      "LeanLab.BHP1997.Decomp312a",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.PNTPort.ExplicitPsi1.Residues"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp386c.lean",
+    "lines": 179,
+    "imports": [
+      "LeanLab.BHP1997.Decomp386a"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp387a.lean",
+    "lines": 71,
+    "imports": [
+      "LeanLab.BHP1997.NormalizationC165",
+      "LeanLab.BHP1997.WindowIntegrability308"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp387b.lean",
+    "lines": 82,
+    "imports": [
+      "LeanLab.BHP1997.Decomp387a"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp387c.lean",
+    "lines": 52,
+    "imports": [
+      "LeanLab.BHP1997.Decomp387b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp387d.lean",
+    "lines": 62,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp387e.lean",
+    "lines": 95,
+    "imports": [
+      "LeanLab.BHP1997.Decomp387d"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp387f.lean",
+    "lines": 43,
+    "imports": [
+      "LeanLab.BHP1997.Decomp387e"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp387g.lean",
+    "lines": 125,
+    "imports": [
+      "LeanLab.BHP1997.Decomp387f",
+      "LeanLab.BHP1997.ShortConditions308"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp414a.lean",
+    "lines": 2895,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp414b.lean",
+    "lines": 196,
+    "imports": [
+      "LeanLab.BHP1997.Decomp312a",
+      "LeanLab.BHP1997.Decomp386b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp414c.lean",
+    "lines": 130,
+    "imports": [
+      "LeanLab.BHP1997.Decomp386b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437a.lean",
+    "lines": 151,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437e"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437b.lean",
+    "lines": 50,
+    "imports": [
+      "LeanLab.BHP1997.MeanSquareC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437c.lean",
+    "lines": 155,
+    "imports": [
+      "LeanLab.BHP1997.Decomp414a"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437d.lean",
+    "lines": 88,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437c"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437e.lean",
+    "lines": 29,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437d"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437f.lean",
+    "lines": 249,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437a"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437g.lean",
+    "lines": 73,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437h"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437h.lean",
+    "lines": 1420,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437f"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp437i.lean",
+    "lines": 86,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437d"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp488a.lean",
+    "lines": 1653,
+    "imports": [
+      "LeanLab.BHP1997.Decomp132b",
+      "LeanLab.BHP1997.KernelC165",
+      "Mathlib.Analysis.Complex.RemovableSingularity",
+      "LeanLab.DERZ1997.Kernel136",
+      "LeanLab.BHP1997.Decomp312c",
+      "LeanLab.PNTPort.StrongPNT.ResidueCalcOnRectangles"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp488b.lean",
+    "lines": 79,
+    "imports": [
+      "LeanLab.BHP1997.Decomp488a",
+      "Mathlib.MeasureTheory.Integral.DominatedConvergence"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Decomp488c.lean",
+    "lines": 525,
+    "imports": [
+      "LeanLab.BHP1997.Decomp488b"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/DecompC165a.lean",
+    "lines": 217,
+    "imports": [
+      "LeanLab.BHP1997.Decomp488c"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/DecompC165b.lean",
+    "lines": 2281,
+    "imports": [
+      "LeanLab.BHP1997.Sifted312",
+      "LeanLab.BHP1997.Decomp312a",
+      "LeanLab.BHP1997.Decomp312b",
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.Decomp414a",
+      "LeanLab.BHP1997.DecompC165d",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Thm2Sing",
+      "LeanLab.BHP1997.Characters132",
+      "LeanLab.BHP1997.SieveMarginsC165",
+      "LeanLab.ChenDoubleSieve.BuchstabBounds"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/DecompC165c.lean",
+    "lines": 1337,
+    "imports": [
+      "LeanLab.BHP1997.MeanSquareC165",
+      "LeanLab.BHP1997.Thm4Exponents",
+      "LeanLab.Akeno2026.Decomp86",
+      "LeanLab.BHP1997.EnergyLogC165"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/DecompC165d.lean",
+    "lines": 117,
+    "imports": [
+      "LeanLab.BHP1997.Certificate312Total",
+      "LeanLab.BHP1997.DecompC165dBase312"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/DecompC165dBase312.lean",
+    "lines": 2625,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.DensityMono1609",
+      "LeanLab.BHP1997.MeanValue132",
+      "LeanLab.BHP1997.Grid490",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.NormalizationC165",
+      "LeanLab.ChenDoubleSieve.I2Range",
+      "LeanLab.BHP1997.Decomp308a",
+      "LeanLab.BHP1997.ShortConditions308"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/DensityAudit308.lean",
+    "lines": 123,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/DensityMono1609.lean",
+    "lines": 140,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/EnergyLogC165.lean",
+    "lines": 198,
+    "imports": [
+      "LeanLab.BHP1997.MeanSquareC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Grid490.lean",
+    "lines": 102,
+    "imports": [
+      "Mathlib.Algebra.BigOperators.Intervals",
+      "Lean.Elab.Tactic.Omega"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Instances132.lean",
+    "lines": 57,
+    "imports": [
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.MeanValue132"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/InstancesC165.lean",
+    "lines": 110,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165b",
+      "LeanLab.BHP1997.Instances132",
+      "LeanLab.BHP1997.MeanSquareC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/KernelC165.lean",
+    "lines": 101,
+    "imports": [
+      "LeanLab.BHP1997.Spacing132"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma10.lean",
+    "lines": 70,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma11_12.lean",
+    "lines": 58,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma13_14.lean",
+    "lines": 72,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma15_16.lean",
+    "lines": 53,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma17_20.lean",
+    "lines": 143,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma22.lean",
+    "lines": 49,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma23.lean",
+    "lines": 53,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma24.lean",
+    "lines": 30,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma25.lean",
+    "lines": 37,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma26_27.lean",
+    "lines": 74,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma28.lean",
+    "lines": 76,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma29.lean",
+    "lines": 89,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma2Exponents.lean",
+    "lines": 113,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma30.lean",
+    "lines": 51,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma31.lean",
+    "lines": 54,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma32.lean",
+    "lines": 69,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma33.lean",
+    "lines": 57,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BHP1997.Thm4Exponents"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma34.lean",
+    "lines": 25,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma35.lean",
+    "lines": 84,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma3Exponents.lean",
+    "lines": 125,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma4Exponents.lean",
+    "lines": 109,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma5.lean",
+    "lines": 127,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma6.lean",
+    "lines": 126,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Lemma9.lean",
+    "lines": 49,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/MeanSquareC165.lean",
+    "lines": 83,
+    "imports": [
+      "LeanLab.BHP1997.Thm4Statement"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/MeanSquareClosure308.lean",
+    "lines": 155,
+    "imports": [
+      "LeanLab.BHP1997.ShortConditions308",
+      "LeanLab.BHP1997.WindowIntegrability308"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/MeanValue132.lean",
+    "lines": 55,
+    "imports": [
+      "LeanLab.BHP1997.Thm4Statement"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/MomentParameters308.lean",
+    "lines": 103,
+    "imports": [
+      "LeanLab.BHP1997.Selection308",
+      "LeanLab.BHP1997.Lemma32"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Normalization308.lean",
+    "lines": 89,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/NormalizationC165.lean",
+    "lines": 58,
+    "imports": [
+      "LeanLab.BHP1997.Thm2Statement"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Range132.lean",
+    "lines": 87,
+    "imports": [
+      "LeanLab.BHP1997.Statements"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Rough308.lean",
+    "lines": 86,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/SPLIT_hybrid_large_values.lean",
+    "lines": 170,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/SPLIT_hybrid_mean_square.lean",
+    "lines": 174,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_exceptional_set_moment.lean",
+    "lines": 223,
+    "imports": [
+      "LeanLab.BHP1997.SPLIT_lower_short_weight_analytic"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/SPLIT_lower_short_weight_analytic.lean",
+    "lines": 1634,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165d",
+      "LeanLab.BHP1997.DecompC165b",
+      "LeanLab.BHP1997.ShortConditions308",
+      "LeanLab.BHP1997.Decomp387g",
+      "LeanLab.BHP1997.Decomp387b",
+      "LeanLab.BHP1997.InstancesC165"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/SPLIT_section2_circle_method.lean",
+    "lines": 87,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165b"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Selection308.lean",
+    "lines": 144,
+    "imports": [
+      "LeanLab.BHP1997.Lemma31"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/ShortConditions308.lean",
+    "lines": 158,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/SieveConditionsC165.lean",
+    "lines": 64,
+    "imports": [
+      "LeanLab.BHP1997.Thm2Statement"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/SieveMarginsC165.lean",
+    "lines": 37,
+    "imports": [
+      "LeanLab.BHP1997.Statements"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Sifted312.lean",
+    "lines": 65,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Spacing132.lean",
+    "lines": 308,
+    "imports": [
+      "LeanLab.BHP1997.MeanValue132"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Statements.lean",
+    "lines": 139,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Thm2Sing.lean",
+    "lines": 31,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BHP1997.Thm2Statement",
+      "LeanLab.ChenExplicit.Reductions"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Thm2Statement.lean",
+    "lines": 107,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Thm3III.lean",
+    "lines": 246,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BHP1997.Statements"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Thm3III132.lean",
+    "lines": 173,
+    "imports": [
+      "LeanLab.BHP1997.Thm3III"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Thm4Exponents.lean",
+    "lines": 375,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/Thm4Statement.lean",
+    "lines": 75,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BHP1997.Thm4Exponents"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/TrivialC165.lean",
+    "lines": 145,
+    "imports": [
+      "LeanLab.BHP1997.MeanValue132"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/WindowIntegrability308.lean",
+    "lines": 52,
+    "imports": [
+      "Mathlib"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261102-stale-PC-DecompC165a.lean",
+    "lines": 189,
+    "imports": [
+      "LeanLab.BHP1997.Decomp132b",
+      "LeanLab.BHP1997.KernelC165"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261102-stale-PC-DecompC165b.lean",
+    "lines": 321,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.DecompC165d",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Thm2Sing",
+      "LeanLab.BHP1997.Characters132"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261102-stale-PC-DecompC165d.lean",
+    "lines": 68,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.NormalizationC165"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261105-stale-PC-DecompC165b.lean",
+    "lines": 2246,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.DecompC165d",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Thm2Sing",
+      "LeanLab.BHP1997.Characters132",
+      "LeanLab.BHP1997.SieveMarginsC165",
+      "LeanLab.ChenDoubleSieve.BuchstabBounds"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261105-stale-PC-DecompC165d.lean",
+    "lines": 1977,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.DensityMono1609",
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.NormalizationC165",
+      "LeanLab.ChenDoubleSieve.I2Range"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261106-stale-PC-Decomp312a.lean",
+    "lines": 760,
+    "imports": [
+      "LeanLab.BHP1997.Sifted312",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Decomp312c"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261106-stale-PC-Decomp312b.lean",
+    "lines": 59,
+    "imports": [
+      "LeanLab.BHP1997.Decomp312a"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261106-stale-PC-Decomp312c.lean",
+    "lines": 242,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.Thm4Statement"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261106-stale-PC-DecompC165dBase312.lean",
+    "lines": 2430,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.DensityMono1609",
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.NormalizationC165",
+      "LeanLab.ChenDoubleSieve.I2Range"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261107-stale-PC-Decomp312a.lean",
+    "lines": 770,
+    "imports": [
+      "LeanLab.BHP1997.Sifted312",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Decomp312c"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261107-stale-PC-Decomp386b.lean",
+    "lines": 994,
+    "imports": [
+      "LeanLab.BHP1997.Decomp386c",
+      "LeanLab.BHP1997.Decomp312a",
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261107-stale-PC-Decomp414a.lean",
+    "lines": 220,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261107-stale-PC-SPLIT_hybrid_large_values.lean",
+    "lines": 133,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261107-stale-PC-SPLIT_hybrid_mean_square.lean",
+    "lines": 112,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165c"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261108-stale-PC-Decomp312c.lean",
+    "lines": 312,
+    "imports": [
+      "LeanLab.BHP1997.SieveConditionsC165",
+      "LeanLab.BHP1997.Thm4Statement"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "lines": 161,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165d"
+    ],
+    "sorries": 4
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261108-stale-PC-SPLIT_section2_circle_method.lean",
+    "lines": 84,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165b"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261109-stale-PC-Decomp437e.lean",
+    "lines": 111,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437d"
+    ],
+    "sorries": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261109-stale-PC-Decomp437f.lean",
+    "lines": 249,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437a"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261110-stale-PC-Decomp437h.lean",
+    "lines": 264,
+    "imports": [
+      "LeanLab.BHP1997.Decomp437f"
+    ],
+    "sorries": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261110-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "lines": 512,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165d"
+    ],
+    "sorries": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261111-stale-PC-DecompC165b.lean",
+    "lines": 2194,
+    "imports": [
+      "LeanLab.BHP1997.Sifted312",
+      "LeanLab.BHP1997.DecompC165a",
+      "LeanLab.BHP1997.DecompC165c",
+      "LeanLab.BHP1997.DecompC165d",
+      "LeanLab.BHP1997.Decomp132",
+      "LeanLab.BHP1997.Thm2Sing",
+      "LeanLab.BHP1997.Characters132",
+      "LeanLab.BHP1997.SieveMarginsC165",
+      "LeanLab.ChenDoubleSieve.BuchstabBounds"
+    ],
+    "sorries": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/BHP1997/old/20261111-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "lines": 546,
+    "imports": [
+      "LeanLab.BHP1997.DecompC165d"
+    ],
+    "sorries": 2
+  }
+]

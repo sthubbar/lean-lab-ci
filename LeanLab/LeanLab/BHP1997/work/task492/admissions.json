@@ -1,0 +1,506 @@
+[
+  {
+    "file": "Decomp132.lean",
+    "declaration": "sieve_data",
+    "line": 98,
+    "admissions": 1,
+    "header": "theorem sieve_data :\n    \u2203 \u03b5 u0 u1 v0 v1 : \u211d, 0 < \u03b5 \u2227 \u03b5 < 8.8 / 10 ^ 5 \u2227\n      0.99 < u0 \u2227 u0 \u2264 u1 \u2227 u1 < 1.01 \u2227 0.05 < v0 \u2227 v0 \u2264 v1 \u2227 v1 < 2.2 \u2227\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192\n        \u2203 (I J : Finset \u2115) (a0 a1 b0 b1 : \u2115 \u2192 \u211d) (E : Finset \u2115),\n          (\u2200 k \u2208 I, a0 k \u2264 primeWeight k \u2227 primeWeight k \u2264 a1 k) \u2227\n          (\u2200 m \u2208 J, b0 m \u2264 primeWeight m \u2227 primeWeight m \u2264 b1 m) \u2227\n          (E.card : \u211d) < x ^ ((11 / 20 + \u03b5) * (2 * (1 / 16 - 1 / 10 ^ 5))) /\n            Real.log x ^ A \u2227\n          \u2200 N \u2208 Finset.Icc \u2308x\u2309\u208a \u230ax + x ^ ((11 / 20 + \u03b5) * (2 * (1 / 16 - 1 / 10 ^ 5)))\u230b\u208a,\n            Even N \u2192 N \u2209 E \u2192 \u2203 r : \u211d, 0 < r \u2227\n              |convolution I J a0 b1 N - u0 * v1 * r| \u2264\n                (u0 * v1 + u1 * v0 - u1 * v1) * r / 6 \u2227\n              |convolution I J a1 b0 N - u1 * v0 * r| \u2264\n                (u0 * v1 + u1 * v0 - u1 * v1) * r / 6 \u2227\n              |convolution I J a1 b1 N - u1 * v1 * r| \u2264\n                (u0 * v1 + u1 * v0 - u1 * v1) * r / 6",
+    "historical": false
+  },
+  {
+    "file": "Decomp132b.lean",
+    "declaration": "perron_input",
+    "line": 20,
+    "admissions": 1,
+    "header": "theorem perron_input :\n    \u2203 B C : \u211d, 0 \u2264 B \u2227 0 < C \u2227 \u2200 x N T : \u211d, \u2200 q : \u2115,\n      \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n      2 \u2264 x \u2192 2 \u2264 N \u2192 N \u2264 x \u2192 2 \u2264 T \u2192 T \u2264 x \u2192 1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192\n      Thm4.WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n        \u2203 J : \u211d \u00d7 DirichletCharacter \u2102 q \u2192 \u2102,\n          (\u2211 p \u2208 S, \u2016J p\u2016 ^ 4) \u2264 C * ((q : \u211d) * T * Real.log x ^ B) \u2227\n          \u2200 p \u2208 S, \u2016partialSum N p.2 p.1\u2016 \u2264 \u2016J p\u2016 +\n            C * Real.log x * (Real.sqrt q / Real.sqrt T) +\n            C * Real.log x * (Real.sqrt N / T) +\n            C * (if p.2 = 1 then Real.sqrt N / (1 + |p.1|) else 0)",
+    "historical": false
+  },
+  {
+    "file": "Decomp312a.lean",
+    "declaration": "lower_mean_value_supply",
+    "line": 759,
+    "admissions": 1,
+    "header": "theorem lower_mean_value_supply (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < B0 \u2227 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u0 : \u211d) (c0 b : \u211d \u2192 \u2115 \u2192 \u211d),\n        0.9953 < u0 \u2227 u0 \u2264 1 \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c0 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |b x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        MeanValue41 \u03b5 b \u2227 ReferenceDensity u0 b \u2227\n        ShortApproximation \u03b5 (section4SiftedFamily c0) b \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, section4SiftedFamily c0 x k \u2264 Decomp132.primeWeight k",
+    "historical": false
+  },
+  {
+    "file": "Decomp312b.lean",
+    "declaration": "upper_mean_value_supply",
+    "line": 28,
+    "admissions": 1,
+    "header": "theorem upper_mean_value_supply (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < B0 \u2227 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u1 : \u211d) (c1 b : \u211d \u2192 \u2115 \u2192 \u211d),\n        1 \u2264 u1 \u2227 u1 < 1.0001 \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c1 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |b x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        MeanValue41 \u03b5 b \u2227 ReferenceDensity u1 b \u2227\n        ShortApproximation \u03b5 (section4SiftedFamily c1) b \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, primeWeight k \u2264 section4SiftedFamily c1 x k",
+    "historical": false
+  },
+  {
+    "file": "Decomp488a.lean",
+    "declaration": "all_character_fourth_moment",
+    "line": 26,
+    "admissions": 1,
+    "header": "theorem all_character_fourth_moment : MeanValue132.Lemma7",
+    "historical": false
+  },
+  {
+    "file": "Decomp488a.lean",
+    "declaration": "rademacher_convexity",
+    "line": 32,
+    "admissions": 1,
+    "header": "theorem rademacher_convexity :\n    \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 C : \u211d, 0 < C \u2227 \u2200 (q : \u2115) [NeZero q], 1 \u2264 q \u2192\n      \u2200 \u03c7 : DirichletCharacter \u2102 q, \u2200 \u03c3 t : \u211d, 0 \u2264 \u03c3 \u2192 \u03c3 \u2264 1 \u2192\n        (\u03c3 : \u2102) + t * Complex.I \u2260 1 \u2192\n        \u2016\u03c7.LFunction ((\u03c3 : \u2102) + t * Complex.I)\u2016 \u2264\n          C * (((q : \u211d) * (|t| + 1)) ^ ((1 - \u03c3) / 2 + \u03b5) +\n            1 / \u2016(\u03c3 : \u2102) + t * Complex.I - 1\u2016)",
+    "historical": false
+  },
+  {
+    "file": "Decomp488c.lean",
+    "declaration": "horizontal_convexity_input",
+    "line": 18,
+    "admissions": 1,
+    "header": "theorem horizontal_convexity_input :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 x : \u211d, 2 \u2264 x \u2192 \u2200 (q : \u2115) [NeZero q], 1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192\n      \u2200 \u03c7 : DirichletCharacter \u2102 q, \u2200 \u03c3 \u03c4 : \u211d, 0 \u2264 \u03c3 \u2192 \u03c3 \u2264 1 / 2 + 1 / Real.log x \u2192\n        1 / 4 \u2264 |\u03c4| \u2192 |\u03c4| \u2264 2 * x \u2192\n        \u2016\u03c7.LFunction (((1 / 2 + \u03c3 : \u211d) : \u2102) + \u03c4 * I)\u2016 \u2264\n          C * Real.log x *\n            (((q : \u211d) * (|\u03c4| + 1)) ^ (1 / 2 + 1 / Real.log x - \u03c3) + 1)",
+    "historical": false
+  },
+  {
+    "file": "DecompC165b.lean",
+    "declaration": "section2_circle_method",
+    "line": 88,
+    "admissions": 1,
+    "header": "theorem section2_circle_method : Thm2.Theorem2Paper",
+    "historical": false
+  },
+  {
+    "file": "DecompC165c.lean",
+    "declaration": "hybrid_mean_square",
+    "line": 39,
+    "admissions": 1,
+    "header": "theorem hybrid_mean_square : Lemma1MeanSquare",
+    "historical": false
+  },
+  {
+    "file": "DecompC165c.lean",
+    "declaration": "hybrid_large_values",
+    "line": 46,
+    "admissions": 1,
+    "header": "theorem hybrid_large_values : Lemma1LargeValues",
+    "historical": false
+  },
+  {
+    "file": "DecompC165c.lean",
+    "declaration": "dyadic_mean_value",
+    "line": 203,
+    "admissions": 1,
+    "header": "theorem dyadic_mean_value (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues)\n    (henergy : EnergyLogBound) : Thm4.Theorem4Paper",
+    "historical": false
+  },
+  {
+    "file": "DecompC165d.lean",
+    "declaration": "lower_short_weight_analytic",
+    "line": 30,
+    "admissions": 1,
+    "header": "theorem lower_short_weight_analytic (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :\n    \u2203 \u03c9 : \u211d \u2192 \u211d,\n      LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9 \u2227\n      LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9 \u2227\n      \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n        \u2203 (v0 : \u211d) (b0 : \u211d \u2192 \u2115 \u2192 \u211d),\n          1 - lowerTwoDeletedIntegral \u03c9 \u03b5 - lowerFourDeletedIntegral \u03c9 \u03b5 \u2264 v0 \u2227\n          RightConditions \u03b5 B v0 b0 \u2227\n          \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n            \u2200 m \u2208 rightInterval \u03b5 x, b0 x m \u2264 primeWeight m",
+    "historical": false
+  },
+  {
+    "file": "DecompC165dBase312.lean",
+    "declaration": "upper_short_coefficient",
+    "line": 1179,
+    "admissions": 1,
+    "header": "theorem upper_short_coefficient \n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 : \u211d} (hB : 0 \u2264 B) (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1 / 10 ^ 8) :\n    \u2203 b1 : \u211d \u2192 \u2115 \u2192 \u211d,\n      (\u2203 C : \u211d, \u2200 x k, |b1 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n      Task308.ShortDistribution \u03b5\n        (\u03c9 (1/(1/4+(2*(1/16-1/10^5))/8-\u03b5)) / (1/4+(2*(1/16-1/10^5))/8-\u03b5) +\n          upperDeletedIntegral \u03c9 \u03b5) b1 \u2227\n      Task308.ShortMeanSquare \u03b5\n        (\u03c9 (1/(1/4+(2*(1/16-1/10^5))/8-\u03b5)) / (1/4+(2*(1/16-1/10^5))/8-\u03b5) +\n          upperDeletedIntegral \u03c9 \u03b5) b1 \u2227\n      \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192 \u2200 m \u2208 rightInterval \u03b5 x,\n        upperRawWeight \u03b5 (x ^ (11 / 20 + \u03b5)) m \u2264 b1 x m",
+    "historical": false
+  },
+  {
+    "file": "SPLIT_leaf_exceptional_set_moment.lean",
+    "declaration": "leaf_exceptional_set_small_card",
+    "line": 38,
+    "admissions": 1,
+    "header": "theorem leaf_exceptional_set_small_card\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 v0 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8)\n    {b0 : \u211d \u2192 \u2115 \u2192 \u211d}\n    (hbd : \u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B)\n    (hchar : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) :\n    \u2203 E : \u211d \u2192 \u211d \u2192 (q : \u2115) \u2192 Finset (DirichletCharacter \u2102 q),\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        ((E A x q).card : \u211d) \u2264 C * (q : \u211d) ^ (1 / 2 : \u211d) * Real.log x ^ (-2 * A)",
+    "historical": false
+  },
+  {
+    "file": "SPLIT_leaf_exceptional_set_moment.lean",
+    "declaration": "leaf_exceptional_set_moment_narrow",
+    "line": 68,
+    "admissions": 1,
+    "header": "theorem leaf_exceptional_set_moment_narrow\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 v0 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8)\n    {b0 : \u211d \u2192 \u2115 \u2192 \u211d}\n    (hbd : \u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B)\n    (hchar : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A))\n    {E : \u211d \u2192 \u211d \u2192 (q : \u2115) \u2192 Finset (DirichletCharacter \u2102 q)}\n    (hcard : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        ((E A x q).card : \u211d) \u2264 C * (q : \u211d) ^ (1 / 2 : \u211d) * Real.log x ^ (-2 * A)) :\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        \u2200 z : \u211d, (q * sieveQ \u03b5 x : \u211d) / (6 * x ^ (11 / 20 + \u03b5)) \u2264 z \u2192\n          z \u2264 6 * q * sieveQ \u03b5 x / x ^ (11 / 20 + \u03b5) \u2192\n          z \u2264 1 \u2192\n          \u2211 \u03c7 \u2208 (Finset.univ : Finset (DirichletCharacter \u2102 q)) \\ E A x q,\n            \u222b y in (x ^ (11 / 20 + \u03b5) / 2)..(3 * x ^ (11 / 20 + \u03b5)),\n              \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter\n                  (fun m : \u2115 => y \u2264 (m : \u211d) \u2227 (m : \u211d) \u2264 y + y * z),\n                ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n                  Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 ^ 2 \u2264\n                    C * ((q : \u211d) * sieveQ \u03b5 x) ^ 2 *\n                      x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)",
+    "historical": false
+  },
+  {
+    "file": "SPLIT_leaf_exceptional_set_moment.lean",
+    "declaration": "leaf_exceptional_set_moment_wide",
+    "line": 111,
+    "admissions": 1,
+    "header": "theorem leaf_exceptional_set_moment_wide\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 v0 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8)\n    {b0 : \u211d \u2192 \u2115 \u2192 \u211d}\n    (hbd : \u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B)\n    (hchar : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A))\n    {E : \u211d \u2192 \u211d \u2192 (q : \u2115) \u2192 Finset (DirichletCharacter \u2102 q)}\n    (hcard : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        ((E A x q).card : \u211d) \u2264 C * (q : \u211d) ^ (1 / 2 : \u211d) * Real.log x ^ (-2 * A)) :\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        \u2200 z : \u211d, (q * sieveQ \u03b5 x : \u211d) / (6 * x ^ (11 / 20 + \u03b5)) \u2264 z \u2192\n          z \u2264 6 * q * sieveQ \u03b5 x / x ^ (11 / 20 + \u03b5) \u2192\n          1 \u2264 z \u2192\n          \u2211 \u03c7 \u2208 (Finset.univ : Finset (DirichletCharacter \u2102 q)) \\ E A x q,\n            \u222b y in (x ^ (11 / 20 + \u03b5) / 2)..(3 * x ^ (11 / 20 + \u03b5)),\n              \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter\n                  (fun m : \u2115 => y \u2264 (m : \u211d) \u2227 (m : \u211d) \u2264 y + y * z),\n                ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n                  Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 ^ 2 \u2264\n                    C * ((q : \u211d) * sieveQ \u03b5 x) ^ 2 *\n                      x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)",
+    "historical": false
+  },
+  {
+    "file": "SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_centered_character_mean_value",
+    "line": 460,
+    "admissions": 1,
+    "header": "theorem leaf_centered_character_mean_value\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8) :\n    \u2203 (v0 : \u211d) (b0 : \u211d \u2192 \u2115 \u2192 \u211d),\n      1 - lowerTwoDeletedIntegral \u03c9 \u03b5 - lowerFourDeletedIntegral \u03c9 \u03b5 \u2264 v0 \u2227\n      (\u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n      (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n      \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n        \u2200 m \u2208 rightInterval \u03b5 x, b0 x m \u2264 primeWeight m",
+    "historical": false
+  },
+  {
+    "file": "SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_exceptional_set_moment",
+    "line": 494,
+    "admissions": 1,
+    "header": "theorem leaf_exceptional_set_moment\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 v0 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8)\n    {b0 : \u211d \u2192 \u2115 \u2192 \u211d}\n    (hbd : \u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B)\n    (hchar : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) :\n    \u2203 E : \u211d \u2192 \u211d \u2192 (q : \u2115) \u2192 Finset (DirichletCharacter \u2102 q),\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        ((E A x q).card : \u211d) \u2264 C * (q : \u211d) ^ (1 / 2 : \u211d) * Real.log x ^ (-2 * A) \u2227\n        \u2200 z : \u211d, (q * sieveQ \u03b5 x : \u211d) / (6 * x ^ (11 / 20 + \u03b5)) \u2264 z \u2192\n          z \u2264 6 * q * sieveQ \u03b5 x / x ^ (11 / 20 + \u03b5) \u2192\n          \u2211 \u03c7 \u2208 (Finset.univ : Finset (DirichletCharacter \u2102 q)) \\ E A x q,\n            \u222b y in (x ^ (11 / 20 + \u03b5) / 2)..(3 * x ^ (11 / 20 + \u03b5)),\n              \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter\n                  (fun m : \u2115 => y \u2264 (m : \u211d) \u2227 (m : \u211d) \u2264 y + y * z),\n                ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n                  Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 ^ 2 \u2264\n                    C * ((q : \u211d) * sieveQ \u03b5 x) ^ 2 *\n                      x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)",
+    "historical": false
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165a.lean",
+    "declaration": "all_character_fourth_moment",
+    "line": 22,
+    "admissions": 1,
+    "header": "theorem all_character_fourth_moment : MeanValue132.Lemma7",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165a.lean",
+    "declaration": "rademacher_strip_bound",
+    "line": 27,
+    "admissions": 1,
+    "header": "theorem rademacher_strip_bound : MeanValue132.Lemma8",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165a.lean",
+    "declaration": "contour_holder",
+    "line": 34,
+    "admissions": 1,
+    "header": "theorem contour_holder (h8 : MeanValue132.Lemma8) :\n    \u2203 C : \u211d, 0 < C \u2227 \u2200 x N T : \u211d, \u2200 (q : \u2115) [NeZero q],\n      \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n      2 \u2264 x \u2192 2 \u2264 N \u2192 N \u2264 x \u2192 2 \u2264 T \u2192 T \u2264 x \u2192 1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192\n      Thm4.WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n        \u2203 J : \u211d \u00d7 DirichletCharacter \u2102 q \u2192 \u2102,\n          (\u2211 p \u2208 S, \u2016J p\u2016 ^ 4) \u2264 C * Real.log x ^ (3 : \u211d) * weightedMoment T S \u2227\n          \u2200 p \u2208 S, \u2016partialSum N p.2 p.1\u2016 \u2264 \u2016J p\u2016 +\n            C * Real.log x * (Real.sqrt q / Real.sqrt T) +\n            C * Real.log x * (Real.sqrt N / T) +\n            C * (if p.2 = 1 then Real.sqrt N / (1 + |p.1|) else 0)",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165b.lean",
+    "declaration": "section2_circle_method",
+    "line": 82,
+    "admissions": 1,
+    "header": "theorem section2_circle_method : Thm2.Theorem2Paper",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165b.lean",
+    "declaration": "section4_lower",
+    "line": 94,
+    "admissions": 1,
+    "header": "theorem section4_lower (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u0 : \u211d) (a0 : \u211d \u2192 \u2115 \u2192 \u211d),\n        0.9953 < u0 \u2227 u0 \u2264 1 \u2227 LeftConditions \u03b5 B u0 a0 \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, a0 x k \u2264 primeWeight k",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165b.lean",
+    "declaration": "section4_upper",
+    "line": 105,
+    "admissions": 1,
+    "header": "theorem section4_upper (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u1 : \u211d) (a1 : \u211d \u2192 \u2115 \u2192 \u211d),\n        1 \u2264 u1 \u2227 u1 < 1.0001 \u2227 LeftConditions \u03b5 B u1 a1 \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, primeWeight k \u2264 a1 x k",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165d.lean",
+    "declaration": "lower_short_weight",
+    "line": 21,
+    "admissions": 1,
+    "header": "theorem lower_short_weight (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (v0 : \u211d) (b0 : \u211d \u2192 \u2115 \u2192 \u211d),\n        0.05 < v0 \u2227 v0 \u2264 1 \u2227 RightConditions \u03b5 B v0 b0 \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 m \u2208 rightInterval \u03b5 x, b0 x m \u2264 primeWeight m",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165d.lean",
+    "declaration": "upper_short_weight",
+    "line": 35,
+    "admissions": 1,
+    "header": "theorem upper_short_weight (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (v1 : \u211d) (b1 : \u211d \u2192 \u2115 \u2192 \u211d),\n        1 \u2264 v1 \u2227 v1 < 2.2 \u2227 RightConditions \u03b5 B v1 b1 \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 m \u2208 rightInterval \u03b5 x, primeWeight m \u2264 b1 x m",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165b.lean",
+    "declaration": "section2_circle_method",
+    "line": 84,
+    "admissions": 1,
+    "header": "theorem section2_circle_method : Thm2.Theorem2Paper",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165b.lean",
+    "declaration": "section4_lower_sifted_data",
+    "line": 790,
+    "admissions": 1,
+    "header": "theorem section4_lower_sifted_data (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u0 : \u211d) (c0 : \u211d \u2192 \u2115 \u2192 \u211d),\n        0.9953 < u0 \u2227 u0 \u2264 1 \u2227\n        (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n          1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n          \u2200 t : \u211d, t \u2264 x \u2192\n            \u2016\u2211 k \u2208 (leftInterval \u03b5 x).filter (fun k : \u2115 => (k : \u211d) \u2264 t),\n              ((section4SiftedFamily c0 x k : \u2102) * \u03c7 (k : ZMod q) -\n                Thm2.delta \u03c7 * u0 / Real.log x)\u2016 \u2264\n              C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c0 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, section4SiftedFamily c0 x k \u2264 primeWeight k",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165b.lean",
+    "declaration": "section4_upper_sifted_data",
+    "line": 814,
+    "admissions": 1,
+    "header": "theorem section4_upper_sifted_data (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u1 : \u211d) (c1 : \u211d \u2192 \u2115 \u2192 \u211d),\n        1 \u2264 u1 \u2227 u1 < 1.0001 \u2227\n        (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n          1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n          \u2200 t : \u211d, t \u2264 x \u2192\n            \u2016\u2211 k \u2208 (leftInterval \u03b5 x).filter (fun k : \u2115 => (k : \u211d) \u2264 t),\n              ((section4SiftedFamily c1 x k : \u2102) * \u03c7 (k : ZMod q) -\n                Thm2.delta \u03c7 * u1 / Real.log x)\u2016 \u2264\n              C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c1 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, primeWeight k \u2264 section4SiftedFamily c1 x k",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165d.lean",
+    "declaration": "upper_short_weight_analytic",
+    "line": 957,
+    "admissions": 1,
+    "header": "theorem upper_short_weight_analytic\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :\n    \u2203 \u03c9 : \u211d \u2192 \u211d,\n      LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9 \u2227\n      LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9 \u2227\n      \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n        \u2203 (v1 : \u211d) (b1 : \u211d \u2192 \u2115 \u2192 \u211d),\n          v1 \u2264 \u03c9 (1/(1/4+(2*(1/16-1/10^5))/8-\u03b5)) /\n              (1/4+(2*(1/16-1/10^5))/8-\u03b5) + upperDeletedIntegral \u03c9 \u03b5 \u2227\n          RightConditions \u03b5 B v1 b1 \u2227\n          \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n            \u2200 m \u2208 rightInterval \u03b5 x, primeWeight m \u2264 b1 x m",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165d.lean",
+    "declaration": "lower_two_integral_bound",
+    "line": 1879,
+    "admissions": 1,
+    "header": "theorem lower_two_integral_bound {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {\u03b5 : \u211d} (h\u03b5 : 0 \u2264 \u03b5) (h\u03b5' : \u03b5 \u2264 1/10^8) :\n    lowerTwoDeletedIntegral \u03c9 \u03b5 \u2264 3799/4000",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165d.lean",
+    "declaration": "lower_short_weight_analytic",
+    "line": 1890,
+    "admissions": 1,
+    "header": "theorem lower_short_weight_analytic (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :\n    \u2203 \u03c9 : \u211d \u2192 \u211d,\n      LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9 \u2227\n      LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9 \u2227\n      \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n        \u2203 (v0 : \u211d) (b0 : \u211d \u2192 \u2115 \u2192 \u211d),\n          1 - lowerTwoDeletedIntegral \u03c9 \u03b5 - lowerFourDeletedIntegral \u03c9 \u03b5 \u2264 v0 \u2227\n          RightConditions \u03b5 B v0 b0 \u2227\n          \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n            \u2200 m \u2208 rightInterval \u03b5 x, b0 x m \u2264 primeWeight m",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-Decomp312a.lean",
+    "declaration": "lower_mean_value_supply",
+    "line": 719,
+    "admissions": 1,
+    "header": "theorem lower_mean_value_supply (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < B0 \u2227 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u0 : \u211d) (c0 b : \u211d \u2192 \u2115 \u2192 \u211d),\n        0.9953 < u0 \u2227 u0 \u2264 1 \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c0 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |b x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        MeanValue41 \u03b5 b \u2227 ReferenceDensity u0 b \u2227\n        ShortApproximation \u03b5 (section4SiftedFamily c0) b \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, section4SiftedFamily c0 x k \u2264 Decomp132.primeWeight k",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-Decomp312b.lean",
+    "declaration": "upper_mean_value_supply",
+    "line": 18,
+    "admissions": 1,
+    "header": "theorem upper_mean_value_supply (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < B0 \u2227 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u1 : \u211d) (c1 b : \u211d \u2192 \u2115 \u2192 \u211d),\n        1 \u2264 u1 \u2227 u1 < 1.0001 \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c1 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |b x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        MeanValue41 \u03b5 b \u2227 ReferenceDensity u1 b \u2227\n        ShortApproximation \u03b5 (section4SiftedFamily c1) b \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, primeWeight k \u2264 section4SiftedFamily c1 x k",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-Decomp312c.lean",
+    "declaration": "perron_window_comparison",
+    "line": 89,
+    "admissions": 1,
+    "header": "theorem perron_window_comparison (B : \u211d) :\n    \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 a : \u211d \u2192 \u2115 \u2192 \u211d,\n      (\u2203 C : \u211d, \u2200 x k, |a x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2192\n      MeanValue41 \u03b5 a \u2192 WindowComparison \u03b5 a",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-DecompC165dBase312.lean",
+    "declaration": "upper_short_weight_analytic",
+    "line": 957,
+    "admissions": 1,
+    "header": "theorem upper_short_weight_analytic\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :\n    \u2203 \u03c9 : \u211d \u2192 \u211d,\n      LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9 \u2227\n      LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9 \u2227\n      \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n        \u2203 (v1 : \u211d) (b1 : \u211d \u2192 \u2115 \u2192 \u211d),\n          v1 \u2264 \u03c9 (1/(1/4+(2*(1/16-1/10^5))/8-\u03b5)) /\n              (1/4+(2*(1/16-1/10^5))/8-\u03b5) + upperDeletedIntegral \u03c9 \u03b5 \u2227\n          RightConditions \u03b5 B v1 b1 \u2227\n          \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n            \u2200 m \u2208 rightInterval \u03b5 x, primeWeight m \u2264 b1 x m",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp312a.lean",
+    "declaration": "lower_mean_value_supply",
+    "line": 729,
+    "admissions": 1,
+    "header": "theorem lower_mean_value_supply (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < B0 \u2227 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u0 : \u211d) (c0 b : \u211d \u2192 \u2115 \u2192 \u211d),\n        0.9953 < u0 \u2227 u0 \u2264 1 \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c0 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |b x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B0) \u2227\n        MeanValue41 \u03b5 b \u2227 ReferenceDensity u0 b \u2227\n        ShortApproximation \u03b5 (section4SiftedFamily c0) b \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, section4SiftedFamily c0 x k \u2264 Decomp132.primeWeight k",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp386b.lean",
+    "declaration": "truncated_perron_window",
+    "line": 38,
+    "admissions": 1,
+    "header": "theorem truncated_perron_window (B : \u211d) :\n    \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 a : \u211d \u2192 \u2115 \u2192 \u211d,\n      (\u2203 C : \u211d, \u2200 x k, |a x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2192\n      \u2203 C X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192 \u2200 q : \u2115, 1 \u2264 q \u2192\n      \u2200 \u03c7 : DirichletCharacter \u2102 q, \u2200 y : \u211d, 2 \u2264 y \u2192 y \u2264 referenceWidth x \u2192\n        \u2016(\u2211 k \u2208 Finset.Ioc \u230ax - y\u230b\u208a \u230ax\u230b\u208a, (a x k : \u2102) * \u03c7 (k : ZMod q)) -\n          windowContour a x y (x ^ (0.45 - 2 * \u03b5 / 3)) \u03c7\u2016 \u2264\n            C * x ^ (0.55 + 11 * \u03b5 / 12)",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp414a.lean",
+    "declaration": "both_dominant",
+    "line": 54,
+    "admissions": 1,
+    "header": "theorem both_dominant (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues)\n    (henergy : EnergyLogBound) :\n    \u2200 B : \u211d, \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 c\u2081 c\u2082 : \u211d, 0 < c\u2081 \u2192 c\u2081 < c\u2082 \u2192 \u2200 K : \u211d \u2192 \u211d, \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d,\n    \u2200 \u03b8 \u03b1\u2081 \u03b1\u2082 x X T : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n    \u2200 a b e : \u2115 \u2192 \u2102,\n    1 / 2 + \u03b5 < \u03b8 \u2192 \u03b8 < 7 / 12 \u2192 |\u03b1\u2081 - \u03b1\u2082| < 2 * \u03b8 - 1 - \u03b5 \u2192 1 - (\u03b1\u2081 + \u03b1\u2082) < gam \u03b8 - \u03b5 \u2192\n    2 \u2264 x \u2192 (X = x \u2228 X = (x ^ (11 / 20 + \u03b5)) ^ 2) \u2192\n    1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 (q : \u211d) * T = X ^ (1 - \u03b8) \u2192\n    2 \u2264 X ^ \u03b1\u2081 \u2192 X ^ \u03b1\u2081 \u2264 x \u2192 2 \u2264 X ^ \u03b1\u2082 \u2192 X ^ \u03b1\u2082 \u2264 x \u2192\n    2 \u2264 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2192 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2264 x \u2192\n    WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n    CoeffBound a B \u2192 CoeffBound b B \u2192 CoeffBound e B \u2192\n    (\u2200 A' : \u211d, 0 < A' \u2192 \u2200 p \u2208 S,\n      \u2016dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n        K A' * (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) ^ (1 / 2 : \u211d) * Real.log x ^ (-A')) \u2192\n    \u2211 p \u2208 casePart S\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2081) (dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1)))\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2082) (dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1))) true true, \u2016dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1) * dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1) *\n      dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n      C * X ^ (1 / 2 : \u211d) * Real.log x ^ (-A)",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp414a.lean",
+    "declaration": "neither_dominant",
+    "line": 81,
+    "admissions": 1,
+    "header": "theorem neither_dominant (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues)\n    (henergy : EnergyLogBound) :\n    \u2200 B : \u211d, \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 c\u2081 c\u2082 : \u211d, 0 < c\u2081 \u2192 c\u2081 < c\u2082 \u2192 \u2200 K : \u211d \u2192 \u211d, \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d,\n    \u2200 \u03b8 \u03b1\u2081 \u03b1\u2082 x X T : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n    \u2200 a b e : \u2115 \u2192 \u2102,\n    1 / 2 + \u03b5 < \u03b8 \u2192 \u03b8 < 7 / 12 \u2192 |\u03b1\u2081 - \u03b1\u2082| < 2 * \u03b8 - 1 - \u03b5 \u2192 1 - (\u03b1\u2081 + \u03b1\u2082) < gam \u03b8 - \u03b5 \u2192\n    2 \u2264 x \u2192 (X = x \u2228 X = (x ^ (11 / 20 + \u03b5)) ^ 2) \u2192\n    1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 (q : \u211d) * T = X ^ (1 - \u03b8) \u2192\n    2 \u2264 X ^ \u03b1\u2081 \u2192 X ^ \u03b1\u2081 \u2264 x \u2192 2 \u2264 X ^ \u03b1\u2082 \u2192 X ^ \u03b1\u2082 \u2264 x \u2192\n    2 \u2264 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2192 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2264 x \u2192\n    WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n    CoeffBound a B \u2192 CoeffBound b B \u2192 CoeffBound e B \u2192\n    (\u2200 A' : \u211d, 0 < A' \u2192 \u2200 p \u2208 S,\n      \u2016dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n        K A' * (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) ^ (1 / 2 : \u211d) * Real.log x ^ (-A')) \u2192\n    \u2211 p \u2208 casePart S\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2081) (dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1)))\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2082) (dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1))) false false, \u2016dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1) * dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1) *\n      dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n      C * X ^ (1 / 2 : \u211d) * Real.log x ^ (-A)",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp414a.lean",
+    "declaration": "first_dominant",
+    "line": 109,
+    "admissions": 1,
+    "header": "theorem first_dominant (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues)\n    (henergy : EnergyLogBound) :\n    \u2200 B : \u211d, \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 c\u2081 c\u2082 : \u211d, 0 < c\u2081 \u2192 c\u2081 < c\u2082 \u2192 \u2200 K : \u211d \u2192 \u211d, \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d,\n    \u2200 \u03b8 \u03b1\u2081 \u03b1\u2082 x X T : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n    \u2200 a b e : \u2115 \u2192 \u2102,\n    1 / 2 + \u03b5 < \u03b8 \u2192 \u03b8 < 7 / 12 \u2192 |\u03b1\u2081 - \u03b1\u2082| < 2 * \u03b8 - 1 - \u03b5 \u2192 1 - (\u03b1\u2081 + \u03b1\u2082) < gam \u03b8 - \u03b5 \u2192\n    2 \u2264 x \u2192 (X = x \u2228 X = (x ^ (11 / 20 + \u03b5)) ^ 2) \u2192\n    1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 (q : \u211d) * T = X ^ (1 - \u03b8) \u2192\n    2 \u2264 X ^ \u03b1\u2081 \u2192 X ^ \u03b1\u2081 \u2264 x \u2192 2 \u2264 X ^ \u03b1\u2082 \u2192 X ^ \u03b1\u2082 \u2264 x \u2192\n    2 \u2264 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2192 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2264 x \u2192\n    WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n    CoeffBound a B \u2192 CoeffBound b B \u2192 CoeffBound e B \u2192\n    (\u2200 A' : \u211d, 0 < A' \u2192 \u2200 p \u2208 S,\n      \u2016dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n        K A' * (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) ^ (1 / 2 : \u211d) * Real.log x ^ (-A')) \u2192\n    \u2211 p \u2208 casePart S\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2081) (dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1)))\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2082) (dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1))) true false, \u2016dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1) * dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1) *\n      dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n      C * X ^ (1 / 2 : \u211d) * Real.log x ^ (-A)",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_large_values.lean",
+    "declaration": "large_values_second_branch",
+    "line": 31,
+    "admissions": 1,
+    "header": "theorem large_values_second_branch :\n    \u2200 B c1 c2 : \u211d, 0 < c1 \u2192 c1 < c2 \u2192 \u2203 C : \u211d, 0 < C \u2227\n      \u2200 x F T V : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n      \u2200 a : \u2115 \u2192 \u2102, Thm4.CoeffBound a B \u2192\n        2 \u2264 x \u2192 2 \u2264 F \u2192 F \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192 0 < V \u2192\n        Thm4.WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n        (\u2200 p \u2208 S, V \u2264 \u2016Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)\u2016) \u2192\n        energy a c1 c2 F ^ 2 * ((q : \u211d) * T) \u2264 V ^ 4 \u2192\n        (S.card : \u211d) \u2264 C * Real.log x ^ 2 * (energy a c1 c2 F * F / V ^ 2)",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_large_values.lean",
+    "declaration": "large_values_third_branch",
+    "line": 46,
+    "admissions": 1,
+    "header": "theorem large_values_third_branch :\n    \u2200 B c1 c2 : \u211d, 0 < c1 \u2192 c1 < c2 \u2192 \u2203 C : \u211d, 0 < C \u2227\n      \u2200 x F T V : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n      \u2200 a : \u2115 \u2192 \u2102, Thm4.CoeffBound a B \u2192\n        2 \u2264 x \u2192 2 \u2264 F \u2192 F \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192 0 < V \u2192\n        Thm4.WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n        (\u2200 p \u2208 S, V \u2264 \u2016Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)\u2016) \u2192\n        V ^ 4 \u2264 energy a c1 c2 F ^ 2 * ((q : \u211d) * T) \u2192\n        (S.card : \u211d) \u2264\n          C * Real.log x ^ 2 * (energy a c1 c2 F ^ 3 * F * (q : \u211d) * T / V ^ 6)",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_mean_square.lean",
+    "declaration": "mean_square_pointwise",
+    "line": 31,
+    "admissions": 1,
+    "header": "theorem mean_square_pointwise (a : \u2115 \u2192 \u2102) (c1 c2 F : \u211d) {q : \u2115}\n    (\u03c7 : DirichletCharacter \u2102 q) (t : \u211d)\n    (hc1 : 0 < c1) (hc2 : c1 < c2) (hF : 0 < F) :\n    \u2016Thm4.dirPoly a c1 c2 F \u03c7 (Thm4.half t)\u2016 ^ 2 \u2264\n      (((\u230ac2 * F\u230b\u208a + 1 : \u2115) : \u211d) * energy a c1 c2 F)",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_mean_square.lean",
+    "declaration": "mean_square_qt_dominant",
+    "line": 42,
+    "admissions": 1,
+    "header": "theorem mean_square_qt_dominant :\n    \u2200 B c1 c2 : \u211d, 0 < c1 \u2192 c1 < c2 \u2192 \u2203 C : \u211d, 0 < C \u2227\n      \u2200 x F T : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n      \u2200 a : \u2115 \u2192 \u2102, Thm4.CoeffBound a B \u2192\n        2 \u2264 x \u2192 2 \u2264 F \u2192 F \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192\n        F \u2264 (q : \u211d) * T \u2192 Thm4.WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n          (\u2211 p \u2208 S, \u2016Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)\u2016 ^ 2) \u2264\n            C * Real.log x * ((q : \u211d) * T + F) * energy a c1 c2 F",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_mean_square.lean",
+    "declaration": "mean_square_F_dominant",
+    "line": 56,
+    "admissions": 1,
+    "header": "theorem mean_square_F_dominant :\n    \u2200 B c1 c2 : \u211d, 0 < c1 \u2192 c1 < c2 \u2192 \u2203 C : \u211d, 0 < C \u2227\n      \u2200 x F T : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n      \u2200 a : \u2115 \u2192 \u2102, Thm4.CoeffBound a B \u2192\n        2 \u2264 x \u2192 2 \u2264 F \u2192 F \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192\n        (q : \u211d) * T \u2264 F \u2192 Thm4.WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n          (\u2211 p \u2208 S, \u2016Thm4.dirPoly a c1 c2 F p.2 (Thm4.half p.1)\u2016 ^ 2) \u2264\n            C * Real.log x * ((q : \u211d) * T + F) * energy a c1 c2 F",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-Decomp312c.lean",
+    "declaration": "perron_window_comparison",
+    "line": 159,
+    "admissions": 1,
+    "header": "theorem perron_window_comparison (B : \u211d) :\n    \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 a : \u211d \u2192 \u2115 \u2192 \u211d,\n      (\u2203 C : \u211d, \u2200 x k, |a x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2192\n      MeanValue41 \u03b5 a \u2192 WindowComparison \u03b5 a",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_buchstab_model_exists",
+    "line": 37,
+    "admissions": 1,
+    "header": "theorem leaf_buchstab_model_exists :\n    \u2203 \u03c9 : \u211d \u2192 \u211d,\n      LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9 \u2227\n      LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_thresholds",
+    "line": 51,
+    "admissions": 1,
+    "header": "theorem leaf_thresholds :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u03b7 \u2264 1/10^8 \u2227\n      \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192 0 < \u03b5 \u2227 \u03b5 \u2264 1/10^8",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_centered_character_mean_value",
+    "line": 70,
+    "admissions": 1,
+    "header": "theorem leaf_centered_character_mean_value\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8) :\n    \u2203 (v0 : \u211d) (b0 : \u211d \u2192 \u2115 \u2192 \u211d),\n      1 - lowerTwoDeletedIntegral \u03c9 \u03b5 - lowerFourDeletedIntegral \u03c9 \u03b5 \u2264 v0 \u2227\n      (\u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n      (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n      \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n        \u2200 m \u2208 rightInterval \u03b5 x, b0 x m \u2264 primeWeight m",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_exceptional_set_moment",
+    "line": 104,
+    "admissions": 1,
+    "header": "theorem leaf_exceptional_set_moment\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 v0 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8)\n    {b0 : \u211d \u2192 \u2115 \u2192 \u211d}\n    (hbd : \u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B)\n    (hchar : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) :\n    \u2203 E : \u211d \u2192 \u211d \u2192 (q : \u2115) \u2192 Finset (DirichletCharacter \u2102 q),\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        ((E A x q).card : \u211d) \u2264 C * (q : \u211d) ^ (1 / 2 : \u211d) * Real.log x ^ (-2 * A) \u2227\n        \u2200 z : \u211d, (q * sieveQ \u03b5 x : \u211d) / (6 * x ^ (11 / 20 + \u03b5)) \u2264 z \u2192\n          z \u2264 6 * q * sieveQ \u03b5 x / x ^ (11 / 20 + \u03b5) \u2192\n          \u2211 \u03c7 \u2208 (Finset.univ : Finset (DirichletCharacter \u2102 q)) \\ E A x q,\n            \u222b y in (x ^ (11 / 20 + \u03b5) / 2)..(3 * x ^ (11 / 20 + \u03b5)),\n              \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter\n                  (fun m : \u2115 => y \u2264 (m : \u211d) \u2227 (m : \u211d) \u2264 y + y * z),\n                ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n                  Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 ^ 2 \u2264\n                    C * ((q : \u211d) * sieveQ \u03b5 x) ^ 2 *\n                      x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_section2_circle_method.lean",
+    "declaration": "theorem2_paper_small_divisor_exponent",
+    "line": 42,
+    "admissions": 1,
+    "header": "theorem theorem2_paper_small_divisor_exponent :\n    \u2200 B : \u211d, B \u2264 1 \u2192 \u2203 \u03b5\u2080 : \u211d, 0 < \u03b5\u2080 \u2227\n      \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b5\u2080 \u2192 Thm2.Theorem2 \u03b5 B",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_section2_circle_method.lean",
+    "declaration": "theorem2_paper_bounded_divisor_exponent",
+    "line": 53,
+    "admissions": 1,
+    "header": "theorem theorem2_paper_bounded_divisor_exponent :\n    \u2200 B : \u211d, 1 \u2264 B \u2192 B \u2264 2 \u2192 \u2203 \u03b5\u2080 : \u211d, 0 < \u03b5\u2080 \u2227\n      \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b5\u2080 \u2192 Thm2.Theorem2 \u03b5 B",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_section2_circle_method.lean",
+    "declaration": "theorem2_paper_large_divisor_exponent",
+    "line": 64,
+    "admissions": 1,
+    "header": "theorem theorem2_paper_large_divisor_exponent :\n    \u2200 B : \u211d, 2 \u2264 B \u2192 \u2203 \u03b5\u2080 : \u211d, 0 < \u03b5\u2080 \u2227\n      \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b5\u2080 \u2192 Thm2.Theorem2 \u03b5 B",
+    "historical": true
+  },
+  {
+    "file": "old/20261109-stale-PC-Decomp437f.lean",
+    "declaration": "neither_large_third",
+    "line": 183,
+    "admissions": 1,
+    "header": "theorem neither_large_third (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues)\n    (henergy : EnergyLogBound) :\n    \u2200 B : \u211d, \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 c\u2081 c\u2082 : \u211d, 0 < c\u2081 \u2192 c\u2081 < c\u2082 \u2192 \u2200 K : \u211d \u2192 \u211d, \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d,\n    \u2200 \u03b8 \u03b1\u2081 \u03b1\u2082 x X T : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n    \u2200 a b e : \u2115 \u2192 \u2102,\n    1 / 2 + \u03b5 < \u03b8 \u2192 \u03b8 < 7 / 12 \u2192 |\u03b1\u2081 - \u03b1\u2082| < 2 * \u03b8 - 1 - \u03b5 \u2192 1 - (\u03b1\u2081 + \u03b1\u2082) < gam \u03b8 - \u03b5 \u2192\n    2 \u2264 x \u2192 (X = x \u2228 X = (x ^ (11 / 20 + \u03b5)) ^ 2) \u2192\n    1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 (q : \u211d) * T = X ^ (1 - \u03b8) \u2192\n    2 \u2264 X ^ \u03b1\u2081 \u2192 X ^ \u03b1\u2081 \u2264 x \u2192 2 \u2264 X ^ \u03b1\u2082 \u2192 X ^ \u03b1\u2082 \u2264 x \u2192\n    2 \u2264 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2192 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2264 x \u2192\n    WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n    CoeffBound a B \u2192 CoeffBound b B \u2192 CoeffBound e B \u2192\n    (\u2200 A' : \u211d, 0 < A' \u2192 \u2200 p \u2208 S,\n      \u2016dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n        K A' * (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) ^ (1 / 2 : \u211d) * Real.log x ^ (-A')) \u2192\n    \u2211 p \u2208 thirdNormPart (casePart S\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2081) (dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1)))\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2082) (dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1))) false false)\n      (fun p => dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1))\n      (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) false, \u2016dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1) * dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1) *\n      dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n      C * X ^ (1 / 2 : \u211d) * Real.log x ^ (-A)",
+    "historical": true
+  },
+  {
+    "file": "old/20261110-stale-PC-Decomp437h.lean",
+    "declaration": "first_large_third",
+    "line": 151,
+    "admissions": 1,
+    "header": "theorem first_large_third (hmean : Lemma1MeanSquare) (hlarge : Lemma1LargeValues)\n    (henergy : EnergyLogBound) :\n    \u2200 B : \u211d, \u2203 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n    \u2200 c\u2081 c\u2082 : \u211d, 0 < c\u2081 \u2192 c\u2081 < c\u2082 \u2192 \u2200 K : \u211d \u2192 \u211d, \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d,\n    \u2200 \u03b8 \u03b1\u2081 \u03b1\u2082 x X T : \u211d, \u2200 q : \u2115, \u2200 S : Finset (\u211d \u00d7 DirichletCharacter \u2102 q),\n    \u2200 a b e : \u2115 \u2192 \u2102,\n    1 / 2 + \u03b5 < \u03b8 \u2192 \u03b8 < 7 / 12 \u2192 |\u03b1\u2081 - \u03b1\u2082| < 2 * \u03b8 - 1 - \u03b5 \u2192 1 - (\u03b1\u2081 + \u03b1\u2082) < gam \u03b8 - \u03b5 \u2192\n    2 \u2264 x \u2192 (X = x \u2228 X = (x ^ (11 / 20 + \u03b5)) ^ 2) \u2192\n    1 \u2264 q \u2192 (q : \u211d) \u2264 x \u2192 2 < T \u2192 T \u2264 x / 4 \u2192 (q : \u211d) * T = X ^ (1 - \u03b8) \u2192\n    2 \u2264 X ^ \u03b1\u2081 \u2192 X ^ \u03b1\u2081 \u2264 x \u2192 2 \u2264 X ^ \u03b1\u2082 \u2192 X ^ \u03b1\u2082 \u2264 x \u2192\n    2 \u2264 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2192 X ^ (1 - \u03b1\u2081 - \u03b1\u2082) \u2264 x \u2192\n    WellSpaced S \u2192 (\u2200 p \u2208 S, |p.1| \u2264 T) \u2192\n    CoeffBound a B \u2192 CoeffBound b B \u2192 CoeffBound e B \u2192\n    (\u2200 A' : \u211d, 0 < A' \u2192 \u2200 p \u2208 S,\n      \u2016dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n        K A' * (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) ^ (1 / 2 : \u211d) * Real.log x ^ (-A')) \u2192\n    \u2211 p \u2208 thirdNormPart (casePart S\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2081) (dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1)))\n      (fun p => dominanceFlag ((q : \u211d) * T) (X ^ \u03b1\u2082) (dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1))) true false)\n      (fun p => dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1))\n      (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) false, \u2016dirPoly a c\u2081 c\u2082 (X ^ \u03b1\u2081) p.2 (half p.1) * dirPoly b c\u2081 c\u2082 (X ^ \u03b1\u2082) p.2 (half p.1) *\n      dirPoly e c\u2081 c\u2082 (X ^ (1 - \u03b1\u2081 - \u03b1\u2082)) p.2 (half p.1)\u2016 \u2264\n      C * X ^ (1 / 2 : \u211d) * Real.log x ^ (-A)",
+    "historical": true
+  },
+  {
+    "file": "old/20261110-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_centered_character_mean_value",
+    "line": 421,
+    "admissions": 1,
+    "header": "theorem leaf_centered_character_mean_value\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8) :\n    \u2203 (v0 : \u211d) (b0 : \u211d \u2192 \u2115 \u2192 \u211d),\n      1 - lowerTwoDeletedIntegral \u03c9 \u03b5 - lowerFourDeletedIntegral \u03c9 \u03b5 \u2264 v0 \u2227\n      (\u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n      (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n      \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n        \u2200 m \u2208 rightInterval \u03b5 x, b0 x m \u2264 primeWeight m",
+    "historical": true
+  },
+  {
+    "file": "old/20261110-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_exceptional_set_moment",
+    "line": 455,
+    "admissions": 1,
+    "header": "theorem leaf_exceptional_set_moment\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 v0 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8)\n    {b0 : \u211d \u2192 \u2115 \u2192 \u211d}\n    (hbd : \u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B)\n    (hchar : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) :\n    \u2203 E : \u211d \u2192 \u211d \u2192 (q : \u2115) \u2192 Finset (DirichletCharacter \u2102 q),\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        ((E A x q).card : \u211d) \u2264 C * (q : \u211d) ^ (1 / 2 : \u211d) * Real.log x ^ (-2 * A) \u2227\n        \u2200 z : \u211d, (q * sieveQ \u03b5 x : \u211d) / (6 * x ^ (11 / 20 + \u03b5)) \u2264 z \u2192\n          z \u2264 6 * q * sieveQ \u03b5 x / x ^ (11 / 20 + \u03b5) \u2192\n          \u2211 \u03c7 \u2208 (Finset.univ : Finset (DirichletCharacter \u2102 q)) \\ E A x q,\n            \u222b y in (x ^ (11 / 20 + \u03b5) / 2)..(3 * x ^ (11 / 20 + \u03b5)),\n              \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter\n                  (fun m : \u2115 => y \u2264 (m : \u211d) \u2227 (m : \u211d) \u2264 y + y * z),\n                ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n                  Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 ^ 2 \u2264\n                    C * ((q : \u211d) * sieveQ \u03b5 x) ^ 2 *\n                      x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)",
+    "historical": true
+  },
+  {
+    "file": "old/20261111-stale-PC-DecompC165b.lean",
+    "declaration": "section2_circle_method",
+    "line": 85,
+    "admissions": 1,
+    "header": "theorem section2_circle_method : Thm2.Theorem2Paper",
+    "historical": true
+  },
+  {
+    "file": "old/20261111-stale-PC-DecompC165b.lean",
+    "declaration": "section4_lower_sifted_data",
+    "line": 738,
+    "admissions": 1,
+    "header": "theorem section4_lower_sifted_data (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u0 : \u211d) (c0 : \u211d \u2192 \u2115 \u2192 \u211d),\n        0.9953 < u0 \u2227 u0 \u2264 1 \u2227\n        (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n          1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n          \u2200 t : \u211d, t \u2264 x \u2192\n            \u2016\u2211 k \u2208 (leftInterval \u03b5 x).filter (fun k : \u2115 => (k : \u211d) \u2264 t),\n              ((section4SiftedFamily c0 x k : \u2102) * \u03c7 (k : ZMod q) -\n                Thm2.delta \u03c7 * u0 / Real.log x)\u2016 \u2264\n              C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c0 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, section4SiftedFamily c0 x k \u2264 primeWeight k",
+    "historical": true
+  },
+  {
+    "file": "old/20261111-stale-PC-DecompC165b.lean",
+    "declaration": "section4_upper_sifted_data",
+    "line": 762,
+    "admissions": 1,
+    "header": "theorem section4_upper_sifted_data (h4 : Thm4.Theorem4Paper) :\n    \u2203 B0 \u03b7 : \u211d, 0 < \u03b7 \u2227 \u2200 B \u03b5 : \u211d, B0 \u2264 B \u2192 0 < \u03b5 \u2192 \u03b5 < \u03b7 \u2192\n      \u2203 (u1 : \u211d) (c1 : \u211d \u2192 \u2115 \u2192 \u211d),\n        1 \u2264 u1 \u2227 u1 < 1.0001 \u2227\n        (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n          1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n          \u2200 t : \u211d, t \u2264 x \u2192\n            \u2016\u2211 k \u2208 (leftInterval \u03b5 x).filter (fun k : \u2115 => (k : \u211d) \u2264 t),\n              ((section4SiftedFamily c1 x k : \u2102) * \u03c7 (k : ZMod q) -\n                Thm2.delta \u03c7 * u1 / Real.log x)\u2016 \u2264\n              C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n        (\u2203 C : \u211d, \u2200 x k, |section4SiftedFamily c1 x k| \u2264\n          C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n        \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n          \u2200 k \u2208 leftInterval \u03b5 x, primeWeight k \u2264 section4SiftedFamily c1 x k",
+    "historical": true
+  },
+  {
+    "file": "old/20261111-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_centered_character_mean_value",
+    "line": 455,
+    "admissions": 1,
+    "header": "theorem leaf_centered_character_mean_value\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8) :\n    \u2203 (v0 : \u211d) (b0 : \u211d \u2192 \u2115 \u2192 \u211d),\n      1 - lowerTwoDeletedIntegral \u03c9 \u03b5 - lowerFourDeletedIntegral \u03c9 \u03b5 \u2264 v0 \u2227\n      (\u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B) \u2227\n      (\u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) \u2227\n      \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n        \u2200 m \u2208 rightInterval \u03b5 x, b0 x m \u2264 primeWeight m",
+    "historical": true
+  },
+  {
+    "file": "old/20261111-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_exceptional_set_moment",
+    "line": 489,
+    "admissions": 1,
+    "header": "theorem leaf_exceptional_set_moment\n    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)\n    {\u03c9 : \u211d \u2192 \u211d}\n    (h\u03c9 : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab \u03c9)\n    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne \u03c9)\n    {B \u03b5 v0 : \u211d} (h\u03b5 : 0 < \u03b5) (h\u03b58 : \u03b5 \u2264 1/10^8)\n    {b0 : \u211d \u2192 \u2115 \u2192 \u211d}\n    (hbd : \u2203 C : \u211d, \u2200 x k, |b0 x k| \u2264 C * ((k.divisors.card : \u2115) : \u211d) ^ B)\n    (hchar : \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 (q : \u211d) \u2264 Real.log x ^ A \u2192 \u2200 \u03c7 : DirichletCharacter \u2102 q,\n        \u2200 t : \u211d, t \u2264 2 * x ^ (11 / 20 + \u03b5) \u2192\n          \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter (fun m : \u2115 => (m : \u211d) \u2264 t),\n            ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n              Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 \u2264\n                C * x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)) :\n    \u2203 E : \u211d \u2192 \u211d \u2192 (q : \u2115) \u2192 Finset (DirichletCharacter \u2102 q),\n      \u2200 A : \u211d, 0 < A \u2192 \u2203 C : \u211d, \u2200 x : \u211d, C \u2264 x \u2192 \u2200 q : \u2115,\n        1 \u2264 q \u2192 q \u2264 sieveQ \u03b5 x \u2192\n        ((E A x q).card : \u211d) \u2264 C * (q : \u211d) ^ (1 / 2 : \u211d) * Real.log x ^ (-2 * A) \u2227\n        \u2200 z : \u211d, (q * sieveQ \u03b5 x : \u211d) / (6 * x ^ (11 / 20 + \u03b5)) \u2264 z \u2192\n          z \u2264 6 * q * sieveQ \u03b5 x / x ^ (11 / 20 + \u03b5) \u2192\n          \u2211 \u03c7 \u2208 (Finset.univ : Finset (DirichletCharacter \u2102 q)) \\ E A x q,\n            \u222b y in (x ^ (11 / 20 + \u03b5) / 2)..(3 * x ^ (11 / 20 + \u03b5)),\n              \u2016\u2211 m \u2208 (rightInterval \u03b5 x).filter\n                  (fun m : \u2115 => y \u2264 (m : \u211d) \u2227 (m : \u211d) \u2264 y + y * z),\n                ((b0 x m : \u2102) * \u03c7 (m : ZMod q) -\n                  Thm2.delta \u03c7 * v0 / Real.log (x ^ (11 / 20 + \u03b5)))\u2016 ^ 2 \u2264\n                    C * ((q : \u211d) * sieveQ \u03b5 x) ^ 2 *\n                      x ^ (11 / 20 + \u03b5) * Real.log x ^ (-A)",
+    "historical": true
+  }
+]
