@@ -17,7 +17,8 @@ permissions:
   contents: read
   actions: read
 # One run at a time keeps gate slots free; a push that waits behind a newer one is folded in, since the plan diffs from the
-# newest main sha a completed main-check already covered when that sha is older than the event's before.
+# newest main sha a main-check run that finished with success or failure covered, when that sha is older than the event's before;
+# a cancelled run covered nothing, GitHub cancels the waiting run when a third push arrives.
 concurrency:
   group: main-check
   cancel-in-progress: false
@@ -37,7 +38,7 @@ jobs:
           AFTER: ${{ github.sha }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          LAST=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/main-check.yml/runs?branch=main&status=completed&per_page=1" | python3 -c "import json,sys; r=json.load(sys.stdin).get('workflow_runs', []); print(r[0]['head_sha'] if r else '')") || LAST=""
+          LAST=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/main-check.yml/runs?branch=main&status=completed&per_page=30" | python3 -c "import json,sys; r=[x for x in json.load(sys.stdin).get('workflow_runs', []) if x['conclusion'] in ('success', 'failure')]; print(r[0]['head_sha'] if r else '')") || LAST=""
           if [ -n "$LAST" ] && [ -n "$BEFORE" ] && [ "$LAST" != "$BEFORE" ] && git merge-base --is-ancestor "$LAST" "$BEFORE" 2>/dev/null; then echo "MAIN CHECK folding in pushes since $LAST"; BEFORE=$LAST; fi
           if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then BEFORE=$(git rev-parse "$AFTER^" 2>/dev/null || echo ""); fi
           if [ -z "$BEFORE" ]; then echo 'folders=[]' >> "$GITHUB_OUTPUT"; echo "MAIN CHECK no old main to diff from"; exit 0; fi
