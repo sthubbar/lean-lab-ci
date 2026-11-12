@@ -87,7 +87,7 @@ jobs:
       - name: Sweep this shard
         if: steps.prio.outputs.skip != 'true'
         env:
-          SWEEP_DEADLINE: '15600'
+          SWEEP_DEADLINE: '12000'
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           python3 scripts/ci/sweep.py shard ${{ matrix.shard }} 8 "$RUNNER_TEMP/sweep" "${{ github.run_id }}" | tee -a "$RUNNER_TEMP/sweep.log"

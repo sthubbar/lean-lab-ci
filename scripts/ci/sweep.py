@@ -18,7 +18,7 @@ SRC = "LeanLab/LeanLab"
 TACTICS = ["norm_num", "simp", "decide", "omega", "linarith", "nlinarith", "positivity", "aesop", "field_simp", "ring"]
 BANNED = ("native_decide", "exact?", "apply?")
 MAX_LINES, COMPILE_MAX = 3000, 600
-DEADLINE = int(os.environ.get("SWEEP_DEADLINE", "15600"))
+DEADLINE = int(os.environ.get("SWEEP_DEADLINE", "12000"))  # no new file after 200 min: one file can take 60 min of imports and 3 compiles of 10, inside the 300 min job
 IMPORT_MAX = int(os.environ.get("SWEEP_IMPORT_MAX", "3600"))
 T0 = time.time()
 DECL = re.compile(r"^\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|noncomputable|nonrec|unsafe|partial)\s+)*"
@@ -89,7 +89,7 @@ def combinator():
 def put(line, col, kind, tac):
     return line[:col] + ("by " if kind == "term" else "") + tac + line[col + 5:]
 def compile_(path):
-    """messages of lake env lean on one file as a list of (line, severity, text), or None after the 10 minute cap"""
+    """messages of lake env lean on one file as line, severity and text triples, or None after the 10 minute cap"""
     try:
         p = subprocess.run(["lake", "env", "lean", "--json", os.path.abspath(path)], cwd="LeanLab", capture_output=True, text=True, errors="replace", timeout=COMPILE_MAX)
     except subprocess.TimeoutExpired: return None
@@ -168,21 +168,25 @@ def candidates(n):
         except OSError: continue
         if "sorry" in t: out.append((p, shard_of(p, n)))
     return out
+def write(i, n, outdir, run, sha, mine, items, per):
+    summ = {"files": len(mine), "declarations_closed": len({(x["file"], x["declaration"]) for x in items}), "sites": len(items),
+            "skipped": sum(1 for x in per if x["result"].startswith(("SKIP", "UNFINISHED", "ERROR"))), "seconds": int(time.time() - T0)}
+    res = {"run_id": run, "shard": i, "shards": n, "mirror_sha": sha, "items": items, "files": per, "summary": summ}
+    f = os.path.join(outdir, f"{run}-{i}.json"); json.dump(res, open(f, "w"), indent=1)
+    return f, summ
 def shard(i, n, outdir, run):
     os.makedirs(outdir, exist_ok=True); sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     mine = [p for p, s in candidates(n) if s == i]; items, per = [], []
     say(f"SWEEP SHARD {i} of {n}: {len(mine)} files with sorry, mirror {sha[:10]}")
     for p in mine:
+        write(i, n, outdir, run, sha, mine, items, per)  # partial result on disk after every file, so a killed job still commits what it found
         if time.time() - T0 > DEADLINE: per.append({"file": p, "result": "UNFINISHED deadline"}); continue
         s = time.time()
         try: got, why = sweep_file(p, os.path.join(outdir, "tmp"))
         except Exception as e: got, why = [], f"ERROR {type(e).__name__}: {str(e)[:200]}"
         items += got; per.append({"file": p, "result": why, "seconds": int(time.time() - s)})
         say(f"SWEEP {p}: {why}, {int(time.time() - s)} s" + "".join(f"\nSWEEP CLOSED {x['declaration']} line {x['line']} by {x['tactic']}" for x in got))
-    summ = {"files": len(mine), "declarations_closed": len({(x["file"], x["declaration"]) for x in items}), "sites": len(items),
-            "skipped": sum(1 for x in per if x["result"].startswith(("SKIP", "UNFINISHED", "ERROR"))), "seconds": int(time.time() - T0)}
-    res = {"run_id": run, "shard": i, "shards": n, "mirror_sha": sha, "items": items, "files": per, "summary": summ}
-    f = os.path.join(outdir, f"{run}-{i}.json"); json.dump(res, open(f, "w"), indent=1)
+    f, summ = write(i, n, outdir, run, sha, mine, items, per)
     say(f"SWEEP RESULT shard {i}: {summ['declarations_closed']} declarations closed, {summ['sites']} sites, {summ['files']} files, {summ['skipped']} skipped")
     return f
 def git(*a, env=None, inp=None):
