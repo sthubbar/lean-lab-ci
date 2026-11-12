@@ -7,6 +7,7 @@ AI wrote the Lean code. CODEX task165. Goldbach is open.
 import LeanLab.BHP1997.MeanSquareC165
 import LeanLab.BHP1997.Thm4Exponents
 import LeanLab.Akeno2026.Decomp86
+import LeanLab.BHP1997.EnergyLogC165
 
 namespace LeanLab.BHP1997.DecompC165c
 open MeanSquareC165
@@ -56,12 +57,40 @@ def EnergyLogBound : Prop :=
 P0069 Baker Harman Pintz 1997, Section 3, proof of Theorem 4, page 12.
 For every real exponent k the k-th divisor moment up to N is at most a constant times
 N times a fixed power of 1 + log N. The paper uses it without a written derivation.
-LEAF, OPEN: the case k at most one is the proved Decomp386b.divisor_sum_bound route of
-Decomp414c, the general case needs higher divisor moments not in Mathlib. -/
+PROVED, ROUTE BURST 2, formerly LEAF, OPEN: from `τ ≥ 1`, `k ≤ ⌈k⌉`, `n ≤ N` and the harmonic
+divisor moment bound `EnergyLogC165.harmonicDivisorMoment_le`, with `K = 2^⌈k⌉` and `C = 1`. -/
 theorem divisor_power_moment (k : ℝ) : ∃ K C : ℝ, 0 ≤ K ∧ 0 < C ∧
     ∀ N : ℕ, (∑ n ∈ Finset.Ioc 0 N, ((n.divisors.card : ℕ) : ℝ) ^ k) ≤
       C * N * (1 + Real.log N) ^ K := by
-  sorry
+  set m : ℕ := ⌈k⌉₊
+  refine ⟨((2 ^ m : ℕ) : ℝ), 1, by positivity, one_pos, ?_⟩
+  intro N
+  rw [Real.rpow_natCast, one_mul]
+  have hIoc : Finset.Ioc 0 N = Finset.Icc 1 N := Finset.val_inj.mp rfl
+  have hterm : ∀ n ∈ Finset.Icc 1 N, ((n.divisors.card : ℕ) : ℝ) ^ k ≤
+      (N : ℝ) * (((n.divisors.card : ℕ) : ℝ) ^ m / (n : ℝ)) := by
+    intro n hn
+    obtain ⟨h1, h2⟩ := Finset.mem_Icc.mp hn
+    have hn0 : (0 : ℝ) < n := by exact_mod_cast h1
+    have hτ : (1 : ℝ) ≤ ((n.divisors.card : ℕ) : ℝ) := by
+      exact_mod_cast Finset.card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr (by omega)⟩
+    have hk : ((n.divisors.card : ℕ) : ℝ) ^ k ≤ ((n.divisors.card : ℕ) : ℝ) ^ m := by
+      rw [← Real.rpow_natCast]
+      exact Real.rpow_le_rpow_of_exponent_le hτ (Nat.le_ceil k)
+    have hnN : (n : ℝ) ≤ N := by exact_mod_cast h2
+    have hpos : 0 ≤ ((n.divisors.card : ℕ) : ℝ) ^ m / (n : ℝ) := by positivity
+    calc ((n.divisors.card : ℕ) : ℝ) ^ k ≤ ((n.divisors.card : ℕ) : ℝ) ^ m := hk
+      _ = (n : ℝ) * (((n.divisors.card : ℕ) : ℝ) ^ m / (n : ℝ)) := by field_simp
+      _ ≤ (N : ℝ) * (((n.divisors.card : ℕ) : ℝ) ^ m / (n : ℝ)) :=
+        mul_le_mul_of_nonneg_right hnN hpos
+  rw [hIoc]
+  calc (∑ n ∈ Finset.Icc 1 N, ((n.divisors.card : ℕ) : ℝ) ^ k)
+      ≤ ∑ n ∈ Finset.Icc 1 N, (N : ℝ) * (((n.divisors.card : ℕ) : ℝ) ^ m / (n : ℝ)) :=
+        Finset.sum_le_sum hterm
+    _ = (N : ℝ) * EnergyLogC165.harmonicDivisorMoment m N := by
+        rw [← Finset.mul_sum]; rfl
+    _ ≤ (N : ℝ) * (1 + Real.log N) ^ (2 ^ m) :=
+        mul_le_mul_of_nonneg_left (EnergyLogC165.harmonicDivisorMoment_le m N) (Nat.cast_nonneg N)
 
 /-- Page 12, the step "using (3.1)" itself. P0069 Baker Harman Pintz 1997, Section 3,
 proof of Theorem 4, page 12, with display 3.1 and the energy G of display 3.3 on page 11.
@@ -129,7 +158,7 @@ theorem one_add_log_floor_le {c2 F : ℝ} (hc2 : 0 < c2) (hF : 2 ≤ F) :
 /-- Page 12, the coefficient input cut out of `dyadic_mean_value` by U-1609. It is a
 divisor moment bound, `Σ_{n ≤ F} τ(n)^{2B}/n ≪ (log F)^K`, elementary and not in Mathlib. It is
 exactly what the bound `energy_small_power` cannot give, see `positive_power_not_log_bounded`.
-Burst 2 split: no direct sorry. CONDITIONAL on the OPEN leaf `divisor_power_moment`, through the
+Burst 2 split: no direct sorry, and no sorry below it: `divisor_power_moment` is now PROVED, through the
 proved steps `energy_le_divisor_moment` and `one_add_log_floor_le`. -/
 theorem energy_log_bound : EnergyLogBound := by
   intro B c1 c2 hc1 hc12
