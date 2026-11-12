@@ -8,6 +8,8 @@ import LeanLab.Perelli1996.Decomp103
 import LeanLab.Perelli1996.RamanujanInt400
 import LeanLab.Perelli1996.Cor1b
 import LeanLab.Perelli1996.Series320
+import LeanLab.Perelli1996.PrincipalModel320
+import LeanLab.Perelli1996.ArcModel320
 
 namespace LeanLab.Perelli1996.Decomp320a
 open Finset Real Polynomial MeasureTheory
@@ -42,7 +44,47 @@ theorem window_pos (F : ℤ[X]) (hF : Admissible F) :
   have hvI : 0 < Fv F n := by exact_mod_cast hv
   omega
 
-/-- LEAF. Page 481 equation 2 before completing the singular series.
+/-- Page 481 equation 2, the prime sum comparison on the primary arcs.
+On the arc at a over q with q at most L^B, Vaughan 1981 Chapter 3, Lemma 3.1 with the
+Siegel Walfisz theorem, replaces the prime sum by mu q over phi q times the kernel T.
+Summing the squared model over the reduced residues a gives the Ramanujan coefficient
+Series320.coefficient m q times the central kernel integral over radius L^B over N.
+Cited input: Vaughan 1981 Chapter 3; Perelli 1996 page 481 equation 2.
+PROVED from ArcModel320.arc_model, whose pieces leaf_arc_pointwise, via the lab's
+PNTPort Siegel Walfisz major arc lemma, and leaf_arc_integral_split are proved. -/
+theorem leaf_prime_model (F : ℤ[X]) (hF : Admissible F)
+    (c : ℝ) (hc : 0 < c) (A ε B : ℝ) (hA : 0 < A) (hε : 0 < ε) (hB : 0 < B) :
+    ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
+      N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H →
+      H ≤ N ^ (1 / (F.natDegree : ℝ)) →
+      (∀ n ∈ win F N H, 0 ≤ Fv F n ∧ (Fv F n).toNat ≤ ⌊c * N⌋₊) →
+      ∀ n ∈ win F N H,
+      ‖(∫ α in Set.Icc 0 1 ∩ majorArcs N B,
+          coefficientIntegrand ⌊c * N⌋₊ (Fv F n).toNat α) -
+        (∑ q ∈ Icc 1 ⌊Real.log N ^ B⌋₊, Series320.coefficient (Fv F n).toNat q) *
+          (∫ α in (-(Real.log N ^ B / N))..(Real.log N ^ B / N),
+            Kernel.T 0 (⌊c * N⌋₊ + 1) α ^ 2 * Kernel.e (-((Fv F n).toNat : ℝ) * α))‖ ≤
+        C * N * (Real.log N ^ (1 - B) + Real.log N ^ (-A / 2)) := by
+  obtain ⟨C, N₀, hC, hN₀, h⟩ := ArcModel320.arc_model c hc A B hA hB
+  refine ⟨C, N₀, hC, hN₀, ?_⟩
+  intro N H hN _ _ _ n _
+  have hN0 : 0 < N := by linarith
+  have hL : 0 ≤ Real.log N := Real.log_nonneg (by linarith)
+  refine (h N hN _).trans ?_
+  have hy : 0 ≤ Real.log N ^ (1 - B) := Real.rpow_nonneg hL _
+  exact mul_le_mul_of_nonneg_left (le_add_of_nonneg_left hy) (by positivity)
+
+/-- Page 481 equation 2: the finite singular partial sum written with Series320 coefficients. -/
+theorem singularPartial_eq (m : ℕ) (P : ℝ) :
+    singularPartial m P = ∑ q ∈ Icc 1 ⌊P⌋₊, Series320.coefficient m q := by
+  unfold singularPartial Series320.coefficient
+  apply Finset.sum_congr rfl
+  intro q hq
+  rw [RamanujanInt400.ramanujanSumInt_eq_natAbs q (-(m : ℤ)) (Finset.mem_Icc.mp hq).1]
+  simp only [Int.natAbs_neg, Int.natAbs_natCast]
+
+/-- Page 481 equation 2 before completing the singular series.
+PROVED from leaf_prime_model; the principal model error is PROVED in PrincipalModel320.
 Vaughan Chapter 3 supplies the prime approximation.
 The primary rectangular arcs are exactly the arcs defined on page 480. -/
 theorem leaf_finite_major (F : ℤ[X]) (hF : Admissible F)
@@ -56,7 +98,55 @@ theorem leaf_finite_major (F : ℤ[X]) (hF : Admissible F)
           coefficientIntegrand ⌊c * N⌋₊ (Fv F n).toNat α) -
         (Fv F n : ℂ) * singularPartial (Fv F n).toNat (Real.log N ^ B)‖ ≤
         C * N * (Real.log N ^ (1 - B) + Real.log N ^ (-A / 2)) := by
-  sorry
+  obtain ⟨CP, NP, hCP, hNP, hprime⟩ := leaf_prime_model F hF c hc A ε B hA hε hB
+  obtain ⟨CM, hCM, hmodel⟩ := PrincipalModel320.finite_model_error_scaled c hc
+  obtain ⟨NA, hNA, harc⟩ := arc_parameters F hF ε B hε hB
+  obtain ⟨NW, hNW, hpos⟩ := window_pos F hF
+  refine ⟨CP + CM, max (max NP NA) (max NW (Real.exp 1)), by positivity,
+    hNP.trans ((le_max_left _ _).trans (le_max_left _ _)), ?_⟩
+  intro N H hN hH hHu hcut n hn
+  have hNP' : NP ≤ N := ((le_max_left _ _).trans (le_max_left _ _)).trans hN
+  have hNA' : NA ≤ N := ((le_max_right _ _).trans (le_max_left _ _)).trans hN
+  have hNW' : NW ≤ N := ((le_max_left _ _).trans (le_max_right _ _)).trans hN
+  have hNe : Real.exp 1 ≤ N := ((le_max_right _ _).trans (le_max_right _ _)).trans hN
+  have hN0 : 0 < N := (Real.exp_pos 1).trans_le hNe
+  have hL1 : 1 ≤ Real.log N := by simpa using Real.log_le_log (Real.exp_pos 1) hNe
+  have hL : 0 < Real.log N := by linarith
+  set m := (Fv F n).toNat with hm_def
+  have hmpos : 0 < m := hpos N H hNW' n hn
+  have hmcast : (m : ℝ) = (Fv F n : ℝ) := by
+    exact_mod_cast Int.toNat_of_nonneg (hcut n hn).1
+  have hmC : (Fv F n : ℂ) = (m : ℂ) := by
+    have : ((Fv F n : ℝ) : ℂ) = ((m : ℝ) : ℂ) := by rw [hmcast]
+    simpa using this
+  have hmN : (m : ℝ) ≤ c * N :=
+    (by exact_mod_cast (hcut n hn).2 : (m : ℝ) ≤ (⌊c * N⌋₊ : ℝ)).trans
+      (Nat.floor_le (by positivity))
+  have hmM : m ≤ ⌊c * N⌋₊ := (hcut n hn).2
+  have hP : 0 < Real.log N ^ B := Real.rpow_pos_of_pos hL B
+  have hhalf := (harc N H hNA' hH).1
+  have h1 := hprime N H hNP' hH hHu hcut n hn
+  have h2 := hmodel N (Real.log N ^ B) hNe hP hhalf m ⌊c * N⌋₊ hmpos hmM hmN
+    (Icc 1 ⌊Real.log N ^ B⌋₊)
+  have hscale : Real.log N / Real.log N ^ B = Real.log N ^ (1 - B) := by
+    rw [Real.rpow_sub hL, Real.rpow_one]
+  rw [mul_div_assoc, hscale] at h2
+  rw [singularPartial_eq, hmC]
+  set I : ℂ := ∫ α in Set.Icc 0 1 ∩ majorArcs N B, coefficientIntegrand ⌊c * N⌋₊ m α
+  set S : ℂ := ∑ q ∈ Icc 1 ⌊Real.log N ^ B⌋₊, Series320.coefficient m q
+  set J : ℂ := ∫ α in (-(Real.log N ^ B / N))..(Real.log N ^ B / N),
+    Kernel.T 0 (⌊c * N⌋₊ + 1) α ^ 2 * Kernel.e (-(m : ℝ) * α)
+  have htri : ‖I - (m : ℂ) * S‖ ≤ ‖I - S * J‖ + ‖S * J - (m : ℂ) * S‖ := by
+    have : I - (m : ℂ) * S = (I - S * J) + (S * J - (m : ℂ) * S) := by ring
+    rw [this]
+    exact norm_add_le _ _
+  have hA2 : 0 ≤ Real.log N ^ (-A / 2) := by positivity
+  have hB1 : 0 ≤ Real.log N ^ (1 - B) := by positivity
+  calc ‖I - (m : ℂ) * S‖ ≤ ‖I - S * J‖ + ‖S * J - (m : ℂ) * S‖ := htri
+    _ ≤ CP * N * (Real.log N ^ (1 - B) + Real.log N ^ (-A / 2)) +
+        CM * N * Real.log N ^ (1 - B) := add_le_add h1 h2
+    _ ≤ (CP + CM) * N * (Real.log N ^ (1 - B) + Real.log N ^ (-A / 2)) := by
+      nlinarith [mul_nonneg (mul_nonneg hCM.le hN0.le) hA2]
 
 /-- LEAF. Page 481 equation 3 and the singular series expansion used in equation 2.
 Only the arithmetic completion of the finite Ramanujan series is estimated here. -/
@@ -77,7 +167,7 @@ theorem leaf_singular_tail :
   exact htail m hm P hP
 
 /-- The exact sealed pointwise target assembled from the two smaller comparisons.
-CONDITIONAL ON leaf_finite_major. The arithmetic tail has a clean proof. -/
+PROVED from leaf_finite_major and leaf_singular_tail. -/
 theorem leaf_major_pointwise (F : ℤ[X]) (hF : Admissible F)
     (c : ℝ) (hc : 0 < c) (A ε B : ℝ) (hA : 0 < A) (hε : 0 < ε) (hB : 0 < B) :
     ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
