@@ -34,7 +34,8 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        shard: ${{ fromJSON(inputs.only != '' && inputs.only != null && format('[{0}]', inputs.only) || '[0, 1, 2, 3, 4, 5, 6, 7]') }}
+        shard: ${{ fromJSON(inputs.only != '' && format('[{0}]', inputs.only) || '[0, 1, 2, 3, 4, 5, 6, 7]') }}
+    # only is compared to the empty string alone: GitHub coerces both null and '0' to the number 0, so a null test ran all 8 shards for only 0
     steps:
       - uses: actions/checkout@v4
       - name: Gate priority, the gate runs first
