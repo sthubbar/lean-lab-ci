@@ -7,6 +7,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.MajorArcEnergy.Display13
 import LeanLab.Linnik.MajorArcEnergy.Leaves1517
+import LeanLab.Linnik.MajorArcEnergy.Display17
 
 namespace LeanLab.Linnik.MajorArcEnergy
 
@@ -253,8 +254,9 @@ theorem correctedEnergy_exc_eq (N : ℕ) (θ γ : ℝ) (r : ℕ) (e : PChar)
     simp [ampNorm, correctedAmplitude, hx0', hxr]
 
 
-/-- CONDITIONAL ON `major_arc_pair_expansion`, `pair_weight_bound`, `principal_pair_sum_of_leaves`
-and `exceptional_weight_bound`. Gallagher 1975 pp.131 and 132 displays 15 to 17: with the
+/-- CONDITIONAL ON `major_arc_pair_expansion_of_steps`, `pair_weight_bound_of_cited`,
+`principal_pair_sum_of_leaves` and `exceptional_weight_bound_of_cited`, hence only on the
+CITED-LEFT leaves induced_cn_bound, singular_tail_cited and singular_weighted_sums_cited. Gallagher 1975 pp.131 and 132 displays 15 to 17: with the
 exceptional character chi~ to conductor r, the pairs avoiding chi~ are treated as in
 display 13, display 15 bounds the pairs of chi~ with chi not 1 or chi~, and displays 16 and
 17 bound the remaining pairs by N L^(-2) n/phi(n) r phi((n, r))/phi(r)^2.
@@ -278,11 +280,11 @@ theorem major_arc_energy_exceptional_split
               (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
                 (1 + normalizedEnergy N θ r γ) * normalizedEnergy N θ r γ +
                 exceptionalWeight r n) := by
-  obtain ⟨K1, θ1, hK1, hθ1, hexp⟩ := major_arc_pair_expansion hExpansion
-  obtain ⟨K2, hK2, hpw⟩ := pair_weight_bound
+  obtain ⟨K1, θ1, hK1, hθ1, hexp⟩ := major_arc_pair_expansion_of_steps hExpansion
+  obtain ⟨K2, hK2, hpw⟩ := pair_weight_bound_of_cited
   obtain ⟨K3, θ3, hK3, hθ3, hpp⟩ := principal_pair_sum_of_leaves
   obtain ⟨K4, hK4, N4, hamp⟩ := principal_amp_norm
-  obtain ⟨K5, hK5, hexw⟩ := exceptional_weight_bound
+  obtain ⟨K5, hK5, hexw⟩ := exceptional_weight_bound_of_cited
   obtain ⟨N6, hTt⟩ := exceptionalMain_norm_eventually
   obtain ⟨ε, hε, hzeta⟩ := zeta_ne_zero_near_one
   have hb0 := (Classical.choose_spec LeanLab.Linnik.Decomp1532b.page_subsingleton).2
