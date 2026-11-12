@@ -45,7 +45,9 @@ uses the hypotheses on `N` and `θ`, and it is what makes the `N ^ θ` conjunct 
 predicate superfluous once `N < |dif x|` is known. -/
 theorem large_shift_scale_le_self (N : ℕ) (hN : 1 ≤ N) (θ : ℝ) (hθ : 0 < θ) (hθ1 : θ ≤ 1) :
     (N : ℝ) ^ θ ≤ (N : ℝ) := by
-  sorry
+  have h1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  calc (N : ℝ) ^ θ ≤ (N : ℝ) ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le h1 hθ1
+    _ = (N : ℝ) := Real.rpow_one _
 
 /-- LEAF, OPEN. Step 2 of 4, the transitivity step: given that the major arc scale does not exceed
 `N`, an absolute difference that is at most `N ^ θ` is at most `N`. This is the implication whose
@@ -53,14 +55,14 @@ contrapositive turns `N < |dif x|` into the `N ^ θ` conjunct of the sealed pred
 theorem large_shift_le_self_of_le_scale (N : ℕ) (θ : ℝ) (d : ℤ)
     (hscale : (N : ℝ) ^ θ ≤ (N : ℝ)) (h : |(d : ℝ)| ≤ (N : ℝ) ^ θ) :
     |(d : ℝ)| ≤ (N : ℝ) := by
-  sorry
+  exact le_trans h hscale
 
 /-- LEAF, OPEN. Step 3 of 4, the forward reading of the strict order: a difference whose absolute
 value is not at most `N` has absolute value strictly above `N`. This is the step that collapses the
 third conjunct of the sealed predicate into `N < |dif x|` on the forward side of the equivalence. -/
 theorem large_shift_lt_abs_of_not_le_self (N : ℕ) (d : ℤ)
     (h : ¬(|(d : ℝ)| ≤ (N : ℝ))) : (N : ℝ) < |(d : ℝ)| := by
-  sorry
+  exact not_le.mp h
 
 /-- LEAF, OPEN. Step 4 of 4, the backward reading of the strict order: a difference whose absolute
 value is strictly above `N` is not at most `N`. This is the step that puts the third conjunct of the
@@ -68,7 +70,7 @@ sealed predicate back on the backward side of the equivalence, where the hypothe
 is all that is available. -/
 theorem large_shift_not_le_self_of_lt_abs (N : ℕ) (d : ℤ)
     (h : (N : ℝ) < |(d : ℝ)|) : ¬(|(d : ℝ)| ≤ (N : ℝ)) := by
-  sorry
+  exact not_le.mpr h
 
 /-- ASSEMBLY. The sealed statement `large_shift_filter_iff`, from the four leaves of this split:
 the forward direction reads the third conjunct as `N < |dif x|` and drops the middle one, and the
