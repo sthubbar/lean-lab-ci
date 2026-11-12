@@ -6,11 +6,13 @@ Written proof: Tolev 1999 pages 71 and 82 to 87, Lemmas 4 and 12.
 This file is a verbatim port of the leaf part of Decomp286b, which cannot be
 imported by Decomp83 because Decomp286b itself imports Decomp83.
 Only the namespace and the imports differ. typeI_estimate and typeII_estimate
-carry full proofs; prime_decomposition stays an OPEN cited leaf, supplied
-elsewhere only through Decomp424c, which also imports Decomp83.
+carry full proofs. Route burst 7: prime_decomposition is now PROVED through the copied
+Decomp424 chain below, the copied inputs in Sup83Heath and the new grouping in Sup83Group.
 -/
 import LeanLab.Tolev2009.PublishedTheorem
 import LeanLab.PNTPort.Vinogradov.Count
+import LeanLab.Tolev2009.Sup83Heath
+import LeanLab.Tolev2009.Sup83Group
 
 open Finset Real
 
@@ -2790,11 +2792,211 @@ theorem typeII_estimate :
   rw [ht] at hs''
   exact (sq_le_sq₀ (norm_nonneg _) (by positivity)).mp hs''
 
-/-- LEAF. Tolev 1999 page 71 Lemma 4 and page 82 display 52 followed by 53 and 54.
+section HeathPort
+
+open LeanLab.Tolev2009.Sup83Heath
+
+/-! ### Port of the Decomp424 chain, see Sup83Heath for the copied proved inputs -/
+
+/-- Same statement as Decomp424a.grouped_annular_decomposition, PROVED here in route
+burst 7 through Sup83Group.grouped_blocks: Heath Brown's identity on dyadic boxes, the
+grouping into Type I and Type II blocks and the tau5 coefficient bounds.
+Tolev 1999 page 71 Lemma 4 and page 83 displays 53 and 54.
+Heath Brown 1982 pages 1367 to 1368 give the six variable dyadic subdivision and grouping.
+The coefficient identity is already proved. This leaf only groups its explicit polynomial
+on one annulus into normalized blocks. There is no outer shell or prime conversion. -/
+theorem grouped_annular_decomposition :
+    ∃ C X₀ : ℝ, 0 ≤ C ∧ 3 ≤ X₀ ∧ ∀ N : ℕ, 1 ≤ Real.log N →
+      ∀ x : ℝ, X₀ ≤ x → x ≤ N →
+      ∀ lam : ℕ → ℝ, ∀ l₃ K : ℕ, ∀ α : ℝ,
+        ∃ J : ℕ, (J : ℝ) ≤ C * Real.log N ^ (6 : ℕ) ∧
+        ∃ M M₁ H H₁ : Fin J → ℝ, ∃ a b : Fin J → ℕ → ℂ, ∃ c : Fin J → ℂ,
+          Sup83Heath.annularHeathBrown lam l₃ K N α x =
+            ∑ j : Fin J, c j * bilinear lam l₃ K N α x
+              (M j) (M₁ j) (H j) (H₁ j) (a j) (b j) ∧
+          ∀ j : Fin J,
+            ‖c j‖ ≤ C ∧
+            0 < M j ∧ M j ≤ M₁ j ∧ M₁ j ≤ 2 * M j ∧
+            0 < H j ∧ H j ≤ H₁ j ∧ H₁ j ≤ 2 * H j ∧
+            x / 4 ≤ M j * H j ∧ M j * H j ≤ 2 * x ∧
+            (∀ m, ‖a j m‖ ≤ (tau5 m : ℝ) * Real.log N) ∧
+            ((x ^ ((249 : ℝ) / 500) ≤ H j ∧
+                (b j = (fun _ => 1) ∨ b j = (fun l : ℕ => (Real.log l : ℂ)))) ∨
+              (x ^ ((1 : ℝ) / 1000) ≤ H j ∧ H j ≤ 2 ^ 30 * x ^ ((1 : ℝ) / 3) ∧
+                ∀ l, ‖b j l‖ ≤ (tau5 l : ℝ) * Real.log N)) := by
+  obtain ⟨C, X₀, hC, hX₀, h⟩ := Sup83Group.grouped_blocks
+  refine ⟨C, X₀, hC, hX₀, ?_⟩
+  intro N hL x hx hxN lam l₃ K α
+  set w : ℕ → ℂ := fun n => ee (α * n) * (L2Bound.weight lam l₃ K n : ℂ) with hw
+  obtain ⟨n, hn, J, hJ, c, M, M₁, H, H₁, a, b, hS, hb⟩ := h N hL x hx hxN w
+  refine ⟨J, (Nat.cast_le.mpr hJ).trans hn, M, M₁, H, H₁, a, b, c, ?_, fun j => hb j⟩
+  have h1 : Sup83Heath.annularHeathBrown lam l₃ K N α x =
+      Sup83Group.annSum w N x
+        (Sup83Heath.heathBrownPolynomial ⌊(2 * x) ^ ((1 : ℝ) / 3)⌋₊) := by
+    unfold Sup83Heath.annularHeathBrown Sup83Group.annSum
+    apply sum_congr rfl
+    intro n _
+    split_ifs
+    · simp only [hw, mul_assoc]
+    · rfl
+  rw [h1, hS]
+  apply sum_congr rfl
+  intro j _
+  congr 1
+  unfold bilinear Sup83Group.blockSum
+  apply sum_congr rfl
+  intro m _
+  apply sum_congr rfl
+  intro l _
+  split_ifs
+  · simp only [hw, mul_assoc]
+  · rfl
+
+/-- COPY of Decomp424a.annular_decomposition, Tolev 1999 page 71 Lemma 4.
+The annular von Mangoldt identity follows from the explicit polynomial grouping.
+Uses grouped_annular_decomposition, now proved. The coefficient identity is proved. -/
+theorem annular_decomposition :
+    ∃ C X₀ : ℝ, 0 ≤ C ∧ 3 ≤ X₀ ∧ ∀ N : ℕ, 1 ≤ Real.log N →
+      ∀ x : ℝ, X₀ ≤ x → x ≤ N →
+      ∀ lam : ℕ → ℝ, ∀ l₃ K : ℕ, ∀ α : ℝ,
+        ∃ J : ℕ, (J : ℝ) ≤ C * Real.log N ^ (6 : ℕ) ∧
+        ∃ M M₁ H H₁ : Fin J → ℝ, ∃ a b : Fin J → ℕ → ℂ, ∃ c : Fin J → ℂ,
+          Sup83Heath.annularMangoldt lam l₃ K N α x =
+            ∑ j : Fin J, c j * bilinear lam l₃ K N α x
+              (M j) (M₁ j) (H j) (H₁ j) (a j) (b j) ∧
+          ∀ j : Fin J,
+            ‖c j‖ ≤ C ∧
+            0 < M j ∧ M j ≤ M₁ j ∧ M₁ j ≤ 2 * M j ∧
+            0 < H j ∧ H j ≤ H₁ j ∧ H₁ j ≤ 2 * H j ∧
+            x / 4 ≤ M j * H j ∧ M j * H j ≤ 2 * x ∧
+            (∀ m, ‖a j m‖ ≤ (tau5 m : ℝ) * Real.log N) ∧
+            ((x ^ ((249 : ℝ) / 500) ≤ H j ∧
+                (b j = (fun _ => 1) ∨ b j = (fun l : ℕ => (Real.log l : ℂ)))) ∨
+              (x ^ ((1 : ℝ) / 1000) ≤ H j ∧ H j ≤ 2 ^ 30 * x ^ ((1 : ℝ) / 3) ∧
+                ∀ l, ‖b j l‖ ≤ (tau5 l : ℝ) * Real.log N)) := by
+  obtain ⟨C, X₀, hC, hX₀, hgroup⟩ := grouped_annular_decomposition
+  refine ⟨C, X₀, hC, hX₀, ?_⟩
+  intro N hL x hx hxN lam l₃ K α
+  simpa only [annularMangoldt_eq_heathBrown lam l₃ K N α x (hX₀.trans hx)] using
+    hgroup N hL x hx hxN lam l₃ K α
+
+
+/-- COPY of Decomp424c.retained_identity, Tolev 1999 page 82 displays 52 to 54.
+The full retained identity follows from the annular step and proved shell bookkeeping. -/
+theorem retained_identity :
+    ∀ A : ℝ, 10 ^ 4 ≤ A → ∀ l₃ : ℕ, 1 ≤ l₃ →
+      ∃ C N₀ : ℝ, 0 ≤ C ∧ ∀ N : ℕ, Odd N → N₀ ≤ N →
+        ∀ lam : ℕ → ℝ, (∀ k, |lam k| ≤ 1) → ∀ α : ℝ,
+          ∃ J : ℕ, (J : ℝ) ≤ C * Real.log N ^ (7 : ℕ) ∧
+          ∃ x M M₁ H H₁ : Fin J → ℝ, ∃ a b : Fin J → ℕ → ℂ, ∃ c : Fin J → ℂ,
+            retainedMangoldt A lam l₃ (cutoff3 (10 ^ 4 * A) N) N α =
+              ∑ j : Fin J, c j * bilinear lam l₃ (cutoff3 (10 ^ 4 * A) N) N α
+                (x j) (M j) (M₁ j) (H j) (H₁ j) (a j) (b j) ∧
+            ∀ j : Fin J,
+              ‖c j‖ ≤ C ∧
+              (N : ℝ) * Real.log N ^ (-4 * A) ≤ x j ∧ x j ≤ N ∧ 2 < x j ∧
+              0 < M j ∧ M j ≤ M₁ j ∧ M₁ j ≤ 2 * M j ∧
+              0 < H j ∧ H j ≤ H₁ j ∧ H₁ j ≤ 2 * H j ∧
+              x j / 4 ≤ M j * H j ∧ M j * H j ≤ 2 * x j ∧
+              (∀ m, ‖a j m‖ ≤ (tau5 m : ℝ) * Real.log N) ∧
+              ((x j ^ ((249 : ℝ) / 500) ≤ H j ∧
+                  (b j = (fun _ => 1) ∨ b j = (fun l : ℕ => (Real.log l : ℂ)))) ∨
+                (x j ^ ((1 : ℝ) / 1000) ≤ H j ∧ H j ≤ 2 ^ 30 * x j ^ ((1 : ℝ) / 3) ∧
+                  ∀ l, ‖b j l‖ ≤ (tau5 l : ℝ) * Real.log N)) := by
+  classical
+  intro A hA l₃ hl₃
+  obtain ⟨C, X₀, hC, hX₀, hann⟩ := annular_decomposition
+  obtain ⟨N₀, hN₀⟩ := eventual_retained_radius A X₀ (by linarith)
+  let d : ℝ := 1 / Real.log 2 + 2
+  have hd : 0 ≤ d := by dsimp [d]; positivity
+  refine ⟨C * d + C, N₀, by positivity, ?_⟩
+  intro N hodd hN lam hlam α
+  obtain ⟨hL, hY⟩ := hN₀ N hN
+  let y : ℝ := (N : ℝ) * Real.log N ^ (-4 * A)
+  let t : ℕ := Nat.clog 2 N
+  let r : Fin t → ℝ := fun i => y * 2 ^ (i : ℕ)
+  have hy : 1 ≤ y := by dsimp [y]; linarith
+  have hr : ∀ i : Fin t, y ≤ r i := by
+    intro i
+    exact le_mul_of_one_le_right (by linarith) (one_le_pow₀ (by norm_num))
+  have hall : ∀ i : Fin t,
+      ∃ J : ℕ, (J : ℝ) ≤ C * Real.log N ^ (6 : ℕ) ∧
+      ∃ M M₁ H H₁ : Fin J → ℝ, ∃ a b : Fin J → ℕ → ℂ, ∃ c : Fin J → ℂ,
+        annularMangoldt lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (r i) =
+          ∑ j : Fin J, c j * bilinear lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (r i)
+            (M j) (M₁ j) (H j) (H₁ j) (a j) (b j) ∧
+        ∀ j : Fin J,
+          r i ≤ N ∧ ‖c j‖ ≤ C ∧
+          0 < M j ∧ M j ≤ M₁ j ∧ M₁ j ≤ 2 * M j ∧
+          0 < H j ∧ H j ≤ H₁ j ∧ H₁ j ≤ 2 * H j ∧
+          (r i) / 4 ≤ M j * H j ∧ M j * H j ≤ 2 * (r i) ∧
+          (∀ m, ‖a j m‖ ≤ (tau5 m : ℝ) * Real.log N) ∧
+          (((r i) ^ ((249 : ℝ) / 500) ≤ H j ∧
+              (b j = (fun _ => 1) ∨ b j = (fun l : ℕ => (Real.log l : ℂ)))) ∨
+            ((r i) ^ ((1 : ℝ) / 1000) ≤ H j ∧ H j ≤ 2 ^ 30 * (r i) ^ ((1 : ℝ) / 3) ∧
+              ∀ l, ‖b j l‖ ≤ (tau5 l : ℝ) * Real.log N)) := by
+    intro i
+    by_cases hi : r i ≤ N
+    · obtain ⟨J, hJ, M, M₁, H, H₁, a, b, c, he, hb⟩ :=
+        hann N hL (r i) (hY.trans (hr i)) hi lam l₃ _ α
+      exact ⟨J, hJ, M, M₁, H, H₁, a, b, c, he, fun j => ⟨hi, hb j⟩⟩
+    · refine ⟨0, ?_, Fin.elim0, Fin.elim0, Fin.elim0, Fin.elim0,
+        Fin.elim0, Fin.elim0, Fin.elim0, ?_, fun j => Fin.elim0 j⟩
+      · simpa using mul_nonneg hC (pow_nonneg (show 0 ≤ Real.log N by linarith) 6)
+      · simpa using annularMangoldt_eq_zero lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (r i)
+          (le_of_not_ge hi)
+  choose Js hJs M M₁ H H₁ a b c he hb using hall
+  let U := (i : Fin t) × Fin (Js i)
+  let e : U ≃ Fin (Fintype.card U) := Fintype.equivFin U
+  have hcard : (Fintype.card U : ℝ) = ∑ i : Fin t, (Js i : ℝ) := by
+    simp [U, Fintype.card_sigma, Nat.cast_sum]
+  refine ⟨Fintype.card U, ?_, (fun j => r (e.symm j).1),
+    (fun j => M (e.symm j).1 (e.symm j).2), (fun j => M₁ (e.symm j).1 (e.symm j).2),
+    (fun j => H (e.symm j).1 (e.symm j).2), (fun j => H₁ (e.symm j).1 (e.symm j).2),
+    (fun j => a (e.symm j).1 (e.symm j).2), (fun j => b (e.symm j).1 (e.symm j).2),
+    (fun j => c (e.symm j).1 (e.symm j).2), ?_, ?_⟩
+  · calc
+      (Fintype.card U : ℝ) = ∑ i : Fin t, (Js i : ℝ) := hcard
+      _ ≤ ∑ i : Fin t, C * Real.log N ^ (6 : ℕ) := sum_le_sum (fun i _ => hJs i)
+      _ = (t : ℝ) * (C * Real.log N ^ (6 : ℕ)) := by simp
+      _ ≤ (d * Real.log N) * (C * Real.log N ^ (6 : ℕ)) :=
+        mul_le_mul_of_nonneg_right (shell_count_le N hL) (by positivity)
+      _ = (C * d) * Real.log N ^ (7 : ℕ) := by ring
+      _ ≤ (C * d + C) * Real.log N ^ (7 : ℕ) :=
+        mul_le_mul_of_nonneg_right (by linarith) (by positivity)
+  · have hcover : (N : ℝ) ≤ y * 2 ^ t := by
+      have hp : (N : ℝ) ≤ 2 ^ t := by exact_mod_cast Nat.le_pow_clog (by norm_num : 1 < 2) N
+      exact hp.trans (le_mul_of_one_le_left (by positivity) hy)
+    calc
+      retainedMangoldt A lam l₃ (cutoff3 (10 ^ 4 * A) N) N α =
+          ∑ i : Fin t, annularMangoldt lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (r i) := by
+        change _ = ∑ i : Fin t, annularMangoldt lam l₃ (cutoff3 (10 ^ 4 * A) N) N α
+          (y * 2 ^ (i : ℕ))
+        exact (retainedMangoldt_eq_annuli A lam l₃ _ N t α hcover).trans
+          (Fin.sum_univ_eq_sum_range (fun j : ℕ =>
+            annularMangoldt lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (y * 2 ^ j)) t).symm
+      _ = ∑ i : Fin t, ∑ j : Fin (Js i), c i j *
+          bilinear lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (r i)
+            (M i j) (M₁ i j) (H i j) (H₁ i j) (a i j) (b i j) := by simp_rw [he]
+      _ = ∑ u : U, c u.1 u.2 * bilinear lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (r u.1)
+            (M u.1 u.2) (M₁ u.1 u.2) (H u.1 u.2) (H₁ u.1 u.2) (a u.1 u.2) (b u.1 u.2) :=
+        (Fintype.sum_sigma (fun u : U => c u.1 u.2 *
+          bilinear lam l₃ (cutoff3 (10 ^ 4 * A) N) N α (r u.1)
+            (M u.1 u.2) (M₁ u.1 u.2) (H u.1 u.2) (H₁ u.1 u.2) (a u.1 u.2) (b u.1 u.2))).symm
+      _ = _ := (e.symm.sum_comp _).symm
+  · intro j
+    let u := e.symm j
+    have hh := hb u.1 u.2
+    exact ⟨hh.2.1.trans (by nlinarith [mul_nonneg hC hd]),
+      hr u.1, hh.1, by linarith [hY.trans (hr u.1)], hh.2.2⟩
+
+/-- Tolev 1999 page 71 Lemma 4 and page 82 display 52 followed by 53 and 54.
 Apply Heath Brown's identity on dyadic shells, omitting the initial short segment.
 The remainder includes that segment and the prime power conversion.
 There are at most C log N to seven blocks after shell subdivision.
-The source's tau5 coefficient constants are moved into the bounded scalars c. OPEN. -/
+The source's tau5 coefficient constants are moved into the bounded scalars c.
+Route burst 7: proof copied from Decomp424c.prime_decomposition; the grouping step
+grouped_annular_decomposition above and the conversion error in Sup83Heath are proved. -/
 theorem prime_decomposition :
     ∀ A : ℝ, 10 ^ 4 ≤ A → ∀ l₃ : ℕ, 1 ≤ l₃ →
       ∃ C N₀ : ℝ, 0 ≤ C ∧ ∀ N : ℕ, Odd N → N₀ ≤ N →
@@ -2816,6 +3018,27 @@ theorem prime_decomposition :
                   (b j = (fun _ => 1) ∨ b j = (fun l : ℕ => (Real.log l : ℂ)))) ∨
                 (x j ^ ((1 : ℝ) / 1000) ≤ H j ∧ H j ≤ 2 ^ 30 * x j ^ ((1 : ℝ) / 3) ∧
                   ∀ l, ‖b j l‖ ≤ (tau5 l : ℝ) * Real.log N)) := by
-  sorry
+  intro A hA l₃ hl₃
+  obtain ⟨C₁, N₁, hC₁, h₁⟩ := prime_power_and_initial_segment A hA l₃ hl₃
+  obtain ⟨C₂, N₂, hC₂, h₂⟩ := retained_identity A hA l₃ hl₃
+  refine ⟨C₁ + C₂, max N₁ N₂, add_nonneg hC₁ hC₂, ?_⟩
+  intro N hodd hN lam hlam α
+  have hN₁ : N₁ ≤ N := (le_max_left _ _).trans hN
+  have hN₂ : N₂ ≤ N := (le_max_right _ _).trans hN
+  obtain ⟨J, hJ, x, M, M₁, H, H₁, a, b, c, he, hb⟩ := h₂ N hodd hN₂ lam hlam α
+  refine ⟨J, ?_, Kfun lam l₃ (cutoff3 (10 ^ 4 * A) N) N α -
+    retainedMangoldt A lam l₃ (cutoff3 (10 ^ 4 * A) N) N α, ?_,
+    x, M, M₁, H, H₁, a, b, c, ?_, ?_⟩
+  · exact hJ.trans (mul_le_mul_of_nonneg_right (le_add_of_nonneg_left hC₁) (by positivity))
+  · apply (h₁ N hodd hN₁ lam hlam α).trans
+    exact mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right (le_add_of_nonneg_right hC₂) (Nat.cast_nonneg N))
+      (Real.rpow_nonneg (Real.log_natCast_nonneg N) _)
+  · rw [he]
+    ring
+  · intro j
+    exact ⟨(hb j).1.trans (le_add_of_nonneg_left hC₁), (hb j).2⟩
+
+end HeathPort
 
 end LeanLab.Tolev2009.Sup83Split
