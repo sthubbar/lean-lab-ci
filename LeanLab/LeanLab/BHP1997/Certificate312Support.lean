@@ -2,7 +2,7 @@
 P0069, page 51. Exact support reduction for the fixed E2 grid.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.DecompC165dBase312
+import LeanLab.BHP1997.Grid490
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical

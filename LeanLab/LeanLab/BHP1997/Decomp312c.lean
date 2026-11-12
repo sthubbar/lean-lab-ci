@@ -3336,4 +3336,38 @@ theorem squarefree_reciprocal_rankin (N : ℕ) (hN : Squarefree N)
           (fun d hd hdS => Real.rpow_nonneg (Nat.cast_nonneg _) _)) (Real.rpow_nonneg hγ.le _)
     _ = _ := by rw [hp]
 
+
+/-- Auxiliary Perron kernel bound for the page 22 contour calculation. -/
+theorem perron_remainder_bound490 {y c T : ℝ}
+    (hy : 0 < y) (hy1 : y ≠ 1) (hc : 0 < c) (hT : 0 < T) :
+    ‖((1 / (2 * Real.pi) : ℂ) * ∫ t in (-T)..T,
+        (y : ℂ) ^ ((c : ℂ) + t * I) / ((c : ℂ) + t * I)) -
+        (if 1 < y then 1 else 0)‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
+  rw [perron_rescale_general hy hc]
+  let a : ℝ := c / 2
+  let z : ℝ := y ^ a
+  have ha : 0 < a := by dsimp [a]; positivity
+  have hz : 0 < z := Real.rpow_pos_of_pos hy a
+  have hlog : Real.log z = a * Real.log y := Real.log_rpow hy a
+  have hbranch : (1 < z) ↔ (1 < y) := by
+    rw [Real.one_lt_rpow_iff_of_pos hy]
+    simp [ha, ha.not_gt]
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hh := congrArg Real.log h
+    rw [hlog, Real.log_one] at hh
+    exact (mul_ne_zero ha.ne' (Real.log_ne_zero_of_pos_of_ne_one hy hy1)) hh
+  have h := perron_kernel_two z hz hz1 (T / a) (div_pos hT ha)
+  have hpow : z ^ 2 = y ^ c := by
+    dsimp [z]
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hy.le]
+    congr 1
+    dsimp [a]
+    ring
+  simp only [hbranch, hpow, hlog, abs_mul, abs_of_pos ha] at h
+  have hden : Real.pi * (T / a) * (a * |Real.log y|) = Real.pi * T * |Real.log y| := by
+    field_simp
+  rw [hden] at h
+  exact h
+
 end LeanLab.BHP1997.Decomp312c

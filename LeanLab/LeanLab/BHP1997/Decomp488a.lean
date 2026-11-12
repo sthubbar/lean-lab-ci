@@ -7,7 +7,8 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.BHP1997.Decomp132b
 import LeanLab.BHP1997.KernelC165
 import Mathlib.Analysis.Complex.RemovableSingularity
-import LeanLab.DERZ1997.Perron136
+import LeanLab.DERZ1997.Kernel136
+import LeanLab.BHP1997.Decomp312c
 import LeanLab.PNTPort.StrongPNT.ResidueCalcOnRectangles
 
 namespace LeanLab.BHP1997.DecompC165a
@@ -953,9 +954,9 @@ theorem perron_difference_bound {N c H : ℝ} {n : ℕ} (hn : 0 < n) (hc : 0 < c
   have hl1 : (1 / 2 : ℝ) / n ≠ 1 := by
     rw [ne_eq, div_eq_one_iff_eq hn0.ne']
     linarith
-  have hu := LeanLab.DERZ1997.Perron136.perron_remainder_bound
+  have hu := LeanLab.BHP1997.Decomp312c.perron_remainder_bound490
     (div_pos ha hn0) hu1 hc hH
-  have hl := LeanLab.DERZ1997.Perron136.perron_remainder_bound
+  have hl := LeanLab.BHP1997.Decomp312c.perron_remainder_bound490
     (div_pos (by norm_num : (0 : ℝ) < 1 / 2) hn0) hl1 hc hH
   have hbranch : 1 < ((⌊N⌋₊ : ℝ) + 1 / 2) / n ↔ n ≤ ⌊N⌋₊ := by
     rw [lt_div_iff₀ hn0, one_mul]

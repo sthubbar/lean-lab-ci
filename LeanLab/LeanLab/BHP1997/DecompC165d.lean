@@ -5,6 +5,7 @@ The exact final statement is CONDITIONAL on both OPEN leaves.
 AI wrote the Lean code. CODEX task165. Goldbach is open.
 -/
 import LeanLab.BHP1997.Certificate312Total
+import LeanLab.BHP1997.DecompC165dBase312
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b

@@ -6,6 +6,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Sifted312
 import LeanLab.BHP1997.Decomp312a
+import LeanLab.BHP1997.Decomp312b
 import LeanLab.BHP1997.DecompC165a
 import LeanLab.BHP1997.DecompC165c
 import LeanLab.BHP1997.Decomp414a
@@ -731,19 +732,12 @@ theorem numeric_regions_nonempty : upperFiveRegion.Nonempty ∧ delta4Region.Non
   · refine ⟨![(0.48 : ℝ),0.17,0.11,0.1], ?_⟩
     norm_num [delta4Region, Fin.sum_univ_succ]
 
-/-- Section 4, pages 24 to 41. Construct the lower sifted coefficients,
-prove the character distribution and divisor bound, and link the discarded
-region integrals to the stated density. The remaining analytic inputs include
-Lemma 11, Lemma 12 with Hildebrand and Siegel Walfisz, and the region classification
-of Lemmas 13 to 27. The Delta2, Delta3 and six dimensional certificates remain OPEN.
-The Gamma and Delta4 envelope certificates above do not prove that classification.
-The rough support clause is omitted here because it is proved separately.
-ROUTE BURST 2, 2026-11-12: proved from the identical statement
-Decomp312a.section4_lower_sifted_data, which splits the paper argument at
-Lemma 11 into the Perron transfer of pages 24 and 25 and the lower sieve
-supply of pages 26 to 41. The Perron transfer is PROVED, axioms only
-propext, Classical.choice and Quot.sound. CONDITIONAL on the single OPEN
-leaf Decomp312a.lower_mean_value_supply. -/
+/-- Section 4, pages 24 to 41. The exact Decomp312a assembly combines the
+lower supply with the proved Perron transfer. The actual Buchstab family,
+both mean values, reference density and discarded region classification
+remain in lower_mean_value_supply. The numerical envelopes above do not
+prove that construction. Rough support is proved separately.
+CONDITIONAL on Decomp312a.lower_mean_value_supply. -/
 theorem section4_lower_sifted_data (h4 : Thm4.Theorem4Paper) :
     ∃ B0 η : ℝ, 0 < η ∧ ∀ B ε : ℝ, B0 ≤ B → 0 < ε → ε < η →
       ∃ (u0 : ℝ) (c0 : ℝ → ℕ → ℝ),
@@ -758,16 +752,15 @@ theorem section4_lower_sifted_data (h4 : Thm4.Theorem4Paper) :
         (∃ C : ℝ, ∀ x k, |section4SiftedFamily c0 x k| ≤
           C * ((k.divisors.card : ℕ) : ℝ) ^ B) ∧
         ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
-          ∀ k ∈ leftInterval ε x, section4SiftedFamily c0 x k ≤ primeWeight k :=
-  Decomp312a.section4_lower_sifted_data h4
+          ∀ k ∈ leftInterval ε x, section4SiftedFamily c0 x k ≤ primeWeight k := by
+  exact Decomp312a.section4_lower_sifted_data h4
 
-/-- LEAF. Section 4, pages 41 and 42. Construct the upper sifted coefficients,
-prove the character distribution and divisor bound, and link the five and seven
-dimensional losses with their actual multiplicities to the upper density.
-Lemma 28 supplies the decomposition ranges. The five dimensional integral has
-a certified conservative envelope above. The seven dimensional certificate and
-the analytic distribution estimates remain OPEN.
-The rough support clause is omitted here because it is proved separately. OPEN. -/
+/-- Section 4, pages 41 and 42. The exact Decomp312b assembly combines the
+upper supply with the proved Perron transfer. The actual Buchstab family,
+both mean values, reference density and five and seven dimensional losses
+with their multiplicities remain in upper_mean_value_supply.
+Rough support is proved separately.
+CONDITIONAL on Decomp312b.upper_mean_value_supply. -/
 theorem section4_upper_sifted_data (h4 : Thm4.Theorem4Paper) :
     ∃ B0 η : ℝ, 0 < η ∧ ∀ B ε : ℝ, B0 ≤ B → 0 < ε → ε < η →
       ∃ (u1 : ℝ) (c1 : ℝ → ℕ → ℝ),
@@ -783,7 +776,7 @@ theorem section4_upper_sifted_data (h4 : Thm4.Theorem4Paper) :
           C * ((k.divisors.card : ℕ) : ℝ) ^ B) ∧
         ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
           ∀ k ∈ leftInterval ε x, primeWeight k ≤ section4SiftedFamily c1 x k := by
-  sorry
+  exact Decomp312b.section4_upper_sifted_data h4
 
 /-- Page 27, nonempty consistency certificate for 4.14. -/
 theorem buchstab_nonempty_instance :
@@ -2142,8 +2135,8 @@ theorem correlation_transfer
     · exact hbound u1 v1 K11 a1 b1 hnot11 hD11
 
 /-- Pages 1 to 4 and Sections 2 to 5. The exact existing sieve_data
-statement follows from three local OPEN leaves, the Sections 3 and 5 decompositions
-and the proved correlation transfer.
+statement follows from the Section 2 to 5 suppliers and the proved correlation
+transfer. Section 4 uses the two named Decomp312 mean value supplies.
 No direct sorry.
 CONDITIONAL on all named analytic inputs. -/
 theorem sieve_data :

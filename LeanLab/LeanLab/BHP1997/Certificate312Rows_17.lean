@@ -2,7 +2,8 @@
 P0069, page 51. Bounded E2 grid certificate shard.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.Certificate312Rows_16
+
+import LeanLab.BHP1997.Certificate312Support
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical
@@ -10,134 +11,261 @@ set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 
 private theorem lowerTwo_row_1088 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1088 j) = 279675161 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1088 j) = 279675161 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1089 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1089 j) = 279828348 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1089 j) = 279828348 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1090 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1090 j) = 279981757 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1090 j) = 279981757 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1091 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1091 j) = 279310860 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1091 j) = 279310860 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1092 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1092 j) = 279464226 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1092 j) = 279464226 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1093 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1093 j) = 277969163 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1093 j) = 277969163 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1094 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1094 j) = 277298408 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1094 j) = 277298408 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1095 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1095 j) = 275805303 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1095 j) = 275805303 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1096 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1096 j) = 275134958 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1096 j) = 275134958 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1097 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1097 j) = 273643816 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1097 j) = 273643816 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1098 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1098 j) = 272973897 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1098 j) = 272973897 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1099 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1099 j) = 271484688 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1099 j) = 271484688 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1100 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1100 j) = 270815178 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1100 j) = 270815178 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1101 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1101 j) = 269327923 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1101 j) = 269327923 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1102 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1102 j) = 268658841 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1102 j) = 268658841 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1103 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1103 j) = 267173483 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1103 j) = 267173483 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1104 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1104 j) = 266504807 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1104 j) = 266504807 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1105 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1105 j) = 265021385 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1105 j) = 265021385 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1106 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1106 j) = 264353117 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1106 j) = 264353117 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1107 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1107 j) = 262871613 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1107 j) = 262871613 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1108 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1108 j) = 262203731 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1108 j) = 262203731 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1109 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1109 j) = 260724119 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1109 j) = 260724119 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1110 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1110 j) = 260056648 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1110 j) = 260056648 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1111 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1111 j) = 258578936 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1111 j) = 258578936 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1112 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1112 j) = 257911853 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1112 j) = 257911853 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1113 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1113 j) = 256436037 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1113 j) = 256436037 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1114 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1114 j) = 255769336 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1114 j) = 255769336 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1115 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1115 j) = 254770756 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1115 j) = 254770756 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1116 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1116 j) = 275007892 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1116 j) = 275007892 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1117 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1117 j) = 275634999 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1117 j) = 275634999 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1118 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1118 j) = 276261449 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1118 j) = 276261449 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1119 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1119 j) = 276058153 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1119 j) = 276058153 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1120 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1120 j) = 276682788 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1120 j) = 276682788 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1121 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1121 j) = 276477479 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1121 j) = 276477479 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1122 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1122 j) = 277100307 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1122 j) = 277100307 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1123 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1123 j) = 276892995 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1123 j) = 276892995 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1124 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1124 j) = 277514057 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1124 j) = 277514057 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1125 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1125 j) = 278134501 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1125 j) = 278134501 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1126 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1126 j) = 277924058 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1126 j) = 277924058 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1127 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1127 j) = 278542722 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1127 j) = 278542722 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1128 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1128 j) = 278330299 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1128 j) = 278330299 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1129 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1129 j) = 278947201 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1129 j) = 278947201 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1130 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1130 j) = 278732812 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1130 j) = 278732812 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1131 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1131 j) = 279347962 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1131 j) = 279347962 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1132 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1132 j) = 279962526 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1132 j) = 279962526 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1133 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1133 j) = 279745001 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1133 j) = 279745001 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1134 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1134 j) = 280357803 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1134 j) = 280357803 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1135 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1135 j) = 280138318 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1135 j) = 280138318 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1136 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1136 j) = 280749377 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1136 j) = 280749377 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1137 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1137 j) = 280527937 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1137 j) = 280527937 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1138 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1138 j) = 281137263 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1138 j) = 281137263 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1139 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1139 j) = 281746006 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1139 j) = 281746006 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1140 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1140 j) = 281521450 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1140 j) = 281521450 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1141 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1141 j) = 282128451 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1141 j) = 282128451 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1142 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1142 j) = 281901971 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1142 j) = 281901971 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1143 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1143 j) = 282507238 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1143 j) = 282507238 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1144 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1144 j) = 282278809 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1144 j) = 282278809 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1145 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1145 j) = 282882361 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1145 j) = 282882361 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1146 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1146 j) = 283485317 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1146 j) = 283485317 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1147 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1147 j) = 283253745 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1147 j) = 283253745 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1148 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1148 j) = 283854923 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1148 j) = 283854923 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1149 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1149 j) = 283621335 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1149 j) = 283621335 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1150 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1150 j) = 284220704 := by decide
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1150 j) = 284220704 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 private theorem lowerTwo_row_1151 :
-    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1151 j) = 283985104 := by decide
-
+    (∑ j ∈ Finset.range 4096, lowerTwoGridWeight 1151 j) = 283985104 := by
+  rw [lowerTwo_row_support_sum]
+  decide +kernel
 /-- Page 51. Exact E2 row block 1088 through 1151. -/
 theorem lowerTwo_rows312_17 :
     (∑ i ∈ Finset.range 64, ∑ j ∈ Finset.range 4096, lowerTwoGridWeight (1088+i) j) = 17601343661 := by
