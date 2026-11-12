@@ -19,6 +19,7 @@ third is a multiplicity identity for square-free integers.
 AI-written Lean code. Checked only by the Lean kernel.
 -/
 import LeanLab.AlmostPrimes.Statements
+import LeanLab.AlmostPrimes.U1437DudekAll
 import LeanLab.ChebyshevExplicit.PiUpperSharp
 
 
@@ -252,8 +253,8 @@ Dudek-type remainder input; it asserts no bound on the number of prime factors o
 remainder. -/
 theorem leaf_squarefree_remainder (N : ℕ) (hEven : Even N) (hN : 4 ≤ N)
     (hsmall : (N : ℝ) ≤ Real.exp (Real.exp 32.73)) :
-    ∃ p m : ℕ, p.Prime ∧ 0 < m ∧ Squarefree m ∧ N = p + m := by
-  sorry
+    ∃ p m : ℕ, p.Prime ∧ 0 < m ∧ Squarefree m ∧ N = p + m :=
+  LeanLab.AlmostPrimes.U1437DudekAll.dudek_even_fast N hEven hN
 
 /-- LEAF 2 of 3, the counting estimate of the small range: a positive integer below
 `exp (exp 32.73)` has at most `exp 29.3` distinct prime factors. The constant is the one obtained
