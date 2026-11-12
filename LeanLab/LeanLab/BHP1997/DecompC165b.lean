@@ -9,6 +9,7 @@ import LeanLab.BHP1997.DecompC165a
 import LeanLab.BHP1997.DecompC165c
 import LeanLab.BHP1997.Decomp414a
 import LeanLab.BHP1997.DecompC165d
+import LeanLab.BHP1997.Decomp312b
 import LeanLab.BHP1997.Decomp132
 import LeanLab.BHP1997.Thm2Sing
 import LeanLab.BHP1997.Characters132
@@ -760,7 +761,12 @@ dimensional losses with their actual multiplicities to the upper density.
 Lemma 28 supplies the decomposition ranges. The five dimensional integral has
 a certified conservative envelope above. The seven dimensional certificate and
 the analytic distribution estimates remain OPEN.
-The rough support clause is omitted here because it is proved separately. OPEN. -/
+The rough support clause is omitted here because it is proved separately.
+CONDITIONAL, burst2 2026-11-12: the proof now cites the exact twin
+Decomp312b.section4_upper_sifted_data, which splits this step along the paper
+into the upper supply Decomp312b.upper_mean_value_supply, pages 41 and 42, and
+the Lemma 11 Perron transfer Decomp312a.perron_transfer, pages 24 and 25.
+Those inputs remain OPEN. -/
 theorem section4_upper_sifted_data (h4 : Thm4.Theorem4Paper) :
     ∃ B0 η : ℝ, 0 < η ∧ ∀ B ε : ℝ, B0 ≤ B → 0 < ε → ε < η →
       ∃ (u1 : ℝ) (c1 : ℝ → ℕ → ℝ),
@@ -776,7 +782,7 @@ theorem section4_upper_sifted_data (h4 : Thm4.Theorem4Paper) :
           C * ((k.divisors.card : ℕ) : ℝ) ^ B) ∧
         ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
           ∀ k ∈ leftInterval ε x, primeWeight k ≤ section4SiftedFamily c1 x k := by
-  sorry
+  exact Decomp312b.section4_upper_sifted_data h4
 
 /-- Page 27, nonempty consistency certificate for 4.14. -/
 theorem buchstab_nonempty_instance :
