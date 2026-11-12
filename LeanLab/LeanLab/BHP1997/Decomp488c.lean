@@ -9,10 +9,209 @@ namespace LeanLab.BHP1997.DecompC165a.Contour230
 open Classical Complex MeanValue132 MeasureTheory Set Filter
 open scoped Topology
 
-/-- LEAF. Page 22, horizontal segment estimate before display 3.36.
+/-- LEAF. P0069 Baker Harman Pintz 1997, page 22, Lemma 8 as it is used in the
+horizontal display before 3.36: the exponent is taken at epsilon equal to the
+reciprocal of log x, so that the maximum reads (qT)^(c - sigma) with c equal to
+1/2 + 1/log x. The uniformity in epsilon costs one factor log x, the zeta value at
+one plus epsilon in Rademacher reference 28. The safe height keeps the pole term
+bounded. CITED and OPEN. -/
+theorem horizontal_convexity_input :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x → ∀ (q : ℕ) [NeZero q], 1 ≤ q → (q : ℝ) ≤ x →
+      ∀ χ : DirichletCharacter ℂ q, ∀ σ τ : ℝ, 0 ≤ σ → σ ≤ 1 / 2 + 1 / Real.log x →
+        1 / 4 ≤ |τ| → |τ| ≤ 2 * x →
+        ‖χ.LFunction (((1 / 2 + σ : ℝ) : ℂ) + τ * I)‖ ≤
+          C * Real.log x *
+            (((q : ℝ) * (|τ| + 1)) ^ (1 / 2 + 1 / Real.log x - σ) + 1) := by
+  sorry
+
+/-- P0069 Baker Harman Pintz 1997, page 22, the maximum over sigma in [0, c] in the
+horizontal display before 3.36. The product is log-convex in sigma, so it is
+bounded by its two endpoint values. -/
+theorem horizontal_endpoint_max {Y Z c σ : ℝ} (hY : 1 ≤ Y) (hZ : 1 ≤ Z)
+    (hσ0 : 0 ≤ σ) (hσc : σ ≤ c) :
+    Y ^ (c - σ) * Z ^ σ ≤ Y ^ c + Z ^ c := by
+  have hY0 : 0 < Y := by linarith
+  have hZ0 : 0 < Z := by linarith
+  rcases le_total Y Z with h | h
+  · have h1 : Y ^ (c - σ) ≤ Z ^ (c - σ) :=
+      Real.rpow_le_rpow hY0.le h (by linarith)
+    have h2 : Z ^ (c - σ) * Z ^ σ = Z ^ c := by
+      rw [← Real.rpow_add hZ0]; ring_nf
+    have h3 : 0 ≤ Y ^ c := Real.rpow_nonneg hY0.le _
+    have h4 : 0 ≤ Z ^ σ := Real.rpow_nonneg hZ0.le _
+    nlinarith [mul_le_mul_of_nonneg_right h1 h4]
+  · have h1 : Z ^ σ ≤ Y ^ σ := Real.rpow_le_rpow hZ0.le h hσ0
+    have h2 : Y ^ (c - σ) * Y ^ σ = Y ^ c := by
+      rw [← Real.rpow_add hY0]; ring_nf
+    have h3 : 0 ≤ Z ^ c := Real.rpow_nonneg hZ0.le _
+    have h4 : 0 ≤ Y ^ (c - σ) := Real.rpow_nonneg hY0.le _
+    nlinarith [mul_le_mul_of_nonneg_left h1 h4]
+
+/-- P0069 Baker Harman Pintz 1997, page 22, the endpoint evaluation in the
+horizontal display before 3.36: with c equal to 1/2 + 1/log x, any quantity at
+most a fixed power of x loses only a bounded factor against its square root. -/
+theorem log_scale_power_le {x Y : ℝ} (hx : 2 ≤ x) (hY : 0 < Y) (hYx : Y ≤ x ^ 4) :
+    Y ^ (1 / 2 + 1 / Real.log x) ≤ Real.exp 4 * Real.sqrt Y := by
+  have hL : 0 < Real.log x := Real.log_pos (by linarith)
+  rw [Real.rpow_add hY, Real.sqrt_eq_rpow, mul_comm]
+  apply mul_le_mul_of_nonneg_right _ (Real.rpow_nonneg hY.le _)
+  rw [Real.rpow_def_of_pos hY]
+  apply Real.exp_le_exp.mpr
+  have hlog : Real.log Y ≤ 4 * Real.log x := by
+    have := Real.log_le_log hY hYx
+    rwa [Real.log_pow, Nat.cast_ofNat] at this
+  rw [mul_one_div, div_le_iff₀ hL]
+  exact hlog
+
+/-- P0069 Baker Harman Pintz 1997, page 22, the horizontal display before 3.36,
+pointwise form. On either horizontal side at the safe height, the integrand is
+bounded by log x times q^(1/2) T^(-1/2) + N^(1/2) T^(-1). This combines the cited
+strip bound with the kernel bound, the maximum over sigma and the endpoint
+evaluation. CONDITIONAL on horizontal_convexity_input. -/
+theorem horizontal_pointwise_bound :
+    ∃ K : ℝ, 0 < K ∧ ∀ x N T : ℝ, ∀ (q : ℕ) [NeZero q],
+      ∀ χ : DirichletCharacter ℂ q, ∀ t σ u : ℝ,
+      2 ≤ x → 2 ≤ N → N ≤ x → 2 ≤ T → T ≤ x → 1 ≤ q → (q : ℝ) ≤ x → |t| ≤ T →
+      0 ≤ σ → σ ≤ 1 / 2 + 1 / Real.log x → |u| = height T t →
+        ‖integrand ((⌊N⌋₊ : ℝ) + 1 / 2) (1 / 2) χ t ((σ : ℂ) + u * I)‖ ≤
+          K * Real.log x * (Real.sqrt q / Real.sqrt T + Real.sqrt N / T) := by
+  obtain ⟨C, hC, hL⟩ := horizontal_convexity_input
+  refine ⟨24 * C * Real.exp 4, by positivity, ?_⟩
+  intro x N T q _ χ t σ u hx hN hNx hT hTx hq hqx ht hσ0 hσc hu
+  obtain ⟨hHc, hH1, hHT, hm, hp⟩ := height_spec (t := t) hT
+  have hHlow : T / 2 ≤ height T t := by rcases hHc with h | h <;> linarith
+  have hH0 : 0 < height T t := by linarith
+  have hlog : 0 < Real.log x := Real.log_pos (by linarith)
+  have hT0 : 0 < T := by linarith
+  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  -- the imaginary part on the side
+  have hτlow : 1 / 4 ≤ |t + u| := by
+    rcases (abs_eq hH0.le).mp hu with h | h
+    · rw [h]; exact hp
+    · rw [h, ← sub_eq_add_neg]; exact hm
+  have hτup : |t + u| ≤ 2 * T := by
+    have := abs_add_le t u
+    linarith
+  have hLb := hL x hx q hq hqx χ σ (t + u) hσ0 hσc hτlow (by linarith)
+  have he : Thm4.half t + ((σ : ℂ) + u * I) =
+      (((1 / 2 + σ : ℝ) : ℂ) + ((t + u : ℝ) : ℂ) * I) := by
+    unfold Thm4.half
+    push_cast
+    ring
+  -- the kernel
+  obtain ⟨ha2, haN, -⟩ := half_endpoint_bounds N hN
+  set a : ℝ := (⌊N⌋₊ : ℝ) + 1 / 2 with ha
+  have ha0 : 0 < a := by linarith
+  have hu0 : u ≠ 0 := by
+    intro h0; rw [h0, abs_zero] at hu; linarith
+  have hn : |u| ≤ ‖((σ : ℂ) + u * I)‖ := by
+    simpa using Complex.abs_im_le_norm ((σ : ℂ) + u * I)
+  have hz : ((σ : ℂ) + u * I) ≠ 0 :=
+    norm_pos_iff.mp ((abs_pos.mpr hu0).trans_le hn)
+  have hk := kernel_strip_bound a (1 / 2) hz
+  have hk' : ‖kernel a (1 / 2) ((σ : ℂ) + u * I)‖ ≤
+      (Real.exp (Real.log a * σ) + Real.exp (Real.log (1 / 2) * σ)) / |u| := by
+    apply hk.trans
+    simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re,
+      mul_zero, Complex.ofReal_im, Complex.I_im, zero_mul, sub_self, add_zero]
+    exact div_le_div_of_nonneg_left (by positivity) (abs_pos.mpr hu0) hn
+  rw [← Real.rpow_def_of_pos ha0, hu] at hk'
+  have hhalf : Real.exp (Real.log (1 / 2) * σ) ≤ 1 := by
+    rw [Real.exp_le_one_iff]
+    have : Real.log (1 / 2) < 0 := Real.log_neg (by norm_num) (by norm_num)
+    nlinarith
+  have haσ : 1 ≤ a ^ σ := Real.one_le_rpow (by linarith) hσ0
+  have hK2 : ‖kernel a (1 / 2) ((σ : ℂ) + u * I)‖ ≤ 2 * a ^ σ / height T t := by
+    apply hk'.trans
+    apply div_le_div_of_nonneg_right _ hH0.le
+    linarith
+  -- the maximum over sigma and the endpoints
+  set c : ℝ := 1 / 2 + 1 / Real.log x with hc
+  set Y : ℝ := (q : ℝ) * (|t + u| + 1) with hY
+  have hY1 : 1 ≤ Y := by
+    have : 1 ≤ |t + u| + 1 := by linarith [abs_nonneg (t + u)]
+    nlinarith only [this, hq1]
+  have hY3 : Y ≤ 3 * q * T := by
+    have : |t + u| + 1 ≤ 3 * T := by linarith
+    have := mul_le_mul_of_nonneg_left this (by linarith : (0 : ℝ) ≤ q)
+    linarith
+  have hx4 : 3 * x * x ≤ x ^ 4 := by
+    have hs : 4 ≤ x * x := by nlinarith only [hx]
+    have h4 : x ^ 4 = (x * x) * (x * x) := by ring
+    rw [h4]; nlinarith only [hs, hx]
+  have hYx : Y ≤ x ^ 4 := by
+    have : (q : ℝ) * T ≤ x * x := mul_le_mul hqx hTx hT0.le (by linarith)
+    linarith
+  have hax : a ≤ x ^ 4 := by
+    have : x + 1 / 2 ≤ 3 * x * x := by nlinarith only [hx]
+    linarith only [this, hx4, haN, hNx]
+  have hYc : Y ^ c ≤ Real.exp 4 * (2 * Real.sqrt q * Real.sqrt T) := by
+    apply (log_scale_power_le hx (by linarith) hYx).trans
+    apply mul_le_mul_of_nonneg_left _ (Real.exp_pos 4).le
+    calc Real.sqrt Y ≤ Real.sqrt (3 * q * T) := Real.sqrt_le_sqrt hY3
+      _ = Real.sqrt 3 * Real.sqrt q * Real.sqrt T := by
+        rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity)]
+      _ ≤ 2 * Real.sqrt q * Real.sqrt T := by
+        have h3 : Real.sqrt 3 ≤ 2 := by
+          rw [Real.sqrt_le_left (by norm_num)]; norm_num
+        have := mul_le_mul_of_nonneg_right h3
+          (mul_nonneg (Real.sqrt_nonneg (q : ℝ)) (Real.sqrt_nonneg T))
+        linarith
+  have hac : a ^ c ≤ Real.exp 4 * (2 * Real.sqrt N) := by
+    apply (log_scale_power_le hx ha0 hax).trans
+    apply mul_le_mul_of_nonneg_left _ (Real.exp_pos 4).le
+    calc Real.sqrt a ≤ Real.sqrt (2 * N) := Real.sqrt_le_sqrt (by linarith)
+      _ = Real.sqrt 2 * Real.sqrt N := Real.sqrt_mul (by norm_num) _
+      _ ≤ 2 * Real.sqrt N := by
+        have h2 : Real.sqrt 2 ≤ 2 := by
+          rw [Real.sqrt_le_left (by norm_num)]; norm_num
+        exact mul_le_mul_of_nonneg_right h2 (Real.sqrt_nonneg N)
+  have hσc' : a ^ σ ≤ a ^ c := Real.rpow_le_rpow_of_exponent_le (by linarith) hσc
+  have hmax := horizontal_endpoint_max hY1 (by linarith : 1 ≤ a) hσ0 hσc
+  have hE : (Y ^ (c - σ) + 1) * a ^ σ ≤
+      Real.exp 4 * (2 * Real.sqrt q * Real.sqrt T) + 2 * (Real.exp 4 * (2 * Real.sqrt N)) := by
+    have hYc0 : 0 ≤ Y ^ c := Real.rpow_nonneg (by linarith) _
+    nlinarith only [hmax, hσc', hYc, hac, hYc0]
+  -- the product
+  have hprod : ‖integrand a (1 / 2) χ t ((σ : ℂ) + u * I)‖ ≤
+      C * Real.log x * (2 * ((Y ^ (c - σ) + 1) * a ^ σ)) / height T t := by
+    unfold integrand
+    rw [norm_mul, he]
+    have hP0 : 0 ≤ C * Real.log x * (Y ^ (c - σ) + 1) := by positivity
+    calc _ ≤ C * Real.log x * (Y ^ (c - σ) + 1) * (2 * a ^ σ / height T t) :=
+          mul_le_mul hLb hK2 (norm_nonneg _) hP0
+      _ = _ := by ring
+  apply hprod.trans
+  rw [div_le_iff₀ hH0]
+  have hA : (Real.sqrt q / Real.sqrt T + Real.sqrt N / T) * T =
+      Real.sqrt q * Real.sqrt T + Real.sqrt N := by
+    rw [add_mul, div_mul_eq_mul_div, mul_div_assoc, Real.div_sqrt,
+      div_mul_cancel₀ _ hT0.ne']
+  have hA0 : 0 ≤ Real.sqrt q / Real.sqrt T + Real.sqrt N / T := by positivity
+  have hCl : 0 ≤ C * Real.log x := by positivity
+  have hstep : 24 * C * Real.exp 4 * Real.log x *
+      (Real.sqrt q / Real.sqrt T + Real.sqrt N / T) * (T / 2) ≤
+      24 * C * Real.exp 4 * Real.log x *
+      (Real.sqrt q / Real.sqrt T + Real.sqrt N / T) * height T t :=
+    mul_le_mul_of_nonneg_left hHlow (by positivity)
+  have hid : 24 * C * Real.exp 4 * Real.log x *
+      (Real.sqrt q / Real.sqrt T + Real.sqrt N / T) * (T / 2) =
+      12 * (C * Real.log x) * Real.exp 4 * (Real.sqrt q * Real.sqrt T + Real.sqrt N) := by
+    rw [← hA]; ring
+  have hE' := mul_le_mul_of_nonneg_left hE hCl
+  have hsq : 0 ≤ Real.sqrt q * Real.sqrt T := by positivity
+  have hsN : 0 ≤ Real.sqrt N := Real.sqrt_nonneg N
+  have he4 : 0 < Real.exp 4 := Real.exp_pos 4
+  have hm1 : 0 ≤ C * Real.log x * Real.exp 4 * (Real.sqrt q * Real.sqrt T) := by positivity
+  have hm2 : 0 ≤ C * Real.log x * Real.exp 4 * Real.sqrt N := by positivity
+  nlinarith only [hstep, hid, hE', hm1, hm2]
+
+/-- Page 22, horizontal segment estimate before display 3.36.
 Subtracting the normalized rectangle integral removes the residue exactly.
 The remaining difference is the two horizontal integrals at the safe height.
-This is the uniform analytic input from Lemma 8. CITED and OPEN. -/
+Split in burst 2: proved from horizontal_pointwise_bound by the length estimate
+on each side. The binder h8 is no longer used. CONDITIONAL on
+horizontal_convexity_input, the uniform form of Lemma 8. -/
 theorem safe_height_horizontal_bound (h8 : MeanValue132.Lemma8) :
     ∃ C : ℝ, 0 < C ∧ ∀ x N T : ℝ, ∀ (q : ℕ) [NeZero q],
       ∀ χ : DirichletCharacter ℂ q, ∀ t : ℝ,
@@ -27,7 +226,56 @@ theorem safe_height_horizontal_bound (h8 : MeanValue132.Lemma8) :
               ((σ : ℂ) + height T t * I)))‖ ≤
           C * Real.log x * (Real.sqrt q / Real.sqrt T) +
           C * Real.log x * (Real.sqrt N / T) := by
-  sorry
+  obtain ⟨K, hK, hpt⟩ := horizontal_pointwise_bound
+  refine ⟨K, hK, ?_⟩
+  intro x N T q _ χ t hx hN hNx hT hTx hq hqx ht
+  have hlog : 0 < Real.log x := Real.log_pos (by linarith)
+  have hc0 : 0 ≤ 1 / 2 + 1 / Real.log x := by positivity
+  have hc2 : 1 / 2 + 1 / Real.log x ≤ 2 := by
+    have h2 := Real.log_two_gt_d9
+    have hl : Real.log 2 ≤ Real.log x := Real.log_le_log (by norm_num) hx
+    have hi : 1 / Real.log x ≤ 1 / (0.6931471803 : ℝ) :=
+      one_div_le_one_div_of_le (by norm_num) (by linarith)
+    have : 1 / (0.6931471803 : ℝ) ≤ 3 / 2 := by norm_num
+    linarith
+  have hH0 : 0 ≤ height T t := by linarith [(height_spec (t := t) hT).2.1]
+  set M := K * Real.log x * (Real.sqrt q / Real.sqrt T + Real.sqrt N / T) with hM
+  have hM0 : 0 ≤ M := by positivity
+  have h1 : ‖∫ σ in (0 : ℝ)..(1 / 2 + 1 / Real.log x),
+      integrand ((⌊N⌋₊ : ℝ) + 1 / 2) (1 / 2) χ t ((σ : ℂ) - height T t * I)‖ ≤
+      M * |1 / 2 + 1 / Real.log x - 0| := by
+    apply intervalIntegral.norm_integral_le_of_norm_le_const
+    intro σ hσ
+    rw [Set.uIoc_of_le hc0] at hσ
+    have he : (σ : ℂ) - height T t * I = (σ : ℂ) + ((-height T t : ℝ) : ℂ) * I := by
+      push_cast; ring
+    rw [he]
+    exact hpt x N T q χ t σ (-height T t) hx hN hNx hT hTx hq hqx ht hσ.1.le hσ.2
+      (by rw [abs_neg, abs_of_nonneg hH0])
+  have h2 : ‖∫ σ in (0 : ℝ)..(1 / 2 + 1 / Real.log x),
+      integrand ((⌊N⌋₊ : ℝ) + 1 / 2) (1 / 2) χ t ((σ : ℂ) + height T t * I)‖ ≤
+      M * |1 / 2 + 1 / Real.log x - 0| := by
+    apply intervalIntegral.norm_integral_le_of_norm_le_const
+    intro σ hσ
+    rw [Set.uIoc_of_le hc0] at hσ
+    exact hpt x N T q χ t σ (height T t) hx hN hNx hT hTx hq hqx ht hσ.1.le hσ.2
+      (abs_of_nonneg hH0)
+  rw [sub_zero, abs_of_nonneg hc0] at h1 h2
+  have hcM : M * (1 / 2 + 1 / Real.log x) ≤ M * 2 := mul_le_mul_of_nonneg_left hc2 hM0
+  have hnorm : ‖(1 / (2 * (Real.pi : ℂ) * I))‖ = 1 / (2 * Real.pi) := by
+    simp [abs_of_pos Real.pi_pos]
+  rw [norm_mul, hnorm]
+  have hsub := norm_sub_le
+    (∫ σ in (0 : ℝ)..(1 / 2 + 1 / Real.log x),
+      integrand ((⌊N⌋₊ : ℝ) + 1 / 2) (1 / 2) χ t ((σ : ℂ) - height T t * I))
+    (∫ σ in (0 : ℝ)..(1 / 2 + 1 / Real.log x),
+      integrand ((⌊N⌋₊ : ℝ) + 1 / 2) (1 / 2) χ t ((σ : ℂ) + height T t * I))
+  have hpi : 0 < 2 * Real.pi := by positivity
+  have hpi3 : 3 < Real.pi := Real.pi_gt_three
+  rw [show K * Real.log x * (Real.sqrt q / Real.sqrt T) +
+      K * Real.log x * (Real.sqrt N / T) = M by rw [hM]; ring]
+  rw [one_div, inv_mul_le_iff₀ hpi]
+  nlinarith
 
 /-- Page 22, the rectangle bookkeeping before display 3.36.
 The right line minus the left line minus the rectangle is the negative horizontal part. -/
