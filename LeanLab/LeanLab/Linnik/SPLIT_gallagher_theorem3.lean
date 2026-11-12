@@ -43,7 +43,8 @@ theorem split_exceptional_radius_select :
       ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
         ∃ r : ℕ,
           (r = 0 ∨ ∃ x ∈ excSet exceptionalStrip (((N : ℝ) ^ θ) ^ 5), r = x.1 + 1) := by
-  sorry
+  intro _ _ _ _ _ _
+  exact ⟨0, fun _ _ => ⟨0, Or.inl rfl⟩⟩
 
 /-- LEAF. The exceptional conductor is smaller than the scale. A member of the
 exceptional set at height `(N ^ θ) ^ 5`, with `θ` in `(0, 1]`, has conductor one more
