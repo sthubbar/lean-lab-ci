@@ -57,7 +57,177 @@ theorem zero_family_card_bound481 (hdensity : JutilaStatement481)
         (∀ w, (univ.filter (fun i => i ≠ 0 ∧ z i = w)).card ≤
           analyticOrderNatAt (Lfun481 w.2.1) w.2.2) →
         (K : ℝ) ≤ C₀ * Real.exp (4 * H) := by
-  sorry
+  obtain ⟨C₀, hC₀, hdens⟩ := hdensity
+  refine ⟨C₀, hC₀, fun H T hH hT => ?_⟩
+  obtain ⟨X₁, hX₁⟩ : ∃ X₁ : ℕ, ∀ X : ℕ, X₁ ≤ X → T ≤ (X : ℝ) ^ ((2 : ℝ) / 5) := by
+    refine ⟨⌈(T + 1) ^ ((5 : ℝ) / 2)⌉₊ + 1, fun X hX => ?_⟩
+    have hpos : (0 : ℝ) < T + 1 := by linarith
+    have hM : (0 : ℝ) ≤ (T + 1) ^ ((5 : ℝ) / 2) := Real.rpow_nonneg hpos.le _
+    have hXM : (T + 1) ^ ((5 : ℝ) / 2) ≤ (X : ℝ) := by
+      have h1 : ⌈(T + 1) ^ ((5 : ℝ) / 2)⌉₊ ≤ X := by omega
+      exact le_trans (Nat.le_ceil _) (by exact_mod_cast h1)
+    have h1 : ((T + 1) ^ ((5 : ℝ) / 2)) ^ ((2 : ℝ) / 5) ≤ (X : ℝ) ^ ((2 : ℝ) / 5) :=
+      Real.rpow_le_rpow hM hXM (by norm_num)
+    have h2 : ((T + 1) ^ ((5 : ℝ) / 2)) ^ ((2 : ℝ) / 5) = T + 1 := by
+      rw [← Real.rpow_mul hpos.le]
+      norm_num
+    rw [h2] at h1
+    linarith
+  obtain ⟨X₂, hX₂⟩ := hdens H T hH hT
+  refine ⟨max (max X₁ 2) X₂, fun X hX P hP => ?_⟩
+  have hX1 : X₁ ≤ X := by omega
+  have hX2 : 2 ≤ X := by omega
+  have hX3 : X₂ ≤ X := by omega
+  obtain ⟨hPlow, hPhigh⟩ := hP
+  have hTP : T ≤ P := le_trans (hX₁ X hX1) hPlow
+  have hPX : P ≤ Real.sqrt X := by
+    refine le_trans hPhigh ?_
+    have h1 : (X : ℝ) ^ ((41 : ℝ) / 100) ≤ (X : ℝ) ^ ((1 : ℝ) / 2) := by
+      rw [Real.rpow_le_rpow_left_iff (by exact_mod_cast (by omega : 1 < X))]
+      norm_num
+    rwa [Real.sqrt_eq_rpow]
+  intro K z hz01 hz0s hbox hmult
+  set F : Finset (Σ r : ℕ, DirichletCharacter ℂ r × ℂ) :=
+    (univ.erase (0 : Fin (K + 1))).image z with hF
+  have hFbox : ∀ w ∈ F, w ∈ zeroBox481 X H T P := by
+    intro w hw
+    rw [hF] at hw
+    obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hw
+    exact hbox i (Finset.mem_erase.mp hi).1
+  have hdensF := hX₂ X hX3 P hTP hPX F hFbox
+  have hcard_le : ∀ w, (univ.filter (fun i : Fin K => z i.succ = w)).card
+      ≤ (univ.filter (fun i : Fin (K + 1) => i ≠ 0 ∧ z i = w)).card := by
+    intro w
+    calc (univ.filter (fun i : Fin K => z i.succ = w)).card
+        = ((univ.filter (fun i : Fin K => z i.succ = w)).image
+            (Fin.succ : Fin K → Fin (K + 1))).card :=
+          (Finset.card_image_of_injective _ (Fin.succ_injective K)).symm
+      _ ≤ (univ.filter (fun i : Fin (K + 1) => i ≠ 0 ∧ z i = w)).card := by
+          refine Finset.card_le_card ?_
+          intro b hb
+          obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hb
+          rw [Finset.mem_filter] at hi ⊢
+          exact ⟨Finset.mem_univ _, Fin.succ_ne_zero i, hi.2⟩
+  have hsub : (univ : Finset (Fin K)).image (fun i => z i.succ) ⊆ F := by
+    intro w hw
+    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hw
+    rw [hF]
+    exact Finset.mem_image.mpr
+      ⟨Fin.succ i, Finset.mem_erase.mpr ⟨Fin.succ_ne_zero i, Finset.mem_univ _⟩, rfl⟩
+  have hsum_le : ∑ w ∈ (univ : Finset (Fin K)).image (fun i => z i.succ),
+        (analyticOrderNatAt (Lfun481 w.2.1) w.2.2 : ℝ)
+      ≤ ∑ w ∈ F, (analyticOrderNatAt (Lfun481 w.2.1) w.2.2 : ℝ) :=
+    Finset.sum_le_sum_of_subset_of_nonneg hsub (fun x _ _ => Nat.cast_nonneg _)
+  have hK := hcount (fun i : Fin K => z i.succ) (fun w => (hcard_le w).trans (hmult w))
+  linarith
+
+/-- `1 - 1/(m-1)^2` lies in `[0,1]` for `m ≥ 3`. -/
+private lemma factor_bounds481 {m : ℕ} (hm : 3 ≤ m) :
+    0 ≤ 1 - 1 / ((m : ℝ) - 1) ^ 2 ∧ 1 - 1 / ((m : ℝ) - 1) ^ 2 ≤ 1 := by
+  have h3 : (3 : ℝ) ≤ m := by exact_mod_cast hm
+  have h2 : (2 : ℝ) ≤ (m : ℝ) - 1 := by linarith
+  have h4 : (4 : ℝ) ≤ ((m : ℝ) - 1) ^ 2 := by nlinarith
+  constructor
+  · rw [sub_nonneg, div_le_one (by positivity)]
+    linarith
+  · have h : 0 ≤ 1 / ((m : ℝ) - 1) ^ 2 := by positivity
+    linarith
+
+/-- The Euler product of `1 - 1/(m-1)^2` telescopes. -/
+private lemma telescope_prod481 (M : ℕ) (hM : 2 ≤ M) :
+    ∏ m ∈ Icc 3 M, (1 - 1 / ((m : ℝ) - 1) ^ 2) = (M : ℝ) / (2 * ((M : ℝ) - 1)) := by
+  induction M, hM using Nat.le_induction with
+  | base => norm_num
+  | succ M hM ih =>
+    rw [prod_Icc_succ_top (by omega), ih]
+    have hM1 : (1 : ℝ) < (M : ℝ) := by exact_mod_cast hM
+    have hM0 : (M : ℝ) ≠ 0 := by linarith
+    have hM0' : (M : ℝ) - 1 ≠ 0 := by linarith
+    push_cast
+    rw [add_sub_cancel_right]
+    field_simp
+    ring
+
+/-- The singular series factor dominates `1 - 1/(p-1)^2` at every prime. -/
+private lemma singF_ge_factor481 (n : ℕ) (p : {p : ℕ // p.Prime}) :
+    1 - 1 / ((p.1 : ℝ) - 1) ^ 2 ≤ singF n p := by
+  obtain ⟨m, hm⟩ := p
+  unfold singF
+  split_ifs with h
+  · have hm2 : (2 : ℝ) ≤ m := by exact_mod_cast hm.two_le
+    have hpos : 0 < (m : ℝ) - 1 := by linarith
+    have hge : (1 : ℝ) ≤ (m : ℝ) / ((m : ℝ) - 1) := by
+      rw [le_div_iff₀ hpos]
+      linarith
+    have hnn : 0 ≤ 1 / ((m : ℝ) - 1) ^ 2 := by positivity
+    linarith
+  · exact le_refl _
+
+/-- At the prime two an even `n` gives the factor `2`. -/
+private lemma singF_two481 {n : ℕ} (h2 : 2 ∣ n) :
+    singF n ⟨2, Nat.prime_two⟩ = 2 := by
+  have h2' : (⟨2, Nat.prime_two⟩ : {p : ℕ // p.Prime}).1 = 2 := rfl
+  unfold singF
+  rw [if_pos h2]
+  norm_num
+
+/-- Every finite subproduct of the singular series factors of an even `n` is at least `1/2`. -/
+private lemma prod_singF_ge_half481 {n : ℕ} (h2n : 2 ∣ n)
+    (s : Finset {p : ℕ // p.Prime}) :
+    (1 / 2 : ℝ) ≤ ∏ p ∈ s, singF n p := by
+  classical
+  set T := s.erase ⟨2, Nat.prime_two⟩ with hT
+  set M : ℕ := max 3 (∑ p ∈ s, p.1) with hM
+  have hM3 : 3 ≤ M := le_max_left _ _
+  have hstep1 : (1 / 2 : ℝ) ≤ ∏ m ∈ Icc 3 M, (1 - 1 / ((m : ℝ) - 1) ^ 2) := by
+    rw [telescope_prod481 M (by omega)]
+    have hM3' : (2 : ℝ) ≤ (M : ℝ) - 1 := by
+      have : (3 : ℝ) ≤ M := by exact_mod_cast hM3
+      linarith
+    rw [le_div_iff₀ (by positivity)]
+    linarith
+  have hTsub : T.image (fun p : {p : ℕ // p.Prime} => (p.1 : ℕ)) ⊆ Icc 3 M := by
+    intro m hm
+    obtain ⟨p, hp, rfl⟩ := Finset.mem_image.mp hm
+    rw [hT, Finset.mem_erase] at hp
+    obtain ⟨hp2, hps⟩ := hp
+    have hp2' : p.1 ≠ 2 := fun h => hp2 (Subtype.ext h)
+    have hpge : 3 ≤ p.1 := by
+      have h2le : 2 ≤ p.1 := p.2.two_le
+      omega
+    have hle : p.1 ≤ ∑ q ∈ s, q.1 :=
+      Finset.single_le_sum (f := fun q => q.1) (fun _ _ => Nat.zero_le _) hps
+    exact Finset.mem_Icc.mpr ⟨hpge, le_trans hle (le_max_right _ _)⟩
+  have hstep2 : ∏ m ∈ Icc 3 M, (1 - 1 / ((m : ℝ) - 1) ^ 2)
+      ≤ ∏ m ∈ T.image (fun p : {p : ℕ // p.Prime} => (p.1 : ℕ)), (1 - 1 / ((m : ℝ) - 1) ^ 2) :=
+    Finset.prod_le_prod_of_subset_of_le_one₀ hTsub
+      (fun m hm => (factor_bounds481 (Finset.mem_Icc.mp hm).1).1)
+      (fun m hm _ => (factor_bounds481 (Finset.mem_Icc.mp hm).1).2)
+  have hstep3 : ∏ m ∈ T.image (fun p : {p : ℕ // p.Prime} => (p.1 : ℕ)), (1 - 1 / ((m : ℝ) - 1) ^ 2)
+      = ∏ p ∈ T, (1 - 1 / ((p.1 : ℝ) - 1) ^ 2) := by
+    rw [Finset.prod_image]
+    intro p _ q _ hpq
+    exact Subtype.ext hpq
+  have hstep4 : ∏ p ∈ T, (1 - 1 / ((p.1 : ℝ) - 1) ^ 2)
+      ≤ ∏ p ∈ T, singF n p :=
+    Finset.prod_le_prod₀
+      (fun p hp => (factor_bounds481 (Finset.mem_Icc.mp
+        (hTsub (Finset.mem_image_of_mem (fun p : {p : ℕ // p.Prime} => (p.1 : ℕ)) hp))).1).1)
+      (fun p _ => singF_ge_factor481 n p)
+  have hstep5 : ∏ p ∈ T, singF n p ≤ ∏ p ∈ s, singF n p := by
+    by_cases hmem : (⟨2, Nat.prime_two⟩ : {p : ℕ // p.Prime}) ∈ s
+    · have hins : s = insert ⟨2, Nat.prime_two⟩ T := by
+        rw [hT, Finset.insert_erase hmem]
+      rw [hins, Finset.prod_insert (Finset.notMem_erase _ _), singF_two481 h2n]
+      have h0 : 0 ≤ ∏ p ∈ T, singF n p := Finset.prod_nonneg (fun p _ => singF_nonneg131 n p)
+      linarith
+    · have : s = T := by rw [hT, Finset.erase_eq_of_notMem hmem]
+      rw [this]
+  calc (1 / 2 : ℝ) ≤ ∏ m ∈ Icc 3 M, (1 - 1 / ((m : ℝ) - 1) ^ 2) := hstep1
+    _ ≤ ∏ m ∈ T.image (fun p : {p : ℕ // p.Prime} => (p.1 : ℕ)), (1 - 1 / ((m : ℝ) - 1) ^ 2) := hstep2
+    _ = ∏ p ∈ T, (1 - 1 / ((p.1 : ℝ) - 1) ^ 2) := hstep3
+    _ ≤ ∏ p ∈ T, singF n p := hstep4
+    _ ≤ ∏ p ∈ s, singF n p := hstep5
 
 /-- LEAF. Page 2, display 2: for even `n` the singular series is `2 c_0` times a product of
 factors `(p - 1) / (p - 2)` over odd primes `p` dividing `n`, each at least one, so it is at least
@@ -67,7 +237,15 @@ no lower bound for the singular series; the earlier citation of that paragraph w
 corrected by architect U-1649. Only positivity, not any asymptotic, is used by the reduction. -/
 theorem singular_series_lower481 :
     ∃ s₀ : ℝ, 0 < s₀ ∧ ∀ (X n : ℕ), n ∈ evenJ131 X → s₀ ≤ Sing n := by
-  sorry
+  refine ⟨1 / 2, by norm_num, fun X n hn => ?_⟩
+  have hev : Even n := (Finset.mem_filter.mp hn).2.1
+  have h2n : 2 ∣ n := even_iff_two_dvd.mp hev
+  have hS : Sing n = ∏' p : {p : ℕ // p.Prime}, singF n p := rfl
+  rw [hS]
+  by_cases hm : Multipliable (fun p : {p : ℕ // p.Prime} => singF n p)
+  · exact ge_of_tendsto' hm.hasProd (fun s => prod_singF_ge_half481 h2n s)
+  · rw [tprod_eq_one_of_not_multipliable hm]
+    norm_num
 
 /-- LEAF. Page 6, the choice of the parameters: the height and the frequency cut-off can be
 taken large enough that the uniform remainder of Lemma 4.1 is below `η s₀ / 2`, and then the
@@ -81,7 +259,156 @@ theorem absorption_constants481 (c B ε₀ s₀ C₀ η H₀ T₀ : ℝ)
     ∃ H T ε : ℝ, H₀ ≤ H ∧ 1 ≤ H ∧ T₀ ≤ T ∧ 1 ≤ T ∧ 0 < ε ∧ ε < ε₀ ∧
       2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T) ≤ η * s₀ / 2 ∧
       (C₀ * Real.exp (4 * H) + 2) ^ 2 * Real.pi * ε ≤ η * s₀ / 2 := by
-  sorry
+  have hquarter : 0 < η * s₀ / 4 := by
+    have h := mul_pos hη hs₀
+    linarith
+  have hhalf : 0 < η * s₀ / 2 := by
+    have h := mul_pos hη hs₀
+    linarith
+  have hexpH : Filter.Tendsto (fun H : ℝ => Real.exp (-c * H)) Filter.atTop (nhds 0) := by
+    have hcH : Filter.Tendsto (fun H : ℝ => c * H) Filter.atTop Filter.atTop :=
+      (Filter.tendsto_const_mul_atTop_of_pos (f := fun H : ℝ => H) hc).mpr Filter.tendsto_id
+    have h1 : Filter.Tendsto (fun H : ℝ => -(c * H)) Filter.atTop Filter.atBot :=
+      Filter.tendsto_neg_atBot_iff.mpr hcH
+    have h2 : Filter.Tendsto (fun H : ℝ => Real.exp (-(c * H))) Filter.atTop (nhds 0) :=
+      Real.tendsto_exp_atBot.comp h1
+    simpa [neg_mul] using h2
+  have hmulH : Filter.Tendsto (fun H : ℝ => 2 * B * Real.exp (-c * H)) Filter.atTop (nhds 0) := by
+    have h := hexpH.const_mul (2 * B)
+    simpa using h
+  have hevH : ∀ᶠ H : ℝ in Filter.atTop, 2 * B * Real.exp (-c * H) ≤ η * s₀ / 4 :=
+    hmulH.eventually (eventually_le_nhds hquarter)
+  obtain ⟨H₁, hH₁⟩ := Filter.eventually_atTop.mp hevH
+  have hinvT : Filter.Tendsto (fun T : ℝ => (Real.sqrt T)⁻¹) Filter.atTop (nhds 0) :=
+    tendsto_inv_atTop_zero.comp Real.tendsto_sqrt_atTop
+  have hmulT : Filter.Tendsto (fun T : ℝ => 2 * B * (1 / Real.sqrt T)) Filter.atTop (nhds 0) := by
+    have h := hinvT.const_mul (2 * B)
+    simpa [one_div] using h
+  have hevT : ∀ᶠ T : ℝ in Filter.atTop, 2 * B * (1 / Real.sqrt T) ≤ η * s₀ / 4 :=
+    hmulT.eventually (eventually_le_nhds hquarter)
+  obtain ⟨T₁, hT₁⟩ := Filter.eventually_atTop.mp hevT
+  set H : ℝ := max (max H₀ 1) H₁ with hHH
+  set T : ℝ := max (max T₀ 1) T₁ with hTT
+  have hH₀ : H₀ ≤ H := by rw [hHH]; exact le_trans (le_max_left _ _) (le_max_left _ _)
+  have hH1 : 1 ≤ H := by rw [hHH]; exact le_trans (le_max_right _ _) (le_max_left _ _)
+  have hH₁le : H₁ ≤ H := by rw [hHH]; exact le_max_right _ _
+  have hT₀ : T₀ ≤ T := by rw [hTT]; exact le_trans (le_max_left _ _) (le_max_left _ _)
+  have hT1 : 1 ≤ T := by rw [hTT]; exact le_trans (le_max_right _ _) (le_max_left _ _)
+  have hT₁le : T₁ ≤ T := by rw [hTT]; exact le_max_right _ _
+  have hAbs : 2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T) ≤ η * s₀ / 2 := by
+    have h1 : 2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)
+        = 2 * B * Real.exp (-c * H) + 2 * B * (1 / Real.sqrt T) := by ring
+    have h2 := hH₁ H hH₁le
+    have h3 := hT₁ T hT₁le
+    rw [h1]
+    linarith
+  set D : ℝ := (C₀ * Real.exp (4 * H) + 2) ^ 2 * Real.pi with hDD
+  have hD0 : 0 ≤ D := by
+    rw [hDD]
+    exact mul_nonneg (sq_nonneg _) Real.pi_pos.le
+  have hD1 : 0 < D + 1 := by linarith
+  have hεpos : 0 < min (ε₀ / 2) (η * s₀ / 2 / (2 * (D + 1))) := by
+    refine lt_min ?_ ?_
+    · linarith
+    · exact div_pos hhalf (by linarith)
+  have hεlt : min (ε₀ / 2) (η * s₀ / 2 / (2 * (D + 1))) < ε₀ := by
+    have h1 : min (ε₀ / 2) (η * s₀ / 2 / (2 * (D + 1))) ≤ ε₀ / 2 := min_le_left _ _
+    linarith
+  have hεbound : D * min (ε₀ / 2) (η * s₀ / 2 / (2 * (D + 1))) ≤ η * s₀ / 2 := by
+    have hle : min (ε₀ / 2) (η * s₀ / 2 / (2 * (D + 1)))
+        ≤ (η * s₀ / 2) / (2 * (D + 1)) := min_le_right _ _
+    have hstep : D * ((η * s₀ / 2) / (2 * (D + 1))) ≤ η * s₀ / 2 := by
+      have hkey : D * ((η * s₀ / 2) / (2 * (D + 1)))
+          = (D / (D + 1)) * (η * s₀ / 2 / 2) := by
+        field_simp
+      rw [hkey]
+      have h1 : D / (D + 1) ≤ 1 := by
+        rw [div_le_one hD1]
+        linarith
+      have h2 : 0 ≤ η * s₀ / 2 / 2 := by linarith
+      have h3 := mul_le_mul_of_nonneg_right h1 h2
+      have h4 : 1 * (η * s₀ / 2 / 2) = η * s₀ / 2 / 2 := one_mul _
+      rw [h4] at h3
+      linarith
+    calc D * min (ε₀ / 2) (η * s₀ / 2 / (2 * (D + 1)))
+        ≤ D * ((η * s₀ / 2) / (2 * (D + 1))) := mul_le_mul_of_nonneg_left hle hD0
+      _ ≤ η * s₀ / 2 := hstep
+  exact ⟨H, T, min (ε₀ / 2) (η * s₀ / 2 / (2 * (D + 1))),
+    hH₀, hH1, hT₀, hT1, hεpos, hεlt, hAbs, hεbound⟩
+
+/-- The algebraic core of the near diagonal estimate: the pole pair is worth exactly
+`n * Sing n`; every other summand is at most `ε` in modulus and there are at most
+`(K + 1) ^ 2 - 1` of them. -/
+private theorem main_term_core481 (K : ℕ) (f : Fin (K + 1) → Fin (K + 1) → ℂ) (n : ℕ) (ε s : ℝ)
+    (hf00 : f 0 0 = (s : ℂ) * (n : ℂ))
+    (hpair : ∀ i j : Fin (K + 1), (i ≠ 0 ∨ j ≠ 0) → ‖f i j‖ ≤ ε * (Real.pi * n))
+    (hε : 0 ≤ ε) :
+    |(∑ i, ∑ j, f i j).re - n * s| ≤ ((K : ℝ) + 1) ^ 2 * ε * Real.pi * n := by
+  have hrow : ∀ i : Fin (K + 1), i ≠ 0 →
+      ‖∑ j, f i j‖ ≤ ((K : ℝ) + 1) * (ε * (Real.pi * n)) := by
+    intro i hi
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ j : Fin (K + 1), ‖f i j‖
+        ≤ ∑ _j : Fin (K + 1), ε * (Real.pi * n) :=
+          Finset.sum_le_sum (fun j _ => hpair i j (Or.inl hi))
+      _ = ((K : ℝ) + 1) * (ε * (Real.pi * n)) := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+          push_cast
+          ring
+  have hcard : (univ.erase (0 : Fin (K + 1))).card = K := by
+    rw [Finset.card_erase_of_mem (Finset.mem_univ _), Finset.card_univ, Fintype.card_fin]
+    omega
+  have hrow0 : ‖∑ j ∈ univ.erase (0 : Fin (K + 1)), f 0 j‖ ≤
+      ((K : ℝ)) * (ε * (Real.pi * n)) := by
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ j ∈ univ.erase (0 : Fin (K + 1)), ‖f 0 j‖
+        ≤ ∑ _j ∈ univ.erase (0 : Fin (K + 1)), ε * (Real.pi * n) :=
+          Finset.sum_le_sum (fun j hj => hpair 0 j (Or.inr (Finset.mem_erase.mp hj).1))
+      _ = ((K : ℝ)) * (ε * (Real.pi * n)) := by
+          rw [Finset.sum_const, nsmul_eq_mul, hcard]
+  have hrows : ‖∑ i ∈ univ.erase (0 : Fin (K + 1)), ∑ j, f i j‖ ≤
+      ((K : ℝ)) * (((K : ℝ) + 1) * (ε * (Real.pi * n))) := by
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ i ∈ univ.erase (0 : Fin (K + 1)), ‖∑ j, f i j‖
+        ≤ ∑ _i ∈ univ.erase (0 : Fin (K + 1)), ((K : ℝ) + 1) * (ε * (Real.pi * n)) :=
+          Finset.sum_le_sum (fun i hi => hrow i (Finset.mem_erase.mp hi).1)
+      _ = ((K : ℝ)) * (((K : ℝ) + 1) * (ε * (Real.pi * n))) := by
+          rw [Finset.sum_const, nsmul_eq_mul, hcard]
+  have hdec : (∑ i, ∑ j, f i j) - (s : ℂ) * (n : ℂ)
+      = (∑ j ∈ univ.erase (0 : Fin (K + 1)), f 0 j) +
+        (∑ i ∈ univ.erase (0 : Fin (K + 1)), ∑ j, f i j) := by
+    have h1 : (∑ i : Fin (K + 1), ∑ j, f i j)
+        = (∑ j, f 0 j) + ∑ i ∈ univ.erase (0 : Fin (K + 1)), ∑ j, f i j := by
+      rw [← Finset.add_sum_erase (univ : Finset (Fin (K + 1)))
+        (fun i => ∑ j, f i j) (Finset.mem_univ 0)]
+    have h2 : (∑ j : Fin (K + 1), f 0 j)
+        = f 0 0 + ∑ j ∈ univ.erase (0 : Fin (K + 1)), f 0 j := by
+      rw [← Finset.add_sum_erase (univ : Finset (Fin (K + 1)))
+        (fun j => f 0 j) (Finset.mem_univ 0)]
+    rw [h1, h2, hf00]
+    ring
+  have hbound : ‖(∑ i, ∑ j, f i j) - (s : ℂ) * (n : ℂ)‖ ≤
+      ((K : ℝ)) * (ε * (Real.pi * n)) +
+        ((K : ℝ)) * (((K : ℝ) + 1) * (ε * (Real.pi * n))) := by
+    rw [hdec]
+    exact (norm_add_le _ _).trans (add_le_add hrow0 hrows)
+  have hre : (∑ i, ∑ j, f i j).re - (n : ℝ) * s
+      = ((∑ i, ∑ j, f i j) - (s : ℂ) * (n : ℂ)).re := by
+    rw [Complex.sub_re]
+    have hC : ((s : ℂ) * (n : ℂ)).re = (n : ℝ) * s := by
+      rw [Complex.mul_re]
+      simp
+      ring
+    rw [hC]
+  rw [hre]
+  refine ((Complex.abs_re_le_norm _).trans hbound).trans ?_
+  have hpos : 0 ≤ ε * (Real.pi * n) :=
+    mul_nonneg hε (mul_nonneg Real.pi_pos.le (Nat.cast_nonneg n))
+  have hEq : ((K : ℝ)) * (ε * (Real.pi * n)) +
+      ((K : ℝ)) * (((K : ℝ) + 1) * (ε * (Real.pi * n)))
+      = ((K : ℝ) + 1) ^ 2 * ε * Real.pi * n - ε * (Real.pi * n) := by ring
+  rw [hEq]
+  linarith
 
 /-- LEAF. Page 5, Lemma 4.1: the finite zero sum for one integer `n`. The pole pair carries
 the full main term `n * Sing n`, and every pair with at least one zero factor contributes at
@@ -96,7 +423,27 @@ theorem explicit_formula_main_term481 {K : ℕ}
     |(∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
         gammaPair481 (z i).2.2 (z j).2.2 n).re - n * Sing n| ≤
       ((K : ℝ) + 1) ^ 2 * ε * Real.pi * n := by
-  sorry
+  have hgamma11 : gammaPair481 1 1 n = (n : ℂ) := by
+    have hG2 : Complex.Gamma ((1 : ℂ) + 1) = 1 := by
+      rw [Complex.Gamma_add_one 1 one_ne_zero, Complex.Gamma_one, one_mul]
+    have h3 : (1 : ℂ) + 1 - 1 = 1 := by norm_num
+    unfold gammaPair481
+    rw [hG2, h3, Complex.Gamma_one, Complex.cpow_one]
+    norm_num
+  have hsign : ∀ i : Fin (K + 1), ‖zeroSign481 i‖ = 1 := by
+    intro i
+    unfold zeroSign481
+    split_ifs <;> simp
+  refine main_term_core481 K (fun i j => Sg i j n * zeroSign481 i * zeroSign481 j *
+    gammaPair481 (z i).2.2 (z j).2.2 n) n ε (Sing n) ?_ ?_ hε
+  · have h0s : zeroSign481 (0 : Fin (K + 1)) = 1 := by simp [zeroSign481]
+    rw [hz0, hSg00, hgamma11, h0s]
+    ring
+  · intro i j hij
+    have h1 : ‖Sg i j n‖ ≤ ε := hSgε i j hij
+    have h2 : ‖gammaPair481 (z i).2.2 (z j).2.2 n‖ ≤ Real.pi * n := hγ i j
+    rw [norm_mul, norm_mul, norm_mul, hsign i, hsign j, mul_one, mul_one]
+    exact mul_le_mul h1 h2 (norm_nonneg _) hε
 
 /-- LEAF. Page 5, Lemma 4.1: the crude size of the same finite zero sum for one integer `n`,
 with every pair counted at its uniform bound `Sing n` rather than at the small parameter.
@@ -110,7 +457,56 @@ theorem explicit_formula_total_size481 {K : ℕ}
     |(∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
         gammaPair481 (z i).2.2 (z j).2.2 n).re| ≤
       n * Sing n + ((K : ℝ) + 1) ^ 2 * Real.pi * n * Sing n := by
-  sorry
+  have hz : ∀ i : Fin (K + 1), ‖zeroSign481 i‖ = 1 := by
+    intro i
+    unfold zeroSign481
+    split_ifs <;> simp
+  have hterm : ∀ i j : Fin (K + 1),
+      ‖Sg i j n * zeroSign481 i * zeroSign481 j *
+        gammaPair481 (z i).2.2 (z j).2.2 n‖ ≤ Sing n * Real.pi * n := by
+    intro i j
+    rw [norm_mul, norm_mul, norm_mul, hz i, hz j, mul_one, mul_one]
+    have h1 : ‖Sg i j n‖ ≤ Sing n := hSgb i j
+    have h2 : ‖gammaPair481 (z i).2.2 (z j).2.2 n‖ ≤ Real.pi * n := hγ i j
+    have hpi : 0 ≤ Real.pi * n := mul_nonneg Real.pi_pos.le (Nat.cast_nonneg n)
+    calc ‖Sg i j n‖ * ‖gammaPair481 (z i).2.2 (z j).2.2 n‖
+        ≤ Sing n * (Real.pi * n) := mul_le_mul h1 h2 (norm_nonneg _) hS0
+      _ = Sing n * Real.pi * n := by ring
+  have hinner : ∀ i : Fin (K + 1),
+      ‖∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
+        gammaPair481 (z i).2.2 (z j).2.2 n‖ ≤ ((K : ℝ) + 1) * (Sing n * Real.pi * n) := by
+    intro i
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ j : Fin (K + 1), ‖Sg i j n * zeroSign481 i * zeroSign481 j *
+          gammaPair481 (z i).2.2 (z j).2.2 n‖
+        ≤ ∑ _j : Fin (K + 1), Sing n * Real.pi * n :=
+          Finset.sum_le_sum (fun j _ => hterm i j)
+      _ = ((K : ℝ) + 1) * (Sing n * Real.pi * n) := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+          push_cast
+          ring
+  have hT : ‖∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
+        gammaPair481 (z i).2.2 (z j).2.2 n‖ ≤
+      ((K : ℝ) + 1) * (((K : ℝ) + 1) * (Sing n * Real.pi * n)) := by
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ i : Fin (K + 1), ‖∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
+          gammaPair481 (z i).2.2 (z j).2.2 n‖
+        ≤ ∑ _i : Fin (K + 1), ((K : ℝ) + 1) * (Sing n * Real.pi * n) :=
+          Finset.sum_le_sum (fun i _ => hinner i)
+      _ = ((K : ℝ) + 1) * (((K : ℝ) + 1) * (Sing n * Real.pi * n)) := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+          push_cast
+          ring
+  have hre : |(∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
+        gammaPair481 (z i).2.2 (z j).2.2 n).re| ≤
+      ((K : ℝ) + 1) * (((K : ℝ) + 1) * (Sing n * Real.pi * n)) :=
+    (Complex.abs_re_le_norm _).trans hT
+  have hnn : 0 ≤ (n : ℝ) * Sing n := mul_nonneg (Nat.cast_nonneg n) hS0
+  refine hre.trans ?_
+  have hEq : ((K : ℝ) + 1) * (((K : ℝ) + 1) * (Sing n * Real.pi * n))
+      = ((K : ℝ) + 1) ^ 2 * Real.pi * n * Sing n := by ring
+  rw [hEq]
+  linarith
 
 /-! ### The assembly -/
 
