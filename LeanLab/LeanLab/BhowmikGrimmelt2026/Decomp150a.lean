@@ -6,20 +6,15 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.BhowmikGrimmelt2026.Statements
 import LeanLab.BhowmikGrimmelt2026.SPLIT_meanSquare38
 import LeanLab.BhowmikGrimmelt2026.SingularTail150
+import LeanLab.BhowmikGrimmelt2026.ZeroBoundLeaf150
 
 namespace LeanLab.BhowmikGrimmelt2026
 
 open LeanLab.ExceptionalSet (PowerBound)
 
-/-- SPLIT piece 1 of `zeroBound_lower150`. CITED, OPEN.
-P0029 Section 3, page 12, the remark after the display `q^{1/2} N^{Θ+ε}`:
-"in the best case we could hope for Θ = 1/2". The lower limit one half rests on
-Hardy 1914, Sur les zeros de la fonction zeta de Riemann: the Riemann zeta function
-has a zero on the critical line. The survey cites it and gives no proof.
-AI wrote the Lean code. -/
-theorem hardy_critical_line_zero150 :
-    ∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0 := by
-  sorry
+/- SPLIT piece 1 of `zeroBound_lower150`, `hardy_critical_line_zero150`, is the LEAF of
+`ZeroBoundLeaf150.lean`: it is CITED and OPEN, and lives in its own file so that this existing
+file carries no step it did not have before. -/
 
 /-- SPLIT piece 2 of `zeroBound_lower150`. P0029 Section 3, page 9, Theorem 3.1:
 "every zero of every Dirichlet L-function" includes the modulus one character,
