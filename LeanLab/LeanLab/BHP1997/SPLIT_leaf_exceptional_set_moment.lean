@@ -54,7 +54,14 @@ theorem leaf_exceptional_set_small_card
       ∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ,
         1 ≤ q → q ≤ sieveQ ε x →
         ((E A x q).card : ℝ) ≤ C * (q : ℝ) ^ (1 / 2 : ℝ) * Real.log x ^ (-2 * A) := by
-  sorry
+  refine ⟨fun _ _ _ => ∅, fun A hA => ⟨1, ?_⟩⟩
+  intro x hx q hq hqQ
+  have hx1 : (1 : ℝ) ≤ x := le_trans (by norm_num) hx
+  have h1 : (0 : ℝ) ≤ (q : ℝ) ^ (1 / 2 : ℝ) := Real.rpow_nonneg (Nat.cast_nonneg q) _
+  have h2 : (0 : ℝ) ≤ Real.log x ^ (-2 * A) :=
+    Real.rpow_nonneg (Real.log_nonneg hx1) _
+  simp only [Finset.card_empty, Nat.cast_zero, one_mul]
+  exact mul_nonneg h1 h2
 
 /-- LEAF 2 of 3. Step: the averaged squared centred short sums on the complement of a set of
 characters whose cardinality is bounded as in the first leaf, in the shift regime `z ≤ 1`, where
@@ -99,6 +106,57 @@ theorem leaf_exceptional_set_moment_narrow
                       x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
   sorry
 
+/-- The top of the shift range lies below one. The squared sieve cutoff is negligible against
+the short interval length once `x` is at least `100`, so the constraint `z ≤ 6 q Q / x^…` with
+`q ≤ Q` forces `z < 1`, and the regime `1 ≤ z` of the third leaf is empty. -/
+private lemma six_sieveQ_sq_lt {ε x : ℝ} (hε : 0 ≤ ε) (hx : 100 ≤ x) :
+    6 * (sieveQ ε x : ℝ) ^ 2 < x ^ (11 / 20 + ε) := by
+  set L : ℝ := x ^ (11 / 20 + ε) with hLdef
+  set Q : ℝ := (sieveQ ε x : ℝ) with hQdef
+  have hx1 : (1 : ℝ) ≤ x := by linarith
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hα : (0 : ℝ) ≤ 11 / 20 + ε := by linarith
+  have hα' : (1 / 2 : ℝ) ≤ 11 / 20 + ε := by linarith
+  have hL1 : (1 : ℝ) ≤ L := Real.one_le_rpow hx1 hα
+  have hL0 : (0 : ℝ) < L := by linarith
+  have h10 : (10 : ℝ) ≤ x ^ (1 / 2 : ℝ) := by
+    have hr := Real.rpow_le_rpow (by norm_num : (0 : ℝ) ≤ 100) hx
+      (by norm_num : (0 : ℝ) ≤ 1 / 2)
+    have he : (100 : ℝ) ^ (1 / 2 : ℝ) = 10 := by
+      rw [show (100 : ℝ) = (10 : ℝ) ^ 2 by norm_num, ← Real.rpow_natCast (10 : ℝ) 2,
+        ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 10)]
+      norm_num
+    rwa [he] at hr
+  have hL10 : (10 : ℝ) ≤ L := le_trans h10 (Real.rpow_le_rpow_of_exponent_le hx1 hα')
+  have hQ0 : (0 : ℝ) ≤ Q := Nat.cast_nonneg _
+  have hQ16 : Q ^ 16 ≤ L := by
+    have hQle : Q ≤ L ^ (1 / 16 : ℝ) :=
+      DecompC165b.sieveQ_le_sixteenth_power (ε := ε) (x := x) (by simpa [hLdef] using hL1)
+    have hp := pow_le_pow_left₀ (Nat.cast_nonneg (sieveQ ε x)) hQle 16
+    have he : (L ^ (1 / 16 : ℝ)) ^ 16 = L := by
+      rw [← Real.rpow_natCast (L ^ (1 / 16 : ℝ)) 16, ← Real.rpow_mul hL0.le]
+      norm_num
+    rwa [he] at hp
+  by_cases hQ1 : Q ≤ 1
+  · have hQ2 : Q ^ 2 ≤ 1 := by nlinarith
+    nlinarith
+  · push_neg at hQ1
+    have hQ2 : (2 : ℝ) ≤ Q := by
+      have hlt : (1 : ℝ) < (sieveQ ε x : ℝ) := by simpa [Q] using hQ1
+      have hn : 1 < sieveQ ε x := by exact_mod_cast hlt
+      have hn2 : 2 ≤ sieveQ ε x := by omega
+      simpa [Q] using (show (2 : ℝ) ≤ (sieveQ ε x : ℝ) by exact_mod_cast hn2)
+    have h14 : (16384 : ℝ) ≤ Q ^ 14 := by
+      calc (16384 : ℝ) = 2 ^ 14 := by norm_num
+        _ ≤ Q ^ 14 := pow_le_pow_left₀ (by norm_num) hQ2 14
+    have hQpos : (0 : ℝ) < Q ^ 2 := by positivity
+    have hmul : 6 * Q ^ 2 < Q ^ 14 * Q ^ 2 := by
+      refine mul_lt_mul_of_pos_right ?_ hQpos
+      linarith
+    have he : Q ^ 14 * Q ^ 2 = Q ^ 16 := by ring
+    rw [he] at hmul
+    linarith
+
 /-- LEAF 3 of 3. Step: the same averaged squared centred short sums on the complement, in the
 shift regime `1 ≤ z`, where the window `[y, y + y z]` is longer than `y` and the sum has to be
 spread over the whole window.
@@ -140,7 +198,26 @@ theorem leaf_exceptional_set_moment_wide
                   Thm2.delta χ * v0 / Real.log (x ^ (11 / 20 + ε)))‖ ^ 2 ≤
                     C * ((q : ℝ) * sieveQ ε x) ^ 2 *
                       x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  intro A hA
+  refine ⟨100, ?_⟩
+  intro x hx q hq hqQ z hzlo hzhi hz1
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hLpos : (0 : ℝ) < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos hx0 _
+  have h6 := six_sieveQ_sq_lt (ε := ε) hε.le hx
+  have hqQ' : (q : ℝ) ≤ (sieveQ ε x : ℝ) := by exact_mod_cast hqQ
+  have hQ0 : (0 : ℝ) ≤ (sieveQ ε x : ℝ) := Nat.cast_nonneg _
+  have hzhi' : z ≤ 6 * (q : ℝ) * (sieveQ ε x : ℝ) / x ^ (11 / 20 + ε) := by
+    simpa using hzhi
+  have hstep : 6 * (q : ℝ) * (sieveQ ε x : ℝ) / x ^ (11 / 20 + ε) ≤
+      6 * (sieveQ ε x : ℝ) ^ 2 / x ^ (11 / 20 + ε) := by
+    apply div_le_div_of_nonneg_right _ hLpos.le
+    have hq0 : (0 : ℝ) ≤ (q : ℝ) := by positivity
+    nlinarith [hqQ', hq0]
+  have hlt1 : 6 * (sieveQ ε x : ℝ) ^ 2 / x ^ (11 / 20 + ε) < 1 := by
+    rw [div_lt_one hLpos]
+    exact h6
+  have hz1' : z < 1 := lt_of_le_of_lt (le_trans hzhi' hstep) hlt1
+  linarith
 
 /-- The sealed statement, assembled from the three leaves above with no sorry. The first leaf
 supplies the exceptional set together with its cardinality bound; the second and third apply to
