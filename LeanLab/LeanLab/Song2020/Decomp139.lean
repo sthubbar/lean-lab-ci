@@ -65,6 +65,455 @@ theorem fourier_approximation :
               C * tailBudget γ n y H := by
   sorry
 
+/-- Page 8, first display after summing over h. The exponent triples of the S1 bound:
+the exponent of n, of y and of H in each monomial. The last triple uses n to the
+gamma over four, from the preceding per h display on page 8, as recorded in QUESTION Q139b;
+the printed page 8 display shows n to the gamma there. -/
+def s1Terms (γ : ℝ) : List (ℝ × ℝ × ℝ) :=
+  [(1 - γ / 4, 0, 3 / 4), ((γ + 4) / 8, 1 / 4, 9 / 8), ((3 * γ + 4) / 14, 3 / 7, 17 / 14),
+   (3 / 4, 1 / 8, 1), (γ / 2 - 1, 1, 3 / 2), (3 * γ / 10, 3 / 5, 13 / 10),
+   ((γ + 6) / 10, 1 / 5, 11 / 10), ((γ + 2) / 6, 1 / 3, 7 / 6), (γ / 4, 1 / 2, 5 / 4)]
+
+/-- Page 8, first display after summing over h. The S1 polynomial in H. -/
+def s1Poly (γ n y H : ℝ) : ℝ :=
+  (s1Terms γ |>.map (fun t => n ^ t.1 * y ^ t.2.1 * H ^ t.2.2)).sum
+
+/-- Page 5. The truncated subwindow of the prime window: the integers x with
+x minus n over 3 less than y in absolute value and x at most t. Partial summation over the
+window produces sums over these initial segments. -/
+def subWindow (n : ℕ) (y t : ℝ) : Finset ℕ :=
+  (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+    (fun x => |(x : ℝ) - (n : ℝ) / 3| < y ∧ (x : ℝ) ≤ t)
+
+/-- Page 5. The von Mangoldt weighted exponential sum of the paper, the sum of
+Lambda of x times e of alpha x plus h x to the gamma, over an initial segment of the window. -/
+def lambdaSum (γ : ℝ) (n : ℕ) (y α : ℝ) (h : ℤ) (t : ℝ) : ℂ :=
+  ∑ x ∈ subWindow n y t,
+    (ArithmeticFunction.vonMangoldt x : ℂ) * eC (α * x + h * (x : ℝ) ^ γ)
+
+/-- Page 8, first display. The ten monomials of the per h bound for
+x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3, with x replaced by n,
+which is legitimate since x is of size n over 3 on the window. The argument k stands for
+the absolute value of h. -/
+def perH (γ n y k : ℝ) : ℝ :=
+  n ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) + n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) +
+  n ^ (γ / 2 - 1) * y * k ^ ((1 : ℝ) / 2) +
+  n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * k ^ ((1 : ℝ) / 6) +
+  n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * k ^ ((1 : ℝ) / 4) +
+  n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * k ^ ((1 : ℝ) / 8) +
+  n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) +
+  n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) +
+  n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * k ^ ((3 : ℝ) / 10) +
+  n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * k ^ ((3 : ℝ) / 14)
+
+/-- CITED. Song 2020, page 5, the displays from "For S1, we first observe" to
+"We have shown so far": partial summation in the weight c x to the 1 minus gamma,
+the bound a_h at most K over h for the Fourier coefficients, the bound of
+e of h times the difference of x plus 1 to the gamma and x to the gamma minus 1
+by h x to the gamma minus 1, and the passage from primes to the von Mangoldt function.
+The paper writes the maximum over centred windows and a saving 1 over log n; this form
+keeps instead the initial segments that partial summation really produces, drops the
+log saving, and writes out the prime power error as K H n to the 1/2, which the
+paper absorbs into its O of n to the 3/2 minus gamma. Any bound B on the von Mangoldt
+sums for 1 at most |h| at most H then bounds S1. The factor n to the epsilon on the B sum
+was added in the check of 2026-11-12: for y close to n/3 the window reaches down to small x,
+and the total variation of the partial summation weight x to the 1 minus gamma times
+e of h times the gamma difference minus 1 is then of size |h| log n, not |h|; the paper's
+y is a power of n below 1, where this loss does not arise, and n to the epsilon absorbs it. -/
+theorem s1_lambda_reduction :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
+        (∀ H : ℕ, ∀ h : ℤ, h ≠ 0 → ‖a H h‖ ≤ K / |(h : ℝ)|) →
+        ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+          (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+            ∀ H : ℕ, 1 ≤ H → ∀ B : ℤ → ℝ,
+              (∀ h : ℤ, h ≠ 0 → |h| ≤ (H : ℤ) → ∀ t : ℝ, ‖lambdaSum γ n y α h t‖ ≤ B h) →
+              ‖truncatedSum a H γ n y α‖ ≤
+                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (H : ℝ) * (n : ℝ) ^ ((1 : ℝ) / 2) +
+                  (n : ℝ) ^ ε * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := by
+  sorry
+
+/-- CITED. Song 2020, pages 5 to 8, the per h estimate displayed at the top of page 8:
+x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3 is bounded by the ten
+monomials of perH at k equal to the absolute value of h. Published inputs, in the order the
+paper applies them: Dirichlet approximation of alpha by a over q with q at most log n and the
+splitting into the Ramanujan type sums S of a plus b and q, page 5; the Vaughan identity,
+the paper's Lemma 3.2 with u v at most n, page 5; Iwaniec and Kowalski Corollary 8.13 for
+the type I sum Sigma 1, page 6; dyadic division of Sigma 2 and Sigma 3 into the bilinear
+sums T of R and S, page 6; Graham and Kolesnik Lemma 2.5, the Weyl differencing
+inequality for T of R and S, page 6; Iwaniec and Kowalski Corollary 8.13 for the inner sum
+over r, page 7; and Graham and Kolesnik Lemma 2.4 for the choices of L, v and u, pages 7
+and 8. -/
+theorem lambda_sum_per_h :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ,
+            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε * perH γ n y |(h : ℝ)| := by
+  sorry
+
+/-- PROVED. Summation over h on page 8, nonnegative exponents: the sum of k to the beta
+for k from 1 to H is at most H to the beta plus 1. -/
+theorem sum_rpow_le_of_nonneg (β : ℝ) (hβ : 0 ≤ β) (H : ℕ) :
+    ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ β ≤ (H : ℝ) ^ (β + 1) := by
+  have hle : ∀ k ∈ Finset.Icc 1 H, (k : ℝ) ^ β ≤ (H : ℝ) ^ β := by
+    intro k hk
+    have hk' := (Finset.mem_Icc.mp hk).2
+    exact Real.rpow_le_rpow (by positivity) (by exact_mod_cast hk') hβ
+  have h1 := Finset.sum_le_card_nsmul _ _ _ hle
+  rw [Nat.card_Icc, nsmul_eq_mul] at h1
+  have h2 : ((H + 1 - 1 : ℕ) : ℝ) * (H : ℝ) ^ β = (H : ℝ) ^ (β + 1) := by
+    rw [Nat.add_sub_cancel]
+    rcases Nat.eq_zero_or_pos H with h | h
+    · subst h; simp [Real.zero_rpow (by linarith : β + 1 ≠ 0)]
+    · rw [Real.rpow_add (by exact_mod_cast h), Real.rpow_one]; ring
+  linarith
+
+/-- PROVED. Summation over h on page 8, the one negative exponent: the sum of k to the
+minus 1/4 for k from 1 to H is at most 4/3 times H to the 3/4. Proof by induction with the
+weighted arithmetic geometric mean inequality, which is the concavity of t to the 3/4. -/
+theorem sum_rpow_neg_quarter_le (H : ℕ) :
+    ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ (-(1 : ℝ) / 4) ≤ 4 / 3 * (H : ℝ) ^ ((3 : ℝ) / 4) := by
+  induction H with
+  | zero => simp
+  | succ m ih =>
+    rw [Finset.sum_Icc_succ_top (by omega)]
+    push_cast
+    have hs0 : (0 : ℝ) < (m : ℝ) + 1 := by positivity
+    have amgm := Real.geom_mean_le_arith_mean2_weighted (w₁ := 3 / 4) (w₂ := 1 / 4)
+      (p₁ := (m : ℝ)) (p₂ := (m : ℝ) + 1) (by norm_num) (by norm_num) (by positivity)
+      hs0.le (by norm_num)
+    have hq : ((m : ℝ) + 1) ^ ((1 : ℝ) / 4) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) = 1 := by
+      rw [← Real.rpow_add hs0]; norm_num
+    have hq2 : ((m : ℝ) + 1) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) =
+        ((m : ℝ) + 1) ^ ((3 : ℝ) / 4) := by
+      calc ((m : ℝ) + 1) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) =
+            ((m : ℝ) + 1) ^ (1 : ℝ) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) := by rw [Real.rpow_one]
+        _ = ((m : ℝ) + 1) ^ ((3 : ℝ) / 4) := by rw [← Real.rpow_add hs0]; norm_num
+    have hpos : 0 < ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) := Real.rpow_pos_of_pos hs0 _
+    have h1 := mul_le_mul_of_nonneg_right amgm hpos.le
+    have h3 : (m : ℝ) ^ ((3 : ℝ) / 4) * ((m : ℝ) + 1) ^ ((1 : ℝ) / 4) *
+        ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) = (m : ℝ) ^ ((3 : ℝ) / 4) := by
+      rw [mul_assoc, hq, mul_one]
+    have e : (3 / 4 * (m : ℝ) + 1 / 4 * ((m : ℝ) + 1)) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) =
+        ((m : ℝ) + 1) ^ ((3 : ℝ) / 4) - 3 / 4 * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) := by
+      rw [← hq2]; ring
+    linarith
+
+/-- PROVED. Page 8, summation over h of the per h display: the sum of perH over
+k from 1 to H is at most twice the S1 polynomial. The term n to the gamma over 10 plus 2/5
+times y to the 2/5, which the printed summed display omits, is dominated by the term
+n to the gamma plus 6 over 10 times y to the 1/5, since y is at most n. -/
+theorem sum_perH_le (γ n y : ℝ) (hn : 0 < n) (hy : 0 < y) (hyn : y ≤ n) (H : ℕ) :
+    ∑ k ∈ Finset.Icc 1 H, perH γ n y k ≤ 2 * s1Poly γ n y H := by
+  have hdom : n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) := by
+    have e1 : n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) =
+        (n ^ (γ / 10 + 2 / 5) * y ^ ((1 : ℝ) / 5)) * y ^ ((1 : ℝ) / 5) := by
+      rw [mul_assoc, ← Real.rpow_add hy]; norm_num
+    have e2 : n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) =
+        (n ^ (γ / 10 + 2 / 5) * y ^ ((1 : ℝ) / 5)) * n ^ ((1 : ℝ) / 5) := by
+      rw [mul_comm (n ^ (γ / 10 + 2 / 5)), mul_assoc, ← Real.rpow_add hn]
+      rw [mul_comm]; congr 1; congr 1; ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hy.le hyn (by norm_num)) (by positivity)
+  have s1 := sum_rpow_neg_quarter_le H
+  have s3 := sum_rpow_le_of_nonneg ((1 : ℝ) / 2) (by norm_num) H
+  have s4 := sum_rpow_le_of_nonneg ((1 : ℝ) / 6) (by norm_num) H
+  have s5 := sum_rpow_le_of_nonneg ((1 : ℝ) / 4) (by norm_num) H
+  have s6 := sum_rpow_le_of_nonneg ((1 : ℝ) / 8) (by norm_num) H
+  have s7 := sum_rpow_le_of_nonneg ((1 : ℝ) / 10) (by norm_num) H
+  have s9 := sum_rpow_le_of_nonneg ((3 : ℝ) / 10) (by norm_num) H
+  have s10 := sum_rpow_le_of_nonneg ((3 : ℝ) / 14) (by norm_num) H
+  have hS7 : 0 ≤ ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 10) := by positivity
+  have t1 := mul_le_mul_of_nonneg_left s1 (by positivity : 0 ≤ n ^ (1 - γ / 4))
+  have t3 := mul_le_mul_of_nonneg_left s3 (by positivity : 0 ≤ n ^ (γ / 2 - 1) * y)
+  have t4 := mul_le_mul_of_nonneg_left s4
+    (by positivity : 0 ≤ n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3))
+  have t5 := mul_le_mul_of_nonneg_left s5
+    (by positivity : 0 ≤ n ^ (γ / 4) * y ^ ((1 : ℝ) / 2))
+  have t6 := mul_le_mul_of_nonneg_left s6
+    (by positivity : 0 ≤ n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4))
+  have t7 := mul_le_mul_of_nonneg_left s7
+    (by positivity : 0 ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5))
+  have t8 := mul_le_mul_of_nonneg_right hdom hS7
+  have t9 := mul_le_mul_of_nonneg_left s9
+    (by positivity : 0 ≤ n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5))
+  have t10 := mul_le_mul_of_nonneg_left s10
+    (by positivity : 0 ≤ n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7))
+  have hH0 : 0 ≤ (H : ℝ) ^ ((3 : ℝ) / 4) := by positivity
+  have hn1 : 0 ≤ n ^ (1 - γ / 4) * (H : ℝ) ^ ((3 : ℝ) / 4) := by positivity
+  have hP : s1Poly γ n y H =
+      n ^ (1 - γ / 4) * (H : ℝ) ^ ((3 : ℝ) / 4) +
+      n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * (H : ℝ) ^ ((1 : ℝ) / 8 + 1) +
+      n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * (H : ℝ) ^ ((3 : ℝ) / 14 + 1) +
+      n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) +
+      n ^ (γ / 2 - 1) * y * (H : ℝ) ^ ((1 : ℝ) / 2 + 1) +
+      n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * (H : ℝ) ^ ((3 : ℝ) / 10 + 1) +
+      n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * (H : ℝ) ^ ((1 : ℝ) / 10 + 1) +
+      n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * (H : ℝ) ^ ((1 : ℝ) / 6 + 1) +
+      n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * (H : ℝ) ^ ((1 : ℝ) / 4 + 1) := by
+    simp only [s1Poly, s1Terms, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil,
+      Real.rpow_zero, Real.rpow_one, mul_one, add_zero]
+    rw [show (γ + 4) / 8 = γ / 8 + 1 / 2 by ring, show (3 * γ + 4) / 14 = 3 * γ / 14 + 2 / 7 by ring]
+    norm_num
+    ring_nf
+  have hL : ∑ k ∈ Finset.Icc 1 H, perH γ n y k =
+      n ^ (1 - γ / 4) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ (-(1 : ℝ) / 4) +
+      n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) +
+      n ^ (γ / 2 - 1) * y * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 2) +
+      n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 6) +
+      n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 4) +
+      n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 8) +
+      n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 10) +
+      n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 10) +
+      n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((3 : ℝ) / 10) +
+      n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) *
+        ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((3 : ℝ) / 14) := by
+    simp only [perH, Finset.sum_add_distrib, Finset.mul_sum, Finset.sum_const, Nat.card_Icc,
+      nsmul_eq_mul, Nat.add_sub_cancel]
+    ring
+  have p2 : 0 ≤ n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * (H : ℝ) ^ ((1 : ℝ) / 8 + 1) := by
+    positivity
+  have p3 : 0 ≤ n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * (H : ℝ) ^ ((3 : ℝ) / 14 + 1) := by
+    positivity
+  have p4 : 0 ≤ n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) := by positivity
+  have p5 : 0 ≤ n ^ (γ / 2 - 1) * y * (H : ℝ) ^ ((1 : ℝ) / 2 + 1) := by positivity
+  have p6 : 0 ≤ n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * (H : ℝ) ^ ((3 : ℝ) / 10 + 1) := by
+    positivity
+  have p7 : 0 ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * (H : ℝ) ^ ((1 : ℝ) / 10 + 1) := by
+    positivity
+  have p8 : 0 ≤ n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * (H : ℝ) ^ ((1 : ℝ) / 6 + 1) := by
+    positivity
+  have p9 : 0 ≤ n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * (H : ℝ) ^ ((1 : ℝ) / 4 + 1) := by positivity
+  rw [hL, hP]
+  linarith
+
+/-- Song 2020, pages 5 through 8. The S1 estimate after summing over h, now assembled from
+the cited partial summation step s1_lambda_reduction, the cited per h estimate
+lambda_sum_per_h, and the proved summation over h, sum_perH_le. -/
+theorem s1_estimate_of_split :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
+        (∀ H : ℕ, ∀ h : ℤ, h ≠ 0 → ‖a H h‖ ≤ K / |(h : ℝ)|) →
+        ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+          (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+            ∀ H : ℕ, 1 ≤ H →
+              ‖truncatedSum a H γ n y α‖ ≤
+                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (n : ℝ) ^ ε * s1Poly γ n y H) := by
+  intro γ hγ hγ1 ε hε
+  obtain ⟨C₁, hC₁, N₁, hred⟩ := s1_lambda_reduction γ hγ hγ1 (ε / 2) (by positivity)
+  obtain ⟨C₂, hC₂, N₂, hper⟩ := lambda_sum_per_h γ hγ hγ1 (ε / 2) (by positivity)
+  refine ⟨C₁ * (1 + 4 * C₂), by positivity, max 1 (max N₁ N₂), ?_⟩
+  intro K hK a ha n hn y hy hyu α H hH
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (show 1 ≤ n by omega)
+  set N : ℝ := (n : ℝ) with hNdef
+  have hN0 : 0 < N := by linarith
+  have hθ : 0 ≤ songExponent γ := by unfold songExponent; linarith
+  have hy1 : 1 ≤ y := (Real.one_le_rpow hn1 hθ).trans hy.le
+  have hy0 : 0 < y := by linarith
+  have hyn : y ≤ N := by linarith
+  have hNe : 1 ≤ N ^ ε := Real.one_le_rpow hn1 hε.le
+  have hee : N ^ (ε / 2) * N ^ (ε / 2) = N ^ ε := by
+    rw [← Real.rpow_add hN0, add_halves]
+  let B : ℤ → ℝ := fun h => C₂ * N ^ (ε / 2) * perH γ N y |(h : ℝ)|
+  have hB : ∀ h : ℤ, h ≠ 0 → |h| ≤ (H : ℤ) → ∀ t : ℝ, ‖lambdaSum γ n y α h t‖ ≤ B h :=
+    fun h hh _ t => hper n (by omega) y hy hyu α h hh t
+  have hr := hred K hK a ha n (by omega) y hy hyu α H hH B hB
+  have hsumB : ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ))) =
+      2 * C₂ * N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, perH γ N y k := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro k _
+    simp only [B]
+    have : |((-(k : ℤ) : ℤ) : ℝ)| = (k : ℝ) := by
+      push_cast; rw [abs_neg]; exact abs_of_nonneg (by positivity)
+    have h2 : |(((k : ℤ)) : ℝ)| = (k : ℝ) := by push_cast; exact abs_of_nonneg (by positivity)
+    rw [this, h2]; ring
+  have hsum := sum_perH_le γ N y hN0 hy0 hyn H
+  have hP0 : 0 ≤ s1Poly γ N y H := by
+    unfold s1Poly
+    apply List.sum_nonneg
+    intro x hx
+    obtain ⟨ab, _, rfl⟩ := List.mem_map.mp hx
+    positivity
+  have hHn : (H : ℝ) * N ^ ((1 : ℝ) / 2) ≤ N ^ ε * s1Poly γ N y H := by
+    have h4 : N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) ^ (1 : ℝ) ≤ s1Poly γ N y H := by
+      unfold s1Poly
+      apply List.single_le_sum
+      · intro x hx
+        obtain ⟨ab, _, rfl⟩ := List.mem_map.mp hx
+        positivity
+      · exact List.mem_map.mpr ⟨(3 / 4, 1 / 8, 1), by simp [s1Terms], rfl⟩
+    rw [Real.rpow_one] at h4
+    have h5 : N ^ ((1 : ℝ) / 2) ≤ N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) := by
+      calc N ^ ((1 : ℝ) / 2) ≤ N ^ ((3 : ℝ) / 4) :=
+            Real.rpow_le_rpow_of_exponent_le hn1 (by norm_num)
+        _ ≤ N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) :=
+            le_mul_of_one_le_right (by positivity) (Real.one_le_rpow hy1 (by norm_num))
+    have hH0 : (0 : ℝ) ≤ H := by positivity
+    have h6 := mul_le_mul_of_nonneg_left h5 hH0
+    have h7 := le_mul_of_one_le_left hP0 hNe
+    nlinarith
+  have hK0 : 0 ≤ K := by linarith
+  have hfin : N ^ (3 / 2 - γ) + (H : ℝ) * N ^ ((1 : ℝ) / 2) +
+      N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ))) ≤
+      (1 + 4 * C₂) * (N ^ (3 / 2 - γ) + N ^ ε * s1Poly γ N y H) := by
+    rw [hsumB, show N ^ (ε / 2) * (2 * C₂ * N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, perH γ N y k) =
+      2 * C₂ * N ^ ε * ∑ k ∈ Finset.Icc 1 H, perH γ N y k by rw [← hee]; ring]
+    have h8 := mul_le_mul_of_nonneg_left hsum (by positivity : 0 ≤ 2 * C₂ * N ^ ε)
+    have h9 : 0 ≤ N ^ (3 / 2 - γ) := by positivity
+    have h10 : 0 ≤ C₂ * N ^ (3 / 2 - γ) := by positivity
+    have h11 : 0 ≤ C₂ * (N ^ ε * s1Poly γ N y H) := by positivity
+    nlinarith
+  calc ‖truncatedSum a H γ n y α‖ ≤ C₁ * K * (N ^ (3 / 2 - γ) + (H : ℝ) * N ^ ((1 : ℝ) / 2) +
+        N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := hr
+    _ ≤ C₁ * K * ((1 + 4 * C₂) * (N ^ (3 / 2 - γ) + N ^ ε * s1Poly γ N y H)) :=
+        mul_le_mul_of_nonneg_left hfin (by positivity)
+    _ = C₁ * (1 + 4 * C₂) * K * (N ^ (3 / 2 - γ) + N ^ ε * s1Poly γ N y H) := by ring
+
+/-- CITED. Song 2020, pages 5 through 8, the S1 estimate after summing over h:
+S1 is bounded by n to the 3/2 minus gamma plus n to the epsilon times the nine H monomials.
+Published inputs used by the paper for this display: the reduction to Lambda weighted sums
+by partial summation, page 5; the Vaughan identity, the paper's Lemma 3.2, page 5;
+Iwaniec and Kowalski Corollary 8.13 for Sigma 1, page 6, and for the inner sums of
+T(R,S), page 7; Graham and Kolesnik Lemma 2.5 for T(R,S), page 6; Graham and Kolesnik
+Lemma 2.4 for the choices of L and u, page 7; and the additive character identity, page 8.
+The coefficient hypothesis is the paper's bound a_h less than 1 over h, with constant K. -/
+theorem s1_estimate :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
+        (∀ H : ℕ, ∀ h : ℤ, h ≠ 0 → ‖a H h‖ ≤ K / |(h : ℝ)|) →
+        ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+          (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+            ∀ H : ℕ, 1 ≤ H →
+              ‖truncatedSum a H γ n y α‖ ≤
+                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (n : ℝ) ^ ε * s1Poly γ n y H) :=
+  s1_estimate_of_split
+
+/-- PROVED. Graham and Kolesnik, Van der Corput's Method of Exponential Sums, Lemma 2.4,
+in the case of a single negative power and lower endpoint H1 equal to 1, as Song 2020 uses
+it on page 8 to choose H: for L(H) the sum of A_i H to the a_i plus B over H, some integer H
+with 1 at most H at most H2 has L(H) bounded by the sum of the balanced terms
+A_i to the 1 over a_i plus 1 times B to the a_i over a_i plus 1, plus the endpoint terms
+A_i at H equal to 1 and B over H2. The constant depends only on the exponents, which
+absorbs the rounding to an integer. Proved here directly, not cited. -/
+theorem gk_lemma_2_4 {m : ℕ} (e : Fin m → ℝ) (he : ∀ i, 0 < e i) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (A : Fin m → ℝ) (B : ℝ), (∀ i, 0 ≤ A i) → 0 ≤ B →
+      ∀ H₂ : ℕ, 1 ≤ H₂ →
+      ∃ H : ℕ, 1 ≤ H ∧ H ≤ H₂ ∧
+        ∑ i, A i * (H : ℝ) ^ (e i) + B * (H : ℝ)⁻¹ ≤
+          C * (∑ i, (A i * B ^ (e i)) ^ (1 / (e i + 1)) + ∑ i, A i + B * (H₂ : ℝ)⁻¹) := by
+  refine ⟨∑ i, (2 : ℝ) ^ (e i) + 1, by positivity, ?_⟩
+  intro A B hA hB H₂ hH₂
+  set S := ∑ i, (A i * B ^ (e i)) ^ (1 / (e i + 1)) + ∑ i, A i with hS
+  have hb0 : ∀ i, 0 ≤ (A i * B ^ (e i)) ^ (1 / (e i + 1)) := fun i => by
+    have := hA i; positivity
+  have hS1 : 0 ≤ ∑ i, (A i * B ^ (e i)) ^ (1 / (e i + 1)) :=
+    Finset.sum_nonneg (fun i _ => hb0 i)
+  have hS2 : 0 ≤ ∑ i, A i := Finset.sum_nonneg (fun i _ => hA i)
+  have hAS : ∀ i, A i ≤ S := fun i => by
+    have := Finset.single_le_sum (f := A) (fun j _ => hA j) (Finset.mem_univ i)
+    linarith
+  have hbS : ∀ i, A i * B ^ (e i) ≤ S ^ (e i + 1) := by
+    intro i
+    have h1 : (A i * B ^ (e i)) ^ (1 / (e i + 1)) ≤ S := by
+      have := Finset.single_le_sum (f := fun j => (A j * B ^ (e j)) ^ (1 / (e j + 1)))
+        (fun j _ => hb0 j) (Finset.mem_univ i)
+      linarith
+    have hne : e i + 1 ≠ 0 := by linarith [he i]
+    have h2 := Real.rpow_le_rpow (hb0 i) h1 (by linarith [he i] : 0 ≤ e i + 1)
+    rwa [one_div, Real.rpow_inv_rpow (by have := hA i; positivity) hne] at h2
+  have hC1 : (1 : ℝ) ≤ ∑ i, (2 : ℝ) ^ (e i) + 1 := by
+    have : 0 ≤ ∑ i, (2 : ℝ) ^ (e i) := by positivity
+    linarith
+  have hBH₂ : 0 ≤ B * (H₂ : ℝ)⁻¹ := by positivity
+  have hfin := le_mul_of_one_le_left hBH₂ hC1
+  rcases (show 0 ≤ S by linarith).lt_or_eq with hSpos | hS0
+  · set H₀ : ℕ := max 1 ⌈B / S⌉₊ with hH₀
+    refine ⟨min H₀ H₂, le_min (le_max_left _ _) hH₂, min_le_right _ _, ?_⟩
+    have hH₀1 : 1 ≤ H₀ := le_max_left _ _
+    have hH₀R : (1 : ℝ) ≤ H₀ := by exact_mod_cast hH₀1
+    have hH₂R : (1 : ℝ) ≤ H₂ := by exact_mod_cast hH₂
+    have hBH₀ : B * (H₀ : ℝ)⁻¹ ≤ S := by
+      have hc : B / S ≤ (H₀ : ℝ) :=
+        (Nat.le_ceil _).trans (by exact_mod_cast le_max_right _ _)
+      rw [div_le_iff₀ hSpos] at hc
+      rw [← div_eq_mul_inv, div_le_iff₀ (by linarith)]
+      linarith
+    have hHle : ((min H₀ H₂ : ℕ) : ℝ) ≤ H₀ := by exact_mod_cast min_le_left _ _
+    have hHpos : (0 : ℝ) < ((min H₀ H₂ : ℕ) : ℝ) := by
+      have : 1 ≤ min H₀ H₂ := le_min hH₀1 hH₂
+      exact_mod_cast (show 0 < min H₀ H₂ by omega)
+    have hBH : B * ((min H₀ H₂ : ℕ) : ℝ)⁻¹ ≤ S + B * (H₂ : ℝ)⁻¹ := by
+      rcases min_choice H₀ H₂ with h | h <;> rw [h] <;> linarith
+    have hH₀2 : (H₀ : ℝ) ≤ 2 * max 1 (B / S) := by
+      rw [hH₀, Nat.cast_max, Nat.cast_one]
+      apply max_le
+      · linarith [le_max_left 1 (B / S)]
+      · rcases le_total (B / S) 1 with h | h
+        · have h' : ⌈B / S⌉₊ ≤ 1 := Nat.ceil_le.mpr (by simpa using h)
+          have : (⌈B / S⌉₊ : ℝ) ≤ 1 := by exact_mod_cast h'
+          linarith [le_max_left 1 (B / S)]
+        · have := Nat.ceil_lt_add_one (show 0 ≤ B / S by positivity)
+          linarith [le_max_right 1 (B / S)]
+    have key : ∀ i, A i * (max 1 (B / S)) ^ (e i) ≤ S := by
+      intro i
+      rcases le_total (B / S) 1 with h | h
+      · rw [max_eq_left h, Real.one_rpow, mul_one]
+        exact hAS i
+      · rw [max_eq_right h, Real.div_rpow hB hSpos.le, ← mul_div_assoc,
+          div_le_iff₀ (Real.rpow_pos_of_pos hSpos _)]
+        calc A i * B ^ e i ≤ S ^ (e i + 1) := hbS i
+          _ = S * S ^ e i := by rw [Real.rpow_add hSpos, Real.rpow_one]; ring
+    have hterm : ∀ i, A i * ((min H₀ H₂ : ℕ) : ℝ) ^ (e i) ≤ 2 ^ (e i) * S := by
+      intro i
+      have hr1 : 1 ≤ max 1 (B / S) := le_max_left _ _
+      calc A i * ((min H₀ H₂ : ℕ) : ℝ) ^ (e i)
+          ≤ A i * (2 * max 1 (B / S)) ^ (e i) := by
+            apply mul_le_mul_of_nonneg_left _ (hA i)
+            exact Real.rpow_le_rpow hHpos.le (hHle.trans hH₀2) (he i).le
+        _ = 2 ^ (e i) * (A i * (max 1 (B / S)) ^ (e i)) := by
+            rw [Real.mul_rpow (by norm_num) (by linarith)]; ring
+        _ ≤ 2 ^ (e i) * S := mul_le_mul_of_nonneg_left (key i) (by positivity)
+    have hsum : ∑ i, A i * ((min H₀ H₂ : ℕ) : ℝ) ^ (e i) ≤ (∑ i, (2 : ℝ) ^ (e i)) * S := by
+      rw [Finset.sum_mul]
+      exact Finset.sum_le_sum (fun i _ => hterm i)
+    have hexp : (∑ i, (2 : ℝ) ^ (e i) + 1) * (S + B * (H₂ : ℝ)⁻¹) =
+        (∑ i, (2 : ℝ) ^ (e i)) * S + S + (∑ i, (2 : ℝ) ^ (e i) + 1) * (B * (H₂ : ℝ)⁻¹) := by
+      ring
+    linarith
+  · refine ⟨H₂, hH₂, le_rfl, ?_⟩
+    have hA0 : ∀ i, A i = 0 := fun i => le_antisymm (by linarith [hAS i]) (hA i)
+    have h0 : ∑ i, A i * (H₂ : ℝ) ^ (e i) = 0 := by simp [hA0]
+    rw [h0, ← hS0]
+    linarith
+
+/-- PROVED. Page 8, exponent arithmetic of the balance in Graham and Kolesnik Lemma 2.4:
+balancing n to the eps times n to the e1 times y to the e2 times H to the a against
+n to the eps times y times n to the 1 minus gamma over H gives n to the eps times
+n to the E times y to the F with E and F as below. -/
+theorem balance_rpow (n y ε γ e1 e2 a E F : ℝ) (hn : 0 < n) (hy : 0 < y) (ha : 0 < a)
+    (hE : e1 + a * (1 - γ) = E * (a + 1)) (hF : e2 + a = F * (a + 1)) :
+    ((n ^ ε * (n ^ e1 * y ^ e2)) * (n ^ ε * (y * n ^ (1 - γ))) ^ a) ^ (1 / (a + 1)) =
+      n ^ ε * (n ^ E * y ^ F) := by
+  obtain ⟨L, rfl⟩ : ∃ L, n = Real.exp L := ⟨Real.log n, (Real.exp_log hn).symm⟩
+  obtain ⟨M, rfl⟩ : ∃ M, y = Real.exp M := ⟨Real.log y, (Real.exp_log hy).symm⟩
+  simp only [← Real.exp_mul, ← Real.exp_add]
+  congr 1
+  have ha1 : a + 1 ≠ 0 := by linarith
+  field_simp
+  linear_combination L * hE + M * hF
+
+/-- PROVED. Page 8. Every optimized monomial is at most the optimized budget. -/
+theorem le_budget (γ n y : ℝ) (hn : 0 ≤ n) (hy : 0 ≤ y) (E F : ℝ)
+    (h : (E, F) ∈ terms γ) : n ^ E * y ^ F ≤ budget γ n y := by
+  unfold budget
+  apply List.single_le_sum
+  · intro x hx
+    obtain ⟨ab, _, rfl⟩ := List.mem_map.mp hx
+    positivity
+  · exact List.mem_map.mpr ⟨(E, F), h, rfl⟩
+
 /-- LEAF. Pages 5 through 8, S1 estimates and parameter choices.
 Published inputs: Iwaniec and Kowalski Corollary 8.13, the cited Vaughan identity,
 and Graham and Kolesnik Lemmas 2.4 and 2.5.
@@ -78,7 +527,160 @@ theorem optimized_truncated_bound :
             ∃ H : ℕ, 1 ≤ H ∧
               ‖truncatedSum a H γ n y α‖ + tailBudget γ n y H ≤
                 C * K * (n : ℝ) ^ ε * budget γ n y := by
-  sorry
+  intro γ hγ hγ1 ε hε
+  obtain ⟨C₁, hC₁, N₀, hs1⟩ := s1_estimate γ hγ hγ1 ε hε
+  let e : Fin 10 → ℝ := ![3 / 4, 9 / 8, 17 / 14, 1, 3 / 2, 13 / 10, 11 / 10, 7 / 6, 5 / 4, 1 / 2]
+  obtain ⟨Cg, hCg, hgk⟩ := gk_lemma_2_4 e (by intro i; fin_cases i <;> norm_num [e])
+  refine ⟨C₁ + max 1 C₁ * Cg * 21, by positivity, N₀, ?_⟩
+  intro K hK a ha n hn y hy hyu α
+  have hn1 : (1 : ℝ) ≤ (n : ℝ) := by
+    rcases Nat.eq_zero_or_pos n with h | h
+    · subst h
+      have hse : songExponent γ ≠ 0 := by unfold songExponent; intro h; linarith
+      simp [Real.zero_rpow hse] at hy hyu
+      linarith
+    · exact_mod_cast h
+  set N : ℝ := (n : ℝ) with hNdef
+  have hN0 : 0 < N := by linarith
+  have hy0 : 0 < y := (Real.rpow_pos_of_pos hN0 _).trans hy
+  have hNe : 1 ≤ N ^ ε := Real.one_le_rpow hn1 hε.le
+  let t : Fin 10 → ℝ × ℝ :=
+    ![(1 - γ / 4, 0), ((γ + 4) / 8, 1 / 4), ((3 * γ + 4) / 14, 3 / 7), (3 / 4, 1 / 8),
+      (γ / 2 - 1, 1), (3 * γ / 10, 3 / 5), ((γ + 6) / 10, 1 / 5), ((γ + 2) / 6, 1 / 3),
+      (γ / 4, 1 / 2), (1 - γ / 2, 0)]
+  let A : Fin 10 → ℝ := fun i => N ^ ε * (N ^ (t i).1 * y ^ (t i).2)
+  let B : ℝ := N ^ ε * (y * N ^ (1 - γ))
+  obtain ⟨H, hH, -, hL⟩ := hgk A B (by intro i; positivity) (by positivity)
+    (⌈B⌉₊ + 1) (by omega)
+  refine ⟨H, hH, ?_⟩
+  have hs := hs1 K hK a ha n hn y hy hyu α H hH
+  have hH0 : (0 : ℝ) < H := by exact_mod_cast hH
+  set M : ℝ := N ^ ε * budget γ N y with hM
+  have hbud0 : 0 ≤ budget γ N y := by
+    unfold budget
+    apply List.sum_nonneg
+    intro x hx
+    obtain ⟨ab, _, rfl⟩ := List.mem_map.mp hx
+    positivity
+  have hM0 : 0 ≤ M := by positivity
+  -- each balanced term and each endpoint term is at most M
+  have hgen : ∀ e1 e2 c E F : ℝ, 0 < c → e1 + c * (1 - γ) = E * (c + 1) →
+      e2 + c = F * (c + 1) → (E, F) ∈ terms γ →
+      ((N ^ ε * (N ^ e1 * y ^ e2)) * B ^ c) ^ (1 / (c + 1)) ≤ M := by
+    intro e1 e2 c E F hc hE hF hmem
+    rw [balance_rpow N y ε γ e1 e2 c E F hN0 hy0 hc hE hF]
+    exact mul_le_mul_of_nonneg_left (le_budget γ N y hN0.le hy0.le E F hmem) (by positivity)
+  have hend : ∀ e1 e2 E : ℝ, e1 ≤ E → (E, e2) ∈ terms γ →
+      N ^ ε * (N ^ e1 * y ^ e2) ≤ M := by
+    intro e1 e2 E hle hmem
+    apply mul_le_mul_of_nonneg_left _ (by positivity)
+    calc N ^ e1 * y ^ e2 ≤ N ^ E * y ^ e2 :=
+          mul_le_mul_of_nonneg_right (Real.rpow_le_rpow_of_exponent_le hn1 hle) (by positivity)
+      _ ≤ budget γ N y := le_budget γ N y hN0.le hy0.le E e2 hmem
+  have hbal : ∀ i, (A i * B ^ (e i)) ^ (1 / (e i + 1)) ≤ M := by
+    intro i
+    fin_cases i
+    · exact hgen (1 - γ / 4) (0) (3 / 4) (1 - 4 * γ / 7) (3 / 7) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen ((γ + 4) / 8) (1 / 4) (9 / 8) (13 / 17 - 8 * γ / 17) (11 / 17) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen ((3 * γ + 4) / 14) (3 / 7) (17 / 14) (21 / 31 - 14 * γ / 31) (23 / 31) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen (3 / 4) (1 / 8) (1) (7 / 8 - γ / 2) (9 / 16) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen (γ / 2 - 1) (1) (3 / 2) (1 / 5 - 2 * γ / 5) (1) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen (3 * γ / 10) (3 / 5) (13 / 10) (13 / 23 - 10 * γ / 23) (19 / 23) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen ((γ + 6) / 10) (1 / 5) (11 / 10) (17 / 21 - 10 * γ / 21) (13 / 21) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen ((γ + 2) / 6) (1 / 3) (7 / 6) (9 / 13 - 6 * γ / 13) (9 / 13) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen (γ / 4) (1 / 2) (5 / 4) (5 / 9 - 4 * γ / 9) (7 / 9) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+    · exact hgen (1 - γ / 2) (0) (1 / 2) (1 - 2 * γ / 3) (1 / 3) (by norm_num) (by ring) (by ring)
+        (by simp [terms])
+  have hA : ∀ i, A i ≤ M := by
+    intro i
+    fin_cases i
+    · exact hend (1 - γ / 4) (0) (1 - γ / 4) (by linarith) (by simp [terms])
+    · exact hend ((γ + 4) / 8) (1 / 4) (γ / 8 + 1 / 2) (by linarith) (by simp [terms])
+    · exact hend ((3 * γ + 4) / 14) (3 / 7) (3 * γ / 14 + 2 / 7) (by linarith) (by simp [terms])
+    · exact hend (3 / 4) (1 / 8) (3 / 4) (by linarith) (by simp [terms])
+    · exact hend (γ / 2 - 1) (1) (1 / 5 - 2 * γ / 5) (by linarith) (by simp [terms])
+    · exact hend (3 * γ / 10) (3 / 5) (3 * γ / 10) (by linarith) (by simp [terms])
+    · exact hend ((γ + 6) / 10) (1 / 5) (γ / 10 + 3 / 5) (by linarith) (by simp [terms])
+    · exact hend ((γ + 2) / 6) (1 / 3) ((γ + 2) / 6) (by linarith) (by simp [terms])
+    · exact hend (γ / 4) (1 / 2) (γ / 4) (by linarith) (by simp [terms])
+    · exact hend (1 - γ / 2) (0) (1 - γ / 4) (by linarith) (by simp [terms])
+  have hbase : N ^ (3 / 2 - γ) ≤ M := by
+    have h := hend (3 / 2 - γ) 0 (3 / 2 - γ) le_rfl (by simp [terms])
+    have : N ^ (3 / 2 - γ) ≤ N ^ ε * (N ^ (3 / 2 - γ) * y ^ (0 : ℝ)) := by
+      rw [Real.rpow_zero, mul_one]
+      exact le_mul_of_one_le_left (Real.rpow_nonneg hN0.le _) hNe
+    linarith
+  have hR : ∑ i, (A i * B ^ (e i)) ^ (1 / (e i + 1)) + ∑ i, A i +
+      B * ((⌈B⌉₊ + 1 : ℕ) : ℝ)⁻¹ ≤ 21 * M := by
+    have h1 := Finset.sum_le_sum (fun i (_ : i ∈ Finset.univ) => hbal i)
+    have h2 := Finset.sum_le_sum (fun i (_ : i ∈ Finset.univ) => hA i)
+    rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at h1 h2
+    push_cast at h1 h2
+    have hB2 : B * ((⌈B⌉₊ + 1 : ℕ) : ℝ)⁻¹ ≤ 1 := by
+      have hc : B ≤ ((⌈B⌉₊ + 1 : ℕ) : ℝ) := by
+        push_cast; linarith [Nat.le_ceil B]
+      rw [← div_eq_mul_inv, div_le_one (by positivity)]
+      exact hc
+    have hM1 : 1 ≤ M := (Real.one_le_rpow hn1 (by linarith)).trans hbase
+    linarith
+  -- the S1 polynomial and the S2 budget are the Lemma 2.4 sum
+  have hQ : ∑ i, A i * (H : ℝ) ^ (e i) + B * (H : ℝ)⁻¹ =
+      N ^ ε * s1Poly γ N y H + N ^ ε * (N ^ (1 - γ / 2) * (H : ℝ) ^ ((1 : ℝ) / 2)) +
+        N ^ ε * ((H : ℝ)⁻¹ * y * N ^ (1 - γ)) := by
+    simp [A, B, t, e, Fin.sum_univ_succ, s1Poly, s1Terms]
+    ring
+  have hP0 : 0 ≤ s1Poly γ N y H := by
+    unfold s1Poly
+    apply List.sum_nonneg
+    intro x hx
+    obtain ⟨ab, _, rfl⟩ := List.mem_map.mp hx
+    positivity
+  have hT : tailBudget γ N y H ≤ N ^ ε * (N ^ (1 - γ / 2) * (H : ℝ) ^ ((1 : ℝ) / 2)) +
+        N ^ ε * ((H : ℝ)⁻¹ * y * N ^ (1 - γ)) := by
+    unfold tailBudget
+    have h1 : 0 ≤ N ^ (1 - γ / 2) * (H : ℝ) ^ ((1 : ℝ) / 2) := by positivity
+    have h2 : 0 ≤ (H : ℝ)⁻¹ * y * N ^ (1 - γ) := by positivity
+    have h3 := le_mul_of_one_le_left h1 hNe
+    have h4 := le_mul_of_one_le_left h2 hNe
+    linarith
+  have hT0 : 0 ≤ tailBudget γ N y H := by unfold tailBudget; positivity
+  have hPT : N ^ ε * s1Poly γ N y H + tailBudget γ N y H ≤ Cg * (21 * M) := by
+    calc _ ≤ ∑ i, A i * (H : ℝ) ^ (e i) + B * (H : ℝ)⁻¹ := by rw [hQ]; linarith
+      _ ≤ _ := hL
+      _ ≤ _ := mul_le_mul_of_nonneg_left hR hCg
+  have hK0 : 0 ≤ K := by linarith
+  have hmax : 1 ≤ max 1 C₁ := le_max_left _ _
+  have hmax' : C₁ ≤ max 1 C₁ := le_max_right _ _
+  have hPs0 : 0 ≤ N ^ ε * s1Poly γ N y H := by positivity
+  have hstep : C₁ * K * (N ^ ε * s1Poly γ N y H) + tailBudget γ N y H ≤
+      max 1 C₁ * K * (N ^ ε * s1Poly γ N y H + tailBudget γ N y H) := by
+    have e1 : C₁ * K * (N ^ ε * s1Poly γ N y H) ≤ max 1 C₁ * K * (N ^ ε * s1Poly γ N y H) :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hmax' hK0) hPs0
+    have e2 : tailBudget γ N y H ≤ max 1 C₁ * K * tailBudget γ N y H :=
+      le_mul_of_one_le_left hT0 (one_le_mul_of_one_le_of_one_le hmax hK)
+    rw [mul_add]
+    linarith
+  have hfin : ‖truncatedSum a H γ n y α‖ + tailBudget γ N y H ≤
+      C₁ * K * M + max 1 C₁ * K * (Cg * (21 * M)) := by
+    have h3 : C₁ * K * N ^ (3 / 2 - γ) ≤ C₁ * K * M :=
+      mul_le_mul_of_nonneg_left hbase (mul_nonneg hC₁ hK0)
+    have h4 := mul_le_mul_of_nonneg_left hPT (mul_nonneg (by linarith : 0 ≤ max 1 C₁) hK0)
+    have hs' : ‖truncatedSum a H γ n y α‖ ≤
+        C₁ * K * N ^ (3 / 2 - γ) + C₁ * K * (N ^ ε * s1Poly γ N y H) := by
+      rw [← mul_add]; exact hs
+    linarith
+  calc ‖truncatedSum a H γ n y α‖ + tailBudget γ N y H
+      ≤ C₁ * K * M + max 1 C₁ * K * (Cg * (21 * M)) := hfin
+    _ = (C₁ + max 1 C₁ * Cg * 21) * K * N ^ ε * budget γ N y := by rw [hM]; ring
 
 /-- LEAF. Page 8, last sentence. Endpoint exponent comparisons bound each monomial. -/
 theorem monomial_le (n y θ A B D E : ℝ) (hn : 1 ≤ n) (hy : n ^ θ ≤ y)
@@ -200,6 +802,16 @@ end LeanLab.Song2020.Decomp139
 
 #print axioms LeanLab.Song2020.Decomp139.characteristic_reduction
 #print axioms LeanLab.Song2020.Decomp139.fourier_approximation
+#print axioms LeanLab.Song2020.Decomp139.s1_lambda_reduction
+#print axioms LeanLab.Song2020.Decomp139.lambda_sum_per_h
+#print axioms LeanLab.Song2020.Decomp139.sum_rpow_le_of_nonneg
+#print axioms LeanLab.Song2020.Decomp139.sum_rpow_neg_quarter_le
+#print axioms LeanLab.Song2020.Decomp139.sum_perH_le
+#print axioms LeanLab.Song2020.Decomp139.s1_estimate_of_split
+#print axioms LeanLab.Song2020.Decomp139.s1_estimate
+#print axioms LeanLab.Song2020.Decomp139.gk_lemma_2_4
+#print axioms LeanLab.Song2020.Decomp139.balance_rpow
+#print axioms LeanLab.Song2020.Decomp139.le_budget
 #print axioms LeanLab.Song2020.Decomp139.optimized_truncated_bound
 #print axioms LeanLab.Song2020.Decomp139.monomial_le
 #print axioms LeanLab.Song2020.Decomp139.budget_le
