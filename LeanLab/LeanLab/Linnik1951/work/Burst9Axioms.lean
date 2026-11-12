@@ -1,0 +1,29 @@
+import LeanLab.Linnik1951.Decomp111
+open LeanLab.Linnik1951
+#print axioms polylog_small_split111
+#print axioms arc_abs_le_split111
+#print axioms power_norm_le_split111
+#print axioms prime_square_integrableOn_split111
+#print axioms lemma7_split111
+#print axioms exceptional_absorb_split111
+#print axioms exponent_count_split111
+#print axioms trunc_difference_split111
+#print axioms trunc_absorb_split111
+#print axioms divisor_count_le_rpow_split111
+#print axioms kernel_e_re_split111
+#print axioms truncSingular_eq_re_split111
+#print axioms lemma4_measure_split111
+#print axioms power_zero_lower_split111
+#print axioms dyadic_weight_split111
+#print axioms exp_phase_diff_split111
+#print axioms power_shift_diff_split111
+#print axioms lemma5_shift_split111
+#print axioms grid_cover_split111
+#print axioms lemma5_cover_split111
+#print axioms covered_square_split111
+#print axioms exceptional_square_split111
+#print axioms major_truncated_split111
+#print axioms singular_truncation_split111
+#print axioms major_error_split111
+#print axioms exceptional_error_split111
+#print axioms error_bound111
