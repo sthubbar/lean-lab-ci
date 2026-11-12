@@ -1,4 +1,5 @@
 import LeanLab.LanguascoPintzZaccagnini2007.Decomp481b
+import LeanLab.PNTPort.DirichletZF.Siegel
 
 /-!
 Split of `real_zero_bound481` of `Decomp481b`, the real zero lower bound of preprint page 5.
@@ -448,6 +449,104 @@ private theorem riemannZeta_ne_zero_of_mem_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ
 
 end RZB481
 
+namespace RZB481
+
+open Complex Filter
+open scoped Topology
+
+/-- A character with real values has square one. -/
+private theorem sq_of_real481 {r : ℕ} [NeZero r] (χ : DirichletCharacter ℂ r)
+    (hreal : ∀ a, (χ a).im = 0) : χ ^ 2 = 1 := by
+  have hstar : star χ = χ := by
+    ext a
+    change star (χ a) = χ a
+    apply Complex.ext <;> simp [hreal a]
+  rw [MulChar.star_eq_inv] at hstar
+  calc χ ^ 2 = χ⁻¹ * χ := by rw [hstar, pow_two]
+    _ = 1 := inv_mul_cancel _
+
+/-- One Euler factor of the principal character does not vanish at a real point of `(0,1)`. -/
+private theorem one_sub_cpow_neg_ne_zero481 {p : ℕ} (hp : p.Prime) {β : ℝ} (h0 : 0 < β) :
+    (1 : ℂ) - (p : ℂ) ^ (-(β : ℂ)) ≠ 0 := by
+  intro h
+  have h1 : (p : ℂ) ^ (-(β : ℂ)) = 1 := by linear_combination -h
+  have hp0 : (0 : ℝ) < (p : ℝ) := by exact_mod_cast hp.pos
+  have hcast : (((p : ℝ)) : ℂ) = (p : ℂ) := by push_cast; ring
+  have hn := Complex.norm_cpow_eq_rpow_re_of_pos (x := (p : ℝ)) hp0 (-(β : ℂ))
+  rw [hcast, h1, norm_one] at hn
+  simp only [Complex.neg_re, Complex.ofReal_re] at hn
+  have hlt : (p : ℝ) ^ (-β) < 1 :=
+    Real.rpow_lt_one_of_one_lt_of_neg (by exact_mod_cast hp.one_lt) (by linarith)
+  linarith
+
+/-- The principal character has no real zero in `(0,1)`. -/
+private theorem principal_ne_zero481 {r : ℕ} [NeZero r] {β : ℝ} (hβ0 : 0 < β) (hβ1 : β < 1) :
+    DirichletCharacter.LFunction (1 : DirichletCharacter ℂ r) (β : ℂ) ≠ 0 := by
+  have hne : (β : ℂ) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.ofReal_re, Complex.one_re] at hre
+    linarith
+  change DirichletCharacter.LFunctionTrivChar r (β : ℂ) ≠ 0
+  rw [DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta hne]
+  refine mul_ne_zero ?_ ?_
+  · refine Finset.prod_ne_zero_iff.mpr (fun p hp => ?_)
+    exact one_sub_cpow_neg_ne_zero481 (Nat.prime_of_mem_primeFactors hp) hβ0
+  · exact riemannZeta_ne_zero_of_mem_Ioo hβ0 hβ1
+
+/-- **The real zero lower bound for every real character**, from Siegel's theorem at exponent
+one half. This is strictly stronger than either of the two remaining leaves: no case
+distinction on primitivity, and no restriction on the size of `δ`. -/
+private theorem real_zero_bound_all481 :
+    ∃ a : ℝ, 0 < a ∧ ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
+      (∀ b, (χ b).im = 0) → ∀ δ : ℝ, 0 < δ →
+        Lfun481 χ (1 - (δ : ℂ)) = 0 → a * (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ δ := by
+  obtain ⟨c, hc, H⟩ := LeanLab.PNTPort.DirichletZF.siegel_zero (1 / 2) (by norm_num)
+  let C := min (c * (8 : ℝ) ^ (-(1 / 2 : ℝ))) (1 / 2)
+  have hC : 0 < C := lt_min (by positivity) (by norm_num)
+  refine ⟨C, hC, fun r hr χ hreal δ hδ hz => ?_⟩
+  have hr0 : 0 < r := by omega
+  have hrne : r ≠ 0 := by omega
+  haveI : NeZero r := ⟨hrne⟩
+  have hrreal : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr
+  have hrpow : (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos hrreal (by norm_num)
+  by_cases hfar : (1 / 2 : ℝ) ≤ δ
+  · have hC1 : C ≤ 1 / 2 := min_le_right _ _
+    calc C * (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ C * 1 := mul_le_mul_of_nonneg_left hrpow hC.le
+      _ = C := mul_one C
+      _ ≤ δ := by linarith
+  have hβ0 : 0 < 1 - δ := by linarith
+  have hβ1 : 1 - δ < 1 := by linarith
+  have hL : Lfun481 χ (1 - (δ : ℂ)) = DirichletCharacter.LFunction χ (1 - (δ : ℂ)) := by
+    unfold Lfun481
+    rw [dif_neg hrne]
+  have hz' : DirichletCharacter.LFunction χ ((1 - δ : ℝ) : ℂ) = 0 := by
+    rw [hL] at hz
+    rwa [show (1 : ℂ) - (δ : ℂ) = ((1 - δ : ℝ) : ℂ) by push_cast; ring] at hz
+  have hχ : χ ≠ 1 := by
+    rintro rfl
+    exact principal_ne_zero481 hβ0 hβ1 hz'
+  have hχ2 : χ ^ 2 = 1 := sq_of_real481 χ hreal
+  let M := 8 * r
+  haveI : NeZero M := ⟨Nat.mul_ne_zero (by decide) hrne⟩
+  have hd : r ∣ M := Dvd.intro_left 8 rfl
+  have hM : 8 ≤ M := by dsimp only [M]; omega
+  have hzlift : DirichletCharacter.LFunction (DirichletCharacter.changeLevel hd χ)
+      ((1 - δ : ℝ) : ℂ) = 0 := by
+    rw [LeanLab.PNTPort.DirichletZF.L_lift hd hχ, hz', zero_mul]
+  have hb := H M hM (DirichletCharacter.changeLevel hd χ)
+    (LeanLab.PNTPort.DirichletZF.lift_ne_one hd hχ)
+    (LeanLab.PNTPort.DirichletZF.lift_sq hd hχ2) (1 - δ) hβ1.le hzlift
+  have hMr : (M : ℝ) = 8 * r := by simp [M]
+  rw [hMr, Real.mul_rpow (by norm_num) (Nat.cast_nonneg r)] at hb
+  have hcoeff : C ≤ c * (8 : ℝ) ^ (-(1 / 2 : ℝ)) := min_le_left _ _
+  have hmul := mul_le_mul_of_nonneg_right hcoeff
+    (Real.rpow_nonneg (Nat.cast_nonneg r) (-(1 / 2 : ℝ)))
+  nlinarith
+
+end RZB481
+
 /-- LEAF. The modulus one case of the real zero lower bound. For the trivial character, whose
 L function is the Riemann zeta function, a zero at `1 - δ` with `0 < δ < 1 / 2` costs at least a
 fixed positive multiple of `1 ^ (-(1 / 2))`, uniformly in the character of modulus one. -/
@@ -473,7 +572,8 @@ theorem leaf_real_zero_primitive_large481 :
     ∃ a : ℝ, 0 < a ∧ ∀ r : ℕ, 1 ≤ r → 2 ≤ r → ∀ χ : DirichletCharacter ℂ r,
       χ.IsPrimitive → (∀ b, (χ b).im = 0) → ∀ δ : ℝ, 0 < δ → δ < 1 / 2 →
         Lfun481 χ (1 - (δ : ℂ)) = 0 → a * (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ δ := by
-  sorry
+  obtain ⟨a, ha, H⟩ := RZB481.real_zero_bound_all481
+  exact ⟨a, ha, fun r hr _hr2 χ _hprim hreal δ hδ _hδ2 hz => H r hr χ hreal δ hδ hz⟩
 
 /-- LEAF. The imprimitive case of the real zero lower bound. For a real character that is not
 primitive, a zero of its L function at `1 - δ` with `0 < δ < 1 / 2` costs at least a fixed
@@ -483,7 +583,8 @@ theorem leaf_real_zero_imprimitive481 :
     ∃ a : ℝ, 0 < a ∧ ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
       ¬ χ.IsPrimitive → (∀ b, (χ b).im = 0) → ∀ δ : ℝ, 0 < δ → δ < 1 / 2 →
         Lfun481 χ (1 - (δ : ℂ)) = 0 → a * (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ δ := by
-  sorry
+  obtain ⟨a, ha, H⟩ := RZB481.real_zero_bound_all481
+  exact ⟨a, ha, fun r hr χ _hnp hreal δ hδ _hδ2 hz => H r hr χ hreal δ hδ hz⟩
 
 /-- The real zero lower bound from its three cases and the elementary step for large `δ`. -/
 theorem real_zero_bound481_split : RealZeroStatement481 := by
