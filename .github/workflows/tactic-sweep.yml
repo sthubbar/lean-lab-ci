@@ -4,7 +4,9 @@
 # Every 2 hours, 8 shards by stable file hash, each runs scripts/ci/sweep.py on its files and commits
 # results/<run_id>-<shard>.json to branch sweep-results; the summary job writes results/<run_id>-summary.json.
 # sweep_import.py on the PC turns closed declarations into sweep/ branches that the gate judges like any other.
-# PRIORITY: the gate runs first. A shard that sees any lean-gate run queued or in progress exits early with success.
+# PRIORITY: the gate runs first. A shard that sees a lean-gate run QUEUED, waiting for a runner, exits early with success.
+# lrefresh 20261112T1600Z, Steve live: it used to skip on in_progress too, and the gate runs about 230 times a day, so every shard
+# exited in 6 seconds and the sweep closed 0. The repo has 20 concurrent jobs and the sweep takes at most 8, so a running gate is not starved.
 # Test by hand: POST actions/workflows/tactic-sweep.yml/dispatches {"ref":"main","inputs":{"only":"0","force":"true"}}
 name: tactic-sweep
 on:
@@ -46,12 +48,12 @@ jobs:
         run: |
           if [ "$FORCE" = "true" ]; then echo "SWEEP force, priority check skipped"; echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           n=0
-          for s in queued in_progress; do
+          for s in queued; do
             c=$(curl -sS --retry 2 -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/lean-gate.yml/runs?status=$s&per_page=1" | python3 -c "import json,sys; print(int(json.load(sys.stdin)['total_count']))") || c=1
             n=$((n + c))
           done
           if [ "$n" -gt 0 ]; then
-            echo "SWEEP SKIP shard ${{ matrix.shard }}: $n lean-gate runs queued or in progress, the gate runs first" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "SWEEP SKIP shard ${{ matrix.shard }}: $n lean-gate runs queued for a runner, the gate runs first" | tee -a "$GITHUB_STEP_SUMMARY"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
       - name: Free disk space
