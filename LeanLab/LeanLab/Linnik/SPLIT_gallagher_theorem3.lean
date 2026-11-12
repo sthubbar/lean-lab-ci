@@ -43,7 +43,11 @@ theorem split_exceptional_radius_select :
       ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
         ∃ r : ℕ,
           (r = 0 ∨ ∃ x ∈ excSet exceptionalStrip (((N : ℝ) ^ θ) ^ 5), r = x.1 + 1) := by
-  sorry
+  -- Refutation pass: the leaf asks only for the *existence* of a radius and does not
+  -- constrain its size. `r = 0` is allowed at every `N`, so no exceptional character
+  -- is needed and no positivity or size hypothesis on `N` is required.
+  intro _θ₀ _hθ₀ _hθ₀1 _θ _hθ _hθθ₀
+  exact ⟨0, fun _N _hN => ⟨0, Or.inl rfl⟩⟩
 
 /-- LEAF. The exceptional conductor is smaller than the scale. A member of the
 exceptional set at height `(N ^ θ) ^ 5`, with `θ` in `(0, 1]`, has conductor one more
