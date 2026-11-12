@@ -79,7 +79,30 @@ theorem leaf_real_nonreal_threshold481 :
     ∃ b : ℝ, 0 < b ∧ ∀ X : ℕ, 1 < X → ∀ H T P : ℝ,
       ∀ z ∈ zeroBox481 X H T P, (∀ a, (z.2.1 a).im = 0) → z.2.2.im ≠ 0 →
         b / Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤ H / Real.log X := by
-  sorry
+  -- The analytic input is the classical zero free region for real primitive Dirichlet
+  -- characters off the real axis: there is an absolute `b > 0` such that a nonreal zero `rho`
+  -- of a real character of modulus `r` satisfies `b / log (r (|rho.im| + 2)) <= 1 - rho.re`.
+  -- This is an external result of Davenport, Multiplicative Number Theory, Chapter 14.
+  -- It is not in Mathlib and it is not in `Decomp481b`, which only cites the region for
+  -- nonreal primitive characters and the real zero bound on the real axis.
+  have hclassical : ∃ b : ℝ, 0 < b ∧
+      ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
+        (∀ a, (χ a).im = 0) → ∀ ρ : ℂ,
+          Lfun481 χ ρ = 0 → ρ.im ≠ 0 →
+            b / Real.log ((r : ℝ) * (|ρ.im| + 2)) ≤ 1 - ρ.re := by
+    sorry
+  obtain ⟨b, hb, hregion⟩ := hclassical
+  refine ⟨b, hb, ?_⟩
+  intro X hX H T P z hz hreal him
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hz
+  -- The region places the nonreal zero at least `b / log (r (|t| + 2))` to the left of one.
+  have hzreg : b / Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤ 1 - z.2.2.re :=
+    hregion z.1 h1 z.2.1 hreal z.2.2 h4 him
+  -- The box puts the zero at real part at least `1 - H / log X`, so the gap to one is at most
+  -- `H / log X`. The two radii are therefore ordered.
+  have hgap : 1 - z.2.2.re ≤ H / Real.log X := by
+    linarith [h5]
+  exact le_trans hzreg hgap
 
 /-- LEAF. From that radius to the conductor bound: for a fixed `H ≥ 1` and `T ≥ 1`, if every
 nonreal zero of the box satisfies the radius inequality at every height, then the modulus of such
