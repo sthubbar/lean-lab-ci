@@ -10,6 +10,8 @@ import LeanLab.BHP1997.DecompC165a
 import LeanLab.BHP1997.Decomp132
 import LeanLab.BHP1997.NormalizationC165
 import LeanLab.ChenDoubleSieve.I2Range
+import LeanLab.BHP1997.Decomp308a
+import LeanLab.BHP1997.ShortConditions308
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b
@@ -946,6 +948,250 @@ theorem upper_deleted_nonneg {ω : ℝ → ℝ}
     exact div_nonneg (buchstab_nonneg hω (le_of_not_gt hu)) (by positivity)
   · exact le_rfl
 
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The sifting indicator psi(n, w): it is 1 when n has no prime factor below w. -/
+noncomputable def upperRough (n : ℕ) (w : ℝ) : ℝ :=
+  if ∀ p ∈ n.primeFactors, w ≤ (p : ℝ) then 1 else 0
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The sifting indicator psi is nonnegative; used when terms are deleted from k_m. -/
+theorem upperRough_nonneg (n : ℕ) (w : ℝ) : 0 ≤ upperRough n w := by
+  unfold upperRough; split_ifs <;> norm_num
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. One step of Buchstab's identity behind the display for rho(m):
+psi(n, z2) = psi(n, z1) minus the sum over primes z1 <= p < z2 with p n' = n of psi(n', p). -/
+theorem upper_rough_buchstab_step (n : ℕ) {z1 z2 : ℝ} (hz : z1 ≤ z2) :
+    upperRough n z2 = upperRough n z1 -
+      ∑ p ∈ n.primeFactors.filter (fun p : ℕ => z1 ≤ (p : ℝ) ∧ (p : ℝ) < z2),
+        upperRough (n / p : ℕ) (p : ℝ) := by
+  -- a prime factor q of n other than p divides n / p
+  have hdvd : ∀ {p q : ℕ}, p ∈ n.primeFactors → q ∈ n.primeFactors → q ≠ p →
+      q ∈ (n / p).primeFactors := by
+    intro p q hp hq hqp
+    have hp' := Nat.mem_primeFactors.mp hp
+    have hq' := Nat.mem_primeFactors.mp hq
+    have hn : n = p * (n / p) := (Nat.mul_div_cancel' hp'.2.1).symm
+    refine Nat.mem_primeFactors.mpr ⟨hq'.1, ?_, ?_⟩
+    · have h1 : q ∣ p * (n / p) := hn ▸ hq'.2.1
+      rcases (Nat.Prime.dvd_mul hq'.1).mp h1 with h | h
+      · exact absurd ((Nat.prime_dvd_prime_iff_eq hq'.1 hp'.1).mp h) hqp
+      · exact h
+    · intro h0
+      rw [h0, mul_zero] at hn
+      exact hp'.2.2 hn
+  by_cases h1 : ∀ p ∈ n.primeFactors, z1 ≤ (p : ℝ)
+  · by_cases hn1 : n.primeFactors = ∅
+    · simp [upperRough, hn1]
+    · have hn0 : n ≠ 0 := by rintro rfl; simp at hn1
+      have hn1' : n ≠ 1 := by rintro rfl; simp at hn1
+      set q := n.minFac with hqdef
+      have hqp : q.Prime := Nat.minFac_prime hn1'
+      have hqmem : q ∈ n.primeFactors :=
+        Nat.mem_primeFactors.mpr ⟨hqp, Nat.minFac_dvd n, hn0⟩
+      have hmin : ∀ p ∈ n.primeFactors, q ≤ p := fun p hp =>
+        Nat.minFac_le_of_dvd (Nat.mem_primeFactors.mp hp).1.two_le (Nat.mem_primeFactors.mp hp).2.1
+      by_cases hq2 : z2 ≤ (q : ℝ)
+      · have hall : ∀ p ∈ n.primeFactors, z2 ≤ (p : ℝ) := fun p hp =>
+          hq2.trans (by exact_mod_cast hmin p hp)
+        have hempty : n.primeFactors.filter (fun p : ℕ => z1 ≤ (p : ℝ) ∧ (p : ℝ) < z2) = ∅ := by
+          apply Finset.filter_eq_empty_iff.mpr
+          intro p hp hc
+          linarith [hall p hp, hc.2]
+        rw [hempty, Finset.sum_empty]; unfold upperRough; rw [if_pos hall, if_pos h1]; ring
+      · have hq2' : (q : ℝ) < z2 := lt_of_not_ge hq2
+        have hnot : ¬ ∀ p ∈ n.primeFactors, z2 ≤ (p : ℝ) := fun h => hq2 (h q hqmem)
+        have hsum : (∑ p ∈ n.primeFactors.filter (fun p : ℕ => z1 ≤ (p : ℝ) ∧ (p : ℝ) < z2),
+            upperRough (n / p : ℕ) (p : ℝ)) = 1 := by
+          rw [Finset.sum_eq_single q]
+          · unfold upperRough
+            rw [if_pos]
+            intro r hr
+            have hr' := Nat.mem_primeFactors.mp hr
+            have hrn : r ∈ n.primeFactors := Nat.mem_primeFactors.mpr
+              ⟨hr'.1, hr'.2.1.trans (Nat.div_dvd_of_dvd (Nat.minFac_dvd n)), hn0⟩
+            exact_mod_cast hmin r hrn
+          · intro p hp hpq
+            have hp' := Finset.mem_filter.mp hp
+            have hqin := hdvd hp'.1 hqmem (Ne.symm hpq)
+            unfold upperRough
+            rw [if_neg]
+            intro hall
+            have h3 := hall q hqin
+            have h4 : q < p := lt_of_le_of_ne (hmin p hp'.1) (Ne.symm hpq)
+            have h5 : (q : ℝ) < p := by exact_mod_cast h4
+            linarith
+          · intro hq
+            exact absurd (Finset.mem_filter.mpr ⟨hqmem, h1 q hqmem, hq2'⟩) hq
+        rw [hsum]; unfold upperRough; rw [if_neg hnot, if_pos h1]; ring
+  · obtain ⟨r, hr, hrz⟩ : ∃ r ∈ n.primeFactors, (r : ℝ) < z1 := by
+      push_neg at h1; exact h1
+    have hnot : ¬ ∀ p ∈ n.primeFactors, z2 ≤ (p : ℝ) := fun h => by
+      linarith [h r hr]
+    have hsum : (∑ p ∈ n.primeFactors.filter (fun p : ℕ => z1 ≤ (p : ℝ) ∧ (p : ℝ) < z2),
+        upperRough (n / p : ℕ) (p : ℝ)) = 0 := by
+      apply Finset.sum_eq_zero
+      intro p hp
+      have hp' := Finset.mem_filter.mp hp
+      have hrp : r ≠ p := by
+        rintro rfl; linarith [hp'.2.1]
+      unfold upperRough
+      rw [if_neg]
+      intro hall
+      have := hall r (hdvd hp'.1 hr hrp)
+      linarith [hp'.2.1]
+    rw [hsum]; unfold upperRough; rw [if_neg hnot, if_neg h1]; ring
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53, and Section 5 page 50. The exponent c1 = (1 + 7 theta2)/15 - eps with theta2 = 2(1/16 - 1/10^5). -/
+noncomputable def upperC1 (ε : ℝ) : ℝ := (1+7*(2*(1/16-1/10^5)))/15-ε
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The exponent c4 = 1/4 + theta2/8 - eps with theta2 = 2(1/16 - 1/10^5). -/
+noncomputable def upperC4 (ε : ℝ) : ℝ := 1/4+(2*(1/16-1/10^5))/8-ε
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The first term g_m = psi(m, Y^c1) of the four-term display. -/
+noncomputable def upperG (ε Y : ℝ) (m : ℕ) : ℝ := upperRough m (Y ^ upperC1 ε)
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The second term h_m: sum over p1 n2 = m, Y^c1 <= p1 < Y^c4, of psi(n2, Y^c1). -/
+noncomputable def upperH (ε Y : ℝ) (m : ℕ) : ℝ :=
+  ∑ p1 ∈ m.primeFactors.filter
+      (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < Y ^ upperC4 ε),
+    upperRough (m / p1 : ℕ) (Y ^ upperC1 ε)
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The third term j_m: sum over p1 p2 n3 = m, Y^c1 <= p2 < p1 < Y^c4, of psi(n3, Y^c1). -/
+noncomputable def upperJ (ε Y : ℝ) (m : ℕ) : ℝ :=
+  ∑ p1 ∈ m.primeFactors.filter
+      (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < Y ^ upperC4 ε),
+    ∑ p2 ∈ (m / p1 : ℕ).primeFactors.filter
+        (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p1 : ℝ)),
+      upperRough (m / p1 / p2 : ℕ) (Y ^ upperC1 ε)
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The fourth term k_m: sum over p1 p2 p3 n4 = m, Y^c1 <= p3 < p2 < p1 < Y^c4, of psi(n4, p3). -/
+noncomputable def upperK (ε Y : ℝ) (m : ℕ) : ℝ :=
+  ∑ p1 ∈ m.primeFactors.filter
+      (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < Y ^ upperC4 ε),
+    ∑ p2 ∈ (m / p1 : ℕ).primeFactors.filter
+        (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p1 : ℝ)),
+      ∑ p3 ∈ (m / p1 / p2 : ℕ).primeFactors.filter
+          (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p2 : ℝ)),
+        upperRough (m / p1 / p2 / p3 : ℕ) (p3 : ℝ)
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The part of k_m that is kept: the terms where Lemma 33 applies to an arrangement
+of the exponents beta_i = log p_i / log Y, in the lab's conservative form upperPrimeCovered.
+The other terms of k_m are the deleted set E of page 53, matching upperDeletedIntegrand. -/
+noncomputable def upperKept (ε Y : ℝ) (m : ℕ) : ℝ :=
+  ∑ p1 ∈ m.primeFactors.filter
+      (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < Y ^ upperC4 ε),
+    ∑ p2 ∈ (m / p1 : ℕ).primeFactors.filter
+        (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p1 : ℝ)),
+      ∑ p3 ∈ (m / p1 / p2 : ℕ).primeFactors.filter
+          (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p2 : ℝ)),
+        if upperPrimeCovered ε (Real.log p1 / Real.log Y) (Real.log p2 / Real.log Y)
+            (Real.log p3 / Real.log Y) then upperRough (m / p1 / p2 / p3 : ℕ) (p3 : ℝ) else 0
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. The paper's raw coefficient b1(m) = g_m - h_m + j_m - kept part of k_m. -/
+noncomputable def upperRawWeight (ε Y : ℝ) (m : ℕ) : ℝ :=
+  upperG ε Y m - upperH ε Y m + upperJ ε Y m - upperKept ε Y m
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53, the displayed four-term identity
+psi(m, Y^c4) = g_m - h_m + j_m - k_m, from three Buchstab steps. PROVED. -/
+theorem upper_rough_four_term (ε : ℝ) {Y : ℝ} (hY : 1 ≤ Y) (m : ℕ) :
+    upperRough m (Y ^ upperC4 ε) =
+      upperG ε Y m - upperH ε Y m + upperJ ε Y m - upperK ε Y m := by
+  have hc : Y ^ upperC1 ε ≤ Y ^ upperC4 ε :=
+    Real.rpow_le_rpow_of_exponent_le hY (by unfold upperC1 upperC4; norm_num)
+  rw [upper_rough_buchstab_step m hc]
+  unfold upperG upperH upperJ upperK
+  have e1 : ∀ p1 ∈ m.primeFactors.filter
+      (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < Y ^ upperC4 ε),
+      upperRough (m / p1 : ℕ) (p1 : ℝ) =
+        upperRough (m / p1 : ℕ) (Y ^ upperC1 ε) -
+          (∑ p2 ∈ (m / p1 : ℕ).primeFactors.filter
+            (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p1 : ℝ)),
+            (upperRough (m / p1 / p2 : ℕ) (Y ^ upperC1 ε) -
+              ∑ p3 ∈ (m / p1 / p2 : ℕ).primeFactors.filter
+                (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p2 : ℝ)),
+                upperRough (m / p1 / p2 / p3 : ℕ) (p3 : ℝ))) := by
+    intro p1 hp1
+    rw [upper_rough_buchstab_step (m / p1) (Finset.mem_filter.mp hp1).2.1]
+    congr 1
+    apply Finset.sum_congr rfl
+    intro p2 hp2
+    exact upper_rough_buchstab_step (m / p1 / p2) (Finset.mem_filter.mp hp2).2.1
+  rw [Finset.sum_congr rfl e1]
+  simp only [Finset.sum_sub_distrib]
+  ring
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. Deleting terms from k_m lowers it, since every psi term is nonnegative. -/
+theorem upper_kept_le (ε Y : ℝ) (m : ℕ) : upperKept ε Y m ≤ upperK ε Y m := by
+  unfold upperKept upperK
+  apply Finset.sum_le_sum; intro p1 _
+  apply Finset.sum_le_sum; intro p2 _
+  apply Finset.sum_le_sum; intro p3 _
+  split_ifs
+  · exact le_rfl
+  · exact upperRough_nonneg _ _
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53. "We obtain b1(m) from psi(m, Y^c4) by deleting from k_m the terms ...":
+the deletion raises the weight, g - h + j - k <= b1. -/
+theorem upper_four_term_le_raw (ε Y : ℝ) (m : ℕ) :
+    upperG ε Y m - upperH ε Y m + upperJ ε Y m - upperK ε Y m ≤ upperRawWeight ε Y m := by
+  unfold upperRawWeight
+  linarith [upper_kept_le ε Y m]
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53, first inequality rho(m) <= psi(m, Y^c4) for m in J = (Y, 2Y], Y = x^(11/20+eps):
+a prime m > Y >= Y^c4 has no prime factor below Y^c4. -/
+theorem upper_prime_le_rough {ε x : ℝ} (hε : 0 < ε) (hx : 1 ≤ x) {m : ℕ}
+    (hm : m ∈ rightInterval ε x) :
+    primeWeight m ≤ upperRough m ((x ^ (11 / 20 + ε)) ^ upperC4 ε) := by
+  unfold primeWeight
+  split_ifs with hp
+  · have hY : 1 ≤ x ^ (11 / 20 + ε) := Real.one_le_rpow hx (by linarith)
+    have hc : (x ^ (11 / 20 + ε)) ^ upperC4 ε ≤ x ^ (11 / 20 + ε) := by
+      conv_rhs => rw [← Real.rpow_one (x ^ (11 / 20 + ε))]
+      exact Real.rpow_le_rpow_of_exponent_le hY (by unfold upperC4; linarith)
+    have hmY : x ^ (11 / 20 + ε) < (m : ℝ) := by
+      have h1 := (Finset.mem_Ioc.mp hm).1
+      have h2 := Nat.lt_floor_add_one (x ^ (11 / 20 + ε))
+      have h3 : ((⌊x ^ (11 / 20 + ε)⌋₊ : ℕ) : ℝ) + 1 ≤ (m : ℝ) := by exact_mod_cast h1
+      linarith
+    unfold upperRough
+    rw [if_pos]
+    intro p hpm
+    rw [Nat.Prime.primeFactors hp, Finset.mem_singleton] at hpm
+    subst hpm
+    linarith
+  · exact upperRough_nonneg _ _
+
+/-- P0069 Baker Harman Pintz 1997, Section 5, page 53 and Theorem 2 conditions, pages 1 to 3. Choice of the divisor exponent B0 = 0
+and the threshold eta = 1/10^8, so that every admissible eps lies in (0, 1/10^8] where the
+page 53 deleted integral is evaluated. -/
+theorem upper_thresholds :
+    ∃ B0 η : ℝ, 0 < η ∧ ∀ B ε : ℝ, B0 ≤ B → 0 < ε → ε < η →
+      0 ≤ B ∧ 0 < ε ∧ ε ≤ 1 / 10 ^ 8 :=
+  ⟨0, 1 / 10 ^ 8, by norm_num, fun _ _ hB hε hεη => ⟨hB, hε, hεη.le⟩⟩
+
+/-- LEAF, OPEN. P0069 Baker Harman Pintz 1997, Section 5, page 53, with Lemmas 29 to 34 on pages 43 to 50 and displays 5.17 to 5.23 on page 52.
+"We use Lemma 34 to obtain (5.1) and (5.2) for g_m, h_m and j_m", Lemma 33 for the kept part of
+k_m, the prime number theorem for the density v1 = w(1/c4)/c4 + integral over E, and "we may
+now repeat for b1(m) the argument" of 5.18 to 5.23 for the mean square 1.9.
+The coefficient b1 is existential, because the raw weight upperRawWeight tracks 1/log m, not
+1/log Y, on J; Audit1624 records that the raw weight cannot meet condition iii exactly, and
+U-1624 proposes a slowly varying center rescaling by a factor at least one. The leaf asks only
+that b1 dominate the raw page 53 weight on J, with the paper's density v1.
+Non-vacuity: b1 = 0 fails the domination, since the raw weight is 1 at primes of J. -/
+theorem upper_short_coefficient 
+    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {B ε : ℝ} (hB : 0 ≤ B) (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    ∃ b1 : ℝ → ℕ → ℝ,
+      (∃ C : ℝ, ∀ x k, |b1 x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B) ∧
+      Task308.ShortDistribution ε
+        (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
+          upperDeletedIntegral ω ε) b1 ∧
+      Task308.ShortMeanSquare ε
+        (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
+          upperDeletedIntegral ω ε) b1 ∧
+      ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ m ∈ rightInterval ε x,
+        upperRawWeight ε (x ^ (11 / 20 + ε)) m ≤ b1 x m := by
+  sorry
+
 /-- LEAF. Pages 43 to 53, Lemmas 29 to 35 and displays 5.18 to 5.23.
 Construct the actual upper weight, its divisor and distribution bounds,
 its centered moment bounds and its density comparison with the conservative
@@ -972,7 +1218,18 @@ theorem upper_short_weight_analytic
           RightConditions ε B v1 b1 ∧
           ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
             ∀ m ∈ rightInterval ε x, primeWeight m ≤ b1 x m := by
-  sorry
+  obtain ⟨ω, hω, hz⟩ := Task308.buchstab_model_exists
+  obtain ⟨B0, η, hη, hrange⟩ := upper_thresholds
+  refine ⟨ω, hω, hz, B0, η, hη, fun B ε hB hε hεη => ?_⟩
+  obtain ⟨hB0, hε0, hε8⟩ := hrange B ε hB hε hεη
+  obtain ⟨b1, hdiv, hdist, hms, X, hmaj⟩ := upper_short_coefficient h4 h9 hω hz hB0 hε0 hε8
+  refine ⟨_, b1, le_rfl, Task308.right_conditions_of_parts hdiv hdist hms, max X 1, ?_⟩
+  intro x hx m hm
+  have hx1 : 1 ≤ x := le_of_max_le_right hx
+  have hY : 1 ≤ x ^ (11 / 20 + ε) := Real.one_le_rpow hx1 (by linarith)
+  have h1 := upper_prime_le_rough hε0 hx1 hm
+  rw [upper_rough_four_term ε hY m] at h1
+  exact h1.trans ((upper_four_term_le_raw ε _ m).trans (hmaj x (le_of_max_le_left hx) m hm))
 
 /-- Page 51. Numerators of the four-prime grid, with denominator 400000. -/
 def lowerFourGridPoint (i : ℕ) : ℕ := 49996+587*i
