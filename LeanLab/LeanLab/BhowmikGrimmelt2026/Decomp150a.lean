@@ -4,6 +4,8 @@ OPEN leaves for Jules. The assembly is CONDITIONAL on these leaves.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Statements
+import LeanLab.BhowmikGrimmelt2026.SPLIT_meanSquare38
+import LeanLab.BhowmikGrimmelt2026.SingularTail150
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -16,10 +18,184 @@ OPEN. This input is not proved by the survey. -/
 theorem zeroBound_lower150 {Θ : ℝ} (hZ : ZeroBound Θ) : 1 / 2 ≤ Θ := by
   sorry
 
-/-- LEAF. Page 13 display 3.8, from the character zero error in 3.7 and Parseval.
-OPEN. The uniform explicit formula and arc summation remain to be supplied. -/
-theorem mean_square150 : MeanSquare38 := by
+/-! ### Split of `mean_square150`, burst 20261112
+
+P0029 pages 12 and 13 obtain display 3.8 from three ingredients: on each Farey arc the main
+term of 3.5, summed over reduced residues and then over `q ≤ Q ≍ N ^ (1/2)`, gives the truncated
+singular series `N Σ_{q ≤ Q} μ(q)² c_q(N) / φ(q)²`, which equals `N 𝔖(N) + O(N ^ (1/2 + ε))`
+by the display on page 12; Parseval together with the zero bound 3.7 controls the mean square of
+`r2` minus that truncated main term; and the odd `N` carry no main term at all.  The odd part and
+the singular series vanishing are the proved leaves `meanSquare38_odd_singular` and
+`meanSquare38_odd_energy` of `SPLIT_meanSquare38`.  The inequality `Θ ≥ 1/2` is the existing
+leaf `zeroBound_lower150` above.  AI wrote the Lean code. Goldbach is open. -/
+
+/-- The truncated main term of P0029 page 12: `N Σ_{q ≤ Q} μ(q)² c_q(N) / φ(q)²` with the
+Farey level `Q = ⌊N ^ (1/2)⌋`, page 11 "on the Farey arcs one has q ≤ Q ≍ N ^ (1/2)".
+Here `c_q(-N) = c_q(N)` is real, so the real part of `ramanujan` is used as in `singular`. -/
+noncomputable def truncMain150 (N : ℕ) : ℝ :=
+  (N : ℝ) * ∑ q ∈ Finset.Icc 1 (Nat.sqrt N),
+    ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 / (Nat.totient q : ℝ) ^ 2 *
+      (ramanujan q (N : ℤ)).re
+
+/-- LEAF, new. P0029 Section 3, page 12, the unnumbered display after 3.7:
+`N Σ_{q ≤ Q} μ(q)² c_q(-N) / φ(q)² = N 𝔖(N) + O(N ^ (1/2 + ε))`, the completion of the
+truncated singular series at the Farey level `Q ≍ N ^ (1/2)`.  PROVED, PROVE PASS 20261112,
+from `singular_tail150` in `SingularTail150.lean`: `|c_q(N)| ≤ Σ_{e ∣ (q,N)} e`, a Rankin
+weight on `q > Q`, `φ(em) ≥ φ(e)φ(m)` and the divisor bound.  AI wrote the Lean code. -/
+theorem singular_truncation150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ N : ℕ, 1 ≤ N →
+      |truncMain150 N - (N : ℝ) * singular N| ≤ C * (N : ℝ) ^ (1 / 2 + ε) := by
+  intro ε hε
+  obtain ⟨C, hC⟩ := singular_tail150 ε hε
+  exact ⟨C, fun N hN => by simpa only [truncMain150] using hC N hN⟩
+
+/-- LEAF, new. P0029 Section 3, pages 12 and 13, the sentence before display 3.8: Parseval's
+identity applied to the circle method integral 3.2, with the arc main term of page 12 and the
+zero bound 3.7 on the error of 3.5, bounds the mean square of `r2` minus the truncated main term
+over the even `N ≤ X` by `X ^ (3/2 + 2Θ + ε)`.  OPEN: this is the analytic core, the uniform
+explicit formula 3.5 and its arc summation, which the survey does not write out. -/
+theorem major_minor_mean_square150 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
+      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (r2 N - truncMain150 N) ^ 2 ≤
+        C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
   sorry
+
+/-- PROVED. The elementary inequality used to pass from `r2 - truncMain150` and
+`truncMain150 - N 𝔖(N)` to `E2`, P0029 page 13, implicit in "using Parseval together with 3.7". -/
+theorem sq_sub_le_two150 (a b c : ℝ) : (a - b) ^ 2 ≤ 2 * (a - c) ^ 2 + 2 * (c - b) ^ 2 := by
+  nlinarith [sq_nonneg (a - 2 * c + b)]
+
+/-- The even part of display 3.8, P0029 page 13, derived from the two new leaves and
+`zeroBound_lower150`. -/
+theorem mean_square150_even_part (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
+      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2 ≤
+        C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+  intro ε hε
+  obtain ⟨CB, hB⟩ := major_minor_mean_square150 Θ hΘ hZ ε hε
+  obtain ⟨CA, hA⟩ := singular_truncation150 (ε / 2) (by linarith)
+  have hhalf : (1 : ℝ) / 2 ≤ Θ := zeroBound_lower150 hZ
+  refine ⟨2 * CB + 2 * CA ^ 2, ?_⟩
+  intro X hX
+  have hX1 : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+  have hX0 : (0 : ℝ) ≤ (X : ℝ) := by linarith
+  have hXpos : (0 : ℝ) < (X : ℝ) := by linarith
+  have e : ((X : ℝ) ^ (1 / 2 + ε / 2)) ^ 2 = (X : ℝ) ^ (1 + ε) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hX0]
+    congr 1
+    push_cast
+    ring
+  have hpt : ∀ N ∈ (Finset.Icc 1 X).filter (fun N => Even N),
+      (E2 N) ^ 2 ≤ 2 * (r2 N - truncMain150 N) ^ 2 + 2 * (CA ^ 2 * (X : ℝ) ^ (1 + ε)) := by
+    intro N hN
+    have hN' := (Finset.mem_filter.mp hN).1
+    rw [Finset.mem_Icc] at hN'
+    have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN'.1
+    have hNX : (N : ℝ) ≤ (X : ℝ) := by exact_mod_cast hN'.2
+    have hsq : (E2 N) ^ 2 ≤ 2 * (r2 N - truncMain150 N) ^ 2 +
+        2 * (truncMain150 N - (N : ℝ) * singular N) ^ 2 := by
+      unfold E2
+      exact sq_sub_le_two150 _ _ _
+    have habs := hA N hN'.1
+    have hpow : (N : ℝ) ^ (1 / 2 + ε / 2) ≤ (X : ℝ) ^ (1 / 2 + ε / 2) :=
+      Real.rpow_le_rpow (by linarith) hNX (by linarith)
+    have hb : |truncMain150 N - (N : ℝ) * singular N| ≤ |CA| * (X : ℝ) ^ (1 / 2 + ε / 2) := by
+      calc |truncMain150 N - (N : ℝ) * singular N| ≤ CA * (N : ℝ) ^ (1 / 2 + ε / 2) := habs
+        _ ≤ |CA| * (N : ℝ) ^ (1 / 2 + ε / 2) :=
+          mul_le_mul_of_nonneg_right (le_abs_self _) (by positivity)
+        _ ≤ |CA| * (X : ℝ) ^ (1 / 2 + ε / 2) :=
+          mul_le_mul_of_nonneg_left hpow (abs_nonneg _)
+    have hsq2 : (truncMain150 N - (N : ℝ) * singular N) ^ 2 ≤ CA ^ 2 * (X : ℝ) ^ (1 + ε) := by
+      have h1 : (truncMain150 N - (N : ℝ) * singular N) ^ 2 ≤
+          (|CA| * (X : ℝ) ^ (1 / 2 + ε / 2)) ^ 2 := by
+        rw [← sq_abs]
+        exact pow_le_pow_left₀ (abs_nonneg _) hb 2
+      have h2 : (|CA| * (X : ℝ) ^ (1 / 2 + ε / 2)) ^ 2 = CA ^ 2 * (X : ℝ) ^ (1 + ε) := by
+        rw [mul_pow, sq_abs, e]
+      linarith
+    linarith
+  have hsum := Finset.sum_le_sum hpt
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, Finset.sum_const, nsmul_eq_mul] at hsum
+  have hcard : (((Finset.Icc 1 X).filter (fun N => Even N)).card : ℝ) ≤ (X : ℝ) := by
+    have : ((Finset.Icc 1 X).filter (fun N => Even N)).card ≤ X := by
+      calc ((Finset.Icc 1 X).filter (fun N => Even N)).card ≤ (Finset.Icc 1 X).card :=
+            Finset.card_filter_le _ _
+        _ = X := by simp
+    exact_mod_cast this
+  have hB' := hB X hX
+  have hXe : (X : ℝ) * (X : ℝ) ^ (1 + ε) = (X : ℝ) ^ (2 + ε) := by
+    have h := Real.rpow_add hXpos (1 + ε) 1
+    rw [Real.rpow_one] at h
+    rw [show (2 : ℝ) + ε = (1 + ε) + 1 by ring, h]
+    ring
+  have hexp : (X : ℝ) ^ (2 + ε) ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    Real.rpow_le_rpow_of_exponent_le hX1 (by linarith)
+  have hnn : 0 ≤ 2 * (CA ^ 2 * (X : ℝ) ^ (1 + ε)) := by positivity
+  have hc : (((Finset.Icc 1 X).filter (fun N => Even N)).card : ℝ) *
+      (2 * (CA ^ 2 * (X : ℝ) ^ (1 + ε))) ≤ 2 * CA ^ 2 * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    calc (((Finset.Icc 1 X).filter (fun N => Even N)).card : ℝ) *
+          (2 * (CA ^ 2 * (X : ℝ) ^ (1 + ε)))
+        ≤ (X : ℝ) * (2 * (CA ^ 2 * (X : ℝ) ^ (1 + ε))) :=
+          mul_le_mul_of_nonneg_right hcard hnn
+      _ = 2 * CA ^ 2 * ((X : ℝ) * (X : ℝ) ^ (1 + ε)) := by ring
+      _ = 2 * CA ^ 2 * (X : ℝ) ^ (2 + ε) := by rw [hXe]
+      _ ≤ 2 * CA ^ 2 * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+          mul_le_mul_of_nonneg_left hexp (by positivity)
+  have hfin : (2 * CB + 2 * CA ^ 2) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) =
+      2 * (CB * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε)) + 2 * CA ^ 2 * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    ring
+  rw [hfin]
+  linarith
+
+/-- Page 13 display 3.8, from the character zero error in 3.7 and Parseval.
+SPLIT 20261112: derived from `zeroBound_lower150`, the proved odd leaves of
+`SPLIT_meanSquare38`, and `mean_square150_even_part`, whose open inputs are the new leaves
+`singular_truncation150` and `major_minor_mean_square150`. -/
+theorem mean_square150 : MeanSquare38 := by
+  intro Θ hΘ hZ ε hε
+  obtain ⟨Ce, heEven⟩ := mean_square150_even_part Θ hΘ hZ ε hε
+  obtain ⟨Co, hoPos, hoOdd⟩ := meanSquare38_odd_energy
+  refine ⟨Ce + Co, ?_⟩
+  intro X hX
+  have hhalf : (1 : ℝ) / 2 ≤ Θ := zeroBound_lower150 hZ
+  have hX1 : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+  have hexp : (2 : ℝ) ≤ 3 / 2 + 2 * Θ + ε := by linarith
+  have hmono : (X : ℝ) ^ (2 : ℝ) ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    Real.rpow_le_rpow_of_exponent_le hX1 hexp
+  have hmono' : (X : ℝ) ^ 2 ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    simpa using hmono
+  have hsplit :
+      (∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2) +
+        ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 =
+      ∑ N ∈ Finset.Icc 1 X, (E2 N) ^ 2 :=
+    Finset.sum_filter_add_sum_filter_not (s := Finset.Icc 1 X)
+      (p := fun N => Even N) (f := fun N => (E2 N) ^ 2)
+  have hodd :
+      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 ≤
+        Co * (X : ℝ) ^ 2 := by
+    have hEq :
+        ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 =
+        ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Odd N), (r2 N) ^ 2 := by
+      refine Finset.sum_congr ?_ ?_
+      · ext N
+        simp only [Finset.mem_filter]
+        exact ⟨fun h => ⟨h.1, Nat.not_even_iff_odd.mp h.2⟩,
+          fun h => ⟨h.1, Nat.not_even_iff_odd.mpr h.2⟩⟩
+      · intro N hN
+        rw [Finset.mem_filter] at hN
+        have h0 : singular N = 0 := meanSquare38_odd_singular N hN.2
+        simp only [E2, h0, mul_zero, sub_zero]
+    rw [hEq]
+    exact hoOdd X hX
+  have heven := heEven X hX
+  calc ∑ N ∈ Finset.Icc 1 X, (E2 N) ^ 2
+      = (∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2) +
+          ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 := hsplit.symm
+    _ ≤ Ce * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) + Co * (X : ℝ) ^ 2 := by linarith
+    _ ≤ Ce * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) + Co * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+      have hCo := mul_le_mul_of_nonneg_left hmono' hoPos.le
+      linarith
+    _ = (Ce + Co) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by ring
 
 open ArithmeticFunction
 
