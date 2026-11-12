@@ -6,11 +6,13 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Perelli1996.B.Definitions
 import LeanLab.Perelli1996.B.Cor1b
 import LeanLab.Perelli1996.Decomp88
+import LeanLab.Perelli1996.Burst103
 
 namespace LeanLab.Perelli1996.B
 
-/-- Cited. P0083 Theorem 1 stays an analytic input. -/
-theorem perelli_theorem1 : Theorem1 := Decomp88.theorem1
+/-- Cited. P0083 Theorem 1 stays an analytic input.
+Assembled in Burst103 so the pointwise major arc step uses the smaller Decomp320a leaf. -/
+theorem perelli_theorem1 : Theorem1 := Burst103.theorem1_of_split
 
 /-- Corollary 1, second part, CONDITIONAL ON the cited Theorem 1 only. -/
 theorem perelli_cor1b : Cor1b := cor1b_of perelli_theorem1
