@@ -96,7 +96,20 @@ character does not vanish there, independently of the region denominator. -/
 theorem iwaniec_no_zero_half_plane481 (r : ℕ) (hr : 1 ≤ r) (χ : DirichletCharacter ℂ r)
     (hprim : χ.IsPrimitive) (hnonreal : ∃ a, (χ a).im ≠ 0) {s : ℂ}
     (hs : 1 ≤ s.re) : Lfun481 χ s ≠ 0 := by
-  sorry
+  have hr0 : r ≠ 0 := by omega
+  haveI : NeZero r := ⟨hr0⟩
+  have hne : χ ≠ 1 := by
+    rintro rfl
+    obtain ⟨a, ha⟩ := hnonreal
+    have h1 : ((1 : DirichletCharacter ℂ r) a).im = 0 := by
+      by_cases hu : IsUnit a
+      · simp [MulChar.one_apply hu]
+      · simp [MulChar.map_nonunit _ hu]
+    exact ha h1
+  have hL : Lfun481 χ s = DirichletCharacter.LFunction χ s := by
+    simp only [Lfun481, dif_neg hr0]
+  rw [hL]
+  exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hne) hs
 
 /-- LEAF. Step three, the open strip below one: a nonreal primitive character does
 not vanish strictly between real part zero and one once it lies to the right of the
