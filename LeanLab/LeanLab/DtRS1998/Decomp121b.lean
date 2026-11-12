@@ -18,6 +18,12 @@ import LeanLab.DtRS1998.Interval55
 import LeanLab.DtRS1998.Interval60
 import LeanLab.DtRS1998.Interval65
 import LeanLab.DtRS1998.Interval70
+import LeanLab.DtRS1998.Decomp270a
+import LeanLab.DtRS1998.Certificate294
+import LeanLab.DtRS1998.Decomp372a
+import LeanLab.DtRS1998.Decomp372b
+import LeanLab.DtRS1998.Decomp372c
+import LeanLab.DtRS1998.Candidate445
 
 namespace LeanLab.DtRS1998.Decomp121b
 
@@ -43,11 +49,76 @@ theorem first_family_proved :
   · exact I70.theorem2
 
 
-/-- LEAF. P0037 Theorem 2 page 206 and Section 5.1 pages 211 to 213.
-The six intervals beyond the existing kernel verification are cited computations. -/
+/-- Split of first_family_remaining, burst 20261112. AI wrote this Lean code.
+P0037 Section 5.1 page 211, the unnumbered interval display, with Table 1
+page 213, row 10^75, and the page 207 recurrence for the sets F: the listed
+primes q near 10^75 cover every even n in the interval by n - q prime.
+Reuses the proved certificate Task294 row 75 through Decomp270a. -/
+theorem interval_75 : IntervalSum (10 ^ 75) (10 ^ 8) := by
+  obtain ⟨qs, _, hq, hc⟩ := Decomp270a.certificate75
+  exact Decomp270a.interval_of_certificate (by decide) (fun q h => (hq q h).1) hc
+
+/-- Split of first_family_remaining, burst 20261112. AI wrote this Lean code.
+P0037 Section 5.1 page 211, the unnumbered interval display, with Table 1
+page 213, row 10^80, and the page 207 recurrence for the sets F: the listed
+primes q near 10^80 cover every even n in the interval by n - q prime.
+Reuses the proved certificate Task294 row 80 through Decomp270a. -/
+theorem interval_80 : IntervalSum (10 ^ 80) (10 ^ 8) := by
+  obtain ⟨qs, _, hq, hc⟩ := Decomp270a.certificate80
+  exact Decomp270a.interval_of_certificate (by decide) (fun q h => (hq q h).1) hc
+
+/-- Split of first_family_remaining, burst 20261112. AI wrote this Lean code.
+P0037 Section 5.1 page 211, the unnumbered interval display, with Table 1
+page 213, row 10^85, and the page 207 recurrence for the sets F: the listed
+primes q near 10^85 cover every even n in the interval by n - q prime.
+Reuses the proved certificate Task294 row 85 through Decomp270a. -/
+theorem interval_85 : IntervalSum (10 ^ 85) (10 ^ 8) := by
+  obtain ⟨qs, _, hq, hc⟩ := Decomp270a.certificate85
+  exact Decomp270a.interval_of_certificate (by decide) (fun q h => (hq q h).1) hc
+
+/-- Split of first_family_remaining, burst 20261112. AI wrote this Lean code.
+P0037 Section 5.1 page 211, the unnumbered interval display, with Table 1
+page 213, row 10^90, and the page 207 recurrence for the sets F.
+CONDITIONAL ON the candidate primality leaves of Candidate445.T90, as in
+Decomp445d.certificate90; the window coverage of Decomp372a is reused. -/
+theorem interval_90 : IntervalSum (10 ^ 90) (10 ^ 8) := by
+  have hcheck := Certificate294.offsets_certificate (B := 10 ^ 90) (L := 10 ^ 8)
+    (fun d hd => le_trans (Decomp372a.offset_bounds d hd) (by norm_num)) Decomp372a.offset_cover
+  exact Decomp270a.interval_of_certificate (by decide) Candidate445.T90.candidate_primes hcheck
+
+/-- Split of first_family_remaining, burst 20261112. AI wrote this Lean code.
+P0037 Section 5.1 page 211, the unnumbered interval display, with Table 1
+page 213, row 10^95, and the page 207 recurrence for the sets F.
+CONDITIONAL ON the candidate primality leaves of Candidate445.T95, as in
+Decomp445d.certificate95; the window coverage of Decomp372b is reused. -/
+theorem interval_95 : IntervalSum (10 ^ 95) (10 ^ 8) := by
+  have hcheck := Certificate294.offsets_certificate (B := 10 ^ 95) (L := 10 ^ 8)
+    (fun d hd => le_trans (Decomp372b.offset_bounds d hd) (by norm_num)) Decomp372b.offset_cover
+  exact Decomp270a.interval_of_certificate (by decide) Candidate445.T95.candidate_primes hcheck
+
+/-- Split of first_family_remaining, burst 20261112. AI wrote this Lean code.
+P0037 Section 5.1 page 211, the unnumbered interval display, with Table 1
+page 213, row 10^100, and the page 207 recurrence for the sets F.
+CONDITIONAL ON the candidate primality leaves of Candidate445.T100, as in
+Decomp445d.certificate100; the window coverage of Decomp372c is reused. -/
+theorem interval_100 : IntervalSum (10 ^ 100) (10 ^ 8) := by
+  have hcheck := Certificate294.offsets_certificate (B := 10 ^ 100) (L := 10 ^ 8)
+    (fun d hd => le_trans (Decomp372c.offset_bounds d hd) (by norm_num)) Decomp372c.offset_cover
+  exact Decomp270a.interval_of_certificate (by decide) Candidate445.T100.candidate_primes hcheck
+
+/-- P0037 Theorem 2 page 206 and Section 5.1 pages 211 to 213.
+Split in burst 20261112: assembled from the six row lemmas interval_75
+through interval_100 above, one per row of Table 1 page 213. No sorry of its own. -/
 theorem first_family_remaining :
     ∀ i : ℕ, 15 ≤ i → i ≤ 20 → IntervalSum (10 ^ (5 * i)) (10 ^ 8) := by
-  sorry
+  intro i hlo hhi
+  interval_cases i
+  · exact interval_75
+  · exact interval_80
+  · exact interval_85
+  · exact interval_90
+  · exact interval_95
+  · exact interval_100
 
 /-- LEAF. P0037 Theorem 2 page 206 and Section 5.2 pages 212 to 214.
 The eleven intervals at powers 200 through 300 are cited computations. -/
@@ -74,6 +145,12 @@ theorem theorem2 : FullTheorem2 :=
   theorem2_of_remaining first_family_remaining second_family
 
 #print axioms first_family_proved
+#print axioms interval_75
+#print axioms interval_80
+#print axioms interval_85
+#print axioms interval_90
+#print axioms interval_95
+#print axioms interval_100
 #print axioms first_family_remaining
 #print axioms second_family
 #print axioms theorem2_of_remaining
