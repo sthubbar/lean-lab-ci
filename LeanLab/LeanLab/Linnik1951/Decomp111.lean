@@ -5,6 +5,7 @@ The circle method error remains a cited input. The Romanov input is proved in Se
 -/
 import LeanLab.Linnik1951.Conventions
 import LeanLab.Perelli1996.Sing
+import LeanLab.Linnik1951.CircleSplit111
 
 namespace LeanLab.Linnik1951
 
@@ -63,6 +64,110 @@ theorem count_pos_of_representation111 {k N : ℕ} (h : LinnikExact k N) : 0 < r
   simp only [Finset.mem_filter, Finset.mem_univ, true_and]
   exact ⟨hp, hq, hν, hN⟩
 
+/-! ### SPLIT of error_bound111 along P0093 Sections 2, 8, 9 and 10.
+AI wrote the Lean code. Binary Goldbach is open.
+The definitions below are local copies, made upstream of SecondMoment111 and
+Decomp280b, of the damped generating functions, the three arc families and the
+arc contribution. They are definitionally the same expressions as
+primeFourier111, powerFourier111, majorArcs280, exceptionalArcs280,
+goodMinorArcs280 and arcContribution280, which live in modules importing this
+one and so cannot be used here. -/
+
+/-- P0093 page 154, the exponentially damped prime series S. Local copy of
+primeFourier111. -/
+noncomputable def primeSeriesSplit111 (N : ℕ) (α : ℝ) : ℂ :=
+  ∑' p : Nat.Primes,
+    (Real.exp (-((p : ℕ) : ℝ) / N) : ℂ) *
+      Complex.exp ((-(2 * Real.pi * α * (p : ℕ)) : ℝ) * Complex.I)
+
+/-- P0093 pages 154 and 161, the damped series T over positive powers of two.
+Local copy of powerFourier111. -/
+noncomputable def powerSeriesSplit111 (N : ℕ) (α : ℝ) : ℂ :=
+  ∑' m : ℕ,
+    (Real.exp (-((2 ^ (m + 1) : ℕ) : ℝ) / N) : ℂ) *
+      Complex.exp ((-(2 * Real.pi * α * (2 ^ (m + 1) : ℕ)) : ℝ) * Complex.I)
+
+/-- P0093 page 165 Section 8. Major arcs with Q equal to N to the one tenth and
+tau equal to N to the one seventh. Local copy of majorArcs280. -/
+noncomputable def majorArcsSplit111 (N : ℕ) : Set ℝ :=
+  {α | α ∈ Set.Icc 0 1 ∧ ∃ r : ℚ, (r.den : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ) ∧
+    |α - r| ≤ 1 / ((r.den : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ)))}
+
+/-- P0093 pages 162 and 167. Minor points where T is large. Local copy of
+exceptionalArcs280. -/
+noncomputable def exceptionalArcsSplit111 (N : ℕ) (η : ℝ) : Set ℝ :=
+  {α | α ∈ Set.Icc 0 1 ∧ α ∉ majorArcsSplit111 N ∧
+    (1 - η) * ‖powerSeriesSplit111 N 0‖ < ‖powerSeriesSplit111 N α‖}
+
+/-- P0093 page 167 before equation 10.1. The remaining minor points. Local copy
+of goodMinorArcs280. -/
+noncomputable def goodMinorArcsSplit111 (N : ℕ) (η : ℝ) : Set ℝ :=
+  Set.Icc 0 1 \ (majorArcsSplit111 N ∪ exceptionalArcsSplit111 N η)
+
+/-- P0093 pages 154 and 167, equations 2.2 and 10.2. Real contribution of an
+arc set, including the factor e from exponential damping. Local copy of
+arcContribution280. -/
+noncomputable def arcContributionSplit111 (k N : ℕ) (s : Set ℝ) : ℝ :=
+  Real.exp 1 * (∫ α in s, primeSeriesSplit111 N α ^ 2 * powerSeriesSplit111 N α ^ k *
+    Complex.exp (((2 * Real.pi * α * N) : ℝ) * Complex.I)).re
+
+/-- SPLIT piece 1 of error_bound111. P0093 page 154 equation 2.2 and page 167
+equation 10.2. Fourier orthogonality on the unit interval counts the ordered
+representations, and the disjoint partition into major, exceptional and good
+minor arcs splits the integral into three parts. -/
+theorem circle_partition_split111 (k N : ℕ) (hN : 1 ≤ N) (η : ℝ) :
+    (representationCount111 k N : ℝ) =
+      arcContributionSplit111 k N (majorArcsSplit111 N) +
+      arcContributionSplit111 k N (exceptionalArcsSplit111 N η) +
+      arcContributionSplit111 k N (goodMinorArcsSplit111 N η) := by
+  -- PROVE PASS: the local copies are definitionally the ported proved
+  -- circle_partition_proved435_up111 of CircleSplit111.
+  exact circle_partition_proved435_up111 k N hN η
+
+/-- SPLIT piece 2 of error_bound111. P0093 Sections 3 to 6, pages 155 to 161,
+the GRH Mellin estimate 5.2 on page 159, and Section 8 equations 8.1 and 8.2
+on page 165 with equations 10.5 to 10.7 on page 168. For fixed k the major arc
+integral equals the singular series main term up to an error that is
+arbitrarily small relative to the scale. -/
+theorem major_error_split111 (hG : GRH) (k : ℕ) (hk : 3 ≤ k) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
+      |arcContributionSplit111 k N (majorArcsSplit111 N) - mainTerm111 k N| ≤
+        ε * scale111 k N := by
+  sorry
+
+/-- SPLIT piece 3 of error_bound111. P0093 pages 162 to 166, Lemmas 4 to 7,
+equations 7.6, 9.1 and 9.2. Under GRH one absolute eta makes the set where T
+is large so small that its minor arc contribution is arbitrarily small relative
+to the scale for each fixed k. -/
+theorem exceptional_error_split111 (hG : GRH) :
+    ∃ η : ℝ, 0 < η ∧ η < 1 ∧ ∀ k : ℕ, 3 ≤ k →
+      ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
+        |arcContributionSplit111 k N (exceptionalArcsSplit111 N η)| ≤
+          ε * scale111 k N := by
+  sorry
+
+/-- P0093 page 167 immediately before equation 10.1. Outside the exceptional
+set, T is at most the threshold one minus eta times T at zero. Proved. -/
+theorem good_minor_power_bound_split111 (N : ℕ) (η α : ℝ)
+    (hα : α ∈ goodMinorArcsSplit111 N η) :
+    ‖powerSeriesSplit111 N α‖ ≤ (1 - η) * ‖powerSeriesSplit111 N 0‖ :=
+  le_of_not_gt (fun h => hα.2 (Or.inr ⟨hα.1, fun hm => hα.2 (Or.inl hm), h⟩))
+
+/-- SPLIT piece 4 of error_bound111. P0093 page 167 equation 10.1, with Lemma 3
+of page 162, equation 7.3, from Romanov 1940. Bounding k minus 2 factors of T
+by the threshold and the remaining square by Lemma 3 gives geometric decay in
+k minus 2, the factor e of equation 2.2 absorbed in C. -/
+theorem minor_error_split111 (η : ℝ) (hη : 0 < η) (hη1 : η < 1)
+    (hT : ∀ N : ℕ, ∀ α : ℝ, α ∈ goodMinorArcsSplit111 N η →
+      ‖powerSeriesSplit111 N α‖ ≤ (1 - η) * ‖powerSeriesSplit111 N 0‖) :
+    ∃ C : ℝ, 0 < C ∧ ∀ k : ℕ, 3 ≤ k → ∃ N0 : ℕ,
+      ∀ N : ℕ, Even N → N0 < N →
+        |arcContributionSplit111 k N (goodMinorArcsSplit111 N η)| ≤
+          C * scale111 k N * (1 - η) ^ (k - 2) := by
+  -- PROVE PASS: definitional transport of the ported proved
+  -- minor_error_proved357_up111 of CircleSplit111.
+  exact minor_error_proved357_up111 η hη hη1 hT
+
 /-- LEAF. P0093 Section 10, page 168 after equation 10.7.
 This leaf includes the analytic work of Sections 3 to 10 and Romanov 1940,
 reference 4, used by Lemma 3 on page 162. The geometric exponent is weakened
@@ -72,7 +177,48 @@ theorem error_bound111 (hG : GRH) :
       ∀ k : ℕ, 3 ≤ k → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
         |(representationCount111 k N : ℝ) - mainTerm111 k N| ≤
           5 * C * scale111 k N * (1 - η) ^ (k - 2) := by
-  sorry
+  -- P0093 page 168 after equation 10.7: combine the three arc estimates.
+  obtain ⟨η, hη, hη1, hE⟩ := exceptional_error_split111 hG
+  obtain ⟨C, hC, hR⟩ := minor_error_split111 η hη hη1
+    (fun N α hα => good_minor_power_bound_split111 N η α hα)
+  refine ⟨C, η, hC, hη, hη1, ?_⟩
+  intro k hk
+  have hr : 0 < (1 - η) ^ (k - 2) := pow_pos (by linarith) _
+  have hε : 0 < C * (1 - η) ^ (k - 2) := mul_pos hC hr
+  obtain ⟨NM, hM⟩ := major_error_split111 hG k hk _ hε
+  obtain ⟨NE, hE⟩ := hE k hk _ hε
+  obtain ⟨NR, hR⟩ := hR k hk
+  refine ⟨max 1 (max NM (max NE NR)), ?_⟩
+  intro N hev hN
+  have h1 : 1 < N := lt_of_le_of_lt (le_max_left _ _) hN
+  have hm : NM < N := lt_of_le_of_lt
+    (le_trans (le_max_left _ _) (le_max_right _ _)) hN
+  have he : NE < N := lt_of_le_of_lt
+    (le_trans (le_max_left _ _) (le_trans (le_max_right _ _) (le_max_right _ _))) hN
+  have hg : NR < N := lt_of_le_of_lt
+    (le_trans (le_max_right _ _) (le_trans (le_max_right _ _) (le_max_right _ _))) hN
+  have hmajor := hM N hev hm
+  have hexc := hE N hev he
+  have hminor := hR N hev hg
+  have hs : 0 ≤ scale111 k N := by
+    unfold scale111
+    have hl : 0 ≤ Real.log N := Real.log_natCast_nonneg N
+    have hl2 : 0 ≤ Real.log 2 := Real.log_nonneg (by norm_num)
+    exact mul_nonneg (Nat.cast_nonneg _) (pow_nonneg (div_nonneg hl hl2) _)
+  have hid := circle_partition_split111 k N (by omega) η
+  have htri := abs_add_le
+    (arcContributionSplit111 k N (majorArcsSplit111 N) - mainTerm111 k N)
+    (arcContributionSplit111 k N (exceptionalArcsSplit111 N η))
+  have htri' := abs_add_le
+    ((arcContributionSplit111 k N (majorArcsSplit111 N) - mainTerm111 k N) +
+      arcContributionSplit111 k N (exceptionalArcsSplit111 N η))
+    (arcContributionSplit111 k N (goodMinorArcsSplit111 N η))
+  have heq : (representationCount111 k N : ℝ) - mainTerm111 k N =
+    ((arcContributionSplit111 k N (majorArcsSplit111 N) - mainTerm111 k N) +
+      arcContributionSplit111 k N (exceptionalArcsSplit111 N η)) +
+      arcContributionSplit111 k N (goodMinorArcsSplit111 N η) := by rw [hid]; ring
+  rw [heq]
+  nlinarith [mul_nonneg (mul_nonneg hC.le hs) hr.le]
 
 /-- P0093 page 168 following equation 10.6. The singular series is at least one
 at every positive even residual, by the existing lab Euler product proof. -/
