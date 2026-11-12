@@ -92,13 +92,18 @@ def combinator():
 def put(line, col, kind, tac):
     return line[:col] + ("by " if kind == "term" else "") + tac + line[col + 5:]
 def group_rss_mb(pg):
+    """anonymous resident memory of a process group in MB; plain RSS counted the mapped Mathlib oleans once per lean process,
+    about 8 GB each, so test run 43160887445 killed 22 import builds at 11 to 25 GB within 5 s that were not short of memory"""
     tot = 0
     for d in os.listdir("/proc"):
         if not d.isdigit(): continue
-        try: s = open(f"/proc/{d}/stat").read(); f = s[s.rfind(")") + 2:].split()
-        except OSError: continue
-        if int(f[2]) == pg: tot += int(f[21])
-    return tot * os.sysconf("SC_PAGE_SIZE") >> 20
+        try:
+            s = open(f"/proc/{d}/stat").read(); f = s[s.rfind(")") + 2:].split()
+            if int(f[2]) != pg: continue
+            m = re.search(r"RssAnon:\s+(\d+)", open(f"/proc/{d}/status").read())
+            if m: tot += int(m.group(1))
+        except (OSError, ValueError): continue
+    return tot >> 10
 PEAK = [0]
 def run_capped(cmd, limit):
     """return code, stdout and the reason it was killed: timeout, memory or empty"""
@@ -159,8 +164,9 @@ def sweep_file(path, tmp):
     if m1 is None: return [], "SKIP combinator compile over 10 minutes or the memory cap"
     W1 = warned(m1, ds); ok_at = {}
     for ln, sv, tx in m1:
-        q = re.search(r"SWEEP_OK (\S+)", tx)
-        if q and ln - 1 in S and ln - 1 not in ok_at: ok_at[ln - 1] = q.group(1)
+        # information only: the unusedTactic linter warning quotes the trace source text, SWEEP_OK and all, for every alternative
+        q = re.match(r"\s*SWEEP_OK (\S+)", tx)
+        if q and sv in ("information", "info") and ln - 1 in S and ln - 1 not in ok_at: ok_at[ln - 1] = q.group(1)
     closed = set()
     for d in {s[2] for s in S.values()}:
         lo, hi = dec_range(ds, d, len(lines)); mine = [i for i, s in S.items() if s[2] == d]
