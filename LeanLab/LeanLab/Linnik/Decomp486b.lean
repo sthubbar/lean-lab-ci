@@ -5,6 +5,7 @@ No character energy decay is assumed in either leaf.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.Decomp482b
+import LeanLab.Linnik.MajorArcEnergy.Display1517
 
 namespace LeanLab.Linnik.Decomp486b
 
@@ -85,7 +86,9 @@ theorem corrected_pair_integral_le_energy_sq (N r k j : ℕ) (θ γ δ n : ℝ)
     (LeanLab.Linnik.Decomp486c.corrected_norm_le_energy N r j θ γ ψ hj hψ)
     (Real.sqrt_nonneg _) (correctedEnergy_nonneg N θ r γ)
 
-/-- LEAF. Gallagher 1975 p.131 display 13.
+/-- CONDITIONAL ON the leaves of LeanLab/Linnik/MajorArcEnergy/Leaves13.lean, via
+`LeanLab.Linnik.MajorArcEnergy.major_arc_energy_zero_split`; formerly a LEAF.
+Gallagher 1975 p.131 display 13.
 The uncorrected energy controls the major arc error without a separate
 exceptional contribution. This is the conductor zero case of the reduction.
 The supplied expansion is the proved rational arc character expansion. -/
@@ -102,9 +105,11 @@ theorem major_arc_energy_zero
           K * ((N : ℝ) / Real.log N ^ 2) * totientWeight n *
             (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
               (1 + normalizedEnergy N θ 0 0) * normalizedEnergy N θ 0 0) := by
-  sorry
+  exact LeanLab.Linnik.MajorArcEnergy.major_arc_energy_zero_split hExpansion
 
-/-- LEAF. Gallagher 1975 p.131 displays 15 through 17 and p.132.
+/-- CONDITIONAL ON the leaves of LeanLab/Linnik/MajorArcEnergy/Leaves13.lean and
+Leaves1517.lean, via `LeanLab.Linnik.MajorArcEnergy.major_arc_energy_exceptional_split`;
+formerly a LEAF. Gallagher 1975 p.131 displays 15 through 17 and p.132.
 For a positive exceptional conductor the corrected character energy controls
 the remaining terms and the exceptional coefficient has the printed weight.
 This is only the positive conductor case of the arithmetic reduction. -/
@@ -127,7 +132,7 @@ theorem major_arc_energy_exceptional
               (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
                 (1 + normalizedEnergy N θ r γ) * normalizedEnergy N θ r γ +
                 exceptionalWeight r n) := by
-  sorry
+  exact LeanLab.Linnik.MajorArcEnergy.major_arc_energy_exceptional_split hExpansion
 
 /-- Gallagher 1975 p.131 display 13 and displays 15 through 17.
 Combine the two arithmetic cases with uniform constants and thresholds.
