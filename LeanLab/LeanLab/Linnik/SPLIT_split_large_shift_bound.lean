@@ -46,7 +46,20 @@ theorem large_shift_filter_iff (k N : ℕ) (hN : 1 ≤ N) (θ : ℝ) (hθ : 0 < 
         ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ))) ↔
       (LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
         (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)|) := by
-  sorry
+  have hNθ : (N : ℝ) ^ θ ≤ (N : ℝ) := by
+    have hn : (1 : ℝ) ≤ N := by exact_mod_cast hN
+    calc
+      _ ≤ (N : ℝ) ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le hn hθ1
+      _ = N := by rw [Real.rpow_one]
+  constructor
+  · rintro ⟨hd0, _, hnotle⟩
+    refine ⟨hd0, ?_⟩
+    have hNlt : (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| := lt_of_not_ge hnotle
+    exact not_le.mpr (hNθ.trans_lt hNlt)
+  · rintro ⟨hd0, hNlt⟩
+    refine ⟨hd0, ?_, ?_⟩
+    · exact not_le.mpr (hNθ.trans_lt hNlt)
+    · exact not_le.mpr hNlt
 
 /-- LEAF, OPEN. Support reduction, one tuple at a time: for a shift larger than `N` in absolute
 value the full unit interval correlation vanishes, hence the major arc correlation of that shift
@@ -61,7 +74,8 @@ theorem large_shift_major_eq_neg_minor (k N : ℕ) (θ : ℝ)
       -(∫ α in Set.Icc (0 : ℝ) 1 \ majorArcs N ((N : ℝ) ^ θ),
         ‖Sg N α‖ ^ 2 *
           (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) := by
-  sorry
+  exact LeanLab.Linnik.Decomp1532c.major_correlation_eq_neg_minor_of_large_shift N ((N : ℝ) ^ θ)
+    (LeanLab.Linnik.Decomp1532a.dif x) hx
 
 /-- LEAF, OPEN. The open estimate of this range: once `N` is large, the total over the long shifts
 of the correlation over the complement of the major arcs is at most a third of the sealed budget
