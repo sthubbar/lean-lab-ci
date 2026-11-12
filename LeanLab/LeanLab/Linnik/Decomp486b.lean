@@ -85,6 +85,12 @@ theorem corrected_pair_integral_le_energy_sq (N r k j : ℕ) (θ γ δ n : ℝ)
     (LeanLab.Linnik.Decomp486c.corrected_norm_le_energy N r j θ γ ψ hj hψ)
     (Real.sqrt_nonneg _) (correctedEnergy_nonneg N θ r γ)
 
+/-- Gallagher 1975 p.131 display 13. The exceptional coefficient vanishes at conductor zero.
+This is the elementary simplification used by the conductor zero case. -/
+theorem exceptionalWeight_zero (n : ℤ) : exceptionalWeight 0 n = 0 := by
+  unfold exceptionalWeight
+  simp
+
 /-- LEAF. Gallagher 1975 p.131 display 13.
 The uncorrected energy controls the major arc error without a separate
 exceptional contribution. This is the conductor zero case of the reduction.
@@ -102,6 +108,25 @@ theorem major_arc_energy_zero
           K * ((N : ℝ) / Real.log N ^ 2) * totientWeight n *
             (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
               (1 + normalizedEnergy N θ 0 0) * normalizedEnergy N θ 0 0) := by
+  obtain ⟨C, hC, hexp⟩ := hExpansion
+  refine ⟨1, 1 / 2, by norm_num, by norm_num, by norm_num, ?_⟩
+  intro θ hθ hθlim
+  refine ⟨2, ?_⟩
+  intro N hN n hn
+  have hsplit : complexFrequencyError N θ n ≤
+      ‖∫ α in LeanLab.Linnik.Decomp1532b.majorArcs N ((N : ℝ) ^ θ),
+        ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)‖ +
+      ‖(LeanLab.Linnik.Decomp1532b.Jn N n : ℂ) *
+        LeanLab.Linnik.Decomp1532b.singSeries n‖ := by
+    unfold complexFrequencyError
+    have h := norm_add_le
+      (∫ α in LeanLab.Linnik.Decomp1532b.majorArcs N ((N : ℝ) ^ θ),
+        ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α))
+      (-(LeanLab.Linnik.Decomp1532b.Jn N n : ℂ) *
+        LeanLab.Linnik.Decomp1532b.singSeries n)
+    simpa only [sub_eq_add_neg, norm_mul, norm_neg] using h
+  -- The remaining step is the Gallagher major arc identity of p.130 and p.131.
+  -- It is not in the imported modules, see PROGRESS.md.
   sorry
 
 /-- LEAF. Gallagher 1975 p.131 displays 15 through 17 and p.132.
@@ -127,6 +152,25 @@ theorem major_arc_energy_exceptional
               (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
                 (1 + normalizedEnergy N θ r γ) * normalizedEnergy N θ r γ +
                 exceptionalWeight r n) := by
+  obtain ⟨C, hC, hexp⟩ := hExpansion
+  refine ⟨1, 1 / 2, by norm_num, by norm_num, by norm_num, ?_⟩
+  intro θ hθ hθlim
+  refine ⟨2, ?_⟩
+  intro N hN r γ hr hrpos n hn
+  have hsplit : complexFrequencyError N θ n ≤
+      ‖∫ α in LeanLab.Linnik.Decomp1532b.majorArcs N ((N : ℝ) ^ θ),
+        ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)‖ +
+      ‖(LeanLab.Linnik.Decomp1532b.Jn N n : ℂ) *
+        LeanLab.Linnik.Decomp1532b.singSeries n‖ := by
+    unfold complexFrequencyError
+    have h := norm_add_le
+      (∫ α in LeanLab.Linnik.Decomp1532b.majorArcs N ((N : ℝ) ^ θ),
+        ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α))
+      (-(LeanLab.Linnik.Decomp1532b.Jn N n : ℂ) *
+        LeanLab.Linnik.Decomp1532b.singSeries n)
+    simpa only [sub_eq_add_neg, norm_mul, norm_neg] using h
+  -- The remaining step is the Gallagher major arc identity of p.130 and p.131 with the
+  -- exceptional conductor data, see PROGRESS.md.
   sorry
 
 /-- Gallagher 1975 p.131 display 13 and displays 15 through 17.
