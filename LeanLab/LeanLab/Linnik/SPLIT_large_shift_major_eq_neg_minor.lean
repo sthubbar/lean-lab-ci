@@ -36,6 +36,37 @@ open LeanLab.Linnik.Decomp1532b (majorArcs)
 open LeanLab.Linnik.U7204 (Sg primesLe)
 open LeanLab.Linnik.U1426ChainWire (Gs continuous_Gs)
 
+/-- The real part of the additive character. -/
+private lemma e_re_eq_cos (y : ℝ) :
+    (LeanLab.PNTPort.LargeSieve.e y).re = Real.cos (2 * Real.pi * y) := by
+  unfold LeanLab.PNTPort.LargeSieve.e
+  rw [show Complex.I * ((2 * Real.pi * y : ℝ) : ℂ) = ((2 * Real.pi * y : ℝ) : ℂ) * Complex.I
+    by ring,
+    Complex.exp_ofReal_mul_I_re]
+
+/-- The real part of the additive character is even. -/
+private lemma e_neg_re (y : ℝ) :
+    (LeanLab.PNTPort.LargeSieve.e (-y)).re = (LeanLab.PNTPort.LargeSieve.e y).re := by
+  rw [e_re_eq_cos, e_re_eq_cos, show 2 * Real.pi * (-y) = -(2 * Real.pi * y) by ring,
+    Real.cos_neg]
+
+/-- A real scalar in front of a complex number passes through the real part. -/
+private lemma ofReal_mul_re (r : ℝ) (z : ℂ) : (((r : ℂ) * z).re) = r * z.re := by
+  simp [Complex.mul_re]
+
+/-- The real part of a natural number coerced to `ℂ`. -/
+private lemma natCast_re (m : ℕ) : ((m : ℂ)).re = (m : ℝ) := by
+  simp
+
+/-- The correlation kernel is continuous. -/
+private lemma continuous_kernel (N : ℕ) (n : ℤ) :
+    Continuous fun α : ℝ => ‖Sg N α‖ ^ 2 *
+      (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re := by
+  have he : Continuous fun α : ℝ => (LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)).re := by
+    unfold LeanLab.PNTPort.LargeSieve.e
+    fun_prop
+  exact (LeanLab.Linnik.U7206.continuous_Sg N).norm.pow 2 |>.mul he
+
 /-- LEAF, OPEN. Orthogonality half of the support reduction: the correlation of one shift over the
 whole unit interval is the number of ordered pairs of primes at most `N` whose difference is that
 shift, negated. This is an identity about the kernel alone, with no major arc set and no range
@@ -48,7 +79,34 @@ theorem large_shift_correlation_eq_pair_count (k N : ℕ) (θ : ℝ)
           (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) =
       ((#{y ∈ primesLe N ×ˢ primesLe N |
           (y.1 : ℤ) - y.2 = -(LeanLab.Linnik.Decomp1532a.dif x)} : ℕ) : ℝ) := by
-  sorry
+  classical
+  have hpoint (α : ℝ) :
+      ‖Sg N α‖ ^ 2 * (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re =
+        (((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e
+          ((-(LeanLab.Linnik.Decomp1532a.dif x) : ℤ) * α : ℝ)).re := by
+    rw [ofReal_mul_re]
+    congr 1
+    rw [show ((-(LeanLab.Linnik.Decomp1532a.dif x) : ℤ) : ℝ) * α =
+      -((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α) by push_cast; ring]
+    exact (e_neg_re _).symm
+  have hcont : Continuous fun α : ℝ =>
+      ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e
+        ((-(LeanLab.Linnik.Decomp1532a.dif x) : ℤ) * α : ℝ) := by
+    have he : Continuous fun α : ℝ => LeanLab.PNTPort.LargeSieve.e
+        ((-(LeanLab.Linnik.Decomp1532a.dif x) : ℤ) * α : ℝ) := by
+      unfold LeanLab.PNTPort.LargeSieve.e
+      fun_prop
+    exact (Complex.continuous_ofReal.comp
+      ((LeanLab.Linnik.U7206.continuous_Sg N).norm.pow 2)).mul he
+  simp_rw [hpoint]
+  have hstep : (∫ α in Set.Icc (0 : ℝ) 1,
+      (((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e
+        ((-(LeanLab.Linnik.Decomp1532a.dif x) : ℤ) * α : ℝ)).re) =
+      ((∫ α in Set.Icc (0 : ℝ) 1,
+        (((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e
+          ((-(LeanLab.Linnik.Decomp1532a.dif x) : ℤ) * α : ℝ)))).re :=
+    integral_re hcont.integrableOn_Icc
+  rw [hstep, prime_pair_fourier_identity N (-(LeanLab.Linnik.Decomp1532a.dif x)), natCast_re]
 
 /-- LEAF, OPEN. Emptiness half of the support reduction: on the long shift range no such pair
 exists, because both primes are at most `N` and so their difference is at most `N` in absolute
@@ -59,7 +117,32 @@ theorem large_shift_pair_count_zero (k N : ℕ) (θ : ℝ)
     (hx : (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)|) :
     ((#{y ∈ primesLe N ×ˢ primesLe N |
         (y.1 : ℤ) - y.2 = -(LeanLab.Linnik.Decomp1532a.dif x)} : ℕ) : ℝ) = 0 := by
-  sorry
+  classical
+  have hA : ∀ a ∈ primesLe N, a ≤ N := fun a ha =>
+    Nat.le_of_lt_succ (Finset.mem_range.mp (Finset.mem_filter.mp ha).1)
+  have hfalse : ∀ y ∈ primesLe N ×ˢ primesLe N,
+      ¬ ((y.1 : ℤ) - y.2 = -(LeanLab.Linnik.Decomp1532a.dif x)) := by
+    intro y hy heq
+    rw [Finset.mem_product] at hy
+    obtain ⟨h1, h2⟩ := hy
+    have hb1 : (y.1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hA y.1 h1
+    have hb2 : (y.2 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hA y.2 h2
+    have hd : (LeanLab.Linnik.Decomp1532a.dif x : ℤ) = (y.2 : ℤ) - (y.1 : ℤ) := by
+      omega
+    have hcast : ((LeanLab.Linnik.Decomp1532a.dif x : ℤ) : ℝ) =
+        (y.2 : ℝ) - (y.1 : ℝ) := by
+      rw [hd]; push_cast; ring
+    have hbound : |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) := by
+      rw [hcast, abs_le]
+      constructor
+      · linarith [Nat.cast_nonneg (α := ℝ) y.1]
+      · linarith [Nat.cast_nonneg (α := ℝ) y.2]
+    linarith
+  have hempty : ({y ∈ primesLe N ×ˢ primesLe N |
+      (y.1 : ℤ) - y.2 = -(LeanLab.Linnik.Decomp1532a.dif x)} : Finset (ℕ × ℕ)) = ∅ :=
+    Finset.filter_false_of_mem hfalse
+  rw [hempty]
+  simp
 
 /-- LEAF, OPEN. Integrability of the correlation kernel on the unit interval, the side condition of
 the splitting lemma used in the assembly. The exponential sum `Sg N α` is a finite sum of phases, so
@@ -71,7 +154,8 @@ theorem large_shift_integrand_integrable (k N : ℕ) (θ : ℝ)
       (fun α => ‖Sg N α‖ ^ 2 *
         (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re)
       (Set.Icc (0 : ℝ) 1) := by
-  sorry
+  exact (continuous_kernel N (LeanLab.Linnik.Decomp1532a.dif x)).integrableOn_Icc
+
 
 /-- ASSEMBLY. The support reduction `large_shift_major_eq_neg_minor`, from the three leaves of this
 split: the correlation over the whole unit interval counts the matching tuples
