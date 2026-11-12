@@ -6,6 +6,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.Decomp482a
 import LeanLab.PNTPort.Gallagher.Basic
+import LeanLab.Linnik.ExplicitFormula.Assembly
 
 namespace LeanLab.Linnik.Decomp482b
 
@@ -322,7 +323,142 @@ theorem exceptionalMain_window_mean_le (N : ℕ) (γ : ℝ) (hγ : γ ≤ 1) (R 
     _ = _ := heq
     _ ≤ _ := exceptionalMain_mean_square_le N γ hγ
 
-/-- LEAF. Gallagher 1975 p.131 display 14 before the exceptional replacement.
+/-- Gallagher 1975 p.131 display 14 by the method of reference 10 Section 7, Gallagher 1970
+Lemma 1. The window length, about N over 2P with P equal to N to theta, so that the
+p.128 norm window of radius P over N lies inside the Gallagher window of radius 1 over 2L. -/
+noncomputable def gallagherLength (N : ℕ) (θ : ℝ) : ℕ :=
+  ⌊(N : ℝ) / (2 * (N : ℝ) ^ θ)⌋₊
+
+/-- Gallagher 1975 p.131 display 14 with the p.128 norm window of radius P over N.
+For theta at most one half and N at least four, the window length is positive and
+P over N is at most 1 over 2L. Elementary. -/
+theorem gallagherLength_spec {N : ℕ} {θ : ℝ} (_hθ : 0 ≤ θ) (hθ2 : θ ≤ 1 / 2) (hN : 4 ≤ N) :
+    0 < gallagherLength N θ ∧
+      (N : ℝ) ^ θ / N ≤ 1 / (2 * (gallagherLength N θ : ℝ)) := by
+  have hN0 : (0 : ℝ) < N := by exact_mod_cast (by omega : 0 < N)
+  have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast (by omega : 1 ≤ N)
+  have hP : 0 < (N : ℝ) ^ θ := Real.rpow_pos_of_pos hN0 _
+  have hkey : 2 * (N : ℝ) ^ θ ≤ N := by
+    have h1 : (N : ℝ) ^ θ ≤ (N : ℝ) ^ (1 / 2 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le hN1 hθ2
+    have h2 : 2 * (N : ℝ) ^ (1 / 2 : ℝ) ≤ N := by
+      rw [← Real.sqrt_eq_rpow]
+      have hs : 2 ≤ Real.sqrt N := by
+        rw [show (2 : ℝ) = Real.sqrt 4 by
+          rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
+        exact Real.sqrt_le_sqrt (by exact_mod_cast hN)
+      have hm := Real.mul_self_sqrt hN0.le
+      nlinarith
+    linarith
+  have hx1 : 1 ≤ (N : ℝ) / (2 * (N : ℝ) ^ θ) := by
+    rw [le_div_iff₀ (by positivity)]
+    linarith
+  have hL : 0 < gallagherLength N θ := Nat.floor_pos.mpr hx1
+  refine ⟨hL, ?_⟩
+  have hLle : (gallagherLength N θ : ℝ) ≤ N / (2 * (N : ℝ) ^ θ) :=
+    Nat.floor_le (by positivity)
+  have hLpos : (0 : ℝ) < gallagherLength N θ := by exact_mod_cast hL
+  have hm := (le_div_iff₀ (by positivity : (0 : ℝ) < 2 * (N : ℝ) ^ θ)).mp hLle
+  rw [div_le_div_iff₀ hN0 (by positivity)]
+  nlinarith
+
+/-- Gallagher 1975 p.131, the first step of the method of reference 10 Section 7:
+Gallagher 1970 Lemma 1 bounds the p.128 norm of a corrected character amplitude over
+the window of radius P over N by pi over 2L times the L2 norm of its window sums of
+length L. From the proved discrete Gallagher inequality. -/
+theorem energy_window_gallagher {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (N r L : ℕ) (θ γ : ℝ) (hL : 0 < L)
+    (hR : (N : ℝ) ^ θ / N ≤ 1 / (2 * (L : ℝ))) :
+    Real.sqrt (∫ β in Set.Icc (-((N : ℝ) ^ θ / N)) ((N : ℝ) ^ θ / N),
+      ‖correctedAmplitude χ N r γ β‖ ^ 2) ≤
+    Real.pi / (2 * L) * Real.sqrt (∑ m ∈ range (N + 1 + L),
+      ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ r γ) (N + 1) L m‖ ^ 2) := by
+  have hsub : Set.Icc (-((N : ℝ) ^ θ / N)) ((N : ℝ) ^ θ / N) ⊆
+      Set.Icc (-(1 / (2 * L) : ℝ)) (1 / (2 * L)) := fun β hβ =>
+    ⟨by linarith [hβ.1], by linarith [hβ.2]⟩
+  have hmono := setIntegral_mono_set
+    (integrableOn_corrected_norm_sq χ N r γ (-(1 / (2 * L) : ℝ)) (1 / (2 * L)))
+    (Filter.Eventually.of_forall fun β => sq_nonneg ‖correctedAmplitude χ N r γ β‖)
+    (Filter.Eventually.of_forall fun β hβ => hsub hβ)
+  have h := hmono.trans (corrected_amplitude_short_window_le χ N r L γ hL)
+  calc
+    _ ≤ Real.sqrt ((Real.pi / (2 * L)) ^ 2 * ∑ m ∈ range (N + 1 + L),
+          ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ r γ) (N + 1) L m‖ ^ 2) :=
+      Real.sqrt_le_sqrt h
+    _ = _ := by
+      rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (by positivity)]
+
+/-- Gallagher 1975 p.127 definition of the exceptional zero relative to T equal to P to
+the fifth, used on p.131 after display 14. If no conductor at most P lies in the
+exceptional set, every zero of a primitive L function of conductor at most P with
+height at most P to the fifth lies left of the line 1 minus b over log T. Elementary. -/
+theorem nonexceptional_zero_gap {N : ℕ} {θ : ℝ} (hN : 1 ≤ N) (hθ : 0 ≤ θ)
+    (hno : ¬ ∃ x ∈ excSet exceptionalStrip (((N : ℝ) ^ θ) ^ 5),
+      ((x.1 + 1 : ℕ) : ℝ) ≤ (N : ℝ) ^ θ) :
+    ∀ k < ⌊(N : ℝ) ^ θ⌋₊, ∀ χ : DirichletCharacter ℂ (k + 1), χ.IsPrimitive →
+      ∀ ρ : ℂ, χ.LFunction ρ = 0 → |ρ.im| ≤ ((N : ℝ) ^ θ) ^ 5 →
+        ρ.re < 1 - exceptionalStrip / Real.log (((N : ℝ) ^ θ) ^ 5) := by
+  intro k hk χ hχ ρ hρ him
+  by_contra hre
+  push_neg at hre
+  have hP1 : 1 ≤ (N : ℝ) ^ θ := Real.one_le_rpow (by exact_mod_cast hN) hθ
+  have hkP : ((k + 1 : ℕ) : ℝ) ≤ (N : ℝ) ^ θ :=
+    (Nat.le_floor_iff (by linarith)).mp (Nat.succ_le_of_lt hk)
+  have hP5 : (N : ℝ) ^ θ ≤ ((N : ℝ) ^ θ) ^ 5 := le_self_pow₀ hP1 (by norm_num)
+  have hk5 : (k : ℝ) + 1 ≤ ((N : ℝ) ^ θ) ^ 5 := by push_cast at hkP; linarith
+  exact hno ⟨⟨k, χ⟩, ⟨hk5, hχ, ρ, hρ, hre, him⟩, hkP⟩
+
+/-- CONDITIONAL ON the ExplicitFormula lemmas, via
+`LeanLab.Linnik.ExplicitFormula.mean_decay_nonexceptional`; formerly a LEAF.
+Gallagher 1975 p.131 display 14, E at most N to the one half over log N times
+e to the minus c over theta, "by the method of [10, Section 7]", Gallagher 1970 Invent.
+Math. 11 Section 7, in the case with no exceptional zero. After the Gallagher window step
+energy_window_gallagher, the remaining content is the mean square of the short interval
+corrected prime sums of length about N over 2P, summed over primitive characters of
+conductor at most P, given the zero gap of nonexceptional_zero_gap. Its proof needs the
+explicit formula for primitive L of s and chi uniform in q, the proved density
+estimate density_near_one, and the classical zero free region above height P to the fifth. -/
+theorem short_interval_mean_decay :
+    ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < C ∧ 0 < θ₀ ∧ θ₀ ≤ 1 / 2 ∧
+      ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+        (∀ k < ⌊(N : ℝ) ^ θ⌋₊, ∀ χ : DirichletCharacter ℂ (k + 1), χ.IsPrimitive →
+          ∀ ρ : ℂ, χ.LFunction ρ = 0 → |ρ.im| ≤ ((N : ℝ) ^ θ) ^ 5 →
+            ρ.re < 1 - exceptionalStrip / Real.log (((N : ℝ) ^ θ) ^ 5)) →
+        ∑ k ∈ range ⌊(N : ℝ) ^ θ⌋₊,
+          ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ (k + 1))).filter (fun χ => χ.IsPrimitive),
+            Real.pi / (2 * gallagherLength N θ) *
+              Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
+                ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ 0 0) (N + 1)
+                  (gallagherLength N θ) m‖ ^ 2)
+          ≤ C * Real.exp (-c / θ) * (Real.sqrt N / Real.log N) := by
+  exact LeanLab.Linnik.ExplicitFormula.mean_decay_nonexceptional exceptionalStrip
+    exceptionalStrip_pos
+
+/-- LEAF. Gallagher 1975 p.131 display 14 and the paragraph after it, exceptional case:
+the single term for the exceptional character is replaced by R tilde, A of chi tilde equal
+to minus T tilde plus R tilde, and the same method of reference 10 Section 7 applies.
+After the Gallagher window step, the remaining content is the mean square of the short
+interval corrected sums with the real exceptional zero gamma removed.
+QUESTION, burst 2026-11-12 session 6: stated for every real zero in the strip, this needs a
+Page theorem at width exceptionalStrip, which the lab lacks; no longer on the route, see
+research/burst-20261112/Linnik-explicit-formula-plan.md. -/
+theorem short_interval_mean_decay_exceptional :
+    ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < C ∧ 0 < θ₀ ∧ θ₀ ≤ 1 / 2 ∧
+      ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+        ∀ x ∈ excSet exceptionalStrip (((N : ℝ) ^ θ) ^ 5),
+          ((x.1 + 1 : ℕ) : ℝ) ≤ (N : ℝ) ^ θ →
+          ∀ γ : ℝ, x.2.LFunction (γ : ℂ) = 0 →
+            1 - exceptionalStrip / Real.log (((N : ℝ) ^ θ) ^ 5) ≤ γ → γ < 1 →
+        ∑ k ∈ range ⌊(N : ℝ) ^ θ⌋₊,
+          ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ (k + 1))).filter (fun χ => χ.IsPrimitive),
+            Real.pi / (2 * gallagherLength N θ) *
+              Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
+                ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (x.1 + 1) γ) (N + 1)
+                  (gallagherLength N θ) m‖ ^ 2)
+          ≤ C * Real.exp (-c / θ) * (Real.sqrt N / Real.log N) := by
+  sorry
+
+/-- CONDITIONAL ON short_interval_mean_decay. Gallagher 1975 p.131 display 14 before the exceptional replacement.
 If no character in the fixed strip has conductor at most P, the principal
 corrected energy decays exponentially. The zero density bound is already proved. -/
 theorem energy_decay_without_exception :
@@ -331,9 +467,23 @@ theorem energy_decay_without_exception :
         (¬ ∃ x ∈ excSet exceptionalStrip (((N : ℝ) ^ θ) ^ 5),
           ((x.1 + 1 : ℕ) : ℝ) ≤ (N : ℝ) ^ θ) →
         normalizedEnergy N θ 0 0 ≤ C * Real.exp (-c / θ) := by
-  sorry
+  obtain ⟨c, C, θ₀, hc, hC, hθ₀, hθ₀2, hleaf⟩ := short_interval_mean_decay
+  refine ⟨c, C, θ₀, hc, hC, hθ₀, by linarith, fun θ hθ hθle => ?_⟩
+  obtain ⟨N₀, hN₀⟩ := hleaf θ hθ hθle
+  refine ⟨max N₀ 4, fun N hN hno => ?_⟩
+  have hN4 : 4 ≤ N := (le_max_right _ _).trans hN
+  obtain ⟨hL, hR⟩ := gallagherLength_spec hθ.le (hθle.trans hθ₀2) hN4
+  have hgap := nonexceptional_zero_gap (by omega) hθ.le hno
+  have hsum := hN₀ N ((le_max_left _ _).trans hN) hgap
+  rw [normalizedEnergy_le_iff (by omega)]
+  refine le_trans ?_ hsum
+  unfold correctedEnergy
+  exact sum_le_sum fun k _ => sum_le_sum fun χ _ =>
+    energy_window_gallagher χ N 0 _ θ 0 hL hR
 
-/-- LEAF. Gallagher 1975 p.131 display 14 and the paragraph following it.
+/-- CONDITIONAL ON the ExplicitFormula lemmas via `ExplicitFormula.mean_decay_exceptional_max` with the largest real zero
+from `ExplicitFormula.exists_max_real_zero`; it no longer uses the leaf short_interval_mean_decay_exceptional.
+Gallagher 1975 p.131 display 14 and the paragraph following it.
 For a character in the fixed strip with conductor at most P, removing its real
 zero main polynomial gives exponential decay of the corrected energy.
 Only the exceptional case is asserted here. -/
@@ -345,7 +495,29 @@ theorem energy_decay_with_exception :
           ∃ γ : ℝ, x.2.LFunction (γ : ℂ) = 0 ∧
             1 - exceptionalStrip / Real.log (((N : ℝ) ^ θ) ^ 5) ≤ γ ∧ γ < 1 ∧
             normalizedEnergy N θ (x.1 + 1) γ ≤ C * Real.exp (-c / θ) := by
-  sorry
+  obtain ⟨c, C, θ₀, hc, hC, hθ₀, hθ₀2, hleaf⟩ :=
+    LeanLab.Linnik.ExplicitFormula.mean_decay_exceptional_max
+  refine ⟨c, C, θ₀, hc, hC, hθ₀, by linarith, fun θ hθ hθle => ?_⟩
+  obtain ⟨N₀, hN₀⟩ := hleaf θ hθ hθle
+  have hev : ∀ᶠ N : ℕ in atTop, (2 : ℝ) ≤ (N : ℝ) ^ θ :=
+    ((tendsto_rpow_atTop hθ).comp (tendsto_natCast_atTop_atTop (R := ℝ))).eventually_ge_atTop 2
+  obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp hev
+  refine ⟨max (max N₀ N₁) 4, fun N hN x hx hxP => ?_⟩
+  have hN4 : 4 ≤ N := (le_max_right _ _).trans hN
+  have hNN₀ : N₀ ≤ N := (le_max_left _ _).trans ((le_max_left _ _).trans hN)
+  have hNN₁ : N₁ ≤ N := (le_max_right _ _).trans ((le_max_left _ _).trans hN)
+  have hP2 : (2 : ℝ) ≤ (N : ℝ) ^ θ := hN₁ N hNN₁
+  have hT : (2 : ℝ) ≤ ((N : ℝ) ^ θ) ^ 5 :=
+    hP2.trans (le_self_pow₀ (by linarith) (by norm_num))
+  obtain ⟨γ, hz, hlo, hlt, hmax⟩ := LeanLab.Linnik.ExplicitFormula.exists_max_real_zero hT x hx
+  obtain ⟨hL, hR⟩ := gallagherLength_spec hθ.le (hθle.trans hθ₀2) hN4
+  have hsum := hN₀ N hNN₀ x hx hxP γ hz hlo hlt hmax
+  refine ⟨γ, hz, hlo, hlt, ?_⟩
+  rw [normalizedEnergy_le_iff (by omega)]
+  refine le_trans ?_ hsum
+  unfold correctedEnergy
+  exact sum_le_sum fun k _ => sum_le_sum fun χ _ =>
+    energy_window_gallagher χ N (x.1 + 1) _ θ γ hL hR
 
 /-- Gallagher 1975 p.131 display 14 and its exceptional replacement.
 Combine the two cases after choosing a real exceptional zero when one exists.
@@ -416,6 +588,11 @@ theorem corrected_energy_decay_split :
 end LeanLab.Linnik.Decomp486c
 
 #print axioms LeanLab.Linnik.Decomp486c.exceptional_real_zero
+#print axioms LeanLab.Linnik.Decomp486c.gallagherLength_spec
+#print axioms LeanLab.Linnik.Decomp486c.energy_window_gallagher
+#print axioms LeanLab.Linnik.Decomp486c.nonexceptional_zero_gap
+#print axioms LeanLab.Linnik.Decomp486c.short_interval_mean_decay
+#print axioms LeanLab.Linnik.Decomp486c.short_interval_mean_decay_exceptional
 #print axioms LeanLab.Linnik.Decomp486c.energy_decay_without_exception
 #print axioms LeanLab.Linnik.Decomp486c.energy_decay_with_exception
 #print axioms LeanLab.Linnik.Decomp486c.corrected_energy_decay_of_cases
