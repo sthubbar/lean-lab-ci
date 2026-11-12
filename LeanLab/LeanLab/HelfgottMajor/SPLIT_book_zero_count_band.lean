@@ -53,16 +53,16 @@ This is the elementary half of the band. It is what makes the lower side of the 
 free: with `0 ≤ bookCount` and `bookMain ≤ 0`, the difference `bookMain - bookCount` is at most
 zero, hence below the positive error. -/
 theorem book_count_band_main_nonpos {T : ℝ} (hT : 1 ≤ T)
-    (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) : bookMain q T ≤ 0 := by
-  sorry
+    (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) : bookMain q T ≤ 0 :=
+  (bookMain_band_agy37 (q := q) hT hband).2
 
 /-- LEAF. Band error floor: on `T ≥ 1`, and with `q ≥ 1` since `q` is a nonzero natural, one
 has `q * T ≥ 1`, so the logarithm in the error is nonnegative and `3.389 ≤ bookError q T`.
 
 This is the constant that absorbs the count: together with `-1 ≤ bookMain q T` it gives
 `bookCount - bookMain ≤ 2.389 + 1 = 3.389 ≤ bookError` on the band. -/
-theorem book_count_band_error_ge {T : ℝ} (hT : 1 ≤ T) : 3.389 ≤ bookError q T := by
-  sorry
+theorem book_count_band_error_ge {T : ℝ} (hT : 1 ≤ T) : 3.389 ≤ bookError q T :=
+  bookError_ge_agy37 (q := q) hT
 
 /-- Assembly: the band statement, with the statement of the target unchanged, follows from the
 three leaves and the two costless bounds of the parent file.
