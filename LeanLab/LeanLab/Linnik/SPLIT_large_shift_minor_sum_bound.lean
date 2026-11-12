@@ -30,7 +30,7 @@ Assembly: `large_shift_minor_sum_bound_split`, the sealed statement, with no sor
 AI-written Lean code, DeepSeek V4.1 Flash Low, 2026-11-12. Checked only by the Lean kernel.
 Binary Goldbach is OPEN.
 -/
-import LeanLab.Linnik.SPLIT_split_large_shift_bound
+import LeanLab.Linnik.Decomp1532b
 
 namespace LeanLab.Linnik.Decomp1532c
 
@@ -39,6 +39,24 @@ open scoped Topology
 open LeanLab.Linnik.Decomp1532b (majorArcs)
 open LeanLab.Linnik.U7204 (Sg primesLe)
 open LeanLab.Linnik.U1426ChainWire (Gs continuous_Gs)
+
+/-- Elementary support bound for a tuple difference. Every tuple difference has absolute value at
+most `k N`, since each exponent sum is at most `k 2 ^ (Nat.log 2 N)`. This is the existing
+Gallagher p.136 Lemma 8 estimate, cast from the natural absolute value to the real one. -/
+lemma dif_abs_le_kN {k N : ℕ} (hN : 1 ≤ N)
+    (x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N)) :
+    |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (k : ℝ) * (N : ℝ) := by
+  have ha := LeanLab.Linnik.U1434Lemma21.sv_le x.1
+  have hb := LeanLab.Linnik.U1434Lemma21.sv_le x.2
+  have hp : 2 ^ Nat.log 2 N ≤ N := Nat.pow_log_le_self 2 (by omega)
+  have ha' := ha.trans (Nat.mul_le_mul_left k hp)
+  have hb' := hb.trans (Nat.mul_le_mul_left k hp)
+  have hm : (LeanLab.Linnik.Decomp1532a.dif x).natAbs ≤ k * N := by
+    unfold LeanLab.Linnik.Decomp1532a.dif
+    omega
+  have hr : ((LeanLab.Linnik.Decomp1532a.dif x).natAbs : ℝ) ≤
+      (k : ℝ) * (N : ℝ) := by exact_mod_cast hm
+  simpa only [Nat.cast_natAbs, Int.cast_abs] using hr
 
 /-- LEAF, OPEN. First piece of the long shift range, the near one: shifts above the summation range
 `N` but no larger than twice it. This is the step of the target where the difference of the two
@@ -98,7 +116,44 @@ theorem large_shift_far_sum_bound :
               ‖Sg N α‖ ^ 2 *
                 (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 9) := by
-  sorry
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  refine ⟨k ^ 2 + 1, ?_⟩
+  intro N hN
+  have hk2 : (k : ℝ) ^ 2 < (N : ℝ) := by
+    have hnat : k ^ 2 < N := by omega
+    exact_mod_cast hnat
+  have hk_nonneg : 0 ≤ (k : ℝ) := by positivity
+  have hk2_nonneg : 0 ≤ (k : ℝ) ^ 2 := sq_nonneg _
+  have hNpos : 0 < (N : ℝ) := by nlinarith
+  have hsqrt : (k : ℝ) < Real.sqrt (N : ℝ) := by
+    exact (Real.lt_sqrt (by norm_num : (0 : ℝ) ≤ k)).2 hk2
+  have hhalf : (k : ℝ) < (N : ℝ) ^ ((1 : ℝ) / 2) := by
+    rw [← Real.sqrt_eq_rpow]
+    exact hsqrt
+  have hrpow3 : (N : ℝ) ^ ((3 : ℝ) / 2) =
+      (N : ℝ) * (N : ℝ) ^ ((1 : ℝ) / 2) := by
+    rw [show ((3 : ℝ) / 2) = 1 + 1 / 2 by norm_num, Real.rpow_add hNpos]
+    simp
+  have hkNpow : (k : ℝ) * (N : ℝ) < (N : ℝ) ^ ((3 : ℝ) / 2) := by
+    rw [hrpow3]
+    simpa only [mul_comm] using (mul_lt_mul_of_pos_right hhalf hNpos)
+  have hempty :
+      Finset.univ.filter (fun x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) =>
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
+          (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ∧
+          ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ 2 * (N : ℝ)) ∧
+          ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ ((3 : ℝ) / 2))) = ∅ := by
+    apply Finset.filter_eq_empty_iff.mpr
+    intro x hx hp
+    have habs := dif_abs_le_kN (by omega) x
+    have hfar := not_le.mp hp.2.2.2
+    exact (not_lt_of_ge hkNpow.le) (hfar.trans_le habs)
+  rw [hempty, Finset.sum_empty, abs_zero]
+  have hM : 0 ≤ 2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2 := by
+    positivity
+  have hδ9 : 0 ≤ δ / 9 := div_nonneg hδ.le (by norm_num)
+  exact mul_nonneg hM hδ9
 
 /-- ASSEMBLY. The sealed statement `large_shift_minor_sum_bound`, from the three pieces of the long
 shift range: split the tuple sum by `|dif x| ≤ 2 N` and then by `|dif x| ≤ N ^ (3/2)`, apply each
