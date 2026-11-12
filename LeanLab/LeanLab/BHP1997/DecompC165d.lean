@@ -5,6 +5,7 @@ The exact final statement is CONDITIONAL on both OPEN leaves.
 AI wrote the Lean code. CODEX task165. Goldbach is open.
 -/
 import LeanLab.BHP1997.Certificate312Total
+import LeanLab.BHP1997.LowerShortC165
 import LeanLab.BHP1997.DecompC165dBase312
 
 namespace LeanLab.BHP1997.DecompC165d
@@ -23,7 +24,7 @@ theorem lower_two_integral_bound {ω : ℝ → ℝ}
   rw [lower_two_grid_total] at hh
   exact hh.trans (by norm_num)
 
-/-- LEAF, OPEN. Pages 43 to 52, the lower short weight b0, with the page 51 formula for its density:
+/-- SPLIT in burst 2 into LowerShortC165, CONDITIONAL on its three OPEN leaves. Pages 43 to 52, the lower short weight b0, with the page 51 formula for its density:
 `v₀` is 1 minus the integrals over `E₂` and `E₄`. Since `lowerFourDeletedIntegral` is the
 conservative superset of `E₄`, that formula is stated as a lower bound for `v₀`.
 Lemmas 29 to 35 supply the moment estimates and 5.18 to 5.23 on page 52 normalize condition iv. -/
@@ -37,7 +38,16 @@ theorem lower_short_weight_analytic (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132
           RightConditions ε B v0 b0 ∧
           ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
             ∀ m ∈ rightInterval ε x, b0 x m ≤ primeWeight m := by
-  sorry
+  -- Burst 2 split: the explicit page 51 coefficient of `LowerShortC165`.
+  obtain ⟨ω, hω, hz⟩ := Task308.buchstab_model_exists
+  refine ⟨ω, hω, hz, 4, 1/10^8, by norm_num, ?_⟩
+  intro B ε hB hε hεη
+  have hε8 : ε ≤ 1/10^8 := hεη.le
+  refine ⟨LowerShortC165.lowerV0 ω ε, LowerShortC165.lowerShortWeight ω ε, le_rfl,
+    ⟨LowerShortC165.lowerShortWeight_divisor_bound ω ε hB,
+      LowerShortC165.lower_short_distribution ω hω hz hε hε8,
+      LowerShortC165.lower_exceptional_mean_square h4 h9 ω hω hz hε hε8⟩,
+    0, fun x _ m _ => LowerShortC165.lowerShortWeight_le_primeWeight ω ε x m⟩
 
 /-- Pages 43 to 52, the lower short weight b0. `0.05 < v0` is now derived from the page 51 density
 formula, `lower_two_integral_bound` and the proved `lower_four_discard_small`, by
