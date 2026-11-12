@@ -1,10 +1,11 @@
 /-
 Gallagher 1975 P0094 p.130, displays 9 to 11. Display 11 assembled from the leaves
-`principal_arc_integral`, `singular_tail_cited` and `singular_weighted_sums_cited`.
+`principal_arc_integral_of_steps` of Display9.lean, `singular_tail_cited` and `singular_weighted_sums_cited`.
 Source https://doi.org/10.1007/BF01390190
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.MajorArcEnergy.Leaves13
+import LeanLab.Linnik.MajorArcEnergy.Display9
 
 namespace LeanLab.Linnik.MajorArcEnergy
 
@@ -137,7 +138,7 @@ theorem norm_summand (q : ℕ) (c X : ℂ) :
   rw [norm_mul, norm_mul, norm_div, norm_pow, norm_pow, Complex.norm_intCast,
     Complex.norm_natCast, sq_abs]
 
-/-- Gallagher 1975 p.130 display 11, assembled from display 9 `principal_arc_integral`,
+/-- Gallagher 1975 p.130 display 11, assembled from display 9 `principal_arc_integral_of_steps`, PROVED in Display9.lean,
 the identities tau(1_q) equal to mu(q) and c_n(1_q) equal to c_q(n), and the cited
 estimates `singular_tail_cited` and `singular_weighted_sums_cited` of reference 10. -/
 theorem principal_pair_sum_of_leaves :
@@ -149,7 +150,7 @@ theorem principal_pair_sum_of_leaves :
                 (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ) +
               Real.sqrt N / Real.log N * remNorm N ((N : ℝ) ^ θ) +
               remNorm N ((N : ℝ) ^ θ) ^ 2) := by
-  obtain ⟨K1, θ1, hK1, hθ1, hI⟩ := principal_arc_integral
+  obtain ⟨K1, θ1, hK1, hθ1, hI⟩ := principal_arc_integral_of_steps
   obtain ⟨K3, hK3, hT⟩ := singular_tail_cited
   obtain ⟨K2, hK2, hW⟩ := singular_weighted_sums_cited
   obtain ⟨N2, hN2⟩ := J0_le_two

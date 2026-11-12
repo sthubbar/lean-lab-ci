@@ -12,7 +12,8 @@ open Finset
 open scoped Classical
 open LeanLab.Linnik.Decomp466a LeanLab.Linnik.Decomp482a
 
-/-- LEAF. Gallagher 1975 p.131 display 17 and its printed proof on pp.131 and 132 from
+/-- LEAF, OFF ROUTE: superseded by `exceptional_weight_bound_of_cited` in Display17.lean, the same
+statement proved from the CITED-LEFT display 5. Gallagher 1975 p.131 display 17 and its printed proof on pp.131 and 132 from
 display 5: C_n(chi~, 1) + C_n(chi~, chi~) is at most a constant times
 n/phi(n) r phi((n, r))/phi(r)^2 for chi~ primitive to conductor r. The term C_n(1, chi~),
 which the paper treats in the same way, is included. -/

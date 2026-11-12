@@ -1,13 +1,15 @@
 /-
 Gallagher 1975 P0094 p.131 display 13, the conductor zero case of the major arc reduction.
 Assembled from displays 3, 4, 7, 10, 11 and 12 exactly as on pp.128 to 131.
-CONDITIONAL ON the leaves in Leaves13.lean.
+CONDITIONAL ON the CITED-LEFT leaves of Leaves13.lean, see the main theorem.
 Source https://doi.org/10.1007/BF01390190
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.MajorArcEnergy.Leaves13
 import LeanLab.Linnik.MajorArcEnergy.Basic13
 import LeanLab.Linnik.MajorArcEnergy.Display11
+import LeanLab.Linnik.MajorArcEnergy.Display7
+import LeanLab.Linnik.MajorArcEnergy.Display3
 
 namespace LeanLab.Linnik.MajorArcEnergy
 
@@ -204,9 +206,10 @@ theorem large_N_facts (θ : ℝ) (hθ : 0 < θ) (hθ8 : θ ≤ 1 / 8) :
       _ ≤ (N : ℝ) / Real.log N ^ 2 * (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ) := by
         gcongr
 
-/-- CONDITIONAL ON `major_arc_pair_expansion`, `pair_weight_bound` and, through
-`principal_pair_sum_of_leaves`, on `principal_arc_integral`, `singular_tail_cited` and
-`singular_weighted_sums_cited`. Gallagher 1975 p.131 display 13: combining display 3, display 8
+/-- CONDITIONAL ON the three CITED-LEFT leaves only: `induced_cn_bound` through
+`pair_weight_bound_of_cited` in Display7.lean, and `singular_tail_cited` and
+`singular_weighted_sums_cited` through `principal_pair_sum_of_leaves` in Display11.lean.
+Display 3 is `major_arc_pair_expansion_of_steps`, PROVED in Display3.lean. Gallagher 1975 p.131 display 13: combining display 3, display 8
 from 4 and 7, display 11 and display 12 from 4, 7 and 10, the major arc integral is
 J(n) S(n) plus O(n/phi(n) (N L^(-2) tau(n) log P / P + (N^(1/2) L^(-1) + E) E)),
 and the O(P^(5/2)) of display 3 is absorbed for theta small.
@@ -224,8 +227,8 @@ theorem major_arc_energy_zero_split
           K * ((N : ℝ) / Real.log N ^ 2) * totientWeight n *
             (Real.log ((N : ℝ) ^ θ) / (N : ℝ) ^ θ * n.natAbs.divisors.card +
               (1 + normalizedEnergy N θ 0 0) * normalizedEnergy N θ 0 0) := by
-  obtain ⟨K1, θ1, hK1, hθ1, hexp⟩ := major_arc_pair_expansion hExpansion
-  obtain ⟨K2, hK2, hpw⟩ := pair_weight_bound
+  obtain ⟨K1, θ1, hK1, hθ1, hexp⟩ := major_arc_pair_expansion_of_steps hExpansion
+  obtain ⟨K2, hK2, hpw⟩ := pair_weight_bound_of_cited
   obtain ⟨K3, θ3, hK3, hθ3, hpp⟩ := principal_pair_sum_of_leaves
   obtain ⟨K4, hK4, N4, hamp⟩ := principal_amp_norm
   refine ⟨K1 + 2 * K3 + 2 * K2 * K4 + 3 * K2, min θ1 (min θ3 (1 / 8)), by positivity,
