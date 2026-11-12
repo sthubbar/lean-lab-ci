@@ -1,6 +1,7 @@
 import LeanLab.HelfgottMajor.Assembly
 import LeanLab.HelfgottMajor.Lemma41Terms
 import LeanLab.HelfgottArcs.Statements
+import LeanLab.HelfgottMajor.SplitGaussian123
 
 /-!
 P0014 Theorem 1.1, page 3, proof on pages 56 and 57.
@@ -156,7 +157,13 @@ theorem gaussian_explicit_estimate (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
       |s.im| ≤ T → s.re = 1 / 2) :
     MajorShape etaHeart χ δ x (gaussianError q δ x T) := by
-  sorry
+  -- SPLIT 2026-11-12 route burst: Lemma 4.1, Lemma 4.4 and Lemma 4.5 pieces in
+  -- SplitGaussian123, combined by the proved page 43 and 44 assembly.
+  unfold MajorShape gaussianError
+  exact SplitGaussian123.assembly_of_components x hx q χ δ T
+    (SplitGaussian123.explicit_formula_remainder x hx q χ hχ δ T hT hzeros)
+    (SplitGaussian123.low_zero_bound x hx q χ hχ δ T hT hzeros)
+    (SplitGaussian123.high_zero_bound x hx q χ hχ δ T hT hzeros)
 
 /-- The numerical substitution in P0014 pages 56 and 57, independent of cited analysis. -/
 theorem error_bound {q δ x : ℝ} (hq1 : 1 ≤ q) (hq : q ≤ 300000)
