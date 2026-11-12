@@ -6,6 +6,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.Decomp482a
 import LeanLab.PNTPort.Gallagher.Basic
+import LeanLab.Linnik.ExplicitFormula.Assembly
 
 namespace LeanLab.Linnik.Decomp482b
 
@@ -407,7 +408,9 @@ theorem nonexceptional_zero_gap {N : ℕ} {θ : ℝ} (hN : 1 ≤ N) (hθ : 0 ≤
   have hk5 : (k : ℝ) + 1 ≤ ((N : ℝ) ^ θ) ^ 5 := by push_cast at hkP; linarith
   exact hno ⟨⟨k, χ⟩, ⟨hk5, hχ, ρ, hρ, hre, him⟩, hkP⟩
 
-/-- LEAF. Gallagher 1975 p.131 display 14, E at most N to the one half over log N times
+/-- CONDITIONAL ON the ExplicitFormula lemmas, via
+`LeanLab.Linnik.ExplicitFormula.mean_decay_nonexceptional`; formerly a LEAF.
+Gallagher 1975 p.131 display 14, E at most N to the one half over log N times
 e to the minus c over theta, "by the method of [10, Section 7]", Gallagher 1970 Invent.
 Math. 11 Section 7, in the case with no exceptional zero. After the Gallagher window step
 energy_window_gallagher, the remaining content is the mean square of the short interval
@@ -428,13 +431,17 @@ theorem short_interval_mean_decay :
                 ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ 0 0) (N + 1)
                   (gallagherLength N θ) m‖ ^ 2)
           ≤ C * Real.exp (-c / θ) * (Real.sqrt N / Real.log N) := by
-  sorry
+  exact LeanLab.Linnik.ExplicitFormula.mean_decay_nonexceptional exceptionalStrip
+    exceptionalStrip_pos
 
 /-- LEAF. Gallagher 1975 p.131 display 14 and the paragraph after it, exceptional case:
 the single term for the exceptional character is replaced by R tilde, A of chi tilde equal
 to minus T tilde plus R tilde, and the same method of reference 10 Section 7 applies.
 After the Gallagher window step, the remaining content is the mean square of the short
-interval corrected sums with the real exceptional zero gamma removed. -/
+interval corrected sums with the real exceptional zero gamma removed.
+QUESTION, burst 2026-11-12 session 6: stated for every real zero in the strip, this needs a
+Page theorem at width exceptionalStrip, which the lab lacks; no longer on the route, see
+research/burst-20261112/Linnik-explicit-formula-plan.md. -/
 theorem short_interval_mean_decay_exceptional :
     ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < C ∧ 0 < θ₀ ∧ θ₀ ≤ 1 / 2 ∧
       ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
@@ -474,7 +481,9 @@ theorem energy_decay_without_exception :
   exact sum_le_sum fun k _ => sum_le_sum fun χ _ =>
     energy_window_gallagher χ N 0 _ θ 0 hL hR
 
-/-- CONDITIONAL ON short_interval_mean_decay_exceptional. Gallagher 1975 p.131 display 14 and the paragraph following it.
+/-- CONDITIONAL ON the ExplicitFormula lemmas via `ExplicitFormula.mean_decay_exceptional_max` with the largest real zero
+from `ExplicitFormula.exists_max_real_zero`; it no longer uses the leaf short_interval_mean_decay_exceptional.
+Gallagher 1975 p.131 display 14 and the paragraph following it.
 For a character in the fixed strip with conductor at most P, removing its real
 zero main polynomial gives exponential decay of the corrected energy.
 Only the exceptional case is asserted here. -/
@@ -486,7 +495,8 @@ theorem energy_decay_with_exception :
           ∃ γ : ℝ, x.2.LFunction (γ : ℂ) = 0 ∧
             1 - exceptionalStrip / Real.log (((N : ℝ) ^ θ) ^ 5) ≤ γ ∧ γ < 1 ∧
             normalizedEnergy N θ (x.1 + 1) γ ≤ C * Real.exp (-c / θ) := by
-  obtain ⟨c, C, θ₀, hc, hC, hθ₀, hθ₀2, hleaf⟩ := short_interval_mean_decay_exceptional
+  obtain ⟨c, C, θ₀, hc, hC, hθ₀, hθ₀2, hleaf⟩ :=
+    LeanLab.Linnik.ExplicitFormula.mean_decay_exceptional_max
   refine ⟨c, C, θ₀, hc, hC, hθ₀, by linarith, fun θ hθ hθle => ?_⟩
   obtain ⟨N₀, hN₀⟩ := hleaf θ hθ hθle
   have hev : ∀ᶠ N : ℕ in atTop, (2 : ℝ) ≤ (N : ℝ) ^ θ :=
@@ -499,9 +509,9 @@ theorem energy_decay_with_exception :
   have hP2 : (2 : ℝ) ≤ (N : ℝ) ^ θ := hN₁ N hNN₁
   have hT : (2 : ℝ) ≤ ((N : ℝ) ^ θ) ^ 5 :=
     hP2.trans (le_self_pow₀ (by linarith) (by norm_num))
-  obtain ⟨γ, hz, hlo, hlt⟩ := exceptional_real_zero hT x hx
+  obtain ⟨γ, hz, hlo, hlt, hmax⟩ := LeanLab.Linnik.ExplicitFormula.exists_max_real_zero hT x hx
   obtain ⟨hL, hR⟩ := gallagherLength_spec hθ.le (hθle.trans hθ₀2) hN4
-  have hsum := hN₀ N hNN₀ x hx hxP γ hz hlo hlt
+  have hsum := hN₀ N hNN₀ x hx hxP γ hz hlo hlt hmax
   refine ⟨γ, hz, hlo, hlt, ?_⟩
   rw [normalizedEnergy_le_iff (by omega)]
   refine le_trans ?_ hsum

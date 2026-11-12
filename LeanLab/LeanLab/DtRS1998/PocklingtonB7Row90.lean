@@ -10,6 +10,10 @@ outside Lean; only the kernel check counts. No native_decide.
 -/
 import LeanLab.DtRS1998.Decomp372aData
 import LeanLab.DtRS1998.PocklingtonB7Lucas
+import LeanLab.DtRS1998.PocklingtonS6Row90G0
+import LeanLab.DtRS1998.PocklingtonS6Row90G1
+import LeanLab.DtRS1998.PocklingtonS6Row90G2
+import LeanLab.DtRS1998.PocklingtonS6Row90Rest
 
 namespace LeanLab.DtRS1998.PocklingtonB7Row90
 
@@ -2599,13 +2603,20 @@ theorem prime12 : ∀ q ∈ C12.map lastP2, q.Prime :=
 /-- The candidates of row 10^90 without a Pocklington certificate in this file. -/
 def hard : List ℕ := [999999999999999999999999999999999999999999999999999999999999999999999999999999999999942421, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999949133, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999956281, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999962953, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999963239, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999963917, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999964669, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999965227, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999965897, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999974033, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999975833, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999979159, 999999999999999999999999999999999999999999999999999999999999999999999999999999999999980191]
 
-/-- LEAF. P0037 Section 5.1 page 211, the finite primality certification
-paragraph, and Table 1 page 213, row 10^90. These 13 candidates of the fixed list
-are prime. PARI/GP reports each a probable prime, but no N - 1 factorization with a
-N + 1 factorization with a large enough factored part was found within the
-generation budget, so their kernel certificates remain OPEN. -/
+/-- Every hard candidate of row 10^90 is in a route burst session 6 group or in the rest list. -/
+theorem hard_cover : ∀ q ∈ hard, q ∈ PocklingtonS6Row90G0.C.map lastP2 ∨ q ∈ PocklingtonS6Row90G1.C.map lastP2 ∨ q ∈ PocklingtonS6Row90G2.C.map lastP2 ∨ q ∈ PocklingtonS6Row90Rest.rest := by
+  decide +kernel
+
+/-- P0037 Section 5.1 page 211, the finite primality certification
+paragraph, and Table 1 page 213, row 10^90. Proved in route burst session 6 from the
+kernel checked certificate groups PocklingtonS6Row90G0, PocklingtonS6Row90G1, PocklingtonS6Row90G2, CONDITIONAL ON the LEAF PocklingtonS6Row90Rest.rest_prime. -/
 theorem hard_prime : ∀ q ∈ hard, q.Prime := by
-  sorry
+  intro q hq
+  rcases hard_cover q hq with h | h | h | h
+  · exact PocklingtonS6Row90G0.primes q h
+  · exact PocklingtonS6Row90G1.primes q h
+  · exact PocklingtonS6Row90G2.primes q h
+  · exact PocklingtonS6Row90Rest.rest_prime q h
 
 /-- Every candidate of row 10^90 is covered by a group or by `hard`. -/
 theorem cover : ∀ q ∈ qs, q ∈ C0.map lastP2 ∨ q ∈ C1.map lastP2 ∨ q ∈ C2.map lastP2 ∨ q ∈ C3.map lastP2 ∨ q ∈ C4.map lastP2 ∨ q ∈ C5.map lastP2 ∨ q ∈ C6.map lastP2 ∨ q ∈ C7.map lastP2 ∨ q ∈ C8.map lastP2 ∨ q ∈ C9.map lastP2 ∨ q ∈ C10.map lastP2 ∨ q ∈ C11.map lastP2 ∨ q ∈ C12.map lastP2 ∨ q ∈ hard := by
@@ -2632,6 +2643,7 @@ theorem qs_prime : ∀ q ∈ qs, q.Prime := by
   · exact prime12 q h
   · exact hard_prime q h
 
+#print axioms hard_prime
 #print axioms qs_prime
 
 end LeanLab.DtRS1998.PocklingtonB7Row90

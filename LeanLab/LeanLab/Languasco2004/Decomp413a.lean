@@ -6,29 +6,12 @@ Source http://www.numdam.org/item/CM_1992__82_3_355_0/.
 AI wrote the Lean code. Goldbach is open.
 The three smaller inputs stay OPEN. Existing declarations stay sealed.
 -/
-import LeanLab.Languasco2004.Decomp279b
+import LeanLab.Languasco2004.Decomp489e
 
 namespace LeanLab.Languasco2004.Decomp413a
 open Finset Real MeasureTheory Decomp279b
 noncomputable section
 attribute [local instance] Classical.propDecidable
-
-/-- Page 44 display 5: the minor part of the chosen integration period. -/
-def minorDomain (N Y H B : ℝ) : Set ℝ := period H \ majorSet N Y B
-
-/-- Page 44 display 5: S2 mass in a short interval centred at xi.
-The period restriction gives the explicit endpoint version used here. -/
-def localMass (N Y H B ξ : ℝ) : ℝ :=
-  ∫ α in minorDomain N Y H B ∩ Set.Ioo (ξ - 1 / H) (ξ + 1 / H), ‖secondSum Y α‖ ^ 2
-
-/-- Page 44 display 3: distance to the nearest integer, with the value H
-at a kernel pole. This explicit value prevents inverse zero from losing a pole. -/
-def kernel (H x : ℝ) : ℝ :=
-  if x = (round x : ℤ) then H else min H (|x - (round x : ℤ)|⁻¹)
-
-/-- Page 44 display 3: the squared kernel weighted S2 integral. -/
-def kernelMass (N Y H B ξ : ℝ) : ℝ :=
-  ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 * kernel H (2 * (α - ξ)) ^ 2
 
 /-- Page 44 display 3: the capped kernel is nonnegative for nonnegative H. -/
 theorem kernel_nonneg {H : ℝ} (hH : 0 ≤ H) (x : ℝ) : 0 ≤ kernel H x := by
@@ -72,7 +55,8 @@ theorem local_mass_bound :
     ∃ η₀ : ℝ, 0 < η₀ ∧ ∀ η A : ℝ, 0 < η → η < η₀ → 0 < A →
     ∃ C N₀ : ℝ, 0 < C ∧ ∀ N : ℝ, N₀ ≤ N → ∀ ξ : ℝ,
       localMass N (localization N η) (windowLength N η) (arcExponent η A) ξ ≤
-        C * localization N η / Real.log N ^ (2 * A + 3) := by sorry
+        C * localization N η / Real.log N ^ (2 * A + 3) := by
+  exact Decomp489e.local_mass_bound_from_leaves
 
 /-! ### Private support lemmas for the local covering step -/
 
@@ -827,7 +811,8 @@ theorem coefficient_energy :
       (∀ ξ : ℝ, kernelMass N (localization N η) (windowLength N η) (arcExponent η A) ξ ≤ K) →
       (∑ m ∈ window N η,
         ‖minorCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m‖ ^ 2) ^ 2 ≤
-        D * (localization N η * Real.log N) ^ 3 * K := by sorry
+        D * (localization N η * Real.log N) ^ 3 * K := by
+  exact Decomp489e.coefficient_energy_from_leaves
 
 /-- Page 44 displays 3 and 5 give the exact sealed minor_bound statement.
 CONDITIONAL ON local_mass_bound, kernel_from_local and coefficient_energy. -/
