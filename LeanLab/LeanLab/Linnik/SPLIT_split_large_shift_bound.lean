@@ -45,7 +45,7 @@ open LeanLab.Linnik.Decomp1532b (majorArcs)
 open LeanLab.Linnik.U7204 (Sg primesLe)
 open LeanLab.Linnik.U1426ChainWire (Gs continuous_Gs)
 
-/-- LEAF, OPEN. Reduction of the range predicate: for `N` at least one and `theta` in `(0, 1]` the
+/-- LEAF, PROVED. Reduction of the range predicate: for `N` at least one and `theta` in `(0, 1]` the
 major arc scale `N ^ theta` does not exceed `N`, so on the long shift range the three conjunct
 predicate of the sealed statement says exactly that the difference is nonzero and exceeds `N` in
 absolute value. This is the first step of the split, an equivalence of predicates with no
@@ -57,9 +57,16 @@ theorem large_shift_filter_iff (k N : ℕ) (hN : 1 ≤ N) (θ : ℝ) (hθ : 0 < 
         ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ))) ↔
       (LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
         (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)|) := by
-  sorry
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hle : (N : ℝ) ^ θ ≤ (N : ℝ) := by
+    simpa using Real.rpow_le_rpow_of_exponent_le hN1 hθ1
+  constructor
+  · rintro ⟨h0, _h1, h2⟩
+    exact ⟨h0, not_le.mp h2⟩
+  · rintro ⟨h0, hlt⟩
+    exact ⟨h0, not_le.mpr (lt_of_le_of_lt hle hlt), not_le.mpr hlt⟩
 
-/-- LEAF, OPEN. Support reduction, one tuple at a time: for a shift larger than `N` in absolute
+/-- LEAF, PROVED. Support reduction, one tuple at a time: for a shift larger than `N` in absolute
 value the full unit interval correlation vanishes, hence the major arc correlation of that shift
 is minus its correlation over the complement of the major arcs. This is the second step of the
 split and it is what turns the major arc sum into a sum over the complement. -/
@@ -71,8 +78,9 @@ theorem large_shift_major_eq_neg_minor (k N : ℕ) (θ : ℝ)
           (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) =
       -(∫ α in Set.Icc (0 : ℝ) 1 \ majorArcs N ((N : ℝ) ^ θ),
         ‖Sg N α‖ ^ 2 *
-          (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) := by
-  sorry
+          (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) :=
+  major_correlation_eq_neg_minor_of_large_shift N ((N : ℝ) ^ θ)
+    (LeanLab.Linnik.Decomp1532a.dif x) hx
 
 /-- LEAF, OPEN. The open estimate of this range: once `N` is large, the total over the long shifts
 of the correlation over the complement of the major arcs is at most a third of the sealed budget
