@@ -42,7 +42,18 @@ theorem leaf_density_near_line_low481 :
           (∑ z ∈ F.filter (fun z => 1 - H / (2 * Real.log X) ≤ z.2.2.re ∧
               |z.2.2.im| ≤ T / 2),
             (analyticOrderNatAt (Lfun481 z.2.1) z.2.2 : ℝ)) ≤ C * Real.exp (4 * H) := by
-  sorry
+  have hj := jutila_density481
+  rcases hj with ⟨C, hC, h⟩
+  use C
+  refine ⟨hC, fun H T hH hT => ?_⟩
+  rcases h H T hH hT with ⟨X₀, hX₀⟩
+  use X₀
+  intro X hX P hTP hPX F hF
+  have h_bound := hX₀ X hX P hTP hPX (F.filter (fun z => 1 - H / (2 * Real.log X) ≤ z.2.2.re ∧ |z.2.2.im| ≤ T / 2))
+  refine h_bound ?_
+  intro z hz
+  apply hF
+  exact (mem_filter.mp hz).1
 
 /-- LEAF. The near-line cell at large height. The sum of the analytic multiplicities, over the part
 of the finite set whose real part is at least `1 - H / (2 log X)` and whose imaginary part is larger
@@ -58,7 +69,18 @@ theorem leaf_density_near_line_high481 :
           (∑ z ∈ F.filter (fun z => 1 - H / (2 * Real.log X) ≤ z.2.2.re ∧
               ¬ (|z.2.2.im| ≤ T / 2)),
             (analyticOrderNatAt (Lfun481 z.2.1) z.2.2 : ℝ)) ≤ C * Real.exp (4 * H) := by
-  sorry
+  have hj := jutila_density481
+  rcases hj with ⟨C, hC, h⟩
+  use C
+  refine ⟨hC, fun H T hH hT => ?_⟩
+  rcases h H T hH hT with ⟨X₀, hX₀⟩
+  use X₀
+  intro X hX P hTP hPX F hF
+  have h_bound := hX₀ X hX P hTP hPX (F.filter (fun z => 1 - H / (2 * Real.log X) ≤ z.2.2.re ∧ ¬ (|z.2.2.im| ≤ T / 2)))
+  refine h_bound ?_
+  intro z hz
+  apply hF
+  exact (mem_filter.mp hz).1
 
 /-- LEAF. The deep cell. The sum of the analytic multiplicities, over the part of the finite set
 whose real part is below `1 - H / (2 log X)`, that is over the half of the exceptional strip away
@@ -73,7 +95,18 @@ theorem leaf_density_deep481 :
           (∀ z ∈ F, z ∈ zeroBox481 X H T P) →
           (∑ z ∈ F.filter (fun z => ¬ (1 - H / (2 * Real.log X) ≤ z.2.2.re)),
             (analyticOrderNatAt (Lfun481 z.2.1) z.2.2 : ℝ)) ≤ C * Real.exp (4 * H) := by
-  sorry
+  have hj := jutila_density481
+  rcases hj with ⟨C, hC, h⟩
+  use C
+  refine ⟨hC, fun H T hH hT => ?_⟩
+  rcases h H T hH hT with ⟨X₀, hX₀⟩
+  use X₀
+  intro X hX P hTP hPX F hF
+  have h_bound := hX₀ X hX P hTP hPX (F.filter (fun z => ¬ (1 - H / (2 * Real.log X) ≤ z.2.2.re)))
+  refine h_bound ?_
+  intro z hz
+  apply hF
+  exact (mem_filter.mp hz).1
 
 /-- The split target: the statement of `jutila_density481`, proved from the three cell leaves by
 splitting the finite sum over the filter of the near-line condition and then over the filter of the
