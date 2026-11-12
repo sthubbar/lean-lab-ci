@@ -786,18 +786,6 @@ def sieveTwoCoefficient337 : ℝ :=
   8 / (2 * (0.95 : ℝ) - 1) *
     ∫ t in (2.29 : ℝ)..10, log (2.29 - 3.29 / (t + 1)) / t
 
-/-- LEAF. Pages 602 to 604 displays 4.8 to 4.13, before prime pair partial summation.
-This is the count to weighted pair sum step. The errors and closed endpoint loss
-must be absorbed. External inputs remain the cited linear sieve, Wu 1993
-https://doi.org/10.1093/qmath/44.1.109 and Huxley's short interval theorem.
-This is open. No uniform Wu family estimate is inferred from WuMeanValue118. -/
-theorem leaf337_two_switching :
-    ∀ δ : ℝ, 0 < δ → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
-      (((switchedClosedIndex337 N (switchedE118 N)).filter
-        (fun b => (N - b.1 * b.2).Prime)).card : ℝ) ≤ (sieveTwoPairSum337 N + δ) *
-        (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
-  sorry
-
 private theorem bsc_blk_sum (L : ℝ) (hL : 0 < L) (t : ℕ → ℝ) (ht : Monotone t) (h2 : log 2 ≤ t 0 * L)
     (f : ℝ → ℝ) (M : ℕ → ℝ) (K : ℕ)
     (hM : ∀ j < K, ∀ v, t j < v → v ≤ t (j+1) → f v ≤ M j) (hM0 : ∀ j < K, 0 ≤ M j) :
@@ -1538,6 +1526,784 @@ theorem leaf337_two_pair_sum :
       c * (∫ u in (1 / 11 : ℝ)..(100 / 329), bsc_G2 u / u) +
       c * (11 / K + 168 * K / log N + 42 / log N) := by ring
   linarith
+
+/-! ### Split of the switching leaf, route burst 2026-11-12 -/
+
+/-- The level D of page 603, N^(θ - 1/2) / log^B N with θ = 0.95. -/
+def sw2Level337 (N : ℕ) (B : ℝ) : ℝ := (N : ℝ) ^ (0.45 : ℝ) / log N ^ B
+
+/-- The sifting cutoff z = D^(1/2) of page 603. -/
+def sw2Cut337 (N : ℕ) (B : ℝ) : ℝ := Real.sqrt (sw2Level337 N B)
+
+/-- The sieve parameter s for the level D reduced by a fixed factor k, page 603. -/
+def sw2Param337 (N : ℕ) (B k : ℝ) : ℝ :=
+  log (sw2Level337 N B / k) / log (sw2Cut337 N B)
+
+/-- The sieve product V at z, page 603 with the density of display 4.3. -/
+def sw2V337 (N : ℕ) (B : ℝ) : ℝ :=
+  ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} (sw2Cut337 N B),
+    (1 - caiDensity118 p)
+
+/-- The mass X of page 603 before display 4.10. -/
+def sw2X337 (N : ℕ) : ℝ := ∑ e ∈ switchedE118 N, switchedLiTerm337 N e
+
+/-- The coprime part of the remainder R1 at one modulus, page 603 display 4.10. -/
+def sw2Wu337 (N d : ℕ) : ℝ :=
+  |∑ e ∈ (switchedE118 N).filter (fun e => e.Coprime d),
+    ((switchedLocalCount337 N e d : ℝ) - switchedLiTerm337 N e / d.totient)|
+
+/-- CITED. Page 603 display 4.12, Lemma 4 of page 599, Wu 1993,
+https://doi.org/10.1093/qmath/44.1.109, applied to the switched coefficient g of
+page 603, with constants uniform in N. The lab's WuMeanValue118 interface lets the
+constants depend on the coefficient sequence, see wu_uniformity_obstruction118, so
+this uniform form is stated as its own cited input. -/
+theorem leaf337_two_wu_uniform (A : ℝ) (hA : 0 < A) :
+    ∃ B : ℝ, 0 < B ∧ ∃ K : ℝ, 0 < K ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 ≤ N →
+      (∑ d ∈ (Icc 1 ⌊sw2Level337 N B⌋₊).filter (fun d => N.Coprime d), sw2Wu337 N d) ≤
+        K * (N : ℝ) ^ (0.95 : ℝ) / log N ^ A := by
+  sorry
+
+/-- The level D lies between N^0.25 and N^0.45 for large N. Page 603. -/
+theorem sw2_level_bounds337 (B : ℝ) (hB : 0 < B) :
+    ∀ᶠ N : ℕ in atTop, (N : ℝ) ^ (0.25 : ℝ) ≤ sw2Level337 N B ∧
+      sw2Level337 N B ≤ (N : ℝ) ^ (0.45 : ℝ) := by
+  have ho := (isLittleO_log_rpow_rpow_atTop B (by norm_num : (0 : ℝ) < 0.2)).tendsto_div_nhds_zero
+  have hev := (ho.comp tendsto_natCast_atTop_atTop).eventually
+    (eventually_lt_nhds (by norm_num : (0 : ℝ) < 1))
+  filter_upwards [hev, eventually_ge_atTop (3 : ℕ)] with N hN hN3
+  simp only [Function.comp_def] at hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hL1 : 1 ≤ log (N : ℝ) := by
+    rw [← log_exp 1]
+    apply log_le_log (exp_pos 1)
+    have : (3 : ℝ) ≤ N := by exact_mod_cast hN3
+    linarith [Real.exp_one_lt_d9]
+  have hlB : 1 ≤ log (N : ℝ) ^ B := one_le_rpow hL1 hB.le
+  have hp2 : 0 < (N : ℝ) ^ (0.2 : ℝ) := rpow_pos_of_pos hNp _
+  have hlt : log (N : ℝ) ^ B < (N : ℝ) ^ (0.2 : ℝ) := (div_lt_one hp2).mp hN
+  unfold sw2Level337
+  constructor
+  · rw [le_div_iff₀ (by linarith)]
+    have hsplit : (N : ℝ) ^ (0.45 : ℝ) = (N : ℝ) ^ (0.25 : ℝ) * (N : ℝ) ^ (0.2 : ℝ) := by
+      rw [← rpow_add hNp]; norm_num
+    rw [hsplit]
+    exact mul_le_mul_of_nonneg_left hlt.le (rpow_pos_of_pos hNp _).le
+  · exact div_le_self (rpow_pos_of_pos hNp _).le hlB
+
+/-- The sieve parameter is 2 minus a shift. Page 603, z = D^(1/2). -/
+theorem sw2_param_eq337 (N : ℕ) (B k : ℝ) (hk : 0 < k) (hL : 1 < sw2Level337 N B) :
+    sw2Param337 N B k = 2 - 2 * log k / log (sw2Level337 N B) := by
+  have hl : 0 < log (sw2Level337 N B) := log_pos hL
+  unfold sw2Param337 sw2Cut337
+  rw [log_div (by linarith) hk.ne', Real.log_sqrt (by linarith)]
+  field_simp
+
+/-- The product V at z is in the unit interval for even N. Page 601 display 4.3. -/
+theorem sw2V_bounds337 (N : ℕ) (B : ℝ) (he : Even N) : 0 < sw2V337 N B ∧ sw2V337 N B ≤ 1 := by
+  classical
+  constructor
+  · apply Finset.prod_pos
+    intro p hp
+    simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+    exact sub_pos.mpr (caiDensity118_prime N p he hp.2.1 hp.2.2).2
+  · apply Finset.prod_le_one₀
+    · intro p hp
+      simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+      exact sub_nonneg.mpr (caiDensity118_prime N p he hp.2.1 hp.2.2).2.le
+    · intro p hp
+      simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+      linarith [(caiDensity118_prime N p he hp.2.1 hp.2.2).1]
+
+
+/-- The Li difference over an interval is at most its length over log of the left end.
+Page 603, the Li mass X. -/
+theorem li_diff_le337 (a b : ℝ) (ha : 2 ≤ a) (hab : a ≤ b) :
+    li118 b - li118 a ≤ (b - a) / log a := by
+  have hla : 0 < log a := log_pos (by linarith)
+  have hc (u v : ℝ) (hu : 2 ≤ u) (huv : u ≤ v) :
+      IntervalIntegrable (fun t : ℝ => 1 / log t) MeasureTheory.volume u v := by
+    apply ContinuousOn.intervalIntegrable_of_Icc huv
+    exact continuousOn_const.div
+      (continuousOn_id.log (fun t ht => by change t ≠ 0; linarith [ht.1]))
+      (fun t ht => ne_of_gt (log_pos (by linarith [ht.1])))
+  have hi := intervalIntegral.integral_add_adjacent_intervals (hc 2 a le_rfl ha) (hc a b ha hab)
+  have hm : (∫ t in a..b, 1 / log t) ≤ ∫ _t in a..b, 1 / log a :=
+    intervalIntegral.integral_mono_on hab (hc a b ha hab) intervalIntegrable_const
+      (fun t ht => one_div_le_one_div_of_le hla (log_le_log (by linarith) ht.1))
+  simp only [intervalIntegral.integral_const, smul_eq_mul] at hm
+  unfold li118
+  have : (b - a) * (1 / log a) = (b - a) / log a := by ring
+  linarith
+
+/-- The Mertens product at z = D^(1/2) has the expected upper size.
+Page 603 with page 601 display 4.3, from mertens_twin_of_euler_product at a fixed power
+just below N^0.225 and monotonicity of the product in z. -/
+theorem sw2V_upper337 (B : ℝ) (hB : 0 < B) (η : ℝ) (hη : 0 < η) (hη1 : η ≤ 1) :
+    ∀ᶠ N : ℕ in atTop, Even N →
+      sw2V337 N B ≤ (1 + η) * (2 * exp (-eulerMascheroniConstant) * C N / (0.225 * log N)) := by
+  classical
+  set θ : ℝ := 0.225 / (1 + η / 3) with hθ
+  have hθ0 : 0 < θ := by positivity
+  have hθlt : θ < 0.225 := by
+    rw [hθ, div_lt_iff₀ (by positivity)]; nlinarith
+  have hθ1 : θ ≤ 1 := by linarith
+  have hM := LeanLab.AlmostPrimeSums.Decomp1527c.mertens_twin_of_euler_product θ hθ0 hθ1
+    LeanLab.AlmostPrimeSums.Decomp1527c.mertens_euler_product
+  have hMev := hM.eventually (eventually_le_nhds (show (1 : ℝ) < 1 + η / 3 by linarith))
+  have hc : (0 : ℝ) < 0.45 - 2 * θ := by linarith
+  have ho := (isLittleO_log_rpow_rpow_atTop B hc).tendsto_div_nhds_zero
+  have hev := (ho.comp tendsto_natCast_atTop_atTop).eventually
+    (eventually_lt_nhds (by norm_num : (0 : ℝ) < 1))
+  filter_upwards [hMev, hev, eventually_ge_atTop (3 : ℕ)] with N hMN hN hN3
+  intro he
+  simp only [Function.comp_def] at hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hN1 : (1 : ℝ) < N := by exact_mod_cast (show 1 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos hN1
+  have hU : LeanLab.ChenExplicit.U N = 2 * exp (-eulerMascheroniConstant) * C N := by
+    unfold LeanLab.ChenExplicit.U C
+    ring
+  have hC : 0 < C N := by
+    unfold C
+    exact mul_pos LeanLab.ChenExplicit.twinC_pos
+      (lt_of_lt_of_le zero_lt_one (LeanLab.ChenExplicit.one_le_oddFactor N))
+  -- the cutoff lies above N^θ
+  have hzθ : (N : ℝ) ^ θ ≤ sw2Cut337 N B := by
+    unfold sw2Cut337 sw2Level337
+    apply Real.le_sqrt_of_sq_le
+    have hpc : 0 < (N : ℝ) ^ (0.45 - 2 * θ) := rpow_pos_of_pos hNp _
+    have hlt : log (N : ℝ) ^ B < (N : ℝ) ^ (0.45 - 2 * θ) := (div_lt_one hpc).mp hN
+    have hlB : 0 < log (N : ℝ) ^ B := rpow_pos_of_pos hLp B
+    rw [le_div_iff₀ hlB]
+    have hsq : ((N : ℝ) ^ θ) ^ 2 = (N : ℝ) ^ (2 * θ) := by
+      rw [← rpow_natCast, ← rpow_mul hNp.le]; ring_nf
+    have hsplit : (N : ℝ) ^ (0.45 : ℝ) = (N : ℝ) ^ (2 * θ) * (N : ℝ) ^ (0.45 - 2 * θ) := by
+      rw [← rpow_add hNp]; ring_nf
+    rw [hsq, hsplit]
+    exact mul_le_mul_of_nonneg_left hlt.le (rpow_pos_of_pos hNp _).le
+  -- monotonicity in z
+  have hsub : LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} ((N : ℝ) ^ θ) ⊆
+      LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} (sw2Cut337 N B) := by
+    intro p hp
+    simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter, Finset.mem_range] at hp ⊢
+    exact ⟨hp.1.trans_le (Nat.ceil_mono hzθ), hp.2⟩
+  have hmono : sw2V337 N B ≤ ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} ((N : ℝ) ^ θ), (1 - caiDensity118 p) := by
+    unfold sw2V337
+    apply Finset.prod_le_prod_of_subset_of_le_one₀ hsub
+    · intro p hp
+      simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+      exact sub_nonneg.mpr (caiDensity118_prime N p he hp.2.1 hp.2.2).2.le
+    · intro p hp _
+      simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+      linarith [(caiDensity118_prime N p he hp.2.1 hp.2.2).1]
+  -- identification with the Mertens product
+  have hzN : (N : ℝ) ^ θ ≤ N := by
+    simpa using rpow_le_rpow_of_exponent_le hN1.le hθ1
+  have hset : LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} ((N : ℝ) ^ θ) =
+      (range N).filter (fun p : ℕ => p.Prime ∧ 2 < p ∧ (p : ℝ) < (N : ℝ) ^ θ ∧ ¬ p ∣ N) := by
+    ext p
+    simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter, Finset.mem_range,
+      Set.mem_ofPred_eq]
+    constructor
+    · rintro ⟨hpc, hp, hcop⟩
+      have hpz : (p : ℝ) < (N : ℝ) ^ θ := Nat.lt_ceil.mp hpc
+      have hpN : p < N := by exact_mod_cast hpz.trans_le hzN
+      exact ⟨hpN, hp, (cai_primes_odd306 N p he hp hcop).2, hpz,
+        hp.coprime_iff_not_dvd.mp hcop⟩
+    · rintro ⟨_, hp, _, hpz, hpn⟩
+      exact ⟨Nat.lt_ceil.mpr hpz, hp, hp.coprime_iff_not_dvd.mpr hpn⟩
+  have hprod : (∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} ((N : ℝ) ^ θ), (1 - caiDensity118 p)) =
+      ∏ p ∈ (range N).filter (fun p : ℕ => p.Prime ∧ 2 < p ∧ (p : ℝ) < (N : ℝ) ^ θ ∧ ¬ p ∣ N),
+        (1 - 1 / ((p : ℝ) - 1)) := by
+    rw [hset]
+    apply Finset.prod_congr rfl
+    intro p hp
+    have hprime := (Finset.mem_filter.mp hp).2.1
+    change (1 - 1 / (p.totient : ℝ)) = _
+    rw [Nat.totient_prime hprime, Nat.cast_sub hprime.one_lt.le, Nat.cast_one]
+  have hlogθ : log ((N : ℝ) ^ θ) = θ * log N := log_rpow hNp θ
+  have hlθ : 0 < θ * log N := by positivity
+  rw [hlogθ, hU] at hMN
+  have hUp : 0 < 2 * exp (-eulerMascheroniConstant) * C N := by positivity
+  rw [div_le_iff₀ hUp] at hMN
+  have hP : (∏ p ∈ (range N).filter (fun p : ℕ => p.Prime ∧ 2 < p ∧ (p : ℝ) < (N : ℝ) ^ θ ∧
+      ¬ p ∣ N), (1 - 1 / ((p : ℝ) - 1))) ≤
+      (1 + η / 3) * (2 * exp (-eulerMascheroniConstant) * C N) / (θ * log N) := by
+    rw [le_div_iff₀ hlθ]; linarith
+  have hfinal : (1 + η / 3) * (2 * exp (-eulerMascheroniConstant) * C N) / (θ * log N) ≤
+      (1 + η) * (2 * exp (-eulerMascheroniConstant) * C N / (0.225 * log N)) := by
+    rw [hθ]
+    have h3 : (1 + η / 3) * (1 + η / 3) ≤ 1 + η := by nlinarith
+    rw [div_le_iff₀ (by positivity)]
+    have hid : (1 + η) * (2 * exp (-eulerMascheroniConstant) * C N / (0.225 * log N)) *
+        (0.225 / (1 + η / 3) * log N) =
+        (1 + η) / (1 + η / 3) * (2 * exp (-eulerMascheroniConstant) * C N) := by
+      field_simp
+    rw [hid]
+    apply mul_le_mul_of_nonneg_right _ hUp.le
+    rw [le_div_iff₀ (by positivity)]
+    linarith
+  linarith [hmono, hprod ▸ hP]
+
+/-- The Li mass X of page 603 is at most the weighted prime pair sum times N^θ.
+Each Li difference is at most its length over the logarithm of the left end; the
+endpoint N - N^θ changes the logarithm by a bounded amount. The sum over the product
+set E is at most the sum over the prime pairs. Page 604 display 4.13. -/
+theorem sw2X_upper337 (η : ℝ) (hη : 0 < η) :
+    ∀ᶠ N : ℕ in atTop, sw2X337 N ≤ (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) *
+      ∑ b ∈ switchedPairs118 N, 1 / ((b.1 * b.2 : ℕ) * log ((N : ℝ) / (b.1 * b.2 : ℕ)))) := by
+  classical
+  have hlog : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
+    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hp05 := (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 0.05)).comp
+    (tendsto_natCast_atTop_atTop (R := ℝ))
+  have hp13 := (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 3)).comp
+    (tendsto_natCast_atTop_atTop (R := ℝ))
+  filter_upwards [hp05.eventually_ge_atTop 2, hp13.eventually_ge_atTop 4,
+    hlog.eventually_ge_atTop (3 * (1 + η) * log 2 / η), eventually_ge_atTop 2]
+    with N h05 h13 hlN hN2
+  simp only [Function.comp_def] at h05 h13
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hN1 : (1 : ℝ) < N := by exact_mod_cast (show 1 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos hN1
+  have hl2 : 0 < log (2 : ℝ) := log_pos (by norm_num)
+  set f : ℕ → ℝ := fun e => 1 / ((e : ℝ) * log ((N : ℝ) / e)) with hf
+  have hrange : ∀ e ∈ switchedE118 N, (N : ℝ) ^ (1 / 3 : ℝ) < e ∧ (e : ℝ) < (N : ℝ) ^ (2 / 3 : ℝ) := by
+    intro e he
+    obtain ⟨b, hb, rfl⟩ := mem_image.mp he
+    obtain ⟨_, _, hp1, hp2, hq1, hq2, _⟩ := (mem_switchedPairs118_iff N b.1 b.2 hN2).mp hb
+    have hr := switched_product_range118 (N : ℝ) b.1 b.2 hN1 hp1 hp2 hq1 hq2
+    push_cast
+    exact hr
+  have hNe : ∀ e ∈ switchedE118 N, (N : ℝ) ^ (1 / 3 : ℝ) ≤ (N : ℝ) / e := by
+    intro e he
+    obtain ⟨_, h2⟩ := hrange e he
+    have hep : (0 : ℝ) < e := (rpow_pos_of_pos hNp _).trans (hrange e he).1
+    rw [le_div_iff₀ hep]
+    have hsplit : (N : ℝ) = (N : ℝ) ^ (1 / 3 : ℝ) * (N : ℝ) ^ (2 / 3 : ℝ) := by
+      rw [← rpow_add hNp]; norm_num
+    calc (N : ℝ) ^ (1 / 3 : ℝ) * e ≤ (N : ℝ) ^ (1 / 3 : ℝ) * (N : ℝ) ^ (2 / 3 : ℝ) :=
+          mul_le_mul_of_nonneg_left h2.le (rpow_pos_of_pos hNp _).le
+      _ = N := hsplit.symm
+  have hlogNe : ∀ e ∈ switchedE118 N, log N / 3 ≤ log ((N : ℝ) / e) := by
+    intro e he
+    have h := log_le_log (rpow_pos_of_pos hNp _) (hNe e he)
+    rw [log_rpow hNp] at h
+    linarith
+  have hterm : ∀ e ∈ switchedE118 N,
+      switchedLiTerm337 N e ≤ (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) * f e) := by
+    intro e he
+    have hep : (0 : ℝ) < e := (rpow_pos_of_pos hNp _).trans (hrange e he).1
+    have hhalf : (N : ℝ) ^ (0.95 : ℝ) * 2 ≤ N := by
+      have hsplit : (N : ℝ) = (N : ℝ) ^ (0.95 : ℝ) * (N : ℝ) ^ (0.05 : ℝ) := by
+        rw [← rpow_add hNp]; norm_num
+      calc (N : ℝ) ^ (0.95 : ℝ) * 2 ≤ (N : ℝ) ^ (0.95 : ℝ) * (N : ℝ) ^ (0.05 : ℝ) :=
+            mul_le_mul_of_nonneg_left h05 (rpow_pos_of_pos hNp _).le
+        _ = N := hsplit.symm
+    set a : ℝ := ((N : ℝ) - (N : ℝ) ^ (0.95 : ℝ)) / e with ha
+    have ha2 : (N : ℝ) / e / 2 ≤ a := by
+      rw [ha, div_div, le_div_iff₀ hep]
+      field_simp
+      linarith
+    have hNe4 : 4 ≤ (N : ℝ) / e := h13.trans (hNe e he)
+    have hA2 : 2 ≤ a := by linarith
+    have hab : a ≤ (N : ℝ) / e := by
+      rw [ha]
+      apply div_le_div_of_nonneg_right _ hep.le
+      linarith [rpow_pos_of_pos hNp (0.95 : ℝ)]
+    have hli := li_diff_le337 a ((N : ℝ) / e) hA2 hab
+    have hlen : (N : ℝ) / e - a = (N : ℝ) ^ (0.95 : ℝ) / e := by
+      rw [ha]; field_simp; ring
+    have hloga : log ((N : ℝ) / e) - log 2 ≤ log a := by
+      have h := log_le_log (by positivity) ha2
+      rw [log_div (by positivity) (by norm_num)] at h
+      exact h
+    have hLe := hlogNe e he
+    have hηl : (1 + η) * log 2 ≤ η * (log N / 3) := by
+      have := (div_le_iff₀ hη).mp hlN
+      linarith
+    have hkey : log ((N : ℝ) / e) ≤ (1 + η) * log a := by
+      have h1 : η * (log N / 3) ≤ η * log ((N : ℝ) / e) := mul_le_mul_of_nonneg_left hLe hη.le
+      nlinarith
+    have hlogap : 0 < log a := log_pos (by linarith)
+    have hlogNep : 0 < log ((N : ℝ) / e) := by
+      have : 0 < log N / 3 := by positivity
+      linarith
+    unfold switchedLiTerm337
+    rw [← ha]
+    calc li118 ((N : ℝ) / e) - li118 a ≤ ((N : ℝ) / e - a) / log a := hli
+      _ = (N : ℝ) ^ (0.95 : ℝ) / e / log a := by rw [hlen]
+      _ ≤ (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) * f e) := by
+        rw [hf]
+        dsimp only
+        rw [div_le_iff₀ hlogap]
+        have hid : (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) * (1 / ((e : ℝ) * log ((N : ℝ) / e)))) *
+            log a = ((N : ℝ) ^ (0.95 : ℝ) / e) * ((1 + η) * log a / log ((N : ℝ) / e)) := by
+          field_simp
+        rw [hid]
+        have hq : 1 ≤ (1 + η) * log a / log ((N : ℝ) / e) := by
+          rw [le_div_iff₀ hlogNep]; linarith
+        have hpos : 0 ≤ (N : ℝ) ^ (0.95 : ℝ) / e := by positivity
+        nlinarith
+  have hf0 : ∀ e ∈ switchedE118 N, 0 ≤ f e := by
+    intro e he
+    have hep : (0 : ℝ) < e := (rpow_pos_of_pos hNp _).trans (hrange e he).1
+    have : 0 < log ((N : ℝ) / e) := by
+      have := hlogNe e he
+      have : 0 < log N / 3 := by positivity
+      linarith
+    rw [hf]; positivity
+  have himg : (∑ e ∈ switchedE118 N, f e) ≤
+      ∑ b ∈ switchedPairs118 N, f (b.1 * b.2) := by
+    unfold switchedE118
+    calc (∑ e ∈ (switchedPairs118 N).image (fun b => b.1 * b.2), f e) ≤
+          ∑ e ∈ (switchedPairs118 N).image (fun b => b.1 * b.2),
+            ∑ b ∈ (switchedPairs118 N).filter (fun b => b.1 * b.2 = e), f (b.1 * b.2) := by
+          apply Finset.sum_le_sum
+          intro e he
+          obtain ⟨b, hb, hbe⟩ := mem_image.mp he
+          have hmem : b ∈ (switchedPairs118 N).filter (fun b => b.1 * b.2 = e) :=
+            Finset.mem_filter.mpr ⟨hb, hbe⟩
+          have hnn : ∀ c ∈ (switchedPairs118 N).filter (fun b => b.1 * b.2 = e),
+              0 ≤ f (c.1 * c.2) := by
+            intro c hc
+            obtain ⟨hc1, hc2⟩ := Finset.mem_filter.mp hc
+            rw [hc2]
+            exact hf0 e he
+          have h := Finset.single_le_sum hnn hmem
+          rw [hbe] at h
+          exact h
+      _ = ∑ b ∈ switchedPairs118 N, f (b.1 * b.2) :=
+          Finset.sum_fiberwise_of_maps_to (fun b hb => mem_image_of_mem _ hb) _
+  unfold sw2X337
+  have hNpow : 0 ≤ (N : ℝ) ^ (0.95 : ℝ) := (rpow_pos_of_pos hNp _).le
+  calc (∑ e ∈ switchedE118 N, switchedLiTerm337 N e) ≤
+        ∑ e ∈ switchedE118 N, (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) * f e) :=
+        Finset.sum_le_sum hterm
+    _ = (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) * ∑ e ∈ switchedE118 N, f e) := by
+        rw [Finset.mul_sum, Finset.mul_sum]
+    _ ≤ (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) * ∑ b ∈ switchedPairs118 N, f (b.1 * b.2)) :=
+        mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left himg hNpow) (by linarith)
+    _ = _ := by rw [hf]
+
+set_option maxHeartbeats 1600000 in
+/-- Page 603 display 4.10 main term with page 604 display 4.13: the linear sieve
+main term F(s) X V of the switched set is at most the weighted prime pair sum.
+Proved from the Mertens product at a fixed power just below z = D^(1/2), sw2V_upper337,
+F(s) = 2 e^γ / s for s at most 3, the size of each Li difference in X, sw2X_upper337,
+and the bound on the pair sum from leaf337_two_pair_sum. The paper cites Huxley and
+integration by parts for X; for the Li mass X itself the elementary bound suffices. -/
+theorem leaf337_two_main_term (δ : ℝ) (hδ : 0 < δ) :
+    ∃ ε : ℝ, 0 < ε ∧ ε ≤ 1 / 100000 ∧ ∀ B k : ℝ, 0 < B → 0 < k →
+      ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+        upperPhi337 ε (sw2Param337 N B k) * sw2X337 N * sw2V337 N B ≤
+          (sieveTwoPairSum337 N + δ) * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+  classical
+  obtain ⟨nP, hPb⟩ := leaf337_two_pair_sum 1 one_pos
+  set Pa : ℝ := |sieveTwoCoefficient337 + 1| + 1 with hPa
+  have hPa0 : 0 < Pa := by positivity
+  set η : ℝ := min (1 / 2) (δ / (15 * Pa)) with hηdef
+  have hη0 : 0 < η := lt_min (by norm_num) (by positivity)
+  have hη1 : η ≤ 1 / 2 := min_le_left _ _
+  have hηδ : 15 * η * Pa ≤ δ := by
+    have h := min_le_right (1 / 2 : ℝ) (δ / (15 * Pa))
+    rw [← hηdef, le_div_iff₀ (by positivity)] at h
+    linarith
+  have hγ : 0 < exp eulerMascheroniConstant := exp_pos _
+  set ε : ℝ := min (1 / 100000) (η * exp eulerMascheroniConstant / 106) with hεdef
+  have hε0 : 0 < ε := lt_min (by norm_num) (by positivity)
+  have hε1 : ε ≤ 1 / 100000 := min_le_left _ _
+  have hε2 : ε ≤ η * exp eulerMascheroniConstant / 106 := min_le_right _ _
+  refine ⟨ε, hε0, hε1, fun B k hB hk => ?_⟩
+  have hlogN : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
+    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hall : ∀ᶠ N : ℕ in atTop, Even N →
+      upperPhi337 ε (sw2Param337 N B k) * sw2X337 N * sw2V337 N B ≤
+        (sieveTwoPairSum337 N + δ) * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+    filter_upwards [sw2V_upper337 B hB η hη0 (by linarith), sw2X_upper337 η hη0,
+      sw2_level_bounds337 B hB, hlogN.eventually_ge_atTop (16 * (|log k| + 1) / η + 8),
+      eventually_ge_atTop nP, eventually_ge_atTop (3 : ℕ)] with N hV hX hLb hlN hNP hN3
+    intro he
+    have hN2 : 2 ≤ N := by omega
+    have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+    have hN1 : (1 : ℝ) < N := by exact_mod_cast (show 1 < N by omega)
+    have hLp : 0 < log (N : ℝ) := log_pos hN1
+    have hC : 0 < C N := by
+      unfold C
+      exact mul_pos LeanLab.ChenExplicit.twinC_pos
+        (lt_of_lt_of_le zero_lt_one (LeanLab.ChenExplicit.one_le_oddFactor N))
+    set L : ℝ := sw2Level337 N B with hLdef
+    have hL1 : 1 < L := lt_of_lt_of_le (one_lt_rpow hN1 (by norm_num)) hLb.1
+    have hlogL : log N / 4 ≤ log L := by
+      have := log_le_log (rpow_pos_of_pos hNp _) hLb.1
+      rw [log_rpow hNp] at this
+      linarith
+    have hlogLp : 0 < log L := log_pos hL1
+    have hsmall : 4 * |log k| ≤ η * log L := by
+      have h1 := (div_le_iff₀ hη0).mp (show 16 * (|log k| + 1) / η ≤ log N - 8 by linarith)
+      have h2 : η * (log N / 4) ≤ η * log L := mul_le_mul_of_nonneg_left hlogL hη0.le
+      nlinarith [abs_nonneg (log k)]
+    have hs := sw2_param_eq337 N B k hk hL1
+    set s : ℝ := sw2Param337 N B k with hsdef
+    have hs_lo : 2 - η / 2 ≤ s := by
+      rw [hs]
+      have : 2 * log k / log L ≤ η / 2 := by
+        rw [div_le_iff₀ hlogLp]; linarith [le_abs_self (log k)]
+      linarith
+    have hs_hi : s ≤ 2 + η / 2 := by
+      rw [hs]
+      have : -(η / 2) ≤ 2 * log k / log L := by
+        rw [le_div_iff₀ hlogLp]; linarith [neg_abs_le (log k)]
+      linarith
+    have hs0 : 0 < s := by linarith
+    have hs3 : s ≤ 3 := by linarith
+    have hF : sieveUpper306 s = 2 * exp eulerMascheroniConstant / s :=
+      linear_sieve_formulas306.1 s hs0 hs3
+    have hFle : sieveUpper306 s ≤ (1 + η) * exp eulerMascheroniConstant := by
+      rw [hF, div_le_iff₀ hs0]
+      have : 2 ≤ (1 + η) * s := by nlinarith
+      nlinarith
+    obtain ⟨hh0, hh1⟩ := hSieve_bounds337 s
+    have he2 : exp 2 * exp (-2) = 1 := by rw [← exp_add]; norm_num
+    have hεh : ε * 106 * exp 2 * LeanLab.ChenExplicit.hSieve s ≤ η * exp eulerMascheroniConstant := by
+      have h := mul_le_mul_of_nonneg_left hh1 (show 0 ≤ ε * 106 * exp 2 by positivity)
+      have : ε * 106 * exp 2 * exp (-2) = ε * 106 := by rw [mul_assoc, he2, mul_one]
+      linarith
+    have hφ : upperPhi337 ε s ≤ (1 + η) ^ 2 * exp eulerMascheroniConstant := by
+      unfold upperPhi337
+      nlinarith [mul_pos hη0 hγ]
+    have hφ0 : 0 ≤ upperPhi337 ε s := by
+      unfold upperPhi337
+      have := sieveUpper_pos306 s hs0
+      positivity
+    obtain ⟨hV0, _⟩ := sw2V_bounds337 N B he
+    have hVb := hV he
+    -- the pair sum
+    set Sp : ℝ := ∑ b ∈ switchedPairs118 N,
+      1 / ((b.1 * b.2 : ℕ) * log ((N : ℝ) / (b.1 * b.2 : ℕ))) with hSdef
+    have hS0 : 0 ≤ Sp := by
+      apply Finset.sum_nonneg
+      intro b hb
+      obtain ⟨hx, hy, hp1, hp2, hq1, hq2, _⟩ := (mem_switchedPairs118_iff N b.1 b.2 hN2).mp hb
+      have hr := (switched_product_range118 (N : ℝ) b.1 b.2 hN1 hp1 hp2 hq1 hq2).2
+      have hbp : (0 : ℝ) < ((b.1 * b.2 : ℕ) : ℝ) := by
+        exact_mod_cast Nat.mul_pos hx.pos hy.pos
+      have hle : ((b.1 * b.2 : ℕ) : ℝ) ≤ N := by
+        push_cast
+        refine hr.le.trans ?_
+        simpa using rpow_le_rpow_of_exponent_le hN1.le (by norm_num : (2 / 3 : ℝ) ≤ 1)
+      have hl : 0 ≤ log ((N : ℝ) / (b.1 * b.2 : ℕ)) :=
+        log_nonneg ((one_le_div hbp).mpr hle)
+      positivity
+    have hP2 : sieveTwoPairSum337 N = 8 / (2 * (0.95 : ℝ) - 1) * log N * Sp := rfl
+    have hP20 : 0 ≤ sieveTwoPairSum337 N := by rw [hP2]; positivity
+    have hP2a : sieveTwoPairSum337 N ≤ Pa := by
+      have := hPb N hNP
+      linarith [le_abs_self (sieveTwoCoefficient337 + 1)]
+    set Xb : ℝ := (1 + η) * ((N : ℝ) ^ (0.95 : ℝ) * Sp) with hXb
+    have hXb0 : 0 ≤ Xb := by positivity
+    set Vb : ℝ := (1 + η) * (2 * exp (-eulerMascheroniConstant) * C N / (0.225 * log N))
+      with hVbdef
+    have step1 : upperPhi337 ε s * sw2X337 N * sw2V337 N B ≤ upperPhi337 ε s * Xb * sw2V337 N B := by
+      apply mul_le_mul_of_nonneg_right _ hV0.le
+      exact mul_le_mul_of_nonneg_left hX hφ0
+    have step2 : upperPhi337 ε s * Xb * sw2V337 N B ≤
+        ((1 + η) ^ 2 * exp eulerMascheroniConstant) * Xb * Vb := by
+      apply mul_le_mul (mul_le_mul_of_nonneg_right hφ hXb0) hVb hV0.le (by positivity)
+    have hid : ((1 + η) ^ 2 * exp eulerMascheroniConstant) * Xb * Vb =
+        (1 + η) ^ 4 * (sieveTwoPairSum337 N * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2)) := by
+      rw [hXb, hVbdef, hP2, exp_neg]
+      field_simp
+      ring
+    have hpow : (1 + η) ^ 4 ≤ 1 + 15 * η := by
+      have q2 : η ^ 2 ≤ η := by nlinarith
+      have q3 : η ^ 3 ≤ η := by
+        have : η ^ 3 = η ^ 2 * η := by ring
+        nlinarith [pow_pos hη0 2]
+      have q4 : η ^ 4 ≤ η := by
+        have : η ^ 4 = η ^ 3 * η := by ring
+        nlinarith [pow_pos hη0 3]
+      have : (1 + η) ^ 4 = 1 + 4 * η + 6 * η ^ 2 + 4 * η ^ 3 + η ^ 4 := by ring
+      linarith
+    have hK : 0 < C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2 := leaf118_scale_pos N hN2
+    have hfin : (1 + η) ^ 4 * sieveTwoPairSum337 N ≤ sieveTwoPairSum337 N + δ := by
+      nlinarith [mul_le_mul_of_nonneg_right hpow hP20, mul_le_mul_of_nonneg_left hP2a hη0.le]
+    calc upperPhi337 ε s * sw2X337 N * sw2V337 N B ≤ _ := step1.trans step2
+      _ = _ := hid
+      _ = ((1 + η) ^ 4 * sieveTwoPairSum337 N) * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+          ring
+      _ ≤ _ := mul_le_mul_of_nonneg_right hfin hK.le
+  obtain ⟨N0, hN0⟩ := eventually_atTop.mp hall
+  exact ⟨N0, fun N he hN => hN0 N hN he⟩
+
+#print axioms li_diff_le337
+#print axioms sw2V_upper337
+#print axioms sw2X_upper337
+#print axioms sw2_level_bounds337
+#print axioms sw2_param_eq337
+#print axioms sw2V_bounds337
+#print axioms leaf337_two_wu_uniform
+#print axioms leaf337_two_main_term
+
+set_option maxHeartbeats 1600000 in
+/-- Pages 602 to 604 displays 4.8 to 4.13, before prime pair partial summation.
+This is the count to weighted pair sum step. Assembled from the finite closed endpoint
+and small prime losses, the linear sieve bound switched_upper_finite306 CONDITIONAL ON
+the cited leaf306_theorem6, the remainder split of display 4.10, the R2 bound of
+display 4.11, the cited uniform Wu input leaf337_two_wu_uniform of display 4.12,
+and the open main term leaf337_two_main_term of display 4.13. -/
+theorem leaf337_two_switching :
+    ∀ δ : ℝ, 0 < δ → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+      (((switchedClosedIndex337 N (switchedE118 N)).filter
+        (fun b => (N - b.1 * b.2).Prime)).card : ℝ) ≤ (sieveTwoPairSum337 N + δ) *
+        (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+  classical
+  intro δ hδ
+  obtain ⟨ε, hε, hεmax, hmainε⟩ := leaf337_two_main_term (δ / 4) (by positivity)
+  obtain ⟨w, hw, hupper⟩ := switched_upper_finite306 leaf306_theorem6 ε hε hεmax
+  obtain ⟨M, hM0, hM⟩ := upper_phi_bound337 ε hε.le
+  have hk0 : 0 ≤ ∏ p ∈ oddSievePrimes306 w, (p : ℝ) :=
+    Finset.prod_nonneg (fun p _ => Nat.cast_nonneg p)
+  set k : ℝ := 1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ) with hkdef
+  have hk : 0 < k := by rw [hkdef]; linarith
+  obtain ⟨B, hB, Kw, hKw, nW, hW⟩ := leaf337_two_wu_uniform 4 (by norm_num)
+  obtain ⟨nM, hmain⟩ := hmainε B k hB hk
+  obtain ⟨C4, hC4, hC4sum⟩ := LeanLab.PNTPort.BV.sum_inv_totient_le
+  obtain ⟨nR, hR2⟩ := sieve_two_R2_small337 (δ / 4) (by positivity)
+  obtain ⟨nS, hS⟩ := switched_small_value_loss337 (δ / 4) (by positivity)
+  have hlogN : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
+    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hpow : Tendsto (fun N : ℕ => (N : ℝ) ^ (0.25 : ℝ)) atTop atTop :=
+    (tendsto_rpow_atTop (by norm_num)).comp tendsto_natCast_atTop_atTop
+  set H : ℝ := Kw * (1 + M + 2 * C4) with hH
+  have htw := LeanLab.ChenExplicit.twinC_pos
+  have hall : ∀ᶠ N : ℕ in atTop, Even N →
+      (((switchedClosedIndex337 N (switchedE118 N)).filter
+        (fun b => (N - b.1 * b.2).Prime)).card : ℝ) ≤ (sieveTwoPairSum337 N + δ) *
+        (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+    filter_upwards [sw2_level_bounds337 B hB,
+      hpow.eventually_ge_atTop (max 2 (max (w ^ 2 + 1) (exp (40 * |log k| + 40)))),
+      hlogN.eventually_ge_atTop (max 1 (H / (δ / 4 * LeanLab.ChenExplicit.twinC))),
+      eventually_ge_atTop nW, eventually_ge_atTop nM, eventually_ge_atTop nR,
+      eventually_ge_atTop nS, eventually_ge_atTop (3 : ℕ)]
+      with N hLb hpN hlN hNW hNM hNR hNS hN3
+    intro he
+    have hN2 : 2 ≤ N := by omega
+    have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+    have hlN1 : 1 ≤ log (N : ℝ) := (le_max_left ..).trans hlN
+    have hlNH : H / (δ / 4 * LeanLab.ChenExplicit.twinC) ≤ log (N : ℝ) :=
+      (le_max_right ..).trans hlN
+    have hK : 0 < C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2 := leaf118_scale_pos N hN2
+    set K0 : ℝ := C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2 with hK0
+    set L : ℝ := sw2Level337 N B with hLdef
+    have hL2 : 2 ≤ L := le_trans (le_max_left ..) (hpN.trans hLb.1)
+    have hLw : w ^ 2 + 1 ≤ L := le_trans ((le_max_left ..).trans (le_max_right ..))
+      (hpN.trans hLb.1)
+    have hLe : exp (40 * |log k| + 40) ≤ L := le_trans ((le_max_right ..).trans
+      (le_max_right ..)) (hpN.trans hLb.1)
+    have hlogL : 40 * |log k| + 40 ≤ log L := by
+      have := log_le_log (exp_pos _) hLe
+      rwa [log_exp] at this
+    have hlogLp : 0 < log L := by linarith [abs_nonneg (log k)]
+    -- the parameter
+    have hs := sw2_param_eq337 N B k hk (by linarith)
+    have hsr : sw2Param337 N B k ∈ Set.Icc (1.8 : ℝ) 4.3 := by
+      rw [hs]
+      have h1 : 2 * log k / log L ≤ 0.2 := by
+        rw [div_le_iff₀ hlogLp]; linarith [le_abs_self (log k)]
+      have h2 : -0.2 ≤ 2 * log k / log L := by
+        rw [le_div_iff₀ hlogLp]; linarith [neg_abs_le (log k)]
+      constructor <;> linarith
+    obtain ⟨hφ0, hφM⟩ := hM _ hsr
+    set z : ℝ := sw2Cut337 N B with hzdef
+    have hzw : w < z := by
+      rw [hzdef, sw2Cut337, ← hLdef]
+      apply Real.lt_sqrt (by linarith) |>.mpr
+      linarith
+    have hz1 : 1 < z := by linarith
+    have hDpos : 0 < L / k := div_pos (by linarith) hk
+    have hzD : z ≤ L / k := by
+      have h1 : 1 ≤ sw2Param337 N B k := by linarith [hsr.1]
+      unfold sw2Param337 at h1
+      rw [← hzdef, ← hLdef] at h1
+      have hlz : 0 < log z := log_pos hz1
+      rw [le_div_iff₀ hlz, one_mul] at h1
+      exact (log_le_log_iff (by linarith) hDpos).mp h1
+    have hz225 : z ≤ (N : ℝ) ^ (0.225 : ℝ) := by
+      rw [hzdef, sw2Cut337, ← hLdef]
+      calc Real.sqrt L ≤ Real.sqrt ((N : ℝ) ^ (0.45 : ℝ)) := Real.sqrt_le_sqrt hLb.2
+        _ = (N : ℝ) ^ (0.225 : ℝ) := by
+          rw [Real.sqrt_eq_rpow, ← rpow_mul hNp.le]; norm_num
+    have hLN : L ≤ N := by
+      refine hLb.2.trans ?_
+      simpa using rpow_le_rpow_of_exponent_le
+        (by exact_mod_cast (show 1 ≤ N by omega) : (1 : ℝ) ≤ N) (by norm_num : (0.45 : ℝ) ≤ 1)
+    have hfl : ⌊L⌋₊ ≤ N := by
+      have : (⌊L⌋₊ : ℝ) ≤ N := (Nat.floor_le (by linarith)).trans hLN
+      exact_mod_cast this
+    have hfl1 : 1 ≤ ⌊L⌋₊ := Nat.le_floor (by norm_num; linarith)
+    -- finite losses
+    set E := switchedE118 N with hEdef
+    set T := switchedIndex306 N E with hTdef
+    set PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} z, p with hPP
+    have h0 := switched_closed_selection337 N hN2 E Nat.Prime
+    have h1 := switched_prime_sift337 N hN2 E {p : ℕ | p.Prime ∧ p.Coprime N}
+      (fun p hp => hp.1) z
+    dsimp only at h1
+    have hloss := hS N hNS E (switchedE_card337 N hN2) z hz225
+    have hfin : (((switchedClosedIndex337 N E).filter
+        (fun b => (N - b.1 * b.2).Prime)).card : ℝ) ≤
+        ((T.filter (fun b => (N - b.1 * b.2).Coprime PP)).card : ℝ) +
+          (E.card * (⌈z⌉₊ + 1) : ℝ) := by
+      have hh : ((switchedClosedIndex337 N E).filter
+          (fun b => (N - b.1 * b.2).Prime)).card ≤
+          (T.filter (fun b => (N - b.1 * b.2).Coprime PP)).card + E.card * ⌈z⌉₊ + E.card :=
+        h0.trans (Nat.add_le_add_right h1 _)
+      have hh' : (((switchedClosedIndex337 N E).filter
+          (fun b => (N - b.1 * b.2).Prime)).card : ℝ) ≤
+          ((T.filter (fun b => (N - b.1 * b.2).Coprime PP)).card : ℝ) +
+            (E.card : ℝ) * (⌈z⌉₊ : ℝ) + (E.card : ℝ) := by exact_mod_cast hh
+      linarith
+    -- Theorem 6
+    have h6 := hupper N he E z hzw (L / k) hzD
+    dsimp only at h6
+    set Qw : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} w with hQw
+    set R : ℕ → ℝ := fun d => |(((T.filter (fun b => d ∣ N - b.1 * b.2)).card : ℝ) -
+      (T.card : ℝ) * caiDensity118 d)| with hRdef
+    change ((T.filter (fun b => (N - b.1 * b.2).Coprime PP)).card : ℝ) ≤
+      upperPhi337 ε (sw2Param337 N B k) * (T.card : ℝ) * sw2V337 N B +
+        ∑ d ∈ PP.divisors.filter (fun d : ℕ => (d : ℝ) < (∏ p ∈ Qw, (p : ℝ)) * (L / k)), R d
+      at h6
+    have hQk : (∏ p ∈ Qw, (p : ℝ)) ≤ k := by
+      have := sieve_exceptional_product306 w {p : ℕ | p.Prime ∧ p.Coprime N}
+        (fun p hp => cai_primes_odd306 N p he hp.1 hp.2)
+      rw [hkdef]; linarith
+    have hcut : (∏ p ∈ Qw, (p : ℝ)) * (L / k) ≤ L := by
+      calc (∏ p ∈ Qw, (p : ℝ)) * (L / k) ≤ k * (L / k) :=
+            mul_le_mul_of_nonneg_right hQk hDpos.le
+        _ = L := by field_simp
+    have hdiv := sieve_divisor_remainder306 N {p : ℕ | p.Prime ∧ p.Coprime N}
+      (fun p hp => hp.2) z Qw (L / k) L hcut R (fun _ => abs_nonneg _)
+    set U := (Icc 1 ⌊L⌋₊).filter (fun d => N.Coprime d) with hU
+    -- remainder pieces
+    let nc : ℕ → ℝ := fun d => |∑ e ∈ E.filter (fun e => ¬ e.Coprime d),
+      switchedLiTerm337 N e / (d.totient : ℝ)|
+    have hwu1 : |(T.card : ℝ) - sw2X337 N| ≤ sw2Wu337 N 1 := by
+      have h := switched_remainder_split337 N 1 (Nat.coprime_one_right N) E
+      have hT1 : T.filter (fun b => 1 ∣ N - b.1 * b.2) = T :=
+        Finset.filter_true_of_mem (fun _ _ => one_dvd _)
+      have hE1 : E.filter (fun e => ¬ e.Coprime 1) = ∅ :=
+        Finset.filter_false_of_mem (fun e _ => by simp)
+      rw [hT1, hE1, Finset.sum_empty, abs_zero, add_zero] at h
+      simpa only [sw2Wu337, sw2X337, Nat.totient_one, Nat.cast_one, div_one] using h
+    have hRd : ∀ d ∈ U, R d ≤ sw2Wu337 N d + nc d + caiDensity118 d * sw2Wu337 N 1 := by
+      intro d hd
+      have hc : N.Coprime d := (Finset.mem_filter.mp hd).2
+      have h := switched_remainder_split337 N d hc E
+      have hg : caiDensity118 d = 1 / (d.totient : ℝ) := rfl
+      have hg0 : 0 ≤ caiDensity118 d := by rw [hg]; positivity
+      have htri : R d ≤ abs ((((T.filter (fun b => d ∣ N - b.1 * b.2)).card : ℝ) -
+          (∑ e ∈ E, switchedLiTerm337 N e) / (d.totient : ℝ))) +
+          caiDensity118 d * abs ((T.card : ℝ) - sw2X337 N) := by
+        have heq : (((T.filter (fun b => d ∣ N - b.1 * b.2)).card : ℝ) -
+            (T.card : ℝ) * caiDensity118 d) =
+            ((((T.filter (fun b => d ∣ N - b.1 * b.2)).card : ℝ) -
+              (∑ e ∈ E, switchedLiTerm337 N e) / d.totient) +
+            caiDensity118 d * (sw2X337 N - (T.card : ℝ))) := by
+          rw [hg]; unfold sw2X337; ring
+        change abs _ ≤ _
+        rw [heq]
+        refine (abs_add_le _ _).trans ?_
+        rw [abs_mul, abs_of_nonneg hg0, abs_sub_comm (sw2X337 N)]
+      have hmul := mul_le_mul_of_nonneg_left hwu1 hg0
+      have h' : abs ((((T.filter (fun b => d ∣ N - b.1 * b.2)).card : ℝ) -
+          (∑ e ∈ E, switchedLiTerm337 N e) / (d.totient : ℝ))) ≤ sw2Wu337 N d + nc d := h
+      linarith
+    have hsumR : (∑ d ∈ U, R d) ≤ (∑ d ∈ U, sw2Wu337 N d) + (∑ d ∈ U, nc d) +
+        sw2Wu337 N 1 * ∑ d ∈ U, caiDensity118 d := by
+      rw [Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      apply Finset.sum_le_sum
+      intro d hd
+      have := hRd d hd
+      linarith
+    have hWsum := hW N hNW
+    have hnc : (∑ d ∈ U, nc d) ≤ δ / 4 * K0 := by
+      refine le_trans ?_ (hR2 N hNR ⌊L⌋₊ hfl)
+      exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+        (fun _ _ _ => abs_nonneg _)
+    have hg : (∑ d ∈ U, caiDensity118 d) ≤ C4 * (1 + log N) := by
+      have h0 : (∑ d ∈ U, caiDensity118 d) = ∑ d ∈ U, (1 : ℝ) / d.totient := rfl
+      have h1 : (∑ d ∈ U, caiDensity118 d) ≤ ∑ d ∈ Icc 1 ⌊L⌋₊, (1 : ℝ) / d.totient := by
+        rw [h0]
+        exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+          (fun d _ _ => by positivity)
+      refine h1.trans ((hC4sum ⌊L⌋₊).trans ?_)
+      apply mul_le_mul_of_nonneg_left _ hC4.le
+      have : log (⌊L⌋₊ : ℝ) ≤ log N :=
+        log_le_log (by exact_mod_cast (show 0 < ⌊L⌋₊ by omega)) (by exact_mod_cast hfl)
+      linarith
+    have hwu1U : sw2Wu337 N 1 ≤ ∑ d ∈ U, sw2Wu337 N d :=
+      Finset.single_le_sum (f := fun d => sw2Wu337 N d) (fun _ _ => abs_nonneg _)
+        (Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨le_rfl, hfl1⟩, Nat.coprime_one_right N⟩)
+    have hwu10 : 0 ≤ sw2Wu337 N 1 := abs_nonneg _
+    -- main term
+    obtain ⟨hV0, hV1⟩ := sw2V_bounds337 N B he
+    have hmainN := hmain N he hNM
+    have hTX : (T.card : ℝ) ≤ sw2X337 N + sw2Wu337 N 1 := by
+      linarith [le_abs_self ((T.card : ℝ) - sw2X337 N)]
+    have hφV : upperPhi337 ε (sw2Param337 N B k) * sw2V337 N B ≤ M := by nlinarith
+    have hmain' : upperPhi337 ε (sw2Param337 N B k) * (T.card : ℝ) * sw2V337 N B ≤
+        upperPhi337 ε (sw2Param337 N B k) * sw2X337 N * sw2V337 N B + M * sw2Wu337 N 1 := by
+      have h := mul_le_mul_of_nonneg_left hTX (mul_nonneg hφ0 hV0.le)
+      nlinarith [mul_le_mul_of_nonneg_right hφV hwu10]
+    -- the Wu error total
+    set Wsum : ℝ := Kw * (N : ℝ) ^ (0.95 : ℝ) / log N ^ (4 : ℝ) with hWs
+    have hWerr : Wsum * (1 + M + C4 * (1 + log N)) ≤ δ / 4 * K0 := by
+      have hlp : 0 < log (N : ℝ) := by linarith
+      have hW0 : 0 ≤ Wsum := by positivity
+      have hfac : 1 + M + C4 * (1 + log N) ≤ (1 + M + 2 * C4) * log N := by nlinarith
+      have hHl : H ≤ δ / 4 * LeanLab.ChenExplicit.twinC * log N := by
+        have := (div_le_iff₀ (by positivity)).mp hlNH
+        linarith
+      have hC : LeanLab.ChenExplicit.twinC ≤ C N := by
+        unfold C
+        exact le_mul_of_one_le_right LeanLab.ChenExplicit.twinC_pos.le
+          (LeanLab.ChenExplicit.one_le_oddFactor N)
+      calc Wsum * (1 + M + C4 * (1 + log N)) ≤ Wsum * ((1 + M + 2 * C4) * log N) :=
+            mul_le_mul_of_nonneg_left hfac hW0
+        _ = H * ((N : ℝ) ^ (0.95 : ℝ) / log N ^ 3) := by
+            rw [hWs, hH, rpow_ofNat]; field_simp
+        _ ≤ (δ / 4 * LeanLab.ChenExplicit.twinC * log N) * ((N : ℝ) ^ (0.95 : ℝ) / log N ^ 3) :=
+            mul_le_mul_of_nonneg_right hHl (by positivity)
+        _ = δ / 4 * (LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+            field_simp
+        _ ≤ δ / 4 * K0 := by
+            rw [hK0]
+            apply mul_le_mul_of_nonneg_left _ (by positivity)
+            apply div_le_div_of_nonneg_right _ (sq_nonneg _)
+            exact mul_le_mul_of_nonneg_right hC (rpow_pos_of_pos hNp _).le
+    have hWsumU : (∑ d ∈ U, sw2Wu337 N d) ≤ Wsum := hWsum
+    have hgw : sw2Wu337 N 1 * ∑ d ∈ U, caiDensity118 d ≤ Wsum * (C4 * (1 + log N)) := by
+      have hg0 : 0 ≤ ∑ d ∈ U, caiDensity118 d :=
+        Finset.sum_nonneg (fun d _ => by
+          change 0 ≤ 1 / (d.totient : ℝ); positivity)
+      calc sw2Wu337 N 1 * ∑ d ∈ U, caiDensity118 d ≤ Wsum * ∑ d ∈ U, caiDensity118 d :=
+            mul_le_mul_of_nonneg_right (hwu1U.trans hWsumU) hg0
+        _ ≤ Wsum * (C4 * (1 + log N)) :=
+            mul_le_mul_of_nonneg_left hg (by rw [hWs]; positivity)
+    have hMw : M * sw2Wu337 N 1 ≤ M * Wsum :=
+      mul_le_mul_of_nonneg_left (hwu1U.trans hWsumU) hM0
+    have hRem := hdiv.trans hsumR
+    rw [← hK0] at hmainN hloss
+    have : Wsum * (1 + M + C4 * (1 + log N)) =
+        Wsum + M * Wsum + Wsum * (C4 * (1 + log N)) := by ring
+    linarith [hfin, h6, hRem, hmain', hmainN, hloss, hnc, hWerr, hgw, hMw, hWsumU]
+  obtain ⟨N0, hN0⟩ := eventually_atTop.mp hall
+  exact ⟨N0, fun N he hN => hN0 N hN he⟩
 
 /-- The exact sealed second upper leaf follows from the two smaller analytic steps.
 CONDITIONAL ON leaf337_two_switching and leaf337_two_pair_sum. -/
