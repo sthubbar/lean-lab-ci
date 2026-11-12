@@ -6,6 +6,7 @@ All interval coverage proofs and data definitions are reused unchanged.
 Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Decomp372aData
+import LeanLab.DtRS1998.PocklingtonB7Row90
 
 namespace LeanLab.DtRS1998.Decomp395a
 
@@ -44,36 +45,48 @@ paragraph, and Table 1 page 213, row 10^90.
 Batch 1 of the existing fixed candidate list consists of primes.
 This is only the primality subproblem at positions 1 through 64.
 Cohen and Lenstra 1987 page 104 separates each candidate test.
-The required individual prime certificates remain OPEN. -/
+The required individual prime certificates remain OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row90.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem batch0_prime : ∀ q ∈ qs.take 64, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_take hq)
 
 /-- LEAF. P0037 Section 5.1 page 211, the finite primality certification
 paragraph, and Table 1 page 213, row 10^90.
 Batch 2 of the existing fixed candidate list consists of primes.
 This is only the primality subproblem at positions 65 through 128.
 Cohen and Lenstra 1987 page 104 separates each candidate test.
-The required individual prime certificates remain OPEN. -/
+The required individual prime certificates remain OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row90.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem batch1_prime : ∀ q ∈ (qs.drop 64).take 64, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF. P0037 Section 5.1 page 211, the finite primality certification
 paragraph, and Table 1 page 213, row 10^90.
 Batch 3 of the existing fixed candidate list consists of primes.
 This is only the primality subproblem at positions 129 through 192.
 Cohen and Lenstra 1987 page 104 separates each candidate test.
-The required individual prime certificates remain OPEN. -/
+The required individual prime certificates remain OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row90.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem batch2_prime : ∀ q ∈ (qs.drop 128).take 64, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF. P0037 Section 5.1 page 211, the finite primality certification
 paragraph, and Table 1 page 213, row 10^90.
 Batch 4 of the existing fixed candidate list consists of primes.
 This is only the primality subproblem at positions 193 through 209.
 Cohen and Lenstra 1987 page 104 separates each candidate test.
-The required individual prime certificates remain OPEN. -/
+The required individual prime certificates remain OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row90.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem batch3_prime : ∀ q ∈ qs.drop 192, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop hq)
 
 /-- P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90.
 CONDITIONAL ON the four OPEN finite prime batches.

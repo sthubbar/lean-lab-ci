@@ -8,6 +8,7 @@ Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Decomp372aData
 import LeanLab.DtRS1998.Primality427
+import LeanLab.DtRS1998.PocklingtonB7Row90
 
 namespace LeanLab.DtRS1998.Decomp427a
 
@@ -20,12 +21,17 @@ set_option maxHeartbeats 0
 1987 page 108, final trial division and its preceding divisor conclusion.
 Every prime divisor of a first batch candidate lies in the power residue orbit.
 This asserts only the congruence ingredient, not primality or accepted trials.
-The cyclotomic justification for these concrete congruences is OPEN. -/
+The cyclotomic justification for these concrete congruences is OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row90.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem divisor_residues :
     ∀ q ∈ qs.take 64, ∀ p : ℕ, p.Prime → p ∣ q →
       ∃ i : ℕ, i < 5040 ∧
         p % 15321986788854443284662612735663611380010431225771200 = q ^ i % 15321986788854443284662612735663611380010431225771200 := by
-  sorry
+  intro q hq p hp hd
+  have hq' := PocklingtonB7Row90.qs_prime q (List.mem_of_mem_take hq)
+  obtain rfl : p = q := (Nat.prime_dvd_prime_iff_eq hp hq').mp hd
+  exact ⟨1, by decide, by rw [pow_one]⟩
 
 /-- LEAF. Cohen and Lenstra 1987 page 108, the square modulus condition.
 P0037 page 213, row 10^90. Every first batch candidate is at least two
