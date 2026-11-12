@@ -2,6 +2,8 @@ import Mathlib
 import LeanLab.ExceptionalSet.BrudernPerelli1998
 import LeanLab.ExceptionalSet.State1539
 import LeanLab.ExceptionalSet.PrimeKernel264
+import LeanLab.ExceptionalSet.TailSupplyJ200
+import LeanLab.ExceptionalSet.UpJ200.Decomp467a
 
 /-!
 Decomposition of Theorem 1 of P0082, Brüdern and Perelli 1998, repaired in unit U-1610.
@@ -123,13 +125,145 @@ theorem leaf_dyadic_split (γ δ κ c₀ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) 
     _ ≤ L.card + R.card := Finset.card_union_le _ _
 
 
+/-! ### Split of `leaf_minor_bound`, P0082 pages 365 to 366, displays 24 to 27
+
+AI wrote the Lean code. Goldbach is open. The split mirrors `Decomp371b.minor_bound_assembly`,
+which cannot be imported here because `Decomp371b` imports this file. -/
+
+/-- The integral over the truncated minor arcs `𝔫 ∩ [-P, P]` of P0082 page 365 display 24, with
+the same `P = X^{6δ}`, `X = F(N)` and `Δ = ℰ^{-1/8}` as `minorInt`. -/
+noncomputable def minorTruncInt (γ δ κ : ℝ) (N n : ℕ) : ℂ :=
+  ∫ α in (majorArcs (F γ N ^ (6 * δ)) (F γ N))ᶜ ∩
+      Set.Icc (-(F γ N ^ (6 * δ))) (F γ N ^ (6 * δ)),
+    Sp (F γ N ^ (6 * δ)) (F γ N) α ^ 2 *
+      (Kfun (calE γ κ N ^ (-(1 / 8 : ℝ))) α : ℂ) * eC (-(α * F γ n))
+
+/-- SPLIT of `leaf_minor_bound`, P0082 section 5, page 365 display 24: the part of the minor arc
+integral with `|α| > P` is `O(X log X / (Δ P))`, by the decay `K(α) ≪ Δ^{-1} α^{-2}` of the kernel
+and the trivial bound `|S| ≤ Σ log p`. For fixed `δ, κ > 0` this is eventually below half the
+level `X ℰ^{-1/3}`, uniformly in `n`. The same statement for `Decomp371b.truncatedMinor` is
+proved as `TailSupply385.leaf_tail_supplied`, outside this file's import cone. -/
+theorem leaf_minor_tail (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
+    (δ κ : ℝ) (hδ : 0 < δ) (hκ : 0 < κ) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ n : ℕ,
+      ‖minorInt γ δ κ N n - minorTruncInt γ δ κ N n‖ ≤
+        F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) / 2 := by
+  obtain ⟨N₀, hN₀⟩ := TailSupplyJ200.TailParameters.tail_parameters_eventually γ h1 h2 δ κ hδ hκ
+  refine ⟨N₀, fun N hN n => ?_⟩
+  obtain ⟨hX, hP, hd0, hd1, hb⟩ := hN₀ N hN
+  have ht := TailSupplyJ200.PrimeTail.truncation_error_le
+    (F γ N ^ (6 * δ)) (F γ N) (calE γ κ N ^ (-(1 / 8 : ℝ)))
+    (F γ n) (F γ N ^ (6 * δ)) hX hd0 hd1 hP
+    (majorArcs (F γ N ^ (6 * δ)) (F γ N))ᶜ
+  simpa only [minorInt, minorTruncInt, TailSupplyJ200.PrimeTail.integrand] using ht.trans hb
+
+/-- P0082 pages 365 to 366, displays 25 to 27, CONDITIONAL ON the cited Karacuba Lemma 10,
+P0082 pages 370 to 371: the second moment of `minorTruncInt` over the window is
+`O(N X² ℰ^{-11/12})`. This is `Decomp467a.truncated_moment_of_karacuba` read through its upstream
+copy `UpJ200.Decomp467a`, whose `truncatedMinor` and `window` are by definition `minorTruncInt`
+and `window` of this file. -/
+theorem minor_truncated_moment_of_karacuba (h10 : LeanLab.ExceptionalSet.U1539.Lemma10)
+    (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
+    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+          (∑ n ∈ window γ N, ‖minorTruncInt γ δ κ N n‖ ^ 2) ≤
+            B * N * F γ N ^ 2 * calE γ κ N ^ (-(11 / 12 : ℝ)) :=
+  UpJ200.Decomp467a.truncated_moment_of_karacuba h10 γ h1 h2
+
+/-- SPLIT of `leaf_minor_bound`, P0082 section 5, pages 365 to 366 displays 25 to 27: expanding
+the square and summing over the window, Theorem 2 with `c = 1 - 3δ` bounds the far phase sums and
+Gallagher's energy bound the near ones, so the second moment of the truncated minor integrals over
+the window is `O(N X² (log X)² ℰ^{-1})`. Here only the weaker `ℰ^{-3/4}` is asked, after the
+logarithms are absorbed into `ℰ^{1/4}`. -/
+theorem leaf_minor_truncated_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
+    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+          (∑ n ∈ window γ N, ‖minorTruncInt γ δ κ N n‖ ^ 2) ≤
+            B * N * F γ N ^ 2 * calE γ κ N ^ (-(3 / 4 : ℝ)) := by
+  -- The sum is the one of `Decomp467a.truncated_moment_of_karacuba`, through its upstream copy
+  -- `UpJ200.Decomp467a`, with the cited Karacuba Lemma 10, P0082 pages 370 to 371, supplied by
+  -- the existing sealed leaf `U1539.lemma10`. The exponent `-11/12` is then weakened to `-3/4`.
+  obtain ⟨δ₀, hδ₀, hm⟩ := minor_truncated_moment_of_karacuba LeanLab.ExceptionalSet.U1539.lemma10
+    γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, hm⟩ := hm δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨B, hB, N₀, hm⟩ := hm κ hκ hκsmall
+  refine ⟨B, hB, max 2 N₀, fun N hN => ?_⟩
+  have hN2 : 2 ≤ N := (le_max_left _ _).trans hN
+  have hE : 1 ≤ calE γ κ N := by
+    apply Real.one_le_exp
+    exact mul_nonneg hκ.le (Real.rpow_nonneg
+      (Real.log_nonneg (by exact_mod_cast (show 1 ≤ N by omega))) _)
+  exact (hm N ((le_max_right _ _).trans hN)).trans
+    (mul_le_mul_of_nonneg_left
+      (Real.rpow_le_rpow_of_exponent_le hE (by norm_num)) (by positivity))
+
+/-- SPLIT of `leaf_minor_bound`, the Chebyshev step of P0082 page 366 after display 27: if each
+`f n` is within `T/2` of `g n` and `Σ ‖g n‖² ≤ A`, then at most `A / (T/2)²` indices have
+`‖f n‖ > T`. Finite and elementary. -/
+theorem minor_count_chebyshev (s : Finset ℕ) (f g : ℕ → ℂ)
+    (T A : ℝ) (hT : 0 < T)
+    (htail : ∀ n ∈ s, ‖f n - g n‖ ≤ T / 2)
+    (hmoment : (∑ n ∈ s, ‖g n‖ ^ 2) ≤ A) :
+    (((s.filter (fun n => T < ‖f n‖)).card : ℝ) * (T / 2) ^ 2) ≤ A := by
+  let bad := s.filter (fun n => T < ‖f n‖)
+  have hlarge : ∀ n ∈ bad, (T / 2) ^ 2 ≤ ‖g n‖ ^ 2 := by
+    intro n hn
+    rcases Finset.mem_filter.mp hn with ⟨hns, hnf⟩
+    have hnorm : ‖f n‖ ≤ ‖f n - g n‖ + ‖g n‖ := norm_le_norm_sub_add _ _
+    have hg : T / 2 ≤ ‖g n‖ := by linarith [htail n hns]
+    exact pow_le_pow_left₀ (by positivity) hg 2
+  calc
+    _ ≤ ∑ n ∈ bad, ‖g n‖ ^ 2 := by
+      simpa only [nsmul_eq_mul] using
+        Finset.card_nsmul_le_sum bad (fun n => ‖g n‖ ^ 2) ((T / 2) ^ 2) hlarge
+    _ ≤ ∑ n ∈ s, ‖g n‖ ^ 2 :=
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+        (fun n _ _ => sq_nonneg _)
+    _ ≤ A := hmoment
+
 /-- LEAF page 366, the variance bound of section 5, from Theorem 2 with `c = 1 - 3δ`, Vinogradov's
 bound for `S` on `𝔫` and Chebyshev. The paper states the exceptions as `O(N ℰ^{-1/4})`; we ask only
 for the weaker `O(N ℰ^{-1/12})`, which is all that the proof of Theorem 1 uses. -/
 theorem leaf_minor_bound (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ → ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
       ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
-        (Eγ_minor_block γ δ κ N : ℝ) ≤ B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by sorry
+        (Eγ_minor_block γ δ κ N : ℝ) ≤ B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
+  obtain ⟨δ₀, hδ₀, hm⟩ := leaf_minor_truncated_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, hm⟩ := hm δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨B, hB, Nm, hm⟩ := hm κ hκ hκsmall
+  obtain ⟨Nt, ht⟩ := leaf_minor_tail γ h1 h2 δ κ hδ hκ
+  refine ⟨4 * B, by positivity, max Nm Nt, fun N hN => ?_⟩
+  have hNm : Nm ≤ N := (le_max_left _ _).trans hN
+  have hNt : Nt ≤ N := (le_max_right _ _).trans hN
+  have hX : 0 < F γ N := Real.exp_pos _
+  have hE : 0 < calE γ κ N := Real.exp_pos _
+  have hT : 0 < F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) :=
+    mul_pos hX (Real.rpow_pos_of_pos hE _)
+  have hc := minor_count_chebyshev (window γ N)
+    (minorInt γ δ κ N) (minorTruncInt γ δ κ N)
+    (F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)))
+    (B * N * F γ N ^ 2 * calE γ κ N ^ (-(3 / 4 : ℝ)))
+    hT (fun n _ => ht N hNt n) (hm N hNm)
+  change (Eγ_minor_block γ δ κ N : ℝ) *
+    (F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) / 2) ^ 2 ≤ _ at hc
+  have hp : calE γ κ N ^ (-(3 / 4 : ℝ)) =
+      calE γ κ N ^ (-(1 / 12 : ℝ)) * (calE γ κ N ^ (-(1 / 3 : ℝ))) ^ 2 := by
+    rw [← Real.rpow_mul_natCast hE.le, ← Real.rpow_add hE]
+    congr 1
+    norm_num
+  have hfactor : B * (N : ℝ) * F γ N ^ 2 * calE γ κ N ^ (-(3 / 4 : ℝ)) =
+      (4 * B * N * calE γ κ N ^ (-(1 / 12 : ℝ))) *
+        (F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) / 2) ^ 2 := by
+    rw [hp]
+    ring
+  rw [hfactor] at hc
+  exact (mul_le_mul_iff_left₀ (sq_pos_of_pos (half_pos hT))).mp hc
 
 /-- LEAF page 365, Lemma 8, with one `κ` shared by the two arcs as in the paper, where `ℰ` is
 fixed once for sections 4 to 7. `U1539.Lemma8` is the same bound with a private `κ`, too weak to
