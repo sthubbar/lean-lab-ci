@@ -1900,18 +1900,6 @@ private theorem sieveOnePrimeSum337_eq_integral337 (N : ℕ) :
       = 5.225 - 11 * (Real.log p / Real.log N) := by ring
   rw [harg]
 
-/-! ### The leaf -/
-
-/-- LEAF. Pages 601 to 602 displays 4.5 to 4.7, before prime partial summation.
-The varying upper function is retained. This requires the linear sieve of Lemma 1
-and the Bombieri bound of Lemma 3, including the summed recentering correction.
-This is an open analytic substep, not a proved cited input. -/
-theorem leaf337_one_sieve :
-    ∀ δ : ℝ, 0 < δ → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
-      (S1 N 0.95 : ℝ) ≤ (sieveOnePrimeSum337 N + δ) *
-        (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
-  sorry
-
 /-- LEAF. Page 602 display 4.7, prime partial summation and evaluation of the integral.
 This statement concerns only the weighted prime sum. It contains no sifted count.
 The prime number theorem and the formulas of Lemma 2 give this limit. -/
@@ -1927,6 +1915,763 @@ theorem leaf337_one_prime_sum :
   refine Tendsto.congr' (Filter.Eventually.of_forall (fun N => ?_)) hmul
   exact (sieveOnePrimeSum337_eq_integral337 N).symm
 
+/-! ### The split of the first upper leaf, route burst 2026-11-12 -/
+
+/-- The q dependent sieve level of page 601 display 4.5, reduced by a fixed factor k. -/
+def upperLevel337 (N : ℕ) (B k : ℝ) (q : ℕ) : ℝ :=
+  ((N : ℝ) ^ (0.95 / 2 : ℝ) / log N ^ B) / (k * q)
+
+/-- The q dependent sieve parameter s of page 601 display 4.5. -/
+def upperParam337 (N : ℕ) (B k : ℝ) (q : ℕ) : ℝ :=
+  log (upperLevel337 N B k q) / log (z1 N)
+
+/-- The explicit upper sieve factor of Lemma 1 page 598, with the BJS error term. -/
+def upperPhi337 (ε s : ℝ) : ℝ :=
+  sieveUpper306 s + ε * 106 * exp 2 * LeanLab.ChenExplicit.hSieve s
+
+/-- The sieve product V of page 601 display 4.3. -/
+def caiV337 (N : ℕ) : ℝ :=
+  ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N),
+    (1 - caiDensity118 p)
+
+/-- The q dependent parameter stays in a fixed compact range for all q in S1.
+Page 601 display 4.5 with the range N^(1/11) to N^(1/3.29) of page 601. -/
+theorem upper_q_param_range337 (B k : ℝ) (hk : 0 < k) :
+    ∃ N0 : ℕ, ∀ N : ℕ, N0 ≤ N → ∀ q ∈ Q1 N,
+      upperParam337 N B k q ∈ Set.Icc (1.8 : ℝ) 4.3 := by
+  have hlog : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
+    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hsmall : Tendsto (fun N : ℕ => log (log (N : ℝ)) / log N) atTop (𝓝 0) :=
+    isLittleO_log_id_atTop.tendsto_div_nhds_zero.comp hlog
+  have hshift : Tendsto (fun N : ℕ =>
+      11 * B * (log (log (N : ℝ)) / log N) + (11 * log k) / log N) atTop (𝓝 0) := by
+    simpa using (hsmall.const_mul (11 * B)).add (tendsto_const_nhds.div_atTop hlog)
+  have hnear := hshift.eventually
+    (Metric.ball_mem_nhds (0 : ℝ) (by norm_num : (0 : ℝ) < 0.05))
+  simp only [Real.dist_eq, sub_zero] at hnear
+  obtain ⟨n0, hn0⟩ := eventually_atTop.mp hnear
+  refine ⟨max 2 n0, fun N hN q hq => ?_⟩
+  have hN2 : 2 ≤ N := (le_max_left ..).trans hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+  obtain ⟨_, hprime, hqlo, hqhi, _⟩ :=
+    (show q < N + 1 ∧ q.Prime ∧ z1 N ≤ (q : ℝ) ∧ (q : ℝ) < z2 N ∧ q.Coprime N from by
+      simpa only [Q1, mem_filter, mem_range] using hq)
+  have hqp : (0 : ℝ) < q := by exact_mod_cast hprime.pos
+  have hlo : (1 / 11 : ℝ) ≤ log q / log N := by
+    have hh := log_le_log (rpow_pos_of_pos hNp (1 / 11 : ℝ)) hqlo
+    rw [log_rpow hNp] at hh
+    apply (le_div_iff₀ hLp).mpr
+    linarith
+  have hhi : log q / log N ≤ (1 / 3.29 : ℝ) := by
+    have hh := log_lt_log hqp hqhi
+    unfold z2 at hh
+    rw [log_rpow hNp] at hh
+    apply (div_le_iff₀ hLp).mpr
+    linarith
+  have hv := abs_lt.mp (hn0 N ((le_max_right ..).trans hN))
+  unfold upperParam337 upperLevel337
+  rw [upper_q_parameter_identity337 N q hN2 hprime.pos B k hk]
+  simp only [mul_div_assoc] at hv ⊢
+  constructor <;> nlinarith [hv.1, hv.2]
+
+/-- The BJS error weight h is between zero and e to the minus two.
+BJS page 5 equation 9, as used in Cai Lemma 1 page 598. -/
+theorem hSieve_bounds337 (s : ℝ) :
+    0 ≤ LeanLab.ChenExplicit.hSieve s ∧ LeanLab.ChenExplicit.hSieve s ≤ exp (-2) := by
+  unfold LeanLab.ChenExplicit.hSieve
+  split_ifs with h1 h2
+  · exact ⟨(exp_pos _).le, le_rfl⟩
+  · exact ⟨(exp_pos _).le, exp_le_exp.mpr (by linarith)⟩
+  · push Not at h1 h2
+    have hs : 0 < s := by linarith
+    refine ⟨by positivity, ?_⟩
+    have h3 : 3 * s⁻¹ ≤ 1 := by
+      rw [← div_eq_mul_inv, div_le_one hs]
+      linarith
+    calc 3 * s⁻¹ * exp (-s) ≤ 1 * exp (-s) :=
+          mul_le_mul_of_nonneg_right h3 (exp_pos _).le
+      _ ≤ exp (-2) := by
+          rw [one_mul]
+          exact exp_le_exp.mpr (by linarith)
+
+/-- The upper sieve factor is nonnegative and bounded on the parameter range of S1.
+Cai Lemma 1 page 598: F is continuous, and the BJS weight is bounded. -/
+theorem upper_phi_bound337 (ε : ℝ) (hε : 0 ≤ ε) :
+    ∃ M : ℝ, 0 ≤ M ∧ ∀ s ∈ Set.Icc (1.8 : ℝ) 4.3,
+      0 ≤ upperPhi337 ε s ∧ upperPhi337 ε s ≤ M := by
+  have hF : ContinuousOn sieveUpper306 (Set.Icc (1.8 : ℝ) 4.3) :=
+    sieveFns306.2.1.mono (by intro s hs; change 0 < s; linarith [hs.1])
+  obtain ⟨M0, hM0⟩ := isCompact_Icc.exists_bound_of_continuousOn hF
+  refine ⟨|M0| + ε * 106, by positivity, fun s hs => ?_⟩
+  have hs0 : 0 < s := by linarith [hs.1]
+  have hFp := sieveUpper_pos306 s hs0
+  obtain ⟨h0, h1⟩ := hSieve_bounds337 s
+  have hb := hM0 s hs
+  rw [Real.norm_eq_abs, abs_of_pos hFp] at hb
+  have he : exp 2 * exp (-2) = 1 := by rw [← exp_add]; norm_num
+  unfold upperPhi337
+  constructor
+  · have : 0 ≤ ε * 106 * exp 2 * LeanLab.ChenExplicit.hSieve s := by positivity
+    linarith
+  · have hh : ε * 106 * exp 2 * LeanLab.ChenExplicit.hSieve s ≤ ε * 106 * exp 2 * exp (-2) :=
+      mul_le_mul_of_nonneg_left h1 (by positivity)
+    have hh2 : ε * 106 * exp 2 * exp (-2) = ε * 106 := by
+      rw [mul_assoc, he, mul_one]
+    linarith [le_abs_self M0]
+
+/-- The sieve product V lies in the unit interval for even N.
+Page 601 display 4.3. -/
+theorem caiV337_bounds (N : ℕ) (he : Even N) : 0 < caiV337 N ∧ caiV337 N ≤ 1 := by
+  classical
+  refine ⟨cai_product_pos306 N he, ?_⟩
+  apply Finset.prod_le_one₀
+  · intro p hp
+    simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+    exact sub_nonneg.mpr (caiDensity118_prime N p he hp.2.1 hp.2.2).2.le
+  · intro p hp
+    simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+    linarith [(caiDensity118_prime N p he hp.2.1 hp.2.2).1]
+
+/-- The upper end z2 of the S1 range lies below the Bombieri Vinogradov level.
+Page 601 display 4.2 and the range of S1 on page 601. -/
+theorem z2_below_level337 (B : ℝ) (hB : 0 ≤ B) :
+    ∀ᶠ N : ℕ in atTop, z2 N ≤
+      Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) / log ((N : ℝ) ^ (0.95 : ℝ)) ^ B := by
+  have hc : (0 : ℝ) < 0.475 - 1 / 3.29 := by norm_num
+  have ho := (isLittleO_log_rpow_rpow_atTop B hc).tendsto_div_nhds_zero
+  have hev := (ho.comp tendsto_natCast_atTop_atTop).eventually
+    (eventually_lt_nhds (by norm_num : (0 : ℝ) < 1))
+  filter_upwards [hev, eventually_ge_atTop (3 : ℕ)] with N hN hN3
+  simp only [Function.comp_def] at hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hN1 : (1 : ℝ) < N := by exact_mod_cast (show 1 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos hN1
+  have hpc : 0 < (N : ℝ) ^ (0.475 - 1 / 3.29 : ℝ) := rpow_pos_of_pos hNp _
+  have hlogB : log (N : ℝ) ^ B < (N : ℝ) ^ (0.475 - 1 / 3.29 : ℝ) := by
+    have := (div_lt_one hpc).mp hN
+    exact this
+  have hl95 : 0 < log ((N : ℝ) ^ (0.95 : ℝ)) := by
+    rw [log_rpow hNp]; positivity
+  have hle : log ((N : ℝ) ^ (0.95 : ℝ)) ^ B ≤ log (N : ℝ) ^ B := by
+    apply rpow_le_rpow hl95.le _ hB
+    rw [log_rpow hNp]; nlinarith
+  have hsq : Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) =
+      (N : ℝ) ^ (1 / 3.29 : ℝ) * (N : ℝ) ^ (0.475 - 1 / 3.29 : ℝ) := by
+    rw [Real.sqrt_eq_rpow, ← rpow_mul hNp.le, ← rpow_add hNp]
+    norm_num
+  rw [hsq, le_div_iff₀ (rpow_pos_of_pos hl95 B)]
+  unfold z2
+  have hz : 0 < (N : ℝ) ^ (1 / 3.29 : ℝ) := rpow_pos_of_pos hNp _
+  nlinarith [mul_le_mul_of_nonneg_left hle hz.le, mul_lt_mul_of_pos_left hlogB hz]
+
+/-- The summed mass remainder over the S1 primes is negligible.
+Page 601 display 4.6, the term from writing the mass of A_q as X over phi of q plus
+a remainder. Lemma 3, page 599, Bombieri Vinogradov, which the lab proves in
+bombieriVinogradov118_proved through cai_remainder_level118. -/
+theorem sieve_one_mass_small337 (η : ℝ) (hη : 0 < η) :
+    ∃ N0 : ℕ, ∀ N : ℕ, N0 ≤ N →
+      (∑ q ∈ Q1 N, caiRemainder337 N q) ≤
+        η * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+  classical
+  obtain ⟨B, hB, K, hK, hbv⟩ := cai_remainder_level118 5 (by norm_num)
+  let c : ℝ := η * LeanLab.ChenExplicit.twinC * (0.95 : ℝ) ^ 5
+  have hc : 0 < c := by
+    dsimp [c]
+    exact mul_pos (mul_pos hη LeanLab.ChenExplicit.twinC_pos) (by norm_num)
+  have hlog : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
+    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  obtain ⟨n0, hn0⟩ := eventually_atTop.mp
+    (hlog.eventually (eventually_ge_atTop (max 1 (K / c))))
+  obtain ⟨n1, hn1⟩ := eventually_atTop.mp (z2_below_level337 B hB.le)
+  refine ⟨max (max n0 n1) 4, fun N hN => ?_⟩
+  have hN4 : 4 ≤ N := (le_max_right ..).trans hN
+  have hNn0 : n0 ≤ N := (le_max_left ..).trans ((le_max_left ..).trans hN)
+  have hNn1 : n1 ≤ N := (le_max_right ..).trans ((le_max_left ..).trans hN)
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hL1 : 1 ≤ log (N : ℝ) := (le_max_left ..).trans (hn0 N hNn0)
+  have hLK : K / c ≤ log (N : ℝ) := (le_max_right ..).trans (hn0 N hNn0)
+  have hlogp : 0 < log (N : ℝ) := by linarith
+  have hKlog : K ≤ c * log N ^ 3 := by
+    have hh := (div_le_iff₀ hc).mp hLK
+    have hp : log (N : ℝ) ≤ log N ^ 3 := le_self_pow₀ hL1 (by norm_num)
+    exact hh.trans (by simpa only [mul_comm] using mul_le_mul_of_nonneg_left hp hc.le)
+  have hsub : (∑ q ∈ Q1 N, caiRemainder337 N q) ≤
+      ∑ d ∈ (Finset.Icc 1 ⌊Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
+          log ((N : ℝ) ^ (0.95 : ℝ)) ^ B⌋₊).filter (fun d => N.Coprime d),
+        caiRemainder337 N d := by
+    apply Finset.sum_le_sum_of_subset_of_nonneg
+    · intro q hq
+      obtain ⟨_, hprime, _, hqhi, hcop⟩ :=
+        (show q < N + 1 ∧ q.Prime ∧ z1 N ≤ (q : ℝ) ∧ (q : ℝ) < z2 N ∧ q.Coprime N from by
+          simpa only [Q1, mem_filter, mem_range] using hq)
+      refine Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨hprime.one_lt.le, ?_⟩, hcop.symm⟩
+      exact Nat.le_floor (hqhi.le.trans (hn1 N hNn1))
+    · intro d _ _
+      exact abs_nonneg _
+  have hb := hsub.trans (hbv N hN4)
+  refine hb.trans ?_
+  rw [log_rpow hNp]
+  have hC : LeanLab.ChenExplicit.twinC ≤ C N := by
+    unfold C
+    exact le_mul_of_one_le_right LeanLab.ChenExplicit.twinC_pos.le
+      (LeanLab.ChenExplicit.one_le_oddFactor N)
+  have hmain : K * (N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N) ^ (5 : ℝ) ≤
+      η * (LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+    rw [rpow_ofNat, mul_pow]
+    apply (div_le_iff₀ (by positivity : 0 < (0.95 : ℝ) ^ 5 * log (N : ℝ) ^ 5)).mpr
+    have hh := mul_le_mul_of_nonneg_right hKlog (rpow_pos_of_pos hNp (0.95 : ℝ)).le
+    dsimp [c] at hh
+    convert hh using 1 <;> field_simp [ne_of_gt hlogp]
+  exact hmain.trans (by gcongr)
+
+/-- The logarithmic integral has the upper asymptotic coefficient one.
+Elementary split of the integral at x to the power one minus θ.
+Input for the mass X of page 601 display 4.4. -/
+theorem li118_upper337 (η : ℝ) (hη : 0 < η) :
+    ∀ᶠ x : ℝ in atTop, li118 x ≤ (1 + η) * x / log x := by
+  set θ : ℝ := min (1 / 2) (η / 4) with hθdef
+  have hθ0 : 0 < θ := lt_min (by norm_num) (by linarith)
+  have hθ1 : θ ≤ 1 / 2 := min_le_left _ _
+  have hθ2 : θ ≤ η / 4 := min_le_right _ _
+  have hlog2 : 0 < log (2 : ℝ) := log_pos (by norm_num)
+  have ho := (isLittleO_log_rpow_rpow_atTop 1 hθ0).tendsto_div_nhds_zero
+  have hev := ho.eventually (eventually_lt_nhds
+    (show (0 : ℝ) < η / 2 * log 2 by positivity))
+  have hy : Tendsto (fun x : ℝ => x ^ (1 - θ)) atTop atTop :=
+    tendsto_rpow_atTop (by linarith)
+  filter_upwards [hev, eventually_ge_atTop (3 : ℝ), hy.eventually_ge_atTop 2]
+    with x hx hx3 hy2
+  have hxp : 0 < x := by linarith
+  have hlx : 0 < log x := log_pos (by linarith)
+  set y : ℝ := x ^ (1 - θ) with hydef
+  have hyx : y ≤ x := by
+    have := rpow_le_rpow_of_exponent_le (by linarith : (1 : ℝ) ≤ x)
+      (show 1 - θ ≤ 1 by linarith)
+    simpa using this
+  have hly : log y = (1 - θ) * log x := by rw [hydef, log_rpow hxp]
+  have hlyp : 0 < log y := by rw [hly]; nlinarith
+  have hc (u v : ℝ) (hu : 2 ≤ u) (huv : u ≤ v) :
+      IntervalIntegrable (fun t : ℝ => 1 / log t) MeasureTheory.volume u v := by
+    apply ContinuousOn.intervalIntegrable_of_Icc huv
+    exact continuousOn_const.div
+      (continuousOn_id.log (fun t ht => by change t ≠ 0; linarith [ht.1]))
+      (fun t ht => ne_of_gt (log_pos (by linarith [ht.1])))
+  have hsplit := intervalIntegral.integral_add_adjacent_intervals
+    (hc 2 y le_rfl hy2) (hc y x hy2 hyx)
+  have h1 : (∫ t in (2 : ℝ)..y, 1 / log t) ≤ ∫ _t in (2 : ℝ)..y, 1 / log 2 :=
+    intervalIntegral.integral_mono_on hy2 (hc 2 y le_rfl hy2) intervalIntegrable_const
+      (fun t ht => one_div_le_one_div_of_le hlog2 (log_le_log (by norm_num) ht.1))
+  have h2 : (∫ t in y..x, 1 / log t) ≤ ∫ _t in y..x, 1 / log y :=
+    intervalIntegral.integral_mono_on hyx (hc y x hy2 hyx) intervalIntegrable_const
+      (fun t ht => one_div_le_one_div_of_le hlyp (log_le_log (by linarith) ht.1))
+  simp only [intervalIntegral.integral_const, smul_eq_mul] at h1 h2
+  have hli : li118 x ≤ (y - 2) * (1 / log 2) + (x - y) * (1 / log y) := by
+    unfold li118
+    rw [← hsplit]
+    linarith
+  -- tail: y / log 2 ≤ η / 2 * x / log x
+  have htail : y * (1 / log 2) ≤ η / 2 * x / log x := by
+    have hxθ : 0 < x ^ θ := rpow_pos_of_pos hxp θ
+    have hx' : log x / x ^ θ < η / 2 * log 2 := by simpa using hx
+    have hyeq : y * x ^ θ = x := by
+      rw [hydef, ← rpow_add hxp]; simp
+    rw [div_lt_iff₀ hxθ] at hx'
+    rw [le_div_iff₀ hlx]
+    have : y * (1 / log 2) * log x * log 2 ≤ η / 2 * x * log 2 := by
+      have hh : y * log x ≤ y * (η / 2 * log 2 * x ^ θ) :=
+        mul_le_mul_of_nonneg_left hx'.le (by positivity)
+      have hh2 : y * (η / 2 * log 2 * x ^ θ) = η / 2 * log 2 * x := by
+        calc y * (η / 2 * log 2 * x ^ θ) = η / 2 * log 2 * (y * x ^ θ) := by ring
+          _ = η / 2 * log 2 * x := by rw [hyeq]
+      field_simp
+      nlinarith
+    nlinarith
+  have hmain : (x - y) * (1 / log y) ≤ (1 + η / 2) * x / log x := by
+    rw [hly]
+    have hθ' : 1 / (1 - θ) ≤ 1 + η / 2 := by
+      rw [div_le_iff₀ (by linarith)]
+      nlinarith
+    have : (x - y) * (1 / ((1 - θ) * log x)) ≤ x * (1 / ((1 - θ) * log x)) :=
+      mul_le_mul_of_nonneg_right (by linarith [rpow_pos_of_pos hxp (1 - θ)])
+        (by have : 0 < (1 - θ) * log x := by nlinarith
+            positivity)
+    calc (x - y) * (1 / ((1 - θ) * log x)) ≤ x * (1 / ((1 - θ) * log x)) := this
+      _ = (1 / (1 - θ)) * x / log x := by field_simp
+      _ ≤ (1 + η / 2) * x / log x := by
+        apply div_le_div_of_nonneg_right _ hlx.le
+        exact mul_le_mul_of_nonneg_right hθ' hxp.le
+  have hy2' : (y - 2) * (1 / log 2) ≤ y * (1 / log 2) :=
+    mul_le_mul_of_nonneg_right (by linarith) (by positivity)
+  have : (1 + η / 2) * x / log x + η / 2 * x / log x = (1 + η) * x / log x := by ring
+  linarith
+
+/-- The inclusive prime mass has the upper asymptotic coefficient one.
+Cai page 601 before equation 4.4, from the proved continuous Li distribution theorem. -/
+theorem primeCount_upper337 (δ : ℝ) (hδ : 0 < δ) :
+    ∀ᶠ x : ℝ in atTop, (apCount118 x 1 0 : ℝ) ≤ (1 + δ) * x / log x := by
+  obtain ⟨B, hB, K, hK, x0, hx0, hbv⟩ := bombieriVinogradov118_proved 3 (by norm_num)
+  have hsmall : Tendsto (fun x : ℝ => log x ^ B / x ^ (1 / 2 : ℝ)) atTop (𝓝 0) :=
+    (isLittleO_log_rpow_rpow_atTop B (s := 1 / 2) (by norm_num)).tendsto_div_nhds_zero
+  have herr : Tendsto (fun x : ℝ => K / log x ^ 2) atTop (𝓝 0) := by
+    have hlog2 : Tendsto (fun x : ℝ => log x ^ 2) atTop atTop :=
+      (tendsto_pow_atTop (by norm_num : 2 ≠ 0)).comp tendsto_log_atTop
+    exact hlog2.const_div_atTop K
+  filter_upwards [eventually_ge_atTop x0, hsmall.eventually (eventually_lt_nhds
+      (by norm_num : (0 : ℝ) < 1)), herr.eventually (eventually_lt_nhds (half_pos hδ)),
+      li118_upper337 (δ / 2) (half_pos hδ)] with x hx hs he hli
+  have hx2 : 2 ≤ x := hx0.trans hx
+  have hxp : 0 < x := by linarith
+  have hlp : 0 < log x := log_pos (by linarith)
+  have hpB : 0 < log x ^ B := rpow_pos_of_pos hlp B
+  have hpX : 0 < x ^ (1 / 2 : ℝ) := rpow_pos_of_pos hxp _
+  have hlevel : 1 ≤ x ^ (1 / 2 : ℝ) / log x ^ B := by
+    apply (one_le_div hpB).mpr
+    exact (by simpa using (div_lt_iff₀ hpX).mp hs : log x ^ B < x ^ (1 / 2 : ℝ)).le
+  have hmem : 1 ∈ Finset.Icc 1 ⌊x ^ (1 / 2 : ℝ) / log x ^ B⌋₊ :=
+    Finset.mem_Icc.mpr ⟨le_rfl, Nat.le_floor (by simpa using hlevel)⟩
+  obtain ⟨R, hR, hsum⟩ := hbv x hx
+  have hfirst := Finset.single_le_sum (f := R) (fun d hd => (hR d hd).1) hmem
+  have hpoint := (hR 1 hmem).2 0 (by norm_num) (by norm_num) x hx2 le_rfl
+  norm_num only [Nat.totient_one, Nat.cast_one, div_one] at hpoint
+  have habs : |(apCount118 x 1 0 : ℝ) - li118 x| ≤ K * x / log x ^ (3 : ℝ) :=
+    hpoint.trans (hfirst.trans hsum)
+  have hpi : (apCount118 x 1 0 : ℝ) ≤ li118 x + K * x / log x ^ (3 : ℝ) := by
+    linarith [(abs_le.mp habs).2]
+  have herror : K * x / log x ^ (3 : ℝ) ≤ δ / 2 * x / log x := by
+    rw [rpow_ofNat]
+    have hh : K / log x ^ 2 * (x / log x) ≤ δ / 2 * (x / log x) :=
+      mul_le_mul_of_nonneg_right he.le (by positivity)
+    have e1 : K * x / log x ^ 3 = K / log x ^ 2 * (x / log x) := by
+      field_simp
+    have e2 : δ / 2 * x / log x = δ / 2 * (x / log x) := by ring
+    rw [e1, e2]
+    exact hh
+  have : (1 + δ / 2) * x / log x + δ / 2 * x / log x = (1 + δ) * x / log x := by ring
+  linarith
+
+/-- The upper sieve function is at least 2 e^γ / s. Cai Lemma 1 page 598 and
+BJS equation 8 page 5. -/
+theorem sieveUpper_ge337 (s : ℝ) (hs : 0 < s) :
+    2 * exp eulerMascheroniConstant / s ≤ sieveUpper306 s :=
+  div_le_div_of_nonneg_right (sieveStage_bounds306 ⌈s⌉₊ s).1 hs.le
+
+/-- The limiting argument 5.225 - 11 log q / log N lies in 1.8 to 4.3 for q in
+the S1 range N^(1/11) to N^(1/3.29), page 601. -/
+theorem limit_arg_range337 (N q : ℕ) (hN : 2 ≤ N) (hprime : q.Prime)
+    (hqlo : z1 N ≤ (q : ℝ)) (hqhi : (q : ℝ) < z2 N) :
+    5.225 - 11 * log q / log N ∈ Set.Icc (1.8 : ℝ) 4.3 := by
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hqp : (0 : ℝ) < q := by exact_mod_cast hprime.pos
+  have hlo : (1 / 11 : ℝ) ≤ log q / log N := by
+    have hh := log_le_log (rpow_pos_of_pos hNp (1 / 11 : ℝ)) hqlo
+    rw [log_rpow hNp] at hh
+    apply (le_div_iff₀ hLp).mpr
+    linarith
+  have hhi : log q / log N ≤ (1 / 3.29 : ℝ) := by
+    have hh := log_lt_log hqp hqhi
+    unfold z2 at hh
+    rw [log_rpow hNp] at hh
+    apply (div_le_iff₀ hLp).mpr
+    linarith
+  simp only [mul_div_assoc]
+  constructor <;> linarith
+
+set_option maxHeartbeats 1600000 in
+/-- Page 602 display 4.7, first line: evaluation of the linear sieve main term
+of display 4.5 summed over the S1 primes. The mass X of page 601 display 4.4 comes from
+primeCount_upper337, the product V from Mertens in display 4.3 through
+cai_product_norm_limit306, and the varying parameter from continuity of F through
+upper_q_parameter_uniform337. The constant ε is the BJS error parameter. -/
+theorem leaf337_one_main_term (δ : ℝ) (hδ : 0 < δ) :
+    ∃ ε : ℝ, 0 < ε ∧ ε ≤ 1 / 100000 ∧ ∀ B k : ℝ, 0 < k →
+      ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+        (∑ q ∈ Q1 N, upperPhi337 ε (upperParam337 N B k q) *
+            (((caiSequence118 N).card : ℝ) * caiDensity118 q) * caiV337 N) ≤
+          (sieveOnePrimeSum337 N + δ) * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+  classical
+  set Pa : ℝ := |sieveOneCoefficient337 + 1| + 1 with hPa
+  have hPa0 : 0 < Pa := by positivity
+  set η : ℝ := min 1 (δ / (15 * Pa)) with hηdef
+  have hη0 : 0 < η := lt_min one_pos (by positivity)
+  have hη1 : η ≤ 1 := min_le_left _ _
+  have hηδ : 15 * η * Pa ≤ δ := by
+    have h := min_le_right 1 (δ / (15 * Pa))
+    rw [← hηdef, le_div_iff₀ (by positivity)] at h
+    linarith
+  set m : ℝ := 2 * exp eulerMascheroniConstant / 4.3 with hm
+  have hm0 : 0 < m := by positivity
+  set ε : ℝ := min (1 / 100000) (η * m / 212) with hεdef
+  have hε0 : 0 < ε := lt_min (by norm_num) (by positivity)
+  have hε1 : ε ≤ 1 / 100000 := min_le_left _ _
+  have hε2 : ε ≤ η * m / 212 := min_le_right _ _
+  refine ⟨ε, hε0, hε1, fun B k hk => ?_⟩
+  set G : ℝ := 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) with hG
+  have hG0 : 0 < G := by positivity
+  obtain ⟨n1, hn1⟩ := upper_q_parameter_uniform337 B k hk (η * m / 2) (by positivity)
+  obtain ⟨n2, hn2⟩ := upper_q_param_range337 B k hk
+  have hz : ∀ᶠ N : ℕ in atTop, 1 + 1 / η ≤ z1 N :=
+    ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 11)).comp
+      tendsto_natCast_atTop_atTop).eventually (eventually_ge_atTop _)
+  have hmass := ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 0.95)).comp
+    tendsto_natCast_atTop_atTop).eventually (primeCount_upper337 η hη0)
+  have hnorm := cai_product_norm_limit306.eventually
+    (eventually_le_nhds (show (1 : ℝ) < 1 + η by linarith))
+  have hP := leaf337_one_prime_sum.eventually
+    (eventually_le_nhds (show sieveOneCoefficient337 < sieveOneCoefficient337 + 1 by linarith))
+  have hall : ∀ᶠ N : ℕ in atTop, Even N →
+      (∑ q ∈ Q1 N, upperPhi337 ε (upperParam337 N B k q) *
+          (((caiSequence118 N).card : ℝ) * caiDensity118 q) * caiV337 N) ≤
+        (sieveOnePrimeSum337 N + δ) * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+    filter_upwards [hz, hmass, hnorm, hP, eventually_ge_atTop n1, eventually_ge_atTop n2,
+      eventually_ge_atTop (2 : ℕ)] with N hzN hmN hnN hPN hN1 hN2 hN
+    intro he
+    have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+    have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+    have hK : 0 < C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2 := leaf118_scale_pos N hN
+    set K0 : ℝ := C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2 with hK0
+    obtain ⟨hV0, hV1⟩ := caiV337_bounds N he
+    set X : ℝ := (N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N) with hX
+    have hA : ((caiSequence118 N).card : ℝ) ≤ (1 + η) * X := by
+      rw [card_caiSequence118 N hN]
+      have h := hmN
+      simp only [Function.comp_def] at h
+      rw [log_rpow hNp] at h
+      rw [hX, ← mul_div_assoc]
+      exact h
+    have hid := cai_mainTerm_identity306 N he hN 1
+    have hnorm0 : 0 < caiProductNorm306 N := by
+      have h1 : 0 ≤ X * caiV337 N := by positivity
+      have h2 : (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) * 1 *
+          caiProductNorm306 N) * K0 = 1 * X * caiV337 N := hid
+      by_contra hc
+      push Not at hc
+      have : (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) * 1 *
+          caiProductNorm306 N) * K0 ≤ 0 := by
+        apply mul_nonpos_of_nonpos_of_nonneg _ hK.le
+        apply mul_nonpos_of_nonneg_of_nonpos (by positivity) hc
+      have hXV : 0 < X * caiV337 N := mul_pos (by positivity) hV0
+      linarith
+    have hAV : ((caiSequence118 N).card : ℝ) * caiV337 N ≤ (1 + η) ^ 2 * G * K0 := by
+      have h1 : ((caiSequence118 N).card : ℝ) * caiV337 N ≤ (1 + η) * X * caiV337 N :=
+        mul_le_mul_of_nonneg_right hA hV0.le
+      have h2 : X * caiV337 N = G * caiProductNorm306 N * K0 := by
+        rw [hX, hG, hK0]
+        unfold caiV337
+        linarith [hid]
+      have h3 : G * caiProductNorm306 N * K0 ≤ G * (1 + η) * K0 := by
+        apply mul_le_mul_of_nonneg_right _ hK.le
+        exact mul_le_mul_of_nonneg_left hnN hG0.le
+      calc ((caiSequence118 N).card : ℝ) * caiV337 N ≤ (1 + η) * (X * caiV337 N) := by
+            linarith
+        _ = (1 + η) * (G * caiProductNorm306 N * K0) := by rw [h2]
+        _ ≤ (1 + η) * (G * (1 + η) * K0) := mul_le_mul_of_nonneg_left h3 (by linarith)
+        _ = (1 + η) ^ 2 * G * K0 := by ring
+    -- termwise bound
+    have hterm : ∀ q ∈ Q1 N, upperPhi337 ε (upperParam337 N B k q) *
+        (((caiSequence118 N).card : ℝ) * caiDensity118 q) * caiV337 N ≤
+        ((1 + η) ^ 4 * K0) * (G * (sieveUpper306 (5.225 - 11 * log q / log N) / q)) := by
+      intro q hq
+      obtain ⟨_, hprime, hqlo, hqhi, hcopq⟩ :=
+        (show q < N + 1 ∧ q.Prime ∧ z1 N ≤ (q : ℝ) ∧ (q : ℝ) < z2 N ∧ q.Coprime N from by
+          simpa only [Q1, mem_filter, mem_range] using hq)
+      have hqp : (0 : ℝ) < q := by exact_mod_cast hprime.pos
+      have ht := limit_arg_range337 N q hN hprime hqlo hqhi
+      set t : ℝ := 5.225 - 11 * log q / log N with htdef
+      have hFt : m ≤ sieveUpper306 t := by
+        have h := sieveUpper_ge337 t (by linarith [ht.1])
+        refine le_trans ?_ h
+        exact div_le_div_of_nonneg_left (by positivity) (by linarith [ht.1]) ht.2
+      have hsr := hn2 N hN2 q hq
+      have hu := hn1 N hN1 q hq
+      have hs_eq : log (((N : ℝ) ^ (0.95 / 2 : ℝ) / log N ^ B) / (k * q)) / log (z1 N) =
+          upperParam337 N B k q := rfl
+      rw [hs_eq] at hu
+      obtain ⟨hh0, hh1⟩ := hSieve_bounds337 (upperParam337 N B k q)
+      have hphi : upperPhi337 ε (upperParam337 N B k q) ≤ (1 + η) * sieveUpper306 t := by
+        unfold upperPhi337
+        have he2 : ε * 106 * exp 2 * LeanLab.ChenExplicit.hSieve (upperParam337 N B k q)
+            ≤ ε * 106 := by
+          have h := mul_le_mul_of_nonneg_left hh1 (show 0 ≤ ε * 106 * exp 2 by positivity)
+          have he : exp 2 * exp (-2) = 1 := by rw [← exp_add]; norm_num
+          calc _ ≤ ε * 106 * exp 2 * exp (-2) := h
+            _ = ε * 106 := by rw [mul_assoc, he, mul_one]
+        have hF : sieveUpper306 (upperParam337 N B k q) - sieveUpper306 t ≤ η * m / 2 :=
+          (abs_le.mp hu).2
+        have hηF := mul_le_mul_of_nonneg_left hFt hη0.le
+        have hε3 : ε * 106 ≤ η * m / 2 := by linarith
+        nlinarith
+      have hphi0 : 0 ≤ upperPhi337 ε (upperParam337 N B k q) :=
+        ((upper_phi_bound337 ε hε0.le).choose_spec.2 _ hsr).1
+      have hg : caiDensity118 q ≤ (1 + η) / q := by
+        change 1 / (Nat.totient q : ℝ) ≤ _
+        rw [Nat.totient_prime hprime, Nat.cast_sub hprime.one_lt.le, Nat.cast_one]
+        have hq1 : 1 + 1 / η ≤ (q : ℝ) := hzN.trans hqlo
+        have hqm : 0 < (q : ℝ) - 1 := by
+          have : 0 < 1 / η := by positivity
+          linarith
+        rw [div_le_div_iff₀ hqm hqp]
+        have : 1 + η ≤ η * q := by
+          have h := mul_le_mul_of_nonneg_left hq1 hη0.le
+          rw [mul_add, mul_one_div_cancel hη0.ne'] at h
+          linarith
+        have hexp : (1 + η) * ((q : ℝ) - 1) = q + η * q - 1 - η := by ring
+        rw [hexp]
+        linarith
+      have hg0 : 0 ≤ caiDensity118 q := (caiDensity118_prime N q he hprime hcopq).1
+      have hFt0 : 0 ≤ sieveUpper306 t := le_trans hm0.le hFt
+      calc upperPhi337 ε (upperParam337 N B k q) *
+            (((caiSequence118 N).card : ℝ) * caiDensity118 q) * caiV337 N
+          = upperPhi337 ε (upperParam337 N B k q) * caiDensity118 q *
+            (((caiSequence118 N).card : ℝ) * caiV337 N) := by ring
+        _ ≤ ((1 + η) * sieveUpper306 t) * ((1 + η) / q) * ((1 + η) ^ 2 * G * K0) := by
+          apply mul_le_mul (mul_le_mul hphi hg hg0 (by positivity)) hAV
+            (mul_nonneg (Nat.cast_nonneg _) hV0.le) (by positivity)
+        _ = ((1 + η) ^ 4 * K0) * (G * (sieveUpper306 t / q)) := by
+          field_simp
+    -- the prime sum dominates
+    have hsub : (∑ q ∈ Q1 N, G * (sieveUpper306 (5.225 - 11 * log q / log N) / q)) ≤
+        sieveOnePrimeSum337 N := by
+      unfold sieveOnePrimeSum337
+      rw [show (5.5 : ℝ) * 0.95 = 5.225 by norm_num]
+      have hGe : 22 * exp (-eulerMascheroniConstant) / 0.95 = G := by rw [hG]; ring
+      rw [hGe, ← Finset.mul_sum]
+      apply mul_le_mul_of_nonneg_left _ hG0.le
+      apply Finset.sum_le_sum_of_subset_of_nonneg
+      · intro q hq
+        obtain ⟨hlt, hprime, hqlo, hqhi, _⟩ :=
+          (show q < N + 1 ∧ q.Prime ∧ z1 N ≤ (q : ℝ) ∧ (q : ℝ) < z2 N ∧ q.Coprime N from by
+            simpa only [Q1, mem_filter, mem_range] using hq)
+        exact Finset.mem_filter.mpr ⟨Finset.mem_range.mpr hlt, hprime, hqlo, hqhi⟩
+      · intro q hq _
+        obtain ⟨_, hprime, hqlo, hqhi⟩ := Finset.mem_filter.mp hq
+        have ht := limit_arg_range337 N q hN hprime hqlo hqhi
+        exact div_nonneg (sieveUpper_pos306 _ (by linarith [ht.1])).le (Nat.cast_nonneg _)
+    have hP0 : 0 ≤ sieveOnePrimeSum337 N := by
+      unfold sieveOnePrimeSum337
+      rw [show (5.5 : ℝ) * 0.95 = 5.225 by norm_num]
+      apply mul_nonneg (by positivity)
+      apply Finset.sum_nonneg
+      intro q hq
+      obtain ⟨_, hprime, hqlo, hqhi⟩ := Finset.mem_filter.mp hq
+      have ht := limit_arg_range337 N q hN hprime hqlo hqhi
+      exact div_nonneg (sieveUpper_pos306 _ (by linarith [ht.1])).le (Nat.cast_nonneg _)
+    have hPle : sieveOnePrimeSum337 N ≤ Pa := by
+      have := le_abs_self (sieveOneCoefficient337 + 1)
+      linarith
+    have hsum := Finset.sum_le_sum hterm
+    rw [← Finset.mul_sum] at hsum
+    have q2 : η ^ 2 ≤ η := by nlinarith
+    have q3 : η ^ 3 ≤ η := by
+      have : η ^ 3 = η ^ 2 * η := by ring
+      nlinarith [pow_pos hη0 2]
+    have q4 : η ^ 4 ≤ η := by
+      have : η ^ 4 = η ^ 3 * η := by ring
+      nlinarith [pow_pos hη0 3]
+    have hpow : (1 + η) ^ 4 ≤ 1 + 15 * η := by
+      have : (1 + η) ^ 4 = 1 + 4 * η + 6 * η ^ 2 + 4 * η ^ 3 + η ^ 4 := by ring
+      linarith
+    have h1 : ((1 + η) ^ 4 * K0) *
+        (∑ q ∈ Q1 N, G * (sieveUpper306 (5.225 - 11 * log q / log N) / q)) ≤
+        ((1 + η) ^ 4 * K0) * sieveOnePrimeSum337 N :=
+      mul_le_mul_of_nonneg_left hsub (by positivity)
+    have h2 : ((1 + η) ^ 4 * K0) * sieveOnePrimeSum337 N ≤
+        (sieveOnePrimeSum337 N + δ) * K0 := by
+      have h3 : (1 + η) ^ 4 * sieveOnePrimeSum337 N ≤ sieveOnePrimeSum337 N + δ := by
+        nlinarith [mul_le_mul_of_nonneg_right hpow hP0, mul_le_mul_of_nonneg_left hPle hη0.le]
+      nlinarith
+    linarith
+  obtain ⟨N0, hN0⟩ := eventually_atTop.mp hall
+  exact ⟨N0, fun N he hN => hN0 N hN he⟩
+
+
+/-- The product of q and any modulus below k times the q level stays within the
+Bombieri Vinogradov level. Page 601 displays 4.5 and 4.6, level choice. -/
+theorem level_cut337 (N : ℕ) (hN : 2 ≤ N) (B k : ℝ) (hB : 0 ≤ B) (hk : 0 < k)
+    (q : ℕ) (hq : 0 < q) (x : ℝ) (hx : x ≤ k * upperLevel337 N B k q) :
+    (q : ℝ) * x ≤ Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) / log ((N : ℝ) ^ (0.95 : ℝ)) ^ B := by
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hqp : (0 : ℝ) < q := by exact_mod_cast hq
+  have hl95 : 0 < log ((N : ℝ) ^ (0.95 : ℝ)) := by
+    rw [log_rpow hNp]; positivity
+  have hle : log ((N : ℝ) ^ (0.95 : ℝ)) ^ B ≤ log (N : ℝ) ^ B := by
+    apply rpow_le_rpow hl95.le _ hB
+    rw [log_rpow hNp]; nlinarith
+  have hid : (q : ℝ) * (k * upperLevel337 N B k q) = (N : ℝ) ^ (0.95 / 2 : ℝ) / log N ^ B := by
+    unfold upperLevel337
+    field_simp
+  have hsq : Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) = (N : ℝ) ^ (0.95 / 2 : ℝ) := by
+    rw [Real.sqrt_eq_rpow, ← rpow_mul hNp.le]
+    norm_num
+  calc (q : ℝ) * x ≤ (q : ℝ) * (k * upperLevel337 N B k q) :=
+        mul_le_mul_of_nonneg_left hx hqp.le
+    _ = (N : ℝ) ^ (0.95 / 2 : ℝ) / log N ^ B := hid
+    _ ≤ _ := by
+        rw [hsq]
+        exact div_le_div_of_nonneg_left (rpow_pos_of_pos hNp _).le
+          (rpow_pos_of_pos hl95 B) hle
+
+#print axioms upper_q_param_range337
+#print axioms hSieve_bounds337
+#print axioms upper_phi_bound337
+#print axioms caiV337_bounds
+#print axioms z2_below_level337
+#print axioms sieve_one_mass_small337
+#print axioms level_cut337
+#print axioms li118_upper337
+#print axioms primeCount_upper337
+#print axioms sieveUpper_ge337
+#print axioms limit_arg_range337
+#print axioms leaf337_one_main_term
+
+/-! ### The leaf -/
+
+/-- Pages 601 to 602 displays 4.5 to 4.7, before prime partial summation.
+The varying upper function is retained. Assembled from the finite linear sieve bound
+for each q, cai_upper_q_finite306, CONDITIONAL ON the cited leaf306_theorem6;
+the recentered remainder of display 4.6, sieve_one_recenter_small337, proved from
+Bombieri Vinogradov; the mass remainder sieve_one_mass_small337, proved; and the
+main term leaf337_one_main_term of display 4.7, which is the remaining open piece. -/
+theorem leaf337_one_sieve :
+    ∀ δ : ℝ, 0 < δ → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+      (S1 N 0.95 : ℝ) ≤ (sieveOnePrimeSum337 N + δ) *
+        (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+  classical
+  intro δ hδ
+  obtain ⟨ε, hε, hεmax, hmainε⟩ := leaf337_one_main_term (δ / 3) (by positivity)
+  obtain ⟨w, hw, hupper⟩ := cai_upper_q_finite306 ε hε hεmax
+  obtain ⟨M, hM0, hM⟩ := upper_phi_bound337 ε hε.le
+  have hk0 : 0 ≤ ∏ p ∈ oddSievePrimes306 w, (p : ℝ) :=
+    Finset.prod_nonneg (fun p _ => Nat.cast_nonneg p)
+  have hk : 0 < 1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ) := by linarith
+  obtain ⟨B, hB, nR, hR⟩ := sieve_one_recenter_small337 (δ / 3) (by positivity)
+  obtain ⟨nM, hmain⟩ := hmainε B (1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ)) hk
+  obtain ⟨nP, hP⟩ := upper_q_param_range337 B (1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ)) hk
+  obtain ⟨nD, hD⟩ := sieve_one_mass_small337 (δ / 3 / (M + 1)) (by positivity)
+  obtain ⟨nz, hz⟩ := eventually_atTop.mp
+    (((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 11)).comp
+      tendsto_natCast_atTop_atTop).eventually (eventually_gt_atTop w))
+  refine ⟨max (max (max nR nM) (max nP nD)) (max nz 2), fun N he hN => ?_⟩
+  simp only [max_le_iff] at hN
+  obtain ⟨⟨⟨hNR, hNM⟩, hNP, hND⟩, hNz, hN2⟩ := hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hz1 : 1 < z1 N := by
+    unfold z1
+    exact one_lt_rpow (by exact_mod_cast (show 1 < N by omega)) (by norm_num)
+  have hK : 0 < C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2 := leaf118_scale_pos N hN2
+  obtain ⟨hV0, hV1⟩ := caiV337_bounds N he
+  have hwz : w < z1 N := by
+    have := hz N hNz
+    simpa only [Function.comp_def, z1] using this
+  let Qw : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} w
+  let PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+    {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), p
+  let kk : ℝ := 1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ)
+  let f : ℕ × ℕ → ℝ := fun b =>
+    |((((caiSequence118 N).filter (fun a => b.1 ∣ a)).filter (fun a => b.2 ∣ a)).card : ℝ) -
+      (((caiSequence118 N).filter (fun a => b.1 ∣ a)).card : ℝ) * caiDensity118 b.2|
+  let Rq : ℕ → ℝ := fun q => ∑ d ∈ PP.divisors.filter
+      (fun d : ℕ => (d : ℝ) < (∏ p ∈ Qw, (p : ℝ)) * upperLevel337 N B kk q), f (q, d)
+  have hQw : (∏ p ∈ Qw, (p : ℝ)) ≤ kk := by
+    have := sieve_exceptional_product306 w {p : ℕ | p.Prime ∧ p.Coprime N}
+      (fun p hp => cai_primes_odd306 N p he hp.1 hp.2)
+    dsimp only [kk, Qw]
+    linarith
+  have hper : ∀ q ∈ Q1 N, ((Asift N 0.95 q).card : ℝ) ≤
+      upperPhi337 ε (upperParam337 N B kk q) *
+          (((caiSequence118 N).card : ℝ) * caiDensity118 q) * caiV337 N +
+        M * caiRemainder337 N q + Rq q := by
+    intro q hq
+    have hqprime : q.Prime := (Finset.mem_filter.mp hq).2.1
+    have hqp : (0 : ℝ) < q := by exact_mod_cast hqprime.pos
+    have hrange := hP N hNP q hq
+    have hDpos : 0 < upperLevel337 N B kk q := by
+      unfold upperLevel337
+      exact div_pos (div_pos (rpow_pos_of_pos hNp _) (rpow_pos_of_pos hLp _)) (mul_pos hk hqp)
+    have hlev : z1 N ≤ upperLevel337 N B kk q := by
+      have h1 : 1 ≤ upperParam337 N B kk q := by linarith [hrange.1]
+      unfold upperParam337 at h1
+      have hlz : 0 < log (z1 N) := log_pos hz1
+      rw [le_div_iff₀ hlz, one_mul] at h1
+      exact (log_le_log_iff (by linarith) hDpos).mp h1
+    have hu := hupper N he hwz q (upperLevel337 N B kk q) hlev
+    obtain ⟨hφ0, hφM⟩ := hM _ hrange
+    have hr : (((caiSequence118 N).filter (fun a => q ∣ a)).card : ℝ) ≤
+        ((caiSequence118 N).card : ℝ) * caiDensity118 q + caiRemainder337 N q := by
+      unfold caiRemainder337
+      have := le_abs_self ((((caiSequence118 N).filter (fun a => q ∣ a)).card : ℝ) -
+        ((caiSequence118 N).card : ℝ) * caiDensity118 q)
+      linarith
+    have hφV : upperPhi337 ε (upperParam337 N B kk q) * caiV337 N ≤ M := by nlinarith
+    have hrem0 : 0 ≤ caiRemainder337 N q := abs_nonneg _
+    change ((Asift N 0.95 q).card : ℝ) ≤ upperPhi337 ε (upperParam337 N B kk q) *
+      (((caiSequence118 N).filter (fun a => q ∣ a)).card : ℝ) * caiV337 N + Rq q at hu
+    nlinarith [mul_le_mul_of_nonneg_left hr (mul_nonneg hφ0 hV0.le),
+      mul_le_mul_of_nonneg_right hφV hrem0]
+  have hsum : (S1 N 0.95 : ℝ) ≤ ∑ q ∈ Q1 N,
+      (upperPhi337 ε (upperParam337 N B kk q) *
+          (((caiSequence118 N).card : ℝ) * caiDensity118 q) * caiV337 N +
+        M * caiRemainder337 N q + Rq q) := by
+    unfold S1
+    push_cast
+    exact Finset.sum_le_sum hper
+  rw [Finset.sum_add_distrib, Finset.sum_add_distrib, ← Finset.mul_sum] at hsum
+  -- the recentered remainder
+  let T : Finset (ℕ × ℕ) := ((Q1 N) ×ˢ PP.divisors).filter
+    (fun b : ℕ × ℕ => (b.2 : ℝ) < (∏ p ∈ Qw, (p : ℝ)) * upperLevel337 N B kk b.1)
+  have hT : ∑ q ∈ Q1 N, Rq q = ∑ b ∈ T, f b := by
+    simp only [T, Rq, Finset.sum_filter, Finset.sum_product]
+  have hcN : N.Coprime PP := Nat.coprime_prod_right_iff.mpr (fun p hp => by
+    simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+    exact hp.2.2.symm)
+  have hRT := hR N hNR (z1 N) T (by
+    intro b hb
+    obtain ⟨hbprod, hblt⟩ := Finset.mem_filter.mp hb
+    obtain ⟨hb1, hb2⟩ := Finset.mem_product.mp hbprod
+    obtain ⟨_, hprime, hqlo, _, hcop⟩ :=
+      (show b.1 < N + 1 ∧ b.1.Prime ∧ z1 N ≤ (b.1 : ℝ) ∧ (b.1 : ℝ) < z2 N ∧
+          b.1.Coprime N from by simpa only [Q1, mem_filter, mem_range] using hb1)
+    have hd0 := Nat.pos_of_mem_divisors hb2
+    have hdvd := (Nat.mem_divisors.mp hb2).1
+    refine ⟨hprime, hqlo, hd0, ?_, ?_, ?_⟩
+    · intro p hp
+      have hpp := Nat.prime_of_mem_primeFactors hp
+      have hpPP := (Nat.dvd_of_mem_primeFactors hp).trans hdvd
+      obtain ⟨r, hr, hpr⟩ := (Prime.dvd_finsetProd_iff hpp.prime _).mp hpPP
+      simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter,
+        Finset.mem_range] at hr
+      have hreq : p = r := (Nat.prime_dvd_prime_iff_eq hpp hr.2.1).mp hpr
+      have hrlt : r < ⌈z1 N⌉₊ := hr.1
+      rw [hreq]
+      exact Nat.lt_ceil.mp hrlt
+    · apply Nat.le_floor
+      push_cast
+      apply level_cut337 N hN2 B kk hB.le hk b.1 hprime.pos
+      have hDpos : 0 < upperLevel337 N B kk b.1 := by
+        unfold upperLevel337
+        exact div_pos (div_pos (rpow_pos_of_pos hNp _) (rpow_pos_of_pos hLp _))
+          (mul_pos hk (by exact_mod_cast hprime.pos))
+      nlinarith [mul_le_mul_of_nonneg_right hQw hDpos.le]
+    · exact Nat.Coprime.mul_right hcop.symm (hcN.coprime_dvd_right hdvd))
+  have hRsum : ∑ q ∈ Q1 N, Rq q ≤ δ / 3 * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+    rw [hT]
+    exact hRT
+  have hmainN := hmain N he hNM
+  have hDN := hD N hND
+  have hfrac : M * (δ / 3 / (M + 1)) ≤ δ / 3 := by
+    rw [← mul_div_assoc, div_le_iff₀ (by linarith)]
+    nlinarith
+  have hMY : M * ∑ q ∈ Q1 N, caiRemainder337 N q ≤
+      δ / 3 * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+    calc M * ∑ q ∈ Q1 N, caiRemainder337 N q ≤
+          M * (δ / 3 / (M + 1) * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2)) :=
+        mul_le_mul_of_nonneg_left hDN hM0
+      _ = (M * (δ / 3 / (M + 1))) * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by ring
+      _ ≤ _ := mul_le_mul_of_nonneg_right hfrac hK.le
+  nlinarith [hsum, hmainN, hRsum, hMY]
 
 /-- The exact sealed first upper leaf follows from the two smaller analytic steps.
 CONDITIONAL ON leaf337_one_sieve and leaf337_one_prime_sum. -/
