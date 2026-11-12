@@ -1,4 +1,5 @@
 import LeanLab.LiuWang2002.CheckData368_132
+import LeanLab.LiuWang2002.Decomp460a
 
 /-!
 Strictly smaller finite ranges supplying Task352.primorial_block_c.
@@ -18,7 +19,7 @@ theorem primorial_c1 (n : ℕ) (hn : 1000000 < n) (hn' : n ≤ 2000000) :
 2000000 strictly below n through 4000000. This is one proper subrange. -/
 theorem primorial_c2 (n : ℕ) (hn : 2000000 < n) (hn' : n ≤ 4000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.LiuWang2002.Task460.primorial_c2 n hn hn'
 
 /-- LEAF. Page 356, display 5.1 star, derived integer certificate for
 4000000 strictly below n through 8000000. This is one proper subrange. -/
