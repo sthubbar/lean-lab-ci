@@ -52,11 +52,118 @@ def EnergyLogBound : Prop :=
     ∀ a : ℕ → ℂ, Thm4.CoeffBound a B → ∀ F : ℝ, 2 ≤ F →
       energy a c1 c2 F ≤ C * Real.log F ^ K
 
-/-- LEAF, OPEN. Page 12, the coefficient input cut out of `dyadic_mean_value` by U-1609. It is a
-divisor moment bound, `Σ_{n ≤ F} τ(n)^{2B}/n ≪ (log F)^K`, elementary and not in Mathlib. It is
-exactly what the bound `energy_small_power` cannot give, see `positive_power_not_log_bounded`. -/
-theorem energy_log_bound : EnergyLogBound := by
+/-- Page 12, the standard divisor moment behind "using (3.1) to bound G(P^g) by 𝓛^B".
+P0069 Baker Harman Pintz 1997, Section 3, proof of Theorem 4, page 12.
+For every real exponent k the k-th divisor moment up to N is at most a constant times
+N times a fixed power of 1 + log N. The paper uses it without a written derivation.
+LEAF, OPEN: the case k at most one is the proved Decomp386b.divisor_sum_bound route of
+Decomp414c, the general case needs higher divisor moments not in Mathlib. -/
+theorem divisor_power_moment (k : ℝ) : ∃ K C : ℝ, 0 ≤ K ∧ 0 < C ∧
+    ∀ N : ℕ, (∑ n ∈ Finset.Ioc 0 N, ((n.divisors.card : ℕ) : ℝ) ^ k) ≤
+      C * N * (1 + Real.log N) ^ K := by
   sorry
+
+/-- Page 12, the step "using (3.1)" itself. P0069 Baker Harman Pintz 1997, Section 3,
+proof of Theorem 4, page 12, with display 3.1 and the energy G of display 3.3 on page 11.
+On the support c1 F < n the weight 1/n is at most 1/(c1 F), and 3.1 bounds the square of the
+coefficient by the divisor function to the power 2B. -/
+theorem energy_le_divisor_moment {a : ℕ → ℂ} {B c1 c2 F : ℝ}
+    (ha : Thm4.CoeffBound a B) (hc1 : 0 < c1) (hF : 0 < F) :
+    energy a c1 c2 F ≤
+      (∑ n ∈ Finset.Ioc 0 ⌊c2 * F⌋₊, ((n.divisors.card : ℕ) : ℝ) ^ (2 * B)) / (c1 * F) := by
+  set N := ⌊c2 * F⌋₊
+  set S := (Finset.range (N + 1)).filter
+    (fun n : ℕ => c1 * F < n ∧ (n : ℝ) < c2 * F)
+  have hden : 0 < c1 * F := mul_pos hc1 hF
+  have hsub : S ⊆ Finset.Ioc 0 N := by
+    intro n hn
+    obtain ⟨hnN, hnlo, _⟩ := Finset.mem_filter.mp hn
+    have hn0 : 0 < (n : ℝ) := hden.trans hnlo
+    rw [Finset.mem_range] at hnN
+    exact Finset.mem_Ioc.mpr ⟨by exact_mod_cast hn0, by omega⟩
+  change (∑ n ∈ S, ‖a n‖ ^ 2 / (n : ℝ)) ≤ _
+  calc
+    _ ≤ ∑ n ∈ S, ((n.divisors.card : ℕ) : ℝ) ^ (2 * B) / (c1 * F) := by
+      apply Finset.sum_le_sum
+      intro n hn
+      have hnlo := (Finset.mem_filter.mp hn).2.1
+      have hsq : ‖a n‖ ^ 2 ≤ ((n.divisors.card : ℕ) : ℝ) ^ (2 * B) := by
+        calc
+          _ ≤ (((n.divisors.card : ℕ) : ℝ) ^ B) ^ 2 :=
+            pow_le_pow_left₀ (norm_nonneg _) (ha n) 2
+          _ = ((n.divisors.card : ℕ) : ℝ) ^ (B * (2 : ℕ)) :=
+            (Real.rpow_mul_natCast (by positivity) B 2).symm
+          _ = _ := by congr 1; push_cast; ring
+      exact (div_le_div_of_nonneg_right hsq (Nat.cast_nonneg _)).trans
+        (div_le_div_of_nonneg_left (by positivity) hden hnlo.le)
+    _ = (∑ n ∈ S, ((n.divisors.card : ℕ) : ℝ) ^ (2 * B)) / (c1 * F) := by
+      rw [Finset.sum_div]
+    _ ≤ _ :=
+      div_le_div_of_nonneg_right
+        (Finset.sum_le_sum_of_subset_of_nonneg hsub (fun n _ _ => by positivity)) hden.le
+
+/-- Page 12, the logarithmic rescaling in "bound G(P^g) by 𝓛^B". P0069 Baker Harman Pintz 1997,
+Section 3, proof of Theorem 4, page 12. With N the integer part of c2 F and F at least 2,
+1 + log N is at most a constant depending on c2 times log F. -/
+theorem one_add_log_floor_le {c2 F : ℝ} (hc2 : 0 < c2) (hF : 2 ≤ F) :
+    1 + Real.log (⌊c2 * F⌋₊ : ℕ) ≤ ((1 + |Real.log c2|) / Real.log 2 + 1) * Real.log F := by
+  have hF0 : 0 < F := by linarith
+  have hl2 : 0 < Real.log (2 : ℝ) := Real.log_pos (by norm_num)
+  have hlog : Real.log 2 ≤ Real.log F := Real.log_le_log (by norm_num) hF
+  have hlogF : 0 ≤ Real.log F := hl2.le.trans hlog
+  have hlogN : Real.log ((⌊c2 * F⌋₊ : ℕ) : ℝ) ≤ |Real.log c2| + Real.log F := by
+    rcases Nat.eq_zero_or_pos ⌊c2 * F⌋₊ with h0 | hpos
+    · rw [h0, Nat.cast_zero, Real.log_zero]; positivity
+    · have hN0 : 0 < ((⌊c2 * F⌋₊ : ℕ) : ℝ) := by exact_mod_cast hpos
+      have hNle : ((⌊c2 * F⌋₊ : ℕ) : ℝ) ≤ c2 * F := Nat.floor_le (mul_pos hc2 hF0).le
+      have hh := Real.log_le_log hN0 hNle
+      rw [Real.log_mul (ne_of_gt hc2) (ne_of_gt hF0)] at hh
+      linarith [le_abs_self (Real.log c2)]
+  have hscale := mul_le_mul_of_nonneg_left hlog
+    (show 0 ≤ (1 + |Real.log c2|) / Real.log 2 by positivity)
+  have hid : (1 + |Real.log c2|) / Real.log 2 * Real.log 2 = 1 + |Real.log c2| :=
+    div_mul_cancel₀ _ (ne_of_gt hl2)
+  rw [hid] at hscale
+  nlinarith
+
+/-- Page 12, the coefficient input cut out of `dyadic_mean_value` by U-1609. It is a
+divisor moment bound, `Σ_{n ≤ F} τ(n)^{2B}/n ≪ (log F)^K`, elementary and not in Mathlib. It is
+exactly what the bound `energy_small_power` cannot give, see `positive_power_not_log_bounded`.
+Burst 2 split: no direct sorry. CONDITIONAL on the OPEN leaf `divisor_power_moment`, through the
+proved steps `energy_le_divisor_moment` and `one_add_log_floor_le`. -/
+theorem energy_log_bound : EnergyLogBound := by
+  intro B c1 c2 hc1 hc12
+  have hc2 : 0 < c2 := hc1.trans hc12
+  obtain ⟨K, C, hK, hC, hmom⟩ := divisor_power_moment (2 * B)
+  have hl2 : 0 < Real.log (2 : ℝ) := Real.log_pos (by norm_num)
+  set R : ℝ := (1 + |Real.log c2|) / Real.log 2 + 1 with hRdef
+  have hR : 0 < R := by rw [hRdef]; positivity
+  refine ⟨K, C * (c2 / c1) * R ^ K, by positivity, ?_⟩
+  intro a ha F hF
+  have hF0 : 0 < F := by linarith
+  have hden : 0 < c1 * F := mul_pos hc1 hF0
+  have hNle : ((⌊c2 * F⌋₊ : ℕ) : ℝ) ≤ c2 * F := Nat.floor_le (mul_pos hc2 hF0).le
+  have hlog1 : 0 ≤ 1 + Real.log ((⌊c2 * F⌋₊ : ℕ) : ℝ) := by
+    rcases Nat.eq_zero_or_pos ⌊c2 * F⌋₊ with h0 | hpos
+    · rw [h0, Nat.cast_zero, Real.log_zero]; norm_num
+    · have h1 : (1 : ℝ) ≤ ((⌊c2 * F⌋₊ : ℕ) : ℝ) := by exact_mod_cast hpos
+      linarith [Real.log_nonneg h1]
+  have hlogF : 0 ≤ Real.log F := Real.log_nonneg (by linarith)
+  have hpow : (1 + Real.log ((⌊c2 * F⌋₊ : ℕ) : ℝ)) ^ K ≤ R ^ K * Real.log F ^ K := by
+    rw [← Real.mul_rpow hR.le hlogF]
+    exact Real.rpow_le_rpow hlog1 (one_add_log_floor_le hc2 hF) hK
+  calc
+    energy a c1 c2 F ≤
+        (∑ n ∈ Finset.Ioc 0 ⌊c2 * F⌋₊, ((n.divisors.card : ℕ) : ℝ) ^ (2 * B)) / (c1 * F) :=
+      energy_le_divisor_moment ha hc1 hF0
+    _ ≤ (C * ((⌊c2 * F⌋₊ : ℕ) : ℝ) * (1 + Real.log ((⌊c2 * F⌋₊ : ℕ) : ℝ)) ^ K) / (c1 * F) :=
+      div_le_div_of_nonneg_right (hmom _) hden.le
+    _ ≤ (C * (c2 * F) * (R ^ K * Real.log F ^ K)) / (c1 * F) := by
+      apply div_le_div_of_nonneg_right _ hden.le
+      exact mul_le_mul (mul_le_mul_of_nonneg_left hNle hC.le) hpow
+        (Real.rpow_nonneg hlog1 _) (by positivity)
+    _ = C * (c2 / c1) * R ^ K * Real.log F ^ K := by
+      field_simp
 
 /-- LEAF, OPEN. Pages 12 to 15, the paper's own proof of Theorem 4. It is not cited: dyadically
 split the three norms, apply 3.3 and 3.4 to the powers of each polynomial, and sum the level sets.
