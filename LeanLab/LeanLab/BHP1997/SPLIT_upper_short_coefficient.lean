@@ -1,0 +1,116 @@
+import LeanLab.BHP1997.DecompC165dBase312
+
+namespace LeanLab.BHP1997.DecompC165d
+open Classical Complex Decomp132 DecompC165b
+
+/-- LEAF 1 of 3. Step: build the coefficient. For a Buchstab weight with its zero extension,
+a divisor exponent `B` and a cutoff `eps` at most one over ten to the eighth, there is one family
+`b1` on the reals and the naturals such that it obeys the divisor bound at exponent `B`, it obeys
+the short-interval character distribution clause at the short-weight density (the normalised
+Buchstab value at the fourth exponent plus the deleted integral), and, from some point on, it
+majorises the sum of the two positive pieces of the four-term decomposition on every short
+interval.
+
+This is the construction step alone: it asserts no mean square clause and no majorisation of the
+signed four-term weight. Non-vacuity and edge cases: the family `b1 = 0` satisfies the divisor
+bound with `C = 0`; at `B = 0` the bound is the constant `C`, and at `k = 0` and `k = 1` the
+divisor count is one and the right side is `C`; at `x = 0` the short interval is empty and the
+majorisation is vacuous; the distribution clause at an empty prefix sum is the bound on the
+density term alone, so it constrains the density, not the empty set. -/
+theorem leaf_upper_short_majorant_exists
+    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {B ε : ℝ} (hB : 0 ≤ B) (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    ∃ b1 : ℝ → ℕ → ℝ,
+      (∃ C : ℝ, ∀ x k, |b1 x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B) ∧
+      Task308.ShortDistribution ε
+        (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
+          upperDeletedIntegral ω ε) b1 ∧
+      ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ m ∈ rightInterval ε x,
+        upperG ε (x ^ (11 / 20 + ε)) m + upperJ ε (x ^ (11 / 20 + ε)) m ≤ b1 x m := by
+  sorry
+
+/-- LEAF 2 of 3. Step: mean square from distribution. For the same short-weight density and any
+family `b1` that already obeys the divisor bound at exponent `B` and the short-interval character
+distribution clause, the averaged square of the centred character sums over the complement of an
+exceptional set obeys the short-interval mean square clause.
+
+The step consumes the two boundedness properties and adds only the exceptional-set average, so it
+does not assert the divisor bound, the distribution clause or the pointwise majorisation.
+Non-vacuity and edge cases: at `b1 = 0` and density `0` the divisor bound holds with `C = 0` and
+the distribution clause holds, and then the exceptional set may be taken empty, matching the
+proved zero instance of the two clauses; at `q = 1` the character set is a single principal
+character; at `A = 0` the conclusion is not required, since `0 < A` is assumed; the empty sum over
+a complement of an empty set is the zero integral, which the right side bounds. -/
+theorem leaf_upper_mean_square_of_distribution
+    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)
+    {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {B ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {b1 : ℝ → ℕ → ℝ}
+    (hdiv : ∃ C : ℝ, ∀ x k, |b1 x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B)
+    (hdist : Task308.ShortDistribution ε
+      (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
+        upperDeletedIntegral ω ε) b1) :
+    Task308.ShortMeanSquare ε
+      (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
+        upperDeletedIntegral ω ε) b1 := by
+  sorry
+
+/-- LEAF 3 of 3. Step: the signed four-term weight is at most the two positive pieces. The two
+discarded terms of the four-term decomposition are sums of nonnegative rough-number counts, so
+subtracting them can only lower the weight: the signed weight `g - h + j - kept` is at most
+`g + j`.
+
+This is one inequality about the weight itself and mentions no coefficient family, so it is
+strictly easier than the split statement. Edge cases: at `m = 0` and `m = 1` every prime-factor
+set is empty, so both discarded sums are zero and the two sides agree; at `Y = 1` the filtered
+prime sets are empty for the same reason; both sides are real numbers, so no division and no empty
+sum is undefined, and the rough-number count is nonnegative at every argument. -/
+theorem leaf_upper_raw_weight_le_two_positive
+    (ε Y : ℝ) (m : ℕ) :
+    upperRawWeight ε Y m ≤ upperG ε Y m + upperJ ε Y m := by
+  unfold upperRawWeight
+  have hH : 0 ≤ upperH ε Y m := by
+    unfold upperH
+    exact Finset.sum_nonneg (fun p _ => upperRough_nonneg _ _)
+  have hKept : 0 ≤ upperKept ε Y m := by
+    unfold upperKept
+    refine Finset.sum_nonneg (fun p _ => Finset.sum_nonneg (fun q _ =>
+      Finset.sum_nonneg (fun r _ => ?_)))
+    split_ifs with h
+    · exact upperRough_nonneg _ _
+    · exact le_rfl
+  linarith
+
+/-- The split statement, assembled from the three leaves with no sorry. Leaf 1 supplies the family
+`b1` with its divisor bound, its short-interval distribution clause and the majorisation of the two
+positive pieces; leaf 2 turns the distribution clause into the mean square clause for that same
+family; leaf 3 identifies the signed weight as at most the two positive pieces, so the majorisation
+of leaf 1 gives the majorisation of the signed weight. No step uses the sealed leaf. -/
+theorem upper_short_coefficient_split
+    (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {B ε : ℝ} (hB : 0 ≤ B) (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    ∃ b1 : ℝ → ℕ → ℝ,
+      (∃ C : ℝ, ∀ x k, |b1 x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B) ∧
+      Task308.ShortDistribution ε
+        (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
+          upperDeletedIntegral ω ε) b1 ∧
+      Task308.ShortMeanSquare ε
+        (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
+          upperDeletedIntegral ω ε) b1 ∧
+      ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ m ∈ rightInterval ε x,
+        upperRawWeight ε (x ^ (11 / 20 + ε)) m ≤ b1 x m := by
+  obtain ⟨b1, hdiv, hdist, hmaj⟩ :=
+    leaf_upper_short_majorant_exists h4 h9 hω hz hB hε hε8
+  obtain ⟨X, hX⟩ := hmaj
+  refine ⟨b1, hdiv, hdist, ?_, X, ?_⟩
+  · exact leaf_upper_mean_square_of_distribution h4 h9 hω hz hε hε8 hdiv hdist
+  · intro x hx m hm
+    exact (leaf_upper_raw_weight_le_two_positive ε (x ^ (11 / 20 + ε)) m).trans (hX x hx m hm)
+
+#print axioms upper_short_coefficient_split
+#print axioms leaf_upper_raw_weight_le_two_positive
