@@ -1,0 +1,103 @@
+# MAIN CHECK, the post-merge check on the public mirror sthubbar/lean-lab-ci. Written by lrefresh 20261112 with Steve live,
+# 11:00 PM PT Wed 11-11. Owner: lean-merge. Source of truth is scripts/ci/main-check.yml in the Lean Lab folder; ci_mirror.py
+# copies it here. Every mirror push to main builds only the folders that changed between the old and the new main,
+# one job per folder, at most 4 at once. main_check_watch.py, called by main_watch.py on the PC, reads the newest
+# conclusion and writes an ALARM BROKEN line on a failure.
+name: main-check
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      before:
+        description: 'Old main sha to diff from; empty means the parent commit'
+        required: false
+        default: ''
+permissions:
+  contents: read
+  actions: read
+# One run at a time keeps gate slots free; a push that waits behind a newer one is folded in, since the plan diffs from the
+# newest main sha a completed main-check already covered when that sha is older than the event's before.
+concurrency:
+  group: main-check
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      folders: ${{ steps.p.outputs.folders }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Folders changed by this push
+        id: p
+        env:
+          BEFORE: ${{ inputs.before || github.event.before }}
+          AFTER: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LAST=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/main-check.yml/runs?branch=main&status=completed&per_page=1" | python3 -c "import json,sys; r=json.load(sys.stdin).get('workflow_runs', []); print(r[0]['head_sha'] if r else '')") || LAST=""
+          if [ -n "$LAST" ] && [ -n "$BEFORE" ] && [ "$LAST" != "$BEFORE" ] && git merge-base --is-ancestor "$LAST" "$BEFORE" 2>/dev/null; then echo "MAIN CHECK folding in pushes since $LAST"; BEFORE=$LAST; fi
+          if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then BEFORE=$(git rev-parse "$AFTER^" 2>/dev/null || echo ""); fi
+          if [ -z "$BEFORE" ]; then echo 'folders=[]' >> "$GITHUB_OUTPUT"; echo "MAIN CHECK no old main to diff from"; exit 0; fi
+          git diff --name-only "$BEFORE" "$AFTER" -- LeanLab/LeanLab > "$RUNNER_TEMP/changed.txt"
+          python3 - "$RUNNER_TEMP/changed.txt" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, os, sys
+          fs = sorted({l.split("/")[2] for l in open(sys.argv[1]).read().split() if l.count("/") >= 3 and l.endswith(".lean") and "/old/" not in l})
+          fs = [f for f in fs if os.path.isdir(os.path.join("LeanLab/LeanLab", f))][:250]
+          print("folders=" + json.dumps(fs))
+          PY
+          echo "MAIN CHECK $BEFORE..$AFTER folders: $(tail -1 "$GITHUB_OUTPUT")"
+  build:
+    needs: plan
+    if: needs.plan.outputs.folders != '[]' && needs.plan.outputs.folders != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        folder: ${{ fromJSON(needs.plan.outputs.folders) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL; df -h /
+      - name: Restore compiled lab modules
+        uses: actions/cache/restore@v4
+        with:
+          path: LeanLab/.lake/build
+          key: lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-none
+          restore-keys: |
+            lab-${{ hashFiles('LeanLab/lean-toolchain', 'LeanLab/lake-manifest.json') }}-
+      - name: Cache the Lean toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: elan-${{ hashFiles('LeanLab/lean-toolchain') }}
+      - name: Lean and Mathlib cache
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          for i in 1 2 3 4 5; do
+            if ! command -v elan >/dev/null 2>&1; then
+              curl -sSfL --retry 3 -o "$RUNNER_TEMP/elan.tar.gz" https://github.com/leanprover/elan/releases/download/v4.1.2/elan-x86_64-unknown-linux-gnu.tar.gz && tar xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP" && "$RUNNER_TEMP/elan-init" -y --default-toolchain none >/dev/null || true
+            fi
+            bash scripts/agent_setup.sh
+            if (cd LeanLab && lake --version) >/dev/null 2>&1; then echo "toolchain ok on try $i"; break; fi
+            echo "toolchain missing after try $i"; sleep $((i * 40))
+          done
+          (cd LeanLab && lake --version) >/dev/null 2>&1 || { echo "CI: INFRA toolchain download failed"; exit 1; }
+      - name: Build the folder
+        env:
+          F: ${{ matrix.folder }}
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd LeanLab
+          MODS=$(find "LeanLab/$F" -name '*.lean' -not -path '*/old/*' -not -path '*/build/*' | sed 's/\.lean$//; s#/#.#g' | sort)
+          echo "MAIN CHECK building $F: $(echo "$MODS" | wc -w) modules"
+          if lake build $MODS 2>&1 | grep -v '^✔' | tee "$RUNNER_TEMP/build.log"; test "${PIPESTATUS[0]}" -eq 0; then
+            echo "MAIN CHECK OK $F" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "MAIN CHECK FAIL $F: $(grep -m3 'error:' "$RUNNER_TEMP/build.log" | tr '\n' ' ' | cut -c1-400)" | tee -a "$GITHUB_STEP_SUMMARY"; exit 1
+          fi
+        shell: bash
