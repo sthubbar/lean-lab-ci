@@ -8,6 +8,7 @@ Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Modulus427
 import LeanLab.DtRS1998.Projections445
+import LeanLab.DtRS1998.PocklingtonB7Row100
 
 namespace LeanLab.DtRS1998.Decomp445c
 
@@ -20,12 +21,17 @@ Cohen and H. W. Lenstra 1984 page 306, proof of Theorem 6.3,
 conditions 6.4 and 6.5 and the choice of the common exponent.
 This derived finite subclaim retains only the 2 primary projection.
 It asks for its own witness below 16, not a shared full orbit witness.
-The missing character and p-adic certification remains OPEN. -/
+The missing character and p-adic certification remains OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row100.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem component2 :
     ∀ q ∈ qs.take 64, ∀ p : ℕ, p.Prime → p ∣ q →
       ∃ i : ℕ, i < 16 ∧
         p ^ 315 % 15321986788854443284662612735663611380010431225771200 = q ^ (315 * i) % 15321986788854443284662612735663611380010431225771200 := by
-  sorry
+  intro q hq p hp hd
+  have hq' := PocklingtonB7Row100.qs_prime q (List.mem_of_mem_take hq)
+  obtain rfl : p = q := (Nat.prime_dvd_prime_iff_eq hp hq').mp hd
+  exact ⟨1, by decide, by rw [Nat.mul_one]⟩
 
 
 /-- LEAF. P0037 page 211, finite primality phase, and Table 1 page 213.
@@ -33,12 +39,17 @@ Cohen and H. W. Lenstra 1984 page 306, proof of Theorem 6.3,
 conditions 6.4 and 6.5 and the choice of the common exponent.
 This derived finite subclaim retains only the 3 primary projection.
 It asks for its own witness below 9, not a shared full orbit witness.
-The missing character and p-adic certification remains OPEN. -/
+The missing character and p-adic certification remains OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row100.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem component3 :
     ∀ q ∈ qs.take 64, ∀ p : ℕ, p.Prime → p ∣ q →
       ∃ i : ℕ, i < 9 ∧
         p ^ 560 % 15321986788854443284662612735663611380010431225771200 = q ^ (560 * i) % 15321986788854443284662612735663611380010431225771200 := by
-  sorry
+  intro q hq p hp hd
+  have hq' := PocklingtonB7Row100.qs_prime q (List.mem_of_mem_take hq)
+  obtain rfl : p = q := (Nat.prime_dvd_prime_iff_eq hp hq').mp hd
+  exact ⟨1, by decide, by rw [Nat.mul_one]⟩
 
 
 /-- LEAF. P0037 page 211, finite primality phase, and Table 1 page 213.
@@ -46,12 +57,17 @@ Cohen and H. W. Lenstra 1984 page 306, proof of Theorem 6.3,
 conditions 6.4 and 6.5 and the choice of the common exponent.
 This derived finite subclaim retains only the 5 primary projection.
 It asks for its own witness below 5, not a shared full orbit witness.
-The missing character and p-adic certification remains OPEN. -/
+The missing character and p-adic certification remains OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row100.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem component5 :
     ∀ q ∈ qs.take 64, ∀ p : ℕ, p.Prime → p ∣ q →
       ∃ i : ℕ, i < 5 ∧
         p ^ 1008 % 15321986788854443284662612735663611380010431225771200 = q ^ (1008 * i) % 15321986788854443284662612735663611380010431225771200 := by
-  sorry
+  intro q hq p hp hd
+  have hq' := PocklingtonB7Row100.qs_prime q (List.mem_of_mem_take hq)
+  obtain rfl : p = q := (Nat.prime_dvd_prime_iff_eq hp hq').mp hd
+  exact ⟨1, by decide, by rw [Nat.mul_one]⟩
 
 
 /-- LEAF. P0037 page 211, finite primality phase, and Table 1 page 213.
@@ -59,12 +75,17 @@ Cohen and H. W. Lenstra 1984 page 306, proof of Theorem 6.3,
 conditions 6.4 and 6.5 and the choice of the common exponent.
 This derived finite subclaim retains only the 7 primary projection.
 It asks for its own witness below 7, not a shared full orbit witness.
-The missing character and p-adic certification remains OPEN. -/
+The missing character and p-adic certification remains OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row100.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem component7 :
     ∀ q ∈ qs.take 64, ∀ p : ℕ, p.Prime → p ∣ q →
       ∃ i : ℕ, i < 7 ∧
         p ^ 720 % 15321986788854443284662612735663611380010431225771200 = q ^ (720 * i) % 15321986788854443284662612735663611380010431225771200 := by
-  sorry
+  intro q hq p hp hd
+  have hq' := PocklingtonB7Row100.qs_prime q (List.mem_of_mem_take hq)
+  obtain rfl : p = q := (Nat.prime_dvd_prime_iff_eq hp hq').mp hd
+  exact ⟨1, by decide, by rw [Nat.mul_one]⟩
 
 
 /-- P0037 page 213, a concrete nonempty premise for every new leaf.

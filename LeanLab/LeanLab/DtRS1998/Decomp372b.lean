@@ -28,6 +28,7 @@ import LeanLab.DtRS1998.Decomp372bWindows3
 import LeanLab.DtRS1998.Decomp372bWindows2
 import LeanLab.DtRS1998.Decomp372bWindows1
 import LeanLab.DtRS1998.Decomp372bWindows0
+import LeanLab.DtRS1998.PocklingtonB7Row95
 
 namespace LeanLab.DtRS1998.Decomp372b
 
@@ -38,9 +39,11 @@ set_option maxHeartbeats 0
 
 /-- LEAF. P0037 Section 5.1 page 211, primality certification paragraph,
 and Table 1 page 213, row 10^95. Prove primality of this fixed list only.
-This leaf asserts no Goldbach coverage. Full prime certificates are OPEN. -/
+This leaf asserts no Goldbach coverage. Full prime certificates are OPEN.
+ROUTE BURST 7: proved from `PocklingtonB7Row95.qs_prime`, the kernel checked Pocklington
+certificates, and so CONDITIONAL only on that file's `hard_prime` leaf while it is open. -/
 theorem candidate_primes : ∀ q ∈ qs, q.Prime := by
-  sorry
+  exact PocklingtonB7Row95.qs_prime
 
 /-- LEAF. P0037 page 207, the displayed recurrence for F,
 Section 5.1 page 211 and Table 1 page 213, row 10^95.
