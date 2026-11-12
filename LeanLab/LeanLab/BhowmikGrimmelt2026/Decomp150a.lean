@@ -9,12 +9,41 @@ namespace LeanLab.BhowmikGrimmelt2026
 
 open LeanLab.ExceptionalSet (PowerBound)
 
-/-- LEAF. Page 12, the best possible zero bound is at least one half.
-Cited input: existence of a nontrivial zeta zero on the critical line,
-Hardy 1914, Sur les zeros de la fonction zeta de Riemann.
-OPEN. This input is not proved by the survey. -/
-theorem zeroBound_lower150 {Θ : ℝ} (hZ : ZeroBound Θ) : 1 / 2 ≤ Θ := by
+/-- SPLIT piece 1 of `zeroBound_lower150`. CITED, OPEN.
+P0029 Section 3, page 12, the remark after the display `q^{1/2} N^{Θ+ε}`:
+"in the best case we could hope for Θ = 1/2". The lower limit one half rests on
+Hardy 1914, Sur les zeros de la fonction zeta de Riemann: the Riemann zeta function
+has a zero on the critical line. The survey cites it and gives no proof.
+AI wrote the Lean code. -/
+theorem hardy_critical_line_zero150 :
+    ∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0 := by
   sorry
+
+/-- SPLIT piece 2 of `zeroBound_lower150`. P0029 Section 3, page 9, Theorem 3.1:
+"every zero of every Dirichlet L-function" includes the modulus one character,
+whose L-function is the Riemann zeta function. PROVED from Mathlib.
+AI wrote the Lean code. -/
+theorem LFunction_modOne_eq_zeta150 (s : ℂ) :
+    DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1) s = riemannZeta s := by
+  rw [DirichletCharacter.LFunction_modOne_eq]
+
+/-- SPLIT piece 3 of `zeroBound_lower150`. P0029 Section 3, page 9, hypothesis of
+Theorem 3.1 applied to the modulus one character: a zeta zero in the strip
+`0 < Re s < 1` has real part at most Θ. PROVED. AI wrote the Lean code. -/
+theorem zeroBound_zeta_zero150 {Θ : ℝ} (hZ : ZeroBound Θ) {s : ℂ}
+    (hs : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) : s.re ≤ Θ := by
+  haveI : NeZero (1 : ℕ) := ⟨one_ne_zero⟩
+  exact hZ 1 (1 : DirichletCharacter ℂ 1) s (by rw [LFunction_modOne_eq_zeta150]; exact hs) h0 h1
+
+/-- LEAF, now SPLIT. Page 12, the best possible zero bound is at least one half.
+Derived from the cited Hardy 1914 critical line zero, `hardy_critical_line_zero150`,
+and the modulus one case of the zero bound hypothesis, `zeroBound_zeta_zero150`.
+CONDITIONAL ON `hardy_critical_line_zero150`, which is OPEN. -/
+theorem zeroBound_lower150 {Θ : ℝ} (hZ : ZeroBound Θ) : 1 / 2 ≤ Θ := by
+  obtain ⟨t, ht⟩ := hardy_critical_line_zero150
+  have hre : ((1 / 2 : ℂ) + (t : ℂ) * Complex.I).re = 1 / 2 := by simp
+  have h := zeroBound_zeta_zero150 hZ ht (by rw [hre]; norm_num) (by rw [hre]; norm_num)
+  rwa [hre] at h
 
 /-- LEAF. Page 13 display 3.8, from the character zero error in 3.7 and Parseval.
 OPEN. The uniform explicit formula and arc summation remain to be supplied. -/
