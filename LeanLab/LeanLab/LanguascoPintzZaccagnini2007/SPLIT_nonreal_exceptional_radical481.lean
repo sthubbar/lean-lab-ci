@@ -27,8 +27,20 @@ Together the three leaves make a zero of the box with a nonreal character imposs
 large enough, so the conclusion holds for any positive constant, and in particular for one. The
 threshold absorbs the small scales, where the box is not excluded.
 
-`nonreal_exceptional_radical481_split` below is proved from the three leaves with no `sorry`,
-does not use `nonreal_exceptional_radical481`, and keeps the statement of the target.
+`nonreal_exceptional_radical481_split` below is proved from the three leaves, does not use
+`nonreal_exceptional_radical481`, and keeps the statement of the target; it still depends on
+`sorryAx` through `leaf_denom_upper_bound481`.
+
+Architect U-1649 warning. The assembly closes by `False.elim`: it shows the box holds no zero of a
+nonreal character for large `X`, and never uses `oddRad131`. That is not the argument of P0045
+page 6, which only concludes `log r' ≫ L` from the Iwaniec region. `leaf_denom_upper_bound481`
+bounds the whole denominator, including its first summand `4 * 10 ^ 4 * log (2 r')`, by
+`C * (log X) ^ (7 / 8)`; with `r' ≤ P ≤ X ^ (41 / 100)` this says every box zero has
+`log r'` at most of order `(log X) ^ (7 / 8)`, so together with the Iwaniec leaf it asserts that the
+box is empty. P0045 does not supply that, and it is not known unconditionally. The leaf is
+handed to the repair lane: bound only the second summand `(l log (2 l)) ^ (3 / 4)`, then
+conclude `log (2 r') ≥ log X / (2 * 4 * 10 ^ 4 * H)` for large `X`, which gives the target
+through `oddRad131` without emptiness. See REPAIR_QUEUE.md.
 
 AI wrote the Lean code. Goldbach is open.
 -/
@@ -81,7 +93,8 @@ private theorem lpz481_denom_pos {r : ℕ} {t : ℝ} (hr : 1 ≤ r) :
 /-- LEAF. The zero free region in the shape the box uses. From the hypothesis `hiw`, a zero of a
 nonreal primitive character that lies in the box, whose real part is at least `1 - H / log X`,
 cannot sit inside `re > 1 - 1 / iwaniecDenom481 r t`; hence the two radii are ordered, that is
-`log X / H ≤ iwaniecDenom481 r t` for its height `t = im`. -/
+`log X / H ≤ iwaniecDenom481 r t` for its height `t = im`. The binder `hT` is not used by the
+proof; it is kept so that the leaf takes the same parameters as the assembly. -/
 theorem leaf_iwaniec_bound481 (hiw : IwaniecStatement481)
     (H T : ℝ) (hH : 1 ≤ H) (hT : 1 ≤ T) :
     ∀ X : ℕ, 2 ≤ X → ∀ P : ℝ, ∀ z ∈ zeroBox481 X H T P,

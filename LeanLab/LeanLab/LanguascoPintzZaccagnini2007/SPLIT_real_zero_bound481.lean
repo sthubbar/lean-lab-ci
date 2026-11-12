@@ -17,10 +17,15 @@ The character. A character of modulus one is the trivial character, whose L func
 Riemann zeta function, so the zeros near one there are a statement about zeta alone: that is
 `leaf_real_zero_modulus_one481`. A real primitive character of modulus at least two is the
 quadratic case, and the lower bound for it is `leaf_real_zero_primitive_large481`. An
-imprimitive real character is the remaining case: the Euler factors at the ramified primes
-remove zeros rather than add them, so a zero of the imprimitive L function need not come from
-any primitive one, and the lower bound must be stated for that class on its own, which is
-`leaf_real_zero_imprimitive481`.
+imprimitive real character is the remaining case, `leaf_real_zero_imprimitive481`. Its L function
+is the inducing primitive L function times the Euler factors `1 - χ*(p) p ^ (-s)` at the primes `p`
+dividing the modulus but not the conductor. Those factors never remove a zero of the primitive
+L function, and they do add zeros, all on the line `re s = 0`. At a real point `s` in `(0, 1)` each
+factor is nonzero, since `p ^ (-s) < 1`, so a real zero in `(1 / 2, 1)` of the imprimitive L function
+is a real zero of the inducing primitive one; that nonvanishing, not any removal of zeros, is what
+the imprimitive case rests on. The case is stated on its own only for the case split; it is not
+an independent difficulty, and in this file it is closed by the same argument as the primitive
+case. Header corrected by architect U-1649.
 
 Every leaf is the target with one case restriction and with `δ < 1 / 2`, so every leaf is
 strictly weaker than the target and none of them restates it. The three case conditions `r ≤ 1`,
@@ -577,8 +582,9 @@ theorem leaf_real_zero_primitive_large481 :
 
 /-- LEAF. The imprimitive case of the real zero lower bound. For a real character that is not
 primitive, a zero of its L function at `1 - δ` with `0 < δ < 1 / 2` costs at least a fixed
-positive multiple of `r ^ (-(1 / 2))`. No restriction to zeros induced from a primitive
-character is made here, since the Euler factors at the ramified primes do not remove them all. -/
+positive multiple of `r ^ (-(1 / 2))`. The extra Euler factors of an imprimitive character
+vanish only on `re s = 0`, so its real zeros in `(1 / 2, 1)` are those of the inducing primitive
+character; the case is stated separately only to keep the case split exhaustive. -/
 theorem leaf_real_zero_imprimitive481 :
     ∃ a : ℝ, 0 < a ∧ ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
       ¬ χ.IsPrimitive → (∀ b, (χ b).im = 0) → ∀ δ : ℝ, 0 < δ → δ < 1 / 2 →

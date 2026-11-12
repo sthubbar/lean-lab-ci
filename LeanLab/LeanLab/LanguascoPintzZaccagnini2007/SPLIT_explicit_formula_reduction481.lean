@@ -59,9 +59,12 @@ theorem zero_family_card_bound481 (hdensity : JutilaStatement481)
         (K : ℝ) ≤ C₀ * Real.exp (4 * H) := by
   sorry
 
-/-- LEAF. Page 6, the paragraph before Corollary 4.2: the singular series is uniformly
-bounded below on the even window by a positive constant. Only positivity, not any asymptotic,
-is used by the reduction. -/
+/-- LEAF. Page 2, display 2: for even `n` the singular series is `2 c_0` times a product of
+factors `(p - 1) / (p - 2)` over odd primes `p` dividing `n`, each at least one, so it is at least
+the twin prime constant `2 c_0`, which is positive. Every member of the even window is even, so
+this gives a uniform positive lower bound there. The page 6 paragraph before Corollary 4.2 states
+no lower bound for the singular series; the earlier citation of that paragraph was wrong and is
+corrected by architect U-1649. Only positivity, not any asymptotic, is used by the reduction. -/
 theorem singular_series_lower481 :
     ∃ s₀ : ℝ, 0 < s₀ ∧ ∀ (X n : ℕ), n ∈ evenJ131 X → s₀ ≤ Sing n := by
   sorry

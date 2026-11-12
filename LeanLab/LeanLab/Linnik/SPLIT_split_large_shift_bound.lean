@@ -1,4 +1,15 @@
 /-
+OFF ROUTE, architect 20261112T0802Z-24456 U-1647, 2026-11-12. Do not spend prover time here.
+This file re-cuts `Display5PlainExpansion`, the C = 0 form whose leaf
+`Decomp1532c.display5_plain_expansion` was RETIRED on 2026-11-06 by architect U-1625 as stronger
+than the printed source: Gallagher 1975 P0094 Theorem 3 p.127 and display 5 p.138 keep the term
+`e^{-c/θ}`, a fixed positive multiple of the main size for fixed θ, and display 6 p.139 absorbs
+it only by letting θ tend to zero with k. Its open leaf serves only the retired C = 0 parent. The live route statement is
+`LeanLab.Linnik.Decomp1532c.major_arc_remainder_bound`, which keeps `C * Real.exp (-c / θ)` and
+is supplied by `Decomp466c.major_arc_remainder_bound_split` from the cited Theorem 3.
+No assembly on the route imports this file. Statements below are unchanged; they are not to be
+repaired, since a leaf stronger than the source on a dead branch has no repair worth making.
+
 Split of `LeanLab.Linnik.Decomp1532c.split_large_shift_bound`.
 
 The sealed leaf `split_large_shift_bound` is the long shift range of the averaged major arc

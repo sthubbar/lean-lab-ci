@@ -7,6 +7,15 @@ denominator, the classically known half plane at real part one and above, and th
 open strip below one where the analytic content of the region sits. The region
 edge is placed on the nonnegative axis in the assembly, which is where the
 denominator bound is used.
+
+Source check. The constant and the region in `iwaniecDenom481`, namely
+`B = 4 * 10 ^ 4 * (log (2 r') + (l log (2 l)) ^ (3 / 4))` with `l = log (r (|t| + 2))` and
+zero free part `re s > 1 - 1 / B`, were verified only against the page image of P0045 page 6.
+The text extraction papers/P0045.txt drops the bracket after `4 * 10 ^ 4`, so it reads as if the
+factor multiplied the first summand only; do not audit this constant from the txt. Iwaniec 1974
+itself is not in papers, so the constant is checked against P0045 only, not against the cited
+theorem. The half plane leaf does not use primitivity, a harmless strengthening. Note added by
+architect U-1649.
 AI wrote the Lean code. Goldbach is open.
 -/
 

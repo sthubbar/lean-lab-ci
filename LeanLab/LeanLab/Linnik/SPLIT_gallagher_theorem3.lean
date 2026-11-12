@@ -1,6 +1,23 @@
 /-
 Split of `LeanLab.Linnik.Decomp466a.gallagher_theorem3`.
 
+OFF ROUTE, architect U-1645, PC 20261112T0802Z-24456, 2026-11-12. This file is not on the
+route of `LeanLab.Linnik.Decomp1532c.theorem1_of_leaves`. That route runs
+theorem1_of_leaves to `Decomp1532c.major_arc_remainder_bound` to
+`Decomp466c.major_arc_remainder_bound_split` to `Decomp466a.gallagher_theorem3`, whose proof is
+`Decomp482c.gallagher_theorem3_split`, whose open inputs are the Decomp482 and Decomp486 energy
+leaves. No file on main imports this SPLIT file. Its assembly `gallagher_theorem3_split` here is
+textually identical to `Decomp466a.gallagher_theorem3` and `Decomp482c.gallagher_theorem3_split`,
+so it adds no new statement. Its cut is also unsound as a decomposition: leaf 1 is thin, proved by
+r = 0; leaf 2 asks that an exceptional conductor at height `(N ^ θ) ^ 5` be at most `N ^ θ`, which
+the definition of excSet does not give and which fails whenever an exceptional conductor lies
+strictly between P and P to the fifth, P = `N ^ θ`, Gallagher 1975 p.127 and p.131 take r at most P
+as a restriction, not a derived bound; leaf 3 admits r = 0 and so asserts the bound with no
+exceptional term unconditionally, dropping the side conditions r = x.1 + 1, x in excSet and r at
+most P that the route leaves carry. The statement to cut on the route is the open energy input of
+`Decomp482c.gallagher_theorem3_split`, owned by the Decomp486b and Decomp486c work. Hand nothing
+from this file to provers. Statement texts below are unchanged.
+
 The sealed statement is one uniform bound for the major arc frequency error at
 scale `N ^ θ`, carrying an exceptional radius `r` that is either zero or one more
 than the conductor of a character whose L-function has a zero in the fixed strip.
@@ -107,3 +124,4 @@ theorem gallagher_theorem3_split :
     exact hN₁ N hN₁' r hrle n hn
 
 end LeanLab.Linnik.Decomp466a
+
