@@ -5,6 +5,7 @@ The exact sieve_data assembly is CONDITIONAL on those leaves.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Sifted312
+import LeanLab.BHP1997.Decomp312a
 import LeanLab.BHP1997.DecompC165a
 import LeanLab.BHP1997.DecompC165c
 import LeanLab.BHP1997.Decomp414a
@@ -730,13 +731,19 @@ theorem numeric_regions_nonempty : upperFiveRegion.Nonempty ∧ delta4Region.Non
   · refine ⟨![(0.48 : ℝ),0.17,0.11,0.1], ?_⟩
     norm_num [delta4Region, Fin.sum_univ_succ]
 
-/-- LEAF. Section 4, pages 24 to 41. Construct the lower sifted coefficients,
+/-- Section 4, pages 24 to 41. Construct the lower sifted coefficients,
 prove the character distribution and divisor bound, and link the discarded
 region integrals to the stated density. The remaining analytic inputs include
 Lemma 11, Lemma 12 with Hildebrand and Siegel Walfisz, and the region classification
 of Lemmas 13 to 27. The Delta2, Delta3 and six dimensional certificates remain OPEN.
 The Gamma and Delta4 envelope certificates above do not prove that classification.
-The rough support clause is omitted here because it is proved separately. OPEN. -/
+The rough support clause is omitted here because it is proved separately.
+ROUTE BURST 2, 2026-11-12: proved from the identical statement
+Decomp312a.section4_lower_sifted_data, which splits the paper argument at
+Lemma 11 into the Perron transfer of pages 24 and 25 and the lower sieve
+supply of pages 26 to 41. The Perron transfer is PROVED, axioms only
+propext, Classical.choice and Quot.sound. CONDITIONAL on the single OPEN
+leaf Decomp312a.lower_mean_value_supply. -/
 theorem section4_lower_sifted_data (h4 : Thm4.Theorem4Paper) :
     ∃ B0 η : ℝ, 0 < η ∧ ∀ B ε : ℝ, B0 ≤ B → 0 < ε → ε < η →
       ∃ (u0 : ℝ) (c0 : ℝ → ℕ → ℝ),
@@ -751,8 +758,8 @@ theorem section4_lower_sifted_data (h4 : Thm4.Theorem4Paper) :
         (∃ C : ℝ, ∀ x k, |section4SiftedFamily c0 x k| ≤
           C * ((k.divisors.card : ℕ) : ℝ) ^ B) ∧
         ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
-          ∀ k ∈ leftInterval ε x, section4SiftedFamily c0 x k ≤ primeWeight k := by
-  sorry
+          ∀ k ∈ leftInterval ε x, section4SiftedFamily c0 x k ≤ primeWeight k :=
+  Decomp312a.section4_lower_sifted_data h4
 
 /-- LEAF. Section 4, pages 41 and 42. Construct the upper sifted coefficients,
 prove the character distribution and divisor bound, and link the five and seven
