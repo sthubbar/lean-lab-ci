@@ -62,6 +62,10 @@ theorem certificate220_lower_first_half :
       (List.range (10 ^ 9 / 8 + 1)).all (fun j =>
         qs.any (fun q => decide
           (q ≤ 10 ^ 220 + 2 * j ∧ (10 ^ 220 + 2 * j - q).Prime))) = true := by
+  -- BLOCKED 2026-11-11 FREE-nv-mistral task330 certificate220_lower_first_half:
+  -- OUT OF REACH: requires explicit Pocklington certificates for primes near 10^220.
+  -- Searched Mathlib for Nat.Prime decision procedures; trial division infeasible at 10^220.
+  -- No pre-generated certificate data exists in the repository for exponent 220.
   sorry
 
 /-- LEAF. Step 2 of the proof, the second half of the lower half of the offset
@@ -75,6 +79,10 @@ theorem certificate220_lower_second_half :
       ((List.range (10 ^ 9 / 4 + 1)).drop (10 ^ 9 / 8 + 1)).all (fun j =>
         qs.any (fun q => decide
           (q ≤ 10 ^ 220 + 2 * j ∧ (10 ^ 220 + 2 * j - q).Prime))) = true := by
+  -- BLOCKED 2026-11-11 FREE-nv-mistral task330 certificate220_lower_second_half:
+  -- OUT OF REACH: requires explicit Pocklington certificates for primes near 10^220.
+  -- Searched Mathlib for Nat.Prime decision procedures; trial division infeasible at 10^220.
+  -- No pre-generated certificate data exists in the repository for exponent 220.
   sorry
 
 /-- The two halves together give the lower half certificate: concatenating their
