@@ -6,6 +6,11 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.BhowmikGrimmelt2026.Statements
 import LeanLab.BhowmikGrimmelt2026.SPLIT_meanSquare38
 import LeanLab.BhowmikGrimmelt2026.SingularTail150
+import LeanLab.BhowmikGrimmelt2026.MeanSquareCore150
+import LeanLab.BhowmikGrimmelt2026.ModelL2_150
+import LeanLab.BhowmikGrimmelt2026.Coefficients150
+import LeanLab.BhowmikGrimmelt2026.SingularTailAbs150
+import LeanLab.BhowmikGrimmelt2026.ArcTails150
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -49,16 +54,384 @@ theorem singular_truncation150 :
   obtain ⟨C, hC⟩ := singular_tail150 ε hε
   exact ⟨C, fun N hN => by simpa only [truncMain150] using hC N hN⟩
 
+/-! ### Split of `major_minor_mean_square150`, ROUTE BURST 7
+
+The circle method core of P0029 pages 10 to 13.  With `S = Ssum X` of page 14 and the major arc
+model `V = VX150 X` of `MeanSquareCore150.lean`, which is display 3.5 with only its main term
+`μ(q)/φ(q) Σ_{n ≤ X} e(n(α - a/q))` kept on the Dirichlet arcs of level `Q = ⌊X^{1/2}⌋`:
+
+* `major_arc_uniform150`, CITED, display 3.5 with 3.6 and 3.7: `|S - V| ≪ X^{Θ + 1/4 + ε}`.
+* `major_model_L2_150`, elementary, PROVED: `∫_0^1 |V|² ≪ X^{1 + ε}`.
+* `major_coefficients150`, page 12, the arc main term: the `N`-th Fourier coefficient of `V²`
+  is the truncated main term `truncMain150 N` up to an error of mean square `≪ X^{2 + ε}`.
+  Derived from the PROVED exact coefficient `coeff_WX150` of the full model `W`, Bessel
+  `bessel_VW150`, the PROVED level change `truncation_level150`, and the elementary leaf
+  `arc_tails150`.
+* PROVED in `MeanSquareCore150.lean`: display 3.2, Parseval for `S`, Bessel on `[0, 1]` and the
+  abstract assembly `bessel_model150`; the assembly below adds the exponents.
+
+AI wrote the Lean code. Goldbach is open. -/
+
+/-- LEAF, CITED. P0029 pages 11 and 12, display 3.5 with the Gauss sum bound 3.6 and the zero
+bound 3.7: under `ZeroBound Θ`, on every Dirichlet arc of denominator `q ≤ Q ≍ X^{1/2}` the prime
+sum differs from its main term `μ(q)/φ(q) T(α - a/q)` by `≪ q^{1/2} X^{Θ + ε} ≪ X^{Θ + 1/4 + ε}`,
+the right hand side of 3.7.  The survey states 3.7 at the centres of the arcs; the bound uniform
+over the arc, in the sharp form `X^{Θ+ε} (q (1 + |β| X))^{1/2}` with `|β| ≤ 1/(qQ)`, is the
+Hardy and Littlewood 1923 Partitio Numerorum V input that the survey cites for Theorem 3.1.
+OPEN: needs the explicit formula for `ψ(x, χ)` uniformly in `q`, not in Mathlib. -/
+theorem major_arc_uniform150 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
+      ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε) := by
+  sorry
+
+/-- LEAF, elementary. P0029 page 12, the size of the main term: `∫_0^1 |V(α)|² dα ≪ X^{1+ε}`,
+since the arcs of denominator `q` cover the `φ(q)` points `a/q` with `|α - a/q| ≤ 1/(qQ)`,
+`∫ |T|² = X` on each, and `Σ_{q ≤ Q} (q + 1) / φ(q)² ≪ Q^ε`.  PROVED, ROUTE BURST 7, as
+`integral_norm_sq_VX_le150` in ModelL2_150.lean. -/
+theorem major_model_L2_150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
+      ∫ α in (0 : ℝ)..1, ‖VX150 X α‖ ^ 2 ≤ C * (X : ℝ) ^ (1 + ε) :=
+  integral_norm_sq_VX_le150
+
+/-- PROVED. `‖a - c‖² ≤ 2‖a - b‖² + 2‖b - c‖²` in `ℂ`. -/
+theorem norm_sub_sq_le_two150 (a b c : ℂ) :
+    ‖a - c‖ ^ 2 ≤ 2 * ‖a - b‖ ^ 2 + 2 * ‖b - c‖ ^ 2 := by
+  have h : ‖a - c‖ ≤ ‖a - b‖ + ‖b - c‖ := norm_sub_le_norm_sub_add_norm_sub a b c
+  have h0 : 0 ≤ ‖a - c‖ := norm_nonneg _
+  nlinarith [sq_nonneg (‖a - b‖ - ‖b - c‖), norm_nonneg (a - b), norm_nonneg (b - c)]
+
+/-- LEAF, elementary, page 12, the arc tails pointwise.  `V² - W` is minus the sum over
+`q ≤ Q = ⌊X^{1/2}⌋`, `(a, q) = 1`, of `μ(q)²/φ(q)² T(α - a/q)²` over the fractions `a/q` whose
+arc does not contain `α`, with `|T(β)| ≤ min(X, 1/(2‖β‖))`.  The claim is
+`|V(α)² - W(α)| ≪ X^{1+ε}` uniformly: the fractions within `1/(qQ)` of `α` but not assigned to
+it have `q > Q/2`, by the Farey spacing `|a/q - a'/q'| ≥ 1/(q q')`, and there are `O(1)` of them,
+each `≤ X²/φ(q)² ≪ X^{1+ε}`; the others give `Σ_{q ≤ Q} φ(q)^{-2} min(X², q²/‖qα‖²) ≪ X^{1+ε}`
+by the standard count of `q` with `‖qα‖` small.  This is the `O(N^{1/2+ε})` of page 12, which
+the survey states without proof.  OPEN: the Farey counting is not in the lab. -/
+theorem arc_tails_sup150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
+      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε) := by
+  sorry
+
+/-- Page 12, the arc tails in mean square: `∫_0^1 |V² - W|² ≪ X^{2+ε}`.  ROUTE BURST 7: derived
+from the leaf `arc_tails_sup150` and the PROVED `integral_norm_VW_le150` and
+`integral_sq_VW_le_sup150` of ArcTails150.lean, `∫|g|² ≤ sup|g| ∫|g|`. -/
+theorem arc_tails150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
+      ∫ α in (0 : ℝ)..1, ‖VX150 X α ^ 2 - WX150 X α‖ ^ 2 ≤ C * (X : ℝ) ^ (2 + ε) := by
+  intro ε hε
+  obtain ⟨C1, h1⟩ := arc_tails_sup150 (ε / 2) (by linarith)
+  obtain ⟨C2, h2⟩ := integral_norm_VW_le150 (ε / 2) (by linarith)
+  refine ⟨|C1| * |C2|, fun X hX => ?_⟩
+  have hXR : (1 : ℝ) ≤ X := by exact_mod_cast hX
+  set P : ℝ := (X : ℝ) ^ (1 + ε / 2) with hP
+  have hP0 : 0 ≤ P := by positivity
+  have hB : ∀ α ∈ Set.Icc (0 : ℝ) 1, ‖VX150 X α ^ 2 - WX150 X α‖ ≤ |C1| * P :=
+    fun α hα => (h1 X hX α hα).trans (mul_le_mul_of_nonneg_right (le_abs_self _) hP0)
+  have hI : (∫ α in (0 : ℝ)..1, ‖VX150 X α ^ 2 - WX150 X α‖) ≤ |C2| * P :=
+    (h2 X hX).trans (mul_le_mul_of_nonneg_right (le_abs_self _) hP0)
+  have hPP : P * P = (X : ℝ) ^ (2 + ε) := by
+    rw [hP, ← Real.rpow_add (by linarith : (0 : ℝ) < X)]; congr 1; ring
+  calc _ ≤ |C1| * P * ∫ α in (0 : ℝ)..1, ‖VX150 X α ^ 2 - WX150 X α‖ :=
+        integral_sq_VW_le_sup150 X _ hB
+    _ ≤ |C1| * P * (|C2| * P) := mul_le_mul_of_nonneg_left hI (by positivity)
+    _ = |C1| * |C2| * (P * P) := by ring
+    _ = |C1| * |C2| * (X : ℝ) ^ (2 + ε) := by rw [hPP]
+
+/-- PROVED. `Σ_{q ≤ ⌊X^{1/2}⌋} μ(q)² |c_q(N)| / φ(q)² ≪ X^ε`, from `|c_q(N)| ≤ φ(q)` and
+`Σ_{q ≤ Q} (q + 1)/φ(q)² ≪ Q^{4/k}` of ModelL2_150.lean. -/
+theorem sum_abs_singular_terms150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 1 ≤ X → ∀ N : ℕ,
+      ∑ q ∈ Finset.Icc 1 (Nat.sqrt X),
+        |((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 / (Nat.totient q : ℝ) ^ 2 *
+          (ramanujan q (N : ℤ)).re| ≤ C * (X : ℝ) ^ ε := by
+  intro ε hε
+  set k : ℕ := ⌈2 / ε⌉₊ + 1 with hk
+  have hk1 : 1 ≤ k := by omega
+  have hkR : (2 / ε : ℝ) < k := by
+    have := Nat.le_ceil (2 / ε)
+    rw [hk]; push_cast; linarith
+  have hkpos : (0 : ℝ) < k := by exact_mod_cast hk1
+  have hs : 2 * (k : ℝ)⁻¹ ≤ ε := by
+    rw [mul_comm, ← div_eq_inv_mul, div_le_iff₀ hkpos]
+    have := (div_lt_iff₀ hε).mp hkR
+    linarith
+  obtain ⟨C, hC0, hC⟩ := sum_totient_weight_le150 k hk1
+  refine ⟨C, hC0, fun X hX N => ?_⟩
+  have hXR : (1 : ℝ) ≤ X := by exact_mod_cast hX
+  have hQ1 : 1 ≤ Nat.sqrt X := Nat.le_sqrt.mpr (by simpa using hX)
+  have hQ2 : ((Nat.sqrt X : ℝ)) ^ 2 ≤ X := by exact_mod_cast Nat.sqrt_le' X
+  have hQpow : (Nat.sqrt X : ℝ) ^ (4 * (k : ℝ)⁻¹) ≤ (X : ℝ) ^ ε := by
+    have hQR : (1 : ℝ) ≤ (Nat.sqrt X : ℝ) := by exact_mod_cast hQ1
+    have e : (Nat.sqrt X : ℝ) ^ (4 * (k : ℝ)⁻¹) = ((Nat.sqrt X : ℝ) ^ 2) ^ (2 * (k : ℝ)⁻¹) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by linarith)]; congr 1; push_cast; ring
+    rw [e]
+    calc ((Nat.sqrt X : ℝ) ^ 2) ^ (2 * (k : ℝ)⁻¹) ≤ (X : ℝ) ^ (2 * (k : ℝ)⁻¹) :=
+          Real.rpow_le_rpow (by positivity) hQ2 (by positivity)
+      _ ≤ (X : ℝ) ^ ε := Real.rpow_le_rpow_of_exponent_le hXR hs
+  have hpt : ∀ q ∈ Finset.Icc 1 (Nat.sqrt X),
+      |((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 / (Nat.totient q : ℝ) ^ 2 *
+          (ramanujan q (N : ℤ)).re| ≤ ((q : ℝ) + 1) / (Nat.totient q : ℝ) ^ 2 := by
+    intro q hq
+    have hq1 := (Finset.mem_Icc.mp hq).1
+    have hφ : (0 : ℝ) < (Nat.totient q : ℝ) := by exact_mod_cast Nat.totient_pos.mpr hq1
+    have hφq : (Nat.totient q : ℝ) ≤ q := by exact_mod_cast Nat.totient_le q
+    have hmu : ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 ≤ 1 := by
+      have hm : |((ArithmeticFunction.moebius q : ℤ) : ℝ)| ≤ 1 := by
+        have h := ArithmeticFunction.abs_moebius_le_one (n := q)
+        exact_mod_cast h
+      exact (sq_le_one_iff_abs_le_one _).mpr hm
+    have hre : |(ramanujan q (N : ℤ)).re| ≤ (Nat.totient q : ℝ) :=
+      (Complex.abs_re_le_norm _).trans (norm_ramanujan_le150 q N)
+    rw [abs_mul, abs_of_nonneg (by positivity)]
+    calc ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 / (Nat.totient q : ℝ) ^ 2 *
+          |(ramanujan q (N : ℤ)).re|
+        ≤ 1 / (Nat.totient q : ℝ) ^ 2 * (Nat.totient q : ℝ) :=
+          mul_le_mul (div_le_div_of_nonneg_right hmu (by positivity)) hre (abs_nonneg _)
+            (by positivity)
+      _ ≤ ((q : ℝ) + 1) / (Nat.totient q : ℝ) ^ 2 := by
+          rw [one_div_mul_eq_div]
+          apply div_le_div_of_nonneg_right (by linarith) (by positivity)
+  calc _ ≤ ∑ q ∈ Finset.Icc 1 (Nat.sqrt X), ((q : ℝ) + 1) / (Nat.totient q : ℝ) ^ 2 :=
+        Finset.sum_le_sum hpt
+    _ ≤ C * (Nat.sqrt X : ℝ) ^ (4 * (k : ℝ)⁻¹) := hC _ hQ1
+    _ ≤ C * (X : ℝ) ^ ε := mul_le_mul_of_nonneg_left hQpow hC0
+
+/-- Page 12, the display after 3.7 at the level of `X`: the coefficient
+`(N - 1) Σ_{q ≤ ⌊X^{1/2}⌋} μ(q)²/φ(q)² c_q(-N)` of the full model, `coeff_WX150`, against
+`truncMain150 N = N Σ_{q ≤ ⌊N^{1/2}⌋} μ(q)²/φ(q)² c_q(N)`, in mean square over the even `N ≤ X`.
+Pointwise the difference is `-Σ_{q ≤ Q} μ²c_q/φ²`, which is `≪ X^ε`,
+`sum_abs_singular_terms150`, plus `N Σ_{N^{1/2} < q ≤ X^{1/2}} μ²c_q/φ²`, which is
+`≪ N^{1/2+ε}` by the absolute tail bound `singular_tail_abs150`; and `c_q(-N) = c_q(N)` is real,
+`ramanujan_neg_eq_re150`.  PROVED, ROUTE BURST 7. -/
+theorem truncation_level150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
+      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N),
+        ‖((N : ℂ) - 1) * (∑ q ∈ Finset.Icc 1 (Nat.sqrt X), wq150 q * ramanujan q (-(N : ℤ))) -
+          (truncMain150 N : ℂ)‖ ^ 2 ≤ C * (X : ℝ) ^ (2 + ε) := by
+  intro ε hε
+  obtain ⟨C1, hC10, hC1⟩ := sum_abs_singular_terms150 (ε / 2) (by linarith)
+  obtain ⟨C2, hC2⟩ := singular_tail_abs150 (ε / 2) (by linarith)
+  refine ⟨(C1 + |C2|) ^ 2, fun X hX => ?_⟩
+  have hXR : (1 : ℝ) ≤ X := by exact_mod_cast hX
+  have hX0 : (0 : ℝ) ≤ X := by linarith
+  set F := (Finset.Icc 1 X).filter (fun N => Even N) with hFdef
+  set P : ℝ := (X : ℝ) ^ (1 / 2 + ε / 2) with hP
+  have hP0 : 0 ≤ P := by positivity
+  have hpt : ∀ N ∈ F,
+      ‖((N : ℂ) - 1) * (∑ q ∈ Finset.Icc 1 (Nat.sqrt X), wq150 q * ramanujan q (-(N : ℤ))) -
+          (truncMain150 N : ℂ)‖ ^ 2 ≤ ((C1 + |C2|) * P) ^ 2 := by
+    intro N hN
+    obtain ⟨hN1, hNX⟩ := Finset.mem_Icc.mp (Finset.mem_filter.mp hN).1
+    have hNR : (1 : ℝ) ≤ N := by exact_mod_cast hN1
+    have hNXR : (N : ℝ) ≤ X := by exact_mod_cast hNX
+    set f : ℕ → ℝ := fun q => ((ArithmeticFunction.moebius q : ℤ) : ℝ) ^ 2 /
+      (Nat.totient q : ℝ) ^ 2 * (ramanujan q (N : ℤ)).re with hf
+    have hterm : ∀ q, wq150 q * ramanujan q (-(N : ℤ)) = ((f q : ℝ) : ℂ) := by
+      intro q
+      rw [ramanujan_neg_eq_re150, hf]
+      unfold wq150
+      push_cast
+      ring
+    set QX := Nat.sqrt X
+    set QN := Nat.sqrt N
+    have hQ : QN ≤ QX := Nat.sqrt_le_sqrt hNX
+    have hsplit : ∑ q ∈ Finset.Icc 1 QX, f q =
+        ∑ q ∈ Finset.Icc 1 QN, f q + ∑ q ∈ Finset.Ioc QN QX, f q := by
+      have hu : Finset.Icc 1 QX = Finset.Icc 1 QN ∪ Finset.Ioc QN QX := by
+        ext q; simp only [Finset.mem_Icc, Finset.mem_union, Finset.mem_Ioc]; omega
+      rw [hu, Finset.sum_union]
+      rw [Finset.disjoint_left]
+      intro q h1 h2
+      simp only [Finset.mem_Icc, Finset.mem_Ioc] at h1 h2
+      omega
+    have htrunc : truncMain150 N = (N : ℝ) * ∑ q ∈ Finset.Icc 1 QN, f q := rfl
+    have hval : ((N : ℂ) - 1) * (∑ q ∈ Finset.Icc 1 QX, wq150 q * ramanujan q (-(N : ℤ))) -
+        (truncMain150 N : ℂ) =
+        (((-(∑ q ∈ Finset.Icc 1 QX, f q) + (N : ℝ) * ∑ q ∈ Finset.Ioc QN QX, f q : ℝ)) : ℂ) := by
+      simp_rw [hterm]
+      rw [← Complex.ofReal_sum, hsplit, htrunc]
+      push_cast
+      ring
+    rw [hval, Complex.norm_real, Real.norm_eq_abs, sq_abs]
+    -- the two bounds
+    have hA : |∑ q ∈ Finset.Icc 1 QX, f q| ≤ C1 * (X : ℝ) ^ (ε / 2) :=
+      (Finset.abs_sum_le_sum_abs _ _).trans (hC1 X hX N)
+    have hT : (N : ℝ) * |∑ q ∈ Finset.Ioc QN QX, f q| ≤ C2 * (N : ℝ) ^ (1 / 2 + ε / 2) := by
+      refine le_trans ?_ (hC2 N hN1 (QX + 1))
+      apply mul_le_mul_of_nonneg_left _ (by linarith)
+      refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+      have hsub : Finset.Ioc QN QX ⊆ Finset.range (QX + 1) := by
+        intro q hq; simp only [Finset.mem_Ioc, Finset.mem_range] at hq ⊢; omega
+      calc ∑ q ∈ Finset.Ioc QN QX, |f q|
+          = ∑ q ∈ Finset.Ioc QN QX, |(if q ≤ QN then 0 else f q)| := by
+            refine Finset.sum_congr rfl (fun q hq => ?_)
+            have : ¬ q ≤ QN := by simp only [Finset.mem_Ioc] at hq; omega
+            rw [if_neg this]
+        _ ≤ ∑ q ∈ Finset.range (QX + 1), |(if q ≤ QN then 0 else f q)| :=
+            Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => abs_nonneg _)
+    have hXe1 : (X : ℝ) ^ (ε / 2) ≤ P :=
+      Real.rpow_le_rpow_of_exponent_le hXR (by linarith)
+    have hNe : (N : ℝ) ^ (1 / 2 + ε / 2) ≤ P :=
+      Real.rpow_le_rpow (by linarith) hNXR (by linarith)
+    have habs : |-(∑ q ∈ Finset.Icc 1 QX, f q) + (N : ℝ) * ∑ q ∈ Finset.Ioc QN QX, f q| ≤
+        (C1 + |C2|) * P := by
+      refine (abs_add_le _ _).trans ?_
+      rw [abs_neg, abs_mul, abs_of_nonneg (by linarith : (0 : ℝ) ≤ N)]
+      have h1 : C1 * (X : ℝ) ^ (ε / 2) ≤ C1 * P := mul_le_mul_of_nonneg_left hXe1 hC10
+      have h2 : C2 * (N : ℝ) ^ (1 / 2 + ε / 2) ≤ |C2| * P :=
+        (mul_le_mul_of_nonneg_right (le_abs_self _) (by positivity)).trans
+          (mul_le_mul_of_nonneg_left hNe (abs_nonneg _))
+      linarith
+    rw [← sq_abs]
+    exact pow_le_pow_left₀ (abs_nonneg _) habs 2
+  have hsum := Finset.sum_le_sum hpt
+  rw [Finset.sum_const, nsmul_eq_mul] at hsum
+  have hcard : ((F.card : ℕ) : ℝ) ≤ X := by
+    have : F.card ≤ X := by
+      calc F.card ≤ (Finset.Icc 1 X).card := Finset.card_filter_le _ _
+        _ = X := by simp
+    exact_mod_cast this
+  have hP2 : P ^ 2 = (X : ℝ) ^ (1 + ε) := by
+    rw [hP, ← Real.rpow_natCast, ← Real.rpow_mul hX0]; congr 1; push_cast; ring
+  have hXe : (X : ℝ) * (X : ℝ) ^ (1 + ε) = (X : ℝ) ^ (2 + ε) := by
+    rw [show (2 : ℝ) + ε = 1 + (1 + ε) by ring,
+      Real.rpow_add (by linarith : (0 : ℝ) < X) 1 (1 + ε), Real.rpow_one]
+  calc _ ≤ ((F.card : ℕ) : ℝ) * ((C1 + |C2|) * P) ^ 2 := hsum
+    _ ≤ (X : ℝ) * ((C1 + |C2|) * P) ^ 2 := mul_le_mul_of_nonneg_right hcard (by positivity)
+    _ = (C1 + |C2|) ^ 2 * ((X : ℝ) * P ^ 2) := by ring
+    _ = (C1 + |C2|) ^ 2 * (X : ℝ) ^ (2 + ε) := by rw [hP2, hXe]
+
+/-- Page 12. "If in 3.5 we keep only the main term and substitute it into 3.2, then the
+contribution of the arc around `a/q` can be shown to be `μ(q)²/φ(q)² N e(-aN/q) + O(N^{1/2+ε})`.
+Summing first over reduced residues produces Ramanujan sums": the `N`-th Fourier coefficient of
+`V²` is `truncMain150 N` up to an error whose mean square over the even `N ≤ X` is `≪ X^{2+ε}`,
+the square of the survey's pointwise `N^{1/2+ε}` summed over `N ≤ X`.  ROUTE BURST 7: derived
+from the PROVED `coeff_WX150` and `bessel_VW150` of Coefficients150.lean and the two elementary
+leaf `arc_tails150` and the PROVED `truncation_level150`. -/
+theorem major_coefficients150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
+      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N),
+        ‖(∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))) - (truncMain150 N : ℂ)‖ ^ 2 ≤
+          C * (X : ℝ) ^ (2 + ε) := by
+  intro ε hε
+  obtain ⟨Ca, ha⟩ := arc_tails150 ε hε
+  obtain ⟨Cb, hb⟩ := truncation_level150 ε hε
+  refine ⟨2 * Ca + 2 * Cb, fun X hX => ?_⟩
+  set F := (Finset.Icc 1 X).filter (fun N => Even N) with hFdef
+  have hpt : ∀ N ∈ F,
+      ‖(∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))) - (truncMain150 N : ℂ)‖ ^ 2 ≤
+        2 * ‖(∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))) -
+          ∫ α in (0 : ℝ)..1, WX150 X α * ee (-((N : ℝ) * α))‖ ^ 2 +
+        2 * ‖((N : ℂ) - 1) * (∑ q ∈ Finset.Icc 1 (Nat.sqrt X), wq150 q * ramanujan q (-(N : ℤ))) -
+          (truncMain150 N : ℂ)‖ ^ 2 := by
+    intro N hN
+    have hN' := Finset.mem_Icc.mp (Finset.mem_filter.mp hN).1
+    rw [← coeff_WX150 hN'.1 hN'.2]
+    exact norm_sub_sq_le_two150 _ _ _
+  have hsum := Finset.sum_le_sum hpt
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum] at hsum
+  have h1 := (bessel_VW150 X F).trans (ha X hX)
+  have h2 := hb X hX
+  calc _ ≤ _ := hsum
+    _ ≤ 2 * (Ca * (X : ℝ) ^ (2 + ε)) + 2 * (Cb * (X : ℝ) ^ (2 + ε)) := by linarith
+    _ = (2 * Ca + 2 * Cb) * (X : ℝ) ^ (2 + ε) := by ring
+
 /-- LEAF, new. P0029 Section 3, pages 12 and 13, the sentence before display 3.8: Parseval's
 identity applied to the circle method integral 3.2, with the arc main term of page 12 and the
 zero bound 3.7 on the error of 3.5, bounds the mean square of `r2` minus the truncated main term
-over the even `N ≤ X` by `X ^ (3/2 + 2Θ + ε)`.  OPEN: this is the analytic core, the uniform
-explicit formula 3.5 and its arc summation, which the survey does not write out. -/
+over the even `N ≤ X` by `X ^ (3/2 + 2Θ + ε)`.  ROUTE BURST 7: now derived from the three leaves
+`major_arc_uniform150`, `major_model_L2_150`, `major_coefficients150` and `zeroBound_lower150`,
+through the PROVED Bessel assembly `bessel_model150`. -/
 theorem major_minor_mean_square150 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
       ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (r2 N - truncMain150 N) ^ 2 ≤
         C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  intro ε hε
+  obtain ⟨C1, h1⟩ := major_arc_uniform150 Θ hΘ hZ (ε / 4) (by linarith)
+  obtain ⟨C2, h2⟩ := major_model_L2_150 (ε / 2) (by linarith)
+  obtain ⟨C3, h3⟩ := major_coefficients150 ε hε
+  have hhalf : (1 : ℝ) / 2 ≤ Θ := zeroBound_lower150 hZ
+  refine ⟨4 * C1 ^ 2 * (16 / ε ^ 2 + |C2|) + 2 * |C3|, ?_⟩
+  intro X hX
+  have hX1 : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+  have hX0 : (0 : ℝ) ≤ (X : ℝ) := by linarith
+  set F := (Finset.Icc 1 X).filter (fun N => Even N) with hFdef
+  have hF : ∀ N ∈ F, N ≤ X := fun N hN => (Finset.mem_Icc.mp (Finset.mem_filter.mp hN).1).2
+  set B := C1 * (X : ℝ) ^ (Θ + 1 / 4 + ε / 4) with hBdef
+  have hM : ∀ α, ‖VX150 X α‖ ≤ ∑ q ∈ Finset.Icc 1 (Nat.sqrt X),
+      ‖((ArithmeticFunction.moebius q : ℤ) : ℂ) / (Nat.totient q : ℂ)‖ * X :=
+    norm_VX_le150 X
+  have hbes := bessel_model150 X (VX150 X) (measurable_VX150 X) _ hM B (h1 X hX) F hF
+  -- the three integrals
+  have hS2 : (∫ α in (0 : ℝ)..1, ‖Ssum X α‖ ^ 2) ≤ 16 / ε ^ 2 * (X : ℝ) ^ (1 + ε / 2) := by
+    rw [integral_norm_sq_Ssum150]
+    refine (sum_vonMangoldt_sq_le150 X).trans ?_
+    have hl : Real.log X ≤ (X : ℝ) ^ (ε / 4) / (ε / 4) :=
+      Real.log_le_rpow_div hX0 (by linarith)
+    have hl0 : 0 ≤ Real.log X := Real.log_nonneg hX1
+    have hsq : Real.log X ^ 2 ≤ ((X : ℝ) ^ (ε / 4) / (ε / 4)) ^ 2 := pow_le_pow_left₀ hl0 hl 2
+    have he : ((X : ℝ) ^ (ε / 4) / (ε / 4)) ^ 2 = 16 / ε ^ 2 * (X : ℝ) ^ (ε / 2) := by
+      rw [div_pow, ← Real.rpow_natCast, ← Real.rpow_mul hX0]
+      field_simp
+      ring_nf
+    have hXe : (X : ℝ) * (X : ℝ) ^ (ε / 2) = (X : ℝ) ^ (1 + ε / 2) := by
+      rw [Real.rpow_add (by linarith), Real.rpow_one]
+    calc (X : ℝ) * Real.log X ^ 2 ≤ (X : ℝ) * (16 / ε ^ 2 * (X : ℝ) ^ (ε / 2)) := by
+          rw [← he]; exact mul_le_mul_of_nonneg_left hsq hX0
+      _ = 16 / ε ^ 2 * (X : ℝ) ^ (1 + ε / 2) := by rw [← hXe]; ring
+  have hV2 : (∫ α in (0 : ℝ)..1, ‖VX150 X α‖ ^ 2) ≤ |C2| * (X : ℝ) ^ (1 + ε / 2) :=
+    (h2 X hX).trans (mul_le_mul_of_nonneg_right (le_abs_self _) (by positivity))
+  have hB2 : B ^ 2 = C1 ^ 2 * (X : ℝ) ^ (2 * Θ + 1 / 2 + ε / 2) := by
+    have hp : ((X : ℝ) ^ (Θ + 1 / 4 + ε / 4)) ^ 2 = (X : ℝ) ^ (2 * Θ + 1 / 2 + ε / 2) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul hX0]
+      congr 1
+      push_cast; ring
+    rw [hBdef, mul_pow, hp]
+  have hfirst : 2 * B ^ 2 * ((∫ α in (0 : ℝ)..1, ‖Ssum X α‖ ^ 2) +
+      ∫ α in (0 : ℝ)..1, ‖VX150 X α‖ ^ 2) ≤
+      2 * C1 ^ 2 * (16 / ε ^ 2 + |C2|) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    have hsum : (∫ α in (0 : ℝ)..1, ‖Ssum X α‖ ^ 2) + ∫ α in (0 : ℝ)..1, ‖VX150 X α‖ ^ 2 ≤
+        (16 / ε ^ 2 + |C2|) * (X : ℝ) ^ (1 + ε / 2) := by linarith
+    have hexp : (X : ℝ) ^ (2 * Θ + 1 / 2 + ε / 2) * (X : ℝ) ^ (1 + ε / 2) =
+        (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+      rw [← Real.rpow_add (by linarith)]
+      congr 1; ring
+    rw [hB2]
+    calc 2 * (C1 ^ 2 * (X : ℝ) ^ (2 * Θ + 1 / 2 + ε / 2)) *
+          ((∫ α in (0 : ℝ)..1, ‖Ssum X α‖ ^ 2) + ∫ α in (0 : ℝ)..1, ‖VX150 X α‖ ^ 2)
+        ≤ 2 * (C1 ^ 2 * (X : ℝ) ^ (2 * Θ + 1 / 2 + ε / 2)) *
+          ((16 / ε ^ 2 + |C2|) * (X : ℝ) ^ (1 + ε / 2)) :=
+          mul_le_mul_of_nonneg_left hsum (by positivity)
+      _ = 2 * C1 ^ 2 * (16 / ε ^ 2 + |C2|) *
+          ((X : ℝ) ^ (2 * Θ + 1 / 2 + ε / 2) * (X : ℝ) ^ (1 + ε / 2)) := by ring
+      _ = 2 * C1 ^ 2 * (16 / ε ^ 2 + |C2|) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by rw [hexp]
+  have hthird : C3 * (X : ℝ) ^ (2 + ε) ≤ |C3| * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    have hmono : (X : ℝ) ^ (2 + ε) ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+      Real.rpow_le_rpow_of_exponent_le hX1 (by linarith)
+    calc C3 * (X : ℝ) ^ (2 + ε) ≤ |C3| * (X : ℝ) ^ (2 + ε) :=
+          mul_le_mul_of_nonneg_right (le_abs_self _) (by positivity)
+      _ ≤ |C3| * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+          mul_le_mul_of_nonneg_left hmono (abs_nonneg _)
+  have h3X := h3 X hX
+  -- pointwise triangle inequality
+  have hpt : ∀ N ∈ F, (r2 N - truncMain150 N) ^ 2 ≤
+      2 * ‖(r2 N : ℂ) - ∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))‖ ^ 2 +
+      2 * ‖(∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))) - (truncMain150 N : ℂ)‖ ^ 2 := by
+    intro N _
+    have he : (r2 N - truncMain150 N) ^ 2 = ‖(r2 N : ℂ) - (truncMain150 N : ℂ)‖ ^ 2 := by
+      rw [← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs, sq_abs]
+    rw [he]
+    exact norm_sub_sq_le_two150 _ _ _
+  have hsum := Finset.sum_le_sum hpt
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum] at hsum
+  calc ∑ N ∈ F, (r2 N - truncMain150 N) ^ 2
+      ≤ 2 * (2 * B ^ 2 * ((∫ α in (0 : ℝ)..1, ‖Ssum X α‖ ^ 2) +
+          ∫ α in (0 : ℝ)..1, ‖VX150 X α‖ ^ 2)) + 2 * (C3 * (X : ℝ) ^ (2 + ε)) := by
+        linarith
+    _ ≤ 2 * (2 * C1 ^ 2 * (16 / ε ^ 2 + |C2|) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε)) +
+          2 * (|C3| * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε)) := by linarith
+    _ = (4 * C1 ^ 2 * (16 / ε ^ 2 + |C2|) + 2 * |C3|) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by ring
 
 /-- PROVED. The elementary inequality used to pass from `r2 - truncMain150` and
 `truncMain150 - N 𝔖(N)` to `E2`, P0029 page 13, implicit in "using Parseval together with 3.7". -/
