@@ -1445,7 +1445,10 @@ theorem classMembership_of_leaves (h16a : Lemma16a) (h16b : Lemma16b) (γ c C θ
 
 /-- ASSEMBLY. Theorem 2, CONDITIONAL ON Lemma 10, which is CITED, on Lemma 16 (a), (b) and on
 the leaves `leaf_T2_*`. With `lemma16a_of_leaves`, `lemma16b_of_leaves` and the chain above,
-Theorem 2 rests on Lemma 10 and the leaves of this file only: see `theorem2_of_all_leaves`. -/
+Theorem 2 rests on Lemma 10 and the leaves of this file only: see `theorem2_of_all_leaves`.
+SUPERSEDED 2026-11-12, coordinator decision 1, by `theorem2_of_leaves_kar` in
+`Theorem2Kar.lean`, which takes `KaracubaCore.Lemma10Kar`, Lemma 10 with `S ⊆ [2, k-1]` as in
+Karacuba's Theorem 1, instead of `Lemma10`, whose class allows `s = 1`. Kept unchanged. -/
 theorem theorem2_of_leaves (h10 : Lemma10) (h16a : Lemma16a) (h16b : Lemma16b) : Theorem2 := by
   intro γ h1 h2 c C hc0 hc1 hC0 hC1
   set θ := min (1 / 4 : ℝ) ((γ - 1 - C) / (2 * γ)) with hθdef
@@ -1511,7 +1514,8 @@ theorem theorem2_of_leaves (h10 : Lemma10) (h16a : Lemma16a) (h16b : Lemma16b) :
           exact mul_le_mul_of_nonneg_right (le_max_left _ _) hE
 
 /-- ASSEMBLY. Theorem 2 CONDITIONAL ON Lemma 10, which is CITED, and on the leaves of this
-file only: Lemmas 11 to 16 are discharged by their assemblies above. -/
+file only: Lemmas 11 to 16 are discharged by their assemblies above.
+SUPERSEDED 2026-11-12 by `theorem2_of_all_leaves_kar` in `Theorem2Kar.lean`. -/
 theorem theorem2_of_all_leaves (h10 : Lemma10) : Theorem2 :=
   theorem2_of_leaves h10
     (lemma16a_of_leaves lemma15_of_leaves)

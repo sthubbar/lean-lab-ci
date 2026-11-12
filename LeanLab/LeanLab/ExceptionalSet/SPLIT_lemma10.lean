@@ -8,6 +8,11 @@ the range where the derivative conditions of the class are used, and the disposa
 bounded range, where the sum is bounded by the number of its terms and what remains is
 real arithmetic on powers of `N`.
 
+OFF ROUTE, NOT PROGRESS, coordinator decision 4, 2026-11-12: this split is circular. Its
+LEAF 1 `leaf_sum_large_N` is proved by calling `lemma10` itself, so `lemma10_split` adds no
+evidence for Lemma 10. The live route is the Karacuba split in `KaracubaCore.lean`. Kept for
+history, not deleted.
+
 AI wrote the Lean code.  Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
