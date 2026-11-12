@@ -285,6 +285,213 @@ theorem smoothed_explicit_lower {m : ℕ} (hm : 2 ≤ m) {δ u X : ℝ}
   exact ⟨hs, Task301.psi_lower_of_explicit_identity m hδ.le hu.le hX3 hs
     (Task259.psiAverage_explicit hm0 hδ hu (by linarith))⟩
 
+/-- Page 3 equation 2.7 and page 9 after equation 2.64. The enlarged
+Brun Titchmarsh logarithm quotient decreases in X once X (e^u - 1) exceeds one.
+AI wrote this Lean code, burst3 2026-11-12. -/
+theorem tail_log_ratio_antitone {δ u Y X : ℝ} (hδ : 0 ≤ δ) (hu : 0 < u)
+    (hY : 0 < Y) (hYX : Y ≤ X) (hgap : 1 < Y * (Real.exp u - 1)) :
+    Real.log (Real.exp u * X * (1 + δ)) / Real.log (X * (Real.exp u - 1)) ≤
+      Real.log (Real.exp u * Y * (1 + δ)) / Real.log (Y * (Real.exp u - 1)) := by
+  have hE : 0 < Real.exp u - 1 := by linarith [Real.add_one_le_exp u]
+  have hX : 0 < X := hY.trans_le hYX
+  have hc : 0 < Real.exp u * (1 + δ) := by positivity
+  have hEc : Real.exp u - 1 ≤ Real.exp u * (1 + δ) := by
+    nlinarith [Real.exp_pos u, mul_nonneg (Real.exp_pos u).le hδ]
+  have hA : Real.log (Real.exp u - 1) ≤ Real.log (Real.exp u * (1 + δ)) :=
+    Real.log_le_log hE hEc
+  have hl : Real.log Y ≤ Real.log X := Real.log_le_log hY hYX
+  have eX1 : Real.log (Real.exp u * X * (1 + δ)) = Real.log X + Real.log (Real.exp u * (1 + δ)) := by
+    rw [show Real.exp u * X * (1 + δ) = X * (Real.exp u * (1 + δ)) by ring,
+      Real.log_mul hX.ne' hc.ne']
+  have eY1 : Real.log (Real.exp u * Y * (1 + δ)) = Real.log Y + Real.log (Real.exp u * (1 + δ)) := by
+    rw [show Real.exp u * Y * (1 + δ) = Y * (Real.exp u * (1 + δ)) by ring,
+      Real.log_mul hY.ne' hc.ne']
+  have eX2 : Real.log (X * (Real.exp u - 1)) = Real.log X + Real.log (Real.exp u - 1) :=
+    Real.log_mul hX.ne' hE.ne'
+  have eY2 : Real.log (Y * (Real.exp u - 1)) = Real.log Y + Real.log (Real.exp u - 1) :=
+    Real.log_mul hY.ne' hE.ne'
+  have hdY : 0 < Real.log (Y * (Real.exp u - 1)) := Real.log_pos hgap
+  have hdX : 0 < Real.log (X * (Real.exp u - 1)) := by
+    rw [eX2]; rw [eY2] at hdY; linarith
+  rw [div_le_div_iff₀ hdX hdY, eX1, eY1, eX2, eY2]
+  nlinarith [mul_nonneg (sub_nonneg.mpr hA) (sub_nonneg.mpr hl)]
+
+/-- Page 3 equation 2.3. The endpoint mass nu grows with the cut a on [0, 1/2].
+AI wrote this Lean code, burst3 2026-11-12. -/
+theorem tailMass_mono (m : ℕ) {a b : ℝ} (ha : 0 ≤ a) (hab : a ≤ b) (hb : b ≤ 1 / 2) :
+    tailMass m a ≤ tailMass m b := by
+  unfold tailMass
+  rw [weight_tail_symm, weight_tail_symm]
+  have hi : ∀ s v : ℝ, IntervalIntegrable (weight m) volume s v :=
+    fun s v => (weight_continuous m).intervalIntegrable s v
+  have hsplit := intervalIntegral.integral_add_adjacent_intervals (hi 0 a) (hi a b)
+  have hnn : 0 ≤ ∫ t in a..b, weight m t :=
+    intervalIntegral.integral_nonneg hab (fun t ht =>
+      weight_nonneg m ⟨ha.trans ht.1, by linarith [ht.2]⟩)
+  linarith
+
+/-- Page 9 equation 2.64 and the remark before Table 2 that the budget only
+improves as X grows. Every term of the normalized budget is monotone in X and
+in the cut a, and the absolute zero sum Sigma decreases in X. So the budget at
+an admissible point Y below X with a larger cut b implies the budget at X and a.
+This is the reduction of the Table 2 check to its least X.
+AI wrote this Lean code, burst3 2026-11-12. -/
+theorem zero_budget_of_endpoint {m : ℕ} (hm : 0 < m) {δ u a b Y X : ℝ}
+    (hδ : 0 < δ) (hu : 0 < u) (ha : 0 ≤ a) (hab : a ≤ b) (hb : b ≤ 1 / 2)
+    (hY : Real.exp 38 ≤ Y) (hYX : Y ≤ X) (hgap : 1 < Y * (Real.exp u - 1))
+    (hend : (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt Y +
+      tailCoefficient δ u Y * tailMass m b / (∫ t in (0 : ℝ)..1, weight m t) +
+        u / (2 * Y) < (Real.exp u - 1) * Y * (1 + δ / 2 - zeroError m δ u Y)) :
+    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt X +
+      tailCoefficient δ u X * tailMass m a / (∫ t in (0 : ℝ)..1, weight m t) +
+        u / (2 * X) < (Real.exp u - 1) * X * (1 + δ / 2 - zeroError m δ u X) := by
+  have hY0 : 0 < Y := (Real.exp_pos 38).trans_le hY
+  have hX0 : 0 < X := hY0.trans_le hYX
+  have hE : 0 < Real.exp u - 1 := by linarith [Real.add_one_le_exp u]
+  have hM := weight_mass_pos m
+  set M := ∫ t in (0 : ℝ)..1, weight m t
+  set E := Real.exp u - 1 with hEdef
+  set lam := X / Y with hlam
+  have hlam1 : 1 ≤ lam := (one_le_div hY0).mpr hYX
+  have hlamY : lam * Y = X := by rw [hlam]; field_simp
+  -- the zero sum
+  have hz := (zeroError_antitone m δ u hY0 hYX
+    (Task259.absolute_zero_summable hm hδ hu hY0)).2
+  -- the tail term
+  have hr := tail_log_ratio_antitone hδ.le hu hY0 hYX hgap
+  have hX1 : 1 < X := by linarith [Real.add_one_le_exp (38 : ℝ)]
+  have hrX : 0 ≤ Real.log (Real.exp u * X * (1 + δ)) / Real.log (X * E) := by
+    have h1 : 0 < Real.log (X * E) := Real.log_pos (by nlinarith)
+    have h2 : 0 < Real.log (Real.exp u * X * (1 + δ)) := by
+      apply Real.log_pos
+      have he1 : 1 < Real.exp u := Real.one_lt_exp_iff.mpr hu
+      have h3 : 1 < Real.exp u * X := by nlinarith
+      nlinarith
+    positivity
+  have hnu := tailMass_mono m ha hab hb
+  have hnua : 0 ≤ tailMass m a := by
+    have h4 := tailMass_mono m le_rfl ha (by linarith)
+    have h0 : tailMass m 0 = 0 := by simp [tailMass]
+    linarith
+  have hK : Real.log (Real.exp u * X * (1 + δ)) / Real.log (X * E) * tailMass m a ≤
+      Real.log (Real.exp u * Y * (1 + δ)) / Real.log (Y * E) * tailMass m b :=
+    mul_le_mul hr hnu hnua (hrX.trans hr)
+  have h0 : 0 ≤ 2 * (1 + δ) * E * X := by positivity
+  have hL : tailCoefficient δ u X * tailMass m a = (2 * (1 + δ) * E * X) *
+      (Real.log (Real.exp u * X * (1 + δ)) / Real.log (X * E) * tailMass m a) := by
+    unfold tailCoefficient; ring
+  have hR : lam * (tailCoefficient δ u Y * tailMass m b / M) = (2 * (1 + δ) * E * X) *
+      (Real.log (Real.exp u * Y * (1 + δ)) / Real.log (Y * E) * tailMass m b) / M := by
+    unfold tailCoefficient; rw [← hlamY]; ring
+  have htail : tailCoefficient δ u X * tailMass m a / M ≤
+      lam * (tailCoefficient δ u Y * tailMass m b / M) := by
+    rw [hR, hL]
+    exact div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hK h0) hM.le
+  -- the square root term
+  have hsq : Real.sqrt X ≤ lam * Real.sqrt Y := by
+    have hsY : 0 < Real.sqrt Y := Real.sqrt_pos.mpr hY0
+    have hsXY : Real.sqrt Y ≤ Real.sqrt X := Real.sqrt_le_sqrt hYX
+    have e1 : Real.sqrt X * Real.sqrt X = X := Real.mul_self_sqrt hX0.le
+    have e2 : Real.sqrt Y * Real.sqrt Y = Y := Real.mul_self_sqrt hY0.le
+    rw [hlam, div_mul_eq_mul_div, le_div_iff₀ hY0]
+    nlinarith [mul_le_mul_of_nonneg_left hsXY (Real.sqrt_nonneg X)]
+  -- the u over 2X term
+  have hux : u / (2 * X) ≤ lam * (u / (2 * Y)) := by
+    have h1 : u / (2 * X) ≤ u / (2 * Y) :=
+      div_le_div_of_nonneg_left hu.le (by positivity) (by linarith)
+    have h2 : u / (2 * Y) ≤ lam * (u / (2 * Y)) :=
+      le_mul_of_one_le_left (by positivity) hlam1
+    linarith
+  have hω : (0 : ℝ) ≤ 2.05022 * 10 ^ (-3 : ℤ) := by norm_num
+  have hmul := mul_lt_mul_of_pos_left hend (by linarith : 0 < lam)
+  have hrhs : lam * (E * Y * (1 + δ / 2 - zeroError m δ u Y)) ≤
+      E * X * (1 + δ / 2 - zeroError m δ u X) := by
+    have he : lam * (E * Y * (1 + δ / 2 - zeroError m δ u Y)) =
+        E * X * (1 + δ / 2 - zeroError m δ u Y) := by rw [← hlamY]; ring
+    rw [he]
+    exact mul_le_mul_of_nonneg_left (by linarith) (by positivity)
+  have hωs := mul_le_mul_of_nonneg_left hsq hω
+  have hdist : lam * ((2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt Y +
+      tailCoefficient δ u Y * tailMass m b / M + u / (2 * Y)) =
+      (2.05022 * 10 ^ (-3 : ℤ)) * (lam * Real.sqrt Y) +
+        lam * (tailCoefficient δ u Y * tailMass m b / M) + lam * (u / (2 * Y)) := by ring
+  linarith
+
+/-- The least admissible normalized X for a Table 2 row, uniformly in the cut a. -/
+noncomputable def rowEndpointX (r : PrintedRow) : ℝ :=
+  r.threshold / (Real.exp r.uQ * (1 + (r.deltaQ : ℝ)))
+
+/-- LEAF, OPEN. Page 9 Theorem 2.7 equation 2.64 and page 13 Table 2, at the least
+admissible X of each row and the upper end aQ + 1/10000 of the printed a interval.
+This is the finite per-row numerical zero budget left after the monotone reduction
+zero_budget_of_endpoint. Its analytic sources are Lemmas 2.5 and 2.6 and Theorem 3.2,
+with Platt 2011, Kadiri 2005 and 2013 and Rosser 1941. An uncertified mpmath probe
+that sums the zeros up to height 3.061e10 on the critical line with the smooth
+Riemann von Mangoldt density gives positive margins on all rows, see
+research/burst-20261112/KadiriLumley2014-table_zero_budget.md. This leaf remains unproved. -/
+theorem table_endpoint_budget {r : PrintedRow} (hr : r ∈ tableTwo) :
+    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
+      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
+        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
+      (Real.exp r.uQ - 1) * rowEndpointX r *
+        (1 + (r.deltaQ : ℝ) / 2 - zeroError r.m r.deltaQ r.uQ (rowEndpointX r)) := by
+  sorry
+
+/-- Page 2 equation 2.1. The row endpoint is admissible and lies below every
+normalized X allowed by table_zero_budget. AI wrote this Lean code, burst3 2026-11-12. -/
+theorem rowEndpointX_domain {r : PrintedRow} (hr : r ∈ tableTwo) {a X : ℝ}
+    (ha : a ∈ Icc (r.aQ : ℝ) ((r.aQ : ℝ) + 1 / 10000)) (hX : Real.exp 38 ≤ X)
+    (hx : r.threshold < Real.exp r.uQ * (X * (1 + (r.deltaQ : ℝ) * (1 - a)))) :
+    Real.exp 38 ≤ rowEndpointX r ∧ rowEndpointX r ≤ X ∧
+      1 < rowEndpointX r * (Real.exp r.uQ - 1) := by
+  have hs := table_small_steps r hr
+  have hδ : (0 : ℝ) < r.deltaQ := by exact_mod_cast hs.1
+  have hδ1 : (r.deltaQ : ℝ) ≤ 0.0001 := by
+    have h := (Rat.cast_le (K := ℝ)).mpr hs.2.1
+    norm_num at h ⊢
+    exact h
+  have hu : 1 / (10 : ℝ) ^ 12 ≤ r.uQ := by
+    have h := (Rat.cast_le (K := ℝ)).mpr hs.2.2.1
+    norm_num at h ⊢
+    exact h
+  have hu1 : (r.uQ : ℝ) ≤ 0.0001 := by
+    have h := (Rat.cast_le (K := ℝ)).mpr hs.2.2.2
+    norm_num at h ⊢
+    exact h
+  have hrpar := (tableTwo_rounding_arithmetic r hr).1
+  have haQ : (0 : ℝ) ≤ r.aQ := by exact_mod_cast hrpar.2.2.2.1
+  have ha0 : 0 ≤ a := haQ.trans ha.1
+  have he : Real.exp (r.uQ : ℝ) ≤ 2 := by
+    have h := Real.exp_bound_div_one_sub_of_interval (by norm_num : (0 : ℝ) ≤ 0.0001)
+      (by norm_num : (0.0001 : ℝ) < 1)
+    have hu' := Real.exp_le_exp.mpr hu1
+    norm_num at h
+    linarith
+  have hS : 0 < Real.exp r.uQ * (1 + (r.deltaQ : ℝ)) := by positivity
+  have hS4 : Real.exp r.uQ * (1 + (r.deltaQ : ℝ)) ≤ 4 := by
+    nlinarith [Real.exp_pos (r.uQ : ℝ)]
+  have hbase : (4 * 10 ^ 18 : ℝ) ≤ r.threshold := by
+    have h := tableTwo_threshold_ge_base hr
+    norm_num [evenBase] at h ⊢
+    exact h
+  have hlow : (10 : ℝ) ^ 18 ≤ rowEndpointX r := by
+    unfold rowEndpointX
+    rw [le_div_iff₀ hS]
+    nlinarith
+  refine ⟨exp38_lt_base_quarter.le.trans hlow, ?_, ?_⟩
+  · unfold rowEndpointX
+    rw [div_le_iff₀ hS]
+    have hX0 : 0 < X := (Real.exp_pos 38).trans_le hX
+    have h1 : X * (1 + (r.deltaQ : ℝ) * (1 - a)) ≤ X * (1 + (r.deltaQ : ℝ)) := by
+      apply mul_le_mul_of_nonneg_left _ hX0.le
+      nlinarith
+    have h2 := mul_le_mul_of_nonneg_left h1 (Real.exp_pos (r.uQ : ℝ)).le
+    nlinarith
+  · have huE : (r.uQ : ℝ) ≤ Real.exp r.uQ - 1 := by linarith [Real.add_one_le_exp (r.uQ : ℝ)]
+    have hE : 1 / (10 : ℝ) ^ 12 ≤ Real.exp r.uQ - 1 := hu.trans huE
+    have hprod := mul_le_mul hlow hE (by norm_num) (by positivity)
+    nlinarith
+
 /-- LEAF. Page 9 equation 2.64 and page 13 Table 2.
 This is the remaining zero-sum and numerical budget after the explicit formula.
 Its analytic sources are Lemmas 2.5 and 2.6 and Theorem 3.2, including
@@ -299,7 +506,23 @@ theorem table_zero_budget {r : PrintedRow} (hr : r ∈ tableTwo) {a X : ℝ}
         (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * X) <
       (Real.exp r.uQ - 1) * X *
         (1 + (r.deltaQ : ℝ) / 2 - zeroError r.m r.deltaQ r.uQ X) := by
-  sorry
+  obtain ⟨hY38, hYX, hgap⟩ := rowEndpointX_domain hr ha hX hx
+  have hs := table_small_steps r hr
+  have hδ : (0 : ℝ) < r.deltaQ := by exact_mod_cast hs.1
+  have hu : (0 : ℝ) < r.uQ := by
+    have h := (Rat.cast_le (K := ℝ)).mpr hs.2.2.1
+    norm_num at h
+    linarith
+  have hrpar := (tableTwo_rounding_arithmetic r hr).1
+  have haQ : (0 : ℝ) ≤ r.aQ := by exact_mod_cast hrpar.2.2.2.1
+  have hbQ : (r.aQ : ℝ) + 1 / 10000 ≤ 1 / 2 := by
+    have hb := (Rat.cast_le (K := ℝ)).mpr hrpar.2.2.2.2.1
+    push_cast at hb
+    norm_num at hb ⊢
+    exact hb
+  have hm : 0 < r.m := by have := (tableTwo_parameters r hr).1; omega
+  exact zero_budget_of_endpoint hm hδ hu (haQ.trans ha.1) ha.2 hbQ hY38 hYX hgap
+    (table_endpoint_budget hr)
 
 /-- LEAF. Page 3 equation 2.14, page 9 Theorem 2.7 equation 2.64 and
 page 13 Table 2. This is the remaining psi lower estimate and numerical margin,
