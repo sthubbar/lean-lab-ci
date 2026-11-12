@@ -9,11 +9,16 @@ import LeanLab.Linnik1951.Decomp376d
 import LeanLab.Linnik1951.Decomp376f
 import LeanLab.Linnik1951.Decomp357j
 
+import LeanLab.Linnik1951.Decomp487a
+import LeanLab.Linnik1951.Decomp487b
+import LeanLab.Linnik1951.Decomp487c
+import LeanLab.Linnik1951.Circle435
+
 namespace LeanLab.Linnik1951
 
 open LeanLab.Linnik LeanLab.DERZ1997
 
-/-- P0093 Page 158 final sentence. Exact negative outer statement by character reflection. CONDITIONAL only on outer_to_kernels376 after the two real kernel bounds are proved. -/
+/-- P0093 Page 158 final sentence. Exact negative outer statement by character reflection. CONDITIONAL on the signed outer contour leaves and the character transfer. -/
 theorem mellin_negative_far_refined376 (hG : LeanLab.DERZ1997.GRH) :
     ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
       ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
@@ -21,7 +26,7 @@ theorem mellin_negative_far_refined376 (hG : LeanLab.DERZ1997.GRH) :
           (∫ α in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..-(4 / (N : ℝ)),
             ‖characterPrime280 χ N α‖ ^ 2) ≤
               B * (N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) * Real.log N ^ 10 := by
-  obtain ⟨B, hB, N0, hpos⟩ := mellin_positive_far_decomposed376 hG
+  obtain ⟨B, hB, N0, hpos⟩ := mellin_positive_far487 hG
   refine ⟨B, hB, N0, ?_⟩
   intro N hN q hq hqt χ hχ
   have hstar : star χ ≠ 1 := by
@@ -34,8 +39,8 @@ theorem mellin_negative_far_refined376 (hG : LeanLab.DERZ1997.GRH) :
 
 /-- P0093 Page 159 equation 5.2. Exact MellinBound280 assembly through the refined central and outer estimates. CONDITIONAL on the stated analytic leaves. -/
 theorem mellin_bound_refined376 (hG : LeanLab.DERZ1997.GRH) : MellinBound280 := by
-  obtain ⟨B0, hB0, N0, h0⟩ := mellin_near_decomposed376 hG
-  obtain ⟨Bp, hBp, Np, hp⟩ := mellin_positive_far_decomposed376 hG
+  obtain ⟨B0, hB0, N0, h0⟩ := mellin_near487 hG
+  obtain ⟨Bp, hBp, Np, hp⟩ := mellin_positive_far487 hG
   obtain ⟨Bm, hBm, Nm, hm⟩ := mellin_negative_far_refined376 hG
   obtain ⟨L, hL⟩ := exists_nat_gt (Real.exp 1)
   refine ⟨Bm + B0 + Bp, by positivity, max 1 (max L (max N0 (max Np Nm))), ?_⟩
@@ -87,7 +92,7 @@ theorem major_error_refined376 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBound280)
     ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
       |arcContribution280 k N (majorArcs280 N) - mainTerm111 k N| ≤
         ε * scale111 k N := by
-  obtain ⟨Na, ha⟩ := major_to_truncated_decomposed376 hG hM k hk (ε / 2) (by positivity)
+  obtain ⟨Na, ha⟩ := major_to_truncated487 hG hM k hk (ε / 2) (by positivity)
   obtain ⟨Nt, ht⟩ := truncated_to_main_proved376 k hk (ε / 2) (by positivity)
   refine ⟨max Na Nt, ?_⟩
   intro N hev hN
@@ -99,12 +104,12 @@ theorem major_error_refined376 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBound280)
     _ ≤ ε / 2 * scale111 k N + ε / 2 * scale111 k N := add_le_add hA hT
     _ = _ := by ring
 
-/-- P0093 Page 166 equation 9.2. Exact exceptional_error280 statement through the refined interval cover and doubled system mass. CONDITIONAL on these analytic and geometric inputs. -/
+/-- P0093 Page 166 equation 9.2. Exact exceptional_error280 statement through the refined interval cover and doubled system mass. CONDITIONAL on the signed outer contour leaves and the character transfer. The finite cover is proved. -/
 theorem exceptional_error_refined376 (hG : LeanLab.DERZ1997.GRH) :
     ∃ η : ℝ, 0 < η ∧ η < 1 ∧ ∀ k : ℕ, 3 ≤ k →
       ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
         |arcContribution280 k N (exceptionalArcs280 N η)| ≤ ε * scale111 k N := by
-  obtain ⟨η, hη, hη1, C, hC, Nc, hc⟩ := exceptional_prime_mass_decomposed376 hG
+  obtain ⟨η, hη, hη1, C, hC, Nc, hc⟩ := exceptional_prime_mass487 hG
   obtain ⟨A, hA, Na, ha⟩ := power_uniform_log357
   refine ⟨η, hη, hη1, ?_⟩
   intro k hk ε hε
@@ -166,7 +171,7 @@ theorem error_bound_refined376 (hG : LeanLab.DERZ1997.GRH) :
   have hexc := hE N hev he
   have hminor := hR N hev hg
   have hs := (scale_pos111 k N h1).le
-  have hid := circle_partition_decomposed357 k N (by omega) η
+  have hid := circle_partition_proved435 k N (by omega) η
   have htri := abs_add_le
     (arcContribution280 k N (majorArcs280 N) - mainTerm111 k N)
     (arcContribution280 k N (exceptionalArcs280 N η))
