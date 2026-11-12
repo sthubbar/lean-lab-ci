@@ -6,7 +6,8 @@ Tolev 1999 pages 76 to 82 displays 23 to 49.
 Halupczok 2008 pages 8 to 12 and 18 to 19, proof of Theorem 3.
 The analytic components are OPEN. The assembly is CONDITIONAL ON them.
 -/
-import LeanLab.Tolev2009.Decomp83
+-- 2026-11-12 PROVE PASS: was `import LeanLab.Tolev2009.Decomp83`; no declaration of it is used.
+import LeanLab.Tolev2009.PublishedTheorem
 import LeanLab.PNTPort.BV.Helpers
 
 open Finset Real MeasureTheory

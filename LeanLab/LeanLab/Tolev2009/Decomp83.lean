@@ -6,6 +6,7 @@ The two analytic leaves remain cited inputs.
 The opaque legacy series has no identification equation.
 -/
 import LeanLab.Tolev2009.PublishedTheorem
+import LeanLab.Tolev2009.Major83
 
 namespace LeanLab.Tolev2009.Decomp83
 
@@ -59,9 +60,9 @@ theorem theorem_transfer_admissible (S T : SSeries)
 /-- LEAF. Page 4 display 9. Major arc mean bound.
 Published inputs: Tolev 1999 sections 4 and 5 and Halupczok 2008 Theorem 3.
 The source references were reviewed by task45. Task83 checked the rendered paper page after network access was restored.
-This cited analytic input is not proved here. -/
+Split 2026-11-12 into the three errors of Major83, CONDITIONAL ON them. -/
 theorem major_arc_leaf : BoundE1 := by
-  sorry
+  exact Major83.major_arc_of_three
 
 /-- LEAF. Page 4 display 12, supremum half only.
 Published input: the adaptation of Tolev 1999 Lemma 12 cited by Tolev 2009.
