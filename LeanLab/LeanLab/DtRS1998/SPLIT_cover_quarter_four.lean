@@ -25,6 +25,10 @@ theorem cover_quarter_four_lower :
       (∀ j : ℕ, 375000001 ≤ j → j ≤ 437500000 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
+  -- BLOCKED 2026-11-12 FREE-nv-mistral task339 cover_quarter_four_lower:
+  -- OUT OF REACH: requires explicit Pocklington certificates for primes near 10^270.
+  -- Searched Mathlib for Nat.Prime decision procedures; trial division infeasible at 10^270.
+  -- No pre-generated certificate data exists in the repository for exponent 270.
   sorry
 
 /-- LEAF. Second step of the assembly: the upper half of the fourth quarter.
@@ -38,6 +42,10 @@ theorem cover_quarter_four_upper :
       (∀ j : ℕ, 437500001 ≤ j → j ≤ 500000000 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
+  -- BLOCKED 2026-11-12 FREE-nv-mistral task339 cover_quarter_four_upper:
+  -- OUT OF REACH: requires explicit Pocklington certificates for primes near 10^270.
+  -- Searched Mathlib for Nat.Prime decision procedures; trial division infeasible at 10^270.
+  -- No pre-generated certificate data exists in the repository for exponent 270.
   sorry
 
 /-- The two half lists, concatenated, certify the fourth quarter: the lengths
