@@ -16,6 +16,7 @@ is open; the assembly is complete.
 Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Decomp270c
+import LeanLab.DtRS1998.Decomp455k
 
 namespace LeanLab.DtRS1998.SPLITcertificate300
 
@@ -87,7 +88,7 @@ theorem cover_block1 :
     126429, 127301, 131189, 131207, 131337, 131889, 132219, 132729, 133377, 133391,
     158457, 291297, 336179, 421491, 505017, 699059, 969173, 1334189, 1668413, 2240913,
     3166973, 3361883, 3697757 ] : List ℕ), a ≤ 10 ^ 300 ∧ (2 * j + a).Prime := by
-  sorry
+  exact _root_.LeanLab.DtRS1998.Decomp455b.cover_block1
 
 /-- LEAF. Step 3 of 5, the coverage job on the second block.  For every j with
 125000000 ≤ j < 250000000 some listed offset a below 10 ^ 300 makes 2 * j + a
@@ -117,7 +118,7 @@ theorem cover_block2 :
     126429, 127301, 131189, 131207, 131337, 131889, 132219, 132729, 133377, 133391,
     158457, 291297, 336179, 421491, 505017, 699059, 969173, 1334189, 1668413, 2240913,
     3166973, 3361883, 3697757 ] : List ℕ), a ≤ 10 ^ 300 ∧ (2 * j + a).Prime := by
-  sorry
+  exact _root_.LeanLab.DtRS1998.Decomp455c.cover_block2
 
 /-- LEAF. Step 4 of 5, the coverage job on the third block.  For every j with
 250000000 ≤ j < 375000000 some listed offset a below 10 ^ 300 makes 2 * j + a
