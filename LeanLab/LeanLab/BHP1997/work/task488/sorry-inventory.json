@@ -1,0 +1,297 @@
+[
+  {
+    "file": "Decomp132.lean",
+    "declaration": "sieve_data",
+    "historical": false
+  },
+  {
+    "file": "Decomp132b.lean",
+    "declaration": "perron_input",
+    "historical": false
+  },
+  {
+    "file": "Decomp312a.lean",
+    "declaration": "lower_mean_value_supply",
+    "historical": false
+  },
+  {
+    "file": "Decomp312b.lean",
+    "declaration": "upper_mean_value_supply",
+    "historical": false
+  },
+  {
+    "file": "Decomp488a.lean",
+    "declaration": "all_character_fourth_moment",
+    "historical": false
+  },
+  {
+    "file": "Decomp488a.lean",
+    "declaration": "rademacher_convexity",
+    "historical": false
+  },
+  {
+    "file": "Decomp488a.lean",
+    "declaration": "summed_perron_remainders",
+    "historical": false
+  },
+  {
+    "file": "Decomp488c.lean",
+    "declaration": "safe_height_horizontal_bound",
+    "historical": false
+  },
+  {
+    "file": "DecompC165b.lean",
+    "declaration": "section2_circle_method",
+    "historical": false
+  },
+  {
+    "file": "DecompC165b.lean",
+    "declaration": "section4_lower_sifted_data",
+    "historical": false
+  },
+  {
+    "file": "DecompC165b.lean",
+    "declaration": "section4_upper_sifted_data",
+    "historical": false
+  },
+  {
+    "file": "DecompC165c.lean",
+    "declaration": "hybrid_mean_square",
+    "historical": false
+  },
+  {
+    "file": "DecompC165c.lean",
+    "declaration": "hybrid_large_values",
+    "historical": false
+  },
+  {
+    "file": "DecompC165c.lean",
+    "declaration": "energy_log_bound",
+    "historical": false
+  },
+  {
+    "file": "DecompC165c.lean",
+    "declaration": "dyadic_mean_value",
+    "historical": false
+  },
+  {
+    "file": "DecompC165d.lean",
+    "declaration": "lower_short_weight_analytic",
+    "historical": false
+  },
+  {
+    "file": "DecompC165dBase312.lean",
+    "declaration": "upper_short_weight_analytic",
+    "historical": false
+  },
+  {
+    "file": "SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_centered_character_mean_value",
+    "historical": false
+  },
+  {
+    "file": "SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_exceptional_set_moment",
+    "historical": false
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165a.lean",
+    "declaration": "all_character_fourth_moment",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165a.lean",
+    "declaration": "rademacher_strip_bound",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165a.lean",
+    "declaration": "contour_holder",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165b.lean",
+    "declaration": "section2_circle_method",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165b.lean",
+    "declaration": "section4_lower",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165b.lean",
+    "declaration": "section4_upper",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165d.lean",
+    "declaration": "lower_short_weight",
+    "historical": true
+  },
+  {
+    "file": "old/20261102-stale-PC-DecompC165d.lean",
+    "declaration": "upper_short_weight",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165b.lean",
+    "declaration": "section2_circle_method",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165b.lean",
+    "declaration": "section4_lower_sifted_data",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165b.lean",
+    "declaration": "section4_upper_sifted_data",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165d.lean",
+    "declaration": "upper_short_weight_analytic",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165d.lean",
+    "declaration": "lower_two_integral_bound",
+    "historical": true
+  },
+  {
+    "file": "old/20261105-stale-PC-DecompC165d.lean",
+    "declaration": "lower_short_weight_analytic",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-Decomp312a.lean",
+    "declaration": "lower_mean_value_supply",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-Decomp312b.lean",
+    "declaration": "upper_mean_value_supply",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-Decomp312c.lean",
+    "declaration": "perron_window_comparison",
+    "historical": true
+  },
+  {
+    "file": "old/20261106-stale-PC-DecompC165dBase312.lean",
+    "declaration": "upper_short_weight_analytic",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp312a.lean",
+    "declaration": "lower_mean_value_supply",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp386b.lean",
+    "declaration": "truncated_perron_window",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp414a.lean",
+    "declaration": "both_dominant",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp414a.lean",
+    "declaration": "neither_dominant",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-Decomp414a.lean",
+    "declaration": "first_dominant",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_large_values.lean",
+    "declaration": "large_values_second_branch",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_large_values.lean",
+    "declaration": "large_values_third_branch",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_mean_square.lean",
+    "declaration": "mean_square_pointwise",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_mean_square.lean",
+    "declaration": "mean_square_qt_dominant",
+    "historical": true
+  },
+  {
+    "file": "old/20261107-stale-PC-SPLIT_hybrid_mean_square.lean",
+    "declaration": "mean_square_F_dominant",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-Decomp312c.lean",
+    "declaration": "perron_window_comparison",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_buchstab_model_exists",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_thresholds",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_centered_character_mean_value",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_exceptional_set_moment",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_section2_circle_method.lean",
+    "declaration": "theorem2_paper_small_divisor_exponent",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_section2_circle_method.lean",
+    "declaration": "theorem2_paper_bounded_divisor_exponent",
+    "historical": true
+  },
+  {
+    "file": "old/20261108-stale-PC-SPLIT_section2_circle_method.lean",
+    "declaration": "theorem2_paper_large_divisor_exponent",
+    "historical": true
+  },
+  {
+    "file": "old/20261109-stale-PC-Decomp437f.lean",
+    "declaration": "neither_large_third",
+    "historical": true
+  },
+  {
+    "file": "old/20261110-stale-PC-Decomp437h.lean",
+    "declaration": "first_large_third",
+    "historical": true
+  },
+  {
+    "file": "old/20261110-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_centered_character_mean_value",
+    "historical": true
+  },
+  {
+    "file": "old/20261110-stale-PC-SPLIT_lower_short_weight_analytic.lean",
+    "declaration": "leaf_exceptional_set_moment",
+    "historical": true
+  }
+]
