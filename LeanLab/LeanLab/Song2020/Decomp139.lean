@@ -6,6 +6,7 @@ The final assembly has the exact sealed Lemma4 proposition.
 Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
+import LeanLab.Song2020.SPLIT_lambda_sum_per_h
 
 namespace LeanLab.Song2020.Decomp139
 
@@ -78,6 +79,535 @@ def s1Terms (γ : ℝ) : List (ℝ × ℝ × ℝ) :=
 def s1Poly (γ n y H : ℝ) : ℝ :=
   (s1Terms γ |>.map (fun t => n ^ t.1 * y ^ t.2.1 * H ^ t.2.2)).sum
 
+/-- Page 5. The truncated subwindow of the prime window: the integers x with
+x minus n over 3 less than y in absolute value and x at most t. Partial summation over the
+window produces sums over these initial segments. -/
+def subWindow (n : ℕ) (y t : ℝ) : Finset ℕ :=
+  (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+    (fun x => |(x : ℝ) - (n : ℝ) / 3| < y ∧ (x : ℝ) ≤ t)
+
+/-- Page 5. The von Mangoldt weighted exponential sum of the paper, the sum of
+Lambda of x times e of alpha x plus h x to the gamma, over an initial segment of the window. -/
+def lambdaSum (γ : ℝ) (n : ℕ) (y α : ℝ) (h : ℤ) (t : ℝ) : ℂ :=
+  ∑ x ∈ subWindow n y t,
+    (ArithmeticFunction.vonMangoldt x : ℂ) * eC (α * x + h * (x : ℝ) ^ γ)
+
+/-- Page 8, first display. The ten monomials of the per h bound for
+x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3, with x replaced by n,
+which is legitimate since x is of size n over 3 on the window. The argument k stands for
+the absolute value of h. -/
+def perH (γ n y k : ℝ) : ℝ :=
+  n ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) + n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) +
+  n ^ (γ / 2 - 1) * y * k ^ ((1 : ℝ) / 2) +
+  n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * k ^ ((1 : ℝ) / 6) +
+  n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * k ^ ((1 : ℝ) / 4) +
+  n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * k ^ ((1 : ℝ) / 8) +
+  n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) +
+  n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) +
+  n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * k ^ ((3 : ℝ) / 10) +
+  n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * k ^ ((3 : ℝ) / 14)
+
+/-- CITED. Song 2020, page 5, the displays from "For S1, we first observe" to
+"We have shown so far": partial summation in the weight c x to the 1 minus gamma,
+the bound a_h at most K over h for the Fourier coefficients, the bound of
+e of h times the difference of x plus 1 to the gamma and x to the gamma minus 1
+by h x to the gamma minus 1, and the passage from primes to the von Mangoldt function.
+The paper writes the maximum over centred windows and a saving 1 over log n; this form
+keeps instead the initial segments that partial summation really produces, drops the
+log saving, and writes out the prime power error as K H n to the 1/2, which the
+paper absorbs into its O of n to the 3/2 minus gamma. Any bound B on the von Mangoldt
+sums for 1 at most |h| at most H then bounds S1. The factor n to the epsilon on the B sum
+was added in the check of 2026-11-12: for y close to n/3 the window reaches down to small x,
+and the total variation of the partial summation weight x to the 1 minus gamma times
+e of h times the gamma difference minus 1 is then of size |h| log n, not |h|; the paper's
+y is a power of n below 1, where this loss does not arise, and n to the epsilon absorbs it. -/
+theorem s1_lambda_reduction :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
+        (∀ H : ℕ, ∀ h : ℤ, h ≠ 0 → ‖a H h‖ ≤ K / |(h : ℝ)|) →
+        ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+          (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+            ∀ H : ℕ, 1 ≤ H → ∀ B : ℤ → ℝ,
+              (∀ h : ℤ, h ≠ 0 → |h| ≤ (H : ℤ) → ∀ t : ℝ, ‖lambdaSum γ n y α h t‖ ≤ B h) →
+              ‖truncatedSum a H γ n y α‖ ≤
+                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (H : ℝ) * (n : ℝ) ^ ((1 : ℝ) / 2) +
+                  (n : ℝ) ^ ε * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := by
+  simpa only [LeanLab.Song2020.SPLIT_lambda_sum_per_h.lambdaSum, lambdaSum,
+    LeanLab.Song2020.SPLIT_lambda_sum_per_h.subWindow, subWindow,
+    LeanLab.Song2020.SPLIT_lambda_sum_per_h.truncatedSum, truncatedSum,
+    LeanLab.Song2020.SPLIT_lambda_sum_per_h.fourier, fourier]
+    using LeanLab.Song2020.SPLIT_lambda_sum_per_h.s1_lambda_reduction
+
+/-- CITED. Song 2020, page 7, the display after "Choosing v = (n/u)^{1/2}": for every
+Vaughan parameter u with 1 at most u at most n, so that u v is at most n,
+x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3 is bounded by six monomials,
+written here with x replaced by n since x is of size n over 3, and with k the absolute value
+of h. Published inputs: Dirichlet approximation with q at most log n and the Ramanujan sum
+splitting, page 5; the Vaughan identity, the paper's Lemma 3.2, page 5; Iwaniec and
+Kowalski Corollary 8.13 for Sigma 1, page 6; dyadic division into T(R,S) and Graham and
+Kolesnik Lemma 2.5, page 6; Iwaniec and Kowalski Corollary 8.13 for the inner r sum and
+Graham and Kolesnik Lemma 2.4 for L, page 7. The Sigma 1 term x to the 1 minus gamma over 2
+times h to the minus 1/2 of page 6 is absorbed in n to the 1 minus gamma over 4 times
+h to the minus 1/4, as on page 7. -/
+theorem vaughan_per_u :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ, ∀ u : ℝ, 1 ≤ u → u ≤ n →
+            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε *
+              ((n : ℝ) ^ (1 - γ / 4) * |(h : ℝ)| ^ (-(1 : ℝ) / 4) +
+                u ^ ((1 : ℝ) / 4) * (n : ℝ) ^ ((3 : ℝ) / 4) +
+                u * (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y) +
+                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
+                u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
+                  |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
+                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
+                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
+  simpa only [LeanLab.Song2020.SPLIT_lambda_sum_per_h.lambdaSum, lambdaSum,
+    LeanLab.Song2020.SPLIT_lambda_sum_per_h.subWindow, subWindow]
+    using LeanLab.Song2020.SPLIT_lambda_sum_per_h.vaughan_per_u
+
+/-- CITED. Graham and Kolesnik, Van der Corput's Method of Exponential Sums, Lemma 2.4,
+with two positive and three negative powers and the range 1 at most u at most U, as Song 2020
+applies it on page 8 to choose u: some u in the range has the five term sum bounded by the
+six pairwise balances, the values of the positive terms at u equal to 1 and the values of the
+negative terms at u equal to U. -/
+theorem gk_lemma_2_4_two_three (a₁ a₂ b₁ b₂ b₃ : ℝ) (ha₁ : 0 < a₁) (ha₂ : 0 < a₂)
+    (hb₁ : 0 < b₁) (hb₂ : 0 < b₂) (hb₃ : 0 < b₃) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ P₁ P₂ Q₁ Q₂ Q₃ : ℝ, 0 ≤ P₁ → 0 ≤ P₂ → 0 ≤ Q₁ → 0 ≤ Q₂ → 0 ≤ Q₃ →
+      ∀ U : ℝ, 1 ≤ U → ∃ u : ℝ, 1 ≤ u ∧ u ≤ U ∧
+        P₁ * u ^ a₁ + P₂ * u ^ a₂ + Q₁ * u ^ (-b₁) + Q₂ * u ^ (-b₂) + Q₃ * u ^ (-b₃) ≤
+          C * ((P₁ ^ b₁ * Q₁ ^ a₁) ^ (1 / (a₁ + b₁)) + (P₁ ^ b₂ * Q₂ ^ a₁) ^ (1 / (a₁ + b₂)) +
+            (P₁ ^ b₃ * Q₃ ^ a₁) ^ (1 / (a₁ + b₃)) + (P₂ ^ b₁ * Q₁ ^ a₂) ^ (1 / (a₂ + b₁)) +
+            (P₂ ^ b₂ * Q₂ ^ a₂) ^ (1 / (a₂ + b₂)) + (P₂ ^ b₃ * Q₃ ^ a₂) ^ (1 / (a₂ + b₃)) +
+            P₁ + P₂ + Q₁ * U ^ (-b₁) + Q₂ * U ^ (-b₂) + Q₃ * U ^ (-b₃)) := by
+  exact LeanLab.Song2020.SPLIT_lambda_sum_per_h.gk_lemma_2_4_two_three
+    a₁ a₂ b₁ b₂ b₃ ha₁ ha₂ hb₁ hb₂ hb₃
+
+/-- PROVED. Page 8, exponent arithmetic of one balance in Graham and Kolesnik Lemma 2.4
+for monomials in n, y and the absolute value k of h. -/
+theorem balance3 (n y k p₁ p₂ p₃ q₁ q₂ q₃ a b E₁ E₂ E₃ : ℝ) (hn : 0 < n) (hy : 0 < y)
+    (hk : 0 < k) (hab : 0 < a + b)
+    (h₁ : p₁ * b + q₁ * a = E₁ * (a + b)) (h₂ : p₂ * b + q₂ * a = E₂ * (a + b))
+    (h₃ : p₃ * b + q₃ * a = E₃ * (a + b)) :
+    ((n ^ p₁ * y ^ p₂ * k ^ p₃) ^ b * (n ^ q₁ * y ^ q₂ * k ^ q₃) ^ a) ^ (1 / (a + b)) =
+      n ^ E₁ * y ^ E₂ * k ^ E₃ := by
+  obtain ⟨L, rfl⟩ : ∃ L, n = Real.exp L := ⟨Real.log n, (Real.exp_log hn).symm⟩
+  obtain ⟨M, rfl⟩ : ∃ M, y = Real.exp M := ⟨Real.log y, (Real.exp_log hy).symm⟩
+  obtain ⟨T, rfl⟩ : ∃ T, k = Real.exp T := ⟨Real.log k, (Real.exp_log hk).symm⟩
+  simp only [← Real.exp_mul, ← Real.exp_add]
+  congr 1
+  have hne : a + b ≠ 0 := hab.ne'
+  field_simp
+  linear_combination L * h₁ + M * h₂ + T * h₃
+
+/-- PROVED. One monomial at most perH, since every monomial of perH is nonnegative. -/
+theorem le_perH_of (γ n y k z : ℝ) (hn : 0 < n) (hy : 0 < y) (hk : 0 < k)
+    (h : z ≤ n ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) ∨
+      z ≤ n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) ∨
+      z ≤ n ^ (γ / 2 - 1) * y * k ^ ((1 : ℝ) / 2) ∨
+      z ≤ n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * k ^ ((1 : ℝ) / 6) ∨
+      z ≤ n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * k ^ ((1 : ℝ) / 4) ∨
+      z ≤ n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * k ^ ((1 : ℝ) / 8) ∨
+      z ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) ∨
+      z ≤ n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) ∨
+      z ≤ n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * k ^ ((3 : ℝ) / 10) ∨
+      z ≤ n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * k ^ ((3 : ℝ) / 14)) :
+    z ≤ perH γ n y k := by
+  have q1 : 0 ≤ n ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) := by positivity
+  have q2 : 0 ≤ n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) := by positivity
+  have q3 : 0 ≤ n ^ (γ / 2 - 1) * y * k ^ ((1 : ℝ) / 2) := by positivity
+  have q4 : 0 ≤ n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * k ^ ((1 : ℝ) / 6) := by positivity
+  have q5 : 0 ≤ n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * k ^ ((1 : ℝ) / 4) := by positivity
+  have q6 : 0 ≤ n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * k ^ ((1 : ℝ) / 8) := by positivity
+  have q7 : 0 ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) := by positivity
+  have q8 : 0 ≤ n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) := by positivity
+  have q9 : 0 ≤ n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * k ^ ((3 : ℝ) / 10) := by positivity
+  have q10 : 0 ≤ n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * k ^ ((3 : ℝ) / 14) := by
+    positivity
+  unfold perH
+  rcases h with h | h | h | h | h | h | h | h | h | h <;> linarith
+
+/-- Song 2020, pages 7 and 8. The per h display at the top of page 8, assembled from the
+cited per u display vaughan_per_u and the cited Graham and Kolesnik Lemma 2.4 choice of u,
+with the six balances and five endpoint terms matched to the ten monomials of perH. -/
+theorem lambda_sum_per_h_of_split :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ,
+            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε * perH γ n y |(h : ℝ)| := by
+  intro γ hγ hγ1 ε hε
+  obtain ⟨C₁, hC₁, N₁, hv⟩ := vaughan_per_u γ hγ hγ1 ε hε
+  obtain ⟨Cg, hCg, hgk⟩ := gk_lemma_2_4_two_three (1 / 4) 1 (1 / 4) (1 / 6) (1 / 4)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  refine ⟨C₁ * (1 + 11 * Cg), by positivity, max 1 N₁, ?_⟩
+  intro n hn y hy hyu α h hh t
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (show 1 ≤ n by omega)
+  set N : ℝ := (n : ℝ) with hNdef
+  set k : ℝ := |(h : ℝ)| with hkdef
+  have hk1 : 1 ≤ k := by
+    rw [hkdef]
+    have : (1 : ℝ) ≤ |(h : ℝ)| := by
+      have h' : 1 ≤ |h| := Int.one_le_abs hh
+      exact_mod_cast h'
+    exact this
+  have hk0 : 0 < k := by linarith
+  have hN0 : 0 < N := by linarith
+  have hθ : 0 ≤ songExponent γ := by unfold songExponent; linarith
+  have hy1 : 1 ≤ y := (Real.one_le_rpow hn1 hθ).trans hy.le
+  have hy0 : 0 < y := by linarith
+  have hyn : y ≤ N := by linarith
+  set P₁ : ℝ := N ^ ((3 : ℝ) / 4) * y ^ (0 : ℝ) * k ^ (0 : ℝ) with hP₁
+  set P₂ : ℝ := N ^ (γ / 2 - 1) * y ^ (1 : ℝ) * k ^ ((1 : ℝ) / 2) with hP₂
+  set Q₁ : ℝ := N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4) * k ^ (0 : ℝ) with hQ₁
+  set Q₂ : ℝ := N ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) * k ^ ((1 : ℝ) / 6) with hQ₂
+  set Q₃ : ℝ := N ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) * k ^ ((1 : ℝ) / 4) with hQ₃
+  obtain ⟨u, hu1, huN, hbound⟩ := hgk P₁ P₂ Q₁ Q₂ Q₃ (by positivity) (by positivity)
+    (by positivity) (by positivity) (by positivity) N hn1
+  have hvu := hv n (by omega) y hy hyu α h hh t u hu1 huN
+  have hu0 : 0 < u := by linarith
+  -- the cited display is the Lemma 2.4 sum plus the h to the minus 1/4 term
+  have hshape : u ^ ((1 : ℝ) / 4) * N ^ ((3 : ℝ) / 4) +
+      u * (k ^ ((1 : ℝ) / 2) * N ^ (γ / 2 - 1) * y) +
+      u ^ (-(1 : ℝ) / 4) * (N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
+      u ^ (-(1 : ℝ) / 6) * (N ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) * k ^ ((1 : ℝ) / 6)) +
+      u ^ (-(1 : ℝ) / 4) * (N ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) * k ^ ((1 : ℝ) / 4)) =
+      P₁ * u ^ ((1 : ℝ) / 4) + P₂ * u ^ (1 : ℝ) + Q₁ * u ^ (-((1 : ℝ) / 4)) +
+        Q₂ * u ^ (-((1 : ℝ) / 6)) + Q₃ * u ^ (-((1 : ℝ) / 4)) := by
+    simp only [hP₁, hP₂, hQ₁, hQ₂, hQ₃, Real.rpow_zero, Real.rpow_one, mul_one, neg_div]
+    ring
+  -- each of the eleven pieces is at most perH
+  have b11 : (P₁ ^ ((1 : ℝ) / 4) * Q₁ ^ ((1 : ℝ) / 4)) ^ (1 / ((1 : ℝ) / 4 + 1 / 4)) ≤
+      perH γ N y k := by
+    rw [hP₁, hQ₁, balance3 N y k (3 / 4) 0 0 (3 / 4) (1 / 4) 0 (1 / 4) (1 / 4) (3 / 4) (1 / 8) 0 hN0 hy0 hk0 (by norm_num)
+      (by ring) (by ring) (by ring)]
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; left; rw [Real.rpow_zero, mul_one]
+  have b12 : (P₁ ^ ((1 : ℝ) / 6) * Q₂ ^ ((1 : ℝ) / 4)) ^ (1 / ((1 : ℝ) / 4 + 1 / 6)) ≤
+      perH γ N y k := by
+    rw [hP₁, hQ₂, balance3 N y k (3 / 4) 0 0 ((γ + 3) / 6) (1 / 3) (1 / 6) (1 / 4) (1 / 6) ((γ + 6) / 10) (1 / 5) (1 / 10) hN0 hy0 hk0
+      (by norm_num) (by ring) (by ring) (by ring)]
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; right; right; right; right; left; exact le_rfl
+  have b13 : (P₁ ^ ((1 : ℝ) / 4) * Q₃ ^ ((1 : ℝ) / 4)) ^ (1 / ((1 : ℝ) / 4 + 1 / 4)) ≤
+      perH γ N y k := by
+    rw [hP₁, hQ₃, balance3 N y k (3 / 4) 0 0 ((γ + 1) / 4) (1 / 2) (1 / 4) (1 / 4) (1 / 4) (γ / 8 + 1 / 2) (1 / 4) (1 / 8) hN0 hy0 hk0
+      (by norm_num) (by ring) (by ring) (by ring)]
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; right; right; right; left; exact le_rfl
+  have b21 : (P₂ ^ ((1 : ℝ) / 4) * Q₁ ^ (1 : ℝ)) ^ (1 / ((1 : ℝ) + 1 / 4)) ≤
+      perH γ N y k := by
+    rw [hP₂, hQ₁, balance3 N y k (γ / 2 - 1) 1 (1 / 2) (3 / 4) (1 / 4) 0 1 (1 / 4) (γ / 10 + 2 / 5) (2 / 5) (1 / 10) hN0 hy0 hk0
+      (by norm_num) (by ring) (by ring) (by ring)]
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; right; right; right; right; right; left; exact le_rfl
+  have b22 : (P₂ ^ ((1 : ℝ) / 6) * Q₂ ^ (1 : ℝ)) ^ (1 / ((1 : ℝ) + 1 / 6)) ≤
+      perH γ N y k := by
+    rw [hP₂, hQ₂, balance3 N y k (γ / 2 - 1) 1 (1 / 2) ((γ + 3) / 6) (1 / 3) (1 / 6) 1 (1 / 6) (3 * γ / 14 + 2 / 7) (3 / 7) (3 / 14) hN0 hy0 hk0
+      (by norm_num) (by ring) (by ring) (by ring)]
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; right; right; right; right; right; right; right; exact le_rfl
+  have b23 : (P₂ ^ ((1 : ℝ) / 4) * Q₃ ^ (1 : ℝ)) ^ (1 / ((1 : ℝ) + 1 / 4)) ≤
+      perH γ N y k := by
+    rw [hP₂, hQ₃, balance3 N y k (γ / 2 - 1) 1 (1 / 2) ((γ + 1) / 4) (1 / 2) (1 / 4) 1 (1 / 4) (3 * γ / 10) (3 / 5) (3 / 10) hN0 hy0 hk0
+      (by norm_num) (by ring) (by ring) (by ring)]
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; right; right; right; right; right; right; left; exact le_rfl
+  have e1 : P₁ ≤ perH γ N y k := by
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; left
+    rw [hP₁, Real.rpow_zero, Real.rpow_zero, mul_one, mul_one]
+    exact le_mul_of_one_le_right (by positivity) (Real.one_le_rpow hy1 (by norm_num))
+  have e2 : P₂ ≤ perH γ N y k := by
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; left
+    rw [hP₂, Real.rpow_one]
+  have e3 : Q₁ * N ^ (-((1 : ℝ) / 4)) ≤ perH γ N y k := by
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; left
+    have hy8 : y ^ ((1 : ℝ) / 8) ≤ N ^ ((1 : ℝ) / 4) :=
+      (Real.rpow_le_rpow hy0.le hyn (by norm_num)).trans
+        (Real.rpow_le_rpow_of_exponent_le hn1 (by norm_num))
+    have hm : N ^ ((1 : ℝ) / 2) * y ^ ((1 : ℝ) / 4) ≤ N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) := by
+      have e1 : y ^ ((1 : ℝ) / 4) = y ^ ((1 : ℝ) / 8) * y ^ ((1 : ℝ) / 8) := by
+        rw [← Real.rpow_add hy0]; norm_num
+      have e2 : N ^ ((3 : ℝ) / 4) = N ^ ((1 : ℝ) / 2) * N ^ ((1 : ℝ) / 4) := by
+        rw [← Real.rpow_add hN0]; norm_num
+      rw [e1, e2]
+      have := mul_le_mul_of_nonneg_left hy8
+        (by positivity : 0 ≤ N ^ ((1 : ℝ) / 2) * y ^ ((1 : ℝ) / 8))
+      linarith
+    have : Q₁ * N ^ (-((1 : ℝ) / 4)) = N ^ ((1 : ℝ) / 2) * y ^ ((1 : ℝ) / 4) := by
+      rw [hQ₁, Real.rpow_zero, mul_one, mul_comm, ← mul_assoc, ← Real.rpow_add hN0]
+      norm_num
+    rw [this]; exact hm
+  have e4 : Q₂ * N ^ (-((1 : ℝ) / 6)) ≤ perH γ N y k := by
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; right; left
+    apply le_of_eq
+    rw [hQ₂, mul_comm, ← mul_assoc, ← mul_assoc, ← Real.rpow_add hN0,
+      show -((1 : ℝ) / 6) + (γ + 3) / 6 = (γ + 2) / 6 by ring]
+  have e5 : Q₃ * N ^ (-((1 : ℝ) / 4)) ≤ perH γ N y k := by
+    apply le_perH_of γ N y k _ hN0 hy0 hk0
+    right; right; right; right; left
+    apply le_of_eq
+    rw [hQ₃, mul_comm, ← mul_assoc, ← mul_assoc, ← Real.rpow_add hN0,
+      show -((1 : ℝ) / 4) + (γ + 1) / 4 = γ / 4 by ring]
+  have e0 : N ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) ≤ perH γ N y k :=
+    le_perH_of γ N y k _ hN0 hy0 hk0 (Or.inl le_rfl)
+  have hsum : P₁ * u ^ ((1 : ℝ) / 4) + P₂ * u ^ (1 : ℝ) + Q₁ * u ^ (-((1 : ℝ) / 4)) +
+        Q₂ * u ^ (-((1 : ℝ) / 6)) + Q₃ * u ^ (-((1 : ℝ) / 4)) ≤ Cg * (11 * perH γ N y k) := by
+    refine hbound.trans (mul_le_mul_of_nonneg_left ?_ hCg)
+    linarith
+  have hNe : 0 ≤ N ^ ε := by positivity
+  calc ‖lambdaSum γ n y α h t‖ ≤ C₁ * N ^ ε * (N ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) +
+        (P₁ * u ^ ((1 : ℝ) / 4) + P₂ * u ^ (1 : ℝ) + Q₁ * u ^ (-((1 : ℝ) / 4)) +
+        Q₂ * u ^ (-((1 : ℝ) / 6)) + Q₃ * u ^ (-((1 : ℝ) / 4)))) := by
+        refine hvu.trans (le_of_eq ?_)
+        rw [← hshape]; ring
+    _ ≤ C₁ * N ^ ε * (perH γ N y k + Cg * (11 * perH γ N y k)) :=
+        mul_le_mul_of_nonneg_left (add_le_add e0 hsum) (by positivity)
+    _ = C₁ * (1 + 11 * Cg) * N ^ ε * perH γ N y k := by ring
+
+/-- CITED. Song 2020, pages 5 to 8, the per h estimate displayed at the top of page 8:
+x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3 is bounded by the ten
+monomials of perH at k equal to the absolute value of h. Published inputs, in the order the
+paper applies them: Dirichlet approximation of alpha by a over q with q at most log n and the
+splitting into the Ramanujan type sums S of a plus b and q, page 5; the Vaughan identity,
+the paper's Lemma 3.2 with u v at most n, page 5; Iwaniec and Kowalski Corollary 8.13 for
+the type I sum Sigma 1, page 6; dyadic division of Sigma 2 and Sigma 3 into the bilinear
+sums T of R and S, page 6; Graham and Kolesnik Lemma 2.5, the Weyl differencing
+inequality for T of R and S, page 6; Iwaniec and Kowalski Corollary 8.13 for the inner sum
+over r, page 7; and Graham and Kolesnik Lemma 2.4 for the choices of L, v and u, pages 7
+and 8. -/
+theorem lambda_sum_per_h :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ,
+            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε * perH γ n y |(h : ℝ)| :=
+  lambda_sum_per_h_of_split
+
+/-- PROVED. Summation over h on page 8, nonnegative exponents: the sum of k to the beta
+for k from 1 to H is at most H to the beta plus 1. -/
+theorem sum_rpow_le_of_nonneg (β : ℝ) (hβ : 0 ≤ β) (H : ℕ) :
+    ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ β ≤ (H : ℝ) ^ (β + 1) := by
+  have hle : ∀ k ∈ Finset.Icc 1 H, (k : ℝ) ^ β ≤ (H : ℝ) ^ β := by
+    intro k hk
+    have hk' := (Finset.mem_Icc.mp hk).2
+    exact Real.rpow_le_rpow (by positivity) (by exact_mod_cast hk') hβ
+  have h1 := Finset.sum_le_card_nsmul _ _ _ hle
+  rw [Nat.card_Icc, nsmul_eq_mul] at h1
+  have h2 : ((H + 1 - 1 : ℕ) : ℝ) * (H : ℝ) ^ β = (H : ℝ) ^ (β + 1) := by
+    rw [Nat.add_sub_cancel]
+    rcases Nat.eq_zero_or_pos H with h | h
+    · subst h; simp [Real.zero_rpow (by linarith : β + 1 ≠ 0)]
+    · rw [Real.rpow_add (by exact_mod_cast h), Real.rpow_one]; ring
+  linarith
+
+/-- PROVED. Summation over h on page 8, the one negative exponent: the sum of k to the
+minus 1/4 for k from 1 to H is at most 4/3 times H to the 3/4. Proof by induction with the
+weighted arithmetic geometric mean inequality, which is the concavity of t to the 3/4. -/
+theorem sum_rpow_neg_quarter_le (H : ℕ) :
+    ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ (-(1 : ℝ) / 4) ≤ 4 / 3 * (H : ℝ) ^ ((3 : ℝ) / 4) := by
+  induction H with
+  | zero => simp
+  | succ m ih =>
+    rw [Finset.sum_Icc_succ_top (by omega)]
+    push_cast
+    have hs0 : (0 : ℝ) < (m : ℝ) + 1 := by positivity
+    have amgm := Real.geom_mean_le_arith_mean2_weighted (w₁ := 3 / 4) (w₂ := 1 / 4)
+      (p₁ := (m : ℝ)) (p₂ := (m : ℝ) + 1) (by norm_num) (by norm_num) (by positivity)
+      hs0.le (by norm_num)
+    have hq : ((m : ℝ) + 1) ^ ((1 : ℝ) / 4) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) = 1 := by
+      rw [← Real.rpow_add hs0]; norm_num
+    have hq2 : ((m : ℝ) + 1) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) =
+        ((m : ℝ) + 1) ^ ((3 : ℝ) / 4) := by
+      calc ((m : ℝ) + 1) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) =
+            ((m : ℝ) + 1) ^ (1 : ℝ) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) := by rw [Real.rpow_one]
+        _ = ((m : ℝ) + 1) ^ ((3 : ℝ) / 4) := by rw [← Real.rpow_add hs0]; norm_num
+    have hpos : 0 < ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) := Real.rpow_pos_of_pos hs0 _
+    have h1 := mul_le_mul_of_nonneg_right amgm hpos.le
+    have h3 : (m : ℝ) ^ ((3 : ℝ) / 4) * ((m : ℝ) + 1) ^ ((1 : ℝ) / 4) *
+        ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) = (m : ℝ) ^ ((3 : ℝ) / 4) := by
+      rw [mul_assoc, hq, mul_one]
+    have e : (3 / 4 * (m : ℝ) + 1 / 4 * ((m : ℝ) + 1)) * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) =
+        ((m : ℝ) + 1) ^ ((3 : ℝ) / 4) - 3 / 4 * ((m : ℝ) + 1) ^ (-(1 : ℝ) / 4) := by
+      rw [← hq2]; ring
+    linarith
+
+/-- PROVED. Page 8, summation over h of the per h display: the sum of perH over
+k from 1 to H is at most twice the S1 polynomial. The term n to the gamma over 10 plus 2/5
+times y to the 2/5, which the printed summed display omits, is dominated by the term
+n to the gamma plus 6 over 10 times y to the 1/5, since y is at most n. -/
+theorem sum_perH_le (γ n y : ℝ) (hn : 0 < n) (hy : 0 < y) (hyn : y ≤ n) (H : ℕ) :
+    ∑ k ∈ Finset.Icc 1 H, perH γ n y k ≤ 2 * s1Poly γ n y H := by
+  have hdom : n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) := by
+    have e1 : n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) =
+        (n ^ (γ / 10 + 2 / 5) * y ^ ((1 : ℝ) / 5)) * y ^ ((1 : ℝ) / 5) := by
+      rw [mul_assoc, ← Real.rpow_add hy]; norm_num
+    have e2 : n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) =
+        (n ^ (γ / 10 + 2 / 5) * y ^ ((1 : ℝ) / 5)) * n ^ ((1 : ℝ) / 5) := by
+      rw [mul_comm (n ^ (γ / 10 + 2 / 5)), mul_assoc, ← Real.rpow_add hn]
+      rw [mul_comm]; congr 1; congr 1; ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hy.le hyn (by norm_num)) (by positivity)
+  have s1 := sum_rpow_neg_quarter_le H
+  have s3 := sum_rpow_le_of_nonneg ((1 : ℝ) / 2) (by norm_num) H
+  have s4 := sum_rpow_le_of_nonneg ((1 : ℝ) / 6) (by norm_num) H
+  have s5 := sum_rpow_le_of_nonneg ((1 : ℝ) / 4) (by norm_num) H
+  have s6 := sum_rpow_le_of_nonneg ((1 : ℝ) / 8) (by norm_num) H
+  have s7 := sum_rpow_le_of_nonneg ((1 : ℝ) / 10) (by norm_num) H
+  have s9 := sum_rpow_le_of_nonneg ((3 : ℝ) / 10) (by norm_num) H
+  have s10 := sum_rpow_le_of_nonneg ((3 : ℝ) / 14) (by norm_num) H
+  have hS7 : 0 ≤ ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 10) := by positivity
+  have t1 := mul_le_mul_of_nonneg_left s1 (by positivity : 0 ≤ n ^ (1 - γ / 4))
+  have t3 := mul_le_mul_of_nonneg_left s3 (by positivity : 0 ≤ n ^ (γ / 2 - 1) * y)
+  have t4 := mul_le_mul_of_nonneg_left s4
+    (by positivity : 0 ≤ n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3))
+  have t5 := mul_le_mul_of_nonneg_left s5
+    (by positivity : 0 ≤ n ^ (γ / 4) * y ^ ((1 : ℝ) / 2))
+  have t6 := mul_le_mul_of_nonneg_left s6
+    (by positivity : 0 ≤ n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4))
+  have t7 := mul_le_mul_of_nonneg_left s7
+    (by positivity : 0 ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5))
+  have t8 := mul_le_mul_of_nonneg_right hdom hS7
+  have t9 := mul_le_mul_of_nonneg_left s9
+    (by positivity : 0 ≤ n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5))
+  have t10 := mul_le_mul_of_nonneg_left s10
+    (by positivity : 0 ≤ n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7))
+  have hH0 : 0 ≤ (H : ℝ) ^ ((3 : ℝ) / 4) := by positivity
+  have hn1 : 0 ≤ n ^ (1 - γ / 4) * (H : ℝ) ^ ((3 : ℝ) / 4) := by positivity
+  have hP : s1Poly γ n y H =
+      n ^ (1 - γ / 4) * (H : ℝ) ^ ((3 : ℝ) / 4) +
+      n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * (H : ℝ) ^ ((1 : ℝ) / 8 + 1) +
+      n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * (H : ℝ) ^ ((3 : ℝ) / 14 + 1) +
+      n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) +
+      n ^ (γ / 2 - 1) * y * (H : ℝ) ^ ((1 : ℝ) / 2 + 1) +
+      n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * (H : ℝ) ^ ((3 : ℝ) / 10 + 1) +
+      n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * (H : ℝ) ^ ((1 : ℝ) / 10 + 1) +
+      n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * (H : ℝ) ^ ((1 : ℝ) / 6 + 1) +
+      n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * (H : ℝ) ^ ((1 : ℝ) / 4 + 1) := by
+    simp only [s1Poly, s1Terms, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil,
+      Real.rpow_zero, Real.rpow_one, mul_one, add_zero]
+    rw [show (γ + 4) / 8 = γ / 8 + 1 / 2 by ring, show (3 * γ + 4) / 14 = 3 * γ / 14 + 2 / 7 by ring]
+    norm_num
+    ring_nf
+  have hL : ∑ k ∈ Finset.Icc 1 H, perH γ n y k =
+      n ^ (1 - γ / 4) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ (-(1 : ℝ) / 4) +
+      n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) +
+      n ^ (γ / 2 - 1) * y * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 2) +
+      n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 6) +
+      n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 4) +
+      n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 8) +
+      n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 10) +
+      n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((1 : ℝ) / 10) +
+      n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((3 : ℝ) / 10) +
+      n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) *
+        ∑ k ∈ Finset.Icc 1 H, (k : ℝ) ^ ((3 : ℝ) / 14) := by
+    simp only [perH, Finset.sum_add_distrib, Finset.mul_sum, Finset.sum_const, Nat.card_Icc,
+      nsmul_eq_mul, Nat.add_sub_cancel]
+    ring
+  have p2 : 0 ≤ n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * (H : ℝ) ^ ((1 : ℝ) / 8 + 1) := by
+    positivity
+  have p3 : 0 ≤ n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * (H : ℝ) ^ ((3 : ℝ) / 14 + 1) := by
+    positivity
+  have p4 : 0 ≤ n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) := by positivity
+  have p5 : 0 ≤ n ^ (γ / 2 - 1) * y * (H : ℝ) ^ ((1 : ℝ) / 2 + 1) := by positivity
+  have p6 : 0 ≤ n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * (H : ℝ) ^ ((3 : ℝ) / 10 + 1) := by
+    positivity
+  have p7 : 0 ≤ n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * (H : ℝ) ^ ((1 : ℝ) / 10 + 1) := by
+    positivity
+  have p8 : 0 ≤ n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * (H : ℝ) ^ ((1 : ℝ) / 6 + 1) := by
+    positivity
+  have p9 : 0 ≤ n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * (H : ℝ) ^ ((1 : ℝ) / 4 + 1) := by positivity
+  rw [hL, hP]
+  linarith
+
+/-- Song 2020, pages 5 through 8. The S1 estimate after summing over h, now assembled from
+the cited partial summation step s1_lambda_reduction, the cited per h estimate
+lambda_sum_per_h, and the proved summation over h, sum_perH_le. -/
+theorem s1_estimate_of_split :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
+        (∀ H : ℕ, ∀ h : ℤ, h ≠ 0 → ‖a H h‖ ≤ K / |(h : ℝ)|) →
+        ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+          (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+            ∀ H : ℕ, 1 ≤ H →
+              ‖truncatedSum a H γ n y α‖ ≤
+                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (n : ℝ) ^ ε * s1Poly γ n y H) := by
+  intro γ hγ hγ1 ε hε
+  obtain ⟨C₁, hC₁, N₁, hred⟩ := s1_lambda_reduction γ hγ hγ1 (ε / 2) (by positivity)
+  obtain ⟨C₂, hC₂, N₂, hper⟩ := lambda_sum_per_h γ hγ hγ1 (ε / 2) (by positivity)
+  refine ⟨C₁ * (1 + 4 * C₂), by positivity, max 1 (max N₁ N₂), ?_⟩
+  intro K hK a ha n hn y hy hyu α H hH
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (show 1 ≤ n by omega)
+  set N : ℝ := (n : ℝ) with hNdef
+  have hN0 : 0 < N := by linarith
+  have hθ : 0 ≤ songExponent γ := by unfold songExponent; linarith
+  have hy1 : 1 ≤ y := (Real.one_le_rpow hn1 hθ).trans hy.le
+  have hy0 : 0 < y := by linarith
+  have hyn : y ≤ N := by linarith
+  have hNe : 1 ≤ N ^ ε := Real.one_le_rpow hn1 hε.le
+  have hee : N ^ (ε / 2) * N ^ (ε / 2) = N ^ ε := by
+    rw [← Real.rpow_add hN0, add_halves]
+  let B : ℤ → ℝ := fun h => C₂ * N ^ (ε / 2) * perH γ N y |(h : ℝ)|
+  have hB : ∀ h : ℤ, h ≠ 0 → |h| ≤ (H : ℤ) → ∀ t : ℝ, ‖lambdaSum γ n y α h t‖ ≤ B h :=
+    fun h hh _ t => hper n (by omega) y hy hyu α h hh t
+  have hr := hred K hK a ha n (by omega) y hy hyu α H hH B hB
+  have hsumB : ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ))) =
+      2 * C₂ * N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, perH γ N y k := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro k _
+    simp only [B]
+    have : |((-(k : ℤ) : ℤ) : ℝ)| = (k : ℝ) := by
+      push_cast; rw [abs_neg]; exact abs_of_nonneg (by positivity)
+    have h2 : |(((k : ℤ)) : ℝ)| = (k : ℝ) := by push_cast; exact abs_of_nonneg (by positivity)
+    rw [this, h2]; ring
+  have hsum := sum_perH_le γ N y hN0 hy0 hyn H
+  have hP0 : 0 ≤ s1Poly γ N y H := by
+    unfold s1Poly
+    apply List.sum_nonneg
+    intro x hx
+    obtain ⟨ab, _, rfl⟩ := List.mem_map.mp hx
+    positivity
+  have hHn : (H : ℝ) * N ^ ((1 : ℝ) / 2) ≤ N ^ ε * s1Poly γ N y H := by
+    have h4 : N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) * (H : ℝ) ^ (1 : ℝ) ≤ s1Poly γ N y H := by
+      unfold s1Poly
+      apply List.single_le_sum
+      · intro x hx
+        obtain ⟨ab, _, rfl⟩ := List.mem_map.mp hx
+        positivity
+      · exact List.mem_map.mpr ⟨(3 / 4, 1 / 8, 1), by simp [s1Terms], rfl⟩
+    rw [Real.rpow_one] at h4
+    have h5 : N ^ ((1 : ℝ) / 2) ≤ N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) := by
+      calc N ^ ((1 : ℝ) / 2) ≤ N ^ ((3 : ℝ) / 4) :=
+            Real.rpow_le_rpow_of_exponent_le hn1 (by norm_num)
+        _ ≤ N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) :=
+            le_mul_of_one_le_right (by positivity) (Real.one_le_rpow hy1 (by norm_num))
+    have hH0 : (0 : ℝ) ≤ H := by positivity
+    have h6 := mul_le_mul_of_nonneg_left h5 hH0
+    have h7 := le_mul_of_one_le_left hP0 hNe
+    nlinarith
+  have hK0 : 0 ≤ K := by linarith
+  have hfin : N ^ (3 / 2 - γ) + (H : ℝ) * N ^ ((1 : ℝ) / 2) +
+      N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ))) ≤
+      (1 + 4 * C₂) * (N ^ (3 / 2 - γ) + N ^ ε * s1Poly γ N y H) := by
+    rw [hsumB, show N ^ (ε / 2) * (2 * C₂ * N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, perH γ N y k) =
+      2 * C₂ * N ^ ε * ∑ k ∈ Finset.Icc 1 H, perH γ N y k by rw [← hee]; ring]
+    have h8 := mul_le_mul_of_nonneg_left hsum (by positivity : 0 ≤ 2 * C₂ * N ^ ε)
+    have h9 : 0 ≤ N ^ (3 / 2 - γ) := by positivity
+    have h10 : 0 ≤ C₂ * N ^ (3 / 2 - γ) := by positivity
+    have h11 : 0 ≤ C₂ * (N ^ ε * s1Poly γ N y H) := by positivity
+    nlinarith
+  calc ‖truncatedSum a H γ n y α‖ ≤ C₁ * K * (N ^ (3 / 2 - γ) + (H : ℝ) * N ^ ((1 : ℝ) / 2) +
+        N ^ (ε / 2) * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := hr
+    _ ≤ C₁ * K * ((1 + 4 * C₂) * (N ^ (3 / 2 - γ) + N ^ ε * s1Poly γ N y H)) :=
+        mul_le_mul_of_nonneg_left hfin (by positivity)
+    _ = C₁ * (1 + 4 * C₂) * K * (N ^ (3 / 2 - γ) + N ^ ε * s1Poly γ N y H) := by ring
+
 /-- CITED. Song 2020, pages 5 through 8, the S1 estimate after summing over h:
 S1 is bounded by n to the 3/2 minus gamma plus n to the epsilon times the nine H monomials.
 Published inputs used by the paper for this display: the reduction to Lambda weighted sums
@@ -94,8 +624,8 @@ theorem s1_estimate :
           (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
             ∀ H : ℕ, 1 ≤ H →
               ‖truncatedSum a H γ n y α‖ ≤
-                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (n : ℝ) ^ ε * s1Poly γ n y H) := by
-  sorry
+                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (n : ℝ) ^ ε * s1Poly γ n y H) :=
+  s1_estimate_of_split
 
 /-- PROVED. Graham and Kolesnik, Van der Corput's Method of Exponential Sums, Lemma 2.4,
 in the case of a single negative power and lower endpoint H1 equal to 1, as Song 2020 uses
@@ -509,6 +1039,17 @@ end LeanLab.Song2020.Decomp139
 
 #print axioms LeanLab.Song2020.Decomp139.characteristic_reduction
 #print axioms LeanLab.Song2020.Decomp139.fourier_approximation
+#print axioms LeanLab.Song2020.Decomp139.s1_lambda_reduction
+#print axioms LeanLab.Song2020.Decomp139.vaughan_per_u
+#print axioms LeanLab.Song2020.Decomp139.gk_lemma_2_4_two_three
+#print axioms LeanLab.Song2020.Decomp139.balance3
+#print axioms LeanLab.Song2020.Decomp139.le_perH_of
+#print axioms LeanLab.Song2020.Decomp139.lambda_sum_per_h_of_split
+#print axioms LeanLab.Song2020.Decomp139.lambda_sum_per_h
+#print axioms LeanLab.Song2020.Decomp139.sum_rpow_le_of_nonneg
+#print axioms LeanLab.Song2020.Decomp139.sum_rpow_neg_quarter_le
+#print axioms LeanLab.Song2020.Decomp139.sum_perH_le
+#print axioms LeanLab.Song2020.Decomp139.s1_estimate_of_split
 #print axioms LeanLab.Song2020.Decomp139.s1_estimate
 #print axioms LeanLab.Song2020.Decomp139.gk_lemma_2_4
 #print axioms LeanLab.Song2020.Decomp139.balance_rpow
