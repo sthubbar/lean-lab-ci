@@ -3,10 +3,12 @@ AI wrote this Lean code for the route burst of 2026-11-12, step second_family.
 P0037 Section 5.2, printed page 212, and Table 2, printed page 214.
 Pieces of the paper's argument for the second interval family of Theorem 2,
 the intervals [10^(10 i), 10^(10 i) + 10^9] for i = 20 to 30.
-This file imports only Task71Paper, so Decomp121b can import it without a cycle.
-The two Table 2 certificate lemmas are OPEN computations. Binary Goldbach is open.
+The imports are Task71Paper and the independent Decomp500a row file.
+Decomp121b can import this file without a cycle.
+The two Table 2 certificate results depend on eleven OPEN row computations. Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Task71Paper
+import LeanLab.DtRS1998.Decomp500a
 
 namespace LeanLab.DtRS1998.Decomp121bSecond
 
@@ -47,26 +49,52 @@ theorem table2_base_even (i : ℕ) (hi : 1 ≤ i) : Even (10 ^ (10 * i)) := by
 Phase one, sieve plus Miller Rabin to bases 2, 3, 5, 7, produced a list q1, ..., qNq;
 phase two, ECPP, certified each entry prime. Page 212 states Nq varies from 222 up
 to 231, and Table 2 prints Nq = 224, 222, 222, 228, 228, 231 for these rows.
-OPEN: the prime lists and ECPP certificates are not in the lab. -/
+CONDITIONAL ON Decomp500a.table2_row_20 through table2_row_25.
+The prime lists and primality certificates remain OPEN. -/
 theorem table2_certificates_lower :
     ∀ i : ℕ, 20 ≤ i → i ≤ 25 →
       ∃ qs : List ℕ, qs.length ≤ 231 ∧ (∀ q ∈ qs, q.Prime) ∧
         (List.range (10 ^ 9 / 2 + 1)).all (fun j =>
           qs.any (fun q => decide
             (q ≤ 10 ^ (10 * i) + 2 * j ∧ (10 ^ (10 * i) + 2 * j - q).Prime))) = true := by
-  sorry
+  intro i hlo hhi
+  interval_cases i
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_20
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_21
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_22
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_23
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_24
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_25
+    exact ⟨qs, by omega, hprime, hcover⟩
 
 /-- LEAF: P0037 Section 5.2 page 212 and Table 2 page 214, rows log10 B = 260 to 300.
 Same two phase method; Table 2 prints Nq = 226, 223, 225, 226, 227 for these rows,
 within the page 212 range 222 to 231.
-OPEN: the prime lists and ECPP certificates are not in the lab. -/
+CONDITIONAL ON Decomp500a.table2_row_26 through table2_row_30.
+The prime lists and primality certificates remain OPEN. -/
 theorem table2_certificates_upper :
     ∀ i : ℕ, 26 ≤ i → i ≤ 30 →
       ∃ qs : List ℕ, qs.length ≤ 231 ∧ (∀ q ∈ qs, q.Prime) ∧
         (List.range (10 ^ 9 / 2 + 1)).all (fun j =>
           qs.any (fun q => decide
             (q ≤ 10 ^ (10 * i) + 2 * j ∧ (10 ^ (10 * i) + 2 * j - q).Prime))) = true := by
-  sorry
+  intro i hlo hhi
+  interval_cases i
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_26
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_27
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_28
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_29
+    exact ⟨qs, by omega, hprime, hcover⟩
+  · obtain ⟨qs, hlen, hprime, hcover⟩ := Decomp500a.table2_row_30
+    exact ⟨qs, by omega, hprime, hcover⟩
 
 #print axioms interval_of_table2_certificate
 #print axioms table2_base_even
