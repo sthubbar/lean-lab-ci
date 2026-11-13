@@ -1,8 +1,8 @@
 /-
 P0083 Perelli 1996, pages 481 through 486. ROUTE BURST 3 wiring file.
 Theorem 1 reassembled with the pointwise major arc step taken from Decomp320a,
-where it is proved from the smaller leaf Decomp320a.leaf_finite_major and the
-proved arithmetic tail Decomp320a.leaf_singular_tail.
+where it is PROVED from Decomp320a.leaf_finite_major, itself PROVED through
+ArcModel320, and the proved arithmetic tail Decomp320a.leaf_singular_tail.
 Decomp103.lean is claimed by another agent, so nothing there is edited; this file
 proves copies of Decomp103.major and Decomp88.theorem1 under new names.
 AI wrote the Lean code. Binary Goldbach is open.
@@ -18,7 +18,7 @@ open LeanLab.Perelli1996.Decomp88 LeanLab.Perelli1996.Decomp103
 noncomputable section
 
 /-- Equation 4 of page 481, same statement as Decomp103.major.
-CONDITIONAL ON Decomp103.leaf_nair_mean and Decomp320a.leaf_finite_major. -/
+CONDITIONAL ON Decomp103.leaf_nair_mean only. -/
 theorem major_of_split (F : ℤ[X]) (hF : Admissible F) (c : ℝ) (hc : 0 < c) :
     ∃ d : ℝ, 0 ≤ d ∧ ∀ A ε B : ℝ, 0 < A → 0 < ε → 0 < B →
       ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
@@ -73,7 +73,7 @@ theorem major_of_split (F : ℤ[X]) (hF : Admissible F) (c : ℝ) (hc : 0 < c) :
 
 /-- Theorem 1, page 478, same assembly as Decomp88.theorem1 with the major arc step
 from major_of_split. CONDITIONAL ON Decomp103.leaf_nair_mean,
-Decomp320a.leaf_finite_major, Decomp103b.leaf_differencing and Decomp88.leaf_character. -/
+Decomp103b.leaf_differencing and Decomp88.leaf_character. -/
 theorem theorem1_of_split : LeanLab.Perelli1996.Theorem1 := by
   intro F hF A ε hA hε
   obtain ⟨c, Nc, hc, hNc, hcut⟩ := leaf_cutoff F hF
