@@ -35,7 +35,7 @@ theorem negative_bottom_order_summable (q : ℕ) [NeZero q] (χ : DirichletChara
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} =>
       Set.indicator {ρ | -(3 / 2) < ρ.val.im ∧ ρ.val.im < -1}
         (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) ρ) := by
-  sorry
+  exact ZeroCount1623.summable_zeroIdx χ T _
 
 /-- LEAF 2 of 3. The count. Twice the multiplicity sum of the zeros of the window is at most
 the small height budget `0.15 * log q + 3.389`. The factor two is the slack that the weight
