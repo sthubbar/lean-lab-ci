@@ -424,14 +424,84 @@
    "file": "LeanLab/LeanLab/Routes/U1554LinnikGRH.lean",
    "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
    "seconds": 1159
+  },
+  {
+   "file": "LeanLab/LeanLab/SchnirelmannGoldbach/Discharged.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Song2020/State1562.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 37
+  },
+  {
+   "file": "LeanLab/LeanLab/Teravainen2016/Lemma34.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Teravainen2016/TernaryBridge.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Teravainen2016/TernaryCounting.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp361e.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp420f.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary78/Decomp104.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Tolev2009/Decomp83.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Tolev2009/Faithful.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Tolev2009/FinishAssembly1112.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/OeSHPTables.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/FastUpTo.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/GapsSummary.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Summary.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Zinoviev1997/DecompJ1130.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Zinoviev1997/State1546.lean",
+   "result": "UNFINISHED deadline"
   }
  ],
  "summary": {
   "files": 99,
   "declarations_closed": 1,
   "sites": 1,
-  "skipped": 2,
-  "seconds": 11990
+  "skipped": 17,
+  "seconds": 12029
  },
  "selftest": {
   "ok": true,
