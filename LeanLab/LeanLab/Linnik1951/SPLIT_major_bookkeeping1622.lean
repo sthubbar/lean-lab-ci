@@ -50,7 +50,17 @@ theorem major_bookkeeping_sharp1622 (k : ℕ) (hk : 3 ≤ k) (B : ℝ) (hB : 0 <
         A * majorRelative376 k N +
           A * (N : ℝ) ^ (1 - (3 / 140 : ℝ)) * Real.log N ^ (k + 13) +
             A * (N : ℝ) ^ (1 - (1 / 1000 : ℝ)) * Real.log N ^ (k + 13) := by
-  sorry
+  obtain ⟨A, hA, N1, hN1⟩ := major_bookkeeping1622 k hk B hB N0 hL B' hB' hC
+  refine ⟨A, hA, N1, fun N hev hN => ?_⟩
+  have hNge : 1 ≤ N := by omega
+  have hR : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hNge
+  have hlog : 0 ≤ Real.log N ^ (k + 13) :=
+    pow_nonneg (Real.log_nonneg hR) _
+  have hpow : 0 < (N : ℝ) ^ (1 - (3 / 140 : ℝ)) :=
+    Real.rpow_pos_of_pos (by linarith) _
+  have hpos : 0 ≤ A * (N : ℝ) ^ (1 - (3 / 140 : ℝ)) * Real.log N ^ (k + 13) :=
+    mul_nonneg (mul_nonneg hA.le hpow.le) hlog
+  linarith [hN1 N hev hN]
 
 /- Step two of four. A power saving three over one hundred and forty is at least
 the power saving one over one thousandth, so at every N from one on the sharper
