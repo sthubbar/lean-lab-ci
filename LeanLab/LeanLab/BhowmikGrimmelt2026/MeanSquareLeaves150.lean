@@ -14,6 +14,7 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.BhowmikGrimmelt2026.Statements
 import LeanLab.BhowmikGrimmelt2026.MeanSquareCore150
 import LeanLab.BhowmikGrimmelt2026.Coefficients150
+import LeanLab.BhowmikGrimmelt2026.Decomp502a
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -44,6 +45,7 @@ the survey states without proof.  OPEN: the Farey counting is not in the lab. -/
 theorem arc_tails_sup150 :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
       ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε) := by
-  sorry
+  -- CONDITIONAL on near_arc_tail502 and far_kernel502 through the far estimate.
+  exact arc_tails_of_near_far502 near_arc_tail502 far_arc_tail502
 
 end LeanLab.BhowmikGrimmelt2026
