@@ -98,7 +98,89 @@ theorem large_shift_far_sum_bound :
               ‖Sg N α‖ ^ 2 *
                 (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 9) := by
-  sorry
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  -- `N ^ (3/2)` overtakes the largest tuple difference once `N > k ^ 2`.
+  refine ⟨k ^ 2 + 1, ?_⟩
+  intro N hN
+  have hk4 : 4 ≤ k ^ 2 := by
+    have h := Nat.mul_le_mul hk hk
+    simpa [pow_two] using h
+  have hN5 : 5 ≤ N := by omega
+  have hkR : (0 : ℝ) ≤ (k : ℝ) := by positivity
+  have hNsq : (k : ℝ) ^ 2 < (N : ℝ) := by
+    have h : ((k ^ 2 + 1 : ℕ) : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+    push_cast at h
+    linarith
+  have hNpos : (0 : ℝ) < (N : ℝ) := by
+    have : (0 : ℝ) ≤ (k : ℝ) ^ 2 := sq_nonneg _
+    linarith
+  have hklt : (k : ℝ) < Real.sqrt (N : ℝ) := (Real.lt_sqrt hkR).mpr hNsq
+  have hkey : (k : ℝ) * (N : ℝ) < (N : ℝ) ^ ((3 : ℝ) / 2) := by
+    calc (k : ℝ) * (N : ℝ) < Real.sqrt (N : ℝ) * (N : ℝ) :=
+          mul_lt_mul_of_pos_right hklt hNpos
+      _ = (N : ℝ) ^ ((3 : ℝ) / 2) := by
+          rw [Real.sqrt_eq_rpow,
+            show ((3 : ℝ) / 2) = (1 : ℝ) / 2 + 1 by norm_num,
+            Real.rpow_add hNpos, Real.rpow_one]
+  -- every tuple difference is at most `k * 2 ^ log₂ N`.
+  have hsvbound : ∀ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N),
+      |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (k : ℝ) * (2 : ℝ) ^ (Nat.log 2 N) := by
+    intro x
+    have h1 : LeanLab.Linnik.U1434Lemma21.sv x.1 ≤ k * 2 ^ Nat.log 2 N :=
+      LeanLab.Linnik.U1434Lemma21.sv_le x.1
+    have h2 : LeanLab.Linnik.U1434Lemma21.sv x.2 ≤ k * 2 ^ Nat.log 2 N :=
+      LeanLab.Linnik.U1434Lemma21.sv_le x.2
+    have hai : (LeanLab.Linnik.U1434Lemma21.sv x.1 : ℤ) ≤
+        ((k * 2 ^ Nat.log 2 N : ℕ) : ℤ) := by exact_mod_cast h1
+    have hbi : (LeanLab.Linnik.U1434Lemma21.sv x.2 : ℤ) ≤
+        ((k * 2 ^ Nat.log 2 N : ℕ) : ℤ) := by exact_mod_cast h2
+    have hi : -(((k * 2 ^ Nat.log 2 N : ℕ) : ℤ)) ≤ LeanLab.Linnik.Decomp1532a.dif x ∧
+        LeanLab.Linnik.Decomp1532a.dif x ≤ ((k * 2 ^ Nat.log 2 N : ℕ) : ℤ) := by
+      unfold LeanLab.Linnik.Decomp1532a.dif
+      omega
+    have hr : -((k : ℝ) * (2 : ℝ) ^ (Nat.log 2 N)) ≤
+          (LeanLab.Linnik.Decomp1532a.dif x : ℝ) ∧
+        (LeanLab.Linnik.Decomp1532a.dif x : ℝ) ≤ (k : ℝ) * (2 : ℝ) ^ (Nat.log 2 N) := by
+      exact_mod_cast hi
+    exact abs_le.mpr hr
+  have h2L : (2 : ℝ) ^ (Nat.log 2 N) ≤ (N : ℝ) := by
+    have h := Nat.pow_log_le_self 2 (by omega : N ≠ 0)
+    have h' : ((2 ^ Nat.log 2 N : ℕ) : ℝ) ≤ ((N : ℕ) : ℝ) := by exact_mod_cast h
+    simpa using h'
+  have hscale : ∀ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N),
+      |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (k : ℝ) * (N : ℝ) := by
+    intro x
+    exact (hsvbound x).trans (mul_le_mul_of_nonneg_left h2L hkR)
+  -- so the far range is empty.
+  have hempty : (Finset.univ.filter
+      (fun x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) =>
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
+          (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ∧
+          ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ 2 * (N : ℝ)) ∧
+          ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ ((3 : ℝ) / 2)))) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro x _ hx
+    exact hx.2.2.2 (le_of_lt ((hscale x).trans_lt hkey))
+  have hsum : (∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+      LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
+        (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ∧
+        ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ 2 * (N : ℝ)) ∧
+        ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ ((3 : ℝ) / 2)),
+      ∫ α in Set.Icc (0 : ℝ) 1 \ majorArcs N ((N : ℝ) ^ θ),
+        ‖Sg N α‖ ^ 2 *
+          (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) = 0 := by
+    rw [hempty]
+    simp
+  rw [hsum]
+  simp only [abs_zero]
+  have hlog : (0 : ℝ) < Real.log (N : ℝ) := by
+    apply Real.log_pos
+    have : (1 : ℕ) < N := by omega
+    exact_mod_cast this
+  have hδ9 : (0 : ℝ) < δ / 9 := by linarith
+  refine mul_nonneg ?_ (le_of_lt hδ9)
+  exact div_nonneg (by positivity) (le_of_lt (pow_pos hlog 2))
 
 /-- ASSEMBLY. The sealed statement `large_shift_minor_sum_bound`, from the three pieces of the long
 shift range: split the tuple sum by `|dif x| ≤ 2 N` and then by `|dif x| ≤ N ^ (3/2)`, apply each
