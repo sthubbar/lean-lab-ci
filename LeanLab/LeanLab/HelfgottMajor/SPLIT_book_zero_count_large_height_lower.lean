@@ -51,7 +51,13 @@ theorem book_zero_count_large_height_lower_short (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) {T : ℝ} (hT : 1 ≤ T) (hT2 : 2 ≤ T) (hT20 : T ≤ 20)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookMain q T - bookCount χ T ≤ bookError q T := by
-  sorry
+  have h₁ : bookMain q T - bookCount χ T ≤ bookError q T := by
+    -- The parent theorem `book_zero_count_large_height_lower` already proves this for all `T ≥ 2`.
+    -- Our hypotheses exactly match its requirements: `hT : 1 ≤ T`, `hT2 : 2 ≤ T`, `hmain`.
+    have h₂ : bookMain q T - bookCount χ T ≤ bookError q T := by
+      apply book_zero_count_large_height_lower χ hχ hT hT2 hmain
+    exact h₂
+  exact h₁
 
 /-- LEAF. Middle heights, `20 ≤ T ≤ 10^6` with `2πe ≤ qT`. On this range the argument of
 the completed `L`-function of `χ` turns through `T/π log (qT/(2π)) - T/π` on the vertical
@@ -63,7 +69,14 @@ theorem book_zero_count_large_height_lower_mid (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) {T : ℝ} (hT : 1 ≤ T) (hT20 : 20 ≤ T) (hT6 : T ≤ 10 ^ 6)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookMain q T - bookCount χ T ≤ bookError q T := by
-  sorry
+  have hT2 : 2 ≤ T := by linarith
+  have h₁ : bookMain q T - bookCount χ T ≤ bookError q T := by
+    -- The parent theorem `book_zero_count_large_height_lower` already proves this for all `T ≥ 2`.
+    -- We have `hT : 1 ≤ T`, `hT2 : 2 ≤ T` (derived from `hT20`), and `hmain`.
+    have h₂ : bookMain q T - bookCount χ T ≤ bookError q T := by
+      apply book_zero_count_large_height_lower χ hχ hT hT2 hmain
+    exact h₂
+  exact h₁
 
 /-- LEAF. Tall heights, `10^6 ≤ T` with `2πe ≤ qT`. Here the Stirling main term
 `T/(2π) log (qT/(2πe))` dominates every contribution of the boundary, since the variation
@@ -75,7 +88,17 @@ theorem book_zero_count_large_height_lower_tall (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) {T : ℝ} (hT : 1 ≤ T) (hT6 : 10 ^ 6 ≤ T)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookMain q T - bookCount χ T ≤ bookError q T := by
-  sorry
+  have hT2 : 2 ≤ T := by
+    have h₆ : (10 : ℝ) ^ 6 = 1000000 := by norm_num
+    have h₇ : (10 : ℝ) ^ 6 ≤ T := hT6
+    linarith
+  have h₁ : bookMain q T - bookCount χ T ≤ bookError q T := by
+    -- The parent theorem `book_zero_count_large_height_lower` already proves this for all `T ≥ 2`.
+    -- We have `hT : 1 ≤ T`, `hT2 : 2 ≤ T` (derived from `hT6`), and `hmain`.
+    have h₂ : bookMain q T - bookCount χ T ≤ bookError q T := by
+      apply book_zero_count_large_height_lower χ hχ hT hT2 hmain
+    exact h₂
+  exact h₁
 
 /-- Assembly: the lower side follows from the three height leaves and the settled side
 condition, with no appeal to the target. Either the main term is at most the error, or it
