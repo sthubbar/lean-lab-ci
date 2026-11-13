@@ -71,7 +71,12 @@ theorem leaf_sum_split_exceptional {N : ℕ} {θ γ : ℝ}
             Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
               ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient x.2 (x.1 + 1) γ) (N + 1)
                 (gallagherLength N θ) m‖ ^ 2)) := by
-  sorry
+  classical
+  have hxK : x.1 ∈ range ⌊(N : ℝ) ^ θ⌋₊ := mem_range.mpr hK
+  have hmem : x.2 ∈ (univ : Finset (DirichletCharacter ℂ (x.1 + 1))).filter
+      (fun χ => χ.IsPrimitive) := mem_filter.mpr ⟨mem_univ _, hp⟩
+  rw [← sum_erase_add _ _ hxK, ← sum_erase_add _ _ hmem]
+  ring
 
 /-- LEAF. The exceptional pair decays on its own. For a primitive character `χ` of
 conductor `q + 1` at most `N` to the theta whose L function has a real zero `γ` in the strip
@@ -128,7 +133,15 @@ of the constants times the single envelope of rate `min c₁ c₂`. -/
 theorem leaf_envelope_add {c₁ c₂ C₁ C₂ θ : ℝ} (hC₁ : 0 < C₁) (hC₂ : 0 < C₂) (hθ : 0 < θ) :
     C₁ * Real.exp (-c₁ / θ) + C₂ * Real.exp (-c₂ / θ)
       ≤ (C₁ + C₂) * Real.exp (-(min c₁ c₂) / θ) := by
-  sorry
+  have h1 : Real.exp (-c₁ / θ) ≤ Real.exp (-(min c₁ c₂) / θ) := by
+    apply Real.exp_le_exp.mpr
+    exact div_le_div_of_nonneg_right (neg_le_neg (min_le_left c₁ c₂)) hθ.le
+  have h2 : Real.exp (-c₂ / θ) ≤ Real.exp (-(min c₁ c₂) / θ) := by
+    apply Real.exp_le_exp.mpr
+    exact div_le_div_of_nonneg_right (neg_le_neg (min_le_right c₁ c₂)) hθ.le
+  rw [add_mul]
+  exact add_le_add (mul_le_mul_of_nonneg_left h1 hC₁.le)
+    (mul_le_mul_of_nonneg_left h2 hC₂.le)
 
 /-- Gallagher 1975 p.131 display 14 and the paragraph following it. The sealed statement:
 some positive rate, constant and exponent bound give, for every character of the exceptional
