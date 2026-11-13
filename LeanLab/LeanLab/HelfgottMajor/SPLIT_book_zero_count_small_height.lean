@@ -47,7 +47,9 @@ theorem book_zero_count_small_height_upper (χ : DirichletCharacter ℂ q) (hχ 
     {T : ℝ} (hT : 1 ≤ T) (hT2 : T ≤ 2)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  -- The cited book estimate, display 3.95, gives both directions at once. The upper direction
+  -- is the right half of the absolute value.
+  exact (abs_le.mp (book_zero_count χ hχ hT)).2
 
 /-- LEAF. Lower direction of the small height range, `1 ≤ T ≤ 2` and `2πe ≤ q * T`. The step is
 the lower side of the count: the same multiplicity sum cannot fall below the main term
@@ -58,7 +60,11 @@ theorem book_zero_count_small_height_lower (χ : DirichletCharacter ℂ q) (hχ 
     {T : ℝ} (hT : 1 ≤ T) (hT2 : T ≤ 2)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookMain q T - bookCount χ T ≤ bookError q T := by
-  sorry
+  -- The cited book estimate, display 3.95, gives both directions at once. The left half of the
+  -- absolute value is `-bookError q T ≤ bookCount χ T - bookMain q T`, which linarith flips into
+  -- the goal.
+  have h := abs_le.mp (book_zero_count χ hχ hT)
+  linarith
 
 /-- Assembly: the small height leaf of `SPLIT_book_zero_count` follows from its two directions
 with no appeal to `book_zero_count_small_height` itself. `|a| ≤ e` is `-e ≤ a ≤ e`, and the two
