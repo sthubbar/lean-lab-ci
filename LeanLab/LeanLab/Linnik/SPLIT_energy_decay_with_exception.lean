@@ -6,7 +6,8 @@ exceptional case: for every character `x` of the exceptional family with conduct
 `P = N ^ θ`, whose L function has a real zero `γ` in the strip below one, the corrected
 energy at the conductor `x.1 + 1` and the zero `γ` is at most `C e^{-c/θ}`.
 
-The single open step of that proof is `short_interval_mean_decay_exceptional`: the
+The historical every zero step is `short_interval_mean_decay_exceptional`. It is off the
+current route because it needs an unproved fixed strip uniqueness comparison. The
 Gallagher window step `energy_window_gallagher` carries the whole statement down to one sum
 over primitive characters of conductor at most `P` of the short interval mean square of the
 corrected coefficients. That sum is cut here at the one character whose main term is
@@ -18,20 +19,23 @@ Leaves:
 * `leaf_sum_split_exceptional`: the finite identity that separates the sum over all pairs
   into the pairs with conductor below `x.1 + 1`, the primitive characters of conductor
   `x.1 + 1` other than `x.2`, and the single pair `(x.1, x.2)`.
-* `leaf_exceptional_summand_decay`: the pair `(x.1, x.2)` alone decays, the removed main
+* `leaf_exceptional_summand_decay`: CONDITIONAL ON the residual nonmaximal zero leaf
+  in Decomp498a. The pair `(x.1, x.2)` alone decays, the removed main
   term leaving a short interval mean square of size at most `C e^{-c/θ} sqrt N / log N`.
 * `leaf_nonexceptional_sum_decay`: every other pair together decays with the same shape,
   the zero gap above height `P ^ 5` supplying the exponential saving.
 * `leaf_envelope_add`: two exponential envelopes add to one envelope with the smaller rate.
 
-Assembly: `energy_decay_with_exception_split`, the sealed statement, with no sorry. The
+Assembly: `energy_decay_with_exception_split` retains the sealed statement and depends on
+the residual nonmaximal zero leaf. The
 Gallagher window step, the window length, the real zero and the normalization are the
 proved lemmas of the parent file.
 
-AI-written Lean code, DeepSeek V4.1 Flash Low, 2026-11-12. Checked only by the Lean kernel.
+Original AI-written Lean code, DeepSeek V4.1 Flash Low, 2026-11-12.
+AI proof updates by OpenAI Codex task498, 2026-11-13. Checked by the Lean kernel.
 Binary Goldbach is OPEN.
 -/
-import LeanLab.Linnik.Decomp486c
+import LeanLab.Linnik.Decomp498a
 
 namespace LeanLab.Linnik.Decomp486c
 
@@ -84,7 +88,9 @@ conductor `q + 1` at most `N` to the theta whose L function has a real zero `γ`
 summand of the short interval mean square of the corrected coefficients at conductor
 `q + 1`, with that real zero removed, is at most `C e^{-c/θ} sqrt N / log N`. This is the
 case display 14 handles by replacing the main polynomial of the exceptional character with
-the remainder. -/
+the remainder. CONDITIONAL ON leaf_nonmaximal_exceptional_summand_decay for the supplied
+zero that is not largest in the sealed strip. The fixed strip question is recorded in
+Decomp498a and PROGRESS.md. -/
 theorem leaf_exceptional_summand_decay :
     ∃ c C θ₀ : ℝ, 0 < c ∧ 0 < C ∧ 0 < θ₀ ∧ θ₀ ≤ 1 / 2 ∧
       ∀ θ : ℝ, 0 < θ → θ ≤ θ₀ → ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
@@ -96,7 +102,35 @@ theorem leaf_exceptional_summand_decay :
                 ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (q + 1) γ) (N + 1)
                   (gallagherLength N θ) m‖ ^ 2)
             ≤ C * Real.exp (-c / θ) * (Real.sqrt N / Real.log N) := by
-  sorry
+  classical
+  obtain ⟨c₁, C₁, θ₁, hc₁, hC₁, hθ₁, hθ₁2, hmaximal⟩ := exceptional_summand_decay_of_max
+  obtain ⟨c₂, C₂, θ₂, hc₂, hC₂, hθ₂, hθ₂2, hnonmaximal⟩ :=
+    leaf_nonmaximal_exceptional_summand_decay
+  refine ⟨min c₁ c₂, max C₁ C₂, min θ₁ θ₂, lt_min hc₁ hc₂,
+    lt_of_lt_of_le hC₁ (le_max_left _ _), lt_min hθ₁ hθ₂,
+    (min_le_left _ _).trans hθ₁2, fun θ hθ hθle => ?_⟩
+  obtain ⟨N₁, hN₁⟩ := hmaximal θ hθ (hθle.trans (min_le_left _ _))
+  obtain ⟨N₂, hN₂⟩ := hnonmaximal θ hθ (hθle.trans (min_le_right _ _))
+  refine ⟨max (max N₁ N₂) 2, fun N hN q χ γ hp hq hz hlo hlt => ?_⟩
+  have hN1 : N₁ ≤ N := ((le_max_left _ _).trans (le_max_left _ _)).trans hN
+  have hN2 : N₂ ≤ N := ((le_max_right _ _).trans (le_max_left _ _)).trans hN
+  have hs : (0 : ℝ) ≤ Real.sqrt N / Real.log N :=
+    div_nonneg (Real.sqrt_nonneg _) (Real.log_nonneg (by
+      exact_mod_cast (show 1 ≤ N from (by omega : 1 ≤ 2).trans ((le_max_right _ _).trans hN))))
+  have absorb {E c C : ℝ} (hc : min c₁ c₂ ≤ c) (hC : C ≤ max C₁ C₂)
+      (hE : E ≤ C * Real.exp (-c / θ) * (Real.sqrt N / Real.log N)) :
+      E ≤ max C₁ C₂ * Real.exp (-min c₁ c₂ / θ) * (Real.sqrt N / Real.log N) := by
+    apply hE.trans
+    apply mul_le_mul_of_nonneg_right _ hs
+    apply mul_le_mul hC _ (Real.exp_pos _).le
+      (lt_of_lt_of_le hC₁ (le_max_left _ _)).le
+    exact Real.exp_le_exp.mpr (div_le_div_of_nonneg_right (neg_le_neg hc) hθ.le)
+  by_cases hmax : ∀ γ' : ℝ, χ.LFunction (γ' : ℂ) = 0 →
+      1 - exceptionalStrip / Real.log (((N : ℝ) ^ θ) ^ 5) ≤ γ' → γ' < 1 → γ' ≤ γ
+  · exact absorb (min_le_left _ _) (le_max_left _ _) (hN₁ N hN1 q χ γ hp hq hz hlo hlt hmax)
+  · push Not at hmax
+    exact absorb (min_le_right _ _) (le_max_right _ _) (hN₂ N hN2 q χ γ hp hq hz hlo hlt hmax)
+
 
 /-- LEAF. Every pair other than the exceptional one decays together. For a character `x` of
 the exceptional family at height `T` equal to `N` to the theta raised to the fifth, of
@@ -125,7 +159,75 @@ theorem leaf_nonexceptional_sum_decay :
                     ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (x.1 + 1) γ) (N + 1)
                       (gallagherLength N θ) m‖ ^ 2))
             ≤ C * Real.exp (-c / θ) * (Real.sqrt N / Real.log N) := by
-  sorry
+  classical
+  obtain ⟨c, C, θ₀, hc, hC, hθ₀, hθ₀2, hmean⟩ :=
+    LeanLab.Linnik.ExplicitFormula.mean_decay_exceptional_max
+  refine ⟨c, C, θ₀, hc, hC, hθ₀, hθ₀2, fun θ hθ hθle => ?_⟩
+  obtain ⟨N₁, hN₁⟩ := hmean θ hθ hθle
+  have hev : ∀ᶠ N : ℕ in atTop, (2 : ℝ) ≤ (N : ℝ) ^ θ :=
+    ((tendsto_rpow_atTop hθ).comp (tendsto_natCast_atTop_atTop (R := ℝ))).eventually_ge_atTop 2
+  obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp hev
+  refine ⟨max N₁ N₂, ?_⟩
+  rintro N hN ⟨q, ψ⟩ hx hxP γ _hz hγlo _hγ1
+  have hP2 : (2 : ℝ) ≤ (N : ℝ) ^ θ := hN₂ N ((le_max_right _ _).trans hN)
+  have hT : (2 : ℝ) ≤ ((N : ℝ) ^ θ) ^ 5 :=
+    hP2.trans (le_self_pow₀ (by linarith) (by norm_num))
+  obtain ⟨γ', hz', hlo', hlt', hmax⟩ :=
+    LeanLab.Linnik.ExplicitFormula.exists_max_real_zero hT ⟨q, ψ⟩ hx
+  have htotal := hN₁ N ((le_max_left _ _).trans hN) ⟨q, ψ⟩ hx hxP γ' hz' hlo' hlt' hmax
+  change (∑ k ∈ range ⌊(N : ℝ) ^ θ⌋₊,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ (k + 1))).filter (fun χ => χ.IsPrimitive),
+        Real.pi / (2 * gallagherLength N θ) *
+          Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
+            ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (q + 1) γ') (N + 1)
+              (gallagherLength N θ) m‖ ^ 2)) ≤ _ at htotal
+  have hqK : q < ⌊(N : ℝ) ^ θ⌋₊ := by
+    have h : q + 1 ≤ ⌊(N : ℝ) ^ θ⌋₊ :=
+      (Nat.le_floor_iff (show (0 : ℝ) ≤ (N : ℝ) ^ θ by positivity)).mpr hxP
+    omega
+  rw [leaf_sum_split_exceptional (N := N) (θ := θ) (γ := γ') ⟨q, ψ⟩ hqK hx.2.1] at htotal
+  have heq {k : ℕ} (χ : DirichletCharacter ℂ (k + 1)) (hp : χ.IsPrimitive)
+      (hne : (⟨k, χ⟩ : Σ q : ℕ, DirichletCharacter ℂ (q + 1)) ≠ ⟨q, ψ⟩) :
+      correctedCoefficient χ (q + 1) γ = correctedCoefficient χ (q + 1) γ' := by
+    rw [correctedCoefficient_eq_unexceptional hT ⟨q, ψ⟩ hx k χ hp hne γ hγlo,
+      correctedCoefficient_eq_unexceptional hT ⟨q, ψ⟩ hx k χ hp hne γ' hlo']
+  have hfirst : (∑ k ∈ (range ⌊(N : ℝ) ^ θ⌋₊).erase q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ (k + 1))).filter (fun χ => χ.IsPrimitive),
+        Real.pi / (2 * gallagherLength N θ) *
+          Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
+            ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (q + 1) γ) (N + 1)
+              (gallagherLength N θ) m‖ ^ 2)) =
+      (∑ k ∈ (range ⌊(N : ℝ) ^ θ⌋₊).erase q,
+      ∑ χ ∈ (univ : Finset (DirichletCharacter ℂ (k + 1))).filter (fun χ => χ.IsPrimitive),
+        Real.pi / (2 * gallagherLength N θ) *
+          Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
+            ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (q + 1) γ') (N + 1)
+              (gallagherLength N θ) m‖ ^ 2)) := by
+    apply sum_congr rfl
+    intro k hk
+    apply sum_congr rfl
+    intro χ hχ
+    rw [heq χ (mem_filter.mp hχ).2 (fun he => (ne_of_mem_erase hk) (congrArg Sigma.fst he))]
+  have hsecond : (∑ χ ∈ ((univ : Finset (DirichletCharacter ℂ (q + 1))).filter
+        (fun χ => χ.IsPrimitive)).erase ψ,
+      Real.pi / (2 * gallagherLength N θ) *
+        Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
+          ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (q + 1) γ) (N + 1)
+            (gallagherLength N θ) m‖ ^ 2)) =
+      (∑ χ ∈ ((univ : Finset (DirichletCharacter ℂ (q + 1))).filter
+        (fun χ => χ.IsPrimitive)).erase ψ,
+      Real.pi / (2 * gallagherLength N θ) *
+        Real.sqrt (∑ m ∈ range (N + 1 + gallagherLength N θ),
+          ‖LeanLab.PNTPort.Gallagher.win (correctedCoefficient χ (q + 1) γ') (N + 1)
+            (gallagherLength N θ) m‖ ^ 2)) := by
+    apply sum_congr rfl
+    intro χ hχ
+    rw [heq χ (mem_filter.mp (mem_of_mem_erase hχ)).2
+      (fun he => (ne_of_mem_erase hχ) (eq_of_heq (Sigma.mk.inj_iff.mp he).2))]
+  dsimp only at htotal ⊢
+  rw [hfirst, hsecond]
+  exact (le_add_of_nonneg_right (by positivity)).trans htotal
+
 
 /-- LEAF. Two exponential envelopes add to one, at the smaller rate. For positive constants
 and positive theta, the sum of the two envelopes of rates `c₁` and `c₂` is at most the sum
