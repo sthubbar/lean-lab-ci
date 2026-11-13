@@ -62,7 +62,23 @@ theorem near_negative_sup357 (hG : LeanLab.DERZ1997.GRH) :
         ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ α : ℝ, -(4 / (N : ℝ)) ≤ α →
           α ≤ 0 →
           ‖characterPrime280 χ N α‖ ^ 2 ≤ C * (N : ℝ) / (q : ℝ) * Real.log N ^ 5 := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := near_positive_sup357 hG
+  refine ⟨C, hC, N0, ?_⟩
+  intro N hN q hq hqt χ hχ α hα1 hα2
+  have hstar : star χ ≠ 1 := by
+    intro hs
+    apply hχ
+    ext x
+    have hx : star (χ x) = 1 := by
+      rw [← MulChar.star_apply, hs]
+      simp
+    rw [← star_star (χ x), hx]
+    simp
+  have hb := h N hN q hq hqt (star χ) hstar (-α) (by linarith) (by linarith)
+  have hrefl := character_norm_reflect357 χ N (-α)
+  rw [neg_neg] at hrefl
+  rw [hrefl]
+  exact hb
 
 /-- LEAF. Step 4 of 4: the constant and the logarithmic bookkeeping. For every
 positive C there is N0 such that for every N beyond N0 and every modulus q at
