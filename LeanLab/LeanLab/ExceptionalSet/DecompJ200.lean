@@ -2,10 +2,12 @@ import Mathlib
 import LeanLab.ExceptionalSet.BrudernPerelli1998
 import LeanLab.ExceptionalSet.State1539
 import LeanLab.ExceptionalSet.PrimeKernel264
+import LeanLab.ExceptionalSet.MajorSupplyJ200
+import LeanLab.ExceptionalSet.BoundarySupplyJ200
+import LeanLab.ExceptionalSet.CoeffSupplyJ200
+import LeanLab.ExceptionalSet.MajorLeafJ200
 import LeanLab.ExceptionalSet.TailSupplyJ200
 import LeanLab.ExceptionalSet.UpJ200.Decomp467a
-import LeanLab.ExceptionalSet.MajorSupplyJ200
-import LeanLab.ExceptionalSet.UpJ200.MajorBoundLeavesJ200
 
 /-!
 Decomposition of Theorem 1 of P0082, Brüdern and Perelli 1998, repaired in unit U-1610.
@@ -271,12 +273,12 @@ theorem leaf_minor_bound (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
 
 The proof of Lemma 8 on page 365 has three parts. First, display (8) on page 357, specialized as
 display (23) on page 364, writes the major integral as `R₁(ν_n) + R₁(ν_n + 1)` whenever the
-fractional part of `F(n)` stays `Δ = 𝒦^{-1/8}` away from the integers. Second, Lemma 4 on page 358
+fractional part of `F(n)` stays `Δ = ℰ^{-1/8}` away from the integers. Second, Lemma 4 on page 358
 bounds the `n` of the window whose fractional part is within `Δ` of an integer by `O(N Δ)`.
 Third, Lemma 7 on page 362, with the odd second moment of displays (29) and (30) on pages 366
-to 369, bounds the `n` where the adjacent coefficient sum is small. The first part is proved
-here; the other two are the leaves of `UpJ200.MajorBoundLeavesJ200`, where they sit because an
-existing file may not gain a `sorry`. AI wrote this Lean split. -/
+to 369, bounds the `n` where the adjacent coefficient sum is small. The three lemmas below are
+those parts; AI wrote this Lean split. The first is proved downstream as
+`Decomp404a.major_identity`, which this file cannot import because `Decomp404a` imports it. -/
 
 /-- P0082 page 357 display (8) and page 364 display (23). When `Δ ≤ {F(n)} ≤ 1 - Δ`, both
 trapezoid weights of the kernel equal one and the major integral is the sum of the two adjacent
@@ -302,9 +304,8 @@ theorem leaf_major_identity (γ δ κ : ℝ) (N n : ℕ)
   rw [hw0, hw1]
   simp only [Complex.ofReal_one, one_mul, nu]
 
-/-- P0082 page 358 Lemma 4, applied on page 364 after display (23). With `Δ = 𝒦^{-1/8}`, at most
-`B N Δ` members of the window have `{F(n)} < Δ` or `{F(n)} > 1 - Δ`, for every small `κ`. Proved
-from the leaf of `UpJ200.MajorBoundLeavesJ200`, whose `window` is this file's `window`. -/
+/-- P0082 page 358 Lemma 4, applied on page 364 after display (23). With `Δ = ℰ^{-1/8}`, at most
+`B N Δ` members of the window have `{F(n)} < Δ` or `{F(n)} > 1 - Δ`, for every small `κ`. -/
 theorem leaf_major_fractional_boundary (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
       ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
@@ -312,13 +313,15 @@ theorem leaf_major_fractional_boundary (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2
           Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨
             1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  simpa only [window, UpJ200.DecompJ200.window] using
-    UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
+  -- Burst 7: the simple variant of Lemma 4 that page 359 says suffices, proved in
+  -- `BoundarySupplyJ200` by a Fejér square from Theorem 2 with `c = 1/2`. CONDITIONAL ON
+  -- Theorem 2 only, supplied here by `U1539.theorem2_via_karacuba`, which rests on the CITED
+  -- Lemma 10 of page 370, Karacuba's estimate.
+  exact BoundarySupplyJ200.boundary_of_theorem2 U1539.theorem2_via_karacuba γ h1 h2
 
 /-- P0082 page 362 Lemma 7, with the odd second moment of pages 366 to 369 displays (29) and
-(30): the real part of `R₁(ν_n) + R₁(ν_n + 1)` is below `c₀ X 𝒦^{-1/10}` for at most
-`B N 𝒦^{-1/12}` members of the window. Proved from the leaf of
-`UpJ200.MajorBoundLeavesJ200`, whose `window` is this file's `window`. -/
+(30): the real part of `R₁(ν_n) + R₁(ν_n + 1)` is below `c₀ X ℰ^{-1/10}` for at most
+`B N ℰ^{-1/12}` members of the window. -/
 theorem leaf_major_coefficient_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
       ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
@@ -328,8 +331,51 @@ theorem leaf_major_coefficient_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) 
               U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <
                 c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
             B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
-  simpa only [window, UpJ200.DecompJ200.window] using
-    UpJ200.MajorBoundLeavesJ200.leaf_major_coefficient_lower γ h1 h2
+  -- Burst 7: the first sentence of the proof of Lemma 7 on page 362, from the even coefficient
+  -- leaf and the odd moment leaf above. The proof copies `Decomp467b.coefficient_lower_from_inputs`.
+  classical
+  obtain ⟨δe, hδe, he⟩ := MajorLeafJ200.leaf_major_even_coefficient γ h1 h2
+  obtain ⟨δo, hδo, ho⟩ := MajorLeafJ200.leaf_major_odd_moment γ h1 h2
+  refine ⟨min δe δo, lt_min hδe hδo, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κe, hκe, he⟩ := he δ hδ (hδsmall.trans_le (min_le_left _ _))
+  obtain ⟨κo, hκo, ho⟩ := ho δ hδ (hδsmall.trans_le (min_le_right _ _))
+  refine ⟨min κe κo, lt_min hκe hκo, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨c, Be, hc, hBe, Ne, he⟩ := he κ hκ (hκsmall.trans (min_le_left _ _))
+  obtain ⟨Bo, hBo, No, ho⟩ := ho κ hκ (hκsmall.trans (min_le_right _ _))
+  refine ⟨c / 2, Be + 16 * Bo / c ^ 2, by positivity, by positivity,
+    max 2 (max Ne No), fun N hN => ?_⟩
+  have hN2 : 2 ≤ N := (le_max_left _ _).trans hN
+  have hNe : Ne ≤ N := (le_max_left _ _).trans ((le_max_right _ _).trans hN)
+  have hNo : No ≤ N := (le_max_right _ _).trans ((le_max_right _ _).trans hN)
+  have hE : 1 ≤ calE γ κ N := by
+    apply Real.one_le_exp
+    exact mul_nonneg hκ.le
+      (Real.rpow_nonneg (Real.log_nonneg (by exact_mod_cast (show 1 ≤ N by omega))) _)
+  let f : ℕ → ℂ := fun n =>
+    U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (CoeffSupplyJ200.evenAdjacent γ n)
+  let g : ℕ → ℂ := fun n => U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (U1539.nuOdd γ n)
+  let T := c / 2 * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ))
+  have hpair := CoeffSupplyJ200.bad_pair_count (window γ N) f g T
+  have hrewrite (n : ℕ) : f n + g n =
+      U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +
+        U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1) :=
+    CoeffSupplyJ200.adjacent_sum (U1539.R1 (F γ N ^ (6 * δ)) (F γ N)) γ n
+  have htwo : 2 * T = c * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)) := by
+    dsimp [T]
+    ring
+  simp_rw [hrewrite, htwo] at hpair
+  have hodd := CoeffSupplyJ200.odd_bad_count (window γ N) g c Bo (F γ N) (calE γ κ N) N
+    hc hBo.le (Real.exp_pos _) hE (by simpa only [window] using ho N hNo)
+  have hpairR := Nat.cast_le (α := ℝ).mpr hpair
+  push_cast at hpairR
+  change _ ≤ _ at hodd
+  have heN := he N hNe
+  change (((window γ N).filter (fun n => (f n).re <
+    c * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤ _ at heN
+  dsimp only [T] at hpairR
+  refine hpairR.trans ((add_le_add heN hodd).trans ?_)
+  ring_nf
+  exact le_rfl
 
 /-- LEAF page 365, Lemma 8, with one `κ` shared by the two arcs as in the paper, where `ℰ` is
 fixed once for sections 4 to 7. `U1539.Lemma8` is the same bound with a private `κ`, too weak to
@@ -397,6 +443,7 @@ theorem leaf_major_bound (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         Bb * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
       gcongr
     _ = _ := by ring
+
 
 /-- ASSEMBLY of the three leaves above, p. 366: `r(F(n)) > 0` for all but `O(N ℰ^{-1/12})` values
 of `n` with `X/2 < ν_n ≤ X`. -/
