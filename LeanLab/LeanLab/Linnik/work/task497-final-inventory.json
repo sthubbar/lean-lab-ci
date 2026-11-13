@@ -1,0 +1,712 @@
+[
+  {
+    "file": "LeanLab/LeanLab/Linnik/Audit1610.lean",
+    "sha256": "79c7f077cd4335994bbf951b23f6b37bd2022a5642de7494d4d9182812c7afab",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Audit1619.lean",
+    "sha256": "4d022e16bfe58639d8b76e835e5a2866d12b79feca4ec51bde49b002ac18b2fc",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Audit1625.lean",
+    "sha256": "abdbccd9bba7774e51e4c9d349a3cde696062542b8aa71cecce1a08ee0f032eb",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532a.lean",
+    "sha256": "7c02082fa97d20163dbdacf88e7156ddfbef00597cb79291042fe0882d60894c",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532b.lean",
+    "sha256": "f08e355c6f108f5e42f7313aa40de62dc526adc142acc470acb667a57829a977",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532b2.lean",
+    "sha256": "7541d21b66ecde1ce24607deee44e88236a4b3aaef9408ad93aab2a25e63fa39",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532c.lean",
+    "sha256": "a773d74f1ba993838235cddb5f2e07877f15607a609e58066912ae9ab1803628",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1536a.lean",
+    "sha256": "4f6c313afbe47d806001bb89ecb944229c95a7cfff67c6cc9b29d32a5ea20002",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1536b.lean",
+    "sha256": "8331ec5e7b6402945b42adecf32301f0c1633cd3e6f6a6270685498c4733d5e4",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1536c.lean",
+    "sha256": "fc0e710e9c73faec6bdd3469ac62f7ee8e3f61def817e732761eb1d15bccac65",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1537a.lean",
+    "sha256": "2aa3f03a2079904b3d1a22f4351e0eec37b4f3fab0b5fd6cd1a3768d38c67097",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1537b.lean",
+    "sha256": "d7c5186ed6a48cb1aa5533fdf01a7aa125503551d9711543ff7e60673c91d8f8",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1537c.lean",
+    "sha256": "98c5530a91ff4ead110f96612db0be45d4e72be7c73dede8c372d14579565afd",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp307a.lean",
+    "sha256": "02633d620b2f69f673e78a9e7d4c1890135607284102032a98b49a4f1c5aa9ba",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp307b.lean",
+    "sha256": "e5ee2ab8cf47d39562c01820142c5151323351de77b20544abaa5c3e7387a3c4",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp335a.lean",
+    "sha256": "cacc1e9403881ca54122fa0d738335eb5de78c178c5ce67c8156fd3ce559f907",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp335b.lean",
+    "sha256": "15a39f11741e613bdb3b0471b250a0d0637d9175a0188c9766621ffa2e042531",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp335c.lean",
+    "sha256": "dbf516c1be5a88f84a2fcea69344509912fda174062bc9be306b8c36c351625e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp340a.lean",
+    "sha256": "72744d56cdbaee42484f38e3aba1dfc2904c1183603895202d7c6e5a466e960a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp340b.lean",
+    "sha256": "2a2861f3613f64fb8612e15cedce50e3f57b717570bb4d6db2cd375fea49239a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp340c.lean",
+    "sha256": "67b8db151777996616bc4eed4429c68d53f5a64e6f9c50513a77b541fe6be6df",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp466a.lean",
+    "sha256": "542fd7eba401d88367133cbc1768fe28e0999b56d07e74eff6ba97eb028792f0",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp466b.lean",
+    "sha256": "43e94d0f3f3a89f30a2f661a52c35ad9fddff9857ec23286350710cdddf7ea76",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp466c.lean",
+    "sha256": "4936e1850f7fa566437670d963fc52d00b29f08dc44d2906353e760e58c5f50c",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp482a.lean",
+    "sha256": "74c3b2e0deb4b8559ecee9d13e54ecfeed5e6127df2a983fc68b292c92e16c8c",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp482b.lean",
+    "sha256": "83af0f70696b921700ef5a78d370194d8edf6a8332584d021035258c06d2e80b",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp482c.lean",
+    "sha256": "225b9835a6ff53a6c894b5c4c85fc17500be722f8958189e4bf2ed5a5e7d3a6b",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp486a.lean",
+    "sha256": "24de862fd708d37c6371ef64001e055c27fd20465ade71e171f14a8440b770c0",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp486b.lean",
+    "sha256": "e91859e9e3d661e1520adc88b009f0547e191a66571596dc8a4258bef552ba70",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp486c.lean",
+    "sha256": "d06a1e83978903de31bdda8005603dbad62d9bb738e3bb0e8654b40ba77c8794",
+    "sorry_count": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp495a.lean",
+    "sha256": "709f05fba2c200f78ebe8cc586dbf8d6889611881295a730cae3701d4ff4ea4b",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp496a.lean",
+    "sha256": "a2fcf8878e483348dbd18bd5c94159ea039c639a7077d136bcb4a22ca919f7fe",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp497a.lean",
+    "sha256": "37d3951abe1bd91d742b29da3aa1673558e2e42668105b210c7b72a10832442e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp498a.lean",
+    "sha256": "bd1856a1b9662df62c107dc633006942471cf3afbc8730238462d13574874b0c",
+    "sorry_count": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExactAtMost.lean",
+    "sha256": "3debe031d842a9bec6bc311d8af5b34b9f2120a831dfb9bd893473b1134a0954",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Assembly.lean",
+    "sha256": "989db0e324e19dcb7b9dace0c1c0a9169c8fec5e922c49d568bb8603b5e3e614",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Cesaro.lean",
+    "sha256": "e15b1f0bac2441d83ad639265bdb8fbd3e1f05e5ff824875101bee0f9894fe51",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Defs.lean",
+    "sha256": "fe139edb722a6cc7ecb06e66396e9ec805f9f8a01376a05fa168fc7b00530342",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/DensityLayer.lean",
+    "sha256": "bb05cd0b91fe2c41d5d7cd314656c4c40980a56d7284dcef96e82a30e4733f33",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Final.lean",
+    "sha256": "7e8740b15d758d7121020175d3e18b1c201882579ad969e577e0b41313303e72",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Heights.lean",
+    "sha256": "9a3b48b88601d6e24448c03651cd2aedeee477a4f488afece87614ae0ee15eac",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Kernel.lean",
+    "sha256": "3f4ffd5ea5d19fbec433ef0ca1f9189e79a7ea4d63e5a255bc21376b17d85a9a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/LeftHalf.lean",
+    "sha256": "906afd60f97d912d9aea90d38a8e03228e6344ed65c70dc5610a95eabd73ceff",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Page.lean",
+    "sha256": "fdcca18c6db3e2c4448e98da45fe7b9436b9bfa46da575ad17ec8a34a1a4777a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Primes.lean",
+    "sha256": "eafca6f2fe61396e9dc2fde89443cb14f082ebdb1f518dba1e360a586f6f6c6a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Residues.lean",
+    "sha256": "6c2ba82d1e0e0a74d40ac8b773316f131bee4873bbf66f68c7dfa1a9046b8082",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Window.lean",
+    "sha256": "7a21b76b29d706bb333ae9ca6b15e5193e3f7f017aeae1d982c6c8ea094f840d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/ZeroSum.lean",
+    "sha256": "67673246e58f2bc6f19500a0bb2c15dc035a2f644e4cca99798f6c4335021a1d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/ZeroTerm.lean",
+    "sha256": "86787d42ace68580ee657c2d0e3ce189cd945e725947a51182beb7d267536ab3",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975.lean",
+    "sha256": "9a0c8bca296af188b7a9e5158f8cd030b1ea495fb3f156884540080b62f49fa4",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Lemma1.lean",
+    "sha256": "5a4971fea4d736c510527ab42f7b7dffb105b0a99ba933ee1131ff5e893d1ef1",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Lemma2.lean",
+    "sha256": "15781e2ce3756cd81343759766e98087f3ea93284ff6065038654a014d166659",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Lemma3.lean",
+    "sha256": "ae82a7e0cc8e330435ef0e201ca856a7b7411ef52eb52cabb1f4693661d6b6a7",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Thm2.lean",
+    "sha256": "12333be564332bfaaa80b308c9bcc3ce319386b0ba52e4f1eb49241a5a000a7d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Thm2Count.lean",
+    "sha256": "3a9dd2559c5c2bb2aaeb8ebc7f5837eb1dda7b2bac0e07ff65ee73d885094a6a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Thm2Full.lean",
+    "sha256": "c1912907bdd16b73d4f99cd651448179983800898b4a1ff20ff8d35c2d73d02a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/HBPMajorCap.lean",
+    "sha256": "9f06cab996cba064ba01012b9e195b7efd019bd21d24696efc0996905cd4c856",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/HilbertCosecant.lean",
+    "sha256": "0844698f5b3d685dfb2bd15d89daaf2b1ee06ed4ee33e92976791c0b2e41a218",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTK7Levers.lean",
+    "sha256": "3c1b3f7c8822e57c5283e0cf5a9fbdbb6092ab2e29abc80c82b233ab01169735",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTK7LeversTwinC.lean",
+    "sha256": "3303c85f42dad0290520e0f6048a4d4f6f1a61289986dbd5245ab76f75bcf964",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTNumeric.lean",
+    "sha256": "28e37505b79e30d388d71bdf920d7b6b6f1d2d0fe7c09d303925cd2af2cc4e6e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTTable2.lean",
+    "sha256": "bc9f21eecdb8acdb7ca708a97c5d7b06a58143693ebca6041d169f013f9d943e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/K3TwoFunction.lean",
+    "sha256": "491eb4fd29ed0d03cf939661eaec4c5545a9ec28d43c04de572b6fd666e67c41",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/K4EH.lean",
+    "sha256": "9c933c28ffa007a5c3a6a391b9d56f0a82cc945789718e7adc691a9b8101fbf0",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/K6Map.lean",
+    "sha256": "3eed96cb7755545cc5a25bcb5eeb8c4aad91e7e65681a0f85a7c179df3aa6725",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/KLadder.lean",
+    "sha256": "ec6035b43ad3911ba161b531224781971dd89c55ae9f0c6edeb33b458f39ed97",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiu2026.lean",
+    "sha256": "d4ff13ce2534b28a0d5ce6508e9401b89df2ce57a2dfbc530a448ff447ec1aa0",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiu2026Chain.lean",
+    "sha256": "28cd79da050e16085f42335fd7dcc0356c4e62605dc7b702b7ee1c5ec2f0c0f1",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuDisplay37.lean",
+    "sha256": "b5cb51e555ecc75bd9270095ae676b163cc4c2e7aadc4c87a5eecbc76fb6bf99",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuDisplay37PNT.lean",
+    "sha256": "e3ab67707f9e414679ec1c47e9b61cc8e4728f7f32ba49a9b797c979be17a13a",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuK5Levers.lean",
+    "sha256": "4571e58b7e806f646d2e5233c9d7a54dae7355381fe0893696af5a921295553d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuLemma43.lean",
+    "sha256": "8a12d652cbb4534e4e659de0fb71cd2a75948dbbb4e8d097d43dbc908e38db5c",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuLemma43Int.lean",
+    "sha256": "68fd2515b2af085a769e84678e3c18e2bdaecbecdf5485d231eac571961f3444",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LowerShiftBudget.lean",
+    "sha256": "08d0e5fb20b6c6fe4ae821b39b664c33381307ba9fff0f9dc1a9a5ba6fa0d1f5",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Basic13.lean",
+    "sha256": "5ead57437b29fc15faf8e5b55e36a41a56e7ead87ded63ddad501f999bc6d5d6",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Defs.lean",
+    "sha256": "2fc4dba5840ee5792100ad80757cb19a22ac054ee8027004ebb9bb134578447d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display11.lean",
+    "sha256": "f1767b528a87a04df37ba85d15a8da50d8917352a8a5308dc3c8f33b0466b2e6",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display13.lean",
+    "sha256": "79c77f05e88b8c85f04840bef339dd6267fea186610e241016962235199f4bca",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display1517.lean",
+    "sha256": "6e80850a4625d106a7eff440c37943f5cf9c1fb6ffb1da60b776d0e0ac146589",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display17.lean",
+    "sha256": "6f53838d019064d3cc6958bc06689a6944c5e815a83c57c138c3b70f6f5b1d25",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display3.lean",
+    "sha256": "d1c5dc2399d7c9320d667fefa348a9c0a61a096862a44fe98dff629a22d4ce12",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display7.lean",
+    "sha256": "f6a5cbf9a05e5cab725672cbb4e2323f5b207e558b0509bc662f83d3dade9de0",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display9.lean",
+    "sha256": "7b434f1fdecc9f39b9c690eb272e8dce682df98c4aa6667d90695de6d96d2a10",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13.lean",
+    "sha256": "b8698817c0a6ee39f1fe8db6422456f79c192cb1e728913ebbb927ec28fe2a45",
+    "sorry_count": 4
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13Major.lean",
+    "sha256": "af4df3faad87b9b78d933caa74ea7f3e5609a433c21888ca06677070b0275663",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13PairWeight.lean",
+    "sha256": "ccc0e097e1128f4986938fbad567eb71e70b3460200cbf7b2fcd55ca79120229",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13Principal.lean",
+    "sha256": "3dcd16d2375fb854295b96ef9b7a839dbc2253d12ec9fe034aeb9c8fc2056124",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves1517.lean",
+    "sha256": "c54ce373e76106f450159cec8655072b6e70fbd51eb6e8b41b074f68bd9c40ed",
+    "sorry_count": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/PR2003.lean",
+    "sha256": "86fd27426ec4d81674f5f29a85561c5d0b38e38138221bc15c2be474037dfc9e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/PR2020.lean",
+    "sha256": "9bc169f8cba4f8bde44f67e3ef2c89a218e58324e2b958f473b285b620db285c",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_display5_plain_expansion.lean",
+    "sha256": "08d197d1360947e204e971143ad15e67a6feb9f1598e7ba7b877b39362ea850c",
+    "sorry_count": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_energy_decay_with_exception.lean",
+    "sha256": "0f2df6a32f47799ee5bd6c92854a1659a5f8f7373c69bcc0f1ad8201708360be",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_gallagher_theorem3.lean",
+    "sha256": "e84e0451e792ca32b6b60b29e2ea34e9816f6bf9052e7c6be4f2b4f5af9d6a7d",
+    "sorry_count": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_intermediate_lower_shift_bound.lean",
+    "sha256": "7d9914c7195c2979cb1178d0dfbf407b4e6c3fda945357b0b1384892df4cc1ce",
+    "sorry_count": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_intermediate_middle_shift_bound.lean",
+    "sha256": "954d0a860972e9d69d51114cbedd6e9f8e40fe7b69a726613964bf81044bb42f",
+    "sorry_count": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_intermediate_upper_shift_bound.lean",
+    "sha256": "e977df846d5e08c3c37ace898237b670d31005068920fc62cb3b566f1596abd3",
+    "sorry_count": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_filter_iff.lean",
+    "sha256": "ae5002c64fd115bc316037e3f76d4f85e11d45d47722551e03a1cfa717c7fc87",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_major_eq_neg_minor.lean",
+    "sha256": "9777819fd728685d468ea64b0220df5acba79333058c88bbc2926efc76a48e57",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_minor_sum_bound.lean",
+    "sha256": "cc30ffdc8bb1051488896d08c9470b995630d026e919813213621a4784e4cfa0",
+    "sorry_count": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_major_arc_energy_exceptional.lean",
+    "sha256": "b12abed9514a5b3c92f8c653ce3a1300a33e5bcb4dc5ce4259c5cb6a4cdab2a5",
+    "sorry_count": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_major_arc_energy_zero.lean",
+    "sha256": "1c357a62d74b6b869d376dee09767b742477b3272107275d16d51d7712a5cd31",
+    "sorry_count": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_short_interval_mean_decay_exceptional.lean",
+    "sha256": "fc067f0dd2524b332911937469583bfc359eb34983475542f002291d8d010608",
+    "sorry_count": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_intermediate_shift_bound.lean",
+    "sha256": "c2050503d74fdb4fff4b6ede6e00ca0d1ea21d76fa4bc5c5e7d984bafd9acc10",
+    "sorry_count": 3
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_large_shift_bound.lean",
+    "sha256": "eb4329c282ab3ea1195e2f3772e0e8ca6569d48e6434e7bce5ca6b0f3a868b65",
+    "sorry_count": 1
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_small_shift_bound.lean",
+    "sha256": "ca5a244bd45092d838ae3a862b735b1cfe591651175c614990f600d0e1f3e306",
+    "sorry_count": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_small_shift_constant_phase.lean",
+    "sha256": "01ab68e578fe927187a4261f96b37e05c29bfb85385eee487caaf5196ea7db67",
+    "sorry_count": 4
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_small_shift_oscillating_phase.lean",
+    "sha256": "d9e8f4fd38d08edd8ad178ad255f34f931af8083a250d4786740a5419d3b3d4e",
+    "sorry_count": 2
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Statements.lean",
+    "sha256": "b8f061c7a8f51a3caa8417b337807e52e4041f3d9037df44e5720dee3facaf58",
+    "sorry_count": 4
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Diagonal.lean",
+    "sha256": "7e6984556f7a0e8285dce3643a07344b29530a01d7526c49ef0c39f80ae0e157",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Display18.lean",
+    "sha256": "2aea61a0ad3cfd78b099a589d5462cb9a2ccccf8a4bd7c076515df0bb177e590",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Display19.lean",
+    "sha256": "6dd55b90eb12ad371b113ae44461151858be28aad4f481fc3ef16e887b5fac86",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Display64.lean",
+    "sha256": "163ca3229c43376ac795fb2cd80fe7065177d975bdd7731a6380681b3142120d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37EulerFinite.lean",
+    "sha256": "90212ba1e5de3613661ceb0f143e8b92c6cfcc5bc2affccc1088425a53cfdda8",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37FirstMoments.lean",
+    "sha256": "3fa438cc58af098eece8979736a07d0d13f565b5c1af2fc10109a596d3f32543",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Fourier.lean",
+    "sha256": "d7e11d861799c55a9d7bb12a1cec9a447c5b1998e7f8d33af174cc5c01cf35f3",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Gram.lean",
+    "sha256": "93321bcf9a0a715f6e27a0d676ee27a17a7be62f3a886b50c919bc03f465426e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Lemma71.lean",
+    "sha256": "438c566afefc1532646b76a5dcd7391ad6c97f7a354e63166d88960bdd87b835",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Lemma71Integral.lean",
+    "sha256": "56641afe58865a4ed94fd1fa8792471c02cad111d38819b31e21ecd1646dca3b",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1394Fejer.lean",
+    "sha256": "60366d4a5890022c7e3c3b4917a31e49ff04466a20b12ee5422232169e30d62e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1394Lemma43Lower.lean",
+    "sha256": "f87dd7d07d1e6a4e653d2c878dac960ac12c5e39a6867297edc56ac754c99824",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1412Display53.lean",
+    "sha256": "b15f351b44731388bed6faa3d7e05b5741c2c37931b949a75e071b9cf4a3b9b3",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1412MuPhi.lean",
+    "sha256": "e7dfd98e03f7a3c2d1ff0d04ff10e59fed0e00a97e4248db62d10d30e47382a9",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420Cover.lean",
+    "sha256": "82765d18589ea2da25a0d7712b9ad3bd8441151fb6d0ea378f28afe867436d51",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420Lemma51.lean",
+    "sha256": "bbb0aa2620f981271003d0a7285ac7e12072bf0abc8e8dea614504128ae633ef",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420LogCosh.lean",
+    "sha256": "e3bcc88864be10e541ae7629010cbce1f3d2fc3249329f9ae2297100a5d858f3",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420Moment46.lean",
+    "sha256": "b0a617819b32e88163a1431b3c2c390b96ef380dbabc3c389b7180d691a9065b",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1426ChainWire.lean",
+    "sha256": "e48f861efe53eb25c021d1d92587db2da674491e5a5fdca77c10e7ca830f2e58",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1429Display58.lean",
+    "sha256": "efe2004c6056f0d501fc60de4d85bec5128ec66867bb30a433a1f2ad78bf72e1",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1434Lemma21.lean",
+    "sha256": "e4776d0bfa068d320cc9f4db52feade554c269d55f82ad5a1283a0488e55ec5d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1447Display30.lean",
+    "sha256": "78edb17416e1c72d10e4218454924b57e4eebaa19bdce959c89b44e99628236e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1458Lemma42.lean",
+    "sha256": "342f644cee177673514c9b1ea0dd1c207537dee12ea09555e6987e32c6eb51ac",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1464Display20.lean",
+    "sha256": "89c46a5cef9b091b847957ddc47cc026efb4da488dc844409357f8236b4b4a18",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1466Display17.lean",
+    "sha256": "25f3fb67fb66f576816512f6e9d5fc290ed1f8a5412e4c2de046e79769b6f7cb",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1469Mertens.lean",
+    "sha256": "332e86f81a00d75d682a433c32d31b3e75689df05658a162e41fa0883b6d9420",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1474R0.lean",
+    "sha256": "1d5b46f47d6f0d56f652221842626d3b17e435fa0e3aa284debbf6ada740923e",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7200Minor35.lean",
+    "sha256": "51921b5c8902f0407249910994e5d370bcfb60f3973ea5f673ad5558618e20ef",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7201Lemma14.lean",
+    "sha256": "76621251d3982190131bf9fc9de53ad76c771ed87533b7ec97b7c729e3f38a98",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7203Display33.lean",
+    "sha256": "75df4c60b0e91b4f797cf80f131be304f0fad0e999bca9a09df32998bedbfa1d",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7204Display4.lean",
+    "sha256": "f2eea916b9154a35114af6b7a7474cdc60cddbacdfca0e73c35b7e2aca2a0adf",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7204Theorem1.lean",
+    "sha256": "aad5025ae58249ed3eef2cf12ff29e98f5d681258e9ed121a84f850b24e79d48",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7205Display34.lean",
+    "sha256": "5f4e5d1c0f038e2d7c195b59b57f9134d7423acbfce5a31a3a4740c0db5c6045",
+    "sorry_count": 0
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7206Display6.lean",
+    "sha256": "bdbb373d2d68fe5fcf4c36d7756acb2184e5d8900ae9d8d7489dcf6aeb9bdbe8",
+    "sorry_count": 0
+  }
+]

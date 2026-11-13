@@ -1,0 +1,254 @@
+[
+  {
+    "declaration": "Decomp497a.main_series_norm",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The main product norm equals nonnegative J times the singular series norm.",
+    "source": "p.127 definition of J and p.130.",
+    "instance": "N four and frequency two."
+  },
+  {
+    "declaration": "Decomp497a.Jn_nat_eq_sum",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "For a natural shift k, J equals the sum over integers b from two through N minus k of the reciprocal of log of b plus k times log b.",
+    "source": "p.127 definition of J.",
+    "instance": "N four and k two leaves exactly the pair four and two."
+  },
+  {
+    "declaration": "Decomp497a.Jn_nat_lower",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "J at natural shift k is at least the natural number N minus k minus one divided by log squared N. Natural subtraction truncates at zero.",
+    "source": "p.127 definition of J and p.130 main scale.",
+    "instance": "N four and k two gives a positive lower bound of one over log squared four."
+  },
+  {
+    "declaration": "Decomp497a.main_series_nat_lower",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The main series product norm is at least that lower bound times the singular series norm.",
+    "source": "p.127 main term and p.131 display 13.",
+    "instance": "N four and k two. No exceptional zero premise is used."
+  },
+  {
+    "declaration": "Decomp497a.main_series_upper",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "For all sufficiently large N, every main product norm is at most twice N over log squared N times the singular series norm.",
+    "source": "p.130 bound J of n by J of zero and its asymptotic.",
+    "instance": "The threshold has a witness from the existing J0_le_two. Frequency two is allowed at every N above that threshold."
+  },
+  {
+    "declaration": "Decomp497a.main_series_odd",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The main series product vanishes for every odd frequency.",
+    "source": "p.125 Euler factor at two and p.134 parity convention.",
+    "instance": "N four and frequency one."
+  },
+  {
+    "declaration": "Decomp497a.Jn_eq_zero_of_natAbs",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "J vanishes when the absolute shift exceeds N minus two.",
+    "source": "p.127 exact difference range.",
+    "instance": "N four and frequency three."
+  },
+  {
+    "declaration": "Decomp497a.main_series_outside",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The main product vanishes outside that exact difference range.",
+    "source": "p.127 main term.",
+    "instance": "N four and frequency three."
+  },
+  {
+    "declaration": "Decomp497a.exceptional_budget_nonneg",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The exceptional right hand budget is nonnegative at N at least two, K nonnegative and theta nonnegative.",
+    "source": "p.127 Theorem 3 and p.131 displays 13 and 17.",
+    "instance": "N four, K one, theta one half, r zero, gamma zero and frequency two."
+  },
+  {
+    "declaration": "Decomp497a.main_series_odd_bound",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The requested separate main bound holds at odd frequencies with those scalar restrictions.",
+    "source": "p.125 Euler factor, p.134 parity and p.127 budget.",
+    "instance": "N four, K one, theta one half, r zero, gamma zero and frequency one."
+  },
+  {
+    "declaration": "Decomp497a.main_series_outside_bound",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The requested separate main bound holds outside the exact difference range.",
+    "source": "p.127 definition of J and its budget.",
+    "instance": "N four, K one, theta one half, r zero, gamma zero and frequency three."
+  },
+  {
+    "declaration": "Decomp497a.main_series_nat_half_lower",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "If N is at least twice k plus two, the main norm is at least half of N over log squared N times the singular series norm.",
+    "source": "p.127 definition of J and p.131 main term.",
+    "instance": "N six and k two. The scalar condition is equality."
+  },
+  {
+    "declaration": "Decomp497a.main_series_bound_requires_budget",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "CONDITIONAL ON the supplied norm bounds. A separate main bound by N over log squared N times A forces the singular series norm to be at most twice A under the same size condition.",
+    "source": "Audit consequence of p.131 display 13.",
+    "instance": "N six and k two with A equal to the actual main norm divided by the positive scale. The bound hypothesis is equality."
+  },
+  {
+    "declaration": "Decomp497a.main_series_small_budget_impossible",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "If twice A is strictly smaller than the singular series norm, the separate main bound fails. This does not assert that the assigned exceptional budget meets that strict inequality.",
+    "source": "Audit consequence of p.131 display 13.",
+    "instance": "N six, k two and A minus one. The strict hypothesis holds because a norm is nonnegative."
+  },
+  {
+    "declaration": "Decomp497a.arc_integral_le_error_add_main",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The arc integral norm is at most the error norm plus the main norm. The main term is retained.",
+    "source": "p.131 display 13 and the triangle inequality.",
+    "instance": "N six, theta one half and frequency two."
+  },
+  {
+    "declaration": "Decomp497a.main_series_le_arc_add_error",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The main norm is at most the arc norm plus the error norm.",
+    "source": "p.131 display 13 and the reverse triangle inequality.",
+    "instance": "N six, theta one half and frequency two."
+  },
+  {
+    "declaration": "Decomp497a.arc_bound_requires_budget",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "CONDITIONAL ON the supplied norm bounds. If both the error norm and the arc norm are at most N over log squared N times A, then four times A is at least the singular series norm at a natural shift k once N is at least twice k plus two.",
+    "source": "Audit consequence of p.131 display 13.",
+    "instance": "N six, k two and theta one half. Choose A as the sum of the two norms divided by the positive scale. Both hypotheses hold because norms are nonnegative."
+  },
+  {
+    "declaration": "Decomp497a.one_le_singSeries_norm",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The singular series norm is at least one at every nonzero even frequency.",
+    "source": "p.125 singular product and p.130 singular series. Uses the existing Montgomery and Vaughan truncated binary singular series bound and the proved convergence bridge.",
+    "instance": "Frequency two is nonzero and even."
+  },
+  {
+    "declaration": "Decomp497a.main_series_two_lower",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "For N at least six, the main norm at frequency two is at least one half of N over log squared N.",
+    "source": "p.127 definition of J and p.131 main term.",
+    "instance": "N six meets the size condition."
+  },
+  {
+    "declaration": "Decomp497a.main_series_two_budget",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "CONDITIONAL ON the supplied norm bounds. A separate main estimate at frequency two requires its normalized budget A to be at least one half for N at least six.",
+    "source": "Audit consequence of p.131 display 13.",
+    "instance": "N six and A equal to the actual main norm divided by the positive scale. Its bound hypothesis is equality."
+  },
+  {
+    "declaration": "Decomp497a.exceptional_main_bound_requires_budget",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "CONDITIONAL ON the supplied norm bounds. At N at least six the exact separate main bound at frequency two forces K times its bracket to be at least one quarter. The bracket has twice log P over P, corrected energy times one plus corrected energy, and the exceptional weight.",
+    "source": "Audit consequence of p.131 displays 13 and 15 to 17.",
+    "instance": "N six, theta one half, gamma zero and r two. Its exceptional weight at frequency two is two. Taking K as one plus the actual main norm divided by twice the positive natural scale times that positive bracket supplies the bound hypothesis. No exceptional zero is asserted."
+  },
+  {
+    "declaration": "Decomp497a.main_series_two_not_littleO",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The main term norm at frequency two is not little o of N over log squared N as N grows. This does not assert that the actual exceptional budget tends to zero.",
+    "source": "Audit consequence of p.127 main term and p.131 display 13.",
+    "instance": "There are no hypotheses. At every N at least six, main_series_two_lower gives a positive half scale lower bound."
+  },
+  {
+    "declaration": "Decomp497a.concrete_main_series_instances",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "At N four, J at shift two is at least one over log squared four, J at shift three vanishes and the main product at shift one vanishes. At N six, the main product at shift two is at least half the natural scale and exceeds one quarter of that scale.",
+    "source": "pp.127, 130, 131 and 134.",
+    "instance": "This is a closed conjunction with no hypotheses. Its positive interior and zero exterior cases test the exact range boundary."
+  },
+  {
+    "declaration": "Decomp497a.exceptionalWeight_two_le",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "At positive conductor r, the exceptional weight at frequency two is at most fourteen times r to the power minus three quarters.",
+    "source": "p.127 quoted weight. Derived using the existing Zinoviev1997 totient estimate.",
+    "instance": "r two is positive. Its weight equals two. The upper bound is greater than two."
+  },
+  {
+    "declaration": "Decomp497a.exceptionalWeight_two_tendsto_zero",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "That exceptional weight tends to zero as the natural conductor tends to infinity.",
+    "source": "p.127 quoted weight.",
+    "instance": "The sequence r equal to N tends to infinity. No exceptional zero is assumed or constructed."
+  },
+  {
+    "declaration": "Decomp497a.divisor_budget_two_tendsto_zero",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "For each fixed positive theta, twice log of N to theta divided by N to theta tends to zero as N grows.",
+    "source": "p.127 Theorem 3 divisor term.",
+    "instance": "theta one half is positive."
+  },
+  {
+    "declaration": "Decomp497a.no_eventual_main_bound_of_budget_tendsto_zero",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "No normalized budget A tending to zero can bound the separate main norm at frequency two for all sufficiently large N.",
+    "source": "Audit consequence of p.131 display 13.",
+    "instance": "A identically zero tends to zero. The positive half scale lower bound rules out its eventual bound. No actual energy decay is asserted."
+  },
+  {
+    "declaration": "Decomp497a.no_eventual_arc_and_error_small",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The arc norm and the error norm at frequency two cannot both eventually be bounded by the natural scale times the same budget A tending to zero.",
+    "source": "Audit consequence of p.131 display 13.",
+    "instance": "theta one half and A identically zero satisfy the parameter assumptions. No actual exceptional zero or zero energy is asserted."
+  },
+  {
+    "declaration": "Decomp497a.exceptionalWeight_two_uniform_small",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "At every fixed positive theta, the frequency two exceptional weight is eventually below each positive epsilon uniformly over all exceptional characters at height P to the fifth.",
+    "source": "p.127 exceptional conductor growth and quoted weight.",
+    "instance": "theta one half and epsilon one meet the scalar conditions. The membership hypothesis is retained. No exceptional character is asserted to exist."
+  },
+  {
+    "declaration": "Decomp497a.two_tail_budget_uniform_small",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The sum of twice log P over P and that exceptional weight is uniformly eventually below every positive epsilon.",
+    "source": "p.127 Theorem 3 divisor and exceptional terms.",
+    "instance": "theta one half and epsilon one. No exceptional character witness is asserted."
+  },
+  {
+    "declaration": "Decomp497a.main_series_bound_fails_of_small_corrected_energy",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "For every fixed positive theta and K, the separate main bound at frequency two fails in each sufficiently large exceptional case whenever K times the quadratic corrected energy is less than one eighth.",
+    "source": "Audit consequence of p.131 displays 13 and 15 to 17 and p.127 conductor growth.",
+    "instance": "theta one half and K one satisfy the scalar hypotheses. Energy zero satisfies the scalar strict inequality. The theorem retains actual exceptional membership and energy evaluation as hypotheses and asserts no such analytic instance exists."
+  },
+  {
+    "declaration": "Decomp497a.exists_small_theta_quadratic",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "For positive c, C and K there is a positive theta cutoff such that every nonnegative energy bounded by C times exp of minus c over theta has K times its quadratic energy below one eighth.",
+    "source": "p.131 displays 13 and 14. Elementary consequence of the exponential bound.",
+    "instance": "c, C and K all equal one. The explicit cutoff is one over 128. Energy zero satisfies the bound at every positive theta below that cutoff."
+  },
+  {
+    "declaration": "Decomp497a.separate_main_bound_forces_eventual_no_exception",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "CONDITIONAL ON the exact assigned separate main bound. It would force the exceptional strip to contain no character with conductor at most P for all sufficiently large N at every sufficiently small positive theta.",
+    "source": "Audit consequence of pp.127 and 131 using the already proved corrected energy selection and conductor growth. This zero free consequence is not asserted by the paper or proved unconditionally here.",
+    "instance": "The hypothesis is the full open leaf and is retained. Its scalar theta and K conditions are positive. No witness to that full unproved analytic hypothesis or to an exceptional zero is claimed."
+  },
+  {
+    "declaration": "Decomp497a.separate_main_bound_of_arc_and_error",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "CONDITIONAL ON the supplied separate arc bound and the faithful difference bound. They imply the exact separate main bound with the sum of constants and the smaller cutoff.",
+    "source": "p.131 display 13 and displays 15 to 17, reverse triangle inequality audit.",
+    "instance": "The scalar constants and cutoffs one give sum two and cutoff one. The full analytic hypotheses are retained. No witness to an unproved uniform arc estimate is claimed."
+  },
+  {
+    "declaration": "Decomp497a.separate_arc_bound_forces_eventual_no_exception",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "CONDITIONAL ON those two supplied bounds. They would force eventual absence of exceptional conductors below P for every sufficiently small positive theta.",
+    "source": "Audit consequence of pp.127 and 131. This absence conclusion is not asserted by the paper or proved unconditionally here.",
+    "instance": "The scalar conditions are as in the preceding row. Both global analytic hypotheses remain explicit. No exceptional zero witness is asserted."
+  },
+  {
+    "declaration": "Decomp497a.separate_main_bound_iff_eventual_no_exception",
+    "match": "MATCH as an explicitly labeled derived or audit consequence",
+    "twin": "The exact assigned separate main bound is equivalent to eventual absence of exceptional conductors below P for every sufficiently small positive theta. The equivalence itself asserts neither side.",
+    "source": "Lab split audit consequence of pp.127 and 131. The paper supplies the energy estimate used in the forward implication.",
+    "instance": "This is a closed equivalence with no hypotheses. In its reverse implication the explicit constants are K one and the minimum of the supplied positive cutoff and one. No zero free theorem or exceptional zero witness is asserted."
+  }
+]

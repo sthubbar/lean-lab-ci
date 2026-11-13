@@ -2,9 +2,17 @@
 Split of the positive exceptional conductor major arc frequency estimate.
 The frequency error is the norm of the difference of the arc integral and the
 main term, so the estimate follows from a bound on each of the two summands.
+Task497 source audit, Gallagher 1975 p.131 displays 13 and 15 to 17.
+The paper bounds the difference of the integral and the main term. The separate
+summand bounds below require an additional estimate. Both remain open.
+Decomp497a records exact support cases and necessary main scale budgets.
+It proves the separate main leaf equivalent to eventual absence of exceptional
+conductors below P for all sufficiently small theta. Neither side is proved.
+This is a question about the lab split and asserts no paper error.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.Decomp486b
+import LeanLab.Linnik.Decomp497a
 
 namespace LeanLab.Linnik.Decomp486b
 

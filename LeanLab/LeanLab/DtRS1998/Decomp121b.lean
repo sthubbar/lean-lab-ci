@@ -24,6 +24,7 @@ import LeanLab.DtRS1998.Decomp372a
 import LeanLab.DtRS1998.Decomp372b
 import LeanLab.DtRS1998.Decomp372c
 import LeanLab.DtRS1998.Candidate445
+import LeanLab.DtRS1998.Decomp121bSecond
 
 namespace LeanLab.DtRS1998.Decomp121b
 
@@ -120,11 +121,23 @@ theorem first_family_remaining :
   · exact interval_95
   · exact interval_100
 
-/-- LEAF. P0037 Theorem 2 page 206 and Section 5.2 pages 212 to 214.
-The eleven intervals at powers 200 through 300 are cited computations. -/
+/-- P0037 Theorem 2 page 206 and Section 5.2 pages 212 to 214.
+The eleven intervals at powers 200 through 300 are cited computations.
+Split in the route burst of 2026-11-12: CONDITIONAL ON the two open Table 2
+certificate lemmas in Decomp121bSecond; this proof has no sorry of its own. -/
 theorem second_family :
     ∀ i : ℕ, 20 ≤ i → i ≤ 30 → IntervalSum (10 ^ (10 * i)) (10 ^ 9) := by
-  sorry
+  intro i hlo hhi
+  have hcert : ∃ qs : List ℕ, qs.length ≤ 231 ∧ (∀ q ∈ qs, q.Prime) ∧
+      (List.range (10 ^ 9 / 2 + 1)).all (fun j =>
+        qs.any (fun q => decide
+          (q ≤ 10 ^ (10 * i) + 2 * j ∧ (10 ^ (10 * i) + 2 * j - q).Prime))) = true := by
+    by_cases hlow : i ≤ 25
+    · exact Decomp121bSecond.table2_certificates_lower i hlo hlow
+    · exact Decomp121bSecond.table2_certificates_upper i (by omega) hhi
+  obtain ⟨qs, _, hq, hc⟩ := hcert
+  exact Decomp121bSecond.interval_of_table2_certificate
+    (Decomp121bSecond.table2_base_even i (by omega)) hq hc
 
 /-- CONDITIONAL ON the supplied remaining first family and second family.
 P0037 Theorem 2 page 206. This assembly uses no cited sorry leaf. -/

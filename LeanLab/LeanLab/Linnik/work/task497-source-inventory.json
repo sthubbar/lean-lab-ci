@@ -1,0 +1,918 @@
+[
+  {
+    "file": "LeanLab/LeanLab/Linnik/Audit1610.lean",
+    "declarations": 1,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Audit1619.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Audit1625.lean",
+    "declarations": 2,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532a.lean",
+    "declarations": 35,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532b.lean",
+    "declarations": 175,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532b2.lean",
+    "declarations": 66,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1532c.lean",
+    "declarations": 57,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1536a.lean",
+    "declarations": 43,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1536b.lean",
+    "declarations": 39,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1536c.lean",
+    "declarations": 23,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1537a.lean",
+    "declarations": 35,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1537b.lean",
+    "declarations": 23,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp1537c.lean",
+    "declarations": 52,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp307a.lean",
+    "declarations": 55,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp307b.lean",
+    "declarations": 16,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp335a.lean",
+    "declarations": 7,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp335b.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp335c.lean",
+    "declarations": 16,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp340a.lean",
+    "declarations": 2,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp340b.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp340c.lean",
+    "declarations": 3,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp466a.lean",
+    "declarations": 1,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp466b.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp466c.lean",
+    "declarations": 3,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp482a.lean",
+    "declarations": 19,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp482b.lean",
+    "declarations": 1,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp482c.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp486a.lean",
+    "declarations": 1,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp486b.lean",
+    "declarations": 7,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp486c.lean",
+    "declarations": 35,
+    "sorry": [
+      {
+        "name": "short_interval_mean_decay_exceptional",
+        "line": 459
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp495a.lean",
+    "declarations": 17,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp496a.lean",
+    "declarations": 17,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Decomp497a.lean",
+    "declarations": 17,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExactAtMost.lean",
+    "declarations": 7,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Assembly.lean",
+    "declarations": 22,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Cesaro.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Defs.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/DensityLayer.lean",
+    "declarations": 17,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Final.lean",
+    "declarations": 22,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Heights.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Kernel.lean",
+    "declarations": 14,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/LeftHalf.lean",
+    "declarations": 20,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Page.lean",
+    "declarations": 5,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Primes.lean",
+    "declarations": 7,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Residues.lean",
+    "declarations": 24,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/Window.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/ZeroSum.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/ExplicitFormula/ZeroTerm.lean",
+    "declarations": 12,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975.lean",
+    "declarations": 16,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Lemma1.lean",
+    "declarations": 19,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Lemma2.lean",
+    "declarations": 15,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Lemma3.lean",
+    "declarations": 9,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Thm2.lean",
+    "declarations": 14,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Thm2Count.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Gallagher1975Thm2Full.lean",
+    "declarations": 10,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/HBPMajorCap.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/HilbertCosecant.lean",
+    "declarations": 22,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTK7Levers.lean",
+    "declarations": 6,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTK7LeversTwinC.lean",
+    "declarations": 5,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTNumeric.lean",
+    "declarations": 6,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/JTTable2.lean",
+    "declarations": 6,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/K3TwoFunction.lean",
+    "declarations": 5,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/K4EH.lean",
+    "declarations": 14,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/K6Map.lean",
+    "declarations": 2,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/KLadder.lean",
+    "declarations": 6,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiu2026.lean",
+    "declarations": 60,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiu2026Chain.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuDisplay37.lean",
+    "declarations": 23,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuDisplay37PNT.lean",
+    "declarations": 24,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuK5Levers.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuLemma43.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LiLiuLemma43Int.lean",
+    "declarations": 21,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/LowerShiftBudget.lean",
+    "declarations": 2,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Basic13.lean",
+    "declarations": 7,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Defs.lean",
+    "declarations": 14,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display11.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display13.lean",
+    "declarations": 9,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display1517.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display17.lean",
+    "declarations": 12,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display3.lean",
+    "declarations": 20,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display7.lean",
+    "declarations": 25,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Display9.lean",
+    "declarations": 11,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13.lean",
+    "declarations": 7,
+    "sorry": [
+      {
+        "name": "induced_cn_bound",
+        "line": 53
+      },
+      {
+        "name": "singular_tail_cited",
+        "line": 86
+      },
+      {
+        "name": "singular_weighted_sums_cited",
+        "line": 99
+      },
+      {
+        "name": "principal_pair_sum",
+        "line": 117
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13Major.lean",
+    "declarations": 20,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13PairWeight.lean",
+    "declarations": 25,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves13Principal.lean",
+    "declarations": 11,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves1517.lean",
+    "declarations": 1,
+    "sorry": [
+      {
+        "name": "exceptional_weight_bound",
+        "line": 24
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/PR2003.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/PR2020.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_display5_plain_expansion.lean",
+    "declarations": 13,
+    "sorry": [
+      {
+        "name": "split_small_shift_bound",
+        "line": 330
+      },
+      {
+        "name": "split_intermediate_shift_bound",
+        "line": 353
+      },
+      {
+        "name": "split_large_shift_bound",
+        "line": 376
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_energy_decay_with_exception.lean",
+    "declarations": 5,
+    "sorry": [
+      {
+        "name": "leaf_exceptional_summand_decay",
+        "line": 99
+      },
+      {
+        "name": "leaf_nonexceptional_sum_decay",
+        "line": 128
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_gallagher_theorem3.lean",
+    "declarations": 4,
+    "sorry": [
+      {
+        "name": "split_exceptional_conductor_lt_scale",
+        "line": 73
+      },
+      {
+        "name": "split_frequency_error_bound",
+        "line": 89
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_intermediate_lower_shift_bound.lean",
+    "declarations": 6,
+    "sorry": [
+      {
+        "name": "leaf_lower_quarter_shift_bound",
+        "line": 129
+      },
+      {
+        "name": "leaf_lower_cube_shift_bound",
+        "line": 162
+      },
+      {
+        "name": "leaf_lower_sqrt_remainder_shift_bound",
+        "line": 194
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_intermediate_middle_shift_bound.lean",
+    "declarations": 4,
+    "sorry": [
+      {
+        "name": "middle_shift_lower_third_bound",
+        "line": 75
+      },
+      {
+        "name": "middle_shift_middle_third_bound",
+        "line": 106
+      },
+      {
+        "name": "middle_shift_upper_third_bound",
+        "line": 138
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_intermediate_upper_shift_bound.lean",
+    "declarations": 4,
+    "sorry": [
+      {
+        "name": "intermediate_upper_low_part_bound",
+        "line": 58
+      },
+      {
+        "name": "intermediate_upper_middle_part_bound",
+        "line": 86
+      },
+      {
+        "name": "intermediate_upper_top_part_bound",
+        "line": 114
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_filter_iff.lean",
+    "declarations": 5,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_major_eq_neg_minor.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_minor_sum_bound.lean",
+    "declarations": 4,
+    "sorry": [
+      {
+        "name": "large_shift_near_sum_bound",
+        "line": 60
+      },
+      {
+        "name": "large_shift_middle_sum_bound",
+        "line": 81
+      },
+      {
+        "name": "large_shift_far_sum_bound",
+        "line": 101
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_major_arc_energy_exceptional.lean",
+    "declarations": 3,
+    "sorry": [
+      {
+        "name": "leaf_arc_integral_part_bound",
+        "line": 34
+      },
+      {
+        "name": "leaf_main_series_part_bound",
+        "line": 50
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_major_arc_energy_zero.lean",
+    "declarations": 3,
+    "sorry": [
+      {
+        "name": "leaf_arc_integral_part_bound",
+        "line": 34
+      },
+      {
+        "name": "leaf_main_series_part_bound",
+        "line": 48
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_short_interval_mean_decay_exceptional.lean",
+    "declarations": 4,
+    "sorry": [
+      {
+        "name": "leaf_conductor_one_term",
+        "line": 50
+      },
+      {
+        "name": "leaf_low_conductor_range",
+        "line": 72
+      },
+      {
+        "name": "leaf_high_conductor_range",
+        "line": 93
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_intermediate_shift_bound.lean",
+    "declarations": 4,
+    "sorry": [
+      {
+        "name": "intermediate_lower_shift_bound",
+        "line": 71
+      },
+      {
+        "name": "intermediate_middle_shift_bound",
+        "line": 99
+      },
+      {
+        "name": "intermediate_upper_shift_bound",
+        "line": 127
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_large_shift_bound.lean",
+    "declarations": 4,
+    "sorry": [
+      {
+        "name": "large_shift_minor_sum_bound",
+        "line": 100
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_small_shift_bound.lean",
+    "declarations": 3,
+    "sorry": [
+      {
+        "name": "split_small_shift_constant_phase",
+        "line": 68
+      },
+      {
+        "name": "split_small_shift_oscillating_phase",
+        "line": 93
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_small_shift_constant_phase.lean",
+    "declarations": 5,
+    "sorry": [
+      {
+        "name": "split_small_shift_constant_phase_eighth",
+        "line": 75
+      },
+      {
+        "name": "split_small_shift_constant_phase_quarter",
+        "line": 103
+      },
+      {
+        "name": "split_small_shift_constant_phase_three_eighths",
+        "line": 133
+      },
+      {
+        "name": "split_small_shift_constant_phase_half",
+        "line": 164
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/SPLIT_split_small_shift_oscillating_phase.lean",
+    "declarations": 3,
+    "sorry": [
+      {
+        "name": "small_shift_oscillating_mid_band",
+        "line": 64
+      },
+      {
+        "name": "small_shift_oscillating_top_band",
+        "line": 90
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Statements.lean",
+    "declarations": 19,
+    "sorry": [
+      {
+        "name": "heathBrownPuchta",
+        "line": 66
+      },
+      {
+        "name": "pintzRuzsa1",
+        "line": 69
+      },
+      {
+        "name": "pintzRuzsa2",
+        "line": 72
+      },
+      {
+        "name": "johnstonTrudgian_GRH",
+        "line": 76
+      }
+    ]
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Diagonal.lean",
+    "declarations": 5,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Display18.lean",
+    "declarations": 11,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Display19.lean",
+    "declarations": 5,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Display64.lean",
+    "declarations": 4,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37EulerFinite.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37FirstMoments.lean",
+    "declarations": 7,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Fourier.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Gram.lean",
+    "declarations": 11,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Lemma71.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/Task37Lemma71Integral.lean",
+    "declarations": 8,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1394Fejer.lean",
+    "declarations": 31,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1394Lemma43Lower.lean",
+    "declarations": 2,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1412Display53.lean",
+    "declarations": 17,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1412MuPhi.lean",
+    "declarations": 6,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420Cover.lean",
+    "declarations": 14,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420Lemma51.lean",
+    "declarations": 10,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420LogCosh.lean",
+    "declarations": 15,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1420Moment46.lean",
+    "declarations": 22,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1426ChainWire.lean",
+    "declarations": 65,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1429Display58.lean",
+    "declarations": 18,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1434Lemma21.lean",
+    "declarations": 34,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1447Display30.lean",
+    "declarations": 51,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1458Lemma42.lean",
+    "declarations": 23,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1464Display20.lean",
+    "declarations": 43,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1466Display17.lean",
+    "declarations": 27,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1469Mertens.lean",
+    "declarations": 10,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U1474R0.lean",
+    "declarations": 19,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7200Minor35.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7201Lemma14.lean",
+    "declarations": 15,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7203Display33.lean",
+    "declarations": 13,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7204Display4.lean",
+    "declarations": 12,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7204Theorem1.lean",
+    "declarations": 9,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7205Display34.lean",
+    "declarations": 11,
+    "sorry": []
+  },
+  {
+    "file": "LeanLab/LeanLab/Linnik/U7206Display6.lean",
+    "declarations": 11,
+    "sorry": []
+  }
+]
