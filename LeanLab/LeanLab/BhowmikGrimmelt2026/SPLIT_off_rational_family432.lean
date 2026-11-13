@@ -28,23 +28,33 @@ theorem leaf_off_eta_range_arithmetic432 {ϑ : ℝ} (hϑ : 0 < ϑ)
     (hscale : 10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X) :
     (10 : ℝ) ≤ X ∧ (X : ℝ) ^ ϑ ≤ X ∧ 1 ≤ Real.log X ∧
       Real.log X ≤ 16 * Real.log X ^ 5 := by
-  have hX2 : (2 : ℝ) ≤ X := by exact_mod_cast hX
-  have hX0 : (0 : ℝ) < X := by linarith
-  have hXϑ1 : 1 ≤ (X : ℝ) ^ ϑ := Real.one_le_rpow (by linarith) hϑ.le
-  have hsq : (X : ℝ) ^ ϑ ≤ ((X : ℝ) ^ ϑ) ^ 2 := by nlinarith
-  have hηX : η * X ≤ X := by nlinarith
-  have h10 : (10 : ℝ) ≤ X := by nlinarith
-  have hXϑ : (X : ℝ) ^ ϑ ≤ X := by nlinarith
-  have hlog : 1 ≤ Real.log X := by
-    have he : Real.exp 1 ≤ X := by
-      have := Real.exp_one_lt_d9; linarith
-    calc (1 : ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
-      _ ≤ Real.log X := Real.log_le_log (Real.exp_pos 1) he
-  refine ⟨h10, hXϑ, hlog, ?_⟩
-  have h5 : Real.log X ≤ Real.log X ^ 5 := by
-    calc Real.log X = Real.log X ^ 1 := (pow_one _).symm
-      _ ≤ Real.log X ^ 5 := pow_le_pow_right₀ hlog (by norm_num)
-  linarith
+  have hX1 : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast (by omega : 1 ≤ X)
+  have hXpos : (0 : ℝ) < (X : ℝ) := by exact_mod_cast (by omega : 0 < X)
+  obtain ⟨hηX, -⟩ : η * (X : ℝ) ≤ (X : ℝ) ∧ (0 : ℝ) ≤ (X : ℝ) :=
+    ⟨by nlinarith [hη1, hXpos], le_of_lt hXpos⟩
+  set R : ℝ := (X : ℝ) ^ ϑ with hRdef
+  have hR1 : 1 ≤ R := by
+    rw [hRdef]; exact Real.one_le_rpow hX1 hϑ.le
+  have hR2le : R ^ 2 ≤ (X : ℝ) := by nlinarith [hscale, hηX]
+  have hRleX : R ≤ (X : ℝ) := by
+    nlinarith [hR2le, hR1, mul_nonneg (by linarith : (0 : ℝ) ≤ R) (by linarith : (0 : ℝ) ≤ R - 1)]
+  have hR21 : (1 : ℝ) ≤ R ^ 2 := by
+    nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ R - 1) (by linarith : (0 : ℝ) ≤ R + 1)]
+  have h10le : (10 : ℝ) ≤ (X : ℝ) := by nlinarith [hscale, hηX, hR21]
+  have hlog1 : (1 : ℝ) ≤ Real.log (X : ℝ) := by
+    have h3 : (3 : ℝ) ≤ (X : ℝ) := by linarith
+    have hexp : Real.exp 1 ≤ (X : ℝ) := by
+      linarith [Real.exp_one_lt_three]
+    have h := Real.log_le_log (Real.exp_pos 1) hexp
+    simpa using h
+  have hlog4 : (1 : ℝ) ≤ Real.log (X : ℝ) ^ 4 := by
+    have h := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1) hlog1 4
+    simpa using h
+  have hlog5 : Real.log (X : ℝ) ≤ Real.log (X : ℝ) ^ 5 := by
+    have h := mul_le_mul_of_nonneg_left hlog4 (le_of_lt (by linarith : (0 : ℝ) < Real.log (X : ℝ)))
+    have h' : Real.log (X : ℝ) * Real.log (X : ℝ) ^ 4 = Real.log (X : ℝ) ^ 5 := by ring
+    nlinarith [h, h']
+  exact ⟨h10le, hRleX, hlog1, by nlinarith [hlog5]⟩
 
 /-- LEAF. The continuous off rational family has the logarithm power five moment bound.
 
@@ -79,23 +89,26 @@ theorem leaf_off_central_alias_family432 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (
       10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X →
       ∑ N ∈ Finset.Icc 1 X, ‖centralAlias432 ϕ G X N ϑ η‖ ^ 2 ≤
         C * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  obtain ⟨C, hC, hb⟩ := central_alias_family432 hϕ hG ϑ hϑ
+  obtain ⟨C, hC, hf⟩ := central_alias_family432 hϕ hG ϑ hϑ
   refine ⟨16 * C, by positivity, ?_⟩
   intro X hX hR η hη hη1 hsmall hscale
-  have hlog := Real.log_natCast_nonneg X
   have hhalf : (1 / 2 : ℝ) ≤ Real.log X := by
     have hh := Real.log_le_log (by norm_num : (0 : ℝ) < 2)
       (show (2 : ℝ) ≤ X by exact_mod_cast hX)
     linarith [Real.log_two_gt_d9]
+  have hlog : 0 ≤ Real.log (X : ℝ) := by linarith
   have hlog5 : Real.log (X : ℝ) ≤ 16 * Real.log X ^ 5 := by
     have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 1 / 2) hhalf 4
-    have hh := mul_le_mul_of_nonneg_right hp hlog
+    have hh := mul_le_mul_of_nonneg_right hp (by linarith : 0 ≤ Real.log (X : ℝ))
     norm_num at hh
     nlinarith only [hh]
-  have hh := hb X hX η hη hη1 hscale
-  have hup := mul_le_mul_of_nonneg_left hlog5
-    (by positivity : 0 ≤ C * η ^ 4 * (X : ℝ) ^ 3)
-  nlinarith only [hh, hup]
+  have hb := hf X hX η hη hη1 hscale
+  calc ∑ N ∈ Finset.Icc 1 X, ‖centralAlias432 ϕ G X N ϑ η‖ ^ 2
+      ≤ C * η ^ 4 * (X : ℝ) ^ 3 * Real.log X := hb
+    _ ≤ 16 * C * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
+        nlinarith only [hlog5,
+          mul_le_mul_of_nonneg_left hlog5
+            (by positivity : (0 : ℝ) ≤ C * η ^ 4 * (X : ℝ) ^ 3)]
 
 /-- The split assembly: the exact sealed statement of `off_rational_family432`, proved
 from the three leaves above through the coefficient triangle inequality and no sorry. -/
