@@ -9,7 +9,7 @@ the budget factor `2 * N * (log 2 N) ^ (2 * k) / (log N) ^ 2`.
 
 This file cuts the upper piece again by the size of the shift, at the intermediate scale
 `N ^ (3 * θ / 4)`. An arc of `majorArcs N (N ^ θ)` has half width `N ^ θ / (q * N)`, so the phase
-`dif x * α` moves across an arc by at most a constant multiple of `N ^ (5 * θ / 4 - 1)` for a shift
+`dif x * α` moves across an arc by at most a constant multiple of `N ^ (7 * θ / 4 - 1)` for a shift
 of the lower band and by up to a constant multiple of `N ^ (2 * θ - 1)` for a shift of the upper
 band, a factor `N ^ (θ / 4)` more. The two bands are handled separately, each carrying a twelfth of
 the budget factor; the two bounds add to the sixth.
@@ -40,7 +40,7 @@ open LeanLab.Linnik.U1426ChainWire (Gs continuous_Gs)
 /-- LEAF, OPEN. Lower band of the oscillating phase range. These are the tuples of the sealed range
 whose shift lies in `N ^ (θ / 2) < |dif x| ≤ N ^ (3 * θ / 4)`, where the shift is small enough
 against the arc width `N ^ θ / (q * N)` that the phase `dif x * α` moves by at most a constant
-multiple of `N ^ (5 * θ / 4 - 1)` across an arc. The averaged correlation error with both sums
+multiple of `N ^ (7 * θ / 4 - 1)` across an arc. The averaged correlation error with both sums
 restricted to this band is at most a twelfth of the budget factor once `N` is large. -/
 theorem small_shift_oscillating_mid_band :
     ∀ θ : ℝ, 0 < θ → θ ≤ 1 / 4 → ∀ k : ℕ, 2 ≤ k → ∀ δ : ℝ, 0 < δ →
