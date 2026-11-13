@@ -341,6 +341,48 @@ theorem subWindow_mono_y (n : ℕ) {y y' t : ℝ} (hyy : y ≤ y') :
     Nat.ceil_le_ceil (by linarith)
   exact ⟨by omega, lt_of_lt_of_le hx.2.1 hyy, hx.2.2⟩
 
+/-- PROVED. The S1 side assembled from a bound on the truncated Fourier sums: if every one of
+those sums is at most M in modulus, then the window sum of the paper is at most twice M times
+the total weight of the window, by the triangle inequality and the fact that the additive
+character has modulus one. This is the shape the paper needs when the exponential sum
+estimates are inserted into S1, with M a free parameter. -/
+theorem norm_truncatedSum_le_of_fourier_bound (a : ℕ → ℤ → ℂ) (H : ℕ) (γ : ℝ) (n : ℕ)
+    (y α : ℝ) (M : ℝ) (hM : 0 ≤ M)
+    (hF : ∀ x : ℝ,
+      ‖∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0), a H h * eC (h * x)‖ ≤ M) :
+    ‖∑ p ∈ windowPrimes n y, (psWeight γ p : ℂ) * eC (α * p) *
+        (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ)) -
+          ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖
+      ≤ 2 * M * ∑ p ∈ windowPrimes n y, ‖(psWeight γ p : ℂ)‖ := by
+  have hterm : ∀ p ∈ windowPrimes n y,
+      ‖(psWeight γ p : ℂ) * eC (α * p) *
+        (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ)) -
+          ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖
+        ≤ 2 * M * ‖(psWeight γ p : ℂ)‖ := by
+    intro p _
+    rw [norm_mul, norm_mul, norm_eC, mul_one]
+    have hdiff : ‖(∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ))) -
+          (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖ ≤ 2 * M := by
+      refine (norm_sub_le _ _).trans ?_
+      linarith [hF (-((p : ℝ) + 1) ^ γ), hF (-(p : ℝ) ^ γ)]
+    have hnn : 0 ≤ ‖(psWeight γ p : ℂ)‖ := norm_nonneg _
+    nlinarith [hdiff, hnn, hM]
+  calc ‖∑ p ∈ windowPrimes n y, (psWeight γ p : ℂ) * eC (α * p) *
+        (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ)) -
+          ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖
+      ≤ ∑ p ∈ windowPrimes n y, 2 * M * ‖(psWeight γ p : ℂ)‖ :=
+        (norm_sum_le _ _).trans (Finset.sum_le_sum hterm)
+    _ = 2 * M * ∑ p ∈ windowPrimes n y, ‖(psWeight γ p : ℂ)‖ := by
+        rw [Finset.mul_sum]
+
 end
 
 end LeanLab.Song2020.SPLIT_vaughan_per_u
