@@ -319,6 +319,81 @@
    "file": "LeanLab/LeanLab/Linnik/SPLIT_energy_decay_with_exception.lean",
    "result": "1 closed",
    "seconds": 830
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_split_intermediate_shift_bound.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 183
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/Decomp357l.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 543
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/Decomp412c.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 65
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/Decomp435b.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 30
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_local_arc_shoulder1622.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 57
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_mellin_positive_far357.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 21
+  },
+  {
+   "file": "LeanLab/LeanLab/LiuWang2002/Decomp368b.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 19
+  },
+  {
+   "file": "LeanLab/LeanLab/OeSHP2014/OeSHP2014U6818Exact1e7.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/OeSHP2014/U1454Reductions.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/OpenProblems/SPLIT_leaf_card_lt_of_lcm_lt.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 118
+  },
+  {
+   "file": "LeanLab/LeanLab/PerelliPintz1992/Decomp1519.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/PerelliPintz1992/DecompJ288.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 25
+  },
+  {
+   "file": "LeanLab/LeanLab/PerelliPintz1992/Statements.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 25
+  },
+  {
+   "file": "LeanLab/LeanLab/Pintz2021/DecompJ665.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 93
+  },
+  {
+   "file": "LeanLab/LeanLab/PlattTrudgian2014/Decomp380a.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 77
   }
  ],
  "summary": {
@@ -326,7 +401,7 @@
   "declarations_closed": 1,
   "sites": 1,
   "skipped": 2,
-  "seconds": 9211
+  "seconds": 10472
  },
  "selftest": {
   "ok": true,
