@@ -55,7 +55,17 @@ theorem intermediate_upper_low_part_bound :
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 27) := by
-  sorry
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  -- Attempt 1: the proved master estimate for the whole set of nonzero tuple differences.
+  obtain ⟨c, C, θ₀, hc, hθ₀, hmaster⟩ := major_arc_remainder_bound
+  have hθ₀' : 1 / 4 ≤ θ₀ := by linarith
+  obtain ⟨Nk, hNk⟩ := hmaster θ hθ hθ₀' k hk (δ / 27) (by positivity)
+  refine ⟨Nk, ?_⟩
+  intro N hN
+  have hbound := hNk N hN
+  -- Attempt 2: read the leaf sum off the master bound.
+  simpa only [Finset.filter_filter] using hbound
 
 /-- LEAF, OPEN. Middle sub-range of the upper range. Tuple differences above `N ^ (7/8)` but no
 larger than `N ^ (15/16)`: the step of the target between the two finer scales, still a positive
@@ -83,7 +93,17 @@ theorem intermediate_upper_middle_part_bound :
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 27) := by
-  sorry
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  -- Attempt 1: the proved master estimate for the whole set of nonzero tuple differences.
+  obtain ⟨c, C, θ₀, hc, hθ₀, hmaster⟩ := major_arc_remainder_bound
+  have hθ₀' : 1 / 4 ≤ θ₀ := by linarith
+  obtain ⟨Nk, hNk⟩ := hmaster θ hθ hθ₀' k hk (δ / 27) (by positivity)
+  refine ⟨Nk, ?_⟩
+  intro N hN
+  have hbound := hNk N hN
+  -- Attempt 2: read the leaf sum off the master bound.
+  simpa only [Finset.filter_filter] using hbound
 
 /-- LEAF, OPEN. Top sub-range of the upper range. Tuple differences above `N ^ (15/16)` but no
 larger than `N`: the step of the target where the shift is within a vanishing power of the
@@ -111,7 +131,17 @@ theorem intermediate_upper_top_part_bound :
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 27) := by
-  sorry
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  -- Attempt 1: the proved master estimate for the whole set of nonzero tuple differences.
+  obtain ⟨c, C, θ₀, hc, hθ₀, hmaster⟩ := major_arc_remainder_bound
+  have hθ₀' : 1 / 4 ≤ θ₀ := by linarith
+  obtain ⟨Nk, hNk⟩ := hmaster θ hθ hθ₀' k hk (δ / 27) (by positivity)
+  refine ⟨Nk, ?_⟩
+  intro N hN
+  have hbound := hNk N hN
+  -- Attempt 2: read the leaf sum off the master bound.
+  simpa only [Finset.filter_filter] using hbound
 
 /-- ASSEMBLY. The sealed statement `intermediate_upper_shift_bound`, from the three sub-range
 leaves: split the tuple sum by `|dif x| ≤ N ^ (7/8)` and then by `|dif x| ≤ N ^ (15/16)`, apply
