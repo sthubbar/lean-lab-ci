@@ -33,6 +33,73 @@ open scoped ComplexConjugate LSeries.notation
 
 variable {q : ℕ} [NeZero q]
 
+/-- HELPER. The book count is nondecreasing in the height: every zero keeps its weight, a
+zero at the old top height `T` gains the missing half weight, and zeros between `T` and `T'`
+enter with nonnegative contribution. In the band this reduces the count bound to the single
+fixed height `2πe`, the top of the band. -/
+lemma bookCount_mono (χ : DirichletCharacter ℂ q) {T T' : ℝ} (h : T ≤ T') :
+    bookCount χ T ≤ bookCount χ T' := by
+  classical
+  have hwt' : ∀ ρ : ℂ, 0 ≤ halfWeight T' ρ.im * (mult χ ρ : ℝ) :=
+    fun ρ => mul_nonneg (by unfold halfWeight; split_ifs <;> norm_num) (Nat.cast_nonneg _)
+  unfold bookCount
+  have hsub : (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 ≤ ρ.im) ⊆
+      (stripZeros_finite χ T').toFinset.filter (fun ρ => 0 ≤ ρ.im) := by
+    intro ρ hρ
+    have hmem := (stripZeros_finite χ T).mem_toFinset.mp (Finset.mem_filter.mp hρ).1
+    exact Finset.mem_filter.mpr
+      ⟨(stripZeros_finite χ T').mem_toFinset.mpr
+        ⟨hmem.1, hmem.2.1, hmem.2.2.1, hmem.2.2.2.trans h⟩, (Finset.mem_filter.mp hρ).2⟩
+  have hpoint : ∀ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 ≤ ρ.im),
+      halfWeight T ρ.im * (mult χ ρ : ℝ) ≤ halfWeight T' ρ.im * (mult χ ρ : ℝ) := by
+    intro ρ hρ
+    have him : 0 ≤ ρ.im := (Finset.mem_filter.mp hρ).2
+    have hbt : |ρ.im| ≤ T :=
+      ((stripZeros_finite χ T).mem_toFinset.mp (Finset.mem_filter.mp hρ).1).2.2.2
+    have hw : halfWeight T ρ.im ≤ halfWeight T' ρ.im := by
+      unfold halfWeight
+      by_cases h1 : ρ.im = 0 ∨ ρ.im = T
+      · rw [if_pos h1]
+        by_cases h2 : ρ.im = 0 ∨ ρ.im = T'
+        · rw [if_pos h2]
+        · rw [if_neg h2]; norm_num
+      · rw [if_neg h1]
+        by_cases h2 : ρ.im = 0 ∨ ρ.im = T'
+        · rcases h2 with h2 | h2
+          · exact absurd (Or.inl h2) h1
+          · have hT'0 : 0 ≤ T' := by rw [← h2]; exact him
+            have hT'T : T' ≤ T := by
+              rw [h2] at hbt
+              rw [← abs_of_nonneg hT'0]
+              exact hbt
+            exact absurd (Or.inr (h2.trans (le_antisymm hT'T h))) h1
+        · rw [if_neg h2]
+    exact mul_le_mul_of_nonneg_right hw (Nat.cast_nonneg _)
+  calc (∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 ≤ ρ.im),
+        halfWeight T ρ.im * (mult χ ρ : ℝ))
+      ≤ ∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 ≤ ρ.im),
+          halfWeight T' ρ.im * (mult χ ρ : ℝ) :=
+        Finset.sum_le_sum hpoint
+    _ ≤ ∑ ρ ∈ (stripZeros_finite χ T').toFinset.filter (fun ρ => 0 ≤ ρ.im),
+          halfWeight T' ρ.im * (mult χ ρ : ℝ) :=
+        Finset.sum_le_sum_of_subset_of_nonneg hsub (fun ρ _ _ => hwt' ρ)
+
+/-- HELPER, CONDITIONAL ON the fixed-height band data. The whole band count bound follows
+from the single data statement `bookCount χ (2πe) ≤ 2.389` at the top of the band: the count
+is nondecreasing in the height and in the band `T ≤ 2πe`, since `q ≥ 1`. A future verified
+zero count below `2πe` for primitive `L`-functions of conductor `q ≤ 17` closes the leaf
+through this one line. -/
+lemma book_count_band_count_le_of_top_count (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
+    {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1)
+    (hdata : bookCount χ (2 * Real.pi * Real.exp 1) ≤ 2.389) :
+    bookCount χ T ≤ 2.389 := by
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by
+    exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hTle : T ≤ 2 * Real.pi * Real.exp 1 := by
+    have h1 : T ≤ (q : ℝ) * T := by nlinarith
+    exact le_trans h1 hband
+  exact le_trans (bookCount_mono χ hTle) hdata
+
 /-- LEAF. Band count bound: on `1 ≤ T` and `q * T ≤ 2πe` the book count is at most `2.389`.
 
 The band bounds the conductor and the height at once, `q ≤ 2πe` and `T ≤ 2πe`, since each of
@@ -44,6 +111,12 @@ here. -/
 theorem book_count_band_count_le (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) {T : ℝ}
     (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     bookCount χ T ≤ 2.389 := by
+  refine book_count_band_count_le_of_top_count χ hχ hT hband ?_
+  -- The remaining input is the fixed-height band data: every primitive Dirichlet
+  -- L-function with `(q : ℝ) ≤ 2πe` has `bookCount χ (2πe) ≤ 2.389`. This is a verified
+  -- numerical zero count below height `2πe ≤ 17.09` (for `q = 1`: zeta has exactly one
+  -- zero below `17.09`, at height `14.1347`). Mathlib has no zero counting for Dirichlet
+  -- L-functions; see the BLOCKED line in PROGRESS.md.
   sorry
 
 /-- LEAF. Band sign of the main term: on `q * T ≤ 2πe` the argument of the logarithm is at
