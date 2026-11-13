@@ -32,6 +32,9 @@ namespace LeanLab.BhowmikGrimmelt2026
 open LeanLab.ExceptionalSet (PowerSaving)
 open ArithmeticFunction
 
+attribute [local instance] Classical.propDecidable
+
+set_option maxHeartbeats 4000000 in
 /-- LEAF 1 of 4. Part one of Proposition 5.2, read off from `h52` alone: there are `c > 0`
 and `C` such that, whenever the three range conditions of the proposition hold and there is
 no Siegel zero of level `R`, the sum over primitive characters of the interval maxima is at
@@ -46,7 +49,10 @@ theorem leaf_prop52_part_one (h52 : Prop52) :
       primSum R (fun _ _ χ => intervalMax N R
         (fun n => (vonMangoldt n : ℂ) * χ n - if χ = 1 then 1 else 0)) ≤
         C * Real.exp (-c * Real.log N / Real.log R) := by
-  sorry
+  obtain ⟨c, hc, C, hC⟩ := h52
+  refine ⟨c, C, hc, ?_⟩
+  intro N R h1 h2 h3 hns
+  exact (hC N R h1 h2 h3).1 hns
 
 /-- LEAF 2 of 4. The level `R = X ^ ϑ` is admissible and the saving of LEAF 1 there is the
 constant `exp (-(c / ϑ))`. For every `ϑ` in `(0, 1/5)` all three range conditions hold once
@@ -69,7 +75,102 @@ theorem leaf_interval_max_saving_at_level (c C : ℝ) (hc : 0 < c)
       primSum (X ^ ϑ) (fun _ _ χ => intervalMax ⌈X⌉₊ (X ^ ϑ)
         (fun n => (vonMangoldt n : ℂ) * χ n - if χ = 1 then 1 else 0)) ≤
         max C 0 * Real.exp (-(c / ϑ)) := by
-  sorry
+  intro ϑ hϑ hϑ5
+  refine ⟨Real.exp (Real.exp 2 / ϑ ^ 2) + 2, ?_⟩
+  intro X hX hX0 hns
+  have hXpos : 0 < X := by linarith
+  have hϑ2pos : (0 : ℝ) < ϑ ^ 2 := by positivity
+  have hϑ2lt1 : ϑ ^ 2 < 1 := by nlinarith [hϑ, hϑ5]
+  have hexp2ge : (2 : ℝ) ≤ Real.exp 2 := by
+    have h := Real.add_one_le_exp (2 : ℝ)
+    linarith
+  have hlogX_big : Real.exp 2 / ϑ ^ 2 ≤ Real.log X := by
+    have hle : Real.exp (Real.exp 2 / ϑ ^ 2) ≤ X := by linarith
+    have h := Real.log_le_log (Real.exp_pos _) hle
+    rwa [Real.log_exp] at h
+  have hLge2 : (2 : ℝ) ≤ Real.log X := by
+    have h1 : (2 : ℝ) ≤ Real.exp 2 / ϑ ^ 2 := by
+      rw [le_div_iff₀ hϑ2pos]
+      nlinarith
+    linarith
+  have hLpos : (0 : ℝ) < Real.log X := by linarith
+  have hNX : X ≤ ((⌈X⌉₊ : ℕ) : ℝ) := Nat.le_ceil X
+  have hNXpos : (0 : ℝ) < ((⌈X⌉₊ : ℕ) : ℝ) := by linarith
+  have hNle : ((⌈X⌉₊ : ℕ) : ℝ) ≤ 2 * X := by
+    have h := Nat.ceil_lt_add_one hXpos.le
+    linarith
+  have hlogN_ge : Real.log X ≤ Real.log ((⌈X⌉₊ : ℕ) : ℝ) := Real.log_le_log hXpos hNX
+  have hlogN_le : Real.log ((⌈X⌉₊ : ℕ) : ℝ) ≤ 2 * Real.log X := by
+    have h1 := Real.log_le_log hNXpos hNle
+    have h2 : Real.log (2 * X) = Real.log 2 + Real.log X :=
+      Real.log_mul (by norm_num) hXpos.ne'
+    have h3 : Real.log 2 ≤ Real.log X := Real.log_le_log (by norm_num) hX
+    linarith
+  have hlogN1 : (1 : ℝ) ≤ Real.log ((⌈X⌉₊ : ℕ) : ℝ) := by linarith
+  have hcond1 : (2 : ℝ) ≤ Real.exp (Real.sqrt (Real.log ⌈X⌉₊)) := by
+    have hsqrt1 : (1 : ℝ) ≤ Real.sqrt (Real.log ((⌈X⌉₊ : ℕ) : ℝ)) := by
+      have h := Real.sqrt_le_sqrt hlogN1
+      simpa using h
+    have h1 : Real.exp 1 ≤ Real.exp (Real.sqrt (Real.log ((⌈X⌉₊ : ℕ) : ℝ))) :=
+      Real.exp_le_exp.mpr hsqrt1
+    have h2 : (2 : ℝ) < Real.exp 1 := by
+      have h := Real.exp_one_gt_d9
+      linarith
+    linarith
+  have hsqrt_le : Real.sqrt (Real.log ((⌈X⌉₊ : ℕ) : ℝ)) ≤ ϑ * Real.log X := by
+    have h1 : Real.sqrt (Real.log ((⌈X⌉₊ : ℕ) : ℝ)) ≤ Real.sqrt (2 * Real.log X) :=
+      Real.sqrt_le_sqrt hlogN_le
+    have h2 : Real.sqrt (2 * Real.log X) ≤ ϑ * Real.log X := by
+      rw [Real.sqrt_le_left (mul_pos hϑ hLpos).le]
+      have hmul : Real.exp 2 ≤ ϑ ^ 2 * Real.log X := by
+        have h := (div_le_iff₀ hϑ2pos).1 hlogX_big
+        rwa [mul_comm] at h
+      nlinarith [hmul, hexp2ge, hLpos, hϑ2pos]
+    linarith
+  have hcond2 : Real.exp (Real.sqrt (Real.log ⌈X⌉₊)) ≤ X ^ ϑ := by
+    rw [Real.rpow_def_of_pos hXpos]
+    refine Real.exp_le_exp.mpr ?_
+    calc Real.sqrt (Real.log ⌈X⌉₊) ≤ ϑ * Real.log X := hsqrt_le
+      _ = Real.log X * ϑ := by ring
+  have hcond3 : X ^ ϑ ≤ ((⌈X⌉₊ : ℕ) : ℝ) := by
+    have h1 : X ^ ϑ ≤ X := by
+      have h := Real.rpow_le_rpow_of_exponent_le (by linarith : (1 : ℝ) ≤ X) (by linarith : ϑ ≤ 1)
+      simpa using h
+    exact h1.trans hNX
+  have hb := hbound ⌈X⌉₊ (X ^ ϑ) hcond1 hcond2 hcond3 hns
+  have hlogR : Real.log (X ^ ϑ) = ϑ * Real.log X := Real.log_rpow hXpos ϑ
+  have hmono : Real.exp (-c * Real.log ⌈X⌉₊ / Real.log (X ^ ϑ)) ≤ Real.exp (-(c / ϑ)) := by
+    apply Real.exp_le_exp.mpr
+    rw [hlogR]
+    have h1 : c / ϑ ≤ c * Real.log ((⌈X⌉₊ : ℕ) : ℝ) / (ϑ * Real.log X) := by
+      have hcϑ : (0 : ℝ) < c / ϑ := div_pos hc hϑ
+      have hAL : (1 : ℝ) ≤ Real.log ((⌈X⌉₊ : ℕ) : ℝ) / Real.log X := by
+        rw [le_div_iff₀ hLpos]
+        linarith
+      have heq : c * Real.log ((⌈X⌉₊ : ℕ) : ℝ) / (ϑ * Real.log X)
+          = (c / ϑ) * (Real.log ((⌈X⌉₊ : ℕ) : ℝ) / Real.log X) := by
+        field_simp
+      rw [heq]
+      calc c / ϑ = (c / ϑ) * 1 := by ring
+        _ ≤ (c / ϑ) * (Real.log ((⌈X⌉₊ : ℕ) : ℝ) / Real.log X) :=
+            mul_le_mul_of_nonneg_left hAL hcϑ.le
+    have harg : -c * Real.log ((⌈X⌉₊ : ℕ) : ℝ) / (ϑ * Real.log X)
+        = -(c * Real.log ((⌈X⌉₊ : ℕ) : ℝ) / (ϑ * Real.log X)) := by
+      rw [neg_mul, neg_div]
+    rw [harg]
+    exact neg_le_neg h1
+  have hCs : C * Real.exp (-c * Real.log ⌈X⌉₊ / Real.log (X ^ ϑ))
+      ≤ max C 0 * Real.exp (-(c / ϑ)) := by
+    by_cases hC0 : C ≤ 0
+    · have h1 : C * Real.exp (-c * Real.log ⌈X⌉₊ / Real.log (X ^ ϑ)) ≤ 0 :=
+        mul_nonpos_of_nonpos_of_nonneg hC0 (Real.exp_pos _).le
+      have h2 : (0 : ℝ) ≤ max C 0 * Real.exp (-(c / ϑ)) :=
+        mul_nonneg (le_max_right _ _) (Real.exp_pos _).le
+      linarith
+    · have hCpos : 0 < C := lt_of_not_ge hC0
+      rw [max_eq_left hCpos.le]
+      exact mul_le_mul_of_nonneg_left hmono hCpos.le
+  exact hb.trans hCs
 
 /-- LEAF 3 of 4. The count of the circle method, and the large step of this split: given the
 character sum bound of LEAF 2 at the level `X ^ ϑ` and the Gallagher second moment bound on
