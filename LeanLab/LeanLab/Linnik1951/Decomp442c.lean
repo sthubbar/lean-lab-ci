@@ -2,8 +2,11 @@
 P0093 pages 155, 156, 160 and 166. Character algebra and rational interval integration.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.SPLIT1622_exceptional
+import LeanLab.Linnik1951.Decomp376c
+import LeanLab.Linnik1951.SPLIT1622_mellin
+import LeanLab.Linnik1951.Principal442
 import LeanLab.Linnik1951.FiniteCover435
+import LeanLab.Linnik1951.SPLIT_rational_pointwise_characters442
 
 namespace LeanLab.Linnik1951
 
@@ -23,7 +26,7 @@ theorem rational_pointwise_characters442 :
           (q : ℝ) * ∑ χ ∈ univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1),
             ‖characterPrime280 χ N z‖ ^ 2) +
         B * (q.totient : ℝ) * Real.log q ^ 2 := by
-  sorry
+  exact rational_pointwise_characters442_split
 
 /-- LEAF. P0093 page 166 definition of F_q as phi q doubled
 intervals. For q at least two and tau at least four, integrate a
@@ -104,7 +107,7 @@ theorem rational_system_integral442 (q : ℕ) [NeZero q] (τ : ℝ)
 
 /-- P0093 pages 155, 160 and 166. Exact doubled_system_characters1622
 statement from the pointwise finite character bound and the rational
-interval integration step. CONDITIONAL on those two smaller leaves. -/
+interval integration step. Both smaller inputs now have clean proofs. -/
 theorem doubled_system_characters_decomposed442 :
     ∃ B : ℝ, 0 < B ∧ ∀ (N q : ℕ) [NeZero q] (τ : ℝ), 1 ≤ N → 2 ≤ q → 4 ≤ τ →
       (∫ α in arcSystem111 q τ ∩ Set.Icc 0 1, ‖primeFourier111 N α‖ ^ 2) ≤

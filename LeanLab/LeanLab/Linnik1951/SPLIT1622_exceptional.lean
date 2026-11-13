@@ -11,6 +11,8 @@ system, the trivial principal mass, a totient bound, and the Mellin bound at rad
 -/
 import LeanLab.Linnik1951.Decomp376c
 import LeanLab.Linnik1951.SPLIT1622_mellin
+import LeanLab.Linnik1951.Principal442
+import LeanLab.Linnik1951.Decomp442c
 
 namespace LeanLab.Linnik1951
 
@@ -33,7 +35,7 @@ theorem doubled_system_characters1622 :
               ∫ z in -(2 / ((q : ℝ) * τ))..(2 / ((q : ℝ) * τ)),
                 ‖characterPrime280 χ N z‖ ^ 2) +
         B * (q.totient : ℝ) * (2 / ((q : ℝ) * τ)) * Real.log q ^ 2 := by
-  sorry
+  exact doubled_system_characters_decomposed442
 
 /-- LEAF. P0093 page 159 trivial estimate before equation 5.3. The square integral
 of the principal character sum over an interval of radius r at most 1/2 is at most
@@ -41,13 +43,13 @@ B N, by the full period. Unconditional. -/
 theorem principal_mass1622 :
     ∃ B : ℝ, 0 < B ∧ ∀ (N q : ℕ) (r : ℝ), 1 ≤ N → 0 ≤ r → r ≤ 1 / 2 →
       (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ ^ 2) ≤ B * (N : ℝ) := by
-  sorry
+  exact principal_mass_proved442
 
 /-- LEAF. P0093 page 166 equation 9.3, the factor 1 over Q to the 0.99 uses a lower
 bound for phi of q on the range q above Q. The weaker classical form suffices. -/
 theorem totient_sqrt_lower1622 (q : ℕ) (hq : 1 ≤ q) :
     Real.sqrt q ≤ 2 * (q.totient : ℝ) := by
-  sorry
+  exact totient_sqrt_lower_proved442 q hq
 
 /-- Eventual comparison of the three terms with N to ninety eight hundredths. -/
 theorem doubled_eventual1622 :

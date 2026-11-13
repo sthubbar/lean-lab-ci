@@ -16,7 +16,7 @@ theorem count_circle_coefficient357 (k N : ℕ) (hN : 1 ≤ N) :
       primeFourier111 N α ^ 2 * powerFourier111 N α ^ k *
         Complex.exp (((2 * Real.pi * α * N) : ℝ) * Complex.I)) =
       (Real.exp (-1) : ℂ) * (representationCount111 k N : ℂ) := by
-  sorry
+  exact count_circle_coefficient_proved435_up111 k N hN
 
 /-- P0093 page 167 partition before equation 10.1. Integrating a continuous
 function over the unit interval gives the sum of its three arc integrals. -/

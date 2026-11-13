@@ -5,6 +5,7 @@ the region split of the frequency square at the sign of t + u, and the two regio
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Decomp487b
+import LeanLab.Linnik1951.Repair493PositiveKernel
 
 namespace LeanLab.Linnik1951
 
@@ -188,10 +189,7 @@ theorem outer_finite_square_integrable487 :
         (4 / (N : ℝ)) (1 / R) := by
   refine ⟨2, ?_⟩
   intro N hN R M hM
-  have hN3 : 3 ≤ N := by omega
-  have h : Continuous (fun α : ℝ => ‖truncatedMellin487 N R M α‖ ^ 2) :=
-    ((continuous_truncatedMellin487 N hN3 R M hM).norm).pow 2
-  exact h.intervalIntegrable _ _
+  exact ((continuous_truncatedMellin487 N (by omega) R M hM).norm.pow 2).intervalIntegrable _ _
 
 /-- LEAF. Square and Fubini step. The squared finite contour is bounded by two over pi squared
 times the double frequency integral of the coefficient moduli times the modulus of the alpha
@@ -206,99 +204,100 @@ theorem outer_finite_modulus_reduction487 (N : ℕ) (hN : 3 ≤ N) (R : ℝ) (M 
             ‖M t‖ * ‖M u‖ *
               ‖∫ α in (4 / (N : ℝ))..(1 / R),
                 mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u)‖ := by
-  have hN1 : 1 ≤ N := by omega
-  set T : ℝ := (N : ℝ) / R * Real.log N ^ 3 with hT
-  set a : ℝ := 4 / (N : ℝ) with ha
-  set b : ℝ := 1 / R with hb
-  set Y : ℝ → ℝ → ℂ := fun t u => M t * (starRingEnd ℂ) (M u) *
-      ∫ α in a..b, mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u) with hY
-  have hAcont : Continuous (fun p : ℝ × ℝ => ∫ α in a..b,
-      mellinKernel442 N α p.1 * (starRingEnd ℂ) (mellinKernel442 N α p.2)) :=
-    continuous_alphaKernel_integral487 N hN1 a b
-  have hYcont : Continuous (fun p : ℝ × ℝ => Y p.1 p.2) := by
-    have h1 : Continuous (fun p : ℝ × ℝ => M p.1) := hM.comp continuous_fst
-    have h2 : Continuous (fun p : ℝ × ℝ => (starRingEnd ℂ) (M p.2)) :=
-      (hM.comp continuous_snd).star
-    exact (h1.mul h2).mul hAcont
-  have hYint : IntegrableOn (fun p : ℝ × ℝ => Y p.1 p.2)
-      (Set.uIoc (-T) T ×ˢ Set.uIoc (-T) T) :=
-    (hYcont.continuousOn.integrableOn_compact
-      (isCompact_uIcc.prod isCompact_uIcc)).mono_set
-      (Set.prod_mono Set.uIoc_subset_uIcc Set.uIoc_subset_uIcc)
-  have hYint' : Integrable (fun p : ℝ × ℝ => Y p.1 p.2)
-      (volume.restrict (Set.uIoc (-T) T ×ˢ Set.uIoc (-T) T)) := hYint
-  have hstep1 : (∫ α in a..b, ‖truncatedMellin487 N R M α‖ ^ 2) =
-      (1 / (2 * Real.pi)) ^ 2 * (∫ t in -T..T, ∫ u in -T..T, ∫ α in a..b,
-        (mellinKernel442 N α t * M t) *
-          (starRingEnd ℂ) (mellinKernel442 N α u * M u)).re := by
-    have hfub := truncated_signed_fubini487 N hN R M hM a b
-    dsimp only at hfub
-    simpa only [hT] using hfub
-  have hinner : ∀ t u : ℝ, (∫ α in a..b,
-      (mellinKernel442 N α t * M t) *
-        (starRingEnd ℂ) (mellinKernel442 N α u * M u)) = Y t u := by
-    intro t u
-    have hpt : ∀ α : ℝ, (mellinKernel442 N α t * M t) *
-        (starRingEnd ℂ) (mellinKernel442 N α u * M u) =
-        (mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u)) *
-          (M t * (starRingEnd ℂ) (M u)) := by
-      intro α
+  let T : ℝ := (N : ℝ) / R * Real.log N ^ 3
+  let a : ℝ := 4 / (N : ℝ)
+  let b : ℝ := 1 / R
+  let H : ℝ → ℝ → ℝ := fun t u => ‖M t‖ * ‖M u‖ *
+    ‖∫ α in a..b, mellinKernel442 N α t * star (mellinKernel442 N α u)‖
+  have hH0 (t u : ℝ) : 0 ≤ H t u := by dsimp [H]; positivity
+  have hpos : 0 ≤ ∫ t in -T..T, ∫ u in -T..T, H t u := by
+    rcases le_total (-T) T with hT | hT
+    · exact intervalIntegral.integral_nonneg_of_forall hT (fun t =>
+        intervalIntegral.integral_nonneg_of_forall hT (hH0 t))
+    · have hrev : (∫ t in -T..T, ∫ u in -T..T, H t u) =
+          ∫ t in T..-T, ∫ u in T..-T, H t u := by
+        calc
+          _ = -(∫ t in T..-T, ∫ u in -T..T, H t u) := by
+            rw [intervalIntegral.integral_symm]
+          _ = -(∫ t in T..-T, -(∫ u in T..-T, H t u)) := by
+            congr 1
+            apply intervalIntegral.integral_congr
+            intro t ht
+            change (∫ u in -T..T, H t u) = -(∫ u in T..-T, H t u)
+            exact intervalIntegral.integral_symm T (-T)
+          _ = _ := by rw [intervalIntegral.integral_neg, neg_neg]
+      rw [hrev]
+      exact intervalIntegral.integral_nonneg_of_forall hT (fun t =>
+        intervalIntegral.integral_nonneg_of_forall hT (hH0 t))
+  change (∫ α in a..b, ‖truncatedMellin487 N R M α‖ ^ 2) ≤
+    (1 / (2 * Real.pi)) ^ 2 * ∫ t in -T..T, ∫ u in -T..T, H t u
+  by_cases hab : a ≤ b
+  · have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+    have ha : 0 < a := by dsimp [a]; positivity
+    have hRp : 0 < R := (one_div_pos).mp (ha.trans_le hab)
+    have hl : 0 ≤ Real.log N := Real.log_natCast_nonneg N
+    have hT0 : 0 ≤ T := by dsimp [T]; positivity
+    have horder : -T ≤ T := by linarith
+    let G : ℝ → ℝ → ℂ := fun t u => (M t * star (M u)) *
+      ∫ α in a..b, mellinKernel442 N α t * star (mellinKernel442 N α u)
+    have hK : Continuous (fun p : ℝ × ℝ => mellinKernel442 N p.1 p.2) := by
+      simpa only [mul_one] using
+        continuous_mellin_integrand487 N hN (fun _ => 1) continuous_const
+    have hP : Continuous (fun p : (ℝ × ℝ) × ℝ => (p.2, p.1.1)) :=
+      continuous_snd.prodMk continuous_fst.fst
+    have hQ : Continuous (fun p : (ℝ × ℝ) × ℝ => (p.2, p.1.2)) :=
+      continuous_snd.prodMk continuous_fst.snd
+    have hF : Continuous (fun p : (ℝ × ℝ) × ℝ =>
+        mellinKernel442 N p.2 p.1.1 * star (mellinKernel442 N p.2 p.1.2)) := by
+      simpa only [Function.comp_def, Pi.mul_def] using (hK.comp hP).mul (hK.comp hQ).star
+    have hI : Continuous (fun p : ℝ × ℝ =>
+        ∫ α in a..b, mellinKernel442 N α p.1 * star (mellinKernel442 N α p.2)) :=
+      intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' hF a b
+    have hG : Continuous (fun p : ℝ × ℝ => G p.1 p.2) := by
+      simpa only [G, Function.comp_def, Pi.mul_def] using
+        ((hM.comp continuous_fst).mul (hM.comp continuous_snd).star).mul hI
+    have hH : Continuous (fun p : ℝ × ℝ => H p.1 p.2) := by
+      simpa only [H, Function.comp_def, Pi.mul_def] using
+        ((hM.comp continuous_fst).norm.mul (hM.comp continuous_snd).norm).mul hI.norm
+    have hGi : Continuous (fun t : ℝ => ∫ u in -T..T, G t u) :=
+      intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' hG (-T) T
+    have hHi : Continuous (fun t : ℝ => ∫ u in -T..T, H t u) :=
+      intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' hH (-T) T
+    have hfactor (t u : ℝ) :
+        (∫ α in a..b, (mellinKernel442 N α t * M t) *
+          (starRingEnd ℂ) (mellinKernel442 N α u * M u)) = G t u := by
+      dsimp [G]
+      rw [← intervalIntegral.integral_const_mul]
+      apply intervalIntegral.integral_congr
+      intro α hα
       simp only [map_mul]
       ring
-    calc (∫ α in a..b, (mellinKernel442 N α t * M t) *
-            (starRingEnd ℂ) (mellinKernel442 N α u * M u))
-        = ∫ α in a..b, (mellinKernel442 N α t *
-              (starRingEnd ℂ) (mellinKernel442 N α u)) *
-            (M t * (starRingEnd ℂ) (M u)) := by
-          apply intervalIntegral.integral_congr
-          intro α _
-          exact hpt α
-      _ = Y t u := by
-          rw [intervalIntegral.integral_mul_const]
-          simp only [hY]
-          ring
-  have htriple : (∫ t in -T..T, ∫ u in -T..T, ∫ α in a..b,
-        (mellinKernel442 N α t * M t) *
-          (starRingEnd ℂ) (mellinKernel442 N α u * M u)) =
-      ∫ t in -T..T, ∫ u in -T..T, Y t u := by
-    apply intervalIntegral.integral_congr
-    intro t _
-    apply intervalIntegral.integral_congr
-    intro u _
-    exact hinner t u
-  have hnorm : (∫ t in -T..T, ∫ u in -T..T, Y t u).re ≤
-      ∫ t in -T..T, ∫ u in -T..T, ‖Y t u‖ := by
-    have h1 : (∫ t in -T..T, ∫ u in -T..T, Y t u).re ≤
-        ‖∫ t in -T..T, ∫ u in -T..T, Y t u‖ := Complex.re_le_norm _
-    have h2 : ‖∫ t in -T..T, ∫ u in -T..T, Y t u‖ =
-        ‖∫ z in (Set.uIoc (-T) T ×ˢ Set.uIoc (-T) T), Y z.1 z.2‖ := by
-      rw [iterated_eq_box487 Y (-T) T hYint]
-    have h3 : ‖∫ z in (Set.uIoc (-T) T ×ˢ Set.uIoc (-T) T), Y z.1 z.2‖ ≤
-        ∫ z in (Set.uIoc (-T) T ×ˢ Set.uIoc (-T) T), ‖Y z.1 z.2‖ :=
-      norm_integral_le_integral_norm _
-    have h4 : (∫ z in (Set.uIoc (-T) T ×ˢ Set.uIoc (-T) T), ‖Y z.1 z.2‖) =
-        ∫ t in -T..T, ∫ u in -T..T, ‖Y t u‖ :=
-      (iterated_eq_box487 (fun t u => ‖Y t u‖) (-T) T hYint'.norm).symm
-    exact h1.trans (h2.trans_le (h3.trans_eq h4))
-  have hfinal : (∫ t in -T..T, ∫ u in -T..T, ‖Y t u‖) =
-      ∫ t in -T..T, ∫ u in -T..T, ‖M t‖ * ‖M u‖ *
-        ‖∫ α in a..b,
-          mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u)‖ := by
-    apply intervalIntegral.integral_congr
-    intro t _
-    apply intervalIntegral.integral_congr
-    intro u _
-    simp only [hY, norm_mul, Complex.norm_conj]
-  calc (∫ α in a..b, ‖truncatedMellin487 N R M α‖ ^ 2)
-      = (1 / (2 * Real.pi)) ^ 2 * (∫ t in -T..T, ∫ u in -T..T, Y t u).re := by
-        rw [hstep1, htriple]
-    _ ≤ (1 / (2 * Real.pi)) ^ 2 * (∫ t in -T..T, ∫ u in -T..T, ‖Y t u‖) :=
-        mul_le_mul_of_nonneg_left hnorm (by positivity)
-    _ = (1 / (2 * Real.pi)) ^ 2 *
-        ∫ t in -T..T, ∫ u in -T..T, ‖M t‖ * ‖M u‖ *
-          ‖∫ α in a..b,
-            mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u)‖ := by
-        rw [hfinal]
+    have hf := truncated_signed_fubini487 N hN R M hM a b
+    dsimp only at hf
+    simp_rw [hfactor] at hf
+    rw [hf]
+    apply mul_le_mul_of_nonneg_left _ (sq_nonneg _)
+    calc
+      _ ≤ ‖∫ t in -T..T, ∫ u in -T..T, G t u‖ := Complex.re_le_norm _
+      _ ≤ ∫ t in -T..T, ‖∫ u in -T..T, G t u‖ :=
+        intervalIntegral.norm_integral_le_integral_norm horder
+      _ ≤ ∫ t in -T..T, ∫ u in -T..T, H t u := by
+        apply intervalIntegral.integral_mono_on horder
+          (hGi.norm.intervalIntegrable _ _) (hHi.intervalIntegrable _ _)
+        intro t ht
+        calc
+          _ ≤ ∫ u in -T..T, ‖G t u‖ :=
+            intervalIntegral.norm_integral_le_integral_norm horder
+          _ = _ := by
+            apply intervalIntegral.integral_congr
+            intro u hu
+            simp only [G, H, norm_mul, norm_star]
+  · have hba : b ≤ a := le_of_not_ge hab
+    have hleft : (∫ α in a..b, ‖truncatedMellin487 N R M α‖ ^ 2) ≤ 0 := by
+      rw [intervalIntegral.integral_symm]
+      exact neg_nonpos.mpr (intervalIntegral.integral_nonneg_of_forall hba
+        (fun α => sq_nonneg ‖truncatedMellin487 N R M α‖))
+    exact hleft.trans (mul_nonneg (sq_nonneg _) hpos)
 
 /-- LEAF. Region split of the frequency square. The double modulus integral over the square of
 radius N over R times log cubed N is the sum of its part with t + u nonnegative and its part with
@@ -324,28 +323,83 @@ theorem outer_finite_region_split487 (N : ℕ) (R : ℝ) (M : ℝ → ℂ) (hM :
               ‖M t‖ * ‖M u‖ *
                 ‖∫ α in (4 / (N : ℝ))..(1 / R),
                   mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u)‖) := by
-  rcases Nat.eq_zero_or_pos N with hN0 | hNpos
-  · subst hN0
-    have hT0 : ((0 : ℕ) : ℝ) / R * Real.log ((0 : ℕ) : ℝ) ^ 3 = 0 := by
-      simp [Real.log_zero]
-    rw [hT0]
-    simp only [neg_zero]
-    rw [intervalIntegral.integral_same, intervalIntegral.integral_same,
-      intervalIntegral.integral_same]
-    norm_num
-  · have hAcont : Continuous (fun p : ℝ × ℝ => ∫ α in (4 / (N : ℝ))..(1 / R),
+  by_cases hzero : N = 0
+  · subst N
+    simp
+  have hN : 1 ≤ N := by omega
+  let T : ℝ := (N : ℝ) / R * Real.log N ^ 3
+  let H : ℝ × ℝ → ℝ := fun p => ‖M p.1‖ * ‖M p.2‖ *
+    ‖∫ α in (4 / (N : ℝ))..(1 / R),
+      mellinKernel442 N α p.1 * (starRingEnd ℂ) (mellinKernel442 N α p.2)‖
+  have hK : Continuous (fun p : ℝ × ℝ => mellinKernel442 N p.1 p.2) := by
+    simpa only [mul_one] using
+      continuous_mellin_integrand_positive493 N hN (fun _ => 1) continuous_const
+  have hP : Continuous (fun p : (ℝ × ℝ) × ℝ => (p.2, p.1.1)) :=
+    continuous_snd.prodMk continuous_fst.fst
+  have hQ : Continuous (fun p : (ℝ × ℝ) × ℝ => (p.2, p.1.2)) :=
+    continuous_snd.prodMk continuous_fst.snd
+  have hF : Continuous (fun p : (ℝ × ℝ) × ℝ =>
+      mellinKernel442 N p.2 p.1.1 * (starRingEnd ℂ) (mellinKernel442 N p.2 p.1.2)) := by
+    simpa only [Function.comp_def, Pi.mul_def, starRingEnd_apply] using (hK.comp hP).mul (hK.comp hQ).star
+  have hI : Continuous (fun p : ℝ × ℝ =>
+      ∫ α in (4 / (N : ℝ))..(1 / R),
         mellinKernel442 N α p.1 * (starRingEnd ℂ) (mellinKernel442 N α p.2)) :=
-      continuous_alphaKernel_integral487 N hNpos _ _
-    have h1 : Continuous (fun p : ℝ × ℝ => ‖M p.1‖) := (hM.comp continuous_fst).norm
-    have h2 : Continuous (fun p : ℝ × ℝ => ‖M p.2‖) := (hM.comp continuous_snd).norm
-    have hG : Continuous (Function.uncurry (fun t u => ‖M t‖ * ‖M u‖ *
-        ‖∫ α in (4 / (N : ℝ))..(1 / R),
-          mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u)‖)) :=
-      (h1.mul h2).mul hAcont.norm
-    exact (region_split_aux487 ((N : ℝ) / R * Real.log N ^ 3)
-      (fun t u => ‖M t‖ * ‖M u‖ *
-        ‖∫ α in (4 / (N : ℝ))..(1 / R),
-          mellinKernel442 N α t * (starRingEnd ℂ) (mellinKernel442 N α u)‖) hG).le
+    intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' hF _ _
+  have hH : Continuous H := by
+    simpa only [H, Function.comp_def, Pi.mul_def] using
+      ((hM.comp continuous_fst).norm.mul (hM.comp continuous_snd).norm).mul hI.norm
+  let μ : Measure ℝ := volume.restrict (Set.uIoc (-T) T)
+  have hprod : Integrable H (μ.prod μ) := by
+    dsimp only [μ]
+    rw [Measure.prod_restrict]
+    exact (hH.continuousOn.integrableOn_compact
+      (isCompact_uIcc.prod isCompact_uIcc)).mono_set
+      (Set.prod_mono Set.uIoc_subset_uIcc Set.uIoc_subset_uIcc)
+  have hinner (S : Set (ℝ × ℝ)) (hS : MeasurableSet S) (t : ℝ) :
+      IntervalIntegrable (fun u => S.indicator H (t, u)) volume (-T) T := by
+    apply intervalIntegrable_iff.mpr
+    have hc : Continuous (fun u : ℝ => H (t, u)) :=
+      hH.comp (continuous_const.prodMk continuous_id)
+    have hi : IntervalIntegrable (fun u : ℝ => H (t,u)) volume (-T) T :=
+      hc.intervalIntegrable (-T) T
+    have hs : MeasurableSet ((fun u : ℝ => (t, u)) ⁻¹' S) :=
+      hS.preimage (measurable_const.prodMk measurable_id)
+    change IntegrableOn (((fun u : ℝ => (t,u)) ⁻¹' S).indicator
+      (fun u => H (t,u))) (Set.uIoc (-T) T) volume
+    exact hi.def'.indicator hs
+  have houter (S : Set (ℝ × ℝ)) (hS : MeasurableSet S) :
+      IntervalIntegrable (fun t => ∫ u in -T..T, S.indicator H (t, u))
+        volume (-T) T := by
+    apply intervalIntegrable_iff.mpr
+    have hi := (hprod.indicator hS).integral_prod_left
+    have hs := hi.const_mul (if -T ≤ T then (1 : ℝ) else -1)
+    simpa only [intervalIntegral.intervalIntegral_eq_integral_uIoc, smul_eq_mul, μ, IntegrableOn] using hs
+  let S : Set (ℝ × ℝ) := {p | 0 ≤ p.1 + p.2}
+  have hS : MeasurableSet S := measurableSet_le measurable_const (measurable_fst.add measurable_snd)
+  change (∫ t in -T..T, ∫ u in -T..T, H (t,u)) ≤
+    (∫ t in -T..T, ∫ u in -T..T, if 0 ≤ t + u then H (t,u) else 0) +
+    (∫ t in -T..T, ∫ u in -T..T, if 0 ≤ t + u then 0 else H (t,u))
+  have hsplit (t : ℝ) : (∫ u in -T..T, H (t,u)) =
+      (∫ u in -T..T, S.indicator H (t,u)) +
+      (∫ u in -T..T, Sᶜ.indicator H (t,u)) := by
+    rw [← intervalIntegral.integral_add (hinner S hS t) (hinner Sᶜ hS.compl t)]
+    apply intervalIntegral.integral_congr
+    intro u hu
+    simp only [Set.indicator_apply, S, Set.mem_ofPred_eq, Set.mem_compl_iff]
+    split_ifs <;> simp
+  calc
+    _ = ∫ t in -T..T, ((∫ u in -T..T, S.indicator H (t,u)) +
+        (∫ u in -T..T, Sᶜ.indicator H (t,u))) := by
+      apply intervalIntegral.integral_congr
+      intro t ht
+      exact hsplit t
+    _ = (∫ t in -T..T, ∫ u in -T..T, S.indicator H (t,u)) +
+        (∫ t in -T..T, ∫ u in -T..T, Sᶜ.indicator H (t,u)) :=
+      intervalIntegral.integral_add (houter S hS) (houter Sᶜ hS.compl)
+    _ ≤ _ := by
+      simp only [Set.indicator_apply, S, Set.mem_ofPred_eq, Set.mem_compl_iff,
+        ite_not]
+      exact le_rfl
 
 /-- LEAF. Positive frequency difference region, t + u nonnegative. The second mean value theorem in
 alpha applied to the monotone arctangent factor bounds the alpha integral of the kernel product by

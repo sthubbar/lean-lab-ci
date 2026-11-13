@@ -16,7 +16,7 @@ logarithm is bounded away from pi over two by a fixed gap. That gap is
 what keeps the exponential of the Gamma factor away from the Gamma decay,
 and it is the reason the mass is finite at all.
 -/
-import LeanLab.Linnik1951.Decomp442a
+import LeanLab.Linnik1951.Repair493KernelData
 import LeanLab.Linnik1951.Gamma442
 
 namespace LeanLab.Linnik1951

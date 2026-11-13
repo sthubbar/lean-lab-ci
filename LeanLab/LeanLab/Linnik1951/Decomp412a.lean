@@ -2,7 +2,6 @@
 P0093 pages 162 to 165. Measure and local stability before interval packing.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp376e
 import LeanLab.Linnik1951.Packing412
 import LeanLab.Linnik1951.Shift412
 import LeanLab.Linnik1951.Decomp412b

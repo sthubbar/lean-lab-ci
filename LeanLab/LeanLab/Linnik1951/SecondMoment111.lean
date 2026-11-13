@@ -274,7 +274,7 @@ theorem fourier_coefficient111 (N : ℕ) (hN : 1 ≤ N) (i : ℤ) :
         if i ≤ 0 then
           ((primePowerCount111 i.natAbs : ℝ) * Real.exp (-(i.natAbs : ℝ) / N) : ℂ)
         else 0 := by
-  sorry
+  exact fourier_coefficient_proved357_up111 N hN i
 
 /-- P0093 page 162 equation 7.4. CONDITIONAL only on fourier_coefficient111.
 Abstract Parseval and the zero extension reindexing are proved. -/

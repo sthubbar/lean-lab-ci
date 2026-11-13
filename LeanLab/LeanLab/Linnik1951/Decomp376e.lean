@@ -4,6 +4,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Decomp357c
 import LeanLab.Linnik1951.Decomp111b
+import LeanLab.Linnik1951.Measure435
 
 namespace LeanLab.Linnik1951
 
@@ -20,7 +21,7 @@ theorem large_value_intervals376 :
         {α : ℝ | α ∈ Set.Icc 0 1 ∧
           (1 - η) * ‖powerFourier111 N 0‖ < ‖powerFourier111 N α‖} ⊆
           ⋃ p ∈ I, Set.Icc p.1 p.2 := by
-  sorry
+  exact large_value_intervals435
 
 /-- P0093 page 166 proof of Lemma 6. Retain the upper denominator
 bound supplied by Dirichlet approximation, as well as the lower bound

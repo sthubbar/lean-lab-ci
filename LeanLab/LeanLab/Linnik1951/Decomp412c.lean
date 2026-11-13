@@ -2,26 +2,13 @@
 P0093 pages 162 to 165. Separate phase concentration from binary entropy.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Truncation412
+import LeanLab.Linnik1951.Repair493EntropyData
+import LeanLab.Linnik1951.Entropy435
+import LeanLab.Linnik1951.Decomp435a
 
 namespace LeanLab.Linnik1951
 
 open MeasureTheory Finset
-
-/-- P0093 page 163 equation 7.11. Indices of the first M positive
-powers whose phase lies within two to negative r of an integer. -/
-noncomputable def nearIntegerIndices412 (M r : ℕ) (α : ℝ) : Finset ℕ := by
-  classical
-  exact (range M).filter fun m => ∃ z : ℤ,
-    |α * (2 : ℝ) ^ (m + 1) - z| ≤ (1 / 2 : ℝ) ^ r
-
-/-- P0093 page 163 equation 7.11. At phase zero every index qualifies.
-This certifies that the binary concentration set is nonempty. -/
-theorem near_indices_zero412 (M r : ℕ) : nearIntegerIndices412 M r 0 = range M := by
-  classical
-  apply Finset.filter_eq_self.mpr
-  intro m hm
-  exact ⟨0, by simp⟩
 
 /-- LEAF. P0093 page 162 equations 7.8 and 7.9 and page 163 through
 7.11. Choosing a small large value margin forces any prescribed fraction
@@ -36,7 +23,7 @@ theorem finite_phase_concentration412 (ε : ℝ) (hε : 0 < ε) (hεhalf : ε < 
         (1 - η) * ‖powerTrunc412 N 0‖ < ‖powerTrunc412 N α‖ →
           (1 - ε) * (Nat.log 2 N : ℝ) ≤
             (nearIntegerIndices412 (Nat.log 2 N) r α).card := by
-  sorry
+  exact finite_phase_concentration_decomposed435 ε hε hεhalf r
 
 /-- LEAF. P0093 page 163 binary expansion 7.12 through page 165
 7.19. For any positive entropy exponent choose a small exceptional
@@ -50,7 +37,7 @@ theorem binary_entropy_measure412 (δ : ℝ) (hδ : 0 < δ) :
         volume.real {α : ℝ | α ∈ Set.Icc (-1) 2 ∧
           (1 - ε) * (M : ℝ) ≤ (nearIntegerIndices412 M r α).card} ≤
             C * (2 : ℝ) ^ ((M : ℝ) * (δ - 1)) := by
-  sorry
+  exact binary_entropy_measure_proved435 δ hδ
 
 /-- P0093 page 165 conversion from binary length to N after 7.19.
 For a negative exponent a between negative one and zero, using the

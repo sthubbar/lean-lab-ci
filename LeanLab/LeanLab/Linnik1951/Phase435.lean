@@ -2,7 +2,7 @@
 P0093 page 163 equations 7.10 and 7.11. Remove the common rotation.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp412c
+import LeanLab.Linnik1951.Repair493EntropyData
 
 namespace LeanLab.Linnik1951
 

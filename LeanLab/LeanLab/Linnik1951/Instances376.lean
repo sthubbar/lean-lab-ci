@@ -2,7 +2,7 @@
 P0093 pages 154 and 165. Nonempty large value set for the entropy cover.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp376e
+import LeanLab.Linnik1951.SecondMoment111
 
 namespace LeanLab.Linnik1951
 

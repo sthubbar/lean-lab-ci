@@ -5,6 +5,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Linnik1951.Data357
 import LeanLab.Linnik1951.Decomp357i
 import LeanLab.Linnik1951.Asymptotics357
+import LeanLab.Linnik1951.Decomp376a
 
 namespace LeanLab.Linnik1951
 
@@ -64,7 +65,7 @@ theorem singular_tail357 :
       ∀ n : ℕ, 2 ≤ n → n ≤ N → Even n →
         |truncatedSingular357 N n - singularSeries111 n| ≤
           C * (N : ℝ) ^ (-(1 / 100 : ℝ)) := by
-  sorry
+  exact singular_tail_decomposed376
 
 /-- P0093 page 168 equations 10.5 and 10.6. A pointwise coefficient tail
 bounds the total error by its constant bound times the logarithmic box size. -/

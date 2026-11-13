@@ -2,7 +2,7 @@
 P0093 page 157 Gamma decay for the Mellin kernel.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp442a
+import LeanLab.Linnik1951.Repair493KernelData
 import LeanLab.PNTPort.ZetaZeros.GammaBounds
 
 namespace LeanLab.Linnik1951

@@ -21,7 +21,10 @@ the statement of `rational_pointwise_characters442`: the theorem
 `rational_pointwise_characters442_split` restates it character for character and
 proves it from the three leaves without using the original theorem.
 -/
-import LeanLab.Linnik1951.Decomp442c
+import LeanLab.Linnik1951.Decomp376c
+import LeanLab.Linnik1951.SPLIT1622_mellin
+import LeanLab.Linnik1951.Principal442
+import LeanLab.Linnik1951.FiniteCover435
 
 namespace LeanLab.Linnik1951
 

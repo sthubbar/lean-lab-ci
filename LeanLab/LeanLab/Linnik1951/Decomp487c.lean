@@ -7,6 +7,8 @@ import LeanLab.Linnik1951.Relative442
 import LeanLab.Linnik1951.Principal442
 import LeanLab.Linnik1951.Decomp487b
 import LeanLab.Linnik1951.SPLIT_rational_pointwise_characters442
+import LeanLab.Linnik1951.Decomp442c
+import LeanLab.Linnik1951.SPLIT1622_exceptional
 import LeanLab.Linnik1951.Cover435
 
 namespace LeanLab.Linnik1951

@@ -3,7 +3,7 @@ P0093 page 163 binary runs. Bridge to the proved Gallagher binary change count.
 P0094 pages 132 and 133 give the later proof of the same counting argument.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp412c
+import LeanLab.Linnik1951.Repair493EntropyData
 import LeanLab.Linnik.Gallagher1975Lemma2
 
 namespace LeanLab.Linnik1951

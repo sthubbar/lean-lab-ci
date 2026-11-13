@@ -3,6 +3,7 @@ P0093 page 168 equation 10.6. Close the arithmetic main term replacement.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Decomp376a
+import LeanLab.Linnik1951.Decomp357l
 
 namespace LeanLab.Linnik1951
 

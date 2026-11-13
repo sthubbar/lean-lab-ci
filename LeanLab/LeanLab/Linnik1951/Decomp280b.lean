@@ -56,7 +56,7 @@ theorem major_error280 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBound280)
     ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
       |arcContribution280 k N (majorArcs280 N) - mainTerm111 k N| ≤
         ε * scale111 k N := by
-  sorry
+  exact major_error_split111 hG k hk ε hε
 
 /-- LEAF. P0093 pages 162 to 166 Lemmas 4 to 7, equations 7.6 and 9.2.
 Choose one absolute eta so the exceptional minor contribution is arbitrarily
@@ -67,7 +67,7 @@ theorem exceptional_error280 (hG : LeanLab.DERZ1997.GRH) :
     ∃ η : ℝ, 0 < η ∧ η < 1 ∧ ∀ k : ℕ, 3 ≤ k →
       ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
         |arcContribution280 k N (exceptionalArcs280 N η)| ≤ ε * scale111 k N := by
-  sorry
+  exact exceptional_error_split111 hG
 
 /-- LEAF. P0093 page 167 immediately before equation 10.1.
 Outside the exceptional set the power series is at most its chosen threshold. -/
@@ -86,7 +86,7 @@ theorem minor_error280 (η : ℝ) (hη : 0 < η) (hη1 : η < 1)
       ∀ N : ℕ, Even N → N0 < N →
         |arcContribution280 k N (goodMinorArcs280 N η)| ≤
           C * scale111 k N * (1 - η) ^ (k - 2) := by
-  sorry
+  exact minor_error_proved357_up111 η hη hη1 hT
 
 /-- LEAF. P0093 page 154 equation 2.2 and page 167 equation 10.2.
 Fourier orthogonality counts the representations and the disjoint measurable
@@ -96,7 +96,7 @@ theorem circle_partition280 (k N : ℕ) (hN : 1 ≤ N) (η : ℝ) :
       arcContribution280 k N (majorArcs280 N) +
       arcContribution280 k N (exceptionalArcs280 N η) +
       arcContribution280 k N (goodMinorArcs280 N η) := by
-  sorry
+  exact circle_partition_proved435_up111 k N hN η
 
 /-- P0093 page 168 after equation 10.7. The exact error_bound111 statement
 follows from the six smaller leaves. CONDITIONAL on those leaves. -/

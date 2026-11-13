@@ -3,7 +3,6 @@ P0093 page 159 before equation 5.3. Full period principal square mass.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Decomp357g
-import LeanLab.Linnik1951.SPLIT1622_exceptional
 import LeanLab.Linnik1951.Mass435
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 

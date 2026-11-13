@@ -2,7 +2,9 @@
 P0093 page 168 equation 10.5. The independent divisor growth and real power steps.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp357l
+import LeanLab.Linnik1951.Data357
+import LeanLab.Linnik1951.Decomp357i
+import LeanLab.Linnik1951.Asymptotics357
 import LeanLab.HeathBrown1985.DivisorEps
 
 namespace LeanLab.Linnik1951
