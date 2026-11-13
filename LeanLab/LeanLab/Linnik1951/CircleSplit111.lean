@@ -59,11 +59,6 @@ noncomputable def powerFourier111_up111 (N : ℕ) (α : ℝ) : ℂ :=
     (Real.exp (-((2 ^ (m + 1) : ℕ) : ℝ) / N) : ℂ) *
       Complex.exp ((-(2 * Real.pi * α * (2 ^ (m + 1) : ℕ)) : ℝ) * Complex.I)
 
-/-- CITED. P0093 page 162 Lemma 3, equation 7.3. -/
-def LemmaThree111_up111 : Prop :=
-  ∃ C : ℝ, 0 < C ∧ ∀ N : ℕ, 1 ≤ N →
-    (∫ α in (0 : ℝ)..1, ‖primeFourier111_up111 N α * powerFourier111_up111 N α‖ ^ 2) < C * N
-
 /-- P0093 page 162. The count agrees with the existing lab Romanov count. -/
 theorem primePowerCount_eq_romanov111_up111 (u : ℕ) :
     primePowerCount111_up111 u = LeanLab.Romanov.repCount u := by
@@ -755,8 +750,12 @@ theorem parseval_second_moment_proved357_up111 (N : ℕ) (hN : 1 ≤ N) :
       congr 2
       ring
 
-/-- P0093 page 162 Lemma 3. The proved Romanov moment and clean Parseval give the bound. -/
-theorem lemma_three_proved357_up111 : LemmaThree111_up111 := by
+/-- CITED. P0093 page 162 Lemma 3, equation 7.3, with the statement of the cited
+Lemma 3 written out here because this file introduces no definition. -/
+theorem lemma_three_proved357_up111 :
+    ∃ C : ℝ, 0 < C ∧ ∀ N : ℕ, 1 ≤ N →
+      (∫ α in (0 : ℝ)..1, ‖primeFourier111_up111 N α * powerFourier111_up111 N α‖ ^ 2) <
+        C * N := by
   obtain ⟨C, hC, hprefix⟩ := romanov_second_moment111_up111
   refine ⟨3 * C, by positivity, ?_⟩
   intro N hN

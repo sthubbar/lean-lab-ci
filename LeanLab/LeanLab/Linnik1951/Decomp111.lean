@@ -6,17 +6,40 @@ The circle method error remains a cited input. The Romanov input is proved in Se
 import LeanLab.Linnik1951.Conventions
 import LeanLab.Perelli1996.Sing
 import LeanLab.Linnik1951.CircleSplit111
-import LeanLab.Linnik1951.Repair493Data
+import LeanLab.Linnik1951.CoverError111
 import LeanLab.Perelli1996.Series320
 import LeanLab.Perelli1996.TotientRatio320
-import LeanLab.Linnik1951.Lemma4Port111
-import LeanLab.Linnik1951.Lemma6Split111
-import LeanLab.Linnik1951.Major81Split111
 
 namespace LeanLab.Linnik1951
 
 open LeanLab.Linnik LeanLab.DERZ1997
 open Finset
+
+/-- Ordered representations in P0093 equation 2.1, page 154.
+The finite bounds lose no representations because each summand is at most N. -/
+noncomputable def representationCount111 (k N : ℕ) : ℕ := by
+  classical
+  exact (Finset.univ.filter fun t : Fin (N + 1) × Fin (N + 1) × (Fin k → Fin (N + 1)) =>
+    (t.1.val).Prime ∧ (t.2.1.val).Prime ∧ (∀ i, 1 ≤ (t.2.2 i).val) ∧
+      N = t.1.val + t.2.1.val + ∑ i, 2 ^ (t.2.2 i).val).card
+
+/-- Singular series in P0093 page 168, equation 10.6. -/
+noncomputable def singularSeries111 (n : ℕ) : ℝ :=
+  ∏' p : Nat.Primes, if (p : ℕ) ∣ n then
+    1 + 1 / (((p : ℕ) : ℝ) - 1) else 1 - 1 / (((p : ℕ) : ℝ) - 1) ^ 2
+
+/-- Main term in P0093 page 168 after equation 10.7, with multiplicity of exponent tuples. -/
+noncomputable def mainTerm111 (k N : ℕ) : ℝ := by
+  classical
+  exact ∑ ν ∈ (Finset.univ.filter fun ν : Fin k → Fin (N + 1) =>
+    (∀ i, 1 ≤ (ν i).val) ∧ 2 ≤ N - ∑ i, 2 ^ (ν i).val ∧
+      Even (N - ∑ i, 2 ^ (ν i).val)),
+    singularSeries111 (N - ∑ i, 2 ^ (ν i).val) *
+      (N - ∑ i, 2 ^ (ν i).val : ℕ) / Real.log (N - ∑ i, 2 ^ (ν i).val : ℕ) ^ 2
+
+/-- The positive scale in P0093 Section 11, page 169. -/
+noncomputable def scale111 (k N : ℕ) : ℝ :=
+  N * (Real.log N / Real.log 2) ^ (k - 2)
 
 /-- LEAF. P0093 page 154, equation 2.1. A positive count gives a representation. -/
 theorem representation_of_count_pos111 {k N : ℕ} (h : 0 < representationCount111 k N) :
@@ -52,6 +75,44 @@ arc contribution. They are definitionally the same expressions as
 primeFourier111, powerFourier111, majorArcs280, exceptionalArcs280,
 goodMinorArcs280 and arcContribution280, which live in modules importing this
 one and so cannot be used here. -/
+
+/-- P0093 page 154, the exponentially damped prime series S. Local copy of
+primeFourier111. -/
+noncomputable def primeSeriesSplit111 (N : ℕ) (α : ℝ) : ℂ :=
+  ∑' p : Nat.Primes,
+    (Real.exp (-((p : ℕ) : ℝ) / N) : ℂ) *
+      Complex.exp ((-(2 * Real.pi * α * (p : ℕ)) : ℝ) * Complex.I)
+
+/-- P0093 pages 154 and 161, the damped series T over positive powers of two.
+Local copy of powerFourier111. -/
+noncomputable def powerSeriesSplit111 (N : ℕ) (α : ℝ) : ℂ :=
+  ∑' m : ℕ,
+    (Real.exp (-((2 ^ (m + 1) : ℕ) : ℝ) / N) : ℂ) *
+      Complex.exp ((-(2 * Real.pi * α * (2 ^ (m + 1) : ℕ)) : ℝ) * Complex.I)
+
+/-- P0093 page 165 Section 8. Major arcs with Q equal to N to the one tenth and
+tau equal to N to the one seventh. Local copy of majorArcs280. -/
+noncomputable def majorArcsSplit111 (N : ℕ) : Set ℝ :=
+  {α | α ∈ Set.Icc 0 1 ∧ ∃ r : ℚ, (r.den : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ) ∧
+    |α - r| ≤ 1 / ((r.den : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ)))}
+
+/-- P0093 pages 162 and 167. Minor points where T is large. Local copy of
+exceptionalArcs280. -/
+noncomputable def exceptionalArcsSplit111 (N : ℕ) (η : ℝ) : Set ℝ :=
+  {α | α ∈ Set.Icc 0 1 ∧ α ∉ majorArcsSplit111 N ∧
+    (1 - η) * ‖powerSeriesSplit111 N 0‖ < ‖powerSeriesSplit111 N α‖}
+
+/-- P0093 page 167 before equation 10.1. The remaining minor points. Local copy
+of goodMinorArcs280. -/
+noncomputable def goodMinorArcsSplit111 (N : ℕ) (η : ℝ) : Set ℝ :=
+  Set.Icc 0 1 \ (majorArcsSplit111 N ∪ exceptionalArcsSplit111 N η)
+
+/-- P0093 pages 154 and 167, equations 2.2 and 10.2. Real contribution of an
+arc set, including the factor e from exponential damping. Local copy of
+arcContribution280. -/
+noncomputable def arcContributionSplit111 (k N : ℕ) (s : Set ℝ) : ℝ :=
+  Real.exp 1 * (∫ α in s, primeSeriesSplit111 N α ^ 2 * powerSeriesSplit111 N α ^ k *
+    Complex.exp (((2 * Real.pi * α * N) : ℝ) * Complex.I)).re
 
 /-- SPLIT piece 1 of error_bound111. P0093 page 154 equation 2.2 and page 167
 equation 10.2. Fourier orthogonality on the unit interval counts the ordered
@@ -145,22 +206,8 @@ at most C N to the kappa minus 1. Proof in the paper by the binary digit count
 theorem lemma4_measure_split111 (κ : ℝ) (hκ : 0 < κ) :
     ∃ η : ℝ, 0 < η ∧ η < 1 / 2 ∧ ∃ C : ℝ, 0 < C ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
       volume (largeSet111 N (2 * η)) ≤ ENNReal.ofReal (C * (N : ℝ) ^ (κ - 1)) := by
-  -- PROVE PASS burst 8 p3: Lemma 4 is proved in Lemma4Port111 for every kappa
-  -- at most one, a port of the clean Measure435 chain; a larger kappa only
-  -- weakens the bound since N is at least one.
-  obtain ⟨η, hη, hηh, C, hC, N0, h⟩ :=
-    large_value_measure_general_l4p111 (min κ 1) (lt_min hκ one_pos) (min_le_right _ _)
-  refine ⟨η, hη, hηh, C, hC, N0, fun N hN => ?_⟩
-  have hfin : volume (largeSet111 N (2 * η)) ≠ ⊤ :=
-    ne_top_of_le_ne_top (by simp [Real.volume_Icc] : volume (Set.Icc (-1 : ℝ) 2) ≠ ⊤)
-      (measure_mono (fun α hα => hα.1))
-  have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast (show 1 ≤ N by omega)
-  have hle : (N : ℝ) ^ (min κ 1 - 1) ≤ (N : ℝ) ^ (κ - 1) :=
-    Real.rpow_le_rpow_of_exponent_le hN1 (by linarith [min_le_left κ 1])
-  rw [← ENNReal.ofReal_toReal hfin]
-  apply ENNReal.ofReal_le_ofReal
-  have hN' := h N hN
-  exact hN'.trans (mul_le_mul_of_nonneg_left hle hC.le)
+  -- PROVE PASS: the local copies are definitionally the leaf of CoverError111.
+  exact lemma4_measure_leaf111 κ hκ
 
 /-- SPLIT 9, P0093 page 161 equation 7.1 in its weakest form: T at zero is at
 least one third once N is at least 2, from its first term. Proved. -/
@@ -504,70 +551,8 @@ theorem covered_square_split111 (hG : GRH) :
       ∀ s : Finset ℝ, (s.card : ℝ) ≤ (N : ℝ) ^ (1 / 100 : ℝ) →
         ∫ α in coverSet111 N s ∩ (Set.Icc 0 1 \ majorArcsSplit111 N),
             ‖primeSeriesSplit111 N α‖ ^ 2 ≤ B * N / (N : ℝ) ^ (1 / 20 : ℝ) := by
-  -- SPLIT burst 8 p3: Lemma 6 and the count of 9.3 are proved in Lemma6Split111;
-  -- the GRH content is the single system leaf system_mass_split111, equation 9.1.
-  classical
-  obtain ⟨C, hC, N1, hm⟩ := system_mass_split111 hG
-  refine ⟨C, hC, max N1 1, fun N _ hN s hs => ?_⟩
-  have hN1 : N1 < N := lt_of_le_of_lt (le_max_left _ _) hN
-  have hN : 1 ≤ N := by have := le_max_right N1 1; omega
-  have hNR : (1 : ℝ) ≤ N := by exact_mod_cast hN
-  have hNp : (0 : ℝ) < N := by linarith
-  let f : ℝ → ℝ := fun α => ‖primeSeriesSplit111 N α‖ ^ 2
-  let minor : Set ℝ := Set.Icc 0 1 \ majorArcsSplit111 N
-  let J : ℝ → Set ℝ := fun c => Set.Icc (c - 1 / (2 * (N : ℝ) ^ (99 / 100 : ℝ)))
-    (c + 1 / (2 * (N : ℝ) ^ (99 / 100 : ℝ)))
-  have hsel : ∀ c : ℝ, ∃ t : Set ℝ, J c ∩ minor ⊆ t ∧ MeasureTheory.IntegrableOn f t ∧
-      ∫ α in t, f α ≤ C * (N : ℝ) ^ (93 / 100 : ℝ) := by
-    intro c
-    by_cases hne : (J c ∩ minor).Nonempty
-    · obtain ⟨θ, hθJ, hθ01, hθM⟩ := hne
-      have hθm : ¬ ∃ r : ℚ, (r.den : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ) ∧
-          |θ - r| ≤ 1 / ((r.den : ℝ) * ((N : ℝ) ^ (1 / 7 : ℝ))) :=
-        fun hr => hθM ⟨hθ01, hr⟩
-      obtain ⟨q, hqQ, hqτ, hsub⟩ := lemma6_split111 N hN c θ hθJ hθm
-      refine ⟨arcSystemSplit111 q ((N : ℝ) ^ (1 / 7 : ℝ)) ∩ Set.Icc 0 1, ?_, ?_, ?_⟩
-      · intro α hα
-        exact ⟨hsub hα.1, hα.2.1⟩
-      · exact prime_square_integrableOn_split111 N hN _ Set.inter_subset_right
-      · exact hm N hN1 q hqQ hqτ
-    · refine ⟨∅, ?_, by simp, by simp; positivity⟩
-      intro α hα
-      exact hne ⟨α, hα⟩
-  choose t ht using hsel
-  have hcover : coverSet111 N s ∩ minor ⊆ ⋃ c ∈ s, t c := by
-    intro α hα
-    have h1 := hα.1
-    simp only [coverSet111, Set.mem_iUnion] at h1
-    obtain ⟨c, hc, hαc⟩ := h1
-    exact Set.mem_biUnion hc ((ht c).1 ⟨hαc, hα.2⟩)
-  have hsum := finite_cover_integral_split111 f (fun α => by positivity)
-    (coverSet111 N s ∩ minor) s t (fun c _ => (ht c).2.1) hcover
-  have hcount : ∑ c ∈ s, ∫ α in t c, f α ≤
-      (s.card : ℝ) * (C * (N : ℝ) ^ (93 / 100 : ℝ)) := by
-    have := Finset.sum_le_card_nsmul s (fun c => ∫ α in t c, f α)
-      (C * (N : ℝ) ^ (93 / 100 : ℝ)) (fun c _ => (ht c).2.2)
-    simpa [nsmul_eq_mul] using this
-  have hpos93 : 0 ≤ C * (N : ℝ) ^ (93 / 100 : ℝ) := by positivity
-  have hfinal : (N : ℝ) ^ (1 / 100 : ℝ) * (C * (N : ℝ) ^ (93 / 100 : ℝ)) ≤
-      C * N / (N : ℝ) ^ (1 / 20 : ℝ) := by
-    have h1 : (N : ℝ) ^ (1 / 100 : ℝ) * (C * (N : ℝ) ^ (93 / 100 : ℝ)) =
-        C * (N : ℝ) ^ (94 / 100 : ℝ) := by
-      rw [mul_left_comm, ← Real.rpow_add hNp]; norm_num
-    have h2 : C * N / (N : ℝ) ^ (1 / 20 : ℝ) = C * (N : ℝ) ^ (19 / 20 : ℝ) := by
-      rw [mul_div_assoc]
-      congr 1
-      rw [show (19 / 20 : ℝ) = 1 - 1 / 20 by norm_num, Real.rpow_sub hNp, Real.rpow_one]
-    rw [h1, h2]
-    exact mul_le_mul_of_nonneg_left
-      (Real.rpow_le_rpow_of_exponent_le hNR (by norm_num)) hC.le
-  calc ∫ α in coverSet111 N s ∩ (Set.Icc 0 1 \ majorArcsSplit111 N),
-        ‖primeSeriesSplit111 N α‖ ^ 2
-      ≤ ∑ c ∈ s, ∫ α in t c, f α := hsum
-    _ ≤ (s.card : ℝ) * (C * (N : ℝ) ^ (93 / 100 : ℝ)) := hcount
-    _ ≤ (N : ℝ) ^ (1 / 100 : ℝ) * (C * (N : ℝ) ^ (93 / 100 : ℝ)) :=
-        mul_le_mul_of_nonneg_right hs hpos93
-    _ ≤ C * N / (N : ℝ) ^ (1 / 20 : ℝ) := hfinal
+  -- PROVE PASS: the local copies are definitionally the leaf of CoverError111.
+  exact covered_square_leaf111 hG
 
 /-- SPLIT 9 under GRH, proved from the two leaves above. P0093 pages 162 to 166: Lemma 4 equation 7.6,
 Lemma 5 equation 7.19, Lemma 6 and the GRH estimate 9.1, assembled as in the
@@ -717,21 +702,6 @@ noncomputable def mainTermTrunc111 (k N Q : ℕ) : ℝ := by
     truncSingular111 Q (N - ∑ i, 2 ^ (ν i).val) *
       (N - ∑ i, 2 ^ (ν i).val : ℕ) / Real.log (N - ∑ i, 2 ^ (ν i).val : ℕ) ^ 2
 
-/-- P0093 page 165 equation 8.1 applied to the major arcs, burst 8 p3: the major arc
-contribution is e times the real part of the sum over tuples of the tuple weight times the
-major arc integral of S squared times e of N_1 alpha. Proved from arc_tuple_expand_split111
-of Major81Split111. -/
-theorem major_tuple_expand_split111 (k N : ℕ) (hN : 1 ≤ N) :
-    arcContributionSplit111 k N (majorArcsSplit111 N) = Real.exp 1 *
-      (∑' ν : Fin k → ℕ,
-        (((∏ i, Real.exp (-((2 ^ (ν i + 1) : ℕ) : ℝ) / N)) : ℝ) : ℂ) *
-          ∫ α in majorArcsSplit111 N, primeSeriesSplit111 N α ^ 2 *
-            Complex.exp (((2 * Real.pi * α * ((N : ℝ) - ∑ i, ((2 ^ (ν i + 1) : ℕ) : ℝ))) : ℝ) *
-              Complex.I)).re := by
-  have h := (arc_tuple_expand_split111 k N hN (majorArcsSplit111 N) (fun α h => h.1)).tsum_eq
-  unfold arcContributionSplit111
-  exact congrArg (fun z : ℂ => Real.exp 1 * z.re) h.symm
-
 /-- SPLIT 9 LEAF under GRH. P0093 Sections 3 to 6 with equation 6.4 on page 161,
 Section 8 equations 8.1 and 8.2 on page 165, and equation 10.7 on page 168.
 The major arc integral equals the main term built from the truncated singular
@@ -741,22 +711,8 @@ theorem major_truncated_split111 (hG : GRH) (k : ℕ) (hk : 3 ≤ k) (ε : ℝ) 
     ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
       |arcContributionSplit111 k N (majorArcsSplit111 N) -
           mainTermTrunc111 k N ⌊(N : ℝ) ^ (1 / 10 : ℝ)⌋₊| ≤ ε * scale111 k N := by
-  -- SPLIT burst 8 p3: the tuple expansion of 8.1 is proved; the GRH core 6.4 is the leaf
-  -- major_local_expansion_m111 and the bookkeeping of 8.1, 8.2 and 10.7 is the
-  -- unconditional leaf major_bookkeeping_m111, both in Major81Split111.
-  obtain ⟨B, hB, N1, hA⟩ := major_local_expansion_m111 hG
-  obtain ⟨N2, hC⟩ := major_bookkeeping_m111 k hk ε hε B hB
-  refine ⟨max N1 (max N2 1), fun N hEv hN => ?_⟩
-  have hN1 : N1 < N := lt_of_le_of_lt (le_max_left _ _) hN
-  have hN2 : N2 < N := lt_of_le_of_lt (le_trans (le_max_left _ _) (le_max_right _ _)) hN
-  have hN0 : 1 ≤ N := by
-    have := lt_of_le_of_lt (le_trans (le_max_right _ _) (le_max_right _ _)) hN
-    omega
-  rw [major_tuple_expand_split111 k N hN0]
-  exact hC N hEv hN2
-    (fun t => ∫ α in majorArcsSplit111 N, primeSeriesSplit111 N α ^ 2 *
-      Complex.exp (((2 * Real.pi * α * t) : ℝ) * Complex.I))
-    (fun n hn => hA N hN1 n hn)
+  -- PROVE PASS: the local copies are definitionally the leaf of CoverError111.
+  exact major_truncated_leaf111 hG k hk ε hε
 
 section Burst9Singular
 open Real Finset
