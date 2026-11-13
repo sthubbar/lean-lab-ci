@@ -33,7 +33,56 @@ theorem leaf_moment_height_pullout (q : ℕ) [NeZero q] (χ : DirichletCharacter
         Set.indicator {ρ | |ρ.val.im| ≤ 1}ᶜ
           (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
             ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) := by
-  sorry
+  have hT0 : 0 ≤ T := by linarith
+  -- Use the fact that the index set is finite to get summability
+  haveI : Fintype {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} := by
+    classical
+    exact Fintype.ofFinite (ZeroCount1623.stripZeros_finite χ T).to_subtype
+  -- Unfold the definition of gaussianMomentSum
+  simp only [gaussianMomentSum] at *
+  -- The sum over the subtype is the same as the sum over ZeroIdx
+  have h₁ : (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * |ρ.val.im| * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) = ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * |ρ.val.im| * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ := rfl
+  rw [h₁]
+  -- Use tsum_le_tsum with pointwise inequality
+  have h₂ : ∀ (ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}), Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * |ρ.val.im| * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ ≤ T * (Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) := by
+    intro ρ
+    by_cases h : |ρ.val.im| ≤ 1
+    · -- Case: |ρ.val.im| ≤ 1, indicator is 0
+      simp [Set.indicator, h]
+      <;> positivity
+    · -- Case: |ρ.val.im| > 1, indicator is 1
+      have h₃ : 0 ≤ (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) := by positivity
+      have h₄ : 0 ≤ ‖gaussianMellin δ ρ.val‖ ^ 2 := by positivity
+      have h₅ : 0 ≤ (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2 := by positivity
+      have h₆ : |ρ.val.im| ≤ T := ρ.property.2.2.2
+      simp [Set.indicator, h] at *
+      <;>
+      (try norm_num at *) <;>
+      (try nlinarith) <;>
+      (try
+        {
+          have h₇ : 0 ≤ (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * |ρ.val.im| * ‖gaussianMellin δ ρ.val‖ ^ 2 := by positivity
+          have h₈ : (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * |ρ.val.im| * ‖gaussianMellin δ ρ.val‖ ^ 2 = ((analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) * |ρ.val.im| := by ring
+          rw [h₈]
+          have h₉ : ((analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) * |ρ.val.im| ≤ ((analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) * T := by
+            exact mul_le_mul_of_nonneg_left h₆ (by positivity)
+          nlinarith
+        })
+  -- Sum the pointwise inequality
+  have h₃ : (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * |ρ.val.im| * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) ≤ ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, T * (Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) := by
+    apply tsum_le_tsum
+    · -- Summability of LHS
+      apply Summable.of_finite
+    · -- Summability of RHS
+      apply Summable.of_finite
+    · -- Pointwise inequality
+      intro ρ
+      exact h₂ ρ
+  -- Factor out T from the RHS sum
+  have h₄ : (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, T * (Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ)) = T * (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) := by
+    rw [tsum_mul_left]
+  rw [h₄] at h₃
+  exact h₃
 
 /-- LEAF. Cutoff removal.  The cutoff `1 < |im ρ|` contributes the factor `1` on the zeros it
 keeps and `0` on the zeros with `|im ρ| ≤ 1`, whose contribution is nonnegative; so the
@@ -50,7 +99,30 @@ theorem leaf_moment_mass_indicator_le_full (q : ℕ) [NeZero q] (χ : DirichletC
         |ρ.im| ≤ T},
       (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
         ‖gaussianMellin δ ρ.val‖ ^ 2 := by
-  sorry
+  haveI : Fintype {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} := by
+    classical
+    exact Fintype.ofFinite (ZeroCount1623.stripZeros_finite χ T).to_subtype
+  -- Use tsum_le_tsum with pointwise inequality
+  have h₁ : ∀ (ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}), Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ ≤ (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2 := by
+    intro ρ
+    by_cases h : |ρ.val.im| ≤ 1
+    · -- Case: |ρ.val.im| ≤ 1, indicator is 0
+      simp [Set.indicator, h]
+      <;> positivity
+    · -- Case: |ρ.val.im| > 1, indicator is 1
+      simp [Set.indicator, h]
+      <;> ring_nf
+  -- Sum the pointwise inequality
+  have h₂ : (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, Set.indicator {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T | |ρ.val.im| ≤ 1}ᶜ (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) ≤ ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * ‖gaussianMellin δ ρ.val‖ ^ 2 := by
+    apply tsum_le_tsum
+    · -- Summability of LHS
+      apply Summable.of_finite
+    · -- Summability of RHS
+      apply Summable.of_finite
+    · -- Pointwise inequality
+      intro ρ
+      exact h₁ ρ
+  simpa using h₂
 
 /-- LEAF. Plancherel mass bound.  The sum over the strip zeros of the multiplicity times the
 squared Mellin norm of the Gaussian profile at that zero is at most the sum of the two
