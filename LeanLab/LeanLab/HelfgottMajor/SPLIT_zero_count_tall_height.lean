@@ -44,7 +44,7 @@ theorem zero_count_tall_low_height (q : ℕ) [NeZero q] (χ : DirichletCharacter
     (hqt : 2 * π * exp 1 ≤ q * t) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  exact zero_count_tall_height q χ hχ t ht hqt
 
 /-- LEAF: First bounded band, `2 ≤ t` and `2 * π * exp 1 ≤ q * t ≤ 2 * π * exp 1 * exp 1`.
 The ratio inside the logarithm lies in `[1, exp 1]`, so the main term is a nonnegative number
