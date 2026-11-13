@@ -4,6 +4,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Repair493ContourData
 import LeanLab.Linnik1951.SPLIT_outer_tail_pointwise487
+import LeanLab.Linnik1951.Decomp501a
 
 namespace LeanLab.Linnik1951
 
@@ -82,7 +83,7 @@ theorem outer_finite_square487 (B0 : ℝ) (hB0 : 0 < B0) :
           (∫ α in (4 / (N : ℝ))..(1 / R), ‖truncatedMellin487 N R M α‖ ^ 2) ≤
             C * Real.log N ^ 6 * differenceKernel376 ((N : ℝ) / R * Real.log N ^ 3) +
             C * Real.log N ^ 7 * sumKernel376 ((N : ℝ) / R * Real.log N ^ 3) := by
-  sorry
+  exact outer_finite_square487_split B0 hB0
 
 /-- P0093 pages 157 and 158 equations 4.3 through 4.7. Exact abstract_outer_kernels442 statement from the finite signed contour and its tail. CONDITIONAL only on outer_tail_square487 and outer_finite_square487. -/
 theorem abstract_outer_kernels487 (B0 : ℝ) (hB0 : 0 < B0) :
