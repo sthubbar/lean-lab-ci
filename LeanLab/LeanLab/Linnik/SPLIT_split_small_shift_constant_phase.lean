@@ -1,4 +1,12 @@
 /-
+SOURCE STATUS, CODEX task495, 2026-11-13.
+The parent SPLIT_split_small_shift_bound is marked OFF ROUTE by architect U-1647.
+It re-cuts the retired plain expansion, which omits the exponential error retained in
+Gallagher 1975 p.127 Theorem 3 and p.138 display 5. The four leaves below inherit that
+stronger fixed theta assertion. The printed estimate alone does not prove them.
+This is a source mismatch in the proposed proof route, not a refutation of the leaves.
+Decomp495a records the elementary local phase variation separately.
+
 Split of the constant phase piece of the small shift range of
 `LeanLab.Linnik.Decomp1532c.split_small_shift_bound`.
 
