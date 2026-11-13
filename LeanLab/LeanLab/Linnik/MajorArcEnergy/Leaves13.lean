@@ -7,6 +7,9 @@ Source https://doi.org/10.1007/BF01390190
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Linnik.MajorArcEnergy.Defs
+import LeanLab.Linnik.MajorArcEnergy.Leaves13Major
+import LeanLab.Linnik.MajorArcEnergy.Leaves13Principal
+import LeanLab.Linnik.MajorArcEnergy.Leaves13PairWeight
 
 namespace LeanLab.Linnik.MajorArcEnergy
 
@@ -34,7 +37,7 @@ theorem major_arc_pair_expansion
             ((‖Sg N α‖ ^ 2 : ℝ) : ℂ) * LeanLab.PNTPort.LargeSieve.e ((n : ℝ) * α)) -
           ∑ x ∈ family ((N : ℝ) ^ θ), ∑ y ∈ family ((N : ℝ) ^ θ),
             pairSum N ((N : ℝ) ^ θ) n x y‖ ≤ K * ((N : ℝ) ^ θ) ^ (5 / 2 : ℝ) := by
-  sorry
+  exact Leaves13Major.major_arc_pair_expansion_of_steps hExpansion
 
 /-- LEAF, CITED-LEFT. Gallagher 1975 p.129 display 5, quoted from the evaluation in
 reference 10, Montgomery and Vaughan 1975: for a character chi to modulus q and
@@ -56,7 +59,7 @@ characters and in P. -/
 theorem pair_weight_bound :
     ∃ K : ℝ, 0 < K ∧ ∀ (P : ℝ) (n : ℤ) (x y : PChar), n ≠ 0 →
       x.2.IsPrimitive → y.2.IsPrimitive → pairWeight P n x y ≤ K * totientWeight n := by
-  sorry
+  exact Leaves13PairWeight.pair_weight_bound_aux induced_cn_bound
 
 /-- LEAF, OFF ROUTE: superseded by `principal_arc_integral_of_steps` in Display9.lean, the same
 statement PROVED. Gallagher 1975 p.130 display 9, Gallagher's own derivation: partial summation
@@ -71,7 +74,7 @@ theorem principal_arc_integral :
             K * (q * ((N : ℝ) / (N : ℝ) ^ θ) / Real.log N ^ 2 +
               Real.sqrt N / Real.log N * remNorm N ((N : ℝ) ^ θ) +
               remNorm N ((N : ℝ) ^ θ) ^ 2) := by
-  sorry
+  exact Leaves13Principal.principal_arc_integral_of_steps
 
 /-- LEAF, CITED-LEFT. Gallagher 1975 p.130 before display 11, quoting reference 10,
 equation 6.13: the singular series truncated at P differs from the full series by
