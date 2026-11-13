@@ -14,12 +14,15 @@ weaker than it.
 All six leaves are open. Binary Goldbach is open.
 -/
 import LeanLab.DtRS1998.Decomp455d
+import LeanLab.DtRS1998.CoverUpper342Part1
 
 namespace LeanLab.DtRS1998.Decomp455d
 
 open Decomp455a
 
 set_option maxRecDepth 100000
+set_option maxHeartbeats 0
+set_option Elab.async false
 
 /-- LEAF: Step 1 of 6 of the index cut, the indices 312500000 up to 323000000. Some
 offset of the fixed list makes 2 * j + a prime. The leaf claims nothing about an index
@@ -28,7 +31,28 @@ weaker than the target. -/
 theorem cover_upper_part1 :
     ∀ j : ℕ, 312500000 ≤ j → j < 323000000 →
       ∃ a ∈ offsets, (2 * j + a).Prime := by
-  sorry
+  intro j hlo hj
+  by_cases h312500000 : j < 313500000
+  · exact CoverUpper342Part1.window312500000 j (by omega) h312500000
+  by_cases h313500000 : j < 314500000
+  · exact CoverUpper342Part1.window313500000 j (by omega) h313500000
+  by_cases h314500000 : j < 315500000
+  · exact CoverUpper342Part1.window314500000 j (by omega) h314500000
+  by_cases h315500000 : j < 316500000
+  · exact CoverUpper342Part1.window315500000 j (by omega) h315500000
+  by_cases h316500000 : j < 317500000
+  · exact CoverUpper342Part1.window316500000 j (by omega) h316500000
+  by_cases h317500000 : j < 318500000
+  · exact CoverUpper342Part1.window317500000 j (by omega) h317500000
+  by_cases h318500000 : j < 319500000
+  · exact CoverUpper342Part1.window318500000 j (by omega) h318500000
+  by_cases h319500000 : j < 320500000
+  · exact CoverUpper342Part1.window319500000 j (by omega) h319500000
+  by_cases h320500000 : j < 321500000
+  · exact CoverUpper342Part1.window320500000 j (by omega) h320500000
+  by_cases h321500000 : j < 322500000
+  · exact CoverUpper342Part1.window321500000 j (by omega) h321500000
+  exact CoverUpper342Part1.window322500000 j (by omega) (by omega)
 
 /-- LEAF: Step 2 of 6 of the index cut, the indices 323000000 up to 333500000. Some
 offset of the fixed list makes 2 * j + a prime. Strictly weaker than the target: one
