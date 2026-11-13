@@ -16,9 +16,10 @@ domination on the window. Leaf 3 is the mean-value step: it builds an auxiliary 
 with the divisor bound and the character mean value. Leaf 4 is the smoothing step: from
 an auxiliary family that already carries the mean value it produces one that keeps the
 divisor bound and the mean value and adds the reference density and the absolute
-approximation of the sifted family. The assembly below closes every step.
+approximation of the sifted family. The assembly below depends on all four leaves.
 
-The numeric and auxiliary witnesses are elementary. The smoothing step remains OPEN.
+The numeric and auxiliary witnesses are elementary. The unrestricted smoothing step
+is false, as checked by `smoothed_reference_family_counterexample` below.
 The prime sifted witness is CONDITIONAL ON the sealed h4 input.
 AI wrote the Lean code. Goldbach is open.
 -/
@@ -93,6 +94,97 @@ theorem leaf_auxiliary_mean_value (B0 : ℝ) (hB0 : 1 ≤ B0) (ε : ℝ) (hε : 
   intro x k
   simp
 
+/-- Diagnostic for the lab split, not a claim about P0069. The arbitrary input
+family can grow too fast for any divisor-bounded approximation. Take divisor
+exponent 1, epsilon 1/20, density 1 and the zero input auxiliary family. At
+arbitrarily large prime endpoints the sieve factor is 1, while the quadratic
+coefficient exceeds both the divisor bound and the allowed approximation error. -/
+theorem smoothed_reference_family_counterexample :
+    (∃ C : ℝ, ∀ (_x : ℝ) (k : ℕ), |(0 : ℝ)| ≤
+      C * ((k.divisors.card : ℕ) : ℝ) ^ (1 : ℝ)) ∧
+    MeanValue41 (1 / 20) (fun _ _ => 0) ∧
+    ¬ ∃ b' : ℝ → ℕ → ℝ,
+      (∃ C : ℝ, ∀ x k, |b' x k| ≤
+        C * ((k.divisors.card : ℕ) : ℝ) ^ (1 : ℝ)) ∧
+      MeanValue41 (1 / 20) b' ∧ ReferenceDensity 1 b' ∧
+      ShortApproximation (1 / 20)
+        (section4SiftedFamily
+          (fun x k => x * ((k.divisors.card : ℝ) + x))) b' := by
+  refine ⟨⟨0, by simp⟩, (analytic_zero_instances _).1, ?_⟩
+  rintro ⟨b', ⟨Cb, hCb⟩, _, _, ha⟩
+  obtain ⟨Ca, Xa, ha⟩ := ha 1 (by norm_num)
+  obtain ⟨Xs, hs⟩ := Filter.eventually_atTop.mp
+    (prime_sifted_eventually_on_left (ε := 1 / 20) (by norm_num))
+  let M : ℝ := max 3 (max Xa (max Xs (max (Cb + 1) (|Ca| + 1))))
+  obtain ⟨p, hpM, hp⟩ := Nat.exists_infinite_primes ⌈M⌉₊
+  have hMp : M ≤ (p : ℝ) := (Nat.le_ceil M).trans (by exact_mod_cast hpM)
+  have hp3 : 3 ≤ (p : ℝ) := (le_max_left _ _).trans hMp
+  have hpXa : Xa ≤ (p : ℝ) :=
+    (le_trans (le_max_left _ _) (le_max_right _ _)).trans hMp
+  have hpXs : Xs ≤ (p : ℝ) :=
+    (le_trans (le_max_left _ _)
+      (le_trans (le_max_right _ _) (le_max_right _ _))).trans hMp
+  have hpCb : Cb + 1 ≤ (p : ℝ) :=
+    (le_trans (le_max_left _ _) (le_trans (le_max_right _ _)
+      (le_trans (le_max_right _ _) (le_max_right _ _)))).trans hMp
+  have hpCa : |Ca| + 1 ≤ (p : ℝ) :=
+    (le_trans (le_max_right _ _) (le_trans (le_max_right _ _)
+      (le_trans (le_max_right _ _) (le_max_right _ _)))).trans hMp
+  have hp0 : 0 < (p : ℝ) := by linarith
+  have hp1 : 1 ≤ (p : ℝ) := by linarith
+  have hmem : p ∈ leftInterval (1 / 20) (p : ℝ) := by
+    unfold leftInterval
+    rw [Nat.floor_natCast]
+    apply Finset.mem_Ioc.mpr
+    refine ⟨?_, le_rfl⟩
+    have hr : 0 < (p : ℝ) ^ (11 / 20 + 1 / 20 : ℝ) :=
+      Real.rpow_pos_of_pos hp0 _
+    by_cases hleft : 0 ≤ (p : ℝ) - 2 * (p : ℝ) ^ (11 / 20 + 1 / 20 : ℝ)
+    · exact (Nat.floor_lt hleft).2 (by linarith)
+    · rw [Nat.floor_eq_zero.mpr (by linarith : (p : ℝ) -
+        2 * (p : ℝ) ^ (11 / 20 + 1 / 20 : ℝ) < 1)]
+      exact hp.pos
+  have hsieve : siftedWeight p
+      ⌈Real.exp (Real.log (p : ℝ) ^ (9 / 10 : ℝ))⌉₊ = 1 := by
+    simpa [section4SiftedFamily, primeWeight, hp] using hs p hpXs p hmem
+  have hterm := Finset.single_le_sum
+    (fun k (_ : k ∈ leftInterval (1 / 20) (p : ℝ)) =>
+      abs_nonneg (section4SiftedFamily
+        (fun x k => x * ((k.divisors.card : ℝ) + x)) p k - b' p k)) hmem
+  have herr := hterm.trans (ha p hpXa)
+  simp only [section4SiftedFamily, hsieve, mul_one] at herr
+  have hlog : 1 ≤ Real.log (p : ℝ) := by
+    apply (Real.le_log_iff_exp_le hp0).2
+    exact Real.exp_one_lt_d9.le.trans
+      ((by norm_num : (2.7182818286 : ℝ) ≤ 3).trans hp3)
+  have hpow : (p : ℝ) ^ (11 / 20 + 1 / 20 : ℝ) ≤ (p : ℝ) := by
+    calc
+      _ ≤ (p : ℝ) ^ (1 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le hp1 (by norm_num)
+      _ = _ := Real.rpow_one _
+  have hinv : Real.log (p : ℝ) ^ (-1 : ℝ) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos hlog (by norm_num)
+  have herror : Ca * (p : ℝ) ^ (11 / 20 + 1 / 20 : ℝ) *
+      Real.log (p : ℝ) ^ (-1 : ℝ) ≤ |Ca| * (p : ℝ) := by
+    calc
+      _ ≤ |Ca| * (p : ℝ) ^ (11 / 20 + 1 / 20 : ℝ) *
+          Real.log (p : ℝ) ^ (-1 : ℝ) := by
+        gcongr
+        exact le_abs_self Ca
+      _ ≤ |Ca| * (p : ℝ) * 1 := by gcongr
+      _ = _ := mul_one _
+  have hbound := hCb (p : ℝ) p
+  rw [Real.rpow_one] at hbound
+  have habs := le_abs_self
+    ((p : ℝ) * ((p.divisors.card : ℝ) + p) - b' p p)
+  have hvalue := le_abs_self (b' p p)
+  have hdiv : Cb * (p.divisors.card : ℝ) ≤ (p : ℝ) * (p.divisors.card : ℝ) :=
+    mul_le_mul_of_nonneg_right (by linarith) (Nat.cast_nonneg _)
+  have hquad : |Ca| * (p : ℝ) < (p : ℝ) * p :=
+    mul_lt_mul_of_pos_right (by linarith) hp0
+  norm_num only [neg_mul, one_mul] at herr
+  nlinarith
+
 /-- LEAF 4 of 4. The smoothing step, P0069 page 42, the tapered weight. From an
 auxiliary family `b` that already carries the divisor bound and `MeanValue41`, and from
 `B0 >= 1`, `u1` in `[1, 1.0001)`, `eps` and `c1`, it produces `b'` that keeps the
@@ -111,6 +203,7 @@ theorem leaf_smoothed_reference_family (B0 : ℝ) (hB0 : 1 ≤ B0) (ε : ℝ) (h
       (∃ C : ℝ, ∀ x k, |b' x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B0) ∧
       MeanValue41 ε b' ∧ ReferenceDensity u1 b' ∧
       ShortApproximation ε (section4SiftedFamily c1) b' := by
+  -- The unrestricted input family is ruled out by the counterexample above.
   sorry
 
 /-- The same statement as the sealed supply theorem, assembled from the four leaves
