@@ -44,6 +44,37 @@ theorem book_zero_count_large_height_upper_short (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) {T : ℝ} (hT : 1 ≤ T) (hT2 : 2 ≤ T) (hT20 : T ≤ 20)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
+  have hqpos : 0 < (q : ℝ) := by exact_mod_cast NeZero.pos q
+  have hTpos : 0 < T := by linarith
+  have hqTpos : 0 < (q : ℝ) * T := mul_pos hqpos hTpos
+  have hqT_ge : 1 ≤ (q : ℝ) * T / (2 * Real.pi * Real.exp 1) := by
+    rw [one_le_div (by positivity)]
+    exact hmain
+  have hlogpos : 0 ≤ Real.log ((q : ℝ) * T / (2 * Real.pi * Real.exp 1)) :=
+    Real.log_nonneg hqT_ge
+  have hmain_nonneg : 0 ≤ bookMain q T := by
+    unfold bookMain
+    positivity
+  have herror_nonneg : 0 ≤ bookError q T := by
+    unfold bookError
+    have hlog : 0 ≤ Real.log ((q : ℝ) * T) := Real.log_nonneg (by nlinarith)
+    nlinarith
+  have hcount_nonneg : 0 ≤ bookCount χ T := bookCount_nonneg_agy37 χ T
+  -- The inequality count ≤ main + error requires a bound on the number of zeros of
+  -- L(s, χ) in the strip with 0 ≤ Im s ≤ T ≤ 20.  The set is finite but no explicit
+  -- bound is available in Mathlib; the argument principle (Backlund's theorem) and
+  -- Stirling's approximation with explicit remainder are both absent.
+  -- BLOCKED 2026-11-13 FREE-ms-leanstral task372
+  --   book_zero_count_large_height_upper_short,
+  --   book_zero_count_large_height_upper_mid,
+  --   book_zero_count_large_height_upper_tall: OUT OF REACH.
+  -- Missing: Backlund winding number theorem for L-functions;
+  -- Stirling approximation Γ(s) = s^{s-1/2} e^{-s} √(2π) (1 + O(1/|s|)) with
+  -- explicit constants on the critical line Re(s)=1, |Im(s)| ≤ 20;
+  -- zero-count bound N(χ,T) ≤ (T/2π) log(qT/2πe) + O(log(qT)) for primitive
+  -- Dirichlet characters.  Searched Mathlib (exact?, apply?, rw?), LeanSearch,
+  -- Loogle, web fetch for "Backlund", "Stirling L-function", "zero density";
+  -- none of these return relevant lemmas.
   sorry
 
 /-- LEAF. Middle heights, `20 ≤ T ≤ 10^6` with `2πe ≤ qT`. On this range the argument of the
@@ -56,6 +87,30 @@ theorem book_zero_count_large_height_upper_mid (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) {T : ℝ} (hT : 1 ≤ T) (hT20 : 20 ≤ T) (hT6 : T ≤ 10 ^ 6)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
+  have hqpos : 0 < (q : ℝ) := by exact_mod_cast NeZero.pos q
+  have hTpos : 0 < T := by linarith
+  have hqTpos : 0 < (q : ℝ) * T := mul_pos hqpos hTpos
+  have hlogpos : 0 ≤ Real.log ((q : ℝ) * T / (2 * Real.pi * Real.exp 1)) :=
+    Real.log_nonneg (by
+      rw [one_le_div (by positivity)]
+      exact hmain)
+  have hmain_nonneg : 0 ≤ bookMain q T := by
+    unfold bookMain
+    positivity
+  have herror_nonneg : 0 ≤ bookError q T := by
+    unfold bookError
+    have hlog : 0 ≤ Real.log ((q : ℝ) * T) := Real.log_nonneg (by nlinarith)
+    nlinarith
+  have hcount_nonneg : 0 ≤ bookCount χ T := bookCount_nonneg_agy37 χ T
+  -- The inequality count ≤ main + error for T in [20, 10^6] requires:
+  -- 1. Backlund's theorem (argument principle for L-functions on the rectangle
+  --    1 ± iT, -iT); 2. Stirling's approximation with explicit O-remainder on
+  --    |Im(s)| ≤ 10^6; 3. Explicit bounds on the horizontal and vertical
+  --    boundary terms.  None of these exist in Mathlib.
+  -- BLOCKED 2026-11-13 FREE-ms-leanstral task372
+  --   book_zero_count_large_height_upper_short,
+  --   book_zero_count_large_height_upper_mid,
+  --   book_zero_count_large_height_upper_tall: OUT OF REACH.
   sorry
 
 /-- LEAF. Tall heights, `10^6 ≤ T` with `2πe ≤ qT`. Here the Stirling main term
@@ -67,6 +122,29 @@ theorem book_zero_count_large_height_upper_tall (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) {T : ℝ} (hT : 1 ≤ T) (hT6 : 10 ^ 6 ≤ T)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
+  have hqpos : 0 < (q : ℝ) := by exact_mod_cast NeZero.pos q
+  have hTpos : 0 < T := by linarith
+  have hqTpos : 0 < (q : ℝ) * T := mul_pos hqpos hTpos
+  have hlogpos : 0 ≤ Real.log ((q : ℝ) * T / (2 * Real.pi * Real.exp 1)) :=
+    Real.log_nonneg (by
+      rw [one_le_div (by positivity)]
+      exact hmain)
+  have hmain_nonneg : 0 ≤ bookMain q T := by
+    unfold bookMain
+    positivity
+  have herror_nonneg : 0 ≤ bookError q T := by
+    unfold bookError
+    have hlog : 0 ≤ Real.log ((q : ℝ) * T) := Real.log_nonneg (by nlinarith)
+    nlinarith
+  have hcount_nonneg : 0 ≤ bookCount χ T := bookCount_nonneg_agy37 χ T
+  -- The inequality count ≤ main + error for T ≥ 10^6 requires:
+  -- 1. Stirling's approximation with explicit O(1/|s|) remainder on |Im(s)| ≥ 10^6;
+  -- 2. The asymptotic dominance T log T ≫ log(qT) to absorb boundary terms;
+  -- 3. The argument principle on the rectangle.  None of these are in Mathlib.
+  -- BLOCKED 2026-11-13 FREE-ms-leanstral task372
+  --   book_zero_count_large_height_upper_short,
+  --   book_zero_count_large_height_upper_mid,
+  --   book_zero_count_large_height_upper_tall: OUT OF REACH.
   sorry
 
 /-- Assembly: the upper side follows from the three height leaves. The cases `T ≤ 20` and
