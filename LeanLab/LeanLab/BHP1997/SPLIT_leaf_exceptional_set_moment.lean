@@ -17,10 +17,14 @@ combination of the three constants, with no sorry.
 
 The three analytic leaves remain OPEN. AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.SPLIT_lower_short_weight_analytic
+import LeanLab.BHP1997.SieveConditionsC165
+import LeanLab.BHP1997.Thm4Statement
+import LeanLab.BHP1997.MeanValue132
+import LeanLab.ChenDoubleSieve.FunctionalStatements
+import LeanLab.ChenDoubleSieve.I2Range
 
 namespace LeanLab.BHP1997.DecompC165d
-open Classical Complex Decomp132 DecompC165b
+open Classical Complex DecompC165b
 open scoped BigOperators
 set_option maxHeartbeats 0
 set_option maxRecDepth 100000
@@ -104,7 +108,37 @@ theorem leaf_exceptional_set_moment_narrow
                   Thm2.delta χ * v0 / Real.log (x ^ (11 / 20 + ε)))‖ ^ 2 ≤
                     C * ((q : ℝ) * sieveQ ε x) ^ 2 *
                       x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
+  intro A hA
+  obtain ⟨C, hC⟩ := hchar A hA
+  refine ⟨max C 1, ?_⟩
+  intro x hx q hq hqQ z hzlo hzhi hz1
+  have hxC : C ≤ x := (le_max_left _ _).trans hx
+  have hwin (y : ℝ) (hylo : x ^ (11 / 20 + ε) / 2 ≤ y)
+      (hyhi : y ≤ 3 * x ^ (11 / 20 + ε)) :
+      ‖∑ m ∈ (rightInterval ε x).filter
+          (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z),
+        ((b0 x m : ℂ) * χ (m : ZMod q) -
+          Thm2.delta χ * v0 / Real.log (x ^ (11 / 20 + ε)))‖ ≤
+        2 * C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
+    sorry
   sorry
+
+/-- The integer sieve cutoff is at most the one sixteenth power of the short scale. -/
+private lemma sieveQ_le_sixteenth_power_local {ε x : ℝ}
+    (hY : 1 ≤ x ^ (11 / 20 + ε)) :
+    (sieveQ ε x : ℝ) ≤ (x ^ (11 / 20 + ε)) ^ (1 / 16 : ℝ) := by
+  have hY0 : 0 ≤ x ^ (11 / 20 + ε) := by linarith
+  unfold sieveQ
+  calc
+    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) / 2 :=
+      Nat.floor_le (by positivity)
+    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) :=
+      div_le_self (by positivity) (by norm_num)
+    _ = (x ^ (11 / 20 + ε)) ^ ((1 / 16 : ℝ) - 1 / 10 ^ 5) := by
+      rw [← Real.rpow_mul hY0]
+      congr 1
+      norm_num
+    _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hY (by norm_num)
 
 /-- The top of the shift range lies below one. The squared sieve cutoff is negligible against
 the short interval length once `x` is at least `100`, so the constraint `z ≤ 6 q Q / x^…` with
@@ -131,7 +165,7 @@ private lemma six_sieveQ_sq_lt {ε x : ℝ} (hε : 0 ≤ ε) (hx : 100 ≤ x) :
   have hQ0 : (0 : ℝ) ≤ Q := Nat.cast_nonneg _
   have hQ16 : Q ^ 16 ≤ L := by
     have hQle : Q ≤ L ^ (1 / 16 : ℝ) :=
-      DecompC165b.sieveQ_le_sixteenth_power (ε := ε) (x := x) (by simpa [hLdef] using hL1)
+      sieveQ_le_sixteenth_power_local (ε := ε) (x := x) (by simpa [hLdef] using hL1)
     have hp := pow_le_pow_left₀ (Nat.cast_nonneg (sieveQ ε x)) hQle 16
     have he : (L ^ (1 / 16 : ℝ)) ^ 16 = L := by
       rw [← Real.rpow_natCast (L ^ (1 / 16 : ℝ)) 16, ← Real.rpow_mul hL0.le]
