@@ -1,44 +1,21 @@
 import LeanLab.HelfgottMajor.Lemma41Terms
 import LeanLab.HelfgottArcs.Statements
-import Mathlib.Analysis.MellinTransform
-import Mathlib.Analysis.Analytic.Order
+import LeanLab.HelfgottMajor.Gaussian123Base
 
 /-!
-Route burst 2026-11-12, split of Decomp123.gaussian_explicit_estimate.
 P0014 Proposition 4.6, pages 43 and 44, display 4.43, with the recorded factor 6 repair.
-The proof of Proposition 4.6 applies Lemma 4.1, the explicit formula with residue R,
-then Lemma 4.4 to the zeros up to T and Lemma 4.5 to the zeros above T.
-This file mirrors the decomposition of Decomp269a, which cannot be imported by Decomp123
-because it imports Decomp123 itself. The three analytic pieces stay OPEN with sorry.
+This file proves the three statements the lab and Decomp123 refer to from the LEAF pieces of
+Gaussian123Base, which holds the shared development: the explicit formula with its residue
+bound, Lemma 4.4 for the zeros up to T and Lemma 4.5 for the zeros above T. Every statement
+here is the one Decomp123 and the rest of the lab already use, unchanged, in the namespace
+LeanLab.HelfgottMajor.SplitGaussian123.
 AI wrote this Lean code. Binary Goldbach is open.
 -/
 
 namespace LeanLab.HelfgottMajor.SplitGaussian123
 open Real LeanLab.HelfgottArcs
 
-/-- The Mellin transform F_delta used on page 43 in the proof of display 4.43. -/
-noncomputable def gaussianMellin (δ : ℝ) (s : ℂ) : ℂ :=
-  mellin (fun t : ℝ => (exp (-t ^ 2 / 2) : ℂ) * e (δ * t)) s
-
-/-- A zero contribution with its analytic multiplicity, as in display 4.1 on page 31. -/
-noncomputable def zeroTerm {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (δ x : ℝ) (ρ : ℂ) : ℂ :=
-  analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ •
-    (gaussianMellin δ ρ * (x : ℂ) ^ ρ)
-
-/-- The zero sum over zeros of height at most T, Lemma 4.4, display 4.29 on page 39. -/
-noncomputable def lowZeros {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (δ x T : ℝ) : ℂ :=
-  ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
-    0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}, zeroTerm χ δ x ρ.val
-
-/-- The zero sum over zeros of height above T, Lemma 4.5 on page 40. -/
-noncomputable def highZeros {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (δ x T : ℝ) : ℂ :=
-  ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
-    0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}, zeroTerm χ δ x ρ.val
-
-/-- LEAF: P0014 Lemma 4.1, pages 31 to 36, displays 4.1 to 4.3 and 4.23, as specialized
+/-- PROVED from the LEAF pieces of Gaussian123Base. P0014 Lemma 4.1, pages 31 to 36, displays 4.1 to 4.3 and 4.23, as specialized
 on page 44 in the proof of Proposition 4.6: the explicit formula with residue
 abs R at most 3 log q + 13.347 abs delta + 16.695 and contour error
 (log q + 6.01)(1 + 6 abs delta) x^(-1/2), the factor 6 being the recorded repair F-5032. -/
@@ -51,9 +28,10 @@ theorem explicit_formula_remainder (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
       ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
         lowZeros χ δ x T + highZeros χ δ x T + R‖ ≤
         (log q + 6.01) * (1 + 6 * |δ|) / sqrt x := by
-  sorry
+  -- Route burst session 9: Lemma 4.1 with R of display 4.2, then display 4.23 and page 44.
+  exact explicit_formula_of_pieces x hx q χ hχ δ T hT
 
-/-- LEAF: P0014 Lemma 4.4, display 4.29 on page 39, with the norms of display 4.42,
+/-- PROVED from the LEAF pieces of Gaussian123Base. P0014 Lemma 4.4, display 4.29 on page 39, with the norms of display 4.42,
 as applied on page 43: the zeros up to T, all on the critical line by hzeros, contribute
 (2.337 sqrt T log qT + 21.817 sqrt T + 2.85 log q + 74.38) sqrt x. -/
 theorem low_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
@@ -64,9 +42,23 @@ theorem low_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     ‖lowZeros χ δ x T‖ ≤
       (2.337 * sqrt T * log (q * T) + 21.817 * sqrt T +
         2.85 * log q + 74.38) * sqrt x := by
-  sorry
+  -- Route burst session 9: split at height 1 as on page 39, then the arithmetic of page 43.
+  apply low_zero_bound_of_mass χ δ x T _ (by linarith) hzeros
+  rw [mass_split χ δ T]
+  have hT100 : 100 ≤ T := (le_max_right _ _).trans hT
+  have hT1 : 1 ≤ T := by linarith
+  have hv := very_low_mass_bound q χ hχ δ T hT1 hzeros
+  have hm := middle_mass_bound q χ hχ δ T hT1 hzeros
+  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast (NeZero.pos q)
+  have hlogq : 0 ≤ log (q : ℝ) := log_nonneg hq1
+  have hlogqT : 0 ≤ log ((q : ℝ) * T) := log_nonneg (by nlinarith)
+  have ha := mul_le_mul_of_nonneg_right Sec45.coef_sqrtT0_log
+    (mul_nonneg (sqrt_nonneg T) hlogqT)
+  have hb := mul_le_mul_of_nonneg_right Sec45.coef_sqrtT0 (sqrt_nonneg T)
+  obtain ⟨hc, hd⟩ := Sec45.coef_logq
+  nlinarith
 
-/-- LEAF: P0014 Lemma 4.5, pages 40 to 43, display 4.35 and its use on page 43:
+/-- PROVED from the LEAF pieces of Gaussian123Base. P0014 Lemma 4.5, pages 40 to 43, display 4.35 and its use on page 43:
 the zeros above T contribute log(qT/2π)(4.329 e^(-0.1598 T)
 + 0.802 abs delta e^(-0.1065 (T/(π abs delta))^2)) x. -/
 theorem high_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
@@ -78,79 +70,32 @@ theorem high_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
       log (q * T / (2 * π)) *
         (4.329 * exp (-0.1598 * T) +
           0.802 * |δ| * exp (-0.1065 * (T / (π * |δ|)) ^ 2)) * x := by
-  sorry
-
-/-- PROVED. P0014 page 44, last display of the proof of Proposition 4.6:
-(6.01 - 6)(1 + 6 abs delta) + 13.347 abs delta + 16.695 is below 14 abs delta + 17,
-so the extra 0.01 of the contour term is absorbed into the residue budget for x at least 1. -/
-theorem contour_residue_budget (q δ x : ℝ) (hx : 1 ≤ x) (hδ : 0 ≤ δ) :
-    (log q + 6.01) * (1 + 6 * δ) / sqrt x + 3 * log q + 13.347 * δ + 16.695 ≤
-      (log q + 6) * (1 + 6 * δ) / sqrt x + 3 * log q + 14 * δ + 17 := by
-  have h := div_le_self (show 0 ≤ (0.01 : ℝ) * (1 + 6 * δ) by positivity)
-    (one_le_sqrt.mpr hx)
-  have hr := Lemma41Terms.repaired_R hδ
-  have he : (log q + 6.01) * (1 + 6 * δ) / sqrt x =
-      (log q + 6) * (1 + 6 * δ) / sqrt x + 0.01 * (1 + 6 * δ) / sqrt x := by ring
-  rw [he]
-  linarith
-
-/-- PROVED. P0014 pages 43 and 44, the triangle inequality and arithmetic that combine
-Lemmas 4.1, 4.4 and 4.5 into display 4.43, written out without Decomp123.gaussianError. -/
-theorem assembly_of_components (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
-    (χ : DirichletCharacter ℂ q) (δ T : ℝ)
-    (hformula : ∃ R : ℂ, ‖R‖ ≤ 3 * log q + 13.347 * |δ| + 16.695 ∧
-      ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
-        lowZeros χ δ x T + highZeros χ δ x T + R‖ ≤
-        (log q + 6.01) * (1 + 6 * |δ|) / sqrt x)
-    (hL : ‖lowZeros χ δ x T‖ ≤
-      (2.337 * sqrt T * log (q * T) + 21.817 * sqrt T +
-        2.85 * log q + 74.38) * sqrt x)
-    (hH : ‖highZeros χ δ x T‖ ≤
-      log (q * T / (2 * π)) *
-        (4.329 * exp (-0.1598 * T) +
-          0.802 * |δ| * exp (-0.1065 * (T / (π * |δ|)) ^ 2)) * x) :
-    ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0)‖ ≤
-      (log (q * T / (2 * π)) *
-          (4.329 * exp (-0.1598 * T) +
-            0.802 * |δ| * exp (-0.1065 * (T / (π * |δ|)) ^ 2)) +
-        (2.337 * sqrt T * log (q * T) + 21.817 * sqrt T + 2.85 * log q + 74.38) /
-          sqrt x + (3 * log q + 14 * |δ| + 17) / x +
-        (log q + 6) * (1 + 6 * |δ|) / (x * sqrt x)) * x := by
-  obtain ⟨R, hR, hE⟩ := hformula
-  have hx0 : 0 < x := by linarith
-  have hs0 : 0 < sqrt x := sqrt_pos.mpr hx0
-  have hbudget := contour_residue_budget (q : ℝ) |δ| x hx (abs_nonneg δ)
-  have htri : ‖Schi etaHeart χ δ x -
-      (if q = 1 then fhat etaHeart (-δ) * x else 0)‖ ≤
-      ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
-        lowZeros χ δ x T + highZeros χ δ x T + R‖ +
-        ‖lowZeros χ δ x T‖ + ‖highZeros χ δ x T‖ + ‖R‖ := by
-    calc
-      _ = ‖(Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
-          lowZeros χ δ x T + highZeros χ δ x T + R) -
-          lowZeros χ δ x T - highZeros χ δ x T - R‖ := by congr 1; abel
-      _ ≤ _ := (norm_sub_le _ _).trans (by
-        gcongr
-        exact (norm_sub_le _ _).trans (by gcongr; exact norm_sub_le _ _))
-  have heq :
-      (log (q * T / (2 * π)) *
-          (4.329 * exp (-0.1598 * T) +
-            0.802 * |δ| * exp (-0.1065 * (T / (π * |δ|)) ^ 2)) +
-        (2.337 * sqrt T * log (q * T) + 21.817 * sqrt T + 2.85 * log q + 74.38) /
-          sqrt x + (3 * log q + 14 * |δ| + 17) / x +
-        (log q + 6) * (1 + 6 * |δ|) / (x * sqrt x)) * x =
-      log (q * T / (2 * π)) *
-          (4.329 * exp (-0.1598 * T) +
-            0.802 * |δ| * exp (-0.1065 * (T / (π * |δ|)) ^ 2)) * x +
-        (2.337 * sqrt T * log (q * T) + 21.817 * sqrt T + 2.85 * log q + 74.38) *
-          sqrt x + (3 * log q + 14 * |δ| + 17) +
-        (log q + 6) * (1 + 6 * |δ|) / sqrt x := by
-    generalize hroot : sqrt x = s
-    have hxx : x = s ^ 2 := by rw [← hroot, sq_sqrt hx0.le]
-    have hsne : s ≠ 0 := by rw [← hroot]; exact hs0.ne'
-    rw [hxx]
-    field_simp [hsne]
-  rw [heq]
-  linarith
+  -- Route burst session 9: display 4.35 bound, then displays 4.36 and 4.41, page 42.
+  obtain ⟨hs, hm⟩ := tail_mass_integral q χ hχ δ T hT hzeros
+  apply high_zero_bound_of_mass χ δ x T _ hx hs
+  have hT100 : 100 ≤ T := (le_max_right _ _).trans hT
+  have he := TailIntegral123.exp_integral_bound q T hT100
+  have hg : TailIntegral123.gaussianTailIntegral q δ T ≤
+      0.18787 * |δ| * log (q * T / (2 * π)) *
+        exp (-0.1065 * (T / (π * |δ|)) ^ 2) := by
+    by_cases hδ : δ = 0
+    · simp [hδ, TailIntegral123.gaussianTailIntegral]
+    · exact TailIntegral123.gaussian_integral_bound q δ T hδ hT
+  have hlog : 0 ≤ log ((q : ℝ) * T / (2 * π)) := by
+    have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast (NeZero.pos q)
+    apply log_nonneg
+    rw [le_div_iff₀ (by positivity)]
+    nlinarith [pi_lt_four]
+  calc
+    _ ≤ 4.226 * (TailIntegral123.expTailIntegral q T +
+          TailIntegral123.gaussianTailIntegral q δ T) := hm
+    _ ≤ 4.226 * (1.0242 * log (q * T / (2 * π)) * exp (-0.1598 * T) +
+        0.18787 * |δ| * log (q * T / (2 * π)) *
+          exp (-0.1065 * (T / (π * |δ|)) ^ 2)) :=
+      mul_le_mul_of_nonneg_left (add_le_add he hg) (by norm_num)
+    _ ≤ _ := by
+      nlinarith [mul_nonneg hlog (exp_pos (-0.1598 * T)).le,
+        mul_nonneg hlog (mul_nonneg (abs_nonneg δ)
+          (exp_pos (-0.1065 * (T / (π * |δ|)) ^ 2)).le)]
 
 end LeanLab.HelfgottMajor.SplitGaussian123
