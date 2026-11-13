@@ -39,7 +39,21 @@ theorem split_leaf_sphi_minor_log2 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) :
       ∀ (N : ℕ), N ≤ X → ∀ α : ℝ, ¬ MajorArc X R α →
         ‖Sphi ϕ N α‖ ≤ C * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) *
           Real.log X ^ 2 := by
-  sorry
+  obtain ⟨L, hL⟩ := ContDiff.lipschitzWith_of_hasCompactSupport hϕ.compact hϕ.smooth (by simp)
+  obtain ⟨C₀, hC₀, h₀⟩ := split_leaf_ssum_minor_log2
+  refine ⟨(L : ℝ) * C₀, mul_nonneg (by positivity) hC₀, ?_⟩
+  intro X hX R hR1 hRX N hNX α hm
+  have hB : (0 : ℝ) ≤ C₀ * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) *
+      Real.log X ^ 2 := mul_nonneg (mul_nonneg hC₀ (by positivity)) (by positivity)
+  have hpart : ∀ m ≤ N, ‖Ssum m α‖ ≤
+      C₀ * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) * Real.log X ^ 2 :=
+    fun m hm' => h₀ X hX R hR1 hRX m (hm'.trans hNX) α hm
+  calc
+    ‖Sphi ϕ N α‖ ≤ (L : ℝ) * (C₀ * ((X : ℝ) / Real.sqrt R +
+        (X : ℝ) ^ (4 / 5 : ℝ)) * Real.log X ^ 2) :=
+      Sphi_of_partial_bound261 hϕ hL hB hpart
+    _ = ((L : ℝ) * C₀) * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) *
+        Real.log X ^ 2 := by ring
 
 /-- LEAF. The power bookkeeping identity: at `R = X ^ ϑ` the power part of the logarithm
 power nine estimate, namely `(X^2/R + X^(8/5)) * X`, is exactly the target power part
