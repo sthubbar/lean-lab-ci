@@ -341,6 +341,92 @@ theorem subWindow_mono_y (n : ℕ) {y y' t : ℝ} (hyy : y ≤ y') :
     Nat.ceil_le_ceil (by linarith)
   exact ⟨by omega, lt_of_lt_of_le hx.2.1 hyy, hx.2.2⟩
 
+/-- PROVED. The S1 side assembled from a bound on the truncated Fourier sums: if every one of
+those sums is at most M in modulus, then the window sum of the paper is at most twice M times
+the total weight of the window, by the triangle inequality and the fact that the additive
+character has modulus one. This is the shape the paper needs when the exponential sum
+estimates are inserted into S1, with M a free parameter. -/
+theorem norm_truncatedSum_le_of_fourier_bound (a : ℕ → ℤ → ℂ) (H : ℕ) (γ : ℝ) (n : ℕ)
+    (y α : ℝ) (M : ℝ) (hM : 0 ≤ M)
+    (hF : ∀ x : ℝ,
+      ‖∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0), a H h * eC (h * x)‖ ≤ M) :
+    ‖∑ p ∈ windowPrimes n y, (psWeight γ p : ℂ) * eC (α * p) *
+        (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ)) -
+          ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖
+      ≤ 2 * M * ∑ p ∈ windowPrimes n y, ‖(psWeight γ p : ℂ)‖ := by
+  have hterm : ∀ p ∈ windowPrimes n y,
+      ‖(psWeight γ p : ℂ) * eC (α * p) *
+        (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ)) -
+          ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖
+        ≤ 2 * M * ‖(psWeight γ p : ℂ)‖ := by
+    intro p _
+    rw [norm_mul, norm_mul, norm_eC, mul_one]
+    have hdiff : ‖(∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ))) -
+          (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖ ≤ 2 * M := by
+      refine (norm_sub_le _ _).trans ?_
+      linarith [hF (-((p : ℝ) + 1) ^ γ), hF (-(p : ℝ) ^ γ)]
+    have hnn : 0 ≤ ‖(psWeight γ p : ℂ)‖ := norm_nonneg _
+    nlinarith [hdiff, hnn, hM]
+  calc ‖∑ p ∈ windowPrimes n y, (psWeight γ p : ℂ) * eC (α * p) *
+        (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ)) -
+          ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖
+      ≤ ∑ p ∈ windowPrimes n y, 2 * M * ‖(psWeight γ p : ℂ)‖ :=
+        (norm_sum_le _ _).trans (Finset.sum_le_sum hterm)
+    _ = 2 * M * ∑ p ∈ windowPrimes n y, ‖(psWeight γ p : ℂ)‖ := by
+        rw [Finset.mul_sum]
+
+/-- PROVED. The counting form of the prime power error: a set of naturals whose squares are
+all at most M lies below the square root of M, so it has at most root M plus one elements.
+Every prime power p to the k with k at least two satisfies p squared at most p to the k, so
+this bounds the number of composite prime powers in the window, which is the error term the
+paper separates when it passes from primes to the von Mangoldt function. -/
+theorem card_le_sqrt_of_sq_le (M : ℕ) (s : Finset ℕ) (hs : ∀ x ∈ s, x ^ 2 ≤ M) :
+    s.card ≤ Nat.sqrt M + 1 := by
+  have hsub : s ⊆ Finset.range (Nat.sqrt M + 1) := by
+    intro x hx
+    rw [Finset.mem_range]
+    exact Nat.lt_succ_of_le (Nat.le_sqrt'.mpr (hs x hx))
+  calc s.card ≤ (Finset.range (Nat.sqrt M + 1)).card := Finset.card_le_card hsub
+    _ = Nat.sqrt M + 1 := Finset.card_range _
+
+/-- PROVED. The mass form of the prime power error: on a set of naturals whose squares are at
+most M and with M at least two, the von Mangoldt mass is at most root M plus one times the
+logarithm of M, because each term is at most log M and there are at most root M plus one
+terms. This is the size the paper charges to the prime power error when it passes from primes
+to the von Mangoldt function inside the partial summation leaf. -/
+theorem mass_le_sqrt_mul_log (M : ℕ) (hM : 2 ≤ M) (s : Finset ℕ)
+    (hs : ∀ x ∈ s, x ^ 2 ≤ M) :
+    ∑ x ∈ s, (ArithmeticFunction.vonMangoldt x : ℝ) ≤
+      ((Nat.sqrt M : ℝ) + 1) * Real.log (M : ℝ) := by
+  have hlog : 0 ≤ Real.log (M : ℝ) :=
+    Real.log_nonneg (by exact_mod_cast (show (1 : ℕ) ≤ M by omega))
+  have hterm : ∀ x ∈ s, (ArithmeticFunction.vonMangoldt x : ℝ) ≤ Real.log (M : ℝ) := by
+    intro x hx
+    rcases Nat.eq_zero_or_pos x with h0 | hpos
+    · subst h0
+      simpa using hlog
+    · have hx1 : (1 : ℝ) ≤ (x : ℝ) := by exact_mod_cast hpos
+      have hsq : (x : ℝ) * (x : ℝ) ≤ (M : ℝ) := by
+        have h := hs x hx
+        have : ((x ^ 2 : ℕ) : ℝ) ≤ (M : ℝ) := by exact_mod_cast h
+        simpa [pow_two] using this
+      have hxM : (x : ℝ) ≤ (M : ℝ) := by nlinarith
+      exact (ArithmeticFunction.vonMangoldt_le_log (n := x)).trans
+        (Real.log_le_log (by linarith) hxM)
+  calc ∑ x ∈ s, (ArithmeticFunction.vonMangoldt x : ℝ)
+      ≤ s.card • Real.log (M : ℝ) := Finset.sum_le_card_nsmul _ _ _ hterm
+    _ = (s.card : ℝ) * Real.log (M : ℝ) := nsmul_eq_mul _ _
+    _ ≤ ((Nat.sqrt M : ℝ) + 1) * Real.log (M : ℝ) :=
+        mul_le_mul_of_nonneg_right (by exact_mod_cast card_le_sqrt_of_sq_le M s hs) hlog
+
 end
 
 end LeanLab.Song2020.SPLIT_vaughan_per_u
