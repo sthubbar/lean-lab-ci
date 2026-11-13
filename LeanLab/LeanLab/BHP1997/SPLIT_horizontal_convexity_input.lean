@@ -27,43 +27,86 @@ the single constant `max (max C₁ C₂) C₃`, the height weight of the interpo
 `log x` of the two endpoints collapse to the single `log x`, and the factor `2` that the
 interpolation costs is absorbed into the constant. No leaf is a restriction of the
 sealed statement to some range of its parameters: each one is a strictly different
-inequality, so none of them gives the sealed statement back. Every leaf is OPEN, the
-assembly `horizontal_convexity_input_split` has no sorry, and the sealed theorem
+inequality. All three edge bounds are PROVED in CODEX task499. The interpolation leaf remains OPEN. The assembly `horizontal_convexity_input_split` has no sorry, and the sealed theorem
 `horizontal_convexity_input` is not used.
 
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp488c
+import LeanLab.BHP1997.Repair499Euler
+import LeanLab.BHP1997.Repair499Critical
+import LeanLab.BHP1997.Repair499Principal
 
 namespace LeanLab.BHP1997.DecompC165a.Contour230
 open Classical Complex MeanValue132 MeasureTheory Set Filter
 open scoped Topology
 
-/-- LEAF: leaf 1 of 4. Step of the proof: the bound on the line `Re s = 1 / 2` for a
-non-principal character, from the functional equation of `L(s, χ)` together with
-Stirling's formula for the gamma factor. The gamma factor contributes the exponent
-`1 / 2`, the loss `ε = 1 / log x` of the functional equation the rest of the exponent,
-and dropping the epsilon with its cost the factor `log x`. One line, no `σ`, so not the
-sealed statement. OPEN. -/
+/-- LEAF: P0069 page 22. On the critical line, a nonprincipal character
+has norm at most a constant times the square root of q times the height plus one.
+A balanced cutoff and periodic partial character sums prove the stronger estimate
+in Repair499Critical.nonprincipal_norm499. The factor log x and the extra exponent
+are positive slack in the sealed statement. PROVED in CODEX task499. -/
 theorem leaf_critical_line_nonprincipal :
     ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x → ∀ (q : ℕ) [NeZero q], 1 ≤ q → (q : ℝ) ≤ x →
       ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ u : ℝ,
         ‖χ.LFunction (((1 / 2 : ℝ) : ℂ) + u * I)‖ ≤
           C * Real.log x * ((q : ℝ) * (|u| + 1)) ^ (1 / 2 + 1 / Real.log x) := by
-  sorry
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  refine ⟨7 / Real.log 2, by positivity, ?_⟩
+  intro x hx q _ hq hqx χ hχ u
+  have hl : 0 < Real.log x := Real.log_pos (by linarith)
+  have hq' : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  have hQ : (1 : ℝ) ≤ (q : ℝ) * (|u| + 1) := by nlinarith [abs_nonneg u]
+  have hpow : Real.sqrt ((q : ℝ) * (|u| + 1)) ≤
+      ((q : ℝ) * (|u| + 1)) ^ (1 / 2 + 1 / Real.log x) := by
+    rw [Real.sqrt_eq_rpow]
+    apply Real.rpow_le_rpow_of_exponent_le hQ
+    have : 0 ≤ 1 / Real.log x := by positivity
+    linarith
+  have hlog : Real.log 2 ≤ Real.log x := Real.log_le_log (by norm_num) hx
+  have hratio : 1 ≤ Real.log x / Real.log 2 := (le_div_iff₀ hlog2).mpr (by simpa using hlog)
+  have hcoef : (7 : ℝ) ≤ 7 / Real.log 2 * Real.log x := by
+    calc (7 : ℝ) ≤ 7 * (Real.log x / Real.log 2) := by linarith
+      _ = _ := by ring
+  calc _ ≤ 7 * Real.sqrt ((q : ℝ) * (|u| + 1)) := by
+        simpa [Thm4.half] using Repair499Critical.nonprincipal_norm499 hχ u
+    _ ≤ 7 * ((q : ℝ) * (|u| + 1)) ^ (1 / 2 + 1 / Real.log x) :=
+      mul_le_mul_of_nonneg_left hpow (by norm_num)
+    _ ≤ _ := mul_le_mul_of_nonneg_right hcoef (Real.rpow_nonneg (by positivity) _)
 
-/-- LEAF: leaf 2 of 4. Step of the proof: the bound on the line `Re s = 1 / 2` for the
-principal character. Here `L(s, 1)` is the zeta function times the finitely many Euler
-factors of the primes dividing the modulus, and the same functional equation and
-Stirling step is applied to the zeta function; those Euler factors are absorbed into the
-constant because the modulus is bounded by `x`. One line, no `σ`, so not the sealed
-statement. OPEN. -/
+/-- LEAF: P0069 page 22. A principal character is zeta times the finite
+Euler factors of primes dividing its modulus. The Euler-Maclaurin cutoff bounds
+zeta, and the finite factors cost at most twice the square root of the modulus.
+Repair499Principal.principal_norm499 supplies the stronger estimate.
+PROVED in CODEX task499. -/
 theorem leaf_critical_line_principal :
     ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x → ∀ (q : ℕ) [NeZero q], 1 ≤ q → (q : ℝ) ≤ x →
       ∀ χ : DirichletCharacter ℂ q, χ = 1 → ∀ u : ℝ,
         ‖χ.LFunction (((1 / 2 : ℝ) : ℂ) + u * I)‖ ≤
           C * Real.log x * ((q : ℝ) * (|u| + 1)) ^ (1 / 2 + 1 / Real.log x) := by
-  sorry
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  refine ⟨24 / Real.log 2, by positivity, ?_⟩
+  intro x hx q _ hq hqx χ hχ u
+  subst χ
+  have hl : 0 < Real.log x := Real.log_pos (by linarith)
+  have hq' : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  have hQ : (1 : ℝ) ≤ (q : ℝ) * (|u| + 1) := by nlinarith [abs_nonneg u]
+  have hpow : Real.sqrt ((q : ℝ) * (|u| + 1)) ≤
+      ((q : ℝ) * (|u| + 1)) ^ (1 / 2 + 1 / Real.log x) := by
+    rw [Real.sqrt_eq_rpow]
+    apply Real.rpow_le_rpow_of_exponent_le hQ
+    have : 0 ≤ 1 / Real.log x := by positivity
+    linarith
+  have hlog : Real.log 2 ≤ Real.log x := Real.log_le_log (by norm_num) hx
+  have hratio : 1 ≤ Real.log x / Real.log 2 := (le_div_iff₀ hlog2).mpr (by simpa using hlog)
+  have hcoef : (24 : ℝ) ≤ 24 / Real.log 2 * Real.log x := by
+    calc (24 : ℝ) ≤ 24 * (Real.log x / Real.log 2) := by linarith
+      _ = _ := by ring
+  calc _ ≤ 24 * Real.sqrt ((q : ℝ) * (|u| + 1)) := by
+        simpa [Thm4.half] using Repair499Principal.principal_norm499 hq u
+    _ ≤ 24 * ((q : ℝ) * (|u| + 1)) ^ (1 / 2 + 1 / Real.log x) :=
+      mul_le_mul_of_nonneg_left hpow (by norm_num)
+    _ ≤ _ := mul_le_mul_of_nonneg_right hcoef (Real.rpow_nonneg (by positivity) _)
 
 set_option maxHeartbeats 4000000 in
 
@@ -135,7 +178,7 @@ private lemma LSeries_norm_le_tsum {f : ℕ → ℂ} (hf : ∀ n : ℕ, ‖f n�
 
 set_option maxHeartbeats 4000000 in
 /-- LEAF: leaf 3 of 4. Step of the proof: the bound on the line `Re s = 1 + 1 / log x`,
-from the Euler product. Every Euler factor has absolute value at most one, so the
+from absolute convergence. Every character coefficient has norm at most one, so the
 L-function is at most `ζ(1 + 1 / log x)`, and that is at most `1 + 1 / (1 / log x) =
 1 + log x` because the zeta function is at most `1 + 1 / (s - 1)` to the right of one.
 The height does not enter and the right hand side carries no conductor, so this is far

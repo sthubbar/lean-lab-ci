@@ -3,6 +3,26 @@ import LeanLab.BHP1997.DecompC165dBase312
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b
 
+/-- The zero coefficient family satisfies the short-interval mean-square clause at density zero for
+every cutoff. This isolates the non-vacuous zero instance used to check the shape of the sealed
+mean-square clause. -/
+theorem task357_short_mean_square_zero (ε : ℝ) :
+    Task308.ShortMeanSquare ε 0 (fun _ _ => 0) := by
+  refine ⟨fun _ _ _ => ∅, ?_⟩
+  intro A hA
+  refine ⟨1, ?_⟩
+  intro x hx q hq hqx
+  have hx0 : 0 ≤ x := by linarith
+  have hlog : 0 ≤ Real.log x := Real.log_nonneg hx
+  constructor
+  · simp only [Finset.card_empty, Nat.cast_zero]
+    positivity
+  · intro z hzl hzu
+    simp only [Complex.ofReal_zero, zero_mul, mul_zero, zero_div, sub_zero,
+      Finset.sum_const_zero, norm_zero, zero_pow (by norm_num : 2 ≠ 0),
+      intervalIntegral.integral_zero]
+    positivity
+
 /-- LEAF: the construction step of the upper short coefficient. For a Buchstab weight with its zero
 extension, a divisor exponent `B` and a cutoff `eps` at most one over ten to the eighth, there is one
 family `b1` on the reals and the naturals that obeys the divisor bound at exponent `B`, obeys the
@@ -102,3 +122,4 @@ theorem upper_short_coefficient_split
 
 #print axioms upper_short_coefficient_split
 #print axioms leaf_upper_raw_weight_le_two_positive
+#print axioms task357_short_mean_square_zero

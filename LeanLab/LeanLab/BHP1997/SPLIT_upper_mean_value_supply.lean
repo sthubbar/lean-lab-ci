@@ -18,9 +18,12 @@ an auxiliary family that already carries the mean value it produces one that kee
 divisor bound and the mean value and adds the reference density and the absolute
 approximation of the sifted family. The assembly below closes every step.
 
-Every leaf is OPEN. AI wrote the Lean code. Goldbach is open.
+The numeric and auxiliary witnesses are elementary. The smoothing step remains OPEN.
+The prime sifted witness is CONDITIONAL ON the sealed h4 input.
+AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp312b
+import LeanLab.BHP1997.DecompC165b
 
 namespace LeanLab.BHP1997.Decomp312b
 open Classical Complex DecompC165b Decomp312a Decomp312c Decomp132
@@ -36,7 +39,7 @@ conjuncts, and `u1 = 1` shows the half-open range is nonempty, so the leaf is no
 vacuous. -/
 theorem leaf_thresholds_and_density_constant :
     ∃ B0 η u1 : ℝ, 1 ≤ B0 ∧ 0 < η ∧ η ≤ 1 / 10 ∧ 1 ≤ u1 ∧ u1 < 1.0001 := by
-  sorry
+  exact ⟨1, 1 / 10, 1, by norm_num⟩
 
 /-- LEAF 2 of 4. The sieve step, P0069 pages 41 and 42 Lemma 28. For `B0 >= 1` and a
 fixed `eps` in `(0, 1/10]` it produces the sifted family `c1` with two facts: the
@@ -55,7 +58,23 @@ theorem leaf_sifted_family_supply (h4 : Thm4.Theorem4Paper) (B0 : ℝ) (hB0 : 1 
         C * ((k.divisors.card : ℕ) : ℝ) ^ B0) ∧
       (∀ᶠ x : ℝ in Filter.atTop,
         ∀ k ∈ leftInterval ε x, primeWeight k ≤ section4SiftedFamily c1 x k) := by
-  sorry
+  refine ⟨fun _ k => primeWeight k, ⟨1, ?_⟩, ?_⟩
+  · intro x k
+    by_cases hk : k.Prime
+    · have ht : (1 : ℝ) ≤ ((k.divisors.card : ℕ) : ℝ) := by
+        exact_mod_cast Finset.card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr hk.ne_zero⟩
+      have hp : (1 : ℝ) ≤ ((k.divisors.card : ℕ) : ℝ) ^ B0 :=
+        Real.one_le_rpow ht (by linarith)
+      simp only [section4SiftedFamily, primeWeight, if_pos hk, one_mul]
+      unfold siftedWeight
+      split_ifs
+      · simpa using hp
+      · simpa using (le_trans zero_le_one hp)
+    · simp only [section4SiftedFamily, primeWeight, if_neg hk, zero_mul, abs_zero, one_mul]
+      exact Real.rpow_nonneg (Nat.cast_nonneg _) _
+  · filter_upwards [prime_sifted_eventually_on_left (ε := ε) (by linarith)] with x hx
+    intro k hk
+    exact le_of_eq (hx k hk).symm
 
 /-- LEAF 3 of 4. The mean-value step. For a divisor exponent `B0 ≥ 1` and a fixed
 `ε ∈ (0, 1/10]` it produces an auxiliary family `b` with its own divisor-count bound
@@ -70,7 +89,9 @@ theorem leaf_auxiliary_mean_value (B0 : ℝ) (hB0 : 1 ≤ B0) (ε : ℝ) (hε : 
     ∃ b : ℝ → ℕ → ℝ,
       (∃ C : ℝ, ∀ x k, |b x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B0) ∧
       MeanValue41 ε b := by
-  sorry
+  refine ⟨fun _ _ => 0, ⟨0, ?_⟩, (analytic_zero_instances ε).1⟩
+  intro x k
+  simp
 
 /-- LEAF 4 of 4. The smoothing step, P0069 page 42, the tapered weight. From an
 auxiliary family `b` that already carries the divisor bound and `MeanValue41`, and from

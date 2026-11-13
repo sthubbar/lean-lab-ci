@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Decomp389c
+import LeanLab.HelfgottMajor.ZeroCount1623
 
 /-!
 # Split of `strip_zero_count` (`HelfgottMajor/Decomp389c`)
@@ -29,6 +30,11 @@ them. A cut by the height of the zero, rather than by the size of `T`, does not 
 at height `2` the count already grows like `(2/π) log q`, while the budget of the target
 spends `T/π * log (qT)` plus `0.5 * log (qT)` on `log q`, so the two ranges would have to
 share that `0.5` in a ratio fixed by the true asymptotics, with no room to spare.
+The three range leaves are supplied by the shared zero count file `HelfgottMajor/ZeroCount1623`,
+unit U-1623. The summability leaf is proved here directly. The three range leaves are
+CONDITIONAL ON the cited book zero count `ZeroCount1623.book_zero_count`, which is the open
+leaf of that file. The shared count holds for every height at least one, so the range
+hypotheses of the three leaves are not needed for the bound.
 -/
 
 namespace LeanLab.HelfgottMajor.Decomp389c
@@ -98,8 +104,8 @@ theorem strip_count_short_height (q : ℕ) [NeZero q] (χ : DirichletCharacter �
     (hχ : χ.IsPrimitive) (T : ℝ) (hT : 1 ≤ T) (hT2 : T ≤ 2) :
     (∑' ρ, stripCountTerm χ T ρ) ≤
       T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
-        0.5 * log ((q : ℝ) * T) + 17.7 := by
-  sorry
+        0.5 * log ((q : ℝ) * T) + 17.7 :=
+  ZeroCount1623.strip_count χ hχ T hT
 
 /-- LEAF. Bounded band, `2 ≤ T` and `q * T ≤ 2πe`. The band bounds the conductor by
 `q ≤ 2πe / T ≤ πe < 8.6` while the height is at most `2πe`, so only finitely many zeros of
@@ -112,8 +118,8 @@ theorem strip_count_band (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hband : (q : ℝ) * T ≤ 2 * π * exp 1) :
     (∑' ρ, stripCountTerm χ T ρ) ≤
       T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
-        0.5 * log ((q : ℝ) * T) + 17.7 := by
-  sorry
+        0.5 * log ((q : ℝ) * T) + 17.7 :=
+  ZeroCount1623.strip_count χ hχ T hT
 
 /-- LEAF. Main range, `2 ≤ T` and `2πe ≤ q * T`. Here the argument principle for the
 completed `L`-function applies: the Stirling estimate for the `Γ`-factor contributes
@@ -126,8 +132,8 @@ theorem strip_count_main_range (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ
     (hmain : 2 * π * exp 1 ≤ (q : ℝ) * T) :
     (∑' ρ, stripCountTerm χ T ρ) ≤
       T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
-        0.5 * log ((q : ℝ) * T) + 17.7 := by
-  sorry
+        0.5 * log ((q : ℝ) * T) + 17.7 :=
+  ZeroCount1623.strip_count χ hχ T hT
 
 /-- Assembly: the target statement follows from the four leaves. The count is summable by
 `strip_count_summable`, and the inequality holds on the short height range, on the band
