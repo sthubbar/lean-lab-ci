@@ -16,6 +16,65 @@ open LeanLab.Linnik.Decomp482b
 open LeanLab.Linnik.Decomp1532b (majorArcs Jn singSeries)
 open LeanLab.Linnik.U7204 (Sg)
 
+/-- A uniform absolute bound for the singular series at a nonzero frequency.
+The two cited estimates at Gallagher 1975 p.130 bound the truncated series by
+the totient weight and its tail by the same weight times the divisor count.
+Taking the truncation level beyond the tail constant removes the divisor
+count from the final uniform bound. -/
+theorem singSeries_norm_le_totientWeight (n : ℤ) (hn : n ≠ 0) :
+    ∃ K : ℝ, 0 < K ∧ ‖singSeries n‖ ≤ K * totientWeight n := by
+  obtain ⟨K₂, hK₂, hW⟩ := LeanLab.Linnik.MajorArcEnergy.singular_weighted_sums_cited
+  obtain ⟨K₃, hK₃, hT⟩ := LeanLab.Linnik.MajorArcEnergy.singular_tail_cited
+  let d : ℝ := (n.natAbs.divisors.card : ℝ)
+  let P : ℝ := max 2 (K₃ * d / K₂ + 1)
+  refine ⟨2 * K₂, mul_pos (by positivity) hK₂, ?_⟩
+  have hP2 : 2 ≤ P := le_max_left _ _
+  have hP0 : 0 < P := by linarith
+  have htw : 0 ≤ totientWeight n := by
+    exact (LeanLab.Linnik.MajorArcEnergy.one_le_totientWeight hn).le
+  have hWsum := hW P n hP2 hn
+  have htail := hT P n hP2 hn
+  have htrunc : ‖LeanLab.Linnik.MajorArcEnergy.singTrunc P n‖ ≤
+      K₂ * totientWeight n := by
+    calc
+      ‖LeanLab.Linnik.MajorArcEnergy.singTrunc P n‖ =
+          ‖∑ q ∈ Finset.Icc 1 ⌊P⌋₊,
+            ((ArithmeticFunction.moebius q : ℤ) : ℂ) ^ 2 / (q.totient : ℂ) ^ 2 *
+              LeanLab.Linnik.MajorArcEnergy.ramanujanSum q n‖ := rfl
+      _ ≤ ∑ q ∈ Finset.Icc 1 ⌊P⌋₊,
+          ‖((ArithmeticFunction.moebius q : ℤ) : ℂ) ^ 2 / (q.totient : ℂ) ^ 2 *
+            LeanLab.Linnik.MajorArcEnergy.ramanujanSum q n‖ := norm_sum_le _ _
+      _ = ∑ q ∈ Finset.Icc 1 ⌊P⌋₊,
+          ((ArithmeticFunction.moebius q : ℝ)) ^ 2 / (q.totient : ℝ) ^ 2 *
+            ‖LeanLab.Linnik.MajorArcEnergy.ramanujanSum q n‖ := by
+        apply Finset.sum_congr rfl
+        intro q hq
+        rw [LeanLab.Linnik.MajorArcEnergy.norm_summand]
+        simp
+      _ ≤ K₂ * totientWeight n := hWsum.2
+  have hratio : K₃ * d / P ≤ K₂ := by
+    rw [div_le_iff₀ hP0]
+    have hP : K₃ * d / K₂ + 1 ≤ P := le_max_right _ _
+    have hK₂0 : 0 < K₂ := hK₂
+    have hK₃d : 0 ≤ K₃ * d := by positivity
+    nlinarith
+  calc
+    ‖singSeries n‖ ≤ ‖LeanLab.Linnik.MajorArcEnergy.singTrunc P n‖ +
+        ‖singSeries n - LeanLab.Linnik.MajorArcEnergy.singTrunc P n‖ := by
+      have heq : singSeries n = LeanLab.Linnik.MajorArcEnergy.singTrunc P n +
+          (singSeries n - LeanLab.Linnik.MajorArcEnergy.singTrunc P n) := by ring
+      rw [heq]
+      exact norm_add_le _ _
+    _ ≤ K₂ * totientWeight n + K₃ * totientWeight n * d / P := by
+      gcongr
+      exact htail
+    _ ≤ K₂ * totientWeight n + K₂ * totientWeight n := by
+      have hmul : K₃ * totientWeight n * d / P ≤ K₂ * totientWeight n := by
+        rw [show K₃ * totientWeight n * d / P = totientWeight n * (K₃ * d / P) by ring]
+        exact mul_le_mul_of_nonneg_left hratio htw
+      linarith
+    _ = 2 * K₂ * totientWeight n := by ring
+
 /-- LEAF. Step one of the triangle inequality: the major arc integral of the squared
 generating function against the character exponential, taken in norm, is at most the
 constant times the scale N over log squared N, the totient weight of the frequency,
