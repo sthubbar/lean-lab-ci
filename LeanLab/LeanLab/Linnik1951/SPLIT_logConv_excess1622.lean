@@ -118,6 +118,38 @@ theorem logConv_term_majorant1622 (u v L : ℝ) (hu : 0 < u) (hv : 0 < v) (hL : 
     1 / (u * v) ≤ 1 / L ^ 2 + (2 / L ^ 3) * (2 * L - (u + v)) := by
   sorry
 
+/-- The exact universal majorant annotation is false. This audits the split
+annotation of page 161 after equation 6.3, rather than the paper estimate. -/
+theorem not_logConv_term_majorant1622 :
+    ¬ (∀ (u v L : ℝ), (0 < u) → (0 < v) → (0 < L) →
+      (u + v ≤ 2 * L) → (2 * L - (u + v) ≤ L / 2) →
+      1 / (u * v) ≤ 1 / L ^ 2 + (2 / L ^ 3) * (2 * L - (u + v))) := by
+  intro h
+  have hbad := h (1 / 2) (3 / 2) 1 (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num)
+  norm_num at hbad
+
+/-- The valid termwise estimate includes the upper bounds on both logarithms.
+These hold for convolution indices on page 161 after equation 6.3. -/
+theorem logConv_term_majorant_bounded474 (u v L : ℝ) (hu : 0 < u) (hv : 0 < v)
+    (hL : 0 < L) (huL : u ≤ L) (hvL : v ≤ L)
+    (hshift : 2 * L - (u + v) ≤ L / 2) :
+    1 / (u * v) ≤ 1 / L ^ 2 + (2 / L ^ 3) * (2 * L - (u + v)) := by
+  have hprod : L ^ 2 - L * (2 * L - (u + v)) ≤ u * v := by
+    nlinarith [mul_nonneg (sub_nonneg.mpr huL) (sub_nonneg.mpr hvL)]
+  have hs : 0 ≤ 2 * L - (u + v) := by linarith
+  have ht : 0 ≤ (2 * L - (u + v)) * (L - 2 * (2 * L - (u + v))) :=
+    mul_nonneg hs (by linarith)
+  have hmult := mul_le_mul_of_nonneg_left hprod
+    (show 0 ≤ L + 2 * (2 * L - (u + v)) by positivity)
+  have hn : L ^ 3 ≤ (L + 2 * (2 * L - (u + v))) * (u * v) := by
+    nlinarith [mul_nonneg hL.le ht]
+  calc
+    _ ≤ (L + 2 * (2 * L - (u + v))) / L ^ 3 := by
+      apply (div_le_div_iff₀ (mul_pos hu hv) (pow_pos hL 3)).mpr
+      simpa only [one_mul] using hn
+    _ = _ := by field_simp [ne_of_gt hL]
+
 /-- LEAF. Small shift in the middle of the range: for n at least 10^3 and for an
 index m with 2 sqrt n <= m <= n - 2 sqrt n the product m (n - m) is at least
 n^(3/2), so the shift 2 log n - log m - log (n - m) is at most half of log n. This
@@ -315,8 +347,14 @@ theorem logConv_excess1622_split :
       have hsum : Real.log m + Real.log (n - m : ℕ) ≤ 2 * Real.log (n : ℝ) := by
         linarith [logConv_shift_nonneg1622 n m hmem]
       have hshift := logConv_middle_shift1622 n m hn hm1 hm2
-      exact logConv_term_majorant1622 (Real.log m) (Real.log (n - m : ℕ)) (Real.log (n : ℝ))
-        hu hv hL hsum (by linarith)
+      have huL : Real.log (m : ℝ) ≤ Real.log (n : ℝ) :=
+        Real.log_le_log (by exact_mod_cast (show 0 < m by omega))
+          (by exact_mod_cast (show m ≤ n by omega))
+      have hvL : Real.log ((n - m : ℕ) : ℝ) ≤ Real.log (n : ℝ) :=
+        Real.log_le_log (by exact_mod_cast (show 0 < (n - m : ℕ) by omega))
+          (by exact_mod_cast Nat.sub_le n m)
+      exact logConv_term_majorant_bounded474 (Real.log m) (Real.log (n - m : ℕ))
+        (Real.log (n : ℝ)) hu hv hL huL hvL (by linarith)
     have hcard : (((Finset.Icc 2 (n - 2)).filter
         (fun m => 2 * Nat.sqrt n ≤ m ∧ m ≤ n - 2 * Nat.sqrt n)).card : ℝ) ≤ (n : ℝ) := by
       have h1 : ((Finset.Icc 2 (n - 2)).filter
@@ -390,39 +428,6 @@ theorem logConv_excess1622_split :
       ∑ m ∈ Finset.Icc 2 (n - 2), 1 / (Real.log m * Real.log (n - m : ℕ)) := rfl
   rw [hunfold]
   linarith [hsplit, hmid, hends, hcomb]
-
-/-- The exact universal majorant annotation is false. This audits the split
-annotation of page 161 after equation 6.3, rather than the paper estimate. -/
-theorem not_logConv_term_majorant1622 :
-    ¬ (∀ (u v L : ℝ), (0 < u) → (0 < v) → (0 < L) →
-      (u + v ≤ 2 * L) → (2 * L - (u + v) ≤ L / 2) →
-      1 / (u * v) ≤ 1 / L ^ 2 + (2 / L ^ 3) * (2 * L - (u + v))) := by
-  intro h
-  have hbad := h (1 / 2) (3 / 2) 1 (by norm_num) (by norm_num)
-    (by norm_num) (by norm_num) (by norm_num)
-  norm_num at hbad
-
-/-- The valid termwise estimate includes the upper bounds on both logarithms.
-These hold for convolution indices on page 161 after equation 6.3. -/
-theorem logConv_term_majorant_bounded474 (u v L : ℝ) (hu : 0 < u) (hv : 0 < v)
-    (hL : 0 < L) (huL : u ≤ L) (hvL : v ≤ L)
-    (hshift : 2 * L - (u + v) ≤ L / 2) :
-    1 / (u * v) ≤ 1 / L ^ 2 + (2 / L ^ 3) * (2 * L - (u + v)) := by
-  have hprod : L ^ 2 - L * (2 * L - (u + v)) ≤ u * v := by
-    nlinarith [mul_nonneg (sub_nonneg.mpr huL) (sub_nonneg.mpr hvL)]
-  have hs : 0 ≤ 2 * L - (u + v) := by linarith
-  have ht : 0 ≤ (2 * L - (u + v)) * (L - 2 * (2 * L - (u + v))) :=
-    mul_nonneg hs (by linarith)
-  have hmult := mul_le_mul_of_nonneg_left hprod
-    (show 0 ≤ L + 2 * (2 * L - (u + v)) by positivity)
-  have hn : L ^ 3 ≤ (L + 2 * (2 * L - (u + v))) * (u * v) := by
-    nlinarith [mul_nonneg hL.le ht]
-  calc
-    _ ≤ (L + 2 * (2 * L - (u + v))) / L ^ 3 := by
-      apply (div_le_div_iff₀ (mul_pos hu hv) (pow_pos hL 3)).mpr
-      simpa only [one_mul] using hn
-    _ = _ := by field_simp [ne_of_gt hL]
-
 /-- The convolution excess estimate from the bounded majorant. This proof
 uses the two logarithm upper bounds and avoids the false sealed annotation. -/
 theorem logConv_excess_corrected474 :
