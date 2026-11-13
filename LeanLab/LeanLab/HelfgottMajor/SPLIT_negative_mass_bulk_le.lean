@@ -48,7 +48,12 @@ theorem negative_bulk_mass_integral (q : ℕ) [NeZero q] (χ : DirichletCharacte
       (∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) - (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389)) := by
-  sorry
+  -- BLOCKED 2026-11-13 FREE-ms-leanstral task366 negative_bulk_mass_integral: OUT OF REACH
+  -- Requires Dirichlet L-function explicit formula (sampling inequality)
+  -- Mathlib lacks: Mellin inversion on strips, zero-density estimates,
+  -- Montgomery-Vaughan Lemma 6.3, quantitative zero-sum formula.
+  -- Parent theorem `negative_mass_bulk_le` in SPLIT_negative_sampling_raw.lean:82 is also open.
+  -- See PROGRESS.md for details and searches performed.
 
 /-! ### Continuity of the Gaussian Mellin transform on the critical line -/
 
