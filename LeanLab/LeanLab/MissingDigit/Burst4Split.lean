@@ -8,8 +8,8 @@ arXiv 2412.19975v1, Section 2 "Proof of Theorem 1.1", pages 7 to 11.
 
 AI wrote this Lean code. Binary Goldbach is OPEN.
 
-The cited main result `LeanLab.MissingDigit.kim_thm1_1 : D4Bound (3 / 5) 7` is left open in
-`Statements.lean`, which is untouched. Here `kim_thm1_1_of_split` proves the same
+The cited main result `LeanLab.MissingDigit.kim_thm1_1 : D4Bound (3 / 5) 7` is proved by `sorry`
+in `Statements.lean`, which is left untouched. Here `kim_thm1_1_of_split` proves the same
 statement from the top level structure of the paper's Section 2 proof:
 
 * `orthogonality`, the circle method identity behind the left side of display (2.1),
