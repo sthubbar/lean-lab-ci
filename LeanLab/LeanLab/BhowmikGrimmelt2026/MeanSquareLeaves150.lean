@@ -20,9 +20,13 @@ namespace LeanLab.BhowmikGrimmelt2026
 /-- LEAF: P0029 pages 11 and 12, display 3.5 with the Gauss sum bound 3.6 and the zero bound 3.7.
 Under `ZeroBound Θ`, on every Dirichlet arc of denominator `q ≤ Q ≍ X^{1/2}` the prime sum
 differs from its main term `μ(q)/φ(q) T(α - a/q)` by `≪ q^{1/2} X^{Θ + ε} ≪ X^{Θ + 1/4 + ε}`,
-the right hand side of 3.7.  The survey states 3.7 at the centres of the arcs; the bound uniform
-over the arc, in the sharp form `X^{Θ+ε} (q (1 + |β| X))^{1/2}` with `|β| ≤ 1/(qQ)`, is the
-Hardy and Littlewood 1923 Partitio Numerorum V input that the survey cites for Theorem 3.1.
+the right hand side of 3.7.  The survey states 3.7 only at the centres of the arcs and for the
+smoothed power series `f(e(a/q) e^{-1/N})`, not for the sharp sum `S`.  The bound uniform over
+the arc, in the sharp form `X^{Θ+ε} (q (1 + |β| X))^{1/2}` with `|β| ≤ 1/(qQ)`, is not stated in
+the survey: it is the standard consequence of the truncated explicit formula for `ψ(x, χ)` under
+`ZeroBound Θ`.  The survey's reference for Theorem 3.1 is its [10], Hardy and Littlewood 1923,
+Partitio Numerorum III, Acta Math. 44.  Architect pass U-1662 checked it numerically at
+`X = 400, 1600, 3600`, max `|S - V| / X^{3/4}` about 0.5 to 0.65.
 OPEN: needs the explicit formula for `ψ(x, χ)` uniformly in `q`, not in Mathlib. -/
 theorem major_arc_uniform150 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,

@@ -1,8 +1,10 @@
 /-
 Leaf of `zeroBound_lower150`: P0029 Section 3, page 12, the remark after the display
 `q^{1/2} N^{Θ+ε}`, "in the best case we could hope for Θ = 1/2".  The lower limit one half rests
-on Hardy 1914, Sur les zeros de la fonction zeta de Riemann: the Riemann zeta function has a zero
-on the critical line.  The survey cites it and gives no proof.
+on Hardy 1914, Sur les zeros de la fonction zeta de Riemann, which proves infinitely many zeros
+of the Riemann zeta function on the critical line.  The survey does not cite Hardy 1914; the
+classical source is Hardy's paper, and this leaf states only one such zero, the first being at
+`t = 14.1347...`, checked numerically by the architect pass U-1662.
 
 Moved here from `Decomp150a.lean` by the REPAIR pass 20261112 so that an existing file carries no
 newly added sorry.  The statement is unchanged, and `zeroBound_lower150` there still derives the
@@ -15,8 +17,9 @@ namespace LeanLab.BhowmikGrimmelt2026
 
 /-- LEAF: P0029 Section 3, page 12, the remark after the display `q^{1/2} N^{Θ+ε}`,
 "in the best case we could hope for Θ = 1/2".  The lower limit one half rests on Hardy 1914,
-Sur les zeros de la fonction zeta de Riemann: the Riemann zeta function has a zero on the
-critical line.  The survey cites it and gives no proof, so this is CITED and OPEN.
+Sur les zeros de la fonction zeta de Riemann, which proves infinitely many zeros on the critical
+line; this leaf states one.  The survey does not cite Hardy 1914, so the citation is to Hardy's
+paper directly.  CITED and OPEN.
 AI wrote the Lean code. Goldbach is open. -/
 theorem hardy_critical_line_zero150 :
     ∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0 := by
