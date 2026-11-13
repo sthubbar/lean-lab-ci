@@ -79,7 +79,33 @@ theorem leaf_count_of_deviation (s : Finset ℕ) (g : ℕ → ℝ) (X E c₀ A :
     (hmom : (∑ n ∈ s, (X - g n) ^ 2) ≤ A) :
     (((s.filter (fun n : ℕ => g n < c₀ * X * E ^ (-(1 / 10 : ℝ)))).card : ℝ) *
       (X / 2) ^ 2) ≤ A := by
-  sorry
+  classical
+  have hEpos : (0 : ℝ) < E := lt_of_lt_of_le zero_lt_one hE
+  have hpow : 0 ≤ E ^ (-(1 / 10 : ℝ)) := Real.rpow_nonneg hEpos.le _
+  -- the threshold never exceeds `X/2`
+  have hthr : c₀ * X * E ^ (-(1 / 10 : ℝ)) ≤ X / 2 := by
+    have h := mul_le_mul_of_nonneg_right hc₀E hX.le
+    nlinarith [h]
+  have hX2 : (0 : ℝ) < X / 2 := by linarith
+  -- each counted index contributes more than `(X/2)^2`
+  have hterm : ∀ n ∈ s.filter (fun n : ℕ => g n < c₀ * X * E ^ (-(1 / 10 : ℝ))),
+      (X / 2) ^ 2 ≤ (X - g n) ^ 2 := by
+    intro n hn
+    rw [Finset.mem_filter] at hn
+    have hgn : g n < X / 2 := lt_of_lt_of_le hn.2 hthr
+    have hpos : X / 2 < X - g n := by linarith
+    nlinarith [hX2, hpos]
+  calc ((s.filter (fun n : ℕ => g n < c₀ * X * E ^ (-(1 / 10 : ℝ)))).card : ℝ) *
+        (X / 2) ^ 2
+      = ∑ _n ∈ s.filter (fun n : ℕ => g n < c₀ * X * E ^ (-(1 / 10 : ℝ))),
+          (X / 2) ^ 2 := by
+        rw [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ ∑ n ∈ s.filter (fun n : ℕ => g n < c₀ * X * E ^ (-(1 / 10 : ℝ))),
+          (X - g n) ^ 2 := Finset.sum_le_sum hterm
+    _ ≤ ∑ n ∈ s, (X - g n) ^ 2 :=
+        Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+          (fun n _ _ => sq_nonneg _)
+    _ ≤ A := hmom
 
 /-! ### Assembly -/
 
