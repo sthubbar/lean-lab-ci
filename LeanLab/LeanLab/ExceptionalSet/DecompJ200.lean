@@ -4,6 +4,8 @@ import LeanLab.ExceptionalSet.State1539
 import LeanLab.ExceptionalSet.PrimeKernel264
 import LeanLab.ExceptionalSet.TailSupplyJ200
 import LeanLab.ExceptionalSet.UpJ200.Decomp467a
+import LeanLab.ExceptionalSet.MajorSupplyJ200
+import LeanLab.ExceptionalSet.UpJ200.MajorBoundLeavesJ200
 
 /-!
 Decomposition of Theorem 1 of P0082, Brüdern and Perelli 1998, repaired in unit U-1610.
@@ -265,13 +267,136 @@ theorem leaf_minor_bound (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
   rw [hfactor] at hc
   exact (mul_le_mul_iff_left₀ (sq_pos_of_pos (half_pos hT))).mp hc
 
+/-! ### Split of `leaf_major_bound`, P0082 pages 357 to 365
+
+The proof of Lemma 8 on page 365 has three parts. First, display (8) on page 357, specialized as
+display (23) on page 364, writes the major integral as `R₁(ν_n) + R₁(ν_n + 1)` whenever the
+fractional part of `F(n)` stays `Δ = 𝒦^{-1/8}` away from the integers. Second, Lemma 4 on page 358
+bounds the `n` of the window whose fractional part is within `Δ` of an integer by `O(N Δ)`.
+Third, Lemma 7 on page 362, with the odd second moment of displays (29) and (30) on pages 366
+to 369, bounds the `n` where the adjacent coefficient sum is small. The first part is proved
+here; the other two are the leaves of `UpJ200.MajorBoundLeavesJ200`, where they sit because an
+existing file may not gain a `sorry`. AI wrote this Lean split. -/
+
+/-- P0082 page 357 display (8) and page 364 display (23). When `Δ ≤ {F(n)} ≤ 1 - Δ`, both
+trapezoid weights of the kernel equal one and the major integral is the sum of the two adjacent
+coefficients `R₁(ν_n) + R₁(ν_n + 1)`. -/
+theorem leaf_major_identity (γ δ κ : ℝ) (N n : ℕ)
+    (hΔ : 0 < calE γ κ N ^ (-(1 / 8 : ℝ)))
+    (hΔ1 : calE γ κ N ^ (-(1 / 8 : ℝ)) < 1)
+    (hleft : calE γ κ N ^ (-(1 / 8 : ℝ)) ≤ Int.fract (F γ n))
+    (hright : Int.fract (F γ n) ≤ 1 - calE γ κ N ^ (-(1 / 8 : ℝ))) :
+    majorInt γ δ κ N n =
+      U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +
+        U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1) := by
+  unfold majorInt
+  rw [MajorSupplyJ200.major_integral_formula _ _ _ _ hΔ hΔ1]
+  have hw0 : KernelTransform264.weight (calE γ κ N ^ (-(1 / 8 : ℝ))) (Int.fract (F γ n)) = 1 := by
+    apply KernelTransform264.weight_one hΔ hΔ1
+    rw [abs_of_nonneg (Int.fract_nonneg _)]
+    exact hright
+  have hw1 : KernelTransform264.weight (calE γ κ N ^ (-(1 / 8 : ℝ))) (Int.fract (F γ n) - 1) = 1 := by
+    apply KernelTransform264.weight_one hΔ hΔ1
+    rw [abs_of_nonpos (by linarith [Int.fract_lt_one (F γ n)] : Int.fract (F γ n) - 1 ≤ 0)]
+    linarith
+  rw [hw0, hw1]
+  simp only [Complex.ofReal_one, one_mul, nu]
+
+/-- P0082 page 358 Lemma 4, applied on page 364 after display (23). With `Δ = 𝒦^{-1/8}`, at most
+`B N Δ` members of the window have `{F(n)} < Δ` or `{F(n)} > 1 - Δ`, for every small `κ`. Proved
+from the leaf of `UpJ200.MajorBoundLeavesJ200`, whose `window` is this file's `window`. -/
+theorem leaf_major_fractional_boundary (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
+    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+        (((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨
+            1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤
+          B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
+  simpa only [window, UpJ200.DecompJ200.window] using
+    UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
+
+/-- P0082 page 362 Lemma 7, with the odd second moment of pages 366 to 369 displays (29) and
+(30): the real part of `R₁(ν_n) + R₁(ν_n + 1)` is below `c₀ X 𝒦^{-1/10}` for at most
+`B N 𝒦^{-1/12}` members of the window. Proved from the leaf of
+`UpJ200.MajorBoundLeavesJ200`, whose `window` is this file's `window`. -/
+theorem leaf_major_coefficient_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
+    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+          (((window γ N).filter (fun n : ℕ =>
+            (U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +
+              U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <
+                c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
+            B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
+  simpa only [window, UpJ200.DecompJ200.window] using
+    UpJ200.MajorBoundLeavesJ200.leaf_major_coefficient_lower γ h1 h2
+
 /-- LEAF page 365, Lemma 8, with one `κ` shared by the two arcs as in the paper, where `ℰ` is
 fixed once for sections 4 to 7. `U1539.Lemma8` is the same bound with a private `κ`, too weak to
 combine with `leaf_minor_bound`. -/
 theorem leaf_major_bound (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ → ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
       ∃ c₀ B : ℝ, 0 < c₀ ∧ 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
-        (Eγ_major_block γ δ κ c₀ N : ℝ) ≤ B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by sorry
+        (Eγ_major_block γ δ κ c₀ N : ℝ) ≤ B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
+  classical
+  obtain ⟨δ₀, hδ₀, hcoeff⟩ := leaf_major_coefficient_lower γ h1 h2
+  obtain ⟨κb, hκb, hboundary⟩ := leaf_major_fractional_boundary γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κa, hκa, hcoeff⟩ := hcoeff δ hδ hδsmall
+  refine ⟨min κa κb, lt_min hκa hκb, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨c₀, Ba, hc₀, hBa, Na, ha⟩ :=
+    hcoeff κ hκ (hκsmall.trans (min_le_left _ _))
+  obtain ⟨Bb, hBb, Nb, hb⟩ :=
+    hboundary κ hκ (hκsmall.trans (min_le_right _ _))
+  refine ⟨c₀, Ba + Bb, hc₀, add_pos hBa hBb, max 2 (max Na Nb), fun N hN => ?_⟩
+  have hN2 : 2 ≤ N := (le_max_left _ _).trans hN
+  have hNa : Na ≤ N := (le_max_left _ _).trans ((le_max_right _ _).trans hN)
+  have hNb : Nb ≤ N := (le_max_right _ _).trans ((le_max_right _ _).trans hN)
+  have hlog : 0 < Real.log (N : ℝ) := Real.log_pos (by exact_mod_cast hN2)
+  have hE : 1 < calE γ κ N := by
+    unfold calE
+    exact Real.one_lt_exp_iff.mpr (mul_pos hκ (Real.rpow_pos_of_pos hlog _))
+  have hΔ : 0 < calE γ κ N ^ (-(1 / 8 : ℝ)) :=
+    Real.rpow_pos_of_pos (lt_trans zero_lt_one hE) _
+  have hΔ1 : calE γ κ N ^ (-(1 / 8 : ℝ)) < 1 := by
+    rw [Real.rpow_def_of_pos (lt_trans zero_lt_one hE)]
+    exact Real.exp_lt_one_iff.mpr (mul_neg_of_pos_of_neg (Real.log_pos hE) (by norm_num))
+  let A := (window γ N).filter (fun n : ℕ =>
+    (U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +
+      U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <
+        c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))
+  let B := (window γ N).filter (fun n : ℕ =>
+    Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨
+      1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))
+  have hsubset : (window γ N).filter (fun n : ℕ =>
+      (majorInt γ δ κ N n).re < c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ))) ⊆ A ∪ B := by
+    intro n hn
+    rcases Finset.mem_filter.mp hn with ⟨hnW, hnmajor⟩
+    by_cases hnB : n ∈ B
+    · exact Finset.mem_union_right _ hnB
+    · have hgood : ¬ (Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨
+          1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n)) := by
+        intro hbad
+        exact hnB (Finset.mem_filter.mpr ⟨hnW, hbad⟩)
+      have hid := leaf_major_identity γ δ κ N n hΔ hΔ1
+        (le_of_not_gt (fun h => hgood (Or.inl h)))
+        (le_of_not_gt (fun h => hgood (Or.inr h)))
+      apply Finset.mem_union_left
+      apply Finset.mem_filter.mpr
+      exact ⟨hnW, by rwa [hid] at hnmajor⟩
+  have hcard : (Eγ_major_block γ δ κ c₀ N : ℝ) ≤ (A.card : ℝ) + B.card := by
+    unfold Eγ_major_block
+    exact_mod_cast (Finset.card_le_card hsubset).trans (Finset.card_union_le A B)
+  have hpow : calE γ κ N ^ (-(1 / 8 : ℝ)) ≤ calE γ κ N ^ (-(1 / 12 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le hE.le (by norm_num)
+  calc
+    _ ≤ (A.card : ℝ) + B.card := hcard
+    _ ≤ Ba * N * calE γ κ N ^ (-(1 / 12 : ℝ)) +
+        Bb * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := add_le_add (ha N hNa) (hb N hNb)
+    _ ≤ Ba * N * calE γ κ N ^ (-(1 / 12 : ℝ)) +
+        Bb * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
+      gcongr
+    _ = _ := by ring
 
 /-- ASSEMBLY of the three leaves above, p. 366: `r(F(n)) > 0` for all but `O(N ℰ^{-1/12})` values
 of `n` with `X/2 < ν_n ≤ X`. -/
