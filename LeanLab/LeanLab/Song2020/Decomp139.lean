@@ -6,7 +6,7 @@ The final assembly has the exact sealed Lemma4 proposition.
 Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
-import LeanLab.Song2020.SPLIT_lambda_sum_per_h
+import LeanLab.Song2020.SPLIT_vaughan_per_u
 
 namespace LeanLab.Song2020.Decomp139
 
@@ -132,11 +132,118 @@ theorem s1_lambda_reduction :
               ‖truncatedSum a H γ n y α‖ ≤
                 C * K * ((n : ℝ) ^ (3 / 2 - γ) + (H : ℝ) * (n : ℝ) ^ ((1 : ℝ) / 2) +
                   (n : ℝ) ^ ε * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := by
-  simpa only [LeanLab.Song2020.SPLIT_lambda_sum_per_h.lambdaSum, lambdaSum,
-    LeanLab.Song2020.SPLIT_lambda_sum_per_h.subWindow, subWindow,
-    LeanLab.Song2020.SPLIT_lambda_sum_per_h.truncatedSum, truncatedSum,
-    LeanLab.Song2020.SPLIT_lambda_sum_per_h.fourier, fourier]
-    using LeanLab.Song2020.SPLIT_lambda_sum_per_h.s1_lambda_reduction
+  simpa only [fourier, truncatedSum, subWindow, lambdaSum]
+    using LeanLab.Song2020.SPLIT_vaughan_per_u.s1_lambda_reduction
+
+/-- CITED. Song 2020, pages 5 to 7, the bounds for the three Vaughan pieces with both
+parameters u and v free, 1 at most u, 1 at most v and u v at most n, before the choice
+v = (n/u)^{1/2}: the Sigma 1 display of page 6, u |h|^{1/2} x^{γ/2-1} y plus
+x^{1-γ/2} |h|^{-1/2}, with its log squared factor absorbed in n to the epsilon, plus the
+display for x^{-ε} times Sigma 2 plus Sigma 3 on page 7, n v^{-1/2} plus n^{1/2} (u v)^{1/2}
+plus the four u and h monomials. Here x is replaced by n, since x is of size n over 3.
+Published inputs: Dirichlet approximation and the Ramanujan sum splitting, page 5; the
+Vaughan identity, the paper's Lemma 3.2, page 5; Iwaniec and Kowalski Corollary 8.13 for
+Sigma 1, page 6; dyadic division into T(R,S) and Graham and Kolesnik Lemma 2.5, page 6;
+Iwaniec and Kowalski Corollary 8.13 for the inner r sum and Graham and Kolesnik Lemma 2.4
+for L, page 7. -/
+theorem vaughan_uv :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ, ∀ u v : ℝ, 1 ≤ u → 1 ≤ v → u * v ≤ n →
+            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε *
+              (u * (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y) +
+                (n : ℝ) ^ (1 - γ / 2) * |(h : ℝ)| ^ (-(1 : ℝ) / 2) +
+                (n : ℝ) * v ^ (-(1 : ℝ) / 2) + (n : ℝ) ^ ((1 : ℝ) / 2) * (u * v) ^ ((1 : ℝ) / 2) +
+                (n : ℝ) ^ (1 - γ / 4) * |(h : ℝ)| ^ (-(1 : ℝ) / 4) +
+                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
+                u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
+                  |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
+                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
+                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
+  simpa only [subWindow, lambdaSum]
+    using LeanLab.Song2020.SPLIT_vaughan_per_u.vaughan_uv
+
+/-- PROVED. Triangle inequality for the von Mangoldt sum of the window, transferred from the
+repair file: the exponential sum is at most the mass of the von Mangoldt function over the
+same initial segment, since every term has modulus Lambda of x. This is the first step inside
+the partial summation leaf, s1_lambda_reduction, and it is the only part of that leaf that
+Mathlib supplies on its own. -/
+theorem norm_lambdaSum_le_vonMangoldt_mass (γ : ℝ) (n : ℕ) (y α : ℝ) (h : ℤ) (t : ℝ) :
+    ‖lambdaSum γ n y α h t‖ ≤ ∑ x ∈ subWindow n y t, (ArithmeticFunction.vonMangoldt x : ℝ) := by
+  simpa only [lambdaSum, subWindow]
+    using LeanLab.Song2020.SPLIT_vaughan_per_u.norm_lambdaSum_le_vonMangoldt_mass γ n y α h t
+
+/-- PROVED. Page 7, the choice v = (n/u)^{1/2}, written as n^{1/2} u^{-1/2}: for
+1 at most u at most n it is at least 1, u v is at most n, and both n v^{-1/2} and
+n^{1/2} (u v)^{1/2} equal u^{1/4} n^{3/4}. -/
+theorem choice_v (N u : ℝ) (hu : 1 ≤ u) (huN : u ≤ N) :
+    1 ≤ N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2) ∧
+      u * (N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2)) ≤ N ∧
+      N * (N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2)) ^ (-(1 : ℝ) / 2) =
+        u ^ ((1 : ℝ) / 4) * N ^ ((3 : ℝ) / 4) ∧
+      N ^ ((1 : ℝ) / 2) * (u * (N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2))) ^ ((1 : ℝ) / 2) =
+        u ^ ((1 : ℝ) / 4) * N ^ ((3 : ℝ) / 4) := by
+  have hu0 : 0 < u := by linarith
+  have hN0 : 0 < N := by linarith
+  obtain ⟨L, rfl⟩ : ∃ L, N = Real.exp L := ⟨Real.log N, (Real.exp_log hN0).symm⟩
+  obtain ⟨M, rfl⟩ : ∃ M, u = Real.exp M := ⟨Real.log u, (Real.exp_log hu0).symm⟩
+  have hML : M ≤ L := Real.exp_le_exp.mp huN
+  simp only [← Real.exp_mul, ← Real.exp_add]
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [Real.one_le_exp_iff]; linarith
+  · rw [Real.exp_le_exp]; linarith
+  · congr 1; ring
+  · congr 1; ring
+
+/-- Song 2020, page 7. The per u display, assembled from the cited free u and v bounds
+vaughan_uv by the proved choice v = (n/u)^{1/2}, choice_v, with the Sigma 1 term
+x^{1-γ/2} |h|^{-1/2} absorbed in n^{1-γ/4} |h|^{-1/4}. -/
+theorem vaughan_per_u_of_split :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
+      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
+          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ, ∀ u : ℝ, 1 ≤ u → u ≤ n →
+            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε *
+              ((n : ℝ) ^ (1 - γ / 4) * |(h : ℝ)| ^ (-(1 : ℝ) / 4) +
+                u ^ ((1 : ℝ) / 4) * (n : ℝ) ^ ((3 : ℝ) / 4) +
+                u * (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y) +
+                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
+                u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
+                  |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
+                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
+                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
+  intro γ hγ hγ1 ε hε
+  obtain ⟨C₁, hC₁, N₁, hv⟩ := vaughan_uv γ hγ hγ1 ε hε
+  refine ⟨2 * C₁, by positivity, max 1 N₁, ?_⟩
+  intro n hn y hy hyu α h hh t u hu1 huN
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (show 1 ≤ n by omega)
+  obtain ⟨hv1, huv, e1, e2⟩ := choice_v (n : ℝ) u hu1 huN
+  have hb := hv n (by omega) y hy hyu α h hh t u _ hu1 hv1 huv
+  rw [e1, e2] at hb
+  set N : ℝ := (n : ℝ) with hNdef
+  set k : ℝ := |(h : ℝ)| with hkdef
+  have hk1 : 1 ≤ k := by
+    rw [hkdef]
+    have h' : 1 ≤ |h| := Int.one_le_abs hh
+    exact_mod_cast h'
+  have hN0 : 0 < N := by linarith
+  have hy0 : 0 < y := (Real.rpow_pos_of_pos hN0 _).trans hy
+  have habs : N ^ (1 - γ / 2) * k ^ (-(1 : ℝ) / 2) ≤ N ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) :=
+    mul_le_mul (Real.rpow_le_rpow_of_exponent_le hn1 (by linarith))
+      (Real.rpow_le_rpow_of_exponent_le hk1 (by norm_num)) (by positivity) (by positivity)
+  have z0 : 0 ≤ N ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) := by positivity
+  have z1 : 0 ≤ u ^ ((1 : ℝ) / 4) * N ^ ((3 : ℝ) / 4) := by positivity
+  have z2 : 0 ≤ u * (k ^ ((1 : ℝ) / 2) * N ^ (γ / 2 - 1) * y) := by positivity
+  have z3 : 0 ≤ u ^ (-(1 : ℝ) / 4) * (N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) := by positivity
+  have z4 : 0 ≤ u ^ (-(1 : ℝ) / 6) * (N ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
+      k ^ ((1 : ℝ) / 6)) := by positivity
+  have z5 : 0 ≤ u ^ (-(1 : ℝ) / 4) * (N ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
+      k ^ ((1 : ℝ) / 4)) := by positivity
+  refine hb.trans ?_
+  rw [show 2 * C₁ * N ^ ε = C₁ * N ^ ε * 2 by ring, mul_assoc (C₁ * N ^ ε)]
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  linarith
 
 /-- CITED. Song 2020, page 7, the display after "Choosing v = (n/u)^{1/2}": for every
 Vaughan parameter u with 1 at most u at most n, so that u v is at most n,
@@ -162,16 +269,49 @@ theorem vaughan_per_u :
                 u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
                   |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
                 u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  simpa only [LeanLab.Song2020.SPLIT_lambda_sum_per_h.lambdaSum, lambdaSum,
-    LeanLab.Song2020.SPLIT_lambda_sum_per_h.subWindow, subWindow]
-    using LeanLab.Song2020.SPLIT_lambda_sum_per_h.vaughan_per_u
+                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) :=
+  vaughan_per_u_of_split
 
-/-- CITED. Graham and Kolesnik, Van der Corput's Method of Exponential Sums, Lemma 2.4,
+/-- PROVED. The balancing step inside Graham and Kolesnik Lemma 2.4: if S is at most
+3 P u to the a and at most 3 Q u to the minus b, then S is at most 3 times the balance
+P to the b times Q to the a, to the power 1 over a plus b. -/
+theorem balance_core (S P Q u a b : ℝ) (hS : 0 ≤ S) (hP : 0 ≤ P) (hQ : 0 ≤ Q) (hu : 0 < u)
+    (ha : 0 < a) (hb : 0 < b) (h₁ : S ≤ 3 * (P * u ^ a)) (h₂ : S ≤ 3 * (Q * u ^ (-b))) :
+    S ≤ 3 * (P ^ b * Q ^ a) ^ (1 / (a + b)) := by
+  have hab : a + b ≠ 0 := by linarith
+  have e1 : S ^ b ≤ (3 * (P * u ^ a)) ^ b := Real.rpow_le_rpow hS h₁ hb.le
+  have e2 : S ^ a ≤ (3 * (Q * u ^ (-b))) ^ a := Real.rpow_le_rpow hS h₂ ha.le
+  have hua : 0 ≤ u ^ a := by positivity
+  have hub : 0 ≤ u ^ (-b) := by positivity
+  have f1 : (3 * (P * u ^ a)) ^ b = 3 ^ b * (P ^ b * u ^ (a * b)) := by
+    rw [Real.mul_rpow (by norm_num) (by positivity), Real.mul_rpow hP hua,
+      ← Real.rpow_mul hu.le]
+  have f2 : (3 * (Q * u ^ (-b))) ^ a = 3 ^ a * (Q ^ a * u ^ (-b * a)) := by
+    rw [Real.mul_rpow (by norm_num) (by positivity), Real.mul_rpow hQ hub,
+      ← Real.rpow_mul hu.le]
+  have f3 : u ^ (-b * a) * u ^ (a * b) = 1 := by
+    rw [← Real.rpow_add hu, show -b * a + a * b = 0 by ring, Real.rpow_zero]
+  have f4 : (3 : ℝ) ^ a * 3 ^ b = 3 ^ (a + b) := (Real.rpow_add (by norm_num) a b).symm
+  have hSab : S ^ (a + b) ≤ 3 ^ (a + b) * (P ^ b * Q ^ a) := by
+    rw [Real.rpow_add' hS hab]
+    calc S ^ a * S ^ b ≤ (3 * (Q * u ^ (-b))) ^ a * (3 * (P * u ^ a)) ^ b :=
+          mul_le_mul e2 e1 (Real.rpow_nonneg hS _) (by positivity)
+      _ = (3 ^ a * 3 ^ b) * (P ^ b * Q ^ a) * (u ^ (-b * a) * u ^ (a * b)) := by
+          rw [f1, f2]; ring
+      _ = 3 ^ (a + b) * (P ^ b * Q ^ a) := by rw [f3, f4, mul_one]
+  have hX : 0 ≤ P ^ b * Q ^ a := by positivity
+  have g1 := Real.rpow_le_rpow (Real.rpow_nonneg hS _) hSab
+    (by positivity : (0 : ℝ) ≤ 1 / (a + b))
+  rw [one_div, Real.rpow_rpow_inv hS hab, Real.mul_rpow (by positivity) hX,
+    Real.rpow_rpow_inv (by norm_num) hab] at g1
+  rw [one_div]
+  exact g1
+
+/-- PROVED. Graham and Kolesnik, Van der Corput's Method of Exponential Sums, Lemma 2.4,
 with two positive and three negative powers and the range 1 at most u at most U, as Song 2020
 applies it on page 8 to choose u: some u in the range has the five term sum bounded by the
 six pairwise balances, the values of the positive terms at u equal to 1 and the values of the
-negative terms at u equal to U. -/
+negative terms at u equal to U. Proved here by the intermediate value theorem, not cited. -/
 theorem gk_lemma_2_4_two_three (a₁ a₂ b₁ b₂ b₃ : ℝ) (ha₁ : 0 < a₁) (ha₂ : 0 < a₂)
     (hb₁ : 0 < b₁) (hb₂ : 0 < b₂) (hb₃ : 0 < b₃) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ P₁ P₂ Q₁ Q₂ Q₃ : ℝ, 0 ≤ P₁ → 0 ≤ P₂ → 0 ≤ Q₁ → 0 ≤ Q₂ → 0 ≤ Q₃ →
@@ -181,8 +321,92 @@ theorem gk_lemma_2_4_two_three (a₁ a₂ b₁ b₂ b₃ : ℝ) (ha₁ : 0 < a�
             (P₁ ^ b₃ * Q₃ ^ a₁) ^ (1 / (a₁ + b₃)) + (P₂ ^ b₁ * Q₁ ^ a₂) ^ (1 / (a₂ + b₁)) +
             (P₂ ^ b₂ * Q₂ ^ a₂) ^ (1 / (a₂ + b₂)) + (P₂ ^ b₃ * Q₃ ^ a₂) ^ (1 / (a₂ + b₃)) +
             P₁ + P₂ + Q₁ * U ^ (-b₁) + Q₂ * U ^ (-b₂) + Q₃ * U ^ (-b₃)) := by
-  exact LeanLab.Song2020.SPLIT_lambda_sum_per_h.gk_lemma_2_4_two_three
-    a₁ a₂ b₁ b₂ b₃ ha₁ ha₂ hb₁ hb₂ hb₃
+  refine ⟨6, by norm_num, ?_⟩
+  intro P₁ P₂ Q₁ Q₂ Q₃ hP₁ hP₂ hQ₁ hQ₂ hQ₃ U hU
+  set B : ℝ := (P₁ ^ b₁ * Q₁ ^ a₁) ^ (1 / (a₁ + b₁)) + (P₁ ^ b₂ * Q₂ ^ a₁) ^ (1 / (a₁ + b₂)) +
+    (P₁ ^ b₃ * Q₃ ^ a₁) ^ (1 / (a₁ + b₃)) + (P₂ ^ b₁ * Q₁ ^ a₂) ^ (1 / (a₂ + b₁)) +
+    (P₂ ^ b₂ * Q₂ ^ a₂) ^ (1 / (a₂ + b₂)) + (P₂ ^ b₃ * Q₃ ^ a₂) ^ (1 / (a₂ + b₃)) with hBdef
+  have hB : ∀ x, x = (P₁ ^ b₁ * Q₁ ^ a₁) ^ (1 / (a₁ + b₁)) ∨
+      x = (P₁ ^ b₂ * Q₂ ^ a₁) ^ (1 / (a₁ + b₂)) ∨ x = (P₁ ^ b₃ * Q₃ ^ a₁) ^ (1 / (a₁ + b₃)) ∨
+      x = (P₂ ^ b₁ * Q₁ ^ a₂) ^ (1 / (a₂ + b₁)) ∨ x = (P₂ ^ b₂ * Q₂ ^ a₂) ^ (1 / (a₂ + b₂)) ∨
+      x = (P₂ ^ b₃ * Q₃ ^ a₂) ^ (1 / (a₂ + b₃)) → x ≤ B := by
+    have z1 : 0 ≤ (P₁ ^ b₁ * Q₁ ^ a₁) ^ (1 / (a₁ + b₁)) := by positivity
+    have z2 : 0 ≤ (P₁ ^ b₂ * Q₂ ^ a₁) ^ (1 / (a₁ + b₂)) := by positivity
+    have z3 : 0 ≤ (P₁ ^ b₃ * Q₃ ^ a₁) ^ (1 / (a₁ + b₃)) := by positivity
+    have z4 : 0 ≤ (P₂ ^ b₁ * Q₁ ^ a₂) ^ (1 / (a₂ + b₁)) := by positivity
+    have z5 : 0 ≤ (P₂ ^ b₂ * Q₂ ^ a₂) ^ (1 / (a₂ + b₂)) := by positivity
+    have z6 : 0 ≤ (P₂ ^ b₃ * Q₃ ^ a₂) ^ (1 / (a₂ + b₃)) := by positivity
+    intro x hx
+    rw [hBdef]
+    rcases hx with h | h | h | h | h | h <;> rw [h] <;> linarith
+  have hB0 : 0 ≤ B := by rw [hBdef]; positivity
+  let g : ℝ → ℝ := fun u => P₁ * u ^ a₁ + P₂ * u ^ a₂
+  let k : ℝ → ℝ := fun u => Q₁ * u ^ (-b₁) + Q₂ * u ^ (-b₂) + Q₃ * u ^ (-b₃)
+  have hfg : ∀ u, P₁ * u ^ a₁ + P₂ * u ^ a₂ + Q₁ * u ^ (-b₁) + Q₂ * u ^ (-b₂) +
+      Q₃ * u ^ (-b₃) = g u + k u := by intro u; simp only [g, k]; ring
+  have hU0 : 0 < U := by linarith
+  have hQU : 0 ≤ Q₁ * U ^ (-b₁) + Q₂ * U ^ (-b₂) + Q₃ * U ^ (-b₃) := by positivity
+  by_cases c1 : k 1 ≤ g 1
+  · refine ⟨1, le_rfl, hU, ?_⟩
+    rw [hfg]
+    have : g 1 = P₁ + P₂ := by simp [g]
+    linarith
+  by_cases c2 : g U ≤ k U
+  · refine ⟨U, hU, le_rfl, ?_⟩
+    rw [hfg]
+    have : k U = Q₁ * U ^ (-b₁) + Q₂ * U ^ (-b₂) + Q₃ * U ^ (-b₃) := rfl
+    have hP0 : 0 ≤ P₁ + P₂ := by linarith
+    linarith
+  push_neg at c1 c2
+  have hpow : ∀ c : ℝ, ContinuousOn (fun u : ℝ => u ^ c) (Set.Icc 1 U) := fun c =>
+    ContinuousOn.rpow_const continuousOn_id (fun x hx => Or.inl (by
+      have := hx.1; exact (show (0 : ℝ) < x by linarith).ne'))
+  have hcont : ContinuousOn (fun u => g u - k u) (Set.Icc 1 U) := by
+    simp only [g, k]
+    exact (((continuousOn_const.mul (hpow a₁)).add (continuousOn_const.mul (hpow a₂))).sub
+      (((continuousOn_const.mul (hpow (-b₁))).add (continuousOn_const.mul (hpow (-b₂)))).add
+        (continuousOn_const.mul (hpow (-b₃)))))
+  have hmem : (0 : ℝ) ∈ Set.Icc ((fun u => g u - k u) 1) ((fun u => g u - k u) U) := by
+    exact ⟨by show g 1 - k 1 ≤ 0; linarith, by show 0 ≤ g U - k U; linarith⟩
+  obtain ⟨u, ⟨hu1, huU⟩, hu⟩ := intermediate_value_Icc hU hcont hmem
+  have hu' : g u - k u = 0 := hu
+  refine ⟨u, hu1, huU, ?_⟩
+  have hu0 : 0 < u := by linarith
+  have hgk : g u = k u := by linarith
+  have hSg : g u = P₁ * u ^ a₁ + P₂ * u ^ a₂ := rfl
+  have hSk' : k u = Q₁ * u ^ (-b₁) + Q₂ * u ^ (-b₂) + Q₃ * u ^ (-b₃) := rfl
+  have hS0 : 0 ≤ g u := by rw [hSg]; positivity
+  have t1 : 0 ≤ P₁ * u ^ a₁ := by positivity
+  have t2 : 0 ≤ P₂ * u ^ a₂ := by positivity
+  have r1 : 0 ≤ Q₁ * u ^ (-b₁) := by positivity
+  have r2 : 0 ≤ Q₂ * u ^ (-b₂) := by positivity
+  have r3 : 0 ≤ Q₃ * u ^ (-b₃) := by positivity
+  have hSk : g u = Q₁ * u ^ (-b₁) + Q₂ * u ^ (-b₂) + Q₃ * u ^ (-b₃) := hgk.trans hSk'
+  have key : (g u) ≤ 3 * B := by
+    rcases le_total (P₂ * u ^ a₂) (P₁ * u ^ a₁) with hi | hi
+    · have hSi : (g u) ≤ 3 * (P₁ * u ^ a₁) := by linarith
+      rcases le_or_gt (g u) (3 * (Q₁ * u ^ (-b₁))) with j1 | j1
+      · have := balance_core (g u) P₁ Q₁ u a₁ b₁ hS0 hP₁ hQ₁ hu0 ha₁ hb₁ hSi j1
+        linarith [hB _ (Or.inl rfl)]
+      rcases le_or_gt (g u) (3 * (Q₂ * u ^ (-b₂))) with j2 | j2
+      · have := balance_core (g u) P₁ Q₂ u a₁ b₂ hS0 hP₁ hQ₂ hu0 ha₁ hb₂ hSi j2
+        linarith [hB _ (Or.inr (Or.inl rfl))]
+      have j3 : (g u) ≤ 3 * (Q₃ * u ^ (-b₃)) := by linarith
+      have := balance_core (g u) P₁ Q₃ u a₁ b₃ hS0 hP₁ hQ₃ hu0 ha₁ hb₃ hSi j3
+      linarith [hB _ (Or.inr (Or.inr (Or.inl rfl)))]
+    · have hSi : (g u) ≤ 3 * (P₂ * u ^ a₂) := by linarith
+      rcases le_or_gt (g u) (3 * (Q₁ * u ^ (-b₁))) with j1 | j1
+      · have := balance_core (g u) P₂ Q₁ u a₂ b₁ hS0 hP₂ hQ₁ hu0 ha₂ hb₁ hSi j1
+        linarith [hB _ (Or.inr (Or.inr (Or.inr (Or.inl rfl))))]
+      rcases le_or_gt (g u) (3 * (Q₂ * u ^ (-b₂))) with j2 | j2
+      · have := balance_core (g u) P₂ Q₂ u a₂ b₂ hS0 hP₂ hQ₂ hu0 ha₂ hb₂ hSi j2
+        linarith [hB _ (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl rfl)))))]
+      have j3 : (g u) ≤ 3 * (Q₃ * u ^ (-b₃)) := by linarith
+      have := balance_core (g u) P₂ Q₃ u a₂ b₃ hS0 hP₂ hQ₃ hu0 ha₂ hb₃ hSi j3
+      linarith [hB _ (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr rfl)))))]
+  rw [hfg]
+  have hP0 : 0 ≤ P₁ + P₂ := by linarith
+  linarith
 
 /-- PROVED. Page 8, exponent arithmetic of one balance in Graham and Kolesnik Lemma 2.4
 for monomials in n, y and the absolute value k of h. -/
@@ -1040,7 +1264,11 @@ end LeanLab.Song2020.Decomp139
 #print axioms LeanLab.Song2020.Decomp139.characteristic_reduction
 #print axioms LeanLab.Song2020.Decomp139.fourier_approximation
 #print axioms LeanLab.Song2020.Decomp139.s1_lambda_reduction
+#print axioms LeanLab.Song2020.Decomp139.vaughan_uv
+#print axioms LeanLab.Song2020.Decomp139.choice_v
+#print axioms LeanLab.Song2020.Decomp139.vaughan_per_u_of_split
 #print axioms LeanLab.Song2020.Decomp139.vaughan_per_u
+#print axioms LeanLab.Song2020.Decomp139.balance_core
 #print axioms LeanLab.Song2020.Decomp139.gk_lemma_2_4_two_three
 #print axioms LeanLab.Song2020.Decomp139.balance3
 #print axioms LeanLab.Song2020.Decomp139.le_perH_of
