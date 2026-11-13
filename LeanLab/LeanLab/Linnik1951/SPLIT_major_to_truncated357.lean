@@ -40,7 +40,21 @@ theorem major_error_remainder357 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBound28
     ∃ C : ℝ, 0 < C ∧ ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 < N →
       |arcContribution280 k N (majorArcs280 N) - truncatedMain357 k N| ≤
         ε / 2 * scale111 k N + C * (N : ℝ) / Real.log N := by
-  sorry
+  obtain ⟨N0, hN0⟩ :=
+    major_to_truncated357 hG hM k hk (ε / 2) (by positivity)
+  refine ⟨1, by norm_num, max N0 3, ?_⟩
+  intro N hev hN
+  have hN0le : N0 < N := lt_of_le_of_lt (le_max_left _ _) hN
+  have hmain := hN0 N hev hN0le
+  have hN1 : (1 : ℝ) < (N : ℝ) := by
+    exact_mod_cast (show (1 : ℕ) < N by omega)
+  have hlog : 0 < Real.log N := Real.log_pos hN1
+  have htail : 0 ≤ 1 * (N : ℝ) / Real.log N :=
+    div_nonneg (mul_nonneg (by norm_num) (Nat.cast_nonneg N)) hlog.le
+  calc
+    |arcContribution280 k N (majorArcs280 N) - truncatedMain357 k N| ≤
+        ε / 2 * scale111 k N := hmain
+    _ ≤ ε / 2 * scale111 k N + 1 * (N : ℝ) / Real.log N := by linarith
 
 /-- LEAF. Step 2 of 3: growth of the logarithm against a constant.  For every
 positive constant, every positive coefficient and every positive natural power
