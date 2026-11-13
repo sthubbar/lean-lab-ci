@@ -65,17 +65,109 @@ theorem leaf_critical_line_principal :
           C * Real.log x * ((q : ℝ) * (|u| + 1)) ^ (1 / 2 + 1 / Real.log x) := by
   sorry
 
+set_option maxHeartbeats 4000000 in
+
+private lemma tsum_nat_rpow_neg_le {σ : ℝ} (hσ : 1 < σ) :
+    ∑' n : ℕ, (n : ℝ) ^ (-σ) ≤ 1 + 1 / (σ - 1) := by
+  have hσpos : 0 < σ := by linarith
+  have hanti : AntitoneOn (fun t : ℝ => t ^ (-σ)) (Ici (1 : ℝ)) :=
+    (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (r := -σ) (by linarith)).mono
+      fun t ht => Set.mem_Ioi.mpr (lt_of_lt_of_le zero_lt_one ht)
+  have hnonneg : ∀ t ∈ Ioi (1 : ℝ), (0 : ℝ) ≤ t ^ (-σ) := fun t ht =>
+    Real.rpow_nonneg (le_of_lt (lt_trans zero_lt_one ht)) _
+  have hint : IntegrableOn (fun t : ℝ => t ^ (-σ)) (Ioi (1 : ℝ)) :=
+    integrableOn_Ioi_rpow_of_lt (by linarith : -σ < -1) zero_lt_one
+  have hsummable : Summable (fun n : ℕ => (n : ℝ) ^ (-σ)) :=
+    AntitoneOn.summable_of_integrableOn_Ioi (f := fun t : ℝ => t ^ (-σ)) (N := 1)
+      (by simpa using hanti) (by simpa using hint) (by simpa using hnonneg)
+  have htail : ∑' n : ℕ, ((n + 1 + 1 : ℕ) : ℝ) ^ (-σ) ≤
+      ∫ x in Ioi (1 : ℝ), x ^ (-σ) := by
+    simpa using (AntitoneOn.tsum_comp_add_le_integral (f := fun t : ℝ => t ^ (-σ)) 1
+      (by simpa using hanti) (by simpa using hint) (by simpa using hnonneg))
+  have hInt : ∫ x in Ioi (1 : ℝ), x ^ (-σ) = 1 / (σ - 1) := by
+    have hc : (0 : ℝ) < 1 := by norm_num
+    rw [integral_Ioi_rpow_of_lt (a := -σ) (by linarith : -σ < -1) (c := 1) hc]
+    norm_num
+    rw [show -σ + 1 = -(σ - 1) by ring, div_neg, neg_div, neg_neg, one_div]
+  rw [hInt] at htail
+  have hsplit := hsummable.sum_add_tsum_nat_add 2
+  have h0 : (((0 : ℕ) : ℝ)) ^ (-σ) = 0 := by
+    rw [Nat.cast_zero, Real.zero_rpow (by linarith : -σ ≠ 0)]
+  have h1 : (((1 : ℕ) : ℝ)) ^ (-σ) = 1 := by
+    rw [Nat.cast_one, Real.one_rpow]
+  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, h0, h1,
+    zero_add] at hsplit
+  linarith [hsplit]
+
+set_option maxHeartbeats 4000000 in
+private lemma LSeries_norm_le_tsum {f : ℕ → ℂ} (hf : ∀ n : ℕ, ‖f n‖ ≤ 1) {s : ℂ}
+    (hs : 1 < s.re) :
+    ‖LSeries f s‖ ≤ ∑' n : ℕ, (n : ℝ) ^ (-s.re) := by
+  have hσpos : 0 < s.re := by linarith
+  have hanti : AntitoneOn (fun t : ℝ => t ^ (-s.re)) (Ici (1 : ℝ)) :=
+    (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (r := -s.re) (by linarith)).mono
+      fun t ht => Set.mem_Ioi.mpr (lt_of_lt_of_le zero_lt_one ht)
+  have hnonneg : ∀ t ∈ Ioi (1 : ℝ), (0 : ℝ) ≤ t ^ (-s.re) := fun t ht =>
+    Real.rpow_nonneg (le_of_lt (lt_trans zero_lt_one ht)) _
+  have hint : IntegrableOn (fun t : ℝ => t ^ (-s.re)) (Ioi (1 : ℝ)) :=
+    integrableOn_Ioi_rpow_of_lt (by linarith : -s.re < -1) zero_lt_one
+  have hdom : Summable (fun n : ℕ => (n : ℝ) ^ (-s.re)) :=
+    AntitoneOn.summable_of_integrableOn_Ioi (f := fun t : ℝ => t ^ (-s.re)) (N := 1)
+      (by simpa using hanti) (by simpa using hint) (by simpa using hnonneg)
+  have hterm : ∀ n : ℕ, ‖LSeries.term f s n‖ ≤ (n : ℝ) ^ (-s.re) := by
+    intro n
+    rcases eq_or_ne n 0 with h0 | hn
+    · subst h0
+      rw [LSeries.term_zero, norm_zero, Nat.cast_zero,
+        Real.zero_rpow (by linarith : -s.re ≠ 0)]
+    · have hnpos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+      rw [LSeries.norm_term_eq, if_neg hn]
+      calc ‖f n‖ / (n : ℝ) ^ s.re ≤ 1 / (n : ℝ) ^ s.re := by
+            gcongr
+            exact hf n
+        _ = (n : ℝ) ^ (-s.re) := by
+            rw [Real.rpow_neg hnpos.le, one_div]
+  have hsumm : Summable (fun n : ℕ => ‖LSeries.term f s n‖) :=
+    Summable.of_nonneg_of_le (fun n => norm_nonneg _) hterm hdom
+  calc ‖LSeries f s‖ = ‖∑' n : ℕ, LSeries.term f s n‖ := rfl
+    _ ≤ ∑' n : ℕ, ‖LSeries.term f s n‖ := norm_tsum_le_tsum_norm hsumm
+    _ ≤ ∑' n : ℕ, (n : ℝ) ^ (-s.re) := hsumm.tsum_le_tsum hterm hdom
+
+set_option maxHeartbeats 4000000 in
 /-- LEAF: leaf 3 of 4. Step of the proof: the bound on the line `Re s = 1 + 1 / log x`,
 from the Euler product. Every Euler factor has absolute value at most one, so the
 L-function is at most `ζ(1 + 1 / log x)`, and that is at most `1 + 1 / (1 / log x) =
 1 + log x` because the zeta function is at most `1 + 1 / (s - 1)` to the right of one.
 The height does not enter and the right hand side carries no conductor, so this is far
-from the sealed statement. OPEN. -/
+from the sealed statement. PROVED: the two private lemmas above give the termwise bound
+`‖L(s, χ)‖ ≤ ∑ n ^ (-Re s)` at `Re s > 1` and the integral-test bound
+`∑ n ^ (-σ) ≤ 1 + 1 / (σ - 1)`, and `σ = 1 + 1 / log x` turns the latter into
+`1 + log x ≤ 3 * log x` for `2 ≤ x`. -/
 theorem leaf_right_line_euler_product :
     ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x → ∀ (q : ℕ) [NeZero q], 1 ≤ q → (q : ℝ) ≤ x →
       ∀ χ : DirichletCharacter ℂ q, ∀ u : ℝ,
         ‖χ.LFunction (((1 + 1 / Real.log x : ℝ) : ℂ) + u * I)‖ ≤ C * Real.log x := by
-  sorry
+  refine ⟨3, by norm_num, ?_⟩
+  intro x hx q _ hq hqx χ u
+  have hlog : 0 < Real.log x := Real.log_pos (by linarith)
+  have h2 : Real.log 2 ≤ Real.log x := Real.log_le_log (by norm_num) hx
+  have hlog2 : (1 : ℝ) / 2 ≤ Real.log x := by linarith [Real.log_two_gt_d9]
+  set σ : ℝ := 1 + 1 / Real.log x with hσ
+  have hσ1 : 1 < σ := by
+    have hpos : 0 < 1 / Real.log x := by positivity
+    rw [hσ]; linarith
+  have hre : ((((1 + 1 / Real.log x : ℝ)) : ℂ) + u * I).re = σ := by
+    simp [hσ]
+  rw [DirichletCharacter.LFunction_eq_LSeries χ (by rw [hre]; exact hσ1)]
+  have hmain := LSeries_norm_le_tsum (f := fun n : ℕ => χ ((n : ZMod q)))
+    (fun n => DirichletCharacter.norm_le_one χ ((n : ZMod q)))
+    (s := ((((1 + 1 / Real.log x : ℝ)) : ℂ) + u * I)) (by rw [hre]; exact hσ1)
+  rw [hre] at hmain
+  have hts := tsum_nat_rpow_neg_le (σ := σ) hσ1
+  have hσm : σ - 1 = 1 / Real.log x := by rw [hσ]; ring
+  have hval : (1 : ℝ) + 1 / (σ - 1) = 1 + Real.log x := by rw [hσm, one_div_one_div]
+  rw [hval] at hts
+  linarith [hmain, hts, hlog, hlog2]
 
 /-- LEAF: leaf 4 of 4. Step of the proof: convexity in the strip. Two bounds on the two
 vertical edges, holding at every height `u` and carrying the weight `q * (|u| + 1)` with

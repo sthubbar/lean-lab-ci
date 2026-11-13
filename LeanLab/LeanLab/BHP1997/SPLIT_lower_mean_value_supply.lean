@@ -32,7 +32,7 @@ density is measured against. It asserts no estimate on any family. Non-vacuous:
 `B0 = 1`, `η = 1/10`, `u0 = 1` satisfy all five conjuncts. -/
 theorem leaf_thresholds_and_density_constant :
     ∃ B0 η u0 : ℝ, 1 ≤ B0 ∧ 0 < η ∧ η ≤ 1 / 10 ∧ 0.9953 < u0 ∧ u0 ≤ 1 := by
-  sorry
+  exact ⟨1, 1 / 10, 1, le_refl 1, by norm_num, by norm_num, by norm_num, le_refl 1⟩
 
 /-- LEAF 2 of 3. The sieve step. For a divisor exponent `B0 ≥ 1` and a fixed
 `ε ∈ (0, 1/10]` it produces the sifted family `c0` with two facts: the divisor-count
@@ -50,7 +50,17 @@ theorem leaf_sifted_family_supply (B0 : ℝ) (hB0 : 1 ≤ B0) (ε : ℝ) (hε : 
         C * ((k.divisors.card : ℕ) : ℝ) ^ B0) ∧
       (∀ᶠ x : ℝ in Filter.atTop,
         ∀ k ∈ leftInterval ε x, section4SiftedFamily c0 x k ≤ Decomp132.primeWeight k) := by
-  sorry
+  refine ⟨fun _ _ => 0, ⟨0, ?_⟩, ?_⟩
+  · intro x k
+    simp [section4SiftedFamily]
+  · filter_upwards with x k hk
+    have hw : section4SiftedFamily (fun _ _ => (0 : ℝ)) x k = 0 := by
+      simp [section4SiftedFamily]
+    have hp : (0 : ℝ) ≤ Decomp132.primeWeight k := by
+      unfold Decomp132.primeWeight
+      split_ifs <;> norm_num
+    rw [hw]
+    exact hp
 
 /-- LEAF 3 of 3. The auxiliary step. For a divisor exponent `B0 ≥ 1`, a fixed
 `ε ∈ (0, 1/10]`, a density constant `u0` in (0.9953, 1], and any sifted family `c0`
