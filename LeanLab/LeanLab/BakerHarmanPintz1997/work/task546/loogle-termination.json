@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Nat.div_lt_self.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Init.Data.Nat.Div.Basic", "name": "Nat.div_lt_self", "type": " {n k : \u2115} (hLtN : 0 < n) (hLtK : 1 < k) : n / k < n"}]}

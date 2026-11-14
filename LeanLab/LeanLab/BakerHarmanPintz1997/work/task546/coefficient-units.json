@@ -1,0 +1,29 @@
+[
+  {
+    "unit": "3",
+    "draft": "Coeff.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| restricted_divisor_coeff | If B is nonnegative and a is bounded by tau to B, any sum of a at k/d over a subset of the divisors of positive k has norm at most tau k to B plus one. Page 29 last coefficient display, used on page 31. | k = 6, a identically one, B = 0 and divisor subset containing 1 and 2. |\n| prime_subset_coeff | Under the same coefficient bound, a restricted sum indexed by subsets of a finite set of primes whose product divides k has the same bound tau k to B plus one. The restriction is any predicate on the product. Page 29 last coefficient display. | k = 6, a identically one, B = 0, prime set containing 2 and 3 and restriction always true. |",
+    "status": "Both coefficient bounds are PROVED. The bound is independent of the cardinality of a prime subset.",
+    "progress": "restricted_divisor_coeff and prime_subset_coeff are PROVED. The exact finite divisor and prime subset instances compile. This supplies coefficient control but no cancellation estimate.",
+    "next": "prove uniqueness of the decreasing prime chains and their uniform coefficient bound.",
+    "commit": "prove divisor bounds for restricted grouped coefficients"
+  },
+  {
+    "unit": "4",
+    "draft": "Chain.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| prime_chain_unique | Two strictly decreasing finite lists of primes with equal products are equal. Page 29 iteration convention and coefficient display, used on page 31. | Both lists are 5, 3, 2. Every entry is prime and the order is strict. |",
+    "status": "prime_chain_unique is PROVED. Mathlib primeFactors_prod and the uniqueness of a sorted list are reused.",
+    "progress": "prime_chain_unique is PROVED. Strict ordering removes permutation multiplicities before the divisor count. The nonempty three prime instance compiles.",
+    "next": "apply the divisor bound to a restricted collection of chains.",
+    "commit": "prove uniqueness of ordered Buchstab prime chains"
+  },
+  {
+    "unit": "5",
+    "draft": "ChainCoeff.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| prime_chain_coeff | For nonnegative B and coefficients bounded by tau to B, the sum of a at k divided by each chain product over any finite collection of strictly decreasing prime chains with products dividing positive k has norm at most tau k to B plus one. The estimate is independent of chain lengths. Page 29 last display, used on page 31. | k = 6, B = 0, a identically one and the two chains 3, 2 and 2. Both products divide 6. |",
+    "status": "prime_chain_coeff is PROVED. The exponent B plus one is an explicit implementation bound for the paper convention of enlarging B.",
+    "progress": "prime_chain_coeff is PROVED. Its bound is independent of chain depth and keeps every restriction through the finite set of chains. The two distinct nonempty chain instance compiles.",
+    "next": "complete the depth bound and exact terminating Buchstab evaluation.",
+    "commit": "bound repeated Buchstab coefficients independently of depth"
+  }
+]

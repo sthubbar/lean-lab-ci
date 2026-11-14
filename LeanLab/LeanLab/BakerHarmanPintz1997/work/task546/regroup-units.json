@@ -1,0 +1,20 @@
+[
+  {
+    "unit": "12",
+    "draft": "RestrictedRegroup.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| restricted_prime_divisor_regroup | For positive L and any finite original support S, summing over m in S with m dividing L and prime p dividing L/m equals summing over u dividing L and prime p dividing u, retaining the condition u/p in S. The third argument of the kernel becomes L/u. Page 31 grouping u = mp. | L = 12, S contains 2 and 3, and the kernel is identically one. Both supports are nonempty. |",
+    "status": "restricted_prime_divisor_regroup is PROVED. It retains the original coefficient support exactly.",
+    "progress": "restricted_prime_divisor_regroup is PROVED. The original m support survives as the exact condition u/p in S. The full finite instance compiles.",
+    "next": "apply this identity to the complete restricted prime error.",
+    "commit": "preserve the original support in prime regrouping"
+  },
+  {
+    "unit": "13",
+    "draft": "FullRegroup.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| restricted_prime_error_regroup | For positive k, the restricted sum over m in S, n in T and prime divisors p of k/mn equals the sum over n dividing k, u dividing k/n and prime divisors p of u after u = mp. The condition u/p in S, the prime interval, any original region predicate, both coefficients and psi at k/nu with cutoff p are all retained. Page 31 first paragraph. | k = 12, both supports contain 1 and 2, both coefficients are one, w = 2, z = 7 and the region predicate is true. The compiled instance has prime 2 in its original prime set. |",
+    "status": "restricted_prime_error_regroup is PROVED. Its left side is the exact finite template used by primePart. No transfer or cutoff independence is assumed.",
+    "progress": "restricted_prime_error_regroup is PROVED. It covers the full original m,n,p summation rather than only a toy coefficient kernel. The positive k and nonempty prime support instance compiles.",
+    "next": "connect this clean identity to the sealed primePart data in Decomp409c.",
+    "commit": "regroup the full restricted prime error exactly"
+  }
+]

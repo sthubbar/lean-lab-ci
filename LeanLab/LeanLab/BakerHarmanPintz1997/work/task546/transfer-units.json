@@ -1,0 +1,56 @@
+[
+  {
+    "unit": "6",
+    "draft": "Depth.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| buchstab_depth | If x exceeds one, every factor in a finite indexed product is at least w of x and the product is at most x to 0.4, the number of factors is at most 0.4 times log x to 0.1. Pages 29 and 31, the stated order of the number of repeated steps. | x is exp 59049 and the singleton factor is w of x. Its logarithm is 19683, below 0.4 times 59049. The product and depth premises compile. |",
+    "status": "buchstab_depth is PROVED. Its constant 0.4 is an explicit bound for the small range and is not a quoted displayed constant.",
+    "progress": "buchstab_depth is PROVED with a nonempty factor instance. It supplies the quantitative finite depth bound without an analytic stopping assumption.",
+    "next": "verify the exact terminating Buchstab computation.",
+    "commit": "prove the finite repeated Buchstab depth bound"
+  },
+  {
+    "unit": "7",
+    "draft": "Tree.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| buchstabTree | Repeatedly apply 4.14 to the rough cofactor. Stop when the grouped variable u exceeds x to 0.4. Each edge replaces n by n/p for a prime divisor p and u by up. At n zero return the original indicator. Pages 27 and 31. | x = 1, w = 2, z = 7, u = 1 and n = 30. The initial prime sum is nonempty. |\n| buchstabTree_eq | For w at most z this terminating finite computation equals psi n z for every u and n. Page 31 repeated Buchstab procedure. | The preceding n = 30 instance compiles. It retains all three prime branches and does not assert an analytic transfer. |",
+    "status": "buchstabTree is an ordinary complex valued definition. buchstabTree_eq is PROVED. Termination uses Nat.div_lt_self and the primality of every filtered factor.",
+    "progress": "buchstabTree and buchstabTree_eq build. The exact finite procedure is PROVED and terminates by a strictly decreasing natural cofactor. No analytic leaf or additional sorry is introduced.",
+    "next": "audit the dependent cutoff shortcut and retain its correction exactly.",
+    "commit": "formalize the terminating repeated Buchstab computation"
+  },
+  {
+    "unit": "8",
+    "draft": "Cutoff.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| varying_cutoff_not_single | If p is prime and p is less than q, no complex scalar c and real cutoff z make psi h p plus psi h q equal c times psi h z for every natural h. This diagnoses direct cutoff replacement in the grouping on page 31. Page 28 after 4.16 supplies a Perron procedure instead. | p = 2 and q = 3. At h = 1 the scalar is forced to be 2. At h = 2 the left side is 1, while the right side is zero or 2. |",
+    "status": "varying_cutoff_not_single is PROVED. It is a negative result for a proposed algebraic shortcut. It does not refute Lemma13, any transfer leaf or the paper.",
+    "progress": "varying_cutoff_not_single is PROVED for every prime p below q. The compiled p = 2 and q = 3 instance rules out collapsing the grouped kernel to one rough indicator. This is not a paper error.",
+    "next": "preserve the exact extra term through Buchstab expansion.",
+    "commit": "prove the obstruction to direct cutoff replacement"
+  },
+  {
+    "unit": "9",
+    "draft": "Expansion.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| grouped_cutoff_expansion | For positive h and w at most every p in a finite set S, the sum of a p times psi h p equals the total coefficient times psi h w minus the full nested prime correction with w at most q below p and q dividing h. This is 4.14 applied inside the grouped coefficient on page 31. | h = 6, w = 2, S contains 2 and 3, and a is arbitrary. The sets are nonempty and the correction is retained. |",
+    "status": "grouped_cutoff_expansion is PROVED. It does not drop the extra prime correction or give a transfer estimate for it.",
+    "progress": "grouped_cutoff_expansion is PROVED. Replacing the varying cutoff creates an explicit nested prime correction. This is the exact remaining object rather than an omitted error.",
+    "next": "build the fixed prime conditional Lemma13 specialization.",
+    "commit": "retain the full dependent cutoff correction"
+  },
+  {
+    "unit": "10",
+    "draft": "PrimeBlock.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| primeGroupedCoeff | For fixed p, the coefficient at u is a at u/p when u is positive, p divides u and u/p lies in the original m interval. Otherwise it is zero. Page 31 grouping u = mp. | p = 2, u = 2, M = 1/2 and a identically one give coefficient one. |\n| primeGroupedCoeff_bound | For nonnegative B, grouping with fixed p preserves the coefficient bound tau u to B. Pages 29 and 31. | The preceding positive coefficient instance has B = 0. |\n| lemma13_prime_block | Given an explicit Lemma13 hypothesis, fixed prime blocks satisfy Holds42 once the grouped length U and N and the cutoff p satisfy exactly 4.18. This leaves summation over p and removal of its varying cutoff separate. Page 31 invocation of Lemma13. | B = 0, a and b identically one, U = x to 0.4, N = 1, p = 2 and M = U/2. The length conditions hold above 1 and the cutoff domination holds above 4. These full premises compile. |",
+    "status": "primeGroupedCoeff is an ordinary data definition. primeGroupedCoeff_bound is PROVED. lemma13_prime_block is CONDITIONAL ON the explicit Lemma13 hypothesis.",
+    "progress": "The fixed prime block and its coefficient bound build with compiled nonzero coefficient premises. lemma13_prime_block is CONDITIONAL ON Lemma13. It gives a real application of that existing interface but does not assert uniform summation over a growing set of p.",
+    "next": "build the fixed exponent conditional Theorem4 specialization.",
+    "commit": "apply conditional Lemma13 to fixed prime grouped blocks"
+  },
+  {
+    "unit": "11",
+    "draft": "Exponents.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| large_block_exponents | For positive epsilon below 1/100, if the difference of the two exponents is at most 0.1 plus epsilon/6 and the remaining exponent is at most 0.18 plus epsilon/6, then theta equal to 0.55 plus 2epsilon/3 satisfies the strict theta, difference and gamma inequalities of Theorem4. Page 12 displays 3.6 to 3.8 and page 31 displayed large range bounds. | epsilon = 1/200 and both exponents equal 0.41. Every strict conclusion compiles. |\n| theorem4_large_block | Given an explicit Theorem4 hypothesis, the preceding exponent bounds yield its Concl39 conclusion for families satisfying FamOK, the exact qT relation and Cond32. The exponents are fixed throughout each family. Pages 12 and 31. | epsilon = 1/200, exponents 0.41 and 0.41, three zero polynomials, and a sample class containing one principal modulus one configuration at x = 256. Its T is 256 to 67/150 and lies between 4 and 16. The nonempty class, FamOK, standard configuration and Cond32 premises compile. |",
+    "status": "large_block_exponents is PROVED. theorem4_large_block is CONDITIONAL ON the explicit Theorem4 and Cond32 inputs. Its conclusion remains Concl39.",
+    "progress": "The strict exponent margins and full nonempty configuration instance build. large_block_exponents is PROVED. theorem4_large_block is CONDITIONAL ON Theorem4 and Cond32. It does not convert Concl39 into Holds42 or infer uniform constants for variable exponents.",
+    "next": "finish the remaining interface, source and axiom audits.",
+    "commit": "check large range exponents and apply conditional Theorem4"
+  }
+]

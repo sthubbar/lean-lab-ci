@@ -1,0 +1,20 @@
+[
+  {
+    "unit": "15",
+    "draft": "PowerMargins.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| large_power_block_parameters | For positive epsilon below 1/100, all sufficiently large x admit the strict Theorem4 numerical conditions whenever two pure power lengths have both ratios at most twice x to 0.1 and the remaining length is at most twice x to 0.18. The threshold is uniform over the two exponents. Pages 12 and 31, retaining the dyadic constants. | epsilon = 1/200 and both exponents equal 0.41. Every x at least one satisfies the three numerical upper bounds. Both the full eventual conclusion and these compatible premises compile. |",
+    "status": "large_power_block_parameters is PROVED. It absorbs the factor two by x to epsilon/6. It does not assert analytic uniformity over varying exponent families.",
+    "progress": "large_power_block_parameters is PROVED. Dyadic constants now feed the strict numerical margins without being silently discarded. The compatible fixed exponent instance compiles.",
+    "next": "handle every real input divisor exponent before the final audit.",
+    "commit": "absorb dyadic factors in strict large block margins"
+  },
+  {
+    "unit": "16",
+    "draft": "RealExponent.lean.txt",
+    "twins": "| Lean name | Plain math twin and source | Concrete instance |\n|---|---|---|\n| tau_rpow_enlarge | For every real B and natural n, tau n to B is at most tau n to max of B and zero. The convention at n zero is included. Pages 11 and 29, enlargement of the divisor exponent. | B = minus one at n = 0 and n = 6. Both cases compile. |\n| lemma13_prime_block_real | The fixed prime conditional Lemma13 application also accepts every real original coefficient exponent B. Enlarge both coefficient bounds to the nonnegative exponent max of B and zero, then use lemma13_prime_block. Page 31. | B = minus one with both coefficients equal to tau k to minus one, embedded in the complex numbers. Their norm bounds compile. The earlier U = x to 0.4, N = 1 and p = 2 length premises apply unchanged. |",
+    "status": "tau_rpow_enlarge is PROVED. lemma13_prime_block_real is CONDITIONAL ON the explicit Lemma13 input. It retains the original all real B quantifier.",
+    "progress": "The zero index and negative coefficient exponent checks build. tau_rpow_enlarge is PROVED. lemma13_prime_block_real is CONDITIONAL ON Lemma13 for every real B. No nonnegative exponent restriction is silently imposed on the original transfer targets.",
+    "next": "finish the remaining input, complete axiom and source audits, then run the gates.",
+    "commit": "handle all real divisor exponents in the conditional prime block"
+  }
+]

@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Nat.dvd_div_iff_mul_dvd.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Init.Data.Nat.Lemmas", "name": "Nat.dvd_div_iff_mul_dvd", "type": " {a b c : \u2115} (hbc : c \u2223 b) : a \u2223 b / c \u2194 c * a \u2223 b"}]}

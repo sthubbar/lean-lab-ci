@@ -2,6 +2,7 @@
 P0069 pages 30 and 31, the three pm ranges in the written proof of Lemma 15.
 AI wrote the Lean code. Goldbach is open.
 -/
+import LeanLab.BakerHarmanPintz1997.Decomp546a
 import LeanLab.BakerHarmanPintz1997.Decomp409b
 import LeanLab.BakerHarmanPintz1997.DecompJ612
 
@@ -144,6 +145,26 @@ theorem lemma15_decomposed : Lemma15 := by
     primePart 2 x (a x) (b x) (M x) (N x) (wof x) (z x) k) _ hadd
   exact ⟨0, fun x hx k hk => (primePart_sum x (a x) (b x) (M x) (N x) (wof x) (z x) k).symm⟩
 
+/-- Page 31 exact grouping u = mp in each of the three prime ranges.
+The original dyadic support and the p dependent rough cutoff are retained. -/
+theorem primePart_regroup (j : Fin 3) (x : ℝ) (a b : ℕ → ℂ) (M N w z : ℝ)
+    {k : ℕ} (hk : 0 < k) :
+    primePart j x a b M N w z k =
+      ∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊, if n ∣ k then
+        ∑ u ∈ (k / n).divisors, ∑ p ∈ u.primeFactors,
+          if u / p ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊ ∧ w ≤ (p : ℝ) ∧ (p : ℝ) < z ∧
+            primeRegion x (u / p) p = j then
+            a (u / p) * b n * psi (k / n / u) (p : ℝ) else 0 else 0 := by
+  convert Decomp546a.restricted_prime_error_regroup hk
+    (Ioc ⌊M⌋₊ ⌊2 * M⌋₊) (Ioc ⌊N⌋₊ ⌊2 * N⌋₊) a b w z
+    (fun m p => primeRegion x m p = j) using 1 <;>
+    (try dsimp only [primePart]) <;> congr!
+
+example : primePart 2 1 (fun _ => 1) (fun _ => 1) 1 1 2 7 12 = 1 := by
+  have hr : Rough 1 3 := fun p hp _ hd => hp.not_dvd_one hd
+  have h3 : (3 : ℕ).primeFactors = {3} := (by norm_num : Nat.Prime 3).primeFactors
+  norm_num [primePart, primeRegion, h3, psi, hr, Finset.filter_singleton]
+
 #print axioms primeRegion
 #print axioms primePart
 #print axioms primePart_sum
@@ -153,5 +174,6 @@ theorem lemma15_decomposed : Lemma15 := by
 #print axioms middle_prime_transfer
 #print axioms large_prime_transfer
 #print axioms lemma15_decomposed
+#print axioms primePart_regroup
 
 end LeanLab.BakerHarmanPintz1997.Decomp409c
