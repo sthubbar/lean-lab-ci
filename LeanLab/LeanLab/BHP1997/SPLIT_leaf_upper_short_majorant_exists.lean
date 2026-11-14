@@ -18,6 +18,148 @@ import LeanLab.BHP1997.SPLIT_upper_short_coefficient
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b
 
+/-! ### Private helpers for the divisor-bound leaf. At most 18 distinct primes at least
+`Y ^ c1` with `c1 >= 1/9` divide an integer `k <= 2 Y`, so the two positive pieces are
+bounded by `500` on the short interval. -/
+
+private theorem mjr_rough_le_one (n : ℕ) (w : ℝ) : upperRough n w ≤ 1 := by
+  unfold upperRough; split_ifs <;> norm_num
+
+private theorem mjr_large_primes_pow_le {w : ℝ} (hw : 0 ≤ w) {m : ℕ} (hm : m ≠ 0)
+    (S : Finset ℕ) (hS : S ⊆ m.primeFactors) (hSw : ∀ p ∈ S, w ≤ (p : ℝ)) :
+    w ^ S.card ≤ (m : ℝ) := by
+  have hdvd : (∏ p ∈ S, p) ∣ m :=
+    (Finset.prod_dvd_prod_of_subset S m.primeFactors (fun p => p) hS).trans
+      (Nat.prod_primeFactors_dvd m)
+  have hle : (∏ p ∈ S, p) ≤ m := Nat.le_of_dvd (Nat.pos_of_ne_zero hm) hdvd
+  calc w ^ S.card = ∏ _p ∈ S, w := by rw [Finset.prod_const]
+    _ ≤ ∏ p ∈ S, (p : ℝ) := by gcongr with p hp; exact hSw p hp
+    _ = ((∏ p ∈ S, p : ℕ) : ℝ) := by push_cast; rfl
+    _ ≤ (m : ℝ) := by exact_mod_cast hle
+
+private theorem mjr_upperC1_ge {ε : ℝ} (hε8 : ε ≤ 1 / 10 ^ 8) : 1 / 9 ≤ upperC1 ε := by
+  unfold upperC1; norm_num at hε8 ⊢; linarith
+
+private theorem mjr_card_le_eighteen {ε Y : ℝ} (hε8 : ε ≤ 1 / 10 ^ 8) (hY : 2 ≤ Y)
+    {m : ℕ} (hm : m ≠ 0) (hmY : (m : ℝ) ≤ 2 * Y) (S : Finset ℕ)
+    (hS : S ⊆ m.primeFactors) (hSw : ∀ p ∈ S, Y ^ upperC1 ε ≤ (p : ℝ)) :
+    S.card ≤ 18 := by
+  have hY0 : 0 < Y := by linarith
+  have h1 := mjr_large_primes_pow_le (Real.rpow_nonneg hY0.le _) hm S hS hSw
+  rw [← Real.rpow_natCast, ← Real.rpow_mul hY0.le] at h1
+  have h2 : (m : ℝ) ≤ Y ^ (2 : ℝ) := by
+    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]; nlinarith
+  have h3 : upperC1 ε * (S.card : ℝ) ≤ 2 :=
+    (Real.rpow_le_rpow_left_iff (by linarith)).mp (h1.trans h2)
+  have h4 := mjr_upperC1_ge hε8
+  have h5 : (S.card : ℝ) ≤ 18 := by nlinarith [Nat.cast_nonneg (α := ℝ) S.card]
+  exact_mod_cast h5
+
+/-- A sum of terms in `[0, a]` over a finset with at most `N` elements is in `[0, N a]`. -/
+private theorem mjr_sum_bound {S : Finset ℕ} {f : ℕ → ℝ} {a : ℝ} {N : ℕ} (ha : 0 ≤ a)
+    (hN : S.card ≤ N) (hf : ∀ p ∈ S, 0 ≤ f p ∧ f p ≤ a) :
+    0 ≤ ∑ p ∈ S, f p ∧ ∑ p ∈ S, f p ≤ N * a := by
+  refine ⟨Finset.sum_nonneg fun p hp => (hf p hp).1, ?_⟩
+  calc ∑ p ∈ S, f p ≤ ∑ _p ∈ S, a := Finset.sum_le_sum fun p hp => (hf p hp).2
+    _ = S.card * a := by rw [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ N * a := mul_le_mul_of_nonneg_right (by exact_mod_cast hN) ha
+
+private theorem mjr_card_le_two {m : ℕ} (hm3 : m ≤ 3) (S : Finset ℕ)
+    (hS : S ⊆ m.primeFactors) : S.card ≤ 2 := by
+  have hsub : S ⊆ ({2, 3} : Finset ℕ) := by
+    intro p hp
+    have hp' := Nat.mem_primeFactors.mp (hS hp)
+    have hpm : p ≤ m := Nat.le_of_dvd (by omega) hp'.2.1
+    have h2 : 2 ≤ p := hp'.1.two_le
+    have hp3 : p ≤ 3 := le_trans hpm hm3
+    have : p = 2 ∨ p = 3 := by omega
+    rcases this with h | h <;> simp [h]
+  calc S.card ≤ ({2, 3} : Finset ℕ).card := Finset.card_le_card hsub
+    _ = 2 := by norm_num
+
+/-- The nested sum of the third positive piece `upperJ`, bounded by `N * N` once every filtered
+prime-factor set inside a divisor of `m` has at most `N` elements. -/
+private theorem mjr_J_bound {ε Y : ℝ} {N : ℕ} {m : ℕ}
+    (hcard : ∀ n : ℕ, n ∣ m → ∀ P : ℕ → Prop,
+      ((n.primeFactors.filter fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ P p).card ≤ N)) :
+    0 ≤ upperJ ε Y m ∧ upperJ ε Y m ≤ (N : ℝ) * (N : ℝ) := by
+  have hdivp : ∀ {n p : ℕ}, p ∈ n.primeFactors → n / p ∣ n := fun hp =>
+    Nat.div_dvd_of_dvd (Nat.mem_primeFactors.mp hp).2.1
+  have hinner : ∀ p1 ∈ m.primeFactors.filter
+      (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < Y ^ upperC4 ε),
+      (0 ≤ ∑ p2 ∈ (m / p1).primeFactors.filter
+          (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p1 : ℝ)),
+          upperRough (m / p1 / p2) (Y ^ upperC1 ε)) ∧
+      (∑ p2 ∈ (m / p1).primeFactors.filter
+          (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p1 : ℝ)),
+          upperRough (m / p1 / p2) (Y ^ upperC1 ε)) ≤ (N : ℝ) * 1 := by
+    intro p1 hp1
+    exact mjr_sum_bound (show (0 : ℝ) ≤ 1 by norm_num)
+      (hcard (m / p1) (hdivp (Finset.mem_filter.mp hp1).1) _)
+      (fun p _ => ⟨upperRough_nonneg _ _, mjr_rough_le_one _ _⟩)
+  have hmain := mjr_sum_bound (show (0 : ℝ) ≤ (N : ℝ) * 1 by positivity)
+    (hcard m dvd_rfl _) hinner
+  constructor
+  · unfold upperJ
+    exact hmain.1
+  · unfold upperJ
+    calc ∑ p1 ∈ m.primeFactors.filter
+          (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < Y ^ upperC4 ε),
+        ∑ p2 ∈ (m / p1).primeFactors.filter
+          (fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (p1 : ℝ)),
+          upperRough (m / p1 / p2) (Y ^ upperC1 ε)
+        ≤ (N : ℝ) * ((N : ℝ) * 1) := hmain.2
+      _ = (N : ℝ) * (N : ℝ) := by ring
+
+/-- The divisor bound on the short interval when `Y >= 2`: at most 18 primes at least `Y ^ c1` can
+divide `k <= 2 Y`, so `upperG` is at most one and `upperJ` at most `18 * 18`. -/
+private theorem mjr_abs_le_big {ε Y : ℝ} (hε8 : ε ≤ 1 / 10 ^ 8) (hY : 2 ≤ Y) {m : ℕ}
+    (hm0 : m ≠ 0) (hmY : (m : ℝ) ≤ 2 * Y) :
+    |upperG ε Y m + upperJ ε Y m| ≤ 1 + 18 * 18 := by
+  have hcard : ∀ n : ℕ, n ∣ m → ∀ P : ℕ → Prop,
+      ((n.primeFactors.filter fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ P p).card ≤ 18) := by
+    intro n hn P
+    have hnpos : 0 < n := Nat.pos_of_dvd_of_pos hn (Nat.pos_of_ne_zero hm0)
+    have hle : n ≤ m := Nat.le_of_dvd (Nat.pos_of_ne_zero hm0) hn
+    have hnY : (n : ℝ) ≤ 2 * Y := by
+      have hcast : (n : ℝ) ≤ (m : ℝ) := by exact_mod_cast hle
+      linarith
+    exact mjr_card_le_eighteen hε8 hY hnpos.ne' hnY
+      (n.primeFactors.filter fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ P p)
+      (fun p hp => (Finset.mem_filter.mp hp).1)
+      (fun p hp => (Finset.mem_filter.mp hp).2.1)
+  obtain ⟨hJ0, hJ⟩ := mjr_J_bound (N := 18) hcard
+  have hG0 : 0 ≤ upperG ε Y m := upperRough_nonneg m _
+  have hG1 : upperG ε Y m ≤ 1 := mjr_rough_le_one m _
+  have hJ' : upperJ ε Y m ≤ 18 * 18 := by
+    have : ((18 : ℕ) : ℝ) * ((18 : ℕ) : ℝ) = 18 * 18 := by norm_num
+    linarith [this ▸ hJ]
+  rw [abs_of_nonneg (by linarith)]
+  linarith
+
+/-- The divisor bound on the short interval when `Y < 2`: then `k <= 3`, so only the primes `2` and
+`3` can occur and both pieces are tiny. -/
+private theorem mjr_abs_le_small {ε Y : ℝ} (hY2 : Y < 2) {m : ℕ} (hm0 : m ≠ 0)
+    (hmY : (m : ℝ) ≤ 2 * Y) : |upperG ε Y m + upperJ ε Y m| ≤ 5 := by
+  have h4 : (m : ℝ) < 4 := by linarith
+  have hm4 : m < 4 := by exact_mod_cast h4
+  have hm3 : m ≤ 3 := by omega
+  have hcard : ∀ n : ℕ, n ∣ m → ∀ P : ℕ → Prop,
+      ((n.primeFactors.filter fun p : ℕ => Y ^ upperC1 ε ≤ (p : ℝ) ∧ P p).card ≤ 2) := by
+    intro n hn P
+    have hle : n ≤ m := Nat.le_of_dvd (Nat.pos_of_ne_zero hm0) hn
+    refine mjr_card_le_two (hle.trans hm3) _ ?_
+    intro p hp
+    exact (Finset.mem_filter.mp hp).1
+  obtain ⟨hJ0, hJ⟩ := mjr_J_bound (N := 2) hcard
+  have hG0 : 0 ≤ upperG ε Y m := upperRough_nonneg m _
+  have hG1 : upperG ε Y m ≤ 1 := mjr_rough_le_one m _
+  have hJ' : upperJ ε Y m ≤ 4 := by
+    have : ((2 : ℕ) : ℝ) * ((2 : ℕ) : ℝ) = 4 := by norm_num
+    linarith [this ▸ hJ]
+  rw [abs_of_nonneg (by linarith)]
+  linarith
+
 /- Side notes for the leaf below, kept out of its doc comment because the gate reads only the 800
 characters before a declaration. Only `m` in the short interval is tested, and there `m ≤ 2 * Y` with
 `Y = x ^ (11 / 20 + ε)`; every prime counted by the two positive pieces is at least `Y ^ c1` with
@@ -37,7 +179,41 @@ theorem leaf_upper_short_majorant_divisor_bound (ε B : ℝ) (hB : 0 ≤ B)
       |(if k ∈ rightInterval ε x then
         upperG ε (x ^ (11 / 20 + ε)) k + upperJ ε (x ^ (11 / 20 + ε)) k else 0)|
         ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B := by
-  sorry
+  refine ⟨500, fun x k => ?_⟩
+  by_cases hk : k ∈ rightInterval ε x
+  · rw [if_pos hk]
+    have hk' : ⌊x ^ (11 / 20 + ε)⌋₊ < k ∧ k ≤ ⌊2 * x ^ (11 / 20 + ε)⌋₊ := by
+      have h := hk
+      unfold rightInterval at h
+      exact Finset.mem_Ioc.mp h
+    have hk1 : 1 ≤ k := by omega
+    have hk0 : k ≠ 0 := by omega
+    have hYpos : 0 < x ^ (11 / 20 + ε) := by
+      rcases le_or_gt (x ^ (11 / 20 + ε)) 0 with h | h
+      · exfalso
+        have hz : ⌊2 * x ^ (11 / 20 + ε)⌋₊ = 0 := Nat.floor_of_nonpos (by linarith)
+        omega
+      · exact h
+    have hkY : (k : ℝ) ≤ 2 * x ^ (11 / 20 + ε) := by
+      have h1 : (k : ℝ) ≤ (⌊2 * x ^ (11 / 20 + ε)⌋₊ : ℝ) := by exact_mod_cast hk'.2
+      exact h1.trans (Nat.floor_le (by linarith))
+    have hkey : |upperG ε (x ^ (11 / 20 + ε)) k + upperJ ε (x ^ (11 / 20 + ε)) k| ≤ 500 := by
+      by_cases hY : 2 ≤ x ^ (11 / 20 + ε)
+      · have h := mjr_abs_le_big hε8 hY hk0 hkY
+        linarith
+      · have h := mjr_abs_le_small (ε := ε) (lt_of_not_ge hY) hk0 hkY
+        linarith
+    have hd1 : (1 : ℝ) ≤ ((k.divisors.card : ℕ) : ℝ) := by
+      have hpos : 1 ≤ k.divisors.card :=
+        Finset.card_pos.mpr ⟨1, Nat.mem_divisors.mpr ⟨one_dvd k, hk0⟩⟩
+      exact_mod_cast hpos
+    have hdB : (1 : ℝ) ≤ ((k.divisors.card : ℕ) : ℝ) ^ B := Real.one_le_rpow hd1 hB
+    calc |upperG ε (x ^ (11 / 20 + ε)) k + upperJ ε (x ^ (11 / 20 + ε)) k| ≤ 500 := hkey
+      _ = 500 * 1 := by ring
+      _ ≤ 500 * ((k.divisors.card : ℕ) : ℝ) ^ B :=
+          mul_le_mul_of_nonneg_left hdB (by norm_num)
+  · rw [if_neg hk, abs_zero]
+    exact mul_nonneg (by norm_num) (Real.rpow_nonneg (Nat.cast_nonneg _) B)
 
 /- Side notes for the leaf below. Only terms with `m` in the short interval are summed, so masking
 the family outside the interval changes nothing. Edge cases: `t` may be negative, in which case the
