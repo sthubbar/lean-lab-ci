@@ -15,6 +15,70 @@ namespace LeanLab.Halupczok2012.Decomp329g
 
 open scoped Classical
 
+/-- The part excluded at 3 consists exactly of three times a prime, above 3.
+This is an arithmetic description of the extra restriction on Halupczok page 345. -/
+theorem isp_two_dvd_three_iff {n : ℕ} (hn : 3 < n) :
+    (IsP 2 n ∧ 3 ∣ n) ↔ ∃ q : ℕ, q.Prime ∧ n = 3 * q := by
+  constructor
+  · rintro ⟨hP, q, rfl⟩
+    have hq : 1 < q := by omega
+    have hcount := hP.2
+    rw [ArithmeticFunction.cardFactors_mul (by decide) (by omega),
+      ArithmeticFunction.cardFactors_apply_prime (by decide : Nat.Prime 3)] at hcount
+    have hpos := ArithmeticFunction.cardFactors_pos_iff_one_lt.mpr hq
+    exact ⟨q, ArithmeticFunction.cardFactors_eq_one_iff_prime.mp (by omega), rfl⟩
+  · rintro ⟨q, hq, rfl⟩
+    exact ⟨isP_mul (isP_prime (by decide : Nat.Prime 3)) (isP_prime hq),
+      dvd_mul_right 3 q⟩
+
+/-- The unrestricted Chen count splits into the sealed rough count and the
+prime shifts of the form three times a prime. No distribution estimate is used. -/
+theorem chen_count_split {X : ℝ} (hX : 3 ≤ X) (Y : ℝ) :
+    ((kRange X Y).filter (fun p => p.Prime ∧ IsP 2 (p + 2))).card =
+      ((kRange X Y).filter
+        (fun p => p.Prime ∧ IsP 2 (p + 2) ∧ ¬ 3 ∣ (p + 2))).card +
+      ((kRange X Y).filter
+        (fun p => p.Prime ∧ ∃ q : ℕ, q.Prime ∧ p + 2 = 3 * q)).card := by
+  let s := (kRange X Y).filter (fun p => p.Prime ∧ IsP 2 (p + 2))
+  have hsplit := Finset.card_filter_add_card_filter_not
+    (s := s) (fun p => ¬ 3 ∣ (p + 2))
+  have hgood : s.filter (fun p => ¬ 3 ∣ (p + 2)) =
+      (kRange X Y).filter
+        (fun p => p.Prime ∧ IsP 2 (p + 2) ∧ ¬ 3 ∣ (p + 2)) := by
+    ext p
+    simp [s, and_assoc]
+  have hbad : s.filter (fun p => ¬ ¬ 3 ∣ (p + 2)) =
+      (kRange X Y).filter
+        (fun p => p.Prime ∧ ∃ q : ℕ, q.Prime ∧ p + 2 = 3 * q) := by
+    ext p
+    by_cases hp : p ∈ kRange X Y
+    · have hplo := ((Fourier398.window_mem _ _ _).mp hp).1
+      have hpn : 3 < p + 2 := by
+        have : (3 : ℝ) < p := hX.trans_lt hplo
+        have : 3 < p := by exact_mod_cast this
+        omega
+      simp only [Finset.mem_filter, s, hp, true_and, not_not]
+      rw [and_assoc, isp_two_dvd_three_iff hpn]
+    · simp [s, hp]
+  rw [hgood, hbad] at hsplit
+  exact hsplit.symm
+
+/-- A lower bound for all Chen candidates and an upper bound for the excluded
+three-times-prime candidates give the required rough count by subtraction. -/
+theorem rough_count_lower_of_subtraction {X Y A B : ℝ} (hX : 3 ≤ X)
+    (hall : A ≤
+      (((kRange X Y).filter (fun p => p.Prime ∧ IsP 2 (p + 2))).card : ℝ))
+    (hbad :
+      (((kRange X Y).filter
+        (fun p => p.Prime ∧ ∃ q : ℕ, q.Prime ∧ p + 2 = 3 * q)).card : ℝ) ≤ B) :
+    A - B ≤
+      (((kRange X Y).filter
+        (fun p => p.Prime ∧ IsP 2 (p + 2) ∧ ¬ 3 ∣ (p + 2))).card : ℝ) := by
+  have hsplit := chen_count_split hX Y
+  have hsplitR := congrArg (fun n : ℕ => (n : ℝ)) hsplit
+  push_cast at hsplitR
+  linarith
+
 /-- LEAF. Halupczok page 345, Wu arXiv page 5 Theorem 5 at theta 0.971.
 Use the rough sieved contribution in the proof on pages 34, 38 and 42.
 Only the one power length X to 0.971 is counted, with denominator log X squared.

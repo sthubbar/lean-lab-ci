@@ -97,6 +97,606 @@ noncomputable def mainArc (ε : ℝ) (X : ℕ) (H : ℝ) (q a : ℕ) (β : ℝ) 
     eC ((a : ℝ) * m * b / q) * (1 / ((m : ℂ) * q)) *
       ∫ u in (X : ℝ)..(X + H), (Pm (R4 ε X) m (Real.log u) : ℂ) * eC (u * β)
 
+/-!
+### Ported from Burst8P23: the proof chain of Proposition 2.3.
+
+This file cannot import Burst8P23, which imports this file, so the chain of lemmas behind
+Burst8P23.prop_2_3_p3 is ported here verbatim, with the same statements, to prove
+prop_2_3 below. AI wrote the Lean code. Binary Goldbach is OPEN.
+-/
+
+noncomputable def Vset (R : ℝ) (m j : ℕ) : Finset (Fin 3 → ℕ) :=
+  (Fintype.piFinset fun _ : Fin 3 => Icc 1 ⌊R ^ 2⌋₊).filter
+    (fun v => v 0 * v 1 * v 2 = m ∧ (∀ i : Fin 3, i.val < j → (v i : ℝ) ≤ R) ∧
+      (∀ i : Fin 3, j ≤ i.val → R < (v i : ℝ) ∧ (v i : ℝ) ≤ R ^ 2))
+
+/-- The shift `log(n₁ ⋯ n_j R^{4-j})` in `P_m`. -/
+noncomputable def Lsh (R : ℝ) (j : ℕ) (v : Fin 3 → ℕ) : ℝ :=
+  Real.log ((∏ i ∈ (univ : Finset (Fin 3)).filter (fun i => i.val < j), (v i : ℝ)) * R ^ (4 - j))
+
+theorem Pm_eq (R : ℝ) (m : ℕ) (t : ℝ) : Pm R m t = ∑ j ∈ range 4, (Nat.choose 4 j : ℝ) *
+    ∑ v ∈ Vset R m j, (t - Lsh R j v) ^ (3 - j) /
+      ((Nat.factorial (3 - j) : ℝ) * Real.log R ^ (3 - j)) := rfl
+
+/-- The derivative of `P_m`. -/
+noncomputable def Pmd (R : ℝ) (m : ℕ) (t : ℝ) : ℝ := ∑ j ∈ range 4, (Nat.choose 4 j : ℝ) *
+    ∑ v ∈ Vset R m j, ((3 - j : ℕ) : ℝ) * (t - Lsh R j v) ^ (3 - j - 1) /
+      ((Nat.factorial (3 - j) : ℝ) * Real.log R ^ (3 - j))
+
+theorem hasDerivAt_Pm (R : ℝ) (m : ℕ) (t : ℝ) : HasDerivAt (Pm R m) (Pmd R m t) t := by
+  have e : Pm R m = fun t => ∑ j ∈ range 4, (Nat.choose 4 j : ℝ) *
+      ∑ v ∈ Vset R m j, (t - Lsh R j v) ^ (3 - j) /
+        ((Nat.factorial (3 - j) : ℝ) * Real.log R ^ (3 - j)) := by
+    funext t; exact Pm_eq R m t
+  rw [e]
+  unfold Pmd
+  apply HasDerivAt.fun_sum
+  intro j _
+  apply HasDerivAt.const_mul
+  apply HasDerivAt.fun_sum
+  intro v _
+  have h := (((hasDerivAt_id t).sub_const (Lsh R j v)).pow (3 - j)).div_const
+    ((Nat.factorial (3 - j) : ℝ) * Real.log R ^ (3 - j))
+  simp only [id, mul_one] at h
+  exact h
+
+theorem card_Vset_le {R : ℝ} (hR : 1 ≤ R) (m j : ℕ) : ((Vset R m j).card : ℝ) ≤ R ^ 6 := by
+  have h1 : (Vset R m j).card ≤ ⌊R ^ 2⌋₊ ^ 3 := by
+    unfold Vset
+    refine le_trans (Finset.card_filter_le _ _) ?_
+    simp
+  have h2 : ((⌊R ^ 2⌋₊ ^ 3 : ℕ) : ℝ) ≤ R ^ 6 := by
+    push_cast
+    have := Nat.floor_le (by positivity : (0 : ℝ) ≤ R ^ 2)
+    calc (⌊R ^ 2⌋₊ : ℝ) ^ 3 ≤ (R ^ 2) ^ 3 := pow_le_pow_left₀ (by positivity) this 3
+      _ = R ^ 6 := by ring
+  exact le_trans (by exact_mod_cast h1) h2
+
+theorem Lsh_bounds {R : ℝ} (hR : 1 ≤ R) {m j : ℕ} (hj : j < 4) {v : Fin 3 → ℕ}
+    (hv : v ∈ Vset R m j) : 0 ≤ Lsh R j v ∧ Lsh R j v ≤ 10 * Real.log R := by
+  have hvi : ∀ i, 1 ≤ (v i : ℝ) ∧ (v i : ℝ) ≤ R ^ 2 := by
+    intro i
+    unfold Vset at hv
+    rw [Finset.mem_filter, Fintype.mem_piFinset] at hv
+    have h := hv.1 i
+    rw [Finset.mem_Icc] at h
+    exact ⟨by exact_mod_cast h.1, le_trans (by exact_mod_cast h.2) (Nat.floor_le (by positivity))⟩
+  set P := ∏ i ∈ (univ : Finset (Fin 3)).filter (fun i => i.val < j), (v i : ℝ)
+  have hP1 : 1 ≤ P := Finset.one_le_prod₀ (fun i _ => (hvi i).1)
+  have hP2 : P ≤ (R ^ 2) ^ 3 := by
+    calc P ≤ ∏ i ∈ (univ : Finset (Fin 3)).filter (fun i => i.val < j), R ^ 2 :=
+          Finset.prod_le_prod₀ (fun i _ => by linarith [(hvi i).1]) (fun i _ => (hvi i).2)
+      _ = (R ^ 2) ^ ((univ : Finset (Fin 3)).filter (fun i => i.val < j)).card := by
+          rw [Finset.prod_const]
+      _ ≤ (R ^ 2) ^ 3 := by
+          apply pow_le_pow_right₀ (by nlinarith)
+          exact le_trans (Finset.card_filter_le _ _) (by simp)
+  have hR4 : 1 ≤ R ^ (4 - j) := one_le_pow₀ hR
+  have hR4' : R ^ (4 - j) ≤ R ^ 4 := pow_le_pow_right₀ hR (by omega)
+  have hRp : 0 < R := by linarith
+  unfold Lsh
+  constructor
+  · exact Real.log_nonneg (one_le_mul_of_one_le_of_one_le hP1 hR4)
+  · have : P * R ^ (4 - j) ≤ R ^ 10 := by
+      calc P * R ^ (4 - j) ≤ (R ^ 2) ^ 3 * R ^ 4 :=
+            mul_le_mul hP2 hR4' (by positivity) (by positivity)
+        _ = R ^ 10 := by ring
+    calc Real.log (P * R ^ (4 - j)) ≤ Real.log (R ^ 10) :=
+          Real.log_le_log (by positivity) this
+      _ = 10 * Real.log R := by rw [Real.log_pow]; norm_num
+
+theorem sum_choose_four : ∑ j ∈ range 4, (Nat.choose 4 j : ℝ) = 15 := by
+  simp [Finset.sum_range_succ, Nat.choose]; norm_num
+
+/-- Generic bound for the double sum shape of `P_m` and its derivative. -/
+theorem abs_double_sum_le {R B : ℝ} (hR : 1 ≤ R) (hB : 0 ≤ B) (m : ℕ)
+    (f : ℕ → (Fin 3 → ℕ) → ℝ) (hf : ∀ j < 4, ∀ v ∈ Vset R m j, |f j v| ≤ B) :
+    |∑ j ∈ range 4, (Nat.choose 4 j : ℝ) * ∑ v ∈ Vset R m j, f j v| ≤ 15 * R ^ 6 * B := by
+  refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
+  have h : ∀ j ∈ range 4, |(Nat.choose 4 j : ℝ) * ∑ v ∈ Vset R m j, f j v| ≤
+      (Nat.choose 4 j : ℝ) * (R ^ 6 * B) := by
+    intro j hj
+    rw [abs_mul, abs_of_nonneg (Nat.cast_nonneg _)]
+    apply mul_le_mul_of_nonneg_left _ (Nat.cast_nonneg _)
+    refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
+    refine le_trans (Finset.sum_le_sum fun v hv => hf j (Finset.mem_range.1 hj) v hv) ?_
+    rw [Finset.sum_const, nsmul_eq_mul]
+    exact mul_le_mul_of_nonneg_right (card_Vset_le hR m j) hB
+  refine le_trans (Finset.sum_le_sum h) ?_
+  rw [← Finset.sum_mul, sum_choose_four]; ring_nf; rfl
+
+/-- Crude bounds `|P_m(t)| ≤ 15 R⁶ K³` and `|P_m'(t)| ≤ 45 R⁶ K³` for `|t| ≤ T`, `R ≥ 3`, with
+`K = (T + 10 log R)/log R`. They are a crude form of the remark `P_m(log n) ≪_ε d₃(m)`,
+page 7. -/
+theorem Pm_bounds {R : ℝ} (hR : 3 ≤ R) {T : ℝ} (hT : 0 ≤ T) {t : ℝ} (ht : |t| ≤ T) (m : ℕ) :
+    |Pm R m t| ≤ 15 * R ^ 6 * ((T + 10 * Real.log R) / Real.log R) ^ 3 ∧
+      |Pmd R m t| ≤ 15 * R ^ 6 * (3 * ((T + 10 * Real.log R) / Real.log R) ^ 3) := by
+  have hR1 : (1 : ℝ) ≤ R := by linarith
+  have hℓ : 1 ≤ Real.log R := by
+    rw [Real.le_log_iff_exp_le (by linarith)]
+    exact le_trans (le_of_lt (lt_of_lt_of_le Real.exp_one_lt_d9 (by norm_num))) hR
+  set ℓ := Real.log R
+  set K := (T + 10 * ℓ) / ℓ with hK
+  have hℓp : 0 < ℓ := by linarith
+  have hK1 : 1 ≤ K := by rw [hK, le_div_iff₀ hℓp]; linarith
+  have hdiff : ∀ j < 4, ∀ v ∈ Vset R m j, |t - Lsh R j v| ≤ K * ℓ := by
+    intro j hj v hv
+    obtain ⟨h0, h1⟩ := Lsh_bounds hR1 hj hv
+    rw [hK, div_mul_cancel₀ _ hℓp.ne']
+    rw [abs_le] at ht ⊢; constructor <;> linarith [ht.1, ht.2]
+  have hpow : ∀ p : ℕ, p ≤ 3 → ∀ x : ℝ, |x| ≤ K * ℓ →
+      |x ^ p / ((Nat.factorial p : ℝ) * ℓ ^ p)| ≤ K ^ 3 := by
+    intro p hp x hx
+    have hfac : (1 : ℝ) ≤ Nat.factorial p := by exact_mod_cast Nat.one_le_iff_ne_zero.2 (Nat.factorial_ne_zero p)
+    have hd : 0 < (Nat.factorial p : ℝ) * ℓ ^ p := mul_pos (by linarith) (pow_pos hℓp p)
+    rw [abs_div, abs_of_pos hd, abs_pow]
+    rw [div_le_iff₀ hd]
+    calc |x| ^ p ≤ (K * ℓ) ^ p := pow_le_pow_left₀ (abs_nonneg _) hx p
+      _ = K ^ p * ℓ ^ p := by ring
+      _ ≤ K ^ 3 * ℓ ^ p := mul_le_mul_of_nonneg_right (pow_le_pow_right₀ hK1 hp) (by positivity)
+      _ ≤ K ^ 3 * ((Nat.factorial p : ℝ) * ℓ ^ p) := by
+          apply mul_le_mul_of_nonneg_left _ (by positivity)
+          nlinarith [pow_pos hℓp p]
+  constructor
+  · rw [Pm_eq]
+    exact abs_double_sum_le hR1 (by positivity) m _ fun j hj v hv =>
+      hpow (3 - j) (by omega) _ (hdiff j hj v hv)
+  · unfold Pmd
+    refine abs_double_sum_le hR1 (by positivity) m _ fun j hj v hv => ?_
+    have hx := hdiff j hj v hv
+    rcases Nat.lt_or_ge j 3 with hj3 | hj3
+    · -- `p = 3 - j ≥ 1`
+      obtain ⟨p, hp⟩ : ∃ p, 3 - j = p + 1 := ⟨3 - j - 1, by omega⟩
+      rw [hp, show p + 1 - 1 = p by omega]
+      have hfac : (Nat.factorial (p + 1) : ℝ) = (p + 1) * Nat.factorial p := by
+        push_cast [Nat.factorial_succ]; ring
+      have e : ((p + 1 : ℕ) : ℝ) * (t - Lsh R j v) ^ p /
+          ((Nat.factorial (p + 1) : ℝ) * ℓ ^ (p + 1)) =
+          ((t - Lsh R j v) ^ p / ((Nat.factorial p : ℝ) * ℓ ^ p)) / ℓ := by
+        rw [hfac]; push_cast
+        have : (Nat.factorial p : ℝ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero p
+        field_simp
+        ring
+      rw [e, abs_div, abs_of_pos hℓp]
+      have h1 := hpow p (by omega) _ hx
+      have h2 : |(t - Lsh R j v) ^ p / ((Nat.factorial p : ℝ) * ℓ ^ p)| / ℓ ≤
+          |(t - Lsh R j v) ^ p / ((Nat.factorial p : ℝ) * ℓ ^ p)| :=
+        div_le_self (abs_nonneg _) hℓ
+      have h3 : 0 ≤ K ^ 3 := by positivity
+      linarith
+    · have : 3 - j = 0 := by omega
+      rw [this]; simp; positivity
+
+/-! ### Sums against integrals -/
+
+/-- A sum over consecutive integers against an integral: for `h` with derivative `h'` on
+`[J₀ - 2, J₁ + 2]`, `|h| ≤ M₀` and `|h'| ≤ M₁` there, and endpoints `a ∈ [J₀ - 2, J₀]`,
+`b ∈ [J₁, J₁ + 2]`, `|∑_{J₀ ≤ j ≤ J₁} h(j) - ∫_a^b h| ≤ 3M₀ + (J₁ + 1 - J₀) M₁`. -/
+theorem sum_Icc_sub_integral_le {h h' : ℝ → ℂ} {J₀ J₁ : ℕ} (hJ : J₀ ≤ J₁ + 1) {a b : ℝ}
+    (ha : (J₀ : ℝ) - 2 ≤ a) (ha' : a ≤ J₀) (hb : (J₁ : ℝ) ≤ b) (hb' : b ≤ J₁ + 2) {M₀ M₁ : ℝ}
+    (hd : ∀ x ∈ Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2), HasDerivAt h (h' x) x)
+    (h0 : ∀ x ∈ Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2), ‖h x‖ ≤ M₀)
+    (h1 : ∀ x ∈ Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2), ‖h' x‖ ≤ M₁) :
+    ‖∑ j ∈ Icc J₀ J₁, h j - ∫ x in a..b, h x‖ ≤ 3 * M₀ + ((J₁ + 1 - J₀ : ℕ) : ℝ) * M₁ := by
+  set I := Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2)
+  have hJR : (J₀ : ℝ) ≤ J₁ + 1 := by exact_mod_cast hJ
+  have hcont : ContinuousOn h I := fun x hx => (hd x hx).continuousAt.continuousWithinAt
+  have hii : ∀ u v : ℝ, u ∈ I → v ∈ I → IntervalIntegrable h volume u v := by
+    intro u v hu hv
+    exact (hcont.mono (Set.uIcc_subset_Icc hu hv)).intervalIntegrable
+  have hmemI : ∀ x : ℝ, (J₀ : ℝ) - 2 ≤ x → x ≤ J₁ + 2 → x ∈ I := fun x h1 h2 => ⟨h1, h2⟩
+  have hM₀ : 0 ≤ M₀ := le_trans (norm_nonneg _) (h0 J₀ (hmemI _ (by linarith) (by linarith)))
+  have hM₁ : 0 ≤ M₁ := le_trans (norm_nonneg _) (h1 J₀ (hmemI _ (by linarith) (by linarith)))
+  set N := J₁ + 1 - J₀ with hN
+  -- the sum as a sum over `range N`
+  have hsum : ∑ j ∈ Icc J₀ J₁, h j = ∑ i ∈ range N, h ((J₀ : ℝ) + i) := by
+    have e : Icc J₀ J₁ = Ico J₀ (J₁ + 1) := by
+      ext x; simp only [Finset.mem_Icc, Finset.mem_Ico]; omega
+    rw [e, Finset.sum_Ico_eq_sum_range]
+    push_cast; rfl
+  -- the middle integral as a sum
+  have hmid : ∫ x in (J₀ : ℝ)..(J₁ + 1 : ℝ), h x =
+      ∑ i ∈ range N, ∫ x in ((J₀ : ℝ) + i)..((J₀ : ℝ) + (i + 1 : ℕ)), h x := by
+    rw [intervalIntegral.sum_integral_adjacent_intervals (a := fun i : ℕ => (J₀ : ℝ) + i)]
+    · simp only [Nat.cast_zero, add_zero]
+      congr 1
+      rw [hN]; push_cast [Nat.cast_sub hJ]; ring
+    · intro k hk
+      apply hii
+      · exact hmemI _ (by push_cast; linarith) (by
+          have : (k : ℝ) + 1 ≤ N := by exact_mod_cast hk
+          have hN' : (N : ℝ) = J₁ + 1 - J₀ := by rw [hN]; push_cast [Nat.cast_sub hJ]; ring
+          linarith)
+      · exact hmemI _ (by push_cast; linarith) (by
+          have : (k : ℝ) + 1 ≤ N := by exact_mod_cast hk
+          have hN' : (N : ℝ) = J₁ + 1 - J₀ := by rw [hN]; push_cast [Nat.cast_sub hJ]; ring
+          push_cast; linarith)
+  have hNR : (N : ℝ) = J₁ + 1 - J₀ := by rw [hN]; push_cast [Nat.cast_sub hJ]; ring
+  -- each unit step
+  have hstep : ∀ i ∈ range N, ‖h ((J₀ : ℝ) + i) -
+      ∫ x in ((J₀ : ℝ) + i)..((J₀ : ℝ) + (i + 1 : ℕ)), h x‖ ≤ M₁ := by
+    intro i hi
+    have hi' : (i : ℝ) + 1 ≤ N := by exact_mod_cast Finset.mem_range.1 hi
+    set c := (J₀ : ℝ) + i
+    have hcI : Set.Icc c (c + 1) ⊆ I := by
+      intro x hx; exact hmemI _ (by linarith [hx.1]) (by linarith [hx.2])
+    have hmv := norm_image_sub_le_of_norm_deriv_le_segment' (f := h) (a := c) (b := c + 1)
+      (fun x hx => (hd x (hcI hx)).hasDerivWithinAt)
+      (fun x hx => h1 x (hcI (Set.Ico_subset_Icc_self hx)))
+    have e1 : ((J₀ : ℝ) + (i + 1 : ℕ)) = c + 1 := by push_cast; ring
+    rw [e1]
+    have e2 : h c = ∫ x in c..(c + 1), h c := by simp
+    rw [e2, ← intervalIntegral.integral_sub intervalIntegrable_const
+      (hii _ _ (hcI ⟨le_refl _, by linarith⟩) (hcI ⟨by linarith, le_refl _⟩))]
+    have := intervalIntegral.norm_integral_le_of_norm_le_const (a := c) (b := c + 1)
+      (C := M₁) (f := fun x => h c - h x) (fun x hx => by
+        rw [Set.uIoc_of_le (by linarith)] at hx
+        have := hmv x ⟨hx.1.le, hx.2⟩
+        rw [norm_sub_rev]
+        calc ‖h x - h c‖ ≤ M₁ * (x - c) := this
+          _ ≤ M₁ * 1 := mul_le_mul_of_nonneg_left (by linarith [hx.2]) hM₁
+          _ = M₁ := mul_one _)
+    simpa using this
+  -- assemble
+  have hsplit : ∫ x in a..b, h x = (∫ x in a..(J₀ : ℝ), h x) +
+      (∫ x in (J₀ : ℝ)..(J₁ + 1 : ℝ), h x) + ∫ x in (J₁ + 1 : ℝ)..b, h x := by
+    rw [intervalIntegral.integral_add_adjacent_intervals
+        (hii _ _ (hmemI _ ha (by linarith)) (hmemI _ (by linarith) (by linarith)))
+        (hii _ _ (hmemI _ (by linarith) (by linarith)) (hmemI _ (by linarith) (by linarith))),
+      intervalIntegral.integral_add_adjacent_intervals
+        (hii _ _ (hmemI _ ha (by linarith)) (hmemI _ (by linarith) (by linarith)))
+        (hii _ _ (hmemI _ (by linarith) (by linarith)) (hmemI _ (by linarith) hb'))]
+  have hA : ‖∫ x in a..(J₀ : ℝ), h x‖ ≤ 2 * M₀ := by
+    refine le_trans (intervalIntegral.norm_integral_le_of_norm_le_const (C := M₀) fun x hx => ?_) ?_
+    · rw [Set.uIoc_of_le ha'] at hx
+      exact h0 x (hmemI _ (by linarith [hx.1]) (by linarith [hx.2]))
+    · rw [abs_of_nonneg (by linarith)]; nlinarith
+  have hB : ‖∫ x in (J₁ + 1 : ℝ)..b, h x‖ ≤ M₀ := by
+    refine le_trans (intervalIntegral.norm_integral_le_of_norm_le_const (C := M₀) fun x hx => ?_) ?_
+    · have hx' := Set.uIoc_subset_uIcc hx
+      rw [Set.mem_uIcc] at hx'
+      rcases hx' with ⟨h1', h2'⟩ | ⟨h1', h2'⟩
+      · exact h0 x (hmemI _ (by linarith) (by linarith))
+      · exact h0 x (hmemI _ (by linarith) (by linarith))
+    · have : |b - (J₁ + 1)| ≤ 1 := by rw [abs_le]; constructor <;> linarith
+      nlinarith
+  rw [hsplit, hsum, hmid]
+  have e : ∑ i ∈ range N, h ((J₀ : ℝ) + i) - ((∫ x in a..(J₀ : ℝ), h x) +
+      (∑ i ∈ range N, ∫ x in ((J₀ : ℝ) + i)..((J₀ : ℝ) + (i + 1 : ℕ)), h x) +
+        ∫ x in (J₁ + 1 : ℝ)..b, h x) =
+      (∑ i ∈ range N, (h ((J₀ : ℝ) + i) -
+        ∫ x in ((J₀ : ℝ) + i)..((J₀ : ℝ) + (i + 1 : ℕ)), h x)) -
+        (∫ x in a..(J₀ : ℝ), h x) - ∫ x in (J₁ + 1 : ℝ)..b, h x := by
+    rw [Finset.sum_sub_distrib]; ring
+  rw [e]
+  have hs : ‖∑ i ∈ range N, (h ((J₀ : ℝ) + i) -
+      ∫ x in ((J₀ : ℝ) + i)..((J₀ : ℝ) + (i + 1 : ℕ)), h x)‖ ≤ N * M₁ := by
+    refine le_trans (norm_sum_le _ _) ?_
+    refine le_trans (Finset.sum_le_sum hstep) ?_
+    simp
+  calc ‖(∑ i ∈ range N, (h ((J₀ : ℝ) + i) -
+        ∫ x in ((J₀ : ℝ) + i)..((J₀ : ℝ) + (i + 1 : ℕ)), h x)) -
+        (∫ x in a..(J₀ : ℝ), h x) - ∫ x in (J₁ + 1 : ℝ)..b, h x‖
+      ≤ ‖∑ i ∈ range N, (h ((J₀ : ℝ) + i) -
+        ∫ x in ((J₀ : ℝ) + i)..((J₀ : ℝ) + (i + 1 : ℕ)), h x)‖ +
+        ‖∫ x in a..(J₀ : ℝ), h x‖ + ‖∫ x in (J₁ + 1 : ℝ)..b, h x‖ := by
+        refine le_trans (norm_sub_le _ _) ?_
+        exact add_le_add (norm_sub_le _ _) le_rfl
+    _ ≤ N * M₁ + 2 * M₀ + M₀ := by linarith
+    _ = 3 * M₀ + (N : ℝ) * M₁ := by ring
+
+/-! ### Rearranging `S♯₄(a/q + β)` -/
+
+theorem S4sharp_eq_sum_m (ε : ℝ) {X : ℕ} (hX : 1 ≤ X) (H α : ℝ) :
+    S4sharp ε X H α = ∑ m ∈ Icc 1 ⌊R4 ε X ^ 6⌋₊,
+      ∑ n ∈ (Icc X (X + ⌊H⌋₊)).filter (fun n => m ∣ n),
+        (Pm (R4 ε X) m (Real.log n) : ℂ) * eC (n * α) := by
+  have hR : 0 ≤ R4 ε X ^ 6 := by unfold R4; positivity
+  unfold S4sharp d4sharp
+  push_cast
+  simp_rw [Finset.sum_mul]
+  rw [Finset.sum_comm']
+  intro n m
+  simp only [Finset.mem_Icc, Finset.mem_filter, Nat.mem_divisors]
+  constructor
+  · rintro ⟨⟨hn1, hn2⟩, ⟨hmn, hn0⟩, hmR⟩
+    have hm0 : m ≠ 0 := fun h => by subst h; simp at hmn; omega
+    exact ⟨⟨⟨by omega, hn2⟩, hmn⟩, by omega, Nat.le_floor hmR⟩
+  · rintro ⟨⟨⟨hn1, hn2⟩, hmn⟩, hm1, hmR⟩
+    exact ⟨⟨hn1, hn2⟩, ⟨hmn, by omega⟩, (Nat.le_floor_iff hR).1 hmR⟩
+
+/-- The `j` range: `X ≤ m(qj + c) ≤ Y`. -/
+def Jset (X Y m q c : ℕ) : Finset ℕ :=
+  (range (Y + 1)).filter (fun j => X ≤ m * (q * j + c) ∧ m * (q * j + c) ≤ Y)
+
+theorem sum_dvd_eq_sum_c_j {X Y m q : ℕ} (hm : 1 ≤ m) (hq : 1 ≤ q) (G : ℕ → ℂ) :
+    ∑ n ∈ (Icc X Y).filter (fun n => m ∣ n), G n =
+      ∑ c ∈ range q, ∑ j ∈ Jset X Y m q c, G (m * (q * j + c)) := by
+  have hm0 : 0 < m := by omega
+  have hq0 : 0 < q := by omega
+  have e : ∑ c ∈ range q, ∑ j ∈ Jset X Y m q c, G (m * (q * j + c)) =
+      ∑ p ∈ (range q ×ˢ range (Y + 1)).filter
+        (fun p => X ≤ m * (q * p.2 + p.1) ∧ m * (q * p.2 + p.1) ≤ Y),
+        G (m * (q * p.2 + p.1)) := by
+    rw [Finset.sum_filter, Finset.sum_product]
+    refine Finset.sum_congr rfl fun c _ => ?_
+    unfold Jset; rw [Finset.sum_filter]
+  rw [e]
+  symm
+  apply Finset.sum_nbij' (fun p => m * (q * p.2 + p.1)) (fun n => ((n / m) % q, (n / m) / q))
+  · intro p hp
+    simp only [Finset.mem_filter, Finset.mem_product, Finset.mem_range, Finset.mem_Icc,
+      Finset.mem_coe] at hp ⊢
+    exact ⟨⟨hp.2.1, hp.2.2⟩, Dvd.intro _ rfl⟩
+  · intro n hn
+    simp only [Finset.mem_filter, Finset.mem_product, Finset.mem_range, Finset.mem_Icc,
+      Finset.mem_coe] at hn ⊢
+    have h1 : m * (n / m) = n := Nat.mul_div_cancel' hn.2
+    have h2 : q * (n / m / q) + n / m % q = n / m := Nat.div_add_mod _ _
+    rw [h2, h1]
+    refine ⟨⟨Nat.mod_lt _ hq0, ?_⟩, hn.1.1, hn.1.2⟩
+    have : n / m / q ≤ n := le_trans (Nat.div_le_self _ _) (Nat.div_le_self _ _)
+    omega
+  · intro p hp
+    simp only [Finset.mem_filter, Finset.mem_product, Finset.mem_range, Finset.mem_coe] at hp
+    have h1 : m * (q * p.2 + p.1) / m = q * p.2 + p.1 := Nat.mul_div_cancel_left _ hm0
+    simp only [h1]
+    have h2 : (q * p.2 + p.1) % q = p.1 := by
+      rw [Nat.add_comm, Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt hp.1.1]
+    have h3 : (q * p.2 + p.1) / q = p.2 := by
+      rw [Nat.add_comm, Nat.add_mul_div_left _ _ hq0, Nat.div_eq_of_lt hp.1.1, zero_add]
+    rw [h2, h3]
+  · intro n hn
+    simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_coe] at hn
+    have h1 : m * (n / m) = n := Nat.mul_div_cancel' hn.2
+    have h2 : q * (n / m / q) + n / m % q = n / m := Nat.div_add_mod _ _
+    simp only [h2, h1]
+  · intro p _; rfl
+
+theorem Jset_eq {X Y m q c : ℕ} (hm : 1 ≤ m) (hq : 1 ≤ q) (hXY : X ≤ Y)
+    (ha : 0 ≤ (((X : ℝ) / m - c) / q)) :
+    Jset X Y m q c = Icc ⌈((X : ℝ) / m - c) / q⌉₊ ⌊((Y : ℝ) / m - c) / q⌋₊ := by
+  have hmR : (0 : ℝ) < m := by exact_mod_cast hm
+  have hqR : (0 : ℝ) < q := by exact_mod_cast hq
+  have hXYR : (X : ℝ) ≤ Y := by exact_mod_cast hXY
+  have hb : 0 ≤ ((Y : ℝ) / m - c) / q := by
+    refine le_trans ha ?_
+    apply div_le_div_of_nonneg_right _ hqR.le
+    have := div_le_div_of_nonneg_right hXYR hmR.le
+    linarith
+  ext j
+  simp only [Jset, Finset.mem_filter, Finset.mem_range, Finset.mem_Icc]
+  have k1 : X ≤ m * (q * j + c) ↔ ((X : ℝ) / m - c) / q ≤ j := by
+    rw [div_le_iff₀ hqR, sub_le_iff_le_add, div_le_iff₀ hmR]
+    constructor
+    · intro h; have : (X : ℝ) ≤ ((m * (q * j + c) : ℕ) : ℝ) := by exact_mod_cast h
+      push_cast at this; linarith
+    · intro h; have : (X : ℝ) ≤ ((m * (q * j + c) : ℕ) : ℝ) := by push_cast; linarith
+      exact_mod_cast this
+  have k2 : m * (q * j + c) ≤ Y ↔ (j : ℝ) ≤ ((Y : ℝ) / m - c) / q := by
+    rw [le_div_iff₀ hqR, le_sub_iff_add_le, le_div_iff₀ hmR]
+    constructor
+    · intro h; have : ((m * (q * j + c) : ℕ) : ℝ) ≤ Y := by exact_mod_cast h
+      push_cast at this; linarith
+    · intro h; have : ((m * (q * j + c) : ℕ) : ℝ) ≤ Y := by push_cast; linarith
+      exact_mod_cast this
+  rw [k1, k2, Nat.ceil_le, Nat.le_floor_iff hb]
+  constructor
+  · rintro ⟨_, h1, h2⟩; exact ⟨h1, h2⟩
+  · rintro ⟨h1, h2⟩
+    refine ⟨?_, h1, h2⟩
+    have : m * (q * j + c) ≤ Y := k2.2 h2
+    have : j ≤ q * j := Nat.le_mul_of_pos_left j (by omega)
+    have : q * j ≤ m * (q * j + c) := by nlinarith
+    omega
+
+/-- `F_m(u) = P_m(log u) e(uβ)`. -/
+noncomputable def Fm (R : ℝ) (m : ℕ) (β u : ℝ) : ℂ := (Pm R m (Real.log u) : ℂ) * eC (u * β)
+
+/-- Its derivative for `u ≠ 0`. -/
+noncomputable def Fmd (R : ℝ) (m : ℕ) (β u : ℝ) : ℂ :=
+  ((Pmd R m (Real.log u) * u⁻¹ : ℝ) : ℂ) * eC (u * β) +
+    (Pm R m (Real.log u) : ℂ) * ((2 * π * Complex.I * β) * eC (u * β))
+
+theorem hasDerivAt_Fm (R : ℝ) (m : ℕ) (β : ℝ) {u : ℝ} (hu : u ≠ 0) :
+    HasDerivAt (Fm R m β) (Fmd R m β u) u := by
+  have h1 : HasDerivAt (fun u => Pm R m (Real.log u)) (Pmd R m (Real.log u) * u⁻¹) u :=
+    (hasDerivAt_Pm R m (Real.log u)).comp u (Real.hasDerivAt_log hu)
+  have h2 : HasDerivAt (fun u : ℝ => eC (u * β)) ((2 * π * Complex.I * β) * eC (u * β)) u := by
+    have h3 : HasDerivAt (fun u : ℝ => (2 * π * Complex.I * β) * (u : ℂ))
+        ((2 * π * Complex.I * β) * 1) u :=
+      ((hasDerivAt_id u).ofReal_comp).const_mul _
+    have h4 := h3.cexp
+    have e : (fun u : ℝ => eC (u * β)) =
+        fun u : ℝ => Complex.exp ((2 * π * Complex.I * β) * (u : ℂ)) := by
+      funext u; unfold eC; congr 1; push_cast; ring
+    rw [e]
+    convert h4 using 1
+    rw [mul_one, mul_comm]
+    unfold eC; congr 2; push_cast; ring
+  exact h1.ofReal_comp.mul h2
+
+theorem norm_Fm_le (R : ℝ) (m : ℕ) (β u : ℝ) : ‖Fm R m β u‖ = |Pm R m (Real.log u)| := by
+  unfold Fm; rw [norm_mul, norm_eC, mul_one, Complex.norm_real, Real.norm_eq_abs]
+
+theorem norm_Fmd_le (R : ℝ) (m : ℕ) (β : ℝ) {u : ℝ} (hu : 0 < u) :
+    ‖Fmd R m β u‖ ≤ |Pmd R m (Real.log u)| / u + 2 * π * |β| * |Pm R m (Real.log u)| := by
+  unfold Fmd
+  refine le_trans (norm_add_le _ _) ?_
+  rw [norm_mul, norm_eC, mul_one, Complex.norm_real, Real.norm_eq_abs, abs_mul,
+    abs_inv, abs_of_pos hu, norm_mul, norm_mul, norm_eC, mul_one, Complex.norm_real,
+    Real.norm_eq_abs]
+  have : ‖(2 * π * Complex.I * β : ℂ)‖ = 2 * π * |β| := by
+    rw [norm_mul, norm_mul, norm_mul, Complex.norm_I, Complex.norm_real, Real.norm_eq_abs]
+    simp [abs_of_pos Real.pi_pos]
+  rw [this, div_eq_mul_inv]
+  nlinarith [abs_nonneg (Pm R m (Real.log u)), abs_nonneg β, Real.pi_pos]
+
+/-- The comparison for one `m` and one residue `c`: the sum over the progression
+`n = m(qj + c)` in `[X, X+H]` against `(1/(mq)) ∫_X^{X+H} P_m(log u) e(uβ) du`. -/
+theorem mc_estimate {X : ℕ} {H : ℝ} {m q c : ℕ} (hm : 1 ≤ m) (hq : 1 ≤ q) (hc : c < q)
+    (hX : 4 * (m * q : ℝ) ≤ X) (hH : 0 ≤ H) (hHX : H ≤ X) {R β B₀ B₁ : ℝ}
+    (hB₀ : ∀ u ∈ Set.Icc ((X : ℝ) / 2) (3 * X), |Pm R m (Real.log u)| ≤ B₀)
+    (hB₁ : ∀ u ∈ Set.Icc ((X : ℝ) / 2) (3 * X), |Pmd R m (Real.log u)| ≤ B₁) :
+    ‖∑ j ∈ Jset X (X + ⌊H⌋₊) m q c, Fm R m β ((m * (q * j + c) : ℕ) : ℝ) -
+        (1 / ((m : ℂ) * q)) * ∫ u in (X : ℝ)..(X + H), Fm R m β u‖ ≤
+      3 * B₀ + (H + m * q) * (2 * B₁ / X + 2 * π * |β| * B₀) := by
+  have hmR : (1 : ℝ) ≤ m := by exact_mod_cast hm
+  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  have hcR : (c : ℝ) + 1 ≤ q := by exact_mod_cast hc
+  have hmq : (1 : ℝ) ≤ m * q := one_le_mul_of_one_le_of_one_le hmR hqR
+  have hXR : (4 : ℝ) ≤ X := by nlinarith
+  have hXp : (0 : ℝ) < X := by linarith
+  set d : ℝ := m * q with hd
+  have hdp : 0 < d := by linarith
+  set a' : ℝ := ((X : ℝ) / m - c) / q with ha'
+  set b : ℝ := (((X : ℝ) + H) / m - c) / q with hb
+  set b'' : ℝ := (((X + ⌊H⌋₊ : ℕ) : ℝ) / m - c) / q with hb''
+  have hfl : (⌊H⌋₊ : ℝ) ≤ H := Nat.floor_le hH
+  have hfl' : H < ⌊H⌋₊ + 1 := Nat.lt_floor_add_one H
+  -- the affine change of variables `u = d t + m c`
+  have hu_a : d * a' + m * c = X := by rw [hd, ha']; field_simp; ring
+  have hu_b : d * b + m * c = X + H := by rw [hd, hb]; field_simp; ring
+  have ha0 : 0 ≤ a' := by
+    rw [ha']; apply div_nonneg _ (by linarith)
+    rw [sub_nonneg, le_div_iff₀ (by linarith)]; nlinarith
+  have hab : b - a' = H / d := by rw [hb, ha', hd]; field_simp; ring
+  have hb''b : b'' ≤ b := by
+    rw [hb'', hb]; apply div_le_div_of_nonneg_right _ (by linarith)
+    push_cast; have := div_le_div_of_nonneg_right (by linarith : (X : ℝ) + ⌊H⌋₊ ≤ X + H)
+      (by linarith : (0 : ℝ) ≤ m)
+    linarith
+  have hbb'' : b ≤ b'' + 1 := by
+    have : b - b'' = (H - ⌊H⌋₊) / d := by rw [hb, hb'', hd]; push_cast; field_simp; ring
+    have : (H - ⌊H⌋₊) / d ≤ 1 := by rw [div_le_one hdp]; linarith
+    linarith
+  have hab'' : a' ≤ b'' := by
+    rw [ha', hb'']; apply div_le_div_of_nonneg_right _ (by linarith)
+    push_cast; have := div_le_div_of_nonneg_right (by linarith : (X : ℝ) ≤ X + ⌊H⌋₊)
+      (by linarith : (0 : ℝ) ≤ m)
+    linarith
+  rw [Jset_eq hm hq (by omega) ha0]
+  set J₀ := ⌈a'⌉₊
+  set J₁ := ⌊b''⌋₊
+  have hb''0 : 0 ≤ b'' := le_trans ha0 hab''
+  have hJ₀a : a' ≤ J₀ := Nat.le_ceil a'
+  have hJ₀a' : (J₀ : ℝ) < a' + 1 := Nat.ceil_lt_add_one ha0
+  have hJ₁b : (J₁ : ℝ) ≤ b'' := Nat.floor_le hb''0
+  have hJ₁b' : b'' < J₁ + 1 := Nat.lt_floor_add_one b''
+  have hJ : J₀ ≤ J₁ + 1 := le_trans (Nat.ceil_le_ceil hab'') (Nat.ceil_le_floor_add_one b'')
+  -- the function in `t`
+  set h : ℝ → ℂ := fun t => Fm R m β (d * t + m * c) with hh
+  have hsum : ∑ j ∈ Icc J₀ J₁, Fm R m β ((m * (q * j + c) : ℕ) : ℝ) = ∑ j ∈ Icc J₀ J₁, h j := by
+    refine Finset.sum_congr rfl fun j _ => ?_
+    simp only [hh, hd]; congr 1; push_cast; ring
+  have hint : (1 / ((m : ℂ) * q)) * ∫ u in (X : ℝ)..(X + H), Fm R m β u =
+      ∫ t in a'..b, h t := by
+    simp only [hh]
+    rw [intervalIntegral.integral_comp_mul_add (Fm R m β) hdp.ne' ((m : ℝ) * c), hu_a, hu_b]
+    rw [Complex.real_smul, hd]; push_cast; field_simp
+  rw [hsum, hint]
+  -- range of `u`
+  have hrange : ∀ t ∈ Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2),
+      d * t + m * c ∈ Set.Icc ((X : ℝ) / 2) (3 * X) := by
+    intro t ht
+    constructor
+    · have : (J₀ : ℝ) - 2 ≥ a' - 2 := by linarith
+      have h1 : d * t + m * c ≥ d * (a' - 2) + m * c := by nlinarith [ht.1]
+      nlinarith
+    · have : (J₁ : ℝ) + 2 ≤ b + 2 := by linarith
+      have h1 : d * t + m * c ≤ d * (b + 2) + m * c := by nlinarith [ht.2]
+      nlinarith
+  have hB₀0 : 0 ≤ B₀ := le_trans (abs_nonneg _) (hB₀ X ⟨by linarith, by linarith⟩)
+  have hB₁0 : 0 ≤ B₁ := le_trans (abs_nonneg _) (hB₁ X ⟨by linarith, by linarith⟩)
+  set M₁ : ℝ := d * (2 * B₁ / X + 2 * π * |β| * B₀) with hM₁
+  have hM₁0 : 0 ≤ M₁ := by
+    have : 0 ≤ 2 * B₁ / X := by positivity
+    have : 0 ≤ 2 * π * |β| * B₀ := by have := Real.pi_pos; positivity
+    rw [hM₁]; positivity
+  have hderiv : ∀ t ∈ Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2),
+      HasDerivAt h ((d : ℂ) * Fmd R m β (d * t + m * c)) t := by
+    intro t ht
+    have hu := hrange t ht
+    have hu0 : d * t + m * c ≠ 0 := by have := hu.1; linarith
+    have hin : HasDerivAt (fun t : ℝ => d * t + m * c) d t := by
+      simpa using ((hasDerivAt_id t).const_mul d).add_const ((m : ℝ) * c)
+    have h1 := (hasDerivAt_Fm R m β hu0).scomp t hin
+    have h2 : HasDerivAt h (d • Fmd R m β (d * t + m * c)) t := h1
+    rwa [Complex.real_smul] at h2
+  have hbd0 : ∀ t ∈ Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2), ‖h t‖ ≤ B₀ := by
+    intro t ht
+    simp only [hh]; rw [norm_Fm_le]; exact hB₀ _ (hrange t ht)
+  have hbd1 : ∀ t ∈ Set.Icc ((J₀ : ℝ) - 2) (J₁ + 2),
+      ‖(d : ℂ) * Fmd R m β (d * t + m * c)‖ ≤ M₁ := by
+    intro t ht
+    have hu := hrange t ht
+    have hup : 0 < d * t + m * c := by have := hu.1; linarith
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hdp, hM₁]
+    apply mul_le_mul_of_nonneg_left _ hdp.le
+    refine le_trans (norm_Fmd_le R m β hup) ?_
+    have e1 : |Pmd R m (Real.log (d * t + m * c))| / (d * t + m * c) ≤ 2 * B₁ / X := by
+      have s1 : |Pmd R m (Real.log (d * t + m * c))| / (d * t + m * c) ≤ B₁ / (d * t + m * c) :=
+        div_le_div_of_nonneg_right (hB₁ _ hu) hup.le
+      have s2 : B₁ / (d * t + m * c) ≤ B₁ / ((X : ℝ) / 2) :=
+        div_le_div_of_nonneg_left hB₁0 (by linarith) hu.1
+      have s3 : B₁ / ((X : ℝ) / 2) = 2 * B₁ / X := by field_simp
+      linarith
+    have e2 : 2 * π * |β| * |Pm R m (Real.log (d * t + m * c))| ≤ 2 * π * |β| * B₀ := by
+      apply mul_le_mul_of_nonneg_left (hB₀ _ hu)
+      have := Real.pi_pos; positivity
+    linarith
+  have key := sum_Icc_sub_integral_le hJ (by linarith) hJ₀a (le_trans hJ₁b hb''b)
+    (by linarith [hbb'', hJ₁b']) hderiv hbd0 hbd1
+  refine le_trans key ?_
+  have hN : ((J₁ + 1 - J₀ : ℕ) : ℝ) ≤ H / d + 1 := by
+    rw [Nat.cast_sub hJ]; push_cast
+    linarith
+  have : ((J₁ + 1 - J₀ : ℕ) : ℝ) * M₁ ≤ (H / d + 1) * M₁ := mul_le_mul_of_nonneg_right hN hM₁0
+  have e : (H / d + 1) * M₁ = (H + m * q) * (2 * B₁ / X + 2 * π * |β| * B₀) := by
+    rw [hM₁, hd]; field_simp
+  linarith
+
+/-- The exact identity behind display (2.5): the difference between `S♯₄(a/q + β)` and the main
+term `mainArc` is a sum over `m` and over residues `c` of progression sums minus integrals. -/
+theorem S4sharp_sub_mainArc (ε : ℝ) {X : ℕ} (hX : 1 ≤ X) (H : ℝ) {q : ℕ} (hq : 1 ≤ q) (a : ℕ)
+    (β : ℝ) :
+    S4sharp ε X H ((a : ℝ) / q + β) - mainArc ε X H q a β =
+      ∑ m ∈ Icc 1 ⌊R4 ε X ^ 6⌋₊, ∑ c ∈ range q, eC ((a : ℝ) * m * c / q) *
+        (∑ j ∈ Jset X (X + ⌊H⌋₊) m q c, Fm (R4 ε X) m β ((m * (q * j + c) : ℕ) : ℝ) -
+          (1 / ((m : ℂ) * q)) * ∫ u in (X : ℝ)..(X + H), Fm (R4 ε X) m β u) := by
+  have hqR : (q : ℝ) ≠ 0 := by
+    have : (1 : ℝ) ≤ q := by exact_mod_cast hq
+    linarith
+  rw [S4sharp_eq_sum_m ε hX]
+  unfold mainArc
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  have hm1 : 1 ≤ m := (Finset.mem_Icc.1 hm).1
+  rw [sum_dvd_eq_sum_c_j hm1 hq, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun c _ => ?_
+  have hj : ∀ j : ℕ, (Pm (R4 ε X) m (Real.log ((m * (q * j + c) : ℕ) : ℝ)) : ℂ) *
+      eC (((m * (q * j + c) : ℕ) : ℝ) * ((a : ℝ) / q + β)) =
+      eC ((a : ℝ) * m * c / q) * Fm (R4 ε X) m β ((m * (q * j + c) : ℕ) : ℝ) := by
+    intro j
+    unfold Fm
+    have e : ((m * (q * j + c) : ℕ) : ℝ) * ((a : ℝ) / q + β) =
+        ((a * m * j : ℕ) : ℤ) + ((a : ℝ) * m * c / q + ((m * (q * j + c) : ℕ) : ℝ) * β) := by
+      push_cast; field_simp; ring
+    rw [e, eC_add, eC_int, one_mul, eC_add]; ring
+  simp_rw [hj]
+  rw [← Finset.mul_sum]
+  unfold Fm
+  ring
+
+
+theorem eventually_p23 {ε : ℝ} (hε : 0 < ε) (hε' : ε < 1 / 2) :
+    ∀ᶠ x : ℝ in atTop, 3 ≤ x ∧ 3 ≤ x ^ (ε / 40) ∧ 4 ≤ x ^ (1 - 23 * ε / 20) := by
+  have h1 := (tendsto_rpow_atTop (by linarith : (0 : ℝ) < ε / 40)).eventually_ge_atTop 3
+  have h2 := (tendsto_rpow_atTop (by linarith : (0 : ℝ) < 1 - 23 * ε / 20)).eventually_ge_atTop 4
+  filter_upwards [eventually_ge_atTop 3, h1, h2] with x hx1 hx2 hx3
+  exact ⟨hx1, hx2, hx3⟩
+
+
 /-- LEAF: Kim, Proposition 2.3, display (2.5), page 9: for `X^{3/5+ε} ≤ H ≤ X^{1-ε}`,
 `∑_{n ∈ [X,X+H]} d♯₄(n) e(an/q) e(nβ)` equals the main term `mainArc` up to
 `O(q X^{2ε} (1 + H|β|))`. The paper states it for every `q` and `a`; it is encoded here, more
@@ -108,7 +708,111 @@ theorem prop_2_3 : ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < 
       ∀ q a : ℕ, 1 ≤ q → (q : ℝ) ≤ Qpar ε X → Nat.Coprime a q → ∀ β : ℝ,
         ‖S4sharp ε X H ((a : ℝ) / q + β) - mainArc ε X H q a β‖ ≤
           C * q * (X : ℝ) ^ (2 * ε) * (1 + H * |β|) := by
-  sorry
+  refine ⟨1 / 2, by norm_num, fun ε hε hεε => ?_⟩
+  set K₀ : ℝ := 80 / ε + 10 with hK₀
+  have hK₀p : 0 < K₀ := by positivity
+  obtain ⟨X₀, hX₀⟩ := Filter.eventually_atTop.1
+    (tendsto_natCast_atTop_atTop.eventually (eventually_p23 hε hεε))
+  refine ⟨420 * K₀ ^ 3, X₀, fun X hX H hlo hhi q a hq hqQ _ β => ?_⟩
+  obtain ⟨hX3, hR3, hX4⟩ := hX₀ X hX
+  have hXp : (0 : ℝ) < X := by linarith
+  have hX1 : 1 ≤ X := by exact_mod_cast (by linarith : (1 : ℝ) ≤ X)
+  set R := R4 ε X with hRdef
+  have hR3' : 3 ≤ R := hR3
+  have hRp : 0 < R := by linarith
+  have hR6 : R ^ 6 = (X : ℝ) ^ (3 * ε / 20) := by
+    rw [hRdef]; unfold R4; rw [← Real.rpow_natCast, ← Real.rpow_mul hXp.le]; ring_nf
+  have hR12 : R ^ 6 * R ^ 6 ≤ (X : ℝ) ^ (2 * ε) := by
+    rw [hR6, ← Real.rpow_add hXp]
+    exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+  have hLX : 0 < Real.log X := Real.log_pos (by linarith)
+  have hlogR : Real.log R = ε / 40 * Real.log X := by
+    rw [hRdef]; unfold R4; rw [Real.log_rpow hXp]
+  have hK : (2 * Real.log X + 10 * Real.log R) / Real.log R = K₀ := by
+    rw [hlogR, hK₀]; field_simp; ring
+  set B₀ : ℝ := 15 * R ^ 6 * K₀ ^ 3 with hB₀def
+  have hB₀p : 0 ≤ B₀ := by positivity
+  have hbounds : ∀ (m : ℕ) u, u ∈ Set.Icc ((X : ℝ) / 2) (3 * X) →
+      |Pm R m (Real.log u)| ≤ B₀ ∧ |Pmd R m (Real.log u)| ≤ 3 * B₀ := by
+    intro m u hu
+    have hu0 : 0 < u := by linarith [hu.1]
+    have hlog : |Real.log u| ≤ 2 * Real.log X := by
+      rw [abs_le]; constructor
+      · have : 0 ≤ Real.log u := Real.log_nonneg (by linarith [hu.1])
+        linarith
+      · have : Real.log u ≤ Real.log ((X : ℝ) ^ 2) :=
+          Real.log_le_log hu0 (by nlinarith [hu.2])
+        rw [Real.log_pow] at this; push_cast at this; linarith
+    have := Pm_bounds hR3' (by linarith) hlog m
+    rw [hK] at this
+    exact ⟨this.1, by rw [hB₀def]; linarith [this.2]⟩
+  have hHX : H ≤ X := le_trans hhi (by
+    calc (X : ℝ) ^ (1 - ε) ≤ (X : ℝ) ^ (1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+      _ = X := Real.rpow_one _)
+  have hH0 : 0 ≤ H := le_trans (Real.rpow_nonneg hXp.le _) hlo
+  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  -- the size of `m q`
+  have hmq : ∀ m ∈ Icc 1 ⌊R ^ 6⌋₊, 4 * ((m : ℝ) * q) ≤ X ∧ (m : ℝ) * q ≤ H := by
+    intro m hm
+    have hm6 : (m : ℝ) ≤ R ^ 6 := by
+      have := (Finset.mem_Icc.1 hm).2
+      exact le_trans (by exact_mod_cast this) (Nat.floor_le (by positivity))
+    have hmq' : (m : ℝ) * q ≤ (X : ℝ) ^ (23 * ε / 20) := by
+      have : (X : ℝ) ^ (23 * ε / 20) = (X : ℝ) ^ (3 * ε / 20) * (X : ℝ) ^ ε := by
+        rw [← Real.rpow_add hXp]; ring_nf
+      rw [this, ← hR6]
+      exact mul_le_mul hm6 hqQ (by linarith) (by positivity)
+    constructor
+    · have : (X : ℝ) = (X : ℝ) ^ (23 * ε / 20) * (X : ℝ) ^ (1 - 23 * ε / 20) := by
+        rw [← Real.rpow_add hXp]; simp
+      have hpos : 0 ≤ (X : ℝ) ^ (23 * ε / 20) := by positivity
+      nlinarith
+    · refine le_trans hmq' (le_trans ?_ hlo)
+      exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+  rw [S4sharp_sub_mainArc ε hX1 H hq a β]
+  have hterm : ∀ m ∈ Icc 1 ⌊R ^ 6⌋₊, ∀ c ∈ range q,
+      ‖eC ((a : ℝ) * m * c / q) *
+        (∑ j ∈ Jset X (X + ⌊H⌋₊) m q c, Fm R m β ((m * (q * j + c) : ℕ) : ℝ) -
+          (1 / ((m : ℂ) * q)) * ∫ u in (X : ℝ)..(X + H), Fm R m β u)‖ ≤
+        28 * B₀ * (1 + H * |β|) := by
+    intro m hm c hc
+    obtain ⟨h4, hmH⟩ := hmq m hm
+    rw [norm_mul, norm_eC, one_mul]
+    have hm1 : 1 ≤ m := (Finset.mem_Icc.1 hm).1
+    refine le_trans (mc_estimate hm1 hq (Finset.mem_range.1 hc) h4 hH0 hHX
+      (fun u hu => (hbounds m u hu).1) (fun u hu => (hbounds m u hu).2)) ?_
+    have e1 : (H + m * q) * (2 * (3 * B₀) / X) ≤ 12 * B₀ := by
+      rw [show (H + m * q) * (2 * (3 * B₀) / X) = (H + m * q) / X * (6 * B₀) by ring]
+      have : (H + m * q) / X ≤ 2 := by rw [div_le_iff₀ hXp]; linarith
+      nlinarith
+    have e2 : (H + m * q) * (2 * π * |β| * B₀) ≤ 13 * (H * |β| * B₀) := by
+      have hpi := Real.pi_lt_d2
+      have : 0 ≤ |β| * B₀ := by positivity
+      have h2 : (H + m * q) ≤ 2 * H := by linarith
+      calc (H + m * q) * (2 * π * |β| * B₀) = (H + m * q) * (2 * π) * (|β| * B₀) := by ring
+        _ ≤ (2 * H) * (2 * 3.15) * (|β| * B₀) := by
+            apply mul_le_mul_of_nonneg_right _ this
+            apply mul_le_mul h2 (by linarith) (by positivity) (by linarith)
+        _ ≤ 13 * (H * |β| * B₀) := by nlinarith
+    have : 0 ≤ H * |β| * B₀ := by positivity
+    nlinarith
+  refine le_trans (norm_sum_le _ _) ?_
+  refine le_trans (Finset.sum_le_sum fun m hm => (norm_sum_le _ _).trans
+    (Finset.sum_le_sum fun c hc => hterm m hm c hc)) ?_
+  simp only [Finset.sum_const, Finset.card_range, Nat.card_Icc, nsmul_eq_mul]
+  have hcount : ((⌊R ^ 6⌋₊ + 1 - 1 : ℕ) : ℝ) ≤ R ^ 6 := by
+    simp only [Nat.add_sub_cancel]; exact Nat.floor_le (by positivity)
+  have hpos : 0 ≤ (q : ℝ) * (28 * B₀ * (1 + H * |β|)) := by positivity
+  calc ((⌊R ^ 6⌋₊ + 1 - 1 : ℕ) : ℝ) * ((q : ℝ) * (28 * B₀ * (1 + H * |β|)))
+      ≤ R ^ 6 * ((q : ℝ) * (28 * B₀ * (1 + H * |β|))) :=
+        mul_le_mul_of_nonneg_right hcount hpos
+    _ = 420 * K₀ ^ 3 * q * (R ^ 6 * R ^ 6) * (1 + H * |β|) := by rw [hB₀def]; ring
+    _ ≤ 420 * K₀ ^ 3 * q * (X : ℝ) ^ (2 * ε) * (1 + H * |β|) := by
+        apply mul_le_mul_of_nonneg_right _ (by positivity)
+        apply mul_le_mul_of_nonneg_left hR12 (by positivity)
+
+/-! ### Proposition 2.4 and the major arc leaf without cited inputs beyond Section 2.2 -/
 
 /-! ### Integrating the main term over one arc -/
 
