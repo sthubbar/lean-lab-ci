@@ -204,6 +204,23 @@ theorem leaf_mid_conductor_le (q : ℕ) [NeZero q] (t : ℝ) (ht : 1 ≤ t)
 multiplicity weighted nontrivial zeros in the critical strip.  The height is fixed here and
 the conductor condition replaces the range conditions of the target, so this is strictly
 weaker than the target. -/
+BLOCKED 2026-11-14 FREE-ms-leanstral task473 leaf_mid_zero_count_at_exp: OUT OF REACH.
+Missing result: a verified explicit zero count for Dirichlet L-functions at the fixed height
+2 * π * exp 1 ≈ 17.079, namely that for every primitive χ of conductor q ≤ 17 the
+multiplicity weighted zero count zeroCount χ (2 * π * exp 1) is at most 13.
+Mathlib has no zero counting theorems, argument principle zero counts on rectangles, or
+verified low-height zero tables for Dirichlet L-functions. The finite conductor bound q ≤ 17
+reduces the problem to checking finitely many characters (16 primitive characters modulo
+q = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17), but no such table
+exists in Mathlib or the import closure. For q = 1 this is the statement that ζ has
+exactly one zero of height ≤ 17.079 (the zero at height 14.1347), which needs verified
+numerics or a zero counting theorem; no such result is available. The upstream count
+supplies zero_count_explicit_upper and its 17.7 family in Decomp388a.lean remain open sorries
+with constants far above 13. Own attempt error: exact? and apply? on the goal zeroCount
+chi (2 * π * exp 1) ≤ 13 failed; LeanSearch and Loogle returned only definitions and
+nonvanishing theorems for DirichletCharacter.LFunction; local grep found no zero count
+bounds in Mathlib NumberTheory. AI wrote the Lean code. Binary Goldbach is open.
+-/
 theorem leaf_mid_zero_count_at_exp (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hq : q ≤ 17) :
     zeroCount χ (2 * π * exp 1) ≤ 13 := by
