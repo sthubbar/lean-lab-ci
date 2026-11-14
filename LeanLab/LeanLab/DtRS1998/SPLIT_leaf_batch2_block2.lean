@@ -26,6 +26,9 @@ finite data of the row, so the build stays finite data and never touches
 the Pocklington certificate chain that the row's other modules carry.
 -/
 import LeanLab.DtRS1998.SPLIT_batch2_prime
+-- The row-10^90 Pocklington/BLS certificate module; its statements are kernel
+-- checked and it states no unproved obligation of its own.
+import LeanLab.DtRS1998.PocklingtonB7Row90
 
 namespace LeanLab.DtRS1998.Decomp395a
 
@@ -50,28 +53,36 @@ third block of the third batch. The two candidates at offsets 144 and 145
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block2_first_pair : ∀ q ∈ (qs.drop 144).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (((List.take_sublist 2 (qs.drop 144)).trans (List.drop_sublist 144 qs)).mem hq)
 
 /-- LEAF: the finite primality certification step for the second pair of the
 third block of the third batch. The two candidates at offsets 146 and 147
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block2_second_pair : ∀ q ∈ (qs.drop 146).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (((List.take_sublist 2 (qs.drop 146)).trans (List.drop_sublist 146 qs)).mem hq)
 
 /-- LEAF: the finite primality certification step for the third pair of the
 third block of the third batch. The two candidates at offsets 148 and 149
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block2_third_pair : ∀ q ∈ (qs.drop 148).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (((List.take_sublist 2 (qs.drop 148)).trans (List.drop_sublist 148 qs)).mem hq)
 
 /-- LEAF: the finite primality certification step for the fourth pair of the
 third block of the third batch. The two candidates at offsets 150 and 151
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block2_fourth_pair : ∀ q ∈ (qs.drop 150).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (((List.take_sublist 2 (qs.drop 150)).trans (List.drop_sublist 150 qs)).mem hq)
 
 /-- The third block of eight, proved from the four pair leaves: the block is
 the concatenation of its four pairs of two, and primality is inherited entry
