@@ -1,0 +1,20 @@
+{
+  "task": "CODEX task520",
+  "start_utc": "2026-11-14T06:05:18Z",
+  "branch": "codex/task520",
+  "proof_commit": "591299052a",
+  "baseline_process": 955,
+  "baseline_tool_session": 40841,
+  "proof_status": "Helper and target builds passed. Sixty two helper declarations and nineteen target declarations have axiom receipts. Forty one new helper theorems are clean. Three analytic leaves remain open.",
+  "source_change_after_proof_commit": "Citation comment only. Equation 3.4 is on printed page 156.",
+  "remaining": [
+    "Finish all 177 original active module baseline requests",
+    "Commit remaining receipts and source review",
+    "Fetch and merge origin/main while preserving all ledger appends",
+    "Append exactly one CODEX task520 LOG line with all sixty two MATCH names",
+    "Run final seal_check.py and check_branch.sh with installed ELAN_HOME and PATH",
+    "Commit the actual CHECK report",
+    "Push codex/task520 and open CODEX task520: Linnik1951 to main",
+    "Verify the published pull request head"
+  ]
+}

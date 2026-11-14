@@ -1,0 +1,21 @@
+{
+  "start_utc": "2026-11-14T06:06:01Z",
+  "max_end_utc": "2026-11-14T09:06:01Z",
+  "branch": "codex/task523",
+  "merged_main": "1b54830602",
+  "baseline_pid": 13559,
+  "baseline_session": 62296,
+  "audit_session": 46906,
+  "direct_results": 106,
+  "failures": [],
+  "core_status": "13 helpers with nine clean elementary proofs, three conditional assemblies and one open majorant. Two assigned leaves built as conditional assemblies.",
+  "next": [
+    "Finish current audit dependency build and inspect audit results",
+    "Continue module baseline within shift cap",
+    "Final fetch and merge preserving ledgers",
+    "Stop baseline at a module boundary in time for gates",
+    "Commit exact coverage, all blocked declaration lines and one root LOG line",
+    "Run seal_check.py and check_branch.sh, commit actual receipts",
+    "Push codex/task523 and open requested PR"
+  ]
+}

@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_fractional_boundary
+import LeanLab.ExceptionalSet.Decomp523a
 
 /-!
 Split of the first arc of `Decomp371a.leaf_fractional_boundary`: the outer half of the lower
@@ -7,10 +8,10 @@ boundary arc, the window indices whose fractional part satisfies
 
 The band is cut at the quarter point `Δ / 4` into a lower and an upper piece, and the window
 `n ≤ 2N` is cut at the index `N` into the indices `n ≤ N` and the indices `N < n`. The four
-resulting pieces are counted separately. Every piece adds one genuine restriction to the
-condition defining the band, either an index restriction or the refinement of the fractional
-part condition, so each booked estimate is an estimate for a subset of the band and is strictly
-easier than the estimate for the band itself.
+resulting pieces are counted separately. For sufficiently large N the existing window
+geometry places every window index at most N. The two upper index pieces are therefore
+empty. The two lower index pieces contain the analytic counting problem. They are transferred
+from a half dyadic index count through the one sided majorant and exponential sum inputs.
 
 `Δ > 0` holds because `Δ` is a positive power of the exponential `calE`, so `Δ / 4 < Δ / 2` and
 the lower piece of the band is contained in it.
@@ -19,7 +20,8 @@ The assembly `leaf_boundary_outer_low_split` adds the four constants, takes the 
 four thresholds and the smallest of the four caps, and reproduces the statement of the arc
 exactly. It uses only the four leaves below; the sealed statement of the arc is used nowhere.
 
-The four leaves are open; the assembly is complete.
+The lower index leaves use the explicit Erdos Turan and exponential sum inputs in Decomp523a.
+The upper index leaves and the assembly have no admission of their own.
 -/
 
 namespace LeanLab.ExceptionalSet.Decomp371a
@@ -32,21 +34,33 @@ open LeanLab.ExceptionalSet.DecompJ200
 /-- LEAF. Step 1 of the split: the lower piece of the band, on the indices `n ≤ N`. It counts the
 window indices with `n ≤ N` and `{F γ n} < Δ / 4`, where `Δ = calE γ κ N ^ (-(1 / 8))`.
 Since `Δ > 0` we have `Δ / 4 < Δ / 2`, so every index counted here satisfies the band condition
-`{F γ n} < Δ / 2`; with `n ≤ N` added, the counted set is a subset of the band and the estimate is
-strictly easier than the band estimate. -/
+`{F γ n} < Δ / 2`. The counted set is a subset of that band. For large N the index
+condition follows from the window geometry. The bound uses the finite Fourier count. -/
 theorem leaf_outer_low_low_band_lower_indices (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
       ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
         (((window γ N).filter (fun n : ℕ =>
           n ≤ N ∧ Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 4)).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  obtain ⟨κ₀, hκ₀, hband⟩ := Decomp523a.dyadic_band_bound γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκcap => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀16, hN₀⟩ := hband κ hκ hκcap
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hN16 : 16 ≤ N := hN₀16.trans hN
+  have hlog : 0 ≤ Real.log N := Real.log_nonneg (by exact_mod_cast (show 1 ≤ N by omega))
+  obtain ⟨hδ, hδ1⟩ := Decomp523a.delta_bounds γ κ N hκ hlog
+  have hc := hN₀ N hN 0 (calE γ κ N ^ (-(1 / 8 : ℝ)) / 4)
+    (by norm_num) (by positivity) (by linarith) (by linarith)
+  have hw := Decomp523a.window_band_transfer γ 0
+    (calE γ κ N ^ (-(1 / 8 : ℝ)) / 4) B
+    (calE γ κ N ^ (-(1 / 8 : ℝ))) N h1 hN16 hc
+  simpa only [Int.fract_nonneg, true_and] using hw
 
 /-- LEAF. Step 2 of the split: the upper piece of the band, on the indices `n ≤ N`. It counts the
 window indices with `n ≤ N` and `Δ / 4 ≤ {F γ n} < Δ / 2`, where
 `Δ = calE γ κ N ^ (-(1 / 8))`. The condition on the fractional part is one half of the band
-condition, and `n ≤ N` is added, so the counted set is a subset of the band and the estimate is
-strictly easier than the band estimate. -/
+condition, so the counted set is a subset of the band. For large N the index condition
+follows from the window geometry. The bound uses the finite Fourier count. -/
 theorem leaf_outer_low_high_band_lower_indices (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
       ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
@@ -54,7 +68,20 @@ theorem leaf_outer_low_high_band_lower_indices (γ : ℝ) (h1 : 1 < γ) (h2 : γ
           n ≤ N ∧ calE γ κ N ^ (-(1 / 8 : ℝ)) / 4 ≤ Int.fract (F γ n) ∧
             Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  obtain ⟨κ₀, hκ₀, hband⟩ := Decomp523a.dyadic_band_bound γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκcap => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀16, hN₀⟩ := hband κ hκ hκcap
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hN16 : 16 ≤ N := hN₀16.trans hN
+  have hlog : 0 ≤ Real.log N := Real.log_nonneg (by exact_mod_cast (show 1 ≤ N by omega))
+  obtain ⟨hδ, hδ1⟩ := Decomp523a.delta_bounds γ κ N hκ hlog
+  have hc := hN₀ N hN (calE γ κ N ^ (-(1 / 8 : ℝ)) / 4)
+    (calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)
+    (by positivity) (by linarith) (by linarith) (by linarith)
+  exact Decomp523a.window_band_transfer γ
+    (calE γ κ N ^ (-(1 / 8 : ℝ)) / 4)
+    (calE γ κ N ^ (-(1 / 8 : ℝ)) / 2) B
+    (calE γ κ N ^ (-(1 / 8 : ℝ))) N h1 hN16 hc
 
 /-- LEAF. Step 3 of the split: the lower piece of the band, on the indices `N < n`. It counts the
 window indices with `N < n` and `{F γ n} < Δ / 4`, where `Δ = calE γ κ N ^ (-(1 / 8))`.

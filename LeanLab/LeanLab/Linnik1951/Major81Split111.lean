@@ -6,8 +6,8 @@ AI wrote the Lean code. Binary Goldbach is open.
 The tuple expansion of T to the k, the first step of 8.1, is proved here, and so is the
 whole bookkeeping of 8.1, 8.2 and 10.7: major_bookkeeping_m111, major_main_sum_m111 and
 truncSingular_small_m111, with the convolution estimate ported in LogConvPort111 and the
-singular series size proved in SingularSize111. One leaf is left:
-- major_local_expansion_m111, under GRH: 6.4 for every q at most Q, summed over the arcs
+singular series size proved in SingularSize111. The remaining input is decomposed in Decomp520a:
+- major_local_expansion_m111, under GRH and three local analytic leaves: 6.4 for every q at most Q, summed over the arcs
   of the major arcs, at one residual n, uniformly in n. This is the analytic core, which
   rests in P0093 on Lemma 1, cited to Lucke [5], and on the GRH bound for ln L of s chi
   on the line sigma_0 stated on page 159 without proof. CITED-LEFT.
@@ -15,6 +15,7 @@ Definitions here are local copies, same bodies, of truncSingular111 and mainTerm
 of Decomp111 and of logConvolution1622 of SPLIT1622_major, which sit downstream.
 -/
 import LeanLab.Linnik1951.CircleSplit111
+import LeanLab.Linnik1951.Decomp520a
 import LeanLab.Perelli1996.TotientRatio320
 import LeanLab.Linnik1951.LogConvPort111
 import LeanLab.Linnik1951.SingularSize111
@@ -445,8 +446,9 @@ logConvolution1622 of SPLIT1622_major. -/
 noncomputable def logConv_m111 (n : ℕ) : ℝ :=
   ∑ m ∈ Finset.Icc 2 (n - 2), 1 / (Real.log m * Real.log (n - m : ℕ))
 
-/-- LEAF under GRH, CITED-LEFT core. P0093 page 161 equation 6.4, from 3.4, 5.4, 5.5 and
-6.3 on pages 158 to 161, for each q at most Q equal to N to the one tenth, summed over the
+/-- CONDITIONAL under GRH on the three local analytic leaves of Decomp520a.
+P0093 page 161 equation 6.4, from 3.4, 5.4, 5.5 and
+6.3 on pages 156 and 159 to 161, for each q at most Q equal to N to the one tenth, summed over the
 disjoint arcs of the major arcs as in 8.1 on page 165, at one residual n, uniformly in n.
 The main term keeps the exact convolution of 6.3 and the damping e to the minus n over N,
 which the printed e to the minus 1 absorbs together with the tuple weight; it is zero for
@@ -461,7 +463,8 @@ theorem major_local_expansion_m111 (hG : GRH) :
             logConv_m111 n.toNat) : ℝ) : ℂ)‖ ≤
         B * N * Real.log N ^ 13 * ∑ q ∈ Finset.Icc 1 ⌊(N : ℝ) ^ (1 / 10 : ℝ)⌋₊,
           (1 / (N : ℝ) ^ (1 / 7 : ℝ) + 1 / Real.sqrt (q * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  simpa only [truncSingular_m111, logConv_m111, logConvolution520] using
+    major_expansion520 hG
 
 /-- P0093 page 165, the N_1 of 8.1 are even: a sum of powers 2 to the x with x at least 1
 is even. Proved. -/

@@ -16,8 +16,8 @@ Contents.
   Theorem 2, and the hypotheses i to iv of Theorem 2 copied verbatim from
   `Thm2.Theorem2`; `theorem2_iff_with` checks by `Iff.rfl` that they match exactly.
 * `conclusion_of_meanSquare`, PROVED: the page 6 reduction, for u v ≠ 0.
-* `section2_mean_square`, LEAF, OPEN: the page 6 display from hypotheses i to iv, which is
-  2.2 plus 2.3, the whole analytic content of pages 6 to 11.
+* `section2_mean_square`, CONDITIONAL on the decomposed leaves: the page 6 display from hypotheses i to iv, which is
+  2.2 plus 2.3, with exact Fourier and error combination proofs in Decomp512a.
 * `theorem2_paper_nondegenerate`, PROVED from the leaf: Theorem 2 in the form
   `Thm2.Theorem2Paper` for every pair with u v ≠ 0.
 
@@ -34,7 +34,7 @@ is left untouched and the u v ≠ 0 case is the one proved from the leaf.
 
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.Thm2Sing
+import LeanLab.BHP1997.Decomp512a
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical Complex Thm2
@@ -67,21 +67,7 @@ theorem two_C2_le_sing (n : ℕ) : 2 * C2 ≤ sing n := by
   have := C2_pos
   nlinarith
 
-/-- P0069 Baker Harman Pintz 1997, Section 2, page 6, the display after 2.1:
-Σ_{2n ∈ K} |∫_{1/Q}^{1+1/Q} S₁S₂e(-2nα)dα - uvY/(ℒℒ') 𝔖(2n)|² ≪ H Y² ℒ^{-A-7}, for every
-A > 0, with K = [x, x + H] and H = x^{θ₁θ₂} = Y^{θ₂}. The integral is written as the
-convolution it equals by orthogonality. -/
-def MeanSquare (ε : ℝ) (a b : ℝ → ℕ → ℂ) (u v : ℝ) : Prop :=
-  let θ₁ : ℝ := 11 / 20 + ε
-  let θ₂ : ℝ := 2 * (1 / 16 - 1 / 10 ^ 5)
-  let Y : ℝ → ℝ := fun x => x ^ θ₁
-  let I : ℝ → Finset ℕ := fun x => Finset.Ioc ⌊x - 2 * Y x⌋₊ ⌊x⌋₊
-  let J : ℝ → Finset ℕ := fun x => Finset.Ioc ⌊Y x⌋₊ ⌊2 * Y x⌋₊
-  ∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x →
-    ∑ N ∈ (Finset.Icc ⌈x⌉₊ ⌊x + x ^ (θ₁ * θ₂)⌋₊).filter (fun N : ℕ => Even N),
-      ‖(∑ k ∈ I x, ∑ m ∈ J x, if k + m = N then a x k * b x m else 0) -
-          u * v * Y x / (Real.log x * Real.log (Y x)) * sing (N / 2)‖ ^ 2 ≤
-      C * x ^ (θ₁ * θ₂) * Y x ^ 2 * Real.log x ^ (-A - 7)
+
 
 set_option maxHeartbeats 1000000 in
 /-- P0069 Baker Harman Pintz 1997, Section 2, page 6: "To prove Theorem 2 it suffices to
@@ -205,41 +191,7 @@ def Conclusion (ε : ℝ) (a b : ℝ → ℕ → ℂ) (u v : ℝ) : Prop :=
           u * v * Y x / (Real.log x * Real.log (Y x)) * sing (N / 2)‖)).card : ℝ) <
       x ^ (θ₁ * θ₂) / Real.log x ^ A
 
-/-- P0069 Baker Harman Pintz 1997, page 3, Theorem 2 with an arbitrary conclusion `P`:
-the hypotheses i to iv copied verbatim from `Thm2.Theorem2`. With `P = Conclusion` it is
-`Thm2.Theorem2` itself, see `theorem2_iff_with`. -/
-def Theorem2With (ε B : ℝ)
-    (P : (ℝ → ℕ → ℂ) → (ℝ → ℕ → ℂ) → ℝ → ℝ →
-      (ℝ → ℝ → (q : ℕ) → Finset (DirichletCharacter ℂ q)) → Prop) : Prop :=
-  ∀ (a b : ℝ → ℕ → ℂ) (u v : ℝ) (E : ℝ → ℝ → (q : ℕ) → Finset (DirichletCharacter ℂ q)),
-    let θ₁ : ℝ := 11 / 20 + ε
-    let θ₂ : ℝ := 2 * (1 / 16 - 1 / 10 ^ 5)
-    let Y : ℝ → ℝ := fun x => x ^ θ₁
-    let Q : ℝ → ℕ := fun x => ⌊(Y x ^ θ₂) ^ (1 / 2 : ℝ) / 2⌋₊
-    let I : ℝ → Finset ℕ := fun x => Finset.Ioc ⌊x - 2 * Y x⌋₊ ⌊x⌋₊
-    let J : ℝ → Finset ℕ := fun x => Finset.Ioc ⌊Y x⌋₊ ⌊2 * Y x⌋₊
-    (∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ Real.log x ^ A →
-      ∀ χ : DirichletCharacter ℂ q, ∀ t : ℝ, t ≤ x →
-        ‖∑ k ∈ (I x).filter (fun k : ℕ => (k : ℝ) ≤ t),
-          (a x k * χ (k : ZMod q) - delta χ * u / Real.log x)‖ ≤ C * Y x * Real.log x ^ (-A)) →
-    (∃ C : ℝ, ∀ x k, ‖a x k‖ ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B ∧
-      ‖b x k‖ ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B) →
-    (∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ k : ℕ,
-      Nat.gcd k (primorialBelow (Real.log x ^ A)) ≠ 1 → a x k = 0) →
-    (∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ Real.log x ^ A →
-      ∀ χ : DirichletCharacter ℂ q, ∀ t : ℝ, t ≤ 2 * Y x →
-        ‖∑ m ∈ (J x).filter (fun m : ℕ => (m : ℝ) ≤ t),
-          (b x m * χ (m : ZMod q) - delta χ * v / Real.log (Y x))‖ ≤
-            C * Y x * Real.log x ^ (-A)) →
-    (∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q → q ≤ Q x →
-      ((E A x q).card : ℝ) ≤ C * (q : ℝ) ^ (1 / 2 : ℝ) * Real.log x ^ (-2 * A) ∧
-      ∀ z : ℝ, (q * Q x : ℝ) / (6 * Y x) ≤ z → z ≤ 6 * q * Q x / Y x →
-        ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ q)) \ E A x q,
-          ∫ y in (Y x / 2)..(3 * Y x),
-            ‖∑ m ∈ (J x).filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z),
-              (b x m * χ (m : ZMod q) - delta χ * v / Real.log (Y x))‖ ^ 2 ≤
-          C * ((q : ℝ) * Q x) ^ 2 * Y x * Real.log x ^ (-A)) →
-    P a b u v E
+
 
 /-- The hypotheses of `Theorem2With` are exactly those of `Thm2.Theorem2`. PROVED by `Iff.rfl`. -/
 theorem theorem2_iff_with (ε B : ℝ) :
@@ -249,11 +201,11 @@ theorem theorem2_iff_with (ε B : ℝ) :
 display from hypotheses i to iv of Theorem 2, with ε in the paper's window where Bε is
 small, page 3. The paper proves it as 2.2, the major arcs, pages 6 to 8 with 2.4 to 2.9,
 plus 2.3, the minor arcs, pages 8 to 11 with 2.10 to 2.16 and Gallagher's lemma. No
-hypothesis u v ≠ 0 is needed here. OPEN. -/
+hypothesis u v ≠ 0 is needed here. CONDITIONAL ON the four analytic leaves in Decomp512a. -/
 theorem section2_mean_square :
     ∀ B : ℝ, ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       Theorem2With ε B (fun a b u v _ => MeanSquare ε a b u v) := by
-  sorry
+  exact section2_from_arc_leaves512
 
 /-- P0069 Baker Harman Pintz 1997, Theorem 2 in the form of `Thm2.Theorem2Paper`, for
 every pair of densities with u v ≠ 0: the page 6 reduction `conclusion_of_meanSquare`

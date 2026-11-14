@@ -6,6 +6,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BakerHarmanPintz1997.Statements
 import LeanLab.BakerHarmanPintz1997.PortedVanDerCorput
+import LeanLab.BakerHarmanPintz1997.DecompJ883
 open scoped Real
 
 namespace LeanLab.BakerHarmanPintz1997
@@ -677,6 +678,276 @@ def Lemma10Repaired : Prop :=
       max (Ml x) (Nl x) ≤ x ^ (0.46 + ε / 8)) →
     (∃ X1 : ℝ, ∀ x, X1 ≤ x → T0 x ≤ Ml x * Nl x) →
     Concl39 (fun x => [M x, N x, (⟨fun _ => 1, Finset.Ioo ⌊c1 * Ll x⌋₊ ⌈c2 * Ll x⌉₊⟩ : DP)]) 𝒮
+
+namespace Reflection425
+
+/-- Page 24, principal dyadic blocks in the reflection step.
+The discretization and integral bounds used here have clean axioms. -/
+theorem principal_dyadic_bound :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ N N1 t : ℝ, 1 ≤ N → N ≤ N1 → N1 ≤ 2 * N → |t| ≤ N →
+      ‖∑ n ∈ Ioc ⌊N⌋₊ ⌊N1⌋₊, (n : ℂ) ^ (-(half t))‖ ≤
+        C * N ^ (-1 / 2 : ℝ) + 5 * N ^ (1 / 2 : ℝ) / (1 + |t|) := by
+  obtain ⟨C, hC, hdisc⟩ := DecompJ883.fgm_discretization_error
+  refine ⟨C, hC, ?_⟩
+  intro N N1 t hN hNN1 hN1 ht
+  have hsplit : ∀ n ∈ Ioc ⌊N⌋₊ ⌊N1⌋₊,
+      (n : ℂ) ^ (-(half t)) =
+        (n : ℂ) ^ (-(t : ℂ) * Complex.I) * (n : ℂ) ^ (-1 / 2 : ℂ) := by
+    intro n hn
+    have hn0 : n ≠ 0 := by
+      have := (mem_Ioc.mp hn).1
+      omega
+    rw [← Complex.cpow_add _ _ (by exact_mod_cast hn0)]
+    congr 1
+    unfold half
+    ring
+  rw [sum_congr rfl hsplit]
+  have hd := hdisc N N1 hN hNN1 hN1 t ht
+  have hi := DecompJ883.fgm_integral_bound N N1 hN hNN1 hN1 t
+  have htri := norm_add_le
+    ((∑ n ∈ Ioc ⌊N⌋₊ ⌊N1⌋₊, (n : ℂ) ^ (-(t : ℂ) * Complex.I) *
+      (n : ℂ) ^ (-1 / 2 : ℂ)) -
+      ∫ y in N..N1, (y : ℂ) ^ (-1 / 2 : ℂ) * (y : ℂ) ^ (-(t : ℂ) * Complex.I))
+    (∫ y in N..N1, (y : ℂ) ^ (-1 / 2 : ℂ) * (y : ℂ) ^ (-(t : ℂ) * Complex.I))
+  rw [sub_add_cancel] at htri
+  exact htri.trans (add_le_add hd hi)
+
+/-- Page 24, reflection with the polar term, for modulus one and the block F to 2F. -/
+theorem principal_reflection_dyadic :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ F t : ℝ, 2 ≤ F → |t| ≤ F →
+      ‖(longDP 1 2 F).eval (1 : DirichletCharacter ℂ 1) (half t)‖ ≤
+        K * (Real.log F + F ^ (1 / 2 : ℝ) / (1 + |t|)) := by
+  obtain ⟨C, hC, hbound⟩ := principal_dyadic_bound
+  have hl2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  refine ⟨C / Real.log 2 + 5, by positivity, ?_⟩
+  intro F t hF ht
+  let b : ℕ := ⌈2 * F⌉₊ - 1
+  have hceil := Nat.le_ceil (2 * F)
+  have hceilpos : 1 ≤ ⌈2 * F⌉₊ := by
+    by_contra h
+    have hz : ⌈2 * F⌉₊ = 0 := by omega
+    rw [hz] at hceil
+    norm_num at hceil
+    linarith
+  have hbcast : (b : ℝ) = (⌈2 * F⌉₊ : ℝ) - 1 := by
+    dsimp [b]
+    rw [Nat.cast_sub hceilpos, Nat.cast_one]
+  have hb0 : F ≤ (b : ℝ) := by
+    rw [hbcast]
+    linarith
+  have hb1 : (b : ℝ) ≤ 2 * F :=
+    (Nat.lt_ceil.mp (show b < ⌈2 * F⌉₊ by dsimp [b]; omega)).le
+  have hsupp : Ioo ⌊F⌋₊ ⌈2 * F⌉₊ = Ioc ⌊F⌋₊ b := by
+    ext n
+    simp only [mem_Ioo, mem_Ioc, b]
+    omega
+  have hχ : ∀ z : ZMod 1, (1 : DirichletCharacter ℂ 1) z = 1 := by
+    intro z
+    apply MulChar.one_apply
+    rw [Subsingleton.elim z 1]
+    exact isUnit_one
+  have heval : (longDP 1 2 F).eval (1 : DirichletCharacter ℂ 1) (half t) =
+      ∑ n ∈ Ioc ⌊F⌋₊ b, (n : ℂ) ^ (-(half t)) := by
+    simp [longDP, DP.eval, hχ, hsupp]
+  have hb := hbound F b t (by linarith) hb0 hb1 ht
+  rw [Nat.floor_natCast, ← heval] at hb
+  have hpow : F ^ (-1 / 2 : ℝ) ≤ 1 := by
+    simpa using Real.rpow_le_rpow_of_nonpos (by norm_num : (0 : ℝ) < 1)
+      (by linarith : 1 ≤ F) (by norm_num : (-1 / 2 : ℝ) ≤ 0)
+  have hlog : Real.log 2 ≤ Real.log F := Real.log_le_log (by norm_num) hF
+  have hClog : C ≤ (C / Real.log 2) * Real.log F := by
+    have hh := mul_le_mul_of_nonneg_left hlog (div_nonneg hC hl2.le)
+    rw [div_mul_cancel₀ C hl2.ne'] at hh
+    exact hh
+  have herr := mul_le_mul_of_nonneg_left hpow hC
+  have hmain : 0 ≤ F ^ (1 / 2 : ℝ) / (1 + |t|) := by positivity
+  have hcross := mul_nonneg (div_nonneg hC hl2.le) hmain
+  have hlog0 : 0 ≤ Real.log F := hl2.le.trans hlog
+  rw [show 5 * F ^ (1 / 2 : ℝ) / (1 + |t|) =
+    5 * (F ^ (1 / 2 : ℝ) / (1 + |t|)) by ring] at hb
+  nlinarith
+
+/-- Page 24, the Cauchy Schwarz step before the two sampled mean squares.
+CONDITIONAL ON the displayed pointwise bound for the third polynomial. -/
+theorem norm1prod_le_sup_mul_pnorm22 (M N P : DP) (c : Cfg) {H : ℝ} (hH : 0 ≤ H)
+    (hP : ∀ e ∈ c.S, ‖P.eval e.2 (half e.1)‖ ≤ H) :
+    norm1prod [M, N, P] c ≤ H * pnorm M c 2 * pnorm N c 2 := by
+  have hcs := Real.sum_mul_le_sqrt_mul_sqrt c.S
+    (fun e => ‖M.eval e.2 (half e.1)‖) (fun e => ‖N.eval e.2 (half e.1)‖)
+  calc
+    _ = ∑ e ∈ c.S,
+        ‖M.eval e.2 (half e.1)‖ * ‖N.eval e.2 (half e.1)‖ *
+          ‖P.eval e.2 (half e.1)‖ := by
+      simp [norm1prod, mul_assoc]
+    _ ≤ ∑ e ∈ c.S, ‖M.eval e.2 (half e.1)‖ * ‖N.eval e.2 (half e.1)‖ * H :=
+      sum_le_sum fun e he => mul_le_mul_of_nonneg_left (hP e he) (by positivity)
+    _ = H * ∑ e ∈ c.S, ‖M.eval e.2 (half e.1)‖ * ‖N.eval e.2 (half e.1)‖ := by
+      rw [← sum_mul]
+      ring
+    _ ≤ H * (Real.sqrt (∑ e ∈ c.S, ‖M.eval e.2 (half e.1)‖ ^ 2) *
+        Real.sqrt (∑ e ∈ c.S, ‖N.eval e.2 (half e.1)‖ ^ 2)) :=
+      mul_le_mul_of_nonneg_left hcs hH
+    _ = _ := by
+      simp only [pnorm, Real.sqrt_eq_rpow]
+      norm_num only [Real.rpow_ofNat]
+      ring
+
+/-- Page 24, the large L product reduced to two sampled mean squares.
+CONDITIONAL ON LongSup and the stated principal height lower bound. -/
+theorem longSup_product_bound (c1 c2 : ℝ) (M N : ℝ → DP) (Ll : ℝ → ℝ)
+    (𝒮 : ℝ → Set Cfg) (hsup : LongSup c1 c2 Ll 𝒮)
+    (hstd : ∀ x, ∀ c ∈ 𝒮 x, c.Std x)
+    (hLl : ∀ x, ∀ c ∈ 𝒮 x, 0 ≤ Ll x)
+    (hheight : ∀ x, ∀ c ∈ 𝒮 x, ∀ e ∈ c.S, e.2 = 1 → c.T / 2 ≤ |e.1|) :
+    ∃ B K X0 : ℝ, 0 ≤ K ∧ ∀ x, X0 ≤ x → ∀ c ∈ 𝒮 x,
+      norm1prod [M x, N x, longDP c1 c2 (Ll x)] c ≤
+        K * (L x ^ B + 2 * Ll x ^ (1 / 2 : ℝ) / c.T) *
+          pnorm (M x) c 2 * pnorm (N x) c 2 := by
+  obtain ⟨B, K, X0, hsup⟩ := hsup
+  refine ⟨B, |K|, max X0 1, abs_nonneg _, ?_⟩
+  intro x hx c hc
+  have hx0 : X0 ≤ x := (le_max_left _ _).trans hx
+  have hx1 : 1 ≤ x := (le_max_right _ _).trans hx
+  have hT : 0 < c.T := by
+    have := (hstd x c hc).2.2.2.1
+    linarith
+  have hL : 0 ≤ L x ^ B := Real.rpow_nonneg (Real.log_nonneg hx1) _
+  have hroot : 0 ≤ Ll x ^ (1 / 2 : ℝ) := Real.rpow_nonneg (hLl x c hc) _
+  have hpolar : 0 ≤ 2 * Ll x ^ (1 / 2 : ℝ) / c.T := by positivity
+  apply norm1prod_le_sup_mul_pnorm22 (M x) (N x) _ c (by positivity)
+  intro e he
+  obtain ⟨hne, heq⟩ := hsup x hx0 c hc e he
+  by_cases hχ : e.2 = 1
+  · have hden : Ll x ^ (1 / 2 : ℝ) / (1 + |e.1|) ≤
+        2 * Ll x ^ (1 / 2 : ℝ) / c.T := by
+      calc
+        _ ≤ Ll x ^ (1 / 2 : ℝ) / (c.T / 2) :=
+          div_le_div_of_nonneg_left hroot (by positivity)
+            (by linarith [hheight x c hc e he hχ])
+        _ = _ := by ring
+    exact (heq hχ).trans (mul_le_mul (le_abs_self K) (add_le_add le_rfl hden)
+      (by positivity) (abs_nonneg K))
+  · exact (hne hχ).trans (mul_le_mul (le_abs_self K) (le_add_of_nonneg_right hpolar)
+      hL (abs_nonneg K))
+
+/-- Page 11, the integer power of a sampled norm is its defining moment. -/
+theorem pnorm_nat_pow (P : DP) (c : Cfg) (n : ℕ) (hn : n ≠ 0) :
+    pnorm P c (n : ℝ) ^ n = ∑ e ∈ c.S, ‖P.eval e.2 (half e.1)‖ ^ n := by
+  simp only [pnorm, Real.rpow_natCast, one_div]
+  exact Real.rpow_inv_natCast_pow (by positivity) hn
+
+/-- Page 24, passing from initial polynomials in Lemma 9 to interval polynomials. -/
+theorem interval_pnorm_fourth_le (a b : ℕ) (hab : a ≤ b) (c : Cfg) :
+    pnorm ⟨fun _ => 1, Ioc a b⟩ c 4 ^ 4 ≤
+      8 * (pnorm ⟨fun _ => 1, Icc 1 b⟩ c 4 ^ 4 +
+        pnorm ⟨fun _ => 1, Icc 1 a⟩ c 4 ^ 4) := by
+  have hsub : Icc 1 a ⊆ Icc 1 b := by
+    intro n hn
+    exact mem_Icc.mpr ⟨(mem_Icc.mp hn).1, (mem_Icc.mp hn).2.trans hab⟩
+  have hset : Icc 1 b \ Icc 1 a = Ioc a b := by
+    ext n
+    simp only [mem_sdiff, mem_Icc, mem_Ioc]
+    omega
+  have heval : ∀ e : ℝ × DirichletCharacter ℂ c.q,
+      (⟨fun _ => 1, Ioc a b⟩ : DP).eval e.2 (half e.1) =
+        (⟨fun _ => 1, Icc 1 b⟩ : DP).eval e.2 (half e.1) -
+        (⟨fun _ => 1, Icc 1 a⟩ : DP).eval e.2 (half e.1) := by
+    intro e
+    apply (eq_sub_iff_add_eq).mpr
+    simpa only [DP.eval, one_mul, hset] using
+      (sum_sdiff hsub (f := fun n : ℕ =>
+        e.2 (n : ZMod c.q) * (n : ℂ) ^ (-(half e.1))))
+  rw [show (4 : ℝ) = ((4 : ℕ) : ℝ) by norm_num,
+    pnorm_nat_pow _ _ 4 (by norm_num), pnorm_nat_pow _ _ 4 (by norm_num),
+    pnorm_nat_pow _ _ 4 (by norm_num), ← sum_add_distrib, mul_sum]
+  apply sum_le_sum
+  intro e he
+  rw [heval]
+  exact (pow_le_pow_left₀ (norm_nonneg _) (norm_sub_le _ _) 4).trans
+    (by
+      have hp := add_pow_le
+        (norm_nonneg ((⟨fun _ => 1, Icc 1 b⟩ : DP).eval e.2 (half e.1)))
+        (norm_nonneg ((⟨fun _ => 1, Icc 1 a⟩ : DP).eval e.2 (half e.1))) 4
+      norm_num at hp
+      exact hp)
+
+/-- Pages 22 and 24, the interval version needed in the small L cases.
+CONDITIONAL ON Lemma9, not on its cited declaration. -/
+theorem interval_fourth_moment_of_lemma9 (h9 : Lemma9) :
+    ∃ B K : ℝ, ∀ x : ℝ, 2 ≤ x → ∀ a b : ℕ, a ≤ b → (b : ℝ) ≤ x →
+      ∀ c : Cfg, c.WellSpaced → 1 ≤ c.q → (c.q : ℝ) ≤ x → 2 ≤ c.T → c.T ≤ x →
+        pnorm ⟨fun _ => 1, Ioc a b⟩ c 4 ^ 4 ≤
+          K * (c.q * c.T * L x ^ B +
+            L x ^ 4 * c.S.card * (c.q ^ 2 / c.T ^ 2 + (b : ℝ) ^ 2 / c.T ^ 4) +
+            (b : ℝ) ^ 2 * ∑ e ∈ c.S, delta e.2 / (1 + |e.1|) ^ 4) := by
+  obtain ⟨B, K, h9⟩ := h9
+  refine ⟨B, 16 * |K|, ?_⟩
+  intro x hx a b hab hbx c hws hq hqx hT hTx
+  have hax : (a : ℝ) ≤ x := (show (a : ℝ) ≤ b by exact_mod_cast hab).trans hbx
+  have hL : 0 ≤ L x ^ B := Real.rpow_nonneg (Real.log_nonneg (by linarith)) _
+  have hδ : 0 ≤ ∑ e ∈ c.S, delta e.2 / (1 + |e.1|) ^ 4 := by
+    apply sum_nonneg
+    intro e he
+    unfold delta
+    split_ifs <;> positivity
+  let R : ℕ → ℝ := fun n =>
+    c.q * c.T * L x ^ B +
+      L x ^ 4 * c.S.card * (c.q ^ 2 / c.T ^ 2 + (n : ℝ) ^ 2 / c.T ^ 4) +
+      (n : ℝ) ^ 2 * ∑ e ∈ c.S, delta e.2 / (1 + |e.1|) ^ 4
+  have hR : ∀ n, 0 ≤ R n := by
+    intro n
+    dsimp [R]
+    positivity
+  have hRmono : R a ≤ R b := by
+    dsimp [R]
+    gcongr
+  have ha0 : pnorm ⟨fun _ => 1, Icc 1 a⟩ c 4 ^ 4 ≤ K * R a :=
+    h9 x hx a hax c hws hq hqx hT hTx
+  have hb0 : pnorm ⟨fun _ => 1, Icc 1 b⟩ c 4 ^ 4 ≤ K * R b :=
+    h9 x hx b hbx c hws hq hqx hT hTx
+  have ha : pnorm ⟨fun _ => 1, Icc 1 a⟩ c 4 ^ 4 ≤ |K| * R b :=
+    ha0.trans ((mul_le_mul_of_nonneg_right (le_abs_self K) (hR a)).trans
+      (mul_le_mul_of_nonneg_left hRmono (abs_nonneg K)))
+  have hb : pnorm ⟨fun _ => 1, Icc 1 b⟩ c 4 ^ 4 ≤ |K| * R b :=
+    hb0.trans (mul_le_mul_of_nonneg_right (le_abs_self K) (hR b))
+  calc
+    _ ≤ 8 * (pnorm ⟨fun _ => 1, Icc 1 b⟩ c 4 ^ 4 +
+        pnorm ⟨fun _ => 1, Icc 1 a⟩ c 4 ^ 4) := interval_pnorm_fourth_le a b hab c
+    _ ≤ 8 * (|K| * R b + |K| * R b) :=
+      mul_le_mul_of_nonneg_left (add_le_add hb ha) (by norm_num)
+    _ = _ := by dsimp [R]; ring
+
+/-- Page 24, the polar contribution in Lemma 9 under the principal height condition. -/
+theorem principal_polar_fourth_sum_le (c : Cfg) (hT : 0 < c.T)
+    (hheight : ∀ e ∈ c.S, e.2 = 1 → c.T / 2 ≤ |e.1|) :
+    ∑ e ∈ c.S, delta e.2 / (1 + |e.1|) ^ 4 ≤ 16 * c.S.card / c.T ^ 4 := by
+  classical
+  have hpoint : ∀ e ∈ c.S, delta e.2 / (1 + |e.1|) ^ 4 ≤ 16 / c.T ^ 4 := by
+    intro e he
+    by_cases hχ : e.2 = 1
+    · have hδ : delta e.2 = 1 := by simp [delta, hχ]
+      rw [hδ]
+      calc
+        _ ≤ 1 / (c.T / 2) ^ 4 := by
+          apply div_le_div_of_nonneg_left (by norm_num) (by positivity)
+          exact pow_le_pow_left₀ (by positivity)
+            (by linarith [hheight e he hχ]) 4
+        _ = _ := by ring
+    · simpa [delta, hχ] using (show (0 : ℝ) ≤ 16 / c.T ^ 4 by positivity)
+  calc
+    _ ≤ ∑ _e ∈ c.S, 16 / c.T ^ 4 := sum_le_sum hpoint
+    _ = _ := by simp; ring
+
+#print axioms principal_dyadic_bound
+#print axioms principal_reflection_dyadic
+#print axioms norm1prod_le_sup_mul_pnorm22
+#print axioms longSup_product_bound
+#print axioms pnorm_nat_pow
+#print axioms interval_pnorm_fourth_le
+#print axioms interval_fourth_moment_of_lemma9
+#print axioms principal_polar_fourth_sum_le
+
+end Reflection425
 
 /-- LEAF, OPEN. p. 24, the reflection step, reference 24 eq. (21), with the polar term of `χ₀` the
 print omits. It should follow from `DecompJ883.fgm_bound` by partial summation over dyadic blocks. -/
