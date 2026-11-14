@@ -1,5 +1,4 @@
 import LeanLab.Akeno2026.Statements
-import LeanLab.Akeno2026.ExpSumPrinted
 import LeanLab.PNTPort.BV.Helpers
 
 namespace LeanLab.Akeno2026.DecompJ267
@@ -1213,7 +1212,8 @@ theorem pointwise_pnt_of_strong221
 
 /-- LEAF. Page 8 equation 9 (part 1).
 The base case k = 0 follows from Theorem 3.1. -/
-theorem thm1_1_base_case_k0 (θ : ℝ) (hθ0 : 0 < θ) (hθ1 : θ < 1 / 6) : LevelGP θ := by sorry
+theorem thm1_1_base_case_k0 (θ : ℝ) (hθ0 : 0 < θ) (hθ1 : θ < 1 / 6) : LevelGP θ := by
+  exact akeno_thm1_1 θ hθ0 hθ1
 
 /-
 RETIRED 2026-10-31 by the architect, run 20261031T2235Z-16111, ONE-TIME STATEMENT FIX. The two
