@@ -1,0 +1,402 @@
+[
+  [
+    "a",
+    "hasDerivWithinAt_fract537",
+    "The fractional part has right derivative one at every real point",
+    "Backlund p. 346 display 7, reused upstream Euler brick",
+    "x = 0 is a permitted point and the derivative is taken from the right",
+    "clean"
+  ],
+  [
+    "a",
+    "hasDerivWithinAt_q537",
+    "Half the periodic second Bernoulli polynomial has right derivative fractional part x minus one half",
+    "Backlund p. 346 display 8, reused upstream Euler brick",
+    "x = 0 is a permitted point with right derivative minus one half",
+    "clean"
+  ],
+  [
+    "a",
+    "continuous_q_fract537",
+    "Half the periodic second Bernoulli polynomial is continuous on the real line",
+    "Backlund p. 346 display 8, reused upstream Euler brick",
+    "x = 0 is continuous because the endpoint polynomial values agree",
+    "clean"
+  ],
+  [
+    "a",
+    "abs_q_le537",
+    "The absolute value of half the periodic second Bernoulli polynomial is at most one twelfth",
+    "Backlund p. 361 display 52, reused upstream Euler brick",
+    "x = 0 gives equality",
+    "clean"
+  ],
+  [
+    "a",
+    "intervalIntegrable_b537",
+    "The complex sawtooth fractional part minus one half is integrable on every finite real interval",
+    "Backlund p. 346 displays 6 and 7, reused upstream Euler brick",
+    "a = 17 and b = 18 give a nonempty interval",
+    "clean"
+  ],
+  [
+    "a",
+    "intervalIntegrable_q537",
+    "The complex half second Bernoulli kernel is integrable on every finite real interval",
+    "Backlund p. 346 display 8, reused upstream Euler brick",
+    "a = 17 and b = 18 give a nonempty interval",
+    "clean"
+  ],
+  [
+    "a",
+    "ibp_q537",
+    "For positive a at most b and positive real part of s, integration by parts expresses the sawtooth power integral through the two half-Bernoulli endpoint terms and the second-order kernel integral",
+    "Backlund p. 346, integration by parts from display 6 to 8, reused upstream Euler brick",
+    "a = 17, b = 18 and s = 1 + 50i satisfy every premise",
+    "clean"
+  ],
+  [
+    "a",
+    "integrable_b_Ioi537",
+    "For natural N at least one and positive real part of s, the sawtooth times x to minus s minus one is integrable above N",
+    "Backlund p. 346 display 6, reused upstream Euler brick",
+    "N = 17 and s = 1 + 50i satisfy both premises",
+    "clean"
+  ],
+  [
+    "a",
+    "floor_kernel_eq537",
+    "The floor kernel floor x plus one half minus x equals minus the sawtooth fractional part x minus one half",
+    "Backlund p. 346 display 7, reused upstream Euler brick",
+    "x = 0 gives one half on both sides",
+    "clean"
+  ],
+  [
+    "a",
+    "integrable_q_Ioi537",
+    "For natural N at least one and positive real part of s, the half second Bernoulli kernel times x to minus s minus two is integrable above N",
+    "Backlund p. 346 display 8, reused upstream Euler brick",
+    "N = 17 and s = 1 + 50i satisfy both premises",
+    "clean"
+  ],
+  [
+    "a",
+    "em_one_interval537",
+    "For natural one at most N at most M and positive real part of s, the finite sawtooth integral equals the one-twelfth endpoint power difference plus s plus one times the half-Bernoulli integral",
+    "Backlund p. 346 display 8, reused upstream Euler brick",
+    "N = 17, M = 18 and s = 1 + 50i satisfy every premise",
+    "clean"
+  ],
+  [
+    "a",
+    "em_one_Ioi537",
+    "For natural N at least one and positive real part of s, the infinite sawtooth integral equals minus one twelfth times the endpoint power plus s plus one times the half-Bernoulli tail",
+    "Backlund p. 346 display 8, reused upstream Euler brick",
+    "N = 17 and s = 1 + 50i satisfy both premises",
+    "clean"
+  ],
+  [
+    "a",
+    "em_q_zeta537",
+    "For natural N at least one, positive real part of s and s unequal to one, the second Euler summation formula expresses zeta through the finite sum through N, its endpoint and pole terms, the one-twelfth correction and the half-Bernoulli integral",
+    "Backlund p. 346 display 8, reused upstream Euler brick",
+    "N = 17 and s = 1 + 50i satisfy every premise",
+    "clean"
+  ],
+  [
+    "a",
+    "bernoulli_kernel_bound",
+    "For complex s with real part at least one and real x at least one, the norm of the periodic second Bernoulli polynomial divided by x to s plus two is at most one sixth times x to minus three",
+    "Backlund p. 361 display 52",
+    "s = 1 + 50i and x = 17 meet both premises",
+    "clean"
+  ],
+  [
+    "a",
+    "bernoulli_integral_bound",
+    "For natural n at least one and real part of s at least one, the complex second Bernoulli tail integral above n has norm at most one over twelve n squared",
+    "Backlund p. 361 display 52",
+    "n = 17 and s = 1 + 50i meet both premises",
+    "clean"
+  ],
+  [
+    "a",
+    "euler8_identity",
+    "Zeta equals the finite reciprocal power sum up to n minus one, the half endpoint, the pole term, s over twelve n to s plus one, minus s times s plus one over two times the actual periodic second Bernoulli integral. The Euler proof reuses the development merged upstream in 79b318e5c0",
+    "Backlund p. 346 display 8",
+    "n = 17 and s = 1 + 50i satisfy every premise including s unequal to one",
+    "clean"
+  ],
+  [
+    "a",
+    "euler8_bernoulli_bound",
+    "The exact sealed Euler norm statement follows from the Euler identity. Its harmonic endpoint, one over t and both square root terms are unchanged. The Euler proof reuses the development merged upstream in 79b318e5c0",
+    "Backlund pp. 346 and 361 displays 8 and 52",
+    "n = 17, sigma = 1 and t = 50 satisfy every numeric premise",
+    "clean"
+  ],
+  [
+    "b",
+    "functionalMultiplier",
+    "At complex s, the multiplier is two times two pi to minus s times Gamma s times cosine of pi s over two",
+    "Backlund p. 369 display 75",
+    "s = 1 - 50i is a defined value with no hypotheses",
+    "def"
+  ],
+  [
+    "b",
+    "reflection_norm_identity",
+    "At positive t and every real a, the zeta norm at one minus a plus it equals the multiplier norm at a minus it times the zeta norm at a plus it",
+    "Backlund p. 369 display 75 and the functional equation",
+    "a = 1 and t = 50 satisfy the sole premise",
+    "clean"
+  ],
+  [
+    "b",
+    "multiplier_error_budget",
+    "For t at least fifty, the product of one plus one over four t squared, one plus one over eight t squared and one plus one over sixteen t squared is at most one plus one over two t squared",
+    "Backlund p. 369 display 76, derived rational refinement",
+    "t = 50 satisfies the premise",
+    "clean"
+  ],
+  [
+    "b",
+    "exp_cosine_error",
+    "For t at least fifty, exp of minus pi t is at most one over sixteen t squared",
+    "Backlund p. 369 before display 75, derived rational cosine error",
+    "t = 50 satisfies the premise",
+    "clean"
+  ],
+  [
+    "b",
+    "cosine_factor_bound",
+    "The norm of cosine of pi times a minus it over two is at most exp of pi t over two divided by two times one plus one over sixteen t squared",
+    "Backlund p. 369 before display 75",
+    "a = 1 and t = 50 satisfy the sole premise",
+    "clean"
+  ],
+  [
+    "b",
+    "gamma74_upper",
+    "For a from one through three halves and t at least fifty, Gamma at a minus it has norm at most square root two pi times t to a minus one half times exp of minus pi t over two times one plus one over four t squared times one plus one over eight t squared",
+    "Backlund pp. 368 and 369 display 74 and the Gamma recurrence",
+    "a = 1 and t = 50 satisfy both premises. The two factors represent the shifted Stirling remainder and the recurrence norm ratio",
+    "open"
+  ],
+  [
+    "b",
+    "multiplier76_bound",
+    "The explicit Gamma and cosine multiplier satisfies the display 76 bound from gamma74_upper, the proved cosine estimate, the exact real power identity and the proved rational error budget",
+    "Backlund pp. 368 and 369 displays 74 through 76",
+    "a = 1 and t = 50 satisfy both premises. There is no zeta growth premise",
+    "conditional"
+  ],
+  [
+    "b",
+    "reflection76",
+    "The exact sealed reflected zeta norm comparison follows from the multiplier norm bound and the clean functional equation norm identity",
+    "Backlund p. 369 display 76",
+    "sigma = 0 and t = 50 satisfy every numeric premise",
+    "conditional"
+  ],
+  [
+    "c",
+    "normalizer",
+    "At s, the factor is pi to minus s over two times Gamma of s over two times the principal square root of sine of pi s over two divided by complex log of minus si",
+    "Backlund p. 363 display 57",
+    "s = 1/2 + 50i is in the intended half-strip. The definition has no hypotheses",
+    "def"
+  ],
+  [
+    "c",
+    "normalized_vertical_boundary",
+    "The actual right zeta boundary saving implies that the normalized zeta norm is at most one on both vertical edges from height fifty",
+    "Backlund pp. 365 and 366 displays 67 through 72",
+    "t = 50 is on both edges. The actual analytic input h54 is unproved here. It is not replaced by arbitrary boundary data",
+    "open"
+  ],
+  [
+    "c",
+    "normalized_bottom_boundary",
+    "The actual height-fifty zeta bound on real parts one half through one implies a normalized norm at most one along the entire bottom edge from zero through one",
+    "Backlund pp. 366 through 368 displays 70, 71 and 73",
+    "sigma = 1/2 is a bottom point. The actual analytic input h50 is unproved here",
+    "open"
+  ],
+  [
+    "c",
+    "half_strip_of_damped_top",
+    "A complex function regular on the closed upper half-strip and bounded by one on its three finite boundary edges has norm at most one throughout if Gaussian damping has arbitrarily high top edges bounded by one for every positive damping parameter",
+    "Backlund p. 368, the Phragmen Lindelof argument made explicit",
+    "The constant zero function satisfies regularity, all edge bounds and every damped top bound. sigma = 1/2 and t = 50 are permitted points",
+    "clean"
+  ],
+  [
+    "c",
+    "normalized_regular",
+    "The actual normalized zeta function is holomorphic in the open half-strip and continuous on its closure. The square-root branch, Gamma poles, logarithm denominator and zeta pole are checked",
+    "Backlund p. 363 display 57",
+    "s = 1/2 + 51i is an interior point and s = 1/2 + 50i is a boundary point. No arbitrary function is substituted",
+    "clean"
+  ],
+  [
+    "c",
+    "normalized_damped_top",
+    "For every positive epsilon and every real H, the actual normalized zeta function after Gaussian damping has a horizontal top above both fifty and H with norm at most one for all real parts zero through one",
+    "Backlund p. 368, polynomial growth from displays 13 and 67",
+    "epsilon = 1 and H = 50 meet the premises. Existence of the actual top remains unproved",
+    "open"
+  ],
+  [
+    "c",
+    "normalized_half_strip",
+    "The actual normalized zeta norm is at most one in the half-strip if its three finite boundary edges have norm at most one. Regularity and the Gaussian maximum argument are proved. Only the actual damped top growth leaf remains an analytic input",
+    "Backlund p. 368, Phragmen Lindelof after display 73",
+    "sigma = 1/2 and t = 50 meet the domain premises. Boundary assumptions remain actual analytic inputs",
+    "conditional"
+  ],
+  [
+    "c",
+    "normalizer_lower",
+    "For real parts zero through one and heights at least fifty, the normalizer norm times the exact display 56 zeta majorant is at least one. This leaf contains no zeta value",
+    "Backlund p. 365 displays 60 through 68, derived inversion of the lower error bound",
+    "sigma = 1/2 and t = 50 meet both premises. The correction denominator is positive",
+    "open"
+  ],
+  [
+    "c",
+    "strip56_of_boundary",
+    "The exact sealed strip implication follows from the two normalized boundary estimates, the normalized regularity and growth leaves and the lower normalizer estimate",
+    "Backlund pp. 363 through 368 displays 56 through 73",
+    "sigma = 1/2 and t = 50 meet the domain premises. The exact h54 and h50 inputs are retained",
+    "conditional"
+  ],
+  [
+    "d",
+    "boundaryH",
+    "The same finite H sum as on main consists of reciprocal powers from one through nine plus half the reciprocal power at ten at height fifty",
+    "Backlund p. 367",
+    "sigma = 1/2 is defined. The compatibility audit checks definitional equality with the sealed H",
+    "def"
+  ],
+  [
+    "d",
+    "rising",
+    "The rising factorial is the product of s plus j for natural j below m",
+    "Backlund p. 346 displays 10 and 11",
+    "s = 1/2 + 50i and m = 10 are defined. m = 0 gives one",
+    "def"
+  ],
+  [
+    "d",
+    "periodicB10",
+    "The unshifted periodic tenth Bernoulli polynomial is five over sixty-six minus three halves q squared minus three q cubed minus five halves q to the fourth minus q to the fifth, where q is fractional part x times one minus fractional part x",
+    "Backlund p. 346 display 8 iterated to order ten, derived modern Bernoulli normalization",
+    "x = 0 gives five over sixty-six and q = 0",
+    "def"
+  ],
+  [
+    "d",
+    "periodicB10_eq_mathlib",
+    "The symmetric periodic tenth Bernoulli kernel equals evaluation of Mathlib's rational tenth Bernoulli polynomial at the fractional part of x",
+    "Backlund p. 346, derived higher-order refinement of display 8",
+    "x = 0 gives the standard Bernoulli number five over sixty-six on both sides",
+    "clean"
+  ],
+  [
+    "d",
+    "periodicB10_bound",
+    "At every real x the absolute value of the unshifted periodic tenth Bernoulli polynomial is at most five over sixty-six",
+    "Backlund p. 346, derived uniform bound for the higher-order refinement",
+    "x = 0 gives equality",
+    "clean"
+  ],
+  [
+    "d",
+    "correction",
+    "The finite correction is the pole term plus all five standard Euler terms with coefficients one over twelve, minus one over 720, one over 30240, minus one over 1209600 and one over 47900160 at cutoff ten",
+    "Backlund pp. 346 and 368, derived five-term refinement of display 8",
+    "s = 1/2 + 50i is defined and s minus one is nonzero",
+    "def"
+  ],
+  [
+    "d",
+    "euler10_identity",
+    "At height fifty and real part from one half through one, zeta minus the exact finite H is the five-term finite correction minus the rising factorial of length ten over ten factorial times the actual unshifted tenth Bernoulli tail integral",
+    "Backlund p. 346 display 8 iterated to order ten, used for p. 368",
+    "sigma = 1/2 meets the premise. This is a derived standard Euler identity, not the disputed printed two-term majorant",
+    "open"
+  ],
+  [
+    "d",
+    "rising_norm_bound",
+    "For sigma from one half through one, if b is nonnegative and b squared is at least 2500 plus m squared, the rising factorial at sigma plus fifty i of length m has norm at most b to m",
+    "Backlund p. 368, derived numerator certificate",
+    "sigma = 1/2, m = 10 and b = 51 satisfy every premise",
+    "clean"
+  ],
+  [
+    "d",
+    "tenth_kernel_bound",
+    "For sigma at least one half and x at least one, the tenth Bernoulli kernel norm is at most five over sixty-six times x to minus twenty-one halves",
+    "Backlund p. 368, derived remainder majorant",
+    "sigma = 1/2 and x = 10 satisfy both premises",
+    "clean"
+  ],
+  [
+    "d",
+    "tenth_majorant_integral",
+    "The real majorant integral above ten equals five over sixty-six divided by nineteen halves times ten to the ninth times square root ten",
+    "Backlund p. 368, derived exact remainder integral",
+    "There are no premises. The positive endpoint is ten",
+    "clean"
+  ],
+  [
+    "d",
+    "power_norm_lower",
+    "For sigma at least one half and natural m, the norm of ten to sigma plus fifty i plus m is at least seventy-nine over twenty-five times ten to m",
+    "Backlund p. 368, derived denominator certificate",
+    "sigma = 1/2 and m = 0 meet the sole premise",
+    "clean"
+  ],
+  [
+    "d",
+    "finite_term_bound",
+    "The norm of a rising-factorial Euler term with positive coefficient denominator c is at most b to m over c times seventy-nine over twenty-five times ten to m under the stated rising-factorial premises",
+    "Backlund p. 368, derived finite-term certificate",
+    "sigma = 1/2, m = 3, b = 50.1 and c = 720 satisfy every premise",
+    "clean"
+  ],
+  [
+    "d",
+    "pole_first_bound",
+    "For sigma from one half through one at height fifty, the pole term plus the first Euler correction has norm at most 0.069",
+    "Backlund p. 368, derived cancellation certificate",
+    "sigma = 1/2 meets the premise. Both complex terms are retained before taking their norm",
+    "clean"
+  ],
+  [
+    "d",
+    "correction_bound",
+    "For sigma from one half through one at height fifty, the pole term and all five Euler corrections together have norm at most 0.196",
+    "Backlund p. 368, derived five-term budget",
+    "sigma = 1/2 meets the premise. The pole and first term are grouped and the remaining four terms use rational bounds",
+    "clean"
+  ],
+  [
+    "d",
+    "tenth_remainder_bound",
+    "For sigma from one half through one, the actual tenth Bernoulli tail integral times its length-ten rising factorial over ten factorial has norm at most 0.084",
+    "Backlund p. 368, derived higher-order remainder budget",
+    "sigma = 1/2 meets the premise. The lower endpoint is ten and the kernel majorant is integrable",
+    "clean"
+  ],
+  [
+    "d",
+    "boundaryK",
+    "The exact sealed K norm bound of 0.281 follows from the higher-order Euler identity, the proved 0.196 finite correction budget and the proved 0.084 remainder budget",
+    "Backlund p. 368, repaired certification of the unchanged K target",
+    "sigma = 1/2 meets the premise. The actual K norm is used and the H definition is unchanged",
+    "conditional"
+  ]
+]

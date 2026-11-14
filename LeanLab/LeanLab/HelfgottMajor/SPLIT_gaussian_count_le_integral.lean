@@ -40,7 +40,17 @@ theorem gaussian_count_zero_shift (q : ℕ) [NeZero q] (χ : DirichletCharacter 
         0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|},
           if δ = 0 then 0 else exp (-0.1065 * (|ρ.val.im| / (π * |δ|)) ^ 2)) ≤
       gaussianTailIntegral q δ T := by
-  sorry
+  subst hδ
+  have hz : (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} =>
+        if (0 : ℝ) = 0 then 0 else exp (-0.1065 * (|ρ.val.im| / (π * |0|)) ^ 2))
+      = fun _ => (0 : ℝ) := by
+    funext ρ
+    simp
+  have hg : gaussianTailIntegral q 0 T = 0 := by
+    simp [gaussianTailIntegral]
+  rw [hz, hg]
+  exact ⟨summable_zero, by simp⟩
 
 /-- LEAF. Summability at nonzero shift: the Gaussian weights of the strip zeros above height
 `T` form a summable family. This is the counting input for the branch, with the absolute
