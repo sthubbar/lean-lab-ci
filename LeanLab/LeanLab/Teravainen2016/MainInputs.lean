@@ -1550,7 +1550,24 @@ theorem paper_dense_modular_progressions_input (A : Set ℕ)
       N < 3 * a ∧ 3 * a < 2 * N ∧
       N < 3 * b ∧ 3 * b < 2 * N ∧
       N < 3 * c ∧ 3 * c < 2 * N ∧
-      a ≠ b ∧ (a : ZMod N) + c = 2 * b := by sorry
+      a ≠ b ∧ (a : ZMod N) + c = 2 * b := by
+  intro X
+  unfold PosUpperDensityIn at hδ
+  obtain ⟨c, hc, hδ⟩ := hδ
+  obtain ⟨N, hN, hcount⟩ := hδ X
+  have hcountA : 0 < countIn A N := by
+    have hB : 0 ≤ countIn PStar N := by
+      unfold countIn
+      positivity
+    unfold countIn at hcount ⊢
+    linarith
+  have hcard : 0 < (Finset.filter (fun n : ℕ => n ∈ A) (Finset.Icc 1 N)).card := by
+    simpa [countIn] using hcountA
+  rcases Finset.exists_mem_of_card_pos hcard with ⟨a, ha⟩
+  have haA : a ∈ A := (Finset.mem_filter.mp ha).2
+  have haN : a ≤ N := (Finset.mem_filter.mp ha).1.2
+  trace_state
+  exact hcountA
 
 /-- LEAF. Pages 44 to 47, the Section 11 prime approximation estimate.
 CONDITIONAL ON that prime approximation estimate.
@@ -1558,7 +1575,14 @@ The positive frequency and small positive exponent reading precedes display 11.1
 theorem paper_dyadic_approximation_input (ξ : ℝ) (hξ : Irrational ξ) (hξ0 : 0 < ξ)
     (κ θ : ℝ) (hθ0 : 0 < θ) (hθ1 : θ < 1 / 80) :
     ∀ X : ℕ, ∃ N p : ℕ, max 1 X ≤ N ∧ N ≤ p ∧ p ≤ 2 * N ∧
-      InP p ∧ distInt (ξ * p + κ) ≤ (N : ℝ) ^ (-θ) / 2 := by sorry
+      InP p ∧ distInt (ξ * p + κ) ≤ (N : ℝ) ^ (-θ) / 2 := by
+  intro X
+  have hN0 : 0 < (max 1 X : ℝ) := by
+    positivity
+  have hθ01 : 0 ≤ θ := hθ0.le
+  have hθ11 : θ ≤ 1 := by linarith
+  trace_state
+  exact hN0
 
 #print axioms paper_smooth_cutoff_input
 
