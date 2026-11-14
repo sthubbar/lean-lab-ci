@@ -26,7 +26,10 @@ different arguments:
   bounded by `2U + 2q(1 + log q)`.
 
 `leaf_karLemma3_split` is the statement of `leaf_karLemma3`, from these four leaves, with no
-`sorry` and without using `leaf_karLemma3`; `sorry` sits on the four LEAF leaves only.
+`sorry` and without using `leaf_karLemma3`; `sorry` sits on the three remaining LEAF leaves
+`leaf_karLemma3_few`, `leaf_karLemma3_many_large_U` and `leaf_karLemma3_many_small_U`.
+`leaf_karLemma3_unit` is proved: every summand is at most `U`, so the sum is at most `U P`,
+which the right side covers.
 -/
 import LeanLab.ExceptionalSet.KaracubaSplit
 
@@ -43,7 +46,23 @@ theorem leaf_karLemma3_unit (U : ℝ) (P : ℕ) (a : ℤ) (q : ℕ) (θ β : ℝ
     (hU : 0 < U) (hq : q = 1) (hgcd : Int.gcd a q = 1) (hθ : |θ| ≤ 1) :
     ∑ x ∈ Finset.Icc 1 P, min U (1 / nint ((a / q + θ / (q : ℝ) ^ 2) * x + β))
       ≤ 6 * (U + q * Real.log q) * (P / q + 1) := by
-  sorry
+  have hle : ∀ x ∈ Finset.Icc 1 P,
+      min U (1 / nint ((a / q + θ / (q : ℝ) ^ 2) * x + β)) ≤ U :=
+    fun x _ => min_le_left _ _
+  subst hq
+  have hcard : ((Finset.Icc 1 P).card : ℝ) = (P : ℝ) := by
+    have h : (Finset.Icc 1 P).card = P := by simp
+    rw [h]
+  have h2 := Finset.sum_le_sum hle
+  rw [Finset.sum_const, nsmul_eq_mul] at h2
+  have h3 : ((Finset.Icc 1 P).card : ℝ) * U ≤ (P : ℝ) * U := by
+    rw [hcard]
+  have hP : (0 : ℝ) ≤ (P : ℝ) := Nat.cast_nonneg P
+  have hgoal : 6 * (U + (1 : ℕ) * Real.log ((1 : ℕ) : ℝ)) * (((P : ℕ) : ℝ) / ((1 : ℕ) : ℝ) + 1)
+      = 6 * U * ((P : ℝ) + 1) := by
+    norm_num [Real.log_one]
+  rw [hgoal]
+  nlinarith [h2, h3, hU, hP]
 
 /-- LEAF. The case `2 ≤ q` and `P < q` of Lemma 3: few summands, `P/q = 0`, so the right side
 is `6 (U + q log q)`. Every difference `x - x'` with `0 < |x - x'| < q` keeps `a (x - x')/q` at
