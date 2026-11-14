@@ -34,7 +34,10 @@ leaf still needs is Karacuba Lemma 2 applied at that `A/q`, which turns the deno
 `τ`, `l` and `ρ` into a single `ρ` bounded away from zero. The `τ` side of that bookkeeping
 is proved: `karTau_of_le`, `karTau_pos`, `karTau_le_one` and `karTau_ge` pin `τ` in the range
 `1 < q ≤ P`, and `kar_l_pos` with `kar_rho_pos` give `l > 0` and `ρ > 0` for every `n ≥ 2` and
-`0 < τ ≤ 1`.
+`0 < τ ≤ 1`. The block length side is proved too: `c2_lt_block_exponent` from
+`c2 + c4 < c1`, and `kar_denom_lt_pow`, which turns `P ≥ 2` above the threshold
+`2^(s+1) ≤ P^((A - c2) s)` and `m ≥ P^A/2` into the denominator bound `⌈P^(c2 s)⌉ < m^s`
+that Lemma 2 asks for, with `A = c1 - c4/2`.
 AI wrote the Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.KaracubaSplit
@@ -550,6 +553,51 @@ private theorem kar_l_pos {n : ℕ} {τ : ℝ} (hn : 2 ≤ n) (hτ0 : 0 < τ) (h
 private theorem kar_rho_pos {n : ℕ} {τ : ℝ} (hn : 2 ≤ n) (hτ0 : 0 < τ) (hτ1 : τ ≤ 1) :
     0 < τ / (3 * (n : ℝ) ^ 2 * Real.log (12 * (n : ℝ) * ((n : ℝ) + 1) / τ)) :=
   div_pos hτ0 (mul_pos (by positivity) (kar_l_pos hn hτ0 hτ1))
+
+/-- The exponent of the block length exceeds `c2`: from `c2 + c4 < c1` and `0 < c4`. -/
+private theorem c2_lt_block_exponent {c1 c2 c4 : ℝ} (hc4 : 0 < c4) (h241 : c2 + c4 < c1) :
+    c2 < c1 - c4 / 2 := by linarith
+
+/-- The block length bound of the p. 248 case: once `P` is above the threshold
+`2^(s+1) ≤ P^((A - c2) s)`, the coefficient denominator `⌈P^(c2 s)⌉` is below `m^s` for a
+block length `m` of at least `P^A / 2`. This is the `q < m^s` condition of Karacuba's
+Lemma 2 at the `s`-th coefficient. -/
+private theorem kar_denom_lt_pow {A c2 : ℝ} {P : ℝ} {m s : ℕ}
+    (_hA : 0 < A) (hc2 : 0 < c2) (_hc2A : c2 < A) (hs : 2 ≤ s) (hP : 2 ≤ P)
+    (hm : P ^ A / 2 ≤ (m : ℝ)) (hthr : (2 : ℝ) ^ (s + 1) ≤ P ^ ((A - c2) * (s : ℝ))) :
+    ((⌈P ^ (c2 * (s : ℝ))⌉₊ : ℕ) : ℝ) < (m : ℝ) ^ s := by
+  have hPpos : (0 : ℝ) < P := by linarith
+  have hPone : (1 : ℝ) ≤ P := by linarith
+  have hx0 : (0 : ℝ) ≤ P ^ (c2 * (s : ℝ)) := (Real.rpow_pos_of_pos hPpos _).le
+  have hx1 : (1 : ℝ) ≤ P ^ (c2 * (s : ℝ)) := Real.one_le_rpow hPone (by positivity)
+  have hceil : ((⌈P ^ (c2 * (s : ℝ))⌉₊ : ℕ) : ℝ) < 2 * P ^ (c2 * (s : ℝ)) := by
+    have h := Nat.ceil_lt_add_one (R := ℝ) hx0
+    linarith
+  have hPA : (0 : ℝ) < P ^ A / 2 := by
+    have := Real.rpow_pos_of_pos hPpos A
+    linarith
+  have hmpos : (0 : ℝ) < (m : ℝ) := lt_of_lt_of_le hPA hm
+  have hlow : (P ^ A / 2) ^ s ≤ (m : ℝ) ^ s := pow_le_pow_left₀ hPA.le hm s
+  have hdiv : (P ^ A / 2) ^ s = P ^ (A * (s : ℝ)) / (2 : ℝ) ^ s := by
+    rw [div_pow, ← Real.rpow_natCast (P ^ A) s, ← Real.rpow_mul hPpos.le A (s : ℝ)]
+  have hsplit : P ^ (A * (s : ℝ)) = P ^ ((A - c2) * (s : ℝ)) * P ^ (c2 * (s : ℝ)) := by
+    rw [← Real.rpow_add hPpos]
+    congr 1
+    ring
+  have h2s : (0 : ℝ) < (2 : ℝ) ^ s := by positivity
+  have hmul : (2 : ℝ) ^ (s + 1) * P ^ (c2 * (s : ℝ))
+      ≤ P ^ ((A - c2) * (s : ℝ)) * P ^ (c2 * (s : ℝ)) :=
+    mul_le_mul_of_nonneg_right hthr hx0
+  have hkey : (2 : ℝ) * P ^ (c2 * (s : ℝ)) ≤ P ^ (A * (s : ℝ)) / (2 : ℝ) ^ s := by
+    rw [le_div_iff₀ h2s]
+    have heq : (2 : ℝ) * P ^ (c2 * (s : ℝ)) * (2 : ℝ) ^ s
+        = (2 : ℝ) ^ (s + 1) * P ^ (c2 * (s : ℝ)) := by
+      rw [pow_succ]
+      ring
+    rw [heq, hsplit]
+    exact hmul
+  calc ((⌈P ^ (c2 * (s : ℝ))⌉₊ : ℕ) : ℝ) < 2 * P ^ (c2 * (s : ℝ)) := hceil
+    _ ≤ (m : ℝ) ^ s := (hkey.trans (le_of_eq hdiv.symm)).trans hlow
 
 /-- The charged statement, from the three leaves. -/
 theorem leaf_small_case_split (h2 : KarLemma2) :
