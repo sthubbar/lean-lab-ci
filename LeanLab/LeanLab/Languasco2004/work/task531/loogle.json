@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Real.mul_abs_le_abs_sin.\n", "heartbeats": 0, "hits": [{"doc": "Half of **Jordan's inequality** for absolute values.", "module": "Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds", "name": "Real.mul_abs_le_abs_sin", "type": " {x : \u211d} (hx : |x| \u2264 Real.pi / 2) : 2 / Real.pi * |x| \u2264 |Real.sin x|"}]}

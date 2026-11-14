@@ -1,0 +1,7 @@
+*.png
+*.olean
+*.ilean
+Search.lean
+axioms.lean
+Instances.lean
+Remaining.lean

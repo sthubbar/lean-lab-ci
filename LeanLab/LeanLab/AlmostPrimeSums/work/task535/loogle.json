@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Finset.card_lt_card.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Data.Finset.Card", "name": "Finset.card_lt_card", "type": " {\u03b1 : Type u_1} {s t : Finset \u03b1} (h : s \u2282 t) : s.card < t.card"}]}

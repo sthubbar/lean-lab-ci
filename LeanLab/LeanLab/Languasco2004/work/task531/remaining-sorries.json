@@ -1,0 +1,149 @@
+{
+  "main_sorries": 36,
+  "open_declarations": [
+    {
+      "file": "Decomp279a.lean",
+      "name": "initial_bound"
+    },
+    {
+      "file": "Decomp279a.lean",
+      "name": "subtraction_bound"
+    },
+    {
+      "file": "Decomp279a.lean",
+      "name": "recovery_bound"
+    },
+    {
+      "file": "Decomp279b.lean",
+      "name": "major_bound"
+    },
+    {
+      "file": "Decomp279b.lean",
+      "name": "minor_bound"
+    },
+    {
+      "file": "Decomp316a.lean",
+      "name": "low_sieve_lower"
+    },
+    {
+      "file": "Decomp316a.lean",
+      "name": "removed_upper"
+    },
+    {
+      "file": "Decomp316b.lean",
+      "name": "low_subtraction_upper"
+    },
+    {
+      "file": "Decomp316b.lean",
+      "name": "deleted_subtraction_lower"
+    },
+    {
+      "file": "Decomp316c.lean",
+      "name": "group1_lower"
+    },
+    {
+      "file": "Decomp316c.lean",
+      "name": "group2_lower"
+    },
+    {
+      "file": "Decomp316c.lean",
+      "name": "group3_lower"
+    },
+    {
+      "file": "Decomp316c.lean",
+      "name": "group4_lower"
+    },
+    {
+      "file": "Decomp316c.lean",
+      "name": "group5_lower"
+    },
+    {
+      "file": "Decomp413b.lean",
+      "name": "principal_bound"
+    },
+    {
+      "file": "Decomp413b.lean",
+      "name": "remainder_bound"
+    },
+    {
+      "file": "Decomp489a.lean",
+      "name": "density_input"
+    },
+    {
+      "file": "Decomp489a.lean",
+      "name": "zero_free_input"
+    },
+    {
+      "file": "Decomp489a.lean",
+      "name": "gallagher_input"
+    },
+    {
+      "file": "Decomp489a.lean",
+      "name": "explicit_formula_input"
+    },
+    {
+      "file": "Decomp489b.lean",
+      "name": "remainder_to_good"
+    },
+    {
+      "file": "Decomp489b.lean",
+      "name": "good_character_envelope"
+    },
+    {
+      "file": "Decomp489d.lean",
+      "name": "short_mangoldt_input"
+    },
+    {
+      "file": "Decomp489f.lean",
+      "name": "dyadic_input"
+    },
+    {
+      "file": "Decomp489g.lean",
+      "name": "finite_kernel_energy"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "li1999"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "jia"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "perelliPintz1993"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "luoYao"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "peneva"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "languasco2004a"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "brunnerPerelliPintz"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "zaccagnini"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "perelliPintzMikawa"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "perelliZaccagnini"
+    },
+    {
+      "file": "StatementsA.lean",
+      "name": "languasco2004b"
+    }
+  ]
+}
