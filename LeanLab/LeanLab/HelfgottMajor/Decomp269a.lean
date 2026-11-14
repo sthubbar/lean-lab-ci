@@ -12,10 +12,6 @@ AI wrote this Lean code. Binary Goldbach is open.
 namespace LeanLab.HelfgottMajor.Decomp269a
 open Real LeanLab.HelfgottArcs Decomp123
 
-/-- The Mellin transform F_delta used on page 43 in the proof of display 4.43. -/
-noncomputable def gaussianMellin (δ : ℝ) (s : ℂ) : ℂ :=
-  mellin (fun t : ℝ => (exp (-t ^ 2 / 2) : ℂ) * e (δ * t)) s
-
 /-- A zero contribution with its analytic multiplicity, as in display 4.1 on page 31. -/
 noncomputable def zeroTerm {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
     (δ x : ℝ) (ρ : ℂ) : ℂ :=

@@ -1,5 +1,6 @@
 import LeanLab.HelfgottMajor.Gamma431
-import LeanLab.HelfgottMajor.Gaussian269
+import Mathlib
+import LeanLab.HelfgottMajor.Sec45
 
 /-!
 The scalar log squared Gaussian moment from P0014 page 43 display 4.42.

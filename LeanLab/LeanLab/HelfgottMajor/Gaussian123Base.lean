@@ -1,3 +1,4 @@
+import LeanLab.HelfgottMajor.Decomp526a
 import LeanLab.HelfgottMajor.Decomp503a
 import LeanLab.HelfgottMajor.Lemma41Terms
 import LeanLab.HelfgottArcs.Statements
@@ -56,40 +57,6 @@ import Decomp123, which imports this file. AI wrote this Lean code. Binary Goldb
 
 section RouteBurst9
 open MeasureTheory
-
-/-- The multiplicity weighted Mellin norm of one zero, P0014 Lemma 4.4 pages 38 and 39 and
-Lemma 4.5 page 40. The same definition as Decomp269b.mellinMassTerm. -/
-noncomputable def mellinMassTerm {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (δ : ℝ) (ρ : ℂ) : ℝ :=
-  (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) * ‖gaussianMellin δ ρ‖
-
-/-- PROVED. P0014 display 4.30, page 39: the trivial bound of the Gaussian Mellin transform by
-the absolute integral. Copy of Gaussian269.mellin_norm_le. -/
-theorem mellin_norm_le (δ : ℝ) (s : ℂ) :
-    ‖gaussianMellin δ s‖ ≤
-      ∫ t in Set.Ioi (0 : ℝ), t ^ (s.re - 1) * exp (-t ^ 2 / 2) := by
-  unfold gaussianMellin mellin
-  calc
-    _ ≤ ∫ t in Set.Ioi (0 : ℝ),
-        ‖(t : ℂ) ^ (s - 1) • ((exp (-t ^ 2 / 2) : ℂ) * e (δ * t))‖ :=
-      norm_integral_le_integral_norm _
-    _ = _ := by
-      apply setIntegral_congr_fun measurableSet_Ioi
-      intro t ht
-      dsimp only
-      have he : ‖e (δ * t)‖ = 1 := by simp [e, Complex.norm_exp, Complex.mul_re]
-      rw [norm_smul, norm_mul, he, mul_one,
-        Complex.norm_cpow_eq_rpow_re_of_pos ht, Complex.norm_real,
-        Real.norm_eq_abs, abs_of_pos (exp_pos _)]
-      simp
-
-/-- PROVED. P0014 display 4.30 on page 39 with the norm 2.15581 of display 4.42 on page 43:
-on the critical line the Gaussian Mellin transform has norm at most 2.15581. -/
-theorem mellin_critical_norm_le (δ : ℝ) (s : ℂ) (hs : s.re = 1 / 2) :
-    ‖gaussianMellin δ s‖ ≤ 2.15581 := by
-  have h := mellin_norm_le δ s
-  rw [hs] at h
-  exact h.trans HalfMoment389.gaussian_half_moment_bound
 
 /-- PROVED. The critical line gives the square root of x in the proof of Proposition 4.6,
 page 43. Copy of Zeros269.zero_term_norm. -/
@@ -168,13 +135,6 @@ noncomputable def veryLowMass {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ 
     0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
     Set.indicator {ρ | |ρ.val.im| ≤ 1} (fun ρ => mellinMassTerm χ δ ρ.val) ρ
 
-/-- The part of the low Mellin mass with absolute imaginary part above 1, P0014 pages 39, 40. -/
-noncomputable def middleMass {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (δ T : ℝ) : ℝ :=
-  ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
-    0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
-    Set.indicator {ρ | |ρ.val.im| ≤ 1}ᶜ (fun ρ => mellinMassTerm χ δ ρ.val) ρ
-
 /-- PROVED. The partition at height 1 in the proof of Lemma 4.4, P0014 page 39.
 No hypothesis: the index set is finite. -/
 theorem mass_split {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (δ T : ℝ) :
@@ -225,9 +185,10 @@ theorem very_low_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
             (fun ρ => (ZeroCount1623.mult χ ρ.val : ℝ)) ρ := tsum_mul_left
     _ ≤ _ := mul_le_mul_of_nonneg_left hc (by norm_num)
 
-/-- LEAF: OPEN. P0014 Lemma 4.4, pages 39 and 40, display 4.32 and the final Cauchy Schwarz step,
+/-- P0014 Lemma 4.4, pages 39 and 40, display 4.32 and the final Cauchy Schwarz step,
 with the norms of display 4.42 on page 43: the zeros with 1 < abs Im rho at most T.
-Same statement as Decomp269b.middle_mass_bound, whose lab split in Decomp389b is open. -/
+CONDITIONAL ON the shared lab count ZeroCount1623.book_zero_count.
+Signed sampling, energies and the finite upper endpoint correction are proved in Decomp526a. -/
 theorem middle_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
     (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
@@ -236,7 +197,7 @@ theorem middle_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
       (sqrt Sec45.nTwo + sqrt Sec45.nLog) * sqrt T * log (q * T) +
       (17.21 * sqrt Sec45.nLog - log (2 * π * sqrt (exp 1)) * sqrt Sec45.nTwo) * sqrt T +
       2.15581 * (0.5 * log q + 17.7) := by
-  sorry
+  exact Decomp526a.middle_mass_bound q χ hχ δ T hT hzeros
 
 /-- LEAF: OPEN. P0014 Corollary 3.2, page 10, display 3.4 with k equal to 0 and c0 equal to 4.226:
 for s with real part in the closed unit interval and abs Im s at least max(100, 4π² abs δ),

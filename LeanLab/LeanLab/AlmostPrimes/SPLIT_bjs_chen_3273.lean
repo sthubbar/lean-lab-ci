@@ -34,6 +34,16 @@ theorem bjs_chen_3273_leaf_count_low (N : ℕ) (hN : Even N)
     (hhi : (N : ℝ) ≤ Real.exp (Real.exp 32.78)) :
     (1 / 10000 : ℝ) * (N : ℝ) / (Real.log (N : ℝ)) ^ 2 <
       ((Finset.range N).filter (fun p => p.Prime ∧ bigOmega (N - p) ≤ 2)).card := by
+  -- BLOCKED 2026-11-14 FREE-nv-nemotron task416 bjs_chen_3273_leaf_count_low: OUT OF REACH
+  -- The required unconditional lower bound on the Chen count (or the filtered set) is not available.
+  -- The library has conditional results:
+  -- 1. BJS3_of_sieveBounds: (2/10000) * U_N * N / log² N < chenCount N, assuming Thm44Bound, Thm50Bound, Thm51Bound
+  -- 2. cor4_of_BJS3At: √N < chenCount N, assuming BJS3At t
+  -- But the sieve bounds (Thm44Bound, Thm50Bound, Thm51Bound) for the concrete functions SA, sumSAq, SB
+  -- are not proved in the library. Only the parametric version (cAbP, cBP, etc.) in AT3273.lean is worked out.
+  -- Searches: grep for "Thm44Bound\|Thm50Bound\|Thm51Bound" in LeanLab/ChenExplicit/ shows only the definitions
+  -- and BJS3_of_sieveBounds, no proof of the bounds for concrete SA/sumSAq/SB.
+  -- The leaf requires formalizing the explicit lower-bound sieve with constants, which is not yet done.
   sorry
 
 /-- LEAF. The counting step of the sieve on the middle sub-range
@@ -45,6 +55,10 @@ theorem bjs_chen_3273_leaf_count_mid (N : ℕ) (hN : Even N)
     (hhi : (N : ℝ) ≤ Real.exp (Real.exp 32.83)) :
     (1 / 10000 : ℝ) * (N : ℝ) / (Real.log (N : ℝ)) ^ 2 <
       ((Finset.range N).filter (fun p => p.Prime ∧ bigOmega (N - p) ≤ 2)).card := by
+  -- BLOCKED 2026-11-14 FREE-nv-nemotron task416 bjs_chen_3273_leaf_count_mid: OUT OF REACH
+  -- Same missing result as the low leaf: unconditional lower bound on chenCount N.
+  -- The library only has conditional results assuming unproved sieve bounds (Thm44Bound, Thm50Bound, Thm51Bound).
+  -- The parametric version at 32.73 is in AT3273.lean (margin_bP) but the concrete bounds are not proved.
   sorry
 
 /-- LEAF. The counting step of the sieve on the top sub-range `N > exp (exp 32.83)`, where no
@@ -55,6 +69,9 @@ theorem bjs_chen_3273_leaf_count_high (N : ℕ) (hN : Even N)
     (hlo : Real.exp (Real.exp 32.83) < (N : ℝ)) :
     (1 / 10000 : ℝ) * (N : ℝ) / (Real.log (N : ℝ)) ^ 2 <
       ((Finset.range N).filter (fun p => p.Prime ∧ bigOmega (N - p) ≤ 2)).card := by
+  -- BLOCKED 2026-11-14 FREE-nv-nemotron task416 bjs_chen_3273_leaf_count_high: OUT OF REACH
+  -- Same missing result: unconditional lower bound on chenCount N.
+  -- The library only has conditional results assuming unproved sieve bounds.
   sorry
 
 /-! ### Assembly -/

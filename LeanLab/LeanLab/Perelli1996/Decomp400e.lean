@@ -6,7 +6,7 @@ The rational arcs enclose the printed Farey cells. The principal comparison
 includes the kernel tail correction for this enlargement.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Perelli1996.Decomp289a
+import LeanLab.Perelli1996.Decomp533a
 import LeanLab.Perelli1996.Ramanujan103
 import LeanLab.Perelli1996.Localization103
 
@@ -14,27 +14,6 @@ namespace LeanLab.Perelli1996.Decomp400e
 open Finset Real Polynomial MeasureTheory
 open LeanLab.Perelli1996.Decomp88 LeanLab.Perelli1996.Decomp289a
 noncomputable section
-
-/-- Page 486 before equation 26. Periodic enclosing arcs of radius one over q Q.
-These contain the printed Farey cells and are the domains of the remainder mass. -/
-def meanMajorArcs (F : ℤ[X]) (N H B : ℝ) : Set ℝ :=
-  {α | ∃ q : ℕ, 0 < q ∧ (q : ℝ) ≤ Real.log N ^ B ∧
-    ∃ a : ℤ, Nat.Coprime a.natAbs q ∧
-      |α - (a : ℝ) / q| ≤ 1 / ((q : ℝ) * meanOrder F N H B)}
-
-/-- Page 486 equation 26. Real part of the major arc prime mean integral. -/
-def majorPrimeMean (F : ℤ[X]) (M : ℕ) (N H B : ℝ) : ℝ :=
-  (∫ α in Set.Icc 0 1 ∩ meanMajorArcs F N H B,
-    primeSum M α ^ 2 * Section2.polynomialKernel F N H (-α)).re
-
-/-- Pages 486 and 487 equations 27 and 28. The truncated singular mean.
-The Ramanujan sum at a negative integer equals its value at that integer's absolute value.
-The cutoff hypotheses in the leaves ensure nonnegative polynomial values. -/
-def truncatedWeightedMean (F : ℤ[X]) (N H B : ℝ) : ℝ :=
-  (∑ n ∈ win F N H, ((Fv F n : ℝ) : ℂ) *
-    ∑ q ∈ Icc 1 ⌊Real.log N ^ B⌋₊,
-      ((ArithmeticFunction.moebius q : ℂ) ^ 2 / (q.totient : ℂ) ^ 2) *
-        Ramanujan103.ramanujanSum q (Fv F n).toNat).re
 
 /-- LEAF. Page 486 equation 26. Parseval and the secondary Weyl decay discard the minor arcs.
 This is only the comparison with the major integral, before the character expansion.
@@ -235,7 +214,7 @@ theorem leaf_principal_mean (F : ℤ[X]) (hF : Admissible F)
         C * H * (remainderMass F c N H B +
           Real.sqrt (N * Real.log N * remainderMass F c N H B)) +
         C * H * N * Real.log N ^ (-A) := by
-  sorry
+  exact Decomp533a.principal_mean F hF A ε B c hA hε hB hc
 
 /-- LEAF. Page 487 equation 28, by the tail argument of page 481 equations 3 and 4.
 Only the finite singular series is replaced by the full singular series here. -/
@@ -248,7 +227,7 @@ theorem leaf_singular_tail (F : ℤ[X]) (hF : Admissible F)
       |truncatedWeightedMean F N H B -
         ∑ n ∈ win F N H, (Fv F n : ℝ) * Sing (Fv F n).toNat| ≤
           C * H * N * Real.log N ^ (-A) := by
-  sorry
+  exact Decomp533a.singular_tail F hF A ε hA hε
 
 /-- Pages 486 and 487 equations 26 through 28. The exact existing weighted mean target.
 CONDITIONAL ON the three smaller leaves and the existing Weyl input.
