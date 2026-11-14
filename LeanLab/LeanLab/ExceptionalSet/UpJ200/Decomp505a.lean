@@ -1,3 +1,4 @@
+import LeanLab.ExceptionalSet.UpJ200.Decomp527a
 import LeanLab.ExceptionalSet.UpJ200.Decomp509a
 import LeanLab.ExceptionalSet.UpJ200.Decomp371a
 
@@ -139,7 +140,10 @@ theorem leaf_even_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
             (R1 (F γ N ^ (6 * δ)) (F γ N) (evenIndex γ n)).re <
               c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
                 B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
-  sorry
+  have hindex (n : ℕ) : evenIndex γ n = Decomp527a.evenMember γ n := by
+    by_cases he : Even (nu γ n) <;> simp [evenIndex, Decomp527a.evenMember, he]
+  simp_rw [hindex]
+  exact Decomp527a.even_coefficient_from_inputs γ h1 h2
 
 /-- LEAF: P0082 page367 display29 and page366 display28.
 On the even floor parity the successor coefficient is odd.

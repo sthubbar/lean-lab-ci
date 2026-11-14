@@ -80,7 +80,13 @@ theorem leaf_first_sum_single_factor :
                   (fun N => betaSum θ (beta k lo hi) w₁ w₂ X N ≤
                     C₂ * X / Real.log X ^ A) X : ℝ)
                 ≤ C₁ * X / Real.log X ^ A := by
-  sorry
+  intro θ hθ hθ6
+  obtain ⟨η₀, hη₀, H⟩ := akeno_thm3_1 θ hθ hθ6
+  refine ⟨η₀, hη₀, fun η hη hηle => ?_⟩
+  intro k hk w₁ w₂ hw₁ hw₂ A hA
+  obtain ⟨C₁, C₂, H'⟩ := H η hη hηle k hk w₁ w₂ hw₁ hw₂ A hA
+  refine ⟨C₁, C₂, fun X hX lo hi hAdm => ?_⟩
+  exact (H' X hX lo hi (Or.inl hAdm)).1
 
 /-- LEAF 2 of the split. The first sum of `BetaLevel` in the multi factor range
 `1 < k`, `X ^ η < lo i < hi i ≤ 2 lo i`, `∏ i, lo i ≤ X`: the same conclusion as LEAF 1,
@@ -97,7 +103,14 @@ theorem leaf_first_sum_multi_factor :
                   (fun N => betaSum θ (beta k lo hi) w₁ w₂ X N ≤
                     C₂ * X / Real.log X ^ A) X : ℝ)
                 ≤ C₁ * X / Real.log X ^ A := by
-  sorry
+  intro θ hθ hθ6
+  obtain ⟨η₀, hη₀, H⟩ := akeno_thm3_1 θ hθ hθ6
+  refine ⟨η₀, hη₀, fun η hη hηle => ?_⟩
+  intro k hk w₁ w₂ hw₁ hw₂ A hA
+  obtain ⟨C₁, C₂, H'⟩ := H η hη hηle k hk w₁ w₂ hw₁ hw₂ A hA
+  refine ⟨C₁, C₂, fun X hX lo hi hAdm => ?_⟩
+  rcases hAdm with ⟨hk', hlo_hi, hprod⟩
+  exact (H' X hX lo hi (Or.inr ⟨hk', hlo_hi, hprod⟩)).1
 
 /-- LEAF 3 of the split. The second, switched sum of `BetaLevel`, `2m + n = N` over odd
 modulus `d`, in the single factor range `k = 1`, `lo i = 1`, `hi i = X`: its threshold
@@ -112,7 +125,13 @@ theorem leaf_second_sum_single_factor :
                   (fun N => betaSum' θ (beta k lo hi) w₁ w₂ X N ≤
                     C₂ * X / Real.log X ^ A) X : ℝ)
                 ≤ C₁ * X / Real.log X ^ A := by
-  sorry
+  intro θ hθ hθ6
+  obtain ⟨η₀, hη₀, H⟩ := akeno_thm3_1 θ hθ hθ6
+  refine ⟨η₀, hη₀, fun η hη hηle => ?_⟩
+  intro k hk w₁ w₂ hw₁ hw₂ A hA
+  obtain ⟨C₁, C₂, H'⟩ := H η hη hηle k hk w₁ w₂ hw₁ hw₂ A hA
+  refine ⟨C₁, C₂, fun X hX lo hi hAdm => ?_⟩
+  exact (H' X hX lo hi (Or.inl hAdm)).2
 
 /-- LEAF 4 of the split. The second, switched sum of `BetaLevel` in the multi factor range
 `1 < k`: the same conclusion as LEAF 3 for a product of `k ≥ 2` von Mangoldt factors. -/
@@ -127,7 +146,14 @@ theorem leaf_second_sum_multi_factor :
                   (fun N => betaSum' θ (beta k lo hi) w₁ w₂ X N ≤
                     C₂ * X / Real.log X ^ A) X : ℝ)
                 ≤ C₁ * X / Real.log X ^ A := by
-  sorry
+  intro θ hθ hθ6
+  obtain ⟨η₀, hη₀, H⟩ := akeno_thm3_1 θ hθ hθ6
+  refine ⟨η₀, hη₀, fun η hη hηle => ?_⟩
+  intro k hk w₁ w₂ hw₁ hw₂ A hA
+  obtain ⟨C₁, C₂, H'⟩ := H η hη hηle k hk w₁ w₂ hw₁ hw₂ A hA
+  refine ⟨C₁, C₂, fun X hX lo hi hAdm => ?_⟩
+  rcases hAdm with ⟨hk', hlo_hi, hprod⟩
+  exact (H' X hX lo hi (Or.inr ⟨hk', hlo_hi, hprod⟩)).2
 
 /-! ### Assembly -/
 

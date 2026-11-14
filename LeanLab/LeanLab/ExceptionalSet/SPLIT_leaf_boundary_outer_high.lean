@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_fractional_boundary
+import LeanLab.ExceptionalSet.Decomp524a
 
 /-!
 Split of the fourth arc of `Decomp371a.leaf_fractional_boundary`: the outer half of the upper
@@ -47,7 +48,13 @@ theorem leaf_outer_high_lower_band_lower_indices (γ : ℝ) (h1 : 1 < γ) (h2 : 
           n ≤ N ∧ 1 - calE γ κ N ^ (-(1 / 8 : ℝ)) / 2 < Int.fract (F γ n) ∧
             Int.fract (F γ n) ≤ 1 - 1 / 4 * calE γ κ N ^ (-(1 / 8 : ℝ)))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨κ₀, hκ₀, hb⟩ := Decomp524a.dyadic_upper_boundary524 γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκcap => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := hb κ hκ hκcap
+  refine ⟨B, hB, max 16 N₀, fun N hN => ?_⟩
+  exact (Decomp524a.lower_band_card524 γ κ N h1 ((le_max_left _ _).trans hN)).trans
+    (hN₀ N ((le_max_right _ _).trans hN))
 
 /-- LEAF. Step 2 of the split: the upper piece of the half band, on the indices `n ≤ N`. It counts
 the window indices with `n ≤ N` and `1 - Δ / 4 < {F γ n}`, where
@@ -60,7 +67,13 @@ theorem leaf_outer_high_upper_band_lower_indices (γ : ℝ) (h1 : 1 < γ) (h2 : 
         (((window γ N).filter (fun n : ℕ =>
           n ≤ N ∧ 1 - 1 / 4 * calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨κ₀, hκ₀, hb⟩ := Decomp524a.dyadic_upper_boundary524 γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκcap => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := hb κ hκ hκcap
+  refine ⟨B, hB, max 16 N₀, fun N hN => ?_⟩
+  exact (Decomp524a.upper_band_card524 γ κ N h1 ((le_max_left _ _).trans hN)).trans
+    (hN₀ N ((le_max_right _ _).trans hN))
 
 /-- LEAF. Step 3 of the split: the lower piece of the half band, on the indices `N < n`. It counts
 the window indices with `N < n` and `1 - Δ / 2 < {F γ n} ≤ 1 - Δ / 4`, where

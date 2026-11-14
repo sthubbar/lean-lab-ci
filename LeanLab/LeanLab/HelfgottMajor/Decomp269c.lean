@@ -928,18 +928,13 @@ theorem tail_mass_integral (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
       0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}, mellinMassTerm χ δ ρ.val) ≤
       4.226 * (expTailIntegral q T + gaussianTailIntegral q δ T) := by
-  -- BLOCKED OUT OF REACH: this is the zero-count reduction of Lemma 4.5 (pages 40-42).
-  -- It requires bounding a sum over Dirichlet L-function zeros above height T by an
-  -- integral of the zero density countDensity. The hzeros hypothesis only constrains
-  -- zeros up to height T (on the critical line); zeros above T are unconstrained.
-  -- Mathlib lacks: (1) Riemann-von Mangoldt zero-counting N_q(T) ≤ C·T·log(qT),
-  -- (2) explicit formula for Dirichlet L-functions, (3) Stieltjes integral bounds
-  -- relating tsum over zeros to ∫ countDensity. Searches run: LeanSearch, Loogle,
-  -- local grep for zero count, tsum_le_integral, sum_zeros_le, countDensity in all
-  -- LeanLab files; found only Zeros269.low_zero_terms_summable (finite support for
-  -- zeros up to T) and high_zero_bound_of_mellin_sum (consumes this output).
-  -- No zero-counting theorem exists in Mathlib or the repo.
-  sorry
+  -- This assembly retains the OPEN analytic inputs of Gaussian123Base.
+  simpa only [mellinMassTerm, SplitGaussian123.mellinMassTerm,
+    Decomp269a.gaussianMellin, SplitGaussian123.gaussianMellin,
+    expTailIntegral, TailIntegral123.expTailIntegral,
+    gaussianTailIntegral, TailIntegral123.gaussianTailIntegral,
+    countDensity, TailIntegral123.countDensity] using
+    SplitGaussian123.tail_mass_integral q χ hχ δ T hT hzeros
 
 /-- LEAF. Page 41, display 4.36. This estimates only the exponential integral. -/
 theorem exp_integral_bound (q : ℕ) [NeZero q] (T : ℝ) (hT : 100 ≤ T) :

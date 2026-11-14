@@ -1,0 +1,182 @@
+{
+  "adjacent_le_X": [
+    "Every interior index in the floor window has both adjacent integers at most X.",
+    "P0082 pages358 and362. The coefficient expansion stops at m at most X.",
+    "Gamma five quarters, N sixteen, n fifteen and shift zero satisfy the parameter bounds. Window membership remains the displayed premise."
+  ],
+  "one_le_count_scale": [
+    "For gamma above one, kappa between zero and one and N at least eight, N times E to minus one twelfth is at least one.",
+    "P0082 page364 display22. Derived endpoint budget.",
+    "Gamma five quarters, kappa one and N eight."
+  ],
+  "floor_residue_fract": [
+    "A floor residue a modulo positive d puts the fractional part of x over d in the half open interval from a over d to a plus one over d.",
+    "P0082 page360 display16. Exact floor residue bookkeeping.",
+    "x five, d three and a two."
+  ],
+  "progression_counts": [
+    "Assume Lemma4. For gamma between one and three halves, sufficiently small positive delta and kappa, floor residues at each shift zero or one have count at most C times N over d plus N over E, uniformly for d at most P.",
+    "P0082 page360 display16. CONDITIONAL ON the explicit discrepancy input.",
+    "Gamma five quarters and shift zero. The modulus one and residue zero satisfy the arithmetic restrictions. The cited Lemma4 is an explicit conditional premise."
+  ],
+  "progression_counts_below_sqrt": [
+    "Assume Lemma4. The same residue count holds uniformly for positive moduli below the square root of X.",
+    "P0082 page360 display16 with the stated alpha range of Lemma4. CONDITIONAL.",
+    "Gamma five quarters and modulus one for every sufficiently large N. The cited Lemma4 remains an explicit premise."
+  ],
+  "gammaOne_mean_from_lemma4": [
+    "Assume Lemma4. The sum of the explicit positive Gamma1 envelope over the floor window is at most C N E to minus one half, uniformly in the allowed conductor and both shifts.",
+    "P0082 page360 Lemma5. CONDITIONAL ON discrepancy.",
+    "Gamma five quarters, conductor one and shift zero at the theorem threshold. The explicit discrepancy hypothesis is retained."
+  ],
+  "window_divisor_sq_le": [
+    "A uniform divisor count bound D times k to one sixteenth gives an adjacent floor divisor count squared at most two D squared X to one eighth.",
+    "P0082 page362 display19. Derived arithmetic envelope.",
+    "Gamma five quarters, N sixteen and shift zero. D is any positive constant supplied by the existing divisor bound. Window membership is retained."
+  ],
+  "far_gammaTwo_window_bound": [
+    "For small delta the far divisor envelope summed over the floor window is at most B N times one plus log X times X to minus one eighth.",
+    "P0082 page362 display19. Derived bound with a weaker logarithmic envelope.",
+    "Gamma five quarters, delta one thousandth, conductor one and shift zero for sufficiently large N."
+  ],
+  "gammaTwo_mean_from_lemma4": [
+    "Assume Lemma4. The positive infinite Gamma2 envelope summed over the floor window is at most C N E to minus one half for both adjacent shifts and every allowed conductor.",
+    "P0082 pages361 and362 displays17 to19. CONDITIONAL ON discrepancy.",
+    "Gamma five quarters, conductor one and shift zero at the theorem threshold. The cited discrepancy hypothesis stays explicit."
+  ],
+  "large_gcd_from_lemma4": [
+    "Assume Lemma4. A conductor above E to one seventh has at most B N E to minus one twelfth window indices with adjacent gcd at least r over twenty four.",
+    "P0082 page364 display22. CONDITIONAL ON discrepancy.",
+    "Gamma five quarters and shift zero. The conductor lower bound and upper bound are compatible for sufficiently large N because P grows faster than E."
+  ],
+  "divisorError": [
+    "The positive divisor error is the sum of r over P times the finite totient kernel over conductor multiples and r times the infinite kernel above P.",
+    "P0082 page359 displays14 and15. Positive envelope.",
+    "Conductor one, P two and integer m two. The finite sum is defined and the infinite sum is the existing convergent totient kernel."
+  ],
+  "divisorError_nonneg": [
+    "The explicit divisor error is nonnegative when P is nonnegative.",
+    "P0082 page359 displays14 and15.",
+    "Conductor one, P two and integer m two."
+  ],
+  "error_mean_raw": [
+    "Assume Lemma4. The two positive divisor envelopes together have first moment at most C N E to minus one half, uniformly in the conductor and both shifts.",
+    "P0082 page362 completion of Lemma5. CONDITIONAL.",
+    "Gamma five quarters, conductor one and shift zero. Lemma4 is retained as the explicit conditional premise."
+  ],
+  "error_mean": [
+    "Assume Lemma4. The defined positive divisor error has first moment at most C N E to minus one half.",
+    "P0082 page362 completion of Lemma5. CONDITIONAL.",
+    "Gamma five quarters, conductor one and shift zero. Lemma4 remains a conditional premise."
+  ],
+  "odd_squarefree_dvd_three_mul": [
+    "An odd squarefree u divides three m if every prime above three dividing u divides m.",
+    "P0082 page363 case ii c before display22. Elementary conductor arithmetic.",
+    "u five and m five."
+  ],
+  "conductor_large_gcd": [
+    "A conductor r equal to two to k times odd squarefree u, with k at most three and every prime above three in u dividing m, is at most twenty four times gcd m r.",
+    "P0082 page363 case ii c. CONDITIONAL ON the explicit conductor shape.",
+    "r forty, m five, k three and u five."
+  ],
+  "conductor_prime_witness": [
+    "For a conductor of that shape, twenty four times gcd m r below r forces a prime above three in r that does not divide m.",
+    "P0082 page363 display21. CONDITIONAL ON the explicit conductor shape.",
+    "r forty, m one, k three and u five. Prime five is a witness."
+  ],
+  "absent_character_lower": [
+    "If m is at least X over two, S is at least nonnegative a and the real coefficient is at least m S minus an error at most a X over four, the coefficient is at least a X over four.",
+    "P0082 page362 case i. Derived scalar implication with the expansion explicit.",
+    "X four, m two, S one, a one, R one and error one."
+  ],
+  "nonempty_prime_product_third": [
+    "A nonempty finite product of reciprocals of p minus two over primes p above three is at most one third.",
+    "P0082 page363 display21 and case ii b. Elementary factor estimate.",
+    "The singleton set containing five has product one third."
+  ],
+  "small_gcd_correction_lower": [
+    "If absolute J is at most nonnegative m and absolute T is at most S over three, m S plus J T is at least two thirds m S.",
+    "P0082 page363 case ii b after display21. Exact printed contraction.",
+    "m three, S three, J three and T minus one attain equality."
+  ],
+  "near_zero_conductor_gap": [
+    "If r above one is at most E to one seventh, log r is at most L and the zero gap is at least b r to minus one half over log r squared for nonnegative b, then the gap is at least b E to minus one fourteenth over L squared.",
+    "P0082 page364 case ii d and display10. CONDITIONAL ON the explicit zero gap.",
+    "E one hundred twenty eight, r two, b one, L log two and beta equal to one minus r to minus one half over log r squared."
+  ],
+  "near_zero_log_margin": [
+    "For E at least one and positive L with L squared at most E to one thirty fifth, E to minus one tenth is at most E to minus one fourteenth divided by L squared.",
+    "P0082 page364 final sentence of case ii d. Derived exact exponent margin.",
+    "E one and L one attain equality."
+  ],
+  "empty_product_large_gcd": [
+    "For the printed conductor shape, absence of a prime above three in r that fails to divide integer m forces gcd m r at least r over twenty four.",
+    "P0082 page363 case ii c before display22. CONDITIONAL ON the explicit shape.",
+    "r one hundred twenty, k three, u fifteen and m five. The gcd is five and r over twenty four is five."
+  ],
+  "four_case_lower": [
+    "The absence, coprime, nonempty product and small conductor near zero pointwise estimates imply the E to minus one tenth lower bound whenever the conductor is small or its gcd is below r over twenty four.",
+    "P0082 pages362 to364 Lemma7. Finite case assembly. CONDITIONAL ON the four displayed coefficient estimates and conductor shape.",
+    "r one, k zero, u one, m two, c one, X four, E one and Y four. The absent case holds and the other conditions are consistent."
+  ],
+  "leaf_pointwise_major_character": [
+    "For gamma between one and three halves there are uniform small delta and kappa caps, positive c and A and a threshold. At every later N one selected conductor r at most P is either one for absence or is the modulus of a primitive real nonprincipal character. At every even adjacent integer in the floor window below X, R1 real part plus A X times the explicit divisor error is at least c X in the absent, coprime and nonempty product cases. In the empty product small conductor case it is at least c X E to minus one tenth. No count or odd coefficient estimate is asserted.",
+    "P0082 pages362 to364 Lemma7, display20, display21 and case ii d. LEAF OPEN. This is a derived pointwise formulation of the printed cases with the Gamma errors retained.",
+    "Gamma five quarters satisfies the parameter range. Conductor one, k zero and u one witness the absence branch of the shape alternative. No unconditional instance of the open analytic coefficient estimate is asserted."
+  ],
+  "pointwise_lower_from_cases": [
+    "The four selected conductor pointwise cases imply one lower estimate for all even adjacent window integers below X, except when the conductor exceeds E to one seventh and its gcd is at least r over twenty four.",
+    "P0082 pages362 to364 Lemma7. CONDITIONAL ON leaf_pointwise_major_character. The real primitive conductor classification is a separate OPEN leaf.",
+    "Gamma five quarters and shift zero are valid. The finite conductor one model in four_case_lower checks the case logic. The analytic estimate remains conditional."
+  ],
+  "evenMember": [
+    "Select the even integer from the floor of F gamma n and its successor.",
+    "P0082 page362 before Lemma6. Numeric data definition.",
+    "At gamma five quarters and n four the existing floor instance gives four, so the even member is four."
+  ],
+  "adjacent_count_from_inputs": [
+    "Outside at most B N E to minus one twelfth indices, each even adjacent coefficient on the floor window is at least c0 X E to minus one tenth. The count applies to shifts zero and one with the original uniform caps.",
+    "P0082 pages362 to364 Lemma7. CONDITIONAL ON the pointwise character leaf and cited Lemma4.",
+    "Gamma five quarters and shift zero are valid. Conductor one and index four in the earlier checked parity instance show the parity domain is nonempty. The asymptotic threshold is not asserted to equal four."
+  ],
+  "even_index_from_inputs": [
+    "The even floor parity specialization of the adjacent coefficient count has the same uniform small parameter family.",
+    "P0082 pages362 to364 Lemma7. CONDITIONAL ON the character leaf and Lemma4.",
+    "Gamma five quarters, n four and shift zero give the existing nonempty even parity model. No finite asymptotic threshold is asserted."
+  ],
+  "odd_index_from_inputs": [
+    "On odd floor parity the successor coefficient has the same lower count estimate with the uniform small parameter family.",
+    "P0082 pages362 to364 Lemma7. CONDITIONAL ON the character leaf and Lemma4.",
+    "Gamma five quarters and the existing task509 odd parity model supply a nonempty parameter domain. No asymptotic threshold is asserted."
+  ],
+  "even_coefficient_from_inputs": [
+    "Combining the two floor parities gives the exact even member lower bound on the literal page365 floor window with uniform small delta and kappa.",
+    "P0082 pages362 to364 Lemma7 on the page365 floor window. CONDITIONAL ON the selected character pointwise leaf and cited Lemma4.",
+    "Gamma five quarters and the existing n four even member instance are valid parameter checks. The analytic estimates remain conditional."
+  ],
+  "gammaTwo": [
+    "The positive infinite Gamma2 envelope is r times the totient kernel sum over conductor multiples strictly above P.",
+    "P0082 page359 display15. Numeric envelope definition.",
+    "r one, P two and m two give the existing positive convergent kernel."
+  ],
+  "real_primitive_conductor": [
+    "The modulus of a primitive nonprincipal real Dirichlet character is two to k times an odd squarefree integer, with k at most three. Real means its square is the principal character.",
+    "P0082 page363 case ii c before display22. CONDITIONAL ON the two local conductor leaves. Mathlib supplies the power of two and odd part decomposition.",
+    "The primitive character associated to the explicit real nonprincipal character chi4 modulo four supplies a nonempty primitive real input. Its primitive, real and nonprincipal conditions are checked in the instance driver. The conductor is positive and divides four."
+  ],
+  "leaf_real_primitive_odd_part": [
+    "Every odd part u in r equal to two to k times u is squarefree when r is the modulus of a primitive real nonprincipal character.",
+    "P0082 page363 case ii c before display22. LEAF OPEN. Odd prime part of the printed classification.",
+    "The primitive character associated to the explicit real nonprincipal character chi4 modulo four supplies a nonempty primitive real input. Its primitive, real and nonprincipal conditions are checked in the instance driver. The conductor is positive and divides four."
+  ],
+  "leaf_real_primitive_two_part": [
+    "The exponent k in r equal to two to k times odd u is at most three for a primitive real nonprincipal character.",
+    "P0082 page363 case ii c before display22. LEAF OPEN. Two primary part of the printed classification.",
+    "The primitive character associated to the explicit real nonprincipal character chi4 modulo four supplies a nonempty primitive real input. Its primitive, real and nonprincipal conditions are checked in the instance driver. The conductor is positive and divides four."
+  ],
+  "zero_gap_scale_absorbed": [
+    "For every gamma below three halves and positive kappa, E to minus one tenth is eventually at most E to minus one fourteenth divided by log E squared.",
+    "P0082 page364 final sentence of case ii d. Derived elementary logarithmic absorption for the actual E. PROVED only after the recorded build and axiom check.",
+    "Gamma five quarters and kappa one satisfy the parameter conditions. The theorem supplies their threshold. The finite E equal to exp one model satisfies the scalar exponent margin."
+  ]
+}
