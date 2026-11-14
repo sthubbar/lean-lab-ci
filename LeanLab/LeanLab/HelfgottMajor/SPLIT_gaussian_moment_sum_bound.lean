@@ -11,6 +11,15 @@ times squared Mellin norms by their sum gives the moment sum at most `(nTwo + nL
 and the square root of a sum of two nonnegative terms is at most the sum of the square
 roots, once the common height factor is taken out.  The assembly at the end of the file
 is exactly those three steps and has no `sorry` of its own.
+
+OFF ROUTE, architect 2026-11-14, U-1664: this split targets the old form of
+`DecompJ1153.gaussian_moment_sum_bound`, with right side `sqrt nTwo * sqrt T + sqrt nLog * sqrt T`
+and no `sqrt (log (q * T))` factor. arch20261108T1030Z restated the sealed theorem with that factor
+and the primitive and critical line hypotheses, because the old form fails for large q at T = 2, so
+`gaussian_moment_sum_bound_split` no longer proves the sealed statement. `leaf_moment_plancherel_bound`
+is false for large q: the zeros with `1 < |im ρ| ≤ 2` number about `log q / (2 π)` per half line by
+book display 16.21, each with weight at least one times a squared Mellin norm bounded below for fixed
+`δ`, against a right side `(nTwo + nLog) * 2` free of q. Provers leave this file alone.
 -/
 
 namespace LeanLab.HelfgottMajor.DecompJ1153
@@ -25,7 +34,8 @@ theorem leaf_plancherel_constants_nonneg : 0 ≤ Sec45.nTwo ∧ 0 ≤ Sec45.nLog
     positivity
   · exact Sec45.nLog_nonneg
 
-/-- LEAF. Moment sum step.  Every zero in the middle range has `1 < |im| ≤ T`, its
+/-- OFF ROUTE, FALSE for large q, architect 2026-11-14 U-1664, was LEAF: see the header.
+Moment sum step.  Every zero in the middle range has `1 < |im| ≤ T`, its
 multiplicity is a nonnegative natural number, and the squared Mellin norm is nonnegative, so
 the zero sum is at most `T` times a sum of multiplicities times squared norms; the Plancherel
 identities for the Gaussian profile give `Sec45.nTwo` and its logarithm gives

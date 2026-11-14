@@ -77,7 +77,15 @@ theorem negative_mass_bulk_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ 
 /-- LEAF 3 of 3. The bottom of the negative half: the zeros of height between three halves
 and one. Their count at height one is what the constant `0.15 * log q + 3.389` bounds, so
 the whole block is charged to the single endpoint value at the critical point `1 / 2 - i`.
-No energy integral and no positive half enters. -/
+No energy integral and no positive half enters.
+
+SUSPECT, architect 2026-11-14 U-1664: not derivable from the book as cut. Display 16.21 on book
+pages 431 and 432 bounds the error of the zero count `N(T)` by `g(t) = 0.15 log qt + 3.389`; it does
+not bound the count of the window between one and three halves, which it gives only as the main term
+near `0.0796 log q` plus two errors, about `0.38 log q + 6.7`. The book charges the constant
+`g(1)` to the endpoint as a boundary term of the Stieltjes integral at height one, not to a window.
+No counterexample is known: the true window count is near `0.08 log q`. Re-cut at height one
+through the boundary term, filed as DECOMPOSE WANTED in PROGRESS.md. -/
 theorem negative_mass_bottom_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
     (hlarge : 2 * π * exp 2 ≤ (q : ℝ) * T)

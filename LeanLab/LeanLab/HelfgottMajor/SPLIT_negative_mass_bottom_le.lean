@@ -19,6 +19,17 @@ The partition inside the window, the pointwise comparison, the extraction of the
 from the sum and the final arithmetic are done in `negative_mass_bottom_le_split`, which has
 no sorry of its own. All three leaves are OPEN. No sign condition and no positivity of the
 Gaussian Mellin norm is assumed anywhere; a zero multiplicity contributes nothing.
+
+OFF ROUTE, architect 2026-11-14, U-1664: LEAF 2 is false for large q. By book display 16.21 the
+zeros of the window number `(1 / (4 π)) log q - 0.13` plus an error, about `0.0796 log q`, so twice
+their count is about `0.159 log q`, above `0.15 log q + 3.389` once `log q` passes about 405. The
+factor two was never needed: mpmath with the closed form `Γ(s) exp(-a^2/4) D_{-s}(-i a)`,
+`a = 2 π δ`, gives a sup ratio over the window at most 1.0009 for every tested `δ` from -5 to 12,
+with limit `sqrt((1 + e^{-2π}) / (1 + e^{-3π}))`, about 1.000893, as `δ` grows. LEAF 3 holds
+numerically. A re-split with slack 1.01 in place of 2 still asks the count leaf for
+`1.01 * count ≤ 0.15 log q + 3.389`, which display 16.21 does not give either, since it bounds the
+error of `N(T)`, not the count of a window; see the note on `negative_mass_bottom_le`. Provers
+leave LEAF 2 alone.
 AI wrote this Lean code. Binary Goldbach is open.
 -/
 
@@ -37,7 +48,8 @@ theorem negative_bottom_order_summable (q : ℕ) [NeZero q] (χ : DirichletChara
         (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) ρ) := by
   exact ZeroCount1623.summable_zeroIdx χ T _
 
-/-- LEAF 2 of 3. The count. Twice the multiplicity sum of the zeros of the window is at most
+/-- OFF ROUTE, FALSE for large q, architect 2026-11-14 U-1664, was LEAF 2 of 3: see the header.
+The count. Twice the multiplicity sum of the zeros of the window is at most
 the small height budget `0.15 * log q + 3.389`. The factor two is the slack that the weight
 estimate of the third leaf spends, so this leaf is easier than the sealed statement, which
 carries the budget without that factor. Nothing about the weight enters. -/

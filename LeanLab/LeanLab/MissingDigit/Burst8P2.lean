@@ -537,6 +537,7 @@ theorem main_term_bound : ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε �
       ((g ^ k : ℕ) : ℝ) ^ ((3 : ℝ) / 5 + ε) ≤ H → H ≤ ((g ^ k : ℕ) : ℝ) ^ (1 - ε) →
       ‖∑ n ∈ starSet g b (g ^ k) H, mainK ε (g ^ k) H n‖ ≤
         C * Real.log ((g ^ k : ℕ) : ℝ) ^ 7 * (starSet g b (g ^ k) H).card := by
+  -- OUT OF REACH: requires Lemma 1.8 and Dartyge-Mauduit Lemma 2.6, neither in scope.
   sorry
 
 /-- `log g ≤ 2 log(g - 1)` for `g ≥ 3`, so the counting exponent `log(g-1)/log g` is at

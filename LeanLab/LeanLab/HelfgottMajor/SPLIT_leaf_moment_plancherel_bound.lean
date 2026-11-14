@@ -15,6 +15,16 @@ norms, is the discrete Plancherel quantity that the two closed-form `L2` energie
 `Sec45.nTwo` and `Sec45.nLog` of the Gaussian profile dominate.  Multiplying the resulting
 bound by the nonnegative height `T` gives the target.  Each step is a separate leaf ending
 in `sorry`; the assembly `leaf_moment_plancherel_bound_split` below uses only those leaves.
+
+OFF ROUTE, architect 2026-11-14, U-1664: this split cannot work and no longer serves the sealed
+statement. Its target `leaf_moment_plancherel_bound` in `SPLIT_gaussian_moment_sum_bound` splits the
+old form of `DecompJ1153.gaussian_moment_sum_bound`, with no `sqrt (log (q * T))` factor and no
+primitive or critical line hypothesis; arch20261108T1030Z restated the sealed theorem because that
+old form fails for large q at T = 2. The Plancherel mass leaf is false for large q for the same
+reason: the zeros with `|im ρ| ≤ 1` number about `log q / π` by the zero count of book display
+16.21, and each carries a squared Mellin norm bounded below for fixed `δ`, so the left side grows
+like `log q` while the right side is a constant. Provers leave this file alone; the restated
+sealed theorem needs a new split, filed as DECOMPOSE WANTED in PROGRESS.md.
 -/
 
 namespace LeanLab.HelfgottMajor.DecompJ1153
@@ -89,7 +99,8 @@ private theorem zeros_strip_finite_mpb (q : ℕ) [NeZero q] (χ : DirichletChara
   rintro z ⟨hL, h0, h1, him⟩
   exact ⟨⟨le_of_lt h0, le_of_lt h1, him⟩, hne z hL h1⟩
 
-/-- LEAF. Height pull-out.  Every zero in the index set satisfies `|im ρ| ≤ T`, the
+/-- OFF ROUTE, architect 2026-11-14 U-1664, was LEAF: the split serves a superseded statement.
+Height pull-out.  Every zero in the index set satisfies `|im ρ| ≤ T`, the
 multiplicity is a nonnegative natural number and the squared Mellin norm is nonnegative, so
 the weighted zero sum is at most `T` times the zero sum in which the weight `|im ρ|` is
 replaced by `1`.  No information about the Mellin norms is used, only the height window and
@@ -131,7 +142,8 @@ theorem leaf_moment_height_pullout (q : ℕ) [NeZero q] (χ : DirichletCharacter
       _ ≤ T * ((analyticOrderNatAt (DirichletCharacter.LFunction χ) (ρ : ℂ) : ℝ) *
             ‖gaussianMellin δ (ρ : ℂ)‖ ^ 2) := hmul
 
-/-- LEAF. Cutoff removal.  The cutoff `1 < |im ρ|` contributes the factor `1` on the zeros it
+/-- OFF ROUTE, architect 2026-11-14 U-1664, was LEAF: the split serves a superseded statement.
+Cutoff removal.  The cutoff `1 < |im ρ|` contributes the factor `1` on the zeros it
 keeps and `0` on the zeros with `|im ρ| ≤ 1`, whose contribution is nonnegative; so the
 indicator can be dropped and the mass can only grow.  This is a termwise comparison of two
 sums over the same index set, with no estimate of the Mellin norms. -/
@@ -159,7 +171,8 @@ theorem leaf_moment_mass_indicator_le_full (q : ℕ) [NeZero q] (χ : DirichletC
     exact mul_nonneg (Nat.cast_nonneg _) (sq_nonneg _)
   · rw [if_pos (by simp [h])]
 
-/-- LEAF. Plancherel mass bound.  The sum over the strip zeros of the multiplicity times the
+/-- OFF ROUTE, FALSE for large q, architect 2026-11-14 U-1664, was LEAF: see the header.
+Plancherel mass bound.  The sum over the strip zeros of the multiplicity times the
 squared Mellin norm of the Gaussian profile at that zero is at most the sum of the two
 squared `L2` energies of the profile, `Sec45.nTwo` and the log-weighted `Sec45.nLog`.  This
 is the discrete sampling estimate that turns the two closed forms of the Gaussian energies

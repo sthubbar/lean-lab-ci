@@ -1,3 +1,4 @@
+import LeanLab.Halupczok2012.Decomp532a
 import LeanLab.Halupczok2012.Decomp398a
 
 /-!
@@ -26,7 +27,7 @@ theorem fixed_residue_moment (c K : ℝ) (hc : 0 < c) (hK : 0 < K) (a : ℤ) :
       ∑ k ∈ kRange X R,
         (((Icc 1 ⌊Q⌋₊).filter (fun q : ℕ => ((2 * k : ℕ) : ℤ) ≡ a [ZMOD q])).card : ℝ) ^ 2 ≤
         C * R * Real.log Y ^ 3 := by
-  sorry
+  exact Decomp532a.fixed_even_moment c K hc hK a
 
 /-- Display 4.1 on page 343, conditional on Theorem5 and the prime free moment leaf. -/
 theorem theorem7_of_theorem5 (h5 : Theorem5) : Theorem7 := by
