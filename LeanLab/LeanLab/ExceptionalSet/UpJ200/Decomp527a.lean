@@ -1,3 +1,5 @@
+import LeanLab.ExceptionalSet.UpJ200.Decomp559b
+import LeanLab.ExceptionalSet.UpJ200.Decomp559a
 import LeanLab.ExceptionalSet.UpJ200.Decomp371a
 import LeanLab.ExceptionalSet.GammaOne465
 import LeanLab.ExceptionalSet.GammaParameters465
@@ -675,16 +677,6 @@ noncomputable def gammaTwo (r : ℕ) (P : ℝ) (m : ℤ) : ℝ :=
   (r : ℝ) * ∑' q : ℕ, if P < (q : ℝ) ∧ r ∣ q then
     1 / ((q.totient : ℝ) * ((q / Int.gcd m q).totient : ℝ)) else 0
 
-/-- The sum of the explicit positive envelopes for Gamma1 and Gamma2.
-P0082 page 359 displays 14 and 15. The implicit constants belong in the
-pointwise estimate. The integer m is allowed to have either parity. -/
-noncomputable def divisorError (r : ℕ) (P : ℝ) (m : ℤ) : ℝ :=
-  (r : ℝ) / P *
-    ∑ q ∈ (Icc 1 ⌊P⌋₊).filter (fun q => r ∣ q),
-      (q : ℝ) / ((q.totient : ℝ) * ((q / Int.gcd m q).totient : ℝ)) +
-  (r : ℝ) * ∑' q : ℕ, if P < (q : ℝ) ∧ r ∣ q then
-    1 / ((q.totient : ℝ) * ((q / Int.gcd m q).totient : ℝ)) else 0
-
 /-- P0082 page 359 displays 14 and 15 are nonnegative error envelopes. -/
 theorem divisorError_nonneg (r : ℕ) (P : ℝ) (m : ℤ) (hP : 0 ≤ P) :
     0 ≤ divisorError r P m := by
@@ -910,7 +902,8 @@ theorem leaf_real_primitive_odd_part (r : ℕ) [NeZero r]
     (hreal : χ ^ 2 = 1) (hnonprincipal : χ ≠ 1)
     (k u : ℕ) (hr : r = 2 ^ k * u) (hu : Odd u) :
     Squarefree u := by
-  sorry
+  exact LeanLab.ExceptionalSet.UpJ200.Decomp559a.real_primitive_odd_part
+    r χ hprimitive hreal hnonprincipal k u hr hu
 
 /-- LEAF: P0082 page363 case ii c before display22.
 The power of two in a primitive real conductor has exponent at most three.
@@ -920,7 +913,8 @@ theorem leaf_real_primitive_two_part (r : ℕ) [NeZero r]
     (hreal : χ ^ 2 = 1) (hnonprincipal : χ ≠ 1)
     (k u : ℕ) (hr : r = 2 ^ k * u) (hu : Odd u) :
     k ≤ 3 := by
-  sorry
+  exact LeanLab.ExceptionalSet.UpJ200.Decomp559a.real_primitive_two_part
+    r χ hprimitive hreal hnonprincipal k u hr hu
 
 /-- P0082 page363 case ii c before display22. Mathlib supplies the odd
 part decomposition. The two local real character inputs give the printed shape.
