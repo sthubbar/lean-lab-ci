@@ -6,6 +6,7 @@ Vaughan 1975, and are CITED-LEFT walls, not split further.
 Source https://doi.org/10.1007/BF01390190
 AI wrote the Lean code. Goldbach is open.
 -/
+import LeanLab.Linnik.Decomp507a
 import LeanLab.Linnik.MajorArcEnergy.Defs
 import LeanLab.Linnik.MajorArcEnergy.Leaves13Major
 import LeanLab.Linnik.MajorArcEnergy.Leaves13Principal
@@ -50,7 +51,7 @@ theorem induced_cn_bound {q : ℕ} (hq : 1 ≤ q) (χ : DirichletCharacter ℂ q
       (cn χ n ≠ 0 → χ.conductor ∣ q / Nat.gcd q n.natAbs ∧
         Squarefree (q / Nat.gcd q n.natAbs / χ.conductor) ∧
         Nat.Coprime (q / Nat.gcd q n.natAbs / χ.conductor) χ.conductor) := by
-  sorry
+  exact LeanLab.Linnik.Decomp507a.induced_cn hq χ n
 
 /-- LEAF, OFF ROUTE: superseded by `pair_weight_bound_of_cited` in Display7.lean, the same
 statement proved from the CITED-LEFT display 5. Gallagher 1975 p.129 display 7 with its printed proof from display 5:
@@ -83,7 +84,7 @@ theorem singular_tail_cited :
     ∃ K : ℝ, 0 < K ∧ ∀ (P : ℝ) (n : ℤ), 1 ≤ P → n ≠ 0 →
       ‖singTrunc P n - singSeries n‖ ≤
         K * totientWeight n * n.natAbs.divisors.card / P := by
-  sorry
+  exact LeanLab.Linnik.Decomp507a.singular_tail
 
 /-- LEAF, CITED-LEFT. Gallagher 1975 p.130 before display 11, quoting reference 10,
 equation 6.14: the sum over q at most P of (mu(q)/phi(q))^2 |c_q(n)| q is
@@ -96,7 +97,7 @@ theorem singular_weighted_sums_cited :
         K * totientWeight n * n.natAbs.divisors.card * Real.log P) ∧
       (∑ q ∈ Icc 1 ⌊P⌋₊, ((ArithmeticFunction.moebius q : ℝ)) ^ 2 / (q.totient : ℝ) ^ 2 *
           ‖ramanujanSum q n‖ ≤ K * totientWeight n) := by
-  sorry
+  exact LeanLab.Linnik.Decomp507a.singular_weighted_sums
 
 /-- Gallagher 1975 p.130: the modulus one character induces the principal character mod q. -/
 private theorem l13_induced_one (q : ℕ) : induced one q = 1 := by

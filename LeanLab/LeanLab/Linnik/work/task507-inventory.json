@@ -1,0 +1,3903 @@
+[
+  {
+    "file": "Audit1610.lean",
+    "lines": 20,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532c"
+    ],
+    "declarations": [
+      "display5_plain_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Audit1619.lean",
+    "lines": 111,
+    "imports": [
+      "LeanLab.Linnik.Decomp335b"
+    ],
+    "declarations": [
+      "RepairedWindow",
+      "repaired_of_old",
+      "repaired_of_old_form",
+      "detector_of_repaired"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Audit1625.lean",
+    "lines": 33,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532c"
+    ],
+    "declarations": [
+      "major_arc_remainder_instance",
+      "source_allowance_gt_plain"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1532a.lean",
+    "lines": 1080,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Gallagher1975Lemma3",
+      "LeanLab.Linnik.Task37Fourier",
+      "LeanLab.Linnik.U1434Lemma21",
+      "LeanLab.Linnik.Task37Display19",
+      "LeanLab.Linnik.U1474R0",
+      "LeanLab.Romanov.Decomp134b",
+      "LeanLab.Romanov.Residues134"
+    ],
+    "declarations": [
+      "ordTwo",
+      "dif",
+      "Mprod",
+      "ordTwo_pos",
+      "dvd_two_pow_ordTwo_sub_one",
+      "log_le_ordTwo_mul_log_two",
+      "two_pow_modEq_iff",
+      "card_pow_residue_le",
+      "card_two_pow_pairs_le",
+      "rkk_zero_le",
+      "card_dvd_dif_le",
+      "dvd_Mprod",
+      "three_le_Mprod",
+      "log_Mprod_le",
+      "sum_divisors_eq_prod",
+      "odd_correction_partial",
+      "prime_correction_prod_le",
+      "prod_le_two_mul_div_totient",
+      "div_totient_le_loglog",
+      "lemma7",
+      "totient_ratio_le_weight",
+      "one_coordinate_weight",
+      "lemma8",
+      "lemma4",
+      "moebius_totient_le_weight",
+      "order_weight_tail",
+      "order_weight_tail_log",
+      "order_weight_summable",
+      "totient_square_sum_le_log",
+      "rational_Gs_eq_character_sum",
+      "Gs_grid_moment_eq",
+      "Gs_grid_moment_le",
+      "rational_power_gap",
+      "primitive_grid_moment_le"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1532b.lean",
+    "lines": 9849,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Decomp1532b2",
+      "LeanLab.RieselVaughan1983.MuPhiSum",
+      "LeanLab.RieselVaughan1983.GaussImprim",
+      "LeanLab.PNTSieve.MertensUpper",
+      "LeanLab.Linnik.U1394Fejer",
+      "LeanLab.Linnik.HilbertCosecant",
+      "LeanLab.HardyLittlewood1923.U1482ZeroCount",
+      "LeanLab.RieselVaughan1983.LargeSieveSchur",
+      "LeanLab.PNTPort.LargeSieve.Montgomery",
+      "LeanLab.Linnik.Decomp1532a",
+      "LeanLab.HeathBrown1985.DivisorEps",
+      "LeanLab.Linnik.U7204Display4",
+      "LeanLab.Zinoviev1997.TotientTail",
+      "LeanLab.PNTPort.DirichletZF.Siegel",
+      "LeanLab.Romanov.Decomp134",
+      "LeanLab.PNTPort.DirichletZF.Landau",
+      "LeanLab.PNTPort.StrongPNT.StrongPNT",
+      "LeanLab.Romanov.TotientWeights134",
+      "LeanLab.Linnik.Decomp1537a"
+    ],
+    "declarations": [
+      "majorArcs",
+      "ramanujanSum",
+      "singSeries",
+      "Jn",
+      "zeroCount",
+      "excSet",
+      "majorArcs_disjoint",
+      "volume_majorArcs_le",
+      "exists_approx",
+      "minor_approx",
+      "gaussSum_norm_sq",
+      "ramanujanSum_eq_divisor_sum",
+      "ramanujanSum_squarefree",
+      "printed_ramanujan_formula_two_one_ne",
+      "summable_singSeries",
+      "singSeries_odd",
+      "Jn_zero_eq_sum",
+      "Jn_le_J0",
+      "J0_lower",
+      "J0_asymp",
+      "norm_geom_sum_le",
+      "weaker_large_sieve_constant_insufficient",
+      "large_sieve_level_one",
+      "primitive_sieve_le_additive",
+      "zeroCount_eq_zero_of_one_le",
+      "density_sum_at_one",
+      "fourier_energy_split",
+      "circular_kernel_eq_cosecant",
+      "circular_kernel_norm_le",
+      "circular_hilbert_small_family",
+      "geometric_kernel_endpoints",
+      "offdiagonal_bound_of_hilbert",
+      "circular_hilbert_of_cosecant",
+      "spaced_sampling_of_hilbert",
+      "farey_sampling_of_hilbert",
+      "cosecant_hilbert_large_family",
+      "circular_hilbert_sharp",
+      "spaced_sampling",
+      "additive_large_sieve_sharp",
+      "large_sieve",
+      "log_Bt_le_log_height",
+      "height_box_real_nonprincipal",
+      "zeta_height_box_nonzero",
+      "primitive_sigma_eq_of_lift_eq",
+      "excSet_mono",
+      "excSet_nonprincipal",
+      "page_real",
+      "ramanujan_tuple_sum_eq",
+      "ramanujan_tuple_sum_one",
+      "offdiag_singSeries_eq_tsum",
+      "ramanujanSum_zero",
+      "half_order_totient_weight_le",
+      "lcm_order_weight_le",
+      "exceptional_gcd_totient_le",
+      "twisted_totient_crude",
+      "page_subsingleton",
+      "siegel",
+      "lemma9",
+      "kf_lcm_order_weight_le",
+      "Aq_order_bound",
+      "divisor_sqrt_log_sum_le",
+      "log_sq_div_sqrt_le",
+      "totient_ratio_sqrt_log_decay",
+      "exceptional_divisor_log_decay",
+      "one_coordinate_totient_order",
+      "restricted_tuple_totient_bound",
+      "weighted_gcd_divisor_reduction",
+      "reciprocal_totient_sum_le_log",
+      "truncated_ramanujan_diagonal_le",
+      "reciprocal_totient_square_tail",
+      "reciprocal_totient_square_tail_succ",
+      "three_fourths_div_totient_le",
+      "totient_square_multiples_tail",
+      "gcd_totient_square_tail",
+      "singular_coefficient_norm_le_gcd",
+      "singular_series_truncation_le",
+      "tuple_singular_truncation_bound",
+      "tuple_truncation_eventually",
+      "complete_nat_grid_moment_le",
+      "primitive_nat_grid_moment_le",
+      "odd_moment_order_split",
+      "order_parameter_choice",
+      "singular_coefficient_double_even",
+      "finite_parity_pair_bound",
+      "l6_cutoff_bounds",
+      "l6_log_error_le",
+      "ramanujan_moment_coefficient",
+      "finite_singular_diagonal_eq",
+      "rational_moment_parity",
+      "reciprocal_totient_parity",
+      "finite_singular_main_bound",
+      "lemma10",
+      "page_zero_unique",
+      "page_zero_simple",
+      "exceptional_conductor_log_growth",
+      "density_sum_in_page_strip",
+      "zeroCount_le_unit_height",
+      "density_sum_polynomial",
+      "density_sum_away_from_one",
+      "density_sum_fixed_gap",
+      "power_sum_interpolation",
+      "power_sum_nonzero_of_injective",
+      "power_sum_interpolation_bound",
+      "power_sum_lower_bound_of_interpolant",
+      "turan_power_sum_single",
+      "pure_power_sum_nonzero",
+      "pure_power_sum_fixed_length",
+      "singleton_selector_unbounded",
+      "two_term_power_sum_bound",
+      "turan_power_sum_pair",
+      "turan_interpolant",
+      "turan_power_sum_lower_bound_normalized",
+      "turan_power_sum_lower_bound",
+      "integral_fejer_exp",
+      "integral_fejer_exp_scaled",
+      "integrable_fejer_phase",
+      "fejer_exponential_energy",
+      "fejer_lower_half",
+      "integrable_fejer_energy",
+      "gallagher_frequency_smoothing",
+      "interval_window_overlap",
+      "frequencyWindow",
+      "frequency_window_energy",
+      "gallagher_window_smoothing",
+      "large_sieve_unweighted",
+      "large_sieve_finset",
+      "large_sieve_real_interval",
+      "characterPolynomial",
+      "hybridEnergy",
+      "primeDetector",
+      "integrable_frequencyWindow_energy",
+      "mellin_window_sieve",
+      "integral_mellin_window_weight",
+      "mellin_window_weight_bound",
+      "integrated_mellin_window_sieve",
+      "characterPolynomial_time_integral",
+      "hybrid_mean_value_bound",
+      "continuous_characterPolynomial",
+      "hybridEnergy_nonneg",
+      "norm_mellin_twist",
+      "hybridEnergy_le_of_pointwise",
+      "characterPolynomial_pointwise_sieve",
+      "hybridEnergy_pointwise_bound",
+      "hybridEnergy_short_support",
+      "pointwise_hybrid_coefficient_insufficient",
+      "detector_weighted_cauchy",
+      "detector_l2_of_l1",
+      "logarithmic_window_mass",
+      "prime_log_sq_div_sum_le",
+      "prime_detector_coefficient_energy_le",
+      "gallagher_hybrid_mean_value",
+      "pT_weighted_turan_power_sum",
+      "pT_reciprocal_pole_turan",
+      "pC_local_disc_order_sum_global",
+      "pC_far_zero_pole_power_sum_global",
+      "pC_near_zero_logDeriv_expansion_global",
+      "pC_nonprincipal_large_logDeriv_global",
+      "pC_sum_log_primeFactors_le",
+      "pC_norm_prime_cpow_neg_le",
+      "pC_norm_euler_log_correction_le",
+      "pC_analyticAt_euler_log_correction",
+      "pC_iteratedDeriv_euler_log_correction_le",
+      "pC_principal_logDeriv_eq_zeta_add_euler",
+      "pC_zeta_window_order_sum_global",
+      "pC_zeta_disc_order_sum_global",
+      "pC_zeta_shift_local_order_sum_global",
+      "pC_zeta_far_zero_pole_power_sum_global",
+      "pC_zeta_near_zero_logDeriv_expansion_global",
+      "pC_zeta_large_logDeriv_global",
+      "pA_poisson_norm_eq_derivative_norm",
+      "pA_poisson_lower_of_derivative_lower",
+      "pA_shifted_logDeriv_norm_eq",
+      "pA_nonprincipal_poisson_global",
+      "pA_principal_large_logarithmic_derivative",
+      "pA_detector_constant_mono",
+      "pA_poisson_series_detector_of_turan",
+      "pW_contDiff_poissonKernel",
+      "pW_poisson_log_hasDerivAt",
+      "pW_norm_deriv_poisson_log_le",
+      "pW_integrableOn_deriv_poisson_log",
+      "pW_integrableOn_partial_sum_norm_div",
+      "pW_poisson_partial_summation_bound",
+      "pW_sum_primeWindowCoefficient",
+      "pW_mangoldt_reciprocal_sum_le_log",
+      "pW_poisson_small_cutoff_norm",
+      "pW_mangoldt_rpow_series_bound",
+      "pW_poisson_large_cutoff_norm",
+      "pW_principal_zero_iff_zeta",
+      "pW_norm_chi_cpow_le_one",
+      "pW_cpow_neg_one_add",
+      "pW_seriesTerm_eq",
+      "pW_summable_series",
+      "pW_tsum_three_split",
+      "pW_detector_norm_le",
+      "pW_sum_windowCoefficient",
+      "pW_absorption",
+      "pW_floor_lt_iff",
+      "pW_kernel_engine1",
+      "pW_kernel_engine2",
+      "pW_kernel_engine3",
+      "pW_pow_le_exp_of_log",
+      "pW_sq_le_exp",
+      "pW_k_logD_le",
+      "pW_lb_k_le",
+      "pW_final_scaled",
+      "pW_final_div",
+      "pW_seriesTerm_eq_coefficient",
+      "pW_norm_sub_ge",
+      "pW_norm_three_lower",
+      "pW_chain_arith",
+      "pW_small_part_le",
+      "pW_tail_part_le",
+      "pW_norm_series_coef",
+      "pW_kernel_endpoint_le",
+      "pW_endpoint_bound",
+      "pW_pp_bound",
+      "pW_eight_C3_r_le",
+      "pW_pp_scaled",
+      "pW_pp_div",
+      "pW_pp_comparison",
+      "pW_k_logD_quarter",
+      "pW_Dk_le_sqrt",
+      "pW_comp_small",
+      "pW_comp_tail",
+      "pW_comp_endpoint",
+      "pW_poisson_window_localization_proof",
+      "pW_poisson_window_localization",
+      "pW_prime_poisson_partial_summation",
+      "pW_gallagher_zero_detector_of_turan",
+      "gallagher_zero_detector_of_turan",
+      "gallagher_zero_detector",
+      "weighted_gauss_parseval",
+      "weighted_character_conductor_fiber",
+      "weighted_gauss_conductor_lower",
+      "logarithmic_conductor_weight_le",
+      "rough_character_sieve_le_additive",
+      "gallagher_rough_finite_sieve",
+      "hybrid_of_weighted_finite_sieve",
+      "gallagher_prime_hybrid_mean_value",
+      "pG_integrableOn_floor_div",
+      "pG_detector_count_scale",
+      "pG_local_zero_order_sum",
+      "pG_principal_low_height_zero_count",
+      "pG_exists_zeroCount_finset",
+      "pG_primitive_local_zero_card",
+      "pG_primitive_height_window_occupancy",
+      "pG_charPoly_primeWindow",
+      "pG_primeWindow_rough",
+      "pG_primeWindow_energy",
+      "pG_energy_nonneg",
+      "pG_energy_le_of_prime_hybrid",
+      "pG_rounded_square_sieve_level",
+      "pG_energy_log_bound",
+      "pG_measurable_energy",
+      "pG_measurable_primeDetector_uncurry",
+      "pG_integrated_energy_of_prime_hybrid",
+      "pG_finite_height_count_from_local_detector",
+      "pG_integrableOn_primeDetector_norm_pow_div",
+      "pG_primeDetector_logarithmic_l2_lower",
+      "pG_integrableOn_primeDetector_energy_rectangle",
+      "pG_primeDetector_energy_swap",
+      "pG_integrableOn_primeDetector_height_energy",
+      "pG_finite_height_count_from_log_detector",
+      "pG_nonprincipal_zero_count_from_local_l1",
+      "pG_principal_high_count_from_local_l1",
+      "pG_primitive_count_from_local_l1",
+      "pG_integral_energy_eq_sum",
+      "pG_fixed_character_narrow_count_from_detector",
+      "pG_zero_count_from_integrated_detector",
+      "gallagher_density_from_detector_and_prime_hybrid",
+      "gallagher_density_transition",
+      "logarithmic_loss_not_uniformly_absorbable",
+      "gallagher_density_away_from_one",
+      "gallagher_density_lt_one",
+      "gallagher_density",
+      "lemma6",
+      "primitive_local_zero_order_sum",
+      "principal_low_height_zero_count",
+      "weighted_turan_power_sum",
+      "reciprocal_pole_turan",
+      "nonprincipal_large_logDeriv",
+      "nonprincipal_series_detector",
+      "nonprincipal_poisson_detector"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1532b2.lean",
+    "lines": 1828,
+    "imports": [
+      "Mathlib",
+      "LeanLab.PNTPort.DirichletZF.LogDerivStrip",
+      "LeanLab.PNTPort.DirichletZF.SiegelTaylor"
+    ],
+    "declarations": [
+      "exists_large_polynomial_value",
+      "exists_radius_product_gap",
+      "radius_subproduct_gap",
+      "circle_subproduct_gap",
+      "radius_outer_nonempty",
+      "radius_ne_root_norm",
+      "root_product_coeff_sum",
+      "rootPrefix",
+      "rootPrefix_succ",
+      "rootPrefix_kernel",
+      "rootPrefix_kernel_at_root",
+      "power_kernel_partial_fraction",
+      "circle_integral_inv_outside",
+      "circle_inverse_power",
+      "circleIntegrable_inverse_power",
+      "circle_power_kernel",
+      "rootPrefix_natDegree",
+      "newton_sum_natDegree_lt",
+      "newton_sum_coeff_norm",
+      "circleNewtonCoefficient",
+      "circleIntegrable_prefix_kernel",
+      "circle_newton_interpolates",
+      "prefix_circle_norm_ge",
+      "circleNewtonCoefficient_norm_le",
+      "turan_interpolant_finite",
+      "poissonKernel",
+      "poissonKernel_nonneg",
+      "poissonKernel_le_one",
+      "hasDerivAt_poissonKernel_succ",
+      "abs_deriv_poissonKernel_le_one",
+      "poissonKernel_tilt_bound",
+      "poissonKernel_small_tail",
+      "poissonKernel_large_tail",
+      "supported_partial_summation",
+      "detector_partial_summation_lower",
+      "norm_logDeriv_right_halfplane",
+      "reciprocal_pole_re_ge",
+      "local_disc_order_sum_nonprincipal_add_one",
+      "local_disc_order_sum_nonprincipal",
+      "local_disc_order_sum_zeta_add_one",
+      "local_zero_order_sum_nonprincipal",
+      "local_zero_order_sum_zeta",
+      "local_zero_order_sum_primitive",
+      "height_window_mass_ge",
+      "finite_height_cover_bound",
+      "reciprocal_tail_of_sqrt_mass",
+      "prime_power_reciprocal_tail",
+      "iterated_neg_logDeriv_eq_LSeries",
+      "zero_removed_factor_ne_zero",
+      "zero_removed_logDeriv_analytic",
+      "zero_removed_logDeriv_eq",
+      "zero_removed_logDeriv_bound",
+      "iterated_zero_removed_logDeriv_bound",
+      "iterated_logDeriv_pole_expansion_bound",
+      "iterated_zero_removed_logDeriv_eq",
+      "iterated_zeta_logDeriv_pole_expansion_bound",
+      "poisson_weighted_prime_power_removal",
+      "finite_dyadic_reciprocal_tail",
+      "local_disc_order_sum_nonprincipal_all_radii",
+      "norm_shift_right_ge",
+      "far_zero_pole_power_sum_bound",
+      "near_zero_logDeriv_expansion_nonprincipal",
+      "reciprocal_pole_error_absorbed",
+      "normalized_log_series_term_eq_poisson",
+      "normalized_log_series_eq_poisson",
+      "summable_poisson_twist"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1532c.lean",
+    "lines": 1656,
+    "imports": [
+      "Mathlib",
+      "LeanLab.PNTPort.Vinogradov.Final",
+      "LeanLab.Linnik.Decomp1532b",
+      "LeanLab.Linnik.Gallagher1975Lemma2",
+      "LeanLab.Romanov.GallagherBridge",
+      "LeanLab.ExceptionalSet.MVMajorSing",
+      "LeanLab.Common.CircleOrth",
+      "LeanLab.Linnik.Decomp466c"
+    ],
+    "declarations": [
+      "etaK",
+      "epsK",
+      "thetaK",
+      "thetaK_bounds",
+      "thetaK_mul_log_tendsto_zero",
+      "measurableSet_majorArcs",
+      "G_eq_Gs",
+      "vonMangoldt_prefix_bound",
+      "norm_sum_div_log_le",
+      "major_arc_integrand_expand",
+      "major_arc_integral_expand",
+      "major_arc_Sg_mean_le",
+      "major_arc_Sg_mean_eventually",
+      "major_arc_diagonal_split",
+      "major_arc_crude_bound",
+      "two_pow_add_sorted",
+      "two_pow_add_eq",
+      "two_pow_pair_fiber_card",
+      "equal_sum_tuple_count",
+      "diagonal_tuple_count",
+      "major_arc_diagonal_le",
+      "major_arc_diagonal_negligible",
+      "ramanujanSum_im_zero",
+      "ramanujanSum_neg",
+      "singSeries_neg",
+      "singSeries_im_zero",
+      "logarithmic_range_lt_power",
+      "primeCounting_not_log_sq_bounded",
+      "major_arc_diagonal_order",
+      "singSeries_term_eq_f2",
+      "singSeries_eq_tsum_f2",
+      "singSeries_re_nonneg",
+      "weighted_singSeries_le",
+      "weighted_singSeries_main_bound",
+      "Jn_eq_zero_of_large_shift",
+      "prime_correlation_full_zero_of_large_shift",
+      "major_correlation_eq_neg_minor_of_large_shift",
+      "prime_pair_fourier_identity",
+      "Display5PlainExpansion",
+      "major_arc_remainder_bound_of_plain",
+      "major_arc_remainder_bound",
+      "major_arc_nonzero_bound",
+      "major_arc_bound",
+      "lemma11",
+      "thetaK_small",
+      "exp_neg_le",
+      "etaK_small",
+      "power_le",
+      "split3",
+      "sup_piece",
+      "alg_piece2",
+      "alg_final",
+      "piece2",
+      "piece3",
+      "display6Large_of_leaves",
+      "theorem1_of_leaves",
+      "theorem2_of_leaves"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1536a.lean",
+    "lines": 754,
+    "imports": [
+      "LeanLab.Ported.Prove2Me.Linnik1536a"
+    ],
+    "declarations": [
+      "re_GL",
+      "norm_GL_le",
+      "continuous_GL_norm",
+      "continuous_SL",
+      "markov",
+      "exp_le_even_partial",
+      "moment_binom",
+      "four_pow_le",
+      "moment_SL_nonneg",
+      "even_partial_le_int_exp",
+      "one_le_EL",
+      "moment_G_le",
+      "lemma4_GL",
+      "devSet_le",
+      "centralBinom_sq_lower",
+      "four_pow_le_sqrt_mul_centralBinom",
+      "moment_G_le_sqrt",
+      "lemma4_GL_sqrt",
+      "EL_le_norm_moment",
+      "log_norm_moment_gap",
+      "log_prefactor_div_tendsto_zero",
+      "log_norm_moment_gap_div_tendsto_zero",
+      "norm_moment_rate_of_EL_rate",
+      "norm_moment_exp_of_EL_rate",
+      "Spow_add",
+      "Spow_periodic",
+      "Spow_block_distortion",
+      "integral_unit_split",
+      "abs_Spow_le",
+      "EL_exp_bounds",
+      "EL_pos",
+      "EL_log_bounds",
+      "blockAverage",
+      "blockAverage_continuous",
+      "blockAverage_mean",
+      "EL_block_identity",
+      "blockAverage_ratio",
+      "blockAverage_le_EL",
+      "EL_add_le",
+      "EL_rate_exists",
+      "norm_moment_asymptotic",
+      "EL_asymptotic",
+      "exponential_moments_common_rate"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1536b.lean",
+    "lines": 666,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Decomp1536a"
+    ],
+    "declarations": [
+      "cosPoly",
+      "Fprod",
+      "vcoef",
+      "bz",
+      "Umat",
+      "hterm",
+      "Fprod_succ",
+      "Fprod_periodic",
+      "Fprod_continuous",
+      "cos_mul_cosPoly",
+      "halving",
+      "vcoef_zero",
+      "hterm_eq_signed_sum",
+      "sum_bz_ite",
+      "lemma6_reindex",
+      "perron_mulVec_le",
+      "perron_entry_mul_le",
+      "perron",
+      "EL_le_vcoef",
+      "lemma5",
+      "vvec_eq",
+      "lemma7",
+      "bz_nonneg",
+      "Umat_nonneg",
+      "b6",
+      "w6",
+      "b6_nonneg",
+      "w6_pos",
+      "cosPoly_b6",
+      "exp_le_taylor6",
+      "cert6",
+      "up_b6",
+      "EL_one_le",
+      "vcoef_nonneg",
+      "vcoef_eq_zero_of_degree_lt",
+      "vcoef_mono",
+      "vcoef_b6_bounds",
+      "log_cert6_lt",
+      "EL_one_rate"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1536c.lean",
+    "lines": 593,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Decomp1536b"
+    ],
+    "declarations": [
+      "Gpaper",
+      "ratio_num",
+      "poly_geom",
+      "measure_transfer",
+      "devSet_34",
+      "cor1_34",
+      "cor1_N",
+      "paper_d_lt",
+      "k7_with_34",
+      "large_deviation_rate",
+      "large_deviation_criterion",
+      "log_EL_convex",
+      "rate_convex",
+      "convex_large_deviation_criterion",
+      "ratio_quasiconvex",
+      "ratio_minimum_bracket",
+      "cor1_exceptional_set",
+      "cor1_N_weighted_small",
+      "cor1_N_little_o",
+      "exceptional_error_small",
+      "Gpaper_eq_Gpow",
+      "norm_Gpaper_le",
+      "exceptional_integral_small"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1537a.lean",
+    "lines": 678,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.U1474R0"
+    ],
+    "declarations": [
+      "kf",
+      "xi",
+      "sfac",
+      "nus",
+      "Aq",
+      "Pm",
+      "oddSqf",
+      "qOf",
+      "kf_nonneg",
+      "odd_of_kf_ne",
+      "sfac_nonneg",
+      "Pm_pos",
+      "sfac_eq_sum_kf",
+      "Aq_eq_sum",
+      "card_nus_le",
+      "xi_le_of_dvd",
+      "log_le_xi_mul",
+      "summable_kf_div_xi",
+      "tail_small",
+      "sum_div_xi_lcm_le",
+      "Pm_le",
+      "large_prime_prod_le",
+      "small_prime_prod_le",
+      "mertens_prod",
+      "log_le_mul_eventually",
+      "oddSqf_dvd_r",
+      "oddSqf_pos",
+      "qOf_dvd",
+      "qOf_odd",
+      "le_qOf_mul",
+      "lemma1_general",
+      "lemma1_class",
+      "sum_kf_le_log",
+      "sfac_Pm_le_log",
+      "sfac_Pm_small"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1537b.lean",
+    "lines": 547,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "I1",
+      "Irho",
+      "I1_le",
+      "abs_I1_sub",
+      "norm_Irho_le",
+      "Irho_one_one",
+      "cor1_of_thm2",
+      "real_case",
+      "nonreal_case",
+      "ell_le",
+      "modulus_real_large",
+      "modulus_nonreal_large",
+      "lcm_not_dvd_of_left",
+      "I1_eq_sub",
+      "abs_I1_sub_main",
+      "Irho_eq_double_sum",
+      "Irho_neg_swap",
+      "cor1_of_Irho",
+      "real_conductor_rate",
+      "nonreal_conductor_power",
+      "cutoff_small",
+      "cor1_for_large_N",
+      "modulus_growth_of_alternatives"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp1537c.lean",
+    "lines": 1256,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.U7206Display6",
+      "LeanLab.Linnik.Decomp1537a",
+      "LeanLab.Linnik.PR2020"
+    ],
+    "declarations": [
+      "ee",
+      "primesIn",
+      "Ssum",
+      "Gsum",
+      "svv",
+      "difc",
+      "rk'",
+      "rkk",
+      "rK''",
+      "sing",
+      "majorArcs",
+      "Ufull",
+      "R1",
+      "S2",
+      "star",
+      "hdiff",
+      "Bk",
+      "mset",
+      "majorArcs_measurable",
+      "minor_measurable",
+      "sing_nonneg",
+      "sing_le",
+      "rkk_sum_eq",
+      "Gsum_norm_pow_expand",
+      "parseval_k",
+      "split3",
+      "major_expand",
+      "R1_zero_re_le",
+      "sum_log_sq_le",
+      "R1_zero_re_nonneg",
+      "pair_k1",
+      "minor_compare",
+      "E_part",
+      "convolution",
+      "rk'_even",
+      "odd_count",
+      "exists_of_pos",
+      "union_bound",
+      "bad_reindex_1",
+      "bad_reindex_k",
+      "identity44",
+      "lemma5_of_leaves",
+      "lemma5_bad_bound",
+      "weighted_split",
+      "lemma9_of_leaves",
+      "lemma9_bad_bound",
+      "final_positivity",
+      "k4_positive",
+      "k4_representation",
+      "first_moment_bounds",
+      "first_moment_estimate"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp307a.lean",
+    "lines": 1460,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532b",
+      "LeanLab.Linnik.Decomp335a"
+    ],
+    "declarations": [
+      "contDiff_poissonKernel",
+      "poisson_log_hasDerivAt",
+      "norm_deriv_poisson_log_le",
+      "integrableOn_deriv_poisson_log",
+      "integrableOn_partial_sum_norm_div",
+      "poisson_partial_summation_bound",
+      "primeWindowCoefficient",
+      "sum_primeWindowCoefficient",
+      "mangoldt_reciprocal_sum_le_log",
+      "poisson_small_cutoff_norm",
+      "mangoldt_rpow_series_bound",
+      "poisson_large_cutoff_norm",
+      "principal_zero_iff_zeta",
+      "poisson_series_detector_of_turan",
+      "norm_chi_cpow_le_one",
+      "cpow_neg_one_add",
+      "seriesTerm_eq",
+      "summable_series",
+      "tsum_three_split",
+      "detector_norm_le",
+      "sum_windowCoefficient",
+      "absorption",
+      "floor_lt_iff",
+      "kernel_engine1",
+      "kernel_engine2",
+      "kernel_engine3",
+      "pow_le_exp_of_log",
+      "sq_le_exp",
+      "k_logD_le",
+      "lb_k_le",
+      "final_scaled",
+      "final_div",
+      "seriesTerm_eq_coefficient",
+      "norm_sub_ge",
+      "norm_three_lower",
+      "chain_arith",
+      "small_part_le",
+      "tail_part_le",
+      "norm_series_coef",
+      "kernel_endpoint_le",
+      "endpoint_bound",
+      "pp_bound",
+      "eight_C3_r_le",
+      "pp_scaled",
+      "pp_div",
+      "pp_comparison",
+      "k_logD_quarter",
+      "Dk_le_sqrt",
+      "comp_small",
+      "comp_tail",
+      "comp_endpoint",
+      "poisson_window_localization_proof",
+      "poisson_window_localization",
+      "prime_poisson_partial_summation",
+      "gallagher_zero_detector_of_turan"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp307b.lean",
+    "lines": 445,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532b"
+    ],
+    "declarations": [
+      "primeWindowWeight",
+      "characterPolynomial_primeWindowWeight",
+      "primeWindowWeight_rough",
+      "primeWindowWeight_energy",
+      "detectorEnergy",
+      "detectorEnergy_nonneg",
+      "detectorEnergy_le_of_prime_hybrid",
+      "rounded_square_sieve_level",
+      "detectorEnergy_log_bound",
+      "measurable_detectorEnergy",
+      "measurable_primeDetector_uncurry",
+      "finite_height_count_from_local_detector",
+      "zero_count_from_integrated_detector",
+      "integrated_detector_energy_of_prime_hybrid",
+      "integrated_detector_energy",
+      "gallagher_density_from_detector_and_prime_hybrid"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp335a.lean",
+    "lines": 291,
+    "imports": [
+      "LeanLab.Linnik.Decomp335c"
+    ],
+    "declarations": [
+      "poisson_norm_eq_derivative_norm",
+      "poisson_lower_of_derivative_lower",
+      "shifted_logDeriv_norm_eq",
+      "nonprincipal_poisson_global",
+      "principal_large_logarithmic_derivative",
+      "detector_constant_mono",
+      "poisson_series_detector_of_turan"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp335b.lean",
+    "lines": 259,
+    "imports": [
+      "LeanLab.Linnik.Decomp335a",
+      "LeanLab.Linnik.Decomp307a"
+    ],
+    "declarations": [
+      "norm_primeWindowCoefficient_le",
+      "norm_primeDetector_le_log",
+      "poisson_endpoint_bound",
+      "endpoint_budget_absorbed",
+      "poisson_endpoint_negligible",
+      "poisson_dyadic_cutoffs",
+      "uniform_prime_power_budget_too_large",
+      "gallagher_zero_detector_of_turan"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp335c.lean",
+    "lines": 812,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532b"
+    ],
+    "declarations": [
+      "local_disc_order_sum_global",
+      "far_zero_pole_power_sum_global",
+      "near_zero_logDeriv_expansion_global",
+      "nonprincipal_large_logDeriv_global",
+      "sum_log_primeFactors_le",
+      "norm_prime_cpow_neg_le",
+      "norm_euler_log_correction_le",
+      "analyticAt_euler_log_correction",
+      "iteratedDeriv_euler_log_correction_le",
+      "principal_logDeriv_eq_zeta_add_euler",
+      "zeta_window_order_sum_global",
+      "zeta_disc_order_sum_global",
+      "zeta_shift_local_order_sum_global",
+      "zeta_far_zero_pole_power_sum_global",
+      "zeta_near_zero_logDeriv_expansion_global",
+      "zeta_large_logDeriv_global"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp340a.lean",
+    "lines": 87,
+    "imports": [
+      "Mathlib.Analysis.SpecialFunctions.Exp",
+      "Mathlib.MeasureTheory.Function.Floor",
+      "Mathlib.MeasureTheory.Integral.Bochner.Set",
+      "Mathlib.MeasureTheory.Measure.Lebesgue.Basic",
+      "Mathlib.Tactic"
+    ],
+    "declarations": [
+      "integrableOn_floor_div",
+      "detector_count_scale"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp340b.lean",
+    "lines": 790,
+    "imports": [
+      "LeanLab.Linnik.Decomp340a",
+      "LeanLab.Linnik.Decomp340c",
+      "LeanLab.Linnik.Decomp307b"
+    ],
+    "declarations": [
+      "integrableOn_primeDetector_norm_pow_div",
+      "primeDetector_logarithmic_l2_lower",
+      "integrableOn_primeDetector_energy_rectangle",
+      "primeDetector_energy_swap",
+      "integrableOn_primeDetector_height_energy",
+      "finite_height_count_from_log_detector",
+      "nonprincipal_zero_count_from_local_l1",
+      "principal_high_count_from_local_l1",
+      "primitive_count_from_local_l1",
+      "integral_detectorEnergy_eq_sum",
+      "fixed_character_narrow_count_from_detector",
+      "zero_count_from_integrated_detector",
+      "gallagher_density_from_detector_and_prime_hybrid"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp340c.lean",
+    "lines": 131,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532b"
+    ],
+    "declarations": [
+      "exists_zeroCount_finset",
+      "primitive_local_zero_card",
+      "primitive_height_window_occupancy"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp466a.lean",
+    "lines": 35,
+    "imports": [
+      "LeanLab.Linnik.Decomp482c"
+    ],
+    "declarations": [
+      "gallagher_theorem3"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp466b.lean",
+    "lines": 122,
+    "imports": [
+      "LeanLab.Linnik.Decomp466a"
+    ],
+    "declarations": [
+      "difference_le",
+      "divisor_error_small",
+      "exceptional_conductor_escape",
+      "exceptional_average_small"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp466c.lean",
+    "lines": 171,
+    "imports": [
+      "LeanLab.Linnik.Decomp466b",
+      "LeanLab.Linnik.Decomp486a"
+    ],
+    "declarations": [
+      "weighted_error_sum",
+      "major_arc_remainder_bound_of_theorem3",
+      "major_arc_remainder_bound_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp482a.lean",
+    "lines": 476,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532b",
+      "LeanLab.PNTPort.LargeSieve.Multiplicative",
+      "LeanLab.LanguascoPerelli1996.Primitive422"
+    ],
+    "declarations": [
+      "exceptionalStrip",
+      "exceptionalStrip_pos",
+      "totientWeight",
+      "exceptionalWeight",
+      "frequencyError",
+      "complexFrequencyError",
+      "frequencyError_le_complexFrequencyError",
+      "primeAmplitude",
+      "multiplicative_sieve",
+      "continuous_primeAmplitude",
+      "character_expansion_level_one",
+      "gauss_character_synthesis",
+      "finite_character_expansion",
+      "gauss_shift_energy",
+      "gauss_norm_le_sqrt_modulus",
+      "bad_prime_count",
+      "amplitude_primitive_difference",
+      "imprimitive_expansion",
+      "character_expansion"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp482b.lean",
+    "lines": 53,
+    "imports": [
+      "LeanLab.Linnik.Decomp486c"
+    ],
+    "declarations": [
+      "corrected_energy_decay"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp482c.lean",
+    "lines": 163,
+    "imports": [
+      "LeanLab.Linnik.Decomp486b"
+    ],
+    "declarations": [
+      "major_arc_energy_bound",
+      "quadratic_energy_decay",
+      "gallagher_theorem3_of_energy_bounds",
+      "gallagher_theorem3_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp486a.lean",
+    "lines": 38,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532b"
+    ],
+    "declarations": [
+      "major_arc_remainder_le_fiber_sum"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp486b.lean",
+    "lines": 250,
+    "imports": [
+      "LeanLab.Linnik.Decomp482b",
+      "LeanLab.Linnik.MajorArcEnergy.Display1517"
+    ],
+    "declarations": [
+      "arc_pair_integral_le",
+      "arc_pair_integral_le_common_window",
+      "corrected_pair_integral_le_energy_sq",
+      "major_arc_energy_zero",
+      "major_arc_energy_exceptional",
+      "major_arc_energy_bound_of_cases",
+      "major_arc_energy_bound_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp486c.lean",
+    "lines": 614,
+    "imports": [
+      "LeanLab.Linnik.Decomp482a",
+      "LeanLab.PNTPort.Gallagher.Basic",
+      "LeanLab.Linnik.ExplicitFormula.Assembly"
+    ],
+    "declarations": [
+      "principalMain",
+      "exceptionalMain",
+      "correctedAmplitude",
+      "correctedEnergy",
+      "normalizedEnergy",
+      "continuous_principalMain",
+      "continuous_exceptionalMain",
+      "continuous_correctedAmplitude",
+      "integrableOn_corrected_norm_sq",
+      "normalizedEnergy_zero_conductor",
+      "density_near_one",
+      "correctedEnergy_nonneg",
+      "normalizedEnergy_nonneg",
+      "normalizedEnergy_le_iff",
+      "exceptional_real_zero",
+      "corrected_norm_le_energy",
+      "pointwise_character_loss_tendsto_atTop",
+      "principalMain_mean_square",
+      "principalMain_window_mean_le",
+      "principalMain_window_mean_eventually",
+      "correctedCoefficient",
+      "correctedAmplitude_eq_sum",
+      "corrected_amplitude_short_window_le",
+      "exceptionalMain_mean_square_le",
+      "exceptionalMain_window_mean_le",
+      "gallagherLength",
+      "gallagherLength_spec",
+      "energy_window_gallagher",
+      "nonexceptional_zero_gap",
+      "short_interval_mean_decay",
+      "short_interval_mean_decay_exceptional",
+      "energy_decay_without_exception",
+      "energy_decay_with_exception",
+      "corrected_energy_decay_of_cases",
+      "corrected_energy_decay_split"
+    ],
+    "sorry": 1
+  },
+  {
+    "file": "Decomp495a.lean",
+    "lines": 573,
+    "imports": [
+      "Mathlib",
+      "LeanLab.PNTPort.LargeSieve.Basic",
+      "LeanLab.Linnik.LiLiuDisplay37PNT",
+      "LeanLab.Linnik.Decomp1532c"
+    ],
+    "declarations": [
+      "phase_travel_le",
+      "phase_character_le",
+      "phase_character_small_shift_le",
+      "exists_measurable_arc_center",
+      "weighted_phase_freeze_le",
+      "logarithmic_phase_error_tendsto",
+      "small_shift_phase_freeze_le",
+      "four_nonzero_shift_instances",
+      "four_cut_values_instance",
+      "small_shift_filtered_freeze_le",
+      "phase_freeze_budget_eventually",
+      "small_shift_filtered_freeze_eventually",
+      "small_shift_box_embedding",
+      "first_range_box_density",
+      "first_range_count_not_littleO",
+      "frozen_remainder_isLittleO_iff",
+      "four_original_filters_nonempty"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp496a.lean",
+    "lines": 688,
+    "imports": [
+      "LeanLab.Linnik.Decomp495a"
+    ],
+    "declarations": [
+      "phase_character_oscillating_le",
+      "mid_band_phase_character_le",
+      "logarithmic_phase_error_tendsto",
+      "oscillating_phase_freeze_le",
+      "oscillating_filtered_freeze_le",
+      "phase_freeze_budget_eventually",
+      "oscillating_filtered_freeze_eventually",
+      "frozen_remainder_isLittleO_iff",
+      "oscillating_remainder_budget_of_frozen",
+      "mid_band_frozen_reduction",
+      "top_band_frozen_reduction",
+      "shifted_box_embedding",
+      "band_box_density",
+      "band_count_not_littleO",
+      "original_band_counts_not_littleO",
+      "band_weight_not_littleO",
+      "two_original_filters_nonempty"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp497a.lean",
+    "lines": 749,
+    "imports": [
+      "LeanLab.Linnik.Decomp486b",
+      "LeanLab.Linnik.Decomp1532c"
+    ],
+    "declarations": [
+      "main_series_norm",
+      "Jn_nat_eq_sum",
+      "Jn_nat_lower",
+      "main_series_nat_lower",
+      "main_series_upper",
+      "main_series_odd",
+      "Jn_eq_zero_of_natAbs",
+      "main_series_outside",
+      "exceptional_budget_nonneg",
+      "main_series_odd_bound",
+      "main_series_outside_bound",
+      "main_series_nat_half_lower",
+      "main_series_bound_requires_budget",
+      "main_series_small_budget_impossible",
+      "arc_integral_le_error_add_main",
+      "main_series_le_arc_add_error",
+      "arc_bound_requires_budget",
+      "one_le_singSeries_norm",
+      "main_series_two_lower",
+      "main_series_two_budget",
+      "exceptional_main_bound_requires_budget",
+      "main_series_two_not_littleO",
+      "concrete_main_series_instances",
+      "exceptionalWeight_two_le",
+      "exceptionalWeight_two_tendsto_zero",
+      "divisor_budget_two_tendsto_zero",
+      "no_eventual_main_bound_of_budget_tendsto_zero",
+      "no_eventual_arc_and_error_small",
+      "exceptionalWeight_two_uniform_small",
+      "two_tail_budget_uniform_small",
+      "main_series_bound_fails_of_small_corrected_energy",
+      "exists_small_theta_quadratic",
+      "separate_main_bound_forces_eventual_no_exception",
+      "separate_main_bound_of_arc_and_error",
+      "separate_arc_bound_forces_eventual_no_exception",
+      "separate_main_bound_iff_eventual_no_exception"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp498a.lean",
+    "lines": 199,
+    "imports": [
+      "LeanLab.Linnik.Decomp486c"
+    ],
+    "declarations": [
+      "correctedCoefficient_eq_unexceptional",
+      "exceptional_summand_decay_of_max",
+      "distinct_main_coefficient_budget_obstruction",
+      "exceptionalMain_sub_mean_square_le",
+      "leaf_nonmaximal_exceptional_summand_decay"
+    ],
+    "sorry": 1
+  },
+  {
+    "file": "ExactAtMost.lean",
+    "lines": 106,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Statements"
+    ],
+    "declarations": [
+      "exact_append",
+      "exact_cast",
+      "exact_succ",
+      "exact_mono",
+      "pow_split",
+      "exact_succ_of_atMost",
+      "exact_iff_atMost_up_to_one"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Gallagher1975.lean",
+    "lines": 235,
+    "imports": [
+      "Mathlib",
+      "LeanLab.LPZ2007.Elementary"
+    ],
+    "declarations": [
+      "PolignacExact",
+      "rk",
+      "rk_pos_iff",
+      "exceptions",
+      "Theorem1",
+      "log_le_two_mul_log2",
+      "cheb_algebra",
+      "exceptions_le",
+      "tendsto_log_sq_div",
+      "density_tends_to_one",
+      "fL",
+      "fL_le",
+      "fL_ge",
+      "fL_ge_of_le",
+      "polignac_7",
+      "fL_example"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Gallagher1975Lemma1.lean",
+    "lines": 262,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "e",
+      "G",
+      "digit",
+      "changes",
+      "changesPaper",
+      "norm_e",
+      "re_e",
+      "e_two_mul",
+      "norm_sub_one_sq",
+      "digit_eq_of_cos_pos",
+      "exists_rot",
+      "pair_step",
+      "lemma1",
+      "lemma1_paper_range",
+      "G_half",
+      "digit_half_one",
+      "digit_half_two",
+      "lemma1_literal_fails",
+      "lemma1_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Gallagher1975Lemma2.lean",
+    "lines": 297,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Gallagher1975Lemma1"
+    ],
+    "declarations": [
+      "bit",
+      "bitChanges",
+      "T",
+      "bigSet",
+      "digit_eq_bit",
+      "changes_eq_bitChanges",
+      "measure_le_card",
+      "eq_of_bits",
+      "bit_lt_two",
+      "bits_eq_of_changes",
+      "card_T_le",
+      "zero_mem_T",
+      "card_small_subsets_le",
+      "lemma2_explicit",
+      "lemma2"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Gallagher1975Lemma3.lean",
+    "lines": 242,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Gallagher1975Lemma1"
+    ],
+    "declarations": [
+      "digit_periodic",
+      "digit_periodic_mul",
+      "const_window",
+      "fract_step",
+      "int_of_const",
+      "window_change",
+      "card_changes_ge",
+      "lemma3",
+      "lemma3_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Gallagher1975Thm2.lean",
+    "lines": 261,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Gallagher1975"
+    ],
+    "declarations": [
+      "M",
+      "s",
+      "oddPairs",
+      "conv_decomp",
+      "sum_reflect_le",
+      "oddPairs_subset",
+      "ai_le",
+      "last_term_sq",
+      "oddPairs_10",
+      "rk_even_le",
+      "even_sum_le",
+      "even_sq_sum_le",
+      "even_terms_sq",
+      "card_oddPairs"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Gallagher1975Thm2Count.lean",
+    "lines": 128,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Gallagher1975Thm2Full"
+    ],
+    "declarations": [
+      "rpp",
+      "rkSet",
+      "rk_eq_card",
+      "pow2sum_append",
+      "mem_tuples_append",
+      "rpp_add_eq",
+      "theorem2",
+      "rpp_one_eight_pos"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Gallagher1975Thm2Full.lean",
+    "lines": 323,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Gallagher1975Thm2"
+    ],
+    "declarations": [
+      "Lemma14",
+      "conv",
+      "filter_not_even_eq",
+      "even_part_le",
+      "sum_oddPairs_reflect",
+      "middle_le",
+      "log_two_mul_sq_le",
+      "eventually_log_sq_le",
+      "theorem2_conv",
+      "main_pos_example"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "HBPMajorCap.lean",
+    "lines": 80,
+    "imports": [
+      "LeanLab.ChenExplicit.TwinCNumeric"
+    ],
+    "declarations": [
+      "Crit",
+      "cap_le",
+      "k12_needs",
+      "k12_fails_at_cap",
+      "grh_k6_needs",
+      "grh_k6_fails_at_cap",
+      "lam_needed_k12",
+      "vacuity_k13"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "HilbertCosecant.lean",
+    "lines": 948,
+    "imports": [
+      "Mathlib",
+      "LeanLab.PNTPort.LargeSieve.Dual"
+    ],
+    "declarations": [
+      "cos_le_quartic",
+      "cosecant_cotangent_bound",
+      "cosecant_product",
+      "sum_inv_sq_sep_sharp",
+      "sum_off_diag_sharp",
+      "eigen_identity",
+      "eigen_bound",
+      "star_dotProduct_self",
+      "star_dotProduct_mulVec_eq",
+      "sum_norm_sq_unitary",
+      "form_bound_of_eigen_bound",
+      "sin_ne_zero_of_dist0_pos",
+      "kernel_bound",
+      "cosecant_hilbert_fintype",
+      "cosecant_hilbert",
+      "cotangent_hilbert",
+      "sum_off_diag_real_sharp",
+      "hilbert_real_fintype",
+      "hilbert_real",
+      "exponential_mean_square",
+      "log_nat_spacing",
+      "dirichlet_polynomial_mean_square"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "JTK7Levers.lean",
+    "lines": 134,
+    "imports": [
+      "LeanLab.Linnik.JTNumeric"
+    ],
+    "declarations": [
+      "crit43_le",
+      "C2p_nonneg",
+      "k7_of_C1",
+      "k7_of_c1",
+      "k7_of_lp",
+      "k7_MPR"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "JTK7LeversTwinC.lean",
+    "lines": 51,
+    "imports": [
+      "LeanLab.Linnik.JTK7Levers",
+      "LeanLab.ChenExplicit.TwinCUpper"
+    ],
+    "declarations": [
+      "twinC_nonneg",
+      "twinC_le",
+      "k7_of_C1_twinC",
+      "k7_of_c1_twinC",
+      "k7_of_lp_twinC"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "JTNumeric.lean",
+    "lines": 124,
+    "imports": [
+      "LeanLab.ChenExplicit.TwinCNumeric",
+      "LeanLab.ChenExplicit.Reductions"
+    ],
+    "declarations": [
+      "C2p",
+      "crit",
+      "C2p_le",
+      "thm1_numeric",
+      "thm1_numeric_twinC",
+      "table1_K7_uncond"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "JTTable2.lean",
+    "lines": 130,
+    "imports": [
+      "LeanLab.Linnik.JTNumeric"
+    ],
+    "declarations": [
+      "thm3_numeric",
+      "Dp",
+      "pintzVal",
+      "Dp_bounds",
+      "row_of",
+      "table2"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "K3TwoFunction.lean",
+    "lines": 108,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.KLadder"
+    ],
+    "declarations": [
+      "quad_le",
+      "core",
+      "k3_fails",
+      "k3_fails_at_lambda",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "K4EH.lean",
+    "lines": 156,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.LiLiu2026"
+    ],
+    "declarations": [
+      "region_z_56",
+      "region_z_2532",
+      "normSq_sub12",
+      "region_c_56",
+      "k4_uncond_z2",
+      "k4_uncond_EH",
+      "vc",
+      "vAv_c_exact",
+      "vAv_c_tail",
+      "k4_uncond_c",
+      "k4_grh_z2",
+      "level_uncond",
+      "level_grh",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "K6Map.lean",
+    "lines": 24,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "k6_fails",
+      "k6_needs"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "KLadder.lean",
+    "lines": 96,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.LiLiu2026"
+    ],
+    "declarations": [
+      "k2_fails",
+      "astar11_ge",
+      "mem_pts",
+      "key_max",
+      "k4_fails",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LiLiu2026.lean",
+    "lines": 323,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "Hq",
+      "step",
+      "nvec",
+      "mob",
+      "ram",
+      "numer",
+      "Aq",
+      "numer_3",
+      "numer_5",
+      "numer_7",
+      "numer_15",
+      "numer_31",
+      "A3",
+      "A5",
+      "A7",
+      "A15",
+      "A31",
+      "A3_eq",
+      "A5_eq",
+      "A7_eq",
+      "A15_eq",
+      "A31_eq",
+      "Astar",
+      "qf",
+      "v",
+      "w",
+      "vAv_star",
+      "vAv_star_lt",
+      "wAw_4vAv_star",
+      "wAw_4vAv_star_lt",
+      "table3",
+      "Astar_diag",
+      "tail_bounds",
+      "vAv_tail",
+      "wAw_tail",
+      "k6_criterion",
+      "k6_margin",
+      "k6_final",
+      "gamma6",
+      "lemma61_exp",
+      "k5_setup",
+      "k5_criterion",
+      "k5_final",
+      "gamma5",
+      "Ilam",
+      "log_one_sub_bounds",
+      "I56",
+      "I2532",
+      "rl",
+      "betal",
+      "Dl",
+      "beta56_le",
+      "beta2532_le",
+      "normSq_Q",
+      "normSq_sub8",
+      "mem_Dl_poly",
+      "region61",
+      "region67",
+      "zero_mem_Dl",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LiLiu2026Chain.lean",
+    "lines": 115,
+    "imports": [
+      "LeanLab.Linnik.LiLiu2026"
+    ],
+    "declarations": [
+      "diag22",
+      "tail23",
+      "qf_cast",
+      "sqrt_lt_of",
+      "vAv_lt",
+      "k6_of_cited",
+      "k5_of_cited",
+      "k6_of_cited_vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LiLiuDisplay37.lean",
+    "lines": 369,
+    "imports": [
+      "LeanLab.Linnik.LiLiuLemma43Int",
+      "Mathlib.NumberTheory.Chebyshev"
+    ],
+    "declarations": [
+      "G",
+      "half_ne",
+      "half_zero",
+      "G_eq_two_half",
+      "G_eq",
+      "G_zero",
+      "G_nonneg",
+      "G_ge",
+      "e_mul_conj_re",
+      "normSq_expand",
+      "int_fejer_eq",
+      "blk",
+      "same_blk",
+      "fejer_lower",
+      "primesIn",
+      "logw",
+      "sum_primesIn",
+      "display37_weak",
+      "lemma43_lower_explicit",
+      "I",
+      "Display37",
+      "lemma43_lower_of_display37",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LiLiuDisplay37PNT.lean",
+    "lines": 426,
+    "imports": [
+      "LeanLab.Linnik.LiLiuDisplay37",
+      "LeanLab.PNTPort.StrongPNT.Bridge"
+    ],
+    "declarations": [
+      "theta_pnt",
+      "e_lip",
+      "continuous_e",
+      "abel_identity",
+      "abel_bound",
+      "F",
+      "norm_F_le",
+      "continuous_F",
+      "riemann",
+      "cw",
+      "sum_Ioc_zero_eq_range",
+      "theta_eq_range",
+      "D",
+      "D_zero",
+      "cw_eq",
+      "SA_split",
+      "norm_SA_le_theta",
+      "continuous_SA",
+      "key_bound",
+      "uniform_conv",
+      "cov",
+      "display37",
+      "vacuity_display37",
+      "lemma43_lower"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LiLiuK5Levers.lean",
+    "lines": 100,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.LiLiu2026"
+    ],
+    "declarations": [
+      "wAw_tail_tight",
+      "region67_tight",
+      "k5_uncond_criterion",
+      "printed_rounding_too_coarse",
+      "k5_exponent_ok_at_GRH",
+      "minor_level_barrier",
+      "barrier_rho",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LiLiuLemma43.lean",
+    "lines": 148,
+    "imports": [
+      "LeanLab.PNTPort.Vinogradov.MajorArc",
+      "LeanLab.PNTPort.LargeSieve.MontgomeryBT"
+    ],
+    "declarations": [
+      "SA",
+      "units",
+      "card_units",
+      "twisted_sum",
+      "cauchy_units",
+      "mu_sq_div_totient_sqf",
+      "lemma43_core",
+      "lemma43_vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LiLiuLemma43Int.lean",
+    "lines": 385,
+    "imports": [
+      "LeanLab.Linnik.LiLiuLemma43"
+    ],
+    "declarations": [
+      "majorArcs",
+      "R10",
+      "arc",
+      "mem_units",
+      "units_zero",
+      "cross_ne",
+      "sep",
+      "frac_bounds",
+      "delta_small",
+      "arc_disjoint",
+      "arc_subset",
+      "arc_measurable",
+      "arc_subset_Icc",
+      "integral_arc",
+      "sum_arcs_le",
+      "SA_continuous",
+      "SA_periodic",
+      "lemma43_integrated",
+      "lemma43_lower_conditional",
+      "params_ok",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "LowerShiftBudget.lean",
+    "lines": 33,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "lower_shift_fixed_exponential_budget_obstruction",
+      "lower_shift_signed_subsum_not_monotone"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "PR2003.lean",
+    "lines": 34,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "lemma10",
+      "lemma11",
+      "eq102",
+      "eq1015"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "PR2020.lean",
+    "lines": 51,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "c20_lt",
+      "c3_lt",
+      "cauchy_conv",
+      "positivity_of_C3"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "SPLIT_display5_plain_expansion.lean",
+    "lines": 454,
+    "imports": [
+      "LeanLab.Linnik.Decomp1532c",
+      "LeanLab.Linnik.Decomp466b"
+    ],
+    "declarations": [
+      "small_shift_of_coordinate_bound",
+      "large_shift_has_high_coordinate",
+      "low_box_card",
+      "large_shift_tuple_count_le",
+      "large_shift_tuple_count_bound",
+      "large_shift_tuple_count_log",
+      "large_shift_tuple_density_zero",
+      "large_shift_totient_weight_negligible",
+      "large_shift_main_sum_eq_zero",
+      "split_small_shift_bound",
+      "split_intermediate_shift_bound",
+      "split_large_shift_bound",
+      "display5_plain_expansion_split"
+    ],
+    "sorry": 3
+  },
+  {
+    "file": "SPLIT_energy_decay_with_exception.lean",
+    "lines": 314,
+    "imports": [
+      "LeanLab.Linnik.Decomp498a"
+    ],
+    "declarations": [
+      "leaf_sum_split_exceptional",
+      "leaf_exceptional_summand_decay",
+      "leaf_nonexceptional_sum_decay",
+      "leaf_envelope_add",
+      "energy_decay_with_exception_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "SPLIT_gallagher_theorem3.lean",
+    "lines": 127,
+    "imports": [
+      "LeanLab.Linnik.Decomp466a"
+    ],
+    "declarations": [
+      "split_exceptional_radius_select",
+      "split_exceptional_conductor_lt_scale",
+      "split_frequency_error_bound",
+      "gallagher_theorem3_split"
+    ],
+    "sorry": 2
+  },
+  {
+    "file": "SPLIT_intermediate_lower_shift_bound.lean",
+    "lines": 309,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_intermediate_shift_bound",
+      "LeanLab.Linnik.LowerShiftBudget"
+    ],
+    "declarations": [
+      "lower_shift_error_le_complex_sum",
+      "lower_shift_eventual_bound_of_complex_sum",
+      "leaf_lower_quarter_shift_bound",
+      "leaf_lower_cube_shift_bound",
+      "leaf_lower_sqrt_remainder_shift_bound",
+      "is",
+      "intermediate_lower_shift_bound_split"
+    ],
+    "sorry": 3
+  },
+  {
+    "file": "SPLIT_intermediate_middle_shift_bound.lean",
+    "lines": 248,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_intermediate_shift_bound"
+    ],
+    "declarations": [
+      "middle_shift_lower_third_bound",
+      "middle_shift_middle_third_bound",
+      "middle_shift_upper_third_bound",
+      "intermediate_middle_shift_bound_split"
+    ],
+    "sorry": 3
+  },
+  {
+    "file": "SPLIT_intermediate_upper_shift_bound.lean",
+    "lines": 222,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_intermediate_shift_bound"
+    ],
+    "declarations": [
+      "intermediate_upper_low_part_bound",
+      "intermediate_upper_middle_part_bound",
+      "intermediate_upper_top_part_bound",
+      "intermediate_upper_shift_bound_split"
+    ],
+    "sorry": 3
+  },
+  {
+    "file": "SPLIT_large_shift_filter_iff.lean",
+    "lines": 100,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_large_shift_bound"
+    ],
+    "declarations": [
+      "large_shift_scale_le_self",
+      "large_shift_le_self_of_le_scale",
+      "large_shift_lt_abs_of_not_le_self",
+      "large_shift_not_le_self_of_lt_abs",
+      "large_shift_filter_iff_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "SPLIT_large_shift_major_eq_neg_minor.lean",
+    "lines": 193,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_large_shift_bound"
+    ],
+    "declarations": [
+      "e_re_eq_cos",
+      "e_neg_re",
+      "ofReal_mul_re",
+      "natCast_re",
+      "continuous_kernel",
+      "large_shift_correlation_eq_pair_count",
+      "large_shift_pair_count_zero",
+      "large_shift_integrand_integrable",
+      "large_shift_major_eq_neg_minor_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "SPLIT_large_shift_minor_sum_bound.lean",
+    "lines": 245,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_large_shift_bound"
+    ],
+    "declarations": [
+      "large_shift_near_sum_bound",
+      "large_shift_middle_sum_bound",
+      "large_shift_far_sum_bound",
+      "large_shift_minor_sum_bound_split"
+    ],
+    "sorry": 2
+  },
+  {
+    "file": "SPLIT_major_arc_energy_exceptional.lean",
+    "lines": 137,
+    "imports": [
+      "LeanLab.Linnik.Decomp486b",
+      "LeanLab.Linnik.Decomp497a"
+    ],
+    "declarations": [
+      "leaf_arc_integral_part_bound",
+      "leaf_main_series_part_bound",
+      "major_arc_energy_exceptional_split"
+    ],
+    "sorry": 2
+  },
+  {
+    "file": "SPLIT_major_arc_energy_zero.lean",
+    "lines": 106,
+    "imports": [
+      "LeanLab.Linnik.Decomp486b"
+    ],
+    "declarations": [
+      "leaf_arc_integral_part_bound",
+      "leaf_main_series_part_bound",
+      "major_arc_energy_zero_split"
+    ],
+    "sorry": 2
+  },
+  {
+    "file": "SPLIT_short_interval_mean_decay_exceptional.lean",
+    "lines": 206,
+    "imports": [
+      "LeanLab.Linnik.Decomp486c"
+    ],
+    "declarations": [
+      "leaf_conductor_one_term",
+      "leaf_low_conductor_range",
+      "leaf_high_conductor_range",
+      "add_two_exponential_bounds",
+      "of",
+      "short_interval_mean_decay_exceptional_split"
+    ],
+    "sorry": 3
+  },
+  {
+    "file": "SPLIT_split_intermediate_shift_bound.lean",
+    "lines": 224,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_display5_plain_expansion"
+    ],
+    "declarations": [
+      "intermediate_lower_shift_bound",
+      "intermediate_middle_shift_bound",
+      "intermediate_upper_shift_bound",
+      "split_intermediate_shift_bound_split"
+    ],
+    "sorry": 3
+  },
+  {
+    "file": "SPLIT_split_large_shift_bound.lean",
+    "lines": 182,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_display5_plain_expansion"
+    ],
+    "declarations": [
+      "large_shift_filter_iff",
+      "large_shift_major_eq_neg_minor",
+      "large_shift_minor_sum_bound",
+      "split_large_shift_bound_split"
+    ],
+    "sorry": 1
+  },
+  {
+    "file": "SPLIT_split_small_shift_bound.lean",
+    "lines": 170,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_display5_plain_expansion"
+    ],
+    "declarations": [
+      "split_small_shift_constant_phase",
+      "split_small_shift_oscillating_phase",
+      "split_small_shift_bound_split"
+    ],
+    "sorry": 2
+  },
+  {
+    "file": "SPLIT_split_small_shift_constant_phase.lean",
+    "lines": 301,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_small_shift_bound"
+    ],
+    "declarations": [
+      "split_small_shift_constant_phase_eighth",
+      "split_small_shift_constant_phase_quarter",
+      "split_small_shift_constant_phase_three_eighths",
+      "split_small_shift_constant_phase_half",
+      "split_small_shift_constant_phase_split"
+    ],
+    "sorry": 4
+  },
+  {
+    "file": "SPLIT_split_small_shift_oscillating_phase.lean",
+    "lines": 171,
+    "imports": [
+      "LeanLab.Linnik.SPLIT_split_small_shift_bound"
+    ],
+    "declarations": [
+      "small_shift_oscillating_mid_band",
+      "small_shift_oscillating_top_band",
+      "split_small_shift_oscillating_phase_split"
+    ],
+    "sorry": 2
+  },
+  {
+    "file": "Statements.lean",
+    "lines": 101,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach",
+      "LeanLab.DERZ1997.Statements"
+    ],
+    "declarations": [
+      "LinnikExact",
+      "LinnikAtMost",
+      "AllLargeEven",
+      "atMost_of_exact",
+      "atMost_mono",
+      "allLargeEven_mono",
+      "hbp_atMost_of_pr2",
+      "gallagher_of_hbp",
+      "hbp_GRH_of_pr1",
+      "atMost7_of_jt",
+      "linnik1951_of_gallagher",
+      "heathBrownPuchta",
+      "pintzRuzsa1",
+      "pintzRuzsa2",
+      "johnstonTrudgian_GRH",
+      "gallagher",
+      "linnik1951",
+      "heathBrownPuchta_GRH",
+      "exact_zero_iff"
+    ],
+    "sorry": 4
+  },
+  {
+    "file": "Task37Diagonal.lean",
+    "lines": 84,
+    "imports": [
+      "LeanLab.Linnik.Task37Display18"
+    ],
+    "declarations": [
+      "good_one_one",
+      "Pd_one_one",
+      "Bdef_one_one",
+      "singSum20",
+      "fifteen_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37Display18.lean",
+    "lines": 232,
+    "imports": [
+      "LeanLab.Linnik.U1474R0"
+    ],
+    "declarations": [
+      "modulus_le_pow",
+      "eps_log_lower",
+      "eps_tendsto",
+      "cnt_le",
+      "soffQ_le",
+      "normalized_le",
+      "lemma31_18",
+      "r6_lower11",
+      "modulus_instance",
+      "count_instance",
+      "display18_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37Display19.lean",
+    "lines": 96,
+    "imports": [
+      "LeanLab.Linnik.Task37Diagonal"
+    ],
+    "declarations": [
+      "pair_le_two",
+      "Dc_two_left",
+      "Dc_symm",
+      "display19",
+      "diagonal_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37Display64.lean",
+    "lines": 89,
+    "imports": [
+      "LeanLab.Linnik.Task37FirstMoments"
+    ],
+    "declarations": [
+      "Lemma71",
+      "normalization_arith",
+      "display64",
+      "display64_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37EulerFinite.lean",
+    "lines": 92,
+    "imports": [
+      "LeanLab.Linnik.Task37Gram"
+    ],
+    "declarations": [
+      "localC",
+      "localF",
+      "absent_factor",
+      "present_factor",
+      "wt_div_eq_prod",
+      "totient_sqf",
+      "finite_coefficient",
+      "coefficient_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37FirstMoments.lean",
+    "lines": 121,
+    "imports": [
+      "LeanLab.Linnik.Task37Lemma71Integral"
+    ],
+    "declarations": [
+      "sum_UN_rj_ge",
+      "mass",
+      "mass_tendsto",
+      "combined",
+      "combined_tendsto",
+      "combined_eq",
+      "mass_half"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37Fourier.lean",
+    "lines": 163,
+    "imports": [
+      "LeanLab.Linnik.Task37Display19"
+    ],
+    "declarations": [
+      "zq",
+      "char_star",
+      "char_prod",
+      "zq_pow",
+      "zq_star_pow",
+      "zq_mixed",
+      "tuple_orthogonality",
+      "residue_period",
+      "Pd_eq_period_count",
+      "Pd_fourier",
+      "char_nat_exp",
+      "zq_exp",
+      "zq_one"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37Gram.lean",
+    "lines": 124,
+    "imports": [
+      "LeanLab.Linnik.Task37Display64"
+    ],
+    "declarations": [
+      "AqC",
+      "Aq",
+      "zq_neg",
+      "AqC_conj",
+      "AqC_hermitian",
+      "AqC_eq_real",
+      "Aq_symm",
+      "Aq_expand",
+      "Aq_gram",
+      "Aq_psd",
+      "gram_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37Lemma71.lean",
+    "lines": 139,
+    "imports": [
+      "LeanLab.Linnik.Task37Fourier"
+    ],
+    "declarations": [
+      "r5pp",
+      "f2",
+      "split5",
+      "r5pp_eq",
+      "reflection",
+      "f2_positive_part_le",
+      "lemma71_finite",
+      "reflection_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Task37Lemma71Integral.lean",
+    "lines": 94,
+    "imports": [
+      "LeanLab.Linnik.Task37Lemma71"
+    ],
+    "declarations": [
+      "F2G",
+      "Joint",
+      "SF2_sum",
+      "integral_F2",
+      "integral_F3",
+      "joint_parseval",
+      "lemma71_integral_finite",
+      "integral_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1394Fejer.lean",
+    "lines": 298,
+    "imports": [
+      "LeanLab.Linnik.LiLiuDisplay37"
+    ],
+    "declarations": [
+      "tri",
+      "continuous_tri",
+      "tri_eq_zero",
+      "tri_eq",
+      "hasCompactSupport_tri",
+      "integrable_tri",
+      "fourier_tri",
+      "fej",
+      "I_eq",
+      "continuous_e'",
+      "continuous_fej",
+      "fej_le_one",
+      "fej_nonneg",
+      "fej_ne",
+      "fej_eq_G",
+      "fej_mul_sq_le",
+      "fej_le_inv_sq",
+      "fej_le_two_div",
+      "integrable_fej",
+      "integral_fej",
+      "integral_Ioi_inv_sq",
+      "integrableOn_inv_sq",
+      "tail_le",
+      "fej_neg",
+      "tail_eq",
+      "one_sub_I_eq",
+      "one_sub_I_le",
+      "I_le_one",
+      "one_sub_I_le'",
+      "tendsto_I",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1394Lemma43Lower.lean",
+    "lines": 59,
+    "imports": [
+      "LeanLab.Linnik.LiLiuDisplay37PNT",
+      "LeanLab.Linnik.U1394Fejer"
+    ],
+    "declarations": [
+      "lemma43_lower_one",
+      "vacuity"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1412Display53.lean",
+    "lines": 165,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "eC",
+      "norm_eC",
+      "continuous_eC",
+      "zL",
+      "continuous_zL",
+      "norm_zL_le",
+      "rl",
+      "bl",
+      "Dl",
+      "V",
+      "Phi",
+      "continuous_Phi",
+      "Moment46",
+      "CoverInput",
+      "prop52",
+      "moment46_zero",
+      "cover_neg"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1412MuPhi.lean",
+    "lines": 178,
+    "imports": [
+      "LeanLab.Linnik.U1394Lemma43Lower",
+      "LeanLab.PNTPort.BV.Helpers"
+    ],
+    "declarations": [
+      "log_le_sum_mu_sq_div_totient",
+      "log_sub_log_le_sum",
+      "sum_mu_sq_div_totient_le",
+      "lemma43_lower_logP",
+      "vacuity_logP",
+      "lemma43_lower_logP_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1420Cover.lean",
+    "lines": 263,
+    "imports": [
+      "LeanLab.Linnik.U1412Display53"
+    ],
+    "declarations": [
+      "sl",
+      "Il",
+      "sl_pos",
+      "Il_eq",
+      "sq_norm_eq",
+      "bl_sq",
+      "bl_pos",
+      "ge_of_not_mem_Dl",
+      "pair47",
+      "exists_pair",
+      "coverInput",
+      "prop52_of_moment46",
+      "Il_half_pos",
+      "coverInput_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1420Lemma51.lean",
+    "lines": 138,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "Q",
+      "Q_cont",
+      "Q_periodic",
+      "Q_succ",
+      "int_comp_two",
+      "int_step",
+      "int_prod_eq_one",
+      "prod_Icc_eq",
+      "int_prod_Icc_eq_one",
+      "lemma51"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1420LogCosh.lean",
+    "lines": 145,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "g",
+      "sinh_le_mul_cosh",
+      "self_le_sinh_mul_cosh",
+      "k",
+      "hasDerivAt_g",
+      "k_le_half",
+      "k_nonneg",
+      "k_antitone",
+      "continuousOn_g",
+      "continuous_g",
+      "concaveOn_g",
+      "monotoneOn_g",
+      "g_sub_le",
+      "g_le_of_le",
+      "log_cosh_eq_g"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1420Moment46.lean",
+    "lines": 272,
+    "imports": [
+      "LeanLab.Linnik.U1412Display53",
+      "LeanLab.Linnik.U1420Cover",
+      "LeanLab.Linnik.U1420LogCosh",
+      "LeanLab.Linnik.U1420Lemma51"
+    ],
+    "declarations": [
+      "eC_add",
+      "eC_one",
+      "eC_half",
+      "re_sq_add_im_sq",
+      "wf",
+      "continuous_wf",
+      "wf_periodic",
+      "wf_anti",
+      "wf_sq",
+      "sum_shift",
+      "R44",
+      "norm_R44_le",
+      "sum_wf_sq",
+      "display44",
+      "sum_sq_le",
+      "V_nonneg",
+      "sum_wf",
+      "pointwise46",
+      "continuous_sum46",
+      "moment46",
+      "prop52_unconditional",
+      "prop52_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1426ChainWire.lean",
+    "lines": 820,
+    "imports": [
+      "LeanLab.Linnik.LiLiu2026Chain",
+      "LeanLab.Linnik.U1420Moment46",
+      "LeanLab.Linnik.U1412MuPhi"
+    ],
+    "declarations": [
+      "Il_eq_Ilam",
+      "Dl_eq",
+      "rl_nonneg",
+      "betal_nonneg",
+      "betal_lt",
+      "Dl_eq_mul",
+      "Dl_compact",
+      "zero_mem_Dl",
+      "exists_max",
+      "measurableSet_exc",
+      "exc6",
+      "exc5",
+      "Q6",
+      "continuous_Q6",
+      "Q5",
+      "continuous_Q5",
+      "exists_H6",
+      "exists_H5",
+      "Gs",
+      "continuous_Gs",
+      "Gs_eq",
+      "Qc",
+      "FG",
+      "continuous_FG",
+      "FG_eq",
+      "display54",
+      "display54_K6",
+      "Qc6",
+      "display56_pt",
+      "display56",
+      "integral_cos_int",
+      "parseval",
+      "Sle",
+      "Sm",
+      "continuous_SA",
+      "Sm_eq",
+      "norm_Qc_le",
+      "norm_FG_le",
+      "norm_sub_sq_le",
+      "sum_log_sq_le",
+      "lemma61_bound",
+      "measurable_dist0",
+      "measurableSet_majorArcs",
+      "minorArcs",
+      "measurableSet_minorArcs",
+      "minorArcs_sub",
+      "Lfun",
+      "MinorSup1924",
+      "Lfun_lower",
+      "Lfun_le",
+      "eventually_Lfun_ge_one",
+      "rpow_sq_eq",
+      "exponent_le",
+      "term_le",
+      "lemma61",
+      "minorSup_trivial",
+      "R1_ge_11log2",
+      "major_term_le",
+      "R1_vacuity",
+      "k6_wired",
+      "k5_wired",
+      "k6_wired_instance",
+      "lemma61_instance",
+      "lemma61_bound_instance",
+      "display56_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1429Display58.lean",
+    "lines": 292,
+    "imports": [
+      "LeanLab.Linnik.U1426ChainWire"
+    ],
+    "declarations": [
+      "r6pp",
+      "integral_split",
+      "assembly58",
+      "assembly58_instance",
+      "N1f",
+      "SFG",
+      "SG",
+      "R1",
+      "Lemma21",
+      "Display30Upper",
+      "Minor35",
+      "continuous_SFG",
+      "stuff_le",
+      "r6_core",
+      "r6_lower",
+      "C1_slack",
+      "C1_arith",
+      "C1_slack_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1434Lemma21.lean",
+    "lines": 508,
+    "imports": [
+      "LeanLab.Linnik.U1429Display58",
+      "LeanLab.Linnik.LiLiuDisplay37PNT"
+    ],
+    "declarations": [
+      "sv",
+      "rj",
+      "ff",
+      "rj_nonneg",
+      "sv_le",
+      "sv_even",
+      "e_eq_eC",
+      "eC_add",
+      "Gs_fin",
+      "eC_prod",
+      "Gs_pow",
+      "SG_pow",
+      "SFG_sum",
+      "integral_SFG",
+      "inner_sum",
+      "split6",
+      "r6pp_eq",
+      "UN",
+      "sum_UN_refl",
+      "card_UN",
+      "cauchy_step",
+      "sum_UN_rj",
+      "card_fun",
+      "sum_primes_le_theta",
+      "sum_UN_rj_le",
+      "sum_UN_r3_ge",
+      "two_pow_small",
+      "N1_small",
+      "pnt_window",
+      "g_le",
+      "g_sq_le",
+      "lemma21",
+      "lemma21_half",
+      "r6_lower'"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1447Display30.lean",
+    "lines": 610,
+    "imports": [
+      "LeanLab.Linnik.U7205Display34"
+    ],
+    "declarations": [
+      "pow_key",
+      "pow_pair",
+      "Dc",
+      "sv_cons",
+      "sum_cons",
+      "sv_pos",
+      "sv_zero",
+      "Dc_succ_zero",
+      "Dc_zero_succ",
+      "Dc_zero_zero",
+      "inner_le_one",
+      "inner_eq",
+      "Dc_split",
+      "Dc_rec",
+      "Dc_one_one",
+      "Dc_bound",
+      "wv",
+      "Gs_zero",
+      "FG_expand",
+      "conj_eC'",
+      "normSq_sum3",
+      "Gpow_conj",
+      "eC_re_neg",
+      "Off",
+      "Lemma42",
+      "R1h_re",
+      "R1h_zero",
+      "intOn",
+      "block",
+      "SFG_expand",
+      "integral_major_SFG",
+      "R1_nonneg",
+      "R1_le_sum",
+      "Dc_nonneg",
+      "term_le",
+      "term_le00",
+      "wv_mul",
+      "pow_six",
+      "pow_four",
+      "abs_wv_mul",
+      "sum_vv",
+      "sum_abs_vv",
+      "Gw",
+      "sum_Gw",
+      "display30Upper_of",
+      "fin_shift",
+      "sum_fin1",
+      "Off11_eq",
+      "lemma42Lower11_of",
+      "r6_lower5",
+      "Dc_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1458Lemma42.lean",
+    "lines": 453,
+    "imports": [
+      "LeanLab.Linnik.U1447Display30"
+    ],
+    "declarations": [
+      "oddRad",
+      "qRad",
+      "oddRad_le",
+      "qRad_tendsto",
+      "qRad_odd",
+      "qRad_dvd",
+      "C0_nonneg",
+      "singS_nonneg",
+      "Lemma41",
+      "SOffQ",
+      "SOff",
+      "Lemma31_18",
+      "Display20",
+      "Prop32",
+      "re_sub_le",
+      "abs_h_le",
+      "even_h",
+      "compare_of_41",
+      "lemma42_of",
+      "SOff11_eq",
+      "singSum20_of",
+      "r6_lower6",
+      "qRad_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1464Display20.lean",
+    "lines": 642,
+    "imports": [
+      "LeanLab.Linnik.U1458Lemma42"
+    ],
+    "declarations": [
+      "wt",
+      "eps",
+      "three_le_of_mem",
+      "wt_nonneg",
+      "eps_pos",
+      "gp",
+      "sq_prod",
+      "wt_prod",
+      "prod_expand",
+      "singS_expand",
+      "cnt",
+      "cntAll",
+      "T17",
+      "Lhs17",
+      "T17_nonneg",
+      "split_tuple",
+      "soff_split",
+      "cntRes",
+      "cntRes_eq",
+      "cntRes_bounds",
+      "cntRes_tendsto",
+      "sum_fiber",
+      "good",
+      "dvd_iff_good",
+      "cntAll_eq",
+      "Pd",
+      "Pd_nonneg",
+      "cntAll_tendsto",
+      "cnt_le_cntAll",
+      "cntAll_le",
+      "Dc_le",
+      "cnt_tendsto",
+      "R0tail",
+      "Display17",
+      "Display17lim",
+      "display17_lim",
+      "Bdef",
+      "sum_cnt_le_T17",
+      "split_div",
+      "display20_of",
+      "display20_of_17",
+      "r6_lower7",
+      "wt_eps_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1466Display17.lean",
+    "lines": 463,
+    "imports": [
+      "LeanLab.Linnik.U1464Display20"
+    ],
+    "declarations": [
+      "oddPrimesUpTo",
+      "MertensProd",
+      "R0Summable",
+      "FD",
+      "hval",
+      "Pm",
+      "Pm_ne_zero",
+      "cntX",
+      "cntX_le",
+      "FD_eq",
+      "sum_FD_le",
+      "sum_tail_le",
+      "sum_dvd_le",
+      "card_pf_le",
+      "Pm_le",
+      "prod_bound",
+      "one_coord",
+      "T17_eq_FD",
+      "sv_cons",
+      "sum_cons",
+      "natAbs_sub_le",
+      "T17_le",
+      "display17_of",
+      "r6_lower8",
+      "mertens_instance",
+      "R0_term_instance",
+      "cntX_instance"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1469Mertens.lean",
+    "lines": 139,
+    "imports": [
+      "LeanLab.Linnik.U1466Display17",
+      "LeanLab.PNTSieve.MertensProduct"
+    ],
+    "declarations": [
+      "ratio_le_exp",
+      "inv_sub_two_le",
+      "oddPrimes_sub_primes",
+      "oddPrimes_sub_Icc",
+      "sum_inv_sub_two_le",
+      "oddPrimes_prod_le",
+      "mertensProd",
+      "display17_of'",
+      "r6_lower9",
+      "oddPrimes_seven"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U1474R0.lean",
+    "lines": 246,
+    "imports": [
+      "LeanLab.Linnik.U1469Mertens"
+    ],
+    "declarations": [
+      "Q",
+      "Q_ne_zero",
+      "Q_le",
+      "dvd_two_pow_eps",
+      "dvd_Q",
+      "block_le",
+      "jd",
+      "g",
+      "g_summable",
+      "g_nonneg",
+      "tsum_g",
+      "dyadic_le",
+      "partial_le",
+      "r0Summable",
+      "R0_le",
+      "display17",
+      "r6_lower10",
+      "Q_four",
+      "fifteen_dvd_Q"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U7200Minor35.lean",
+    "lines": 159,
+    "imports": [
+      "LeanLab.Linnik.U1434Lemma21"
+    ],
+    "declarations": [
+      "C0",
+      "singS",
+      "pairCount",
+      "Display31",
+      "SingSum20",
+      "Display33",
+      "Display34Lower",
+      "continuous_SG",
+      "integral_split2",
+      "minor35_arith",
+      "minor35_of",
+      "minor35_arith_instance",
+      "r6_lower''"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U7201Lemma14.lean",
+    "lines": 433,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.Gallagher1975Thm2Count",
+      "LeanLab.PNTPort.StrongPNT.Bridge"
+    ],
+    "declarations": [
+      "rk_eq_sum",
+      "sum_rk_eq",
+      "fL_mono",
+      "sum_rk_le",
+      "sum_rk_ge",
+      "PiAsymp",
+      "theta_eventually",
+      "theta_le_pi_mul_log",
+      "pi_split",
+      "piAsymp",
+      "log_div_ge",
+      "lemma14_of_pi",
+      "lemma14",
+      "theorem2_of_theorem1",
+      "sum_rk_pos_example"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U7203Display33.lean",
+    "lines": 379,
+    "imports": [
+      "LeanLab.Linnik.U7200Minor35"
+    ],
+    "declarations": [
+      "r1",
+      "SG_r1",
+      "sq_sum_expand",
+      "log_le_logN",
+      "log_nonneg_p",
+      "diag_block",
+      "offdiag_block",
+      "integral_SG_le",
+      "Lfun_tendsto",
+      "diag_small",
+      "h_conds",
+      "display33",
+      "r6_lower3"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U7204Display4.lean",
+    "lines": 156,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.U7204Theorem1",
+      "LeanLab.Linnik.U1434Lemma21"
+    ],
+    "declarations": [
+      "primesLe",
+      "Sg",
+      "cf",
+      "cf_nonneg",
+      "SG_eq",
+      "integral_SG",
+      "rk_le_cf",
+      "display4",
+      "Display6",
+      "lemma13_of_display6",
+      "theorem1_of_display6",
+      "theorem2_of_display6"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U7204Theorem1.lean",
+    "lines": 245,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.U7201Lemma14"
+    ],
+    "declarations": [
+      "Lemma13",
+      "card_odd",
+      "key_alg",
+      "X_le",
+      "eventually_small",
+      "theorem1_of",
+      "theorem1_of_lemma13",
+      "theorem2_of_lemma13",
+      "lemma13_lhs_pos"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U7205Display34.lean",
+    "lines": 199,
+    "imports": [
+      "LeanLab.Linnik.U7203Display33"
+    ],
+    "declarations": [
+      "R1h",
+      "Lemma42Lower11",
+      "conj_eC",
+      "normG_sq",
+      "majorArcs_sub",
+      "integrableOn_major",
+      "continuous_term",
+      "integral_term",
+      "integral_major_SG",
+      "display34Lower_of",
+      "r6_lower4"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "U7206Display6.lean",
+    "lines": 190,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Linnik.U7204Display4"
+    ],
+    "declarations": [
+      "Lemma12",
+      "Display6Large",
+      "norm_Gs_le",
+      "continuous_Sg",
+      "pointwise",
+      "arc_bound",
+      "log_le_L",
+      "display6_small",
+      "display6_of",
+      "theorem1_of_large",
+      "theorem2_of_large"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "Decomp507a.lean",
+    "lines": 127,
+    "imports": [
+      "LeanLab.Perelli1996.InverseTotient320",
+      "LeanLab.PNTPort.BV.Helpers"
+    ],
+    "declarations": [
+      "weighted_reciprocal_totient_sum",
+      "gcd_weight_swap",
+      "weighted_multiples_le"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Assembly.lean",
+    "lines": 1492,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Window",
+      "LeanLab.Linnik.ExplicitFormula.LeftHalf",
+      "LeanLab.Linnik.ExplicitFormula.Primes",
+      "LeanLab.Linnik.ExplicitFormula.Page",
+      "LeanLab.Linnik.ExplicitFormula.DensityLayer",
+      "LeanLab.Linnik.Decomp482a",
+      "LeanLab.PNTPort.Gallagher.Basic"
+    ],
+    "declarations": [
+      "asm_one_le_mult",
+      "asm_zerosTo_iff",
+      "asmZ",
+      "asm_re_bounds",
+      "asm_weight_nonneg",
+      "asmZ_nonneg",
+      "asm_rpow_three_halves",
+      "asm_piece",
+      "asm_dyadic",
+      "asm_window_corr_tail",
+      "window_corr_bound",
+      "win_eq_Ioc",
+      "asm_corrCoef_zero",
+      "asm_mem_zerosTo",
+      "asm_card_prim_le",
+      "asm_win_sq_sum_le",
+      "asm_norm_factor_le",
+      "asm_mean_core",
+      "asm_zsum_split",
+      "mean_decay_nonexceptional",
+      "exists_max_real_zero",
+      "mean_decay_exceptional_max"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Cesaro.lean",
+    "lines": 118,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs"
+    ],
+    "declarations": [
+      "Jchi_eq",
+      "norm_bCoef_le",
+      "first_difference",
+      "first_difference_err_le"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Defs.lean",
+    "lines": 78,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "wK",
+      "cesaroChi",
+      "Fchi",
+      "Zall",
+      "mult",
+      "zterm",
+      "bCoef",
+      "Jchi",
+      "Dz",
+      "corrCoef",
+      "zerosTo",
+      "wK_of_le",
+      "wK_of_gt"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/DensityLayer.lean",
+    "lines": 876,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs",
+      "LeanLab.Linnik.Decomp1532b",
+      "LeanLab.PNTPort.DirichletZF.Exceptional"
+    ],
+    "declarations": [
+      "ZeroSetHyp",
+      "zsumP",
+      "gap_all",
+      "mult_local",
+      "dl_re_lt_one_of_zero",
+      "zeros_finite",
+      "distinct_count",
+      "weighted_count",
+      "layer_point",
+      "series_bound",
+      "zero_sum_high",
+      "card_prim_le",
+      "mult_total_le",
+      "low_asymp",
+      "zero_sum_low",
+      "zsum_split",
+      "zero_sum_density_layer"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Final.lean",
+    "lines": 448,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Kernel",
+      "LeanLab.Linnik.ExplicitFormula.Residues",
+      "LeanLab.Linnik.ExplicitFormula.Heights",
+      "LeanLab.Linnik.ExplicitFormula.ZeroSum"
+    ],
+    "declarations": [
+      "efVInt",
+      "efHInt",
+      "ef_rect_decomp",
+      "efXb",
+      "ef_rpow_le_Xb",
+      "ef_Xb_pos",
+      "ef_norm_Fchi",
+      "ef_norm_F_horiz_le",
+      "ef_norm_HInt_le",
+      "ef_continuous_F_line",
+      "ef_norm_left_ge",
+      "ef_log_le_sqrt",
+      "ef_one_le_log_q",
+      "ef_log_qt_le",
+      "ef_left_majorant",
+      "ef_integrable_left",
+      "ef_logDeriv_right_le",
+      "ef_integrable_right",
+      "ef_log_sq_le",
+      "explicit_formula_integral",
+      "left_line_bound",
+      "explicit_formula_primitive"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Heights.lean",
+    "lines": 533,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.LeftHalf",
+      "LeanLab.PNTPort.ExplicitPsi1.Edges",
+      "LeanLab.PNTPort.ZetaZeros.GoodHeight",
+      "LeanLab.HardyLittlewood1923.U1503LogDeriv",
+      "LeanLab.HardyLittlewood1923.U1482ZeroCount"
+    ],
+    "declarations": [
+      "Znear",
+      "znear_count",
+      "good_heights_right",
+      "gf_ne_zero_of_im_ne",
+      "logDeriv_fe_strip",
+      "logDeriv_gf_strip",
+      "log_tau_le",
+      "good_heights"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Kernel.lean",
+    "lines": 291,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs"
+    ],
+    "declarations": [
+      "wK_eq",
+      "wK_continuous",
+      "mellin_wK_eq_interval",
+      "mellin_wK",
+      "wK_mellinConvergent",
+      "norm_kernelK_le",
+      "KK",
+      "KK_continuous",
+      "KK_integrable",
+      "kernel_perron",
+      "lseries_chi_vonMangoldt",
+      "cpow_div_eq'",
+      "perron_coeff",
+      "perron_chi"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/LeftHalf.lean",
+    "lines": 546,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs",
+      "LeanLab.PNTPort.ZetaZeros.Digamma2"
+    ],
+    "declarations": [
+      "gf_ne_zero_of_re_pos",
+      "completed_eq_L_mul_gf",
+      "ne_one_of_primitive",
+      "rootNumber_ne_zero'",
+      "completed_ne_zero_of_re_nonpos",
+      "gf_ne_zero_left",
+      "zero_left_strip",
+      "mult_zero_le_one",
+      "no_zero_left_line",
+      "gf_diff_of_ne",
+      "logDeriv_fe_left",
+      "logDeriv_L_three_half_le",
+      "logDeriv_Gamma\u211d",
+      "digamma_conj'",
+      "not_pole_of_near",
+      "digamma_bdd_segment",
+      "digamma_line_bound",
+      "digamma_vert_bound",
+      "logDeriv_gf_le",
+      "logDeriv_left_line"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Page.lean",
+    "lines": 211,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs",
+      "LeanLab.PNTPort.DirichletZF.RealZero"
+    ],
+    "declarations": [
+      "page_log_Bt_le",
+      "page_zeta_box",
+      "page_order_shift",
+      "page_one_zero_nonprincipal",
+      "page_one_zero"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Primes.lean",
+    "lines": 260,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs"
+    ],
+    "declarations": [
+      "abel_window_le",
+      "prime_power_count_le",
+      "one_div_log_le",
+      "corrCoef_sub_eq",
+      "norm_err_le",
+      "corrCoef_window_le",
+      "norm_corrCoef_le"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Residues.lean",
+    "lines": 337,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs",
+      "LeanLab.PNTPort.StrongPNT.ResidueCalcOnRectangles",
+      "LeanLab.PNTPort.ExplicitPsi1.Merom"
+    ],
+    "declarations": [
+      "LFunction_modOne_fun",
+      "analyticAt_LFunction",
+      "ne_one_of_isPrimitive",
+      "LFunction_two_ne_zero",
+      "analyticOrderAt_LFunction_ne_top",
+      "order_LFunction_of_ne_one",
+      "meromorphicAt_LFunction",
+      "analyticAt_kernel2",
+      "ne_neg_one_of_re",
+      "ne_neg_two_of_re",
+      "residue_Fchi_of_ne_one",
+      "residue_Fchi_zero",
+      "residue_Fchi_one",
+      "zeros_compact_finite_of_ne_one",
+      "re_lt_one_of_zero",
+      "zeros_rect_finite",
+      "order_LFunction_ne_top",
+      "meromorphicAt_Fchi",
+      "order_Fchi_ge",
+      "analyticAt_Fchi",
+      "residue_Fchi_at_one",
+      "border_cases2",
+      "mem_rect2",
+      "rect_explicit_chi"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/Window.lean",
+    "lines": 459,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Final",
+      "LeanLab.Linnik.ExplicitFormula.Cesaro",
+      "LeanLab.Linnik.ExplicitFormula.ZeroTerm"
+    ],
+    "declarations": [
+      "one_le_mult_of_mem_Zall",
+      "sq_mul_zterm",
+      "Dz_one",
+      "norm_tsum_sub_sum_le",
+      "efErr",
+      "Jchi_decomp",
+      "summable_mult_Dz",
+      "sharp_window_le",
+      "D2_le",
+      "zero_part_le",
+      "tail_part_le",
+      "point_err_le",
+      "window_bCoef_bound"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/ZeroSum.lean",
+    "lines": 309,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.LeftHalf",
+      "LeanLab.HardyLittlewood1923.U1482ZeroCount"
+    ],
+    "declarations": [
+      "Zall_nt_or_zero",
+      "zero_mult_unit_window",
+      "zero_mult_up_to",
+      "sum_jtwo_eq",
+      "sum_jtwo_le",
+      "im_sq_le_norm_mul",
+      "dyadic_index",
+      "zero_sum_tail",
+      "norm_mul_ge_of_re",
+      "log_three_q_le",
+      "zero_sum_total",
+      "rpow_le_sum_of_mem",
+      "summable_zterm"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "ExplicitFormula/ZeroTerm.lean",
+    "lines": 285,
+    "imports": [
+      "LeanLab.Linnik.ExplicitFormula.Defs"
+    ],
+    "declarations": [
+      "D1z",
+      "D1z_hasDerivAt",
+      "Dz_hasDerivAt",
+      "D1z_diff_le",
+      "double_diff_le",
+      "norm_Dz_le",
+      "double_diff_le'",
+      "ofReal_ne_neg_one",
+      "double_diff_step",
+      "double_diff_tele",
+      "err_sum_le",
+      "double_diff_main"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Basic13.lean",
+    "lines": 191,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Defs"
+    ],
+    "declarations": [
+      "integral_norm_mul_le_sqrt",
+      "arc_integral_le_window",
+      "sqrt_integral_add_le",
+      "pair_sum_schwarz",
+      "principal_amp_norm",
+      "correctedEnergy_zero_eq",
+      "one_mem_family"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Defs.lean",
+    "lines": 82,
+    "imports": [
+      "LeanLab.Linnik.Decomp482b"
+    ],
+    "declarations": [
+      "family",
+      "one",
+      "induced",
+      "cn",
+      "tau",
+      "pairCoeff",
+      "arcIntegral",
+      "pairModuli",
+      "pairSum",
+      "pairWeight",
+      "ampNorm",
+      "remNorm",
+      "singTrunc"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Display11.lean",
+    "lines": 237,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13",
+      "LeanLab.Linnik.MajorArcEnergy.Display9"
+    ],
+    "declarations": [
+      "induced_one",
+      "pairModuli_one",
+      "cn_one",
+      "ramanujanSum_one",
+      "Jn_nonneg",
+      "pairCoeff_one",
+      "pairSum_one",
+      "pairSum_one_sub",
+      "J0_le_two",
+      "three_le_rpow",
+      "one_le_log_of_three_le",
+      "norm_summand",
+      "principal_pair_sum_of_leaves"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Display13.lean",
+    "lines": 326,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13",
+      "LeanLab.Linnik.MajorArcEnergy.Basic13",
+      "LeanLab.Linnik.MajorArcEnergy.Display11",
+      "LeanLab.Linnik.MajorArcEnergy.Display7",
+      "LeanLab.Linnik.MajorArcEnergy.Display3"
+    ],
+    "declarations": [
+      "isPrimitive_of_mem_family",
+      "pairSum_le_of_mem_family",
+      "norm_double_sum_le",
+      "double_sum_split",
+      "one_le_totientWeight",
+      "one_le_divisors_card",
+      "display13_algebra",
+      "large_N_facts",
+      "major_arc_energy_zero_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Display1517.lean",
+    "lines": 510,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Display13",
+      "LeanLab.Linnik.MajorArcEnergy.Leaves1517",
+      "LeanLab.Linnik.MajorArcEnergy.Display17"
+    ],
+    "declarations": [
+      "display1517_algebra",
+      "exceptionalMain_norm_eventually",
+      "exc_ampNorm_le",
+      "pairWeight_nonneg",
+      "double_sum_split_two",
+      "zeta_ne_zero_near_one",
+      "correctedEnergy_exc_eq",
+      "major_arc_energy_exceptional_split"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Display17.lean",
+    "lines": 366,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Display7",
+      "LeanLab.Linnik.MajorArcEnergy.Leaves1517"
+    ],
+    "declarations": [
+      "induced_one",
+      "excFactor",
+      "excFactor_nonneg",
+      "exc_term_le",
+      "weight_le_exc",
+      "totient_mul_le_mul",
+      "excFactor_mul_le",
+      "weight_le_final",
+      "term_x_one",
+      "term_one_x",
+      "term_x_x",
+      "exceptional_weight_bound_of_cited"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Display3.lean",
+    "lines": 681,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13"
+    ],
+    "declarations": [
+      "primitiveCharacter_apply_of_isPrimitive",
+      "primeAmplitude_induced",
+      "sum_family_induced",
+      "gaussSum_eq_tau",
+      "sum_units_eq_cn",
+      "arcMain",
+      "continuous_eL",
+      "continuous_arcMain",
+      "normSq_arcMain_expand",
+      "sum_units_normSq_arcMain",
+      "sum_pairSum_regroup",
+      "pair_q_part_eq",
+      "reduced_frac_inj",
+      "integral_Icc_translate",
+      "integral_majorArcs_eq",
+      "abs_normSq_sub_le",
+      "norm_Sg_le_primeCounting",
+      "arc_replacement_bound",
+      "error_sum_numeric",
+      "major_arc_pair_expansion_of_steps"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Display7.lean",
+    "lines": 693,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13"
+    ],
+    "declarations": [
+      "induced_eq_changeLevel",
+      "conductor_induced",
+      "conductor_induced_inv",
+      "conductor_pair_dvd",
+      "tau_bound",
+      "pair_term_le",
+      "split_q",
+      "pairFactor",
+      "eulerTerm",
+      "pair_term_le_split",
+      "pairFactor_nonneg",
+      "eulerTerm_nonneg",
+      "pairWeight_le_split",
+      "tele_le",
+      "totient_squarefree_real",
+      "primeFactors_div_gcd",
+      "eulerTerm_eq_prod",
+      "euler_sum_le_prod",
+      "euler_prod_le",
+      "prime_prod_cube_le",
+      "cube_le_totient_pow",
+      "mul_sqrt_le_totient_sq",
+      "ratio_eq_prod",
+      "pairFactor_mul_le",
+      "pair_weight_bound_of_cited"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Display9.lean",
+    "lines": 518,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13",
+      "LeanLab.Linnik.MajorArcEnergy.Basic13"
+    ],
+    "declarations": [
+      "abel_antitone_bound",
+      "principalMain_upper_part",
+      "principalMain_split_bound",
+      "dist0_eq_abs",
+      "principalMain_sq_le",
+      "integral_e_int_half",
+      "principalMain_full_period",
+      "integral_tail_bound",
+      "principalMain_window_main",
+      "sqrt_le_qQ",
+      "principal_arc_integral_of_steps"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Leaves13.lean",
+    "lines": 352,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Defs",
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13Major",
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13Principal",
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13PairWeight"
+    ],
+    "declarations": [
+      "major_arc_pair_expansion",
+      "induced_cn_bound",
+      "pair_weight_bound",
+      "principal_arc_integral",
+      "singular_tail_cited",
+      "singular_weighted_sums_cited",
+      "l13_induced_one",
+      "l13_pairModuli_one",
+      "l13_cn_one",
+      "l13_ramanujanSum_one",
+      "l13_Jn_nonneg",
+      "l13_pairCoeff_one",
+      "l13_pairSum_one",
+      "l13_pairSum_one_sub",
+      "l13_J0_le_two",
+      "l13_three_le_rpow",
+      "l13_one_le_log_of_three_le",
+      "l13_norm_summand",
+      "principal_pair_sum_of_l13_leaves",
+      "principal_pair_sum"
+    ],
+    "sorry": 3
+  },
+  {
+    "file": "MajorArcEnergy/Leaves13Major.lean",
+    "lines": 668,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Defs"
+    ],
+    "declarations": [
+      "primitiveCharacter_apply_of_isPrimitive",
+      "primeAmplitude_induced",
+      "sum_family_induced",
+      "gaussSum_eq_tau",
+      "sum_units_eq_cn",
+      "arcMain",
+      "continuous_eL",
+      "continuous_arcMain",
+      "normSq_arcMain_expand",
+      "sum_units_normSq_arcMain",
+      "sum_pairSum_regroup",
+      "pair_q_part_eq",
+      "reduced_frac_inj",
+      "integral_Icc_translate",
+      "integral_majorArcs_eq",
+      "abs_normSq_sub_le",
+      "norm_Sg_le_primeCounting",
+      "arc_replacement_bound",
+      "error_sum_numeric",
+      "major_arc_pair_expansion_of_steps"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Leaves13PairWeight.lean",
+    "lines": 705,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Defs"
+    ],
+    "declarations": [
+      "induced_eq_changeLevel",
+      "conductor_induced",
+      "conductor_induced_inv",
+      "conductor_pair_dvd",
+      "tau_bound",
+      "pair_term_le",
+      "split_q",
+      "pairFactor",
+      "eulerTerm",
+      "pair_term_le_split",
+      "pairFactor_nonneg",
+      "eulerTerm_nonneg",
+      "pairWeight_le_split",
+      "tele_le",
+      "totient_squarefree_real",
+      "primeFactors_div_gcd",
+      "eulerTerm_eq_prod",
+      "euler_sum_le_prod",
+      "euler_prod_le",
+      "prime_prod_cube_le",
+      "cube_le_totient_pow",
+      "mul_sqrt_le_totient_sq",
+      "ratio_eq_prod",
+      "pairFactor_mul_le",
+      "pair_weight_bound_aux"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Leaves13Principal.lean",
+    "lines": 508,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Defs",
+      "LeanLab.Linnik.MajorArcEnergy.Basic13"
+    ],
+    "declarations": [
+      "abel_antitone_bound",
+      "principalMain_upper_part",
+      "principalMain_split_bound",
+      "dist0_eq_abs",
+      "principalMain_sq_le",
+      "integral_e_int_half",
+      "principalMain_full_period",
+      "integral_tail_bound",
+      "principalMain_window_main",
+      "sqrt_le_qQ",
+      "principal_arc_integral_of_steps"
+    ],
+    "sorry": 0
+  },
+  {
+    "file": "MajorArcEnergy/Leaves1517.lean",
+    "lines": 26,
+    "imports": [
+      "LeanLab.Linnik.MajorArcEnergy.Leaves13"
+    ],
+    "declarations": [
+      "exceptional_weight_bound"
+    ],
+    "sorry": 1
+  }
+]
