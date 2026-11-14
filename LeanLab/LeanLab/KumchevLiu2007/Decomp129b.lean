@@ -50,7 +50,7 @@ theorem truncation_input (A ε : ℝ) (hA : 2 ≤ A) (hε : 0 < ε) :
       (∑ n ∈ intervalNumbers x y,
         ‖(series2 n P - product2 n Q) - tail2 n P (y ^ (1 / 3 : ℝ)) Q‖ ^ 2) ≤
           C * (y / Real.log x ^ A) := by
-  sorry
+  exact Task506aTask342e.truncation_input A ε hA hε
 
 /-- LEAF. Pages 14 and 15 display 51. Expand the tail square into diagonal
 and off diagonal terms. Display 47 bounds the diagonal. The orthogonality
@@ -62,7 +62,7 @@ theorem tail_mean_square_input (A ε : ℝ) (hA : 2 ≤ A) (hε : 0 < ε) :
       Q ≤ Real.exp (Real.log x ^ (1 - ε)) →
       (∑ n ∈ intervalNumbers x y, ‖tail2 n P (y ^ (1 / 3 : ℝ)) Q‖ ^ 2) ≤
         C * (y / P * Real.log x + y / Real.log x ^ A) := by
-  sorry
+  exact Task506aTask342c.tail_mean_square_input A ε hA hε
 
 /-- LEAF. Page 14 after display 50. The square of a sum is at most twice
 the sum of the squares, summed over a finite set. -/

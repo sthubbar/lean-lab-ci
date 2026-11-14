@@ -1,5 +1,7 @@
 import LeanLab.BhowmikGrimmelt2026.Statements
 import LeanLab.BhowmikGrimmelt2026.DecompJ249
+import LeanLab.BhowmikGrimmelt2026.Decomp384d
+import LeanLab.BhowmikGrimmelt2026.Decomp508a
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Calculus.MeanValue
 
@@ -320,7 +322,20 @@ root, a far stronger claim than the square root prime power budget of P0029 page
 exponent is now the real one half, written as in `prime_power_error_three_halves384` of Decomp384d. -/
 theorem r2_prime_power_bound (N : ℕ) (hN : Even N) (h_not_G : ¬ IsGoldbachSum N) :
   r2 N ≤ 3/2 * (N : ℝ) ^ ((1 : ℝ) / 2) * (Real.log (N : ℝ))^3 := by
-  sorry
+  by_cases h16 : 16 ≤ N
+  · simpa only [primeR2_zero_of_not_goldbach384 N h_not_G, sub_zero] using
+      prime_power_error_three_halves384 N h16
+  · by_cases h2 : N ≤ 2
+    · rw [r2_small_zero508 h2]
+      by_cases h0 : N = 0
+      · simp [h0]
+      · have hlog : 0 ≤ Real.log (N : ℝ) := Real.log_nonneg
+          (by exact_mod_cast Nat.one_le_iff_ne_zero.mpr h0)
+        positivity
+    · have h4 : 4 ≤ N := by
+        obtain ⟨k, hk⟩ := hN
+        omega
+      exact False.elim (h_not_G (small_even_goldbach508 hN h4 (by omega)))
 
 -- LEAF 3: Asymptotic inequality
 /-- LEAF. Page 13. Size comparison for large N.

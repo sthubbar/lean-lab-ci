@@ -3,7 +3,7 @@ Transport of prime components to a common multiple of the source level.
 Source: Pintz Part I pages 19 and 20, displays 7.9 to 7.14.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BhowmikGrimmelt2026.Decomp247a
+import LeanLab.BhowmikGrimmelt2026.TotientRatio247
 
 namespace LeanLab.BhowmikGrimmelt2026
 

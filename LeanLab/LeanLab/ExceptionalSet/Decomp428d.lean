@@ -33,7 +33,7 @@ theorem leaf_far_phase (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
           ∀ t : ℝ, F γ N ^ (3 * δ - 1) < |t| → |t| ≤ 2 * F γ N ^ (6 * δ) →
             ‖phaseSum γ N t‖ ≤ C * N * calE γ κ N ^ (-(3 / 2 : ℝ)) := by
-  sorry
+  exact UpJ200.Decomp467a.far_phase_of_karacuba U1539.lemma10 γ h1 h2
 
 /-- LEAF. P0082 page 366 first contribution to display 26. A bound V
 for the distant phase sum leaves the product of two weighted energies.
@@ -47,7 +47,7 @@ theorem leaf_far_localization (γ δ κ : ℝ) (N : ℕ) (V : ℝ) (hV : 0 ≤ V
       (∫ α in truncatedDomain (F γ N ^ (6 * δ)) (F γ N),
         ‖Sp (F γ N ^ (6 * δ)) (F γ N) α ^ 2 *
           (Kfun (calE γ κ N ^ (-(1 / 8 : ℝ))) α : ℂ)‖) ^ 2 := by
-  sorry
+  exact UpJ200.Localization446.leaf_far_localization_supplied γ δ κ N V hV hΔ hphase
 
 /-- Assembly. P0082 page 366 display 26. This is the exact existing
 Decomp404e.leaf_far_moment statement. The smaller phase and integral

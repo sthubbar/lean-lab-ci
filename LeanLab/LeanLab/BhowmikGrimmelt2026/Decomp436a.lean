@@ -5,7 +5,6 @@ The residue fiber proof is Montgomery Vaughan 1975 pages 359 and 360.
 Existing statements remain sealed.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BhowmikGrimmelt2026.Decomp247a
 import LeanLab.BhowmikGrimmelt2026.TotientRatio247
 
 namespace LeanLab.BhowmikGrimmelt2026

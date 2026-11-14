@@ -19,6 +19,8 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Decomp1534a
 import LeanLab.KumchevLiu2007.Decomp1534c
+import LeanLab.KumchevLiu2007.Decomp506a
+import LeanLab.KumchevLiu2007.Decomp506b
 
 namespace LeanLab.KumchevLiu2007.Task129L
 
@@ -49,7 +51,7 @@ theorem sifted_sieve_input (A B δ ε : ℝ) (hA : 0 < A) (hB : 0 < B) (hδ : 0 
       (1 - if p ∣ n then 0 else
       (((Finset.range p).filter (fun x => x ^ 2 % p = n % p)).card : ℝ) / (Nat.totient p : ℝ)) +
           (X ^ (7 / 12 + ε / 2)) ^ (1 / 2 : ℝ) * Real.log X ^ (-A)) := by
-  sorry
+  exact Task506b.sifted_sieve_bound A B δ ε hA hB hδ hδ1 hε hε1
 
 /-- LEAF: Lemma 3.8 on page 14, display 49, for j = 2, a local twin of
 Task129b.lemma38_two with the partial product of page 13 display 45 in place of
@@ -65,7 +67,7 @@ theorem lemma38_two_local (A ε : ℝ) (hA : 2 ≤ A) (hε : 0 < ε) :
       Q ≤ Real.exp (Real.log x ^ (1 - ε)) →
       (∑ n ∈ Finset.Ioc ⌊x⌋₊ ⌊x + y⌋₊, ‖(∑ q ∈ Finset.Icc 1 ⌊(P)⌋₊, U1534.A2 n q) - ∏ p ∈ (Finset.range (⌊(Q)⌋₊ + 1)).filter Nat.Prime, (1 + U1534.A2 n p)‖ ^ 2) ≤
         C * (y / P * Real.log x + y / Real.log x ^ A) := by
-  sorry
+  exact Task506aTask342e.lemma38_two_proved A ε hA hε
 
 /-- LEAF: Proposition 2 on page 16 is stated only for H at most Y to the
 1 - epsilon, while Theorem 1 on page 2 allows H up to X. This is the remaining

@@ -1,3 +1,4 @@
+import LeanLab.ExceptionalSet.UpJ200.Decomp509a
 import LeanLab.ExceptionalSet.Decomp371a
 import LeanLab.ExceptionalSet.Decomp404b
 
@@ -25,30 +26,7 @@ theorem major_periodic (P X : ℝ) :
     exact Iff.of_eq (Decomp371a.majorArcs_periodic P X α)
   simp only [Set.indicator_apply, hmem, Decomp371a.Sp_periodic P X α]
 
-/-- P0082 page 357 display 8. The major arc indicator times S squared
-is integrable on one period. -/
-theorem major_intervalIntegrable (P X : ℝ) :
-    IntervalIntegrable ((majorArcs P X).indicator (fun α => Sp P X α ^ 2)) volume 0 1 := by
-  have hc : Continuous (fun α : ℝ => Sp P X α ^ 2) := by
-    unfold Sp eC
-    fun_prop
-  exact ⟨(hc.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self).indicator
-    (PrimeKernel264.measurableSet_majorArcs P X),
-    by simp⟩
 
-/-- P0082 page 357 display 7. The Fourier coefficient of the indicated
-prime square is precisely R1 with the same integer frequency. -/
-theorem major_hcheck (P X : ℝ) (m : ℤ) :
-    hcheck ((majorArcs P X).indicator (fun α => Sp P X α ^ 2)) m = R1 P X m := by
-  classical
-  unfold hcheck R1
-  rw [intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)]
-  have he : (fun α : ℝ => (majorArcs P X).indicator (fun α => Sp P X α ^ 2) α *
-      eC (-(α * m))) = (majorArcs P X).indicator (fun α => Sp P X α ^ 2 * eC (-(α * m))) := by
-    ext α
-    by_cases hα : α ∈ majorArcs P X <;> simp [hα]
-  rw [he, ← integral_Icc_eq_integral_Ioc,
-    setIntegral_indicator (PrimeKernel264.measurableSet_majorArcs P X), Set.inter_comm]
 
 /-- P0082 page 357 display 8. The weighted major integral is the sum
 of its two adjacent integer coefficients times the explicit trapezoid weights. -/

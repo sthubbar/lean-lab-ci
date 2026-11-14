@@ -15,6 +15,7 @@ import LeanLab.BhowmikGrimmelt2026.Statements
 import LeanLab.BhowmikGrimmelt2026.MeanSquareCore150
 import LeanLab.BhowmikGrimmelt2026.Coefficients150
 import LeanLab.BhowmikGrimmelt2026.Decomp502a
+import LeanLab.BhowmikGrimmelt2026.Decomp508a
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -28,8 +29,10 @@ the survey: it is the standard consequence of the truncated explicit formula for
 `ZeroBound Θ`.  The survey's reference for Theorem 3.1 is its [10], Hardy and Littlewood 1923,
 Partitio Numerorum III, Acta Math. 44.  Architect pass U-1662 checked it numerically at
 `X = 400, 1600, 3600`, max `|S - V| / X^{3/4}` about 0.5 to 0.65.
-OPEN: psi_zero_expansion504 supplies the uniform sharp character formula as a leaf.
-major_arc_partial_summation504 retains the oscillatory zero mode estimate and assembly. -/
+OPEN: primitive_psi_zero_expansion508 supplies the primitive sharp contour input.
+oscillatory_zero_modes508 retains the uniform sharp finite zero mode estimate.
+sharp_rational_arc508 assembles that input with the proved sharp residual budget.
+The general character transfer and Dirichlet arc assembly have proved elementary steps. -/
 theorem major_arc_uniform150 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
       ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε) := by

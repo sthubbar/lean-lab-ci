@@ -1,0 +1,27 @@
+[
+  {
+    "pid": 6377,
+    "comm": "lean",
+    "args": "/workspace/.leanlab-tools/elan/toolchains/leanprover--lean4---v4.35.0/bin/lean /workspace/lean-lab/LeanLab/LeanLab/Dudek2014/SmallRange.lean -o /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/Dudek2014/SmallRange.olean -i /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/Dudek2014/SmallRange.ilean -c /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/Dudek2014/SmallRange.c --setup /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/Dudek2014/SmallRange.setup.json --json"
+  },
+  {
+    "pid": 6645,
+    "comm": "lean",
+    "args": "/workspace/.leanlab-tools/elan/toolchains/leanprover--lean4---v4.35.0/bin/lean /workspace/lean-lab/LeanLab/LeanLab/PNTPort/StrongPNT/StrongPNT.lean -o /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/PNTPort/StrongPNT/StrongPNT.olean -i /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/PNTPort/StrongPNT/StrongPNT.ilean -c /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/PNTPort/StrongPNT/StrongPNT.c --setup /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/PNTPort/StrongPNT/StrongPNT.setup.json --json"
+  },
+  {
+    "pid": 6722,
+    "comm": "lean",
+    "args": "/workspace/.leanlab-tools/elan/toolchains/leanprover--lean4---v4.35.0/bin/lean /workspace/lean-lab/LeanLab/LeanLab/KadiriLumley2014/Corollary.lean -o /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/KadiriLumley2014/Corollary.olean -i /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/KadiriLumley2014/Corollary.ilean -c /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/KadiriLumley2014/Corollary.c --setup /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/KadiriLumley2014/Corollary.setup.json --json"
+  },
+  {
+    "pid": 6735,
+    "comm": "lean",
+    "args": "/workspace/.leanlab-tools/elan/toolchains/leanprover--lean4---v4.35.0/bin/lean /workspace/lean-lab/LeanLab/LeanLab/KadiriLumley2014/PsiFinite301.lean -o /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/KadiriLumley2014/PsiFinite301.olean -i /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/KadiriLumley2014/PsiFinite301.ilean -c /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/KadiriLumley2014/PsiFinite301.c --setup /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/KadiriLumley2014/PsiFinite301.setup.json --json"
+  },
+  {
+    "pid": 6739,
+    "comm": "lean",
+    "args": "/workspace/.leanlab-tools/elan/toolchains/leanprover--lean4---v4.35.0/bin/lean /workspace/lean-lab/LeanLab/LeanLab/HelfgottMajor/Decomp269b.lean -o /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/HelfgottMajor/Decomp269b.olean -i /workspace/lean-lab/LeanLab/.lake/build/lib/lean/LeanLab/HelfgottMajor/Decomp269b.ilean -c /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/HelfgottMajor/Decomp269b.c --setup /workspace/lean-lab/LeanLab/.lake/build/ir/LeanLab/HelfgottMajor/Decomp269b.setup.json --json"
+  }
+]

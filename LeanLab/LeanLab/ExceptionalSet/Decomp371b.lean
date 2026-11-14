@@ -29,7 +29,7 @@ theorem leaf_tail (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
     ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ n : ℕ,
       ‖minorInt γ δ κ N n - truncatedMinor γ δ κ N n‖ ≤
         F γ N * calE γ κ N ^ (-(1 / 3 : ℝ)) / 2 := by
-  sorry
+  exact DecompJ200.leaf_minor_tail γ h1 h2 δ κ hδ hκ
 
 /-- LEAF. P0082 pages 365 to 366 displays 25 to 27. The truncated second moment
 is O of N X squared log X squared over calE. This asks for the weaker exponent
@@ -41,7 +41,7 @@ theorem leaf_truncated_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
           (∑ n ∈ window γ N, ‖truncatedMinor γ δ κ N n‖ ^ 2) ≤
             B * N * F γ N ^ 2 * calE γ κ N ^ (-(3 / 4 : ℝ)) := by
-  sorry
+  exact DecompJ200.leaf_minor_truncated_moment γ h1 h2
 
 /-- The finite Chebyshev step of P0082 page 366 after display 27.
 A uniform tail bound and a truncated second moment control the bad count. -/

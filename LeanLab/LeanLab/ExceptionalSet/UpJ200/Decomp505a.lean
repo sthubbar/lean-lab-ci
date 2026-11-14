@@ -1,3 +1,4 @@
+import LeanLab.ExceptionalSet.UpJ200.Decomp509a
 import LeanLab.ExceptionalSet.UpJ200.Decomp371a
 
 /-!
@@ -150,7 +151,13 @@ theorem leaf_even_parity_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Ioc (N / 2) N).filter (fun n : ℕ => Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, h⟩ := Decomp509a.parity_moment_from_shifted γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, h⟩ := h δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨B, hB, N₀, h⟩ := h κ hκ hκsmall
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  simpa only [add_zero, sub_zero] using h N hN 0 (Or.inl rfl)
 
 /-- LEAF: P0082 page367 display30 and page366 display28.
 On the odd floor parity the floor coefficient itself is odd.
@@ -162,7 +169,14 @@ theorem leaf_odd_parity_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Ioc (N / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, h⟩ := Decomp509a.parity_moment_from_shifted γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, h⟩ := h δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨B, hB, N₀, h⟩ := h κ hκ hκsmall
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  simpa only [even_add_one, Int.not_even_iff_odd, sub_add_cancel] using
+    h N hN 1 (Or.inr rfl)
 
 /-- P0082 page367 after displays29 and30.
 The odd moment on the floor window is CONDITIONAL ON the two parity leaves. -/

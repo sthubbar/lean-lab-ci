@@ -8,6 +8,7 @@ import LeanLab.KumchevLiu2007.Decomp1534c
 import LeanLab.KumchevLiu2007.Decomp129a
 import LeanLab.KumchevLiu2007.Decomp129s
 import LeanLab.KumchevLiu2007.Leaves129
+import LeanLab.KumchevLiu2007.Decomp516a
 
 namespace LeanLab.KumchevLiu2007.Task129
 
@@ -62,6 +63,818 @@ def kumchev_liu_thm1 : Prop :=
             main2 X (windowY X ε) (Real.log X ^ B) n‖) X H : ℝ) ≤
           C * H / Real.log X ^ A
 
+/-- Page 2 displays 4 to 6. No window pair can reach n at least X + Y. -/
+theorem windowPairs_empty_above (X Y : ℝ) (hY : 0 ≤ Y) (n : ℕ)
+    (hn : X + Y ≤ (n : ℝ)) : windowPairs X Y n = ∅ := by
+  apply Finset.eq_empty_iff_forall_notMem.mpr
+  intro v hv
+  obtain ⟨_, hlo, hhi, hqlo, hqhi, heq⟩ := Finset.mem_filter.mp hv
+  have hq2 : (v.2 : ℝ) ^ 2 ≤ Y := by
+    have hsq := (sq_le_sq₀ (Nat.cast_nonneg v.2) (Real.sqrt_nonneg Y)).mpr hqhi.le
+    nlinarith only [hsq, Real.sq_sqrt hY]
+  have hcast : (v.1 : ℝ) + (v.2 : ℝ)^2 = (n : ℝ) := by exact_mod_cast heq
+  linarith
+
+/-- Page 2 displays 4 to 6 and page 8 display 35. The counts and main term
+vanish beyond the support of the fixed representation windows. -/
+theorem counts_vanish_above (X Y P : ℝ) (hY : 0 ≤ Y) (n : ℕ) (hn : X + Y ≤ (n : ℝ)) :
+    primeCount X Y n = 0 ∧ roughCount X Y P n = 0 ∧
+      main2 X Y P n = 0 ∧ residualCount X Y P n = 0 := by
+  simp [primeCount, roughCount, main2, integerMain, residualCount,
+    windowPairs_empty_above X Y hY n hn]
+
+/-! ### Split of `circle_input`, route burst 2026-11-12.
+Pieces of page 16, Section 4, displays 53 to 55, together with the inputs
+eq. 48 and Lemma 3.8 eq. 49 on page 13. AI wrote the Lean code. Goldbach is open. -/
+
+/-- The weight f2 of page 15, Section 4, before display 52:
+f2 of u is 1 over log u plus the integral from z0 to the square root of u of
+dt over t log t log of u over t. -/
+noncomputable def f2Weight (z0 u : ℝ) : ℝ :=
+  1 / Real.log u + ∫ t in z0..Real.sqrt u, 1 / (t * Real.log t * Real.log (u / t))
+
+/-- The singular integral I of n, varpi, lambda0, page 7 display 27, with
+f1 of u equal to 1 over log u, page 15, and f2 as above with z0 from display 34. -/
+noncomputable def singInt (X Y P : ℝ) (n : ℕ) : ℝ :=
+  ∑ v ∈ windowPairs X Y n,
+    (1 / Real.log (v.1 : ℝ)) * f2Weight (Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ)) (v.2 : ℝ)
+
+/-- The error in display 53 of page 16: R of n, varpi, lambda0 minus S2 of n, P times I. -/
+noncomputable def err53 (X ε B : ℝ) (n : ℕ) : ℝ :=
+  ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
+    series2 n (Real.log X ^ B) * (singInt X (windowY X ε) (Real.log X ^ B) n : ℂ)‖
+
+/-- SPLIT LEAF. Page 16 display 53, from Proposition 1 display 33 on page 8 by
+Chebyshev's inequality, with the hypotheses verified on page 15. The written
+range is X to the 7 over 18 plus epsilon up to X to the 1 minus epsilon, page 16
+after display 55. CITED: needs the short interval Siegel Walfisz input and Lemma 3.4. -/
+theorem eq53_prop1 (A : ℝ) (hA : 0 < A) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X ^ (1 - ε) →
+        (cntIoc (fun n => InH2 n ∧
+          Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
+          C * H / Real.log X ^ A := by
+  exact Task516a.eq53_prop1 A hA
+
+/-- SPLIT LEAF, UNWRITTEN RESIDUE. Display 53 of page 16 when epsilon exceeds
+5 over 18 and H exceeds X to the 1 minus epsilon. For epsilon at most 5 over 18
+this range reduces to the written one by the support of the windows, proved
+below in `eq53_full_range`. The paper treats epsilon as a small fixed number and
+does not write this case; it is recorded as BLOCKED NO WRITTEN PROOF in PROGRESS.md. -/
+theorem eq53_large_eps (A : ℝ) (hA : 0 < A) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → 5 / 18 < ε → X ^ (1 - ε) < H → H ≤ X →
+        (cntIoc (fun n => InH2 n ∧
+          Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
+          C * H / Real.log X ^ A := by
+  exact Task516a.eq53_large_eps A hA
+
+/-- Helper for display 54, page 16, proved 2026-11-12 PROVE PASS: the integral
+term of f2 on page 15 is nonnegative and at most log of sqrt u over z0 divided by
+log z0 times log sqrt u, since log t is at least log z0 and log of u over t is at
+least log sqrt u on the range of integration. AI wrote the Lean code. -/
+theorem f2_integral_bound {a u : ℝ} (ha : 1 < a) (hab : a ≤ Real.sqrt u) :
+    0 ≤ ∫ t in a..Real.sqrt u, 1 / (t * Real.log t * Real.log (u / t)) ∧
+    ∫ t in a..Real.sqrt u, 1 / (t * Real.log t * Real.log (u / t)) ≤
+      (1 / (Real.log a * Real.log (Real.sqrt u))) * Real.log (Real.sqrt u / a) := by
+  have hb1 : 1 < Real.sqrt u := lt_of_lt_of_le ha hab
+  have hu0 : 0 < u := by
+    by_contra h; push Not at h; rw [Real.sqrt_eq_zero'.mpr h] at hb1; linarith
+  have hsq : Real.sqrt u * Real.sqrt u = u := Real.mul_self_sqrt hu0.le
+  have hla : 0 < Real.log a := Real.log_pos ha
+  have hlb : 0 < Real.log (Real.sqrt u) := Real.log_pos hb1
+  have key : ∀ t ∈ Set.Icc a (Real.sqrt u), 0 < t ∧ Real.log a ≤ Real.log t ∧
+      Real.log (Real.sqrt u) ≤ Real.log (u / t) := by
+    intro t ⟨h1, h2⟩
+    have ht : 0 < t := by linarith
+    refine ⟨ht, Real.log_le_log (by linarith) h1, Real.log_le_log (by linarith) ?_⟩
+    rw [le_div_iff₀ ht]; nlinarith
+  have hcont : ContinuousOn (fun t => 1 / (t * Real.log t * Real.log (u / t)))
+      (Set.uIcc a (Real.sqrt u)) := by
+    rw [Set.uIcc_of_le hab]
+    apply ContinuousOn.div continuousOn_const
+    · apply ContinuousOn.mul (ContinuousOn.mul continuousOn_id ?_) ?_
+      · exact Real.continuousOn_log.mono (fun t ht => by
+          have := (key t ht).1; simp; linarith)
+      · apply ContinuousOn.log (continuousOn_const.div continuousOn_id
+          (fun t ht => ((key t ht).1).ne')) (fun t ht => ?_)
+        exact div_ne_zero hu0.ne' (key t ht).1.ne'
+    · intro t ht
+      obtain ⟨h0, h1, h2⟩ := key t ht
+      have : 0 < t * Real.log t * Real.log (u / t) := by
+        have := lt_of_lt_of_le hla h1; have := lt_of_lt_of_le hlb h2; positivity
+      exact this.ne'
+  have hint : IntervalIntegrable (fun t => 1 / (t * Real.log t * Real.log (u / t)))
+      MeasureTheory.volume a (Real.sqrt u) := hcont.intervalIntegrable
+  refine ⟨intervalIntegral.integral_nonneg hab (fun t ht => ?_), ?_⟩
+  · obtain ⟨h0, h1, h2⟩ := key t ht
+    have := lt_of_lt_of_le hla h1; have := lt_of_lt_of_le hlb h2; positivity
+  · rw [← integral_one_div_of_pos (by linarith) (by linarith), ← intervalIntegral.integral_const_mul]
+    apply intervalIntegral.integral_mono_on hab hint
+    · apply ContinuousOn.intervalIntegrable
+      rw [Set.uIcc_of_le hab]
+      apply ContinuousOn.mul continuousOn_const
+      apply ContinuousOn.div continuousOn_const continuousOn_id
+      intro t ht; exact ((key t ht).1).ne'
+    · intro t ht
+      obtain ⟨h0, h1, h2⟩ := key t ht
+      rw [one_div_mul_one_div]
+      apply one_div_le_one_div_of_le (by positivity)
+      have : Real.log a * Real.log (Real.sqrt u) ≤ Real.log t * Real.log (u / t) :=
+        mul_le_mul h1 h2 hlb.le (by linarith)
+      nlinarith
+
+/-- SPLIT LEAF. Page 16 display 54: I of n, varpi, lambda0 equals r2 of n times
+1 plus O of L to the minus 1 times log L, from the formula for f2 on page 15.
+Elementary real analysis: the integral term is relatively O of log P over log z0. -/
+theorem eq54_singInt (B : ℝ) (hB : 0 < B) (ε : ℝ) (hε : 0 < ε) :
+    ∃ K1 X0 : ℝ, 0 < K1 ∧ 2 ≤ X0 ∧ ∀ X : ℝ, X0 ≤ X → ∀ n : ℕ,
+      |singInt X (windowY X ε) (Real.log X ^ B) n - integerMain X (windowY X ε) n| ≤
+        K1 * integerMain X (windowY X ε) n *
+          (Real.log X ^ (-1 : ℝ) * Real.log (Real.log X)) := by
+  set M := max (Real.exp (1 / B)) (max ((55 * B) ^ 2) 4) with hMdef
+  have hM4 : 4 ≤ M := le_trans (le_max_right _ _) (le_max_right _ _)
+  refine ⟨55 * B, Real.exp M, by positivity, ?_, ?_⟩
+  · have := Real.add_one_le_exp M; linarith
+  intro X hX n
+  have hXpos : 0 < X := lt_of_lt_of_le (Real.exp_pos _) hX
+  set L := Real.log X with hL
+  have hLM : M ≤ L := by rw [← Real.log_exp M]; exact Real.log_le_log (Real.exp_pos _) hX
+  have hL4 : 4 ≤ L := le_trans hM4 hLM
+  have hLB : (55 * B) ^ 2 ≤ L := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hLM
+  have hLe : Real.exp (1 / B) ≤ L := le_trans (le_max_left _ _) hLM
+  have hLpos : 0 < L := by linarith
+  set ℓ := Real.log L with hℓ
+  have hℓB : 1 / B ≤ ℓ := by
+    rw [← Real.log_exp (1 / B)]; exact Real.log_le_log (Real.exp_pos _) hLe
+  have hBℓ : 1 ≤ B * ℓ := by
+    rw [div_le_iff₀ hB] at hℓB; linarith
+  have hℓpos : 0 < ℓ := by
+    by_contra h; push Not at h; nlinarith
+  have hsqL : 55 * B ≤ Real.sqrt L := by
+    have := Real.sqrt_le_sqrt hLB
+    rwa [Real.sqrt_sq (by positivity)] at this
+  have hℓsq : ℓ ≤ 2 * Real.sqrt L := by
+    have h1 := Real.log_le_sub_one_of_pos (Real.sqrt_pos.mpr hLpos)
+    rw [Real.log_sqrt hLpos.le] at h1; linarith
+  have hsqsq : Real.sqrt L * Real.sqrt L = L := Real.mul_self_sqrt hLpos.le
+  have hkey : 2 * B * ℓ ≤ 7 * L / 96 := by
+    have h1 := mul_le_mul_of_nonneg_left hℓsq (by positivity : (0:ℝ) ≤ 2 * B)
+    have h2 := mul_le_mul_of_nonneg_right hsqL (Real.sqrt_nonneg L)
+    nlinarith
+  set e := 7 / 12 + ε / 2 with he
+  have he7 : 7 / 12 ≤ e := by linarith
+  have hYdef : windowY X ε = X ^ e := rfl
+  set Y := windowY X ε with hY
+  have hYpos : 0 < Y := by rw [hYdef]; exact Real.rpow_pos_of_pos hXpos _
+  have hlogY : Real.log Y = e * L := by rw [hYdef]; exact Real.log_rpow hXpos e
+  set P := L ^ B with hP
+  have hPpos : 0 < P := Real.rpow_pos_of_pos hLpos _
+  have hlogP : Real.log P = B * ℓ := Real.log_rpow hLpos B
+  set z0 := Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ) with hz0
+  have hz0pos : 0 < z0 := by positivity
+  have hlz : Real.log z0 = e * L / 4 - 2 * (B * ℓ) := by
+    rw [hz0, Real.log_mul (by positivity) (by positivity), Real.log_rpow hYpos,
+      Real.log_zpow, hlogY, hlogP]
+    push_cast; ring
+  have hlz8 : e * L / 8 ≤ Real.log z0 := by
+    rw [hlz]; nlinarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+  have hlz96 : 7 * L / 96 ≤ Real.log z0 := by
+    nlinarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+  have hlzpos : 0 < Real.log z0 := by linarith
+  have hz1 : 1 < z0 := (Real.log_pos_iff hz0pos.le).mp hlzpos
+  have hu : L ^ (-1 : ℝ) = L⁻¹ := Real.rpow_neg_one L
+  have hsY : Real.log (Real.sqrt Y) = e * L / 2 := by
+    rw [Real.log_sqrt hYpos.le, hlogY]
+  have hlog2 : Real.log 2 < 1 := by have := Real.log_two_lt_d9; norm_num at this; linarith
+  -- per term bound
+  have per : ∀ v ∈ windowPairs X Y n,
+      |(1 / Real.log (v.1 : ℝ)) * f2Weight z0 (v.2 : ℝ) -
+          1 / (Real.log (v.1 : ℝ) * Real.log (v.2 : ℝ))| ≤
+        55 * B * (L ^ (-1 : ℝ) * ℓ) * (1 / (Real.log (v.1 : ℝ) * Real.log (v.2 : ℝ))) := by
+    intro v hv
+    obtain ⟨_, _, _, hm2lo, hm2hi, _⟩ := Finset.mem_filter.mp hv
+    set m : ℝ := (v.2 : ℝ) with hm
+    have hsYpos : 0 < Real.sqrt Y := Real.sqrt_pos.mpr hYpos
+    have hmpos : 0 < m := by linarith
+    have hlmlo : e * L / 2 - Real.log 2 ≤ Real.log m := by
+      have := Real.log_le_log (by positivity) hm2lo
+      rwa [Real.log_div hsYpos.ne' (by norm_num), hsY] at this
+    have hlmhi : Real.log m < e * L / 2 := by
+      have := Real.log_lt_log hmpos hm2hi
+      rwa [hsY] at this
+    have hlm8 : 7 * L / 24 - 1 ≤ Real.log m := by
+      nlinarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+    have hlmpos : 0 < Real.log m := by linarith
+    have hsm : Real.log (Real.sqrt m) = Real.log m / 2 := Real.log_sqrt hmpos.le
+    have hsmpos : 0 < Real.sqrt m := Real.sqrt_pos.mpr hmpos
+    have hzle : z0 ≤ Real.sqrt m := by
+      rw [← Real.log_le_log_iff hz0pos hsmpos, hsm, hlz]; linarith
+    obtain ⟨hJ0, hJ1⟩ := f2_integral_bound (u := m) hz1 hzle
+    have hf2 : f2Weight z0 m = 1 / Real.log m +
+        ∫ t in z0..Real.sqrt m, 1 / (t * Real.log t * Real.log (m / t)) := rfl
+    generalize (∫ t in z0..Real.sqrt m, 1 / (t * Real.log t * Real.log (m / t))) = J at hJ0 hJ1 hf2
+    have hlq : Real.log (Real.sqrt m / z0) ≤ 2 * (B * ℓ) := by
+      rw [Real.log_div hsmpos.ne' hz0pos.ne', hsm, hlz]; linarith
+    have hJ2 : J ≤ 4 * (B * ℓ) / (Real.log z0 * Real.log m) := by
+      refine hJ1.trans ?_
+      rw [hsm]
+      have hc : 0 ≤ 1 / (Real.log z0 * (Real.log m / 2)) := by positivity
+      refine (mul_le_mul_of_nonneg_left hlq hc).trans (le_of_eq ?_)
+      field_simp; ring
+    have hJ3 : J ≤ 55 * B * (L⁻¹ * ℓ) * (1 / Real.log m) := by
+      refine hJ2.trans ?_
+      have hr : 55 * B * (L⁻¹ * ℓ) * (1 / Real.log m) = (55 * (B * ℓ)) / (L * Real.log m) := by
+        field_simp
+      rw [hr, div_le_div_iff₀ (by positivity) (by positivity)]
+      have h4 : 4 * L ≤ 55 * Real.log z0 := by linarith
+      have h5 := mul_le_mul_of_nonneg_left h4 (by positivity : (0:ℝ) ≤ B * ℓ * Real.log m)
+      calc 4 * (B * ℓ) * (L * Real.log m) = B * ℓ * Real.log m * (4 * L) := by ring
+        _ ≤ B * ℓ * Real.log m * (55 * Real.log z0) := h5
+        _ = 55 * (B * ℓ) * (Real.log z0 * Real.log m) := by ring
+    have hq : 0 ≤ 1 / Real.log (v.1 : ℝ) := by
+      have := Real.log_natCast_nonneg v.1; positivity
+    have hexpr : (1 / Real.log (v.1 : ℝ)) * f2Weight z0 m -
+        1 / (Real.log (v.1 : ℝ) * Real.log m) = (1 / Real.log (v.1 : ℝ)) * J := by
+      rw [hf2]; ring
+    rw [hexpr, abs_of_nonneg (mul_nonneg hq hJ0), hu]
+    calc (1 / Real.log (v.1 : ℝ)) * J
+        ≤ (1 / Real.log (v.1 : ℝ)) * (55 * B * (L⁻¹ * ℓ) * (1 / Real.log m)) :=
+          mul_le_mul_of_nonneg_left hJ3 hq
+      _ = _ := by ring
+  unfold singInt integerMain
+  rw [← Finset.sum_sub_distrib]
+  refine (Finset.abs_sum_le_sum_abs _ _).trans ((Finset.sum_le_sum per).trans (le_of_eq ?_))
+  rw [← Finset.mul_sum]; ring
+
+/-- SPLIT LEAF. Page 14 display 48, the lower bound of P2 of n, P by
+log P to the minus 1 on H2, together with Lemma 3.8 display 49 with y equal to H
+and Chebyshev's inequality: S2 of n, P is at least c over log P for all but
+O of H L to the minus A integers n in H2 in the interval X, X plus H.
+CITED: Lemma 3.8 and display 48 are proved on pages 14 and 15. -/
+theorem eq48_49_series_lower (A : ℝ) (hA : 0 < A) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ c C X0 : ℝ, 0 < c ∧ 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X →
+        (cntIoc (fun n => InH2 n ∧
+          ‖series2 n (Real.log X ^ B)‖ < c / Real.log (Real.log X ^ B)) X H : ℝ) ≤
+          C * H / Real.log X ^ A := by
+  exact Task516a.eq48_49_series_lower A hA
+
+/-- Helper: a finite set of naturals inside the open real interval a, b has at most
+b minus a plus 1 elements. Counting bookkeeping for page 16. AI wrote the Lean code. -/
+theorem card_le_of_Ioo_real (S : Finset ℕ) (a b : ℝ) (ha : 0 ≤ a) (hab : a ≤ b)
+    (hS : ∀ n ∈ S, a < (n : ℝ) ∧ (n : ℝ) < b) : (S.card : ℝ) ≤ b - a + 1 := by
+  have hsub : S ⊆ Finset.Ioo ⌊a⌋₊ ⌈b⌉₊ := by
+    intro n hn
+    obtain ⟨h1, h2⟩ := hS n hn
+    exact Finset.mem_Ioo.mpr ⟨(Nat.floor_lt ha).mpr h1, Nat.lt_ceil.mpr h2⟩
+  have hc := Finset.card_le_card hsub
+  rw [Nat.card_Ioo] at hc
+  have hq := Nat.ceil_lt_add_one (le_trans ha hab)
+  have hp := Nat.sub_one_lt_floor a
+  have hcR : (S.card : ℝ) ≤ ((⌈b⌉₊ - ⌊a⌋₊ - 1 : ℕ) : ℝ) := by exact_mod_cast hc
+  rw [Nat.sub_sub] at hcR
+  by_cases h : ⌊a⌋₊ + 1 ≤ ⌈b⌉₊
+  · rw [Nat.cast_sub h] at hcR; push_cast at hcR; linarith
+  · push Not at h
+    rw [Nat.sub_eq_zero_of_le h.le] at hcR; push_cast at hcR; linarith
+
+/-- Helper for page 16, the size of r2 of page 2 display 6: every m2 in a set K of
+integers in the window I2 with m2 squared above n minus X gives the admissible pair
+n minus m2 squared, m2, of weight at least L to the minus 2. AI wrote the Lean code. -/
+theorem r2_ge_card (X Y : ℝ) (n : ℕ) (K : Finset ℕ) (hX4 : 4 ≤ X) (hYX : 2 * Y ≤ X)
+    (hs4 : 4 ≤ Real.sqrt Y) (hXn : X < (n : ℝ))
+    (hK : ∀ k ∈ K, Real.sqrt Y / 2 ≤ (k : ℝ) ∧ (k : ℝ) < Real.sqrt Y ∧
+      (n : ℝ) - X < (k : ℝ) ^ 2) :
+    (K.card : ℝ) * (1 / (Real.log X * Real.log X)) ≤ integerMain X Y n := by
+  set s := Real.sqrt Y with hs
+  have hYpos : 0 < Y := by
+    by_contra h; push Not at h; rw [hs, Real.sqrt_eq_zero'.mpr h] at hs4; linarith
+  have hss : s * s = Y := Real.mul_self_sqrt hYpos.le
+  have hsY : s ≤ Y := by nlinarith
+  set L := Real.log X with hL
+  let f : ℕ → ℕ × ℕ := fun k => (n - k ^ 2, k)
+  have hfacts : ∀ k ∈ K, f k ∈ windowPairs X Y n ∧
+      1 / (L * L) ≤ 1 / (Real.log ((f k).1 : ℝ) * Real.log ((f k).2 : ℝ)) := by
+    intro k hk
+    obtain ⟨hk1, hk2, hk3⟩ := hK k hk
+    have hk0 : (0:ℝ) ≤ k := Nat.cast_nonneg k
+    have hkY : (k : ℝ) ^ 2 < Y := by nlinarith
+    have hkn : k ^ 2 ≤ n := by
+      have : ((k ^ 2 : ℕ) : ℝ) ≤ n := by push_cast; linarith
+      exact_mod_cast this
+    have hm1 : ((n - k ^ 2 : ℕ) : ℝ) = (n : ℝ) - (k : ℝ) ^ 2 := by
+      rw [Nat.cast_sub hkn]; push_cast; ring
+    have hm1lo : X - Y < ((n - k ^ 2 : ℕ) : ℝ) := by rw [hm1]; linarith
+    have hm1hi : ((n - k ^ 2 : ℕ) : ℝ) < X := by rw [hm1]; linarith
+    refine ⟨?_, ?_⟩
+    · rw [windowPairs, Finset.mem_filter]
+      exact ⟨Finset.mem_product.mpr ⟨Finset.mem_range.mpr (Nat.lt_succ_of_le (Nat.le_floor hm1hi.le)),
+        Finset.mem_range.mpr (Nat.lt_succ_of_le (Nat.le_floor hk2.le))⟩,
+        hm1lo.le, hm1hi, hk1, hk2, Nat.sub_add_cancel hkn⟩
+    · simp only [f]
+      have hl1 : 0 < Real.log ((n - k ^ 2 : ℕ) : ℝ) := Real.log_pos (by linarith)
+      have hl1' : Real.log ((n - k ^ 2 : ℕ) : ℝ) ≤ L := Real.log_le_log (by linarith) hm1hi.le
+      have hl2 : 0 < Real.log (k : ℝ) := Real.log_pos (by linarith)
+      have hl2' : Real.log (k : ℝ) ≤ L := Real.log_le_log (by linarith) (by linarith)
+      apply one_div_le_one_div_of_le (by positivity)
+      exact mul_le_mul hl1' hl2' hl2.le (by linarith)
+  have hinj : Set.InjOn f K := fun a _ b _ h => congrArg Prod.snd h
+  have hnonneg : ∀ v ∈ windowPairs X Y n, v ∉ K.image f →
+      0 ≤ 1 / (Real.log (v.1 : ℝ) * Real.log (v.2 : ℝ)) := by
+    intro v _ _
+    have := Real.log_natCast_nonneg v.1
+    have := Real.log_natCast_nonneg v.2
+    positivity
+  have hsub : K.image f ⊆ windowPairs X Y n := by
+    intro v hv
+    obtain ⟨k, hk, rfl⟩ := Finset.mem_image.mp hv
+    exact (hfacts k hk).1
+  unfold integerMain
+  calc (K.card : ℝ) * (1 / (L * L)) = ∑ k ∈ K, 1 / (L * L) := by
+        rw [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ ∑ k ∈ K, 1 / (Real.log ((f k).1 : ℝ) * Real.log ((f k).2 : ℝ)) :=
+        Finset.sum_le_sum (fun k hk => (hfacts k hk).2)
+    _ = ∑ v ∈ K.image f, 1 / (Real.log (v.1 : ℝ) * Real.log (v.2 : ℝ)) :=
+        by rw [Finset.sum_image hinj]
+    _ ≤ _ := Finset.sum_le_sum_of_subset_of_nonneg hsub hnonneg
+
+/-- SPLIT LEAF. Size of r2 of n, page 2 display 6, used implicitly on page 16
+in passing from the absolute error of display 53 to the relative error of
+display 55: r2 of n is at least Y to the one half times L to the minus A minus 3
+except for O of H L to the minus A integers n below X plus Y. Elementary count.
+PROVED 2026-11-12 PROVE PASS: r2 of n is small only when n minus X exceeds
+Y minus O of Y^(1/2) plus Y L^(-A-1), a range of that length. AI wrote the Lean code. -/
+theorem r2_lower (A : ℝ) (hA : 0 < A) (ε : ℝ) (hε : 0 < ε) :
+    ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+      X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X →
+      (cntIoc (fun n => (n : ℝ) < X + windowY X ε ∧
+        integerMain X (windowY X ε) n <
+          Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 3))) X H : ℝ) ≤
+        C * H / Real.log X ^ A := by
+  set T := (16 * A + 8) ^ 2 with hT
+  have hT64 : 64 ≤ T := by nlinarith
+  refine ⟨5, Real.exp T, by norm_num, ?_, ?_⟩
+  · have := Real.add_one_le_exp T; linarith
+  intro X H hX hH hHX
+  have hXpos : 0 < X := lt_of_lt_of_le (Real.exp_pos _) hX
+  set L := Real.log X with hL
+  have hLT : T ≤ L := by rw [← Real.log_exp T]; exact Real.log_le_log (Real.exp_pos _) hX
+  have hL64 : 64 ≤ L := le_trans hT64 hLT
+  have hLpos : 0 < L := by linarith
+  have hX4 : 4 ≤ X := by
+    have h1 := Real.add_one_le_exp T
+    have h2 : Real.exp T ≤ X := hX
+    linarith
+  have hX1 : 1 < X := by linarith
+  -- the case epsilon above 11/18 is vacuous
+  have hε1 : ε ≤ 11 / 18 := by
+    by_contra hc; push Not at hc
+    have : X ^ (1 : ℝ) < X ^ (7 / 18 + ε) := Real.rpow_lt_rpow_of_exponent_lt hX1 (by linarith)
+    rw [Real.rpow_one] at this; linarith
+  have hHnn : 0 ≤ H := le_trans (Real.rpow_nonneg hXpos.le _) hH
+  set e := 7 / 12 + ε / 2 with he
+  have he7 : 7 / 12 ≤ e := by linarith
+  have he8 : e ≤ 8 / 9 := by linarith
+  have hYdef : windowY X ε = X ^ e := rfl
+  set Y := windowY X ε with hY
+  have hYpos : 0 < Y := by rw [hYdef]; exact Real.rpow_pos_of_pos hXpos _
+  have hlogY : Real.log Y = e * L := by rw [hYdef]; exact Real.log_rpow hXpos e
+  set s := Real.sqrt Y with hs
+  have hss : s * s = Y := Real.mul_self_sqrt hYpos.le
+  have hspos : 0 < s := Real.sqrt_pos.mpr hYpos
+  have hlogs : Real.log s = e * L / 2 := by rw [hs, Real.log_sqrt hYpos.le, hlogY]
+  have hlog2 : Real.log 2 < 0.7 := by
+    have := Real.log_two_lt_d9; norm_num at this ⊢; linarith
+  have hX2Y : 2 * Y ≤ X := by
+    calc 2 * Y = Real.exp (Real.log 2 + Real.log Y) := by
+          rw [Real.exp_add, Real.exp_log (by norm_num), Real.exp_log hYpos]
+      _ ≤ Real.exp L := by
+          apply Real.exp_le_exp.mpr; rw [hlogY]
+          linarith [mul_le_mul_of_nonneg_right he8 hLpos.le]
+      _ = X := Real.exp_log hXpos
+  have hs8 : 8 ≤ s := by
+    have h8 : Real.log 8 = 3 * Real.log 2 := by
+      rw [show (8:ℝ) = 2 ^ 3 by norm_num, Real.log_pow]; norm_num
+    calc (8:ℝ) = Real.exp (Real.log 8) := (Real.exp_log (by norm_num)).symm
+      _ ≤ Real.exp (Real.log s) := by
+          apply Real.exp_le_exp.mpr; rw [hlogs, h8]
+          linarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+      _ = s := Real.exp_log hspos
+  -- lambda = L^(-A), rho = lambda / L
+  set lam := L ^ (-A) with hlam
+  have hlampos : 0 < lam := Real.rpow_pos_of_pos hLpos _
+  have hlam1 : lam ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by linarith)
+  have hlamA : lam = (L ^ A)⁻¹ := Real.rpow_neg hLpos.le A
+  have hA3 : L ^ (-(A + 3)) = lam / (L * L) / L := by
+    rw [show -(A + 3) = -A + (-3 : ℝ) by ring, Real.rpow_add hLpos, ← hlam,
+      Real.rpow_neg hLpos.le 3]
+    rw [show (3:ℝ) = ((3 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+    field_simp
+  set ρ := lam / L with hρ
+  have hρpos : 0 < ρ := by positivity
+  have hρ8 : ρ ≤ 1 / 8 := by
+    rw [hρ, div_le_iff₀ hLpos]; linarith
+  have hρlam : ρ ≤ lam := by
+    rw [hρ, div_le_iff₀ hLpos]
+    have := mul_le_mul_of_nonneg_left (by linarith : (1:ℝ) ≤ L) hlampos.le; linarith
+  -- growth: 6 ≤ s * lam
+  have hgrowth : 6 ≤ s * lam := by
+    set ℓ := Real.log L with hℓ
+    have hsqT : 16 * A + 8 ≤ Real.sqrt L := by
+      have := Real.sqrt_le_sqrt hLT
+      rwa [hT, Real.sqrt_sq (by positivity)] at this
+    have hℓsq : ℓ ≤ 2 * Real.sqrt L := by
+      have h1 := Real.log_le_sub_one_of_pos (Real.sqrt_pos.mpr hLpos)
+      rw [Real.log_sqrt hLpos.le] at h1; linarith
+    have hsqsq : Real.sqrt L * Real.sqrt L = L := Real.mul_self_sqrt hLpos.le
+    have hlog6 : Real.log 6 ≤ 5 := by
+      have := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 6); linarith
+    have hkey : Real.log 6 + A * ℓ ≤ e * L / 2 := by
+      have h1 := mul_le_mul_of_nonneg_left hℓsq hA.le
+      have h2 := mul_le_mul_of_nonneg_right hsqT (Real.sqrt_nonneg L)
+      have h3 := mul_nonneg hA.le (Real.sqrt_nonneg L)
+      linarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+    have hLA : L ^ A = Real.exp (A * ℓ) := by
+      rw [Real.rpow_def_of_pos hLpos, mul_comm]
+    rw [hlamA, hLA, ← div_eq_mul_inv, le_div_iff₀ (Real.exp_pos _)]
+    calc 6 * Real.exp (A * ℓ) = Real.exp (Real.log 6 + A * ℓ) := by
+          rw [Real.exp_add, Real.exp_log (by norm_num)]
+      _ ≤ Real.exp (Real.log s) := Real.exp_le_exp.mpr (by rw [hlogs]; exact hkey)
+      _ = s := Real.exp_log hspos
+  set W := 2 * s + 2 * Y * ρ with hW
+  have hWY : W ≤ Y / 2 := by
+    have h1 := mul_le_mul_of_nonneg_left hs8 hspos.le
+    have h2 := mul_le_mul_of_nonneg_left hρ8 (by positivity : (0:ℝ) ≤ 2 * Y)
+    rw [hW]; linarith
+  -- pointwise: every bad n lies in X + Y - W, X + Y
+  have hpt : ∀ n : ℕ, X < (n : ℝ) → (n : ℝ) < X + Y →
+      integerMain X Y n < s * L ^ (-(A + 3)) → X + Y - W < (n : ℝ) := by
+    intro n hXn hnY hbad
+    set d := (n : ℝ) - X with hd
+    have hd0 : 0 < d := by linarith
+    set t := Real.sqrt d with ht
+    have htt : t * t = d := Real.mul_self_sqrt hd0.le
+    have ht0 : 0 ≤ t := Real.sqrt_nonneg d
+    set η := 1 + s * ρ with hη
+    have hηs : η ≤ s / 2 := by
+      have := mul_le_mul_of_nonneg_left hρ8 hspos.le; rw [hη]; linarith
+    by_contra hcon
+    push Not at hcon
+    -- then t ≤ s - η
+    have hts : t ≤ s - η := by
+      by_contra h2; push Not at h2
+      have h3 : 0 ≤ s - η := by linarith
+      have h4 : (s - η) * (s - η) < t * t := mul_self_lt_mul_self h3 h2
+      have h5 : (s - η) * (s - η) = Y - W + η * η := by rw [hη, hW, ← hss]; ring
+      have h6 := mul_self_nonneg η
+      linarith
+    set p := max ⌈s / 2⌉₊ (⌊t⌋₊ + 1) with hp
+    set K := Finset.Ico p ⌈s⌉₊ with hK
+    have hpR : (p : ℝ) ≤ s - η + 1 := by
+      rw [hp, Nat.cast_max]
+      apply max_le
+      · have := Nat.ceil_lt_add_one (by linarith : (0:ℝ) ≤ s / 2); linarith
+      · have := Nat.floor_le ht0; push_cast; linarith
+    have hqR : s ≤ (⌈s⌉₊ : ℝ) := Nat.le_ceil s
+    have hpq : p ≤ ⌈s⌉₊ := by
+      have : (p : ℝ) ≤ (⌈s⌉₊ : ℝ) := by have := mul_pos hspos hρpos; linarith
+      exact_mod_cast this
+    have hKcard : s * ρ ≤ (K.card : ℝ) := by
+      rw [hK, Nat.card_Ico, Nat.cast_sub hpq]; linarith
+    have hKmem : ∀ k ∈ K, s / 2 ≤ (k : ℝ) ∧ (k : ℝ) < s ∧ (n : ℝ) - X < (k : ℝ) ^ 2 := by
+      intro k hk
+      rw [hK, Finset.mem_Ico] at hk
+      have h1 : ⌈s / 2⌉₊ ≤ k := le_trans (le_max_left _ _) hk.1
+      have h2 : ⌊t⌋₊ + 1 ≤ k := le_trans (le_max_right _ _) hk.1
+      have h2' : t < (k : ℝ) := by
+        have := Nat.lt_floor_add_one t
+        have : ((⌊t⌋₊ + 1 : ℕ) : ℝ) ≤ k := by exact_mod_cast h2
+        push_cast at this; linarith
+      refine ⟨Nat.ceil_le.mp h1, Nat.lt_ceil.mp hk.2, ?_⟩
+      rw [← hd, ← htt, sq]; exact mul_self_lt_mul_self ht0 h2'
+    have hr2 := r2_ge_card X Y n K hX4 hX2Y (by linarith) hXn hKmem
+    have hcmp : s * L ^ (-(A + 3)) ≤ (K.card : ℝ) * (1 / (L * L)) := by
+      rw [hA3]
+      calc s * (lam / (L * L) / L) = s * ρ * (1 / (L * L)) := by rw [hρ]; ring
+        _ ≤ _ := mul_le_mul_of_nonneg_right hKcard (by positivity)
+    linarith
+  -- count
+  have hXH : 0 ≤ X + H := by linarith
+  have hcnt : (cntIoc (fun n => (n : ℝ) < X + Y ∧
+      integerMain X Y n < s * L ^ (-(A + 3))) X H : ℝ) ≤ W + 1 := by
+    have hW0 : 0 ≤ W := by have := mul_pos hYpos hρpos; rw [hW]; linarith
+    generalize hSp : (fun n : ℕ => (n : ℝ) < X + Y ∧
+      integerMain X Y n < s * L ^ (-(A + 3))) = Sp
+    unfold cntIoc
+    refine (card_le_of_Ioo_real _ (X + Y - W) (X + Y) (by linarith) (by linarith) ?_).trans
+      (by linarith)
+    intro n hn
+    obtain ⟨_, hXn, hS⟩ := Finset.mem_filter.mp hn
+    rw [← hSp] at hS
+    obtain ⟨hnY, hb⟩ := hS
+    exact ⟨hpt n hXn hnY hb, hnY⟩
+  have hempty : H < Y / 2 → cntIoc (fun n => (n : ℝ) < X + Y ∧
+      integerMain X Y n < s * L ^ (-(A + 3))) X H = 0 := by
+    intro hHY
+    generalize hSp : (fun n : ℕ => (n : ℝ) < X + Y ∧
+      integerMain X Y n < s * L ^ (-(A + 3))) = Sp
+    unfold cntIoc
+    rw [Finset.card_eq_zero, Finset.eq_empty_iff_forall_notMem]
+    intro n hn'
+    obtain ⟨hn, hXn, hS⟩ := Finset.mem_filter.mp hn'
+    rw [← hSp] at hS
+    obtain ⟨hnY, hb⟩ := hS
+    have h1 := hpt n hXn hnY hb
+    have h2 : (n : ℝ) ≤ X + H := by
+      have := Finset.mem_range.mp hn
+      have h3 : n ≤ ⌊X + H⌋₊ := Nat.lt_succ_iff.mp this
+      exact le_trans (by exact_mod_cast h3) (Nat.floor_le hXH)
+    linarith
+  have hgoal : 5 * H / L ^ A = 5 * H * lam := by rw [hlamA, div_eq_mul_inv]
+  rw [hgoal]
+  by_cases hHY : H < Y / 2
+  · rw [hempty hHY]; simp; positivity
+  · push Not at hHY
+    refine hcnt.trans ?_
+    have h1 : 2 * Y * ρ ≤ 4 * H * lam := by
+      have := mul_le_mul_of_nonneg_left hρlam (by positivity : (0:ℝ) ≤ 2 * Y)
+      have := mul_le_mul_of_nonneg_right hHY hlampos.le
+      linarith
+    have h2 : 2 * s + 1 ≤ H * lam := by
+      have h3 := mul_le_mul_of_nonneg_right hHY hlampos.le
+      have h4 := mul_le_mul_of_nonneg_left hgrowth hspos.le
+      rw [← hss] at h3
+      linarith
+    rw [hW]; linarith
+
+/-- Pages 2 and 8, displays 4 to 6 and 34: the error of display 53 vanishes
+beyond the support of the windows. -/
+theorem err53_vanish (X ε B : ℝ) (n : ℕ) (hY : 0 ≤ windowY X ε)
+    (hn : X + windowY X ε ≤ (n : ℝ)) : err53 X ε B n = 0 := by
+  simp [err53, roughCount, singInt, windowPairs_empty_above X _ hY n hn]
+
+/-- Counting bookkeeping: a predicate supported below X plus Y has no more
+points in X, X plus H than in X, X plus Y when Y is at most H. -/
+theorem cnt_le_of_support (S : ℕ → Prop) (X Y H : ℝ) (hYH : Y ≤ H)
+    (hS : ∀ n, S n → (n : ℝ) < X + Y) : cntIoc S X H ≤ cntIoc S X Y := by
+  unfold cntIoc
+  apply Finset.card_le_card
+  intro n hn
+  simp only [Finset.mem_filter, Finset.mem_range] at hn ⊢
+  obtain ⟨_, hXn, hSn⟩ := hn
+  exact ⟨Nat.lt_succ_of_le (Nat.le_floor (hS n hSn).le), hXn, hSn⟩
+
+/-- Display 53 of page 16 on the full range X to the 7 over 18 plus epsilon up
+to X. For epsilon at most 5 over 18, Y is at most X to the 1 minus epsilon and the
+range above Y adds nothing by `err53_vanish`. -/
+theorem eq53_full_range (A : ℝ) (hA : 0 < A) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X →
+        (cntIoc (fun n => InH2 n ∧
+          Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
+          C * H / Real.log X ^ A := by
+  obtain ⟨B1, hB1, h1⟩ := eq53_prop1 A hA
+  obtain ⟨B2, hB2, h2⟩ := eq53_large_eps A hA
+  refine ⟨max B1 B2, lt_of_lt_of_le hB1 (le_max_left _ _), ?_⟩
+  intro B hB ε hε
+  obtain ⟨C1, X1, hC1, hX1, h1⟩ := h1 B (le_trans (le_max_left _ _) hB) ε hε
+  obtain ⟨C2, X2, hC2, hX2, h2⟩ := h2 B (le_trans (le_max_right _ _) hB) ε hε
+  refine ⟨C1 + C2, max X1 X2, by positivity, le_trans hX1 (le_max_left _ _), ?_⟩
+  intro X H hX hH hHX
+  have hX1' : X1 ≤ X := le_trans (le_max_left _ _) hX
+  have hX2' : X2 ≤ X := le_trans (le_max_right _ _) hX
+  have hXone : 1 ≤ X := by linarith
+  have hXpos : 0 < X := by linarith
+  have hHnn : 0 ≤ H := le_trans (Real.rpow_nonneg hXpos.le _) hH
+  have hLA : 0 ≤ Real.log X ^ A := Real.rpow_nonneg (Real.log_nonneg hXone) _
+  have hmono : ∀ C' : ℝ, C' ≤ C1 + C2 →
+      C' * H / Real.log X ^ A ≤ (C1 + C2) * H / Real.log X ^ A := fun C' hC' =>
+    div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_right hC' hHnn) hLA
+  by_cases hsmall : H ≤ X ^ (1 - ε)
+  · exact (h1 X H hX1' hH hsmall).trans (hmono C1 (by linarith))
+  · push_neg at hsmall
+    by_cases heps : ε ≤ 5 / 18
+    · have hYle : windowY X ε ≤ X ^ (1 - ε) := by
+        unfold windowY; exact Real.rpow_le_rpow_of_exponent_le hXone (by linarith)
+      have hYH : windowY X ε ≤ H := hYle.trans hsmall.le
+      have hYlow : X ^ (7 / 18 + ε) ≤ windowY X ε := by
+        unfold windowY; exact Real.rpow_le_rpow_of_exponent_le hXone (by linarith)
+      have hYnn : 0 ≤ windowY X ε := Real.rpow_nonneg hXpos.le _
+      have hsupp : ∀ n, (InH2 n ∧
+          Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) →
+          (n : ℝ) < X + windowY X ε := by
+        intro n ⟨_, hn⟩
+        by_contra hc
+        push_neg at hc
+        rw [err53_vanish X ε B n hYnn hc] at hn
+        have : 0 ≤ Real.sqrt (windowY X ε) * Real.log X ^ (-A) :=
+          mul_nonneg (Real.sqrt_nonneg _) (Real.rpow_nonneg (Real.log_nonneg hXone) _)
+        linarith
+      have hc := cnt_le_of_support _ X (windowY X ε) H hYH hsupp
+      calc (cntIoc (fun n => InH2 n ∧
+            Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ)
+          ≤ (cntIoc (fun n => InH2 n ∧
+            Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n)
+              X (windowY X ε) : ℝ) := by exact_mod_cast hc
+        _ ≤ C1 * windowY X ε / Real.log X ^ A := h1 X _ hX1' hYlow hYle
+        _ ≤ C1 * H / Real.log X ^ A :=
+          div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hYH hC1.le) hLA
+        _ ≤ _ := hmono C1 (by linarith)
+    · push_neg at heps
+      exact (h2 X H hX2' heps hsmall hHX).trans (hmono C2 (by linarith))
+
+/-- Real arithmetic of the passage from displays 53 and 54 to display 55 on
+page 16: an absolute error s u u and a relative error K1 r u l combine to a
+relative error 1 plus K1 times r g u l once g is at least c over B l and u is at
+most c over B. -/
+theorem eq55_arith {e g r s u l d K1 c B : ℝ} (hE : e ≤ s * u * u)
+    (hS : c / (B * l) ≤ g) (hr : s ≤ r) (hd : d ≤ K1 * r * (u * l))
+    (hs0 : 0 ≤ s) (hg0 : 0 ≤ g) (hu : 0 < u) (hl : 0 < l) (hB : 0 < B)
+    (hucB : u ≤ c / B) : e + g * d ≤ (1 + K1) * (r * g) * (u * l) := by
+  have h1 : c / (B * l) * s ≤ g * r := mul_le_mul hS hr hs0 hg0
+  have h2 : c / (B * l) * s * (u * l) = c / B * s * u := by
+    field_simp
+  have h3 : s * u * u ≤ c / B * s * u := by
+    have := mul_le_mul_of_nonneg_left hucB (mul_nonneg hs0 hu.le)
+    linarith [this]
+  have h4 : c / (B * l) * s * (u * l) ≤ g * r * (u * l) :=
+    mul_le_mul_of_nonneg_right h1 (mul_nonneg hu.le hl.le)
+  have h5 : g * d ≤ g * (K1 * r * (u * l)) := mul_le_mul_of_nonneg_left hd hg0
+  nlinarith [h2, h3, h4, h5]
+
+/-- Page 16 displays 53 to 55 and page 14 displays 48 and 49.
+CONDITIONAL ON the explicit display 53 estimate on the selected range and the singular
+series lower estimate. All arithmetic, integral and r2 estimates used in the
+assembly have clean proofs. The unwritten range is supplied as an explicit
+hypothesis, not asserted by this generic assembly. -/
+theorem circle_input_of_estimates (A : ℝ) (hA : 0 < A)
+    (upper : ℝ → ℝ → ℝ)
+    (hupper : ∀ X ε : ℝ, 2 ≤ X → 0 < ε → upper X ε ≤ X)
+    (h53input :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ upper X ε →
+        (cntIoc (fun n => InH2 n ∧
+          Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 5)) < err53 X ε B n) X H : ℝ) ≤
+          C * H / Real.log X ^ (A + 5))
+    (h48input :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ c C X0 : ℝ, 0 < c ∧ 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X →
+        (cntIoc (fun n => InH2 n ∧
+          ‖series2 n (Real.log X ^ B)‖ < c / Real.log (Real.log X ^ B)) X H : ℝ) ≤
+          C * H / Real.log X ^ A) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ C K X0 : ℝ, 0 < C ∧ 0 < K ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ upper X ε →
+        (cntIoc (fun n => InH2 n ∧
+          K * ‖main2 X (windowY X ε) (Real.log X ^ B) n‖ *
+            (Real.log X ^ (-1 : ℝ) * Real.log (Real.log X)) <
+          ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
+            main2 X (windowY X ε) (Real.log X ^ B) n‖) X H : ℝ) ≤
+          C * H / Real.log X ^ A := by
+  obtain ⟨B1, hB1, h53⟩ := h53input
+  obtain ⟨B3, hB3, h48⟩ := h48input
+  refine ⟨max B1 B3, lt_of_lt_of_le hB1 (le_max_left _ _), ?_⟩
+  intro B hB ε hε
+  have hBpos : 0 < B := lt_of_lt_of_le hB1 (le_trans (le_max_left _ _) hB)
+  obtain ⟨C1, X1, hC1, hX1, h53⟩ := h53 B (le_trans (le_max_left _ _) hB) ε hε
+  obtain ⟨K1, X2, hK1, hX2, h54⟩ := eq54_singInt B hBpos ε hε
+  obtain ⟨c, C3, X3, hc, hC3, hX3, h48⟩ := h48 B (le_trans (le_max_right _ _) hB) ε hε
+  obtain ⟨C4, X4, hC4, hX4, hr2⟩ := r2_lower A hA ε hε
+  refine ⟨C1 + C3 + C4, 1 + K1,
+    max (max (max X1 X2) (max X3 X4)) (Real.exp (max (Real.exp 1) (B / c))),
+    by positivity, by positivity,
+    le_trans hX1 (le_trans (le_max_left _ _) (le_trans (le_max_left _ _) (le_max_left _ _))), ?_⟩
+  intro X H hX hH hHX
+  have hX1' : X1 ≤ X :=
+    le_trans (le_trans (le_max_left _ _) (le_trans (le_max_left _ _) (le_max_left _ _))) hX
+  have hX2' : X2 ≤ X :=
+    le_trans (le_trans (le_max_right _ _) (le_trans (le_max_left _ _) (le_max_left _ _))) hX
+  have hX3' : X3 ≤ X :=
+    le_trans (le_trans (le_max_left _ _) (le_trans (le_max_right _ _) (le_max_left _ _))) hX
+  have hX4' : X4 ≤ X :=
+    le_trans (le_trans (le_max_right _ _) (le_trans (le_max_right _ _) (le_max_left _ _))) hX
+  have hXe : Real.exp (max (Real.exp 1) (B / c)) ≤ X := le_trans (le_max_right _ _) hX
+  have hXpos : 0 < X := lt_of_lt_of_le (Real.exp_pos _) hXe
+  have hHXfull : H ≤ X := hHX.trans (hupper X ε (by linarith) hε)
+  have hLge : max (Real.exp 1) (B / c) ≤ Real.log X := by
+    rw [← Real.log_exp (max (Real.exp 1) (B / c))]
+    exact Real.log_le_log (Real.exp_pos _) hXe
+  have hLe : Real.exp 1 ≤ Real.log X := le_trans (le_max_left _ _) hLge
+  have hBc : B / c ≤ Real.log X := le_trans (le_max_right _ _) hLge
+  have he1 : (1 : ℝ) ≤ Real.exp 1 := Real.one_le_exp (by norm_num)
+  have hL1 : 1 ≤ Real.log X := le_trans he1 hLe
+  have hLpos : 0 < Real.log X := by linarith
+  have hlogL : 1 ≤ Real.log (Real.log X) := by
+    rw [← Real.log_exp 1]
+    exact Real.log_le_log (Real.exp_pos 1) hLe
+  have hlogP : Real.log (Real.log X ^ B) = B * Real.log (Real.log X) :=
+    Real.log_rpow hLpos B
+  have hYnn : 0 ≤ windowY X ε := Real.rpow_nonneg hXpos.le _
+  have hu : Real.log X ^ (-1 : ℝ) = (Real.log X)⁻¹ := Real.rpow_neg_one _
+  have hupos : 0 < Real.log X ^ (-1 : ℝ) := Real.rpow_pos_of_pos hLpos _
+  have hucB : Real.log X ^ (-1 : ℝ) ≤ c / B := by
+    rw [hu]
+    have : B / c ≤ Real.log X := hBc
+    rw [div_le_iff₀ hc] at this
+    rw [inv_eq_one_div, div_le_div_iff₀ hLpos hBpos]
+    linarith
+  have hsplit : Real.log X ^ (-(A + 5)) =
+      Real.log X ^ (-(A + 3)) * Real.log X ^ (-1 : ℝ) * Real.log X ^ (-1 : ℝ) := by
+    rw [← Real.rpow_add hLpos, ← Real.rpow_add hLpos]
+    congr 1
+    ring
+  let badA := fun n => InH2 n ∧
+    Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 5)) < err53 X ε B n
+  let badC := fun n => InH2 n ∧
+    ‖series2 n (Real.log X ^ B)‖ < c / Real.log (Real.log X ^ B)
+  let badD := fun n : ℕ => (n : ℝ) < X + windowY X ε ∧
+    integerMain X (windowY X ε) n <
+      Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 3))
+  have sub : ∀ n, (InH2 n ∧
+      (1 + K1) * ‖main2 X (windowY X ε) (Real.log X ^ B) n‖ *
+        (Real.log X ^ (-1 : ℝ) * Real.log (Real.log X)) <
+      ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
+        main2 X (windowY X ε) (Real.log X ^ B) n‖) → badA n ∨ (badC n ∨ badD n) := by
+    intro n ⟨hn, hbad⟩
+    by_contra h
+    simp only [not_or] at h
+    obtain ⟨hA', hC', hD'⟩ := h
+    by_cases hnY : X + windowY X ε ≤ (n : ℝ)
+    · obtain ⟨_, hr0, hm0, _⟩ :=
+        counts_vanish_above X (windowY X ε) (Real.log X ^ B) hYnn n hnY
+      rw [hr0, hm0] at hbad
+      simp at hbad
+    · push_neg at hnY
+      have hE : err53 X ε B n ≤ Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 5)) :=
+        le_of_not_gt (fun hh => hA' ⟨hn, hh⟩)
+      have hS : c / Real.log (Real.log X ^ B) ≤ ‖series2 n (Real.log X ^ B)‖ :=
+        le_of_not_gt (fun hh => hC' ⟨hn, hh⟩)
+      have hr : Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 3)) ≤
+          integerMain X (windowY X ε) n :=
+        le_of_not_gt (fun hh => hD' ⟨hnY, hh⟩)
+      have hI := h54 X hX2' n
+      have hs0 : 0 ≤ Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 3)) :=
+        mul_nonneg (Real.sqrt_nonneg _) (Real.rpow_nonneg hLpos.le _)
+      have hr0 : 0 ≤ integerMain X (windowY X ε) n := le_trans hs0 hr
+      have hE' : err53 X ε B n ≤ Real.sqrt (windowY X ε) * Real.log X ^ (-(A + 3)) *
+          Real.log X ^ (-1 : ℝ) * Real.log X ^ (-1 : ℝ) := by
+        rw [hsplit] at hE; linarith [hE]
+      have hmain : ‖main2 X (windowY X ε) (Real.log X ^ B) n‖ =
+          integerMain X (windowY X ε) n * ‖series2 n (Real.log X ^ B)‖ := by
+        simp only [main2, norm_mul, Complex.norm_real, Real.norm_eq_abs]
+        rw [abs_of_nonneg hr0]
+      have hdecomp : (roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
+          main2 X (windowY X ε) (Real.log X ^ B) n =
+          ((roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
+            series2 n (Real.log X ^ B) *
+              (singInt X (windowY X ε) (Real.log X ^ B) n : ℂ)) +
+          series2 n (Real.log X ^ B) *
+            ((singInt X (windowY X ε) (Real.log X ^ B) n -
+              integerMain X (windowY X ε) n : ℝ) : ℂ) := by
+        simp only [main2, Complex.ofReal_sub]
+        ring
+      have htri : ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
+          main2 X (windowY X ε) (Real.log X ^ B) n‖ ≤
+          err53 X ε B n + ‖series2 n (Real.log X ^ B)‖ *
+            |singInt X (windowY X ε) (Real.log X ^ B) n - integerMain X (windowY X ε) n| := by
+        rw [hdecomp]
+        refine (norm_add_le _ _).trans (le_of_eq ?_)
+        rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+        rfl
+      rw [hlogP] at hS
+      have hfin := htri.trans (eq55_arith hE' hS hr hI hs0 (norm_nonneg _) hupos
+        (by linarith) hBpos hucB)
+      rw [← hmain] at hfin
+      exact (not_lt_of_ge hfin) hbad
+  have hcount := le_trans (U1534.cnt_mono sub X H)
+    (le_trans (U1534.cnt_or_le badA (fun n => badC n ∨ badD n) X H)
+      (Nat.add_le_add_left (U1534.cnt_or_le badC badD X H) _))
+  have hcountR : (cntIoc (fun n => InH2 n ∧
+      (1 + K1) * ‖main2 X (windowY X ε) (Real.log X ^ B) n‖ *
+        (Real.log X ^ (-1 : ℝ) * Real.log (Real.log X)) <
+      ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
+        main2 X (windowY X ε) (Real.log X ^ B) n‖) X H : ℝ) ≤
+      (cntIoc badA X H : ℝ) + ((cntIoc badC X H : ℝ) + (cntIoc badD X H : ℝ)) := by
+    exact_mod_cast hcount
+  have hHnn : 0 ≤ H := le_trans (Real.rpow_nonneg hXpos.le _) hH
+  have hA1 : (cntIoc badA X H : ℝ) ≤ C1 * H / Real.log X ^ A := by
+    refine (h53 X H hX1' hH hHX).trans ?_
+    apply div_le_div_of_nonneg_left (by positivity) (Real.rpow_pos_of_pos hLpos _)
+    exact Real.rpow_le_rpow_of_exponent_le hL1 (by linarith)
+  have hC := h48 X H hX3' hH hHXfull
+  have hD := hr2 X H hX4' hH hHXfull
+  calc _ ≤ (cntIoc badA X H : ℝ) + ((cntIoc badC X H : ℝ) + (cntIoc badD X H : ℝ)) := hcountR
+    _ ≤ C1 * H / Real.log X ^ A + (C3 * H / Real.log X ^ A + C4 * H / Real.log X ^ A) :=
+        add_le_add hA1 (add_le_add hC hD)
+    _ = (C1 + C3 + C4) * H / Real.log X ^ A := by ring
+
 /-- LEAF. Page 16 eq. 55 from eqs. 48, 49, 53 and 54.
 This includes extension to H at most X by subdivision, which is not written out
 in the paper. It requires the short interval Siegel Walfisz input on page 15,
@@ -78,7 +891,9 @@ theorem circle_input (A : ℝ) (hA : 0 < A) :
           ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) -
             main2 X (windowY X ε) (Real.log X ^ B) n‖) X H : ℝ) ≤
           C * H / Real.log X ^ A := by
-  sorry
+  exact circle_input_of_estimates A hA (fun X _ => X)
+    (by intro X ε hX hε; exact le_rfl)
+    (eq53_full_range (A + 5) (by linarith)) (eq48_49_series_lower A hA)
 
 /-- The sieve level z = exp of L to the 1 minus delta/2, chosen on page 17
 before display 58 when Lemma 3.7 is applied with D = Y to the 1/9. -/
@@ -290,7 +1105,7 @@ theorem sieve_product_input :
   exact Task129s.sieve_product_explicit Q hQ n
 
 /-- SPLIT LEAF shared by residual_sieve_pointwise and product_series_almost_all.
-Page 13 display 48, lower bound: P2(n, P) is at least a constant times
+Page 14 display 48, lower bound: P2(n, P) is at least a constant times
 (log P) to the -1. The paper cites Schwarz Sections 2 and 3; it rests on
 property iii on page 13, A2(n, p) > -1 for n in H2, and display 46. CITED. -/
 theorem product_lower_input :
@@ -1000,26 +1815,6 @@ theorem thm1_from_leaves : kumchev_liu_thm1 := by
   calc _ ≤ (cntIoc badc X H : ℝ) + (cntIoc badr X H : ℝ) := hcountR
     _ ≤ Cc * H / Real.log X ^ A + Cr * H / Real.log X ^ A := add_le_add hcb hrb
     _ = (Cc + Cr) * H / Real.log X ^ A := by ring
-
-/-- Page 2 displays 4 to 6. No window pair can reach n at least X + Y. -/
-theorem windowPairs_empty_above (X Y : ℝ) (hY : 0 ≤ Y) (n : ℕ)
-    (hn : X + Y ≤ (n : ℝ)) : windowPairs X Y n = ∅ := by
-  apply Finset.eq_empty_iff_forall_notMem.mpr
-  intro v hv
-  obtain ⟨_, hlo, hhi, hqlo, hqhi, heq⟩ := Finset.mem_filter.mp hv
-  have hq2 : (v.2 : ℝ) ^ 2 ≤ Y := by
-    have hsq := (sq_le_sq₀ (Nat.cast_nonneg v.2) (Real.sqrt_nonneg Y)).mpr hqhi.le
-    nlinarith only [hsq, Real.sq_sqrt hY]
-  have hcast : (v.1 : ℝ) + (v.2 : ℝ)^2 = (n : ℝ) := by exact_mod_cast heq
-  linarith
-
-/-- Page 2 displays 4 to 6 and page 8 display 35. The counts and main term
-vanish beyond the support of the fixed representation windows. -/
-theorem counts_vanish_above (X Y P : ℝ) (hY : 0 ≤ Y) (n : ℕ) (hn : X + Y ≤ (n : ℝ)) :
-    primeCount X Y n = 0 ∧ roughCount X Y P n = 0 ∧
-      main2 X Y P n = 0 ∧ residualCount X Y P n = 0 := by
-  simp [primeCount, roughCount, main2, integerMain, residualCount,
-    windowPairs_empty_above X Y hY n hn]
 
 /-- Page 8 display 35. Every prime pair is counted by the sifted count
 when the cutoff is below the lower endpoint of I2, so the residual is nonnegative. -/

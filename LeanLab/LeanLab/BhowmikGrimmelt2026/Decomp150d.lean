@@ -1,28 +1,16 @@
 /-
 Lemma 7.3, P0029 pages 26 and 27.
-OPEN leaves for Jules. Every coefficient keeps its own smoothing scale N.
+Cycle free supply from Decomp525a. Every coefficient keeps its own smoothing scale N.
 The assembly is CONDITIONAL. No varying family Parseval theorem is asserted.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BhowmikGrimmelt2026.ApproximationError
+import LeanLab.BhowmikGrimmelt2026.Decomp525a
 
 namespace LeanLab.BhowmikGrimmelt2026
 
 open MeasureTheory
 
 attribute [local instance] Classical.propDecidable
-
-/-- Major arc part of the error coefficient in the proof of 7.8, pages 26 and 27. -/
-noncomputable def majorError150 (ϕ G : ℝ → ℝ) (X N : ℕ) (ϑ η : ℝ) : ℂ :=
-  ∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then
-    Sphi ϕ N α ^ 2 * (1 - bRhat G ((X : ℝ) ^ ϑ)
-      (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α)) else 0
-
-/-- Minor arc part of the same coefficient. The smoothing still depends on N. -/
-noncomputable def minorError150 (ϕ G : ℝ → ℝ) (X N : ℕ) (ϑ η : ℝ) : ℂ :=
-  ∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else
-    Sphi ϕ N α ^ 2 * (1 - bRhat G ((X : ℝ) ^ ϑ)
-      (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))
 
 private theorem integral_split_indicator150 {f : ℝ → ℂ} (hf : Continuous f) (s : Set ℝ)
     (hs : MeasurableSet s) :
@@ -97,19 +85,19 @@ theorem error_split150 {ϕ G : ℝ → ℝ} (hG : IsMajorWeight G)
   rfl
 
 /-- LEAF. Page 27, major arc contribution in the proof of 7.8.
-OPEN family estimate. The written Parseval step uses one function, while Sphi depends on N.
-A proof must control this actual varying family. Do not apply fixed function Bessel directly. -/
+CONDITIONAL ON major_tail_multi525 after the proved central and single denominator cases.
+The proof controls the actual varying family and retains the exact original statement. -/
 theorem major_family150 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G)
     (ϑ : ℝ) (hϑ : 0 < ϑ) (hϑ' : ϑ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 2 ≤ X → ∀ η : ℝ, 0 < η → η ≤ 1 →
       10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X →
       ∑ N ∈ Finset.Icc 1 X, ‖majorError150 ϕ G X N ϑ η‖ ^ 2 ≤
         C * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  exact major_family_supply525 hϕ hG ϑ hϑ hϑ'
 
 /-- LEAF. Page 27, minor arc contribution in the proof of 7.8.
-OPEN family estimate with the printed logarithm power five.
-Both uniform smoothing control and the recorded logarithm question remain obligations. -/
+CONDITIONAL ON minor_bare_multi525 and minor_weighted_multi525.
+The proved single denominator case and the printed logarithm power five are retained. -/
 theorem minor_family150 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G)
     (ϑ : ℝ) (hϑ : 0 < ϑ) (hϑ' : ϑ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 2 ≤ X → ∀ η : ℝ, 0 < η → η ≤ 1 →
@@ -117,7 +105,7 @@ theorem minor_family150 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeigh
       ∑ N ∈ Finset.Icc 1 X, ‖minorError150 ϕ G X N ϑ η‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
           (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  exact minor_family_supply525 hϕ hG ϑ hϑ hϑ'
 
 /-- Exactly the sealed Lemma73 proposition. CONDITIONAL on the three OPEN leaves. -/
 theorem lemma73_decomposed150 : Lemma73 := by

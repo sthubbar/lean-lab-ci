@@ -100,7 +100,7 @@ algebraic integral step and contains no cancellation estimate. -/
 theorem leaf_moment_split (γ δ κ : ℝ) (N : ℕ) :
     (∑ n ∈ Finset.Ioc (N / 2) N, ‖truncatedMinor γ δ κ N n‖ ^ 2) ≤
       farMoment γ δ κ N + nearMoment γ δ κ N := by
-  sorry
+  exact UpJ200.MomentSplit428.leaf_moment_split_supplied γ δ κ N
 
 /-- LEAF. P0082 page 366, the first contribution to display 26.
 Theorem 2 controls the full index phase sum outside the diagonal strip.
@@ -111,7 +111,7 @@ theorem leaf_far_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
           farMoment γ δ κ N ≤
             B * N * F γ N ^ 2 * Real.log (F γ N) ^ 2 * calE γ κ N ^ (-1 : ℝ) := by
-  sorry
+  exact UpJ200.Decomp467a.far_moment_of_karacuba U1539.lemma10 γ h1 h2
 
 /-- LEAF. P0082 page 366 display 27. The nearby strip uses the trivial
 phase sum bound and Vaughan Theorem 3.1 for the prime minor arc sum.
@@ -121,7 +121,7 @@ theorem leaf_near_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
       ∀ κ : ℝ, 0 < κ → ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
         nearMoment γ δ κ N ≤ B * N * F γ N ^ (2 - 2 * δ) := by
-  sorry
+  exact UpJ200.MomentSupply446.near_moment_supplied γ h1 h2
 
 /-- Assembly. P0082 page 366 after display 27. This is the exact existing
 truncated moment statement. It depends only on the expansion and the two

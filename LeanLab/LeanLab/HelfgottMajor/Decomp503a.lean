@@ -1,3 +1,4 @@
+import LeanLab.HelfgottMajor.Decomp511a
 import LeanLab.HelfgottMajor.Gamma503
 import LeanLab.HelfgottArcs.Statements
 import LeanLab.HelfgottMajor.BookL1523
@@ -408,7 +409,8 @@ theorem saddle_pair_expansion (δ : ℝ) (s : ℂ) (hδ : δ ≠ 0)
     ‖gaussianMellin δ s‖ + ‖gaussianMellin δ (1 - s)‖ ≤
       4.217 * exp (-BookE.E (|s.im| / (π * δ) ^ 2) * |s.im|) +
         saddleRemainder δ s.im := by
-  sorry
+  simpa only [saddleRemainder] using
+    Decomp511a.pair_expansion δ s hδ hσ0 hσ1 hτ
 
 /-- The zero shift case of Corollary 3.2 has no open analytic input.
 P0014 page 10, display 3.4, with delta and k equal to zero.

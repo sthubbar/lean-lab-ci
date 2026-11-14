@@ -21,7 +21,8 @@ namespace LeanLab.BhowmikGrimmelt2026
 
 open LeanLab.ExceptionalSet (PowerBound)
 
-/-- LEAF. The second moment of `E2 = r2 - N * singular` over the even `N ≤ X`, bounded by
+/-- CONDITIONAL on the current arc route and the existing Hardy leaf.
+The second moment of `E2 = r2 - N * singular` over the even `N ≤ X`, bounded by
 `X ^ (3/2 + 2 * Θ + ε)`.  This is the analytic step of the proof: `r2` is the weighted count of
 the representations of `N` as a sum of two positive integers, and the circle method writes it as
 the major-arc main term `N * singular N` plus the contribution of the zeros on the major arcs
@@ -33,9 +34,10 @@ theorem even_second_moment_main_error150 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : Zer
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
       ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2 ≤
         C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  exact mean_square150_even_part Θ hΘ hZ
 
-/-- LEAF. The second moment of the truncation error `truncMain150 N - N * singular N` over the
+/-- CONDITIONAL on the existing Hardy leaf through zeroBound_lower150.
+The second moment of the truncation error `truncMain150 N - N * singular N` over the
 even `N ≤ X`, bounded by `X ^ (3/2 + 2 * Θ + ε)`.  The truncation of the singular series at the
 Farey level `Q = ⌊N ^ (1/2)⌋` leaves the tail past `Q`, whose size is at most a constant times
 `N ^ (1/2 + δ)` for every `δ > 0`; squaring and summing over at most `X` values of `N` therefore
@@ -47,7 +49,50 @@ theorem even_second_moment_truncation_error150 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ
       ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N),
           (truncMain150 N - (N : ℝ) * singular N) ^ 2 ≤
         C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  intro ε hε
+  obtain ⟨C, hC⟩ := singular_truncation150 (ε / 2) (by linarith)
+  have hhalf := zeroBound_lower150 hZ
+  refine ⟨C ^ 2, ?_⟩
+  intro X hX
+  have hx1 : (1 : ℝ) ≤ X := by exact_mod_cast hX
+  have hxp : (0 : ℝ) < X := by linarith
+  have he : ((X : ℝ) ^ (1 / 2 + ε / 2)) ^ 2 = (X : ℝ) ^ (1 + ε) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hxp.le]
+    congr 1
+    norm_num
+    ring
+  have hpt : ∀ N ∈ (Finset.Icc 1 X).filter (fun N => Even N),
+      (truncMain150 N - (N : ℝ) * singular N) ^ 2 ≤ C ^ 2 * (X : ℝ) ^ (1 + ε) := by
+    intro N hN
+    obtain ⟨hN, hNe⟩ := Finset.mem_filter.mp hN
+    obtain ⟨hN1, hNX⟩ := Finset.mem_Icc.mp hN
+    have hn0 : (0 : ℝ) ≤ N := Nat.cast_nonneg _
+    have hpow : (N : ℝ) ^ (1 / 2 + ε / 2) ≤ (X : ℝ) ^ (1 / 2 + ε / 2) :=
+      Real.rpow_le_rpow hn0 (by exact_mod_cast hNX) (by linarith)
+    have hb : |truncMain150 N - (N : ℝ) * singular N| ≤
+        |C| * (X : ℝ) ^ (1 / 2 + ε / 2) :=
+      (hC N hN1).trans ((mul_le_mul_of_nonneg_right (le_abs_self C) (by positivity)).trans
+        (mul_le_mul_of_nonneg_left hpow (abs_nonneg C)))
+    have hs := pow_le_pow_left₀ (abs_nonneg _) hb 2
+    simpa only [sq_abs, mul_pow, he] using hs
+  have hcard : (((Finset.Icc 1 X).filter (fun N => Even N)).card : ℝ) ≤ X := by
+    have h := Finset.card_filter_le (Finset.Icc 1 X) (fun N => Even N)
+    simpa using (show (((Finset.Icc 1 X).filter (fun N => Even N)).card : ℝ) ≤
+      (Finset.Icc 1 X).card by exact_mod_cast h)
+  have hpow : (X : ℝ) ^ (2 + ε) ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    Real.rpow_le_rpow_of_exponent_le hx1 (by linarith)
+  calc
+    _ ≤ ∑ _N ∈ (Finset.Icc 1 X).filter (fun N => Even N),
+        C ^ 2 * (X : ℝ) ^ (1 + ε) := Finset.sum_le_sum hpt
+    _ ≤ (X : ℝ) * (C ^ 2 * (X : ℝ) ^ (1 + ε)) := by
+      simp only [Finset.sum_const, nsmul_eq_mul]
+      exact mul_le_mul_of_nonneg_right hcard (by positivity)
+    _ = C ^ 2 * (X : ℝ) ^ (2 + ε) := by
+      have hxpow : (X : ℝ) ^ (2 + ε) = (X : ℝ) * (X : ℝ) ^ (1 + ε) := by
+        rw [show (2 + ε) = 1 + (1 + ε) by ring, Real.rpow_add hxp, Real.rpow_one]
+      rw [hxpow]
+      ring
+    _ ≤ _ := mul_le_mul_of_nonneg_left hpow (sq_nonneg C)
 
 /-- The mean square estimate over the even `N`, assembled from the two second-moment leaves: on
 each even `N` the deviation of `r2 N` from the truncated main term splits into the deviation from

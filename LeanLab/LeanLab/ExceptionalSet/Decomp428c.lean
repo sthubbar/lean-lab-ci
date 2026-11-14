@@ -24,7 +24,7 @@ theorem leaf_minor_sup (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         ∀ β ∈ truncatedDomain (F γ N ^ (6 * δ)) (F γ N),
           ‖Sp (F γ N ^ (6 * δ)) (F γ N) β‖ ^ 2 ≤
             C * F γ N ^ (2 - 6 * δ) * Real.log (F γ N) ^ 8 := by
-  sorry
+  exact UpJ200.MinorSup446.leaf_minor_sup_supplied γ h1 h2
 
 /-- LEAF. P0082 page 365 before display 24 and page 366 display 27.
 The weighted prime energy on the truncated domain is at most a constant
@@ -34,7 +34,7 @@ theorem leaf_weighted_energy : ∃ C : ℝ, 0 < C ∧
     ∀ P X Δ : ℝ, 0 < P → 2 ≤ X → 0 < Δ → Δ < 1 →
       (∫ α in truncatedDomain P X, ‖Sp P X α ^ 2 * (Kfun Δ α : ℂ)‖) ≤
         C * X * Real.log X / Δ := by
-  sorry
+  exact UpJ200.Energy446.leaf_weighted_energy_supplied
 
 /-- LEAF. P0082 page 366 display 27. Bound the finite phase sum by N
 and the second kernel by 2. The strip has length at most twice its radius.
@@ -48,7 +48,7 @@ theorem leaf_localization (γ δ κ : ℝ) (N : ℕ) (U : ℝ)
         (∫ α in truncatedDomain (F γ N ^ (6 * δ)) (F γ N),
           ‖Sp (F γ N ^ (6 * δ)) (F γ N) α ^ 2 *
             (Kfun (calE γ κ N ^ (-(1 / 8 : ℝ))) α : ℂ)‖) := by
-  sorry
+  exact UpJ200.Localization446.leaf_localization_supplied γ δ κ N U hU hΔ hsup
 
 /-- Page 366 after display 27. The logarithms and inverse kernel width
 are subpowers of X and are absorbed in a positive delta power. -/

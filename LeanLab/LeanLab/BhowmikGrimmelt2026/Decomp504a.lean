@@ -608,45 +608,4 @@ theorem character_zero_finset504 {q : ℕ} [NeZero q] (χ : DirichletCharacter �
         (χ.LFunction_apply_one_ne_zero hχ) T
   exact ⟨hfinite.toFinset, fun ρ => Set.Finite.mem_toFinset hfinite⟩
 
-/-- LEAF: P0029 page 11, display 3.5, the sharp truncated explicit formula input.
-This is a standard sufficient input beyond the survey's smoothed centre formula.
-Choose a truncation height between X and twice X. List every nontrivial zero through that
-height once and weight it by its analytic multiplicity. The sharp character Chebyshev sum
-has the principal main term minus these zero modes, with a uniform logarithmic remainder.
-The zero bound keeps zeros away from both edges of the strip through the functional equation.
-OPEN: the uniform contour shift for sharp partial sums. -/
-theorem psi_zero_expansion504 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 2 ≤ X → ∀ (q : ℕ) [NeZero q],
-      q ≤ Nat.sqrt X → ∀ χ : DirichletCharacter ℂ q,
-      ∃ T ∈ Set.Icc (X : ℝ) (2 * (X : ℝ)), ∃ Z : Finset ℂ,
-        (∀ ρ : ℂ, ρ ∈ Z ↔ DirichletCharacter.LFunction χ ρ = 0 ∧
-          0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) ∧
-        ∀ n : ℕ, 1 ≤ n → n ≤ X →
-          ‖(∑ m ∈ Finset.range (n + 1),
-              (ArithmeticFunction.vonMangoldt m : ℂ) * χ (m : ZMod q)) -
-            (if χ = 1 then (n : ℂ) else 0) +
-            ∑ ρ ∈ Z, (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ‖ ≤ C * Real.log X ^ 2 := by
-  sorry
-
-/-- LEAF: P0029 pages 11 and 12, displays 3.4 through 3.7.
-CONDITIONAL on the displayed sharp character explicit formula.
-The remaining step estimates the oscillatory zero modes after partial summation, then uses
-character orthogonality, Gauss sums and the Dirichlet arc width. Applying a norm bound to
-psi before partial summation gives the wrong frequency loss and is not a proof of this leaf.
-OPEN: the uniform oscillatory zero mode estimate and character assembly. -/
-theorem major_arc_partial_summation504 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ)
-    (hpsi : ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 2 ≤ X → ∀ (q : ℕ) [NeZero q],
-      q ≤ Nat.sqrt X → ∀ χ : DirichletCharacter ℂ q,
-      ∃ T ∈ Set.Icc (X : ℝ) (2 * (X : ℝ)), ∃ Z : Finset ℂ,
-        (∀ ρ : ℂ, ρ ∈ Z ↔ DirichletCharacter.LFunction χ ρ = 0 ∧
-          0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) ∧
-        ∀ n : ℕ, 1 ≤ n → n ≤ X →
-          ‖(∑ m ∈ Finset.range (n + 1),
-              (ArithmeticFunction.vonMangoldt m : ℂ) * χ (m : ZMod q)) -
-            (if χ = 1 then (n : ℂ) else 0) +
-            ∑ ρ ∈ Z, (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ‖ ≤ C * Real.log X ^ 2) :
-    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 2 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε) := by
-  sorry
-
 end LeanLab.BhowmikGrimmelt2026

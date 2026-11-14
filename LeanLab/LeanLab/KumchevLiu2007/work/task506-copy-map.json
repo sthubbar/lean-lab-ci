@@ -1,0 +1,632 @@
+[
+  {
+    "source": "Task129.series2",
+    "copy": "Task506aTask129.series2",
+    "lines": 2
+  },
+  {
+    "source": "Task129b.intervalNumbers",
+    "copy": "Task506aTask129b.intervalNumbers",
+    "lines": 1
+  },
+  {
+    "source": "Task129b.product2",
+    "copy": "Task506aTask129b.product2",
+    "lines": 2
+  },
+  {
+    "source": "Task129b.smoothWeight",
+    "copy": "Task506aTask129b.smoothWeight",
+    "lines": 2
+  },
+  {
+    "source": "Task129b.tail2",
+    "copy": "Task506aTask129b.tail2",
+    "lines": 2
+  },
+  {
+    "source": "Task129b.mean_square_add",
+    "copy": "Task506aTask129b.mean_square_add",
+    "lines": 11
+  },
+  {
+    "source": "Task129b.A2_eq_zero_of_not_squarefree",
+    "copy": "Task506aTask129b.A2_eq_zero_of_not_squarefree",
+    "lines": 2
+  },
+  {
+    "source": "Task129b.A2_periodic",
+    "copy": "Task506aTask129b.A2_periodic",
+    "lines": 19
+  },
+  {
+    "source": "Task129b.A2_orthogonal",
+    "copy": "Task506aTask129b.A2_orthogonal",
+    "lines": 70
+  },
+  {
+    "source": "Task129b.periodic_zero_mean_interval",
+    "copy": "Task506aTask129b.periodic_zero_mean_interval",
+    "lines": 25
+  },
+  {
+    "source": "Task129b.A2_interval_bound",
+    "copy": "Task506aTask129b.A2_interval_bound",
+    "lines": 9
+  },
+  {
+    "source": "Task129b.A2_prime_root_count",
+    "copy": "Task506aTask129b.A2_prime_root_count",
+    "lines": 95
+  },
+  {
+    "source": "Task129b.nonzero_square_roots_le_two",
+    "copy": "Task506aTask129b.nonzero_square_roots_le_two",
+    "lines": 11
+  },
+  {
+    "source": "Task129b.A2_prime_norm_bound",
+    "copy": "Task506aTask129b.A2_prime_norm_bound",
+    "lines": 20
+  },
+  {
+    "source": "Task129b.A2_prime_norm_le_inv_add",
+    "copy": "Task506aTask129b.A2_prime_norm_le_inv_add",
+    "lines": 17
+  },
+  {
+    "source": "Task271a.ee_add_real",
+    "copy": "Task506aTask271a.ee_add_real",
+    "lines": 6
+  },
+  {
+    "source": "Task271a.ee_int_add",
+    "copy": "Task506aTask271a.ee_int_add",
+    "lines": 7
+  },
+  {
+    "source": "Task271a.crt_coprime",
+    "copy": "Task506aTask271a.crt_coprime",
+    "lines": 12
+  },
+  {
+    "source": "Task271a.coprime_of_mod",
+    "copy": "Task506aTask271a.coprime_of_mod",
+    "lines": 4
+  },
+  {
+    "source": "Task271a.crt_image_mem",
+    "copy": "Task506aTask271a.crt_image_mem",
+    "lines": 12
+  },
+  {
+    "source": "Task271a.crt_injOn",
+    "copy": "Task506aTask271a.crt_injOn",
+    "lines": 49
+  },
+  {
+    "source": "Task271a.card_filter_coprime",
+    "copy": "Task506aTask271a.card_filter_coprime",
+    "lines": 7
+  },
+  {
+    "source": "Task271a.crt_residue_bij",
+    "copy": "Task506aTask271a.crt_residue_bij",
+    "lines": 16
+  },
+  {
+    "source": "Task271a.sum_units_mul",
+    "copy": "Task506aTask271a.sum_units_mul",
+    "lines": 32
+  },
+  {
+    "source": "Task271a.sum_residue_reindex",
+    "copy": "Task506aTask271a.sum_residue_reindex",
+    "lines": 10
+  },
+  {
+    "source": "Task271a.ee_nat_period",
+    "copy": "Task506aTask271a.ee_nat_period",
+    "lines": 22
+  },
+  {
+    "source": "Task271a.ee_nat_period_neg",
+    "copy": "Task506aTask271a.ee_nat_period_neg",
+    "lines": 23
+  },
+  {
+    "source": "Task271a.ee_sq_split",
+    "copy": "Task506aTask271a.ee_sq_split",
+    "lines": 12
+  },
+  {
+    "source": "Task271a.ee_neg_split",
+    "copy": "Task506aTask271a.ee_neg_split",
+    "lines": 12
+  },
+  {
+    "source": "Task271a.ee_nat_period'",
+    "copy": "Task506aTask271a.ee_nat_period'",
+    "lines": 5
+  },
+  {
+    "source": "Task271a.sum_units_mul_raw",
+    "copy": "Task506aTask271a.sum_units_mul_raw",
+    "lines": 7
+  },
+  {
+    "source": "Task271a.inner_mul",
+    "copy": "Task506aTask271a.inner_mul",
+    "lines": 131
+  },
+  {
+    "source": "Task271a.A2_eq_double",
+    "copy": "Task506aTask271a.A2_eq_double",
+    "lines": 13
+  },
+  {
+    "source": "Task271a.A2_mul_coprime",
+    "copy": "Task506aTask271a.A2_mul_coprime",
+    "lines": 23
+  },
+  {
+    "source": "Task271a.A2_one",
+    "copy": "Task506aTask271a.A2_one",
+    "lines": 5
+  },
+  {
+    "source": "Task271a.A2_prod_primes",
+    "copy": "Task506aTask271a.A2_prod_primes",
+    "lines": 18
+  },
+  {
+    "source": "Task271a.prod_expansion",
+    "copy": "Task506aTask271a.prod_expansion",
+    "lines": 22
+  },
+  {
+    "source": "Task271a.squarefree_prod_primes",
+    "copy": "Task506aTask271a.squarefree_prod_primes",
+    "lines": 15
+  },
+  {
+    "source": "Task271a.sum_smooth_eq_subsets",
+    "copy": "Task506aTask271a.sum_smooth_eq_subsets",
+    "lines": 53
+  },
+  {
+    "source": "Task271a.mem_primes_iff",
+    "copy": "Task506aTask271a.mem_primes_iff",
+    "lines": 11
+  },
+  {
+    "source": "Task271a.smoothWeight_eq_indicator",
+    "copy": "Task506aTask271a.smoothWeight_eq_indicator",
+    "lines": 17
+  },
+  {
+    "source": "Task271a.sum_smoothWeight_eq",
+    "copy": "Task506aTask271a.sum_smoothWeight_eq",
+    "lines": 31
+  },
+  {
+    "source": "Task271a.smooth_sum_Icc",
+    "copy": "Task506aTask271a.smooth_sum_Icc",
+    "lines": 7
+  },
+  {
+    "source": "Task271a.series_tail_eq",
+    "copy": "Task506aTask271a.series_tail_eq",
+    "lines": 59
+  },
+  {
+    "source": "Task271a.product2_eq_subsets",
+    "copy": "Task506aTask271a.product2_eq_subsets",
+    "lines": 6
+  },
+  {
+    "source": "Task271a.rem_eq_subset_tail",
+    "copy": "Task506aTask271a.rem_eq_subset_tail",
+    "lines": 27
+  },
+  {
+    "source": "Task271a.prod_le_prod_real",
+    "copy": "Task506aTask271a.prod_le_prod_real",
+    "lines": 15
+  },
+  {
+    "source": "Task271a.A2_norm_le",
+    "copy": "Task506aTask271a.A2_norm_le",
+    "lines": 13
+  },
+  {
+    "source": "Task271a.prod_add_expansion",
+    "copy": "Task506aTask271a.prod_add_expansion",
+    "lines": 19
+  },
+  {
+    "source": "Task271a.subset_tail_rankin",
+    "copy": "Task506aTask271a.subset_tail_rankin",
+    "lines": 65
+  },
+  {
+    "source": "Task271a.prod_one_add_le_exp",
+    "copy": "Task506aTask271a.prod_one_add_le_exp",
+    "lines": 15
+  },
+  {
+    "source": "Task271a.weight_pow_le",
+    "copy": "Task506aTask271a.weight_pow_le",
+    "lines": 19
+  },
+  {
+    "source": "Task271a.euler_product_le",
+    "copy": "Task506aTask271a.euler_product_le",
+    "lines": 13
+  },
+  {
+    "source": "Task271a.one_div_succ_le_log_sub",
+    "copy": "Task506aTask271a.one_div_succ_le_log_sub",
+    "lines": 10
+  },
+  {
+    "source": "Task271a.sum_Icc_one_div_le",
+    "copy": "Task506aTask271a.sum_Icc_one_div_le",
+    "lines": 12
+  },
+  {
+    "source": "Task271a.card_primes_block_le",
+    "copy": "Task506aTask271a.card_primes_block_le",
+    "lines": 35
+  },
+  {
+    "source": "Task271a.log2_spec",
+    "copy": "Task506aTask271a.log2_spec",
+    "lines": 6
+  },
+  {
+    "source": "Task271a.prime_sum_inv_le",
+    "copy": "Task506aTask271a.prime_sum_inv_le",
+    "lines": 115
+  },
+  {
+    "source": "Task271a.log_le_rpow_div",
+    "copy": "Task506aTask271a.log_le_rpow_div",
+    "lines": 8
+  },
+  {
+    "source": "Task271a.logu_add_two_le",
+    "copy": "Task506aTask271a.logu_add_two_le",
+    "lines": 14
+  },
+  {
+    "source": "Task271a.rpow_mul_self",
+    "copy": "Task506aTask271a.rpow_mul_self",
+    "lines": 5
+  },
+  {
+    "source": "Task271a.rpow_threshold",
+    "copy": "Task506aTask271a.rpow_threshold",
+    "lines": 6
+  },
+  {
+    "source": "Task271a.remainder_le_majorant",
+    "copy": "Task506aTask271a.remainder_le_majorant",
+    "lines": 40
+  },
+  {
+    "source": "Task271a.majorant_le",
+    "copy": "Task506aTask271a.majorant_le",
+    "lines": 100
+  },
+  {
+    "source": "Task271a.rpow_le_rpow_of_le_one",
+    "copy": "Task506aTask271a.rpow_le_rpow_of_le_one",
+    "lines": 6
+  },
+  {
+    "source": "Task271a.one_add_log_le",
+    "copy": "Task506aTask271a.one_add_log_le",
+    "lines": 18
+  },
+  {
+    "source": "Task271a.sigma_mul_le_one",
+    "copy": "Task506aTask271a.sigma_mul_le_one",
+    "lines": 79
+  },
+  {
+    "source": "Task271a.exp_majorant_le",
+    "copy": "Task506aTask271a.exp_majorant_le",
+    "lines": 35
+  },
+  {
+    "source": "Task271a.interval_card_le",
+    "copy": "Task506aTask271a.interval_card_le",
+    "lines": 6
+  },
+  {
+    "source": "Task271a.smooth_remainder_pointwise",
+    "copy": "Task506aTask271a.smooth_remainder_pointwise",
+    "lines": 174
+  },
+  {
+    "source": "Task271a.truncation_from_pointwise",
+    "copy": "Task506aTask271a.truncation_from_pointwise",
+    "lines": 23
+  },
+  {
+    "source": "Task271b.norm_sum_sq_split",
+    "copy": "Task506aTask271b.norm_sum_sq_split",
+    "lines": 20
+  },
+  {
+    "source": "Task271b.smoothWeight_norm_le_one",
+    "copy": "Task506aTask271b.smoothWeight_norm_le_one",
+    "lines": 5
+  },
+  {
+    "source": "Task271b.sum_inv_sq_Ioc_le",
+    "copy": "Task506aTask271b.sum_inv_sq_Ioc_le",
+    "lines": 32
+  },
+  {
+    "source": "Task271b.quarter_power_absorption",
+    "copy": "Task506aTask271b.quarter_power_absorption",
+    "lines": 24
+  },
+  {
+    "source": "Task292a.localMajorant",
+    "copy": "Task506aTask292a.localMajorant",
+    "lines": 2
+  },
+  {
+    "source": "Task292a.ee_add_292a",
+    "copy": "Task506aTask292a.ee_add_292a",
+    "lines": 6
+  },
+  {
+    "source": "Task292a.A2_pair_form",
+    "copy": "Task506aTask292a.A2_pair_form",
+    "lines": 26
+  },
+  {
+    "source": "Task292a.ee_eq_stdAddChar_292a",
+    "copy": "Task506aTask292a.ee_eq_stdAddChar_292a",
+    "lines": 7
+  },
+  {
+    "source": "Task292a.sum_units_eq_sum_zmod_units",
+    "copy": "Task506aTask292a.sum_units_eq_sum_zmod_units",
+    "lines": 23
+  },
+  {
+    "source": "Task292a.stdAddChar_crt_split",
+    "copy": "Task506aTask292a.stdAddChar_crt_split",
+    "lines": 29
+  },
+  {
+    "source": "Task292a.stdAddChar_crt_split'",
+    "copy": "Task506aTask292a.stdAddChar_crt_split'",
+    "lines": 20
+  },
+  {
+    "source": "Task292a.pair_form_zmod",
+    "copy": "Task506aTask292a.pair_form_zmod",
+    "lines": 23
+  },
+  {
+    "source": "Task292a.sum_units_mul_shift",
+    "copy": "Task506aTask292a.sum_units_mul_shift",
+    "lines": 22
+  },
+  {
+    "source": "Task292a.gcdB_isUnit",
+    "copy": "Task506aTask292a.gcdB_isUnit",
+    "lines": 13
+  },
+  {
+    "source": "Task292a.gcdA_isUnit",
+    "copy": "Task506aTask292a.gcdA_isUnit",
+    "lines": 13
+  },
+  {
+    "source": "Task292a.sum_units_crt_transport",
+    "copy": "Task506aTask292a.sum_units_crt_transport",
+    "lines": 43
+  },
+  {
+    "source": "Task292a.cast_crt_symm_fst",
+    "copy": "Task506aTask292a.cast_crt_symm_fst",
+    "lines": 8
+  },
+  {
+    "source": "Task292a.cast_crt_symm_snd",
+    "copy": "Task506aTask292a.cast_crt_symm_snd",
+    "lines": 8
+  },
+  {
+    "source": "Task292a.quadruple_sum_mul",
+    "copy": "Task506aTask292a.quadruple_sum_mul",
+    "lines": 11
+  },
+  {
+    "source": "Task292a.V_term_factor",
+    "copy": "Task506aTask292a.V_term_factor",
+    "lines": 34
+  },
+  {
+    "source": "Task292a.V_coprime_mul",
+    "copy": "Task506aTask292a.V_coprime_mul",
+    "lines": 81
+  },
+  {
+    "source": "Task292a.A2_sum_eq_V",
+    "copy": "Task506aTask292a.A2_sum_eq_V",
+    "lines": 8
+  },
+  {
+    "source": "Task292a.A2_zero_292a",
+    "copy": "Task506aTask292a.A2_zero_292a",
+    "lines": 2
+  },
+  {
+    "source": "Task292a.A2_coprime_mul",
+    "copy": "Task506aTask292a.A2_coprime_mul",
+    "lines": 29
+  },
+  {
+    "source": "Task292a.prime_coefficient_bound",
+    "copy": "Task506aTask292a.prime_coefficient_bound",
+    "lines": 3
+  },
+  {
+    "source": "Task292a.squarefree_factorization",
+    "copy": "Task506aTask292a.squarefree_factorization",
+    "lines": 6
+  },
+  {
+    "source": "Task292a.coefficient_product_bound",
+    "copy": "Task506aTask292a.coefficient_product_bound",
+    "lines": 22
+  },
+  {
+    "source": "Task292a.pi_upper",
+    "copy": "Task506aTask292a.pi_upper",
+    "lines": 41
+  },
+  {
+    "source": "Task292a.pi_log_le",
+    "copy": "Task506aTask292a.pi_log_le",
+    "lines": 39
+  },
+  {
+    "source": "Task292a.sum_inv_prime_le",
+    "copy": "Task506aTask292a.sum_inv_prime_le",
+    "lines": 51
+  },
+  {
+    "source": "Task292a.log_sub_log_ge",
+    "copy": "Task506aTask292a.log_sub_log_ge",
+    "lines": 9
+  },
+  {
+    "source": "Task292a.inv_log_step",
+    "copy": "Task506aTask292a.inv_log_step",
+    "lines": 22
+  },
+  {
+    "source": "Task292a.range_H_le",
+    "copy": "Task506aTask292a.range_H_le",
+    "lines": 19
+  },
+  {
+    "source": "Task292a.V_bound",
+    "copy": "Task506aTask292a.V_bound",
+    "lines": 66
+  },
+  {
+    "source": "Task292a.V_le_four",
+    "copy": "Task506aTask292a.V_le_four",
+    "lines": 12
+  },
+  {
+    "source": "Task292a.core",
+    "copy": "Task506aTask292a.core",
+    "lines": 122
+  },
+  {
+    "source": "Task292a.localMajorant_log_bound",
+    "copy": "Task506aTask292a.localMajorant_log_bound",
+    "lines": 30
+  },
+  {
+    "source": "Task292a.reciprocal_square_tail",
+    "copy": "Task506aTask292a.reciprocal_square_tail",
+    "lines": 46
+  },
+  {
+    "source": "Task292a.diagonal_bound",
+    "copy": "Task506aTask292a.diagonal_bound",
+    "lines": 45
+  },
+  {
+    "source": "Task292b.complete_period_majorant",
+    "copy": "Task506aTask292b.complete_period_majorant",
+    "lines": 18
+  },
+  {
+    "source": "Task342a.reduced_sum_zmod",
+    "copy": "Task506aTask342a.reduced_sum_zmod",
+    "lines": 23
+  },
+  {
+    "source": "Task342a.A2_zmod_formula",
+    "copy": "Task506aTask342a.A2_zmod_formula",
+    "lines": 28
+  },
+  {
+    "source": "Task342a.unit_character_sum_conj",
+    "copy": "Task506aTask342a.unit_character_sum_conj",
+    "lines": 21
+  },
+  {
+    "source": "Task342a.A2_conj",
+    "copy": "Task506aTask342a.A2_conj",
+    "lines": 12
+  },
+  {
+    "source": "Task342b.local_factor_power",
+    "copy": "Task506aTask342b.local_factor_power",
+    "lines": 10
+  },
+  {
+    "source": "Task342b.localMajorant_power_bound",
+    "copy": "Task506aTask342b.localMajorant_power_bound",
+    "lines": 46
+  },
+  {
+    "source": "Task342b.majorant_sum_bound",
+    "copy": "Task506aTask342b.majorant_sum_bound",
+    "lines": 22
+  },
+  {
+    "source": "Task342b.majorant_pair_sum",
+    "copy": "Task506aTask342b.majorant_pair_sum",
+    "lines": 32
+  },
+  {
+    "source": "Task342c.A2_conjugate_interval_bound",
+    "copy": "Task506aTask342c.A2_conjugate_interval_bound",
+    "lines": 6
+  },
+  {
+    "source": "Task342c.weighted_pair_interval",
+    "copy": "Task506aTask342c.weighted_pair_interval",
+    "lines": 38
+  },
+  {
+    "source": "Task342c.off_diagonal_power_bound",
+    "copy": "Task506aTask342c.off_diagonal_power_bound",
+    "lines": 31
+  },
+  {
+    "source": "Task342c.off_diagonal_bound",
+    "copy": "Task506aTask342c.off_diagonal_bound",
+    "lines": 18
+  },
+  {
+    "source": "Task342c.tail_mean_square_input",
+    "copy": "Task506aTask342c.tail_mean_square_input",
+    "lines": 33
+  },
+  {
+    "source": "Task342e.truncation_input",
+    "copy": "Task506aTask342e.truncation_input",
+    "lines": 8
+  },
+  {
+    "source": "Task342e.lemma38_two_proved",
+    "copy": "Task506aTask342e.lemma38_two_proved",
+    "lines": 34
+  }
+]

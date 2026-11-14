@@ -12,6 +12,7 @@ lower bound from this leaf exactly as before.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Statements
+import LeanLab.BhowmikGrimmelt2026.Decomp515a
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -19,10 +20,11 @@ namespace LeanLab.BhowmikGrimmelt2026
 "in the best case we could hope for Θ = 1/2".  The lower limit one half rests on Hardy 1914,
 Sur les zeros de la fonction zeta de Riemann, which proves infinitely many zeros on the critical
 line; this leaf states one.  The survey does not cite Hardy 1914, so the citation is to Hardy's
-paper directly.  CITED and OPEN.
+paper directly. CITED and CONDITIONAL on the base Mellin transform, differentiation
+under its integral, and the theta cusp limit in Decomp515a.
 AI wrote the Lean code. Goldbach is open. -/
 theorem hardy_critical_line_zero150 :
     ∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0 := by
-  sorry
+  exact hardy_critical_line_zero515
 
 end LeanLab.BhowmikGrimmelt2026

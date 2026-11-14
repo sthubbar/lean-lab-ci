@@ -1,3 +1,4 @@
+import LeanLab.ExceptionalSet.UpJ200.Decomp509a
 import LeanLab.ExceptionalSet.DecompJ200
 import LeanLab.ExceptionalSet.BrudernPerelliExplicit
 
@@ -152,35 +153,7 @@ theorem window_subset_Ioc (γ : ℝ) (hγ : 1 < γ) (N : ℕ) (hN : 16 ≤ N) :
   exact Finset.mem_Ioc.mpr ⟨window_lower γ hγ N hN n hn,
     window_upper γ hγ N (by omega) n hn⟩
 
-/-- P0082 page 357, the prime sum preceding display 6. Its integer frequencies
-make it periodic with period one, as required by the Fourier coefficient argument. -/
-theorem Sp_periodic (P X : ℝ) : Function.Periodic (Sp P X) 1 := by
-  intro α
-  unfold Sp
-  apply Finset.sum_congr rfl
-  intro p hp
-  have he : eC ((α + 1) * (p : ℝ)) = eC (α * (p : ℝ)) := by
-    unfold eC
-    push_cast
-    rw [show (2 * (Real.pi : ℂ) * Complex.I * (((α : ℂ) + 1) * (p : ℂ))) =
-      2 * (Real.pi : ℂ) * Complex.I * ((α : ℂ) * (p : ℂ)) + (p : ℂ) * (2 * Real.pi * Complex.I) by ring]
-    rw [Complex.exp_add, Complex.exp_nat_mul_two_pi_mul_I, mul_one]
-  rw [he]
 
-/-- P0082 page 357 major arc definition. Translation by one shifts the integer
-numerator by its denominator and preserves both coprimality and arc width. -/
-theorem majorArcs_periodic (P X : ℝ) : Function.Periodic (majorArcs P X) 1 := by
-  intro α
-  apply propext
-  constructor
-  · rintro ⟨q, a, hq, hqP, hcop, hclose⟩
-    refine ⟨q, a - q, hq, hqP, ?_, ?_⟩
-    · simpa only [Int.gcd_sub_self_left] using hcop
-    · convert hclose using 1 <;> push_cast <;> congr 1 <;> ring
-  · rintro ⟨q, a, hq, hqP, hcop, hclose⟩
-    refine ⟨q, a + q, hq, hqP, ?_, ?_⟩
-    · simpa only [Int.gcd_add_self_left] using hcop
-    · convert hclose using 1 <;> push_cast <;> congr 1 <;> ring
 
 /-- P0082 page 362 Lemma 7 versus page 365 Lemma 8. Every member of the
 literal floor window lies in the value window used for the coefficient lower bound. -/
@@ -205,7 +178,7 @@ theorem leaf_coefficient_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <
                 c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
             B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
-  sorry
+  exact UpJ200.MajorBoundLeavesJ200.leaf_major_coefficient_lower γ h1 h2
 
 /-- LEAF. P0082 page 364, display 23 and the next paragraph. Lemma 4 gives
 O of N times Delta plus N over calE boundary indices. Delta is calE to
@@ -217,7 +190,7 @@ theorem leaf_fractional_boundary (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨
             1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  exact UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
 
 /-- LEAF. P0082 pages 357 and 364, displays 8 and 23. Away from the fractional
 boundary both kernel weights are one. The major integral is the sum of the
@@ -230,7 +203,7 @@ theorem leaf_major_identity (γ δ κ : ℝ) (N n : ℕ)
     majorInt γ δ κ N n =
       R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n) +
         R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1) := by
-  sorry
+  exact DecompJ200.leaf_major_identity γ δ κ N n hΔ hΔ1 hleft hright
 
 /-- Assembly. P0082 page 365, Lemma 8, with the exact statement of
 DecompJ200.leaf_major_bound. Conditional on the three open leaves above. -/

@@ -1,3 +1,4 @@
+import LeanLab.ExceptionalSet.Decomp464j
 import LeanLab.ExceptionalSet.Decomp371d
 import LeanLab.ExceptionalSet.Decomp404b
 
@@ -21,7 +22,7 @@ theorem leaf_product_integrable (h K : ℝ → ℂ) (hper : Function.Periodic h 
     (hh : IntervalIntegrable h volume 0 1) (hK : Integrable K) (hcont : Continuous K)
     (hsupp : ∀ α : ℝ, 1 < |α| → ftR K α = 0) :
     Integrable (fun α : ℝ => h α * K α) := by
-  sorry
+  exact Decomp464j.product_integrable_supplied h K hper hh hK hcont hsupp
 
 /-- Assembly. P0082 page 356, first proof display of Lemma 1.
 This is the exact existing Decomp371d.leaf_fold statement. The integral

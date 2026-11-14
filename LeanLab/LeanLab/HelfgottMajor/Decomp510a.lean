@@ -240,4 +240,49 @@ theorem single_squared_mass_le_full_mass (q : ℕ) [NeZero q]
           ‖gaussianMellin δ z.val‖ ^ 2)
       (fun z _ => mul_nonneg (Nat.cast_nonneg _) (sq_nonneg _)) (Finset.mem_univ ρ)
 
+/-- A single zero with the externally tested mass rules out the old full mass split.
+Derived audit of the lab leaf associated with P0014 pages 39 and 40.
+CONDITIONAL ON the supplied zero and norm certificate. This is not a paper theorem refutation. -/
+theorem full_mass_bound_fails_of_single_zero (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (δ T : ℝ)
+    (ρ : ZeroCount1623.ZeroIdx χ T) (hlarge : 3.94 ≤ ‖gaussianMellin δ ρ.val‖ ^ 2) :
+    ¬ (∑' z : ZeroCount1623.ZeroIdx χ T,
+      (analyticOrderNatAt (DirichletCharacter.LFunction χ) z.val : ℝ) *
+        ‖gaussianMellin δ z.val‖ ^ 2) ≤ Sec45.nTwo + Sec45.nLog := by
+  have hsingle := single_squared_mass_le_full_mass q χ hχ δ T ρ
+  have hbudget : Sec45.nTwo + Sec45.nLog < 2.834 := by
+    have htwo : Sec45.nTwo < 0.886227 := by
+      unfold Sec45.nTwo
+      linarith [Sec45.sqrt_pi_lt]
+    linarith [Sec45.nLog_le]
+  intro hbound
+  linarith
+
+/-- The character hypotheses for the modulo 163 sampling audit are inhabited.
+Derived source audit support for P0014 pages 39 and 40.
+This proves the character facts and no assertion about its zeros. -/
+theorem exists_primitive_odd_mod163 :
+    ∃ χ : DirichletCharacter ℂ 163, χ.IsPrimitive ∧ χ ≠ 1 ∧ χ.Odd := by
+  let _ : Fact (Nat.Prime 163) := ⟨by norm_num⟩
+  let χ : DirichletCharacter ℂ 163 :=
+    (quadraticChar (ZMod 163)).ringHomComp (Int.castRingHom ℂ)
+  have hχ : χ ≠ 1 := by
+    apply (MulChar.ringHomComp_ne_one_iff (Int.cast_injective (α := ℂ))).mpr
+    exact quadraticChar_ne_one
+      (by rw [ZMod.ringChar_zmod_n]; decide : ringChar (ZMod 163) ≠ 2)
+  have hodd : χ.Odd := by
+    have hs : quadraticChar (ZMod 163) (-1) = -1 := by
+      rw [quadraticChar_neg_one
+        (by rw [ZMod.ringChar_zmod_n]; decide : ringChar (ZMod 163) ≠ 2)]
+      norm_num [ZMod.χ₄_nat_eq_if_mod_four]
+    change (Int.castRingHom ℂ) (quadraticChar (ZMod 163) (-1)) = -1
+    rw [hs]
+    simp
+  refine ⟨χ, ?_, hχ, hodd⟩
+  change DirichletCharacter.conductor χ = 163
+  rcases (Nat.dvd_prime (by norm_num : Nat.Prime 163)).mp
+    (DirichletCharacter.conductor_dvd_level χ) with h | h
+  · exact False.elim (hχ (DirichletCharacter.eq_one_iff_conductor_eq_one.mpr h))
+  · exact h
+
 end LeanLab.HelfgottMajor.Decomp510a

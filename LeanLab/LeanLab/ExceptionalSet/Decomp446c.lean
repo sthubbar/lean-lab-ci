@@ -1,3 +1,5 @@
+import LeanLab.ExceptionalSet.UpJ200.Decomp450e
+import LeanLab.ExceptionalSet.UpJ200.Decomp450e
 import LeanLab.ExceptionalSet.PhaseInterval446
 
 /-!
@@ -23,7 +25,7 @@ theorem leaf_frequency_range (γ δ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
       F γ N ^ (3 * δ - 1) < |t| → |t| ≤ 2 * F γ N ^ (6 * δ) →
         F γ (2 * (N / 2 : ℕ)) ^ (-(1 - 2 * δ)) ≤ |t| ∧
           |t| ≤ F γ (N / 2 : ℕ) ^ (12 * δ) := by
-  sorry
+  exact UpJ200.Decomp450e.frequency_range_supplied γ δ h1 h2 hδ hδsmall
 
 /-- LEAF. P0082 page 366, common kappa rescaling after Theorem 2.
 A positive dyadic exponential saving absorbs the two endpoint terms.
@@ -34,7 +36,7 @@ theorem leaf_decay_rescale (γ η B : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
       ∀ N : ℕ, N₀ ≤ N →
         B * (N / 2 : ℕ) * Real.exp (-η * Real.log (N / 2 : ℕ) ^ (3 - 2 * γ)) + 2 ≤
           C * N * calE γ κ N ^ (-(3 / 2 : ℝ)) := by
-  sorry
+  exact UpJ200.Decomp450c.decay_rescale_supplied γ η B h1 h2 hη hB
 
 /-- Assembly. P0082 page 366, exact existing Decomp428d.leaf_far_phase.
 The two scalar leaves and the existing Theorem 2 proof through the cited
