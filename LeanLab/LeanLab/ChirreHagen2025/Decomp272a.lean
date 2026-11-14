@@ -1,3 +1,4 @@
+import LeanLab.ChirreHagen2025.SeriesBounds297
 import LeanLab.ChirreHagen2025.Statements
 
 /-!
@@ -21,7 +22,21 @@ HasSum records convergence as well as the identity. -/
 theorem laurent_series (t : ℝ) (ht : 0 < t) (htop : t ≤ 1 / 2) :
     HasSum (fun n : ℕ => laurentCoeff n * ((t : ℂ) * Complex.I) ^ n)
       (riemannZeta (1 + t * Complex.I) - 1 / (t * Complex.I)) := by
-  sorry
+  have heq (z : ℂ) : regularPart z = riemannZeta₀ (1 + z) := by
+    by_cases hz : z = 0
+    · simp [regularPart, hz]
+    · simp [regularPart, riemannZeta₀, hz, show (1 : ℂ) + z ≠ 1 by simpa using hz,
+        one_div]
+  have hent : Differentiable ℂ regularPart := by
+    simp_rw [show regularPart = fun z => riemannZeta₀ (1 + z) from funext heq]
+    exact differentiable_riemannZeta₀.comp (differentiable_const 1 |>.add differentiable_id)
+  have hsum (z : ℂ) : HasSum (fun n : ℕ => laurentCoeff n * z ^ n) (regularPart z) := by
+    convert Complex.hasSum_taylorSeries_of_entire hent 0 z using 1
+    ext n
+    simp [laurentCoeff, smul_eq_mul, div_eq_mul_inv]
+    ring
+  have hz : (t : ℂ) * Complex.I ≠ 0 := mul_ne_zero (by exact_mod_cast ht.ne') Complex.I_ne_zero
+  simpa only [regularPart, if_neg hz] using hsum ((t : ℂ) * Complex.I)
 
 /-- LEAF. P0075 page 5, text after equation 2.11 and the next display.
 Berndt's cited Stieltjes estimates give 4 over n pi to n for positive even n
@@ -43,7 +58,7 @@ theorem laurent_log_majorant (a : ℕ → ℂ) (z : ℂ) (t : ℝ)
       (if Even n then 4 else 2) / ((n : ℝ) * Real.pi ^ n)) :
     ‖z‖ ≤ 0.578 - 2 * Real.log (1 - 1 / (2 * Real.pi)) -
       Real.log (1 - 1 / (4 * Real.pi ^ 2)) := by
-  sorry
+  exact SeriesBounds297.laurent_log_majorant a z t ht htop hsum hzero hcoeff
 
 /-- LEAF. P0075 page 5, last inequality of the final display.
 Only the two real logarithms and pi remain. -/

@@ -1,3 +1,4 @@
+import LeanLab.ChirreHagen2025.ValueSplit358
 import LeanLab.ChirreHagen2025.Statements
 import LeanLab.ChirreHagen2025.Additional122
 
@@ -16,7 +17,7 @@ theorem leaf_split_n0 (n0 : ℕ) (hn0 : n0 = 26355867) :
       Real.log (p : ℝ) / (Real.sqrt (p : ℝ) * ((p : ℝ) - 1))) +
     (∑' p : {p : Nat.Primes // n0 < (p : ℕ)},
       Real.log (p : ℝ) / (Real.sqrt (p : ℝ) * ((p : ℝ) - 1))) := by
-  sorry
+  exact ValueSplit358.leaf_split_n0 n0 hn0
 
 /-- LEAF. P0075 page 13, bound the finite sum up to n0. -/
 theorem leaf_finite_sum_bound (n0 : ℕ) (hn0 : n0 = 26355867) :
@@ -42,13 +43,13 @@ theorem leaf_tail_sum_bound (n0 : ℕ) (hn0 : n0 = 26355867) :
 theorem leaf_integral_bound (n0 : ℕ) (hn0 : n0 = 26355867) :
     (∫ x in Set.Ioi (n0 : ℝ), Real.log (x * Real.log x) /
       (Real.sqrt (x * Real.log x) * (x * Real.log x - 1))) < 0.000104 := by
-  sorry
+  exact ValueSplit358.leaf_integral_bound n0 hn0
 
 /-- LEAF. P0075 page 13, summability of the series. -/
 theorem leaf_summability_lemma :
     Summable (fun p : Nat.Primes => Real.log (p : ℝ) /
       (Real.sqrt (p : ℝ) * ((p : ℝ) - 1))) := by
-  sorry
+  exact Summability272.part1_summable
 
 /-- P0075 Lemma A.1 part 1 assembled. -/
 theorem lemmaA1_part1_assembled : Additional122.lemmaA1_part1 := by

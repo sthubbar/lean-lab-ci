@@ -1,5 +1,4 @@
 import LeanLab.ChirreHagen2025.Additional122
-import LeanLab.ChirreHagen2025.DecompJ207
 
 /-!
 Convergence and series comparison from P0075 Lemma A.1, pages 13 and 14.
@@ -89,9 +88,8 @@ theorem prime_sum_le_part3 :
   have hpoint (p : Nat.Primes) :
       Real.log (p : ℝ) ^ 2 / ((p : ℝ) ^ 2 - 1) ≤
         Real.log (p : ℝ) ^ 2 / ((p : ℝ) ^ 2 - (p : ℝ)) := by
-    simpa [div_eq_mul_inv] using
-      mul_le_mul_of_nonneg_left (DecompJ207.prime_fraction_le p p.property)
-        (sq_nonneg (Real.log (p : ℝ)))
+    have hp : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast p.property.two_le
+    exact div_le_div_of_nonneg_left (sq_nonneg _) (by nlinarith) (by linarith)
   have hleft := part3_summable.of_nonneg_of_le (fun p => by
     have hp : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast p.property.two_le
     have hd : 0 < (p : ℝ) ^ 2 - 1 := by nlinarith

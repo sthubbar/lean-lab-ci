@@ -11,7 +11,8 @@ limits rest on (i) the base Mellin transform of the moment at order zero and (ii
 identification of the second derivative of that transform with the moment at order
 one.
 
-Both leaves are open.  The assembly below is sorry free and does not use the target.
+Both leaves use the existing open Mellin inputs in Decomp515a.
+The assembly below is conditional on those inputs and does not use the target.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.ZeroBoundLeaf150
@@ -21,20 +22,20 @@ namespace LeanLab.BhowmikGrimmelt2026
 open Real Filter Topology MeasureTheory Set
 open Complex
 
-/-- LEAF: the base Mellin transform, at order zero, of the weighted moment of `Xi`:
+/-- CONDITIONAL on hardy_mellin_base515. The base Mellin transform, at order zero, of the weighted moment of `Xi`:
 inside the strip the moment equals the cosine main term minus the theta correction.
 This is one identity in the parameter, and it is the transform step alone, with no
 differentiated moment. -/
 theorem hardy_mellin_base150 (α : ℝ) (hα : |α| < Real.pi / 2) :
     hardyMoment515 0 α = Real.pi * Real.cos (α / 4) - hardyThetaCorrection515 α := by
-  sorry
+  exact hardy_mellin_base515 α hα
 
-/-- LEAF: the differentiation step at order one: differentiating the moment of order
+/-- CONDITIONAL on hardy_mellin_differentiation515. The differentiation step at order one: differentiating the moment of order
 zero twice gives the moment of order one, inside the strip.  This is one identity,
 strictly weaker than the general even-order statement since only order one is asked. -/
 theorem hardy_moment_second_derivative150 (α : ℝ) (hα : |α| < Real.pi / 2) :
     iteratedDeriv 2 (hardyMoment515 0) α = hardyMoment515 1 α := by
-  sorry
+  simpa only [Nat.mul_one] using (hardy_mellin_differentiation515 1 α hα).2
 
 /-- The order one transform identity, from the two leaves above by the derivative
 test: near a point of the strip the theta correction is the cosine main term minus the

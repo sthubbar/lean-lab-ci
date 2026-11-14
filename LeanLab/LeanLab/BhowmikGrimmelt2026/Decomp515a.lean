@@ -1,21 +1,17 @@
 /-
 Hardy 1914, Comptes rendus 158, pages 1012 to 1014.
-The Mellin transform and weighted differentiation are separate analytic inputs.
+The unshifted theta formula and residue contour shift remain analytic inputs.
+Weighted differentiation and the corrected theta ray estimates are proved.
 Only the zeroth and second moments are needed for the one zero target.
 The theta boundary limit at every derivative order is proved from shifted Gaussian bounds.
 AI wrote the Lean code. Goldbach is open.
 -/
-import Mathlib
+import LeanLab.BhowmikGrimmelt2026.Decomp540a
 
 namespace LeanLab.BhowmikGrimmelt2026
 
 open Real Filter Topology MeasureTheory Set
 open Complex Asymptotics Metric Function
-
-/-- Hardy 1914 page 1012, the displayed definition of Xi. -/
-noncomputable def hardyXi515 (t : ℝ) : ℝ :=
-  -((1 / 4 : ℝ) + t ^ 2) / 2 *
-    (completedRiemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I)).re
 
 /-- Hardy 1914 page 1013, the left side of display 3. -/
 noncomputable def hardyMoment515 (p : ℕ) (α : ℝ) : ℝ :=
@@ -173,57 +169,58 @@ theorem contDiffAt_hardyThetaCorrection515 (n : ℕ) (α : ℝ) (hα : |α| < Re
     ((contDiffAt_const.mul
       (hexp.contDiffAt.comp α ((hof.contDiffAt.mul contDiffAt_const).div_const 4))).mul hr)
 
-/-- LEAF Hardy 1914 page 1013, display 2, from page 1012 display 1.
-The Mellin contour is shifted to real part one quarter before substituting
-`y = π * exp (I * α)`. This is the base transform, with no differentiated moments. -/
+/-- Hardy 1914 page 1013 display 2 from page 1012 display 1.
+CONDITIONAL on the exact unshifted theta formula and residue contour shift in Decomp540a. -/
 theorem hardy_mellin_base515 (α : ℝ) (hα : |α| < Real.pi / 2) :
     hardyMoment515 0 α = Real.pi * Real.cos (α / 4) - hardyThetaCorrection515 α := by
-  sorry
+  have he : expMoment540 hardyAmplitude540 0 α = hardyMoment515 0 α := by
+    rw [expMoment540, hardyMoment_eq_completed515, ← integral_const_mul]
+    apply integral_congr_ae
+    filter_upwards [] with t
+    simp only [expMomentIntegrand540, hardyAmplitude540, pow_zero, one_mul]
+    ring
+  have hs := hardy_shifted_contour540 α hα
+  rw [hardy_unshifted_theta540 α hα, he] at hs
+  have hre : (Complex.exp ((α : ℂ) * I / 4)).re = Real.cos (α / 4) := by
+    simp [Complex.exp_re]
+  have hr : (Complex.exp ((α : ℂ) * I / 4) * ((Real.pi : ℂ) *
+      (jacobiTheta (I * Complex.exp ((α : ℂ) * I)) - 1))).re =
+      2 * hardyThetaCorrection515 α - Real.pi * Real.cos (α / 4) := by
+    simp only [hardyThetaCorrection515, mul_sub, Complex.sub_re, Complex.mul_re, Complex.mul_im,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.one_re, Complex.one_im, hre]
+    ring
+  rw [hr] at hs
+  linarith
 
-/-- Hardy 1914 page 1013 display 2: continuity of the moment follows from its transform.
-CONDITIONAL on the base Mellin identity. -/
-theorem continuousAt_hardyMoment_zero515 (α : ℝ) (hα : |α| < Real.pi / 2) :
-    ContinuousAt (hardyMoment515 0) α := by
-  have he : hardyMoment515 0 =ᶠ[𝓝 α]
-      (fun β : ℝ => Real.pi * Real.cos (β / 4) - hardyThetaCorrection515 β) := by
-    filter_upwards [(isOpen_lt continuous_abs continuous_const).mem_nhds hα] with β hβ
-    exact hardy_mellin_base515 β hβ
-  exact ((by fun_prop : ContinuousAt (fun β : ℝ => Real.pi * Real.cos (β / 4)) α).sub
-    (continuousAt_hardyThetaCorrection515 α hα)).congr_of_eventuallyEq he
-
-/-- Hardy 1914 page 1013 displays 2 and 3: the order zero differentiation case.
-CONDITIONAL on the base Mellin identity, with no differentiated integral input. -/
-theorem hardy_mellin_differentiation_zero515 (α : ℝ) (hα : |α| < Real.pi / 2) :
-    ContDiffAt ℝ 0 (hardyMoment515 0) α ∧
-      iteratedDeriv 0 (hardyMoment515 0) α = hardyMoment515 0 α := by
-  refine ⟨contDiffAt_zero.mpr ?_, by simp⟩
-  refine ⟨{β : ℝ | |β| < Real.pi / 2},
-    (isOpen_lt continuous_abs continuous_const).mem_nhds hα, ?_⟩
-  intro β hβ
-  exact (continuousAt_hardyMoment_zero515 β hβ).continuousWithinAt
-
-/-- Hardy 1914 page 1013 displays 2 and 3: the base transform gives every local smoothness order.
-CONDITIONAL on the base Mellin identity. Weighted derivative identification is separate. -/
-theorem contDiffAt_hardyMoment_zero515 (n : ℕ) (α : ℝ) (hα : |α| < Real.pi / 2) :
-    ContDiffAt ℝ n (hardyMoment515 0) α := by
-  have he : hardyMoment515 0 =ᶠ[𝓝 α]
-      (fun β : ℝ => Real.pi * Real.cos (β / 4) - hardyThetaCorrection515 β) := by
-    filter_upwards [(isOpen_lt continuous_abs continuous_const).mem_nhds hα] with β hβ
-    exact hardy_mellin_base515 β hβ
-  exact ((by fun_prop : ContDiffAt ℝ n (fun β : ℝ => Real.pi * Real.cos (β / 4)) α).sub
-    (contDiffAt_hardyThetaCorrection515 n α hα)).congr_of_eventuallyEq he
-
-/-- LEAF Hardy 1914 page 1013, the differentiation step from display 2 to display 3.
-The strip margin gives the local domination needed to differentiate the integral.
-This states both the required smoothness and the resulting even derivative. -/
+/-- Hardy 1914 page 1013, differentiation from display 2 to display 3.
+Proved for every even order by the theta ray decay and dominated differentiation.
+No cited Mellin or contour input is used by this derivative theorem. -/
 theorem hardy_mellin_differentiation515 (p : ℕ) (α : ℝ)
     (hα : |α| < Real.pi / 2) :
     ContDiffAt ℝ (2 * p) (hardyMoment515 0) α ∧
       iteratedDeriv (2 * p) (hardyMoment515 0) α = hardyMoment515 p α := by
-  refine ⟨contDiffAt_hardyMoment_zero515 (2 * p) α hα, ?_⟩
-  cases p with
-  | zero => simp
-  | succ p => sorry
+  let φ : ℝ := (|α| + Real.pi / 2) / 2
+  have hφα : |α| < φ := by dsimp [φ]; linarith
+  have hφpos : 0 < φ := lt_of_le_of_lt (abs_nonneg α) hφα
+  have hφ : |φ| < Real.pi / 2 := by rw [abs_of_pos hφpos]; dsimp [φ]; linarith
+  obtain ⟨C, hC, hdecay⟩ := hardyAmplitude_decay540 φ hφ
+  have he (q : ℕ) : expMoment540 hardyAmplitude540 (2 * q) = hardyMoment515 q := by
+    funext β
+    rw [hardyMoment_eq_completed515, expMoment540, ← integral_const_mul]
+    apply integral_congr_ae
+    filter_upwards [] with t
+    simp only [expMomentIntegrand540, hardyAmplitude540, pow_mul,
+      neg_one_sq, one_pow, one_mul]
+    ring
+  have hzero : expMoment540 hardyAmplitude540 0 = hardyMoment515 0 := by simpa using he 0
+  have hd := (contDiffOn_expMoment540 hardyAmplitude540 continuous_hardyAmplitude540
+    φ C hC.le hdecay (2 * p) 0).contDiffAt
+      ((isOpen_lt continuous_abs continuous_const).mem_nhds hφα)
+  rw [hzero] at hd
+  have hi := iteratedDeriv_expMoment540 hardyAmplitude540 continuous_hardyAmplitude540
+    φ C hC.le hdecay (2 * p) α hφα
+  rw [hzero, he p] at hi
+  exact ⟨hd, hi⟩
 
 /-- Hardy 1914 page 1013, display 3: the even derivative of the cosine term. -/
 theorem hardy_cos_iteratedDeriv515 (p : ℕ) (α : ℝ) :
@@ -241,8 +238,8 @@ theorem hardy_cos_iteratedDeriv515 (p : ℕ) (α : ℝ) :
   rw [ha, one_div_pow]
   ring
 
-/-- Hardy 1914 page 1013, display 3, derived from the base transform and differentiation.
-CONDITIONAL on the two Mellin leaves. -/
+/-- Hardy 1914 page 1013 display 3, assembled from the base transform and proved differentiation.
+CONDITIONAL only on the two base contour inputs. -/
 theorem hardy_mellin_identity515 (p : ℕ) (α : ℝ) (hα : |α| < Real.pi / 2) :
     hardyMoment515 p α =
       (-1 : ℝ) ^ p * Real.pi / 4 ^ (2 * p) * Real.cos (α / 4) -
@@ -847,8 +844,8 @@ theorem hardy_zero_of_signs515 {a b : ℝ}
   obtain ⟨t, _, ht⟩ := intermediate_value_uIcc continuous_hardyXi515.continuousOn hz
   exact ⟨t, (hardyXi_eq_zero_iff515 t).mp ht⟩
 
-/-- Hardy 1914 page 1013, Section 3: one zero from the three analytic leaves.
-CONDITIONAL on the Mellin identity and the theta cusp limit. -/
+/-- Hardy 1914 page 1013 Section 3, one critical line zero from the interior moments.
+CONDITIONAL only on the two base contour inputs. Theta flatness and differentiation are proved. -/
 theorem hardy_critical_line_zero515 :
     ∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0 := by
   have hzero : Tendsto (hardyMoment515 0) (𝓝[<] (Real.pi / 2))
@@ -863,5 +860,28 @@ theorem hardy_critical_line_zero515 :
       (hardy_theta_flat515 1)
   obtain ⟨⟨a, _, ha⟩, ⟨b, _, hb⟩⟩ := hardyXi_signs_of_moment_limits515 hzero hone
   exact hardy_zero_of_signs515 ha hb
+
+/-- Hardy 1914 page 1013 display 2, continuity from the proved dominated differentiation theorem. -/
+theorem continuousAt_hardyMoment_zero515 (α : ℝ) (hα : |α| < Real.pi / 2) :
+    ContinuousAt (hardyMoment515 0) α := by
+  exact (hardy_mellin_differentiation515 0 α hα).1.continuousAt
+
+/-- Hardy 1914 page 1013 displays 2 and 3, the proved order zero case.
+The continuity supplier has no cited analytic input. -/
+theorem hardy_mellin_differentiation_zero515 (α : ℝ) (hα : |α| < Real.pi / 2) :
+    ContDiffAt ℝ 0 (hardyMoment515 0) α ∧
+      iteratedDeriv 0 (hardyMoment515 0) α = hardyMoment515 0 α := by
+  refine ⟨contDiffAt_zero.mpr ?_, by simp⟩
+  refine ⟨{β : ℝ | |β| < Real.pi / 2},
+    (isOpen_lt continuous_abs continuous_const).mem_nhds hα, ?_⟩
+  intro β hβ
+  exact (continuousAt_hardyMoment_zero515 β hβ).continuousWithinAt
+
+/-- Hardy 1914 page 1013 displays 2 and 3, every local finite smoothness order.
+The proof uses the dominated derivative theorem and no base transform. -/
+theorem contDiffAt_hardyMoment_zero515 (n : ℕ) (α : ℝ) (hα : |α| < Real.pi / 2) :
+    ContDiffAt ℝ n (hardyMoment515 0) α := by
+  exact (hardy_mellin_differentiation515 n α hα).1.of_le
+    (by exact_mod_cast (show n ≤ 2 * n by omega))
 
 end LeanLab.BhowmikGrimmelt2026

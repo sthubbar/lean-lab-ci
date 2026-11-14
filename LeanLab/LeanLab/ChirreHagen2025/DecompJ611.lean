@@ -1,3 +1,5 @@
+import LeanLab.ChirreHagen2025.FinitePrimePowers272
+import LeanLab.ChirreHagen2025.Decomp377c
 import LeanLab.ChirreHagen2025.Additional122
 import LeanLab.ChirreHagen2025.DecompJ207
 
@@ -16,14 +18,16 @@ theorem leaf_sum_split (x : ℝ) (hx : 10 ^ 13 ≤ x) :
       (∑ p ∈ Finset.filter Nat.Prime (Finset.Icc 1 ⌊x⌋₊), Real.log (p : ℝ) ^ 2 / (p : ℝ)) +
         (∑ p ∈ Finset.filter Nat.Prime (Finset.Icc 1 ⌊Real.sqrt x⌋₊),
           ∑ k ∈ Finset.Icc 2 ⌊Real.log x / Real.log (p : ℝ)⌋₊,
-            Real.log (p : ℝ) ^ 2 / (p : ℝ) ^ k) := sorry
+            Real.log (p : ℝ) ^ 2 / (p : ℝ) ^ k) := by
+  exact Decomp377c.leaf_sum_split x hx
 
 /-- LEAF. P0075 Lemma A.2, page 14: bound the sum over prime powers by the infinite series. -/
 theorem leaf_sum_prime_powers (x : ℝ) (hx : 10 ^ 13 ≤ x) :
     (∑ p ∈ Finset.filter Nat.Prime (Finset.Icc 1 ⌊Real.sqrt x⌋₊),
       ∑ k ∈ Finset.Icc 2 ⌊Real.log x / Real.log (p : ℝ)⌋₊,
         Real.log (p : ℝ) ^ 2 / (p : ℝ) ^ k) ≤
-          ∑' p : Nat.Primes, Real.log (p : ℝ) ^ 2 / ((p : ℝ) ^ 2 - (p : ℝ)) := sorry
+          ∑' p : Nat.Primes, Real.log (p : ℝ) ^ 2 / ((p : ℝ) ^ 2 - (p : ℝ)) := by
+  exact FinitePrimePowers272.leaf_sum_prime_powers x hx
 
 /-- LEAF. P0075 Lemma A.2, page 14: numerical bound for the sum over prime powers. -/
 theorem leaf_sum_prime_powers_bound :

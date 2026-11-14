@@ -1,5 +1,6 @@
 import LeanLab.RamareSaouter2003.Circle419
 import LeanLab.RamareSaouter2003.Decomp378c
+import LeanLab.RamareSaouter2003.Decomp537a
 
 /-!
 Rosser 1941 p. 224 and Backlund pp. 361 to 374.
@@ -4446,7 +4447,7 @@ theorem zeta_circle_bound (T φ : ℝ) (hT : 1400 ≤ T) (hφ : φ ∈ Set.Icc (
       Real.exp (logEnvelope T φ) ∧
     ‖riemannZeta ((1.32 : ℂ) * Complex.exp (φ * I) + 5 / 4 - T * I)‖ ≤
       Real.exp (logEnvelope T φ) := by
-  sorry
+  exact Decomp537a.circle_bound T φ hT
 
 /-- LEAF. Backlund p. 374, the three final gamma remainder estimates.
 Their sum is 1 over 3T plus 1 over 16T plus 1 over 8T, equal to 25 over 48T.

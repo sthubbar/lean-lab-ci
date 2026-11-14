@@ -1,0 +1,86 @@
+[
+  [
+    "log_three_bounds",
+    "The logarithm of three lies between 1.0986122 and 1.0986124",
+    "Backlund p. 367, derived logarithm certificate for the height-50 table",
+    "No premises. The interval comes from the finite log series with x equal to one fifth"
+  ],
+  [
+    "log_five_bounds",
+    "The logarithm of five lies between 1.6094378 and 1.6094380",
+    "Backlund p. 367, derived logarithm certificate",
+    "No premises. Use x equal to one ninth and the Mathlib log two bounds"
+  ],
+  [
+    "imaginary_two",
+    "The positive imaginary contribution at two is at least 0.070",
+    "Backlund p. 367, derived check of the imaginary positive-part table",
+    "No premises. This is the actual sine term divided by square root two"
+  ],
+  [
+    "imaginary_three",
+    "The positive imaginary contribution at three is at least 0.576",
+    "Backlund p. 367, derived check of the imaginary positive-part table",
+    "No premises. The sine term is near minus one"
+  ],
+  [
+    "imaginary_five",
+    "The positive imaginary contribution at five is at least 0.4175",
+    "Backlund p. 367, derived check of the imaginary positive-part table",
+    "No premises. The actual sine and square root are retained"
+  ],
+  [
+    "imaginaryPositiveAtHalf",
+    "The sum of the positive imaginary summands in H at real part one half and height fifty, including half of the tenth term",
+    "Backlund p. 367, the definition of A prime from the actual H sum",
+    "No premises. The positive part is maximum with zero"
+  ],
+  [
+    "positive_table_exceeds_printed",
+    "The actual positive imaginary sum exceeds 1.061, since the terms at two, three and five alone contribute at least 1.0635",
+    "Backlund p. 367, QUESTION about the printed A prime bound",
+    "No premises. The finite sum is fixed. This does not assert failure of the final H enclosure"
+  ],
+  [
+    "remainder12Budget",
+    "The display 12 remainder majorant at real part one half, height fifty, n equal to ten and k equal to two. Its numerator is the norm of the six factors from s through s plus five",
+    "Backlund pp. 346 and 347, displays 10 and 12, applied on p. 368",
+    "No premises. The denominator is 30240 times square root ten times ten to the fifth times eleven halves"
+  ],
+  [
+    "boundary_factor_norm",
+    "For every natural k, the norm of one half plus fifty i plus k is at least fifty",
+    "Backlund p. 368, derived lower bound on each remainder factor",
+    "k = 0 is allowed. The imaginary part remains fifty"
+  ],
+  [
+    "remainder12_floor",
+    "The remainder majorant is at least fifty to the sixth divided by its explicit denominator",
+    "Backlund p. 368, derived product comparison",
+    "No premises. Each of the six factors has norm at least fifty"
+  ],
+  [
+    "remainder12_budget_exceeds_printed",
+    "The printed remainder majorant alone exceeds 0.281",
+    "Backlund p. 368, QUESTION about the claimed application of display 12",
+    "No premises. This compares the majorant with a decimal and asserts no lower bound on the actual K norm"
+  ],
+  [
+    "euler_constant_upper",
+    "The Euler Mascheroni constant is below 0.578",
+    "Backlund p. 362, the bound C below 0.578 used in display 54",
+    "No premises. Mathlib bounds the constant by harmonic one thousand minus log one thousand. The harmonic comparison is checked by the Lean kernel"
+  ],
+  [
+    "right54_error_budget",
+    "For every t at least fifty, the explicit right-strip Euler error after subtracting log three is at most minus 0.048. The two square roots cover real parts one through three halves",
+    "Backlund pp. 361 and 362, the elementary calculation before displays 53 and 54",
+    "t = 50 meets the premise. This theorem does not assert the missing Euler summation estimate"
+  ],
+  [
+    "right54_budget_at_fifty",
+    "The explicit right-strip scalar error at height fifty is at most minus 0.048",
+    "Backlund p. 362, display 54 boundary calculation",
+    "No premises. This is the t equal to fifty specialization"
+  ]
+]

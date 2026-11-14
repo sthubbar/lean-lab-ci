@@ -1,3 +1,5 @@
+import LeanLab.ChirreHagen2025.Summability272
+import LeanLab.ChirreHagen2025.PrimePowers272
 import LeanLab.ChirreHagen2025.Statements
 import LeanLab.ChirreHagen2025.Additional122
 
@@ -14,7 +16,7 @@ Equality between the sum of Λ(n)^2/n^2 and sum over primes. -/
 theorem mangoldt_sum_eq_prime_sum :
     (∑' n : ℕ, ArithmeticFunction.vonMangoldt (n + 1) ^ 2 / ((n : ℝ) + 1) ^ 2) =
     (∑' p : Nat.Primes, Real.log (p : ℝ) ^ 2 / ((p : ℝ) ^ 2 - 1)) := by
-  sorry
+  exact PrimePowers272.mangoldt_sum_eq_prime_sum
 
 /-- LEAF. P0075 page 14, inequality.
 1 / (p^2 - 1) ≤ 1 / (p^2 - p). -/
@@ -34,7 +36,7 @@ theorem prime_fraction_le (p : ℕ) (hp : p.Prime) :
 theorem prime_sum_le_part3 :
     (∑' (p : Nat.Primes), log (p : ℝ) ^ 2 / ((p : ℝ) ^ 2 - 1)) ≤
     (∑' (p : Nat.Primes), log (p : ℝ) ^ 2 / ((p : ℝ) ^ 2 - (p : ℝ))) := by
-  sorry
+  exact Summability272.prime_sum_le_part3
 
 /-- LEAF. P0075 page 14, final numerical bound for part 2. -/
 theorem mangoldt_sum_bound

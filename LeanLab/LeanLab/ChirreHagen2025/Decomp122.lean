@@ -1,3 +1,4 @@
+import LeanLab.ChirreHagen2025.Decomp272b
 import LeanLab.ChirreHagen2025.Statements
 
 /-!
@@ -10,13 +11,13 @@ namespace LeanLab.ChirreHagen2025.Decomp122
 The Laurent remainder bound uses the Stieltjes coefficient estimate from reference 2. -/
 theorem zeta_remainder (t : ℝ) (ht : 0 < t) (htop : t ≤ 1 / 2) :
     ‖riemannZeta (1 + t * Complex.I) - 1 / (t * Complex.I)‖ ≤ 0.951 := by
-  sorry
+  exact Decomp272a.zeta_remainder t ht htop
 
 /-- LEAF. P0075 page 6, first display, obtained by differentiating equation 2.11.
 The coefficient estimate is from reference 2, cited on page 5. -/
 theorem deriv_remainder (t : ℝ) (ht : 0 < t) (htop : t ≤ 1 / 2) :
     ‖deriv riemannZeta (1 + t * Complex.I) - 1 / (t : ℂ) ^ 2‖ ≤ 0.862 := by
-  sorry
+  exact Decomp272b.deriv_remainder t ht htop
 
 /-- LEAF. P0075 page 6, the final quotient estimate in the proof of Lemma 2.4. -/
 theorem quotient_bound (t : ℝ) (ht : 0 < t) (htop : t ≤ 1 / 2)

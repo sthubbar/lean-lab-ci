@@ -4,8 +4,8 @@ of Decomp525a into its two multiplier pieces.
 
 The weighted minor coefficient is the full minor coefficient minus the bare one, so the
 termwise square split bounds its family second moment by twice the sum of the two
-component family budgets, each at the same power part. Each component is one open leaf
-below; the assembly is complete and uses no sorry.
+component family budgets, each at the same power part. The bare component reuses the existing open minor_bare_multi525 input.
+The full component remains open. The assembly is conditional on both estimates.
 
 AI wrote the Lean code. Goldbach is open.
 -/
@@ -15,7 +15,7 @@ namespace LeanLab.BhowmikGrimmelt2026
 
 open MeasureTheory
 
-/-- LEAF. The bare minor coefficient family on the range where the minor scale is at
+/-- CONDITIONAL on minor_bare_multi525. The bare minor coefficient family on the range where the minor scale is at
 least two: one nonnegative constant bounds the sum of its squared coefficients by the
 inverse scale power part, X cubed and the fifth power of log X, for every X at least two
 with X to the theta at least two. This is the multiplier free summand of the difference
@@ -26,7 +26,7 @@ theorem split_leaf_bare_multi525 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ)
       ∑ N ∈ Finset.Icc 1 X, ‖minorBare525 ϕ X N ϑ‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
           (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  exact minor_bare_multi525 hϕ ϑ hϑ hϑ'
 
 /-- LEAF. The full minor coefficient family on the same range, with the weight
 transform present as the factor one minus bRhat: one nonnegative constant bounds the
@@ -72,7 +72,8 @@ private lemma weighted_sq_le_split_525 (ϕ G : ℝ → ℝ) (X : ℕ) (ϑ η : �
     _ = 2 * ((∑ N ∈ Finset.Icc 1 X, ‖minorError150 ϕ G X N ϑ η‖ ^ 2) +
           ∑ N ∈ Finset.Icc 1 X, ‖minorBare525 ϕ X N ϑ‖ ^ 2) := by rw [hsq]
 
-/-- The weighted multi denominator minor family estimate, from the two multiplier
+/-- CONDITIONAL on minor_bare_multi525 and split_leaf_full_multi525.
+The weighted multi denominator minor family estimate, from the two multiplier
 pieces. The constant is twice the sum of the two leaf constants. -/
 theorem minor_weighted_multi525_split {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G)
     (ϑ : ℝ) (hϑ : 0 < ϑ) (hϑ' : ϑ < 1 / 2) :

@@ -1,3 +1,4 @@
+import LeanLab.ChirreHagen2025.Decomp391b
 import LeanLab.ChirreHagen2025.Decomp272c
 
 /-!
@@ -25,7 +26,7 @@ theorem mangoldt_large_range (m : ℕ) (hm : 100000 ≤ m) :
     (∑ n ∈ Finset.Icc 1 m, vonMangoldt n / (n : ℝ)) ≤
       Real.log (m : ℝ) - Real.eulerMascheroniConstant +
         0.67 / Real.log (m : ℝ) ^ 2 := by
-  sorry
+  exact Decomp391b.mangoldt_large_range m hm
 
 /-- P0075 page 3 first bound after equation 2.1, the triangle inequality.
 This elementary part does not use the cited real Mangoldt estimate. -/

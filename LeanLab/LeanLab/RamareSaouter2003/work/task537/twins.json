@@ -1,0 +1,226 @@
+[
+  [
+    "zeta_norm_le_tsum_re",
+    "Above real part one, the zeta modulus is at most the real Dirichlet series at the same real part",
+    "Backlund p. 362, the far right comparison used by Rosser p. 224",
+    "s = 2 satisfies the real-part premise",
+    "PROVED"
+  ],
+  [
+    "div_cpow_ofReal",
+    "For a positive natural n, the reciprocal complex power with real exponent sigma equals the embedded real power n to minus sigma",
+    "Backlund p. 362, derived Dirichlet-series conversion",
+    "n = 1 and sigma = 2 give equality one",
+    "PROVED"
+  ],
+  [
+    "zeta_ofReal_eq_tsum_rpow",
+    "At real sigma above one, zeta equals the embedded sum of n to minus sigma",
+    "Backlund p. 362, real Dirichlet-series identity",
+    "sigma = 2 satisfies the premise",
+    "PROVED"
+  ],
+  [
+    "zeta_abs_ofReal",
+    "At real sigma above one, the zeta norm equals the sum of n to minus sigma",
+    "Backlund p. 362, positivity of the real series",
+    "sigma = 2 satisfies the premise",
+    "PROVED"
+  ],
+  [
+    "far_right",
+    "At every complex point of real part at least five quarters, the zeta norm is bounded by the maximum of one and the real zeta norm",
+    "Rosser p. 224 and Backlund p. 362, far right arc",
+    "s = 5/4 + 1500i has the required real part",
+    "PROVED"
+  ],
+  [
+    "correction_pos",
+    "For t at least fifty, t squared minus four is positive",
+    "Backlund p. 363, denominator in display 56",
+    "t = 50 gives denominator 2496",
+    "PROVED"
+  ],
+  [
+    "correction_antitone",
+    "The factor t squared over t squared minus four decreases for t at least fifty",
+    "Backlund display 56, derived height enlargement",
+    "a = b = 50 gives equality",
+    "PROVED"
+  ],
+  [
+    "correction_at_fifty",
+    "The critical-strip correction at fifty equals 625 over 624",
+    "Backlund display 56, explicit bottom-edge calculation",
+    "No premises. Both sides are the same rational",
+    "PROVED"
+  ],
+  [
+    "boundaryH",
+    "H is the sum of the first nine reciprocal powers at sigma plus fifty i, plus half the tenth reciprocal power",
+    "Backlund p. 367, H with n equal to ten",
+    "sigma = 1/2 defines the actual finite complex sum",
+    "Definition"
+  ],
+  [
+    "boundaryH_components",
+    "For sigma from one half through one, the real part of H lies from minus 0.870 through 1.649 and its imaginary part from minus 0.684 through 1.061",
+    "Backlund p. 367, the final rectangular enclosure",
+    "sigma = 1/2 lies in the range. Numerical H is about minus 0.220485 plus 0.454505i. No false positive-part table is assumed",
+    "OPEN"
+  ],
+  [
+    "norm_of_boundary_components",
+    "A complex number in the printed rectangle has norm at most 1.962",
+    "Backlund p. 367, derived sum of coordinate squares",
+    "z = 0 lies in both coordinate intervals",
+    "PROVED"
+  ],
+  [
+    "boundaryK",
+    "For sigma from one half through one, zeta at sigma plus fifty i minus the actual finite H has norm at most 0.281",
+    "Backlund p. 368, Euler summation with k equal to two and display 12",
+    "sigma = 1/2 lies in the range. Numerical remainder norm is about 0.185910",
+    "OPEN"
+  ],
+  [
+    "boundary_fifty",
+    "At height fifty and real part from one half through one, the zeta norm is at most 2.243",
+    "Backlund pp. 367 and 368, derived from 1.962 plus 0.281",
+    "sigma = 1/2. A numerical check gives size about 0.340735 meets the intended conclusion",
+    "CONDITIONAL ON boundaryH_components and boundaryK"
+  ],
+  [
+    "three_lt_log_fifty",
+    "The natural logarithm of fifty exceeds three",
+    "Backlund p. 368, derived scalar margin for display 73",
+    "No premises. The logarithm is about 3.912",
+    "PROVED"
+  ],
+  [
+    "boundary73_budget",
+    "The display 73 majorant at height fifty exceeds 2.243 on the half-edge from one half through one",
+    "Backlund p. 367, display 73, derived with a conservative scalar margin",
+    "sigma = 1 gives the smallest factor and a right side above 3.89",
+    "PROVED"
+  ],
+  [
+    "boundary73",
+    "The actual height-fifty half-edge satisfies display 73 with coefficient 0.9964",
+    "Backlund p. 367, display 73",
+    "sigma = 1/2 is in the nonempty half-edge",
+    "CONDITIONAL ON boundaryH_components and boundaryK"
+  ],
+  [
+    "backlund54",
+    "At real part at least one and height at least fifty, the zeta norm is at most log t minus 0.048",
+    "Backlund p. 362, display 54 and the preceding display 53 at real part one",
+    "sigma = 1 and t = 50 meet both premises",
+    "OPEN"
+  ],
+  [
+    "boundary54",
+    "At height fifty and real part at least one, the zeta norm is at most log fifty minus 0.048",
+    "Backlund p. 362, display 54, height-fifty specialization",
+    "sigma = 1 is allowed",
+    "CONDITIONAL ON backlund54"
+  ],
+  [
+    "strip56_of_boundary",
+    "The actual right-strip estimate and certified height-fifty half-edge imply display 56 throughout the critical strip at height at least fifty",
+    "Backlund pp. 363 to 368, displays 57 through 72, the bottom edge and the Phragmen Lindelof step",
+    "sigma = 1/2 and t = 50 meet the numeric premises. The actual boundary inputs are supplied by backlund54 and boundary73",
+    "OPEN"
+  ],
+  [
+    "backlund56",
+    "On the critical strip and above height fifty, the zeta norm is at most t squared over t squared minus four times t over two pi to the power one minus sigma over two times log t",
+    "Backlund p. 363, display 56",
+    "sigma = 1/2 and t = 50 meet the numeric premises",
+    "CONDITIONAL ON backlund54, boundaryH_components, boundaryK and strip56_of_boundary"
+  ],
+  [
+    "boundary56",
+    "At height fifty on the critical strip, the majorant has the explicit correction 625 over 624 and power base 25 over pi",
+    "Backlund display 56, height-fifty specialization",
+    "sigma = 1/2 lies in the critical strip",
+    "CONDITIONAL ON the display 56 leaves"
+  ],
+  [
+    "reflection76",
+    "On the short left strip from minus one half through zero, reflection to one minus sigma increases the zeta norm by at most the printed power factor times one plus one over twice t squared",
+    "Backlund p. 369, displays 75 and 76, norm form after conjugation",
+    "sigma = 0 and t = 50 meet both numeric premises",
+    "OPEN"
+  ],
+  [
+    "saving_absorbs",
+    "For t at least fifty, multiplying log t minus 0.048 by one plus one over twice t squared stays at most log t",
+    "Backlund p. 369, elementary absorption before display 77",
+    "t = 50 gives a positive saving",
+    "PROVED"
+  ],
+  [
+    "backlund77",
+    "On the short left strip above fifty, the zeta norm is at most t over two pi to the power one half minus sigma times log t",
+    "Backlund p. 369, display 77",
+    "sigma = 0 and t = 50 meet both numeric premises",
+    "CONDITIONAL ON backlund54 and reflection76"
+  ],
+  [
+    "boundary77",
+    "At height fifty on the short left strip, the display 77 power base is explicitly 25 over pi",
+    "Backlund display 77, height-fifty specialization",
+    "sigma = 0 is allowed",
+    "CONDITIONAL ON backlund54 and reflection76"
+  ],
+  [
+    "norm_zeta_abs_height",
+    "The zeta modulus at sigma plus it equals its modulus at sigma plus i times absolute t",
+    "Backlund strip displays extended by conjugation, used in Rosser p. 224",
+    "sigma = 1 and t = minus 50 test the negative-height case",
+    "PROVED"
+  ],
+  [
+    "circle_real_range",
+    "The real part five quarters plus 1.32 cos phi lies from minus 0.07 through 2.57",
+    "Rosser p. 224, radius 1.32 and center five quarters",
+    "phi = 0 gives the upper endpoint. phi = pi gives the lower endpoint",
+    "PROVED"
+  ],
+  [
+    "circle_height_range",
+    "For T at least 1400, both absolute circle ordinates lie between T minus 1.32 and T plus 1.32",
+    "Rosser p. 224, derived ordinate bounds",
+    "T = 1500 and phi = 0 give both absolute ordinates 1500",
+    "PROVED"
+  ],
+  [
+    "critical_majorant_enlarge",
+    "The critical-strip majorant at any ordinate in the circle window is bounded by the envelope using the smallest correction height and largest power and logarithm height",
+    "Backlund display 56 applied to Rosser p. 224",
+    "T = t = 1500 and sigma = 1/2 satisfy every premise",
+    "PROVED"
+  ],
+  [
+    "left_majorant_enlarge",
+    "For sigma at most zero, the short-left majorant increases when the positive height is enlarged to T plus 1.32",
+    "Backlund display 77 applied to Rosser p. 224",
+    "T = t = 1500 and sigma = 0 satisfy every premise",
+    "PROVED"
+  ],
+  [
+    "point_bound",
+    "Each actual zeta value with circle real part and absolute ordinate in the circle window is bounded by the original logarithmic envelope",
+    "Rosser p. 224, the four arcs from Backlund displays 54, 56 and 77",
+    "T = t = 1500 and phi = 0 have real part 2.57 and lie on the proved far right arc",
+    "CONDITIONAL ON the five analytic and numerical leaves"
+  ],
+  [
+    "circle_bound",
+    "Both original shifted zeta values on the radius-1.32 circle satisfy the exact original exponential envelope",
+    "Rosser p. 224 and Backlund pp. 362 to 369",
+    "T = 1500 and phi = 0 meet the only premise. All angles are covered",
+    "CONDITIONAL ON the five analytic and numerical leaves"
+  ]
+]

@@ -14,13 +14,14 @@ and (3) take `T` and `Z` as given, so neither of them has to produce the height 
 the assembly takes them from leaf (1) and splits on whether the character is trivial, keeping
 the larger of the two constants.
 
-AI wrote the Lean code. Binary Goldbach is open. The three leaves are open.
+AI wrote the Lean code. Binary Goldbach is open. The finite list step is proved. The two analytic bounds remain open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp508a
 
 namespace LeanLab.BhowmikGrimmelt2026
 
-/-- LEAF. Step 1, the height and the zero list: for a primitive `χ` of modulus `q` and any
+/-- PROVED from character_zero_finset504 with T equal to X.
+This produces no zero avoidance estimate. Step 1, the height and the zero list: for a primitive `χ` of modulus `q` and any
 `X ≥ 2` there is a height `T` between `X` and `2X` and a finset `Z` of complex numbers whose
 members are exactly the zeros of the `L`-function of `χ` in the open strip with imaginary part
 of absolute value at most `T`. This is the finiteness and the selection step; it produces no
@@ -30,7 +31,9 @@ theorem zero_set_window508 {X q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q
     ∃ T ∈ Set.Icc (X : ℝ) (2 * (X : ℝ)), ∃ Z : Finset ℂ,
       (∀ ρ : ℂ, ρ ∈ Z ↔ DirichletCharacter.LFunction χ ρ = 0 ∧
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) := by
-  sorry
+  refine ⟨(X : ℝ), ⟨le_rfl, ?_⟩, ?_⟩
+  · nlinarith only [show (0 : ℝ) ≤ (X : ℝ) from Nat.cast_nonneg X]
+  · exact character_zero_finset504 χ (X : ℝ)
 
 /-- LEAF. Step 2, the error estimate away from the trivial character: for a primitive
 `χ ≠ 1`, a height `T` of the size of `X` and the zero list `Z` up to that height, the twisted
@@ -68,7 +71,8 @@ theorem principal_psi_zero_bound508 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBoun
             ∑ ρ ∈ Z, (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ‖ ≤ C * Real.log X ^ 2 := by
   sorry
 
-/-- The sharp explicit formula with zeros, assembled from the three leaves above. Leaf 1 gives
+/-- CONDITIONAL on nonprincipal_psi_zero_bound508 and principal_psi_zero_bound508.
+The sharp explicit formula with zeros, assembled from the three leaves above. Leaf 1 gives
 the height `T` and the zero list `Z`; the character being trivial or not selects leaf 3 or
 leaf 2 for the estimate, and the two constants are merged into their maximum. -/
 theorem primitive_psi_zero_expansion508_split (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
