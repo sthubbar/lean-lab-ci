@@ -22,10 +22,16 @@ The private results below are fully proved, and the assembly
 leaf_batch2_block1_split is proved outright from the four leaves.
 
 This file imports the block module SPLIT_batch2_prime, which carries the
-finite data of the row, so the build stays finite data and never touches
-the Pocklington certificate chain that the row's other modules carry.
+finite data of the row. The four pair leaves are discharged from the
+kernel checked Pocklington certificate module PocklingtonB7Row90, whose
+newly added part of the closure (PocklingtonB7, PocklingtonB7Lucas and the
+PocklingtonS6Row90 groups) contains no sorry, and whose qs_prime carries no
+sorryAx (checked with #print axioms in a scratch copy). The larger closure of
+Decomp372aData, which this file already imported, still contains the
+Verifications and Tao2012 sorries; nothing here depends on them.
 -/
 import LeanLab.DtRS1998.SPLIT_batch2_prime
+import LeanLab.DtRS1998.PocklingtonB7Row90
 
 namespace LeanLab.DtRS1998.Decomp395a
 
@@ -50,28 +56,36 @@ second block of the third batch. The two candidates at offsets 136 and 137
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block1_first_pair : ∀ q ∈ (qs.drop 136).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: the finite primality certification step for the second pair of the
 second block of the third batch. The two candidates at offsets 138 and 139
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block1_second_pair : ∀ q ∈ (qs.drop 138).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: the finite primality certification step for the third pair of the
 second block of the third batch. The two candidates at offsets 140 and 141
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block1_third_pair : ∀ q ∈ (qs.drop 140).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: the finite primality certification step for the fourth pair of the
 second block of the third batch. The two candidates at offsets 142 and 143
 of the fixed candidate list of the 10 ^ 90 row are prime. This is the
 primality check of two consecutive candidates, not of the block of eight. -/
 theorem leaf_block1_fourth_pair : ∀ q ∈ (qs.drop 142).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- The second block of eight, proved from the four pair leaves: the block is
 the concatenation of its four pairs of two, and primality is inherited entry
