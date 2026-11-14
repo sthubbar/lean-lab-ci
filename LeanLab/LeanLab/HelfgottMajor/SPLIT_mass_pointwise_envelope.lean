@@ -50,7 +50,23 @@ exponential `exp (-0.1598 * t)` of the target. Only the two rates and the consta
 here; no analytic input is used. -/
 theorem multiplicity_decay_product_le (t : ℝ) (ht : 100 ≤ t) :
     exp (0.6 * t) * (2.15581 * exp (-0.78 * t)) ≤ exp (-0.1598 * t) := by
-  sorry
+  have hT : (2.02 : ℝ) ≤ 0.0202 * t := by nlinarith
+  have hbig : (2.15581 : ℝ) ≤ exp (0.0202 * t) := by
+    have h1 : (2.02 : ℝ) + 1 ≤ exp 2.02 := Real.add_one_le_exp 2.02
+    have h2 : exp (2.02 : ℝ) ≤ exp (0.0202 * t) := exp_le_exp.mpr hT
+    linarith
+  have hmul : exp (0.6 * t) * exp (-0.78 * t) = exp (-0.18 * t) := by
+    rw [← exp_add]
+    congr 1
+    ring
+  have hkey : exp (0.6 * t) * (2.15581 * exp (-0.78 * t)) =
+      2.15581 * exp (-0.18 * t) := by
+    rw [← hmul]
+    ring
+  rw [hkey, show (-0.1598 : ℝ) * t = -0.18 * t + 0.0202 * t by ring, exp_add]
+  calc (2.15581 : ℝ) * exp (-0.18 * t) = exp (-0.18 * t) * 2.15581 := by ring
+    _ ≤ exp (-0.18 * t) * exp (0.0202 * t) :=
+        mul_le_mul_of_nonneg_left hbig (exp_pos _).le
 
 /-- The pointwise envelope, assembled from the three steps. The mass is the multiplicity times
 the norm of the Mellin transform, the decay and the multiplicity bound are multiplied, the
