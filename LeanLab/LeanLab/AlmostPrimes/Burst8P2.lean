@@ -66,6 +66,8 @@ theorem hj_rep_of_R_pos (k n : ℕ) (h : 0 < hjR k n) :
 square-free k = 30030 = 2 · 3 · 5 · 7 · 11 · 13 ≤ 2 · 10^5 with C = 0.2: the right side of
 (5.2) is positive, so R_k(n) > 0 for every even n ≥ 4 · 10^18. -/
 theorem hj_large_R_pos : ∀ n : ℕ, Even n → 4 * 10 ^ 18 ≤ n → 0 < hjR 30030 n := by
+  -- BLOCKED 2026-11-13 FREE-ms-leanstral task378 hj_large_R_pos: Friedlander-Iwaniec type sieve bound; 500-1000 lines, not in Mathlib
+  intro n hE hle
   sorry
 
 /-- A prime not dividing 30030 is coprime to it. -/
@@ -237,6 +239,7 @@ theorem theorem42_bracket (hpar : ParamConditions43)
     ∀ N : ℕ, Even N → X2v3 ≤ (N : ℝ) →
       5 * ((setA N).card : ℝ) * UN N / Real.log (N : ℝ) <
         ((siftedSet N ((N : ℝ) ^ ((1 : ℝ) / 40))).card : ℝ) := by
+  intro N hE hX
   sorry
 
 /-- PROVED. X₂ ≥ 4 · 10^18 and ε ≤ 1/74. -/

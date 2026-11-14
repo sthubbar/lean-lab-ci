@@ -1,3 +1,4 @@
+import LeanLab.HelfgottMajor.Decomp503a
 import LeanLab.HelfgottMajor.Lemma41Terms
 import LeanLab.HelfgottArcs.Statements
 import LeanLab.HelfgottMajor.TailIntegral123
@@ -24,10 +25,6 @@ AI wrote this Lean code. Binary Goldbach is open.
 
 namespace LeanLab.HelfgottMajor.SplitGaussian123
 open Real LeanLab.HelfgottArcs
-
-/-- The Mellin transform F_delta used on page 43 in the proof of display 4.43. -/
-noncomputable def gaussianMellin (δ : ℝ) (s : ℂ) : ℂ :=
-  mellin (fun t : ℝ => (exp (-t ^ 2 / 2) : ℂ) * e (δ * t)) s
 
 /-- A zero contribution with its analytic multiplicity, as in display 4.1 on page 31. -/
 noncomputable def zeroTerm {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
@@ -241,11 +238,6 @@ theorem middle_mass_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
       2.15581 * (0.5 * log q + 17.7) := by
   sorry
 
-/-- The right side of display 3.4 on page 10 for k equal to 0, without the constant c0. -/
-noncomputable def corEnvelope (δ τ : ℝ) : ℝ :=
-  if |τ| < 3 / 2 * (π * δ) ^ 2 then exp (-0.1065 * (τ / (π * δ)) ^ 2)
-  else exp (-0.1598 * |τ|)
-
 /-- LEAF: OPEN. P0014 Corollary 3.2, page 10, display 3.4 with k equal to 0 and c0 equal to 4.226:
 for s with real part in the closed unit interval and abs Im s at least max(100, 4π² abs δ),
 the Mellin transform F_δ of e^(-t²/2) e(δt) satisfies abs F_δ(s) + abs F_δ(1 - s) at most
@@ -254,7 +246,7 @@ Theorem 3.1, pages 9 and 10, the saddle point analysis of Section 3. -/
 theorem corollary_3_2_k0 (δ : ℝ) (s : ℂ) (hσ0 : 0 ≤ s.re) (hσ1 : s.re ≤ 1)
     (hτ : max 100 (4 * π ^ 2 * |δ|) ≤ |s.im|) :
     ‖gaussianMellin δ s‖ + ‖gaussianMellin δ (1 - s)‖ ≤ 4.226 * corEnvelope δ s.im := by
-  sorry
+  exact Decomp503a.corollary_from_saddle_pieces δ s hσ0 hσ1 hτ
 
 /-- PROVED. The envelope of display 3.4 is at most the sum of its two nonnegative branches,
 the Gaussian branch being absent at zero shift, where the first case of 3.4 is empty. -/
