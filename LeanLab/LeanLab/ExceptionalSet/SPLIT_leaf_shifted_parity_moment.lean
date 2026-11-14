@@ -13,6 +13,11 @@ sealed statement.
 `leaf_shifted_parity_moment_split` puts the four cut-down bounds together: the two parity
 branches share the widths and heights taken below and the constants add up, so a single
 bound covers the whole half interval and both parity classes.
+
+All four leaves are CONDITIONAL: their proofs pass through
+`Decomp509a.leaf_shifted_parity_moment`, whose chain runs through the U1539 inputs
+`U1539.lemma9` and `U1539.lemma10` (sorry on main), so `#print axioms` on a closed leaf
+reports `sorryAx` in addition to `propext`, `Classical.choice` and `Quot.sound`.
 -/
 
 namespace LeanLab.ExceptionalSet.UpJ200.Decomp509a
@@ -35,7 +40,18 @@ theorem leaf_moment_low_j0 (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 OddTail467.integrand (F γ N ^ (6 * δ)) (F γ N)
                   (calE γ κ N ^ (-(5 / 12 : ℝ))) (F γ n - (0 : ℤ)) α‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+
+  classical
+  obtain ⟨δ₀, hδ₀, H⟩ := leaf_shifted_parity_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδs => ?_⟩
+  obtain ⟨κ₀, hκ₀, H⟩ := H δ hδ hδs
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, H⟩ := H κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hbase := H N hN 0 (Or.inl rfl)
+  refine (Finset.sum_le_sum_of_subset_of_nonneg (fun x hx => Finset.mem_of_mem_filter x hx) ?_).trans hbase
+  intro x _ _
+  exact sq_nonneg _
 
 /-- LEAF: the even-parity case `j = 0` of the truncated shifted moment bound, restricted to
 the upper block `n > 3 * N / 4` of the half interval.  Only the large indices are summed,
@@ -50,7 +66,18 @@ theorem leaf_moment_high_j0 (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 OddTail467.integrand (F γ N ^ (6 * δ)) (F γ N)
                   (calE γ κ N ^ (-(5 / 12 : ℝ))) (F γ n - (0 : ℤ)) α‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+
+  classical
+  obtain ⟨δ₀, hδ₀, H⟩ := leaf_shifted_parity_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδs => ?_⟩
+  obtain ⟨κ₀, hκ₀, H⟩ := H δ hδ hδs
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, H⟩ := H κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hbase := H N hN 0 (Or.inl rfl)
+  refine (Finset.sum_le_sum_of_subset_of_nonneg (fun x hx => Finset.mem_of_mem_filter x hx) ?_).trans hbase
+  intro x _ _
+  exact sq_nonneg _
 
 /-- LEAF: the odd-parity case `j = 1` of the truncated shifted moment bound, restricted to
 the lower block `n ≤ 3 * N / 4`.  The index set here is the opposite parity class at the
@@ -65,7 +92,18 @@ theorem leaf_moment_low_j1 (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 OddTail467.integrand (F γ N ^ (6 * δ)) (F γ N)
                   (calE γ κ N ^ (-(5 / 12 : ℝ))) (F γ n - (1 : ℤ)) α‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+
+  classical
+  obtain ⟨δ₀, hδ₀, H⟩ := leaf_shifted_parity_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδs => ?_⟩
+  obtain ⟨κ₀, hκ₀, H⟩ := H δ hδ hδs
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, H⟩ := H κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hbase := H N hN 1 (Or.inr rfl)
+  refine (Finset.sum_le_sum_of_subset_of_nonneg (fun x hx => Finset.mem_of_mem_filter x hx) ?_).trans hbase
+  intro x _ _
+  exact sq_nonneg _
 
 /-- LEAF: the odd-parity case `j = 1` of the truncated shifted moment bound, restricted to
 the upper block `n > 3 * N / 4`.  Only the large indices of the opposite parity class are
@@ -80,7 +118,18 @@ theorem leaf_moment_high_j1 (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                 OddTail467.integrand (F γ N ^ (6 * δ)) (F γ N)
                   (calE γ κ N ^ (-(5 / 12 : ℝ))) (F γ n - (1 : ℤ)) α‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+
+  classical
+  obtain ⟨δ₀, hδ₀, H⟩ := leaf_shifted_parity_moment γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδs => ?_⟩
+  obtain ⟨κ₀, hκ₀, H⟩ := H δ hδ hδs
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, H⟩ := H κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hbase := H N hN 1 (Or.inr rfl)
+  refine (Finset.sum_le_sum_of_subset_of_nonneg (fun x hx => Finset.mem_of_mem_filter x hx) ?_).trans hbase
+  intro x _ _
+  exact sq_nonneg _
 
 /-- The truncated shifted parity moment obtained from the four block leaves.
 The widths and heights are the minima of the four leaves, the constant is their sum and the
