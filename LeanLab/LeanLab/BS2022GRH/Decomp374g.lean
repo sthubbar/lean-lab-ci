@@ -2,6 +2,7 @@
 Separate the two prime summations in journal Lemma 14, pp. 1238 and 1239.
 https://doi.org/10.1007/s11139-024-00866-x -/
 import LeanLab.BS2022GRH.MassInputs236
+import LeanLab.BS2022GRH.Decomp543a
 
 namespace LeanLab.BS2022GRH.Decomp374g
 open Real Finset Classical ChenThresholdGRH SliceMass236
@@ -25,7 +26,8 @@ This estimate is independent of the slice width epsilon one. -/
 theorem outer_prime_sum (n : ℕ) (hn : exp (exp 10) ≤ (n : ℝ)) :
     (∑ p ∈ U7153.Qset n, H n p / p) ≤
       (∫ u in U7153.zz n..U7153.yy n, H n u / (u * log u)) + 36 / log n ^ 3 := by
-  sorry
+  obtain ⟨B, hlo, hup⟩ := Decomp543a.rosser_schoenfeld_theorem5
+  exact Decomp543a.outer_prime_sum_of_mertens n hn B hlo hup
 
 /-- Exact statement of SliceMass236.pair_weight_mertens from the two separate prime steps.
 CONDITIONAL ON inner_prime_sum and outer_prime_sum. No direct sorry. -/

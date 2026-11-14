@@ -1,0 +1,332 @@
+[
+  {
+    "file": "AdditiveTypeITask08.lean",
+    "sha256": "fd735727b1517c641a8c499195a39b6b0e64c2a5033679c8cf5ccb9093c05d0d",
+    "sorries": []
+  },
+  {
+    "file": "AdditiveVaughanTask08.lean",
+    "sha256": "33158c9ad7cfeddb66d49a0db26c0ed89810145d715b42ce44347ef4a6944da8",
+    "sorries": []
+  },
+  {
+    "file": "Applications.lean",
+    "sha256": "e33c9ed474d959b673d4fb4f6dc3bb246617fedd6b222375d72a526c983b3991",
+    "sorries": []
+  },
+  {
+    "file": "Assembly168.lean",
+    "sha256": "c337335da4ddd17a8de477da963a25d74b1a1a0b9901289a1197e3975fa48cc9",
+    "sorries": []
+  },
+  {
+    "file": "Audit1614.lean",
+    "sha256": "301f2ac5aad93f67a69f70fa57d765ae16e4d7600248cb55af87ed27e079119f",
+    "sorries": []
+  },
+  {
+    "file": "Audit1625.lean",
+    "sha256": "24f8addd740014b107ce3c7ab2066f4750078eba944c5b5f193860fca42ee63d",
+    "sorries": []
+  },
+  {
+    "file": "Audit168.lean",
+    "sha256": "052dc5a2c336aee160b5c7b81290aea10bb0816ed414abf4f9414a6b131b20e6",
+    "sorries": []
+  },
+  {
+    "file": "AveragingTask99.lean",
+    "sha256": "1b8d70077e7e8f40963987e84f6369ab15f467901dad1f11c888effea28d7bfa",
+    "sorries": []
+  },
+  {
+    "file": "AxiomsU1341.lean",
+    "sha256": "f3c7c14bffce532e722f365341555658bcac437d75c6dd1ee0672aababaec333",
+    "sorries": []
+  },
+  {
+    "file": "BetaTask99.lean",
+    "sha256": "60224bd78095db8ebdb9ebf87e70b14cd87a0bf27c02b9213bc8ee7fbf579178",
+    "sorries": []
+  },
+  {
+    "file": "CharacterSumsTask53.lean",
+    "sha256": "8f432f35df70fbac59d109c7a2765bdd26d837ce2ed1af90acd3fc8289f6718a",
+    "sorries": []
+  },
+  {
+    "file": "ConductorFamilyTask99.lean",
+    "sha256": "4423002b466928a39f0d2eda7e001e36c423a63e42ca127309dae0ccae191fa6",
+    "sorries": []
+  },
+  {
+    "file": "CutoffArithmetic168.lean",
+    "sha256": "5d10a58b7b74b85c61753c6bc203f41e63f1218ed9230c755976101155747517",
+    "sorries": []
+  },
+  {
+    "file": "CutoffTask53.lean",
+    "sha256": "429a6e76059aa329c174e61842dbad3f4f9ad4f5c01529277e063596096c68d8",
+    "sorries": []
+  },
+  {
+    "file": "Decomp393a.lean",
+    "sha256": "1b5dd91501b7c468ed8b8e04f9f326bcadde8f1456da75a25755fa786ad42369",
+    "sorries": []
+  },
+  {
+    "file": "Decomp393b.lean",
+    "sha256": "12361709171117cdaeaa9611b95c17abd4d5423debea546bbad4af3e2d75c784",
+    "sorries": []
+  },
+  {
+    "file": "Decomp393c.lean",
+    "sha256": "4ebe7afe5690a14668bf63d24dd86fb71d63d6e582e23ae2019f207841b80270",
+    "sorries": []
+  },
+  {
+    "file": "DecompJ281.lean",
+    "sha256": "bdd10c9e525cabe01fbb0f7d179f8635ccaa88031ddded8c3f68bec763481c82",
+    "sorries": [
+      {
+        "name": "leaf_221",
+        "line": 131,
+        "statement": "theorem leaf_221 :\n  \u2203 \u03b50 : \u211d, 0 < \u03b50 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b50 \u2192\n    \u2203 c C A H0 : \u211d, 0 < c \u2227 0 \u2264 A \u2227 \u2200 H : \u211d, H0 \u2264 H \u2192 \u2203 X0 : \u211d, \u2200 X P0 : \u211d,\n      Thm1Hyp \u03b5 A X0 X P0 \u2192\n      \u2203 P : \u211d, 1 \u2264 P \u2227 P0 * X ^ (-\u03b5) \u2264 P \u2227 P \u2264 P0 \u2227\n        (excSet H (Real.sqrt X) P X).Finite \u2227\n        \u2203 Sg' : ExcPair \u2192 ExcPair \u2192 \u2115 \u2192 \u2102,\n          (\u2200 z \u2208 excSet H (Real.sqrt X) P X, \u2200 w \u2208 excSet H (Real.sqrt X) P X, \u2200 m : \u2115, 0 < m \u2192\n            Tendsto (singPartialPrime z w m) atTop (\ud835\udcdd (Sg' z w m))) \u2227\n          (\u2200 m : \u2115, (m : \u211d) \u2264 X \u2192\n            \u2016R1majPrime \u03b5 X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X m\u2016 \u2264\n              C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - \u03b5))) \u2227\n          \u2200 m : \u2115, \u2200 U : \u211d, X / 4 \u2264 m \u2192 (m : \u211d) \u2264 X / 2 \u2192 2 \u2264 U \u2192 U \u2264 Real.sqrt X \u2192\n            \u2016mainTermPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X m -\n              mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X P U m\u2016 \u2264\n              C * (Sing m * X * Real.log U / Real.sqrt U)"
+      }
+    ]
+  },
+  {
+    "file": "DecompJ281Audit.lean",
+    "sha256": "ef06ed135a6ea5d072f9a109b8047c78501aa91a7b01c9c3eb709f8e29680995",
+    "sorries": []
+  },
+  {
+    "file": "DecompJ579.lean",
+    "sha256": "b93f1144b5d87e86c37bea944ce3cc44c655008db8ecfec3c410861aa2943cda",
+    "sorries": [
+      {
+        "name": "leaf_main_term_bound",
+        "line": 1587,
+        "statement": "theorem leaf_main_term_bound :\n  \u2203 \u03b50 : \u211d, 0 < \u03b50 \u2227 \u03b50 \u2264 1 / 5 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b50 \u2192\n    \u2203 c C A H0 : \u211d, 0 < c \u2227 0 \u2264 A \u2227 \u2200 H : \u211d, H0 \u2264 H \u2192 \u2203 X0 : \u211d,\n      \u2200 X P0 : \u211d, Thm1Hyp \u03b5 A X0 X P0 \u2192\n      \u2203 P : \u211d, P0 * X ^ (-\u03b5) \u2264 P \u2227 P \u2264 P0 \u2227\n      \u2200 Sg' : ExcPair \u2192 ExcPair \u2192 \u2115 \u2192 \u2102,\n      (\u2200 z \u2208 excSet H (Real.sqrt X) P X, \u2200 w \u2208 excSet H (Real.sqrt X) P X, \u2200 m : \u2115, 0 < m \u2192\n        Tendsto (singPartialPrime z w m) atTop (\ud835\udcdd (Sg' z w m))) \u2192\n      \u2200 m : \u2115, 0 < m \u2192 (m : \u211d) \u2264 X \u2192\n        \u2016R1majPrime \u03b5 X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X m\u2016 \u2264\n          C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - \u03b5))"
+      }
+    ]
+  },
+  {
+    "file": "DecompJ665.lean",
+    "sha256": "f8c90f31f4908cfb183b36a5c1cad2d9115d5ee853e22ebb267c6aae4319e3df",
+    "sorries": [
+      {
+        "name": "leaf_P_exists",
+        "line": 31,
+        "statement": "theorem leaf_P_exists {\u03b5 H0 X0 H X P0 : \u211d} (hHyp : Thm1Hyp_v2 \u03b5 H0 X0 H X P0) :\n  \u2203 P : \u211d, P0 * X ^ (-\u03b5) \u2264 P \u2227 P \u2264 P0 \u2227 (excSet H (Real.sqrt X) P X).Finite"
+      },
+      {
+        "name": "leaf_singular_series_converges",
+        "line": 36,
+        "statement": "theorem leaf_singular_series_converges (H X P : \u211d) :\n  \u2203 Sg' : ExcPair \u2192 ExcPair \u2192 \u2115 \u2192 \u2102,\n    \u2200 z \u2208 excSet H (Real.sqrt X) P X, \u2200 w \u2208 excSet H (Real.sqrt X) P X, \u2200 m : \u2115,\n      Tendsto (singPartialPrime z w m) atTop (\ud835\udcdd (Sg' z w m))"
+      }
+    ]
+  },
+  {
+    "file": "DecompJ803.lean",
+    "sha256": "c0bae083cbe9e4671a50918aa5d1044cf269e1008860dbe98876cd1e49ddb244",
+    "sorries": [
+      {
+        "name": "leaf_P_exists_2",
+        "line": 1252,
+        "statement": "theorem leaf_P_exists_2 {\u03b5 H0 X0 H X P0 : \u211d} (hHyp : Thm1Hyp_v2 \u03b5 H0 X0 H X P0) :\n  \u2203 P : \u211d, P0 * X ^ (-\u03b5) \u2264 P \u2227 P \u2264 P0 \u2227 (excSet H (Real.sqrt X) P X).Finite"
+      },
+      {
+        "name": "leaf_main_term_bound_exists_C_2",
+        "line": 1275,
+        "statement": "theorem leaf_main_term_bound_exists_C_2 (\u03b5 \u03b50 c H0 C X0 : \u211d) :\n  \u2200 H X P0 P : \u211d, \u2200 Sg' : ExcPair \u2192 ExcPair \u2192 \u2115 \u2192 \u2102,\n    Thm1Hyp_v2 \u03b5 H0 X0 H X P0 \u2192\n    P0 * X ^ (-\u03b5) \u2264 P \u2192 P \u2264 P0 \u2192\n    (\u2200 z \u2208 excSet H (Real.sqrt X) P X, \u2200 w \u2208 excSet H (Real.sqrt X) P X, \u2200 m : \u2115, 0 < m \u2192\n      Tendsto (singPartialPrime z w m) atTop (\ud835\udcdd (Sg' z w m))) \u2192\n    \u2200 m : \u2115, (m : \u211d) \u2264 X \u2192 0 < m \u2192\n      \u2016R1majPrime \u03b5 X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X m\u2016 \u2264\n        C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - \u03b50))"
+      },
+      {
+        "name": "leaf_truncation_error_2",
+        "line": 1326,
+        "statement": "theorem leaf_truncation_error_2 :\n  \u2203 \u03b50 : \u211d, 0 < \u03b50 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b50 \u2192\n    \u2203 H0 C' X0 : \u211d, 0 < C' \u2227 \u2200 H X P0 P U : \u211d, \u2200 Sg' : ExcPair \u2192 ExcPair \u2192 \u2115 \u2192 \u2102, \u2200 m : \u2115,\n      Thm1Hyp_v2 \u03b5 H0 X0 H X P0 \u2192 1 \u2264 P \u2192 P \u2264 P0 \u2192\n      (excSet H (Real.sqrt X) P X).Finite \u2192\n      (\u2200 z \u2208 excSet H (Real.sqrt X) P X, \u2200 w \u2208 excSet H (Real.sqrt X) P X, \u2200 n : \u2115, 0 < n \u2192\n        Tendsto (singPartialPrime z w n) atTop (\ud835\udcdd (Sg' z w n))) \u2192\n      X / 4 \u2264 m \u2192 (m : \u211d) \u2264 X / 2 \u2192 2 \u2264 U \u2192\n      \u2016mainTermPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X m -\n        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X P U m\u2016 \u2264\n      C' * (Sing m * X * Real.log U / Real.sqrt U)"
+      }
+    ]
+  },
+  {
+    "file": "DecompJ834.lean",
+    "sha256": "5f3ff3ddfed8bdd650da7613648c66b1b3d78737d3e6044841324b3991b6a266",
+    "sorries": [
+      {
+        "name": "leaf_P_exists_3",
+        "line": 1249,
+        "statement": "theorem leaf_P_exists_3 {\u03b5 H0 X0 H X P0 : \u211d} (hHyp : Thm1Hyp_v2 \u03b5 H0 X0 H X P0) :\n  \u2203 P : \u211d, P0 * X ^ (-\u03b5) \u2264 P \u2227 P \u2264 P0 \u2227 (excSet H (Real.sqrt X) P X).Finite"
+      },
+      {
+        "name": "leaf_main_term_bound_exists_C_3",
+        "line": 1271,
+        "statement": "theorem leaf_main_term_bound_exists_C_3 (\u03b5 \u03b50 c H0 C X0 : \u211d) :\n  \u2200 H X P0 P : \u211d, \u2200 Sg' : ExcPair \u2192 ExcPair \u2192 \u2115 \u2192 \u2102,\n    Thm1Hyp_v2 \u03b5 H0 X0 H X P0 \u2192\n    P0 * X ^ (-\u03b5) \u2264 P \u2192 P \u2264 P0 \u2192\n    (\u2200 z \u2208 excSet H (Real.sqrt X) P X, \u2200 w \u2208 excSet H (Real.sqrt X) P X, \u2200 m : \u2115, 0 < m \u2192\n      Tendsto (singPartialPrime z w m) atTop (\ud835\udcdd (Sg' z w m))) \u2192\n    \u2200 m : \u2115, (m : \u211d) \u2264 X \u2192 0 < m \u2192\n      \u2016R1majPrime \u03b5 X P m - mainTermPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X m\u2016 \u2264\n        C * (Sing m * X * Real.exp (-(c * H)) + X ^ (1 - \u03b50))"
+      },
+      {
+        "name": "leaf_truncation_error_3",
+        "line": 1323,
+        "statement": "theorem leaf_truncation_error_3 :\n  \u2203 \u03b50 : \u211d, 0 < \u03b50 \u2227 \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < \u03b50 \u2192\n    \u2203 H0 C' X0 : \u211d, 0 < C' \u2227 \u2200 H X P0 P U : \u211d, \u2200 Sg' : ExcPair \u2192 ExcPair \u2192 \u2115 \u2192 \u2102, \u2200 m : \u2115,\n      Thm1Hyp_v2 \u03b5 H0 X0 H X P0 \u2192 1 \u2264 P \u2192 P \u2264 P0 \u2192\n      (excSet H (Real.sqrt X) P X).Finite \u2192\n      (\u2200 z \u2208 excSet H (Real.sqrt X) P X, \u2200 w \u2208 excSet H (Real.sqrt X) P X, \u2200 n : \u2115, 0 < n \u2192\n        Tendsto (singPartialPrime z w n) atTop (\ud835\udcdd (Sg' z w n))) \u2192\n      X / 4 \u2264 m \u2192 (m : \u211d) \u2264 X / 2 \u2192 2 \u2264 U \u2192\n      \u2016mainTermPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X m -\n        mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' \u03b5 X P U m\u2016 \u2264\n      C' * (Sing m * X * Real.log U / Real.sqrt U)"
+      }
+    ]
+  },
+  {
+    "file": "DifferenceTask53.lean",
+    "sha256": "40aa3eb4faa60f77f6a2ec7fe53d620790dbda25636eed3527ffade555c30dc6",
+    "sorries": []
+  },
+  {
+    "file": "DiscreteFormulaTask08.lean",
+    "sha256": "21574dc1c220749f3c6d6cc381f3ec58b065266b9d690b989686aa0c869bf32a",
+    "sorries": []
+  },
+  {
+    "file": "DivisorSumTask53.lean",
+    "sha256": "5d4ac009ab9a36ef737d4c250e5a3d2bbddcc465085e499f373a747fee9516da",
+    "sorries": []
+  },
+  {
+    "file": "DivisorTask53.lean",
+    "sha256": "d904068629c84b5d44720d7da02d5983534974f482393d3c69db467130d5fcfc",
+    "sorries": []
+  },
+  {
+    "file": "ElementaryTask08.lean",
+    "sha256": "a0c74dbfd8ed4b35d2c2752e959bb6f908b3aac9a5fdd7bfe4bbee4f69b6eeab",
+    "sorries": []
+  },
+  {
+    "file": "ExponentU1341.lean",
+    "sha256": "645074d90bd75d32a940613917147a66aae8421c61afb1bf1b0280e681a67edb",
+    "sorries": []
+  },
+  {
+    "file": "Holder511.lean",
+    "sha256": "843f5adb99b82ddfec66469131306ab064543377062643eb8000360038fd9478",
+    "sorries": []
+  },
+  {
+    "file": "KernelFourier168.lean",
+    "sha256": "ce1ce6107bdab6680ebccc7c333090c299a42bff519255f8e0f1fda1774fca1d",
+    "sorries": []
+  },
+  {
+    "file": "LeafAudit168.lean",
+    "sha256": "8397091c06d6fdfdf174e0ece5d60501e0d08821c3d350c4e5cab90cdb9bf251",
+    "sorries": []
+  },
+  {
+    "file": "Lemma1U1369.lean",
+    "sha256": "915194aedd82aff4e594634599f3cd01bb6ac1677fd9e4652b8d88cfda052472",
+    "sorries": []
+  },
+  {
+    "file": "Lemma2Closure168.lean",
+    "sha256": "10ce05ac2baf9c2065798c21a262ace78aad5537bfa240e91c85835d3cde6962",
+    "sorries": []
+  },
+  {
+    "file": "Lemma2Task99.lean",
+    "sha256": "560b30060e9c4a6a4f8df154cb2c12b0e065a0acf7d83b187d43963e3eb687d3",
+    "sorries": []
+  },
+  {
+    "file": "Minor511Task08.lean",
+    "sha256": "6f7f8fb75dd62cc5f61f0f74e6b54968132ad376f437769533d8960f21ae3332",
+    "sorries": []
+  },
+  {
+    "file": "MinorArc168.lean",
+    "sha256": "66b87a71b97f00a175a61d64a84cc2ef3bfeed18b44d0f06bbcccb11731484eb",
+    "sorries": []
+  },
+  {
+    "file": "MinorArcs.lean",
+    "sha256": "838bd82898cc0e69f642591c009d59168f0e68fbccf38c5af8b7c4ffa38a3323",
+    "sorries": []
+  },
+  {
+    "file": "Moment510U1357.lean",
+    "sha256": "995b6cfc6b142da2cbc4c0687286315b46de549213334efbf71fe19815df702c",
+    "sorries": []
+  },
+  {
+    "file": "MultiplePowersTask53.lean",
+    "sha256": "c8d918b094a5f3453e7816c72303dced59b583d5e5133c76766abe7967694b17",
+    "sorries": []
+  },
+  {
+    "file": "PowersTask99.lean",
+    "sha256": "46134155b35c0077c389b4c936328ebaee7fbde308cd730eb16f8a3789197626",
+    "sorries": []
+  },
+  {
+    "file": "PrincipalSeriesTask99.lean",
+    "sha256": "cf650e6c707bc6d8988a00dbd623941cff183a6f57b9c320711084107fda7d5a",
+    "sorries": []
+  },
+  {
+    "file": "QuantitativeBeta168.lean",
+    "sha256": "e4dc1912113014973b34df94dad5beb32939c5f0b4897c15359fcc7f6fc8829f",
+    "sorries": []
+  },
+  {
+    "file": "QuasiTask53.lean",
+    "sha256": "41e9314bb79df553377acab1b6fc8889c196e9dc1e6925e69ab45c7db70a7229",
+    "sorries": []
+  },
+  {
+    "file": "Reduction3.lean",
+    "sha256": "243f5b8e0797afc8147ae7107b991975f6be84999012950a02db0469fd9b2ad6",
+    "sorries": []
+  },
+  {
+    "file": "Reduction5.lean",
+    "sha256": "48d5ca35124528927b67e14bdbaeba99adfb431857d786c2a97b643dcb5395c7",
+    "sorries": []
+  },
+  {
+    "file": "State1581.lean",
+    "sha256": "74274e36b5b7be9e61c5107326e775f5dc1743feeff860f451475056832c6e1c",
+    "sorries": []
+  },
+  {
+    "file": "Statements.lean",
+    "sha256": "821e97f215df431603c6a4f162830a028c9859f0a7fe9cf6378d5d426b46d79a",
+    "sorries": []
+  },
+  {
+    "file": "Theorem1U1369.lean",
+    "sha256": "f4c9643a64b4b8f2f31987a9e3bd935f42475f1c854588ebd8b9936c777b8e87",
+    "sorries": []
+  },
+  {
+    "file": "Theorem3Prime.lean",
+    "sha256": "8c6622975e4849b3fcfa4e83152ab079b69616c2308aa519687e7183bee3b3ab",
+    "sorries": []
+  },
+  {
+    "file": "TheoremAU1357.lean",
+    "sha256": "36125ac226bacb57434e9c866fd1e5bb733c092b93c058541d1f0ec8d77d547e",
+    "sorries": []
+  },
+  {
+    "file": "TranslatedTask53.lean",
+    "sha256": "c8771c1b15eb6dfdf50afcfbf66c017b2bc03fa9393c7c8c401ef8ced840bad1",
+    "sorries": []
+  },
+  {
+    "file": "Truncation168.lean",
+    "sha256": "674b565da7549607471081bd31308ba92a89efadc6133f7c5b48ca5eed4a5c71",
+    "sorries": []
+  },
+  {
+    "file": "VaughanBoundTask08.lean",
+    "sha256": "b546353ebc90de5365e08f1426f7723d0e633d3c062656e4465cdba24b0fda90",
+    "sorries": []
+  },
+  {
+    "file": "WeightedKernelsTask08.lean",
+    "sha256": "dc33ec80b5ffce10a48171d599e03d91670d42849b9053b67ae5933d00a57142",
+    "sorries": []
+  }
+]

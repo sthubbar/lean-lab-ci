@@ -1,0 +1,194 @@
+[
+  {
+    "file": "ChenThresholdGRH.lean",
+    "declaration": "theorems567_of_inputs",
+    "header": "theorem theorems567_of_inputs (h3 : Lemma3J) (h7 : Lemma7J) : Thm5J \u2227 Thm6J \u2227 Thm7J",
+    "line": 468
+  },
+  {
+    "file": "Decomp138.lean",
+    "declaration": "reciprocal_sum_lt",
+    "header": "theorem reciprocal_sum_lt (z u : \u211d) (hz : exp 2753 < z) (hu : 400 \u2264 u) (huz : u < z) :\n    \u2211 p \u2208 band u z, (1 : \u211d) / p < log (log z) - log (log u) + 1.131e-7",
+    "line": 26
+  },
+  {
+    "file": "Decomp148b.lean",
+    "declaration": "small_conductors",
+    "header": "theorem small_conductors (hG : GRH) (c : \u2115 \u2192 \u2102) (X Y Z D D\u2080 : \u211d) (a : \u2124)\n    (hc : \u2200 n, \u2016c n\u2016 \u2264 1) (hX : 25 \u2264 X) (hY : 25 \u2264 Y) (hZ : 25 \u2264 Z)\n    (hZY : Z < Y) (hD : 1 < D) (hD\u2080 : 1 < D\u2080) (hD\u2080D : D\u2080 \u2264 D)\n    (hD\u2080Z : D\u2080 \u2264 \u221aZ) (hbal : \u221a(X * Y) / D \u2264 D\u2080) (ha : Even a) :\n    smallMass c X Y Z D D\u2080 a \u2264 smallBound X Y D D\u2080",
+    "line": 19
+  },
+  {
+    "file": "Decomp148f.lean",
+    "declaration": "upper_sieve",
+    "header": "theorem upper_sieve (supp : Finset \u2115) (a : \u2115 \u2192 \u211d) (P : Set \u2115) (Q : Finset \u2115)\n    (g : \u2115 \u2192 \u2115 \u2192 \u211d) (z D : \u211d)\n    (ha : \u2200 n, 0 \u2264 a n) (hsupp : \u2200 n, n \u2209 supp \u2192 a n = 0)\n    (hP : \u2200 p \u2208 P, p.Prime) (hQ : \u2191Q \u2286 P)\n    (hg : \u2200 n, \u2200 p \u2208 P, 0 \u2264 g n p \u2227 g n p < 1) (hz : 2 \u2264 z)\n    (hprod : \u2200 n u, 1 < u \u2192 u < z \u2192\n      \u220f p \u2208 (range \u2308z\u2309\u208a).filter (fun p => p \u2208 P \u2227 p \u2209 Q \u2227 u \u2264 (p : \u211d) \u2227 (p : \u211d) < z),\n        (1 - g n p)\u207b\u00b9 \u2264 (1 + (1 / 8349 : \u211d)) * (log z / log u))\n    (hzD : z \u2264 D) (hs : log D / log z \u2264 3) :\n    sifted supp a P z \u2264\n      (2 * exp eulerMascheroniConstant / (log D / log z) +\n        (1 / 8349 : \u211d) * 112 * exp 2 * hS (log D / log z)) * mainMass supp a P g z +\n      errorSum supp a P Q g z D",
+    "line": 31
+  },
+  {
+    "file": "Decomp327a.lean",
+    "declaration": "delay_partial_sums",
+    "header": "theorem delay_partial_sums (s : \u211d) (N : \u2115) :\n    (1 \u2264 s \u2192 s \u2264 3 \u2192\n      (\u2211 n \u2208 range N, if n % 2 = 1 then delayTerm n s else 0) \u2264\n        2 * exp eulerMascheroniConstant / s - 1) \u2227\n    (2 \u2264 s \u2192 s \u2264 4 \u2192\n      (\u2211 n \u2208 range N, if 0 < n \u2227 n % 2 = 0 then delayTerm n s else 0) \u2264\n        1 - 2 * exp eulerMascheroniConstant * log (s - 1) / s)",
+    "line": 117
+  },
+  {
+    "file": "Decomp327b.lean",
+    "declaration": "upper_stopping_error",
+    "header": "theorem upper_stopping_error (P : Set \u2115) (Q : Finset \u2115) (g : \u2115 \u2192 \u211d) (z D : \u211d)\n    (hP : \u2200 p \u2208 P, p.Prime) (hg : \u2200 p \u2208 P, 0 \u2264 g p \u2227 g p < 1)\n    (hz : 2 \u2264 z)\n    (hprod : \u2200 u, 1 < u \u2192 u < z \u2192\n      \u220f p \u2208 (range \u2308z\u2309\u208a).filter (fun p => p \u2208 P \u2227 p \u2209 Q \u2227 u \u2264 (p : \u211d) \u2227 (p : \u211d) < z),\n        (1 - g p)\u207b\u00b9 \u2264 (1 + (1 / 8349 : \u211d)) * (log z / log u))\n    (hzD : z \u2264 D) (hs : log D / log z \u2264 3) :\n    (\u2211 n \u2208 range ((siftingPrimes P z \\ Q).card + 3),\n      if n % 2 = 1 then\n        stoppingTerm (siftingPrimes P z \\ Q) D g n -\n          (\u220f p \u2208 siftingPrimes P z \\ Q, (1 - g p)) * delayTerm n (log D / log z)\n      else 0) \u2264\n      (\u220f p \u2208 siftingPrimes P z \\ Q, (1 - g p)) *\n        ((1 / 8349 : \u211d) * 112 * exp 2 * hS (log D / log z))",
+    "line": 17
+  },
+  {
+    "file": "Decomp327c.lean",
+    "declaration": "lower_stopping_error",
+    "header": "theorem lower_stopping_error (P : Set \u2115) (Q : Finset \u2115) (g : \u2115 \u2192 \u211d) (z D : \u211d)\n    (hP : \u2200 p \u2208 P, p.Prime) (hg : \u2200 p \u2208 P, 0 \u2264 g p \u2227 g p < 1)\n    (hz : 2 \u2264 z)\n    (hprod : \u2200 u, 1 < u \u2192 u < z \u2192\n      \u220f p \u2208 (range \u2308z\u2309\u208a).filter (fun p => p \u2208 P \u2227 p \u2209 Q \u2227 u \u2264 (p : \u211d) \u2227 (p : \u211d) < z),\n        (1 - g p)\u207b\u00b9 \u2264 (1 + (1 / 8349 : \u211d)) * (log z / log u))\n    (hzD : z ^ 2 \u2264 D) (hs : log D / log z \u2264 4) :\n    (\u2211 n \u2208 range ((siftingPrimes P z \\ Q).card + 3),\n      if 0 < n \u2227 n % 2 = 0 then\n        stoppingTerm (siftingPrimes P z \\ Q) D g n -\n          (\u220f p \u2208 siftingPrimes P z \\ Q, (1 - g p)) * delayTerm n (log D / log z)\n      else 0) \u2264\n      (\u220f p \u2208 siftingPrimes P z \\ Q, (1 - g p)) *\n        ((1 / 8349 : \u211d) * 114 * exp 2 * hS (log D / log z))",
+    "line": 17
+  },
+  {
+    "file": "Decomp374d.lean",
+    "declaration": "primitive_term_cap",
+    "header": "theorem primitive_term_cap (hG : GRH) (c : \u2115 \u2192 \u2102) (X Y Z D D\u2080 : \u211d) (r s : \u2115)\n    (hc : \u2200 n, \u2016c n\u2016 \u2264 1) (hX : 25 \u2264 X) (hY : 25 \u2264 Y) (hZ : 25 \u2264 Z)\n    (hZY : Z < Y) (hD : 5 \u2264 D) (hD\u2080 : 1 < D\u2080) (hD\u2080D : D\u2080 \u2264 D)\n    (hD\u2080Z : D\u2080 \u2264 \u221aZ) (hr : 3 \u2264 r) (hrD : (r : \u211d) \u2264 D\u2080)\n    (hs : 1 \u2264 s) (hsD : (s : \u211d) < D) :\n    primitiveTerm c X Y Z r s \u2264 D\u2080 * X * smallFactor Y D D\u2080",
+    "line": 19
+  },
+  {
+    "file": "Decomp374g.lean",
+    "declaration": "inner_prime_sum",
+    "header": "theorem inner_prime_sum (n : \u2115) (\u03b5\u2081 : \u211d)\n    (hn : exp (exp 10) \u2264 (n : \u211d)) (h\u03b5 : 0 < \u03b5\u2081) (h\u03b51 : \u03b5\u2081 < 1) :\n    pairWeightSum n \u03b5\u2081 \u2264\n      (\u2211 p \u2208 U7153.Qset n, H n p / p) +\n        (log (8 / 3) + 64 / log n ^ 2) * massErrorTail n \u03b5\u2081",
+    "line": 15
+  },
+  {
+    "file": "Decomp410a.lean",
+    "declaration": "rh_reciprocal_upper",
+    "header": "theorem rh_reciprocal_upper (hRH : RiemannHypothesis) (x : \u211d) (hx : 64 \u2264 x) :\n    (\u2211 p \u2208 Nat.primesLE \u230ax\u230b\u208a, (1 : \u211d) / p) \u2264\n      log (log x) + DecompC169c.mertensConstant + (3 * log x + 4) / (8 * \u03c0 * \u221ax)",
+    "line": 16
+  },
+  {
+    "file": "Decomp543a.lean",
+    "declaration": "rosser_schoenfeld_theorem5",
+    "header": "theorem rosser_schoenfeld_theorem5 : \u2203 B : \u211d,\n    (\u2200 x : \u211d, 1 < x \u2192 log (log x) + B - 1 / (2 * log x ^ 2) <\n      \u2211 p \u2208 Nat.primesLE \u230ax\u230b\u208a, (1 : \u211d) / p) \u2227\n    (\u2200 x : \u211d, 286 \u2264 x \u2192 (\u2211 p \u2208 Nat.primesLE \u230ax\u230b\u208a, (1 : \u211d) / p) <\n      log (log x) + B + 1 / (2 * log x ^ 2))",
+    "line": 15
+  },
+  {
+    "file": "DecompC164a.lean",
+    "declaration": "progression_at_endpoint",
+    "header": "theorem progression_at_endpoint (hG : GRH) (d a : \u2115) (N : \u211d)\n    (hd : 3 \u2264 d) (hdN : (d : \u211d) \u2264 \u221aN) (ha : Nat.Coprime a d) :\n    |((((range (\u230aN\u230b\u208a + 1)).filter (fun p => p.Prime \u2227 p % d = a % d)).card : \u2115) : \u211d)\n        - liPV N / (d.totient : \u211d)| \u2264 qG N * \u221aN * log N",
+    "line": 147
+  },
+  {
+    "file": "DecompC164c.lean",
+    "declaration": "main_at_threshold",
+    "header": "theorem main_at_threshold (\u03b1 A u \u03b5 C\u2081 X\u2082 \u03b5\u2081 : \u211d) (n : \u2115)\n    (hC\u2081 : 0 \u2264 C\u2081) (he0 : 0 < \u03b5) (h\u03b5\u2081 : 0 < \u03b5\u2081) (h\u03b5\u20811 : \u03b5\u2081 < 1)\n    (h\u03b1 : 0 < \u03b1) (h\u03b11 : \u03b1 < 1 / 16) (hA : 0 < A)\n    (hc : Cond25 \u03b1 A u X\u2082) (hX : exp (exp 10) \u2264 X\u2082) (hn : X\u2082 \u2264 (n : \u211d))\n    (hm : mass n \u03b5\u2081 \u2264 massBound n \u03b5\u2081) :\n    mass n \u03b5\u2081 * sieveCoefficient n \u03b1 \u03b5 C\u2081 \u2264\n      UNfull n * n / log n ^ 2 * mainBracket \u03b1 \u03b5 C\u2081 X\u2082 \u03b5\u2081",
+    "line": 34
+  },
+  {
+    "file": "DecompC164c.lean",
+    "declaration": "remainder_bound",
+    "header": "theorem remainder_bound (\u03b1 A u X\u2082 \u03b5\u2081 : \u211d) (n : \u2115) (hG : GRH)\n    (h\u03b5\u2081 : 0 < \u03b5\u2081) (h\u03b5\u20811 : \u03b5\u2081 < 1) (h\u03b1 : 0 < \u03b1) (h\u03b11 : \u03b1 < 1 / 16)\n    (hA : 0 < A) (hc : Cond25 \u03b1 A u X\u2082) (hX : exp (exp 10) \u2264 X\u2082)\n    (hn : X\u2082 \u2264 (n : \u211d)) (hev : Even n) :\n    remainder n A \u03b5\u2081 \u2264 UNfull n * n / log n ^ 2 * errorBracket A X\u2082 \u03b5\u2081",
+    "line": 44
+  },
+  {
+    "file": "DecompC169d.lean",
+    "declaration": "rosser_upper_model",
+    "header": "theorem rosser_upper_model (supp : Finset \u2115) (a : \u2115 \u2192 \u211d) (P : Set \u2115) (Q : Finset \u2115)\n    (g : \u2115 \u2192 \u2115 \u2192 \u211d) (z D : \u211d)\n    (ha : \u2200 n, 0 \u2264 a n) (hsupp : \u2200 n, n \u2209 supp \u2192 a n = 0)\n    (hP : \u2200 p \u2208 P, p.Prime) (hQ : \u2191Q \u2286 P)\n    (hg : \u2200 n, \u2200 p \u2208 P, 0 \u2264 g n p \u2227 g n p < 1) (hz : 2 \u2264 z)\n    (hprod : \u2200 n u, 1 < u \u2192 u < z \u2192\n      \u220f p \u2208 (range \u2308z\u2309\u208a).filter (fun p => p \u2208 P \u2227 p \u2209 Q \u2227 u \u2264 (p : \u211d) \u2227 (p : \u211d) < z),\n        (1 - g n p)\u207b\u00b9 \u2264 (1 + (1 / 8349 : \u211d)) * (log z / log u))\n    (hzD : z \u2264 D) (hs : log D / log z \u2264 3) :\n    weightedModel supp a P Q g z D (rosserSubsetWeight P Q z D true) \u2264\n        (2 * exp eulerMascheroniConstant / (log D / log z) +\n          (1 / 8349 : \u211d) * 112 * exp 2 * hS (log D / log z)) * mainMass supp a P g z",
+    "line": 619
+  },
+  {
+    "file": "DecompC169d.lean",
+    "declaration": "rosser_lower_model",
+    "header": "theorem rosser_lower_model (supp : Finset \u2115) (a : \u2115 \u2192 \u211d) (P : Set \u2115) (Q : Finset \u2115)\n    (g : \u2115 \u2192 \u2115 \u2192 \u211d) (z D : \u211d)\n    (ha : \u2200 n, 0 \u2264 a n) (hsupp : \u2200 n, n \u2209 supp \u2192 a n = 0)\n    (hP : \u2200 p \u2208 P, p.Prime) (hQ : \u2191Q \u2286 P)\n    (hg : \u2200 n, \u2200 p \u2208 P, 0 \u2264 g n p \u2227 g n p < 1) (hz : 2 \u2264 z)\n    (hprod : \u2200 n u, 1 < u \u2192 u < z \u2192\n      \u220f p \u2208 (range \u2308z\u2309\u208a).filter (fun p => p \u2208 P \u2227 p \u2209 Q \u2227 u \u2264 (p : \u211d) \u2227 (p : \u211d) < z),\n        (1 - g n p)\u207b\u00b9 \u2264 (1 + (1 / 8349 : \u211d)) * (log z / log u))\n    (hzD : z ^ 2 \u2264 D) (hs : log D / log z \u2264 4) :\n    (2 * exp eulerMascheroniConstant * log (log D / log z - 1) / (log D / log z) -\n        (1 / 8349 : \u211d) * 114 * exp 2 * hS (log D / log z)) * mainMass supp a P g z \u2264\n        weightedModel supp a P Q g z D (rosserSubsetWeight P Q z D false)",
+    "line": 662
+  },
+  {
+    "file": "FiniteMertens224.lean",
+    "declaration": "rosser_schoenfeld_small",
+    "header": "theorem rosser_schoenfeld_small (x : \u211d) (hx : 3 \u2264 x) (hx8 : x \u2264 1e8) :\n    log (log x) + PortedMertens.Mertens.M \u2264\n      \u2211 p \u2208 Nat.primesBelow \u2308x\u2309\u208a, (1 : \u211d) / p",
+    "line": 13
+  },
+  {
+    "file": "FiniteMertens224.lean",
+    "declaration": "journal_computation",
+    "header": "theorem journal_computation (n : \u2115) (hn8 : 10 ^ 8 \u2264 n) (hn12 : n < 10 ^ 12) :\n    log (log ((n : \u211d) + 1)) + PortedMertens.Mertens.M \u2264\n      \u2211 p \u2208 Nat.primesLE n, (1 : \u211d) / p",
+    "line": 21
+  },
+  {
+    "file": "MassInputs236.lean",
+    "declaration": "pair_weight_mertens",
+    "header": "theorem pair_weight_mertens (n : \u2115) (\u03b5\u2081 : \u211d)\n    (hn : exp (exp 10) \u2264 (n : \u211d)) (h\u03b5 : 0 < \u03b5\u2081) (h\u03b51 : \u03b5\u2081 < 1) :\n    pairWeightSum n \u03b5\u2081 \u2264\n      (\u222b u in U7153.zz n..U7153.yy n, H n u / (u * log u)) + 36 / log n ^ 3 +\n        (log (8 / 3) + 64 / log n ^ 2) * massErrorTail n \u03b5\u2081",
+    "line": 16
+  },
+  {
+    "file": "Novelty1602.lean",
+    "declaration": "lemma7_sharp",
+    "header": "theorem lemma7_sharp : Lemma7Sharp",
+    "line": 167
+  },
+  {
+    "file": "PublishedInputs232.lean",
+    "declaration": "lemma5_mu",
+    "header": "theorem lemma5_mu : PaperInputs148.Lemma5MuJ",
+    "line": 12
+  },
+  {
+    "file": "PublishedInputs232.lean",
+    "declaration": "lemma5_phi",
+    "header": "theorem lemma5_phi : PaperInputs148.Lemma5PhiJ",
+    "line": 17
+  },
+  {
+    "file": "PublishedInputs232.lean",
+    "declaration": "lemma1_schoenfeld",
+    "header": "theorem lemma1_schoenfeld : PaperInputs148.Lemma1J",
+    "line": 21
+  },
+  {
+    "file": "PublishedInputs232.lean",
+    "declaration": "weighted_reciprocal_primes",
+    "header": "theorem weighted_reciprocal_primes (n : \u2115) (\u03b1 : \u211d)\n    (hn : exp (exp 10) \u2264 (n : \u211d)) (h\u03b1 : 0 < \u03b1) (h\u03b11 : \u03b1 < 1 / 24) :\n    (\u2211 q \u2208 U7153.Qset n,\n      (1 : \u211d) / ((q : \u211d) * log ((n : \u211d) ^ (1 / 2 - \u03b1) / q))) \u2264\n      (log 6 + log ((3 - 8 * \u03b1) / (3 - 18 * \u03b1))) / ((1 / 2 - \u03b1) * log n) +\n        512 / (kA \u03b1 * log n ^ 3)",
+    "line": 1246
+  },
+  {
+    "file": "PublishedInputs232.lean",
+    "declaration": "reciprocal_prime_interval",
+    "header": "theorem reciprocal_prime_interval (n : \u2115) (hn : exp (exp 10) \u2264 (n : \u211d)) (hev : Even n) :\n    (\u2211 q \u2208 U7153.Qset n, (1 : \u211d) / q) \u2264 log (8 / 3) + 64 / log n ^ 2",
+    "line": 1256
+  },
+  {
+    "file": "PublishedInputs232.lean",
+    "declaration": "density_upper",
+    "header": "theorem density_upper (n : \u2115) (hn : exp (exp 10) \u2264 (n : \u211d)) (hev : Even n) :\n    DecompC169a.density n \u2264 8 * UNfull n / log n *\n      (1 + 0.62 * log n / (n : \u211d) ^ (1 / 16 : \u211d))",
+    "line": 2428
+  },
+  {
+    "file": "PublishedInputs236.lean",
+    "declaration": "density_y_upper",
+    "header": "theorem density_y_upper (n : \u2115) (hG : GRH) (hn : exp (exp 10) \u2264 (n : \u211d)) (hev : Even n) :\n    (\u220f p \u2208 primesBelow n (U7153.yy n), (1 - 1 / ((p : \u211d) - 1))) \u2264\n      3 * UNfull n / log n * (1 + 0.06 * log n / (n : \u211d) ^ (1 / 6 : \u211d))",
+    "line": 12
+  },
+  {
+    "file": "SieveAllLevels1611.lean",
+    "declaration": "fixedKappa_of_allLevels",
+    "header": "theorem fixedKappa_of_allLevels {\u03b5F \u03b5 C\u2081 C\u2082 : \u211d} (h : LinearSieveAllLevels \u03b5 C\u2081 C\u2082) :\n    LinearSieveFixedKappa \u03b5F \u03b5 C\u2081 C\u2082",
+    "line": 119
+  },
+  {
+    "file": "ThetaInputs224.lean",
+    "declaration": "theta_table15_2500",
+    "header": "theorem theta_table15_2500 (x : \u211d) (hx : exp 2500 < x) :\n    |Chebyshev.theta x - x| \u2264 2.2885e-9 * x / log x",
+    "line": 12
+  },
+  {
+    "file": "ThetaInputs224.lean",
+    "declaration": "theta_table15_6e11",
+    "header": "theorem theta_table15_6e11 (x : \u211d) (hx : 6e11 < x) :\n    |Chebyshev.theta x - x| \u2264 6.9322e-5 * x / log x",
+    "line": 18
+  },
+  {
+    "file": "ThetaInputs224.lean",
+    "declaration": "theta_table15_37",
+    "header": "theorem theta_table15_37 (x : \u211d) (hx : exp 37 < x) :\n    |Chebyshev.theta x - x| \u2264 8.6315e-7 * x / log x",
+    "line": 24
+  },
+  {
+    "file": "ThetaInputs224.lean",
+    "declaration": "theta_buthe_1e19",
+    "header": "theorem theta_buthe_1e19 (x : \u211d) (hx : 1 \u2264 x) (hx1 : x \u2264 1e19) :\n    (0.05 : \u211d) * sqrt x < x - Chebyshev.theta x",
+    "line": 30
+  }
+]

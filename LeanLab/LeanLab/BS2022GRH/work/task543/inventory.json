@@ -1,0 +1,1531 @@
+[
+  {
+    "file": "Audit138c.lean",
+    "lines": 169,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp138b"
+    ]
+  },
+  {
+    "file": "Audit1580.lean",
+    "lines": 175,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Audit138c"
+    ]
+  },
+  {
+    "file": "Audit1601.lean",
+    "lines": 61,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompJ215"
+    ]
+  },
+  {
+    "file": "Audit406.lean",
+    "lines": 60,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.PhiBridge406"
+    ]
+  },
+  {
+    "file": "AuditC164.lean",
+    "lines": 62,
+    "sorries": 0,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BS2022GRH.Constants"
+    ]
+  },
+  {
+    "file": "Balance339.lean",
+    "lines": 143,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Scalar339"
+    ]
+  },
+  {
+    "file": "Bilinear339.lean",
+    "lines": 241,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceRemainder236",
+      "LeanLab.BS2022GRH.SliceRanges236"
+    ]
+  },
+  {
+    "file": "BookkeepingC164.lean",
+    "lines": 48,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.U7153Lemma10"
+    ]
+  },
+  {
+    "file": "Cert1567.lean",
+    "lines": 987,
+    "sorries": 3,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH",
+      "LeanLab.BS2022GRH.QG",
+      "LeanLab.BS2022GRH.Cert1575"
+    ]
+  },
+  {
+    "file": "Cert1575.lean",
+    "lines": 456,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.ChebyshevExplicit.Psi30",
+      "LeanLab.ChebyshevExplicit.Psi30Quadratic",
+      "LeanLab.BS2022GRH.Cert1575W00",
+      "LeanLab.BS2022GRH.Cert1575W01",
+      "LeanLab.BS2022GRH.Cert1575W02",
+      "LeanLab.BS2022GRH.Cert1575W03",
+      "LeanLab.BS2022GRH.Cert1575W04",
+      "LeanLab.BS2022GRH.Cert1575W05",
+      "LeanLab.BS2022GRH.Cert1575W06",
+      "LeanLab.BS2022GRH.Cert1575W07",
+      "LeanLab.BS2022GRH.Cert1575W08",
+      "LeanLab.BS2022GRH.Cert1575W09",
+      "LeanLab.BS2022GRH.Cert1575W10"
+    ]
+  },
+  {
+    "file": "Cert1575Closed.lean",
+    "lines": 28,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1567",
+      "LeanLab.BS2022GRH.Cert1575"
+    ]
+  },
+  {
+    "file": "Cert1575Defs.lean",
+    "lines": 37,
+    "sorries": 0,
+    "imports": []
+  },
+  {
+    "file": "Cert1575W00.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W01.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W02.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W03.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W04.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W05.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W06.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W07.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W08.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W09.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Cert1575W10.lean",
+    "lines": 12,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "CertC164.lean",
+    "lines": 20,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Defs"
+    ]
+  },
+  {
+    "file": "Chain1611.lean",
+    "lines": 93,
+    "sorries": 2,
+    "imports": [
+      "LeanLab.BS2022GRH.SieveAllLevels1611",
+      "LeanLab.BS2022GRH.Cert1575Closed"
+    ]
+  },
+  {
+    "file": "CharacterC164.lean",
+    "lines": 123,
+    "sorries": 0,
+    "imports": [
+      "Mathlib",
+      "Mathlib.NumberTheory.DirichletCharacter.Orthogonality",
+      "Mathlib.NumberTheory.DirichletCharacter.Bounds"
+    ]
+  },
+  {
+    "file": "CharacterInputs332.lean",
+    "lines": 224,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp406e"
+    ]
+  },
+  {
+    "file": "ChenThresholdGRH.lean",
+    "lines": 517,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.U7154UN",
+      "LeanLab.BS2022GRH.RangeCheck13375",
+      "LeanLab.AlmostPrimeSums.Statements"
+    ]
+  },
+  {
+    "file": "Coefficient333.lean",
+    "lines": 55,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169a"
+    ]
+  },
+  {
+    "file": "CoefficientsC169.lean",
+    "lines": 67,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.EndpointC169",
+      "LeanLab.BS2022GRH.QG"
+    ]
+  },
+  {
+    "file": "Constants.lean",
+    "lines": 290,
+    "sorries": 0,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BS2022GRH.Params",
+      "LeanLab.ChenExplicit.BJSCbar",
+      "LeanLab.ChenExplicit.GammaBounds"
+    ]
+  },
+  {
+    "file": "Correction339.lean",
+    "lines": 99,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Bilinear339",
+      "LeanLab.BS2022GRH.Decomp406d"
+    ]
+  },
+  {
+    "file": "Cutoff339.lean",
+    "lines": 130,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Correction339"
+    ]
+  },
+  {
+    "file": "Decomp138.lean",
+    "lines": 280,
+    "sorries": 2,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH",
+      "LeanLab.BS2022GRH.Lemma8"
+    ]
+  },
+  {
+    "file": "Decomp138b.lean",
+    "lines": 106,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575Closed"
+    ]
+  },
+  {
+    "file": "Decomp148a.lean",
+    "lines": 459,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH",
+      "LeanLab.BS2022GRH.CharacterC164",
+      "Mathlib.NumberTheory.DirichletCharacter.Orthogonality"
+    ]
+  },
+  {
+    "file": "Decomp148b.lean",
+    "lines": 36,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148a",
+      "LeanLab.BS2022GRH.Decomp374b"
+    ]
+  },
+  {
+    "file": "Decomp148c.lean",
+    "lines": 38,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148a",
+      "LeanLab.BS2022GRH.Decomp406a",
+      "LeanLab.BS2022GRH.Decomp374f"
+    ]
+  },
+  {
+    "file": "Decomp148d.lean",
+    "lines": 43,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC164b",
+      "LeanLab.BS2022GRH.Decomp148c"
+    ]
+  },
+  {
+    "file": "Decomp148e.lean",
+    "lines": 35,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC164a"
+    ]
+  },
+  {
+    "file": "Decomp148f.lean",
+    "lines": 47,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH"
+    ]
+  },
+  {
+    "file": "Decomp148g.lean",
+    "lines": 33,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148f",
+      "LeanLab.BS2022GRH.DecompC169d"
+    ]
+  },
+  {
+    "file": "Decomp327a.lean",
+    "lines": 1258,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169d",
+      "LeanLab.BS2022GRH.Envelope327"
+    ]
+  },
+  {
+    "file": "Decomp327b.lean",
+    "lines": 95,
+    "sorries": 2,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp327a"
+    ]
+  },
+  {
+    "file": "Decomp327c.lean",
+    "lines": 97,
+    "sorries": 2,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp327a"
+    ]
+  },
+  {
+    "file": "Decomp332a.lean",
+    "lines": 85,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp333a",
+      "LeanLab.BS2022GRH.DecompC164c",
+      "LeanLab.BS2022GRH.Decomp332b",
+      "LeanLab.BS2022GRH.Decomp332c"
+    ]
+  },
+  {
+    "file": "Decomp332b.lean",
+    "lines": 62,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.CharacterInputs332",
+      "LeanLab.BS2022GRH.EndpointCompare332",
+      "LeanLab.BS2022GRH.Decomp339b"
+    ]
+  },
+  {
+    "file": "Decomp332c.lean",
+    "lines": 68,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Theta332",
+      "LeanLab.BS2022GRH.DecompC169b"
+    ]
+  },
+  {
+    "file": "Decomp333a.lean",
+    "lines": 93,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Slack333",
+      "LeanLab.BS2022GRH.WeakSieve333",
+      "LeanLab.BS2022GRH.DecompC169a",
+      "LeanLab.BS2022GRH.Density333"
+    ]
+  },
+  {
+    "file": "Decomp339a.lean",
+    "lines": 114,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Bilinear339",
+      "LeanLab.BS2022GRH.Balance339",
+      "LeanLab.BS2022GRH.Decomp339c",
+      "LeanLab.BS2022GRH.SliceInstances236",
+      "LeanLab.BS2022GRH.Decomp406e"
+    ]
+  },
+  {
+    "file": "Decomp339b.lean",
+    "lines": 126,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp339a",
+      "LeanLab.BS2022GRH.EndpointCompare332"
+    ]
+  },
+  {
+    "file": "Decomp339c.lean",
+    "lines": 213,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Scale339",
+      "LeanLab.BS2022GRH.SliceInstances236"
+    ]
+  },
+  {
+    "file": "Decomp374a.lean",
+    "lines": 841,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148a",
+      "LeanLab.PNTPort.LargeSieve.Bilinear",
+      "LeanLab.Linnik.HilbertCosecant"
+    ]
+  },
+  {
+    "file": "Decomp374b.lean",
+    "lines": 799,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148a",
+      "LeanLab.BS2022GRH.Prefix374"
+    ]
+  },
+  {
+    "file": "Decomp374c.lean",
+    "lines": 20,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169c"
+    ]
+  },
+  {
+    "file": "Decomp374d.lean",
+    "lines": 103,
+    "sorries": 2,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148a",
+      "LeanLab.BS2022GRH.DecompC164b",
+      "LeanLab.BS2022GRH.Totient374"
+    ]
+  },
+  {
+    "file": "Decomp374e.lean",
+    "lines": 31,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169d"
+    ]
+  },
+  {
+    "file": "Decomp374f.lean",
+    "lines": 380,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp374a",
+      "LeanLab.BS2022GRH.PublishedInputs232"
+    ]
+  },
+  {
+    "file": "Decomp374g.lean",
+    "lines": 44,
+    "sorries": 3,
+    "imports": [
+      "LeanLab.BS2022GRH.MassInputs236"
+    ]
+  },
+  {
+    "file": "Decomp406a.lean",
+    "lines": 143,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp374a",
+      "LeanLab.Linnik.Decomp1532b"
+    ]
+  },
+  {
+    "file": "Decomp406b.lean",
+    "lines": 179,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp374f",
+      "LeanLab.BS2022GRH.Decomp374d"
+    ]
+  },
+  {
+    "file": "Decomp406c.lean",
+    "lines": 381,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.RobinFinite406",
+      "Mathlib.Analysis.SpecialFunctions.Log.Monotone",
+      "LeanLab.JohnstonStarichkova.Theorem14"
+    ]
+  },
+  {
+    "file": "Decomp406d.lean",
+    "lines": 160,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp374b",
+      "LeanLab.BS2022GRH.Decomp374d",
+      "LeanLab.BS2022GRH.Decomp406c"
+    ]
+  },
+  {
+    "file": "Decomp406e.lean",
+    "lines": 124,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp406a",
+      "LeanLab.BS2022GRH.Decomp406b",
+      "LeanLab.BS2022GRH.Decomp406d",
+      "LeanLab.BS2022GRH.Decomp148d"
+    ]
+  },
+  {
+    "file": "Decomp410a.lean",
+    "lines": 57,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.Density410",
+      "LeanLab.BS2022GRH.RH148",
+      "LeanLab.BS2022GRH.Mertens410"
+    ]
+  },
+  {
+    "file": "Decomp543a.lean",
+    "lines": 462,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.SlicePartial236",
+      "LeanLab.BS2022GRH.Lemma11C164"
+    ]
+  },
+  {
+    "file": "DecompC164a.lean",
+    "lines": 172,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH"
+    ]
+  },
+  {
+    "file": "DecompC164b.lean",
+    "lines": 167,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148b",
+      "LeanLab.BS2022GRH.Decomp148c"
+    ]
+  },
+  {
+    "file": "DecompC164c.lean",
+    "lines": 79,
+    "sorries": 3,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceModel236",
+      "LeanLab.BS2022GRH.SliceSieveAssembly236",
+      "LeanLab.BS2022GRH.MassAssembly236",
+      "LeanLab.BS2022GRH.Decomp332b"
+    ]
+  },
+  {
+    "file": "DecompC169a.lean",
+    "lines": 965,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp138",
+      "LeanLab.BS2022GRH.DecompC164a",
+      "LeanLab.BS2022GRH.EndpointC169",
+      "LeanLab.BS2022GRH.DecompC169c",
+      "LeanLab.BS2022GRH.PublishedInputs233",
+      "LeanLab.BS2022GRH.ModelC233",
+      "LeanLab.BS2022GRH.RemainderC233",
+      "LeanLab.BS2022GRH.PublishedInputs232",
+      "LeanLab.BS2022GRH.Verify1565"
+    ]
+  },
+  {
+    "file": "DecompC169b.lean",
+    "lines": 1484,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169a",
+      "LeanLab.BS2022GRH.ProgressionC169",
+      "LeanLab.BS2022GRH.CoefficientsC169",
+      "LeanLab.BS2022GRH.PublishedInputs232",
+      "LeanLab.BS2022GRH.Lemma11C164"
+    ]
+  },
+  {
+    "file": "DecompC169c.lean",
+    "lines": 277,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Lemma6Input138",
+      "LeanLab.BS2022GRH.PortedMertens",
+      "LeanLab.BS2022GRH.ThetaMertens224",
+      "LeanLab.BS2022GRH.ThetaInputs224",
+      "LeanLab.BS2022GRH.LowerMertens224",
+      "LeanLab.BS2022GRH.FiniteMertens224"
+    ]
+  },
+  {
+    "file": "DecompC169d.lean",
+    "lines": 1638,
+    "sorries": 2,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148f",
+      "LeanLab.AlmostPrimeSums.Decomp1527b"
+    ]
+  },
+  {
+    "file": "DecompJ215.lean",
+    "lines": 64,
+    "sorries": 0,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BS2022GRH.ChenThresholdGRH",
+      "LeanLab.BS2022GRH.Params",
+      "LeanLab.BS2022GRH.U7154UN",
+      "LeanLab.BS2022GRH.Decomp138b",
+      "LeanLab.DERZ1997.Statements",
+      "LeanLab.BS2022GRH.Decomp333a"
+    ]
+  },
+  {
+    "file": "DecompJ278.lean",
+    "lines": 33,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1567",
+      "LeanLab.BS2022GRH.TailC164"
+    ]
+  },
+  {
+    "file": "Delay327.lean",
+    "lines": 76,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp327a"
+    ]
+  },
+  {
+    "file": "Density333.lean",
+    "lines": 42,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Reciprocal333",
+      "LeanLab.BS2022GRH.Density410",
+      "LeanLab.BS2022GRH.Mertens410"
+    ]
+  },
+  {
+    "file": "Density410.lean",
+    "lines": 375,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ModelC233",
+      "LeanLab.BS2022GRH.DecompC169c",
+      "LeanLab.BS2022GRH.Verify1565"
+    ]
+  },
+  {
+    "file": "Endpoint339.lean",
+    "lines": 89,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp339a"
+    ]
+  },
+  {
+    "file": "EndpointAudit339.lean",
+    "lines": 73,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cutoff339"
+    ]
+  },
+  {
+    "file": "EndpointC169.lean",
+    "lines": 81,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC164a"
+    ]
+  },
+  {
+    "file": "EndpointCompare332.lean",
+    "lines": 219,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Endpoint339",
+      "LeanLab.BS2022GRH.EndpointWeights332"
+    ]
+  },
+  {
+    "file": "EndpointGrowth339.lean",
+    "lines": 171,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Endpoint339",
+      "Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics"
+    ]
+  },
+  {
+    "file": "EndpointWeights332.lean",
+    "lines": 125,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.LogWeights332"
+    ]
+  },
+  {
+    "file": "Envelope327.lean",
+    "lines": 131,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Thm6Factor"
+    ]
+  },
+  {
+    "file": "FiniteC164.lean",
+    "lines": 46,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cert1575",
+      "LeanLab.BS2022GRH.CertC164"
+    ]
+  },
+  {
+    "file": "FiniteMertens224.lean",
+    "lines": 58,
+    "sorries": 2,
+    "imports": [
+      "LeanLab.BS2022GRH.PortedMertens"
+    ]
+  },
+  {
+    "file": "InputsC169.lean",
+    "lines": 25,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169b",
+      "LeanLab.BS2022GRH.DecompC169d",
+      "LeanLab.BS2022GRH.DecompC164c",
+      "LeanLab.BS2022GRH.Cert1575Closed"
+    ]
+  },
+  {
+    "file": "Instances327.lean",
+    "lines": 81,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp327a",
+      "LeanLab.BS2022GRH.SieveAllLevels1611"
+    ]
+  },
+  {
+    "file": "Instances332.lean",
+    "lines": 64,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.EndpointCompare332"
+    ]
+  },
+  {
+    "file": "Instances333.lean",
+    "lines": 58,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Scalar333",
+      "LeanLab.BS2022GRH.Cert1575Closed"
+    ]
+  },
+  {
+    "file": "Instances339.lean",
+    "lines": 72,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Bilinear339"
+    ]
+  },
+  {
+    "file": "Instances374.lean",
+    "lines": 79,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp374a",
+      "LeanLab.BS2022GRH.Decomp374b",
+      "LeanLab.BS2022GRH.Decomp374d",
+      "LeanLab.BS2022GRH.Decomp374f",
+      "LeanLab.BS2022GRH.Decomp374g"
+    ]
+  },
+  {
+    "file": "Instances406.lean",
+    "lines": 62,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp406b",
+      "LeanLab.BS2022GRH.Instances374",
+      "LeanLab.BS2022GRH.Decomp406d"
+    ]
+  },
+  {
+    "file": "Instances410.lean",
+    "lines": 78,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Density410"
+    ]
+  },
+  {
+    "file": "InstancesC164.lean",
+    "lines": 87,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC164b",
+      "LeanLab.BS2022GRH.QG",
+      "LeanLab.BS2022GRH.Lemma9M"
+    ]
+  },
+  {
+    "file": "JournalLower.lean",
+    "lines": 133,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.JournalMargin"
+    ]
+  },
+  {
+    "file": "JournalMargin.lean",
+    "lines": 111,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Constants"
+    ]
+  },
+  {
+    "file": "JournalPositive.lean",
+    "lines": 152,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.JournalMargin",
+      "LeanLab.Helfgott2013.GammaFine"
+    ]
+  },
+  {
+    "file": "Lemma11.lean",
+    "lines": 269,
+    "sorries": 0,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BS2022GRH.Constants"
+    ]
+  },
+  {
+    "file": "Lemma11C164.lean",
+    "lines": 108,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.BookkeepingC164",
+      "LeanLab.BS2022GRH.Constants",
+      "LeanLab.BS2022GRH.LiPV"
+    ]
+  },
+  {
+    "file": "Lemma5Coeffs138.lean",
+    "lines": 76,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH"
+    ]
+  },
+  {
+    "file": "Lemma6Input138.lean",
+    "lines": 52,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Mertens138"
+    ]
+  },
+  {
+    "file": "Lemma8.lean",
+    "lines": 304,
+    "sorries": 0,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BS2022GRH.Params"
+    ]
+  },
+  {
+    "file": "Lemma9M.lean",
+    "lines": 318,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Thm7Factor"
+    ]
+  },
+  {
+    "file": "LiPV.lean",
+    "lines": 231,
+    "sorries": 0,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "LiTwo.lean",
+    "lines": 261,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.LiTwoA"
+    ]
+  },
+  {
+    "file": "LiTwoA.lean",
+    "lines": 134,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.LiPV"
+    ]
+  },
+  {
+    "file": "LogWeights332.lean",
+    "lines": 77,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.WeightedQ339"
+    ]
+  },
+  {
+    "file": "LowerMertens224.lean",
+    "lines": 149,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ThetaMertens224"
+    ]
+  },
+  {
+    "file": "MassAssembly236.lean",
+    "lines": 121,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.MassInputs236",
+      "LeanLab.BS2022GRH.SchoenfeldEnvelope236",
+      "LeanLab.BS2022GRH.Lemma11C164"
+    ]
+  },
+  {
+    "file": "MassEndpoint476.lean",
+    "lines": 114,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceMass236",
+      "LeanLab.BS2022GRH.Instances339"
+    ]
+  },
+  {
+    "file": "MassInputs236.lean",
+    "lines": 25,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.OuterIntegral236"
+    ]
+  },
+  {
+    "file": "Mbar339.lean",
+    "lines": 57,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Bilinear339"
+    ]
+  },
+  {
+    "file": "MbarCompare339.lean",
+    "lines": 126,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.MbarWeights339",
+      "LeanLab.BS2022GRH.Mbar339"
+    ]
+  },
+  {
+    "file": "MbarWeights339.lean",
+    "lines": 117,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.WeightedQ339"
+    ]
+  },
+  {
+    "file": "Mertens138.lean",
+    "lines": 72,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp138"
+    ]
+  },
+  {
+    "file": "Mertens410.lean",
+    "lines": 66,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169c"
+    ]
+  },
+  {
+    "file": "ModelC233.lean",
+    "lines": 44,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH"
+    ]
+  },
+  {
+    "file": "Mphi339.lean",
+    "lines": 103,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Scalar339"
+    ]
+  },
+  {
+    "file": "Novelty1602.lean",
+    "lines": 209,
+    "sorries": 3,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "OuterIntegral236.lean",
+    "lines": 69,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SlicePartial236"
+    ]
+  },
+  {
+    "file": "PaperInputs148.lean",
+    "lines": 39,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.RH148",
+      "LeanLab.BS2022GRH.Lemma5Coeffs138"
+    ]
+  },
+  {
+    "file": "Parameters138.lean",
+    "lines": 57,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp138",
+      "LeanLab.BS2022GRH.Cert1575Closed"
+    ]
+  },
+  {
+    "file": "Params.lean",
+    "lines": 185,
+    "sorries": 0,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "PhiBridge406.lean",
+    "lines": 82,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.PaperInputs148"
+    ]
+  },
+  {
+    "file": "PortedMertens.lean",
+    "lines": 1823,
+    "sorries": 0,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "Prefix374.lean",
+    "lines": 96,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC164a",
+      "Mathlib.NumberTheory.DirichletCharacter.Bounds"
+    ]
+  },
+  {
+    "file": "PrimeAbel333.lean",
+    "lines": 168,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SchoenfeldEnvelope236",
+      "LeanLab.BS2022GRH.DecompC169c"
+    ]
+  },
+  {
+    "file": "ProgressionC169.lean",
+    "lines": 111,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ModelC233",
+      "LeanLab.BS2022GRH.BookkeepingC164"
+    ]
+  },
+  {
+    "file": "PublishedInputs232.lean",
+    "lines": 2448,
+    "sorries": 6,
+    "imports": [
+      "LeanLab.BS2022GRH.PaperInputs148",
+      "LeanLab.BS2022GRH.ModelC233",
+      "LeanLab.BS2022GRH.Theta332"
+    ]
+  },
+  {
+    "file": "PublishedInputs233.lean",
+    "lines": 103,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ModelC233",
+      "LeanLab.BS2022GRH.DecompC169c",
+      "LeanLab.BS2022GRH.Decomp410a"
+    ]
+  },
+  {
+    "file": "PublishedInputs236.lean",
+    "lines": 18,
+    "sorries": 1,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169a"
+    ]
+  },
+  {
+    "file": "QG.lean",
+    "lines": 141,
+    "sorries": 0,
+    "imports": [
+      "Mathlib",
+      "LeanLab.BS2022GRH.Constants"
+    ]
+  },
+  {
+    "file": "QuotientC169.lean",
+    "lines": 61,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169b"
+    ]
+  },
+  {
+    "file": "RH148.lean",
+    "lines": 47,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH",
+      "Mathlib.NumberTheory.LSeries.Nonvanishing"
+    ]
+  },
+  {
+    "file": "RangeCheck13375.lean",
+    "lines": 123,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.JournalPositive"
+    ]
+  },
+  {
+    "file": "Reciprocal333.lean",
+    "lines": 95,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.PrimeAbel333"
+    ]
+  },
+  {
+    "file": "RemainderC233.lean",
+    "lines": 255,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.ModelC233",
+      "LeanLab.BS2022GRH.ProgressionC169",
+      "LeanLab.BS2022GRH.CoefficientsC169",
+      "LeanLab.BS2022GRH.PaperInputs148",
+      "LeanLab.BS2022GRH.RangeCheck13375"
+    ]
+  },
+  {
+    "file": "ResidueC169.lean",
+    "lines": 52,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169b"
+    ]
+  },
+  {
+    "file": "RobinFinite406.lean",
+    "lines": 309,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.PaperInputs148"
+    ]
+  },
+  {
+    "file": "Scalar333.lean",
+    "lines": 53,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.EndpointC169",
+      "LeanLab.BS2022GRH.ModelC233"
+    ]
+  },
+  {
+    "file": "Scalar339.lean",
+    "lines": 76,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Cutoff339"
+    ]
+  },
+  {
+    "file": "Scale339.lean",
+    "lines": 43,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.MbarCompare339"
+    ]
+  },
+  {
+    "file": "SchoenfeldEnvelope236.lean",
+    "lines": 182,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SlicePartial236",
+      "LeanLab.BS2022GRH.PublishedInputs232"
+    ]
+  },
+  {
+    "file": "SieveAllLevels1611.lean",
+    "lines": 377,
+    "sorries": 3,
+    "imports": [
+      "LeanLab.BS2022GRH.ChenThresholdGRH"
+    ]
+  },
+  {
+    "file": "SieveModelC169.lean",
+    "lines": 100,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169a",
+      "LeanLab.BS2022GRH.Decomp148f"
+    ]
+  },
+  {
+    "file": "Slack333.lean",
+    "lines": 108,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Scalar333",
+      "LeanLab.BS2022GRH.DecompC169a"
+    ]
+  },
+  {
+    "file": "SliceInstances236.lean",
+    "lines": 32,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceRanges236"
+    ]
+  },
+  {
+    "file": "SliceMass236.lean",
+    "lines": 181,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceModel236",
+      "LeanLab.BS2022GRH.PaperInputs148"
+    ]
+  },
+  {
+    "file": "SliceModel236.lean",
+    "lines": 302,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp148d"
+    ]
+  },
+  {
+    "file": "SlicePartial236.lean",
+    "lines": 126,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceMass236"
+    ]
+  },
+  {
+    "file": "SliceRanges236.lean",
+    "lines": 94,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceSieveAssembly236"
+    ]
+  },
+  {
+    "file": "SliceRemainder236.lean",
+    "lines": 255,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceSieve236"
+    ]
+  },
+  {
+    "file": "SliceSieve236.lean",
+    "lines": 365,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceModel236",
+      "LeanLab.BS2022GRH.DecompC169b",
+      "LeanLab.BS2022GRH.SieveModelC169",
+      "LeanLab.BS2022GRH.PublishedInputs236"
+    ]
+  },
+  {
+    "file": "SliceSieveAssembly236.lean",
+    "lines": 126,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.SliceSieve236"
+    ]
+  },
+  {
+    "file": "TailC164.lean",
+    "lines": 116,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.FiniteC164"
+    ]
+  },
+  {
+    "file": "Theorem3.lean",
+    "lines": 133,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Lemma9M"
+    ]
+  },
+  {
+    "file": "Theorem3LiPV.lean",
+    "lines": 98,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Theorem3",
+      "LeanLab.BS2022GRH.LiPV"
+    ]
+  },
+  {
+    "file": "Theta332.lean",
+    "lines": 25,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.PaperInputs148",
+      "LeanLab.BS2022GRH.ThetaInputs224"
+    ]
+  },
+  {
+    "file": "ThetaInputs224.lean",
+    "lines": 34,
+    "sorries": 4,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "ThetaMertens224.lean",
+    "lines": 342,
+    "sorries": 0,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "Thm5Factor.lean",
+    "lines": 148,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.QG",
+      "LeanLab.ChenExplicit.TwinCNumeric"
+    ]
+  },
+  {
+    "file": "Thm6Factor.lean",
+    "lines": 300,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Thm5Factor"
+    ]
+  },
+  {
+    "file": "Thm7Factor.lean",
+    "lines": 363,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Thm6Factor"
+    ]
+  },
+  {
+    "file": "Totient374.lean",
+    "lines": 58,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Decomp374f"
+    ]
+  },
+  {
+    "file": "U7153Lemma10.lean",
+    "lines": 525,
+    "sorries": 0,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "U7153Theorem3.lean",
+    "lines": 49,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Theorem3LiPV",
+      "LeanLab.BS2022GRH.U7153Lemma10"
+    ]
+  },
+  {
+    "file": "U7154UN.lean",
+    "lines": 113,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.U7153Theorem3",
+      "LeanLab.ChenExplicit.TwinCNumeric"
+    ]
+  },
+  {
+    "file": "Verify1565.lean",
+    "lines": 57,
+    "sorries": 0,
+    "imports": [
+      "Mathlib"
+    ]
+  },
+  {
+    "file": "WeakSieve333.lean",
+    "lines": 73,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.DecompC169a"
+    ]
+  },
+  {
+    "file": "WeightedQ339.lean",
+    "lines": 135,
+    "sorries": 0,
+    "imports": [
+      "LeanLab.BS2022GRH.Mphi339"
+    ]
+  }
+]
