@@ -51,7 +51,8 @@ theorem rough_to_integral_rest :
         (remainderIntegral - K * ε) * scale N (localization N ε) n ≤
           roughModelRest N (localization N ε) n := by sorry
 
-/-- Page 277: the certified integral leaves a reserve of 31 hundred millionths. -/
+/-- Page 277: the integral leaves a reserve of 31 hundred millionths.
+CONDITIONAL ON the open numerical polynomial integral leaves. -/
 theorem remainderIntegral_reserve : (0.34129331 : ℝ) ≤ remainderIntegral :=
   remainder_numeric_margin
 
@@ -69,7 +70,8 @@ theorem coefficient_comparison (I K L ε s model value : ℝ)
 
 /-- Pages 274 to 277: the exact sealed remainder_lower type follows
 from the two strictly smaller source transfers. CONDITIONAL ON
-prime_to_rough_rest and rough_to_integral_rest. No admission occurs here. -/
+prime_to_rough_rest, rough_to_integral_rest and the open numerical leaves.
+No admission occurs here. -/
 theorem remainder_lower_from_transfers :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε B : ℝ, 0 < ε → ε < ε₀ → 0 < B →
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →

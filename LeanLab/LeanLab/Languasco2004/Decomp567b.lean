@@ -73,7 +73,8 @@ def remainderIntegral : ℝ :=
   (∫ t in (281 / 570 : ℝ)..(143 / 290), ∫ u in ((16 / 135) + (0) * t)..((89 / 27) + (-58 / 9) * t), kernel 2 t u) +
   (∫ t in (143 / 290 : ℝ)..(1 / 2), ∫ u in ((17 / 99) + (0) * t)..((40 / 57) + (-1) * t), kernel 0 t u)
 
-/-- Page 277: the full remainder coefficient has a reserve of 31 hundred millionths. -/
+/-- Page 277: the full remainder coefficient has a reserve of 31 hundred millionths.
+CONDITIONAL ON the open numerical polynomial integral leaves. -/
 theorem remainder_numeric_margin : (0.34129331 : ℝ) ≤ remainderIntegral := by
   unfold remainderIntegral
   linarith [Numeric567_02.source_integral_lower,
@@ -108,7 +109,8 @@ theorem remainder_numeric_margin : (0.34129331 : ℝ) ≤ remainderIntegral := b
     Numeric567_31.source_integral_lower,
     Numeric567_32.source_integral_lower]
 
-/-- Page 277: the printed coefficient follows from the certified strict reserve. -/
+/-- Page 277: the printed coefficient follows from the strict reserve.
+CONDITIONAL ON the open numerical polynomial integral leaves. -/
 theorem remainder_numeric_lower : (0.341293 : ℝ) ≤ remainderIntegral := by
   linarith [remainder_numeric_margin]
 
