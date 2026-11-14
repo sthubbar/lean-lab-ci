@@ -34,6 +34,7 @@ list of candidates, and the four pair leaves carry the whole arithmetic
 content of the block.
 -/
 import LeanLab.DtRS1998.SPLIT_batch2_prime
+import LeanLab.DtRS1998.PocklingtonB7Row90
 
 namespace LeanLab.DtRS1998.Decomp395a
 
@@ -60,29 +61,48 @@ Kernel checked on the fixed data. -/
 private theorem block7_pair_nonempty : (qs.drop 184).take 2 ≠ [] := by
   decide +kernel
 
+/-- Membership is inherited from a truncated slice. Pure list arithmetic, no
+data: a candidate in `l.take n` is a candidate of `l`. -/
+private theorem block7_mem_of_mem_take {l : List ℕ} {n : ℕ} {q : ℕ}
+    (hq : q ∈ l.take n) : q ∈ l :=
+  List.Sublist.subset (List.take_sublist n l) hq
+
+/-- Membership is inherited from a dropped tail. -/
+private theorem block7_mem_of_mem_drop {l : List ℕ} {n : ℕ} {q : ℕ}
+    (hq : q ∈ l.drop n) : q ∈ l :=
+  List.Sublist.subset (List.drop_sublist n l) hq
+
 /-- LEAF: the primality check of the first pair of the eighth block of the
 third batch, the two candidates at offsets 185 and 186 of the fixed
 candidate list. This is two candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair0 : ∀ q ∈ (qs.drop 184).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (block7_mem_of_mem_drop (block7_mem_of_mem_take hq))
 
 /-- LEAF: the primality check of the second pair of the eighth block, the two
 candidates at offsets 187 and 188 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair1 : ∀ q ∈ (qs.drop 186).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (block7_mem_of_mem_drop (block7_mem_of_mem_take hq))
 
 /-- LEAF: the primality check of the third pair of the eighth block, the two
 candidates at offsets 189 and 190 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair2 : ∀ q ∈ (qs.drop 188).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (block7_mem_of_mem_drop (block7_mem_of_mem_take hq))
 
 /-- LEAF: the primality check of the fourth pair of the eighth block, the two
 candidates at offsets 191 and 192 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair3 : ∀ q ∈ (qs.drop 190).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    (block7_mem_of_mem_drop (block7_mem_of_mem_take hq))
 
 /-- The block, proved from the four pair leaves: the block is the four pairs
 concatenated, and primality is inherited entry by entry from the pair whose
