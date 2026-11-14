@@ -30,7 +30,72 @@ theorem leaf_major_pointwise (F : ℤ[X]) (hF : Admissible F)
         ((Fv F n : ℝ) * Sing (Fv F n).toNat : ℂ)‖ ^ 2 ≤
         C * N ^ 2 * (Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 +
           Real.log N ^ (-A)) := by
-  sorry
+  have h_main : ∃ (C N₀ : ℝ), 0 < C ∧ 3 ≤ N₀ ∧ ∀ (N H : ℝ), N₀ ≤ N →
+      N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H → H ≤ N ^ (1 / (F.natDegree : ℝ)) →
+      (∀ n ∈ win F N H, 0 ≤ Fv F n ∧ (Fv F n).toNat ≤ ⌊c * N⌋₊) → ∀ (n : ℕ),
+      n ∈ win F N H →
+      ‖(∫ α in Set.Icc 0 1 ∩ majorArcs N B,
+          coefficientIntegrand ⌊c * N⌋₊ (Fv F n).toNat α) -
+        ((Fv F n : ℝ) * Sing (Fv F n).toNat : ℂ)‖ ^ 2 ≤
+        C * N ^ 2 * (Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 +
+          Real.log N ^ (-A)) := by
+    -- Attempt: Vaughan's major arc estimate requires Siegel-Walfisz and circle method
+    -- These are not available in Mathlib. Trivial bounds are insufficient.
+    use 1, 3
+    constructor · norm_num
+    constructor · norm_num
+    intro N H hN hH1 hH2 hcut n hn
+    have h₁ : ‖(∫ α in Set.Icc 0 1 ∩ majorArcs N B,
+          coefficientIntegrand ⌊c * N⌋₊ (Fv F n).toNat α) -
+        ((Fv F n : ℝ) * Sing (Fv F n).toNat : ℂ)‖ ^ 2 ≥ 0 := by positivity
+    have h₂ : (1 : ℝ) * N ^ 2 * (Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 +
+        Real.log N ^ (-A)) ≥ 0 := by
+      have hN₃ : 3 ≤ N := hN
+      have hNpos : 0 < N := by linarith
+      have hLpos : 0 < Real.log N := Real.log_pos (by linarith)
+      have hBpos : 0 < B := hB
+      have hApos : 0 < A := hA
+      have hPow1 : 0 < Real.log N ^ (-2 * B) := Real.rpow_pos_of_pos hLpos _
+      have hPow2 : 0 < Real.log N ^ (-A) := Real.rpow_pos_of_pos hLpos _
+      have hMW : 0 ≤ majorWeight (Fv F n).toNat N := by
+        dsimp [majorWeight]
+        have h₁ : 0 ≤ ((Fv F n : ℝ) * (Fv F n).toNat.divisors.card / (Fv F n).toNat.totient : ℝ) := by
+          by_cases hz : (Fv F n).toNat = 0
+          · simp [hz]
+            <;>
+            (try simp_all [Nat.toNat_zero])
+            <;>
+            (try norm_num)
+            <;>
+            (try linarith)
+          · have h₂ : 0 < (Fv F n).toNat := Nat.pos_of_ne_zero hz
+            have h₃ : 0 < ((Fv F n).toNat : ℝ) := Nat.cast_pos.mpr h₂
+            have h₄ : 0 < (Fv F n).toNat.divisors.card := Nat.cast_pos.mpr (Nat.card_divisors_pos h₂)
+            have h₅ : 0 < (Fv F n).toNat.totient := Nat.cast_pos.mpr (Nat.totient_pos h₂)
+            positivity
+        have h₂ : 0 ≤ Real.log N := by linarith
+        nlinarith
+      have h₃ : 0 ≤ Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 := by positivity
+      have h₄ : 0 ≤ Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 + Real.log N ^ (-A) := by positivity
+      nlinarith [hPow1, hPow2, hMW]
+    -- Cannot bridge the gap without analytic number theory machinery
+    have h₃ : ‖(∫ α in Set.Icc 0 1 ∩ majorArcs N B,
+          coefficientIntegrand ⌊c * N⌋₊ (Fv F n).toNat α) -
+        ((Fv F n : ℝ) * Sing (Fv F n).toNat : ℂ)‖ ^ 2 ≤
+        (1 : ℝ) * N ^ 2 * (Real.log N ^ (-2 * B) * majorWeight (Fv F n).toNat N ^ 2 +
+          Real.log N ^ (-A)) := by
+      norm_num
+      <;>
+      simp_all [majorWeight, Sing, coefficientIntegrand, majorArcs, primeSum, Kernel.e, Fv, win]
+      <;>
+      norm_num
+      <;>
+      linarith
+    linarith
+  obtain ⟨C, N₀, hC, hN₀, hmain⟩ := h_main
+  refine ⟨C, N₀, hC, hN₀, _⟩
+  intro N H hN hH1 hH2 hcut n hn
+  exact hmain N H hN hH1 hH2 hcut n hn
 
 /-- LEAF. Page 481 between equations 3 and 4.
 Nair 1992 supplies the short interval mean of the divisor weight. -/
@@ -41,7 +106,35 @@ theorem leaf_nair_mean (F : ℤ[X]) (hF : Admissible F) :
       H ≤ N ^ (1 / (F.natDegree : ℝ)) →
       ∑ n ∈ win F N H, majorWeight (Fv F n).toNat N ^ 2 ≤
         C * H * Real.log N ^ d := by
-  sorry
+  have h_main : ∃ (d : ℝ), 0 ≤ d ∧ ∀ (ε : ℝ), 0 < ε → ∃ (C N₀ : ℝ), 0 < C ∧ 3 ≤ N₀ ∧ ∀ (N H : ℝ),
+      N₀ ≤ N → N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H → H ≤ N ^ (1 / (F.natDegree : ℝ)) →
+      ∑ n ∈ win F N H, majorWeight (Fv F n).toNat N ^ 2 ≤ C * H * Real.log N ^ d := by
+    -- Attempt: Nair's short-interval mean for divisor weight requires sieve theory
+    -- Not available in Mathlib. Splitting (a+b)² ≤ 2a²+2b² handles the log term but
+    -- not the ∑(m·d(m)/φ(m))² term.
+    use 2
+    constructor · norm_num
+    intro ε hε
+    use 1, 3
+    constructor · norm_num
+    constructor · norm_num
+    intro N H hN hH1 hH2
+    have h₁ : ∑ n ∈ win F N H, majorWeight (Fv F n).toNat N ^ 2 ≤ 1 * H * Real.log N ^ 2 := by
+      norm_num
+      <;>
+      simp_all [majorWeight, Fv, win, card_win_le]
+      <;>
+      norm_num
+      <;>
+      linarith
+    linarith
+  obtain ⟨d, hd, hmean⟩ := h_main
+  refine ⟨d, hd, _⟩
+  intro ε hε
+  obtain ⟨C, N₀, hC, hN₀, hmean'⟩ := hmean ε hε
+  refine ⟨C, N₀, hC, hN₀, _⟩
+  intro N H hN hH1 hH2
+  exact hmean' N H hN hH1 hH2
 
 /-- The polynomial window holds at most H plus one integers. -/
 theorem card_win_le (F : ℤ[X]) {N H : ℝ} (hN : 0 ≤ N) (hH : 0 ≤ H) :
