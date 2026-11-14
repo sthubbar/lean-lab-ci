@@ -50,23 +50,27 @@ exponential `exp (-0.1598 * t)` of the target. Only the two rates and the consta
 here; no analytic input is used. -/
 theorem multiplicity_decay_product_le (t : ℝ) (ht : 100 ≤ t) :
     exp (0.6 * t) * (2.15581 * exp (-0.78 * t)) ≤ exp (-0.1598 * t) := by
-  have hT : (2.02 : ℝ) ≤ 0.0202 * t := by nlinarith
-  have hbig : (2.15581 : ℝ) ≤ exp (0.0202 * t) := by
-    have h1 : (2.02 : ℝ) + 1 ≤ exp 2.02 := Real.add_one_le_exp 2.02
-    have h2 : exp (2.02 : ℝ) ≤ exp (0.0202 * t) := exp_le_exp.mpr hT
-    linarith
-  have hmul : exp (0.6 * t) * exp (-0.78 * t) = exp (-0.18 * t) := by
-    rw [← exp_add]
+  have hnonneg : (0 : ℝ) ≤ t := le_trans (by norm_num) ht
+  have hsplit : exp (0.6 * t) * exp (-0.78 * t) = exp (-0.18 * t) := by
+    rw [← Real.exp_add]
     congr 1
     ring
-  have hkey : exp (0.6 * t) * (2.15581 * exp (-0.78 * t)) =
-      2.15581 * exp (-0.18 * t) := by
-    rw [← hmul]
+  have hjoin : exp (-0.1598 * t) = exp (0.0202 * t) * exp (-0.18 * t) := by
+    rw [← Real.exp_add]
+    congr 1
     ring
-  rw [hkey, show (-0.1598 : ℝ) * t = -0.18 * t + 0.0202 * t by ring, exp_add]
-  calc (2.15581 : ℝ) * exp (-0.18 * t) = exp (-0.18 * t) * 2.15581 := by ring
-    _ ≤ exp (-0.18 * t) * exp (0.0202 * t) :=
-        mul_le_mul_of_nonneg_left hbig (exp_pos _).le
+  have hgap : (2.02 : ℝ) ≤ 0.0202 * t := by nlinarith
+  have hmono : exp (2 : ℝ) ≤ exp (0.0202 * t) := Real.exp_le_exp.mpr (by nlinarith)
+  have htwo : (2.15581 : ℝ) ≤ exp (2 : ℝ) :=
+    (lt_of_le_of_lt (by norm_num) Real.exp_two_gt_d9).le
+  have hkey : 2.15581 * exp (-0.18 * t) ≤ exp (-0.1598 * t) := by
+    rw [hjoin]
+    exact mul_le_mul_of_nonneg_right (htwo.trans hmono) (Real.exp_nonneg _)
+  calc exp (0.6 * t) * (2.15581 * exp (-0.78 * t))
+      = (2.15581 * exp (0.6 * t)) * exp (-0.78 * t) := by ring
+    _ = 2.15581 * (exp (0.6 * t) * exp (-0.78 * t)) := by ring
+    _ = 2.15581 * exp (-0.18 * t) := by rw [hsplit]
+    _ ≤ exp (-0.1598 * t) := hkey
 
 /-- The pointwise envelope, assembled from the three steps. The mass is the multiplicity times
 the norm of the Mellin transform, the decay and the multiplicity bound are multiplied, the
