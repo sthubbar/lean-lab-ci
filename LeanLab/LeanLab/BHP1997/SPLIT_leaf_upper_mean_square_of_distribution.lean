@@ -96,7 +96,8 @@ theorem leaf_exceptional_set_card_emptyset
     ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q →
       (((fun _ _ _ => (∅ : Finset (DirichletCharacter ℂ q))) A x q).card : ℝ) ≤
         C * (q : ℝ) ^ (1 / 2 : ℝ) * Real.log x ^ (-2 * A) := by
-  sorry
+  refine ⟨0, fun x _ q _ => ?_⟩
+  simp
 
 /-- The split statement, assembled from the three LEAF statements above with no sorry. Leaf 1
 covers the moduli at most one, leaf 2 the moduli from two up to `sieveQ eps x`; together they
