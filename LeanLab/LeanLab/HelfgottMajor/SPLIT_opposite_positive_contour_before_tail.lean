@@ -75,7 +75,55 @@ theorem leaf_real_tail_estimate (δ : ℝ) (s : ℂ) (a : ℝ) (ha : 0 < a) :
     ‖∫ x : ℝ in Set.Ioi a, (x : ℂ) ^ (s - 1) *
         ((exp (-x ^ 2 / 2) : ℂ) * LeanLab.HelfgottArcs.e (δ * x))‖ ≤
       ∫ x : ℝ in Set.Ioi a, exp (-x ^ 2 / 2) * x ^ (s.re - 1) := by
-  sorry
+  obtain ⟨k, hk⟩ := exists_nat_gt (s.re - 1)
+  have hk' : s.re - 1 - (k : ℝ) ≤ 0 := by linarith
+  have hmaj : MeasureTheory.IntegrableOn (fun x : ℝ =>
+      a ^ (s.re - 1 - (k : ℝ)) * (x ^ (k : ℝ) * exp (-x ^ 2 / 2))) (Set.Ioi a) := by
+    have hb : MeasureTheory.Integrable (fun x : ℝ =>
+        x ^ (k : ℝ) * exp (-(1 / 2 : ℝ) * x ^ 2)) :=
+      integrable_rpow_mul_exp_neg_mul_sq (by norm_num : (0 : ℝ) < 1 / 2)
+        (by
+          have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+          linarith)
+    have heq : (fun x : ℝ => x ^ (k : ℝ) * exp (-(1 / 2 : ℝ) * x ^ 2)) =
+        (fun x : ℝ => x ^ (k : ℝ) * exp (-x ^ 2 / 2)) := by
+      funext x
+      congr 2
+      ring
+    rw [heq] at hb
+    exact (hb.const_mul _).integrableOn
+  have hdom : MeasureTheory.IntegrableOn (fun x : ℝ => exp (-x ^ 2 / 2) * x ^ (s.re - 1))
+      (Set.Ioi a) := by
+    apply hmaj.mono'
+    · fun_prop
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+      have hxpos : 0 < x := ha.trans hx
+      have hxp : 0 ≤ x ^ (k : ℝ) * exp (-x ^ 2 / 2) := by positivity
+      have hp : x ^ (s.re - 1 - (k : ℝ)) ≤ a ^ (s.re - 1 - (k : ℝ)) :=
+        rpow_le_rpow_of_nonpos ha hx.le hk'
+      have hid : x ^ (s.re - 1) = x ^ (k : ℝ) * x ^ (s.re - 1 - (k : ℝ)) := by
+        conv_lhs => rw [show s.re - 1 = (k : ℝ) + (s.re - 1 - (k : ℝ)) by ring]
+        rw [rpow_add hxpos]
+      rw [Real.norm_eq_abs,
+        abs_of_nonneg (mul_nonneg (exp_nonneg _) (rpow_nonneg hxpos.le _)), hid]
+      calc exp (-x ^ 2 / 2) * (x ^ (k : ℝ) * x ^ (s.re - 1 - (k : ℝ)))
+          = (x ^ (k : ℝ) * exp (-x ^ 2 / 2)) * x ^ (s.re - 1 - (k : ℝ)) := by ring
+        _ ≤ (x ^ (k : ℝ) * exp (-x ^ 2 / 2)) * a ^ (s.re - 1 - (k : ℝ)) :=
+            mul_le_mul_of_nonneg_left hp hxp
+        _ = a ^ (s.re - 1 - (k : ℝ)) * (x ^ (k : ℝ) * exp (-x ^ 2 / 2)) := by ring
+  have hn : ∀ᵐ x : ℝ ∂(MeasureTheory.volume.restrict (Set.Ioi a)),
+      ‖(x : ℂ) ^ (s - 1) * ((exp (-x ^ 2 / 2) : ℂ) * LeanLab.HelfgottArcs.e (δ * x))‖ ≤
+        exp (-x ^ 2 / 2) * x ^ (s.re - 1) := by
+    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+    have hxpos : 0 < x := ha.trans hx
+    have he : ‖LeanLab.HelfgottArcs.e (δ * x)‖ = 1 := by
+      simp [LeanLab.HelfgottArcs.e, Complex.norm_exp, Complex.mul_re]
+    rw [norm_mul, norm_mul, he, mul_one,
+      Complex.norm_cpow_eq_rpow_re_of_pos hxpos,
+      Complex.norm_real, Real.norm_eq_abs, abs_of_pos (exp_pos _)]
+    simp only [Complex.sub_re, Complex.one_re]
+    exact le_of_eq (mul_comm _ _)
+  exact MeasureTheory.norm_integral_le_of_norm_le hdom hn
 
 /-- The contour reduction with the real tail left unevaluated, assembled from the two
 leaves.  The Mellin integral is the sum of its two parts at the endpoint `a`, and each
