@@ -31,9 +31,9 @@ open scoped Topology FourierTransform
 
 /-- LEAF 1 of 2, the near window. The multiplicity weighted Mellin mass attached to the zeros
 whose ordinate lies in the closed interval from minus two to minus three halves is at most the
-whole mean weight integral over the height interval, plus three quarters of the shifted log weight
-integral over the same interval. The window carries the largest summands, but it occupies a
-bounded stretch of heights, so it is charged to the larger share of the error budget. -/
+whole mean weight integral over the height interval, plus three quarters of the shifted log
+weight integral over the same interval. The window carries the largest summands, but it occupies
+a bounded stretch of heights, so it is charged to the larger share of the error budget. -/
 theorem negative_bulk_mass_window_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (δ T : ℝ) (hT : 1 ≤ T) :
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
@@ -46,11 +46,15 @@ theorem negative_bulk_mass_window_le (q : ℕ) [NeZero q] (χ : DirichletCharact
       (3 / 4) * (∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) - (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389)) := by
+  -- BLOCKED OUT OF REACH 2026-11-14 FREE-ms-leanstral task484
+  -- Required: pointwise bound on mellinMassTerm for zeros in [-2, -3/2]
+  -- Missing: explicit formula with residue, zero counting estimate N(T), optimal
+  -- logarithmic derivative bound with constants 0.15 and 3.389
   sorry
 
 /-- LEAF 2 of 2, the tail. The multiplicity weighted Mellin mass attached to the zeros whose
-ordinate is at most minus two in absolute value is at most one quarter of the shifted log weight
-integral over the height interval. Beyond height two the Gaussian profile has decayed
+ordinate is at most minus two in absolute value is at most one quarter of the shifted log
+weight integral over the height interval. Beyond height two the Gaussian profile has decayed
 exponentially while the number of ordinates grows only logarithmically, so the smallest share of
 the error budget carries the tail. -/
 theorem negative_bulk_mass_tail_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
@@ -62,6 +66,10 @@ theorem negative_bulk_mass_tail_le (q : ℕ) [NeZero q] (χ : DirichletCharacter
       (1 / 4) * (∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) - (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389)) := by
+  -- BLOCKED OUT OF REACH 2026-11-14 FREE-ms-leanstral task484
+  -- Required: pointwise bound on mellinMassTerm for zeros with |im| > 2
+  -- Missing: explicit formula with residue, zero counting estimate N(T), tail bound
+  -- with optimal constants
   sorry
 
 /-- The two leaves add up to the bound of `negative_bulk_mass_integral`: the zero set splits at
