@@ -1,4 +1,4 @@
-import LeanLab.ChirreHagen2025.Decomp391a
+import LeanLab.ChirreHagen2025.Decomp391aLocal
 import LeanLab.ChirreHagen2025.IntegralRepair391c
 
 /-!
@@ -101,12 +101,193 @@ theorem transfer_budget_of_scaled_error (x E : ℝ) (hx : 100000 ≤ x)
     nlinarith
 
 
+/-- Elementary exponential bound used in the large-tail comparison. -/
+lemma exp_neg_half_ge_half : (1 / 2 : ℝ) ≤ Real.exp (-(1 / 2 : ℝ)) := by
+  have hepos : 0 < Real.exp (1 / 2 : ℝ) := Real.exp_pos _
+  have hsq : Real.exp (1 / 2 : ℝ) ^ 2 = Real.exp 1 := by
+    calc
+      Real.exp (1 / 2 : ℝ) ^ 2 = Real.exp (1 / 2 : ℝ) * Real.exp (1 / 2 : ℝ) := by ring
+      _ = Real.exp ((1 / 2 : ℝ) + (1 / 2 : ℝ)) := by rw [Real.exp_add]
+      _ = Real.exp 1 := by norm_num
+  have hone : Real.exp 1 ≤ 4 := by
+    have h := Real.exp_one_lt_d9
+    norm_num at h ⊢
+    linarith
+  have hle : Real.exp (1 / 2 : ℝ) ≤ 2 := by
+    nlinarith [hsq, hone, sq_nonneg (Real.exp (1 / 2 : ℝ) - 2)]
+  have hhalf : (1 / 2 : ℝ) ≤ 1 / Real.exp (1 / 2 : ℝ) := by
+    apply (le_div_iff₀ hepos).mpr
+    nlinarith
+  simpa only [Real.exp_neg, one_div] using hhalf
+
+/-- The repaired auxiliary integral dominates the printed Ramare tail envelope. -/
+lemma zero_tail_error_le_correctedTail (x : ℝ) :
+    Decomp429e.zeroTailError x ≤ correctedTail x := by
+  by_cases hs : Real.log x < 2 * 5.69693 * Real.log (2.44 * 10 ^ 12) ^ 2
+  · simp [Decomp429e.zeroTailError, correctedTail, hs]
+  · simp only [Decomp429e.zeroTailError, correctedTail, if_neg hs]
+    let t : ℝ := Real.log (2.44 * 10 ^ 12 : ℝ)
+    let a : ℝ := Real.log x / 5.69693
+    let v : ℝ := Real.sqrt a
+    have ht0 : 0 < t := by
+      dsimp [t]
+      exact Real.log_pos (by norm_num)
+    have htlo : 28 ≤ t := by
+      dsimp [t]
+      rw [Real.le_log_iff_exp_le (by norm_num)]
+      calc
+        Real.exp 28 = Real.exp 1 ^ (28 : ℕ) := by rw [← Real.exp_nat_mul]; norm_num
+        _ ≤ (2.72 : ℝ) ^ 28 := by gcongr; linarith [Real.exp_one_lt_d9]
+        _ ≤ 2.44 * 10 ^ 12 := by norm_num
+    have hthi : t ≤ 30 := by
+      dsimp [t]
+      rw [Real.log_le_iff_le_exp (by norm_num)]
+      calc
+        (2.44 * 10 ^ 12 : ℝ) ≤ (2.7 : ℝ) ^ 30 := by norm_num
+        _ ≤ Real.exp 1 ^ 30 := by gcongr; linarith [Real.exp_one_gt_d9]
+        _ = Real.exp 30 := by rw [← Real.exp_nat_mul]; norm_num
+    have htrans : 2 * 5.69693 * t ^ 2 ≤ Real.log x := by
+      simpa [t] using le_of_not_gt hs
+    have hl0 : 0 ≤ Real.log x := by
+      nlinarith [sq_nonneg t, htrans]
+    have ha0 : 0 ≤ a := by
+      dsimp [a]
+      exact div_nonneg hl0 (by norm_num)
+    have h2t2 : 2 * t ^ 2 ≤ a := by
+      dsimp [a]
+      apply (le_div_iff₀ (by norm_num : (0 : ℝ) < 5.69693)).mpr
+      nlinarith
+    have hv0 : 0 ≤ v := by
+      dsimp [v]
+      exact Real.sqrt_nonneg _
+    have hv2 : v ^ 2 = a := by
+      dsimp [v]
+      exact Real.sq_sqrt ha0
+    have hv39 : 39 ≤ v := by
+      nlinarith
+    have hsubset : Icc (v - 4) (v + 4) ⊆ Ioi t := by
+      intro u hu
+      have hu1 := hu.1
+      have hu2 := hu.2
+      change t < u
+      linarith
+    have hi := (IntegralRepair391c.auxiliary_integral_bound a t ha0 ht0).1
+    have hpoint (u : ℝ) (hu : u ∈ Icc (v - 4) (v + 4)) :
+        (v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi) ≤
+          u * Real.exp (-a / u - u) / (2 * Real.pi) := by
+      have hu0 : 0 < u := by linarith [hu.1, hv39]
+      have hu32 : (32 : ℝ) ≤ u := by linarith [hu.1, hv39]
+      have hd2 : (u - v) ^ 2 ≤ 16 := by nlinarith [hu.1, hu.2]
+      have hfrac : (u - v) ^ 2 / u ≤ 1 / 2 := by
+        apply (div_le_iff₀ hu0).mpr
+        nlinarith
+      have hident : a / u + u = 2 * v + (u - v) ^ 2 / u := by
+        rw [← hv2]
+        field_simp
+        ring
+      have hfrac' : (u - v) ^ 2 ≤ u / 2 := by
+        have hh := (div_le_iff₀ hu0).mp hfrac
+        nlinarith
+      have hbound' : a + u ^ 2 ≤ (2 * v + 1 / 2) * u := by
+        rw [← hv2]
+        nlinarith [hfrac']
+      have hbound : a / u + u ≤ 2 * v + 1 / 2 := by
+        calc
+          a / u + u = (a + u ^ 2) / u := by field_simp
+          _ ≤ (2 * v + 1 / 2) * u / u := by
+            gcongr
+          _ = 2 * v + 1 / 2 := by field_simp
+      have hexp : Real.exp (-(2 * v + 1 / 2)) ≤ Real.exp (-a / u - u) := by
+        apply Real.exp_le_exp.mpr
+        have harg : -(2 * v + 1 / 2) ≤ -(a / u + u) := by linarith [hbound]
+        simpa only [neg_div] using harg
+      have hv4 : 0 ≤ v - 4 := by nlinarith [hv39]
+      have hvu : v - 4 ≤ u := by linarith [hu.1]
+      have hcoeff : (v - 4) * Real.exp (-(2 * v + 1 / 2)) ≤
+          u * Real.exp (-(2 * v + 1 / 2)) :=
+        mul_le_mul_of_nonneg_right hvu (Real.exp_pos _).le
+      have hmain : u * Real.exp (-(2 * v + 1 / 2)) ≤
+          u * Real.exp (-a / u - u) := by
+        simpa only [mul_comm] using mul_le_mul_of_nonneg_right hexp hu0.le
+      apply (div_le_div_iff₀ (by positivity : (0 : ℝ) < 2 * Real.pi)).2
+      exact hcoeff.trans hmain
+    have hsmall : (∫ u in Icc (v - 4) (v + 4),
+          (v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) ≤
+        ∫ u in Icc (v - 4) (v + 4),
+          u * Real.exp (-a / u - u) / (2 * Real.pi) := by
+      apply integral_mono_ae (continuousOn_const.integrableOn_Icc) (hi.mono_set hsubset)
+      filter_upwards [ae_restrict_mem measurableSet_Icc] with u hu
+      exact hpoint u hu
+    have hlarge : (∫ u in Icc (v - 4) (v + 4),
+          u * Real.exp (-a / u - u) / (2 * Real.pi)) ≤
+        ∫ u in Ioi t, u * Real.exp (-a / u - u) / (2 * Real.pi) := by
+      apply setIntegral_mono_set hi _ (Filter.Eventually.of_forall hsubset)
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+      have hu0 : 0 < u := ht0.trans hu
+      positivity
+    have hconst : (∫ u in Icc (v - 4) (v + 4),
+          (v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) =
+        8 * ((v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) := by
+      rw [integral_Icc_eq_integral_Ioc,
+        ← intervalIntegral.integral_of_le (by linarith), intervalIntegral.integral_const]
+      ring
+    have hcore : 8 * (v - 4) * Real.exp (-(1 / 2 : ℝ)) ≥ 1 + 2 * v := by
+      have hv4 : 0 ≤ v - 4 := by nlinarith [hv39]
+      have hm : (v - 4) * Real.exp (-(1 / 2 : ℝ)) ≥ (v - 4) / 2 := by
+        have hh := mul_le_mul_of_nonneg_left exp_neg_half_ge_half hv4
+        nlinarith
+      calc
+        8 * (v - 4) * Real.exp (-(1 / 2 : ℝ)) = 8 * ((v - 4) * Real.exp (-(1 / 2 : ℝ))) := by ring
+        _ ≥ 8 * ((v - 4) / 2) := by
+          exact mul_le_mul_of_nonneg_left hm (by norm_num)
+        _ = 4 * (v - 4) := by ring
+        _ ≥ 1 + 2 * v := by nlinarith [hv39]
+    have headd : Real.exp (-(2 * v + 1 / 2)) =
+          Real.exp (-2 * v) * Real.exp (-(1 / 2 : ℝ)) := by
+      rw [← Real.exp_add]
+      congr 1
+      ring
+    have hprod : (1 + 2 * v) * Real.exp (-2 * v) ≤
+        8 * ((v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) * (2 * Real.pi) := by
+      calc
+        (1 + 2 * v) * Real.exp (-2 * v) ≤
+            (8 * (v - 4) * Real.exp (-(1 / 2 : ℝ))) * Real.exp (-2 * v) :=
+          mul_le_mul_of_nonneg_right hcore (Real.exp_pos _).le
+        _ = 8 * ((v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) * (2 * Real.pi) := by
+          rw [headd]
+          field_simp
+          ring
+    have hint : 8 * ((v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) ≤
+        ∫ u in Ioi t, u * Real.exp (-a / u - u) / (2 * Real.pi) := by
+      calc
+        8 * ((v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) =
+            (∫ u in Icc (v - 4) (v + 4),
+              (v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) := by
+              exact hconst.symm
+        _ ≤ ∫ u in Ioi t, u * Real.exp (-a / u - u) / (2 * Real.pi) :=
+          hsmall.trans hlarge
+    have hold : (1 + 2 * v) / (2 * Real.pi) * Real.exp (-2 * v) ≤
+        ∫ u in Ioi t, u * Real.exp (-a / u - u) / (2 * Real.pi) := by
+      rw [show (1 + 2 * v) / (2 * Real.pi) * Real.exp (-2 * v) =
+          (1 + 2 * v) * Real.exp (-2 * v) / (2 * Real.pi) by ring]
+      apply (div_le_iff₀ (by positivity : (0 : ℝ) < 2 * Real.pi)).mpr
+      calc
+        (1 + 2 * v) * Real.exp (-2 * v) ≤
+            8 * ((v - 4) * Real.exp (-(2 * v + 1 / 2)) / (2 * Real.pi)) * (2 * Real.pi) := hprod
+        _ ≤ (∫ u in Ioi t, u * Real.exp (-a / u - u) / (2 * Real.pi)) * (2 * Real.pi) :=
+          mul_le_mul_of_nonneg_right hint (by positivity)
+    change (1 + 2 * Real.sqrt a) / (2 * Real.pi) * Real.exp (-2 * Real.sqrt a) ≤
+      ∫ u in Ioi t, u * Real.exp (-a / u - u) / (2 * Real.pi)
+    simpa [a, v] using hold
+
 /-- LEAF. Ramare page 118 equation 5.1 and page 119 last upper bound on J.
 This isolates the zero input before the audited scalar integration on page 120.
 It contains neither a Mangoldt sum nor a psi estimate. -/
 theorem zero_sum_reduction (x : ℝ) (hx : 100000 ≤ x) :
     ‖∑' ρ, Decomp391a.zeroTerm x ρ‖ ≤ 0.047 / Real.sqrt x + correctedTail x := by
-  sorry
+  have hz := Decomp391a.zero_sum_bound x hx
+  have ht := zero_tail_error_le_correctedTail x
+  exact hz.trans (add_le_add_right ht _)
 
 /-- JRT page 3 Lemma 9, using the corrected scalar route.
 CONDITIONAL ON the explicit formula and the zero sum reduction. -/
@@ -155,3 +336,4 @@ theorem mangoldt_large_range (m : ℕ) (hm : 100000 ≤ m) :
   linarith
 
 end LeanLab.ChirreHagen2025.Decomp391b
+
