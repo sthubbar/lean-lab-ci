@@ -8,6 +8,7 @@ statement.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Decomp491b
+import LeanLab.Linnik1951.Decomp555a
 import LeanLab.ChebyshevExplicit.PiUpperSharp
 
 namespace LeanLab.Linnik1951
@@ -1326,74 +1327,20 @@ theorem mixed_bound491_split (hM : MellinBound280) :
         ∀ n : ℤ, ‖mixedTerm491 N q n‖ ≤
           C * (N : ℝ) * Real.log N ^ 6 /
             Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  obtain ⟨C, hC, N0, hle⟩ := mixed_pair_bound491 hM
-  refine ⟨2 * C, by positivity, N0, ?_⟩
+  obtain ⟨C, hC, N0, hmass⟩ := mixed_mass491 hM
+  refine ⟨2 * C, by positivity, max N0 1, ?_⟩
   intro N hN q hq hqQ
-  classical
   letI : NeZero q := ⟨by omega⟩
   intro n
-  have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (show 0 < q by omega)
-  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (show 0 < N by omega)
-  have hτpos : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
-  have hRpos : (0 : ℝ) < (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) := by positivity
-  have hφpos : (0 : ℝ) < (q.totient : ℝ) := by
-    exact_mod_cast Nat.totient_pos.mpr (show 0 < q by omega)
-  have hstep : ∀ χ ∈ (univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1)),
-      ‖characterPair491 N q n 1 χ + characterPair491 N q n χ 1‖ ≤
-        C * (N : ℝ) * Real.log N ^ 6 /
-          ((q.totient : ℝ) * Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-    intro χ hχ
-    exact hle N hN q hq hqQ n χ (by simpa using hχ)
-  have hcard : (((univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1)).card : ℕ) : ℝ) ≤
-      (q.totient : ℝ) := by
-    exact_mod_cast mixed_card491 q
-  have hBnn : (0 : ℝ) ≤ C * (N : ℝ) * Real.log N ^ 6 /
-      ((q.totient : ℝ) * Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-    apply div_nonneg
-    · positivity
-    · positivity
-  have hnorm : ‖mixedTerm491 N q n‖ ≤
-      ∑ χ ∈ (univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1)),
-        ‖characterPair491 N q n 1 χ + characterPair491 N q n χ 1‖ := by
-    simp only [mixedTerm491]
-    exact norm_sum_le _ _
-  have hfirst : ∑ χ ∈ (univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1)),
-        ‖characterPair491 N q n 1 χ + characterPair491 N q n χ 1‖ ≤
-      ((univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1)).card : ℝ) *
-        (C * (N : ℝ) * Real.log N ^ 6 /
-          ((q.totient : ℝ) * Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))) := by
-    refine (Finset.sum_le_sum hstep).trans ?_
-    rw [Finset.sum_const, nsmul_eq_mul]
-  have harith : (q.totient : ℝ) * (C * (N : ℝ) * Real.log N ^ 6 /
-      ((q.totient : ℝ) * Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))) =
-      C * (N : ℝ) * Real.log N ^ 6 /
-        Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-    have hs : Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≠ 0 :=
-      (Real.sqrt_pos.mpr hRpos).ne'
-    field_simp [hφpos.ne', hs]
-  have hright : (0 : ℝ) ≤ C * (N : ℝ) * Real.log N ^ 6 /
-      Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-    apply div_nonneg
-    · positivity
-    · exact (Real.sqrt_pos.mpr hRpos).le
-  calc ‖mixedTerm491 N q n‖
-      ≤ ∑ χ ∈ (univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1)),
-          ‖characterPair491 N q n 1 χ + characterPair491 N q n χ 1‖ := hnorm
-    _ ≤ ((univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1)).card : ℝ) *
-          (C * (N : ℝ) * Real.log N ^ 6 /
-            ((q.totient : ℝ) * Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))) := hfirst
-    _ ≤ (q.totient : ℝ) * (C * (N : ℝ) * Real.log N ^ 6 /
-          ((q.totient : ℝ) * Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))) :=
-        mul_le_mul_of_nonneg_right hcard hBnn
-    _ = C * (N : ℝ) * Real.log N ^ 6 /
-          Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := harith
-    _ ≤ 2 * C * (N : ℝ) * Real.log N ^ 6 /
-          Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-        have heq : 2 * C * (N : ℝ) * Real.log N ^ 6 /
-              Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) =
-            2 * (C * (N : ℝ) * Real.log N ^ 6 /
-              Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by ring
-        rw [heq]
-        linarith
+  have hN0 : N0 < N := lt_of_le_of_lt (le_max_left _ _) hN
+  have hN1 : 1 ≤ N := by omega
+  have hM0 : 0 ≤ C * (N : ℝ) * Real.log N ^ 6 /
+      Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by positivity
+  have h := mixedTerm_of_mass555 N q n
+    (C * (N : ℝ) * Real.log N ^ 6 /
+      Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))
+    hq hN1 hM0 (mixed_principal_gauss491 q hq)
+    (fun χ hχ => hmass N hN0 q hq hqQ χ hχ)
+  convert h using 1 <;> ring
 
 end LeanLab.Linnik1951
