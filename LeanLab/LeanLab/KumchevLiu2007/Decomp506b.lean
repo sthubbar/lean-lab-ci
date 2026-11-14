@@ -4,6 +4,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Decomp506bBase
 import LeanLab.KumchevLiu2007.Decomp506g
+import LeanLab.KumchevLiu2007.Decomp542a
 
 namespace LeanLab.KumchevLiu2007.Task506b
 
@@ -33,7 +34,7 @@ theorem bv_remainder (A B ε : ℝ) (hA : 0 < A) (hB : 0 < B)
     ∃ C X0 : ℝ, 0 < C ∧ ∀ X : ℝ, X0 ≤ X → ∀ n : ℕ, InH2 n → X < (n : ℝ) →
       (n : ℝ) ≤ X + Y X ε ^ (1 - ε) →
       remainder X B ε n ≤ C * errorScale X ε A := by
-  sorry
+  exact Task542a.bv_remainder_from_maximal A B ε hA hB hε hε1
 
 /-- Page 17 display 58 with N bounded by display 57.
 CONDITIONAL on rosser_application and bv_remainder. -/
