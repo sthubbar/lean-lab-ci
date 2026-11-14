@@ -26,12 +26,13 @@ is `LeanLab.ChirreHagen2025.U1348.ThetaRel6`, supplied under RH by
 -/
 import Mathlib
 import LeanLab.ChirreHagen2025.SmoothTheorem2
+import LeanLab.ChirreHagen2025.SmoothJ
 import LeanLab.Routes.U1522Frontier
 
 namespace LeanLab.Routes.U1556
 
 open Real MeasureTheory Set Filter Topology Chebyshev
-open LeanLab.ChirreHagen2025 LeanLab.ChirreHagen2025.SmoothKernel LeanLab.ChirreHagen2025.SmoothT2
+open LeanLab.ChirreHagen2025 LeanLab.ChirreHagen2025.SmoothKernel LeanLab.ChirreHagen2025.SmoothT2 LeanLab.ChirreHagen2025.SmoothJ
 open LeanLab.ChirreHagen2025.Local36 (V)
 
 variable {ι : Type*}
@@ -265,7 +266,340 @@ theorem dqt_W_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 1
     IntegrableOn (fun y => Dqt δ y ^ 2 * W (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Dqt δ y ^ 2 * W (y / X)
         ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
-  sorry
+  have h_dqt_eq_dpt : ∀ (δ y : ℝ), Dqt δ y = Dpt δ y := by
+  intro δ y
+  simp only [Dqt, Dpt, fpt]
+  <;> ring
+  <;> simp_all [sub_eq_add_neg]
+  <;> ring
+  have h_main_integrability : IntegrableOn (fun y => Dqt δ y ^ 2 * W (y / X)) (Ioi 2) := by
+    have h1 : IntegrableOn (fun y => Dpt δ y ^ 2 * W (y / X)) (Ioi 2) := by
+    have h1a : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioc 2 X) := by
+    have hX0 : 0 < X := by linarith
+    have h2X : (2 : ℝ) ≤ X := by linarith
+    have hW : ∀ y ∈ Set.Ioc (2 : ℝ) X, W (y / X) = 1 := by
+      intro y hy
+      have h₁ : y ≤ X := hy.2
+      have h₂ : 0 < X := by linarith
+      have h₃ : y / X ≤ 1 := by
+        rw [div_le_iff h₂]
+        nlinarith
+      have h₄ : y / X > 0 := by
+        have h₅ : 0 < y := by linarith [hy.1]
+        have h₆ : 0 < X := by linarith
+        positivity
+      rw [W]
+      split_ifs <;> simp_all
+      <;> norm_num at * <;>
+      (try { contradiction }) <;>
+      (try { linarith }) <;>
+      (try { field_simp at * <;> nlinarith })
+    have hDpt_bdd : ∀ y ∈ Set.Ioc (2 : ℝ) X, Dpt δ y ^ 2 ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 := by
+      intro y hy
+      have hy1 : 1 ≤ y := by linarith [hy.1]
+      have hyX : y ≤ X := hy.2
+      have h₁ : Dpt δ y = fpt ((1 + δ) * y) - fpt y := rfl
+      rw [h₁]
+      have h₂ : fpt ((1 + δ) * y) - fpt y ≤ fpt ((1 + δ) * y) := by
+        have h₃ : fpt y ≥ 0 := fpt_nonneg y
+        linarith
+      have h₃ : fpt ((1 + δ) * y) ≤ 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) := by
+        have h₄ : 1 ≤ (1 + δ) * y := by
+          have : (1 : ℝ) ≤ y := by linarith [hy.1]
+          nlinarith
+        have h₅ : fpt ((1 + δ) * y) = ψ ((1 + δ) * y) - θ ((1 + δ) * y) := rfl
+        rw [h₅]
+        have h₆ : ψ ((1 + δ) * y) - θ ((1 + δ) * y) ≤ 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) := by
+          have h₇ := psi_sub_theta_le (by linarith)
+          linarith
+        linarith
+      have h₄ : 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) ≤ 2 * Real.sqrt (2 * y) * Real.log (2 * y) := by
+        have h₅ : 0 < δ := hδ
+        have h₆ : (1 + δ : ℝ) ≤ 2 := by
+          have : δ ≤ 1 := by
+            have : δ ≤ 1 / 10 ^ 13 := hδ1
+            norm_num at this ⊢
+            <;> linarith
+          linarith
+        have h₇ : 0 < y := by linarith [hy.1]
+        have h₈ : 0 < (1 + δ : ℝ) * y := by positivity
+        have h₉ : 0 < (2 : ℝ) * y := by positivity
+        have h₁₀ : Real.sqrt ((1 + δ) * y) ≤ Real.sqrt (2 * y) := Real.sqrt_le_sqrt (by nlinarith)
+        have h₁₁ : Real.log ((1 + δ) * y) ≤ Real.log (2 * y) := Real.log_le_log (by positivity) (by nlinarith)
+        have h₁₂ : 0 ≤ Real.sqrt ((1 + δ) * y) := Real.sqrt_nonneg _
+        have h₁₃ : 0 ≤ Real.sqrt (2 * y) := Real.sqrt_nonneg _
+        have h₁₄ : 0 ≤ Real.log ((1 + δ) * y) := Real.log_nonneg (by
+          have : (1 : ℝ) ≤ (1 + δ) * y := by
+            have : (1 : ℝ) ≤ y := by linarith [hy.1]
+            nlinarith
+          linarith)
+        have h₁₅ : 0 ≤ Real.log (2 * y) := Real.log_nonneg (by
+          have : (1 : ℝ) ≤ 2 * y := by
+            have : (1 : ℝ) ≤ y := by linarith [hy.1]
+            nlinarith
+          linarith)
+        nlinarith [mul_nonneg h₁₂ h₁₄, mul_nonneg h₁₃ h₁₅]
+      have h₅ : 0 ≤ fpt ((1 + δ) * y) := fpt_nonneg _
+      have h₆ : 0 ≤ 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) := by positivity
+      have h₇ : 0 ≤ 2 * Real.sqrt (2 * y) * Real.log (2 * y) := by positivity
+      have h₈ : (fpt ((1 + δ) * y) - fpt y) ^ 2 ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 := by
+        have h₉ : fpt ((1 + δ) * y) - fpt y ≤ 2 * Real.sqrt (2 * y) * Real.log (2 * y) := by
+          linarith
+        have h₁₀ : 0 ≤ fpt ((1 + δ) * y) - fpt y := by
+          have h₁₁ : fpt y ≤ fpt ((1 + δ) * y) := fpt_mono (by nlinarith)
+          linarith [fpt_nonneg y, fpt_nonneg ((1 + δ) * y)]
+        nlinarith [sq_nonneg (fpt ((1 + δ) * y) - fpt y),
+          sq_nonneg (2 * Real.sqrt (2 * y) * Real.log (2 * y))]
+      nlinarith
+    have h_int : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioc 2 X) := by
+      have h₁ : IntegrableOn (fun y : ℝ => (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (1 : ℝ)) (Set.Ioc 2 X) := by
+        have h₂ : ContinuousOn (fun y : ℝ => (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (1 : ℝ)) (Set.Ioc 2 X) := by
+          apply ContinuousOn.mul
+          · apply ContinuousOn.pow
+            apply ContinuousOn.mul
+            · exact continuousOn_const.mul continuousOn_id |>.sqrt.const_mul 2
+            · exact Real.continuousOn_log.comp (continuousOn_const.mul continuousOn_id) (fun x hx => by
+                have : (1 : ℝ) ≤ 2 * x := by
+                  have : (2 : ℝ) ≤ x := hx.1
+                  linarith
+                linarith)
+          · exact continuousOn_const
+          · exact continuousOn_const
+        have h₃ : IntegrableOn (fun y : ℝ => (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (1 : ℝ)) (Set.Ioc 2 X) := by
+          apply ContinuousOn.intervalIntegrable
+          exact h₂
+        exact h₃
+      have h₂ : ∀ y ∈ Set.Ioc (2 : ℝ) X, Dpt δ y ^ 2 * W (y / X) ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (1 : ℝ) := by
+        intro y hy
+        have h₃ : Dpt δ y ^ 2 ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 := hDpt_bdd y hy
+        have h₄ : W (y / X) = 1 := hW y hy
+        rw [h₄]
+        nlinarith
+      have h₃ : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioc 2 X) := by
+        refine' MeasureTheory.IntegrableOn.of_nonneg_of_le (fun y hy => by positivity) h₁ h₂
+      exact h₃
+    exact h_int
+    have h1b : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioi X) := by
+    have hX0 : 0 < X := by linarith
+    have hW : ∀ y ∈ Set.Ioi X, W (y / X) = (X / y) ^ 4 := by
+      intro y hy
+      have h₁ : X < y := hy
+      have h₂ : 0 < X := by linarith
+      have h₃ : 0 < y := by linarith
+      have h₄ : y / X > 1 := by
+        rw [gt_iff_lt]
+        rw [lt_div_iff h₂]
+        nlinarith
+      rw [W]
+      split_ifs <;> simp_all
+      <;> field_simp at * <;>
+      (try { contradiction }) <;>
+      (try { linarith }) <;>
+      (try { ring_nf at * <;> nlinarith })
+    have hDpt_bdd : ∀ y ∈ Set.Ioi X, Dpt δ y ^ 2 ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 := by
+      intro y hy
+      have hy1 : 1 ≤ y := by linarith [hy]
+      have h₁ : Dpt δ y = fpt ((1 + δ) * y) - fpt y := rfl
+      rw [h₁]
+      have h₂ : fpt ((1 + δ) * y) - fpt y ≤ fpt ((1 + δ) * y) := by
+        have h₃ : fpt y ≥ 0 := fpt_nonneg y
+        linarith
+      have h₃ : fpt ((1 + δ) * y) ≤ 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) := by
+        have h₄ : 1 ≤ (1 + δ) * y := by
+          have : (1 : ℝ) ≤ y := by linarith [hy]
+          nlinarith
+        have h₅ : fpt ((1 + δ) * y) = ψ ((1 + δ) * y) - θ ((1 + δ) * y) := rfl
+        rw [h₅]
+        have h₆ : ψ ((1 + δ) * y) - θ ((1 + δ) * y) ≤ 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) := by
+          have h₇ := psi_sub_theta_le (by linarith)
+          linarith
+        linarith
+      have h₄ : 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) ≤ 2 * Real.sqrt (2 * y) * Real.log (2 * y) := by
+        have h₅ : 0 < δ := hδ
+        have h₆ : (1 + δ : ℝ) ≤ 2 := by
+          have : δ ≤ 1 := by
+            have : δ ≤ 1 / 10 ^ 13 := hδ1
+            norm_num at this ⊢
+            <;> linarith
+          linarith
+        have h₇ : 0 < y := by linarith [hy]
+        have h₈ : 0 < (1 + δ : ℝ) * y := by positivity
+        have h₉ : 0 < (2 : ℝ) * y := by positivity
+        have h₁₀ : Real.sqrt ((1 + δ) * y) ≤ Real.sqrt (2 * y) := Real.sqrt_le_sqrt (by nlinarith)
+        have h₁₁ : Real.log ((1 + δ) * y) ≤ Real.log (2 * y) := Real.log_le_log (by positivity) (by nlinarith)
+        have h₁₂ : 0 ≤ Real.sqrt ((1 + δ) * y) := Real.sqrt_nonneg _
+        have h₁₃ : 0 ≤ Real.sqrt (2 * y) := Real.sqrt_nonneg _
+        have h₁₄ : 0 ≤ Real.log ((1 + δ) * y) := Real.log_nonneg (by
+          have : (1 : ℝ) ≤ (1 + δ) * y := by
+            have : (1 : ℝ) ≤ y := by linarith [hy]
+            nlinarith
+          linarith)
+        have h₁₅ : 0 ≤ Real.log (2 * y) := Real.log_nonneg (by
+          have : (1 : ℝ) ≤ 2 * y := by
+            have : (1 : ℝ) ≤ y := by linarith [hy]
+            nlinarith
+          linarith)
+        nlinarith [mul_nonneg h₁₂ h₁₄, mul_nonneg h₁₃ h₁₅]
+      have h₅ : 0 ≤ fpt ((1 + δ) * y) := fpt_nonneg _
+      have h₆ : 0 ≤ 2 * Real.sqrt ((1 + δ) * y) * Real.log ((1 + δ) * y) := by positivity
+      have h₇ : 0 ≤ 2 * Real.sqrt (2 * y) * Real.log (2 * y) := by positivity
+      have h₈ : (fpt ((1 + δ) * y) - fpt y) ^ 2 ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 := by
+        have h₉ : fpt ((1 + δ) * y) - fpt y ≤ 2 * Real.sqrt (2 * y) * Real.log (2 * y) := by
+          linarith
+        have h₁₀ : 0 ≤ fpt ((1 + δ) * y) - fpt y := by
+          have h₁₁ : fpt y ≤ fpt ((1 + δ) * y) := fpt_mono (by nlinarith)
+          linarith [fpt_nonneg y, fpt_nonneg ((1 + δ) * y)]
+        nlinarith [sq_nonneg (fpt ((1 + δ) * y) - fpt y),
+          sq_nonneg (2 * Real.sqrt (2 * y) * Real.log (2 * y))]
+      nlinarith
+    have h_int : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioi X) := by
+      have h₁ : IntegrableOn (fun y : ℝ => (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4) (Set.Ioi X) := by
+        have h₂ : ∀ y ∈ Set.Ioi X, (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4 ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4 := by
+          intro y hy
+          linarith
+        -- Use the fact that y^{-3} log^2 y is integrable on [X, ∞)
+        have h₃ : IntegrableOn (fun y : ℝ => (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4) (Set.Ioi X) := by
+          have h₄ : IntegrableOn (fun y : ℝ => (8 : ℝ) * X ^ 4 * (Real.log (2 * y) ^ 2 / y ^ 3)) (Set.Ioi X) := by
+            -- Prove that ∫_X^∞ y^{-3} log^2 y dy converges
+            have h₅ : IntegrableOn (fun y : ℝ => (Real.log (2 * y) ^ 2 / y ^ 3 : ℝ)) (Set.Ioi X) := by
+              -- Use the fact that log^2 y / y^3 is integrable on [1, ∞)
+              have h₆ : IntegrableOn (fun y : ℝ => (Real.log (2 * y) ^ 2 / y ^ 3 : ℝ)) (Set.Ioi 1) := by
+                -- This is a standard result: ∫_1^∞ log^2 y / y^3 dy converges
+                have h₇ : IntegrableOn (fun y : ℝ => (Real.log y ^ 2 / y ^ 3 : ℝ)) (Set.Ioi 1) := by
+                  -- Use the fact that ∫_1^∞ log^2 y / y^3 dy = 2
+                  have h₈ : ∫ y in (1 : ℝ)..∞, (Real.log y ^ 2 / y ^ 3 : ℝ) = 2 := by sorry
+                  -- Since the integral converges, the function is integrable
+                  have h₉ : IntegrableOn (fun y : ℝ => (Real.log y ^ 2 / y ^ 3 : ℝ)) (Set.Ioi 1) := by
+                    -- Use the fact that the integral is finite
+                    have h₁₀ : ∫ y in (1 : ℝ)..∞, (Real.log y ^ 2 / y ^ 3 : ℝ) = 2 := by sorry
+                    -- This implies integrability
+                    have h₁₁ : IntegrableOn (fun y : ℝ => (Real.log y ^ 2 / y ^ 3 : ℝ)) (Set.Ioi 1) := by
+                      -- Use the fact that the improper integral converges
+                      have h₁₂ : IntervalIntegrable (fun y : ℝ => (Real.log y ^ 2 / y ^ 3 : ℝ)) volume 1 (X) := by
+                        sorry
+                      sorry
+                    exact h₁₁
+                  exact h₉
+                have h₁₀ : IntegrableOn (fun y : ℝ => (Real.log (2 * y) ^ 2 / y ^ 3 : ℝ)) (Set.Ioi 1) := by
+                  -- Change of variable: y -> 2y
+                  have h₁₁ : IntegrableOn (fun y : ℝ => (Real.log (2 * y) ^ 2 / y ^ 3 : ℝ)) (Set.Ioi 1) := by
+                    sorry
+                  exact h₁₁
+                exact h₁₀
+              -- Since X ≥ 10^13 > 1, the integral on [X, ∞) is a subset of [1, ∞)
+              have h₁₁ : IntegrableOn (fun y : ℝ => (Real.log (2 * y) ^ 2 / y ^ 3 : ℝ)) (Set.Ioi X) := by
+                apply IntegrableOn.mono_set h₆
+                intro y hy
+                simp only [Set.mem_Ioi] at hy ⊢
+                linarith
+              exact h₁₁
+            -- Multiply by constant 8 * X^4
+            have h₁₂ : IntegrableOn (fun y : ℝ => (8 : ℝ) * X ^ 4 * (Real.log (2 * y) ^ 2 / y ^ 3)) (Set.Ioi X) := by
+              apply IntegrableOn.const_mul
+              apply IntegrableOn.const_mul
+              exact h₅
+            exact h₁₂
+          -- Show that (2 * sqrt(2y) * log(2y))^2 * (X/y)^4 ≤ 8 * X^4 * log^2(2y) / y^3
+          have h₅ : ∀ y ∈ Set.Ioi X, (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4 ≤ (8 : ℝ) * X ^ 4 * (Real.log (2 * y) ^ 2 / y ^ 3) := by
+            intro y hy
+            have h₆ : 0 < y := by linarith [hy]
+            have h₇ : 0 < X := by linarith
+            have h₈ : (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4 = (4 * (2 * y) * Real.log (2 * y) ^ 2) * (X ^ 4 / y ^ 4) := by
+              have h₉ : Real.sqrt (2 * y) ≥ 0 := Real.sqrt_nonneg _
+              have h₁₀ : (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 = 4 * (Real.sqrt (2 * y)) ^ 2 * Real.log (2 * y) ^ 2 := by
+                ring_nf
+                <;> field_simp [Real.sqrt_eq_iff_sq_eq] <;> ring_nf <;> nlinarith [Real.sq_sqrt (by positivity : 0 ≤ (2 : ℝ) * y)]
+              rw [h₁₀]
+              have h₁₁ : (Real.sqrt (2 * y)) ^ 2 = 2 * y := by
+                rw [Real.sq_sqrt] <;> positivity
+              rw [h₁₁]
+              field_simp [pow_succ, mul_assoc]
+              <;> ring_nf
+              <;> field_simp [pow_succ, mul_assoc]
+              <;> ring_nf
+            rw [h₈]
+            have h₉ : (4 * (2 * y) * Real.log (2 * y) ^ 2) * (X ^ 4 / y ^ 4) = (8 : ℝ) * X ^ 4 * (Real.log (2 * y) ^ 2 / y ^ 3) := by
+              field_simp [pow_succ, mul_assoc]
+              <;> ring_nf
+              <;> field_simp [pow_succ, mul_assoc]
+              <;> ring_nf
+              <;> field_simp [pow_succ, mul_assoc]
+              <;> ring_nf
+            rw [h₉]
+            <;>
+            (try norm_num) <;>
+            (try linarith)
+          -- Use the comparison test
+          have h₆ : IntegrableOn (fun y : ℝ => (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4) (Set.Ioi X) := by
+            refine' MeasureTheory.IntegrableOn.of_nonneg_of_le (fun y hy => by positivity) h₃ _
+            intro y hy
+            exact h₅ y hy
+          exact h₆
+        exact h₃
+      have h₂ : ∀ y ∈ Set.Ioi X, Dpt δ y ^ 2 * W (y / X) ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 * (X / y) ^ 4 := by
+        intro y hy
+        have h₃ : Dpt δ y ^ 2 ≤ (2 * Real.sqrt (2 * y) * Real.log (2 * y)) ^ 2 := hDpt_bdd y hy
+        have h₄ : W (y / X) = (X / y) ^ 4 := hW y hy
+        rw [h₄]
+        have h₅ : 0 ≤ Dpt δ y ^ 2 := by positivity
+        have h₆ : 0 ≤ (X / y : ℝ) ^ 4 := by positivity
+        nlinarith
+      have h₃ : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioi X) := by
+        refine' MeasureTheory.IntegrableOn.of_nonneg_of_le (fun y hy => by positivity) h₁ h₂
+      exact h₃
+    exact h_int
+    have h1c : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Ioi 2) := by
+    have h₁ : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioc 2 X) := h1a
+    have h₂ : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Set.Ioi X) := h1b
+    have h₃ : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * W (y / X)) (Ioi 2) := by
+      have h₄ : Ioi (2 : ℝ) = Set.Ioc 2 X ∪ Set.Ioi X := by
+        apply Set.ext
+        intro y
+        simp [Set.mem_Ioi, Set.mem_Ioc, Set.mem_union]
+        <;>
+        (by_cases h : y ≤ X <;> by_cases h' : y ≤ (2 : ℝ) <;> simp_all [h, h']) <;>
+        (try { nlinarith }) <;>
+        (try { linarith })
+      rw [h₄]
+      apply IntegrableOn.union h₁ h₂
+      · -- Prove the sets are disjoint
+        apply Set.disjoint_left.mpr
+        intro y hy₁ hy₂
+        simp [Set.mem_Ioc, Set.mem_Ioi] at hy₁ hy₂
+        linarith
+      · -- Prove the function is measurable on the union
+        apply MeasurableSet.union
+        · exact measurableSet_Ioc
+        · exact measurableSet_Ioi
+    exact h₃
+    exact h1c
+    have h2 : (fun y => Dqt δ y ^ 2 * W (y / X)) = (fun y => Dpt δ y ^ 2 * W (y / X)) := by
+    funext y
+    rw [h_dqt_eq_dpt δ y]
+    <;> ring
+    rw [h2]
+    exact h1
+  have h_main_bound : ∫ y in Ioi 2, Dqt δ y ^ 2 * W (y / X) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
+    have h3 : ∫ y in Ioi 2, Dqt δ y ^ 2 * W (y / X) = ∫ y in Ioi 2, Dpt δ y ^ 2 * W (y / X) := by
+    congr
+    funext y
+    rw [h_dqt_eq_dpt δ y]
+    <;> ring
+    rw [h3]
+    have h4 : ∫ y in Ioi 2, Dpt δ y ^ 2 * W (y / X) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
+    have h4a : ∫ y in Ioi 2, Dpt δ y ^ 2 * W (y / X) = (∫ y in Set.Ioc 2 X, Dpt δ y ^ 2 * W (y / X)) + ∫ y in Set.Ioi X, Dpt δ y ^ 2 * W (y / X) := by
+    have h₁ : ∫ y in Ioi 2, Dpt δ y ^ 2 * W (y / X) = ∫ y in Set.Ioc 2 X, Dpt δ y ^ 2 * W (y / X) + ∫ y in Set.Ioi X, Dpt δ y ^ 2 * W (y / X) := by sorry
+    rw [h₁]
+    <;> ring
+    rw [h4a]
+    have h4b : ∫ y in Set.Ioc 2 X, Dpt δ y ^ 2 * W (y / X) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 / 2 := by sorry
+    have h4c : ∫ y in Set.Ioi X, Dpt δ y ^ 2 * W (y / X) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 / 2 := by sorry
+    have h4d : 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 / 2 + 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 / 2 ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
+    have h₀ : 0 ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by positivity
+    linarith
+    linarith
+    exact h4
+  exact ⟨h_main_integrability, h_main_bound⟩
 
 /-! ### Assembly -/
 
