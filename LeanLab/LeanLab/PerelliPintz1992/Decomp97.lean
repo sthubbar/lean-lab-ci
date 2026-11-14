@@ -92,6 +92,10 @@ QUESTION U-1624, 2026-11-06. Off the live route. The printed Gallagher line uses
 radius `1 / (q Q)`, past the kernel zero at `1 / (2 q Q)`, so no proof of this form is available.
 The statement follows from Estimate7 and is not refuted. The live route is
 `Decomp1624.reduction27A` with `Decomp1624.energy_decayA`. Statement unchanged. -/
+-- BLOCKED 2026-11-13 FREE-ms-leanstral task414 reduction27: requires Gallagher's large sieve
+--   (not in Mathlib), Farey splitting, and character expansion; Decomp1624.reduction27A is also
+--   sorry; the doc comment explicitly flags this as off the live route.
+
 theorem reduction27 :
     ∃ ε₁ : ℝ, 0 < ε₁ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∀ A : ℝ, 0 < A →
       ∃ C c N₀ : ℝ, 0 < C ∧ 0 < c ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ,
@@ -111,6 +115,12 @@ the printed comparison W with W tilde on p. 365 does not follow, and this leaf a
 bound at N for moduli near the square root of N that the x average of p. 365 does not give. True
 on GRH by a size count, not refuted. The live route is `Decomp1624.energy_decayA`.
 Statement unchanged. -/
+-- BLOCKED 2026-11-13 FREE-ms-leanstral task414 energy_decay: requires Davenport Ch. 19,
+--   Saffari-Vaughan Lemmas 5-6, Montgomery Ch. 12, Prachar Ch. 8 lower Siegel gap (p. 372),
+--   and a pointwise bound for W at moduli near √N not given by the x-average on p. 365;
+--   Decomp1624.energy_decayA is also sorry; gl (glm.md) sketches a q=2 counterexample
+--   conditional on MulChar semantics.
+
 theorem energy_decay :
     ∀ ε : ℝ, 0 < ε → ε < 1 / 12 → ∀ D : ℝ, 0 < D →
       ∃ C N₀ : ℝ, 0 < C ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ, 0 ≤ ξ → ξ ≤ 1 →
