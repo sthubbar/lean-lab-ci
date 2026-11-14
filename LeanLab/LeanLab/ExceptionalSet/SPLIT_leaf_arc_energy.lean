@@ -56,6 +56,114 @@ open LeanLab.ExceptionalSet.BG2026.Supply385
 
 noncomputable section
 
+/-- A finite set of integers is split off a summable family: the tail over its complement is the
+total minus the finite sum. -/
+private lemma tsum_compl_sub {g : ℤ → ℝ} (hg : Summable g) (s : Finset ℤ) :
+    ∑' n : ℤ, (if n ∈ s then 0 else g n) = ∑' n : ℤ, g n - ∑ n ∈ s, g n := by
+  set w : ℤ → ℝ := fun n => if n ∈ s then g n else 0 with hw
+  have hw0 : ∀ n ∉ s, w n = 0 := by
+    intro n hn
+    simp [hw, hn]
+  have hws : Summable w :=
+    summable_of_ne_finset_zero (L := SummationFilter.unconditional ℤ) (f := w) (s := s) hw0
+  have hwval : ∑' n : ℤ, w n = ∑ n ∈ s, g n := by
+    rw [tsum_eq_sum (L := SummationFilter.unconditional ℤ) (s := s) hw0]
+    exact Finset.sum_congr rfl (fun n hn => by simp [hw, hn])
+  have hd : (fun n : ℤ => if n ∈ s then 0 else g n) = fun n => g n - w n := by
+    funext n
+    by_cases h : n ∈ s <;> simp [hw, h]
+  have hsub : HasSum (fun n : ℤ => g n - w n)
+      (∑' n : ℤ, g n - ∑' n : ℤ, w n) := hg.hasSum.sub hws.hasSum
+  rw [hd, ← hwval]
+  exact hsub.tsum_eq
+
+/-- A nonnegative summable family dominates its sum over the complement of a finite set: the piece
+dropped in `tsum_compl_sub` is at most the whole sum. -/
+private lemma tsum_compl_le {g : ℤ → ℝ} (hg : Summable g) (h0 : ∀ n, 0 ≤ g n)
+    (s : Finset ℤ) :
+    ∑' n : ℤ, (if n ∈ s then 0 else g n) ≤ ∑' n : ℤ, g n := by
+  have hle : ∀ n : ℤ, (if n ∈ s then 0 else g n) ≤ g n := by
+    intro n
+    by_cases h : n ∈ s <;> simp [h, h0 n]
+  have hsum : Summable (fun n : ℤ => if n ∈ s then 0 else g n) :=
+    Summable.of_nonneg_of_le (fun n => by by_cases h : n ∈ s <;> simp [h, h0 n]) hle hg
+  exact hsum.tsum_le_tsum hle hg
+
+/-- The square of the cut generating function has no Fourier coefficient on a negative frequency
+and none above twice the cut: it is a polynomial in `e(t)` of degree `2M`. -/
+private lemma fourierCoeff_FX_sq_eq_zero {X : ℝ} {M : ℕ} {n : ℤ}
+    (hn : n < 0 ∨ 2 * (M : ℤ) < n) :
+    fourierCoeff (fun t : AddCircle (1 : ℝ) => FX X M t ^ 2) n = 0 := by
+  have hfun : (fun t : AddCircle (1 : ℝ) => FX X M t ^ 2) =
+      (fun t : AddCircle (1 : ℝ) => ∑ p ∈ range (M + 1) ×ˢ range (M + 1),
+        (aF X p.1 * aF X p.2) * fourier ((p.1 : ℤ) + (p.2 : ℤ)) t) := by
+    funext t
+    exact trig_sq (aF X) M t
+  rw [hfun, fourierCoeff_sum_monomial]
+  refine Finset.sum_eq_zero (fun p hp => ?_)
+  have hmem := Finset.mem_product.1 hp
+  have hp1 : (p.1 : ℤ) ≤ (M : ℤ) := by
+    exact_mod_cast Nat.lt_succ_iff.1 (Finset.mem_range.1 hmem.1)
+  have hp2 : (p.2 : ℤ) ≤ (M : ℤ) := by
+    exact_mod_cast Nat.lt_succ_iff.1 (Finset.mem_range.1 hmem.2)
+  have hp1' : (0 : ℤ) ≤ (p.1 : ℤ) := by positivity
+  have hp2' : (0 : ℤ) ≤ (p.2 : ℤ) := by positivity
+  rw [if_neg]
+  intro hnk
+  omega
+
+/-- The coefficient of the difference is the difference of the coefficients, at EVERY integer
+frequency: the window version of this identity only covers `0 ≤ n ≤ X` with `n` even, and the
+complement of the window needs all of `ℤ`. -/
+private lemma fourierCoeff_FX_sq_sub_Vfun (X : ℕ) (hX : 1 ≤ X) (n : ℤ) :
+    fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n =
+      fourierCoeff (fun t => FX X (X ^ 2) t ^ 2) n -
+        fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) n := by
+  have hX0 : (0 : ℝ) < X := by exact_mod_cast (show 0 < X by omega)
+  have hF : MemLp (fun t => FX (X : ℝ) (X ^ 2) t ^ 2) 2 haarAddCircle :=
+    memLp_FX_sq (X : ℝ) (X ^ 2)
+  have hV : MemLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) 2 haarAddCircle :=
+    memLp_Vfun hX0 _ _
+  have hneg : fourierCoeff (-(Vfun X (Nat.sqrt X) (Nat.sqrt X))) =
+      -fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) := by
+    ext m
+    have h := fourierCoeff.const_smul (T := (1 : ℝ)) (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (-1) m
+    simpa [neg_smul, one_smul] using h
+  have hadd := fourierCoeff.add (T := (1 : ℝ))
+    (f := fun t => FX (X : ℝ) (X ^ 2) t ^ 2) (g := -(Vfun X (Nat.sqrt X) (Nat.sqrt X)))
+    (hF.integrable one_le_two) ((hV.integrable one_le_two).neg)
+  have heq : (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) =
+      (fun t => FX (X : ℝ) (X ^ 2) t ^ 2) + (-(Vfun X (Nat.sqrt X) (Nat.sqrt X))) := by
+    ext t
+    simp [sub_eq_add_neg]
+  rw [heq, hadd, hneg]
+  simp [Pi.add_apply, Pi.neg_apply, sub_eq_add_neg]
+
+/-- The model side of the off window: the squared coefficient energy of the arc model outside the
+even window `0 ≤ n ≤ X` is at most the full `L²` energy of the model, which is the quantity the
+paper's (4.12) controls. This is where the off window leaf must get its model contribution from. -/
+private lemma tsum_compl_fourierCoeff_Vfun_le (X : ℕ) (hX : 1 ≤ X) :
+    (∑' n : ℤ, if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+        else ‖fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) n‖ ^ 2) ≤
+      ∫ t, ‖Vfun X (Nat.sqrt X) (Nat.sqrt X) t‖ ^ 2 ∂haarAddCircle := by
+  classical
+  have hX0 : (0 : ℝ) < X := by exact_mod_cast (show 0 < X by omega)
+  have hV : MemLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) 2 haarAddCircle := memLp_Vfun hX0 _ _
+  have hh := hasSum_sq_fourierCoeff (hV.toLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)))
+  have hcoef : fourierCoeff ((hV.toLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) : Lp ℂ 2 haarAddCircle) :
+        AddCircle (1 : ℝ) → ℂ) = fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) :=
+    fourierCoeff_congr_ae (MemLp.coeFn_toLp hV)
+  have hint : ∫ t, ‖((hV.toLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) : Lp ℂ 2 haarAddCircle) :
+        AddCircle (1 : ℝ) → ℂ) t‖ ^ 2 ∂haarAddCircle =
+      ∫ t, ‖Vfun X (Nat.sqrt X) (Nat.sqrt X) t‖ ^ 2 ∂haarAddCircle := by
+    apply integral_congr_ae
+    filter_upwards [MemLp.coeFn_toLp hV] with t ht
+    rw [ht]
+  rw [hcoef, hint] at hh
+  have h := tsum_compl_le hh.summable (fun n => by positivity)
+    (((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)))
+  rwa [hh.tsum_eq] at h
+
 /-- LEAF. The cut of the circle integral at the even frequencies up to `X`: for `1 ≤ X`, the square
 integral of the difference between the squared generating function cut at `X ^ 2` and the arc model
 cut at `Nat.sqrt X` is at most the squared Fourier coefficient energy of that difference on the
@@ -75,7 +183,188 @@ theorem leaf_arc_energy_spectral (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3
       (∑' n : ℤ, if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
         else ‖fourierCoeff
           (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2) := by
-  sorry
+  classical
+  set F : AddCircle (1 : ℝ) → ℂ := fun t =>
+    FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t with hF
+  have hX0 : (0 : ℝ) < X := by exact_mod_cast (show 0 < X by omega)
+  have hmL2 : MemLp F 2 haarAddCircle :=
+    (memLp_FX_sq (X : ℝ) (X ^ 2)).sub (memLp_Vfun hX0 _ _)
+  have hh := hasSum_sq_fourierCoeff (hmL2.toLp F)
+  have hcoef : fourierCoeff ((hmL2.toLp F : Lp ℂ 2 haarAddCircle) : AddCircle (1 : ℝ) → ℂ) =
+      fourierCoeff F := fourierCoeff_congr_ae (MemLp.coeFn_toLp hmL2)
+  have hint : ∫ t, ‖((hmL2.toLp F : Lp ℂ 2 haarAddCircle) : AddCircle (1 : ℝ) → ℂ) t‖ ^ 2
+        ∂haarAddCircle = ∫ t, ‖F t‖ ^ 2 ∂haarAddCircle := by
+    apply integral_congr_ae
+    filter_upwards [MemLp.coeFn_toLp hmL2] with t ht
+    rw [ht]
+  rw [hcoef, hint] at hh
+  have hsumm : Summable (fun n : ℤ => ‖fourierCoeff F n‖ ^ 2) := hh.summable
+  have hsp := tsum_compl_sub hsumm (((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)))
+  have himg : (∑ n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)),
+        ‖fourierCoeff F n‖ ^ 2) =
+      ∑ n ∈ (range (X + 1)).filter Even, ‖fourierCoeff F (n : ℤ)‖ ^ 2 :=
+    Finset.sum_image (fun a _ b _ hab => by exact_mod_cast hab)
+  have htot : ∑' n : ℤ, ‖fourierCoeff F n‖ ^ 2 =
+      (∑ n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)),
+          ‖fourierCoeff F n‖ ^ 2) +
+        ∑' n : ℤ, (if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+          else ‖fourierCoeff F n‖ ^ 2) := by
+    rw [hsp]
+    ring
+  have hmain : ∫ t, ‖F t‖ ^ 2 ∂haarAddCircle =
+      (∑ n ∈ (range (X + 1)).filter Even, ‖fourierCoeff F (n : ℤ)‖ ^ 2) +
+        ∑' n : ℤ, (if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+          else ‖fourierCoeff F n‖ ^ 2) := by
+    rw [← hh.tsum_eq, ← himg]
+    exact htot
+  exact le_of_eq hmain
+
+/-- The window leaf reduces to the paper's mean square input for the coefficient error `error n`:
+if the squared error on the even frequencies up to `X` is eventually at most
+`C · X^(3/2 + 2Θ + ε)`, then the squared coefficient energy of the difference on that window is too.
+The two summands of `r2 n e^{−n/X} − v_X(n)` are the exponential smoothing of `error n`, whose square
+the exponential damping only shrinks, and the reconstruction error of the arc model against
+`e^{−n/X} n Sing n`, which `leaf_singular_energy` bounds by `X^(5/2 + ε)`, below the target power
+because `1 ≤ 2Θ`. This is a reduction only: the hypothesis `hE` is the missing input, and this
+theorem is not the leaf. -/
+private theorem window_of_error_mean_square (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4)
+    (hZF : ZeroFreeBeyond Θ) (ε : ℝ) (hε : 0 < ε)
+    (hsublinear : ε < 3 / 2 - 2 * Θ)
+    (hE : ∃ Ce : ℝ, 0 ≤ Ce ∧ ∃ Xe : ℕ, ∀ X : ℕ, Xe ≤ X →
+      ∑ n ∈ (range (X + 1)).filter Even, (error n) ^ 2 ≤
+        Ce * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+      (∑ n ∈ (range (X + 1)).filter Even,
+        ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t)
+          (n : ℤ)‖ ^ 2) ≤ C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+  classical
+  obtain ⟨Ce, hCe, Xe, hE'⟩ := hE
+  obtain ⟨Cs, hCs, Xs, hs⟩ := leaf_singular_energy ε hε
+  refine ⟨2 * Ce + 2 * Cs, by positivity, max (max Xe Xs) 1 + 1, ?_⟩
+  intro X hX
+  have hXe : Xe ≤ X := by omega
+  have hXs : Xs ≤ X := by omega
+  have hX1 : 1 ≤ X := by omega
+  have hX0 : (0 : ℝ) < X := by exact_mod_cast (show 0 < X by omega)
+  have hXR : (1 : ℝ) ≤ X := by exact_mod_cast hX1
+  set W : AddCircle (1 : ℝ) → ℂ := Vfun X (Nat.sqrt X) (Nat.sqrt X) with hWdef
+  have hW : MemLp W 2 haarAddCircle := memLp_Vfun hX0 _ _
+  have hFX : MemLp (fun t => FX (X : ℝ) (X ^ 2) t ^ 2) 2 haarAddCircle :=
+    memLp_FX_sq (X : ℝ) (X ^ 2)
+  have hneg : fourierCoeff (-W) = -fourierCoeff W := by
+    ext m
+    have h := fourierCoeff.const_smul (T := (1 : ℝ)) W (-1) m
+    simpa [neg_smul, one_smul] using h
+  have hcoef (n : ℕ) (hn : n ≤ X) :
+      fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t)
+          (n : ℤ) =
+        ((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) - fourierCoeff W (n : ℤ) := by
+    have hadd := fourierCoeff.add (T := (1 : ℝ))
+      (f := fun t => FX X (X ^ 2) t ^ 2) (g := -W)
+      (hFX.integrable one_le_two) (hW.integrable one_le_two).neg
+    have heq : (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) =
+        (fun t => FX X (X ^ 2) t ^ 2) + (-W) := by
+      ext t
+      simp [hWdef, sub_eq_add_neg]
+    rw [heq, hadd, hneg, Pi.add_apply, Pi.neg_apply,
+      fourierCoeff_FX_sq (X : ℝ) (X ^ 2) n (hn.trans (Nat.le_self_pow two_ne_zero X))]
+    rfl
+  have hterm (n : ℕ) (hn : n ∈ (range (X + 1)).filter Even) :
+      ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t)
+          (n : ℤ)‖ ^ 2 ≤
+        2 * (error n) ^ 2 +
+          2 * ‖fourierCoeff W (n : ℤ) -
+            ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 := by
+    have hnX : n ≤ X := by
+      have := mem_range.mp (mem_filter.mp hn).1
+      omega
+    rw [hcoef n hnX]
+    have hexp1 : Real.exp (-(n : ℝ) / X) ≤ 1 := by
+      rw [Real.exp_le_one_iff, neg_div]
+      have hnn : (0 : ℝ) ≤ (n : ℝ) / X := div_nonneg (Nat.cast_nonneg n) hX0.le
+      linarith
+    have hexp0 : (0 : ℝ) < Real.exp (-(n : ℝ) / X) := Real.exp_pos _
+    have hab : ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+        ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 ≤ (error n) ^ 2 := by
+      have hid : ((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+          ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) =
+            ((error n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) := by
+        simp only [error]
+        push_cast
+        ring
+      rw [hid, Complex.norm_real, Real.norm_eq_abs, sq_abs, mul_pow]
+      have he2 : Real.exp (-(n : ℝ) / X) ^ 2 ≤ 1 := by nlinarith
+      nlinarith [sq_nonneg (error n)]
+    have hsplit : ((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+        fourierCoeff W (n : ℤ) =
+        (((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+          ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)) +
+        (((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
+          fourierCoeff W (n : ℤ)) := by
+      ring
+    have hstep : ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+        fourierCoeff W (n : ℤ)‖ ^ 2 ≤
+        2 * ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+          ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 +
+        2 * ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
+          fourierCoeff W (n : ℤ)‖ ^ 2 := by
+      rw [hsplit]
+      calc ‖(((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+            ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)) +
+          (((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
+            fourierCoeff W (n : ℤ))‖ ^ 2
+          ≤ (‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+              ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ +
+            ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
+              fourierCoeff W (n : ℤ)‖) ^ 2 :=
+            pow_le_pow_left₀ (norm_nonneg _) (norm_add_le _ _) 2
+        _ ≤ 2 * (‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+              ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 +
+            ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
+              fourierCoeff W (n : ℤ)‖ ^ 2) := add_sq_le
+        _ = 2 * ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
+              ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 +
+            2 * ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
+              fourierCoeff W (n : ℤ)‖ ^ 2 := by ring
+    have hsymm : ‖fourierCoeff W (n : ℤ) -
+        ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ =
+        ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
+          fourierCoeff W (n : ℤ)‖ := norm_sub_rev _ _
+    rw [hsymm]
+    nlinarith [hab, hstep]
+  have hsum := sum_le_sum hterm
+  have hsplit2 : (∑ n ∈ (range (X + 1)).filter Even,
+      (2 * (error n) ^ 2 +
+        2 * ‖fourierCoeff W (n : ℤ) -
+          ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2)) =
+      2 * (∑ n ∈ (range (X + 1)).filter Even, (error n) ^ 2) +
+        2 * (∑ n ∈ (range (X + 1)).filter Even,
+          ‖fourierCoeff W (n : ℤ) -
+            ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2) := by
+    rw [sum_add_distrib, ← mul_sum, ← mul_sum]
+  have hpow : (X : ℝ) ^ (5 / 2 + ε) ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    Real.rpow_le_rpow_of_exponent_le hXR (by linarith)
+  have hpow0 : (0 : ℝ) ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by positivity
+  calc ∑ n ∈ (range (X + 1)).filter Even,
+        ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t)
+          (n : ℤ)‖ ^ 2
+      ≤ 2 * (∑ n ∈ (range (X + 1)).filter Even, (error n) ^ 2) +
+        2 * (∑ n ∈ (range (X + 1)).filter Even,
+          ‖fourierCoeff W (n : ℤ) -
+            ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2) := by
+        rw [← hsplit2]; exact hsum
+    _ ≤ 2 * (Ce * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε)) +
+        2 * (Cs * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε)) := by
+        have h1 : (∑ n ∈ (range (X + 1)).filter Even, (error n) ^ 2) ≤
+            Ce * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := hE' X hXe
+        have h2 : (∑ n ∈ (range (X + 1)).filter Even,
+            ‖fourierCoeff W (n : ℤ) -
+              ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2) ≤
+            Cs * (X : ℝ) ^ (5 / 2 + ε) := hs X hXs
+        have h2' : Cs * (X : ℝ) ^ (5 / 2 + ε) ≤ Cs * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+          mul_le_mul_of_nonneg_left hpow hCs
+        linarith
+    _ = (2 * Ce + 2 * Cs) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by ring
 
 /-- LEAF. The even frequency window `0 ≤ n ≤ X` only: there are `C` and `X₀` with `0 ≤ C` and, for
 every `X ≥ X₀`, the squared Fourier coefficient energy of the difference on the even frequencies
