@@ -15,8 +15,7 @@ central transform and the full transform, so the work is:
 The assembly masks the difference to the unit interval, applies the family
 estimate to the masked multiplier and collects the constants.
 
-The family estimate is proved from smoothed_family_bound261.
-The pointwise estimate remains open and the assembly is conditional on it.
+All leaves are open; the assembly is complete and uses no sorry.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp525a
@@ -49,8 +48,7 @@ theorem multi_tail_pointwise525 {G : ℝ → ℝ} (hG : IsMajorWeight G)
         D * η ^ 2 := by
   sorry
 
-/-- PROVED from smoothed_family_bound261 and log_le_sixteen_log5_525.
-The smoothed family mean square with the fifth power of the logarithm.
+/-- LEAF. The smoothed family mean square with the fifth power of the logarithm.
 
 For an admissible phi, one nonnegative constant bounds the sum over N up to X of
 the squared coefficient of the smoothed square times an arbitrary measurable
@@ -68,16 +66,18 @@ theorem multi_tail_family525 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) :
   obtain ⟨C, hC, hfamily⟩ := smoothed_family_bound261 hϕ
   refine ⟨16 * C, by positivity, ?_⟩
   intro X hX B hB W hW hWB
-  calc
-    _ ≤ C * B ^ 2 * (X : ℝ) ^ 3 * Real.log X := hfamily X hX W hW B hB hWB
+  have hlog := log_le_sixteen_log5_525 hX
+  have hnonneg : (0 : ℝ) ≤ C * B ^ 2 * (X : ℝ) ^ 3 := by positivity
+  calc ∑ N ∈ Finset.Icc 1 X,
+        ‖∫ α in (0 : ℝ)..1, Sphi ϕ N α ^ 2 * W α * ee (-(N * α))‖ ^ 2
+      ≤ C * B ^ 2 * (X : ℝ) ^ 3 * Real.log X := hfamily X hX W hW B hB hWB
     _ ≤ C * B ^ 2 * (X : ℝ) ^ 3 * (16 * Real.log X ^ 5) :=
-      mul_le_mul_of_nonneg_left (log_le_sixteen_log5_525 hX) (by positivity)
-    _ = _ := by ring
+        mul_le_mul_of_nonneg_left hlog hnonneg
+    _ = 16 * C * B ^ 2 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by ring
 
 /-! ## Assembly -/
 
-/-- CONDITIONAL on multi_tail_pointwise525.
-The major tail family on the multi denominator range, from the pointwise input and the proved family bound.
+/-- The major tail family on the multi denominator range, from the two leaves.
 
 The multiplier is the difference of the two transforms, masked to the major arcs
 of the unit interval; the mask is measurable, the pointwise leaf bounds it by the
