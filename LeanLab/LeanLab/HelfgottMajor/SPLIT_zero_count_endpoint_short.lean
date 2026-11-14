@@ -73,7 +73,50 @@ constant `17.7` against only `0.5 * log (2 * π)` and because `2 / q` is at most
 theorem endpoint_book_arithmetic (q : ℕ) [NeZero q] :
     2 * ZeroCount1623.bookMain q (2 * π / q) + 2 * ZeroCount1623.bookError q (2 * π / q) ≤
       0.5 * log (2 * π) + 17.7 - (2 / q) * log (2 * π * exp 1) := by
-  sorry
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast NeZero.one_le
+  have hq0 : (0 : ℝ) < (q : ℝ) := by linarith
+  have hqT : (q : ℝ) * (2 * π / (q : ℝ)) = 2 * π := by
+    field_simp
+  have hmain : ZeroCount1623.bookMain q (2 * π / q) = -1 / (q : ℝ) := by
+    unfold ZeroCount1623.bookMain
+    rw [hqT]
+    have h2 : (2 * π / (q : ℝ)) / (2 * π) = 1 / (q : ℝ) := by
+      field_simp
+    rw [h2]
+    have h3 : 2 * π / (2 * π * exp 1) = (exp 1)⁻¹ := by
+      field_simp
+    rw [h3, ← exp_neg, log_exp]
+    ring
+  have herr : ZeroCount1623.bookError q (2 * π / q) = 0.15 * log (2 * π) + 3.389 := by
+    unfold ZeroCount1623.bookError
+    rw [hqT]
+  have hexp : log (2 * π * exp 1) = log (2 * π) + 1 := by
+    rw [log_mul (by positivity) (exp_pos 1).ne', log_exp]
+  rw [hmain, herr, hexp]
+  have hB0 : (0 : ℝ) ≤ log (2 * π) := log_nonneg (by nlinarith [Real.pi_gt_three])
+  have hBle : log (2 * π) ≤ 5.2832 := by
+    have h1 : log (2 * π) ≤ 2 * π - 1 := log_le_sub_one_of_pos (by positivity)
+    have h2 : π < 3.1416 := Real.pi_lt_d4
+    linarith
+  have hA0 : (0 : ℝ) ≤ 2 / (q : ℝ) := by positivity
+  have hA2 : 2 / (q : ℝ) ≤ 2 := by
+    rw [div_le_iff₀ hq0]
+    linarith
+  have hqne : (q : ℝ) ≠ 0 := ne_of_gt hq0
+  have hprod : log (2 * π) * (2 / (q : ℝ)) ≤ 5.2832 * 2 :=
+    mul_le_mul hBle hA2 hA0 (by norm_num)
+  have hEq : 2 * (-1 / (q : ℝ)) + 2 * (0.15 * log (2 * π) + 3.389) -
+      (0.5 * log (2 * π) + 17.7 - (2 / (q : ℝ)) * (log (2 * π) + 1))
+      = log (2 * π) * (2 / (q : ℝ)) - 0.2 * log (2 * π) - 10.922 := by
+    field_simp
+    ring
+  have hle : log (2 * π) * (2 / (q : ℝ)) - 0.2 * log (2 * π) - 10.922 ≤ 0 := by
+    rcases le_or_gt (0.2 : ℝ) (2 / (q : ℝ)) with hc | hc
+    · nlinarith [hprod, hB0]
+    · have hlt : log (2 * π) * (2 / (q : ℝ)) ≤ log (2 * π) * 0.2 :=
+        mul_le_mul_of_nonneg_left hc.le hB0
+      nlinarith [hlt]
+  linarith [hEq, hle]
 
 /-- The endpoint count, assembled from the two conductor regimes. -/
 theorem zero_count_endpoint_short_split (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
