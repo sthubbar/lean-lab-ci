@@ -8,6 +8,7 @@ import LeanLab.BhowmikGrimmelt2026.ModelL2_150
 import LeanLab.BhowmikGrimmelt2026.FareyCount451
 import LeanLab.BhowmikGrimmelt2026.ArcTails150
 import LeanLab.PNTPort.Vinogradov.Basic
+import LeanLab.BhowmikGrimmelt2026.Decomp504a
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -89,14 +90,6 @@ theorem near_card_le502 {X : ℕ} (hX : 1 ≤ X) (α : ℝ) :
   have hQ : 1 ≤ Nat.sqrt X := Nat.sqrt_pos.mpr (by omega)
   simpa using nearPairs_card451 (by exact_mod_cast hQ : (1 : ℝ) ≤ Nat.sqrt X)
     (by norm_num : 1 ≤ (1 : ℕ))
-
-/-- LEAF: P0029 page 12, the nearby arc tails. Retain the least denominator assignment.
-The difference between V squared and the nearby full model has size X to one plus epsilon.
-The estimate requires identification of the assigned residue and bounds for the other nearby terms. -/
-theorem near_arc_tail502 :
-    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - nearWX502 X α‖ ≤ C * (X : ℝ) ^ (1 + ε) := by
-  sorry
 
 /-- P0029 page 12. CONDITIONAL on the two displayed near and far estimates. -/
 theorem arc_tails_of_near_far502
@@ -337,19 +330,164 @@ theorem farMass_le_kernel502 (X : ℕ) (α : ℝ) : farMass502 X α ≤ farKerne
   exact mul_le_mul hw hsq (sq_nonneg _) (by positivity)
 
 /-- LEAF: P0029 page 12. The far reduced fractions satisfy a pure weighted kernel bound.
-This contains no prime sum and no exponential sum. The remaining work is a dyadic Farey count
+This contains no prime sum and no exponential sum. The proof uses a dyadic Farey count
 and the subpower bound for the ratio of a denominator to its totient. -/
 theorem far_kernel502 :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
       farKernel502 X α ≤ C * (X : ℝ) ^ (1 + ε) := by
-  sorry
+  classical
+  intro ε hε
+  obtain ⟨C, hC0, hC⟩ := far_weighted_subpower504 (2 * ε) (by positivity)
+  refine ⟨C, fun X hX α _hα => ?_⟩
+  let Q := Nat.sqrt X
+  have hQ : 1 ≤ Q := Nat.sqrt_pos.mpr (by omega)
+  let s := (reducedPairs Q).filter
+    (fun p => 1 < (Q : ℝ) * p.1 * intDist (α - p.2 / p.1))
+  have hb := hC Q hQ α s (Finset.filter_subset _ _)
+    (fun p hp => (Finset.mem_filter.mp hp).2)
+  have hm : farKernel502 X α ≤ ∑ p ∈ s,
+      (1 / (Nat.totient p.1 : ℝ) ^ 2) * (1 / intDist (α - p.2 / p.1) ^ 2) := by
+    apply Finset.sum_le_sum
+    intro p hp
+    have hf := (Finset.mem_filter.mp hp).2
+    have hd : 0 < intDist (α - p.2 / p.1) := by
+      by_contra! hbad
+      have hh : (Q : ℝ) * p.1 * intDist (α - p.2 / p.1) ≤ 0 :=
+        mul_nonpos_of_nonneg_of_nonpos (by positivity) hbad
+      linarith
+    have hmin : min (X : ℝ) (1 / (2 * intDist (α - p.2 / p.1))) ≤
+        1 / intDist (α - p.2 / p.1) :=
+      (min_le_right _ _).trans (one_div_le_one_div_of_le hd (by linarith))
+    have hmin0 : 0 ≤ min (X : ℝ) (1 / (2 * intDist (α - p.2 / p.1))) := by positivity
+    have hh := pow_le_pow_left₀ hmin0 hmin 2
+    simpa only [one_div_pow] using
+      mul_le_mul_of_nonneg_left hh (by positivity : 0 ≤ 1 / (Nat.totient p.1 : ℝ) ^ 2)
+  have hQ0 : (0 : ℝ) ≤ Q := by positivity
+  have hQX : (Q : ℝ) ^ 2 ≤ X := by exact_mod_cast Nat.sqrt_le' X
+  have heq : (Q : ℝ) ^ (2 + 2 * ε) = ((Q : ℝ) ^ 2) ^ (1 + ε) := by
+    rw [← Real.rpow_natCast_mul hQ0]
+    congr 1
+    push_cast
+    ring
+  calc
+    farKernel502 X α ≤ C * (Q : ℝ) ^ (2 + 2 * ε) := hm.trans hb
+    _ = C * ((Q : ℝ) ^ 2) ^ (1 + ε) := by rw [heq]
+    _ ≤ C * (X : ℝ) ^ (1 + ε) :=
+      mul_le_mul_of_nonneg_left (Real.rpow_le_rpow (by positivity) hQX (by positivity)) hC0
 
-/-- P0029 page 12. CONDITIONAL on the pure weighted kernel leaf. -/
+/-- P0029 page 12. The far arc mass follows from the proved pure weighted kernel bound. -/
 theorem far_arc_tail502 :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
       farMass502 X α ≤ C * (X : ℝ) ^ (1 + ε) := by
   intro ε hε
   obtain ⟨C, hC⟩ := far_kernel502 ε hε
   exact ⟨C, fun X hX α hα => (farMass_le_kernel502 X α).trans (hC X hX α hα)⟩
+
+/-- LEAF: P0029 page 12, the nearby arc tails. Retain the least denominator assignment.
+The difference between V squared and the nearby full model has size X to one plus epsilon.
+The proof identifies and cancels the assigned residue before bounding the other nearby terms. -/
+theorem near_arc_tail502 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
+      ‖VX150 X α ^ 2 - nearWX502 X α‖ ≤ C * (X : ℝ) ^ (1 + ε) := by
+  classical
+  intro ε hε
+  let k : ℕ := ⌈2 / ε⌉₊ + 1
+  have hk : 1 ≤ k := by dsimp [k]; omega
+  have hkp : (0 : ℝ) < k := by exact_mod_cast hk
+  have hkε : (k : ℝ)⁻¹ ≤ ε / 2 := by
+    have hh := Nat.le_ceil (2 / ε)
+    have hkbig : 2 / ε < (k : ℝ) := by dsimp [k]; push_cast; linarith
+    have hh' := (div_lt_iff₀ hε).mp hkbig
+    rw [← one_div, div_le_iff₀ hkp]
+    nlinarith only [hh']
+  obtain ⟨D, hD, hDb⟩ := totient_ratio_subpower504 k hk
+  refine ⟨96 * D ^ 2, fun X hX α hα => ?_⟩
+  let Q := Nat.sqrt X
+  have hQ : 1 ≤ Q := Nat.sqrt_pos.mpr (by omega)
+  have hQp : (0 : ℝ) < Q := by exact_mod_cast hQ
+  have hXR : (1 : ℝ) ≤ X := by exact_mod_cast hX
+  have hXp : (0 : ℝ) < X := by linarith
+  have hXQ : (X : ℝ) ≤ 4 * (Q : ℝ) ^ 2 := by
+    have hh : (X : ℝ) < ((Q : ℝ) + 1) ^ 2 := by exact_mod_cast Nat.lt_succ_sqrt' X
+    have hQR : (1 : ℝ) ≤ Q := by exact_mod_cast hQ
+    nlinarith only [hh, hQR, sq_nonneg ((Q : ℝ) - 1)]
+  obtain ⟨q, hq, haq⟩ := exists_arc502 hX α
+  obtain ⟨b, hb, hcop, hnear, hterm⟩ := assigned_residue504 hq hα haq
+  let p : Σ _ : ℕ, ℕ := ⟨q, b⟩
+  let s := nearPairs451 (Q : ℝ) α 1
+  have hpM : p ∈ reducedPairs Q :=
+    (mem_reducedPairs _ _).mpr ⟨(Finset.mem_Icc.mp hq).1, (Finset.mem_Icc.mp hq).2, hb, hcop⟩
+  have hp : p ∈ s := by
+    simp only [s, nearPairs451, Nat.floor_natCast, Finset.mem_filter, Nat.cast_one]
+    exact ⟨hpM, hnear⟩
+  have hV : VX150 X α ^ 2 = wq150 p.1 * TX150 X (α - p.2 / p.1) ^ 2 := by
+    rw [VX_eq_arcTerm502 hq haq]
+    exact hterm
+  have hlarge : ∀ r ∈ s.erase p, (Q : ℝ) ≤ 2 * r.1 := by
+    intro r hr
+    obtain ⟨hrne, hrs⟩ := Finset.mem_erase.mp hr
+    have hrfilter := Finset.mem_filter.mp hrs
+    have hrM : r ∈ reducedPairs Q := by simpa only [Nat.floor_natCast] using hrfilter.1
+    have hrnear : (Q : ℝ) * r.1 * intDist (α - r.2 / r.1) ≤ 1 := by simpa only [Nat.cast_one] using hrfilter.2
+    have hrq := (mem_reducedPairs _ r).mp hrM
+    have hround : |(r.1 : ℝ) * α - (nint150 ((r.1 : ℝ) * α) : ℝ)| ≤
+        1 / (Nat.sqrt X : ℝ) := by
+      have hh := intDist_mul_nat504 r.1 r.2 α hrq.1
+      have hh' : (r.1 : ℝ) * intDist (α - r.2 / r.1) ≤ 1 / (Q : ℝ) := by
+        apply (le_div_iff₀ hQp).mpr
+        nlinarith only [hrnear]
+      have hd := hh.trans hh'
+      simpa only [intDist, nint150, round_eq] using hd
+    have hmin : p.1 ≤ r.1 := arc_denominator_min502 haq hrq.1 hround
+    exact near_other_large502 hQp hpM hrM hrne.symm hnear hrnear hmin
+  have hweight : ∀ r ∈ s.erase p, (r.1 : ℝ) ≤
+      (D * (X : ℝ) ^ (ε / 2)) * Nat.totient r.1 := by
+    intro r hr
+    have hrs := (Finset.mem_erase.mp hr).2
+    have hrM : r ∈ reducedPairs Q := by
+      simpa only [Nat.floor_natCast] using (Finset.mem_filter.mp hrs).1
+    have hrq := (mem_reducedPairs _ r).mp hrM
+    have hrX : (r.1 : ℝ) ≤ X := by
+      exact_mod_cast hrq.2.1.trans (Nat.sqrt_le_self X)
+    refine (hDb r.1 hrq.1).trans ?_
+    apply mul_le_mul_of_nonneg_right _ (by positivity)
+    apply mul_le_mul_of_nonneg_left _ hD.le
+    exact (Real.rpow_le_rpow (by positivity) hrX (by positivity)).trans
+      (Real.rpow_le_rpow_of_exponent_le hXR hkε)
+  have hsingle : ∀ r ∈ s.erase p,
+      ‖wq150 r.1 * TX150 X (α - r.2 / r.1) ^ 2‖ ≤
+        16 * (D * (X : ℝ) ^ (ε / 2)) ^ 2 * X := by
+    intro r hr
+    have hrs := (Finset.mem_erase.mp hr).2
+    have hrM : r ∈ reducedPairs Q := by
+      simpa only [Nat.floor_natCast] using (Finset.mem_filter.mp hrs).1
+    exact near_term_le504 hXQ ((mem_reducedPairs _ r).mp hrM).1
+      (hlarge r hr) (hweight r hr) _
+  have hcard : ((s.erase p).card : ℝ) ≤ 6 := by
+    have hh := (Finset.card_erase_le (s := s) (a := p)).trans (near_card_le502 hX α)
+    exact_mod_cast hh
+  have hcancel : VX150 X α ^ 2 - nearWX502 X α =
+      -(∑ r ∈ s.erase p, wq150 r.1 * TX150 X (α - r.2 / r.1) ^ 2) := by
+    have hh := Finset.sum_erase_add s
+      (fun r => wq150 r.1 * TX150 X (α - r.2 / r.1) ^ 2) hp
+    change VX150 X α ^ 2 - (∑ r ∈ s, _) = _
+    rw [hV, ← hh]
+    ring
+  have heq : 6 * (16 * (D * (X : ℝ) ^ (ε / 2)) ^ 2 * X) =
+      96 * D ^ 2 * (X : ℝ) ^ (1 + ε) := by
+    rw [mul_pow, ← Real.rpow_mul_natCast hXp.le]
+    rw [show ε / 2 * (2 : ℕ) = ε by push_cast; ring,
+      Real.rpow_add hXp, Real.rpow_one]
+    ring
+  calc
+    _ = ‖∑ r ∈ s.erase p, wq150 r.1 * TX150 X (α - r.2 / r.1) ^ 2‖ := by
+      rw [hcancel, norm_neg]
+    _ ≤ ∑ r ∈ s.erase p, ‖wq150 r.1 * TX150 X (α - r.2 / r.1) ^ 2‖ := norm_sum_le _ _
+    _ ≤ ∑ _r ∈ s.erase p, 16 * (D * (X : ℝ) ^ (ε / 2)) ^ 2 * X :=
+      Finset.sum_le_sum hsingle
+    _ = ((s.erase p).card : ℝ) * (16 * (D * (X : ℝ) ^ (ε / 2)) ^ 2 * X) := by simp
+    _ ≤ 6 * (16 * (D * (X : ℝ) ^ (ε / 2)) ^ 2 * X) :=
+      mul_le_mul_of_nonneg_right hcard (by positivity)
+    _ = _ := heq
 
 end LeanLab.BhowmikGrimmelt2026
