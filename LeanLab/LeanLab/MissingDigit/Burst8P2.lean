@@ -349,6 +349,807 @@ theorem prop_2_1 : ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < 
         ‖S4 X H α - S4sharp ε X H α‖ ≤ C * H * (X : ℝ) ^ (-(c * ε)) := by
   sorry
 
+private theorem norm_eC_w (x : ℝ) : ‖eC x‖ = 1 := by
+  unfold eC
+  have : 2 * (π : ℂ) * Complex.I * (x : ℂ) = ((2 * π * x : ℝ) : ℂ) * Complex.I := by
+    push_cast; ring
+  rw [this, Complex.norm_exp_ofReal_mul_I]
+
+private theorem eC_nat_mul_w (d : ℕ) (θ : ℝ) : eC (d * θ) = eC θ ^ d := by
+  induction d with
+  | zero => simp [eC]
+  | succ d ih => rw [pow_succ, ← ih, ← eC_add]; congr 1; push_cast; ring
+
+private theorem norm_eC_sub_one_w (θ : ℝ) : ‖eC θ - 1‖ = 2 * |Real.sin (π * θ)| := by
+  have : eC θ = Complex.exp (Complex.I * ((2 * π * θ : ℝ) : ℂ)) := by
+    unfold eC; congr 1; push_cast; ring
+  rw [this, Complex.norm_exp_I_mul_ofReal_sub_one, norm_mul, Real.norm_eq_abs,
+    Real.norm_eq_abs]
+  norm_num
+  congr 2; ring
+
+private theorem Gsum_w_le (g : ℕ) (θ : ℝ) : ‖∑ d ∈ range g, eC (d * θ)‖ ≤ g := by
+  refine le_trans (norm_sum_le _ _) ?_
+  simp [norm_eC_w]
+
+/-- The exact size of the geometric sum: `|G_g(θ)| sin(πθ) = |sin(π g θ)|`, valid at `θ = 0`
+where both sides vanish. -/
+private theorem Gsum_w_mul_sin {g : ℕ} {θ : ℝ} (h0 : 0 ≤ θ) (h1 : θ < 1) :
+    ‖∑ d ∈ range g, eC (d * θ)‖ * Real.sin (π * θ) = |Real.sin (π * (g : ℝ) * θ)| := by
+  rcases h0.eq_or_lt with rfl | h0'
+  · have hsum : (∑ d ∈ range g, eC (d * (0 : ℝ))) = (g : ℂ) := by
+      simp [eC]
+    rw [hsum]
+    simp
+  · have hs : 0 < Real.sin (π * θ) :=
+      Real.sin_pos_of_pos_of_lt_pi (by positivity) (by nlinarith [Real.pi_pos])
+    have hne : eC θ - 1 ≠ 0 := by
+      intro h
+      have := norm_eC_sub_one_w θ
+      rw [h, norm_zero, abs_of_pos hs] at this
+      linarith
+    have hz : eC θ ≠ 1 := fun h => hne (by rw [h, sub_self])
+    have hsum : (∑ d ∈ range g, eC (d * θ)) = ∑ d ∈ range g, eC θ ^ d :=
+      Finset.sum_congr rfl (fun d _ => eC_nat_mul_w d θ)
+    rw [hsum, geom_sum_eq hz, norm_div]
+    have hnum : ‖eC θ ^ g - 1‖ = 2 * |Real.sin (π * ((g : ℝ) * θ))| := by
+      rw [← eC_nat_mul_w g θ, norm_eC_sub_one_w]
+    have hden : ‖eC θ - 1‖ = 2 * |Real.sin (π * θ)| := norm_eC_sub_one_w θ
+    rw [hnum, hden, abs_of_pos hs, show π * ((g : ℝ) * θ) = π * (g : ℝ) * θ by ring]
+    have h2 : (2 * Real.sin (π * θ)) ≠ 0 := by positivity
+    field_simp
+
+/-! ### The quadratic lower bound for `sin` and the sine reciprocal -/
+
+private theorem sin_pi_ge_quad_half {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1 / 2) :
+    π * x * (1 - x) ≤ Real.sin (π * x) := by
+  have hpi : (0 : ℝ) < π := Real.pi_pos
+  set y := π * x with hy
+  have hy0 : 0 ≤ y := by positivity
+  have hy1 : y ≤ π / 2 := by rw [hy]; nlinarith
+  have hcube : y - y ^ 3 / 6 ≤ Real.sin y := Real.sin_ge_sub_cube hy0
+  have hp2 : π ^ 2 ≤ 12 := by nlinarith [Real.pi_lt_d4, hpi]
+  have hy6 : y * π ≤ 6 := by nlinarith [hy1, hpi, hp2]
+  have hkey : y ^ 3 / 6 ≤ y ^ 2 / π := by
+    rw [div_le_div_iff₀ (by norm_num : (0 : ℝ) < 6) hpi]
+    have h1 : y ^ 2 * (y * π) ≤ y ^ 2 * 6 := mul_le_mul_of_nonneg_left hy6 (by positivity)
+    nlinarith [h1]
+  have e : π * x * (1 - x) = y - y ^ 2 / π := by
+    rw [hy]
+    field_simp
+  rw [e]
+  linarith [hkey]
+
+private theorem sin_pi_ge_quad {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1) :
+    π * x * (1 - x) ≤ Real.sin (π * x) := by
+  rcases le_or_gt x (1 / 2) with hx | hx
+  · exact sin_pi_ge_quad_half h0 hx
+  · have h1x0 : 0 ≤ 1 - x := by linarith
+    have h1x1 : 1 - x ≤ 1 / 2 := by linarith
+    have h := sin_pi_ge_quad_half h1x0 h1x1
+    have e : Real.sin (π * (1 - x)) = Real.sin (π * x) := by
+      rw [show π * (1 - x) = π - π * x by ring, Real.sin_pi_sub]
+    rw [e] at h
+    nlinarith
+
+private theorem inv_sin_pi_le_quad {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
+    1 / Real.sin (π * x) ≤ 1 / (π * x * (1 - x)) := by
+  have hs : 0 < π * x * (1 - x) :=
+    mul_pos (mul_pos Real.pi_pos h0) (by linarith)
+  exact one_div_le_one_div_of_le hs (sin_pi_ge_quad h0.le h1.le)
+
+/-! ### The harmonic bounds -/
+
+private theorem sum_inv_range_w (g : ℕ) : ∑ c ∈ range g, (1 : ℝ) / c ≤ 1 + Real.log g := by
+  rcases Nat.eq_zero_or_pos g with rfl | hg
+  · simp
+  obtain ⟨n, rfl⟩ : ∃ n, g = n + 1 := ⟨g - 1, by omega⟩
+  rw [Finset.sum_range_succ']
+  have e : ∑ i ∈ range n, (1 : ℝ) / ((i + 1 : ℕ) : ℝ) = ((harmonic n : ℚ) : ℝ) := by
+    unfold harmonic; push_cast; simp [one_div]
+  simp only [Nat.cast_zero, div_zero, add_zero]
+  rw [e]
+  refine le_trans (harmonic_le_one_add_log n) ?_
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp
+  have : Real.log n ≤ Real.log ((n + 1 : ℕ) : ℝ) :=
+    Real.log_le_log (by exact_mod_cast hn) (by push_cast; linarith)
+  linarith
+
+private theorem sum_inv_shift_w {g : ℕ} {β : ℝ} (hβ : 0 ≤ β) :
+    ∑ c ∈ range g, (1 : ℝ) / (β + c) ≤ 1 / β + 1 + Real.log g := by
+  rcases Nat.eq_zero_or_pos g with rfl | hg
+  · rw [Finset.range_zero, Finset.sum_empty]
+    have h0 : Real.log (((0 : ℕ)) : ℝ) = 0 := by simp
+    rw [h0]
+    have : 0 ≤ (1 : ℝ) / β := by positivity
+    linarith
+  obtain ⟨n, rfl⟩ : ∃ n, g = n + 1 := ⟨g - 1, by omega⟩
+  rw [Finset.sum_range_succ']
+  simp only [Nat.cast_zero, add_zero]
+  have hfirst : ∑ i ∈ range n, (1 : ℝ) / (β + ((i + 1 : ℕ) : ℝ)) + 1 / β ≤
+      (∑ i ∈ range n, (1 : ℝ) / ((i + 1 : ℕ) : ℝ)) + 1 / β := by
+    have hle : ∑ i ∈ range n, (1 : ℝ) / (β + ((i + 1 : ℕ) : ℝ)) ≤
+        ∑ i ∈ range n, (1 : ℝ) / ((i + 1 : ℕ) : ℝ) := by
+      refine Finset.sum_le_sum (fun i _ => ?_)
+      have hi : (0 : ℝ) < ((i + 1 : ℕ) : ℝ) := by positivity
+      apply one_div_le_one_div_of_le hi
+      push_cast
+      linarith
+    linarith
+  have hsecond : ∑ i ∈ range n, (1 : ℝ) / ((i + 1 : ℕ) : ℝ) ≤ 1 + Real.log ((n : ℝ) + 1) := by
+    have e : ∑ i ∈ range n, (1 : ℝ) / ((i + 1 : ℕ) : ℝ) = ((harmonic n : ℚ) : ℝ) := by
+      unfold harmonic; push_cast; simp [one_div]
+    rw [e]
+    refine le_trans (harmonic_le_one_add_log n) ?_
+    rcases Nat.eq_zero_or_pos n with rfl | hn
+    · simp
+    have h : Real.log (n : ℝ) ≤ Real.log ((n : ℝ) + 1) := by
+      apply Real.log_le_log (by exact_mod_cast hn) (by linarith)
+    linarith
+  have hcast : Real.log (((n + 1 : ℕ) : ℝ)) = Real.log ((n : ℝ) + 1) := by
+    push_cast; ring_nf
+  rw [hcast]
+  linarith
+
+/-- The reflected form: `∑_{c<g} 1/(g - β - c) ≤ 1/(1-β) + 1 + log g`. -/
+private theorem sum_inv_sub_shift_w {g : ℕ} {β : ℝ} (hβ : β ≤ 1) :
+    ∑ c ∈ range g, (1 : ℝ) / ((g : ℝ) - β - c) ≤ 1 / (1 - β) + 1 + Real.log g := by
+  rcases Nat.eq_zero_or_pos g with rfl | hg0
+  · rw [Finset.range_zero, Finset.sum_empty]
+    have h0 : Real.log (((0 : ℕ)) : ℝ) = 0 := by simp
+    rw [h0]
+    have : 0 ≤ (1 : ℝ) / (1 - β) := by positivity
+    linarith
+  have hrefl : ∑ c ∈ range g, (1 : ℝ) / ((g : ℝ) - β - c) =
+      ∑ c ∈ range g, (1 : ℝ) / (1 - β + c) := by
+    conv_lhs => rw [← Finset.sum_range_reflect (fun c => (1 : ℝ) / ((g : ℝ) - β - c)) g]
+    refine Finset.sum_congr rfl (fun c hc => ?_)
+    have hc' : c ≤ g - 1 := by
+      have h := Finset.mem_range.1 hc
+      omega
+    have hcast : ((g - 1 - c : ℕ) : ℝ) = (g : ℝ) - 1 - (c : ℝ) := by
+      have h1 : ((g - 1 - c : ℕ) : ℝ) = ((g - 1 : ℕ) : ℝ) - (c : ℝ) := by
+        rw [Nat.cast_sub hc']
+      have h2 : ((g - 1 : ℕ) : ℝ) = (g : ℝ) - 1 := by
+        rw [Nat.cast_sub hg0]
+        push_cast
+        ring
+      rw [h1, h2]
+    rw [hcast]
+    congr 1
+    ring
+  rw [hrefl]
+  exact sum_inv_shift_w (by linarith)
+
+/-! ### The exact size of the geometric sum at the shifted points -/
+
+private theorem abs_sin_pi_add_cast {β : ℝ} {c : ℕ} (hβ0 : 0 ≤ β) (hβ1 : β ≤ 1) :
+    |Real.sin (π * (β + c))| = Real.sin (π * β) := by
+  induction c with
+  | zero =>
+    rw [Nat.cast_zero, add_zero]
+    exact abs_of_nonneg (Real.sin_nonneg_of_nonneg_of_le_pi (by positivity)
+      (by nlinarith [Real.pi_pos]))
+  | succ c ih =>
+    rw [show π * (β + ((c + 1 : ℕ) : ℝ)) = π * (β + c) + π by push_cast; ring]
+    rw [Real.sin_add_pi, abs_neg, ih]
+
+/-- `‖G_g((β+c)/g)‖ = sin(πβ)/sin(π(β+c)/g)`, for `0 < β + c` (so that the point is not `0`)
+and `β + c < g`. -/
+private theorem Gsum_w_shift {g c : ℕ} {β : ℝ} (hg : 0 < g) (hc : c < g)
+    (hβc : 0 < (β : ℝ) + c) (hβg : (β : ℝ) + c < (g : ℝ)) (hβ0 : 0 ≤ β) (hβ1 : β ≤ 1) :
+    ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖ =
+      Real.sin (π * β) / Real.sin (π * ((β + c) / g)) := by
+  have hgR : (0 : ℝ) < g := by exact_mod_cast hg
+  have hθ0 : 0 ≤ (β + c) / g := by positivity
+  have hθ1 : (β + c) / g < 1 := by
+    rw [div_lt_one hgR]
+    linarith
+  have hmul := Gsum_w_mul_sin (g := g) (θ := (β + c) / g) hθ0 hθ1
+  rw [show π * (g : ℝ) * ((β + c) / (g : ℝ)) = π * (β + (c : ℝ)) by
+    field_simp] at hmul
+  rw [show π * (β + (c : ℝ)) = π * (β + c) by push_cast; ring] at hmul
+  rw [abs_sin_pi_add_cast hβ0 hβ1] at hmul
+  have hs : 0 < Real.sin (π * ((β + c) / g)) :=
+    Real.sin_pos_of_pos_of_lt_pi (by positivity) (by nlinarith [Real.pi_pos])
+  exact (eq_div_iff hs.ne').mpr hmul
+
+/-- The sharp per-`c` bound on the geometric sum at a point `(β+c)/g` of `(0,1)`. -/
+private theorem Gsum_w_shift_bound {g c : ℕ} {β : ℝ} (hg : 0 < g) (hcg : c < g)
+    (hβc : 0 < (β : ℝ) + c) (hβg : (β : ℝ) + c < (g : ℝ)) (hβ0 : 0 ≤ β) (hβ1 : β ≤ 1) :
+    ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖ ≤
+      (Real.sin (π * β) / π) * ((g : ℝ) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c))) := by
+  have hgR : (0 : ℝ) < g := by exact_mod_cast hg
+  have hu : 0 < (β : ℝ) + c := hβc
+  have hv : 0 < (g : ℝ) - β - c := by linarith
+  have hx0 : 0 < ((β : ℝ) + c) / g := div_pos hu hgR
+  have hx1 : ((β : ℝ) + c) / g < 1 := by
+    rw [div_lt_one hgR]
+    linarith
+  have hEq := Gsum_w_shift hg hcg hβc hβg hβ0 hβ1
+  have hs0 : 0 ≤ Real.sin (π * β) :=
+    Real.sin_nonneg_of_nonneg_of_le_pi (by positivity) (by nlinarith [Real.pi_pos])
+  have hinv : 1 / Real.sin (π * ((β + c) / g)) ≤
+      1 / (π * ((β + c) / g) * (1 - (β + c) / g)) :=
+    inv_sin_pi_le_quad hx0 hx1
+  have hinv' : (Real.sin (π * ((β + c) / g)))⁻¹ ≤
+      (π * ((β + c) / g) * (1 - (β + c) / g))⁻¹ := by
+    simpa [one_div] using hinv
+  have hxv2 : ((β + (c : ℝ)) / g) * (1 - (β + (c : ℝ)) / g) =
+      ((β + c) * ((g : ℝ) - β - c)) / (g : ℝ) ^ 2 := by
+    have hg' : (g : ℝ) ≠ 0 := ne_of_gt hgR
+    field_simp
+    ring
+  have hx2 : 1 / (π * ((β + (c : ℝ)) / g) * (1 - (β + (c : ℝ)) / g)) =
+      (g : ℝ) ^ 2 / (π * ((β + c) * ((g : ℝ) - β - c))) := by
+    have hA : π * ((β + (c : ℝ)) / g) * (1 - (β + (c : ℝ)) / g) =
+        π * (((β + (c : ℝ)) / g) * (1 - (β + (c : ℝ)) / g)) := by ring
+    rw [hA, hxv2]
+    have hu' : (β + (c : ℝ)) ≠ 0 := ne_of_gt hu
+    have hv' : ((g : ℝ) - β - c) ≠ 0 := ne_of_gt hv
+    have hg' : (g : ℝ) ≠ 0 := ne_of_gt hgR
+    have hp' : (π : ℝ) ≠ 0 := ne_of_gt Real.pi_pos
+    field_simp
+    try ring
+  have hx3 : (g : ℝ) ^ 2 / (π * ((β + c) * ((g : ℝ) - β - c))) =
+      (g : ℝ) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) / π := by
+    have hu' : (β + (c : ℝ)) ≠ 0 := ne_of_gt hu
+    have hv' : ((g : ℝ) - β - c) ≠ 0 := ne_of_gt hv
+    have hp' : (π : ℝ) ≠ 0 := ne_of_gt Real.pi_pos
+    field_simp
+    try ring
+  have hident : (π * ((β + c) / g) * (1 - (β + c) / g))⁻¹ =
+      (g : ℝ) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) / π := by
+    rw [inv_eq_one_div]
+    exact hx2.trans hx3
+  rw [hEq, div_eq_mul_inv]
+  calc Real.sin (π * β) * (Real.sin (π * ((β + c) / g)))⁻¹
+      ≤ Real.sin (π * β) * (π * ((β + c) / g) * (1 - (β + c) / g))⁻¹ :=
+        mul_le_mul_of_nonneg_left hinv' hs0
+    _ = (Real.sin (π * β) / π) * ((g : ℝ) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c))) := by
+        rw [hident]
+        ring
+
+/-! ### The sharp digit average -/
+
+/-- The digit average with the sharp constant `log g + 1`: for `β ∈ [0,1]`,
+`∑_{c<g} |f_{g,b}((β+c)/g)| ≤ g (log g + 1)`. This is the `+1` of Kim's Lemma 1.7; the version
+in `Burst8L17` has `log g + 4`. The two endpoint indices `c = 0` and `c = g-1` are bounded
+crudely, since at `β = 0, 1` the corresponding point is `0, 1`. -/
+private theorem digit_avg_le {g b : ℕ} (hg : 33554432 ≤ g) (hbg : b < g) {β : ℝ}
+    (hβ0 : 0 ≤ β) (hβ1 : β ≤ 1) :
+    ∑ c ∈ range g, ‖∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * ((β + c) / g))‖ ≤
+      (g : ℝ) * (Real.log g + 1) := by
+  have hg1 : 1 ≤ g := by omega
+  have hg2 : 2 ≤ g := by omega
+  have hgR : (0 : ℝ) < g := by exact_mod_cast hg1
+  have hlog : 17 ≤ Real.log g := by
+    have h1 : Real.log (33554432 : ℝ) = 25 * Real.log 2 := by
+      rw [show (33554432 : ℝ) = 2 ^ 25 by norm_num, Real.log_pow]
+      push_cast
+      ring
+    have h2 : Real.log (33554432 : ℝ) ≤ Real.log g :=
+      Real.log_le_log (by norm_num) (by exact_mod_cast hg)
+    have h3 : 0.693 < Real.log 2 := by linarith [Real.log_two_gt_d9]
+    linarith
+  have hstep : ∀ c ∈ range g,
+      ‖∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * ((β + c) / g))‖ ≤
+        ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖ + 1 := by
+    intro c _
+    have hsplit : (∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * ((β + c) / g)))
+        = (∑ d ∈ range g, eC (d * ((β + c) / g))) - eC (b * ((β + c) / g)) := by
+      rw [Finset.filter_ne', Finset.sum_erase_eq_sub (Finset.mem_range.2 hbg)]
+    rw [hsplit]
+    refine le_trans (norm_sub_le _ _) ?_
+    rw [norm_eC_w]
+  refine le_trans (Finset.sum_le_sum hstep) ?_
+  rw [Finset.sum_add_distrib, Finset.sum_const, Finset.card_range, nsmul_eq_mul, mul_one]
+  -- the geometric-sum part, with the two endpoints bounded crudely
+  set S : ℝ := Real.sin (π * β) / π with hS
+  have hs0 : 0 ≤ Real.sin (π * β) :=
+    Real.sin_nonneg_of_nonneg_of_le_pi (by positivity) (by nlinarith [Real.pi_pos])
+  have hS0 : 0 ≤ S := div_nonneg hs0 Real.pi_pos.le
+  have hg0 : (0 : ℝ) ≤ (g : ℝ) := by positivity
+  set Mid := ((range g).erase 0).erase (g - 1) with hMid
+  have hMem : ∀ c ∈ Mid, c ∈ range g := fun c hc =>
+    Finset.mem_of_mem_erase (Finset.mem_of_mem_erase hc)
+  have hmid_le : ∑ c ∈ Mid, ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖ ≤
+      ∑ c ∈ Mid, (S * g) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) := by
+    refine Finset.sum_le_sum (fun c hc => ?_)
+    have hcr : c ∈ range g := hMem c hc
+    have hc0 : c ≠ 0 := Finset.ne_of_mem_erase (Finset.mem_of_mem_erase hc)
+    have hcl : c ≠ g - 1 := Finset.ne_of_mem_erase hc
+    have hcg : c < g := Finset.mem_range.1 hcr
+    have hcpos : 0 < (c : ℝ) := by
+      have : 0 < c := Nat.pos_of_ne_zero hc0
+      exact_mod_cast this
+    have hclt : c < g - 1 := by
+      rcases lt_or_gt_of_ne hcl with h | h
+      · exact h
+      · omega
+    have hβc : 0 < (β : ℝ) + c := by linarith
+    have hβg : (β : ℝ) + c < (g : ℝ) := by
+      have hc2 : (c : ℝ) + 2 ≤ (g : ℝ) := by exact_mod_cast (show c + 2 ≤ g by omega)
+      linarith
+    have h1 := Gsum_w_shift_bound (g := g) (c := c) (β := β) (by omega) hcg hβc hβg hβ0 hβ1
+    rw [hS]
+    calc ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖
+        ≤ (Real.sin (π * β) / π) * ((g : ℝ) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c))) := h1
+      _ = (Real.sin (π * β) / π * g) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) := by ring
+  have hsub : ∑ c ∈ Mid, (S * g) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) ≤
+      ∑ c ∈ range g, (S * g) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) := by
+    refine Finset.sum_le_sum_of_subset_of_nonneg (by intro c hc; exact hMem c hc) ?_
+    intro c hc _
+    have hcg : c < g := Finset.mem_range.1 hc
+    have hcR1 : (c : ℝ) + 1 ≤ (g : ℝ) := by exact_mod_cast (show c + 1 ≤ g by omega)
+    have h1 : (0 : ℝ) ≤ (1 : ℝ) / (β + c) := div_nonneg zero_le_one (by positivity)
+    have h2 : (0 : ℝ) ≤ 1 / ((g : ℝ) - β - c) :=
+      div_nonneg zero_le_one (by linarith)
+    exact mul_nonneg (mul_nonneg hS0 hg0) (by linarith)
+  -- split the total sum into the two endpoints and the middle
+  have hmem0 : (0 : ℕ) ∈ range g := Finset.mem_range.2 (by omega)
+  have hmeml : g - 1 ∈ range g := Finset.mem_range.2 (by omega)
+  have htotal : ∑ c ∈ range g, ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖ ≤
+      2 * g + ∑ c ∈ range g, (S * g) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) := by
+    have hcrude : ∀ c : ℕ, ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖ ≤ g :=
+      fun c => Gsum_w_le g _
+    have hpair : ({0, g - 1} : Finset ℕ) ⊆ range g := by
+      intro c hc
+      simp only [Finset.mem_insert, Finset.mem_singleton] at hc
+      rcases hc with rfl | rfl
+      · exact Finset.mem_range.2 (by omega)
+      · exact Finset.mem_range.2 (by omega)
+    have hgl : ((g - 1 : ℕ) : ℝ) = (g : ℝ) - 1 := by
+      rw [Nat.cast_sub (by omega : 1 ≤ g)]
+      push_cast
+      ring
+    have hMidEq : (range g) \ ({0, g - 1} : Finset ℕ) = Mid := by
+      ext c
+      simp only [hMid, Finset.mem_sdiff, Finset.mem_erase, Finset.mem_range, Finset.mem_insert,
+        Finset.mem_singleton]
+      tauto
+    have hsd := Finset.sum_sdiff (s₁ := ({0, g - 1} : Finset ℕ)) (s₂ := range g) hpair
+      (f := fun c => ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖)
+    rw [hMidEq] at hsd
+    have hpairsum : ∑ x ∈ ({0, g - 1} : Finset ℕ),
+        ‖∑ d ∈ range g, eC (d * ((β + x) / g))‖ =
+        ‖∑ d ∈ range g, eC (d * ((β + 0) / g))‖ +
+          ‖∑ d ∈ range g, eC (d * ((β + (g - 1)) / g))‖ := by
+      have h0mem : (0 : ℕ) ∉ ({g - 1} : Finset ℕ) := by
+        simp only [Finset.mem_singleton]
+        intro h
+        omega
+      rw [Finset.sum_insert h0mem, Finset.sum_singleton]
+      simp only [Nat.cast_zero, add_zero, hgl]
+    rw [hpairsum] at hsd
+    have hb0 : ‖∑ d ∈ range g, eC (d * ((β + 0) / g))‖ ≤ (g : ℝ) := by
+      have h := hcrude 0
+      simpa using h
+    have hbl : ‖∑ d ∈ range g, eC (d * ((β + ((g : ℝ) - 1)) / g))‖ ≤ (g : ℝ) := by
+      have h := hcrude (g - 1)
+      rw [hgl] at h
+      exact h
+    linarith [hsd, hb0, hbl, hsub]
+  -- evaluate the sharp sum
+  have h1 : ∑ c ∈ range g, (1 : ℝ) / (β + c) ≤ 1 / β + 1 + Real.log g := sum_inv_shift_w hβ0
+  have h2 : ∑ c ∈ range g, 1 / ((g : ℝ) - β - c) ≤ 1 / (1 - β) + 1 + Real.log g :=
+    sum_inv_sub_shift_w hβ1
+  have hSg : 0 ≤ S * g := mul_nonneg hS0 hg0
+  have hb1 : ∑ c ∈ range g, (S * g) * ((1 : ℝ) / (β + c)) ≤
+      (S * g) * (1 / β + 1 + Real.log g) := by
+    rw [← Finset.mul_sum]
+    exact mul_le_mul_of_nonneg_left h1 hSg
+  have hb2 : ∑ c ∈ range g, (S * g) * (1 / ((g : ℝ) - β - c)) ≤
+      (S * g) * (1 / (1 - β) + 1 + Real.log g) := by
+    rw [← Finset.mul_sum]
+    exact mul_le_mul_of_nonneg_left h2 hSg
+  have hcpi : (1 : ℝ) / π ≤ 0.32 := by
+    rw [div_le_iff₀ Real.pi_pos]
+    nlinarith [Real.pi_gt_d4]
+  have hp1 : S * g * (1 / β) ≤ (g : ℝ) := by
+    rcases eq_or_lt_of_le hβ0 with hb | hb
+    · have hzero : S = 0 := by rw [hS, ← hb]; simp
+      rw [hzero]; simp
+    · have hSb : S * (1 / β) ≤ 1 := by
+        have hp : (0 : ℝ) < π * β := by positivity
+        have he : S * (1 / β) = Real.sin (π * β) / (π * β) := by
+          rw [hS]; field_simp
+        rw [he, div_le_iff₀ hp]
+        simpa only [one_mul] using Real.sin_le (show (0 : ℝ) ≤ π * β by positivity)
+      have h := mul_le_mul_of_nonneg_right hSb hg0
+      have e : S * g * (1 / β) = S * (1 / β) * g := by ring
+      rw [e]
+      simpa using h
+  have hp2 : S * g * (1 / (1 - β)) ≤ (g : ℝ) := by
+    rcases eq_or_lt_of_le hβ1 with hb | hb
+    · have hzero : S = 0 := by rw [hS, hb]; simp
+      rw [hzero]; simp
+    · have h1b : 0 < 1 - β := by linarith
+      have hSc : S * (1 / (1 - β)) ≤ 1 := by
+        have hp : (0 : ℝ) < π * (1 - β) := by positivity
+        have he : S * (1 / (1 - β)) = Real.sin (π * β) / (π * (1 - β)) := by
+          rw [hS]; field_simp
+        rw [he, div_le_iff₀ hp]
+        have e : Real.sin (π * β) = Real.sin (π * (1 - β)) := by
+          rw [show π * (1 - β) = π - π * β by ring, Real.sin_pi_sub]
+        rw [e]
+        simpa only [one_mul] using Real.sin_le (show (0 : ℝ) ≤ π * (1 - β) by positivity)
+      have h := mul_le_mul_of_nonneg_right hSc hg0
+      have e : S * g * (1 / (1 - β)) = S * (1 / (1 - β)) * g := by ring
+      rw [e]
+      simpa using h
+  have hp3 : S * g ≤ (1 / π) * g := by
+    have hSle : S ≤ 1 / π := by
+      rw [hS]
+      exact div_le_div_of_nonneg_right (Real.sin_le_one _) Real.pi_pos.le
+    nlinarith
+  have hp4 : S * g * Real.log g ≤ (1 / π) * g * Real.log g := by
+    have hSle : S ≤ 1 / π := by
+      rw [hS]
+      exact div_le_div_of_nonneg_right (Real.sin_le_one _) Real.pi_pos.le
+    have hl0 : (0 : ℝ) ≤ Real.log g := by linarith
+    nlinarith
+  have hgk : (S * g) * (1 / β + 1 + Real.log g) ≤ g + (1 / π) * g + (1 / π) * g * Real.log g := by
+    have e : (S * g) * (1 / β + 1 + Real.log g) =
+        S * g * (1 / β) + S * g + S * g * Real.log g := by ring
+    rw [e]
+    linarith [hp1, hp3, hp4]
+  have hgk2 : (S * g) * (1 / (1 - β) + 1 + Real.log g) ≤
+      g + (1 / π) * g + (1 / π) * g * Real.log g := by
+    have e : (S * g) * (1 / (1 - β) + 1 + Real.log g) =
+        S * g * (1 / (1 - β)) + S * g + S * g * Real.log g := by ring
+    rw [e]
+    linarith [hp2, hp3, hp4]
+  have hl0 : (0 : ℝ) ≤ Real.log g := by linarith
+  have key3 : 2 * g + ((g + (1 / π) * g + (1 / π) * g * Real.log g) +
+      (g + (1 / π) * g + (1 / π) * g * Real.log g)) ≤ (g : ℝ) * Real.log g := by
+    have e1 : (1 / π) * g ≤ 0.32 * g := mul_le_mul_of_nonneg_right hcpi hg0
+    have e2 : (1 / π) * g * Real.log g ≤ 0.32 * g * Real.log g := by
+      have h := mul_le_mul_of_nonneg_right hcpi (mul_nonneg hg0 hl0)
+      nlinarith [h]
+    nlinarith [e1, e2, hlog, hgR]
+  have hsplit5 : ∑ c ∈ range g, (S * g) * ((1 : ℝ) / (β + c) + 1 / ((g : ℝ) - β - c)) =
+      ∑ c ∈ range g, (S * g) * ((1 : ℝ) / (β + c)) +
+        ∑ c ∈ range g, (S * g) * (1 / ((g : ℝ) - β - c)) := by
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl (fun c _ => by ring)
+  have htot2 : ∑ c ∈ range g, ‖∑ d ∈ range g, eC (d * ((β + c) / g))‖ ≤
+      2 * g + (∑ c ∈ range g, (S * g) * ((1 : ℝ) / (β + c)) +
+        ∑ c ∈ range g, (S * g) * (1 / ((g : ℝ) - β - c))) := by
+    refine le_trans htotal ?_
+    rw [hsplit5]
+  linarith [htot2, hb1, hb2, hgk, hgk2, key3]
+
+/-! ### The digit recursion for the truncated missing-digit sum -/
+
+private theorem sum_range_mul_add (g q r : ℕ) (F : ℕ → ℂ) :
+    ∑ m ∈ range (g * q + r), F m =
+      ∑ y ∈ range q, ∑ x ∈ range g, F (x + g * y) + ∑ x ∈ range r, F (x + g * q) := by
+  rw [Finset.sum_range_add]
+  congr 1
+  · induction q with
+    | zero => simp
+    | succ q ih =>
+      rw [show g * (q + 1) = g * q + g by ring, Finset.sum_range_add, ih, Finset.sum_range_succ]
+      congr 1
+      exact Finset.sum_congr rfl fun x _ => by rw [add_comm]
+  · exact Finset.sum_congr rfl fun x _ => by rw [add_comm]
+
+/-- The digit recursion: `|E_N(α)| ≤ |f_{g,b}(α)| |E_{⌊N/g⌋}(gα)| + g`. -/
+private theorem norm_EN_le {g b : ℕ} (hg : 2 ≤ g) (hb : 1 ≤ b) (N : ℕ) (α : ℝ) :
+    ‖∑ m ∈ (range N).filter (NoDigit g b), eC (m * α)‖ ≤
+      ‖∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * α)‖ *
+        ‖∑ m ∈ (range (N / g)).filter (NoDigit g b), eC (m * (g * α))‖ + g := by
+  have hg0 : 0 < g := by omega
+  set q := N / g
+  set r := N % g
+  have hN : N = g * q + r := (Nat.div_add_mod N g).symm
+  have hr : r < g := Nat.mod_lt _ hg0
+  have key : ∀ y x : ℕ, x < g →
+      (if NoDigit g b (x + g * y) then eC (((x + g * y : ℕ) : ℝ) * α) else 0) =
+        (if x ≠ b then eC (x * α) else 0) *
+          (if NoDigit g b y then eC (y * (g * α)) else 0) := by
+    intro y x hx
+    have hiff := md_add_mul (y := y) hg hb hx
+    by_cases h1 : x = b
+    · have : ¬ NoDigit g b (x + g * y) := fun h => (hiff.1 h).1 h1
+      rw [if_neg this]; simp [h1]
+    · by_cases h2 : NoDigit g b y
+      · have : NoDigit g b (x + g * y) := hiff.2 ⟨h1, h2⟩
+        simp only [this, h1, h2, if_true, ne_eq, not_false_eq_true]
+        rw [← eC_add]; congr 1; push_cast; ring
+      · have : ¬ NoDigit g b (x + g * y) := fun h => h2 (hiff.1 h).2
+        simp [this, h2]
+  have hEN : (∑ m ∈ (range N).filter (NoDigit g b), eC (m * α)) =
+      (∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * α)) *
+          (∑ m ∈ (range q).filter (NoDigit g b), eC (m * (g * α))) +
+        ∑ x ∈ range r, (if NoDigit g b (x + g * q) then
+          eC (((x + g * q : ℕ) : ℝ) * α) else 0) := by
+    rw [Finset.sum_filter, Finset.sum_filter, Finset.sum_filter]
+    conv_lhs => rw [hN]
+    rw [sum_range_mul_add]
+    congr 1
+    rw [Finset.sum_mul_sum, Finset.sum_comm]
+    refine Finset.sum_congr rfl fun x hx => Finset.sum_congr rfl fun y _ => ?_
+    rw [key y x (Finset.mem_range.1 hx)]
+  rw [hEN]
+  refine le_trans (norm_add_le _ _) ?_
+  rw [norm_mul]
+  have hR : ‖∑ x ∈ range r, (if NoDigit g b (x + g * q) then
+      eC (((x + g * q : ℕ) : ℝ) * α) else 0)‖ ≤ g := by
+    refine le_trans (norm_sum_le _ _) ?_
+    have : ∀ x ∈ range r, ‖(if NoDigit g b (x + g * q) then
+        eC (((x + g * q : ℕ) : ℝ) * α) else 0)‖ ≤ 1 := by
+      intro x _
+      split_ifs
+      · rw [norm_eC_w]
+      · simp
+    refine le_trans (Finset.sum_le_sum this) ?_
+    simp only [Finset.sum_const, Finset.card_range, nsmul_eq_mul, mul_one]
+    exact_mod_cast hr.le
+  linarith
+
+/-- The change of variables `α = (β + c)/g` on the `g` subintervals of `[0,1]`:
+`∫_0^1 h(α) k(gα) dα ≤ D ∫_0^1 k` when `k ≥ 0` is `1`-periodic and
+`∑_{c<g} h((β+c)/g) ≤ g D` on `[0,1]`. -/
+private theorem integral_mul_comp_le {g : ℕ} (hg : 1 ≤ g) (h k : ℝ → ℝ) (hh : Continuous h)
+    (hk : Continuous k) (hk0 : ∀ x, 0 ≤ k x) (hkper : Function.Periodic k 1) {D : ℝ}
+    (hD : ∀ β ∈ Set.Icc (0 : ℝ) 1, ∑ c ∈ range g, h ((β + c) / g) ≤ g * D) :
+    ∫ α in (0 : ℝ)..1, h α * k (g * α) ≤ D * ∫ β in (0 : ℝ)..1, k β := by
+  have hgR : (1 : ℝ) ≤ g := by exact_mod_cast hg
+  have hgp : (0 : ℝ) < g := by linarith
+  set F : ℝ → ℝ := fun α => h α * k (g * α) with hFdef
+  have hF : Continuous F := by fun_prop
+  have hsplit : ∫ α in (0 : ℝ)..1, F α =
+      ∑ c ∈ range g, ∫ α in ((c : ℝ) / g)..(((c + 1 : ℕ) : ℝ) / g), F α := by
+    rw [intervalIntegral.sum_integral_adjacent_intervals
+      (a := fun c : ℕ => (c : ℝ) / g) (fun _ _ => hF.intervalIntegrable _ _)]
+    simp [hgp.ne']
+  have hpiece : ∀ c : ℕ, ∫ α in ((c : ℝ) / g)..(((c + 1 : ℕ) : ℝ) / g), F α =
+      (1 / (g : ℝ)) * ∫ β in (0 : ℝ)..1, h ((β + c) / g) * k β := by
+    intro c
+    have e1 : (fun β : ℝ => h ((β + c) / g) * k β) = fun β => F ((β + c) / g) := by
+      funext β
+      simp only [hFdef]
+      congr 1
+      rw [mul_div_cancel₀ _ hgp.ne']
+      have := hkper.nat_mul c β
+      simp only [mul_one] at this
+      rw [this]
+    rw [e1, intervalIntegral.integral_comp_add_right (fun y => F (y / g)),
+      intervalIntegral.integral_comp_div F hgp.ne']
+    rw [smul_eq_mul, ← mul_assoc, one_div_mul_cancel hgp.ne', one_mul]
+    push_cast; ring_nf
+  show ∫ α in (0 : ℝ)..1, F α ≤ _
+  rw [hsplit]
+  simp_rw [hpiece]
+  have hsum : ∑ c ∈ range g, ∫ β in (0 : ℝ)..1, h ((β + c) / g) * k β =
+      ∫ β in (0 : ℝ)..1, ∑ c ∈ range g, h ((β + c) / g) * k β := by
+    rw [intervalIntegral.integral_finsetSum]
+    intro c _
+    exact (by fun_prop : Continuous fun β => h ((β + c) / g) * k β).intervalIntegrable _ _
+  rw [← Finset.mul_sum, hsum]
+  simp_rw [← Finset.sum_mul]
+  have hmono : ∫ β in (0 : ℝ)..1, (∑ c ∈ range g, h ((β + c) / g)) * k β ≤
+      ∫ β in (0 : ℝ)..1, (g * D) * k β := by
+    apply intervalIntegral.integral_mono_on zero_le_one
+    · exact (by fun_prop : Continuous fun β => (∑ c ∈ range g, h ((β + c) / g)) * k β)
+        |>.intervalIntegrable _ _
+    · exact (by fun_prop : Continuous fun β => (g * D) * k β).intervalIntegrable _ _
+    · intro β hβ
+      exact mul_le_mul_of_nonneg_right (hD β hβ) (hk0 β)
+  rw [intervalIntegral.integral_const_mul] at hmono
+  calc 1 / (g : ℝ) * ∫ β in (0 : ℝ)..1, (∑ c ∈ range g, h ((β + c) / g)) * k β
+      ≤ 1 / (g : ℝ) * ((g * D) * ∫ β in (0 : ℝ)..1, k β) :=
+        mul_le_mul_of_nonneg_left hmono (by positivity)
+    _ = D * ∫ β in (0 : ℝ)..1, k β := by field_simp
+
+/-- One step of the recursion for `a(N) = ∫_0^1 |E_N|`: `a(N) ≤ (log g + 1) a(⌊N/g⌋) + g`. -/
+private theorem int_EN_step {g b : ℕ} (hg : 33554432 ≤ g) (hb : 1 ≤ b) (hbg : b < g) (N : ℕ) :
+    ∫ α in (0 : ℝ)..1, ‖∑ m ∈ (range N).filter (NoDigit g b), eC (m * α)‖ ≤
+      (Real.log g + 1) * (∫ α in (0 : ℝ)..1,
+        ‖∑ m ∈ (range (N / g)).filter (NoDigit g b), eC (m * α)‖) + g := by
+  have hg2 : 2 ≤ g := by omega
+  have hc1 : Continuous fun α => ‖∑ m ∈ (range N).filter (NoDigit g b), eC (m * α)‖ := by
+    have := continuous_eC; fun_prop
+  have hc2 : Continuous fun α =>
+      ‖∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * α)‖ *
+        ‖∑ m ∈ (range (N / g)).filter (NoDigit g b), eC (m * (g * α))‖ + g := by
+    have := continuous_eC; fun_prop
+  have hmono : ∫ α in (0 : ℝ)..1, ‖∑ m ∈ (range N).filter (NoDigit g b), eC (m * α)‖ ≤
+      ∫ α in (0 : ℝ)..1, (‖∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * α)‖ *
+        ‖∑ m ∈ (range (N / g)).filter (NoDigit g b), eC (m * (g * α))‖ + g) :=
+    intervalIntegral.integral_mono_on zero_le_one (hc1.intervalIntegrable _ _)
+      (hc2.intervalIntegrable _ _) (fun α _ => norm_EN_le hg2 hb N α)
+  have hc3 : Continuous fun α => ‖∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * α)‖ *
+      ‖∑ m ∈ (range (N / g)).filter (NoDigit g b), eC (m * (g * α))‖ := by
+    have := continuous_eC; fun_prop
+  rw [intervalIntegral.integral_add (hc3.intervalIntegrable _ _) intervalIntegrable_const,
+    intervalIntegral.integral_const, sub_zero, one_smul] at hmono
+  have hper : Function.Periodic (fun α => ‖∑ m ∈ (range (N / g)).filter (NoDigit g b),
+      eC (m * α)‖) 1 :=
+    periodic_norm_sum_eC _
+  have hcv := integral_mul_comp_le (g := g) (by omega)
+    (fun α => ‖∑ d ∈ (range g).filter (fun d => d ≠ b), eC (d * α)‖)
+    (fun α => ‖∑ m ∈ (range (N / g)).filter (NoDigit g b), eC (m * α)‖)
+    (by have := continuous_eC; fun_prop) (by have := continuous_eC; fun_prop)
+    (fun _ => norm_nonneg _) hper
+    (D := Real.log g + 1) (fun β hβ => digit_avg_le hg hbg hβ.1 hβ.2)
+  linarith
+
+private theorem int_EN_le {g b : ℕ} (hg : 33554432 ≤ g) (hb : 1 ≤ b) (hbg : b < g) :
+    ∀ j N : ℕ, N < g ^ j →
+      ∫ α in (0 : ℝ)..1, ‖∑ m ∈ (range N).filter (NoDigit g b), eC (m * α)‖ ≤
+        2 * g * (Real.log g + 1) ^ j - g := by
+  have hg2 : 2 ≤ g := by omega
+  have hgR : (2 : ℝ) ≤ g := by exact_mod_cast hg2
+  have hL : 0 ≤ Real.log g := Real.log_nonneg (by linarith)
+  have hlog : 17 ≤ Real.log g := by
+    have h1 : Real.log (33554432 : ℝ) = 25 * Real.log 2 := by
+      rw [show (33554432 : ℝ) = 2 ^ 25 by norm_num, Real.log_pow]
+      push_cast
+      ring
+    have h2 : Real.log (33554432 : ℝ) ≤ Real.log g :=
+      Real.log_le_log (by norm_num) (by exact_mod_cast hg)
+    have h3 : 0.693 < Real.log 2 := by linarith [Real.log_two_gt_d9]
+    linarith
+  intro j
+  induction j with
+  | zero =>
+    intro N hN
+    have : N = 0 := by simpa using hN
+    subst this
+    simp
+    linarith
+  | succ j ih =>
+    intro N hN
+    have hq : N / g < g ^ j := by
+      rw [Nat.div_lt_iff_lt_mul (by omega)]; rwa [← pow_succ]
+    have h1 := int_EN_step hg hb hbg N
+    have h2 := ih _ hq
+    have hD : 2 ≤ Real.log g + 1 := by linarith [hlog]
+    have hDj : 0 ≤ (Real.log g + 1) ^ j := by positivity
+    have h3 : (Real.log g + 1) * (∫ α in (0 : ℝ)..1,
+        ‖∑ m ∈ (range (N / g)).filter (NoDigit g b), eC (m * α)‖) ≤
+        (Real.log g + 1) * (2 * g * (Real.log g + 1) ^ j - g) :=
+      mul_le_mul_of_nonneg_left h2 (by linarith)
+    rw [pow_succ]
+    have hDj : (0 : ℝ) ≤ (Real.log g + 1) ^ j := by positivity
+    have hgg : (0 : ℝ) ≤ (g : ℝ) := by positivity
+    nlinarith [h1, h3, hDj, hgg]
+
+/-! ### From `starSet` to the truncated sum -/
+
+private theorem starSet_eq_map {g b k : ℕ} (hg : 2 ≤ g) (hb : 2 ≤ b) {H : ℝ}
+    (hHX : ⌊H⌋₊ < g ^ k) :
+    starSet g b (g ^ k) H =
+      ((Ioc 0 ⌊H⌋₊).filter (NoDigit g b)).map (addLeftEmbedding (g ^ k)) := by
+  have hS : ∀ m, m ≤ ⌊H⌋₊ → (NoDigit g b (g ^ k + m) ↔ NoDigit g b m) :=
+    fun m hm => md_pow_add hg hb k m (by omega)
+  ext n
+  simp only [starSet, Finset.mem_filter, Finset.mem_Ioc, Finset.mem_map, addLeftEmbedding_apply]
+  constructor
+  · rintro ⟨⟨h1, h2⟩, h3⟩
+    refine ⟨n - g ^ k, ⟨⟨by omega, by omega⟩, ?_⟩, by omega⟩
+    rw [← hS _ (by omega), show g ^ k + (n - g ^ k) = n by omega]; exact h3
+  · rintro ⟨m, ⟨⟨h1, h2⟩, h3⟩, rfl⟩
+    exact ⟨⟨by omega, by omega⟩, (hS m h2).2 h3⟩
+
+private theorem EN_succ_eq (g b M : ℕ) (α : ℝ) :
+    (∑ m ∈ (range (M + 1)).filter (NoDigit g b), eC (m * α)) =
+      1 + ∑ m ∈ (Ioc 0 M).filter (NoDigit g b), eC (m * α) := by
+  have e2 : (Finset.range (M + 1)).filter (NoDigit g b) =
+      insert 0 ((Finset.Ioc 0 M).filter (NoDigit g b)) := by
+    ext n
+    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_insert, Finset.mem_Ioc]
+    constructor
+    · rintro ⟨h1, h2⟩
+      rcases Nat.eq_zero_or_pos n with rfl | hp
+      · exact Or.inl rfl
+      · exact Or.inr ⟨⟨hp, by omega⟩, h2⟩
+    · rintro (rfl | ⟨⟨h1, h2⟩, h3⟩)
+      · exact ⟨by omega, md_zero g b⟩
+      · exact ⟨by omega, h3⟩
+  have h0 : ¬ (0 : ℕ) ∈ (Ioc 0 M).filter (NoDigit g b) := by
+    simp only [Finset.mem_filter, Finset.mem_Ioc]; omega
+  rw [e2, Finset.sum_insert h0]
+  have := eC_int 0
+  push_cast at this
+  simp [this]
+
+private theorem norm_sum_starSet_le {g b k : ℕ} (hg : 2 ≤ g) (hb : 2 ≤ b) {H : ℝ}
+    (hHX : ⌊H⌋₊ < g ^ k) (α : ℝ) :
+    ‖∑ n ∈ starSet g b (g ^ k) H, eC (n * α)‖ ≤
+      ‖∑ m ∈ (range (⌊H⌋₊ + 1)).filter (NoDigit g b), eC (m * α)‖ + 1 := by
+  rw [starSet_eq_map hg hb hHX, Finset.sum_map]
+  simp only [addLeftEmbedding_apply]
+  have e : ∀ m : ℕ, eC (((g ^ k + m : ℕ) : ℝ) * α) =
+      eC (((g ^ k : ℕ) : ℝ) * α) * eC (m * α) := by
+    intro m; rw [← eC_add]; congr 1; push_cast; ring
+  simp_rw [e]
+  rw [← Finset.mul_sum, norm_mul, norm_eC_w, one_mul]
+  have h := EN_succ_eq g b ⌊H⌋₊ α
+  have : ∑ m ∈ (Ioc 0 ⌊H⌋₊).filter (NoDigit g b), eC (m * α) =
+      (∑ m ∈ (range (⌊H⌋₊ + 1)).filter (NoDigit g b), eC (m * α)) - 1 := by
+    rw [h]; ring
+  rw [this]
+  refine le_trans (norm_sub_le _ _) ?_
+  simp
+
+/-! ### Assembly: Kim's Lemma 1.7 with the exponent `thetaG` -/
+
+private theorem lemma_1_7_wip : ∃ g₀ : ℕ, ∀ g b : ℕ, g₀ ≤ g → 2 ≤ b → b ≤ g - 1 → ∃ C : ℝ,
+    ∀ (k : ℕ) (H : ℝ), 1 ≤ H → H < ((g ^ k : ℕ) : ℝ) →
+      ∫ α in (0 : ℝ)..1, ‖∑ n ∈ starSet g b (g ^ k) H, eC (n * α)‖ ≤
+        C * ((starSet g b (g ^ k) H).card : ℝ) ^ thetaG g := by
+  refine ⟨33554432, fun g b hg hb hbg => ?_⟩
+  have hg3 : 3 ≤ g := by omega
+  have hkg : 1 ≤ g := by omega
+  have hgR3 : (3 : ℝ) ≤ (g : ℝ) := by exact_mod_cast hg3
+  set D : ℝ := Real.log g + 1 with hD
+  have hL : 0 < Real.log g := Real.log_pos (by linarith)
+  have hD1 : 1 ≤ D := by rw [hD]; linarith
+  refine ⟨2 * g * D ^ 2 + 1, fun k H hH1 hHX => ?_⟩
+  set M := ⌊H⌋₊ with hM
+  have hMk : M < g ^ k := (Nat.floor_lt (by linarith)).2 hHX
+  set j := Nat.log g M with hj
+  have hMj : M < g ^ (j + 1) := Nat.lt_pow_succ_log_self (by omega) M
+  have hMj2 : M + 1 < g ^ (j + 2) := by
+    have : g ^ (j + 1) < g ^ (j + 2) := Nat.pow_lt_pow_right (by omega) (by omega)
+    omega
+  have hc1 : Continuous fun α => ‖∑ n ∈ starSet g b (g ^ k) H, eC (n * α)‖ := by
+    have := continuous_eC
+    fun_prop
+  have hc2 : Continuous fun α => ‖∑ m ∈ (range (M + 1)).filter (NoDigit g b), eC (m * α)‖ + 1 := by
+    have := continuous_eC
+    fun_prop
+  have hint : ∫ α in (0 : ℝ)..1, ‖∑ n ∈ starSet g b (g ^ k) H, eC (n * α)‖ ≤
+      2 * g * D ^ (j + 2) - g + 1 := by
+    refine le_trans (intervalIntegral.integral_mono_on zero_le_one (hc1.intervalIntegrable _ _)
+      (hc2.intervalIntegrable _ _) (fun α _ => norm_sum_starSet_le (by omega) hb hMk α)) ?_
+    rw [intervalIntegral.integral_add
+      ((by have := continuous_eC; fun_prop : Continuous fun α =>
+        ‖∑ m ∈ (range (M + 1)).filter (NoDigit g b), eC (m * α)‖).intervalIntegrable _ _)
+      intervalIntegrable_const, intervalIntegral.integral_const, sub_zero, one_smul]
+    have hb2 := int_EN_le (g := g) (b := b) hg (by omega) (by omega) (j + 2) (M + 1) hMj2
+    rw [hD]
+    linarith
+  set N : ℝ := ((starSet g b (g ^ k) H).card : ℝ) with hNdef
+  have hcard := card_starSet_ge (by omega) hb (by omega) hH1 hHX
+  have hNj : ((g : ℝ) - 1) ^ j ≤ N := by
+    have : (((g - 1) ^ j : ℕ) : ℝ) ≤ N := by rw [hNdef]; exact_mod_cast hcard
+    push_cast [show 1 ≤ g by omega] at this
+    exact this
+  have hN1 : 1 ≤ N := le_trans (one_le_pow₀ (by linarith : (1 : ℝ) ≤ (g : ℝ) - 1)) hNj
+  have hNp : 0 < N := by linarith
+  have hgm : (0 : ℝ) < (g : ℝ) - 1 := by linarith
+  have hLm : 0 < Real.log ((g : ℝ) - 1) := Real.log_pos (by linarith)
+  have hθD : thetaG g = Real.log D / Real.log ((g : ℝ) - 1) := by
+    unfold thetaG
+    rw [← hD]
+  have hθ0 : 0 ≤ thetaG g := by
+    rw [hθD]
+    exact div_nonneg (Real.log_nonneg hD1) hLm.le
+  have hbase : ((g : ℝ) - 1) ^ thetaG g = D := by
+    rw [Real.rpow_def_of_pos hgm, hθD, mul_div_cancel₀ _ hLm.ne', Real.exp_log (by linarith)]
+  have hDj : D ^ j ≤ N ^ thetaG g := by
+    calc D ^ j = (((g : ℝ) - 1) ^ thetaG g) ^ j := by rw [hbase]
+      _ = (((g : ℝ) - 1) ^ j) ^ thetaG g := by
+          rw [← Real.rpow_natCast, ← Real.rpow_mul hgm.le, mul_comm,
+            Real.rpow_mul hgm.le, Real.rpow_natCast]
+      _ ≤ N ^ thetaG g := Real.rpow_le_rpow (by positivity) hNj hθ0
+  have hgj : 0 ≤ (g : ℝ) := by linarith
+  have hD2 : 0 ≤ 2 * g * D ^ 2 := by positivity
+  calc ∫ α in (0 : ℝ)..1, ‖∑ n ∈ starSet g b (g ^ k) H, eC (n * α)‖
+      ≤ 2 * g * D ^ (j + 2) - g + 1 := hint
+    _ ≤ (2 * g * D ^ 2 + 1) * D ^ j := by
+        rw [pow_add]
+        have hDj1 : 1 ≤ D ^ j := one_le_pow₀ hD1
+        nlinarith [hDj1, hgj, hD2, pow_pos (by linarith : (0:ℝ) < D) j]
+    _ ≤ (2 * g * D ^ 2 + 1) * N ^ thetaG g :=
+        mul_le_mul_of_nonneg_left hDj (by positivity)
+
 /-- LEAF: Kim, Lemma 1.7, page 5: for `g` sufficiently large,
 `∫_{[0,1]} |F_{[X,X+H]}(α)| dα ≪ |[X,X+H]^*|^{-1 + log((log g)+1)/log(g-1)}`, with
 `F_{[X,X+H]}(α) = |[X,X+H]^*|^{-1} ∑_{n ∈ [X,X+H]^*} e(nα)`. Multiplied through by
@@ -358,8 +1159,8 @@ setting of Sections 1 and 2. -/
 theorem lemma_1_7 : ∃ g₀ : ℕ, ∀ g b : ℕ, g₀ ≤ g → 2 ≤ b → b ≤ g - 1 → ∃ C : ℝ,
     ∀ (k : ℕ) (H : ℝ), 1 ≤ H → H < ((g ^ k : ℕ) : ℝ) →
       ∫ α in (0 : ℝ)..1, ‖∑ n ∈ starSet g b (g ^ k) H, eC (n * α)‖ ≤
-        C * ((starSet g b (g ^ k) H).card : ℝ) ^ thetaG g := by
-  sorry
+        C * ((starSet g b (g ^ k) H).card : ℝ) ^ thetaG g :=
+  lemma_1_7_wip
 
 /-- LEAF: Kim, Proposition 3.5, page 13: for `α ∈ 𝔪`, `S♯₄(α; H) ≪ δH`, with
 `δ = X^{-ε}` and `X^{3/5+ε} ≤ H ≤ X^{1-ε}` as in Section 2. It combines Lemma 3.3, which is

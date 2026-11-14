@@ -1,4 +1,5 @@
 import LeanLab.LanguascoPerelli1996.Window422
+import LeanLab.LanguascoPerelli1996.Decomp545a
 
 /-!
 P0071 pages 355 through 359. Separate the three actual Gallagher regions.
@@ -22,7 +23,7 @@ theorem leading_window_bound :
             ∀ L : ℕ, 0 < L → 1 / (4 * (L : ℝ)) ≤ ξ X q →
               ξ X q ≤ 1 / (2 * (L : ℝ)) →
                 Window422.leadingMass X Y q a L ≤ B * L * X ^ (1 + ε) := by
-  sorry
+  exact Decomp545a.leading_window_bound_decomposed
 
 /-- LEAF. Pages 356 and 357 displays 15 and 16, the interior integral I2.
 Derived discrete window estimate for the stopped remainder in page 358 display 21.
@@ -37,7 +38,7 @@ theorem interior_window_bound :
             ∀ L : ℕ, 0 < L → 1 / (4 * (L : ℝ)) ≤ ξ X q →
               ξ X q ≤ 1 / (2 * (L : ℝ)) →
                 Window422.interiorMass X Y q a L ≤ B * L * X ^ (1 + ε) := by
-  sorry
+  exact Decomp545a.interior_window_bound_decomposed
 
 /-- LEAF. Page 357 displays 17 through 19, the trailing integral I3.
 Derived discrete window estimate for the stopped remainder in page 358 display 21.
@@ -52,7 +53,7 @@ theorem trailing_window_bound :
             ∀ L : ℕ, 0 < L → 1 / (4 * (L : ℝ)) ≤ ξ X q →
               ξ X q ≤ 1 / (2 * (L : ℝ)) →
                 Window422.trailingMass X Y q a L ≤ B * L * X ^ (1 + ε) := by
-  sorry
+  exact Decomp545a.trailing_window_bound_decomposed
 
 /-- Pages 358 and 359 displays 21 through 24, assembled from the three
 strictly smaller window estimates and the proved discrete Gallagher transfer.
