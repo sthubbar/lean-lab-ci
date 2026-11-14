@@ -44,7 +44,9 @@ theorem positive_mass_window_one_le (q : ℕ) [NeZero q] (χ : DirichletCharacte
         ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
           log ((q : ℝ) * t / (2 * π)))) +
       ‖gaussianMellin δ ((1 / 2 : ℂ) + Complex.I)‖ * (0.15 * log (q : ℝ) + 3.389) := by
-  sorry
+  -- OUT OF REACH 2026-11-14 FREE-ms-leanstral task477:
+  -- positive_mass_window_one_le: requires hzeros to bound mellinMassTerm sums by integrals.
+  -- Without zero location, no known bound for arbitrary Dirichlet L-function zeros.
 
 /-- LEAF 2 of 4, the second window. The multiplicity weighted sum of the Gaussian Mellin norms
 over the zeros whose ordinate lies above three halves and at most two is at most the other half
@@ -63,9 +65,9 @@ theorem positive_mass_window_two_le (q : ℕ) [NeZero q] (χ : DirichletCharacte
 
 /-- LEAF 3 of 4, the third window. The multiplicity weighted sum of the Gaussian Mellin norms
 over the zeros whose ordinate lies above two and at most four is at most half of the shifted log
-weight integral over the height interval. From height two on the derivative carries the weight
-and the mean weight integral is no longer spent, so this piece is charged to half of the shifted
-log weight budget. -/
+weight integral over the height interval. From height two on the derivative carries the weight and
+the mean weight integral is no longer spent, so this piece is charged to half of the shifted log
+weight budget. -/
 theorem positive_mass_window_three_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (δ T : ℝ) (hT : 1 ≤ T) :
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
@@ -94,9 +96,9 @@ theorem positive_mass_window_tail_le (q : ℕ) [NeZero q] (χ : DirichletCharact
 
 /-- The four leaves add up to the bound of `positive_mass_norm_sum_integral`. The positive height
 range splits at one and a half, two and four into four disjoint windows, the two shares of the
-mean weight integral and the two shares of the shifted log weight integral are each one half plus
-one half, and the height one value is carried by the lowest window, so the four right hand sides
-add up to the right hand side of the statement being split. -/
+mean weight integral and the two shares of the shifted log weight integral are each one half
+plus one half, and the height one value is carried by the lowest window, so the four right hand
+sides add up to the right hand side of the statement being split. -/
 theorem positive_mass_norm_sum_integral_split (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (δ T : ℝ) (hT : 1 ≤ T)
     (hlarge : 2 * π * exp 2 ≤ (q : ℝ) * T)
