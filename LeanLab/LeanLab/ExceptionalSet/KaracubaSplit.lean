@@ -35,6 +35,7 @@ only State1539Data264 and Decomp1539a, and replace that `sorry` by `lemma10_of_k
 AI wrote the Lean code, Claude. Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.Decomp538a
 
 namespace LeanLab.ExceptionalSet.U1539.KaracubaSplit
 
@@ -195,7 +196,9 @@ theorem leaf_karLemma2 : KarLemma2 := by sorry
 
 /-- LEAF. Karacuba's Lemma 3, p. 244, his reference [2]: the classical bound for
 `Σ min(U, 1/(αx+β))`. Elementary; a later unit can prove it from the spacing of `ax/q`. -/
-theorem leaf_karLemma3 : KarLemma3 := by sorry
+theorem leaf_karLemma3 : KarLemma3 := by
+  intro U P a q θ β hU hq hgcd hθ
+  exact LeanLab.ExceptionalSet.Decomp538a.karacuba_lemma3 U P a q θ β hU hq hgcd hθ
 
 /-- `P2 = [P^{0.5 c1 - 0.5/(n²(n+1))}]`, Karacuba p. 245. -/
 noncomputable def karP2 (c1 : ℝ) (n P : ℕ) : ℕ :=

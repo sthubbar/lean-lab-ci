@@ -1,0 +1,85 @@
+{
+  "main": "e0209916a6dfaa15de6b095001432dc8476a0e7d",
+  "entries": [
+    {
+      "path": "LeanLab/LeanLab/BHP1997/Decomp312c.lean",
+      "sha": "c38fb19872cd1b674b07e42b7beb9ba43c7de818",
+      "remote_sha": "c38fb19872cd1b674b07e42b7beb9ba43c7de818"
+    },
+    {
+      "path": "LeanLab/LeanLab/BHP1997/Repair499Euler.lean",
+      "sha": "db0b3ec7b0648634aa443e85094fe4403070235a",
+      "remote_sha": "db0b3ec7b0648634aa443e85094fe4403070235a"
+    },
+    {
+      "path": "LeanLab/LeanLab/BHP1997/SieveConditionsC165.lean",
+      "sha": "56e35d48773783ba21a77d914f2aac65f317e95b",
+      "remote_sha": "56e35d48773783ba21a77d914f2aac65f317e95b"
+    },
+    {
+      "path": "LeanLab/LeanLab/BHP1997/Sifted312.lean",
+      "sha": "1ef5878527e8422219c6f358f1ad3125b33625c4",
+      "remote_sha": "1ef5878527e8422219c6f358f1ad3125b33625c4"
+    },
+    {
+      "path": "LeanLab/LeanLab/BHP1997/Thm2Statement.lean",
+      "sha": "dfc42dad7c489f09c33d09eae03bd0e4995ec36c",
+      "remote_sha": "dfc42dad7c489f09c33d09eae03bd0e4995ec36c"
+    },
+    {
+      "path": "LeanLab/LeanLab/BHP1997/Thm4Exponents.lean",
+      "sha": "14aec98b1172687da18e1e559f90f51055a65ada",
+      "remote_sha": "14aec98b1172687da18e1e559f90f51055a65ada"
+    },
+    {
+      "path": "LeanLab/LeanLab/BHP1997/Thm4Statement.lean",
+      "sha": "eccbf9b5f351b8ec23721a1b5b3f1b6756d3dd7c",
+      "remote_sha": "eccbf9b5f351b8ec23721a1b5b3f1b6756d3dd7c"
+    },
+    {
+      "path": "LeanLab/LeanLab/PNTPort/ExplicitPsi1/Merom.lean",
+      "sha": "bfc210991860444685960e6846c2a46a3bd4ad78",
+      "remote_sha": "bfc210991860444685960e6846c2a46a3bd4ad78"
+    },
+    {
+      "path": "LeanLab/LeanLab/PNTPort/ExplicitPsi1/Residues.lean",
+      "sha": "ae7ad532e20f235c888f0cc6e0f109465f168564",
+      "remote_sha": "ae7ad532e20f235c888f0cc6e0f109465f168564"
+    },
+    {
+      "path": "LeanLab/LeanLab/PNTPort/StrongPNT/Rectangle.lean",
+      "sha": "00ef8d3fa6ce908ea18cf17983e58a49fe614ed1",
+      "remote_sha": "00ef8d3fa6ce908ea18cf17983e58a49fe614ed1"
+    },
+    {
+      "path": "LeanLab/LeanLab/PNTPort/StrongPNT/ResidueCalcOnRectangles.lean",
+      "sha": "77983684f9311fe5f6434ee86a5bb3b9ce9157b8",
+      "remote_sha": "77983684f9311fe5f6434ee86a5bb3b9ce9157b8"
+    },
+    {
+      "path": "LeanLab/LeanLab/PNTPort/StrongPNT/Tactic/AdditiveCombination.lean",
+      "sha": "605e13375c4284d77fc87bd17550f2035edd2276",
+      "remote_sha": "605e13375c4284d77fc87bd17550f2035edd2276"
+    },
+    {
+      "path": "LeanLab/LeanLab/PNTPort/StrongPNT/Tactic/LinearCombinationPrime.lean",
+      "sha": "48c9f4d999f2502c2e0d185139593cfbe09d9b69",
+      "remote_sha": "48c9f4d999f2502c2e0d185139593cfbe09d9b69"
+    },
+    {
+      "path": "LeanLab/lean-toolchain",
+      "sha": "a6aff065db2882c535684f8c5bcd4f16e9a23915",
+      "remote_sha": "a6aff065db2882c535684f8c5bcd4f16e9a23915"
+    },
+    {
+      "path": "LeanLab/lakefile.toml",
+      "sha": "8b692d1b5a9d1dea03b57513ee0721c1284984d5",
+      "remote_sha": "8b692d1b5a9d1dea03b57513ee0721c1284984d5"
+    },
+    {
+      "path": "LeanLab/lake-manifest.json",
+      "sha": "c56dda7649440b7e1c3c80427e3b3b6dd59dc5d9",
+      "remote_sha": "c56dda7649440b7e1c3c80427e3b3b6dd59dc5d9"
+    }
+  ]
+}

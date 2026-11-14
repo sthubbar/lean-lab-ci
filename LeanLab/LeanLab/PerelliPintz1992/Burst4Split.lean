@@ -20,6 +20,12 @@ split into the paper's own top-level structure:
 
 AI wrote this Lean code. Binary Goldbach is OPEN.
 -/
+/-
+Status CODEX task544, 2026-11-14. The two original estimate statements and their
+assemblies moved to Decomp544 with identical names and statement text.
+The clamping definitions and their proved comparisons remain here.
+Import Decomp544 to use the moved reduction and assembly declarations.
+-/
 import LeanLab.PerelliPintz1992.MainAssembly
 import LeanLab.PerelliPintz1992.Decomp1624
 
@@ -30,32 +36,7 @@ open LeanLab.PerelliPintz1992 LeanLab.PerelliPintz1992.Decomp97 LeanLab.PerelliP
 noncomputable section
 attribute [local instance] Classical.propDecidable
 
-/-! ### The leaves -/
-
-/-- LEAF, Section 4, pp. 359 to 362, displays 8 to 20: the major arcs estimate 6, p. 359,
-`Σ_{k=V}^{V+H} |∫_𝔐 |S(α)|² e(-2kα) dα - 𝔖(2k)(N-2k)|² ≪ H N² L^{-A}` with `H = N^{1/2+ε}`,
-for block starts `V < N/2`, as the paper's sentence "clearly sufficient to prove the case
-`H = N^{1/2+ε}`", p. 358, uses it; see QUESTION Q-P0070-7 part iii. The proof in the paper:
-display 8 splits 𝔐 into arcs, display 9 the integral of `|T|²`, displays 13 to 17 the bound on
-`R` by Siegel and Walfisz, displays 19 and 20 the singular series with Shiu's Theorem 2.
-`Decomp1519.estimate6_explicit` already proves the explicit form; the Siegel and Walfisz input
-and the Shiu input with the asymptotic count remain. -/
-theorem major_arcs_estimate6 : Estimate6Wide := by
-  sorry
-
-/-- LEAF, Section 5, pp. 363 and 364, displays 22 to 27: the Farey dissection of 𝔪 and
-Gallagher's lemma, P. X. Gallagher, Invent. Math. 11, 1970, pp. 329 to 339, reduce the window
-integral in 7 to the character expression of 27, here in the averaged form `energyA` of
-`Decomp1624`. This is `Decomp1624.reduction27A` read for every real centre ξ, which 7 needs
-since 𝔪 ⊆ (1/Q, 1 + 1/Q] reaches past 1, QUESTION Q-P0070-7 part ii; the paper's argument is
-pointwise in ξ, and the Farey arc of 1/1 has radius 1/Q, so the same proof reads for ξ ∈ ℝ. -/
-theorem reduction27A_wide :
-    ∃ ε₁ : ℝ, 0 < ε₁ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∀ A : ℝ, 0 < A →
-      ∃ C c N₀ : ℝ, 0 < C ∧ 0 < c ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ, ∀ E : ℝ, 0 ≤ E →
-        (∀ M : ℕ, 1 ≤ M → (M : ℝ) ≤ Q N → energyA N ε ξ M ≤ E) →
-        (∫ α in Ioo (ξ - 1 / H N ε) (ξ + 1 / H N ε) ∩ minorArcs N A,
-          ‖S N α‖ ^ 2) ≤ C * N * (L N ^ c * E + L N ^ (-(A + 1))) := by
-  sorry
+/-! ### The retained clamping data -/
 
 /-! ### Glue, proved -/
 
@@ -116,54 +97,10 @@ theorem energyA_le_clamp {N : ℕ} (hN : 1 ≤ N) (ε ξ : ℝ) (M : ℕ) :
   exact Finset.sum_le_sum_of_subset_of_nonneg (Y_subset_clamp hN ε ξ M)
     (fun q _ _ => sq_nonneg _)
 
-/-- 7 for every real centre, `Estimate7Wide`, from the two Section 5 and 6 leaves.
-CONDITIONAL ON `reduction27A_wide` and `Decomp1624.energy_decayA`. -/
-theorem estimate7Wide_of_split : Estimate7Wide := by
-  obtain ⟨ε₁, hε₁, hred⟩ := reduction27A_wide
-  refine ⟨min ε₁ (1 / 12), lt_min hε₁ (by norm_num), ?_⟩
-  intro ε hε hεsmall A hA
-  have hεred : ε < ε₁ := lt_of_lt_of_le hεsmall (min_le_left _ _)
-  have hεden : ε < 1 / 12 := lt_of_lt_of_le hεsmall (min_le_right _ _)
-  obtain ⟨C, c, N₀, hC, hc, hbound⟩ := hred ε hε hεred A hA
-  obtain ⟨K, N₁, hK, hdecay⟩ := energy_decayA ε hε hεden (A + 1 + c) (by linarith)
-  refine ⟨C * (K + 1), max (max N₀ N₁) 2, ?_⟩
-  intro N hN ξ
-  have hN₀ : N₀ ≤ N := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hN
-  have hN₁ : N₁ ≤ N := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hN
-  have hN₂ : 2 ≤ N := by exact_mod_cast (le_trans (le_max_right _ _) hN : (2 : ℝ) ≤ N)
-  have hL := L_pos hN₂
-  have hξ0 : 0 ≤ clamp01 ξ := le_max_left _ _
-  have hξ1 : clamp01 ξ ≤ 1 := max_le zero_le_one (min_le_right _ _)
-  have hE : ∀ M : ℕ, 1 ≤ M → (M : ℝ) ≤ Q N →
-      energyA N ε ξ M ≤ K * L N ^ (-(A + 1 + c)) := fun M hM1 hM2 =>
-    (energyA_le_clamp (by omega) ε ξ M).trans (hdecay N hN₁ (clamp01 ξ) hξ0 hξ1 M hM1 hM2)
-  have he := hbound N hN₀ ξ (K * L N ^ (-(A + 1 + c))) (by positivity) hE
-  have hprod : L N ^ c * (K * L N ^ (-(A + 1 + c))) = K * L N ^ (-(A + 1)) := by
-    calc
-      _ = K * (L N ^ c * L N ^ (-(A + 1 + c))) := by ring
-      _ = _ := by rw [← Real.rpow_add hL]; congr 2; ring
-  change (∫ α in Ioo (ξ - 1 / H N ε) (ξ + 1 / H N ε) ∩ minorArcs N A,
-    ‖S N α‖ ^ 2) ≤ _
-  calc
-    _ ≤ C * N * (L N ^ c * (K * L N ^ (-(A + 1 + c))) + L N ^ (-(A + 1))) := he
-    _ = (C * (K + 1)) * N / L N ^ (A + 1) := by
-      rw [hprod, Real.rpow_neg hL.le]
-      ring
-
-/-! ### The assembly -/
-
-/-- **Perelli and Pintz 1992, the Theorem, p. 356**, same type as `perelliPintz`, from the split:
-Section 2 by `mainTheorem_of_wide`, Section 4 by `major_arcs_estimate6`, Sections 5 and 6 by
-`estimate7Wide_of_split`. CONDITIONAL ON the three analytic leaves. No sorry in this proof. -/
-theorem perelliPintz_of_split : MainTheorem :=
-  mainTheorem_of_wide major_arcs_estimate6 estimate7Wide_of_split
-
 example : MainTheorem := perelliPintz
-#check (perelliPintz_of_split : MainTheorem)
 
 #print axioms Y_subset_clamp
 #print axioms energyA_le_clamp
-#print axioms perelliPintz_of_split
 
 end
 end LeanLab.PerelliPintz1992.Burst4Split

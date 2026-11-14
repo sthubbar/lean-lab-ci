@@ -1,0 +1,48 @@
+{
+  "declarations": 78,
+  "data": 12,
+  "proved": 59,
+  "conditional": 6,
+  "open_leaf": 1,
+  "sorry_delta": 1,
+  "original_active_modules": 214,
+  "fresh_main_shell_fetch": "succeeded again at 07:51 UTC after temporary authentication failure",
+  "remote_dependencies_changed_in_checked_main_comparison": [],
+  "statuses": {
+    "CONDITIONAL": 6,
+    "OPEN LEAF": 1,
+    "PROVED": 59,
+    "BUILT DATA": 12
+  },
+  "current_active_modules": 228,
+  "audit_independent_modules": 182,
+  "audit_cold_dependent_modules": 40,
+  "source_file_blobs": {
+    "Decomp528a.lean": "cb231f9500aaec1fdf6c4ea13069f3b0b2b07a43",
+    "Decomp528b.lean": "c46c0960107c1eaebf3417ac776612817b9e1135",
+    "Decomp528c.lean": "a67ad40320da2f4ec68b0ecd16e2445bd5e88c80",
+    "Decomp528d.lean": "3345673a0f10cee21df46cb67386fef0a415181c",
+    "Decomp528e.lean": "0ba1c612962919c11da6c394ae8cc52632c05c40",
+    "Decomp528f.lean": "866adf658165b38e7bbbe6f14c103b69ff337634"
+  },
+  "folder_audit": {
+    "passed": 160,
+    "active": 228,
+    "without_completed_request": 68,
+    "time_cap_nonzero_requests": 1,
+    "initial_assembly_interrupted": true
+  },
+  "model": {
+    "runtime_identity": "Codex based on GPT-6",
+    "exact_identifier": null,
+    "effort": null,
+    "environment_metadata_keys": "unset"
+  },
+  "check_result": "RESULT PASS  CODEX-task528  folder BHP1997  base e0209916a",
+  "final_axiom_reports": 66,
+  "sorry_dependent_declarations": [
+    "LeanLab.BHP1997.Decomp528a.leaf_section4Block_mean_value",
+    "LeanLab.BHP1997.Decomp528a.section4Block_supply"
+  ],
+  "pull_request": "https://github.com/sthubbar/lean-lab/pull/1829"
+}

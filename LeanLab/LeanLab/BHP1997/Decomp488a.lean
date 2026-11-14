@@ -4,6 +4,7 @@ The contour and cited L-function bounds remain OPEN.
 The final assembly is CONDITIONAL on the named leaves.
 AI wrote the Lean code. Goldbach is open.
 -/
+import LeanLab.BHP1997.Decomp530a
 import LeanLab.BHP1997.Decomp132b
 import LeanLab.BHP1997.KernelC165
 import Mathlib.Analysis.Complex.RemovableSingularity
@@ -36,7 +37,7 @@ theorem rademacher_convexity :
         ‖χ.LFunction ((σ : ℂ) + t * Complex.I)‖ ≤
           C * (((q : ℝ) * (|t| + 1)) ^ ((1 - σ) / 2 + ε) +
             1 / ‖(σ : ℂ) + t * Complex.I - 1‖) := by
-  sorry
+  exact LeanLab.BHP1997.Decomp530a.convexity_from_edges
 
 /-- Page 22, Lemma 8, second display. The weaker printed exponent follows
 from the stronger cited convexity input. CONDITIONAL on rademacher_convexity. -/
@@ -836,22 +837,6 @@ theorem principal_regularization {q : ℕ} [NeZero q] (a b t : ℝ) {w : ℂ} (h
   rw [he]
   field_simp
 
-/-- Pages 22 and 23, auxiliary regular contour and Perron step. -/
-theorem principal_residue_factor_le (q : ℕ) : ‖∏ p ∈ q.primeFactors, (1 - (p : ℂ)⁻¹)‖ ≤ 1 := by
-  calc
-    _ ≤ ∏ p ∈ q.primeFactors, ‖(1 - (p : ℂ)⁻¹)‖ := Finset.norm_prod_le _ _
-    _ ≤ 1 := by
-      apply Finset.prod_le_one₀
-      · intro p hp
-        exact norm_nonneg _
-      · intro p hp
-        have hp1 : (1 : ℝ) ≤ p := by
-          exact_mod_cast (Nat.prime_of_mem_primeFactors hp).one_le
-        have hreal : (1 - (p : ℂ)⁻¹) = ((1 - (p : ℝ)⁻¹ : ℝ) : ℂ) := by push_cast; rfl
-        rw [hreal, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg]
-        · have hp0 : (0 : ℝ) ≤ (p : ℝ)⁻¹ := inv_nonneg.mpr (by positivity)
-          linarith
-        · exact sub_nonneg.mpr (inv_le_one_of_one_le₀ hp1)
 
 /-- Pages 22 and 23, auxiliary regular contour and Perron step. -/
 noncomputable def integrand {q : ℕ} [NeZero q] (a b : ℝ)

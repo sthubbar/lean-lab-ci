@@ -5,7 +5,7 @@ Compositio Math. 82, 1992, pp. 355 to 372.
 ROUTE BURST session 8, part 2, 2026-11-12. The Section 4 leaf `Burst4Split.major_arcs_estimate6`
 split further along pp. 359 to 362:
 
-* `siegel_walfisz_uniform`, LEAF, display 16, p. 361, CITED: the Siegel and Walfisz theorem,
+* `siegel_walfisz_uniform`, proved from PNTPort, display 16, p. 361: the Siegel and Walfisz theorem,
   Davenport, Multiplicative Number Theory, Ch. 22, eqs 2 and 3, in residue class form.
 * `shiu_d2`, LEAF, CITED: Theorem 2 of reference 12, P. Shiu, J. reine angew. Math. 313, 1980,
   as used on p. 362 for the first term of display 20.
@@ -14,12 +14,13 @@ split further along pp. 359 to 362:
   `R₁ + R₂ + R₃` of display 12, the Shiu sum over the block, the overhang `N < 2k ≤ N + 2H`
   of the wide range, `overhang_estimate6`, through `T_orth_high`, `arc_integral_bound_high`,
   `eq19_high` and `S2k_le_divisors`, and the asymptotic assembly `estimate6Wide_of_split` of
-  `Estimate6Wide` from `Decomp1519.estimate6_explicit`. So display 6 is CONDITIONAL ON the
-  two cited classical theorems only.
+  `Estimate6Wide` from `Decomp1519.estimate6_explicit`. So display 6 is CONDITIONAL ON
+  the cited Shiu theorem only.
 
 AI wrote this Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.PerelliPintz1992.Burst4Split
+import LeanLab.PerelliPintz1992.Decomp544b
 import LeanLab.PerelliPintz1992.Decomp1519
 import LeanLab.VanDerCorput1939.Totient
 import LeanLab.PerelliPintz1992.DivisorBound
@@ -35,17 +36,32 @@ noncomputable section
 /-- `ψ(x; q, b) = Σ_{n ≤ x, n ≡ b mod q} Λ(n)`, for a residue `b < q`. -/
 def psiAP (x q b : ℕ) : ℝ := ∑ n ∈ Finset.Ioc 0 x, if n % q = b then Λ n else 0
 
-/-- LEAF: display 16, p. 361, CITED, the Siegel and Walfisz theorem, Davenport, Multiplicative Number
+/-- Display 16, p. 361, the Siegel and Walfisz theorem, Davenport, Multiplicative Number
 Theory, Ch. 22, eqs 2 and 3: for every `D, A' > 0`,
 `ψ(x; q, b) = x/φ(q) + O(x exp(-c √log x))` uniformly for `q ≤ (log x)^D`, `(b, q) = 1`.
 Read here in the standard uniform form `|ψ(x; q, b) - x/φ(q)| ≤ C Y (log Y)^{-A'}` for every
-`x ≤ Y` and `q ≤ (log Y)^D`: for `x ≥ √Y` this is the theorem with `D + 1` in place of `D`,
-and for `x < √Y` both terms are at most `2 √Y` by Chebyshev's bound. Not proved here. -/
+`x ≤ Y` and `q ≤ (log Y)^D`: the proof uses the existing PNTPort theorem and an elementary uniform cutoff conversion.
+The small cutoff branch uses the finite bound psi at most x log Y. -/
 theorem siegel_walfisz_uniform : ∀ D A' : ℝ, 0 < D → 0 < A' → ∃ C : ℝ, 0 ≤ C ∧
     ∀ Y : ℕ, 2 ≤ Y → ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ L Y ^ D → ∀ b : ℕ, b < q →
       Nat.Coprime b q → ∀ x : ℕ, x ≤ Y →
         |psiAP x q b - x / (Nat.totient q : ℝ)| ≤ C * Y / L Y ^ A' := by
-  sorry
+  intro D A hD hA
+  obtain ⟨C, hC, hbound⟩ := Decomp544b.siegel_walfisz_uniform D A hD hA
+  refine ⟨C, hC, ?_⟩
+  intro Y hY q hq hqY b hb hcop x hx
+  have heq : psiAP x q b = LeanLab.HeathBrown1985.psi x q b := by
+    classical
+    unfold psiAP LeanLab.HeathBrown1985.psi
+    simp only [Nat.floor_natCast, Nat.mod_eq_of_lt hb, Finset.sum_filter]
+    apply Finset.sum_congr
+    · ext n
+      simp only [Finset.mem_Ioc, Finset.mem_Icc]
+      omega
+    · intro n hn
+      rfl
+  rw [heq]
+  exact hbound Y hY q hq hqY b hb hcop x hx
 
 /-- LEAF: p. 362, first term of display 20, CITED, Theorem 2 of reference 12, P. Shiu, A
 Brun-Titchmarsh theorem for multiplicative functions, J. reine angew. Math. 313, 1980,
@@ -613,8 +629,8 @@ set_option maxHeartbeats 1000000 in
 `H = N^{1/2+ε}`. There `∫_{-1/2}^{1/2} |T(η)|² e(-2kη) dη = 0`, `T_orth_high`, so the major arcs
 give `|∫_𝔐| ≤ E19 ≪ N L^{-B/4}`, `eq19_high` with `E19_le`, while the main term
 `𝔖(2k)(N - 2k)` has size `≤ 2 C₂ d(k) 2H ≪ N^{7/8}`, `S2k_le_divisors` with the divisor bound
-`Section6.divisors_card_le_rpow`. So each term is `≪ N² L^{-A}`. CONDITIONAL ON
-`siegel_walfisz_uniform` only; no sorry in this proof. -/
+`Section6.divisors_card_le_rpow`. So each term is `≪ N² L^{-A}`. The Siegel and Walfisz input is now proved above
+through its independent cutoff conversion. -/
 theorem overhang_estimate6 : ∀ ε : ℝ, 0 < ε → ε < 1 / 4 → ∀ A : ℝ, 0 < A →
     ∃ C N0 : ℝ, ∀ N : ℕ, N0 ≤ N → ∀ k : ℕ, N < 2 * k →
       (k : ℝ) ≤ N / 2 + (N : ℝ) ^ (1 / 2 + ε) →
@@ -787,8 +803,7 @@ set_option maxHeartbeats 1000000 in
 /-- **Display 6, p. 359, in the wide form**, from the explicit form
 `Decomp1519.estimate6_explicit`, the window Siegel and Walfisz bound `R_small`, the bound
 `E19_le`, the Shiu block sum `shiu_block` and the overhang leaf. Same type as the burst 4 leaf
-`Burst4Split.major_arcs_estimate6`. CONDITIONAL ON `siegel_walfisz_uniform`, `shiu_d2` and
-`overhang_estimate6`; no sorry in this proof. -/
+`Burst4Split.major_arcs_estimate6`. CONDITIONAL ON `shiu_d2`. The Siegel and Walfisz input and overhang bound are proved. -/
 theorem estimate6Wide_of_split : Estimate6Wide := by
   refine ⟨1 / 4, by norm_num, fun ε hε hε4 A hA => ?_⟩
   have hB : 0 < Bexp A := by unfold Bexp; linarith

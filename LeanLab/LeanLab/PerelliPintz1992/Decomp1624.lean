@@ -4,9 +4,9 @@ Display 27 is stated through the printed W. That W is clipped to n in [N, 2N] an
 at radius `1 / (q Q)`. The kernel of a window 2 q Q vanishes at `1 / (2 q Q)`, inside that radius.
 The fixed ends N and 2 N of the clipped sum are also not averaged by the integral over x.
 Here W is replaced by an averaged window quantity with window q Q / 2, a constant change of window
-that lies in the printed theta range, and with the sum unclipped. The two leaves are OPEN.
-The Theorem of the paper is not refuted. The assembly has no sorry of its own and is
-CONDITIONAL on the two leaves.
+that lies in the printed theta range, and with the sum unclipped. The decay leaf remains OPEN.
+The reduction27A proof and estimate7_recut assembly now live in Decomp544 to avoid an import cycle.
+The assembly remains CONDITIONAL on energy_decayA.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.PerelliPintz1992.Decomp97
@@ -61,19 +61,6 @@ theorem energyA_bound_exists (N : ℕ) (ε ξ : ℝ) :
   exact Finset.single_le_sum (f := fun M => energyA N ε ξ M)
     (fun M _ => energyA_nonneg N ε ξ M) hmem
 
-/-- LEAF. Pages 363 and 364, displays 22 to 27, with WA in place of W. The route: replace the
-range [N, 2 N] by [a, b] with a and b in end blocks of length `N L ^ (-K)`, at a cost `N L ^ (1 - K)`
-by Parseval, average over a and b, then use Gallagher's lemma, P. X. Gallagher, Invent. Math. 11,
-1970, pp. 329 to 339, at window q Q / 2 and radius `1 / (q Q)`. The exponent c depends on A. -/
-theorem reduction27A :
-    ∃ ε₁ : ℝ, 0 < ε₁ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∀ A : ℝ, 0 < A →
-      ∃ C c N₀ : ℝ, 0 < C ∧ 0 < c ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ,
-        0 ≤ ξ → ξ ≤ 1 → ∀ E : ℝ, 0 ≤ E →
-        (∀ M : ℕ, 1 ≤ M → (M : ℝ) ≤ Q N → energyA N ε ξ M ≤ E) →
-        (∫ α in Ioo (ξ - 1 / H N ε) (ξ + 1 / H N ε) ∩ minorArcs N A,
-          ‖S N α‖ ^ 2) ≤ C * N * (L N ^ c * E + L N ^ (-(A + 1))) := by
-  sorry
-
 /-- LEAF. Sections 5 and 6, pp. 365 to 372, for WA. The zero sum of display 31 is monotone in
 the window through `min(Θ, 1 / |ρ|)`, so all windows up to q Q / 2 are served by the printed proof.
 The open sign question in ZeroFreeInputs remains separate. -/
@@ -83,39 +70,8 @@ theorem energy_decayA :
         ∀ M : ℕ, 1 ≤ M → (M : ℝ) ≤ Q N → energyA N ε ξ M ≤ C * L N ^ (-D) := by
   sorry
 
-/-- The exact existing Estimate7 Prop from the re-cut leaves.
-CONDITIONAL ON reduction27A and energy_decayA. This does not prove either leaf. -/
-theorem estimate7_recut : Estimate7 := by
-  obtain ⟨ε₁, hε₁, hred⟩ := reduction27A
-  refine ⟨min ε₁ (1 / 12), lt_min hε₁ (by norm_num), ?_⟩
-  intro ε hε hεsmall A hA
-  have hεred : ε < ε₁ := lt_of_lt_of_le hεsmall (min_le_left _ _)
-  have hεden : ε < 1 / 12 := lt_of_lt_of_le hεsmall (min_le_right _ _)
-  obtain ⟨C, c, N₀, hC, hc, hbound⟩ := hred ε hε hεred A hA
-  obtain ⟨K, N₁, hK, hdecay⟩ := energy_decayA ε hε hεden (A + 1 + c) (by linarith)
-  refine ⟨C * (K + 1), max (max N₀ N₁) 2, ?_⟩
-  intro N hN ξ hξ hξ'
-  have hN₀ : N₀ ≤ N := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hN
-  have hN₁ : N₁ ≤ N := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hN
-  have hN₂ : 2 ≤ N := by exact_mod_cast (le_trans (le_max_right _ _) hN : (2 : ℝ) ≤ N)
-  have hL := L_pos hN₂
-  have he := hbound N hN₀ ξ hξ hξ' (K * L N ^ (-(A + 1 + c)))
-    (by positivity) (hdecay N hN₁ ξ hξ hξ')
-  have hprod : L N ^ c * (K * L N ^ (-(A + 1 + c))) = K * L N ^ (-(A + 1)) := by
-    calc
-      _ = K * (L N ^ c * L N ^ (-(A + 1 + c))) := by ring
-      _ = _ := by rw [← Real.rpow_add hL]; congr 2; ring
-  change (∫ α in Ioo (ξ - 1 / H N ε) (ξ + 1 / H N ε) ∩ minorArcs N A,
-    ‖S N α‖ ^ 2) ≤ _
-  calc
-    _ ≤ C * N * (L N ^ c * (K * L N ^ (-(A + 1 + c))) + L N ^ (-(A + 1))) := he
-    _ = (C * (K + 1)) * N / L N ^ (A + 1) := by
-      rw [hprod, Real.rpow_neg hL.le]
-      ring
-
 #print axioms energyA_nonneg
 #print axioms energyA_bound_exists
-#print axioms estimate7_recut
 
 end
 end LeanLab.PerelliPintz1992.Decomp1624
