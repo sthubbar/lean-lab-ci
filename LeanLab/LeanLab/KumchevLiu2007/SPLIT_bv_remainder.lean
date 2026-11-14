@@ -31,6 +31,13 @@ theorem weighted_modulus_discrepancy (A B ε : ℝ) (hA : 0 < A) (hB : 0 < B)
           (ArithmeticFunction.moebius d : ℝ) ^ 2 *
             |progressionCount X B ε n d - density n d * primeMass X B ε| /
               (1 + Real.log (d : ℝ)) ≤ C * errorScale X ε (A + 1) := by
+  -- BLOCKED OUT OF REACH 2026-11-14 FREE-ms-leanstral task501 weighted_modulus_discrepancy:
+  -- the exact missing result is the weighted distribution input (a Bombieri-Vinogradov type
+  -- estimate for the semiprime progression count at level Y^(1/9)). The upstream
+  -- maximal_bombieri_vinogradov in Decomp542a.lean has its own sorry and is CITED.
+  -- No other lemma in the project provides the required weighted discrepancy estimate.
+  -- The plan documents confirm this is a deep analytic input from Kumchev-Liu 2007
+  -- that is not formalized in Mathlib or in this project.
   sorry
 
 /-- LEAF: Step 2 of the split, the logarithmic size of the modulus range. With
