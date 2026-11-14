@@ -31,6 +31,7 @@ list of candidates, and the four pair leaves carry the whole arithmetic
 content of the block.
 -/
 import LeanLab.DtRS1998.SPLIT_batch2_prime
+import LeanLab.DtRS1998.PocklingtonB7Row90
 
 namespace LeanLab.DtRS1998.Decomp395a
 
@@ -61,25 +62,33 @@ private theorem block0_pair_nonempty : (qs.drop 128).take 2 ≠ [] := by
 third batch, the two candidates at positions 129 and 130 of the fixed
 candidate list. This is two candidates, not the eight of the block. -/
 theorem leaf_batch2_block0_pair0 : ∀ q ∈ (qs.drop 128).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    ((List.drop_subset 128 qs) ((List.take_subset 2 (qs.drop 128)) hq))
 
 /-- LEAF: the primality check of the second pair of the first block, the two
 candidates at positions 131 and 132 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block0_pair1 : ∀ q ∈ (qs.drop 130).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    ((List.drop_subset 130 qs) ((List.take_subset 2 (qs.drop 130)) hq))
 
 /-- LEAF: the primality check of the third pair of the first block, the two
 candidates at positions 133 and 134 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block0_pair2 : ∀ q ∈ (qs.drop 132).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    ((List.drop_subset 132 qs) ((List.take_subset 2 (qs.drop 132)) hq))
 
 /-- LEAF: the primality check of the fourth pair of the first block, the two
 candidates at positions 135 and 136 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block0_pair3 : ∀ q ∈ (qs.drop 134).take 2, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q
+    ((List.drop_subset 134 qs) ((List.take_subset 2 (qs.drop 134)) hq))
 
 /-- The block, proved from the four pair leaves: the block is the four pairs
 concatenated, and primality is inherited entry by entry from the pair whose
