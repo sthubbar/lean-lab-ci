@@ -3,7 +3,7 @@ The local density in the sieve application on page 17 is multiplicative.
 The proofs transport square roots through the Chinese remainder equivalence.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.Decomp506b
+import LeanLab.KumchevLiu2007.Decomp506bBase
 
 namespace LeanLab.KumchevLiu2007.Task506d
 

@@ -3,7 +3,7 @@ Elementary distribution algebra and parameter margins for page 17 display 58.
 These theorems do not supply the cited prime distribution or sieve weights.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.Decomp506b
+import LeanLab.KumchevLiu2007.Decomp506bBase
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
 namespace LeanLab.KumchevLiu2007.Task506c

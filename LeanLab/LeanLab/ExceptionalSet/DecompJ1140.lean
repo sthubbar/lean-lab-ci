@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.ExceptionalSet.Decomp385a
 import LeanLab.ExceptionalSet.BhowmikGrimmelt2026
 
 namespace LeanLab.ExceptionalSet.BG2026
@@ -22,7 +23,7 @@ theorem leaf_large_eps (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (_hΘ2 : Θ < 3 / 4) (_h
 /-- LEAF 2: Theorem 3.1 for small epsilon. -/
 theorem leaf_small_eps (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4) (hZF : ZeroFreeBeyond Θ)
     (ε : ℝ) (hε0 : 0 < ε) (hε1 : ε < 1 / 2) : PowerBound (2 * Θ - 1 / 2 + ε) := by
-  sorry
+  exact Supply385.leaf_small_eps_supplied Θ hΘ1 hΘ2 hZF ε hε0 hε1
 
 /-- Assembly. -/
 theorem theorem31_assembly : Theorem31 := by

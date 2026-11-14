@@ -8,7 +8,7 @@ system estimate system_mass_split111, which is what 9.1 gives for one system F_q
 q between Q and tau. Lemma 6, the Dirichlet choice of q, and the finite cover count are
 proved here and assembled in Decomp111.
 -/
-import LeanLab.Linnik1951.CircleSplit111
+import LeanLab.Linnik1951.Decomp519a
 
 namespace LeanLab.Linnik1951
 
@@ -36,7 +36,7 @@ theorem system_mass_split111 (hG : GRH) :
       ∀ q : ℕ, (N : ℝ) ^ (1 / 10 : ℝ) < (q : ℝ) → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
         (∫ α in arcSystemSplit111 q ((N : ℝ) ^ (1 / 7 : ℝ)) ∩ Set.Icc 0 1,
           ‖primeFourier111_up111 N α‖ ^ 2) ≤ C * (N : ℝ) ^ (93 / 100 : ℝ) := by
-  sorry
+  exact Task519.system_mass519 hG
 
 /-- P0093 page 166 proof of Lemma 7, equation 9.3: a finite cover bounds the integral of
 a nonnegative function by the sum of its integrals over the covering sets, which need
