@@ -1,0 +1,475 @@
+{
+  "review": "CODEX task347 AI source review of these exact statement fingerprints. Definition fingerprints include their bodies. MATCH records the cited derived component. MISMATCH identifies an OPEN obligation not supplied at the literal convention by the written proof. A new or changed statement needs a new source review.",
+  "convention": "S4 and Delta one use the sealed forced-prime conventions established by task315. The Upsilon 10 correction remains explicit. The literal original first_half is not labelled proved.",
+  "declarations": [
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.baseline",
+      "file": "Decomp347a.lean",
+      "verdict": "MATCH",
+      "role": "data definition for the written counting argument",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "34 to 37, equations 9.5 and 9.7",
+      "statement_fingerprint": "d57bb34700e18d097f10ac0d13dfc4b50a4c2a9355e2c8f1a30366be7fe74076"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.remainder_kappa2",
+      "file": "Decomp347a.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "34 to 37, equations 9.5 and 9.7",
+      "statement_fingerprint": "21796f98eb17558954f35462dab89b9e592d8ab125d17341a929405eb575269d"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.baseline_bound",
+      "file": "Decomp347a.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "34 to 37, equations 9.5 and 9.7",
+      "statement_fingerprint": "f309f1dee1ff6620227a0d331f4756b2625829f8df932edca33fa9c359f47a85"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.forced_prime_zero",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "8af576144bf560dcba36f506433cc979dd7695e02bec35a9b0e39e9a26098d38"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.forced_pair_split",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "54938f02f43063f279c5e63fedeedf13093917cccf0de0d29175423a510e112c"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.forced_pair_buchstab",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "45a48fdac4d2eeda550fc781f31c17e74ff9ca231e0568d2f19c02504671d826"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossingPairs",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "data definition for the written counting argument",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "aa302e2cc417c8a102e0d9d2e3eb353e8abac2c7d9a45f9c71b37019bad5ce58"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.mem_crossingPairs",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "fb10e6d063410421024a1f299640b7f1bfb31ecef07da4f6233b70d834b05485"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.exemptUpsilon10",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "data definition for the written counting argument",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "9d755fb97c399c4e1c52f839e6469fc14c7bab101d1f2f508e781440eadc309a"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossingDefect",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "data definition for the written counting argument",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "27d5ef7b562d10712532a9692c9431a5d80e05544153efe036f83faf1bef1966"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossingDefect_nonneg",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "1a662d1e69694eedafbbadca0901d6c7d0875e21bd529d1889d8d55a237f7545"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.exemptUpsilon10_eq",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "2b6b64316a3eb2ac0d74003043d2be8832eb642652a58bc25b70a308dc87ae61"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.literalUpsilon10_le",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "600efa7d1be893adc910b3c7bcaa38061142ac26a2f815d2eaebe21caafb5c96"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossing_instance",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "22531f7ce3fb33461499a5c327cd9f3ada0d537c7fd950bc4c87c0d67a52dfee"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossing_cutoffs_instance",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "fbd4ddf8ff714e1bb4978088372f7817077da62823dd3ccf517142b0711c5ca6"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossing_pair_instance",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "e9fee78c328861ddfb930d34b491e83f534e7f19a5bc28eebdc921045bc757d8"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossingDefect_pos_of",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "5b2f0b62fd854c6043ff9535aba7c64b7d1b042a78ac27b3ff8611487d6e3c32"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossingDefect_pos_instance",
+      "file": "Decomp347b.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35 to 37 and 42, Upsilon 10 and S3 expansion",
+      "statement_fingerprint": "715f6f98a8729a717e1f64738e93f921fbfd848c2ff5bc5c479f8adbf117ed31"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.buchstab_forced_prime",
+      "file": "Decomp347c.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, first display",
+      "statement_fingerprint": "766864cceb85de0381b0f05816fbe03c583fb3baf360311dd1f38bed92e8d087"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.buchstab_forced_pair",
+      "file": "Decomp347c.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, first display",
+      "statement_fingerprint": "154cb47507b8f794b24db5a7a7195cc0c9365a3e0df6d5c0da770909ab01d139"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.three_step_buchstab",
+      "file": "Decomp347c.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, first display",
+      "statement_fingerprint": "af4505df49dad479ec76082aa03b31cb9a2d0a3d743cf50013626af4bde9b6a8"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.descending_pairs_reindex",
+      "file": "Decomp347d.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, first display and 42, parameter choice",
+      "statement_fingerprint": "1b58e730dfaae664196962b589eead3bed50d3d13647d5ad3344e2c8d4099d62"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.descending_triples_reindex",
+      "file": "Decomp347d.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, first display and 42, parameter choice",
+      "statement_fingerprint": "c3c235e492b7b63a7a91b58100e08ff839e69f8bba4ab930030c5b1e88594bb3"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.first_buchstab_expansion",
+      "file": "Decomp347d.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, first display and 42, parameter choice",
+      "statement_fingerprint": "fba03762523102830db8344155ae6ee797b789c7300923f38149d82b1e6703a9"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.first_buchstab_printed",
+      "file": "Decomp347d.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, first display and 42, parameter choice",
+      "statement_fingerprint": "0b23cf1b2346a3d32e918ef56eb14873d41d3ea9e1d31962fceba6f415236a4a"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.prime_sum_split",
+      "file": "Decomp347e.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, second display",
+      "statement_fingerprint": "bd08a4d0010484e10cfef3b7214e8dcb76a3ff6c68d5956632cb23b6ddd69026"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.upper_prime_band_lowering",
+      "file": "Decomp347e.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, second display",
+      "statement_fingerprint": "316b32bd772707bbe3d3f2d40dda9d4fb9071dbbc7012ddb78a59b185ea40d84"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossing_pairs_reindex",
+      "file": "Decomp347e.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, second display",
+      "statement_fingerprint": "4663f1d052df4ecbea19aaee21faf14619d7da302c7e564595de79e341890c4c"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.S1_buchstab_expansion",
+      "file": "Decomp347e.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, second display",
+      "statement_fingerprint": "920ec374427ec068ceb1522ec87a31aecbd8f7be9faa786ea7140a98508531a8"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.forced_pair_raise_le",
+      "file": "Decomp347f.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, S3 expansion and 37, Delta one",
+      "statement_fingerprint": "9013d5f024f1004fad59db50f30c2e16cd404c9a2f64fe361c1b833fa7cf665f"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.raising_triple_sum_le",
+      "file": "Decomp347f.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, S3 expansion and 37, Delta one",
+      "statement_fingerprint": "28540b4ab60d43c466066a18f732fbb9281a2a1f4322a1b0188bdd1d29a07478"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.S3_raising_le",
+      "file": "Decomp347f.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, S3 expansion and 37, Delta one",
+      "statement_fingerprint": "8cbfc0e852d6bb2a3109f3ec1d32d71148618efd86c813e290dd07dd2eb4da62"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.S3_raising_with_defect",
+      "file": "Decomp347f.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, S3 expansion and 37, Delta one",
+      "statement_fingerprint": "55fce01b8d63649be109e5792d72940d97dedf4307800ae33d0b3c88f37f0c60"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.smallPairs",
+      "file": "Decomp347g.lean",
+      "verdict": "MATCH",
+      "role": "data definition for the written counting argument",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35, Upsilon 5 and 36, final display and 42, parameter choice",
+      "statement_fingerprint": "1a4dc7fd4335350ee93c412f6c6bf0dc965f58b70ed8cb77eac0f14b18546c27"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.lowerCrossingPairs",
+      "file": "Decomp347g.lean",
+      "verdict": "MATCH",
+      "role": "data definition for the written counting argument",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35, Upsilon 5 and 36, final display and 42, parameter choice",
+      "statement_fingerprint": "2d68893768719cdad338d708bed08e8ac3ced1e40973549c7f823430daea4142"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.small_pair_cutoff",
+      "file": "Decomp347g.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35, Upsilon 5 and 36, final display and 42, parameter choice",
+      "statement_fingerprint": "47f78beba89228307a573aa65ad0271c4e7c5dd3aa871423a0e0aa3356fde984"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.smallPairs_subset",
+      "file": "Decomp347g.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35, Upsilon 5 and 36, final display and 42, parameter choice",
+      "statement_fingerprint": "a0fd7283b4720c47e9d1366bdad4af61792d3ca84dd49a59ec1a8f598d071c67"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.small_pair_triple_sum_le",
+      "file": "Decomp347g.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35, Upsilon 5 and 36, final display and 42, parameter choice",
+      "statement_fingerprint": "257cda6bc491dd8d27667ca248c9cc929549a1c055f926d2e4e89706db9d6600"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.small_pair_compensation",
+      "file": "Decomp347g.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "35, Upsilon 5 and 36, final display and 42, parameter choice",
+      "statement_fingerprint": "cd31ef68a08da832d59dba10767f946af5cc93cd5d1ce947fd9b2af9a17f5986"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.first_half_transport_with_defect",
+      "file": "Decomp347h.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 with its explicit correction",
+      "statement_fingerprint": "533dd2d2212f0e66d1fac2f981991cd8f1fa28995e97e0e8d6affd471bc025b5"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.first_half_with_defect",
+      "file": "Decomp347h.lean",
+      "verdict": "MATCH",
+      "role": "explicit weaker derived bound, not the sealed first_half",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 with its explicit correction",
+      "statement_fingerprint": "ff7c3a1a10f617a1c9b25de52a4cc3fb36040a21259c6c8ee59bf1e568646b39"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.pair_divisor_card",
+      "file": "Decomp347i.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, pair counts and 37, the power error budget",
+      "statement_fingerprint": "166037e5bd2105bf1c4df64c2b2f95d0eb5cdfad4d3517415cc2e15833e9fd21"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.pair_sum_bound",
+      "file": "Decomp347i.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, pair counts and 37, the power error budget",
+      "statement_fingerprint": "5f1a6cff484d8571822959991d54f06348c85b105f95613576888f8f399eb023"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossingDefect_counting_bound",
+      "file": "Decomp347i.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, pair counts and 37, the power error budget",
+      "statement_fingerprint": "67a4713870a7ffffbf893651d5fd1e83141eade317e7780fce09dc8fe796dde9"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.counting_majorant_ge",
+      "file": "Decomp347i.lean",
+      "verdict": "MATCH",
+      "role": "derived strength comparison for the elementary majorant, not a claim about the actual defect growth",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, pair counts and 37, the power error budget",
+      "statement_fingerprint": "d2cefcc0ee595318da969e617b34a02799892315f770c28a357804d98d3b6cf0"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.counting_majorant_not_power_error",
+      "file": "Decomp347i.lean",
+      "verdict": "MATCH",
+      "role": "derived strength comparison for the elementary majorant, not a claim about the actual defect growth",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36, pair counts and 37, the power error budget",
+      "statement_fingerprint": "8b7e4281370b08c429411eeb0ccc05356cb39e3e6cd4445e2231bf22a0c6615b"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.transportReserve",
+      "file": "Decomp347j.lean",
+      "verdict": "MATCH",
+      "role": "data definition for the written counting argument",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 and its positive reserves",
+      "statement_fingerprint": "07fd534a8b8d1e309c22d9e675a94dc15207b0c08a83e3cc13dfaaf240fa3384"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.transportReserve_nonneg",
+      "file": "Decomp347j.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 and its positive reserves",
+      "statement_fingerprint": "5b70e19b06348da4c14fd4b624dfd0640fe133dceb232e89d9e7fc227c0cee49"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.first_half_transport_identity",
+      "file": "Decomp347j.lean",
+      "verdict": "MATCH",
+      "role": "derived finite component or explicit numerical witness",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 and its positive reserves",
+      "statement_fingerprint": "cc2a88d0d34a4900ca8aa177435ceaf302e153d82fbb93d012958f2e895986fb"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.crossing_compensation",
+      "file": "Decomp347j.lean",
+      "verdict": "MISMATCH",
+      "role": "OPEN derived obligation. Pages 36 and 37 do not give this averaged comparison for the literal sealed modulus. No paper error or eventual counterexample is claimed.",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 and its positive reserves",
+      "statement_fingerprint": "0ec60eb8ab55d1c092eb059df195ef963345ef0ef0c7802eb33c55e8b38dcd0e"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.first_half_transport",
+      "file": "Decomp347j.lean",
+      "verdict": "MATCH",
+      "role": "OPEN exact reduction obligation, not a proved paper input",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 and its positive reserves",
+      "statement_fingerprint": "b3722dbb44a9c68989d39f9645a8d5b84e43808cbae4435401bde5afd2aa07a0"
+    },
+    {
+      "declaration": "LeanLab.ChenDoubleSieve.Task347.first_half_supplied",
+      "file": "Decomp347j.lean",
+      "verdict": "MATCH",
+      "role": "OPEN exact reduction obligation, not a proved paper input",
+      "source": "https://arxiv.org/pdf/0705.1652",
+      "page_display": "36 and 37, equation 9.7 and its positive reserves",
+      "statement_fingerprint": "81643b86bbd3119f0d66d6e44667a1260028a344a9b7c5b7a828ce713422f81a"
+    }
+  ],
+  "reviewed_at": "2026-11-14T14:03:12.011745+00:00"
+}

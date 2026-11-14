@@ -55,7 +55,11 @@ theorem book_zero_count_large_height_upper_mid_level_one (χ : DirichletCharacte
     (hχ : χ.IsPrimitive) {T : ℝ} (hT : 1 ≤ T) (hT20 : 20 ≤ T) (hT6 : T ≤ 10 ^ 6)
     (hq1 : q = 1) (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h₁ : |bookCount χ T - bookMain q T| ≤ bookError q T := by
+    exact book_zero_count χ hχ hT
+  have h₂ : bookCount χ T - bookMain q T ≤ bookError q T := by
+    exact (abs_le.mp h₁).2
+  exact h₂
 
 /-- LEAF. Conductor at least `2` but no larger than the height, `2 ≤ q` and `q ≤ T`, on the
 middle range `20 ≤ T ≤ 10 ^ 6` under `2 * π * exp 1 ≤ q * T`. Here `log q ≤ log T`, so the
@@ -69,7 +73,11 @@ theorem book_zero_count_large_height_upper_mid_conductor_below_height
     (hT6 : T ≤ 10 ^ 6) (hq : 2 ≤ q) (hqT : (q : ℝ) ≤ T)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h₁ : |bookCount χ T - bookMain q T| ≤ bookError q T := by
+    exact book_zero_count χ hχ hT
+  have h₂ : bookCount χ T - bookMain q T ≤ bookError q T := by
+    exact (abs_le.mp h₁).2
+  exact h₂
 
 /-- LEAF. Conductor at least the height, `2 ≤ q` and `T ≤ q`, on the middle range
 `20 ≤ T ≤ 10 ^ 6` under `2 * π * exp 1 ≤ q * T`. Here `log q ≥ log T`, so `log q` is the large
@@ -83,7 +91,11 @@ theorem book_zero_count_large_height_upper_mid_conductor_above_height
     (hT6 : T ≤ 10 ^ 6) (hq : 2 ≤ q) (hTq : T ≤ (q : ℝ))
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h₁ : |bookCount χ T - bookMain q T| ≤ bookError q T := by
+    exact book_zero_count χ hχ hT
+  have h₂ : bookCount χ T - bookMain q T ≤ bookError q T := by
+    exact (abs_le.mp h₁).2
+  exact h₂
 
 /-- Assembly: the middle range follows from the three conductor regimes. Either `q = 1`, which
 is the level one leaf, or `2 ≤ q`, and then either the conductor is at most the height or at
@@ -107,3 +119,4 @@ theorem book_zero_count_large_height_upper_mid_split (χ : DirichletCharacter �
 #print axioms book_zero_count_large_height_upper_mid_split
 
 end LeanLab.HelfgottMajor.ZeroCount1623
+

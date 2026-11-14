@@ -73,6 +73,12 @@ theorem book_zero_count_large_height_upper_short_level_one (χ : DirichletCharac
     (hχ : χ.IsPrimitive) (hq : q = 1) {T : ℝ} (hT : 1 ≤ T) (hT20 : T ≤ 20)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T ≤ 3.389 := by
+  -- BLOCKED 2026-11-14 FREE-ms-leanstral task467: OUT OF REACH, requires a verified count of
+  -- zeros of the Riemann zeta function below height 20. The L-function for q=1 is the
+  -- completed zeta function; its zeros below 20 are known numerically (first zero at
+  -- 14.1347...) but Mathlib has no zero-counting for Dirichlet L-functions. The bound is
+  -- true (actual count ≤ 0.5 for T∈[2πe,20]) but unprovable with current Mathlib
+  -- infrastructure.
   sorry
 
 /-- LEAF. Small conductor, `2 ≤ q ≤ T ≤ 20`. Both the conductor and the height are at most
@@ -85,6 +91,8 @@ theorem book_zero_count_large_height_upper_short_conductor_le_height
     (hT : 1 ≤ T) (hT2 : 2 ≤ T) (hT20 : T ≤ 20) (hqT : (q : ℝ) ≤ T)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
+  -- BLOCKED 2026-11-14 FREE-ms-leanstral task467: OUT OF REACH, requires explicit zero-counting
+  -- for all primitive Dirichlet L-functions with conductor at most 20 below height 20.
   sorry
 
 /-- LEAF. Large conductor, `2 ≤ q` with `T < q`. The conductor is the large parameter and is
@@ -97,6 +105,9 @@ theorem book_zero_count_large_height_upper_short_conductor_gt_height
     (hT : 1 ≤ T) (hT2 : 2 ≤ T) (hT20 : T ≤ 20) (hTq : T < (q : ℝ))
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
+  -- BLOCKED 2026-11-14 FREE-ms-leanstral task467: OUT OF REACH, requires the uniform-in-q
+  -- bound on the increment of the argument of the completed L-function, which is the
+  -- analytic input that the rest of the file is built around but is not available in Mathlib.
   sorry
 
 /-- Assembly: case `q = 1` gives the count by the constant `3.389` alone, and then

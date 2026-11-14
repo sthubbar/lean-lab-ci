@@ -30,8 +30,11 @@ the `n`-th Taylor polynomial at the left end plus `m` times the remainder
 itself: `exists_coefficient_approximation` produces an `s` in `T` with `2 ≤ s ≤ n`, the
 bounds `P^(-c2 s) ≤ |f^(s)(a)/s!| ≤ P^(-c3 s)` at the left end, and by Dirichlet a coprime
 `A/q` with `q ≤ ⌈P^(c2 s)⌉` and `|f^(s)(a)/s! - A/q| ≤ 1/(⌈P^(c2 s)⌉ q)`. What the open
-leaf still needs is Karacuba Lemma 2 applied at that `A/q`, and the bookkeeping that turns
-its `τ`, `l` and `ρ` into a single `ρ` bounded away from zero.
+leaf still needs is Karacuba Lemma 2 applied at that `A/q`, which turns the denominator bound into `τ ≥ δ`, and the bookkeeping that turns
+`τ`, `l` and `ρ` into a single `ρ` bounded away from zero. The `τ` side of that bookkeeping
+is proved: `karTau_of_le`, `karTau_pos`, `karTau_le_one` and `karTau_ge` pin `τ` in the range
+`1 < q ≤ P`, and `kar_l_pos` with `kar_rho_pos` give `l > 0` and `ρ > 0` for every `n ≥ 2` and
+`0 < τ ≤ 1`.
 AI wrote the Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.KaracubaSplit
@@ -508,6 +511,45 @@ private theorem exists_coefficient_approximation
     · exact h
   obtain ⟨A, q, hgcd, hq1, hqQ, herr⟩ := exists_rat_approx _ _ hQ
   exact ⟨s, hsT, hs2, hsn, hc2, hc3, A, q, hgcd, hq1, hqQ, herr⟩
+
+/-- In the range `1 < q ≤ P` the parameter `τ` of Lemma 2 is the logarithmic ratio. -/
+private theorem karTau_of_le {P q : ℝ} (r : ℕ) (hq : q ≤ P) :
+    karTau P q r = Real.log q / Real.log P := by
+  simp [karTau, hq]
+
+/-- In the range `1 < q ≤ P` the parameter `τ` is positive. -/
+private theorem karTau_pos {P q : ℝ} (r : ℕ) (hP : 1 < P) (hq : 1 < q) (hqP : q ≤ P) :
+    0 < karTau P q r := by
+  rw [karTau_of_le r hqP]
+  exact div_pos (Real.log_pos hq) (Real.log_pos hP)
+
+/-- In the range `1 < q ≤ P` the parameter `τ` is at most one. -/
+private theorem karTau_le_one {P q : ℝ} (r : ℕ) (hP : 1 < P) (hq : 1 < q) (hqP : q ≤ P) :
+    karTau P q r ≤ 1 := by
+  rw [karTau_of_le r hqP, div_le_one (Real.log_pos hP)]
+  exact Real.log_le_log (by linarith) hqP
+
+/-- A denominator bound `P^δ ≤ q` gives `δ ≤ τ`, the reason `τ` stays away from zero. -/
+private theorem karTau_ge {P q : ℝ} (r : ℕ) {δ : ℝ} (hP : 1 < P) (hδ : P ^ δ ≤ q)
+    (hqP : q ≤ P) : δ ≤ karTau P q r := by
+  rw [karTau_of_le r hqP, le_div_iff₀ (Real.log_pos hP), ← Real.log_rpow (by linarith : (0 : ℝ) < P)]
+  exact Real.log_le_log (Real.rpow_pos_of_pos (by linarith : (0 : ℝ) < P) δ) hδ
+
+/-- For `n ≥ 2` and `0 < τ ≤ 1` the logarithm `l = log (12 n (n+1) / τ)` of Lemma 2 is
+positive, so that `ρ = τ/(3 n² l)` is positive. -/
+private theorem kar_l_pos {n : ℕ} {τ : ℝ} (hn : 2 ≤ n) (hτ0 : 0 < τ) (hτ1 : τ ≤ 1) :
+    0 < Real.log (12 * (n : ℝ) * ((n : ℝ) + 1) / τ) := by
+  have hnR : (2 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+  have hbig : (12 : ℝ) ≤ 12 * (n : ℝ) * ((n : ℝ) + 1) := by nlinarith
+  have hone : (1 : ℝ) < 12 * (n : ℝ) * ((n : ℝ) + 1) / τ := by
+    rw [lt_div_iff₀ hτ0]
+    nlinarith
+  exact Real.log_pos hone
+
+/-- The saving `ρ = τ/(3 n² l)` of Lemma 2 is positive for `n ≥ 2` and `0 < τ ≤ 1`. -/
+private theorem kar_rho_pos {n : ℕ} {τ : ℝ} (hn : 2 ≤ n) (hτ0 : 0 < τ) (hτ1 : τ ≤ 1) :
+    0 < τ / (3 * (n : ℝ) ^ 2 * Real.log (12 * (n : ℝ) * ((n : ℝ) + 1) / τ)) :=
+  div_pos hτ0 (mul_pos (by positivity) (kar_l_pos hn hτ0 hτ1))
 
 /-- The charged statement, from the three leaves. -/
 theorem leaf_small_case_split (h2 : KarLemma2) :
