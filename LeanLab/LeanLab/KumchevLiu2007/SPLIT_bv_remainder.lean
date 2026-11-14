@@ -39,7 +39,30 @@ theorem weighted_modulus_discrepancy (A B ε : ℝ) (hA : 0 < A) (hB : 0 < B)
 theorem sieve_level_log_scale (ε : ℝ) (hε : 0 < ε) (hε1 : ε ≤ 11 / 18) :
     ∃ X0 : ℝ, 0 < X0 ∧ ∀ X : ℝ, X0 ≤ X → ∀ d : ℕ, 1 ≤ d →
       d ≤ ⌊Y X ε ^ (1 / 9 : ℝ)⌋₊ → 1 + Real.log (d : ℝ) ≤ 2 * Real.log X := by
-  sorry
+  refine ⟨Real.exp 1, Real.exp_pos 1, ?_⟩
+  intro X hX d hd1 hdD
+  have hX1 : 1 ≤ X := (Real.one_le_exp zero_le_one).trans hX
+  have hX0 : 0 < X := lt_of_lt_of_le zero_lt_one hX1
+  have hL1 : 1 ≤ Real.log X := by
+    have h := Real.log_le_log (Real.exp_pos 1) hX
+    rwa [Real.log_exp] at h
+  have hL0 : 0 < Real.log X := lt_of_lt_of_le zero_lt_one hL1
+  have hDpos : (0 : ℝ) < Y X ε ^ (1 / 9 : ℝ) :=
+    Real.rpow_pos_of_pos (Real.rpow_pos_of_pos hX0 _) _
+  have hdle : (d : ℝ) ≤ X ^ (8 / 81 : ℝ) := by
+    have h1 : (d : ℝ) ≤ (⌊Y X ε ^ (1 / 9 : ℝ)⌋₊ : ℝ) := by exact_mod_cast hdD
+    have h2 : (⌊Y X ε ^ (1 / 9 : ℝ)⌋₊ : ℝ) ≤ Y X ε ^ (1 / 9 : ℝ) := Nat.floor_le hDpos.le
+    have h3 : Y X ε ^ (1 / 9 : ℝ) ≤ X ^ (8 / 81 : ℝ) := by
+      have hexp : (7 / 12 + ε / 2) * (1 / 9) ≤ 8 / 81 := by linarith
+      calc Y X ε ^ (1 / 9 : ℝ) = (X ^ (7 / 12 + ε / 2)) ^ (1 / 9 : ℝ) := rfl
+        _ = X ^ ((7 / 12 + ε / 2) * (1 / 9)) := (Real.rpow_mul hX0.le _ _).symm
+        _ ≤ X ^ (8 / 81 : ℝ) := Real.rpow_le_rpow_of_exponent_le hX1 hexp
+    linarith
+  have hdpos : (0 : ℝ) < (d : ℝ) := by exact_mod_cast hd1
+  have hlogd : Real.log (d : ℝ) ≤ 8 / 81 * Real.log X := by
+    have h := Real.log_le_log hdpos hdle
+    rwa [Real.log_rpow hX0] at h
+  nlinarith
 
 /-- LEAF: Step 3 of the split, the large-`X` regime of the parameters. Beyond a threshold
 `log X ≥ 1`, the ninth power of the window `Y` is at least one, and the error scale at the
@@ -48,7 +71,24 @@ in the range. -/
 theorem sieve_regime (A ε : ℝ) (hA : 0 < A) (hε : 0 < ε) :
     ∃ X0 : ℝ, 0 < X0 ∧ ∀ X : ℝ, X0 ≤ X →
       1 ≤ Real.log X ∧ 1 ≤ Y X ε ^ (1 / 9 : ℝ) ∧ 0 ≤ errorScale X ε A := by
-  sorry
+  refine ⟨Real.exp 1, Real.exp_pos 1, ?_⟩
+  intro X hX
+  have hX1 : 1 ≤ X := (Real.one_le_exp zero_le_one).trans hX
+  have hX0 : 0 < X := lt_of_lt_of_le zero_lt_one hX1
+  have hlog1 : 1 ≤ Real.log X := by
+    have h := Real.log_le_log (Real.exp_pos 1) hX
+    rwa [Real.log_exp] at h
+  have hY1 : 1 ≤ Y X ε := by
+    unfold Y
+    exact Real.one_le_rpow hX1 (by linarith)
+  have hY0 : 0 < Y X ε ^ (1 / 9 : ℝ) :=
+    Real.rpow_pos_of_pos (Real.rpow_pos_of_pos hX0 _) _
+  refine ⟨hlog1, Real.one_le_rpow hY1 (by norm_num), ?_⟩
+  unfold errorScale
+  have h1 : 0 ≤ Y X ε ^ (1 / 2 : ℝ) := Real.rpow_nonneg (le_of_lt (lt_of_lt_of_le zero_lt_one hY1)) _
+  have h2 : 0 ≤ Real.log X ^ (-A) :=
+    le_of_lt (Real.rpow_pos_of_pos (lt_of_lt_of_le zero_lt_one hlog1) _)
+  exact mul_nonneg h1 h2
 
 /-- Split of `bv_remainder`: the explicit squarefree remainder at level `Y ^ (1 / 9)` is at
 most a constant times `Y ^ (1 / 2) * (log X) ^ (-A)`, from the three leaves above and the
