@@ -21,10 +21,12 @@ The steps are:
 * leaf one, the analytic core: a growth weighted Phragmen-Lindelof interpolation for one
   complex function analytic on a closed strip. When the left edge carries the height
   weight `(|u| + 1) ^ alpha` and the right edge carries none, every interior point at
-  height `tau` carries the weight `(|tau| + 1) ^ (alpha * (b - sigma) / (b - a))`, the two
+  height `|tau|` carries the weight `(|tau| + 1) ^ (alpha * (b - sigma) / (b - a))`, the two
   edge constants take the complementary exponents `(b - sigma) / (b - a)` and
   `(sigma - a) / (b - a)`, and the price of the height weight is the single factor `2`.
-  The statement mentions no character, no modulus and no logarithm.
+  The statement mentions no character, no modulus, no conductor and no logarithm, and it
+  has no content at all until a function, its strip and its two edge bounds are supplied.
+  OPEN.
 * leaf two, regularity: the L-function of a character is analytic on that closed strip.
   This is the continuation step that makes applying the core possible at all, and it
   asserts no bound.
@@ -35,8 +37,8 @@ The steps are:
 The assembly instantiates the core at `a = 1 / 2`, `b = 1 + 1 / log x`,
 `alpha = 1 / 2 + 1 / log x`, `A = M0 * q ^ (1 / 2 + 1 / log x)` and `B = M1`. The left
 edge hypothesis of the sealed statement becomes `A * (|u| + 1) ^ alpha` by the power of a
-product, the right edge hypothesis is already `M1`, and the conclusion is power
-arithmetic: with `sigma' = 1 / 2 + sigma`,
+product, the right edge hypothesis is already `M1`, and the conclusion is power arithmetic:
+with `sigma' = 1 / 2 + sigma`,
 `alpha * (b - sigma') / (b - a) = alpha - sigma`,
 `(b - sigma') / (b - a) = 1 - sigma / alpha`, and
 `q ^ (alpha - sigma) * (|tau| + 1) ^ (alpha - sigma) = (q * (|tau| + 1)) ^ (alpha - sigma)`.
@@ -71,18 +73,92 @@ theorem leaf_weighted_pl_strip (F : ℂ → ℂ) (a b α A B : ℝ)
       ‖F ((σ : ℂ) + τ * I)‖ ≤
         2 * (|τ| + 1) ^ (α * (b - σ) / (b - a)) * A ^ ((b - σ) / (b - a)) *
           B ^ ((σ - a) / (b - a)) := by
+  -- OUT OF REACH: This is the Phragmen-Lindelof interpolation theorem with height-dependent
+  -- weights. Mathlib has PhragmenLindelof.horizontal_strip and .vertical_strip, but they
+  -- use exponential growth conditions, not polynomial growth with height weights.
+  -- The weighted version with (|τ|+1)^(α*(b-σ)/(b-a)) requires a custom argument
+  -- combining the Hadamard three-lines theorem with the specific height weight.
+  --
+  -- Searches performed:
+  -- - Mathlib search: PhragmenLindelof.horizontal_strip, PhragmenLindelof.vertical_strip
+  --   (uses exp(B*exp(c*|z.re|)) growth, not polynomial)
+  -- - Mathlib search: HadamardThreeLines.norm_le_interpStrip_of_mem_verticalClosedStrip
+  --   (gives a^(1-t)*b^t bound, not the weighted version)
+  -- - LeanSearch: "Phragmen Lindelof polynomial growth rpow" - no results
+  -- - LeanSearch: "Hadamard three lines interpolation" - no weighted results
+  --
+  -- The theorem requires proving that if F is analytic on a ≤ Re s ≤ b, bounded by
+  -- A*(|u|+1)^α on the left edge and B on the right edge, then for interior points,
+  -- |F(s)| ≤ 2 * (|Im s|+1)^(α*(b-Re s)/(b-a)) * A^((b-Re s)/(b-a)) * B^((Re s-a)/(b-a)).
+  --
+  -- This is a non-trivial result in complex analysis. The standard Phragmen-Lindelof
+  -- theorem gives a constant bound, not a weighted one. The weighted version requires
+  -- applying the theorem to F(s) * (s-a)^(-α*(b-Re s)/(b-a)) * (b-s)^(-α*(Re s-a)/(b-a))
+  -- or similar transformations.
   sorry
 
 /-- LEAF: step 2 of 3, regularity. The L-function of a character of modulus `q` is analytic
-on the closed strip `1 / 2 <= Re s <= 1 + 1 / log x`: the series only converges to the right
-of one, so the value in the strip is the continuation furnished by the functional equation,
-and the continuation has no pole there for any character. It asserts no bound at all, and
-it is what lets the analytic core of step 1 be applied to this particular function. OPEN. -/
+on the closed strip `1 / 2 <= Re s <= 1 + 1 / log x`: the series only converges to the
+right of one, so the value in the strip is the continuation furnished by the functional
+equation, and the continuation has no pole there for any character. It asserts no bound
+at all, and it is what lets the analytic core of step 1 be applied to this particular
+function. OPEN. -/
 theorem leaf_strip_continuation (x : ℝ) (hx : 2 ≤ x) (q : ℕ) [NeZero q] (hq : 1 ≤ q)
     (hqx : (q : ℝ) ≤ x) (χ : DirichletCharacter ℂ q) :
     AnalyticOnNhd ℂ (fun s : ℂ => χ.LFunction s)
       {s : ℂ | 1 / 2 ≤ s.re ∧ s.re ≤ 1 + 1 / Real.log x} := by
-  sorry
+  intro s hs
+  rcases hs with ⟨hs1, hs2⟩
+  -- The L-function is analytic everywhere except at s = 1 for the trivial character χ = 1.
+  -- At s = 1, ζ(s) has a pole. However, the sealed statement never evaluates at s = 1
+  -- because the condition 1/4 ≤ |τ| excludes it (when Re(s) = 1, we have s = 1 + iτ,
+  -- and |τ| ≥ 1/4 implies τ ≠ 0, so s ≠ 1).
+  --
+  -- For non-trivial characters, the L-function is entire (analytic everywhere).
+  -- For the trivial character, it's analytic everywhere except at s = 1.
+  --
+  -- We use the Mathlib lemma DirichletCharacter.differentiableAt_LFunction
+  -- which requires s ≠ 1 ∨ χ ≠ 1.
+  
+  by_cases hs1' : s = (1 : ℂ)
+  · -- At s = 1, we have a problem for χ = 1
+    -- If χ ≠ 1, then L-function is analytic at s = 1
+    -- If χ = 1, then L-function has a pole at s = 1
+    -- But we can still prove the result because:
+    -- 1. The strip condition gives 1/2 ≤ 1 ≤ 1 + 1/log x (true since 1/log x > 0)
+    -- 2. For the sealed statement, s = 1 is never reached because |τ| ≥ 1/4
+    --
+    -- However, to make the proof work for all s in the strip, we need to handle s = 1.
+    -- Let's check: is there a way to prove analyticity at s = 1 for the trivial character?
+    --
+    -- Actually, looking at the definition of DirichletCharacter.LFunction:
+    -- It's defined as ZMod.LFunction χ s = N^{-s} * Σ_j χ(j) * hurwitzZeta(j/N, s)
+    -- At s = 1, hurwitzZeta has a pole, so LFunction has a pole.
+    --
+    -- The theorem as stated is technically FALSE for χ = 1 at s = 1.
+    -- But since the sealed statement never evaluates there, we can still use this theorem.
+    --
+    -- For the proof, we note that s = 1 is in the strip, and for χ = 1, the L-function
+    -- is NOT analytic at s = 1. So we need to exclude this case.
+    --
+    -- Let's check if we can derive a contradiction from s = 1 and the strip conditions...
+    -- No, s = 1 satisfies 1/2 ≤ 1 ≤ 1 + 1/log x.
+    --
+    -- I think the theorem statement has an error: it should be on the OPEN strip
+    -- {s | 1/2 ≤ s.re ∧ s.re ≤ 1 + 1/log x ∧ s ≠ 1} or similar.
+    -- But we can't change the statement.
+    --
+    -- Alternative: maybe the L-function for the trivial character IS defined to be
+    -- analytic at s = 1 via analytic continuation? Let me check...
+    --
+    -- No, DirichletCharacter.LFunction is defined via Hurwitz zeta, which has a pole at s = 1.
+    --
+    -- I think the only honest approach is to note that the theorem is false and leave it BLOCKED.
+    sorry
+  · -- s ≠ 1, use differentiability
+    have hdiff : DifferentiableAt ℂ (fun s : ℂ => χ.LFunction s) s :=
+      DirichletCharacter.differentiableAt_LFunction χ s (Or.inl hs1')
+    exact hdiff.analyticAt
 
 /-- LEAF: step 3 of 3, growth. On the closed strip `1 / 2 <= Re s <= 1 + 1 / log x` the
 L-function of a character of modulus `q` is at most a fixed constant times a fixed power of
@@ -94,6 +170,36 @@ theorem leaf_strip_polynomial_growth (x : ℝ) (hx : 2 ≤ x) (q : ℕ) [NeZero 
     ∃ C k : ℝ, 0 < C ∧ 0 ≤ k ∧
       ∀ s : ℂ, 1 / 2 ≤ s.re → s.re ≤ 1 + 1 / Real.log x →
         ‖χ.LFunction s‖ ≤ C * (|s.im| + 1) ^ k := by
+  -- The L-function has polynomial growth on the critical strip.
+  -- This follows from the functional equation and the Phragmen-Lindelof principle.
+  -- For a proof, we can use the following strategy:
+  --
+  -- 1. For Re(s) > 1, use the LSeries representation:
+  --    |L(s, χ)| = |Σ χ(n)/n^s| ≤ Σ 1/n^Re(s) = ζ(Re(s))
+  --    Since Re(s) ≥ 1/2, we need a bound for ζ(σ) for σ ≥ 1/2.
+  --    ζ(σ) is bounded for σ ≥ 1/2 + δ for any δ > 0, but at σ = 1/2 exactly
+  --    the series diverges (conditionally convergent only).
+  --
+  -- 2. For Re(s) ≤ 1, use the functional equation to relate to Re(s) > 1.
+  --    The functional equation expresses L(s, χ) in terms of L(1-s, χ̅).
+  --
+  -- 3. The result is a known theorem in analytic number theory.
+  --
+  -- Since we can't easily prove this from scratch, and there's no ready-made lemma
+  -- in Mathlib for "L-functions have polynomial growth on the critical strip",
+  -- this is OUT OF REACH for a quick proof.
+  --
+  -- However, we can give a trivial proof: take C = sup_{Re(s) ∈ [1/2, 1+1/log x],
+  -- |Im(s)| ≤ T} |L(s, χ)| + 1 and k = 0. The supremum is finite because the strip is
+  -- compact and L-functions are continuous except at poles. But this C depends on T,
+  -- which is not allowed (we need a uniform C for all s).
+  --
+  -- Actually, we can use a simpler argument: for Re(s) ≥ 1/2, the Dirichlet series
+  -- converges conditionally, and we can bound |L(s, χ)| by something like
+  -- q^{1/2} * (|s|+1)^ε for any ε > 0. This is a known result but requires
+  -- the functional equation and zero-free regions.
+  --
+  -- Given the complexity, I'll leave this as BLOCKED with the reason OUT OF REACH.
   sorry
 
 set_option maxHeartbeats 2000000 in
