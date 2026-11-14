@@ -34,6 +34,23 @@ theorem nonprincipal_character_count491 (q : ℕ) (hq : 1 ≤ q) :
     (fun χ => χ ≠ 1)
   simpa [hcard] using hle
 
+/-- The principal-product filter for a fixed nonprincipal character contains
+exactly its inverse. -/
+theorem nonprincipal_principal_filter491 (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) :
+    (univ.filter (fun ψ : DirichletCharacter ℂ q => ψ ≠ 1)).filter
+        (fun ψ => ψ * χ = 1) = {χ⁻¹} := by
+  classical
+  ext ψ
+  simp only [Finset.mem_filter, Finset.mem_univ, Finset.mem_singleton]
+  constructor
+  · rintro ⟨_, hmul⟩
+    refine ⟨eq_inv_of_mul_eq_one_left hmul, ?_⟩
+    intro hinv
+    exact hχ (inv_eq_one.mp hinv)
+  · rintro ⟨-, rfl⟩
+    simp
+
 /-- LEAF. Step two of the nonprincipal block, the pairs with a principal product,
 for one fixed nonprincipal character. The reduced residue phase of such a pair is
 an untwisted Ramanujan phase, bounded by the residue count, so this block of
