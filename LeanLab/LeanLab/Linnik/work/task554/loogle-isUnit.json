@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning ZMod.isUnit_iff_coprime.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Data.ZMod.Basic", "name": "ZMod.isUnit_iff_coprime", "type": " (m n : \u2115) : IsUnit \u2191m \u2194 m.Coprime n"}]}

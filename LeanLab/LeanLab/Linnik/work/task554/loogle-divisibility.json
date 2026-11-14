@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning sub_one_dvd_pow_sub_one.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Algebra.Ring.GeomSum", "name": "sub_one_dvd_pow_sub_one", "type": " {R : Type u_1} [Ring R] (x : R) (n : \u2115) : x - 1 \u2223 x ^ n - 1"}]}
