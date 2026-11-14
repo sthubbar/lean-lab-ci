@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.ExceptionalSet.UpJ200.Decomp505a
 import LeanLab.ExceptionalSet.BrudernPerelli1998
 import LeanLab.ExceptionalSet.State1539
 import LeanLab.ExceptionalSet.UpJ200.DecompJ200
@@ -119,6 +120,29 @@ theorem leaf_major_coefficient_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) 
               U1539.R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <
                 c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
             B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
-  sorry
+  exact LeanLab.ExceptionalSet.UpJ200.Decomp505a.coefficient_lower_assembly γ h1 h2
+
+/-- P0082 page368 display33, derived free width version of the boundary input.
+Rescaling the small kappa cap allows every fixed positive power of E.
+CONDITIONAL ON the discrepancy input U1539.lemma4 used by the sibling theorem. -/
+theorem boundary_at_rate (γ a : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) (ha : 0 < a) :
+    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+      ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+        (((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < calE γ κ N ^ (-a) ∨
+            1 - calE γ κ N ^ (-a) < Int.fract (F γ n))).card : ℝ) ≤
+          B * N * calE γ κ N ^ (-a) := by
+  obtain ⟨κb, hκb, hb⟩ := leaf_major_fractional_boundary γ h1 h2
+  refine ⟨κb / (8 * a), by positivity, fun κ hκ hκsmall => ?_⟩
+  have hsmall : 8 * a * κ ≤ κb := by
+    have h := (le_div_iff₀ (by positivity : 0 < 8 * a)).mp hκsmall
+    nlinarith
+  obtain ⟨B, hB, N₀, hb⟩ := hb (8 * a * κ) (by positivity) hsmall
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  have hpow : calE γ (8 * a * κ) N ^ (-(1 / 8 : ℝ)) = calE γ κ N ^ (-a) := by
+    simp only [calE, ← Real.exp_mul]
+    congr 1
+    ring
+  simpa only [hpow] using hb N hN
 
 end LeanLab.ExceptionalSet.UpJ200.MajorBoundLeavesJ200
