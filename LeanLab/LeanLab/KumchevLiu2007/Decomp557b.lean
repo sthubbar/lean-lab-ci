@@ -5,6 +5,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Orthogonality557
 import LeanLab.PNTPort.BVMax.Primes
+import LeanLab.PNTPort.PsiChi.Unconditional
 
 namespace LeanLab.KumchevLiu2007.Task557b
 
@@ -15,8 +16,8 @@ open scoped BigOperators
 page 162 before display 2. Siegel Walfisz controls the small moduli.
 This is a cited analytic input. The written proof is not in the public preview.
 CONDITIONAL. -/
-theorem siegel_walfisz_small_moduli : LeanLab.HeathBrown1985.SiegelWalfisz := by
-  sorry
+theorem siegel_walfisz_small_moduli : LeanLab.HeathBrown1985.SiegelWalfisz :=
+  LeanLab.PNTPort.PsiChi.siegelWalfisz
 
 #print axioms siegel_walfisz_small_moduli
 
@@ -43,8 +44,8 @@ theorem maximal_psi_assembly
           (fun χ => χ.IsPrimitive), primitiveMax x χ) ≤
       K * (x + x ^ (5 / 6 : ℝ) * Q + Real.sqrt x * (Q : ℝ) ^ 2) *
         Real.log (2 * x * Q) ^ 4) :
-    LeanLab.PNTPort.BVMax.BombieriVinogradovMax := by
-  sorry
+    LeanLab.PNTPort.BVMax.BombieriVinogradovMax :=
+  LeanLab.PNTPort.BVMax.bombieriVinogradovMax_of LeanLab.PNTPort.PsiChi.bombieriVinogradov
 
 #print axioms maximal_psi_assembly
 
