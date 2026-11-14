@@ -33,7 +33,16 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.013908667`; the bound adds 0.1 percent. -/
 theorem I2_r0_9 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 0 ≤ (870161/62500000 : ℝ) := by
-  sorry
+  have e : I2 ω (tableParams 0) 0 = buchstabSup ω 1
+      (fun _ => 1 / (tableParams 0).k1) (fun _ => 1 / (tableParams 0).k3) := rfl
+  have hb := buchstabSup_le_box (extended_buchstab_le_one hω hz) (n := 1)
+    ((fun _ => 1 / (tableParams 0).k1) : Fin (1 + 2) → ℝ)
+    ((fun _ => 1 / (tableParams 0).k3) : Fin (1 + 2) → ℝ)
+    (by intro j; fin_cases j <;> norm_num [tableParams])
+    (by intro j; fin_cases j <;> norm_num [tableParams])
+  rw [e]
+  refine hb.trans ?_
+  norm_num [tableParams, Fin.prod_univ_succ]
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,10}` defining `I_{2,10}(s, s', κ₁, κ₂, κ₃)`, for row 1 of Table 1,
