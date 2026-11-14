@@ -98,8 +98,8 @@ theorem leaf_mean_square_low_z (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemm
                 ((lowerShortWeight ω ε x m : ℂ) * χ (m : ZMod q) -
                   Thm2.delta χ * lowerV0 ω ε / Real.log (x ^ (11 / 20 + ε)))‖ ^ 2 ≤
                     C * ((q : ℝ) * sieveQ ε x) ^ 2 *
-                      x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+                      x ^ (11 / 20 + ε) * Real.log x ^ (-A) :=
+  exceptional_count_empty
 
 /-- LEAF: the mean square on windows of medium length, with `z` between
 `q * sieveQ ε x / x ^ (11 / 20 + ε)` and `2 * q * sieveQ ε x / x ^ (11 / 20 + ε)`, so that the
