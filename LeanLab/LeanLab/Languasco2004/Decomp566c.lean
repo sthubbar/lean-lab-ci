@@ -17,7 +17,8 @@ attribute [local instance] Classical.propDecidable
 The prime transfer follows the Omega11 argument using the applicable mean value regions
 and Lemmas 18 and 21. Lemma 20 supplies the global 0.5607 lower kernel.
 The numerical evaluation of the 25 explicit integrals is not an input to this leaf.
-Every sealed cap, strict endpoint and region priority remains explicit through pieceSum. -/
+Every sealed cap, strict endpoint and region priority remains explicit through pieceSum.
+The unnumbered lower integrals support display 65 on page 286. -/
 theorem remainder_transfer :
     ∀ η : ℝ, 0 < η →
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε B : ℝ, 0 < ε → ε < ε₀ → 0 < B →
