@@ -32,7 +32,9 @@ theorem count_transfer (s E : Finset ℕ) (f g : ℕ → ℝ) (I c η : ℝ)
 Lemma 8 region i supplies display 8, Lemma 18 supplies the exceptional prime transfer,
 and Lemma 21 on page 262 supplies the sifted integer model.
 For each fixed error budget, sufficiently small epsilon gives this one sided transfer.
-The numerical evaluation of model11 is not an input to this leaf. -/
+The numerical evaluation of model11 is not an input to this leaf.
+These unnumbered Omega11 equalities support display 65 on page 286.
+The mean value input is display 32 on page 253. -/
 theorem region11_transfer :
     ∀ η : ℝ, 0 < η →
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε B : ℝ, 0 < ε → ε < ε₀ → 0 < B →

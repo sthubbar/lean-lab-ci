@@ -4,6 +4,11 @@ Source https://doi.org/10.4064/aa-77-3-207-287.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Languasco2004.RemainderKernel566
+import LeanLab.Languasco2004.HornerPiece566_21
+import LeanLab.Languasco2004.HornerPiece566_22
+import LeanLab.Languasco2004.HornerPiece566_23
+import LeanLab.Languasco2004.HornerPiece566_24
+import LeanLab.Languasco2004.HornerPiece566_25
 
 namespace LeanLab.Languasco2004.NumericRest566e
 open Real intervalIntegral RemainderData566 RemainderKernel566 Numeric548 Numeric30_548
@@ -14,7 +19,13 @@ set_option maxRecDepth 100000
 /-- LEAF. Pages 271 to 273: exact polynomial integration certifies five printed components with reserves. -/
 theorem block_lower (j : Fin 5) :
     (coefficient ⟨20 + j.val, by omega⟩ : ℝ) + 0.00000001 ≤
-      polynomialTerm ⟨20 + j.val, by omega⟩ := by sorry
+      polynomialTerm ⟨20 + j.val, by omega⟩ := by
+  fin_cases j
+  · exact HornerPiece566.component_21_polynomial_lower
+  · exact HornerPiece566.component_22_polynomial_lower
+  · exact HornerPiece566.component_23_polynomial_lower
+  · exact HornerPiece566.component_24_polynomial_lower
+  · exact HornerPiece566.component_25_polynomial_lower
 
 #print axioms block_lower
 end
