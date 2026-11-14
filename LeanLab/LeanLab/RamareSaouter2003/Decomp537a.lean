@@ -1253,6 +1253,318 @@ end LeanLab.RamareSaouter2003.Decomp537a
 namespace LeanLab.RamareSaouter2003.Decomp537a
 open Real Complex MeasureTheory
 
+/-! ## Euler–Maclaurin bricks for the leaf `euler8_bernoulli_bound`. -/
+
+open Set Filter
+open scoped Topology
+
+set_option maxHeartbeats 2000000
+
+private theorem hasDerivWithinAt_fract537 (x : ℝ) :
+    HasDerivWithinAt (fun y : ℝ => Int.fract y) 1 (Set.Ioi x) x := by
+  have hfloor : ∀ᶠ y in 𝓝[Set.Ioi x] x, (⌊y⌋ : ℝ) = (⌊x⌋ : ℝ) := by
+    have hopen : Set.Iio ((⌊x⌋ : ℝ) + 1) ∈ 𝓝 (x : ℝ) :=
+      isOpen_Iio.mem_nhds (Int.lt_floor_add_one x)
+    filter_upwards [nhdsWithin_le_nhds hopen, self_mem_nhdsWithin] with y hy hyx
+    have hyx' : x < y := hyx
+    have h : ⌊y⌋ = ⌊x⌋ :=
+      Int.floor_eq_iff.mpr ⟨by linarith [Int.floor_le x], hy⟩
+    exact_mod_cast h
+  have heq : (fun y : ℝ => y - (⌊x⌋ : ℝ)) =ᶠ[𝓝[Set.Ioi x] x] (fun y : ℝ => Int.fract y) := by
+    filter_upwards [hfloor] with y hy
+    rw [← hy]
+    exact Int.self_sub_floor y
+  have hpt : x - (⌊x⌋ : ℝ) = Int.fract x := Int.self_sub_floor x
+  exact (heq.hasDerivWithinAt_iff hpt).mp ((hasDerivAt_id x).sub_const (⌊x⌋ : ℝ)).hasDerivWithinAt
+
+
+private theorem hasDerivWithinAt_q537 (x : ℝ) :
+    HasDerivWithinAt (fun y : ℝ => Int.fract y ^ 2 / 2 - Int.fract y / 2 + 1 / 12)
+      (Int.fract x - 1 / 2) (Set.Ioi x) x := by
+  have h := hasDerivWithinAt_fract537 x
+  have h2 : HasDerivWithinAt (fun y : ℝ => Int.fract y ^ 2 / 2) (Int.fract x) (Set.Ioi x) x := by
+    have hp := h.pow 2
+    have hd := hp.div_const 2
+    convert hd using 1
+    ring
+  have h3 : HasDerivWithinAt (fun y : ℝ => Int.fract y / 2) (1 / 2) (Set.Ioi x) x := by
+    have hd := h.div_const 2
+    simpa using hd
+  have h4 := (h2.sub h3).add_const (1 / 12)
+  convert h4 using 1
+
+
+private theorem continuous_q_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 2 / 2 - y / 2 + 1 / 12) (Set.Icc (0 : ℝ) 1) := by
+    fun_prop
+  have hf : (fun y : ℝ => y ^ 2 / 2 - y / 2 + 1 / 12) 0
+      = (fun y : ℝ => y ^ 2 / 2 - y / 2 + 1 / 12) 1 := by norm_num
+  simpa [Function.comp_def] using h.comp_fract'' hf
+
+private theorem abs_q_le537 (x : ℝ) :
+    |Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12| ≤ 1 / 12 := by
+  have h0 := Int.fract_nonneg x
+  have h1 := Int.fract_lt_one x
+  have h2 : Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12
+      = (Int.fract x - 1 / 2) ^ 2 / 2 - 1 / 24 := by ring
+  rw [h2, abs_le]
+  have h3 : (Int.fract x - 1 / 2) ^ 2 ≤ 1 / 4 := by
+    nlinarith [h0, h1, mul_nonneg h0 (sub_nonneg.mpr h1.le)]
+  constructor <;> nlinarith
+
+private theorem intervalIntegrable_b537 (a b : ℝ) :
+    IntervalIntegrable (fun x : ℝ => ((Int.fract x - 1 / 2 : ℝ) : ℂ)) volume a b := by
+  rw [intervalIntegrable_iff']
+  refine Measure.integrableOn_of_bounded (by simp) (by fun_prop) (M := 1) ?_
+  filter_upwards [self_mem_ae_restrict (by measurability)] with x hx
+  have h0 := Int.fract_nonneg x
+  have h1 := Int.fract_lt_one x
+  rw [Complex.norm_real, Real.norm_eq_abs, abs_le]
+  constructor <;> linarith
+
+private theorem intervalIntegrable_q537 (a b : ℝ) :
+    IntervalIntegrable
+      (fun x : ℝ => ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ)) volume a b := by
+  refine ContinuousOn.intervalIntegrable ?_
+  exact (Complex.continuous_ofReal.comp continuous_q_fract537).continuousOn
+
+private theorem ibp_q537 (a b : ℝ) (ha : 0 < a) (hab : a ≤ b) {s : ℂ} (hs : 0 < s.re) :
+    ∫ x in a..b, ((Int.fract x - 1 / 2 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 1))
+      = ((Int.fract b ^ 2 / 2 - Int.fract b / 2 + 1 / 12 : ℝ) : ℂ) * (b : ℂ) ^ (-(s + 1))
+        - ((Int.fract a ^ 2 / 2 - Int.fract a / 2 + 1 / 12 : ℝ) : ℂ) * (a : ℂ) ^ (-(s + 1))
+        + (s + 1) * ∫ x in a..b,
+            ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)) := by
+  have hne : (-(s + 1) : ℂ) ≠ 0 := by
+    intro h
+    have h0 : (-(s + 1) : ℂ).re = 0 := by rw [h]; simp
+    simp only [Complex.neg_re, Complex.add_re, Complex.one_re] at h0
+    linarith
+  have hpos : ∀ x ∈ Set.uIcc a b, x ≠ 0 := by
+    intro x hx
+    rcases Set.mem_uIcc.mp hx with ⟨h1, _⟩ | ⟨_, h2⟩
+    · linarith
+    · linarith
+  have hu : ContinuousOn
+      (fun y : ℝ => ((Int.fract y ^ 2 / 2 - Int.fract y / 2 + 1 / 12 : ℝ) : ℂ)) (Set.uIcc a b) :=
+    (Complex.continuous_ofReal.comp continuous_q_fract537).continuousOn
+  have hv : ContinuousOn (fun y : ℝ => (y : ℂ) ^ (-(s + 1))) (Set.uIcc a b) := fun x hx =>
+    (Complex.continuousAt_ofReal_cpow_const x _ (Or.inr (hpos x hx))).continuousWithinAt
+  have huu' : ∀ x ∈ Set.Ioo (min a b) (max a b),
+      HasDerivWithinAt
+        (fun y : ℝ => ((Int.fract y ^ 2 / 2 - Int.fract y / 2 + 1 / 12 : ℝ) : ℂ))
+        ((Int.fract x - 1 / 2 : ℝ) : ℂ) (Set.Ioi x) x := fun x _ =>
+    (hasDerivWithinAt_q537 x).ofReal_comp
+  have hvv' : ∀ x ∈ Set.Ioo (min a b) (max a b),
+      HasDerivWithinAt (fun y : ℝ => (y : ℂ) ^ (-(s + 1)))
+        ((-(s + 1)) * (x : ℂ) ^ (-(s + 2))) (Set.Ioi x) x := by
+    intro x hx
+    rw [min_eq_left hab, max_eq_right hab] at hx
+    have hx0 : x ≠ 0 := by linarith [hx.1]
+    have hd : HasDerivWithinAt (fun y : ℝ => (y : ℂ) ^ (-(s + 1)))
+        ((-(s + 1)) * (x : ℂ) ^ (-(s + 1) - 1)) (Set.Ioi x) x :=
+      (hasDerivAt_ofReal_cpow_const hx0 hne).hasDerivWithinAt
+    convert hd using 1
+    ring
+  have hu' : IntervalIntegrable (fun x : ℝ => ((Int.fract x - 1 / 2 : ℝ) : ℂ)) volume a b :=
+    intervalIntegrable_b537 a b
+  have hv' : IntervalIntegrable (fun y : ℝ => (-(s + 1)) * (y : ℂ) ^ (-(s + 2))) volume a b := by
+    refine ContinuousOn.intervalIntegrable (u := fun y : ℝ => (-(s + 1)) * (y : ℂ) ^ (-(s + 2))) ?_
+    intro x hx
+    exact ((Complex.continuousAt_ofReal_cpow_const x _ (Or.inr (hpos x hx))).const_mul
+      (-(s + 1))).continuousWithinAt
+  have key := intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDeriv_right
+    hu hv huu' hvv' hu' hv'
+  have hleft : ∫ x in a..b,
+      ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) *
+        ((-(s + 1)) * (x : ℂ) ^ (-(s + 2)))
+      = -(s + 1) * ∫ x in a..b,
+          ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)) := by
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun x _ => ?_)
+    ring
+  rw [hleft] at key
+  linear_combination key
+
+
+private theorem integrable_b_Ioi537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ} (hs : 0 < s.re) :
+    IntegrableOn (fun x : ℝ => (((Int.fract x : ℝ) : ℂ) - 1 / 2) * (x : ℂ) ^ (-(s + 1)))
+      (Set.Ioi (N : ℝ)) := by
+  have hNR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have hcp : IntegrableOn (fun x : ℝ => (x : ℂ) ^ (-(s + 1))) (Set.Ioi (N : ℝ)) := by
+    refine integrableOn_Ioi_cpow_of_lt ?_ hNR
+    simp only [Complex.neg_re, Complex.add_re, Complex.one_re]
+    linarith
+  have hmble : AEStronglyMeasurable
+      (fun x : ℝ => (((Int.fract x : ℝ) : ℂ) - 1 / 2)) (volume.restrict (Set.Ioi (N : ℝ))) := by
+    have hmeas : Measurable fun x : ℝ => (((Int.fract x : ℝ) : ℂ) - 1 / 2) :=
+      (Complex.continuous_ofReal.measurable.comp measurable_fract).sub measurable_const
+    exact hmeas.aestronglyMeasurable
+  have hbdd : ∀ᵐ x ∂(volume.restrict (Set.Ioi (N : ℝ))),
+      ‖(((Int.fract x : ℝ) : ℂ) - 1 / 2)‖ ≤ 1 := by
+    filter_upwards with x
+    have h0 := Int.fract_nonneg x
+    have h1 := Int.fract_lt_one x
+    have he : (((Int.fract x : ℝ) : ℂ) - 1 / 2) = ((Int.fract x - 1 / 2 : ℝ) : ℂ) := by
+      push_cast
+      ring
+    rw [he, Complex.norm_real, Real.norm_eq_abs, abs_le]
+    constructor <;> linarith
+  exact (hcp.bdd_mul hmble hbdd).congr (ae_of_all _ (fun x => by ring))
+
+
+private theorem floor_kernel_eq537 (x : ℝ) :
+    (((⌊x⌋ : ℤ) : ℂ) + 1 / 2 - ((x : ℝ) : ℂ)) = -((((Int.fract x : ℝ)) : ℂ) - 1 / 2) := by
+  have h : ((Int.fract x : ℝ)) = x - ((⌊x⌋ : ℤ) : ℝ) := Int.self_sub_floor x
+  rw [h]
+  push_cast
+  ring
+
+/-- The `q`-kernel is integrable against `x ^ (-(s+2))` on `Ioi N`. -/
+private theorem integrable_q_Ioi537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ} (hs : 0 < s.re) :
+    IntegrableOn (fun x : ℝ =>
+      ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)))
+      (Set.Ioi (N : ℝ)) := by
+  have hNR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have hcp : IntegrableOn (fun x : ℝ => (x : ℂ) ^ (-(s + 2))) (Set.Ioi (N : ℝ)) := by
+    refine integrableOn_Ioi_cpow_of_lt ?_ hNR
+    simp only [Complex.neg_re, Complex.add_re]
+    norm_num
+    linarith
+  have hmeas : AEStronglyMeasurable (fun x : ℝ =>
+      ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ))
+      (volume.restrict (Set.Ioi (N : ℝ))) :=
+    Complex.continuous_ofReal.measurable.comp continuous_q_fract537.measurable |>.aestronglyMeasurable
+  have hbdd : ∀ᵐ x ∂(volume.restrict (Set.Ioi (N : ℝ))),
+      ‖((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ)‖ ≤ 1 := by
+    filter_upwards with x
+    rw [Complex.norm_real, Real.norm_eq_abs]
+    exact (abs_q_le537 x).trans (by norm_num)
+  exact (hcp.bdd_mul hmeas hbdd).congr (ae_of_all _ (fun x => by ring))
+
+/-- The second-order Euler–Maclaurin formula on a finite interval `[N, M]`. -/
+private theorem em_one_interval537 (N M : ℕ) (hN : 1 ≤ N) (hNM : N ≤ M) {s : ℂ}
+    (hs : 0 < s.re) :
+    ∫ x in (N : ℝ)..(M : ℝ), (((Int.fract x : ℝ) : ℂ) - 1 / 2) * (x : ℂ) ^ (-(s + 1))
+      = (1 / 12) * (((M : ℝ) : ℂ) ^ (-(s + 1)) - ((N : ℝ) : ℂ) ^ (-(s + 1)))
+        + (s + 1) * ∫ x in (N : ℝ)..(M : ℝ),
+            ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)) := by
+  have hNR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have hNMR : (N : ℝ) ≤ (M : ℝ) := by exact_mod_cast hNM
+  have hq := ibp_q537 (N : ℝ) (M : ℝ) hNR hNMR hs
+  have hgoal : (∫ x in (N : ℝ)..(M : ℝ),
+        (((Int.fract x : ℝ) : ℂ) - 1 / 2) * (x : ℂ) ^ (-(s + 1)))
+      = ∫ x in (N : ℝ)..(M : ℝ),
+          ((Int.fract x - 1 / 2 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 1)) := by
+    refine intervalIntegral.integral_congr (fun x _ => ?_)
+    push_cast
+    ring
+  rw [hgoal, hq]
+  have e1 : ((Int.fract ((M : ℝ)) ^ 2 / 2 - Int.fract ((M : ℝ)) / 2 + 1 / 12 : ℝ) : ℂ)
+      = (1 / 12 : ℂ) := by rw [Int.fract_natCast]; norm_num
+  have e2 : ((Int.fract ((N : ℝ)) ^ 2 / 2 - Int.fract ((N : ℝ)) / 2 + 1 / 12 : ℝ) : ℂ)
+      = (1 / 12 : ℂ) := by rw [Int.fract_natCast]; norm_num
+  rw [e1, e2]
+  ring
+
+/-- The `b`-kernel integral on `Ioi N` in terms of the `q`-kernel. -/
+private theorem em_one_Ioi537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ} (hs : 0 < s.re) :
+    (∫ x in Set.Ioi (N : ℝ), (((Int.fract x : ℝ) : ℂ) - 1 / 2) * (x : ℂ) ^ (-(s + 1)))
+      = -(1 / 12) * ((N : ℝ) : ℂ) ^ (-(s + 1))
+        + (s + 1) * (∫ x in Set.Ioi (N : ℝ),
+            ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))) := by
+  have hlim_b := intervalIntegral_tendsto_integral_Ioi (μ := volume) (l := Filter.atTop)
+    (b := fun n : ℕ => ((n : ℝ)))
+    (f := fun x : ℝ => (((Int.fract x : ℝ) : ℂ) - 1 / 2) * (x : ℂ) ^ (-(s + 1)))
+    ((N : ℝ)) (integrable_b_Ioi537 N hN hs) tendsto_natCast_atTop_atTop
+  have hlim_q := intervalIntegral_tendsto_integral_Ioi (μ := volume) (l := Filter.atTop)
+    (b := fun n : ℕ => ((n : ℝ)))
+    (f := fun x : ℝ =>
+      ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)))
+    ((N : ℝ)) (integrable_q_Ioi537 N hN hs) tendsto_natCast_atTop_atTop
+  have hM : Tendsto (fun M : ℕ => (((M : ℝ) : ℂ)) ^ (-(s + 1))) Filter.atTop (𝓝 0) := by
+    have h := Complex.cpow_tendsto (s := s + 2)
+      (show (1 : ℝ) < (s + 2).re by simp only [Complex.add_re]; norm_num; linarith)
+    refine h.congr (fun M => ?_)
+    push_cast
+    congr 1
+    ring
+  have hlim_c : Tendsto (fun M : ℕ =>
+      (1 / 12) * ((((M : ℝ) : ℂ)) ^ (-(s + 1)) - ((N : ℝ) : ℂ) ^ (-(s + 1)))
+        + (s + 1) * (∫ x in (N : ℝ)..((M : ℝ)),
+            ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))))
+      Filter.atTop
+      (𝓝 ((1 / 12) * (0 - ((N : ℝ) : ℂ) ^ (-(s + 1)))
+        + (s + 1) * (∫ x in Set.Ioi (N : ℝ),
+            ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))))) :=
+    ((hM.sub_const _).const_mul _).add (hlim_q.const_mul _)
+  have heq : (fun M : ℕ => ∫ x in (N : ℝ)..((M : ℝ)),
+      (((Int.fract x : ℝ) : ℂ) - 1 / 2) * (x : ℂ) ^ (-(s + 1)))
+      =ᶠ[Filter.atTop] (fun M : ℕ =>
+      (1 / 12) * ((((M : ℝ) : ℂ)) ^ (-(s + 1)) - ((N : ℝ) : ℂ) ^ (-(s + 1)))
+        + (s + 1) * (∫ x in (N : ℝ)..((M : ℝ)),
+            ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)))) := by
+    filter_upwards [Filter.eventually_ge_atTop N] with M hM'
+    exact em_one_interval537 N M hN hM' hs
+  have hfin := tendsto_nhds_unique hlim_b (hlim_c.congr' heq.symm)
+  rw [hfin]
+  ring
+
+/-- Second-order Euler–Maclaurin for `ζ` with the `q`-kernel remainder, on `Re s > 0`. -/
+private theorem em_q_zeta537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ} (hs : 0 < s.re) (h1 : s ≠ 1) :
+    riemannZeta s
+      = (∑ n ∈ Finset.range (N + 1), (1 : ℂ) / (n : ℂ) ^ s)
+        + (-(N : ℂ) ^ (1 - s)) / (1 - s) + (-(N : ℂ) ^ (-s)) / 2
+        + s * (1 / 12) * (N : ℂ) ^ (-(s + 1))
+        - s * (s + 1) * (∫ x in Set.Ioi (N : ℝ),
+            ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))) := by
+  have hz : riemannZeta0 N s = riemannZeta s := Zeta0EqZeta hN hs h1
+  rw [← hz, riemannZeta0_apply]
+  have hker : (∫ x in Set.Ioi (N : ℝ), (⌊x⌋ + 1 / 2 - x) * (x : ℂ) ^ (-(s + 1)))
+      = -(∫ x in Set.Ioi (N : ℝ),
+          (((Int.fract x : ℝ) : ℂ) - 1 / 2) * (x : ℂ) ^ (-(s + 1))) := by
+    rw [← integral_neg]
+    refine setIntegral_congr_fun measurableSet_Ioi (fun x _ => ?_)
+    rw [floor_kernel_eq537]
+    ring
+  rw [hker, em_one_Ioi537 N hN hs]
+  push_cast
+  ring
+
+/-- Norm bound for the `q`-kernel remainder integral. -/
+private theorem norm_integral_q_le537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ} (hs : 0 < s.re) :
+    ‖∫ x in Set.Ioi (N : ℝ),
+        ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))‖
+      ≤ (1 / 12) * (((N : ℝ)) ^ (-s.re - 1) / (s.re + 1)) := by
+  have hNR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have hsre : 0 < s.re := hs
+  refine (norm_integral_le_integral_norm _).trans ?_
+  have hni : IntegrableOn (fun x : ℝ => (1 / 12 : ℝ) * x ^ (-s.re - 2)) (Set.Ioi (N : ℝ)) :=
+    (integrableOn_Ioi_rpow_of_lt (by linarith) hNR).const_mul _
+  refine (integral_mono_of_nonneg ?_ hni ?_).trans_eq ?_
+  · filter_upwards with x
+    positivity
+  · filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with x hx
+    have hx0 : (0 : ℝ) < x := hNR.trans hx
+    have hqx : ‖((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ)‖ ≤ 1 / 12 := by
+      rw [Complex.norm_real, Real.norm_eq_abs]
+      exact abs_q_le537 x
+    have hxw : ‖(x : ℂ) ^ (-(s + 2))‖ = x ^ (-s.re - 2) := by
+      rw [norm_cpow_eq_rpow_re_of_pos hx0]
+      simp only [Complex.neg_re, Complex.add_re]
+      norm_num
+      ring
+    rw [norm_mul, hxw]
+    exact mul_le_mul_of_nonneg_right hqx (Real.rpow_nonneg hx0.le _)
+  · rw [integral_const_mul,
+      integral_Ioi_rpow_of_lt (a := -s.re - 2) (by linarith) hNR]
+    have e : -((N : ℝ)) ^ (-s.re - 2 + 1) / (-s.re - 2 + 1)
+        = ((N : ℝ)) ^ (-s.re - 1) / (s.re + 1) := by
+      have a1 : -s.re - 2 + 1 = -s.re - 1 := by ring
+      have a2 : -s.re - 1 = -(s.re + 1) := by ring
+      rw [a1, a2, neg_div_neg_eq]
+    rw [e]
+
 /-- LEAF. Backlund p. 346, display 8, and p. 361, display 52.
 This is the finite Euler norm estimate with its actual harmonic half endpoint.
 The missing step is the complex periodic Bernoulli remainder representation
@@ -1264,7 +1576,180 @@ theorem euler8_bernoulli_bound (n : ℕ) (hn : 1 ≤ n) (σ t : ℝ)
       (harmonic (n - 1) : ℝ) + 1 / (2 * (n : ℝ)) + 1 / t +
         Real.sqrt (t ^ 2 + 9 / 4) / (12 * (n : ℝ) ^ 2) +
         Real.sqrt ((t ^ 2 + 9 / 4) * (t ^ 2 + 25 / 4)) / (24 * (n : ℝ) ^ 2) := by
-  sorry
+  obtain ⟨hσ1, hσ2⟩ := hσ
+  set s : ℂ := (σ : ℂ) + t * I with hsdef
+  have hsre : s.re = σ := by simp [s]
+  have hsim : s.im = t := by simp [s]
+  have hspos : 0 < s.re := by rw [hsre]; linarith
+  have hsne1 : s ≠ 1 := by
+    intro h
+    have h2 := congr_arg Complex.im h
+    rw [hsim] at h2
+    simp at h2
+    linarith
+  have hnR : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+  have hnpos : (0 : ℝ) < (n : ℝ) := by linarith
+  have htpos : (0 : ℝ) < t := by linarith
+  have hn0 : 0 < n := by omega
+  -- the second-order Euler–Maclaurin identity, regrouped
+  have hsplit : (∑ k ∈ Finset.range (n + 1), (1 : ℂ) / (k : ℂ) ^ s)
+      = (∑ k ∈ Finset.range n, (1 : ℂ) / (k : ℂ) ^ s) + 1 / (n : ℂ) ^ s := by
+    rw [Finset.sum_range_succ]
+  have hneg : (1 : ℂ) / (n : ℂ) ^ s = (n : ℂ) ^ (-s) := by
+    rw [one_div, Complex.cpow_neg]
+  have hdiv : (-(n : ℂ) ^ (1 - s)) / (1 - s) = ((n : ℂ) ^ (1 - s)) / (s - 1) := by
+    have h1 : (1 : ℂ) - s ≠ 0 := by
+      intro h
+      apply hsne1
+      linear_combination -h
+    field_simp
+    ring
+  have hmain : riemannZeta s = (∑ k ∈ Finset.range n, (1 : ℂ) / (k : ℂ) ^ s)
+      + (n : ℂ) ^ (-s) / 2 + ((n : ℂ) ^ (1 - s)) / (s - 1)
+      + s * (1 / 12) * (n : ℂ) ^ (-(s + 1))
+      + -(s * (s + 1) * (∫ x in Set.Ioi (n : ℝ),
+          ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)))) := by
+    rw [em_q_zeta537 n hn hspos hsne1, hsplit, hneg, hdiv]
+    ring
+  -- bound on the finite sum
+  have hA : ‖∑ k ∈ Finset.range n, (1 : ℂ) / (k : ℂ) ^ s‖ ≤ (harmonic (n - 1) : ℝ) := by
+    have hstep : ∀ k ∈ Finset.range n, ‖(1 : ℂ) / (k : ℂ) ^ s‖ ≤ ((k : ℝ))⁻¹ := by
+      intro k hk
+      rcases Nat.eq_zero_or_pos k with h0 | hkpos
+      · subst h0
+        have hs0 : s ≠ 0 := by
+          intro h
+          rw [h] at hspos
+          simp at hspos
+        simp only [Nat.cast_zero, Complex.zero_cpow hs0, div_zero, norm_zero, inv_zero]
+        exact le_refl 0
+      · have hk1 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hkpos
+        have hk0 : (0 : ℝ) < (k : ℝ) := by linarith
+        rw [norm_div, norm_one, Complex.norm_natCast_cpow_of_pos hkpos, one_div, hsre]
+        have hrp : (k : ℝ) ^ (1 : ℝ) ≤ (k : ℝ) ^ σ :=
+          Real.rpow_le_rpow_of_exponent_le hk1 hσ1
+        rw [Real.rpow_one] at hrp
+        rw [← one_div, ← one_div]
+        exact one_div_le_one_div_of_le hk0 hrp
+    refine (norm_sum_le_of_le (Finset.range n) hstep).trans_eq ?_
+    have hset : Finset.range n = Finset.Icc 0 (n - 1) := by
+      ext k
+      simp only [Finset.mem_range, Finset.mem_Icc]
+      omega
+    rw [hset]
+    exact harmonic_eq_sum_Icc0 (n - 1)
+  -- the half term
+  have hB : ‖(n : ℂ) ^ (-s) / 2‖ ≤ 1 / (2 * (n : ℝ)) := by
+    rw [norm_div, Complex.norm_natCast_cpow_of_pos hn0, Complex.neg_re, hsre,
+      show ‖(2 : ℂ)‖ = 2 by norm_num]
+    have hle : ((n : ℝ)) ^ (-σ) ≤ ((n : ℝ))⁻¹ := by
+      calc ((n : ℝ)) ^ (-σ) ≤ ((n : ℝ)) ^ (-1 : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le hnR (by linarith)
+        _ = ((n : ℝ))⁻¹ := Real.rpow_neg_one _
+    have e : (1 : ℝ) / (2 * (n : ℝ)) = ((n : ℝ))⁻¹ / 2 := by
+      rw [one_div, mul_comm (2 : ℝ) ((n : ℝ)), mul_inv, div_eq_mul_inv]
+    rw [e]
+    linarith
+  -- the main term
+  have hC : ‖((n : ℂ) ^ (1 - s)) / (s - 1)‖ ≤ 1 / t := by
+    rw [norm_div, Complex.norm_natCast_cpow_of_pos hn0, Complex.sub_re, Complex.one_re, hsre]
+    have hnum : ((n : ℝ)) ^ (1 - σ) ≤ 1 :=
+      Real.rpow_le_one_of_one_le_of_nonpos hnR (by linarith)
+    have hst : t ≤ ‖s - 1‖ := by
+      have h := Complex.abs_im_le_norm (s - 1)
+      have him : (s - 1).im = t := by
+        rw [Complex.sub_im, hsim, Complex.one_im, sub_zero]
+      rw [him, abs_of_pos htpos] at h
+      exact h
+    have h1 : ((n : ℝ)) ^ (1 - σ) / ‖s - 1‖ ≤ 1 / ‖s - 1‖ :=
+      div_le_div_of_nonneg_right hnum (norm_nonneg _)
+    have h2 : 1 / ‖s - 1‖ ≤ 1 / t := one_div_le_one_div_of_le htpos hst
+    linarith
+  -- the square-root of ‖s‖
+  have hsq : ‖s‖ ^ 2 = σ ^ 2 + t ^ 2 := by
+    have h := Complex.sq_norm s
+    rw [Complex.normSq_apply] at h
+    rw [h, hsre, hsim]
+    ring
+  have hsn : ‖s‖ ≤ Real.sqrt (t ^ 2 + 9 / 4) := by
+    rw [show ‖s‖ = Real.sqrt (‖s‖ ^ 2) from (Real.sqrt_sq (norm_nonneg s)).symm]
+    apply Real.sqrt_le_sqrt
+    rw [hsq]
+    nlinarith
+  have hsq1 : ‖s + 1‖ ^ 2 = (σ + 1) ^ 2 + t ^ 2 := by
+    have h := Complex.sq_norm (s + 1)
+    rw [Complex.normSq_apply] at h
+    have h1 : (s + 1).re = σ + 1 := by rw [Complex.add_re, hsre, Complex.one_re]
+    have h2 : (s + 1).im = t := by rw [Complex.add_im, hsim, Complex.one_im, add_zero]
+    rw [h, h1, h2]
+    ring
+  have hs1 : ‖s + 1‖ ≤ Real.sqrt (t ^ 2 + 25 / 4) := by
+    rw [show ‖s + 1‖ = Real.sqrt (‖s + 1‖ ^ 2) from (Real.sqrt_sq (norm_nonneg _)).symm]
+    apply Real.sqrt_le_sqrt
+    rw [hsq1]
+    nlinarith
+  have hP : ∀ e : ℝ, e ≤ -2 → ((n : ℝ)) ^ e ≤ (((n : ℝ)) ^ 2)⁻¹ := by
+    intro e he
+    calc ((n : ℝ)) ^ e ≤ ((n : ℝ)) ^ (-2 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le hnR he
+      _ = (((n : ℝ)) ^ 2)⁻¹ := by
+          rw [Real.rpow_neg (le_of_lt hnpos), Real.rpow_two]
+  -- the 1/12 term
+  have hD : ‖s * (1 / 12) * (n : ℂ) ^ (-(s + 1))‖ ≤
+      Real.sqrt (t ^ 2 + 9 / 4) / (12 * (n : ℝ) ^ 2) := by
+    have hn2 : ((n : ℝ)) ^ (-(σ + 1)) ≤ (((n : ℝ)) ^ 2)⁻¹ := hP _ (by linarith)
+    rw [norm_mul, norm_mul, Complex.norm_natCast_cpow_of_pos hn0, Complex.neg_re,
+      Complex.add_re, Complex.one_re, hsre, show ‖(1 / 12 : ℂ)‖ = 1 / 12 by norm_num]
+    have h1 : ‖s‖ * (1 / 12) ≤ Real.sqrt (t ^ 2 + 9 / 4) * (1 / 12) :=
+      mul_le_mul_of_nonneg_right hsn (by norm_num)
+    have h2 : ‖s‖ * (1 / 12) * ((n : ℝ)) ^ (-(σ + 1))
+        ≤ Real.sqrt (t ^ 2 + 9 / 4) * (1 / 12) * (((n : ℝ)) ^ 2)⁻¹ :=
+      mul_le_mul h1 hn2 (Real.rpow_nonneg (le_of_lt hnpos) _) (by positivity)
+    refine h2.trans_eq ?_
+    have hA : (((n : ℝ)) ^ 2) ≠ 0 := by positivity
+    field_simp
+  -- the remainder integral
+  have hE : ‖-(s * (s + 1) * (∫ x in Set.Ioi (n : ℝ),
+        ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))))‖
+      ≤ Real.sqrt ((t ^ 2 + 9 / 4) * (t ^ 2 + 25 / 4)) / (24 * (n : ℝ) ^ 2) := by
+    have hq := norm_integral_q_le537 n hn hspos
+    rw [hsre] at hq
+    have hqb : ‖∫ x in Set.Ioi (n : ℝ),
+        ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))‖
+        ≤ (1 / 24) * (((n : ℝ)) ^ 2)⁻¹ := by
+      refine hq.trans ?_
+      have hn2 : ((n : ℝ)) ^ (-σ - 1) ≤ (((n : ℝ)) ^ 2)⁻¹ := hP _ (by linarith)
+      have hstep : ((n : ℝ)) ^ (-σ - 1) / (σ + 1) ≤ (1 / 2) * (((n : ℝ)) ^ 2)⁻¹ := by
+        have h3 : (σ + 1)⁻¹ ≤ (2 : ℝ)⁻¹ := by
+          rw [← one_div, ← one_div]
+          exact one_div_le_one_div_of_le (by norm_num) (by linarith)
+        calc ((n : ℝ)) ^ (-σ - 1) / (σ + 1)
+            = ((n : ℝ)) ^ (-σ - 1) * (σ + 1)⁻¹ := by rw [div_eq_mul_inv]
+          _ ≤ (((n : ℝ)) ^ 2)⁻¹ * (σ + 1)⁻¹ := by
+              apply mul_le_mul_of_nonneg_right hn2 (by positivity)
+          _ ≤ (((n : ℝ)) ^ 2)⁻¹ * (2 : ℝ)⁻¹ := by
+              apply mul_le_mul_of_nonneg_left h3 (by positivity)
+          _ = (1 / 2) * (((n : ℝ)) ^ 2)⁻¹ := by
+              rw [show ((2 : ℝ)⁻¹) = 1 / 2 by norm_num]
+              ring
+      calc (1 / 12) * (((n : ℝ)) ^ (-σ - 1) / (σ + 1))
+          ≤ (1 / 12) * ((1 / 2) * (((n : ℝ)) ^ 2)⁻¹) := by
+            apply mul_le_mul_of_nonneg_left hstep (by norm_num)
+        _ = (1 / 24) * (((n : ℝ)) ^ 2)⁻¹ := by ring
+    rw [norm_neg, norm_mul, norm_mul]
+    have h1 : ‖s‖ * ‖s + 1‖ ≤ Real.sqrt (t ^ 2 + 9 / 4) * Real.sqrt (t ^ 2 + 25 / 4) :=
+      mul_le_mul hsn hs1 (norm_nonneg _) (by positivity)
+    have h2 : ‖s‖ * ‖s + 1‖ * ‖∫ x in Set.Ioi (n : ℝ),
+        ((Int.fract x ^ 2 / 2 - Int.fract x / 2 + 1 / 12 : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))‖
+        ≤ Real.sqrt (t ^ 2 + 9 / 4) * Real.sqrt (t ^ 2 + 25 / 4) * ((1 / 24) * (((n : ℝ)) ^ 2)⁻¹) :=
+      mul_le_mul h1 hqb (norm_nonneg _) (by positivity)
+    refine h2.trans_eq ?_
+    rw [Real.sqrt_mul (by positivity)]
+    have hA : (((n : ℝ)) ^ 2) ≠ 0 := by positivity
+    field_simp
+  rw [hmain]
+  refine (norm_add₅_le _ _ _ _ _).trans ?_
+  linarith [hA, hB, hC, hD, hE]
 
 /-- Backlund p. 361, the harmonic half-term is absorbed into log n plus C.
 CONDITIONAL ON the finite complex Euler estimate with Bernoulli remainder. -/
@@ -1398,6 +1883,169 @@ theorem boundary56 (σ : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) :
   have hb : (50 : ℝ) / (2 * π) = 25 / π := by ring
   norm_num [hb] at h ⊢
   exact h
+
+/-- The functional equation at `s = t·I`, in norms, with the exact constants
+`‖Γ (t I)‖² = π / (t sinh (π t))` and `‖cos (π t I / 2)‖ = cosh (π t / 2)`:
+`‖ζ (t I)‖ · √(2 π / t) ≤ ‖ζ (1 + t I)‖`. -/
+private theorem norm_zeta_I_mul_sqrt (t : ℝ) (ht : 0 < t) :
+    ‖riemannZeta ((t : ℂ) * I)‖ * Real.sqrt (2 * π / t) ≤
+      ‖riemannZeta (1 + (t : ℂ) * I)‖ := by
+  have hsne : ∀ n : ℕ, ((t : ℂ) * I) ≠ -(n : ℂ) := by
+    intro n h
+    have h2 := congr_arg Complex.im h
+    simp at h2
+    linarith
+  have hsne1 : ((t : ℂ) * I) ≠ 1 := by
+    intro h
+    have h2 := congr_arg Complex.im h
+    simp at h2
+    linarith
+  have hfe := riemannZeta_one_sub (s := (t : ℂ) * I) hsne hsne1
+  have hC : ‖Complex.cos (π * ((t : ℂ) * I) / 2)‖ = Real.cosh (π * t / 2) := by
+    have he : π * ((t : ℂ) * I) / 2 = (((π * t / 2 : ℝ)) : ℂ) * I := by push_cast; ring
+    rw [he, Complex.cos_mul_I, ← Complex.ofReal_cosh, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos (Real.cosh_pos _)]
+  have hG : ‖Complex.Gamma ((t : ℂ) * I)‖ ^ 2 = π / (t * Real.sinh (π * t)) := by
+    have hne0 : ((t : ℂ) * I) ≠ 0 := by
+      intro h
+      have h2 := congr_arg Complex.im h
+      simp at h2
+      linarith
+    have h1 : Complex.Gamma (1 + (t : ℂ) * I) =
+        ((t : ℂ) * I) * Complex.Gamma ((t : ℂ) * I) := by
+      rw [add_comm (1 : ℂ) ((t : ℂ) * I)]
+      exact Complex.Gamma_add_one _ hne0
+    have h2 := LeanLab.PNTPort.ZetaZeros.normSq_Gamma_one t (ne_of_gt ht)
+    rw [h1, norm_mul, show ‖((t : ℂ) * I)‖ = t by
+      rw [Complex.norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos ht], mul_pow] at h2
+    have hsh : 0 < Real.sinh (π * t) := Real.sinh_pos_iff.mpr (by positivity)
+    have hshne : Real.sinh (π * t) ≠ 0 := ne_of_gt hsh
+    have htne : t ≠ 0 := ne_of_gt ht
+    field_simp at h2
+    rw [eq_div_iff (by positivity : t * Real.sinh (π * t) ≠ 0)]
+    rw [show Real.sinh (π * t) = Real.sinh (t * π) by rw [mul_comm]]
+    linear_combination h2
+  have hprod : ‖riemannZeta (1 - (t : ℂ) * I)‖
+      = 2 * ‖Complex.Gamma ((t : ℂ) * I)‖ * Real.cosh (π * t / 2)
+        * ‖riemannZeta ((t : ℂ) * I)‖ := by
+    rw [hfe, norm_mul, norm_mul, norm_mul, norm_mul]
+    have hbase : ‖(2 * (π : ℂ)) ^ (-((t : ℂ) * I))‖ = 1 := by
+      rw [show (2 * (π : ℂ)) = ((2 * π : ℝ) : ℂ) by push_cast; ring,
+        Complex.norm_cpow_eq_rpow_re_of_pos (by positivity)]
+      have hre : (-((t : ℂ) * I)).re = 0 := by simp
+      rw [hre, Real.rpow_zero]
+    rw [hbase, hC, show ‖(2 : ℂ)‖ = 2 by norm_num]
+    ring
+  have hconj : ‖riemannZeta (1 - (t : ℂ) * I)‖ = ‖riemannZeta (1 + (t : ℂ) * I)‖ := by
+    have h : (1 : ℂ) - (t : ℂ) * I = starRingEnd ℂ (1 + (t : ℂ) * I) := by
+      apply Complex.ext <;> simp
+    rw [h, riemannZeta_conj, Complex.norm_conj]
+  have hch : Real.sinh (π * t) ≤ 2 * Real.cosh (π * t / 2) ^ 2 := by
+    rw [Real.sinh_eq, Real.cosh_eq]
+    have h1 : Real.exp (π * t / 2) * Real.exp (π * t / 2) = Real.exp (π * t) := by
+      rw [← Real.exp_add]; ring_nf
+    have h2 : Real.exp (-(π * t / 2)) * Real.exp (-(π * t / 2)) = Real.exp (-(π * t)) := by
+      rw [← Real.exp_add]; ring_nf
+    rw [← h1, ← h2]
+    have hx : (0:ℝ) < Real.exp (π * t / 2) := Real.exp_pos _
+    have hy : (0:ℝ) < Real.exp (-(π * t / 2)) := Real.exp_pos _
+    have hx1 : (1:ℝ) ≤ Real.exp (π * t / 2) := Real.one_le_exp (by positivity)
+    nlinarith [hx, hy, hx1, mul_pos hx hy]
+  have hbnd : Real.sqrt (2 * π / t) ≤
+      2 * ‖Complex.Gamma ((t : ℂ) * I)‖ * Real.cosh (π * t / 2) := by
+    rw [Real.sqrt_le_iff]
+    refine ⟨by positivity, ?_⟩
+    have hshpos : 0 < Real.sinh (π * t) := Real.sinh_pos_iff.mpr (by positivity)
+    have hexp : (2 * ‖Complex.Gamma ((t : ℂ) * I)‖ * Real.cosh (π * t / 2)) ^ 2
+        = 4 * (π / (t * Real.sinh (π * t))) * Real.cosh (π * t / 2) ^ 2 := by
+      rw [mul_pow, mul_pow, hG]; ring
+    rw [hexp]
+    have hkey : 2 * π * Real.sinh (π * t) ≤ 2 * π * (2 * Real.cosh (π * t / 2) ^ 2) := by
+      apply mul_le_mul_of_nonneg_left hch (by positivity)
+    have htne : t ≠ 0 := ne_of_gt ht
+    have hshne : Real.sinh (π * t) ≠ 0 := ne_of_gt hshpos
+    field_simp
+    nlinarith [hkey]
+  calc ‖riemannZeta ((t : ℂ) * I)‖ * Real.sqrt (2 * π / t)
+      ≤ ‖riemannZeta ((t : ℂ) * I)‖ *
+          (2 * ‖Complex.Gamma ((t : ℂ) * I)‖ * Real.cosh (π * t / 2)) :=
+        mul_le_mul_of_nonneg_left hbnd (norm_nonneg _)
+    _ = ‖riemannZeta (1 + (t : ℂ) * I)‖ := by
+        have e : ‖riemannZeta ((t : ℂ) * I)‖ *
+              (2 * ‖Complex.Gamma ((t : ℂ) * I)‖ * Real.cosh (π * t / 2))
+            = 2 * ‖Complex.Gamma ((t : ℂ) * I)‖ * Real.cosh (π * t / 2)
+              * ‖riemannZeta ((t : ℂ) * I)‖ := by ring
+        rw [e, ← hprod, hconj]
+
+/-- The `σ = 0` edge of the reflection bound: the factor is `√(t/2π)`, with room for
+`1 + 1/(2t²)`. This is the boundary case of `reflection76`. -/
+private theorem norm_zeta_at_zero_re (t : ℝ) (ht : 50 ≤ t) :
+    ‖riemannZeta ((t : ℂ) * I)‖ ≤
+      (t / (2 * π)) ^ (1 / 2 : ℝ) * (1 + 1 / (2 * t ^ 2)) *
+        ‖riemannZeta (1 + (t : ℂ) * I)‖ := by
+  have htpos : 0 < t := by linarith
+  have h := norm_zeta_I_mul_sqrt t htpos
+  set r : ℝ := Real.sqrt (t / (2 * π)) with hr
+  have hrpos : 0 < r := Real.sqrt_pos.mpr (by positivity)
+  have hsq : Real.sqrt (2 * π / t) = r⁻¹ := by
+    rw [hr, ← Real.sqrt_inv]
+    congr 1
+    field_simp
+  rw [hsq] at h
+  have h2 : ‖riemannZeta ((t : ℂ) * I)‖ ≤ ‖riemannZeta (1 + (t : ℂ) * I)‖ * r := by
+    have hm := mul_le_mul_of_nonneg_right h hrpos.le
+    rwa [mul_assoc, inv_mul_cancel₀ hrpos.ne', mul_one] at hm
+  have hfac : r ≤ r * (1 + 1 / (2 * t ^ 2)) := by
+    have hp : (1 : ℝ) ≤ 1 + 1 / (2 * t ^ 2) := by
+      have h0 : (0 : ℝ) < 1 / (2 * t ^ 2) := by positivity
+      linarith
+    exact le_mul_of_one_le_right hrpos.le hp
+  calc ‖riemannZeta ((t : ℂ) * I)‖ ≤ ‖riemannZeta (1 + (t : ℂ) * I)‖ * r := h2
+    _ ≤ ‖riemannZeta (1 + (t : ℂ) * I)‖ * (r * (1 + 1 / (2 * t ^ 2))) :=
+        mul_le_mul_of_nonneg_left hfac (norm_nonneg _)
+    _ = (t / (2 * π)) ^ (1 / 2 : ℝ) * (1 + 1 / (2 * t ^ 2)) *
+          ‖riemannZeta (1 + (t : ℂ) * I)‖ := by
+        rw [hr, Real.sqrt_eq_rpow]; ring
+
+/-- The left edge of Backlund's display 56: `‖ζ (t I)‖ ≤ √(t/2π) log t` for `t ≥ 50`,
+from the `σ = 0` reflection and display 54 (`backlund54`, proved above). -/
+private theorem norm_zeta_at_zero_re_log (t : ℝ) (ht : 50 ≤ t) :
+    ‖riemannZeta ((t : ℂ) * I)‖ ≤ (t / (2 * π)) ^ (1 / 2 : ℝ) * Real.log t := by
+  have htpos : 0 < t := by linarith
+  have h1 := norm_zeta_at_zero_re t ht
+  have h2 := backlund54 1 t le_rfl ht
+  have h3 : (1 + 1 / (2 * t ^ 2)) * (Real.log t - 0.048) ≤ Real.log t := by
+    have hL : Real.log t ≤ t := by
+      have := Real.log_le_sub_one_of_pos htpos
+      linarith
+    have hlt : Real.log t / (2 * t ^ 2) ≤ 0.048 := by
+      have h4 : Real.log t / (2 * t ^ 2) ≤ t / (2 * t ^ 2) :=
+        div_le_div_of_nonneg_right hL (by positivity)
+      have he : t / (2 * t ^ 2) = 1 / (2 * t) := by
+        field_simp
+      rw [he] at h4
+      have h5 : 1 / (2 * t) ≤ 1 / 100 :=
+        one_div_le_one_div_of_le (by norm_num) (by linarith)
+      linarith
+    have key : (1 + 1 / (2 * t ^ 2)) * (Real.log t - 0.048)
+        = Real.log t + (Real.log t / (2 * t ^ 2) - 0.048 - 0.048 / (2 * t ^ 2)) := by
+      field_simp
+      ring
+    rw [key]
+    have h7 : Real.log t / (2 * t ^ 2) - 0.048 ≤ 0 := by linarith
+    have h8 : (0 : ℝ) < 0.048 / (2 * t ^ 2) := by positivity
+    linarith
+  calc ‖riemannZeta ((t : ℂ) * I)‖
+      ≤ (t / (2 * π)) ^ (1 / 2 : ℝ) * (1 + 1 / (2 * t ^ 2)) *
+          ‖riemannZeta (1 + (t : ℂ) * I)‖ := h1
+    _ ≤ (t / (2 * π)) ^ (1 / 2 : ℝ) * (1 + 1 / (2 * t ^ 2)) *
+          (Real.log t - 0.048) := by
+        apply mul_le_mul_of_nonneg_left h2
+        positivity
+    _ ≤ (t / (2 * π)) ^ (1 / 2 : ℝ) * Real.log t := by
+        have hb : (0 : ℝ) ≤ (t / (2 * π)) ^ (1 / 2 : ℝ) := by positivity
+        nlinarith [h3, hb]
 
 /-- LEAF. Backlund p. 369, displays 75 and 76, functional equation multiplier.
 This states only the norm comparison with the reflected right-strip point.
