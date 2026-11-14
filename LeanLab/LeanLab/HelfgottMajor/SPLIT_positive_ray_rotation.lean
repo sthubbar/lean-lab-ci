@@ -30,7 +30,11 @@ open scoped Topology
 Gaussian Mellin integrand, so the rotated ray integral is `gaussianMellin` itself. -/
 theorem zero_angle_ray_eq_mellin (δ : ℝ) (s : ℂ) (hσ : 0 < s.re) :
     (∫ x : ℝ in Ioi (0 : ℝ), rotatedKernel δ 0 s x) = gaussianMellin δ s := by
-  sorry
+  unfold gaussianMellin mellin rotatedKernel
+  apply setIntegral_congr_fun measurableSet_Ioi
+  intro x hx
+  dsimp only
+  simp only [Complex.exp_zero, Complex.ofReal_zero, zero_add, one_mul]
 
 /-- LEAF endpoint continuity of the angle family. As the angle decreases to zero from above,
 the normalized rotated ray integral tends to its value at angle zero. This is the dominated
@@ -55,7 +59,12 @@ theorem angle_family_deriv_zero (δ : ℝ) (s : ℂ) (hσ : 0 < s.re) (φ : ℝ)
 theorem angle_prefactor_hasDerivAt (s : ℂ) (φ : ℝ) :
     HasDerivAt (fun ψ : ℝ => Complex.exp ((ψ : ℂ) * Complex.I * s))
       (Complex.I * s * Complex.exp ((φ : ℂ) * Complex.I * s)) φ := by
-  sorry
+  have hinner : HasDerivAt (fun ψ : ℝ => (ψ : ℂ) * Complex.I * s)
+      (Complex.I * s) φ := by
+    convert (((hasDerivAt_id φ).ofReal_comp).mul_const Complex.I).mul_const s using 1 <;>
+      simp only [id_eq, one_mul] <;> ring
+  convert (Complex.hasDerivAt_exp ((φ : ℂ) * Complex.I * s)).comp φ hinner using 1 <;>
+    simp only [id_eq] <;> ring
 
 /-- The contour replacement by the rotated ray, assembled from the four leaves above.
 No hypothesis of the sealed statement is dropped and no leaf is used as its hypothesis. -/

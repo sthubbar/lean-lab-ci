@@ -1,0 +1,13 @@
+import LeanLab.HelfgottMajor.Decomp511b
+#check rexp
+#check Complex.ofReal_exp
+#check Complex.exp_add
+#check HasDerivAt.ofReal_comp
+#check HasDerivAt.mul_const
+#check Complex.hasDerivAt_exp
+#check Complex.continuous_exp
+#check MeasureTheory.tendsto_integral_filter_of_dominated_convergence
+#check tendsto_integral_filter_of_dominated_convergence
+#check MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto
+#check hasDerivAt_ofReal_cpow_const
+#check Complex.continuous_ofReal_cpow_const
