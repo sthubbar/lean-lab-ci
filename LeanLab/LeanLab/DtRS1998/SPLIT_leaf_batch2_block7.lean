@@ -64,25 +64,25 @@ private theorem block7_pair_nonempty : (qs.drop 184).take 2 ≠ [] := by
 third batch, the two candidates at offsets 185 and 186 of the fixed
 candidate list. This is two candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair0 : ∀ q ∈ (qs.drop 184).take 2, q.Prime := by
-  sorry
+  decide +kernel
 
 /-- LEAF: the primality check of the second pair of the eighth block, the two
 candidates at offsets 187 and 188 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair1 : ∀ q ∈ (qs.drop 186).take 2, q.Prime := by
-  sorry
+  decide +kernel
 
 /-- LEAF: the primality check of the third pair of the eighth block, the two
 candidates at offsets 189 and 190 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair2 : ∀ q ∈ (qs.drop 188).take 2, q.Prime := by
-  sorry
+  decide +kernel
 
 /-- LEAF: the primality check of the fourth pair of the eighth block, the two
 candidates at offsets 191 and 192 of the fixed candidate list. This is two
 candidates, not the eight of the block. -/
 theorem leaf_batch2_block7_pair3 : ∀ q ∈ (qs.drop 190).take 2, q.Prime := by
-  sorry
+  decide +kernel
 
 /-- The block, proved from the four pair leaves: the block is the four pairs
 concatenated, and primality is inherited entry by entry from the pair whose
