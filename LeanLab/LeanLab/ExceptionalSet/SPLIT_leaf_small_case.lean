@@ -23,7 +23,16 @@ multiplying out is `leaf_small_bookkeeping` and `leaf_block_length_ge`; the asse
 does the partition, the count and the constants.
 
 `sorry` sits on the one analytic leaf `leaf_small_block_sum_bound` alone; the two
-bookkeeping leaves are proved below. AI wrote the Lean code. Binary Goldbach is OPEN.
+bookkeeping leaves are proved below, and so is the Taylor reduction that leaf needs, as
+`block_sum_taylor_reduction`: on a block inside `[N, N+P]` the sum over `f` is the sum over
+the `n`-th Taylor polynomial at the left end plus `m` times the remainder
+`4π (n+1) P^(-c1(n+1)) m^(n+1)`. The Vinogradov input is also in place up to Lemma 2
+itself: `exists_coefficient_approximation` produces an `s` in `T` with `2 ≤ s ≤ n`, the
+bounds `P^(-c2 s) ≤ |f^(s)(a)/s!| ≤ P^(-c3 s)` at the left end, and by Dirichlet a coprime
+`A/q` with `q ≤ ⌈P^(c2 s)⌉` and `|f^(s)(a)/s! - A/q| ≤ 1/(⌈P^(c2 s)⌉ q)`. What the open
+leaf still needs is Karacuba Lemma 2 applied at that `A/q`, and the bookkeeping that turns
+its `τ`, `l` and `ρ` into a single `ρ` bounded away from zero.
+AI wrote the Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.KaracubaSplit
 
@@ -265,6 +274,240 @@ private lemma block_partition_bound (g : ℕ → ℂ) (C ρ : ℝ) (L : ℕ) (hL
               (((P₁ - L : ℕ) : ℝ) / (L : ℝ) + 1) * (C * (L : ℝ) ^ (1 - ρ)) :=
               add_le_add hfirst htail
           _ = _ := hsum
+
+/-- `e(t) = exp(2πit)`: its real and imaginary parts and its Lipschitz constant `4π`. -/
+private theorem eC_re (t : ℝ) : (eC t).re = Real.cos (2 * Real.pi * t) := by
+  rw [eC, show (2 : ℂ) * (Real.pi : ℂ) * Complex.I * (t : ℂ) = ((2 * Real.pi * t : ℝ) : ℂ) * Complex.I by
+    push_cast; ring]
+  exact Complex.exp_ofReal_mul_I_re _
+
+private theorem eC_im (t : ℝ) : (eC t).im = Real.sin (2 * Real.pi * t) := by
+  rw [eC, show (2 : ℂ) * (Real.pi : ℂ) * Complex.I * (t : ℂ) = ((2 * Real.pi * t : ℝ) : ℂ) * Complex.I by
+    push_cast; ring]
+  exact Complex.exp_ofReal_mul_I_im _
+
+/-- `e(t) = exp(2πit)` is Lipschitz with constant `4π`. -/
+private theorem norm_eC_sub_le (u v : ℝ) : ‖eC u - eC v‖ ≤ 4 * Real.pi * |u - v| := by
+  have h1 : ‖eC u - eC v‖ ≤ |(eC u - eC v).re| + |(eC u - eC v).im| :=
+    Complex.norm_le_abs_re_add_abs_im _
+  have h2 : |(eC u - eC v).re| = |Real.cos (2 * Real.pi * u) - Real.cos (2 * Real.pi * v)| := by
+    rw [Complex.sub_re, eC_re, eC_re]
+  have h3 : |(eC u - eC v).im| = |Real.sin (2 * Real.pi * u) - Real.sin (2 * Real.pi * v)| := by
+    rw [Complex.sub_im, eC_im, eC_im]
+  have h4 : |Real.cos (2 * Real.pi * u) - Real.cos (2 * Real.pi * v)| ≤ 2 * Real.pi * |u - v| := by
+    have := Real.abs_cos_sub_cos_le (2 * Real.pi * u) (2 * Real.pi * v)
+    rw [show 2 * Real.pi * u - 2 * Real.pi * v = 2 * Real.pi * (u - v) by ring, abs_mul,
+      abs_of_pos (by positivity : (0:ℝ) < 2 * Real.pi)] at this
+    exact this
+  have h5 : |Real.sin (2 * Real.pi * u) - Real.sin (2 * Real.pi * v)| ≤ 2 * Real.pi * |u - v| := by
+    have := Real.abs_sin_sub_sin_le (2 * Real.pi * u) (2 * Real.pi * v)
+    rw [show 2 * Real.pi * u - 2 * Real.pi * v = 2 * Real.pi * (u - v) by ring, abs_mul,
+      abs_of_pos (by positivity : (0:ℝ) < 2 * Real.pi)] at this
+    exact this
+  rw [h2, h3] at h1
+  linarith
+
+/-- The block Taylor remainder: on a block `[a, a+m)` inside `[N, N+P]`, the `n`-th Taylor
+polynomial at the left end misses `f` by at most `(n+1) P^{-c1(n+1)} m^{n+1}`. -/
+private theorem taylor_remainder_block
+    {c0 c1 c2 c3 : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hP : 0 < P)
+    {a m : ℕ} (ha : N ≤ a) (ham : a + m ≤ N + P) :
+    ∀ y : ℕ, y ≤ m →
+      |f ((a : ℝ) + (y : ℝ)) -
+        taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
+          ((a : ℝ) + (y : ℝ))|
+        ≤ ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1) := by
+  obtain ⟨U, hUopen, hUI, hCf⟩ := hH.1
+  have hCn := hH.2.1
+  have hPr : (0 : ℝ) < (P : ℝ) := by exact_mod_cast hP
+  have haR : (N : ℝ) ≤ (a : ℝ) := by exact_mod_cast ha
+  have hamR : (a : ℝ) + (m : ℝ) ≤ (N : ℝ) + (P : ℝ) := by
+    have h : ((a + m : ℕ) : ℝ) ≤ ((N + P : ℕ) : ℝ) := by exact_mod_cast ham
+    push_cast at h
+    linarith
+  have hsub : Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)) ⊆ U := by
+    intro z hz
+    exact hUI ⟨by linarith [hz.1], by linarith [hz.2]⟩
+  rcases Nat.eq_zero_or_pos m with hm0 | hmpos
+  · subst hm0
+    intro y hy
+    have hy0 : y = 0 := by omega
+    subst hy0
+    rw [Nat.cast_zero, add_zero, taylorWithinEval_self, sub_self, abs_zero]
+    positivity
+  · have hab : (a : ℝ) < (a : ℝ) + (m : ℝ) := by
+      have : (0 : ℝ) < (m : ℝ) := by exact_mod_cast hmpos
+      linarith
+    have hu : UniqueDiffOn ℝ (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) := uniqueDiffOn_Icc hab
+    have hCdiff : ContDiffOn ℝ (n + 1) f (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) :=
+      hCf.mono (fun z hz => hsub hz)
+    have hCbd : ∀ z ∈ Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)),
+        ‖iteratedDerivWithin (n + 1) f (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) z‖
+          ≤ ((n + 1).factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := by
+      intro z hz
+      have hzU : z ∈ U := hsub hz
+      have hcont : ContDiffAt ℝ (n + 1) f z := hCf.contDiffAt (hUopen.mem_nhds hzU)
+      have heq : iteratedDerivWithin (n + 1) f (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) z
+          = iteratedDeriv (n + 1) f z := iteratedDerivWithin_eq_iteratedDeriv hu hcont hz
+      have hzI : z ∈ Set.Icc (N : ℝ) ((N : ℝ) + (P : ℝ)) :=
+        ⟨by linarith [hz.1], by linarith [hz.2]⟩
+      have hb := hCn z hzI
+      have hb' : ‖iteratedDeriv (n + 1) f z‖ / ((n + 1).factorial : ℝ)
+          ≤ (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := by
+        rw [← Real.norm_eq_abs, norm_div, Real.norm_natCast] at hb
+        exact hb
+      have hfac : (0 : ℝ) < ((n + 1).factorial : ℝ) := by positivity
+      rw [div_le_iff₀ hfac] at hb'
+      rw [heq, Real.norm_eq_abs]
+      calc |iteratedDeriv (n + 1) f z| = ‖iteratedDeriv (n + 1) f z‖ := (Real.norm_eq_abs _).symm
+        _ ≤ ((n + 1).factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := by
+            rw [mul_comm]; exact hb'
+    intro y hy
+    have hym : (y : ℝ) ≤ (m : ℝ) := by exact_mod_cast hy
+    have hy0 : (0 : ℝ) ≤ (y : ℝ) := Nat.cast_nonneg y
+    have hx : (a : ℝ) + (y : ℝ) ∈ Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)) := by
+      refine ⟨by linarith, by linarith⟩
+    have hmain := taylor_mean_remainder_bound (f := f) (a := (a : ℝ)) (b := (a : ℝ) + (m : ℝ))
+      (C := ((n + 1).factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))))
+      (x := (a : ℝ) + (y : ℝ)) (n := n) hab.le hCdiff hx hCbd
+    rw [Real.norm_eq_abs] at hmain
+    refine hmain.trans ?_
+    have hxa : (a : ℝ) + (y : ℝ) - (a : ℝ) = (y : ℝ) := by ring
+    rw [hxa]
+    have hpow : (y : ℝ) ^ (n + 1) ≤ (m : ℝ) ^ (n + 1) := pow_le_pow_left₀ hy0 hym _
+    have hPnn : (0 : ℝ) ≤ (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := Real.rpow_nonneg hPr.le _
+    have hfs : ((n + 1).factorial : ℝ) = ((n : ℝ) + 1) * (n.factorial : ℝ) := by
+      rw [Nat.factorial_succ]
+      push_cast
+      ring
+    have hfac : (0 : ℝ) < ((n.factorial : ℕ) : ℝ) := by positivity
+    rw [hfs]
+    rw [show ((n : ℝ) + 1) * (n.factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) *
+        (y : ℝ) ^ (n + 1) / (n.factorial : ℝ)
+        = ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (y : ℝ) ^ (n + 1) by
+      field_simp]
+    exact mul_le_mul_of_nonneg_left hpow (by positivity)
+
+
+/-- Changing each term of a block sum by a remainder bounded by `ε` costs `m * 4π ε`. -/
+private theorem sum_eC_le_add {g h : ℕ → ℝ} {m : ℕ} {ε : ℝ}
+    (_hε : 0 ≤ ε) (hgh : ∀ y, y < m → |g y - h y| ≤ ε) :
+    ‖∑ y ∈ Finset.range m, eC (g y)‖ ≤
+      ‖∑ y ∈ Finset.range m, eC (h y)‖ + (m : ℝ) * (4 * Real.pi * ε) := by
+  have hdecomp : ∑ y ∈ Finset.range m, eC (g y) =
+      (∑ y ∈ Finset.range m, eC (h y)) + ∑ y ∈ Finset.range m, (eC (g y) - eC (h y)) := by
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl (fun y _ => by ring)
+  have hb : ‖∑ y ∈ Finset.range m, (eC (g y) - eC (h y))‖ ≤ (m : ℝ) * (4 * Real.pi * ε) := by
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ y ∈ Finset.range m, ‖eC (g y) - eC (h y)‖
+        ≤ ∑ y ∈ Finset.range m, (4 * Real.pi * ε) := by
+          refine Finset.sum_le_sum (fun y hy => ?_)
+          refine (norm_eC_sub_le _ _).trans ?_
+          exact mul_le_mul_of_nonneg_left (hgh y (Finset.mem_range.1 hy))
+            (by positivity)
+      _ = (m : ℝ) * (4 * Real.pi * ε) := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  rw [hdecomp]
+  linarith [norm_add_le (∑ y ∈ Finset.range m, eC (h y))
+    (∑ y ∈ Finset.range m, (eC (g y) - eC (h y)))]
+
+/-- The p. 248 Taylor reduction: on a block `[a, a+m)` inside `[N, N+P]` the exponential sum
+over `f` is that over the `n`-th Taylor polynomial at `a`, up to `m` times the remainder
+`4π (n+1) P^{-c1(n+1)} m^{n+1}`. -/
+private theorem block_sum_taylor_reduction
+    {c0 c1 c2 c3 : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hP : 0 < P)
+    {a m : ℕ} (ha : N ≤ a) (ham : a + m ≤ N + P) :
+    ‖∑ x ∈ Finset.Ico a (a + m), eC (f x)‖ ≤
+      ‖∑ y ∈ Finset.range m,
+        eC (taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
+          ((a : ℝ) + (y : ℝ)))‖ +
+      (m : ℝ) * (4 * Real.pi * (((n : ℝ) + 1) *
+        (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1))) := by
+  have hrem := taylor_remainder_block hH hP ha ham
+  have hε : (0 : ℝ) ≤ ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1) := by
+    have hPr : (0 : ℝ) < (P : ℝ) := by exact_mod_cast hP
+    have := Real.rpow_nonneg hPr.le (-(c1 * ((n + 1 : ℕ) : ℝ)))
+    positivity
+  have hfun : ∀ y : ℕ, y < m →
+      |f ((a : ℝ) + (y : ℝ)) - taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)))
+        (a : ℝ) ((a : ℝ) + (y : ℝ))| ≤
+        ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1) :=
+    fun y hy => hrem y (le_of_lt hy)
+  have h := sum_eC_le_add (g := fun y => f ((a : ℝ) + (y : ℝ)))
+    (h := fun y => taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
+      ((a : ℝ) + (y : ℝ))) (m := m) (ε := ((n : ℝ) + 1) *
+        (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1)) hε hfun
+  rw [Finset.sum_Ico_eq_sum_range, show a + m - a = m by omega]
+  simpa using h
+
+/-- The set `T` of the hypotheses is nonempty, since `c0 n ≤ |T|` with `c0 > 0` and `2 ≤ n`. -/
+private theorem index_nonempty {c0 c1 c2 c3 : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hc0 : 0 < c0) (hn : 2 ≤ n) : T.Nonempty := by
+  have hcard : c0 * (n : ℝ) ≤ (T.card : ℝ) := hH.2.2.2.1
+  have hn0 : (0 : ℝ) < (n : ℝ) := by exact_mod_cast (by omega : 0 < n)
+  have hpos : (0 : ℝ) < (T.card : ℝ) := lt_of_lt_of_le (mul_pos hc0 hn0) hcard
+  exact Finset.card_pos.mp (by exact_mod_cast hpos)
+
+/-- An index `s` of the hypothesis set, with `2 ≤ s ≤ n`. -/
+private theorem exists_index {c0 c1 c2 c3 : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hc0 : 0 < c0) (hn : 2 ≤ n) :
+    ∃ s ∈ T, 2 ≤ s ∧ s ≤ n := by
+  obtain ⟨s, hs⟩ := index_nonempty hH hc0 hn
+  have := Finset.mem_Icc.mp (hH.2.2.1 hs)
+  exact ⟨s, hs, this.1, this.2⟩
+
+/-- Dirichlet approximation with a denominator bound: for `Q > 0` and real `α` there are
+`A` and `q` with `gcd A q = 1`, `1 ≤ q ≤ Q` and `|α - A/q| ≤ 1/(Q q)`. -/
+private theorem exists_rat_approx (α : ℝ) (Q : ℕ) (hQ : 0 < Q) :
+    ∃ (A : ℤ) (q : ℕ), Int.gcd A q = 1 ∧ 1 ≤ q ∧ q ≤ Q ∧
+      |α - (A : ℝ) / (q : ℝ)| ≤ 1 / ((Q : ℝ) * (q : ℝ)) := by
+  obtain ⟨r, h1, h2⟩ := Real.exists_rat_abs_sub_le_and_den_le α hQ
+  have hQpos : (0 : ℝ) < (Q : ℝ) := by exact_mod_cast hQ
+  have hdpos : (0 : ℝ) < (r.den : ℝ) := by exact_mod_cast r.den_pos
+  have hle : (Q : ℝ) * (r.den : ℝ) ≤ ((Q : ℝ) + 1) * (r.den : ℝ) := by nlinarith
+  have hmono : 1 / (((Q : ℝ) + 1) * (r.den : ℝ)) ≤ 1 / ((Q : ℝ) * (r.den : ℝ)) :=
+    one_div_le_one_div_of_le (mul_pos hQpos hdpos) hle
+  refine ⟨r.num, r.den, r.reduced, r.den_pos, h2, ?_⟩
+  have hr : (r : ℝ) = (r.num : ℝ) / (r.den : ℝ) := by
+    rw [Rat.cast_def]
+  rw [← hr]
+  exact h1.trans hmono
+
+/-- The Vinogradov input of the p. 248 case, at one coefficient: some `s ∈ T` satisfies
+`2 ≤ s ≤ n`, and the `s`-th Taylor coefficient at the left end of the block has a rational
+approximation with coprime numerator and denominator `q ≤ ⌈P^(c2 s)⌉` and error at most
+`1/(⌈P^(c2 s)⌉ q)`. -/
+private theorem exists_coefficient_approximation
+    {c0 c1 c2 c3 : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hc0 : 0 < c0) (hn : 2 ≤ n) (hP : 0 < P)
+    {a m : ℕ} (ha : N ≤ a) (ham : a + m ≤ N + P) :
+    ∃ s ∈ T, 2 ≤ s ∧ s ≤ n ∧
+      (P : ℝ) ^ (-(c2 * s)) ≤ |iteratedDeriv s f (a : ℝ) / (s.factorial : ℝ)| ∧
+      |iteratedDeriv s f (a : ℝ) / (s.factorial : ℝ)| ≤ (P : ℝ) ^ (-(c3 * s)) ∧
+      ∃ (A : ℤ) (q : ℕ), Int.gcd A q = 1 ∧ 1 ≤ q ∧ q ≤ ⌈(P : ℝ) ^ (c2 * s)⌉₊ ∧
+        |iteratedDeriv s f (a : ℝ) / (s.factorial : ℝ) - (A : ℝ) / (q : ℝ)|
+          ≤ 1 / ((⌈(P : ℝ) ^ (c2 * s)⌉₊ : ℝ) * (q : ℝ)) := by
+  obtain ⟨s, hsT, hs2, hsn⟩ := exists_index hH hc0 hn
+  have haR : (N : ℝ) ≤ (a : ℝ) := by exact_mod_cast ha
+  have hamR : (a : ℝ) ≤ (N : ℝ) + (P : ℝ) := by
+    have h : ((a + m : ℕ) : ℝ) ≤ ((N + P : ℕ) : ℝ) := by exact_mod_cast ham
+    push_cast at h
+    linarith
+  obtain ⟨hc2, hc3⟩ := hH.2.2.2.2 s hsT (a : ℝ) ⟨haR, hamR⟩
+  have hx : (0 : ℝ) < (P : ℝ) ^ (c2 * s) := Real.rpow_pos_of_pos (by exact_mod_cast hP) _
+  have hQ : 0 < ⌈(P : ℝ) ^ (c2 * s)⌉₊ := by
+    rcases Nat.eq_zero_or_pos ⌈(P : ℝ) ^ (c2 * s)⌉₊ with h | h
+    · exfalso
+      have hle : (P : ℝ) ^ (c2 * s) ≤ (0 : ℝ) := by
+        have := (Nat.ceil_le (a := (P : ℝ) ^ (c2 * s)) (n := 0)).mp (le_of_eq h)
+        simpa using this
+      linarith
+    · exact h
+  obtain ⟨A, q, hgcd, hq1, hqQ, herr⟩ := exists_rat_approx _ _ hQ
+  exact ⟨s, hsT, hs2, hsn, hc2, hc3, A, q, hgcd, hq1, hqQ, herr⟩
 
 /-- The charged statement, from the three leaves. -/
 theorem leaf_small_case_split (h2 : KarLemma2) :
