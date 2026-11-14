@@ -1,4 +1,5 @@
 import LeanLab.ChirreHagen2025.Decomp429e
+import LeanLab.PNTPort.ExplicitPsi1.ZeroSum
 
 /-!
 Supply for Decomp358d.mangoldt_large_range through the existing Decomp429e split.
@@ -11,7 +12,7 @@ https://doi.org/10.4064/aa159-2-2
 AI wrote this Lean code. Goldbach is open.
 -/
 namespace LeanLab.ChirreHagen2025.Decomp391a
-open ArithmeticFunction MeasureTheory Set
+open ArithmeticFunction MeasureTheory Set Filter
 
 /-- CHS page 4 equation 3.3, a zero term with analytic multiplicity.
 The subtype includes every nontrivial zero in the open critical strip. -/
@@ -151,6 +152,83 @@ theorem remainder_integral_abs_le (x : ℝ) (hx : 71 ≤ x) :
   rw [integral_const_mul, hi.2] at hh
   exact abs_integral_le_integral_abs.trans (by simpa only [mul_one_div] using hh)
 
+/-- Comparison of shifted zero denominators outside a disk. -/
+theorem shifted_denominator_comparison (z : ℂ) (hz : 2 ≤ ‖z‖) :
+    ‖z + 1‖ ≤ 3 * ‖z - 1‖ := by
+  have hm := norm_sub_norm_le z (1 : ℂ)
+  simp only [norm_one] at hm
+  have hh := norm_add_le (z - 1) (2 : ℂ)
+  rw [show z - 1 + 2 = z + 1 by ring] at hh
+  norm_num at hh
+  linarith
+
+/-- CHS page 4 equation 3.3, comparison with the convergent zero-count weight. -/
+theorem zero_term_norm_le (x : ℝ) (hx : 1 ≤ x)
+    (ρ : {s : ℂ // riemannZeta s = 0 ∧ 0 < s.re ∧ s.re < 1})
+    (hρ : 2 ≤ ‖(ρ : ℂ)‖) :
+    ‖zeroTerm x ρ‖ ≤
+      3 * ((analyticOrderNatAt riemannZeta ρ : ℝ) / ‖(ρ : ℂ) * ((ρ : ℂ) + 1)‖) := by
+  have hx0 : 0 < x := by linarith
+  have hz0 : (ρ : ℂ) ≠ 0 := by intro h; have := ρ.2.2.1; simp [h] at this
+  have hzm : (ρ : ℂ) - 1 ≠ 0 := by
+    intro h
+    have hh : (ρ : ℂ) = 1 := sub_eq_zero.mp h
+    have := ρ.2.2.2
+    simp [hh] at this
+  have hzp : (ρ : ℂ) + 1 ≠ 0 := by
+    intro h
+    have hh := congrArg Complex.re h
+    have := ρ.2.2.1
+    simp only [Complex.add_re, Complex.one_re, Complex.zero_re] at hh
+    linarith
+  have hdm : 0 < ‖(ρ : ℂ) * ((ρ : ℂ) - 1)‖ := norm_pos_iff.mpr (mul_ne_zero hz0 hzm)
+  have hdp : 0 < ‖(ρ : ℂ) * ((ρ : ℂ) + 1)‖ := norm_pos_iff.mpr (mul_ne_zero hz0 hzp)
+  have hp := Real.rpow_le_one_of_one_le_of_nonpos hx (sub_nonpos.mpr ρ.2.2.2.le)
+  have hc := shifted_denominator_comparison ρ hρ
+  rw [zeroTerm, norm_div, norm_mul, Complex.norm_natCast,
+    Complex.norm_cpow_eq_rpow_re_of_pos hx0]
+  simp only [Complex.sub_re, Complex.one_re]
+  calc
+    _ ≤ (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖(ρ : ℂ) * ((ρ : ℂ) - 1)‖ := by
+      apply div_le_div_of_nonneg_right _ hdm.le
+      simpa using mul_le_mul_of_nonneg_left hp (Nat.cast_nonneg (analyticOrderNatAt riemannZeta ρ))
+    _ ≤ _ := by
+      rw [← mul_div_assoc]
+      apply (div_le_div_iff₀ hdm hdp).mpr
+      calc
+        _ = ((analyticOrderNatAt riemannZeta ρ : ℝ) * ‖(ρ : ℂ)‖) * ‖(ρ : ℂ) + 1‖ := by
+          rw [norm_mul]; ring
+        _ ≤ ((analyticOrderNatAt riemannZeta ρ : ℝ) * ‖(ρ : ℂ)‖) * (3 * ‖(ρ : ℂ) - 1‖) :=
+          mul_le_mul_of_nonneg_left hc (by positivity)
+        _ = _ := by rw [norm_mul]; ring
+
+/-- CHS page 4 equation 3.3, absolute convergence of its zero expansion. -/
+theorem zero_series_summable (x : ℝ) (hx : 1 ≤ x) :
+    Summable (zeroTerm x) := by
+  let i : {s : ℂ // riemannZeta s = 0 ∧ 0 < s.re ∧ s.re < 1} →
+      LeanLab.PNTPort.ExplicitPsi1.Zall :=
+    fun ρ => ⟨ρ, ρ.2.1, by linarith [ρ.2.2.1]⟩
+  have hi : Function.Injective i := by
+    intro a b h
+    apply Subtype.ext
+    exact congrArg (fun z : LeanLab.PNTPort.ExplicitPsi1.Zall => (z : ℂ)) h
+  have hw : Summable (fun ρ : {s : ℂ // riemannZeta s = 0 ∧ 0 < s.re ∧ s.re < 1} =>
+      (analyticOrderNatAt riemannZeta ρ : ℝ) / ‖(ρ : ℂ) * ((ρ : ℂ) + 1)‖) := by
+    simpa [i, Function.comp_def, LeanLab.PNTPort.ExplicitPsi1.hw] using
+      (LeanLab.PNTPort.ExplicitPsi1.summable_hw.comp_injective hi)
+  have hc := (isCompact_closedBall (0 : ℂ) 2).inter_riemannZetaZeros_finite
+  have hpre : ((fun ρ : {s : ℂ // riemannZeta s = 0 ∧ 0 < s.re ∧ s.re < 1} => (ρ : ℂ)) ⁻¹'
+      (Metric.closedBall (0 : ℂ) 2 ∩ riemannZetaZeros)).Finite :=
+    hc.preimage (fun a _ b _ h => Subtype.ext h)
+  have hf : {ρ : {s : ℂ // riemannZeta s = 0 ∧ 0 < s.re ∧ s.re < 1} | ¬ 2 ≤ ‖(ρ : ℂ)‖}.Finite := by
+    apply hpre.subset
+    intro ρ hρ
+    refine ⟨?_, ρ.2.1⟩
+    simpa only [Metric.mem_closedBall, dist_zero_right] using (lt_of_not_ge hρ).le
+  apply (hw.mul_left 3).of_norm_bounded_eventually
+  filter_upwards [eventually_cofinite.mpr hf] with ρ hρ
+  simpa only [zeroTerm] using zero_term_norm_le x hx ρ hρ
+
 /-- LEAF. CHS page 4 equation 3.3 and Remark 7.
 This is the exact corrected explicit formula without a quantitative psi bound.
 Absolute convergence is part of the statement to rule out a default tsum. -/
@@ -159,7 +237,9 @@ theorem weighted_explicit_formula (x : ℝ) (hx : 100000 ≤ x) :
     (∑ n ∈ Finset.Icc 1 ⌊x⌋₊, vonMangoldt n / (n : ℝ)) =
       Real.log x - Real.eulerMascheroniConstant + (Chebyshev.psi x - x) / x -
         (∑' ρ, zeroTerm x ρ).re + ∫ u in Ioi x, remainderKernel u := by
-  sorry
+  constructor
+  · exact zero_series_summable x (by linarith)
+  · exact?
 
 /-- LEAF. Ramare pages 118 to 120, equation 5.1 and its following estimates.
 This controls only the zero contribution. It contains no Mangoldt sum or psi.
