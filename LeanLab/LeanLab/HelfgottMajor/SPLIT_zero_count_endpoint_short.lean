@@ -49,7 +49,19 @@ nothing else. -/
 theorem zero_count_endpoint_short_q (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hq : (q : ℝ) ≤ 2 * π) :
     zeroCount χ (2 * π / q) ≤ 0.5 * log (2 * π) + 17.7 - (2 / q) * log (2 * π * exp 1) := by
-  sorry
+  have hq0 : (0 : ℝ) < (q : ℝ) := by exact_mod_cast NeZero.pos q
+  have hqne : (q : ℝ) ≠ 0 := hq0.ne'
+  have hT : (1 : ℝ) ≤ 2 * π / q := by
+    rw [le_div_iff₀ hq0]
+    simpa using hq
+  have hqt : (q : ℝ) * (2 * π / (q : ℝ)) ≤ 2 * π := by
+    rw [mul_div_cancel₀ _ hqne]
+  have h := zero_count_short_height q χ hχ (2 * π / q) hT hqt
+  have e1 : (q : ℝ) * (2 * π / (q : ℝ)) = 2 * π := mul_div_cancel₀ _ hqne
+  have e2 : (2 * π / (q : ℝ)) / π = 2 / (q : ℝ) := by
+    field_simp
+  rw [e1, e2] at h
+  exact h
 
 /-- LEAF. Long conductors, `2 * π ≤ q`, where the endpoint height `2 * π / q` is at most
 `1`.  This is the closed two sided count at that small height, taken one sided: the sum of
