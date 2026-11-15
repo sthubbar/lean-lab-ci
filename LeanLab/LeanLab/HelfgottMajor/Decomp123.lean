@@ -2,6 +2,7 @@ import LeanLab.HelfgottMajor.Assembly
 import LeanLab.HelfgottMajor.Lemma41Terms
 import LeanLab.HelfgottArcs.Statements
 import LeanLab.HelfgottMajor.SplitGaussian123
+import LeanLab.HelfgottMajor.Lemma41Corrected123
 
 /-!
 P0014 Theorem 1.1, page 3, proof on pages 56 and 57.
@@ -159,11 +160,12 @@ theorem gaussian_explicit_estimate (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     MajorShape etaHeart χ δ x (gaussianError q δ x T) := by
   -- SPLIT 2026-11-12 route burst: Lemma 4.1, Lemma 4.4 and Lemma 4.5 pieces in
   -- SplitGaussian123, combined by the proved page 43 and 44 assembly.
+  -- Route burst 2026-11-15 p6: Lemma 4.1 enters in corrected form, with the log x of the
+  -- double pole at s = 0 for even characters; the printed Lemma 4.1 leaf is SUSPECTED FALSE
+  -- and is no longer used here. The log x is paid by two units of proved slack in the low
+  -- zero bound, since log x is at most 2 sqrt x. See Lemma41Corrected123.
   unfold MajorShape gaussianError
-  exact SplitGaussian123.assembly_of_components x hx q χ δ T
-    (SplitGaussian123.explicit_formula_remainder x hx q χ hχ δ T hT hzeros)
-    (SplitGaussian123.low_zero_bound x hx q χ hχ δ T hT hzeros)
-    (SplitGaussian123.high_zero_bound x hx q χ hχ δ T hT hzeros)
+  exact Lemma41Corrected123.gaussian_explicit_estimate_corrected x hx q χ hχ δ T hT hzeros
 
 /-- The numerical substitution in P0014 pages 56 and 57, independent of cited analysis. -/
 theorem error_bound {q δ x : ℝ} (hq1 : 1 ≤ q) (hq : q ≤ 300000)
