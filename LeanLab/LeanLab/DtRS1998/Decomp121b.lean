@@ -121,7 +121,7 @@ theorem first_family_remaining :
   · exact interval_95
   · exact interval_100
 
-/-- P0037 Theorem 2 page 206 and Section 5.2 pages 212 to 214.
+/-- LEAF. P0037 Theorem 2 page 206 and Section 5.2 pages 212 to 214.
 The eleven intervals at powers 200 through 300 are cited computations.
 Split in the route burst of 2026-11-12: CONDITIONAL ON the two open Table 2
 certificate lemmas in Decomp121bSecond; this proof has no sorry of its own. -/
