@@ -5,6 +5,7 @@ arc estimates remain separate cited analytic leaves.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Thm2Sing
+import LeanLab.BHP1997.Route512Large
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical Complex Thm2 MeasureTheory Set
@@ -473,13 +474,30 @@ theorem leaf_small_divisor_moment512 :
   sorry
 
 /-- LEAF. P0069 page 8 display 2.9: the large-divisor mean square estimate on K.
-It is separate from the small-divisor bound and retains the printed tail range. OPEN. -/
+It is separate from the small-divisor bound and retains the printed tail range.
+PROVED 2026-11-15 from Route512Large.large_divisor_moment_raw512, no sorry. -/
 theorem leaf_large_divisor_moment512 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
         ∃ C : ℝ, ∀ x : ℝ, C ≤ x → largeDivisorMoment512 ε D x ≤
           C * x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) * Real.log x ^ (-A - 7) := by
-  sorry
+  refine ⟨1, one_pos, fun ε hε hε1 A hA => ?_⟩
+  have hc : (2 : ℝ) * (1 / 16 - 1 / 10 ^ 5) ≤ 1 / 8 := by norm_num
+  have hc0 : (0 : ℝ) < 2 * (1 / 16 - 1 / 10 ^ 5) := by norm_num
+  have h0 : (0 : ℝ) < (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) :=
+    mul_pos (by linarith) hc0
+  have h1 : (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) ≤ 1 := by
+    calc (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))
+        ≤ (31 / 20) * (1 / 8) := mul_le_mul (by linarith) hc hc0.le (by norm_num)
+      _ ≤ 1 := by norm_num
+  obtain ⟨D₀, hD₀⟩ :=
+    LeanLab.BHP1997.Route512.large_divisor_moment_raw512 _ h0 h1 A hA
+  refine ⟨D₀, fun D hD => ?_⟩
+  obtain ⟨C, hC⟩ := hD₀ D hD
+  refine ⟨C, fun x hx => ?_⟩
+  have hraw := hC x hx
+  unfold largeDivisorMoment512 largeDivisorTail512 frequencies512
+  exact hraw
 
 /-- P0069 page 8: assemble 2.7, 2.8 and 2.9 with common epsilon, parameter and
 threshold. CONDITIONAL ON those three printed estimates. -/
