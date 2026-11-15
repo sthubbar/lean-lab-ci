@@ -306,7 +306,41 @@ theorem rosser_main_of_dimension (K : ℝ) (hK : 2 ≤ K) :
             (1 + K / Real.log w)) →
         (sieveModel X B δ ε n hn).mainSum (rosserWeight (Y X ε ^ (1 / 9 : ℝ)) β) ≤
           C * strictProduct X δ n := by
-  sorry
+  refine ⟨2, 2 * K, 1, by norm_num, by positivity, by norm_num, ?_⟩
+  intro X B δ ε n hn hz hratio hdim
+  have hpos : 0 ≤ (sieveModel X B δ ε n hn).mainSum (rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2) :=
+    (sieveModel X B δ ε n hn).mainSum_nonneg _ (rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2)
+  have h_bound : (sieveModel X B δ ε n hn).mainSum (rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2) ≤
+      2 * K * strictProduct X δ n := by
+    have h_support : ∀ d, rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2 d ≠ 0 →
+        (d : ℝ) ≤ Y X ε ^ (1 / 9 : ℝ) := by
+      intro d hd
+      contrapose! hd
+      exact rosserWeight_support (Y X ε ^ (1 / 9 : ℝ)) 2 (by norm_num) (by positivity) d hd
+    have h_abs : ∀ d, |rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2 d| ≤ 1 :=
+      rosserWeight_abs_le_one (Y X ε ^ (1 / 9 : ℝ)) 2
+    have h_dense : ∀ p : ℕ, p.Prime → (1 : ℝ) - density n p ≤ 1 := by
+      intro p hp
+      exact sub_le_self _ (density_nonneg n p)
+    calc
+      (sieveModel X B δ ε n hn).mainSum (rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2) ≤
+          (sieveModel X B δ ε n hn).siftedSum := by
+        refine le_trans ?_ ((sieveModel X B δ ε n hn).siftedSum_le_mainSum_of_upperMoebius _ ?_)
+        · exact (sieveModel X B δ ε n hn).mainSum_le_siftedSum_of_upperMoebius
+            (rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2)
+            (rosserWeight_upper (Y X ε ^ (1 / 9 : ℝ)) 2)
+        · exact rosserWeight_upper (Y X ε ^ (1 / 9 : ℝ)) 2
+      _ ≤ 2 * K * sieveProduct X δ n := by
+        have h := rosserWeight_upper (Y X ε ^ (1 / 9 : ℝ)) 2
+        have h_sifted := (sieveModel X B δ ε n hn).siftedSum_le_of_upperMoebius
+          (rosserWeight (Y X ε ^ (1 / 9 : ℝ)) 2) h
+        have h_prod : sieveProduct X δ n ≤ 2 * K * sieveProduct X δ n := by
+          nlinarith [sieveProduct_nonneg X δ n, hK]
+        nlinarith
+      _ ≤ 2 * K * (2 * strictProduct X δ n) := by
+        nlinarith [strictProduct_le X δ n hn, mul_comm (2 * K), mul_le_mul_of_nonneg_left (strictProduct_le X δ n hn) (by positivity : 0 ≤ 2 * K)]
+      _ = (2 * K) * strictProduct X δ n := by ring
+  exact h_bound
 
 /-- Page 17 before display 58, the exact sealed upper_weights statement from
 one strictly smaller analytic leaf. CONDITIONAL ON
