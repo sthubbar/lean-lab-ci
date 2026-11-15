@@ -14,7 +14,15 @@ attribute [local instance] Classical.propDecidable
 
 /-- LEAF. Jia page 285, Lemma 28, supporting display 65 on page 286.
 Only region 1 of group 5 is bounded. The coefficient is 0.468045.
-The finite caps, strict endpoints and recovery clipping remain explicit. -/
+The finite caps, strict endpoints and recovery clipping remain explicit.
+
+BLOCKED OUT OF REACH 2026-11-15 FREE-ms-leanstral task528 region1_lower:
+Jia 1996 Lemma 28 display 65 requires zero-density estimate for double sieve
+region sums not available in Mathlib or existing repo lemmas.
+SEARCH: LeanSearch (zero density, large sieve, Gallagher),
+  Loogle (Finset.card_filter, Real.log_rpow),
+  web (Gallagher inequality, zero density estimates).
+-/
 theorem region1_lower :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε B : ℝ, 0 < ε → ε < ε₀ → 0 < B →
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
@@ -24,7 +32,11 @@ theorem region1_lower :
 
 /-- LEAF. Jia page 285, Lemma 28, supporting display 65 on page 286.
 Only group 5 with region 1 removed is bounded. The coefficient is 0.542578.
-This is a proper subfamily of the parent group. Endpoint conventions stay sealed. -/
+This is a proper subfamily of the parent group. Endpoint conventions stay sealed.
+
+BLOCKED OUT OF REACH 2026-11-15 FREE-ms-leanstral task528 remainder_lower:
+Same reason as region1_lower - zero-density estimate not available.
+-/
 theorem remainder_lower :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε B : ℝ, 0 < ε → ε < ε₀ → 0 < B →
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
