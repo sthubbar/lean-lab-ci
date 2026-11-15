@@ -68,6 +68,32 @@ private lemma logrpow_le_exp_three_quarters (B : ℝ) (hB : 0 < B) :
   apply Real.exp_le_exp.mpr
   linarith [mul_comm (Real.log L) B]
 
+/-- For `ε > 11/36` and `2 ≤ X` the window `X ^ (7/18 + ε) ≤ H ≤ X ^ (1 - ε)`
+is empty. -/
+private lemma window_empty_of_large_eps {ε X H : ℝ} (hε : 11 / 36 < ε) (hX : 2 ≤ X)
+    (h1 : X ^ (7 / 18 + ε) ≤ H) (h2 : H ≤ X ^ (1 - ε)) : False := by
+  have hlt : X ^ (1 - ε) < X ^ (7 / 18 + ε) :=
+    Real.rpow_lt_rpow_of_exponent_lt (by linarith) (by linarith)
+  linarith
+
+/-- SPLIT PIECE of `eq33_weighted_mean_square`, AGY task60. The same
+statement restricted to `ε ≤ 11/36`; for larger `ε` the hypothesis window on
+`H` is empty. Page 8 Proposition 1 display 33, still an analytic leaf. -/
+theorem eq33_weighted_mean_square_small_eps (A : ℝ) (hA : 0 < A) :
+    let windowY (X ε : ℝ) : ℝ := X ^ (7 / 12 + ε / 2)
+    let windowPairs (X Y : ℝ) (n : ℕ) : Finset (ℕ × ℕ) := ((Finset.range (⌊X⌋₊ + 1)).product (Finset.range (⌊Real.sqrt Y⌋₊ + 1))).filter (fun v => X - Y ≤ (v.1 : ℝ) ∧ (v.1 : ℝ) < X ∧ Real.sqrt Y / 2 ≤ (v.2 : ℝ) ∧ (v.2 : ℝ) < Real.sqrt Y ∧ v.1 + v.2 ^ 2 = n)
+    let series2 (n : ℕ) (P : ℝ) : ℂ := ∑ q ∈ Finset.Icc 1 ⌊P⌋₊, U1534.A2 n q
+    let roughCount (X Y P : ℝ) (n : ℕ) : ℕ := ((windowPairs X Y n).filter (fun v => v.1.Prime ∧ ∀ p : ℕ, p.Prime → p ∣ v.2 → Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ) ≤ (p : ℝ))).card
+    let f2Weight (z0 u : ℝ) : ℝ := 1 / Real.log u + ∫ t in z0..Real.sqrt u, 1 / (t * Real.log t * Real.log (u / t))
+    let singInt (X Y P : ℝ) (n : ℕ) : ℝ := ∑ v ∈ windowPairs X Y n, (1 / Real.log (v.1 : ℝ)) * f2Weight (Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ)) (v.2 : ℝ)
+    let err53 (X ε B : ℝ) (n : ℕ) : ℝ := ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) - series2 n (Real.log X ^ B) * (singInt X (windowY X ε) (Real.log X ^ B) n : ℂ)‖
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε → ε ≤ 11 / 36 →
+      ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X ^ (1 - ε) →
+        (∑ n ∈ (Finset.range (⌊X + H⌋₊ + 1)).filter (fun n : ℕ => X < (n : ℝ)),
+          err53 X ε B n ^ 2) ≤ C * H * windowY X ε / Real.log X ^ A := by
+  sorry
+
 /-- LEAF. Page 8 Proposition 1 display 33 with the page 15 weights and
 hypotheses, in the written range on page 16 after display 55. The short
 interval character estimates and Lemma 3.4 remain analytic inputs.
@@ -85,7 +111,13 @@ theorem eq33_weighted_mean_square (A : ℝ) (hA : 0 < A) :
         X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X ^ (1 - ε) →
         (∑ n ∈ (Finset.range (⌊X + H⌋₊ + 1)).filter (fun n : ℕ => X < (n : ℝ)),
           err53 X ε B n ^ 2) ≤ C * H * windowY X ε / Real.log X ^ A := by
-  sorry
+  intro windowY windowPairs series2 roughCount f2Weight singInt err53
+  obtain ⟨B0, hB0, h⟩ := eq33_weighted_mean_square_small_eps A hA
+  refine ⟨B0, hB0, fun B hB ε hε => ?_⟩
+  by_cases hs : ε ≤ 11 / 36
+  · exact h B hB ε hε hs
+  · refine ⟨1, 2, one_pos, le_rfl, fun X H hX h1 h2 => ?_⟩
+    exact (window_empty_of_large_eps (not_le.mp hs) hX h1 h2).elim
 
 /-- Page 16 display 53 follows from Proposition 1 display 33 by the
 finite Chebyshev inequality. CONDITIONAL on eq33_weighted_mean_square. -/
@@ -165,6 +197,45 @@ theorem eq53_prop1 (A : ℝ) (hA : 0 < A) :
     (by simpa only [mul_comm (T ^ 2)] using (hcnt.trans hsum).trans_eq heq.symm)
 
 
+/-- For `ε > 5/6` and `X` large in terms of `ε`, the window length
+`X ^ (7/12 + ε/2)` exceeds `8 X`. -/
+private lemma windowY_gt_eight {ε : ℝ} (hε : 5 / 6 < ε) :
+    ∃ X0 : ℝ, 2 ≤ X0 ∧ ∀ X : ℝ, X0 ≤ X → 8 * X < X ^ (7 / 12 + ε / 2) := by
+  set δ := ε / 2 - 5 / 12 with hδ
+  have hδ0 : 0 < δ := by rw [hδ]; linarith
+  refine ⟨max 2 ((9 : ℝ) ^ (1 / δ)), le_max_left _ _, fun X hX => ?_⟩
+  have hX2 : 2 ≤ X := (le_max_left _ _).trans hX
+  have hXpos : 0 < X := by linarith
+  have h9 : (9 : ℝ) ≤ X ^ δ := by
+    have h := Real.rpow_le_rpow (by positivity) ((le_max_right _ _).trans hX) hδ0.le
+    rwa [← Real.rpow_mul (by norm_num), one_div, inv_mul_cancel₀ hδ0.ne',
+      Real.rpow_one] at h
+  have he : X ^ (7 / 12 + ε / 2) = X * X ^ δ := by
+    rw [show (7 / 12 + ε / 2 : ℝ) = 1 + δ by rw [hδ]; ring,
+      Real.rpow_add hXpos, Real.rpow_one]
+  rw [he]
+  nlinarith
+
+/-- SPLIT PIECE of `eq53_large_eps`, AGY task60. The same statement
+restricted to `ε ≤ 5/6`; for larger `ε` every window pair has `v.2 ^ 2`
+above `2 X`, so the windows are empty on `(X, X + H]` and the count is zero.
+Unwritten residue of page 16 display 53, still an analytic leaf. -/
+theorem eq53_large_eps_mid (A : ℝ) (hA : 0 < A) :
+    let windowY (X ε : ℝ) : ℝ := X ^ (7 / 12 + ε / 2)
+    let windowPairs (X Y : ℝ) (n : ℕ) : Finset (ℕ × ℕ) := ((Finset.range (⌊X⌋₊ + 1)).product (Finset.range (⌊Real.sqrt Y⌋₊ + 1))).filter (fun v => X - Y ≤ (v.1 : ℝ) ∧ (v.1 : ℝ) < X ∧ Real.sqrt Y / 2 ≤ (v.2 : ℝ) ∧ (v.2 : ℝ) < Real.sqrt Y ∧ v.1 + v.2 ^ 2 = n)
+    let series2 (n : ℕ) (P : ℝ) : ℂ := ∑ q ∈ Finset.Icc 1 ⌊P⌋₊, U1534.A2 n q
+    let roughCount (X Y P : ℝ) (n : ℕ) : ℕ := ((windowPairs X Y n).filter (fun v => v.1.Prime ∧ ∀ p : ℕ, p.Prime → p ∣ v.2 → Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ) ≤ (p : ℝ))).card
+    let f2Weight (z0 u : ℝ) : ℝ := 1 / Real.log u + ∫ t in z0..Real.sqrt u, 1 / (t * Real.log t * Real.log (u / t))
+    let singInt (X Y P : ℝ) (n : ℕ) : ℝ := ∑ v ∈ windowPairs X Y n, (1 / Real.log (v.1 : ℝ)) * f2Weight (Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ)) (v.2 : ℝ)
+    let err53 (X ε B : ℝ) (n : ℕ) : ℝ := ‖(roughCount X (windowY X ε) (Real.log X ^ B) n : ℂ) - series2 n (Real.log X ^ B) * (singInt X (windowY X ε) (Real.log X ^ B) n : ℂ)‖
+    ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε → ε ≤ 5 / 6 →
+      ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → 5 / 18 < ε → X ^ (1 - ε) < H → H ≤ X →
+        (cntIoc (fun n => InH2 n ∧
+          Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
+          C * H / Real.log X ^ A := by
+  sorry
+
 /-- LEAF, UNWRITTEN RESIDUE. Display 53 of page 16 when epsilon exceeds
 5 over 18 and H exceeds X to the 1 minus epsilon. For epsilon at most 5 over 18
 this range reduces to the written one by the support of the windows, proved
@@ -184,7 +255,53 @@ theorem eq53_large_eps (A : ℝ) (hA : 0 < A) :
         (cntIoc (fun n => InH2 n ∧
           Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
           C * H / Real.log X ^ A := by
-  sorry
+  intro windowY windowPairs series2 roughCount f2Weight singInt err53
+  obtain ⟨B0, hB0, h⟩ := eq53_large_eps_mid A hA
+  refine ⟨B0, hB0, fun B hB ε hε => ?_⟩
+  by_cases hs : ε ≤ 5 / 6
+  · exact h B hB ε hε hs
+  obtain ⟨X0, hX0, hY⟩ := windowY_gt_eight (not_le.mp hs)
+  refine ⟨1, X0, one_pos, hX0, fun X H hX _ hH hHX => ?_⟩
+  have hX2 : 2 ≤ X := hX0.trans hX
+  have hXpos : 0 < X := by linarith
+  have hLpos : 0 < Real.log X := Real.log_pos (by linarith)
+  have hHpos : 0 < H := (Real.rpow_pos_of_pos hXpos _).trans hH
+  have h8 : 8 * X < windowY X ε := hY X hX
+  have hYpos : 0 < windowY X ε := by linarith
+  have hcnt : cntIoc (fun n => InH2 n ∧
+      Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H = 0 := by
+    unfold cntIoc
+    apply Finset.card_eq_zero.mpr
+    apply Finset.eq_empty_of_forall_notMem
+    intro n hmem
+    rw [Finset.mem_filter] at hmem
+    obtain ⟨hn, _, _, hlt⟩ := hmem
+    have hn' : (n : ℝ) ≤ X + H := by
+      have h1 : n ≤ ⌊X + H⌋₊ := Nat.lt_succ_iff.mp (Finset.mem_range.mp hn)
+      exact (Nat.cast_le.mpr h1).trans (Nat.floor_le (by linarith))
+    have hempty : windowPairs X (windowY X ε) n = ∅ := by
+      rw [Finset.eq_empty_iff_forall_notMem]
+      intro v hv
+      obtain ⟨_, _, hv2, _, hsum⟩ := (Finset.mem_filter.mp hv).2
+      have hsq : windowY X ε / 4 ≤ (v.2 : ℝ) ^ 2 := by
+        have h0 : 0 ≤ Real.sqrt (windowY X ε) / 2 := by positivity
+        have := pow_le_pow_left₀ h0 hv2 2
+        rw [div_pow, Real.sq_sqrt hYpos.le] at this
+        linarith
+      have hcast : ((v.1 : ℕ) : ℝ) + (v.2 : ℝ) ^ 2 = n := by exact_mod_cast hsum
+      have : (0 : ℝ) ≤ v.1 := Nat.cast_nonneg _
+      linarith
+    have hz : err53 X ε B n = 0 := by
+      simp only [err53, roughCount, singInt, hempty, Finset.filter_empty,
+        Finset.card_empty, Finset.sum_empty, Nat.cast_zero, Complex.ofReal_zero,
+        mul_zero, sub_zero, norm_zero]
+    rw [hz] at hlt
+    have : 0 < Real.sqrt (windowY X ε) * Real.log X ^ (-A) :=
+      mul_pos (Real.sqrt_pos.mpr hYpos) (Real.rpow_pos_of_pos hLpos _)
+    linarith
+  rw [hcnt, Nat.cast_zero]
+  have : 0 < Real.log X ^ A := Real.rpow_pos_of_pos hLpos _
+  positivity
 
 /-- LEAF. Page 14 display 48, the lower bound of P2 of n, P by
 log P to the minus 1 on H2, together with Lemma 3.8 display 49 with y equal to H
