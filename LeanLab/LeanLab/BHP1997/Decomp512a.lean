@@ -5,6 +5,10 @@ arc estimates remain separate cited analytic leaves.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Thm2Sing
+import LeanLab.BHP1997.Route512Large
+import LeanLab.BHP1997.Route512Kernel
+import LeanLab.BHP1997.Route512Moment
+import LeanLab.BHP1997.Route512Small
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical Complex Thm2 MeasureTheory Set
@@ -464,22 +468,56 @@ theorem leaf_vaughan_tail_reduction512 :
 
 /-- LEAF. P0069 page 8 display 2.8: the small-divisor mean square estimate on K.
 The uniform short interval divisor moment bound used by the paper is not supplied
-by a full summatory divisor estimate. OPEN. -/
+by a full summatory divisor estimate.
+PROVED 2026-11-15 from Route512Small.small_divisor_moment_raw512, no sorry. -/
 theorem leaf_small_divisor_moment512 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
         ∃ C : ℝ, ∀ x : ℝ, C ≤ x → smallDivisorMoment512 ε D x ≤
           C * x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) * Real.log x ^ (-A - 7) := by
-  sorry
+  refine ⟨1, one_pos, fun ε hε hε1 A hA => ?_⟩
+  have hc : (2 : ℝ) * (1 / 16 - 1 / 10 ^ 5) ≤ 1 / 8 := by norm_num
+  have hc0 : (0 : ℝ) < 2 * (1 / 16 - 1 / 10 ^ 5) := by norm_num
+  have h0 : (0 : ℝ) < (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) :=
+    mul_pos (by linarith) hc0
+  have h1 : (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) ≤ 1 := by
+    calc (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))
+        ≤ (31 / 20) * (1 / 8) := mul_le_mul (by linarith) hc hc0.le (by norm_num)
+      _ ≤ 1 := by norm_num
+  obtain ⟨D₀, hD₀⟩ :=
+    LeanLab.BHP1997.Route512.small_divisor_moment_raw512 _ h0 h1 A hA
+  refine ⟨D₀, fun D hD => ?_⟩
+  obtain ⟨C, hC⟩ := hD₀ D hD
+  refine ⟨C, fun x hx => ?_⟩
+  have hraw := hC x hx
+  unfold smallDivisorMoment512 smallDivisorTail512 frequencies512
+  exact hraw
 
 /-- LEAF. P0069 page 8 display 2.9: the large-divisor mean square estimate on K.
-It is separate from the small-divisor bound and retains the printed tail range. OPEN. -/
+It is separate from the small-divisor bound and retains the printed tail range.
+PROVED 2026-11-15 from Route512Large.large_divisor_moment_raw512, no sorry. -/
 theorem leaf_large_divisor_moment512 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
         ∃ C : ℝ, ∀ x : ℝ, C ≤ x → largeDivisorMoment512 ε D x ≤
           C * x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) * Real.log x ^ (-A - 7) := by
-  sorry
+  refine ⟨1, one_pos, fun ε hε hε1 A hA => ?_⟩
+  have hc : (2 : ℝ) * (1 / 16 - 1 / 10 ^ 5) ≤ 1 / 8 := by norm_num
+  have hc0 : (0 : ℝ) < 2 * (1 / 16 - 1 / 10 ^ 5) := by norm_num
+  have h0 : (0 : ℝ) < (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) :=
+    mul_pos (by linarith) hc0
+  have h1 : (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) ≤ 1 := by
+    calc (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))
+        ≤ (31 / 20) * (1 / 8) := mul_le_mul (by linarith) hc hc0.le (by norm_num)
+      _ ≤ 1 := by norm_num
+  obtain ⟨D₀, hD₀⟩ :=
+    LeanLab.BHP1997.Route512.large_divisor_moment_raw512 _ h0 h1 A hA
+  refine ⟨D₀, fun D hD => ?_⟩
+  obtain ⟨C, hC⟩ := hD₀ D hD
+  refine ⟨C, fun x hx => ?_⟩
+  have hraw := hC x hx
+  unfold largeDivisorMoment512 largeDivisorTail512 frequencies512
+  exact hraw
 
 /-- P0069 page 8: assemble 2.7, 2.8 and 2.9 with common epsilon, parameter and
 threshold. CONDITIONAL ON those three printed estimates. -/
@@ -584,7 +622,9 @@ noncomputable def localMinorEnergy512 (ε D x : ℝ) (b : ℕ → ℂ) (ζ : ℝ
 /-- LEAF. P0069 pages 8 and 9, display 2.10 and the reduction to 2.11.
 Parseval, Cauchy and the periodic Dirichlet kernel convert arbitrarily strong
 uniform local minor arc energy savings into the required mean square saving.
-The input concerns the actual local integral of S2. OPEN. -/
+The input concerns the actual local integral of S2.
+PROVED 2026-11-15 from Route512Kernel.gallagher_window512 and
+Route512Moment.short_divisor_moment512, no sorry. -/
 theorem leaf_minor_kernel_reduction512 :
     ∀ B : ℝ, ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       Theorem2With ε B (fun a b _ _ _ =>
@@ -595,7 +635,145 @@ theorem leaf_minor_kernel_reduction512 :
         ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
           ∃ C : ℝ, ∀ x : ℝ, C ≤ x →
             minorError512 ε D x (a x) (b x) ≤ C * scale512 ε A x) := by
-  sorry
+  intro B
+  refine ⟨1, one_pos, fun ε hε _ a b u v E h1 h2 h3 h4 h5 hloc A hA => ?_⟩
+  -- the real variable bookkeeping behind display 2.10: Cauchy with the two energy bounds
+  have key : ∀ H Y l1 l2 l3 Sa G c2 c3 c4 : ℝ, 0 ≤ H → 0 ≤ Y → 0 ≤ l1 → 0 ≤ l2 →
+      l1 * l2 ≤ l3 → G ≤ 30 * H * Sa * (c4 * Y * l2) → Sa ≤ c2 * (c3 * Y * l1) →
+      0 ≤ c2 → 0 ≤ c3 → 0 ≤ c4 → G ≤ (30 * (c2 * c3) * c4) * (H * Y ^ 2 * l3) := by
+    intro H Y l1 l2 l3 Sa G c2 c3 c4 hH hY hl1 hl2 h12 hG hSa hc2 hc3 hc4
+    have hE : 0 ≤ c4 * Y * l2 := mul_nonneg (mul_nonneg hc4 hY) hl2
+    have hH30 : 0 ≤ 30 * H := mul_nonneg (by norm_num) hH
+    have hK : 0 ≤ 30 * (c2 * c3) * c4 :=
+      mul_nonneg (mul_nonneg (by norm_num) (mul_nonneg hc2 hc3)) hc4
+    calc G ≤ 30 * H * Sa * (c4 * Y * l2) := hG
+      _ ≤ 30 * H * (c2 * (c3 * Y * l1)) * (c4 * Y * l2) :=
+        mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hSa hH30) hE
+      _ = (30 * (c2 * c3) * c4) * (H * Y ^ 2 * (l1 * l2)) := by ring
+      _ ≤ (30 * (c2 * c3) * c4) * (H * Y ^ 2 * l3) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left h12 (mul_nonneg hH (sq_nonneg Y))) hK
+  -- hypothesis ii of Theorem 2, the page 9 divisor moment, and the local energy input 2.11
+  obtain ⟨C2, hC2⟩ := h2
+  obtain ⟨c, C3, hC3⟩ := Route512.short_divisor_moment512 B ε hε
+  have hL : 0 < A + 7 + |c| := by positivity
+  obtain ⟨D₀, hD₀⟩ := hloc (A + 7 + |c|) hL
+  refine ⟨D₀, fun D hD => ?_⟩
+  obtain ⟨C4, hC4⟩ := hD₀ D hD
+  refine ⟨max (max C3 C4) (max (30 * (C2 ^ 2 * |C3|) * |C4|) 3), fun x hx => ?_⟩
+  have hx3 : C3 ≤ x := (le_max_left _ _).trans ((le_max_left _ _).trans hx)
+  have hx4 : C4 ≤ x := (le_max_right _ _).trans ((le_max_left _ _).trans hx)
+  have hx3' : (3 : ℝ) ≤ x := (le_max_right _ _).trans ((le_max_right _ _).trans hx)
+  have hx1 : (1 : ℝ) ≤ x := le_trans (by norm_num) hx3'
+  have hx0 : (0 : ℝ) < x := lt_of_lt_of_le (by norm_num) hx3'
+  have hlog1 : 1 ≤ Real.log x := by
+    rw [Real.le_log_iff_exp_le hx0]
+    have he : Real.exp 1 < 3 := lt_trans Real.exp_one_lt_d9 (by norm_num)
+    linarith
+  have hlog0 : 0 < Real.log x := lt_of_lt_of_le one_pos hlog1
+  have hθ : (0 : ℝ) ≤ (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) :=
+    mul_nonneg (by linarith) (by norm_num)
+  have hH1 : 1 ≤ x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) :=
+    Real.one_le_rpow hx1 hθ
+  have hHn : 0 ≤ x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) :=
+    le_trans zero_le_one hH1
+  have hYn : 0 ≤ length512 ε x := Real.rpow_nonneg hx0.le _
+  have hΛ1 : 0 ≤ Real.log x ^ c := Real.rpow_nonneg hlog0.le _
+  have hΛ2 : 0 ≤ Real.log x ^ (-(A + 7 + |c|)) := Real.rpow_nonneg hlog0.le _
+  have hΛ : Real.log x ^ c * Real.log x ^ (-(A + 7 + |c|)) ≤ Real.log x ^ (-A - 7) := by
+    rw [← Real.rpow_add hlog0]
+    exact Real.rpow_le_rpow_of_exponent_le hlog1 (by have := le_abs_self c; linarith)
+  -- the minor arcs lie in the complete period starting at 1/Q
+  have hmc : minor512 ε D x ⊆
+      Ioc (1 / (order512 ε x : ℝ)) (1 / (order512 ε x : ℝ) + 1) := by
+    intro t ht
+    have ht' : t ∈ Ioc (1 / (order512 ε x : ℝ)) (1 + 1 / (order512 ε x : ℝ)) :=
+      (show minor512 ε D x ⊆ period512 ε x from sdiff_subset) ht
+    exact ⟨ht'.1, by have := ht'.2; linarith⟩
+  -- the frequencies of K lie in an interval of length H starting at the ceiling of x
+  have hK : ∀ N ∈ frequencies512 ε x, ⌈x⌉₊ ≤ N ∧
+      (N : ℝ) ≤ (⌈x⌉₊ : ℝ) + x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) := by
+    intro N hN
+    unfold frequencies512 at hN
+    rw [Finset.mem_filter, Finset.mem_Icc] at hN
+    refine ⟨hN.1.1, ?_⟩
+    have h1 : (N : ℝ) ≤
+        (⌊x + x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))⌋₊ : ℝ) := by
+      exact_mod_cast hN.1.2
+    have h2 : (⌊x + x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))⌋₊ : ℝ) ≤
+        x + x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) :=
+      Nat.floor_le (add_nonneg hx0.le hHn)
+    have h3 : x ≤ (⌈x⌉₊ : ℝ) := Nat.le_ceil x
+    linarith
+  -- display 2.11 as the uniform local energy input of the window inequality
+  have hE : ∀ ζ : ℝ,
+      ∫ t in Ioo (ζ - 1 / x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))))
+          (ζ + 1 / x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) ∩ minor512 ε D x,
+        ‖∑ k ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊,
+          b x k * @fourier 1 (k : ℤ) (t : AddCircle (1 : ℝ))‖ ^ 2 ≤
+        |C4| * length512 ε x * Real.log x ^ (-(A + 7 + |c|)) := by
+    intro ζ
+    have h1 : C4 * length512 ε x * Real.log x ^ (-(A + 7 + |c|)) ≤
+        |C4| * length512 ε x * Real.log x ^ (-(A + 7 + |c|)) :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (le_abs_self C4) hYn) hΛ2
+    exact (hC4 x hx4 ζ).trans h1
+  -- page 9 first display: the energy of S1 by hypothesis ii and the divisor moment
+  have hSa : ∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊, ‖a x k‖ ^ 2 ≤
+      C2 ^ 2 * (|C3| * length512 ε x * Real.log x ^ c) := by
+    have hleaf : ∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊,
+        ((k.divisors.card : ℕ) : ℝ) ^ (2 * B) ≤
+          C3 * length512 ε x * Real.log x ^ c := hC3 x hx3
+    have hpt : ∀ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊,
+        ‖a x k‖ ^ 2 ≤ C2 ^ 2 * ((k.divisors.card : ℕ) : ℝ) ^ (2 * B) := by
+      intro k _
+      have hτ : (0 : ℝ) ≤ ((k.divisors.card : ℕ) : ℝ) := Nat.cast_nonneg _
+      have hτB : (0 : ℝ) ≤ ((k.divisors.card : ℕ) : ℝ) ^ B := Real.rpow_nonneg hτ B
+      have h' : ‖a x k‖ ≤ |C2| * ((k.divisors.card : ℕ) : ℝ) ^ B :=
+        (hC2 x k).1.trans (mul_le_mul_of_nonneg_right (le_abs_self C2) hτB)
+      have hsq : ‖a x k‖ ^ 2 ≤ (|C2| * ((k.divisors.card : ℕ) : ℝ) ^ B) ^ 2 :=
+        pow_le_pow_left₀ (norm_nonneg _) h' 2
+      have he : (((k.divisors.card : ℕ) : ℝ) ^ B) ^ 2 =
+          ((k.divisors.card : ℕ) : ℝ) ^ (2 * B) := by
+        rw [mul_comm 2 B, Real.rpow_mul hτ, Real.rpow_two]
+      calc ‖a x k‖ ^ 2 ≤ (|C2| * ((k.divisors.card : ℕ) : ℝ) ^ B) ^ 2 := hsq
+        _ = C2 ^ 2 * ((k.divisors.card : ℕ) : ℝ) ^ (2 * B) := by
+          rw [mul_pow, sq_abs, he]
+    calc ∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊, ‖a x k‖ ^ 2
+        ≤ ∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊,
+            C2 ^ 2 * ((k.divisors.card : ℕ) : ℝ) ^ (2 * B) := Finset.sum_le_sum hpt
+      _ = C2 ^ 2 * ∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊,
+            ((k.divisors.card : ℕ) : ℝ) ^ (2 * B) := by rw [Finset.mul_sum]
+      _ ≤ C2 ^ 2 * (C3 * length512 ε x * Real.log x ^ c) :=
+        mul_le_mul_of_nonneg_left hleaf (sq_nonneg _)
+      _ ≤ C2 ^ 2 * (|C3| * length512 ε x * Real.log x ^ c) :=
+        mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_right (le_abs_self C3) hYn) hΛ1) (sq_nonneg _)
+  -- display 2.10: Parseval, Cauchy and the periodic kernel, as the window inequality
+  have hG : minorError512 ε D x (a x) (b x) ≤
+      30 * x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) *
+        (∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊, ‖a x k‖ ^ 2) *
+          (|C4| * length512 ε x * Real.log x ^ (-(A + 7 + |c|))) :=
+    Route512.gallagher_window512 (1 / (order512 ε x : ℝ)) (minor512 ε D x)
+      (measurable_minor512 ε D x) hmc
+      (Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊)
+      (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊)
+      (a x) (b x) (frequencies512 ε x) ⌈x⌉₊
+      (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))))
+      (|C4| * length512 ε x * Real.log x ^ (-(A + 7 + |c|))) hH1 hK hE
+  have hfin := key (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))))
+    (length512 ε x) (Real.log x ^ c) (Real.log x ^ (-(A + 7 + |c|)))
+    (Real.log x ^ (-A - 7))
+    (∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊, ‖a x k‖ ^ 2)
+    (minorError512 ε D x (a x) (b x)) (C2 ^ 2) |C3| |C4|
+    hHn hYn hΛ1 hΛ2 hΛ hG hSa (sq_nonneg _) (abs_nonneg _) (abs_nonneg _)
+  calc minorError512 ε D x (a x) (b x)
+      ≤ (30 * (C2 ^ 2 * |C3|) * |C4|) *
+          (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) * length512 ε x ^ 2 *
+            Real.log x ^ (-A - 7)) := hfin
+    _ = (30 * (C2 ^ 2 * |C3|) * |C4|) * scale512 ε A x := rfl
+    _ ≤ max (max C3 C4) (max (30 * (C2 ^ 2 * |C3|) * |C4|) 3) * scale512 ε A x :=
+      mul_le_mul_of_nonneg_right ((le_max_left _ _).trans (le_max_right _ _))
+        (scale_nonneg512 ε A hx1)
 
 /-- LEAF. P0069 pages 9 and 10, display 2.11, reduced there to 2.12, 2.13 and 2.15.
 The exceptional characters use Parseval. The remaining characters use Gallagher
