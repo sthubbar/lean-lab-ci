@@ -1,6 +1,7 @@
 import LeanLab.HelfgottMajor.Lemma41Terms
 import LeanLab.HelfgottArcs.Statements
 import LeanLab.HelfgottMajor.Gaussian123Base
+import LeanLab.HelfgottMajor.ResidueZeros123
 
 /-!
 P0014 Proposition 4.6, pages 43 and 44, display 4.43, with the recorded factor 6 repair.
@@ -29,7 +30,9 @@ theorem explicit_formula_remainder (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
         lowZeros χ δ x T + highZeros χ δ x T + R‖ ≤
         (log q + 6.01) * (1 + 6 * |δ|) / sqrt x := by
   -- Route burst session 9: Lemma 4.1 with R of display 4.2, then display 4.23 and page 44.
-  exact explicit_formula_of_pieces x hx q χ hχ δ T hT
+  -- Route burst 2026-11-15 p5: display 4.23 through Lemma 4.2 with its zero hypothesis, as in
+  -- the paper, so the unconditional leaf residue_log_derivative_bound is no longer used here.
+  exact ResidueZeros123.explicit_formula_of_pieces_of_zeros x hx q χ hχ δ T hT hzeros
 
 /-- PROVED from the LEAF pieces of Gaussian123Base. P0014 Lemma 4.4, display 4.29 on page 39, with the norms of display 4.42,
 as applied on page 43: the zeros up to T, all on the critical line by hzeros, contribute
