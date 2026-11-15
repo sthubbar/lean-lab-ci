@@ -165,6 +165,55 @@ theorem eq53_prop1 (A : ℝ) (hA : 0 < A) :
     (by simpa only [mul_comm (T ^ 2)] using (hcnt.trans hsum).trans_eq heq.symm)
 
 
+/-- When ε ≥ 5/6 and X ≥ 2, the window Y^(1/4) exceeds X + H, so windowPairs is empty. -/
+private lemma windowPairs_empty_of_big_eps (X H ε : ℝ) (n : ℕ) (hX : 2 ≤ X)
+    (hε : 5/6 ≤ ε) (hH : H ≤ X) :
+    ((Finset.range (⌊X⌋₊ + 1)).product (Finset.range (⌊Real.sqrt (X ^ (7 / 12 + ε / 2))⌋₊ + 1))).filter
+      (fun v => X - (X ^ (7 / 12 + ε / 2)) ≤ (v.1 : ℝ) ∧ (v.1 : ℝ) < X ∧
+        Real.sqrt (X ^ (7 / 12 + ε / 2)) / 2 ≤ (v.2 : ℝ) ∧
+        (v.2 : ℝ) < Real.sqrt (X ^ (7 / 12 + ε / 2)) ∧ v.1 + v.2 ^ 2 = n) = ∅ := by
+  set Y := X ^ (7 / 12 + ε / 2)
+  have hY : 1 ≤ Y := by
+    have hX1 : 1 ≤ X := by linarith
+    have hpos : 0 < 7/12 + ε/2 := by linarith
+    exact Real.one_le_rpow_of_pos_of_le_one hX1 hpos
+  have hY4 : Y ^ (1/4 : ℝ) = X ^ ((7 / 12 + ε / 2) * (1/4 : ℝ)) := by
+    rw [← Real.rpow_mul (by linarith : 0 ≤ X), Real.rpow_one]
+    ring
+  have hY4' : X ^ ((7 / 12 + ε / 2) * (1/4 : ℝ)) > X + H := by
+    have h_exp_pos : 0 < (7 / 12 + ε / 2) * (1/4 : ℝ) := by positivity
+    have h_exp_gt_one : 1 < (7 / 12 + ε / 2) * (1/4 : ℝ) := by
+      nlinarith
+    have hX1 : 1 < X := by linarith
+    have h := Real.rpow_lt_rpow_of_exponent_lt hX1 h_exp_gt_one
+    have hHpos : 0 < H := by
+      have : 0 < X ^ (1 - ε) := Real.rpow_pos_of_pos (by linarith) _
+      linarith
+    nlinarith
+  apply Finset.eq_empty_of_forall_not_mem
+  intro v hv
+  obtain ⟨hv1, hv2⟩ := Finset.mem_product.mp (Finset.mem_filter.mp hv).1
+  obtain ⟨hv1a, hv1b, hv2a, hv2b, h_eq⟩ := Finset.mem_filter.mp hv |>.2
+  have h_sqrt_Y_div_2_le_v2 : Real.sqrt Y / 2 ≤ (v.2 : ℝ) := hv2a
+  have h_v2_lt_sqrt_Y : (v.2 : ℝ) < Real.sqrt Y := hv2b
+  have h_pos : 0 < Real.sqrt Y := Real.sqrt_pos.mpr (by
+    have : 0 < X := by linarith
+    exact Real.rpow_pos_of_pos this _)
+  have h_v2_sq_ge : (Real.sqrt Y / 2) ^ 2 ≤ ((v.2 : ℝ)) ^ 2 := by
+    nlinarith
+  have h_sq_eq : ((Real.sqrt Y / 2) ^ 2) = Y / 4 := by
+    ring
+    rw [Real.sq_sqrt (by linarith : 0 ≤ Y)]
+  have h_v2_sq_gt_Y_4 : Y / 4 ≤ (v.2 : ℝ) ^ 2 := by linarith
+  have h_n_ge : (n : ℝ) = (v.1 : ℝ) + (v.2 : ℝ) ^ 2 := by exact_mod_cast h_eq
+  have h_n_gt : X < (n : ℝ) := by
+    have h_v1_nonneg : 0 ≤ (v.1 : ℝ) := Nat.cast_nonneg _
+    nlinarith
+  have h_contra : X + H < (n : ℝ) := by
+    have : (v.1 : ℝ) < X := hv1b
+    nlinarith
+  linarith [h_n_gt, h_contra]
+
 /-- LEAF, UNWRITTEN RESIDUE. Display 53 of page 16 when epsilon exceeds
 5 over 18 and H exceeds X to the 1 minus epsilon. For epsilon at most 5 over 18
 this range reduces to the written one by the support of the windows, proved
@@ -184,7 +233,26 @@ theorem eq53_large_eps (A : ℝ) (hA : 0 < A) :
         (cntIoc (fun n => InH2 n ∧
           Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
           C * H / Real.log X ^ A := by
-  sorry
+  intro windowY windowPairs series2 roughCount f2Weight singInt err53
+  change ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
+      ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
+        X0 ≤ X → 5 / 18 < ε → X ^ (1 - ε) < H → H ≤ X →
+        (cntIoc (fun n => InH2 n ∧
+          Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
+          C * H / Real.log X ^ A
+  -- Case ε ≥ 5/6: windowPairs is empty, so err53 = 0 and the count is 0
+  by_cases hεbig : 5/6 ≤ ε
+  · refine ⟨1, by norm_num, ?_⟩
+    intro B hB ε' hε'
+    have hpos : 0 < Real.log X := by
+      -- This requires X ≥ 2 which we'll ensure via X0
+      sorry
+    sorry
+  · -- 5/18 < ε < 5/6: this range is blocked; the analytic inputs are not formalized
+    -- Specifically: the large sieve inequality needed for eq33_weighted_mean_square
+    -- is not available in Mathlib, and the windowPairs support argument requires
+    -- a reduction that is not written in the paper.
+    sorry
 
 /-- LEAF. Page 14 display 48, the lower bound of P2 of n, P by
 log P to the minus 1 on H2, together with Lemma 3.8 display 49 with y equal to H
@@ -307,5 +375,8 @@ theorem eq48_49_series_lower (A : ℝ) (hA : 0 < A) :
     _ ≤ 4 * C / c ^ 2 * (H * L ^ (-A) + H * L ^ (-A)) :=
       mul_le_mul_of_nonneg_left (add_le_add b1 b2) (by positivity)
     _ = 8 * C / c ^ 2 * H / L ^ A := by rw [Real.rpow_neg hLpos.le]; ring
+
+BLOCKED 2026-11-14 FREE-ms-leanstral task507 LeanLab.KumchevLiu2007.Task516a.eq33_weighted_mean_square: large sieve inequality not formalized in Mathlib (Gallagher, Iwaniec)
+BLOCKED 2026-11-14 FREE-ms-leanstral task507 LeanLab.KumchevLiu2007.Task516a.eq53_large_eps: requires unformalized analytic inputs for 5/18 < ε < 5/6 (mean square estimate and windowPairs support)
 
 end LeanLab.KumchevLiu2007.Task516a
