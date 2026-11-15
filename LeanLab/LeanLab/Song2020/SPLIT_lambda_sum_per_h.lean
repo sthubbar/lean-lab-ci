@@ -6,6 +6,7 @@ that the existing file Decomp139 gains no sorry and proves its steps from these 
 Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
+import LeanLab.Song2020.RouteS1Lambda
 
 namespace LeanLab.Song2020.SPLIT_lambda_sum_per_h
 
@@ -67,7 +68,10 @@ theorem s1_lambda_reduction :
               ‖truncatedSum a H γ n y α‖ ≤
                 C * K * ((n : ℝ) ^ (3 / 2 - γ) + (H : ℝ) * (n : ℝ) ^ ((1 : ℝ) / 2) +
                   (n : ℝ) ^ ε * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := by
-  sorry
+  -- PROVED via the route module on main: RouteS1Lambda proves this exact statement,
+  -- and the three local definitions are unfolded to reach its form.
+  simpa only [truncatedSum, fourier, lambdaSum, subWindow] using
+    (RouteS1Lambda.s1_lambda_reduction_route)
 
 /-- LEAF: Song 2020, page 7, the display after "Choosing v = (n/u)^{1/2}": for every
 Vaughan parameter u with 1 at most u at most n, n to the minus epsilon times Sigma 1 plus
