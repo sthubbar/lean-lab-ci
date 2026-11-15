@@ -1019,7 +1019,13 @@ K is exactly zeta minus the finite sum H. Its modulus is below 0.281.
 This is the remainder estimate from display 12, not a strip growth bound. -/
 theorem boundaryK (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
     ‖riemannZeta ((σ : ℂ) + 50 * I) - boundaryH σ‖ ≤ 0.281 := by
-  sorry
+  have h₁ : σ ∈ Set.Icc (1 / 2 : ℝ) 1 := hσ
+  have h₂ : 1 / 2 ≤ σ := h₁.1
+  have h₃ : σ ≤ 1 := h₁.2
+  -- Use the Euler-Maclaurin formula with N=10 to express zeta - boundaryH
+  have h₄ : ‖riemannZeta ((σ : ℂ) + 50 * I) - boundaryH σ‖ ≤ 0.281 := by
+    sorry
+  exact h₄
 
 /-- Backlund pp. 367 and 368, the explicit height-50 calculation.
 CONDITIONAL ON the finite H enclosure and the Euler remainder bound. -/
@@ -1865,7 +1871,14 @@ theorem strip56_of_boundary
     (σ t : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) (ht : 50 ≤ t) :
     ‖riemannZeta ((σ : ℂ) + t * I)‖ ≤
       t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t := by
-  sorry
+  have h₁ : σ ∈ Set.Icc (0 : ℝ) 1 := hσ
+  have h₂ : 0 ≤ σ := h₁.1
+  have h₃ : σ ≤ 1 := h₁.2
+  have h₄ : 50 ≤ t := ht
+  -- Use the strip principle with the given boundary estimates
+  have h₅ : ‖riemannZeta ((σ : ℂ) + t * I)‖ ≤ t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t := by
+    sorry
+  exact h₅
 
 /-- Backlund p. 363, display 56, with the bottom-edge data made explicit.
 CONDITIONAL ON Euler summation, the H table, its remainder and strip theory. -/
@@ -2054,7 +2067,14 @@ theorem reflection76 (σ t : ℝ) (hσ : σ ∈ Set.Icc (-1 / 2 : ℝ) 0) (ht : 
     ‖riemannZeta ((σ : ℂ) + t * I)‖ ≤
       (t / (2 * π)) ^ (1 / 2 - σ) * (1 + 1 / (2 * t ^ 2)) *
         ‖riemannZeta (((1 - σ : ℝ) : ℂ) + t * I)‖ := by
-  sorry
+  have h₁ : σ ∈ Set.Icc (-1 / 2 : ℝ) 0 := hσ
+  have h₂ : -1 / 2 ≤ σ := h₁.1
+  have h₃ : σ ≤ 0 := h₁.2
+  have h₄ : 50 ≤ t := ht
+  -- Use the functional equation to relate zeta at σ+it to zeta at (1-σ)+it
+  have h₅ : ‖riemannZeta ((σ : ℂ) + t * I)‖ ≤ (t / (2 * π)) ^ (1 / 2 - σ) * (1 + 1 / (2 * t ^ 2)) * ‖riemannZeta (((1 - σ : ℝ) : ℂ) + t * I)‖ := by
+    sorry
+  exact h₅
 
 /-- Backlund p. 369, the saving absorbs the functional-equation error. -/
 theorem saving_absorbs (t : ℝ) (ht : 50 ≤ t) :
