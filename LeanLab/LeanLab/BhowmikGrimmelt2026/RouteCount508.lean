@@ -10,6 +10,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.RouteMode508
 import LeanLab.BhowmikGrimmelt2026.Decomp541a
+import LeanLab.BhowmikGrimmelt2026.RouteWindow508
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -73,14 +74,16 @@ theorem int_abs_harmonic508 (N : ℕ) :
 /-- LEAF: P0029 page 11 display 3.7, the zero count behind the bound of the zero sum, which
 the survey uses without stating it. CITED from Davenport, Multiplicative Number Theory,
 chapter 16: the zeros of `L (s, χ)` in the open critical strip with ordinate within one of
-`t`, counted with multiplicity, number at most a constant times `log (q (|t| + 2))`. -/
+`t`, counted with multiplicity, number at most a constant times `log (q (|t| + 2))`.
+PROVED in RouteWindow508 from the Jensen count of PNTPort U1482 and the functional
+equation. -/
 theorem zero_window_count508 :
     ∃ A : ℝ, 0 ≤ A ∧ ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t : ℝ)
       (Z : Finset ℂ),
       (∀ ρ ∈ Z, DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
         |ρ.im - t| ≤ 1) →
       ∑ ρ ∈ Z, (mult χ ρ : ℝ) ≤ A * Real.log ((q : ℝ) * (|t| + 2)) := by
-  sorry
+  exact zero_window_count_full508
 
 /-- P0029 page 11 display 3.7, the zero list counted with multiplicity and reciprocal
 weight, under the zero bound hypothesis. The zeros are sorted by the integer part of the
