@@ -13,7 +13,7 @@ character square saves a factor of the modulus. Counting the nonprincipal
 characters then multiplies the one-index bound by at most the totient, which is
 what removes the modulus from the final bound.
 -/
-import LeanLab.Linnik1951.Decomp491b
+import LeanLab.Linnik1951.Base491b
 
 namespace LeanLab.Linnik1951
 
@@ -666,5 +666,251 @@ theorem nonprincipal_bound491_split (hM : MellinBound280) :
         exact div_mul_cancel₀ _ hφpos.ne'
     _ = (C1 + C2) * (N : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 13 := by
         ring
+
+/-! ### The printed Parseval argument over the reduced residues, P0093 page 160 -/
+
+private lemma sum_range_eq_sum_zmod_real (q : ℕ) [NeZero q] (f : ZMod q → ℝ) :
+    ∑ a ∈ Finset.range q, f (a : ZMod q) = ∑ a : ZMod q, f a := by
+  symm
+  refine Finset.sum_nbij' (fun x => x.val) (fun c => (c : ZMod q)) ?_ ?_ ?_ ?_ ?_
+  · intro x _; rw [Finset.mem_range]; exact ZMod.val_lt x
+  · intro c _; exact Finset.mem_univ _
+  · intro x _; exact ZMod.natCast_zmod_val x
+  · intro c hc; rw [Finset.mem_range] at hc; exact ZMod.val_natCast_of_lt hc
+  · intro x _; rw [ZMod.natCast_zmod_val]
+
+/-- Orthogonality of two Dirichlet characters summed over the residues. -/
+private lemma char_orth491 (q : ℕ) [NeZero q] (χ ψ : DirichletCharacter ℂ q) :
+    ∑ x : ZMod q, χ x * (starRingEnd ℂ) (ψ x) =
+      if χ = ψ then (q.totient : ℂ) else 0 := by
+  have hconj : ∀ x : ZMod q, (starRingEnd ℂ) (ψ x) = ψ⁻¹ x := by
+    intro x
+    rw [MulChar.inv_apply_eq_inv']
+    by_cases hx : IsUnit x
+    · have h1 : ‖ψ x‖ = 1 := by
+        rw [← hx.unit_spec]
+        exact ψ.unit_norm_eq_one _
+      exact (Complex.inv_eq_conj h1).symm
+    · simp [MulChar.map_nonunit _ hx]
+  simp_rw [hconj, ← MulChar.mul_apply]
+  split_ifs with h
+  · subst h
+    rw [mul_inv_cancel, MulChar.sum_one_eq_card_units, ZMod.card_units_eq_totient]
+  · apply MulChar.sum_eq_zero_of_ne_one
+    intro h1
+    exact h (mul_inv_eq_one.mp h1)
+
+/-- Parseval over the residues for a combination of Dirichlet characters. -/
+private lemma char_parseval491 (q : ℕ) [NeZero q] (T : Finset (DirichletCharacter ℂ q))
+    (c : DirichletCharacter ℂ q → ℂ) :
+    ∑ x : ZMod q, ‖∑ χ ∈ T, c χ * χ x‖ ^ 2 =
+      (q.totient : ℝ) * ∑ χ ∈ T, ‖c χ‖ ^ 2 := by
+  classical
+  apply Complex.ofReal_injective
+  push_cast
+  have hsq : ∀ w : ℂ, ((‖w‖ : ℝ) : ℂ) ^ 2 = w * (starRingEnd ℂ) w :=
+    fun w => (Complex.mul_conj' w).symm
+  simp_rw [hsq, map_sum, map_mul, Finset.sum_mul, Finset.mul_sum]
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro χ hχ
+  rw [Finset.sum_comm]
+  have hin : ∀ ψ ∈ T,
+      ∑ x : ZMod q, c χ * χ x * ((starRingEnd ℂ) (c ψ) * (starRingEnd ℂ) (ψ x)) =
+        c χ * (starRingEnd ℂ) (c ψ) * (if χ = ψ then (q.totient : ℂ) else 0) := by
+    intro ψ _
+    rw [← char_orth491, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro x _
+    ring
+  rw [Finset.sum_congr rfl hin, Finset.sum_eq_single_of_mem χ hχ]
+  · rw [if_pos rfl]
+    ring
+  · intro ψ _ hne
+    rw [if_neg (fun h => hne h.symm), mul_zero]
+
+/-- Parseval over the reduced residues in natural form, as an upper bound. -/
+private lemma char_parseval_range491 (q : ℕ) [NeZero q]
+    (T : Finset (DirichletCharacter ℂ q)) (c : DirichletCharacter ℂ q → ℂ) :
+    ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        ‖∑ χ ∈ T, c χ * χ (a : ZMod q)‖ ^ 2 ≤
+      (q.totient : ℝ) * ∑ χ ∈ T, ‖c χ‖ ^ 2 := by
+  rw [← char_parseval491]
+  calc ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        ‖∑ χ ∈ T, c χ * χ (a : ZMod q)‖ ^ 2
+      ≤ ∑ a ∈ range q, ‖∑ χ ∈ T, c χ * χ (a : ZMod q)‖ ^ 2 :=
+        Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+          (fun _ _ _ => by positivity)
+    _ = ∑ x : ZMod q, ‖∑ χ ∈ T, c χ * χ x‖ ^ 2 :=
+        sum_range_eq_sum_zmod_real q (fun x => ‖∑ χ ∈ T, c χ * χ x‖ ^ 2)
+
+/-- The finite sums over the character pairs and over the residues go inside the
+integral, where the double character sum is a square. -/
+private lemma pair_sum_eq_integral491 {ι : Type*} (T : Finset ι) (A : Finset ℕ)
+    (g : ι → ℂ) (c : ι → ℕ → ℂ) (e : ℕ → ℂ) (S : ι → ℝ → ℂ) (E : ℝ → ℂ)
+    (hS : ∀ i, Continuous (S i)) (hE : Continuous E) (K : ℂ) (a0 b0 : ℝ) :
+    ∑ χ ∈ T, ∑ ψ ∈ T, K * g χ * g ψ * (∑ a ∈ A, c χ a * c ψ a * e a) *
+        (∫ z in a0..b0, S χ z * S ψ z * E z) =
+      K * ∫ z in a0..b0, ∑ a ∈ A, e a * (∑ χ ∈ T, g χ * c χ a * S χ z) ^ 2 * E z := by
+  have hc : ∀ χ ψ a, Continuous (fun z : ℝ =>
+      (g χ * g ψ * (c χ a * c ψ a * e a)) * (S χ z * S ψ z * E z)) := by
+    intro χ ψ a
+    exact continuous_const.mul (((hS χ).mul (hS ψ)).mul hE)
+  have hpt : ∀ z, ∑ a ∈ A, e a * (∑ χ ∈ T, g χ * c χ a * S χ z) ^ 2 * E z =
+      ∑ χ ∈ T, ∑ ψ ∈ T, ∑ a ∈ A,
+        (g χ * g ψ * (c χ a * c ψ a * e a)) * (S χ z * S ψ z * E z) := by
+    intro z
+    have hsq : ∀ a, e a * (∑ χ ∈ T, g χ * c χ a * S χ z) ^ 2 * E z =
+        ∑ χ ∈ T, ∑ ψ ∈ T,
+          (g χ * g ψ * (c χ a * c ψ a * e a)) * (S χ z * S ψ z * E z) := by
+      intro a
+      rw [sq, Finset.sum_mul_sum, Finset.mul_sum, Finset.sum_mul]
+      refine Finset.sum_congr rfl fun χ _ => ?_
+      rw [Finset.mul_sum, Finset.sum_mul]
+      refine Finset.sum_congr rfl fun ψ _ => ?_
+      ring
+    simp_rw [hsq]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun χ _ => ?_
+    rw [Finset.sum_comm]
+  simp_rw [hpt]
+  rw [intervalIntegral.integral_finsetSum (fun χ _ =>
+    (continuous_finsetSum _ fun ψ _ => continuous_finsetSum _ fun a _ =>
+      hc χ ψ a).intervalIntegrable _ _), Finset.mul_sum]
+  refine Finset.sum_congr rfl fun χ _ => ?_
+  rw [intervalIntegral.integral_finsetSum (fun ψ _ =>
+    (continuous_finsetSum _ fun a _ => hc χ ψ a).intervalIntegrable _ _), Finset.mul_sum]
+  refine Finset.sum_congr rfl fun ψ _ => ?_
+  rw [intervalIntegral.integral_finsetSum (fun a _ => (hc χ ψ a).intervalIntegrable _ _)]
+  simp_rw [intervalIntegral.integral_const_mul]
+  rw [← Finset.sum_mul, ← Finset.mul_sum]
+  ring
+
+/-- P0093 page 160 equation 5.4, by the printed Parseval argument over the reduced residues. -/
+theorem nonprincipal_bound491_parseval (hM : MellinBound280) :
+    ∃ C : ℝ, 0 < C ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
+      ∀ q : ℕ, ∀ hq : 1 ≤ q, (q : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ) →
+        letI : NeZero q := ⟨by omega⟩
+        ∀ n : ℤ, ‖nonprincipalTerm491 N q n‖ ≤
+          C * (N : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 13 := by
+  obtain ⟨B, hB, N0, hN0⟩ := hM
+  refine ⟨B, hB, max N0 1, ?_⟩
+  intro N hN q hq hqQ
+  letI : NeZero q := ⟨by omega⟩
+  intro n
+  have hN1 : N0 < N := lt_of_le_of_lt (le_max_left _ _) hN
+  have hNge1 : 1 ≤ N := le_of_lt (lt_of_le_of_lt (le_max_right _ _) hN)
+  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (show 0 < N by omega)
+  have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (show 0 < q by omega)
+  have hφpos : (0 : ℝ) < (q.totient : ℝ) := by
+    exact_mod_cast Nat.totient_pos.mpr (show 0 < q by omega)
+  have hτpos : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
+  have hlog : 0 ≤ Real.log N := Real.log_nonneg (by exact_mod_cast hNge1)
+  have hQ7 : (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) := by
+    refine le_trans hqQ (Real.rpow_le_rpow_of_exponent_le ?_ ?_)
+    · exact_mod_cast hNge1
+    · norm_num
+  have hSc : ∀ χ : DirichletCharacter ℂ q,
+      Continuous (fun z : ℝ => characterPrime280 χ N z) :=
+    fun χ => characterPrime280_continuous q χ N hNge1
+  have hEc : Continuous (fun z : ℝ =>
+      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) := by
+    fun_prop
+  have hg2 : ∀ χ : DirichletCharacter ℂ q, ‖conjugateGauss491 q χ‖ ^ 2 ≤ (q : ℝ) := by
+    intro χ
+    have h2 := pow_le_pow_left₀ (norm_nonneg _) (conjugateGauss491_norm_le q χ) 2
+    rwa [Real.sq_sqrt hqpos.le] at h2
+  set b0 : ℝ := 1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) with hb0
+  have hb0pos : 0 < b0 := by rw [hb0]; positivity
+  have hab : -b0 ≤ b0 := by linarith
+  set M : ℝ := B * (N : ℝ) / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) * Real.log N ^ 13 with hMdef
+  have hM0 : 0 ≤ M :=
+    mul_nonneg (div_nonneg (mul_nonneg hB.le hNpos.le) (mul_pos hqpos hτpos).le)
+      (pow_nonneg hlog 13)
+  have hEq : nonprincipalTerm491 N q n = (1 / (q.totient : ℂ) ^ 2) *
+      ∫ z in -b0..b0, ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I) *
+        (∑ χ ∈ univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1),
+          conjugateGauss491 q χ * χ (a : ZMod q) * characterPrime280 χ N z) ^ 2 *
+        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I) :=
+    pair_sum_eq_integral491 (univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1))
+      ((range q).filter (fun a => Nat.Coprime a q))
+      (fun χ => conjugateGauss491 q χ) (fun χ a => χ (a : ZMod q))
+      (fun a => Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I))
+      (fun χ z => characterPrime280 χ N z)
+      (fun z => Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))
+      hSc hEc (1 / (q.totient : ℂ) ^ 2) (-b0) b0
+  set T : Finset (DirichletCharacter ℂ q) :=
+    univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1) with hT
+  have hpt : ∀ z : ℝ, ‖∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I) *
+        (∑ χ ∈ T, conjugateGauss491 q χ * χ (a : ZMod q) * characterPrime280 χ N z) ^ 2 *
+        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
+      (q.totient : ℝ) * ((q : ℝ) * ∑ χ ∈ T, ‖characterPrime280 χ N z‖ ^ 2) := by
+    intro z
+    calc ‖∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+          Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I) *
+          (∑ χ ∈ T, conjugateGauss491 q χ * χ (a : ZMod q) * characterPrime280 χ N z) ^ 2 *
+          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖
+        ≤ ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+          ‖Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I) *
+          (∑ χ ∈ T, conjugateGauss491 q χ * χ (a : ZMod q) * characterPrime280 χ N z) ^ 2 *
+          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ :=
+          norm_sum_le _ _
+      _ = ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+          ‖∑ χ ∈ T, (conjugateGauss491 q χ * characterPrime280 χ N z) *
+            χ (a : ZMod q)‖ ^ 2 := by
+          refine Finset.sum_congr rfl fun a _ => ?_
+          rw [norm_mul, norm_mul, norm_pow, Complex.norm_exp_ofReal_mul_I,
+            Complex.norm_exp_ofReal_mul_I, one_mul, mul_one]
+          congr 2
+          exact Finset.sum_congr rfl fun χ _ => by ring
+      _ ≤ (q.totient : ℝ) *
+          ∑ χ ∈ T, ‖conjugateGauss491 q χ * characterPrime280 χ N z‖ ^ 2 :=
+          char_parseval_range491 q T
+            (fun χ => conjugateGauss491 q χ * characterPrime280 χ N z)
+      _ ≤ (q.totient : ℝ) * ((q : ℝ) * ∑ χ ∈ T, ‖characterPrime280 χ N z‖ ^ 2) := by
+          refine mul_le_mul_of_nonneg_left ?_ hφpos.le
+          rw [Finset.mul_sum]
+          refine Finset.sum_le_sum fun χ _ => ?_
+          rw [norm_mul, mul_pow]
+          exact mul_le_mul_of_nonneg_right (hg2 χ) (by positivity)
+  have hgint : IntervalIntegrable (fun z : ℝ =>
+      (q.totient : ℝ) * ((q : ℝ) * ∑ χ ∈ T, ‖characterPrime280 χ N z‖ ^ 2))
+      volume (-b0) b0 := by
+    refine Continuous.intervalIntegrable ?_ _ _
+    exact continuous_const.mul (continuous_const.mul
+      (continuous_finsetSum _ fun χ _ => (hSc χ).norm.pow 2))
+  have hI := intervalIntegral.norm_integral_le_of_norm_le hab
+    (Filter.Eventually.of_forall fun z _ => hpt z) hgint
+  have hsum : ∫ z in -b0..b0,
+        (q.totient : ℝ) * ((q : ℝ) * ∑ χ ∈ T, ‖characterPrime280 χ N z‖ ^ 2) =
+      (q.totient : ℝ) * ((q : ℝ) *
+        ∑ χ ∈ T, ∫ z in -b0..b0, ‖characterPrime280 χ N z‖ ^ 2) := by
+    rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
+      intervalIntegral.integral_finsetSum]
+    intro χ _
+    exact ((hSc χ).norm.pow 2).intervalIntegrable _ _
+  have hen : ∑ χ ∈ T, ∫ z in -b0..b0, ‖characterPrime280 χ N z‖ ^ 2 ≤
+      (q.totient : ℝ) * M := by
+    calc ∑ χ ∈ T, ∫ z in -b0..b0, ‖characterPrime280 χ N z‖ ^ 2
+        ≤ ∑ _χ ∈ T, M :=
+          Finset.sum_le_sum fun χ hχ =>
+            hN0 N hN1 q hq hQ7 χ (Finset.mem_filter.mp hχ).2
+      _ = (T.card : ℝ) * M := by rw [Finset.sum_const, nsmul_eq_mul]
+      _ ≤ (q.totient : ℝ) * M :=
+          mul_le_mul_of_nonneg_right
+            (by exact_mod_cast nonprincipal_character_count491 q hq) hM0
+  have hfin : (1 / (q.totient : ℝ) ^ 2) *
+        ((q.totient : ℝ) * ((q : ℝ) * ((q.totient : ℝ) * M))) =
+      B * (N : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 13 := by
+    rw [hMdef]
+    field_simp
+  have hn1 : ‖(1 / (q.totient : ℂ) ^ 2)‖ = 1 / (q.totient : ℝ) ^ 2 := by
+    rw [norm_div, norm_one, norm_pow, Complex.norm_natCast]
+  rw [hEq, norm_mul, hn1]
+  refine le_of_le_of_eq (mul_le_mul_of_nonneg_left (hI.trans ?_) (by positivity)) hfin
+  rw [hsum]
+  exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hen hqpos.le) hφpos.le
 
 end LeanLab.Linnik1951

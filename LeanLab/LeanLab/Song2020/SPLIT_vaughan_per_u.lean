@@ -36,6 +36,8 @@ the inner r sum and Graham and Kolesnik Lemma 2.4 for L, page 7.
 Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
+import LeanLab.Song2020.RouteS1Lambda
+import LeanLab.Song2020.RouteVaughanUV
 
 namespace LeanLab.Song2020.SPLIT_vaughan_per_u
 
@@ -47,7 +49,8 @@ noncomputable section
 /-- LEAF: Song 2020, page 5, from "For S1, we first observe" to "We have shown so far":
 partial summation over the prime window with a_h at most K over h reduces S1 to the von
 Mangoldt sums over an initial segment, with n to the epsilon absorbing the weight variation
-when y is close to n/3. The header of this file carries the full reading. -/
+when y is close to n/3. The header of this file carries the full reading.
+PROVED 2026-11-15 from RouteS1Lambda.s1_lambda_reduction_route, no sorry. -/
 theorem s1_lambda_reduction :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
       ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
@@ -63,11 +66,14 @@ theorem s1_lambda_reduction :
         ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0), a H h * eC (h * (-(p : ℝ) ^ γ)))‖ ≤
                 C * K * ((n : ℝ) ^ (3 / 2 - γ) + (H : ℝ) * (n : ℝ) ^ ((1 : ℝ) / 2) +
                   (n : ℝ) ^ ε * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := by
-  sorry
+  exact RouteS1Lambda.s1_lambda_reduction_route
 
 /-- LEAF: Song 2020, pages 6 and 7, with u and v both free: the Sigma 1 display and the
 display for x to the minus epsilon times Sigma 2 plus Sigma 3, before the choice
-v = (n/u)^{1/2}. The header of this file carries the full reading. -/
+v = (n/u)^{1/2}. The header of this file carries the full reading.
+ROUTED 2026-11-15 through RouteVaughanUV.vaughan_uv_route: no sorry here. CONDITIONAL ON the
+three open leaves RouteVaughanLeaves.sigma2_bound, RouteVaughanLeaves.sigma3_bound and
+RouteVaughanSigma1.inner_sum_bound. -/
 theorem vaughan_uv :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
       ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
@@ -85,7 +91,7 @@ theorem vaughan_uv :
                   |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
                 u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
                   |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  sorry
+  exact RouteVaughanUV.vaughan_uv_route
 
 /-- PROVED. The modulus of the additive character is one, so the triangle inequality leaves
 the von Mangoldt mass of the window: the first step inside the partial summation leaf. -/

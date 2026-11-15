@@ -1,0 +1,157 @@
+[
+  {
+    "file": "AlmostEqual.lean",
+    "name": "mms_theorem11",
+    "header": "theorem mms_theorem11 (\u03b8 : \u211d) (h\u03b8 : 11 / 20 < \u03b8) : AlmostEqualVinogradov \u03b8"
+  },
+  {
+    "file": "Decomp361b.lean",
+    "name": "short_progression_input",
+    "header": "theorem short_progression_input (\u03b8 : \u211d) (h\u03b8 : 11 / 20 < \u03b8) (h\u03b81 : \u03b8 < 1) :\n    \u2203 \u03b5 : \u211d, 0 < \u03b5 \u2227 \u03b5 < 1 \u2227\n      \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192 Hyp2 \u03b8 \u03b5 x 0.99"
+  },
+  {
+    "file": "Decomp361e.lean",
+    "name": "harman_fourier_input",
+    "header": "theorem harman_fourier_input (\u03b8 : \u211d) (h\u03b8 : 11 / 20 < \u03b8) (h\u03b81 : \u03b8 < 1) :\n    \u2203 \u03b1p : \u211d, 0 < \u03b1p \u2227 \u03b1p < 2.9 \u2227\n      \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n        Hyp1 \u03b8 x \u03b1p \u03b7 (harmanMajorant x)"
+  },
+  {
+    "file": "Decomp379a.lean",
+    "name": "bhp_endpoint_lower",
+    "header": "theorem bhp_endpoint_lower (\u03c3 : \u211d) (h\u03c3 : 11 / 20 < \u03c3) (h\u03c31 : \u03c3 < 1) :\n    \u2203 Y : \u211d, 1 < Y \u2227 \u2200 y : \u211d, Y \u2264 y \u2192 \u2200 h : \u211d,\n      y ^ \u03c3 \u2264 h \u2192 h \u2264 y / Real.log y \u2192 \u2200 d c : \u2115,\n      1 \u2264 d \u2192 (d : \u211d) \u2264 Real.log y ^ (2 : \u2115) \u2192 Nat.Coprime c d \u2192\n      0.995 * h / (d.totient * Real.log y) \u2264\n        \u2211 n \u2208 (ints (y - h) y).filter (fun n => n \u2261 c [MOD d]), \u03c1 n"
+  },
+  {
+    "file": "Decomp379b.lean",
+    "name": "helfgott_weighted_total_lower",
+    "header": "theorem helfgott_weighted_total_lower (N : \u2115) (ho : Odd N)\n    (hN : (10 : \u211d) ^ (27 : \u2115) \u2264 N) :\n    0.08068 * LeanLab.Helfgott2013.xOf N ^ 2 / LeanLab.Helfgott2013.\u03ba \u2264\n      weightedTotal N (helfgottTripleWeight N)"
+  },
+  {
+    "file": "Decomp379b.lean",
+    "name": "helfgott_discarded_upper",
+    "header": "theorem helfgott_discarded_upper (N : \u2115)\n    (hN : (10 : \u211d) ^ (27 : \u2115) \u2264 N) :\n    discardedTotal N (helfgottTripleWeight N) \u2264\n      7.3306 * (N : \u211d) ^ (3 / 2 : \u211d) * Real.log N"
+  },
+  {
+    "file": "Decomp379c.lean",
+    "name": "harman_reference_mean",
+    "header": "theorem harman_reference_mean :\n    \u2203 \u03b1p : \u211d, 0 < \u03b1p \u2227 \u03b1p < 2.9 \u2227\n      \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n        |referenceMean x - \u03b1p| \u2264 \u03b4"
+  },
+  {
+    "file": "Decomp379c.lean",
+    "name": "harman_fourier_of_reference_mean",
+    "header": "theorem harman_fourier_of_reference_mean (\u03b8 : \u211d) (h\u03b8 : 11 / 20 < \u03b8) (h\u03b81 : \u03b8 < 1)\n    (\u03b1p : \u211d)\n    (hmean : \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n      |referenceMean x - \u03b1p| \u2264 \u03b4) :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n      Hyp1 \u03b8 x \u03b1p \u03b7 (Task361.harmanMajorant x)"
+  },
+  {
+    "file": "Decomp420b.lean",
+    "name": "helfgott_major_integral_lower",
+    "header": "theorem helfgott_major_integral_lower (N : \u2115) (ho : Odd N)\n    (hN : (10 : \u211d) ^ (27 : \u2115) \u2264 N) :\n    1.058259 * LeanLab.Helfgott2013.xOf N ^ 2 / LeanLab.Helfgott2013.\u03ba \u2264\n      (\u222b \u03b1 in Set.Ioc (0 : \u211d) 1 \u2229 helfgottMajorArcs (LeanLab.Helfgott2013.xOf N),\n        helfgottIntegrand N \u03b1).re"
+  },
+  {
+    "file": "Decomp420b.lean",
+    "name": "helfgott_minor_norm_integral_upper",
+    "header": "theorem helfgott_minor_norm_integral_upper (N : \u2115)\n    (hN : (10 : \u211d) ^ (27 : \u2115) \u2264 N) :\n    (\u222b \u03b1 in Set.Ioc (0 : \u211d) 1 \\ helfgottMajorArcs (LeanLab.Helfgott2013.xOf N),\n      \u2016helfgottIntegrand N \u03b1\u2016) \u2264\n        0.97757 * LeanLab.Helfgott2013.xOf N ^ 2 / LeanLab.Helfgott2013.\u03ba"
+  },
+  {
+    "file": "Decomp420c.lean",
+    "name": "harman_reference_mean_enveloped",
+    "header": "theorem harman_reference_mean_enveloped :\n    \u2203 \u03b1p : \u211d, 0 < \u03b1p \u2227 \u03b1p \u2264 4 * buchstabEnvelope 4 + buchstabEnvelopeIntegral \u2227\n      \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n        |Task379.referenceMean x - \u03b1p| \u2264 \u03b4"
+  },
+  {
+    "file": "Decomp420d.lean",
+    "name": "harman_fourier_reference_input",
+    "header": "theorem harman_fourier_reference_input (\u03b8 : \u211d) (h\u03b8 : 11 / 20 < \u03b8) (h\u03b81 : \u03b8 < 1) :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n      Hyp1 \u03b8 x (Task379.referenceMean x) \u03b7 (Task361.harmanMajorant x)"
+  },
+  {
+    "file": "Decomp420f.lean",
+    "name": "hfun_bandlimited_error",
+    "header": "theorem hfun_bandlimited_error {t : \u211d} (ht : 0 < t) :\n    |LeanLab.HelfgottArcs.mconv LeanLab.HelfgottArcs.hfun\n        (LeanLab.HelfgottArcs.FH 200) t - LeanLab.HelfgottArcs.hfun t| \u2264\n      t * 2.80582038 * ((1 + 4 / Real.pi * Real.log 200) / 200)"
+  },
+  {
+    "file": "Decomp534a.lean",
+    "name": "sineIntegral_value_leaf",
+    "header": "theorem sineIntegral_value_leaf (L : \u211d)\n    (hL : Tendsto sineIntegral atTop (\ud835\udcdd L)) : L = Real.pi / 2"
+  },
+  {
+    "file": "Decomp571b.lean",
+    "name": "roughReferenceMean_limit",
+    "header": "theorem roughReferenceMean_limit :\n    \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n      |roughReferenceMean x - 4 * buchstabModel 4| \u2264 \u03b4"
+  },
+  {
+    "file": "Decomp571b.lean",
+    "name": "correctionReferenceMean_limit",
+    "header": "theorem correctionReferenceMean_limit :\n    \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 X : \u211d, \u2200 x : \u211d, X \u2264 x \u2192\n      |correctionReferenceMean x - profileIntegral buchstabModel| \u2264 \u03b4"
+  },
+  {
+    "file": "Decomp573a.lean",
+    "name": "prime_moment_upper",
+    "header": "theorem prime_moment_upper (x : \u211d) (hx : 4.9e26 \u2264 x) :\n    (\u222b \u03b1 in minorDomain x, starNorm x \u03b1 * \u2016primeSeries x \u03b1\u2016 ^ 2) \u2264\n      (Real.sqrt (Real.pi / 2) * (0.77962 + 3.5776e-4)) *\n        (x ^ 2 / LeanLab.Helfgott2013.\u03ba)"
+  },
+  {
+    "file": "Decomp573a.lean",
+    "name": "remainder_moment_upper",
+    "header": "theorem remainder_moment_upper (x : \u211d) (hx : 4.9e26 \u2264 x) :\n    (\u222b \u03b1 in minorDomain x, starNorm x \u03b1 * \u2016remainderSeries x \u03b1\u2016 ^ 2) \u2264\n      1.0532e-11 * (x ^ 2 / LeanLab.Helfgott2013.\u03ba)"
+  },
+  {
+    "file": "Decomp580a.lean",
+    "name": "prime_supported_large_sieve_finset",
+    "header": "theorem prime_supported_large_sieve_finset (A : Finset \u2115) (a : \u2115 \u2192 \u2102) (x \u03b4 Q\u2080 : \u211d)\n    (hx : 0 < x) (h\u03b4 : 1 \u2264 \u03b4) (hQ : 1e5 \u2264 Q\u2080)\n    (hsize : (20000 * Q\u2080) ^ 2 \u2264 x / (2 * \u03b4))\n    (hpower : 2 * Q\u2080 \u2264 (2 * Real.sqrt (x / (2 * \u03b4))) ^ (0.6 : \u211d))\n    (hsupport : \u2200 n \u2208 A, \u00acn.Prime \u2228 (n : \u211d) \u2264 Real.sqrt x \u2192 a n = 0) :\n    (\u222b \u03b1 in majorArcs x \u03b4 Q\u2080 \u2229 Set.Ioc (0 : \u211d) 1,\n      \u2016\u2211 n \u2208 A, a n * LeanLab.Ternary.MMS.e ((n : \u211d) * \u03b1)\u2016 ^ 2) \u2264\n      ((Real.log (2 * Q\u2080) + 1.36) /\n        (Real.log (2 * Real.sqrt (x / (2 * \u03b4))) + sieveConstant)) *\n          \u2211 n \u2208 A, \u2016a n\u2016 ^ 2"
+  },
+  {
+    "file": "Decomp580b.lean",
+    "name": "star_mass_error",
+    "header": "theorem star_mass_error (x : \u211d) (hx : 4.9e26 \u2264 x) :\n    |(\u2211' n : \u2115, (ArithmeticFunction.vonMangoldt n : \u211d) * starWeight (n / x)) -\n      x * (\u222b t in Set.Ioi (0 : \u211d), starWeight t)| \u2264\n      1.9075e-8 * x / LeanLab.Helfgott2013.\u03ba"
+  },
+  {
+    "file": "Decomp580c.lean",
+    "name": "nonprime_coeff_square_upper",
+    "header": "theorem nonprime_coeff_square_upper (x : \u211d) (hx : 4.9e26 \u2264 x) :\n    (\u2211' n : \u2115, if \u00acn.Prime then\n      \u2016((ArithmeticFunction.vonMangoldt n : \u211d) : \u2102) *\n        (LeanLab.HelfgottArcs.etaPlus (n / x) : \u2102)\u2016 ^ 2 else 0) \u2264\n      (2.33744 * (2 + Real.log x) + 0.44937) * Real.sqrt x"
+  },
+  {
+    "file": "Decomp580c.lean",
+    "name": "small_index_coeff_square_upper",
+    "header": "theorem small_index_coeff_square_upper (x : \u211d) (hx : 4.9e26 \u2264 x) :\n    (\u2211' n : \u2115, if (n : \u211d) \u2264 Real.sqrt x then\n      \u2016((ArithmeticFunction.vonMangoldt n : \u211d) : \u2102) *\n        (LeanLab.HelfgottArcs.etaPlus (n / x) : \u2102)\u2016 ^ 2 else 0) \u2264\n      0.60581 * Real.sqrt x * Real.log x"
+  },
+  {
+    "file": "Decomp91.lean",
+    "name": "asymmetric_popular_input",
+    "header": "theorem asymmetric_popular_input :\n    \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u03b5 < 1 \u2192 \u2203 \u03b4 > (0 : \u211d),\n      \u2200 (N : \u2115) (A B : Finset \u2115), 0 < N \u2192 A \u2286 Icc 1 N \u2192 B \u2286 Icc 1 N \u2192\n      ((popular N \u03b4 A B).card : \u211d) \u2264 4 * (min A.card B.card : \u2115) - \u03b5 * N \u2192\n      \u2203 P : Finset \u2115, IsAPIn N P \u2227 \u03b4 * N \u2264 P.card \u2227\n        (1 / 2 + \u03b5 / 5) * P.card \u2264 (A \u2229 P).card"
+  },
+  {
+    "file": "MMSTransference.lean",
+    "name": "mms_prop32",
+    "header": "theorem mms_prop32 : Prop32"
+  },
+  {
+    "file": "MMSTransference.lean",
+    "name": "mms_prop33",
+    "header": "theorem mms_prop33 : Prop33"
+  },
+  {
+    "file": "MMSTransference.lean",
+    "name": "mms_thm41",
+    "header": "theorem mms_thm41 : Thm41"
+  },
+  {
+    "file": "MMSTransference.lean",
+    "name": "mms_prop31",
+    "header": "theorem mms_prop31 : Prop31"
+  },
+  {
+    "file": "MMSTransference.lean",
+    "name": "mms_thm21",
+    "header": "theorem mms_thm21 : Thm21"
+  },
+  {
+    "file": "State1535.lean",
+    "name": "chenWang_weighted",
+    "header": "theorem chenWang_weighted : ChenWangWeighted (Real.exp (Real.exp 9.715))"
+  },
+  {
+    "file": "State1535.lean",
+    "name": "zeroFreeHigh_exists",
+    "header": "theorem zeroFreeHigh_exists : \u2203 c : \u211d, 0 < c \u2227 ZeroFreeHigh c"
+  },
+  {
+    "file": "Statements.lean",
+    "name": "helfgott_analytic",
+    "header": "theorem helfgott_analytic : TernaryAbove (10 ^ 27)"
+  }
+]

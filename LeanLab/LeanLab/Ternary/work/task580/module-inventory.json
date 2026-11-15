@@ -1,0 +1,1487 @@
+[
+  {
+    "module": "AERange1",
+    "lines": 12,
+    "imports": [
+      "LeanLab.Ternary.AlmostEqualSmall"
+    ],
+    "declarations": [
+      "aeRange_7",
+      "aeRange_1000"
+    ]
+  },
+  {
+    "module": "AERange2",
+    "lines": 12,
+    "imports": [
+      "LeanLab.Ternary.AlmostEqualSmall"
+    ],
+    "declarations": [
+      "aeRange_2000",
+      "aeRange_3000"
+    ]
+  },
+  {
+    "module": "AERange3",
+    "lines": 12,
+    "imports": [
+      "LeanLab.Ternary.AlmostEqualSmall"
+    ],
+    "declarations": [
+      "aeRange_4000",
+      "aeRange_5000"
+    ]
+  },
+  {
+    "module": "AERange4",
+    "lines": 12,
+    "imports": [
+      "LeanLab.Ternary.AlmostEqualSmall"
+    ],
+    "declarations": [
+      "aeRange_6000",
+      "aeRange_7000"
+    ]
+  },
+  {
+    "module": "AERange5",
+    "lines": 11,
+    "imports": [
+      "LeanLab.Ternary.AlmostEqualSmall"
+    ],
+    "declarations": [
+      "aeRange_8000"
+    ]
+  },
+  {
+    "module": "AERange6",
+    "lines": 11,
+    "imports": [
+      "LeanLab.Ternary.AlmostEqualSmall"
+    ],
+    "declarations": [
+      "aeRange_9000"
+    ]
+  },
+  {
+    "module": "AERange7",
+    "lines": 11,
+    "imports": [
+      "LeanLab.Ternary.AlmostEqualSmall"
+    ],
+    "declarations": [
+      "aeRange_9500"
+    ]
+  },
+  {
+    "module": "AlmostEqual",
+    "lines": 136,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach",
+      "LeanLab.Ternary.Statements"
+    ],
+    "declarations": [
+      "IsAlmostEqualTernary",
+      "AlmostEqualVinogradov",
+      "mms_theorem11",
+      "bakerHarman_quoted",
+      "panPan_quoted",
+      "isAlmostEqualTernary_mono",
+      "IsAlmostEqualTernary.isTernarySum",
+      "almostEqualVinogradov_mono",
+      "bakerHarman_of_mms",
+      "panPan_of_bakerHarman",
+      "vinogradov_of_almostEqual",
+      "prime_near_third_of_almostEqual",
+      "exists_prime_le_third",
+      "exists_prime_ge_third",
+      "not_almostEqual_small_window"
+    ]
+  },
+  {
+    "module": "AlmostEqualSmall",
+    "lines": 103,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach",
+      "LeanLab.Ternary.AlmostEqual"
+    ],
+    "declarations": [
+      "inW",
+      "inW_sound",
+      "findQ",
+      "findP",
+      "aeCheck",
+      "findQ_sound",
+      "findP_sound",
+      "aeCheck_sound",
+      "aeRange",
+      "aeRange_sound"
+    ]
+  },
+  {
+    "module": "AlmostEqualSqrt",
+    "lines": 47,
+    "imports": [
+      "LeanLab.Ternary.AERange1",
+      "LeanLab.Ternary.AERange2",
+      "LeanLab.Ternary.AERange3",
+      "LeanLab.Ternary.AERange4",
+      "LeanLab.Ternary.AERange5",
+      "LeanLab.Ternary.AERange6",
+      "LeanLab.Ternary.AERange7"
+    ],
+    "declarations": [
+      "almostEqual_sqrt_upTo_10000"
+    ]
+  },
+  {
+    "module": "BinaryToTernary",
+    "lines": 150,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Ternary.AlmostEqual"
+    ],
+    "declarations": [
+      "IsAlmostEqualBinary",
+      "IsAlmostEqualBinary.abs_snd",
+      "almostEqualTernary_of_binary_step",
+      "almostEqualTernary_of_binary",
+      "AlmostEqualBinaryGoldbach",
+      "isAlmostEqualBinary_mono",
+      "almostEqualTernary_of_binaryGoldbach",
+      "hsmall_of_lt_one",
+      "almostEqualTernary_of_binaryGoldbach'"
+    ]
+  },
+  {
+    "module": "Decomp1535a",
+    "lines": 545,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Ternary.State1535",
+      "LeanLab.Ternary.MMSOrthogonality",
+      "LeanLab.Ternary.Decomp1535b"
+    ],
+    "declarations": [
+      "orth_int",
+      "circle_identity_of_orth",
+      "isTernarySum_of_r3_pos",
+      "parseval_of_orth",
+      "continuous_S",
+      "split_arcs",
+      "minor_bound",
+      "sum_log_sq_le",
+      "theta_le",
+      "norm_S_le",
+      "r3_eq_re_integral",
+      "r3_pos_of_arcs",
+      "r3_pos_of_arcs_log4",
+      "ternaryAbove_of_arcs",
+      "ternaryAbove_of_weighted",
+      "weighted_iff_ternaryAbove",
+      "periodic_S",
+      "periodic_F",
+      "circle_identity_shifted",
+      "norm_vonMangoldt_sum_sub_S_le",
+      "parseval_shifted",
+      "minor_bound_log4",
+      "r3_le_positive_triples_mul_log_cube",
+      "S_zero",
+      "norm_S_zero",
+      "global_norm_bound_iff",
+      "one_mem_arcs_of_minor_lt_theta",
+      "norm_truncated_vonMangoldt_sub_prime_le"
+    ]
+  },
+  {
+    "module": "Decomp1535b",
+    "lines": 566,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Ternary.State1535"
+    ],
+    "declarations": [
+      "dirichlet_cover",
+      "arcs_disjoint",
+      "ramanujan_prime",
+      "triple_count",
+      "singular_tail_product",
+      "singular_partial",
+      "singular_coprime_factor",
+      "primePower_excess",
+      "exp_exp_upper",
+      "exp_exp_lower",
+      "exp_exp_1989",
+      "minor_q_large",
+      "chenWang_size",
+      "ternaryAbove_10pow_of_chenWang",
+      "threshold_gap",
+      "major_arc_intervals_disjoint",
+      "singular_coprime_factor_two",
+      "singular_finite_lower",
+      "singular_finite_even_zero",
+      "J",
+      "J_zero",
+      "norm_J_le_length",
+      "norm_J_le_reciprocal",
+      "norm_J_le_min",
+      "singular_simplex_area"
+    ]
+  },
+  {
+    "module": "Decomp361a",
+    "lines": 23,
+    "imports": [
+      "LeanLab.Ternary.MMSProp31Complete",
+      "LeanLab.Ternary.Decomp91"
+    ],
+    "declarations": [
+      "mms_thm41_decomposed",
+      "mms_prop31_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp361b",
+    "lines": 65,
+    "imports": [
+      "LeanLab.Ternary.Decomp361e"
+    ],
+    "declarations": [
+      "sieve_majorant_input",
+      "short_progression_input",
+      "mms_theorem11_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp361c",
+    "lines": 242,
+    "imports": [
+      "LeanLab.Ternary.State1535",
+      "LeanLab.PNTPort.DirichletZF.RealZero"
+    ],
+    "declarations": [
+      "zeta_compact_strip",
+      "zeta_log_strip",
+      "principal_log_strip",
+      "log_Bt_comparison",
+      "nonprincipal_log_strip",
+      "strip_denominator_mono",
+      "zeroFreeHigh_exists_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp361d",
+    "lines": 107,
+    "imports": [
+      "LeanLab.Ternary.State1535",
+      "LeanLab.Ternary.Decomp1535b"
+    ],
+    "declarations": [
+      "exp_9_7_lower",
+      "sub_mul_log_mono",
+      "cutoff_of_log_margin",
+      "chenWang_cutoff_three",
+      "chenWang_cutoff_seven",
+      "chenWang_arc_margin",
+      "chenWang_threshold_exceeds_helfgott"
+    ]
+  },
+  {
+    "module": "Decomp361e",
+    "lines": 112,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "roughIndicator",
+      "harmanMajorant",
+      "roughIndicator_nonneg",
+      "roughIndicator_prime",
+      "harmanMajorant_nonneg",
+      "primeIndicator_le_harmanMajorant",
+      "interval_above_rough_cutoff",
+      "harman_fourier_input"
+    ]
+  },
+  {
+    "module": "Decomp361f",
+    "lines": 70,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "hyp1_zero_frequency",
+      "hyp1_prime_count_upper",
+      "hyp2_full_interval_length",
+      "hyp2_full_prime_count"
+    ]
+  },
+  {
+    "module": "Decomp379a",
+    "lines": 150,
+    "imports": [
+      "LeanLab.Ternary.Decomp361b"
+    ],
+    "declarations": [
+      "bhp_endpoint_lower",
+      "endpoint_coefficient_loss",
+      "eventual_normalization_budget",
+      "interval_normalization",
+      "short_progression_input_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp379b",
+    "lines": 99,
+    "imports": [
+      "LeanLab.Ternary.State1535",
+      "LeanLab.HelfgottArcs.Statements",
+      "LeanLab.Helfgott2013.Slip"
+    ],
+    "declarations": [
+      "weightedTotal",
+      "discardedTotal",
+      "helfgottTripleWeight",
+      "isTernarySum_of_weighted_gap",
+      "helfgott_weighted_total_lower",
+      "helfgott_discarded_upper",
+      "helfgott_analytic_decomposed",
+      "chenWang_weighted_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp379c",
+    "lines": 146,
+    "imports": [
+      "LeanLab.Ternary.Decomp361e"
+    ],
+    "declarations": [
+      "referenceLength",
+      "referenceWeight",
+      "referenceMean",
+      "referenceWeight_nonneg",
+      "referenceLength_pos",
+      "referenceWeight_midpoint_pos",
+      "referenceWeight_contDiff",
+      "referenceWeight_pos_inside",
+      "referenceWeight_zero_outside",
+      "referenceWeight_integral_pos",
+      "referenceMean_nonneg",
+      "harman_reference_mean",
+      "harman_fourier_of_reference_mean",
+      "harman_fourier_input_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp379d",
+    "lines": 55,
+    "imports": [
+      "LeanLab.Ternary.Decomp379a",
+      "LeanLab.Ternary.Decomp379c"
+    ],
+    "declarations": [
+      "sieve_majorant_input_decomposed",
+      "mms_theorem11_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp420a",
+    "lines": 361,
+    "imports": [
+      "LeanLab.Ternary.Decomp379b",
+      "LeanLab.Ternary.Decomp420f",
+      "LeanLab.Common.PsiTheta.Bound",
+      "LeanLab.Helfgott2013.MellinSup",
+      "LeanLab.Helfgott2013.Conclusion"
+    ],
+    "declarations": [
+      "triple_sum_rotate",
+      "constrained_inner_sum_le",
+      "bad_first_sum_le",
+      "discarded_le_of_weight_bound",
+      "bad_mangoldt_mass_identity",
+      "psi_le_111",
+      "bad_mangoldt_mass_le",
+      "mangoldt_range_sum",
+      "etaStar_eq_mellin",
+      "etaStar_abs_le",
+      "etaPlus_abs_le",
+      "mangoldt_le_log_of_le",
+      "helfgottTripleWeight_le",
+      "helfgott_discarded_upper_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp420b",
+    "lines": 188,
+    "imports": [
+      "LeanLab.Ternary.Decomp420e"
+    ],
+    "declarations": [
+      "helfgottMajorArcs",
+      "measurableSet_helfgottMajorArcs",
+      "zero_mem_helfgottMajorArcs",
+      "re_integral_ge_major_sub_norm",
+      "helfgott_fourier_identity",
+      "helfgott_major_integral_lower",
+      "norm_helfgottIntegrand",
+      "integrableOn_helfgottIntegrand_minor",
+      "integrableOn_norm_helfgottIntegrand_minor",
+      "repaired_minor_total",
+      "helfgott_minor_norm_integral_upper_of_repaired_inputs",
+      "helfgott_minor_norm_integral_upper",
+      "helfgott_weighted_total_lower_decomposed",
+      "helfgott_analytic_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp420c",
+    "lines": 388,
+    "imports": [
+      "LeanLab.Ternary.Decomp379c",
+      "LeanLab.Helfgott2013.SectionSeven"
+    ],
+    "declarations": [
+      "buchstabEnvelope",
+      "buchstabEnvelopeIntegral",
+      "buchstab_argument_ge_one",
+      "buchstab_constant_lt",
+      "buchstabEnvelope_nonneg",
+      "buchstabEnvelope_le_057",
+      "buchstabEnvelope_le_one",
+      "buchstabEnvelopeIntegral_nonneg",
+      "log_ratio_kernel",
+      "log_ratio_sq_kernel",
+      "interval_integral_mono_nonneg",
+      "envelope_inner_bound",
+      "envelope_double_bound",
+      "kernel_total_bound",
+      "kernel_tail_bound",
+      "buchstab_envelope_integral_upper",
+      "harman_reference_mean_enveloped",
+      "buchstab_envelope_lt",
+      "harman_reference_mean_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp420d",
+    "lines": 215,
+    "imports": [
+      "LeanLab.Ternary.Decomp420c",
+      "LeanLab.Ternary.MMSBohrSmoothing",
+      "LeanLab.Halupczok2012.U1439Combin"
+    ],
+    "declarations": [
+      "wheel_eq_primorial",
+      "wheel_pos",
+      "wheel_le_log",
+      "eventual_wheel_le_rpow",
+      "class_card_mul_wheel_le",
+      "class_fourier_mul_wheel_le",
+      "mean_replacement_norm",
+      "hyp1_change_mean",
+      "hyp1_mono_error",
+      "harman_fourier_reference_input",
+      "harman_fourier_of_reference_mean_decomposed",
+      "harman_fourier_input_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp420e",
+    "lines": 403,
+    "imports": [
+      "LeanLab.Ternary.Decomp420a",
+      "LeanLab.Ternary.MMSOrthogonality"
+    ],
+    "declarations": [
+      "helfgottIntegrand",
+      "charSeries",
+      "continuous_charSeries",
+      "integral_l1_characters",
+      "charSeries_triple_expansion",
+      "l1_triple_circle_identity",
+      "S_eq_charSeries",
+      "FH_coarse_bound",
+      "hfun_div_bound",
+      "mconv_hfun_coarse_bound",
+      "etaPlus_gaussian_bound",
+      "etaPlus_coefficients_summable",
+      "phi_scale_gaussian_bound",
+      "etaStar_gaussian_bound",
+      "etaStar_coefficients_summable",
+      "helfgott_fourier_identity_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp420f",
+    "lines": 118,
+    "imports": [
+      "LeanLab.HelfgottArcs.Statements",
+      "LeanLab.Helfgott2013.SectionSevenI",
+      "LeanLab.Helfgott2013.Conclusion"
+    ],
+    "declarations": [
+      "hfun_gaussian_bump_le",
+      "gaussian_derivative_rounding",
+      "coarse_gaussian_bound_not_sharp",
+      "hfun_bandlimited_error",
+      "etaPlus_abs_le_from_bandlimited_error"
+    ]
+  },
+  {
+    "module": "Decomp534a",
+    "lines": 595,
+    "imports": [
+      "Mathlib",
+      "LeanLab.HelfgottArcs.Statements"
+    ],
+    "declarations": [
+      "sineIntegral",
+      "sineIntegral_neg",
+      "sineIntegral_unit",
+      "integral_inverse_square",
+      "sine_tail_parts",
+      "sine_tail_finite",
+      "sineIntegral_sub",
+      "sineIntegral_tail_of_limit",
+      "reflected_negative_tail",
+      "sineIntegral_has_limit",
+      "hasDerivAt_sineIntegral",
+      "sineIntegral_parts",
+      "reflected_weight_no_uniform_decay",
+      "smoothing_scalar_rounding",
+      "sineIntegral_value_leaf",
+      "sineIntegral_limit_value",
+      "sineIntegral_positive_tail",
+      "sineIntegral_negative_tail",
+      "hfun_logarithmic_envelope",
+      "logarithmic_tail_bound",
+      "diagnostic_tail_rounding",
+      "mconv_logarithmic_identity",
+      "logarithmic_integrable_left",
+      "mconv_logarithmic_truncation",
+      "diagnostic_truncation_error",
+      "sineIntegral_small_positive",
+      "sineIntegral_small_negative",
+      "sine_tail_finite_gap",
+      "cosine_defect_positive",
+      "sineIntegral_tail_strict_of_limit",
+      "sineIntegral_positive_tail_strict",
+      "sineIntegral_negative_tail_strict"
+    ]
+  },
+  {
+    "module": "Decomp571a",
+    "lines": 705,
+    "imports": [
+      "LeanLab.Ternary.Decomp379c"
+    ],
+    "declarations": [
+      "buchstabStage",
+      "buchstabModel",
+      "referenceEnvelope",
+      "profileIntegral",
+      "buchstabStage_nonneg",
+      "buchstabStage_initial",
+      "buchstabStage_middle",
+      "buchstabStage_stable",
+      "buchstabModel_recursion",
+      "buchstabStage_eq_of_recursion",
+      "buchstabModel_four_pos",
+      "buchstabStage_continuous_clamp",
+      "referenceEnvelope_continuous_clamp",
+      "clamped_intervalIntegrable",
+      "referenceEnvelope_middle_budgets",
+      "referenceEnvelope_middle_integral",
+      "referenceEnvelope_primitive_bound",
+      "buchstabStage_le_referenceEnvelope",
+      "buchstabModel_tail",
+      "buchstabModel_le_envelope",
+      "profile_argument_bounds",
+      "profileIntegral_nonneg",
+      "buchstab_coefficient_pos",
+      "continuous_integral_bounds",
+      "extendedKernel",
+      "extendedKernel_continuous",
+      "extendedKernel_eq",
+      "profileIntegral_mono",
+      "buchstab_coefficient_le"
+    ]
+  },
+  {
+    "module": "Decomp571b",
+    "lines": 150,
+    "imports": [
+      "LeanLab.Ternary.Decomp571a"
+    ],
+    "declarations": [
+      "roughReferenceMean",
+      "correctionReferenceMean",
+      "referenceMean_split",
+      "harman_correction_nonneg",
+      "roughReferenceMean_nonneg",
+      "correctionReferenceMean_nonneg",
+      "pnt_envelope_ge_referenceLength",
+      "pnt_envelope_not_half_referenceLength",
+      "roughReferenceMean_limit",
+      "correctionReferenceMean_limit",
+      "referenceMean_limit",
+      "harman_reference_mean_enveloped_supply"
+    ]
+  },
+  {
+    "module": "Decomp573a",
+    "lines": 205,
+    "imports": [
+      "LeanLab.Ternary.Decomp420e"
+    ],
+    "declarations": [
+      "minorDomain",
+      "primeSeries",
+      "remainderSeries",
+      "starNorm",
+      "weighted_norm_add_sq",
+      "weighted_integral_add_sq",
+      "primeSeries_continuous",
+      "plusSeries_continuous",
+      "remainderSeries_continuous",
+      "starNorm_continuous",
+      "weighted_moment_integrable",
+      "plusSeries_split",
+      "norm_integrand_weighted",
+      "prime_moment_upper",
+      "remainder_moment_upper",
+      "minor_norm_integral_upper_decomposed"
+    ]
+  },
+  {
+    "module": "Decomp573b",
+    "lines": 73,
+    "imports": [
+      "LeanLab.Ternary.Decomp573a",
+      "LeanLab.Ternary.MMSBohrSmoothing"
+    ],
+    "declarations": [
+      "charSeries_parseval"
+    ]
+  },
+  {
+    "module": "Decomp580a",
+    "lines": 124,
+    "imports": [
+      "LeanLab.Ternary.Decomp420e",
+      "LeanLab.Ternary.Decomp580e",
+      "LeanLab.Helfgott2013.Decomp1538b"
+    ],
+    "declarations": [
+      "majorArcs",
+      "majorArcs_isOpen",
+      "majorArcs_mono",
+      "sieveConstant",
+      "prime_supported_large_sieve_finset",
+      "prime_supported_large_sieve",
+      "charSeries_radial"
+    ]
+  },
+  {
+    "module": "Decomp580b",
+    "lines": 123,
+    "imports": [
+      "LeanLab.Ternary.Decomp420e",
+      "LeanLab.Helfgott2013.MellinL1"
+    ],
+    "declarations": [
+      "starWeight",
+      "starNorm",
+      "eta2_nonneg",
+      "phi_nonneg",
+      "etaStar_nonneg",
+      "starNorm_le_mass",
+      "starWeight_integral",
+      "star_mass_error",
+      "star_mass_upper",
+      "starNorm_uniform"
+    ]
+  },
+  {
+    "module": "Decomp580c",
+    "lines": 232,
+    "imports": [
+      "LeanLab.Ternary.Decomp580a",
+      "LeanLab.Ternary.Decomp580b",
+      "LeanLab.Ternary.Decomp580d"
+    ],
+    "declarations": [
+      "minorDomain",
+      "primeSeries",
+      "remainderSeries",
+      "remainderCoeff",
+      "remainderCoeff_summable",
+      "remainderSeries_eq_charSeries",
+      "nonprime_coeff_square_upper",
+      "small_index_coeff_square_upper",
+      "remainderCoeff_square_upper",
+      "remainder_circle_l2",
+      "remainderSeries_continuous",
+      "starNorm_continuous",
+      "remainder_moment_upper",
+      "minorDomain_eq_majorArcs_complement",
+      "minorDomain_measurable"
+    ]
+  },
+  {
+    "module": "Decomp580d",
+    "lines": 97,
+    "imports": [
+      "LeanLab.Helfgott2013.Decomp1538a",
+      "LeanLab.Helfgott2013.SectionSeven"
+    ],
+    "declarations": [
+      "radial_sum_with_terminal_mass",
+      "v2_remainder_rounding_exceeds_printed",
+      "book_remainder_rounding_covers",
+      "scaled_cor13_budget_exceeds_star_allowance",
+      "book_E_bound"
+    ]
+  },
+  {
+    "module": "Decomp580e",
+    "lines": 96,
+    "imports": [
+      "LeanLab.Ternary.Decomp420e",
+      "LeanLab.Helfgott2013.Decomp1538b"
+    ],
+    "declarations": [
+      "charSeries_l2_of_finset_bounds",
+      "charSeries_parseval"
+    ]
+  },
+  {
+    "module": "Decomp580f",
+    "lines": 39,
+    "imports": [
+      "LeanLab.Helfgott2013.SectionSevenH"
+    ],
+    "declarations": [
+      "book_C0_envelope",
+      "book_C1_envelope",
+      "book_C2_envelope"
+    ]
+  },
+  {
+    "module": "Decomp580g",
+    "lines": 55,
+    "imports": [
+      "LeanLab.Ternary.Decomp580d",
+      "LeanLab.Helfgott2013.Decomp1538b"
+    ],
+    "declarations": [
+      "weighted_integral_with_terminal_mass"
+    ]
+  },
+  {
+    "module": "Decomp91",
+    "lines": 188,
+    "imports": [
+      "LeanLab.Ternary.MMSProp33",
+      "LeanLab.Ternary.MMSZeroAudit"
+    ],
+    "declarations": [
+      "essential_support",
+      "good_count",
+      "weighted_count",
+      "asymmetric_popular_input",
+      "prop32_decomposed"
+    ]
+  },
+  {
+    "module": "Discharged",
+    "lines": 24,
+    "imports": [
+      "LeanLab.PNTPort.PsiChi.CitedDischarged"
+    ],
+    "declarations": [
+      "vinogradov",
+      "hardyLittlewood"
+    ]
+  },
+  {
+    "module": "MMSApproximation",
+    "lines": 125,
+    "imports": [
+      "LeanLab.Ternary.MMSLemma43Full",
+      "LeanLab.Ternary.MMSFullConvolution"
+    ],
+    "declarations": [
+      "prop31_approximation_general",
+      "prop31_small_density_approximation",
+      "prop31_approximation_proved"
+    ]
+  },
+  {
+    "module": "MMSBohrBounds",
+    "lines": 102,
+    "imports": [
+      "LeanLab.Ternary.MMSMass"
+    ],
+    "declarations": [
+      "intLq",
+      "continuous_intHat",
+      "intLq_mono",
+      "bohr_multiplier_bounds",
+      "intSmooth_fourier_contractions",
+      "intSmooth_restriction_bounds",
+      "intLq_intervalLift",
+      "one_sub_norm_sq_le",
+      "intSmooth_uniform_bound"
+    ]
+  },
+  {
+    "module": "MMSBohrDensity",
+    "lines": 63,
+    "imports": [
+      "LeanLab.Ternary.MMSShiftDensity"
+    ],
+    "declarations": [
+      "intSmooth_denseOnAPs"
+    ]
+  },
+  {
+    "module": "MMSBohrMajorant",
+    "lines": 90,
+    "imports": [
+      "LeanLab.Ternary.MMSOrthogonality",
+      "LeanLab.Ternary.MMSBohrPointwise"
+    ],
+    "declarations": [
+      "continuous_bohrMean",
+      "intSmooth_sub",
+      "integral_bohrMean_sq_complex",
+      "integral_bohrMean_sq",
+      "intSmooth_difference_bound",
+      "intSmooth_majorant_le"
+    ]
+  },
+  {
+    "module": "MMSBohrNet",
+    "lines": 76,
+    "imports": [
+      "LeanLab.Ternary.MMSRealBohr",
+      "LeanLab.Ternary.MMSLemma43Model"
+    ],
+    "declarations": [
+      "phase_control_of_frequency_net",
+      "exists_bohr_set_of_frequency_net",
+      "lemma43_of_frequency_nets"
+    ]
+  },
+  {
+    "module": "MMSBohrPhases",
+    "lines": 82,
+    "imports": [
+      "LeanLab.Ternary.MMSOrthogonality"
+    ],
+    "declarations": [
+      "norm_e_sub_one_le",
+      "e_sub_int",
+      "bohrMean_sub_one_le",
+      "bohrMean_phase_control",
+      "prop31Hyp_uniform_bound"
+    ]
+  },
+  {
+    "module": "MMSBohrPointwise",
+    "lines": 51,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrSmoothing"
+    ],
+    "declarations": [
+      "intSmooth_nonneg",
+      "intSmooth_mono",
+      "intSmooth_le_const"
+    ]
+  },
+  {
+    "module": "MMSBohrSmoothing",
+    "lines": 104,
+    "imports": [
+      "LeanLab.Ternary.MMSIntegerFourier"
+    ],
+    "declarations": [
+      "bohrSum",
+      "bohrMean",
+      "intSmooth",
+      "norm_e",
+      "conj_e",
+      "bohrMean_norm_le_one",
+      "intShift_apply",
+      "intSmooth_apply",
+      "intHat_smooth",
+      "intHat_uniform_part"
+    ]
+  },
+  {
+    "module": "MMSBoundary",
+    "lines": 35,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "boundaryF",
+      "boundaryG",
+      "boundaryG_zero",
+      "boundary_truncated_mass",
+      "boundary_truncated_identity_false"
+    ]
+  },
+  {
+    "module": "MMSConvolution",
+    "lines": 72,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "conv3_add_left",
+      "conv3_add_middle",
+      "conv3_add_right",
+      "conv3_telescoping",
+      "conv3_ge_of_three_errors"
+    ]
+  },
+  {
+    "module": "MMSDensityInstances",
+    "lines": 40,
+    "imports": [
+      "LeanLab.Ternary.MMSLemma43Model"
+    ],
+    "declarations": [
+      "lemma43_bohr_nonvacuous"
+    ]
+  },
+  {
+    "module": "MMSFourierConvolution",
+    "lines": 67,
+    "imports": [
+      "LeanLab.Ternary.MMSOrthogonality"
+    ],
+    "declarations": [
+      "intHat_triple_integral",
+      "abs_int_triple_le_integral"
+    ]
+  },
+  {
+    "module": "MMSFourierError",
+    "lines": 105,
+    "imports": [
+      "LeanLab.Ternary.MMSHolder",
+      "LeanLab.Ternary.MMSFourierConvolution"
+    ],
+    "declarations": [
+      "mms_error_scale",
+      "abs_int_triple_le_restriction",
+      "abs_int_triple_uniform_bound",
+      "exists_uniform_error_scale"
+    ]
+  },
+  {
+    "module": "MMSFullConvolution",
+    "lines": 164,
+    "imports": [
+      "LeanLab.Ternary.MMSIntervalConvolution"
+    ],
+    "declarations": [
+      "fullConv3",
+      "fullConv3_nonneg",
+      "fullConv3_mono_left",
+      "fullConv3_mono_middle",
+      "fullConv3_mono_right",
+      "fullConv3_add_left",
+      "fullConv3_add_middle",
+      "fullConv3_add_right",
+      "fullConv3_telescoping",
+      "fullConv3_intervalLift",
+      "intervalLift_restrict_le",
+      "conv3_le_fullConv3",
+      "fullConv3_fourier",
+      "fullConv3_swap_left",
+      "fullConv3_swap_right",
+      "fullConv3_ge_of_three_errors",
+      "conv3_ge_of_integer_decomposition"
+    ]
+  },
+  {
+    "module": "MMSGridCover",
+    "lines": 96,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "exists_unit_grid_cell",
+      "exists_grid_spectrum_cover"
+    ]
+  },
+  {
+    "module": "MMSHolder",
+    "lines": 135,
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": [
+      "intervalIntegral_prod_rpow_le",
+      "integral_three_uniform_bound"
+    ]
+  },
+  {
+    "module": "MMSIntegerFourier",
+    "lines": 87,
+    "imports": [
+      "LeanLab.Ternary.MMSRestriction"
+    ],
+    "declarations": [
+      "intHat",
+      "intShift",
+      "intervalLift",
+      "e_add",
+      "intHat_add",
+      "intHat_smul",
+      "intHat_sum",
+      "intHat_single",
+      "intHat_shift",
+      "intHat_intervalLift"
+    ]
+  },
+  {
+    "module": "MMSIntervalConvolution",
+    "lines": 48,
+    "imports": [
+      "LeanLab.Ternary.MMSIntervalLift",
+      "LeanLab.Ternary.MMSFourierError"
+    ],
+    "declarations": [
+      "intervalLift_sum_mul",
+      "intervalLift_sub_pair",
+      "int_triple_intervalLift"
+    ]
+  },
+  {
+    "module": "MMSIntervalLift",
+    "lines": 84,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrMajorant"
+    ],
+    "declarations": [
+      "intervalLift_apply_nat",
+      "intervalLift_apply_neg",
+      "intervalLift_nonneg",
+      "intervalLift_mono",
+      "intervalLift_one_le",
+      "prop31Hyp_smooth_bounds"
+    ]
+  },
+  {
+    "module": "MMSLargeSpectrum",
+    "lines": 108,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrNet",
+      "LeanLab.Ternary.MMSSpectrum",
+      "LeanLab.Ternary.MMSGridCover"
+    ],
+    "declarations": [
+      "exists_large_spectrum_net",
+      "lemma43_small_density"
+    ]
+  },
+  {
+    "module": "MMSLemma43",
+    "lines": 67,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrBounds",
+      "LeanLab.Ternary.MMSProp31"
+    ],
+    "declarations": [
+      "Lemma43Data",
+      "Lemma43",
+      "lemma43_one_instance"
+    ]
+  },
+  {
+    "module": "MMSLemma43Arithmetic",
+    "lines": 31,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "lemma43_loss_identity",
+      "lemma43_printed_equality_false",
+      "lemma43_density_loss"
+    ]
+  },
+  {
+    "module": "MMSLemma43Full",
+    "lines": 116,
+    "imports": [
+      "LeanLab.Ternary.MMSLargeSpectrum"
+    ],
+    "declarations": [
+      "lemma43_density_loss_quarter",
+      "sum_intervalLift_shift_lower_general",
+      "intSmooth_denseOnAPs_general",
+      "lemma43_general_density",
+      "lemma43_proved"
+    ]
+  },
+  {
+    "module": "MMSLemma43Model",
+    "lines": 44,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrDensity",
+      "LeanLab.Ternary.MMSBohrPhases",
+      "LeanLab.Ternary.MMSSmallModel"
+    ],
+    "declarations": [
+      "lemma43_bounded_model",
+      "lemma43Data_of_bohr"
+    ]
+  },
+  {
+    "module": "MMSMass",
+    "lines": 57,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrSmoothing"
+    ],
+    "declarations": [
+      "fhat_zero",
+      "fhat_norm_le_mass",
+      "prop31Hyp_mass_le",
+      "prop31Hyp_fhat_le"
+    ]
+  },
+  {
+    "module": "MMSNormalization",
+    "lines": 52,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "avg_div",
+      "unitValued_normalize",
+      "denseOnAPs_normalize",
+      "conv3_div"
+    ]
+  },
+  {
+    "module": "MMSOrthogonality",
+    "lines": 75,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrBounds"
+    ],
+    "declarations": [
+      "e_int",
+      "integral_e_int",
+      "intHat_inversion"
+    ]
+  },
+  {
+    "module": "MMSProp31",
+    "lines": 98,
+    "imports": [
+      "LeanLab.Ternary.MMSProp33",
+      "LeanLab.Ternary.MMSNormalization"
+    ],
+    "declarations": [
+      "conv3_nonneg",
+      "prop31Hyp_one",
+      "Prop31Approximation",
+      "prop31_of_prop32_of_approximation",
+      "prop31_of_thm41_of_approximation"
+    ]
+  },
+  {
+    "module": "MMSProp31Complete",
+    "lines": 50,
+    "imports": [
+      "LeanLab.Ternary.MMSApproximation"
+    ],
+    "declarations": [
+      "prop31_of_prop32",
+      "prop31_of_thm41"
+    ]
+  },
+  {
+    "module": "MMSProp32",
+    "lines": 310,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "isAPIn_Icc",
+      "IsAPIn.mono",
+      "IsAPIn.subset_Icc",
+      "card_filter_ge",
+      "conv3_ge",
+      "count_good",
+      "dense_mono",
+      "prop32_of_prop33",
+      "mms_prop32_of_cited"
+    ]
+  },
+  {
+    "module": "MMSProp33",
+    "lines": 591,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Ternary.MMSTransference",
+      "LeanLab.Ternary.MMSProp32"
+    ],
+    "declarations": [
+      "filter_mod_eq_image",
+      "isAPIn_filter_mod",
+      "mem_ap_iff",
+      "key",
+      "piece",
+      "keys",
+      "block_iff",
+      "piece_eq",
+      "piece_isAPIn",
+      "keys_card_le",
+      "card_eq_sum_fib",
+      "filter_key_eq_inter",
+      "sum_card_piece",
+      "exists_trim",
+      "ends",
+      "block_card_le",
+      "ends_card_le",
+      "piece_trichotomy",
+      "trim_upper",
+      "trim_lower",
+      "rep_mono",
+      "prop33_core",
+      "denseSetOnAPs_mono",
+      "prop33_of_thm41",
+      "mms_prop33_of_thm41",
+      "mms_prop32_of_thm41",
+      "prop32_of_thm41"
+    ]
+  },
+  {
+    "module": "MMSRealBohr",
+    "lines": 147,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrPhases"
+    ],
+    "declarations": [
+      "phaseBucket",
+      "phaseBucket_lt",
+      "phase_close_of_bucket",
+      "exists_finite_frequency_bohr",
+      "exists_bohr_set_of_finite_spectrum"
+    ]
+  },
+  {
+    "module": "MMSRestriction",
+    "lines": 41,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "continuous_fhat",
+      "fhatLq_mono",
+      "fhatLq_le_of_real_multiplier"
+    ]
+  },
+  {
+    "module": "MMSShiftAP",
+    "lines": 105,
+    "imports": [
+      "LeanLab.Ternary.MMSShifts"
+    ],
+    "declarations": [
+      "shiftRightIn_isAP",
+      "shiftLeftIn_isAP"
+    ]
+  },
+  {
+    "module": "MMSShiftDensity",
+    "lines": 119,
+    "imports": [
+      "LeanLab.Ternary.MMSShiftAP",
+      "LeanLab.Ternary.MMSIntervalLift",
+      "LeanLab.Ternary.MMSLemma43Arithmetic"
+    ],
+    "declarations": [
+      "sum_intervalLift_right",
+      "sum_intervalLift_left",
+      "sum_intervalLift_right_lower",
+      "sum_intervalLift_left_lower",
+      "sum_intervalLift_shift_lower"
+    ]
+  },
+  {
+    "module": "MMSShifts",
+    "lines": 77,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "shiftRightIn",
+      "shiftLeftIn",
+      "shiftRightIn_subset",
+      "shiftLeftIn_subset",
+      "shiftRightIn_card",
+      "shiftLeftIn_card"
+    ]
+  },
+  {
+    "module": "MMSSmallModel",
+    "lines": 88,
+    "imports": [
+      "LeanLab.Ternary.MMSIntervalLift",
+      "LeanLab.Ternary.MMSLemma43"
+    ],
+    "declarations": [
+      "prop31Hyp_pointwise_le",
+      "prop31Hyp_lift_bounds",
+      "intLq_zero",
+      "lemma43_trivial_model"
+    ]
+  },
+  {
+    "module": "MMSSpectrum",
+    "lines": 129,
+    "imports": [
+      "LeanLab.Ternary.MMSBohrPhases"
+    ],
+    "declarations": [
+      "norm_e_sub_e_le",
+      "prop31Hyp_fhat_lipschitz",
+      "prop31Hyp_near_large_frequency",
+      "prop31Hyp_large_peak_integral",
+      "prop31Hyp_moment_le",
+      "fhat_periodic"
+    ]
+  },
+  {
+    "module": "MMSTransference",
+    "lines": 363,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Ternary.AlmostEqual"
+    ],
+    "declarations": [
+      "IsAPIn",
+      "avg",
+      "DenseOnAPs",
+      "conv3",
+      "UnitValued",
+      "Prop32Printed",
+      "Prop32",
+      "mms_prop32",
+      "prop32_of_printed",
+      "IsAPIn.card_pos",
+      "avg_one",
+      "denseOnAPs_one",
+      "conv3_two_two",
+      "prop32_printed_false",
+      "rep",
+      "popular",
+      "DenseSetOnAPs",
+      "Prop33Printed",
+      "Prop33",
+      "mms_prop33",
+      "prop33_of_printed",
+      "popular_one_one_subset",
+      "prop33_printed_false",
+      "Thm41Printed",
+      "Thm41",
+      "mms_thm41",
+      "thm41_of_printed",
+      "thm41_printed_false",
+      "fhat",
+      "fhatLq",
+      "Prop31Hyp",
+      "Prop31Printed",
+      "Prop31",
+      "mms_prop31",
+      "prop31_of_printed",
+      "wheel",
+      "ints",
+      "e",
+      "\u03c1",
+      "Hyp1",
+      "Hyp2",
+      "Thm21Conclusion",
+      "Thm21",
+      "mms_thm21",
+      "almostEqual_of_thm21Conclusion",
+      "almostEqual_of_thm21"
+    ]
+  },
+  {
+    "module": "MMSZeroAudit",
+    "lines": 44,
+    "imports": [
+      "LeanLab.Ternary.MMSTransference"
+    ],
+    "declarations": [
+      "popular_empty_empty",
+      "thm41_zero_hyp_impossible",
+      "thm41_of_positive"
+    ]
+  },
+  {
+    "module": "State1535",
+    "lines": 131,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Ternary.Statements"
+    ],
+    "declarations": [
+      "R3",
+      "S",
+      "F",
+      "theta",
+      "ChenWangWeighted",
+      "ZeroFreeHigh",
+      "chenWang_weighted",
+      "zeroFreeHigh_exists",
+      "term_nonneg",
+      "r3_pos_of_isTernarySum",
+      "r3_seven_pos",
+      "chenWangWeighted_of_ternaryAbove",
+      "zeroFreeHigh_neg_one"
+    ]
+  },
+  {
+    "module": "Statements",
+    "lines": 121,
+    "imports": [
+      "Mathlib",
+      "LeanLab.Common.Goldbach",
+      "LeanLab.DERZ1997.Statements",
+      "LeanLab.Verifications.Statements"
+    ],
+    "declarations": [
+      "TernaryAbove",
+      "hardyLittlewood_stmt",
+      "vinogradov_stmt",
+      "helfgott_analytic",
+      "ternaryAbove_mono",
+      "helfgott_main_of",
+      "helfgott",
+      "ternaryAbove_of_ternaryGoldbach",
+      "two_pow_le_exp",
+      "liuWang_of_helfgott",
+      "exp_9715_ge",
+      "chenWang_of_liuWang",
+      "vinogradov_of_chenWang",
+      "hardyLittlewood_of_vinogradov",
+      "hardyLittlewood_of_derz",
+      "all_of_helfgott",
+      "liuWang",
+      "chenWang"
+    ]
+  }
+]
