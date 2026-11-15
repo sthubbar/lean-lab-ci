@@ -9,6 +9,7 @@ import LeanLab.BHP1997.Route512Large
 import LeanLab.BHP1997.Route512Kernel
 import LeanLab.BHP1997.Route512Moment
 import LeanLab.BHP1997.Route512Small
+import LeanLab.BHP1997.Route512Eta
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical Complex Thm2 MeasureTheory Set
@@ -354,13 +355,14 @@ theorem leaf_major_coefficients512 :
 
 /-- LEAF. P0069 page 8 first two displays after 2.6: extend the eta integral
 to a complete period and replace the exact convolution count by Y.
-The original finite support and its endpoint error are retained. OPEN. -/
+The original finite support and its endpoint error are retained.
+PROVED 2026-11-15 from Route512Eta.eta_extension_raw512, no sorry. -/
 theorem leaf_major_eta_extension512 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∀ u v : ℝ,
       ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
         ∃ C : ℝ, ∀ x : ℝ, C ≤ x →
           etaExtensionError512 ε D x u v ≤ C * scale512 ε A x := by
-  sorry
+  exact LeanLab.BHP1997.Route512.eta_extension_raw512
 
 /-- LEAF. P0069 pages 6 to 8, displays 2.4 to 2.6 and the first display on page 8.
 Replace both exponential sums by their principal approximations and extend each

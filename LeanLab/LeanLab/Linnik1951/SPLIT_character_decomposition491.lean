@@ -13,7 +13,7 @@ is carried separately for nonnegative and for negative residuals, since the two
 regions use conjugate reduced residue phases. The separation of the square into
 the three named blocks is a finite rearrangement with no error term.
 -/
-import LeanLab.Linnik1951.Decomp491b
+import LeanLab.Linnik1951.Base491b
 
 namespace LeanLab.Linnik1951
 

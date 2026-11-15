@@ -3,56 +3,13 @@ P0093 pages 156 and 159 through 161. The three character terms of equation 3.4.
 The principal integral is extended to a full period as in equations 6.2 and 6.3.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp491a
+import LeanLab.Linnik1951.Base491b
+import LeanLab.Linnik1951.SPLIT_character_decomposition491
+import LeanLab.Linnik1951.SPLIT_mixed_bound491
 
 namespace LeanLab.Linnik1951
 
 open Finset MeasureTheory
-
-/-- P0093 page 155 equation 2.3. Conjugate Gauss coefficient in natural residues. -/
-noncomputable def conjugateGauss491 (q : ℕ) (χ : DirichletCharacter ℂ q) : ℂ :=
-  star (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-    χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I))
-
-/-- P0093 page 156 equation 3.4. The signed reduced residue phase. -/
-noncomputable def signedRamanujan491 (q : ℕ) (n : ℤ) : ℂ :=
-  ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-    Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)
-
-/-- P0093 page 156 equation 3.4. One ordered character pair contribution. -/
-noncomputable def characterPair491 (N q : ℕ) (n : ℤ)
-    (χ ψ : DirichletCharacter ℂ q) : ℂ :=
-  (1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ * conjugateGauss491 q ψ *
-    (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-      χ a * ψ a * Complex.exp
-        (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) *
-    (∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
-        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
-      characterPrime280 χ N z * characterPrime280 ψ N z *
-        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))
-
-/-- P0093 page 160 equation 6.1. The principal square integral alone. -/
-noncomputable def principalIntegral491 (N q : ℕ) (n : ℤ) : ℂ :=
-  ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
-      (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
-    characterPrime280 (1 : DirichletCharacter ℂ q) N z ^ 2 *
-      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)
-
-/-- P0093 page 156 equation 3.4. The term I zero. -/
-noncomputable def principalTerm491 (N q : ℕ) (n : ℤ) : ℂ :=
-  ((((ArithmeticFunction.moebius q : ℝ) ^ 2 / (q.totient : ℝ) ^ 2 : ℝ) : ℂ) *
-    signedRamanujan491 q n) * principalIntegral491 N q n
-
-/-- P0093 page 156 equation 3.4. The mixed term I one, with both ordered pairs. -/
-noncomputable def mixedTerm491 (N q : ℕ) [NeZero q] (n : ℤ) : ℂ :=
-  ∑ χ ∈ univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1),
-    (characterPair491 N q n 1 χ + characterPair491 N q n χ 1)
-
-/-- P0093 page 156 equation 3.4. The term I two with both characters nonprincipal. -/
-noncomputable def nonprincipalTerm491 (N q : ℕ) [NeZero q] (n : ℤ) : ℂ :=
-  ∑ χ ∈ univ.filter (fun χ : DirichletCharacter ℂ q => χ ≠ 1),
-    ∑ ψ ∈ univ.filter (fun ψ : DirichletCharacter ℂ q => ψ ≠ 1),
-      characterPair491 N q n χ ψ
 
 /-- LEAF. P0093 page 156 equation 3.4. Separate the three character terms.
 Only the omitted prime divisors of q contribute to this remainder.
@@ -64,7 +21,7 @@ theorem character_decomposition491 :
         ∀ n : ℤ, ‖localArc1622 N q n -
           (principalTerm491 N q n + mixedTerm491 N q n + nonprincipalTerm491 N q n)‖ ≤
           C * (N : ℝ) * Real.log q / (N : ℝ) ^ (1 / 7 : ℝ) := by
-  sorry
+  exact character_decomposition491_split
 
 /-- LEAF. P0093 page 160 equation 5.4. The term with two nonprincipal
 characters is bounded using the character square estimate. It contains no
@@ -87,7 +44,7 @@ theorem mixed_bound491 (hM : MellinBound280) :
         ∀ n : ℤ, ‖mixedTerm491 N q n‖ ≤
           C * (N : ℝ) * Real.log N ^ 6 /
             Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  exact mixed_bound491_split hM
 
 /-- LEAF. P0093 pages 160 and 161 equations 6.1 through 6.3.
 The principal square integral is replaced by the exact damped logarithmic
@@ -136,20 +93,6 @@ theorem principal_coefficient_norm491 (q : ℕ) (hq : 1 ≤ q) (n : ℤ) :
       apply (div_le_iff₀ (show (0 : ℝ) < (q.totient : ℝ) ^ 2 by positivity)).mpr
       have hsq : (q.totient : ℝ) ≤ (q.totient : ℝ) ^ 2 := by nlinarith
       exact (mul_le_mul_of_nonneg_right hμ2 (by positivity)).trans (by simpa using hsq)
-
-/-- LEAF. P0093 page 161 equation 6.4. For nonnegative residuals the signed
-reduced residue phase is the existing natural Ramanujan sum. -/
-theorem signedRamanujan_toNat491 (q : ℕ) (n : ℤ) (hn : 0 ≤ n) :
-    signedRamanujan491 q n = LeanLab.Perelli1996.Ramanujan103.ramanujanSum q n.toNat := by
-  have hc : (n.toNat : ℝ) = (n : ℝ) := by exact_mod_cast Int.toNat_of_nonneg hn
-  unfold signedRamanujan491 LeanLab.Perelli1996.Ramanujan103.ramanujanSum
-    LeanLab.Perelli1996.Kernel.e
-  apply sum_congr rfl
-  intro a ha
-  rw [hc]
-  congr 1
-  push_cast
-  ring
 
 /-- LEAF. P0093 page 161 equation 6.4. The coefficient times the exact
 convolution agrees with the sealed main term, also at negative residuals. -/
