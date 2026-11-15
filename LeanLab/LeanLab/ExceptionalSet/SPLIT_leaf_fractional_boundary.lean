@@ -27,7 +27,29 @@ theorem leaf_boundary_outer_low (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         (((window γ N).filter (fun n : ℕ =>
           Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨κ₀, hκ₀, hb⟩ := UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := hb κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  set Δ : ℝ := calE γ κ N ^ (-(1 / 8 : ℝ))
+  have hΔ : 0 < Δ := Real.rpow_pos_of_pos (by unfold calE; exact Real.exp_pos _) _
+  have hparent : (((window γ N).filter (fun n : ℕ =>
+      Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) ≤ B * N * Δ :=
+    hN₀ N hN
+  have hcard : ((window γ N).filter (fun n : ℕ => Int.fract (F γ n) < Δ / 2)).card
+      ≤ ((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card := by
+    apply Finset.card_le_card
+    intro n hn
+    simp only [Finset.mem_filter] at hn ⊢
+    exact ⟨hn.1, Or.inl (by linarith [hn.2])⟩
+  have hcast : (((window γ N).filter (fun n : ℕ => Int.fract (F γ n) < Δ / 2)).card : ℝ)
+      ≤ (((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) := by
+    exact_mod_cast hcard
+  linarith [hparent]
+
 
 /-- LEAF. Step 2 of the boundary split: the inner half of the lower boundary arc, the window
 indices with `Δ / 2 ≤ {F γ n} < Δ`. It is contained in the lower boundary arc, so the estimate is
@@ -39,7 +61,30 @@ theorem leaf_boundary_inner_low (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           calE γ κ N ^ (-(1 / 8 : ℝ)) / 2 ≤ Int.fract (F γ n) ∧
             Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨κ₀, hκ₀, hb⟩ := UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := hb κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  set Δ : ℝ := calE γ κ N ^ (-(1 / 8 : ℝ))
+  have hparent : (((window γ N).filter (fun n : ℕ =>
+      Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) ≤ B * N * Δ :=
+    hN₀ N hN
+  have hcard : ((window γ N).filter (fun n : ℕ =>
+        Δ / 2 ≤ Int.fract (F γ n) ∧ Int.fract (F γ n) < Δ)).card
+      ≤ ((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card := by
+    apply Finset.card_le_card
+    intro n hn
+    simp only [Finset.mem_filter] at hn ⊢
+    exact ⟨hn.1, Or.inl hn.2.2⟩
+  have hcast : (((window γ N).filter (fun n : ℕ =>
+        Δ / 2 ≤ Int.fract (F γ n) ∧ Int.fract (F γ n) < Δ)).card : ℝ)
+      ≤ (((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) := by
+    exact_mod_cast hcard
+  linarith [hparent]
+
 
 /-- LEAF. Step 3 of the boundary split: the inner half of the upper boundary arc, the window
 indices with `1 - Δ < {F γ n} ≤ 1 - Δ / 2`. It is contained in the upper boundary arc, so the
@@ -51,7 +96,30 @@ theorem leaf_boundary_inner_high (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n) ∧
             Int.fract (F γ n) ≤ 1 - calE γ κ N ^ (-(1 / 8 : ℝ)) / 2)).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨κ₀, hκ₀, hb⟩ := UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := hb κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  set Δ : ℝ := calE γ κ N ^ (-(1 / 8 : ℝ))
+  have hparent : (((window γ N).filter (fun n : ℕ =>
+      Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) ≤ B * N * Δ :=
+    hN₀ N hN
+  have hcard : ((window γ N).filter (fun n : ℕ =>
+        1 - Δ < Int.fract (F γ n) ∧ Int.fract (F γ n) ≤ 1 - Δ / 2)).card
+      ≤ ((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card := by
+    apply Finset.card_le_card
+    intro n hn
+    simp only [Finset.mem_filter] at hn ⊢
+    exact ⟨hn.1, Or.inr hn.2.1⟩
+  have hcast : (((window γ N).filter (fun n : ℕ =>
+        1 - Δ < Int.fract (F γ n) ∧ Int.fract (F γ n) ≤ 1 - Δ / 2)).card : ℝ)
+      ≤ (((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) := by
+    exact_mod_cast hcard
+  linarith [hparent]
+
 
 /-- LEAF. Step 4 of the boundary split: the outer half of the upper boundary arc, the window
 indices with `1 - Δ / 2 < {F γ n}`. Since `Δ / 2 < Δ` it is contained in the upper boundary arc,
@@ -62,7 +130,29 @@ theorem leaf_boundary_outer_high (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         (((window γ N).filter (fun n : ℕ =>
           1 - calE γ κ N ^ (-(1 / 8 : ℝ)) / 2 < Int.fract (F γ n))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨κ₀, hκ₀, hb⟩ := UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
+  refine ⟨κ₀, hκ₀, fun κ hκ hκs => ?_⟩
+  obtain ⟨B, hB, N₀, hN₀⟩ := hb κ hκ hκs
+  refine ⟨B, hB, N₀, fun N hN => ?_⟩
+  set Δ : ℝ := calE γ κ N ^ (-(1 / 8 : ℝ))
+  have hΔ : 0 < Δ := Real.rpow_pos_of_pos (by unfold calE; exact Real.exp_pos _) _
+  have hparent : (((window γ N).filter (fun n : ℕ =>
+      Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) ≤ B * N * Δ :=
+    hN₀ N hN
+  have hcard : ((window γ N).filter (fun n : ℕ => 1 - Δ / 2 < Int.fract (F γ n))).card
+      ≤ ((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card := by
+    apply Finset.card_le_card
+    intro n hn
+    simp only [Finset.mem_filter] at hn ⊢
+    exact ⟨hn.1, Or.inr (by linarith [hn.2])⟩
+  have hcast : (((window γ N).filter (fun n : ℕ => 1 - Δ / 2 < Int.fract (F γ n))).card : ℝ)
+      ≤ (((window γ N).filter (fun n : ℕ =>
+          Int.fract (F γ n) < Δ ∨ 1 - Δ < Int.fract (F γ n))).card : ℝ) := by
+    exact_mod_cast hcard
+  linarith [hparent]
+
 
 /-- Assembly. The two-arc fractional boundary count follows from the four half-arc counts: the
 boundary set is the union of the four pieces, cardinalities add, and the four constants add. -/
