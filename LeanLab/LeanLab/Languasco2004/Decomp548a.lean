@@ -6,9 +6,11 @@ Two proper region estimates remain OPEN. The final assembly is CONDITIONAL.
 The sealed group1_lower is unchanged.
 -/
 import LeanLab.Languasco2004.GroupSplit548
+import LeanLab.Languasco2004.Decomp566a
+import LeanLab.Languasco2004.Decomp566c
 
 namespace LeanLab.Languasco2004.Decomp548a
-open Finset Real Decomp279a Decomp316c GroupSplit548
+open Finset Real Decomp279a Decomp316c GroupSplit548 Decomp566a Decomp566c
 noncomputable section
 attribute [local instance] Classical.propDecidable
 
@@ -20,7 +22,8 @@ theorem region11_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 1 11 true N (localization N ε) n <
         0.027761 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B :=
+  region11_lower_from_parts
 
 /-- LEAF. Jia page 273, Lemma 24, supporting display 65 on page 286.
 Only group 1 with region 11 removed is bounded. The coefficient is 0.394965.
@@ -30,7 +33,8 @@ theorem remainder_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 1 11 false N (localization N ε) n <
         0.394965 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B :=
+  remainder_lower_from_parts
 
 /-- Jia Lemma 24: the exact sealed group1_lower statement follows
 from the two smaller region estimates. CONDITIONAL ON region11_lower
