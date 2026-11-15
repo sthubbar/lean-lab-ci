@@ -10,7 +10,7 @@ namespace LeanLab.BHP1997.LowerShortC165
 open Classical Complex Decomp132 DecompC165b DecompC165d
 open scoped BigOperators
 
-/-- LEAF: P0069 page 51, the integrals of display 5.17 and of `v0`, with the U-1624
+/-- P0069 page 51, the integrals of display 5.17 and of `v0`, with the U-1624
 normalization of pages 51 and 52. The density `V(s) = 1/s - D2(s) - D4(s)` of the raw
 coefficient is Lipschitz just below `s = 1`: the Buchstab function is bounded and Lipschitz
 on `[1, ∞)`, its jump at one is crossed only on a strip of area `O(|s - s'|)`, and the
@@ -22,7 +22,36 @@ theorem leaf_density_lipschitz (ω : ℝ → ℝ)
     {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1/10^8) :
     ∃ s0 L : ℝ, s0 < 1 ∧ ∀ s s' : ℝ, s0 ≤ s → s ≤ 1 → s0 ≤ s' → s' ≤ 1 →
       |lowerDensityAt ω ε s - lowerDensityAt ω ε s'| ≤ L * |s - s'| := by
-  sorry
+  obtain ⟨L2, δ2, hL2, hδ2, h2⟩ := Decomp514a.two_density_lipschitz ω hω hz hε hε8
+  obtain ⟨L4, δ4, hL4, hδ4, h4⟩ := Decomp514a.four_density_lipschitz ω hω hz hε hε8
+  refine ⟨max (1 / 2) (max (1 - δ2) (1 - δ4)), 4 + L2 + L4, ?_, fun s s' hs hs1 hs' hs1' => ?_⟩
+  · exact max_lt (by norm_num) (max_lt (by linarith) (by linarith))
+  have hsh : (1 / 2 : ℝ) ≤ s := (le_max_left _ _).trans hs
+  have hsh' : (1 / 2 : ℝ) ≤ s' := (le_max_left _ _).trans hs'
+  have hs2 : 1 - δ2 ≤ s := ((le_max_left _ _).trans (le_max_right _ _)).trans hs
+  have hs2' : 1 - δ2 ≤ s' := ((le_max_left _ _).trans (le_max_right _ _)).trans hs'
+  have hs4 : 1 - δ4 ≤ s := ((le_max_right _ _).trans (le_max_right _ _)).trans hs
+  have hs4' : 1 - δ4 ≤ s' := ((le_max_right _ _).trans (le_max_right _ _)).trans hs'
+  have e2 := h2 s s' hs2 hs1 hs2' hs1'
+  have e4 := h4 s s' hs4 hs1 hs4' hs1'
+  have hpos : 0 < s := by linarith
+  have hpos' : 0 < s' := by linarith
+  have e1 : |1 / s - 1 / s'| ≤ 4 * |s - s'| := by
+    have hss : 0 < s * s' := mul_pos hpos hpos'
+    have hq : (1 / 4 : ℝ) ≤ s * s' := by nlinarith
+    rw [div_sub_div _ _ hpos.ne' hpos'.ne', abs_div, abs_of_pos hss, div_le_iff₀ hss,
+      one_mul, mul_one, abs_sub_comm s' s]
+    nlinarith [abs_nonneg (s - s')]
+  unfold lowerDensityAt
+  have key : 1 / s - lowerTwoDensityAt ω ε s - lowerFourDensityAt ω ε s -
+      (1 / s' - lowerTwoDensityAt ω ε s' - lowerFourDensityAt ω ε s') =
+      (1 / s - 1 / s') - (lowerTwoDensityAt ω ε s - lowerTwoDensityAt ω ε s') -
+        (lowerFourDensityAt ω ε s - lowerFourDensityAt ω ε s') := by ring
+  rw [key]
+  have t1 := abs_sub (1 / s - 1 / s' - (lowerTwoDensityAt ω ε s - lowerTwoDensityAt ω ε s'))
+    (lowerFourDensityAt ω ε s - lowerFourDensityAt ω ε s')
+  have t2 := abs_sub (1 / s - 1 / s') (lowerTwoDensityAt ω ε s - lowerTwoDensityAt ω ε s')
+  nlinarith [abs_nonneg (s - s')]
 
 /-- P0069 pages 51 and 52 with the U-1624 normalization, the step behind display 5.17 on
 page 51: for large `x` and every integer `m` from floor Y to floor 2Y the exponent
