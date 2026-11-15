@@ -2,7 +2,7 @@
 P0093 page 160 equation 5.5. Finite coefficient energy for the mixed term.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp491b
+import LeanLab.Linnik1951.Base491b
 import LeanLab.PNTPort.LargeSieve.Multiplicative
 
 namespace LeanLab.Linnik1951
