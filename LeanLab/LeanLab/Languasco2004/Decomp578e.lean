@@ -551,6 +551,501 @@ private theorem buchstab_le_three_four (u : ℝ) (h3 : 3 ≤ u) (h4 : u ≤ 4) :
       obtain ⟨hb1, hb2⟩ := abs_le.mp hb
       linarith
 
+/-! ## The first finite base grid -/
+
+
+/-! ## The second grid: logarithmic-integral bounds at three and 2.22 -/
+
+private theorem poly_int_three :
+    (0.1472206 : ℝ) ≤ ∫ t in (2 : ℝ)..(3 : ℝ), logPoly (-1 + 1 * t) * recipPoly 3 t ∧
+      (∫ t in (2 : ℝ)..(3 : ℝ), logPoly (-1 + 1 * t) * recipPoly 3 t) ≤ 0.1472208 := by
+  constructor
+  · unfold logPoly recipPoly
+    simp only [sum_range_succ, sum_range_zero]
+    ring_nf
+    simp (disch := apply Continuous.intervalIntegrable; fun_prop) only
+      [integral_add, integral_mul_const (𝕜 := ℝ), integral_pow, integral_const, integral_id,
+       smul_eq_mul]
+    norm_num
+  · unfold logPoly recipPoly
+    simp only [sum_range_succ, sum_range_zero]
+    ring_nf
+    simp (disch := apply Continuous.intervalIntegrable; fun_prop) only
+      [integral_add, integral_mul_const (𝕜 := ℝ), integral_pow, integral_const, integral_id,
+       smul_eq_mul]
+    norm_num
+
+private theorem poly_int_two_two_two :
+    (0.0105374 : ℝ) ≤ ∫ t in (2 : ℝ)..(2.22), logPoly (-1 + 1 * t) * recipPoly 2.22 t ∧
+      (∫ t in (2 : ℝ)..(2.22), logPoly (-1 + 1 * t) * recipPoly 2.22 t) ≤ 0.0105414 := by
+  constructor
+  · unfold logPoly recipPoly
+    simp only [sum_range_succ, sum_range_zero]
+    ring_nf
+    simp (disch := apply Continuous.intervalIntegrable; fun_prop) only
+      [integral_add, integral_mul_const (𝕜 := ℝ), integral_pow, integral_const, integral_id,
+       smul_eq_mul]
+    norm_num
+  · unfold logPoly recipPoly
+    simp only [sum_range_succ, sum_range_zero]
+    ring_nf
+    simp (disch := apply Continuous.intervalIntegrable; fun_prop) only
+      [integral_add, integral_mul_const (𝕜 := ℝ), integral_pow, integral_const, integral_id,
+       smul_eq_mul]
+    norm_num
+
+private theorem J_three :
+    (0.1472196 : ℝ) ≤ ∫ t in (2 : ℝ)..(3 : ℝ), log (t - 1) / t ∧
+      (∫ t in (2 : ℝ)..(3 : ℝ), log (t - 1) / t) ≤ 0.1472218 := by
+  obtain ⟨hp, hp2⟩ := poly_int_three
+  obtain ⟨h1, h2⟩ := J_of_poly 2 3 0.1472206 0.1472208 (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num)
+    (by intro t ht; constructor <;> linarith [ht.1, ht.2]) hp hp2
+  constructor <;> linarith
+
+private theorem J_two_two_two :
+    (0.0105373 : ℝ) ≤ ∫ t in (2 : ℝ)..(2.22), log (t - 1) / t ∧
+      (∫ t in (2 : ℝ)..(2.22), log (t - 1) / t) ≤ 0.0105415 := by
+  obtain ⟨hp, hp2⟩ := poly_int_two_two_two
+  obtain ⟨h1, h2⟩ := J_of_poly 2 2.22 0.0105374 0.0105414 (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num)
+    (by intro t ht; constructor <;> linarith [ht.1, ht.2]) hp hp2
+  constructor <;> linarith
+
+private theorem log_one_two_two :
+    (0.1988508 : ℝ) ≤ log 1.22 ∧ log 1.22 ≤ 0.1988509 := by
+  have h := log_rat_bounds (11 / 111) 0.1988508 0.1988509 (by norm_num) (by norm_num)
+    (by simp only [sum_range_succ, sum_range_zero]; norm_num)
+    (by simp only [sum_range_succ, sum_range_zero]; norm_num)
+  have he : (1 + 11 / 111) / (1 - 11 / 111) = (1.22 : ℝ) := by
+    rw [div_eq_iff (by norm_num : (1:ℝ) - 11 / 111 ≠ 0)]
+    norm_num
+  rwa [he] at h
+
+private theorem log_two_two_two :
+    (0.7975071 : ℝ) ≤ log 2.22 ∧ log 2.22 ≤ 0.7975072 := by
+  have h := log_rat_bounds (61 / 161) 0.7975071 0.7975072 (by norm_num) (by norm_num)
+    (by simp only [sum_range_succ, sum_range_zero]; norm_num)
+    (by simp only [sum_range_succ, sum_range_zero]; norm_num)
+  have he : (1 + 61 / 161) / (1 - 61 / 161) = (2.22 : ℝ) := by
+    rw [div_eq_iff (by norm_num : (1:ℝ) - 61 / 161 ≠ 0)]
+    norm_num
+  rwa [he] at h
+
+/-! ## The integral of the solution over one to three -/
+
+private theorem continuousOn_log_div (a b : ℝ) (hab : 1 < a) :
+    ContinuousOn (fun t : ℝ => log (t - 1) / t) (Set.Icc a b) := by
+  apply ContinuousOn.div
+  · apply ContinuousOn.log (by fun_prop)
+    intro t ht
+    linarith [ht.1]
+  · fun_prop
+  · intro t ht
+    linarith [ht.1]
+
+private theorem integral_one_three :
+    (∫ t in (1 : ℝ)..(3 : ℝ), buchstab t) = log 3 + ∫ t in (2 : ℝ)..(3 : ℝ), log (t - 1) / t := by
+  have hi12 : IntervalIntegrable buchstab MeasureTheory.volume 1 2 :=
+    buchstab_continuous.intervalIntegrable 1 2
+  have hi23 : IntervalIntegrable buchstab MeasureTheory.volume 2 3 :=
+    buchstab_continuous.intervalIntegrable 2 3
+  have hadd := intervalIntegral.integral_add_adjacent_intervals hi12 hi23
+  have h1 : (∫ t in (1 : ℝ)..(2 : ℝ), buchstab t) = log 2 := by
+    have hc : (∫ t in (1 : ℝ)..(2 : ℝ), buchstab t) = ∫ t in (1 : ℝ)..(2 : ℝ), 1 / t := by
+      apply integral_congr
+      intro t ht
+      rw [Set.uIcc_of_le (by norm_num)] at ht
+      exact buchstab_initial t ht.1 ht.2
+    rw [hc, integral_one_div_of_pos (by norm_num) (by norm_num),
+      show (2:ℝ) / 1 = 2 by norm_num]
+  have hlog : IntervalIntegrable (fun t : ℝ => log (t - 1) / t) MeasureTheory.volume 2 3 :=
+    ContinuousOn.intervalIntegrable_of_Icc (by norm_num) (continuousOn_log_div 2 3 (by norm_num))
+  have hinv : IntervalIntegrable (fun t : ℝ => 1 / t) MeasureTheory.volume 2 3 :=
+    ContinuousOn.intervalIntegrable_of_Icc (by norm_num)
+      (by
+        apply ContinuousOn.div continuousOn_const continuousOn_id
+        intro t ht
+        exact ne_of_gt (lt_of_lt_of_le (by norm_num : (0:ℝ) < 2) ht.1))
+  have h2 : (∫ t in (2 : ℝ)..(3 : ℝ), buchstab t) =
+      log (3 / 2) + ∫ t in (2 : ℝ)..(3 : ℝ), log (t - 1) / t := by
+    have hc : (∫ t in (2 : ℝ)..(3 : ℝ), buchstab t) =
+        ∫ t in (2 : ℝ)..(3 : ℝ), (1 / t + log (t - 1) / t) := by
+      apply integral_congr
+      intro t ht
+      rw [Set.uIcc_of_le (by norm_num)] at ht
+      rw [buchstab_two_three t ht.1 ht.2]
+      ring
+    rw [hc, intervalIntegral.integral_add hinv hlog,
+      integral_one_div_of_pos (by norm_num) (by norm_num)]
+  have hlog3 : log 2 + log (3 / 2) = log 3 := by
+    rw [← Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (by norm_num : (3/2:ℝ) ≠ 0)]
+    norm_num
+  linarith [hadd, h1, h2, hlog3]
+
+/-! ## The lower half of the second grid -/
+
+private theorem buchstab_ge_four_five (u : ℝ) (h4 : 4 < u) (h5 : u ≤ 5) :
+    0.5613 ≤ buchstab u := by
+  have hu : 0 < u := by linarith
+  have hs3 : 3 ≤ u - 1 := by linarith
+  have hs4 : u - 1 ≤ 4 := by linarith
+  have hrec := buchstab_recurrence u (by linarith)
+  have hi13 : IntervalIntegrable buchstab MeasureTheory.volume 1 3 :=
+    buchstab_continuous.intervalIntegrable 1 3
+  have hi3s : IntervalIntegrable buchstab MeasureTheory.volume 3 (u - 1) :=
+    buchstab_continuous.intervalIntegrable 3 (u - 1)
+  have hadd := intervalIntegral.integral_add_adjacent_intervals hi13 hi3s
+  have hmono : (∫ t in (3:ℝ)..(u-1), (0.56081 : ℝ)) ≤ ∫ t in (3:ℝ)..(u-1), buchstab t := by
+    apply integral_mono_on (hab := hs3) (hf := ?_) (hg := hi3s)
+    · intro t ht
+      exact buchstab_ge_three_four t ht.1 (ht.2.trans hs4)
+    · exact continuous_const.intervalIntegrable 3 (u - 1)
+  have hconst : (∫ t in (3:ℝ)..(u-1), (0.56081 : ℝ)) = 0.56081 * ((u - 1) - 3) := by
+    rw [intervalIntegral.integral_const, smul_eq_mul]
+    ring
+  have hI3 := integral_one_three
+  have hJ3 := J_three.1
+  have hlog3 := log_three.1
+  have hkey : 0.5613 * u ≤ u * buchstab u := by
+    linarith [hrec, hadd, hmono, hconst, hI3, hJ3, hlog3]
+  have hdiv : 0.5613 ≤ (u * buchstab u) / u := by
+    rw [le_div_iff₀ hu]
+    linarith
+  have hd : (u * buchstab u) / u = buchstab u := by
+    field_simp
+  rwa [hd] at hdiv
+
+/-! ## Sign and comparison bounds for the upper constant 0.5616 -/
+
+private theorem q_5616_nonpos_left (s : ℝ) (h2 : 2.22 ≤ s) (h3 : s ≤ 2.46) :
+    log (s - 1) - 0.5616 * s + 1 ≤ 0 := by
+  have h146 := log_one_four_six
+  have hb := log_le_tangent 1.46 (s - 1) (by norm_num) (by linarith)
+  have hle : log (s - 1) ≤ 0.3784365 + (s - 1 - 1.46) * (1 / 1.46) := by linarith
+  have key : 0.3784365 + (s - 1 - 1.46) * (1 / 1.46) - 0.5616 * s + 1 ≤ 0 := by
+    have hcoef : (0:ℝ) ≤ 1 / 1.46 - 0.5616 := by norm_num
+    have hneg : (s - 2.46) * (1 / 1.46 - 0.5616) ≤ 0 := by nlinarith
+    nlinarith [hneg]
+  linarith
+
+private theorem log_sub_one_diff (a b : ℝ) (ha : 1 < a) (hab : a ≤ b) :
+    log (b - 1) - log (a - 1) = ∫ t in a..b, (1 / (t - 1)) := by
+  have hderiv : ∀ t ∈ Set.uIcc a b, HasDerivAt (fun t : ℝ => log (t - 1)) (1 / (t - 1)) t := by
+    intro t ht
+    rw [Set.uIcc_of_le hab] at ht
+    have h1 : HasDerivAt (fun t : ℝ => t - 1) 1 t := by
+      simpa using (hasDerivAt_id t).sub_const (1:ℝ)
+    simpa using h1.log (by linarith [ht.1, ha] : t - 1 ≠ 0)
+  have hint : IntervalIntegrable (fun t : ℝ => 1 / (t - 1)) MeasureTheory.volume a b := by
+    apply ContinuousOn.intervalIntegrable_of_Icc hab
+    apply ContinuousOn.div continuousOn_const (continuousOn_id.sub continuousOn_const)
+    intro t ht
+    exact ne_of_gt (by linarith [ht.1, ha] : (0:ℝ) < t - 1)
+  exact (intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint).symm
+
+private theorem q_5616_incr (a b : ℝ) (ha : 2.5 ≤ a) (hab : a ≤ b) (hb : b ≤ 2.78) :
+    log (a - 1) - 0.5616 * a + 1 ≤ log (b - 1) - 0.5616 * b + 1 := by
+  have hd := log_sub_one_diff a b (by linarith) hab
+  have hnn : 0 ≤ ∫ t in a..b, (1 / (t - 1) - 0.5616) := by
+    apply integral_nonneg hab
+    intro t ht
+    have ht1 : (2.5:ℝ) ≤ t := ha.trans ht.1
+    have ht2 : t ≤ 2.78 := by linarith [ht.2, hb]
+    have ht0 : 0 < t - 1 := by linarith
+    have h1 : 0.5616 ≤ 1 / (t - 1) := by
+      rw [le_div_iff₀ ht0]
+      nlinarith
+    linarith
+  have hsplit : (log (b - 1) - 0.5616 * b + 1) - (log (a - 1) - 0.5616 * a + 1) =
+      ∫ t in a..b, (1 / (t - 1) - 0.5616) := by
+    have hc : (∫ t in a..b, (1 / (t - 1) - 0.5616)) =
+        (∫ t in a..b, (1 / (t - 1))) - 0.5616 * (b - a) := by
+      rw [intervalIntegral.integral_sub
+        (ContinuousOn.intervalIntegrable_of_Icc hab
+          (by
+            apply ContinuousOn.div continuousOn_const (continuousOn_id.sub continuousOn_const)
+            intro t ht
+            exact ne_of_gt (by linarith [ht.1, ha] : (0:ℝ) < t - 1)))
+        (continuous_const.intervalIntegrable a b), intervalIntegral.integral_const, smul_eq_mul]
+      ring
+    rw [hc, ← hd]
+    ring
+  linarith
+
+private theorem q_5616_decr (a b : ℝ) (ha : 2.79 ≤ a) (hab : a ≤ b) (hb : b ≤ 3) :
+    log (b - 1) - 0.5616 * b + 1 ≤ log (a - 1) - 0.5616 * a + 1 := by
+  have hd := log_sub_one_diff a b (by linarith) hab
+  have hnn : ∫ t in a..b, (1 / (t - 1) - 0.5616) ≤ 0 := by
+    have hneg : 0 ≤ ∫ t in a..b, -(1 / (t - 1) - 0.5616) := by
+      apply integral_nonneg hab
+      intro t ht
+      have ht1 : (2.79:ℝ) ≤ t := ha.trans ht.1
+      have ht2 : t ≤ 3 := by linarith [ht.2, hb]
+      have ht0 : 0 < t - 1 := by linarith
+      have h1 : 1 / (t - 1) ≤ 0.5616 := by
+        rw [div_le_iff₀ ht0]
+        nlinarith
+      linarith
+    have e2 : (fun t : ℝ => -(1 / (t - 1) - 0.5616)) =
+        fun t : ℝ => -(fun s : ℝ => 1 / (s - 1) - 0.5616) t := rfl
+    rw [e2, intervalIntegral.integral_neg] at hneg
+    linarith
+  have hsplit : (log (b - 1) - 0.5616 * b + 1) - (log (a - 1) - 0.5616 * a + 1) =
+      ∫ t in a..b, (1 / (t - 1) - 0.5616) := by
+    have hc : (∫ t in a..b, (1 / (t - 1) - 0.5616)) =
+        (∫ t in a..b, (1 / (t - 1))) - 0.5616 * (b - a) := by
+      rw [intervalIntegral.integral_sub
+        (ContinuousOn.intervalIntegrable_of_Icc hab
+          (by
+            apply ContinuousOn.div continuousOn_const (continuousOn_id.sub continuousOn_const)
+            intro t ht
+            exact ne_of_gt (by linarith [ht.1, ha] : (0:ℝ) < t - 1)))
+        (continuous_const.intervalIntegrable a b), intervalIntegral.integral_const, smul_eq_mul]
+      ring
+    rw [hc, ← hd]
+    ring
+  linarith
+
+private theorem log_one_seven_eight :
+    (0.5766128 : ℝ) ≤ log 1.78 ∧ log 1.78 ≤ 0.5766136 := by
+  have h := log_rat_bounds (39 / 139) 0.5766128 0.5766136 (by norm_num) (by norm_num)
+    (by simp only [sum_range_succ, sum_range_zero]; norm_num)
+    (by simp only [sum_range_succ, sum_range_zero]; norm_num)
+  have he : (1 + 39 / 139) / (1 - 39 / 139) = (1.78 : ℝ) := by
+    rw [div_eq_iff (by norm_num : (1:ℝ) - 39 / 139 ≠ 0)]
+    norm_num
+  rwa [he] at h
+
+private theorem q_5616_nonneg_right (s : ℝ) (h2 : 2.5 ≤ s) (h3 : s ≤ 3) :
+    0 ≤ log (s - 1) - 0.5616 * s + 1 := by
+  have h15 := log_one_five
+  have hq25 : (0 : ℝ) ≤ log (2.5 - 1) - 0.5616 * 2.5 + 1 := by linarith
+  have hq3 : (0 : ℝ) ≤ log (3 - 1) - 0.5616 * 3 + 1 := by linarith [Real.log_two_gt_d9]
+  by_cases h : s ≤ 2.78
+  · have hinc := q_5616_incr 2.5 s (le_refl 2.5) h2 h
+    linarith
+  · have h1 : 2.78 < s := not_le.mp h
+    by_cases h' : 2.79 ≤ s
+    · have hdec := q_5616_decr s 3 h' h3 (le_refl 3)
+      linarith
+    · -- the small gap 2.78 to 2.79: a linear lower bound for the logarithm
+      have h178 := log_one_seven_eight
+      have hb := log_ge_linear 1.78 (s - 1) 1.79 (by norm_num) (by linarith) (by linarith)
+      have key : 0.5616 * s - 1 - 0.5766128 ≤ (s - 2.78) * (1 / 1.79) := by
+        rw [mul_one_div, le_div_iff₀ (by norm_num : (0:ℝ) < 1.79)]
+        nlinarith
+      have hb' : 0.5766128 + (s - 2.78) * (1 / 1.79) ≤ log (s - 1) := by
+        have e : (s - 1 - 1.78) * (1 / 1.79) = (s - 2.78) * (1 / 1.79) := by ring
+        linarith [hb, h178.1, e]
+      linarith
+
+private theorem Phi_5616_nonpos (s : ℝ) (h2 : 2.22 ≤ s) (h3 : s ≤ 3) :
+    (∫ t in (2:ℝ)..s, log (t - 1) / t) - (0.5616 * (s + 1) - 1 - log s) ≤ 0 := by
+  have h222 : (∫ t in (2:ℝ)..(2.22:ℝ), log (t - 1) / t) -
+      (0.5616 * (2.22 + 1) - 1 - log 2.22) ≤ -(0.00028 : ℝ) := by
+    have h1 := J_two_two_two.2
+    have h2' := log_two_two_two.2
+    linarith
+  have h3' : (∫ t in (2:ℝ)..(3:ℝ), log (t - 1) / t) - (0.5616 * (3 + 1) - 1 - log 3) ≤
+      -(0.00056 : ℝ) := by
+    have h1 := J_three.2
+    have h2' := log_three.2
+    linarith
+  by_cases hc : s ≤ 2.46
+  · have h := Phi_le_of_nonpos (c := 0.5616) (a := 2.22) (b := s) (by norm_num) h2 h3
+      (fun t ht => q_5616_nonpos_left t ht.1 (ht.2.trans hc))
+    linarith
+  · push_neg at hc
+    by_cases hc2 : s ≤ 2.5
+    · have hP := Phi_sub_Phi (c := 0.5616) (a := 2.46) (b := s) (by norm_num) hc.le h3
+      have hb : |∫ t in (2.46 : ℝ)..s, (log (t - 1) - 0.5616 * t + 1) / t| ≤ 0.000051 := by
+        have hC : ‖∫ t in (2.46 : ℝ)..s, (log (t - 1) - 0.5616 * t + 1) / t‖ ≤
+            0.00127 * |s - 2.46| := by
+          apply intervalIntegral.norm_integral_le_of_norm_le_const
+          intro t ht
+          rw [Set.uIoc_of_le hc.le] at ht
+          have ht1 : (2.46 : ℝ) ≤ t := ht.1.le
+          have ht3 : t ≤ 2.5 := by linarith [ht.2, hc2]
+          rw [Real.norm_eq_abs, abs_div, abs_of_pos (by linarith : (0:ℝ) < t)]
+          have hq1 : log (t - 1) - 0.5616 * t + 1 ≤ 0.0031 := by
+            have hl := log_le_tangent 1.46 (t - 1) (by norm_num) (by linarith)
+            have h146 := log_one_four_six
+            linarith
+          have hq2 : -(0.0031 : ℝ) ≤ log (t - 1) - 0.5616 * t + 1 := by
+            have hl := log_ge_linear 1.46 (t - 1) 1.5 (by norm_num) (by linarith) (by linarith)
+            have h146 := log_one_four_six
+            linarith
+          have hqabs : |log (t - 1) - 0.5616 * t + 1| ≤ 0.0031 := by
+            rw [abs_le]
+            exact ⟨hq2, hq1⟩
+          rw [div_le_iff₀ (by linarith : (0:ℝ) < t)]
+          nlinarith [hqabs]
+        rw [Real.norm_eq_abs] at hC
+        have hle : |s - 2.46| ≤ 0.04 := by
+          rw [abs_of_nonneg (by linarith)]
+          linarith
+        nlinarith [hC, hle]
+      have h46 : (∫ t in (2:ℝ)..(2.46:ℝ), log (t - 1) / t) -
+          (0.5616 * (2.46 + 1) - 1 - log 2.46) ≤ -(0.00028 : ℝ) := by
+        have hant := Phi_le_of_nonpos (c := 0.5616) (a := 2.22) (b := 2.46) (by norm_num)
+          (by norm_num) (by norm_num)
+          (fun t ht => q_5616_nonpos_left t ht.1 (by linarith [ht.2]))
+        linarith
+      obtain ⟨hb1, hb2⟩ := abs_le.mp hb
+      linarith
+    · push_neg at hc2
+      have h := Phi_le_of_nonneg (c := 0.5616) (a := s) (b := 3) (by linarith) h3 (le_refl 3)
+        (fun t ht => q_5616_nonneg_right t (hc2.le.trans ht.1) ht.2)
+      linarith
+
+private theorem buchstab_le_5616 (v : ℝ) (h3 : 3.22 ≤ v) (h4 : v ≤ 4) :
+    buchstab v ≤ 0.5616 := by
+  have hv : 0 < v := by linarith
+  rw [Endpoints578.buchstab_three_four v (by linarith) h4, div_le_iff₀ hv]
+  have hPhi := Phi_5616_nonpos (v - 1) (by linarith) (by linarith)
+  linarith
+
+/-! ## The slope bound above three and the excess area -/
+
+private theorem buchstab_slope_le (v : ℝ) (h3 : 3 ≤ v) (h4 : v ≤ 3.22) :
+    buchstab v ≤ 0.56439 - 0.00343 * (v - 3) := by
+  have hd : ∀ t ∈ Set.uIcc (3:ℝ) v, HasDerivAt buchstab ((buchstab (t - 1) - buchstab t) / t) t := by
+    intro t ht
+    rw [Set.uIcc_of_le h3] at ht
+    exact buchstab_derivative t (by linarith [ht.1])
+  have hcont : ContinuousOn (fun t : ℝ => (buchstab (t - 1) - buchstab t) / t)
+      (Set.Icc (3:ℝ) v) := by
+    apply ContinuousOn.div
+    · exact ((buchstab_continuous.comp (continuous_id.sub continuous_const)).sub
+        buchstab_continuous).continuousOn
+    · exact continuousOn_id
+    · intro t ht
+      linarith [ht.1]
+  have hint : IntervalIntegrable (fun t : ℝ => (buchstab (t - 1) - buchstab t) / t)
+      MeasureTheory.volume 3 v :=
+    ContinuousOn.intervalIntegrable_of_Icc h3 hcont
+  have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt hd hint
+  have hbound : (∫ t in (3:ℝ)..v, (buchstab (t - 1) - buchstab t) / t) ≤
+      ∫ t in (3:ℝ)..v, (-0.00343 : ℝ) := by
+    apply integral_mono_on (hab := h3) (hf := hint)
+      (hg := continuous_const.intervalIntegrable 3 v)
+    · intro t ht
+      have ht1 : (3:ℝ) ≤ t := ht.1
+      have ht2 : t ≤ 3.22 := by linarith [ht.2, h4]
+      have hupper : buchstab (t - 1) ≤ (t - 2) / (t - 1) := by
+        rw [buchstab_two_three (t - 1) (by linarith) (by linarith),
+          show t - 1 - 1 = t - 2 from by ring]
+        have hl : log (t - 2) ≤ t - 3 := by
+          have h2' := Real.log_le_sub_one_of_pos (by linarith : (0:ℝ) < t - 2)
+          linarith
+        rw [div_le_div_iff_of_pos_right (by linarith : (0:ℝ) < t - 1)]
+        nlinarith
+      have hlower := buchstab_ge_three_four t ht1 (by linarith)
+      have hratio : (t - 2) / (t - 1) ≤ 1.22 / 2.22 := by
+        rw [le_div_iff₀ (by norm_num : (0:ℝ) < 2.22), div_mul_eq_mul_div,
+          div_le_iff₀ (by linarith : (0:ℝ) < t - 1)]
+        nlinarith
+      have hnum : buchstab (t - 1) - buchstab t ≤ -0.0112 := by linarith
+      rw [div_le_iff₀ (by linarith : (0:ℝ) < t)]
+      nlinarith
+  have hconst : (∫ t in (3:ℝ)..v, (-0.00343 : ℝ)) = -0.00343 * (v - 3) := by
+    rw [intervalIntegral.integral_const, smul_eq_mul]
+    ring
+  have hw3 := buchstab_le_three_four 3 (le_refl 3) (by norm_num)
+  linarith
+
+private theorem area_small (s : ℝ) (h3 : 3 ≤ s) (h4 : s ≤ 3.22) :
+    (∫ t in (3:ℝ)..s, (buchstab t - 0.5616)) ≤ 0.000531 := by
+  have hcont : Continuous fun t : ℝ => buchstab t - 0.5616 :=
+    buchstab_continuous.sub continuous_const
+  have hlin : Continuous fun t : ℝ => 0.00279 - 0.00343 * (t - 3) := by fun_prop
+  have hmono : (∫ t in (3:ℝ)..s, (buchstab t - 0.5616)) ≤
+      ∫ t in (3:ℝ)..s, (0.00279 - 0.00343 * (t - 3)) := by
+    apply integral_mono_on (hab := h3) (hf := hcont.intervalIntegrable 3 s)
+      (hg := hlin.intervalIntegrable 3 s)
+    · intro t ht
+      have hslope := buchstab_slope_le t ht.1 (by linarith [ht.2, h4])
+      linarith
+  have hval : (∫ t in (3:ℝ)..s, (0.00279 - 0.00343 * (t - 3))) ≤ 0.000531 := by
+    have heq : (∫ t in (3:ℝ)..s, (0.00279 - 0.00343 * (t - 3))) =
+        0.00279 * (s - 3) - 0.00343 * ((s - 3) * (s - 3)) / 2 := by
+      rw [show (∫ t in (3:ℝ)..s, (0.00279 - 0.00343 * (t - 3))) =
+          ∫ t in (3:ℝ)..s,
+            ((fun _ : ℝ => (0.00279 + 0.00343 * 3)) t + (fun t : ℝ => (-0.00343) * t) t) by
+        apply integral_congr
+        intro t _
+        ring]
+      rw [intervalIntegral.integral_add (f := fun _ : ℝ => (0.00279 + 0.00343 * 3))
+        (g := fun t : ℝ => (-0.00343) * t) (continuous_const.intervalIntegrable 3 s)
+        ((continuous_const.mul continuous_id).intervalIntegrable 3 s),
+        intervalIntegral.integral_const, intervalIntegral.integral_const_mul]
+      rw [show (∫ x in (3:ℝ)..s, x) = (s ^ 2 - 3 ^ 2) / 2 by
+        simpa using integral_pow (a := (3:ℝ)) (b := s) 1]
+      simp only [pow_one, smul_eq_mul]
+      ring
+    rw [heq]
+    nlinarith
+  linarith
+
+private theorem area_le (s : ℝ) (h3 : 3 ≤ s) (h4 : s ≤ 4) :
+    (∫ t in (3:ℝ)..s, (buchstab t - 0.5616)) ≤ 0.000531 := by
+  have hcont : Continuous fun t : ℝ => buchstab t - 0.5616 :=
+    buchstab_continuous.sub continuous_const
+  by_cases hle : s ≤ 3.22
+  · exact area_small s h3 hle
+  · push_neg at hle
+    have hi1 : IntervalIntegrable (fun t : ℝ => buchstab t - 0.5616) MeasureTheory.volume 3 3.22 :=
+      hcont.intervalIntegrable 3 3.22
+    have hi2 : IntervalIntegrable (fun t : ℝ => buchstab t - 0.5616) MeasureTheory.volume 3.22 s :=
+      hcont.intervalIntegrable 3.22 s
+    have hadd := intervalIntegral.integral_add_adjacent_intervals hi1 hi2
+    have h1 : (∫ t in (3:ℝ)..(3.22:ℝ), (buchstab t - 0.5616)) ≤ 0.000531 :=
+      area_small 3.22 (by norm_num) (le_refl 3.22)
+    have h2 : (∫ t in (3.22:ℝ)..s, (buchstab t - 0.5616)) ≤ 0 := by
+      have hnn : 0 ≤ ∫ t in (3.22:ℝ)..s, -(buchstab t - 0.5616) := by
+        apply integral_nonneg hle.le
+        intro t ht
+        have hle' := buchstab_le_5616 t ht.1 (ht.2.trans h4)
+        linarith
+      have e2 : (fun t : ℝ => -(buchstab t - 0.5616)) =
+          fun t : ℝ => -(fun s : ℝ => buchstab s - 0.5616) t := rfl
+      rw [e2, intervalIntegral.integral_neg] at hnn
+      linarith
+    linarith
+
+/-! ## The upper half of the second grid -/
+
+private theorem buchstab_le_four_five (u : ℝ) (h4 : 4 < u) (h5 : u ≤ 5) :
+    buchstab u ≤ 0.5616 := by
+  have hu : 0 < u := by linarith
+  have hs3 : 3 ≤ u - 1 := by linarith
+  have hs4 : u - 1 ≤ 4 := by linarith
+  have hrec := buchstab_recurrence u (by linarith)
+  have hi13 : IntervalIntegrable buchstab MeasureTheory.volume 1 3 :=
+    buchstab_continuous.intervalIntegrable 1 3
+  have hi3s : IntervalIntegrable buchstab MeasureTheory.volume 3 (u - 1) :=
+    buchstab_continuous.intervalIntegrable 3 (u - 1)
+  have hadd := intervalIntegral.integral_add_adjacent_intervals hi13 hi3s
+  have hsplit : (∫ t in (3:ℝ)..(u-1), (buchstab t - 0.5616)) =
+      (∫ t in (3:ℝ)..(u-1), buchstab t) - 0.5616 * ((u - 1) - 3) := by
+    rw [intervalIntegral.integral_sub hi3s (continuous_const.intervalIntegrable 3 (u - 1)),
+      intervalIntegral.integral_const, smul_eq_mul]
+    ring
+  have harea := area_le (u - 1) hs3 hs4
+  have hI3 := integral_one_three
+  have hJ3 := J_three.2
+  have hlog3 := log_three.2
+  have hkey : u * buchstab u ≤ 0.5616 * u := by
+    linarith [hrec, hadd, hsplit, harea, hI3, hJ3, hlog3]
+  have hdiv : (u * buchstab u) / u ≤ 0.5616 := by
+    rw [div_le_iff₀ hu]
+    linarith
+  have hd : (u * buchstab u) / u = buchstab u := by field_simp
+  rwa [hd] at hdiv
+
+/-! ## The second finite base grid -/
+
 end
 
 /-- LEAF. Jia page 262 first finite base grid, restricted to the unresolved interior.
@@ -571,7 +1066,14 @@ theorem grid_three_interior : ∀ k : ℕ, 0 < k → k < 10000 →
 The value at four is already certified. Only the remaining 10000 values are asserted. -/
 theorem grid_four_tail : ∀ k : ℕ, 0 < k → k ≤ 10000 →
     0.5613 ≤ buchstab (4 + 0.0001 * (k : ℝ)) ∧
-      buchstab (4 + 0.0001 * (k : ℝ)) ≤ 0.5616 := by sorry
+      buchstab (4 + 0.0001 * (k : ℝ)) ≤ 0.5616 := by
+  intro k hk hk2
+  have hk0 : (0 : ℝ) < (k : ℝ) := by exact_mod_cast hk
+  have hk1 : (k : ℝ) ≤ 10000 := by exact_mod_cast hk2
+  have h4 : 4 < 4 + 0.0001 * (k : ℝ) := by linarith
+  have h5 : 4 + 0.0001 * (k : ℝ) ≤ 5 := by linarith
+  exact ⟨buchstab_ge_four_five _ h4 h5, buchstab_le_four_five _ h4 h5⟩
+
 
 /-- Jia page 262 proof of Lemma 20, the first two unnumbered finite grid bounds.
 CONDITIONAL ON grid_three_interior only.
