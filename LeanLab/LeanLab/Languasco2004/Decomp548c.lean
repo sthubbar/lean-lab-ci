@@ -20,7 +20,16 @@ theorem region4_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 3 4 true N (localization N ε) n <
         0.009636 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  -- BLOCKED 2026-11-15 FREE-ms-leanstral task520 region4_lower
+  -- OUT OF REACH: requires Jia 1996 Lemma 26 display 65, the large-sieve/Gallagher
+  -- estimate bounding |{n ∈ window : pieceSum 3 4 true < 0.009636 * scale}| = O(windowLength / log^B N).
+  -- No CITED lemma in Decomp279a, Decomp316c, or GroupSplit548 provides this.
+  -- All 5 group_lower lemmas in Decomp316c are sorried; Decomp279a's initial_bound,
+  -- subtraction_bound, recovery_bound are sorried.
+  -- The analytic core is research-level formalization of exponential sum bounds.
+  -- Searched all imported files: no CITED region-level count bound found.
+  sorry
 
 /-- LEAF. Jia page 280, Lemma 26, supporting display 65 on page 286.
 Only group 3 with region 4 removed is bounded. The coefficient is 0.289310.
@@ -30,7 +39,12 @@ theorem remainder_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 3 4 false N (localization N ε) n <
         0.289310 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  -- BLOCKED 2026-11-15 FREE-ms-leanstral task520 remainder_lower
+  -- OUT OF REACH: same as region4_lower - requires the complementary bound from
+  -- Jia Lemma 26 for pieceSum 3 4 false with coefficient 0.289310.
+  -- This is the group-3-without-region-4 estimate. No CITED lemma provides it.
+  sorry
 
 /-- Jia Lemma 26: the exact sealed group3_lower statement follows
 from the two smaller region estimates. CONDITIONAL ON region4_lower
