@@ -7,7 +7,7 @@ character pair. The assembly at the end has no sorry and does not use the split
 statement.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp491b
+import LeanLab.Linnik1951.Base491b
 import LeanLab.Linnik1951.Decomp555a
 import LeanLab.ChebyshevExplicit.PiUpperSharp
 
