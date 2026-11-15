@@ -6,6 +6,8 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Linnik1951.Base491b
 import LeanLab.Linnik1951.SPLIT_character_decomposition491
 import LeanLab.Linnik1951.SPLIT_mixed_bound491
+import LeanLab.Linnik1951.SPLIT_nonprincipal_bound491
+import LeanLab.Linnik1951.PrincipalRoute491
 
 namespace LeanLab.Linnik1951
 
@@ -32,7 +34,7 @@ theorem nonprincipal_bound491 (hM : MellinBound280) :
         letI : NeZero q := ⟨by omega⟩
         ∀ n : ℤ, ‖nonprincipalTerm491 N q n‖ ≤
           C * (N : ℝ) / (N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 13 := by
-  sorry
+  exact nonprincipal_bound491_parseval hM
 
 /-- LEAF. P0093 page 160 equation 5.5. The mixed character term has
 logarithmic exponent six and denominator square root of q tau.
@@ -58,7 +60,7 @@ theorem principal_convolution491 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBound28
           C * (N : ℝ) * Real.log N ^ 13 *
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
               1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  exact principal_convolution491_route hG hM
 
 /-- LEAF. P0093 page 156 equation 3.4. The principal arithmetic coefficient
 has norm at most one for every positive modulus and every signed frequency. -/
