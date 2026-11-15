@@ -11,7 +11,7 @@
 name: tactic-sweep
 on:
   schedule:
-    - cron: '41 */2 * * *'
+    - cron: '41 */8 * * *'   # lrefresh 20261115T1150Z: 0 declarations closed in 3 days over 981 files every 2 h; every 8 h frees runners for main-check, which waited up to 63 min
   workflow_dispatch:
     inputs:
       only:
