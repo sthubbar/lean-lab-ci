@@ -2421,6 +2421,1701 @@ private theorem horizontal_segments_540 (α c K : ℝ) (hc : |α| < c) (hK : 0 �
         tendsto_const_nhds.mul (h1.mul tendsto_const_nhds)
       simpa using h2
 
+/-! ## (G1) vertical-strip bounds for `Γ`, from the Beta integral -/
+
+private theorem gamma_prod_eq_540 (σ T : ℝ) (h0 : 0 < σ) (h1 : σ < 1) :
+    Complex.Gamma ((σ : ℂ) + (T : ℂ) * Complex.I) * Complex.Gamma (((1 - σ : ℝ)) : ℂ) =
+      Complex.Gamma (1 + (T : ℂ) * Complex.I) *
+        Complex.betaIntegral ((σ : ℂ) + (T : ℂ) * Complex.I) (((1 - σ : ℝ)) : ℂ) := by
+  have hb := Complex.Gamma_mul_Gamma_eq_betaIntegral (s := (σ : ℂ) + (T : ℂ) * Complex.I)
+    (t := (((1 - σ : ℝ)) : ℂ)) (by simpa using h0) (by simpa using (by linarith : (0:ℝ) < 1 - σ))
+  have hsum : (σ : ℂ) + (T : ℂ) * Complex.I + (((1 - σ : ℝ)) : ℂ) = 1 + (T : ℂ) * Complex.I := by
+    push_cast; ring
+  rwa [hsum] at hb
+
+private theorem betaIntegral_norm_le_540 (σ T : ℝ) (h0 : 0 < σ) (h1 : σ < 1) :
+    ‖Complex.betaIntegral ((σ : ℂ) + (T : ℂ) * Complex.I) (((1 - σ : ℝ)) : ℂ)‖ ≤
+      Real.Gamma σ * Real.Gamma (1 - σ) := by
+  set s : ℂ := (σ : ℂ) + (T : ℂ) * Complex.I with hs
+  have h1σ : (0:ℝ) < 1 - σ := by linarith
+  -- step 1: triangle inequality
+  have hstep : ‖Complex.betaIntegral s (((1 - σ : ℝ)) : ℂ)‖ ≤
+      ∫ x : ℝ in (0:ℝ)..1,
+        ‖(x : ℂ) ^ (s - 1) * (1 - (x : ℂ)) ^ ((((1 - σ : ℝ)) : ℂ) - 1)‖ :=
+    intervalIntegral.norm_integral_le_integral_norm (by norm_num)
+  -- step 2: pointwise identification of the modulus integrand on (0,1]
+  have hpt : ∀ x ∈ Set.Ioc (0:ℝ) 1,
+      ‖(x : ℂ) ^ (s - 1) * (1 - (x : ℂ)) ^ ((((1 - σ : ℝ)) : ℂ) - 1)‖ =
+        x ^ (σ - 1) * (1 - x) ^ (-σ) := by
+    intro x hx
+    have hx0 : 0 < x := hx.1
+    rcases eq_or_lt_of_le hx.2 with h | h
+    · subst h
+      have hz : (1 : ℂ) - ((1:ℝ) : ℂ) = 0 := by norm_num
+      rw [hz, zero_cpow (by
+        intro hc
+        have hc' := congrArg Complex.re hc
+        simp only [Complex.sub_re, Complex.ofReal_re, Complex.one_re, Complex.zero_re] at hc'
+        linarith)]
+      simp [Real.zero_rpow (show (-σ : ℝ) ≠ 0 by linarith), sub_self]
+    · have hx1 : 0 < 1 - x := by linarith
+      have hcast : (1 : ℂ) - (x : ℂ) = (((1 - x : ℝ)) : ℂ) := by push_cast; ring
+      rw [norm_mul, hcast, Complex.norm_cpow_eq_rpow_re_of_pos hx0,
+        Complex.norm_cpow_eq_rpow_re_of_pos hx1]
+      have h3 : (s - 1).re = σ - 1 := by simp [hs]
+      have h4 : (((((1 - σ : ℝ)) : ℂ) - 1)).re = -σ := by simp
+      rw [h3, h4]
+  have hstep2 : ∫ x : ℝ in (0:ℝ)..1,
+        ‖(x : ℂ) ^ (s - 1) * (1 - (x : ℂ)) ^ ((((1 - σ : ℝ)) : ℂ) - 1)‖ =
+      ∫ x : ℝ in (0:ℝ)..1, x ^ (σ - 1) * (1 - x) ^ (-σ) := by
+    refine intervalIntegral.integral_congr_ae (Filter.Eventually.of_forall fun x hx => ?_)
+    exact hpt x (by rwa [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)] at hx)
+  -- step 3: the real integral is the complex Beta integral at real arguments
+  have hreal : Complex.betaIntegral (σ : ℂ) (((1 - σ : ℝ)) : ℂ) =
+      ((∫ x : ℝ in (0:ℝ)..1, x ^ (σ - 1) * (1 - x) ^ (-σ) : ℝ) : ℂ) := by
+    rw [show Complex.betaIntegral (σ : ℂ) (((1 - σ : ℝ)) : ℂ) =
+      ∫ x : ℝ in (0:ℝ)..1,
+        ((x : ℂ) ^ ((σ : ℂ) - 1) * (1 - (x : ℂ)) ^ ((((1 - σ : ℝ)) : ℂ) - 1)) from rfl]
+    rw [← intervalIntegral.integral_ofReal]
+    refine intervalIntegral.integral_congr_ae (Filter.Eventually.of_forall fun x hx => ?_)
+    rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)] at hx
+    have hx0 : 0 < x := hx.1
+    rcases eq_or_lt_of_le hx.2 with h | h
+    · subst h
+      have hz : (1 : ℂ) - ((1:ℝ) : ℂ) = 0 := by norm_num
+      rw [hz, zero_cpow (by
+        intro hc
+        have hc' := congrArg Complex.re hc
+        simp only [Complex.sub_re, Complex.ofReal_re, Complex.one_re, Complex.zero_re] at hc'
+        linarith)]
+      simp [Real.zero_rpow (show (-σ : ℝ) ≠ 0 by linarith), sub_self]
+    · have hx1 : 0 < 1 - x := by linarith
+      have hcast : (1 : ℂ) - (x : ℂ) = (((1 - x : ℝ)) : ℂ) := by push_cast; ring
+      have e1 : ((x : ℂ) ^ ((σ : ℂ) - 1)) = ((x ^ (σ - 1) : ℝ) : ℂ) := by
+        rw [show ((σ : ℂ) - 1) = ((σ - 1 : ℝ) : ℂ) by push_cast; ring,
+          Complex.ofReal_cpow hx0.le (σ - 1)]
+      have e2 : ((1 : ℂ) - (x : ℂ)) ^ ((((1 - σ : ℝ)) : ℂ) - 1) =
+          (((1 - x) ^ (-σ) : ℝ) : ℂ) := by
+        rw [hcast,
+          show ((((1 - σ : ℝ)) : ℂ) - 1) = ((-σ : ℝ) : ℂ) by push_cast; ring,
+          Complex.ofReal_cpow hx1.le (-σ)]
+      rw [e1, e2, ← Complex.ofReal_mul]
+  -- step 4: Gamma value of the real Beta integral
+  have hkey : (∫ x : ℝ in (0:ℝ)..1, x ^ (σ - 1) * (1 - x) ^ (-σ)) =
+      Real.Gamma σ * Real.Gamma (1 - σ) := by
+    have hb := Complex.Gamma_mul_Gamma_eq_betaIntegral (s := (σ : ℂ)) (t := (((1 - σ : ℝ)) : ℂ))
+      (by simpa using h0) (by simpa using h1σ)
+    have hsum : (σ : ℂ) + (((1 - σ : ℝ)) : ℂ) = 1 := by push_cast; ring
+    rw [hsum, hreal, Complex.Gamma_one, one_mul] at hb
+    have hre := congrArg Complex.re hb
+    simp only [Complex.mul_re, Complex.Gamma_ofReal, Complex.ofReal_re, Complex.ofReal_im,
+      zero_mul, sub_zero] at hre
+    linarith [hre]
+  rw [hstep2, hkey] at hstep
+  exact hstep
+
+private theorem gamma_strip_bound_540 (σ T : ℝ) (h0 : 0 < σ) (h1 : σ < 1) :
+    ‖Complex.Gamma ((σ : ℂ) + (T : ℂ) * Complex.I)‖ ≤
+      Real.Gamma σ * (8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) := by
+  have h1σ : (0:ℝ) < 1 - σ := by linarith
+  have hg : (0:ℝ) < Real.Gamma (1 - σ) := Real.Gamma_pos_of_pos h1σ
+  have hprod := gamma_prod_eq_540 σ T h0 h1
+  have hnorm : ‖Complex.Gamma ((σ : ℂ) + (T : ℂ) * Complex.I)‖ * Real.Gamma (1 - σ) =
+      ‖Complex.Gamma (1 + (T : ℂ) * Complex.I)‖ *
+        ‖Complex.betaIntegral ((σ : ℂ) + (T : ℂ) * Complex.I) (((1 - σ : ℝ)) : ℂ)‖ := by
+    have h' := congrArg norm hprod
+    rw [norm_mul, norm_mul, Complex.Gamma_ofReal, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hg] at h'
+    exact h'
+  have hb := betaIntegral_norm_le_540 σ T h0 h1
+  have hG := gamma_norm_bound_540 T
+  have hBb : (0:ℝ) ≤ ‖Complex.betaIntegral ((σ : ℂ) + (T : ℂ) * Complex.I) (((1 - σ : ℝ)) : ℂ)‖ :=
+    norm_nonneg _
+  have hA : (0:ℝ) ≤ 8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|) := by positivity
+  have hstep : ‖Complex.Gamma ((σ : ℂ) + (T : ℂ) * Complex.I)‖ * Real.Gamma (1 - σ) ≤
+      (8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) * (Real.Gamma σ * Real.Gamma (1 - σ)) := by
+    rw [hnorm]
+    exact mul_le_mul hG hb hBb hA
+  have hstep' : ‖Complex.Gamma ((σ : ℂ) + (T : ℂ) * Complex.I)‖ * Real.Gamma (1 - σ) ≤
+      8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|) * Real.Gamma σ * Real.Gamma (1 - σ) := by
+    rw [show (8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) *
+        (Real.Gamma σ * Real.Gamma (1 - σ)) =
+        8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|) * Real.Gamma σ * Real.Gamma (1 - σ)
+        by ring] at hstep
+    exact hstep
+  have hfin : ‖Complex.Gamma ((σ : ℂ) + (T : ℂ) * Complex.I)‖ ≤
+      8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|) * Real.Gamma σ :=
+    (mul_le_mul_iff_of_pos_right hg).mp hstep'
+  calc ‖Complex.Gamma ((σ : ℂ) + (T : ℂ) * Complex.I)‖
+      ≤ 8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|) * Real.Gamma σ := hfin
+    _ = Real.Gamma σ * (8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) := by ring
+
+/-- `Γ(-1/4+iT) = Γ(3/4+iT)/(-1/4+iT)`. -/
+private theorem gamma_neg_quarter_recur_540 (T : ℝ) :
+    Complex.Gamma (((-(1/4) : ℝ)) + (T : ℂ) * Complex.I) =
+      Complex.Gamma (((3/4 : ℝ)) + (T : ℂ) * Complex.I) /
+        ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I) := by
+  have hs : ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I) ≠ 0 := by
+    intro h
+    have h' := congrArg Complex.re h
+    simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+      Complex.I_re, Complex.I_im] at h'
+    norm_num at h'
+  have h := Complex.Gamma_add_one ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I) hs
+  rw [show ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I) + 1
+      = (((3/4 : ℝ)) : ℂ) + (T : ℂ) * Complex.I by push_cast; ring] at h
+  rw [h, eq_div_iff hs]
+  ring
+
+/-- `‖Γ(-1/4+iT)‖` decays like `(1+|T|) e^{-π|T|/2}`. -/
+private theorem gamma_neg_quarter_bound_540 (T : ℝ) :
+    ‖Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I)‖ ≤
+      32 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) := by
+  have hnum := gamma_strip_bound_540 (3/4) T (by norm_num) (by norm_num)
+  have hden : (1/4 : ℝ) ≤ ‖(((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I‖ := by
+    have h1 : ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I).re = -(1/4) := by simp
+    calc (1/4 : ℝ) = |(-(1/4) : ℝ)| := by
+          rw [abs_neg, abs_of_pos (by norm_num : (0:ℝ) < 1/4)]
+      _ = |((((- (1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I).re| := by rw [h1]
+      _ ≤ ‖(((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I‖ := Complex.abs_re_le_norm _
+  have hpos : (0:ℝ) < ‖(((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I‖ := by linarith
+  rw [gamma_neg_quarter_recur_540 T, norm_div]
+  refine (div_le_iff₀ hpos).mpr ?_
+  have h1 : ‖Complex.Gamma (((3/4 : ℝ)) + (T : ℂ) * Complex.I)‖ ≤
+      Real.Gamma (3/4) * (8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) := hnum
+  have h2 : (32 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|))) *
+      (1/4 : ℝ) = 8 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) := by
+    ring
+  have h3 : ‖Complex.Gamma (((3/4 : ℝ)) + (T : ℂ) * Complex.I)‖ ≤
+      (32 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|))) * (1/4 : ℝ) := by
+    rw [h2]
+    calc ‖Complex.Gamma (((3/4 : ℝ)) + (T : ℂ) * Complex.I)‖
+        ≤ Real.Gamma (3/4) * (8 * (1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) := h1
+      _ = 8 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|)) := by ring
+  calc ‖Complex.Gamma (((3/4 : ℝ)) + (T : ℂ) * Complex.I)‖
+      ≤ (32 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|))) * (1/4 : ℝ) := h3
+    _ ≤ (32 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|))) *
+        ‖(((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I‖ := by
+        apply mul_le_mul_of_nonneg_left hden
+        positivity
+
+private theorem integrable_gamma_neg_quarter_540 :
+    Integrable (fun T : ℝ => Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I)) := by
+  have hbase := exp_abs_pow_integrable_540 (Real.pi / 2) (by positivity) 1
+  have hC : (0:ℝ) ≤ 32 * Real.Gamma (3/4) := by positivity
+  refine Integrable.mono' (hbase.const_mul (32 * Real.Gamma (3/4))) ?_ ?_
+  · have hcont : Continuous fun T : ℝ => Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (T : ℂ) * Complex.I) := by
+      rw [continuous_iff_continuousAt]
+      intro T
+      refine ContinuousAt.comp ?_ (by fun_prop)
+      apply Complex.continuousAt_Gamma
+      intro m hm
+      have h' := congrArg Complex.re hm
+      simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im, Complex.neg_re, Complex.natCast_re, Complex.natCast_im] at h'
+      have hm1 : (m : ℝ) = 1/4 := by linarith
+      have h4 : ((4 * m : ℕ) : ℝ) = 1 := by push_cast; linarith
+      have h5 : 4 * m = 1 := by exact_mod_cast h4
+      omega
+    exact hcont.aestronglyMeasurable
+  · filter_upwards [] with T
+    have h := gamma_neg_quarter_bound_540 T
+    have h1 : 32 * Real.Gamma (3/4) * ((1 + |T|) * Real.exp (-(Real.pi / 2) * |T|))
+        = 32 * Real.Gamma (3/4) * (Real.exp (-((Real.pi / 2) * |T|)) * (1 + |T|) ^ 1) := by
+      rw [pow_one,
+        show -(Real.pi / 2) * |T| = -((Real.pi / 2) * |T|) by ring]
+      ring
+    rw [h1] at h
+    exact h
+
+/-! ## (G3) the inverse Mellin transform of `Γ` on a line `Re s = c > 0` -/
+
+private theorem mellin_exp_neg_eq_gamma_540 (s : ℂ) (hs : 0 < s.re) :
+    mellin (fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) s = Complex.Gamma s := by
+  rw [← Complex.GammaIntegral_eq_mellin, Complex.Gamma_eq_integral hs]
+
+private theorem integrable_gamma_vertical_540 (σ : ℝ) (h0 : 0 < σ) (h1 : σ < 1) :
+    Integrable (fun y : ℝ => Complex.Gamma ((σ : ℂ) + (y : ℂ) * Complex.I)) := by
+  have hbase := exp_abs_pow_integrable_540 (Real.pi / 2) (by positivity) 1
+  have hC : (0:ℝ) ≤ 8 * Real.Gamma σ := by positivity
+  refine Integrable.mono' (hbase.const_mul (8 * Real.Gamma σ)) ?_ ?_
+  · have hcont : Continuous fun y : ℝ => Complex.Gamma ((σ : ℂ) + (y : ℂ) * Complex.I) := by
+      rw [continuous_iff_continuousAt]
+      intro y
+      refine ContinuousAt.comp ?_ (by fun_prop)
+      apply Complex.continuousAt_Gamma
+      intro m hm
+      have h' := congrArg Complex.re hm
+      simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im, Complex.natCast_re, Complex.neg_re, Complex.neg_im, zero_mul,
+        add_zero] at h'
+      have hm1 : (m : ℝ) = 1/4 := by linarith
+      have h4 : ((4 * m : ℕ) : ℝ) = 1 := by push_cast; linarith
+      have h5 : 4 * m = 1 := by exact_mod_cast h4
+      omega
+    exact hcont.aestronglyMeasurable
+  · filter_upwards [] with y
+    have h := gamma_strip_bound_540 σ y h0 h1
+    have heq : Real.Gamma σ * (8 * (1 + |y|) * Real.exp (-(Real.pi / 2) * |y|)) =
+        8 * Real.Gamma σ * (Real.exp (-((Real.pi / 2) * |y|)) * (1 + |y|) ^ 1) := by
+      rw [pow_one,
+        show -(Real.pi / 2) * |y| = -((Real.pi / 2) * |y|) by ring]
+      ring
+    rw [heq] at h
+    exact h
+
+private theorem verticalIntegrable_mellin_exp_neg_540 :
+    Complex.VerticalIntegrable (mellin fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) (3 / 4) := by
+  have hfun : (fun y : ℝ => mellin (fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) ((3 / 4 : ℝ) + y * Complex.I))
+      = fun y : ℝ => Complex.Gamma (((3 / 4 : ℝ)) + y * Complex.I) := by
+    funext y
+    exact mellin_exp_neg_eq_gamma_540 _ (by simp)
+  show Integrable (fun y : ℝ =>
+    mellin (fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) ((3 / 4 : ℝ) + y * Complex.I))
+  rw [hfun]
+  exact integrable_gamma_vertical_540 (3 / 4) (by norm_num) (by norm_num)
+
+/-- `(1/2π) ∫_ℝ x^{-(c+iy)} Γ(c+iy) dy = e^{-x}` for `0 < c < 1`. -/
+private theorem mellinInv_gamma_pos_540 (x : ℝ) (hx : 0 < x) :
+    mellinInv (3 / 4) Complex.Gamma x = ((Real.exp (-x) : ℝ) : ℂ) := by
+  have hf : MellinConvergent (fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) ((3 / 4 : ℝ) : ℂ) := by
+    have h := Complex.GammaIntegral_convergent (s := ((3 / 4 : ℝ) : ℂ)) (by norm_num)
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro t ht
+    simp only [smul_eq_mul]
+    rw [mul_comm]
+  have hV : Complex.VerticalIntegrable (mellin fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) (3 / 4) :=
+    verticalIntegrable_mellin_exp_neg_540
+  have hcont : ContinuousAt (fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) x := by fun_prop
+  have hm := mellinInv_mellin_eq (3 / 4) (fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) hx hf hV hcont
+  have hcongr : mellinInv (3 / 4) (mellin fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) x
+      = mellinInv (3 / 4) Complex.Gamma x := by
+    simp only [mellinInv]
+    congr 1
+    apply integral_congr_ae
+    filter_upwards [] with y
+    rw [mellin_exp_neg_eq_gamma_540 _ (by simp)]
+  rw [← hcongr, hm]
+
+
+/-! ## (G4) the inverse Mellin transform of `Γ` on the shifted line `Re s = -1/4` -/
+
+private theorem mellinInv_neg_quarter_asIntegral_540 (z : ℝ) :
+    mellinInv (-(1 / 4)) Complex.Gamma z =
+      (1 / (2 * Real.pi)) • ∫ y : ℝ, (z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+        Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I) := by
+  simp only [mellinInv]
+  congr 1
+  apply integral_congr_ae
+  filter_upwards [] with y
+  simp only [smul_eq_mul]
+  rw [show -((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) =
+      (((1 / 4 : ℝ)) : ℂ) - (y : ℂ) * Complex.I by push_cast; ring]
+
+private theorem continuous_mellinInv_integrand_540 (z : ℝ) (hz : 0 < z) :
+    Continuous fun y : ℝ => (z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+      Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I) := by
+  have hzne : (z : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hz.ne'
+  rw [continuous_iff_continuousAt]
+  intro y
+  have h1 : ContinuousAt (fun y : ℝ => (z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I)) y :=
+    (continuousAt_const_cpow hzne).comp (by fun_prop)
+  have h2 : ContinuousAt (fun y : ℝ =>
+      Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I)) y := by
+    refine ContinuousAt.comp ?_ (by fun_prop)
+    refine Complex.continuousAt_Gamma _ (by
+      intro m hm
+      have h' := congrArg Complex.re hm
+      simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im, Complex.natCast_re, Complex.neg_re, zero_mul, add_zero] at h'
+      have hm1 : (m : ℝ) = 1/4 := by linarith
+      have h4 : ((4 * m : ℕ) : ℝ) = 1 := by push_cast; linarith
+      have h5 : 4 * m = 1 := by exact_mod_cast h4
+      omega)
+  exact h1.mul h2
+
+private theorem hasDerivAt_mellinInv_gamma_neg_aux_540 (x : ℝ) (hx : 0 < x) :
+    HasDerivAt (fun z : ℝ => (1 / (2 * Real.pi)) • ∫ y : ℝ,
+        (z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+          Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I))
+      (-(((Real.exp (-x) : ℝ)) : ℂ)) x := by
+  have hx2 : (0:ℝ) < x / 2 := by linarith
+  have hx3 : (0:ℝ) < 3 * x / 2 := by linarith
+  set A : ℝ := 32 * Real.Gamma (3/4) with hA
+  set S : ℝ := (x / 2) ^ (-(3/4) : ℝ) + (3 * x / 2) ^ ((1/4) : ℝ) + 1 with hS
+  set C : ℝ := A * S with hC
+  have hApos : 0 < A := by rw [hA]; positivity
+  have hPC : (0:ℝ) < (x / 2) ^ (-(3/4) : ℝ) := Real.rpow_pos_of_pos hx2 _
+  have hTC : (0:ℝ) < (3 * x / 2) ^ ((1/4) : ℝ) := Real.rpow_pos_of_pos hx3 _
+  have hSpos : 0 < S := by rw [hS]; linarith
+  have hCpos : 0 < C := by rw [hC]; positivity
+  set bd : ℝ → ℝ := fun y : ℝ => C * (Real.exp (-(Real.pi / 2) * |y|) * (1 + |y|) ^ 2) with hbd
+  have hbd_int : Integrable bd := by
+    rw [hbd]
+    have h0 : Integrable (fun y : ℝ => Real.exp (-((Real.pi / 2) * |y|)) * (1 + |y|) ^ 2) :=
+      exp_abs_pow_integrable_540 (Real.pi / 2) (by positivity) 2
+    refine (h0.const_mul C).congr ?_
+    filter_upwards [] with y
+    rw [show -(Real.pi / 2) * |y| = -((Real.pi / 2) * |y|) by ring]
+  have hmem : ∀ z ∈ Metric.ball x (x / 2), x / 2 < z ∧ z < 3 * x / 2 := by
+    intro z hz
+    have hz1 : |z - x| < x / 2 := by simpa [Metric.mem_ball, Real.dist_eq] using hz
+    rw [abs_lt] at hz1
+    constructor <;> linarith [hz1.1, hz1.2]
+  have hTS : (3 * x / 2) ^ ((1/4) : ℝ) ≤ S := by rw [hS]; linarith
+  have hPS : (x / 2) ^ (-(3/4) : ℝ) ≤ S := by rw [hS]; linarith
+  -- bound for the integrand itself
+  have hbdF : ∀ y : ℝ, ∀ z ∈ Metric.ball x (x / 2),
+      ‖(z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+        Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I)‖ ≤ bd y := by
+    intro y z hz
+    obtain ⟨hz1, hz2⟩ := hmem z hz
+    have hzpos : 0 < z := by linarith
+    have hnorm : ‖(z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+        Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I)‖
+        = z ^ ((1/4) : ℝ) * ‖Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ := by
+      rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hzpos]
+      congr 1
+      simp
+    rw [hnorm]
+    have hG := gamma_neg_quarter_bound_540 y
+    have hG' : ‖Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ ≤
+        A * ((1 + |y|) * Real.exp (-(Real.pi / 2) * |y|)) := by
+      rw [hA]; exact hG
+    have hz4 : z ^ ((1/4) : ℝ) ≤ (3 * x / 2) ^ ((1/4) : ℝ) :=
+      Real.rpow_le_rpow hzpos.le hz2.le (by norm_num)
+    have hG0 : (0:ℝ) ≤ ‖Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ :=
+      norm_nonneg _
+    have hstep : z ^ ((1/4) : ℝ) *
+          ‖Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ ≤
+        (3 * x / 2) ^ ((1/4) : ℝ) * (A * ((1 + |y|) * Real.exp (-(Real.pi / 2) * |y|))) :=
+      mul_le_mul hz4 hG' hG0 hTC.le
+    have h1y : (0:ℝ) < 1 + |y| := by positivity
+    have h1yle : (1 + |y|) ≤ (1 + |y|) ^ 2 := by nlinarith [abs_nonneg y]
+    have he : (0:ℝ) < Real.exp (-(Real.pi / 2) * |y|) := Real.exp_pos _
+    have hstep2 : (3 * x / 2) ^ ((1/4) : ℝ) * (A * ((1 + |y|) * Real.exp (-(Real.pi / 2) * |y|)))
+        ≤ S * (A * ((1 + |y|) ^ 2 * Real.exp (-(Real.pi / 2) * |y|))) := by
+      have h1 : (3 * x / 2) ^ ((1/4) : ℝ) * (1 + |y|) ≤ S * (1 + |y|) ^ 2 :=
+        mul_le_mul hTS h1yle (by positivity) hSpos.le
+      have h2 : A * Real.exp (-(Real.pi / 2) * |y|) * ((3 * x / 2) ^ ((1/4) : ℝ) * (1 + |y|))
+          ≤ A * Real.exp (-(Real.pi / 2) * |y|) * (S * (1 + |y|) ^ 2) := by
+        apply mul_le_mul_of_nonneg_left h1
+        positivity
+      calc (3 * x / 2) ^ ((1/4) : ℝ) * (A * ((1 + |y|) * Real.exp (-(Real.pi / 2) * |y|)))
+          = A * Real.exp (-(Real.pi / 2) * |y|) * ((3 * x / 2) ^ ((1/4) : ℝ) * (1 + |y|)) := by
+            ring
+        _ ≤ A * Real.exp (-(Real.pi / 2) * |y|) * (S * (1 + |y|) ^ 2) := h2
+        _ = S * (A * ((1 + |y|) ^ 2 * Real.exp (-(Real.pi / 2) * |y|))) := by ring
+    refine hstep.trans (hstep2.trans_eq ?_)
+    rw [hbd, hC]
+    ring
+  -- bound for the derivative integrand
+  have hbdF' : ∀ y : ℝ, ∀ z ∈ Metric.ball x (x / 2),
+      ‖-(Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+        (z : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)))‖ ≤ bd y := by
+    intro y z hz
+    obtain ⟨hz1, hz2⟩ := hmem z hz
+    have hzpos : 0 < z := by linarith
+    have hnorm : ‖-(Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+        (z : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)))‖
+        = ‖Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)‖ * z ^ (-(3/4) : ℝ) := by
+      rw [norm_neg, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hzpos]
+      congr 1
+      simp
+    rw [hnorm]
+    have hG := gamma_strip_bound_540 (3/4) y (by norm_num) (by norm_num)
+    have hG0 : (0:ℝ) ≤ ‖Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)‖ := norm_nonneg _
+    have hz4 : z ^ (-(3/4) : ℝ) ≤ (x / 2) ^ (-(3/4) : ℝ) := by
+      have h1 : (x / 2) ^ ((3/4) : ℝ) ≤ z ^ ((3/4) : ℝ) :=
+        Real.rpow_le_rpow hx2.le hz1.le (by norm_num)
+      have h2 : z ^ (-(3/4) : ℝ) = (z ^ ((3/4) : ℝ))⁻¹ := by
+        rw [← Real.rpow_neg hzpos.le]
+      have h3 : (x / 2) ^ (-(3/4) : ℝ) = ((x / 2) ^ ((3/4) : ℝ))⁻¹ := by
+        rw [← Real.rpow_neg hx2.le]
+      rw [h2, h3]
+      exact ((inv_le_inv₀ (Real.rpow_pos_of_pos hzpos _)
+        (Real.rpow_pos_of_pos hx2 _)).mpr h1)
+    have hz40 : (0:ℝ) ≤ z ^ (-(3/4) : ℝ) := Real.rpow_nonneg hzpos.le _
+    have hstep : ‖Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)‖ * z ^ (-(3/4) : ℝ) ≤
+        (Real.Gamma (3/4) * (8 * (1 + |y|) * Real.exp (-(Real.pi / 2) * |y|))) *
+          (x / 2) ^ (-(3/4) : ℝ) :=
+      mul_le_mul hG hz4 hz40 (by positivity)
+    have hΓ4 : Real.Gamma (3/4) * 8 ≤ A := by rw [hA]; nlinarith [Real.Gamma_pos_of_pos (by norm_num : (0:ℝ) < 3/4)]
+    have hΓ40 : (0:ℝ) ≤ Real.Gamma (3/4) * 8 := by positivity
+    have h1y : (0:ℝ) < 1 + |y| := by positivity
+    have h1yle : (1 + |y|) ≤ (1 + |y|) ^ 2 := by nlinarith [abs_nonneg y]
+    have he : (0:ℝ) < Real.exp (-(Real.pi / 2) * |y|) := Real.exp_pos _
+    have hstep2 : (Real.Gamma (3/4) * (8 * (1 + |y|) * Real.exp (-(Real.pi / 2) * |y|))) *
+          (x / 2) ^ (-(3/4) : ℝ)
+        ≤ C * (Real.exp (-(Real.pi / 2) * |y|) * (1 + |y|) ^ 2) := by
+      rw [hC]
+      have h1 : Real.Gamma (3/4) * 8 * (x / 2) ^ (-(3/4) : ℝ) ≤ A * S := by
+        have : A * S = A * (x / 2) ^ (-(3/4) : ℝ) + A * ((3 * x / 2) ^ ((1/4) : ℝ)) + A * 1 := by
+          rw [hS]; ring
+        rw [this]
+        have h1' : Real.Gamma (3/4) * 8 * (x / 2) ^ (-(3/4) : ℝ) ≤ A * (x / 2) ^ (-(3/4) : ℝ) := by
+          apply mul_le_mul_of_nonneg_right hΓ4 hPC.le
+        have h2' : (0:ℝ) ≤ A * ((3 * x / 2) ^ ((1/4) : ℝ)) := by positivity
+        have h3' : (0:ℝ) ≤ A := hApos.le
+        nlinarith [h1', h2', h3']
+      calc Real.Gamma (3/4) * (8 * (1 + |y|) * Real.exp (-(Real.pi / 2) * |y|)) * (x / 2) ^ (-(3/4) : ℝ)
+          = (Real.Gamma (3/4) * 8 * (x / 2) ^ (-(3/4) : ℝ)) *
+              ((1 + |y|) * Real.exp (-(Real.pi / 2) * |y|)) := by ring
+        _ ≤ (A * S) * ((1 + |y|) * Real.exp (-(Real.pi / 2) * |y|)) := by
+            apply mul_le_mul_of_nonneg_right h1
+            positivity
+        _ ≤ (A * S) * ((1 + |y|) ^ 2 * Real.exp (-(Real.pi / 2) * |y|)) := by
+            apply mul_le_mul_of_nonneg_left _ (by positivity)
+            exact mul_le_mul_of_nonneg_right h1yle he.le
+        _ = A * S * (Real.exp (-(Real.pi / 2) * |y|) * (1 + |y|) ^ 2) := by ring
+    exact hstep.trans hstep2
+  -- differentiability in the parameter
+  have hdiff : ∀ᵐ y : ℝ, ∀ z ∈ Metric.ball x (x / 2),
+      HasDerivAt (fun z : ℝ => (z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+        Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I))
+        (-(Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+          (z : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)))) z := by
+    refine Filter.Eventually.of_forall fun y z hz => ?_
+    obtain ⟨hz1, hz2⟩ := hmem z hz
+    have hzpos : 0 < z := by linarith
+    have hr : ((((1 / 4 : ℝ)) : ℂ) - (y : ℂ) * Complex.I) ≠ 0 := by
+      intro h
+      have h' := congrArg Complex.re h
+      simp at h'
+    have hder := hasDerivAt_ofReal_cpow_const (x := z) hzpos.ne'
+      (r := (((1 / 4 : ℝ)) : ℂ) - (y : ℂ) * Complex.I) hr
+    have hmul := hder.mul_const (Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I))
+    have hd : ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) ≠ 0 := by
+      intro h
+      have h' := congrArg Complex.re h
+      simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im, Complex.neg_re, zero_mul, add_zero] at h'
+      norm_num at h'
+    have hrec := Complex.Gamma_add_one ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) hd
+    rw [show ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) + 1
+      = (((3 / 4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I by push_cast; ring] at hrec
+    refine hmul.congr_deriv ?_
+    rw [hrec]
+    rw [show ((((1 / 4 : ℝ)) : ℂ) - (y : ℂ) * Complex.I) - 1
+      = -((((3 / 4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I) by push_cast; ring]
+    rw [show ((((1 / 4 : ℝ)) : ℂ) - (y : ℂ) * Complex.I)
+      = -((((- (1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) by push_cast; ring]
+    ring
+  -- apply the parametric integral lemma
+  have hmain := (hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (μ := (volume : Measure ℝ))
+    (bound := bd)
+    (s := Metric.ball x (x / 2))
+    (F := fun z : ℝ => fun y : ℝ => (z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+      Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I))
+    (F' := fun z : ℝ => fun y : ℝ => -(Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+      (z : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I))))
+    (Metric.ball_mem_nhds x hx2)
+    (by
+      filter_upwards [Metric.ball_mem_nhds x hx2] with z hz
+      obtain ⟨hz1, hz2⟩ := hmem z hz
+      exact (continuous_mellinInv_integrand_540 z (by linarith)).aestronglyMeasurable)
+    (by
+      refine Integrable.mono' hbd_int
+        (continuous_mellinInv_integrand_540 x hx).aestronglyMeasurable ?_
+      filter_upwards [] with y
+      exact hbdF y x (Metric.mem_ball_self hx2))
+    (by
+      have hc : Continuous fun y : ℝ => -(Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+          (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I))) := by
+        have hzne : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
+        rw [continuous_iff_continuousAt]
+        intro y
+        have h1 : ContinuousAt (fun y : ℝ =>
+            (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I))) y :=
+          (continuousAt_const_cpow hzne).comp (by fun_prop)
+        have h2 : ContinuousAt (fun y : ℝ =>
+            Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)) y := by
+          refine ContinuousAt.comp ?_ (by fun_prop)
+          exact Complex.continuousAt_Gamma _ (by
+            intro m hm
+            have h' := congrArg Complex.re hm
+            simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+              Complex.I_re, Complex.I_im, Complex.natCast_re, Complex.neg_re, zero_mul,
+              add_zero] at h'
+            have hm1 : (m : ℝ) = 1/4 := by linarith
+            have h4 : ((4 * m : ℕ) : ℝ) = 1 := by push_cast; linarith
+            have h5 : 4 * m = 1 := by exact_mod_cast h4
+            omega)
+        exact (h2.mul h1).neg
+      exact hc.aestronglyMeasurable)
+    (Filter.Eventually.of_forall hbdF')
+    hbd_int hdiff).2
+  -- the value of the derivative integral
+  have hIntneg : (∫ y : ℝ, -(Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+      (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I))))
+      = -(∫ y : ℝ, Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+        (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I))) := integral_neg _
+  have h2 : (1 / (2 * Real.pi)) • (∫ y : ℝ, -(Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+      (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I))))
+      = -(((Real.exp (-x) : ℝ)) : ℂ) := by
+    have h1 : mellinInv (3 / 4) Complex.Gamma x = (1 / (2 * Real.pi)) • ∫ y : ℝ,
+        (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+          Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) := rfl
+    have hcongr : (∫ y : ℝ, Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) *
+        (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)))
+        = ∫ y : ℝ, (x : ℂ) ^ (-(((3 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+          Complex.Gamma (((3 / 4 : ℝ)) + (y : ℂ) * Complex.I) := by
+      apply integral_congr_ae
+      filter_upwards [] with y
+      simp only [smul_eq_mul, mul_comm]
+    rw [hIntneg, smul_neg, hcongr, ← h1, mellinInv_gamma_pos_540 x hx]
+  have hfin : HasDerivAt (fun z : ℝ => (1 / (2 * Real.pi)) • ∫ y : ℝ,
+      (z : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+        Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I))
+      (-(((Real.exp (-x) : ℝ)) : ℂ)) x := by
+    have hcs := hmain.const_smul (1 / (2 * Real.pi))
+    rwa [h2] at hcs
+  exact hfin
+
+private theorem hasDerivAt_mellinInv_gamma_neg_540 (x : ℝ) (hx : 0 < x) :
+    HasDerivAt (fun z : ℝ => mellinInv (-(1 / 4)) Complex.Gamma z)
+      (-(((Real.exp (-x) : ℝ)) : ℂ)) x := by
+  have h := hasDerivAt_mellinInv_gamma_neg_aux_540 x hx
+  refine h.congr_of_eventuallyEq ?_
+  filter_upwards [] with z
+  exact mellinInv_neg_quarter_asIntegral_540 z
+
+private theorem mellinInv_gamma_neg_540 (x : ℝ) (hx : 0 < x) :
+    mellinInv (-(1 / 4)) Complex.Gamma x = ((Real.exp (-x) - 1 : ℝ) : ℂ) := by
+  set Gw : ℝ → ℂ := fun z => mellinInv (-(1 / 4)) Complex.Gamma z - ((Real.exp (-z) : ℝ) : ℂ) with hGw
+  have hGderiv : ∀ t : ℝ, 0 < t → HasDerivAt Gw 0 t := by
+    intro t ht
+    have h1 := hasDerivAt_mellinInv_gamma_neg_540 t ht
+    have h3 : HasDerivAt (fun z : ℝ => Real.exp (-z)) (-(Real.exp (-t))) t := by
+      simpa only [Function.comp_def, mul_neg, mul_one] using
+        (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
+    have h2 : HasDerivAt (fun z : ℝ => ((Real.exp (-z) : ℝ) : ℂ)) (((-(Real.exp (-t))) : ℝ) : ℂ) t :=
+      h3.ofReal_comp
+    have h4 := h1.sub h2
+    have hzero : -(((Real.exp (-t) : ℝ)) : ℂ) - (((-(Real.exp (-t))) : ℝ) : ℂ) = 0 := by
+      push_cast; ring
+    rw [hzero] at h4
+    exact h4
+  have hconst : ∀ a : ℝ, 0 < a → a ≤ x → Gw x = Gw a := by
+    intro a ha hax
+    have h := intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (f := Gw) (f' := fun _ => (0:ℂ))
+      (fun t ht => hGderiv t (by
+        rw [Set.uIcc_of_le hax] at ht
+        exact lt_of_lt_of_le ha ht.1)) intervalIntegrable_const
+    rw [intervalIntegral.integral_zero] at h
+    exact sub_eq_zero.mp h.symm
+  -- norm bound near 0
+  set Cw : ℝ := (1 / (2 * Real.pi)) * (∫ y : ℝ,
+    ‖Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖) with hCw
+  have hCw0 : (0:ℝ) ≤ Cw := by
+    rw [hCw]
+    apply mul_nonneg (by positivity)
+    exact integral_nonneg (fun y => norm_nonneg _)
+  have hFa : ∀ a : ℝ, 0 < a → ‖mellinInv (-(1 / 4)) Complex.Gamma a‖ ≤ Cw * a ^ ((1/4) : ℝ) := by
+    intro a ha
+    rw [mellinInv_neg_quarter_asIntegral_540 a]
+    have hnorm : ∀ y : ℝ, ‖(a : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+        Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I)‖
+        = a ^ ((1/4) : ℝ) * ‖Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ := by
+      intro y
+      rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos ha]
+      congr 1
+      simp
+    have h2 : ‖(1 / (2 * Real.pi)) • ∫ y : ℝ, (a : ℂ) ^ (((1 / 4 : ℝ)) - (y : ℂ) * Complex.I) *
+        Complex.Gamma (((-(1 / 4) : ℝ)) + (y : ℂ) * Complex.I)‖ ≤
+        (1 / (2 * Real.pi)) * ∫ y : ℝ, a ^ ((1/4) : ℝ) *
+          ‖Complex.Gamma ((((-(1 / 4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ := by
+      rw [norm_smul, Real.norm_eq_abs, abs_of_pos (by positivity : (0:ℝ) < 1 / (2 * Real.pi))]
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      refine (norm_integral_le_integral_norm _).trans_eq ?_
+      exact integral_congr_ae (Filter.Eventually.of_forall hnorm)
+    refine h2.trans_eq ?_
+    rw [integral_const_mul, hCw]
+    ring
+  have hF0 : Tendsto (fun a : ℝ => mellinInv (-(1 / 4)) Complex.Gamma a) (𝓝[>] 0) (𝓝 0) := by
+    rw [tendsto_zero_iff_norm_tendsto_zero]
+    have hlim : Tendsto (fun a : ℝ => Cw * a ^ ((1/4) : ℝ)) (𝓝[>] 0) (𝓝 0) := by
+      have h1 : Tendsto (fun a : ℝ => a ^ ((1/4) : ℝ)) (𝓝 (0:ℝ)) (𝓝 0) := by
+        have := (Real.continuous_rpow_const (by norm_num : (0:ℝ) ≤ 1/4)).tendsto (0:ℝ)
+        simpa [Real.zero_rpow (by norm_num : (1/4 : ℝ) ≠ 0)] using this
+      simpa using (h1.const_mul Cw).mono_left nhdsWithin_le_nhds
+    refine squeeze_zero' (Eventually.of_forall fun a => norm_nonneg _) ?_ hlim
+    filter_upwards [self_mem_nhdsWithin] with a ha
+    exact hFa a ha
+  have hexp0 : Tendsto (fun a : ℝ => ((Real.exp (-a) : ℝ) : ℂ)) (𝓝[>] 0) (𝓝 ((1:ℝ) : ℂ)) := by
+    have h0 : ContinuousAt (fun a : ℝ => Real.exp (-a)) 0 :=
+      Real.continuous_exp.continuousAt.comp (by fun_prop)
+    have h1 : Tendsto (fun a : ℝ => Real.exp (-a)) (𝓝 (0:ℝ)) (𝓝 1) := by
+      simpa using h0.tendsto
+    exact (Complex.continuous_ofReal.tendsto _).comp (h1.mono_left nhdsWithin_le_nhds)
+  have hGw0 : Tendsto Gw (𝓝[>] 0) (𝓝 (-1)) := by
+    have h1 : Tendsto (fun a : ℝ => mellinInv (-(1 / 4)) Complex.Gamma a - ((Real.exp (-a) : ℝ) : ℂ))
+        (𝓝[>] 0) (𝓝 (0 - ((1:ℝ) : ℂ))) := hF0.sub hexp0
+    have h2 : (0 : ℂ) - ((1:ℝ) : ℂ) = -1 := by norm_num
+    rw [h2] at h1
+    exact h1
+  have hev : ∀ᶠ a : ℝ in 𝓝[>] 0, Gw a = Gw x := by
+    filter_upwards [self_mem_nhdsWithin,
+      (eventually_lt_nhds hx).filter_mono nhdsWithin_le_nhds] with a ha hax
+    exact (hconst a ha hax.le).symm
+  have h2 : Tendsto Gw (𝓝[>] 0) (𝓝 (Gw x)) := tendsto_const_nhds.congr' (hev.mono fun a h => h.symm)
+  have hx1 : Gw x = -1 := tendsto_nhds_unique h2 hGw0
+  have hfin : mellinInv (-(1 / 4)) Complex.Gamma x = ((Real.exp (-x) : ℝ) : ℂ) - 1 := by
+    have h' := hx1
+    rw [hGw] at h'
+    have h2 := sub_eq_iff_eq_add.mp h'
+    rw [h2]
+    ring
+  rw [hfin]
+  push_cast
+  ring
+
+/-! ## (M1) the subtracted theta function `g(x) = θ(ix) - 1 - x^{-(1 / 2)} e^{-x}` -/
+
+private theorem theta_sub_one_inv540 (x : ℝ) (hx : 0 < x) :
+    jacobiTheta (I * (x : ℂ)) - 1 =
+      ((x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) * (jacobiTheta (I * ((x⁻¹ : ℝ) : ℂ)) - 1) +
+        ((x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) - 1 := by
+  have h := theta_modular540 (x : ℂ) (by simpa using hx)
+  have hinv : ((x : ℂ))⁻¹ = ((x⁻¹ : ℝ) : ℂ) := (Complex.ofReal_inv x).symm
+  rw [hinv] at h
+  rw [h]; ring
+
+private theorem continuousAt_g_540 (x : ℝ) (hx : 0 < x) :
+    ContinuousAt (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) x := by
+  have him : (Complex.I * (x : ℂ)).im = x := by simp
+  have hd : DifferentiableAt ℂ jacobiTheta (Complex.I * (x : ℂ)) :=
+    differentiableAt_jacobiTheta (by rw [him]; exact hx)
+  have h1 : ContinuousAt (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ))) x :=
+    (hd.comp (x : ℂ) (by fun_prop)).continuousAt.comp (by fun_prop)
+  have h2 : ContinuousAt (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) x :=
+    (continuousAt_cpow_const (ofReal_mem_slitPlane.2 hx)).comp
+      (Complex.continuous_ofReal.continuousAt)
+  have h3 : ContinuousAt (fun t : ℝ => ((Real.exp (-t) : ℝ) : ℂ)) x := by fun_prop
+  exact ((h1.sub continuousAt_const).sub (h2.mul h3))
+
+
+/-- `g` is bounded near `0⁺`. -/
+private theorem g_bounded_zero_540 :
+    ∀ᶠ t : ℝ in 𝓝[>] 0,
+      ‖jacobiTheta (Complex.I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        ((Real.exp (-t) : ℝ) : ℂ)‖ ≤ 3 := by
+  obtain ⟨C, hC, htop⟩ := Asymptotics.isBigO_iff'.mp theta_raw_bounds540'.1
+  have hCpos : (0:ℝ) < C := hC
+  have hC1 : (0:ℝ) < C + 1 := by linarith
+  have hinv := tendsto_inv_nhdsGT_zero.eventually htop
+  filter_upwards [hinv, self_mem_nhdsWithin,
+    (eventually_lt_nhds (show (0:ℝ) < min 1 (1 / (C + 1)) by positivity)).filter_mono
+      nhdsWithin_le_nhds] with t ht hx hx2
+  have htp : 0 < t := hx
+  have hx1 : t < 1 := lt_of_lt_of_le hx2 (min_le_left _ _)
+  have hx3 : t < 1 / (C + 1) := lt_of_lt_of_le hx2 (min_le_right _ _)
+  have hCt : C * t ≤ 1 := by
+    have h3 : t * (C + 1) < 1 := (lt_div_iff₀ hC1).mp hx3
+    nlinarith
+  have ht12 : t ^ ((1/2) : ℝ) ≤ 1 := by
+    have h := Real.rpow_le_rpow_of_exponent_ge htp hx1.le (show (0:ℝ) ≤ (1/2) by norm_num)
+    rwa [Real.rpow_zero] at h
+  -- the modular term
+  have hb' : ‖jacobiTheta (Complex.I * ((t⁻¹ : ℝ) : ℂ)) - 1‖ ≤ C * t ^ (2 : ℝ) := by
+    have h1 := ht
+    have hnorm : ‖((t⁻¹ : ℝ) ^ (-(2 : ℝ)))‖ = t ^ (2 : ℝ) := by
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (inv_nonneg.mpr htp.le) _),
+        Real.inv_rpow htp.le, ← Real.rpow_neg htp.le, neg_neg]
+    rwa [hnorm] at h1
+  have hdec : ‖((t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) *
+      (jacobiTheta (I * ((t⁻¹ : ℝ) : ℂ)) - 1)‖ ≤ 1 := by
+    rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos htp]
+    simp only [Complex.sub_re, Complex.ofReal_re, Complex.neg_re, Complex.one_re]
+    have h1 : t ^ (-(1/2) : ℝ) * t ^ (2 : ℝ) = t ^ ((3/2) : ℝ) := by
+      rw [← Real.rpow_add htp]; norm_num
+    have h1' : t ^ ((3/2) : ℝ) = t * t ^ ((1/2) : ℝ) := by
+      calc t ^ ((3/2) : ℝ) = t ^ ((1:ℝ) + (1/2)) := by norm_num
+        _ = t ^ (1:ℝ) * t ^ ((1/2) : ℝ) := Real.rpow_add htp 1 (1/2)
+        _ = t * t ^ ((1/2) : ℝ) := by rw [Real.rpow_one]
+    have hkey : t ^ (-(1/2) : ℝ) * (C * t ^ (2 : ℝ)) = (C * t) * t ^ ((1/2) : ℝ) := by
+      have h2 : t ^ (-(1/2) : ℝ) * (C * t ^ (2 : ℝ))
+          = C * (t ^ (-(1/2) : ℝ) * t ^ (2 : ℝ)) := by ring
+      rw [h2, h1, h1']; ring
+    calc t ^ (-(1/2) : ℝ) * ‖jacobiTheta (I * ((t⁻¹ : ℝ) : ℂ)) - 1‖
+        ≤ t ^ (-(1/2) : ℝ) * (C * t ^ (2 : ℝ)) :=
+          mul_le_mul_of_nonneg_left hb' (Real.rpow_nonneg htp.le _)
+      _ = (C * t) * t ^ ((1/2) : ℝ) := hkey
+      _ ≤ 1 * 1 := mul_le_mul hCt ht12 (Real.rpow_nonneg htp.le _) (by norm_num)
+      _ = 1 := by norm_num
+  -- the remaining terms
+  have hrest : ‖((t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)‖ ≤ 2 := by
+    have hcast : (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)
+        = (((t ^ (-(1 / 2) : ℝ) * Real.exp (-t) : ℝ)) : ℂ) := by
+      rw [Complex.ofReal_mul, ← Complex.ofReal_cpow htp.le]
+    have hre : ((t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) = (((t ^ (-(1 / 2) : ℝ) : ℝ)) : ℂ) := by
+      rw [← Complex.ofReal_cpow htp.le]
+    rw [hcast, hre, ← Complex.ofReal_one, ← Complex.ofReal_sub, ← Complex.ofReal_sub,
+      Complex.norm_real, Real.norm_eq_abs]
+    have hone : 1 - Real.exp (-t) ≤ t := by
+      have h := Real.add_one_le_exp (-t)
+      linarith
+    have hone0 : 0 ≤ 1 - Real.exp (-t) := by
+      have h := Real.exp_le_one_iff.mpr (by linarith : -t ≤ 0)
+      linarith
+    have hs0 : 0 ≤ t ^ (-(1 / 2) : ℝ) * (1 - Real.exp (-t)) :=
+      mul_nonneg (Real.rpow_nonneg htp.le _) hone0
+    have hs1 : t ^ (-(1 / 2) : ℝ) * (1 - Real.exp (-t)) ≤ 1 := by
+      have h1 : t ^ (-(1 / 2) : ℝ) * (1 - Real.exp (-t)) ≤ t ^ (-(1 / 2) : ℝ) * t :=
+        mul_le_mul_of_nonneg_left hone (Real.rpow_nonneg htp.le _)
+      have h2 : t ^ (-(1 / 2) : ℝ) * t = t ^ ((1/2) : ℝ) := by
+        calc t ^ (-(1 / 2) : ℝ) * t = t ^ (-(1 / 2) : ℝ) * t ^ (1:ℝ) := by
+              rw [Real.rpow_one]
+          _ = t ^ (-(1 / 2) + 1 : ℝ) := by rw [Real.rpow_add htp]
+          _ = t ^ ((1/2) : ℝ) := by norm_num
+      rw [h2] at h1; linarith
+    have heq : t ^ (-(1 / 2) : ℝ) - 1 - t ^ (-(1 / 2) : ℝ) * Real.exp (-t)
+        = -(1 - t ^ (-(1 / 2) : ℝ) * (1 - Real.exp (-t))) := by ring
+    rw [heq, abs_neg]
+    have hnn : (0:ℝ) ≤ 1 - t ^ (-(1 / 2) : ℝ) * (1 - Real.exp (-t)) := by linarith
+    rw [abs_of_nonneg hnn]
+    linarith
+  have hsplit : jacobiTheta (I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        ((Real.exp (-t) : ℝ) : ℂ)
+      = ((t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) * (jacobiTheta (I * ((t⁻¹ : ℝ) : ℂ)) - 1) +
+        (((t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) - 1 -
+          (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) := by
+    rw [theta_sub_one_inv540 t htp]; ring
+  rw [hsplit]
+  exact le_trans (norm_add_le _ _) (by linarith)
+
+/-- `g` is `O(x^{-(1 / 2)})` at infinity. -/
+private theorem g_isBigO_top_540 :
+    (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+      ((Real.exp (-t) : ℝ) : ℂ)) =O[atTop] (fun t : ℝ => t ^ (-(1 / 2 : ℝ))) := by
+  obtain ⟨C, hC, htop⟩ := Asymptotics.isBigO_iff'.mp theta_raw_bounds540'.1
+  have hCpos : (0:ℝ) < C := hC
+  refine Asymptotics.isBigO_iff.mpr ⟨C + 1, ?_⟩
+  filter_upwards [htop, eventually_ge_atTop (1:ℝ)] with t ht hx
+  have htp : 0 < t := by linarith
+  have hle : t ^ (-(2 : ℝ)) ≤ t ^ (-(1/2 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le hx (by norm_num)
+  have hnorm : ‖t ^ (-(2 : ℝ))‖ = t ^ (-(2 : ℝ)) := by
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg htp.le _)]
+  have h1 : ‖jacobiTheta (I * (t : ℂ)) - 1‖ ≤ C * t ^ (-(2 : ℝ)) := by
+    rw [hnorm] at ht; exact ht
+  have h2 : ‖(t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)‖ ≤ t ^ (-(1/2 : ℝ)) := by
+    rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos htp, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+    simp only [Complex.ofReal_re]
+    have h4 : Real.exp (-t) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
+    have h5 : t ^ (-(1/2) : ℝ) * Real.exp (-t) ≤ t ^ (-(1/2) : ℝ) * 1 :=
+      mul_le_mul_of_nonneg_left h4 (Real.rpow_nonneg htp.le _)
+    linarith
+  have hsplit : jacobiTheta (I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        ((Real.exp (-t) : ℝ) : ℂ)
+      = (jacobiTheta (I * (t : ℂ)) - 1) -
+        (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ) := rfl
+  rw [hsplit]
+  simp only [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg htp.le _)]
+  calc ‖(jacobiTheta (I * (t : ℂ)) - 1) - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        ((Real.exp (-t) : ℝ) : ℂ)‖
+      ≤ ‖jacobiTheta (I * (t : ℂ)) - 1‖ + ‖(t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        ((Real.exp (-t) : ℝ) : ℂ)‖ := norm_sub_le _ _
+    _ ≤ C * t ^ (-(2 : ℝ)) + t ^ (-(1/2 : ℝ)) := by linarith
+    _ ≤ C * t ^ (-(1/2 : ℝ)) + 1 * t ^ (-(1/2 : ℝ)) := by
+        have h5 : C * t ^ (-(2 : ℝ)) ≤ C * t ^ (-(1/2 : ℝ)) :=
+          mul_le_mul_of_nonneg_left hle hCpos.le
+        linarith
+    _ = (C + 1) * t ^ (-(1/2 : ℝ)) := by ring
+
+/-- The Mellin transform of `g` converges at `1/4`. -/
+private theorem mellinConvergent_g_540 :
+    MellinConvergent (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) ((1/4 : ℝ) : ℂ) := by
+  have hcont : ContinuousOn (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) (Set.Ioi 0) :=
+    fun x hx => (continuousAt_g_540 x hx).continuousWithinAt
+  have hbot : (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))
+      =O[𝓝[>] 0] (fun t : ℝ => t ^ (-(0 : ℝ))) := by
+    refine Asymptotics.IsBigO.of_bound 3 ?_
+    filter_upwards [g_bounded_zero_540] with t ht
+    simpa using ht
+  exact mellinConvergent_of_isBigO_rpow (s := ((1/4 : ℝ) : ℂ)) (a := 1/2) (b := 0)
+    (hcont.locallyIntegrableOn measurableSet_Ioi) g_isBigO_top_540 (by norm_num)
+    hbot (by norm_num)
+
+/-! ## (M2) `mellin g w = 2Λ(2w) - Γ(w-1/2)` on the strip, away from the pole -/
+
+private theorem mellin_theta_sub_one_540 (w : ℂ) (hw : 1 / 2 < w.re) :
+    mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1) w =
+      2 * completedRiemannZeta (2 * w) := by
+  have h := completedZeta_theta_mellin540 w hw
+  rw [h]; ring
+
+/-- `x ↦ x^{-1/2} e^{-x}` is continuous on `(0,∞)`. -/
+private theorem continuousOn_rpow_exp_540 :
+    ContinuousOn (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+      ((Real.exp (-t) : ℝ) : ℂ)) (Set.Ioi 0) := by
+  intro x hx
+  have h2 : ContinuousAt (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ)) x :=
+    (continuousAt_cpow_const (ofReal_mem_slitPlane.2 hx)).comp
+      (Complex.continuous_ofReal.continuousAt)
+  exact (h2.mul (by fun_prop)).continuousWithinAt
+
+private theorem isBigO_rpow_exp_bot_540 :
+    (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))
+      =O[𝓝[>] 0] (fun t : ℝ => t ^ (-(1 / 2 : ℝ))) := by
+  refine Asymptotics.IsBigO.of_bound 1 ?_
+  filter_upwards [self_mem_nhdsWithin] with t ht
+  have htp : 0 < t := ht
+  rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos htp, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+  simp only [Complex.ofReal_re]
+  have h4 : Real.exp (-t) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
+  have h5 : t ^ (-(1 / 2) : ℝ) * Real.exp (-t) ≤ t ^ (-(1 / 2) : ℝ) * 1 :=
+    mul_le_mul_of_nonneg_left h4 (Real.rpow_nonneg htp.le _)
+  have h6 : (1:ℝ) * t ^ (-(1 / 2) : ℝ) = t ^ (-(1 / 2) : ℝ) := one_mul _
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg htp.le _), h6]
+  linarith
+
+private theorem isBigO_rpow_exp_top_540 :
+    (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))
+      =O[atTop] (fun t : ℝ => t ^ (-(3 / 2 : ℝ))) := by
+  refine Asymptotics.IsBigO.of_bound 1 ?_
+  filter_upwards [eventually_ge_atTop (1:ℝ)] with t ht
+  have htp : 0 < t := by linarith
+  rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos htp, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+  simp only [Complex.ofReal_re]
+  have hexp : Real.exp (-t) ≤ t⁻¹ := by
+    rw [Real.exp_neg]
+    exact (inv_le_inv₀ (Real.exp_pos t) htp).mpr (by linarith [Real.add_one_le_exp t])
+  have hstep : t ^ (-(1 / 2) : ℝ) * Real.exp (-t) ≤ t ^ (-(1 / 2) : ℝ) * t⁻¹ :=
+    mul_le_mul_of_nonneg_left hexp (Real.rpow_nonneg htp.le _)
+  have heq : t ^ (-(1 / 2) : ℝ) * t⁻¹ = t ^ (-(3 / 2 : ℝ)) := by
+    rw [← Real.rpow_neg_one, ← Real.rpow_add htp]; norm_num
+  have hfin : t ^ (-(1 / 2) : ℝ) * Real.exp (-t) ≤ t ^ (-(3 / 2) : ℝ) :=
+    hstep.trans_eq heq
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg htp.le _)]
+  calc t ^ (-(1 / 2) : ℝ) * Real.exp (-t) ≤ t ^ (-(3 / 2) : ℝ) := hfin
+    _ = 1 * t ^ (-(3 / 2) : ℝ) := by ring
+
+/-- `mellin (x ↦ x^{-1/2} e^{-x}) w = Γ (w - 1/2)` for `Re w > 1/2`. -/
+private theorem mellin_rpow_exp_540 (w : ℂ) (hw : 1 / 2 < w.re) :
+    mellin (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) w =
+      Complex.Gamma (w - 1 / 2) := by
+  have h1 : (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))
+      = (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) • ((Real.exp (-t) : ℝ) : ℂ)) := rfl
+  rw [h1, mellin_cpow_smul]
+  have hre : (w + ((-(1 / 2) : ℝ) : ℂ)).re = w.re - 1/2 := by
+    simp only [Complex.add_re, Complex.ofReal_re]
+    ring
+  rw [mellin_exp_neg_eq_gamma_540 _ (by rw [hre]; linarith)]
+  congr 1
+  push_cast
+  ring
+
+private theorem mellin_g_right_540 (w : ℂ) (hw1 : 1 / 2 < w.re) (hw2 : w.re < 3 / 2) :
+    mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+      ((Real.exp (-t) : ℝ) : ℂ)) w = 2 * completedRiemannZeta (2 * w) - Complex.Gamma (w - 1/2) := by
+  have hcont : ContinuousOn (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1) (Set.Ioi 0) := by
+    intro x hx
+    have him : (Complex.I * (x : ℂ)).im = x := by simp
+    have hd : DifferentiableAt ℂ jacobiTheta (Complex.I * (x : ℂ)) :=
+      differentiableAt_jacobiTheta (by rw [him]; exact hx)
+    exact (((hd.comp (x : ℂ) (by fun_prop)).continuousAt.comp (by fun_prop)).sub
+      continuousAt_const).continuousWithinAt
+  have hi1 : IntegrableOn (fun t : ℝ => (t : ℂ) ^ (w - 1) •
+      (jacobiTheta (Complex.I * (t : ℂ)) - 1)) (Set.Ioi 0) :=
+    mellinConvergent_of_isBigO_rpow (s := w) (a := 2) (b := 1/2)
+      (hcont.locallyIntegrableOn measurableSet_Ioi) theta_raw_bounds540'.1
+      (by linarith : w.re < 2) theta_raw_bounds540'.2 hw1
+  have hconv : MellinConvergent (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+      ((Real.exp (-t) : ℝ) : ℂ)) w :=
+    mellinConvergent_of_isBigO_rpow (s := w) (a := 3/2) (b := 1/2)
+      (continuousOn_rpow_exp_540.locallyIntegrableOn measurableSet_Ioi)
+      isBigO_rpow_exp_top_540 hw2 isBigO_rpow_exp_bot_540 hw1
+  have hi2 : IntegrableOn (fun t : ℝ => (t : ℂ) ^ (w - 1) *
+      ((t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))) (Set.Ioi 0) := by
+    have h := hconv
+    simp only [MellinConvergent, smul_eq_mul] at h
+    exact h
+  have hsub : mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) w
+      = mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1) w -
+        mellin (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) w := by
+    rw [mellin, mellin, mellin, ← integral_sub]
+    · apply setIntegral_congr_fun measurableSet_Ioi
+      intro t ht
+      simp only [smul_eq_mul, Pi.sub_apply]
+      ring
+    · exact hi1
+    · exact hi2
+  rw [hsub, mellin_theta_sub_one_540 w hw1, mellin_rpow_exp_540 w hw1]
+
+/-! ## (M2b) the identity at `Re w = 1/4`, for `Im w ≠ 0` -/
+
+/-- `g` is `O(x^{-3/2})` at infinity. -/
+private theorem g_isBigO_top_three_halves_540 :
+    (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+      ((Real.exp (-t) : ℝ) : ℂ)) =O[atTop] (fun t : ℝ => t ^ (-(3 / 2 : ℝ))) := by
+  have h1 : (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1)
+      =O[atTop] (fun t : ℝ => t ^ (-(3 / 2 : ℝ))) := by
+    obtain ⟨C, hC, htop⟩ := Asymptotics.isBigO_iff'.mp theta_raw_bounds540'.1
+    refine Asymptotics.IsBigO.of_bound C ?_
+    filter_upwards [htop, eventually_ge_atTop (1:ℝ)] with t ht hx
+    have htp : 0 < t := by linarith
+    have hn2 : ‖t ^ (-(2:ℝ))‖ = t ^ (-(2:ℝ)) := by
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg htp.le _)]
+    have hn3 : ‖t ^ (-(3/2):ℝ)‖ = t ^ (-(3/2):ℝ) := by
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg htp.le _)]
+    rw [hn2] at ht
+    rw [hn3]
+    calc ‖jacobiTheta (Complex.I * (t : ℂ)) - 1‖ ≤ C * t ^ (-(2:ℝ)) := ht
+      _ ≤ C * t ^ (-(3/2) : ℝ) := by
+          apply mul_le_mul_of_nonneg_left _ hC.le
+          exact Real.rpow_le_rpow_of_exponent_le hx (by norm_num : (-2:ℝ) ≤ -(3/2))
+  have h2 : (fun t : ℝ => (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))
+      =O[atTop] (fun t : ℝ => t ^ (-(3 / 2 : ℝ))) := isBigO_rpow_exp_top_540
+  have hsplit : (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        ((Real.exp (-t) : ℝ) : ℂ))
+      = (fun t : ℝ => (jacobiTheta (Complex.I * (t : ℂ)) - 1) -
+        (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) := rfl
+  rw [hsplit]
+  exact h1.sub h2
+
+private theorem g_isBigO_bot_zero_540 :
+    (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+      ((Real.exp (-t) : ℝ) : ℂ)) =O[𝓝[>] 0] (fun t : ℝ => t ^ (-(0 : ℝ))) := by
+  refine Asymptotics.IsBigO.of_bound 3 ?_
+  filter_upwards [g_bounded_zero_540] with t ht
+  simpa using ht
+
+/-- `g` is continuous on `(0,∞)`. -/
+private theorem continuousOn_g_540 :
+    ContinuousOn (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) (Set.Ioi 0) :=
+  fun x hx => (continuousAt_g_540 x hx).continuousWithinAt
+
+/-- The Mellin identity of `g` on the line `Re w = 1/4`, away from the real axis. -/
+private theorem mellin_g_quarter_540 (y : ℝ) (hy : y ≠ 0) :
+    mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 - (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+      ((Real.exp (-t) : ℝ) : ℂ)) (((1/4 : ℝ)) + (y : ℂ) * Complex.I)
+      = 2 * completedRiemannZeta (2 * ((((1/4 : ℝ)) + (y : ℂ) * Complex.I))) -
+        Complex.Gamma (((((1/4 : ℝ)) + (y : ℂ) * Complex.I)) - 1/2) := by
+  set r : ℝ := |y| / 2 with hr
+  have hrpos : 0 < r := by
+    rw [hr]; exact half_pos (abs_pos.mpr hy)
+  set Ω : Set ℂ := Complex.reCLM ⁻¹' Set.Ioo ((1/8 : ℝ)) ((5/4 : ℝ)) ∩
+    Complex.imCLM ⁻¹' Metric.ball y r with hΩ
+  have hΩopen : IsOpen Ω := (isOpen_Ioo.preimage Complex.continuous_re).inter
+    (Metric.isOpen_ball.preimage Complex.continuous_im)
+  have hΩconv : Convex ℝ Ω :=
+    ((convex_Ioo _ _).linear_preimage Complex.reCLM.toLinearMap).inter
+      ((convex_ball y r).linear_preimage Complex.imCLM.toLinearMap)
+  have hval : ∀ z ∈ Ω, (1/8 : ℝ) < z.re ∧ z.re < 5/4 ∧ |z.im - y| < r := by
+    intro z hz
+    rw [hΩ, Set.mem_inter_iff, Set.mem_preimage, Set.mem_preimage, Complex.reCLM_apply,
+      Complex.imCLM_apply, Set.mem_Ioo, Metric.mem_ball, Real.dist_eq] at hz
+    exact ⟨hz.1.1, hz.1.2, hz.2⟩
+  have hzene : ∀ z ∈ Ω, z.im ≠ 0 := by
+    intro z hz h0
+    obtain ⟨-, -, hb⟩ := hval z hz
+    rw [h0, zero_sub, abs_neg] at hb
+    rw [hr] at hb
+    linarith [abs_pos.mpr hy]
+  have hw : (((1/4 : ℝ)) + (y : ℂ) * Complex.I) ∈ Ω := by
+    rw [hΩ, Set.mem_inter_iff, Set.mem_preimage, Set.mem_preimage, Complex.reCLM_apply,
+      Complex.imCLM_apply, Set.mem_Ioo, Metric.mem_ball, Real.dist_eq]
+    refine ⟨⟨by norm_num, by norm_num⟩, ?_⟩
+    have him : (((1/4 : ℝ)) + (y : ℂ) * Complex.I).im = y := by simp
+    rw [him, hr, sub_self, abs_zero]
+    exact hrpos
+  have hw₁ : (((1:ℝ)) + (y : ℂ) * Complex.I) ∈ Ω := by
+    rw [hΩ, Set.mem_inter_iff, Set.mem_preimage, Set.mem_preimage, Complex.reCLM_apply,
+      Complex.imCLM_apply, Set.mem_Ioo, Metric.mem_ball, Real.dist_eq]
+    refine ⟨⟨by norm_num, by norm_num⟩, ?_⟩
+    have him : (((1:ℝ)) + (y : ℂ) * Complex.I).im = y := by simp
+    rw [him, hr, sub_self, abs_zero]
+    exact hrpos
+  have hM : DifferentiableOn ℂ (mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))) Ω := by
+    intro z hz
+    obtain ⟨hz1, hz2, -⟩ := hval z hz
+    exact (mellin_differentiableAt_of_isBigO_rpow
+      (continuousOn_g_540.locallyIntegrableOn measurableSet_Ioi)
+      g_isBigO_top_three_halves_540 (by linarith : z.re < 3/2) g_isBigO_bot_zero_540
+      (by linarith : 0 < z.re)).differentiableWithinAt
+  have hF : DifferentiableOn ℂ (fun z : ℂ => 2 * completedRiemannZeta (2 * z) -
+      Complex.Gamma (z - 1/2)) Ω := by
+    intro z hz
+    obtain ⟨hz1, hz2, -⟩ := hval z hz
+    have hzne : z.im ≠ 0 := hzene z hz
+    have hz0 : z ≠ 0 := by intro h; exact hzne (by rw [h]; simp)
+    have hs : 2 * z ≠ 0 := mul_ne_zero (by norm_num) hz0
+    have hs1 : 2 * z ≠ 1 := by
+      intro h
+      have hz : z = 1/2 := by
+        have h2 : (2:ℂ) * z = 2 * (1/2) := by rw [h]; norm_num
+        exact mul_left_cancel₀ (by norm_num : (2:ℂ) ≠ 0) h2
+      exact hzne (by rw [hz]; norm_num)
+    have hΛ : DifferentiableAt ℂ (fun z : ℂ => 2 * completedRiemannZeta (2 * z)) z := by
+      have h0 : DifferentiableAt ℂ completedRiemannZeta (2 * z) :=
+        differentiableAt_completedZeta hs hs1
+      exact (h0.comp z (by fun_prop)).const_mul 2
+    have hΓ : DifferentiableAt ℂ (fun z : ℂ => Complex.Gamma (z - 1/2)) z := by
+      refine (Complex.differentiableAt_Gamma _ ?_).comp z (by fun_prop)
+      intro m hm
+      have h' := congrArg Complex.im hm
+      simp only [Complex.sub_im, Complex.neg_im, Complex.natCast_im] at h'
+      have h2 : ((1/2 : ℂ)).im = 0 := by norm_num
+      exact hzne (by linarith)
+    exact (hΛ.sub hΓ).differentiableWithinAt
+  have hnear : mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))
+      =ᶠ[𝓝 (((1:ℝ)) + (y : ℂ) * Complex.I)]
+      (fun z : ℂ => 2 * completedRiemannZeta (2 * z) - Complex.Gamma (z - 1/2)) := by
+    have hre1 : ((((1:ℝ)) + (y : ℂ) * Complex.I)).re = 1 := by simp
+    filter_upwards [(isOpen_lt continuous_const Complex.continuous_re).mem_nhds
+        (show ((1/2 : ℝ)) < ((((1:ℝ)) + (y : ℂ) * Complex.I)).re by rw [hre1]; norm_num),
+      (isOpen_lt Complex.continuous_re continuous_const).mem_nhds
+        (show ((((1:ℝ)) + (y : ℂ) * Complex.I)).re < ((3/2 : ℝ)) by rw [hre1]; norm_num)]
+      with z hz1 hz2
+    exact mellin_g_right_540 z hz1 hz2
+  exact (hM.analyticOnNhd hΩopen).eqOn_of_preconnected_of_eventuallyEq
+    (hF.analyticOnNhd hΩopen) hΩconv.isPreconnected hw₁ hnear hw
+
+/-! ## (M3) `VerticalIntegrable (mellin g) (1/4)` -/
+
+private theorem continuous_lambda_half_540 (y : ℝ) :
+    ContinuousAt (fun s : ℝ =>
+      completedRiemannZeta ((1/2 : ℂ) + ((2 * s : ℝ) : ℂ) * Complex.I)) y := by
+  have hpt : (1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I ≠ 0 := by
+    intro h
+    have h' := congrArg Complex.re h
+    simp at h'
+  have hpt1 : (1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I ≠ 1 := by
+    intro h
+    have h' := congrArg Complex.re h
+    simp at h'
+  have hΛ : ContinuousAt completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I) :=
+    (differentiableAt_completedZeta hpt hpt1).continuousAt
+  have h2 : ContinuousAt (fun s : ℝ => (1/2 : ℂ) + ((2 * s : ℝ) : ℂ) * Complex.I) y := by
+    fun_prop
+  exact hΛ.tendsto.comp h2.tendsto
+
+private theorem continuous_gamma_neg_quarter_540 (y : ℝ) :
+    ContinuousAt (fun s : ℝ =>
+      Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (s : ℂ) * Complex.I)) y := by
+  have hΓ : ContinuousAt Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) := by
+    refine Complex.continuousAt_Gamma _ (by
+      intro m hm
+      have h' := congrArg Complex.re hm
+      simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im, Complex.natCast_re, Complex.neg_re, zero_mul, add_zero] at h'
+      have hm1 : (m : ℝ) = 1/4 := by linarith
+      have h4 : ((4 * m : ℕ) : ℝ) = 1 := by push_cast; linarith
+      have h5 : 4 * m = 1 := by exact_mod_cast h4
+      omega)
+  have h2 : ContinuousAt (fun s : ℝ => ((((-(1/4) : ℝ)) : ℂ) + (s : ℂ) * Complex.I)) y := by
+    fun_prop
+  exact hΓ.tendsto.comp h2.tendsto
+
+private theorem continuous_cpow_quarter_540 (x : ℝ) (hx : 0 < x) :
+    Continuous fun y : ℝ => (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) := by
+  have hxne : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
+  rw [continuous_iff_continuousAt]
+  intro y
+  exact (continuousAt_const_cpow hxne).comp (by fun_prop)
+
+private theorem norm_cpow_quarter_540 (x : ℝ) (hx : 0 < x) (y : ℝ) :
+    ‖(x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I))‖ = x ^ (-(1/4) : ℝ) := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos hx]
+  congr 1
+  simp
+
+private theorem integrable_weighted_lambda_540 (x : ℝ) (hx : 0 < x) :
+    Integrable (fun y : ℝ => (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+      (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) := by
+  have hbase : Integrable (fun y : ℝ =>
+      2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) :=
+    integrable_half_line_540.const_mul (2:ℂ)
+  refine Integrable.congr (hbase.bdd_mul (continuous_cpow_quarter_540 x hx).aestronglyMeasurable
+    (Filter.Eventually.of_forall fun y => le_of_eq (norm_cpow_quarter_540 x hx y))) ?_
+  filter_upwards [] with y
+  exact (smul_eq_mul _ _).symm
+
+private theorem integrable_weighted_gamma_540 (x : ℝ) (hx : 0 < x) :
+    Integrable (fun y : ℝ => (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+      Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) :=
+  Integrable.congr (integrable_gamma_neg_quarter_540.bdd_mul
+    (continuous_cpow_quarter_540 x hx).aestronglyMeasurable
+    (Filter.Eventually.of_forall fun y => le_of_eq (norm_cpow_quarter_540 x hx y)))
+    (Filter.Eventually.of_forall fun y => (smul_eq_mul _ _).symm)
+
+set_option maxHeartbeats 1000000 in
+private theorem verticalIntegrable_mellin_g_540 :
+    Complex.VerticalIntegrable (mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))) (1/4) := by
+  have hne : ∀ᵐ y : ℝ, y ≠ 0 := by
+    rw [MeasureTheory.ae_iff]
+    simp
+  have h1 : Integrable (fun y : ℝ => 2 * completedRiemannZeta
+      (2 * (((1/4 : ℝ)) + (y : ℂ) * Complex.I))) := by
+    have h0 : Integrable (fun y : ℝ =>
+        2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) :=
+      integrable_half_line_540.const_mul (2:ℂ)
+    refine h0.congr (Filter.Eventually.of_forall fun y => ?_)
+    beta_reduce
+    rw [show 2 * (((1/4 : ℝ)) + (y : ℂ) * Complex.I) =
+      (1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I by push_cast; ring]
+  have h2 : Integrable (fun y : ℝ =>
+      Complex.Gamma ((((1/4 : ℝ)) + (y : ℂ) * Complex.I) - 1/2)) := by
+    refine integrable_gamma_neg_quarter_540.congr (Filter.Eventually.of_forall fun y => ?_)
+    beta_reduce
+    rw [show ((((1/4 : ℝ)) + (y : ℂ) * Complex.I) - 1/2) =
+      ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) by push_cast; ring]
+  have hRHS : Integrable (fun y : ℝ => 2 * completedRiemannZeta
+      (2 * (((1/4 : ℝ)) + (y : ℂ) * Complex.I)) -
+      Complex.Gamma ((((1/4 : ℝ)) + (y : ℂ) * Complex.I) - 1/2)) := h1.sub h2
+  show Integrable (fun y : ℝ => mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+    (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) ((1/4 : ℝ) + y * Complex.I))
+  refine hRHS.congr ?_
+  filter_upwards [hne] with y hy
+  exact (mellin_g_quarter_540 y hy).symm
+
+/-! ## (M4) the inversion at `σ = 1/4` -/
+
+set_option maxHeartbeats 1000000 in
+private theorem star_eq_540 (x : ℝ) (hx : 0 < x) :
+    (1 / (2 * Real.pi)) • (∫ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+      (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+      = (jacobiTheta (Complex.I * (x : ℂ)) - 1) - (x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) := by
+  have hne : ∀ᵐ y : ℝ, y ≠ 0 := by
+    rw [MeasureTheory.ae_iff]
+    simp
+  have hxne : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
+  have hWs : Integrable (fun y : ℝ => (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+      (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) :=
+    integrable_weighted_lambda_540 x hx
+  have hWg : Integrable (fun y : ℝ => (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+      Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) :=
+    integrable_weighted_gamma_540 x hx
+  have hpt : ∀ᵐ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+        mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+          (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) ((1/4 : ℝ) + y * Complex.I)
+      = (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) -
+        (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+          Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) := by
+    filter_upwards [hne] with y hy
+    rw [mellin_g_quarter_540 y hy]
+    rw [show 2 * (((1/4 : ℝ)) + (y : ℂ) * Complex.I) =
+        (1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I by push_cast; ring,
+      show ((((1/4 : ℝ)) + (y : ℂ) * Complex.I) - 1/2) =
+        ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) by push_cast; ring,
+      smul_sub]
+  have hinv := mellinInv_mellin_eq (1/4) (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ)) hx
+      mellinConvergent_g_540 verticalIntegrable_mellin_g_540 (continuousAt_g_540 x hx)
+  have hexp : mellinInv (1/4) (mellin (fun t : ℝ => jacobiTheta (Complex.I * (t : ℂ)) - 1 -
+      (t : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-t) : ℝ) : ℂ))) x
+      = (1 / (2 * Real.pi)) • ((∫ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) -
+        ∫ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+          Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) := by
+    simp only [mellinInv]
+    rw [integral_congr_ae hpt, integral_sub hWs hWg]
+  rw [hexp, smul_sub] at hinv
+  have hfac : ∀ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I))
+      = (x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        (x : ℂ) ^ (-(((-(1/4) : ℝ)) + (y : ℂ) * Complex.I)) := by
+    intro y
+    rw [← Complex.cpow_add _ _ hxne]
+    congr 1
+    push_cast
+    ring
+  have hv : mellinInv (-(1/4)) Complex.Gamma x = (1 / (2 * Real.pi)) •
+      ∫ y : ℝ, (x : ℂ) ^ (-(((-(1/4) : ℝ)) + (y : ℂ) * Complex.I)) •
+        Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I) := rfl
+  have hI : (∫ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+        Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I))
+      = (x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) *
+        (∫ y : ℝ, (x : ℂ) ^ (-(((-(1/4) : ℝ)) + (y : ℂ) * Complex.I)) •
+          Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) := by
+    rw [← integral_const_mul]
+    apply integral_congr_ae
+    filter_upwards [] with y
+    rw [hfac y, smul_eq_mul]
+    ring
+  have hB : (1 / (2 * Real.pi)) • (∫ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+      Complex.Gamma ((((-(1/4) : ℝ)) : ℂ) + (y : ℂ) * Complex.I))
+      = (x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * mellinInv (-(1/4)) Complex.Gamma x := by
+    rw [hI, hv, Complex.real_smul, Complex.real_smul]
+    ring
+  rw [hB, mellinInv_gamma_neg_540 x hx] at hinv
+  have hgoal : (1 / (2 * Real.pi)) • (∫ y : ℝ, (x : ℂ) ^ (-(((1 / 4 : ℝ)) + (y : ℂ) * Complex.I)) •
+      (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+      = (jacobiTheta (Complex.I * (x : ℂ)) - 1 -
+          (x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-x) : ℝ) : ℂ)) +
+        (x : ℂ) ^ ((-(1 / 2) : ℝ) : ℂ) * ((Real.exp (-x) - 1 : ℝ) : ℂ) := by
+    rw [← hinv]
+    ring
+  rw [hgoal]
+  push_cast
+  ring
+
+/-! ## (M5) the `α`-parametrised contour integral is holomorphic on `|Re α| < π/2` -/
+
+private theorem continuous_P_integrand_540 (β : ℂ) :
+    Continuous fun y : ℝ => Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+      (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) := by
+  rw [continuous_iff_continuousAt]
+  intro y
+  exact ((by fun_prop : ContinuousAt (fun y : ℝ =>
+    Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))) y)).mul
+    ((continuous_lambda_half_540 y).const_mul 2)
+
+private theorem continuous_P_deriv_integrand_540 (β : ℂ) :
+    Continuous fun y : ℝ => (-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+      Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+      (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) := by
+  rw [continuous_iff_continuousAt]
+  intro y
+  exact ((by fun_prop : ContinuousAt (fun y : ℝ =>
+    (-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+      Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))) y)).mul
+    ((continuous_lambda_half_540 y).const_mul 2)
+
+set_option maxHeartbeats 2000000 in
+private theorem hasDerivAt_P_540 (α : ℂ) (hα : |α.re| < Real.pi / 2) :
+    HasDerivAt (fun β : ℂ => (1 / (2 * Real.pi)) • ∫ y : ℝ,
+        Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+      ((1 / (2 * Real.pi)) • ∫ y : ℝ,
+        (-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          Complex.exp (-(Complex.I) * α * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) α := by
+  have ha0 : (0:ℝ) ≤ |α.re| := abs_nonneg _
+  have hpi : (0:ℝ) < Real.pi := Real.pi_pos
+  set c : ℝ := (|α.re| + Real.pi / 2) / 2 with hc
+  set r : ℝ := (Real.pi / 2 - |α.re|) / 4 with hrr
+  have hrpos : 0 < r := by rw [hrr]; linarith
+  have hca : |α.re| < c := by rw [hc]; linarith
+  have hc2 : c < Real.pi / 2 := by rw [hc]; linarith
+  have hcpos : 0 < c := by linarith
+  have hgap : 0 < c - (|α.re| + r) := by rw [hrr, hc]; linarith
+  obtain ⟨K, hKpos, hK⟩ := completedZeta_half_line_decay_540 c hcpos hc2
+  set Cst : ℝ := 2 * K * Real.exp ((|α.im| + r) / 4) with hCst
+  have hCst0 : 0 < Cst := by rw [hCst]; positivity
+  -- integrability of the two majorants
+  have hbndF_int : Integrable (fun y : ℝ => Cst * Real.exp (-((c - (|α.re| + r)) * |y|))) := by
+    have h1 := exp_abs_pow_integrable_540 (c - (|α.re| + r)) hgap 0
+    refine (h1.const_mul Cst).congr (Filter.Eventually.of_forall fun y => ?_)
+    beta_reduce
+    rw [pow_zero, mul_one]
+  have hbndF'_int : Integrable (fun y : ℝ =>
+      Cst * ((1 + |y|) * Real.exp (-((c - (|α.re| + r)) * |y|)))) := by
+    have h1 := exp_abs_pow_integrable_540 (c - (|α.re| + r)) hgap 1
+    refine (h1.const_mul Cst).congr (Filter.Eventually.of_forall fun y => ?_)
+    beta_reduce
+    rw [pow_one]
+    ring
+  -- membership estimates
+  have hball : ∀ β ∈ Metric.ball α r, |β.re| ≤ |α.re| + r := by
+    intro β hβ
+    have hd : ‖β - α‖ < r := by simpa [Metric.mem_ball, dist_eq_norm] using hβ
+    have h1 : |β.re - α.re| ≤ ‖β - α‖ := by simpa using Complex.abs_re_le_norm (β - α)
+    calc |β.re| = |α.re + (β.re - α.re)| := by ring_nf
+      _ ≤ |α.re| + |β.re - α.re| := abs_add_le _ _
+      _ ≤ |α.re| + r := by linarith
+  have hball_im : ∀ β ∈ Metric.ball α r, |β.im| ≤ |α.im| + r := by
+    intro β hβ
+    have hd : ‖β - α‖ < r := by simpa [Metric.mem_ball, dist_eq_norm] using hβ
+    have h1 : |β.im - α.im| ≤ ‖β - α‖ := by
+      have h := Complex.abs_im_le_norm (β - α)
+      simpa using h
+    calc |β.im| = |α.im + (β.im - α.im)| := by ring_nf
+      _ ≤ |α.im| + |β.im - α.im| := abs_add_le _ _
+      _ ≤ |α.im| + r := by linarith
+  -- the exponential bound
+  have hexp_bound : ∀ (β : ℂ) (y : ℝ), |β.re| ≤ |α.re| + r → |β.im| ≤ |α.im| + r →
+      ‖Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))‖ ≤
+        Real.exp ((|α.im| + r) / 4) * Real.exp ((|α.re| + r) * |y|) := by
+    intro β y h1 h2
+    rw [Complex.norm_exp]
+    have hre : (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)).re = β.im / 4 + β.re * y := by
+      simp only [Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.I_re,
+        Complex.I_im, Complex.add_re, Complex.add_im, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rw [hre, Real.exp_add]
+    apply mul_le_mul
+    · apply Real.exp_le_exp.mpr
+      nlinarith [abs_nonneg β.im, le_abs_self β.im]
+    · apply Real.exp_le_exp.mpr
+      calc β.re * y ≤ |β.re * y| := le_abs_self _
+        _ = |β.re| * |y| := abs_mul _ _
+        _ ≤ (|α.re| + r) * |y| := mul_le_mul_of_nonneg_right h1 (abs_nonneg y)
+    · positivity
+    · positivity
+  have hexp2 : ∀ y : ℝ, Real.exp ((|α.re| + r) * |y|) * Real.exp (-(c * |y|)) =
+      Real.exp (-((c - (|α.re| + r)) * |y|)) := by
+    intro y
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  -- bound for the integrand itself
+  have hF_bound : ∀ᵐ y : ℝ, ∀ β ∈ Metric.ball α r,
+      ‖Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))‖ ≤
+      Cst * Real.exp (-((c - (|α.re| + r)) * |y|)) := by
+    filter_upwards [] with y
+    intro β hβ
+    have he := hexp_bound β y (hball β hβ) (hball_im β hβ)
+    have hΛ := hK y
+    simp only [norm_mul, Complex.norm_ofNat]
+    calc ‖Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))‖ *
+          (2 * ‖completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)‖)
+        ≤ ‖Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))‖ *
+            (2 * (K * Real.exp (-(c * |y|)))) := by
+          apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
+          exact mul_le_mul_of_nonneg_left hΛ (by norm_num)
+      _ ≤ (Real.exp ((|α.im| + r) / 4) * Real.exp ((|α.re| + r) * |y|)) *
+            (2 * (K * Real.exp (-(c * |y|)))) := by
+          apply mul_le_mul_of_nonneg_right he (by positivity)
+      _ = Cst * Real.exp (-((c - (|α.re| + r)) * |y|)) := by
+          rw [hCst, ← hexp2 y]
+          ring
+  -- bound for the derivative integrand
+  have hF'_bound : ∀ᵐ y : ℝ, ∀ β ∈ Metric.ball α r,
+      ‖(-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))‖ ≤
+      Cst * ((1 + |y|) * Real.exp (-((c - (|α.re| + r)) * |y|))) := by
+    filter_upwards [] with y
+    intro β hβ
+    have he := hexp_bound β y (hball β hβ) (hball_im β hβ)
+    have hΛ := hK y
+    have hcoef : ‖-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ ≤ 1 + |y| := by
+      rw [norm_mul, norm_neg, Complex.norm_I, one_mul]
+      calc ‖((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖
+          ≤ ‖((((1/4 : ℝ)) : ℂ))‖ + ‖(y : ℂ) * Complex.I‖ := norm_add_le _ _
+        _ = 1/4 + |y| := by simp
+        _ ≤ 1 + |y| := by linarith [abs_nonneg y]
+    calc ‖(-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))‖
+        = ‖-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)‖ *
+            ‖Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))‖ *
+            (2 * ‖completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)‖) := by
+          simp only [norm_mul, Complex.norm_ofNat]
+      _ ≤ (1 + |y|) * (Real.exp ((|α.im| + r) / 4) * Real.exp ((|α.re| + r) * |y|)) *
+            (2 * (K * Real.exp (-(c * |y|)))) := by
+          apply mul_le_mul
+          · exact mul_le_mul hcoef he (norm_nonneg _) (by positivity)
+          · linarith
+          · positivity
+          · positivity
+      _ = Cst * ((1 + |y|) * Real.exp (-((c - (|α.re| + r)) * |y|))) := by
+          rw [hCst, ← hexp2 y]
+          ring
+  -- differentiability in the parameter
+  have hdiff : ∀ᵐ y : ℝ, ∀ β ∈ Metric.ball α r,
+      HasDerivAt (fun β : ℂ => Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+        ((-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) β := by
+    refine Filter.Eventually.of_forall fun y β _ => ?_
+    have h1 : HasDerivAt (fun β : ℂ => -(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))
+        (-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) β := by
+      have h0 := ((hasDerivAt_id β).const_mul (-(Complex.I))).mul_const
+        ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)
+      simpa using h0
+    have h2 := (Complex.hasDerivAt_exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I))).comp β h1
+    have h3 := h2.mul_const (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))
+    refine h3.congr_deriv ?_
+    ring
+  have hmain := (hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (μ := (volume : Measure ℝ))
+    (bound := fun y : ℝ => Cst * ((1 + |y|) * Real.exp (-((c - (|α.re| + r)) * |y|))))
+    (s := Metric.ball α r)
+    (F := fun β : ℂ => fun y : ℝ =>
+      Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+    (F' := fun β : ℂ => fun y : ℝ =>
+      (-(Complex.I) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        Complex.exp (-(Complex.I) * β * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+    (Metric.ball_mem_nhds α hrpos)
+    (Filter.Eventually.of_forall fun β => (continuous_P_integrand_540 β).aestronglyMeasurable)
+    (by
+      refine Integrable.mono' hbndF_int (continuous_P_integrand_540 α).aestronglyMeasurable ?_
+      filter_upwards [hF_bound] with y hy
+      exact hy α (Metric.mem_ball_self hrpos))
+    (continuous_P_deriv_integrand_540 α).aestronglyMeasurable
+    hF'_bound hbndF'_int hdiff).2
+  exact hmain.const_smul (1 / (2 * Real.pi))
+
+/-! ## (M5b) the identity in `α` -/
+
+private theorem strip_open_540 : IsOpen {α : ℂ | |α.re| < Real.pi / 2} :=
+  isOpen_lt (continuous_abs.comp Complex.continuous_re) continuous_const
+
+private theorem strip_convex_540 : Convex ℝ {α : ℂ | |α.re| < Real.pi / 2} := by
+  have h : {α : ℂ | |α.re| < Real.pi / 2} =
+      Complex.reCLM ⁻¹' Set.Ioo (-(Real.pi / 2)) (Real.pi / 2) := by
+    ext α
+    simp [Complex.reCLM_apply, abs_lt, and_comm]
+  rw [h]
+  exact (convex_Ioo _ _).linear_preimage Complex.reCLM.toLinearMap
+
+private theorem exp_I_re_pos_540 (α : ℂ) (hα : |α.re| < Real.pi / 2) :
+    0 < (Complex.exp (Complex.I * α)).re := by
+  rw [Complex.exp_re]
+  have hre : (Complex.I * α).re = -α.im := by simp [Complex.mul_re]
+  have him : (Complex.I * α).im = α.re := by simp [Complex.mul_im]
+  rw [hre, him]
+  exact mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo (abs_lt.mp hα))
+
+private theorem differentiableOn_P_540 :
+    DifferentiableOn ℂ (fun α : ℂ => (1 / (2 * Real.pi)) • ∫ y : ℝ,
+        Complex.exp (-(Complex.I) * α * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+      {α : ℂ | |α.re| < Real.pi / 2} := by
+  intro α hα
+  exact (hasDerivAt_P_540 α hα).differentiableAt.differentiableWithinAt
+
+private theorem differentiableOn_theta_540 :
+    DifferentiableOn ℂ (fun α : ℂ => jacobiTheta (Complex.I * Complex.exp (Complex.I * α)) - 1 -
+      Complex.exp (-(Complex.I * α / 2))) {α : ℂ | |α.re| < Real.pi / 2} := by
+  intro α hα
+  have hpos := exp_I_re_pos_540 α hα
+  have hd : DifferentiableAt ℂ jacobiTheta (Complex.I * Complex.exp (Complex.I * α)) :=
+    differentiableAt_jacobiTheta (by simpa using hpos)
+  have hg : DifferentiableAt ℂ (fun α : ℂ => Complex.I * Complex.exp (Complex.I * α)) α := by
+    fun_prop
+  have h1 : DifferentiableAt ℂ (fun α : ℂ => jacobiTheta
+      (Complex.I * Complex.exp (Complex.I * α))) α := by
+    simpa only [Function.comp_def] using hd.comp α hg
+  have h2 : DifferentiableAt ℂ (fun α : ℂ => Complex.exp (-(Complex.I * α / 2))) α := by
+    fun_prop
+  exact ((h1.sub (differentiableAt_const (1:ℂ))).sub h2).differentiableWithinAt
+
+private theorem log_exp_neg_540 (β : ℝ) :
+    Complex.log ((((Real.exp (-β) : ℝ)) : ℂ)) = ((-β : ℝ) : ℂ) := by
+  rw [show ((((Real.exp (-β) : ℝ)) : ℂ)) = Complex.exp ((-β : ℝ) : ℂ) by
+    rw [Complex.ofReal_exp]]
+  exact Complex.log_exp (by simp only [Complex.ofReal_im]; linarith [Real.pi_pos])
+    (by simp only [Complex.ofReal_im]; linarith [Real.pi_pos])
+
+/-- On the imaginary axis the parametrised integral equals the theta expression. -/
+private theorem P_imaginary_540 (β : ℝ) :
+    (1 / (2 * Real.pi)) • (∫ y : ℝ,
+        Complex.exp (-(Complex.I) * ((Complex.I) * (β : ℂ)) *
+          ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+      = jacobiTheta (Complex.I * Complex.exp (Complex.I * ((Complex.I) * (β : ℂ)))) - 1 -
+        Complex.exp (-(Complex.I * ((Complex.I) * (β : ℂ)) / 2)) := by
+  have hx : (0:ℝ) < Real.exp (-β) := Real.exp_pos _
+  have hxne : (((Real.exp (-β) : ℝ)) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
+  have hpt : ∀ y : ℝ,
+      Complex.exp (-(Complex.I) * ((Complex.I) * (β : ℂ)) * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) =
+      ((((Real.exp (-β) : ℝ)) : ℂ)) ^ (-(((1/4 : ℝ)) + (y : ℂ) * Complex.I)) := by
+    intro y
+    rw [Complex.cpow_def_of_ne_zero hxne, log_exp_neg_540 β]
+    congr 1
+    have h1 : -(Complex.I * ((Complex.I) * (β : ℂ))) = (β : ℂ) := by
+      apply Complex.ext <;>
+        simp [Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.I_re,
+          Complex.I_im] <;> ring
+    rw [show -(Complex.I) * ((Complex.I) * (β : ℂ)) =
+      -(Complex.I * ((Complex.I) * (β : ℂ))) by ring, h1]
+    push_cast
+    ring
+  have htheta : Complex.exp (Complex.I * ((Complex.I) * (β : ℂ))) = (((Real.exp (-β) : ℝ)) : ℂ) := by
+    have h1 : Complex.I * ((Complex.I) * (β : ℂ)) = ((-β : ℝ) : ℂ) := by
+      apply Complex.ext <;>
+        simp [Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.I_re,
+          Complex.I_im] <;> ring
+    rw [h1, Complex.ofReal_exp]
+  have hsqrt : Complex.exp (-(Complex.I * ((Complex.I) * (β : ℂ)) / 2)) =
+      ((((Real.exp (-β) : ℝ)) : ℂ)) ^ ((-(1 / 2) : ℝ) : ℂ) := by
+    rw [Complex.cpow_def_of_ne_zero hxne, log_exp_neg_540 β]
+    congr 1
+    have h1 : Complex.I * ((Complex.I) * (β : ℂ)) = -(β : ℂ) := by
+      apply Complex.ext <;>
+        simp [Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.I_re,
+          Complex.I_im] <;> ring
+    rw [show -(Complex.I * ((Complex.I) * (β : ℂ)) / 2) =
+      -(Complex.I * ((Complex.I) * (β : ℂ))) / 2 by ring, h1]
+    push_cast
+    ring
+  have hL : (∫ y : ℝ,
+        Complex.exp (-(Complex.I) * ((Complex.I) * (β : ℂ)) *
+          ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+      = ∫ y : ℝ, ((((Real.exp (-β) : ℝ)) : ℂ)) ^ (-(((1/4 : ℝ)) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) := by
+    apply integral_congr_ae
+    filter_upwards [] with y
+    rw [hpt y]
+  rw [hL, htheta, hsqrt]
+  exact star_eq_540 (Real.exp (-β)) hx
+
+set_option maxHeartbeats 1000000 in
+private theorem P_eq_theta_540 (α : ℂ) (hα : |α.re| < Real.pi / 2) :
+    (1 / (2 * Real.pi)) • (∫ y : ℝ,
+        Complex.exp (-(Complex.I) * α * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))
+      = jacobiTheta (Complex.I * Complex.exp (Complex.I * α)) - 1 -
+        Complex.exp (-(Complex.I * α / 2)) := by
+  set P : ℂ → ℂ := fun α : ℂ => (1 / (2 * Real.pi)) • (∫ y : ℝ,
+        Complex.exp (-(Complex.I) * α * ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) with hP
+  set Q : ℂ → ℂ := fun α : ℂ => jacobiTheta (Complex.I * Complex.exp (Complex.I * α)) - 1 -
+        Complex.exp (-(Complex.I * α / 2)) with hQ
+  have hdiffP : DifferentiableOn ℂ P {α : ℂ | |α.re| < Real.pi / 2} := differentiableOn_P_540
+  have hdiffQ : DifferentiableOn ℂ Q {α : ℂ | |α.re| < Real.pi / 2} := differentiableOn_theta_540
+  have hmem : (0:ℂ) ∈ closure (({z : ℂ | P z = Q z}) \ {(0:ℂ)}) := by
+    rw [Metric.mem_closure_iff]
+    intro ε hε
+    have hε2 : (0:ℝ) < ε / 2 := by linarith
+    refine ⟨Complex.I * ((ε/2 : ℝ) : ℂ), ?_, ?_⟩
+    · simp only [Set.mem_sdiff, Set.mem_setOf_eq, Set.mem_singleton_iff]
+      refine ⟨?_, ?_⟩
+      · rw [hP, hQ]
+        exact P_imaginary_540 (ε/2)
+      · intro h
+        have h' := congrArg Complex.im h
+        simp at h'
+        linarith
+    · rw [dist_eq_norm, zero_sub, norm_neg]
+      have hnorm : ‖Complex.I * ((ε/2 : ℝ) : ℂ)‖ = ε/2 := by
+        rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs,
+          abs_of_pos hε2]
+      rw [hnorm]
+      linarith
+  have hEqOn := AnalyticOnNhd.eqOn_of_preconnected_of_mem_closure
+    (hdiffP.analyticOnNhd strip_open_540) (hdiffQ.analyticOnNhd strip_open_540)
+    (strip_convex_540.isPreconnected)
+    (show (0:ℂ) ∈ {α : ℂ | |α.re| < Real.pi / 2} by
+      simp only [Set.mem_setOf_eq, Complex.zero_re, abs_zero]
+      exact half_pos Real.pi_pos)
+    hmem
+  exact hEqOn hα
+
+/-! ## (M6) the contour-shift identity `hshift` -/
+
+set_option maxHeartbeats 2000000 in
+private theorem hshift_540 (α : ℝ) (hα : |α| < Real.pi / 2) :
+    Complex.exp ((α : ℂ) * Complex.I / 4) * hardyUnshifted540 α =
+      (∫ t : ℝ, Complex.exp ((α : ℂ) * (t : ℂ)) * completedRiemannZeta ((1 / 2 : ℂ) + ((2 * t : ℝ) : ℂ) * Complex.I)) +
+      (Real.pi : ℂ) * Complex.exp (-((α : ℂ) * Complex.I / 4)) := by
+  have hα' : |((α : ℂ)).re| < Real.pi / 2 := by simpa using hα
+  have hP := P_eq_theta_540 (α : ℂ) hα'
+  rw [show Complex.exp (-(Complex.I * (α : ℂ) / 2)) = Complex.exp (-((α : ℂ) * Complex.I / 2)) by
+      rw [show -(Complex.I * (α : ℂ) / 2) = -((α : ℂ) * Complex.I / 2) by ring],
+    show Complex.I * Complex.exp (Complex.I * (α : ℂ)) =
+      Complex.I * Complex.exp ((α : ℂ) * Complex.I) by
+      rw [show Complex.I * (α : ℂ) = (α : ℂ) * Complex.I by ring]] at hP
+  have hexp1' : Complex.exp ((α : ℂ) * Complex.I / 4) * Complex.exp (-((α : ℂ) * Complex.I / 4)) = 1 := by
+    rw [← Complex.exp_add]; ring_nf; simp
+  have hexp3 : Complex.exp ((α : ℂ) * Complex.I / 4) * Complex.exp (-((α : ℂ) * Complex.I / 2)) =
+      Complex.exp (-((α : ℂ) * Complex.I / 4)) := by
+    rw [← Complex.exp_add]; ring_nf
+  have hcpi : ((1 / (2 * Real.pi) : ℝ) : ℂ) * (2 * (Real.pi : ℂ)) = 1 := by
+    rw [show (2 : ℂ) * (Real.pi : ℂ) = ((2 * Real.pi : ℝ) : ℂ) by push_cast; ring,
+      ← Complex.ofReal_mul, ← Complex.ofReal_one]
+    congr 1
+    field_simp
+  have hcpi' : (2 * (Real.pi : ℂ)) * (((1 / (2 * Real.pi) : ℝ) : ℂ)) = 1 := by
+    rw [mul_comm]; exact hcpi
+  -- the pointwise factorisation of the integrand
+  have hfac : ∀ y : ℝ, Complex.exp (-(Complex.I) * (α : ℂ) *
+      ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) =
+      Complex.exp (-((α : ℂ) * Complex.I / 4)) * Complex.exp ((α : ℂ) * (y : ℂ)) := by
+    intro y
+    rw [← Complex.exp_add]
+    congr 1
+    apply Complex.ext <;>
+      simp [Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.I_re,
+        Complex.I_im] <;> ring
+  -- extract the constant from the integral
+  have hL : (∫ y : ℝ, Complex.exp (-(Complex.I) * (α : ℂ) *
+        ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+        (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) =
+      Complex.exp (-((α : ℂ) * Complex.I / 4)) *
+        (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) := by
+    have hp : (∫ y : ℝ, Complex.exp (-(Complex.I) * (α : ℂ) *
+          ((((1/4 : ℝ)) : ℂ) + (y : ℂ) * Complex.I)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) =
+        ∫ y : ℝ, Complex.exp (-((α : ℂ) * Complex.I / 4)) *
+          (Complex.exp ((α : ℂ) * (y : ℂ)) *
+            (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) := by
+      apply integral_congr_ae
+      filter_upwards [] with y
+      rw [hfac y]
+      ring
+    rw [hp, integral_const_mul]
+  -- pull the factor 2 out of the plain integral
+  have hI2 : (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+        (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))) =
+      2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+        completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) := by
+    rw [← integral_const_mul]
+    apply integral_congr_ae
+    filter_upwards [] with y
+    ring
+  rw [hL] at hP
+  have hP1 : (((1 / (2 * Real.pi) : ℝ) : ℂ)) * (Complex.exp (-((α : ℂ) * Complex.I / 4)) *
+        (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+          (2 * completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))) =
+      jacobiTheta (Complex.I * Complex.exp ((α : ℂ) * Complex.I)) - 1 -
+        Complex.exp (-((α : ℂ) * Complex.I / 2)) := by
+    rw [← hP]
+    simp only [Complex.real_smul]
+  rw [hI2] at hP1
+  -- multiply the identity by `2 * π * e^{iα/4}`
+  have hide : (2 * (Real.pi : ℂ) * Complex.exp ((α : ℂ) * Complex.I / 4)) *
+      ((((1 / (2 * Real.pi) : ℝ) : ℂ)) * (Complex.exp (-((α : ℂ) * Complex.I / 4)) *
+        (2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+          completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I))))) =
+      2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+        completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) := by
+    calc (2 * (Real.pi : ℂ) * Complex.exp ((α : ℂ) * Complex.I / 4)) *
+          ((((1 / (2 * Real.pi) : ℝ) : ℂ)) * (Complex.exp (-((α : ℂ) * Complex.I / 4)) *
+            (2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+              completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))))
+        = ((2 * (Real.pi : ℂ)) * (((1 / (2 * Real.pi) : ℝ) : ℂ))) *
+            ((Complex.exp ((α : ℂ) * Complex.I / 4) *
+              Complex.exp (-((α : ℂ) * Complex.I / 4))) *
+              (2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+                completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))) := by ring
+      _ = 1 * (1 * (2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+            completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)))) := by
+          rw [hcpi', hexp1']
+      _ = 2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+            completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) := by ring
+  have hstep : (2 * (Real.pi : ℂ) * Complex.exp ((α : ℂ) * Complex.I / 4)) *
+      (jacobiTheta (Complex.I * Complex.exp ((α : ℂ) * Complex.I)) - 1 -
+        Complex.exp (-((α : ℂ) * Complex.I / 2))) =
+      2 * (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+        completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) := by
+    rw [← hide]
+    exact (congrArg (fun z => (2 * (Real.pi : ℂ) * Complex.exp ((α : ℂ) * Complex.I / 4)) * z) hP1).symm
+  -- conclude the value of the integral
+  have hIt : (∫ y : ℝ, Complex.exp ((α : ℂ) * (y : ℂ)) *
+        completedRiemannZeta ((1/2 : ℂ) + ((2 * y : ℝ) : ℂ) * Complex.I)) =
+      (Real.pi : ℂ) * Complex.exp ((α : ℂ) * Complex.I / 4) *
+        (jacobiTheta (Complex.I * Complex.exp ((α : ℂ) * Complex.I)) - 1 -
+          Complex.exp (-((α : ℂ) * Complex.I / 2))) := by
+    linear_combination (1/2) * hstep.symm
+  rw [hardy_unshifted_theta540 α hα, hIt]
+  linear_combination (Real.pi : ℂ) * hexp3
+
 /-- LEAF Hardy 1914 page 1012 display 1 and page 1013 display 2.
 Shift the completed zeta contour from real part one to one quarter.
 The residue at one half gives pi cosine. Pair the two critical line half rays.
@@ -2428,7 +4123,7 @@ Uniform horizontal bounds for every intermediate real part remain required. -/
 theorem hardy_shifted_contour540 (α : ℝ) (hα : |α| < Real.pi / 2) :
     (Complex.exp ((α : ℂ) * I / 4) * hardyUnshifted540 α).re =
       Real.pi * Real.cos (α / 4) - 2 * expMoment540 hardyAmplitude540 0 α := by
-  sorry
+  exact leaf2_of_shift_540 α hα (hshift_540 α hα)
 
 /-- Hardy 1914 page 1012 display 1, auxiliary obstruction to absolute termwise Mellin integration.
 The critical line Gaussian power series has exponent one half and is not summable.
