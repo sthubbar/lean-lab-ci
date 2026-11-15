@@ -74,10 +74,13 @@ theorem t345_split_q {m s N : ℕ} (hcop : Nat.Coprime s m) :
     exact Nat.gcd_eq_right hmd
   · rw [hdiv, Nat.totient_mul hc2]
 
-/-- Gallagher 1975 p.129 Proof of (7): the summand is nonnegative. -/
-theorem t345_eulerTerm_nonneg (N s : ℕ) :
-    0 ≤ 1 / ((s.totient : ℝ) * (s / Nat.gcd s N).totient) := by
-  positivity
+/-- Gallagher 1975 p.129 Proof of (7): the summand mu^2(s)/(phi(s) phi(s_n)), taken on
+squarefree s, with s_n = s/(s, n). -/
+noncomputable def t345_eulerTerm (N s : ℕ) : ℝ :=
+  1 / ((s.totient : ℝ) * (s / Nat.gcd s N).totient)
+
+theorem t345_eulerTerm_nonneg (N s : ℕ) : 0 ≤ t345_eulerTerm N s := by
+  unfold t345_eulerTerm; positivity
 
 /-- Gallagher 1975 p.129 Proof of (7), the Euler product bound: the product over k from 2
 to X of 1 + 1/(k - 1)^2, which dominates the product over p not dividing mn of
@@ -153,10 +156,11 @@ theorem t345_primeFactors_div_gcd {s : ℕ} (hs : Squarefree s) (N : ℕ) :
 /-- Gallagher 1975 p.129 Proof of (7): for squarefree s, mu^2(s)/(phi(s) phi(s_n)) is the
 product over p dividing s of 1/(p - 1) times 1 if p divides n and 1/(p - 1) otherwise. -/
 theorem t345_eulerTerm_eq_prod {s : ℕ} (hs : Squarefree s) (N : ℕ) :
-    (1 / ((s.totient : ℝ) * (s / Nat.gcd s N).totient)) = ∏ p ∈ s.primeFactors,
+    t345_eulerTerm N s = ∏ p ∈ s.primeFactors,
       ((p : ℝ) - 1)⁻¹ * (if p ∣ N then 1 else ((p : ℝ) - 1)⁻¹) := by
   have ht : Squarefree (s / Nat.gcd s N) :=
     Squarefree.squarefree_of_dvd (Nat.div_dvd_of_dvd (Nat.gcd_dvd_left _ _)) hs
+  unfold t345_eulerTerm
   rw [t345_totient_squarefree_real hs, t345_totient_squarefree_real ht, t345_primeFactors_div_gcd hs N,
     Finset.prod_mul_distrib, Finset.prod_ite, Finset.prod_const_one, one_mul,
     Finset.prod_inv_distrib, Finset.prod_inv_distrib, one_div, mul_inv]
@@ -166,7 +170,7 @@ s at most X prime to m of mu^2(s)/(phi(s) phi(s_n)) is at most the product over 
 most X not dividing m of 1 + 1/(p - 1)^2 when p does not divide n and 1 + 1/(p - 1) when it
 does. -/
 theorem t345_euler_sum_le_prod {N m : ℕ} (X : ℕ) :
-    ∑ s ∈ (Icc 1 X).filter (fun s => Squarefree s ∧ Nat.Coprime s m), (1 / ((s.totient : ℝ) * (s / Nat.gcd s N).totient)) ≤
+    ∑ s ∈ (Icc 1 X).filter (fun s => Squarefree s ∧ Nat.Coprime s m), t345_eulerTerm N s ≤
       ∏ p ∈ (Icc 1 X).filter Nat.Prime, (1 + (if p ∣ m then 0 else
         ((p : ℝ) - 1)⁻¹ * (if p ∣ N then 1 else ((p : ℝ) - 1)⁻¹))) := by
   set f : ℕ → ℝ := fun p => if p ∣ m then 0 else
@@ -178,7 +182,7 @@ theorem t345_euler_sum_le_prod {N m : ℕ} (X : ℕ) :
     split_ifs <;> first | exact le_rfl | (apply mul_nonneg <;> positivity)
   set S := (Icc 1 X).filter (fun s => Squarefree s ∧ Nat.Coprime s m) with hS
   set T := (Icc 1 X).filter Nat.Prime with hT
-  have h1 : ∀ s ∈ S, (1 / ((s.totient : ℝ) * (s / Nat.gcd s N).totient)) = ∏ p ∈ s.primeFactors, f p := by
+  have h1 : ∀ s ∈ S, t345_eulerTerm N s = ∏ p ∈ s.primeFactors, f p := by
     intro s hs
     obtain ⟨-, hsq, hcop⟩ := Finset.mem_filter.mp hs
     rw [t345_eulerTerm_eq_prod hsq N]
@@ -190,7 +194,7 @@ theorem t345_euler_sum_le_prod {N m : ℕ} (X : ℕ) :
       have := Nat.dvd_one.mp (hcop ▸ Nat.dvd_gcd hps hpm : p ∣ 1)
       exact (Nat.prime_of_mem_primeFactors hp).one_lt.ne' this
     simp only [hf, hpm, ↓reduceIte]
-  calc ∑ s ∈ S, (1 / ((s.totient : ℝ) * (s / Nat.gcd s N).totient)) = ∑ s ∈ S, ∏ p ∈ s.primeFactors, f p := Finset.sum_congr rfl h1
+  calc ∑ s ∈ S, t345_eulerTerm N s = ∑ s ∈ S, ∏ p ∈ s.primeFactors, f p := Finset.sum_congr rfl h1
     _ = ∑ t ∈ S.image Nat.primeFactors, ∏ p ∈ t, f p := by
         rw [Finset.sum_image]
         intro a ha b hb hab
@@ -326,10 +330,14 @@ theorem t345_induced_one (q : ℕ) : induced one q = 1 := by
   unfold induced one
   split_ifs <;> simp
 
-/-- Gallagher 1975 p.131 proof of display 17: the factor is nonnegative. -/
-theorem t345_excFactor_nonneg (r N : ℕ) :
-    0 ≤ (r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r N).totient) := by
-  positivity
+/-- Gallagher 1975 p.131 proof of display 17: the factor r/(phi(r) phi(r_n)) in front of
+the sum over s, with r_n = r/(r, n). When the q term is nonzero, r_n = r and this is the
+printed r/phi^2(r). -/
+noncomputable def t345_excFactor (r N : ℕ) : ℝ :=
+  (r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r N).totient)
+
+theorem t345_excFactor_nonneg (r N : ℕ) : 0 ≤ t345_excFactor r N := by
+  unfold t345_excFactor; positivity
 
 /-- Gallagher 1975 pp.131 and 132 proof of display 17, one term: if the q coefficient z has
 |z| at most r phi(q)/phi(q_n), and vanishes unless q = r s with s squarefree and prime to r,
@@ -339,7 +347,7 @@ theorem t345_exc_term_le {q r N : ℕ} (hq : 1 ≤ q) (hr : r ∣ q) (z : ℂ)
     (hz : z ≠ 0 → Squarefree (q / r) ∧ Nat.Coprime (q / r) r) :
     1 / (q.totient : ℝ) ^ 2 * ‖z‖ ≤
       if Squarefree (q / r) ∧ Nat.Coprime (q / r) r then
-        ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r N).totient)) * (1 / (((q / r).totient : ℝ) * ((q / r) / Nat.gcd (q / r) N).totient)) else 0 := by
+        t345_excFactor r N * t345_eulerTerm N (q / r) else 0 := by
   have hr0 : 0 < r := Nat.pos_of_dvd_of_pos hr hq
   by_cases h0 : z = 0
   · rw [h0, norm_zero, mul_zero]
@@ -367,7 +375,8 @@ theorem t345_exc_term_le {q r N : ℕ} (hq : 1 ≤ q) (hr : r ∣ q) (z : ℂ)
       ≤ 1 / ((r.totient : ℝ) * s.totient) ^ 2 *
           ((r : ℝ) * (r.totient * s.totient) /
             ((r / Nat.gcd r N).totient * (s / Nat.gcd s N).totient)) := by gcongr
-    _ = ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r N).totient)) * (1 / ((s.totient : ℝ) * (s / Nat.gcd s N).totient)) := by
+    _ = t345_excFactor r N * t345_eulerTerm N s := by
+        unfold t345_excFactor t345_eulerTerm
         field_simp
 
 /-- Gallagher 1975 p.131 proof of display 17: summing the q terms over q = r s, the weight
@@ -377,12 +386,12 @@ theorem t345_weight_le_exc (P : ℝ) (n : ℤ) {x y : PChar} {r : ℕ} (hr : 0 <
     (hm : Nat.lcm (x.1 + 1) (y.1 + 1) = r)
     (hterm : ∀ q ∈ pairModuli P x y, 1 / (q.totient : ℝ) ^ 2 * ‖pairCoeff n q x y‖ ≤
       if Squarefree (q / r) ∧ Nat.Coprime (q / r) r then
-        ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r n.natAbs).totient)) * (1 / (((q / r).totient : ℝ) * ((q / r) / Nat.gcd (q / r) n.natAbs).totient)) else 0) :
-    pairWeight P n x y ≤ ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r n.natAbs).totient)) *
+        t345_excFactor r n.natAbs * t345_eulerTerm n.natAbs (q / r) else 0) :
+    pairWeight P n x y ≤ t345_excFactor r n.natAbs *
       ∑ s ∈ (Icc 1 ⌊P⌋₊).filter (fun s => Squarefree s ∧ Nat.Coprime s r),
-        (1 / ((s.totient : ℝ) * (s / Nat.gcd s n.natAbs).totient)) := by
+        t345_eulerTerm n.natAbs s := by
   set H : ℕ → ℝ := fun s => if Squarefree s ∧ Nat.Coprime s r then
-    ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r n.natAbs).totient)) * (1 / ((s.totient : ℝ) * (s / Nat.gcd s n.natAbs).totient)) else 0 with hH
+    t345_excFactor r n.natAbs * t345_eulerTerm n.natAbs s else 0 with hH
   have hH0 : ∀ s, 0 ≤ H s := by
     intro s
     simp only [hH]
@@ -412,8 +421,8 @@ theorem t345_weight_le_exc (P : ℝ) (n : ℤ) {x y : PChar} {r : ℕ} (hr : 0 <
           exact (Nat.div_le_self _ _).trans hqP
         · intro s _ _
           exact hH0 s
-    _ = ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r n.natAbs).totient)) * ∑ s ∈ (Icc 1 ⌊P⌋₊).filter (fun s => Squarefree s ∧
-          Nat.Coprime s r), (1 / ((s.totient : ℝ) * (s / Nat.gcd s n.natAbs).totient)) := by
+    _ = t345_excFactor r n.natAbs * ∑ s ∈ (Icc 1 ⌊P⌋₊).filter (fun s => Squarefree s ∧
+          Nat.Coprime s r), t345_eulerTerm n.natAbs s := by
         rw [Finset.sum_filter, Finset.mul_sum]
         apply Finset.sum_congr rfl
         intro s _
@@ -453,7 +462,7 @@ r/(phi(r) phi(r_n)) times the product over p dividing n and not r of 1 + 1/(p - 
 most r phi(g)/phi^2(r) times n/phi(n). This uses phi(r) at most g phi(r_n) and
 g/phi(g) times that product equal to n/phi(n). -/
 theorem t345_excFactor_mul_le {r N : ℕ} (hr : 0 < r) (hN : N ≠ 0) :
-    ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r N).totient)) * ∏ p ∈ N.primeFactors.filter (fun p => ¬ p ∣ r), (1 + ((p : ℝ) - 1)⁻¹) ≤
+    t345_excFactor r N * ∏ p ∈ N.primeFactors.filter (fun p => ¬ p ∣ r), (1 + ((p : ℝ) - 1)⁻¹) ≤
       (r : ℝ) * (Nat.gcd r N).totient / (r.totient : ℝ) ^ 2 * ((N : ℝ) / N.totient) := by
   set g := Nat.gcd r N with hgdef
   set k := r / g with hkdef
@@ -487,12 +496,13 @@ theorem t345_excFactor_mul_le {r N : ℕ} (hr : 0 < r) (hN : N ≠ 0) :
       exact_mod_cast (Nat.prime_of_mem_primeFactors (Finset.mem_filter.mp hp).1).two_le
     have : 0 ≤ ((p : ℝ) - 1)⁻¹ := inv_nonneg.mpr (by linarith)
     linarith
-  have hfac : ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r N).totient)) ≤ (r : ℝ) * g / (r.totient : ℝ) ^ 2 := by
+  have hfac : t345_excFactor r N ≤ (r : ℝ) * g / (r.totient : ℝ) ^ 2 := by
+    unfold t345_excFactor
     rw [← hgdef, ← hkdef, div_le_div_iff₀ (by positivity) (by positivity)]
     have : (r : ℝ) * r.totient * r.totient ≤ (r : ℝ) * r.totient * (g * k.totient) :=
       mul_le_mul_of_nonneg_left hle (by positivity)
     nlinarith
-  calc ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r N).totient)) * PP ≤ (r : ℝ) * g / (r.totient : ℝ) ^ 2 * PP :=
+  calc t345_excFactor r N * PP ≤ (r : ℝ) * g / (r.totient : ℝ) ^ 2 * PP :=
         mul_le_mul_of_nonneg_right hfac hP0
     _ = (r : ℝ) * g.totient / (r.totient : ℝ) ^ 2 * ((g : ℝ) / g.totient * PP) := by
         field_simp
@@ -505,7 +515,7 @@ theorem t345_weight_le_final (P : ℝ) (n : ℤ) (hn : n ≠ 0) {x y : PChar} {r
     (hm : Nat.lcm (x.1 + 1) (y.1 + 1) = r)
     (hterm : ∀ q ∈ pairModuli P x y, 1 / (q.totient : ℝ) ^ 2 * ‖pairCoeff n q x y‖ ≤
       if Squarefree (q / r) ∧ Nat.Coprime (q / r) r then
-        ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r n.natAbs).totient)) * (1 / (((q / r).totient : ℝ) * ((q / r) / Nat.gcd (q / r) n.natAbs).totient)) else 0) :
+        t345_excFactor r n.natAbs * t345_eulerTerm n.natAbs (q / r) else 0) :
     pairWeight P n x y ≤ 4 * totientWeight n * exceptionalWeight r n := by
   have hN : n.natAbs ≠ 0 := Int.natAbs_ne_zero.mpr hn
   have h1 := t345_weight_le_exc P n hr hm hterm
@@ -515,10 +525,10 @@ theorem t345_weight_le_final (P : ℝ) (n : ℤ) (hn : n ≠ 0) {x y : PChar} {r
   have hA := t345_excFactor_nonneg r n.natAbs
   unfold totientWeight exceptionalWeight
   calc pairWeight P n x y
-      ≤ ((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r n.natAbs).totient)) * (4 * ∏ p ∈ n.natAbs.primeFactors.filter (fun p => ¬ p ∣ r),
+      ≤ t345_excFactor r n.natAbs * (4 * ∏ p ∈ n.natAbs.primeFactors.filter (fun p => ¬ p ∣ r),
           (1 + ((p : ℝ) - 1)⁻¹)) :=
         h1.trans (mul_le_mul_of_nonneg_left (h2.trans h3) hA)
-    _ = 4 * (((r : ℝ) / ((r.totient : ℝ) * (r / Nat.gcd r n.natAbs).totient)) * ∏ p ∈ n.natAbs.primeFactors.filter (fun p => ¬ p ∣ r),
+    _ = 4 * (t345_excFactor r n.natAbs * ∏ p ∈ n.natAbs.primeFactors.filter (fun p => ¬ p ∣ r),
           (1 + ((p : ℝ) - 1)⁻¹)) := by ring
     _ ≤ 4 * ((r : ℝ) * (Nat.gcd r n.natAbs).totient / (r.totient : ℝ) ^ 2 *
           ((n.natAbs : ℝ) / n.natAbs.totient)) :=
@@ -530,7 +540,7 @@ c_n(conj chi~_q) conj tau(conj chi~_q) tau(1_q), bounded by display 5 and displa
 theorem t345_term_x_one (P : ℝ) (n : ℤ) {x : PChar} (hx : x.2.IsPrimitive) :
     ∀ q ∈ pairModuli P x one, 1 / (q.totient : ℝ) ^ 2 * ‖pairCoeff n q x one‖ ≤
       if Squarefree (q / (x.1 + 1)) ∧ Nat.Coprime (q / (x.1 + 1)) (x.1 + 1) then
-        (((x.1 + 1 : ℕ) : ℝ) / (((x.1 + 1).totient : ℝ) * ((x.1 + 1) / Nat.gcd (x.1 + 1) n.natAbs).totient)) * (1 / (((q / (x.1 + 1)).totient : ℝ) * ((q / (x.1 + 1)) / Nat.gcd (q / (x.1 + 1)) n.natAbs).totient)) else 0 := by
+        t345_excFactor (x.1 + 1) n.natAbs * t345_eulerTerm n.natAbs (q / (x.1 + 1)) else 0 := by
   intro q hq
   have hq' := Finset.mem_filter.mp hq
   have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq'.1).1
@@ -565,7 +575,7 @@ C_n(chi~, 1): the q coefficient is c_n(chi~_q) conj tau(1_q) tau(conj chi~_q). -
 theorem t345_term_one_x (P : ℝ) (n : ℤ) {x : PChar} (hx : x.2.IsPrimitive) :
     ∀ q ∈ pairModuli P one x, 1 / (q.totient : ℝ) ^ 2 * ‖pairCoeff n q one x‖ ≤
       if Squarefree (q / (x.1 + 1)) ∧ Nat.Coprime (q / (x.1 + 1)) (x.1 + 1) then
-        (((x.1 + 1 : ℕ) : ℝ) / (((x.1 + 1).totient : ℝ) * ((x.1 + 1) / Nat.gcd (x.1 + 1) n.natAbs).totient)) * (1 / (((q / (x.1 + 1)).totient : ℝ) * ((q / (x.1 + 1)) / Nat.gcd (q / (x.1 + 1)) n.natAbs).totient)) else 0 := by
+        t345_excFactor (x.1 + 1) n.natAbs * t345_eulerTerm n.natAbs (q / (x.1 + 1)) else 0 := by
   intro q hq
   have hq' := Finset.mem_filter.mp hq
   have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq'.1).1
@@ -602,7 +612,7 @@ character and |tau|^2 at most r by display 6. -/
 theorem t345_term_x_x (P : ℝ) (n : ℤ) {x : PChar} (hx : x.2.IsPrimitive) :
     ∀ q ∈ pairModuli P x x, 1 / (q.totient : ℝ) ^ 2 * ‖pairCoeff n q x x‖ ≤
       if Squarefree (q / (x.1 + 1)) ∧ Nat.Coprime (q / (x.1 + 1)) (x.1 + 1) then
-        (((x.1 + 1 : ℕ) : ℝ) / (((x.1 + 1).totient : ℝ) * ((x.1 + 1) / Nat.gcd (x.1 + 1) n.natAbs).totient)) * (1 / (((q / (x.1 + 1)).totient : ℝ) * ((q / (x.1 + 1)) / Nat.gcd (q / (x.1 + 1)) n.natAbs).totient)) else 0 := by
+        t345_excFactor (x.1 + 1) n.natAbs * t345_eulerTerm n.natAbs (q / (x.1 + 1)) else 0 := by
   intro q hq
   have hq' := Finset.mem_filter.mp hq
   have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq'.1).1
