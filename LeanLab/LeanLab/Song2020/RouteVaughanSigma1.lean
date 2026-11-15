@@ -46,6 +46,7 @@ Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
 import LeanLab.Akeno2026.Vaughan86
+import LeanLab.Song2020.RouteVaughanInner
 
 namespace LeanLab.Song2020.RouteVaughanSigma1
 
@@ -60,7 +61,8 @@ f(s) in the inner sum": for one fixed r the sum over s of e(R_b(r s)), over any 
 segment of the window |r s - n/3| < y, is at most
 |h|^(1/2) n^(gamma/2-1) y + r^(-1) n^(1-gamma/2) |h|^(-1/2). Citation wall: Iwaniec and
 Kowalski Corollary 8.13. Deviations are listed in the header of this file under
-"Reading of the inner sum leaf". -/
+"Reading of the inner sum leaf".
+PROVED 2026-11-15 from RouteVaughanInner.inner_sum_bound_route, no sorry. -/
 theorem inner_sum_bound :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
       ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
@@ -72,7 +74,7 @@ theorem inner_sum_bound :
               C * (n : ℝ) ^ ε *
                 (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y +
                   (r : ℝ)⁻¹ * ((n : ℝ) ^ (1 - γ / 2) * |(h : ℝ)| ^ (-(1 : ℝ) / 2))) := by
-  sorry
+  exact RouteVaughanInner.inner_sum_bound_route
 
 /-- Song 2020, page 6, "By partial summation": Abel summation against a nonnegative
 nondecreasing weight, the paper's log s. If every initial partial sum of c has modulus at

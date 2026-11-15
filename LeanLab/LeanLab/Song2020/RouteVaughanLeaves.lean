@@ -38,6 +38,7 @@ Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
 import LeanLab.Akeno2026.Vaughan86
+import LeanLab.Song2020.RouteVaughanTypeII
 
 namespace LeanLab.Song2020.RouteVaughanLeaves
 
@@ -52,7 +53,9 @@ n^(1-gamma/4) |h|^(-1/4) + n^(3/4) y^(1/4) u^(-1/4) + u^(-1/6) n^((gamma+3)/6) y
 division into T(R,S), Graham and Kolesnik Lemma 2.5, Iwaniec and Kowalski Corollary 8.13 and
 Graham and Kolesnik Lemma 2.4. Sigma 2 is the window sum of (mu - mu_u) * (Lambda - Lambda_v)
 * zeta, equal to the print's form with its minus sign and d at most u. Deviations: x^epsilon
-written n^epsilon; the header of this file carries the full reading. -/
+written n^epsilon; the header of this file carries the full reading. 
+ROUTED 2026-11-15 through RouteVaughanTypeII.sigma2_route: no sorry here. CONDITIONAL ON the
+one open leaf RouteVaughanTypeII.typeII_bound. -/
 theorem sigma2_bound :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
       ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
@@ -72,14 +75,16 @@ theorem sigma2_bound :
                   |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
                 u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
                   |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  sorry
+  exact RouteVaughanTypeII.sigma2_route
 
 /-- LEAF: Song 2020, page 7, the display "x^(-epsilon) Sigma3 << n^(1/2) (u v)^(1/2) +
 n^(1-gamma/4) |h|^(-1/4) + n^(3/4) y^(1/4) u^(-1/4) + u^(-1/6) n^((gamma+3)/6) y^(1/3)
 |h|^(1/6) + u^(-1/4) n^((gamma+1)/4) y^(1/2) |h|^(1/4)", which the paper states with the one
 word "Similarly". The window sum here is that of the part r > u of mu_u * Lambda_v * zeta,
 which is minus the paper's Sigma 3; the norm does not see the sign. Deviations: x^epsilon
-written n^epsilon; the header of this file carries the full reading. -/
+written n^epsilon; the header of this file carries the full reading. 
+ROUTED 2026-11-15 through RouteVaughanTypeII.sigma3_route: no sorry here. CONDITIONAL ON the
+one open leaf RouteVaughanTypeII.typeII_bound. -/
 theorem sigma3_bound :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
       ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
@@ -100,7 +105,7 @@ theorem sigma3_bound :
                   |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
                 u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
                   |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  sorry
+  exact RouteVaughanTypeII.sigma3_route
 
 end
 
