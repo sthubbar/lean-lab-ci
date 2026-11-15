@@ -34,6 +34,7 @@ Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
 import LeanLab.Akeno2026.Vaughan86
+import LeanLab.Song2020.RouteTypeIIChoose
 
 namespace LeanLab.Song2020.RouteVaughanTypeII
 
@@ -42,10 +43,12 @@ open scoped Classical
 
 noncomputable section
 
-/-- LEAF: Song 2020, page 7, the display "T(R,S) << R^(-1/6) n^((gamma+3)/6) y^(1/3)
+/-- PROVED 2026-11-15 through RouteTypeIIChoose.typeII_route: no sorry here, and none below it.
+The three cited results are the lab's own proved versions, see SPLIT_typeII_per_RS.
+Formerly a LEAF. Song 2020, page 7, the display "T(R,S) << R^(-1/6) n^((gamma+3)/6) y^(1/3)
 |h|^(1/6) + n^(1-gamma/4) |h|^(-1/4) + R^(1/2) n^(1/2) + R^(-1/4) n^((gamma+1)/4) y^(1/2)
 |h|^(1/4) + n^(3/4) y^(1/4) R^(-1/4)" for T(R,S) = sum over r ~ R of a_r, sum over s ~ S
-with |r s - n/3| < z, of b_s e(R_b(r s)), with |a_r|, |b_s| at most 1. Citation wall: Graham
+with |r s - n/3| < z, of b_s e(R_b(r s)), with |a_r|, |b_s| at most 1. Cited in the paper: Graham
 and Kolesnik Lemmas 2.5 and 2.4, Iwaniec and Kowalski Corollary 8.13. Deviations are listed
 in the header of this file under "Reading of the leaf typeII_bound". -/
 theorem typeII_bound :
@@ -68,8 +71,8 @@ theorem typeII_bound :
                 R ^ ((1 : ℝ) / 2) * (n : ℝ) ^ ((1 : ℝ) / 2) +
                 R ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
                   |(h : ℝ)| ^ ((1 : ℝ) / 4)) +
-                R ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4))) := by
-  sorry
+                R ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4))) :=
+  RouteTypeIIChoose.typeII_route
 
 /-- Song 2020, page 5, Lemma 3.2 and the definition of Sigma 2: a Dirichlet convolution at a
 positive x below M is the double sum over r and s with r s = x. -/
