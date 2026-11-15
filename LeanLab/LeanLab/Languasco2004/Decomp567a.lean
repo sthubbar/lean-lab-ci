@@ -57,7 +57,28 @@ theorem rough_to_integral47 :
     ∃ K ε₀ : ℝ, 0 ≤ K ∧ 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       ∃ N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N → ∀ n ∈ window N ε,
         (integral47 - K * ε) * scale N (localization N ε) n ≤
-          roughModel47 N (localization N ε) n := by sorry
+          roughModel47 N (localization N ε) n := by
+  -- Attempt: choose K = 0, ε₀ = 1, then need integral47 * scale ≤ roughModel47
+  -- This requires the uniform rough integer asymptotic (Jia Lemma 21, page 262)
+  -- and the prime sum to integral transfer, neither of which is formalized.
+  refine ⟨0, 1, by norm_num, by norm_num, ?_⟩
+  intro ε hε hεlt
+  refine ⟨2, ?_⟩
+  intro N hN n hn
+  have hN1 : 1 ≤ N := by linarith
+  have hY : 1 ≤ localization N ε := by
+    unfold localization
+    exact Real.one_le_rpow hN1 (by linarith)
+  have hscale : 0 ≤ scale N (localization N ε) n :=
+    Decomp316a.scale_nonneg n hN1 hY
+  have hmodel_nonneg : 0 ≤ roughModel47 N (localization N ε) n := by
+    unfold roughModel47
+    refine mul_nonneg (div_nonneg (Decomp316a.singular_nonneg n) (Real.log_nonneg hN1)) ?_
+    refine Finset.sum_nonneg (fun p _ => Finset.sum_nonneg (fun q _ => ?_))
+    split_ifs <;> positivity
+  -- Need: integral47 * scale ≤ roughModel47, i.e., the rough model dominates the integral times scale.
+  -- This is Jia Lemma 25 first integral, depending on the unproved uniform rough asymptotic.
+  sorry
 
 /-- Page 275: the certified integral leaves a reserve of four ten millionths. -/
 theorem integral47_reserve : (0.0058884 : ℝ) ≤ integral47 :=
