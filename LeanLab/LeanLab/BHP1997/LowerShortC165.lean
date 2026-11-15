@@ -4,6 +4,7 @@ The sealed coefficient declarations now live in Decomp514a with identical text.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp514a
+import LeanLab.BHP1997.LowerPrincipal517d
 
 namespace LeanLab.BHP1997.LowerShortC165
 open Classical Complex Decomp132 DecompC165b DecompC165d
@@ -18,7 +19,9 @@ with the U-1624 factor, so the density is the constant `v0 / log Y`, summed from
 of J. This is the cited input of 5.17 with no character: the prime number theorem with error
 term, applied to the prime term and, through the Buchstab identity, to the E2 and E4 sums of
 5.15. Its truth also needs the numerical fact, U-1624, that the clipping of `lowerFactor` is
-inactive on J for large `x`; see the QUESTION in the burst 7 notes. -/
+inactive on J for large `x`; see the QUESTION in the burst 7 notes.
+Burst 2026-11-15: no longer a direct sorry. It is `lower_principal_density_of_leaves`, CONDITIONAL
+on the open leaves of `LowerPrincipal517a` and on `Decomp514a.leaf_factor_increment`. -/
 theorem lower_principal_density (ω : ℝ → ℝ)
     (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
     (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
@@ -26,8 +29,8 @@ theorem lower_principal_density (ω : ℝ → ℝ)
     ∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ t : ℝ, t ≤ 2 * x ^ (11 / 20 + ε) →
         ‖∑ m ∈ (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t),
           ((lowerShortWeight ω ε x m : ℂ) - lowerV0 ω ε / Real.log (x ^ (11 / 20 + ε)))‖ ≤
-              C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+              C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) :=
+  lower_principal_density_of_leaves ω hω hz hε hε8
 
 /-- P0069 Baker Harman Pintz 1997, Section 5, page 51, display 5.17 in the form condition iii
 of Theorem 2, display 1.8 on page 3, takes for the principal character. The prime factors of
