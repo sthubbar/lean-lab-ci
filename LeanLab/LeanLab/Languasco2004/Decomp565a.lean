@@ -7,6 +7,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Languasco2004.Source565
 import LeanLab.Languasco2004.Numeric565
+import LeanLab.Languasco2004.Decomp578a
 
 namespace LeanLab.Languasco2004.Decomp565a
 open Finset Real Decomp279a Decomp316a GroupSplit548 Source565 Numeric565
@@ -21,7 +22,8 @@ theorem iwaniec_transfer :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         0.0000001 * scale N (localization N ε) n < iwaniecError true N (localization N ε) n ε)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Decomp578a.iwaniec_transfer_from_parts
 
 /-- LEAF. Jia page 260 Lemma 19, specialized on page 283 display 59 and page 284 display 63.
 Only the transfers of the removed low cutoff terms occur here. -/
