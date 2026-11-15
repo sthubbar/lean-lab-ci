@@ -41,6 +41,20 @@ theorem prime_to_rough_rest :
               K * ε * scale N (localization N ε) n)).card : ℝ) ≤
           C * windowLength N ε / Real.log N ^ B := by sorry
 
+/-- The remaining group two rough model is nonnegative for positive scale parameters. -/
+theorem roughModelRest_nonneg (N Y : ℝ) (n : ℕ) (hN : 1 ≤ N) :
+    0 ≤ roughModelRest N Y n := by
+  unfold roughModelRest
+  apply mul_nonneg
+  · exact Decomp316a.singular_nonneg n
+  · apply div_nonneg
+    · apply Finset.sum_nonneg
+      intro p hp
+      apply Finset.sum_nonneg
+      intro q hq
+      split_ifs <;> positivity
+    · exact Real.log_nonneg hN
+
 /-- LEAF. Jia page 277, remaining integrals of Lemma 25, using Lemmas 20 and 21
 on pages 261 and 262 and the second and third comparisons on page 270.
 This deterministic step evaluates the rough model. It asserts no
@@ -49,7 +63,20 @@ theorem rough_to_integral_rest :
     ∃ K ε₀ : ℝ, 0 ≤ K ∧ 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       ∃ N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N → ∀ n ∈ window N ε,
         (remainderIntegral - K * ε) * scale N (localization N ε) n ≤
-          roughModelRest N (localization N ε) n := by sorry
+          roughModelRest N (localization N ε) n := by
+  refine ⟨0, 1, by norm_num, by norm_num, ?_⟩
+  intro ε hε he
+  refine ⟨0, ?_⟩
+  intro N hN n hn
+  have hN1 : 1 ≤ N := hN
+  have hY : 1 ≤ localization N ε := by
+    unfold localization
+    exact Real.one_le_rpow hN1 (by linarith)
+  have hs : 0 ≤ scale N (localization N ε) n :=
+    Decomp316a.scale_nonneg n hN1 hY
+  have hm : 0 ≤ roughModelRest N (localization N ε) n :=
+    roughModelRest_nonneg N (localization N ε) n hN1
+  sorry
 
 /-- Page 277: the integral leaves a reserve of 31 hundred millionths.
 CONDITIONAL ON the open numerical polynomial integral leaves. -/
