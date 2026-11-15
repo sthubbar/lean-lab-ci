@@ -24,9 +24,9 @@ open Finset LeanLab.PNTPort.LargeSieve
 
 /-! ### Helper lemmas for `leaf_singular_series_converges_3`
 
-All of this is new in this session: the Möbius decomposition of the coefficient sum, the bound
-`‖τ_q(ind χ)‖² = conductor`, the twisted Ramanujan bound `‖c_ψ(m)‖ ≤ √r σ(m)`, and the
-`q^{-3/2}(1+log q)^2` majorant.  Nothing here changes a statement of the file. -/
+All new in this session: the Möbius decomposition of the coefficient sum, the bound
+`‖τ_q(ind χ)‖² = conductor` at every level, the twisted Ramanujan bound `‖c_ψ(m)‖ ≤ √r σ(m)`, and
+the `q^{-3/2}(1+log q)^2` majorant.  No statement of the file is changed. -/
 
 noncomputable section
 
@@ -945,16 +945,11 @@ theorem totient_ge_log_two_mul_div {n : ℕ} (hn : 1 ≤ n) :
     nlinarith [hk1, hnpos, hlog2]
   exact hstep.trans hφ
 
-/-! ### The repaired truncation leaf reduced to the discarded-pair mass
 
-`DecompJ665.actual_truncation_error_le_mass` already says the truncation error is at most `X` times
-the multiplicity and series weighted mass of the pairs that `Truncation168.retainedPairs` discards.
-What is left for `leaf_truncation_error_3` is the estimate of that mass by
-`C' * Sing m * X * log U / sqrt U`.  The statement below is exactly that estimate, and the theorem
-after it derives the repaired leaf from it, so the analytic content is visible in one place. -/
-
+/- `DecidableEq ExcPair` has no global instance (a `DirichletCharacter` field), so the `Finset`
+operations below need Mathlib's existing `Classical.propDecidable` activated locally.  This declares
+no instance; it is the idiom `State1581`/`DecompJ281` already use. -/
 attribute [local instance] Classical.propDecidable
-
 
 /-! ### The induced lift and its inverse -/
 
@@ -1240,13 +1235,149 @@ theorem isPrimitive_of_mem_excSet {H U P X : ℝ} {z : ExcPair} (hz : z ∈ excS
     exact DirichletCharacter.isPrimitive_one_level_one
   · exact h.2.1
 
+
+
+/-! ### The size of the singular series
+
+`leaf_truncation_error_3` compares the main term with its truncation on the pairs that the
+`[r₁,r₂] ≤ P`, `|Im ϱ| ≤ U` cutoffs discard, so it needs the size of `𝔖'` on those pairs.  The
+coefficient bound of the previous section gives it: the partial sums are bounded by the converging
+majorant, uniformly in the cutoff `Q`. -/
+
+/-- **The singular series is bounded by the coefficient majorant.** -/
+theorem norm_Sg'_le (z w : ExcPair) (hz : z.χ.IsPrimitive) (hw : w.χ.IsPrimitive)
+    (m : ℕ) (hm : 0 < m) (Sg' : ExcPair → ExcPair → ℕ → ℂ)
+    (hconv : Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) :
+    ‖Sg' z w m‖ ≤
+      ((∑ e ∈ m.divisors, (e : ℝ)) * (Real.sqrt ((Nat.lcm z.r w.r : ℕ) : ℝ)) ^ 3 /
+        (Real.log 2) ^ 2) *
+        (∑' q : ℕ, (q : ℝ) ^ (-(3 / 2 : ℝ)) * (1 + Real.log (q : ℝ)) ^ 2) := by
+  have hA0 : (0 : ℝ) ≤ (∑ e ∈ m.divisors, (e : ℝ)) *
+      (Real.sqrt ((Nat.lcm z.r w.r : ℕ) : ℝ)) ^ 3 / (Real.log 2) ^ 2 := by
+    have := Real.sqrt_nonneg ((Nat.lcm z.r w.r : ℕ) : ℝ)
+    positivity
+  refine le_of_tendsto' hconv.norm ?_
+  intro Q
+  have hfun : singPartialPrime z w m Q = ∑ q ∈ Finset.Icc 1 Q,
+      (if Nat.lcm z.r w.r ∣ q then cCoefPrime z w q m else 0) := by
+    rw [singPartialPrime, ← Finset.sum_filter]
+  rw [hfun]
+  have hstep : ‖∑ q ∈ Finset.Icc 1 Q,
+        (if Nat.lcm z.r w.r ∣ q then cCoefPrime z w q m else 0)‖
+      ≤ ∑ q ∈ Finset.Icc 1 Q, ((∑ e ∈ m.divisors, (e : ℝ)) *
+          (Real.sqrt ((Nat.lcm z.r w.r : ℕ) : ℝ)) ^ 3 / (Real.log 2) ^ 2) *
+            ((q : ℝ) ^ (-(3 / 2 : ℝ)) * (1 + Real.log (q : ℝ)) ^ 2) := by
+    refine le_trans (norm_sum_le _ _) (Finset.sum_le_sum fun q hq => ?_)
+    have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq).1
+    by_cases hd : Nat.lcm z.r w.r ∣ q
+    · rw [ite_eq_left hd]
+      exact norm_cCoefPrime_le z w hz hw m hm q hq1 hd
+    · rw [ite_eq_right hd, norm_zero]
+      exact mul_nonneg hA0 (by positivity)
+  refine le_trans hstep ?_
+  rw [← Finset.mul_sum]
+  refine mul_le_mul_of_nonneg_left ?_ hA0
+  exact Summable.sum_le_tsum (Finset.Icc 1 Q) (fun q _ => by positivity)
+    summable_nat_rpow_mul_one_add_log_sq
+
+
+/-- **The discarded mass is bounded by the multiplicity count** once the singular series is bounded
+uniformly on the pairs of the exceptional set. -/
+theorem mass_le_of_uniform_Sg {X K : ℝ} (hX : 0 ≤ X) {P U : ℝ} {m : ℕ}
+    (Sg' : ExcPair → ExcPair → ℕ → ℂ) {E : Finset ExcPair}
+    (hSg : ∀ z ∈ E, ∀ w ∈ E, ‖Sg' z w m‖ ≤ K) (hK : 0 ≤ K) :
+    X * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+        ((mult p.1 * mult p.2 : ℕ) : ℝ) * ‖Sg' p.1 p.2 m‖
+      ≤ X * K * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+        ((mult p.1 * mult p.2 : ℕ) : ℝ) := by
+  classical
+  have hterm : ∀ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+      ((mult p.1 * mult p.2 : ℕ) : ℝ) * ‖Sg' p.1 p.2 m‖ ≤
+        ((mult p.1 * mult p.2 : ℕ) : ℝ) * K := by
+    intro p hp
+    have hpE : p ∈ E ×ˢ E := Finset.mem_sdiff.mp hp |>.1
+    have h1 : p.1 ∈ E := (Finset.mem_product.mp hpE).1
+    have h2 : p.2 ∈ E := (Finset.mem_product.mp hpE).2
+    exact mul_le_mul_of_nonneg_left (hSg p.1 h1 p.2 h2) (by positivity)
+  have hstep := Finset.sum_le_sum hterm
+  have h1 : X * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+      ((mult p.1 * mult p.2 : ℕ) : ℝ) * ‖Sg' p.1 p.2 m‖
+      ≤ X * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+        ((mult p.1 * mult p.2 : ℕ) : ℝ) * K :=
+    mul_le_mul_of_nonneg_left hstep hX
+  calc X * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+        ((mult p.1 * mult p.2 : ℕ) : ℝ) * ‖Sg' p.1 p.2 m‖
+      ≤ X * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+          ((mult p.1 * mult p.2 : ℕ) : ℝ) * K := h1
+    _ = X * K * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+          ((mult p.1 * mult p.2 : ℕ) : ℝ) := by
+        rw [← Finset.sum_mul]
+        ring
+
+/-- **The repaired truncation leaf follows from a `uniform` singular series bound together with a
+multiplicity count of the discarded pairs.** This is the exact shape of what display 10.27 still
+needs: `norm_Sg'_le` supplies a bound that grows like `(√[r₁,r₂])³` with the conductors, while the
+leaf's constant `C'` is independent of `P`, so a bound uniform over the pairs — i.e. the analytic
+input of the paper — is still missing, and so is the pair count (an `N(T,χ)` estimate). -/
+theorem leaf_truncation_error_3_of_uniform_mass
+    (hinput : ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+      ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
+        Thm1Hyp ε H0 X0 H X P0 → 1 ≤ P → P ≤ P0 →
+        (excSet H (Real.sqrt X) P X).Finite →
+        (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
+          Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
+        X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U →
+        ∀ E : Finset ExcPair, (E : Set ExcPair) = excSet H (Real.sqrt X) P X →
+          ∃ K : ℝ, 0 ≤ K ∧ (∀ z ∈ E, ∀ w ∈ E, ‖Sg' z w m‖ ≤ K) ∧
+            K * ∑ p ∈ (E ×ˢ E) \ LeanLab.Pintz2021.Truncation168.retainedPairs E P U m,
+              ((mult p.1 * mult p.2 : ℕ) : ℝ) ≤
+              C' * (Sing m * Real.log U / Real.sqrt U)) :
+    ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
+      ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
+        Thm1Hyp ε H0 X0 H X P0 → 1 ≤ P → P ≤ P0 →
+        (excSet H (Real.sqrt X) P X).Finite →
+        (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
+          Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
+        X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U →
+        ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
+          mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
+        C' * (Sing m * X * Real.log U / Real.sqrt U) := by
+  classical
+  obtain ⟨ε0, hε0, h⟩ := hinput
+  refine ⟨ε0, hε0, ?_⟩
+  intro ε hε hεlt
+  obtain ⟨H0, C', X0, hC', hb⟩ := h ε hε hεlt
+  refine ⟨H0, C', X0, hC', ?_⟩
+  intro H X P0 P U Sg' m hHyp hP1 hP2 hFin hconv hm1 hm2 hU
+  have hX : (0 : ℝ) ≤ X := by
+    have : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
+    linarith
+  have herr := LeanLab.Pintz2021.DecompJ665.actual_truncation_error_le_mass (H := H) hX P U ε m Sg'
+    hFin.toFinset hFin.coe_toFinset
+  obtain ⟨K, hK, hSg, hcount⟩ :=
+    hb H X P0 P U Sg' m hHyp hP1 hP2 hFin hconv hm1 hm2 hU hFin.toFinset hFin.coe_toFinset
+  have hmass := mass_le_of_uniform_Sg (X := X) hX (P := P) (U := U) (m := m) Sg' hSg hK
+  refine le_trans herr ?_
+  calc X * ∑ p ∈ (hFin.toFinset ×ˢ hFin.toFinset) \
+        LeanLab.Pintz2021.Truncation168.retainedPairs hFin.toFinset P U m,
+        ((mult p.1 * mult p.2 : ℕ) : ℝ) * ‖Sg' p.1 p.2 m‖
+      ≤ X * K * ∑ p ∈ (hFin.toFinset ×ˢ hFin.toFinset) \
+          LeanLab.Pintz2021.Truncation168.retainedPairs hFin.toFinset P U m,
+          ((mult p.1 * mult p.2 : ℕ) : ℝ) := hmass
+    _ = X * (K * ∑ p ∈ (hFin.toFinset ×ˢ hFin.toFinset) \
+          LeanLab.Pintz2021.Truncation168.retainedPairs hFin.toFinset P U m,
+          ((mult p.1 * mult p.2 : ℕ) : ℝ)) := by ring
+    _ ≤ X * (C' * (Sing m * Real.log U / Real.sqrt U)) :=
+        mul_le_mul_of_nonneg_left hcount hX
+    _ = C' * (Sing m * X * Real.log U / Real.sqrt U) := by ring
+
 end
 
 /-! ### The leaves -/
 
 /-- REFUTED, `DecompJ665.P_leaf_false`, no `0 < ε`. Repaired in `DecompJ579.leaf_P_exists`. Do not prove this.
 LEAF arXiv:1804.05561v1 display 8.28: the major arc parameter P exists -/
-theorem leaf_P_exists_3 {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp_v2 ε H0 X0 H X P0) :
+theorem leaf_P_exists_3 {ε H0 X0 H X P0 : ℝ} (hHyp : Thm1Hyp ε H0 X0 H X P0) :
   ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧ (excSet H (Real.sqrt X) P X).Finite := by sorry
 
 theorem leaf_singular_series_converges_3 (H X P : ℝ) :
@@ -1270,7 +1401,7 @@ theorem leaf_singular_series_converges_3 (H X P : ℝ) :
 LEAF arXiv:1804.05561v1 display 10.25: the main term error is bounded by a constant C depending only on ε -/
 theorem leaf_main_term_bound_exists_C_3 (ε ε0 c H0 C X0 : ℝ) :
   ∀ H X P0 P : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ,
-    Thm1Hyp_v2 ε H0 X0 H X P0 →
+    Thm1Hyp ε H0 X0 H X P0 →
     P0 * X ^ (-ε) ≤ P → P ≤ P0 →
     (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ m : ℕ, 0 < m →
       Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) →
@@ -1287,7 +1418,7 @@ theorem leaf_constants_exist_3 :
 /-- Assembly of Theorem 1 display 2.21 (untruncated form). -/
 theorem assembly_321_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 →
+    ∃ c H0 C X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -1316,14 +1447,14 @@ is `1 > P`, so the truncated sum vanishes at every cutoff `U`, the full sum keep
 and the right hand side `C' * (Sing m * X * log U / √U)` tends to zero as `U → ∞`, so no constant
 exists. The lower bound `1 ≤ P` is the paper's own requirement that the pole pair survive the
 `[r₁, r₂] ≤ P` restriction (`DecompJ281.pole_lcm_retained`), and `assembly_322_3` supplies it at
-`P = P0`, which lies in `[P0 X^{-ε}, P0]` once `X ≥ 1` because `Thm1Hyp_v2` gives `1 ≤ P0`. The leaf
+`P = P0`, which lies in `[P0 X^{-ε}, P0]` once `X ≥ 1` because `Thm1Hyp` gives `1 ≤ P0`. The leaf
 itself stays OPEN: display 10.27 needs the mass of the discarded pairs, which is not in Mathlib. -/
 /-- LEAF arXiv:1804.05561v1 display 10.27: the truncated tail error is bounded, at arc levels
 `1 ≤ P ≤ P0` -/
 theorem leaf_truncation_error_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
     ∃ H0 C' X0 : ℝ, 0 < C' ∧ ∀ H X P0 P U : ℝ, ∀ Sg' : ExcPair → ExcPair → ℕ → ℂ, ∀ m : ℕ,
-      Thm1Hyp_v2 ε H0 X0 H X P0 → 1 ≤ P → P ≤ P0 →
+      Thm1Hyp ε H0 X0 H X P0 → 1 ≤ P → P ≤ P0 →
       (excSet H (Real.sqrt X) P X).Finite →
       (∀ z ∈ excSet H (Real.sqrt X) P X, ∀ w ∈ excSet H (Real.sqrt X) P X, ∀ n : ℕ, 0 < n →
         Tendsto (singPartialPrime z w n) atTop (𝓝 (Sg' z w n))) →
@@ -1335,7 +1466,7 @@ theorem leaf_truncation_error_3 :
 /-- LEAF Assembly of Theorem 1 display 2.22 (truncated form). -/
 theorem assembly_322_3 :
   ∃ ε0 : ℝ, 0 < ε0 ∧ ∀ ε : ℝ, 0 < ε → ε < ε0 →
-    ∃ c H0 C C' X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp_v2 ε H0 X0 H X P0 →
+    ∃ c H0 C C' X0 : ℝ, 0 < c ∧ ∀ H X P0 : ℝ, Thm1Hyp ε H0 X0 H X P0 →
       ∃ P : ℝ, P0 * X ^ (-ε) ≤ P ∧ P ≤ P0 ∧
         (excSet H (Real.sqrt X) P X).Finite ∧
         ∃ Sg' : ExcPair → ExcPair → ℕ → ℂ,
@@ -1356,12 +1487,12 @@ theorem assembly_322_3 :
   have hXa : X0a ≤ X := le_trans (le_trans (le_max_left X0a X0b) (le_max_left _ 4)) hX0
   have hXb : X0b ≤ X := le_trans (le_trans (le_max_right X0a X0b) (le_max_left _ 4)) hX0
   have hX4 : (4 : ℝ) ≤ X := le_trans (le_max_right _ 4) hX0
-  have hHA : Thm1Hyp_v2 ε H0a X0a H X P0 :=
+  have hHA : Thm1Hyp ε H0a X0a H X P0 :=
     ⟨le_trans (le_max_left H0a H0b) hH0, hHlog, hXa, hP01, hP0X⟩
-  have hHB : Thm1Hyp_v2 ε H0b X0b H X P0 :=
+  have hHB : Thm1Hyp ε H0b X0b H X P0 :=
     ⟨le_trans (le_max_right H0a H0b) hH0, hHlog, hXb, hP01, hP0X⟩
   -- the level `P = P0` lies in `[P0 X^{-ε}, P0]`, and it is at least `1`, as the repaired
-  -- truncation leaf requires and `Thm1Hyp_v2` supplies
+  -- truncation leaf requires and `Thm1Hyp` supplies
   have hX1 : (1 : ℝ) ≤ X := by linarith
   have hlow : P0 * X ^ (-ε) ≤ P0 := by
     have hx : X ^ (-ε) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos hX1 (by linarith)
