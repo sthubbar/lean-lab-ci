@@ -64,6 +64,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Free disk space
         run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL; df -h /
+      - name: Add swap, guard against runner OOM
+        # lrefresh 20261115T1150Z: 11 main-check failures in 24 h were the runner shutdown signal, exit 143, mid lake build on big folders, not Lean errors
+        run: sudo fallocate -l 12G /swapfile_lab && sudo chmod 600 /swapfile_lab && sudo mkswap /swapfile_lab >/dev/null && sudo swapon /swapfile_lab; free -g; df -h /
       - name: Restore compiled lab modules
         uses: actions/cache/restore@v4
         with:
