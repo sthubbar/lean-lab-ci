@@ -1,5 +1,6 @@
 import Mathlib
 import LeanLab.PNTPort.StrongPNT.EulerMaclaurin
+import LeanLab.RamareSaouter2003.Stirling518
 
 /-!
 Backlund pp. 363 and 364 display 59 and the Stieltjes estimate before display 60.
@@ -183,6 +184,51 @@ theorem finite_log_norm_euler (s : ℂ) (hs : 0 < s.im) (N : ℕ) :
       ∫ x : ℝ in (0 : ℝ)..N, (1 / (s + x) : ℂ).re * B1 x at h
   convert h using 1 <;> ring
 
+/-- Lindelof p. 97 display 3, obtained from finite Euler summation and the Gamma Euler limit. -/
+lemma gamma_log_norm_stirling (s : ℂ) (hre : 0 ≤ s.re) (him : 0 < s.im) :
+    Real.log ‖Complex.Gamma s‖ =
+      ((s - 1 / 2) * Complex.log s - s).re + Real.log (Real.sqrt (2 * π)) +
+        (s⁻¹).re / 12 - ((s⁻¹) ^ 3).re / 360 -
+        (∫ x : ℝ in Ioi (0 : ℝ),
+          (bernoulliFun 4 (Int.fract x) : ℂ) / (s + x) ^ 4).re / 4 := by
+  have havoid : ∀ n : ℕ, s ≠ -n := by
+    intro n h
+    have hi := congrArg Complex.im h
+    simp at hi
+    linarith
+  let M := (s - 1 / 2) * Complex.log s - s
+  let J := ∫ x : ℝ in Ioi (0 : ℝ),
+    (bernoulliFun 4 (Int.fract x) : ℂ) / (s + x) ^ 4
+  have hInv := Stirling518.inv_shift_limit s him
+  have hInt := intervalIntegral_tendsto_integral_Ioi 0
+    (Stirling518.fourth_kernel_integrable s hre him)
+    (tendsto_natCast_atTop_atTop : Tendsto (fun n : ℕ => (n : ℝ)) atTop atTop)
+  have hQ := (((Stirling518.logarithmic_endpoint_limit s him).sub_const M).add
+    ((hInv.sub_const s⁻¹).div_const 12)).sub
+      (((hInv.pow 3).sub_const ((s⁻¹) ^ 3)).div_const 360) |>.add (hInt.div_const 4)
+  have htotal := Stirling518.log_factorial_limit.sub
+    (Complex.continuous_re.continuousAt.tendsto.comp hQ)
+  have hlim : Tendsto (fun n : ℕ => Real.log ‖Complex.GammaSeq s n‖) atTop
+      (𝓝 (Real.log (Real.sqrt (2 * π)) -
+        ((0 - M) + (0 - s⁻¹) / 12 - (0 ^ 3 - (s⁻¹) ^ 3) / 360 + J / 4).re)) := by
+    apply htotal.congr'
+    filter_upwards [eventually_ge_atTop 1] with n hn
+    have hsum : (∑ k ∈ Finset.range (n + 1), Real.log ‖s + k‖) =
+        (∑ k ∈ Finset.range (n + 1), Complex.log (s + k)).re := by
+      simp only [Complex.re_sum, Complex.log_re]
+    rw [gamma_seq_log_norm s havoid n hn, hsum, Stirling518.finite_sum_log s him n]
+    dsimp only [Function.comp_def, M]
+    norm_num only [Complex.add_re, Complex.sub_re, Complex.add_im, Complex.sub_im,
+      Complex.mul_re, Complex.div_ofNat_re, Complex.div_ofNat_im, Complex.one_re, Complex.one_im,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.natCast_re, Complex.natCast_im,
+      inv_pow, one_div, mul_zero, sub_zero, zero_mul, add_zero]
+    ring
+  have he := tendsto_nhds_unique (gamma_log_norm_limit s havoid) hlim
+  norm_num only [zero_sub, zero_pow, zero_div, Complex.add_re, Complex.sub_re,
+    Complex.neg_re, Complex.zero_re, Complex.div_ofNat_re] at he
+  dsimp only [M, J] at he
+  linear_combination he
+
 /-- LEAF. Backlund p. 363 display 59 and Lindelof p. 97 displays 1 and 3.
 The standard Bernoulli convention retains the explicit reciprocal-cube term.
 This is an identity for the real logarithmic norm of the actual Gamma function.
@@ -194,7 +240,55 @@ theorem real_stirling_identity (σ t : ℝ) (hσ : σ ∈ Icc (0 : ℝ) 1) (ht :
           (σ - 1) / 4 * Real.log (1 + (σ / t) ^ 2) + σ / (6 * (σ ^ 2 + t ^ 2)) +
           (stirlingRemainder (((σ : ℂ) + t * I) / 2)).re -
           (1 / (360 * (((σ : ℂ) + t * I) / 2) ^ 3)).re) := by
-  sorry
+  let z : ℂ := ((σ : ℂ) + t * I) / 2
+  have htpos : 0 < t := by linarith
+  have hzre : z.re = σ / 2 := by simp [z]
+  have hzim : z.im = t / 2 := by simp [z]
+  have hre : 0 ≤ z.re := by rw [hzre]; exact div_nonneg hσ.1 (by norm_num)
+  have him : 0 < z.im := by rw [hzim]; positivity
+  have h := gamma_log_norm_stirling z hre him
+  have hnorm : Real.log ‖z‖ =
+      Real.log (t / 2) + Real.log (1 + (σ / t) ^ 2) / 2 := by
+    have hsq : ‖z‖ ^ 2 = (t / 2) ^ 2 * (1 + (σ / t) ^ 2) := by
+      rw [Complex.sq_norm, Complex.normSq_apply, hzre, hzim]
+      field_simp
+      ring
+    have hl := congrArg Real.log hsq
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity), Real.log_pow] at hl
+    linarith
+  have harg : z.arg = π / 2 - Real.arctan (σ / t) := by
+    rw [Stirling518.arg_upper_half_plane z hre him, hzre, hzim,
+      div_div_div_cancel_right₀ (by norm_num : (2 : ℝ) ≠ 0)]
+  have hmain : ((z - 1 / 2) * Complex.log z - z).re =
+      (σ - 1) / 2 * Real.log (t / 2) - π * t / 4 +
+        (t / 2 * Real.arctan (σ / t) - σ / 2 +
+          (σ - 1) / 4 * Real.log (1 + (σ / t) ^ 2)) := by
+    simp only [Complex.sub_re, Complex.sub_im, Complex.mul_re, Complex.log_re,
+      Complex.log_im, Complex.div_ofNat_re, Complex.div_ofNat_im, Complex.one_re,
+      Complex.one_im, hzre, hzim, zero_div, sub_zero, hnorm, harg]
+    ring
+  have hinv : (z⁻¹).re / 12 = σ / (6 * (σ ^ 2 + t ^ 2)) := by
+    rw [Complex.inv_re, Complex.normSq_apply, hzre, hzim]
+    field_simp
+    ring
+  have hcube : (1 / (360 * z ^ 3) : ℂ) = (z⁻¹) ^ 3 / 360 := by
+    simp only [mul_inv, inv_pow, div_eq_mul_inv]
+    ring
+  have hrem : (stirlingRemainder z).re =
+      -(∫ x : ℝ in Ioi (0 : ℝ),
+        (bernoulliFun 4 (Int.fract x) : ℂ) / (z + x) ^ 4).re / 4 := by
+    simp only [stirlingRemainder, periodicB4_eq_mathlib, Complex.mul_re,
+      Complex.neg_re, Complex.neg_im, Complex.div_ofNat_re, Complex.div_ofNat_im,
+      Complex.one_re, Complex.one_im, zero_div]
+    ring
+  change Real.log ‖Complex.Gamma z‖ =
+    (σ - 1) / 2 * Real.log (t / 2) - π * t / 4 + Real.log (Real.sqrt (2 * π)) +
+      (t / 2 * Real.arctan (σ / t) - σ / 2 +
+        (σ - 1) / 4 * Real.log (1 + (σ / t) ^ 2) + σ / (6 * (σ ^ 2 + t ^ 2)) +
+        (stirlingRemainder z).re - (1 / (360 * z ^ 3)).re)
+  rw [hmain, hinv] at h
+  rw [hrem, hcube, Complex.div_ofNat_re]
+  linear_combination h
 
 /-- Lindelof p. 97 display 3, uniform fourth Bernoulli polynomial bound. -/
 theorem periodicB4_bound (x : ℝ) : |periodicB4 x| ≤ 1 / 30 := by
@@ -500,3 +594,4 @@ end LeanLab.RamareSaouter2003.Decomp579c
 
 #print axioms LeanLab.RamareSaouter2003.Decomp579c.shifted_log_norm_derivative
 #print axioms LeanLab.RamareSaouter2003.Decomp579c.finite_log_norm_euler
+#print axioms LeanLab.RamareSaouter2003.Decomp579c.gamma_log_norm_stirling
