@@ -29,7 +29,81 @@ theorem logPoly_le (T U V t u : ℝ)
     (ht : 0 < t) (hu : 0 < u) (hv : 0 < 1 - t - u) (ha : 0 ≤ 1 - t - 3 * u)
     (hT : 0 < T) (hU : 0 < U) (hV : 0 < V)
     (htT : t ≤ T) (huU : u ≤ U) (hvV : 1 - t - u ≤ V) :
-    logPoly T U V t u ≤ (1 + Real.log ((1 - t) / u - 2)) / (t * u * (1 - t - u)) := by sorry
+    logPoly T U V t u ≤ (1 + Real.log ((1 - t) / u - 2)) / (t * u * (1 - t - u)) := by
+  obtain ⟨hA0, hA1⟩ := invPoly5_bounds t T ht hT htT
+  obtain ⟨hB0, hB1⟩ := invPoly7_bounds u U hu hU huU
+  obtain ⟨hv0, hv1⟩ := invPoly3_bounds (1 - t - u) V hv hV hvV
+  set v := invPoly3 (1 - t - u) V with hvdef
+  set z := (1 - t - 3 * u) * v with hzdef
+  have hv0' : 0 ≤ v := by rw [hvdef]; exact hv0
+  have hv1' : v ≤ 1 / (1 - t - u) := by rw [hvdef]; exact hv1
+  have hz0 : 0 ≤ z := by rw [hzdef]; exact mul_nonneg ha hv0'
+  have hvD : v * (1 - t - u) ≤ 1 := (le_div_iff₀ hv).mp hv1'
+  have hzD : z * (1 - t - u) ≤ 1 - t - 3 * u := by
+    have := mul_le_mul_of_nonneg_left hvD ha
+    calc z * (1 - t - u) = (1 - t - 3 * u) * (v * (1 - t - u)) := by
+          rw [hzdef]; ring
+      _ ≤ (1 - t - 3 * u) * 1 := this
+      _ = 1 - t - 3 * u := by ring
+  have hzlt : z < 1 := by
+    rcases le_or_gt 1 z with hge | hlt
+    · have h2 : (1 : ℝ) * (1 - t - u) ≤ z * (1 - t - u) :=
+        mul_le_mul_of_nonneg_right hge hv.le
+      nlinarith [hzD, h2]
+    · exact hlt
+  have hlog4 := log_four_terms z hz0 hzlt
+  have hz1pos : 0 < 1 - z := by linarith
+  have hexp : (1 - t) / u - 2 = (1 - t - 2 * u) / u := by field_simp
+  have hratio : (1 + z) / (1 - z) ≤ (1 - t) / u - 2 := by
+    rw [div_le_iff₀ hz1pos, hexp]
+    have hkey : u * (1 + z) ≤ (1 - t - 2 * u) * (1 - z) := by nlinarith [hzD]
+    rw [div_mul_eq_mul_div₀, le_div_iff₀ hu]
+    linarith [hkey]
+  have hposA : 0 < (1 + z) / (1 - z) := div_pos (by linarith) hz1pos
+  have hposB : 0 < (1 - t) / u - 2 := by
+    have h : 0 < (1 - t - 2 * u) / u := div_pos (by linarith) hu
+    rwa [← hexp] at h
+  have hlog : 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7 ≤ Real.log ((1 - t) / u - 2) :=
+    le_trans hlog4 (Real.log_le_log hposA hratio)
+  have hPz0 : 0 ≤ 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7 := by
+    nlinarith [hz0, pow_nonneg hz0 3, pow_nonneg hz0 5, pow_nonneg hz0 7]
+  have hAt : invPoly5 t T * t ≤ 1 := (le_div_iff₀ ht).mp hA1
+  have hBu : invPoly7 u U * u ≤ 1 := (le_div_iff₀ hu).mp hB1
+  have hAt0 : 0 ≤ invPoly5 t T * t := mul_nonneg hA0 ht.le
+  have hBu0 : 0 ≤ invPoly7 u U * u := mul_nonneg hB0 hu.le
+  have hvD0 : 0 ≤ v * (1 - t - u) := mul_nonneg hv0' hv.le
+  have hprod : invPoly5 t T * invPoly7 u U * v * (t * u * (1 - t - u)) ≤ 1 := by
+    have hp1 : (invPoly5 t T * t) * (invPoly7 u U * u) ≤ 1 := by
+      have h := mul_le_mul hAt hBu hBu0 (by norm_num : (0 : ℝ) ≤ 1)
+      simpa using h
+    have hp2 : ((invPoly5 t T * t) * (invPoly7 u U * u)) * (v * (1 - t - u)) ≤ 1 := by
+      have h := mul_le_mul hp1 hvD hvD0 (by norm_num : (0 : ℝ) ≤ 1)
+      simpa using h
+    calc invPoly5 t T * invPoly7 u U * v * (t * u * (1 - t - u))
+        = ((invPoly5 t T * t) * (invPoly7 u U * u)) * (v * (1 - t - u)) := by ring
+      _ ≤ 1 := hp2
+  have hLHS : logPoly T U V t u
+      = invPoly5 t T * invPoly7 u U * v *
+        (1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7) := by
+    simp only [logPoly]
+    rw [← hvdef, ← hzdef]
+  have hD : 0 < t * u * (1 - t - u) := mul_pos (mul_pos ht hu) hv
+  have h1P : 0 ≤ 1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7 := by linarith
+  have hstep : logPoly T U V t u ≤
+      (1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7) / (t * u * (1 - t - u)) := by
+    rw [hLHS, le_div_iff₀ hD]
+    calc invPoly5 t T * invPoly7 u U * v *
+          (1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7) * (t * u * (1 - t - u))
+        = (invPoly5 t T * invPoly7 u U * v * (t * u * (1 - t - u))) *
+          (1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7) := by ring
+      _ ≤ 1 * (1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7) :=
+          mul_le_mul_of_nonneg_right hprod h1P
+      _ = 1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7 := by ring
+  calc logPoly T U V t u
+      ≤ (1 + 2 * z + 2 / 3 * z^3 + 2 / 5 * z^5 + 2 / 7 * z^7) / (t * u * (1 - t - u)) := hstep
+    _ ≤ (1 + Real.log ((1 - t) / u - 2)) / (t * u * (1 - t - u)) := by
+        exact (div_le_div_iff₀ hD hD).mpr
+          (mul_le_mul_of_nonneg_right (by linarith) hD.le)
 
 /-- LEAF. Pages 279 and 280: continuity of the logarithmic inner integral on a positive rectangle. -/
 theorem log_inner_continuousOn (a b c d : ℝ) (L U : ℝ → ℝ)
@@ -37,7 +111,42 @@ theorem log_inner_continuousOn (a b c d : ℝ) (L U : ℝ → ℝ)
     (hL : Continuous L) (hU : Continuous U)
     (hbound : ∀ t ∈ Icc a b, c ≤ L t ∧ L t ≤ U t ∧ U t ≤ d) :
     ContinuousOn (fun t : ℝ => ∫ u in L t..U t,
-      (1 + Real.log ((1 - t) / u - 2)) / (t * u * (1 - t - u))) (Icc a b) := by sorry
+      (1 + Real.log ((1 - t) / u - 2)) / (t * u * (1 - t - u))) (Icc a b) := by
+  have hrect : ∀ p ∈ Icc a b ×ˢ Icc c d,
+      0 < p.1 ∧ 0 < p.2 ∧ 0 < 1 - p.1 - p.2 ∧ 0 < (1 - p.1) / p.2 - 2 := by
+    intro p hp
+    obtain ⟨hp1, hp2⟩ := hp
+    obtain ⟨hpa, hpb⟩ := hp1
+    obtain ⟨hpc, hpd⟩ := hp2
+    have hp1pos : 0 < p.1 := lt_of_lt_of_le ha hpa
+    have hp2pos : 0 < p.2 := lt_of_lt_of_le hc hpc
+    have hsum : p.1 + 2 * p.2 < 1 := by linarith
+    refine ⟨hp1pos, hp2pos, by linarith, ?_⟩
+    have hgt : 2 < (1 - p.1) / p.2 := (lt_div_iff₀ hp2pos).mpr (by linarith)
+    linarith
+  have hF : ContinuousOn (Function.uncurry
+      (fun t u : ℝ => (1 + Real.log ((1 - t) / u - 2)) / (t * u * (1 - t - u))))
+      (Icc a b ×ˢ Icc c d) := by
+    have hnum : ContinuousOn (fun p : ℝ × ℝ => (1 - p.1) / p.2 - 2)
+        (Icc a b ×ˢ Icc c d) :=
+      (((continuousOn_const.sub continuousOn_fst).div continuousOn_snd
+        (fun p hp => (hrect p hp).2.1.ne')).sub continuousOn_const)
+    have hlog : ContinuousOn (fun p : ℝ × ℝ => Real.log ((1 - p.1) / p.2 - 2))
+        (Icc a b ×ˢ Icc c d) :=
+      hnum.log (fun p hp => (hrect p hp).2.2.2.ne')
+    have hden : ContinuousOn (fun p : ℝ × ℝ => p.1 * p.2 * (1 - p.1 - p.2))
+        (Icc a b ×ˢ Icc c d) := by fun_prop
+    have hne : ∀ p ∈ Icc a b ×ˢ Icc c d, p.1 * p.2 * (1 - p.1 - p.2) ≠ 0 := by
+      intro p hp
+      obtain ⟨hp1, hp2, hp3, _⟩ := hrect p hp
+      exact (mul_pos (mul_pos hp1 hp2) hp3).ne'
+    exact (continuousOn_const.add hlog).div hden hne
+  exact moving_integral_continuousOn
+    (fun t u : ℝ => (1 + Real.log ((1 - t) / u - 2)) / (t * u * (1 - t - u)))
+    a b c d L U hab hcd hF hL hU (by
+      intro t ht
+      obtain ⟨h1, h2, h3⟩ := hbound t ht
+      exact ⟨h1, h2.trans h3, h1.trans h2, h3⟩)
 
 /-- Pages 279 and 280: polynomial inner integrals have continuous moving endpoints. -/
 theorem log_poly_inner_continuous (T U V : ℝ) (L W : ℝ → ℝ)
