@@ -67,6 +67,9 @@ theorem nonprime_defect_log5_525 {ϕ : ℝ → ℝ} {M : ℝ} (hM : 0 ≤ M)
               ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2) *
             ee (-(N * α))‖ ^ 2)
       ≤ 192 * M ^ 4 * (X : ℝ) ^ (13 / 5 : ℝ) * Real.log X ^ 5 := by
+  have hXpos : (0 : ℝ) < X := by exact_mod_cast (by omega : 0 < X)
+  have hX_one_le : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+  -- OUT OF REACH: Requires orthogonality of ee not in Mathlib
   sorry
 
 /-! ## Proved helpers -/
