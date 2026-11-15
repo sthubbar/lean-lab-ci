@@ -20,7 +20,8 @@ theorem region30_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 4 30 true N (localization N ε) n <
         0.000303 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Decomp316c.group4_lower
 
 /-- LEAF. Jia page 282, Lemma 27, supporting display 65 on page 286.
 Only group 4 with region 30 removed is bounded. The coefficient is 0.024279.
