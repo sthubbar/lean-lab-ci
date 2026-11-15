@@ -17,7 +17,19 @@ theorem short_integral_7 :
     let i : Fin 16 := ⟨5, by decide⟩
     let r := numericData i
     (rowTarget i : ℝ) ≤ ∫ t in (r 0 : ℝ)..(r 1),
-      ∫ u in ((r 2 : ℝ)+r 3*t)..((r 4 : ℝ)+r 5*t), shortPolynomial i t u := by sorry
+      ∫ u in ((r 2 : ℝ)+r 3*t)..((r 4 : ℝ)+r 5*t), shortPolynomial i t u := by
+  norm_num [shortPolynomial, numericData, isLog, logReciprocal, rowTarget]
+  ring_nf
+  simp (config := { maxSteps := 3000000 })
+    (disch := apply Continuous.intervalIntegrable; fun_prop) only
+    [integral_add, integral_const_mul (𝕜 := ℝ), integral_mul_const (𝕜 := ℝ),
+     integral_pow, integral_const, integral_id, smul_eq_mul]
+  ring_nf
+  simp (config := { maxSteps := 3000000 })
+    (disch := apply Continuous.intervalIntegrable; fun_prop) only
+    [integral_add, integral_mul_const (𝕜 := ℝ),
+     integral_pow, integral_const, integral_id, smul_eq_mul]
+  norm_num
 #print axioms short_integral_7
 end
 end LeanLab.Languasco2004.Polynomial564s
