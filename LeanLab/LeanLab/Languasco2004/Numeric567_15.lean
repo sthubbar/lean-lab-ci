@@ -13,7 +13,21 @@ set_option maxRecDepth 100000
 
 /-- LEAF. Pages 275 to 277, term 15: exact polynomial integration retains a strict reserve. -/
 theorem polynomial_integral :
-    (17671 / 1000000 : ℝ) + 1/100000000 ≤ ∫ t in (701 / 1566 : ℝ)..(41 / 90), ∫ u in ((1 / 4) + (-1 / 4) * t)..((1 / 3) + (-1 / 3) * t), minorant 1 (1768 / 3915) (30089 / 187920) (24343 / 62640) t u := by sorry
+    (17671 / 1000000 : ℝ) + 1/100000000 ≤ ∫ t in (701 / 1566 : ℝ)..(41 / 90), ∫ u in ((1 / 4) + (-1 / 4) * t)..((1 / 3) + (-1 / 3) * t), minorant 1 (1768 / 3915) (30089 / 187920) (24343 / 62640) t u := by
+  have hR : (∫ t in (701 / 1566 : ℝ)..(41 / 90), ∫ u in ((1 / 4) + (-1 / 4) * t)..((1 / 3) + (-1 / 3) * t),
+      minorant 1 (1768 / 3915) (30089 / 187920) (24343 / 62640) t u) = 17671/1000000 + 1/100000000 := by
+    unfold minorant invPoly5 invPoly7
+    ring_nf
+    simp (disch := apply Continuous.intervalIntegrable; fun_prop) only
+      [integral_add, integral_sub, integral_const_mul (𝕜 := ℝ), integral_mul_const (𝕜 := ℝ),
+       integral_pow, integral_const, integral_id, smul_eq_mul]
+    ring_nf
+    simp (disch := apply Continuous.intervalIntegrable; fun_prop) only
+      [integral_add, integral_sub, integral_const_mul (𝕜 := ℝ), integral_mul_const (𝕜 := ℝ),
+       integral_pow, integral_const, integral_id, smul_eq_mul]
+    norm_num
+  rw [hR]
+  rfl
 
 /-- Pages 275 to 277, term 15: the full source integral exceeds its printed coefficient.
 The reserve is one hundred millionth. No exceptional prime estimate is used. -/
