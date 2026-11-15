@@ -29,12 +29,36 @@ def model4 (Y : ℝ) : ℝ :=
 /-- Page 279: the real coefficient of the complete Omega4 integral. -/
 def integral4 : ℝ := ∫ t in (41 / 180 : ℝ)..(8 / 33), inner4 t
 
+/-- The model is a finite sum of nonnegative cardinalities. -/
+theorem model4_nonneg (Y : ℝ) : 0 ≤ model4 Y := by
+  unfold model4
+  exact sum_nonneg fun p _ => sum_nonneg fun q _ => by positivity
+
 /-- LEAF. Page 279 after displays 53 to 56, using Lemma 21 on page 262.
 Only the all integer model is compared with its Buchstab integral.
 No prime complementary variable or exceptional set occurs in this leaf. -/
 theorem model4_asymptotic :
     ∀ η : ℝ, 0 < η → ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
-      (integral4 - η) * (Y / Real.log Y) ≤ model4 Y := by sorry
+      (integral4 - η) * (Y / Real.log Y) ≤ model4 Y := by
+  intro η hη
+  by_cases hbig : integral4 ≤ η
+  · refine ⟨1, ?_⟩
+    intro Y hY
+    have hlog : 0 ≤ Real.log Y := Real.log_nonneg hY
+    have hdiv : 0 ≤ Y / Real.log Y := div_nonneg (by linarith) hlog
+    have hmul : 0 ≤ (η - integral4) * (Y / Real.log Y) :=
+      mul_nonneg (sub_nonneg.mpr hbig) hdiv
+    have hmodel : 0 ≤ model4 Y := model4_nonneg Y
+    nlinarith
+  · -- ATTEMPT. The remaining case needs the asymptotic of the rough counts and
+    -- the prime density on the Omega4 region.
+    have hY2 : 2 ≤ Y := by linarith
+    have hlog : 0 < Real.log Y := Real.log_pos (by linarith)
+    have hmodel : 0 ≤ model4 Y := model4_nonneg Y
+    have hprime : ∃ p : ℕ, p.Prime ∧ Y ^ (41 / 180 : ℝ) < (p : ℝ) ∧
+        (p : ℝ) ≤ Y ^ (8 / 33 : ℝ) := by
+      exact?
+    sorry
 
 /-- LEAF. Pages 277 to 279, displays 53 to 56 and the exception convention
 before display 48 on page 263. This is the prime to integer model transfer.
@@ -48,7 +72,21 @@ theorem region4_transfer_exception :
         η * scale N (localization N ε) n <
         |pieceSum 3 4 true N (localization N ε) n -
           singular n / Real.log N * model4 (localization N ε)|)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  intro η hη
+  refine ⟨1, by norm_num, ?_⟩
+  intro ε B hε he hB
+  refine ⟨1, 2, ?_⟩
+  intro N hN
+  have hN2 : 2 ≤ N := by linarith
+  have hcard : (((window N ε).filter (fun n =>
+        η * scale N (localization N ε) n <
+        |pieceSum 3 4 true N (localization N ε) n -
+          singular n / Real.log N * model4 (localization N ε)|)).card : ℝ) ≤
+      (window N ε).card := by
+    exact_mod_cast Finset.card_le_card (Finset.filter_subset _ _)
+  have hwin : (window N ε).card ≤ 1 * windowLength N ε / Real.log N ^ B := by
+    exact?
 
 /-- Page 279 numerical support: the coefficient has a half micro unit reserve. -/
 theorem integral4_reserve : (0.0096365 : ℝ) ≤ integral4 := region4_numeric_margin
