@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Burst9Psi2Panels
+import LeanLab.ChenDoubleSieve.Task562Supply
 
 /-!
 # Burst 9: the 52 bounds `I_{2,i}(row) ≤ U`, Wu 2004 Lemma 5.2, page 26
@@ -506,8 +507,8 @@ theorem I2_r3_15 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
 One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A scipy recomputation
 with the exact ω, zero below one, gave `0.000043159`; the bound adds 0.1 percent. -/
 theorem I2_r3_16 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
-    I2 ω (tableParams 3) 7 ≤ (21601/500000000 : ℝ) := by
-  sorry
+    I2 ω (tableParams 3) 7 ≤ (21601/500000000 : ℝ) :=
+  LeanLab.ChenDoubleSieve.Task562.I2_r3_16_clean hω hz
 
 /-- Wu 2004 Lemma 5.2, page 26: `I_{2,17}` for row 4 of Table 1 is at most `0.000e+00`, by
 degenerate, one coordinate is pinned since κ₃ = s, so the bound is 0. CONDITIONAL ON IsBuchstab and ZeroBelowOne, through `ω ≤ 1`. PROVED. -/
