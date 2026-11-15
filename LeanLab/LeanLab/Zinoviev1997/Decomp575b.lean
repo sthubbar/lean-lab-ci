@@ -396,6 +396,457 @@ theorem weighted_prime_power_error {q l : ℕ} {x : ℝ} (hx : 10 ^ 9 ≤ x) :
   have hb := correction_le hx2 q l
   nlinarith [mul_le_mul_of_nonneg_left hL (Real.sqrt_nonneg x)]
 
+/-! ### Explicit estimates for the modulus one prime count -/
+
+private theorem log_two_ge_0693 : (0.693 : ℝ) ≤ Real.log 2 := by
+  linarith [Real.log_two_gt_d9]
+
+private theorem log_four_le_14 : Real.log 4 ≤ 1.4 := by
+  have h : Real.log 4 = 2 * Real.log 2 := by
+    rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+    push_cast
+    ring
+  rw [h]
+  linarith [Real.log_two_lt_d9]
+
+private theorem sqrt_ge_31622 {x : ℝ} (hx : (10 : ℝ) ^ 9 ≤ x) :
+    (31622 : ℝ) ≤ Real.sqrt x := by
+  have h9 : ((10 : ℝ) ^ 9) = 1000000000 := by norm_num
+  have hxx : (31622 : ℝ) ^ 2 ≤ x := by
+    have hsq : (31622 : ℝ) ^ 2 = 999950884 := by norm_num
+    rw [hsq, h9] at *
+    linarith
+  calc (31622 : ℝ) = Real.sqrt ((31622 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt x := Real.sqrt_le_sqrt hxx
+
+private theorem log_ge_207 {x : ℝ} (hx : (10 : ℝ) ^ 9 ≤ x) : (20.7 : ℝ) ≤ Real.log x := by
+  have h0 : (0 : ℝ) < (10 : ℝ) ^ 9 := by norm_num
+  have h10 : (2.302 : ℝ) ≤ Real.log 10 := by
+    rw [Real.log_ten_eq]
+    linarith [Real.log_two_gt_d9, Real.log_five_gt_d9]
+  have h : (20.7 : ℝ) ≤ Real.log ((10 : ℝ) ^ 9) := by
+    rw [Real.log_pow]
+    push_cast
+    linarith
+  exact h.trans (Real.log_le_log h0 hx)
+
+private theorem log_ge_693 {u : ℝ} (hu : (1024 : ℝ) ≤ u) : (6.93 : ℝ) ≤ Real.log u := by
+  have h0 : (0 : ℝ) < 1024 := by norm_num
+  have h : (6.93 : ℝ) ≤ Real.log (1024 : ℝ) := by
+    have e : (1024 : ℝ) = 2 ^ (10 : ℕ) := by norm_num
+    rw [e, Real.log_pow]
+    push_cast
+    linarith [Real.log_two_gt_d9]
+  exact h.trans (Real.log_le_log h0 hu)
+
+/-- `c ≤ u^(1/n)` from `c^n ≤ u`. -/
+private theorem le_rpow_recip {u : ℝ} (hu : (0 : ℝ) ≤ u) {n : ℕ} (hn : 0 < n) {c : ℝ}
+    (hc : (0 : ℝ) ≤ c) (h : c ^ n ≤ u) : c ≤ u ^ ((n : ℝ)⁻¹) := by
+  have h1 : (c ^ n : ℝ) ^ ((n : ℝ)⁻¹) ≤ u ^ ((n : ℝ)⁻¹) :=
+    Real.rpow_le_rpow (by positivity) h (by positivity)
+  have e : (c ^ n : ℝ) ^ ((n : ℝ)⁻¹) = c := by
+    rw [← Real.rpow_natCast c n, ← Real.rpow_mul hc,
+      mul_inv_cancel₀ (by exact_mod_cast hn.ne')]
+    exact Real.rpow_one c
+  rwa [e] at h1
+
+private theorem rpow_small {u : ℝ} (hu : (1024 : ℝ) ≤ u) {k : ℕ} (hk : 3 ≤ k) :
+    u ^ ((k : ℝ)⁻¹) ≤ Real.sqrt u / 2 := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  have hk1 : (1 : ℝ) ≤ u := by linarith
+  have htwo : (2 : ℝ) ≤ u ^ ((6 : ℝ)⁻¹) := by
+    refine le_rpow_recip hu0 (by norm_num : (0:ℕ) < 6) (by norm_num : (0:ℝ) ≤ 2) ?_
+    have h64 : ((2 : ℝ) ^ 6) = 64 := by norm_num
+    rw [h64]
+    linarith
+  have hexp : ((k : ℝ)⁻¹) ≤ ((3 : ℝ)⁻¹) := by
+    have hk3 : (3 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
+    have h := one_div_le_one_div_of_le (a := (3 : ℝ)) (b := (k : ℝ)) (by norm_num) hk3
+    simpa [one_div] using h
+  have h1 : u ^ ((k : ℝ)⁻¹) ≤ u ^ ((3 : ℝ)⁻¹) :=
+    Real.rpow_le_rpow_of_exponent_le hk1 hexp
+  have h2 : u ^ ((3 : ℝ)⁻¹) ≤ Real.sqrt u / 2 := by
+    have hpos : (0 : ℝ) < u ^ ((3 : ℝ)⁻¹) := Real.rpow_pos_of_pos (by linarith) _
+    have hs2 : Real.sqrt u = u ^ ((6 : ℝ)⁻¹) * u ^ ((3 : ℝ)⁻¹) := by
+      rw [← Real.rpow_add (by linarith : (0:ℝ) < u), Real.sqrt_eq_rpow]
+      norm_num
+    rw [hs2, le_div_iff₀ (by norm_num : (0 : ℝ) < 2)]
+    nlinarith [htwo, hpos]
+  exact h1.trans h2
+
+private theorem rpow_small_big {u : ℝ} (hu : (10 : ℝ) ^ 9 ≤ u) {k : ℕ} (hk : 3 ≤ k) :
+    u ^ ((k : ℝ)⁻¹) ≤ Real.sqrt u / 30 := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  have hk1 : (1 : ℝ) ≤ u := by linarith
+  have hthirty : (30 : ℝ) ≤ u ^ ((6 : ℝ)⁻¹) := by
+    refine le_rpow_recip hu0 (by norm_num : (0:ℕ) < 6) (by norm_num : (0:ℝ) ≤ 30) ?_
+    have h9 : ((10 : ℝ) ^ 9) = 1000000000 := by norm_num
+    rw [h9] at hu
+    nlinarith
+  have hexp : ((k : ℝ)⁻¹) ≤ ((3 : ℝ)⁻¹) := by
+    have hk3 : (3 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
+    have h := one_div_le_one_div_of_le (a := (3 : ℝ)) (b := (k : ℝ)) (by norm_num) hk3
+    simpa [one_div] using h
+  have h1 : u ^ ((k : ℝ)⁻¹) ≤ u ^ ((3 : ℝ)⁻¹) :=
+    Real.rpow_le_rpow_of_exponent_le hk1 hexp
+  have h2 : u ^ ((3 : ℝ)⁻¹) ≤ Real.sqrt u / 30 := by
+    have hpos : (0 : ℝ) < u ^ ((3 : ℝ)⁻¹) := Real.rpow_pos_of_pos (by linarith) _
+    have hs2 : Real.sqrt u = u ^ ((6 : ℝ)⁻¹) * u ^ ((3 : ℝ)⁻¹) := by
+      rw [← Real.rpow_add (by linarith : (0:ℝ) < u), Real.sqrt_eq_rpow]
+      norm_num
+    rw [hs2, le_div_iff₀ (by norm_num : (0 : ℝ) < 30)]
+    nlinarith [hthirty, hpos]
+  exact h1.trans h2
+
+/-- `ψ - θ` at the three Costa-Pereira levels, with the Chebyshev bound on each `ψ`. -/
+private theorem psi_sub_theta_explicit {u : ℝ} (hu : 2 ≤ u) :
+    Chebyshev.psi u - Chebyshev.theta u ≤
+      Real.log 4 * (Real.sqrt u + u ^ ((3 : ℝ)⁻¹) + u ^ ((5 : ℝ)⁻¹)) +
+        u ^ ((4 : ℝ)⁻¹) * Real.log u + (2 / 3) * u ^ ((6 : ℝ)⁻¹) * Real.log u +
+          (2 / 5) * u ^ ((10 : ℝ)⁻¹) * Real.log u := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  have hu1 : (1 : ℝ) ≤ u := by linarith
+  have hcp := Chebyshev.psi_sub_theta_le_psi_add_psi_add_psi u
+  have h1 : Chebyshev.psi (Real.sqrt u) ≤
+      Real.log 4 * Real.sqrt u + u ^ ((4 : ℝ)⁻¹) * Real.log u := by
+    have hp := Chebyshev.psi_le (x := Real.sqrt u) (Real.one_le_sqrt.mpr hu1)
+    have hl : Real.log (Real.sqrt u) = Real.log u / 2 := Real.log_sqrt hu0
+    have hs : Real.sqrt (Real.sqrt u) = u ^ ((4 : ℝ)⁻¹) := by
+      rw [Real.sqrt_eq_rpow, Real.sqrt_eq_rpow, ← Real.rpow_mul hu0]
+      norm_num
+    rw [hs, hl] at hp
+    linarith
+  have h2 : Chebyshev.psi (u ^ ((3 : ℝ)⁻¹)) ≤
+      Real.log 4 * u ^ ((3 : ℝ)⁻¹) + (2 / 3) * u ^ ((6 : ℝ)⁻¹) * Real.log u := by
+    have hpos : (0 : ℝ) < u := by linarith
+    have hone : (1 : ℝ) ≤ u ^ ((3 : ℝ)⁻¹) := Real.one_le_rpow hu1 (by norm_num)
+    have hp := Chebyshev.psi_le (x := u ^ ((3 : ℝ)⁻¹)) hone
+    have hl : Real.log (u ^ ((3 : ℝ)⁻¹)) = Real.log u / 3 := by
+      rw [Real.log_rpow hpos]
+      ring
+    have hs : Real.sqrt (u ^ ((3 : ℝ)⁻¹)) = u ^ ((6 : ℝ)⁻¹) := by
+      rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hu0]
+      norm_num
+    rw [hs, hl] at hp
+    linarith
+  have h3 : Chebyshev.psi (u ^ ((5 : ℝ)⁻¹)) ≤
+      Real.log 4 * u ^ ((5 : ℝ)⁻¹) + (2 / 5) * u ^ ((10 : ℝ)⁻¹) * Real.log u := by
+    have hpos : (0 : ℝ) < u := by linarith
+    have hone : (1 : ℝ) ≤ u ^ ((5 : ℝ)⁻¹) := Real.one_le_rpow hu1 (by norm_num)
+    have hp := Chebyshev.psi_le (x := u ^ ((5 : ℝ)⁻¹)) hone
+    have hl : Real.log (u ^ ((5 : ℝ)⁻¹)) = Real.log u / 5 := by
+      rw [Real.log_rpow hpos]
+      ring
+    have hs : Real.sqrt (u ^ ((5 : ℝ)⁻¹)) = u ^ ((10 : ℝ)⁻¹) := by
+      rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hu0]
+      norm_num
+    rw [hs, hl] at hp
+    linarith
+  have e2 : u ^ ((2 : ℝ)⁻¹) = Real.sqrt u := by
+    rw [Real.sqrt_eq_rpow]
+    norm_num
+  rw [e2] at hcp
+  linarith [h1, h2, h3]
+
+/-- The `ψ` error of reference 4 in the shape used below. -/
+private theorem psi_error_le (hG : LeanLab.DERZ1997.GRH) {u : ℝ} (hu : 75 < u) :
+    |Chebyshev.psi u - u| ≤ 0.04 * (Real.sqrt u * Real.log u ^ 2) := by
+  have hp := LeanLab.Zinoviev1997.Decomp575c.schoenfeld_psi hG hu
+  have hpi : 1 / (8 * Real.pi) ≤ 0.04 := by
+    rw [div_le_iff₀ (by positivity)]
+    nlinarith [Real.pi_gt_d20]
+  have h0 : (0 : ℝ) ≤ Real.sqrt u * Real.log u ^ 2 := by positivity
+  have h2 : (1 / (8 * Real.pi)) * Real.sqrt u * Real.log u ^ 2 ≤
+      0.04 * (Real.sqrt u * Real.log u ^ 2) := by
+    nlinarith [hpi, h0]
+  exact hp.trans h2
+
+/-- The kernel of the `θ` remainder is at most `5.012` on `[2, 1024]`. -/
+private theorem theta_error_pointwise_small {u : ℝ} (hu : (2 : ℝ) ≤ u) :
+    |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)| ≤ 5.012 := by
+  have hu0 : (0 : ℝ) < u := by linarith
+  have hlog : (0.693 : ℝ) ≤ Real.log u :=
+    (log_two_ge_0693).trans (Real.log_le_log (by norm_num) hu)
+  have hsq : (0.48 : ℝ) ≤ Real.log u ^ 2 := by nlinarith
+  have ht : Chebyshev.theta u ≤ 1.4 * u := by
+    refine (Chebyshev.theta_le_log4_mul_x (le_of_lt hu0)).trans ?_
+    nlinarith [hu0, log_four_le_14]
+  have habs : |Chebyshev.theta u - u| ≤ 2.4 * u := by
+    rw [abs_le]
+    constructor
+    · nlinarith [Chebyshev.theta_nonneg u]
+    · nlinarith [ht]
+  have hden : (0 : ℝ) < u * Real.log u ^ 2 := by positivity
+  rw [abs_div, abs_of_pos hden, div_le_iff₀ hden]
+  have h2 : (2.4 : ℝ) * u ≤ 5.012 * (u * Real.log u ^ 2) := by nlinarith [hsq, hu0]
+  linarith [habs, h2]
+
+/-- The same kernel decays like `0.3 / √u` from `1024` on, under GRH. -/
+private theorem theta_error_pointwise_decay (hG : LeanLab.DERZ1997.GRH) {u : ℝ}
+    (hu : (1024 : ℝ) ≤ u) :
+    |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)| ≤ 0.3 / Real.sqrt u := by
+  have hu0 : (0 : ℝ) < u := by linarith
+  have hlog : (6.93 : ℝ) ≤ Real.log u := log_ge_693 hu
+  have hsq : (48 : ℝ) ≤ Real.log u ^ 2 := by nlinarith
+  have hs : (0 : ℝ) < Real.sqrt u := Real.sqrt_pos.mpr hu0
+  have hden : (0 : ℝ) < u * Real.log u ^ 2 := by positivity
+  have hpsi := psi_error_le hG (u := u) (by linarith : 75 < u)
+  have hpt := psi_sub_theta_explicit (by linarith : 2 ≤ u)
+  have h3 := rpow_small hu (k := 3) (by norm_num)
+  have h4 := rpow_small hu (k := 4) (by norm_num)
+  have h5 := rpow_small hu (k := 5) (by norm_num)
+  have h6 := rpow_small hu (k := 6) (by norm_num)
+  have h10 := rpow_small hu (k := 10) (by norm_num)
+  have hpd : Chebyshev.psi u - Chebyshev.theta u ≤ 0.26 * (Real.sqrt u * Real.log u ^ 2) := by
+    have hl0 : (0 : ℝ) ≤ Real.log u := by linarith
+    have hl4 : (0 : ℝ) ≤ Real.log 4 := Real.log_nonneg (by norm_num)
+    have hsum : Real.sqrt u + u ^ ((3 : ℝ)⁻¹) + u ^ ((5 : ℝ)⁻¹) ≤ 2 * Real.sqrt u := by
+      linarith
+    have e1 : Real.log 4 * (Real.sqrt u + u ^ ((3 : ℝ)⁻¹) + u ^ ((5 : ℝ)⁻¹)) ≤
+        2.8 * Real.sqrt u := by
+      have h := mul_le_mul log_four_le_14 hsum (by positivity) (by positivity)
+      linarith [h]
+    have e2 : u ^ ((4 : ℝ)⁻¹) * Real.log u ≤ 0.5 * (Real.sqrt u * Real.log u) := by
+      have h := mul_le_mul_of_nonneg_right h4 hl0
+      linarith [h]
+    have e3 : (2 / 3) * u ^ ((6 : ℝ)⁻¹) * Real.log u ≤
+        (1 / 3) * (Real.sqrt u * Real.log u) := by
+      have h := mul_le_mul_of_nonneg_right h6 hl0
+      linarith [h]
+    have e4 : (2 / 5) * u ^ ((10 : ℝ)⁻¹) * Real.log u ≤
+        (1 / 5) * (Real.sqrt u * Real.log u) := by
+      have h := mul_le_mul_of_nonneg_right h10 hl0
+      linarith [h]
+    have hquad : 2.8 * Real.sqrt u + (0.5 + 1 / 3 + 1 / 5) * (Real.sqrt u * Real.log u) ≤
+        0.26 * (Real.sqrt u * Real.log u ^ 2) := by
+      have hbr : (0 : ℝ) < 0.26 * Real.log u ^ 2 - (0.5 + 1/3 + 1/5) * Real.log u - 2.8 := by
+        nlinarith [hlog, hsq]
+      nlinarith [mul_pos hs hbr]
+    linarith [hpt, e1, e2, e3, e4, hquad]
+  have habs : |Chebyshev.theta u - u| ≤
+      0.04 * (Real.sqrt u * Real.log u ^ 2) + (Chebyshev.psi u - Chebyshev.theta u) := by
+    have hlow : u - Chebyshev.theta u ≤
+        0.04 * (Real.sqrt u * Real.log u ^ 2) + (Chebyshev.psi u - Chebyshev.theta u) := by
+      have h1 : u - Chebyshev.theta u =
+          (u - Chebyshev.psi u) + (Chebyshev.psi u - Chebyshev.theta u) := by ring
+      have h2 : u - Chebyshev.psi u ≤ |Chebyshev.psi u - u| := by
+        rw [abs_sub_comm]
+        exact le_abs_self _
+      linarith
+    have hup : Chebyshev.theta u - u ≤
+        0.04 * (Real.sqrt u * Real.log u ^ 2) + (Chebyshev.psi u - Chebyshev.theta u) := by
+      have h1 : Chebyshev.theta u - u ≤ Chebyshev.psi u - u := by
+        linarith [Chebyshev.theta_le_psi u]
+      linarith [h1, le_abs_self (Chebyshev.psi u - u), hpsi]
+    exact abs_le.mpr ⟨by linarith, hup⟩
+  rw [abs_div, abs_of_pos hden, div_le_iff₀ hden]
+  have hcore : (0.3 / Real.sqrt u) * u = 0.3 * Real.sqrt u := by
+    have hsne : Real.sqrt u ≠ 0 := (Real.sqrt_pos.mpr hu0).ne'
+    field_simp
+    nlinarith [Real.sq_sqrt hu0.le]
+  have he : (0.3 / Real.sqrt u) * (u * Real.log u ^ 2) =
+      0.3 * (Real.sqrt u * Real.log u ^ 2) := by
+    calc (0.3 / Real.sqrt u) * (u * Real.log u ^ 2)
+        = ((0.3 / Real.sqrt u) * u) * Real.log u ^ 2 := by ring
+      _ = (0.3 * Real.sqrt u) * Real.log u ^ 2 := by rw [hcore]
+      _ = 0.3 * (Real.sqrt u * Real.log u ^ 2) := by ring
+  rw [he]
+  linarith [habs, hpd]
+
+/-- The `θ` kernel is integrable on any interval inside the positive reals. -/
+private theorem theta_kernel_integrable' {a x : ℝ} (ha : (2 : ℝ) ≤ a) (hax : a ≤ x) :
+    IntervalIntegrable
+      (fun u : ℝ => (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) volume a x := by
+  have hx2 : (2 : ℝ) ≤ x := ha.trans hax
+  have h1 : IntegrableOn (fun u : ℝ => Chebyshev.theta u / (u * Real.log u ^ 2))
+      (Set.Icc a x) volume :=
+    (Chebyshev.integrableOn_theta_div_id_mul_log_sq x).mono_set
+      (fun u hu => ⟨ha.trans hu.1, hu.2⟩)
+  have h2 : IntegrableOn (fun u : ℝ => 1 / Real.log u ^ 2) (Set.Icc a x) volume :=
+    ((intervalIntegrable_iff_integrableOn_Icc_of_le hx2).mp (logarithmic_kernels hx2).1).mono_set
+      (fun u hu => ⟨ha.trans hu.1, hu.2⟩)
+  have hi : IntervalIntegrable
+      (fun u : ℝ => Chebyshev.theta u / (u * Real.log u ^ 2) - 1 / Real.log u ^ 2)
+      volume a x :=
+    (intervalIntegrable_iff_integrableOn_Icc_of_le hax).mpr (h1.sub h2)
+  apply hi.congr
+  intro u hu
+  have hu0 : u ≠ 0 := by
+    rw [Set.uIoc_of_le hax] at hu
+    linarith [hu.1]
+  field_simp
+
+/-- The modulus one count as `Nat.primeCounting`. -/
+private theorem piMod_one_card (x : ℝ) (l : ℕ) : piMod x 1 l = Nat.primeCounting ⌊x⌋₊ := by
+  rw [← Nat.primesLE_card_eq_primeCounting]
+  unfold piMod
+  congr 1
+  ext n
+  simp only [Finset.mem_filter, Finset.mem_Iic, Nat.mod_one, and_true, Nat.mem_primesLE]
+
+/-- Abel summation for the ordinary prime count against `zinLi`. -/
+private theorem prime_count_abel {x : ℝ} (hx : 2 ≤ x) (l : ℕ) :
+    (piMod x 1 l : ℝ) - zinLi x =
+      (Chebyshev.theta x - x) / Real.log x +
+        (∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) +
+          2 / Real.log 2 := by
+  have h1 : (piMod x 1 l : ℝ) = Chebyshev.theta x / Real.log x +
+      ∫ u in (2 : ℝ)..x, Chebyshev.theta u / (u * Real.log u ^ 2) := by
+    rw [piMod_one_card]
+    exact Chebyshev.primeCounting_eq_theta_div_log_add_integral hx
+  have h2 : zinLi x = x / Real.log x - 2 / Real.log 2 +
+      ∫ u in (2 : ℝ)..x, 1 / Real.log u ^ 2 := zinLi_by_parts hx
+  have hI1 : IntervalIntegrable
+      (fun u : ℝ => Chebyshev.theta u / (u * Real.log u ^ 2)) volume 2 x :=
+    (intervalIntegrable_iff_integrableOn_Icc_of_le hx).mpr
+      (Chebyshev.integrableOn_theta_div_id_mul_log_sq x)
+  have hI2 : IntervalIntegrable (fun u : ℝ => 1 / Real.log u ^ 2) volume 2 x :=
+    (logarithmic_kernels hx).1
+  have hi : (∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) =
+      (∫ u in (2 : ℝ)..x, Chebyshev.theta u / (u * Real.log u ^ 2)) -
+        (∫ u in (2 : ℝ)..x, 1 / Real.log u ^ 2) := by
+    rw [← intervalIntegral.integral_sub hI1 hI2]
+    apply intervalIntegral.integral_congr
+    intro u hu
+    have hu0 : u ≠ 0 := by
+      rw [Set.uIcc_of_le hx] at hu
+      linarith [hu.1]
+    field_simp
+  rw [hi, h1, h2]
+  ring
+
+/-- The `θ` remainder integral is bounded by `0.6 √x + 5130`. -/
+private theorem theta_error_integral (hG : LeanLab.DERZ1997.GRH) {x : ℝ}
+    (hx : (10 : ℝ) ^ 9 ≤ x) :
+    |∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)| ≤
+      0.6 * Real.sqrt x + 5130 := by
+  have hx2 : (2 : ℝ) ≤ x := by linarith
+  have hax : (1024 : ℝ) ≤ x := by linarith
+  have hf1 : IntervalIntegrable
+      (fun u : ℝ => (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) volume 2 1024 :=
+    theta_kernel_integrable' (by norm_num) (by norm_num)
+  have hf2 : IntervalIntegrable
+      (fun u : ℝ => (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) volume 1024 x :=
+    theta_kernel_integrable' (by norm_num) hax
+  have hg : IntervalIntegrable (fun u : ℝ => 0.3 / Real.sqrt u) volume 1024 x := by
+    apply ContinuousOn.intervalIntegrable
+    apply ContinuousOn.div continuousOn_const Real.continuous_sqrt.continuousOn
+    intro u hu
+    rw [Set.uIcc_of_le hax] at hu
+    exact (Real.sqrt_pos.mpr (by linarith [hu.1])).ne'
+  have hL : (∫ u in (2 : ℝ)..1024,
+      |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)|) ≤ 5123 := by
+    have hm := intervalIntegral.integral_mono_on (μ := volume) (by norm_num : (2:ℝ) ≤ 1024)
+      hf1.abs intervalIntegrable_const
+      (fun u hu => theta_error_pointwise_small hu.1)
+    simp only [intervalIntegral.integral_const, smul_eq_mul] at hm
+    nlinarith
+  have hR : (∫ u in (1024 : ℝ)..x,
+      |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)|) ≤ 0.6 * Real.sqrt x := by
+    have hm := intervalIntegral.integral_mono_on (μ := volume) hax hf2.abs hg
+      (fun u hu => theta_error_pointwise_decay hG hu.1)
+    have hv : (∫ u in (1024 : ℝ)..x, 0.3 / Real.sqrt u) = 0.6 * (Real.sqrt x - 32) := by
+      have hcongr : (∫ u in (1024 : ℝ)..x, 0.3 / Real.sqrt u) =
+          ∫ u in (1024 : ℝ)..x, 0.3 * u ^ ((-1 : ℝ)/2) := by
+        apply intervalIntegral.integral_congr
+        intro u hu
+        rw [Set.uIcc_of_le hax] at hu
+        have hu0 : (0 : ℝ) < u := by linarith [hu.1]
+        change 0.3 / Real.sqrt u = 0.3 * u ^ ((-1 : ℝ)/2)
+        rw [Real.sqrt_eq_rpow, div_eq_mul_inv, ← Real.rpow_neg (le_of_lt hu0)]
+        norm_num
+      rw [hcongr, intervalIntegral.integral_const_mul,
+        integral_rpow (Or.inl (by norm_num : (-1:ℝ) < -1/2))]
+      have hx' : x ^ ((-1 : ℝ)/2 + 1) = Real.sqrt x := by
+        rw [show (-1 : ℝ)/2 + 1 = (1 : ℝ)/2 by norm_num, ← Real.sqrt_eq_rpow]
+      have h32 : (1024 : ℝ) ^ ((-1 : ℝ)/2 + 1) = 32 := by
+        rw [show (-1 : ℝ)/2 + 1 = (1 : ℝ)/2 by norm_num,
+          show (1024 : ℝ) = 32 ^ 2 by norm_num,
+          ← Real.rpow_natCast (32 : ℝ) 2, ← Real.rpow_mul (by norm_num : (0:ℝ) ≤ 32)]
+        norm_num
+      rw [hx', h32, show (-1 : ℝ)/2 + 1 = (1 : ℝ)/2 by norm_num]
+      ring
+    have hs : (32 : ℝ) ≤ Real.sqrt x := by
+      have h1 : (32 : ℝ) = Real.sqrt ((32 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      rw [h1]
+      apply Real.sqrt_le_sqrt
+      linarith
+    nlinarith [hm, hv]
+  have hsplit : (∫ u in (2 : ℝ)..x,
+      |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)|) =
+      (∫ u in (2 : ℝ)..1024, |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)|) +
+        (∫ u in (1024 : ℝ)..x, |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)|) := by
+    rw [← intervalIntegral.integral_add_adjacent_intervals hf1.abs hf2.abs]
+  calc |∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)|
+      ≤ ∫ u in (2 : ℝ)..x, |(Chebyshev.theta u - u) / (u * Real.log u ^ 2)| :=
+        intervalIntegral.abs_integral_le_integral_abs hx2
+    _ = _ := hsplit
+    _ ≤ 0.6 * Real.sqrt x + 5130 := by linarith [hL, hR]
+
+/-- The endpoint `θ` remainder. -/
+private theorem theta_error_endpoint (hG : LeanLab.DERZ1997.GRH) {x : ℝ}
+    (hx : (10 : ℝ) ^ 9 ≤ x) :
+    |(Chebyshev.theta x - x) / Real.log x| ≤
+      0.04 * Real.sqrt x * Real.log x + 0.15 * Real.sqrt x := by
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hs : (0 : ℝ) < Real.sqrt x := Real.sqrt_pos.mpr hx0
+  have hL : (20.7 : ℝ) ≤ Real.log x := log_ge_207 hx
+  have hL0 : (0 : ℝ) < Real.log x := by linarith
+  have hpsi := psi_error_le hG (u := x) (by linarith : 75 < x)
+  have hpt := psi_sub_theta_explicit (by linarith : 2 ≤ x)
+  have h3 := rpow_small_big hx (k := 3) (by norm_num)
+  have h4 := rpow_small_big hx (k := 4) (by norm_num)
+  have h5 := rpow_small_big hx (k := 5) (by norm_num)
+  have h6 := rpow_small_big hx (k := 6) (by norm_num)
+  have h10 := rpow_small_big hx (k := 10) (by norm_num)
+  have hpd : Chebyshev.psi x - Chebyshev.theta x ≤ 0.15 * Real.sqrt x * Real.log x := by
+    have hl4 : (0 : ℝ) ≤ Real.log 4 := Real.log_nonneg (by norm_num)
+    have hsum : Real.sqrt x + x ^ ((3 : ℝ)⁻¹) + x ^ ((5 : ℝ)⁻¹) ≤ 1.07 * Real.sqrt x := by
+      linarith
+    have e1 : Real.log 4 * (Real.sqrt x + x ^ ((3 : ℝ)⁻¹) + x ^ ((5 : ℝ)⁻¹)) ≤
+        1.5 * Real.sqrt x := by
+      have h := mul_le_mul log_four_le_14 hsum (by positivity) (by positivity)
+      linarith [h]
+    have e2 : x ^ ((4 : ℝ)⁻¹) * Real.log x ≤ (1/30) * (Real.sqrt x * Real.log x) := by
+      have h := mul_le_mul_of_nonneg_right h4 hL0.le
+      linarith [h]
+    have e3 : (2 / 3) * x ^ ((6 : ℝ)⁻¹) * Real.log x ≤
+        (2/90) * (Real.sqrt x * Real.log x) := by
+      have h := mul_le_mul_of_nonneg_right h6 hL0.le
+      linarith [h]
+    have e4 : (2 / 5) * x ^ ((10 : ℝ)⁻¹) * Real.log x ≤
+        (2/150) * (Real.sqrt x * Real.log x) := by
+      have h := mul_le_mul_of_nonneg_right h10 hL0.le
+      linarith [h]
+    have hprod : (0 : ℝ) ≤ Real.sqrt x * Real.log x := by positivity
+    nlinarith [hpt, e1, e2, e3, e4, hL, hs]
+  have habs : |Chebyshev.theta x - x| ≤
+      0.04 * (Real.sqrt x * Real.log x ^ 2) + (Chebyshev.psi x - Chebyshev.theta x) := by
+    have hlow : x - Chebyshev.theta x ≤
+        0.04 * (Real.sqrt x * Real.log x ^ 2) + (Chebyshev.psi x - Chebyshev.theta x) := by
+      have h1 : x - Chebyshev.theta x =
+          (x - Chebyshev.psi x) + (Chebyshev.psi x - Chebyshev.theta x) := by ring
+      have h2 : x - Chebyshev.psi x ≤ |Chebyshev.psi x - x| := by
+        rw [abs_sub_comm]
+        exact le_abs_self _
+      linarith
+    have hup : Chebyshev.theta x - x ≤
+        0.04 * (Real.sqrt x * Real.log x ^ 2) + (Chebyshev.psi x - Chebyshev.theta x) := by
+      have h1 : Chebyshev.theta x - x ≤ Chebyshev.psi x - x := by
+        linarith [Chebyshev.theta_le_psi x]
+      linarith [h1, le_abs_self (Chebyshev.psi x - x), hpsi]
+    exact abs_le.mpr ⟨by linarith, hup⟩
+  rw [abs_div, abs_of_pos hL0, div_le_iff₀ hL0]
+  nlinarith [habs, hpd]
+
+/-- The lower endpoint constant of the Abel formula. -/
+private theorem two_div_log_two_le : |2 / Real.log 2| ≤ 2.9 := by
+  have h : (0.693 : ℝ) ≤ Real.log 2 := log_two_ge_0693
+  have h0 : (0 : ℝ) < Real.log 2 := by linarith
+  rw [abs_of_pos (by positivity)]
+  rw [div_le_iff₀ h0]
+  nlinarith
+
 /-- LEAF. Proposition 1.4, p. 341, last paragraph, reference 4.
 Supporting relaxed Schoenfeld prime counting bound for the ordinary prime count.
 The additive two covers the normalization from the classical li to the integral
@@ -404,7 +855,40 @@ theorem schoenfeld_prime_counting (hG : LeanLab.DERZ1997.GRH)
     {x : ℝ} (hx : 10 ^ 9 ≤ x) :
     |(piMod x 1 0 : ℝ) - zinLi x| ≤
       0.1 * Real.sqrt x * Real.log x + 2 := by
-  sorry
+  have hx2 : (2 : ℝ) ≤ x := by linarith
+  have hs := sqrt_ge_31622 hx
+  have hL := log_ge_207 hx
+  have hab := prime_count_abel hx2 0
+  have hA := theta_error_endpoint hG hx
+  have hI := theta_error_integral hG hx
+  have hC := two_div_log_two_le
+  have h1 : |(Chebyshev.theta x - x) / Real.log x +
+      (∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) +
+        2 / Real.log 2| ≤
+      (0.04 * Real.sqrt x * Real.log x + 0.15 * Real.sqrt x) +
+        (0.6 * Real.sqrt x + 5130) + 2.9 := by
+    calc |(Chebyshev.theta x - x) / Real.log x +
+        (∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) +
+          2 / Real.log 2|
+        ≤ |(Chebyshev.theta x - x) / Real.log x +
+            (∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2))| +
+            |2 / Real.log 2| := abs_add_le _ _
+      _ ≤ (|(Chebyshev.theta x - x) / Real.log x| +
+            |∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)|) +
+            |2 / Real.log 2| := by
+          have h := abs_add_le ((Chebyshev.theta x - x) / Real.log x)
+            (∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2))
+          linarith
+      _ ≤ _ := by linarith [hA, hI, hC]
+  have hprod : (0 : ℝ) ≤ Real.sqrt x * Real.log x := by positivity
+  calc |(piMod x 1 0 : ℝ) - zinLi x|
+      = |(Chebyshev.theta x - x) / Real.log x +
+          (∫ u in (2 : ℝ)..x, (Chebyshev.theta u - u) / (u * Real.log u ^ 2)) +
+            2 / Real.log 2| := by rw [hab]
+    _ ≤ 0.04 * Real.sqrt x * Real.log x + 0.15 * Real.sqrt x +
+        (0.6 * Real.sqrt x + 5130) + 2.9 := h1
+    _ ≤ 0.1 * Real.sqrt x * Real.log x + 2 := by nlinarith [hs, hL, hprod]
+
 
 /-- Scalar assembly of the three separate budgets from pp. 340 to 341.
 This implication proves no analytic estimate assumed in its hypotheses. -/
