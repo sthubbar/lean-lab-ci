@@ -69,6 +69,34 @@ private lemma intervalIntegrable_window561 (Y T : ℝ) (b : ℕ → ℂ) (v : �
       centered561 Y b v χ m‖ := add_nonneg hBnn (norm_nonneg _)
     nlinarith [mul_nonneg h1 h2]
 
+/-- The covering count of the last leaf, the step its docstring leaves implicit.
+With the step z0 = T over 6Y, which the printed range from T over 6Y to 6T over Y
+contains, the geometric chain from any centre y of the translated interval reaches
+the whole additive window of length T over 2 in twelve pieces, uniformly in y. -/
+private lemma window_chain_reach561 {Y T y : ℝ} (hY : 1 ≤ Y) (hT : 0 < T) (hTY : T ≤ Y)
+    (hy : Y / 2 ≤ y) :
+    y + T / 2 ≤ y * (1 + T / (6 * Y)) ^ 12 := by
+  have hYpos : (0 : ℝ) < Y := by linarith
+  have hypos : (0 : ℝ) < y := by linarith
+  have hbern : 1 + 12 * (T / (6 * Y)) ≤ (1 + T / (6 * Y)) ^ 12 := by
+    have hz : (0 : ℝ) ≤ T / (6 * Y) := by positivity
+    have h := one_add_mul_le_pow (a := T / (6 * Y)) (n := 12) (by linarith)
+    simpa using h
+  have htwelve : 12 * (T / (6 * Y)) = 2 * T / Y := by
+    field_simp
+    ring
+  have hquot : T / 2 / y ≤ 2 * T / Y := by
+    rw [div_le_div_iff₀ hypos hYpos]
+    nlinarith [hT, hy]
+  calc y + T / 2 = y * (1 + T / 2 / y) := by
+        field_simp
+    _ ≤ y * (1 + 2 * T / Y) := by
+        apply mul_le_mul_of_nonneg_left _ (le_of_lt hypos)
+        linarith
+    _ = y * (1 + 12 * (T / (6 * Y))) := by rw [htwelve]
+    _ ≤ y * (1 + T / (6 * Y)) ^ 12 :=
+        mul_le_mul_of_nonneg_left hbern (le_of_lt hypos)
+
 /-- LEAF. First step of the comparison: the lower part of the y range carries no
 fixed window at all. The short polynomial is supported above Y while the upper
 end y plus T over 4 stays below Y once y is at most Y minus T over 4, so the
