@@ -10,6 +10,7 @@ import LeanLab.BHP1997.Route512Kernel
 import LeanLab.BHP1997.Route512Moment
 import LeanLab.BHP1997.Route512Small
 import LeanLab.BHP1997.Route512Eta
+import LeanLab.BHP1997.Route512MajorFinal
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical Complex Thm2 MeasureTheory Set
@@ -344,14 +345,19 @@ noncomputable def etaExtensionError512 (ε D x u v : ℝ) : ℝ :=
 
 /-- LEAF. P0069 page 7 display 2.5 and the immediately following S2 replacement.
 The pointwise L1 replacement savings give every requested mean square saving.
-The exact principal model has the original eta limits in display 2.6. OPEN. -/
+The exact principal model has the original eta limits in display 2.6.
+PROVED 2026-11-15 from Route512MajorFinal.major_coefficients_raw512j, no sorry. -/
 theorem leaf_major_coefficients512 :
     ∀ B : ℝ, ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       Theorem2With ε B (fun a b u v _ =>
         ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
           ∃ C : ℝ, ∀ x : ℝ, C ≤ x →
             coefficientReplacementError512 ε D x (a x) (b x) u v ≤ C * scale512 ε A x) := by
-  sorry
+  intro B
+  refine ⟨1, one_pos, fun ε hε _ => ?_⟩
+  unfold Theorem2With
+  intro a b u v E θ₁ θ₂ Y Q I J hi hii hiii hiv _ A hA
+  exact Route512Major.major_coefficients_raw512j B ε hε a b u v hi hii hiii hiv A hA
 
 /-- LEAF. P0069 page 8 first two displays after 2.6: extend the eta integral
 to a complete period and replace the exact convolution count by Y.
