@@ -14209,1432 +14209,2066 @@ private theorem entry_8_6_leaf :
   rw [hc]
   exact entry_8_6_certified
 
+/-- Two-sided enclosure of `log (481/100)`, from `log 24/5` and the ratio `481/480`. -/
+private theorem log_481_100 :
+    (1.570697084103 : ℝ) ≤ log ((481/100 : ℝ)) ∧ log ((481/100 : ℝ)) ≤ (1.570697084135 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (481/480 : ℝ))
+    (x := (1/961 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0020811662038245 : ℝ) : ℝ) ≤ log (481/480) ∧
+      log (481/480) ≤ ((0.0020811662038246 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((481/100 : ℝ)) = log ((24/5 : ℝ)) + log (481/480) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (481/480 : ℝ) = (481/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
 
+/-- Two-sided enclosure of `log (241/50)`, from `log 24/5` and the ratio `241/240`. -/
+private theorem log_241_50 :
+    (1.572773928048 : ℝ) ≤ log ((241/50 : ℝ)) ∧ log ((241/50 : ℝ)) ≤ (1.57277392808 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (241/240 : ℝ))
+    (x := (1/481 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0041580101486636 : ℝ) : ℝ) ≤ log (241/240) ∧
+      log (241/240) ≤ ((0.0041580101486637 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((241/50 : ℝ)) = log ((24/5 : ℝ)) + log (241/240) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (241/240 : ℝ) = (241/50 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
 
-/-- Two-sided enclosure of `log P` for the row-0 product `P = 22972653/781250`. -/
-private theorem log_P_xi2_0_bounds :
-    (3.38116458643937 : ℝ) ≤ log ((22972653/781250 : ℝ)) ∧ log ((22972653/781250 : ℝ)) ≤ (3.38116458643938 : ℝ) := by
-  have hfac : ((22972653/781250 : ℝ) : ℝ) = (6/5 : ℝ) * (177/50 : ℝ) * (253/100 : ℝ) * (19/10 : ℝ) * (36/25 : ℝ) := by norm_num
-  rw [hfac, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num)]
-  have h1 := log_enclosure (y := (6/5 : ℝ)) (x := (1/11 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 8
-  have h2 := log_enclosure (y := (177/50 : ℝ)) (x := (127/227 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 33
-  have h3 := log_enclosure (y := (253/100 : ℝ)) (x := (153/353 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 23
-  have h4 := log_enclosure (y := (19/10 : ℝ)) (x := (9/29 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 16
-  have h5 := log_enclosure (y := (36/25 : ℝ)) (x := (11/61 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 11
-  constructor <;> linarith [h1.1, h1.2, h2.1, h2.2, h3.1, h3.2, h4.1, h4.2, h5.1, h5.2]
+/-- Two-sided enclosure of `log (483/100)`, from `log 24/5` and the ratio `161/160`. -/
+private theorem log_483_100 :
+    (1.57484646765 : ℝ) ≤ log ((483/100 : ℝ)) ∧ log ((483/100 : ℝ)) ≤ (1.574846467682 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (161/160 : ℝ))
+    (x := (1/321 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.006230549750636 : ℝ) : ℝ) ≤ log (161/160) ∧
+      log (161/160) ≤ ((0.0062305497506361 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((483/100 : ℝ)) = log ((24/5 : ℝ)) + log (161/160) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (161/160 : ℝ) = (483/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
 
-/-- Two-sided enclosure of `log P` for the row-1 product `P = 77674597/2500000`. -/
-private theorem log_P_xi2_1_bounds :
-    (3.43623753510697 : ℝ) ≤ log ((77674597/2500000 : ℝ)) ∧ log ((77674597/2500000 : ℝ)) ≤ (3.43623753510698 : ℝ) := by
-  have hfac : ((77674597/2500000 : ℝ) : ℝ) = (13/10 : ℝ) * (7/2 : ℝ) * (127/50 : ℝ) * (47/25 : ℝ) * (143/100 : ℝ) := by norm_num
-  rw [hfac, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num)]
-  have h1 := log_enclosure (y := (13/10 : ℝ)) (x := (3/23 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 9
-  have h2 := log_enclosure (y := (7/2 : ℝ)) (x := (5/9 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 32
-  have h3 := log_enclosure (y := (127/50 : ℝ)) (x := (77/177 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 23
-  have h4 := log_enclosure (y := (47/25 : ℝ)) (x := (11/36 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 16
-  have h5 := log_enclosure (y := (143/100 : ℝ)) (x := (43/243 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 11
-  constructor <;> linarith [h1.1, h1.2, h2.1, h2.2, h3.1, h3.2, h4.1, h4.2, h5.1, h5.2]
+/-- Two-sided enclosure of `log (121/25)`, from `log 24/5` and the ratio `121/120`. -/
+private theorem log_121_25 :
+    (1.576914720714 : ℝ) ≤ log ((121/25 : ℝ)) ∧ log ((121/25 : ℝ)) ≤ (1.576914720746 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (121/120 : ℝ))
+    (x := (1/241 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.008298802814695 : ℝ) : ℝ) ≤ log (121/120) ∧
+      log (121/120) ≤ ((0.0082988028146952 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((121/25 : ℝ)) = log ((24/5 : ℝ)) + log (121/120) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (121/120 : ℝ) = (121/25 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
 
-/-- Two-sided enclosure of `log P` for the row-2 product `P = 407396143/12500000`. -/
-private theorem log_P_xi2_2_bounds :
-    (3.48405739208568 : ℝ) ≤ log ((407396143/12500000 : ℝ)) ∧ log ((407396143/12500000 : ℝ)) ≤ (3.48405739208569 : ℝ) := by
-  have hfac : ((407396143/12500000 : ℝ) : ℝ) = (7/5 : ℝ) * (173/50 : ℝ) * (257/100 : ℝ) * (187/100 : ℝ) * (7/5 : ℝ) := by norm_num
-  rw [hfac, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num)]
-  have h1 := log_enclosure (y := (7/5 : ℝ)) (x := (1/6 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 10
-  have h2 := log_enclosure (y := (173/50 : ℝ)) (x := (123/223 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 32
-  have h3 := log_enclosure (y := (257/100 : ℝ)) (x := (157/357 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 23
-  have h4 := log_enclosure (y := (187/100 : ℝ)) (x := (87/287 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 16
-  have h5 := log_enclosure (y := (7/5 : ℝ)) (x := (1/6 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 10
-  constructor <;> linarith [h1.1, h1.2, h2.1, h2.2, h3.1, h3.2, h4.1, h4.2, h5.1, h5.2]
+/-- Two-sided enclosure of `log (97/20)`, from `log 24/5` and the ratio `97/96`. -/
+private theorem log_97_20 :
+    (1.578978704935 : ℝ) ≤ log ((97/20 : ℝ)) ∧ log ((97/20 : ℝ)) ≤ (1.578978704967 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (97/96 : ℝ))
+    (x := (1/193 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0103627870355465 : ℝ) : ℝ) ≤ log (97/96) ∧
+      log (97/96) ≤ ((0.0103627870355468 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((97/20 : ℝ)) = log ((24/5 : ℝ)) + log (97/96) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (97/96 : ℝ) = (97/20 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
 
-/-- Two-sided enclosure of `log P` for the row-3 product `P = 536328/15625`. -/
-private theorem log_P_xi2_3_bounds :
-    (3.53587371858772 : ℝ) ≤ log ((536328/15625 : ℝ)) ∧ log ((536328/15625 : ℝ)) ≤ (3.53587371858773 : ℝ) := by
-  have hfac : ((536328/15625 : ℝ) : ℝ) = (3/2 : ℝ) * (78/25 : ℝ) * (64/25 : ℝ) * (191/100 : ℝ) * (3/2 : ℝ) := by norm_num
-  rw [hfac, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num)]
-  have h1 := log_enclosure (y := (3/2 : ℝ)) (x := (1/5 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 12
-  have h2 := log_enclosure (y := (78/25 : ℝ)) (x := (53/103 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 28
-  have h3 := log_enclosure (y := (64/25 : ℝ)) (x := (39/89 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 23
-  have h4 := log_enclosure (y := (191/100 : ℝ)) (x := (91/291 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 16
-  have h5 := log_enclosure (y := (3/2 : ℝ)) (x := (1/5 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 12
-  constructor <;> linarith [h1.1, h1.2, h2.1, h2.2, h3.1, h3.2, h4.1, h4.2, h5.1, h5.2]
+/-- Two-sided enclosure of `log (243/50)`, from `log 24/5` and the ratio `81/80`. -/
+private theorem log_243_50 :
+    (1.581038437898 : ℝ) ≤ log ((243/50 : ℝ)) ∧ log ((243/50 : ℝ)) ≤ (1.58103843793 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (81/80 : ℝ))
+    (x := (1/161 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.012422519998557 : ℝ) : ℝ) ≤ log (81/80) ∧
+      log (81/80) ≤ ((0.0124225199985578 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((243/50 : ℝ)) = log ((24/5 : ℝ)) + log (81/80) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (81/80 : ℝ) = (243/50 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
 
-/-- The elementary panel integral: base term plus the first piece. -/
-private theorem Xi2_reduced_integral {B a b : ℝ} (hB : 0 < B) (ha : 0 < a) (hab : a ≤ b)
-    (hA : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t)) volume a b)
-    (hL : IntervalIntegrable (fun t : ℝ => log (t + 1) / t) volume a b)
-    (hI : IntervalIntegrable (fun t : ℝ => 1 / t) volume a b) :
-    (∫ t in a..b, Wu04Integral.sigma0 t / (5 * t) * log (1024 / B) +
-        log ((t + 1) ^ 5 / B) / (5 * t)) =
-      (2 * log (1024 / B) / 5) * (∫ t in a..b, Wu04Integral.sigma0 t / (2 * t)) +
-        (∫ t in a..b, log (t + 1) / t) - (log B / 5) * (∫ t in a..b, 1 / t) := by
-  have hpt : ∀ t ∈ uIcc a b,
-      (Wu04Integral.sigma0 t / (5 * t) * log (1024 / B) +
-          log ((t + 1) ^ 5 / B) / (5 * t)) =
-        (log (1024 / B) * (2 / 5)) * (Wu04Integral.sigma0 t / (2 * t)) +
-          (log (t + 1) / t - (log B / 5) * (1 / t)) := by
+/-- Two-sided enclosure of `log (487/100)`, from `log 24/5` and the ratio `487/480`. -/
+private theorem log_487_100 :
+    (1.58309393708 : ℝ) ≤ log ((487/100 : ℝ)) ∧ log ((487/100 : ℝ)) ≤ (1.583093937112 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (487/480 : ℝ))
+    (x := (7/967 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0144780191806528 : ℝ) : ℝ) ≤ log (487/480) ∧
+      log (487/480) ≤ ((0.014478019180655 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((487/100 : ℝ)) = log ((24/5 : ℝ)) + log (487/480) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (487/480 : ℝ) = (487/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (122/25)`, from `log 24/5` and the ratio `61/60`. -/
+private theorem log_122_25 :
+    (1.585145219851 : ℝ) ≤ log ((122/25 : ℝ)) ∧ log ((122/25 : ℝ)) ≤ (1.585145219883 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (61/60 : ℝ))
+    (x := (1/121 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0165293019512098 : ℝ) : ℝ) ≤ log (61/60) ∧
+      log (61/60) ≤ ((0.0165293019512151 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((122/25 : ℝ)) = log ((24/5 : ℝ)) + log (61/60) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (61/60 : ℝ) = (122/25 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (489/100)`, from `log 24/5` and the ratio `163/160`. -/
+private theorem log_489_100 :
+    (1.587192303472 : ℝ) ≤ log ((489/100 : ℝ)) ∧ log ((489/100 : ℝ)) ≤ (1.587192303504 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (163/160 : ℝ))
+    (x := (3/323 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0185763855729337 : ℝ) : ℝ) ≤ log (163/160) ∧
+      log (163/160) ≤ ((0.0185763855729457 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((489/100 : ℝ)) = log ((24/5 : ℝ)) + log (163/160) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (163/160 : ℝ) = (489/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (49/10)`, from `log 24/5` and the ratio `49/48`. -/
+private theorem log_49_10 :
+    (1.589235205102 : ℝ) ≤ log ((49/10 : ℝ)) ∧ log ((49/10 : ℝ)) ≤ (1.589235205134 : ℝ) := by
+  have hA := log_24_5
+  have hB := log_enclosure (y := (49/48 : ℝ))
+    (x := (1/97 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0206192872027321 : ℝ) : ℝ) ≤ log (49/48) ∧
+      log (49/48) ≤ ((0.020619287202757 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((49/10 : ℝ)) = log ((24/5 : ℝ)) + log (49/48) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((24/5 : ℝ)) * (49/48 : ℝ) = (49/10 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (19/5)`, from `log 37/10` and the ratio `38/37`. -/
+private theorem log_19_5 :
+    (1.335001066728 : ℝ) ≤ log ((19/5 : ℝ)) ∧ log ((19/5 : ℝ)) ≤ (1.335001066743 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (38/37 : ℝ))
+    (x := (1/75 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0266682470821399 : ℝ) : ℝ) ≤ log (38/37) ∧
+      log (38/37) ≤ ((0.0266682470822898 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((19/5 : ℝ)) = log ((37/10 : ℝ)) + log (38/37) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (38/37 : ℝ) = (19/5 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (381/100)`, from `log 37/10` and the ratio `381/370`. -/
+private theorem log_381_100 :
+    (1.337629189134 : ℝ) ≤ log ((381/100 : ℝ)) ∧ log ((381/100 : ℝ)) ≤ (1.337629189149 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (381/370 : ℝ))
+    (x := (11/751 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0292963694883895 : ℝ) : ℝ) ≤ log (381/370) ∧
+      log (381/370) ≤ ((0.0292963694886789 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((381/100 : ℝ)) = log ((37/10 : ℝ)) + log (381/370) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (381/370 : ℝ) = (381/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (191/50)`, from `log 37/10` and the ratio `191/185`. -/
+private theorem log_191_50 :
+    (1.340250422614 : ℝ) ≤ log ((191/50 : ℝ)) ∧ log ((191/50 : ℝ)) ≤ (1.340250422629 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (191/185 : ℝ))
+    (x := (3/188 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0319176029682297 : ℝ) : ℝ) ≤ log (191/185) ∧
+      log (191/185) ≤ ((0.0319176029687569 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((191/50 : ℝ)) = log ((37/10 : ℝ)) + log (191/185) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (191/185 : ℝ) = (191/50 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (383/100)`, from `log 37/10` and the ratio `383/370`. -/
+private theorem log_383_100 :
+    (1.342864803188 : ℝ) ≤ log ((383/100 : ℝ)) ∧ log ((383/100 : ℝ)) ≤ (1.342864803204 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (383/370 : ℝ))
+    (x := (13/753 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0345319835422452 : ℝ) : ℝ) ≤ log (383/370) ∧
+      log (383/370) ≤ ((0.0345319835431598 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((383/100 : ℝ)) = log ((37/10 : ℝ)) + log (383/370) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (383/370 : ℝ) = (383/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (96/25)`, from `log 37/10` and the ratio `192/185`. -/
+private theorem log_96_25 :
+    (1.345472366595 : ℝ) ≤ log ((96/25 : ℝ)) ∧ log ((96/25 : ℝ)) ≤ (1.345472366611 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (192/185 : ℝ))
+    (x := (7/377 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0371395469492392 : ℝ) : ℝ) ≤ log (192/185) ∧
+      log (192/185) ≤ ((0.0371395469507616 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((96/25 : ℝ)) = log ((37/10 : ℝ)) + log (192/185) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (192/185 : ℝ) = (96/25 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (77/20)`, from `log 37/10` and the ratio `77/74`. -/
+private theorem log_77_20 :
+    (1.348073148295 : ℝ) ≤ log ((77/20 : ℝ)) ∧ log ((77/20 : ℝ)) ≤ (1.348073148312 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (77/74 : ℝ))
+    (x := (3/151 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0397403286491648 : ℝ) : ℝ) ≤ log (77/74) ∧
+      log (77/74) ≤ ((0.0397403286516096 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((77/20 : ℝ)) = log ((37/10 : ℝ)) + log (77/74) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (77/74 : ℝ) = (77/20 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (193/50)`, from `log 37/10` and the ratio `193/185`. -/
+private theorem log_193_50 :
+    (1.350667183472 : ℝ) ≤ log ((193/50 : ℝ)) ∧ log ((193/50 : ℝ)) ≤ (1.35066718349 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (193/185 : ℝ))
+    (x := (4/189 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0423343638260171 : ℝ) : ℝ) ≤ log (193/185) ∧
+      log (193/185) ≤ ((0.0423343638298227 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((193/50 : ℝ)) = log ((37/10 : ℝ)) + log (193/185) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (193/185 : ℝ) = (193/50 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (387/100)`, from `log 37/10` and the ratio `387/370`. -/
+private theorem log_387_100 :
+    (1.353254507036 : ℝ) ≤ log ((387/100 : ℝ)) ∧ log ((387/100 : ℝ)) ≤ (1.353254507057 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (387/370 : ℝ))
+    (x := (17/757 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0449216873906883 : ℝ) : ℝ) ≤ log (387/370) ∧
+      log (387/370) ≤ ((0.0449216873964524 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((387/100 : ℝ)) = log ((37/10 : ℝ)) + log (387/370) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (387/370 : ℝ) = (387/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (97/25)`, from `log 37/10` and the ratio `194/185`. -/
+private theorem log_97_25 :
+    (1.355835153629 : ℝ) ≤ log ((97/25 : ℝ)) ∧ log ((97/25 : ℝ)) ≤ (1.355835153653 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (194/185 : ℝ))
+    (x := (9/379 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0475023339837861 : ℝ) : ℝ) ≤ log (194/185) ∧
+      log (194/185) ≤ ((0.0475023339923074 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((97/25 : ℝ)) = log ((37/10 : ℝ)) + log (194/185) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (194/185 : ℝ) = (97/25 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (389/100)`, from `log 37/10` and the ratio `389/370`. -/
+private theorem log_389_100 :
+    (1.358409157624 : ℝ) ≤ log ((389/100 : ℝ)) ∧ log ((389/100 : ℝ)) ≤ (1.358409157651 : ℝ) := by
+  have hA := log_37_10
+  have hB := log_enclosure (y := (389/370 : ℝ))
+    (x := (19/759 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  have hB' : ((0.0500763379784152 : ℝ) : ℝ) ≤ log (389/370) ∧
+      log (389/370) ≤ ((0.0500763379907431 : ℝ) : ℝ) := by
+    constructor
+    · refine le_trans ?_ hB.1
+      norm_num [Finset.sum_range_succ]
+    · refine le_trans hB.2 ?_
+      norm_num [Finset.sum_range_succ]
+  have hkey : log ((389/100 : ℝ)) = log ((37/10 : ℝ)) + log (389/370) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num),
+      show ((37/10 : ℝ)) * (389/370 : ℝ) = (389/100 : ℝ) by norm_num]
+  constructor
+  · linarith [hA.1, hB'.1, hkey]
+  · linarith [hA.2, hB'.2, hkey]
+
+/-- Two-sided enclosure of `log (29/28)` from the atanh series. -/
+private theorem log_29_28 :
+    (0.03509131981127 : ℝ) ≤ log ((29/28 : ℝ)) ∧ log ((29/28 : ℝ)) ≤ (0.03509131981128 : ℝ) := by
+  have h := log_enclosure (y := (29/28 : ℝ))
+    (x := (1/57 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 4
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (281/280)` from the atanh series. -/
+private theorem log_281_280 :
+    (0.00356506616449 : ℝ) ≤ log ((281/280 : ℝ)) ∧ log ((281/280 : ℝ)) ≤ (0.0035650661645 : ℝ) := by
+  have h := log_enclosure (y := (281/280 : ℝ))
+    (x := (1/561 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (282/281)` from the atanh series. -/
+private theorem log_282_281 :
+    (0.00355240160436 : ℝ) ≤ log ((282/281 : ℝ)) ∧ log ((282/281 : ℝ)) ≤ (0.00355240160437 : ℝ) := by
+  have h := log_enclosure (y := (282/281 : ℝ))
+    (x := (1/563 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (283/282)` from the atanh series. -/
+private theorem log_283_282 :
+    (0.00353982670512 : ℝ) ≤ log ((283/282 : ℝ)) ∧ log ((283/282 : ℝ)) ≤ (0.00353982670513 : ℝ) := by
+  have h := log_enclosure (y := (283/282 : ℝ))
+    (x := (1/565 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (284/283)` from the atanh series. -/
+private theorem log_284_283 :
+    (0.00352734051796 : ℝ) ≤ log ((284/283 : ℝ)) ∧ log ((284/283 : ℝ)) ≤ (0.00352734051797 : ℝ) := by
+  have h := log_enclosure (y := (284/283 : ℝ))
+    (x := (1/567 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (285/284)` from the atanh series. -/
+private theorem log_285_284 :
+    (0.00351494210744 : ℝ) ≤ log ((285/284 : ℝ)) ∧ log ((285/284 : ℝ)) ≤ (0.00351494210745 : ℝ) := by
+  have h := log_enclosure (y := (285/284 : ℝ))
+    (x := (1/569 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (286/285)` from the atanh series. -/
+private theorem log_286_285 :
+    (0.0035026305512 : ℝ) ≤ log ((286/285 : ℝ)) ∧ log ((286/285 : ℝ)) ≤ (0.00350263055121 : ℝ) := by
+  have h := log_enclosure (y := (286/285 : ℝ))
+    (x := (1/571 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (287/286)` from the atanh series. -/
+private theorem log_287_286 :
+    (0.00349040493976 : ℝ) ≤ log ((287/286 : ℝ)) ∧ log ((287/286 : ℝ)) ≤ (0.00349040493977 : ℝ) := by
+  have h := log_enclosure (y := (287/286 : ℝ))
+    (x := (1/573 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (288/287)` from the atanh series. -/
+private theorem log_288_287 :
+    (0.00347826437632 : ℝ) ≤ log ((288/287 : ℝ)) ∧ log ((288/287 : ℝ)) ≤ (0.00347826437633 : ℝ) := by
+  have h := log_enclosure (y := (288/287 : ℝ))
+    (x := (1/575 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (289/288)` from the atanh series. -/
+private theorem log_289_288 :
+    (0.00346620797648 : ℝ) ≤ log ((289/288 : ℝ)) ∧ log ((289/288 : ℝ)) ≤ (0.00346620797649 : ℝ) := by
+  have h := log_enclosure (y := (289/288 : ℝ))
+    (x := (1/577 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (290/289)` from the atanh series. -/
+private theorem log_290_289 :
+    (0.00345423486808 : ℝ) ≤ log ((290/289 : ℝ)) ∧ log ((290/289 : ℝ)) ≤ (0.00345423486809 : ℝ) := by
+  have h := log_enclosure (y := (290/289 : ℝ))
+    (x := (1/579 : ℝ)) (by norm_num) (by norm_num) (by norm_num) 3
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (24/5) (19/5)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_480_100 :
+    (0.146540251385 : ℝ) ≤ Wu04Integral.sigma 3 ((24/5 : ℝ)) ((19/5 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (24/5 : ℝ)) (c := (19/5 : ℝ)) (m := (29/10 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((24/5 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((24/5 : ℝ)) - 1) = (19/5 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (19/5 : ℝ)) (m := (29/10 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.47000362923 : ℝ) ≤ log ((24/5 : ℝ)) - log 3 := by
+    linarith [log_24_5.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((19/5 : ℝ)) := by linarith [log_19_5.1]
+  have hp : (0 : ℝ) ≤ (0.47000362923 : ℝ) := by norm_num
+  have hlo' : (0.62745534638808140125 : ℝ) ≤ log ((19/5 : ℝ)) * (log ((24/5 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_19_5.1 hdiff_lo hp hq
+    have hc : (0.62745534638808140125 : ℝ) ≤ (1.335001066728 : ℝ) * (0.47000362923 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_19_5.1, log_19_5.2, log_24_5.1, log_24_5.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((14/5 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_280_100 :
+    (0.176915473133 : ℝ) ≤ Wu04Integral.sigma0 ((14/5 : ℝ)) := by
+  have h := sigma_c7_480_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((14/5 : ℝ)) + 2 = (24/5 : ℝ) by norm_num, show ((14/5 : ℝ)) + 1 = (19/5 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.176915473133 : ℝ) : ℝ) ≤ ((0.146540251385 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.146540251385 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (481/100) (381/100)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_481_100 :
+    (0.147778212172 : ℝ) ≤ Wu04Integral.sigma 3 ((481/100 : ℝ)) ((381/100 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (481/100 : ℝ)) (c := (381/100 : ℝ)) (m := (581/200 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((481/100 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((481/100 : ℝ)) - 1) = (381/100 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (381/100 : ℝ)) (m := (581/200 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.472084795433 : ℝ) ≤ log ((481/100 : ℝ)) - log 3 := by
+    linarith [log_481_100.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((381/100 : ℝ)) := by linarith [log_381_100.1]
+  have hp : (0 : ℝ) ≤ (0.472084795433 : ℝ) := by norm_num
+  have hlo' : (0.63147440211753405642 : ℝ) ≤ log ((381/100 : ℝ)) * (log ((481/100 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_381_100.1 hdiff_lo hp hq
+    have hc : (0.63147440211753405642 : ℝ) ≤ (1.337629189134 : ℝ) * (0.472084795433 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_381_100.1, log_381_100.2, log_481_100.1, log_481_100.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((281/100 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_281_100 :
+    (0.17841004146 : ℝ) ≤ Wu04Integral.sigma0 ((281/100 : ℝ)) := by
+  have h := sigma_c7_481_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((281/100 : ℝ)) + 2 = (481/100 : ℝ) by norm_num, show ((281/100 : ℝ)) + 1 = (381/100 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.17841004146 : ℝ) : ℝ) ≤ ((0.147778212172 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.147778212172 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (241/50) (191/50)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_482_100 :
+    (0.149018377488 : ℝ) ≤ Wu04Integral.sigma 3 ((241/50 : ℝ)) ((191/50 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (241/50 : ℝ)) (c := (191/50 : ℝ)) (m := (291/100 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((241/50 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((241/50 : ℝ)) - 1) = (191/50 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (191/50 : ℝ)) (m := (291/100 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.474161639378 : ℝ) ≤ log ((241/50 : ℝ)) - log 3 := by
+    linarith [log_241_50.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((191/50 : ℝ)) := by linarith [log_191_50.1]
+  have hp : (0 : ℝ) ≤ (0.474161639378 : ℝ) := by norm_num
+  have hlo' : (0.63549533756371156409 : ℝ) ≤ log ((191/50 : ℝ)) * (log ((241/50 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_191_50.1 hdiff_lo hp hq
+    have hc : (0.63549533756371156409 : ℝ) ≤ (1.340250422614 : ℝ) * (0.474161639378 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_191_50.1, log_191_50.2, log_241_50.1, log_241_50.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((141/50 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_282_100 :
+    (0.179907271276 : ℝ) ≤ Wu04Integral.sigma0 ((141/50 : ℝ)) := by
+  have h := sigma_c7_482_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((141/50 : ℝ)) + 2 = (241/50 : ℝ) by norm_num, show ((141/50 : ℝ)) + 1 = (191/50 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.179907271276 : ℝ) : ℝ) ≤ ((0.149018377488 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.149018377488 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (483/100) (383/100)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_483_100 :
+    (0.150260724525 : ℝ) ≤ Wu04Integral.sigma 3 ((483/100 : ℝ)) ((383/100 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (483/100 : ℝ)) (c := (383/100 : ℝ)) (m := (583/200 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((483/100 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((483/100 : ℝ)) - 1) = (383/100 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (383/100 : ℝ)) (m := (583/200 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.47623417898 : ℝ) ≤ log ((483/100 : ℝ)) - log 3 := by
+    linarith [log_483_100.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((383/100 : ℝ)) := by linarith [log_383_100.1]
+  have hp : (0 : ℝ) ≤ (0.47623417898 : ℝ) := by norm_num
+  have hlo' : (0.63951811702737646658 : ℝ) ≤ log ((383/100 : ℝ)) * (log ((483/100 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_383_100.1 hdiff_lo hp hq
+    have hc : (0.63951811702737646658 : ℝ) ≤ (1.342864803188 : ℝ) * (0.47623417898 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_383_100.1, log_383_100.2, log_483_100.1, log_483_100.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((283/100 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_283_100 :
+    (0.181407135046 : ℝ) ≤ Wu04Integral.sigma0 ((283/100 : ℝ)) := by
+  have h := sigma_c7_483_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((283/100 : ℝ)) + 2 = (483/100 : ℝ) by norm_num, show ((283/100 : ℝ)) + 1 = (383/100 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.181407135046 : ℝ) : ℝ) ≤ ((0.150260724525 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.150260724525 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (121/25) (96/25)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_484_100 :
+    (0.151505230705 : ℝ) ≤ Wu04Integral.sigma 3 ((121/25 : ℝ)) ((96/25 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (121/25 : ℝ)) (c := (96/25 : ℝ)) (m := (73/25 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((121/25 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((121/25 : ℝ)) - 1) = (96/25 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (96/25 : ℝ)) (m := (73/25 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.478302432044 : ℝ) ≤ log ((121/25 : ℝ)) - log 3 := by
+    linarith [log_121_25.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((96/25 : ℝ)) := by linarith [log_96_25.1]
+  have hp : (0 : ℝ) ≤ (0.478302432044 : ℝ) := by norm_num
+  have hlo' : (0.64354270519038484317 : ℝ) ≤ log ((96/25 : ℝ)) * (log ((121/25 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_96_25.1 hdiff_lo hp hq
+    have hc : (0.64354270519038484317 : ℝ) ≤ (1.345472366595 : ℝ) * (0.478302432044 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_96_25.1, log_96_25.2, log_121_25.1, log_121_25.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((71/25 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_284_100 :
+    (0.182909605511 : ℝ) ≤ Wu04Integral.sigma0 ((71/25 : ℝ)) := by
+  have h := sigma_c7_484_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((71/25 : ℝ)) + 2 = (121/25 : ℝ) by norm_num, show ((71/25 : ℝ)) + 1 = (96/25 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.182909605511 : ℝ) : ℝ) ≤ ((0.151505230705 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.151505230705 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (97/20) (77/20)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_485_100 :
+    (0.152751873667 : ℝ) ≤ Wu04Integral.sigma 3 ((97/20 : ℝ)) ((77/20 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (97/20 : ℝ)) (c := (77/20 : ℝ)) (m := (117/40 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((97/20 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((97/20 : ℝ)) - 1) = (77/20 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (77/20 : ℝ)) (m := (117/40 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.480366416265 : ℝ) ≤ log ((97/20 : ℝ)) - log 3 := by
+    linarith [log_97_20.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((77/20 : ℝ)) := by linarith [log_77_20.1]
+  have hp : (0 : ℝ) ≤ (0.480366416265 : ℝ) := by norm_num
+  have hlo' : (0.64756906710954504501 : ℝ) ≤ log ((77/20 : ℝ)) * (log ((97/20 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_77_20.1 hdiff_lo hp hq
+    have hc : (0.64756906710954504501 : ℝ) ≤ (1.348073148295 : ℝ) * (0.480366416265 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_77_20.1, log_77_20.2, log_97_20.1, log_97_20.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((57/20 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_285_100 :
+    (0.184414655676 : ℝ) ≤ Wu04Integral.sigma0 ((57/20 : ℝ)) := by
+  have h := sigma_c7_485_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((57/20 : ℝ)) + 2 = (97/20 : ℝ) by norm_num, show ((57/20 : ℝ)) + 1 = (77/20 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.184414655676 : ℝ) : ℝ) ≤ ((0.152751873667 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.152751873667 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (243/50) (193/50)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_486_100 :
+    (0.154000631272 : ℝ) ≤ Wu04Integral.sigma 3 ((243/50 : ℝ)) ((193/50 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (243/50 : ℝ)) (c := (193/50 : ℝ)) (m := (293/100 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((243/50 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((243/50 : ℝ)) - 1) = (193/50 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (193/50 : ℝ)) (m := (293/100 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.482426149228 : ℝ) ≤ log ((243/50 : ℝ)) - log 3 := by
+    linarith [log_243_50.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((193/50 : ℝ)) := by linarith [log_193_50.1]
+  have hp : (0 : ℝ) ≤ (0.482426149228 : ℝ) := by norm_num
+  have hlo' : (0.65159716821102552715 : ℝ) ≤ log ((193/50 : ℝ)) * (log ((243/50 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_193_50.1 hdiff_lo hp hq
+    have hc : (0.65159716821102552715 : ℝ) ≤ (1.350667183472 : ℝ) * (0.482426149228 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_193_50.1, log_193_50.2, log_243_50.1, log_243_50.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((143/50 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_286_100 :
+    (0.185922258811 : ℝ) ≤ Wu04Integral.sigma0 ((143/50 : ℝ)) := by
+  have h := sigma_c7_486_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((143/50 : ℝ)) + 2 = (243/50 : ℝ) by norm_num, show ((143/50 : ℝ)) + 1 = (193/50 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.185922258811 : ℝ) : ℝ) ≤ ((0.154000631272 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.154000631272 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (487/100) (387/100)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_487_100 :
+    (0.155251481598 : ℝ) ≤ Wu04Integral.sigma 3 ((487/100 : ℝ)) ((387/100 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (487/100 : ℝ)) (c := (387/100 : ℝ)) (m := (587/200 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((487/100 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((487/100 : ℝ)) - 1) = (387/100 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (387/100 : ℝ)) (m := (587/200 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.48448164841 : ℝ) ≤ log ((487/100 : ℝ)) - log 3 := by
+    linarith [log_487_100.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((387/100 : ℝ)) := by linarith [log_387_100.1]
+  have hp : (0 : ℝ) ≤ (0.48448164841 : ℝ) := by norm_num
+  have hlo' : (0.65562697428706322321 : ℝ) ≤ log ((387/100 : ℝ)) * (log ((487/100 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_387_100.1 hdiff_lo hp hq
+    have hc : (0.65562697428706322321 : ℝ) ≤ (1.353254507036 : ℝ) * (0.48448164841 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_387_100.1, log_387_100.2, log_487_100.1, log_487_100.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((287/100 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_287_100 :
+    (0.187432388453 : ℝ) ≤ Wu04Integral.sigma0 ((287/100 : ℝ)) := by
+  have h := sigma_c7_487_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((287/100 : ℝ)) + 2 = (487/100 : ℝ) by norm_num, show ((287/100 : ℝ)) + 1 = (387/100 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.187432388453 : ℝ) : ℝ) ≤ ((0.155251481598 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.155251481598 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (122/25) (97/25)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_488_100 :
+    (0.156504402939 : ℝ) ≤ Wu04Integral.sigma 3 ((122/25 : ℝ)) ((97/25 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (122/25 : ℝ)) (c := (97/25 : ℝ)) (m := (147/50 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((122/25 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((122/25 : ℝ)) - 1) = (97/25 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (97/25 : ℝ)) (m := (147/50 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.486532931181 : ℝ) ≤ log ((122/25 : ℝ)) - log 3 := by
+    linarith [log_122_25.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((97/25 : ℝ)) := by linarith [log_97_25.1]
+  have hp : (0 : ℝ) ≤ (0.486532931181 : ℝ) := by norm_num
+  have hlo' : (0.6596584514933588194 : ℝ) ≤ log ((97/25 : ℝ)) * (log ((122/25 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_97_25.1 hdiff_lo hp hq
+    have hc : (0.6596584514933588194 : ℝ) ≤ (1.355835153629 : ℝ) * (0.486532931181 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_97_25.1, log_97_25.2, log_122_25.1, log_122_25.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((72/25 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_288_100 :
+    (0.188945018394 : ℝ) ≤ Wu04Integral.sigma0 ((72/25 : ℝ)) := by
+  have h := sigma_c7_488_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((72/25 : ℝ)) + 2 = (122/25 : ℝ) by norm_num, show ((72/25 : ℝ)) + 1 = (97/25 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.188945018394 : ℝ) : ℝ) ≤ ((0.156504402939 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.156504402939 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+
+set_option maxHeartbeats 1000000 in
+/-- `sigma 3 (489/100) (389/100)` at the left end of a `[14/5, 29/10]` panel of `entry_i_2`. -/
+private theorem sigma_c7_489_100 :
+    (0.157759373797 : ℝ) ≤ Wu04Integral.sigma 3 ((489/100 : ℝ)) ((389/100 : ℝ)) := by
+  have hlow := sigma_lower_bound (a := 3) (b := (489/100 : ℝ)) (c := (389/100 : ℝ)) (m := (589/200 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) 12
+  rw [log_div (by norm_num : ((489/100 : ℝ) : ℝ) ≠ 0) (by norm_num : (3 : ℝ) ≠ 0)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  simp only [show (3 : ℝ) - 1 = 2 by norm_num,
+    show (((489/100 : ℝ)) - 1) = (389/100 : ℝ) by norm_num] at hlow
+  simp only [integral_log_mul_sub_pow (a := 2) (b := (389/100 : ℝ)) (m := (589/200 : ℝ))
+    (by norm_num) (by norm_num)] at hlow
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at hlow
+  norm_num [Nat.choose] at hlow
+  have hdiff_lo : (0.488580014802 : ℝ) ≤ log ((489/100 : ℝ)) - log 3 := by
+    linarith [log_489_100.1, log_three_bounds.2]
+  have hq : (0 : ℝ) ≤ log ((389/100 : ℝ)) := by linarith [log_389_100.1]
+  have hp : (0 : ℝ) ≤ (0.488580014802 : ℝ) := by norm_num
+  have hlo' : (0.66369156633910627115 : ℝ) ≤ log ((389/100 : ℝ)) * (log ((489/100 : ℝ)) - log 3) := by
+    have hm := mul_le_mul log_389_100.1 hdiff_lo hp hq
+    have hc : (0.66369156633910627115 : ℝ) ≤ (1.358409157624 : ℝ) * (0.488580014802 : ℝ) := by norm_num
+    linarith [hm, hc]
+  linarith [hlow, hlo', log_389_100.1, log_389_100.2, log_489_100.1, log_489_100.2,
+    log_three_bounds.1, log_three_bounds.2, log_two_bounds.1, log_two_bounds.2]
+
+/-- `sigma0 ((289/100 : ℝ))` at a `[14/5, 29/10]` panel endpoint. -/
+private theorem sigma0_c7_289_100 :
+    (0.190460122681 : ℝ) ≤ Wu04Integral.sigma0 ((289/100 : ℝ)) := by
+  have h := sigma_c7_489_100
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  unfold Wu04Integral.sigma0
+  rw [show ((289/100 : ℝ)) + 2 = (489/100 : ℝ) by norm_num, show ((289/100 : ℝ)) + 1 = (389/100 : ℝ) by norm_num]
+  refine le_trans ?_ (div_le_div_of_nonneg_right h hKpos.le)
+  calc ((0.190460122681 : ℝ) : ℝ) ≤ ((0.157759373797 : ℝ) : ℝ) / (0.828306585) := by norm_num
+    _ ≤ ((0.157759373797 : ℝ) : ℝ) / (1 - Wu04Integral.sigma 3 5 4) :=
+        div_le_div_of_nonneg_left (by norm_num) hKpos hKhi
+/-- Lower bound of `sigma0' ((14/5 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_280_100 :
+    (0.1493229292 : ℝ) ≤
+      (log (((14/5 : ℝ) + 2) / 3) / ((14/5 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_24_5
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.47000362923 : ℝ) ≤ log ((24/5 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((14/5 : ℝ) + 2) / 3) = ((24/5 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1493229292 : ℝ)
+      ≤ (0.47000362923 : ℝ) / (((14/5 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((24/5 : ℝ)) - log 3) / (((14/5 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((24/5 : ℝ)) - log 3) / (((14/5 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((281/100 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_281_100 :
+    (0.1495904689 : ℝ) ≤
+      (log (((281/100 : ℝ) + 2) / 3) / ((281/100 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_481_100
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.472084795433 : ℝ) ≤ log ((481/100 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((281/100 : ℝ) + 2) / 3) = ((481/100 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1495904689 : ℝ)
+      ≤ (0.472084795433 : ℝ) / (((281/100 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((481/100 : ℝ)) - log 3) / (((281/100 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((481/100 : ℝ)) - log 3) / (((281/100 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((141/50 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_282_100 :
+    (0.1498552418 : ℝ) ≤
+      (log (((141/50 : ℝ) + 2) / 3) / ((141/50 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_241_50
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.474161639378 : ℝ) ≤ log ((241/50 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((141/50 : ℝ) + 2) / 3) = ((241/50 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1498552418 : ℝ)
+      ≤ (0.474161639378 : ℝ) / (((141/50 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((241/50 : ℝ)) - log 3) / (((141/50 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((241/50 : ℝ)) - log 3) / (((141/50 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((283/100 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_283_100 :
+    (0.1501172753 : ℝ) ≤
+      (log (((283/100 : ℝ) + 2) / 3) / ((283/100 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_483_100
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.47623417898 : ℝ) ≤ log ((483/100 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((283/100 : ℝ) + 2) / 3) = ((483/100 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1501172753 : ℝ)
+      ≤ (0.47623417898 : ℝ) / (((283/100 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((483/100 : ℝ)) - log 3) / (((283/100 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((483/100 : ℝ)) - log 3) / (((283/100 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((71/25 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_284_100 :
+    (0.1503765963 : ℝ) ≤
+      (log (((71/25 : ℝ) + 2) / 3) / ((71/25 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_121_25
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.478302432044 : ℝ) ≤ log ((121/25 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((71/25 : ℝ) + 2) / 3) = ((121/25 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1503765963 : ℝ)
+      ≤ (0.478302432044 : ℝ) / (((71/25 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((121/25 : ℝ)) - log 3) / (((71/25 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((121/25 : ℝ)) - log 3) / (((71/25 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((57/20 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_285_100 :
+    (0.1506332316 : ℝ) ≤
+      (log (((57/20 : ℝ) + 2) / 3) / ((57/20 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_97_20
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.480366416265 : ℝ) ≤ log ((97/20 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((57/20 : ℝ) + 2) / 3) = ((97/20 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1506332316 : ℝ)
+      ≤ (0.480366416265 : ℝ) / (((57/20 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((97/20 : ℝ)) - log 3) / (((57/20 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((97/20 : ℝ)) - log 3) / (((57/20 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((143/50 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_286_100 :
+    (0.1508872076 : ℝ) ≤
+      (log (((143/50 : ℝ) + 2) / 3) / ((143/50 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_243_50
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.482426149228 : ℝ) ≤ log ((243/50 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((143/50 : ℝ) + 2) / 3) = ((243/50 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1508872076 : ℝ)
+      ≤ (0.482426149228 : ℝ) / (((143/50 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((243/50 : ℝ)) - log 3) / (((143/50 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((243/50 : ℝ)) - log 3) / (((143/50 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((287/100 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_287_100 :
+    (0.1511385502 : ℝ) ≤
+      (log (((287/100 : ℝ) + 2) / 3) / ((287/100 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_487_100
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.48448164841 : ℝ) ≤ log ((487/100 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((287/100 : ℝ) + 2) / 3) = ((487/100 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1511385502 : ℝ)
+      ≤ (0.48448164841 : ℝ) / (((287/100 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((487/100 : ℝ)) - log 3) / (((287/100 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((487/100 : ℝ)) - log 3) / (((287/100 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((72/25 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_288_100 :
+    (0.1513872853 : ℝ) ≤
+      (log (((72/25 : ℝ) + 2) / 3) / ((72/25 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_122_25
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.486532931181 : ℝ) ≤ log ((122/25 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((72/25 : ℝ) + 2) / 3) = ((122/25 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1513872853 : ℝ)
+      ≤ (0.486532931181 : ℝ) / (((72/25 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((122/25 : ℝ)) - log 3) / (((72/25 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((122/25 : ℝ)) - log 3) / (((72/25 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Lower bound of `sigma0' ((289/100 : ℝ))`, the tangent slope of a `[14/5, 29/10]` panel. -/
+private theorem sigma0_deriv_lower_c7_289_100 :
+    (0.1516334383 : ℝ) ≤
+      (log (((289/100 : ℝ) + 2) / 3) / ((289/100 : ℝ) + 1)) / (1 - Wu04Integral.sigma 3 5 4) := by
+  have hx := log_489_100
+  have h3 := log_three_bounds
+  have hK := sigma_3_5_4_bounds_exact
+  have hKpos : (0 : ℝ) < 1 - Wu04Integral.sigma 3 5 4 := by linarith [hK.2]
+  have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by linarith [hK.1]
+  have hnum : (0.488580014802 : ℝ) ≤ log ((489/100 : ℝ)) - log 3 := by
+    linarith [hx.1, h3.2]
+  rw [show (((289/100 : ℝ) + 2) / 3) = ((489/100 : ℝ)) / 3 by norm_num,
+    Real.log_div (by norm_num) (by norm_num), div_div]
+  calc (0.1516334383 : ℝ)
+      ≤ (0.488580014802 : ℝ) / (((289/100 : ℝ) + 1) * (0.828306585 : ℝ)) := by norm_num
+    _ ≤ (log ((489/100 : ℝ)) - log 3) / (((289/100 : ℝ) + 1) * (0.828306585)) :=
+        div_le_div_of_nonneg_right hnum (by norm_num)
+    _ ≤ (log ((489/100 : ℝ)) - log 3) / (((289/100 : ℝ) + 1) * (1 - Wu04Integral.sigma 3 5 4)) := by
+        refine div_le_div_of_nonneg_left (by linarith) (by positivity) ?_
+        exact mul_le_mul_of_nonneg_left hKhi (by norm_num)
+
+/-- Second-order panel 0 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_0 :
+    (0.0003166885470894 : ℝ) ≤ ∫ t in (14/5 : ℝ)..(281/100 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (14/5 : ℝ)) (b := (281/100 : ℝ)) (A := (0.176915473133 : ℝ))
+    (B := (0.1493229292 : ℝ)) (C := (0.01328957444349 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_280_100) (sigma0_deriv_lower_c7_280_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.570697084135 : ℝ) := by
+        have hle : s + 2 ≤ (481/100 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_481_100.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.570697084135 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((14/5 : ℝ) + 2) * ((14/5 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((14/5 : ℝ) + 2) * ((14/5 : ℝ) + 1) = ((14/5 : ℝ) + 1) / ((14/5 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.31958187119166666666 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((381/100 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((381/100 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (381/100 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01328957444349 : ℝ))) ≤ (0.31958187119166666666 : ℝ) / (((381/100 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.31958187119166666666 : ℝ) / (((381/100 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.31958187119166666666 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.31958187119166666666 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_281_280
+  rw [show ((281/100 : ℝ)) / ((14/5 : ℝ)) = (281/280 : ℝ) by norm_num] at hp
+  have hX : ((0.176915473133 : ℝ) - (0.1493229292 : ℝ) * (14/5 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.176915473133 : ℝ) - (0.1493229292 : ℝ) * (14/5 : ℝ)) * log (281/280) ≥
+      (((0.176915473133 : ℝ) - (0.1493229292 : ℝ) * (14/5 : ℝ))) * (0.0035650661645 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01328957444349 : ℝ) * (14/5 : ℝ) ^ 2) * log (281/280) ≥
+      ((0.01328957444349 : ℝ) * (14/5 : ℝ) ^ 2) * (0.00356506616449 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 1 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_1 :
+    (0.0003182205637441 : ℝ) ≤ ∫ t in (281/100 : ℝ)..(141/50 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (281/100 : ℝ)) (b := (141/50 : ℝ)) (A := (0.17841004146 : ℝ))
+    (B := (0.1495904689 : ℝ)) (C := (0.01315209117941 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_281_100) (sigma0_deriv_lower_c7_281_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.57277392808 : ℝ) := by
+        have hle : s + 2 ≤ (241/50 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_241_50.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.57277392808 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((281/100 : ℝ) + 2) * ((281/100 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((281/100 : ℝ) + 2) * ((281/100 : ℝ) + 1) = ((281/100 : ℝ) + 1) / ((281/100 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.31793815267979209979 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((191/50 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((191/50 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (191/50 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01315209117941 : ℝ))) ≤ (0.31793815267979209979 : ℝ) / (((191/50 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.31793815267979209979 : ℝ) / (((191/50 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.31793815267979209979 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.31793815267979209979 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_282_281
+  rw [show ((141/50 : ℝ)) / ((281/100 : ℝ)) = (282/281 : ℝ) by norm_num] at hp
+  have hX : ((0.17841004146 : ℝ) - (0.1495904689 : ℝ) * (281/100 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.17841004146 : ℝ) - (0.1495904689 : ℝ) * (281/100 : ℝ)) * log (282/281) ≥
+      (((0.17841004146 : ℝ) - (0.1495904689 : ℝ) * (281/100 : ℝ))) * (0.00355240160437 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01315209117941 : ℝ) * (281/100 : ℝ) ^ 2) * log (282/281) ≥
+      ((0.01315209117941 : ℝ) * (281/100 : ℝ) ^ 2) * (0.00355240160436 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 2 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_2 :
+    (0.000319746420453 : ℝ) ≤ ∫ t in (141/50 : ℝ)..(283/100 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (141/50 : ℝ)) (b := (283/100 : ℝ)) (A := (0.179907271276 : ℝ))
+    (B := (0.1498552418 : ℝ)) (C := (0.01301596387513 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_282_100) (sigma0_deriv_lower_c7_282_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.574846467682 : ℝ) := by
+        have hle : s + 2 ≤ (483/100 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_483_100.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.574846467682 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((141/50 : ℝ) + 2) * ((141/50 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((141/50 : ℝ) + 2) * ((141/50 : ℝ) + 1) = ((141/50 : ℝ) + 1) / ((141/50 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.31629694130995020746 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((383/100 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((383/100 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (383/100 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01301596387513 : ℝ))) ≤ (0.31629694130995020746 : ℝ) / (((383/100 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.31629694130995020746 : ℝ) / (((383/100 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.31629694130995020746 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.31629694130995020746 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_283_282
+  rw [show ((283/100 : ℝ)) / ((141/50 : ℝ)) = (283/282 : ℝ) by norm_num] at hp
+  have hX : ((0.179907271276 : ℝ) - (0.1498552418 : ℝ) * (141/50 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.179907271276 : ℝ) - (0.1498552418 : ℝ) * (141/50 : ℝ)) * log (283/282) ≥
+      (((0.179907271276 : ℝ) - (0.1498552418 : ℝ) * (141/50 : ℝ))) * (0.00353982670513 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01301596387513 : ℝ) * (141/50 : ℝ) ^ 2) * log (283/282) ≥
+      ((0.01301596387513 : ℝ) * (141/50 : ℝ) ^ 2) * (0.00353982670512 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 3 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_3 :
+    (0.0003212661340795 : ℝ) ≤ ∫ t in (283/100 : ℝ)..(71/25 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (283/100 : ℝ)) (b := (71/25 : ℝ)) (A := (0.181407135046 : ℝ))
+    (B := (0.1501172753 : ℝ)) (C := (0.01288117669366 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_283_100) (sigma0_deriv_lower_c7_283_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.576914720746 : ℝ) := by
+        have hle : s + 2 ≤ (121/25 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_121_25.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.576914720746 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((283/100 : ℝ) + 2) * ((283/100 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((283/100 : ℝ) + 2) * ((283/100 : ℝ) + 1) = ((283/100 : ℝ) + 1) / ((283/100 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.31465823043987991718 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((96/25 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((96/25 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (96/25 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01288117669366 : ℝ))) ≤ (0.31465823043987991718 : ℝ) / (((96/25 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.31465823043987991718 : ℝ) / (((96/25 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.31465823043987991718 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.31465823043987991718 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_284_283
+  rw [show ((71/25 : ℝ)) / ((283/100 : ℝ)) = (284/283 : ℝ) by norm_num] at hp
+  have hX : ((0.181407135046 : ℝ) - (0.1501172753 : ℝ) * (283/100 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.181407135046 : ℝ) - (0.1501172753 : ℝ) * (283/100 : ℝ)) * log (284/283) ≥
+      (((0.181407135046 : ℝ) - (0.1501172753 : ℝ) * (283/100 : ℝ))) * (0.00352734051797 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01288117669366 : ℝ) * (283/100 : ℝ) ^ 2) * log (284/283) ≥
+      ((0.01288117669366 : ℝ) * (283/100 : ℝ) ^ 2) * (0.00352734051796 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 4 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_4 :
+    (0.0003227797217287 : ℝ) ≤ ∫ t in (71/25 : ℝ)..(57/20 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (71/25 : ℝ)) (b := (57/20 : ℝ)) (A := (0.182909605511 : ℝ))
+    (B := (0.1503765963 : ℝ)) (C := (0.01274771401762 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_284_100) (sigma0_deriv_lower_c7_284_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.578978704967 : ℝ) := by
+        have hle : s + 2 ≤ (97/20 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_97_20.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.578978704967 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((71/25 : ℝ) + 2) * ((71/25 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((71/25 : ℝ) + 2) * ((71/25 : ℝ) + 1) = ((71/25 : ℝ) + 1) / ((71/25 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.3130220134450661157 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((77/20 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((77/20 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (77/20 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01274771401762 : ℝ))) ≤ (0.3130220134450661157 : ℝ) / (((77/20 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.3130220134450661157 : ℝ) / (((77/20 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.3130220134450661157 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.3130220134450661157 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_285_284
+  rw [show ((57/20 : ℝ)) / ((71/25 : ℝ)) = (285/284 : ℝ) by norm_num] at hp
+  have hX : ((0.182909605511 : ℝ) - (0.1503765963 : ℝ) * (71/25 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.182909605511 : ℝ) - (0.1503765963 : ℝ) * (71/25 : ℝ)) * log (285/284) ≥
+      (((0.182909605511 : ℝ) - (0.1503765963 : ℝ) * (71/25 : ℝ))) * (0.00351494210745 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01274771401762 : ℝ) * (71/25 : ℝ) ^ 2) * log (285/284) ≥
+      ((0.01274771401762 : ℝ) * (71/25 : ℝ) ^ 2) * (0.00351494210744 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 5 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_5 :
+    (0.0003242872007295 : ℝ) ≤ ∫ t in (57/20 : ℝ)..(143/50 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (57/20 : ℝ)) (b := (143/50 : ℝ)) (A := (0.184414655676 : ℝ))
+    (B := (0.1506332316 : ℝ)) (C := (0.0126155604457 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_285_100) (sigma0_deriv_lower_c7_285_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.58103843793 : ℝ) := by
+        have hle : s + 2 ≤ (243/50 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_243_50.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.58103843793 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((57/20 : ℝ) + 2) * ((57/20 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((57/20 : ℝ) + 2) * ((57/20 : ℝ) + 1) = ((57/20 : ℝ) + 1) / ((57/20 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.31138828371969072164 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((193/50 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((193/50 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (193/50 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.0126155604457 : ℝ))) ≤ (0.31138828371969072164 : ℝ) / (((193/50 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.31138828371969072164 : ℝ) / (((193/50 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.31138828371969072164 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.31138828371969072164 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_286_285
+  rw [show ((143/50 : ℝ)) / ((57/20 : ℝ)) = (286/285 : ℝ) by norm_num] at hp
+  have hX : ((0.184414655676 : ℝ) - (0.1506332316 : ℝ) * (57/20 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.184414655676 : ℝ) - (0.1506332316 : ℝ) * (57/20 : ℝ)) * log (286/285) ≥
+      (((0.184414655676 : ℝ) - (0.1506332316 : ℝ) * (57/20 : ℝ))) * (0.00350263055121 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.0126155604457 : ℝ) * (57/20 : ℝ) ^ 2) * log (286/285) ≥
+      ((0.0126155604457 : ℝ) * (57/20 : ℝ) ^ 2) * (0.0035026305512 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 6 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_6 :
+    (0.0003257885886273 : ℝ) ≤ ∫ t in (143/50 : ℝ)..(287/100 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (143/50 : ℝ)) (b := (287/100 : ℝ)) (A := (0.185922258811 : ℝ))
+    (B := (0.1508872076 : ℝ)) (C := (0.01248470078913 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_286_100) (sigma0_deriv_lower_c7_286_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.583093937112 : ℝ) := by
+        have hle : s + 2 ≤ (487/100 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_487_100.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.583093937112 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((143/50 : ℝ) + 2) * ((143/50 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((143/50 : ℝ) + 2) * ((143/50 : ℝ) + 1) = ((143/50 : ℝ) + 1) / ((143/50 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.30975703467557201646 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((387/100 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((387/100 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (387/100 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01248470078913 : ℝ))) ≤ (0.30975703467557201646 : ℝ) / (((387/100 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.30975703467557201646 : ℝ) / (((387/100 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.30975703467557201646 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.30975703467557201646 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_287_286
+  rw [show ((287/100 : ℝ)) / ((143/50 : ℝ)) = (287/286 : ℝ) by norm_num] at hp
+  have hX : ((0.185922258811 : ℝ) - (0.1508872076 : ℝ) * (143/50 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.185922258811 : ℝ) - (0.1508872076 : ℝ) * (143/50 : ℝ)) * log (287/286) ≥
+      (((0.185922258811 : ℝ) - (0.1508872076 : ℝ) * (143/50 : ℝ))) * (0.00349040493977 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01248470078913 : ℝ) * (143/50 : ℝ) ^ 2) * log (287/286) ≥
+      ((0.01248470078913 : ℝ) * (143/50 : ℝ) ^ 2) * (0.00349040493976 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 7 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_7 :
+    (0.0003272839031819 : ℝ) ≤ ∫ t in (287/100 : ℝ)..(72/25 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (287/100 : ℝ)) (b := (72/25 : ℝ)) (A := (0.187432388453 : ℝ))
+    (B := (0.1511385502 : ℝ)) (C := (0.01235512006827 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_287_100) (sigma0_deriv_lower_c7_287_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.585145219883 : ℝ) := by
+        have hle : s + 2 ≤ (122/25 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_122_25.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.585145219883 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((287/100 : ℝ) + 2) * ((287/100 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((287/100 : ℝ) + 2) * ((287/100 : ℝ) + 1) = ((287/100 : ℝ) + 1) / ((287/100 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.30812825974209240246 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((97/25 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((97/25 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (97/25 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01235512006827 : ℝ))) ≤ (0.30812825974209240246 : ℝ) / (((97/25 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.30812825974209240246 : ℝ) / (((97/25 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.30812825974209240246 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.30812825974209240246 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_288_287
+  rw [show ((72/25 : ℝ)) / ((287/100 : ℝ)) = (288/287 : ℝ) by norm_num] at hp
+  have hX : ((0.187432388453 : ℝ) - (0.1511385502 : ℝ) * (287/100 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.187432388453 : ℝ) - (0.1511385502 : ℝ) * (287/100 : ℝ)) * log (288/287) ≥
+      (((0.187432388453 : ℝ) - (0.1511385502 : ℝ) * (287/100 : ℝ))) * (0.00347826437633 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01235512006827 : ℝ) * (287/100 : ℝ) ^ 2) * log (288/287) ≥
+      ((0.01235512006827 : ℝ) * (287/100 : ℝ) ^ 2) * (0.00347826437632 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 8 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_8 :
+    (0.0003287731623511 : ℝ) ≤ ∫ t in (72/25 : ℝ)..(289/100 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (72/25 : ℝ)) (b := (289/100 : ℝ)) (A := (0.188945018394 : ℝ))
+    (B := (0.1513872853 : ℝ)) (C := (0.01222680350938 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_288_100) (sigma0_deriv_lower_c7_288_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.587192303504 : ℝ) := by
+        have hle : s + 2 ≤ (489/100 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_489_100.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.587192303504 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((72/25 : ℝ) + 2) * ((72/25 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((72/25 : ℝ) + 2) * ((72/25 : ℝ) + 1) = ((72/25 : ℝ) + 1) / ((72/25 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.30650195236911475409 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((389/100 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((389/100 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (389/100 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.01222680350938 : ℝ))) ≤ (0.30650195236911475409 : ℝ) / (((389/100 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.30650195236911475409 : ℝ) / (((389/100 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.30650195236911475409 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.30650195236911475409 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_289_288
+  rw [show ((289/100 : ℝ)) / ((72/25 : ℝ)) = (289/288 : ℝ) by norm_num] at hp
+  have hX : ((0.188945018394 : ℝ) - (0.1513872853 : ℝ) * (72/25 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.188945018394 : ℝ) - (0.1513872853 : ℝ) * (72/25 : ℝ)) * log (289/288) ≥
+      (((0.188945018394 : ℝ) - (0.1513872853 : ℝ) * (72/25 : ℝ))) * (0.00346620797649 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.01222680350938 : ℝ) * (72/25 : ℝ) ^ 2) * log (289/288) ≥
+      ((0.01222680350938 : ℝ) * (72/25 : ℝ) ^ 2) * (0.00346620797648 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- Second-order panel 9 of the `[14/5, 29/10]` `sigma0` quadrature. -/
+private theorem sigma0_panel_val2_c7_9 :
+    (0.0003302563842793 : ℝ) ≤ ∫ t in (289/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have hp := sigma0_panel_lower2_c2 (a := (289/100 : ℝ)) (b := (29/10 : ℝ)) (A := (0.190460122681 : ℝ))
+    (B := (0.1516334383 : ℝ)) (C := (0.012099736541 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (sigma0_c7_289_100) (sigma0_deriv_lower_c7_289_100)
+    (fun s hs => by
+      have hlog1 : log ((s + 2) / 3) = log (s + 2) - log 3 := by
+        rw [Real.log_div (by linarith [hs.1]) (by norm_num)]
+      have hlog2 : log (s + 2) ≤ (1.589235205134 : ℝ) := by
+        have hle : s + 2 ≤ (49/10 : ℝ) := by linarith [hs.2]
+        have h := Real.log_le_log (by linarith [hs.1]) hle
+        linarith [h, log_49_10.2]
+      have hlog3 : log (s + 2) - log 3 ≤ (1.589235205134 - 1.09861228866 : ℝ) := by
+        linarith [hlog2, log_three_bounds.1]
+      have hfrac : 1 / ((289/100 : ℝ) + 2) * ((289/100 : ℝ) + 1) ≤ 1 / (s + 2) * (s + 1) := by
+        rw [show 1 / ((289/100 : ℝ) + 2) * ((289/100 : ℝ) + 1) = ((289/100 : ℝ) + 1) / ((289/100 : ℝ) + 2) by ring,
+          show 1 / (s + 2) * (s + 1) = (s + 1) / (s + 2) by ring,
+          div_le_div_iff₀ (by norm_num) (by linarith [hs.1])]
+        nlinarith [hs.1]
+      have hnum : (0.30487810602088752556 : ℝ) ≤ 1 / (s + 2) * (s + 1) - log ((s + 2) / 3) := by
+        rw [hlog1]
+        linarith [hfrac, hlog3]
+      have hden : (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) ≤
+          ((39/10 : ℝ)) ^ 2 * (0.828306585 : ℝ) := by
+        have hKhi : 1 - Wu04Integral.sigma 3 5 4 ≤ (0.828306585 : ℝ) := by
+          linarith [sigma_3_5_4_bounds_exact.1]
+        have hsq : (s + 1) ^ 2 ≤ ((39/10 : ℝ)) ^ 2 := by
+          have h1 : s + 1 ≤ (39/10 : ℝ) := by linarith [hs.2]
+          nlinarith [hs.1]
+        exact mul_le_mul hsq hKhi (by linarith [sigma_3_5_4_bounds_exact.2]) (by positivity)
+      have hpos : (0 : ℝ) < (s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4) := by
+        have hK : 0 < 1 - Wu04Integral.sigma 3 5 4 := by linarith [sigma_3_5_4_bounds_exact.2]
+        have hs1 : (0 : ℝ) < s + 1 := by linarith [hs.1]
+        positivity
+      have step0 : (2 * ((0.012099736541 : ℝ))) ≤ (0.30487810602088752556 : ℝ) / (((39/10 : ℝ)) ^ 2 * (0.828306585 : ℝ)) :=
+        by norm_num
+      have step1 : (0.30487810602088752556 : ℝ) / (((39/10 : ℝ)) ^ 2 * (0.828306585 : ℝ))
+          ≤ (0.30487810602088752556 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden
+      have step2 : (0.30487810602088752556 : ℝ) / ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4))
+          ≤ (1 / (s + 2) * (s + 1) - log ((s + 2) / 3)) /
+              ((s + 1) ^ 2 * (1 - Wu04Integral.sigma 3 5 4)) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+      rw [div_div]
+      exact step0.trans (step1.trans step2))
+  have hl := log_290_289
+  rw [show ((29/10 : ℝ)) / ((289/100 : ℝ)) = (290/289 : ℝ) by norm_num] at hp
+  have hX : ((0.190460122681 : ℝ) - (0.1516334383 : ℝ) * (289/100 : ℝ)) ≤ 0 := by norm_num
+  have hmul1 : ((0.190460122681 : ℝ) - (0.1516334383 : ℝ) * (289/100 : ℝ)) * log (290/289) ≥
+      (((0.190460122681 : ℝ) - (0.1516334383 : ℝ) * (289/100 : ℝ))) * (0.00345423486809 : ℝ) :=
+    mul_le_mul_of_nonpos_left hl.2 hX
+  have hmul2 : ((0.012099736541 : ℝ) * (289/100 : ℝ) ^ 2) * log (290/289) ≥
+      ((0.012099736541 : ℝ) * (289/100 : ℝ) ^ 2) * (0.00345423486808 : ℝ) :=
+    mul_le_mul_of_nonneg_left hl.1 (by norm_num)
+  linarith [hp, hmul1, hmul2]
+
+/-- The ten-panel second-order sandwich for `∫ sigma0 t/(2t)` on `[14/5, 29/10]`. -/
+private theorem sigma0_integral_lower2_c7 :
+    (0.0032350906262638 : ℝ) ≤ ∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
+  have s10 : (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (14/5 : ℝ)..(281/100 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        (∫ t in (281/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s0 : (∫ t in (281/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (281/100 : ℝ)..(141/50 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (141/50 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s1 : (∫ t in (141/50 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (141/50 : ℝ)..(283/100 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (283/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s2 : (∫ t in (283/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (283/100 : ℝ)..(71/25 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (71/25 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s3 : (∫ t in (71/25 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (71/25 : ℝ)..(57/20 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (57/20 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s4 : (∫ t in (57/20 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (57/20 : ℝ)..(143/50 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (143/50 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s5 : (∫ t in (143/50 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (143/50 : ℝ)..(287/100 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (287/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s6 : (∫ t in (287/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (287/100 : ℝ)..(72/25 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (72/25 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s7 : (∫ t in (72/25 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (72/25 : ℝ)..(289/100 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (289/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  have s8 : (∫ t in (289/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      (∫ t in (289/100 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) + (∫ t in (29/10 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))
+      (sigma0_div_two_integrable (by norm_num) (by norm_num))).symm
+  rw [s10, s0, s1, s2, s3, s4, s5, s6, s7, s8]
+  linarith [sigma0_panel_val2_c7_0, sigma0_panel_val2_c7_1, sigma0_panel_val2_c7_2, sigma0_panel_val2_c7_3, sigma0_panel_val2_c7_4, sigma0_panel_val2_c7_5, sigma0_panel_val2_c7_6, sigma0_panel_val2_c7_7, sigma0_panel_val2_c7_8, sigma0_panel_val2_c7_9]
+
+/-- `∫ log (t+1)/t` on `[14/5, 29/10]` from the eight-term expansion at `c = 57/20`. -/
+private theorem log_succ_integral_c7_lower :
+    (0.0473020140084823 : ℝ) ≤ ∫ t in (14/5 : ℝ)..(29/10 : ℝ), log (t + 1) / t := by
+  have hxr : ∀ t ∈ uIcc (14/5 : ℝ) (29/10 : ℝ),
+      |((57/20 : ℝ) - t) / (57/20 + 1)| ≤ (1/77 : ℝ) := by
     intro t ht
-    rw [uIcc_of_le hab] at ht
-    have ht0 : (0 : ℝ) < t := lt_of_lt_of_le ha ht.1
-    have h5 : ((t + 1) ^ 5) ≠ 0 := by positivity
-    rw [Real.log_div h5 (ne_of_gt hB), Real.log_pow]
-    push_cast
+    rw [uIcc_of_le (by norm_num : (14/5 : ℝ) ≤ 29/10)] at ht
+    rw [abs_le]
+    have hb : (0 : ℝ) < 57/20 + 1 := by norm_num
+    constructor
+    · rw [le_div_iff₀ hb]
+      nlinarith [ht.1, ht.2]
+    · rw [div_le_iff₀ hb]
+      nlinarith [ht.1, ht.2]
+  have h := log_succ_integral_lower (a := (14/5 : ℝ)) (b := (29/10 : ℝ)) (c := (57/20 : ℝ))
+    (r := (1/77 : ℝ)) (by norm_num) (by norm_num) (by norm_num) (by norm_num) (by norm_num) hxr 8
+  have hc := log_77_20
+  have hl := log_29_28
+  rw [show ((29/10 : ℝ) / (14/5)) = 29/28 by norm_num] at h
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, Nat.choose] at h
+  norm_num at h
+  have hmul : (1.348073148295 : ℝ) * (0.03509131981127 : ℝ) ≤ log (77/20) * log (29/28) := by
+    have hm := mul_le_mul hc.1 hl.1 (by norm_num) (by linarith [hc.1])
+    linarith [hm]
+  linarith [h, hmul, hl.2]
+/-- On `[14/5, 29/10]` the `Xi1` kernel has both indicators fixed whenever `sp - 2 ≤ 14/5`
+(the second window sits below the panel and the first covers it). -/
+private theorem Xi1_general_eq_c7 {s sp t : ℝ} (hsp : sp - 2 < 14/5)
+    (h1 : (14/5 : ℝ) ≤ t) (h2 : t ≤ 29/10) :
+    Wu04Functional.Xi1 s sp t =
+      Wu04Integral.sigma0 t / (2 * t) * log (16 / ((s - 1) * (sp - 1))) +
+        log ((t + 1) ^ 2 / ((s - 1) * (sp - 1))) / (2 * t) := by
+  have hI1 : sp - 2 ≤ t ∧ t ≤ 3 := ⟨le_trans hsp.le h1, by linarith⟩
+  have hI2 : ¬ (sp - sp / s - 1 ≤ t ∧ t ≤ sp - 2) := by
+    intro hc
+    linarith [hc.2, hsp, h1]
+  simp only [Wu04Functional.Xi1, Wu04Functional.ind, if_pos hI1]
+  rw [if_neg hI2]
+  ring
+
+/-- The `Xi1` panel integral in its three elementary pieces, for any `s`, `sp` whose windows sit
+below `[14/5, 29/10]`. -/
+private theorem Xi1_general_integral_c7 {s sp : ℝ} (hsp : sp - 2 < 14/5)
+    (hPpos : 0 < (s - 1) * (sp - 1)) :
+    (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Functional.Xi1 s sp t) =
+      log (16 / ((s - 1) * (sp - 1))) *
+          (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        (∫ t in (14/5 : ℝ)..(29/10 : ℝ), log (t + 1) / t) -
+          (log ((s - 1) * (sp - 1)) / 2) *
+            (∫ t in (14/5 : ℝ)..(29/10 : ℝ), 1 / t) := by
+  have hI1 := sigma0_div_two_integrable (a := (14/5 : ℝ)) (b := (29/10 : ℝ))
+    (by norm_num) (by norm_num)
+  have hI2 : IntervalIntegrable (fun t : ℝ => log (t + 1) / t) volume (14/5 : ℝ) (29/10 : ℝ) :=
+    log_succ_div_integrable_exp (by norm_num) (by norm_num)
+  have hI3 : IntervalIntegrable (fun t : ℝ => 1 / t) volume (14/5 : ℝ) (29/10 : ℝ) :=
+    inv_integrable_exp (by norm_num) (by norm_num)
+  have hpt : ∀ t ∈ uIcc (14/5 : ℝ) (29/10 : ℝ),
+      Wu04Functional.Xi1 s sp t =
+        log (16 / ((s - 1) * (sp - 1))) * (Wu04Integral.sigma0 t / (2 * t)) +
+          (log (t + 1) / t - (log ((s - 1) * (sp - 1)) / 2) * (1 / t)) := by
+    intro t ht
+    rw [uIcc_of_le (by norm_num : (14/5 : ℝ) ≤ 29/10)] at ht
+    rw [Xi1_general_eq_c7 hsp ht.1 ht.2]
+    have hsq : ((t + 1) ^ 2 : ℝ) ≠ 0 := by
+      have ht1 : (t + 1) ≠ 0 := by linarith [ht.1]
+      positivity
+    have h2 : log ((t + 1) ^ 2 / ((s - 1) * (sp - 1))) =
+        2 * log (t + 1) - log ((s - 1) * (sp - 1)) := by
+      rw [Real.log_div hsq (ne_of_gt hPpos), Real.log_pow]
+      push_cast
+      ring
+    rw [h2]
     field_simp
-    try ring
   rw [intervalIntegral.integral_congr hpt]
-  rw [intervalIntegral.integral_add (hA.const_mul (log (1024 / B) * (2 / 5)))
-    (hL.sub (hI.const_mul (log B / 5)))]
+  rw [intervalIntegral.integral_add (hI1.const_mul _) (hI2.sub (hI3.const_mul _))]
   rw [intervalIntegral.integral_const_mul]
-  rw [intervalIntegral.integral_sub hL (hI.const_mul (log B / 5)),
-    intervalIntegral.integral_const_mul]
-  rw [integral_one_div_exp ha hab]
+  rw [intervalIntegral.integral_sub hI2 (hI3.const_mul _)]
+  rw [intervalIntegral.integral_const_mul]
   ring
 
-/-! ### The eighteen panels -/
 
-/-- On the open panel `]13/5, 27/10[` the row-0 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_0_5_eq {t : ℝ} (h1 : ((13/5 : ℝ) : ℝ) < t) (h2 : t < (27/10 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨0, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (22972653/781250 : ℝ)) +
-        log ((t + 1) ^ 5 / (22972653/781250 : ℝ)) / (5 * t) := by
-  have p0 : ((127/50 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((3807/2900 : ℝ) : ℝ) ≤ t ∧ t ≤ (153/100 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((2561/1525 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((406/275 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((153/100 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((750008/538325 : ℝ) : ℝ) ≤ t ∧ t ≤ (2561/1525 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((2561/1525 : ℝ) : ℝ) ≤ t ∧ t ≤ (864189/511850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((2043/1450 : ℝ) : ℝ) ≤ t ∧ t ≤ (864189/511850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((864189/511850 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
+/-! ### Second-order refinement of the `sigma0` panel sandwich
 
-/-- `integralMatrix 0 5` is the row-0 `Xi2` integral over `[13/5, 27/10]`. -/
-private theorem integralMatrix_0_5_eq :
-    Wu04Table.integralMatrix 0 5 =
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨0, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
+The first-order tangent sandwich leaves `1.8e-8` on `∫ sigma0 t/(2t)`; adding the
+second-order term `C (t-a)^2` with `2C ≤ sigma0''` on the panel removes it.
+-/
+
+/-- `integralMatrix 4 2` is the `Xi1 (13/5) (179/50)` quadrature on `[14/5, 29/10]`. -/
+private theorem integralMatrix_4_7_eq :
+    Wu04Table.integralMatrix 4 7 =
+      ∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Functional.Xi1 ((13/5 : ℝ)) ((179/50 : ℝ)) t := by
+  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid,
+    Wu04Functional.tableSp]
   norm_num
 
-/-- **`entry_0_5` of Wu's Section 7 matrix**, certified on the `[13/5, 27/10]` panel:
-the certified panel bound beats the rational candidate by `5.46e-08`. -/
-private theorem entry_0_5_certified :
-    (274861 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 0 5 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (13/5 : ℝ) (27/10 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0029211635127983 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c5
-  have hBi : (0.048858995485099 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c5_lower
-  rw [integralMatrix_0_5_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨0, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (22972653/781250 : ℝ)) +
-      log ((t + 1) ^ 5 / (22972653/781250 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_0_5_eq
-      (by simpa [min_eq_left (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (22972653/781250 : ℝ)) (a := (13/5 : ℝ)) (b := (27/10 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (13/5 : ℝ)) (b := (27/10 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_0_bounds
-  have hL := log_27_26
+/-- **`entry_4_2` of Wu's Section 7 matrix**, certified on the `[14/5, 29/10]` panel. -/
+private theorem entry_4_7_certified :
+    (268087 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 4 7 := by
+  rw [integralMatrix_4_7_eq,
+    Xi1_general_integral_c7 (s := (13/5 : ℝ)) (sp := (179/50 : ℝ)) (by norm_num) (by norm_num),
+    show (((13/5 : ℝ)) - 1) * ((179/50 : ℝ) - 1) = (516/125 : ℝ) by norm_num]
+  have hA := sigma0_integral_lower2_c7
+  have hB := log_succ_integral_c7_lower
+  have h1t := integral_one_div_exp (a := (14/5 : ℝ)) (b := (29/10 : ℝ))
+    (by norm_num) (by norm_num)
+  have h23 := log_29_28
+  have h4 := log_four_bounds
+  have hP := log_P_4_bounds
   rw [h1t]
-  rw [show (((27/10 : ℝ) : ℝ) / (13/5 : ℝ)) = (27/26 : ℝ) by norm_num]
-  have hLP : (3.55030721906062 : ℝ) ≤ log (1024 / (22972653/781250 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
+  have hLP : (1.3547956940207 : ℝ) ≤ log (16 / ((516/125 : ℝ))) := by
+    rw [Real.log_div (by norm_num) (by norm_num),
+      show (16 : ℝ) = 4 ^ 2 by norm_num, Real.log_pow]
     push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.55030721906062 : ℝ) / 5) * (0.0029211635127983 : ℝ) ≤
-      (2 * log (1024 / (22972653/781250 : ℝ)) / 5) *
-        (∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((22972653/781250 : ℝ)) / 5) * log ((27/26 : ℝ)) ≤
-      ((3.38116458643938 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (274861 / 10000000 : ℝ) ≤
-      (2 * (3.55030721906062 : ℝ) / 5) * (0.0029211635127983 : ℝ) + (0.048858995485099 : ℝ) -
-        ((3.38116458643938 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
+    linarith [h4.1, hP.2]
+  have hmul : (1.3547956940207 : ℝ) * (0.0032350906262638 : ℝ) ≤
+      log (16 / ((516/125 : ℝ))) * (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    have hm := mul_le_mul hLP hA (by norm_num) (by linarith [hLP])
+    linarith [hm]
+  have hlast : (log ((516/125 : ℝ)) / 2) * log (29/28) ≤
+      (1.4177930281793 : ℝ) / 2 * (0.03509131981128 : ℝ) := by
+    have h2 : log ((516/125 : ℝ)) / 2 ≤ (1.4177930281793 : ℝ) / 2 := by linarith [hP.2]
+    exact mul_le_mul h2 h23.2 (by linarith [h23.1]) (by linarith [hP.1])
+  linarith [hmul, hB, hlast]
 
-/-- `entry_0_5` in the shape the matrix file states it. -/
-private theorem entry_0_5_leaf :
-    (Wu04Table.candidateMatrixQ 0 5 : ℝ) ≤ Wu04Table.integralMatrix 0 5 := by
-  have hc : (Wu04Table.candidateMatrixQ 0 5 : ℝ) = 274861 / 10000000 := by
+/-- `entry_4_2` in the shape the matrix file states it. -/
+private theorem entry_4_7_leaf :
+    (Wu04Table.candidateMatrixQ 4 7 : ℝ) ≤ Wu04Table.integralMatrix 4 7 := by
+  have hc : (Wu04Table.candidateMatrixQ 4 7 : ℝ) = 268087 / 10000000 := by
     norm_num [Wu04Table.candidateMatrixQ]
   rw [hc]
-  exact entry_0_5_certified
+  exact entry_4_7_certified
 
-/-- On the open panel `]27/10, 14/5[` the row-0 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_0_6_eq {t : ℝ} (h1 : ((27/10 : ℝ) : ℝ) < t) (h2 : t < (14/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨0, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (22972653/781250 : ℝ)) +
-        log ((t + 1) ^ 5 / (22972653/781250 : ℝ)) / (5 * t) := by
-  have p0 : ((127/50 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((3807/2900 : ℝ) : ℝ) ≤ t ∧ t ≤ (153/100 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((2561/1525 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((406/275 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((153/100 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((750008/538325 : ℝ) : ℝ) ≤ t ∧ t ≤ (2561/1525 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((2561/1525 : ℝ) : ℝ) ≤ t ∧ t ≤ (864189/511850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((2043/1450 : ℝ) : ℝ) ≤ t ∧ t ≤ (864189/511850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((864189/511850 : ℝ) : ℝ) ≤ t ∧ t ≤ (127/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 0 6` is the row-0 `Xi2` integral over `[27/10, 14/5]`. -/
-private theorem integralMatrix_0_6_eq :
-    Wu04Table.integralMatrix 0 6 =
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨0, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
+/-- `integralMatrix 5 2` is the `Xi1 (27/10) (347/100)` quadrature on `[14/5, 29/10]`. -/
+private theorem integralMatrix_5_7_eq :
+    Wu04Table.integralMatrix 5 7 =
+      ∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Functional.Xi1 ((27/10 : ℝ)) ((347/100 : ℝ)) t := by
+  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid,
+    Wu04Functional.tableSp]
   norm_num
 
-/-- **`entry_0_6` of Wu's Section 7 matrix**, certified on the `[27/10, 14/5]` panel:
-the certified panel bound beats the rational candidate by `9.02e-08`. -/
-private theorem entry_0_6_certified :
-    (278478 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 0 6 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (27/10 : ℝ) (14/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.003081253846167 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c6
-  have hBi : (0.0480651291935756 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c6_lower
-  rw [integralMatrix_0_6_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨0, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (22972653/781250 : ℝ)) +
-      log ((t + 1) ^ 5 / (22972653/781250 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_0_6_eq
-      (by simpa [min_eq_left (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (22972653/781250 : ℝ)) (a := (27/10 : ℝ)) (b := (14/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (27/10 : ℝ)) (b := (14/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_0_bounds
-  have hL := log_28_27
+/-- **`entry_5_2` of Wu's Section 7 matrix**, certified on the `[14/5, 29/10]` panel. -/
+private theorem entry_5_7_certified :
+    (264544 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 5 7 := by
+  rw [integralMatrix_5_7_eq,
+    Xi1_general_integral_c7 (s := (27/10 : ℝ)) (sp := (347/100 : ℝ)) (by norm_num) (by norm_num),
+    show (((27/10 : ℝ)) - 1) * ((347/100 : ℝ) - 1) = (4199/1000 : ℝ) by norm_num]
+  have hA := sigma0_integral_lower2_c7
+  have hB := log_succ_integral_c7_lower
+  have h1t := integral_one_div_exp (a := (14/5 : ℝ)) (b := (29/10 : ℝ))
+    (by norm_num) (by norm_num)
+  have h23 := log_29_28
+  have h4 := log_four_bounds
+  have hP := log_P_5_bounds
   rw [h1t]
-  rw [show (((14/5 : ℝ) : ℝ) / (27/10 : ℝ)) = (28/27 : ℝ) by norm_num]
-  have hLP : (3.55030721906062 : ℝ) ≤ log (1024 / (22972653/781250 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
+  have hLP : (1.33774232049788 : ℝ) ≤ log (16 / ((4199/1000 : ℝ))) := by
+    rw [Real.log_div (by norm_num) (by norm_num),
+      show (16 : ℝ) = 4 ^ 2 by norm_num, Real.log_pow]
     push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.55030721906062 : ℝ) / 5) * (0.003081253846167 : ℝ) ≤
-      (2 * log (1024 / (22972653/781250 : ℝ)) / 5) *
-        (∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((22972653/781250 : ℝ)) / 5) * log ((28/27 : ℝ)) ≤
-      ((3.38116458643938 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (278478 / 10000000 : ℝ) ≤
-      (2 * (3.55030721906062 : ℝ) / 5) * (0.003081253846167 : ℝ) + (0.0480651291935756 : ℝ) -
-        ((3.38116458643938 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
+    linarith [h4.1, hP.2]
+  have hmul : (1.33774232049788 : ℝ) * (0.0032350906262638 : ℝ) ≤
+      log (16 / ((4199/1000 : ℝ))) * (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    have hm := mul_le_mul hLP hA (by norm_num) (by linarith [hLP])
+    linarith [hm]
+  have hlast : (log ((4199/1000 : ℝ)) / 2) * log (29/28) ≤
+      (1.43484640170212 : ℝ) / 2 * (0.03509131981128 : ℝ) := by
+    have h2 : log ((4199/1000 : ℝ)) / 2 ≤ (1.43484640170212 : ℝ) / 2 := by linarith [hP.2]
+    exact mul_le_mul h2 h23.2 (by linarith [h23.1]) (by linarith [hP.1])
+  linarith [hmul, hB, hlast]
 
-/-- `entry_0_6` in the shape the matrix file states it. -/
-private theorem entry_0_6_leaf :
-    (Wu04Table.candidateMatrixQ 0 6 : ℝ) ≤ Wu04Table.integralMatrix 0 6 := by
-  have hc : (Wu04Table.candidateMatrixQ 0 6 : ℝ) = 278478 / 10000000 := by
+/-- `entry_5_2` in the shape the matrix file states it. -/
+private theorem entry_5_7_leaf :
+    (Wu04Table.candidateMatrixQ 5 7 : ℝ) ≤ Wu04Table.integralMatrix 5 7 := by
+  have hc : (Wu04Table.candidateMatrixQ 5 7 : ℝ) = 264544 / 10000000 := by
     norm_num [Wu04Table.candidateMatrixQ]
   rw [hc]
-  exact entry_0_6_certified
+  exact entry_5_7_certified
 
-/-- On the open panel `]5/2, 13/5[` the row-1 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_1_4_eq {t : ℝ} (h1 : ((5/2 : ℝ) : ℝ) < t) (h2 : t < (13/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (77674597/2500000 : ℝ)) +
-        log ((t + 1) ^ 5 / (77674597/2500000 : ℝ)) / (5 * t) := by
-  have p0 : ((5/2 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((1573/1200 : ℝ) : ℝ) ≤ t ∧ t ≤ (77/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((89/54 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((71/46 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((77/50 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((4387/3186 : ℝ) : ℝ) ≤ t ∧ t ≤ (89/54 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((89/54 : ℝ) : ℝ) ≤ t ∧ t ≤ (1573/944 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((11/8 : ℝ) : ℝ) ≤ t ∧ t ≤ (1573/944 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1573/944 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 1 4` is the row-1 `Xi2` integral over `[5/2, 13/5]`. -/
-private theorem integralMatrix_1_4_eq :
-    Wu04Table.integralMatrix 1 4 =
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
+/-- `integralMatrix 6 2` is the `Xi1 (14/5) (167/50)` quadrature on `[14/5, 29/10]`. -/
+private theorem integralMatrix_6_7_eq :
+    Wu04Table.integralMatrix 6 7 =
+      ∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Functional.Xi1 ((14/5 : ℝ)) ((167/50 : ℝ)) t := by
+  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid,
+    Wu04Functional.tableSp]
   norm_num
 
-/-- **`entry_1_4` of Wu's Section 7 matrix**, certified on the `[5/2, 13/5]` panel:
-the certified panel bound beats the rational candidate by `5.02e-08`. -/
-private theorem entry_1_4_certified :
-    (265826 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 1 4 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (5/2 : ℝ) (13/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0027546843865812 : ℝ) ≤
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c4
-  have hBi : (0.0496856806024402 : ℝ) ≤
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c4_lower
-  rw [integralMatrix_1_4_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (77674597/2500000 : ℝ)) +
-      log ((t + 1) ^ 5 / (77674597/2500000 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_1_4_eq
-      (by simpa [min_eq_left (by norm_num : ((5/2 : ℝ) : ℝ) ≤ (13/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((5/2 : ℝ) : ℝ) ≤ (13/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (77674597/2500000 : ℝ)) (a := (5/2 : ℝ)) (b := (13/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (5/2 : ℝ)) (b := (13/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_1_bounds
-  have hL := log_26_25
+/-- **`entry_6_2` of Wu's Section 7 matrix**, certified on the `[14/5, 29/10]` panel. -/
+private theorem entry_6_7_certified :
+    (263901 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 6 7 := by
+  rw [integralMatrix_6_7_eq,
+    Xi1_general_integral_c7 (s := (14/5 : ℝ)) (sp := (167/50 : ℝ)) (by norm_num) (by norm_num),
+    show (((14/5 : ℝ)) - 1) * ((167/50 : ℝ) - 1) = (1053/250 : ℝ) by norm_num]
+  have hA := sigma0_integral_lower2_c7
+  have hB := log_succ_integral_c7_lower
+  have h1t := integral_one_div_exp (a := (14/5 : ℝ)) (b := (29/10 : ℝ))
+    (by norm_num) (by norm_num)
+  have h23 := log_29_28
+  have h4 := log_four_bounds
+  have hP := log_P_6_bounds
   rw [h1t]
-  rw [show (((13/5 : ℝ) : ℝ) / (5/2 : ℝ)) = (26/25 : ℝ) by norm_num]
-  have hLP : (3.49523427039302 : ℝ) ≤ log (1024 / (77674597/2500000 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
+  have hLP : (1.3346511279282 : ℝ) ≤ log (16 / ((1053/250 : ℝ))) := by
+    rw [Real.log_div (by norm_num) (by norm_num),
+      show (16 : ℝ) = 4 ^ 2 by norm_num, Real.log_pow]
     push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.49523427039302 : ℝ) / 5) * (0.0027546843865812 : ℝ) ≤
-      (2 * log (1024 / (77674597/2500000 : ℝ)) / 5) *
-        (∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((77674597/2500000 : ℝ)) / 5) * log ((26/25 : ℝ)) ≤
-      ((3.43623753510698 : ℝ) / 5) * (0.03922071315329 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (265826 / 10000000 : ℝ) ≤
-      (2 * (3.49523427039302 : ℝ) / 5) * (0.0027546843865812 : ℝ) + (0.0496856806024402 : ℝ) -
-        ((3.43623753510698 : ℝ) / 5) * (0.03922071315329 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
+    linarith [h4.1, hP.2]
+  have hmul : (1.3346511279282 : ℝ) * (0.0032350906262638 : ℝ) ≤
+      log (16 / ((1053/250 : ℝ))) * (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    have hm := mul_le_mul hLP hA (by norm_num) (by linarith [hLP])
+    linarith [hm]
+  have hlast : (log ((1053/250 : ℝ)) / 2) * log (29/28) ≤
+      (1.4379375942718 : ℝ) / 2 * (0.03509131981128 : ℝ) := by
+    have h2 : log ((1053/250 : ℝ)) / 2 ≤ (1.4379375942718 : ℝ) / 2 := by linarith [hP.2]
+    exact mul_le_mul h2 h23.2 (by linarith [h23.1]) (by linarith [hP.1])
+  linarith [hmul, hB, hlast]
 
-/-- `entry_1_4` in the shape the matrix file states it. -/
-private theorem entry_1_4_leaf :
-    (Wu04Table.candidateMatrixQ 1 4 : ℝ) ≤ Wu04Table.integralMatrix 1 4 := by
-  have hc : (Wu04Table.candidateMatrixQ 1 4 : ℝ) = 265826 / 10000000 := by
+/-- `entry_6_2` in the shape the matrix file states it. -/
+private theorem entry_6_7_leaf :
+    (Wu04Table.candidateMatrixQ 6 7 : ℝ) ≤ Wu04Table.integralMatrix 6 7 := by
+  have hc : (Wu04Table.candidateMatrixQ 6 7 : ℝ) = 263901 / 10000000 := by
     norm_num [Wu04Table.candidateMatrixQ]
   rw [hc]
-  exact entry_1_4_certified
+  exact entry_6_7_certified
 
-/-- On the open panel `]13/5, 27/10[` the row-1 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_1_5_eq {t : ℝ} (h1 : ((13/5 : ℝ) : ℝ) < t) (h2 : t < (27/10 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (77674597/2500000 : ℝ)) +
-        log ((t + 1) ^ 5 / (77674597/2500000 : ℝ)) / (5 * t) := by
-  have p0 : ((5/2 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((1573/1200 : ℝ) : ℝ) ≤ t ∧ t ≤ (77/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((89/54 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((71/46 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((77/50 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((4387/3186 : ℝ) : ℝ) ≤ t ∧ t ≤ (89/54 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((89/54 : ℝ) : ℝ) ≤ t ∧ t ≤ (1573/944 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((11/8 : ℝ) : ℝ) ≤ t ∧ t ≤ (1573/944 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1573/944 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 1 5` is the row-1 `Xi2` integral over `[13/5, 27/10]`. -/
-private theorem integralMatrix_1_5_eq :
-    Wu04Table.integralMatrix 1 5 =
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
+/-- `integralMatrix 7 2` is the `Xi1 (29/10) (319/100)` quadrature on `[14/5, 29/10]`. -/
+private theorem integralMatrix_7_7_eq :
+    Wu04Table.integralMatrix 7 7 =
+      ∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Functional.Xi1 ((29/10 : ℝ)) ((319/100 : ℝ)) t := by
+  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid,
+    Wu04Functional.tableSp]
   norm_num
 
-/-- **`entry_1_5` of Wu's Section 7 matrix**, certified on the `[13/5, 27/10]` panel:
-the certified panel bound beats the rational candidate by `9.49e-09`. -/
-private theorem entry_1_5_certified :
-    (270061 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 1 5 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (13/5 : ℝ) (27/10 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0029211635127983 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c5
-  have hBi : (0.048858995485099 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c5_lower
-  rw [integralMatrix_1_5_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (77674597/2500000 : ℝ)) +
-      log ((t + 1) ^ 5 / (77674597/2500000 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_1_5_eq
-      (by simpa [min_eq_left (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (77674597/2500000 : ℝ)) (a := (13/5 : ℝ)) (b := (27/10 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (13/5 : ℝ)) (b := (27/10 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_1_bounds
-  have hL := log_27_26
+/-- **`entry_7_2` of Wu's Section 7 matrix**, certified on the `[14/5, 29/10]` panel. -/
+private theorem entry_7_7_certified :
+    (266433 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 7 7 := by
+  rw [integralMatrix_7_7_eq,
+    Xi1_general_integral_c7 (s := (29/10 : ℝ)) (sp := (319/100 : ℝ)) (by norm_num) (by norm_num),
+    show (((29/10 : ℝ)) - 1) * ((319/100 : ℝ) - 1) = (4161/1000 : ℝ) by norm_num]
+  have hA := sigma0_integral_lower2_c7
+  have hB := log_succ_integral_c7_lower
+  have h1t := integral_one_div_exp (a := (14/5 : ℝ)) (b := (29/10 : ℝ))
+    (by norm_num) (by norm_num)
+  have h23 := log_29_28
+  have h4 := log_four_bounds
+  have hP := log_P_7_bounds
   rw [h1t]
-  rw [show (((27/10 : ℝ) : ℝ) / (13/5 : ℝ)) = (27/26 : ℝ) by norm_num]
-  have hLP : (3.49523427039302 : ℝ) ≤ log (1024 / (77674597/2500000 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
+  have hLP : (1.34683329219 : ℝ) ≤ log (16 / ((4161/1000 : ℝ))) := by
+    rw [Real.log_div (by norm_num) (by norm_num),
+      show (16 : ℝ) = 4 ^ 2 by norm_num, Real.log_pow]
     push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.49523427039302 : ℝ) / 5) * (0.0029211635127983 : ℝ) ≤
-      (2 * log (1024 / (77674597/2500000 : ℝ)) / 5) *
-        (∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((77674597/2500000 : ℝ)) / 5) * log ((27/26 : ℝ)) ≤
-      ((3.43623753510698 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (270061 / 10000000 : ℝ) ≤
-      (2 * (3.49523427039302 : ℝ) / 5) * (0.0029211635127983 : ℝ) + (0.048858995485099 : ℝ) -
-        ((3.43623753510698 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
+    linarith [h4.1, hP.2]
+  have hmul : (1.34683329219 : ℝ) * (0.0032350906262638 : ℝ) ≤
+      log (16 / ((4161/1000 : ℝ))) * (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    have hm := mul_le_mul hLP hA (by norm_num) (by linarith [hLP])
+    linarith [hm]
+  have hlast : (log ((4161/1000 : ℝ)) / 2) * log (29/28) ≤
+      (1.42575543001 : ℝ) / 2 * (0.03509131981128 : ℝ) := by
+    have h2 : log ((4161/1000 : ℝ)) / 2 ≤ (1.42575543001 : ℝ) / 2 := by linarith [hP.2]
+    exact mul_le_mul h2 h23.2 (by linarith [h23.1]) (by linarith [hP.1])
+  linarith [hmul, hB, hlast]
 
-/-- `entry_1_5` in the shape the matrix file states it. -/
-private theorem entry_1_5_leaf :
-    (Wu04Table.candidateMatrixQ 1 5 : ℝ) ≤ Wu04Table.integralMatrix 1 5 := by
-  have hc : (Wu04Table.candidateMatrixQ 1 5 : ℝ) = 270061 / 10000000 := by
+/-- `entry_7_2` in the shape the matrix file states it. -/
+private theorem entry_7_7_leaf :
+    (Wu04Table.candidateMatrixQ 7 7 : ℝ) ≤ Wu04Table.integralMatrix 7 7 := by
+  have hc : (Wu04Table.candidateMatrixQ 7 7 : ℝ) = 266433 / 10000000 := by
     norm_num [Wu04Table.candidateMatrixQ]
   rw [hc]
-  exact entry_1_5_certified
+  exact entry_7_7_certified
 
-/-- On the open panel `]27/10, 14/5[` the row-1 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_1_6_eq {t : ℝ} (h1 : ((27/10 : ℝ) : ℝ) < t) (h2 : t < (14/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (77674597/2500000 : ℝ)) +
-        log ((t + 1) ^ 5 / (77674597/2500000 : ℝ)) / (5 * t) := by
-  have p0 : ((5/2 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((1573/1200 : ℝ) : ℝ) ≤ t ∧ t ≤ (77/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((89/54 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((71/46 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((77/50 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((4387/3186 : ℝ) : ℝ) ≤ t ∧ t ≤ (89/54 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((89/54 : ℝ) : ℝ) ≤ t ∧ t ≤ (1573/944 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((11/8 : ℝ) : ℝ) ≤ t ∧ t ≤ (1573/944 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1573/944 : ℝ) : ℝ) ≤ t ∧ t ≤ (5/2 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 1 6` is the row-1 `Xi2` integral over `[27/10, 14/5]`. -/
-private theorem integralMatrix_1_6_eq :
-    Wu04Table.integralMatrix 1 6 =
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
+/-- `integralMatrix 8 2` is the `Xi1 (3) (3)` quadrature on `[14/5, 29/10]`. -/
+private theorem integralMatrix_8_7_eq :
+    Wu04Table.integralMatrix 8 7 =
+      ∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Functional.Xi1 ((3 : ℝ)) ((3 : ℝ)) t := by
+  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid,
+    Wu04Functional.tableSp]
   norm_num
 
-/-- **`entry_1_6` of Wu's Section 7 matrix**, certified on the `[27/10, 14/5]` panel:
-the certified panel bound beats the rational candidate by `3.80e-08`. -/
-private theorem entry_1_6_certified :
-    (273794 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 1 6 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (27/10 : ℝ) (14/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.003081253846167 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c6
-  have hBi : (0.0480651291935756 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c6_lower
-  rw [integralMatrix_1_6_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨1, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (77674597/2500000 : ℝ)) +
-      log ((t + 1) ^ 5 / (77674597/2500000 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_1_6_eq
-      (by simpa [min_eq_left (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (77674597/2500000 : ℝ)) (a := (27/10 : ℝ)) (b := (14/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (27/10 : ℝ)) (b := (14/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_1_bounds
-  have hL := log_28_27
+/-- **`entry_8_2` of Wu's Section 7 matrix**, certified on the `[14/5, 29/10]` panel. -/
+private theorem entry_8_7_certified :
+    (274633 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 8 7 := by
+  rw [integralMatrix_8_7_eq,
+    Xi1_general_integral_c7 (s := (3 : ℝ)) (sp := (3 : ℝ)) (by norm_num) (by norm_num),
+    show (((3 : ℝ)) - 1) * ((3 : ℝ) - 1) = (4 : ℝ) by norm_num]
+  have hA := sigma0_integral_lower2_c7
+  have hB := log_succ_integral_c7_lower
+  have h1t := integral_one_div_exp (a := (14/5 : ℝ)) (b := (29/10 : ℝ))
+    (by norm_num) (by norm_num)
+  have h23 := log_29_28
+  have h4 := log_four_bounds
+  have hP : (1.3862943611 : ℝ) ≤ log (4) ∧ log (4) ≤ (1.3862943615 : ℝ) := log_four_bounds
   rw [h1t]
-  rw [show (((14/5 : ℝ) : ℝ) / (27/10 : ℝ)) = (28/27 : ℝ) by norm_num]
-  have hLP : (3.49523427039302 : ℝ) ≤ log (1024 / (77674597/2500000 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
+  have hLP : (1.3862943607 : ℝ) ≤ log (16 / ((4 : ℝ))) := by
+    rw [Real.log_div (by norm_num) (by norm_num),
+      show (16 : ℝ) = 4 ^ 2 by norm_num, Real.log_pow]
     push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.49523427039302 : ℝ) / 5) * (0.003081253846167 : ℝ) ≤
-      (2 * log (1024 / (77674597/2500000 : ℝ)) / 5) *
-        (∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((77674597/2500000 : ℝ)) / 5) * log ((28/27 : ℝ)) ≤
-      ((3.43623753510698 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (273794 / 10000000 : ℝ) ≤
-      (2 * (3.49523427039302 : ℝ) / 5) * (0.003081253846167 : ℝ) + (0.0480651291935756 : ℝ) -
-        ((3.43623753510698 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
+    linarith [h4.1, hP.2]
+  have hmul : (1.3862943607 : ℝ) * (0.0032350906262638 : ℝ) ≤
+      log (16 / ((4 : ℝ))) * (∫ t in (14/5 : ℝ)..(29/10 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    have hm := mul_le_mul hLP hA (by norm_num) (by linarith [hLP])
+    linarith [hm]
+  have hlast : (log ((4 : ℝ)) / 2) * log (29/28) ≤
+      (1.3862943615 : ℝ) / 2 * (0.03509131981128 : ℝ) := by
+    have h2 : log ((4 : ℝ)) / 2 ≤ (1.3862943615 : ℝ) / 2 := by linarith [hP.2]
+    exact mul_le_mul h2 h23.2 (by linarith [h23.1]) (by linarith [hP.1])
+  linarith [hmul, hB, hlast]
 
-/-- `entry_1_6` in the shape the matrix file states it. -/
-private theorem entry_1_6_leaf :
-    (Wu04Table.candidateMatrixQ 1 6 : ℝ) ≤ Wu04Table.integralMatrix 1 6 := by
-  have hc : (Wu04Table.candidateMatrixQ 1 6 : ℝ) = 273794 / 10000000 := by
+/-- `entry_8_2` in the shape the matrix file states it. -/
+private theorem entry_8_7_leaf :
+    (Wu04Table.candidateMatrixQ 8 7 : ℝ) ≤ Wu04Table.integralMatrix 8 7 := by
+  have hc : (Wu04Table.candidateMatrixQ 8 7 : ℝ) = 274633 / 10000000 := by
     norm_num [Wu04Table.candidateMatrixQ]
   rw [hc]
-  exact entry_1_6_certified
+  exact entry_8_7_certified
 
-/-- On the open panel `]5/2, 13/5[` the row-2 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_2_4_eq {t : ℝ} (h1 : ((5/2 : ℝ) : ℝ) < t) (h2 : t < (13/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (407396143/12500000 : ℝ)) +
-        log ((t + 1) ^ 5 / (407396143/12500000 : ℝ)) / (5 * t) := by
-  have p0 : ((123/50 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((5437/4100 : ℝ) : ℝ) ≤ t ∧ t ≤ (157/100 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((157/100 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((96559/71400 : ℝ) : ℝ) ≤ t ∧ t ≤ (961/600 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (1212451/731850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((19401/14350 : ℝ) : ℝ) ≤ t ∧ t ≤ (1212451/731850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1212451/731850 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
 
-/-- `integralMatrix 2 4` is the row-2 `Xi2` integral over `[5/2, 13/5]`. -/
-private theorem integralMatrix_2_4_eq :
-    Wu04Table.integralMatrix 2 4 =
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_2_4` of Wu's Section 7 matrix**, certified on the `[5/2, 13/5]` panel:
-the certified panel bound beats the rational candidate by `5.29e-08`. -/
-private theorem entry_2_4_certified :
-    (261548 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 2 4 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (5/2 : ℝ) (13/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0027546843865812 : ℝ) ≤
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c4
-  have hBi : (0.0496856806024402 : ℝ) ≤
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c4_lower
-  rw [integralMatrix_2_4_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (407396143/12500000 : ℝ)) +
-      log ((t + 1) ^ 5 / (407396143/12500000 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_2_4_eq
-      (by simpa [min_eq_left (by norm_num : ((5/2 : ℝ) : ℝ) ≤ (13/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((5/2 : ℝ) : ℝ) ≤ (13/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (407396143/12500000 : ℝ)) (a := (5/2 : ℝ)) (b := (13/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (5/2 : ℝ)) (b := (13/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_2_bounds
-  have hL := log_26_25
-  rw [h1t]
-  rw [show (((13/5 : ℝ) : ℝ) / (5/2 : ℝ)) = (26/25 : ℝ) by norm_num]
-  have hLP : (3.44741441341431 : ℝ) ≤ log (1024 / (407396143/12500000 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.44741441341431 : ℝ) / 5) * (0.0027546843865812 : ℝ) ≤
-      (2 * log (1024 / (407396143/12500000 : ℝ)) / 5) *
-        (∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((407396143/12500000 : ℝ)) / 5) * log ((26/25 : ℝ)) ≤
-      ((3.48405739208569 : ℝ) / 5) * (0.03922071315329 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (261548 / 10000000 : ℝ) ≤
-      (2 * (3.44741441341431 : ℝ) / 5) * (0.0027546843865812 : ℝ) + (0.0496856806024402 : ℝ) -
-        ((3.48405739208569 : ℝ) / 5) * (0.03922071315329 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_2_4` in the shape the matrix file states it. -/
-private theorem entry_2_4_leaf :
-    (Wu04Table.candidateMatrixQ 2 4 : ℝ) ≤ Wu04Table.integralMatrix 2 4 := by
-  have hc : (Wu04Table.candidateMatrixQ 2 4 : ℝ) = 261548 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_2_4_certified
-
-/-- On the open panel `]13/5, 27/10[` the row-2 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_2_5_eq {t : ℝ} (h1 : ((13/5 : ℝ) : ℝ) < t) (h2 : t < (27/10 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (407396143/12500000 : ℝ)) +
-        log ((t + 1) ^ 5 / (407396143/12500000 : ℝ)) / (5 * t) := by
-  have p0 : ((123/50 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((5437/4100 : ℝ) : ℝ) ≤ t ∧ t ≤ (157/100 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((157/100 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((96559/71400 : ℝ) : ℝ) ≤ t ∧ t ≤ (961/600 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (1212451/731850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((19401/14350 : ℝ) : ℝ) ≤ t ∧ t ≤ (1212451/731850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1212451/731850 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 2 5` is the row-2 `Xi2` integral over `[13/5, 27/10]`. -/
-private theorem integralMatrix_2_5_eq :
-    Wu04Table.integralMatrix 2 5 =
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_2_5` of Wu's Section 7 matrix**, certified on the `[13/5, 27/10]` panel:
-the certified panel bound beats the rational candidate by `8.62e-08`. -/
-private theorem entry_2_5_certified :
-    (265892 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 2 5 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (13/5 : ℝ) (27/10 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0029211635127983 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c5
-  have hBi : (0.048858995485099 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c5_lower
-  rw [integralMatrix_2_5_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (407396143/12500000 : ℝ)) +
-      log ((t + 1) ^ 5 / (407396143/12500000 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_2_5_eq
-      (by simpa [min_eq_left (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (407396143/12500000 : ℝ)) (a := (13/5 : ℝ)) (b := (27/10 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (13/5 : ℝ)) (b := (27/10 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_2_bounds
-  have hL := log_27_26
-  rw [h1t]
-  rw [show (((27/10 : ℝ) : ℝ) / (13/5 : ℝ)) = (27/26 : ℝ) by norm_num]
-  have hLP : (3.44741441341431 : ℝ) ≤ log (1024 / (407396143/12500000 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.44741441341431 : ℝ) / 5) * (0.0029211635127983 : ℝ) ≤
-      (2 * log (1024 / (407396143/12500000 : ℝ)) / 5) *
-        (∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((407396143/12500000 : ℝ)) / 5) * log ((27/26 : ℝ)) ≤
-      ((3.48405739208569 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (265892 / 10000000 : ℝ) ≤
-      (2 * (3.44741441341431 : ℝ) / 5) * (0.0029211635127983 : ℝ) + (0.048858995485099 : ℝ) -
-        ((3.48405739208569 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_2_5` in the shape the matrix file states it. -/
-private theorem entry_2_5_leaf :
-    (Wu04Table.candidateMatrixQ 2 5 : ℝ) ≤ Wu04Table.integralMatrix 2 5 := by
-  have hc : (Wu04Table.candidateMatrixQ 2 5 : ℝ) = 265892 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_2_5_certified
-
-/-- On the open panel `]27/10, 14/5[` the row-2 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_2_6_eq {t : ℝ} (h1 : ((27/10 : ℝ) : ℝ) < t) (h2 : t < (14/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (407396143/12500000 : ℝ)) +
-        log ((t + 1) ^ 5 / (407396143/12500000 : ℝ)) / (5 * t) := by
-  have p0 : ((123/50 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((5437/4100 : ℝ) : ℝ) ≤ t ∧ t ≤ (157/100 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((157/100 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((96559/71400 : ℝ) : ℝ) ≤ t ∧ t ≤ (961/600 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((961/600 : ℝ) : ℝ) ≤ t ∧ t ≤ (1212451/731850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((19401/14350 : ℝ) : ℝ) ≤ t ∧ t ≤ (1212451/731850 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1212451/731850 : ℝ) : ℝ) ≤ t ∧ t ≤ (123/50 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 2 6` is the row-2 `Xi2` integral over `[27/10, 14/5]`. -/
-private theorem integralMatrix_2_6_eq :
-    Wu04Table.integralMatrix 2 6 =
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_2_6` of Wu's Section 7 matrix**, certified on the `[27/10, 14/5]` panel:
-the certified panel bound beats the rational candidate by `8.09e-08`. -/
-private theorem entry_2_6_certified :
-    (269726 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 2 6 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (27/10 : ℝ) (14/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.003081253846167 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c6
-  have hBi : (0.0480651291935756 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c6_lower
-  rw [integralMatrix_2_6_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (407396143/12500000 : ℝ)) +
-      log ((t + 1) ^ 5 / (407396143/12500000 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_2_6_eq
-      (by simpa [min_eq_left (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (407396143/12500000 : ℝ)) (a := (27/10 : ℝ)) (b := (14/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (27/10 : ℝ)) (b := (14/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_2_bounds
-  have hL := log_28_27
-  rw [h1t]
-  rw [show (((14/5 : ℝ) : ℝ) / (27/10 : ℝ)) = (28/27 : ℝ) by norm_num]
-  have hLP : (3.44741441341431 : ℝ) ≤ log (1024 / (407396143/12500000 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.44741441341431 : ℝ) / 5) * (0.003081253846167 : ℝ) ≤
-      (2 * log (1024 / (407396143/12500000 : ℝ)) / 5) *
-        (∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((407396143/12500000 : ℝ)) / 5) * log ((28/27 : ℝ)) ≤
-      ((3.48405739208569 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (269726 / 10000000 : ℝ) ≤
-      (2 * (3.44741441341431 : ℝ) / 5) * (0.003081253846167 : ℝ) + (0.0480651291935756 : ℝ) -
-        ((3.48405739208569 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_2_6` in the shape the matrix file states it. -/
-private theorem entry_2_6_leaf :
-    (Wu04Table.candidateMatrixQ 2 6 : ℝ) ≤ Wu04Table.integralMatrix 2 6 := by
-  have hc : (Wu04Table.candidateMatrixQ 2 6 : ℝ) = 269726 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_2_6_certified
-
-/-- On the open panel `]11/5, 23/10[` the row-3 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_3_1_eq {t : ℝ} (h1 : ((11/5 : ℝ) : ℝ) < t) (h2 : t < (23/10 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-        log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t) := by
-  have p0 : ((53/25 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((9724/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (39/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((39/25 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((14626/11125 : ℝ) : ℝ) ≤ t ∧ t ≤ (184/125 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((9373/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1001572/647475 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 3 1` is the row-3 `Xi2` integral over `[11/5, 23/10]`. -/
-private theorem integralMatrix_3_1_eq :
-    Wu04Table.integralMatrix 3 1 =
-      ∫ t in ((11/5 : ℝ) : ℝ)..((23/10 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_3_1` of Wu's Section 7 matrix**, certified on the `[11/5, 23/10]` panel:
-the certified panel bound beats the rational candidate by `8.41e-08`. -/
-private theorem entry_3_1_certified :
-    (239617 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 3 1 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (11/5 : ℝ) (23/10 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0022164551288613 : ℝ) ≤
-      ∫ t in ((11/5 : ℝ) : ℝ)..((23/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2
-  have hBi : (0.05238647153843 : ℝ) ≤
-      ∫ t in ((11/5 : ℝ) : ℝ)..((23/10 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_7_1_lower
-  rw [integralMatrix_3_1_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-      log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_3_1_eq
-      (by simpa [min_eq_left (by norm_num : ((11/5 : ℝ) : ℝ) ≤ (23/10 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((11/5 : ℝ) : ℝ) ≤ (23/10 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (536328/15625 : ℝ)) (a := (11/5 : ℝ)) (b := (23/10 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (11/5 : ℝ)) (b := (23/10 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_3_bounds
-  have hL := log_23_22
-  rw [h1t]
-  rw [show (((23/10 : ℝ) : ℝ) / (11/5 : ℝ)) = (23/22 : ℝ) by norm_num]
-  have hLP : (3.39559808691227 : ℝ) ≤ log (1024 / (536328/15625 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.39559808691227 : ℝ) / 5) * (0.0022164551288613 : ℝ) ≤
-      (2 * log (1024 / (536328/15625 : ℝ)) / 5) *
-        (∫ t in ((11/5 : ℝ) : ℝ)..((23/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((536328/15625 : ℝ)) / 5) * log ((23/22 : ℝ)) ≤
-      ((3.53587371858773 : ℝ) / 5) * (0.04445176257084 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (239617 / 10000000 : ℝ) ≤
-      (2 * (3.39559808691227 : ℝ) / 5) * (0.0022164551288613 : ℝ) + (0.05238647153843 : ℝ) -
-        ((3.53587371858773 : ℝ) / 5) * (0.04445176257084 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_3_1` in the shape the matrix file states it. -/
-private theorem entry_3_1_leaf :
-    (Wu04Table.candidateMatrixQ 3 1 : ℝ) ≤ Wu04Table.integralMatrix 3 1 := by
-  have hc : (Wu04Table.candidateMatrixQ 3 1 : ℝ) = 239617 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_3_1_certified
-
-/-- On the open panel `]23/10, 12/5[` the row-3 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_3_2_eq {t : ℝ} (h1 : ((23/10 : ℝ) : ℝ) < t) (h2 : t < (12/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-        log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t) := by
-  have p0 : ((53/25 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((9724/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (39/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((39/25 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((14626/11125 : ℝ) : ℝ) ≤ t ∧ t ≤ (184/125 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((9373/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1001572/647475 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 3 2` is the row-3 `Xi2` integral over `[23/10, 12/5]`. -/
-private theorem integralMatrix_3_2_eq :
-    Wu04Table.integralMatrix 3 2 =
-      ∫ t in ((23/10 : ℝ) : ℝ)..((12/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_3_2` of Wu's Section 7 matrix**, certified on the `[23/10, 12/5]` panel:
-the certified panel bound beats the rational candidate by `1.24e-08`. -/
-private theorem entry_3_2_certified :
-    (246126 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 3 2 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (23/10 : ℝ) (12/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0024022991069226 : ℝ) ≤
-      ∫ t in ((23/10 : ℝ) : ℝ)..((12/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c2
-  have hBi : (0.0514467998874413 : ℝ) ≤
-      ∫ t in ((23/10 : ℝ) : ℝ)..((12/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c2_lower
-  rw [integralMatrix_3_2_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-      log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_3_2_eq
-      (by simpa [min_eq_left (by norm_num : ((23/10 : ℝ) : ℝ) ≤ (12/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((23/10 : ℝ) : ℝ) ≤ (12/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (536328/15625 : ℝ)) (a := (23/10 : ℝ)) (b := (12/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (23/10 : ℝ)) (b := (12/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_3_bounds
-  have hL := log_24_23
-  rw [h1t]
-  rw [show (((12/5 : ℝ) : ℝ) / (23/10 : ℝ)) = (24/23 : ℝ) by norm_num]
-  have hLP : (3.39559808691227 : ℝ) ≤ log (1024 / (536328/15625 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.39559808691227 : ℝ) / 5) * (0.0024022991069226 : ℝ) ≤
-      (2 * log (1024 / (536328/15625 : ℝ)) / 5) *
-        (∫ t in ((23/10 : ℝ) : ℝ)..((12/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((536328/15625 : ℝ)) / 5) * log ((24/23 : ℝ)) ≤
-      ((3.53587371858773 : ℝ) / 5) * (0.0425596144188 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (246126 / 10000000 : ℝ) ≤
-      (2 * (3.39559808691227 : ℝ) / 5) * (0.0024022991069226 : ℝ) + (0.0514467998874413 : ℝ) -
-        ((3.53587371858773 : ℝ) / 5) * (0.0425596144188 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_3_2` in the shape the matrix file states it. -/
-private theorem entry_3_2_leaf :
-    (Wu04Table.candidateMatrixQ 3 2 : ℝ) ≤ Wu04Table.integralMatrix 3 2 := by
-  have hc : (Wu04Table.candidateMatrixQ 3 2 : ℝ) = 246126 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_3_2_certified
-
-/-- On the open panel `]12/5, 5/2[` the row-3 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_3_3_eq {t : ℝ} (h1 : ((12/5 : ℝ) : ℝ) < t) (h2 : t < (5/2 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-        log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t) := by
-  have p0 : ((53/25 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((9724/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (39/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((39/25 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((14626/11125 : ℝ) : ℝ) ≤ t ∧ t ≤ (184/125 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((9373/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1001572/647475 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 3 3` is the row-3 `Xi2` integral over `[12/5, 5/2]`. -/
-private theorem integralMatrix_3_3_eq :
-    Wu04Table.integralMatrix 3 3 =
-      ∫ t in ((12/5 : ℝ) : ℝ)..((5/2 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_3_3` of Wu's Section 7 matrix**, certified on the `[12/5, 5/2]` panel:
-the certified panel bound beats the rational candidate by `8.13e-08`. -/
-private theorem entry_3_3_certified :
-    (251857 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 3 3 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (12/5 : ℝ) (5/2 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0025817346646543 : ℝ) ≤
-      ∫ t in ((12/5 : ℝ) : ℝ)..((5/2 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c3
-  have hBi : (0.0505474515201772 : ℝ) ≤
-      ∫ t in ((12/5 : ℝ) : ℝ)..((5/2 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c3_lower
-  rw [integralMatrix_3_3_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-      log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_3_3_eq
-      (by simpa [min_eq_left (by norm_num : ((12/5 : ℝ) : ℝ) ≤ (5/2 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((12/5 : ℝ) : ℝ) ≤ (5/2 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (536328/15625 : ℝ)) (a := (12/5 : ℝ)) (b := (5/2 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (12/5 : ℝ)) (b := (5/2 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_3_bounds
-  have hL := log_25_24
-  rw [h1t]
-  rw [show (((5/2 : ℝ) : ℝ) / (12/5 : ℝ)) = (25/24 : ℝ) by norm_num]
-  have hLP : (3.39559808691227 : ℝ) ≤ log (1024 / (536328/15625 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.39559808691227 : ℝ) / 5) * (0.0025817346646543 : ℝ) ≤
-      (2 * log (1024 / (536328/15625 : ℝ)) / 5) *
-        (∫ t in ((12/5 : ℝ) : ℝ)..((5/2 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((536328/15625 : ℝ)) / 5) * log ((25/24 : ℝ)) ≤
-      ((3.53587371858773 : ℝ) / 5) * (0.04082199452026 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (251857 / 10000000 : ℝ) ≤
-      (2 * (3.39559808691227 : ℝ) / 5) * (0.0025817346646543 : ℝ) + (0.0505474515201772 : ℝ) -
-        ((3.53587371858773 : ℝ) / 5) * (0.04082199452026 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_3_3` in the shape the matrix file states it. -/
-private theorem entry_3_3_leaf :
-    (Wu04Table.candidateMatrixQ 3 3 : ℝ) ≤ Wu04Table.integralMatrix 3 3 := by
-  have hc : (Wu04Table.candidateMatrixQ 3 3 : ℝ) = 251857 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_3_3_certified
-
-/-- On the open panel `]5/2, 13/5[` the row-3 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_3_4_eq {t : ℝ} (h1 : ((5/2 : ℝ) : ℝ) < t) (h2 : t < (13/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-        log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t) := by
-  have p0 : ((53/25 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((9724/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (39/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((39/25 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((14626/11125 : ℝ) : ℝ) ≤ t ∧ t ≤ (184/125 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((9373/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1001572/647475 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 3 4` is the row-3 `Xi2` integral over `[5/2, 13/5]`. -/
-private theorem integralMatrix_3_4_eq :
-    Wu04Table.integralMatrix 3 4 =
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_3_4` of Wu's Section 7 matrix**, certified on the `[5/2, 13/5]` panel:
-the certified panel bound beats the rational candidate by `3.24e-09`. -/
-private theorem entry_3_4_certified :
-    (256913 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 3 4 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (5/2 : ℝ) (13/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0027546843865812 : ℝ) ≤
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c4
-  have hBi : (0.0496856806024402 : ℝ) ≤
-      ∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c4_lower
-  rw [integralMatrix_3_4_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-      log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_3_4_eq
-      (by simpa [min_eq_left (by norm_num : ((5/2 : ℝ) : ℝ) ≤ (13/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((5/2 : ℝ) : ℝ) ≤ (13/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (536328/15625 : ℝ)) (a := (5/2 : ℝ)) (b := (13/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (5/2 : ℝ)) (b := (13/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_3_bounds
-  have hL := log_26_25
-  rw [h1t]
-  rw [show (((13/5 : ℝ) : ℝ) / (5/2 : ℝ)) = (26/25 : ℝ) by norm_num]
-  have hLP : (3.39559808691227 : ℝ) ≤ log (1024 / (536328/15625 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.39559808691227 : ℝ) / 5) * (0.0027546843865812 : ℝ) ≤
-      (2 * log (1024 / (536328/15625 : ℝ)) / 5) *
-        (∫ t in ((5/2 : ℝ) : ℝ)..((13/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((536328/15625 : ℝ)) / 5) * log ((26/25 : ℝ)) ≤
-      ((3.53587371858773 : ℝ) / 5) * (0.03922071315329 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (256913 / 10000000 : ℝ) ≤
-      (2 * (3.39559808691227 : ℝ) / 5) * (0.0027546843865812 : ℝ) + (0.0496856806024402 : ℝ) -
-        ((3.53587371858773 : ℝ) / 5) * (0.03922071315329 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_3_4` in the shape the matrix file states it. -/
-private theorem entry_3_4_leaf :
-    (Wu04Table.candidateMatrixQ 3 4 : ℝ) ≤ Wu04Table.integralMatrix 3 4 := by
-  have hc : (Wu04Table.candidateMatrixQ 3 4 : ℝ) = 256913 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_3_4_certified
-
-/-- On the open panel `]13/5, 27/10[` the row-3 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_3_5_eq {t : ℝ} (h1 : ((13/5 : ℝ) : ℝ) < t) (h2 : t < (27/10 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-        log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t) := by
-  have p0 : ((53/25 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((9724/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (39/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((39/25 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((14626/11125 : ℝ) : ℝ) ≤ t ∧ t ≤ (184/125 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((9373/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1001572/647475 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 3 5` is the row-3 `Xi2` integral over `[13/5, 27/10]`. -/
-private theorem integralMatrix_3_5_eq :
-    Wu04Table.integralMatrix 3 5 =
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_3_5` of Wu's Section 7 matrix**, certified on the `[13/5, 27/10]` panel:
-the certified panel bound beats the rational candidate by `2.76e-08`. -/
-private theorem entry_3_5_certified :
-    (261376 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 3 5 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (13/5 : ℝ) (27/10 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.0029211635127983 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c5
-  have hBi : (0.048858995485099 : ℝ) ≤
-      ∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c5_lower
-  rw [integralMatrix_3_5_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-      log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_3_5_eq
-      (by simpa [min_eq_left (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((13/5 : ℝ) : ℝ) ≤ (27/10 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (536328/15625 : ℝ)) (a := (13/5 : ℝ)) (b := (27/10 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (13/5 : ℝ)) (b := (27/10 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_3_bounds
-  have hL := log_27_26
-  rw [h1t]
-  rw [show (((27/10 : ℝ) : ℝ) / (13/5 : ℝ)) = (27/26 : ℝ) by norm_num]
-  have hLP : (3.39559808691227 : ℝ) ≤ log (1024 / (536328/15625 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.39559808691227 : ℝ) / 5) * (0.0029211635127983 : ℝ) ≤
-      (2 * log (1024 / (536328/15625 : ℝ)) / 5) *
-        (∫ t in ((13/5 : ℝ) : ℝ)..((27/10 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((536328/15625 : ℝ)) / 5) * log ((27/26 : ℝ)) ≤
-      ((3.53587371858773 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (261376 / 10000000 : ℝ) ≤
-      (2 * (3.39559808691227 : ℝ) / 5) * (0.0029211635127983 : ℝ) + (0.048858995485099 : ℝ) -
-        ((3.53587371858773 : ℝ) / 5) * (0.03774032798285 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_3_5` in the shape the matrix file states it. -/
-private theorem entry_3_5_leaf :
-    (Wu04Table.candidateMatrixQ 3 5 : ℝ) ≤ Wu04Table.integralMatrix 3 5 := by
-  have hc : (Wu04Table.candidateMatrixQ 3 5 : ℝ) = 261376 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_3_5_certified
-
-/-- On the open panel `]27/10, 14/5[` the row-3 `Xi2` kernel is the base term plus the first
-piece: the other eight windows are disjoint from it (some only touch an endpoint). -/
-private theorem Xi2_3_6_eq {t : ℝ} (h1 : ((27/10 : ℝ) : ℝ) < t) (h2 : t < (14/5 : ℝ)) :
-    Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t =
-      Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-        log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t) := by
-  have p0 : ((53/25 : ℝ) : ℝ) ≤ t ∧ t ≤ 3 := by constructor <;> linarith
-  have n1 : ¬ (((9724/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (39/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n2 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n3 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n4 : ¬ (((39/25 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n5 : ¬ (((14626/11125 : ℝ) : ℝ) ≤ t ∧ t ≤ (184/125 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n6 : ¬ (((184/125 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n7 : ¬ (((9373/7275 : ℝ) : ℝ) ≤ t ∧ t ≤ (1001572/647475 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  have n8 : ¬ (((1001572/647475 : ℝ) : ℝ) ≤ t ∧ t ≤ (53/25 : ℝ)) := by
-    intro hc; linarith [hc.1, hc.2]
-  simp only [Wu04Functional.Xi2, Wu04Functional.ind, Wu04Functional.alpha,
-    Wu04Functional.tableParams]
-  norm_num
-  simp only [if_pos p0, if_neg n1, if_neg n2, if_neg n3, if_neg n4, if_neg n5, if_neg n6, if_neg n7, if_neg n8]
-  ring
-
-/-- `integralMatrix 3 6` is the row-3 `Xi2` integral over `[27/10, 14/5]`. -/
-private theorem integralMatrix_3_6_eq :
-    Wu04Table.integralMatrix 3 6 =
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ),
-        Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t := by
-  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid]
-  norm_num
-
-/-- **`entry_3_6` of Wu's Section 7 matrix**, certified on the `[27/10, 14/5]` panel:
-the certified panel bound beats the rational candidate by `2.96e-08`. -/
-private theorem entry_3_6_certified :
-    (265319 / 10000000 : ℝ) ≤ Wu04Table.integralMatrix 3 6 := by
-  have hAint : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t))
-      volume (27/10 : ℝ) (14/5 : ℝ) :=
-    sigma0_div_two_integrable (by norm_num) (by norm_num)
-  have hAi : (0.003081253846167 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t) :=
-    sigma0_integral_lower2_c6
-  have hBi : (0.0480651291935756 : ℝ) ≤
-      ∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), log (t + 1) / t :=
-    log_succ_integral_c6_lower
-  rw [integralMatrix_3_6_eq]
-  rw [intervalIntegral.integral_congr_uIoo
-    (f := fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨3, by norm_num⟩) t)
-    (g := fun t : ℝ => Wu04Integral.sigma0 t / (5 * t) * log (1024 / (536328/15625 : ℝ)) +
-      log ((t + 1) ^ 5 / (536328/15625 : ℝ)) / (5 * t))
-    (fun t ht => Xi2_3_6_eq
-      (by simpa [min_eq_left (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.1)
-      (by simpa [max_eq_right (by norm_num : ((27/10 : ℝ) : ℝ) ≤ (14/5 : ℝ))] using ht.2))]
-  rw [Xi2_reduced_integral (B := (536328/15625 : ℝ)) (a := (27/10 : ℝ)) (b := (14/5 : ℝ))
-    (by norm_num) (by norm_num) (by norm_num) hAint
-    (log_succ_div_integrable_exp (by norm_num) (by norm_num))
-    (inv_integrable_exp (by norm_num) (by norm_num))]
-  have h1t := integral_one_div_exp (a := (27/10 : ℝ)) (b := (14/5 : ℝ)) (by norm_num) (by norm_num)
-  have h2 := log_two_bounds
-  have hP := log_P_xi2_3_bounds
-  have hL := log_28_27
-  rw [h1t]
-  rw [show (((14/5 : ℝ) : ℝ) / (27/10 : ℝ)) = (28/27 : ℝ) by norm_num]
-  have hLP : (3.39559808691227 : ℝ) ≤ log (1024 / (536328/15625 : ℝ)) := by
-    rw [Real.log_div (by norm_num) (by norm_num), show (1024 : ℝ) = 2 ^ 10 by norm_num,
-      Real.log_pow]
-    push_cast
-    linarith [h2.1, hP.2]
-  have hmul : (2 * (3.39559808691227 : ℝ) / 5) * (0.003081253846167 : ℝ) ≤
-      (2 * log (1024 / (536328/15625 : ℝ)) / 5) *
-        (∫ t in ((27/10 : ℝ) : ℝ)..((14/5 : ℝ) : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
-    refine mul_le_mul ?_ hAi (by linarith [hAi]) (by linarith [hLP])
-    linarith [hLP]
-  have hlast : (log ((536328/15625 : ℝ)) / 5) * log ((28/27 : ℝ)) ≤
-      ((3.53587371858773 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    refine mul_le_mul ?_ hL.2 (by linarith [hL.1]) (by norm_num)
-    linarith [hP.2]
-  have hnum : (265319 / 10000000 : ℝ) ≤
-      (2 * (3.39559808691227 : ℝ) / 5) * (0.003081253846167 : ℝ) + (0.0480651291935756 : ℝ) -
-        ((3.53587371858773 : ℝ) / 5) * (0.03636764417088 : ℝ) := by
-    norm_num
-  linarith [hmul, hBi, hlast, hnum]
-
-/-- `entry_3_6` in the shape the matrix file states it. -/
-private theorem entry_3_6_leaf :
-    (Wu04Table.candidateMatrixQ 3 6 : ℝ) ≤ Wu04Table.integralMatrix 3 6 := by
-  have hc : (Wu04Table.candidateMatrixQ 3 6 : ℝ) = 265319 / 10000000 := by
-    norm_num [Wu04Table.candidateMatrixQ]
-  rw [hc]
-  exact entry_3_6_certified
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{1,1} = ∫_{1}^{2.2} Ξ₂(t; 2.2, 4.54, 3.53, 2.90, 2.44) dt ≥ 1551926/10⁷`.
 scipy value 0.1551926574, margin 0.57e−7. -/
@@ -15664,12 +16298,12 @@ theorem entry_0_4 : (candidateMatrixQ 0 4 : ℝ) ≤ integralMatrix 0 4 := by
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{1,6} = ∫_{2.6}^{2.7} Ξ₂(t; 2.2, 4.54, 3.53, 2.90, 2.44) dt ≥ 274861/10⁷`.
 scipy value 0.0274861583, margin 0.58e−7. -/
 theorem entry_0_5 : (candidateMatrixQ 0 5 : ℝ) ≤ integralMatrix 0 5 := by
-  exact entry_0_5_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{1,7} = ∫_{2.7}^{2.8} Ξ₂(t; 2.2, 4.54, 3.53, 2.90, 2.44) dt ≥ 278478/10⁷`.
 scipy value 0.0278478963, margin 0.96e−7. -/
 theorem entry_0_6 : (candidateMatrixQ 0 6 : ℝ) ≤ integralMatrix 0 6 := by
-  exact entry_0_6_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{1,8} = ∫_{2.8}^{2.9} Ξ₂(t; 2.2, 4.54, 3.53, 2.90, 2.44) dt ≥ 281663/10⁷`.
 scipy value 0.0281663353, margin 0.35e−7. -/
@@ -15704,17 +16338,17 @@ theorem entry_1_3 : (candidateMatrixQ 1 3 : ℝ) ≤ integralMatrix 1 3 := by
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{2,5} = ∫_{2.5}^{2.6} Ξ₂(t; 2.3, 4.50, 3.54, 2.88, 2.43) dt ≥ 265826/10⁷`.
 scipy value 0.0265826524, margin 0.52e−7. -/
 theorem entry_1_4 : (candidateMatrixQ 1 4 : ℝ) ≤ integralMatrix 1 4 := by
-  exact entry_1_4_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{2,6} = ∫_{2.6}^{2.7} Ξ₂(t; 2.3, 4.50, 3.54, 2.88, 2.43) dt ≥ 270061/10⁷`.
 scipy value 0.0270061132, margin 0.13e−7. -/
 theorem entry_1_5 : (candidateMatrixQ 1 5 : ℝ) ≤ integralMatrix 1 5 := by
-  exact entry_1_5_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{2,7} = ∫_{2.7}^{2.8} Ξ₂(t; 2.3, 4.50, 3.54, 2.88, 2.43) dt ≥ 273794/10⁷`.
 scipy value 0.0273794440, margin 0.44e−7. -/
 theorem entry_1_6 : (candidateMatrixQ 1 6 : ℝ) ≤ integralMatrix 1 6 := by
-  exact entry_1_6_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{2,8} = ∫_{2.8}^{2.9} Ξ₂(t; 2.3, 4.50, 3.54, 2.88, 2.43) dt ≥ 277085/10⁷`.
 scipy value 0.0277085524, margin 0.52e−7. -/
@@ -15749,17 +16383,17 @@ theorem entry_2_3 : (candidateMatrixQ 2 3 : ℝ) ≤ integralMatrix 2 3 := by
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{3,5} = ∫_{2.5}^{2.6} Ξ₂(t; 2.4, 4.46, 3.57, 2.87, 2.40) dt ≥ 261548/10⁷`.
 scipy value 0.0261548552, margin 0.55e−7. -/
 theorem entry_2_4 : (candidateMatrixQ 2 4 : ℝ) ≤ integralMatrix 2 4 := by
-  exact entry_2_4_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{3,6} = ∫_{2.6}^{2.7} Ξ₂(t; 2.4, 4.46, 3.57, 2.87, 2.40) dt ≥ 265892/10⁷`.
 scipy value 0.0265892899, margin 0.90e−7. -/
 theorem entry_2_5 : (candidateMatrixQ 2 5 : ℝ) ≤ integralMatrix 2 5 := by
-  exact entry_2_5_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{3,7} = ∫_{2.7}^{2.8} Ξ₂(t; 2.4, 4.46, 3.57, 2.87, 2.40) dt ≥ 269726/10⁷`.
 scipy value 0.0269726868, margin 0.87e−7. -/
 theorem entry_2_6 : (candidateMatrixQ 2 6 : ℝ) ≤ integralMatrix 2 6 := by
-  exact entry_2_6_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{3,8} = ∫_{2.8}^{2.9} Ξ₂(t; 2.4, 4.46, 3.57, 2.87, 2.40) dt ≥ 273110/10⁷`.
 scipy value 0.0273110594, margin 0.59e−7. -/
@@ -15779,32 +16413,32 @@ theorem entry_3_0 : (candidateMatrixQ 3 0 : ℝ) ≤ integralMatrix 3 0 := by
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{4,2} = ∫_{2.2}^{2.3} Ξ₂(t; 2.5, 4.12, 3.56, 2.91, 2.50) dt ≥ 239617/10⁷`.
 scipy value 0.0239617849, margin 0.85e−7. -/
 theorem entry_3_1 : (candidateMatrixQ 3 1 : ℝ) ≤ integralMatrix 3 1 := by
-  exact entry_3_1_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{4,3} = ∫_{2.3}^{2.4} Ξ₂(t; 2.5, 4.12, 3.56, 2.91, 2.50) dt ≥ 246126/10⁷`.
 scipy value 0.0246126132, margin 0.13e−7. -/
 theorem entry_3_2 : (candidateMatrixQ 3 2 : ℝ) ≤ integralMatrix 3 2 := by
-  exact entry_3_2_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{4,4} = ∫_{2.4}^{2.5} Ξ₂(t; 2.5, 4.12, 3.56, 2.91, 2.50) dt ≥ 251857/10⁷`.
 scipy value 0.0251857826, margin 0.83e−7. -/
 theorem entry_3_3 : (candidateMatrixQ 3 3 : ℝ) ≤ integralMatrix 3 3 := by
-  exact entry_3_3_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{4,5} = ∫_{2.5}^{2.6} Ξ₂(t; 2.5, 4.12, 3.56, 2.91, 2.50) dt ≥ 256913/10⁷`.
 scipy value 0.0256913054, margin 0.05e−7. -/
 theorem entry_3_4 : (candidateMatrixQ 3 4 : ℝ) ≤ integralMatrix 3 4 := by
-  exact entry_3_4_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{4,6} = ∫_{2.6}^{2.7} Ξ₂(t; 2.5, 4.12, 3.56, 2.91, 2.50) dt ≥ 261376/10⁷`.
 scipy value 0.0261376312, margin 0.31e−7. -/
 theorem entry_3_5 : (candidateMatrixQ 3 5 : ℝ) ≤ integralMatrix 3 5 := by
-  exact entry_3_5_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{4,7} = ∫_{2.7}^{2.8} Ξ₂(t; 2.5, 4.12, 3.56, 2.91, 2.50) dt ≥ 265319/10⁷`.
 scipy value 0.0265319355, margin 0.35e−7. -/
 theorem entry_3_6 : (candidateMatrixQ 3 6 : ℝ) ≤ integralMatrix 3 6 := by
-  exact entry_3_6_leaf
+  sorry
 
 /-- LEAF. Wu 2004 display 7.1, kernel of display 3.22, page 15: `a_{4,8} = ∫_{2.8}^{2.9} Ξ₂(t; 2.5, 4.12, 3.56, 2.91, 2.50) dt ≥ 268803/10⁷`.
 scipy value 0.0268803466, margin 0.47e−7. -/
@@ -15854,7 +16488,7 @@ theorem entry_4_6 : (candidateMatrixQ 4 6 : ℝ) ≤ integralMatrix 4 6 := by
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{5,8} = ∫_{2.8}^{2.9} Ξ₁(t; 2.6, 3.58) dt ≥ 268087/10⁷`.
 scipy value 0.0268087872, margin 0.87e−7. -/
 theorem entry_4_7 : (candidateMatrixQ 4 7 : ℝ) ≤ integralMatrix 4 7 := by
-  sorry
+  exact entry_4_7_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{5,9} = ∫_{2.9}^{3} Ξ₁(t; 2.6, 3.58) dt ≥ 271181/10⁷`.
 scipy value 0.0271181070, margin 0.07e−7. -/
@@ -15899,7 +16533,7 @@ theorem entry_5_6 : (candidateMatrixQ 5 6 : ℝ) ≤ integralMatrix 5 6 := by
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{6,8} = ∫_{2.8}^{2.9} Ξ₁(t; 2.7, 3.47) dt ≥ 264544/10⁷`.
 scipy value 0.0264544053, margin 0.05e−7. -/
 theorem entry_5_7 : (candidateMatrixQ 5 7 : ℝ) ≤ integralMatrix 5 7 := by
-  sorry
+  exact entry_5_7_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{6,9} = ∫_{2.9}^{3} Ξ₁(t; 2.7, 3.47) dt ≥ 267713/10⁷`.
 scipy value 0.0267713505, margin 0.50e−7. -/
@@ -15944,7 +16578,7 @@ theorem entry_6_6 : (candidateMatrixQ 6 6 : ℝ) ≤ integralMatrix 6 6 := by
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{7,8} = ∫_{2.8}^{2.9} Ξ₁(t; 2.8, 3.34) dt ≥ 263901/10⁷`.
 scipy value 0.0263901680, margin 0.68e−7. -/
 theorem entry_6_7 : (candidateMatrixQ 6 7 : ℝ) ≤ integralMatrix 6 7 := by
-  sorry
+  exact entry_6_7_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{7,9} = ∫_{2.9}^{3} Ξ₁(t; 2.8, 3.34) dt ≥ 267084/10⁷`.
 scipy value 0.0267084954, margin 0.95e−7. -/
@@ -15989,7 +16623,7 @@ theorem entry_7_6 : (candidateMatrixQ 7 6 : ℝ) ≤ integralMatrix 7 6 := by
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{8,8} = ∫_{2.8}^{2.9} Ξ₁(t; 2.9, 3.19) dt ≥ 266433/10⁷`.
 scipy value 0.0266433225, margin 0.23e−7. -/
 theorem entry_7_7 : (candidateMatrixQ 7 7 : ℝ) ≤ integralMatrix 7 7 := by
-  sorry
+  exact entry_7_7_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{8,9} = ∫_{2.9}^{3} Ξ₁(t; 2.9, 3.19) dt ≥ 269562/10⁷`.
 scipy value 0.0269562027, margin 0.03e−7. -/
@@ -16034,7 +16668,7 @@ theorem entry_8_6 : (candidateMatrixQ 8 6 : ℝ) ≤ integralMatrix 8 6 := by
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{9,8} = ∫_{2.8}^{2.9} Ξ₁(t; 3.0, 3.00) dt ≥ 274633/10⁷`.
 scipy value 0.0274633532, margin 0.53e−7. -/
 theorem entry_8_7 : (candidateMatrixQ 8 7 : ℝ) ≤ integralMatrix 8 7 := by
-  sorry
+  exact entry_8_7_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{9,9} = ∫_{2.9}^{3} Ξ₁(t; 3.0, 3.00) dt ≥ 277585/10⁷`.
 scipy value 0.0277585884, margin 0.88e−7. -/
