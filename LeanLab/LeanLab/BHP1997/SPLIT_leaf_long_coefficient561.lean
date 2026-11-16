@@ -19,7 +19,38 @@ theorem leaf_long_frequency_card561 (ε : ℝ) (hε : 0 < ε) :
     ∃ C : ℝ, ∀ x : ℝ, C ≤ x →
       ((frequencies512 ε x).card : ℝ) ≤
         2 * x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) := by
-  sorry
+  set H : ℝ := (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) with hH
+  have hHpos : 0 < H := by
+    rw [hH]
+    have h1 : (0 : ℝ) < 11 / 20 + ε := by linarith
+    have h2 : (0 : ℝ) < 2 * (1 / 16 - 1 / 10 ^ 5) := by norm_num
+    exact mul_pos h1 h2
+  refine ⟨1, fun x hx => ?_⟩
+  have hx1 : (1 : ℝ) ≤ x := hx
+  have hH1 : (1 : ℝ) ≤ x ^ H := Real.one_le_rpow hx1 (le_of_lt hHpos)
+  have hdefeq : frequencies512 ε x = (Finset.Icc ⌈x⌉₊ ⌊x + x ^ H⌋₊).filter (fun N => Even N) := by
+    rw [frequencies512, ← hH]
+  have hfloor : x ≤ (⌊x + x ^ H⌋₊ : ℝ) := by
+    have h1 : x + x ^ H < (⌊x + x ^ H⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one _
+    linarith
+  have hle : ⌈x⌉₊ ≤ ⌊x + x ^ H⌋₊ + 1 :=
+    le_trans (Nat.ceil_le.mpr hfloor) (Nat.le_succ _)
+  have hfilter : (frequencies512 ε x).card ≤ (Finset.Icc ⌈x⌉₊ ⌊x + x ^ H⌋₊).card := by
+    rw [hdefeq]
+    exact Finset.card_filter_le _ _
+  have hcardIcc : ((Finset.Icc ⌈x⌉₊ ⌊x + x ^ H⌋₊).card : ℝ)
+      ≤ (⌊x + x ^ H⌋₊ : ℝ) + 1 - (⌈x⌉₊ : ℝ) := by
+    rw [Nat.card_Icc, Nat.cast_sub hle]
+    push_cast
+    linarith
+  calc ((frequencies512 ε x).card : ℝ)
+      ≤ ((Finset.Icc ⌈x⌉₊ ⌊x + x ^ H⌋₊).card : ℝ) := by exact_mod_cast hfilter
+    _ ≤ (⌊x + x ^ H⌋₊ : ℝ) + 1 - (⌈x⌉₊ : ℝ) := hcardIcc
+    _ ≤ x ^ H + 1 := by
+        have hb : (⌊x + x ^ H⌋₊ : ℝ) ≤ x + x ^ H := Nat.floor_le (by positivity)
+        have ha : x ≤ (⌈x⌉₊ : ℝ) := Nat.le_ceil x
+        linarith
+    _ ≤ 2 * x ^ H := by linarith
 
 /-- LEAF. Mass of the short block. From the divisor type bound alone, the sum of the
 coefficient norms over the short support is at most a constant times the block length
@@ -66,7 +97,21 @@ theorem leaf_long_length_bounds561 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
       1 ≤ length512 ε x ∧ 1 < Real.log x ∧
         1 ≤ x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) := by
-  sorry
+  refine ⟨1, one_pos, fun ε hε _ => ⟨Real.exp 2, fun x hx => ?_⟩⟩
+  have hexp : (1 : ℝ) ≤ Real.exp 2 := by
+    have h := Real.one_lt_exp_iff.mpr (show (0 : ℝ) < 2 by norm_num)
+    linarith
+  have hx1 : (1 : ℝ) ≤ x := le_trans hexp hx
+  have hxexp : Real.exp 2 ≤ x := hx
+  have hlog : 1 < Real.log x := by
+    have h1 : Real.log (Real.exp 2) ≤ Real.log x :=
+      Real.log_le_log (Real.exp_pos 2) hxexp
+    rw [Real.log_exp] at h1
+    linarith
+  refine ⟨?_, hlog, ?_⟩
+  · unfold length512
+    exact Real.one_le_rpow hx1 (by positivity)
+  · exact Real.one_le_rpow hx1 (by positivity)
 
 /-- The long coefficient replacement step, assembled from the frequency count, the
 short block mass, the replacement at a single frequency and the elementary thresholds.
