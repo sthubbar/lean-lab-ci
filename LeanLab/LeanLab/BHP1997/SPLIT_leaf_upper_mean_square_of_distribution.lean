@@ -18,8 +18,9 @@ different estimates, and adds the ledger for the exceptional set.
 * Leaf 3 is the ledger for the exceptional set: the empty set meets the cardinality clause,
   so the assembly takes the empty exceptional set and pays its cardinality there.
 
-The assembly below closes every step with no sorry, and uses the three leaves only. Every
-leaf is OPEN. The two integral leaves keep the whole analytic content: the pointwise
+The assembly below closes every step with no sorry, and uses the three leaves only. Leaf 3 is
+PROVED, the empty set meets the cardinality clause at `C = 0` for every point and modulus;
+the two integral leaves are OPEN. They keep the whole analytic content: the pointwise
 consequence of the distribution clause bounds each short window by `C Y (log x)^(-A)` with
 `Y = x^(11/20+eps)`, while the mean square clause asks for `C (q Q)^2 Y (log x)^(-A)` with
 `Q = sieveQ eps x`; the pointwise bound integrates to `Y^2 / (q Q)^2` times the demanded
