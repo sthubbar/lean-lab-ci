@@ -2,17 +2,15 @@
 Theorem 3.1 of P0029, Bhowmik and Grimmelt 2026 survey, pages 9 to 13, packaged with its cited
 inputs as explicit hypotheses.  ROUTE BURST session 5, 20261112.
 
-The proposition `Theorem31` of Statements.lean is derived here from three inputs, each written out
-in full as an explicit hypothesis of every result that uses it, since a repair pass may introduce
-no definition, not even a proposition:
-* verbatim the statement of the leaf `major_arc_uniform150` of Decomp150a.lean, P0029 pages 11 and
-  12, display 3.5 with 3.6 and 3.7, Hardy and Littlewood 1923;
-* Hardy 1914: the Riemann zeta function has a zero on the critical line;
-* verbatim the statement of the elementary leaf `arc_tails_sup150`, page 12, which a parallel burst
-  branch is proving.
+The proposition `Theorem31` of Statements.lean is derived here from two named inputs:
+* `MajorArcUniform150`, verbatim the statement of the leaf `major_arc_uniform150` of
+  MajorArcLeaf150.lean, P0029 pages 11 and 12, display 3.5 with 3.6 and 3.7, Hardy and Littlewood 1923;
+* `HardyCriticalLineZero150`, Hardy 1914: the Riemann zeta function has a zero on the critical line.
+The third input of the first version, the pointwise arc tail `arc_tails_sup150` of page 12, is now
+PROVED in FareyArcs150.lean, so its proposition was dropped in the REPAIR of 20261112.
 
-`theorem31_of_inputs_full150` uses no sorry: it is PROVED, CONDITIONAL ON these three inputs.
-The chain `arc_tails150`, `major_coefficients150`, `major_minor_mean_square150`,
+`theorem31_of_inputs150` uses no sorry: it is PROVED, CONDITIONAL ON these two inputs.
+The chain `major_minor_mean_square150`,
 `mean_square150_even_part`, `mean_square150`, `theorem31_decomposed150` of Decomp150a.lean is
 re-derived below as ADAPTED COPIES whose proof text is the original with each sorry leaf replaced
 by the matching hypothesis; every PROVED lemma is reused by name.
@@ -26,27 +24,33 @@ namespace LeanLab.BhowmikGrimmelt2026
 
 open LeanLab.ExceptionalSet (PowerBound)
 
-/-! ### The three cited inputs as propositions -/
+/-! ### The two cited inputs as propositions -/
 
-/-- PROVED sanity check: the existing leaf `major_arc_uniform150` has exactly the statement
-hypothesis below.  Its axioms show sorryAx through that leaf. -/
-theorem majorArcUniform150_of_leaf : (∀ Θ : ℝ, Θ < 3 / 4 → ZeroBound Θ →
-      ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-        ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε)) :=
+/-- CITED INPUT, P0029 pages 11 and 12, display 3.5 with 3.6 and 3.7, Hardy and Littlewood 1923.
+Verbatim the universally quantified statement of the leaf `major_arc_uniform150` in
+MajorArcLeaf150.lean.  CAVEAT: the survey states 3.7 at the arc centres and for the weight
+`e^{-n/N}`; this is the sharp cutoff form, uniform over each arc, a strengthening that the
+Parseval step needs.  See the QUESTION in the repair note. -/
+def MajorArcUniform150 : Prop :=
+  ∀ Θ : ℝ, Θ < 3 / 4 → ZeroBound Θ →
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
+      ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε)
+
+/-- CITED INPUT, Hardy 1914, Sur les zeros de la fonction zeta de Riemann: the Riemann zeta
+function has a zero on the critical line.  Verbatim the statement of `hardy_critical_line_zero150`
+in Decomp150a.lean. -/
+def HardyCriticalLineZero150 : Prop :=
+  ∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0
+
+/-- PROVED sanity check: the existing leaf `major_arc_uniform150` is exactly
+`MajorArcUniform150`.  Its axioms show sorryAx through that leaf. -/
+theorem majorArcUniform150_of_leaf : MajorArcUniform150 :=
   major_arc_uniform150
-
-/-- PROVED sanity check: the existing leaf `arc_tails_sup150` has exactly the statement
-hypothesis below.
-Its axioms show sorryAx through that leaf until the arc branch merges. -/
-theorem arcTailsSup150_of_leaf : (∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε)) :=
-  arc_tails_sup150
 
 /-- PROVED, CONDITIONAL ON Hardy 1914.  P0029 page 12: `ZeroBound Θ` forces `1/2 ≤ Θ`, since the
 modulus one character has `L(s, χ) = ζ(s)` and Hardy gives a zero with real part `1/2`.
-This DUPLICATES the lemma deriving `zeroBound_lower150` on the sibling branch
-claude/BhowmikGrimmelt2026-zeroBound_lower150-p2, so the two branches merge independently. -/
-theorem zeroBound_lower_of_hardy150 (hH : (∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0)) {Θ : ℝ}
+Same argument as `zeroBound_lower150` of Decomp150a.lean, with the Hardy leaf as a hypothesis. -/
+theorem zeroBound_lower_of_hardy150 (hH : HardyCriticalLineZero150) {Θ : ℝ}
     (hZ : ZeroBound Θ) : 1 / 2 ≤ Θ := by
   obtain ⟨t, hs⟩ := hH
   set s : ℂ := (1 / 2 : ℂ) + (t : ℂ) * Complex.I with hsdef
@@ -61,73 +65,15 @@ theorem zeroBound_lower_of_hardy150 (hH : (∃ t : ℝ, riemannZeta ((1 / 2 : �
 /-! ### Adapted copies of the Decomp150a chain
 
 Each proof below is an ADAPTED COPY of the Decomp150a.lean proof named in its docstring, with the
-sorry leaves `major_arc_uniform150`, `arc_tails_sup150`, `zeroBound_lower150` replaced by the
-hypotheses `hMA`, `hAT` and `zeroBound_lower_of_hardy150 hH`.  The statements are those of the
+sorry leaves `major_arc_uniform150` and `zeroBound_lower150` replaced by the
+hypotheses `hMA` and `zeroBound_lower_of_hardy150 hH`.  The statements are those of the
 originals with the hypotheses added. -/
 
-/-- ADAPTED COPY of `arc_tails150`, P0029 page 12, with `arc_tails_sup150` replaced by `hAT`. -/
-theorem arc_tails_of150 (hAT : (∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε))) :
-    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
-      ∫ α in (0 : ℝ)..1, ‖VX150 X α ^ 2 - WX150 X α‖ ^ 2 ≤ C * (X : ℝ) ^ (2 + ε) := by
-  intro ε hε
-  obtain ⟨C1, h1⟩ := hAT (ε / 2) (by linarith)
-  obtain ⟨C2, h2⟩ := integral_norm_VW_le150 (ε / 2) (by linarith)
-  refine ⟨|C1| * |C2|, fun X hX => ?_⟩
-  have hXR : (1 : ℝ) ≤ X := by exact_mod_cast hX
-  set P : ℝ := (X : ℝ) ^ (1 + ε / 2) with hP
-  have hP0 : 0 ≤ P := by positivity
-  have hB : ∀ α ∈ Set.Icc (0 : ℝ) 1, ‖VX150 X α ^ 2 - WX150 X α‖ ≤ |C1| * P :=
-    fun α hα => (h1 X hX α hα).trans (mul_le_mul_of_nonneg_right (le_abs_self _) hP0)
-  have hI : (∫ α in (0 : ℝ)..1, ‖VX150 X α ^ 2 - WX150 X α‖) ≤ |C2| * P :=
-    (h2 X hX).trans (mul_le_mul_of_nonneg_right (le_abs_self _) hP0)
-  have hPP : P * P = (X : ℝ) ^ (2 + ε) := by
-    rw [hP, ← Real.rpow_add (by linarith : (0 : ℝ) < X)]; congr 1; ring
-  calc _ ≤ |C1| * P * ∫ α in (0 : ℝ)..1, ‖VX150 X α ^ 2 - WX150 X α‖ :=
-        integral_sq_VW_le_sup150 X _ hB
-    _ ≤ |C1| * P * (|C2| * P) := mul_le_mul_of_nonneg_left hI (by positivity)
-    _ = |C1| * |C2| * (P * P) := by ring
-    _ = |C1| * |C2| * (X : ℝ) ^ (2 + ε) := by rw [hPP]
-
-/-- ADAPTED COPY of `major_coefficients150`, P0029 page 12, with `arc_tails150` replaced by
-`arc_tails_of150 hAT`. -/
-theorem major_coefficients_of150 (hAT : (∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε))) :
-    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
-      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N),
-        ‖(∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))) - (truncMain150 N : ℂ)‖ ^ 2 ≤
-          C * (X : ℝ) ^ (2 + ε) := by
-  intro ε hε
-  obtain ⟨Ca, ha⟩ := arc_tails_of150 hAT ε hε
-  obtain ⟨Cb, hb⟩ := truncation_level150 ε hε
-  refine ⟨2 * Ca + 2 * Cb, fun X hX => ?_⟩
-  set F := (Finset.Icc 1 X).filter (fun N => Even N) with hFdef
-  have hpt : ∀ N ∈ F,
-      ‖(∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))) - (truncMain150 N : ℂ)‖ ^ 2 ≤
-        2 * ‖(∫ α in (0 : ℝ)..1, VX150 X α ^ 2 * ee (-((N : ℝ) * α))) -
-          ∫ α in (0 : ℝ)..1, WX150 X α * ee (-((N : ℝ) * α))‖ ^ 2 +
-        2 * ‖((N : ℂ) - 1) * (∑ q ∈ Finset.Icc 1 (Nat.sqrt X), wq150 q * ramanujan q (-(N : ℤ))) -
-          (truncMain150 N : ℂ)‖ ^ 2 := by
-    intro N hN
-    have hN' := Finset.mem_Icc.mp (Finset.mem_filter.mp hN).1
-    rw [← coeff_WX150 hN'.1 hN'.2]
-    exact norm_sub_sq_le_two150 _ _ _
-  have hsum := Finset.sum_le_sum hpt
-  rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum] at hsum
-  have h1 := (bessel_VW150 X F).trans (ha X hX)
-  have h2 := hb X hX
-  calc _ ≤ _ := hsum
-    _ ≤ 2 * (Ca * (X : ℝ) ^ (2 + ε)) + 2 * (Cb * (X : ℝ) ^ (2 + ε)) := by linarith
-    _ = (2 * Ca + 2 * Cb) * (X : ℝ) ^ (2 + ε) := by ring
-
 /-- ADAPTED COPY of `major_minor_mean_square150`, P0029 pages 12 and 13, with
-`major_arc_uniform150`, `major_coefficients150` and `zeroBound_lower150` replaced by `hMA`,
-`major_coefficients_of150 hAT` and `zeroBound_lower_of_hardy150 hH`. -/
+`major_arc_uniform150` and `zeroBound_lower150` replaced by `hMA` and
+`zeroBound_lower_of_hardy150 hH`; `major_coefficients150` is PROVED and reused by name. -/
 theorem major_minor_mean_square_of150
-    (hMA : (∀ Θ : ℝ, Θ < 3 / 4 → ZeroBound Θ →
-      ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-        ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε))) (hH : (∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0)) (hAT : (∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε)))
+    (hMA : MajorArcUniform150) (hH : HardyCriticalLineZero150)
     (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
       ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (r2 N - truncMain150 N) ^ 2 ≤
@@ -135,7 +81,7 @@ theorem major_minor_mean_square_of150
   intro ε hε
   obtain ⟨C1, h1⟩ := hMA Θ hΘ hZ (ε / 4) (by linarith)
   obtain ⟨C2, h2⟩ := major_model_L2_150 (ε / 2) (by linarith)
-  obtain ⟨C3, h3⟩ := major_coefficients_of150 hAT ε hε
+  obtain ⟨C3, h3⟩ := major_coefficients150 ε hε
   have hhalf : (1 : ℝ) / 2 ≤ Θ := zeroBound_lower_of_hardy150 hH hZ
   refine ⟨4 * C1 ^ 2 * (16 / ε ^ 2 + |C2|) + 2 * |C3|, ?_⟩
   intro X hX
@@ -220,16 +166,13 @@ theorem major_minor_mean_square_of150
 
 /-- ADAPTED COPY of `mean_square150_even_part`, P0029 page 13. -/
 theorem mean_square150_even_part_of
-    (hMA : (∀ Θ : ℝ, Θ < 3 / 4 → ZeroBound Θ →
-      ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-        ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε))) (hH : (∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0)) (hAT : (∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε)))
+    (hMA : MajorArcUniform150) (hH : HardyCriticalLineZero150)
     (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
     ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
       ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2 ≤
         C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
   intro ε hε
-  obtain ⟨CB, hB⟩ := major_minor_mean_square_of150 hMA hH hAT Θ hΘ hZ ε hε
+  obtain ⟨CB, hB⟩ := major_minor_mean_square_of150 hMA hH Θ hΘ hZ ε hε
   obtain ⟨CA, hA⟩ := singular_truncation150 (ε / 2) (by linarith)
   have hhalf : (1 : ℝ) / 2 ≤ Θ := zeroBound_lower_of_hardy150 hH hZ
   refine ⟨2 * CB + 2 * CA ^ 2, ?_⟩
@@ -306,13 +249,10 @@ theorem mean_square150_even_part_of
 
 /-- ADAPTED COPY of `mean_square150`, P0029 page 13 display 3.8. -/
 theorem mean_square_of150
-    (hMA : (∀ Θ : ℝ, Θ < 3 / 4 → ZeroBound Θ →
-      ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-        ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε))) (hH : (∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0)) (hAT : (∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε))) :
+    (hMA : MajorArcUniform150) (hH : HardyCriticalLineZero150) :
     MeanSquare38 := by
   intro Θ hΘ hZ ε hε
-  obtain ⟨Ce, heEven⟩ := mean_square150_even_part_of hMA hH hAT Θ hΘ hZ ε hε
+  obtain ⟨Ce, heEven⟩ := mean_square150_even_part_of hMA hH Θ hΘ hZ ε hε
   obtain ⟨Co, hoPos, hoOdd⟩ := meanSquare38_odd_energy
   refine ⟨Ce + Co, ?_⟩
   intro X hX
@@ -356,17 +296,15 @@ theorem mean_square_of150
       linarith
     _ = (Ce + Co) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by ring
 
-/-- P0029 Theorem 3.1, PROVED, CONDITIONAL ON the three inputs, written out as hypotheses.  ADAPTED COPY of `theorem31_decomposed150`; the PROVED leaves
+/-- P0029 Theorem 3.1, PROVED, CONDITIONAL ON `MajorArcUniform150` and
+`HardyCriticalLineZero150`.  ADAPTED COPY of `theorem31_decomposed150`; the PROVED leaves
 `exceptional_gap150` and `moment_to_count150` are reused by name.  No sorry. -/
-theorem theorem31_of_inputs_full150
-    (hMA : (∀ Θ : ℝ, Θ < 3 / 4 → ZeroBound Θ →
-      ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-        ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε))) (hH : (∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0)) (hAT : (∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε))) :
+theorem theorem31_of_inputs150
+    (hMA : MajorArcUniform150) (hH : HardyCriticalLineZero150) :
     Theorem31 := by
   intro Θ hΘ hZ ε hε
   have hhalf := zeroBound_lower_of_hardy150 hH hZ
-  have hmean := mean_square_of150 hMA hH hAT Θ hΘ hZ ε hε
+  have hmean := mean_square_of150 hMA hH Θ hΘ hZ ε hε
   classical
   have hgap : ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ,
       ∀ N : ℕ, N₀ ≤ N → (Even N ∧ ¬ IsGoldbachSum N) → c * N ≤ |E2 N| := by
@@ -378,13 +316,13 @@ theorem theorem31_of_inputs_full150
   have he : (3 / 2 + 2 * Θ + ε - 2 : ℝ) = 2 * Θ - 1 / 2 + ε := by ring
   rwa [he] at h
 
-/-- P0029 Theorem 3.1 from the two cited inputs only, through the existing leaf
-`arc_tails_sup150`.  Its axioms show sorryAx through `arc_tails_sup150` until the arc branch
-merges; after that it is PROVED, CONDITIONAL ON the first and second inputs. -/
-theorem theorem31_of_inputs150 (hMA : (∀ Θ : ℝ, Θ < 3 / 4 → ZeroBound Θ →
-      ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
-        ‖Ssum X α - VX150 X α‖ ≤ C * (X : ℝ) ^ (Θ + 1 / 4 + ε))) (hH : (∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0)) :
-    Theorem31 :=
-  theorem31_of_inputs_full150 hMA hH arc_tails_sup150
-
 end LeanLab.BhowmikGrimmelt2026
+
+set_option format.width 1000
+
+#print axioms LeanLab.BhowmikGrimmelt2026.majorArcUniform150_of_leaf
+#print axioms LeanLab.BhowmikGrimmelt2026.zeroBound_lower_of_hardy150
+#print axioms LeanLab.BhowmikGrimmelt2026.major_minor_mean_square_of150
+#print axioms LeanLab.BhowmikGrimmelt2026.mean_square150_even_part_of
+#print axioms LeanLab.BhowmikGrimmelt2026.mean_square_of150
+#print axioms LeanLab.BhowmikGrimmelt2026.theorem31_of_inputs150

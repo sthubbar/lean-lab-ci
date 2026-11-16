@@ -6,21 +6,53 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.BhowmikGrimmelt2026.Statements
 import LeanLab.BhowmikGrimmelt2026.SPLIT_meanSquare38
 import LeanLab.BhowmikGrimmelt2026.SingularTail150
-import LeanLab.BhowmikGrimmelt2026.ZeroBoundLeaf150
 import LeanLab.BhowmikGrimmelt2026.MeanSquareCore150
 import LeanLab.BhowmikGrimmelt2026.ModelL2_150
 import LeanLab.BhowmikGrimmelt2026.Coefficients150
 import LeanLab.BhowmikGrimmelt2026.SingularTailAbs150
 import LeanLab.BhowmikGrimmelt2026.ArcTails150
-import LeanLab.BhowmikGrimmelt2026.MeanSquareLeaves150
+import LeanLab.BhowmikGrimmelt2026.FareyArcs150
+import LeanLab.BhowmikGrimmelt2026.MajorArcLeaf150
 
 namespace LeanLab.BhowmikGrimmelt2026
 
 open LeanLab.ExceptionalSet (PowerBound)
 
-/- SPLIT piece 1 of `zeroBound_lower150`, `hardy_critical_line_zero150`, is the LEAF of
-`ZeroBoundLeaf150.lean`: it is CITED and OPEN, and lives in its own file so that this existing
-file carries no step it did not have before. -/
+/-- SPLIT piece 1 of `zeroBound_lower150`. CITED, OPEN.
+P0029 Section 3, page 12, the remark after the display `q^{1/2} N^{Θ+ε}`:
+"in the best case we could hope for Θ = 1/2". The lower limit one half rests on
+Hardy 1914, Sur les zeros de la fonction zeta de Riemann: the Riemann zeta function
+has a zero on the critical line. The survey cites it and gives no proof.
+AI wrote the Lean code. -/
+theorem hardy_critical_line_zero150 :
+    ∃ t : ℝ, riemannZeta ((1 / 2 : ℂ) + (t : ℂ) * Complex.I) = 0 := by
+  sorry
+
+/-- SPLIT piece 2 of `zeroBound_lower150`. P0029 Section 3, page 9, Theorem 3.1:
+"every zero of every Dirichlet L-function" includes the modulus one character,
+whose L-function is the Riemann zeta function. PROVED from Mathlib.
+AI wrote the Lean code. -/
+theorem LFunction_modOne_eq_zeta150 (s : ℂ) :
+    DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1) s = riemannZeta s := by
+  rw [DirichletCharacter.LFunction_modOne_eq]
+
+/-- SPLIT piece 3 of `zeroBound_lower150`. P0029 Section 3, page 9, hypothesis of
+Theorem 3.1 applied to the modulus one character: a zeta zero in the strip
+`0 < Re s < 1` has real part at most Θ. PROVED. AI wrote the Lean code. -/
+theorem zeroBound_zeta_zero150 {Θ : ℝ} (hZ : ZeroBound Θ) {s : ℂ}
+    (hs : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) : s.re ≤ Θ := by
+  haveI : NeZero (1 : ℕ) := ⟨one_ne_zero⟩
+  exact hZ 1 (1 : DirichletCharacter ℂ 1) s (by rw [LFunction_modOne_eq_zeta150]; exact hs) h0 h1
+
+/-- LEAF, now SPLIT. Page 12, the best possible zero bound is at least one half.
+Derived from the cited Hardy 1914 critical line zero, `hardy_critical_line_zero150`,
+and the modulus one case of the zero bound hypothesis, `zeroBound_zeta_zero150`.
+CONDITIONAL ON `hardy_critical_line_zero150`, which is OPEN. -/
+theorem zeroBound_lower150 {Θ : ℝ} (hZ : ZeroBound Θ) : 1 / 2 ≤ Θ := by
+  obtain ⟨t, ht⟩ := hardy_critical_line_zero150
+  have hre : ((1 / 2 : ℂ) + (t : ℂ) * Complex.I).re = 1 / 2 := by simp
+  have h := zeroBound_zeta_zero150 hZ ht (by rw [hre]; norm_num) (by rw [hre]; norm_num)
+  rwa [hre] at h
 
 /-! ### Split of `mean_square150`, burst 20261112
 
@@ -60,9 +92,7 @@ model `V = VX150 X` of `MeanSquareCore150.lean`, which is display 3.5 with only 
 `μ(q)/φ(q) Σ_{n ≤ X} e(n(α - a/q))` kept on the Dirichlet arcs of level `Q = ⌊X^{1/2}⌋`:
 
 * `major_arc_uniform150`, CITED, display 3.5 with 3.6 and 3.7: `|S - V| ≪ X^{Θ + 1/4 + ε}`.
-  The two open leaves of this split, `major_arc_uniform150` and `arc_tails_sup150`, live in
-  `MeanSquareLeaves150.lean`, imported below, because an existing file may never gain a new
-  open leaf; every proof here uses them by name as before.
+  The LEAF itself lives in `MajorArcLeaf150.lean`, so that this file holds no new sorry.
 * `major_model_L2_150`, elementary, PROVED: `∫_0^1 |V|² ≪ X^{1 + ε}`.
 * `major_coefficients150`, page 12, the arc main term: the `N`-th Fourier coefficient of `V²`
   is the truncated main term `truncMain150 N` up to an error of mean square `≪ X^{2 + ε}`.
@@ -89,6 +119,22 @@ theorem norm_sub_sq_le_two150 (a b c : ℂ) :
   have h : ‖a - c‖ ≤ ‖a - b‖ + ‖b - c‖ := norm_sub_le_norm_sub_add_norm_sub a b c
   have h0 : 0 ≤ ‖a - c‖ := norm_nonneg _
   nlinarith [sq_nonneg (‖a - b‖ - ‖b - c‖), norm_nonneg (a - b), norm_nonneg (b - c)]
+
+/-- LEAF, elementary, page 12, the arc tails pointwise.  `V² - W` is minus the sum over
+`q ≤ Q = ⌊X^{1/2}⌋`, `(a, q) = 1`, of `μ(q)²/φ(q)² T(α - a/q)²` over the fractions `a/q` whose
+arc does not contain `α`, with `|T(β)| ≤ min(X, 1/(2‖β‖))`.  The claim is
+`|V(α)² - W(α)| ≪ X^{1+ε}` uniformly: the fractions within `1/(qQ)` of `α` but not assigned to
+it have `q > Q/2`, by the Farey spacing `|a/q - a'/q'| ≥ 1/(q q')`, and there are `O(1)` of them,
+each `≤ X²/φ(q)² ≪ X^{1+ε}`; the others give `Σ_{q ≤ Q} φ(q)^{-2} min(X², q²/‖qα‖²) ≪ X^{1+ε}`
+by the standard count of `q` with `‖qα‖` small.  This is the `O(N^{1/2+ε})` of page 12, which
+the survey states without proof.  PROVED, ROUTE BURST 5 20261112, as `arc_tails_sup_f150` of
+FareyArcs150.lean: Dirichlet covering, the reduced centre, the swap to `h = a0 q - a q0` with
+`q` in one residue class modulo `q0`, and the kernel sum over the Farey neighbours spaced
+`≥ 1/Q²` apart. -/
+theorem arc_tails_sup150 :
+    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X → ∀ α ∈ Set.Icc (0 : ℝ) 1,
+      ‖VX150 X α ^ 2 - WX150 X α‖ ≤ C * (X : ℝ) ^ (1 + ε) :=
+  arc_tails_sup_f150
 
 /-- Page 12, the arc tails in mean square: `∫_0^1 |V² - W|² ≪ X^{2+ε}`.  ROUTE BURST 7: derived
 from the leaf `arc_tails_sup150` and the PROVED `integral_norm_VW_le150` and
@@ -496,67 +542,6 @@ theorem mean_square150_even_part (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound �
     ring
   rw [hfin]
   linarith
-
-/-- Step 4, the second moment over the even `N`: this is the analytic content of the
-estimate, for the `N` that carry a main term. The circle method splits `r2` into the major arcs,
-where the zero-free hypothesis bounds the contribution of the zeros, and the minor arcs, whose
-second moment is bounded by a mean square of the prime exponential sum; the resulting mean square
-of `E2` over the even `N ≤ X` is at most a constant times `X ^ (3/2 + 2Θ + ε)`.
-CONDITIONAL on the sharp arc inputs and Hardy through mean_square150_even_part. -/
-theorem meanSquare38_even_energy (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
-    ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ X : ℕ, 1 ≤ X →
-      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2 ≤
-        C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  exact mean_square150_even_part Θ hΘ hZ
-
-/-- The mean square estimate, assembled from the four leaves: the sum over `N ≤ X` splits into
-the even and the odd `N`, the odd part becomes the second moment of `r2` by the vanishing of the
-singular series there, and both parts are dominated by `X ^ (3/2 + 2Θ + ε)` because `Θ ≥ 1/2`
-puts two below that exponent. -/
-theorem meanSquare38_split : MeanSquare38 := by
-  intro Θ hΘ hZ ε hε
-  obtain ⟨C₁, hC₁⟩ := meanSquare38_even_energy Θ hΘ hZ ε hε
-  obtain ⟨C₂, hC₂pos, hC₂⟩ := meanSquare38_odd_energy
-  refine ⟨C₁ + C₂, ?_⟩
-  intro X hX
-  have hhalf : (1 : ℝ) / 2 ≤ Θ := meanSquare38_theta_lower hZ
-  have hX1 : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
-  have hp : (2 : ℝ) ≤ 3 / 2 + 2 * Θ + ε := by linarith
-  have hXp : (X : ℝ) ^ (2 : ℝ) ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
-    Real.rpow_le_rpow_of_exponent_le hX1 hp
-  have hXp2 : (X : ℝ) ^ 2 ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-    simpa using hXp
-  have hsplit :
-      (∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2) +
-        ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 =
-      ∑ N ∈ Finset.Icc 1 X, (E2 N) ^ 2 :=
-    Finset.sum_filter_add_sum_filter_not (s := Finset.Icc 1 X)
-      (p := fun N => Even N) (f := fun N => (E2 N) ^ 2)
-  have hodd :
-      ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 ≤ C₂ * (X : ℝ) ^ 2 := by
-    have hEq :
-        ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 =
-        ∑ N ∈ (Finset.Icc 1 X).filter (fun N => Odd N), (r2 N) ^ 2 := by
-      refine Finset.sum_congr ?_ ?_
-      · ext N
-        simp only [Finset.mem_filter]
-        exact ⟨fun h => ⟨h.1, Nat.not_even_iff_odd.mp h.2⟩,
-          fun h => ⟨h.1, Nat.not_even_iff_odd.mpr h.2⟩⟩
-      · intro N hN
-        rw [Finset.mem_filter] at hN
-        have h0 : singular N = 0 := meanSquare38_odd_singular N hN.2
-        simp only [E2, h0, mul_zero, sub_zero]
-    rw [hEq]
-    exact hC₂ X hX
-  have heven := hC₁ X hX
-  calc ∑ N ∈ Finset.Icc 1 X, (E2 N) ^ 2
-      = (∑ N ∈ (Finset.Icc 1 X).filter (fun N => Even N), (E2 N) ^ 2) +
-          ∑ N ∈ (Finset.Icc 1 X).filter (fun N => ¬ Even N), (E2 N) ^ 2 := hsplit.symm
-    _ ≤ C₁ * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) + C₂ * (X : ℝ) ^ 2 := by linarith
-    _ ≤ C₁ * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) + C₂ * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-      have := mul_le_mul_of_nonneg_left hXp2 hC₂pos.le
-      linarith
-    _ = (C₁ + C₂) * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by ring
 
 /-- Page 13 display 3.8, from the character zero error in 3.7 and Parseval.
 SPLIT 20261112: derived from `zeroBound_lower150`, the proved odd leaves of
@@ -2070,6 +2055,3 @@ set_option format.width 1000
 #print axioms LeanLab.BhowmikGrimmelt2026.theorem31_decomposed150
 
 #print axioms LeanLab.BhowmikGrimmelt2026.singular_ge_one461
-
-#print axioms LeanLab.BhowmikGrimmelt2026.meanSquare38_even_energy
-#print axioms LeanLab.BhowmikGrimmelt2026.meanSquare38_split

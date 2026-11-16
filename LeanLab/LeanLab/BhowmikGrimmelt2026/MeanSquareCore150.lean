@@ -220,7 +220,8 @@ theorem bessel150 (g : ℝ → ℂ) (hg : MemLp g 2 (volume.restrict (Set.Ioc (0
 
 /-! ### The major arc model of display 3.5 on the Dirichlet dissection -/
 
-/-- The nearest integer `⌊x + 1/2⌋`. -/
+/-- The nearest integer `⌊x + 1/2⌋`, used for the numerator `a` of the arc centre `a/q` nearest
+to `α` in the dissection of P0029 page 11. -/
 noncomputable def nint150 (x : ℝ) : ℤ := ⌊x + 1 / 2⌋
 
 theorem measurable_nint150 : Measurable nint150 := by
