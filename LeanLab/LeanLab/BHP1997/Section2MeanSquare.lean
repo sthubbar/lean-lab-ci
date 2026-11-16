@@ -17,7 +17,7 @@ Contents.
   `Thm2.Theorem2`; `theorem2_iff_with` checks by `Iff.rfl` that they match exactly.
 * `conclusion_of_meanSquare`, PROVED: the page 6 reduction, for u v ≠ 0.
 * `section2_mean_square`, CONDITIONAL on the decomposed leaves: the page 6 display from hypotheses i to iv, which is
-  2.2 plus 2.3, with exact Fourier and error combination proofs in Decomp512a.
+  2.2 plus 2.3, with exact Fourier and error combination proofs in task512/Task512Leaves.lean.
 * `theorem2_paper_nondegenerate`, PROVED from the leaf: Theorem 2 in the form
   `Thm2.Theorem2Paper` for every pair with u v ≠ 0.
 
@@ -34,7 +34,7 @@ is left untouched and the u v ≠ 0 case is the one proved from the leaf.
 
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.Decomp512a
+import LeanLab.task512.Task512Leaves
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical Complex Thm2
@@ -201,7 +201,7 @@ theorem theorem2_iff_with (ε B : ℝ) :
 display from hypotheses i to iv of Theorem 2, with ε in the paper's window where Bε is
 small, page 3. The paper proves it as 2.2, the major arcs, pages 6 to 8 with 2.4 to 2.9,
 plus 2.3, the minor arcs, pages 8 to 11 with 2.10 to 2.16 and Gallagher's lemma. No
-hypothesis u v ≠ 0 is needed here. CONDITIONAL ON the four analytic leaves in Decomp512a. -/
+hypothesis u v ≠ 0 is needed here. CONDITIONAL ON the four analytic leaves in task512/Task512Leaves.lean. -/
 theorem section2_mean_square :
     ∀ B : ℝ, ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       Theorem2With ε B (fun a b u v _ => MeanSquare ε a b u v) := by
