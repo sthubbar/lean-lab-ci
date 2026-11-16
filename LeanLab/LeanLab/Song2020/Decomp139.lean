@@ -6,8 +6,7 @@ The final assembly has the exact sealed Lemma4 proposition.
 Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
-import LeanLab.Song2020.SPLIT_lambda_sum_per_h
-import LeanLab.Song2020.SPLIT_vaughan_per_u
+import LeanLab.Song2020.SPLIT_gk_lemma_2_4_two_three
 
 namespace LeanLab.Song2020.Decomp139
 
@@ -15,15 +14,6 @@ open LeanLab.Song2020 LeanLab.Song2020.State1562
 open scoped Classical
 
 noncomputable section
-
-/-- Pages 4 and 5. The truncated Fourier polynomial of Lemma 1. -/
-def fourier (a : ℕ → ℤ → ℂ) (H : ℕ) (x : ℝ) : ℂ :=
-  ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h => h ≠ 0), a H h * eC (h * x)
-
-/-- Pages 4 and 5. S1 with negative Fourier frequencies as in the defined sawtooth. -/
-def truncatedSum (a : ℕ → ℤ → ℂ) (H : ℕ) (γ : ℝ) (n : ℕ) (y α : ℝ) : ℂ :=
-  ∑ p ∈ windowPrimes n y, (psWeight γ p : ℂ) * eC (α * p) *
-    (fourier a H (-((p : ℝ) + 1) ^ γ) - fourier a H (-(p : ℝ) ^ γ))
 
 /-- Pages 4 and 5. The displayed S2 bound. -/
 def tailBudget (γ n y H : ℝ) : ℝ :=
@@ -79,199 +69,6 @@ def s1Terms (γ : ℝ) : List (ℝ × ℝ × ℝ) :=
 /-- Page 8, first display after summing over h. The S1 polynomial in H. -/
 def s1Poly (γ n y H : ℝ) : ℝ :=
   (s1Terms γ |>.map (fun t => n ^ t.1 * y ^ t.2.1 * H ^ t.2.2)).sum
-
-/-- Page 5. The truncated subwindow of the prime window: the integers x with
-x minus n over 3 less than y in absolute value and x at most t. Partial summation over the
-window produces sums over these initial segments. -/
-def subWindow (n : ℕ) (y t : ℝ) : Finset ℕ :=
-  (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
-    (fun x => |(x : ℝ) - (n : ℝ) / 3| < y ∧ (x : ℝ) ≤ t)
-
-/-- Page 5. The von Mangoldt weighted exponential sum of the paper, the sum of
-Lambda of x times e of alpha x plus h x to the gamma, over an initial segment of the window. -/
-def lambdaSum (γ : ℝ) (n : ℕ) (y α : ℝ) (h : ℤ) (t : ℝ) : ℂ :=
-  ∑ x ∈ subWindow n y t,
-    (ArithmeticFunction.vonMangoldt x : ℂ) * eC (α * x + h * (x : ℝ) ^ γ)
-
-/-- Page 8, first display. The ten monomials of the per h bound for
-x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3, with x replaced by n,
-which is legitimate since x is of size n over 3 on the window. The argument k stands for
-the absolute value of h. -/
-def perH (γ n y k : ℝ) : ℝ :=
-  n ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) + n ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 8) +
-  n ^ (γ / 2 - 1) * y * k ^ ((1 : ℝ) / 2) +
-  n ^ ((γ + 2) / 6) * y ^ ((1 : ℝ) / 3) * k ^ ((1 : ℝ) / 6) +
-  n ^ (γ / 4) * y ^ ((1 : ℝ) / 2) * k ^ ((1 : ℝ) / 4) +
-  n ^ (γ / 8 + 1 / 2) * y ^ ((1 : ℝ) / 4) * k ^ ((1 : ℝ) / 8) +
-  n ^ ((γ + 6) / 10) * y ^ ((1 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) +
-  n ^ (γ / 10 + 2 / 5) * y ^ ((2 : ℝ) / 5) * k ^ ((1 : ℝ) / 10) +
-  n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * k ^ ((3 : ℝ) / 10) +
-  n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * k ^ ((3 : ℝ) / 14)
-
-/-- CITED. Song 2020, page 5, the displays from "For S1, we first observe" to
-"We have shown so far": partial summation in the weight c x to the 1 minus gamma,
-the bound a_h at most K over h for the Fourier coefficients, the bound of
-e of h times the difference of x plus 1 to the gamma and x to the gamma minus 1
-by h x to the gamma minus 1, and the passage from primes to the von Mangoldt function.
-The paper writes the maximum over centred windows and a saving 1 over log n; this form
-keeps instead the initial segments that partial summation really produces, drops the
-log saving, and writes out the prime power error as K H n to the 1/2, which the
-paper absorbs into its O of n to the 3/2 minus gamma. Any bound B on the von Mangoldt
-sums for 1 at most |h| at most H then bounds S1. The factor n to the epsilon on the B sum
-was added in the check of 2026-11-12: for y close to n/3 the window reaches down to small x,
-and the total variation of the partial summation weight x to the 1 minus gamma times
-e of h times the gamma difference minus 1 is then of size |h| log n, not |h|; the paper's
-y is a power of n below 1, where this loss does not arise, and n to the epsilon absorbs it. -/
-theorem s1_lambda_reduction :
-    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
-      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
-        (∀ H : ℕ, ∀ h : ℤ, h ≠ 0 → ‖a H h‖ ≤ K / |(h : ℝ)|) →
-        ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
-          (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
-            ∀ H : ℕ, 1 ≤ H → ∀ B : ℤ → ℝ,
-              (∀ h : ℤ, h ≠ 0 → |h| ≤ (H : ℤ) → ∀ t : ℝ, ‖lambdaSum γ n y α h t‖ ≤ B h) →
-              ‖truncatedSum a H γ n y α‖ ≤
-                C * K * ((n : ℝ) ^ (3 / 2 - γ) + (H : ℝ) * (n : ℝ) ^ ((1 : ℝ) / 2) +
-                  (n : ℝ) ^ ε * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := by
-  simpa only [fourier, truncatedSum, subWindow, lambdaSum]
-    using LeanLab.Song2020.SPLIT_vaughan_per_u.s1_lambda_reduction
-
-/-- CITED. Song 2020, pages 5 to 7, the bounds for the three Vaughan pieces with both
-parameters u and v free, 1 at most u, 1 at most v and u v at most n, before the choice
-v = (n/u)^{1/2}: the Sigma 1 display of page 6, u |h|^{1/2} x^{γ/2-1} y plus
-x^{1-γ/2} |h|^{-1/2}, with its log squared factor absorbed in n to the epsilon, plus the
-display for x^{-ε} times Sigma 2 plus Sigma 3 on page 7, n v^{-1/2} plus n^{1/2} (u v)^{1/2}
-plus the four u and h monomials. Here x is replaced by n, since x is of size n over 3.
-Published inputs: Dirichlet approximation and the Ramanujan sum splitting, page 5; the
-Vaughan identity, the paper's Lemma 3.2, page 5; Iwaniec and Kowalski Corollary 8.13 for
-Sigma 1, page 6; dyadic division into T(R,S) and Graham and Kolesnik Lemma 2.5, page 6;
-Iwaniec and Kowalski Corollary 8.13 for the inner r sum and Graham and Kolesnik Lemma 2.4
-for L, page 7. -/
-theorem vaughan_uv :
-    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
-      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
-        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
-          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ, ∀ u v : ℝ, 1 ≤ u → 1 ≤ v → u * v ≤ n →
-            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε *
-              (u * (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y) +
-                (n : ℝ) ^ (1 - γ / 2) * |(h : ℝ)| ^ (-(1 : ℝ) / 2) +
-                (n : ℝ) * v ^ (-(1 : ℝ) / 2) + (n : ℝ) ^ ((1 : ℝ) / 2) * (u * v) ^ ((1 : ℝ) / 2) +
-                (n : ℝ) ^ (1 - γ / 4) * |(h : ℝ)| ^ (-(1 : ℝ) / 4) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
-                u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  simpa only [subWindow, lambdaSum]
-    using LeanLab.Song2020.SPLIT_vaughan_per_u.vaughan_uv
-
-/-- PROVED. Triangle inequality for the von Mangoldt sum of the window, transferred from the
-repair file: the exponential sum is at most the mass of the von Mangoldt function over the
-same initial segment, since every term has modulus Lambda of x. This is the first step inside
-the partial summation leaf, s1_lambda_reduction, and it is the only part of that leaf that
-Mathlib supplies on its own. -/
-theorem norm_lambdaSum_le_vonMangoldt_mass (γ : ℝ) (n : ℕ) (y α : ℝ) (h : ℤ) (t : ℝ) :
-    ‖lambdaSum γ n y α h t‖ ≤ ∑ x ∈ subWindow n y t, (ArithmeticFunction.vonMangoldt x : ℝ) := by
-  simpa only [lambdaSum, subWindow]
-    using LeanLab.Song2020.SPLIT_vaughan_per_u.norm_lambdaSum_le_vonMangoldt_mass γ n y α h t
-
-/-- PROVED. Page 7, the choice v = (n/u)^{1/2}, written as n^{1/2} u^{-1/2}: for
-1 at most u at most n it is at least 1, u v is at most n, and both n v^{-1/2} and
-n^{1/2} (u v)^{1/2} equal u^{1/4} n^{3/4}. -/
-theorem choice_v (N u : ℝ) (hu : 1 ≤ u) (huN : u ≤ N) :
-    1 ≤ N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2) ∧
-      u * (N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2)) ≤ N ∧
-      N * (N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2)) ^ (-(1 : ℝ) / 2) =
-        u ^ ((1 : ℝ) / 4) * N ^ ((3 : ℝ) / 4) ∧
-      N ^ ((1 : ℝ) / 2) * (u * (N ^ ((1 : ℝ) / 2) * u ^ (-(1 : ℝ) / 2))) ^ ((1 : ℝ) / 2) =
-        u ^ ((1 : ℝ) / 4) * N ^ ((3 : ℝ) / 4) := by
-  have hu0 : 0 < u := by linarith
-  have hN0 : 0 < N := by linarith
-  obtain ⟨L, rfl⟩ : ∃ L, N = Real.exp L := ⟨Real.log N, (Real.exp_log hN0).symm⟩
-  obtain ⟨M, rfl⟩ : ∃ M, u = Real.exp M := ⟨Real.log u, (Real.exp_log hu0).symm⟩
-  have hML : M ≤ L := Real.exp_le_exp.mp huN
-  simp only [← Real.exp_mul, ← Real.exp_add]
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · rw [Real.one_le_exp_iff]; linarith
-  · rw [Real.exp_le_exp]; linarith
-  · congr 1; ring
-  · congr 1; ring
-
-/-- Song 2020, page 7. The per u display, assembled from the cited free u and v bounds
-vaughan_uv by the proved choice v = (n/u)^{1/2}, choice_v, with the Sigma 1 term
-x^{1-γ/2} |h|^{-1/2} absorbed in n^{1-γ/4} |h|^{-1/4}. -/
-theorem vaughan_per_u_of_split :
-    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
-      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
-        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
-          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ, ∀ u : ℝ, 1 ≤ u → u ≤ n →
-            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε *
-              ((n : ℝ) ^ (1 - γ / 4) * |(h : ℝ)| ^ (-(1 : ℝ) / 4) +
-                u ^ ((1 : ℝ) / 4) * (n : ℝ) ^ ((3 : ℝ) / 4) +
-                u * (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
-                u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  intro γ hγ hγ1 ε hε
-  obtain ⟨C₁, hC₁, N₁, hv⟩ := vaughan_uv γ hγ hγ1 ε hε
-  refine ⟨2 * C₁, by positivity, max 1 N₁, ?_⟩
-  intro n hn y hy hyu α h hh t u hu1 huN
-  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (show 1 ≤ n by omega)
-  obtain ⟨hv1, huv, e1, e2⟩ := choice_v (n : ℝ) u hu1 huN
-  have hb := hv n (by omega) y hy hyu α h hh t u _ hu1 hv1 huv
-  rw [e1, e2] at hb
-  set N : ℝ := (n : ℝ) with hNdef
-  set k : ℝ := |(h : ℝ)| with hkdef
-  have hk1 : 1 ≤ k := by
-    rw [hkdef]
-    have h' : 1 ≤ |h| := Int.one_le_abs hh
-    exact_mod_cast h'
-  have hN0 : 0 < N := by linarith
-  have hy0 : 0 < y := (Real.rpow_pos_of_pos hN0 _).trans hy
-  have habs : N ^ (1 - γ / 2) * k ^ (-(1 : ℝ) / 2) ≤ N ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) :=
-    mul_le_mul (Real.rpow_le_rpow_of_exponent_le hn1 (by linarith))
-      (Real.rpow_le_rpow_of_exponent_le hk1 (by norm_num)) (by positivity) (by positivity)
-  have z0 : 0 ≤ N ^ (1 - γ / 4) * k ^ (-(1 : ℝ) / 4) := by positivity
-  have z1 : 0 ≤ u ^ ((1 : ℝ) / 4) * N ^ ((3 : ℝ) / 4) := by positivity
-  have z2 : 0 ≤ u * (k ^ ((1 : ℝ) / 2) * N ^ (γ / 2 - 1) * y) := by positivity
-  have z3 : 0 ≤ u ^ (-(1 : ℝ) / 4) * (N ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) := by positivity
-  have z4 : 0 ≤ u ^ (-(1 : ℝ) / 6) * (N ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
-      k ^ ((1 : ℝ) / 6)) := by positivity
-  have z5 : 0 ≤ u ^ (-(1 : ℝ) / 4) * (N ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
-      k ^ ((1 : ℝ) / 4)) := by positivity
-  refine hb.trans ?_
-  rw [show 2 * C₁ * N ^ ε = C₁ * N ^ ε * 2 by ring, mul_assoc (C₁ * N ^ ε)]
-  apply mul_le_mul_of_nonneg_left _ (by positivity)
-  linarith
-
-/-- CITED. Song 2020, page 7, the display after "Choosing v = (n/u)^{1/2}": for every
-Vaughan parameter u with 1 at most u at most n, so that u v is at most n,
-x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3 is bounded by six monomials,
-written here with x replaced by n since x is of size n over 3, and with k the absolute value
-of h. Published inputs: Dirichlet approximation with q at most log n and the Ramanujan sum
-splitting, page 5; the Vaughan identity, the paper's Lemma 3.2, page 5; Iwaniec and
-Kowalski Corollary 8.13 for Sigma 1, page 6; dyadic division into T(R,S) and Graham and
-Kolesnik Lemma 2.5, page 6; Iwaniec and Kowalski Corollary 8.13 for the inner r sum and
-Graham and Kolesnik Lemma 2.4 for L, page 7. The Sigma 1 term x to the 1 minus gamma over 2
-times h to the minus 1/2 of page 6 is absorbed in n to the 1 minus gamma over 4 times
-h to the minus 1/4, as on page 7. -/
-theorem vaughan_per_u :
-    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
-      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
-        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
-          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ, ∀ u : ℝ, 1 ≤ u → u ≤ n →
-            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε *
-              ((n : ℝ) ^ (1 - γ / 4) * |(h : ℝ)| ^ (-(1 : ℝ) / 4) +
-                u ^ ((1 : ℝ) / 4) * (n : ℝ) ^ ((3 : ℝ) / 4) +
-                u * (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
-                u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) :=
-  vaughan_per_u_of_split
 
 /-- PROVED. The balancing step inside Graham and Kolesnik Lemma 2.4: if S is at most
 3 P u to the a and at most 3 Q u to the minus b, then S is at most 3 times the balance
@@ -1265,9 +1062,6 @@ end LeanLab.Song2020.Decomp139
 #print axioms LeanLab.Song2020.Decomp139.characteristic_reduction
 #print axioms LeanLab.Song2020.Decomp139.fourier_approximation
 #print axioms LeanLab.Song2020.Decomp139.s1_lambda_reduction
-#print axioms LeanLab.Song2020.Decomp139.vaughan_uv
-#print axioms LeanLab.Song2020.Decomp139.choice_v
-#print axioms LeanLab.Song2020.Decomp139.vaughan_per_u_of_split
 #print axioms LeanLab.Song2020.Decomp139.vaughan_per_u
 #print axioms LeanLab.Song2020.Decomp139.balance_core
 #print axioms LeanLab.Song2020.Decomp139.gk_lemma_2_4_two_three
