@@ -727,6 +727,163 @@ theorem continuous_tail_family405_split {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (h
   have hb₂ := h₂ X hX η hη hη1 hscale
   nlinarith only [hsplit, hb₁, hb₂]
 
+
+/-- The remaining major arc family follows from the whole major arc family and the
+denominator one leaf: the region coefficient is the difference of the two, and the split
+identity of Step 1 gives the coefficient as their sum. -/
+private theorem other_arcs_of_whole405 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : IsMajorWeight G)
+    (ϑ : ℝ) (hϑ : 0 < ϑ) (hϑ' : ϑ < 1 / 2) {Cw : ℝ}
+    (hw : ∀ X : ℕ, 2 ≤ X → ∀ η : ℝ, 0 < η → η ≤ 1 →
+      10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X →
+      ∑ N ∈ Finset.Icc 1 X, ‖continuousTail405 ϕ G X N ϑ η‖ ^ 2 ≤
+        Cw * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 2 ≤ X → ∀ η : ℝ, 0 < η → η ≤ 1 →
+      10 * ((X : ℝ) ^ ϑ) ^ 2 ≤ η * X →
+      ∑ N ∈ Finset.Icc 1 X,
+        ‖∫ α in (0 : ℝ)..1,
+          ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+            {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}ᶜ).indicator
+            (fun α => Sphi ϕ N α ^ 2 *
+              (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+                continuousModel405 G ((X : ℝ) ^ ϑ)
+                  (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2 ≤
+        C * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
+  classical
+  obtain ⟨C₂, hC₂, h₂⟩ := leaf_denominator_one405 hϕ hG ϑ hϑ hϑ'
+  refine ⟨2 * (max Cw 0 + C₂), by positivity, ?_⟩
+  intro X hX η hη hη1 hscale
+  have hwhole := hw X hX η hη hη1 hscale
+  have hden := h₂ X hX η hη hη1 hscale
+  have hpt : ∀ N ∈ Finset.Icc 1 X,
+      ‖∫ α in (0 : ℝ)..1,
+        ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+          {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}ᶜ).indicator
+          (fun α => Sphi ϕ N α ^ 2 *
+            (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+              continuousModel405 G ((X : ℝ) ^ ϑ)
+                (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2 ≤
+      2 * (‖continuousTail405 ϕ G X N ϑ η‖ ^ 2 +
+        ‖∫ α in (0 : ℝ)..1,
+          ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+            {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+            (fun α => Sphi ϕ N α ^ 2 *
+              (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+                continuousModel405 G ((X : ℝ) ^ ϑ)
+                  (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2) := by
+    intro N hN
+    have hs := leaf_region_split405 hϕ hG hX N ϑ hϑ hη
+    have he : (∫ α in (0 : ℝ)..1,
+        ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+          {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}ᶜ).indicator
+          (fun α => Sphi ϕ N α ^ 2 *
+            (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+              continuousModel405 G ((X : ℝ) ^ ϑ)
+                (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α) =
+        continuousTail405 ϕ G X N ϑ η - (∫ α in (0 : ℝ)..1,
+          ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+            {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+            (fun α => Sphi ϕ N α ^ 2 *
+              (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+                continuousModel405 G ((X : ℝ) ^ ϑ)
+                  (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α) := by
+      rw [hs]
+      ring
+    rw [he]
+    have htri := norm_sub_le (continuousTail405 ϕ G X N ϑ η) (∫ α in (0 : ℝ)..1,
+      ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+        {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+        (fun α => Sphi ϕ N α ^ 2 *
+          (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+            continuousModel405 G ((X : ℝ) ^ ϑ)
+              (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α)
+    have h1 := norm_nonneg (continuousTail405 ϕ G X N ϑ η)
+    have h2 := norm_nonneg (∫ α in (0 : ℝ)..1,
+      ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+        {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+        (fun α => Sphi ϕ N α ^ 2 *
+          (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+            continuousModel405 G ((X : ℝ) ^ ϑ)
+              (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α)
+    have hsq := pow_le_pow_left₀ (norm_nonneg _) htri 2
+    nlinarith [hsq, h1, h2, sq_nonneg (‖continuousTail405 ϕ G X N ϑ η‖ -
+      ‖∫ α in (0 : ℝ)..1,
+        ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+          {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+          (fun α => Sphi ϕ N α ^ 2 *
+            (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+              continuousModel405 G ((X : ℝ) ^ ϑ)
+                (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖)]
+  have hsum : ∑ N ∈ Finset.Icc 1 X,
+      ‖∫ α in (0 : ℝ)..1,
+        ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+          {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}ᶜ).indicator
+          (fun α => Sphi ϕ N α ^ 2 *
+            (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+              continuousModel405 G ((X : ℝ) ^ ϑ)
+                (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2 ≤
+      2 * ((∑ N ∈ Finset.Icc 1 X, ‖continuousTail405 ϕ G X N ϑ η‖ ^ 2) +
+        ∑ N ∈ Finset.Icc 1 X,
+          ‖∫ α in (0 : ℝ)..1,
+            ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+              {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+              (fun α => Sphi ϕ N α ^ 2 *
+                (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+                  continuousModel405 G ((X : ℝ) ^ ϑ)
+                    (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2) := by
+    calc ∑ N ∈ Finset.Icc 1 X,
+        ‖∫ α in (0 : ℝ)..1,
+          ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+            {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}ᶜ).indicator
+            (fun α => Sphi ϕ N α ^ 2 *
+              (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+                continuousModel405 G ((X : ℝ) ^ ϑ)
+                  (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2
+        ≤ ∑ N ∈ Finset.Icc 1 X, 2 * (‖continuousTail405 ϕ G X N ϑ η‖ ^ 2 +
+            ‖∫ α in (0 : ℝ)..1,
+              ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+                {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+                (fun α => Sphi ϕ N α ^ 2 *
+                  (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+                    continuousModel405 G ((X : ℝ) ^ ϑ)
+                      (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2) :=
+          Finset.sum_le_sum hpt
+      _ = 2 * ((∑ N ∈ Finset.Icc 1 X, ‖continuousTail405 ϕ G X N ϑ η‖ ^ 2) +
+            ∑ N ∈ Finset.Icc 1 X,
+              ‖∫ α in (0 : ℝ)..1,
+                ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+                  {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+                  (fun α => Sphi ϕ N α ^ 2 *
+                    (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+                      continuousModel405 G ((X : ℝ) ^ ϑ)
+                        (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2)
+          := by
+          rw [← Finset.mul_sum, Finset.sum_add_distrib]
+  have hlog : 0 ≤ Real.log X ^ 5 := by positivity
+  have hCX : 0 ≤ η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by positivity
+  have hle1 : ∑ N ∈ Finset.Icc 1 X, ‖continuousTail405 ϕ G X N ϑ η‖ ^ 2 ≤
+      max Cw 0 * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
+    refine hwhole.trans ?_
+    calc Cw * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5
+        = (Cw * η ^ 4 * (X : ℝ) ^ 3) * Real.log X ^ 5 := by ring
+      _ ≤ (max Cw 0 * η ^ 4 * (X : ℝ) ^ 3) * Real.log X ^ 5 := by
+          apply mul_le_mul_of_nonneg_right _ hlog
+          apply mul_le_mul_of_nonneg_right _ (by positivity : (0 : ℝ) ≤ (X : ℝ) ^ 3)
+          exact mul_le_mul_of_nonneg_right (le_max_left Cw 0)
+            (by positivity : (0 : ℝ) ≤ η ^ 4)
+  have hle2 : ∑ N ∈ Finset.Icc 1 X,
+      ‖∫ α in (0 : ℝ)..1,
+        ({α : ℝ | MajorArc X ((X : ℝ) ^ ϑ) α} ∩
+          {α : ℝ | |α - ((round α : ℤ) : ℝ)| ≤ (X : ℝ) ^ ϑ / (X : ℝ)}).indicator
+          (fun α => Sphi ϕ N α ^ 2 *
+            (nearTransform328 G X ((X : ℝ) ^ ϑ) η α -
+              continuousModel405 G ((X : ℝ) ^ ϑ)
+                (fun q => η * X * q / (X : ℝ) ^ ϑ) α) * ee (-(N * α))) α‖ ^ 2 ≤
+      C₂ * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := hden
+  have hcomb : max Cw 0 * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 +
+      C₂ * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 =
+      (max Cw 0 + C₂) * η ^ 4 * (X : ℝ) ^ 3 * Real.log X ^ 5 := by ring
+  nlinarith [hsum, hle1, hle2, hcomb, hCX]
+
 end LeanLab.BhowmikGrimmelt2026
 
 #print axioms LeanLab.BhowmikGrimmelt2026.leaf_region_split405
