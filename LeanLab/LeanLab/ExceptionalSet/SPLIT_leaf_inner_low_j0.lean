@@ -57,7 +57,7 @@ theorem leaf_low_j0_minor_prime_sup (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
         ∀ b ∈ UpJ200.Decomp404e.truncatedDomain (F γ N ^ (6 * δ)) (F γ N),
           ‖U1539.Sp (F γ N ^ (6 * δ)) (F γ N) b‖ ^ 2 ≤
             C * F γ N ^ (2 - 6 * δ) * Real.log (F γ N) ^ 8 := by
-  sorry
+  exact LeanLab.ExceptionalSet.UpJ200.MinorSup446.leaf_minor_sup_supplied γ h1 h2
 
 /-- Assembly. The two steps above give the inner large phase mass estimate on the
 assigned lower block. The set on which the block phase is large sits inside the

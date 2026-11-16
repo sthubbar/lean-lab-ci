@@ -3,7 +3,7 @@ P0069 page 11, the actual finite Dirichlet polynomial and its smooth sampling re
 This file supplies elementary calculus. The continuous hybrid moment estimate remains OPEN.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.Decomp513a
+import LeanLab.BHP1997.Decomp513aSampling605
 open scoped ContDiff
 
 namespace LeanLab.BHP1997.Decomp513b

@@ -25,6 +25,58 @@ import LeanLab.Linnik1951.Decomp520a
 namespace LeanLab.Linnik1951
 open Finset MeasureTheory
 
+/-- Splitting the constant out of the full-prime-factor sum. -/
+private lemma mixed_shift_sum520 (N q : ℕ) (n : ℤ) :
+    2 * principalCoefficient520 q *
+      (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+          principalPrime520 N q z * primeFourier111_up111 N ((a : ℝ) / q + z) *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I)) =
+      ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+          2 * principalCoefficient520 q * principalPrime520 N q z *
+            primeFourier111_up111 N ((a : ℝ) / q + z) *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I) := by
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro a _
+  rw [← intervalIntegral.integral_const_mul]
+  apply intervalIntegral.integral_congr
+  intro z _
+  ring
+
+/-- Splitting the constant and the residue phase out of the diagonal sum. -/
+private lemma mixed_diag_sum520 (N q : ℕ) (n : ℤ) :
+    2 * principalCoefficient520 q ^ 2 *
+      (signedRamanujan520 q n *
+        ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+          principalPrime520 N q z ^ 2 *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) =
+      ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+        ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+          2 * principalCoefficient520 q ^ 2 * principalPrime520 N q z ^ 2 *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I) := by
+  unfold signedRamanujan520
+  rw [Finset.sum_mul, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro a _
+  rw [show 2 * principalCoefficient520 q ^ 2 *
+      (Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I) *
+        ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+          principalPrime520 N q z ^ 2 *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) =
+      (2 * principalCoefficient520 q ^ 2 *
+        Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) *
+        ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+          principalPrime520 N q z ^ 2 *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I) from by ring]
+  rw [← intervalIntegral.integral_const_mul]
+  apply intervalIntegral.integral_congr
+  intro z _
+  dsimp only
+  rw [centred_phase520 q a n z]
+  ring
+
 /-- LEAF. Expansion step. The residue error is the full prime series minus the
 principal part, so the cross term multiplied out gives twice the principal
 coefficient times the reduced residue sum of the principal part against one
@@ -43,7 +95,48 @@ theorem mixed_expansion520 (N q : ℕ) (n : ℤ) :
             ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
               principalPrime520 N q z ^ 2 *
                 Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) := by
-  sorry
+  have hS := mixed_shift_sum520 N q n
+  have hD := mixed_diag_sum520 N q n
+  by_cases hq1 : 1 ≤ q
+  · by_cases hN1 : 1 ≤ N
+    · have hPc : Continuous (principalPrime520 N q) := continuous_principal520 N q hN1
+      have hfc : Continuous (primeFourier111_up111 N) := continuous_prime_fourier111_up111 N hN1
+      unfold mixedIntegral520 residueError520
+      rw [hS, hD]
+      rw [← Finset.sum_sub_distrib]
+      apply Finset.sum_congr rfl
+      intro a _
+      have h1 : IntervalIntegrable (fun z : ℝ => 2 * principalCoefficient520 q *
+          principalPrime520 N q z * primeFourier111_up111 N ((a : ℝ) / q + z) *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I))
+          volume (-(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))) (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) :=
+        (by fun_prop : Continuous (fun z : ℝ => 2 * principalCoefficient520 q *
+          principalPrime520 N q z * primeFourier111_up111 N ((a : ℝ) / q + z) *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) *
+              Complex.I))).intervalIntegrable _ _
+      have h2 : IntervalIntegrable (fun z : ℝ => 2 * principalCoefficient520 q ^ 2 *
+          principalPrime520 N q z ^ 2 *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I))
+          volume (-(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))) (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) :=
+        (by fun_prop : Continuous (fun z : ℝ => 2 * principalCoefficient520 q ^ 2 *
+          principalPrime520 N q z ^ 2 *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) *
+              Complex.I))).intervalIntegrable _ _
+      rw [← intervalIntegral.integral_sub h1 h2]
+      apply intervalIntegral.integral_congr
+      intro z _
+      ring
+    · have hN0 : N = 0 := by omega
+      subst hN0
+      have hA : -(1 / ((q : ℝ) * (((0 : ℕ) : ℝ)) ^ (1 / 7 : ℝ))) = 0 := by simp
+      have hB : 1 / ((q : ℝ) * (((0 : ℕ) : ℝ)) ^ (1 / 7 : ℝ)) = 0 := by simp
+      unfold mixedIntegral520 signedRamanujan520 residueError520
+      rw [hA, hB]
+      simp
+  · have hq0 : q = 0 := by omega
+    subst hq0
+    simp [mixedIntegral520, signedRamanujan520, residueError520]
+
 
 /-- LEAF. Saving step for one full prime factor. The reduced residue sum of the
 principal part against one full prime series, weighted by the central phase and
@@ -84,7 +177,17 @@ value of the modulus divided by its totient, so its norm is at most one for
 every positive modulus. -/
 theorem mixed_coefficient_norm520 (q : ℕ) (hq : 1 ≤ q) :
     ‖principalCoefficient520 q‖ ≤ 1 := by
-  sorry
+  have hφ : (1 : ℝ) ≤ q.totient := by
+    exact_mod_cast Nat.totient_pos.mpr (show 0 < q by omega)
+  have hμ : |(ArithmeticFunction.moebius q : ℝ)| ≤ 1 := by
+    exact_mod_cast (ArithmeticFunction.abs_moebius_le_one (n := q))
+  have hc : principalCoefficient520 q =
+      (((ArithmeticFunction.moebius q : ℝ) / (q.totient : ℝ) : ℝ) : ℂ) := rfl
+  rw [hc, Complex.norm_real, Real.norm_eq_abs, abs_div,
+    abs_of_nonneg (by positivity : (0 : ℝ) ≤ (q.totient : ℝ))]
+  rw [div_le_one (by linarith)]
+  linarith
+
 
 /-- The mixed estimate: the expansion turns the cross term into one term with a
 single full prime factor and the collapsed diagonal term, the coefficient has

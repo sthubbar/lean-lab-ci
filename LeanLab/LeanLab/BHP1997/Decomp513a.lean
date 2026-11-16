@@ -1,21 +1,161 @@
 /-
 P0069 page 11 displays 3.3 and 3.4 and the citations on page 12.
 The two existing cited leaves move here with their sealed statements unchanged.
-Both analytic estimates remain OPEN. Their constants are uniform in F.
+The mean square estimate uses Gallagher smoothing and the proved sampling step.
+The large value estimate remains OPEN. Their constants are uniform in F.
 The elementary finite Halasz and subdivision steps already exist in Decomp492b.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.MeanSquareC165
+import LeanLab.BHP1997.Decomp513b
+import LeanLab.BHP1997.HybridWindow605
+import LeanLab.BHP1997.CriticalLine605
+
+namespace LeanLab.BHP1997.Decomp513a
+open Finset MeasureTheory MeanSquareC165
+open LeanLab.BHP1997.Gallagher605
+
+/-- P0069 page 11 display 3.3, the continuous critical line input.
+Gallagher1970 page 331 display 13 applies to coefficients a n divided by sqrt n. -/
+theorem dirPoly_integral_square_sum (a : ℕ → ℂ) {c1 c2 F T : ℝ}
+    {q : ℕ} [NeZero q] (hlo : 0 < c1 * F) (hT : 1 ≤ T) :
+    (∑ χ : DirichletCharacter ℂ q,
+      ∫ t in (-T)..T, ‖Thm4.dirPoly a c1 c2 F χ (Thm4.half t)‖ ^ 2) ≤
+      (2 * Real.pi ^ 3) * ((q : ℝ) * T + c2 * F) * energy a c1 c2 F := by
+  classical
+  let N := ⌊c2 * F⌋₊
+  let S := (Finset.range (N + 1)).filter
+    (fun n : ℕ => c1 * F < n ∧ (n : ℝ) < c2 * F)
+  let b (n : ℕ) : ℂ := if n ∈ S then a n / (n : ℂ) ^ (1 / 2 : ℂ) else 0
+  have hnpos (n : ℕ) (hn : n ∈ S) : 0 < (n : ℝ) :=
+    hlo.trans (mem_filter.mp hn).2.1
+  have hsub : S ⊆ Finset.Icc 1 N := by
+    intro n hn
+    have hn0 : 0 < n := by exact_mod_cast hnpos n hn
+    exact mem_Icc.mpr ⟨by omega, by
+      have := mem_range.mp (mem_filter.mp hn).1
+      omega⟩
+  have hpoly (χ : DirichletCharacter ℂ q) (t : ℝ) :
+      characterPolynomial χ b N t = Thm4.dirPoly a c1 c2 F χ (Thm4.half t) := by
+    unfold characterPolynomial Thm4.dirPoly
+    change (∑ n ∈ Finset.Icc 1 N, b n * χ n *
+      Complex.exp (-((Real.log n * t : ℝ) : ℂ) * Complex.I)) =
+      ∑ n ∈ S, a n * χ n / (n : ℂ) ^ Thm4.half t
+    rw [← Finset.sum_subset hsub (by
+      intro n hn hnS
+      simp [b, hnS])]
+    apply sum_congr rfl
+    intro n hn
+    dsimp only [b]
+    rw [if_pos hn]
+    exact critical_line_term n (hnpos n hn) (a n) (χ n) t
+  have hbn (n : ℕ) (hn : n ∈ S) : ‖b n‖ ^ 2 = ‖a n‖ ^ 2 / (n : ℝ) := by
+    simp only [b, if_pos hn]
+    exact critical_line_coefficient_norm_sq n (hnpos n hn) (a n)
+  have henergy : (∑ n ∈ Finset.Icc 1 N,
+      ((q : ℝ) * T + n) * ‖b n‖ ^ 2) ≤
+      ((q : ℝ) * T + c2 * F) * energy a c1 c2 F := by
+    rw [← Finset.sum_subset hsub (by intro n hn hnS; simp [b, hnS])]
+    change _ ≤ ((q : ℝ) * T + c2 * F) * ∑ n ∈ S, ‖a n‖ ^ 2 / (n : ℝ)
+    rw [mul_sum]
+    apply sum_le_sum
+    intro n hn
+    rw [hbn n hn]
+    apply mul_le_mul_of_nonneg_right _ (div_nonneg (sq_nonneg _) (Nat.cast_nonneg _))
+    linarith [(mem_filter.mp hn).2.2]
+  have h := fixed_modulus_hybrid_mean_value q N b hT
+  simp_rw [hpoly] at h
+  exact h.trans (by
+    simpa only [mul_assoc] using mul_le_mul_of_nonneg_left henergy
+      (by positivity : (0 : ℝ) ≤ 2 * Real.pi ^ 3))
+
+end LeanLab.BHP1997.Decomp513a
 
 namespace LeanLab.BHP1997.DecompC165c
 open MeanSquareC165
 
-/-- LEAF, CITED. Page 11, Lemma 1, display 3.3. Montgomery reference 21, Lemma 1.4 and
-Theorem 6.4, cited not proved in the lab. U-1609 decision: a citation wall, the paper's own proof is
-one line of citation, there are no cases to re-cut, and it restates the cited stub on purpose.
-It does not follow from the finite kernel estimates. -/
+/-- P0069 page 11 Lemma 1 display 3.3 and the source citation on page 12.
+Gallagher1970 page 331 Theorem 2 display 13 gives the continuous square estimate.
+Montgomery1971 page 3 Lemma 1.4 display 1.7 supplies the sampling route.
+The proof below keeps the sealed statement and a constant uniform in F. -/
 theorem hybrid_mean_square : Lemma1MeanSquare := by
-  sorry
+  intro B c1 c2 hc1 hc2
+  classical
+  have hc2pos : 0 < c2 := hc1.trans hc2
+  let K : ℝ := 2 * Real.pi ^ 3
+  let D : ℝ := 1 + |Real.log c2| / Real.log 2
+  have hlog2 : 0 < Real.log (2 : ℝ) := Real.log_pos (by norm_num)
+  have hD : 0 < D := by dsimp [D]; positivity
+  have hK : 0 < K := by dsimp [K]; positivity
+  refine ⟨K * (2 + c2) * (1 / Real.log 2 + 2 * D), by positivity, ?_⟩
+  intro x F T q S a ha hx hF hFx hT hTx hq hqx hspace htimes
+  letI : NeZero q := ⟨by omega⟩
+  have hFpos : 0 < F := by linarith
+  have hlo : 0 < c1 * F := mul_pos hc1 hFpos
+  have hTpos : 0 < T := by linarith
+  have hlogx : 0 < Real.log x := Real.log_pos (by linarith)
+  have hlogle : Real.log 2 ≤ Real.log x := Real.log_le_log (by norm_num) hx
+  let L : ℝ := D * Real.log x
+  have hL : 0 < L := mul_pos hD hlogx
+  let H : ℝ := K * ((q : ℝ) * (T + 1) + c2 * F)
+  have hH : 0 ≤ H := by dsimp [H]; positivity
+  have hE : 0 ≤ energy a c1 c2 F := by
+    unfold energy
+    exact Finset.sum_nonneg (fun n _ => div_nonneg (sq_nonneg _) (Nat.cast_nonneg _))
+  have hmoment (b : ℕ → ℂ) :
+      (∑ χ : DirichletCharacter ℂ q, ∫ t in (-T)..(T + 1),
+        ‖Thm4.dirPoly b c1 c2 F χ (Thm4.half t)‖ ^ 2) ≤
+        H * energy b c1 c2 F := by
+    apply le_trans _ (Decomp513a.dirPoly_integral_square_sum (q := q) b hlo (by linarith : 1 ≤ T + 1))
+    apply Finset.sum_le_sum
+    intro χ hχ
+    have hc := (Decomp513b.dirPoly_contDiff b c1 c2 F χ hlo).continuous.norm.pow 2
+    apply intervalIntegral.integral_mono_interval
+      (by linarith : -(T + 1) ≤ -T) (by linarith : -T ≤ T + 1) le_rfl
+      (Filter.Eventually.of_forall (fun t => sq_nonneg _)) (hc.intervalIntegrable _ _)
+  let f (χ : DirichletCharacter ℂ q) (t : ℝ) := Thm4.dirPoly a c1 c2 F χ (Thm4.half t)
+  let g (χ : DirichletCharacter ℂ q) (t : ℝ) :=
+    -Complex.I * Thm4.dirPoly (fun n => (Real.log n : ℂ) * a n) c1 c2 F χ (Thm4.half t)
+  have hf (χ : DirichletCharacter ℂ q) (t : ℝ) : HasDerivAt (f χ) (g χ t) t :=
+    Decomp513b.dirPoly_hasDerivAt a c1 c2 F χ hlo t
+  have hg (χ : DirichletCharacter ℂ q) : Continuous (g χ) := by
+    exact continuous_const.mul
+      (Decomp513b.dirPoly_contDiff (fun n => (Real.log n : ℂ) * a n) c1 c2 F χ hlo).continuous
+  have hs := Decomp513a.character_square_sampling_scaled S f g hf hg hspace hTpos.le hL htimes
+  have hA : (∑ χ : DirichletCharacter ℂ q,
+      ∫ t in (-T)..(T + 1), ‖f χ t‖ ^ 2) ≤ H * energy a c1 c2 F := hmoment a
+  have hB : (∑ χ : DirichletCharacter ℂ q,
+      ∫ t in (-T)..(T + 1), ‖g χ t‖ ^ 2) ≤ H * (L ^ 2 * energy a c1 c2 F) := by
+    simp only [g, norm_mul, norm_neg, Complex.norm_I, one_mul]
+    exact (hmoment (fun n => (Real.log n : ℂ) * a n)).trans
+      (mul_le_mul_of_nonneg_left (Decomp513b.log_weight_energy_le a hlo hc2pos hF hFx) hH)
+  have htotal : (∑ p ∈ S, ‖f p.2 p.1‖ ^ 2) ≤ (1 + 2 * L) * H * energy a c1 c2 F := by
+    apply hs.trans
+    calc
+      _ ≤ (1 + L) * (H * energy a c1 c2 F) + L⁻¹ * (H * (L ^ 2 * energy a c1 c2 F)) :=
+        add_le_add (mul_le_mul_of_nonneg_left hA (by positivity))
+          (mul_le_mul_of_nonneg_left hB (inv_nonneg.mpr hL.le))
+      _ = _ := by field_simp [hL.ne']; ring
+  have hlogfactor : 1 + 2 * L ≤ (1 / Real.log 2 + 2 * D) * Real.log x := by
+    have h1 : 1 ≤ Real.log x / Real.log 2 := (le_div_iff₀ hlog2).mpr (by simpa using hlogle)
+    calc
+      _ ≤ Real.log x / Real.log 2 + 2 * L := by linarith only [h1]
+      _ = _ := by dsimp [L]; ring
+  have hqT : 0 ≤ (q : ℝ) * T := by positivity
+  have hbracket : (q : ℝ) * (T + 1) + c2 * F ≤ (2 + c2) * ((q : ℝ) * T + F) := by
+    have hqt : (q : ℝ) ≤ (q : ℝ) * T := by
+      simpa using mul_le_mul_of_nonneg_left (show 1 ≤ T by linarith) (Nat.cast_nonneg q)
+    nlinarith [mul_nonneg hc2pos.le hqT]
+  have hHbound : H ≤ K * (2 + c2) * ((q : ℝ) * T + F) := by
+    dsimp [H]
+    simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hbracket hK.le
+  apply htotal.trans
+  calc
+    _ ≤ ((1 / Real.log 2 + 2 * D) * Real.log x) *
+        (K * (2 + c2) * ((q : ℝ) * T + F)) * energy a c1 c2 F := by
+      exact mul_le_mul_of_nonneg_right
+        (mul_le_mul hlogfactor hHbound hH (by positivity)) hE
+    _ = _ := by ring
 
 /-- LEAF, CITED. Page 11, Lemma 1, display 3.4. Page 12 cites Montgomery reference 21,
 Theorem 8.3, then Huxley reference 14, Section 2, cited not proved in the lab. U-1609 decision: a
@@ -26,121 +166,3 @@ theorem hybrid_large_values : Lemma1LargeValues := by
 
 end LeanLab.BHP1997.DecompC165c
 
-namespace LeanLab.BHP1997.Decomp513a
-open Set MeasureTheory
-
-/-- P0069 page 11 display 3.3 and page 12, the elementary local sampling step.
-For a real C1 function, its value at any point of a unit interval is at most
-its integral plus the integral of the absolute derivative on that interval.
-This is a supporting calculus inequality, not an extra printed paper claim.
-Mathlib supplies the integral mean value theorem and the fundamental theorem. -/
-theorem unit_interval_sampling (f g : ℝ → ℝ)
-    (hf : ∀ u, HasDerivAt f (g u) u) (hg : Continuous g)
-    (a t : ℝ) (ht : t ∈ Icc a (a + 1)) :
-    f t ≤ (∫ u in a..(a + 1), f u) + (∫ u in a..(a + 1), |g u|) := by
-  have hab : a ≤ a + 1 := by linarith
-  have hfc : Continuous f := continuous_iff_continuousAt.mpr (fun u => (hf u).continuousAt)
-  obtain ⟨c, hc, heq⟩ := exists_eq_const_mul_intervalIntegral_of_nonneg
-    (μ := volume) hfc.continuousOn
-    (intervalIntegrable_const (a := a) (b := a + 1) (c := (1 : ℝ)))
-    (by intros; norm_num)
-  have hc' : c ∈ Icc a (a + 1) := by simpa only [uIcc_of_le hab] using hc
-  have heq' : (∫ u in a..(a + 1), f u) = f c := by
-    simpa using heq
-  have hsub : uIoc c t ⊆ uIoc a (a + 1) := by
-    rw [uIoc_of_le hab]
-    exact Ioc_subset_Ioc (le_min hc'.1 ht.1) (max_le hc'.2 ht.2)
-  have hid : (∫ u in c..t, g u) = f t - f c :=
-    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u hu => hf u) (hg.intervalIntegrable _ _)
-  have habs : 0 ≤ ∫ u in a..(a + 1), |g u| :=
-    intervalIntegral.integral_nonneg hab (fun u hu => abs_nonneg _)
-  have hd : |f t - f c| ≤ ∫ u in a..(a + 1), |g u| := by
-    rw [← hid]
-    calc
-      _ ≤ |(∫ u in c..t, |g u|)| := by
-        simpa only [Real.norm_eq_abs] using
-          (intervalIntegral.norm_integral_le_abs_integral_norm (f := g) (a := c) (b := t))
-      _ ≤ |(∫ u in a..(a + 1), |g u|)| :=
-        intervalIntegral.abs_integral_mono_interval hsub
-          (Filter.Eventually.of_forall (fun u => abs_nonneg (g u))) (hg.abs.intervalIntegrable _ _)
-      _ = _ := abs_of_nonneg habs
-  rw [heq']
-  linarith [le_abs_self (f t - f c)]
-/-- P0069 page 11 display 3.3, the finite sampling passage for one character fiber.
-Unit intervals starting at distinct one-spaced times are disjoint. Summing the
-local calculus estimate therefore costs only the integral over the containing interval.
-This is an elementary supporting statement with no cited analytic hypothesis. -/
-theorem finite_spaced_sampling {ι : Type*} (S : Finset ι) (t : ι → ℝ)
-    (f g : ℝ → ℝ) (hf : ∀ u, HasDerivAt f (g u) u) (hg : Continuous g)
-    (hf0 : ∀ u, 0 ≤ f u)
-    (hspace : ∀ r ∈ S, ∀ s ∈ S, r ≠ s → 1 ≤ |t r - t s|)
-    {T : ℝ} (hT : 0 ≤ T) (ht : ∀ r ∈ S, |t r| ≤ T) :
-    (∑ r ∈ S, f (t r)) ≤ ∫ u in (-T)..(T + 1), f u + |g u| := by
-  classical
-  let W : ℝ → ℝ := fun u => f u + |g u|
-  have hfc : Continuous f := continuous_iff_continuousAt.mpr (fun u => (hf u).continuousAt)
-  have hW : Continuous W := hfc.add hg.abs
-  have hW0 (u : ℝ) : 0 ≤ W u := add_nonneg (hf0 u) (abs_nonneg _)
-  have hpair : Set.Pairwise (S : Set ι)
-      (fun r s => Disjoint (Ioc (t r) (t r + 1)) (Ioc (t s) (t s + 1))) := by
-    intro r hr s hs hne
-    have hd := hspace r hr s hs hne
-    rcases le_total (t r) (t s) with h | h
-    · apply Ioc_disjoint_Ioc_of_le
-      rw [abs_of_nonpos (sub_nonpos.mpr h)] at hd
-      linarith
-    · apply Disjoint.symm
-      apply Ioc_disjoint_Ioc_of_le
-      rw [abs_of_nonneg (sub_nonneg.mpr h)] at hd
-      linarith
-  have hsub : (⋃ r ∈ S, Ioc (t r) (t r + 1)) ⊆ Ioc (-T) (T + 1) := by
-    intro u hu
-    obtain ⟨r, hr, hu⟩ := mem_iUnion₂.mp hu
-    have hh := abs_le.mp (ht r hr)
-    exact ⟨lt_of_le_of_lt hh.1 hu.1, by linarith [hu.2]⟩
-  calc
-    _ ≤ ∑ r ∈ S, ∫ u in (t r)..(t r + 1), W u := by
-      apply Finset.sum_le_sum
-      intro r hr
-      have h := unit_interval_sampling f g hf hg (t r) (t r) ⟨le_rfl, by linarith⟩
-      simpa only [W, intervalIntegral.integral_add
-        (hfc.intervalIntegrable _ _) (hg.abs.intervalIntegrable _ _)] using h
-    _ = ∑ r ∈ S, ∫ u in Ioc (t r) (t r + 1), W u := by
-      apply Finset.sum_congr rfl
-      intro r hr
-      exact intervalIntegral.integral_of_le (by linarith)
-    _ = ∫ u in ⋃ r ∈ S, Ioc (t r) (t r + 1), W u :=
-      (integral_biUnion_finset S (fun r hr => measurableSet_Ioc) hpair
-        (fun r hr => (hW.intervalIntegrable _ _).1)).symm
-    _ ≤ ∫ u in Ioc (-T) (T + 1), W u :=
-      setIntegral_mono_set (hW.intervalIntegrable _ _).1
-        (Filter.Eventually.of_forall hW0) hsub.eventuallySubset
-    _ = _ := (intervalIntegral.integral_of_le (by linarith)).symm
-/-- P0069 page 11 display 3.3, the elementary sampling passage for all characters.
-Apply the proved disjoint interval estimate separately to each character fiber and
-sum by Finset.sum_fiberwise. The containing interval is independent of the character.
-No analytic mean value estimate is supplied by this statement. -/
-theorem character_spaced_sampling {q : ℕ}
-    (S : Finset (ℝ × DirichletCharacter ℂ q))
-    (f g : DirichletCharacter ℂ q → ℝ → ℝ)
-    (hf : ∀ χ u, HasDerivAt (f χ) (g χ u) u) (hg : ∀ χ, Continuous (g χ))
-    (hf0 : ∀ χ u, 0 ≤ f χ u) (hspace : Thm4.WellSpaced S)
-    {T : ℝ} (hT : 0 ≤ T) (ht : ∀ p ∈ S, |p.1| ≤ T) :
-    (∑ p ∈ S, f p.2 p.1) ≤
-      ∑ χ : DirichletCharacter ℂ q, ∫ u in (-T)..(T + 1), f χ u + |g χ u| := by
-  classical
-  rw [← Finset.sum_fiberwise S Prod.snd (fun p => f p.2 p.1)]
-  apply Finset.sum_le_sum
-  intro χ hχ
-  let P := S.filter (fun p => p.2 = χ)
-  have hsub : P ⊆ S := Finset.filter_subset _ _
-  have heq (p) (hp : p ∈ P) : p.2 = χ := (Finset.mem_filter.mp hp).2
-  have hPspace : ∀ p ∈ P, ∀ r ∈ P, p ≠ r → 1 ≤ |p.1 - r.1| := by
-    intro p hp r hr hne
-    exact hspace p (hsub hp) r (hsub hr) hne ((heq p hp).trans (heq r hr).symm)
-  have hs := finite_spaced_sampling P Prod.fst (f χ) (g χ) (hf χ) (hg χ) (hf0 χ)
-    hPspace hT (fun p hp => ht p (hsub hp))
-  calc
-    _ = ∑ p ∈ P, f χ p.1 := Finset.sum_congr rfl (fun p hp => by rw [heq p hp])
-    _ ≤ _ := hs
-end LeanLab.BHP1997.Decomp513a
