@@ -54,7 +54,38 @@ theorem leaf_four_rough_low_coarse {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 
               (fun m : ℕ => RoughAbove ε x m),
             ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q)‖ ≤
               C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  intro A hA
+  obtain ⟨C, hC⟩ := leaf_four_rough_siegel_walfisz hε hε8 A hA
+  refine ⟨max C 1, fun x hx q hq hqA χ hχ t ht => ?_⟩
+  have hCx : C ≤ x := (le_max_left C 1).trans hx
+  have hx1 : (1 : ℝ) ≤ x := (le_max_right C 1).trans hx
+  have hxpos : 0 < x := by linarith
+  have hYpos : 0 < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos hxpos _
+  have ht2 : t ≤ 2 * x ^ (11 / 20 + ε) := by linarith
+  have hoff : ∀ S : Finset ℕ,
+      ∑ m ∈ S.filter (fun m : ℕ => ¬ RoughAbove ε x m),
+        ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) = 0 := by
+    intro S
+    refine Finset.sum_eq_zero fun m hm => ?_
+    have h2 : ¬ RoughAbove ε x m := (Finset.mem_filter.mp hm).2
+    have hz : lowerFourTerms ε x m = 0 := by
+      by_contra hne
+      exact h2 (lowerFourTerms_support hne)
+    simp [hz]
+  have hsplit := Finset.sum_filter_add_sum_filter_not
+      (s := (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t))
+      (p := fun m : ℕ => RoughAbove ε x m)
+      (f := fun m : ℕ => ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q))
+  rw [hoff ((rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t)), add_zero] at hsplit
+  rw [hsplit]
+  have hl : 0 ≤ Real.log x ^ (-A) := Real.rpow_nonneg (Real.log_nonneg hx1) _
+  have hs : 0 ≤ x ^ (11 / 20 + ε) * Real.log x ^ (-A) := mul_nonneg hYpos.le hl
+  refine (hC x hCx q hq hqA χ hχ t ht2).trans ?_
+  calc C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)
+      = C * (x ^ (11 / 20 + ε) * Real.log x ^ (-A)) := by ring
+    _ ≤ max C 1 * (x ^ (11 / 20 + ε) * Real.log x ^ (-A)) :=
+        mul_le_mul_of_nonneg_right (le_max_left C 1) hs
+    _ = max C 1 * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by ring
 
 /-- LEAF: step 2 of the split, the upper half of the right interval. The same four-prime sum
 against a non-principal character, over the integers of the right interval strictly above the
@@ -72,7 +103,104 @@ theorem leaf_four_rough_tail_coarse {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 /
               (fun m : ℕ => RoughAbove ε x m),
             ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q)‖ ≤
               C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  intro A hA
+  obtain ⟨C, hC⟩ := leaf_four_rough_siegel_walfisz hε hε8 A hA
+  refine ⟨2 * max C 1, fun x hx q hq hqA χ hχ t => ?_⟩
+  have hCM : C ≤ max C 1 := le_max_left C 1
+  have hM1 : (1 : ℝ) ≤ max C 1 := le_max_right C 1
+  have hCx : C ≤ x := (hCM.trans (by linarith)).trans hx
+  have hx1 : (1 : ℝ) ≤ x := (hM1.trans (by linarith)).trans hx
+  have hxpos : 0 < x := by linarith
+  have hYpos : 0 < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos hxpos _
+  have hoff : ∀ S : Finset ℕ,
+      ∑ m ∈ S.filter (fun m : ℕ => ¬ RoughAbove ε x m),
+        ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) = 0 := by
+    intro S
+    refine Finset.sum_eq_zero fun m hm => ?_
+    have h2 : ¬ RoughAbove ε x m := (Finset.mem_filter.mp hm).2
+    have hz : lowerFourTerms ε x m = 0 := by
+      by_contra hne
+      exact h2 (lowerFourTerms_support hne)
+    simp [hz]
+  set Y := x ^ (11 / 20 + ε) with hYdef
+  set t' := min t (2 * Y) with ht'def
+  have ht'2 : t' ≤ 2 * Y := min_le_right _ _
+  have hY2 : 3 / 2 * Y ≤ 2 * Y := by linarith
+  -- the strip is unchanged when `t` is clamped to the right end `2 Y` of the interval
+  have hseteq : (rightInterval ε x).filter
+        (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t) =
+      (rightInterval ε x).filter
+        (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t') := by
+    refine Finset.filter_congr fun m hm => ?_
+    have hm2 : (m : ℝ) ≤ 2 * Y := by
+      have h1 : m ≤ ⌊2 * Y⌋₊ := (Finset.mem_Ioc.mp (show m ∈ Finset.Ioc ⌊Y⌋₊ ⌊2 * Y⌋₊ from hm)).2
+      exact (by exact_mod_cast h1 : (m : ℝ) ≤ ((⌊2 * Y⌋₊ : ℕ) : ℝ)).trans
+        (Nat.floor_le (by linarith))
+    rw [ht'def, le_min_iff]
+    constructor
+    · rintro ⟨h1, h2⟩
+      exact ⟨h1, h2, hm2⟩
+    · rintro ⟨h1, h2, -⟩
+      exact ⟨h1, h2⟩
+  -- the cut of the truncated interval at the midpoint
+  have hkey :
+      ∑ m ∈ (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t'),
+          ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) =
+        ∑ m ∈ (rightInterval ε x).filter
+              (fun m : ℕ => (m : ℝ) ≤ min t' (3 / 2 * Y)),
+            ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) +
+          ∑ m ∈ (rightInterval ε x).filter
+              (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t'),
+            ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) := by
+    have hset : ((rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t')).filter
+          (fun m : ℕ => ¬ (m : ℝ) ≤ 3 / 2 * Y) =
+        (rightInterval ε x).filter
+          (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t') := by
+      ext m
+      simp only [Finset.mem_filter, not_le]
+      tauto
+    rw [← Finset.sum_filter_add_sum_filter_not
+        (s := (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t'))
+        (p := fun m : ℕ => (m : ℝ) ≤ 3 / 2 * Y),
+      prefix_filter_min (rightInterval ε x) t' (3 / 2 * Y), hset]
+  -- leaf 3 removes the integers without a large prime factor
+  have hstrip : ∑ m ∈ ((rightInterval ε x).filter
+              (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t')).filter
+              (fun m : ℕ => RoughAbove ε x m),
+            ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) =
+        ∑ m ∈ (rightInterval ε x).filter
+              (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t'),
+            ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) := by
+    have h := Finset.sum_filter_add_sum_filter_not
+      (s := (rightInterval ε x).filter
+        (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t'))
+      (p := fun m : ℕ => RoughAbove ε x m)
+      (f := fun m : ℕ => ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q))
+    rw [hoff _, add_zero] at h
+    exact h
+  have hdiff : ∑ m ∈ (rightInterval ε x).filter
+              (fun m : ℕ => 3 / 2 * Y < (m : ℝ) ∧ (m : ℝ) ≤ t'),
+            ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) =
+        ∑ m ∈ (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t'),
+          ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) -
+          ∑ m ∈ (rightInterval ε x).filter
+              (fun m : ℕ => (m : ℝ) ≤ min t' (3 / 2 * Y)),
+            ((lowerFourTerms ε x m : ℝ) : ℂ) * χ (m : ZMod q) := by
+    rw [hkey]
+    ring
+  rw [hseteq, hstrip, hdiff]
+  refine le_trans (norm_sub_le _ _) ?_
+  have h1 := hC x hCx q hq hqA χ hχ t' ht'2
+  have h2 := hC x hCx q hq hqA χ hχ (min t' (3 / 2 * Y))
+    ((min_le_right _ _).trans hY2)
+  refine le_trans (add_le_add h1 h2) ?_
+  have hl : 0 ≤ Real.log x ^ (-A) := Real.rpow_nonneg (Real.log_nonneg hx1) _
+  have hs : 0 ≤ Y * Real.log x ^ (-A) := mul_nonneg hYpos.le hl
+  calc C * Y * Real.log x ^ (-A) + C * Y * Real.log x ^ (-A)
+      = (2 * C) * (Y * Real.log x ^ (-A)) := by ring
+    _ ≤ (2 * max C 1) * (Y * Real.log x ^ (-A)) :=
+        mul_le_mul_of_nonneg_right (by linarith) hs
+    _ = 2 * max C 1 * Y * Real.log x ^ (-A) := by ring
 
 /-- LEAF: step 3 of the split, the integers with no large prime factor contribute nothing. For
 every finite set of integers, the part of the sum that keeps no prime factor at or above the
