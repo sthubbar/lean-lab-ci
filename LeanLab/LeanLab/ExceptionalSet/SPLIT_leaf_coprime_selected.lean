@@ -81,7 +81,27 @@ truncation value empties the finite range and gives the zero contribution, and e
 is a quotient of naturals divided by positive totients. -/
 theorem leaf_coprime_divisor_error_nonneg (r : ℕ) (P : ℝ) (m : ℤ) :
     0 ≤ divisorError r P m := by
-  sorry
+  have hsum : 0 ≤ ∑ q ∈ (Icc 1 ⌊P⌋₊).filter (fun q => r ∣ q),
+      (q : ℝ) / ((q.totient : ℝ) * ((q / Int.gcd m q).totient : ℝ)) :=
+    Finset.sum_nonneg (fun q _ => by positivity)
+  have htsum : 0 ≤ ∑' q : ℕ, if P < (q : ℝ) ∧ r ∣ q then
+      1 / ((q.totient : ℝ) * ((q / Int.gcd m q).totient : ℝ)) else 0 :=
+    tsum_nonneg (fun q => by split_ifs <;> positivity)
+  unfold divisorError
+  rcases lt_or_ge 0 P with hP | hP
+  · exact add_nonneg (mul_nonneg (div_nonneg (by positivity) hP.le) hsum)
+      (mul_nonneg (by positivity) htsum)
+  · have hzero : ⌊P⌋₊ = 0 := Nat.floor_eq_zero.mpr (by linarith)
+    have hempty : (Icc 1 ⌊P⌋₊).filter (fun q => r ∣ q) = ∅ := by
+      rw [hzero]
+      have hI : (Icc 1 (0 : ℕ)) = ∅ := by
+        apply Finset.eq_empty_iff_forall_notMem.mpr
+        intro q hq
+        simp only [Finset.mem_Icc] at hq
+        omega
+      rw [hI, Finset.filter_empty]
+    rw [hempty, Finset.sum_empty, mul_zero, zero_add]
+    exact mul_nonneg (by positivity) htsum
 
 /-- Assembly of `leaf_coprime_selected`: the two frequency halves supply the lower bound at
 whichever even adjacent integer the parity condition selects, and the nonnegativity of the

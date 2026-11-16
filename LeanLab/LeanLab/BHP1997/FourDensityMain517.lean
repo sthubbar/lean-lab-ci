@@ -20,18 +20,19 @@ theorem, cites the partial summation in the outer primes and names the one remai
   `FourDensityMain517a.lean` from the prime number theorem, with the jumps of the E4 indicator
   counted in `FourDensityMain517b.lean`. The resulting sum over integer quadruples is
   rewritten in `four_integer_riemann` as a Riemann sum of the integrand of
-  `lowerFourDensityAt` on the grid of exponents. One leaf is left:
-  `leaf_four_exponent_riemann`, that this Riemann sum is the integral; it uses no prime number
-  theorem.
+  `lowerFourDensityAt` on the grid of exponents. The sealed leaf
+  `leaf_four_exponent_riemann` is assembled from the four coordinate quadrature leaves in
+  `FourExponentQuadrature517`. They use no prime number theorem. All four coordinate estimates are proved.
 
 `four_density_main` has exactly the statement of `leaf_four_density_main` of
-`LowerPrincipal517f.lean` and is proved from this one leaf.
+`LowerPrincipal517f.lean`. It is proved from the four proved coordinate quadrature estimates.
 
-No new definition. AI wrote the Lean code. Goldbach is open.
+No new definition in this file. AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp514a
 import LeanLab.BHP1997.RoughFamily514
 import LeanLab.BHP1997.FourDensityMain517a
+import LeanLab.BHP1997.FourExponentQuadrature517
 
 namespace LeanLab.BHP1997.LowerShortC165
 open Classical Complex Decomp132 DecompC165b DecompC165d
@@ -608,15 +609,32 @@ theorem leaf_four_exponent_riemann (ω : ℝ → ℝ)
           (1 / ((i.1 : ℝ) * Real.log (scaleZ ε x)) * (1 / ((i.2.1 : ℝ) * Real.log (scaleZ ε x))) *
             (1 / ((i.2.2.1 : ℝ) * Real.log (scaleZ ε x))) * (1 / ((i.2.2.2 : ℝ) * Real.log (scaleZ ε x))))) -
         lowerFourDensityAt ω ε (Real.log (m : ℝ) / Real.log (scaleZ ε x))| ≤ C * Real.log x ^ (-A) := by
-  sorry
+  intro A hA
+  obtain ⟨C0, hC0, hp⟩ := four_exponent_quadrature_power ω hω hz hε hε8
+  obtain ⟨X, hX2, hX⟩ := four_exponent_power_absorbs_log A (1/100) C0 (by norm_num)
+  refine ⟨max C0 X, fun x hx m hm1 hm2 => ?_⟩
+  have hbound := (hp x ((le_max_left C0 X).trans hx) m hm1 hm2).trans
+    (hX x ((le_max_right C0 X).trans hx))
+  have hx2 : 2 ≤ x := hX2.trans ((le_max_right C0 X).trans hx)
+  have hfinal := hbound.trans (le_mul_of_one_le_left
+    (Real.rpow_nonneg (Real.log_nonneg (by linarith : (1 : ℝ) ≤ x)) (-A))
+    (by linarith [le_max_left C0 X] : (1 : ℝ) ≤ max C0 X))
+  convert hfinal using 2
+  congr 1
+  unfold fourExponentMixed
+  dsimp only
+  refine Finset.sum_congr rfl fun i hi => ?_
+  have hr := (Finset.mem_filter.mp hi).2.2.2.2
+  simp only [fourExponentKernel, if_pos hr]
+
 
 /-- P0069 page 51, display 5.17, the E4 sum at one point `m` of J after the prime number
 theorem has been applied in each outer variable: the sum over the integer quadruples
 `n1 > n2 > n3 > n4` with exponents in E4, each weighted by its density `1 / log n`, is
 `1 / log Z` times the Riemann sum of `leaf_four_exponent_riemann`, term by term, since
 `log n = β log Z` and `log (m / (n1 n2 n3 n4)) = (s - β1 - β2 - β3 - β4) log Z`; hence it is
-`(1 / log Z)` times the E4 integral of page 51 with `1` replaced by `s`. CONDITIONAL ON
-`leaf_four_exponent_riemann`. -/
+`(1 / log Z)` times the E4 integral of page 51 with `1` replaced by `s`. The Riemann sum input
+`leaf_four_exponent_riemann` is proved in this file. -/
 theorem four_integer_riemann (ω : ℝ → ℝ)
     (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
     (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
@@ -756,7 +774,7 @@ the outer primes `p1`, `p2`, `p3`, `p4` of the E4 sum reached from display 5.15,
 `(1 / log Z)` times the E4 integral of page 51 with `1` replaced by `s`, at `m = Z^s`, with
 every log power saved. Partial summation in `p1`, `p2`, `p3`, `p4` is `four_transfer_p1` to
 `four_transfer_p4` of `FourDensityMain517a.lean`, proved from the prime number theorem.
-CONDITIONAL ON `leaf_four_exponent_riemann`. -/
+The Riemann sum input `leaf_four_exponent_riemann` is proved in this file. -/
 theorem four_quad_density_pointwise (ω : ℝ → ℝ)
     (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
     (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
@@ -859,8 +877,8 @@ applied to the outer primes `p1`, `p2`, `p3`, `p4` of the E4 sum reached from di
 statement of `leaf_four_density_main`. With the rough cofactor `n5 = m / (p1 p2 p3 p4)`
 replaced by its Buchstab density at level `p4`, the sum over prime quadruples with exponents in
 E4 has local density the E4 integral of page 51 with `1` replaced by `s`, over `log Z`, at
-`m = Z^s`, with every log power saved on every prefix of J. CONDITIONAL ON
-`leaf_four_exponent_riemann`. -/
+`m = Z^s`, with every log power saved on every prefix of J. The Riemann sum input
+`leaf_four_exponent_riemann` is proved in this file. -/
 theorem four_density_main (ω : ℝ → ℝ)
     (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
     (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
@@ -950,6 +968,7 @@ theorem four_density_main (ω : ℝ → ℝ)
   linarith
 
 #print axioms four_cofactor_riemann
+#print axioms leaf_four_exponent_riemann
 #print axioms four_integer_riemann
 #print axioms four_quad_density_pointwise
 #print axioms four_density_main
