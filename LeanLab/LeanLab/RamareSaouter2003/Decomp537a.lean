@@ -1014,49 +1014,6 @@ theorem norm_of_boundary_components (z : ℂ)
   rw [Complex.normSq_apply] at hs
   nlinarith [norm_nonneg z]
 
-/-- LEAF. Backlund p. 368, the k equal to two Euler summation remainder.
-K is exactly zeta minus the finite sum H. Its modulus is below 0.281.
-This is the remainder estimate from display 12, not a strip growth bound. -/
-theorem boundaryK (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
-    ‖riemannZeta ((σ : ℂ) + 50 * I) - boundaryH σ‖ ≤ 0.281 := by
-  sorry
-
-/-- Backlund pp. 367 and 368, the explicit height-50 calculation.
-CONDITIONAL ON the finite H enclosure and the Euler remainder bound. -/
-theorem boundary_fifty (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
-    ‖riemannZeta ((σ : ℂ) + 50 * I)‖ ≤ 2.243 := by
-  obtain ⟨hr, hi⟩ := boundaryH_components σ hσ
-  have hh := norm_of_boundary_components (boundaryH σ) hr hi
-  have hk := boundaryK σ hσ
-  have h := norm_add_le (boundaryH σ)
-    (riemannZeta ((σ : ℂ) + 50 * I) - boundaryH σ)
-  rw [add_sub_cancel] at h
-  linarith
-
-/-- Backlund p. 368, a rational lower bound sufficient for display 73. -/
-theorem three_lt_log_fifty : (3 : ℝ) < Real.log 50 := by
-  apply (Real.lt_log_iff_exp_lt (by norm_num)).mpr
-  have he : Real.exp 1 < 3 := lt_trans Real.exp_one_lt_d9 (by norm_num)
-  have hp := pow_lt_pow_left₀ he (Real.exp_pos 1).le (by decide : (3 : ℕ) ≠ 0)
-  rw [← Real.exp_nat_mul] at hp
-  norm_num at hp
-  linarith
-
-/-- Backlund p. 367, display 73, its scalar threshold exceeds 2.243. -/
-theorem boundary73_budget (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
-    (2.243 : ℝ) ≤ 0.9964 * ((25 : ℝ) / π) ^ ((1 - σ) / 2) * Real.log 50 := by
-  have hb : 1 ≤ (25 : ℝ) / π := by
-    apply (one_le_div Real.pi_pos).mpr
-    linarith [Real.pi_lt_four]
-  have hp := Real.one_le_rpow hb (show 0 ≤ (1 - σ) / 2 by linarith [hσ.2])
-  nlinarith [three_lt_log_fifty]
-
-/-- Backlund display 73, the bottom edge before the strip principle.
-CONDITIONAL ON the finite H enclosure and Euler remainder bound. -/
-theorem boundary73 (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
-    ‖riemannZeta ((σ : ℂ) + 50 * I)‖ ≤
-      0.9964 * ((25 : ℝ) / π) ^ ((1 - σ) / 2) * Real.log 50 :=
-  (boundary_fifty σ hσ).trans (boundary73_budget σ hσ)
 
 end LeanLab.RamareSaouter2003.Decomp537a
 
@@ -1530,6 +1487,1457 @@ private theorem em_q_zeta537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ} (hs : 0 < s.re) 
   rw [hker, em_one_Ioi537 N hN hs]
   push_cast
   ring
+
+private theorem hasDerivAt_fract_comp537 (u w : ℝ → ℝ)
+    (hw' : ∀ t : ℝ, HasDerivAt w (u t) t) (x : ℝ) :
+    HasDerivWithinAt (fun y : ℝ => ((w (Int.fract y) : ℝ) : ℂ))
+      ((u (Int.fract x) : ℝ) : ℂ) (Set.Ioi x) x := by
+  have h := (hw' (Int.fract x)).comp_hasDerivWithinAt x (hasDerivWithinAt_fract537 x)
+  rw [mul_one] at h
+  exact h.ofReal_comp
+
+private theorem ibp_interval_gen537 (a b : ℝ) (ha : 0 < a) (hab : a ≤ b) {s : ℂ} (k : ℂ)
+    (hk : 1 < (s + k).re) (u w : ℝ → ℝ)
+    (hu_c : Continuous fun x : ℝ => u (Int.fract x))
+    (hw_c : Continuous fun x : ℝ => w (Int.fract x))
+    (hw' : ∀ t : ℝ, HasDerivAt w (u t) t) :
+    ∫ x in a..b, ((u (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k))
+      = ((w (Int.fract b) : ℝ) : ℂ) * (b : ℂ) ^ (-(s + k))
+        - ((w (Int.fract a) : ℝ) : ℂ) * (a : ℂ) ^ (-(s + k))
+        + (s + k) * ∫ x in a..b, ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k + 1)) := by
+  have hne : (-(s + k) : ℂ) ≠ 0 := by
+    intro h
+    have h0 : (-(s + k) : ℂ).re = 0 := by rw [h]; simp
+    simp only [Complex.neg_re] at h0
+    linarith
+  have hpos : ∀ x ∈ Set.uIcc a b, x ≠ 0 := by
+    intro x hx
+    rcases Set.mem_uIcc.mp hx with ⟨h1, _⟩ | ⟨_, h2⟩
+    · linarith
+    · linarith
+  have hu : ContinuousOn (fun y : ℝ => ((w (Int.fract y) : ℝ) : ℂ)) (Set.uIcc a b) :=
+    (Complex.continuous_ofReal.comp hw_c).continuousOn
+  have hv : ContinuousOn (fun y : ℝ => (y : ℂ) ^ (-(s + k))) (Set.uIcc a b) := fun x hx =>
+    (Complex.continuousAt_ofReal_cpow_const x _ (Or.inr (hpos x hx))).continuousWithinAt
+  have huu' : ∀ x ∈ Set.Ioo (min a b) (max a b),
+      HasDerivWithinAt (fun y : ℝ => ((w (Int.fract y) : ℝ) : ℂ))
+        ((u (Int.fract x) : ℝ) : ℂ) (Set.Ioi x) x := fun x _ =>
+    hasDerivAt_fract_comp537 u w hw' x
+  have hvv' : ∀ x ∈ Set.Ioo (min a b) (max a b),
+      HasDerivWithinAt (fun y : ℝ => (y : ℂ) ^ (-(s + k)))
+        ((-(s + k)) * (x : ℂ) ^ (-(s + k + 1))) (Set.Ioi x) x := by
+    intro x hx
+    rw [min_eq_left hab, max_eq_right hab] at hx
+    have hx0 : x ≠ 0 := by linarith [hx.1]
+    have hd : HasDerivAt (fun y : ℝ => (y : ℂ) ^ (-(s + k)))
+        ((-(s + k)) * (x : ℂ) ^ (-(s + k) - 1)) x :=
+      hasDerivAt_ofReal_cpow_const (x := x) (r := -(s + k)) hx0 hne
+    have hd2 : HasDerivWithinAt (fun y : ℝ => (y : ℂ) ^ (-(s + k)))
+        ((-(s + k)) * (x : ℂ) ^ (-(s + k) - 1)) (Set.Ioi x) x := hd.hasDerivWithinAt
+    convert hd2 using 2
+    ring
+  have hu' : IntervalIntegrable (fun x : ℝ => ((u (Int.fract x) : ℝ) : ℂ)) volume a b :=
+    (Complex.continuous_ofReal.comp hu_c).continuousOn.intervalIntegrable
+  have hv' : IntervalIntegrable (fun y : ℝ => (-(s + k)) * (y : ℂ) ^ (-(s + k + 1)))
+      volume a b := by
+    refine ContinuousOn.intervalIntegrable
+      (u := fun y : ℝ => (-(s + k)) * (y : ℂ) ^ (-(s + k + 1))) ?_
+    intro x hx
+    exact ((Complex.continuousAt_ofReal_cpow_const x _ (Or.inr (hpos x hx))).const_mul
+      (-(s + k))).continuousWithinAt
+  have key := intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDeriv_right
+    hu hv huu' hvv' hu' hv'
+  have hleft : ∫ x in a..b,
+      ((w (Int.fract x) : ℝ) : ℂ) * ((-(s + k)) * (x : ℂ) ^ (-(s + k + 1)))
+      = -(s + k) * ∫ x in a..b,
+          ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k + 1)) := by
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr (fun x _ => ?_)
+    ring
+  rw [hleft] at key
+  linear_combination key
+
+private theorem integrable_fract_cpow537 (N : ℕ) (hN : 1 ≤ N) (u : ℝ → ℝ) (c : ℝ) (hc : 0 ≤ c)
+    {s : ℂ} (k : ℂ) (hk : 1 < (s + k).re)
+    (hu_c : Continuous fun x : ℝ => u (Int.fract x))
+    (hu_b : ∀ x : ℝ, |u (Int.fract x)| ≤ c) :
+    IntegrableOn (fun x : ℝ => ((u (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k)))
+      (Set.Ioi (N : ℝ)) := by
+  have hNR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have hcp : IntegrableOn (fun x : ℝ => (x : ℂ) ^ (-(s + k))) (Set.Ioi (N : ℝ)) := by
+    refine integrableOn_Ioi_cpow_of_lt ?_ hNR
+    simp only [Complex.neg_re]
+    linarith
+  have hmeas : AEStronglyMeasurable (fun x : ℝ => ((u (Int.fract x) : ℝ) : ℂ))
+      (volume.restrict (Set.Ioi (N : ℝ))) :=
+    (Complex.continuous_ofReal.comp hu_c).measurable.aestronglyMeasurable
+  have hbdd : ∀ᵐ x ∂(volume.restrict (Set.Ioi (N : ℝ))),
+      ‖((u (Int.fract x) : ℝ) : ℂ)‖ ≤ c := by
+    filter_upwards with x
+    rw [Complex.norm_real, Real.norm_eq_abs]
+    exact hu_b x
+  exact hcp.bdd_mul hmeas hbdd
+
+private theorem ibp_Ioi_gen537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ}
+    (k : ℕ) (hk : 1 < (s + (k : ℂ)).re) (u w : ℝ → ℝ)
+    (hu_c : Continuous fun x : ℝ => u (Int.fract x))
+    (hw_c : Continuous fun x : ℝ => w (Int.fract x))
+    (hw' : ∀ t : ℝ, HasDerivAt w (u t) t)
+    (hu_int : IntegrableOn (fun x : ℝ => ((u (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + (k : ℂ))))
+      (Set.Ioi (N : ℝ)))
+    (hw_int : IntegrableOn (fun x : ℝ =>
+        ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + ((k + 1 : ℕ) : ℂ))))
+      (Set.Ioi (N : ℝ))) :
+    (∫ x in Set.Ioi (N : ℝ), ((u (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + (k : ℂ))))
+      = -(((w 0 : ℝ) : ℂ)) * (N : ℂ) ^ (-(s + (k : ℂ)))
+        + (s + (k : ℂ)) * (∫ x in Set.Ioi (N : ℝ),
+            ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + ((k + 1 : ℕ) : ℂ)))) := by
+  rw [show (-(s + ((k + 1 : ℕ) : ℂ)) : ℂ) = -(s + (k : ℂ) + 1) by push_cast; ring] at hw_int ⊢
+  have hlim_u := intervalIntegral_tendsto_integral_Ioi (μ := volume) (l := Filter.atTop)
+    (b := fun n : ℕ => ((n : ℝ)))
+    (f := fun x : ℝ => ((u (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k)))
+    ((N : ℝ)) hu_int tendsto_natCast_atTop_atTop
+  have hlim_w := intervalIntegral_tendsto_integral_Ioi (μ := volume) (l := Filter.atTop)
+    (b := fun n : ℕ => ((n : ℝ)))
+    (f := fun x : ℝ => ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k + 1)))
+    ((N : ℝ)) hw_int tendsto_natCast_atTop_atTop
+  have hM : Tendsto (fun M : ℕ => ((w (Int.fract ((M : ℝ))) : ℝ) : ℂ) *
+      (((M : ℝ) : ℂ)) ^ (-(s + k))) Filter.atTop (𝓝 0) := by
+    have hbase : Tendsto (fun M : ℕ => (((M : ℝ)) : ℂ) ^ (-(s + k))) Filter.atTop (𝓝 0) := by
+      have hk1 : (1 : ℝ) < (s + k + 1).re := by
+        have e : (s + k + 1).re = (s + k).re + 1 := by simp
+        rw [e]; linarith
+      have h := Complex.cpow_tendsto (s := s + k + 1) hk1
+      refine h.congr (fun M => ?_)
+      push_cast
+      congr 1
+      ring
+    have h0 : ∀ M : ℕ, (Int.fract ((M : ℝ))) = 0 := fun M => Int.fract_natCast M
+    have := hbase.const_mul (((w 0 : ℝ) : ℂ))
+    simpa only [h0, mul_zero] using this
+  have hlim_c : Tendsto (fun M : ℕ =>
+      ((w (Int.fract ((M : ℝ))) : ℝ) : ℂ) * (((M : ℝ) : ℂ)) ^ (-(s + k))
+        - ((w (Int.fract ((N : ℝ))) : ℝ) : ℂ) * ((N : ℂ)) ^ (-(s + k))
+        + (s + k) * (∫ x in (N : ℝ)..((M : ℝ)),
+            ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k + 1))))
+      Filter.atTop (𝓝 (0 - ((w (Int.fract ((N : ℝ))) : ℝ) : ℂ) * ((N : ℂ)) ^ (-(s + k))
+        + (s + k) * (∫ x in Set.Ioi (N : ℝ),
+            ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k + 1))))) :=
+    (hM.sub_const _).add (hlim_w.const_mul _)
+  have heq : (fun M : ℕ => ∫ x in (N : ℝ)..((M : ℝ)),
+      ((u (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k)))
+      =ᶠ[Filter.atTop] (fun M : ℕ =>
+      ((w (Int.fract ((M : ℝ))) : ℝ) : ℂ) * (((M : ℝ) : ℂ)) ^ (-(s + k))
+        - ((w (Int.fract ((N : ℝ))) : ℝ) : ℂ) * ((N : ℂ)) ^ (-(s + k))
+        + (s + k) * (∫ x in (N : ℝ)..((M : ℝ)),
+            ((w (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + k + 1)))) := by
+    filter_upwards [Filter.eventually_ge_atTop N] with M hMN
+    exact ibp_interval_gen537 (N : ℝ) (M : ℝ) (by exact_mod_cast hN)
+      (by exact_mod_cast hMN) (k := k) hk u w hu_c hw_c hw'
+  have hfin := tendsto_nhds_unique hlim_u (hlim_c.congr' heq.symm)
+  rw [hfin]
+  simp only [Int.fract_natCast]
+  push_cast
+  ring
+
+/-- `10 ^ (-1/2) ≤ 0.3163`. -/
+private theorem pow10_neg_half_le537 : (10 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ 0.3163 := by
+  have h : (10 : ℝ) ^ (-(1 / 2 : ℝ)) = 1 / Real.sqrt 10 := by
+    rw [Real.rpow_neg (by norm_num), ← Real.sqrt_eq_rpow]
+    norm_num
+  rw [h, div_le_iff₀ (Real.sqrt_pos.mpr (by norm_num))]
+  have h2 : (3.1622 : ℝ) ≤ Real.sqrt 10 := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  nlinarith
+
+/-- `10 ^ (-Re s) ≤ 0.3163` for `Re s ≥ 1/2`. -/
+private theorem pow10_neg_re_le537 {s : ℂ} (hσ : (1 / 2 : ℝ) ≤ s.re) :
+    (10 : ℝ) ^ (-s.re) ≤ 0.3163 := by
+  refine (Real.rpow_le_rpow_of_exponent_le (by norm_num : (1:ℝ) ≤ 10) (by linarith)).trans
+    pow10_neg_half_le537
+
+/-- `‖10 ^ (-(s+k))‖ ≤ 0.3163 · 10 ^ (-k)`. -/
+private theorem norm_pow10_le537 {s : ℂ} (hσ : (1 / 2 : ℝ) ≤ s.re) (k : ℕ) :
+    ‖(10 : ℂ) ^ (-(s + (k : ℂ)))‖ ≤ 0.3163 * (10 : ℝ) ^ (-(k : ℝ)) := by
+  rw [show (10 : ℂ) = ((10 : ℝ) : ℂ) by norm_num]
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0:ℝ) < 10)]
+  have hre : (-(s + (k : ℂ))).re = -(s.re + (k : ℝ)) := by simp
+  rw [hre]
+  have hmono : (10 : ℝ) ^ (-(s.re + (k : ℝ))) ≤ (10 : ℝ) ^ (-((1 / 2 : ℝ) + (k : ℝ))) := by
+    apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+    linarith
+  have hsplit : (10 : ℝ) ^ (-((1 / 2 : ℝ) + (k : ℝ)))
+      = (10 : ℝ) ^ (-(1 / 2 : ℝ)) * (10 : ℝ) ^ (-(k : ℝ)) := by
+    rw [show (-((1 / 2 : ℝ) + (k : ℝ))) = -(1 / 2 : ℝ) + (-(k : ℝ)) by ring,
+      Real.rpow_add (by norm_num)]
+  calc (10 : ℝ) ^ (-(s.re + (k : ℝ)))
+      ≤ (10 : ℝ) ^ (-((1 / 2 : ℝ) + (k : ℝ))) := hmono
+    _ = (10 : ℝ) ^ (-(1 / 2 : ℝ)) * (10 : ℝ) ^ (-(k : ℝ)) := hsplit
+    _ ≤ 0.3163 * (10 : ℝ) ^ (-(k : ℝ)) :=
+        mul_le_mul_of_nonneg_right pow10_neg_half_le537 (Real.rpow_nonneg (by norm_num) _)
+
+private theorem continuous_u2_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 2 / 2 - Int.fract x / 2 + (1/12:ℝ) := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 2 / 2 - y / 2 + (1/12:ℝ)) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 2 / 2 - y / 2 + (1/12:ℝ)) 0 = (fun y : ℝ => y ^ 2 / 2 - y / 2 + (1/12:ℝ)) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u3_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 3 / 6 - Int.fract x ^ 2 / 4 + Int.fract x / 12 := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 3 / 6 - y ^ 2 / 4 + y / 12) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 3 / 6 - y ^ 2 / 4 + y / 12) 0 = (fun y : ℝ => y ^ 3 / 6 - y ^ 2 / 4 + y / 12) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u4_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 4 / 24 - Int.fract x ^ 3 / 12 + Int.fract x ^ 2 / 24 - (1/720:ℝ) := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 4 / 24 - y ^ 3 / 12 + y ^ 2 / 24 - (1/720:ℝ)) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 4 / 24 - y ^ 3 / 12 + y ^ 2 / 24 - (1/720:ℝ)) 0 = (fun y : ℝ => y ^ 4 / 24 - y ^ 3 / 12 + y ^ 2 / 24 - (1/720:ℝ)) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u5_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 5 / 120 - Int.fract x ^ 4 / 48 + Int.fract x ^ 3 / 72 - Int.fract x / 720 := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 5 / 120 - y ^ 4 / 48 + y ^ 3 / 72 - y / 720) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 5 / 120 - y ^ 4 / 48 + y ^ 3 / 72 - y / 720) 0 = (fun y : ℝ => y ^ 5 / 120 - y ^ 4 / 48 + y ^ 3 / 72 - y / 720) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u6_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 6 / 720 - Int.fract x ^ 5 / 240 + Int.fract x ^ 4 / 288 - Int.fract x ^ 2 / 1440 + (1/30240:ℝ) := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 6 / 720 - y ^ 5 / 240 + y ^ 4 / 288 - y ^ 2 / 1440 + (1/30240:ℝ)) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 6 / 720 - y ^ 5 / 240 + y ^ 4 / 288 - y ^ 2 / 1440 + (1/30240:ℝ)) 0 = (fun y : ℝ => y ^ 6 / 720 - y ^ 5 / 240 + y ^ 4 / 288 - y ^ 2 / 1440 + (1/30240:ℝ)) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u7_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 7 / 5040 - Int.fract x ^ 6 / 1440 + Int.fract x ^ 5 / 1440 - Int.fract x ^ 3 / 4320 + Int.fract x / 30240 := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 7 / 5040 - y ^ 6 / 1440 + y ^ 5 / 1440 - y ^ 3 / 4320 + y / 30240) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 7 / 5040 - y ^ 6 / 1440 + y ^ 5 / 1440 - y ^ 3 / 4320 + y / 30240) 0 = (fun y : ℝ => y ^ 7 / 5040 - y ^ 6 / 1440 + y ^ 5 / 1440 - y ^ 3 / 4320 + y / 30240) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u8_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 8 / 40320 - Int.fract x ^ 7 / 10080 + Int.fract x ^ 6 / 8640 - Int.fract x ^ 4 / 17280 + Int.fract x ^ 2 / 60480 - (1/1209600:ℝ) := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 8 / 40320 - y ^ 7 / 10080 + y ^ 6 / 8640 - y ^ 4 / 17280 + y ^ 2 / 60480 - (1/1209600:ℝ)) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 8 / 40320 - y ^ 7 / 10080 + y ^ 6 / 8640 - y ^ 4 / 17280 + y ^ 2 / 60480 - (1/1209600:ℝ)) 0 = (fun y : ℝ => y ^ 8 / 40320 - y ^ 7 / 10080 + y ^ 6 / 8640 - y ^ 4 / 17280 + y ^ 2 / 60480 - (1/1209600:ℝ)) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u9_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 9 / 362880 - Int.fract x ^ 8 / 80640 + Int.fract x ^ 7 / 60480 - Int.fract x ^ 5 / 86400 + Int.fract x ^ 3 / 181440 - Int.fract x / 1209600 := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 9 / 362880 - y ^ 8 / 80640 + y ^ 7 / 60480 - y ^ 5 / 86400 + y ^ 3 / 181440 - y / 1209600) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 9 / 362880 - y ^ 8 / 80640 + y ^ 7 / 60480 - y ^ 5 / 86400 + y ^ 3 / 181440 - y / 1209600) 0 = (fun y : ℝ => y ^ 9 / 362880 - y ^ 8 / 80640 + y ^ 7 / 60480 - y ^ 5 / 86400 + y ^ 3 / 181440 - y / 1209600) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u10_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 10 / 3628800 - Int.fract x ^ 9 / 725760 + Int.fract x ^ 8 / 483840 - Int.fract x ^ 6 / 518400 + Int.fract x ^ 4 / 725760 - Int.fract x ^ 2 / 2419200 + (1/47900160:ℝ) := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 10 / 3628800 - y ^ 9 / 725760 + y ^ 8 / 483840 - y ^ 6 / 518400 + y ^ 4 / 725760 - y ^ 2 / 2419200 + (1/47900160:ℝ)) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 10 / 3628800 - y ^ 9 / 725760 + y ^ 8 / 483840 - y ^ 6 / 518400 + y ^ 4 / 725760 - y ^ 2 / 2419200 + (1/47900160:ℝ)) 0 = (fun y : ℝ => y ^ 10 / 3628800 - y ^ 9 / 725760 + y ^ 8 / 483840 - y ^ 6 / 518400 + y ^ 4 / 725760 - y ^ 2 / 2419200 + (1/47900160:ℝ)) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u11_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 11 / 39916800 - Int.fract x ^ 10 / 7257600 + Int.fract x ^ 9 / 4354560 - Int.fract x ^ 7 / 3628800 + Int.fract x ^ 5 / 3628800 - Int.fract x ^ 3 / 7257600 + Int.fract x / 47900160 := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 11 / 39916800 - y ^ 10 / 7257600 + y ^ 9 / 4354560 - y ^ 7 / 3628800 + y ^ 5 / 3628800 - y ^ 3 / 7257600 + y / 47900160) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 11 / 39916800 - y ^ 10 / 7257600 + y ^ 9 / 4354560 - y ^ 7 / 3628800 + y ^ 5 / 3628800 - y ^ 3 / 7257600 + y / 47900160) 0 = (fun y : ℝ => y ^ 11 / 39916800 - y ^ 10 / 7257600 + y ^ 9 / 4354560 - y ^ 7 / 3628800 + y ^ 5 / 3628800 - y ^ 3 / 7257600 + y / 47900160) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem continuous_u12_fract537 :
+    Continuous fun x : ℝ => Int.fract x ^ 12 / 479001600 - Int.fract x ^ 11 / 79833600 + Int.fract x ^ 10 / 43545600 - Int.fract x ^ 8 / 29030400 + Int.fract x ^ 6 / 21772800 - Int.fract x ^ 4 / 29030400 + Int.fract x ^ 2 / 95800320 - (691/1307674368000:ℝ) := by
+  have h : ContinuousOn (fun y : ℝ => y ^ 12 / 479001600 - y ^ 11 / 79833600 + y ^ 10 / 43545600 - y ^ 8 / 29030400 + y ^ 6 / 21772800 - y ^ 4 / 29030400 + y ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Set.Icc (0 : ℝ) 1) := by fun_prop
+  have hf : (fun y : ℝ => y ^ 12 / 479001600 - y ^ 11 / 79833600 + y ^ 10 / 43545600 - y ^ 8 / 29030400 + y ^ 6 / 21772800 - y ^ 4 / 29030400 + y ^ 2 / 95800320 - (691/1307674368000:ℝ)) 0 = (fun y : ℝ => y ^ 12 / 479001600 - y ^ 11 / 79833600 + y ^ 10 / 43545600 - y ^ 8 / 29030400 + y ^ 6 / 21772800 - y ^ 4 / 29030400 + y ^ 2 / 95800320 - (691/1307674368000:ℝ)) 1 := by norm_num
+  exact h.comp_fract'' hf
+
+private theorem abs_u2_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 2 / 2 - t / 2 + (1/12:ℝ)| ≤ (41666667/50000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (41666667/50000000:ℝ) - (t ^ 2 / 2 - t / 2 + (1/12:ℝ)) =(112500001/150000000:ℝ) * (1 - t) ^ 2 + (150000001/75000000:ℝ) * t * (1 - t) + (112500001/150000000:ℝ) * t ^ 2 := by ring
+  have e2 : (41666667/50000000:ℝ) + (t ^ 2 / 2 - t / 2 + (1/12:ℝ)) =(137500001/150000000:ℝ) * (1 - t) ^ 2 + (100000001/75000000:ℝ) * t * (1 - t) + (137500001/150000000:ℝ) * t ^ 2 := by ring
+  have p1 : (0:ℝ) ≤ (112500001/150000000:ℝ) * (1 - t) ^ 2 + (150000001/75000000:ℝ) * t * (1 - t) + (112500001/150000000:ℝ) * t ^ 2 := by
+    have ht0 : (0:ℝ) ≤ (112500001/150000000:ℝ) * (1 - t) ^ 2 := mul_nonneg (by norm_num : (0:ℝ) ≤ (112500001/150000000:ℝ)) (pow_nonneg hone 2)
+    have ht1 : (0:ℝ) ≤ (150000001/75000000:ℝ) * t * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (150000001/75000000:ℝ)) (h0)) (hone)
+    have ht2 : (0:ℝ) ≤ (112500001/150000000:ℝ) * t ^ 2 := mul_nonneg (by norm_num : (0:ℝ) ≤ (112500001/150000000:ℝ)) (pow_nonneg h0 2)
+    linarith
+  have p2 : (0:ℝ) ≤ (137500001/150000000:ℝ) * (1 - t) ^ 2 + (100000001/75000000:ℝ) * t * (1 - t) + (137500001/150000000:ℝ) * t ^ 2 := by
+    have ht0 : (0:ℝ) ≤ (137500001/150000000:ℝ) * (1 - t) ^ 2 := mul_nonneg (by norm_num : (0:ℝ) ≤ (137500001/150000000:ℝ)) (pow_nonneg hone 2)
+    have ht1 : (0:ℝ) ≤ (100000001/75000000:ℝ) * t * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (100000001/75000000:ℝ)) (h0)) (hone)
+    have ht2 : (0:ℝ) ≤ (137500001/150000000:ℝ) * t ^ 2 := mul_nonneg (by norm_num : (0:ℝ) ≤ (137500001/150000000:ℝ)) (pow_nonneg h0 2)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u3_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 3 / 6 - t ^ 2 / 4 + t / 12| ≤ (4009377/50000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (4009377/50000000:ℝ) - (t ^ 3 / 6 - t ^ 2 / 4 + t / 12) =(4009377/50000000:ℝ) * (1 - t) ^ 3 + (23584393/150000000:ℝ) * t * (1 - t) ^ 2 + (48584393/150000000:ℝ) * t ^ 2 * (1 - t) + (4009377/50000000:ℝ) * t ^ 3 := by ring
+  have e2 : (4009377/50000000:ℝ) + (t ^ 3 / 6 - t ^ 2 / 4 + t / 12) =(4009377/50000000:ℝ) * (1 - t) ^ 3 + (48584393/150000000:ℝ) * t * (1 - t) ^ 2 + (23584393/150000000:ℝ) * t ^ 2 * (1 - t) + (4009377/50000000:ℝ) * t ^ 3 := by ring
+  have p1 : (0:ℝ) ≤ (4009377/50000000:ℝ) * (1 - t) ^ 3 + (23584393/150000000:ℝ) * t * (1 - t) ^ 2 + (48584393/150000000:ℝ) * t ^ 2 * (1 - t) + (4009377/50000000:ℝ) * t ^ 3 := by
+    have ht0 : (0:ℝ) ≤ (4009377/50000000:ℝ) * (1 - t) ^ 3 := mul_nonneg (by norm_num : (0:ℝ) ≤ (4009377/50000000:ℝ)) (pow_nonneg hone 3)
+    have ht1 : (0:ℝ) ≤ (23584393/150000000:ℝ) * t * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (23584393/150000000:ℝ)) (h0)) (pow_nonneg hone 2)
+    have ht2 : (0:ℝ) ≤ (48584393/150000000:ℝ) * t ^ 2 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (48584393/150000000:ℝ)) (pow_nonneg h0 2)) (hone)
+    have ht3 : (0:ℝ) ≤ (4009377/50000000:ℝ) * t ^ 3 := mul_nonneg (by norm_num : (0:ℝ) ≤ (4009377/50000000:ℝ)) (pow_nonneg h0 3)
+    linarith
+  have p2 : (0:ℝ) ≤ (4009377/50000000:ℝ) * (1 - t) ^ 3 + (48584393/150000000:ℝ) * t * (1 - t) ^ 2 + (23584393/150000000:ℝ) * t ^ 2 * (1 - t) + (4009377/50000000:ℝ) * t ^ 3 := by
+    have ht0 : (0:ℝ) ≤ (4009377/50000000:ℝ) * (1 - t) ^ 3 := mul_nonneg (by norm_num : (0:ℝ) ≤ (4009377/50000000:ℝ)) (pow_nonneg hone 3)
+    have ht1 : (0:ℝ) ≤ (48584393/150000000:ℝ) * t * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (48584393/150000000:ℝ)) (h0)) (pow_nonneg hone 2)
+    have ht2 : (0:ℝ) ≤ (23584393/150000000:ℝ) * t ^ 2 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (23584393/150000000:ℝ)) (pow_nonneg h0 2)) (hone)
+    have ht3 : (0:ℝ) ≤ (4009377/50000000:ℝ) * t ^ 3 := mul_nonneg (by norm_num : (0:ℝ) ≤ (4009377/50000000:ℝ)) (pow_nonneg h0 3)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u4_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)| ≤ (1388889/100000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (1388889/100000000:ℝ) - (t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) =(13750001/900000000:ℝ) * (1 - t) ^ 4 + (13750001/225000000:ℝ) * t * (1 - t) ^ 3 + (7500001/150000000:ℝ) * t ^ 2 * (1 - t) ^ 2 + (13750001/225000000:ℝ) * t ^ 3 * (1 - t) + (13750001/900000000:ℝ) * t ^ 4 := by ring
+  have e2 : (1388889/100000000:ℝ) + (t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) =(11250001/900000000:ℝ) * (1 - t) ^ 4 + (11250001/225000000:ℝ) * t * (1 - t) ^ 3 + (17500001/150000000:ℝ) * t ^ 2 * (1 - t) ^ 2 + (11250001/225000000:ℝ) * t ^ 3 * (1 - t) + (11250001/900000000:ℝ) * t ^ 4 := by ring
+  have p1 : (0:ℝ) ≤ (13750001/900000000:ℝ) * (1 - t) ^ 4 + (13750001/225000000:ℝ) * t * (1 - t) ^ 3 + (7500001/150000000:ℝ) * t ^ 2 * (1 - t) ^ 2 + (13750001/225000000:ℝ) * t ^ 3 * (1 - t) + (13750001/900000000:ℝ) * t ^ 4 := by
+    have ht0 : (0:ℝ) ≤ (13750001/900000000:ℝ) * (1 - t) ^ 4 := mul_nonneg (by norm_num : (0:ℝ) ≤ (13750001/900000000:ℝ)) (pow_nonneg hone 4)
+    have ht1 : (0:ℝ) ≤ (13750001/225000000:ℝ) * t * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (13750001/225000000:ℝ)) (h0)) (pow_nonneg hone 3)
+    have ht2 : (0:ℝ) ≤ (7500001/150000000:ℝ) * t ^ 2 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (7500001/150000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 2)
+    have ht3 : (0:ℝ) ≤ (13750001/225000000:ℝ) * t ^ 3 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (13750001/225000000:ℝ)) (pow_nonneg h0 3)) (hone)
+    have ht4 : (0:ℝ) ≤ (13750001/900000000:ℝ) * t ^ 4 := mul_nonneg (by norm_num : (0:ℝ) ≤ (13750001/900000000:ℝ)) (pow_nonneg h0 4)
+    linarith
+  have p2 : (0:ℝ) ≤ (11250001/900000000:ℝ) * (1 - t) ^ 4 + (11250001/225000000:ℝ) * t * (1 - t) ^ 3 + (17500001/150000000:ℝ) * t ^ 2 * (1 - t) ^ 2 + (11250001/225000000:ℝ) * t ^ 3 * (1 - t) + (11250001/900000000:ℝ) * t ^ 4 := by
+    have ht0 : (0:ℝ) ≤ (11250001/900000000:ℝ) * (1 - t) ^ 4 := mul_nonneg (by norm_num : (0:ℝ) ≤ (11250001/900000000:ℝ)) (pow_nonneg hone 4)
+    have ht1 : (0:ℝ) ≤ (11250001/225000000:ℝ) * t * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (11250001/225000000:ℝ)) (h0)) (pow_nonneg hone 3)
+    have ht2 : (0:ℝ) ≤ (17500001/150000000:ℝ) * t ^ 2 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (17500001/150000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 2)
+    have ht3 : (0:ℝ) ≤ (11250001/225000000:ℝ) * t ^ 3 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (11250001/225000000:ℝ)) (pow_nonneg h0 3)) (hone)
+    have ht4 : (0:ℝ) ≤ (11250001/900000000:ℝ) * t ^ 4 := mul_nonneg (by norm_num : (0:ℝ) ≤ (11250001/900000000:ℝ)) (pow_nonneg h0 4)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u5_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720| ≤ (203819/100000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (203819/100000000:ℝ) - (t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) =(203819/100000000:ℝ) * (1 - t) ^ 5 + (2084371/180000000:ℝ) * t * (1 - t) ^ 4 + (2334371/90000000:ℝ) * t ^ 2 * (1 - t) ^ 3 + (1334371/90000000:ℝ) * t ^ 3 * (1 - t) ^ 2 + (1584371/180000000:ℝ) * t ^ 4 * (1 - t) + (203819/100000000:ℝ) * t ^ 5 := by ring
+  have e2 : (203819/100000000:ℝ) + (t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) =(203819/100000000:ℝ) * (1 - t) ^ 5 + (1584371/180000000:ℝ) * t * (1 - t) ^ 4 + (1334371/90000000:ℝ) * t ^ 2 * (1 - t) ^ 3 + (2334371/90000000:ℝ) * t ^ 3 * (1 - t) ^ 2 + (2084371/180000000:ℝ) * t ^ 4 * (1 - t) + (203819/100000000:ℝ) * t ^ 5 := by ring
+  have p1 : (0:ℝ) ≤ (203819/100000000:ℝ) * (1 - t) ^ 5 + (2084371/180000000:ℝ) * t * (1 - t) ^ 4 + (2334371/90000000:ℝ) * t ^ 2 * (1 - t) ^ 3 + (1334371/90000000:ℝ) * t ^ 3 * (1 - t) ^ 2 + (1584371/180000000:ℝ) * t ^ 4 * (1 - t) + (203819/100000000:ℝ) * t ^ 5 := by
+    have ht0 : (0:ℝ) ≤ (203819/100000000:ℝ) * (1 - t) ^ 5 := mul_nonneg (by norm_num : (0:ℝ) ≤ (203819/100000000:ℝ)) (pow_nonneg hone 5)
+    have ht1 : (0:ℝ) ≤ (2084371/180000000:ℝ) * t * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2084371/180000000:ℝ)) (h0)) (pow_nonneg hone 4)
+    have ht2 : (0:ℝ) ≤ (2334371/90000000:ℝ) * t ^ 2 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2334371/90000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 3)
+    have ht3 : (0:ℝ) ≤ (1334371/90000000:ℝ) * t ^ 3 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1334371/90000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 2)
+    have ht4 : (0:ℝ) ≤ (1584371/180000000:ℝ) * t ^ 4 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1584371/180000000:ℝ)) (pow_nonneg h0 4)) (hone)
+    have ht5 : (0:ℝ) ≤ (203819/100000000:ℝ) * t ^ 5 := mul_nonneg (by norm_num : (0:ℝ) ≤ (203819/100000000:ℝ)) (pow_nonneg h0 5)
+    linarith
+  have p2 : (0:ℝ) ≤ (203819/100000000:ℝ) * (1 - t) ^ 5 + (1584371/180000000:ℝ) * t * (1 - t) ^ 4 + (1334371/90000000:ℝ) * t ^ 2 * (1 - t) ^ 3 + (2334371/90000000:ℝ) * t ^ 3 * (1 - t) ^ 2 + (2084371/180000000:ℝ) * t ^ 4 * (1 - t) + (203819/100000000:ℝ) * t ^ 5 := by
+    have ht0 : (0:ℝ) ≤ (203819/100000000:ℝ) * (1 - t) ^ 5 := mul_nonneg (by norm_num : (0:ℝ) ≤ (203819/100000000:ℝ)) (pow_nonneg hone 5)
+    have ht1 : (0:ℝ) ≤ (1584371/180000000:ℝ) * t * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1584371/180000000:ℝ)) (h0)) (pow_nonneg hone 4)
+    have ht2 : (0:ℝ) ≤ (1334371/90000000:ℝ) * t ^ 2 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1334371/90000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 3)
+    have ht3 : (0:ℝ) ≤ (2334371/90000000:ℝ) * t ^ 3 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2334371/90000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 2)
+    have ht4 : (0:ℝ) ≤ (2084371/180000000:ℝ) * t ^ 4 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2084371/180000000:ℝ)) (pow_nonneg h0 4)) (hone)
+    have ht5 : (0:ℝ) ≤ (203819/100000000:ℝ) * t ^ 5 := mul_nonneg (by norm_num : (0:ℝ) ≤ (203819/100000000:ℝ)) (pow_nonneg h0 5)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u6_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)| ≤ (33069/100000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (33069/100000000:ℝ) - (t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) =(5625041/18900000000:ℝ) * (1 - t) ^ 6 + (5625041/3150000000:ℝ) * t * (1 - t) ^ 5 + (6500041/1260000000:ℝ) * t ^ 2 * (1 - t) ^ 4 + (8250041/945000000:ℝ) * t ^ 3 * (1 - t) ^ 3 + (6500041/1260000000:ℝ) * t ^ 4 * (1 - t) ^ 2 + (5625041/3150000000:ℝ) * t ^ 5 * (1 - t) + (5625041/18900000000:ℝ) * t ^ 6 := by ring
+  have e2 : (33069/100000000:ℝ) + (t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) =(6875041/18900000000:ℝ) * (1 - t) ^ 6 + (6875041/3150000000:ℝ) * t * (1 - t) ^ 5 + (6000041/1260000000:ℝ) * t ^ 2 * (1 - t) ^ 4 + (4250041/945000000:ℝ) * t ^ 3 * (1 - t) ^ 3 + (6000041/1260000000:ℝ) * t ^ 4 * (1 - t) ^ 2 + (6875041/3150000000:ℝ) * t ^ 5 * (1 - t) + (6875041/18900000000:ℝ) * t ^ 6 := by ring
+  have p1 : (0:ℝ) ≤ (5625041/18900000000:ℝ) * (1 - t) ^ 6 + (5625041/3150000000:ℝ) * t * (1 - t) ^ 5 + (6500041/1260000000:ℝ) * t ^ 2 * (1 - t) ^ 4 + (8250041/945000000:ℝ) * t ^ 3 * (1 - t) ^ 3 + (6500041/1260000000:ℝ) * t ^ 4 * (1 - t) ^ 2 + (5625041/3150000000:ℝ) * t ^ 5 * (1 - t) + (5625041/18900000000:ℝ) * t ^ 6 := by
+    have ht0 : (0:ℝ) ≤ (5625041/18900000000:ℝ) * (1 - t) ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (5625041/18900000000:ℝ)) (pow_nonneg hone 6)
+    have ht1 : (0:ℝ) ≤ (5625041/3150000000:ℝ) * t * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (5625041/3150000000:ℝ)) (h0)) (pow_nonneg hone 5)
+    have ht2 : (0:ℝ) ≤ (6500041/1260000000:ℝ) * t ^ 2 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (6500041/1260000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 4)
+    have ht3 : (0:ℝ) ≤ (8250041/945000000:ℝ) * t ^ 3 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (8250041/945000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 3)
+    have ht4 : (0:ℝ) ≤ (6500041/1260000000:ℝ) * t ^ 4 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (6500041/1260000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 2)
+    have ht5 : (0:ℝ) ≤ (5625041/3150000000:ℝ) * t ^ 5 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (5625041/3150000000:ℝ)) (pow_nonneg h0 5)) (hone)
+    have ht6 : (0:ℝ) ≤ (5625041/18900000000:ℝ) * t ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (5625041/18900000000:ℝ)) (pow_nonneg h0 6)
+    linarith
+  have p2 : (0:ℝ) ≤ (6875041/18900000000:ℝ) * (1 - t) ^ 6 + (6875041/3150000000:ℝ) * t * (1 - t) ^ 5 + (6000041/1260000000:ℝ) * t ^ 2 * (1 - t) ^ 4 + (4250041/945000000:ℝ) * t ^ 3 * (1 - t) ^ 3 + (6000041/1260000000:ℝ) * t ^ 4 * (1 - t) ^ 2 + (6875041/3150000000:ℝ) * t ^ 5 * (1 - t) + (6875041/18900000000:ℝ) * t ^ 6 := by
+    have ht0 : (0:ℝ) ≤ (6875041/18900000000:ℝ) * (1 - t) ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (6875041/18900000000:ℝ)) (pow_nonneg hone 6)
+    have ht1 : (0:ℝ) ≤ (6875041/3150000000:ℝ) * t * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (6875041/3150000000:ℝ)) (h0)) (pow_nonneg hone 5)
+    have ht2 : (0:ℝ) ≤ (6000041/1260000000:ℝ) * t ^ 2 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (6000041/1260000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 4)
+    have ht3 : (0:ℝ) ≤ (4250041/945000000:ℝ) * t ^ 3 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (4250041/945000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 3)
+    have ht4 : (0:ℝ) ≤ (6000041/1260000000:ℝ) * t ^ 4 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (6000041/1260000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 2)
+    have ht5 : (0:ℝ) ≤ (6875041/3150000000:ℝ) * t ^ 5 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (6875041/3150000000:ℝ)) (pow_nonneg h0 5)) (hone)
+    have ht6 : (0:ℝ) ≤ (6875041/18900000000:ℝ) * t ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (6875041/18900000000:ℝ)) (pow_nonneg h0 6)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u7_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240| ≤ (1293/25000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (1293/25000000:ℝ) - (t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) =(1293/25000000:ℝ) * (1 - t) ^ 7 + (1554389/4725000000:ℝ) * t * (1 - t) ^ 6 + (1398139/1575000000:ℝ) * t ^ 2 * (1 - t) ^ 5 + (1460639/945000000:ℝ) * t ^ 3 * (1 - t) ^ 4 + (1960639/945000000:ℝ) * t ^ 4 * (1 - t) ^ 3 + (2023139/1575000000:ℝ) * t ^ 5 * (1 - t) ^ 2 + (1866889/4725000000:ℝ) * t ^ 6 * (1 - t) + (1293/25000000:ℝ) * t ^ 7 := by ring
+  have e2 : (1293/25000000:ℝ) + (t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) =(1293/25000000:ℝ) * (1 - t) ^ 7 + (1866889/4725000000:ℝ) * t * (1 - t) ^ 6 + (2023139/1575000000:ℝ) * t ^ 2 * (1 - t) ^ 5 + (1960639/945000000:ℝ) * t ^ 3 * (1 - t) ^ 4 + (1460639/945000000:ℝ) * t ^ 4 * (1 - t) ^ 3 + (1398139/1575000000:ℝ) * t ^ 5 * (1 - t) ^ 2 + (1554389/4725000000:ℝ) * t ^ 6 * (1 - t) + (1293/25000000:ℝ) * t ^ 7 := by ring
+  have p1 : (0:ℝ) ≤ (1293/25000000:ℝ) * (1 - t) ^ 7 + (1554389/4725000000:ℝ) * t * (1 - t) ^ 6 + (1398139/1575000000:ℝ) * t ^ 2 * (1 - t) ^ 5 + (1460639/945000000:ℝ) * t ^ 3 * (1 - t) ^ 4 + (1960639/945000000:ℝ) * t ^ 4 * (1 - t) ^ 3 + (2023139/1575000000:ℝ) * t ^ 5 * (1 - t) ^ 2 + (1866889/4725000000:ℝ) * t ^ 6 * (1 - t) + (1293/25000000:ℝ) * t ^ 7 := by
+    have ht0 : (0:ℝ) ≤ (1293/25000000:ℝ) * (1 - t) ^ 7 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1293/25000000:ℝ)) (pow_nonneg hone 7)
+    have ht1 : (0:ℝ) ≤ (1554389/4725000000:ℝ) * t * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1554389/4725000000:ℝ)) (h0)) (pow_nonneg hone 6)
+    have ht2 : (0:ℝ) ≤ (1398139/1575000000:ℝ) * t ^ 2 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1398139/1575000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 5)
+    have ht3 : (0:ℝ) ≤ (1460639/945000000:ℝ) * t ^ 3 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1460639/945000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 4)
+    have ht4 : (0:ℝ) ≤ (1960639/945000000:ℝ) * t ^ 4 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1960639/945000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 3)
+    have ht5 : (0:ℝ) ≤ (2023139/1575000000:ℝ) * t ^ 5 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2023139/1575000000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 2)
+    have ht6 : (0:ℝ) ≤ (1866889/4725000000:ℝ) * t ^ 6 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1866889/4725000000:ℝ)) (pow_nonneg h0 6)) (hone)
+    have ht7 : (0:ℝ) ≤ (1293/25000000:ℝ) * t ^ 7 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1293/25000000:ℝ)) (pow_nonneg h0 7)
+    linarith
+  have p2 : (0:ℝ) ≤ (1293/25000000:ℝ) * (1 - t) ^ 7 + (1866889/4725000000:ℝ) * t * (1 - t) ^ 6 + (2023139/1575000000:ℝ) * t ^ 2 * (1 - t) ^ 5 + (1960639/945000000:ℝ) * t ^ 3 * (1 - t) ^ 4 + (1460639/945000000:ℝ) * t ^ 4 * (1 - t) ^ 3 + (1398139/1575000000:ℝ) * t ^ 5 * (1 - t) ^ 2 + (1554389/4725000000:ℝ) * t ^ 6 * (1 - t) + (1293/25000000:ℝ) * t ^ 7 := by
+    have ht0 : (0:ℝ) ≤ (1293/25000000:ℝ) * (1 - t) ^ 7 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1293/25000000:ℝ)) (pow_nonneg hone 7)
+    have ht1 : (0:ℝ) ≤ (1866889/4725000000:ℝ) * t * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1866889/4725000000:ℝ)) (h0)) (pow_nonneg hone 6)
+    have ht2 : (0:ℝ) ≤ (2023139/1575000000:ℝ) * t ^ 2 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2023139/1575000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 5)
+    have ht3 : (0:ℝ) ≤ (1960639/945000000:ℝ) * t ^ 3 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1960639/945000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 4)
+    have ht4 : (0:ℝ) ≤ (1460639/945000000:ℝ) * t ^ 4 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1460639/945000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 3)
+    have ht5 : (0:ℝ) ≤ (1398139/1575000000:ℝ) * t ^ 5 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1398139/1575000000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 2)
+    have ht6 : (0:ℝ) ≤ (1554389/4725000000:ℝ) * t ^ 6 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1554389/4725000000:ℝ)) (pow_nonneg h0 6)) (hone)
+    have ht7 : (0:ℝ) ≤ (1293/25000000:ℝ) * t ^ 7 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1293/25000000:ℝ)) (pow_nonneg h0 7)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u8_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)| ≤ (827/100000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (827/100000000:ℝ) - (t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) =(21491/2362500000:ℝ) * (1 - t) ^ 8 + (21491/295312500:ℝ) * t * (1 - t) ^ 7 + (1125371/4725000000:ℝ) * t ^ 2 * (1 - t) ^ 6 + (969121/2362500000:ℝ) * t ^ 3 * (1 - t) ^ 5 + (844121/1890000000:ℝ) * t ^ 4 * (1 - t) ^ 4 + (969121/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 3 + (1125371/4725000000:ℝ) * t ^ 6 * (1 - t) ^ 2 + (21491/295312500:ℝ) * t ^ 7 * (1 - t) + (21491/2362500000:ℝ) * t ^ 8 := by ring
+  have e2 : (827/100000000:ℝ) + (t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) =(70339/9450000000:ℝ) * (1 - t) ^ 8 + (70339/1181250000:ℝ) * t * (1 - t) ^ 7 + (1062871/4725000000:ℝ) * t ^ 2 * (1 - t) ^ 6 + (1219121/2362500000:ℝ) * t ^ 3 * (1 - t) ^ 5 + (1344121/1890000000:ℝ) * t ^ 4 * (1 - t) ^ 4 + (1219121/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 3 + (1062871/4725000000:ℝ) * t ^ 6 * (1 - t) ^ 2 + (70339/1181250000:ℝ) * t ^ 7 * (1 - t) + (70339/9450000000:ℝ) * t ^ 8 := by ring
+  have p1 : (0:ℝ) ≤ (21491/2362500000:ℝ) * (1 - t) ^ 8 + (21491/295312500:ℝ) * t * (1 - t) ^ 7 + (1125371/4725000000:ℝ) * t ^ 2 * (1 - t) ^ 6 + (969121/2362500000:ℝ) * t ^ 3 * (1 - t) ^ 5 + (844121/1890000000:ℝ) * t ^ 4 * (1 - t) ^ 4 + (969121/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 3 + (1125371/4725000000:ℝ) * t ^ 6 * (1 - t) ^ 2 + (21491/295312500:ℝ) * t ^ 7 * (1 - t) + (21491/2362500000:ℝ) * t ^ 8 := by
+    have ht0 : (0:ℝ) ≤ (21491/2362500000:ℝ) * (1 - t) ^ 8 := mul_nonneg (by norm_num : (0:ℝ) ≤ (21491/2362500000:ℝ)) (pow_nonneg hone 8)
+    have ht1 : (0:ℝ) ≤ (21491/295312500:ℝ) * t * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (21491/295312500:ℝ)) (h0)) (pow_nonneg hone 7)
+    have ht2 : (0:ℝ) ≤ (1125371/4725000000:ℝ) * t ^ 2 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1125371/4725000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 6)
+    have ht3 : (0:ℝ) ≤ (969121/2362500000:ℝ) * t ^ 3 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (969121/2362500000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 5)
+    have ht4 : (0:ℝ) ≤ (844121/1890000000:ℝ) * t ^ 4 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (844121/1890000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 4)
+    have ht5 : (0:ℝ) ≤ (969121/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (969121/2362500000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 3)
+    have ht6 : (0:ℝ) ≤ (1125371/4725000000:ℝ) * t ^ 6 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1125371/4725000000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 2)
+    have ht7 : (0:ℝ) ≤ (21491/295312500:ℝ) * t ^ 7 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (21491/295312500:ℝ)) (pow_nonneg h0 7)) (hone)
+    have ht8 : (0:ℝ) ≤ (21491/2362500000:ℝ) * t ^ 8 := mul_nonneg (by norm_num : (0:ℝ) ≤ (21491/2362500000:ℝ)) (pow_nonneg h0 8)
+    linarith
+  have p2 : (0:ℝ) ≤ (70339/9450000000:ℝ) * (1 - t) ^ 8 + (70339/1181250000:ℝ) * t * (1 - t) ^ 7 + (1062871/4725000000:ℝ) * t ^ 2 * (1 - t) ^ 6 + (1219121/2362500000:ℝ) * t ^ 3 * (1 - t) ^ 5 + (1344121/1890000000:ℝ) * t ^ 4 * (1 - t) ^ 4 + (1219121/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 3 + (1062871/4725000000:ℝ) * t ^ 6 * (1 - t) ^ 2 + (70339/1181250000:ℝ) * t ^ 7 * (1 - t) + (70339/9450000000:ℝ) * t ^ 8 := by
+    have ht0 : (0:ℝ) ≤ (70339/9450000000:ℝ) * (1 - t) ^ 8 := mul_nonneg (by norm_num : (0:ℝ) ≤ (70339/9450000000:ℝ)) (pow_nonneg hone 8)
+    have ht1 : (0:ℝ) ≤ (70339/1181250000:ℝ) * t * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (70339/1181250000:ℝ)) (h0)) (pow_nonneg hone 7)
+    have ht2 : (0:ℝ) ≤ (1062871/4725000000:ℝ) * t ^ 2 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1062871/4725000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 6)
+    have ht3 : (0:ℝ) ≤ (1219121/2362500000:ℝ) * t ^ 3 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1219121/2362500000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 5)
+    have ht4 : (0:ℝ) ≤ (1344121/1890000000:ℝ) * t ^ 4 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1344121/1890000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 4)
+    have ht5 : (0:ℝ) ≤ (1219121/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1219121/2362500000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 3)
+    have ht6 : (0:ℝ) ≤ (1062871/4725000000:ℝ) * t ^ 6 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1062871/4725000000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 2)
+    have ht7 : (0:ℝ) ≤ (70339/1181250000:ℝ) * t ^ 7 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (70339/1181250000:ℝ)) (pow_nonneg h0 7)) (hone)
+    have ht8 : (0:ℝ) ≤ (70339/9450000000:ℝ) * t ^ 8 := mul_nonneg (by norm_num : (0:ℝ) ≤ (70339/9450000000:ℝ)) (pow_nonneg h0 8)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u9_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600| ≤ (33/25000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (33/25000000:ℝ) - (t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) =(33/25000000:ℝ) * (1 - t) ^ 9 + (240157/18900000000:ℝ) * t * (1 - t) ^ 8 + (127891/2362500000:ℝ) * t ^ 2 * (1 - t) ^ 7 + (455431/3543750000:ℝ) * t ^ 3 * (1 - t) ^ 6 + (424181/2362500000:ℝ) * t ^ 4 * (1 - t) ^ 5 + (361681/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 4 + (330431/3543750000:ℝ) * t ^ 6 * (1 - t) ^ 3 + (96641/2362500000:ℝ) * t ^ 7 * (1 - t) ^ 2 + (208907/18900000000:ℝ) * t ^ 8 * (1 - t) + (33/25000000:ℝ) * t ^ 9 := by ring
+  have e2 : (33/25000000:ℝ) + (t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) =(33/25000000:ℝ) * (1 - t) ^ 9 + (208907/18900000000:ℝ) * t * (1 - t) ^ 8 + (96641/2362500000:ℝ) * t ^ 2 * (1 - t) ^ 7 + (330431/3543750000:ℝ) * t ^ 3 * (1 - t) ^ 6 + (361681/2362500000:ℝ) * t ^ 4 * (1 - t) ^ 5 + (424181/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 4 + (455431/3543750000:ℝ) * t ^ 6 * (1 - t) ^ 3 + (127891/2362500000:ℝ) * t ^ 7 * (1 - t) ^ 2 + (240157/18900000000:ℝ) * t ^ 8 * (1 - t) + (33/25000000:ℝ) * t ^ 9 := by ring
+  have p1 : (0:ℝ) ≤ (33/25000000:ℝ) * (1 - t) ^ 9 + (240157/18900000000:ℝ) * t * (1 - t) ^ 8 + (127891/2362500000:ℝ) * t ^ 2 * (1 - t) ^ 7 + (455431/3543750000:ℝ) * t ^ 3 * (1 - t) ^ 6 + (424181/2362500000:ℝ) * t ^ 4 * (1 - t) ^ 5 + (361681/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 4 + (330431/3543750000:ℝ) * t ^ 6 * (1 - t) ^ 3 + (96641/2362500000:ℝ) * t ^ 7 * (1 - t) ^ 2 + (208907/18900000000:ℝ) * t ^ 8 * (1 - t) + (33/25000000:ℝ) * t ^ 9 := by
+    have ht0 : (0:ℝ) ≤ (33/25000000:ℝ) * (1 - t) ^ 9 := mul_nonneg (by norm_num : (0:ℝ) ≤ (33/25000000:ℝ)) (pow_nonneg hone 9)
+    have ht1 : (0:ℝ) ≤ (240157/18900000000:ℝ) * t * (1 - t) ^ 8 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (240157/18900000000:ℝ)) (h0)) (pow_nonneg hone 8)
+    have ht2 : (0:ℝ) ≤ (127891/2362500000:ℝ) * t ^ 2 * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (127891/2362500000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 7)
+    have ht3 : (0:ℝ) ≤ (455431/3543750000:ℝ) * t ^ 3 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (455431/3543750000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 6)
+    have ht4 : (0:ℝ) ≤ (424181/2362500000:ℝ) * t ^ 4 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (424181/2362500000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 5)
+    have ht5 : (0:ℝ) ≤ (361681/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (361681/2362500000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 4)
+    have ht6 : (0:ℝ) ≤ (330431/3543750000:ℝ) * t ^ 6 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (330431/3543750000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 3)
+    have ht7 : (0:ℝ) ≤ (96641/2362500000:ℝ) * t ^ 7 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (96641/2362500000:ℝ)) (pow_nonneg h0 7)) (pow_nonneg hone 2)
+    have ht8 : (0:ℝ) ≤ (208907/18900000000:ℝ) * t ^ 8 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (208907/18900000000:ℝ)) (pow_nonneg h0 8)) (hone)
+    have ht9 : (0:ℝ) ≤ (33/25000000:ℝ) * t ^ 9 := mul_nonneg (by norm_num : (0:ℝ) ≤ (33/25000000:ℝ)) (pow_nonneg h0 9)
+    linarith
+  have p2 : (0:ℝ) ≤ (33/25000000:ℝ) * (1 - t) ^ 9 + (208907/18900000000:ℝ) * t * (1 - t) ^ 8 + (96641/2362500000:ℝ) * t ^ 2 * (1 - t) ^ 7 + (330431/3543750000:ℝ) * t ^ 3 * (1 - t) ^ 6 + (361681/2362500000:ℝ) * t ^ 4 * (1 - t) ^ 5 + (424181/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 4 + (455431/3543750000:ℝ) * t ^ 6 * (1 - t) ^ 3 + (127891/2362500000:ℝ) * t ^ 7 * (1 - t) ^ 2 + (240157/18900000000:ℝ) * t ^ 8 * (1 - t) + (33/25000000:ℝ) * t ^ 9 := by
+    have ht0 : (0:ℝ) ≤ (33/25000000:ℝ) * (1 - t) ^ 9 := mul_nonneg (by norm_num : (0:ℝ) ≤ (33/25000000:ℝ)) (pow_nonneg hone 9)
+    have ht1 : (0:ℝ) ≤ (208907/18900000000:ℝ) * t * (1 - t) ^ 8 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (208907/18900000000:ℝ)) (h0)) (pow_nonneg hone 8)
+    have ht2 : (0:ℝ) ≤ (96641/2362500000:ℝ) * t ^ 2 * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (96641/2362500000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 7)
+    have ht3 : (0:ℝ) ≤ (330431/3543750000:ℝ) * t ^ 3 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (330431/3543750000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 6)
+    have ht4 : (0:ℝ) ≤ (361681/2362500000:ℝ) * t ^ 4 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (361681/2362500000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 5)
+    have ht5 : (0:ℝ) ≤ (424181/2362500000:ℝ) * t ^ 5 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (424181/2362500000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 4)
+    have ht6 : (0:ℝ) ≤ (455431/3543750000:ℝ) * t ^ 6 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (455431/3543750000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 3)
+    have ht7 : (0:ℝ) ≤ (127891/2362500000:ℝ) * t ^ 7 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (127891/2362500000:ℝ)) (pow_nonneg h0 7)) (pow_nonneg hone 2)
+    have ht8 : (0:ℝ) ≤ (240157/18900000000:ℝ) * t ^ 8 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (240157/18900000000:ℝ)) (pow_nonneg h0 8)) (hone)
+    have ht9 : (0:ℝ) ≤ (33/25000000:ℝ) * t ^ 9 := mul_nonneg (by norm_num : (0:ℝ) ≤ (33/25000000:ℝ)) (pow_nonneg h0 9)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u10_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)| ≤ (21/100000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (21/100000000:ℝ) - (t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) =(707737/3742200000000:ℝ) * (1 - t) ^ 10 + (707737/374220000000:ℝ) * t * (1 - t) ^ 9 + (3313/371250000:ℝ) * t ^ 2 * (1 - t) ^ 8 + (405431/15592500000:ℝ) * t ^ 3 * (1 - t) ^ 7 + (3113017/62370000000:ℝ) * t ^ 4 * (1 - t) ^ 6 + (3250517/51975000000:ℝ) * t ^ 5 * (1 - t) ^ 5 + (3113017/62370000000:ℝ) * t ^ 6 * (1 - t) ^ 4 + (405431/15592500000:ℝ) * t ^ 7 * (1 - t) ^ 3 + (3313/371250000:ℝ) * t ^ 8 * (1 - t) ^ 2 + (707737/374220000000:ℝ) * t ^ 9 * (1 - t) + (707737/3742200000000:ℝ) * t ^ 10 := by ring
+  have e2 : (21/100000000:ℝ) + (t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) =(863987/3742200000000:ℝ) * (1 - t) ^ 10 + (863987/374220000000:ℝ) * t * (1 - t) ^ 9 + (29629/2970000000:ℝ) * t ^ 2 * (1 - t) ^ 8 + (380431/15592500000:ℝ) * t ^ 3 * (1 - t) ^ 7 + (2388017/62370000000:ℝ) * t ^ 4 * (1 - t) ^ 6 + (2250517/51975000000:ℝ) * t ^ 5 * (1 - t) ^ 5 + (2388017/62370000000:ℝ) * t ^ 6 * (1 - t) ^ 4 + (380431/15592500000:ℝ) * t ^ 7 * (1 - t) ^ 3 + (29629/2970000000:ℝ) * t ^ 8 * (1 - t) ^ 2 + (863987/374220000000:ℝ) * t ^ 9 * (1 - t) + (863987/3742200000000:ℝ) * t ^ 10 := by ring
+  have p1 : (0:ℝ) ≤ (707737/3742200000000:ℝ) * (1 - t) ^ 10 + (707737/374220000000:ℝ) * t * (1 - t) ^ 9 + (3313/371250000:ℝ) * t ^ 2 * (1 - t) ^ 8 + (405431/15592500000:ℝ) * t ^ 3 * (1 - t) ^ 7 + (3113017/62370000000:ℝ) * t ^ 4 * (1 - t) ^ 6 + (3250517/51975000000:ℝ) * t ^ 5 * (1 - t) ^ 5 + (3113017/62370000000:ℝ) * t ^ 6 * (1 - t) ^ 4 + (405431/15592500000:ℝ) * t ^ 7 * (1 - t) ^ 3 + (3313/371250000:ℝ) * t ^ 8 * (1 - t) ^ 2 + (707737/374220000000:ℝ) * t ^ 9 * (1 - t) + (707737/3742200000000:ℝ) * t ^ 10 := by
+    have ht0 : (0:ℝ) ≤ (707737/3742200000000:ℝ) * (1 - t) ^ 10 := mul_nonneg (by norm_num : (0:ℝ) ≤ (707737/3742200000000:ℝ)) (pow_nonneg hone 10)
+    have ht1 : (0:ℝ) ≤ (707737/374220000000:ℝ) * t * (1 - t) ^ 9 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (707737/374220000000:ℝ)) (h0)) (pow_nonneg hone 9)
+    have ht2 : (0:ℝ) ≤ (3313/371250000:ℝ) * t ^ 2 * (1 - t) ^ 8 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (3313/371250000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 8)
+    have ht3 : (0:ℝ) ≤ (405431/15592500000:ℝ) * t ^ 3 * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (405431/15592500000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 7)
+    have ht4 : (0:ℝ) ≤ (3113017/62370000000:ℝ) * t ^ 4 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (3113017/62370000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 6)
+    have ht5 : (0:ℝ) ≤ (3250517/51975000000:ℝ) * t ^ 5 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (3250517/51975000000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 5)
+    have ht6 : (0:ℝ) ≤ (3113017/62370000000:ℝ) * t ^ 6 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (3113017/62370000000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 4)
+    have ht7 : (0:ℝ) ≤ (405431/15592500000:ℝ) * t ^ 7 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (405431/15592500000:ℝ)) (pow_nonneg h0 7)) (pow_nonneg hone 3)
+    have ht8 : (0:ℝ) ≤ (3313/371250000:ℝ) * t ^ 8 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (3313/371250000:ℝ)) (pow_nonneg h0 8)) (pow_nonneg hone 2)
+    have ht9 : (0:ℝ) ≤ (707737/374220000000:ℝ) * t ^ 9 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (707737/374220000000:ℝ)) (pow_nonneg h0 9)) (hone)
+    have ht10 : (0:ℝ) ≤ (707737/3742200000000:ℝ) * t ^ 10 := mul_nonneg (by norm_num : (0:ℝ) ≤ (707737/3742200000000:ℝ)) (pow_nonneg h0 10)
+    linarith
+  have p2 : (0:ℝ) ≤ (863987/3742200000000:ℝ) * (1 - t) ^ 10 + (863987/374220000000:ℝ) * t * (1 - t) ^ 9 + (29629/2970000000:ℝ) * t ^ 2 * (1 - t) ^ 8 + (380431/15592500000:ℝ) * t ^ 3 * (1 - t) ^ 7 + (2388017/62370000000:ℝ) * t ^ 4 * (1 - t) ^ 6 + (2250517/51975000000:ℝ) * t ^ 5 * (1 - t) ^ 5 + (2388017/62370000000:ℝ) * t ^ 6 * (1 - t) ^ 4 + (380431/15592500000:ℝ) * t ^ 7 * (1 - t) ^ 3 + (29629/2970000000:ℝ) * t ^ 8 * (1 - t) ^ 2 + (863987/374220000000:ℝ) * t ^ 9 * (1 - t) + (863987/3742200000000:ℝ) * t ^ 10 := by
+    have ht0 : (0:ℝ) ≤ (863987/3742200000000:ℝ) * (1 - t) ^ 10 := mul_nonneg (by norm_num : (0:ℝ) ≤ (863987/3742200000000:ℝ)) (pow_nonneg hone 10)
+    have ht1 : (0:ℝ) ≤ (863987/374220000000:ℝ) * t * (1 - t) ^ 9 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (863987/374220000000:ℝ)) (h0)) (pow_nonneg hone 9)
+    have ht2 : (0:ℝ) ≤ (29629/2970000000:ℝ) * t ^ 2 * (1 - t) ^ 8 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (29629/2970000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 8)
+    have ht3 : (0:ℝ) ≤ (380431/15592500000:ℝ) * t ^ 3 * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (380431/15592500000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 7)
+    have ht4 : (0:ℝ) ≤ (2388017/62370000000:ℝ) * t ^ 4 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2388017/62370000000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 6)
+    have ht5 : (0:ℝ) ≤ (2250517/51975000000:ℝ) * t ^ 5 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2250517/51975000000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 5)
+    have ht6 : (0:ℝ) ≤ (2388017/62370000000:ℝ) * t ^ 6 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2388017/62370000000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 4)
+    have ht7 : (0:ℝ) ≤ (380431/15592500000:ℝ) * t ^ 7 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (380431/15592500000:ℝ)) (pow_nonneg h0 7)) (pow_nonneg hone 3)
+    have ht8 : (0:ℝ) ≤ (29629/2970000000:ℝ) * t ^ 8 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (29629/2970000000:ℝ)) (pow_nonneg h0 8)) (pow_nonneg hone 2)
+    have ht9 : (0:ℝ) ≤ (863987/374220000000:ℝ) * t ^ 9 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (863987/374220000000:ℝ)) (pow_nonneg h0 9)) (hone)
+    have ht10 : (0:ℝ) ≤ (863987/3742200000000:ℝ) * t ^ 10 := mul_nonneg (by norm_num : (0:ℝ) ≤ (863987/3742200000000:ℝ)) (pow_nonneg h0 10)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u11_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160| ≤ (1/25000000:ℝ) := by
+  have hone : (0:ℝ) ≤ 1 - t := by linarith
+  have e1 : (1/25000000:ℝ) - (t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) =(1/25000000:ℝ) * (1 - t) ^ 11 + (1568443/3742200000000:ℝ) * t * (1 - t) ^ 10 + (745159/374220000000:ℝ) * t ^ 2 * (1 - t) ^ 9 + (180821/31185000000:ℝ) * t ^ 3 * (1 - t) ^ 8 + (13139/1113750000:ℝ) * t ^ 4 * (1 - t) ^ 7 + (1378247/77962500000:ℝ) * t ^ 5 * (1 - t) ^ 6 + (1503247/77962500000:ℝ) * t ^ 6 * (1 - t) ^ 5 + (2033/139218750:ℝ) * t ^ 7 * (1 - t) ^ 4 + (230821/31185000000:ℝ) * t ^ 8 * (1 - t) ^ 3 + (901409/374220000000:ℝ) * t ^ 9 * (1 - t) ^ 2 + (1724693/3742200000000:ℝ) * t ^ 10 * (1 - t) + (1/25000000:ℝ) * t ^ 11 := by ring
+  have e2 : (1/25000000:ℝ) + (t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) =(1/25000000:ℝ) * (1 - t) ^ 11 + (1724693/3742200000000:ℝ) * t * (1 - t) ^ 10 + (901409/374220000000:ℝ) * t ^ 2 * (1 - t) ^ 9 + (230821/31185000000:ℝ) * t ^ 3 * (1 - t) ^ 8 + (2033/139218750:ℝ) * t ^ 4 * (1 - t) ^ 7 + (1503247/77962500000:ℝ) * t ^ 5 * (1 - t) ^ 6 + (1378247/77962500000:ℝ) * t ^ 6 * (1 - t) ^ 5 + (13139/1113750000:ℝ) * t ^ 7 * (1 - t) ^ 4 + (180821/31185000000:ℝ) * t ^ 8 * (1 - t) ^ 3 + (745159/374220000000:ℝ) * t ^ 9 * (1 - t) ^ 2 + (1568443/3742200000000:ℝ) * t ^ 10 * (1 - t) + (1/25000000:ℝ) * t ^ 11 := by ring
+  have p1 : (0:ℝ) ≤ (1/25000000:ℝ) * (1 - t) ^ 11 + (1568443/3742200000000:ℝ) * t * (1 - t) ^ 10 + (745159/374220000000:ℝ) * t ^ 2 * (1 - t) ^ 9 + (180821/31185000000:ℝ) * t ^ 3 * (1 - t) ^ 8 + (13139/1113750000:ℝ) * t ^ 4 * (1 - t) ^ 7 + (1378247/77962500000:ℝ) * t ^ 5 * (1 - t) ^ 6 + (1503247/77962500000:ℝ) * t ^ 6 * (1 - t) ^ 5 + (2033/139218750:ℝ) * t ^ 7 * (1 - t) ^ 4 + (230821/31185000000:ℝ) * t ^ 8 * (1 - t) ^ 3 + (901409/374220000000:ℝ) * t ^ 9 * (1 - t) ^ 2 + (1724693/3742200000000:ℝ) * t ^ 10 * (1 - t) + (1/25000000:ℝ) * t ^ 11 := by
+    have ht0 : (0:ℝ) ≤ (1/25000000:ℝ) * (1 - t) ^ 11 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1/25000000:ℝ)) (pow_nonneg hone 11)
+    have ht1 : (0:ℝ) ≤ (1568443/3742200000000:ℝ) * t * (1 - t) ^ 10 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1568443/3742200000000:ℝ)) (h0)) (pow_nonneg hone 10)
+    have ht2 : (0:ℝ) ≤ (745159/374220000000:ℝ) * t ^ 2 * (1 - t) ^ 9 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (745159/374220000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 9)
+    have ht3 : (0:ℝ) ≤ (180821/31185000000:ℝ) * t ^ 3 * (1 - t) ^ 8 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (180821/31185000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 8)
+    have ht4 : (0:ℝ) ≤ (13139/1113750000:ℝ) * t ^ 4 * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (13139/1113750000:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 7)
+    have ht5 : (0:ℝ) ≤ (1378247/77962500000:ℝ) * t ^ 5 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1378247/77962500000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 6)
+    have ht6 : (0:ℝ) ≤ (1503247/77962500000:ℝ) * t ^ 6 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1503247/77962500000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 5)
+    have ht7 : (0:ℝ) ≤ (2033/139218750:ℝ) * t ^ 7 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2033/139218750:ℝ)) (pow_nonneg h0 7)) (pow_nonneg hone 4)
+    have ht8 : (0:ℝ) ≤ (230821/31185000000:ℝ) * t ^ 8 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (230821/31185000000:ℝ)) (pow_nonneg h0 8)) (pow_nonneg hone 3)
+    have ht9 : (0:ℝ) ≤ (901409/374220000000:ℝ) * t ^ 9 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (901409/374220000000:ℝ)) (pow_nonneg h0 9)) (pow_nonneg hone 2)
+    have ht10 : (0:ℝ) ≤ (1724693/3742200000000:ℝ) * t ^ 10 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1724693/3742200000000:ℝ)) (pow_nonneg h0 10)) (hone)
+    have ht11 : (0:ℝ) ≤ (1/25000000:ℝ) * t ^ 11 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1/25000000:ℝ)) (pow_nonneg h0 11)
+    linarith
+  have p2 : (0:ℝ) ≤ (1/25000000:ℝ) * (1 - t) ^ 11 + (1724693/3742200000000:ℝ) * t * (1 - t) ^ 10 + (901409/374220000000:ℝ) * t ^ 2 * (1 - t) ^ 9 + (230821/31185000000:ℝ) * t ^ 3 * (1 - t) ^ 8 + (2033/139218750:ℝ) * t ^ 4 * (1 - t) ^ 7 + (1503247/77962500000:ℝ) * t ^ 5 * (1 - t) ^ 6 + (1378247/77962500000:ℝ) * t ^ 6 * (1 - t) ^ 5 + (13139/1113750000:ℝ) * t ^ 7 * (1 - t) ^ 4 + (180821/31185000000:ℝ) * t ^ 8 * (1 - t) ^ 3 + (745159/374220000000:ℝ) * t ^ 9 * (1 - t) ^ 2 + (1568443/3742200000000:ℝ) * t ^ 10 * (1 - t) + (1/25000000:ℝ) * t ^ 11 := by
+    have ht0 : (0:ℝ) ≤ (1/25000000:ℝ) * (1 - t) ^ 11 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1/25000000:ℝ)) (pow_nonneg hone 11)
+    have ht1 : (0:ℝ) ≤ (1724693/3742200000000:ℝ) * t * (1 - t) ^ 10 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1724693/3742200000000:ℝ)) (h0)) (pow_nonneg hone 10)
+    have ht2 : (0:ℝ) ≤ (901409/374220000000:ℝ) * t ^ 2 * (1 - t) ^ 9 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (901409/374220000000:ℝ)) (pow_nonneg h0 2)) (pow_nonneg hone 9)
+    have ht3 : (0:ℝ) ≤ (230821/31185000000:ℝ) * t ^ 3 * (1 - t) ^ 8 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (230821/31185000000:ℝ)) (pow_nonneg h0 3)) (pow_nonneg hone 8)
+    have ht4 : (0:ℝ) ≤ (2033/139218750:ℝ) * t ^ 4 * (1 - t) ^ 7 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (2033/139218750:ℝ)) (pow_nonneg h0 4)) (pow_nonneg hone 7)
+    have ht5 : (0:ℝ) ≤ (1503247/77962500000:ℝ) * t ^ 5 * (1 - t) ^ 6 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1503247/77962500000:ℝ)) (pow_nonneg h0 5)) (pow_nonneg hone 6)
+    have ht6 : (0:ℝ) ≤ (1378247/77962500000:ℝ) * t ^ 6 * (1 - t) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1378247/77962500000:ℝ)) (pow_nonneg h0 6)) (pow_nonneg hone 5)
+    have ht7 : (0:ℝ) ≤ (13139/1113750000:ℝ) * t ^ 7 * (1 - t) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (13139/1113750000:ℝ)) (pow_nonneg h0 7)) (pow_nonneg hone 4)
+    have ht8 : (0:ℝ) ≤ (180821/31185000000:ℝ) * t ^ 8 * (1 - t) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (180821/31185000000:ℝ)) (pow_nonneg h0 8)) (pow_nonneg hone 3)
+    have ht9 : (0:ℝ) ≤ (745159/374220000000:ℝ) * t ^ 9 * (1 - t) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (745159/374220000000:ℝ)) (pow_nonneg h0 9)) (pow_nonneg hone 2)
+    have ht10 : (0:ℝ) ≤ (1568443/3742200000000:ℝ) * t ^ 10 * (1 - t) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1568443/3742200000000:ℝ)) (pow_nonneg h0 10)) (hone)
+    have ht11 : (0:ℝ) ≤ (1/25000000:ℝ) * t ^ 11 := mul_nonneg (by norm_num : (0:ℝ) ≤ (1/25000000:ℝ)) (pow_nonneg h0 11)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  rw [abs_le]
+  constructor <;> linarith
+
+private theorem abs_u12_le537 (t : ℝ) (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    |t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)| ≤ ((28/100)/479001600:ℝ) := by
+  set v : ℝ := (t - 1/2) ^ 2 with hv
+  have hv0 : (0:ℝ) ≤ v := by positivity
+  have hv1 : v ≤ 1/4 := by nlinarith
+  have h4v0 : (0:ℝ) ≤ 4 * v := by linarith
+  have h4v1 : (0:ℝ) ≤ 1 - 4 * v := by linarith
+  have hB : (479001600:ℝ) * (t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) =(1/1:ℝ) * v ^ 6 + (-11/2:ℝ) * v ^ 5 + (231/16:ℝ) * v ^ 4 + (-341/16:ℝ) * v ^ 3 + (4191/256:ℝ) * v ^ 2 + (-2555/512:ℝ) * v + (1414477/5591040:ℝ) := by
+    rw [hv]
+    ring
+  have e1 : (28/100:ℝ) - ((1/1:ℝ) * v ^ 6 + (-11/2:ℝ) * v ^ 5 + (231/16:ℝ) * v ^ 4 + (-341/16:ℝ) * v ^ 3 + (4191/256:ℝ) * v ^ 2 + (-2555/512:ℝ) * v + (1414477/5591040:ℝ)) =(755071/27955200:ℝ) * (1 - (4 * v)) ^ 6 + (410481/291200:ℝ) * (4 * v) * (1 - (4 * v)) ^ 5 + (1309177/232960:ℝ) * (4 * v) ^ 2 * (1 - (4 * v)) ^ 4 + (404303/43680:ℝ) * (4 * v) ^ 3 * (1 - (4 * v)) ^ 3 + (55941/7280:ℝ) * (4 * v) ^ 4 * (1 - (4 * v)) ^ 2 + (7277/2275:ℝ) * (4 * v) ^ 5 * (1 - (4 * v)) + (7277/13650:ℝ) * (4 * v) ^ 6 := by ring
+  have e2 : (28/100:ℝ) + ((1/1:ℝ) * v ^ 6 + (-11/2:ℝ) * v ^ 5 + (231/16:ℝ) * v ^ 4 + (-341/16:ℝ) * v ^ 3 + (4191/256:ℝ) * v ^ 2 + (-2555/512:ℝ) * v + (1414477/5591040:ℝ)) =(14899841/27955200:ℝ) * (1 - (4 * v)) ^ 6 + (567951/291200:ℝ) * (4 * v) * (1 - (4 * v)) ^ 5 + (647687/232960:ℝ) * (4 * v) ^ 2 * (1 - (4 * v)) ^ 4 + (84913/43680:ℝ) * (4 * v) ^ 3 * (1 - (4 * v)) ^ 3 + (5211/7280:ℝ) * (4 * v) ^ 4 * (1 - (4 * v)) ^ 2 + (367/2275:ℝ) * (4 * v) ^ 5 * (1 - (4 * v)) + (367/13650:ℝ) * (4 * v) ^ 6 := by ring
+  have p1 : (0:ℝ) ≤ (755071/27955200:ℝ) * (1 - (4 * v)) ^ 6 + (410481/291200:ℝ) * (4 * v) * (1 - (4 * v)) ^ 5 + (1309177/232960:ℝ) * (4 * v) ^ 2 * (1 - (4 * v)) ^ 4 + (404303/43680:ℝ) * (4 * v) ^ 3 * (1 - (4 * v)) ^ 3 + (55941/7280:ℝ) * (4 * v) ^ 4 * (1 - (4 * v)) ^ 2 + (7277/2275:ℝ) * (4 * v) ^ 5 * (1 - (4 * v)) + (7277/13650:ℝ) * (4 * v) ^ 6 := by
+    have ht0 : (0:ℝ) ≤ (755071/27955200:ℝ) * (1 - (4 * v)) ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (755071/27955200:ℝ)) (pow_nonneg h4v1 6)
+    have ht1 : (0:ℝ) ≤ (410481/291200:ℝ) * (4 * v) * (1 - (4 * v)) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (410481/291200:ℝ)) (h4v0)) (pow_nonneg h4v1 5)
+    have ht2 : (0:ℝ) ≤ (1309177/232960:ℝ) * (4 * v) ^ 2 * (1 - (4 * v)) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (1309177/232960:ℝ)) (pow_nonneg h4v0 2)) (pow_nonneg h4v1 4)
+    have ht3 : (0:ℝ) ≤ (404303/43680:ℝ) * (4 * v) ^ 3 * (1 - (4 * v)) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (404303/43680:ℝ)) (pow_nonneg h4v0 3)) (pow_nonneg h4v1 3)
+    have ht4 : (0:ℝ) ≤ (55941/7280:ℝ) * (4 * v) ^ 4 * (1 - (4 * v)) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (55941/7280:ℝ)) (pow_nonneg h4v0 4)) (pow_nonneg h4v1 2)
+    have ht5 : (0:ℝ) ≤ (7277/2275:ℝ) * (4 * v) ^ 5 * (1 - (4 * v)) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (7277/2275:ℝ)) (pow_nonneg h4v0 5)) (h4v1)
+    have ht6 : (0:ℝ) ≤ (7277/13650:ℝ) * (4 * v) ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (7277/13650:ℝ)) (pow_nonneg h4v0 6)
+    linarith
+  have p2 : (0:ℝ) ≤ (14899841/27955200:ℝ) * (1 - (4 * v)) ^ 6 + (567951/291200:ℝ) * (4 * v) * (1 - (4 * v)) ^ 5 + (647687/232960:ℝ) * (4 * v) ^ 2 * (1 - (4 * v)) ^ 4 + (84913/43680:ℝ) * (4 * v) ^ 3 * (1 - (4 * v)) ^ 3 + (5211/7280:ℝ) * (4 * v) ^ 4 * (1 - (4 * v)) ^ 2 + (367/2275:ℝ) * (4 * v) ^ 5 * (1 - (4 * v)) + (367/13650:ℝ) * (4 * v) ^ 6 := by
+    have ht0 : (0:ℝ) ≤ (14899841/27955200:ℝ) * (1 - (4 * v)) ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (14899841/27955200:ℝ)) (pow_nonneg h4v1 6)
+    have ht1 : (0:ℝ) ≤ (567951/291200:ℝ) * (4 * v) * (1 - (4 * v)) ^ 5 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (567951/291200:ℝ)) (h4v0)) (pow_nonneg h4v1 5)
+    have ht2 : (0:ℝ) ≤ (647687/232960:ℝ) * (4 * v) ^ 2 * (1 - (4 * v)) ^ 4 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (647687/232960:ℝ)) (pow_nonneg h4v0 2)) (pow_nonneg h4v1 4)
+    have ht3 : (0:ℝ) ≤ (84913/43680:ℝ) * (4 * v) ^ 3 * (1 - (4 * v)) ^ 3 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (84913/43680:ℝ)) (pow_nonneg h4v0 3)) (pow_nonneg h4v1 3)
+    have ht4 : (0:ℝ) ≤ (5211/7280:ℝ) * (4 * v) ^ 4 * (1 - (4 * v)) ^ 2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (5211/7280:ℝ)) (pow_nonneg h4v0 4)) (pow_nonneg h4v1 2)
+    have ht5 : (0:ℝ) ≤ (367/2275:ℝ) * (4 * v) ^ 5 * (1 - (4 * v)) := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ (367/2275:ℝ)) (pow_nonneg h4v0 5)) (h4v1)
+    have ht6 : (0:ℝ) ≤ (367/13650:ℝ) * (4 * v) ^ 6 := mul_nonneg (by norm_num : (0:ℝ) ≤ (367/13650:ℝ)) (pow_nonneg h4v0 6)
+    linarith
+  rw [← e1] at p1
+  rw [← e2] at p2
+  have hu : (479001600:ℝ) * (t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) ≤ 28/100 := by rw [hB]; linarith
+  have hl : -(28/100:ℝ) ≤ (479001600:ℝ) * (t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) := by rw [hB]; linarith
+  rw [abs_le]
+  constructor
+  · linarith
+  · linarith
+
+private theorem hasDerivAt_u3_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 3 / 6 - y ^ 2 / 4 + y / 12) (t ^ 2 / 2 - t / 2 + (1/12:ℝ)) t := by
+  have h := (((hasDerivAt_pow 3 t).div_const 6).sub ((hasDerivAt_pow 2 t).div_const 4)).add ((hasDerivAt_id t).div_const 12)
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u4_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 4 / 24 - y ^ 3 / 12 + y ^ 2 / 24 - (1/720:ℝ)) (t ^ 3 / 6 - t ^ 2 / 4 + t / 12) t := by
+  have h := ((((hasDerivAt_pow 4 t).div_const 24).sub ((hasDerivAt_pow 3 t).div_const 12)).add ((hasDerivAt_pow 2 t).div_const 24)).sub (hasDerivAt_const t ((1/720:ℝ)))
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u5_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 5 / 120 - y ^ 4 / 48 + y ^ 3 / 72 - y / 720) (t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) t := by
+  have h := ((((hasDerivAt_pow 5 t).div_const 120).sub ((hasDerivAt_pow 4 t).div_const 48)).add ((hasDerivAt_pow 3 t).div_const 72)).sub ((hasDerivAt_id t).div_const 720)
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u6_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 6 / 720 - y ^ 5 / 240 + y ^ 4 / 288 - y ^ 2 / 1440 + (1/30240:ℝ)) (t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) t := by
+  have h := (((((hasDerivAt_pow 6 t).div_const 720).sub ((hasDerivAt_pow 5 t).div_const 240)).add ((hasDerivAt_pow 4 t).div_const 288)).sub ((hasDerivAt_pow 2 t).div_const 1440)).add (hasDerivAt_const t ((1/30240:ℝ)))
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u7_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 7 / 5040 - y ^ 6 / 1440 + y ^ 5 / 1440 - y ^ 3 / 4320 + y / 30240) (t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) t := by
+  have h := (((((hasDerivAt_pow 7 t).div_const 5040).sub ((hasDerivAt_pow 6 t).div_const 1440)).add ((hasDerivAt_pow 5 t).div_const 1440)).sub ((hasDerivAt_pow 3 t).div_const 4320)).add ((hasDerivAt_id t).div_const 30240)
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u8_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 8 / 40320 - y ^ 7 / 10080 + y ^ 6 / 8640 - y ^ 4 / 17280 + y ^ 2 / 60480 - (1/1209600:ℝ)) (t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) t := by
+  have h := ((((((hasDerivAt_pow 8 t).div_const 40320).sub ((hasDerivAt_pow 7 t).div_const 10080)).add ((hasDerivAt_pow 6 t).div_const 8640)).sub ((hasDerivAt_pow 4 t).div_const 17280)).add ((hasDerivAt_pow 2 t).div_const 60480)).sub (hasDerivAt_const t ((1/1209600:ℝ)))
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u9_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 9 / 362880 - y ^ 8 / 80640 + y ^ 7 / 60480 - y ^ 5 / 86400 + y ^ 3 / 181440 - y / 1209600) (t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) t := by
+  have h := ((((((hasDerivAt_pow 9 t).div_const 362880).sub ((hasDerivAt_pow 8 t).div_const 80640)).add ((hasDerivAt_pow 7 t).div_const 60480)).sub ((hasDerivAt_pow 5 t).div_const 86400)).add ((hasDerivAt_pow 3 t).div_const 181440)).sub ((hasDerivAt_id t).div_const 1209600)
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u10_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 10 / 3628800 - y ^ 9 / 725760 + y ^ 8 / 483840 - y ^ 6 / 518400 + y ^ 4 / 725760 - y ^ 2 / 2419200 + (1/47900160:ℝ)) (t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) t := by
+  have h := (((((((hasDerivAt_pow 10 t).div_const 3628800).sub ((hasDerivAt_pow 9 t).div_const 725760)).add ((hasDerivAt_pow 8 t).div_const 483840)).sub ((hasDerivAt_pow 6 t).div_const 518400)).add ((hasDerivAt_pow 4 t).div_const 725760)).sub ((hasDerivAt_pow 2 t).div_const 2419200)).add (hasDerivAt_const t ((1/47900160:ℝ)))
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u11_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 11 / 39916800 - y ^ 10 / 7257600 + y ^ 9 / 4354560 - y ^ 7 / 3628800 + y ^ 5 / 3628800 - y ^ 3 / 7257600 + y / 47900160) (t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) t := by
+  have h := (((((((hasDerivAt_pow 11 t).div_const 39916800).sub ((hasDerivAt_pow 10 t).div_const 7257600)).add ((hasDerivAt_pow 9 t).div_const 4354560)).sub ((hasDerivAt_pow 7 t).div_const 3628800)).add ((hasDerivAt_pow 5 t).div_const 3628800)).sub ((hasDerivAt_pow 3 t).div_const 7257600)).add ((hasDerivAt_id t).div_const 47900160)
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+private theorem hasDerivAt_u12_537 (t : ℝ) :
+    HasDerivAt (fun y : ℝ => y ^ 12 / 479001600 - y ^ 11 / 79833600 + y ^ 10 / 43545600 - y ^ 8 / 29030400 + y ^ 6 / 21772800 - y ^ 4 / 29030400 + y ^ 2 / 95800320 - (691/1307674368000:ℝ)) (t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) t := by
+  have h := ((((((((hasDerivAt_pow 12 t).div_const 479001600).sub ((hasDerivAt_pow 11 t).div_const 79833600)).add ((hasDerivAt_pow 10 t).div_const 43545600)).sub ((hasDerivAt_pow 8 t).div_const 29030400)).add ((hasDerivAt_pow 6 t).div_const 21772800)).sub ((hasDerivAt_pow 4 t).div_const 29030400)).add ((hasDerivAt_pow 2 t).div_const 95800320)).sub (hasDerivAt_const t ((691/1307674368000:ℝ)))
+  convert h using 1 <;> (first | (funext y; dsimp only; ring) | (funext y; simp) | ring)
+
+/-- The bracket `b₀ + b₁` of the second-order Euler–Maclaurin identity, bounded by `0.06859`. -/
+private theorem norm_b_le537 {s : ℂ} (hsre : (1 / 2 : ℝ) ≤ s.re) (hsim : s.im = 50)
+    (hsle : s.re ≤ 1) :
+    ‖(-(10 : ℂ) ^ (1 - s)) / (1 - s) + (s * (1 / 12)) * (10 : ℂ) ^ (-(s + 1))‖ ≤ 0.06864 := by
+  have hs1ne : (1 : ℂ) - s ≠ 0 := by
+    intro h
+    have h2 := congr_arg Complex.im h
+    simp only [Complex.sub_im, Complex.one_im, Complex.zero_im] at h2
+    rw [hsim] at h2
+    norm_num at h2
+  have hpow1 : (10 : ℂ) ^ (1 - s) = (10 : ℂ) ^ (-s) * 10 := by
+    rw [show (1 - s : ℂ) = -s + 1 by ring,
+      Complex.cpow_add (-s) 1 (by norm_num : (10 : ℂ) ≠ 0), Complex.cpow_one]
+  have hpow2 : (10 : ℂ) ^ (-(s + 1)) = (10 : ℂ) ^ (-s) * (1 / 10) := by
+    rw [show (-(s + 1) : ℂ) = -s + (-1) by ring,
+      Complex.cpow_add (-s) (-1) (by norm_num : (10 : ℂ) ≠ 0), Complex.cpow_neg_one]
+    norm_num
+  have hsm1 : s - 1 ≠ 0 := by
+    intro h
+    apply hs1ne
+    linear_combination -h
+  have hsc : -(10 : ℂ) / (1 - s) + s / 120 = (1200 + s * (s - 1)) / (120 * (s - 1)) := by
+    field_simp
+    ring
+  have hbr : (-(10 : ℂ) ^ (1 - s)) / (1 - s) + (s * (1 / 12)) * (10 : ℂ) ^ (-(s + 1))
+      = (10 : ℂ) ^ (-s) * ((1200 + s * (s - 1)) / (120 * (s - 1))) := by
+    have hb0 : -(10 : ℂ) ^ (1 - s) / (1 - s) = (10 : ℂ) ^ (-s) * (-(10 : ℂ) / (1 - s)) := by
+      rw [hpow1]
+      ring
+    have hb1 : (s * (1 / 12)) * (10 : ℂ) ^ (-(s + 1)) = (10 : ℂ) ^ (-s) * (s / 120) := by
+      rw [hpow2]
+      ring
+    rw [hb0, hb1, ← mul_add, hsc]
+  have hpows : ‖(10 : ℂ) ^ (-s)‖ ≤ 0.3163 := by
+    have h := norm_pow10_le537 (s := s) hsre 0
+    simpa using h
+  have hs1 : (50 : ℝ) ≤ ‖s - 1‖ := by
+    have h := Complex.sq_norm (s - 1)
+    rw [Complex.normSq_apply] at h
+    simp only [Complex.sub_re, Complex.one_re, Complex.sub_im, Complex.one_im, hsim] at h
+    nlinarith [norm_nonneg (s - 1), hsle]
+  have hre : (1200 + s * (s - 1)).re = -1300 - (s.re - s.re ^ 2) := by
+    have h2 : (s * (s - 1)).re = s.re * s.re - s.re - 2500 := by
+      rw [Complex.mul_re, Complex.sub_re, Complex.sub_im, Complex.one_re, Complex.one_im, hsim]
+      ring
+    have h1 : ((1200 : ℂ)).re = 1200 := by norm_num
+    rw [Complex.add_re, h1, h2]
+    ring
+  have him : (1200 + s * (s - 1)).im = 100 * s.re - 50 := by
+    have h2 : (s * (s - 1)).im = 100 * s.re - 50 := by
+      rw [Complex.mul_im, Complex.sub_re, Complex.sub_im, Complex.one_re, Complex.one_im, hsim]
+      ring
+    have h1 : ((1200 : ℂ)).im = 0 := by norm_num
+    rw [Complex.add_im, h1, h2]
+    ring
+  have hnum : ‖1200 + s * (s - 1)‖ ≤ 1302 := by
+    have h := Complex.sq_norm (1200 + s * (s - 1))
+    rw [Complex.normSq_apply, hre, him] at h
+    have ha0 : 0 ≤ s.re - s.re ^ 2 := by nlinarith [hsre, hsle]
+    have ha1 : s.re - s.re ^ 2 ≤ 1 / 4 := by nlinarith [sq_nonneg (s.re - 1 / 2)]
+    nlinarith [norm_nonneg (1200 + s * (s - 1))]
+  rw [hbr, norm_mul, norm_div]
+  have hden : ‖(120 : ℂ) * (s - 1)‖ = 120 * ‖s - 1‖ := by
+    rw [norm_mul]
+    norm_num
+  rw [hden]
+  have hfrac : ‖1200 + s * (s - 1)‖ / (120 * ‖s - 1‖) ≤ 1302 / (120 * 50) := by
+    have hd : (0:ℝ) < 120 * ‖s - 1‖ := by
+      have h1 : (0:ℝ) < ‖s - 1‖ := by linarith
+      nlinarith
+    rw [div_le_iff₀ hd]
+    have h3 : (120:ℝ) * 50 ≤ 120 * ‖s - 1‖ := by nlinarith [hs1]
+    have h4 : (0:ℝ) ≤ 1302 / (120 * 50) := by norm_num
+    nlinarith [hnum, h3, h4]
+  have hstep : ‖(10 : ℂ) ^ (-s)‖ * (‖1200 + s * (s - 1)‖ / (120 * ‖s - 1‖)) ≤
+      0.3163 * (1302 / (120 * 50)) := by
+    apply mul_le_mul hpows hfrac (by positivity)
+    positivity
+  calc ‖(10 : ℂ) ^ (-s)‖ * (‖1200 + s * (s - 1)‖ / (120 * ‖s - 1‖))
+      ≤ 0.3163 * (1302 / (120 * 50)) := hstep
+    _ ≤ 0.06864 := by norm_num
+
+/-- Every factor `s + i` of the falling factorial, `Re s ∈ [0,1]`, `Im s = 50`. -/
+private theorem norm_sadd_le537 {s : ℂ} (hsre0 : 0 ≤ s.re) (hsle : s.re ≤ 1) (hsim : s.im = 50)
+    (i : ℕ) (r : ℝ) (hax : (1 + (i : ℝ)) ^ 2 + 2500 ≤ r ^ 2) (hr2 : 0 ≤ r) :
+    ‖s + ((i : ℝ) : ℂ)‖ ≤ r := by
+  have h := Complex.sq_norm (s + ((i : ℝ) : ℂ))
+  rw [Complex.normSq_apply] at h
+  simp only [Complex.add_re, Complex.add_im, Complex.ofReal_re, Complex.ofReal_im] at h
+  rw [hsim] at h
+  have hiR : (0 : ℝ) ≤ (i : ℝ) := Nat.cast_nonneg i
+  have h1 : s.re + (i : ℝ) ≤ 1 + (i : ℝ) := by linarith
+  have h0 : 0 ≤ s.re + (i : ℝ) := by linarith
+  have key : (s.re + (i : ℝ)) ^ 2 + 2500 ≤ r ^ 2 := by
+    have : (s.re + (i : ℝ)) ^ 2 ≤ (1 + (i : ℝ)) ^ 2 := by nlinarith
+    linarith
+  nlinarith [norm_nonneg (s + ((i : ℝ) : ℂ))]
+
+
+private theorem norm_prod3_le537 {s : ℂ} (hsre0 : 0 ≤ s.re) (hsle : s.re ≤ 1)
+    (hsim : s.im = 50) :
+    ‖s * (s + 1) * (s + 2)‖ ≤ 125401 := by
+  have h0 : ‖s‖ ≤ 50.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 0 50.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h1 : ‖(s + 1)‖ ≤ 50.05 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 1 50.05 (by norm_num) (by norm_num)
+    simpa using hh
+  have h2 : ‖(s + 2)‖ ≤ 50.1 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 2 50.1 (by norm_num) (by norm_num)
+    simpa using hh
+  rw [norm_mul, norm_mul]
+  refine le_trans (mul_le_mul (mul_le_mul (h0) h1 (norm_nonneg _) (by norm_num)) h2 (norm_nonneg _) (by norm_num)) ?_
+  norm_num
+
+
+private theorem norm_prod5_le537 {s : ℂ} (hsre0 : 0 ≤ s.re) (hsle : s.re ≤ 1)
+    (hsim : s.im = 50) :
+    ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4)‖ ≤ 316202463 := by
+  have h0 : ‖s‖ ≤ 50.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 0 50.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h1 : ‖(s + 1)‖ ≤ 50.05 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 1 50.05 (by norm_num) (by norm_num)
+    simpa using hh
+  have h2 : ‖(s + 2)‖ ≤ 50.1 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 2 50.1 (by norm_num) (by norm_num)
+    simpa using hh
+  have h3 : ‖(s + 3)‖ ≤ 50.17 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 3 50.17 (by norm_num) (by norm_num)
+    simpa using hh
+  have h4 : ‖(s + 4)‖ ≤ 50.26 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 4 50.26 (by norm_num) (by norm_num)
+    simpa using hh
+  rw [norm_mul, norm_mul, norm_mul, norm_mul]
+  refine le_trans (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (h0) h1 (norm_nonneg _) (by norm_num)) h2 (norm_nonneg _) (by norm_num)) h3 (norm_nonneg _) (by norm_num)) h4 (norm_nonneg _) (by norm_num)) ?_
+  norm_num
+
+
+private theorem norm_prod7_le537 {s : ℂ} (hsre0 : 0 ≤ s.re) (hsle : s.re ≤ 1)
+    (hsim : s.im = 50) :
+    ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)‖ ≤ 804319460336 := by
+  have h0 : ‖s‖ ≤ 50.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 0 50.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h1 : ‖(s + 1)‖ ≤ 50.05 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 1 50.05 (by norm_num) (by norm_num)
+    simpa using hh
+  have h2 : ‖(s + 2)‖ ≤ 50.1 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 2 50.1 (by norm_num) (by norm_num)
+    simpa using hh
+  have h3 : ‖(s + 3)‖ ≤ 50.17 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 3 50.17 (by norm_num) (by norm_num)
+    simpa using hh
+  have h4 : ‖(s + 4)‖ ≤ 50.26 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 4 50.26 (by norm_num) (by norm_num)
+    simpa using hh
+  have h5 : ‖(s + 5)‖ ≤ 50.37 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 5 50.37 (by norm_num) (by norm_num)
+    simpa using hh
+  have h6 : ‖(s + 6)‖ ≤ 50.5 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 6 50.5 (by norm_num) (by norm_num)
+    simpa using hh
+  rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul]
+  refine le_trans (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (h0) h1 (norm_nonneg _) (by norm_num)) h2 (norm_nonneg _) (by norm_num)) h3 (norm_nonneg _) (by norm_num)) h4 (norm_nonneg _) (by norm_num)) h5 (norm_nonneg _) (by norm_num)) h6 (norm_nonneg _) (by norm_num)) ?_
+  norm_num
+
+
+private theorem norm_prod9_le537 {s : ℂ} (hsre0 : 0 ≤ s.re) (hsle : s.re ≤ 1)
+    (hsim : s.im = 50) :
+    ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)‖ ≤ 2070344833446484 := by
+  have h0 : ‖s‖ ≤ 50.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 0 50.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h1 : ‖(s + 1)‖ ≤ 50.05 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 1 50.05 (by norm_num) (by norm_num)
+    simpa using hh
+  have h2 : ‖(s + 2)‖ ≤ 50.1 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 2 50.1 (by norm_num) (by norm_num)
+    simpa using hh
+  have h3 : ‖(s + 3)‖ ≤ 50.17 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 3 50.17 (by norm_num) (by norm_num)
+    simpa using hh
+  have h4 : ‖(s + 4)‖ ≤ 50.26 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 4 50.26 (by norm_num) (by norm_num)
+    simpa using hh
+  have h5 : ‖(s + 5)‖ ≤ 50.37 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 5 50.37 (by norm_num) (by norm_num)
+    simpa using hh
+  have h6 : ‖(s + 6)‖ ≤ 50.5 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 6 50.5 (by norm_num) (by norm_num)
+    simpa using hh
+  have h7 : ‖(s + 7)‖ ≤ 50.65 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 7 50.65 (by norm_num) (by norm_num)
+    simpa using hh
+  have h8 : ‖(s + 8)‖ ≤ 50.82 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 8 50.82 (by norm_num) (by norm_num)
+    simpa using hh
+  rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul]
+  refine le_trans (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (h0) h1 (norm_nonneg _) (by norm_num)) h2 (norm_nonneg _) (by norm_num)) h3 (norm_nonneg _) (by norm_num)) h4 (norm_nonneg _) (by norm_num)) h5 (norm_nonneg _) (by norm_num)) h6 (norm_nonneg _) (by norm_num)) h7 (norm_nonneg _) (by norm_num)) h8 (norm_nonneg _) (by norm_num)) ?_
+  norm_num
+
+
+private theorem norm_prod11_le537 {s : ℂ} (hsre0 : 0 ≤ s.re) (hsle : s.re ≤ 1)
+    (hsim : s.im = 50) :
+    ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)‖ ≤ 5409256611449265152 := by
+  have h0 : ‖s‖ ≤ 50.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 0 50.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h1 : ‖(s + 1)‖ ≤ 50.05 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 1 50.05 (by norm_num) (by norm_num)
+    simpa using hh
+  have h2 : ‖(s + 2)‖ ≤ 50.1 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 2 50.1 (by norm_num) (by norm_num)
+    simpa using hh
+  have h3 : ‖(s + 3)‖ ≤ 50.17 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 3 50.17 (by norm_num) (by norm_num)
+    simpa using hh
+  have h4 : ‖(s + 4)‖ ≤ 50.26 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 4 50.26 (by norm_num) (by norm_num)
+    simpa using hh
+  have h5 : ‖(s + 5)‖ ≤ 50.37 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 5 50.37 (by norm_num) (by norm_num)
+    simpa using hh
+  have h6 : ‖(s + 6)‖ ≤ 50.5 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 6 50.5 (by norm_num) (by norm_num)
+    simpa using hh
+  have h7 : ‖(s + 7)‖ ≤ 50.65 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 7 50.65 (by norm_num) (by norm_num)
+    simpa using hh
+  have h8 : ‖(s + 8)‖ ≤ 50.82 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 8 50.82 (by norm_num) (by norm_num)
+    simpa using hh
+  have h9 : ‖(s + 9)‖ ≤ 51.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 9 51.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h10 : ‖(s + 10)‖ ≤ 51.22 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 10 51.22 (by norm_num) (by norm_num)
+    simpa using hh
+  rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul]
+  refine le_trans (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (h0) h1 (norm_nonneg _) (by norm_num)) h2 (norm_nonneg _) (by norm_num)) h3 (norm_nonneg _) (by norm_num)) h4 (norm_nonneg _) (by norm_num)) h5 (norm_nonneg _) (by norm_num)) h6 (norm_nonneg _) (by norm_num)) h7 (norm_nonneg _) (by norm_num)) h8 (norm_nonneg _) (by norm_num)) h9 (norm_nonneg _) (by norm_num)) h10 (norm_nonneg _) (by norm_num)) ?_
+  norm_num
+
+
+private theorem norm_prod12_le537 {s : ℂ} (hsre0 : 0 ≤ s.re) (hsle : s.re ≤ 1)
+    (hsim : s.im = 50) :
+    ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10) * (s + 11)‖ ≤ 278306252659064668160 := by
+  have h0 : ‖s‖ ≤ 50.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 0 50.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h1 : ‖(s + 1)‖ ≤ 50.05 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 1 50.05 (by norm_num) (by norm_num)
+    simpa using hh
+  have h2 : ‖(s + 2)‖ ≤ 50.1 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 2 50.1 (by norm_num) (by norm_num)
+    simpa using hh
+  have h3 : ‖(s + 3)‖ ≤ 50.17 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 3 50.17 (by norm_num) (by norm_num)
+    simpa using hh
+  have h4 : ‖(s + 4)‖ ≤ 50.26 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 4 50.26 (by norm_num) (by norm_num)
+    simpa using hh
+  have h5 : ‖(s + 5)‖ ≤ 50.37 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 5 50.37 (by norm_num) (by norm_num)
+    simpa using hh
+  have h6 : ‖(s + 6)‖ ≤ 50.5 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 6 50.5 (by norm_num) (by norm_num)
+    simpa using hh
+  have h7 : ‖(s + 7)‖ ≤ 50.65 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 7 50.65 (by norm_num) (by norm_num)
+    simpa using hh
+  have h8 : ‖(s + 8)‖ ≤ 50.82 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 8 50.82 (by norm_num) (by norm_num)
+    simpa using hh
+  have h9 : ‖(s + 9)‖ ≤ 51.01 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 9 51.01 (by norm_num) (by norm_num)
+    simpa using hh
+  have h10 : ‖(s + 10)‖ ≤ 51.22 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 10 51.22 (by norm_num) (by norm_num)
+    simpa using hh
+  have h11 : ‖(s + 11)‖ ≤ 51.45 := by
+    have hh := norm_sadd_le537 hsre0 hsle hsim 11 51.45 (by norm_num) (by norm_num)
+    simpa using hh
+  rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_mul]
+  refine le_trans (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (mul_le_mul (h0) h1 (norm_nonneg _) (by norm_num)) h2 (norm_nonneg _) (by norm_num)) h3 (norm_nonneg _) (by norm_num)) h4 (norm_nonneg _) (by norm_num)) h5 (norm_nonneg _) (by norm_num)) h6 (norm_nonneg _) (by norm_num)) h7 (norm_nonneg _) (by norm_num)) h8 (norm_nonneg _) (by norm_num)) h9 (norm_nonneg _) (by norm_num)) h10 (norm_nonneg _) (by norm_num)) h11 (norm_nonneg _) (by norm_num)) ?_
+  norm_num
+
+
+/-- The order-twelve remainder integral. -/
+private theorem norm_I12_le537 {s : ℂ} (hσ : (1 / 2 : ℝ) ≤ s.re) :
+    ‖∫ x in Set.Ioi (10 : ℝ), ((((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600
+        + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400
+        + t ^ 2 / 95800320 - (691 / 1307674368000 : ℝ)) (Int.fract x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (-(s + 12))‖
+      ≤ (28 / 100 : ℝ) / 479001600 * ((10 : ℝ) ^ (-s.re - 11) / (s.re + 11)) := by
+  have hc : (0 : ℝ) ≤ (28 / 100 : ℝ) / 479001600 := by norm_num
+  refine (norm_integral_le_integral_norm _).trans ?_
+  have hni : IntegrableOn (fun x : ℝ => ((28 / 100 : ℝ) / 479001600) * x ^ (-s.re - 12))
+      (Set.Ioi (10 : ℝ)) :=
+    (integrableOn_Ioi_rpow_of_lt (by linarith) (by norm_num)).const_mul _
+  refine (integral_mono_of_nonneg ?_ hni ?_).trans_eq ?_
+  · filter_upwards with x
+    positivity
+  · filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with x hx
+    have hx0 : (0 : ℝ) < x := by have h10 : (10:ℝ) < x := hx; linarith
+    have hb : ‖((((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600
+        - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320
+        - (691 / 1307674368000 : ℝ)) (Int.fract x)) : ℝ) : ℂ)‖ ≤ (28 / 100 : ℝ) / 479001600 := by
+      rw [Complex.norm_real, Real.norm_eq_abs]
+      exact abs_u12_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le
+    rw [norm_mul]
+    have hw : ‖(x : ℂ) ^ (-(s + 12))‖ = x ^ (-s.re - 12) := by
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos hx0]
+      have e : (-(s + (12 : ℂ))).re = -s.re - 12 := by
+        rw [Complex.neg_re, Complex.add_re]
+        have h12 : ((12 : ℂ)).re = 12 := by norm_num
+        rw [h12]
+        ring
+      rw [e]
+    rw [hw]
+    exact mul_le_mul_of_nonneg_right hb (Real.rpow_nonneg hx0.le _)
+  · rw [integral_const_mul,
+      integral_Ioi_rpow_of_lt (a := -s.re - 12) (by linarith) (by norm_num)]
+    have e : -((10 : ℝ) ^ (-s.re - 12 + 1)) / (-s.re - 12 + 1)
+        = (10 : ℝ) ^ (-s.re - 11) / (s.re + 11) := by
+      have a1 : -s.re - 12 + 1 = -s.re - 11 := by ring
+      have a2 : -s.re - 11 = -(s.re + 11) := by ring
+      rw [a1, a2, neg_div_neg_eq]
+    rw [e]
+
+
+set_option maxHeartbeats 20000000
+
+/-- LEAF. Backlund p. 368, the k equal to two Euler summation remainder.
+K is exactly zeta minus the finite sum H. Its modulus is below 0.281.
+This is the remainder estimate from display 12, not a strip growth bound. -/
+theorem boundaryK (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
+    ‖riemannZeta ((σ : ℂ) + 50 * I) - boundaryH σ‖ ≤ 0.281 := by
+  set s : ℂ := (σ : ℂ) + 50 * I with hsdef
+  have hsre : s.re = σ := by rw [hsdef]; simp
+  have hsim : s.im = 50 := by rw [hsdef]; simp
+  have hσ1 : (1 / 2 : ℝ) ≤ s.re := by rw [hsre]; exact hσ.1
+  have hσ2 : s.re ≤ 1 := by rw [hsre]; exact hσ.2
+  have hσ0 : (0 : ℝ) ≤ s.re := by linarith
+  have hspos : 0 < s.re := by linarith
+  have hsne1 : s ≠ 1 := by
+    intro h
+    have h2 := congr_arg Complex.im h
+    rw [hsim] at h2
+    norm_num at h2
+  set b : ℂ := (-(10 : ℂ) ^ (1 - s)) / (1 - s) + (s * (1 / 12)) * (10 : ℂ) ^ (-(s + 1)) with hb
+
+  have e2 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 2 / 2 - t / 2 + (1/12:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2)))
+      = -(((0 ^ 3 / 6 - 0 ^ 2 / 4 + 0 / 12 : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 2)) + (s + 2) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 3 / 6 - t ^ 2 / 4 + t / 12) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 3))) := by
+    have hk : (1 : ℝ) < (s + (2 : ℂ)).re := by
+      have e : (s + (2 : ℂ)).re = s.re + 2 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (3 : ℂ)).re := by
+      have e : (s + (3 : ℂ)).re = s.re + 3 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 2) hk
+      (fun t : ℝ => t ^ 2 / 2 - t / 2 + (1/12:ℝ)) (fun t : ℝ => t ^ 3 / 6 - t ^ 2 / 4 + t / 12)
+      continuous_u2_fract537 continuous_u3_fract537
+      hasDerivAt_u3_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 2 / 2 - t / 2 + (1/12:ℝ)) (83333334/100000000 : ℝ) (by norm_num)
+        (k := (2 : ℂ)) hk continuous_u2_fract537
+        (fun x => (abs_u2_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 3 / 6 - t ^ 2 / 4 + t / 12) (8018754/100000000 : ℝ) (by norm_num)
+        (k := (3 : ℂ)) hk1 continuous_u3_fract537
+        (fun x => (abs_u3_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e3 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 3 / 6 - t ^ 2 / 4 + t / 12) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 3)))
+      = -(((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s + 3) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 4))) := by
+    have hk : (1 : ℝ) < (s + (3 : ℂ)).re := by
+      have e : (s + (3 : ℂ)).re = s.re + 3 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (4 : ℂ)).re := by
+      have e : (s + (4 : ℂ)).re = s.re + 4 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 3) hk
+      (fun t : ℝ => t ^ 3 / 6 - t ^ 2 / 4 + t / 12) (fun t : ℝ => t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ))
+      continuous_u3_fract537 continuous_u4_fract537
+      hasDerivAt_u4_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 3 / 6 - t ^ 2 / 4 + t / 12) (8018754/100000000 : ℝ) (by norm_num)
+        (k := (3 : ℂ)) hk continuous_u3_fract537
+        (fun x => (abs_u3_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) (1388889/100000000 : ℝ) (by norm_num)
+        (k := (4 : ℂ)) hk1 continuous_u4_fract537
+        (fun x => (abs_u4_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e4 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 4)))
+      = -(((0 ^ 5 / 120 - 0 ^ 4 / 48 + 0 ^ 3 / 72 - 0 / 720 : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 4)) + (s + 4) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 5))) := by
+    have hk : (1 : ℝ) < (s + (4 : ℂ)).re := by
+      have e : (s + (4 : ℂ)).re = s.re + 4 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (5 : ℂ)).re := by
+      have e : (s + (5 : ℂ)).re = s.re + 5 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 4) hk
+      (fun t : ℝ => t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) (fun t : ℝ => t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720)
+      continuous_u4_fract537 continuous_u5_fract537
+      hasDerivAt_u5_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) (1388889/100000000 : ℝ) (by norm_num)
+        (k := (4 : ℂ)) hk continuous_u4_fract537
+        (fun x => (abs_u4_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) (203819/100000000 : ℝ) (by norm_num)
+        (k := (5 : ℂ)) hk1 continuous_u5_fract537
+        (fun x => (abs_u5_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e5 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 5)))
+      = -(((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s + 5) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 6))) := by
+    have hk : (1 : ℝ) < (s + (5 : ℂ)).re := by
+      have e : (s + (5 : ℂ)).re = s.re + 5 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (6 : ℂ)).re := by
+      have e : (s + (6 : ℂ)).re = s.re + 6 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 5) hk
+      (fun t : ℝ => t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) (fun t : ℝ => t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ))
+      continuous_u5_fract537 continuous_u6_fract537
+      hasDerivAt_u6_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) (203819/100000000 : ℝ) (by norm_num)
+        (k := (5 : ℂ)) hk continuous_u5_fract537
+        (fun x => (abs_u5_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) (33069/100000000 : ℝ) (by norm_num)
+        (k := (6 : ℂ)) hk1 continuous_u6_fract537
+        (fun x => (abs_u6_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e6 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 6)))
+      = -(((0 ^ 7 / 5040 - 0 ^ 6 / 1440 + 0 ^ 5 / 1440 - 0 ^ 3 / 4320 + 0 / 30240 : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 6)) + (s + 6) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 7))) := by
+    have hk : (1 : ℝ) < (s + (6 : ℂ)).re := by
+      have e : (s + (6 : ℂ)).re = s.re + 6 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (7 : ℂ)).re := by
+      have e : (s + (7 : ℂ)).re = s.re + 7 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 6) hk
+      (fun t : ℝ => t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) (fun t : ℝ => t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240)
+      continuous_u6_fract537 continuous_u7_fract537
+      hasDerivAt_u7_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) (33069/100000000 : ℝ) (by norm_num)
+        (k := (6 : ℂ)) hk continuous_u6_fract537
+        (fun x => (abs_u6_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) (5172/100000000 : ℝ) (by norm_num)
+        (k := (7 : ℂ)) hk1 continuous_u7_fract537
+        (fun x => (abs_u7_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e7 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 7)))
+      = -(((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) + (s + 7) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 8))) := by
+    have hk : (1 : ℝ) < (s + (7 : ℂ)).re := by
+      have e : (s + (7 : ℂ)).re = s.re + 7 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (8 : ℂ)).re := by
+      have e : (s + (8 : ℂ)).re = s.re + 8 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 7) hk
+      (fun t : ℝ => t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) (fun t : ℝ => t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ))
+      continuous_u7_fract537 continuous_u8_fract537
+      hasDerivAt_u8_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) (5172/100000000 : ℝ) (by norm_num)
+        (k := (7 : ℂ)) hk continuous_u7_fract537
+        (fun x => (abs_u7_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) (827/100000000 : ℝ) (by norm_num)
+        (k := (8 : ℂ)) hk1 continuous_u8_fract537
+        (fun x => (abs_u8_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e8 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 8)))
+      = -(((0 ^ 9 / 362880 - 0 ^ 8 / 80640 + 0 ^ 7 / 60480 - 0 ^ 5 / 86400 + 0 ^ 3 / 181440 - 0 / 1209600 : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 8)) + (s + 8) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 9))) := by
+    have hk : (1 : ℝ) < (s + (8 : ℂ)).re := by
+      have e : (s + (8 : ℂ)).re = s.re + 8 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (9 : ℂ)).re := by
+      have e : (s + (9 : ℂ)).re = s.re + 9 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 8) hk
+      (fun t : ℝ => t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) (fun t : ℝ => t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600)
+      continuous_u8_fract537 continuous_u9_fract537
+      hasDerivAt_u9_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) (827/100000000 : ℝ) (by norm_num)
+        (k := (8 : ℂ)) hk continuous_u8_fract537
+        (fun x => (abs_u8_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) (132/100000000 : ℝ) (by norm_num)
+        (k := (9 : ℂ)) hk1 continuous_u9_fract537
+        (fun x => (abs_u9_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e9 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 9)))
+      = -(((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9)) + (s + 9) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 10))) := by
+    have hk : (1 : ℝ) < (s + (9 : ℂ)).re := by
+      have e : (s + (9 : ℂ)).re = s.re + 9 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (10 : ℂ)).re := by
+      have e : (s + (10 : ℂ)).re = s.re + 10 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 9) hk
+      (fun t : ℝ => t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) (fun t : ℝ => t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ))
+      continuous_u9_fract537 continuous_u10_fract537
+      hasDerivAt_u10_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) (132/100000000 : ℝ) (by norm_num)
+        (k := (9 : ℂ)) hk continuous_u9_fract537
+        (fun x => (abs_u9_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) (21/100000000 : ℝ) (by norm_num)
+        (k := (10 : ℂ)) hk1 continuous_u10_fract537
+        (fun x => (abs_u10_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e10 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 10)))
+      = -(((0 ^ 11 / 39916800 - 0 ^ 10 / 7257600 + 0 ^ 9 / 4354560 - 0 ^ 7 / 3628800 + 0 ^ 5 / 3628800 - 0 ^ 3 / 7257600 + 0 / 47900160 : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 10)) + (s + 10) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 11))) := by
+    have hk : (1 : ℝ) < (s + (10 : ℂ)).re := by
+      have e : (s + (10 : ℂ)).re = s.re + 10 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (11 : ℂ)).re := by
+      have e : (s + (11 : ℂ)).re = s.re + 11 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 10) hk
+      (fun t : ℝ => t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) (fun t : ℝ => t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160)
+      continuous_u10_fract537 continuous_u11_fract537
+      hasDerivAt_u11_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) (21/100000000 : ℝ) (by norm_num)
+        (k := (10 : ℂ)) hk continuous_u10_fract537
+        (fun x => (abs_u10_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) (4/100000000 : ℝ) (by norm_num)
+        (k := (11 : ℂ)) hk1 continuous_u11_fract537
+        (fun x => (abs_u11_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have e11 : (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 11)))
+      = -(((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 11)) + (s + 11) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12))) := by
+    have hk : (1 : ℝ) < (s + (11 : ℂ)).re := by
+      have e : (s + (11 : ℂ)).re = s.re + 11 := by simp
+      rw [e]; linarith
+    have hk1 : (1 : ℝ) < (s + (12 : ℂ)).re := by
+      have e : (s + (12 : ℂ)).re = s.re + 12 := by simp
+      rw [e]; linarith
+    have h := ibp_Ioi_gen537 10 (by norm_num) (k := 11) hk
+      (fun t : ℝ => t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) (fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ))
+      continuous_u11_fract537 continuous_u12_fract537
+      hasDerivAt_u12_537 ?_ ?_
+    · exact h
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) (4/100000000 : ℝ) (by norm_num)
+        (k := (11 : ℂ)) hk continuous_u11_fract537
+        (fun x => (abs_u11_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+    · exact integrable_fract_cpow537 10 (by norm_num) (fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (1/100000000 : ℝ) (by norm_num)
+        (k := (12 : ℂ)) hk1 continuous_u12_fract537
+        (fun x => (abs_u12_le537 (Int.fract x) (Int.fract_nonneg x) (Int.fract_lt_one x).le).trans (by norm_num))
+
+  have hsum : (∑ n ∈ Finset.range (10 + 1), (1 : ℂ) / (n : ℂ) ^ s)
+      = (∑ n ∈ Finset.Icc (1 : ℕ) 9, (1 : ℂ) / (n : ℂ) ^ s) + (10 : ℂ) ^ (-s) := by
+    have hset : Finset.range (10 + 1) = insert 0 (insert 10 (Finset.Icc (1 : ℕ) 9)) := by
+      ext n
+      simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Icc]
+      omega
+    rw [hset, Finset.sum_insert (by simp), Finset.sum_insert (by simp)]
+    have hs0 : s ≠ 0 := by
+      intro h
+      rw [h] at hspos
+      simp at hspos
+    have hzero : (1 : ℂ) / ((0 : ℕ) : ℂ) ^ s = 0 := by
+      have h0c : ((0 : ℕ) : ℂ) = 0 := by norm_num
+      rw [h0c, Complex.zero_cpow hs0]
+      simp
+    rw [hzero, zero_add]
+    have h10 : (1 : ℂ) / ((10 : ℕ) : ℂ) ^ s = (10 : ℂ) ^ (-s) := by
+      rw [one_div]
+      exact (Complex.cpow_neg ((10 : ℕ) : ℂ) s).symm
+    rw [h10]
+    ring
+  have hHb : boundaryH σ = (∑ n ∈ Finset.Icc (1 : ℕ) 9, (1 : ℂ) / (n : ℂ) ^ s)
+      + (1 / (2 * (10 : ℂ) ^ s)) := by
+    simp only [boundaryH]
+    rw [← hsdef]
+  have hhalf : (1 / (2 * (10 : ℂ) ^ s)) = (10 : ℂ) ^ (-s) / 2 := by
+    rw [one_div, mul_inv, ← Complex.cpow_neg (10 : ℂ) s]
+    ring
+  have hc2 : riemannZeta s - boundaryH σ = b - (s * (s + 1)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 2 / 2 - t / 2 + (1/12:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 2))) := by
+    have hem := em_q_zeta537 (N := 10) (by norm_num) hspos hsne1
+    rw [hsum] at hem
+    rw [hHb, hhalf, hb]
+    linear_combination hem
+
+  have hc3 : riemannZeta s - boundaryH σ
+      = b - (s * (s + 1) * (s + 2)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 3 / 6 - t ^ 2 / 4 + t / 12) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 3))) := by
+    rw [hc2, e2] <;> try norm_num <;> try ring
+
+  have hc4 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) - (s * (s + 1) * (s + 2) * (s + 3)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 4 / 24 - t ^ 3 / 12 + t ^ 2 / 24 - (1/720:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 4))) := by
+    rw [hc3, e3] <;> try norm_num <;> try ring
+
+  have hc5 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 5 / 120 - t ^ 4 / 48 + t ^ 3 / 72 - t / 720) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 5))) := by
+    rw [hc4, e4] <;> try norm_num <;> try ring
+
+  have hc6 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 6 / 720 - t ^ 5 / 240 + t ^ 4 / 288 - t ^ 2 / 1440 + (1/30240:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 6))) := by
+    rw [hc5, e5] <;> try norm_num <;> try ring
+
+  have hc7 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 7 / 5040 - t ^ 6 / 1440 + t ^ 5 / 1440 - t ^ 3 / 4320 + t / 30240) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 7))) := by
+    rw [hc6, e6] <;> try norm_num <;> try ring
+
+  have hc8 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 8 / 40320 - t ^ 7 / 10080 + t ^ 6 / 8640 - t ^ 4 / 17280 + t ^ 2 / 60480 - (1/1209600:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 8))) := by
+    rw [hc7, e7] <;> try norm_num <;> try ring
+
+  have hc9 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 9 / 362880 - t ^ 8 / 80640 + t ^ 7 / 60480 - t ^ 5 / 86400 + t ^ 3 / 181440 - t / 1209600) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 9))) := by
+    rw [hc8, e8] <;> try norm_num <;> try ring
+
+  have hc10 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 10 / 3628800 - t ^ 9 / 725760 + t ^ 8 / 483840 - t ^ 6 / 518400 + t ^ 4 / 725760 - t ^ 2 / 2419200 + (1/47900160:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 10))) := by
+    rw [hc9, e9] <;> try norm_num <;> try ring
+
+  have hc11 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 11 / 39916800 - t ^ 10 / 7257600 + t ^ 9 / 4354560 - t ^ 7 / 3628800 + t ^ 5 / 3628800 - t ^ 3 / 7257600 + t / 47900160) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 11))) := by
+    rw [hc10, e10] <;> try norm_num <;> try ring
+
+  have hc12 : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)) * (((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 11)) - (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10) * (s + 11)) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12))) := by
+    rw [hc11, e11] <;> try norm_num <;> try ring
+
+  have hK : riemannZeta s - boundaryH σ
+      = b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)) * (((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 11)) - s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10) * (s + 11) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12))) := hc12
+
+  have hA2 : ‖(s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3))‖ ≤ 0.05509 := by
+    have hP : ‖(s * (s + 1) * (s + 2))‖ ≤ 125401 := norm_prod3_le537 hσ0 hσ2 hsim
+    have hp : ‖(10 : ℂ) ^ (-(s + 3))‖ ≤ 0.3163 / 1000 := by
+      have h := norm_pow10_le537 (s := s) hσ1 3
+      have h10 : (10 : ℝ) ^ (-((3 : ℕ) : ℝ)) = 1 / 1000 := by
+        rw [Real.rpow_neg (by norm_num), Real.rpow_natCast]
+        norm_num
+      rw [h10] at h
+      calc ‖(10 : ℂ) ^ (-(s + 3))‖ ≤ 0.3163 * (1 / 1000) := h
+        _ = 0.3163 / 1000 := by norm_num
+    calc ‖(s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3))‖
+        = ‖(s * (s + 1) * (s + 2))‖ * (1 / 720) * ‖(10 : ℂ) ^ (-(s + 3))‖ := by
+          rw [norm_mul, norm_mul]
+          have hu : ‖(((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ)‖ = (1 / 720) := by
+            rw [Complex.norm_real, Real.norm_eq_abs]
+            norm_num
+          rw [hu] <;> try ring
+      _ ≤ 125401 * (1 / 720) * (0.3163 / 1000) := by
+          exact mul_le_mul (mul_le_mul_of_nonneg_right hP (by norm_num)) hp (norm_nonneg _) (by norm_num)
+      _ ≤ 0.05509 := by norm_num
+
+  have hA3 : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5))‖ ≤ 0.03308 := by
+    have hP : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4))‖ ≤ 316202463 := norm_prod5_le537 hσ0 hσ2 hsim
+    have hp : ‖(10 : ℂ) ^ (-(s + 5))‖ ≤ 0.3163 / 100000 := by
+      have h := norm_pow10_le537 (s := s) hσ1 5
+      have h10 : (10 : ℝ) ^ (-((5 : ℕ) : ℝ)) = 1 / 100000 := by
+        rw [Real.rpow_neg (by norm_num), Real.rpow_natCast]
+        norm_num
+      rw [h10] at h
+      calc ‖(10 : ℂ) ^ (-(s + 5))‖ ≤ 0.3163 * (1 / 100000) := h
+        _ = 0.3163 / 100000 := by norm_num
+    calc ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5))‖
+        = ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4))‖ * (1 / 30240) * ‖(10 : ℂ) ^ (-(s + 5))‖ := by
+          rw [norm_mul, norm_mul]
+          have hu : ‖(((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ)‖ = (1 / 30240) := by
+            rw [Complex.norm_real, Real.norm_eq_abs,
+              abs_of_pos (by norm_num)]
+            norm_num
+          rw [hu] <;> try ring
+      _ ≤ 316202463 * (1 / 30240) * (0.3163 / 100000) := by
+          exact mul_le_mul (mul_le_mul_of_nonneg_right hP (by norm_num)) hp (norm_nonneg _) (by norm_num)
+      _ ≤ 0.03308 := by norm_num
+
+  have hA4 : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7))‖ ≤ 0.02104 := by
+    have hP : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6))‖ ≤ 804319460336 := norm_prod7_le537 hσ0 hσ2 hsim
+    have hp : ‖(10 : ℂ) ^ (-(s + 7))‖ ≤ 0.3163 / 10000000 := by
+      have h := norm_pow10_le537 (s := s) hσ1 7
+      have h10 : (10 : ℝ) ^ (-((7 : ℕ) : ℝ)) = 1 / 10000000 := by
+        rw [Real.rpow_neg (by norm_num), Real.rpow_natCast]
+        norm_num
+      rw [h10] at h
+      calc ‖(10 : ℂ) ^ (-(s + 7))‖ ≤ 0.3163 * (1 / 10000000) := h
+        _ = 0.3163 / 10000000 := by norm_num
+    calc ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7))‖
+        = ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6))‖ * (1 / 1209600) * ‖(10 : ℂ) ^ (-(s + 7))‖ := by
+          rw [norm_mul, norm_mul]
+          have hu : ‖(((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ)‖ = (1 / 1209600) := by
+            rw [Complex.norm_real, Real.norm_eq_abs]
+            norm_num
+          rw [hu] <;> try ring
+      _ ≤ 804319460336 * (1 / 1209600) * (0.3163 / 10000000) := by
+          exact mul_le_mul (mul_le_mul_of_nonneg_right hP (by norm_num)) hp (norm_nonneg _) (by norm_num)
+      _ ≤ 0.02104 := by norm_num
+
+  have hA5 : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9))‖ ≤ 0.01368 := by
+    have hP : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8))‖ ≤ 2070344833446484 := norm_prod9_le537 hσ0 hσ2 hsim
+    have hp : ‖(10 : ℂ) ^ (-(s + 9))‖ ≤ 0.3163 / 1000000000 := by
+      have h := norm_pow10_le537 (s := s) hσ1 9
+      have h10 : (10 : ℝ) ^ (-((9 : ℕ) : ℝ)) = 1 / 1000000000 := by
+        rw [Real.rpow_neg (by norm_num), Real.rpow_natCast]
+        norm_num
+      rw [h10] at h
+      calc ‖(10 : ℂ) ^ (-(s + 9))‖ ≤ 0.3163 * (1 / 1000000000) := h
+        _ = 0.3163 / 1000000000 := by norm_num
+    calc ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9))‖
+        = ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8))‖ * (1 / 47900160) * ‖(10 : ℂ) ^ (-(s + 9))‖ := by
+          rw [norm_mul, norm_mul]
+          have hu : ‖(((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ)‖ = (1 / 47900160) := by
+            rw [Complex.norm_real, Real.norm_eq_abs,
+              abs_of_pos (by norm_num)]
+            norm_num
+          rw [hu] <;> try ring
+      _ ≤ 2070344833446484 * (1 / 47900160) * (0.3163 / 1000000000) := by
+          exact mul_le_mul (mul_le_mul_of_nonneg_right hP (by norm_num)) hp (norm_nonneg _) (by norm_num)
+      _ ≤ 0.01368 := by norm_num
+
+  have hA6 : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)) * (((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 11))‖ ≤ 0.00905 := by
+    have hP : ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10))‖ ≤ 5409256611449265152 := norm_prod11_le537 hσ0 hσ2 hsim
+    have hp : ‖(10 : ℂ) ^ (-(s + 11))‖ ≤ 0.3163 / 100000000000 := by
+      have h := norm_pow10_le537 (s := s) hσ1 11
+      have h10 : (10 : ℝ) ^ (-((11 : ℕ) : ℝ)) = 1 / 100000000000 := by
+        rw [Real.rpow_neg (by norm_num), Real.rpow_natCast]
+        norm_num
+      rw [h10] at h
+      calc ‖(10 : ℂ) ^ (-(s + 11))‖ ≤ 0.3163 * (1 / 100000000000) := h
+        _ = 0.3163 / 100000000000 := by norm_num
+    calc ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)) * (((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 11))‖
+        = ‖(s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10))‖ * (691 / 1307674368000) * ‖(10 : ℂ) ^ (-(s + 11))‖ := by
+          rw [norm_mul, norm_mul]
+          have hu : ‖(((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ)‖ = (691 / 1307674368000) := by
+            rw [Complex.norm_real, Real.norm_eq_abs]
+            norm_num
+          rw [hu] <;> try ring
+      _ ≤ 5409256611449265152 * (691 / 1307674368000) * (0.3163 / 100000000000) := by
+          exact mul_le_mul (mul_le_mul_of_nonneg_right hP (by norm_num)) hp (norm_nonneg _) (by norm_num)
+      _ ≤ 0.00905 := by norm_num
+
+  have hP12 : ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10) * (s + 11)‖ ≤ 278306252659064668160 := norm_prod12_le537 hσ0 hσ2 hsim
+  have hI12 : ‖(∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12)))‖ ≤ (28 / 100 : ℝ) / 479001600 * ((10 : ℝ) ^ (-s.re - 11) / (s.re + 11)) :=
+    norm_I12_le537 hσ1
+  have hsplit2 : (10 : ℝ) ^ (-s.re - 11) = (10 : ℝ) ^ (-(11 : ℝ)) * (10 : ℝ) ^ (-s.re) := by
+    rw [show (-s.re - 11 : ℝ) = -(11 : ℝ) + (-s.re) by ring, Real.rpow_add (by norm_num)]
+  have h11 : (10 : ℝ) ^ (-(11 : ℝ)) = 1 / 100000000000 := by
+    rw [Real.rpow_neg (by norm_num)]
+    norm_num
+  have hy : (10 : ℝ) ^ (-s.re - 11) / (s.re + 11) ≤ 0.3163 / 100000000000 / (23 / 2) := by
+    rw [hsplit2, h11]
+    have hA0 : (0 : ℝ) ≤ 1 / 100000000000 * (10 : ℝ) ^ (-s.re) := by positivity
+    have hA1 : 1 / 100000000000 * (10 : ℝ) ^ (-s.re) ≤ 0.3163 / 100000000000 := by
+      have hp := pow10_neg_re_le537 hσ1
+      nlinarith [Real.rpow_nonneg (by norm_num : (0:ℝ) ≤ 10) (-s.re)]
+    have hb1 : (23 / 2 : ℝ) ≤ s.re + 11 := by linarith
+    have hstep1 : (1 / 100000000000 * (10 : ℝ) ^ (-s.re)) / (s.re + 11)
+        ≤ (1 / 100000000000 * (10 : ℝ) ^ (-s.re)) / (23 / 2) := by
+      apply div_le_div_of_nonneg_left hA0 (by norm_num) hb1
+    have hstep2 : (1 / 100000000000 * (10 : ℝ) ^ (-s.re)) / (23 / 2)
+        ≤ (0.3163 / 100000000000) / (23 / 2) := by
+      apply div_le_div_of_nonneg_right hA1 (by norm_num)
+    linarith
+  have hrem : ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10) * (s + 11) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12)))‖ ≤ 0.04475 := by
+    rw [norm_mul]
+    have hI' : ‖(∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12)))‖ ≤ (28 / 100 : ℝ) / 479001600 * (0.3163 / 100000000000 / (23 / 2)) := by
+      refine hI12.trans ?_
+      apply mul_le_mul_of_nonneg_left hy (by norm_num)
+    calc ‖s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10) * (s + 11)‖ * ‖(∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12)))‖
+        ≤ 278306252659064668160 * ((28 / 100 : ℝ) / 479001600 * (0.3163 / 100000000000 / (23 / 2))) := by
+          apply mul_le_mul hP12 hI' (norm_nonneg _) (by norm_num)
+      _ ≤ 0.04475 := by norm_num
+  have hb01 : ‖b‖ ≤ 0.06864 := by
+    rw [hb]
+    exact norm_b_le537 (s := s) hσ1 hsim hσ2
+  have h2 := norm_add_le (b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9))) ((s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)) * (((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 11)))
+  have h3 := norm_add_le (b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7))) ((s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9)))
+  have h4 := norm_add_le (b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5))) ((s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)))
+  have h5 := norm_add_le (b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3))) ((s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)))
+  have h6 := norm_add_le b ((s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)))
+  have h7 := norm_sub_le (b + (s * (s + 1) * (s + 2)) * (((0 ^ 4 / 24 - 0 ^ 3 / 12 + 0 ^ 2 / 24 - (1/720:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 3)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4)) * (((0 ^ 6 / 720 - 0 ^ 5 / 240 + 0 ^ 4 / 288 - 0 ^ 2 / 1440 + (1/30240:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 5)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6)) * (((0 ^ 8 / 40320 - 0 ^ 7 / 10080 + 0 ^ 6 / 8640 - 0 ^ 4 / 17280 + 0 ^ 2 / 60480 - (1/1209600:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 7)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8)) * (((0 ^ 10 / 3628800 - 0 ^ 9 / 725760 + 0 ^ 8 / 483840 - 0 ^ 6 / 518400 + 0 ^ 4 / 725760 - 0 ^ 2 / 2419200 + (1/47900160:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 9)) + (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10)) * (((0 ^ 12 / 479001600 - 0 ^ 11 / 79833600 + 0 ^ 10 / 43545600 - 0 ^ 8 / 29030400 + 0 ^ 6 / 21772800 - 0 ^ 4 / 29030400 + 0 ^ 2 / 95800320 - (691/1307674368000:ℝ) : ℝ)) : ℂ) * (10 : ℂ) ^ (-(s + 11)))
+    (s * (s + 1) * (s + 2) * (s + 3) * (s + 4) * (s + 5) * (s + 6) * (s + 7) * (s + 8) * (s + 9) * (s + 10) * (s + 11) * (∫ x in Set.Ioi (10 : ℝ), (((fun t : ℝ => t ^ 12 / 479001600 - t ^ 11 / 79833600 + t ^ 10 / 43545600 - t ^ 8 / 29030400 + t ^ 6 / 21772800 - t ^ 4 / 29030400 + t ^ 2 / 95800320 - (691/1307674368000:ℝ)) (Int.fract x) : ℝ) : ℂ) * (x : ℂ) ^ (-(s + 12))))
+  rw [hK]
+  linarith [h2, h3, h4, h5, h6, h7, hb01, hA2, hA3, hA4, hA5, hA6, hrem]
+
+/-- Backlund pp. 367 and 368, the explicit height-50 calculation.
+CONDITIONAL ON the finite H enclosure and the Euler remainder bound. -/
+theorem boundary_fifty (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
+    ‖riemannZeta ((σ : ℂ) + 50 * I)‖ ≤ 2.243 := by
+  obtain ⟨hr, hi⟩ := boundaryH_components σ hσ
+  have hh := norm_of_boundary_components (boundaryH σ) hr hi
+  have hk := boundaryK σ hσ
+  have h := norm_add_le (boundaryH σ)
+    (riemannZeta ((σ : ℂ) + 50 * I) - boundaryH σ)
+  rw [add_sub_cancel] at h
+  linarith
+
+/-- Backlund p. 368, a rational lower bound sufficient for display 73. -/
+theorem three_lt_log_fifty : (3 : ℝ) < Real.log 50 := by
+  apply (Real.lt_log_iff_exp_lt (by norm_num)).mpr
+  have he : Real.exp 1 < 3 := lt_trans Real.exp_one_lt_d9 (by norm_num)
+  have hp := pow_lt_pow_left₀ he (Real.exp_pos 1).le (by decide : (3 : ℕ) ≠ 0)
+  rw [← Real.exp_nat_mul] at hp
+  norm_num at hp
+  linarith
+
+/-- Backlund p. 367, display 73, its scalar threshold exceeds 2.243. -/
+theorem boundary73_budget (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
+    (2.243 : ℝ) ≤ 0.9964 * ((25 : ℝ) / π) ^ ((1 - σ) / 2) * Real.log 50 := by
+  have hb : 1 ≤ (25 : ℝ) / π := by
+    apply (one_le_div Real.pi_pos).mpr
+    linarith [Real.pi_lt_four]
+  have hp := Real.one_le_rpow hb (show 0 ≤ (1 - σ) / 2 by linarith [hσ.2])
+  nlinarith [three_lt_log_fifty]
+
+/-- Backlund display 73, the bottom edge before the strip principle.
+CONDITIONAL ON the finite H enclosure and Euler remainder bound. -/
+theorem boundary73 (σ : ℝ) (hσ : σ ∈ Set.Icc (1 / 2 : ℝ) 1) :
+    ‖riemannZeta ((σ : ℂ) + 50 * I)‖ ≤
+      0.9964 * ((25 : ℝ) / π) ^ ((1 - σ) / 2) * Real.log 50 :=
+  (boundary_fifty σ hσ).trans (boundary73_budget σ hσ)
 
 /-- Norm bound for the `q`-kernel remainder integral. -/
 private theorem norm_integral_q_le537 (N : ℕ) (hN : 1 ≤ N) {s : ℂ} (hs : 0 < s.re) :

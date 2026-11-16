@@ -1,0 +1,42 @@
+[
+  {
+    "instance": 1,
+    "exit": 0,
+    "panic": false
+  },
+  {
+    "instance": 2,
+    "exit": 0,
+    "panic": false
+  },
+  {
+    "instance": 3,
+    "exit": 0,
+    "panic": false
+  },
+  {
+    "instance": 4,
+    "exit": 0,
+    "panic": false
+  },
+  {
+    "instance": 5,
+    "exit": 0,
+    "panic": false
+  },
+  {
+    "instance": 6,
+    "exit": 0,
+    "panic": false
+  },
+  {
+    "instance": 7,
+    "exit": 0,
+    "panic": false
+  },
+  {
+    "instance": 8,
+    "exit": 1,
+    "panic": true
+  }
+]

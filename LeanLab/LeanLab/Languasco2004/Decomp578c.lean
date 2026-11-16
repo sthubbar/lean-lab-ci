@@ -8,6 +8,7 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.Languasco2004.Reserve578
 import LeanLab.Languasco2004.Buchstab578
 import LeanLab.Languasco2004.Decomp578e
+import LeanLab.Languasco2004.Decomp588c
 
 namespace LeanLab.Languasco2004.Decomp578c
 open Real Finset intervalIntegral Decomp279a Decomp316a Source565 Numeric565 Reserve578
@@ -65,14 +66,16 @@ theorem pair_rough_lower
     ∀ η : ℝ, 0 < η → ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
       ∀ n : ℕ, 2 * Y ≤ (n : ℝ) →
         (pairPrimeModel Y n - η) * (Y / log Y) ≤
-          pairMass true true 0 Y n (Y ^ (16 / 135 : ℝ)) := by sorry
+          pairMass true true 0 Y n (Y ^ (16 / 135 : ℝ)) := by
+  exact Decomp588c.pair_rough_from_inputs hex h20 h21
 
 /-- LEAF. Jia page 283 display 60, the pair prime sum to double integral step.
 Only the reciprocal pair prime sum is estimated. No rough integer count remains.
 The fixed truncated integral is pairCoefficient, without the source numerical reserve. -/
 theorem pair_prime_sum_lower :
     ∀ η : ℝ, 0 < η → ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
-      ∀ n : ℕ, 2 * Y ≤ (n : ℝ) → pairCoefficient - η ≤ pairPrimeModel Y n := by sorry
+      ∀ n : ℕ, 2 * Y ≤ (n : ℝ) → pairCoefficient - η ≤ pairPrimeModel Y n := by
+  exact Decomp588b.pair_prime_sum_from_mertens
 
 /-- Page 283 support: the B pair mass has no dependence on the ambient prime location N. -/
 theorem pair_model_independent (N Y : ℝ) (n : ℕ) (z : ℝ) :
