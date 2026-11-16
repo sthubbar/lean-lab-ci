@@ -591,6 +591,36 @@ private theorem cor42_window_extension_of_strip131
     Cor42OnWindow131 evenJ131 → Cor42OnWindow131 evenWindow131 :=
   fun _ => cor42_strip_input_iff131.mp hs
 
+
+/-- **The window extension from a bound transfer.** `cor42_window_extension131` follows from an
+input that never has to produce the data `P`, `E`: it only has to carry a bound already known on
+`J(X)` across to the strip `X/2 ≤ n < 2X/3` *for the same* `P` and `E`. That is the analytic step
+Lemma 4.1 of P0045 would give (an explicit formula for `R_M` valid for `n` of size `X`, not only
+for `n ≥ 2X/3`), and it is strictly weaker than the leaf's conclusion. -/
+private theorem cor42_window_extension_of_transfer131
+    (hrel : ∀ (X : ℕ) (P : ℝ) (E : Finset ℕ) (Cstar : ℕ) (η : ℝ),
+      (∀ n ∈ evenJ131 X, Nonexceptional131 Cstar E n →
+        |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) →
+      (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n → Nonexceptional131 Cstar E n →
+        |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n))
+    (hup : ∀ (X : ℕ) (P : ℝ) (E : Finset ℕ) (A : ℝ),
+      (∀ n ∈ evenJ131 X, |binaryMajor131 X n P| ≤ A * n * Sing n) →
+      (∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n →
+        |binaryMajor131 X n P| ≤ A * n * Sing n)) :
+    Cor42OnWindow131 evenJ131 → Cor42OnWindow131 evenWindow131 := by
+  intro hJ η hη
+  obtain ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, hX₀⟩ := hJ η hη
+  refine ⟨K₁, Cstar, c, A, h1, h2, h3, X₀, fun X hX => ?_⟩
+  obtain ⟨P, E, hP, hE, hrelJ, hupJ⟩ := hX₀ X hX
+  refine ⟨P, E, hP, hE, ?_, ?_⟩
+  · exact (forall_mem_window_iff131 X
+      (fun n => Nonexceptional131 Cstar E n →
+        |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n)).mpr
+      ⟨hrelJ, hrel X P E Cstar η hrelJ⟩
+  · exact (forall_mem_window_iff131 X
+      (fun n => |binaryMajor131 X n P| ≤ A * n * Sing n)).mpr
+      ⟨hupJ, hup X P E A hupJ⟩
+
 /-- LEAF, CITED. Published Corollary 4.2 with Lemma 4.1 of P0045, page 6, for the binary integral
 R_M of display 4 on exactly J(X) = [2X/3, X]. E is the exceptional moduli, display 9 is
 `Nonexceptional131`, display 10 bounds `oddRad131`, P is chosen by the statement, page 3.
