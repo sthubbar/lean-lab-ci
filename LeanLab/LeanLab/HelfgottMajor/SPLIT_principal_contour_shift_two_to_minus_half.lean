@@ -1,5 +1,6 @@
 import LeanLab.HelfgottMajor.SPLIT_principal_contour_identity
 import LeanLab.Linnik.ExplicitFormula.LeftHalf
+import LeanLab.PNTPort.ExplicitPsi1.ZeroSum
 
 /-!
 Split of `principal_contour_shift_two_to_minus_half` in
@@ -78,22 +79,6 @@ theorem principal_two_line_prime_sum (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero 
           (x : ℂ) ^ ((2 : ℂ) + t * Complex.I) = - Schi etaHeart χ δ x := by
   rw [principal_prime_sum_mellin_contour x hx q χ δ]
   ring
-
-/-! ### B. The move from real part two to real part minus one half -/
-
-/-- LEAF. Step two, the contour shift at conductor one, Lemma 4.1 at page 33 display 4.7.
-The weighted von Mangoldt sum equals minus the principal contour minus log of two pi, plus
-the guarded conductor one main term, minus the two zero sums split at the height `T`. It is
-one leg: the line of real part one half is no contour, since the logarithmic derivative is
-not integrable across the zeros of that line. It asserts no size estimate for the contour
-and no bound for either zero sum, and it needs no hypothesis on the location of the zeros. -/
-theorem principal_explicit_formula_shift (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
-    (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hq : q = 1) :
-    Schi etaHeart χ δ x =
-      -((log (2 * π) : ℂ)) - principalContour δ x +
-        (if q = 1 then fhat etaHeart (-δ) * x else 0) -
-        lowZeros χ δ x T - highZeros χ δ x T := by
-  sorry
 
 /-! ### C. The line of real part minus one half at conductor one -/
 
@@ -893,6 +878,1873 @@ theorem principal_half_line_integrable (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZer
     rw [← hA4]
     ring
   linarith [hstep, heq]
+
+/-! ### F. Towards leaf B: the Gaussian kernel's pole structure in the strip
+
+Leaf B is the exact contour shift of the logarithmic derivative from real part two down to
+real part minus one half.  The integrand of the shift is
+`F(s) = -(L'/L)(s) * continuedGaussian δ s * x ^ s`: it restricts to the leaf's integrand on
+both lines, since `continuedGaussian` agrees with `gaussianMellin` in the half plane of
+absolute convergence (`Continuation457.continuedGaussian_eq`), and its poles are one at
+`1` (from `zeta`), one at `0` (from the continued Gaussian, with residue one) and the
+nontrivial zeros with their multiplicities.  The lemmas below supply the pole structure of
+the Gaussian factor, which the lab does not have. -/
+
+open Filter
+open scoped Topology
+
+/-- The numerator of the continued Gaussian kernel, away from zero. -/
+private theorem pcsB_cont_mul (δ : ℝ) {s : ℂ} (hs : s ≠ 0) :
+    s * continuedGaussian δ s =
+      gaussianMellin δ (s + 2) - (2 * π * Complex.I * δ) * gaussianMellin δ (s + 1) := by
+  unfold continuedGaussian
+  field_simp
+
+/-- The numerator of the continued Gaussian kernel is differentiable near zero, both Mellin
+factors having real part at least one there. -/
+private theorem pcsB_num_differentiableAt (δ : ℝ) {s : ℂ} (hre : -1 < s.re) :
+    DifferentiableAt ℂ (fun z : ℂ => gaussianMellin δ (z + 2) -
+      (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) s := by
+  have h2 : DifferentiableAt ℂ (fun z : ℂ => gaussianMellin δ (z + 2)) s := by
+    have hd := Continuation457.gaussian_mellin_differentiable δ (s + 2) (by
+      have hre' : (s + 2).re = s.re + 2 := by simp
+      rw [hre']; linarith)
+    exact hd.comp s (differentiableAt_id.add (differentiableAt_const _))
+  have h1 : DifferentiableAt ℂ (fun z : ℂ => gaussianMellin δ (z + 1)) s := by
+    have hd := Continuation457.gaussian_mellin_differentiable δ (s + 1) (by
+      have hre' : (s + 1).re = s.re + 1 := by simp
+      rw [hre']; linarith)
+    exact hd.comp s (differentiableAt_id.add (differentiableAt_const _))
+  exact h2.sub (h1.const_mul _)
+
+/-- The numerator of the continued Gaussian kernel has value one at zero, for every shift. -/
+private theorem pcsB_num_zero (δ : ℝ) :
+    gaussianMellin δ 2 - (2 * π * Complex.I * δ) * gaussianMellin δ 1 = 1 :=
+  Continuation457.shifted_first_moment δ
+
+/-- The continued Gaussian kernel has a simple pole of residue one at zero:
+the limit of `s * F(s)` along the punctured neighbourhood of zero is one. -/
+private theorem pcsB_cont_residue_zero (δ : ℝ) :
+    Tendsto (fun s : ℂ => s * continuedGaussian δ s) (𝓝[≠] 0) (𝓝 1) := by
+  have hc : Tendsto (fun s : ℂ => gaussianMellin δ (s + 2) -
+      (2 * π * Complex.I * δ) * gaussianMellin δ (s + 1)) (𝓝 0) (𝓝 1) := by
+    have h := (Continuation457.regular_numerator_continuous δ).tendsto
+    have hv : (fun s : ℂ => gaussianMellin δ (s + 2) -
+        (2 * π * Complex.I * δ) * gaussianMellin δ (s + 1)) 0 = 1 := by
+      simpa using pcsB_num_zero δ
+    simpa only [hv] using h
+  refine (hc.mono_left nhdsWithin_le_nhds).congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with s hs
+  exact (pcsB_cont_mul δ hs).symm
+
+/-- The continued Gaussian kernel is differentiable in the strip `Re s > -1` away from
+zero. -/
+private theorem pcsB_cont_differentiableAt (δ : ℝ) {s : ℂ} (hs : s ≠ 0) (hre : -1 < s.re) :
+    DifferentiableAt ℂ (continuedGaussian δ) s := by
+  have hnum := pcsB_num_differentiableAt δ hre
+  have heq : continuedGaussian δ = (fun z : ℂ => gaussianMellin δ (z + 2) -
+      (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) * (fun z : ℂ => z)⁻¹ := rfl
+  rw [heq]
+  exact hnum.mul (differentiableAt_id.inv hs)
+
+/-- The continued Gaussian kernel is analytic in the strip `Re s > -1` away from zero. -/
+private theorem pcsB_cont_analyticAt (δ : ℝ) {s : ℂ} (hs : s ≠ 0) (hre : -1 < s.re) :
+    AnalyticAt ℂ (continuedGaussian δ) s := by
+  rw [Complex.analyticAt_iff_eventually_differentiableAt]
+  filter_upwards [isOpen_ne.mem_nhds hs,
+    (isOpen_lt continuous_const Complex.continuous_re).mem_nhds hre] with z hz hzre
+  exact pcsB_cont_differentiableAt δ hz hzre
+
+/-- The numerator of the continued Gaussian kernel is analytic in the strip `Re s > -1`. -/
+private theorem pcsB_num_analyticAt (δ : ℝ) {s : ℂ} (hre : -1 < s.re) :
+    AnalyticAt ℂ (fun z : ℂ => gaussianMellin δ (z + 2) -
+      (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) s := by
+  rw [Complex.analyticAt_iff_eventually_differentiableAt]
+  filter_upwards [(isOpen_lt continuous_const Complex.continuous_re).mem_nhds hre] with z hz
+  exact pcsB_num_differentiableAt δ hz
+
+/-- The continued Gaussian kernel has a pole of order exactly minus one at zero. -/
+private theorem pcsB_cont_order_zero (δ : ℝ) :
+    meromorphicOrderAt (continuedGaussian δ) 0 = ((-1 : ℤ) : WithTop ℤ) := by
+  have hnum : AnalyticAt ℂ (fun z : ℂ => gaussianMellin δ (z + 2) -
+      (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) 0 :=
+    pcsB_num_analyticAt δ (s := 0) (by simp)
+  have hnum0 : (fun z : ℂ => gaussianMellin δ (z + 2) -
+      (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) 0 ≠ 0 := by
+    have hv : (fun z : ℂ => gaussianMellin δ (z + 2) -
+        (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) 0 = 1 := by
+      simpa using pcsB_num_zero δ
+    rw [hv]; exact one_ne_zero
+  have hm : MeromorphicAt (continuedGaussian δ) 0 := by
+    have heq : continuedGaussian δ = (fun z : ℂ => gaussianMellin δ (z + 2) -
+        (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) * (fun z : ℂ => z)⁻¹ := rfl
+    rw [heq]
+    exact hnum.meromorphicAt.mul (analyticAt_id.meromorphicAt.inv)
+  rw [meromorphicOrderAt_eq_int_iff hm]
+  refine ⟨fun z : ℂ => gaussianMellin δ (z + 2) -
+      (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1), hnum, hnum0, ?_⟩
+  filter_upwards [self_mem_nhdsWithin] with s hs
+  have hs0 : s ≠ 0 := hs
+  show continuedGaussian δ s = (s - 0) ^ (-1 : ℤ) •
+    (gaussianMellin δ (s + 2) - (2 * π * Complex.I * δ) * gaussianMellin δ (s + 1))
+  rw [sub_zero, zpow_neg_one, smul_eq_mul, inv_mul_eq_div]
+  rfl
+
+/-! #### F2. The integrand of the shift: its poles and their residues -/
+
+open LeanLab.PNTPort.ExplicitPsi1 in
+/-- `x ^ s` is analytic in `s` for a positive scale. -/
+private lemma pcsB_xpow_analyticAt {x : ℝ} (hx : 0 < x) (z : ℂ) :
+    AnalyticAt ℂ (fun s : ℂ => (x : ℂ) ^ s) z :=
+  analyticAt_const.cpow analyticAt_id (Complex.ofReal_mem_slitPlane.mpr hx)
+
+/-- The Gaussian kernel times the scale factor is analytic in the strip, away from zero. -/
+private lemma pcsB_kernel_analyticAt (δ : ℝ) {x : ℝ} (hx : 0 < x) {z : ℂ} (hz : z ≠ 0)
+    (hre : -1 < z.re) :
+    AnalyticAt ℂ (fun s : ℂ => continuedGaussian δ s * (x : ℂ) ^ s) z :=
+  (pcsB_cont_analyticAt δ hz hre).mul (pcsB_xpow_analyticAt hx z)
+
+/-- The Gaussian kernel is meromorphic in the strip. -/
+private lemma pcsB_cont_meromorphicAt (δ : ℝ) {z : ℂ} (hre : -1 < z.re) :
+    MeromorphicAt (continuedGaussian δ) z := by
+  by_cases hz : z = 0
+  · subst hz
+    have heq : continuedGaussian δ = (fun z : ℂ => gaussianMellin δ (z + 2) -
+        (2 * π * Complex.I * δ) * gaussianMellin δ (z + 1)) * (fun z : ℂ => z)⁻¹ := rfl
+    rw [heq]
+    exact (pcsB_num_analyticAt δ (s := 0) (by simp)).meromorphicAt.mul
+      (analyticAt_id.meromorphicAt.inv)
+  · exact (pcsB_cont_analyticAt δ hz hre).meromorphicAt
+
+/-- The integrand of the shift, `-(ζ'/ζ) · G · x ^ s`, is meromorphic in the strip. -/
+private lemma pcsB_F_meromorphicAt {x : ℝ} (hx : 0 < x) (δ : ℝ) {z : ℂ} (hre : -1 < z.re) :
+    MeromorphicAt (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) z :=
+  (((LeanLab.PNTPort.ExplicitPsi1.meromorphicAt_zeta z).deriv.div
+    (LeanLab.PNTPort.ExplicitPsi1.meromorphicAt_zeta z)).neg).mul
+    ((pcsB_cont_meromorphicAt δ hre).mul (pcsB_xpow_analyticAt hx z).meromorphicAt)
+
+/-- The integrand of the shift is analytic away from zero, one and the zeros of zeta. -/
+private lemma pcsB_F_analyticAt {x : ℝ} (hx : 0 < x) (δ : ℝ) {z : ℂ} (hz0 : z ≠ 0)
+    (hre : -1 < z.re) (h1 : z ≠ 1) (hζ : riemannZeta z ≠ 0) :
+    AnalyticAt ℂ (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) z := by
+  have hζa := LeanLab.PNTPort.ExplicitPsi1.analyticAt_zeta h1
+  exact (hζa.deriv.div hζa hζ).neg.mul (pcsB_kernel_analyticAt δ hx hz0 hre)
+
+/-- The integrand of the shift has at most simple poles in the strip. -/
+private lemma pcsB_F_order_ge {x : ℝ} (hx : 0 < x) (δ : ℝ) {z : ℂ} (hre : -1 < z.re) :
+    (-1 : WithTop ℤ) ≤ meromorphicOrderAt
+      (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+        (continuedGaussian δ s * (x : ℂ) ^ s)) z := by
+  have hzeta := LeanLab.PNTPort.ExplicitPsi1.meromorphicAt_zeta z
+  by_cases hz : z = 0
+  · subst hz
+    have hζ0 : riemannZeta 0 ≠ 0 := by rw [riemannZeta_zero]; norm_num
+    have hζa := LeanLab.PNTPort.ExplicitPsi1.analyticAt_zeta (by norm_num : (0 : ℂ) ≠ 1)
+    have hA : AnalyticAt ℂ (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+        (x : ℂ) ^ s) 0 := (hζa.deriv.div hζa hζ0).neg.mul (pcsB_xpow_analyticAt hx 0)
+    have hG := pcsB_cont_meromorphicAt δ (z := 0) (by simp)
+    have hmul : meromorphicOrderAt (fun s : ℂ =>
+        (-(deriv riemannZeta s / riemannZeta s) * (x : ℂ) ^ s) * continuedGaussian δ s) 0 =
+        meromorphicOrderAt (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+          (x : ℂ) ^ s) 0 + meromorphicOrderAt (continuedGaussian δ) 0 :=
+      meromorphicOrderAt_mul hA.meromorphicAt hG
+    have hswap : (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+        (continuedGaussian δ s * (x : ℂ) ^ s)) = (fun s : ℂ =>
+        (-(deriv riemannZeta s / riemannZeta s) * (x : ℂ) ^ s) * continuedGaussian δ s) := by
+      funext s; ring
+    rw [hswap, hmul, pcsB_cont_order_zero δ]
+    have := hA.meromorphicOrderAt_nonneg
+    calc (-1 : WithTop ℤ) = 0 + -1 := by simp
+      _ ≤ _ := add_le_add_left this _
+  · have hk := pcsB_kernel_analyticAt δ hx hz hre
+    have hmul : meromorphicOrderAt ((fun s : ℂ => -(logDeriv riemannZeta s)) *
+        (fun s : ℂ => continuedGaussian δ s * (x : ℂ) ^ s)) z =
+        meromorphicOrderAt (fun s : ℂ => -(logDeriv riemannZeta s)) z +
+          meromorphicOrderAt (fun s : ℂ => continuedGaussian δ s * (x : ℂ) ^ s) z :=
+      meromorphicOrderAt_mul (hzeta.deriv.div hzeta).neg hk.meromorphicAt
+    have hprod : (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+        (continuedGaussian δ s * (x : ℂ) ^ s)) = (fun s : ℂ => -(logDeriv riemannZeta s)) *
+          (fun s : ℂ => continuedGaussian δ s * (x : ℂ) ^ s) := by
+      funext s; simp only [Pi.mul_apply, logDeriv_apply]
+    rw [hprod, hmul]
+    have h1 : meromorphicOrderAt (fun s : ℂ => -(logDeriv riemannZeta s)) z =
+        meromorphicOrderAt (logDeriv riemannZeta) z :=
+      (meromorphicOrderAt_neg (f := logDeriv riemannZeta)).symm
+    rw [h1]
+    calc (-1 : WithTop ℤ) = -1 + 0 := by simp
+      _ ≤ _ := add_le_add (LeanLab.PNTPort.ExplicitPsi1.order_logDeriv_zeta_ge z)
+        hk.meromorphicOrderAt_nonneg
+
+/-- The residue of the integrand at zero is minus log of two pi. -/
+private lemma pcsB_residue_F_zero {x : ℝ} (hx : 0 < x) (δ : ℝ) :
+    residue (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) 0 = -((Real.log (2 * π) : ℝ) : ℂ) := by
+  apply residue_eq_of_tendsto
+  have hζ0 : riemannZeta 0 ≠ 0 := by rw [riemannZeta_zero]; norm_num
+  have hζa := LeanLab.PNTPort.ExplicitPsi1.analyticAt_zeta (by norm_num : (0 : ℂ) ≠ 1)
+  have hlog : ContinuousAt (fun s : ℂ => deriv riemannZeta s / riemannZeta s) 0 :=
+    (hζa.deriv.div hζa hζ0).continuousAt
+  have hval : deriv riemannZeta 0 / riemannZeta 0 = ((Real.log (2 * π) : ℝ) : ℂ) :=
+    LeanLab.HelfgottMajor.Principal457.zeta_logDeriv_zero
+  have hlog' : Tendsto (fun s : ℂ => deriv riemannZeta s / riemannZeta s) (𝓝[≠] (0 : ℂ))
+      (𝓝 ((Real.log (2 * π) : ℝ) : ℂ)) := by
+    have h : Tendsto (fun s : ℂ => deriv riemannZeta s / riemannZeta s) (𝓝[≠] (0 : ℂ))
+        (𝓝 (deriv riemannZeta 0 / riemannZeta 0)) :=
+      hlog.tendsto.mono_left nhdsWithin_le_nhds
+    rwa [hval] at h
+  have hx0 : Tendsto (fun s : ℂ => (x : ℂ) ^ s) (𝓝[≠] (0 : ℂ)) (𝓝 1) := by
+    have h : Tendsto (fun s : ℂ => (x : ℂ) ^ s) (𝓝[≠] (0 : ℂ)) (𝓝 ((x : ℂ) ^ (0 : ℂ))) :=
+      (continuousAt_const_cpow (by exact_mod_cast hx.ne')).tendsto.mono_left
+        nhdsWithin_le_nhds
+    simpa using h
+  have hlim : Tendsto (fun s : ℂ => (-(deriv riemannZeta s / riemannZeta s)) *
+      ((s * continuedGaussian δ s) * (x : ℂ) ^ s)) (𝓝[≠] (0 : ℂ))
+      (𝓝 (-((Real.log (2 * π) : ℝ) : ℂ) * (1 * 1))) :=
+    (hlog'.neg).mul (pcsB_cont_residue_zero δ |>.mul hx0)
+  have hfun : (fun s : ℂ => (s - 0) * (-(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s))) =ᶠ[𝓝[≠] (0 : ℂ)]
+      (fun s : ℂ => (-(deriv riemannZeta s / riemannZeta s)) *
+        ((s * continuedGaussian δ s) * (x : ℂ) ^ s)) := by
+    filter_upwards with s
+    ring
+  have h1 : Tendsto (fun s : ℂ => (s - 0) * (-(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s))) (𝓝[≠] (0 : ℂ))
+      (𝓝 (-((Real.log (2 * π) : ℝ) : ℂ) * (1 * 1))) := hlim.congr' hfun.symm
+  simpa using h1
+
+/-- The residue of the integrand at one is the main term `G(1) · x`. -/
+private lemma pcsB_residue_F_one {x : ℝ} (hx : 0 < x) (δ : ℝ) :
+    residue (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) 1 =
+      fhat etaHeart (-δ) * (x : ℂ) := by
+  apply residue_eq_of_tendsto
+  have hk := pcsB_kernel_analyticAt δ hx (one_ne_zero) (by norm_num : (-1 : ℝ) < (1 : ℂ).re)
+  have hlim : Tendsto (fun s : ℂ => (-((s - 1) * (deriv riemannZeta s / riemannZeta s))) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) (𝓝[≠] (1 : ℂ))
+      (𝓝 (-(-1 : ℂ) * (continuedGaussian δ 1 * (x : ℂ) ^ (1 : ℂ)))) :=
+    (LeanLab.PNTPort.ExplicitPsi1.tendsto_logDeriv_zeta_one.neg.mul
+      (hk.continuousAt.tendsto.mono_left nhdsWithin_le_nhds))
+  have hfun : (fun s : ℂ => (s - 1) * (-(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s))) =ᶠ[𝓝[≠] (1 : ℂ)]
+      (fun s : ℂ => (-((s - 1) * (deriv riemannZeta s / riemannZeta s))) *
+        (continuedGaussian δ s * (x : ℂ) ^ s)) := by
+    filter_upwards with s
+    ring
+  have h1 : Tendsto (fun s : ℂ => (s - 1) * (-(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s))) (𝓝[≠] (1 : ℂ))
+      (𝓝 (-(-1 : ℂ) * (continuedGaussian δ 1 * (x : ℂ) ^ (1 : ℂ)))) := hlim.congr' hfun.symm
+  have hval : -(-1 : ℂ) * (continuedGaussian δ 1 * (x : ℂ) ^ (1 : ℂ)) =
+      fhat etaHeart (-δ) * (x : ℂ) := by
+    rw [Continuation457.continuedGaussian_eq δ 1 (by norm_num),
+      Gaussian269.mellin_one δ, Complex.cpow_one]
+    ring
+  rw [hval] at h1
+  exact h1
+
+/-- The residue of the integrand at a zero of zeta is minus the zero term. -/
+private lemma pcsB_residue_F_zero_of_zeta {x : ℝ} (hx : 0 < x) (δ : ℝ) {ρ : ℂ} (hρ0 : ρ ≠ 0)
+    (hre : -1 < ρ.re) (hρ1 : ρ ≠ 1) :
+    residue (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) ρ =
+      -((analyticOrderNatAt riemannZeta ρ : ℂ) *
+        (continuedGaussian δ ρ * (x : ℂ) ^ ρ)) := by
+  apply residue_eq_of_tendsto
+  have hk := pcsB_kernel_analyticAt δ hx hρ0 hre
+  have hlim : Tendsto (fun s : ℂ => (-((s - ρ) * (deriv riemannZeta s / riemannZeta s))) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) (𝓝[≠] ρ)
+      (𝓝 (-((analyticOrderNatAt riemannZeta ρ : ℂ)) *
+        (continuedGaussian δ ρ * (x : ℂ) ^ ρ))) :=
+    (LeanLab.PNTPort.ExplicitPsi1.tendsto_logDeriv_zeta_of_ne_one hρ1).neg.mul
+      (hk.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
+  have hfun : (fun s : ℂ => (s - ρ) * (-(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s))) =ᶠ[𝓝[≠] ρ]
+      (fun s : ℂ => (-((s - ρ) * (deriv riemannZeta s / riemannZeta s))) *
+        (continuedGaussian δ s * (x : ℂ) ^ s)) := by
+    filter_upwards with s
+    ring
+  have h1 := hlim.congr' hfun.symm
+  simpa only [neg_mul] using h1
+
+section
+open Complex Set
+
+/-! #### F3. The rectangle residue identity for the shifted Gaussian kernel -/
+
+/-- Border points of `[-1/2, 2] × [-T, T]` lie on one of its four sides. -/
+private lemma pcsB_border_cases {T : ℝ} {z : ℂ} (hz : z ∈ RectangleBorder ⟨-1 / 2, -T⟩ ⟨2, T⟩) :
+    z.im = -T ∨ z.re = -1 / 2 ∨ z.im = T ∨ z.re = 2 := by
+  simp only [RectangleBorder, mem_union, mem_reProdIm, mem_singleton_iff] at hz
+  rcases hz with ((⟨_, h⟩ | ⟨h, _⟩) | ⟨_, h⟩) | ⟨h, _⟩
+  · exact Or.inl h
+  · exact Or.inr (Or.inl h)
+  · exact Or.inr (Or.inr (Or.inl h))
+  · exact Or.inr (Or.inr (Or.inr h))
+
+/-- Membership in `[-1/2, 2] × [-T, T]`. -/
+private lemma pcsB_mem_rect {T : ℝ} (hT : 0 ≤ T) {z : ℂ} :
+    z ∈ Rectangle (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩ ↔
+      (-1 / 2 ≤ z.re ∧ z.re ≤ 2) ∧ (-T ≤ z.im ∧ z.im ≤ T) := by
+  simp only [Rectangle, mem_reProdIm]
+  rw [uIcc_of_le (by norm_num : (-1 / 2 : ℝ) ≤ 2), uIcc_of_le (by linarith)]
+  simp
+
+/-- The zeros of zeta in the rectangle are finitely many. -/
+private lemma pcsB_zeros_rect_finite (T : ℝ) :
+    (Rectangle (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩ ∩ riemannZetaZeros).Finite := by
+  have hc : IsCompact (Rectangle (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩) :=
+    (isCompact_uIcc (a := (-1 / 2 : ℝ)) (b := 2)).reProdIm
+      (isCompact_uIcc (a := -T) (b := T))
+  exact IsCompact.inter_riemannZetaZeros_finite hc
+
+
+/-- zeta has no zero at a real point of `[-1/2, 0]`.  Off the real axis this is
+`ZetaZeros.Sym.zeta_ne_zero_of_re_nonpos`; on it the functional equation writes `ζ σ` as
+`2 (2π)^{-s} Γ s cos (π s / 2) ζ s` with `s = 1 - σ ∈ (1, 3/2]`, and no factor vanishes there. -/
+private theorem pcsB_zeta_ne_zero_of_real_nonpos {σ : ℝ} (h1 : -(1 / 2) ≤ σ) (h2 : σ < 0) :
+    riemannZeta (σ : ℂ) ≠ 0 := by
+  intro hz
+  set w : ℂ := ((1 - σ : ℝ) : ℂ) with hw
+  have hwre : w.re = 1 - σ := by rw [hw]; simp
+  have harg : (1 : ℂ) - w = (σ : ℂ) := by rw [hw]; push_cast; ring
+  have hne_nat : ∀ n : ℕ, w ≠ -(n : ℂ) := by
+    intro n h
+    have hre : w.re = (-(n : ℂ)).re := by rw [h]
+    rw [hwre] at hre
+    simp only [Complex.neg_re, Complex.natCast_re] at hre
+    have : (1 : ℝ) < 1 - σ := by linarith
+    rcases n with _ | n
+    · simp at hre; linarith
+    · have hn : (0 : ℝ) ≤ (n : ℝ) := by positivity
+      push_cast at hre
+      linarith
+  have hne1 : w ≠ 1 := by
+    intro h
+    have hre : w.re = 1 := by rw [h]; simp
+    rw [hwre] at hre
+    linarith
+  have hfe := riemannZeta_one_sub hne_nat hne1
+  rw [harg, hz] at hfe
+  have hcos : Complex.cos (π * w / 2) ≠ 0 := by
+    apply LeanLab.PNTPort.ZetaZeros.cos_ne_zero_of_not_odd
+    intro k hk
+    have hreal : (1 - σ : ℝ) = 2 * (k : ℝ) + 1 := by
+      have := congrArg Complex.re hk
+      rw [hw] at this
+      simpa using this
+    have hk1 : (0 : ℝ) < (k : ℝ) := by linarith
+    have hk2 : (k : ℝ) ≤ 1 := by linarith
+    have : (1 : ℤ) ≤ k := by exact_mod_cast hk1
+    have : (k : ℤ) ≤ 1 := by exact_mod_cast hk2
+    interval_cases k
+    norm_num at hreal
+    linarith
+  have hGamma : Complex.Gamma w ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n h
+    have hre : w.re = (-(n : ℂ)).re := by rw [h]
+    rw [hwre] at hre
+    simp only [Complex.neg_re, Complex.natCast_re] at hre
+    have : (0 : ℝ) < 1 - σ := by linarith
+    have hn : (0 : ℝ) ≤ (n : ℝ) := by positivity
+    linarith
+  have hbase : (2 * (π : ℂ)) ^ (-w) ≠ 0 := by
+    have h0 : (2 * (π : ℂ)) ≠ 0 := by
+      have hπ : ((π : ℝ) : ℂ) ≠ 0 := by
+        exact_mod_cast Real.pi_pos.ne'
+      simpa using mul_ne_zero (two_ne_zero : (2 : ℂ) ≠ 0) hπ
+    rw [Complex.cpow_def_of_ne_zero h0]
+    exact Complex.exp_ne_zero _
+  have hfac : (2 : ℂ) * (2 * (π : ℂ)) ^ (-w) * Complex.Gamma w *
+      Complex.cos (π * w / 2) * riemannZeta w ≠ 0 := by
+    refine mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero two_ne_zero hbase) hGamma) hcos) ?_
+    exact riemannZeta_ne_zero_of_one_lt_re (by rw [hwre]; linarith)
+  exact hfac hfe.symm
+
+/-- **The residue sum over a rectangle.** If zeta has no zero on the border of
+`[-1/2, 2] × [-T, T]`, then the normalized rectangle integral of the shift integrand is
+minus log of two pi, plus the main term, minus the zero terms over the zeros inside. -/
+private theorem pcsB_rect_residue {x T : ℝ} (hx : 0 < x) (δ : ℝ) (hT : 0 < T)
+    (hbd : ∀ z ∈ RectangleBorder (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩, riemannZeta z ≠ 0) :
+    RectangleIntegral' (fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+      (continuedGaussian δ s * (x : ℂ) ^ s)) (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩ =
+      -(((Real.log (2 * π) : ℝ)) : ℂ) + fhat etaHeart (-δ) * (x : ℂ) -
+        ∑ ρ ∈ (pcsB_zeros_rect_finite T).toFinset,
+          (analyticOrderNatAt riemannZeta ρ : ℂ) * (gaussianMellin δ ρ * (x : ℂ) ^ ρ) := by
+  set F : ℂ → ℂ := fun s : ℂ => -(deriv riemannZeta s / riemannZeta s) *
+    (continuedGaussian δ s * (x : ℂ) ^ s) with hFdef
+  set R : Set ℂ := Rectangle (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩ with hRdef
+  set Zf := (pcsB_zeros_rect_finite T).toFinset with hZf
+  have hmem := fun z => pcsB_mem_rect (T := T) hT.le (z := z)
+  have hRre : ∀ z ∈ R, -1 < z.re := by
+    intro z hz
+    have := ((hmem z).mp hz).1.1
+    linarith
+  have h0R : (0 : ℂ) ∈ R := by
+    rw [hmem]; refine ⟨⟨?_, ?_⟩, ?_, ?_⟩ <;> simp <;> linarith
+  have h1R : (1 : ℂ) ∈ R := by
+    rw [hmem]; refine ⟨⟨?_, ?_⟩, ?_⟩ <;> simp <;> linarith
+  have hζ0 : riemannZeta 0 ≠ 0 := by rw [riemannZeta_zero]; norm_num
+  have hZfZ : ∀ ρ ∈ Zf, ρ ∈ R ∧ riemannZeta ρ = 0 := by
+    intro ρ hρ
+    rw [hZf, Set.Finite.mem_toFinset] at hρ
+    exact ⟨hρ.1, hρ.2⟩
+  have hgood : ∀ z ∈ R, z ≠ 0 → z ≠ 1 → riemannZeta z ≠ 0 → 0 ≤ meromorphicOrderAt F z :=
+    fun z hz h0 h1 hζ => (pcsB_F_analyticAt hx δ h0 (hRre z hz) h1 hζ).meromorphicOrderAt_nonneg
+  have hbR : RectangleBorder (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩ ⊆ R :=
+    rectangleBorder_subset_rectangle _ _
+  have hP : ∀ z ∈ R, meromorphicOrderAt F z < 0 → z ∈ (insert 0 (insert 1 Zf) : Finset ℂ) := by
+    intro z hz hneg
+    by_contra hns
+    simp only [Finset.mem_insert, not_or] at hns
+    obtain ⟨h0, h1, hZ⟩ := hns
+    have hζ : riemannZeta z ≠ 0 := by
+      intro h
+      apply hZ
+      rw [hZf, Set.Finite.mem_toFinset]
+      exact ⟨hz, h⟩
+    exact absurd (hgood z hz h0 h1 hζ) (not_le.mpr hneg)
+  have hres := RectangleIntegral'_eq_sumResiduesIn (f := F)
+    (z := (⟨-1 / 2, -T⟩ : ℂ)) (w := ⟨2, T⟩) (by simp; linarith) (by simp; linarith)
+    (fun z hz => pcsB_F_meromorphicAt hx δ (hRre z hz))
+    (by
+      rw [Set.disjoint_left]
+      intro z hz hneg
+      simp only [mem_ofPred_eq] at hneg
+      have hzR := hbR hz
+      rcases pcsB_border_cases hz with h | h | h | h
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; simp at h; linarith)
+          (by intro e; rw [e] at h; simp at h; linarith) (hbd z hz)) (not_le.mpr hneg)
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; norm_num at h)
+          (by intro e; rw [e] at h; norm_num at h) (hbd z hz)) (not_le.mpr hneg)
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; simp at h; linarith)
+          (by intro e; rw [e] at h; simp at h; linarith) (hbd z hz)) (not_le.mpr hneg)
+      · exact absurd (hgood z hzR (by intro e; rw [e] at h; norm_num at h)
+          (by intro e; rw [e] at h; norm_num at h) (hbd z hz)) (not_le.mpr hneg))
+    (by
+      apply (insert 0 (insert 1 Zf) : Finset ℂ).finite_toSet.subset
+      intro z ⟨hz, hneg⟩
+      exact hP z hz hneg)
+    (fun z hz => pcsB_F_order_ge hx δ (hRre z hz))
+  rw [hres]
+  have hS : R ∩ {z | meromorphicOrderAt F z < 0} =
+      ((insert 0 (insert 1 Zf) : Finset ℂ) : Set ℂ) ∩ {z | meromorphicOrderAt F z < 0} := by
+    ext z
+    simp only [mem_inter_iff, mem_ofPred_eq, Finset.mem_coe]
+    constructor
+    · rintro ⟨hz, hneg⟩; exact ⟨hP z hz hneg, hneg⟩
+    · rintro ⟨hz, hneg⟩
+      refine ⟨?_, hneg⟩
+      simp only [Finset.mem_insert] at hz
+      rcases hz with rfl | rfl | hz
+      · exact h0R
+      · exact h1R
+      · exact (hZfZ z hz).1
+  rw [sumResiduesIn_inter_eq_of_set_eq hS (fun z hzS hzP =>
+    residue_eq_zero_of_not_pole_of_meromorphicAt (pcsB_F_meromorphicAt hx δ
+      (hRre z (by
+        have hzR : z ∈ R := by
+          simp only [Finset.mem_coe, Finset.mem_insert] at hzS
+          rcases hzS with rfl | rfl | hz
+          · exact h0R
+          · exact h1R
+          · exact (hZfZ z hz).1
+        exact hzR))) (not_lt.mp hzP))]
+  rw [sumResiduesIn, Finset.tsum_subtype' (insert 0 (insert 1 Zf)) (fun z => residue F z)]
+  have h1Z : (1 : ℂ) ∉ Zf := fun h => by
+    have := (hZfZ 1 h).2
+    exact absurd this (by simpa using riemannZeta_one_ne_zero)
+  have h0Z : (0 : ℂ) ∉ insert 1 Zf := by
+    simp only [Finset.mem_insert, not_or]
+    exact ⟨zero_ne_one, fun h => hζ0 (hZfZ 0 h).2⟩
+  rw [Finset.sum_insert h0Z, Finset.sum_insert h1Z]
+  have hres0 : residue F 0 = -(((Real.log (2 * π) : ℝ)) : ℂ) := pcsB_residue_F_zero hx δ
+  have hres1 : residue F 1 = fhat etaHeart (-δ) * (x : ℂ) := pcsB_residue_F_one hx δ
+  rw [hres0, hres1]
+  have hsum : ∑ ρ ∈ Zf, residue F ρ =
+      ∑ ρ ∈ Zf, -((analyticOrderNatAt riemannZeta ρ : ℂ) *
+        (gaussianMellin δ ρ * (x : ℂ) ^ ρ)) := by
+    apply Finset.sum_congr rfl
+    intro ρ hρ
+    obtain ⟨hρR, hρ0⟩ := hZfZ ρ hρ
+    have hρne0 : ρ ≠ 0 := by rintro rfl; exact hζ0 hρ0
+    have hρne1 : ρ ≠ 1 := by rintro rfl; exact absurd hρ0 (by simpa using riemannZeta_one_ne_zero)
+    have hρre : 0 < ρ.re := by
+      by_contra hpos
+      push_neg at hpos
+      have hlow : -(1 / 2 : ℝ) ≤ ρ.re := by linarith [((hmem ρ).mp hρR).1.1]
+      by_cases him : ρ.im = 0
+      · have hρeq : ρ = ((ρ.re : ℝ) : ℂ) := by
+          apply Complex.ext
+          · simp
+          · simp [him]
+        have hne0 : ρ.re ≠ 0 := by
+          intro h
+          have hz0 : riemannZeta ((0 : ℝ) : ℂ) = 0 := by
+            rw [← h, ← hρeq]
+            exact hρ0
+          exact hζ0 hz0
+        exact pcsB_zeta_ne_zero_of_real_nonpos hlow (lt_of_le_of_ne hpos hne0)
+          (by rw [← hρeq]; exact hρ0)
+      · exact LeanLab.PNTPort.ZetaZeros.zeta_ne_zero_of_re_nonpos hpos him hρ0
+    rw [pcsB_residue_F_zero_of_zeta hx δ hρne0 (by linarith) hρne1,
+      Continuation457.continuedGaussian_eq δ ρ hρre]
+  rw [hsum, Finset.sum_neg_distrib]
+  ring
+
+/-! #### F4. The line of real part two: integrability, truncation limit and value
+
+On `Re s = 2` the logarithmic derivative is bounded, because there it is the Dirichlet
+series of the von Mangoldt function and that series converges absolutely, while the Gaussian
+Mellin transform decays like `(1 + t ^ 2)⁻¹` on any vertical line of real part at least
+`1 / 2`.  So the integrand is integrable on the whole line and the truncated integrals
+converge to the full-line integral; that integral is `-Schi` by leaf A. -/
+
+set_option maxHeartbeats 1200000 in
+/-- Zeta's logarithmic derivative is bounded on the line of real part two: there it is minus
+the absolutely convergent Dirichlet series of the von Mangoldt function. -/
+private theorem pcsB_logDeriv_two_bound :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t : ℝ,
+      ‖logDeriv riemannZeta ((2 : ℂ) + t * Complex.I)‖ ≤ C := by
+  set f : ℕ → ℂ := fun n => ((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ) with hf
+  have hf0 : f 0 = 0 := by
+    have h : ArithmeticFunction.vonMangoldt 0 = 0 := by
+      rw [ArithmeticFunction.vonMangoldt_apply]
+      simp [not_isPrimePow_zero]
+    simp [hf, h]
+  have hC : Summable (fun n : ℕ => ‖LSeries.term f (2 : ℂ) n‖) :=
+    (ArithmeticFunction.LSeriesSummable_vonMangoldt (s := (2 : ℂ)) (by norm_num)).norm
+  have hnorms : ∀ t : ℝ, ∑' n : ℕ, ‖LSeries.term f ((2 : ℂ) + t * Complex.I) n‖ =
+      ∑' n : ℕ, ‖LSeries.term f (2 : ℂ) n‖ := by
+    intro t
+    have hsre : ((2 : ℂ) + t * Complex.I).re = 2 := by simp
+    refine tsum_congr fun n => ?_
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn
+      simp [LSeries.term]
+    · have hn0 : n ≠ 0 := hn.ne'
+      simp only [LSeries.term, hn0, if_false]
+      rw [norm_div, norm_div, Complex.norm_natCast_cpow_of_pos hn,
+        Complex.norm_natCast_cpow_of_pos hn, hsre]
+      norm_num
+  refine ⟨∑' n : ℕ, ‖LSeries.term f (2 : ℂ) n‖, tsum_nonneg fun n => norm_nonneg _,
+    fun t => ?_⟩
+  have hsre : ((2 : ℂ) + t * Complex.I).re = 2 := by simp
+  have hLs : LSeriesSummable f ((2 : ℂ) + t * Complex.I) :=
+    ArithmeticFunction.LSeriesSummable_vonMangoldt (by rw [hsre]; norm_num)
+  have hL : logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) =
+      - LSeries f ((2 : ℂ) + t * Complex.I) := by
+    have h := ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div
+      (s := (2 : ℂ) + t * Complex.I) (by rw [hsre]; norm_num)
+    simp only [logDeriv_apply]
+    rw [h]
+    ring
+  rw [hL, norm_neg]
+  calc ‖LSeries f ((2 : ℂ) + t * Complex.I)‖
+      ≤ ∑' n : ℕ, ‖LSeries.term f ((2 : ℂ) + t * Complex.I) n‖ :=
+        norm_tsum_le_tsum_norm hLs.norm
+    _ = ∑' n : ℕ, ‖LSeries.term f (2 : ℂ) n‖ := hnorms t
+
+/-- The integrand of the shift is integrable on the line of real part two. -/
+private theorem pcsB_two_line_integrable {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Integrable (fun t : ℝ =>
+      logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) *
+        (gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((2 : ℂ) + t * Complex.I))) := by
+  have hx0 : (0 : ℝ) < x := by linarith
+  obtain ⟨C1, hC1, hC⟩ := pcsB_logDeriv_two_bound
+  obtain ⟨K, hK, hKdec⟩ := pcst_mellin_decay_half δ 2 (by norm_num)
+  have hcont : Continuous (fun t : ℝ =>
+      logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) *
+        (gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((2 : ℂ) + t * Complex.I))) := by
+    have h1 : Continuous (fun t : ℝ => logDeriv riemannZeta ((2 : ℂ) + t * Complex.I)) := by
+      apply continuous_iff_continuousAt.mpr
+      intro t
+      have hζa : AnalyticAt ℂ riemannZeta ((2 : ℂ) + t * Complex.I) :=
+        LeanLab.PNTPort.ExplicitPsi1.analyticAt_zeta (by
+          intro h
+          have := congrArg Complex.re h
+          simp at this)
+      exact ContinuousAt.comp (f := fun t : ℝ => (2 : ℂ) + t * Complex.I)
+        (hζa.deriv.div hζa (riemannZeta_ne_zero_of_one_lt_re (by simp))).continuousAt
+        (by fun_prop)
+    have h2 : Continuous (fun t : ℝ => gaussianMellin δ ((2 : ℂ) + t * Complex.I)) := by
+      apply continuous_iff_continuousAt.mpr
+      intro t
+      exact ContinuousAt.comp (f := fun t : ℝ => (2 : ℂ) + t * Complex.I)
+        (Continuation457.gaussian_mellin_differentiable δ _ (by simp)).continuousAt
+        (by fun_prop)
+    have h3 : Continuous (fun t : ℝ => (x : ℂ) ^ ((2 : ℂ) + t * Complex.I)) := by
+      apply continuous_iff_continuousAt.mpr
+      intro t
+      exact ContinuousAt.comp (f := fun t : ℝ => (2 : ℂ) + t * Complex.I)
+        (continuousAt_const_cpow (by exact_mod_cast hx0.ne')) (by fun_prop)
+    exact h1.mul (h2.mul h3)
+  refine Integrable.mono' (integrable_inv_one_add_sq.const_mul (C1 * K * x ^ 2))
+    hcont.aestronglyMeasurable ?_
+  filter_upwards with t
+  have hxpow : ‖(x : ℂ) ^ ((2 : ℂ) + t * Complex.I)‖ = x ^ 2 := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hx0]
+    norm_num [Real.rpow_two]
+  have hG := hKdec t
+  have hl := hC t
+  rw [norm_mul, norm_mul, hxpow]
+  have hGG : ‖gaussianMellin δ ((2 : ℂ) + t * Complex.I)‖ * x ^ 2 ≤
+      (K / (1 + t ^ 2)) * x ^ 2 :=
+    mul_le_mul_of_nonneg_right hG (sq_nonneg x)
+  have hden : (0 : ℝ) < 1 + t ^ 2 := by positivity
+  have hstep : ‖logDeriv riemannZeta ((2 : ℂ) + t * Complex.I)‖ *
+      (‖gaussianMellin δ ((2 : ℂ) + t * Complex.I)‖ * x ^ 2) ≤
+      C1 * ((K / (1 + t ^ 2)) * x ^ 2) :=
+    mul_le_mul hl hGG (by positivity) hC1
+  have heq : C1 * ((K / (1 + t ^ 2)) * x ^ 2) = (C1 * K * x ^ 2) * (1 + t ^ 2)⁻¹ := by
+    rw [div_eq_mul_inv]
+    ring
+  rw [heq] at hstep
+  simpa [div_eq_mul_inv] using hstep
+
+/-- The truncated integrals of the shift integrand on the line of real part two converge to
+the full-line integral. -/
+private theorem pcsB_two_line_tendsto {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+      logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) *
+        (gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((2 : ℂ) + t * Complex.I)))
+      atTop (𝓝 (∫ t : ℝ, logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) *
+        (gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((2 : ℂ) + t * Complex.I)))) :=
+  intervalIntegral_tendsto_integral (pcsB_two_line_integrable hx δ)
+    tendsto_neg_atTop_atBot tendsto_id
+
+/-- **The value of the line of real part two.** The normalized integrals of the shift
+integrand over `[-T, T]` on that line converge to minus the twisted von Mangoldt sum: the
+full-line integral is leaf A, once the logarithmic derivative of the trivial character's
+`L`-function is written as that of zeta. -/
+private theorem pcsB_two_line_value {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Tendsto (fun T : ℝ => (1 / (2 * π) : ℂ) * ∫ t in (-T)..T,
+      logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) *
+        (gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((2 : ℂ) + t * Complex.I)))
+      atTop (𝓝 (- Schi etaHeart (1 : DirichletCharacter ℂ 1) δ x)) := by
+  have hA := principal_two_line_prime_sum x hx 1 (1 : DirichletCharacter ℂ 1) δ
+  have hfun : (fun t : ℝ => logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) *
+      (gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+        (x : ℂ) ^ ((2 : ℂ) + t * Complex.I)))
+      = fun t : ℝ => logDeriv (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1))
+          ((2 : ℂ) + t * Complex.I) * gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+            (x : ℂ) ^ ((2 : ℂ) + t * Complex.I) := by
+    funext t
+    simp only [DirichletCharacter.LFunction_modOne_eq]
+    ring
+  have hval : (1 / (2 * π) : ℂ) * ∫ t : ℝ, logDeriv riemannZeta ((2 : ℂ) + t * Complex.I) *
+      (gaussianMellin δ ((2 : ℂ) + t * Complex.I) *
+        (x : ℂ) ^ ((2 : ℂ) + t * Complex.I)) =
+      - Schi etaHeart (1 : DirichletCharacter ℂ 1) δ x := by
+    rw [hfun]
+    exact hA
+  have hT := (pcsB_two_line_tendsto hx δ).const_mul (1 / (2 * π) : ℂ)
+  rw [hval] at hT
+  exact hT
+
+
+/-! #### F5. Quadratic decay of the kernel in the strip, uniformly in the real part
+
+The recurrence `s·G(s) = G(s+2) - 2πiδ·G(s+1)` turns a bound on three neighbouring vertical
+lines into a bound on the strip.  The three line bounds are uniform in the real part on
+`[5/2, 7]`, so the constant below does not depend on `σ`. -/
+
+/-- A line constant for the Gaussian Mellin transform, uniform in the real part of the
+exponent on `[1, b]`: on `(0, 1)` the weight `x ^ (σ - 1)` is at most one and on `(1, ∞)` it
+is at most `x ^ (b - 1)`. -/
+private theorem pcsB_line_constant_uniform (δ : ℝ) (b : ℝ) (hb : 1 ≤ b) :
+    ∃ B : ℝ, 0 < B ∧ ∀ σ : ℝ, 1 ≤ σ → σ ≤ b → ∀ t : ℝ,
+      ‖gaussianMellin δ ((σ : ℂ) + t * Complex.I)‖ ≤ B := by
+  have hgauss : ∀ (τ : ℝ), IntegrableOn (fun x : ℝ => Real.exp (-x ^ 2 / 2)) (Set.Ioi (0 : ℝ)) := by
+    intro τ
+    have h := integrableOn_rpow_mul_exp_neg_mul_sq (b := (1 / 2 : ℝ)) (by norm_num)
+      (s := (0 : ℝ)) (by norm_num)
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro x _
+    dsimp only
+    rw [Real.rpow_zero, one_mul]
+    congr 1
+    ring
+  have hgint := hgauss 0
+  have hrpow : IntegrableOn (fun x : ℝ => x ^ (b - 1) * Real.exp (-x ^ 2 / 2))
+      (Set.Ioi (0 : ℝ)) := by
+    have h := integrableOn_rpow_mul_exp_neg_mul_sq (b := (1 / 2 : ℝ)) (by norm_num)
+      (s := (b - 1)) (by linarith)
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro x _
+    congr 1
+    ring
+  have hsumint : IntegrableOn (fun x : ℝ => (1 + x ^ (b - 1)) * Real.exp (-x ^ 2 / 2))
+      (Set.Ioi (0 : ℝ)) := by
+    have h := hgint.add hrpow
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro x _
+    simp only [Pi.add_apply]
+    rw [show b - 1 = -1 + b by ring]
+    ring
+  refine ⟨(∫ x in Set.Ioi (0 : ℝ), (1 + x ^ (b - 1)) * Real.exp (-x ^ 2 / 2)) + 1, ?_, ?_⟩
+  · have h0 : 0 ≤ ∫ x in Set.Ioi (0 : ℝ), (1 + x ^ (b - 1)) * Real.exp (-x ^ 2 / 2) :=
+      setIntegral_nonneg measurableSet_Ioi fun x hx => by
+        have hx0 : (0 : ℝ) < x := hx
+        have h1 : 0 ≤ x ^ (b - 1) := Real.rpow_nonneg hx0.le _
+        have h2 := Real.exp_pos (-x ^ 2 / 2)
+        nlinarith
+    linarith
+  · intro σ hσ1 hσb t
+    have hm := Gaussian269.mellin_norm_le δ ((σ : ℂ) + t * Complex.I)
+    have hre : ((σ : ℂ) + t * Complex.I).re = σ := by simp
+    rw [hre] at hm
+    refine hm.trans ?_
+    have hint : IntegrableOn (fun x : ℝ => x ^ (σ - 1) * Real.exp (-x ^ 2 / 2))
+        (Set.Ioi (0 : ℝ)) := by
+      have h := integrableOn_rpow_mul_exp_neg_mul_sq (b := (1 / 2 : ℝ)) (by norm_num)
+        (s := (σ - 1)) (by linarith)
+      refine h.congr_fun ?_ measurableSet_Ioi
+      intro x _
+      congr 1
+      ring
+    refine le_trans (setIntegral_mono_on hint hsumint measurableSet_Ioi ?_)
+      (le_add_of_nonneg_right zero_le_one)
+    intro x hx
+    have hx0 : (0 : ℝ) < x := hx
+    have hexp : 0 < Real.exp (-x ^ 2 / 2) := Real.exp_pos _
+    have hkey : x ^ (σ - 1) ≤ 1 + x ^ (b - 1) := by
+      rcases le_or_gt x 1 with h1 | h1
+      · have h2 : x ^ (σ - 1) ≤ 1 := by
+          have hz : (0 : ℝ) ≤ σ - 1 := by linarith
+          calc x ^ (σ - 1) ≤ 1 ^ (σ - 1) := Real.rpow_le_rpow hx0.le h1 hz
+            _ = 1 := Real.one_rpow _
+        have h3 : 0 ≤ x ^ (b - 1) := Real.rpow_nonneg hx0.le _
+        linarith
+      · have h2 : x ^ (σ - 1) ≤ x ^ (b - 1) :=
+          Real.rpow_le_rpow_of_exponent_le h1.le (by linarith)
+        linarith
+    exact mul_le_mul_of_nonneg_right hkey hexp.le
+
+/-- Three recurrence steps give quadratic decay of the Gaussian Mellin transform, with a
+constant uniform in the real part of the exponent on `[1/2, 5/2]`. -/
+private theorem pcsB_mellin_decay_strip (δ : ℝ) :
+    ∃ K : ℝ, 0 < K ∧ ∀ σ : ℝ, 1 / 2 ≤ σ → σ ≤ 5 / 2 → ∀ t : ℝ,
+      ‖gaussianMellin δ ((σ : ℂ) + t * Complex.I)‖ ≤ K / (1 + t ^ 2) := by
+  obtain ⟨B, hB, hBunif⟩ := pcsB_line_constant_uniform δ 7 (by norm_num)
+  have hB2' : ∀ (σ : ℝ), 1 / 2 ≤ σ → σ ≤ 5 / 2 → ∀ t : ℝ,
+      ‖gaussianMellin δ (((σ + 2 : ℝ)) + t * Complex.I)‖ ≤ B :=
+    fun σ h1 h2 t => hBunif (σ + 2) (by linarith) (by linarith) t
+  have hB3' : ∀ (σ : ℝ), 1 / 2 ≤ σ → σ ≤ 5 / 2 → ∀ t : ℝ,
+      ‖gaussianMellin δ (((σ + 3 : ℝ)) + t * Complex.I)‖ ≤ B :=
+    fun σ h1 h2 t => hBunif (σ + 3) (by linarith) (by linarith) t
+  have hB4' : ∀ (σ : ℝ), 1 / 2 ≤ σ → σ ≤ 5 / 2 → ∀ t : ℝ,
+      ‖gaussianMellin δ (((σ + 4 : ℝ)) + t * Complex.I)‖ ≤ B :=
+    fun σ h1 h2 t => hBunif (σ + 4) (by linarith) (by linarith) t
+  set c : ℝ := ‖(2 * π * Complex.I * δ : ℂ)‖ with hc
+  have hc0 : 0 ≤ c := by rw [hc]; exact norm_nonneg _
+  have hP : 0 ≤ B + c * B + c * (B + c * B) := by
+    have h1 : 0 ≤ c * B := mul_nonneg hc0 hB.le
+    have h2 : 0 ≤ c * (B + c * B) :=
+      mul_nonneg hc0 (by have := mul_nonneg hc0 hB.le; linarith)
+    linarith
+  refine ⟨4 * (B + c * B + c * (B + c * B)) + 1, by linarith,
+    fun σ hσ1 hσ2 t => ?_⟩
+  set a : ℂ := (σ : ℂ) + t * Complex.I with ha
+  have hare : a.re = σ := by rw [ha]; simp
+  have ha2 : (1 / 4 : ℝ) + t ^ 2 ≤ ‖a‖ ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    have h1 : a.re = σ := hare
+    have h2 : a.im = t := by rw [ha]; simp
+    rw [h1, h2]
+    nlinarith
+  have hb2 : (1 / 4 : ℝ) + t ^ 2 ≤ ‖a + 1‖ ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    have h1 : (a + 1).re = σ + 1 := by rw [ha]; simp
+    have h2 : (a + 1).im = t := by rw [ha]; simp
+    rw [h1, h2]
+    nlinarith
+  have hquarter : (0 : ℝ) < (1 / 4 : ℝ) + t ^ 2 := by positivity
+  have hapos : 0 < ‖a‖ := by
+    rw [norm_pos_iff]
+    intro h
+    have h1 : a.re = 0 := by rw [h]; simp
+    rw [hare] at h1
+    linarith
+  have hbpos : 0 < ‖a + 1‖ := by
+    rw [norm_pos_iff]
+    intro h
+    have h1 : (a + 1).re = 0 := by rw [h]; simp
+    have h2 : (a + 1).re = σ + 1 := by rw [ha]; simp
+    rw [h2] at h1
+    linarith
+  have ha1 : 0 < (a + 1).re := by rw [ha]; simp; linarith
+  have ha2' : 0 < (a + 2).re := by rw [ha]; simp; linarith
+  have hstep1 := pcst_mellin_step δ a (by rw [hare]; linarith)
+  have hstep2 := pcst_mellin_step δ (a + 1) ha1
+  have hstep3 := pcst_mellin_step δ (a + 2) ha2'
+  have e2 : a + 2 = ((σ + 2 : ℝ) : ℂ) + t * Complex.I := by rw [ha]; push_cast; ring
+  have e3 : a + 3 = ((σ + 3 : ℝ) : ℂ) + t * Complex.I := by rw [ha]; push_cast; ring
+  have e4 : a + 4 = ((σ + 4 : ℝ) : ℂ) + t * Complex.I := by rw [ha]; push_cast; ring
+  have h3 : ‖gaussianMellin δ (a + 2)‖ * ‖a + 2‖ ≤ B + c * B := by
+    have hb : ‖gaussianMellin δ ((a + 2) + 2)‖ ≤ B := by
+      rw [show (a + 2) + 2 = a + 4 by ring, e4]; exact hB4' σ hσ1 hσ2 t
+    have hc1 : ‖gaussianMellin δ ((a + 2) + 1)‖ ≤ B := by
+      rw [show (a + 2) + 1 = a + 3 by ring, e3]; exact hB3' σ hσ1 hσ2 t
+    calc ‖gaussianMellin δ (a + 2)‖ * ‖a + 2‖
+        ≤ ‖gaussianMellin δ ((a + 2) + 2)‖ + c * ‖gaussianMellin δ ((a + 2) + 1)‖ := hstep3
+      _ ≤ B + c * B := by
+          refine add_le_add hb (mul_le_mul_of_nonneg_left hc1 hc0)
+  have h2 : ‖gaussianMellin δ (a + 1)‖ * ‖a + 1‖ ≤ B + c * B := by
+    have hb : ‖gaussianMellin δ ((a + 1) + 2)‖ ≤ B := by
+      rw [show (a + 1) + 2 = a + 3 by ring, e3]; exact hB3' σ hσ1 hσ2 t
+    have hc1 : ‖gaussianMellin δ ((a + 1) + 1)‖ ≤ B := by
+      rw [show (a + 1) + 1 = a + 2 by ring, e2]; exact hB2' σ hσ1 hσ2 t
+    calc ‖gaussianMellin δ (a + 1)‖ * ‖a + 1‖
+        ≤ ‖gaussianMellin δ ((a + 1) + 2)‖ + c * ‖gaussianMellin δ ((a + 1) + 1)‖ := hstep2
+      _ ≤ B + c * B := by
+          refine add_le_add hb (mul_le_mul_of_nonneg_left hc1 hc0)
+  have h2pos : 0 < ‖a + 2‖ := by
+    rw [norm_pos_iff]
+    intro h
+    have h1 : (a + 2).re = 0 := by rw [h]; simp
+    linarith
+  have hquot2 : ‖gaussianMellin δ (a + 2)‖ ≤ (B + c * B) / ‖a + 2‖ := by
+    rw [le_div_iff₀ h2pos]
+    linarith [h3]
+  have hquot1 : ‖gaussianMellin δ (a + 1)‖ ≤ (B + c * B) / ‖a + 1‖ := by
+    rw [le_div_iff₀ hbpos]
+    linarith [h2]
+  have hle : ‖a + 1‖ ≤ ‖a + 2‖ := by
+    have hn1 : Complex.normSq (a + 1) = (σ + 1) ^ 2 + t ^ 2 := by
+      rw [Complex.normSq_apply]
+      have h1 : (a + 1).re = σ + 1 := by rw [ha]; simp
+      have h2 : (a + 1).im = t := by rw [ha]; simp
+      rw [h1, h2]; ring
+    have hn2 : Complex.normSq (a + 2) = (σ + 2) ^ 2 + t ^ 2 := by
+      rw [Complex.normSq_apply]
+      have h1 : (a + 2).re = σ + 2 := by rw [ha]; simp
+      have h2 : (a + 2).im = t := by rw [ha]; simp
+      rw [h1, h2]; ring
+    rw [show ‖a + 1‖ = Real.sqrt (Complex.normSq (a + 1)) by
+          rw [Complex.normSq_eq_norm_sq, Real.sqrt_sq (norm_nonneg _)],
+      show ‖a + 2‖ = Real.sqrt (Complex.normSq (a + 2)) by
+          rw [Complex.normSq_eq_norm_sq, Real.sqrt_sq (norm_nonneg _)]]
+    apply Real.sqrt_le_sqrt
+    rw [hn1, hn2]
+    nlinarith
+  have hsum : ‖gaussianMellin δ a‖ * ‖a‖ * ‖a + 1‖ ≤
+      B + c * B + c * (B + c * B) := by
+    have hb1 : (B + c * B) / ‖a + 2‖ ≤ (B + c * B) / ‖a + 1‖ := by
+      have hnum : (0 : ℝ) ≤ B + c * B := by
+        have := mul_nonneg hc0 hB.le; linarith [hB.le]
+      exact div_le_div_of_nonneg_left hnum hbpos hle
+    have hmid : ‖gaussianMellin δ a‖ * ‖a‖ ≤
+        (B + c * B + c * (B + c * B)) / ‖a + 1‖ := by
+      have hb2' : c * ((B + c * B) / ‖a + 1‖) = c * (B + c * B) / ‖a + 1‖ := by ring
+      calc ‖gaussianMellin δ a‖ * ‖a‖
+          ≤ ‖gaussianMellin δ (a + 2)‖ + c * ‖gaussianMellin δ (a + 1)‖ := hstep1
+        _ ≤ (B + c * B) / ‖a + 2‖ + c * ((B + c * B) / ‖a + 1‖) := by
+            refine add_le_add hquot2 (mul_le_mul_of_nonneg_left hquot1 hc0)
+        _ ≤ (B + c * B) / ‖a + 1‖ + c * (B + c * B) / ‖a + 1‖ := by
+            rw [hb2']
+            exact add_le_add hb1 le_rfl
+        _ = (B + c * B + c * (B + c * B)) / ‖a + 1‖ := by ring
+    calc ‖gaussianMellin δ a‖ * ‖a‖ * ‖a + 1‖
+        ≤ ((B + c * B + c * (B + c * B)) / ‖a + 1‖) * ‖a + 1‖ :=
+          mul_le_mul_of_nonneg_right hmid hbpos.le
+      _ = B + c * B + c * (B + c * B) := by field_simp
+  have hmain : ‖gaussianMellin δ a‖ ≤
+      (B + c * B + c * (B + c * B)) / (‖a‖ * ‖a + 1‖) := by
+    rw [le_div_iff₀ (by positivity : (0 : ℝ) < ‖a‖ * ‖a + 1‖)]
+    calc ‖gaussianMellin δ a‖ * (‖a‖ * ‖a + 1‖) =
+        ‖gaussianMellin δ a‖ * ‖a‖ * ‖a + 1‖ := by ring
+      _ ≤ _ := hsum
+  have hden : (1 / 4 : ℝ) + t ^ 2 ≤ ‖a‖ * ‖a + 1‖ := by
+    have h1 : 0 ≤ ‖a‖ := norm_nonneg _
+    have h2 : 0 ≤ ‖a + 1‖ := norm_nonneg _
+    nlinarith [ha2, hb2]
+  have hfin : ‖gaussianMellin δ a‖ ≤
+      (B + c * B + c * (B + c * B)) / ((1 / 4 : ℝ) + t ^ 2) :=
+    hmain.trans (div_le_div_of_nonneg_left hP hquarter hden)
+  have hfour : (B + c * B + c * (B + c * B)) / ((1 / 4 : ℝ) + t ^ 2) ≤
+      (4 * (B + c * B + c * (B + c * B)) + 1) / (1 + t ^ 2) := by
+    rw [div_le_div_iff₀ hquarter (by positivity : (0 : ℝ) < 1 + t ^ 2)]
+    nlinarith [hP]
+  simpa [ha] using hfin.trans hfour
+
+
+/-- Quadratic decay of the continued Gaussian kernel on the rectangle `[-1/2, 2] × ℝ`, away
+from the origin. -/
+private theorem pcsB_cont_decay_strip (δ : ℝ) :
+    ∃ K : ℝ, 0 < K ∧ ∀ σ : ℝ, -(1 / 2) ≤ σ → σ ≤ 2 → ∀ t : ℝ, 1 ≤ |t| →
+      ‖continuedGaussian δ ((σ : ℂ) + t * Complex.I)‖ ≤ K / (1 + t ^ 2) := by
+  obtain ⟨K1, hK1, hK1'⟩ := pcsB_mellin_decay_strip δ
+  obtain ⟨K0, hK0, hK0'⟩ := pcst_mellin_decay_half δ (1 / 2) le_rfl
+  set c : ℝ := ‖(2 * π * Complex.I * δ : ℂ)‖ with hc
+  have hc0 : 0 ≤ c := by rw [hc]; exact norm_nonneg _
+  refine ⟨(K1 + c * K1) + K0 + 1, by positivity, fun σ h1 h2 t ht => ?_⟩
+  rcases le_or_gt (1 / 2) σ with hs | hs
+  · rw [Continuation457.continuedGaussian_eq δ _ (by simp; linarith)]
+    have h1 : ‖gaussianMellin δ ((σ : ℂ) + t * Complex.I)‖ ≤ K1 / (1 + t ^ 2) :=
+      hK1' σ hs (by linarith) t
+    have hden : (0 : ℝ) < 1 + t ^ 2 := by positivity
+    refine h1.trans ?_
+    apply div_le_div_of_nonneg_right _ hden.le
+    have hc1 : 0 ≤ c * K1 := mul_nonneg hc0 hK1.le
+    linarith
+  · -- `-1/2 ≤ σ < 1/2`: divide the recurrence by `s`, with `‖s‖ ≥ |t| ≥ 1`
+    have hre1 : (0 : ℝ) < (1 / 2 : ℝ) := by norm_num
+    have hnum := pcsB_cont_mul δ (s := (σ : ℂ) + t * Complex.I) (by
+      intro h
+      have him := congrArg Complex.im h
+      simp at him
+      have hz : |t| = 0 := by rw [him]; simp
+      linarith)
+    set s : ℂ := (σ : ℂ) + t * Complex.I with hsd
+    have hsre : s.re = σ := by rw [hsd]; simp
+    have hsim : s.im = t := by rw [hsd]; simp
+    have hsnorm : 1 ≤ ‖s‖ := by
+      have h1 : |t| ≤ ‖s‖ := by
+        rw [← hsim]
+        exact Complex.abs_im_le_norm s
+      linarith
+    have e1 : s + 1 = ((σ + 1 : ℝ) : ℂ) + t * Complex.I := by rw [hsd]; push_cast; ring
+    have e2 : s + 2 = ((σ + 2 : ℝ) : ℂ) + t * Complex.I := by rw [hsd]; push_cast; ring
+    have hb1 : ‖gaussianMellin δ (s + 1)‖ ≤ K1 / (1 + t ^ 2) := by
+      rw [e1]
+      exact hK1' (σ + 1) (by linarith) (by linarith) t
+    have hb2 : ‖gaussianMellin δ (s + 2)‖ ≤ K1 / (1 + t ^ 2) := by
+      rw [e2]
+      exact hK1' (σ + 2) (by linarith) (by linarith) t
+    have hnumle : ‖gaussianMellin δ (s + 2) -
+        (2 * π * Complex.I * δ) * gaussianMellin δ (s + 1)‖ ≤ (K1 + c * K1) / (1 + t ^ 2) := by
+      calc ‖gaussianMellin δ (s + 2) - (2 * π * Complex.I * δ) * gaussianMellin δ (s + 1)‖
+          ≤ ‖gaussianMellin δ (s + 2)‖ +
+              ‖(2 * π * Complex.I * δ) * gaussianMellin δ (s + 1)‖ := norm_sub_le _ _
+        _ = ‖gaussianMellin δ (s + 2)‖ + c * ‖gaussianMellin δ (s + 1)‖ := by
+            rw [norm_mul, hc]
+        _ ≤ K1 / (1 + t ^ 2) + c * (K1 / (1 + t ^ 2)) := by
+            exact add_le_add hb2 (mul_le_mul_of_nonneg_left hb1 hc0)
+        _ = (K1 + c * K1) / (1 + t ^ 2) := by ring
+    have hun : continuedGaussian δ s =
+        (gaussianMellin δ (s + 2) - (2 * π * Complex.I * δ) * gaussianMellin δ (s + 1)) / s :=
+      rfl
+    have hspos : 0 < ‖s‖ := lt_of_lt_of_le (by norm_num) hsnorm
+    have hden : (0 : ℝ) < 1 + t ^ 2 := by positivity
+    have hmul : ‖continuedGaussian δ s‖ ≤ ((K1 + c * K1) / (1 + t ^ 2)) / ‖s‖ := by
+      rw [hun, norm_div]
+      exact div_le_div_of_nonneg_right hnumle (norm_nonneg _)
+    have hfin : ((K1 + c * K1) / (1 + t ^ 2)) / ‖s‖ ≤
+        ((K1 + c * K1) + K0 + 1) / (1 + t ^ 2) := by
+      have h1 : ((K1 + c * K1) / (1 + t ^ 2)) / ‖s‖ ≤
+          ((K1 + c * K1) / (1 + t ^ 2)) / 1 :=
+        div_le_div_of_nonneg_left (by positivity) (by norm_num) hsnorm
+      have h2 : (K1 + c * K1) / (1 + t ^ 2) ≤ ((K1 + c * K1) + K0 + 1) / (1 + t ^ 2) := by
+        apply div_le_div_of_nonneg_right _ hden.le
+        linarith
+      calc ((K1 + c * K1) / (1 + t ^ 2)) / ‖s‖ ≤ ((K1 + c * K1) / (1 + t ^ 2)) / 1 := h1
+        _ = (K1 + c * K1) / (1 + t ^ 2) := by ring
+        _ ≤ ((K1 + c * K1) + K0 + 1) / (1 + t ^ 2) := h2
+    simpa [hsd] using hmul.trans hfin
+
+
+/-! #### F6. The two horizontal pieces are small at a good height -/
+
+/-- A uniform bound on the two horizontal pieces: on the segment the logarithmic derivative is
+at most `B` and the kernel decays like `(1 + |y| ^ 2)⁻¹`, while the scale factor is at most
+`x ^ 2`. -/
+private theorem pcsB_horiz_bound {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    ∃ K : ℝ, 0 < K ∧ ∀ (y B : ℝ), 1 ≤ |y| → 0 ≤ B →
+      (∀ σ ∈ Set.Icc (-(1 / 2) : ℝ) 2,
+        ‖logDeriv riemannZeta ((σ : ℂ) + y * Complex.I)‖ ≤ B) →
+      ‖∫ σ in (-1 / 2 : ℝ)..2,
+        -(deriv riemannZeta ((σ : ℂ) + y * Complex.I) /
+            riemannZeta ((σ : ℂ) + y * Complex.I)) *
+          (continuedGaussian δ ((σ : ℂ) + y * Complex.I) *
+            (x : ℂ) ^ ((σ : ℂ) + y * Complex.I))‖ ≤
+        5 / 2 * (K * B * x ^ 2 / (1 + y ^ 2)) := by
+  obtain ⟨K, hK, hKdec⟩ := pcsB_cont_decay_strip δ
+  refine ⟨K, hK, fun y B hy hB0 hB => ?_⟩
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hden : (0 : ℝ) < 1 + y ^ 2 := by positivity
+  have hb : ∀ σ ∈ Set.Icc (-(1 / 2) : ℝ) 2,
+      ‖-(deriv riemannZeta ((σ : ℂ) + y * Complex.I) /
+            riemannZeta ((σ : ℂ) + y * Complex.I)) *
+          (continuedGaussian δ ((σ : ℂ) + y * Complex.I) *
+            (x : ℂ) ^ ((σ : ℂ) + y * Complex.I))‖ ≤
+        B * (K / (1 + y ^ 2)) * x ^ 2 := by
+    intro σ hσ
+    have hσ1 : -(1 / 2 : ℝ) ≤ σ := hσ.1
+    have hσ2 : σ ≤ 2 := hσ.2
+    have hlogd := hB σ hσ
+    have hkern := hKdec σ hσ1 hσ2 y hy
+    have hpow : ‖(x : ℂ) ^ ((σ : ℂ) + y * Complex.I)‖ = x ^ σ := by
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos hx0]
+      simp
+    have hpowle : x ^ σ ≤ x ^ (2 : ℝ) := Real.rpow_le_rpow_of_exponent_le hx hσ2
+    rw [show x ^ (2 : ℝ) = x ^ 2 by rw [Real.rpow_two]] at hpowle
+    have hkern0 : 0 ≤ K / (1 + y ^ 2) := by positivity
+    rw [norm_mul, norm_mul, norm_neg, hpow]
+    have hGG : ‖continuedGaussian δ ((σ : ℂ) + y * Complex.I)‖ * x ^ σ ≤
+        (K / (1 + y ^ 2)) * x ^ 2 :=
+      mul_le_mul hkern hpowle (Real.rpow_nonneg hx0.le _) hkern0
+    have hstep : ‖logDeriv riemannZeta ((σ : ℂ) + y * Complex.I)‖ *
+        (‖continuedGaussian δ ((σ : ℂ) + y * Complex.I)‖ * x ^ σ) ≤
+        B * ((K / (1 + y ^ 2)) * x ^ 2) :=
+      mul_le_mul hlogd hGG (by positivity) hB0
+    calc ‖deriv riemannZeta ((σ : ℂ) + y * Complex.I) /
+          riemannZeta ((σ : ℂ) + y * Complex.I)‖ *
+        (‖continuedGaussian δ ((σ : ℂ) + y * Complex.I)‖ * x ^ σ)
+        ≤ B * ((K / (1 + y ^ 2)) * x ^ 2) := hstep
+      _ = B * (K / (1 + y ^ 2)) * x ^ 2 := by ring
+  have hint := intervalIntegral.norm_integral_le_of_norm_le_const
+    (f := fun σ : ℝ => -(deriv riemannZeta ((σ : ℂ) + y * Complex.I) /
+            riemannZeta ((σ : ℂ) + y * Complex.I)) *
+          (continuedGaussian δ ((σ : ℂ) + y * Complex.I) *
+            (x : ℂ) ^ ((σ : ℂ) + y * Complex.I)))
+    (C := B * (K / (1 + y ^ 2)) * x ^ 2) (fun σ hσ => by
+      rw [uIoc_of_le (by norm_num : (-(1 / 2) : ℝ) ≤ 2)] at hσ
+      exact hb σ ⟨hσ.1.le, hσ.2⟩)
+  have hlen : |(2 : ℝ) - -(1 / 2)| = 5 / 2 := by
+    rw [show (2 : ℝ) - -(1 / 2) = 5 / 2 by norm_num, abs_of_pos (by norm_num)]
+  rw [hlen] at hint
+  have heq : B * (K / (1 + y ^ 2)) * x ^ 2 * (5 / 2) =
+      5 / 2 * (K * B * x ^ 2 / (1 + y ^ 2)) := by
+    rw [div_eq_mul_inv]
+    ring
+  rw [heq] at hint
+  simpa only [neg_div] using hint
+
+/-! #### F7. The horizontal pieces vanish at the good heights -/
+
+/-- `log ^ 2 T / T ^ 2` tends to zero. -/
+private theorem pcsB_log_sq_div_tendsto :
+    Tendsto (fun T : ℝ => Real.log T ^ 2 / T ^ 2) atTop (𝓝 0) := by
+  have hlogdiv : Tendsto (fun T : ℝ => Real.log T / T) atTop (𝓝 0) := by
+    have h := isLittleO_log_rpow_atTop (r := 1) (by norm_num : (0 : ℝ) < 1)
+    have h2 := h.tendsto_div_nhds_zero
+    simpa [Real.rpow_one] using h2
+  have h2 := hlogdiv.pow 2
+  simpa [div_pow] using h2
+
+/-- At a good height the horizontal pieces vanish: there the logarithmic derivative is
+`C log² T` and the kernel contributes only `(1 + y ^ 2)⁻¹` with `y ≥ T`. -/
+private theorem pcsB_horiz_tendsto {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) {C : ℝ} (hC : 0 ≤ C)
+    {y : ℝ → ℝ} (hy : ∀ T : ℝ, 5 ≤ T → y T ∈ Set.Icc T (T + 1))
+    (hBy : ∀ T : ℝ, 5 ≤ T → ∀ σ ∈ Set.Icc (-(1 / 2) : ℝ) 2,
+      ‖logDeriv riemannZeta ((σ : ℂ) + y T * Complex.I)‖ ≤ C * Real.log T ^ 2) :
+    Tendsto (fun T : ℝ => ∫ σ in (-1 / 2 : ℝ)..2,
+        -(deriv riemannZeta ((σ : ℂ) + y T * Complex.I) /
+            riemannZeta ((σ : ℂ) + y T * Complex.I)) *
+          (continuedGaussian δ ((σ : ℂ) + y T * Complex.I) *
+            (x : ℂ) ^ ((σ : ℂ) + y T * Complex.I)))
+      atTop (𝓝 0) := by
+  obtain ⟨K, hK, hbound⟩ := pcsB_horiz_bound hx δ
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hA0 : 0 ≤ 5 / 2 * K * C * x ^ 2 := by positivity
+  have hev : ∀ᶠ T in atTop, ‖∫ σ in (-1 / 2 : ℝ)..2,
+        -(deriv riemannZeta ((σ : ℂ) + y T * Complex.I) /
+            riemannZeta ((σ : ℂ) + y T * Complex.I)) *
+          (continuedGaussian δ ((σ : ℂ) + y T * Complex.I) *
+            (x : ℂ) ^ ((σ : ℂ) + y T * Complex.I))‖ ≤
+      (5 / 2 * K * C * x ^ 2) * (Real.log T ^ 2 / T ^ 2) := by
+    filter_upwards [eventually_ge_atTop (5 : ℝ)] with T hT
+    have hyI := hy T hT
+    have hT0 : (0 : ℝ) < T := by linarith
+    have hy1 : 1 ≤ |y T| := by
+      have h1 : T ≤ |y T| := le_trans hyI.1 (le_abs_self _)
+      linarith
+    have hlog2 : 0 ≤ Real.log T ^ 2 := sq_nonneg _
+    have hB0 : 0 ≤ C * Real.log T ^ 2 := mul_nonneg hC hlog2
+    have hb := hbound (y T) (C * Real.log T ^ 2) hy1 hB0 (hBy T hT)
+    refine hb.trans ?_
+    have hyl : T ^ 2 ≤ (y T) ^ 2 := by nlinarith [hyI.1, hyI.2, hT0.le]
+    have hden : (0 : ℝ) < 1 + (y T) ^ 2 := by positivity
+    have hT2 : (0 : ℝ) < T ^ 2 := by positivity
+    have key : 5 / 2 * (K * (C * Real.log T ^ 2) * x ^ 2 / (1 + (y T) ^ 2)) =
+        (5 / 2 * K * C * x ^ 2) * (Real.log T ^ 2 / (1 + (y T) ^ 2)) := by
+      rw [div_eq_mul_inv, div_eq_mul_inv]
+      ring
+    rw [key]
+    refine mul_le_mul_of_nonneg_left ?_ hA0
+    exact div_le_div_of_nonneg_left hlog2 hT2 (by linarith)
+  have hlim : Tendsto (fun T : ℝ =>
+      (5 / 2 * K * C * x ^ 2) * (Real.log T ^ 2 / T ^ 2)) atTop (𝓝 0) := by
+    have h := pcsB_log_sq_div_tendsto.const_mul (5 / 2 * K * C * x ^ 2)
+    simpa using h
+  exact squeeze_zero_norm' hev hlim
+
+/-! #### F8. The rectangle integral splits into the two vertical and the two horizontal pieces -/
+
+/-- The normalized rectangle integral of a function over `[-1/2, 2] × [-T, T]` is the
+difference of the two vertical pieces plus the two horizontal ones.  The integrand arguments
+are written with real casts, so that they are the ones `RectangleIntegral'` unfolds to. -/
+private theorem pcsB_rect_decomp (F : ℂ → ℂ) (T : ℝ) :
+    RectangleIntegral' F (⟨-1 / 2, -T⟩ : ℂ) ⟨2, T⟩ =
+      (1 / (2 * π) : ℂ) *
+        ((∫ t in (-T)..T, F (((2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)) -
+         ∫ t in (-T)..T, F (((-1 / 2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)) +
+      (1 / (2 * π * Complex.I) : ℂ) *
+        ((∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + ((-T : ℝ) : ℂ) * Complex.I)) -
+         ∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + ((T : ℝ) : ℂ) * Complex.I)) := by
+  rw [RectangleIntegral', RectangleIntegral]
+  simp only [HIntegral, VIntegral, smul_eq_mul]
+  set A : ℂ := ∫ x in (-1 / 2 : ℝ)..2, F ((x : ℂ) + ((-T : ℝ) : ℂ) * Complex.I) with hA
+  set B : ℂ := ∫ x in (-1 / 2 : ℝ)..2, F ((x : ℂ) + ((T : ℝ) : ℂ) * Complex.I) with hB
+  set P : ℂ := ∫ y in (-T)..T, F (((2 : ℝ) : ℂ) + (y : ℂ) * Complex.I) with hP
+  set Q : ℂ := ∫ y in (-T)..T, F (((-1 / 2 : ℝ) : ℂ) + (y : ℂ) * Complex.I) with hQ
+  have hI : (Complex.I : ℂ) * Complex.I = -1 := Complex.I_mul_I
+  have hπ : (2 * ((π : ℝ) : ℂ) * Complex.I) ≠ 0 := by
+    have h2 : (2 : ℂ) ≠ 0 := two_ne_zero
+    have hpi : ((π : ℝ) : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+    exact mul_ne_zero (mul_ne_zero h2 hpi) Complex.I_ne_zero
+  have hIne : (Complex.I : ℂ) ≠ 0 := Complex.I_ne_zero
+  have key : (1 / (2 * ((π : ℝ) : ℂ) * Complex.I)) * (A - B + Complex.I * P - Complex.I * Q) =
+      (1 / (2 * ((π : ℝ) : ℂ))) * (P - Q) +
+        (1 / (2 * ((π : ℝ) : ℂ) * Complex.I)) * (A - B) := by
+    field_simp
+    ring
+  exact key
+
+/-! #### F9. Quadratic decay of the Mellin transform inside the strip -/
+
+/-- On the open critical strip, away from the real axis, the Gaussian Mellin transform decays
+quadratically: above `Re s = 1/2` this is `pcsB_mellin_decay_strip`, and below it a single
+recurrence step divides by `|s| ≥ |Im s| ≥ 1`. -/
+private theorem pcsB_mellin_decay_strip_full (δ : ℝ) :
+    ∃ K : ℝ, 0 < K ∧ ∀ ρ : ℂ, 0 < ρ.re → ρ.re < 1 → 1 ≤ |ρ.im| →
+      ‖gaussianMellin δ ρ‖ ≤ K / (1 + ρ.im ^ 2) := by
+  obtain ⟨K1, hK1, hK1'⟩ := pcsB_mellin_decay_strip δ
+  refine ⟨K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1 + 1, by positivity, ?_⟩
+  intro ρ hρ0 hρ1 him
+  have hden : (0 : ℝ) < 1 + ρ.im ^ 2 := by positivity
+  have hc0 : 0 ≤ ‖(2 * π * Complex.I * δ : ℂ)‖ := norm_nonneg _
+  have htarget : K1 / (1 + ρ.im ^ 2) ≤
+      (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1 + 1) / (1 + ρ.im ^ 2) := by
+    apply div_le_div_of_nonneg_right _ hden.le
+    have h2 : 0 ≤ ‖(2 * π * Complex.I * δ : ℂ)‖ * K1 := mul_nonneg hc0 hK1.le
+    linarith
+  rcases le_or_gt (1 / 2) ρ.re with hs | hs
+  · have h1 : ‖gaussianMellin δ (((ρ.re : ℝ) : ℂ) + ρ.im * Complex.I)‖ ≤
+        K1 / (1 + ρ.im ^ 2) := hK1' ρ.re hs (by linarith) ρ.im
+    have heq : ((ρ.re : ℝ) : ℂ) + ρ.im * Complex.I = ρ := by
+      apply Complex.ext <;> simp
+    rw [heq] at h1
+    exact h1.trans htarget
+  · have hρnorm : 1 ≤ ‖ρ‖ := by
+      have h1 : |ρ.im| ≤ ‖ρ‖ := Complex.abs_im_le_norm ρ
+      linarith
+    have hstep := pcst_mellin_step δ ρ hρ0
+    have e1 : ρ + 1 = (((ρ.re + 1) : ℝ) : ℂ) + ρ.im * Complex.I := by
+      apply Complex.ext <;> simp
+    have e2 : ρ + 2 = (((ρ.re + 2) : ℝ) : ℂ) + ρ.im * Complex.I := by
+      apply Complex.ext <;> simp
+    have hb1 : ‖gaussianMellin δ (ρ + 1)‖ ≤ K1 / (1 + ρ.im ^ 2) := by
+      rw [e1]
+      exact hK1' (ρ.re + 1) (by linarith) (by linarith) ρ.im
+    have hb2 : ‖gaussianMellin δ (ρ + 2)‖ ≤ K1 / (1 + ρ.im ^ 2) := by
+      rw [e2]
+      exact hK1' (ρ.re + 2) (by linarith) (by linarith) ρ.im
+    have hnum : ‖gaussianMellin δ ρ‖ * ‖ρ‖ ≤
+        (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2) := by
+      have h1 : ‖gaussianMellin δ (ρ + 2)‖ + ‖(2 * π * Complex.I * δ : ℂ)‖ *
+          ‖gaussianMellin δ (ρ + 1)‖ ≤
+          K1 / (1 + ρ.im ^ 2) + ‖(2 * π * Complex.I * δ : ℂ)‖ * (K1 / (1 + ρ.im ^ 2)) :=
+        add_le_add hb2 (mul_le_mul_of_nonneg_left hb1 hc0)
+      have h2 : K1 / (1 + ρ.im ^ 2) + ‖(2 * π * Complex.I * δ : ℂ)‖ *
+          (K1 / (1 + ρ.im ^ 2)) =
+          (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2) := by
+        rw [← mul_div_assoc, ← add_div]
+      exact hstep.trans (h1.trans (le_of_eq h2))
+    have hmul : ‖gaussianMellin δ ρ‖ ≤
+        ((K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2)) / ‖ρ‖ := by
+      rw [le_div_iff₀ (by positivity : (0 : ℝ) < ‖ρ‖)]
+      exact hnum
+    have hfin : ((K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2)) / ‖ρ‖ ≤
+        (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1 + 1) / (1 + ρ.im ^ 2) := by
+      have h1 : ((K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2)) / ‖ρ‖ ≤
+          (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2) := by
+        calc ((K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2)) / ‖ρ‖
+            ≤ ((K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2)) / 1 := by
+              exact div_le_div_of_nonneg_left (by positivity) (by norm_num) hρnorm
+          _ = (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2) := by ring
+      have h2 : (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1) / (1 + ρ.im ^ 2) ≤
+          (K1 + ‖(2 * π * Complex.I * δ : ℂ)‖ * K1 + 1) / (1 + ρ.im ^ 2) := by
+        apply div_le_div_of_nonneg_right _ hden.le
+        linarith
+      exact h1.trans h2
+    exact hmul.trans hfin
+
+
+end
+
+/-! #### F10. The line of real part minus one half: truncation limit and value -/
+
+/-- The integrand of the shift on the line of real part minus one half is integrable once the
+`L`-function is that of zeta. -/
+private theorem pcsB_half_line_integrable_zeta {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Integrable (fun t : ℝ =>
+      logDeriv riemannZeta ((-1 / 2 : ℂ) + t * Complex.I) *
+        (continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I))) := by
+  have hD := principal_half_line_integrable x hx 1 (1 : DirichletCharacter ℂ 1) δ
+  refine hD.congr ?_
+  filter_upwards with t
+  simp only [DirichletCharacter.LFunction_modOne_eq]
+  ring
+
+/-- The truncated integrals of the shift integrand on the line of real part minus one half
+converge to the full-line integral. -/
+private theorem pcsB_half_line_tendsto {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Tendsto (fun T : ℝ => ∫ t in (-T)..T,
+      logDeriv riemannZeta ((-1 / 2 : ℂ) + t * Complex.I) *
+        (continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I)))
+      atTop (𝓝 (∫ t : ℝ,
+      logDeriv riemannZeta ((-1 / 2 : ℂ) + t * Complex.I) *
+        (continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I)))) :=
+  intervalIntegral_tendsto_integral (pcsB_half_line_integrable_zeta hx δ)
+    tendsto_neg_atTop_atBot tendsto_id
+
+/-- **The value of the line of real part minus one half.** The normalized truncated integrals of
+the shift integrand on that line converge to the principal contour. -/
+private theorem pcsB_half_line_value {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Tendsto (fun T : ℝ => (1 / (2 * π) : ℂ) * ∫ t in (-T)..T,
+      logDeriv riemannZeta ((-1 / 2 : ℂ) + t * Complex.I) *
+        (continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I)))
+      atTop (𝓝 (principalContour δ x)) := by
+  have hC := principal_half_line_conductor_one x hx 1 (1 : DirichletCharacter ℂ 1) δ rfl
+  have hfun : (fun t : ℝ => logDeriv riemannZeta ((-1 / 2 : ℂ) + t * Complex.I) *
+        (continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I)))
+      = fun t : ℝ => logDeriv (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1))
+          ((-1 / 2 : ℂ) + t * Complex.I) * continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
+            (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I) := by
+    funext t
+    simp only [DirichletCharacter.LFunction_modOne_eq]
+    ring
+  have hval : (1 / (2 * π) : ℂ) * ∫ t : ℝ,
+      logDeriv riemannZeta ((-1 / 2 : ℂ) + t * Complex.I) *
+        (continuedGaussian δ ((-1 / 2 : ℂ) + t * Complex.I) *
+          (x : ℂ) ^ ((-1 / 2 : ℂ) + t * Complex.I)) = principalContour δ x := by
+    rw [hfun]
+    exact hC
+  have hT := (pcsB_half_line_tendsto hx δ).const_mul (1 / (2 * π) : ℂ)
+  rw [hval] at hT
+  exact hT
+
+/-! #### F11. The zeros of zeta in the strip: summability, and the split at a height -/
+
+/-- One zero term is dominated by the convergent zero weight `m(ρ)/‖ρ (ρ + 1)‖`. -/
+private theorem pcsB_zeroTerm_norm_le {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) {K : ℝ}
+    (hK0 : 0 ≤ K)
+    (hK : ∀ ρ : ℂ, 0 < ρ.re → ρ.re < 1 → 1 ≤ |ρ.im| →
+      ‖gaussianMellin δ ρ‖ ≤ K / (1 + ρ.im ^ 2))
+    {ρ : ℂ} (h1 : 0 < ρ.re) (h2 : ρ.re < 1) (him : 1 ≤ |ρ.im|) :
+    ‖zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ‖ ≤
+      2 * K * x * LeanLab.PNTPort.ExplicitPsi1.hw ρ := by
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hden : (0 : ℝ) < 1 + ρ.im ^ 2 := by positivity
+  have hG : ‖gaussianMellin δ ρ‖ ≤ K / (1 + ρ.im ^ 2) := hK ρ h1 h2 him
+  have hpow : ‖(x : ℂ) ^ ρ‖ ≤ x := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hx0]
+    calc x ^ ρ.re ≤ x ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le hx h2.le
+      _ = x := Real.rpow_one x
+  have hnormz : ‖gaussianMellin δ ρ * (x : ℂ) ^ ρ‖ ≤ K * x / (1 + ρ.im ^ 2) := by
+    rw [norm_mul]
+    calc ‖gaussianMellin δ ρ‖ * ‖(x : ℂ) ^ ρ‖ ≤ (K / (1 + ρ.im ^ 2)) * x :=
+          mul_le_mul hG hpow (norm_nonneg _) (div_nonneg hK0 hden.le)
+      _ = K * x / (1 + ρ.im ^ 2) := by ring
+  -- the scale comparison `‖ρ (ρ + 1)‖ ≤ 2 (1 + im ^ 2)`
+  have hquad : ‖ρ * (ρ + 1)‖ ≤ 2 * (1 + ρ.im ^ 2) := by
+    have hsq1 : ‖ρ‖ ^ 2 ≤ 1 + ρ.im ^ 2 := by
+      rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+      nlinarith [mul_pos h1 h1]
+    have hsq2 : ‖ρ + 1‖ ^ 2 ≤ 4 + ρ.im ^ 2 := by
+      rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+      have hre1 : (ρ + 1).re = ρ.re + 1 := by simp
+      have him1 : (ρ + 1).im = ρ.im := by simp
+      rw [hre1, him1]
+      nlinarith [mul_pos h1 h1]
+    have hpos1 : (0 : ℝ) ≤ ‖ρ‖ := norm_nonneg _
+    have hpos2 : (0 : ℝ) ≤ ‖ρ + 1‖ := norm_nonneg _
+    have hfac : (1 + ρ.im ^ 2) * (4 + ρ.im ^ 2) ≤ (2 * (1 + ρ.im ^ 2)) ^ 2 := by
+      nlinarith [sq_nonneg ρ.im]
+    have hsq : ‖ρ * (ρ + 1)‖ ^ 2 ≤ (2 * (1 + ρ.im ^ 2)) ^ 2 := by
+      rw [norm_mul, mul_pow]
+      nlinarith [hsq1, hsq2, hpos1, hpos2, mul_nonneg hpos1 hpos2]
+    nlinarith [norm_nonneg (ρ * (ρ + 1)), hsq]
+  have hrp : ρ ≠ 0 := by
+    intro h
+    rw [h] at h1
+    simp at h1
+  have hrp1 : ρ + 1 ≠ 0 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp at hre
+    linarith
+  have hnormpos : (0 : ℝ) < ‖ρ * (ρ + 1)‖ := by
+    rw [norm_pos_iff]
+    exact mul_ne_zero hrp hrp1
+  have hm0 : (0 : ℝ) ≤ (analyticOrderNatAt riemannZeta ρ : ℝ) := Nat.cast_nonneg _
+  have hinv : 1 / (1 + ρ.im ^ 2) ≤ 2 / ‖ρ * (ρ + 1)‖ := by
+    rw [div_le_div_iff₀ hden hnormpos]
+    nlinarith [hquad]
+  calc ‖zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ‖
+      = (analyticOrderNatAt riemannZeta ρ : ℝ) *
+          ‖gaussianMellin δ ρ * (x : ℂ) ^ ρ‖ := by
+        rw [zeroTerm, DirichletCharacter.LFunction_modOne_eq, nsmul_eq_mul, norm_mul,
+          Complex.norm_natCast]
+    _ ≤ (analyticOrderNatAt riemannZeta ρ : ℝ) * (K * x / (1 + ρ.im ^ 2)) :=
+        mul_le_mul_of_nonneg_left hnormz hm0
+    _ = ((analyticOrderNatAt riemannZeta ρ : ℝ) * (K * x)) * (1 / (1 + ρ.im ^ 2)) := by
+        ring
+    _ ≤ ((analyticOrderNatAt riemannZeta ρ : ℝ) * (K * x)) * (2 / ‖ρ * (ρ + 1)‖) := by
+        exact mul_le_mul_of_nonneg_left hinv (mul_nonneg hm0 (mul_nonneg hK0 (le_of_lt hx0)))
+    _ = 2 * K * x * LeanLab.PNTPort.ExplicitPsi1.hw ρ := by
+        rw [LeanLab.PNTPort.ExplicitPsi1.hw]
+        field_simp
+
+set_option maxHeartbeats 20000000 in
+/-- The zero terms of the strip zeros of zeta are summable. -/
+private theorem pcsB_zeroTerm_summable {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Summable (fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+      zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val) := by
+  obtain ⟨K, hK0, hK⟩ := pcsB_mellin_decay_strip_full δ
+  have hhw : Summable (fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+      LeanLab.PNTPort.ExplicitPsi1.hw ρ.val) := by
+    have hinj : Function.Injective
+        (fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+          (⟨ρ.val, ρ.2.1, by linarith [ρ.2.2.1]⟩ : LeanLab.PNTPort.ExplicitPsi1.Zall)) := by
+      intro a b h
+      exact Subtype.ext (congrArg (fun z : LeanLab.PNTPort.ExplicitPsi1.Zall => (z : ℂ)) h)
+    have hcomp := LeanLab.PNTPort.ExplicitPsi1.summable_hw.comp_injective
+      (f := fun ρ : LeanLab.PNTPort.ExplicitPsi1.Zall => LeanLab.PNTPort.ExplicitPsi1.hw ρ)
+      (i := fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+        (⟨ρ.val, ρ.2.1, by linarith [ρ.2.2.1]⟩ : LeanLab.PNTPort.ExplicitPsi1.Zall)) hinj
+    exact hcomp
+  have hfin : ({ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} |
+      |ρ.val.im| ≤ 1} : Set {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1}).Finite := by
+    refine Set.Finite.of_finite_image
+      (f := fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} => (ρ.val : ℂ)) ?_
+      (fun a _ b _ h => Subtype.ext h)
+    refine Set.Finite.subset (pcsB_zeros_rect_finite 1) ?_
+    rintro z ⟨ρ, hρ, rfl⟩
+    simp only [Set.mem_setOf_eq] at hρ
+    refine ⟨?_, ρ.2.1⟩
+    rw [pcsB_mem_rect (T := 1) (by norm_num)]
+    have hab := abs_le.mp hρ
+    exact ⟨⟨by linarith [ρ.2.2.1], by linarith [ρ.2.2.2]⟩, hab⟩
+  have h1 : Summable (fun ρ : {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} |
+      |ρ.val.im| ≤ 1} => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val.val) := by
+    haveI := hfin.to_subtype
+    exact Summable.of_finite
+  have h2 : Summable (fun ρ : {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} |
+      ¬ |ρ.val.im| ≤ 1} => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val.val) := by
+    refine Summable.of_norm_bounded (g := fun ρ : {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1} | ¬ |ρ.val.im| ≤ 1} =>
+        (2 * K * x) * LeanLab.PNTPort.ExplicitPsi1.hw ρ.val.val) ?_ ?_
+    · exact (hhw.mul_left (2 * K * x)).subtype _
+    · intro ρ
+      exact pcsB_zeroTerm_norm_le hx δ hK0.le hK ρ.val.2.2.1 ρ.val.2.2.2
+        (by have := not_le.mp ρ.2; linarith)
+  exact Summable.add_compl h1 h2
+
+
+/-- The `L`-function of the trivial character vanishes exactly where zeta does. -/
+private theorem pcsB_LFunction_one_eq_zero {ρ : ℂ} :
+    DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1) ρ = 0 ↔ riemannZeta ρ = 0 := by
+  rw [DirichletCharacter.LFunction_modOne_eq]
+
+/-- A zero of zeta inside the rectangle `[-1/2, 2] × [-T, T]` is a strip zero of height at most
+`T`, and conversely. -/
+private lemma pcsB_rect_zero_iff {T : ℝ} (hT : 0 ≤ T) {ρ : ℂ} :
+    (riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) ↔
+      ρ ∈ (pcsB_zeros_rect_finite T).toFinset := by
+  have hmem := fun z => pcsB_mem_rect (T := T) hT (z := z)
+  constructor
+  · rintro ⟨hz, h1, h2, hi⟩
+    rw [Set.Finite.mem_toFinset]
+    exact ⟨(hmem ρ).mpr ⟨⟨by linarith, by linarith⟩, abs_le.mp hi⟩, hz⟩
+  · intro hρ
+    rw [Set.Finite.mem_toFinset] at hρ
+    obtain ⟨hR, hz⟩ := hρ
+    obtain ⟨hre, him⟩ := (hmem ρ).mp hR
+    refine ⟨hz, ?_, ?_, ?_⟩
+    · rcases eq_or_ne ρ.im 0 with h0 | h0
+      · have hρeq : ρ = ((ρ.re : ℝ) : ℂ) := by
+          apply Complex.ext
+          · simp
+          · simpa using h0
+        rcases lt_or_ge ρ.re 0 with hlt | hge
+        · exact absurd (by rw [← hρeq]; exact hz)
+            (pcsB_zeta_ne_zero_of_real_nonpos (by linarith) hlt)
+        · -- `0 ≤ ρ.re`; only the value zero itself is a real zero of zeta there
+          have hne : ρ.re ≠ 0 := by
+            intro h0re
+            have hρ0 : ρ = 0 := by rw [hρeq, h0re]; norm_num
+            have hzρ : riemannZeta ρ = 0 := mem_riemannZetaZeros.mp hz
+            have hz0 : riemannZeta (0 : ℂ) = 0 := by rwa [hρ0] at hzρ
+            rw [riemannZeta_zero] at hz0
+            norm_num at hz0
+          exact lt_of_le_of_ne hge hne.symm
+      · by_contra hpos
+        push_neg at hpos
+        exact LeanLab.PNTPort.ZetaZeros.zeta_ne_zero_of_re_nonpos hpos h0 hz
+    · by_contra h
+      push_neg at h
+      exact riemannZeta_ne_zero_of_one_le_re h hz
+    · exact abs_le.mpr ⟨by linarith [him.1], him.2⟩
+
+/-- The sum over the zeros of zeta in the rectangle is the low zero sum. -/
+private theorem pcsB_rect_finset_sum {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
+    ∑ ρ ∈ (pcsB_zeros_rect_finite T).toFinset,
+        (analyticOrderNatAt riemannZeta ρ : ℂ) * (gaussianMellin δ ρ * (x : ℂ) ^ ρ) =
+      lowZeros (1 : DirichletCharacter ℂ 1) δ x T := by
+  have h1 : lowZeros (1 : DirichletCharacter ℂ 1) δ x T =
+      ∑' ρ : {ρ : ℂ // ρ ∈ (pcsB_zeros_rect_finite T).toFinset},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val := by
+    rw [lowZeros]
+    refine (tsum_congr_subtype (f := fun ρ : ℂ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ)
+      (P := fun ρ : ℂ => DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1) ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T)
+      (Q := fun ρ : ℂ => riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T)
+      (fun ρ => by simp only [pcsB_LFunction_one_eq_zero])).trans ?_
+    exact tsum_congr_subtype _ (fun ρ => pcsB_rect_zero_iff hT)
+  rw [h1, Finset.tsum_subtype]
+  refine Finset.sum_congr rfl fun ρ hρ => ?_
+  simp only [zeroTerm, DirichletCharacter.LFunction_modOne_eq]
+  rw [nsmul_eq_mul]
+
+/-- The strip zeros of zeta of height at most `T`, `T ≥ 0`, are finitely many. -/
+private theorem pcsB_stripZeros_finite_nonneg (T : ℝ) (hT : 0 ≤ T) :
+    ({ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} | |ρ.val.im| ≤ T} :
+      Set {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1}).Finite := by
+  refine Set.Finite.of_finite_image
+    (s := {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} | |ρ.val.im| ≤ T})
+    (f := fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} => (ρ.val : ℂ)) ?_ ?_
+  · refine Set.Finite.subset (pcsB_zeros_rect_finite T) ?_
+    rintro z ⟨ρ, hρ, rfl⟩
+    simp only [Set.mem_setOf_eq] at hρ
+    refine ⟨?_, ρ.2.1⟩
+    rw [pcsB_mem_rect (T := T) hT]
+    have hab := abs_le.mp hρ
+    exact ⟨⟨by linarith [ρ.2.2.1], by linarith [ρ.2.2.2]⟩, hab⟩
+  · intro a _ b _ h
+    exact Subtype.ext h
+
+/-- The strip zeros of zeta of height at most `T` are finitely many, for any `T`. -/
+private theorem pcsB_stripZeros_finite (T : ℝ) :
+    ({ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} | |ρ.val.im| ≤ T} :
+      Set {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1}).Finite :=
+  Set.Finite.subset (pcsB_stripZeros_finite_nonneg (max T 0) (le_max_right _ _)) fun ρ hρ =>
+    show |ρ.val.im| ≤ max T 0 from le_trans hρ (le_max_left _ _)
+
+/-- The strip zeros of zeta below a growing height exhaust all strip zeros. -/
+private theorem pcsB_stripZeros_finset_tendsto :
+    Tendsto (fun T : ℝ => (pcsB_stripZeros_finite T).toFinset) atTop atTop := by
+  refine Filter.tendsto_atTop_atTop.mpr fun s =>
+    ⟨max (s.sum fun ρ => |ρ.val.im|) 0, fun T hT ρ hρ => ?_⟩
+  rw [Set.Finite.mem_toFinset]
+  refine le_trans (Finset.single_le_sum (f := fun ρ =>
+    |ρ.val.im|) (fun i _ => abs_nonneg _) hρ) ?_
+  exact le_trans (le_max_left _ _) hT
+
+/-- The high zero sum is the sum over the complement of the finitely many low zeros. -/
+private theorem pcsB_high_eq_compl {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) (T : ℝ) :
+    highZeros (1 : DirichletCharacter ℂ 1) δ x T =
+      ∑' ρ : {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} |
+          ¬ |ρ.val.im| ≤ T},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val.val := by
+  rw [highZeros]
+  refine (tsum_congr_subtype (f := fun ρ : ℂ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ)
+    (P := fun ρ : ℂ => DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1) ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|)
+    (Q := fun ρ : ℂ => riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|)
+    (fun ρ => by simp only [pcsB_LFunction_one_eq_zero])).trans ?_
+  refine (tsum_congr_subtype (f := fun ρ : ℂ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ)
+    (P := fun ρ : ℂ => riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|)
+    (Q := fun ρ : ℂ => (riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1) ∧ T < |ρ.im|)
+    (fun ρ => by tauto)).trans ?_
+  refine (tsum_congr_subtype (f := fun ρ : ℂ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ)
+    (P := fun ρ : ℂ => (riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1) ∧ T < |ρ.im|)
+    (Q := fun ρ : ℂ => (riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1) ∧ ¬ |ρ.im| ≤ T)
+    (fun ρ => by
+      constructor
+      · rintro ⟨h1, h2⟩
+        exact ⟨h1, not_le.mpr h2⟩
+      · rintro ⟨h1, h2⟩
+        exact ⟨h1, not_le.mp h2⟩)).trans ?_
+  exact ((Equiv.subtypeSubtypeEquivSubtypeInter
+    (fun ρ : ℂ => riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1)
+    (fun ρ : ℂ => ¬ |ρ.im| ≤ T)).tsum_eq
+      (fun ρ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val)).symm
+
+/-- The low and the high zero sum add up to the total zero sum. -/
+private theorem pcsB_zero_split {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) (T : ℝ) :
+    lowZeros (1 : DirichletCharacter ℂ 1) δ x T +
+        highZeros (1 : DirichletCharacter ℂ 1) δ x T =
+      ∑' ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val := by
+  have hf := pcsB_zeroTerm_summable hx δ
+  have hlow : lowZeros (1 : DirichletCharacter ℂ 1) δ x T =
+      ∑' ρ : {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} | |ρ.val.im| ≤ T},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val.val := by
+    rw [lowZeros]
+    refine (tsum_congr_subtype (f := fun ρ : ℂ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ)
+      (P := fun ρ : ℂ => DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1) ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T)
+      (Q := fun ρ : ℂ => riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T)
+      (fun ρ => by simp only [pcsB_LFunction_one_eq_zero])).trans ?_
+    refine (tsum_congr_subtype (f := fun ρ : ℂ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ)
+      (P := fun ρ : ℂ => riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T)
+      (Q := fun ρ : ℂ => (riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1) ∧ |ρ.im| ≤ T)
+      (fun ρ => by tauto)).trans ?_
+    exact ((Equiv.subtypeSubtypeEquivSubtypeInter
+      (fun ρ : ℂ => riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1)
+      (fun ρ : ℂ => |ρ.im| ≤ T)).tsum_eq
+        (fun ρ => zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val)).symm
+  have hhigh :
+      highZeros (1 : DirichletCharacter ℂ 1) δ x T =
+      ∑' ρ : {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} |
+          ¬ |ρ.val.im| ≤ T},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val.val :=
+    pcsB_high_eq_compl hx δ T
+  rw [hlow, hhigh]
+  exact hf.tsum_subtype_add_tsum_subtype_compl
+    {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} | |ρ.val.im| ≤ T}
+
+/-- The high zero sum of zeta tends to zero as the height grows. -/
+private theorem pcsB_high_tendsto {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Tendsto (fun T : ℝ => highZeros (1 : DirichletCharacter ℂ 1) δ x T) atTop (𝓝 0) := by
+  have h := (tendsto_tsum_compl_atTop_zero
+    (fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+      zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val)).comp
+    pcsB_stripZeros_finset_tendsto
+  refine h.congr' ?_
+  filter_upwards with T
+  have h1 : (∑' a : {x : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} //
+        x ∉ (pcsB_stripZeros_finite T).toFinset},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x a.val.val) =
+      ∑' a : {ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} |
+          ¬ |ρ.val.im| ≤ T},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x a.val.val :=
+    tsum_congr_subtype (f := fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val)
+      (P := fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+        ρ ∉ (pcsB_stripZeros_finite T).toFinset)
+      (Q := fun ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1} =>
+        ¬ |ρ.val.im| ≤ T)
+      (fun a => by simp only [Set.Finite.mem_toFinset, Set.mem_setOf_eq])
+  exact h1.trans (pcsB_high_eq_compl hx δ T).symm
+
+/-- The low zero sum of zeta tends to the total zero sum as the height grows. -/
+private theorem pcsB_low_tendsto_total {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Tendsto (fun T : ℝ => lowZeros (1 : DirichletCharacter ℂ 1) δ x T) atTop
+      (𝓝 (∑' ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val)) := by
+  have h2 : Tendsto (fun T : ℝ =>
+      (∑' ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val) -
+        highZeros (1 : DirichletCharacter ℂ 1) δ x T) atTop
+      (𝓝 ((∑' ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1},
+        zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val) - 0)) :=
+    tendsto_const_nhds.sub (pcsB_high_tendsto hx δ)
+  rw [sub_zero] at h2
+  refine h2.congr' ?_
+  filter_upwards with T
+  have hs := pcsB_zero_split hx δ T
+  rw [← hs]
+  ring
+
+
+/-! #### F12. Conjugation, and the lower horizontal piece at a good height -/
+
+private theorem pcsB_zeta_conj (z : ℂ) :
+    riemannZeta (starRingEnd ℂ z) = starRingEnd ℂ (riemannZeta z) := by
+  simpa using riemannZeta_conj z
+
+private theorem pcsB_zeta_conj_ne {z : ℂ} (h : riemannZeta (starRingEnd ℂ z) ≠ 0) :
+    riemannZeta z ≠ 0 := by
+  intro hz
+  exact h (by rw [pcsB_zeta_conj, hz, map_zero])
+
+private theorem pcsB_logDeriv_conj (z : ℂ) :
+    logDeriv riemannZeta (starRingEnd ℂ z) = starRingEnd ℂ (logDeriv riemannZeta z) := by
+  simpa using logDerivZeta_conj' z
+
+private theorem pcsB_logDeriv_conj_norm (z : ℂ) :
+    ‖logDeriv riemannZeta (starRingEnd ℂ z)‖ = ‖logDeriv riemannZeta z‖ := by
+  rw [pcsB_logDeriv_conj]
+  exact norm_star _
+
+/-- At a good height the horizontal piece at the lower edge also vanishes. -/
+private theorem pcsB_horiz_tendsto_neg {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) {C : ℝ} (hC : 0 ≤ C)
+    {y : ℝ → ℝ} (hy : ∀ t : ℝ, 5 ≤ t → y t ∈ Set.Icc t (t + 1))
+    (hBy : ∀ t : ℝ, 5 ≤ t → ∀ σ ∈ Set.Icc (-(1 / 2) : ℝ) 2,
+      ‖logDeriv riemannZeta ((σ : ℂ) + y t * Complex.I)‖ ≤ C * Real.log t ^ 2) :
+    Tendsto (fun t : ℝ => ∫ σ in (-1 / 2 : ℝ)..2,
+        -(deriv riemannZeta ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I) /
+            riemannZeta ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I)) *
+          (continuedGaussian δ ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I) *
+            (x : ℂ) ^ ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I)))
+      atTop (𝓝 0) := by
+  obtain ⟨K, hK, hbound⟩ := pcsB_horiz_bound hx δ
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hA0 : 0 ≤ 5 / 2 * K * C * x ^ 2 := by positivity
+  have hev : ∀ᶠ t : ℝ in atTop,
+      ‖∫ σ in (-1 / 2 : ℝ)..2,
+        -(deriv riemannZeta ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I) /
+            riemannZeta ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I)) *
+          (continuedGaussian δ ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I) *
+            (x : ℂ) ^ ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I))‖ ≤
+      (5 / 2 * K * C * x ^ 2) * (Real.log t ^ 2 / t ^ 2) := by
+    filter_upwards [eventually_ge_atTop (5 : ℝ)] with t ht
+    have hyI := hy t ht
+    have hT0 : (0 : ℝ) < t := by linarith
+    have hy1 : 1 ≤ |(-y t : ℝ)| := by
+      rw [abs_neg]
+      exact le_trans (by linarith [hyI.1] : (1 : ℝ) ≤ y t) (le_abs_self _)
+    have hlog2 : 0 ≤ Real.log t ^ 2 := sq_nonneg _
+    have hB0 : 0 ≤ C * Real.log t ^ 2 := mul_nonneg hC hlog2
+    have hb := hbound (-y t) (C * Real.log t ^ 2) hy1 hB0 ?_
+    · refine hb.trans ?_
+      have hyl : t ^ 2 ≤ (-y t) ^ 2 := by nlinarith [hyI.1, hyI.2, hT0.le]
+      have hden : (0 : ℝ) < 1 + (-y t) ^ 2 := by positivity
+      have hT2 : (0 : ℝ) < t ^ 2 := by positivity
+      have key : 5 / 2 * (K * (C * Real.log t ^ 2) * x ^ 2 / (1 + (-y t) ^ 2)) =
+          (5 / 2 * K * C * x ^ 2) * (Real.log t ^ 2 / (1 + (-y t) ^ 2)) := by
+        rw [div_eq_mul_inv, div_eq_mul_inv]
+        ring
+      rw [key]
+      refine mul_le_mul_of_nonneg_left ?_ hA0
+      exact div_le_div_of_nonneg_left hlog2 hT2 (by linarith)
+    · intro σ hσ
+      have heqc : ((σ : ℂ) + (((-y t : ℝ) : ℂ)) * Complex.I) =
+          starRingEnd ℂ ((σ : ℂ) + ((y t : ℝ) : ℂ) * Complex.I) := by
+        apply Complex.ext <;> simp
+      rw [heqc, pcsB_logDeriv_conj_norm]
+      exact hBy t ht σ hσ
+  have hlim : Tendsto (fun t : ℝ =>
+      (5 / 2 * K * C * x ^ 2) * (Real.log t ^ 2 / t ^ 2)) atTop (𝓝 0) := by
+    have h := pcsB_log_sq_div_tendsto.const_mul (5 / 2 * K * C * x ^ 2)
+    simpa using h
+  exact squeeze_zero_norm' hev hlim
+
+
+/-! #### F13. The contour shift in the total form -/
+
+/-- **The contour shift, summed over all strip zeros.** This is the identity that leaf B
+states, with the two zero sums replaced by their total. -/
+private theorem pcsB_shift_total {x : ℝ} (hx : 1 ≤ x) (δ : ℝ) :
+    Schi etaHeart (1 : DirichletCharacter ℂ 1) δ x + principalContour δ x =
+      -(((Real.log (2 * π) : ℝ)) : ℂ) + fhat etaHeart (-δ) * (x : ℂ) -
+        ∑' ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1},
+          zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val := by
+  have hx0 : (0 : ℝ) < x := by linarith
+  obtain ⟨C, hC0, hgood⟩ := LeanLab.PNTPort.ZetaZeros.good_height_full
+  set Y : ℝ → ℝ := fun t => if h : 5 ≤ t then (hgood t h).choose else 5 with hY
+  have hYspec : ∀ t : ℝ, 5 ≤ t → Y t ∈ Set.Icc t (t + 1) ∧
+      ∀ σ ∈ Set.Icc (-(1 / 2) : ℝ) 2, riemannZeta ((σ : ℂ) + Y t * Complex.I) ≠ 0 ∧
+        ‖logDeriv riemannZeta ((σ : ℂ) + Y t * Complex.I)‖ ≤ C * Real.log t ^ 2 := by
+    intro t ht
+    have hyv : Y t = (hgood t ht).choose := by rw [hY]; exact dif_pos ht
+    have h0 := (hgood t ht).choose_spec
+    rw [hyv]
+    refine ⟨h0.1, fun σ hσ => ?_⟩
+    have hσ1 : (-1 / 2 : ℝ) ≤ σ ∧ σ ≤ 2 := by
+      rw [Set.mem_Icc] at hσ
+      exact ⟨by linarith [hσ.1], hσ.2⟩
+    refine ⟨?_, ?_⟩
+    · simpa only [mul_comm Complex.I] using (h0.2 σ hσ1).1
+    · rw [logDeriv_apply]
+      simpa only [mul_comm Complex.I] using (h0.2 σ hσ1).2
+  have hYtop : Tendsto Y atTop atTop := by
+    refine Filter.tendsto_atTop_atTop.mpr fun a => ⟨max a 5, fun t ht => ?_⟩
+    have h5 : (5 : ℝ) ≤ t := le_trans (le_max_right a 5) ht
+    exact le_trans (le_trans (le_max_left a 5) ht) (hYspec t h5).1.1
+  set F : ℂ → ℂ := fun s => -(deriv riemannZeta s / riemannZeta s) *
+    (continuedGaussian δ s * (x : ℂ) ^ s) with hF
+  have hbd : ∀ t : ℝ, 5 ≤ t → ∀ z ∈ RectangleBorder (⟨-1 / 2, -(Y t)⟩ : ℂ) ⟨2, Y t⟩,
+      riemannZeta z ≠ 0 := by
+    intro t ht z hz hzero
+    have hT0 : 0 < Y t := by linarith [(hYspec t ht).1.1]
+    have hbdd := (pcsB_mem_rect (T := Y t) (z := z) hT0.le).mp
+      (rectangleBorder_subset_rectangle (⟨-1 / 2, -(Y t)⟩ : ℂ) ⟨2, Y t⟩ hz)
+    obtain ⟨hre, him⟩ := hbdd
+    rcases pcsB_border_cases hz with h | h | h | h
+    · have hconj : riemannZeta (starRingEnd ℂ z) = 0 := by
+        rw [pcsB_zeta_conj, hzero, map_zero]
+      have hz' : starRingEnd ℂ z = ((z.re : ℝ) : ℂ) + Y t * Complex.I := by
+        apply Complex.ext
+        · simp
+        · simp [h]
+      rw [hz'] at hconj
+      exact ((hYspec t ht).2 z.re ⟨by linarith [hre.1], hre.2⟩).1 hconj
+    · rcases eq_or_ne z.im 0 with him0 | him0
+      · have hzeq : z = (((-1 / 2 : ℝ)) : ℂ) := by
+          apply Complex.ext
+          · simpa using h
+          · simpa using him0
+        rw [hzeq] at hzero
+        exact pcsB_zeta_ne_zero_of_real_nonpos (by norm_num) (by norm_num) hzero
+      · exact LeanLab.PNTPort.ZetaZeros.zeta_ne_zero_of_re_nonpos (by rw [h]; norm_num) him0 hzero
+    · have hz' : z = ((z.re : ℝ) : ℂ) + Y t * Complex.I := by
+        apply Complex.ext <;> simp [h]
+      rw [hz'] at hzero
+      exact ((hYspec t ht).2 z.re ⟨by linarith [hre.1], hre.2⟩).1 hzero
+    · exact riemannZeta_ne_zero_of_one_lt_re (by rw [h]; norm_num) hzero
+  have hV2 : Tendsto (fun t : ℝ => (1 / (2 * π) : ℂ) * ∫ s in (-(Y t))..(Y t),
+      F (((2 : ℝ) : ℂ) + (s : ℂ) * Complex.I)) atTop
+      (𝓝 (Schi etaHeart (1 : DirichletCharacter ℂ 1) δ x)) := by
+    have hI : Tendsto (fun t : ℝ => (1 / (2 * π) : ℂ) * ∫ s in (-(Y t))..(Y t),
+        logDeriv riemannZeta ((2 : ℂ) + s * Complex.I) *
+          (gaussianMellin δ ((2 : ℂ) + s * Complex.I) *
+            (x : ℂ) ^ ((2 : ℂ) + s * Complex.I)))
+        atTop (𝓝 (- Schi etaHeart (1 : DirichletCharacter ℂ 1) δ x)) :=
+      (pcsB_two_line_value hx δ).comp hYtop
+    have hI' : Tendsto (fun t : ℝ => -((1 / (2 * π) : ℂ) * ∫ s in (-(Y t))..(Y t),
+        logDeriv riemannZeta ((2 : ℂ) + s * Complex.I) *
+          (gaussianMellin δ ((2 : ℂ) + s * Complex.I) *
+            (x : ℂ) ^ ((2 : ℂ) + s * Complex.I))))
+        atTop (𝓝 (Schi etaHeart (1 : DirichletCharacter ℂ 1) δ x)) := by
+      simpa using hI.neg
+    refine hI'.congr' ?_
+    filter_upwards with t
+    have hpt : (∫ s in (-(Y t))..(Y t), F (((2 : ℝ) : ℂ) + (s : ℂ) * Complex.I)) =
+        -(∫ s in (-(Y t))..(Y t), logDeriv riemannZeta ((2 : ℂ) + s * Complex.I) *
+          (gaussianMellin δ ((2 : ℂ) + s * Complex.I) *
+            (x : ℂ) ^ ((2 : ℂ) + s * Complex.I))) := by
+      rw [← intervalIntegral.integral_neg]
+      apply intervalIntegral.integral_congr
+      intro s _
+      simp only [hF]
+      rw [logDeriv_apply,
+        LeanLab.HelfgottMajor.Continuation457.continuedGaussian_eq δ _ (by push_cast; norm_num)]
+      push_cast
+      ring
+    rw [hpt]
+    ring
+  have hVm : Tendsto (fun t : ℝ => (1 / (2 * π) : ℂ) * ∫ s in (-(Y t))..(Y t),
+      F (((-1 / 2 : ℝ) : ℂ) + (s : ℂ) * Complex.I)) atTop
+      (𝓝 (- principalContour δ x)) := by
+    have hI : Tendsto (fun t : ℝ => (1 / (2 * π) : ℂ) * ∫ s in (-(Y t))..(Y t),
+        logDeriv riemannZeta ((-1 / 2 : ℂ) + s * Complex.I) *
+          (continuedGaussian δ ((-1 / 2 : ℂ) + s * Complex.I) *
+            (x : ℂ) ^ ((-1 / 2 : ℂ) + s * Complex.I)))
+        atTop (𝓝 (principalContour δ x)) :=
+      (pcsB_half_line_value hx δ).comp hYtop
+    have hI' : Tendsto (fun t : ℝ => -((1 / (2 * π) : ℂ) * ∫ s in (-(Y t))..(Y t),
+        logDeriv riemannZeta ((-1 / 2 : ℂ) + s * Complex.I) *
+          (continuedGaussian δ ((-1 / 2 : ℂ) + s * Complex.I) *
+            (x : ℂ) ^ ((-1 / 2 : ℂ) + s * Complex.I))))
+        atTop (𝓝 (- principalContour δ x)) := by
+      simpa using hI.neg
+    refine hI'.congr' ?_
+    filter_upwards with t
+    have hpt : (∫ s in (-(Y t))..(Y t), F (((-1 / 2 : ℝ) : ℂ) + (s : ℂ) * Complex.I)) =
+        -(∫ s in (-(Y t))..(Y t), logDeriv riemannZeta ((-1 / 2 : ℂ) + s * Complex.I) *
+          (continuedGaussian δ ((-1 / 2 : ℂ) + s * Complex.I) *
+            (x : ℂ) ^ ((-1 / 2 : ℂ) + s * Complex.I))) := by
+      rw [← intervalIntegral.integral_neg]
+      apply intervalIntegral.integral_congr
+      intro s _
+      simp only [hF]
+      rw [logDeriv_apply]
+      push_cast
+      ring
+    rw [hpt]
+    ring
+  have hH : Tendsto (fun t : ℝ => (1 / (2 * π * Complex.I) : ℂ) *
+      ((∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + (((-Y t : ℝ) : ℂ)) * Complex.I)) -
+       ∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + ((Y t : ℝ) : ℂ) * Complex.I)))
+      atTop (𝓝 0) := by
+    have hneg := pcsB_horiz_tendsto_neg (x := x) hx δ hC0.le
+      (fun t ht => (hYspec t ht).1) (fun t ht σ hσ => ((hYspec t ht).2 σ hσ).2)
+    have hpos := pcsB_horiz_tendsto (x := x) hx δ hC0.le
+      (fun t ht => (hYspec t ht).1) (fun t ht σ hσ => ((hYspec t ht).2 σ hσ).2)
+    have h := (hneg.sub hpos).const_mul (1 / (2 * π * Complex.I) : ℂ)
+    simpa [hF, mul_zero] using h
+  have hdec : ∀ t : ℝ, RectangleIntegral' F (⟨-1 / 2, -(Y t)⟩ : ℂ) ⟨2, Y t⟩ =
+      (1 / (2 * π) : ℂ) * ((∫ s in (-(Y t))..(Y t), F (((2 : ℝ) : ℂ) + (s : ℂ) * Complex.I)) -
+        ∫ s in (-(Y t))..(Y t), F (((-1 / 2 : ℝ) : ℂ) + (s : ℂ) * Complex.I)) +
+      (1 / (2 * π * Complex.I) : ℂ) *
+        ((∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + (((-Y t : ℝ) : ℂ)) * Complex.I)) -
+         ∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + ((Y t : ℝ) : ℂ) * Complex.I)) := by
+    intro t
+    exact pcsB_rect_decomp F (Y t)
+  have hres : ∀ t : ℝ, 5 ≤ t →
+      RectangleIntegral' F (⟨-1 / 2, -(Y t)⟩ : ℂ) ⟨2, Y t⟩ =
+        -(((Real.log (2 * π) : ℝ)) : ℂ) + fhat etaHeart (-δ) * (x : ℂ) -
+          lowZeros (1 : DirichletCharacter ℂ 1) δ x (Y t) := by
+    intro t ht
+    have hT0 : 0 < Y t := by linarith [(hYspec t ht).1.1]
+    rw [hF]
+    rw [pcsB_rect_residue hx0 δ hT0 (hbd t ht)]
+    rw [pcsB_rect_finset_sum hx δ hT0.le]
+  have hA : Tendsto (fun t : ℝ =>
+      (1 / (2 * π) : ℂ) * (∫ s in (-(Y t))..(Y t), F (((2 : ℝ) : ℂ) + (s : ℂ) * Complex.I))
+      - (1 / (2 * π) : ℂ) * (∫ s in (-(Y t))..(Y t),
+          F (((-1 / 2 : ℝ) : ℂ) + (s : ℂ) * Complex.I))
+      + (1 / (2 * π * Complex.I) : ℂ) *
+        ((∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + (((-Y t : ℝ) : ℂ)) * Complex.I)) -
+         ∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + ((Y t : ℝ) : ℂ) * Complex.I)))
+      atTop (𝓝 (Schi etaHeart (1 : DirichletCharacter ℂ 1) δ x + principalContour δ x)) := by
+    have h := (hV2.sub hVm).add hH
+    simpa using h
+  have hreslim : Tendsto (fun t : ℝ =>
+      -(((Real.log (2 * π) : ℝ)) : ℂ) + fhat etaHeart (-δ) * (x : ℂ) -
+        lowZeros (1 : DirichletCharacter ℂ 1) δ x (Y t)) atTop
+      (𝓝 (-(((Real.log (2 * π) : ℝ)) : ℂ) + fhat etaHeart (-δ) * (x : ℂ) -
+        ∑' ρ : {ρ : ℂ // riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1},
+          zeroTerm (1 : DirichletCharacter ℂ 1) δ x ρ.val)) := by
+    have h1 : Tendsto (fun _ : ℝ => -(((Real.log (2 * π) : ℝ)) : ℂ)) atTop
+        (𝓝 (-(((Real.log (2 * π) : ℝ)) : ℂ))) := tendsto_const_nhds
+    have h2 : Tendsto (fun _ : ℝ => fhat etaHeart (-δ) * (x : ℂ)) atTop
+        (𝓝 (fhat etaHeart (-δ) * (x : ℂ))) := tendsto_const_nhds
+    have h3 := (pcsB_low_tendsto_total hx δ).comp hYtop
+    have h := (h1.add h2).sub h3
+    simpa using h
+  have heqfun : ∀ᶠ t : ℝ in atTop,
+      ((1 / (2 * π) : ℂ) * (∫ s in (-(Y t))..(Y t), F (((2 : ℝ) : ℂ) + (s : ℂ) * Complex.I))
+        - (1 / (2 * π) : ℂ) * (∫ s in (-(Y t))..(Y t),
+            F (((-1 / 2 : ℝ) : ℂ) + (s : ℂ) * Complex.I))
+        + (1 / (2 * π * Complex.I) : ℂ) *
+          ((∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + (((-Y t : ℝ) : ℂ)) * Complex.I)) -
+           ∫ σ in (-1 / 2 : ℝ)..2, F ((σ : ℂ) + ((Y t : ℝ) : ℂ) * Complex.I))) =
+      (-(((Real.log (2 * π) : ℝ)) : ℂ) + fhat etaHeart (-δ) * (x : ℂ) -
+        lowZeros (1 : DirichletCharacter ℂ 1) δ x (Y t)) := by
+    filter_upwards [eventually_ge_atTop (5 : ℝ)] with t ht
+    rw [← hres t ht]
+    rw [hdec t]
+    ring
+  exact tendsto_nhds_unique hA (hreslim.congr' (heqfun.mono fun t h => h.symm))
+
+/-! ### B. The move from real part two to real part minus one half -/
+
+/-- LEAF. Step two, the contour shift at conductor one, Lemma 4.1 at page 33 display 4.7.
+The weighted von Mangoldt sum equals minus the principal contour minus log of two pi, plus
+the guarded conductor one main term, minus the two zero sums split at the height `T`. It is
+one leg: the line of real part one half is no contour, since the logarithmic derivative is
+not integrable across the zeros of that line. It asserts no size estimate for the contour
+and no bound for either zero sum, and it needs no hypothesis on the location of the zeros. -/
+theorem principal_explicit_formula_shift (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hq : q = 1) :
+    Schi etaHeart χ δ x =
+      -((log (2 * π) : ℂ)) - principalContour δ x +
+        (if q = 1 then fhat etaHeart (-δ) * x else 0) -
+        lowZeros χ δ x T - highZeros χ δ x T := by
+  subst hq
+  have hchi : χ = 1 := Subsingleton.elim χ 1
+  rw [hchi, if_pos rfl]
+  have hmain := pcsB_shift_total hx δ
+  have hsplit := pcsB_zero_split hx δ T
+  rw [← hsplit] at hmain
+  linear_combination hmain
 
 /-! ### E. The assembly -/
 
