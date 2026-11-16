@@ -164,6 +164,964 @@ theorem primitive_convexity576 {q : ℕ} [NeZero q]
         (riemannZeta ((1 + η : ℝ) : ℂ)).re := by
   sorry
 
+/-! ### The Jensen mass bound
+The mean of `log ‖realPartPower576‖` over the circle of centre `5/4` and radius
+`9/7` is estimated from the convexity bound on the two shifted `L`-values, and the
+value at the centre from the Euler product. The `9/(14 pi) <= 1/4` budget and the
+`2 log (12/7) >= 1` normalisation are what make the constant `6` close. -/
+
+namespace Decomp576aWip
+
+/-- For `re s > 1` the `L`-function is dominated by the zeta series. -/
+theorem LFunction_norm_le_tsum {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) {s : ℂ}
+    (hs : 1 < s.re) :
+    ‖DirichletCharacter.LFunction χ s‖ ≤ ∑' n : ℕ, (n : ℝ) ^ (-s.re) := by
+  rw [DirichletCharacter.LFunction_eq_LSeries χ hs]
+  have hsummable : Summable fun n : ℕ => (n : ℝ) ^ (-s.re) :=
+    Real.summable_nat_rpow.mpr (by linarith)
+  have hnonneg : ∀ n : ℕ, 0 ≤ (n : ℝ) ^ (-s.re) :=
+    fun n => Real.rpow_nonneg (Nat.cast_nonneg n) _
+  have hterm : ∀ n : ℕ, ‖LSeries.term (χ ·) s n‖ ≤ (n : ℝ) ^ (-s.re) := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with h | hn
+    · subst h
+      simp only [LSeries.term_zero, norm_zero]
+      exact hnonneg 0
+    · rw [LSeries.term_of_ne_zero hn.ne']
+      simp only [norm_div, Complex.norm_natCast_cpow_of_pos hn]
+      calc ‖χ n‖ / (n : ℝ) ^ s.re ≤ 1 / (n : ℝ) ^ s.re := by
+            gcongr
+            exact DirichletCharacter.norm_le_one χ n
+        _ = (n : ℝ) ^ (-s.re) := by
+            rw [Real.rpow_neg (Nat.cast_nonneg n), one_div]
+  have hsumm_norm : Summable fun n : ℕ => ‖LSeries.term (χ ·) s n‖ :=
+    Summable.of_nonneg_of_le (fun n => norm_nonneg _) hterm hsummable
+  calc ‖∑' n : ℕ, LSeries.term (χ ·) s n‖
+      ≤ ∑' n : ℕ, ‖LSeries.term (χ ·) s n‖ := norm_tsum_le_tsum_norm hsumm_norm
+    _ ≤ ∑' n : ℕ, (n : ℝ) ^ (-s.re) := hsumm_norm.tsum_le_tsum hterm hsummable
+
+/-- The real zeta series in the shape `(ζ σ).re = ∑ n ^ (-σ)`. -/
+theorem zeta_re_eq_tsum_rpow {σ : ℝ} (hσ : 1 < σ) :
+    (riemannZeta ((σ : ℝ) : ℂ)).re = ∑' n : ℕ, (n : ℝ) ^ (-σ) := by
+  have hs : (1 : ℝ) < (((σ : ℝ)) : ℂ).re := by simpa using hσ
+  have hσ0 : ¬ (σ = 0) := by linarith
+  have hsumm : Summable fun n : ℕ => 1 / (n : ℂ) ^ ((σ : ℝ) : ℂ) :=
+    Complex.summable_one_div_nat_cpow.mpr hs
+  rw [zeta_eq_tsum_one_div_nat_cpow hs, Complex.re_tsum hsumm]
+  refine tsum_congr fun n => ?_
+  rcases eq_or_ne n 0 with rfl | hn
+  · have h1 : ¬ ((σ : ℝ) : ℂ) = 0 := by simpa using hσ0
+    simp [Complex.zero_cpow h1, Real.zero_rpow (by linarith : (-σ : ℝ) ≠ 0)]
+  · have h1 : (n : ℂ) ^ ((σ : ℝ) : ℂ) = (((n : ℝ) ^ σ : ℝ) : ℂ) := by
+      rw [← Complex.ofReal_natCast, Complex.ofReal_cpow (Nat.cast_nonneg n)]
+    rw [h1, one_div, ← Complex.ofReal_inv, Complex.ofReal_re,
+      Real.rpow_neg (Nat.cast_nonneg n)]
+
+/-- For `re s > 1` the `L`-function is bounded by `ζ (re s)`. -/
+theorem LFunction_norm_le_zeta {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) {s : ℂ}
+    (hs : 1 < s.re) :
+    ‖DirichletCharacter.LFunction χ s‖ ≤ (riemannZeta ((s.re : ℝ) : ℂ)).re :=
+  (LFunction_norm_le_tsum χ hs).trans_eq (zeta_re_eq_tsum_rpow hs).symm
+
+
+/-- Per Euler factor: the loss in the logarithm is at most the modulus. -/
+theorem log_norm_one_sub_le (z : ℂ) : Real.log ‖1 - z‖ ≤ ‖z‖ := by
+  rcases eq_or_lt_of_le (norm_nonneg (1 - z)) with h | h
+  · rw [← h, Real.log_zero]
+    exact norm_nonneg z
+  · refine (Real.log_le_iff_le_exp h).mpr ?_
+    calc ‖1 - z‖ ≤ ‖(1 : ℂ)‖ + ‖z‖ := norm_sub_le 1 z
+      _ = 1 + ‖z‖ := by rw [norm_one]
+      _ = ‖z‖ + 1 := by ring
+      _ ≤ Real.exp ‖z‖ := Real.add_one_le_exp ‖z‖
+
+/-- The prime series is dominated by the zeta series. -/
+theorem tsum_primes_rpow_le {σ : ℝ} (hσ : 1 < σ) :
+    ∑' p : Nat.Primes, (p : ℝ) ^ (-σ) ≤ ∑' n : ℕ, (n : ℝ) ^ (-σ) := by
+  have hf : Summable fun p : Nat.Primes => (p : ℝ) ^ (-σ) :=
+    Nat.Primes.summable_rpow.mpr (by linarith)
+  have hg : Summable fun n : ℕ => (n : ℝ) ^ (-σ) :=
+    Real.summable_nat_rpow.mpr (by linarith)
+  refine hf.tsum_le_tsum_of_inj (e := fun p : Nat.Primes => (p : ℕ)) ?_ ?_ ?_ hg
+  · intro a b hab
+    exact Subtype.ext hab
+  · intro c _
+    exact Real.rpow_nonneg (Nat.cast_nonneg c) _
+  · intro i
+    rfl
+
+/-- Euler-product lower bound: `exp (-ζ (re s)) ≤ ‖L s‖` for `re s > 1`. -/
+theorem exp_neg_zeta_le_norm_LFunction {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    {s : ℂ} (hs : 1 < s.re) :
+    Real.exp (-(riemannZeta ((s.re : ℝ) : ℂ)).re) ≤ ‖DirichletCharacter.LFunction χ s‖ := by
+  have hσ : (1 : ℝ) < s.re := hs
+  have hzero : (-s).re ≠ 0 := by
+    simp only [Complex.neg_re, neg_ne_zero]
+    linarith
+  have hsumm : Summable fun p : Nat.Primes => -Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s)) :=
+    DirichletCharacter.summable_neg_log_one_sub_mul_prime_cpow χ hs
+  have hnorm : ‖DirichletCharacter.LFunction χ s‖ =
+      Real.exp ((∑' p : Nat.Primes, -Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re) := by
+    rw [DirichletCharacter.LFunction_eq_LSeries χ hs,
+      ← DirichletCharacter.LSeries_eulerProduct_exp_log χ hs, Complex.norm_exp]
+  have hre : (∑' p : Nat.Primes, -Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re
+      = ∑' p : Nat.Primes, (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re :=
+    Complex.re_tsum hsumm
+  have hresumm : Summable fun p : Nat.Primes =>
+      (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re :=
+    (Complex.hasSum_re hsumm.hasSum).summable
+  have hterm : ∀ p : Nat.Primes,
+      -(p : ℝ) ^ (-s.re) ≤ (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re := by
+    intro p
+    have hz : ‖χ (p : ℕ) * (p : ℂ) ^ (-s)‖ ≤ (p : ℝ) ^ (-s.re) := by
+      rw [norm_mul, Complex.norm_natCast_cpow_of_re_ne_zero (p : ℕ) hzero]
+      simp only [Complex.neg_re]
+      exact mul_le_of_le_one_left (Real.rpow_nonneg (Nat.cast_nonneg _) _)
+        (DirichletCharacter.norm_le_one χ (p : ℕ))
+    have hlog := log_norm_one_sub_le (χ (p : ℕ) * (p : ℂ) ^ (-s))
+    have hcast : (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re
+        = -Real.log ‖1 - χ (p : ℕ) * (p : ℂ) ^ (-s)‖ := by
+      simp only [Complex.neg_re, Complex.log_re]
+    rw [hcast]
+    linarith
+  have hsum2 : Summable fun p : Nat.Primes => (p : ℝ) ^ (-s.re) :=
+    Nat.Primes.summable_rpow.mpr (by linarith)
+  have hkey : ∑' p : Nat.Primes, -(p : ℝ) ^ (-s.re)
+      ≤ ∑' p : Nat.Primes, (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re :=
+    hsum2.neg.tsum_le_tsum hterm hresumm
+  have hzeta := zeta_re_eq_tsum_rpow hσ
+  rw [hnorm, hre, hzeta]
+  refine Real.exp_le_exp.mpr ?_
+  have h4 : -(∑' p : Nat.Primes, (p : ℝ) ^ (-s.re))
+      = ∑' p : Nat.Primes, -(p : ℝ) ^ (-s.re) :=
+    (tsum_neg (f := fun p : Nat.Primes => (p : ℝ) ^ (-s.re))).symm
+  have h5 := tsum_primes_rpow_le hσ
+  linarith
+
+
+/-- A telescoping series with vanishing tail has sum the first term. -/
+theorem hasSum_sub_shift_of_antitone {g : ℕ → ℝ} (hanti : Antitone g)
+    (hg : Tendsto g atTop (𝓝 0)) :
+    HasSum (fun n : ℕ => g n - g (n + 1)) (g 0) := by
+  have hnonneg : ∀ n : ℕ, 0 ≤ g n - g (n + 1) :=
+    fun n => sub_nonneg.mpr (hanti (Nat.le_succ n))
+  rw [hasSum_iff_tendsto_nat_of_nonneg hnonneg]
+  have hpartial : ∀ n : ℕ, ∑ i ∈ Finset.range n, (g i - g (i + 1)) = g 0 - g n := by
+    intro n
+    have h1 : ∑ i ∈ Finset.range n, (g i - g (i + 1))
+        = -∑ i ∈ Finset.range n, (g (i + 1) - g i) := by
+      rw [← Finset.sum_neg_distrib]
+      exact Finset.sum_congr rfl fun i _ => by ring
+    rw [h1, Finset.sum_range_sub]
+    ring
+  simp only [hpartial]
+  simpa using tendsto_const_nhds.sub hg
+
+/-- Convexity of `x ↦ x ^ (-1/4)`: a unit gain in the antiderivative dominates the
+`x ^ (-5/4)` term. -/
+theorem rpow_neg_quarter_diff_ge {x : ℝ} (hx : 1 ≤ x) :
+    (1 / 4) * (x + 1) ^ (-(5 / 4 : ℝ)) ≤ x ^ (-(1 / 4 : ℝ)) - (x + 1) ^ (-(1 / 4 : ℝ)) := by
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hab : x < x + 1 := by linarith
+  have hcont : ContinuousOn (fun t : ℝ => t ^ (-(1 / 4 : ℝ))) (Set.Icc x (x + 1)) := by
+    intro t ht
+    have ht0 : t ≠ 0 := by
+      have : 0 < t := by linarith [ht.1]
+      linarith
+    exact (Real.continuousAt_rpow_const t (-(1 / 4)) (Or.inl ht0)).continuousWithinAt
+  have hderiv : ∀ t ∈ Set.Ioo x (x + 1),
+      HasDerivAt (fun t : ℝ => t ^ (-(1 / 4 : ℝ)))
+        ((-(1 / 4 : ℝ)) * t ^ (-(1 / 4 : ℝ) - 1)) t := by
+    intro t ht
+    have ht0 : t ≠ 0 := by linarith [ht.1]
+    exact Real.hasDerivAt_rpow_const (Or.inl ht0)
+  obtain ⟨c, hc, hslope⟩ := exists_hasDerivAt_eq_slope
+    (fun t : ℝ => t ^ (-(1 / 4 : ℝ)))
+    (fun t : ℝ => (-(1 / 4 : ℝ)) * t ^ (-(1 / 4 : ℝ) - 1)) hab hcont hderiv
+  have hone : (x + 1) - x = (1 : ℝ) := by ring
+  rw [hone, div_one] at hslope
+  have hcpos : (0 : ℝ) < c := by linarith [hc.1]
+  have hcle : c ≤ x + 1 := le_of_lt hc.2
+  have hmono : (x + 1) ^ (-(5 / 4 : ℝ)) ≤ c ^ (-(5 / 4 : ℝ)) :=
+    Real.rpow_le_rpow_of_nonpos hcpos hcle (by norm_num)
+  have hrewrite : (-(1 / 4 : ℝ)) * c ^ (-(1 / 4 : ℝ) - 1) = -((1 / 4) * c ^ (-(5 / 4 : ℝ))) := by
+    rw [show (-(1 / 4 : ℝ) - 1) = -(5 / 4 : ℝ) by norm_num]
+    ring
+  rw [hrewrite] at hslope
+  linarith
+
+/-- `ζ (5/4) ≤ 5`: the first two terms plus a telescoped tail. -/
+theorem zeta_five_quarters_le_five :
+    (riemannZeta (((5 : ℝ) / 4 : ℝ) : ℂ)).re ≤ 5 := by
+  have hσ : (1 : ℝ) < 5 / 4 := by norm_num
+  rw [zeta_re_eq_tsum_rpow hσ]
+  have hsumm : Summable fun n : ℕ => (n : ℝ) ^ (-(5 / 4 : ℝ)) :=
+    Real.summable_nat_rpow.mpr (by norm_num)
+  have hsplit := hsumm.sum_add_tsum_nat_add 2
+  have hhead : ∑ i ∈ Finset.range 2, (((i : ℕ)) : ℝ) ^ (-(5 / 4 : ℝ)) = 1 := by
+    norm_num [Finset.sum_range_succ]
+  have hshift : Summable fun i : ℕ => (((i + 2 : ℕ)) : ℝ) ^ (-(5 / 4 : ℝ)) :=
+    (summable_nat_add_iff 2).mpr hsumm
+  set G : ℕ → ℝ := fun i => ((((i : ℕ)) : ℝ) + 1) ^ (-(1 / 4 : ℝ)) with hG
+  have hanti : Antitone G := by
+    intro a b hab
+    have h1 : ((a : ℝ) + 1) ≤ ((b : ℝ) + 1) := by
+      have h2 : (a : ℝ) ≤ (b : ℝ) := by exact_mod_cast hab
+      linarith
+    exact Real.rpow_le_rpow_of_nonpos (by positivity) h1 (by norm_num)
+  have hGtend : Tendsto G atTop (𝓝 0) := by
+    have h1 : Tendsto (fun x : ℝ => x ^ (-(1 / 4 : ℝ))) atTop (𝓝 0) :=
+      tendsto_rpow_neg_atTop (by norm_num)
+    have h2 : Tendsto (fun i : ℕ => ((i : ℝ) + 1)) atTop atTop :=
+      tendsto_natCast_atTop_atTop.atTop_add tendsto_const_nhds
+    exact h1.comp h2
+  have htel : HasSum (fun i : ℕ => G i - G (i + 1)) (G 0) :=
+    hasSum_sub_shift_of_antitone hanti hGtend
+  have htel4 : HasSum (fun i : ℕ => 4 * (G i - G (i + 1))) 4 := by
+    have h := htel.mul_left 4
+    rw [show G 0 = 1 by norm_num [hG]] at h
+    simpa using h
+  have hkey : ∀ i : ℕ, (((i + 2 : ℕ)) : ℝ) ^ (-(5 / 4 : ℝ)) ≤ 4 * (G i - G (i + 1)) := by
+    intro i
+    have hx : (1 : ℝ) ≤ ((i : ℝ) + 1) := by
+      have h0 : (0 : ℝ) ≤ (i : ℝ) := Nat.cast_nonneg i
+      linarith
+    have h := rpow_neg_quarter_diff_ge hx
+    have hG0 : G i = ((i : ℝ) + 1) ^ (-(1 / 4 : ℝ)) := rfl
+    have hG1 : G (i + 1) = ((i : ℝ) + 1 + 1) ^ (-(1 / 4 : ℝ)) := by
+      simp only [hG]
+      push_cast
+      ring_nf
+    have hcast : (((i + 2 : ℕ)) : ℝ) = ((i : ℝ) + 1 + 1) := by push_cast; ring
+    rw [hG0, hG1, hcast]
+    calc ((i : ℝ) + 1 + 1) ^ (-(5 / 4 : ℝ))
+        = 4 * ((1 / 4) * ((i : ℝ) + 1 + 1) ^ (-(5 / 4 : ℝ))) := by ring
+      _ ≤ 4 * (((i : ℝ) + 1) ^ (-(1 / 4 : ℝ))
+            - ((i : ℝ) + 1 + 1) ^ (-(1 / 4 : ℝ))) := by
+          exact mul_le_mul_of_nonneg_left h (by norm_num)
+      _ = 4 * (((i : ℝ) + 1) ^ (-(1 / 4 : ℝ))
+            - ((i : ℝ) + 1 + 1) ^ (-(1 / 4 : ℝ))) := by ring
+  have htail : ∑' i : ℕ, (((i + 2 : ℕ)) : ℝ) ^ (-(5 / 4 : ℝ)) ≤ 4 :=
+    (hshift.tsum_le_tsum hkey htel4.summable).trans_eq htel4.tsum_eq
+  rw [← hsplit, hhead]
+  linarith
+
+/-- `ζ` is antitone on the half line `1 < σ`. -/
+theorem zeta_re_le_of_le {σ τ : ℝ} (hτ : 1 < τ) (h : τ ≤ σ) :
+    (riemannZeta ((σ : ℝ) : ℂ)).re ≤ (riemannZeta ((τ : ℝ) : ℂ)).re := by
+  have hσ : (1 : ℝ) < σ := lt_of_lt_of_le hτ h
+  rw [zeta_re_eq_tsum_rpow hσ,
+    zeta_re_eq_tsum_rpow hτ]
+  have hsummσ : Summable fun n : ℕ => (n : ℝ) ^ (-σ) := Real.summable_nat_rpow.mpr (by linarith)
+  have hsummτ : Summable fun n : ℕ => (n : ℝ) ^ (-τ) := Real.summable_nat_rpow.mpr (by linarith)
+  refine hsummσ.tsum_le_tsum ?_ hsummτ
+  intro n
+  rcases Nat.eq_zero_or_pos n with h0 | hn
+  · subst h0
+    have h1 : (-σ : ℝ) ≠ 0 := by linarith
+    have h2 : (-τ : ℝ) ≠ 0 := by linarith
+    simp only [Nat.cast_zero, Real.zero_rpow h1, Real.zero_rpow h2]
+    norm_num
+  · have hn1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+    exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+
+theorem prime_cast_two_le (p : Nat.Primes) : (2 : ℝ) ≤ (p : ℝ) := by
+  have h2 : 2 ≤ (p : ℕ) := p.2.two_le
+  exact_mod_cast h2
+
+theorem prime_cast_pos (p : Nat.Primes) : (0 : ℝ) < (p : ℝ) := by
+  have := prime_cast_two_le p
+  linarith
+
+theorem prime_rpow_nonneg (p : Nat.Primes) (x : ℝ) : (0 : ℝ) ≤ (p : ℝ) ^ x :=
+  Real.rpow_nonneg (le_of_lt (prime_cast_pos p)) x
+
+/-- `log (1 + u) ≤ u` for `u ≥ 0`. -/
+theorem log_one_add_le {u : ℝ} (hu : 0 ≤ u) : Real.log (1 + u) ≤ u := by
+  have h : (0 : ℝ) < 1 + u := by linarith
+  refine (Real.log_le_iff_le_exp h).mpr ?_
+  have := Real.add_one_le_exp u
+  linarith
+
+/-- `0 ≤ log (1 + u)` for `u ≥ 0`. -/
+theorem log_one_add_nonneg {u : ℝ} (hu : 0 ≤ u) : 0 ≤ Real.log (1 + u) :=
+  Real.log_nonneg (by linarith)
+
+/-- The prime power series is dominated by `ζ σ - 1`. -/
+theorem tsum_primes_rpow_le_zeta_sub_one {σ : ℝ} (hσ : 1 < σ) :
+    ∑' p : Nat.Primes, (p : ℝ) ^ (-σ) ≤ (riemannZeta (((σ : ℝ)) : ℂ)).re - 1 := by
+  have hf : Summable fun p : Nat.Primes => (p : ℝ) ^ (-σ) :=
+    Nat.Primes.summable_rpow.mpr (by linarith)
+  have hnat : Summable fun n : ℕ => (n : ℝ) ^ (-σ) := Real.summable_nat_rpow.mpr (by linarith)
+  have hshift : Summable fun n : ℕ => (((n + 2 : ℕ)) : ℝ) ^ (-σ) :=
+    (summable_nat_add_iff 2).mpr hnat
+  have hval : ∑' n : ℕ, (((n + 2 : ℕ)) : ℝ) ^ (-σ) = (riemannZeta (((σ : ℝ)) : ℂ)).re - 1 := by
+    have hsp := hnat.sum_add_tsum_nat_add 2
+    have h0 : (((0 : ℕ)) : ℝ) ^ (-σ) = 0 := by
+      have h2 : (-σ : ℝ) ≠ 0 := by linarith
+      simp [Real.zero_rpow h2]
+    have h1 : (((1 : ℕ)) : ℝ) ^ (-σ) = 1 := by simp
+    have hhead : ∑ i ∈ Finset.range 2, (((i : ℕ)) : ℝ) ^ (-σ) = 1 := by
+      rw [Finset.sum_range_succ, Finset.sum_range_one, h0, h1]
+      norm_num
+    rw [hhead] at hsp
+    rw [zeta_re_eq_tsum_rpow hσ]
+    linarith [hsp]
+  rw [← hval]
+  refine hf.tsum_le_tsum_of_inj (e := fun p : Nat.Primes => ((p : ℕ) - 2)) ?_ ?_ ?_ hshift
+  · intro a b hab
+    have ha : 2 ≤ (a : ℕ) := a.2.two_le
+    have hb : 2 ≤ (b : ℕ) := b.2.two_le
+    have hEq : (a : ℕ) = (b : ℕ) := by
+      have hab' : (a : ℕ) - 2 = (b : ℕ) - 2 := hab
+      have h1 : (a : ℕ) - 2 + 2 = (b : ℕ) - 2 + 2 := by rw [hab']
+      rwa [Nat.sub_add_cancel ha, Nat.sub_add_cancel hb] at h1
+    exact Subtype.ext hEq
+  · intro c _
+    exact Real.rpow_nonneg (by positivity) _
+  · intro p
+    have hp : 2 ≤ (p : ℕ) := p.2.two_le
+    have hcast : ((((p : ℕ) - 2) + 2 : ℕ)) = (p : ℕ) := Nat.sub_add_cancel hp
+    rw [hcast]
+
+/-- The sharper Euler-product lower bound: `exp (-(ζ (re s) - 1)) ≤ ‖L s‖`. -/
+theorem exp_neg_zeta_sub_one_le_norm_LFunction {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) {s : ℂ} (hs : 1 < s.re) :
+    Real.exp (-((riemannZeta ((s.re : ℝ) : ℂ)).re - 1)) ≤ ‖DirichletCharacter.LFunction χ s‖ := by
+  have hzero : (-s).re ≠ 0 := by
+    simp only [Complex.neg_re, neg_ne_zero]
+    linarith
+  have hsumm : Summable fun p : Nat.Primes => -Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s)) :=
+    DirichletCharacter.summable_neg_log_one_sub_mul_prime_cpow χ hs
+  have hnorm : ‖DirichletCharacter.LFunction χ s‖ =
+      Real.exp ((∑' p : Nat.Primes, -Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re) := by
+    rw [DirichletCharacter.LFunction_eq_LSeries χ hs,
+      ← DirichletCharacter.LSeries_eulerProduct_exp_log χ hs, Complex.norm_exp]
+  have hre : (∑' p : Nat.Primes, -Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re
+      = ∑' p : Nat.Primes, (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re :=
+    Complex.re_tsum hsumm
+  have hresumm : Summable fun p : Nat.Primes =>
+      (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re :=
+    (Complex.hasSum_re hsumm.hasSum).summable
+  have hterm : ∀ p : Nat.Primes, -Real.log (1 + (p : ℝ) ^ (-s.re))
+      ≤ (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re := by
+    intro p
+    have hnonneg := prime_rpow_nonneg p (-s.re)
+    have hz : ‖χ (p : ℕ) * (p : ℂ) ^ (-s)‖ ≤ (p : ℝ) ^ (-s.re) := by
+      rw [norm_mul, Complex.norm_natCast_cpow_of_re_ne_zero (p : ℕ) hzero]
+      simp only [Complex.neg_re]
+      exact mul_le_of_le_one_left hnonneg (DirichletCharacter.norm_le_one χ (p : ℕ))
+    have htri : ‖1 - χ (p : ℕ) * (p : ℂ) ^ (-s)‖ ≤ 1 + (p : ℝ) ^ (-s.re) := by
+      have h1 := norm_sub_le (1 : ℂ) (χ (p : ℕ) * (p : ℂ) ^ (-s))
+      have h1' : ‖(1 : ℂ)‖ + ‖χ (p : ℕ) * (p : ℂ) ^ (-s)‖ ≤ 1 + (p : ℝ) ^ (-s.re) := by
+        rw [norm_one]
+        linarith
+      exact h1.trans h1'
+    have hlogle : Real.log ‖1 - χ (p : ℕ) * (p : ℂ) ^ (-s)‖
+        ≤ Real.log (1 + (p : ℝ) ^ (-s.re)) := by
+      rcases eq_or_lt_of_le (norm_nonneg (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))) with h | h
+      · rw [← h, Real.log_zero]
+        exact log_one_add_nonneg hnonneg
+      · exact Real.log_le_log h htri
+    have hcast : (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re
+        = -Real.log ‖1 - χ (p : ℕ) * (p : ℂ) ^ (-s)‖ := by
+      simp only [Complex.neg_re, Complex.log_re]
+    rw [hcast]
+    linarith
+  have hsum_logpos : Summable fun p : Nat.Primes => Real.log (1 + (p : ℝ) ^ (-s.re)) :=
+    Summable.of_nonneg_of_le (fun p => log_one_add_nonneg (prime_rpow_nonneg p (-s.re)))
+      (fun p => log_one_add_le (prime_rpow_nonneg p (-s.re)))
+      (Nat.Primes.summable_rpow.mpr (by linarith : -s.re < -1))
+  have hsum_log : Summable fun p : Nat.Primes => -Real.log (1 + (p : ℝ) ^ (-s.re)) :=
+    hsum_logpos.neg
+  have hsum_neg : Summable fun p : Nat.Primes => -(p : ℝ) ^ (-s.re) :=
+    (Nat.Primes.summable_rpow.mpr (by linarith : -s.re < -1)).neg
+  have hstep1 : ∑' p : Nat.Primes, -(p : ℝ) ^ (-s.re)
+      ≤ ∑' p : Nat.Primes, -Real.log (1 + (p : ℝ) ^ (-s.re)) :=
+    hsum_neg.tsum_le_tsum (fun p => by
+      have hu := prime_rpow_nonneg p (-s.re)
+      linarith [log_one_add_le hu]) hsum_log
+  have hstep2 : ∑' p : Nat.Primes, -Real.log (1 + (p : ℝ) ^ (-s.re))
+      ≤ ∑' p : Nat.Primes, (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re :=
+    hsum_log.tsum_le_tsum hterm hresumm
+  have h4 : -(∑' p : Nat.Primes, (p : ℝ) ^ (-s.re))
+      = ∑' p : Nat.Primes, -(p : ℝ) ^ (-s.re) :=
+    (tsum_neg (f := fun p : Nat.Primes => (p : ℝ) ^ (-s.re))).symm
+  have h5 := tsum_primes_rpow_le_zeta_sub_one hs
+  have hkey : -((riemannZeta ((s.re : ℝ) : ℂ)).re - 1)
+      ≤ ∑' p : Nat.Primes, (-Complex.log (1 - χ (p : ℕ) * (p : ℂ) ^ (-s))).re := by
+    linarith
+  rw [hnorm, hre]
+  refine Real.exp_le_exp.mpr ?_
+  linarith
+
+/-- `log` of a maximum of two nonnegative reals. -/
+theorem log_max_le (a b : ℝ) :
+    Real.log (max a b) ≤ max (Real.log a) (Real.log b) := by
+  rcases le_total a b with h | h
+  · rw [max_eq_right h]
+    exact le_max_right _ _
+  · rw [max_eq_left h]
+    exact le_max_left _ _
+
+/-- The points of the Jensen circle have the stated real and imaginary parts. -/
+theorem circle_re (φ : ℝ) :
+    (((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))).re
+      = 5 / 4 + 9 / 7 * Real.cos φ := by
+  simp [Complex.exp_ofReal_mul_I_re]
+
+theorem circle_im (φ : ℝ) :
+    (((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))).im
+      = 9 / 7 * Real.sin φ := by
+  simp [Complex.exp_ofReal_mul_I_im]
+
+/-- The shifted point stays inside the ball of radius `|T| + 5`. -/
+theorem circle_shift_norm_le {T : ℝ} (hT : 1 ≤ |T|) (φ : ℝ) :
+    ‖((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I)) + (T : ℂ) * I + 1‖
+      ≤ |T| + 5 := by
+  set w : ℂ := (5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I) with hw
+  have hre : w.re = 5 / 4 + 9 / 7 * Real.cos φ := circle_re φ
+  have him : w.im = 9 / 7 * Real.sin φ := circle_im φ
+  have hc1 : -1 ≤ Real.cos φ := Real.neg_one_le_cos φ
+  have hc2 : Real.cos φ ≤ 1 := Real.cos_le_one φ
+  have hs1 : |Real.sin φ| ≤ 1 := Real.abs_sin_le_one φ
+  have hzre : (w + (T : ℂ) * I + 1).re = w.re + 1 := by simp
+  have hzim : (w + (T : ℂ) * I + 1).im = w.im + T := by simp
+  have hnorm := Complex.norm_le_abs_re_add_abs_im (w + (T : ℂ) * I + 1)
+  rw [hzre, hzim] at hnorm
+  have h1 : |w.re + 1| ≤ 99 / 28 := by
+    rw [hre, abs_le]
+    constructor <;> nlinarith
+  have h2 : |w.im + T| ≤ |T| + 9 / 7 := by
+    rw [him, abs_le]
+    have hs1 : -1 ≤ Real.sin φ := (abs_le.mp (Real.abs_sin_le_one φ)).1
+    have hs2 : Real.sin φ ≤ 1 := (abs_le.mp (Real.abs_sin_le_one φ)).2
+    constructor
+    · nlinarith [neg_abs_le T, abs_nonneg T]
+    · nlinarith [le_abs_self T, abs_nonneg T]
+  linarith
+
+/-- The pointwise logarithmic bound on the Jensen circle. -/
+theorem log_realPartPower_le {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (hne : χ ≠ 1)
+    {T : ℝ} (hT : 1 ≤ |T|) (N : ℕ) (φ : ℝ)
+    (hconv : ∀ (η : ℝ), 0 < η → η ≤ 1 / 2 → ∀ (s : ℂ), -η ≤ s.re → s.re ≤ 1 + η →
+      ‖DirichletCharacter.LFunction χ s‖ ≤
+        ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ^ ((1 + η - s.re) / 2) *
+          (riemannZeta ((1 + η : ℝ) : ℂ)).re) :
+    Real.log ‖realPartPower576 χ T N
+        ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖
+      ≤ (N : ℝ) * (max 0 (-(9 / 14) * Real.cos φ) * Real.log ((q : ℝ) * |T|)
+          + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)) := by
+  classical
+  set w : ℂ := (5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I) with hw
+  set L : ℂ → ℂ := DirichletCharacter.LFunction χ with hL
+  set ζ0 : ℝ := (riemannZeta ((5 / 4 : ℝ) : ℂ)).re with hζ0
+  set M : ℝ := Real.log ((q : ℝ) * |T|) with hM
+  have hq : (0 : ℝ) < (q : ℝ) := Nat.cast_pos.mpr (NeZero.pos q)
+  have hTabs : (0 : ℝ) < |T| := by linarith
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by
+    have h1 : 1 ≤ q := NeZero.one_le
+    exact_mod_cast h1
+  have hqT : (1 : ℝ) ≤ (q : ℝ) * |T| := by
+    have h2 : (1 : ℝ) * 1 ≤ (q : ℝ) * |T| := mul_le_mul hq1 hT zero_le_one (le_of_lt hq)
+    simpa using h2
+  have hM0 : 0 ≤ M := Real.log_nonneg hqT
+  have hζ1 : (1 : ℝ) ≤ ζ0 := by
+    rw [hζ0]
+    rw [zeta_re_eq_tsum_rpow (by norm_num : (1:ℝ) < 5 / 4)]
+    have := Summable.le_tsum (Real.summable_nat_rpow.mpr (by norm_num : -(5 / 4 : ℝ) < -1)) 1
+      (fun i _ => Real.rpow_nonneg (Nat.cast_nonneg i) _)
+    simpa using this
+  have hζpos : (0 : ℝ) < ζ0 := by linarith
+  have hlogζ0 : 0 ≤ Real.log ζ0 := Real.log_nonneg hζ1
+  -- the bound for a single point of the circle
+  have key : ∀ s : ℂ, s.re = w.re → |s.im| ≤ |T| + 9 / 7 →
+      Real.log ‖L s‖ ≤ max 0 (-(9 / 14) * Real.cos φ) * M + Real.log ζ0 := by
+    intro s hsre hsim
+    have hzre : s.re = 5 / 4 + 9 / 7 * Real.cos φ := by rw [hsre, hw, circle_re]
+    have hc1 : -1 ≤ Real.cos φ := Real.neg_one_le_cos φ
+    have hc2 : Real.cos φ ≤ 1 := Real.cos_le_one φ
+    have hcre_ub : s.re ≤ 5 / 4 + 9 / 7 * 1 := by rw [hzre]; nlinarith
+    have hcre_lb : 5 / 4 + 9 / 7 * (-1) ≤ s.re := by rw [hzre]; nlinarith
+    -- the shifted norm
+    have hnorm_le : ‖s + 1‖ ≤ |T| + 5 := by
+      have h := Complex.norm_le_abs_re_add_abs_im (s + 1)
+      have hre : (s + 1).re = s.re + 1 := by simp
+      have him : (s + 1).im = s.im := by simp
+      rw [hre, him] at h
+      have h1 : |s.re + 1| ≤ 99 / 28 := by
+        rw [abs_le]
+        constructor <;> linarith
+      have h2 : |s.im| ≤ |T| + 9 / 7 := hsim
+      linarith
+    have hpos_norm : (0 : ℝ) < ‖s + 1‖ := by
+      have hre : (s + 1).re = s.re + 1 := by simp
+      have h1 : |(s + 1).re| ≤ ‖s + 1‖ := Complex.abs_re_le_norm (s + 1)
+      have h2 : (0 : ℝ) < (s + 1).re := by rw [hre]; linarith
+      have h3 : (0 : ℝ) < |(s + 1).re| := abs_pos.mpr (by linarith)
+      linarith
+    have hbase_pos : (0 : ℝ) < (q : ℝ) * ‖s + 1‖ / (2 * Real.pi) := by positivity
+    have hbase_le : (q : ℝ) * ‖s + 1‖ / (2 * Real.pi) ≤ (q : ℝ) * |T| := by
+      have hstep : (|T| + 5) / (2 * Real.pi) ≤ |T| := by
+        rw [div_le_iff₀ (by positivity : (0 : ℝ) < 2 * Real.pi)]
+        nlinarith [Real.pi_gt_three, hTabs]
+      have h2 : ‖s + 1‖ / (2 * Real.pi) ≤ (|T| + 5) / (2 * Real.pi) :=
+        div_le_div_of_nonneg_right hnorm_le (by positivity)
+      calc (q : ℝ) * ‖s + 1‖ / (2 * Real.pi) = (q : ℝ) * (‖s + 1‖ / (2 * Real.pi)) := by ring
+        _ ≤ (q : ℝ) * ((|T| + 5) / (2 * Real.pi)) :=
+            mul_le_mul_of_nonneg_left h2 (le_of_lt hq)
+        _ ≤ (q : ℝ) * |T| := mul_le_mul_of_nonneg_left hstep (le_of_lt hq)
+    have hlogbase : Real.log ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ≤ M := by
+      rw [hM]
+      exact Real.log_le_log hbase_pos hbase_le
+    rcases le_total (Real.cos φ) 0 with hc | hc
+    · -- the convexity branch
+      have hs0 : -(1 / 4 : ℝ) ≤ s.re := by linarith
+      have hs1 : s.re ≤ 1 + 1 / 4 := by linarith
+      have hle := hconv (1 / 4) (by norm_num) (by norm_num) s hs0 hs1
+      have hexp : (1 + 1 / 4 - s.re) / 2 = -((9 : ℝ) / 14) * Real.cos φ := by
+        rw [hzre]; ring
+      have hexp0 : 0 ≤ (1 + 1 / 4 - s.re) / 2 := by rw [hexp]; nlinarith
+      have hexp_le : (1 + 1 / 4 - s.re) / 2 ≤ 1 := by rw [hexp]; nlinarith
+      rcases eq_or_lt_of_le (norm_nonneg (L s)) with h0 | h0
+      · rw [← h0, Real.log_zero]
+        have h1 : 0 ≤ max 0 (-(9 / 14) * Real.cos φ) * M :=
+          mul_nonneg (le_max_left 0 _) hM0
+        linarith
+      · have hlog := Real.log_le_log h0 hle
+        have hζeq : (riemannZeta (((1 + 1 / 4 : ℝ)) : ℂ)).re = ζ0 := by
+          rw [hζ0]
+          norm_num
+        rw [hζeq] at hlog
+        rw [Real.log_mul (ne_of_gt (Real.rpow_pos_of_pos hbase_pos _)) (ne_of_gt hζpos),
+          Real.log_rpow hbase_pos] at hlog
+        have h1 : ((1 + 1 / 4 - s.re) / 2) * Real.log ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi))
+            ≤ max 0 (-(9 / 14) * Real.cos φ) * M := by
+          have h3 : max 0 (-(9 / 14) * Real.cos φ) = -(9 / 14) * Real.cos φ := by
+            rw [max_eq_right (by nlinarith : (0:ℝ) ≤ -(9 / 14) * Real.cos φ)]
+          rw [h3, hexp]
+          exact mul_le_mul_of_nonneg_left hlogbase (by nlinarith : (0:ℝ) ≤ -(9 / 14) * Real.cos φ)
+        linarith [hζ0 ▸ hlogζ0]
+    · -- the trivial branch
+      have hre1 : (1 : ℝ) < s.re := by rw [hzre]; nlinarith
+      have hup : ‖L s‖ ≤ ζ0 := by
+        have h1 := LFunction_norm_le_zeta χ (s := s) hre1
+        have h2 : (riemannZeta ((s.re : ℝ) : ℂ)).re ≤ ζ0 :=
+          zeta_re_le_of_le (σ := s.re) (τ := 5 / 4) (by norm_num) (by linarith)
+        exact h1.trans h2
+      have hmax0 : max 0 (-(9 / 14) * Real.cos φ) = 0 := by
+        rw [max_eq_left (by nlinarith : -(9 / 14) * Real.cos φ ≤ 0)]
+      rw [hmax0, zero_mul, zero_add]
+      rcases eq_or_lt_of_le (norm_nonneg (L s)) with h0 | h0
+      · rw [← h0, Real.log_zero]
+        exact hlogζ0
+      · exact Real.log_le_log h0 hup
+  -- apply to both shifted points
+  have hs1re : (w + (T : ℂ) * I).re = w.re := by simp
+  have hs1im : |(w + (T : ℂ) * I).im| ≤ |T| + 9 / 7 := by
+    have him : (w + (T : ℂ) * I).im = w.im + T := by simp
+    rw [him, hw, circle_im]
+    have h1 : |9 / 7 * Real.sin φ + T| ≤ |9 / 7 * Real.sin φ| + |T| := abs_add_le _ _
+    have h2 : |9 / 7 * Real.sin φ| ≤ 9 / 7 := by
+      rw [abs_mul, abs_of_pos (by norm_num : (0:ℝ) < 9 / 7)]
+      nlinarith [Real.abs_sin_le_one φ]
+    linarith
+  have hs2re : ((starRingEnd ℂ w) + (T : ℂ) * I).re = w.re := by
+    simp [Complex.conj_re]
+  have hs2im : |((starRingEnd ℂ w) + (T : ℂ) * I).im| ≤ |T| + 9 / 7 := by
+    have him : ((starRingEnd ℂ w) + (T : ℂ) * I).im = -w.im + T := by
+      simp [Complex.conj_im]
+    rw [him, hw, circle_im]
+    have h1 : |-(9 / 7 * Real.sin φ) + T| ≤ |-(9 / 7 * Real.sin φ)| + |T| := abs_add_le _ _
+    have h2 : |-(9 / 7 * Real.sin φ)| ≤ 9 / 7 := by
+      rw [abs_neg, abs_mul, abs_of_pos (by norm_num : (0:ℝ) < 9 / 7)]
+      nlinarith [Real.abs_sin_le_one φ]
+    linarith
+  have h1 := key _ hs1re hs1im
+  have h2 := key _ hs2re hs2im
+  -- the power bound
+  have hmax : ‖realPartPower576 χ T N w‖ ≤ (max ‖L (w + (T : ℂ) * I)‖
+      ‖L ((starRingEnd ℂ w) + (T : ℂ) * I)‖) ^ N := realPartPower_norm576 χ T N w
+  rcases eq_or_lt_of_le (norm_nonneg (realPartPower576 χ T N w)) with h0 | h0
+  · rw [← h0, Real.log_zero]
+    refine mul_nonneg (Nat.cast_nonneg N) ?_
+    have hA : 0 ≤ max 0 (-(9 / 14) * Real.cos φ) * M :=
+      mul_nonneg (le_max_left 0 _) hM0
+    linarith
+  · have hlog := Real.log_le_log h0 hmax
+    rw [Real.log_pow] at hlog
+    have hmaxle : Real.log (max ‖L (w + (T : ℂ) * I)‖ ‖L ((starRingEnd ℂ w) + (T : ℂ) * I)‖)
+        ≤ max 0 (-(9 / 14) * Real.cos φ) * M + Real.log ζ0 :=
+      (log_max_le _ _).trans (max_le h1 h2)
+    have : (N : ℝ) * Real.log (max ‖L (w + (T : ℂ) * I)‖
+        ‖L ((starRingEnd ℂ w) + (T : ℂ) * I)‖)
+        ≤ (N : ℝ) * (max 0 (-(9 / 14) * Real.cos φ) * M + Real.log ζ0) :=
+      mul_le_mul_of_nonneg_left hmaxle (Nat.cast_nonneg N)
+    linarith
+
+/-- The mean of the positive part of `-(9/14) cos` over a full period. -/
+theorem integral_max_neg_cos_mul :
+    (∫ φ in (0:ℝ)..(2 * Real.pi), max 0 (-(9 / 14) * Real.cos φ)) = 9 / 7 := by
+  have hc : Continuous fun φ : ℝ => max 0 (-(9 / 14) * Real.cos φ) := by fun_prop
+  have hleft : (∫ φ in (0:ℝ)..(Real.pi / 2), max 0 (-(9 / 14) * Real.cos φ)) = 0 := by
+    have hzero : ∀ φ ∈ Set.uIcc (0:ℝ) (Real.pi / 2), max 0 (-(9 / 14) * Real.cos φ) = 0 := by
+      intro φ hφ
+      rw [Set.uIcc_of_le (by nlinarith [Real.pi_pos])] at hφ
+      have h1 : 0 ≤ Real.cos φ :=
+        Real.cos_nonneg_of_mem_Icc ⟨by linarith [hφ.1, Real.pi_pos],
+          by linarith [hφ.2, Real.pi_pos]⟩
+      rw [max_eq_left (by nlinarith : -(9 / 14) * Real.cos φ ≤ 0)]
+    rw [intervalIntegral.integral_congr hzero, intervalIntegral.integral_zero]
+  have hmid : (∫ φ in (Real.pi / 2)..(3 * Real.pi / 2), max 0 (-(9 / 14) * Real.cos φ))
+      = 2 * (9 / 14) := by
+    have hpos : ∀ φ ∈ Set.uIcc (Real.pi / 2) (3 * Real.pi / 2),
+        max 0 (-(9 / 14) * Real.cos φ) = -(9 / 14) * Real.cos φ := by
+      intro φ hφ
+      rw [Set.uIcc_of_le (by nlinarith [Real.pi_pos])] at hφ
+      have h1 : φ - Real.pi ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) := by
+        rw [Set.mem_Icc]
+        constructor <;> linarith [hφ.1, hφ.2, Real.pi_pos]
+      have h2 : 0 ≤ Real.cos (φ - Real.pi) := Real.cos_nonneg_of_mem_Icc h1
+      have h3 : Real.cos φ = -Real.cos (φ - Real.pi) := by
+        have h4 := Real.cos_add_pi (φ - Real.pi)
+        rw [show (φ - Real.pi) + Real.pi = φ by ring] at h4
+        exact h4
+      have h5 : Real.cos φ ≤ 0 := by rw [h3]; linarith
+      rw [max_eq_right (by nlinarith : (0:ℝ) ≤ -(9 / 14) * Real.cos φ)]
+    rw [intervalIntegral.integral_congr hpos, intervalIntegral.integral_const_mul, integral_cos]
+    have hs3 : Real.sin (3 * Real.pi / 2) = -1 := by
+      have h4 := Real.sin_add_pi (Real.pi / 2)
+      rw [show Real.pi / 2 + Real.pi = 3 * Real.pi / 2 by ring] at h4
+      rw [h4, Real.sin_pi_div_two]
+    rw [hs3, Real.sin_pi_div_two]
+    norm_num
+  have hright : (∫ φ in (3 * Real.pi / 2)..(2 * Real.pi), max 0 (-(9 / 14) * Real.cos φ)) = 0 := by
+    have hzero : ∀ φ ∈ Set.uIcc (3 * Real.pi / 2) (2 * Real.pi),
+        max 0 (-(9 / 14) * Real.cos φ) = 0 := by
+      intro φ hφ
+      rw [Set.uIcc_of_le (by nlinarith [Real.pi_pos])] at hφ
+      set ψ : ℝ := φ - 3 * Real.pi / 2 with hψ
+      have hψ0 : 0 ≤ ψ := by rw [hψ]; linarith [hφ.1]
+      have hψ1 : ψ ≤ Real.pi / 2 := by rw [hψ]; linarith [hφ.2]
+      have hcos : Real.cos φ = Real.sin ψ := by
+        have e1 : φ = (ψ + Real.pi / 2) + Real.pi := by rw [hψ]; ring
+        rw [e1, Real.cos_add_pi, Real.cos_add_pi_div_two]
+        ring
+      have hsin : 0 ≤ Real.sin ψ :=
+        Real.sin_nonneg_of_mem_Icc ⟨hψ0, by linarith [hψ1, Real.pi_pos]⟩
+      rw [hcos, max_eq_left (by nlinarith : -(9 / 14) * Real.sin ψ ≤ 0)]
+    rw [intervalIntegral.integral_congr hzero, intervalIntegral.integral_zero]
+  have i1 : IntervalIntegrable (fun φ : ℝ => max 0 (-(9 / 14) * Real.cos φ))
+      volume 0 (Real.pi / 2) := hc.intervalIntegrable _ _
+  have i2 : IntervalIntegrable (fun φ : ℝ => max 0 (-(9 / 14) * Real.cos φ))
+      volume (Real.pi / 2) (3 * Real.pi / 2) := hc.intervalIntegrable _ _
+  have i3 : IntervalIntegrable (fun φ : ℝ => max 0 (-(9 / 14) * Real.cos φ))
+      volume (3 * Real.pi / 2) (2 * Real.pi) := hc.intervalIntegrable _ _
+  have i021 : IntervalIntegrable (fun φ : ℝ => max 0 (-(9 / 14) * Real.cos φ))
+      volume 0 (3 * Real.pi / 2) := hc.intervalIntegrable _ _
+  have e12 := intervalIntegral.integral_add_adjacent_intervals i1 i2
+  have e123 := intervalIntegral.integral_add_adjacent_intervals i021 i3
+  rw [← e123, ← e12, hleft, hmid, hright]
+  norm_num
+
+/-- The zeta value at `5/4` is at least one. -/
+theorem one_le_zeta_five_quarters : (1 : ℝ) ≤ (riemannZeta ((5 / 4 : ℝ) : ℂ)).re := by
+  rw [zeta_re_eq_tsum_rpow (by norm_num : (1:ℝ) < 5 / 4)]
+  have := Summable.le_tsum (Real.summable_nat_rpow.mpr (by norm_num : -(5 / 4 : ℝ) < -1)) 1
+    (fun i _ => Real.rpow_nonneg (Nat.cast_nonneg i) _)
+  simpa using this
+
+/-- `ζ (5/4) ≤ 5` gives `log ζ (5/4) ≤ 2`. -/
+theorem log_zeta_five_quarters_le_two :
+    Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re) ≤ 2 := by
+  have h1 : (riemannZeta ((5 / 4 : ℝ) : ℂ)).re ≤ 5 := zeta_five_quarters_le_five
+  have h2 : (0 : ℝ) < (riemannZeta ((5 / 4 : ℝ) : ℂ)).re := by
+    linarith [one_le_zeta_five_quarters]
+  have h3 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+  have he : (5 : ℝ) ≤ Real.exp 2 := by
+    have h4 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+    have h5 : (0 : ℝ) < Real.exp 1 := Real.exp_pos 1
+    rw [h3]
+    nlinarith
+  refine (Real.log_le_iff_le_exp h2).mpr ?_
+  linarith
+
+/-- The mean of the logarithm on the Jensen circle. -/
+theorem integral_log_realPartPower_le {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hne : χ ≠ 1) {T : ℝ} (hT : 1 ≤ |T|) (n : ℕ)
+    (hconv : ∀ (η : ℝ), 0 < η → η ≤ 1 / 2 → ∀ (s : ℂ), -η ≤ s.re → s.re ≤ 1 + η →
+      ‖DirichletCharacter.LFunction χ s‖ ≤
+        ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ^ ((1 + η - s.re) / 2) *
+          (riemannZeta ((1 + η : ℝ) : ℂ)).re) :
+    (∫ φ in (0:ℝ)..(2 * Real.pi), Real.log ‖realPartPower576 χ T n
+        ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖)
+      ≤ (n : ℝ) * (Real.log ((q : ℝ) * |T|) * (9 / 7)
+          + 2 * Real.pi * Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)) := by
+  have hζ1 : (1 : ℝ) ≤ (riemannZeta ((5 / 4 : ℝ) : ℂ)).re := one_le_zeta_five_quarters
+  have hζpos : (0 : ℝ) < (riemannZeta ((5 / 4 : ℝ) : ℂ)).re := by linarith
+  have hq : (0 : ℝ) < (q : ℝ) := Nat.cast_pos.mpr (NeZero.pos q)
+  have hM0 : 0 ≤ Real.log ((q : ℝ) * |T|) := by
+    refine Real.log_nonneg ?_
+    have hq1 : (1 : ℝ) ≤ (q : ℝ) := by
+      have h1 : 1 ≤ q := NeZero.one_le
+      exact_mod_cast h1
+    have h2 : (1 : ℝ) * 1 ≤ (q : ℝ) * |T| :=
+      mul_le_mul hq1 hT zero_le_one (le_of_lt hq)
+    simpa using h2
+  have hpoint : ∀ φ ∈ Set.Icc (0:ℝ) (2 * Real.pi),
+      Real.log ‖realPartPower576 χ T n ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖
+        ≤ (n : ℝ) * (max 0 (-(9 / 14) * Real.cos φ) * Real.log ((q : ℝ) * |T|)
+            + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)) := by
+    intro φ _
+    exact log_realPartPower_le χ hne hT n φ hconv
+  have hg_cont : Continuous fun φ : ℝ =>
+      (n : ℝ) * (max 0 (-(9 / 14) * Real.cos φ) * Real.log ((q : ℝ) * |T|)
+        + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)) := by fun_prop
+  have hg_int : IntervalIntegrable (fun φ : ℝ =>
+      (n : ℝ) * (max 0 (-(9 / 14) * Real.cos φ) * Real.log ((q : ℝ) * |T|)
+        + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re))) volume 0 (2 * Real.pi) :=
+    hg_cont.intervalIntegrable _ _
+  have hgval : (∫ φ in (0:ℝ)..(2 * Real.pi), (n : ℝ) *
+      (max 0 (-(9 / 14) * Real.cos φ) * Real.log ((q : ℝ) * |T|)
+        + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)))
+      = (n : ℝ) * (Real.log ((q : ℝ) * |T|) * (9 / 7)
+          + 2 * Real.pi * Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)) := by
+    rw [intervalIntegral.integral_const_mul]
+    congr 1
+    have e1 : ∀ φ : ℝ, max 0 (-(9 / 14) * Real.cos φ) * Real.log ((q : ℝ) * |T|)
+        + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)
+        = Real.log ((q : ℝ) * |T|) * max 0 (-(9 / 14) * Real.cos φ)
+          + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re) := by
+      intro φ
+      ring
+    rw [intervalIntegral.integral_congr (g := fun φ : ℝ =>
+      Real.log ((q : ℝ) * |T|) * max 0 (-(9 / 14) * Real.cos φ)
+        + Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)) (fun φ _ => e1 φ)]
+    rw [intervalIntegral.integral_add ((by fun_prop : Continuous fun φ : ℝ =>
+        Real.log ((q : ℝ) * |T|) * max 0 (-(9 / 14) * Real.cos φ)).intervalIntegrable _ _)
+        intervalIntegrable_const]
+    rw [intervalIntegral.integral_const_mul, integral_max_neg_cos_mul,
+      intervalIntegral.integral_const]
+    simp
+  by_cases hint : IntervalIntegrable (fun φ : ℝ =>
+      Real.log ‖realPartPower576 χ T n ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖)
+      volume 0 (2 * Real.pi)
+  · have hmono := intervalIntegral.integral_mono_on
+      (by positivity : (0:ℝ) ≤ 2 * Real.pi) hint hg_int hpoint
+    rw [hgval] at hmono
+    exact hmono
+  · rw [intervalIntegral.integral_undef hint]
+    refine mul_nonneg (Nat.cast_nonneg n) ?_
+    have h1 : 0 ≤ Real.log ((q : ℝ) * |T|) * (9 / 7) := by positivity
+    have h2 : 0 ≤ 2 * Real.pi * Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re) := by
+      have h3 : 0 ≤ Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re) := Real.log_nonneg hζ1
+      positivity
+    linarith
+
+/-- The centre value of the Jensen mass is not small when the power argument
+tends to a real direction. -/
+theorem centre_log_bound {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) {T : ℝ} (n : ℕ)
+    (hratio : (1 / 2 : ℝ) ≤
+      (DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I) ^ n).re /
+        ‖DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I)‖ ^ n) :
+    -Real.log ‖realPartPower576 χ T n (5 / 4 : ℂ)‖ ≤ Real.log 2 + (n : ℝ) * 4 := by
+  set z : ℂ := DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I) with hz
+  set ζ0 : ℝ := (riemannZeta ((5 / 4 : ℝ) : ℂ)).re with hζ0
+  have hζ5 : ζ0 ≤ 5 := zeta_five_quarters_le_five
+  have hval : realPartPower576 χ T n (5 / 4 : ℂ) = ((((z ^ n).re : ℝ)) : ℂ) := by
+    rw [show (5 / 4 : ℂ) = (((5 : ℝ) / 4 : ℝ) : ℂ) by norm_num]
+    rw [realPartPower_real576]
+    simp [hz]
+  have hkey : (1 / 2) * ‖z‖ ^ n ≤ (z ^ n).re := by
+    have h3 : ‖z‖ ^ n = ‖z‖ ^ n := rfl
+    rcases eq_or_lt_of_le (norm_nonneg z) with h0 | h0
+    · have hz0 : z = 0 := norm_eq_zero.mp h0.symm
+      rw [hz0]
+      rcases Nat.eq_zero_or_pos n with hn | hn
+      · subst hn
+        norm_num
+      · simp [zero_pow hn.ne']
+    · have h1 : (0 : ℝ) < ‖z‖ ^ n := pow_pos h0 n
+      rw [le_div_iff₀ h1] at hratio
+      linarith
+  have hzlow : Real.exp (-(4 : ℝ)) ≤ ‖z‖ := by
+    have h1 := exp_neg_zeta_sub_one_le_norm_LFunction χ
+      (s := ((5 / 4 : ℂ) + (T : ℂ) * I)) (by simp; norm_num)
+    have hsre : (((5 / 4 : ℂ) + (T : ℂ) * I)).re = 5 / 4 := by simp
+    rw [hsre] at h1
+    have h2 : -(4 : ℝ) ≤ -(ζ0 - 1) := by
+      rw [hζ0]
+      linarith [zeta_five_quarters_le_five]
+    have h3 : Real.exp (-(ζ0 - 1)) ≤ ‖z‖ := by
+      simpa [hz, hζ0] using h1
+    exact (Real.exp_le_exp.mpr h2).trans h3
+  have hzlow_n : Real.exp (-(4 * (n : ℝ))) ≤ ‖z‖ ^ n := by
+    have h1 : Real.exp (-(4 * (n : ℝ))) = (Real.exp (-(4 : ℝ))) ^ n := by
+      rw [← Real.exp_nat_mul]
+      congr 1
+      ring
+    rw [h1]
+    exact pow_le_pow_left₀ (Real.exp_pos _).le hzlow n
+  have hpos : (0 : ℝ) < (z ^ n).re := by
+    have hA : (0 : ℝ) < (1 / 2) * Real.exp (-(4 * (n : ℝ))) := by positivity
+    have hB : (1 / 2) * Real.exp (-(4 * (n : ℝ))) ≤ (1 / 2) * ‖z‖ ^ n := by
+      have hC := hzlow_n
+      nlinarith
+    linarith [hB, hkey]
+  have hnorm : ‖realPartPower576 χ T n (5 / 4 : ℂ)‖ = (z ^ n).re := by
+    rw [hval, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hpos]
+  rw [hnorm]
+  have h1 : (1 / 2) * Real.exp (-(4 * (n : ℝ))) ≤ (z ^ n).re := by
+    have h2 : (1 / 2) * Real.exp (-(4 * (n : ℝ))) ≤ (1 / 2) * ‖z‖ ^ n := by
+      have := hzlow_n
+      nlinarith
+    linarith
+  have h2 : Real.log ((1 / 2) * Real.exp (-(4 * (n : ℝ)))) ≤ Real.log ((z ^ n).re) :=
+    Real.log_le_log (by positivity) h1
+  have h3 : Real.log ((1 / 2) * Real.exp (-(4 * (n : ℝ)))) = -(Real.log 2) - 4 * (n : ℝ) := by
+    rw [Real.log_mul (by norm_num) (Real.exp_pos _).ne', Real.log_exp]
+    have h4 : Real.log (1 / 2 : ℝ) = -Real.log 2 := by
+      rw [show (1 / 2 : ℝ) = 2⁻¹ by norm_num, Real.log_inv]
+    rw [h4]
+    ring
+  linarith
+
+/-- `2 log (12/7) ≥ 1`. -/
+theorem two_log_twelve_sevenths_ge_one : (1 : ℝ) ≤ 2 * Real.log (12 / 7 : ℝ) := by
+  have h1 : (1 / 2 : ℝ) ≤ Real.log (12 / 7 : ℝ) := by
+    rw [Real.le_log_iff_exp_le (by norm_num : (0:ℝ) < 12 / 7)]
+    have he1 : Real.exp (1 / 2) * Real.exp (1 / 2) = Real.exp 1 := by
+      rw [← Real.exp_add]
+      norm_num
+    have hpos : (0 : ℝ) < Real.exp (1 / 2) := Real.exp_pos _
+    have hlt : Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+    have hk : Real.exp (1 / 2) < 1.65 := by nlinarith
+    linarith
+  linarith
+
+/-- `9 / (14 π) ≤ 1 / 4`. -/
+theorem nine_div_fourteen_pi_le_quarter : 9 / (14 * Real.pi) ≤ (1 / 4 : ℝ) := by
+  rw [div_le_iff₀ (by positivity : (0:ℝ) < 14 * Real.pi)]
+  nlinarith [Real.pi_gt_three]
+
+/-- The final arithmetic of the Jensen mass budget. -/
+theorem jensen_arith {n M zl ε : ℝ} (hn : 0 < n) (hM : 0 ≤ M) (hzl : zl ≤ 2) (hε : 0 < ε)
+    (hd : (1 : ℝ) ≤ 2 * Real.log (12 / 7 : ℝ)) (hlog2 : Real.log 2 ≤ ε * n) :
+    n * (M * (9 / (14 * Real.pi)) + zl) + (Real.log 2 + 4 * n)
+      ≤ (0.25 * M + 6 + ε) * (2 * n * Real.log (12 / 7 : ℝ)) := by
+  have hK : 9 / (14 * Real.pi) ≤ (1 / 4 : ℝ) := nine_div_fourteen_pi_le_quarter
+  have h1 : n * (M * (9 / (14 * Real.pi))) ≤ n * (M * (1 / 4)) := by
+    refine mul_le_mul_of_nonneg_left ?_ (le_of_lt hn)
+    exact mul_le_mul_of_nonneg_left hK hM
+  have h6 : n * zl ≤ n * 2 := mul_le_mul_of_nonneg_left hzl (le_of_lt hn)
+  have hdp : (1 : ℝ) ≤ 2 * Real.log (12 / 7 : ℝ) := hd
+  have hcn : (0 : ℝ) < 0.25 * M + 6 + ε := by linarith
+  have h4 : (0.25 * M + 6 + ε) * n ≤ (0.25 * M + 6 + ε) * n * (2 * Real.log (12 / 7 : ℝ)) := by
+    have hp : (0 : ℝ) ≤ (0.25 * M + 6 + ε) * n := by
+      have h1 : (0:ℝ) ≤ 0.25 * M + 6 + ε := by linarith
+      exact mul_nonneg h1 (le_of_lt hn)
+    calc (0.25 * M + 6 + ε) * n = ((0.25 * M + 6 + ε) * n) * 1 := by ring
+      _ ≤ ((0.25 * M + 6 + ε) * n) * (2 * Real.log (12 / 7 : ℝ)) :=
+          mul_le_mul_of_nonneg_left hdp hp
+  have h5 : n * (M * (9 / (14 * Real.pi))) + (n * zl + 4 * n + Real.log 2)
+      ≤ (0.25 * M + 6 + ε) * n := by
+    nlinarith [h1, h6, hlog2]
+  nlinarith [h4, h5]
+
+/-- The leaf `jensen_mass_bound576`, proved. -/
+theorem jensen_mass_bound576_wip {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
+    {T : ℝ} (hT : 1 ≤ |T|) (N : ℕ → ℕ) (hN : StrictMono N)
+    (hcentre : Tendsto (fun k =>
+      (DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I) ^ N k).re /
+        ‖DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I)‖ ^ N k)
+      atTop (𝓝 1))
+    (hconv : ∀ (η : ℝ), 0 < η → η ≤ 1 / 2 → ∀ (s : ℂ),
+      -η ≤ s.re → s.re ≤ 1 + η →
+      ‖DirichletCharacter.LFunction χ s‖ ≤
+        ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ^ ((1 + η - s.re) / 2) *
+          (riemannZeta ((1 + η : ℝ) : ℂ)).re) :
+    ∀ ε > 0, ∀ᶠ k in atTop,
+      jensenMass576 χ T (N k) ≤ 0.25 * Real.log ((q : ℝ) * |T|) + 6 + ε := by
+  intro ε hε
+  set M : ℝ := Real.log ((q : ℝ) * |T|) with hM
+  set ζ0 : ℝ := (riemannZeta ((5 / 4 : ℝ) : ℂ)).re with hζ0
+  set z : ℂ := DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I) with hz
+  have hq : (0 : ℝ) < (q : ℝ) := Nat.cast_pos.mpr (NeZero.pos q)
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by
+    have h1 : 1 ≤ q := NeZero.one_le
+    exact_mod_cast h1
+  have hM0 : 0 ≤ M := by
+    rw [hM]
+    refine Real.log_nonneg ?_
+    have h2 : (1 : ℝ) * 1 ≤ (q : ℝ) * |T| := mul_le_mul hq1 hT zero_le_one (le_of_lt hq)
+    simpa using h2
+  have hlogζ : Real.log ζ0 ≤ 2 := log_zeta_five_quarters_le_two
+  have hd : (1 : ℝ) ≤ 2 * Real.log (12 / 7 : ℝ) := two_log_twelve_sevenths_ge_one
+  have hev1 : ∀ᶠ k in atTop, (1 / 2 : ℝ) ≤ (z ^ N k).re / ‖z‖ ^ N k := by
+    have h1 : ∀ᶠ x : ℝ in 𝓝 (1:ℝ), (1 / 2 : ℝ) ≤ x := by
+      filter_upwards [Metric.ball_mem_nhds (1:ℝ) (by norm_num : (0:ℝ) < 1/2)] with x hx
+      have h2 : |x - 1| < 1/2 := by
+        rw [Metric.mem_ball, Real.dist_eq] at hx
+        rw [← Real.dist_eq]
+        simpa [Real.dist_eq] using hx
+      linarith [(abs_lt.mp h2).1]
+    exact hcentre.eventually h1
+  have hev2 : ∀ᶠ k in atTop, Real.log 2 / ε ≤ (N k : ℝ) := by
+    obtain ⟨m, hm⟩ := exists_nat_ge (Real.log 2 / ε)
+    refine eventually_atTop.mpr ⟨m, fun b hb => ?_⟩
+    have h3 : m ≤ N m := hN.id_le m
+    have h4 : N m ≤ N b := hN.monotone hb
+    have h5 : m ≤ N b := le_trans h3 h4
+    have h2 : (m : ℝ) ≤ (N b : ℝ) := by exact_mod_cast h5
+    linarith
+  have hev3 : ∀ᶠ k in atTop, 1 ≤ N k := by
+    refine eventually_atTop.mpr ⟨1, fun b hb => ?_⟩
+    have h1 : N 1 ≤ N b := hN.monotone hb
+    have h2 : N 0 < N 1 := hN (by norm_num)
+    omega
+  filter_upwards [hev1, hev2, hev3] with k hratio hlog2 hNk1
+  have hNpos : (0 : ℝ) < (N k : ℝ) := by
+    have h0 : (0 : ℕ) < N k := by omega
+    exact_mod_cast h0
+  set intA : ℝ := (∫ φ in (0:ℝ)..(2 * Real.pi), Real.log ‖realPartPower576 χ T (N k)
+    ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖) with hA
+  set Cv : ℝ := Real.log ‖realPartPower576 χ T (N k) (5 / 4 : ℂ)‖ with hC
+  have hint := integral_log_realPartPower_le χ hne hT (N k) hconv
+  have hcen := centre_log_bound χ (n := N k) (by simpa [hz] using hratio)
+  have hstep2 : -Cv ≤ Real.log 2 + 4 * (N k : ℝ) := by
+    simpa [hC, mul_comm] using hcen
+  have hstep1 : (1 / (2 * Real.pi)) * intA
+      ≤ (N k : ℝ) * (M * (9 / (14 * Real.pi)) + Real.log ζ0) := by
+    have h1 : (1 / (2 * Real.pi)) * intA ≤ (1 / (2 * Real.pi)) * ((N k : ℝ) *
+        (Real.log ((q : ℝ) * |T|) * (9 / 7)
+          + 2 * Real.pi * Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re))) := by
+      refine mul_le_mul_of_nonneg_left ?_ (by positivity : (0:ℝ) ≤ 1 / (2 * Real.pi))
+      rw [hA]
+      exact hint
+    refine h1.trans_eq ?_
+    field_simp
+    ring
+  have hlog2' : Real.log 2 ≤ ε * (N k : ℝ) := by
+    have h := hlog2
+    rw [div_le_iff₀ hε] at h
+    linarith
+  have hstep3 := jensen_arith (n := (N k : ℝ)) (M := M) (zl := Real.log ζ0) (ε := ε)
+    hNpos hM0 hlogζ hε hd hlog2'
+  rw [jensenMass576]
+  have hden : (0 : ℝ) < 2 * (N k : ℝ) * Real.log (12 / 7 : ℝ) := by
+    have h1 : (0 : ℝ) < Real.log (12 / 7 : ℝ) := Real.log_pos (by norm_num)
+    positivity
+  rw [div_le_iff₀ hden]
+  have hgoal : (1 / (2 * Real.pi)) * intA - Cv
+      ≤ (0.25 * M + 6 + ε) * (2 * (N k : ℝ) * Real.log (12 / 7 : ℝ)) := by
+    linarith [hstep1, hstep2, hstep3]
+  exact hgoal
+
+
+end Decomp576aWip
+
+
 /-- LEAF. Convexity bounds the mean log on the real-part power Jensen circle.
 Trudgian pages 7 to 9, displays 4.4 to 4.9 and 4.12, at eta equal to one quarter
 and p equal to negative one twenty-eighth. The derived budget 6 is deliberately
@@ -183,7 +1141,7 @@ theorem jensen_mass_bound576 {q : ℕ} [NeZero q]
           (riemannZeta ((1 + η : ℝ) : ℂ)).re) :
     ∀ ε > 0, ∀ᶠ k in atTop,
       jensenMass576 χ T (N k) ≤ 0.25 * Real.log ((q : ℝ) * |T|) + 6 + ε := by
-  sorry
+  exact Decomp576aWip.jensen_mass_bound576_wip χ hχ hne hT N hN hcentre hconv
 
 /-- The vertical signed variation is bounded by the absolutely convergent
 Euler-product logarithm. Trudgian page 4, the bound for C2 before display 2.7.
