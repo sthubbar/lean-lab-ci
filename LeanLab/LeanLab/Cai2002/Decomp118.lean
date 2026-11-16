@@ -28,7 +28,6 @@ open scoped Topology
 
 namespace LeanLab.Cai2002
 
-
 /-- Page 599 Lemma 3. The inclusive prime progression counts agree. -/
 theorem apCount118_eq_piAP (y : ℝ) (d l : ℕ) :
     (apCount118 y d l : ℝ) = LeanLab.PNTPort.BVMax.piAP y d l := by
@@ -811,7 +810,6 @@ theorem eq47_margin118 :
   norm_num at hmono hl h4 ⊢
   nlinarith [hmono, hl, h4]
 
-
 /-- Page 604 display 4.14. The exact polynomial certificate leaves a strict upper reserve. -/
 theorem eq414_margin118 :
     let θ : ℝ := 0.95
@@ -865,7 +863,6 @@ theorem eq414_margin118 :
   norm_num
   linarith
 
-
 /-- Page 604 display 4.15. The exact polynomial certificate leaves a strict upper reserve. -/
 theorem eq415_margin118 :
     let θ : ℝ := 0.95
@@ -898,9 +895,6 @@ theorem eq415_margin118 :
       have := mul_le_mul_of_nonneg_left hI h8.le
       norm_num at this ⊢
       linarith
-
-
-
 
 /-- Pages 600 to 601 display 4.2. Divisibility in the actual sequence is exactly prime progression counting. -/
 theorem card_caiSequence118_dvd (N d : ℕ) (hN : 2 ≤ N) :
@@ -1142,7 +1136,6 @@ theorem explicit_lower_epsilon118 (F f : ℝ → ℝ)
   rw [heq]
   linarith
 
-
 /-- Page 601 display 4.4. The strict reserve absorbs an arbitrary small additive coefficient loss.
 CONDITIONAL on the displayed asymptotic lower estimate for a sequence a. -/
 theorem sieve_lower_of_asymptotic118 (a : ℕ → ℝ)
@@ -1314,8 +1307,27 @@ theorem leaf118_loss :
     _ ≤ 0.05 * (C N * (N : ℝ) ^ (0.95 : ℝ)) := by
       gcongr
 
-set_option maxHeartbeats 4000000
-set_option maxRecDepth 10000
+/-- LEAF. Page 604 display 4.14, including its sufficiently large threshold.
+External inputs: Iwaniec's linear sieve, Wu 1993, Quart. J. Math. 44,
+pages 109 to 128, and Huxley's short interval prime number theorem in display 4.13.
+The integral constant alone is already proved in Integral414. -/
+theorem leaf118_sieve_two :
+    ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+      (S2 N 0.95 : ℝ) ≤
+        6.8086 * (C N * (N : ℝ) ^ (0.95 : ℝ) / Real.log N ^ 2) := by
+  -- ATTEMPT two 4: Linear sieve, Wu and Huxley unformalized.
+  sorry
+
+/-- LEAF. Page 604 display 4.15, including its sufficiently large threshold.
+External inputs: the same switching, linear sieve, Wu mean value theorem and
+Huxley short interval theorem as display 4.14.
+The integral constant alone is already proved in Integrals. -/
+theorem leaf118_sieve_three :
+    ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+      (S3 N 0.95 : ℝ) ≤
+        0.1564 * (C N * (N : ℝ) ^ (0.95 : ℝ) / Real.log N ^ 2) := by
+  -- ATTEMPT three 4: Linear sieve, Wu and Huxley unformalized.
+  sorry
 
 /-- Sieving primes for even N are odd. Cai page 600 and page 601 equation 4.3. -/
 theorem cai_primes_odd306 (N p : ℕ) (he : Even N) (hp : p.Prime) (hc : p.Coprime N) :
@@ -1326,7 +1338,6 @@ theorem cai_primes_odd306 (N p : ℕ) (he : Even N) (hp : p.Prime) (hc : p.Copri
     exact (Nat.not_coprime_of_dvd_of_dvd (by norm_num) (dvd_refl 2)
       (even_iff_two_dvd.mp he)) hc
   exact ⟨hp, by have := hp.two_le; omega⟩
-
 
 /-- The actual reciprocal totient density satisfies the uniform dimension condition
 with one fixed initial cutoff. Cai page 601 and Theorem 6 page 4 equation 4. -/
@@ -1356,12 +1367,18 @@ theorem cai_dimension306 (ε : ℝ) (hε : 0 < ε) :
     rw [Nat.totient_prime hprime, Nat.cast_sub hprime.one_lt.le, Nat.cast_one]
   rw [hval]
 
-
 /-- The global construction supplies all four printed formulas without a differential hypothesis.
 Cai Lemma 2 pages 598 to 599. -/
 theorem linear_sieve_formulas306 : Lemma2Formulas118 sieveLower306 sieveUpper306 := by
   exact linear_sieve_formulas118 sieveUpper306 sieveLower306 sieveFns306
 
+/-- The strict lower coefficient reserve is available for the constructed global functions.
+Cai page 601 equation 4.4. No sieve count estimate is asserted here. -/
+theorem explicit_lower_epsilon306 :
+    ∃ ε : ℝ, 0 < ε ∧ ε ≤ 1 / 100000 ∧
+      12.9897 < 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
+        (sieveLower306 5.225 - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve 5.225) := by
+  exact explicit_lower_epsilon118 sieveUpper306 sieveLower306 sieveFns306
 
 /-- Cai's actual product normalization is unconditional on the Mertens input.
 Page 601 equation 4.3. -/
@@ -1373,6 +1390,48 @@ theorem cai_mertens_normalization306 :
           (2 * exp (-eulerMascheroniConstant) * C N)) atTop (𝓝 1) := by
   exact mertens_normalization118 LeanLab.AlmostPrimeSums.Decomp1527c.mertens_euler_product
 
+/-- The actual finite lower sieve has only the cited Theorem 6 as an analytic input.
+The dimension cutoff is supplied uniformly and every Q times D remainder is retained.
+Cai page 601 before equation 4.4. CONDITIONAL ON leaf306_theorem6.
+The final mass and remainder limits needed by leaf118_sieve_lower are separate obligations. -/
+theorem cai_lower_finite306 (ε : ℝ) (hε : 0 < ε) (hεmax : ε ≤ 1 / 100000) :
+    ∃ w : ℝ, 3 ≤ w ∧ ∀ N : ℕ, Even N → 2 ≤ N → w < z1 N →
+      ∀ D : ℝ, (z1 N) ^ 2 ≤ D →
+      let Q : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn
+        {p : ℕ | p.Prime ∧ p.Coprime N} w
+      let PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+        {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), p
+      let s : ℝ := log D / log (z1 N)
+      (sieveLower306 s - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve s) *
+        ((caiSequence118 N).card : ℝ) *
+          (∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+            {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), (1 - caiDensity118 p)) -
+        (∑ d ∈ PP.divisors.filter (fun d : ℕ => (d : ℝ) < (∏ q ∈ Q, (q : ℝ)) * D),
+          |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
+            ((caiSequence118 N).card : ℝ) * caiDensity118 d|) - (N.primeFactors.card : ℝ) ≤
+          (Ssift N 0.95 : ℝ) := by
+  classical
+  obtain ⟨w, hw, hd⟩ := cai_dimension306 ε hε
+  refine ⟨w, hw, fun N he hN hwz D hD => ?_⟩
+  have hQ : ∀ q ∈ LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} w, q.Prime ∧ q.Coprime N :=
+    fun q hq => by
+      simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hq
+      exact hq.2
+  have hl := cai_lower_of_theorem6_118 leaf306_theorem6 sieveUpper306 sieveLower306
+    sieveFns306 N he (by linarith) ε hε hεmax _ hQ (hd N he hwz) D hD
+  have hc := asift_one_card_le118 N 0.95 (by omega)
+  have hcr : ((Asift N 0.95 1).card : ℝ) ≤
+      (Ssift N 0.95 : ℝ) + (N.primeFactors.card : ℝ) := by exact_mod_cast hc
+  dsimp only at hl ⊢
+  linarith
+
+#print axioms cai_primes_odd306
+#print axioms cai_dimension306
+#print axioms linear_sieve_formulas306
+#print axioms explicit_lower_epsilon306
+#print axioms cai_mertens_normalization306
+#print axioms cai_lower_finite306
 
 /-- The exact finite q divisor support gives the sifted count in S1.
 Cai page 601 equation 4.5. No residue or endpoint is dropped. -/
@@ -1417,6 +1476,7 @@ theorem cai_sifted_q_card306 (N q : ℕ) :
       · simpa only [hback] using hcut
     · exact (cai_sift_iff118 N (N - p) (by omega)).mpr hrough
 
+#print axioms cai_sifted_q_card306
 
 /-- Theorem 6 gives the upper bound for each actual q divisor support in S1.
 Cai page 601 equation 4.5. CONDITIONAL ON leaf306_theorem6.
@@ -1457,6 +1517,228 @@ theorem cai_upper_q_finite306 (ε : ℝ) (hε : 0 < ε) (hεmax : ε ≤ 1 / 100
   rw [cai_sifted_q_card306 N q] at hu
   exact hu
 
+#print axioms cai_upper_q_finite306
+
+/-- The exact Q times D remainder is negligible at a level reduced by one fixed factor.
+Cai page 601 equation 4.2 and Theorem 6 page 5 equation 10.
+The fixed factor bounds all exceptional products uniformly in N. -/
+theorem cai_remainder_small306 (w : ℝ) (η : ℝ) (hη : 0 < η) :
+    ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+      let Q : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn
+        {p : ℕ | p.Prime ∧ p.Coprime N} w
+      let PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+        {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), p
+      let L : ℝ := Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
+        log ((N : ℝ) ^ (0.95 : ℝ)) ^ B
+      let D : ℝ := L / (1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ))
+      (∑ d ∈ PP.divisors.filter (fun d : ℕ => (d : ℝ) < (∏ p ∈ Q, (p : ℝ)) * D),
+        |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
+          ((caiSequence118 N).card : ℝ) * caiDensity118 d|) ≤
+        η * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+  classical
+  obtain ⟨B, hB, K, hK, hbv⟩ := cai_remainder_level118 5 (by norm_num)
+  let c : ℝ := η * LeanLab.ChenExplicit.twinC * (0.95 : ℝ) ^ 5
+  have hc : 0 < c := by
+    dsimp [c]
+    exact mul_pos (mul_pos hη LeanLab.ChenExplicit.twinC_pos) (by norm_num)
+  have hlog : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
+    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  obtain ⟨n0, hn0⟩ := eventually_atTop.mp
+    (hlog.eventually (eventually_ge_atTop (max 1 (K / c))))
+  refine ⟨B, hB, max n0 4, fun N he hN => ?_⟩
+  have hN4 : 4 ≤ N := (le_max_right ..).trans hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hL1 : 1 ≤ log (N : ℝ) := (le_max_left ..).trans (hn0 N ((le_max_left ..).trans hN))
+  have hLK : K / c ≤ log (N : ℝ) :=
+    (le_max_right ..).trans (hn0 N ((le_max_left ..).trans hN))
+  have hlogp : 0 < log (N : ℝ) := by linarith
+  have hKlog : K ≤ c * log N ^ 3 := by
+    have hh := (div_le_iff₀ hc).mp hLK
+    have hp : log (N : ℝ) ≤ log N ^ 3 := le_self_pow₀ hL1 (by norm_num)
+    exact hh.trans (by simpa only [mul_comm] using mul_le_mul_of_nonneg_left hp hc.le)
+  let M : ℝ := ∏ p ∈ oddSievePrimes306 w, (p : ℝ)
+  let L : ℝ := Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
+    log ((N : ℝ) ^ (0.95 : ℝ)) ^ B
+  have hM : 0 ≤ M := Finset.prod_nonneg (fun p _ => Nat.cast_nonneg p)
+  have hL : 0 ≤ L := by
+    dsimp [L]
+    rw [log_rpow hNp]
+    exact div_nonneg (sqrt_nonneg _) (rpow_pos_of_pos (mul_pos (by norm_num) hlogp) B).le
+  have hD : 0 ≤ L / (1 + M) := div_nonneg hL (by linarith)
+  have hQ := sieve_exceptional_product306 w
+    {p : ℕ | p.Prime ∧ p.Coprime N}
+    (fun p hp => cai_primes_odd306 N p he hp.1 hp.2)
+  have hcut : (∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} w, (p : ℝ)) * (L / (1 + M)) ≤ L := by
+    calc
+      _ ≤ M * (L / (1 + M)) := mul_le_mul_of_nonneg_right hQ hD
+      _ ≤ L := by
+        rw [← mul_div_assoc, div_le_iff₀ (by linarith : 0 < 1 + M)]
+        nlinarith
+  have hs := sieve_divisor_remainder306 N
+    {p : ℕ | p.Prime ∧ p.Coprime N} (fun p hp => hp.2) (z1 N)
+    (LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} w)
+    (L / (1 + M)) L hcut
+    (fun d => |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
+      ((caiSequence118 N).card : ℝ) * caiDensity118 d|) (fun _ => abs_nonneg _)
+  have hb := hs.trans (hbv N hN4)
+  dsimp only at hb ⊢
+  refine hb.trans ?_
+  rw [log_rpow hNp]
+  have hC : LeanLab.ChenExplicit.twinC ≤ C N := by
+    unfold C
+    exact le_mul_of_one_le_right LeanLab.ChenExplicit.twinC_pos.le
+      (LeanLab.ChenExplicit.one_le_oddFactor N)
+  have hmain : K * (N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N) ^ (5 : ℝ) ≤
+      η * (LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+    rw [rpow_ofNat, mul_pow]
+    apply (div_le_iff₀ (by positivity : 0 < (0.95 : ℝ) ^ 5 * log (N : ℝ) ^ 5)).mpr
+    have hh := mul_le_mul_of_nonneg_right hKlog (rpow_pos_of_pos hNp (0.95 : ℝ)).le
+    dsimp [c] at hh
+    convert hh using 1 <;> field_simp [ne_of_gt hlogp]
+  exact hmain.trans (by gcongr)
+
+#print axioms cai_remainder_small306
+
+/-- The elementary lower bound for the logarithmic integral used in the lower sieve mass.
+Cai page 601 equation 4.4. -/
+theorem li118_lower306 (x : ℝ) (hx : 2 ≤ x) :
+    (x - 2) / log x ≤ li118 x := by
+  have hc : ContinuousOn (fun t : ℝ => 1 / log t) (Icc 2 x) := by
+    apply continuousOn_const.div
+    · exact continuousOn_id.log (fun t ht => by dsimp; linarith [ht.1])
+    · intro t ht
+      exact ne_of_gt (log_pos (by linarith [ht.1]))
+  have hi := integral_mono_on (μ := MeasureTheory.volume) hx (intervalIntegrable_const (c := 1 / log x))
+    (hc.intervalIntegrable_of_Icc hx) (fun t ht =>
+      one_div_le_one_div_of_le (log_pos (by linarith [ht.1]))
+        (log_le_log (by linarith [ht.1]) ht.2))
+  calc
+    _ = ∫ _t in (2 : ℝ)..x, 1 / log x := by
+      simp only [integral_const, smul_eq_mul]
+      ring
+    _ ≤ _ := hi
+#print axioms li118_lower306
+
+/-- The actual inclusive prime mass has the elementary asymptotic lower bound.
+Cai page 601 before equation 4.4, derived from the proved continuous Li distribution theorem. -/
+theorem primeCount_lower306 (δ : ℝ) (hδ : 0 < δ) :
+    ∀ᶠ x : ℝ in atTop, (1 - δ) * x / log x ≤ (apCount118 x 1 0 : ℝ) := by
+  obtain ⟨B, hB, K, hK, x0, hx0, hbv⟩ := bombieriVinogradov118_proved 3 (by norm_num)
+  have hsmall : Tendsto (fun x : ℝ => log x ^ B / x ^ (1 / 2 : ℝ)) atTop (𝓝 0) :=
+    (isLittleO_log_rpow_rpow_atTop B (s := 1 / 2) (by norm_num)).tendsto_div_nhds_zero
+  have herr : Tendsto (fun x : ℝ => 2 / x + K / log x ^ 2) atTop (𝓝 0) := by
+    have hlog2 : Tendsto (fun x : ℝ => log x ^ 2) atTop atTop :=
+      (tendsto_pow_atTop (by norm_num : 2 ≠ 0)).comp tendsto_log_atTop
+    simpa using (tendsto_id.const_div_atTop (2 : ℝ)).add (hlog2.const_div_atTop K)
+  filter_upwards [eventually_ge_atTop x0, hsmall.eventually (eventually_lt_nhds
+      (by norm_num : (0 : ℝ) < 1)), herr.eventually (eventually_lt_nhds hδ)] with x hx hs he
+  have hx2 : 2 ≤ x := hx0.trans hx
+  have hxp : 0 < x := by linarith
+  have hlp : 0 < log x := log_pos (by linarith)
+  have hpB : 0 < log x ^ B := rpow_pos_of_pos hlp B
+  have hpX : 0 < x ^ (1 / 2 : ℝ) := rpow_pos_of_pos hxp _
+  have hlevel : 1 ≤ x ^ (1 / 2 : ℝ) / log x ^ B := by
+    apply (one_le_div hpB).mpr
+    exact (by simpa using (div_lt_iff₀ hpX).mp hs : log x ^ B < x ^ (1 / 2 : ℝ)).le
+  have hmem : 1 ∈ Finset.Icc 1 ⌊x ^ (1 / 2 : ℝ) / log x ^ B⌋₊ :=
+    Finset.mem_Icc.mpr ⟨le_rfl, Nat.le_floor (by simpa using hlevel)⟩
+  obtain ⟨R, hR, hsum⟩ := hbv x hx
+  have hfirst := Finset.single_le_sum (f := R) (fun d hd => (hR d hd).1) hmem
+  have hpoint := (hR 1 hmem).2 0 (by norm_num) (by norm_num) x hx2 le_rfl
+  norm_num only [Nat.totient_one, Nat.cast_one, div_one] at hpoint
+  have habs : |(apCount118 x 1 0 : ℝ) - li118 x| ≤ K * x / log x ^ (3 : ℝ) :=
+    hpoint.trans (hfirst.trans hsum)
+  have hlower := li118_lower306 x hx2
+  have hpi : li118 x - K * x / log x ^ (3 : ℝ) ≤ (apCount118 x 1 0 : ℝ) := by
+    linarith [(abs_le.mp habs).1]
+  have halg : (1 - δ) * x / log x ≤ (x - 2) / log x - K * x / log x ^ (3 : ℝ) := by
+    rw [rpow_ofNat, div_le_iff₀ hlp]
+    have herror : 2 + K * x / log x ^ 2 ≤ δ * x := by
+      have hh := mul_le_mul_of_nonneg_right he.le hxp.le
+      have heq : (2 / x + K / log x ^ 2) * x = 2 + K * x / log x ^ 2 := by
+        field_simp [hxp.ne', hlp.ne']
+      rw [heq] at hh
+      exact hh
+    have heq : ((x - 2) / log x - K * x / log x ^ 3) * log x =
+        x - 2 - K * x / log x ^ 2 := by
+      field_simp [hlp.ne']
+    rw [heq]
+    linarith
+  exact halg.trans (by linarith)
+#print axioms primeCount_lower306
+
+/-- The prime divisor loss is negligible relative to the final scale.
+Cai page 601 equations 4.1 and 4.4. -/
+theorem cai_primeFactors_small306 (η : ℝ) (hη : 0 < η) :
+    ∃ N0 : ℕ, ∀ N : ℕ, N0 ≤ N →
+      (N.primeFactors.card : ℝ) ≤ η * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
+  have h2 : 0 < log (2 : ℝ) := log_pos (by norm_num)
+  have hc : 0 < η * LeanLab.ChenExplicit.twinC * log 2 :=
+    mul_pos (mul_pos hη LeanLab.ChenExplicit.twinC_pos) h2
+  have ho : (fun N : ℕ => log (N : ℝ) ^ 3) =o[atTop]
+      (fun N : ℕ => (N : ℝ) ^ (0.95 : ℝ)) := by
+    simpa only [Function.comp_def, rpow_ofNat] using
+      (isLittleO_log_rpow_rpow_atTop (3 : ℝ) (s := 0.95) (by norm_num)).comp_tendsto
+        (tendsto_natCast_atTop_atTop (R := ℝ))
+  obtain ⟨n0, hn0⟩ := eventually_atTop.mp (ho.bound hc)
+  refine ⟨max n0 2, fun N hN => ?_⟩
+  have hn2 : 2 ≤ N := (le_max_right ..).trans hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hb := hn0 N ((le_max_left ..).trans hN)
+  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), Real.norm_eq_abs,
+    abs_of_pos (rpow_pos_of_pos hNp _)] at hb
+  have hcard := LeanLab.HeathBrown1985.card_primeFactors_mul_log_two_le N (by omega)
+  have hh := mul_le_mul_of_nonneg_right hcard (sq_nonneg (log (N : ℝ)))
+  have hsmall : (N.primeFactors.card : ℝ) * log N ^ 2 ≤
+      η * LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) := by
+    apply (mul_le_mul_iff_right₀ h2).mp
+    nlinarith only [hh, hb]
+  have hC : LeanLab.ChenExplicit.twinC ≤ C N := by
+    unfold C
+    exact le_mul_of_one_le_right LeanLab.ChenExplicit.twinC_pos.le
+      (LeanLab.ChenExplicit.one_le_oddFactor N)
+  rw [← mul_div_assoc]
+  apply (le_div_iff₀ (sq_pos_of_pos hLp)).mpr
+  calc
+    _ ≤ η * LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) := hsmall
+    _ = η * (LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ)) := by ring
+    _ ≤ η * (C N * (N : ℝ) ^ (0.95 : ℝ)) :=
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_right hC (rpow_pos_of_pos hNp (0.95 : ℝ)).le) hη.le
+#print axioms cai_primeFactors_small306
+
+/-- Reducing the distribution level by a fixed positive factor preserves the sieve parameter limit.
+Cai page 601 before equation 4.4 and BJS page 5 equation 10. -/
+theorem cai_parameter_limit306 (B q : ℝ) (hq : 0 < q) :
+    Tendsto (fun N : ℕ =>
+      log (Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
+        (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B)) / log (z1 N)) atTop (𝓝 5.225) := by
+  have hlogZ : Tendsto (fun N : ℕ => log (z1 N)) atTop atTop :=
+    tendsto_log_atTop.comp ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 11)).comp
+      tendsto_natCast_atTop_atTop)
+  have hq' : 0 < q * (0.95 : ℝ) ^ B := mul_pos hq (rpow_pos_of_pos (by norm_num) B)
+  have hh := (sieve_parameter_limit118 B).sub (hlogZ.const_div_atTop (log (q * (0.95 : ℝ) ^ B)))
+  simp only [sub_zero] at hh
+  apply hh.congr'
+  filter_upwards [eventually_ge_atTop (2 : ℕ)] with N hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hsqrt : sqrt ((N : ℝ) ^ (0.95 : ℝ)) = (N : ℝ) ^ (0.95 / 2 : ℝ) := by
+    rw [sqrt_eq_rpow, ← rpow_mul hNp.le]
+    norm_num
+  have hlogpow : log ((N : ℝ) ^ (0.95 : ℝ)) ^ B = (0.95 : ℝ) ^ B * log N ^ B := by
+    rw [log_rpow hNp, mul_rpow (by norm_num : (0 : ℝ) ≤ 0.95) hLp.le]
+  have hD : sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
+      (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B) =
+      ((N : ℝ) ^ (0.95 / 2 : ℝ) / log N ^ B) / (q * (0.95 : ℝ) ^ B) := by
+    rw [hsqrt, hlogpow]
+    ring
+  rw [hD, log_div (div_pos (rpow_pos_of_pos hNp _) (rpow_pos_of_pos hLp B)).ne' hq'.ne']
+  dsimp only [z1]
+  ring
+#print axioms cai_parameter_limit306
 
 /-- For even N, the actual sieve product equals the product used by the proved Mertens limit.
 Cai page 601 equation 4.3. -/
@@ -1491,6 +1773,7 @@ theorem cai_product_eq306 (N : ℕ) (he : Even N) (hN : 2 ≤ N) :
   have hprime := (Finset.mem_filter.mp hp).2.1
   change (1 - 1 / (p.totient : ℝ)) = _
   rw [Nat.totient_prime hprime, Nat.cast_sub hprime.one_lt.le, Nat.cast_one]
+#print axioms cai_product_eq306
 
 /-- The normalized odd product in Cai page 601 equation 4.3. -/
 noncomputable def caiProductNorm306 (N : ℕ) : ℝ :=
@@ -1498,12 +1781,10 @@ noncomputable def caiProductNorm306 (N : ℕ) : ℝ :=
     (p : ℝ) < z1 N ∧ ¬ p ∣ N), (1 - 1 / ((p : ℝ) - 1))) * log (z1 N) /
       (2 * exp (-eulerMascheroniConstant) * C N)
 
-
 /-- The normalized product used in the lower main term tends to one.
 Cai page 601 equation 4.3. -/
 theorem cai_product_norm_limit306 : Tendsto caiProductNorm306 atTop (𝓝 1) :=
   cai_mertens_normalization306
-
 
 /-- The actual sieve product is positive for even N.
 Cai page 601 equation 4.3. -/
@@ -1515,7 +1796,6 @@ theorem cai_product_pos306 (N : ℕ) (he : Even N) :
   intro p hp
   simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
   exact sub_pos.mpr (caiDensity118_prime N p he hp.2.1 hp.2.2).2
-
 
 /-- Exact normalization of the finite lower main term.
 Cai page 601 equations 4.3 and 4.4. -/
@@ -1537,6 +1817,166 @@ theorem cai_mainTerm_identity306 (N : ℕ) (he : Even N) (hN : 2 ≤ N) (t : ℝ
   rw [log_rpow hNp]
   field_simp [hC.ne', hLp.ne', exp_ne_zero]
   ring
+#print axioms cai_product_norm_limit306
+#print axioms cai_product_pos306
+#print axioms cai_mainTerm_identity306
+
+/-- The reduced distribution level eventually exceeds the square of the sieve cutoff.
+Cai page 601 equation 4.4 and BJS page 5 equation 6. -/
+theorem cai_level_admissible306 (B q : ℝ) (hq : 0 < q) :
+    ∀ᶠ N : ℕ in atTop, (z1 N) ^ 2 ≤
+      sqrt ((N : ℝ) ^ (0.95 : ℝ)) / (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B) := by
+  have hs := (cai_parameter_limit306 B q hq).eventually
+    (eventually_gt_nhds (by norm_num : (2 : ℝ) < 5.225))
+  filter_upwards [hs, eventually_ge_atTop (2 : ℕ)] with N hpar hN
+  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hz : 0 < z1 N := rpow_pos_of_pos hNp _
+  have hlz : 0 < log (z1 N) := by
+    rw [z1, log_rpow hNp]
+    positivity
+  have hD : 0 < sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
+      (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B) := by
+    apply div_pos (sqrt_pos.mpr (rpow_pos_of_pos hNp _))
+    apply mul_pos hq
+    rw [log_rpow hNp]
+    exact rpow_pos_of_pos (mul_pos (by norm_num) hLp) B
+  rw [← log_le_log_iff (sq_pos_of_pos hz) hD, log_pow]
+  exact ((lt_div_iff₀ hlz).mp hpar).le
+#print axioms cai_level_admissible306
+
+/-- The corrected lower main coefficient has its exact limiting value.
+Cai page 601 equation 4.4 with BJS page 5 equations 6 and 7. -/
+theorem cai_corrected_limit306 (ε B q : ℝ) (hq : 0 < q) :
+    Tendsto (fun N : ℕ =>
+      let s : ℝ := log (sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
+        (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B)) / log (z1 N)
+      (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
+        (sieveLower306 s - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve s)) * caiProductNorm306 N)
+      atTop (𝓝 (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
+        (sieveLower306 5.225 - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve 5.225))) := by
+  have hp := cai_parameter_limit306 B q hq
+  have hf : ContinuousAt sieveLower306 5.225 := by
+    exact sieveScaled_continuous306.snd.continuousAt.div continuousAt_id (by norm_num)
+  have he := continuousAt_hSieve306 5.225 (by norm_num)
+  have hc := (hf.tendsto.comp hp).sub
+    ((he.tendsto.comp hp).const_mul (ε * 107 * exp 2))
+  have hh := (hc.const_mul (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant))).mul
+    cai_product_norm_limit306
+  simpa only [Function.comp_def, mul_one] using hh
+#print axioms cai_corrected_limit306
+
+/-- The lower asymptotic leaf follows from Theorem 6 and the proved reductions.
+Cai page 601 equation 4.4. CONDITIONAL ON Theorem6Stmt. -/
+theorem cai_lower_asymptotic306 (h6 : LeanLab.ChenExplicit.Theorem6Stmt) :
+    ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
+      12.9897 * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) ≤ (Ssift N 0.95 : ℝ) := by
+  classical
+  obtain ⟨ε, hε, hεmax, hcε⟩ := explicit_lower_epsilon306
+  let c : ℝ := 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
+    (sieveLower306 5.225 - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve 5.225)
+  have hc : 12.9897 < c := hcε
+  have hcpos : 0 < c := by linarith
+  let η : ℝ := (c - 12.9897) / 8
+  have hη : 0 < η := by dsimp [η]; linarith
+  have hηc : η < c := by dsimp [η]; linarith
+  let δ : ℝ := η / c
+  have hδ : 0 < δ := div_pos hη hcpos
+  have hδ1 : δ < 1 := (div_lt_one hcpos).mpr hηc
+  have hδc : δ * c = η := by dsimp [δ]; field_simp
+  have hreserve : 12.9897 + 2 * η ≤ (1 - δ) * (c - η) := by
+    have hh := mul_nonneg hδ.le hη.le
+    dsimp [η] at *
+    nlinarith
+  obtain ⟨w, hw, hdim⟩ := cai_dimension306 ε hε
+  let q : ℝ := 1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ)
+  have hq : 0 < q := by
+    have hh : 0 ≤ ∏ p ∈ oddSievePrimes306 w, (p : ℝ) :=
+      Finset.prod_nonneg (fun p _ => Nat.cast_nonneg p)
+    dsimp [q]
+    linarith
+  obtain ⟨B, hB, nR, hR⟩ := cai_remainder_small306 w η hη
+  obtain ⟨nP, hP⟩ := cai_primeFactors_small306 η hη
+  have hcoef := (cai_corrected_limit306 ε B q hq).eventually
+    (eventually_gt_nhds (show c - η < c by linarith))
+  have hlevel := cai_level_admissible306 B q hq
+  have hz : ∀ᶠ N : ℕ in atTop, w < z1 N :=
+    ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 11)).comp
+      tendsto_natCast_atTop_atTop).eventually (eventually_gt_atTop w)
+  have hmass := ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 0.95)).comp
+    tendsto_natCast_atTop_atTop).eventually (primeCount_lower306 δ hδ)
+  have hall : ∀ᶠ N : ℕ in atTop, Even N →
+      12.9897 * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) ≤ (Ssift N 0.95 : ℝ) := by
+    filter_upwards [hcoef, hlevel, hz, hmass, eventually_ge_atTop nR,
+      eventually_ge_atTop nP, eventually_ge_atTop (2 : ℕ)] with N hcoefN hlevelN hzN hmN hnR hnP hN
+    intro he
+    let D : ℝ := sqrt ((N : ℝ) ^ (0.95 : ℝ)) / (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B)
+    let s : ℝ := log D / log (z1 N)
+    let φ : ℝ := sieveLower306 s - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve s
+    let V : ℝ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), (1 - caiDensity118 p)
+    let K0 : ℝ := C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2
+    let A : ℝ := 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) * φ * caiProductNorm306 N
+    let Q : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} w
+    let PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
+      {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), p
+    let R : ℝ := ∑ d ∈ PP.divisors.filter (fun d : ℕ => (d : ℝ) < (∏ p ∈ Q, (p : ℝ)) * D),
+      |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
+        ((caiSequence118 N).card : ℝ) * caiDensity118 d|
+    have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+    have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+    have hC : 0 < C N := by
+      unfold C
+      exact mul_pos LeanLab.ChenExplicit.twinC_pos
+        (lt_of_lt_of_le zero_lt_one (LeanLab.ChenExplicit.one_le_oddFactor N))
+    have hlogz : 0 < log (z1 N) := by rw [z1, log_rpow hNp]; positivity
+    have hV : 0 < V := cai_product_pos306 N he
+    have hK : 0 < K0 := leaf118_scale_pos N hN
+    have hnorm : 0 < caiProductNorm306 N := by
+      unfold caiProductNorm306
+      rw [← cai_product_eq306 N he hN]
+      exact div_pos (mul_pos hV hlogz) (mul_pos (by positivity) hC)
+    change c - η < A at hcoefN
+    have hA : 0 < A := (show 0 < c - η by linarith).trans hcoefN
+    have hφ : 0 < φ := pos_of_mul_pos_right (pos_of_mul_pos_left hA hnorm.le)
+      (show 0 ≤ 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) by positivity)
+    have hm : (1 - δ) * ((N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N)) ≤
+        ((caiSequence118 N).card : ℝ) := by
+      rw [card_caiSequence118 N hN]
+      simpa only [Function.comp_def, log_rpow hNp, mul_div_assoc] using hmN
+    have hid : A * K0 = φ * ((N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N)) * V :=
+      cai_mainTerm_identity306 N he hN φ
+    have hmain : (1 - δ) * (A * K0) ≤ φ * ((caiSequence118 N).card : ℝ) * V := by
+      rw [hid]
+      calc
+        _ = φ * ((1 - δ) * ((N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N))) * V := by ring
+        _ ≤ _ := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hm hφ.le) hV.le
+    have hmain' : (12.9897 + 2 * η) * K0 ≤ φ * ((caiSequence118 N).card : ℝ) * V := by
+      calc
+        _ ≤ ((1 - δ) * (c - η)) * K0 := mul_le_mul_of_nonneg_right hreserve hK.le
+        _ = (1 - δ) * ((c - η) * K0) := by ring
+        _ ≤ (1 - δ) * (A * K0) := mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_right hcoefN.le hK.le) (by linarith)
+        _ ≤ _ := hmain
+    have hrem : R ≤ η * K0 := by
+      simpa only [R, K0, Q, PP, D, q, div_div, mul_comm] using hR N he hnR
+    have hpf : (N.primeFactors.card : ℝ) ≤ η * K0 := hP N hnP
+    have hQ : ∀ p ∈ Q, p.Prime ∧ p.Coprime N := by
+      intro p hp
+      simp only [Q, LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
+      exact hp.2
+    have hl := cai_lower_of_theorem6_118 h6 sieveUpper306 sieveLower306 sieveFns306
+      N he (by linarith) ε hε hεmax Q hQ (hdim N he hzN) D hlevelN
+    have has := asift_one_card_le118 N 0.95 (by omega)
+    have has' : ((Asift N 0.95 1).card : ℝ) ≤ (Ssift N 0.95 : ℝ) +
+        (N.primeFactors.card : ℝ) := by exact_mod_cast has
+    change φ * ((caiSequence118 N).card : ℝ) * V - R ≤ ((Asift N 0.95 1).card : ℝ) at hl
+    change 12.9897 * K0 ≤ (Ssift N 0.95 : ℝ)
+    nlinarith only [hmain', hrem, hpf, hl, has']
+  obtain ⟨N0, hN0⟩ := eventually_atTop.mp hall
+  exact ⟨N0, fun N he hN => hN0 N hN he⟩
+#print axioms cai_lower_asymptotic306
 
 /-- Coprime divisibility filters combine without loss.
 Cai page 601 equation 4.6. -/
@@ -1553,7 +1993,6 @@ theorem cai_q_filter306 (A : Finset ℕ) (q d : ℕ) (hqd : q.Coprime d) :
     exact ⟨⟨ha, dvd_trans (dvd_mul_right q d) hprod⟩,
       dvd_trans (dvd_mul_left d q) hprod⟩
 
-
 /-- The exact q support remainder has an explicit correction to the full sequence center.
 Cai page 601 equations 4.5 and 4.6. -/
 theorem cai_q_remainder_identity306 (N q d : ℕ) (hqd : q.Coprime d) :
@@ -1566,7 +2005,6 @@ theorem cai_q_remainder_identity306 (N q d : ℕ) (hqd : q.Coprime d) :
   rw [cai_q_filter306 _ q d hqd,
     caiDensity118_multiplicative.map_mul_of_coprime hqd]
   ring
-
 
 /-- The recentered q support remainder has no hidden loss term.
 Cai page 601 equation 4.6. -/
@@ -1587,6 +2025,12 @@ theorem cai_q_remainder_bound306 (N q d : ℕ) (hqd : q.Coprime d) :
         ((caiSequence118 N).card : ℝ) * caiDensity118 (q * d))
       (-(((((caiSequence118 N).filter (fun a => q ∣ a)).card : ℝ) -
         ((caiSequence118 N).card : ℝ) * caiDensity118 q) * caiDensity118 d))
+#print axioms cai_q_filter306
+#print axioms cai_q_remainder_identity306
+#print axioms cai_q_remainder_bound306
+
+set_option maxHeartbeats 4000000
+set_option maxRecDepth 10000
 
 /-- LEAF. Page 602 display 4.7, including its sufficiently large threshold.
 External inputs: Iwaniec's linear sieve and the Pan and Pan Bombieri theorem,
@@ -4132,467 +4576,6 @@ theorem leaf118_sieve_one :
 set_option maxHeartbeats 200000
 set_option maxRecDepth 1000
 
-/-- LEAF. Page 604 display 4.14, including its sufficiently large threshold.
-External inputs: Iwaniec's linear sieve, Wu 1993, Quart. J. Math. 44,
-pages 109 to 128, and Huxley's short interval prime number theorem in display 4.13.
-The integral constant alone is already proved in Integral414. -/
-theorem leaf118_sieve_two :
-    ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
-      (S2 N 0.95 : ℝ) ≤
-        6.8086 * (C N * (N : ℝ) ^ (0.95 : ℝ) / Real.log N ^ 2) := by
-  -- ATTEMPT two 4: Linear sieve, Wu and Huxley unformalized.
-  sorry
-
-/-- LEAF. Page 604 display 4.15, including its sufficiently large threshold.
-External inputs: the same switching, linear sieve, Wu mean value theorem and
-Huxley short interval theorem as display 4.14.
-The integral constant alone is already proved in Integrals. -/
-theorem leaf118_sieve_three :
-    ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
-      (S3 N 0.95 : ℝ) ≤
-        0.1564 * (C N * (N : ℝ) ^ (0.95 : ℝ) / Real.log N ^ 2) := by
-  -- ATTEMPT three 4: Linear sieve, Wu and Huxley unformalized.
-  sorry
-
-/-- The strict lower coefficient reserve is available for the constructed global functions.
-Cai page 601 equation 4.4. No sieve count estimate is asserted here. -/
-theorem explicit_lower_epsilon306 :
-    ∃ ε : ℝ, 0 < ε ∧ ε ≤ 1 / 100000 ∧
-      12.9897 < 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
-        (sieveLower306 5.225 - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve 5.225) := by
-  exact explicit_lower_epsilon118 sieveUpper306 sieveLower306 sieveFns306
-
-/-- The actual finite lower sieve has only the cited Theorem 6 as an analytic input.
-The dimension cutoff is supplied uniformly and every Q times D remainder is retained.
-Cai page 601 before equation 4.4. CONDITIONAL ON leaf306_theorem6.
-The final mass and remainder limits needed by leaf118_sieve_lower are separate obligations. -/
-theorem cai_lower_finite306 (ε : ℝ) (hε : 0 < ε) (hεmax : ε ≤ 1 / 100000) :
-    ∃ w : ℝ, 3 ≤ w ∧ ∀ N : ℕ, Even N → 2 ≤ N → w < z1 N →
-      ∀ D : ℝ, (z1 N) ^ 2 ≤ D →
-      let Q : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn
-        {p : ℕ | p.Prime ∧ p.Coprime N} w
-      let PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
-        {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), p
-      let s : ℝ := log D / log (z1 N)
-      (sieveLower306 s - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve s) *
-        ((caiSequence118 N).card : ℝ) *
-          (∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
-            {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), (1 - caiDensity118 p)) -
-        (∑ d ∈ PP.divisors.filter (fun d : ℕ => (d : ℝ) < (∏ q ∈ Q, (q : ℝ)) * D),
-          |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
-            ((caiSequence118 N).card : ℝ) * caiDensity118 d|) - (N.primeFactors.card : ℝ) ≤
-          (Ssift N 0.95 : ℝ) := by
-  classical
-  obtain ⟨w, hw, hd⟩ := cai_dimension306 ε hε
-  refine ⟨w, hw, fun N he hN hwz D hD => ?_⟩
-  have hQ : ∀ q ∈ LeanLab.ChenExplicit.primesBelowIn
-      {p : ℕ | p.Prime ∧ p.Coprime N} w, q.Prime ∧ q.Coprime N :=
-    fun q hq => by
-      simp only [LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hq
-      exact hq.2
-  have hl := cai_lower_of_theorem6_118 leaf306_theorem6 sieveUpper306 sieveLower306
-    sieveFns306 N he (by linarith) ε hε hεmax _ hQ (hd N he hwz) D hD
-  have hc := asift_one_card_le118 N 0.95 (by omega)
-  have hcr : ((Asift N 0.95 1).card : ℝ) ≤
-      (Ssift N 0.95 : ℝ) + (N.primeFactors.card : ℝ) := by exact_mod_cast hc
-  dsimp only at hl ⊢
-  linarith
-
-#print axioms cai_primes_odd306
-#print axioms cai_dimension306
-#print axioms linear_sieve_formulas306
-#print axioms explicit_lower_epsilon306
-#print axioms cai_mertens_normalization306
-#print axioms cai_lower_finite306
-
-#print axioms cai_sifted_q_card306
-
-#print axioms cai_upper_q_finite306
-
-/-- The exact Q times D remainder is negligible at a level reduced by one fixed factor.
-Cai page 601 equation 4.2 and Theorem 6 page 5 equation 10.
-The fixed factor bounds all exceptional products uniformly in N. -/
-theorem cai_remainder_small306 (w : ℝ) (η : ℝ) (hη : 0 < η) :
-    ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
-      let Q : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn
-        {p : ℕ | p.Prime ∧ p.Coprime N} w
-      let PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
-        {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), p
-      let L : ℝ := Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
-        log ((N : ℝ) ^ (0.95 : ℝ)) ^ B
-      let D : ℝ := L / (1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ))
-      (∑ d ∈ PP.divisors.filter (fun d : ℕ => (d : ℝ) < (∏ p ∈ Q, (p : ℝ)) * D),
-        |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
-          ((caiSequence118 N).card : ℝ) * caiDensity118 d|) ≤
-        η * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
-  classical
-  obtain ⟨B, hB, K, hK, hbv⟩ := cai_remainder_level118 5 (by norm_num)
-  let c : ℝ := η * LeanLab.ChenExplicit.twinC * (0.95 : ℝ) ^ 5
-  have hc : 0 < c := by
-    dsimp [c]
-    exact mul_pos (mul_pos hη LeanLab.ChenExplicit.twinC_pos) (by norm_num)
-  have hlog : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
-    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
-  obtain ⟨n0, hn0⟩ := eventually_atTop.mp
-    (hlog.eventually (eventually_ge_atTop (max 1 (K / c))))
-  refine ⟨B, hB, max n0 4, fun N he hN => ?_⟩
-  have hN4 : 4 ≤ N := (le_max_right ..).trans hN
-  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
-  have hL1 : 1 ≤ log (N : ℝ) := (le_max_left ..).trans (hn0 N ((le_max_left ..).trans hN))
-  have hLK : K / c ≤ log (N : ℝ) :=
-    (le_max_right ..).trans (hn0 N ((le_max_left ..).trans hN))
-  have hlogp : 0 < log (N : ℝ) := by linarith
-  have hKlog : K ≤ c * log N ^ 3 := by
-    have hh := (div_le_iff₀ hc).mp hLK
-    have hp : log (N : ℝ) ≤ log N ^ 3 := le_self_pow₀ hL1 (by norm_num)
-    exact hh.trans (by simpa only [mul_comm] using mul_le_mul_of_nonneg_left hp hc.le)
-  let M : ℝ := ∏ p ∈ oddSievePrimes306 w, (p : ℝ)
-  let L : ℝ := Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
-    log ((N : ℝ) ^ (0.95 : ℝ)) ^ B
-  have hM : 0 ≤ M := Finset.prod_nonneg (fun p _ => Nat.cast_nonneg p)
-  have hL : 0 ≤ L := by
-    dsimp [L]
-    rw [log_rpow hNp]
-    exact div_nonneg (sqrt_nonneg _) (rpow_pos_of_pos (mul_pos (by norm_num) hlogp) B).le
-  have hD : 0 ≤ L / (1 + M) := div_nonneg hL (by linarith)
-  have hQ := sieve_exceptional_product306 w
-    {p : ℕ | p.Prime ∧ p.Coprime N}
-    (fun p hp => cai_primes_odd306 N p he hp.1 hp.2)
-  have hcut : (∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
-      {p : ℕ | p.Prime ∧ p.Coprime N} w, (p : ℝ)) * (L / (1 + M)) ≤ L := by
-    calc
-      _ ≤ M * (L / (1 + M)) := mul_le_mul_of_nonneg_right hQ hD
-      _ ≤ L := by
-        rw [← mul_div_assoc, div_le_iff₀ (by linarith : 0 < 1 + M)]
-        nlinarith
-  have hs := sieve_divisor_remainder306 N
-    {p : ℕ | p.Prime ∧ p.Coprime N} (fun p hp => hp.2) (z1 N)
-    (LeanLab.ChenExplicit.primesBelowIn {p : ℕ | p.Prime ∧ p.Coprime N} w)
-    (L / (1 + M)) L hcut
-    (fun d => |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
-      ((caiSequence118 N).card : ℝ) * caiDensity118 d|) (fun _ => abs_nonneg _)
-  have hb := hs.trans (hbv N hN4)
-  dsimp only at hb ⊢
-  refine hb.trans ?_
-  rw [log_rpow hNp]
-  have hC : LeanLab.ChenExplicit.twinC ≤ C N := by
-    unfold C
-    exact le_mul_of_one_le_right LeanLab.ChenExplicit.twinC_pos.le
-      (LeanLab.ChenExplicit.one_le_oddFactor N)
-  have hmain : K * (N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N) ^ (5 : ℝ) ≤
-      η * (LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
-    rw [rpow_ofNat, mul_pow]
-    apply (div_le_iff₀ (by positivity : 0 < (0.95 : ℝ) ^ 5 * log (N : ℝ) ^ 5)).mpr
-    have hh := mul_le_mul_of_nonneg_right hKlog (rpow_pos_of_pos hNp (0.95 : ℝ)).le
-    dsimp [c] at hh
-    convert hh using 1 <;> field_simp [ne_of_gt hlogp]
-  exact hmain.trans (by gcongr)
-
-#print axioms cai_remainder_small306
-
-/-- The elementary lower bound for the logarithmic integral used in the lower sieve mass.
-Cai page 601 equation 4.4. -/
-theorem li118_lower306 (x : ℝ) (hx : 2 ≤ x) :
-    (x - 2) / log x ≤ li118 x := by
-  have hc : ContinuousOn (fun t : ℝ => 1 / log t) (Icc 2 x) := by
-    apply continuousOn_const.div
-    · exact continuousOn_id.log (fun t ht => by dsimp; linarith [ht.1])
-    · intro t ht
-      exact ne_of_gt (log_pos (by linarith [ht.1]))
-  have hi := integral_mono_on (μ := MeasureTheory.volume) hx (intervalIntegrable_const (c := 1 / log x))
-    (hc.intervalIntegrable_of_Icc hx) (fun t ht =>
-      one_div_le_one_div_of_le (log_pos (by linarith [ht.1]))
-        (log_le_log (by linarith [ht.1]) ht.2))
-  calc
-    _ = ∫ _t in (2 : ℝ)..x, 1 / log x := by
-      simp only [integral_const, smul_eq_mul]
-      ring
-    _ ≤ _ := hi
-#print axioms li118_lower306
-
-/-- The actual inclusive prime mass has the elementary asymptotic lower bound.
-Cai page 601 before equation 4.4, derived from the proved continuous Li distribution theorem. -/
-theorem primeCount_lower306 (δ : ℝ) (hδ : 0 < δ) :
-    ∀ᶠ x : ℝ in atTop, (1 - δ) * x / log x ≤ (apCount118 x 1 0 : ℝ) := by
-  obtain ⟨B, hB, K, hK, x0, hx0, hbv⟩ := bombieriVinogradov118_proved 3 (by norm_num)
-  have hsmall : Tendsto (fun x : ℝ => log x ^ B / x ^ (1 / 2 : ℝ)) atTop (𝓝 0) :=
-    (isLittleO_log_rpow_rpow_atTop B (s := 1 / 2) (by norm_num)).tendsto_div_nhds_zero
-  have herr : Tendsto (fun x : ℝ => 2 / x + K / log x ^ 2) atTop (𝓝 0) := by
-    have hlog2 : Tendsto (fun x : ℝ => log x ^ 2) atTop atTop :=
-      (tendsto_pow_atTop (by norm_num : 2 ≠ 0)).comp tendsto_log_atTop
-    simpa using (tendsto_id.const_div_atTop (2 : ℝ)).add (hlog2.const_div_atTop K)
-  filter_upwards [eventually_ge_atTop x0, hsmall.eventually (eventually_lt_nhds
-      (by norm_num : (0 : ℝ) < 1)), herr.eventually (eventually_lt_nhds hδ)] with x hx hs he
-  have hx2 : 2 ≤ x := hx0.trans hx
-  have hxp : 0 < x := by linarith
-  have hlp : 0 < log x := log_pos (by linarith)
-  have hpB : 0 < log x ^ B := rpow_pos_of_pos hlp B
-  have hpX : 0 < x ^ (1 / 2 : ℝ) := rpow_pos_of_pos hxp _
-  have hlevel : 1 ≤ x ^ (1 / 2 : ℝ) / log x ^ B := by
-    apply (one_le_div hpB).mpr
-    exact (by simpa using (div_lt_iff₀ hpX).mp hs : log x ^ B < x ^ (1 / 2 : ℝ)).le
-  have hmem : 1 ∈ Finset.Icc 1 ⌊x ^ (1 / 2 : ℝ) / log x ^ B⌋₊ :=
-    Finset.mem_Icc.mpr ⟨le_rfl, Nat.le_floor (by simpa using hlevel)⟩
-  obtain ⟨R, hR, hsum⟩ := hbv x hx
-  have hfirst := Finset.single_le_sum (f := R) (fun d hd => (hR d hd).1) hmem
-  have hpoint := (hR 1 hmem).2 0 (by norm_num) (by norm_num) x hx2 le_rfl
-  norm_num only [Nat.totient_one, Nat.cast_one, div_one] at hpoint
-  have habs : |(apCount118 x 1 0 : ℝ) - li118 x| ≤ K * x / log x ^ (3 : ℝ) :=
-    hpoint.trans (hfirst.trans hsum)
-  have hlower := li118_lower306 x hx2
-  have hpi : li118 x - K * x / log x ^ (3 : ℝ) ≤ (apCount118 x 1 0 : ℝ) := by
-    linarith [(abs_le.mp habs).1]
-  have halg : (1 - δ) * x / log x ≤ (x - 2) / log x - K * x / log x ^ (3 : ℝ) := by
-    rw [rpow_ofNat, div_le_iff₀ hlp]
-    have herror : 2 + K * x / log x ^ 2 ≤ δ * x := by
-      have hh := mul_le_mul_of_nonneg_right he.le hxp.le
-      have heq : (2 / x + K / log x ^ 2) * x = 2 + K * x / log x ^ 2 := by
-        field_simp [hxp.ne', hlp.ne']
-      rw [heq] at hh
-      exact hh
-    have heq : ((x - 2) / log x - K * x / log x ^ 3) * log x =
-        x - 2 - K * x / log x ^ 2 := by
-      field_simp [hlp.ne']
-    rw [heq]
-    linarith
-  exact halg.trans (by linarith)
-#print axioms primeCount_lower306
-
-/-- The prime divisor loss is negligible relative to the final scale.
-Cai page 601 equations 4.1 and 4.4. -/
-theorem cai_primeFactors_small306 (η : ℝ) (hη : 0 < η) :
-    ∃ N0 : ℕ, ∀ N : ℕ, N0 ≤ N →
-      (N.primeFactors.card : ℝ) ≤ η * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) := by
-  have h2 : 0 < log (2 : ℝ) := log_pos (by norm_num)
-  have hc : 0 < η * LeanLab.ChenExplicit.twinC * log 2 :=
-    mul_pos (mul_pos hη LeanLab.ChenExplicit.twinC_pos) h2
-  have ho : (fun N : ℕ => log (N : ℝ) ^ 3) =o[atTop]
-      (fun N : ℕ => (N : ℝ) ^ (0.95 : ℝ)) := by
-    simpa only [Function.comp_def, rpow_ofNat] using
-      (isLittleO_log_rpow_rpow_atTop (3 : ℝ) (s := 0.95) (by norm_num)).comp_tendsto
-        (tendsto_natCast_atTop_atTop (R := ℝ))
-  obtain ⟨n0, hn0⟩ := eventually_atTop.mp (ho.bound hc)
-  refine ⟨max n0 2, fun N hN => ?_⟩
-  have hn2 : 2 ≤ N := (le_max_right ..).trans hN
-  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
-  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
-  have hb := hn0 N ((le_max_left ..).trans hN)
-  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), Real.norm_eq_abs,
-    abs_of_pos (rpow_pos_of_pos hNp _)] at hb
-  have hcard := LeanLab.HeathBrown1985.card_primeFactors_mul_log_two_le N (by omega)
-  have hh := mul_le_mul_of_nonneg_right hcard (sq_nonneg (log (N : ℝ)))
-  have hsmall : (N.primeFactors.card : ℝ) * log N ^ 2 ≤
-      η * LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) := by
-    apply (mul_le_mul_iff_right₀ h2).mp
-    nlinarith only [hh, hb]
-  have hC : LeanLab.ChenExplicit.twinC ≤ C N := by
-    unfold C
-    exact le_mul_of_one_le_right LeanLab.ChenExplicit.twinC_pos.le
-      (LeanLab.ChenExplicit.one_le_oddFactor N)
-  rw [← mul_div_assoc]
-  apply (le_div_iff₀ (sq_pos_of_pos hLp)).mpr
-  calc
-    _ ≤ η * LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ) := hsmall
-    _ = η * (LeanLab.ChenExplicit.twinC * (N : ℝ) ^ (0.95 : ℝ)) := by ring
-    _ ≤ η * (C N * (N : ℝ) ^ (0.95 : ℝ)) :=
-      mul_le_mul_of_nonneg_left
-        (mul_le_mul_of_nonneg_right hC (rpow_pos_of_pos hNp (0.95 : ℝ)).le) hη.le
-#print axioms cai_primeFactors_small306
-
-/-- Reducing the distribution level by a fixed positive factor preserves the sieve parameter limit.
-Cai page 601 before equation 4.4 and BJS page 5 equation 10. -/
-theorem cai_parameter_limit306 (B q : ℝ) (hq : 0 < q) :
-    Tendsto (fun N : ℕ =>
-      log (Real.sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
-        (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B)) / log (z1 N)) atTop (𝓝 5.225) := by
-  have hlogZ : Tendsto (fun N : ℕ => log (z1 N)) atTop atTop :=
-    tendsto_log_atTop.comp ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 11)).comp
-      tendsto_natCast_atTop_atTop)
-  have hq' : 0 < q * (0.95 : ℝ) ^ B := mul_pos hq (rpow_pos_of_pos (by norm_num) B)
-  have hh := (sieve_parameter_limit118 B).sub (hlogZ.const_div_atTop (log (q * (0.95 : ℝ) ^ B)))
-  simp only [sub_zero] at hh
-  apply hh.congr'
-  filter_upwards [eventually_ge_atTop (2 : ℕ)] with N hN
-  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
-  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
-  have hsqrt : sqrt ((N : ℝ) ^ (0.95 : ℝ)) = (N : ℝ) ^ (0.95 / 2 : ℝ) := by
-    rw [sqrt_eq_rpow, ← rpow_mul hNp.le]
-    norm_num
-  have hlogpow : log ((N : ℝ) ^ (0.95 : ℝ)) ^ B = (0.95 : ℝ) ^ B * log N ^ B := by
-    rw [log_rpow hNp, mul_rpow (by norm_num : (0 : ℝ) ≤ 0.95) hLp.le]
-  have hD : sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
-      (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B) =
-      ((N : ℝ) ^ (0.95 / 2 : ℝ) / log N ^ B) / (q * (0.95 : ℝ) ^ B) := by
-    rw [hsqrt, hlogpow]
-    ring
-  rw [hD, log_div (div_pos (rpow_pos_of_pos hNp _) (rpow_pos_of_pos hLp B)).ne' hq'.ne']
-  dsimp only [z1]
-  ring
-#print axioms cai_parameter_limit306
-
-#print axioms cai_product_eq306
-
-#print axioms cai_product_norm_limit306
-#print axioms cai_product_pos306
-#print axioms cai_mainTerm_identity306
-
-/-- The reduced distribution level eventually exceeds the square of the sieve cutoff.
-Cai page 601 equation 4.4 and BJS page 5 equation 6. -/
-theorem cai_level_admissible306 (B q : ℝ) (hq : 0 < q) :
-    ∀ᶠ N : ℕ in atTop, (z1 N) ^ 2 ≤
-      sqrt ((N : ℝ) ^ (0.95 : ℝ)) / (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B) := by
-  have hs := (cai_parameter_limit306 B q hq).eventually
-    (eventually_gt_nhds (by norm_num : (2 : ℝ) < 5.225))
-  filter_upwards [hs, eventually_ge_atTop (2 : ℕ)] with N hpar hN
-  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
-  have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
-  have hz : 0 < z1 N := rpow_pos_of_pos hNp _
-  have hlz : 0 < log (z1 N) := by
-    rw [z1, log_rpow hNp]
-    positivity
-  have hD : 0 < sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
-      (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B) := by
-    apply div_pos (sqrt_pos.mpr (rpow_pos_of_pos hNp _))
-    apply mul_pos hq
-    rw [log_rpow hNp]
-    exact rpow_pos_of_pos (mul_pos (by norm_num) hLp) B
-  rw [← log_le_log_iff (sq_pos_of_pos hz) hD, log_pow]
-  exact ((lt_div_iff₀ hlz).mp hpar).le
-#print axioms cai_level_admissible306
-
-/-- The corrected lower main coefficient has its exact limiting value.
-Cai page 601 equation 4.4 with BJS page 5 equations 6 and 7. -/
-theorem cai_corrected_limit306 (ε B q : ℝ) (hq : 0 < q) :
-    Tendsto (fun N : ℕ =>
-      let s : ℝ := log (sqrt ((N : ℝ) ^ (0.95 : ℝ)) /
-        (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B)) / log (z1 N)
-      (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
-        (sieveLower306 s - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve s)) * caiProductNorm306 N)
-      atTop (𝓝 (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
-        (sieveLower306 5.225 - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve 5.225))) := by
-  have hp := cai_parameter_limit306 B q hq
-  have hf : ContinuousAt sieveLower306 5.225 := by
-    exact sieveScaled_continuous306.snd.continuousAt.div continuousAt_id (by norm_num)
-  have he := continuousAt_hSieve306 5.225 (by norm_num)
-  have hc := (hf.tendsto.comp hp).sub
-    ((he.tendsto.comp hp).const_mul (ε * 107 * exp 2))
-  have hh := (hc.const_mul (22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant))).mul
-    cai_product_norm_limit306
-  simpa only [Function.comp_def, mul_one] using hh
-#print axioms cai_corrected_limit306
-
-/-- The lower asymptotic leaf follows from Theorem 6 and the proved reductions.
-Cai page 601 equation 4.4. CONDITIONAL ON Theorem6Stmt. -/
-theorem cai_lower_asymptotic306 (h6 : LeanLab.ChenExplicit.Theorem6Stmt) :
-    ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
-      12.9897 * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) ≤ (Ssift N 0.95 : ℝ) := by
-  classical
-  obtain ⟨ε, hε, hεmax, hcε⟩ := explicit_lower_epsilon306
-  let c : ℝ := 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) *
-    (sieveLower306 5.225 - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve 5.225)
-  have hc : 12.9897 < c := hcε
-  have hcpos : 0 < c := by linarith
-  let η : ℝ := (c - 12.9897) / 8
-  have hη : 0 < η := by dsimp [η]; linarith
-  have hηc : η < c := by dsimp [η]; linarith
-  let δ : ℝ := η / c
-  have hδ : 0 < δ := div_pos hη hcpos
-  have hδ1 : δ < 1 := (div_lt_one hcpos).mpr hηc
-  have hδc : δ * c = η := by dsimp [δ]; field_simp
-  have hreserve : 12.9897 + 2 * η ≤ (1 - δ) * (c - η) := by
-    have hh := mul_nonneg hδ.le hη.le
-    dsimp [η] at *
-    nlinarith
-  obtain ⟨w, hw, hdim⟩ := cai_dimension306 ε hε
-  let q : ℝ := 1 + ∏ p ∈ oddSievePrimes306 w, (p : ℝ)
-  have hq : 0 < q := by
-    have hh : 0 ≤ ∏ p ∈ oddSievePrimes306 w, (p : ℝ) :=
-      Finset.prod_nonneg (fun p _ => Nat.cast_nonneg p)
-    dsimp [q]
-    linarith
-  obtain ⟨B, hB, nR, hR⟩ := cai_remainder_small306 w η hη
-  obtain ⟨nP, hP⟩ := cai_primeFactors_small306 η hη
-  have hcoef := (cai_corrected_limit306 ε B q hq).eventually
-    (eventually_gt_nhds (show c - η < c by linarith))
-  have hlevel := cai_level_admissible306 B q hq
-  have hz : ∀ᶠ N : ℕ in atTop, w < z1 N :=
-    ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 11)).comp
-      tendsto_natCast_atTop_atTop).eventually (eventually_gt_atTop w)
-  have hmass := ((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 0.95)).comp
-    tendsto_natCast_atTop_atTop).eventually (primeCount_lower306 δ hδ)
-  have hall : ∀ᶠ N : ℕ in atTop, Even N →
-      12.9897 * (C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2) ≤ (Ssift N 0.95 : ℝ) := by
-    filter_upwards [hcoef, hlevel, hz, hmass, eventually_ge_atTop nR,
-      eventually_ge_atTop nP, eventually_ge_atTop (2 : ℕ)] with N hcoefN hlevelN hzN hmN hnR hnP hN
-    intro he
-    let D : ℝ := sqrt ((N : ℝ) ^ (0.95 : ℝ)) / (q * log ((N : ℝ) ^ (0.95 : ℝ)) ^ B)
-    let s : ℝ := log D / log (z1 N)
-    let φ : ℝ := sieveLower306 s - ε * 107 * exp 2 * LeanLab.ChenExplicit.hSieve s
-    let V : ℝ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
-      {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), (1 - caiDensity118 p)
-    let K0 : ℝ := C N * (N : ℝ) ^ (0.95 : ℝ) / log N ^ 2
-    let A : ℝ := 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) * φ * caiProductNorm306 N
-    let Q : Finset ℕ := LeanLab.ChenExplicit.primesBelowIn
-      {p : ℕ | p.Prime ∧ p.Coprime N} w
-    let PP : ℕ := ∏ p ∈ LeanLab.ChenExplicit.primesBelowIn
-      {p : ℕ | p.Prime ∧ p.Coprime N} (z1 N), p
-    let R : ℝ := ∑ d ∈ PP.divisors.filter (fun d : ℕ => (d : ℝ) < (∏ p ∈ Q, (p : ℝ)) * D),
-      |(((caiSequence118 N).filter (fun n : ℕ => d ∣ n)).card : ℝ) -
-        ((caiSequence118 N).card : ℝ) * caiDensity118 d|
-    have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
-    have hLp : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
-    have hC : 0 < C N := by
-      unfold C
-      exact mul_pos LeanLab.ChenExplicit.twinC_pos
-        (lt_of_lt_of_le zero_lt_one (LeanLab.ChenExplicit.one_le_oddFactor N))
-    have hlogz : 0 < log (z1 N) := by rw [z1, log_rpow hNp]; positivity
-    have hV : 0 < V := cai_product_pos306 N he
-    have hK : 0 < K0 := leaf118_scale_pos N hN
-    have hnorm : 0 < caiProductNorm306 N := by
-      unfold caiProductNorm306
-      rw [← cai_product_eq306 N he hN]
-      exact div_pos (mul_pos hV hlogz) (mul_pos (by positivity) hC)
-    change c - η < A at hcoefN
-    have hA : 0 < A := (show 0 < c - η by linarith).trans hcoefN
-    have hφ : 0 < φ := pos_of_mul_pos_right (pos_of_mul_pos_left hA hnorm.le)
-      (show 0 ≤ 22 / (0.95 : ℝ) * exp (-eulerMascheroniConstant) by positivity)
-    have hm : (1 - δ) * ((N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N)) ≤
-        ((caiSequence118 N).card : ℝ) := by
-      rw [card_caiSequence118 N hN]
-      simpa only [Function.comp_def, log_rpow hNp, mul_div_assoc] using hmN
-    have hid : A * K0 = φ * ((N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N)) * V :=
-      cai_mainTerm_identity306 N he hN φ
-    have hmain : (1 - δ) * (A * K0) ≤ φ * ((caiSequence118 N).card : ℝ) * V := by
-      rw [hid]
-      calc
-        _ = φ * ((1 - δ) * ((N : ℝ) ^ (0.95 : ℝ) / (0.95 * log N))) * V := by ring
-        _ ≤ _ := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hm hφ.le) hV.le
-    have hmain' : (12.9897 + 2 * η) * K0 ≤ φ * ((caiSequence118 N).card : ℝ) * V := by
-      calc
-        _ ≤ ((1 - δ) * (c - η)) * K0 := mul_le_mul_of_nonneg_right hreserve hK.le
-        _ = (1 - δ) * ((c - η) * K0) := by ring
-        _ ≤ (1 - δ) * (A * K0) := mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_right hcoefN.le hK.le) (by linarith)
-        _ ≤ _ := hmain
-    have hrem : R ≤ η * K0 := by
-      simpa only [R, K0, Q, PP, D, q, div_div, mul_comm] using hR N he hnR
-    have hpf : (N.primeFactors.card : ℝ) ≤ η * K0 := hP N hnP
-    have hQ : ∀ p ∈ Q, p.Prime ∧ p.Coprime N := by
-      intro p hp
-      simp only [Q, LeanLab.ChenExplicit.primesBelowIn, Finset.mem_filter] at hp
-      exact hp.2
-    have hl := cai_lower_of_theorem6_118 h6 sieveUpper306 sieveLower306 sieveFns306
-      N he (by linarith) ε hε hεmax Q hQ (hdim N he hzN) D hlevelN
-    have has := asift_one_card_le118 N 0.95 (by omega)
-    have has' : ((Asift N 0.95 1).card : ℝ) ≤ (Ssift N 0.95 : ℝ) +
-        (N.primeFactors.card : ℝ) := by exact_mod_cast has
-    change φ * ((caiSequence118 N).card : ℝ) * V - R ≤ ((Asift N 0.95 1).card : ℝ) at hl
-    change 12.9897 * K0 ≤ (Ssift N 0.95 : ℝ)
-    nlinarith only [hmain', hrem, hpf, hl, has']
-  obtain ⟨N0, hN0⟩ := eventually_atTop.mp hall
-  exact ⟨N0, fun N he hN => hN0 N hN he⟩
-#print axioms cai_lower_asymptotic306
-
 /-- LEAF. Page 601 display 4.4, including its sufficiently large threshold.
 External inputs: Iwaniec, Rosser's sieve, 1981, pages 203 to 230;
 Pan and Pan, Goldbach Conjecture, 1992, pages 175 to 176, Lemmas 2 and 3 here.
@@ -4637,11 +4620,6 @@ theorem main_theorem_decomp118 : MainTheorem := by
       0.01 * (C N * (N : ℝ) ^ (0.95 : ℝ) / Real.log N ^ 2) < (S N 0.95 : ℝ) := by
     linarith
   simpa only [mul_div_assoc, mul_assoc] using htarget
-
-
-#print axioms cai_q_filter306
-#print axioms cai_q_remainder_identity306
-#print axioms cai_q_remainder_bound306
 
 /-- A sieving divisor below z is coprime to a prime at least z.
 Cai page 601 equations 4.5 and 4.6. -/
