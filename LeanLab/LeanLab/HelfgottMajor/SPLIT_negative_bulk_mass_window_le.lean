@@ -33,6 +33,20 @@ open Real LeanLab.HelfgottArcs Decomp269a Decomp269b Decomp389b
 open MeasureTheory Set Filter Asymptotics
 open scoped Topology FourierTransform
 
+/-- The mass of the union of two disjoint sets is the sum of the two masses, for a summand on a
+finite index type. Finiteness is what makes every series below summable. -/
+private lemma tsum_indicator_split {α : Type*} [Finite α] (s₁ s₂ s : Set α) (f : α → ℝ)
+    (hdisj : Disjoint s₁ s₂) (hunion : s₁ ∪ s₂ = s) :
+    (∑' x, s.indicator f x) = (∑' x, s₁.indicator f x) + (∑' x, s₂.indicator f x) := by
+  classical
+  have h₁ : Summable (fun x => s₁.indicator f x) := Summable.of_finite
+  have h₂ : Summable (fun x => s₂.indicator f x) := Summable.of_finite
+  refine (tsum_congr ?_).trans (h₁.tsum_add h₂)
+  intro x
+  have h := Set.indicator_union_of_disjoint hdisj (f := f)
+  rw [hunion] at h
+  exact congrFun h x
+
 /-- LEAF 1 of 3, the partition of the ordinate window at minus seven quarters. The mass over the
 closed window from minus two to minus three halves equals the mass over the part of the window at
 ordinate at most minus seven quarters plus the mass over the part of the window above minus seven
@@ -53,9 +67,33 @@ theorem negative_bulk_mass_window_partition (q : ℕ) [NeZero q] (χ : Dirichlet
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
         Set.indicator {ρ | -(7 / 4) < ρ.val.im ∧ ρ.val.im ≤ -(3 / 2) ∧ |ρ.val.im| ≤ 2}
           (fun ρ => mellinMassTerm χ δ ρ.val) ρ) := by
-  -- Required: finiteness of the ordinate set in a bounded height range and additivity of the
-  -- sum over a disjoint union of two indicator sets.
-  sorry
+  classical
+  have hfin : ({ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+      |ρ.im| ≤ T}).Finite := ZeroCount1623.stripZeros_finite χ T
+  haveI : Finite {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+      |ρ.im| ≤ T} := hfin.to_subtype
+  refine tsum_indicator_split
+    (s₁ := {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+        |ρ.im| ≤ T} | ρ.val.im ≤ -(7 / 4) ∧ |ρ.val.im| ≤ 2})
+    (s₂ := {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+        |ρ.im| ≤ T} | -(7 / 4) < ρ.val.im ∧ ρ.val.im ≤ -(3 / 2) ∧ |ρ.val.im| ≤ 2})
+    (s := {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+        |ρ.im| ≤ T} | ρ.val.im ≤ -(3 / 2) ∧ |ρ.val.im| ≤ 2})
+    (f := fun ρ => mellinMassTerm χ δ ρ.val) ?_ ?_
+  · rw [Set.disjoint_left]
+    intro x hx hy
+    simp only [Set.mem_setOf_eq] at hx hy
+    linarith [hx.1, hy.1]
+  · ext x
+    simp only [Set.mem_union, Set.mem_setOf_eq]
+    constructor
+    · rintro (⟨h1, h2⟩ | ⟨h1, h2, h3⟩)
+      · exact ⟨by linarith, h2⟩
+      · exact ⟨h2, h3⟩
+    · rintro ⟨h1, h2⟩
+      by_cases h3 : x.val.im ≤ -(7 / 4)
+      · exact Or.inl ⟨h3, h2⟩
+      · exact Or.inr ⟨by linarith, h1, h2⟩
 
 /-- LEAF 2 of 3, the lower half of the window, from minus two to minus seven quarters. The mass
 over that half is at most half of the mean weight integral over the height interval plus three
