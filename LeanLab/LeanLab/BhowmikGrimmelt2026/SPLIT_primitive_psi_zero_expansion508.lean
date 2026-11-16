@@ -14,9 +14,12 @@ and (3) take `T` and `Z` as given, so neither of them has to produce the height 
 the assembly takes them from leaf (1) and splits on whether the character is trivial, keeping
 the larger of the two constants.
 
-AI wrote the Lean code. Binary Goldbach is open. The finite list step is proved. The two analytic bounds remain open.
+AI wrote the Lean code. Binary Goldbach is open. The finite list and principal steps are proved.
+The nonprincipal estimate is conditional on the cited Davenport half weighted formula leaf.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp508a
+import LeanLab.BhowmikGrimmelt2026.PrimitivePsiEstimates592
+import LeanLab.BhowmikGrimmelt2026.SPLIT_davenport_integer_formula592
 import LeanLab.DERZ1997.Decomp1529b2
 import LeanLab.PNTPort.ExplicitPsi1.ZeroSum
 
@@ -1747,7 +1750,8 @@ private theorem principal_from_zeta {Θ : ℝ} (hΘ : Θ < 3 / 4) (hZ : ZeroBoun
 
 end PrimitivePsiZeroAux508
 
-/-- LEAF. Step 2, the error estimate away from the trivial character: for a primitive
+/-- CONDITIONAL on davenport_integer_formula592.
+Step 2, the error estimate away from the trivial character: for a primitive
 `χ ≠ 1`, a height `T` of the size of `X` and the zero list `Z` up to that height, the twisted
 von Mangoldt sum up to `n` plus the zero sum `∑ ρ ∈ Z, mult χ ρ * n ^ ρ / ρ` has size at most
 `C * (log X)²`, with `C` independent of `X`, `q`, `χ`, `T`, `Z` and `n`. The main term of the
@@ -1763,9 +1767,62 @@ theorem nonprincipal_psi_zero_bound508 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroB
           ‖(∑ m ∈ Finset.range (n + 1),
               (ArithmeticFunction.vonMangoldt m : ℂ) * χ (m : ZMod q)) +
             ∑ ρ ∈ Z, (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ‖ ≤ C * Real.log X ^ 2 := by
-  sorry
+  obtain ⟨D, hD, hformula⟩ := davenport_integer_formula592
+  obtain ⟨B, hB, hlow⟩ := low_reciprocal_bound592 Θ hΘ hZ
+  obtain ⟨A, hA, hedge⟩ := boundary_zero_bound592
+  obtain ⟨C₁, hC₁, hone⟩ := psi_one_bound592 Θ hΘ hZ
+  refine ⟨max C₁ (20 * D + 4 * B + 8 * A), le_trans hC₁ (le_max_left _ _), ?_⟩
+  intro X hX q _ hq χ hprim hχ T hT Z hzeros n hn hnX
+  by_cases hn1 : n = 1
+  · subst n
+    simpa only [Nat.cast_one] using ((hone X hX q hq χ T hT Z hzeros).trans
+      (mul_le_mul_of_nonneg_right (le_max_left C₁ (20 * D + 4 * B + 8 * A))
+        (sq_nonneg (Real.log (X : ℝ)))))
+  have hn2 : 2 ≤ n := by omega
+  have hXr : (2 : ℝ) ≤ X := by exact_mod_cast hX
+  have hT2 : 2 ≤ T := hXr.trans hT.1
+  have hnTr : (n : ℝ) ≤ T := (by exact_mod_cast hnX : (n : ℝ) ≤ X).trans hT.1
+  obtain ⟨hbudget, hlowlog, hedgelog⟩ := davenport_log_budget592 hX hq hn hnX hT
+  have hf := hformula q χ hprim hχ T hT2 Z hzeros n hn2
+  have hl := hlow q χ (Z.filter (fun ρ => |ρ.im| < 1)) (by
+    intro ρ hρ
+    obtain ⟨hzmem, him⟩ := Finset.mem_filter.mp hρ
+    obtain ⟨hz, h0, h1, _⟩ := (hzeros ρ).mp hzmem
+    exact ⟨hz, h0, h1, him.le⟩)
+  have he := hedge q χ T (by linarith) n hn hnTr
+    (Z.filter (fun ρ => ¬ |ρ.im| < T)) (by
+      intro ρ hρ
+      obtain ⟨hzmem, him⟩ := Finset.mem_filter.mp hρ
+      obtain ⟨hz, h0, h1, himT⟩ := (hzeros ρ).mp hzmem
+      exact ⟨hz, h0, h1, le_antisymm himT (le_of_not_gt him)⟩)
+  have hsplit := Finset.sum_filter_add_sum_filter_not Z (fun ρ : ℂ => |ρ.im| < T)
+    (fun ρ => (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ)
+  have heq : (∑ m ∈ Finset.range (n + 1),
+      (ArithmeticFunction.vonMangoldt m : ℂ) * χ (m : ZMod q)) +
+      ∑ ρ ∈ Z, (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ =
+      ((∑ m ∈ Finset.range (n + 1),
+        (ArithmeticFunction.vonMangoldt m : ℂ) * χ (m : ZMod q)) +
+        (∑ ρ ∈ Z.filter (fun ρ => |ρ.im| < T), (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ) -
+        ∑ ρ ∈ Z.filter (fun ρ => |ρ.im| < 1), (mult χ ρ : ℂ) / ρ) +
+      (∑ ρ ∈ Z.filter (fun ρ => |ρ.im| < 1), (mult χ ρ : ℂ) / ρ) +
+      ∑ ρ ∈ Z.filter (fun ρ => ¬ |ρ.im| < T), (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ := by
+    rw [← hsplit]
+    ring
+  rw [heq]
+  have htri (a b c : ℂ) : ‖a + b + c‖ ≤ ‖a‖ + ‖b‖ + ‖c‖ :=
+    (norm_add_le (a + b) c).trans (add_le_add (norm_add_le a b) (le_refl ‖c‖))
+  have hsum := add_le_add (add_le_add hf hl) he
+  have hfinal : D * ((n : ℝ) / T * Real.log ((q : ℝ) * n * T) ^ 2 + Real.log q + Real.log n) +
+      B * Real.log (2 * (q : ℝ)) + A * Real.log ((q : ℝ) * (T + 2)) ≤
+      (20 * D + 4 * B + 8 * A) * Real.log X ^ 2 := by
+    have hd := mul_le_mul_of_nonneg_left hbudget hD
+    have hb := mul_le_mul_of_nonneg_left hlowlog hB
+    have ha := mul_le_mul_of_nonneg_left hedgelog hA
+    nlinarith
+  exact ((htri _ _ _).trans (hsum.trans hfinal)).trans
+    (mul_le_mul_of_nonneg_right (le_max_right _ _) (sq_nonneg _))
 
-/-- LEAF. Step 3, the error estimate for the trivial character: for `χ = 1` primitive, a
+/-- Step 3, the proved error estimate for the trivial character: for `χ = 1` primitive, a
 height `T` of the size of `X` and the zero list `Z` up to that height, the twisted von
 Mangoldt sum up to `n` minus `n` plus the zero sum `∑ ρ ∈ Z, mult χ ρ * n ^ ρ / ρ` has size at
 most `C * (log X)²`, again with a constant independent of everything but the hypothesis on the
@@ -1783,7 +1840,7 @@ theorem principal_psi_zero_bound508 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBoun
             ∑ ρ ∈ Z, (mult χ ρ : ℂ) * (n : ℂ) ^ ρ / ρ‖ ≤ C * Real.log X ^ 2 := by
   exact principal_from_zeta hΘ hZ
 
-/-- CONDITIONAL on nonprincipal_psi_zero_bound508 and principal_psi_zero_bound508.
+/-- CONDITIONAL on davenport_integer_formula592 through nonprincipal_psi_zero_bound508.
 The sharp explicit formula with zeros, assembled from the three leaves above. Leaf 1 gives
 the height `T` and the zero list `Z`; the character being trivial or not selects leaf 3 or
 leaf 2 for the estimate, and the two constants are merged into their maximum. -/
