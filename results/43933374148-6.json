@@ -1,0 +1,120 @@
+{
+ "run_id": "43933374148",
+ "shard": 6,
+ "shards": 8,
+ "mirror_sha": "92e3cdb23055275ee52d9a5cdd9378206325dd3a",
+ "items": [
+  {
+   "folder": "BHP1997",
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_upper_slack_split_rescaled_short_distribution.lean",
+   "declaration": "upper_slack_split_bounded_rescaling",
+   "tactic": "aesop",
+   "line": 31,
+   "old": "  sorry",
+   "new": "  aesop"
+  }
+ ],
+ "files": [
+  {
+   "file": "LeanLab/LeanLab/Akeno2026/Prop44Inputs.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimeSums/DecompJ1062.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 46
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Decomp132.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `hasAssignableMVar`, maximum number of heartbeats (200000) has been reached Note: Use `set_",
+   "seconds": 31
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Decomp132b.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 29
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Decomp312a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 785
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Decomp312c.lean",
+   "result": "SKIP over 3000 lines",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Decomp561n.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 5 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached Note: Use `set_option max",
+   "seconds": 35
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/DecompC165c.lean",
+   "result": "SKIP over 3000 lines",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/LowerPrincipal517g.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_horizontal_convexity_input.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 2 errors, first: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHeartbeats <num>` to set the limit. Hint: Add",
+   "seconds": 26
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_hybrid_large_values.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_hybrid_mean_square.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_saffari_vaughan561.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHeartbeats <num>` to set the limit. Hint: Add",
+   "seconds": 28
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_short_weight_tiny_cutoff.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 454
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_strip_convexity_interpolation.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 21
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_lower_short_weight_analytic.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 37
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_upper_slack_split_rescaled_short_distribution.lean",
+   "result": "1 closed",
+   "seconds": 22
+  }
+ ],
+ "summary": {
+  "files": 117,
+  "declarations_closed": 1,
+  "sites": 1,
+  "skipped": 2,
+  "seconds": 1534
+ },
+ "selftest": {
+  "ok": true,
+  "why": "3 closed",
+  "closed": [
+   "sweep_selftest_a by norm_num",
+   "sweep_selftest_b by nlinarith",
+   "sweep_selftest_c by norm_num"
+  ]
+ }
+}
