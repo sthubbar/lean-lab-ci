@@ -97,6 +97,23 @@ private lemma window_chain_reach561 {Y T y : ℝ} (hY : 1 ≤ Y) (hT : 0 < T) (h
     _ ≤ y * (1 + T / (6 * Y)) ^ 12 :=
         mul_le_mul_of_nonneg_left hbern (le_of_lt hypos)
 
+/-- The one piece of the tiling of the last leaf whose ratio is not z0. If a chain
+point w sits at or above the bottom y of the additive window and the window still
+reaches one step z0 beyond w, then the merged piece from w up to y plus T over 2 has
+its ratio inside the printed range, so the hypothesis of the last leaf covers it. -/
+private lemma window_top_piece561 {Y T y w : ℝ} (hY : 1 ≤ Y) (hT : 0 < T) (hTY : T ≤ Y)
+    (hy : Y / 2 ≤ y) (hyw : y ≤ w) (hlo : w + w * (T / (6 * Y)) ≤ y + T / 2) :
+    T / (6 * Y) ≤ (y + T / 2 - w) / w ∧ (y + T / 2 - w) / w ≤ 6 * T / Y := by
+  have hYpos : (0 : ℝ) < Y := by linarith
+  have hwpos : (0 : ℝ) < w := by linarith
+  constructor
+  · rw [le_div_iff₀ hwpos, mul_comm (T / (6 * Y)) w]
+    linarith
+  · rw [div_le_iff₀ hwpos, div_mul_eq_mul_div, le_div_iff₀ (by positivity : (0 : ℝ) < Y)]
+    have h1 : (0 : ℝ) ≤ w - y := by linarith
+    have h2 : (0 : ℝ) ≤ 6 * w - Y / 2 := by linarith
+    nlinarith [mul_nonneg h1 (le_of_lt hYpos), mul_nonneg h2 (le_of_lt hT)]
+
 /-- LEAF. First step of the comparison: the lower part of the y range carries no
 fixed window at all. The short polynomial is supported above Y while the upper
 end y plus T over 4 stays below Y once y is at most Y minus T over 4, so the
