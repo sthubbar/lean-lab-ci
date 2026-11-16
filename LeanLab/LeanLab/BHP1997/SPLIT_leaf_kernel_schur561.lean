@@ -137,23 +137,6 @@ theorem leaf_even_frequency_kernel561 (ε x : ℝ)
     (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) hH
     (floor_ceil_gap x _ (by linarith)) u
 
-/-- LEAF. The finite Fourier double integral rearrangement. Expanding each
-squared modulus of the minor arc sum and summing the characters over the even
-frequency set turns the minor error into one double integral of the two
-polynomial moduli against the pointwise kernel. Only the modulus of the
-summed kernel is used, so this step is an integral rearrangement plus a
-triangle inequality and it carries no constant and no weighted energy bound. -/
-theorem leaf_minor_kernel_double_integral561 (ε D x : ℝ) (a b : ℕ → ℂ)
-    (hH : 2 ≤ x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))))
-    (hkern : ∀ u : ℝ, ‖∑ N ∈ frequencies512 ε x,
-        @fourier 1 (N : ℤ) (u : AddCircle (1 : ℝ))‖ ≤
-      kernelWeight561 (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) u) :
-    minorError512 ε D x a b ≤
-      ∫ t in minor512 ε D x, ∫ s in minor512 ε D x,
-        ‖polynomial512 (Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊) a t‖ * ‖polynomial512 (Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊) a s‖ * ‖polynomial512 (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊) b t‖ * ‖polynomial512 (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊) b s‖ *
-          kernelWeight561 (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) (t - s) := by
-  sorry
-
 
 /-- Nonnegative sectional Cauchy for real functions with integrable squares. -/
 private lemma integral_mul_le_sqrt_sq {α : Type*} [MeasurableSpace α]
@@ -199,6 +182,258 @@ private lemma measurable_kernelWeight561 (H : ℝ) :
   unfold kernelWeight561
   exact Measurable.ite (measurableSet_eq_fun hc measurable_const)
     measurable_const (measurable_const.min (measurable_const.div hc))
+
+/-- LEAF. The finite Fourier double integral rearrangement. Expanding each
+squared modulus of the minor arc sum and summing the characters over the even
+frequency set turns the minor error into one double integral of the two
+polynomial moduli against the pointwise kernel. Only the modulus of the
+summed kernel is used, so this step is an integral rearrangement plus a
+triangle inequality and it carries no constant and no weighted energy bound. -/
+theorem leaf_minor_kernel_double_integral561 (ε D x : ℝ) (a b : ℕ → ℂ)
+    (hH : 2 ≤ x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))))
+    (hkern : ∀ u : ℝ, ‖∑ N ∈ frequencies512 ε x,
+        @fourier 1 (N : ℤ) (u : AddCircle (1 : ℝ))‖ ≤
+      kernelWeight561 (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) u) :
+    minorError512 ε D x a b ≤
+      ∫ t in minor512 ε D x, ∫ s in minor512 ε D x,
+        ‖polynomial512 (Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊) a t‖ * ‖polynomial512 (Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊) a s‖ * ‖polynomial512 (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊) b t‖ * ‖polynomial512 (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊) b s‖ *
+          kernelWeight561 (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) (t - s) := by
+  set H : ℝ := x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) with hHdef
+  have hH0 : 0 ≤ H := by linarith
+  set m : Set ℝ := minor512 ε D x with hmdef
+  set Sa : Finset ℕ := Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊ with hSadef
+  set Sb : Finset ℕ := Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊ with hSbdef
+  set F : ℝ → ℂ := fun t => polynomial512 Sa a t * polynomial512 Sb b t with hFdef
+  set X : ℕ → ℝ → ℂ := fun N t => @fourier 1 (-(N : ℤ)) (t : AddCircle (1 : ℝ)) with hXdef
+  set G : ℕ → ℝ × ℝ → ℂ := fun N z => (F z.1 * X N z.1) * (starRingEnd ℂ) (F z.2 * X N z.2) with hGdef
+  set Wf : ℝ × ℝ → ℝ := fun z => ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖ *
+      ‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖ * kernelWeight561 H (z.1 - z.2) with hWdef
+  set μ : MeasureTheory.Measure (ℝ × ℝ) :=
+    (volume.restrict m).prod (volume.restrict m) with hμdef
+  set a₀ : ℝ := 1 / (order512 ε x : ℝ) with ha₀def
+  set b₀ : ℝ := 1 + 1 / (order512 ε x : ℝ) with hb₀def
+  have hmp : m ⊆ period512 ε x := fun s hs => hs.1
+  have hsub : period512 ε x ⊆ Icc a₀ b₀ := by
+    intro y hy
+    exact ⟨le_of_lt hy.1, hy.2⟩
+  have hmIcc : m ⊆ Icc a₀ b₀ := fun s hs => hsub (hmp hs)
+  have hperfin : volume (period512 ε x) < ⊤ :=
+    (measure_mono hsub).trans_lt isCompact_Icc.measure_lt_top
+  have hmfin : volume m < ⊤ := (measure_mono hmp).trans_lt hperfin
+  haveI hνfin : IsFiniteMeasure (volume.restrict m) := isFiniteMeasure_restrict.2 hmfin.ne
+  haveI : IsFiniteMeasure μ := by
+    rw [hμdef]
+    infer_instance
+  have hfun : ∀ (N : ℕ) (t : ℝ), integrand512 ε x a b N t = F t * X N t := by
+    intro N t
+    simp only [integrand512, hFdef, hXdef]
+    ring
+  -- continuity and integrability of the double integrand
+  have hFc : Continuous F := (continuous_polynomial512 Sa a).mul (continuous_polynomial512 Sb b)
+  have hXc : ∀ N : ℕ, Continuous (X N) := fun N =>
+    (fourier (-(N : ℤ))).continuous.comp (by fun_prop)
+  have hGc : ∀ N : ℕ, Continuous (G N) := by
+    intro N
+    have h1 : Continuous fun z : ℝ × ℝ => F z.1 * X N z.1 :=
+      (hFc.mul (hXc N)).comp continuous_fst
+    have h2 : Continuous fun z : ℝ × ℝ => (starRingEnd ℂ) (F z.2 * X N z.2) :=
+      (continuous_conj).comp ((hFc.mul (hXc N)).comp continuous_snd)
+    exact h1.mul h2
+  have hGint : ∀ N : ℕ, Integrable (G N) μ := by
+    intro N
+    have hbox : IntegrableOn (G N) (Icc a₀ b₀ ×ˢ Icc a₀ b₀) :=
+      (hGc N).continuousOn.integrableOn_compact (isCompact_Icc.prod isCompact_Icc)
+    have hmono : IntegrableOn (G N) (m ×ˢ m) :=
+      hbox.mono_set (fun z hz => ⟨hmIcc hz.1, hmIcc hz.2⟩)
+    rw [hμdef, MeasureTheory.Measure.prod_restrict]
+    exact hmono
+  -- the per-frequency identity
+  have hstep : ∀ N ∈ frequencies512 ε x,
+      ‖∫ t in m, F t * X N t‖ ^ 2 = (∫ z, G N z ∂μ).re := by
+    intro N _
+    have hconj : (starRingEnd ℂ) (∫ t in m, F t * X N t)
+        = ∫ t in m, (starRingEnd ℂ) (F t * X N t) := (integral_conj).symm
+    have hprod : (∫ t in m, F t * X N t) * (∫ t in m, (starRingEnd ℂ) (F t * X N t))
+        = ∫ z, G N z ∂μ := by
+      rw [← MeasureTheory.integral_prod_mul (μ := volume.restrict m) (ν := volume.restrict m)
+        (f := fun t => F t * X N t) (g := fun t => (starRingEnd ℂ) (F t * X N t))]
+    have hsq : ‖∫ t in m, F t * X N t‖ ^ 2
+        = ((∫ t in m, F t * X N t) * (starRingEnd ℂ) (∫ t in m, F t * X N t)).re := by
+      rw [Complex.mul_conj, Complex.ofReal_re, Complex.sq_norm]
+    rw [hsq, hconj, hprod]
+  -- sum the identities
+  have hId : ∫ z, ∑ N ∈ frequencies512 ε x, G N z ∂μ
+      = ∑ N ∈ frequencies512 ε x, ∫ z, G N z ∂μ :=
+    integral_finset_sum _ (fun N _ => hGint N)
+  have hsum : (∑ N ∈ frequencies512 ε x, ‖∫ t in m, F t * X N t‖ ^ 2)
+      = (∫ z, ∑ N ∈ frequencies512 ε x, G N z ∂μ).re := by
+    calc (∑ N ∈ frequencies512 ε x, ‖∫ t in m, F t * X N t‖ ^ 2)
+        = ∑ N ∈ frequencies512 ε x, (∫ z, G N z ∂μ).re := Finset.sum_congr rfl hstep
+      _ = (∑ N ∈ frequencies512 ε x, ∫ z, G N z ∂μ).re :=
+          (map_sum Complex.reCLM _ _).symm
+      _ = (∫ z, ∑ N ∈ frequencies512 ε x, G N z ∂μ).re := by rw [hId]
+  -- pointwise identification of the summed characters
+  have hkey : ∀ (N : ℕ) (p q : ℝ), X N p * (starRingEnd ℂ) (X N q)
+      = @fourier 1 (N : ℤ) ((q - p : ℝ) : AddCircle (1 : ℝ)) := by
+    intro N p q
+    have h1 : (starRingEnd ℂ) (X N q) = @fourier 1 (N : ℤ) ((q : ℝ) : AddCircle (1 : ℝ)) := by
+      rw [hXdef]
+      simp only
+      rw [fourier_neg]
+      simp
+    rw [h1, hXdef]
+    simp only
+    rw [fourier_coe_apply (n := -(N : ℤ)) (x := p) (T := 1),
+      fourier_coe_apply (n := (N : ℤ)) (x := q) (T := 1),
+      fourier_coe_apply (n := (N : ℤ)) (x := q - p) (T := 1),
+      ← Complex.exp_add]
+    congr 1
+    push_cast
+    ring
+  have hGs : ∀ z : ℝ × ℝ, ∑ N ∈ frequencies512 ε x, G N z
+      = F z.1 * (starRingEnd ℂ) (F z.2) * (∑ N ∈ frequencies512 ε x, @fourier 1 (N : ℤ) (z.2 - z.1)) := by
+    intro z
+    have h1 : ∀ N : ℕ, G N z = F z.1 * (starRingEnd ℂ) (F z.2) * (X N z.1 * (starRingEnd ℂ) (X N z.2)) := by
+      intro N
+      rw [hGdef]
+      simp only
+      rw [map_mul]
+      ring
+    have h2 : ∀ N : ℕ, X N z.1 * (starRingEnd ℂ) (X N z.2) = @fourier 1 (N : ℤ) (z.2 - z.1) := by
+      intro N
+      have := hkey N z.1 z.2
+      simpa using this
+    calc ∑ N ∈ frequencies512 ε x, G N z
+        = ∑ N ∈ frequencies512 ε x, F z.1 * (starRingEnd ℂ) (F z.2) * (X N z.1 * (starRingEnd ℂ) (X N z.2)) :=
+          Finset.sum_congr rfl (fun N _ => h1 N)
+      _ = F z.1 * (starRingEnd ℂ) (F z.2) * ∑ N ∈ frequencies512 ε x, (X N z.1 * (starRingEnd ℂ) (X N z.2)) := by
+          rw [Finset.mul_sum]
+      _ = F z.1 * (starRingEnd ℂ) (F z.2) * (∑ N ∈ frequencies512 ε x, @fourier 1 (N : ℤ) (z.2 - z.1)) := by
+          rw [Finset.sum_congr rfl (fun N _ => h2 N)]
+  -- the pointwise bound against the kernel majorant
+  have hpt : ∀ z : ℝ × ℝ, ‖∑ N ∈ frequencies512 ε x, G N z‖ ≤ Wf z := by
+    intro z
+    have h1 : ‖∑ N ∈ frequencies512 ε x, G N z‖
+        = ‖F z.1‖ * ‖F z.2‖ * ‖∑ N ∈ frequencies512 ε x, @fourier 1 (N : ℤ) (z.2 - z.1)‖ := by
+      rw [hGs z, norm_mul, norm_mul, norm_conj]
+    have h2 : ‖∑ N ∈ frequencies512 ε x, @fourier 1 (N : ℤ) (z.2 - z.1)‖
+        ≤ kernelWeight561 H (z.1 - z.2) := by
+      have h3 := hkern (z.2 - z.1)
+      rwa [← kernelWeight561_sub_comm H z.1 z.2] at h3
+    have h4 : ‖F z.1‖ = ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sb b z.1‖ := by
+      rw [hFdef]; simp only; rw [norm_mul]
+    have h5 : ‖F z.2‖ = ‖polynomial512 Sa a z.2‖ * ‖polynomial512 Sb b z.2‖ := by
+      rw [hFdef]; simp only; rw [norm_mul]
+    have h6 : ‖F z.1‖ * ‖F z.2‖ * kernelWeight561 H (z.1 - z.2) = Wf z := by
+      rw [h4, h5, hWdef]
+      ring
+    calc ‖∑ N ∈ frequencies512 ε x, G N z‖
+        = ‖F z.1‖ * ‖F z.2‖ * ‖∑ N ∈ frequencies512 ε x, @fourier 1 (N : ℤ) (z.2 - z.1)‖ := h1
+      _ ≤ ‖F z.1‖ * ‖F z.2‖ * kernelWeight561 H (z.1 - z.2) :=
+          mul_le_mul_of_nonneg_left h2 (by positivity)
+      _ = Wf z := h6
+  -- integrability of the majorant
+  set Ca : ℝ := ∑ k ∈ Sa, ‖a k‖ with hCadef
+  set Cb : ℝ := ∑ k ∈ Sb, ‖b k‖ with hCbdef
+  have hpolyA : ∀ t : ℝ, ‖polynomial512 Sa a t‖ ≤ Ca := by
+    intro t
+    rw [polynomial512, hCadef]
+    calc ‖∑ k ∈ Sa, a k * @fourier 1 (k : ℤ) (t : AddCircle (1 : ℝ))‖
+        ≤ ∑ k ∈ Sa, ‖a k * @fourier 1 (k : ℤ) (t : AddCircle (1 : ℝ))‖ := norm_sum_le _ _
+      _ = ∑ k ∈ Sa, ‖a k‖ := by
+          refine Finset.sum_congr rfl (fun k _ => ?_)
+          rw [norm_mul, fourier_apply, Circle.norm_coe, mul_one]
+  have hpolyB : ∀ t : ℝ, ‖polynomial512 Sb b t‖ ≤ Cb := by
+    intro t
+    rw [polynomial512, hCbdef]
+    calc ‖∑ k ∈ Sb, b k * @fourier 1 (k : ℤ) (t : AddCircle (1 : ℝ))‖
+        ≤ ∑ k ∈ Sb, ‖b k * @fourier 1 (k : ℤ) (t : AddCircle (1 : ℝ))‖ := norm_sum_le _ _
+      _ = ∑ k ∈ Sb, ‖b k‖ := by
+          refine Finset.sum_congr rfl (fun k _ => ?_)
+          rw [norm_mul, fourier_apply, Circle.norm_coe, mul_one]
+  have hCa : 0 ≤ Ca := by rw [hCadef]; positivity
+  have hCb : 0 ≤ Cb := by rw [hCbdef]; positivity
+  have hWmeas : AEStronglyMeasurable Wf μ := by
+    have hk : Measurable fun z : ℝ × ℝ => kernelWeight561 H (z.1 - z.2) :=
+      (measurable_kernelWeight561 H).comp (measurable_fst.sub measurable_snd)
+    have hA1 : Measurable fun z : ℝ × ℝ => ‖polynomial512 Sa a z.1‖ :=
+      (continuous_polynomial512 Sa a).norm.measurable.comp measurable_fst
+    have hA2 : Measurable fun z : ℝ × ℝ => ‖polynomial512 Sa a z.2‖ :=
+      (continuous_polynomial512 Sa a).norm.measurable.comp measurable_snd
+    have hB1 : Measurable fun z : ℝ × ℝ => ‖polynomial512 Sb b z.1‖ :=
+      (continuous_polynomial512 Sb b).norm.measurable.comp measurable_fst
+    have hB2 : Measurable fun z : ℝ × ℝ => ‖polynomial512 Sb b z.2‖ :=
+      (continuous_polynomial512 Sb b).norm.measurable.comp measurable_snd
+    have hm' : Measurable Wf := by
+      rw [hWdef]
+      exact ((((hA1.mul hA2).mul hB1).mul hB2).mul hk)
+    exact hm'.aestronglyMeasurable
+  have hWint : Integrable Wf μ := by
+    have hbd : ∀ᵐ z ∂μ, ‖Wf z‖ ≤ Ca * Ca * Cb * Cb * H := by
+      refine Filter.Eventually.of_forall fun z => ?_
+      have h1 : Wf z = ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖ *
+          ‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖ * kernelWeight561 H (z.1 - z.2) := by
+        rw [hWdef]
+      have hk0 : 0 ≤ kernelWeight561 H (z.1 - z.2) := kernelWeight561_nonneg hH0 _
+      have hkH : kernelWeight561 H (z.1 - z.2) ≤ H := kernelWeight561_le hH0 _
+      have h1' : ‖polynomial512 Sa a z.1‖ ≤ Ca := hpolyA z.1
+      have h2' : ‖polynomial512 Sa a z.2‖ ≤ Ca := hpolyA z.2
+      have h3' : ‖polynomial512 Sb b z.1‖ ≤ Cb := hpolyB z.1
+      have h4' : ‖polynomial512 Sb b z.2‖ ≤ Cb := hpolyB z.2
+      have hn0 : (0:ℝ) ≤ ‖polynomial512 Sa a z.1‖ := norm_nonneg _
+      have hn1 : (0:ℝ) ≤ ‖polynomial512 Sa a z.2‖ := norm_nonneg _
+      have hn2 : (0:ℝ) ≤ ‖polynomial512 Sb b z.1‖ := norm_nonneg _
+      have hn3 : (0:ℝ) ≤ ‖polynomial512 Sb b z.2‖ := norm_nonneg _
+      have hnn : (0:ℝ) ≤ ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖ *
+          ‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖ := by positivity
+      rw [h1, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      have hA' : ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖ ≤ Ca * Ca :=
+        mul_le_mul h1' h2' hn1 hCa
+      have hB' : ‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖ ≤ Cb * Cb :=
+        mul_le_mul h3' h4' hn3 hCb
+      have hcc : (0:ℝ) ≤ Ca * Ca := by positivity
+      have hcc2 : (0:ℝ) ≤ Cb * Cb := by positivity
+      have hprod' : ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖ *
+          ‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖ ≤ Ca * Ca * Cb * Cb := by
+        calc ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖ *
+              ‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖
+            = (‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖) *
+              (‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖) := by ring
+          _ ≤ (Ca * Ca) * (Cb * Cb) := mul_le_mul hA' hB' (by positivity) hcc
+          _ = Ca * Ca * Cb * Cb := by ring
+      calc ‖polynomial512 Sa a z.1‖ * ‖polynomial512 Sa a z.2‖ *
+            ‖polynomial512 Sb b z.1‖ * ‖polynomial512 Sb b z.2‖ * kernelWeight561 H (z.1 - z.2)
+          ≤ (Ca * Ca * Cb * Cb) * H :=
+            mul_le_mul hprod' hkH hk0 (by positivity)
+        _ = Ca * Ca * Cb * Cb * H := by ring
+    exact (integrable_const (Ca * Ca * Cb * Cb * H)).mono' hWmeas hbd
+  -- assemble
+  have hsumGc : Continuous fun z : ℝ × ℝ => ∑ N ∈ frequencies512 ε x, G N z :=
+    continuous_finsetSum _ (fun N _ => hGc N)
+  have hSGint : Integrable (fun z : ℝ × ℝ => ‖∑ N ∈ frequencies512 ε x, G N z‖) μ := by
+    refine hWint.mono' hsumGc.norm.measurable.aestronglyMeasurable ?_
+    exact Filter.Eventually.of_forall fun z => by
+      rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+      exact hpt z
+  have hfinal : (∫ z, ∑ N ∈ frequencies512 ε x, G N z ∂μ).re
+      ≤ ∫ z, Wf z ∂μ := by
+    refine (Complex.re_le_norm _).trans ?_
+    exact (norm_integral_le_integral_norm _).trans
+      (integral_mono hSGint hWint (fun z => hpt z))
+  have hFub : (∫ z, Wf z ∂μ) = ∫ t in m, ∫ s in m, Wf (t, s) :=
+    integral_prod Wf hWint
+  have hminor : minorError512 ε D x a b
+      = ∑ N ∈ frequencies512 ε x, ‖∫ t in m, F t * X N t‖ ^ 2 := by
+    simp only [minorError512, ← hmdef, hfun]
+  calc minorError512 ε D x a b
+      = ∑ N ∈ frequencies512 ε x, ‖∫ t in m, F t * X N t‖ ^ 2 := hminor
+    _ = (∫ z, ∑ N ∈ frequencies512 ε x, G N z ∂μ).re := hsum
+    _ ≤ ∫ z, Wf z ∂μ := hfinal
+    _ = ∫ t in m, ∫ s in m, Wf (t, s) := hFub
+    _ = ∫ t in m, ∫ s in m, ‖polynomial512 Sa a t‖ * ‖polynomial512 Sa a s‖ *
+          ‖polynomial512 Sb b t‖ * ‖polynomial512 Sb b s‖ * kernelWeight561 H (t - s) := by
+        simp only [hWdef]
+
 
 /-- LEAF. The shifted short energy step, one Cauchy inequality. For every
 shift t the short polynomial modulus squared against the kernel at t minus s
