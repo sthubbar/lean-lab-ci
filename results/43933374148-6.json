@@ -99,6 +99,66 @@
    "file": "LeanLab/LeanLab/BHP1997/SPLIT_upper_slack_split_rescaled_short_distribution.lean",
    "result": "1 closed",
    "seconds": 22
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/UpperShortC165Leaves.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 20
+  },
+  {
+   "file": "LeanLab/LeanLab/BakerHarmanPintz1997/Decomp409a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 37
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/SPLIT_mv_no_siegel150.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 34
+  },
+  {
+   "file": "LeanLab/LeanLab/Brun1919/Statements.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/Decomp315a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 23
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/Decomp349c.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 983
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/DecompJ344.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 14
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenExplicit/H78Margin1775.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenExplicit/H78X21776.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenExplicit/MertensProduct260.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 29
+  },
+  {
+   "file": "LeanLab/LeanLab/ChirreHagen2025/Decomp122b.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 38
+  },
+  {
+   "file": "LeanLab/LeanLab/ChirreHagen2025/Decomp391a.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 30
   }
  ],
  "summary": {
@@ -106,7 +166,7 @@
   "declarations_closed": 1,
   "sites": 1,
   "skipped": 2,
-  "seconds": 1534
+  "seconds": 2746
  },
  "selftest": {
   "ok": true,
