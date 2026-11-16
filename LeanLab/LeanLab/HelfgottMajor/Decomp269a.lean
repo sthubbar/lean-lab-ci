@@ -1,6 +1,7 @@
 import LeanLab.HelfgottMajor.Decomp123
 import Mathlib.Analysis.MellinTransform
 import Mathlib.Analysis.Analytic.Order
+import Mathlib.Analysis.Meromorphic.Divisor
 
 /-!
 P0014 Proposition 4.6, pages 43 and 44, display 4.43.
@@ -11,6 +12,10 @@ AI wrote this Lean code. Binary Goldbach is open.
 
 namespace LeanLab.HelfgottMajor.Decomp269a
 open Real LeanLab.HelfgottArcs Decomp123
+
+/-- The Mellin transform F_delta used on page 43 in the proof of display 4.43. -/
+noncomputable def gaussianMellin (δ : ℝ) (s : ℂ) : ℂ :=
+  mellin (fun t : ℝ => (exp (-t ^ 2 / 2) : ℂ) * e (δ * t)) s
 
 /-- A zero contribution with its analytic multiplicity, as in display 4.1 on page 31. -/
 noncomputable def zeroTerm {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
@@ -30,6 +35,38 @@ noncomputable def highZeros {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
   ∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
     0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}, zeroTerm χ δ x ρ.val
 
+/-- The critical-line hypothesis determines the real part of every low zero. -/
+lemma low_zero_real_part {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (T : ℝ)
+    (hzeros : ∀ s : ℂ, DirichletCharacter.LFunction χ s = 0 → 0 < s.re → s.re < 1 →
+      |s.im| ≤ T → s.re = 1 / 2)
+    (ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}) :
+    ρ.val.re = 1 / 2 :=
+  hzeros ρ.val ρ.property.1 ρ.property.2.1 ρ.property.2.2.1 ρ.property.2.2.2
+
+/-- On the critical line, a zero term has exactly the square-root x factor from page 43. -/
+lemma zeroTerm_norm_critical {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (δ x : ℝ) (hx : 0 < x) (ρ : ℂ) (hρ : ρ.re = 1 / 2) :
+    ‖zeroTerm χ δ x ρ‖ =
+      (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) *
+        ‖gaussianMellin δ ρ‖ * sqrt x := by
+  rw [zeroTerm, RCLike.norm_nsmul (K := ℂ), nsmul_eq_mul, norm_mul,
+    Complex.norm_cpow_eq_rpow_re_of_pos hx, hρ, ← sqrt_eq_rpow]
+  ring
+
+/-- Every nontrivial zero term is bounded by x times its multiplicity weighted Mellin norm. -/
+lemma zeroTerm_norm_le_x {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (δ x : ℝ) (hx : 1 ≤ x) (ρ : ℂ) (hρ : 0 < ρ.re ∧ ρ.re < 1) :
+    ‖zeroTerm χ δ x ρ‖ ≤
+      ((analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) *
+        ‖gaussianMellin δ ρ‖) * x := by
+  rw [zeroTerm, RCLike.norm_nsmul (K := ℂ), nsmul_eq_mul, norm_mul,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by linarith : 0 < x)]
+  have hp : x ^ ρ.re ≤ x := by
+    simpa only [rpow_one] using rpow_le_rpow_of_exponent_le hx hρ.2.le
+  simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hp
+    (mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _))
+
 /-- LEAF. Pages 31 to 36, displays 4.1 to 4.3 and 4.23, specialized on page 44.
 The explicit formula leaves a residue and a contour error. This does not bound either zero sum.
 The outside Landau input is Montgomery and Vaughan, Lemma 6.3.
@@ -43,7 +80,7 @@ theorem explicit_formula_remainder (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
       ‖Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
         lowZeros χ δ x T + highZeros χ δ x T + R‖ ≤
         (log q + 6.01) * (1 + 6 * |δ|) / sqrt x := by
-  exact SplitGaussian123.explicit_formula_remainder x hx q χ hχ δ T hT hzeros
+  sorry
 
 /-- LEAF. Page 43 applies Lemma 4.4, display 4.29 on page 39, and the norms in 4.42.
 This bounds only zeros up to T on the critical line.
@@ -56,7 +93,7 @@ theorem low_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     ‖lowZeros χ δ x T‖ ≤
       (2.337 * sqrt T * log (q * T) + 21.817 * sqrt T +
         2.85 * log q + 74.38) * sqrt x := by
-  exact SplitGaussian123.low_zero_bound x hx q χ hχ δ T hT hzeros
+  sorry
 
 /-- LEAF. Pages 40 to 43, Lemma 4.5, display 4.35 and its use in Proposition 4.6.
 This bounds only the zeros above T. The source zero hypothesis is retained.
@@ -70,7 +107,7 @@ theorem high_zero_bound (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
       log (q * T / (2 * π)) *
         (4.329 * exp (-0.1598 * T) +
           0.802 * |δ| * exp (-0.1065 * (T / (π * |δ|)) ^ 2)) * x := by
-  exact SplitGaussian123.high_zero_bound x hx q χ hχ δ T hT hzeros
+  sorry
 
 /-- LEAF. Page 44, the last arithmetic step with the existing factor 6 repair.
 The extra 0.01 in the contour coefficient is absorbed into the residue budget for x at least 1.
