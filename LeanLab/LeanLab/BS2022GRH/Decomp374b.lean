@@ -179,6 +179,8 @@ theorem interval_boundary (Y Z : ℝ) (r : ℕ)
     ‖(∑ p ∈ pRange Y Z, χ p) - (primePrefix Y χ - primePrefix Z χ)‖ ≤ 2 :=
   interval_boundary_aux Y Z r hZ hZY χ
 
+set_option maxHeartbeats 1000000
+
 private lemma exp_0218_le : exp 0.218 ≤ 1.2436 := by
   have h := Real.exp_bound' (x := 0.218) (by norm_num) (by norm_num) (n := 8) (by norm_num)
   norm_num [Finset.sum_range_succ, Nat.factorial] at h
@@ -640,131 +642,160 @@ private lemma env_deriv_nonneg (t : ℝ) (ht : 3.218 ≤ t) :
     rw [← mul_assoc, he1]
   rwa [heq] at hm
 
-/-- `qG X * sqrt X * log X` written in terms of `u = log X`. -/
-private lemma qG_eq_exp (t : ℝ) (ht : 1 < t) :
-    qG t * sqrt t * log t
-      = exp (log t / 2) * (0.165 * log t + 12.683 + 254.980 / log t + 2607.854 / log t ^ 2 + 11605.056 / log t ^ 3)
-        + exp (log t / 4) * (1.314 * log t ^ 2 + 0.092 * log t * log (log t) + 60.883 * log t + 8.250 * log (log t) + 939.260)
-        - 237.934 := by
-  have ht0 : 0 < t := by linarith
-  have hlpos : 0 < log t := log_pos ht
-  have hl : log t ≠ 0 := hlpos.ne'
-  have h4 : t ^ ((1:ℝ)/4) = exp (log t / 4) := by
-    rw [Real.rpow_def_of_pos ht0]; ring_nf
-  have h2 : sqrt t = exp (log t / 2) := by
-    rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos ht0]
-    ring_nf
-  have hsq : exp (log t / 2) = exp (log t / 4) * exp (log t / 4) := by
-    rw [← exp_add]; ring_nf
-  have e1 : exp (log t / 4) ≠ 0 := (exp_pos _).ne'
+/-- The envelope of `qG` as a function of `log X`. -/
+private lemma qG_env_ident (t : ℝ) (ht : 0 < t) :
+    qG (exp t) * exp (t / 2) * t =
+      0.165 * (exp (t / 2) * t) + 12.683 * exp (t / 2)
+      + 254.98 * (exp (t / 2) / t)
+      + 2607.854 * (exp (t / 2) / t ^ 2)
+      + 11605.056 * (exp (t / 2) / t ^ 3)
+      + 1.314 * (exp (t / 4) * t ^ 2)
+      + 0.092 * (exp (t / 4) * (t * log t))
+      + 60.883 * (exp (t / 4) * t)
+      + 8.25 * (exp (t / 4) * log t)
+      + 939.26 * exp (t / 4) - 237.934 := by
+  have h2 : sqrt (exp t) = exp (t / 2) := by
+    rw [sqrt_eq_rpow, rpow_def_of_pos (exp_pos t), log_exp]; congr 1; ring
+  have h4 : (exp t) ^ ((1 : ℝ) / 4) = exp (t / 4) := by
+    rw [rpow_def_of_pos (exp_pos t), log_exp]; congr 1; ring
+  have hsq : exp (t / 2) = exp (t / 4) * exp (t / 4) := by
+    rw [← exp_add]; congr 1; ring
   unfold qG
-  rw [h4, h2, hsq]
-  field_simp
-  ring_nf
-
-private lemma hasDerivAt_h (u : ℝ) (hu : 0 < u) :
-    HasDerivAt (fun u : ℝ => 0.165*u + 12.683 + 254.980/u + 2607.854/u^2 + 11605.056/u^3)
-      (0.165 - 254.980/u^2 - 2*2607.854/u^3 - 3*11605.056/u^4) u := by
-  have hu' : u ≠ 0 := hu.ne'
-  have h0 : HasDerivAt (fun u : ℝ => 0.165*u + 12.683) ((0.165:ℝ) * 1) u :=
-    ((hasDerivAt_id u).const_mul (0.165:ℝ)).add_const 12.683
-  have h1 : HasDerivAt (fun u : ℝ => 254.980/u) ((0 * id u - (254.980:ℝ) * 1) / id u ^ 2) u :=
-    HasDerivAt.div (hasDerivAt_const u (254.980:ℝ)) (hasDerivAt_id u) hu'
-  have h2 : HasDerivAt (fun u : ℝ => 2607.854/u^2) ((0 * u^2 - (2607.854:ℝ) * (2*u)) / (u^2)^2) u :=
-    HasDerivAt.div (hasDerivAt_const u (2607.854:ℝ)) (by simpa using hasDerivAt_pow 2 u) (by positivity)
-  have h3 : HasDerivAt (fun u : ℝ => 11605.056/u^3) ((0 * u^3 - (11605.056:ℝ) * (3*u^2)) / (u^3)^2) u :=
-    HasDerivAt.div (hasDerivAt_const u (11605.056:ℝ)) (by simpa using hasDerivAt_pow 3 u) (by positivity)
-  have hA := ((h0.add h1).add h2).add h3
-  convert hA using 1
-  simp only [id_eq]
+  rw [h2, h4, log_exp]
+  rw [hsq]
   field_simp
   ring
 
-private lemma hasDerivAt_H (u : ℝ) (hu : 0 < u) :
-    HasDerivAt (fun u : ℝ => 1.314*u^2 + 0.092*u*log u + 60.883*u + 8.250*log u + 939.260)
-      (2.628*u + 0.092*(log u + 1) + 60.883 + 8.250/u) u := by
-  have hu' : u ≠ 0 := hu.ne'
-  have hp0 : HasDerivAt (fun u : ℝ => u^2) (2*u) u := by simpa using hasDerivAt_pow 2 u
-  have hp : HasDerivAt (fun u : ℝ => 1.314*u^2) ((1.314:ℝ) * (2*u)) u := hp0.const_mul (1.314:ℝ)
-  have hm : HasDerivAt (fun u : ℝ => 0.092*u*log u) ((0.092:ℝ) * 1 * log u + (0.092:ℝ)*u * u⁻¹) u := by
-    have hi : HasDerivAt (fun u : ℝ => (0.092:ℝ)*u) ((0.092:ℝ) * 1) u := (hasDerivAt_id u).const_mul (0.092:ℝ)
-    exact hi.mul (hasDerivAt_log hu')
-  have hl : HasDerivAt (fun u : ℝ => 60.883*u) ((60.883:ℝ) * 1) u := (hasDerivAt_id u).const_mul (60.883:ℝ)
-  have hlg : HasDerivAt (fun u : ℝ => 8.250*log u) ((8.250:ℝ) * u⁻¹) u := (hasDerivAt_log hu').const_mul (8.250:ℝ)
-  have hA := (((hp.add hm).add hl).add hlg).add_const 939.260
-  convert hA using 1
-  field_simp
-  ring
+/-- The derivative of the envelope, written out. -/
+private lemma env_has_deriv (t : ℝ) (ht : 0 < t) :
+    HasDerivAt (fun t : ℝ =>
+      0.165 * (exp (t / 2) * t) + 12.683 * exp (t / 2)
+      + 254.98 * (exp (t / 2) / t)
+      + 2607.854 * (exp (t / 2) / t ^ 2)
+      + 11605.056 * (exp (t / 2) / t ^ 3)
+      + 1.314 * (exp (t / 4) * t ^ 2)
+      + 0.092 * (exp (t / 4) * (t * log t))
+      + 60.883 * (exp (t / 4) * t)
+      + 8.25 * (exp (t / 4) * log t)
+      + 939.26 * exp (t / 4) - 237.934)
+      (exp (t/2) * (0.0825*t + 6.5065 + 127.49/t + 1048.947/t^2 + 586.82/t^3 - 34815.168/t^4)
+       + exp (t/4) * (0.3285*t^2 + 0.023*t*log t + 17.84875*t + 2.1545*log t + 295.79 + 8.25/t)) t := by
+  have h2' : HasDerivAt (fun t : ℝ => t/2) (1/2) t := by
+    simpa using (hasDerivAt_id t).div_const 2
+  have h4' : HasDerivAt (fun t : ℝ => t/4) (1/4) t := by
+    simpa using (hasDerivAt_id t).div_const 4
+  have he2 : HasDerivAt (fun t : ℝ => exp (t/2)) (exp (t/2) * (1/2)) t := by
+    simpa [Function.comp_def] using (Real.hasDerivAt_exp (t/2)).comp t h2'
+  have he4 : HasDerivAt (fun t : ℝ => exp (t/4)) (exp (t/4) * (1/4)) t := by
+    simpa [Function.comp_def] using (Real.hasDerivAt_exp (t/4)).comp t h4'
+  have hid : HasDerivAt (fun t : ℝ => t) 1 t := hasDerivAt_id t
+  have hlog : HasDerivAt (fun t : ℝ => log t) (1/t) t := by
+    simpa [one_div] using Real.hasDerivAt_log (ne_of_gt ht)
+  have hne : t ≠ 0 := ne_of_gt ht
+  have h1 : HasDerivAt (fun t : ℝ => exp (t/2) * t) (exp (t/2) * (t/2 + 1)) t := by
+    have := he2.mul hid
+    convert this using 1 <;> field_simp <;> ring
+  have h3 : HasDerivAt (fun t : ℝ => exp (t/2) / t) (exp (t/2) * (1/(2*t) - 1/t^2)) t := by
+    have := he2.div hid hne
+    convert this using 1 <;> field_simp <;> ring
+  have h4p : HasDerivAt (fun t : ℝ => exp (t/2) / t^2) (exp (t/2) * (1/(2*t^2) - 2/t^3)) t := by
+    have hp : HasDerivAt (fun t : ℝ => t^2) (2*t) t := by simpa using hasDerivAt_pow 2 t
+    have := he2.div hp (by positivity)
+    convert this using 1 <;> field_simp <;> ring
+  have h5 : HasDerivAt (fun t : ℝ => exp (t/2) / t^3) (exp (t/2) * (1/(2*t^3) - 3/t^4)) t := by
+    have hp : HasDerivAt (fun t : ℝ => t^3) (3*t^2) t := by simpa using hasDerivAt_pow 3 t
+    have := he2.div hp (by positivity)
+    convert this using 1 <;> field_simp <;> ring
+  have h6 : HasDerivAt (fun t : ℝ => exp (t/4) * t^2) (exp (t/4) * (t^2/4 + 2*t)) t := by
+    have hp : HasDerivAt (fun t : ℝ => t^2) (2*t) t := by simpa using hasDerivAt_pow 2 t
+    have := he4.mul hp
+    convert this using 1 <;> field_simp <;> ring
+  have h7 : HasDerivAt (fun t : ℝ => exp (t/4) * (t * log t)) (exp (t/4) * ((t*log t)/4 + log t + 1)) t := by
+    have := he4.mul (hid.mul hlog)
+    convert this using 1 <;> simp only [Pi.mul_apply] <;> field_simp <;> ring
+  have h8 : HasDerivAt (fun t : ℝ => exp (t/4) * t) (exp (t/4) * (t/4 + 1)) t := by
+    have := he4.mul hid
+    convert this using 1 <;> field_simp <;> ring
+  have h9 : HasDerivAt (fun t : ℝ => exp (t/4) * log t) (exp (t/4) * (log t/4 + 1/t)) t := by
+    have := he4.mul hlog
+    convert this using 1 <;> field_simp <;> ring
+  have hsum := h1.const_mul 0.165 |>.add (he2.const_mul 12.683)
+    |>.add (h3.const_mul 254.98) |>.add (h4p.const_mul 2607.854)
+    |>.add (h5.const_mul 11605.056) |>.add (h6.const_mul 1.314)
+    |>.add (h7.const_mul 0.092) |>.add (h8.const_mul 60.883)
+    |>.add (h9.const_mul 8.25) |>.add (he4.const_mul 939.26) |>.sub_const 237.934
+  convert hsum using 1 <;> field_simp <;> ring
 
-/-- Derivative of the envelope `G` of `qG`: it is `exp (u/2) * P u + exp (u/4) * Q u`. -/
-private lemma hasDerivAt_G (u : ℝ) (hu : 0 < u) :
-    HasDerivAt (fun u : ℝ => exp (u/2) * (0.165*u + 12.683 + 254.980/u + 2607.854/u^2 + 11605.056/u^3)
-      + exp (u/4) * (1.314*u^2 + 0.092*u*log u + 60.883*u + 8.250*log u + 939.260) - 237.934)
-      (exp (u/2) * (0.0825*u + 6.5065 + 127.49/u + 1048.947/u^2 + 586.82/u^3 - 34815.168/u^4)
-       + exp (u/4) * (0.3285*u^2 + 0.023*u*log u + 17.84875*u + 2.1545*log u + 295.79 + 8.25/u)) u := by
-  have hh := hasDerivAt_h u hu
-  have hH := hasDerivAt_H u hu
-  have hid : HasDerivAt (fun u : ℝ => u) 1 u := hasDerivAt_id u
-  have hc2 : HasDerivAt (fun u : ℝ => u/2) (1/2) u := by
-    have := hid.div_const 2
-    simpa using this
-  have hc4 : HasDerivAt (fun u : ℝ => u/4) (1/4) u := by
-    have := hid.div_const 4
-    simpa using this
-  have he2 : HasDerivAt (fun u : ℝ => exp (u/2)) (exp (u/2) * (1/2)) u := by
-    have h := (Real.hasDerivAt_exp (u/2)).comp u hc2
-    convert h using 1
-    all_goals first | (funext x; rfl) | norm_num | ring
-  have he4 : HasDerivAt (fun u : ℝ => exp (u/4)) (exp (u/4) * (1/4)) u := by
-    have h := (Real.hasDerivAt_exp (u/4)).comp u hc4
-    convert h using 1
-    all_goals first | (funext x; rfl) | norm_num | ring
-  have hA := (he2.mul hh).add (he4.mul hH)
-  have hB := hA.sub_const 237.934
-  convert hB using 1
-  have hu' : u ≠ 0 := hu.ne'
-  field_simp
-  ring
+/-- The envelope core, as a function of `log X`. -/
+private theorem error_envelope_mono_aux (Y Z : ℝ) (hZ : 25 ≤ Z) (hZY : Z < Y) :
+    qG Z * √Z * log Z ≤ qG Y * √Y * log Y := by
+  have hZ0 : 0 < Z := by linarith
+  have hY0 : 0 < Y := by linarith
+  have hlogZ : 3.218 ≤ log Z := le_trans log_25_ge (log_le_log (by norm_num) hZ)
+  have hlogZ0 : 0 < log Z := by linarith
+  have hlogY0 : 0 < log Y := lt_trans hlogZ0 (log_lt_log hZ0 hZY)
+  have hlt : log Z < log Y := log_lt_log hZ0 hZY
+  let F : ℝ → ℝ := fun t =>
+      0.165 * (exp (t / 2) * t) + 12.683 * exp (t / 2)
+      + 254.98 * (exp (t / 2) / t)
+      + 2607.854 * (exp (t / 2) / t ^ 2)
+      + 11605.056 * (exp (t / 2) / t ^ 3)
+      + 1.314 * (exp (t / 4) * t ^ 2)
+      + 0.092 * (exp (t / 4) * (t * log t))
+      + 60.883 * (exp (t / 4) * t)
+      + 8.25 * (exp (t / 4) * log t)
+      + 939.26 * exp (t / 4) - 237.934
+  have hF : ∀ t : ℝ, 0 < t → HasDerivAt F
+      (exp (t/2) * (0.0825*t + 6.5065 + 127.49/t + 1048.947/t^2 + 586.82/t^3 - 34815.168/t^4)
+       + exp (t/4) * (0.3285*t^2 + 0.023*t*log t + 17.84875*t + 2.1545*log t + 295.79 + 8.25/t)) t :=
+    fun t ht => env_has_deriv t ht
+  have hcont : ContinuousOn F (Set.Icc (log Z) (log Y)) := by
+    intro x hx
+    exact ((hF x (by linarith [hx.1])).continuousAt).continuousWithinAt
+  have hdiff : DifferentiableOn ℝ F (Set.Ioo (log Z) (log Y)) := by
+    intro x hx
+    exact ((hF x (by linarith [hx.1])).differentiableAt).differentiableWithinAt
+  obtain ⟨c, hc, hcd⟩ := exists_deriv_eq_slope F hlt hcont hdiff
+  have hc0 : 0 < c := by linarith [hc.1]
+  have hc3 : 3.218 ≤ c := by linarith [hc.1]
+  have hderivc : deriv F c =
+      exp (c/2) * (0.0825*c + 6.5065 + 127.49/c + 1048.947/c^2 + 586.82/c^3 - 34815.168/c^4)
+       + exp (c/4) * (0.3285*c^2 + 0.023*c*log c + 17.84875*c + 2.1545*log c + 295.79 + 8.25/c) :=
+    (hF c hc0).deriv
+  have hslope : 0 ≤ (F (log Y) - F (log Z)) / (log Y - log Z) := by
+    rw [← hcd, hderivc]
+    exact env_deriv_nonneg c hc3
+  have hden : 0 < log Y - log Z := by linarith
+  have hstep := mul_nonneg hslope hden.le
+  rw [div_mul_cancel₀ _ (ne_of_gt hden)] at hstep
+  have hsZ : exp (log Z / 2) = √Z := by
+    rw [sqrt_eq_rpow, rpow_def_of_pos hZ0]
+    congr 1
+    ring
+  have hsY : exp (log Y / 2) = √Y := by
+    rw [sqrt_eq_rpow, rpow_def_of_pos hY0]
+    congr 1
+    ring
+  have hbZ : F (log Z) = qG Z * √Z * log Z := by
+    have hidZ := qG_env_ident (log Z) hlogZ0
+    rw [exp_log hZ0, hsZ] at hidZ
+    dsimp only [F]
+    rw [hsZ]
+    exact hidZ.symm
+  have hbY : F (log Y) = qG Y * √Y * log Y := by
+    have hidY := qG_env_ident (log Y) hlogY0
+    rw [exp_log hY0, hsY] at hidY
+    dsimp only [F]
+    rw [hsY]
+    exact hidY.symm
+  rw [hbY, hbZ] at hstep
+  linarith [hstep]
 
 /-- LEAF. Journal p. 1224, the last scalar comparison before display 13.
 The whole error envelope increases on this ray. Antitonicity of qG alone is insufficient. -/
 theorem error_envelope_mono (Y Z : ℝ) (hZ : 25 ≤ Z) (hZY : Z < Y) :
-    qG Z * √Z * log Z ≤ qG Y * √Y * log Y := by
-  have hZ1 : (1:ℝ) < Z := by linarith
-  have hY1 : (1:ℝ) < Y := by linarith
-  have hlogZ : 3.218 ≤ log Z := le_trans log_25_ge (log_le_log (by norm_num) hZ)
-  have hlogZ0 : 0 < log Z := by linarith
-  have hlt : log Z < log Y := log_lt_log (by linarith) hZY
-  have hcont : ContinuousOn (fun t : ℝ => exp (t/2) * (0.165*t + 12.683 + 254.980/t + 2607.854/t^2 + 11605.056/t^3)
-      + exp (t/4) * (1.314*t^2 + 0.092*t*log t + 60.883*t + 8.250*log t + 939.260) - 237.934) (Set.Icc (log Z) (log Y)) := by
-    intro x hx
-    exact ((hasDerivAt_G x (by linarith [hx.1])).continuousAt).continuousWithinAt
-  have hdiff : DifferentiableOn ℝ (fun t : ℝ => exp (t/2) * (0.165*t + 12.683 + 254.980/t + 2607.854/t^2 + 11605.056/t^3)
-      + exp (t/4) * (1.314*t^2 + 0.092*t*log t + 60.883*t + 8.250*log t + 939.260) - 237.934) (Set.Ioo (log Z) (log Y)) := by
-    intro x hx
-    exact ((hasDerivAt_G x (by linarith [hx.1])).differentiableAt).differentiableWithinAt
-  obtain ⟨c, hc, hcd⟩ := exists_deriv_eq_slope (fun t : ℝ => exp (t/2) * (0.165*t + 12.683 + 254.980/t + 2607.854/t^2 + 11605.056/t^3)
-      + exp (t/4) * (1.314*t^2 + 0.092*t*log t + 60.883*t + 8.250*log t + 939.260) - 237.934) hlt hcont hdiff
-  have hc0 : 0 < c := by linarith [hc.1]
-  have hc3 : 3.218 ≤ c := by linarith [hc.1]
-  have hderivc : deriv (fun t : ℝ => exp (t/2) * (0.165*t + 12.683 + 254.980/t + 2607.854/t^2 + 11605.056/t^3)
-      + exp (t/4) * (1.314*t^2 + 0.092*t*log t + 60.883*t + 8.250*log t + 939.260) - 237.934) c =
-      exp (c/2) * (0.0825*c + 6.5065 + 127.49/c + 1048.947/c^2 + 586.82/c^3 - 34815.168/c^4) + exp (c/4) * (0.3285*c^2 + 0.023*c*log (c) + 17.84875*c + 2.1545*log (c) + 295.79 + 8.25/c) :=
-    (hasDerivAt_G c hc0).deriv
-  have hslope : 0 ≤ (exp (log Y/2) * (0.165*log Y + 12.683 + 254.980/log Y + 2607.854/log Y^2 + 11605.056/log Y^3)
-      + exp (log Y/4) * (1.314*log Y^2 + 0.092*log Y*log (log Y) + 60.883*log Y + 8.250*log (log Y) + 939.260) - 237.934 - (exp (log Z/2) * (0.165*log Z + 12.683 + 254.980/log Z + 2607.854/log Z^2 + 11605.056/log Z^3)
-      + exp (log Z/4) * (1.314*log Z^2 + 0.092*log Z*log (log Z) + 60.883*log Z + 8.250*log (log Z) + 939.260) - 237.934)) / (log Y - log Z) := by
-    rw [← hcd, hderivc]
-    exact env_deriv_nonneg c hc3
-  have hpos : 0 < log Y - log Z := by linarith
-  have hnn : 0 ≤ exp (log Y/2) * (0.165*log Y + 12.683 + 254.980/log Y + 2607.854/log Y^2 + 11605.056/log Y^3)
-      + exp (log Y/4) * (1.314*log Y^2 + 0.092*log Y*log (log Y) + 60.883*log Y + 8.250*log (log Y) + 939.260) - 237.934 - (exp (log Z/2) * (0.165*log Z + 12.683 + 254.980/log Z + 2607.854/log Z^2 + 11605.056/log Z^3)
-      + exp (log Z/4) * (1.314*log Z^2 + 0.092*log Z*log (log Z) + 60.883*log Z + 8.250*log (log Z) + 939.260) - 237.934) := by
-    have hm := mul_nonneg hslope hpos.le
-    rwa [div_mul_cancel₀ _ hpos.ne'] at hm
-  rw [qG_eq_exp Z hZ1, qG_eq_exp Y hY1]
-  linarith [hnn]
-
+    qG Z * √Z * log Z ≤ qG Y * √Y * log Y :=
+  error_envelope_mono_aux Y Z hZ hZY
 
 /-- Exact statement of Decomp148b.prime_character_bound from the three smaller steps.
 CONDITIONAL ON prefix_bound, interval_boundary and error_envelope_mono. -/
