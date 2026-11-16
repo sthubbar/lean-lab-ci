@@ -45,8 +45,7 @@ def SongTheorem1 : Prop :=
 
 /-! ### The paper, cited, with `sorry` -/
 
-/-- P0078 Song 2020, Theorem 1. Cited, not proved here. -/
-theorem song_theorem1 : SongTheorem1 := by sorry
+
 
 /-! ### Links, zero sorry -/
 

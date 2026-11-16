@@ -73,29 +73,6 @@ theorem s1_lambda_reduction :
   simpa only [truncatedSum, fourier, lambdaSum, subWindow] using
     (RouteS1Lambda.s1_lambda_reduction_route)
 
-/-- LEAF: Song 2020, page 7, the display after "Choosing v = (n/u)^{1/2}": for every
-Vaughan parameter u with 1 at most u at most n, n to the minus epsilon times Sigma 1 plus
-Sigma 2 plus Sigma 3 is at most six monomials in n, y, u and the absolute value of h.
-Published inputs: Dirichlet approximation and the Ramanujan sum splitting, page 5; the
-Vaughan identity, Lemma 3.2, page 5; Iwaniec and Kowalski Corollary 8.13 for Sigma 1,
-page 6; Graham and Kolesnik Lemma 2.5 for T(R,S), page 6, with Corollary 8.13 for the
-inner r sum and Lemma 2.4 for L, page 7. -/
-theorem vaughan_per_u :
-    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
-      ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
-        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 → ∀ α : ℝ,
-          ∀ h : ℤ, h ≠ 0 → ∀ t : ℝ, ∀ u : ℝ, 1 ≤ u → u ≤ n →
-            ‖lambdaSum γ n y α h t‖ ≤ C * (n : ℝ) ^ ε *
-              ((n : ℝ) ^ (1 - γ / 4) * |(h : ℝ)| ^ (-(1 : ℝ) / 4) +
-                u ^ ((1 : ℝ) / 4) * (n : ℝ) ^ ((3 : ℝ) / 4) +
-                u * (|(h : ℝ)| ^ ((1 : ℝ) / 2) * (n : ℝ) ^ (γ / 2 - 1) * y) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4)) +
-                u ^ (-(1 : ℝ) / 6) * ((n : ℝ) ^ ((γ + 3) / 6) * y ^ ((1 : ℝ) / 3) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
-                u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
-                  |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  sorry
-
 /-- Private helper, proved here. The balancing step inside Graham and Kolesnik Lemma 2.4: if S is at most
 3 P u to the a and at most 3 Q u to the minus b, then S is at most 3 times the balance
 P to the b times Q to the a, to the power 1 over a plus b. -/

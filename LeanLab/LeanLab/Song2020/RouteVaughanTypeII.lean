@@ -34,6 +34,7 @@ Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
 import LeanLab.Akeno2026.Vaughan86
+import LeanLab.Song2020.RouteTypeIIChoose
 
 namespace LeanLab.Song2020.RouteVaughanTypeII
 
@@ -69,7 +70,7 @@ theorem typeII_bound :
                 R ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
                   |(h : ℝ)| ^ ((1 : ℝ) / 4)) +
                 R ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((3 : ℝ) / 4) * y ^ ((1 : ℝ) / 4))) := by
-  sorry
+  exact RouteTypeIIChoose.typeII_route
 
 /-- Song 2020, page 5, Lemma 3.2 and the definition of Sigma 2: a Dirichlet convolution at a
 positive x below M is the double sum over r and s with r s = x. -/
