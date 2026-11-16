@@ -77,6 +77,93 @@ private lemma tsum_compl_sub {g : ℤ → ℝ} (hg : Summable g) (s : Finset ℤ
   rw [hd, ← hwval]
   exact hsub.tsum_eq
 
+/-- A nonnegative summable family dominates its sum over the complement of a finite set: the piece
+dropped in `tsum_compl_sub` is at most the whole sum. -/
+private lemma tsum_compl_le {g : ℤ → ℝ} (hg : Summable g) (h0 : ∀ n, 0 ≤ g n)
+    (s : Finset ℤ) :
+    ∑' n : ℤ, (if n ∈ s then 0 else g n) ≤ ∑' n : ℤ, g n := by
+  have hle : ∀ n : ℤ, (if n ∈ s then 0 else g n) ≤ g n := by
+    intro n
+    by_cases h : n ∈ s <;> simp [h, h0 n]
+  have hsum : Summable (fun n : ℤ => if n ∈ s then 0 else g n) :=
+    Summable.of_nonneg_of_le (fun n => by by_cases h : n ∈ s <;> simp [h, h0 n]) hle hg
+  exact hsum.tsum_le_tsum hle hg
+
+/-- The square of the cut generating function has no Fourier coefficient on a negative frequency
+and none above twice the cut: it is a polynomial in `e(t)` of degree `2M`. -/
+private lemma fourierCoeff_FX_sq_eq_zero {X : ℝ} {M : ℕ} {n : ℤ}
+    (hn : n < 0 ∨ 2 * (M : ℤ) < n) :
+    fourierCoeff (fun t : AddCircle (1 : ℝ) => FX X M t ^ 2) n = 0 := by
+  have hfun : (fun t : AddCircle (1 : ℝ) => FX X M t ^ 2) =
+      (fun t : AddCircle (1 : ℝ) => ∑ p ∈ range (M + 1) ×ˢ range (M + 1),
+        (aF X p.1 * aF X p.2) * fourier ((p.1 : ℤ) + (p.2 : ℤ)) t) := by
+    funext t
+    exact trig_sq (aF X) M t
+  rw [hfun, fourierCoeff_sum_monomial]
+  refine Finset.sum_eq_zero (fun p hp => ?_)
+  have hmem := Finset.mem_product.1 hp
+  have hp1 : (p.1 : ℤ) ≤ (M : ℤ) := by
+    exact_mod_cast Nat.lt_succ_iff.1 (Finset.mem_range.1 hmem.1)
+  have hp2 : (p.2 : ℤ) ≤ (M : ℤ) := by
+    exact_mod_cast Nat.lt_succ_iff.1 (Finset.mem_range.1 hmem.2)
+  have hp1' : (0 : ℤ) ≤ (p.1 : ℤ) := by positivity
+  have hp2' : (0 : ℤ) ≤ (p.2 : ℤ) := by positivity
+  rw [if_neg]
+  intro hnk
+  omega
+
+/-- The coefficient of the difference is the difference of the coefficients, at EVERY integer
+frequency: the window version of this identity only covers `0 ≤ n ≤ X` with `n` even, and the
+complement of the window needs all of `ℤ`. -/
+private lemma fourierCoeff_FX_sq_sub_Vfun (X : ℕ) (hX : 1 ≤ X) (n : ℤ) :
+    fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n =
+      fourierCoeff (fun t => FX X (X ^ 2) t ^ 2) n -
+        fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) n := by
+  have hX0 : (0 : ℝ) < X := by exact_mod_cast (show 0 < X by omega)
+  have hF : MemLp (fun t => FX (X : ℝ) (X ^ 2) t ^ 2) 2 haarAddCircle :=
+    memLp_FX_sq (X : ℝ) (X ^ 2)
+  have hV : MemLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) 2 haarAddCircle :=
+    memLp_Vfun hX0 _ _
+  have hneg : fourierCoeff (-(Vfun X (Nat.sqrt X) (Nat.sqrt X))) =
+      -fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) := by
+    ext m
+    have h := fourierCoeff.const_smul (T := (1 : ℝ)) (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (-1) m
+    simpa [neg_smul, one_smul] using h
+  have hadd := fourierCoeff.add (T := (1 : ℝ))
+    (f := fun t => FX (X : ℝ) (X ^ 2) t ^ 2) (g := -(Vfun X (Nat.sqrt X) (Nat.sqrt X)))
+    (hF.integrable one_le_two) ((hV.integrable one_le_two).neg)
+  have heq : (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) =
+      (fun t => FX (X : ℝ) (X ^ 2) t ^ 2) + (-(Vfun X (Nat.sqrt X) (Nat.sqrt X))) := by
+    ext t
+    simp [sub_eq_add_neg]
+  rw [heq, hadd, hneg]
+  simp [Pi.add_apply, Pi.neg_apply, sub_eq_add_neg]
+
+/-- The model side of the off window: the squared coefficient energy of the arc model outside the
+even window `0 ≤ n ≤ X` is at most the full `L²` energy of the model, which is the quantity the
+paper's (4.12) controls. This is where the off window leaf must get its model contribution from. -/
+private lemma tsum_compl_fourierCoeff_Vfun_le (X : ℕ) (hX : 1 ≤ X) :
+    (∑' n : ℤ, if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+        else ‖fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) n‖ ^ 2) ≤
+      ∫ t, ‖Vfun X (Nat.sqrt X) (Nat.sqrt X) t‖ ^ 2 ∂haarAddCircle := by
+  classical
+  have hX0 : (0 : ℝ) < X := by exact_mod_cast (show 0 < X by omega)
+  have hV : MemLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) 2 haarAddCircle := memLp_Vfun hX0 _ _
+  have hh := hasSum_sq_fourierCoeff (hV.toLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)))
+  have hcoef : fourierCoeff ((hV.toLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) : Lp ℂ 2 haarAddCircle) :
+        AddCircle (1 : ℝ) → ℂ) = fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) :=
+    fourierCoeff_congr_ae (MemLp.coeFn_toLp hV)
+  have hint : ∫ t, ‖((hV.toLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) : Lp ℂ 2 haarAddCircle) :
+        AddCircle (1 : ℝ) → ℂ) t‖ ^ 2 ∂haarAddCircle =
+      ∫ t, ‖Vfun X (Nat.sqrt X) (Nat.sqrt X) t‖ ^ 2 ∂haarAddCircle := by
+    apply integral_congr_ae
+    filter_upwards [MemLp.coeFn_toLp hV] with t ht
+    rw [ht]
+  rw [hcoef, hint] at hh
+  have h := tsum_compl_le hh.summable (fun n => by positivity)
+    (((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)))
+  rwa [hh.tsum_eq] at h
+
 /-- LEAF. The cut of the circle integral at the even frequencies up to `X`: for `1 ≤ X`, the square
 integral of the difference between the squared generating function cut at `X ^ 2` and the arc model
 cut at `Nat.sqrt X` is at most the squared Fourier coefficient energy of that difference on the
