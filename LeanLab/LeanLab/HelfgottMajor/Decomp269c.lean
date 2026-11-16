@@ -374,6 +374,7 @@ private theorem exp_integral_bound_aux (q : ℕ) [NeZero q] (T : ℝ) (hT : 100 
         nlinarith [this]
 
 
+
 /-! ## Shifting improper integrals to the origin -/
 
 private theorem integral_Ioi_shift (f : ℝ → ℝ) (hf : Continuous f) (T : ℝ) :
@@ -928,13 +929,7 @@ theorem tail_mass_integral (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
       0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}, mellinMassTerm χ δ ρ.val) ≤
       4.226 * (expTailIntegral q T + gaussianTailIntegral q δ T) := by
-  -- This assembly retains the OPEN analytic inputs of Gaussian123Base.
-  simpa only [mellinMassTerm, SplitGaussian123.mellinMassTerm,
-    Decomp269a.gaussianMellin, SplitGaussian123.gaussianMellin,
-    expTailIntegral, TailIntegral123.expTailIntegral,
-    gaussianTailIntegral, TailIntegral123.gaussianTailIntegral,
-    countDensity, TailIntegral123.countDensity] using
-    SplitGaussian123.tail_mass_integral q χ hχ δ T hT hzeros
+  sorry
 
 /-- LEAF. Page 41, display 4.36. This estimates only the exponential integral. -/
 theorem exp_integral_bound (q : ℕ) [NeZero q] (T : ℝ) (hT : 100 ≤ T) :
