@@ -6,12 +6,29 @@ Source http://www.numdam.org/item/CM_1992__82_3_355_0/.
 AI wrote the Lean code. Goldbach is open.
 The three smaller inputs stay OPEN. Existing declarations stay sealed.
 -/
-import LeanLab.Languasco2004.Decomp489e
+import LeanLab.Languasco2004.Decomp279b
 
 namespace LeanLab.Languasco2004.Decomp413a
 open Finset Real MeasureTheory Decomp279b
 noncomputable section
 attribute [local instance] Classical.propDecidable
+
+/-- Page 44 display 5: the minor part of the chosen integration period. -/
+def minorDomain (N Y H B : ℝ) : Set ℝ := period H \ majorSet N Y B
+
+/-- Page 44 display 5: S2 mass in a short interval centred at xi.
+The period restriction gives the explicit endpoint version used here. -/
+def localMass (N Y H B ξ : ℝ) : ℝ :=
+  ∫ α in minorDomain N Y H B ∩ Set.Ioo (ξ - 1 / H) (ξ + 1 / H), ‖secondSum Y α‖ ^ 2
+
+/-- Page 44 display 3: distance to the nearest integer, with the value H
+at a kernel pole. This explicit value prevents inverse zero from losing a pole. -/
+def kernel (H x : ℝ) : ℝ :=
+  if x = (round x : ℤ) then H else min H (|x - (round x : ℤ)|⁻¹)
+
+/-- Page 44 display 3: the squared kernel weighted S2 integral. -/
+def kernelMass (N Y H B ξ : ℝ) : ℝ :=
+  ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 * kernel H (2 * (α - ξ)) ^ 2
 
 /-- Page 44 display 3: the capped kernel is nonnegative for nonnegative H. -/
 theorem kernel_nonneg {H : ℝ} (hH : 0 ≤ H) (x : ℝ) : 0 ≤ kernel H x := by
@@ -55,8 +72,7 @@ theorem local_mass_bound :
     ∃ η₀ : ℝ, 0 < η₀ ∧ ∀ η A : ℝ, 0 < η → η < η₀ → 0 < A →
     ∃ C N₀ : ℝ, 0 < C ∧ ∀ N : ℝ, N₀ ≤ N → ∀ ξ : ℝ,
       localMass N (localization N η) (windowLength N η) (arcExponent η A) ξ ≤
-        C * localization N η / Real.log N ^ (2 * A + 3) := by
-  exact Decomp489e.local_mass_bound_from_leaves
+        C * localization N η / Real.log N ^ (2 * A + 3) := by sorry
 
 /-! ### Private support lemmas for the local covering step -/
 
@@ -801,6 +817,71 @@ theorem kernel_from_local :
         have h0 : (0:ℝ) ≤ H ^ 2 * V := by positivity
         nlinarith
 
+/-! ### Support lemmas for the remaining minor-arc leaves -/
+
+/-- The cap is worth at least one: for `1 ≤ H` the kernel is bounded below by `1`. -/
+private lemma one_le_kernel' {H : ℝ} (hH : 1 ≤ H) (x : ℝ) : 1 ≤ kernel H x := by
+  unfold kernel
+  by_cases hx : x = (round x : ℤ)
+  · rw [if_pos hx]; exact hH
+  · rw [if_neg hx]
+    refine le_min hH ?_
+    have hpos : 0 < |x - (round x : ℤ)| := abs_pos.mpr (sub_ne_zero.mpr hx)
+    have h2 : |x - (round x : ℤ)| ≤ 1 := by linarith [abs_sub_round x]
+    rw [← one_div]
+    exact (one_le_div hpos).mpr h2
+
+/-- Each local mass is at most the whole unweighted mass of the minor domain. -/
+private lemma localMass_le_mass' (N Y H B ξ : ℝ) :
+    localMass N Y H B ξ ≤ ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 := by
+  rw [localMass]
+  exact setIntegral_mono_set
+    ((integrable_second' Y H).mono_set (fun x hx => minorDomain_subset_period N Y H B hx))
+    (Filter.Eventually.of_forall fun _ => sq_nonneg _)
+    (Filter.Eventually.of_forall fun x hx => hx.1)
+
+/-- Since the squared kernel is worth at least one, the squared kernel mass
+dominates the whole unweighted mass of the minor domain. -/
+private lemma mass_le_kernelMass' (N Y H B ξ : ℝ) (hH : 1 ≤ H) :
+    ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 ≤ kernelMass N Y H B ξ := by
+  rw [kernelMass]
+  have hInt : IntegrableOn
+      (fun α : ℝ => ‖secondSum Y α‖ ^ 2 * kernel H (2 * (α - ξ)) ^ 2)
+      (minorDomain N Y H B) volume :=
+    (integrable_kernelMass' Y H ξ (by linarith)).mono_set
+      (fun x hx => minorDomain_subset_period N Y H B hx)
+  refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun _ => sq_nonneg _) hInt ?_
+  refine Filter.Eventually.of_forall fun α => ?_
+  have h1 : (1:ℝ) ≤ kernel H (2 * (α - ξ)) := one_le_kernel' hH _
+  have h2 : (1:ℝ) ≤ kernel H (2 * (α - ξ)) ^ 2 := by nlinarith
+  nlinarith [sq_nonneg ‖secondSum Y α‖]
+
+/-- A uniform local-mass bound furnishes the uniform kernel-mass bound `K` that
+`coefficient_energy` takes as a hypothesis. -/
+private lemma kernelMass_bounded_of_local' (N Y H B V : ℝ) (hH : 1 ≤ H) (hV : 0 ≤ V)
+    (hloc : ∀ ξ : ℝ, localMass N Y H B ξ ≤ V) :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ ξ : ℝ, kernelMass N Y H B ξ ≤ K := by
+  obtain ⟨D, hDpos, hD⟩ := kernel_from_local
+  refine ⟨D * H ^ 2 * V, ?_, fun ξ => hD N Y H B V hH hV hloc ξ⟩
+  exact mul_nonneg (mul_nonneg (le_of_lt hDpos) (sq_nonneg H)) hV
+
+/-- The bookkeeping that the two remaining leaves share: a uniform local-mass bound
+bounds every local mass, the whole unweighted minor-domain mass, and furnishes the
+uniform kernel-mass bound `K` that `coefficient_energy` takes as a hypothesis. It
+does not supply the mean-square estimate that `local_mass_bound` asserts, nor the
+coefficient-to-kernel comparison that `coefficient_energy` asserts. -/
+private lemma minor_mass_bookkeeping' (N Y H B V : ℝ) (hH : 1 ≤ H) (hV : 0 ≤ V)
+    (hloc : ∀ ξ : ℝ, localMass N Y H B ξ ≤ V) :
+    ∃ K : ℝ, 0 ≤ K ∧ (∀ ξ : ℝ, localMass N Y H B ξ ≤ K) ∧
+      (∀ ξ : ℝ, ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 ≤ K) ∧
+      (∀ ξ : ℝ, kernelMass N Y H B ξ ≤ K) := by
+  obtain ⟨K, hK0, hK⟩ := kernelMass_bounded_of_local' N Y H B V hH hV hloc
+  have hmass : ∀ ξ : ℝ, ∫ α in minorDomain N Y H B, ‖secondSum Y α‖ ^ 2 ≤ K := by
+    intro ξ
+    exact le_trans (mass_le_kernelMass' N Y H B ξ hH) (hK ξ)
+  exact ⟨K, hK0, fun ξ => le_trans (localMass_le_mass' N Y H B ξ) (hmass ξ), hmass,
+    fun ξ => hK ξ⟩
+
 /-- LEAF. Page 44 display 3, after Cauchy Schwarz, Parseval and
 Brun Titchmarsh. Squaring removes the square root and supremum.
 Only the Fourier coefficient to kernel comparison is asserted.
@@ -811,8 +892,7 @@ theorem coefficient_energy :
       (∀ ξ : ℝ, kernelMass N (localization N η) (windowLength N η) (arcExponent η A) ξ ≤ K) →
       (∑ m ∈ window N η,
         ‖minorCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m‖ ^ 2) ^ 2 ≤
-        D * (localization N η * Real.log N) ^ 3 * K := by
-  exact Decomp489e.coefficient_energy_from_leaves
+        D * (localization N η * Real.log N) ^ 3 * K := by sorry
 
 /-- Page 44 displays 3 and 5 give the exact sealed minor_bound statement.
 CONDITIONAL ON local_mass_bound, kernel_from_local and coefficient_energy. -/
