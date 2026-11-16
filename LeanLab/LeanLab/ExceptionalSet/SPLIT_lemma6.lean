@@ -11,6 +11,8 @@ and is strictly weaker than the split's main statement.
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.SPLIT_leaf_even_moment
+import LeanLab.ExceptionalSet.SPLIT_leaf_odd_moment
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -33,17 +35,24 @@ theorem leaf_moment_parity (γ δ : ℝ) (N : ℕ) :
         + (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
           ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) := by
   classical
-  rw [← Finset.sum_filter_add_sum_filter_not (s := Finset.Icc ((N + 1) / 2) N)
-    (p := fun n : ℕ => Even (nu γ n))]
+  rw [← sum_filter_add_sum_filter_not (Finset.Icc ((N + 1) / 2) N) (fun n : ℕ => Even (nu γ n)) (fun n => ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nuOdd γ n)‖ ^ 2)]
   congr 1
-  · refine Finset.sum_congr rfl (fun n hn => ?_)
-    have he : Even (nu γ n) := (Finset.mem_filter.mp hn).2
-    have hodd : ¬ Odd (nu γ n) := Int.not_odd_iff_even.mpr he
-    simp only [nuOdd, hodd, ite_false]
-  · refine Finset.sum_congr rfl (fun n hn => ?_)
-    have hne : ¬ Even (nu γ n) := (Finset.mem_filter.mp hn).2
-    have hodd : Odd (nu γ n) := Int.not_even_iff_odd.mp hne
-    simp only [nuOdd, hodd, ite_true]
+  · apply sum_congr rfl
+    intro x hx
+    have h1 : Even (nu γ x) := (Finset.mem_filter.1 hx).2
+    have h2 : ¬ Odd (nu γ x) := mt Int.not_even_iff_odd.mpr (not_not.mpr h1)
+    have h3 : nuOdd γ x = nu γ x + 1 := by
+      unfold nuOdd
+      simp [h2]
+    rw [h3]
+  · apply sum_congr rfl
+    intro x hx
+    have h1 : ¬ Even (nu γ x) := (Finset.mem_filter.1 hx).2
+    have h2 : Odd (nu γ x) := Int.not_even_iff_odd.mp h1
+    have h3 : nuOdd γ x = nu γ x := by
+      unfold nuOdd
+      simp [h2]
+    rw [h3]
 
 /-- LEAF. Step of the proof, the even branch: display 29. For `1 < γ < 3/2` the
 second moment of the adjacent coefficient `R₁(ν_n + 1)` over the even `ν_n` of the
@@ -58,7 +67,7 @@ theorem leaf_even_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  exact LeanLab.ExceptionalSet.Decomp371c.Split.leaf_even_moment_split γ h1 h2
 
 /-- LEAF. Step of the proof, the odd branch: display 30 with the reflected kernel.
 For `1 < γ < 3/2` the second moment of `R₁(ν_n)` over the odd `ν_n` of the window,
@@ -73,7 +82,7 @@ theorem leaf_odd_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  exact LeanLab.ExceptionalSet.Decomp371c.leaf_odd_moment_split γ h1 h2
 
 /-- LEAF. Step of the proof, the finite Chebyshev step after display 30, with no
 analysis in it. A nonnegative sequence whose squares sum to at most `A` exceeds
@@ -85,15 +94,19 @@ theorem leaf_count_of_moment (s : Finset ℕ) (g : ℕ → ℝ) (T A : ℝ) (hT 
     (hmoment : (∑ n ∈ s, g n ^ 2) ≤ A) :
     (((s.filter (fun n => T < g n)).card : ℝ) * T ^ 2) ≤ A := by
   classical
-  have hcard : (((s.filter (fun n => T < g n)).card : ℝ) * T ^ 2)
-      = ∑ n ∈ s.filter (fun n => T < g n), T ^ 2 := by
-    rw [Finset.sum_const, nsmul_eq_mul]
-  rw [hcard]
-  refine (Finset.sum_le_sum (fun n hn => ?_)).trans
-    ((Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
-      (fun i _ _ => sq_nonneg (g i))).trans hmoment)
-  have h : T < g n := (Finset.mem_filter.mp hn).2
-  nlinarith
+  calc (((s.filter (fun n => T < g n)).card : ℝ) * T ^ 2) =
+      ∑ n ∈ s.filter (fun n => T < g n), T ^ 2 := by rw [sum_const, nsmul_eq_mul]
+    _ ≤ ∑ n ∈ s.filter (fun n => T < g n), g n ^ 2 := by
+      apply sum_le_sum
+      intro i hi
+      have h1 : T < g i := (Finset.mem_filter.1 hi).2
+      have h2 : 0 < g i := hT.trans h1
+      nlinarith
+    _ ≤ ∑ n ∈ s, g n ^ 2 := by
+      apply sum_le_sum_of_subset_of_nonneg (filter_subset _ _)
+      intro i _ _
+      positivity
+    _ ≤ A := hmoment
 
 /-! ### Assembly -/
 
@@ -171,5 +184,3 @@ theorem lemma6_split : Lemma6 := by
 end LeanLab.ExceptionalSet.U1539
 
 #print axioms LeanLab.ExceptionalSet.U1539.lemma6_split
-#print axioms LeanLab.ExceptionalSet.U1539.leaf_moment_parity
-#print axioms LeanLab.ExceptionalSet.U1539.leaf_count_of_moment
