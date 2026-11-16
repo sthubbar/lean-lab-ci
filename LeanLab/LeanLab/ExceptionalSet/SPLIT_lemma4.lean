@@ -66,13 +66,11 @@ theorem leaf_log_regime :
         (Nat.ceil (Real.log N) : ℝ) ≤ F γ N ^ C := by
   intro γ hγ1 hγ2 C hC
   have hδ : 0 < γ - 1 := by linarith
-  have hδne : (γ - 1) ≠ 0 := ne_of_gt hδ
-  set X : ℝ := (1 / C) ^ (1 / (γ - 1)) with hXdef
-  have hX0 : 0 ≤ X := Real.rpow_nonneg (by positivity) _
-  set L₀ : ℝ := max 1 (max (Real.exp 1) X) with hL₀def
-  have hL₀1 : (1 : ℝ) ≤ L₀ := le_max_left _ _
-  have hL₀e : Real.exp 1 ≤ L₀ := le_trans (le_max_left _ _) (le_max_right _ _)
-  have hL₀X : X ≤ L₀ := le_trans (le_max_right _ _) (le_max_right _ _)
+  obtain ⟨L₀, hL₀1, hL₀e, hL₀X⟩ :
+      ∃ L₀ : ℝ, (1 : ℝ) ≤ L₀ ∧ Real.exp 1 ≤ L₀ ∧ (1 / C) ^ (1 / (γ - 1)) ≤ L₀ :=
+    ⟨max 1 (max (Real.exp 1) ((1 / C) ^ (1 / (γ - 1)))),
+      le_max_left _ _, le_trans (le_max_left _ _) (le_max_right _ _),
+      le_trans (le_max_right _ _) (le_max_right _ _)⟩
   have hexp1 : (3 : ℝ) ≤ Real.exp (Real.exp 1) := by
     have h1 : 2 * Real.exp 1 ≤ Real.exp (Real.exp 1) := Real.two_mul_le_exp
     have h2 : (2 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp 1]
@@ -83,7 +81,8 @@ theorem leaf_log_regime :
     have h1 : Real.exp L₀ ≤ (Nat.ceil (Real.exp L₀) : ℝ) := Nat.le_ceil _
     have h2 : (Nat.ceil (Real.exp L₀) : ℝ) ≤ ((Nat.ceil (Real.exp L₀) + 1 : ℕ) : ℝ) := by
       push_cast; linarith
-    linarith [h2.trans (by exact_mod_cast hN : ((Nat.ceil (Real.exp L₀) + 1 : ℕ) : ℝ) ≤ (N : ℝ))]
+    linarith [h2.trans (by exact_mod_cast hN :
+      ((Nat.ceil (Real.exp L₀) + 1 : ℕ) : ℝ) ≤ (N : ℝ))]
   have hL : L₀ ≤ Real.log (N : ℝ) :=
     (Real.le_log_iff_exp_le (by have h := Real.exp_pos L₀; linarith)).mpr hNge
   have hL1 : (1 : ℝ) ≤ Real.log (N : ℝ) := le_trans hL₀1 hL
@@ -91,42 +90,47 @@ theorem leaf_log_regime :
     have h1 : (3 : ℝ) ≤ Real.exp L₀ := le_trans hexp1 (Real.exp_le_exp.mpr hL₀e)
     linarith
   have hLpos : (0 : ℝ) < Real.log (N : ℝ) := by linarith
-  set L := Real.log (N : ℝ) with hLdef
-  -- the power bound
-  have hXpow : X ^ (γ - 1) = 1 / C := by
-    rw [hXdef, ← Real.rpow_mul (by positivity : (0:ℝ) ≤ 1 / C)]
+  have hX0 : (0 : ℝ) ≤ (1 / C) ^ (1 / (γ - 1)) := Real.rpow_nonneg (by positivity) _
+  have hXpow : ((1 / C) ^ (1 / (γ - 1))) ^ (γ - 1) = 1 / C := by
+    rw [← Real.rpow_mul (by positivity : (0 : ℝ) ≤ 1 / C)]
     have h1 : 1 / (γ - 1) * (γ - 1) = 1 := by field_simp
     rw [h1, Real.rpow_one]
-  have hLδ : 1 / C ≤ L ^ (γ - 1) := by
+  have hLδ : 1 / C ≤ (Real.log (N : ℝ)) ^ (γ - 1) := by
     have h := Real.rpow_le_rpow hX0 (le_trans hL₀X hL) hδ.le
     rwa [hXpow] at h
-  have hγsplit : L ^ γ = L * L ^ (γ - 1) := by
+  have hγsplit : (Real.log (N : ℝ)) ^ γ =
+      Real.log (N : ℝ) * (Real.log (N : ℝ)) ^ (γ - 1) := by
     have h : γ = (γ - 1) + 1 := by ring
     conv_lhs => rw [h]
     rw [Real.rpow_add hLpos, Real.rpow_one]
     ring
-  have hmain : L + 1 ≤ Real.exp (C * L ^ γ) := by
-    have h1 : C * L ^ γ = C * L * L ^ (γ - 1) := by rw [hγsplit]; ring
-    have h3 : 2 * (C * L * L ^ (γ - 1)) ≤ Real.exp (C * L ^ γ) := by
+  have hmain : Real.log (N : ℝ) + 1 ≤ Real.exp (C * (Real.log (N : ℝ)) ^ γ) := by
+    have h1 : C * (Real.log (N : ℝ)) ^ γ =
+        C * Real.log (N : ℝ) * (Real.log (N : ℝ)) ^ (γ - 1) := by
+      rw [hγsplit]; ring
+    have h3 : 2 * (C * Real.log (N : ℝ) * (Real.log (N : ℝ)) ^ (γ - 1)) ≤
+        Real.exp (C * (Real.log (N : ℝ)) ^ γ) := by
       rw [h1]; exact Real.two_mul_le_exp
-    have h4 : 2 * (C * L * L ^ (γ - 1)) ≥ 2 * L := by
-      have hCL : (0 : ℝ) < C * L := by positivity
-      have h6 : C * L * (1 / C) ≤ C * L * L ^ (γ - 1) :=
+    have h4 : 2 * (C * Real.log (N : ℝ) * (Real.log (N : ℝ)) ^ (γ - 1)) ≥
+        2 * Real.log (N : ℝ) := by
+      have hCL : (0 : ℝ) < C * Real.log (N : ℝ) := by positivity
+      have h6 : C * Real.log (N : ℝ) * (1 / C) ≤
+          C * Real.log (N : ℝ) * (Real.log (N : ℝ)) ^ (γ - 1) :=
         mul_le_mul_of_nonneg_left hLδ hCL.le
-      have h5 : C * L * (1 / C) = L := by
-        field_simp
+      have h5 : C * Real.log (N : ℝ) * (1 / C) = Real.log (N : ℝ) := by field_simp
       linarith
     linarith
-  have hγle : L ^ γ ≥ 0 := Real.rpow_nonneg hLpos.le _
-  have hceil : (Nat.ceil L : ℝ) ≤ Real.exp (C * L ^ γ) := by
-    have h1 : (Nat.ceil L : ℝ) < L + 1 := Nat.ceil_lt_add_one hLpos.le
+  have hceil : (Nat.ceil (Real.log (N : ℝ)) : ℝ) ≤
+      Real.exp (C * (Real.log (N : ℝ)) ^ γ) := by
+    have h1 : (Nat.ceil (Real.log (N : ℝ)) : ℝ) < Real.log (N : ℝ) + 1 :=
+      Nat.ceil_lt_add_one hLpos.le
     linarith
-  have hceil1 : (1 : ℝ) ≤ (Nat.ceil L : ℝ) := le_trans hL1 (Nat.le_ceil L)
-  have hF : F γ N ^ C = Real.exp (C * L ^ γ) := by
+  have hceil1 : (1 : ℝ) ≤ (Nat.ceil (Real.log (N : ℝ)) : ℝ) := le_trans hL1 (Nat.le_ceil _)
+  have hF : F γ N ^ C = Real.exp (C * (Real.log (N : ℝ)) ^ γ) := by
     have hpos : 0 < F γ N := Real.exp_pos _
     rw [Real.rpow_def_of_pos hpos]
     congr 1
-    simp [F, hLdef, Real.log_exp, mul_comm]
+    simp [F, Real.log_exp, mul_comm]
   refine ⟨?_, hL1, hceil1, ?_⟩
   · exact_mod_cast hL3
   · rw [hF]; exact hceil
@@ -158,29 +162,23 @@ theorem leaf_small_N :
   intro N hN hNN₀ α z₁ z₂ hz₂ hz1 hz₁
   have hp : (0 : ℝ) ≤ 3 - 2 * γ := by linarith
   have hNR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
-  have hN₀R : (0 : ℝ) < (N₀ : ℝ) := by
-    have : (1 : ℝ) ≤ (N₀ : ℝ) := by exact_mod_cast le_trans hN hNN₀
-    linarith
-  set S : Finset ℕ := (Finset.Ioc (N / 2) N).filter
-    (fun n : ℕ => z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁) with hSdef
-  -- the trivial bound on the count
-  have hcard : (S.card : ℝ) ≤ (N : ℝ) := by
-    have h1 : S.card ≤ N := by
-      rw [hSdef]
+  have hcard : (((Finset.Ioc (N / 2) N).filter (fun n : ℕ =>
+      z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁)).card : ℝ) ≤ (N : ℝ) := by
+    have h1 : ((Finset.Ioc (N / 2) N).filter (fun n : ℕ =>
+        z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁)).card ≤ N := by
       refine le_trans (Finset.card_filter_le _ _) ?_
       rw [Nat.card_Ioc]
       omega
     exact_mod_cast h1
   have hx0 : 0 ≤ (z₁ - z₂) * (N : ℝ) / 2 := by
-    have : 0 ≤ z₁ - z₂ := by linarith
+    have h2 : 0 ≤ z₁ - z₂ := by linarith
     positivity
   have hxN : (z₁ - z₂) * (N : ℝ) / 2 ≤ (N : ℝ) := by
     have h1 : z₁ - z₂ ≤ 1 := by linarith
     have h2 : (z₁ - z₂) * (N : ℝ) / 2 ≤ 1 * (N : ℝ) / 2 := by
-      have : (0 : ℝ) ≤ (N : ℝ) / 2 := by positivity
+      have h3 : (0 : ℝ) ≤ (N : ℝ) / 2 := by positivity
       nlinarith
     linarith
-  -- the exp factor is at least `1/B`
   have hL0 : 0 ≤ Real.log (N : ℝ) := Real.log_nonneg (by exact_mod_cast hN)
   have hLM : Real.log (N : ℝ) ≤ Real.log (N₀ : ℝ) :=
     Real.log_le_log hNR (by exact_mod_cast hNN₀)
@@ -192,10 +190,14 @@ theorem leaf_small_N :
     rw [← Real.exp_add, ← Real.exp_zero]
     refine Real.exp_le_exp.mpr ?_
     nlinarith
-  have hmain : |(S.card : ℝ) - (z₁ - z₂) * (N : ℝ) / 2| ≤ (N : ℝ) := by
+  have hmain : |(((Finset.Ioc (N / 2) N).filter (fun n : ℕ =>
+      z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁)).card : ℝ)
+      - (z₁ - z₂) * (N : ℝ) / 2| ≤ (N : ℝ) := by
     rw [abs_le]
     constructor <;> linarith
-  calc |(S.card : ℝ) - (z₁ - z₂) * (N : ℝ) / 2|
+  calc |(((Finset.Ioc (N / 2) N).filter (fun n : ℕ =>
+          z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁)).card : ℝ)
+        - (z₁ - z₂) * (N : ℝ) / 2|
       ≤ (N : ℝ) := hmain
     _ = (N : ℝ) * 1 := by ring
     _ ≤ (N : ℝ) * (Real.exp (κ * Real.log (N₀ : ℝ) ^ (3 - 2 * γ)) *
