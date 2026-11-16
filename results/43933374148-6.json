@@ -444,14 +444,169 @@
    "file": "LeanLab/LeanLab/LiuWang2002/Decomp352a.lean",
    "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
    "seconds": 1221
+  },
+  {
+   "file": "LeanLab/LeanLab/LiuWang2002/Decomp569a.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 1 errors, first: maximum recursion depth has been reached use `set_option maxRecDepth <num>` to increase limit use `set_option diagnostics true` to get diagnostic information",
+   "seconds": 34
+  },
+  {
+   "file": "LeanLab/LeanLab/LiuWang2002/Decomp569b.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 1 errors, first: maximum recursion depth has been reached use `set_option maxRecDepth <num>` to increase limit use `set_option diagnostics true` to get diagnostic information",
+   "seconds": 35
+  },
+  {
+   "file": "LeanLab/LeanLab/MissingDigit/Statements.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 18
+  },
+  {
+   "file": "LeanLab/LeanLab/OeSHP2014/OeSHP2014U6818Joint.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/OeSHP2014/Table9.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/OpenProblems/SPLIT_route_euler_almost_all.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 40
+  },
+  {
+   "file": "LeanLab/LeanLab/OpenProblems/State1612.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 26
+  },
+  {
+   "file": "LeanLab/LeanLab/Perelli1996/Decomp103.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 93
+  },
+  {
+   "file": "LeanLab/LeanLab/PerelliPintz1992/Burst8P2b.lean",
+   "result": "SKIP over 3000 lines",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/PerelliPintz1992/MainAssembly.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Pintz2021/proposed/U1634-reshape-20261108/DecompJ665.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 54
+  },
+  {
+   "file": "LeanLab/LeanLab/Pintz2021/proposed/U1634-reshape-20261108/DecompJ834.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 32
+  },
+  {
+   "file": "LeanLab/LeanLab/PlattTrudgian2014/Lambda.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 20
+  },
+  {
+   "file": "LeanLab/LeanLab/Ramare1995/Decomp1526b.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Ramare1995/Decomp1526c.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/RamareSaouter2003/Decomp126.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 85
+  },
+  {
+   "file": "LeanLab/LeanLab/RamareSaouter2003/Decomp563c.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 37
+  },
+  {
+   "file": "LeanLab/LeanLab/Richstein2001/Decomp116.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: maximum recursion depth has been reached use `set_option maxRecDepth <num>` to increase limit use `set_option diagnostics true` to get diagnostic information",
+   "seconds": 121
+  },
+  {
+   "file": "LeanLab/LeanLab/Richstein2001/Gap.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Sinisalo1993/Arith.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp420b.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 82
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp420d.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 30
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp571b.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 28
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp580c.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 42
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/MMSProp33.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/VanDerCorput1939/Statements.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Vaughan1979/Statements.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 23
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Gaps3.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Records1.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Records2.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Rows3.lean",
+   "result": "no candidate sites",
+   "seconds": 0
   }
  ],
  "summary": {
   "files": 117,
   "declarations_closed": 1,
   "sites": 1,
-  "skipped": 3,
-  "seconds": 9045
+  "skipped": 4,
+  "seconds": 9851
  },
  "selftest": {
   "ok": true,
