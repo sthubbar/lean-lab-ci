@@ -19,6 +19,7 @@ The E4 part, `four_density_drop`, the loss of the strip `s < a + 2 b ≤ 1` of E
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp514a
+import LeanLab.BHP1997.BandRegion635
 
 namespace LeanLab.BHP1997.LowerShortC165
 open Classical Complex Decomp132 DecompC165b DecompC165d Decomp514a
@@ -257,7 +258,113 @@ grid sum over cells inside E2 would prove it. -/
 theorem leaf_two_region_quadrature {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1/10^8) :
     13/10 ≤ ∫ a in (1/10:ℝ)..(1/2:ℝ), ∫ b in (1/10:ℝ)..(1/2:ℝ),
       if lowerTwoDiscarded ε a b then 1/(a*b^2) else 0 := by
-  sorry
+
+  have hband_measurable :
+    MeasurableSet {p : ℝ × ℝ | ((2273/10000 ≤ p.2 ∧ p.2 ≤ p.1 ∧ p.1 ≤ 1/2 ∧ 9/16 ≤ p.1 + 2*p.2 ∧ p.1 + 2*p.2 ≤ 1) ∨
+        (1/8 ≤ p.2 ∧ p.2 ≤ 2273/10000 ∧ p.2 ≤ p.1 ∧ p.1 ≤ 1/2 ∧ 9/16 ≤ p.1 + 2*p.2 ∧
+            p.1 + 2*p.2 ≤ 1 ∧ 4*p.1 + 3*p.2 ≤ 15/8 ∧ 17/8 ≤ 4*p.1 + 7*p.2 ∧
+            (p.1 + p.2 ≤ 7/16 ∨ 17/8 ≤ 4*p.1 + 5*p.2) ∧
+            (2273/10000 ≤ p.1 ∨ p.1 + 1/8 ≤ 2*p.2)) ∨
+        (1/8 ≤ p.2 ∧ p.2 ≤ 2273/10000 ∧ p.2 ≤ p.1 ∧ p.1 ≤ 1/2 ∧ 9/16 ≤ p.1 + 2*p.2 ∧
+            p.1 + 2*p.2 ≤ 1 ∧ 17/8 ≤ 4*p.1 + 3*p.2 ∧
+            (4*p.1 + p.2 ≤ 15/8 ∨ 17/8 ≤ 4*p.1 + p.2))) } := by  
+    have hle : ∀ f g : ℝ × ℝ → ℝ, Continuous f → Continuous g →
+        MeasurableSet {p | f p ≤ g p} := fun f g hf hg => (isClosed_le hf hg).measurableSet
+    simp only [Set.ofPred_and, Set.ofPred_or]
+    repeat' first
+      | apply MeasurableSet.inter
+      | apply MeasurableSet.union
+      | (apply hle <;> fun_prop)
+  
+
+  have hle : ∀ a b : ℝ,
+      (if ((2273/10000 ≤ b ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 4*a + 3*b ≤ 15/8 ∧ 17/8 ≤ 4*a + 7*b ∧
+            (a + b ≤ 7/16 ∨ 17/8 ≤ 4*a + 5*b) ∧
+            (2273/10000 ≤ a ∨ a + 1/8 ≤ 2*b)) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧
+            (4*a + b ≤ 15/8 ∨ 17/8 ≤ 4*a + b))) then 1/(a*b^2) else 0) ≤
+      (if lowerTwoDiscarded ε a b then 1/(a*b^2) else 0) := by
+    intro a b
+    by_cases hR : (((2273/10000 ≤ b ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 4*a + 3*b ≤ 15/8 ∧ 17/8 ≤ 4*a + 7*b ∧
+            (a + b ≤ 7/16 ∨ 17/8 ≤ 4*a + 5*b) ∧
+            (2273/10000 ≤ a ∨ a + 1/8 ≤ 2*b)) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧
+            (4*a + b ≤ 15/8 ∨ 17/8 ≤ 4*a + b))))
+    · rw [if_pos hR]
+      rw [if_pos (by
+        rcases hR with h | h | h
+        · obtain ⟨hb, hba, ha, hs1, hs2⟩ := h
+          exact leaf_high_band_membership hε hε8 hb hba ha hs1 hs2
+        · obtain ⟨hb1, hb2, hba, ha, hs1, hs2, hcut, h7, h5, hclear⟩ := h
+          exact leaf_middle_band_membership hε hε8 hb1 hb2 hba ha hs1 hs2 hcut h7 h5 hclear
+        · obtain ⟨hb1, hb2, hba, ha, hs1, hs2, h3, h4⟩ := h
+          exact leaf_notch_band_membership hε hε8 hb1 hb2 hba ha hs1 hs2 h3 h4)]
+    · rw [if_neg hR]
+      by_cases hD : lowerTwoDiscarded ε a b
+      · rw [if_pos hD]
+        obtain ⟨hb, hba, ha, hs⟩ := lower_two_domain_box hε8 hD
+        have hb2 : (1/100:ℝ) ≤ b^2 := by nlinarith
+        have hab : (1/10:ℝ)*(1/100) ≤ a*b^2 :=
+          mul_le_mul (by linarith) hb2 (by norm_num) (by linarith)
+        have hpos : 0 < a*b^2 := by linarith
+        exact le_of_lt (one_div_pos.2 hpos)
+      · rw [if_neg hD]
+  have hf : Measurable (fun p : ℝ × ℝ =>
+      if ((2273/10000 ≤ p.2 ∧ p.2 ≤ p.1 ∧ p.1 ≤ 1/2 ∧ 9/16 ≤ p.1 + 2*p.2 ∧ p.1 + 2*p.2 ≤ 1) ∨
+        (1/8 ≤ p.2 ∧ p.2 ≤ 2273/10000 ∧ p.2 ≤ p.1 ∧ p.1 ≤ 1/2 ∧ 9/16 ≤ p.1 + 2*p.2 ∧
+            p.1 + 2*p.2 ≤ 1 ∧ 4*p.1 + 3*p.2 ≤ 15/8 ∧ 17/8 ≤ 4*p.1 + 7*p.2 ∧
+            (p.1 + p.2 ≤ 7/16 ∨ 17/8 ≤ 4*p.1 + 5*p.2) ∧
+            (2273/10000 ≤ p.1 ∨ p.1 + 1/8 ≤ 2*p.2)) ∨
+        (1/8 ≤ p.2 ∧ p.2 ≤ 2273/10000 ∧ p.2 ≤ p.1 ∧ p.1 ≤ 1/2 ∧ 9/16 ≤ p.1 + 2*p.2 ∧
+            p.1 + 2*p.2 ≤ 1 ∧ 17/8 ≤ 4*p.1 + 3*p.2 ∧
+            (4*p.1 + p.2 ≤ 15/8 ∨ 17/8 ≤ 4*p.1 + p.2))) then 1/(p.1*p.2^2) else 0) :=
+    Measurable.ite hband_measurable (by fun_prop) measurable_const
+  have hg : Measurable (fun p : ℝ × ℝ =>
+      if lowerTwoDiscarded ε p.1 p.2 then 1/(p.1*p.2^2) else 0) :=
+    Measurable.ite (two_density_region_measurable ε) (by fun_prop) measurable_const
+  have hfb : ∀ a b : ℝ, |(if ((2273/10000 ≤ b ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 4*a + 3*b ≤ 15/8 ∧ 17/8 ≤ 4*a + 7*b ∧
+            (a + b ≤ 7/16 ∨ 17/8 ≤ 4*a + 5*b) ∧
+            (2273/10000 ≤ a ∨ a + 1/8 ≤ 2*b)) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧
+            (4*a + b ≤ 15/8 ∨ 17/8 ≤ 4*a + b))) then 1/(a*b^2) else 0)| ≤ 1000 :=
+    fun a b => leaf_three_band_bound a b
+  have hgb : ∀ a b : ℝ,
+      |(if lowerTwoDiscarded ε a b then 1/(a*b^2) else 0)| ≤ 1000 := fun a b => by
+    by_cases hD : lowerTwoDiscarded ε a b
+    · simp only [hD, ↓reduceIte]
+      obtain ⟨hb, hba, ha, hs⟩ := lower_two_domain_box hε8 hD
+      have hb2 : (1/100:ℝ) ≤ b^2 := by nlinarith
+      have hab : (1/10:ℝ)*(1/100) ≤ a*b^2 :=
+        mul_le_mul (by linarith) hb2 (by norm_num) (by linarith)
+      have hpos : 0 < a*b^2 := by linarith
+      have h1 : 1/(a*b^2) ≤ 1000 := by rw [div_le_iff₀ hpos]; linarith
+      have h0 : 0 ≤ 1/(a*b^2) := by positivity
+      rw [abs_of_nonneg (by linarith)]
+      linarith
+    · simp only [hD, ↓reduceIte]
+      norm_num
+  have hmono := slope_two_mono
+    (fun a b => if ((2273/10000 ≤ b ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 4*a + 3*b ≤ 15/8 ∧ 17/8 ≤ 4*a + 7*b ∧
+            (a + b ≤ 7/16 ∨ 17/8 ≤ 4*a + 5*b) ∧
+            (2273/10000 ≤ a ∨ a + 1/8 ≤ 2*b)) ∨
+        (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
+            a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧
+            (4*a + b ≤ 15/8 ∨ 17/8 ≤ 4*a + b))) then 1/(a*b^2) else 0)
+    (fun a b => if lowerTwoDiscarded ε a b then 1/(a*b^2) else 0)
+    hf hg (M := 1000) hfb hgb hle (lo := 1/10) (hi := 1/2) (by norm_num)
+  have hq := three_band_quadrature635 hε hε8
+  linarith
 
 /-- P0069 page 51, the E2 integral of the computer calculation that gives `v0`, a lower bound:
 the integral of `ω((1 - a - b)/b) / (a b^2)` over E2 is at least `13/20`, since `ω ≥ 1/2` on

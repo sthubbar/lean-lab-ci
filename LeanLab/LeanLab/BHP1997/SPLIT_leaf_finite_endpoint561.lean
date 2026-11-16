@@ -6,7 +6,7 @@ the squared count deviation over the even frequency set must save one arbitrary
 power of the logarithm. That saving is the only arithmetic input of the split.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.Decomp561m
+import LeanLab.BHP1997.PrincipalData635
 
 namespace LeanLab.BHP1997.Decomp561m
 open Classical Complex Thm2 MeasureTheory Set Decomp561d Decomp561e

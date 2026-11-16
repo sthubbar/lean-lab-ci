@@ -4,6 +4,7 @@ Independent split of the local minor arc energy estimate.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Thm2Sing
+import LeanLab.BHP1997.Gallagher605
 
 namespace LeanLab.BHP1997.Decomp561d
 open Classical Complex Thm2 MeasureTheory Set
@@ -92,7 +93,79 @@ theorem leaf_gallagher561 :
     ∃ G : ℝ, 0 < G ∧ ∀ Y T : ℝ, 1 ≤ Y → 0 < T → T ≤ Y →
       ∀ (b : ℕ → ℂ) (v : ℝ) (q : ℕ) (E : Finset (DirichletCharacter ℂ q)),
         characterEnergy561 Y T b v q E ≤ G / T ^ 2 * fixedWindowMoment561 Y T b v q E := by
-  sorry
+  refine ⟨Real.pi ^ 2, sq_pos_of_pos Real.pi_pos, ?_⟩
+  intro Y T hY hT hTY b v q E
+  have hT0 : T ≠ 0 := ne_of_gt hT
+  have hpoly (c : ℕ → ℂ) (t : ℝ) :
+      (∑ m ∈ support561 Y, c m * LeanLab.PNTPort.LargeSieve.e ((m : ℝ) * t)) =
+        polynomial512 (support561 Y) c t := by
+    unfold polynomial512
+    apply Finset.sum_congr rfl
+    intro m hm
+    congr 1
+    rw [fourier_coe_apply]
+    unfold LeanLab.PNTPort.LargeSieve.e
+    congr 1
+    push_cast
+    ring
+  have hwindow (c : ℕ → ℂ) (y : ℝ) :
+      Gallagher605.frequencyWindow (support561 Y) c (fun m => (m : ℝ)) (T / 2) (y - T / 4) =
+        ∑ m ∈ (support561 Y).filter
+          (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4), c m := by
+    unfold Gallagher605.frequencyWindow
+    rw [Finset.sum_filter]
+    apply Finset.sum_congr rfl
+    intro m hm
+    rw [Set.indicator_apply]
+    have he : (y - T / 4 ∈ Set.Icc ((m : ℝ) - T / 2) (m : ℝ)) ↔
+        y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4 := by
+      simp only [Set.mem_Icc]
+      constructor <;> rintro ⟨ha, hb⟩ <;> constructor <;> linarith
+    simp only [he]
+  have hwhole (c : ℕ → ℂ) :
+      (∫ y : ℝ, ‖Gallagher605.frequencyWindow (support561 Y) c
+        (fun m => (m : ℝ)) (T / 2) y‖ ^ 2) =
+      ∫ y in (Y / 2)..(3 * Y),
+        ‖∑ m ∈ (support561 Y).filter
+          (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4), c m‖ ^ 2 := by
+    rw [← MeasureTheory.integral_sub_right_eq_self
+      (fun y : ℝ => ‖Gallagher605.frequencyWindow (support561 Y) c
+        (fun m => (m : ℝ)) (T / 2) y‖ ^ 2) (T / 4)]
+    simp_rw [hwindow]
+    rw [intervalIntegral.integral_of_le (by linarith : Y / 2 ≤ 3 * Y),
+      ← MeasureTheory.integral_Icc_eq_integral_Ioc]
+    symm
+    apply MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero
+    intro y hy
+    have hz : (support561 Y).filter
+        (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4) = ∅ := by
+      apply Finset.filter_eq_empty_iff.mpr
+      intro m hm hw
+      have hm' := Finset.mem_Ioc.mp hm
+      have hmlo : Y < (m : ℝ) := by
+        have hfloor := Nat.lt_floor_add_one Y
+        have hcast : (⌊Y⌋₊ : ℝ) + 1 ≤ (m : ℝ) := by exact_mod_cast hm'.1
+        linarith
+      have hmhi : (m : ℝ) ≤ 2 * Y :=
+        (show (m : ℝ) ≤ (⌊2 * Y⌋₊ : ℝ) by exact_mod_cast hm'.2).trans
+          (Nat.floor_le (by linarith))
+      apply hy
+      constructor <;> linarith [hw.1, hw.2]
+    simp only [hz, Finset.sum_empty, norm_zero, zero_pow (by norm_num : 2 ≠ 0)]
+  unfold characterEnergy561 fixedWindowMoment561
+  rw [Finset.mul_sum]
+  apply Finset.sum_le_sum
+  intro χ hχ
+  have h := Gallagher605.gallagher_window_smoothing (support561 Y)
+    (centered561 Y b v χ) (fun m => (m : ℝ))
+    (δ := T / 2) (T := 1 / T) (by positivity) (by positivity) (by
+      field_simp
+      linarith)
+  simp_rw [hpoly] at h
+  rw [hwhole] at h
+  have hfactor : Real.pi ^ 2 / (4 * (T / 2) ^ 2) = Real.pi ^ 2 / T ^ 2 := by ring
+  rw [hfactor] at h
+  simpa only [neg_div] using h
 
 /-- LEAF. P0069 page 10 after 2.16, Saffari Vaughan reference 29 proof of 6.21.
 Uniform control of the multiplicative windows controls the fixed additive window.

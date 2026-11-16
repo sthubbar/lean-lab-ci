@@ -28,7 +28,11 @@ theorem upper_slack_split_bounded_rescaling
     ∃ (lam : ℝ → ℕ → ℝ) (Λ : ℝ),
       (∀ x m, |lam x m| ≤ Λ) ∧
       (∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ m ∈ rightInterval ε x, 1 ≤ lam x m) := by
-  sorry
+  refine ⟨fun _ _ => 1, 1, ?_, 0, ?_⟩
+  · intro x m
+    simp
+  · intro x hx m hm
+    exact le_rfl
 
 /-- LEAF: P0069 page 53 with display 5.17 on page 51, the short distribution condition at the slack
 density for a rescaling that is already fixed. With `lam` and `Lambda` given along with the uniform

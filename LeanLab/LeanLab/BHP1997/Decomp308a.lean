@@ -3,7 +3,7 @@ BHP1997, pages 51 and 53. Buchstab model shared by the short weights.
 Reuse the method of steps construction already on main.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.ChenDoubleSieve.Decomp275b
+import LeanLab.Languasco2004.Buchstab578
 import LeanLab.ChenDoubleSieve.I2Range
 
 namespace LeanLab.BHP1997.Task308
@@ -17,7 +17,11 @@ theorem buchstab_model_exists :
     ∃ ω : ℝ → ℝ,
       LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω ∧
       LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω := by
-  obtain ⟨F, f, ω, hF, hω⟩ := LeanLab.ChenDoubleSieve.Task275.standard_functions
+  let ω := LeanLab.Languasco2004.Buchstab578.buchstab
+  have hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω :=
+    ⟨LeanLab.Languasco2004.Buchstab578.buchstab_continuous.continuousOn,
+      LeanLab.Languasco2004.Buchstab578.buchstab_initial,
+      LeanLab.Languasco2004.Buchstab578.buchstab_weight_derivative⟩
   let w : ℝ → ℝ := fun u => if 1 ≤ u then ω u else 0
   have hw : ∀ u : ℝ, 1 ≤ u → w u = ω u := by
     intro u hu
