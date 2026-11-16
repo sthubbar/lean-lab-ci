@@ -1261,10 +1261,6 @@ theorem p35_sum_d3_div_le_log {ε : ℝ} (hε : 0 < ε) {X : ℕ} (hX : 1 ≤ X)
     _ ≤ (1 + 3 * ε / 20 * Real.log X) ^ 3 :=
         pow_le_pow_left₀ hH0 (le_trans (p35_harmonic_Icc_le M) (by linarith)) 3
 
-#print axioms p35_dk_sum_step
-#print axioms p35_sum_dk_div_le
-#print axioms p35_harmonic_Icc_le
-#print axioms p35_sum_d3_div_le_log
 
 theorem p35_mem_majorArcs_of_close {ε : ℝ} {X : ℕ} {H : ℝ} {α : ℝ} (hα : α ∈ arcRange ε X)
     (hβ0 : 0 ≤ betaDelta ε X H) (hβQ : betaDelta ε X H < 1 / Qpar ε X) {m M : ℕ} (hm : 1 ≤ m)
@@ -1901,7 +1897,6 @@ private theorem p35_Pm_bounds_m {R : ℝ} (hR : 3 ≤ R) {T : ℝ} (hT : 0 ≤ T
     nlinarith [hDnn, pow_pos hKp 3]
 
 
-
 /-! ### The sum over the multiples of one `m` on a minor arc -/
 
 private theorem p35_inner_m_bound {X : ℕ} (hX : 1 ≤ X) {H : ℝ} (hH : 0 ≤ H) (hHX : H ≤ X)
@@ -2125,7 +2120,6 @@ private theorem p35_inner_m_bound {X : ℕ} (hX : 1 ≤ X) {H : ℝ} (hH : 0 ≤
   calc 1 / (m * β) * (B₀ + N * (3 * B₀ * m / X)) ≤ 1 / (m * β) * (7 * B₀) :=
         mul_le_mul_of_nonneg_left (by linarith) (by positivity)
     _ = 7 * B₀ / (m * β) := by ring
-
 
 
 /-! ### Kim, Proposition 3.5, with the paper's exponent -/
