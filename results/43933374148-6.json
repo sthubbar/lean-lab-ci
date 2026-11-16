@@ -159,6 +159,101 @@
    "file": "LeanLab/LeanLab/ChirreHagen2025/Decomp391a.lean",
    "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
    "seconds": 30
+  },
+  {
+   "file": "LeanLab/LeanLab/ChirreHagen2025/Decomp391b.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 26
+  },
+  {
+   "file": "LeanLab/LeanLab/DensityGoldbach/DecompJ211.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/DensityGoldbach/Statements.lean",
+   "result": "0 closed of 6 declarations, 0 of 6 sites named a tactic, 0 errors",
+   "seconds": 11
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/Decomp372d.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/Decomp395a.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/Decomp455c.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/Decomp500a.lean",
+   "result": "0 closed of 11 declarations, 0 of 11 sites named a tactic, 0 errors",
+   "seconds": 24
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_certificate240.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 606
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_cray_high_blocks.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 24
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_cray_middle2_blocks.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 18
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_leaf_quarter_fourth_250.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 21
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_exp_sum_bound.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 63
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_interval_majorant524.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 284
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_odd_moment_upper.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_perelliPintz.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 24
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_theorem82.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 28
+  },
+  {
+   "file": "LeanLab/LeanLab/GRHComputations/Statements.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 14
+  },
+  {
+   "file": "LeanLab/LeanLab/GoldbachAverage/CesaroDecomp82.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 41
+  },
+  {
+   "file": "LeanLab/LeanLab/GoldbachAverage/DecompJ245.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 710
   }
  ],
  "summary": {
@@ -166,7 +261,7 @@
   "declarations_closed": 1,
   "sites": 1,
   "skipped": 2,
-  "seconds": 2746
+  "seconds": 4645
  },
  "selftest": {
   "ok": true,
