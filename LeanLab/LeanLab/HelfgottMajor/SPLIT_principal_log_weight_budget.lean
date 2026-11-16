@@ -1680,6 +1680,123 @@ end DigammaBudget
 /-! ### The leaves of the unit, unchanged -/
 open Real MeasureTheory Contour457
 
+/-! ### The short range: a rational majorant with an exact integral
+
+The leaf `principal_log_weight_sq_short` was cut with the pointwise hypothesis
+`‖principalLogWeight t‖² ≤ 5`, which is false: the true value at `t = 0` is `12.0524`. The
+reduction below replaces it by a majorant of the Cauchy kernel's shape,
+`‖principalLogWeight t‖² ≤ 14 / (1 + 4 t²)`, which the weight does satisfy on `|t| ≤ 2`
+(the product `(1 + 4t²)·‖w t‖²` is maximal at `t = 0`, at `12.0524`, and decreases), and
+whose integral is exactly `14 · arctan 4 = 18.56 ≤ 20`. The arctan arithmetic is proved
+here, so the leaf rests on that single pointwise inequality and nothing else. -/
+
+/-- `arctan (1/4) ≥ 1/4 - (1/4)³/3`, from `arctan x = ∫_0^x 1/(1+u²) du` and
+`1/(1+u²) ≥ 1 - u²`. -/
+private theorem arctan_quarter_lower :
+    (1 : ℝ) / 4 - ((1 : ℝ) / 4) ^ 3 / 3 ≤ Real.arctan ((1 : ℝ) / 4) := by
+  have hpt : ∀ x ∈ Set.Icc (0 : ℝ) ((1 : ℝ) / 4), (1 - x ^ 2) ≤ (1 : ℝ) / (1 + x ^ 2) := by
+    intro x hx
+    have hx0 : (0 : ℝ) ≤ x := hx.1
+    have hx1 : x ≤ 1 / 4 := hx.2
+    have hx2 : x ^ 2 ≤ 1 := by nlinarith
+    rw [le_div_iff₀ (by positivity : (0 : ℝ) < 1 + x ^ 2)]
+    nlinarith [sq_nonneg x, sq_nonneg (x ^ 2)]
+  have hcont1 : Continuous fun x : ℝ => 1 - x ^ 2 := by fun_prop
+  have hcont2 : Continuous fun x : ℝ => (1 : ℝ) / (1 + x ^ 2) := by
+    refine Continuous.div continuous_const (by fun_prop) ?_
+    intro x
+    positivity
+  have hint := intervalIntegral.integral_mono_on (μ := volume) (a := (0 : ℝ))
+    (b := (1 : ℝ) / 4) (f := fun x : ℝ => 1 - x ^ 2)
+    (g := fun x : ℝ => (1 : ℝ) / (1 + x ^ 2)) (by norm_num)
+    (hcont1.intervalIntegrable 0 (1 / 4)) (hcont2.intervalIntegrable 0 (1 / 4)) hpt
+  have hval : (∫ x in (0 : ℝ)..((1 : ℝ) / 4), (1 - x ^ 2)) = 1 / 4 - (1 / 4) ^ 3 / 3 := by
+    have hd : ∀ x ∈ Set.uIcc (0 : ℝ) ((1 : ℝ) / 4),
+        HasDerivAt (fun y : ℝ => y - y ^ 3 / 3) (1 - x ^ 2) x := by
+      intro x _
+      have h1 : HasDerivAt (fun y : ℝ => y ^ 3 / 3) ((3 * x ^ 2) / 3) x :=
+        (hasDerivAt_pow 3 x).div_const 3
+      have h2 : HasDerivAt (fun y : ℝ => y - y ^ 3 / 3) (1 - (3 * x ^ 2) / 3) x :=
+        (hasDerivAt_id x).sub h1
+      have h3 : (1 : ℝ) - (3 * x ^ 2) / 3 = 1 - x ^ 2 := by ring
+      rwa [h3] at h2
+    rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd
+      (hcont1.intervalIntegrable 0 (1 / 4))]
+    norm_num
+  rw [hval, integral_one_div_one_add_sq] at hint
+  simpa using hint
+
+/-- `arctan 4 ≤ 4/3`: `arctan 4 = π/2 - arctan (1/4)` and `π < 3.15`. -/
+private theorem arctan_four_upper : Real.arctan 4 ≤ 4 / 3 := by
+  have h4 : Real.arctan 4 = Real.pi / 2 - Real.arctan ((1 : ℝ) / 4) := by
+    have h := Real.arctan_inv_of_pos (x := (1 : ℝ) / 4) (by norm_num)
+    have hinv : ((1 : ℝ) / 4)⁻¹ = 4 := by norm_num
+    rwa [hinv] at h
+  have hlow := arctan_quarter_lower
+  have hpi := Real.pi_lt_d2
+  rw [h4]
+  linarith
+
+/-- `∫_{[-2,2]} 14/(1 + 4 t²) = 14 · arctan 4`, from the antiderivative `7 · arctan (2t)`. -/
+private theorem integral_kernel_short :
+    (∫ t in Set.Icc (-2 : ℝ) 2, (14 : ℝ) / (1 + 4 * t ^ 2)) = 14 * Real.arctan 4 := by
+  have hcont : Continuous fun t : ℝ => (14 : ℝ) / (1 + 4 * t ^ 2) := by
+    refine Continuous.div continuous_const (by fun_prop) ?_
+    intro t
+    positivity
+  have hd : ∀ t : ℝ, HasDerivAt (fun y : ℝ => 7 * Real.arctan (2 * y))
+      (14 / (1 + 4 * t ^ 2)) t := by
+    intro t
+    have h2 : HasDerivAt (fun y : ℝ => 2 * y) 2 t := by
+      simpa using (hasDerivAt_id t).const_mul 2
+    have hc := (Real.hasDerivAt_arctan (2 * t)).comp t h2
+    have hm := hc.const_mul (7 : ℝ)
+    have hval : (7 : ℝ) * ((1 / (1 + (2 * t) ^ 2)) * 2) = 14 / (1 + 4 * t ^ 2) := by
+      field_simp
+      ring
+    rwa [hval] at hm
+  have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (a := (-2 : ℝ)) (b := 2)
+    (f := fun y : ℝ => 7 * Real.arctan (2 * y)) (f' := fun t : ℝ => 14 / (1 + 4 * t ^ 2))
+    (fun x _ => hd x) (hcont.intervalIntegrable (-2) 2)
+  rw [integral_Icc_eq_integral_Ioc,
+    ← intervalIntegral.integral_of_le (by norm_num : (-2 : ℝ) ≤ 2), h]
+  have hpos : (2 : ℝ) * 2 = 4 := by norm_num
+  have hneg : (2 : ℝ) * -2 = -4 := by norm_num
+  rw [hpos, hneg, Real.arctan_neg]
+  ring
+
+/-- The short range from the rational majorant: the integral of `14 / (1 + 4 t²)` over the
+segment is `14 · arctan 4 ≤ 14 · 4/3 ≤ 20`. -/
+private theorem principal_log_weight_sq_short_of_rational
+    (hbound : ∀ t : ℝ, |t| ≤ 2 → ‖principalLogWeight t‖ ^ 2 ≤ 14 / (1 + 4 * t ^ 2)) :
+    (∫ t in {t : ℝ | |t| ≤ 2}, ‖principalLogWeight t‖ ^ 2) ≤ 20 := by
+  classical
+  have hset : ({t : ℝ | |t| ≤ 2} : Set ℝ) = Set.Icc (-2) 2 := by
+    ext t
+    simp only [Set.mem_ofPred_eq, Set.mem_Icc, abs_le]
+  have hint : Integrable (fun t : ℝ => ‖principalLogWeight t‖ ^ 2) :=
+    MemLp.integrable_norm_pow LogWeight457.principal_log_weight_memLp_two (by norm_num)
+  have hcont : Continuous fun t : ℝ => (14 : ℝ) / (1 + 4 * t ^ 2) := by
+    refine Continuous.div continuous_const (by fun_prop) ?_
+    intro t
+    positivity
+  have hmi : IntegrableOn (fun t : ℝ => (14 : ℝ) / (1 + 4 * t ^ 2))
+      ({t : ℝ | |t| ≤ 2} : Set ℝ) volume := by
+    rw [hset]
+    exact hcont.continuousOn.integrableOn_compact isCompact_Icc
+  have hmono := setIntegral_mono_on hint.integrableOn hmi
+    (by rw [hset]; exact measurableSet_Icc) (fun t ht => hbound t ht)
+  have hval : (∫ t in {t : ℝ | |t| ≤ 2}, (14 : ℝ) / (1 + 4 * t ^ 2))
+      = 14 * Real.arctan 4 := by
+    rw [hset]
+    exact integral_kernel_short
+  rw [hval] at hmono
+  have hupper : (14 : ℝ) * Real.arctan 4 ≤ 20 := by
+    have := arctan_four_upper
+    nlinarith
+  linarith
+
+
 /-!
 Splitting the numerical square energy budget of `Decomp457b.principal_log_weight_budget`
 into two smaller steps.
@@ -1730,7 +1847,7 @@ over `|t| ≤ 2` is at most twenty. This is the piece where the weight is larges
 interval is short, and it carries the whole numerical size of the small range. -/
 theorem principal_log_weight_sq_short :
     (∫ t in {t : ℝ | |t| ≤ 2}, ‖principalLogWeight t‖ ^ 2) ≤ 20 := by
-  apply principal_log_weight_sq_short_of_pointwise
+  apply principal_log_weight_sq_short_of_rational
   intro t ht
   sorry
 
