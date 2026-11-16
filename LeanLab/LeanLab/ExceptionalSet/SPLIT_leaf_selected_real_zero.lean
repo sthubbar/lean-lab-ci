@@ -28,7 +28,9 @@ theorem leaf_zero_matched_by_real_zero :
         1 ≤ q → (q : ℝ) ≤ P → χ.IsPrimitive →
           ∀ σ : ℝ, 1 - a / Real.log P ≤ σ → σ < 1 → χ.LFunction σ = 0 →
             ∃ β : ℝ, σ ≤ β ∧ β < 1 ∧ χ.LFunction β = 0 := by
-  sorry
+  refine ⟨1, one_pos, ?_⟩
+  intro P hP q hq χ h1q hqP hprim σ hσ hσ1 hσ0
+  exact ⟨σ, le_rfl, hσ1, hσ0⟩
 
 /-- LEAF: the quadratic character step. A real zero below one of a primitive
 character forces that character to be a nontrivial real quadratic one. -/

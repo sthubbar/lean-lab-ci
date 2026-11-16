@@ -48,7 +48,25 @@ theorem leaf_high_j0_strip_mass (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               strips (calE γ κ N) (F γ N) δ a,
               mass (F γ N ^ (6 * δ)) (F γ N) (calE γ κ N ^ (-(5 / 12 : ℝ))) b) ≤
                 6 * C * F γ N * calE γ κ N ^ (-(2 / 3 : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨δm, hδm, hsup⟩ :=
+    LeanLab.ExceptionalSet.UpJ200.MinorSup446.leaf_minor_sup_supplied γ h1 h2
+  refine ⟨min δm 1, lt_min hδm one_pos, fun δ hδ hδs => ?_⟩
+  have hδm' : δ < δm := hδs.trans_le (min_le_left _ _)
+  have hδ1 : δ ≤ 1 := hδs.le.trans (min_le_right _ _)
+  obtain ⟨C, hC, Nm, hsup⟩ := hsup δ hδ hδm'
+  refine ⟨1, one_pos, fun κ hκ _ => ?_⟩
+  obtain ⟨Np, hp⟩ := phase_window_parameters γ δ κ h1 h2 hδ hδ1 hκ
+  refine ⟨C, hC, max Nm Np, fun N hN => ?_⟩
+  have hNm : Nm ≤ N := (le_max_left _ _).trans hN
+  have hNp : Np ≤ N := (le_max_right _ _).trans hN
+  obtain ⟨-, hE1, -, hlog, hscale, hTX, -, -, -⟩ := hp N hNp
+  have hX0 : 0 < F γ N := Real.exp_pos _
+  have hΔ1 : calE γ κ N ^ (-(5 / 12 : ℝ)) < 1 :=
+    Real.rpow_lt_one_of_one_lt_of_neg hE1 (by norm_num)
+  intro a _
+  exact prime_strip_inner (calE γ κ N) (F γ N) C δ hE1.le hX0 hC.le hΔ1 hTX hlog hscale
+    (fun b hb => hsup N hNm b hb) a _ Set.inter_subset_left Set.inter_subset_right
 
 /-- The inner mass bound for the high index block, derived from the two leaves
 by restricting the integral to the localized strips. -/

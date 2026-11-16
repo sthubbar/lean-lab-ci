@@ -14,6 +14,112 @@ set_option autoImplicit false
 namespace LeanLab.BHP1997.Decomp561e
 open Classical Complex Thm2 MeasureTheory Set Decomp561d
 
+/-- The kernel majorant is nonnegative once its height is. -/
+private lemma kernelWeight561_nonneg {H : ℝ} (hH : 0 ≤ H) (t : ℝ) :
+    0 ≤ kernelWeight561 H t := by
+  unfold kernelWeight561
+  split_ifs with h
+  · exact hH
+  · exact le_min hH (by positivity)
+
+/-- The even integers of a Nat interval are exactly twice a full interval of
+halves: the fibre-count reindexing behind display 2.10. -/
+private lemma image_two_mul_Icc (A B : ℕ) :
+    (Finset.Icc ((A + 1) / 2) (B / 2)).image (fun k => 2 * k)
+      = (Finset.Icc A B).filter Even := by
+  ext N
+  simp only [Finset.mem_image, Finset.mem_filter, Finset.mem_Icc]
+  constructor
+  · rintro ⟨k, ⟨h1, h2⟩, rfl⟩
+    exact ⟨⟨by omega, by omega⟩, even_iff_exists_two_mul.mpr ⟨k, rfl⟩⟩
+  · rintro ⟨⟨h1, h2⟩, h3⟩
+    obtain ⟨k, hk⟩ := even_iff_exists_two_mul.mp h3
+    exact ⟨k, ⟨by omega, by omega⟩, hk.symm⟩
+
+/-- The fibre count: the even frequencies of the closed integer range from the
+ceiling of x to the floor of x plus H are an even progression of at most H
+terms, and its exact periodic Dirichlet kernel is at most the kernel majorant. -/
+private lemma kernel_bound_even_Icc (A B : ℕ) (H : ℝ) (hH : 2 ≤ H)
+    (hBA : (B : ℝ) - (A : ℝ) ≤ H) (u : ℝ) :
+    ‖∑ N ∈ (Finset.Icc A B).filter Even,
+        @fourier 1 (N : ℤ) (u : AddCircle (1 : ℝ))‖ ≤
+      kernelWeight561 H u := by
+  have hH0 : 0 ≤ H := by linarith
+  have hinj : Set.InjOn (fun k : ℕ => 2 * k) ↑(Finset.Icc ((A + 1) / 2) (B / 2)) := by
+    intro p _ q _ hpq
+    have hpq' : 2 * p = 2 * q := hpq
+    omega
+  by_cases hAB : A ≤ B
+  · set n : ℕ := B / 2 + 1 - (A + 1) / 2 with hn
+    have hstep :
+        (∑ N ∈ (Finset.Icc A B).filter Even,
+            @fourier 1 (N : ℤ) (u : AddCircle (1 : ℝ)))
+          = ∑ j ∈ Finset.range n,
+              @fourier 1 ((2 * ((A + 1) / 2 + j) : ℕ) : ℤ) (u : AddCircle (1 : ℝ)) := by
+      rw [← image_two_mul_Icc A B, Finset.sum_image hinj,
+        ← Finset.Ico_add_one_right_eq_Icc,
+        Finset.sum_Ico_eq_sum_range
+          (f := fun k => @fourier 1 ((2 * k : ℕ) : ℤ) (u : AddCircle (1 : ℝ)))
+          ((A + 1) / 2) (B / 2 + 1)]
+    have hcast : ∀ j : ℕ,
+        @fourier 1 ((2 * ((A + 1) / 2 + j) : ℕ) : ℤ) (u : AddCircle (1 : ℝ))
+          = @fourier 1 (2 * ((((A + 1) / 2 : ℕ) : ℤ) + (j : ℤ))) (u : AddCircle (1 : ℝ)) := by
+      intro j
+      congr 1
+    have hcastn : ((n : ℕ) : ℝ) = (((B / 2 : ℕ)) : ℝ) + 1 - (((A + 1) / 2 : ℕ) : ℝ) := by
+      have h1 : (A + 1) / 2 ≤ B / 2 + 1 := by omega
+      rw [hn, Nat.cast_sub h1, Nat.cast_add, Nat.cast_one]
+    have hAn : ((A : ℝ)) / 2 ≤ (((A + 1) / 2 : ℕ) : ℝ) := by
+      have h2 : A ≤ 2 * ((A + 1) / 2) := by omega
+      have h3 : (A : ℝ) ≤ 2 * ((((A + 1) / 2 : ℕ)) : ℝ) := by exact_mod_cast h2
+      linarith
+    have hBn : (((B / 2 : ℕ)) : ℝ) ≤ (B : ℝ) / 2 := Nat.cast_div_le
+    have hnH : ((n : ℕ) : ℝ) ≤ H := by
+      rw [hcastn]
+      linarith
+    have hker := Decomp561c.even_frequency_kernel_bound561 ((A + 1) / 2) n u
+    have hmain : ‖∑ j ∈ Finset.range n,
+        @fourier 1 ((2 * ((A + 1) / 2 + j) : ℕ) : ℤ) (u : AddCircle (1 : ℝ))‖ ≤
+        kernelWeight561 H u := by
+      have hEq : (∑ j ∈ Finset.range n,
+          @fourier 1 ((2 * ((A + 1) / 2 + j) : ℕ) : ℤ) (u : AddCircle (1 : ℝ)))
+          = ∑ j ∈ Finset.range n,
+              @fourier 1 (2 * ((((A + 1) / 2 : ℕ) : ℤ) + (j : ℤ))) (u : AddCircle (1 : ℝ)) :=
+        Finset.sum_congr rfl (fun j _ => hcast j)
+      rw [hEq]
+      refine hker.trans ?_
+      by_cases hd : ‖((2 * u : ℝ) : AddCircle (1 : ℝ))‖ = 0
+      · rw [if_pos hd, kernelWeight561, if_pos hd]
+        exact hnH
+      · rw [if_neg hd, kernelWeight561, if_neg hd]
+        exact min_le_min hnH le_rfl
+    rw [hstep]
+    exact hmain
+  · have hemp : (Finset.Icc A B).filter Even = ∅ := by
+      rw [Finset.Icc_eq_empty_iff.mpr (by omega)]
+      simp
+    rw [hemp]
+    simp only [Finset.sum_empty, norm_zero]
+    exact kernelWeight561_nonneg hH0 u
+
+/-- The gap between the floor and the ceiling endpoints of the frequency range
+is at most the fibre length P, both for positive and for negative x. -/
+private lemma floor_ceil_gap (x P : ℝ) (hP : 0 ≤ P) :
+    ((⌊x + P⌋₊ : ℕ) : ℝ) - ((⌈x⌉₊ : ℕ) : ℝ) ≤ P := by
+  by_cases hx : 0 ≤ x
+  · have h1 : ((⌊x + P⌋₊ : ℕ) : ℝ) ≤ x + P := Nat.floor_le (by linarith)
+    have h2 : x ≤ ((⌈x⌉₊ : ℕ) : ℝ) := Nat.le_ceil x
+    linarith
+  · have hmono : ((⌊x + P⌋₊ : ℕ) : ℝ) ≤ ((⌊P⌋₊ : ℕ) : ℝ) := by
+      exact_mod_cast Nat.floor_le_floor (by linarith : x + P ≤ P)
+    have h1 : ((⌊x + P⌋₊ : ℕ) : ℝ) ≤ P := hmono.trans (Nat.floor_le hP)
+    have hz : ⌈x⌉₊ = 0 := by
+      rw [Nat.ceil_eq_zero]
+      linarith
+    rw [hz]
+    simp only [Nat.cast_zero]
+    linarith
+
 /-- LEAF. Fibre count and pointwise kernel bound. The even frequencies in the
 closed integer range from the ceiling of x to the floor of x plus H form a
 single even arithmetic progression of at most H terms, so the exact periodic
@@ -25,7 +131,11 @@ theorem leaf_even_frequency_kernel561 (ε x : ℝ)
     ∀ u : ℝ, ‖∑ N ∈ frequencies512 ε x,
         @fourier 1 (N : ℤ) (u : AddCircle (1 : ℝ))‖ ≤
       kernelWeight561 (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) u := by
-  sorry
+  intro u
+  exact kernel_bound_even_Icc ⌈x⌉₊
+    ⌊x + x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))⌋₊
+    (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) hH
+    (floor_ceil_gap x _ (by linarith)) u
 
 /-- LEAF. The finite Fourier double integral rearrangement. Expanding each
 squared modulus of the minor arc sum and summing the characters over the even
@@ -44,6 +154,52 @@ theorem leaf_minor_kernel_double_integral561 (ε D x : ℝ) (a b : ℕ → ℂ)
           kernelWeight561 (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) (t - s) := by
   sorry
 
+
+/-- Nonnegative sectional Cauchy for real functions with integrable squares. -/
+private lemma integral_mul_le_sqrt_sq {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {f g : α → ℝ}
+    (hf : MemLp f 2 μ) (hg : MemLp g 2 μ)
+    (hf0 : ∀ᵐ x ∂μ, 0 ≤ f x) (hg0 : ∀ᵐ x ∂μ, 0 ≤ g x) :
+    (∫ x, f x * g x ∂μ) ≤
+      Real.sqrt (∫ x, f x ^ 2 ∂μ) * Real.sqrt (∫ x, g x ^ 2 ∂μ) := by
+  have h := integral_mul_le_Lp_mul_Lq_of_nonneg
+    (show (2 : ℝ).HolderConjugate 2 by norm_num [Real.holderConjugate_iff])
+    hf0 hg0 (by simpa using hf) (by simpa using hg)
+  simpa only [Real.rpow_two, Real.sqrt_eq_rpow] using h
+
+/-- The periodic kernel majorant is even in its second argument. -/
+private lemma kernelWeight561_sub_comm (H t s : ℝ) :
+    kernelWeight561 H (t - s) = kernelWeight561 H (s - t) := by
+  unfold kernelWeight561
+  have h : ((2 * (t - s) : ℝ) : AddCircle (1 : ℝ)) =
+      -((2 * (s - t) : ℝ) : AddCircle (1 : ℝ)) := by
+    rw [show 2 * (t - s) = -(2 * (s - t)) by ring, AddCircle.coe_neg]
+  rw [h, norm_neg]
+
+/-- The kernel majorant is bounded by its height. -/
+private lemma kernelWeight561_le {H : ℝ} (hH : 0 ≤ H) (t : ℝ) :
+    kernelWeight561 H t ≤ H := by
+  unfold kernelWeight561
+  split_ifs with h
+  · exact le_rfl
+  · exact min_le_left _ _
+
+/-- The finite polynomial is continuous in the additive variable. -/
+private lemma continuous_polynomial512 (S : Finset ℕ) (a : ℕ → ℂ) :
+    Continuous fun t : ℝ => polynomial512 S a t := by
+  unfold polynomial512
+  exact continuous_finsetSum _ fun k _ =>
+    ((fourier (k : ℤ)).continuous.comp (by fun_prop)).const_mul (a k)
+
+/-- The periodic kernel majorant is measurable. -/
+private lemma measurable_kernelWeight561 (H : ℝ) :
+    Measurable fun u : ℝ => kernelWeight561 H u := by
+  have hc : Measurable fun u : ℝ => ‖((2 * u : ℝ) : AddCircle (1 : ℝ))‖ := by
+    fun_prop
+  unfold kernelWeight561
+  exact Measurable.ite (measurableSet_eq_fun hc measurable_const)
+    measurable_const (measurable_const.min (measurable_const.div hc))
+
 /-- LEAF. The shifted short energy step, one Cauchy inequality. For every
 shift t the short polynomial modulus squared against the kernel at t minus s
 is controlled by the square root of the complete short energy times the square
@@ -56,7 +212,84 @@ theorem leaf_shifted_short_energy561 (ε D x : ℝ) (b : ℕ → ℂ)
     ∀ t : ℝ, ∫ s in minor512 ε D x,
         ‖polynomial512 (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊) b s‖ ^ 2 * kernelWeight561 (x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)))) (t - s) ≤
       Real.sqrt (shortEnergy561 ε x b) * Real.sqrt W := by
-  sorry
+  intro t
+  set H : ℝ := x ^ ((11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5))) with hHdef
+  have hH0 : 0 ≤ H := by linarith
+  set m : Set ℝ := minor512 ε D x with hmdef
+  set sb : Finset ℕ := Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊ with hsbdef
+  set f : ℝ → ℝ := fun s => ‖polynomial512 sb b s‖ with hfdef
+  set g : ℝ → ℝ := fun s => ‖polynomial512 sb b s‖ * kernelWeight561 H (t - s) with hgdef
+  have hfc : Continuous f := (continuous_polynomial512 sb b).norm
+  have hf0 : ∀ s, 0 ≤ f s := fun s => norm_nonneg _
+  have hg0 : ∀ s, 0 ≤ g s :=
+    fun s => mul_nonneg (norm_nonneg _) (kernelWeight561_nonneg hH0 _)
+  have hmp : m ⊆ period512 ε x := fun s hs => hs.1
+  have hsub : period512 ε x ⊆ Icc (1 / (order512 ε x : ℝ)) (1 + 1 / (order512 ε x : ℝ)) := by
+    intro y hy
+    exact ⟨le_of_lt hy.1, hy.2⟩
+  have hperfin : volume (period512 ε x) < ⊤ :=
+    (measure_mono hsub).trans_lt isCompact_Icc.measure_lt_top
+  haveI : IsFiniteMeasure (volume.restrict m) :=
+    isFiniteMeasure_restrict.2 ((measure_mono hmp).trans_lt hperfin).ne
+  have hperInt : IntegrableOn (fun s => f s ^ 2) (period512 ε x) := by
+    have h1 : IntegrableOn (fun s => f s ^ 2) (Icc (1 / (order512 ε x : ℝ))
+        (1 + 1 / (order512 ε x : ℝ))) := (hfc.pow 2).integrableOn_Icc
+    exact h1.mono_set hsub
+  have hfInt : IntegrableOn (fun s => f s ^ 2) m := hperInt.mono_set hmp
+  have hfmem : MemLp f 2 (volume.restrict m) :=
+    (memLp_two_iff_integrable_sq hfc.aestronglyMeasurable).2 hfInt
+  have hkmeas : Measurable fun s : ℝ => kernelWeight561 H (t - s) :=
+    (measurable_kernelWeight561 H).comp (measurable_const.sub measurable_id)
+  have hgmeas : AEStronglyMeasurable g (volume.restrict m) := by
+    have h1 : Measurable g := by
+      have h2 : Measurable fun s : ℝ => ‖polynomial512 sb b s‖ := hfc.measurable
+      have h3 : Measurable fun s : ℝ => ‖polynomial512 sb b s‖ * kernelWeight561 H (t - s) :=
+        h2.mul hkmeas
+      exact h3
+    exact h1.aestronglyMeasurable
+  have hgInt : Integrable (fun s => g s ^ 2) (volume.restrict m) := by
+    have hbd : ∀ᵐ s ∂(volume.restrict m), ‖g s ^ 2‖ ≤ H ^ 2 * f s ^ 2 := by
+      refine Filter.Eventually.of_forall fun s => ?_
+      have h1 : g s ^ 2 = f s ^ 2 * kernelWeight561 H (t - s) ^ 2 := by
+        rw [hgdef]
+        simp only
+        rw [mul_pow]
+      have h3 : kernelWeight561 H (t - s) ^ 2 ≤ H ^ 2 := by
+        have h4 := kernelWeight561_le hH0 (t - s)
+        nlinarith [kernelWeight561_nonneg hH0 (t - s)]
+      have h4 : (0 : ℝ) ≤ f s ^ 2 := sq_nonneg _
+      rw [h1, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      calc f s ^ 2 * kernelWeight561 H (t - s) ^ 2 ≤ f s ^ 2 * H ^ 2 :=
+            mul_le_mul_of_nonneg_left h3 h4
+        _ = H ^ 2 * f s ^ 2 := by ring
+    exact (hfInt.const_mul (H ^ 2)).mono' (hgmeas.pow 2) hbd
+  have hgmem : MemLp g 2 (volume.restrict m) :=
+    (memLp_two_iff_integrable_sq hgmeas).2 hgInt
+  have hA : (∫ s in m, f s ^ 2) ≤ shortEnergy561 ε x b :=
+    setIntegral_mono_set hperInt (Filter.Eventually.of_forall fun s => sq_nonneg (f s))
+      (Filter.Eventually.of_forall fun s hs => hmp hs)
+  have hB : (∫ s in m, g s ^ 2) ≤ W := by
+    have hrew : (fun s => g s ^ 2) =
+        fun s => f s ^ 2 * kernelWeight561 H (s - t) ^ 2 := by
+      funext s
+      have h1 : g s ^ 2 = f s ^ 2 * kernelWeight561 H (t - s) ^ 2 := by
+        rw [hgdef]
+        simp only
+        rw [mul_pow]
+      rw [h1, kernelWeight561_sub_comm H t s]
+    rw [hrew]
+    exact hWE t
+  have hCS := integral_mul_le_sqrt_sq hfmem hgmem
+    (Filter.Eventually.of_forall hf0) (Filter.Eventually.of_forall hg0)
+  calc (∫ s in m, ‖polynomial512 sb b s‖ ^ 2 * kernelWeight561 H (t - s))
+      = ∫ s in m, f s * g s := by
+        simp only [hfdef, hgdef]
+        congr 1 with s
+        ring
+    _ ≤ Real.sqrt (∫ s in m, f s ^ 2) * Real.sqrt (∫ s in m, g s ^ 2) := hCS
+    _ ≤ Real.sqrt (shortEnergy561 ε x b) * Real.sqrt W :=
+        mul_le_mul (Real.sqrt_le_sqrt hA) (Real.sqrt_le_sqrt hB)
+          (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
 
 /-- LEAF. The second Cauchy step, the Schur comparison. Splitting the product of
 the four moduli as long at t with short at s against short at t with long at s,
