@@ -58,7 +58,18 @@ theorem leaf_window_parameter_scale561 :
               ‖∑ m ∈ (support561 Y).filter
                   (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * (T / (2 * y))),
                 centered561 Y b v χ m‖ ^ 2 := by
-  sorry
+  intro Y T hY hT hTY b v q E
+  refine Finset.sum_le_sum (fun χ _ => ?_)
+  apply le_of_eq
+  apply intervalIntegral.integral_congr
+  intro y hy
+  have hab : Y - T / 2 ≤ 3 * Y - T / 4 := by linarith
+  rw [Set.uIcc_of_le hab] at hy
+  have hypos : 0 < y := by linarith [hy.1]
+  have hz : y * (T / (2 * y)) = T / 2 := by
+    have hy0 : y ≠ 0 := ne_of_gt hypos
+    field_simp
+  simp only [hz]
 
 /-- LEAF. Fourth step, the comparison itself: a nonnegative uniform bound M for
 every multiplicative window whose parameter lies in the printed z range bounds
