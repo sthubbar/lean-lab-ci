@@ -25,9 +25,9 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.ExceptionalSet.BhowmikGrimmelt2026
 import LeanLab.ExceptionalSet.MVConditional
 import LeanLab.ExceptionalSet.MVEstermann
--- The one import added by the proving run: Vaughan's Theorem 3.1 (Vaughan, Hardy-Littlewood
--- Method, Thm 3.1) in the dft form `VinogradovDFT`, PROVED in the lab as
--- `vinogradovDFT_proved`, axiom-clean. Needed by LEAF 2 on the minor arcs.
+-- The import added by the proving run: Vaughan's Theorem 3.1 (Vaughan, Hardy-Littlewood Method,
+-- Thm 3.1) in the dft form `VinogradovDFT`, PROVED in the lab as `vinogradovDFT_proved`, with a
+-- clean declaration dependency set. Needed by LEAF 2 on the minor arcs.
 import LeanLab.ExceptionalSet.MVVinogradovProved
 
 namespace LeanLab.ExceptionalSet.BG2026
