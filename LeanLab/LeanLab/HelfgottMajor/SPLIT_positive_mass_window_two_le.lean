@@ -48,7 +48,37 @@ theorem positive_mass_window_two_norm_summable (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hT : 1 ≤ T) :
     Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} => ‖mellinMassTerm χ δ ρ.val‖) := by
-  sorry
+  exact ZeroCount1623.summable_zeroIdx χ T _
+
+/-- The pointwise additivity of the indicator of the band `(3/2, 2]` cut at `7/4`: the two
+half bands are disjoint and their union is the band, so the indicator of the band is the sum of
+the indicators of the halves. -/
+private lemma band_indicator_add (c x : ℝ) :
+    (if (3 / 2 : ℝ) < x ∧ x ≤ 2 then c else 0) =
+      (if (3 / 2 : ℝ) < x ∧ x ≤ 7 / 4 then c else 0) +
+        (if (7 / 4 : ℝ) < x ∧ x ≤ 2 then c else 0) := by
+  by_cases ha : (3 / 2 : ℝ) < x
+  · by_cases hb : x ≤ 7 / 4
+    · have hA : (3 / 2 : ℝ) < x ∧ x ≤ 2 := ⟨ha, by linarith⟩
+      have hB : (3 / 2 : ℝ) < x ∧ x ≤ 7 / 4 := ⟨ha, hb⟩
+      have hC : ¬ ((7 / 4 : ℝ) < x ∧ x ≤ 2) := fun ⟨h', _⟩ => absurd h' (not_lt.mpr hb)
+      simp [hA, hB, hC]
+    · have hb' : (7 / 4 : ℝ) < x := not_le.mp hb
+      by_cases hc : x ≤ 2
+      · have hA : (3 / 2 : ℝ) < x ∧ x ≤ 2 := ⟨ha, hc⟩
+        have hB : ¬ ((3 / 2 : ℝ) < x ∧ x ≤ 7 / 4) := fun ⟨_, h'⟩ => absurd h' hb
+        have hC : (7 / 4 : ℝ) < x ∧ x ≤ 2 := ⟨hb', hc⟩
+        simp [hA, hB, hC]
+      · have hA : ¬ ((3 / 2 : ℝ) < x ∧ x ≤ 2) := fun ⟨_, h'⟩ => absurd h' hc
+        have hB : ¬ ((3 / 2 : ℝ) < x ∧ x ≤ 7 / 4) := fun ⟨_, h'⟩ => absurd h' hb
+        have hC : ¬ ((7 / 4 : ℝ) < x ∧ x ≤ 2) := fun ⟨_, h'⟩ => absurd h' hc
+        simp [hA, hB, hC]
+  · have hA : ¬ ((3 / 2 : ℝ) < x ∧ x ≤ 2) := fun ⟨h', _⟩ => absurd h' ha
+    have hB : ¬ ((3 / 2 : ℝ) < x ∧ x ≤ 7 / 4) := fun ⟨h', _⟩ => absurd h' ha
+    have hC : ¬ ((7 / 4 : ℝ) < x ∧ x ≤ 2) := by
+      intro hcon
+      exact ha (lt_trans (show (3 / 2 : ℝ) < 7 / 4 by norm_num) hcon.1)
+    simp [hA, hB, hC]
 
 /-- LEAF 2 of 4, the window decomposition. Given the summability of the band family, the sum
 over the ordinates above three halves and at most two is the sum over the ordinates above three
@@ -71,7 +101,19 @@ theorem positive_mass_window_two_window_split (q : ℕ) [NeZero q]
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
         Set.indicator {ρ | 7 / 4 < ρ.val.im ∧ ρ.val.im ≤ 2}
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ)) := by
-  sorry
+  classical
+  have h1 : Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} =>
+      Set.indicator {ρ | 3 / 2 < ρ.val.im ∧ ρ.val.im ≤ 7 / 4}
+        (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) := hs.indicator _
+  have h2 : Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} =>
+      Set.indicator {ρ | 7 / 4 < ρ.val.im ∧ ρ.val.im ≤ 2}
+        (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) := hs.indicator _
+  rw [← h1.tsum_add h2]
+  refine tsum_congr fun ρ => ?_
+  simpa only [Set.indicator_apply, Set.mem_ofPred_eq, Pi.add_apply] using
+    band_indicator_add ‖mellinMassTerm χ δ ρ.val‖ ρ.val.im
 
 /-- LEAF 3 of 4, the lower half of the band. The multiplicity weighted sum of the Gaussian
 Mellin norms over the zeros whose ordinate lies above three halves and at most seven quarters is
