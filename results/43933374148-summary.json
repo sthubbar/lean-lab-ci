@@ -1,0 +1,11 @@
+{
+ "run_id": "43933374148",
+ "shards_reported": 8,
+ "files": 1052,
+ "declarations_closed": 1,
+ "sites": 1,
+ "skipped": 109,
+ "closed": [
+  "LeanLab/LeanLab/BHP1997/SPLIT_upper_slack_split_rescaled_short_distribution.lean upper_slack_split_bounded_rescaling by aesop"
+ ]
+}
