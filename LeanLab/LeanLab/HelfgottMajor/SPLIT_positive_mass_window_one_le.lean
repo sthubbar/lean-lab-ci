@@ -16,12 +16,14 @@ all: the statement is a sum over every zero in the strip below height `T` and ca
 hypothesis on the zeros, so nothing in the closure makes that family summable, and a family that
 does not converge has no additivity to offer over a cut of the ordinate range. The finiteness of
 the ordinates below a fixed height inside the closed rectangle is therefore a leaf of its own.
-Second, the band `(1, 3 / 2]` is cut at five quarters and the zero mass of each half is charged a
-quarter of the mean weight integral; the value at height one is charged in full to the lower
-half, which is the piece that carries the smallest ordinates and pays for the endpoint. A quarter
-plus a quarter is the half of the statement being split, and the two halves carry at most the
-whole of the band's ordinates while each of them is set against half of what the whole band is
-allowed, which is what makes both window leaves strictly easier than the statement being split.
+Second, the band `(1, 3 / 2]` is cut at five quarters, and each half is charged a quarter of the
+mean weight integral together with half of the value at height one term. The mean weight
+`log (q * t / (2 * pi))` changes sign, so a window charged a share of that integral alone would
+have a budget that can be negative while its left hand side is not; splitting the value at height
+one term as well keeps every budget nonnegative, and the two quarters of the integral plus the
+two halves of the value at height one add up exactly to the right hand side of the statement
+being split. Each half carries part of the band's ordinates while being set against half of the
+integral, which is what makes both window leaves strictly easier than the statement being split.
 
 The assembly is exactly three ingredients: the identity of sums over the two halves, which is
 where the convergence leaf is spent, and the addition of the two window bounds. It has no sorry
@@ -66,12 +68,13 @@ theorem positive_mass_window_one_window_split (q : ℕ) [NeZero q]
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ)) := by
   sorry
 
-/-- LEAF 3 of 4, the lower half of the band, with the endpoint. The multiplicity weighted sum of
-the Gaussian Mellin norms over the zeros whose ordinate lies above one and at most five quarters
-is at most one quarter of the mean weight integral over the height interval, plus the value at
+/-- LEAF 3 of 4, the lower half of the band. The multiplicity weighted sum of the Gaussian
+Mellin norms over the zeros whose ordinate lies above one and at most five quarters is at most
+one quarter of the mean weight integral over the height interval, plus half of the value at
 height one against the shifted log weight at one. This half carries the smallest ordinates of the
-whole positive range, so it is the one that pays the value at height one, and it is charged only a
-quarter of the mean weight integral, half of the share the whole band is allowed. -/
+positive range, so it is charged the same quarter of the mean weight integral as the other half
+and the same half of the value at height one, which keeps its budget nonnegative at the heights
+where the mean weight itself is negative. -/
 theorem positive_mass_window_one_low_half_le (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hT : 1 ≤ T) :
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
@@ -81,15 +84,17 @@ theorem positive_mass_window_one_low_half_le (q : ℕ) [NeZero q]
       (1 / 4) * ((1 / (2 * π)) * (∫ t in (1 : ℝ)..T,
         ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
           log ((q : ℝ) * t / (2 * π)))) +
-      ‖gaussianMellin δ ((1 / 2 : ℂ) + Complex.I)‖ * (0.15 * log (q : ℝ) + 3.389) := by
+      (1 / 2) * (‖gaussianMellin δ ((1 / 2 : ℂ) + Complex.I)‖ *
+        (0.15 * log (q : ℝ) + 3.389)) := by
   sorry
 
 /-- LEAF 4 of 4, the upper half of the band. The multiplicity weighted sum of the Gaussian
 Mellin norms over the zeros whose ordinate lies above five quarters and at most three halves is
-at most one quarter of the mean weight integral over the height interval. This half has the same
-length as the lower one, carries no endpoint term, and is charged the same quarter of the mean
-weight integral, so the two halves together spend only the one half of the statement being split.
--/
+at most one quarter of the mean weight integral over the height interval, plus the other half of
+the value at height one against the shifted log weight at one. This half has the same length as
+the lower one and is charged the same share, so the two halves together spend only the one half
+of the mean weight integral and the whole of the value at height one of the statement being
+split. -/
 theorem positive_mass_window_one_high_half_le (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hT : 1 ≤ T) :
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
@@ -98,14 +103,16 @@ theorem positive_mass_window_one_high_half_le (q : ℕ) [NeZero q]
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) ≤
       (1 / 4) * ((1 / (2 * π)) * (∫ t in (1 : ℝ)..T,
         ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
-          log ((q : ℝ) * t / (2 * π)))) := by
+          log ((q : ℝ) * t / (2 * π)))) +
+      (1 / 2) * (‖gaussianMellin δ ((1 / 2 : ℂ) + Complex.I)‖ *
+        (0.15 * log (q : ℝ) + 3.389)) := by
   sorry
 
 /-- The two halves add up to the bound of `positive_mass_window_one_le`. The band `(1, 3 / 2]`
 cuts at five quarters into two disjoint halves, the convergence leaf makes that cut an identity
-of sums, the two shares of one quarter each add up to the one half of the statement being split,
-and the value at height one is carried by the lower half, so the two right hand sides add up to
-the right hand side of the statement being split. -/
+of sums, the two quarters of the mean weight integral add up to the one half of the statement
+being split, and the two halves of the value at height one add up to that whole term, so the two
+right hand sides add up to the right hand side of the statement being split. -/
 theorem positive_mass_window_one_le_split (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (δ T : ℝ) (hT : 1 ≤ T) :
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
