@@ -320,5 +320,3 @@ theorem P2_lower_explicit :
   exact Real.log_le_log (by linarith) hNP
 
 end LeanLab.KumchevLiu2007.Task129a
-
-#print axioms LeanLab.KumchevLiu2007.Task129a.P2_lower_explicit
