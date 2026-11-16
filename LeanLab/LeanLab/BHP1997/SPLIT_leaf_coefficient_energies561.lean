@@ -10,13 +10,77 @@ import LeanLab.BHP1997.Decomp561e
 namespace LeanLab.BHP1997.Decomp561e
 open Classical Complex Thm2 MeasureTheory Set Decomp561d
 
+/-- Finite Parseval on the unit circle for complex coefficients: the squared `L²` norm of a
+finite exponential sum is the sum of the squared coefficient norms. -/
+private lemma finite_parseval561 (s : Finset ℕ) (c : ℕ → ℂ) :
+    (∫ z : AddCircle (1 : ℝ),
+        ‖∑ n ∈ s, c n * @fourier (1 : ℝ) (n : ℤ) z‖ ^ 2) =
+      ∑ n ∈ s, ‖c n‖ ^ 2 := by
+  rw [AddCircle.volume_eq_smul_haarAddCircle, ENNReal.ofReal_one, one_smul]
+  have ho : Orthonormal ℂ (fun n : ℕ => fourierLp (T := (1 : ℝ)) 2 (n : ℤ)) :=
+    (orthonormal_fourier (T := (1 : ℝ))).comp (fun n : ℕ => (n : ℤ))
+      (by
+        intro a b h
+        have h2 : (a : ℤ) = (b : ℤ) := h
+        exact_mod_cast h2)
+  have hi := ho.inner_sum c c s
+  have heq : ContinuousMap.toLp 2 AddCircle.haarAddCircle ℂ
+      (∑ n ∈ s, c n • (@fourier (1 : ℝ) (n : ℤ))) =
+      ∑ n ∈ s, c n • fourierLp (T := (1 : ℝ)) 2 (n : ℤ) := by
+    simp [map_sum, map_smul, fourierLp]
+  change inner ℂ (∑ n ∈ s, c n • fourierLp (T := (1 : ℝ)) 2 (n : ℤ))
+    (∑ n ∈ s, c n • fourierLp (T := (1 : ℝ)) 2 (n : ℤ)) =
+    ∑ n ∈ s, (starRingEnd ℂ) (c n) * c n at hi
+  rw [← heq, ContinuousMap.inner_toLp] at hi
+  have hpt : ∀ z : AddCircle (1 : ℝ),
+      (∑ n ∈ s, c n • (@fourier (1 : ℝ) (n : ℤ))) z *
+          (starRingEnd ℂ) ((∑ n ∈ s, c n • (@fourier (1 : ℝ) (n : ℤ))) z) =
+        ((‖∑ n ∈ s, c n * @fourier (1 : ℝ) (n : ℤ) z‖ ^ 2 : ℝ) : ℂ) := by
+    intro z
+    have h1 : (∑ n ∈ s, c n • (@fourier (1 : ℝ) (n : ℤ))) z =
+        ∑ n ∈ s, c n * @fourier (1 : ℝ) (n : ℤ) z := by
+      simp [smul_eq_mul]
+    rw [h1, RCLike.mul_conj]
+    exact (map_pow (algebraMap ℝ ℂ) _ 2).symm
+  have hInt : (∫ z : AddCircle (1 : ℝ),
+      (∑ n ∈ s, c n • (@fourier (1 : ℝ) (n : ℤ))) z *
+        (starRingEnd ℂ) ((∑ n ∈ s, c n • (@fourier (1 : ℝ) (n : ℤ))) z) ∂AddCircle.haarAddCircle) =
+      ((∫ z : AddCircle (1 : ℝ),
+        ‖∑ n ∈ s, c n * @fourier (1 : ℝ) (n : ℤ) z‖ ^ 2 ∂AddCircle.haarAddCircle : ℝ) : ℂ) := by
+    rw [← integral_complex_ofReal]
+    exact integral_congr_ae (Filter.Eventually.of_forall hpt)
+  have hsum : (∑ n ∈ s, (starRingEnd ℂ) (c n) * c n) = ((∑ n ∈ s, ‖c n‖ ^ 2 : ℝ) : ℂ) := by
+    have h1 : ∀ n ∈ s, (starRingEnd ℂ) (c n) * c n = ((‖c n‖ ^ 2 : ℝ) : ℂ) := by
+      intro n _
+      rw [RCLike.conj_mul]
+      exact (map_pow (algebraMap ℝ ℂ) _ 2).symm
+    rw [Finset.sum_congr rfl h1]
+    exact (map_sum (algebraMap ℝ ℂ) (fun n => ‖c n‖ ^ 2) s).symm
+  rw [hInt, hsum] at hi
+  exact Complex.ofReal_injective hi
+
+
 /-- LEAF. Orthogonality on one complete period for the long block: the integral of
 the squared norm of the long polynomial over the period is the sum of the squared
 coefficient norms over the long support, with no analytic input. -/
 theorem leaf_long_energy_parseval561 (ε x : ℝ) (a : ℕ → ℂ) :
     longEnergy561 ε x a =
       ∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊, ‖a k‖ ^ 2 := by
-  sorry
+  have hper : period512 ε x =
+      Ioc (1 / (order512 ε x : ℝ)) (1 / (order512 ε x : ℝ) + 1) := by
+    rw [period512, add_comm]
+  rw [longEnergy561, hper]
+  simp only [polynomial512]
+  have h1 : (∫ t in Ioc (1 / (order512 ε x : ℝ)) (1 / (order512 ε x : ℝ) + 1),
+      ‖∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊,
+        a k * @fourier (1 : ℝ) (k : ℤ) (t : AddCircle (1 : ℝ))‖ ^ 2) =
+      ∫ z : AddCircle (1 : ℝ), ‖∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊,
+        a k * @fourier (1 : ℝ) (k : ℤ) z‖ ^ 2 :=
+    AddCircle.integral_preimage (T := (1 : ℝ)) (t := 1 / (order512 ε x : ℝ))
+      (f := fun z : AddCircle (1 : ℝ) => ‖∑ k ∈ Finset.Ioc ⌊x - 2 * length512 ε x⌋₊ ⌊x⌋₊,
+        a k * @fourier (1 : ℝ) (k : ℤ) z‖ ^ 2)
+  rw [h1]
+  exact finite_parseval561 _ _
 
 /-- LEAF. Orthogonality on one complete period for the short block: the integral of
 the squared norm of the short polynomial over the period is the sum of the squared
@@ -24,7 +88,21 @@ coefficient norms over the short support, with no analytic input. -/
 theorem leaf_short_energy_parseval561 (ε x : ℝ) (b : ℕ → ℂ) :
     shortEnergy561 ε x b =
       ∑ k ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊, ‖b k‖ ^ 2 := by
-  sorry
+  have hper : period512 ε x =
+      Ioc (1 / (order512 ε x : ℝ)) (1 / (order512 ε x : ℝ) + 1) := by
+    rw [period512, add_comm]
+  rw [shortEnergy561, hper]
+  simp only [polynomial512]
+  have h1 : (∫ t in Ioc (1 / (order512 ε x : ℝ)) (1 / (order512 ε x : ℝ) + 1),
+      ‖∑ k ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊,
+        b k * @fourier (1 : ℝ) (k : ℤ) (t : AddCircle (1 : ℝ))‖ ^ 2) =
+      ∫ z : AddCircle (1 : ℝ), ‖∑ k ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊,
+        b k * @fourier (1 : ℝ) (k : ℤ) z‖ ^ 2 :=
+    AddCircle.integral_preimage (T := (1 : ℝ)) (t := 1 / (order512 ε x : ℝ))
+      (f := fun z : AddCircle (1 : ℝ) => ‖∑ k ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊,
+        b k * @fourier (1 : ℝ) (k : ℤ) z‖ ^ 2)
+  rw [h1]
+  exact finite_parseval561 _ _
 
 /-- LEAF. Divisor moment on the window of length twice Y placed directly below x:
 the squared coefficient type bound raised to the exponent B, summed over that
@@ -52,7 +130,40 @@ elementary step that produces the positive epsilon zero of the target. -/
 theorem leaf_length_bounds561 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
       1 ≤ length512 ε x ∧ 2 * length512 ε x ≤ x := by
-  sorry
+  refine ⟨1 / 20, by norm_num, ?_⟩
+  intro ε hε hε'
+  have hθ0 : 0 < 11 / 20 + ε := by linarith
+  have hθ1 : 11 / 20 + ε < 1 := by linarith
+  have hd : 0 < 1 - (11 / 20 + ε) := by linarith
+  refine ⟨(2 : ℝ) ^ (1 / (1 - (11 / 20 + ε))) + 1, ?_⟩
+  intro x hx
+  have hpos2 : (0 : ℝ) < (2 : ℝ) ^ (1 / (1 - (11 / 20 + ε))) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hX2 : (2 : ℝ) ^ (1 / (1 - (11 / 20 + ε))) ≤ x := by linarith
+  have hx1 : 1 ≤ x := by linarith
+  have hxp : 0 < x := by linarith
+  constructor
+  · rw [length512]
+    exact Real.one_le_rpow hx1 hθ0.le
+  · rw [length512]
+    have hbase : (2 : ℝ) ≤ x ^ (1 - (11 / 20 + ε)) := by
+      have hmono : ((2 : ℝ) ^ (1 / (1 - (11 / 20 + ε)))) ^ (1 - (11 / 20 + ε)) ≤
+          x ^ (1 - (11 / 20 + ε)) :=
+        Real.rpow_le_rpow hpos2.le hX2 hd.le
+      have hpow : ((2 : ℝ) ^ (1 / (1 - (11 / 20 + ε)))) ^ (1 - (11 / 20 + ε)) = 2 := by
+        rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
+        rw [show 1 / (1 - (11 / 20 + ε)) * (1 - (11 / 20 + ε)) = 1 by
+          rw [one_div, inv_mul_cancel₀ (ne_of_gt hd)]]
+        exact Real.rpow_one 2
+      linarith [hmono, hpow]
+    have hθpos : 0 < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos hxp _
+    have hsum : 1 - (11 / 20 + ε) + (11 / 20 + ε) = 1 := by ring
+    calc 2 * x ^ (11 / 20 + ε)
+        ≤ x ^ (1 - (11 / 20 + ε)) * x ^ (11 / 20 + ε) :=
+          mul_le_mul_of_nonneg_right hbase hθpos.le
+      _ = x ^ (1 - (11 / 20 + ε) + (11 / 20 + ε)) := (Real.rpow_add hxp _ _).symm
+      _ = x ^ (1 : ℝ) := by rw [hsum]
+      _ = x := Real.rpow_one x
 
 /-- The coefficient energy step, assembled from the two orthogonality identities,
 the two divisor moments and the choice of the exponent cutoff. -/

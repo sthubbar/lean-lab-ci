@@ -56,7 +56,14 @@ theorem leaf_high_band_membership {ε a b : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1
     (hb : 2273/10000 ≤ b) (hba : b ≤ a) (ha : a ≤ 1/2)
     (hs1 : 9/16 ≤ a + 2*b) (hs2 : a + 2*b ≤ 1) :
     lowerTwoDiscarded ε a b := by
-  sorry
+  unfold lowerTwoDiscarded upperPairRegion
+  refine ⟨by linarith, hba, ha, hs2, ?_⟩
+  rintro (hA | hB | hC | hD)
+  · linarith
+  · linarith
+  · linarith
+  · obtain ⟨-, -, -, hbD, -⟩ := hD
+    linarith
 
 /-- LEAF: second band inclusion, the part of E2 below the strip `4 a + 3 b = 2`. Here
 `4 a + 3 b ≤ 15/8` makes both `|4 a + 3 b - 2|` and `|4 a + b - 2|` at least `1/8`, which kills
@@ -70,7 +77,21 @@ theorem leaf_middle_band_membership {ε a b : ℝ} (hε : 0 < ε) (hε8 : ε ≤
     (h5 : a + b ≤ 7/16 ∨ 17/8 ≤ 4*a + 5*b)
     (hclear : 2273/10000 ≤ a ∨ a + 1/8 ≤ 2*b) :
     lowerTwoDiscarded ε a b := by
-  sorry
+  unfold lowerTwoDiscarded upperPairRegion
+  refine ⟨by linarith, hba, ha, hs2, ?_⟩
+  rintro (hA | hB | hC | hD)
+  · linarith
+  · linarith
+  · rcases h5 with h5 | h5 <;> linarith
+  · obtain ⟨-, -, -, -, hrest⟩ := hD
+    rcases hrest with ⟨h1, h2⟩ | h3 | h4
+    · rcases hclear with hcl | hcl
+      · linarith
+      · linarith
+    · rw [abs_le] at h3
+      linarith
+    · rw [abs_le] at h4
+      linarith
 
 /-- LEAF: third band inclusion, the part of E2 above the strip `4 a + 3 b = 2`. Here
 `17/8 ≤ 4 a + 3 b` kills the first and second alternatives at once, and forces
@@ -82,7 +103,18 @@ theorem leaf_notch_band_membership {ε a b : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 
     (hs1 : 9/16 ≤ a + 2*b) (hs2 : a + 2*b ≤ 1)
     (h3 : 17/8 ≤ 4*a + 3*b) (h4 : 4*a + b ≤ 15/8 ∨ 17/8 ≤ 4*a + b) :
     lowerTwoDiscarded ε a b := by
-  sorry
+  unfold lowerTwoDiscarded upperPairRegion
+  refine ⟨by linarith, hba, ha, hs2, ?_⟩
+  rintro (hA | hB | hC | hD)
+  · linarith
+  · linarith
+  · linarith
+  · obtain ⟨-, -, -, -, hrest⟩ := hD
+    rcases hrest with ⟨h1, h2⟩ | h5 | h5
+    · linarith
+    · rw [abs_le] at h5
+      linarith
+    · rcases h4 with h4 | h4 <;> rw [abs_le] at h5 <;> linarith
 
 /-- LEAF: the quadrature. The integral of `1 / (a b^2)` over the union of the three bands, as a
 function of the plane, is at least `13/10`. The region is a fixed finite union of polygons cut out
@@ -113,7 +145,26 @@ theorem leaf_three_band_bound (a b : ℝ) :
         (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
             a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧
             (4*a + b ≤ 15/8 ∨ 17/8 ≤ 4*a + b))) then 1/(a*b^2) else 0)| ≤ 1000 := by
-  sorry
+  split_ifs with h
+  · have hb1 : (1/8:ℝ) ≤ b := by
+      rcases h with ⟨h1, -⟩ | ⟨h1, -⟩ | ⟨h1, -⟩
+      · linarith
+      · exact h1
+      · exact h1
+    have hba : b ≤ a := by
+      rcases h with ⟨-, h2, -⟩ | ⟨-, -, h2, -⟩ | ⟨-, -, h2, -⟩
+      · exact h2
+      · exact h2
+      · exact h2
+    have hb2 : (1/64:ℝ) ≤ b^2 := by nlinarith
+    have hmul : (1/8:ℝ)*(1/64) ≤ a*b^2 :=
+      mul_le_mul (le_trans hb1 hba) hb2 (by norm_num) (by linarith)
+    have hpos : 0 < a*b^2 := by linarith
+    have hnn : 0 ≤ (1:ℝ)/(a*b^2) := by positivity
+    rw [abs_of_nonneg hnn]
+    rw [div_le_iff₀ hpos]
+    linarith
+  · norm_num
 
 /-- The E2 quadrature, assembled from the three band inclusions, the quadrature over their union
 and the pointwise bound. Since every band is contained in E2 and `1 / (a b^2) ≥ 0` on E2, the
