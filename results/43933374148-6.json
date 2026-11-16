@@ -359,6 +359,91 @@
    "file": "LeanLab/LeanLab/Languasco2004/Decomp564c.lean",
    "result": "SKIP imports failed: import build killed, memory 11005 MB",
    "seconds": 1233
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp565d.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 78
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/Audit1608.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/Decomp131.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/Decomp481c.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 169
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/SPLIT_gamma_pair_bound481.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Li2024/Statements.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_intermediate_lower_shift_bound.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_split_large_shift_bound.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 26
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/MajorArcEnergy/Leaves1517.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 15
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/Decomp357a.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 426
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT1622_mellin.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 51
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_local_arc_core_unit1622.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 263
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_nonprincipal_bound491.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 25
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SecondMoment111.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/LiuTsang2005/Decomp1533b.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/LiuTsang2005/Statements.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/LiuWang2002/Decomp352a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 1221
   }
  ],
  "summary": {
@@ -366,7 +451,7 @@
   "declarations_closed": 1,
   "sites": 1,
   "skipped": 3,
-  "seconds": 6766
+  "seconds": 9045
  },
  "selftest": {
   "ok": true,
