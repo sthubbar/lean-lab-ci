@@ -8,8 +8,8 @@ arXiv 2412.19975v1, Section 2 "Proof of Theorem 1.1", pages 7 to 11.
 
 AI wrote this Lean code. Binary Goldbach is OPEN.
 
-The cited main result `LeanLab.MissingDigit.kim_thm1_1 : D4Bound (3 / 5) 7` is left open in
-`Statements.lean`, which is untouched. Here `kim_thm1_1_of_split` proves the same
+The cited main result `LeanLab.MissingDigit.kim_thm1_1 : D4Bound (3 / 5) 7` carries an open step
+in `Statements.lean`, which is left untouched. Here `kim_thm1_1_of_split` proves the same
 statement from the top level structure of the paper's Section 2 proof:
 
 * `orthogonality`, the circle method identity behind the left side of display (2.1),
@@ -17,10 +17,10 @@ statement from the top level structure of the paper's Section 2 proof:
 * `arc_split`, the translation of `[0,1]` to `[1/Q, 1+1/Q]` and its splitting into the major
   arcs `𝔐` and minor arcs `𝔪` of page 3. PROVED.
 * `prop_2_2`, Proposition 2.2, page 8, resting on Proposition 2.1 = MSTT Theorem 1.1 (iii)
-  and Lemma 1.7. sorry, cited.
+  and Lemma 1.7, cited and open.
 * `major_arcs_bound`, Proposition 2.4, page 9, together with Section 2.2, pages 10 and 11.
-  sorry, cited.
-* `prop_2_5`, Proposition 2.5, page 9, resting on Proposition 3.4. sorry, cited.
+  cited and open.
+* `prop_2_5`, Proposition 2.5, page 9, resting on Proposition 3.4, cited and open.
 
 Notation follows Section 1.1 and Section 2 of the paper with `X = g^k`:
 `R₄ = X^{ε/40}`, `δ = X^{-ε}`, `Q = δ^{-1} = X^ε`, `D(δ) = (log X)^{-3^6-1}`,
