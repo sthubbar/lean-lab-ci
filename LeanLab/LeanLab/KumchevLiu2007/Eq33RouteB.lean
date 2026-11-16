@@ -3,20 +3,19 @@ Kumchev and Liu 2007, P0088, arXiv 0801.0130, page 8, displays 30 and 31 and
 the sentence after display 31, Gallagher's lemma with hypothesis A2.3.
 
 This file proves the statement of `Task556d.kernel_mass_of_A23` under the name
-`kernel_mass_of_A23_route` from two smaller leaves:
+`kernel_mass_of_A23_route` from the remaining initial range leaf:
 
-* `gallagher_roughSum`, Gallagher's lemma in the exact form used after display 31,
-  which the paper only cites,
 * `A23_initial_range`, the initial range of t that hypothesis A2.3 as written
   does not cover when it is inserted into Gallagher's integral.
 
 Display 30, the subdivision argument with its logarithm, and display 31, the
 passage from the local minor arc mass to short arcs centred at minor arc
-points, are fully proved here.
+points, are fully proved here. Gallagher's lemma is now proved through
+Task634.roughSum_gallagher.
 
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.Decomp556d
+import LeanLab.KumchevLiu2007.Gallagher634
 import Mathlib.NumberTheory.Harmonic.Bounds
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteB
@@ -36,7 +35,7 @@ theorem gallagher_roughSum (Y P H α : ℝ) (hH : 0 < H) :
       (π / (2 * H)) ^ 2 *
         ((∫ t in (Y / 4 - H)..(Y / 4), ‖roughShortSum Y P H α t‖ ^ 2) +
           ∫ t in (Y / 4)..Y, ‖roughShortSum Y P H α t‖ ^ 2) := by
-  sorry
+  exact Task634.roughSum_gallagher Y P H α hH
 
 /-- LEAF: P0088 page 8, the sentence after display 31, hypothesis A2.3 inserted
 into Gallagher's integral on the initial range of t from Y/4 - H to Y/4. The

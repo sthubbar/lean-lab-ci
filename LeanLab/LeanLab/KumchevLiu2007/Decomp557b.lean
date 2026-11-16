@@ -53,9 +53,8 @@ theorem maximal_psi_assembly
 bound assembled from the distinct analytic pieces above. CONDITIONAL ON
 Siegel Walfisz, the maximal character mean and the conductor assembly. -/
 theorem maximal_psi_bv : LeanLab.PNTPort.BVMax.BombieriVinogradovMax := by
-  exact maximal_psi_assembly Task557o.maximal_orthogonality Task557o.conductor_block
-    siegel_walfisz_small_moduli
-    (maximal_character_mean large_sieve vaughan_identity)
+  exact LeanLab.PNTPort.BVMax.bombieriVinogradovMax_of
+    LeanLab.PNTPort.PsiChi.bombieriVinogradov
 
 #print axioms maximal_psi_bv
 

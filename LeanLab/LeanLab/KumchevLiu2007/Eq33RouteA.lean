@@ -12,7 +12,7 @@ integral, and finish with I1 at most 2 Y.
 
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.Decomp556d
+import LeanLab.KumchevLiu2007.Kernel634Base
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteA
 
