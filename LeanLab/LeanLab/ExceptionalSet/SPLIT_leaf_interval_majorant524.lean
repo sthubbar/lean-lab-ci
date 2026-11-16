@@ -54,6 +54,143 @@ private theorem eC_mul524 (s t : ℝ) : eC s * eC t = eC (s + t) := by
   push_cast
   ring
 
+/-- Fejér kernel of order H: nonnegative, integrates to 1, degree H. -/
+def fejerK524 (H : ℕ) (t : ℝ) : ℝ :=
+  ((1 : ℝ) / (H + 1)) * ((∑ k ∈ range (H+1), cos (2*π*(k:ℝ)*t))^2 +
+                         (∑ k ∈ range (H+1), sin (2*π*(k:ℝ)*t))^2)
+
+lemma fejerK524_nonneg (H : ℕ) (t : ℝ) : 0 ≤ fejerK524 H t := by
+  dsimp [fejerK524]
+  positivity
+
+lemma fejerK524_eq (H : ℕ) (t : ℝ) : fejerK524 H t =
+    ((1 : ℝ) / (H + 1)) * (∑ k ∈ range (H+1), eC ((k : ℝ) * t)) * (starRingEnd ℂ) (∑ k ∈ range (H+1), eC ((k : ℝ) * t)) := by
+  dsimp [fejerK524]
+  simp_rw [Complex.normSq_eq_norm_sq, Complex.norm_sq_eq_norm_mul_self]
+  sorry
+
+lemma fejerK524_coeff (H h : ℕ) (hh : h ≤ H) :
+    (∑ k ∈ range (H+1), eC ((k : ℝ) * 0)) = ((H + 1 : ℕ) : ℂ) := by
+  simp [eC]
+
+/-- The Fejér kernel expressed as a cosine polynomial:
+K_H(t) = 1/(H+1) + 2 Σ_{h=1}^H (1 - h/(H+1)) cos(2π h t) -/
+lemma fejerK524_cos (H : ℕ) (t : ℝ) : fejerK524 H t =
+    ((1 : ℝ) / (H + 1)) + 2 * ∑ h ∈ Icc 1 H, ((1 : ℝ) - (h : ℝ) / (H + 1)) * cos (2 * π * (h : ℝ) * t) := by
+  sorry
+
+/-- The Fejér-smoothed indicator of [a,b):
+σ(x) = (b-a) + 2 Σ_{h=1}^H (1 - h/(H+1)) (sin(π h w)/(π h)) cos(2π h (x-m)) -/
+def sigma524 (a b : ℝ) (H : ℕ) (x : ℝ) : ℝ :=
+  (b - a) + 2 * ∑ h ∈ Icc 1 H,
+    ((1 : ℝ) - (h : ℝ) / (H + 1)) * (Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ))) *
+    Real.cos (2 * π * (h : ℝ) * (x - (a + b) / 2))
+
+lemma sigma524_coeff_norm (a b : ℝ) (H : ℕ) (h : ℕ) (hH : h ∈ Icc 1 H) :
+    ‖(2 * ((1 : ℝ) - (h : ℝ) / (H + 1)) * (Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ)))
+      * Complex.exp (-(2 * π * (h : ℝ) * ((a + b) / 2) * Complex.I)))‖ ≤ 4 / (h : ℝ) := by
+  have hh1 : 1 ≤ (h : ℝ) := by exact_mod_cast (Finset.mem_Icc.mp hH).1
+  have hhH : (h : ℝ) ≤ H := by exact_mod_cast (Finset.mem_Icc.mp hH).2
+  calc
+    ‖(2 * ((1 : ℝ) - (h : ℝ) / (H + 1)) * (Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ)))
+      * Complex.exp (-(2 * π * (h : ℝ) * ((a + b) / 2) * Complex.I)))‖
+        = 2 * ((1 : ℝ) - (h : ℝ) / (H + 1)) * |Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ))| := by
+      rw [norm_mul, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
+      simp [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+      ring
+    _ ≤ 2 * 1 * |Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ))| := by
+      gcongr
+      have hsub : (h : ℝ) / (H + 1) ≤ 1 := by
+        apply (div_le_one (by positivity)).mpr
+        exact hhH.trans (by exact_mod_cast (Nat.lt_succ_self H))
+      nlinarith
+    _ = |Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ))| := by ring
+    _ ≤ |Real.sin (π * (h : ℝ) * (b - a))| / |π * (h : ℝ)| := abs_div _ _
+    _ ≤ 1 / |π * (h : ℝ)| := by
+      gcongr
+      exact Real.sin_le_one _
+    _ = 1 / (π * (h : ℝ)) := by
+      rw [abs_of_pos (by positivity : (0 : ℝ) < π * (h : ℝ))]
+    _ ≤ 1 / ((h : ℝ)) := by
+      gcongr
+      · positivity
+      · exact Real.pi_pos.le.trans (by nlinarith)
+    _ ≤ 4 / (h : ℝ) := by
+      have h4 : (1 : ℝ) ≤ 4 := by norm_num
+      gcongr
+
+lemma sigma524_eq_trig (a b : ℝ) (H : ℕ) (x : ℝ) : sigma524 a b H x =
+    (b - a) + (∑ h ∈ Icc 1 H,
+      (2 * ((1 : ℝ) - (h : ℝ) / (H + 1)) * (Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ)))
+        * Complex.exp (-(2 * π * (h : ℝ) * ((a + b) / 2) * Complex.I)) * eC ((h : ℝ) * x)).re := by
+  dsimp [sigma524]
+  have hcos (θ : ℝ) : (Complex.exp (θ * Complex.I)).re = cos θ := by
+    rw [Complex.exp_ofReal_mul_I_re]
+  simp_rw [hcos]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro h hh
+  have h1 : (Complex.exp (-(2 * π * (h : ℝ) * ((a + b) / 2) * Complex.I)) * eC ((h : ℝ) * x)).re =
+      cos (2 * π * (h : ℝ) * (x - (a + b) / 2)) := by
+    calc
+      (Complex.exp (-(2 * π * (h : ℝ) * ((a + b) / 2) * Complex.I)) * eC ((h : ℝ) * x)).re
+          = (Complex.exp (-(2 * π * (h : ℝ) * ((a + b) / 2) * Complex.I)) *
+              Complex.exp ((2 * π * (h : ℝ) * x) * Complex.I)).re := by
+        rw [eC_eq524]
+        push_cast
+        ring
+      _ = (Complex.exp ((2 * π * (h : ℝ) * (x - (a + b) / 2)) * Complex.I)).re := by
+        rw [← Complex.exp_add]
+        ring
+      _ = cos (2 * π * (h : ℝ) * (x - (a + b) / 2)) := hcos _
+  rw [h1]
+  ring
+
+/-- The correction kernel: Ψ(t) = (K_H(t) + K_H(t + 1/2)) / (H+1) -/
+def psi524 (H : ℕ) (t : ℝ) : ℝ :=
+  (fejerK524 H t + fejerK524 H (t + 1/2)) / (H + 1)
+
+lemma psi524_nonneg (H : ℕ) (t : ℝ) : 0 ≤ psi524 H t := by
+  dsimp [psi524]
+  have h1 : 0 ≤ fejerK524 H t := fejerK524_nonneg H t
+  have h2 : 0 ≤ fejerK524 H (t + 1/2) := fejerK524_nonneg H (t + 1/2)
+  positivity
+
+/-- The correction term: τ(x) = (1/2)(Ψ(x-a) + Ψ(x-b)) -/
+def tau524 (a b : ℝ) (H : ℕ) (x : ℝ) : ℝ :=
+  (psi524 H (x - a) + psi524 H (x - b)) / 2
+
+lemma tau524_nonneg (a b : ℝ) (H : ℕ) (x : ℝ) : 0 ≤ tau524 a b H x := by
+  dsimp [tau524]
+  have h1 : 0 ≤ psi524 H (x - a) := psi524_nonneg H (x - a)
+  have h2 : 0 ≤ psi524 H (x - b) := psi524_nonneg H (x - b)
+  positivity
+
+/-- The majorant polynomial: P(x) = σ(x) + τ(x) where σ is the Fejér mean -/
+def majorant524 (a b : ℝ) (H : ℕ) (x : ℝ) : ℝ :=
+  sigma524 a b H x + tau524 a b H x
+
+lemma majorant524_nonneg (a b : ℝ) (hab : a < b) (ha : 0 ≤ a) (hb : b ≤ 1) (H : ℕ) (x : ℝ) :
+    0 ≤ majorant524 a b H x := by
+  dsimp [majorant524]
+  have hσ : 0 ≤ sigma524 a b H x := by
+    -- sigma524 = (b-a) + nonnegative correction? Actually sigma524 ≥ 0 because it's a convolution with a nonnegative kernel.
+    -- But we don't have that lemma yet. However, we know fejerK524 ≥ 0, and sigma524 is a positive linear combination of fejerK524 evaluated at different points.
+    sorry
+  have hτ : 0 ≤ tau524 a b H x := tau524_nonneg a b H x
+  positivity
+
+/-- The constant term of majorant524 is b-a + 4/(H+1) -/
+lemma majorant524_const (a b : ℝ) (H : ℕ) (hH : 4 ≤ H) :
+    majorant524 a b H 0 = (b - a) + 4 / ((H : ℝ) + 1) := by
+  sorry
+
+/-- The Fourier coefficients of majorant524 are bounded by 4/h -/
+lemma majorant524_coeff_norm (a b : ℝ) (H : ℕ) (h : ℕ) (hH : h ∈ Icc 1 H) :
+    ‖(2 * ((1 : ℝ) - (h : ℝ) / (H + 1)) * (Real.sin (π * (h : ℝ) * (b - a)) / (π * (h : ℝ)))
+      * Complex.exp (-(2 * π * (h : ℝ) * ((a + b) / 2) * Complex.I)))‖ ≤ 4 / (h : ℝ) :=
+  sigma524_coeff_norm a b H h hH
+
 /-- LEAF. Width at most `1/3` with the constant below one and too little
 room below it for a single cosine, since
 `C * (1 + cos (π * (b - a))) < 1`. Here the majorant has to put mass on
@@ -68,6 +205,26 @@ theorem leaf_majorant_small_width524 (a b : ℝ) (hab : a < b) (ha : 0 ≤ a)
       (∀ h ∈ Icc 1 H, ‖c h‖ ≤ 4 / (h : ℝ)) ∧
       ∀ x : ℝ, (if a ≤ Int.fract x ∧ Int.fract x < b then (1 : ℝ) else 0) ≤
         c₀ + (∑ h ∈ Icc 1 H, c h * eC ((h : ℝ) * x)).re := by
+  set C := b - a + 4 / ((H : ℝ) + 1) with hCdef
+  have hClt : C < 1 := by rw [hCdef]; exact hC1
+  have hCpos : 0 ≤ C := by
+    rw [hCdef]
+    positivity
+  set m := (a + b) / 2 with hmdef
+  set w := b - a with hwdef
+  have hwpos : 0 < w := by rw [hwdef]; linarith
+  have hwle : w ≤ 1 / 3 := by rw [hwdef]; exact hw1
+  have hw_half : w / 2 ≤ 1 / 6 := by linarith
+  -- Use the Fejér kernel construction: P(x) = C * K_H(x-m)
+  -- The Fejér kernel has constant term 1/(H+1), so scaled by C gives constant C/(H+1) ≤ C
+  -- The other coefficients are 2C(1 - h/(H+1)) ≤ 2C ≤ 4/h for h ≥ 1
+  -- We need P(x) ≥ 1_{[a,b)}(x)
+  -- Since P(x) = C * K_H(x-m) and K_H is nonnegative and decreasing on [0, 1/2],
+  -- the minimum on [a,b) is at the endpoints, where |x-m| = w/2.
+  -- So we need C * K_H(w/2) ≥ 1.
+  -- For the given ranges, this holds because K_H(t) ≥ (H+1) * (sin(π(H+1/2)t) / (π(H+1/2)t))^2?
+  -- Actually, a simpler bound: K_H(t) ≥ (H+1) * (sin(π(H+1)t) / (π(H+1)t))^2 for t ∈ [0,1/2].
+  -- But this is getting too complex. Let's use a different approach.
   sorry
 
 /-- LEAF. Width strictly between `1/3` and `1/2` with the constant below
@@ -89,8 +246,8 @@ theorem leaf_majorant_mid_width524 (a b : ℝ) (hab : a < b) (ha : 0 ≤ a)
 /-- LEAF. Width at least `1/2` with the constant below one. Here the
 complement of the interval is narrower than the interval itself and the
 cosine of the midpoint is nonpositive, so the majorant is a smoothed
-indicator rather than a bump: the finite Fourier majorant of Lemma 4 in the
-wide width regime. -/
+indicator rather than a bump: the finite Fourier majorant of Lemma 4 in
+the wide width regime. -/
 theorem leaf_majorant_large_width524 (a b : ℝ) (hab : a < b) (ha : 0 ≤ a)
     (hb : b ≤ 1) (H : ℕ) (hH : 4 ≤ H) (hw1 : 1 / 2 ≤ b - a)
     (hC1 : b - a + 4 / ((H : ℝ) + 1) < 1) :
