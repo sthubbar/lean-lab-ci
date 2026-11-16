@@ -36,8 +36,6 @@ the inner r sum and Graham and Kolesnik Lemma 2.4 for L, page 7.
 Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Characteristic139
-import LeanLab.Song2020.RouteS1Lambda
-import LeanLab.Song2020.RouteVaughanUV
 
 namespace LeanLab.Song2020.SPLIT_vaughan_per_u
 
@@ -49,8 +47,7 @@ noncomputable section
 /-- LEAF: Song 2020, page 5, from "For S1, we first observe" to "We have shown so far":
 partial summation over the prime window with a_h at most K over h reduces S1 to the von
 Mangoldt sums over an initial segment, with n to the epsilon absorbing the weight variation
-when y is close to n/3. The header of this file carries the full reading.
-PROVED 2026-11-15 from RouteS1Lambda.s1_lambda_reduction_route, no sorry. -/
+when y is close to n/3. The header of this file carries the full reading. -/
 theorem s1_lambda_reduction :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
       ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ K : ℝ, 1 ≤ K → ∀ a : ℕ → ℤ → ℂ,
@@ -66,14 +63,11 @@ theorem s1_lambda_reduction :
         ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0), a H h * eC (h * (-(p : ℝ) ^ γ)))‖ ≤
                 C * K * ((n : ℝ) ^ (3 / 2 - γ) + (H : ℝ) * (n : ℝ) ^ ((1 : ℝ) / 2) +
                   (n : ℝ) ^ ε * ∑ k ∈ Finset.Icc 1 H, (B k + B (-(k : ℤ)))) := by
-  exact RouteS1Lambda.s1_lambda_reduction_route
+  sorry
 
 /-- LEAF: Song 2020, pages 6 and 7, with u and v both free: the Sigma 1 display and the
 display for x to the minus epsilon times Sigma 2 plus Sigma 3, before the choice
-v = (n/u)^{1/2}. The header of this file carries the full reading.
-ROUTED 2026-11-15 through RouteVaughanUV.vaughan_uv_route: no sorry here. CONDITIONAL ON the
-three open leaves RouteVaughanLeaves.sigma2_bound, RouteVaughanLeaves.sigma3_bound and
-RouteVaughanSigma1.inner_sum_bound. -/
+v = (n/u)^{1/2}. The header of this file carries the full reading. -/
 theorem vaughan_uv :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ∀ ε : ℝ, 0 < ε →
       ∃ C : ℝ, 0 ≤ C ∧ ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
@@ -91,7 +85,7 @@ theorem vaughan_uv :
                   |(h : ℝ)| ^ ((1 : ℝ) / 6)) +
                 u ^ (-(1 : ℝ) / 4) * ((n : ℝ) ^ ((γ + 1) / 4) * y ^ ((1 : ℝ) / 2) *
                   |(h : ℝ)| ^ ((1 : ℝ) / 4))) := by
-  exact RouteVaughanUV.vaughan_uv_route
+  sorry
 
 /-- PROVED. The modulus of the additive character is one, so the triangle inequality leaves
 the von Mangoldt mass of the window: the first step inside the partial summation leaf. -/
@@ -388,6 +382,68 @@ theorem norm_truncatedSum_le_of_fourier_bound (a : ℕ → ℤ → ℂ) (H : ℕ
         (norm_sum_le _ _).trans (Finset.sum_le_sum hterm)
     _ = 2 * M * ∑ p ∈ windowPrimes n y, ‖(psWeight γ p : ℂ)‖ := by
         rw [Finset.mul_sum]
+
+/-- PROVED. The counting form of the prime power error: a set of naturals whose squares are
+all at most M lies below the square root of M, so it has at most root M plus one elements.
+Every prime power p to the k with k at least two satisfies p squared at most p to the k, so
+this bounds the number of composite prime powers in the window, which is the error term the
+paper separates when it passes from primes to the von Mangoldt function. -/
+theorem card_le_sqrt_of_sq_le (M : ℕ) (s : Finset ℕ) (hs : ∀ x ∈ s, x ^ 2 ≤ M) :
+    s.card ≤ Nat.sqrt M + 1 := by
+  have hsub : s ⊆ Finset.range (Nat.sqrt M + 1) := by
+    intro x hx
+    rw [Finset.mem_range]
+    exact Nat.lt_succ_of_le (Nat.le_sqrt'.mpr (hs x hx))
+  calc s.card ≤ (Finset.range (Nat.sqrt M + 1)).card := Finset.card_le_card hsub
+    _ = Nat.sqrt M + 1 := Finset.card_range _
+
+/-- PROVED. The mass form of the prime power error: on a set of naturals whose squares are at
+most M and with M at least two, the von Mangoldt mass is at most root M plus one times the
+logarithm of M, because each term is at most log M and there are at most root M plus one
+terms. This is the size the paper charges to the prime power error when it passes from primes
+to the von Mangoldt function inside the partial summation leaf. -/
+theorem mass_le_sqrt_mul_log (M : ℕ) (hM : 2 ≤ M) (s : Finset ℕ)
+    (hs : ∀ x ∈ s, x ^ 2 ≤ M) :
+    ∑ x ∈ s, (ArithmeticFunction.vonMangoldt x : ℝ) ≤
+      ((Nat.sqrt M : ℝ) + 1) * Real.log (M : ℝ) := by
+  have hlog : 0 ≤ Real.log (M : ℝ) :=
+    Real.log_nonneg (by exact_mod_cast (show (1 : ℕ) ≤ M by omega))
+  have hterm : ∀ x ∈ s, (ArithmeticFunction.vonMangoldt x : ℝ) ≤ Real.log (M : ℝ) := by
+    intro x hx
+    rcases Nat.eq_zero_or_pos x with h0 | hpos
+    · subst h0
+      simpa using hlog
+    · have hx1 : (1 : ℝ) ≤ (x : ℝ) := by exact_mod_cast hpos
+      have hsq : (x : ℝ) * (x : ℝ) ≤ (M : ℝ) := by
+        have h := hs x hx
+        have : ((x ^ 2 : ℕ) : ℝ) ≤ (M : ℝ) := by exact_mod_cast h
+        simpa [pow_two] using this
+      have hxM : (x : ℝ) ≤ (M : ℝ) := by nlinarith
+      exact (ArithmeticFunction.vonMangoldt_le_log (n := x)).trans
+        (Real.log_le_log (by linarith) hxM)
+  calc ∑ x ∈ s, (ArithmeticFunction.vonMangoldt x : ℝ)
+      ≤ s.card • Real.log (M : ℝ) := Finset.sum_le_card_nsmul _ _ _ hterm
+    _ = (s.card : ℝ) * Real.log (M : ℝ) := nsmul_eq_mul _ _
+    _ ≤ ((Nat.sqrt M : ℝ) + 1) * Real.log (M : ℝ) :=
+        mul_le_mul_of_nonneg_right (by exact_mod_cast card_le_sqrt_of_sq_le M s hs) hlog
+
+/-- PROVED. The unconditional trivial bound on the window sum of the paper: with the paper's
+coefficient hypothesis and no other input, the window sum is at most twice the trivial Fourier
+bound times the total weight of the window. This is the first closed estimate of S1 in this
+file, and it is the bound the exponential sum estimates have to improve on. -/
+theorem norm_truncatedSum_le_coeff_bound (a : ℕ → ℤ → ℂ) (H : ℕ) (γ : ℝ) (n : ℕ)
+    (y α : ℝ) (K : ℝ) (hK0 : 0 ≤ K)
+    (hK : ∀ h : ℤ, h ≠ 0 → ‖a H h‖ ≤ K / |(h : ℝ)|) :
+    ‖∑ p ∈ windowPrimes n y, (psWeight γ p : ℂ) * eC (α * p) *
+        (∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-((p : ℝ) + 1) ^ γ)) -
+          ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h : ℤ => h ≠ 0),
+            a H h * eC (h * (-(p : ℝ) ^ γ)))‖
+      ≤ 2 * (K * (2 * (H : ℝ) + 1)) * ∑ p ∈ windowPrimes n y, ‖(psWeight γ p : ℂ)‖ := by
+  refine norm_truncatedSum_le_of_fourier_bound a H γ n y α (K * (2 * (H : ℝ) + 1))
+    (by positivity) ?_
+  intro x
+  exact norm_fourier_sum_le_of_coeff_bound a H x K hK0 hK
 
 end
 
