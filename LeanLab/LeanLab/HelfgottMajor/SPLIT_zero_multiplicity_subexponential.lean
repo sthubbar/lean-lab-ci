@@ -40,7 +40,38 @@ theorem order_le_book_count_upper (q : ℕ) [NeZero q] (χ : DirichletCharacter 
     (him : 100 ≤ |s.im|) (him0 : 0 ≤ s.im) :
     (analyticOrderNatAt (DirichletCharacter.LFunction χ) s : ℝ) ≤
       ZeroCount1623.bookCount χ (|s.im| + 1) := by
-  sorry
+  classical
+  have hmem : s ∈ (ZeroCount1623.stripZeros_finite χ (|s.im| + 1)).toFinset.filter
+      (fun ρ => 0 ≤ ρ.im) := by
+    simp only [Finset.mem_filter, Set.Finite.mem_toFinset, ZeroCount1623.stripZeros]
+    exact ⟨⟨hs, hre0, hre1, by linarith [le_abs_self s.im]⟩, him0⟩
+  have hzero : s.im ≠ 0 := by
+    intro h
+    have h' : |s.im| = 0 := by rw [h]; simp
+    linarith
+  have hneT : s.im ≠ |s.im| + 1 := by
+    have h := le_abs_self s.im
+    intro hh
+    linarith
+  have hw : ZeroCount1623.halfWeight (|s.im| + 1) s.im = 1 := by
+    unfold ZeroCount1623.halfWeight
+    exact if_neg (not_or.mpr ⟨hzero, hneT⟩)
+  have hnonneg : ∀ ρ ∈ (ZeroCount1623.stripZeros_finite χ (|s.im| + 1)).toFinset.filter
+      (fun ρ => 0 ≤ ρ.im),
+      0 ≤ ZeroCount1623.halfWeight (|s.im| + 1) ρ.im * (ZeroCount1623.mult χ ρ : ℝ) := by
+    intro ρ _
+    unfold ZeroCount1623.halfWeight
+    split
+    · positivity
+    · positivity
+  have hsingle := Finset.single_le_sum hnonneg hmem
+  unfold ZeroCount1623.bookCount
+  calc (analyticOrderNatAt (DirichletCharacter.LFunction χ) s : ℝ)
+      = ZeroCount1623.halfWeight (|s.im| + 1) s.im * (ZeroCount1623.mult χ s : ℝ) := by
+        rw [hw, one_mul]
+    _ ≤ ∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ (|s.im| + 1)).toFinset.filter
+          (fun ρ => 0 ≤ ρ.im),
+          ZeroCount1623.halfWeight (|s.im| + 1) ρ.im * (ZeroCount1623.mult χ ρ : ℝ) := hsingle
 
 /-- LEAF. A zero with negative imaginary part is counted by the inverse character. The
 conjugation symmetry of the `L`-function reflects `s` to `conj s`, a zero of `χ⁻¹` with
@@ -52,7 +83,39 @@ theorem order_le_book_count_lower (q : ℕ) [NeZero q] (χ : DirichletCharacter 
     (him : 100 ≤ |s.im|) (himneg : s.im < 0) :
     (analyticOrderNatAt (DirichletCharacter.LFunction χ) s : ℝ) ≤
       ZeroCount1623.bookCount χ⁻¹ (|s.im| + 1) := by
-  sorry
+  classical
+  have himabs : |s.im| = -s.im := abs_of_neg himneg
+  have hmem : s ∈ (ZeroCount1623.stripZeros_finite χ (|s.im| + 1)).toFinset.filter
+      (fun ρ => ρ.im ≤ 0) := by
+    simp only [Finset.mem_filter, Set.Finite.mem_toFinset, ZeroCount1623.stripZeros]
+    exact ⟨⟨hs, hre0, hre1, by linarith [le_abs_self s.im]⟩, himneg.le⟩
+  have hzero : -s.im ≠ 0 := by
+    have h : 0 < -s.im := by linarith
+    exact h.ne'
+  have hneT : -s.im ≠ |s.im| + 1 := by
+    rw [himabs]
+    intro h
+    linarith
+  have hw : ZeroCount1623.halfWeight (|s.im| + 1) (-s.im) = 1 := by
+    unfold ZeroCount1623.halfWeight
+    exact if_neg (not_or.mpr ⟨hzero, hneT⟩)
+  have hnonneg : ∀ ρ ∈ (ZeroCount1623.stripZeros_finite χ (|s.im| + 1)).toFinset.filter
+      (fun ρ => ρ.im ≤ 0),
+      0 ≤ ZeroCount1623.halfWeight (|s.im| + 1) (-ρ.im) * (ZeroCount1623.mult χ ρ : ℝ) := by
+    intro ρ _
+    unfold ZeroCount1623.halfWeight
+    split
+    · positivity
+    · positivity
+  have hsingle := Finset.single_le_sum hnonneg hmem
+  rw [ZeroCount1623.bookCount_inv χ (|s.im| + 1)]
+  calc (analyticOrderNatAt (DirichletCharacter.LFunction χ) s : ℝ)
+      = ZeroCount1623.halfWeight (|s.im| + 1) (-s.im) * (ZeroCount1623.mult χ s : ℝ) := by
+        rw [hw, one_mul]
+    _ ≤ ∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ (|s.im| + 1)).toFinset.filter
+          (fun ρ => ρ.im ≤ 0),
+          ZeroCount1623.halfWeight (|s.im| + 1) (-ρ.im) * (ZeroCount1623.mult χ ρ : ℝ) :=
+        hsingle
 
 /-- LEAF. The counting input: above height `100` the multiplicity weighted count of the zeros
 of `L (·, χ)` is at most the explicit main term `bookMain` plus the explicit error

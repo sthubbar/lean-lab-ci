@@ -26,6 +26,44 @@ half-strip of unit height.  Nothing here is proved about the number of zeros in 
 namespace LeanLab.HelfgottMajor.DecompJ1153
 open Real LeanLab.HelfgottArcs Decomp269a Decomp269b
 
+/-- Monotonicity of a nonnegative index-type sum in its index set, stated in the shape the
+window-removal leaf needs: the mass carried by the sub-index `{P ∧ R}` inside the index `{P}`
+is at most the mass of the index `{Q}`, provided `P ∧ R` implies `Q` and the `Q`-index is
+finite.  Nothing is assumed about the summands beyond nonnegativity. -/
+private theorem tsum_subtype_indicator_le {Ω : Type*} {P Q R : Ω → Prop} (f : Ω → ℝ)
+    (hnn : ∀ x, 0 ≤ f x) (hRQ : ∀ x, P x → R x → Q x) (hQ : {x | Q x}.Finite) :
+    (∑' x : {x // P x}, Set.indicator {y : {x // P x} | R (y : Ω)} (fun y => f (y : Ω)) x) ≤
+      ∑' x : {x // Q x}, f (x : Ω) := by
+  classical
+  -- the indicator sum is the sum over the filtered index
+  have h1 : (∑' x : {x // P x},
+        Set.indicator {y : {x // P x} | R (y : Ω)} (fun y => f (y : Ω)) x)
+      = ∑' y : {y : {x // P x} | R (y : Ω)}, f ((y : {x // P x}) : Ω) :=
+    (tsum_subtype {y : {x // P x} | R (y : Ω)} (fun y : {x // P x} => f (y : Ω))).symm
+  rw [h1]
+  -- re-index the iterated subtype as the conjunction
+  let e : {y : {x // P x} | R (y : Ω)} ≃ {z : Ω // P z ∧ R z} :=
+    { toFun := fun y => ⟨(y.val : Ω), y.val.property, y.property⟩
+      invFun := fun z => ⟨⟨z.val, z.property.1⟩, z.property.2⟩
+      left_inv := fun y => by ext <;> rfl
+      right_inv := fun z => by ext <;> rfl }
+  have h2 : (∑' y : {y : {x // P x} | R (y : Ω)}, f ((y : {x // P x}) : Ω))
+      = ∑' z : {z : Ω // P z ∧ R z}, f (z : Ω) :=
+    Equiv.tsum_eq e (fun z : {z : Ω // P z ∧ R z} => f (z : Ω))
+  rw [h2]
+  -- inject the conjunction index into the `Q`-index
+  haveI : Fintype {z : Ω // Q z} := hQ.fintype
+  have hsum : Summable (fun z : {z : Ω // Q z} => f (z : Ω)) := Summable.of_finite
+  have hinj : Function.Injective
+      (fun z : {z : Ω // P z ∧ R z} => (⟨z.val, hRQ z.val z.property.1 z.property.2⟩ :
+        {z : Ω // Q z})) := by
+    intro a b hab
+    have h : (a : Ω) = (b : Ω) := congrArg (fun w : {z : Ω // Q z} => (w : Ω)) hab
+    exact Subtype.ext h
+  have hle := tsum_comp_le_tsum_of_inj (f := fun z : {z : Ω // Q z} => f (z : Ω)) hsum
+    (fun z => hnn z.val) hinj
+  simpa only [Function.comp_def] using hle
+
 /-- LEAF. Window removal.  The height window `|im ρ| ≤ T` and the indicator `|im ρ| ≤ 1` can
 both be dropped: every zero that survives them satisfies `|im ρ| ≤ 1`, the summands —
 a natural multiplicity times a squared norm — are nonnegative, and re-indexing the surviving
@@ -42,8 +80,18 @@ theorem leaf_moment_low_mass_window_restrict (q : ℕ) [NeZero q] (χ : Dirichle
     (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
         |ρ.im| ≤ 1},
       (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
-        ‖gaussianMellin δ ρ.val‖ ^ 2) := by
-  sorry
+        ‖gaussianMellin δ ρ.val‖ ^ 2) :=
+  tsum_subtype_indicator_le (Ω := ℂ)
+    (P := fun z : ℂ =>
+      DirichletCharacter.LFunction χ z = 0 ∧ 0 < z.re ∧ z.re < 1 ∧ |z.im| ≤ T)
+    (Q := fun z : ℂ =>
+      DirichletCharacter.LFunction χ z = 0 ∧ 0 < z.re ∧ z.re < 1 ∧ |z.im| ≤ 1)
+    (R := fun z : ℂ => |z.im| ≤ 1)
+    (f := fun z : ℂ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) z : ℝ) *
+      ‖gaussianMellin δ z‖ ^ 2)
+    (fun z => mul_nonneg (Nat.cast_nonneg _) (sq_nonneg _))
+    (fun z hP hR => ⟨hP.1, hP.2.1, hP.2.2.1, hR⟩)
+    (leaf_moment_window_finite q χ 1)
 
 /-- LEAF. Lower half of the fixed low band.  On the zeros of `L χ` in the strip with
 `|im ρ| ≤ 1` and `re ρ ≤ 1/2`, the multiplicity-weighted squared Mellin mass is at most half
