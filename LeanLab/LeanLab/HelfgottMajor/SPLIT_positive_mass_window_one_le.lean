@@ -25,7 +25,7 @@ allowed, which is what makes both window leaves strictly easier than the stateme
 
 The assembly is exactly three ingredients: the identity of sums over the two halves, which is
 where the convergence leaf is spent, and the addition of the two window bounds. It has no sorry
-of its own. All four leaves are OPEN.
+of its own. Leaves 1 and 2 are proved below; leaves 3 and 4 are OPEN.
 -/
 
 namespace LeanLab.HelfgottMajor.Decomp431a
@@ -41,7 +41,27 @@ theorem positive_mass_window_one_norm_summable (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hT : 1 ≤ T) :
     Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} => ‖mellinMassTerm χ δ ρ.val‖) := by
-  sorry
+  classical
+  exact ZeroCount1623.summable_zeroIdx χ T _
+
+/-- The pointwise additivity of the indicator of the band `(1, 3 / 2]` cut at `5 / 4`. -/
+private lemma band_indicator_add (c x : ℝ) :
+    (if (1 : ℝ) < x ∧ x ≤ 3 / 2 then c else 0) =
+      (if (1 : ℝ) < x ∧ x ≤ 5 / 4 then c else 0) +
+        (if (5 / 4 : ℝ) < x ∧ x ≤ 3 / 2 then c else 0) := by
+  by_cases hA : (1 : ℝ) < x ∧ x ≤ 3 / 2
+  · have ha : (1 : ℝ) < x := hA.1
+    have hb : x ≤ 3 / 2 := hA.2
+    by_cases h2 : x ≤ 5 / 4
+    · have hB : (1 : ℝ) < x ∧ x ≤ 5 / 4 := ⟨ha, h2⟩
+      have hC : ¬ ((5 / 4 : ℝ) < x ∧ x ≤ 3 / 2) := fun h => absurd h.1 (not_lt.mpr h2)
+      simp [hA, hB, hC]
+    · have hB : ¬ ((1 : ℝ) < x ∧ x ≤ 5 / 4) := fun h => absurd h.2 h2
+      have hC : (5 / 4 : ℝ) < x ∧ x ≤ 3 / 2 := ⟨by linarith, hb⟩
+      simp [hA, hB, hC]
+  · have hB : ¬ ((1 : ℝ) < x ∧ x ≤ 5 / 4) := fun h => hA ⟨h.1, by linarith [h.2]⟩
+    have hC : ¬ ((5 / 4 : ℝ) < x ∧ x ≤ 3 / 2) := fun h => hA ⟨by linarith [h.1], h.2⟩
+    simp [hA, hB, hC]
 
 /-- LEAF 2 of 4, the window decomposition. Given the convergence of the band family, the sum
 over the ordinates above one and at most three halves is the sum over the ordinates above one
@@ -64,7 +84,19 @@ theorem positive_mass_window_one_window_split (q : ℕ) [NeZero q]
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
         Set.indicator {ρ | 5 / 4 < ρ.val.im ∧ ρ.val.im ≤ 3 / 2}
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ)) := by
-  sorry
+  classical
+  have h1 : Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} =>
+      Set.indicator {ρ | 1 < ρ.val.im ∧ ρ.val.im ≤ 5 / 4}
+        (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) := hs.indicator _
+  have h2 : Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} =>
+      Set.indicator {ρ | 5 / 4 < ρ.val.im ∧ ρ.val.im ≤ 3 / 2}
+        (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) := hs.indicator _
+  rw [← h1.tsum_add h2]
+  refine tsum_congr fun ρ => ?_
+  simpa only [Set.indicator_apply, Set.mem_ofPred_eq, Pi.add_apply] using
+    band_indicator_add ‖mellinMassTerm χ δ ρ.val‖ ρ.val.im
 
 /-- LEAF 3 of 4, the lower half of the band, with the endpoint. The multiplicity weighted sum of
 the Gaussian Mellin norms over the zeros whose ordinate lies above one and at most five quarters
