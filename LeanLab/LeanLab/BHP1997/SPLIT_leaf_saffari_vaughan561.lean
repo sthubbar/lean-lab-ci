@@ -10,6 +10,65 @@ namespace LeanLab.BHP1997.Decomp561d
 open Classical Complex Thm2 MeasureTheory Set
 open scoped ComplexConjugate
 
+/-- The window integrand of the first leaf is interval integrable on every
+interval. It is a finite sum of indicators of bounded intervals, so it is
+measurable, and its modulus is bounded by the square of the sum of the
+coefficient norms. -/
+private lemma intervalIntegrable_window561 (Y T : ℝ) (b : ℕ → ℂ) (v : ℝ) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) (a c : ℝ) :
+    IntervalIntegrable (fun y : ℝ =>
+      ‖∑ m ∈ (support561 Y).filter
+          (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+        centered561 Y b v χ m‖ ^ 2) volume a c := by
+  rw [intervalIntegrable_iff]
+  refine IntegrableOn.of_bound (C := (∑ m ∈ support561 Y, ‖centered561 Y b v χ m‖) ^ 2) ?_ ?_ ?_
+  · rw [Set.uIoc]
+    exact measure_Ioc_lt_top
+  · apply Measurable.aestronglyMeasurable
+    have hrewrite : (fun y : ℝ =>
+        ‖∑ m ∈ (support561 Y).filter
+            (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+          centered561 Y b v χ m‖ ^ 2)
+        = fun y : ℝ =>
+          ‖∑ m ∈ support561 Y,
+            (if y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4
+              then centered561 Y b v χ m else 0)‖ ^ 2 := by
+      funext y
+      rw [Finset.sum_filter]
+    rw [hrewrite]
+    have hinner : Measurable (fun y : ℝ =>
+        ∑ m ∈ support561 Y,
+          (if y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4
+            then centered561 Y b v χ m else 0)) := by
+      refine Finset.measurable_sum _ (fun m _ => ?_)
+      have hset : MeasurableSet {y : ℝ | y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4} := by
+        have h1 : MeasurableSet {y : ℝ | y - T / 4 ≤ (m : ℝ)} :=
+          measurableSet_le (by fun_prop) measurable_const
+        have h2 : MeasurableSet {y : ℝ | (m : ℝ) ≤ y + T / 4} :=
+          measurableSet_le measurable_const (by fun_prop)
+        exact h1.inter h2
+      exact Measurable.ite hset measurable_const measurable_const
+    exact (Measurable.norm hinner).pow_const 2
+  · filter_upwards with y
+    have hnn : (0 : ℝ) ≤ ‖∑ m ∈ (support561 Y).filter
+        (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+      centered561 Y b v χ m‖ ^ 2 := by positivity
+    rw [Real.norm_of_nonneg hnn]
+    set B : ℝ := ∑ m ∈ support561 Y, ‖centered561 Y b v χ m‖ with hB
+    have hle : ‖∑ m ∈ (support561 Y).filter
+        (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+      centered561 Y b v χ m‖ ≤ B :=
+      (norm_sum_le _ _).trans (Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.filter_subset _ _) (fun x _ _ => norm_nonneg _))
+    have hBnn : 0 ≤ B := Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+    have h1 : 0 ≤ B - ‖∑ m ∈ (support561 Y).filter
+        (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+      centered561 Y b v χ m‖ := by linarith
+    have h2 : 0 ≤ B + ‖∑ m ∈ (support561 Y).filter
+        (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+      centered561 Y b v χ m‖ := add_nonneg hBnn (norm_nonneg _)
+    nlinarith [mul_nonneg h1 h2]
+
 /-- LEAF. First step of the comparison: the lower part of the y range carries no
 fixed window at all. The short polynomial is supported above Y while the upper
 end y plus T over 4 stays below Y once y is at most Y minus T over 4, so the
@@ -22,7 +81,46 @@ theorem leaf_fixed_window_empty_below561 :
             ∫ y in (Y - T / 4)..(3 * Y),
               ‖∑ m ∈ (support561 Y).filter (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
                 centered561 Y b v χ m‖ ^ 2 := by
-  sorry
+  intro Y T hY hT hTY b v q E
+  have h1 : Y / 2 ≤ Y - T / 4 := by linarith
+  have h2 : Y - T / 4 ≤ 3 * Y := by linarith
+  simp only [fixedWindowMoment561]
+  refine Finset.sum_congr rfl (fun χ _ => ?_)
+  set F : ℝ → ℝ := fun y =>
+    ‖∑ m ∈ (support561 Y).filter
+        (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+      centered561 Y b v χ m‖ ^ 2 with hF
+  have hzero : ∀ y ∈ Set.uIoc (Y / 2) (Y - T / 4), F y = 0 := by
+    intro y hy
+    simp only [hF]
+    rw [Set.uIoc_of_le h1] at hy
+    have hyY : y ≤ Y - T / 4 := hy.2
+    have hsum : (∑ m ∈ (support561 Y).filter
+        (fun m : ℕ => y - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 4),
+        centered561 Y b v χ m) = 0 := by
+      refine Finset.sum_eq_zero (fun m hm => ?_)
+      exfalso
+      obtain ⟨hms, hp1, hp2⟩ := Finset.mem_filter.mp hm
+      have hfloor : (⌊Y⌋₊ : ℝ) < (m : ℝ) := by
+        exact_mod_cast (Finset.mem_Ioc.mp hms).1
+      have hsucc : (⌊Y⌋₊ : ℝ) + 1 ≤ (m : ℝ) := by
+        have hs : ⌊Y⌋₊ + 1 ≤ m := Nat.succ_le_of_lt (Finset.mem_Ioc.mp hms).1
+        exact_mod_cast hs
+      have hlty : Y < (⌊Y⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one Y
+      have hmY : Y < (m : ℝ) := by linarith
+      linarith
+    rw [hsum]
+    simp
+  have hFint : ∀ a c : ℝ, IntervalIntegrable F volume a c := by
+    intro a c
+    rw [hF]
+    exact intervalIntegrable_window561 Y T b v χ a c
+  have hz : (∫ y in (Y / 2)..(Y - T / 4), F y) = 0 := by
+    apply intervalIntegral.integral_zero_ae
+    filter_upwards with y hy
+    exact hzero y hy
+  rw [← intervalIntegral.integral_add_adjacent_intervals
+    (hFint (Y / 2) (Y - T / 4)) (hFint (Y - T / 4) (3 * Y)), hz, zero_add]
 
 /-- LEAF. Second step: the two sided fixed window of half width T over 4 is the
 one sided window of length T over 2 read at the translated centre. Shifting the
@@ -40,7 +138,38 @@ theorem leaf_window_translation561 :
             ∫ y in (Y - T / 2)..(3 * Y - T / 4),
               ‖∑ m ∈ (support561 Y).filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 2),
                 centered561 Y b v χ m‖ ^ 2 := by
-  sorry
+  intro Y T hY hT hTY b v q E
+  refine Finset.sum_congr rfl (fun χ _ => ?_)
+  set f : ℝ → ℝ := fun u =>
+    ‖∑ m ∈ (support561 Y).filter
+        (fun m : ℕ => u - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ u + T / 4),
+      centered561 Y b v χ m‖ ^ 2 with hf
+  have hfil : ∀ x : ℝ,
+      (support561 Y).filter
+          (fun m : ℕ => (x + T / 4) - T / 4 ≤ (m : ℝ) ∧ (m : ℝ) ≤ (x + T / 4) + T / 4)
+        = (support561 Y).filter (fun m : ℕ => x ≤ (m : ℝ) ∧ (m : ℝ) ≤ x + T / 2) := by
+    intro x
+    congr 1
+    funext m
+    simp only [add_sub_cancel_right]
+    have hshift : x + T / 4 + T / 4 = x + T / 2 := by ring
+    rw [hshift]
+  have hpt : ∀ x : ℝ,
+      (‖∑ m ∈ (support561 Y).filter (fun m : ℕ => x ≤ (m : ℝ) ∧ (m : ℝ) ≤ x + T / 2),
+        centered561 Y b v χ m‖ ^ 2) = f (x + T / 4) := by
+    intro x
+    simp only [hf]
+    rw [hfil x]
+  have hconv : (∫ x in (Y - T / 2)..(3 * Y - T / 4),
+      ‖∑ m ∈ (support561 Y).filter (fun m : ℕ => x ≤ (m : ℝ) ∧ (m : ℝ) ≤ x + T / 2),
+        centered561 Y b v χ m‖ ^ 2) =
+      ∫ x in (Y - T / 2)..(3 * Y - T / 4), f (x + T / 4) := by
+    apply intervalIntegral.integral_congr
+    intro x _
+    exact hpt x
+  rw [hconv, intervalIntegral.integral_comp_add_right (f := f) (d := T / 4),
+    show Y - T / 2 + T / 4 = Y - T / 4 by ring,
+    show 3 * Y - T / 4 + T / 4 = 3 * Y by ring]
 
 /-- LEAF. Third step: the one sided window of length T over 2 is the
 multiplicative window of the printed shape with the parameter T over 2 y. On the
@@ -58,7 +187,18 @@ theorem leaf_window_parameter_scale561 :
               ‖∑ m ∈ (support561 Y).filter
                   (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * (T / (2 * y))),
                 centered561 Y b v χ m‖ ^ 2 := by
-  sorry
+  intro Y T hY hT hTY b v q E
+  refine Finset.sum_le_sum (fun χ _ => ?_)
+  apply le_of_eq
+  apply intervalIntegral.integral_congr
+  intro y hy
+  have hab : Y - T / 2 ≤ 3 * Y - T / 4 := by linarith
+  rw [Set.uIcc_of_le hab] at hy
+  have hypos : 0 < y := by linarith [hy.1]
+  have hz : y * (T / (2 * y)) = T / 2 := by
+    have hy0 : y ≠ 0 := ne_of_gt hypos
+    field_simp
+  simp only [hz]
 
 /-- LEAF. Fourth step, the comparison itself: a nonnegative uniform bound M for
 every multiplicative window whose parameter lies in the printed z range bounds
