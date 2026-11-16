@@ -30,6 +30,8 @@ import LeanLab.DERZ1997.Decomp1529a
 import LeanLab.DERZ1997.Kernel136
 import LeanLab.DERZ1997.Perron136
 import LeanLab.PNTPort.ZetaZeros.GoodHeight
+import LeanLab.DERZ1997.Decomp574a
+import LeanLab.DERZ1997.Decomp574b
 
 namespace LeanLab.DERZ1997.Decomp1529b
 open Complex LeanLab.DERZ1997.Decomp1529a
@@ -2151,6 +2153,195 @@ theorem explicit_formula_half_good197 : ∃ C : ℝ, ∀ (N : ℕ), 2 ≤ N → 
       (norm_sub_le _ _).trans (add_le_add (norm_add_le _ _) le_rfl)
     _ ≤ _ := by nlinarith
 
+end LeanLab.DERZ1997.Decomp1529b
+
+namespace LeanLab.DERZ1997.Decomp1529b2
+open Complex Real MeasureTheory Set Filter Topology
+open LeanLab.DERZ1997.Decomp1529a LeanLab.DERZ1997.Decomp1529b
+
+/-- Away from the two integers around x, comparison with its cell midpoint costs at most three halves.
+Auxiliary estimate for the Perron cutoff in Davenport chapter 17 pages 105 to 109. -/
+theorem distant_integer_compare266 {x : ℝ} (N n : ℕ)
+    (hlo : (N : ℝ) ≤ x) (hhi : x < (N : ℝ) + 1)
+    (hn : n ≠ N) (hn1 : n ≠ N + 1) :
+    |(N : ℝ) + 1 / 2 - n| ≤ (3 / 2 : ℝ) * |x - n| := by
+  by_cases hle : n ≤ N
+  · have hh : (n : ℝ) + 1 ≤ N := by exact_mod_cast (show n + 1 ≤ N by omega)
+    rw [abs_of_nonneg (by linarith : 0 ≤ (N : ℝ) + 1 / 2 - n),
+      abs_of_nonneg (by linarith : 0 ≤ x - n)]
+    linarith
+  · have hh : (N : ℝ) + 2 ≤ n := by exact_mod_cast (show N + 2 ≤ n by omega)
+    rw [abs_of_nonpos (by linarith : (N : ℝ) + 1 / 2 - n ≤ 0),
+      abs_of_nonpos (by linarith : x - n ≤ 0)]
+    linarith
+
+/-- The reciprocal cutoff after removing the two nearest integers.
+Auxiliary estimate for Davenport chapter 17 pages 105 to 109. -/
+theorem distant_recip_sum266 {x : ℝ} (hx : 2 ≤ x) :
+    (∑ n ∈ Finset.range (2 * ⌊x⌋₊ + 2),
+      if n = ⌊x⌋₊ ∨ n = ⌊x⌋₊ + 1 then 0 else 1 / |x - n|) ≤ 12 * Real.log x := by
+  classical
+  let N := ⌊x⌋₊
+  have hx0 : 0 ≤ x := by linarith
+  have hlo : (N : ℝ) ≤ x := Nat.floor_le hx0
+  have hhi : x < (N : ℝ) + 1 := Nat.lt_floor_add_one x
+  have hterm (n : ℕ) : (if n = N ∨ n = N + 1 then 0 else 1 / |x - n|) ≤
+      (3 / 2 : ℝ) * (1 / |(N : ℝ) + 1 / 2 - n|) -
+        (if n = N ∨ n = N + 1 then 3 else 0) := by
+    by_cases hn : n = N ∨ n = N + 1
+    · rw [if_pos hn, if_pos hn]
+      rcases hn with rfl | rfl <;> norm_num
+    · rw [if_neg hn, if_neg hn, sub_zero]
+      have hm : 0 < |(N : ℝ) + 1 / 2 - n| := lt_of_lt_of_le (by norm_num)
+        (half_integer_distance197 N n)
+      have hh := distant_integer_compare266 N n hlo hhi
+        (fun h => hn (Or.inl h)) (fun h => hn (Or.inr h))
+      have hd : 0 < |x - n| := by linarith
+      rw [mul_one_div]
+      exact (div_le_div_iff₀ hd hm).mpr (by simpa using hh)
+  have hremoved : (∑ n ∈ Finset.range (2 * N + 2),
+      if n = N ∨ n = N + 1 then (3 : ℝ) else 0) = 6 := by
+    rw [← Finset.sum_filter]
+    have heq : (Finset.range (2 * N + 2)).filter (fun n => n = N ∨ n = N + 1) =
+        ({N, N + 1} : Finset ℕ) := by
+      ext n
+      simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_insert, Finset.mem_singleton]
+      omega
+    rw [heq, Finset.sum_insert (by simp only [Finset.mem_singleton]; omega), Finset.sum_singleton]
+    norm_num
+  have hsum := Finset.sum_le_sum (fun n (_ : n ∈ Finset.range (2 * N + 2)) => hterm n)
+  rw [Finset.sum_sub_distrib, ← Finset.mul_sum, hremoved] at hsum
+  have hlog2 : Real.log 2 ≤ Real.log x := Real.log_le_log (by norm_num) hx
+  have hlog : Real.log ((N : ℝ) + 1) ≤ 2 * Real.log x := by
+    calc
+      _ ≤ Real.log (2 * x) := Real.log_le_log (by positivity) (by linarith)
+      _ = Real.log 2 + Real.log x := Real.log_mul (by norm_num) (by linarith)
+      _ ≤ _ := by linarith
+  have hhalf : 1 / 2 ≤ Real.log x := by linarith [Real.log_two_gt_d9]
+  have hmid := half_integer_recip_sum197 N
+  change (∑ n ∈ Finset.range (2 * N + 2),
+    if n = N ∨ n = N + 1 then 0 else 1 / |x - n|) ≤ _
+  nlinarith
+
+/-- Perron cutoff bound at every real x at least two.
+Auxiliary derivation for Davenport chapter 17 pages 105 to 109.
+This bounds the coefficient sum. It does not assert Perron's formula at integers. -/
+theorem perron_tail_arbitrary266 {x T : ℝ} (hx : 2 ≤ x) (hT : 2 ≤ T) :
+    ∑' n : ℕ, ArithmeticFunction.vonMangoldt n * (x / n) ^ (1 + 1 / Real.log x) *
+      min 1 (1 / (T * |Real.log (x / n)|)) ≤
+        432 * (x * Real.log x ^ 2 / T) + 32 * Real.log x := by
+  classical
+  let N := ⌊x⌋₊
+  let c : ℝ := 1 + 1 / Real.log x
+  have hx0 : 0 < x := by linarith
+  have hT0 : 0 < T := by linarith
+  have hL : 1 / 2 ≤ Real.log x := by
+    have := Real.log_le_log (by norm_num : (0 : ℝ) < 2) hx
+    linarith [Real.log_two_gt_d9]
+  have hc : 1 < c := by
+    dsimp [c]; have := one_div_pos.mpr (show 0 < Real.log x by linarith); linarith
+  have hlo : (N : ℝ) ≤ x := Nat.floor_le hx0.le
+  have hhi : x < (N : ℝ) + 1 := Nat.lt_floor_add_one x
+  let a : ℕ → ℝ := fun n => ArithmeticFunction.vonMangoldt n * (x / n) ^ c
+  let E : ℕ → ℝ := fun n => a n * min 1 (1 / (T * |Real.log (x / n)|))
+  let R : ℕ → ℝ := fun n => if n ∈ Finset.range (2 * N + 2) then
+    if n = N ∨ n = N + 1 then 0 else 1 / |x - n| else 0
+  let K : ℕ → ℝ := fun n => if n = N ∨ n = N + 1 then 1 else 0
+  let A : ℝ := 32 * x * Real.log x / T
+  have hA : 0 ≤ A := by dsimp [A]; positivity
+  have hR0 : ∀ n, 0 ≤ R n := by intro n; dsimp [R]; split_ifs <;> positivity
+  have hK0 : ∀ n, 0 ≤ K n := by intro n; dsimp [K]; split_ifs <;> positivity
+  have hRsupport : ∀ n ∉ Finset.range (2 * N + 2), R n = 0 := by intros; simp_all [R]
+  have hKsupport : ∀ n ∉ ({N, N + 1} : Finset ℕ), K n = 0 := by
+    intro n hn
+    simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hn
+    simp only [K, if_neg (not_or.mpr hn)]
+  have hRsum : Summable R := summable_of_ne_finset_zero hRsupport
+  have hKsum : Summable K := summable_of_ne_finset_zero hKsupport
+  have hRbd : ∑' n, R n ≤ 12 * Real.log x := by
+    rw [tsum_eq_sum hRsupport]
+    calc
+      _ = ∑ n ∈ Finset.range (2 * N + 2),
+          if n = N ∨ n = N + 1 then 0 else 1 / |x - n| := by
+        apply Finset.sum_congr rfl
+        intro n hn
+        simp only [R, if_pos hn]
+      _ ≤ _ := distant_recip_sum266 hx
+  have hKbd : ∑' n, K n = 2 := by
+    rw [tsum_eq_sum hKsupport, Finset.sum_insert (by simp only [Finset.mem_singleton]; omega),
+      Finset.sum_singleton]
+    norm_num [K]
+  have hcoeff : Summable a := LeanLab.DERZ1997.Perron136.perron_coeff_summable hx0 hc
+  have hE : Summable E := hcoeff.of_nonneg_of_le (fun n => by dsimp [E, a]; positivity)
+    (fun n => mul_le_of_le_one_right (by dsimp [a]; positivity) (min_le_left _ _))
+  have hmajor : ∀ n, E n ≤ (2 / T) * a n + A * R n + 16 * Real.log x * K n := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with rfl | hn
+    · simpa [E, a] using add_nonneg (mul_nonneg hA (hR0 0))
+        (mul_nonneg (show 0 ≤ 16 * Real.log x by positivity) (hK0 0))
+    have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+    by_cases hfar : (n : ℝ) ≤ x / 2 ∨ 2 * x ≤ n
+    · have hh := mul_le_mul_of_nonneg_left (perron_far_cutoff197 hx0 hn0 hT0 hfar)
+        (show 0 ≤ a n by dsimp [a]; positivity)
+      dsimp [E]
+      nlinarith [mul_nonneg hA (hR0 n), mul_nonneg (show 0 ≤ 16 * Real.log x by positivity) (hK0 n)]
+    · have hnlo : x / 2 ≤ n := by push_neg at hfar; linarith [hfar.1]
+      have hnhi : (n : ℝ) ≤ 2 * x := by push_neg at hfar; linarith [hfar.2]
+      have ha : a n ≤ 16 * Real.log x :=
+        (mul_le_mul_of_nonneg_right ArithmeticFunction.vonMangoldt_le_log (by positivity)).trans
+          (perron_near_coeff197 hx hnlo hnhi)
+      by_cases hnear : n = N ∨ n = N + 1
+      · have he : E n ≤ 16 * Real.log x :=
+          (mul_le_of_le_one_right (by dsimp [a]; positivity) (min_le_left _ _)).trans ha
+        have hKn : K n = 1 := by simp only [K, if_pos hnear]
+        rw [hKn, mul_one]
+        exact he.trans (le_add_of_nonneg_left (add_nonneg (by dsimp [a]; positivity) (mul_nonneg hA (hR0 n))))
+      · have hmem : n ∈ Finset.range (2 * N + 2) := by
+          apply Finset.mem_range.mpr
+          have hh : (n : ℝ) < (2 * N + 2 : ℕ) := by push_cast; linarith
+          exact_mod_cast hh
+        have hd := distant_integer_compare266 N n hlo hhi
+          (fun h => hnear (Or.inl h)) (fun h => hnear (Or.inr h))
+        have hmid := half_integer_distance197 N n
+        have hdist : 0 < |x - n| := by linarith
+        have hne : x ≠ (n : ℝ) := sub_ne_zero.mp (abs_pos.mp hdist)
+        have hh := mul_le_mul ha (perron_near_cutoff197 hx0 hn0 hT0 hnhi hne)
+          (by positivity : 0 ≤ min 1 (1 / (T * |Real.log (x / n)|))) (by positivity)
+        have heq : (16 * Real.log x) * (2 * x / (T * |x - n|)) = A * R n := by
+          simp only [R, if_pos hmem, if_neg hnear, A]; ring
+        dsimp [E]
+        have he := hh.trans_eq heq
+        nlinarith [mul_nonneg (show 0 ≤ 16 * Real.log x by positivity) (hK0 n),
+          mul_nonneg (show 0 ≤ 2 / T by positivity) (show 0 ≤ a n by dsimp [a]; positivity)]
+  have hsum := hE.tsum_le_tsum hmajor
+    (((hcoeff.mul_left (2 / T)).add (hRsum.mul_left A)).add (hKsum.mul_left (16 * Real.log x)))
+  rw [Summable.tsum_add ((hcoeff.mul_left _).add (hRsum.mul_left _)) (hKsum.mul_left _),
+    Summable.tsum_add (hcoeff.mul_left _) (hRsum.mul_left _),
+    tsum_mul_left, tsum_mul_left, tsum_mul_left, hKbd] at hsum
+  have habd : ∑' n, a n ≤ 24 * x * Real.log x ^ 2 := perron_coeff_bound197 hx
+  have h1 := mul_le_mul_of_nonneg_left habd (by positivity : 0 ≤ 2 / T)
+  have h2 := mul_le_mul_of_nonneg_left hRbd hA
+  change ∑' n, E n ≤ _
+  calc
+    _ ≤ (2 / T) * (24 * x * Real.log x ^ 2) + A * (12 * Real.log x) +
+        16 * Real.log x * 2 := hsum.trans (by linarith)
+    _ = _ := by dsimp [A]; ring
+
+end LeanLab.DERZ1997.Decomp1529b2
+
+namespace LeanLab.DERZ1997.Decomp1529b
+open Complex LeanLab.DERZ1997.Decomp1529a
+open Real MeasureTheory Set
+open Filter Topology
+open scoped ComplexConjugate
+open LeanLab.PNTPort.ExplicitPsi1.Trivial
+open LeanLab.PNTPort.ZetaZeros
+open LeanLab.PNTPort.ExplicitPsi1
+open LeanLab.Routes.Decomp1551a (fK TrivU TrivInf trivU_tendsto)
+open LeanLab.DERZ1997.Decomp1529b2
+open LeanLab.DERZ1997.Decomp574a
+open LeanLab.DERZ1997.Decomp574b
+
 /-- LEAF. Truncated explicit formula for `ψ` with an explicit constant: for `x ≥ 2` and
 `2 ≤ T ≤ x`, `|ψ(x) - x + ∑_{|γ| ≤ T} m_ρ x^ρ/ρ| ≤ 1000 (x log² x / T + log x)`.
 From `perron_psi`, `perron_tail`, `contour_shift`, `good_height`, moving `x` to the nearest
@@ -2164,7 +2355,167 @@ theorem explicit_formula_zeta {x T : ℝ} (hx : 2 ≤ x) (hT : 2 ≤ T) (hTx : T
       1000 * (x * Real.log x ^ 2 / T + Real.log x) := by
   sorry
 
-/-- LEAF. Truncated explicit formula for `ψ(x, χ)` under GRH: there is an absolute `C` such
+/-- Perron's character error at every noninteger x, uniformly in the modulus.
+Davenport chapter 17 pages 105 to 109 and chapter 19 page 120.
+This uses the existing coefficient majorant and logarithmic derivative bridge.
+-/
+theorem character_perron_error623 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) {x T : ℝ} (hx : 2 ≤ x) (hT : 2 ≤ T)
+    (hxn : ∀ n : ℕ, (n : ℝ) ≠ x) :
+    ‖psiChi χ x - (1 / (2 * Real.pi) : ℂ) * (∫ t in (-T)..T,
+      -(deriv (DirichletCharacter.LFunction χ)
+        (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I) /
+        DirichletCharacter.LFunction χ
+          (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I)) *
+      (x : ℂ) ^ (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I) /
+        (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I))‖ ≤
+      432 * (x * Real.log x ^ 2 / T + Real.log x) := by
+  have hx0 : 0 < x := by linarith
+  have hT0 : 0 < T := by linarith
+  have hc : 1 < 1 + 1 / Real.log x := by
+    have := one_div_pos.mpr (Real.log_pos (by linarith : 1 < x))
+    linarith
+  have hlogx0 : 0 ≤ Real.log x := Real.log_nonneg (by linarith)
+  have hh := (perron_character_error197 χ hx hxn hc hT0).trans
+    (perron_tail_arbitrary266 hx hT)
+  rw [← perron_character_tsum197 χ hx0 hc hT0,
+    character_perron_logderiv574 χ x (1 + 1 / Real.log x) T hc] at hh
+  exact hh.trans (by nlinarith)
+
+/-- The nonprincipal explicit formula at noninteger x under GRH.
+Davenport chapter 19 page 120, displays 13 and 14, with the inclusive cutoff.
+The selected-height contour keeps the original zero sum at T.
+-/
+theorem character_formula_noninteger623 (hG : GRH) :
+    ∃ C : ℝ, 0 < C ∧ ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q),
+    χ ≠ 1 → ∀ x T : ℝ, 2 ≤ x → 2 ≤ T → T ≤ x →
+    (∀ n : ℕ, (n : ℝ) ≠ x) → ∀ hf : (LZeros χ T).Finite,
+    ‖psiChi χ x + ∑ ρ ∈ hf.toFinset, (LMult χ ρ : ℂ) * (x : ℂ) ^ ρ / ρ‖ ≤
+      C * (x * Real.log (q * x) ^ 2 / T + √x + Real.log (q * x) ^ 2) := by
+  obtain ⟨A, hA, hcontour⟩ := character_cutoff_contour_GRH574 hG
+  refine ⟨A + 864, by linarith, ?_⟩
+  intro q _ χ hχ x T hx hT hTx hxn hf
+  obtain ⟨U, hU, hcontour⟩ := hcontour q χ hχ x T hx hT hTx
+  let P : ℂ := (1 / (2 * Real.pi) : ℂ) * (∫ t in (-U)..U,
+    -(deriv (DirichletCharacter.LFunction χ)
+      (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I) /
+      DirichletCharacter.LFunction χ
+        (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I)) *
+    (x : ℂ) ^ (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I) /
+      (((1 + 1 / Real.log x : ℝ) : ℂ) + t * I))
+  let Z : ℂ := ∑ ρ ∈ hf.toFinset, (LMult χ ρ : ℂ) * (x : ℂ) ^ ρ / ρ
+  let L : ℝ := Real.log ((q : ℝ) * x)
+  let E : ℝ := x * L ^ 2 / T + √x + L ^ 2
+  have hq : (1 : ℝ) ≤ q := by exact_mod_cast NeZero.pos q
+  have hx0 : 0 < x := by linarith
+  have hT0 : 0 < T := by linarith
+  have hU0 : 0 < U := hT0.trans_le hU.1
+  have hLx : 0 ≤ Real.log x := Real.log_nonneg (by linarith)
+  have hL : Real.log x ≤ L := Real.log_le_log hx0 (by nlinarith)
+  have hLhalf : 1 / 2 ≤ L := by
+    have hh := Real.log_le_log (by norm_num : (0 : ℝ) < 2) hx
+    linarith [Real.log_two_gt_d9]
+  have hterm : x * Real.log x ^ 2 / U ≤ x * L ^ 2 / T := by
+    apply div_le_div₀ (by positivity) ?_ hT0 hU.1
+    gcongr
+  have hlog : Real.log x ≤ 2 * L ^ 2 := by nlinarith
+  have hE : 0 ≤ E := by dsimp [E]; positivity
+  have hmain : 0 ≤ x * L ^ 2 / T := by positivity
+  have hper : ‖psiChi χ x - P‖ ≤ 864 * E := by
+    have hh := character_perron_error623 χ hx (hT.trans hU.1) hxn
+    change ‖psiChi χ x - P‖ ≤ _ at hh
+    exact hh.trans (by dsimp [E]; nlinarith [Real.sqrt_nonneg x])
+  have hcont : ‖P + Z‖ ≤ A * E := hcontour hf
+  change ‖psiChi χ x + Z‖ ≤ (A + 864) * E
+  calc
+    _ = ‖(psiChi χ x - P) + (P + Z)‖ := by congr 1; ring
+    _ ≤ ‖psiChi χ x - P‖ + ‖P + Z‖ := norm_add_le _ _
+    _ ≤ _ := by nlinarith
+
+/-- The nonprincipal explicit formula includes integer x by a right limit.
+Davenport chapter 19 page 120, displays 13 and 14, and page 125 under GRH.
+The psi sum is constant on each half-open integer cell.
+-/
+theorem character_formula623 (hG : GRH) :
+    ∃ C : ℝ, 0 < C ∧ ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q),
+    χ ≠ 1 → ∀ x T : ℝ, 2 ≤ x → 2 ≤ T → T ≤ x →
+    ∀ hf : (LZeros χ T).Finite,
+    ‖psiChi χ x + ∑ ρ ∈ hf.toFinset, (LMult χ ρ : ℂ) * (x : ℂ) ^ ρ / ρ‖ ≤
+      C * (x * Real.log (q * x) ^ 2 / T + √x + Real.log (q * x) ^ 2) := by
+  obtain ⟨C, hC0, hC⟩ := character_formula_noninteger623 hG
+  refine ⟨C, hC0, ?_⟩
+  intro q _ χ hχ x T hx hT hTx hf
+  by_cases hnat : ∃ N : ℕ, (N : ℝ) = x
+  · obtain ⟨N, rfl⟩ := hnat
+    have hN0 : (0 : ℝ) < N := by linarith
+    have hq0 : (0 : ℝ) < q := Nat.cast_pos.mpr (NeZero.pos q)
+    have hpow (ρ : ℂ) : ContinuousAt (fun y : ℝ => (y : ℂ) ^ ρ) (N : ℝ) :=
+      (continuousAt_cpow_const (Complex.ofReal_mem_slitPlane.mpr hN0)).comp
+        Complex.continuous_ofReal.continuousAt
+    have hsum : ContinuousAt (fun y : ℝ => ∑ ρ ∈ hf.toFinset,
+        (LMult χ ρ : ℂ) * (y : ℂ) ^ ρ / ρ) (N : ℝ) := by
+      apply tendsto_finsetSum hf.toFinset
+      intro ρ hρ
+      exact (continuousAt_const.mul (hpow ρ)).div_const ρ
+    have hleft : ContinuousAt (fun y : ℝ => ‖psiChi χ N +
+        ∑ ρ ∈ hf.toFinset, (LMult χ ρ : ℂ) * (y : ℂ) ^ ρ / ρ‖) (N : ℝ) :=
+      (continuousAt_const.add hsum).norm
+    have hright : ContinuousAt (fun y : ℝ =>
+        C * (y * Real.log ((q : ℝ) * y) ^ 2 / T + √y +
+          Real.log ((q : ℝ) * y) ^ 2)) (N : ℝ) := by
+      fun_prop (disch := positivity)
+    apply le_of_tendsto_of_tendsto (b := 𝓝[>] (N : ℝ))
+      (hleft.tendsto.mono_left inf_le_left) (hright.tendsto.mono_left inf_le_left)
+    filter_upwards [Ioo_mem_nhdsGT (show (N : ℝ) < N + 1 by linarith)] with y hy
+    have hy0 : (N : ℝ) < y := hy.1
+    have hy1 : y < (N : ℝ) + 1 := hy.2
+    have hfloor : ⌊y⌋₊ = N :=
+      (Nat.floor_eq_iff (by linarith [hy.1, Nat.cast_nonneg (α := ℝ) N])).mpr ⟨hy.1.le, hy.2⟩
+    have hpsi : psiChi χ y = psiChi χ N := by
+      simp only [psiChi, hfloor, Nat.floor_natCast]
+    have hnonint : ∀ n : ℕ, (n : ℝ) ≠ y := by
+      intro n hn
+      have h0 : N < n := by exact_mod_cast (show (N : ℝ) < n by simpa only [hn] using hy.1)
+      have h1 : n < N + 1 := by exact_mod_cast (show (n : ℝ) < (N : ℝ) + 1 by simpa only [hn] using hy.2)
+      omega
+    simpa only [hpsi] using hC q χ hχ y T (by linarith) hT (by linarith) hnonint hf
+  · apply hC q χ hχ x T hx hT hTx _ hf
+    intro n hn
+    exact hnat ⟨n, hn⟩
+
+/-- CONDITIONAL ON the displayed zeta estimate with constant 1000.
+The nonprincipal character formula is proved independently of that input.
+Davenport chapter 19 pages 119 and 120 and chapter 20 page 125.
+-/
+theorem character_formula_of_zeta623 (hG : GRH)
+    (hZ : ∀ (x T : ℝ), 2 ≤ x → 2 ≤ T → T ≤ x →
+      ∀ hf : (zetaZeros T).Finite,
+      ‖(Chebyshev.psi x : ℂ) - x + ∑ ρ ∈ hf.toFinset,
+        (zetaMult ρ : ℂ) * (x : ℂ) ^ ρ / ρ‖ ≤
+        1000 * (x * Real.log x ^ 2 / T + Real.log x)) :
+    ∃ C : ℝ, ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (x T : ℝ),
+      2 ≤ x → 2 ≤ T → T ≤ x → ∀ hf : (LZeros χ T).Finite,
+      ‖psiChi χ x - (if χ = 1 then (x : ℂ) else 0) +
+        ∑ ρ ∈ hf.toFinset, (LMult χ ρ : ℂ) * (x : ℂ) ^ ρ / ρ‖ ≤
+        C * (x * Real.log (q * x) ^ 2 / T + √x + Real.log (q * x) ^ 2) := by
+  obtain ⟨A, hA, hnon⟩ := character_formula623 hG
+  refine ⟨A + 2002, ?_⟩
+  intro q _ χ x T hx hT hTx hf
+  have hE : 0 ≤ x * Real.log ((q : ℝ) * x) ^ 2 / T + √x +
+      Real.log ((q : ℝ) * x) ^ 2 := by positivity
+  by_cases hχ : χ = 1
+  · subst χ
+    have hh := principal_error_of_zeta574 (q := q) hx hT hf (zetaZeros_finite T)
+      (hZ x T hx hT hTx (zetaZeros_finite T))
+    change ‖psiChi (1 : DirichletCharacter ℂ q) x - x +
+      ∑ ρ ∈ hf.toFinset, (LMult (1 : DirichletCharacter ℂ q) ρ : ℂ) * (x : ℂ) ^ ρ / ρ‖ ≤ _ at hh
+    simp only [↓reduceIte]
+    exact hh.trans (by nlinarith)
+  · simp only [ite_eq_right hχ, sub_zero]
+    exact (hnon q χ hχ x T hx hT hTx hf).trans (by nlinarith)
+
+/-- LEAF. CONDITIONAL ON explicit_formula_zeta for principal characters.
+Truncated explicit formula for `ψ(x, χ)` under GRH: there is an absolute `C` such
 that for every modulus `q`, every character `χ` mod `q`, `x ≥ 2`, `2 ≤ T ≤ x`,
 `|ψ(x, χ) - δ_χ x + ∑_{|γ| ≤ T} m_ρ x^ρ/ρ| ≤ C (x log²(qx)/T + √x + log²(qx))`,
 `δ_χ = 1` for the trivial character. GRH gives `|ρ| ≥ 1/2`, so the zeros with `|γ| < 1` and
@@ -2177,7 +2528,9 @@ theorem explicit_formula_chi_GRH : GRH → ∃ C : ℝ, ∀ (q : ℕ) [NeZero q]
       ‖psiChi χ x - (if χ = 1 then (x : ℂ) else 0) +
           ∑ ρ ∈ hfin.toFinset, (LMult χ ρ : ℂ) * (x : ℂ) ^ ρ / ρ‖ ≤
         C * (x * Real.log (q * x) ^ 2 / T + √x + Real.log (q * x) ^ 2) := by
-  sorry
+  intro hG
+  exact character_formula_of_zeta623 hG
+    (fun x T hx hT hTx hf => explicit_formula_zeta hx hT hTx hf)
 
 /-! ### Assembly: the GRH bound for `ψ(x, χ)` -/
 

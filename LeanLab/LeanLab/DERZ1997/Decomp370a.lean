@@ -1,4 +1,5 @@
 import LeanLab.DERZ1997.Decomp1529a
+import LeanLab.DERZ1997.Decomp576a
 
 /-!
 Supply for primitive_zero_count193. The sealed file is unchanged.
@@ -3685,7 +3686,8 @@ theorem primitive_count_identity370 {q : ℕ} [NeZero q] (χ : DirichletCharacte
     ring
 
 
-/-- LEAF. Backlund and Jensen control the right-limit contour argument.
+/-- LEAF. CONDITIONAL ON horizontal_of_jensen576 and primitive_convexity576.
+Backlund and Jensen control the right-limit contour argument.
 Trudgian pages 4 to 9, displays 2.8, 3.9 and 4.3 to 4.12.
 The displayed budget is loosened to reserve 2 for the separate Gamma error.
 This bounds only L-function argument variation, without a zero-count main term.
@@ -3693,7 +3695,7 @@ This bounds only L-function argument variation, without a zero-count main term.
 theorem primitive_argument_bound370 {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hne : χ ≠ 1) {T : ℝ} (hT : 1 ≤ T) :
     |argumentRight370 χ T| ≤ 0.5 * Real.log (q * T) + 15.7 := by
-  sorry
+  exact Decomp576a.primitive_argument_bound576 χ hχ hne hT
 
 /-- The leading conductor and Gamma terms combine into the published main term.
 Trudgian page 3, displays 2.3 and 2.5. This is logarithm algebra only.

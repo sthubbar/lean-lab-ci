@@ -151,8 +151,11 @@ theorem horizontal_of_jensen576 {q : ℕ} [NeZero q]
     |horizontal576 χ T| ≤ B + 1.5 := by
   sorry
 
-/-- LEAF. Rademacher's convexity estimate in the symmetric strip.
-Trudgian page 8, display 4.6, citing Rademacher Theorem 3.
+/-- LEAF. CONDITIONAL ON Rademacher 1959 Theorem 3, printed page 199,
+the unnumbered display following 6.2. The positive-eta range matches the source.
+Trudgian page 8, display 4.6, cites this same bound.
+REREAD U-1697 checked the local primary PDF rather than the failed web page.
+
 This is a modulus bound only, with no Jensen count or contour argument.
 -/
 theorem primitive_convexity576 {q : ℕ} [NeZero q]
