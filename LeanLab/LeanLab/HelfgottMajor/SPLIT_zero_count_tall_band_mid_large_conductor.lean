@@ -124,6 +124,67 @@ private theorem two_pi_e_cube_le : 2 * π * exp 1 * exp 1 * exp 1 ≤ 126.24 := 
   have h := mul_le_mul hpi exp_one_cube_le (by positivity) (by norm_num)
   linarith
 
+/-! ### Numeric input for the two counts
+
+The cube of `exp 1` from below, the logarithm of `π` from above, and the resulting bounds on the
+logs at the two ends of the band, plus the range of the conductor in the middle box. -/
+
+/-- The numeric cube of the lower decimal bound for `exp 1`. -/
+private theorem exp_cube_num_ge :
+    (20.08 : ℝ) ≤ (2.7182818283 * 2.7182818283) * 2.7182818283 := by
+  norm_num
+
+/-- `exp 1 ^ 3` is at least `20.08`. -/
+private theorem exp_one_cube_ge : 20.08 ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 := by
+  have h0 : (0 : ℝ) < Real.exp 1 := Real.exp_pos 1
+  have hx : 2.7182818283 ≤ Real.exp 1 := Real.exp_one_gt_d9.le
+  have h1 : (2.7182818283 : ℝ) * 2.7182818283 ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul hx hx (by norm_num) h0.le
+  have h2 : ((2.7182818283 : ℝ) * 2.7182818283) * 2.7182818283 ≤
+      Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h1 hx (by norm_num) (by positivity)
+  linarith [exp_cube_num_ge]
+
+/-- `log π ≤ 1.1459`. -/
+private theorem log_pi_le : Real.log π ≤ 1.1459 := by
+  have hsplit : Real.log π = Real.log 3 + Real.log (π / 3) := by
+    rw [← Real.log_mul (by norm_num) (by positivity)]
+    ring_nf
+  have hthird : (0 : ℝ) < π / 3 := by linarith [Real.pi_pos]
+  have hlow : Real.log (π / 3) ≤ π / 3 - 1 := Real.log_le_sub_one_of_pos hthird
+  have h3 : π / 3 ≤ 1.0472 := by linarith [Real.pi_lt_d4]
+  rw [hsplit]
+  linarith [Real.log_three_lt_d9]
+
+/-- `log (2πe³) ≤ 4.84`, the logarithm of the top of the band. -/
+private theorem log_two_pi_e_cube_le :
+    Real.log (2 * π * exp 1 * exp 1 * exp 1) ≤ 4.84 := by
+  have hassoc : 2 * π * exp 1 * exp 1 * exp 1 = (2 * π) * (Real.exp 1) ^ 3 := by ring
+  rw [hassoc, Real.log_mul (by positivity) (by positivity), Real.log_pow, Real.log_exp]
+  have h2 : Real.log (2 * π) = Real.log 2 + Real.log π :=
+    Real.log_mul (by norm_num) Real.pi_pos.ne'
+  rw [h2]
+  nlinarith [Real.log_two_lt_d9, log_pi_le]
+
+/-- `126 ≤ 2πe³`, so the height `2πe³ / q` is at least one on `q ≤ 126`. -/
+private theorem le_two_pi_e_cube : (126 : ℝ) ≤ 2 * π * exp 1 * exp 1 * exp 1 := by
+  have hpi : (6.283 : ℝ) ≤ 2 * π := by linarith [Real.pi_gt_d4]
+  have hassoc : 2 * π * exp 1 * exp 1 * exp 1 =
+      (2 * π) * (Real.exp 1 * Real.exp 1 * Real.exp 1) := by ring
+  rw [hassoc]
+  have h := mul_le_mul hpi exp_one_cube_ge (by norm_num) (by positivity)
+  linarith
+
+/-- `1 / π ≤ 0.3184`. -/
+private theorem one_div_pi_le : (1 : ℝ) / π ≤ 0.3184 := by
+  have h : (1 : ℝ) / π ≤ 1 / 3.1415 := one_div_le_one_div_of_le (by norm_num) Real.pi_gt_d4.le
+  linarith
+
+/-- `log (2 ^ 31) ≤ 21.4876`, the range of the conductor in the middle box. -/
+private theorem log_two_pow_31_le : Real.log ((2 : ℝ) ^ 31) ≤ 21.4876 := by
+  rw [Real.log_pow]
+  nlinarith [Real.log_two_lt_d9]
+
 /-- LEAF. The two sided count at an arbitrary height at least one, unpacked: the count is at
 most `T / π * log (q * T / (2πe)) + 0.3 * log (q * T) + 6.778`. This is the supplied two sided
 count written without the absolute value and with the factor two distributed over the main term
@@ -133,7 +194,23 @@ theorem zero_count_two_sided_upper (q : ℕ) [NeZero q] (χ : DirichletCharacter
     (hχ : χ.IsPrimitive) (T : ℝ) (hT : 1 ≤ T) :
     zeroCount χ T ≤ T / π * log ((q : ℝ) * T / (2 * π * exp 1)) +
       0.3 * log ((q : ℝ) * T) + 6.778 := by
-  sorry
+  have h := ZeroCount1623.zero_count_two_sided χ hχ hT
+  have hone := zeroCount_eq_finset q χ T
+  have hM : 2 * ZeroCount1623.bookMain q T =
+      T / π * Real.log ((q : ℝ) * T / (2 * π * exp 1)) := by
+    have hTπ : T / π = 2 * (T / (2 * π)) := by
+      field_simp
+    unfold ZeroCount1623.bookMain
+    rw [hTπ]
+    ring
+  have hE : 2 * ZeroCount1623.bookError q T =
+      0.3 * Real.log ((q : ℝ) * T) + 6.778 := by
+    unfold ZeroCount1623.bookError
+    ring
+  have hup := (abs_le.mp h).2
+  rw [hM, hE] at hup
+  rw [hone]
+  linarith
 
 /-- LEAF. The height one count on `24 ≤ q ≤ 2 ^ 31`. The two sided count at height one gives
 `(1 / π) * log (q / (2πe)) + 0.3 * log q + 6.778`, and `log q ≤ 31 * log 2 ≤ 21.4876` together
@@ -143,7 +220,29 @@ height, and it is the only place where the range of the conductor is needed. -/
 theorem zero_count_at_one_le_nineteen_six (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hq : 24 ≤ q) (hQ : q ≤ 2 ^ 31) :
     zeroCount χ 1 ≤ 19.6 := by
-  sorry
+  have hq0 : (0 : ℝ) < (q : ℝ) := by exact_mod_cast NeZero.pos q
+  have hqle : (q : ℝ) ≤ (2 : ℝ) ^ 31 := by
+    have h : (q : ℝ) ≤ ((2 ^ 31 : ℕ) : ℝ) := by exact_mod_cast hQ
+    have he : ((2 ^ 31 : ℕ) : ℝ) = (2 : ℝ) ^ 31 := by push_cast; ring
+    linarith
+  have hlogq : Real.log (q : ℝ) ≤ 21.4876 :=
+    (Real.log_le_log hq0 hqle).trans log_two_pow_31_le
+  have h1 := zero_count_two_sided_upper q χ hχ 1 le_rfl
+  simp only [mul_one] at h1
+  have hL : Real.log ((q : ℝ) / (2 * π * exp 1)) ≤ 18.6582 := by
+    rw [Real.log_div hq0.ne' (by positivity)]
+    linarith [ZeroCount1623.log_two_pi_e_ge]
+  have hA : 1 / π * Real.log ((q : ℝ) / (2 * π * exp 1)) ≤ 5.942 := by
+    have h2 : (1 : ℝ) / π * Real.log ((q : ℝ) / (2 * π * exp 1)) ≤
+        1 / π * 18.6582 := mul_le_mul_of_nonneg_left hL (by positivity)
+    have h3 : (1 : ℝ) / π * 18.6582 ≤ 0.3184 * 18.6582 :=
+      mul_le_mul_of_nonneg_right one_div_pi_le (by norm_num)
+    have h4 : (0.3184 : ℝ) * 18.6582 ≤ 5.942 := by norm_num
+    linarith
+  have hB : 0.3 * Real.log ((q : ℝ)) ≤ 6.447 := by
+    have h2 := mul_le_mul_of_nonneg_left hlogq (by norm_num : (0 : ℝ) ≤ 0.3)
+    linarith
+  linarith
 
 /-- LEAF. The box `24 ≤ q ≤ 126`, where the height `2πe³ / q` is at least one. At that height
 `(q) * T = 2πe³`, so the main term is `(T / π) * log (e * e) = 2 * T / π ≤ 10.52 / π ≤ 3.3488`
@@ -153,7 +252,35 @@ height of the band, where the conductor still leaves the height above one. -/
 theorem zero_count_top_height_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hq : 24 ≤ q) (h126 : q ≤ 126) :
     zeroCount χ (2 * π * exp 1 * exp 1 * exp 1 / q) ≤ 19.6 := by
-  sorry
+  have hq0 : (0 : ℝ) < (q : ℝ) := by exact_mod_cast NeZero.pos q
+  have hq24 : (24 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  have hq126 : (q : ℝ) ≤ 126 := by exact_mod_cast h126
+  have hT1 : 1 ≤ 2 * π * exp 1 * exp 1 * exp 1 / (q : ℝ) := by
+    rw [le_div_iff₀ hq0]
+    linarith [le_two_pi_e_cube]
+  have hX : 2 * π * exp 1 * exp 1 * exp 1 / (q : ℝ) / π * 2 =
+      4 * (Real.exp 1 * Real.exp 1 * Real.exp 1) / (q : ℝ) := by
+    field_simp
+    try ring
+  have hmain : 2 * π * exp 1 * exp 1 * exp 1 / (q : ℝ) / π * 2 ≤ 3.3476 := by
+    rw [hX, div_le_iff₀ hq0]
+    nlinarith [exp_one_cube_le, hq24]
+  have hqT : (q : ℝ) * (2 * π * exp 1 * exp 1 * exp 1 / (q : ℝ)) =
+      2 * π * exp 1 * exp 1 * exp 1 := mul_div_cancel₀ _ hq0.ne'
+  have hlog : Real.log ((q : ℝ) * (2 * π * exp 1 * exp 1 * exp 1 / (q : ℝ)) /
+      (2 * π * exp 1)) = 2 := by
+    rw [hqT]
+    have hcancel : 2 * π * exp 1 * exp 1 * exp 1 / (2 * π * exp 1) =
+        Real.exp 1 * Real.exp 1 := by
+      field_simp
+    rw [hcancel, ← Real.exp_add, Real.log_exp]
+    norm_num
+  have herr : 0.3 * Real.log ((q : ℝ) * (2 * π * exp 1 * exp 1 * exp 1 / (q : ℝ))) ≤ 1.452 := by
+    rw [hqT]
+    nlinarith [log_two_pi_e_cube_le]
+  have h1 := zero_count_two_sided_upper q χ hχ (2 * π * exp 1 * exp 1 * exp 1 / (q : ℝ)) hT1
+  rw [hlog] at h1
+  linarith
 
 /-- LEAF. The box `2 ^ 31 < q`, where the height `2πe³ / q` is below `5.88 * 10 ^ -8`. Every
 count of this folder, one sided and two sided alike, is stated for heights at least one, so
