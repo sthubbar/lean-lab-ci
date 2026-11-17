@@ -72,7 +72,35 @@ theorem leaf_low_j1_strip_index_bounded (γ δ κ : ℝ) (N : ℕ) (a b : ℝ) (
     (hheight : 4 * calE γ κ N ^ (2 / 3 : ℝ) + 2 ≤ calE γ κ N ^ (3 / 4 : ℝ))
     (hh : |(b - a) - (h : ℝ) / 2| ≤ F γ N ^ (δ - 1)) :
     (|h| : ℝ) ≤ calE γ κ N ^ (3 / 4 : ℝ) := by
-  sorry
+  have hE0 : 0 < calE γ κ N := Real.exp_pos _
+  have hlogN : 0 ≤ Real.log (N : ℝ) := by
+    rcases Nat.eq_zero_or_pos N with hN | hN
+    · simp [hN]
+    · exact Real.log_nonneg (by exact_mod_cast hN)
+  have hX1 : 1 ≤ F γ N := by
+    simp only [F]
+    exact Real.one_le_exp (Real.rpow_nonneg hlogN γ)
+  have hr1 : F γ N ^ (δ - 1) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos hX1 (by linarith)
+  have ha' : -(calE γ κ N ^ (2 / 3 : ℝ)) ≤ a ∧ a ≤ calE γ κ N ^ (2 / 3 : ℝ) := by
+    simpa only [oddDomain, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_Icc] using ha.2
+  have hb' : -(calE γ κ N ^ (2 / 3 : ℝ)) ≤ b ∧ b ≤ calE γ κ N ^ (2 / 3 : ℝ) := by
+    simpa only [oddDomain, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_Icc] using hb.2
+  have habs_a : |a| ≤ calE γ κ N ^ (2 / 3 : ℝ) := abs_le.mpr ⟨ha'.1, ha'.2⟩
+  have habs_b : |b| ≤ calE γ κ N ^ (2 / 3 : ℝ) := abs_le.mpr ⟨hb'.1, hb'.2⟩
+  have hdiff : |b - a| ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) := by
+    have h : |b - a| ≤ |b| + |a| := by
+      simpa only [sub_eq_add_neg, abs_neg] using abs_add_le b (-a)
+    linarith
+  have hstep : |(h : ℝ) / 2| ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) + 1 := by
+    have hsplit : (h : ℝ) / 2 = (b - a) - ((b - a) - (h : ℝ) / 2) := by ring
+    calc |(h : ℝ) / 2| = |(b - a) - ((b - a) - (h : ℝ) / 2)| := congrArg abs hsplit
+      _ ≤ |b - a| + |(b - a) - (h : ℝ) / 2| := abs_sub _ _
+      _ ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) + 1 := by linarith [hh.trans hr1]
+  have hcast : |(h : ℝ) / 2| = |(h : ℝ)| / 2 := by
+    rw [abs_div, abs_of_pos (by norm_num : (0 : ℝ) < 2)]
+  rw [hcast] at hstep
+  linarith
 
 /-- Assembly. The two steps above localize the large values of the assigned lower
 block phase. The width is fixed at one so every positive `δ` below it satisfies
