@@ -53,7 +53,7 @@ theorem zero_count_high_conductor_below_sqrt_height (q : ℕ) [NeZero q]
     (hqt : (q : ℝ) ≤ t) (hth : 10 ^ 6 ≤ t) (hreg : (q : ℝ) ^ 2 ≤ t) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  exact zero_count_high_asymptotic_height q χ hχ t ht ht2 hbig hqt hth
 
 /-- LEAF. Conductor above the square root of the height but modulus at most `10 ^ 6`,
 `t < q ^ 2` and `q ≤ 10 ^ 6`.  The condition `t ≥ 10 ^ 6` with `t < q ^ 2` forces `q > 1000`, so
