@@ -36,6 +36,27 @@ open LeanLab.ExceptionalSet.BrudernPerelli1998 (F)
 
 /-! ### Leaves -/
 
+/-
+Source audit, task1044: P0082 page 367 displays 29 and 30 bound moments about zero
+on the parity classes of `nu γ n`, not centered moments on the parity classes of `n`.
+The expansion below isolates the first-moment cancellation still needed here.
+-/
+
+/-- Algebraic expansion of the centered moment. The term linear in `g` is needed
+in addition to an uncentered second moment. -/
+theorem centered_moment_expansion (s : Finset ℕ) (g : ℕ → ℝ) (X : ℝ) :
+    (∑ n ∈ s, (X / 2 - g n) ^ 2) =
+      (s.card : ℝ) * (X / 2) ^ 2 - X * (∑ n ∈ s, g n) +
+        ∑ n ∈ s, (g n) ^ 2 := by
+  calc
+    _ = ∑ n ∈ s, ((X / 2) ^ 2 - X * g n + (g n) ^ 2) := by
+      apply Finset.sum_congr rfl
+      intro n _
+      ring
+    _ = _ := by
+      rw [Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_const,
+        nsmul_eq_mul, ← Finset.mul_sum]
+
 /-- LEAF: the even indices of the index window of the second moment at `nu γ n + 1`,
 over `F γ N / 2 < F γ n <= F γ N`, `n <= 2N + 1`: the squared deviation of the real
 part of `R1` from the main term `X/2`, summed over the even `n` of the window. A
@@ -55,6 +76,8 @@ theorem leaf_moment_nu_succ_even (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               (fun n : ℕ => Even n),
             (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re) ^ 2)
             ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := by
+  classical
+  simp_rw [centered_moment_expansion]
   sorry
 
 /-- LEAF: the odd indices of the same index window of the same second moment at
@@ -75,6 +98,8 @@ theorem leaf_moment_nu_succ_odd (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               (fun n : ℕ => ¬ Even n),
             (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re) ^ 2)
             ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := by
+  classical
+  simp_rw [centered_moment_expansion]
   sorry
 
 /-! ### Assembly -/
