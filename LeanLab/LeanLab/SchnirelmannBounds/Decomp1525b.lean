@@ -21,6 +21,7 @@ over `primeFactors` in ℝ instead of `prodQ` in ℚ; the bridge is a separate s
 AI-written Lean code, Claude, 2026-10-25. Binary Goldbach is OPEN.
 -/
 import LeanLab.SchnirelmannBounds.Decomp1525a
+import LeanLab.SchnirelmannBounds.Decomp1525bHilbert
 import LeanLab.Helfgott2013.GammaFine
 import LeanLab.PNTPort.LargeSieve.Montgomery
 import LeanLab.RieselVaughan1983.Stieltjes1Enclosure
@@ -244,6 +245,160 @@ theorem weak_large_sieve_ceiling (N q : ℕ) (Q : ℝ) (hQ : 0 < Q) (hq : (q : �
   have hh := mul_le_mul_of_nonneg_right hq hQ.le
   nlinarith [sq_pos_of_pos hQ]
 
+/-- The half phase difference is twice i times sine.
+MV1973 page 123, the inner sum evaluation following display 2.5. -/
+theorem half_phase_difference (θ : ℝ) :
+    ee (θ/2)-ee (-θ/2) = 2*Complex.I*(Real.sin (Real.pi*θ) : ℂ) := by
+  rw [Complex.ofReal_sin, Complex.sin]
+  have hp : ((Real.pi * θ : ℝ) : ℂ) * Complex.I = 2 * Real.pi * Complex.I * (θ/2) := by
+    push_cast; ring
+  have hn : -((Real.pi * θ : ℝ) : ℂ) * Complex.I = 2 * Real.pi * Complex.I * (-θ/2) := by
+    push_cast; ring
+  rw [hp, hn]
+  unfold ee
+  push_cast
+  ring_nf
+  simp [sub_eq_add_neg]
+/-- A single exponential increment telescopes the half shifted endpoints.
+MV1973 page 123, the inner sum evaluation following display 2.5. -/
+theorem phase_step (t θ : ℝ) :
+    ee ((t+1/2)*θ)-ee ((t-1/2)*θ) = ee (t*θ)*(2*Complex.I*(Real.sin (Real.pi*θ) : ℂ)) := by
+  have hadd (a b : ℝ) : ee (a+b) = ee a*ee b := by
+    simpa only [ee_eq_largeSieve_e] using LeanLab.PNTPort.LargeSieve.e_add a b
+  rw [show (t+1/2)*θ = t*θ+θ/2 by ring,
+    show (t-1/2)*θ = t*θ+(-θ/2) by ring, hadd, hadd, ← mul_sub,
+    half_phase_difference]
+/-- The interval exponential sum times twice i sine equals its endpoint difference.
+MV1973 page 123, the inner sum evaluation following display 2.5. -/
+theorem interval_phase_telescope (M N : ℕ) (θ : ℝ) :
+    (∑ n ∈ Ioc M (M+N), ee ((n:ℝ)*θ))*(2*Complex.I*(Real.sin (Real.pi*θ) : ℂ)) =
+      ee ((((M+N:ℕ):ℝ)+1/2) * θ)-ee (((M:ℝ)+1/2)*θ) := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+    rw [Nat.add_succ, sum_Ioc_succ_top (by omega), add_mul, ih]
+    rw [← phase_step]
+    simp only [Nat.cast_add, Nat.cast_succ]
+    ring_nf
+/-- The exact cosecant formula for the inner sum in MV1973 page 123 display 2.5.
+The sine denominator is nonzero for distinct points modulo one. -/
+theorem interval_phase_cosecant (M N : ℕ) (θ : ℝ) (hs : Real.sin (Real.pi*θ) ≠ 0) :
+    (∑ n ∈ Ioc M (M+N), ee ((n:ℝ)*θ)) =
+      Complex.I/2*(ee (((M:ℝ)+1/2)*θ)-ee (((M:ℝ)+N+1/2)*θ)) /
+        (Real.sin (Real.pi*θ) : ℂ) := by
+  have hsC : (Real.sin (Real.pi*θ) : ℂ) ≠ 0 := by exact_mod_cast hs
+  have h := interval_phase_telescope M N θ
+  simp only [Nat.cast_add] at h
+  apply (mul_right_cancel₀ (mul_ne_zero (mul_ne_zero (by norm_num : (2:ℂ) ≠ 0) Complex.I_ne_zero) hsC))
+  rw [h]
+  generalize (Real.sin (Real.pi*θ) : ℂ) = z at *
+  field_simp [hsC]
+  ring_nf
+  simp [sub_eq_add_neg]
+/-- Two applications of a weighted cosecant bound give the off diagonal Gram bound.
+MV1973 page 123, displays 2.4 and 2.5.
+This reduction is CONDITIONAL ON the explicit cosecant inequality. -/
+theorem cosecant_gram_bound {ι : Type*} [DecidableEq ι]
+    (R : Finset ι) (x : ι → ℝ) (M N : ℕ) (w : ι → ℝ)
+    (hsep : ∀ r ∈ R, ∀ s ∈ R.erase r, Real.sin (Real.pi*(x r-x s)) ≠ 0)
+    (hCsc : ∀ u : ι → ℂ,
+      ‖∑ r ∈ R, ∑ s ∈ R.erase r,
+        u r*(starRingEnd ℂ) (u s)/(Real.sin (Real.pi*(x r-x s)) : ℂ)‖ ≤
+        ∑ r ∈ R, w r*‖u r‖^2) (b : ι → ℂ) :
+    ‖∑ r ∈ R, ∑ s ∈ R.erase r,
+      b r*(starRingEnd ℂ) (b s)*
+        ∑ n ∈ Ioc M (M+N), ee ((n:ℝ)*x r)*(starRingEnd ℂ) (ee ((n:ℝ)*x s))‖ ≤
+      ∑ r ∈ R, w r*‖b r‖^2 := by
+  let u (t : ℝ) (r : ι) := b r*ee (t*x r)
+  let H (v : ι → ℂ) := ∑ r ∈ R, ∑ s ∈ R.erase r,
+    v r*(starRingEnd ℂ) (v s)/(Real.sin (Real.pi*(x r-x s)) : ℂ)
+  have he (t : ℝ) (r s : ι) :
+      ee (t*x r)*(starRingEnd ℂ) (ee (t*x s)) = ee (t*(x r-x s)) := by
+    simp only [ee_eq_largeSieve_e]
+    rw [← LeanLab.PNTPort.LargeSieve.e_neg, ← LeanLab.PNTPort.LargeSieve.e_add]
+    congr 1
+    ring
+  have hu (t : ℝ) : ∑ r ∈ R, w r*‖u t r‖^2 = ∑ r ∈ R, w r*‖b r‖^2 := by
+    simp only [u, norm_mul, ee_eq_largeSieve_e, LeanLab.PNTPort.LargeSieve.norm_e, mul_one]
+  have hp (t : ℝ) (r s : ι) :
+      u t r*(starRingEnd ℂ) (u t s) =
+        b r*(starRingEnd ℂ) (b s)*ee (t*(x r-x s)) := by
+    dsimp [u]
+    rw [map_mul]
+    calc
+      _ = (b r*(starRingEnd ℂ) (b s)) *
+          (ee (t*x r)*(starRingEnd ℂ) (ee (t*x s))) := by ring
+      _ = _ := by rw [he]
+  have hid : (∑ r ∈ R, ∑ s ∈ R.erase r,
+      b r*(starRingEnd ℂ) (b s)*
+        ∑ n ∈ Ioc M (M+N), ee ((n:ℝ)*x r)*(starRingEnd ℂ) (ee ((n:ℝ)*x s))) =
+      Complex.I/2*(H (u ((M:ℝ)+1/2))-H (u ((M:ℝ)+N+1/2))) := by
+    simp_rw [he]
+    dsimp only [H]
+    simp_rw [← sum_sub_distrib, mul_sum]
+    apply sum_congr rfl
+    intro r hr
+    apply sum_congr rfl
+    intro s hs
+    rw [← mul_sum, interval_phase_cosecant M N (x r-x s) (hsep r hr s hs), hp, hp]
+    ring
+  rw [hid, norm_mul, norm_div, Complex.norm_I]
+  norm_num
+  calc
+    _ ≤ (1/2:ℝ)*(‖H (u ((M:ℝ)+1/2))‖+‖H (u ((M:ℝ)+N+1/2))‖) :=
+      mul_le_mul_of_nonneg_left (norm_sub_le _ _) (by norm_num)
+    _ ≤ (1/2:ℝ)*((∑ r ∈ R, w r*‖b r‖^2)+(∑ r ∈ R, w r*‖b r‖^2)) := by
+      apply mul_le_mul_of_nonneg_left _ (by norm_num)
+      exact add_le_add (by simpa only [H, hu] using hCsc (u ((M:ℝ)+1/2)))
+        (by simpa only [H, hu] using hCsc (u ((M:ℝ)+N+1/2)))
+    _ = _ := by ring
+
+/-- The individual Farey spacings give the exact off diagonal energy budget.
+MV1973 page 123 displays 2.4 to 2.6. CONDITIONAL ON MV1974 display 1.3. -/
+theorem farey_off_diagonal_bound (M N : ℕ) (Q : ℝ) (hQ : 1 ≤ Q)
+    (R : Finset (Σ _ : ℕ, ℕ))
+    (hR : R = (Icc 1 ⌊Q⌋₊).sigma (fun q => (Icc 1 q).filter (fun r => r.Coprime q)))
+    (b : (Σ _ : ℕ, ℕ) → ℂ) :
+    (∑ r ∈ R, ∑ t ∈ R.erase r, b r*(starRingEnd ℂ) (b t) *
+      ∑ n ∈ Ioc M (M+N), ee ((r.2 : ℝ)*n/r.1)*(starRingEnd ℂ) (ee ((t.2 : ℝ)*n/t.1))).re ≤
+      ∑ r ∈ R, (3/2*r.1*Q)*‖b r‖^2 := by
+  let x (r : Σ _ : ℕ, ℕ) : ℝ := (r.2 : ℝ)/r.1
+  let δ (r : Σ _ : ℕ, ℕ) : ℝ := 1/((r.1 : ℝ)*Q)
+  let w (r : Σ _ : ℕ, ℕ) : ℝ := 3/2*r.1*Q
+  have hpos : ∀ r ∈ R, 0 < δ r := by
+    intro r hr
+    have hmem := mem_sigma.mp (hR ▸ hr)
+    have hq : (0 : ℝ) < r.1 := by exact_mod_cast (mem_Icc.mp hmem.1).1
+    dsimp [δ]
+    positivity
+  have hsp : ∀ r ∈ R, ∀ s ∈ R, r ≠ s →
+      δ r ≤ LeanLab.PNTPort.LargeSieve.dist0 (x r-x s) := by
+    intro r hr s hs hne
+    exact Decomp1525b2.farey_individual_spacing Q r s (hR ▸ hr) (hR ▸ hs) hne
+  have hsin : ∀ r ∈ R, ∀ s ∈ R.erase r, Real.sin (Real.pi*(x r-x s)) ≠ 0 := by
+    intro r hr s hs hz
+    have hd := (hpos r hr).trans_le (hsp r hr s (mem_of_mem_erase hs) (ne_of_mem_erase hs).symm)
+    obtain ⟨k, hk⟩ := Real.sin_eq_zero_iff.mp hz
+    have he : x r-x s = (k : ℝ) := by nlinarith [Real.pi_pos]
+    simp [LeanLab.PNTPort.LargeSieve.dist0, he] at hd
+  have hCsc (u : (Σ _ : ℕ, ℕ) → ℂ) :
+      ‖∑ r ∈ R, ∑ s ∈ R.erase r,
+        u r*(starRingEnd ℂ) (u s)/(Real.sin (Real.pi*(x r-x s)) : ℂ)‖ ≤
+        ∑ r ∈ R, w r*‖u r‖^2 := by
+    have h := mv1974_individual_cosecant R x δ hpos hsp u
+    refine h.trans_eq ?_
+    rw [mul_sum]
+    apply sum_congr rfl
+    intro r hr
+    dsimp [w, δ]
+    rw [div_div_eq_mul_div, div_one]
+    ring
+  have hnorm := cosecant_gram_bound R x M N w hsin hCsc b
+  have hre := (Complex.re_le_norm _).trans hnorm
+  have harg (r : Σ _ : ℕ, ℕ) (n : ℕ) :
+      ((r.2 : ℝ)*n/r.1) = (n : ℝ)*x r := by dsimp [x]; ring
+  simpa only [harg, w] using hre
+
 /-! ### Leaves: the large sieve -/
 
 /-- LEAF. Montgomery-Vaughan's weighted large sieve at the Farey points `b/q`, `q ≤ Q`:
@@ -254,7 +409,9 @@ theorem mv_large_sieve (M N : ℕ) (Q : ℝ) (a : ℕ → ℂ) (hN : 1 ≤ N) (h
     ∑ q ∈ Icc 1 ⌊Q⌋₊, ∑ b ∈ (Icc 1 q).filter (fun b => b.Coprime q),
       ‖∑ n ∈ Ioc M (M + N), a n * ee ((b : ℝ) * n / q)‖ ^ 2 / ((N : ℝ) + 3 / 2 * q * Q)
       ≤ ∑ n ∈ Ioc M (M + N), ‖a n‖ ^ 2 := by
-  sorry
+  let R := (Icc 1 ⌊Q⌋₊).sigma (fun q => (Icc 1 q).filter (fun r => r.Coprime q))
+  exact mv_large_sieve_of_hilbert M N Q hN hQ R rfl
+    (fun b => farey_off_diagonal_bound M N Q hQ R rfl b) a
 
 /-- LEAF. Montgomery's arithmetic large sieve lemma: if `S` avoids `ω(p) < p` residue classes
 modulo every prime `p | q`, `q` squarefree, then
