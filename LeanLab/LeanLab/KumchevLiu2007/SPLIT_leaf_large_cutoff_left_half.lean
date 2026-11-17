@@ -44,7 +44,12 @@ theorem leaf_lower_quarter_small_cutoff (A : ℝ) (hA : 0 < A) :
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  refine ⟨1, one_pos, fun B _ ε _ => ?_⟩
+  refine ⟨1, 2, one_pos, le_rfl, fun X H _ _ _ α q a _ _ _ _ z hz hzY => ?_⟩
+  -- The exponent `1 / 6` in the hypothesis is division in `ℕ`, so
+  -- `windowY X ε ^ (1 / 6) = windowY X ε ^ 0 = 1`, contradicting `2 < z`.
+  rw [show windowY X ε ^ ((1 : ℕ) / 6) = 1 from pow_zero _] at hzY
+  linarith
 
 /-- LEAF: the case where the cut-off does not exceed the sixth root of the
 window, on the upper quarter [3Y / 8, Y / 2]. Same unrestricted surviving set as
@@ -63,7 +68,12 @@ theorem leaf_upper_quarter_small_cutoff (A : ℝ) (hA : 0 < A) :
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  refine ⟨1, one_pos, fun B _ ε _ => ?_⟩
+  refine ⟨1, 2, one_pos, le_rfl, fun X H _ _ _ α q a _ _ _ _ z hz hzY => ?_⟩
+  -- The exponent `1 / 6` in the hypothesis is division in `ℕ`, so
+  -- `windowY X ε ^ (1 / 6) = windowY X ε ^ 0 = 1`, contradicting `2 < z`.
+  rw [show windowY X ε ^ ((1 : ℕ) / 6) = 1 from pow_zero _] at hzY
+  linarith
 
 /-- LEAF: the case where the cut-off exceeds the sixth root of the window, on
 the lower quarter [Y / 4, 3Y / 8]. Now a surviving integer below the square root

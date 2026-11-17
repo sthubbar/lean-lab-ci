@@ -14,7 +14,7 @@ namespace LeanLab.Halupczok2012.Decomp598Theorem6
 open Finset
 open scoped Classical
 
-/-- LEAF. Journal page 338, Theorem 2.2, display 2.4.
+/-- LEAF: Journal page 338, Theorem 2.2, display 2.4.
 This is Halupczok's adapted first moment, with unrestricted p3.
 Kawada 1993 Theorem 2 alone covers only the equal endpoint case. -/
 theorem kawada_thm22_display24 :

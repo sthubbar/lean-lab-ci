@@ -68,7 +68,11 @@ theorem zero_count_high_conductor_bounded_modulus (q : ℕ) [NeZero q]
     (hqt : (q : ℝ) ≤ t) (hth : 10 ^ 6 ≤ t) (hreg : t < (q : ℝ) ^ 2) (hq6 : q ≤ 10 ^ 6) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  -- The lane's cited input: the explicit upper count P0014 display 4.26, recorded in this
+  -- file's import closure as `Decomp388a.zero_count_explicit_upper`.  It states this
+  -- inequality for every `t ≥ 1`, every modulus and every primitive `χ`, so the region
+  -- conditions of this leaf are not needed and are unused below.
+  exact zero_count_explicit_upper q χ hχ t ht
 
 /-- LEAF. Conductor above the square root of the height and modulus past `10 ^ 6`, `t < q ^ 2`
 and `10 ^ 6 < q`.  Since `q ≤ t` the product obeys `q * t ≤ t ^ 2`, so `log (q * t) ≤ 2 * log t`,
@@ -83,7 +87,9 @@ theorem zero_count_high_conductor_above_sixth_power (q : ℕ) [NeZero q]
     (hqt : (q : ℝ) ≤ t) (hth : 10 ^ 6 ≤ t) (hreg : t < (q : ℝ) ^ 2) (hq6 : 10 ^ 6 < q) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  -- Same cited input as the previous leaf, `Decomp388a.zero_count_explicit_upper`: it
+  -- carries no hypothesis on `q` against `t`, so the region conditions are unused here too.
+  exact zero_count_explicit_upper q χ hχ t ht
 
 /-- Assembly: the asymptotic range is the union of the three conductor regimes.  Either
 `q ^ 2 ≤ t`, which is the first leaf, or `t < q ^ 2`, and then the modulus is either at most
