@@ -39,7 +39,15 @@ hypotheses hold and the segment is empty. -/
 theorem upper_self_scaled_principal_empty_prefix {ε t x : ℝ} (hε : 0 < ε)
     (ht : t ≤ x ^ (11 / 20 + ε)) :
     (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t) = ∅ := by
-  sorry
+  rw [Finset.filter_eq_empty_iff]
+  intro m hmem hle
+  rw [rightInterval, Finset.mem_Ioc] at hmem
+  -- every index of `rightInterval` exceeds the level, by the floor gap
+  have hfloor : ((⌊x ^ (11 / 20 + ε)⌋₊ : ℕ) : ℝ) + 1 ≤ (m : ℝ) := by
+    exact_mod_cast hmem.1
+  have hgap := Nat.lt_floor_add_one (x ^ (11 / 20 + ε))
+  have hmY : x ^ (11 / 20 + ε) < (m : ℝ) := by linarith
+  exact absurd hle (not_le.mpr (lt_of_le_of_lt ht hmY))
 
 /-- LEAF: the centred prefix bound at the weight scale, with no character present. This is the
 analytic content that the leaf carries: for every A the mass of the coefficient on an initial

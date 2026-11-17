@@ -34,6 +34,91 @@ namespace LeanLab.HelfgottMajor.Decomp269c
 open Real LeanLab.HelfgottArcs Decomp269a Decomp269b Decomp123
 open MeasureTheory Filter
 
+/-! Private helpers. Inducing a character from its conductor to the modulus multiplies the `L`
+function by the finitely many Euler factors of the primes dividing the new level, each of which is
+nonzero and analytic in the open right half plane; so the induced character has the same strip zeros
+with the same multiplicities. -/
+
+private lemma euler_factor_ne_of_re_pos {r : ℕ} (χ : DirichletCharacter ℂ r) {p : ℕ}
+    (hp : p.Prime) {s : ℂ} (hs : 0 < s.re) :
+    1 - χ (p : ZMod r) * (p : ℂ) ^ (-s) ≠ 0 := by
+  have hp0 : (0 : ℝ) < p := by exact_mod_cast hp.pos
+  have hp1 : (1 : ℝ) < p := by exact_mod_cast hp.one_lt
+  have hn : ‖χ (p : ZMod r) * (p : ℂ) ^ (-s)‖ < 1 := by
+    rw [norm_mul, ← Complex.ofReal_natCast,
+      Complex.norm_cpow_eq_rpow_re_of_pos hp0, Complex.neg_re]
+    calc
+      _ ≤ 1 * (p : ℝ) ^ (-s.re) := mul_le_mul_of_nonneg_right
+        (DirichletCharacter.norm_le_one χ _) (by positivity)
+      _ < 1 := by
+        rw [one_mul]
+        exact Real.rpow_lt_one_of_one_lt_of_neg hp1 (by linarith)
+  intro hz
+  have hh : χ (p : ZMod r) * (p : ℂ) ^ (-s) = 1 := (sub_eq_zero.mp hz).symm
+  rw [hh, norm_one] at hn
+  exact (lt_irrefl 1) hn
+
+private lemma euler_product_ne_of_re_pos {r : ℕ} (χ : DirichletCharacter ℂ r) (Q : ℕ) {s : ℂ}
+    (hs : 0 < s.re) :
+    (∏ p ∈ Q.primeFactors, (1 - χ (p : ZMod r) * (p : ℂ) ^ (-s))) ≠ 0 := by
+  apply Finset.prod_ne_zero_iff.mpr
+  intro p hp
+  exact euler_factor_ne_of_re_pos χ (Nat.prime_of_mem_primeFactors hp) hs
+
+/-- Inducing a character preserves every zero in the open critical strip. -/
+private lemma lfunction_changeLevel_eq_zero {r q : ℕ} [NeZero r] [NeZero q]
+    (hd : r ∣ q) (χ : DirichletCharacter ℂ r) {s : ℂ}
+    (hs0 : 0 < s.re) (hs1 : s.re < 1) :
+    DirichletCharacter.LFunction (DirichletCharacter.changeLevel hd χ) s = 0 ↔
+      DirichletCharacter.LFunction χ s = 0 := by
+  have hs : s ≠ 1 := by intro h; simp [h] at hs1
+  rw [DirichletCharacter.LFunction_changeLevel hd χ (Or.inr hs),
+    mul_eq_zero, or_iff_left (euler_product_ne_of_re_pos χ q hs0)]
+
+/-- Inducing a character preserves analytic orders in the open critical strip. -/
+private lemma analyticOrderNatAt_changeLevel {r q : ℕ} [NeZero r] [NeZero q]
+    (hd : r ∣ q) (χ : DirichletCharacter ℂ r) {s : ℂ}
+    (hs0 : 0 < s.re) (hs1 : s.re < 1) :
+    analyticOrderNatAt (DirichletCharacter.LFunction (DirichletCharacter.changeLevel hd χ)) s =
+      analyticOrderNatAt (DirichletCharacter.LFunction χ) s := by
+  let P : ℂ → ℂ := fun z => ∏ p ∈ q.primeFactors,
+    (1 - χ (p : ZMod r) * (p : ℂ) ^ (-z))
+  have hs : s ≠ 1 := by intro h; simp [h] at hs1
+  have hP : AnalyticAt ℂ P s := by
+    apply Finset.analyticAt_fun_prod
+    intro p hp
+    have hp0 : (p : ℂ) ≠ 0 := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).ne_zero
+    have hps : (p : ℂ) ∈ Complex.slitPlane := Complex.natCast_mem_slitPlane.mpr
+      (Nat.prime_of_mem_primeFactors hp).ne_zero
+    fun_prop
+  have hL : AnalyticAt ℂ (DirichletCharacter.LFunction χ) s := by
+    apply DifferentiableOn.analyticAt (s := {1}ᶜ) _
+      (isOpen_compl_singleton.mem_nhds hs)
+    intro z hz
+    exact (DirichletCharacter.differentiableAt_LFunction χ z (Or.inl hz)).differentiableWithinAt
+  have he : DirichletCharacter.LFunction (DirichletCharacter.changeLevel hd χ) =ᶠ[nhds s]
+      (fun z => DirichletCharacter.LFunction χ z * P z) := by
+    filter_upwards [eventually_ne_nhds hs] with z hz
+    exact DirichletCharacter.LFunction_changeLevel hd χ (Or.inr hz)
+  unfold analyticOrderNatAt
+  congr 1
+  rw [analyticOrderAt_congr he]
+  change analyticOrderAt (DirichletCharacter.LFunction χ * P) s = _
+  have hP0 : P s ≠ 0 := euler_product_ne_of_re_pos χ q hs0
+  have hPo : analyticOrderAt P s = 0 := analyticOrderAt_eq_zero.mpr (Or.inr hP0)
+  rw [analyticOrderAt_mul hL hP, hPo, add_zero]
+
+/-- Inducing a character from its conductor preserves the zeros in the open critical strip. -/
+private lemma lfunction_primitiveCharacter_eq_zero {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    [NeZero χ.conductor] {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1) :
+    DirichletCharacter.LFunction χ s = 0 ↔
+      DirichletCharacter.LFunction χ.primitiveCharacter s = 0 := by
+  have h : DirichletCharacter.LFunction
+      (DirichletCharacter.changeLevel χ.conductor_dvd_level χ.primitiveCharacter) s = 0 ↔
+      DirichletCharacter.LFunction χ.primitiveCharacter s = 0 :=
+    lfunction_changeLevel_eq_zero (χ := χ.primitiveCharacter) χ.conductor_dvd_level hs0 hs1
+  rwa [DirichletCharacter.changeLevel_primitiveCharacter] at h
+
 /-- LEAF. The primitive case: the one sided count. For a primitive character of modulus `q` and
 height at least `100` the multiplicity weighted strip count is at most the main term plus the
 error. This is the upper half of the two sided explicit estimate, which is stated for heights at
@@ -51,7 +136,10 @@ plane, so a point of the open strip is a zero of one exactly when it is a zero o
 theorem stripZeros_primitiveCharacter (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     [NeZero χ.conductor] (T : ℝ) :
     ZeroCount1623.stripZeros χ T = ZeroCount1623.stripZeros χ.primitiveCharacter T := by
-  sorry
+  ext ρ
+  simp only [ZeroCount1623.stripZeros]
+  exact ⟨fun h => ⟨(lfunction_primitiveCharacter_eq_zero χ h.2.1 h.2.2.1).mp h.1, h.2⟩,
+    fun h => ⟨(lfunction_primitiveCharacter_eq_zero χ h.2.1 h.2.2.1).mpr h.1, h.2⟩⟩
 
 /-- LEAF. The multiplicities of a strip zero of an imprimitive character and of the same point as
 a zero of the inducing primitive character agree. The extra Euler factors are analytic and
@@ -60,7 +148,11 @@ theorem mult_eq_primitiveCharacter (q : ℕ) [NeZero q] (χ : DirichletCharacter
     [NeZero χ.conductor] {ρ : ℂ} (hre0 : 0 < ρ.re) (hre1 : ρ.re < 1)
     (hρ : DirichletCharacter.LFunction χ ρ = 0) :
     ZeroCount1623.mult χ ρ = ZeroCount1623.mult χ.primitiveCharacter ρ := by
-  sorry
+  show analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ =
+    analyticOrderNatAt (DirichletCharacter.LFunction χ.primitiveCharacter) ρ
+  have h := analyticOrderNatAt_changeLevel (χ := χ.primitiveCharacter) χ.conductor_dvd_level hre0 hre1
+  rw [DirichletCharacter.changeLevel_primitiveCharacter] at h
+  exact h
 
 /-- LEAF. The main term plus the error is nondecreasing in the modulus. At a fixed height of at
 least `100` both the main term `T / (2 π)` times a logarithm of a positive multiple of `q` and

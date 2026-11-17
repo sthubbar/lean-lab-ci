@@ -43,7 +43,8 @@ theorem principal_arc_compare_intermediate491 (hG : LeanLab.DERZ1997.GRH) :
             logFourier520 N z ^ 2 *
               Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  obtain ⟨C, hC, N0, h0⟩ := principal_arc_compare491 hG
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _hq2 _hq20 n => h0 N hN q hq hqQ n⟩
 
 /-- LEAF. The full period step of the intermediate modulus case. The arc integral of
 the squared model series is the exactly damped logarithmic convolution up to the
@@ -60,7 +61,8 @@ theorem logFourier_arc_convolution_intermediate491 :
               Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) -
           ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  obtain ⟨C, hC, N0, h0⟩ := logFourier_arc_convolution491
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _hq2 _hq20 n => h0 N hN q hq hqQ n⟩
 
 /-- The intermediate modulus case of the principal convolution estimate, assembled from
 the two comparison steps. The statement is the sealed one, unchanged. The difference of

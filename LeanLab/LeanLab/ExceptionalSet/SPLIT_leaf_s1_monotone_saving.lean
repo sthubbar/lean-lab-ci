@@ -106,7 +106,11 @@ at `c = c'` the two exponents coincide and the inequality is an equality, so the
 theorem leaf_s1_exponent_merge (N : ℝ) (hN : 1 ≤ N) (k : ℕ) (hk : 0 < k) (c c' : ℝ)
     (hc : 0 < c) (hcc' : c ≤ c') :
     1 - c' / (k : ℝ) ^ 2 ≤ 1 - c / (k : ℝ) ^ 2 := by
-  sorry
+  have hkpos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast hk
+  have hk2 : (0 : ℝ) < (k : ℝ) ^ 2 := by positivity
+  have h1 : c / (k : ℝ) ^ 2 ≤ c' / (k : ℝ) ^ 2 :=
+    div_le_div_of_nonneg_right hcc' hk2.le
+  linarith
 
 /-! ### Assembly -/
 
