@@ -67,7 +67,67 @@ theorem diag_scale_absorption520 :
       (N : ℝ) * Real.log N ^ 3 / (N : ℝ) ^ (1 / 7 : ℝ) ≤
         K * ((N : ℝ) * Real.log N ^ 6 /
           Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  refine ⟨1, one_pos, 2, ?_⟩
+  intro N hN q hq hqQ
+  have hN3 : 3 ≤ N := by omega
+  have hq0 : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (show 0 < q by omega)
+  have hN0 : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (show 0 < N by omega)
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (show 1 ≤ N by omega)
+  have hA0 : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hN0 _
+  have hs0 : (0 : ℝ) < Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) :=
+    Real.sqrt_pos.2 (mul_pos hq0 hA0)
+  have hlog1 : 1 ≤ Real.log N := by
+    have h3 : (1 : ℝ) ≤ Real.log 3 := by
+      have hle : Real.log (Real.exp 1) ≤ Real.log 3 :=
+        (Real.log_le_log_iff (Real.exp_pos 1) (by norm_num)).mpr Real.exp_one_lt_three.le
+      simpa [Real.log_exp] using hle
+    have hle : Real.log 3 ≤ Real.log N :=
+      (Real.log_le_log_iff (by norm_num) hN0).mpr (by exact_mod_cast hN3)
+    linarith
+  have hlog0 : 0 < Real.log N := by linarith
+  -- the square root of the modulus times the arc denominator is at most the arc
+  -- denominator times the cube of the logarithm
+  have hsq : Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      (N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 3 := by
+    have hprod : Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) =
+        Real.sqrt (q : ℝ) * Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) :=
+      Real.sqrt_mul hq0.le _
+    have hq20 : Real.sqrt (q : ℝ) ≤ (N : ℝ) ^ (1 / 20 : ℝ) := by
+      have hle : Real.sqrt (q : ℝ) ≤ Real.sqrt ((N : ℝ) ^ (1 / 10 : ℝ)) :=
+        Real.sqrt_le_sqrt hqQ
+      have he : Real.sqrt ((N : ℝ) ^ (1 / 10 : ℝ)) = (N : ℝ) ^ (1 / 20 : ℝ) := by
+        rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hN0.le]
+        norm_num
+      rwa [he] at hle
+    have hN14 : Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) = (N : ℝ) ^ (1 / 14 : ℝ) := by
+      rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hN0.le]
+      norm_num
+    have hN20pos : (0 : ℝ) < (N : ℝ) ^ (1 / 20 : ℝ) := Real.rpow_pos_of_pos hN0 _
+    have hprod2 : Real.sqrt (q : ℝ) * Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) ≤
+        (N : ℝ) ^ (1 / 20 : ℝ) * (N : ℝ) ^ (1 / 14 : ℝ) := by
+      refine mul_le_mul hq20 ?_ (Real.sqrt_nonneg _) hN20pos.le
+      rw [hN14]
+    have hsum : (N : ℝ) ^ (1 / 20 : ℝ) * (N : ℝ) ^ (1 / 14 : ℝ) =
+        (N : ℝ) ^ (17 / 140 : ℝ) := by
+      rw [← Real.rpow_add hN0]
+      norm_num
+    have hsmall : (N : ℝ) ^ (17 / 140 : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le hN1 (by norm_num)
+    have hlog3 : 1 ≤ Real.log N ^ 3 := one_le_pow₀ hlog1
+    calc Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))
+        = Real.sqrt (q : ℝ) * Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) := hprod
+      _ ≤ (N : ℝ) ^ (1 / 20 : ℝ) * (N : ℝ) ^ (1 / 14 : ℝ) := hprod2
+      _ = (N : ℝ) ^ (17 / 140 : ℝ) := hsum
+      _ ≤ (N : ℝ) ^ (1 / 7 : ℝ) := hsmall
+      _ ≤ (N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 3 := by
+          nth_rewrite 1 [← mul_one ((N : ℝ) ^ (1 / 7 : ℝ))]
+          exact mul_le_mul_of_nonneg_left hlog3 hA0.le
+  rw [one_mul, div_le_div_iff₀ hA0 hs0]
+  have hmul : (N : ℝ) * Real.log N ^ 3 * Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      (N : ℝ) * Real.log N ^ 3 * ((N : ℝ) ^ (1 / 7 : ℝ) * Real.log N ^ 3) :=
+    mul_le_mul_of_nonneg_left hsq (mul_nonneg hN0.le (pow_nonneg hlog0.le 3))
+  refine le_trans hmul (le_of_eq ?_)
+  ring
 
 /-- The sealed statement, obtained from the two leaves by the elementary size
 bound for the signed Ramanujan sum and by cancelling the modulus against the
