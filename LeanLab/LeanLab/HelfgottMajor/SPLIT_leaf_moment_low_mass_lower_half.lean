@@ -43,6 +43,14 @@ and the only coercion is the multiplicity, a natural number, cast to `ℝ`.
 namespace LeanLab.HelfgottMajor.DecompJ1153
 open Real LeanLab.HelfgottArcs Decomp269a Decomp269b
 
+/-- Monotonicity of a nonnegative finite indicator sum. -/
+private theorem indicator_mass_mono {α : Type*} [Fintype α] (f : α → ℝ)
+    {s t : Set α} (hst : s ⊆ t) (hf : ∀ x, 0 ≤ f x) :
+    (∑' x, Set.indicator s f x) ≤ ∑' x, Set.indicator t f x := by
+  classical
+  rw [tsum_fintype, tsum_fintype]
+  exact Finset.sum_le_sum fun x _ => Set.indicator_le_indicator_of_subset hst (hf x)
+
 /-- LEAF. Far low cell.  The zeros of `L χ` in the strip with `|im ρ| ≤ 1`, `re ρ ≤ 1/4` and
 `|im ρ| ≤ 1/2` carry at most one quarter `Sec45.nTwo / 8` of the squared `L2` energy; this is
 the part of the half-strip furthest from the critical line, at a height below `1/2`.  It says
@@ -55,7 +63,21 @@ theorem leaf_low_mass_lower_half_far_low (q : ℕ) [NeZero q] (χ : DirichletCha
         (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
           ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) ≤
     Sec45.nTwo / 8 := by
-  sorry
+  classical
+  haveI : Fintype {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+      |ρ.im| ≤ 1} := (leaf_moment_window_finite q χ 1).fintype
+  let f : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+      |ρ.im| ≤ 1} → ℝ := fun ρ =>
+    (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+      ‖gaussianMellin δ ρ.val‖ ^ 2
+  have hsub : ({ρ | ρ.val.re ≤ 1 / 4} ∩ {ρ | |ρ.val.im| ≤ 1 / 2}) ⊆
+      {ρ | ρ.val.re ≤ 1 / 2} := by
+    intro ρ hρ
+    exact hρ.1.1
+  have hcell := indicator_mass_mono f hsub (fun ρ => by
+    exact mul_nonneg (Nat.cast_nonneg _) (sq_nonneg _))
+  have htotal := leaf_moment_low_mass_lower_half q χ δ T
+  linarith
 
 /-- LEAF. Far high cell.  The zeros of `L χ` in the strip with `|im ρ| ≤ 1`, `re ρ ≤ 1/4` and
 `1/2 < |im ρ|` carry at most one quarter `Sec45.nTwo / 8` of the squared `L2` energy; here the
