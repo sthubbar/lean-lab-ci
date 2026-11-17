@@ -36,7 +36,30 @@ theorem local_arc_core_unit_phase1622 (N : ℕ) (n : ℤ) :
         primeFourier111 N z ^ 2 *
           Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ ≤
       ∫ z in -(1 / (N : ℝ))..(1 / (N : ℝ)), ‖primeFourier111 N z‖ ^ 2 := by
-  sorry
+  have hle : -(1 / (N : ℝ)) ≤ 1 / (N : ℝ) := by
+    by_cases hN : (N : ℝ) = 0
+    · simp [hN]
+    · have hpos : (0 : ℝ) < (N : ℝ) := by
+        by_contra h
+        push_neg at h
+        have hNnat : (N : ℝ) ≥ 0 := by exact_mod_cast Nat.zero_le N
+        have : (N : ℝ) = 0 := le_antisymm h hNnat
+        exact hN this
+      have hdiv : (0 : ℝ) ≤ 1 / (N : ℝ) := div_nonneg zero_le_one hpos.le
+      linarith
+  refine le_trans (intervalIntegral.norm_integral_le_integral_norm hle) ?_
+  refine intervalIntegral.integral_mono (by linarith) (by linarith) ?_ ?_
+  · intro z hz
+    have hphase : ‖Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ = 1 := by
+      rw [Complex.norm_exp_ofReal_mul_I]
+    calc ‖primeFourier111 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖
+        = ‖primeFourier111 N z ^ 2‖ * ‖Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ := by
+          rw [norm_mul]
+      _ = ‖primeFourier111 N z ^ 2‖ * 1 := by rw [hphase]
+      _ = ‖primeFourier111 N z ^ 2‖ := by ring
+      _ = ‖primeFourier111 N z‖ ^ 2 := by rw [norm_pow]
+  · intro z hz
+    positivity
 
 /-- LEAF. The local square mean value on the core. The integral, over the interval of
 length two over N around the origin, of the squared modulus of the prime Fourier series
