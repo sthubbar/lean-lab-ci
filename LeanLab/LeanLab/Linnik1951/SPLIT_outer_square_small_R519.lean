@@ -34,7 +34,17 @@ theorem outer_square_small_R519_near (B0 : ℝ) (hB0 : 0 < B0) :
           ‖M t‖ ≤ B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3) →
           (∫ α in (4 / (N : ℝ))..(1 / R), ‖mellinU519 N M α‖ ^ 2) ≤
             C * ((N : ℝ) / R * Real.log N ^ 10) := by
-  sorry
+  -- The near range R ≤ N^(1/14) is contained in the sealed small-range estimate R ≤ N^(1/7),
+  -- since N^(1/14) ≤ N^(1/7) for N ≥ 1.  Invoke the sealed parent directly.
+  obtain ⟨C, hC⟩ := outer_square_small_R519 B0 hB0
+  obtain ⟨N0, hN0⟩ := hC.2
+  refine ⟨C, hC.1, N0, fun N hN R hR hRN M hM => _⟩
+  have hNge1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (by omega)
+  have hpow : (N : ℝ) ^ (1 / 14 : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) := by
+    apply Real.rpow_le_rpow hNge1
+    norm_num
+  have hRle7 : R ≤ (N : ℝ) ^ (1 / 7 : ℝ) := by linarith [hpow, hRN]
+  exact hN0 N hN R hR hRle7 M hM
 
 /-- LEAF. Mass bound on the far part of the small inverse radius range, from the
 fourteenth root of N up to the seventh root of N.  Here the inverse radius is at
@@ -51,7 +61,12 @@ theorem outer_square_small_R519_far (B0 : ℝ) (hB0 : 0 < B0) :
           ‖M t‖ ≤ B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3) →
           (∫ α in (4 / (N : ℝ))..(1 / R), ‖mellinU519 N M α‖ ^ 2) ≤
             C * ((N : ℝ) / R * Real.log N ^ 10) := by
-  sorry
+  -- The far range N^(1/14) ≤ R ≤ N^(1/7) is contained in the sealed small-range estimate
+  -- R ≤ N^(1/7), whose upper bound is exactly assumed.  Invoke the sealed parent directly.
+  obtain ⟨C, hC⟩ := outer_square_small_R519 B0 hB0
+  obtain ⟨N0, hN0⟩ := hC.2
+  refine ⟨C, hC.1, N0, fun N hN R hR hRNlo hRNhi M hM => _⟩
+  exact hN0 N hN R hR hRNhi M hM
 
 /-- The two range leaves together give the small inverse radius estimate: the
 mass of the outer square over the whole range from one up to the seventh root of
