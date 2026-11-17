@@ -503,6 +503,86 @@
    "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_principal_log_weight_sq_window_pos.lean",
    "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
    "seconds": 55
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_very_low_real_zero_card_le_one.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 24
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Decomp292b.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Decomp556b.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 138
+  },
+  {
+   "file": "LeanLab/LeanLab/LPZ2007/Repaired.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 47
+  },
+  {
+   "file": "LeanLab/LeanLab/LZCesaroShort/DecompJ330.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 18
+  },
+  {
+   "file": "LeanLab/LeanLab/LZPowersOfTwo/Burst8Lemma4.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 174
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp316a.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 57
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp316c.lean",
+   "result": "0 closed of 5 declarations, 0 of 5 sites named a tactic, 0 errors",
+   "seconds": 26
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp489f.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 47
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp548d.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 39
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp567a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 176
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp568a.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 428
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/SPLIT_jutila_density481.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/SPLIT_real_exceptional_conductor481.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_major_eq_neg_minor.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_short_interval_mean_decay_exceptional.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 2 errors, first: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHeartbeats <num>` to set the limit. Hint: Add",
+   "seconds": 165
   }
  ],
  "summary": {
@@ -510,7 +590,7 @@
   "declarations_closed": 2,
   "sites": 2,
   "skipped": 3,
-  "seconds": 8714
+  "seconds": 10059
  },
  "selftest": {
   "ok": true,
