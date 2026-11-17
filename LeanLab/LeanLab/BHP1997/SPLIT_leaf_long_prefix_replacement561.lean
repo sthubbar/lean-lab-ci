@@ -28,6 +28,29 @@ theorem leaf_long_arc_decomposition561 (ε D : ℝ) :
             ∫ s in (-(Real.log x ^ (4 * D) / (q * length512 ε x)))..
                 (Real.log x ^ (4 * D) / (q * length512 ε x)),
               integrand512 ε x (a x) (b x) N ((r : ℝ) / q + s) := by
+  refine ⟨Real.exp 1, fun x hx a b N => ?_⟩
+  have hx1 : 1 ≤ x := by
+    have h : (1 : ℝ) ≤ Real.exp 1 := by
+      have := Real.one_lt_exp_iff.mpr (by norm_num : (0 : ℝ) < 1)
+      linarith
+    linarith
+  have hlogpos : 0 < Real.log x := Real.log_pos (by linarith)
+  have hLpos : 0 < length512 ε x := by
+    unfold length512
+    exact Real.rpow_pos_of_pos (by linarith) _
+  have hL_nonneg : 0 ≤ length512 ε x := le_of_lt hLpos
+  have hlog_nonneg : 0 ≤ Real.log x := le_of_lt hlogpos
+  set Q := min (order512 ε x) ⌊Real.log x ^ (2 * D)⌋₊ with hQ
+  set W : ℕ → ℝ := fun q => Real.log x ^ (4 * D) / ((q : ℝ) * length512 ε x) with hW
+  have hW_nonneg : ∀ q, 0 ≤ W q := by
+    intro q
+    rw [hW]
+    refine div_nonneg (Real.rpow_nonneg hlog_nonneg _) ?_
+    refine mul_nonneg (Nat.cast_nonneg _) hL_nonneg
+  have h_periodic : ∀ t : ℝ, integrand512 ε x (a x) (b x) N (t + 1) = integrand512 ε x (a x) (b x) N t := by
+    intro t
+    unfold integrand512 polynomial512
+    simp [fourier_add, AddCircle.add_comm]
   sorry
 
 /-- LEAF. Order domination step.  The Farey order of the major arcs grows like the
@@ -37,7 +60,72 @@ the cutoff, so that the union of arcs is taken over the full range of the model 
 This is an elementary threshold on `x`, uniform in the arc parameter. -/
 theorem leaf_long_order_domination561 (ε D : ℝ) (hD : 0 ≤ D) :
     ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ⌊Real.log x ^ (2 * D)⌋₊ ≤ order512 ε x := by
-  sorry
+  set c : ℝ := (11 / 20 + ε) * (2 * (1 / 16 - 1 / 10 ^ 5)) with hc
+  have hcpos : 0 < c := by
+    rw [hc]
+    have h1 : 0 < 11 / 20 + ε := by
+      by_contra! h
+      have : ε ≤ -(11 / 20) := by linarith
+      linarith [hD]
+    have h2 : 0 < 2 * (1 / 16 - 1 / 10 ^ 5) := by norm_num
+    exact mul_pos h1 h2
+  have hc2pos : 0 < c / 2 := by linarith
+  set δ : ℝ := c / (4 * (2 * D + 1)) with hδ
+  have hδpos : 0 < δ := by
+    rw [hδ]
+    refine div_pos hc2pos (by linarith [hD])
+  refine ⟨Real.exp 1, fun x hx => ?_⟩
+  have hx1 : 1 ≤ x := by
+    have : (1 : ℝ) ≤ Real.exp 1 := by
+      have h := Real.one_lt_exp_iff.mpr (by norm_num : (0 : ℝ) < 1)
+      linarith
+    linarith
+  have hxpos : 0 ≤ x := by linarith
+  have hlog_le : Real.log x ≤ x ^ δ / δ := Real.log_le_rpow_div hxpos hδpos
+  have hlog_nonneg : 0 ≤ Real.log x := Real.log_nonneg hx1
+  have hpow_le : Real.log x ^ (2 * D) ≤ (x ^ δ / δ) ^ (2 * D) :=
+    Real.rpow_le_rpow hlog_nonneg hlog_le (by linarith)
+  have hdiv_le : (x ^ δ / δ) ^ (2 * D) ≤ x ^ (δ * (2 * D)) / δ ^ (2 * D) := by
+    rw [div_rpow (Real.rpow_nonneg hxpos _) (by linarith)]
+    have h1 : (x ^ δ) ^ (2 * D) = x ^ (δ * (2 * D)) := by
+      rw [← Real.rpow_mul hxpos]
+      ring
+    rw [h1]
+    exact le_rfl
+  have hxpow_le : x ^ (δ * (2 * D)) ≤ x ^ (c / 2) := by
+    apply Real.rpow_le_rpow hx1 ?_ (by linarith)
+    rw [hδ]
+    have : δ * (2 * D) = c / 4 * (2 * D) / (2 * D + 1) := by ring
+    rw [this]
+    have hpos : 0 < 2 * D + 1 := by linarith
+    have hle : 2 * D / (2 * D + 1) ≤ 1 := by
+      refine (div_le_one ?_).mpr ?_
+      · linarith
+      · linarith
+    nlinarith
+  have hfinal : Real.log x ^ (2 * D) ≤ x ^ (c / 2) := le_trans hpow_le (le_trans hdiv_le hxpow_le)
+  have hfloor_le : (⌊Real.log x ^ (2 * D)⌋₊ : ℝ) ≤ Real.log x ^ (2 * D) :=
+    Nat.floor_le (Real.rpow_nonneg hlog_nonneg _)
+  have horder_lower : (x ^ (c / 2) / 2 : ℝ) ≤ (order512 ε x : ℝ) := by
+    unfold order512
+    have hpos' : 0 ≤ (length512 ε x ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ)) ^ (1 / 2 : ℝ) / 2 := by
+      positivity
+    have := Nat.floor_le hpos'
+    have hlength : length512 ε x = x ^ (11 / 20 + ε) := rfl
+    rw [hlength] at this
+    have hcalc : (x ^ (11 / 20 + ε)) ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ) = x ^ c := by
+      rw [← Real.rpow_mul hxpos]
+      rw [hc]
+      ring
+    rw [hcalc] at this
+    have hsqrt : (x ^ c) ^ (1 / 2 : ℝ) = x ^ (c / 2) := by
+      rw [← Real.rpow_mul hxpos]
+      ring
+    rw [hsqrt] at this
+    exact this
+  have hfinal' : (⌊Real.log x ^ (2 * D)⌋₊ : ℝ) ≤ (order512 ε x : ℝ) := by
+    linarith
+  exact_mod_cast hfinal'
 
 /-- LEAF. Single arc replacement step.  On one reduced arc of the major arcs, the
 actual long polynomial may be replaced by its principal model: the character expansion
@@ -113,7 +201,131 @@ theorem leaf_long_model_summation561 (ε D : ℝ) (hD : 0 ≤ D) :
           longPrincipal561 ε D x (b x) u N‖ ≤
         max 1 C₀ * Real.log x ^ (-A) *
           ∑ m ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊, ‖b x m‖ := by
-  sorry
+  refine ⟨Real.exp 1, fun x hx => ?_⟩
+  have hx1 : 1 ≤ x := by
+    have h : (1 : ℝ) ≤ Real.exp 1 := by
+      have := Real.one_lt_exp_iff.mpr (by norm_num : (0 : ℝ) < 1)
+      linarith
+    linarith
+  have hlogpos : 0 < Real.log x := Real.log_pos (by linarith)
+  have hlog_nonneg : 0 ≤ Real.log x := le_of_lt hlogpos
+  intro a b u A C₀ N hA hord hN hbound
+  set Q := ⌊Real.log x ^ (2 * D)⌋₊ with hQ
+  set L := length512 ε x with hL
+  set W : ℕ → ℝ := fun q => Real.log x ^ (4 * D) / ((q : ℝ) * L) with hW
+  set M : ℝ := ∑ m ∈ Finset.Ioc ⌊L⌋₊ ⌊2 * L⌋₊, ‖b x m‖ with hM
+  have hM_nonneg : 0 ≤ M := Finset.sum_nonneg (fun m _ => norm_nonneg _)
+  have hLpos : 0 < L := by
+    rw [hL, length512]
+    exact Real.rpow_pos_of_pos (by linarith) _
+  have h_logpow_nonneg : ∀ (e : ℝ), 0 ≤ Real.log x ^ e := fun e => Real.rpow_nonneg hlog_nonneg e
+  unfold longPrincipal561
+  have h_diff : (∑ q ∈ Finset.Icc 1 Q,
+      ∑ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q),
+        ∫ s in (-(W q))..(W q), integrand512 ε x (a x) (b x) N ((r : ℝ) / q + s)) -
+      (u / Real.log x *
+        ∑ q ∈ Finset.Icc 1 Q,
+          (ArithmeticFunction.moebius q : ℂ) / (Nat.totient q : ℂ) *
+            ∑ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q),
+              ∫ t in (-(W q))..(W q),
+                polynomial512 (Finset.Ioc ⌊x - 2 * L⌋₊ ⌊x⌋₊) (fun _ => 1) t *
+                polynomial512 (Finset.Ioc ⌊L⌋₊ ⌊2 * L⌋₊) (b x) ((r : ℝ) / q + t) *
+                @fourier 1 (-(N : ℤ)) ((((r : ℝ) / q + t) : ℝ) : AddCircle (1 : ℝ))) =
+      ∑ q ∈ Finset.Icc 1 Q,
+        ∑ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q),
+          ((∫ s in (-(W q))..(W q), integrand512 ε x (a x) (b x) N ((r : ℝ) / q + s)) -
+            (u / Real.log x) * ((ArithmeticFunction.moebius q : ℂ) / (Nat.totient q : ℂ)) *
+              ∫ s in (-(W q))..(W q),
+                polynomial512 (Finset.Ioc ⌊x - 2 * L⌋₊ ⌊x⌋₊) (fun _ => 1) s *
+                polynomial512 (Finset.Ioc ⌊L⌋₊ ⌊2 * L⌋₊) (b x) ((r : ℝ) / q + s) *
+                @fourier 1 (-(N : ℤ)) ((((r : ℝ) / q + s) : ℝ) : AddCircle (1 : ℝ))) := by
+    simp [Finset.sum_sub_distrib, Finset.mul_sum, mul_assoc]
+  rw [h_diff]
+  calc
+    ‖∑ q ∈ Finset.Icc 1 Q,
+        ∑ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q), _‖ ≤
+        ∑ q ∈ Finset.Icc 1 Q,
+          ∑ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q),
+            ‖(∫ s in (-(W q))..(W q), integrand512 ε x (a x) (b x) N ((r : ℝ) / q + s)) -
+              (u / Real.log x) * ((ArithmeticFunction.moebius q : ℂ) / (Nat.totient q : ℂ)) *
+                ∫ s in (-(W q))..(W q), _‖ := by
+      refine le_trans (norm_sum_le _ _) ?_
+      apply Finset.sum_le_sum
+      intro q hq
+      exact norm_sum_le _ _
+    _ ≤ ∑ q ∈ Finset.Icc 1 Q,
+          ∑ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q),
+            (C₀ * Real.log x ^ (-(A + 6 * D + 3)) * (W q) * M) := by
+      apply Finset.sum_le_sum
+      intro q hq
+      have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq).1
+      have hq_le : (q : ℝ) ≤ Real.log x ^ (2 * D) := by
+        have hqQ : q ≤ Q := (Finset.mem_Icc.mp hq).2
+        have hQ_le : (Q : ℝ) ≤ Real.log x ^ (2 * D) := Nat.floor_le (Real.rpow_nonneg hlog_nonneg _)
+        exact le_trans (by exact_mod_cast hqQ) hQ_le
+      apply Finset.sum_le_sum
+      intro r hr
+      exact hbound q hq1 hq_le r hr
+    _ = C₀ * Real.log x ^ (-(A + 6 * D + 3)) * M *
+        (∑ q ∈ Finset.Icc 1 Q, ((Finset.Icc 1 q).filter (fun r => Nat.Coprime r q)).card *
+          (Real.log x ^ (4 * D) / ((q : ℝ) * L))) := by
+      simp [hW, hM, Finset.mul_sum, Finset.sum_mul, mul_assoc, mul_comm, mul_left_comm]
+    _ ≤ C₀ * Real.log x ^ (-(A + 6 * D + 3)) * M *
+        (∑ q ∈ Finset.Icc 1 Q, (q : ℝ) * (Real.log x ^ (4 * D) / ((q : ℝ) * L))) := by
+      refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+      apply Finset.sum_le_sum
+      intro q hq
+      have hcard : ((Finset.Icc 1 q).filter (fun r => Nat.Coprime r q)).card ≤ q :=
+        Finset.card_filter_le _ _
+      have hqpos : 0 ≤ (q : ℝ) := Nat.cast_nonneg _
+      have hW_nonneg : 0 ≤ Real.log x ^ (4 * D) / ((q : ℝ) * L) := by
+        refine div_nonneg (h_logpow_nonneg _) (mul_nonneg hqpos (le_of_lt hLpos))
+      nlinarith [mul_le_mul_of_nonneg_right (by exact_mod_cast hcard) hW_nonneg]
+    _ = C₀ * Real.log x ^ (-(A + 6 * D + 3)) * M *
+        (∑ q ∈ Finset.Icc 1 Q, Real.log x ^ (4 * D) / L) := by
+      apply congrArg _
+      apply Finset.sum_congr rfl
+      intro q hq
+      have hqpos : (q : ℝ) ≠ 0 := by
+        have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq).1
+        exact Nat.cast_ne_zero.mpr (by omega)
+      field_simp [hqpos]
+    _ = C₀ * Real.log x ^ (-(A + 6 * D + 3)) * M *
+        ((Q : ℝ) * (Real.log x ^ (4 * D) / L)) := by
+      simp [Finset.sum_const, Finset.card_Icc, mul_comm]
+    _ ≤ max 1 C₀ * Real.log x ^ (-A) * M := by
+      have hQ_le' : (Q : ℝ) ≤ Real.log x ^ (2 * D) :=
+        Nat.floor_le (Real.rpow_nonneg hlog_nonneg _)
+      have hL_ge_one : 1 ≤ L := by
+        rw [hL, length512]
+        exact Real.one_le_rpow hx1 (by
+          by_contra! h
+          have : ε ≤ -(11 / 20) := by linarith
+          linarith [hD])
+      have hcalc : Real.log x ^ (-(A + 6 * D + 3)) * Real.log x ^ (2 * D) * Real.log x ^ (4 * D) =
+          Real.log x ^ (-A - 3) := by
+        rw [← Real.rpow_add hlogpos, ← Real.rpow_add hlogpos]
+        congr 1
+        ring
+      have hlog_le : Real.log x ^ (-A - 3) ≤ Real.log x ^ (-A) := by
+        refine Real.rpow_le_rpow_of_exponent_le hlog_nonneg ?_
+        linarith
+      calc
+        C₀ * Real.log x ^ (-(A + 6 * D + 3)) * M * ((Q : ℝ) * (Real.log x ^ (4 * D) / L)) ≤
+            C₀ * Real.log x ^ (-(A + 6 * D + 3)) * M * (Real.log x ^ (2 * D) * (Real.log x ^ (4 * D) / L)) := by
+          gcongr
+          exact hQ_le'
+        _ = C₀ * M * (Real.log x ^ (-(A + 6 * D + 3)) * Real.log x ^ (2 * D) * Real.log x ^ (4 * D)) / L := by ring
+        _ = C₀ * M * Real.log x ^ (-A - 3) / L := by rw [hcalc]
+        _ ≤ C₀ * M * Real.log x ^ (-A - 3) := by
+          refine (div_le_one hLpos).trans ?_
+        _ ≤ C₀ * M * Real.log x ^ (-A) := by
+          gcongr
+          exact hlog_le
+        _ ≤ max 1 C₀ * Real.log x ^ (-A) * M := by
+          rw [mul_assoc]
+          gcongr
+          exact le_max_left _ _
 
 /-- The single frequency long coefficient replacement, assembled from the arc
 decomposition, the order domination, the single arc replacement and the modulus
