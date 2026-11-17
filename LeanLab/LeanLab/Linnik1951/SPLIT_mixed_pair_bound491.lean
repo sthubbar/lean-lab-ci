@@ -31,7 +31,35 @@ theorem mixed_pair_reduction491 (N q : ℕ) (n : ℤ) (χ : DirichletCharacter �
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
           ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
             ‖characterPrime280 χ N z‖) := by
-  sorry
+  have hG : ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ ≤ 1 := mixed_principal_gauss491 q hq
+  have h₁ : ‖characterPair491 N q n 1 χ‖ ≤ (‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ /
+      (q.totient : ℝ) ^ 2) *
+    (∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+      (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+      ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
+        ‖characterPrime280 χ N z‖) := by
+    apply characterPair_principal_le555
+  have h₂ : characterPair491 N q n χ 1 = characterPair491 N q n 1 χ := by
+    rw [characterPair_comm555]
+  calc
+    ‖characterPair491 N q n 1 χ + characterPair491 N q n χ 1‖ =
+        ‖characterPair491 N q n 1 χ + characterPair491 N q n 1 χ‖ := by rw [h₂]
+    _ = ‖(2 : ℂ) * characterPair491 N q n 1 χ‖ := by ring_nf
+    _ = 2 * ‖characterPair491 N q n 1 χ‖ := by
+      simp [norm_mul, norm_two]
+    _ ≤ 2 * ((‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ /
+        (q.totient : ℝ) ^ 2) *
+      (∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+        ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
+          ‖characterPrime280 χ N z‖)) := by
+      gcongr
+    _ = 2 * (‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ /
+        (q.totient : ℝ) ^ 2) *
+      (∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+        ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
+          ‖characterPrime280 χ N z‖) := by ring
 
 /-- LEAF. Coefficient step of equation 5.5, Gauss half. The conjugate Gauss
 coefficient of any character at a modulus is at most four times the totient of
@@ -40,7 +68,45 @@ positive modulus is at least a quarter of the square root of the modulus. This
 is a bound in the modulus alone, with no frequency, no `N` and no logarithm. -/
 theorem gauss_coeff_le_totient491 (q : ℕ) (χ : DirichletCharacter ℂ q) :
     ‖conjugateGauss491 q χ‖ ≤ 4 * (q.totient : ℝ) := by
-  sorry
+  have h₁ : ‖conjugateGauss491 q χ‖ ≤ (q.totient : ℝ) := by
+    calc
+      ‖conjugateGauss491 q χ‖ = ‖(∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+          χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I))‖ := by
+        rw [conjugateGauss491]
+        rw [norm_star]
+      _ ≤ ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+          ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ := by
+        apply Finset.norm_sum_le
+      _ ≤ ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ) := by
+        apply Finset.sum_le_sum
+        intro a ha
+        have h₁ : ‖χ a‖ ≤ 1 := DirichletCharacter.norm_le_one χ a
+        have h₂ : ‖Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ = 1 := by
+          rw [Complex.norm_exp]
+          simp [Complex.ext_iff, pow_two]
+          <;> norm_num
+        calc
+          ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ =
+            ‖χ a‖ * ‖Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ := by
+            rw [norm_mul]
+          _ ≤ 1 * 1 := by gcongr
+          _ = 1 := by norm_num
+      _ = (q.totient : ℝ) := by
+        have h₁ : (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ)) =
+            (q.totient : ℝ) := by
+          calc
+            (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ)) =
+                ((range q).filter (fun a => Nat.Coprime a q)).card := by
+              simp [Finset.sum_const, nsmul_eq_mul, mul_one]
+              <;> norm_cast
+            _ = (q.totient : ℝ) := by
+              rw [Nat.totient_eq_card_coprime]
+              <;> norm_cast
+        rw [h₁]
+  have h₂ : (q.totient : ℝ) ≤ 4 * (q.totient : ℝ) := by
+    have h : (0 : ℝ) ≤ (q.totient : ℝ) := by positivity
+    nlinarith
+  linarith
 
 /-- LEAF. Coefficient step of equation 5.5, phase half. The residue phase of any
 character at a positive modulus is at most the totient of that modulus, since it
@@ -49,7 +115,41 @@ bound of the phase; it carries no frequency dependence beyond the fixed
 frequency and no `N`. -/
 theorem residue_phase_le_totient491 (q : ℕ) (n : ℤ) (χ : DirichletCharacter ℂ q) :
     ‖residuePhase555 q n χ‖ ≤ (q.totient : ℝ) := by
-  sorry
+  have h₁ : ‖residuePhase555 q n χ‖ ≤ (q.totient : ℝ) := by
+    calc
+      ‖residuePhase555 q n χ‖ = ‖(∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+          χ a * Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I))‖ := by
+        rw [residuePhase555]
+      _ ≤ ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+          ‖χ a * Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ := by
+        apply Finset.norm_sum_le
+      _ ≤ ∑ a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ) := by
+        apply Finset.sum_le_sum
+        intro a ha
+        have h₁ : ‖χ a‖ ≤ 1 := DirichletCharacter.norm_le_one χ a
+        have h₂ : ‖Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ = 1 := by
+          rw [Complex.norm_exp]
+          simp [Complex.ext_iff, pow_two]
+          <;> norm_num
+        calc
+          ‖χ a * Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ =
+            ‖χ a‖ * ‖Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ := by
+            rw [norm_mul]
+          _ ≤ 1 * 1 := by gcongr
+          _ = 1 := by norm_num
+      _ = (q.totient : ℝ) := by
+        have h₁ : (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ)) =
+            (q.totient : ℝ) := by
+          calc
+            (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ)) =
+                ((range q).filter (fun a => Nat.Coprime a q)).card := by
+              simp [Finset.sum_const, nsmul_eq_mul, mul_one]
+              <;> norm_cast
+            _ = (q.totient : ℝ) := by
+              rw [Nat.totient_eq_card_coprime]
+              <;> norm_cast
+        rw [h₁]
+  exact h₁
 
 /-- LEAF. Mass step of equation 5.5 at the totient scale. For every nonprincipal
 character the unsigned mixed mass of the principal character series against that
