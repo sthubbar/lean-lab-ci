@@ -5,6 +5,7 @@ Task202 isolates two cited analytic source leaves. Both remain open.
 The original theta and prime-counting leaves are conditional assemblies.
 No unconditional proof of a cited theta input is claimed.
 -/
+import LeanLab.RieselVaughan1983.Decomp600
 import LeanLab.RieselVaughan1983.Lemma8
 import LeanLab.RieselVaughan1983.Lemma6Theta
 import LeanLab.Common.ThetaWindowDusart
@@ -371,7 +372,8 @@ CITED analytic input. Unproved here. Consumers are CONDITIONAL ON this leaf. -/
 theorem rs1975_theta_lower_initial (x : ℝ) (hx : 678407 ≤ x)
     (hxD : x < 908994923) :
     x - x / (40 * log x) < θ x := by
-  sorry
+  -- CONDITIONAL ON the four explicit source leaves in Task600.
+  exact Task600.rs1975_theta_lower_initial_supply x hx hxD
 
 /-- The cited Rosser and Schoenfeld input reduces to a bounded initial interval.
 CONDITIONAL ON the supplied Dusart bound and initial theta bound. -/
