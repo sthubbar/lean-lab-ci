@@ -7,10 +7,10 @@ open LeanLab Task71.Paper Decomp270a
 def qsF864 : List ℕ := [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47]
 
 /-- LEAF Length bound for the first eighth covering list -/
-theorem leaf_len_F864 : qsF864.length ≤ 15 := by sorry
+theorem leaf_len_F864 : qsF864.length ≤ 15 := by decide
 
 /-- LEAF Primality of the first eighth covering list -/
-theorem leaf_prime_F864 : ∀ q ∈ qsF864, q.Prime := by sorry
+theorem leaf_prime_F864 : ∀ q ∈ qsF864, q.Prime := by decide
 
 /-- LEAF Coverage for the first eighth index range -/
 theorem leaf_cov_F864 : ∀ j : ℕ, j < 31250001 → qsF864.any (fun q => decide (q ≤ 10 ^ 250 + 2 * j ∧ (10 ^ 250 + 2 * j - q).Prime)) = true := by sorry
