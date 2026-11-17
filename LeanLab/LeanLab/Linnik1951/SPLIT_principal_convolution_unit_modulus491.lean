@@ -25,6 +25,73 @@ namespace LeanLab.Linnik1951
 
 open Finset MeasureTheory
 
+/- The model series S one of equation 6.3 has period one: the frequency is an
+integer multiple of the phase. This is the auxiliary form of
+`logFourier_periodic_tail491` of PrincipalTail491, restated here because that
+lemma is private. -/
+private theorem logFourier_periodic_unit491 (N : ℕ) :
+    Function.Periodic (logFourier520 N) 1 := by
+  intro z
+  unfold logFourier520
+  apply tsum_congr
+  intro m
+  congr 1
+  have h : ((-(2 * Real.pi * (z + 1) * m) : ℝ) : ℂ) * Complex.I =
+      ((-(2 * Real.pi * z * m) : ℝ) : ℂ) * Complex.I +
+        ((-(m : ℤ) : ℤ) : ℂ) * (2 * Real.pi * Complex.I) := by
+    push_cast
+    ring
+  rw [h, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+/-- The unimodular phase at an integer frequency has period one. -/
+private theorem phase_periodic_unit491 (n : ℤ) :
+    Function.Periodic (fun z : ℝ =>
+      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) 1 := by
+  intro z
+  dsimp only
+  have h : ((2 * Real.pi * (n : ℝ) * (z + 1) : ℝ) : ℂ) * Complex.I =
+      ((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I +
+        (n : ℂ) * (2 * Real.pi * Complex.I) := by
+    push_cast
+    ring
+  rw [h, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+/-- The exact full period value of the square of the model series, at modulus one.
+The interval is moved to a whole period by the periodicity of the integrand, and
+the coefficient is read off from the Fourier extraction of Decomp520a. -/
+private theorem logFourier_full_period_aux491 (N : ℕ) (hN : 1 ≤ N) (n : ℤ) :
+    (∫ z in (-(1 / 2) : ℝ)..(1 / 2), logFourier520 N z ^ 2 *
+      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) =
+      ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ) := by
+  have hper : Function.Periodic (fun z : ℝ => logFourier520 N z ^ 2 *
+      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) 1 := by
+    intro z
+    have h1 := logFourier_periodic_unit491 N z
+    have h2 := phase_periodic_unit491 n z
+    dsimp only at h2 ⊢
+    rw [h1, h2]
+  have hshift := hper.intervalIntegral_add_eq (-(1 / 2) : ℝ) 0
+  have e1 : (-(1 / 2) : ℝ) + 1 = 1 / 2 := by norm_num
+  rw [e1, zero_add] at hshift
+  rw [hshift]
+  have hmain := logFourier_square_integral520 N hN n
+  have hcongr : (∫ z in (0 : ℝ)..1, logFourier520 N z ^ 2 *
+      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) =
+      ∫ z in (0 : ℝ)..1, logFourier520 N z ^ 2 *
+        Complex.exp (((2 * Real.pi * z * (n : ℝ) : ℝ) : ℂ) * Complex.I) := by
+    apply intervalIntegral.integral_congr
+    intro z _
+    dsimp only
+    rw [show 2 * Real.pi * (n : ℝ) * z = 2 * Real.pi * z * (n : ℝ) by ring]
+  rw [hcongr, hmain]
+  have hconv : logConvolution520 n.toNat = logConvolution1622 n.toNat := rfl
+  rw [hconv]
+  by_cases hn : 0 ≤ n
+  · have hc : (n.toNat : ℝ) = (n : ℝ) := by exact_mod_cast Int.toNat_of_nonneg hn
+    rw [hc]
+  · have hz : n.toNat = 0 := Int.toNat_eq_zero.mpr (by omega)
+    simp [hz, logConvolution1622]
+
 /-- LEAF. The arc comparison step, at unit modulus. The principal square integral over
 the long arc is the square integral of the model series S one over the same arc up to
 the square root error size, with no main term subtracted and no reduced residue twist
@@ -39,7 +106,11 @@ theorem principal_arc_compare_unit491 (hG : LeanLab.DERZ1997.GRH) :
           ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
             logFourier520 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  -- The general statement of the arc comparison, PrincipalArc491, holds for every
+  -- positive modulus q and every residual, so the unit modulus case is its
+  -- restriction: q = 1 and n ≤ N are only extra hypotheses.
+  obtain ⟨C, hC, N0, h⟩ := principal_arc_compare491 hG
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _ n _ => h N hN q hq hqQ n⟩
 
 /-- LEAF. The tail step, at unit modulus. The arc integral of the squared model series
 differs from its full period integral by the two tails of length one half minus the
@@ -55,7 +126,13 @@ theorem logFourier_arc_tail_unit491 :
             logFourier520 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) -
           ∫ z in (-(1 / 2) : ℝ)..(1 / 2), logFourier520 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  -- PrincipalTail491 bounds the arc integral of the model series against its exact
+  -- full period value; the full period value is the identity, so the two tails are
+  -- the reciprocal length term with that constant.
+  obtain ⟨C, hC, N0, h⟩ := logFourier_arc_convolution491
+  refine ⟨C, hC, N0, fun N hN q hq hqQ _ n => ?_⟩
+  have hh := h N hN q hq hqQ n
+  rwa [← logFourier_full_period_aux491 N (by omega) n] at hh
 
 /-- LEAF. The exact full period step, at unit modulus. The full period integral of the
 squared model series against the exponential phase is the exactly damped logarithmic
@@ -67,7 +144,7 @@ one, and no error size appears. -/
 theorem logFourier_full_period_unit491 (N : ℕ) (hN : 1 ≤ N) (n : ℤ) :
     (∫ z in (-(1 / 2) : ℝ)..(1 / 2), logFourier520 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) =
       ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ) := by
-  sorry
+  exact logFourier_full_period_aux491 N hN n
 
 /-- The unit modulus step of the principal convolution estimate, assembled from the
 three leaves. The statement is the sealed one, unchanged: the arc comparison gives the
