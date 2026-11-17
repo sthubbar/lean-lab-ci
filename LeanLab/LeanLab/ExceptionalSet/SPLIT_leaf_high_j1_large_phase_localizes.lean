@@ -76,7 +76,30 @@ theorem leaf_high_j1_strip_index_bounded (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 /
             ∀ b ∈ oddDomain (F γ N ^ (6 * δ)) (F γ N) (calE γ κ N),
               ∀ h : ℤ, |(b - a) - (h : ℝ) / 2| ≤ F γ N ^ (δ - 1) →
                 (|h| : ℝ) ≤ calE γ κ N ^ (3 / 4 : ℝ) := by
-  sorry
+  refine ⟨1, one_pos, fun δ hδ hδ1 => ?_⟩
+  refine ⟨1, one_pos, fun κ hκ _ => ?_⟩
+  obtain ⟨N₀, hN₀⟩ := phase_window_parameters γ δ κ h1 h2 hδ hδ1.le hκ
+  refine ⟨N₀, fun N hN a ha b hb h hh => ?_⟩
+  obtain ⟨-, -, -, -, -, -, -, hheight, hr⟩ := hN₀ N hN
+  have hE0 : 0 < calE γ κ N := Real.exp_pos _
+  have hEp : (0 : ℝ) ≤ calE γ κ N ^ (2 / 3 : ℝ) := Real.rpow_nonneg hE0.le _
+  have haI : a ∈ Set.Icc (-(calE γ κ N ^ (2 / 3 : ℝ))) (calE γ κ N ^ (2 / 3 : ℝ)) := by
+    have h := ha
+    rw [oddDomain, Set.mem_inter_iff] at h
+    exact h.2
+  have hbI : b ∈ Set.Icc (-(calE γ κ N ^ (2 / 3 : ℝ))) (calE γ κ N ^ (2 / 3 : ℝ)) := by
+    have h := hb
+    rw [oddDomain, Set.mem_inter_iff] at h
+    exact h.2
+  obtain ⟨ha1, ha2⟩ := Set.mem_Icc.mp haI
+  obtain ⟨hb1, hb2⟩ := Set.mem_Icc.mp hbI
+  have haa : |a| ≤ calE γ κ N ^ (2 / 3 : ℝ) := abs_le.mpr ⟨by linarith, ha2⟩
+  have hbb : |b| ≤ calE γ κ N ^ (2 / 3 : ℝ) := abs_le.mpr ⟨by linarith, hb2⟩
+  have ht : |b - a| ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) := by
+    calc |b - a| ≤ |b| + |a| := abs_sub b a
+      _ ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) := by linarith
+  exact half_integer_height (calE γ κ N) (b - a) (F γ N ^ (δ - 1)) h hr ht hh hheight
+
 
 /-- Assembly. The two steps above localize the large values of the assigned
 upper block phase. If no half integer is within the strip radius of `b - a`, the
