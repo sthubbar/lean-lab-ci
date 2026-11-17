@@ -59,7 +59,26 @@ theorem upper_slack_split_principal_short_prefix
                 upperDeletedIntegral ω ε + δ : ℝ)) /
               Real.log (x ^ (11 / 20 + ε)))‖ ≤
             C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  refine ⟨4, ?_⟩
+  intro x hx q hq hqx χ hχ t ht
+  have hx1 : (1 : ℝ) ≤ x := by linarith
+  have hY0 : (0 : ℝ) ≤ x ^ (11 / 20 + ε) := Real.rpow_nonneg (by linarith) _
+  -- Every element of the right interval exceeds `x^(11/20+eps)`, hence the prefix is empty.
+  have hempty : (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro m hm
+    rw [rightInterval] at hm
+    obtain ⟨h1, -⟩ := Finset.mem_Ioc.mp hm
+    have h1' : ((⌊x ^ (11 / 20 + ε)⌋₊ : ℕ) : ℝ) + 1 ≤ (m : ℝ) := by
+      have h2 : (⌊x ^ (11 / 20 + ε)⌋₊ + 1 : ℕ) ≤ m := Nat.succ_le_of_lt h1
+      exact_mod_cast h2
+    have hlt : x ^ (11 / 20 + ε) < ((⌊x ^ (11 / 20 + ε)⌋₊ : ℕ) : ℝ) + 1 :=
+      Nat.lt_floor_add_one _
+    intro hmt
+    linarith
+  rw [hempty]
+  simp only [Finset.sum_empty, norm_zero]
+  exact mul_nonneg (mul_nonneg (by norm_num) hY0) (Real.rpow_nonneg (Real.log_nonneg hx1) _)
 
 /-- LEAF: the long-prefix half of the principal character, where the density is actually met. On
 `x ^ (11/20+eps) ≤ t ≤ 2 * x ^ (11/20+eps)` the prefix is the whole right interval and the main term
