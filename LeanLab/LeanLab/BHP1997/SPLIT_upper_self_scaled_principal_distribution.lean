@@ -29,7 +29,7 @@ summand is the constant one, and the character sum reduces to the plain sum of t
 coefficient minus its density. -/
 theorem upper_self_scaled_principal_trivial_character (q m : ℕ) :
     (1 : DirichletCharacter ℂ q) (m : ZMod q) = 1 := by
-  sorry
+  rfl
 
 /-- LEAF: the initial segment is empty below the level. Second step, the easy end of the truncation:
 rightInterval is the interval from the floor of the level Y to the floor of 2Y, so every index in it
@@ -39,7 +39,14 @@ hypotheses hold and the segment is empty. -/
 theorem upper_self_scaled_principal_empty_prefix {ε t x : ℝ} (hε : 0 < ε)
     (ht : t ≤ x ^ (11 / 20 + ε)) :
     (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t) = ∅ := by
-  sorry
+  apply Finset.eq_empty_iff_forall_not_mem.mpr
+  intro m hm
+  have hm' := Finset.mem_filter.mp hm
+  rw [rightInterval, Finset.mem_Ioc] at hm'
+  have hfloor := Nat.lt_floor_add_one (x ^ (11 / 20 + ε))
+  have hcast : ((⌊x ^ (11 / 20 + ε)⌋₊ : ℕ) : ℝ) + 1 ≤ (m : ℝ) := by
+    exact_mod_cast hm'.1
+  linarith
 
 /-- LEAF: the centred prefix bound at the weight scale, with no character present. This is the
 analytic content that the leaf carries: for every A the mass of the coefficient on an initial
