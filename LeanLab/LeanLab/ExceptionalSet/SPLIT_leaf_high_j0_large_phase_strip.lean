@@ -77,7 +77,16 @@ theorem leaf_high_j0_strip_index_bounded (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 /
             ∀ b ∈ oddDomain (F γ N ^ (6 * δ)) (F γ N) (calE γ κ N),
               ∀ h : ℤ, |(b - a) - (h : ℝ) / 2| ≤ F γ N ^ (δ - 1) →
                 (|h| : ℝ) ≤ calE γ κ N ^ (3 / 4 : ℝ) := by
-  sorry
+  refine ⟨1, one_pos, fun δ hδ hδ1 => ?_⟩
+  have hδle : δ ≤ 1 := le_of_lt hδ1
+  refine ⟨1, one_pos, fun κ hκ hκ1 => ?_⟩
+  obtain ⟨N₀, hp⟩ := phase_window_parameters γ δ κ h1 h2 hδ hδle hκ
+  refine ⟨N₀, fun N hN a ha b hb h hgap => ?_⟩
+  obtain ⟨hX, hE, hL, hl, hs, hTX, htw, hheight, hr⟩ := hp N hN
+  have hbt : |b - a| ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) := by
+    apply abs_le.mpr
+    constructor <;> linarith [ha.2.1, ha.2.2, hb.1.2.1, hb.1.2.2]
+  exact half_integer_height (calE γ κ N) (b - a) (F γ N ^ (δ - 1)) h hr hbt hgap hheight
 
 /-- Assembly. The two steps above localize the large values of the assigned
 block phase into the finite union of strips. Suppose `b` is outside the union.
