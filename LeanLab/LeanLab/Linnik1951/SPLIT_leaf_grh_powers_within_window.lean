@@ -43,7 +43,9 @@ summands leave exactly the power `2` over. The `4` in the hypothesis keeps the t
 subtraction `N - 2` away from `0` and `1`. -/
 theorem leaf_shift_even_large {M₀ N : ℕ} (hEven : Even N) (hN : M₀ + 4 < N) :
     Even (N - 2) ∧ M₀ < N - 2 := by
-  sorry
+  obtain ⟨k, rfl⟩ := hEven
+  have hk3 : 3 ≤ k := by omega
+  exact ⟨⟨k - 1, by omega⟩, by omega⟩
 
 /-- LEAF. Step 3, the constant power family. For `1 / 2 ≤ θ` and `4 ≤ N` the family `ν ≡ 1` is a
 family of `K` powers that stays inside the window, `1 ≤ ν i` and `2 ^ (ν i) = 2 ≤ N ^ θ`, and its
@@ -52,7 +54,23 @@ window bound on the individual powers, and it holds for the empty family at `K =
 theorem leaf_constant_family_in_window {θ : ℝ} (hθ : 1 / 2 ≤ θ) {K N : ℕ} (hN : 4 ≤ N) :
     ∃ ν : Fin K → ℕ, (∀ i, 1 ≤ ν i ∧ (2 : ℝ) ^ (ν i) ≤ (N : ℝ) ^ θ) ∧
       ∑ i, 2 ^ (ν i) = 2 * K := by
-  sorry
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by
+    have : (1 : ℕ) ≤ N := by omega
+    exact_mod_cast this
+  have h4N : (4 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hfour : (4 : ℝ) ^ (1 / 2 : ℝ) = 2 := by
+    rw [← Real.sqrt_eq_rpow]
+    norm_num
+  refine ⟨fun _ => 1, ?_, ?_⟩
+  · intro i
+    refine ⟨le_rfl, ?_⟩
+    show (2 : ℝ) ^ (1 : ℕ) ≤ (N : ℝ) ^ θ
+    rw [show (2 : ℝ) ^ (1 : ℕ) = 2 from by norm_num]
+    calc (2 : ℝ) = (4 : ℝ) ^ (1 / 2 : ℝ) := hfour.symm
+      _ ≤ (N : ℝ) ^ (1 / 2 : ℝ) :=
+          Real.rpow_le_rpow (by norm_num) h4N (by norm_num)
+      _ ≤ (N : ℝ) ^ θ := Real.rpow_le_rpow_of_exponent_le hN1 hθ
+  · simp [Finset.sum_const, Finset.card_univ, Nat.mul_comm]
 
 /-- `leaf_grh_powers_within_window` of `SPLIT_linnik_low_bits`, assembled from the three leaves
 above with `K = 1` and `N₀ = M₀ + 4`: the analytic input handles `N - 2`, the shift step keeps
