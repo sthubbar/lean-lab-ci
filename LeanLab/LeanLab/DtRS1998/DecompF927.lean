@@ -16,6 +16,10 @@ Binary Goldbach is open. AI wrote this Lean code.
 -/
 import LeanLab.DtRS1998.SPLIT_leaf_quarter_fourth_250
 
+set_option maxRecDepth 100000
+set_option maxHeartbeats 0
+set_option Elab.async false
+
 namespace LeanLab.DtRS1998.Decomp270b
 
 open LeanLab Task71.Paper Decomp270a
