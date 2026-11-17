@@ -50,7 +50,14 @@ theorem principal_arc_compare_large_modulus491 (hG : LeanLab.DERZ1997.GRH) :
               Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 /
             Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  -- The arc comparison of equation 6.1 is already available in the closure of this
+  -- file: Decomp491b imports PrincipalRoute491, which imports PrincipalArc491, where
+  -- principal_arc_compare491 is proved under the Riemann hypothesis from the mean square
+  -- theorem principal_arc_mean_square491, the principal mass and the model mass.
+  -- It carries no hypothesis on the modulus beyond one over q, and no hypothesis on the
+  -- residual, so the large modulus regime is an instantiation.
+  obtain ⟨C, hC, N0, h⟩ := principal_arc_compare491 hG
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _ _ n _ _ => h N hN q hq hqQ n⟩
 
 /-- LEAF. The full period step of the large modulus case. The arc integral of the
 model series square, with the residual exponential, is the exactly damped logarithmic
@@ -68,7 +75,12 @@ theorem principal_full_period_large_modulus491 :
           ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 /
             ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  -- The full period extension of equations 6.2 and 6.3 is also already available in the
+  -- closure of this file: logFourier_arc_convolution491, proved in PrincipalTail491 with
+  -- constant two and threshold one hundred twenty eight by the decay of the model series,
+  -- carries no hypothesis on the modulus beyond one over q and none on the residual.
+  obtain ⟨C, hC, N0, h⟩ := logFourier_arc_convolution491
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _ _ n _ _ => h N hN q hq hqQ n⟩
 
 /-- The principal convolution estimate at a large modulus, assembled from the two
 case steps. The statement is the sealed one, unchanged. The triangle inequality
