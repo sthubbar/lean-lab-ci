@@ -36,7 +36,52 @@ theorem principal_integral_arc_size_small_residual491 (hG : LeanLab.DERZ1997.GRH
           C * (N : ℝ) * Real.log N ^ 13 *
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
               1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨C, hC, N0, hconv⟩ := logFourier_arc_convolution491
+  refine ⟨C, hC, max N0 129, ?_⟩
+  intro N hN q hq hqQ n hn3
+  have hN0 : N0 < N := lt_of_le_of_lt (le_max_left _ _) hN
+  have hN129 : 129 ≤ N := le_of_lt (lt_of_le_of_lt (le_max_right _ _) hN)
+  have hNr : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (by omega : (1 : ℕ) ≤ N)
+  have hlog : 0 ≤ Real.log N := Real.log_nonneg hNr
+  have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (show 0 < q by omega)
+  have hNpos : (0 : ℝ) < (N : ℝ) := by linarith
+  have hpow : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
+  have hden : (0 : ℝ) < (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) := mul_pos hqpos hpow
+  have hsqrtpos : (0 : ℝ) < Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) :=
+    Real.sqrt_pos.mpr hden
+  have hz : logConvolution1622 n.toNat = 0 :=
+    logConvolution_vanish491 n.toNat (Int.toNat_le.mpr hn3)
+  have hb := hconv N hN0 q hq hqQ n
+  have hsimp : ‖(∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+          (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+        logFourier520 N z ^ 2 *
+          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) -
+      ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ)‖ =
+      ‖∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+          (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+        logFourier520 N z ^ 2 *
+          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ := by
+    rw [hz]
+    simp
+  rw [hsimp] at hb
+  have hle : 1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
+        1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
+    have h : 0 < 1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by positivity
+    linarith
+  have hfac : (0 : ℝ) ≤ C * (N : ℝ) * Real.log N ^ 13 := by positivity
+  have hE1 : C * (N : ℝ) * Real.log N ^ 13 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      C * (N : ℝ) * Real.log N ^ 13 *
+        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
+          1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
+    have hstep := mul_le_mul_of_nonneg_left hle hfac
+    calc C * (N : ℝ) * Real.log N ^ 13 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))
+        = C * (N : ℝ) * Real.log N ^ 13 *
+            (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by ring
+      _ ≤ C * (N : ℝ) * Real.log N ^ 13 *
+            (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
+              1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := hstep
+  linarith [hb, hE1]
 
 /-- LEAF. The unit modulus step at a residual of at least four. At modulus one the
 reduced residue set is the single residue zero, the principal character series is the
