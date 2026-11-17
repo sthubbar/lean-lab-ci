@@ -50,6 +50,137 @@ theorem principal_log_weight_tail_neg_zeta_three_halves (y : ℝ) :
     ‖logDeriv riemannZeta ((((3 / 2 : ℝ)) : ℂ) + y * Complex.I)‖ ≤ 19 / 10 := by
   sorry
 
+/-! ### Auxiliary lemmas for the elementary tail integral
+
+`(log x + 7) ^ 2 / x ^ 2` has the primitive `-((log x) ^ 2 + 16 log x + 65) / x` on the
+positive axis, because `P - P' = (log x + 7) ^ 2` for `P = A ^ 2 + 16 A + 65` and `A = log x`.
+The primitive tends to zero at infinity, the squared envelope is dominated by `121 / x ^ (3/2)`,
+and `log 5 ≤ 1.61`, so the integral on `(5, ∞)` is at most `(1.61 ^ 2 + 16 * 1.61 + 65) / 5 < 20`.
+-/
+
+/-- `log 5 ≤ 1.61`. -/
+private theorem log_five_le_tail_neg : Real.log 5 ≤ 1.61 := by
+  rw [Real.log_le_iff_le_exp (by norm_num)]
+  calc (5 : ℝ) ≤ ∑ i ∈ Finset.range 11, (1.61 : ℝ) ^ i / (i.factorial : ℝ) := by
+        norm_num [Finset.sum_range_succ, Nat.factorial]
+    _ ≤ Real.exp 1.61 := Real.sum_le_exp_of_nonneg (by norm_num) _
+
+/-- The primitive of `(log x + 7) ^ 2 / x ^ 2` on the positive axis. -/
+private theorem hasDerivAt_tail_neg_primitive (x : ℝ) (hx : 0 < x) :
+    HasDerivAt (fun y : ℝ => -((Real.log y) ^ 2 + 16 * Real.log y + 65) / y)
+      ((Real.log x + 7) ^ 2 / x ^ 2) x := by
+  have hL : HasDerivAt (fun y : ℝ => Real.log y) x⁻¹ x := Real.hasDerivAt_log hx.ne'
+  have hmul : HasDerivAt (fun y : ℝ => Real.log y * Real.log y)
+      (x⁻¹ * Real.log x + Real.log x * x⁻¹) x := hL.mul hL
+  have hN : HasDerivAt (fun y : ℝ => Real.log y * Real.log y + 16 * Real.log y + 65)
+      (x⁻¹ * Real.log x + Real.log x * x⁻¹ + 16 * x⁻¹) x := by
+    have h1 : HasDerivAt (fun y : ℝ => Real.log y * Real.log y + 16 * Real.log y)
+        (x⁻¹ * Real.log x + Real.log x * x⁻¹ + 16 * x⁻¹) x :=
+      hmul.add (hL.const_mul 16)
+    exact h1.add_const 65
+  have hinv : HasDerivAt (fun y : ℝ => y⁻¹) (-(x ^ 2)⁻¹) x := hasDerivAt_inv hx.ne'
+  have h := hN.neg.mul hinv
+  have hxne : x ≠ 0 := hx.ne'
+  convert h using 1
+  · funext y
+    simp only [Pi.mul_apply, Pi.neg_apply]
+    ring
+  · field_simp
+    simp only [Pi.neg_apply, Pi.add_apply, Pi.mul_apply]
+    ring
+
+/-- The primitive tends to `0` at infinity. -/
+private theorem tendsto_tail_neg_primitive :
+    Tendsto (fun y : ℝ => -((Real.log y) ^ 2 + 16 * Real.log y + 65) / y) atTop (𝓝 0) := by
+  have h12 : Tendsto (fun y : ℝ => Real.log y / y ^ (1 / 2 : ℝ)) atTop (𝓝 0) :=
+    (isLittleO_log_rpow_atTop (r := (1 / 2 : ℝ)) (by norm_num)).tendsto_div_nhds_zero
+  have h1 : Tendsto (fun y : ℝ => Real.log y / y) atTop (𝓝 0) := by
+    simpa using (isLittleO_log_rpow_atTop (r := (1 : ℝ)) (by norm_num)).tendsto_div_nhds_zero
+  have hs : Tendsto (fun y : ℝ => (Real.log y) ^ 2 / y) atTop (𝓝 0) := by
+    have h2 : Tendsto (fun y : ℝ => (Real.log y / y ^ (1 / 2 : ℝ)) ^ 2) atTop (𝓝 0) := by
+      simpa using h12.pow 2
+    refine h2.congr' ?_
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with y hy
+    rw [div_pow, ← Real.sqrt_eq_rpow, Real.sq_sqrt (le_of_lt hy)]
+  have hinv : Tendsto (fun y : ℝ => y⁻¹) atTop (𝓝 0) := tendsto_inv_atTop_zero
+  have hev : (fun y : ℝ => -((Real.log y) ^ 2 + 16 * Real.log y + 65) / y)
+      =ᶠ[atTop] fun y =>
+        -((Real.log y) ^ 2 / y) - 16 * (Real.log y / y) - 65 * y⁻¹ := by
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with y hy
+    field_simp
+    ring
+  rw [Filter.tendsto_congr' hev]
+  have hfin := ((hs.neg).sub (h1.const_mul 16)).sub (hinv.const_mul 65)
+  simpa using hfin
+
+/-- Integrability of the squared envelope on `(5, ∞)`, dominated by `121 / x ^ (3/2)`. -/
+private theorem integrableOn_tail_neg_envelope :
+    IntegrableOn (fun x : ℝ => (Real.log x + 7) ^ 2 / x ^ 2) (Set.Ioi 5) := by
+  have hmaj : IntegrableOn (fun x : ℝ => 121 * x ^ (-(3 / 2) : ℝ)) (Set.Ioi 5) :=
+    (integrableOn_Ioi_rpow_of_lt (by norm_num : (-(3 / 2) : ℝ) < -1)
+      (by norm_num : (0 : ℝ) < 5)).const_mul 121
+  have hcont : ContinuousOn (fun x : ℝ => (Real.log x + 7) ^ 2 / x ^ 2) (Set.Ioi (5 : ℝ)) := by
+    apply ContinuousOn.div
+    · refine ContinuousOn.pow ?_ 2
+      exact (Real.continuousOn_log.mono (fun y hy => by
+        simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+        linarith [Set.mem_Ioi.mp hy])).add continuousOn_const
+    · exact ContinuousOn.pow continuousOn_id 2
+    · intro x hx
+      have hx0 : (0 : ℝ) < x := by linarith [Set.mem_Ioi.mp hx]
+      positivity
+  refine hmaj.mono' (hcont.aestronglyMeasurable measurableSet_Ioi) ?_
+  filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+  have hx5 : (5 : ℝ) < x := Set.mem_Ioi.mp hx
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hx1 : (1 : ℝ) ≤ x ^ (1 / 4 : ℝ) := Real.one_le_rpow (by linarith) (by norm_num)
+  have hlog : Real.log x ≤ 4 * x ^ (1 / 4 : ℝ) := by
+    have hh := Real.log_le_rpow_div (le_of_lt hx0) (by norm_num : (0 : ℝ) < 1 / 4)
+    have h2 : x ^ (1 / 4 : ℝ) / (1 / 4) = 4 * x ^ (1 / 4 : ℝ) := by ring
+    rwa [h2] at hh
+  have hpos : (0 : ℝ) ≤ Real.log x + 7 := by
+    have := Real.log_pos (by linarith : (1 : ℝ) < x)
+    linarith
+  have hbound : Real.log x + 7 ≤ 11 * x ^ (1 / 4 : ℝ) := by linarith
+  have hsq : (Real.log x + 7) ^ 2 ≤ 121 * x ^ (1 / 2 : ℝ) := by
+    have h11 : (0 : ℝ) ≤ 11 * x ^ (1 / 4 : ℝ) := by positivity
+    have e : (11 * x ^ (1 / 4 : ℝ)) ^ 2 = 121 * x ^ (1 / 2 : ℝ) := by
+      rw [mul_pow,
+        show (x ^ (1 / 4 : ℝ)) ^ 2 = x ^ (1 / 2 : ℝ) by
+          rw [sq, ← Real.rpow_add hx0]
+          norm_num]
+      norm_num
+    nlinarith
+  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), Real.rpow_neg (le_of_lt hx0)]
+  have hx2 : (0 : ℝ) < x ^ 2 := by positivity
+  have e2 : x ^ 2 = x ^ (3 / 2 : ℝ) * x ^ (1 / 2 : ℝ) := by
+    rw [← Real.rpow_add hx0]
+    norm_num
+  rw [div_le_iff₀ hx2, e2]
+  have e3 : 121 * (x ^ (3 / 2 : ℝ))⁻¹ * (x ^ (3 / 2 : ℝ) * x ^ (1 / 2 : ℝ))
+      = 121 * x ^ (1 / 2 : ℝ) := by
+    field_simp
+  rw [e3]
+  exact hsq
+
+/-- `∫_5^∞ (log x + 7)^2 / x^2 ≤ 20`. -/
+private theorem integral_Ioi_five_tail_neg_envelope :
+    ∫ x in Set.Ioi (5 : ℝ), (Real.log x + 7) ^ 2 / x ^ 2 ≤ 20 := by
+  have hderiv : ∀ x ∈ Set.Ici (5 : ℝ),
+      HasDerivAt (fun y : ℝ => -((Real.log y) ^ 2 + 16 * Real.log y + 65) / y)
+        ((Real.log x + 7) ^ 2 / x ^ 2) x :=
+    fun x hx => hasDerivAt_tail_neg_primitive x (by linarith [Set.mem_Ici.mp hx])
+  have key := integral_Ioi_of_hasDerivAt_of_tendsto' hderiv integrableOn_tail_neg_envelope
+    tendsto_tail_neg_primitive
+  rw [key]
+  have hlog := log_five_le_tail_neg
+  have hpos5 : (0 : ℝ) < Real.log 5 := Real.log_pos (by norm_num)
+  have e : (0 : ℝ) - -((Real.log 5) ^ 2 + 16 * Real.log 5 + 65) / 5
+      = ((Real.log 5) ^ 2 + 16 * Real.log 5 + 65) / 5 := by ring
+  rw [e]
+  rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 5)]
+  nlinarith
+
 /-- LEAF. The elementary integral. The envelope squared over `t ^ 2` is integrable on the
 half line `t < -5`, and its integral there is at most twenty. The integral is elementary,
 `∫ t in (5, ∞), (log t + 7) ^ 2 / t ^ 2 = (log 5 ^ 2 + 16 log 5 + 65) / 5`, and that is
@@ -58,7 +189,30 @@ the finiteness to compare the two integrands, the value to add up the budget. -/
 theorem principal_log_weight_tail_neg_majorant_integral :
     IntegrableOn (fun t : ℝ => (Real.log (-t) + 7) ^ 2 / t ^ 2) (Set.Iio (-5)) ∧
       (∫ t in Set.Iio (-5 : ℝ), (Real.log (-t) + 7) ^ 2 / t ^ 2) ≤ 20 := by
-  sorry
+  have hA : MeasurableEmbedding (fun x : ℝ => -x) :=
+    (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
+  have hpre : (fun x : ℝ => -x) ⁻¹' (Set.Ioi (5 : ℝ)) = Set.Iio (-5) := by
+    ext x
+    simp only [Set.mem_preimage, Set.mem_Ioi, Set.mem_Iio]
+    constructor <;> intro h <;> linarith
+  have hint : IntegrableOn (fun t : ℝ => (Real.log (-t) + 7) ^ 2 / t ^ 2) (Set.Iio (-5)) := by
+    have hmap := hA.integrableOn_map_iff (μ := volume)
+      (f := fun x : ℝ => (Real.log x + 7) ^ 2 / x ^ 2) (s := Set.Ioi (5 : ℝ))
+    rw [Measure.map_neg_eq_self (volume : Measure ℝ), hpre] at hmap
+    refine (hmap.mp integrableOn_tail_neg_envelope).congr_fun (fun x _ => ?_) measurableSet_Iio
+    simp only [Function.comp_apply, neg_sq]
+  refine ⟨hint, ?_⟩
+  have hsub : (∫ t in Set.Iio (-5 : ℝ), (Real.log (-t) + 7) ^ 2 / t ^ 2)
+      = ∫ x in Set.Ioi (5 : ℝ), (Real.log x + 7) ^ 2 / x ^ 2 := by
+    have hcomp := integral_comp_neg_Iic (-5 : ℝ)
+      (f := fun x : ℝ => (Real.log x + 7) ^ 2 / x ^ 2)
+    rw [show (-(-5) : ℝ) = 5 by norm_num] at hcomp
+    rw [← integral_Iic_eq_integral_Iio (x := (-5 : ℝ))
+      (f := fun t : ℝ => (Real.log (-t) + 7) ^ 2 / t ^ 2)]
+    refine (setIntegral_congr_fun measurableSet_Iic (fun x _ => ?_)).trans hcomp
+    simp only [Function.comp_apply, neg_sq]
+  rw [hsub]
+  exact integral_Ioi_five_tail_neg_envelope
 
 /-- The squared norm of the weight, as the square modulus of the logarithmic derivative of
 zeta on the left contour divided by `1/4 + t ^ 2`. -/
