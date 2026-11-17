@@ -29,7 +29,9 @@ of the two logarithms. This isolates the two halves of `bookError` that the rest
 treats separately, and it is where the positivity of `q` is used. -/
 theorem log_conductor_height_mul_le (q : ℕ) (t : ℝ) (hq : q ≠ 0) (ht : 100 ≤ t) :
     log ((q : ℝ) * (t + 1)) ≤ log q + log (t + 1) := by
-  sorry
+  have hq' : (q : ℝ) ≠ 0 := by exact_mod_cast hq
+  have ht' : (0 : ℝ) < t + 1 := by linarith
+  rw [Real.log_mul hq' (ne_of_gt ht')]
 
 /-- LEAF. The height part of the logarithm is at most the height. The argument `t + 1` is at
 least `101`, in particular at least `1`, so the elementary inequality `log x ≤ x` applies. This
@@ -37,7 +39,9 @@ leaf is the only place where the logarithm at the height is compared with a poly
 uses nothing about `q`. -/
 theorem height_log_le_height (t : ℝ) (ht : 100 ≤ t) :
     log (t + 1) ≤ t + 1 := by
-  sorry
+  have hpos : (0 : ℝ) < t + 1 := by linarith
+  have h := Real.log_le_sub_one_of_pos hpos
+  linarith
 
 /-- LEAF. Linear versus exponential at the height. Once the height part of the logarithm has
 been replaced by `t + 1`, the remaining claim `0.15 * (t + 1) ≤ exp (0.6 * t) / 4` is an
@@ -46,7 +50,8 @@ least `100`, since `0.15 * (t + 1) * 4 = 0.6 * t + 0.6` is at most `0.6 * t + 1`
 no character is involved. -/
 theorem height_linear_le_quarter_exp (t : ℝ) (ht : 100 ≤ t) :
     0.15 * (t + 1) ≤ exp (0.6 * t) / 4 := by
-  sorry
+  have hexp : 0.6 * t + 1 ≤ exp (0.6 * t) := Real.add_one_le_exp _
+  linarith
 
 /-- LEAF. The conductor part absorbed into one quarter of the exponential:
 `0.15 * log q + 3.389 ≤ exp (0.6 * t) / 4`. This is the only step in which the modulus enters,
