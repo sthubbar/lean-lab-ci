@@ -35,33 +35,7 @@ theorem local_arc_shoulder1622_core_phase_norm (N : ℕ) (n : ℤ) (a q : ℕ) (
     ‖primeFourier111 N ((a : ℝ) / q + z) ^ 2 *
         Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I)‖ =
       ‖primeFourier111 N ((a : ℝ) / q + z)‖ ^ 2 := by
-  have h₁ : ‖(primeFourier111 N ((a : ℝ) / q + z) : ℂ) ^ 2 *
-      Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I)‖ =
-    ‖primeFourier111 N ((a : ℝ) / q + z)‖ ^ 2 := by
-    have h₂ : ‖(primeFourier111 N ((a : ℝ) / q + z) : ℂ) ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I)‖ =
-      ‖(primeFourier111 N ((a : ℝ) / q + z) : ℂ) ^ 2‖ * ‖Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I)‖ := by
-      rw [Complex.norm_mul]
-    rw [h₂]
-    have h₃ : ‖(primeFourier111 N ((a : ℝ) / q + z) : ℂ) ^ 2‖ = ‖primeFourier111 N ((a : ℝ) / q + z)‖ ^ 2 := by
-      rw [norm_pow]
-    rw [h₃]
-    have h₄ : ‖Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I)‖ = 1 := by
-      rw [Complex.norm_exp]
-      have h₅ : (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I).re = 0 := by
-        simp [Complex.ext_iff, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
-        <;>
-        ring_nf
-        <;>
-        norm_cast
-        <;>
-        simp_all [Complex.ext_iff, Complex.I_re, Complex.I_im]
-        <;>
-        linarith
-      rw [h₅]
-      norm_num [Real.exp_zero]
-    rw [h₄]
-    <;> ring
-  exact h₁
+  rw [norm_mul, norm_pow, Complex.norm_exp_ofReal_mul_I, mul_one]
 
 /-- LEAF. The square mean value of one reduced residue on the core. The squared modulus
 of the prime Fourier series at one residue class of the modulus, integrated over the
