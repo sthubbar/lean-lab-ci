@@ -33,7 +33,56 @@ holds on the whole plane. -/
 theorem zero_of_conj_neg_im (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (s : ℂ)
     (hs : DirichletCharacter.LFunction χ s = 0) (himneg : s.im < 0) :
     DirichletCharacter.LFunction χ⁻¹ (star s) = 0 := by
-  sorry
+  have h1 : s ≠ 1 := by
+    intro h
+    have : s.im = 0 := by rw [h]; simp
+    linarith
+  rw [Complex.star_def, ZeroCount1623.LFunction_inv_conj χ h1, hs, map_zero]
+
+/-- A private helper: the `L`-function of the trivial character mod `q` is not analytic at `1`,
+because `(s - 1) * L (s)` has a nonzero limit there while `s - 1` tends to zero. -/
+private lemma not_analyticAt_LFunction_triv (q : ℕ) [NeZero q] :
+    ¬ AnalyticAt ℂ (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q)) 1 := by
+  intro h
+  have hct : ContinuousAt (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q)) 1 :=
+    h.continuousAt
+  have h0 : Tendsto
+      (fun s : ℂ => (s - 1) * DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) s)
+      (nhdsWithin (1 : ℂ) {(1 : ℂ)}ᶜ) (nhds 0) := by
+    have h1 : Tendsto (fun s : ℂ => s - 1) (nhdsWithin (1 : ℂ) {(1 : ℂ)}ᶜ) (nhds 0) := by
+      have hsub : ContinuousAt (fun s : ℂ => s - 1) 1 :=
+        continuousAt_id.sub continuousAt_const
+      simpa using hsub.tendsto.mono_left nhdsWithin_le_nhds
+    have h2 : Tendsto (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q))
+        (nhdsWithin (1 : ℂ) {(1 : ℂ)}ᶜ)
+        (nhds (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) 1)) :=
+      hct.tendsto.mono_left nhdsWithin_le_nhds
+    simpa using h1.mul h2
+  have hres :
+      Tendsto (fun s : ℂ => (s - 1) * DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) s)
+        (nhdsWithin (1 : ℂ) {(1 : ℂ)}ᶜ) (nhds (∏ p ∈ q.primeFactors, (1 - (p : ℂ)⁻¹))) :=
+    DirichletCharacter.LFunctionTrivChar_residue_one (N := q)
+  have hne : (∏ p ∈ q.primeFactors, (1 - (p : ℂ)⁻¹)) ≠ 0 := by
+    have h := DirichletCharacter.LFunctionTrivChar₁_apply_one_ne_zero (n := q)
+    simpa [DirichletCharacter.LFunctionTrivChar₁] using h
+  have hlim : (0 : ℂ) = ∏ p ∈ q.primeFactors, (1 - (p : ℂ)⁻¹) :=
+    tendsto_nhds_unique h0 hres
+  exact hne hlim.symm
+
+/-- A private helper: the analytic order of `L (·, χ)` at `1` is zero, for every `χ`. Either
+`χ` is nontrivial, where `L (1, χ) ≠ 0`, or `χ` is trivial and `L` is not even analytic there,
+in which case the order is the junk value `0`. -/
+private lemma analyticOrderNatAt_LFunction_one (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) :
+    analyticOrderNatAt (DirichletCharacter.LFunction χ) 1 = 0 := by
+  by_cases hχ : χ = 1
+  · subst hχ
+    exact analyticOrderNatAt_of_not_analyticAt (not_analyticAt_LFunction_triv q)
+  · have han : AnalyticAt ℂ (DirichletCharacter.LFunction χ) 1 :=
+      (DirichletCharacter.differentiable_LFunction hχ).analyticAt 1
+    have hne : DirichletCharacter.LFunction χ 1 ≠ 0 :=
+      DirichletCharacter.LFunction_apply_one_ne_zero hχ
+    simp [analyticOrderNatAt, han.analyticOrderAt_eq_zero.mpr hne]
 
 /-- LEAF. The multiplicity half of the conjugation symmetry. The order of vanishing of
 `L (·, χ)` at `s` equals the order of vanishing of `L (·, χ⁻¹)` at the reflected point
@@ -44,7 +93,13 @@ identity, not an inequality, and it needs no hypothesis. -/
 theorem order_conj_eq (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (s : ℂ) :
     analyticOrderNatAt (DirichletCharacter.LFunction χ) s =
       analyticOrderNatAt (DirichletCharacter.LFunction χ⁻¹) (star s) := by
-  sorry
+  by_cases hs : s = 1
+  · subst hs
+    have h2 : analyticOrderNatAt (DirichletCharacter.LFunction χ⁻¹) (star (1 : ℂ)) =
+        analyticOrderNatAt (DirichletCharacter.LFunction χ⁻¹) (1 : ℂ) := by rw [star_one]
+    rw [analyticOrderNatAt_LFunction_one q χ, h2, analyticOrderNatAt_LFunction_one q χ⁻¹]
+  · have hm := ZeroCount1623.mult_inv_conj χ hs
+    simpa only [ZeroCount1623.mult, Complex.star_def] using hm.symm
 
 /-- LEAF. The counting input at the reflected point. If the reflected point `star s` is a zero of
 `L (·, χ⁻¹)`, lies in the open strip and in the closed upper half plane, and has height at least
@@ -58,7 +113,45 @@ theorem order_le_book_count_reflected (q : ℕ) [NeZero q] (χ : DirichletCharac
     (him : 100 ≤ |s.im|) (himneg : s.im < 0) :
     (analyticOrderNatAt (DirichletCharacter.LFunction χ⁻¹) (star s) : ℝ) ≤
       ZeroCount1623.bookCount χ⁻¹ (|s.im| + 1) := by
-  sorry
+  classical
+  have him' : (star s).im = |s.im| := by
+    rw [Complex.star_def, Complex.conj_im, abs_of_neg himneg]
+  have hre0' : 0 < (star s).re := by simpa [Complex.star_def] using hre0
+  have hre1' : (star s).re < 1 := by simpa [Complex.star_def] using hre1
+  have him0' : 0 ≤ (star s).im := by rw [him']; exact abs_nonneg _
+  have hle : |(star s).im| ≤ |s.im| + 1 := by rw [him', abs_abs]; linarith
+  have hmem : star s ∈ (ZeroCount1623.stripZeros_finite χ⁻¹ (|s.im| + 1)).toFinset.filter
+      (fun ρ => 0 ≤ ρ.im) := by
+    simp only [Finset.mem_filter, Set.Finite.mem_toFinset, ZeroCount1623.stripZeros]
+    exact ⟨⟨hz, hre0', hre1', hle⟩, him0'⟩
+  have hzero : (star s).im ≠ 0 := by
+    rw [him']
+    have h' : |s.im| = -s.im := abs_of_neg himneg
+    linarith
+  have hneT : (star s).im ≠ |s.im| + 1 := by
+    rw [him']
+    intro h
+    linarith
+  have hw : ZeroCount1623.halfWeight (|s.im| + 1) (star s).im = 1 := by
+    unfold ZeroCount1623.halfWeight
+    exact ite_eq_right (not_or.mpr ⟨hzero, hneT⟩)
+  have hnonneg : ∀ ρ ∈ (ZeroCount1623.stripZeros_finite χ⁻¹ (|s.im| + 1)).toFinset.filter
+      (fun ρ => 0 ≤ ρ.im),
+      0 ≤ ZeroCount1623.halfWeight (|s.im| + 1) ρ.im * (ZeroCount1623.mult χ⁻¹ ρ : ℝ) := by
+    intro ρ _
+    unfold ZeroCount1623.halfWeight
+    split
+    · positivity
+    · positivity
+  have hsingle := Finset.single_le_sum hnonneg hmem
+  unfold ZeroCount1623.bookCount
+  calc (analyticOrderNatAt (DirichletCharacter.LFunction χ⁻¹) (star s) : ℝ)
+      = ZeroCount1623.halfWeight (|s.im| + 1) (star s).im *
+          (ZeroCount1623.mult χ⁻¹ (star s) : ℝ) := by
+        rw [hw, one_mul]
+    _ ≤ ∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ⁻¹ (|s.im| + 1)).toFinset.filter
+          (fun ρ => 0 ≤ ρ.im),
+          ZeroCount1623.halfWeight (|s.im| + 1) ρ.im * (ZeroCount1623.mult χ⁻¹ ρ : ℝ) := hsingle
 
 /-- The target, assembled from the three steps. The reflection turns the zero of `χ` below the
 axis into a zero of `χ⁻¹` above it, the order identity transports the multiplicity to the

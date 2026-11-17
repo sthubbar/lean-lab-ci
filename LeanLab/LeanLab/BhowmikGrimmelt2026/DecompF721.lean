@@ -36,7 +36,20 @@ attribute [local instance] Classical.propDecidable
 arithmetic on `Finset.Icc`; no analytic input. -/
 theorem leaf_window_card_F721 {X : ℝ} (hX : 2 ≤ X) :
     ((Finset.Icc ⌈X / 2⌉₊ ⌊X⌋₊).card : ℝ) ≤ X := by
-  sorry
+  have hb : ((⌊X⌋₊ : ℕ) : ℝ) ≤ X := Nat.floor_le (by linarith)
+  have ha : X / 2 ≤ ((⌈X / 2⌉₊ : ℕ) : ℝ) := Nat.le_ceil (X / 2)
+  rcases le_or_gt ⌈X / 2⌉₊ ⌊X⌋₊ with hle | hgt
+  · rw [Nat.card_Icc]
+    have h1 : ⌈X / 2⌉₊ ≤ ⌊X⌋₊ + 1 := le_trans hle (Nat.le_succ _)
+    have h2 : (((⌊X⌋₊ + 1 - ⌈X / 2⌉₊ : ℕ)) : ℝ)
+        = ((⌊X⌋₊ : ℕ) : ℝ) + 1 - ((⌈X / 2⌉₊ : ℕ) : ℝ) := by
+      rw [Nat.cast_sub h1, Nat.cast_add, Nat.cast_one]
+    rw [h2]
+    linarith
+  · have hempty : Finset.Icc ⌈X / 2⌉₊ ⌊X⌋₊ = ∅ := Finset.Icc_eq_empty_of_lt hgt
+    rw [hempty]
+    simp
+    linarith
 
 /-- LEAF 2 of 4. The filtered set is a subset of the full window, so its cardinality
 is at most the window cardinality. Pure `Finset` monotonicity; no analytic input. -/
@@ -47,7 +60,12 @@ theorem leaf_filter_card_le_window_F721 {X : ℝ} (hX : 2 ≤ X) (r : ℕ) (χ :
               singular N * N * r / (Nat.totient r : ℝ) ^ 2 +
                 X ^ (1 - (1 : ℝ) / 10)) / 2)).card : ℕ) : ℝ) ≤
       ((Finset.Icc ⌈X / 2⌉₊ ⌊X⌋₊).card : ℝ) := by
-  sorry
+  have h := Finset.card_filter_le (Finset.Icc ⌈X / 2⌉₊ ⌊X⌋₊)
+    (fun N : ℕ => Even N ∧ ¬ ‖(r2 N : ℂ) - singular N * N‖ ≤
+      (4 : ℝ) * (singular N * X * (δ * Real.log X) ^ ((1 : ℝ) / 10) +
+          singular N * N * r / (Nat.totient r : ℝ) ^ 2 +
+            X ^ (1 - (1 : ℝ) / 10)) / 2)
+  exact_mod_cast h
 
 /-- LEAF 3 of 4. Under the standing hypotheses `X ≥ 2` and `0 < δ < (1/2)/log X`,
 the half-threshold

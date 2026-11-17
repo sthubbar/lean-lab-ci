@@ -49,7 +49,48 @@ of the inequality, and it holds there with about a tenth of `sqrt q` to spare. -
 theorem leaf_even_harmonic_optimization {q : ℕ} (hq : 2 ≤ q) :
     (q : ℝ) / sqrt q + 4 / π ^ 2 * sqrt q * log (sqrt q) + 1 / 4 * sqrt q ≤
       2 / π ^ 2 * sqrt q * log q + 4 / π ^ 2 * sqrt q * log (log q) + 3 / 2 * sqrt q := by
-  sorry
+  have hq0 : (0 : ℝ) < (q : ℝ) := by
+    have : (0 : ℕ) < q := by omega
+    exact_mod_cast this
+  have hq2 : (2 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  set s := sqrt (q : ℝ) with hs
+  have hs0 : 0 < s := by rw [hs]; exact sqrt_pos.mpr hq0
+  have hlogs : log (sqrt (q : ℝ)) = log (q : ℝ) / 2 := log_sqrt (le_of_lt hq0)
+  have hdiv : (q : ℝ) / sqrt (q : ℝ) = s := by
+    rw [hs, div_sqrt]
+  -- the lower bound `-1/4 <= 4/pi^2 * log (log q)` for `q >= 2`
+  have hlogq : 0 < log (q : ℝ) := log_pos (by linarith)
+  have hcpos : (0 : ℝ) < 0.6931471803 := by norm_num
+  have hlog2gt : (0.6931471803 : ℝ) < log 2 := log_two_gt_d9
+  have hlog2le : log 2 ≤ log (q : ℝ) := log_le_log (by norm_num) hq2
+  have hll : log 0.6931471803 ≤ log (log (q : ℝ)) :=
+    log_le_log hcpos (by linarith)
+  have hsub : 1 - (0.6931471803 : ℝ)⁻¹ ≤ log 0.6931471803 :=
+    one_sub_inv_le_log_of_pos hcpos
+  have hlt : 4 / π ^ 2 ≤ 4 / 9 := by
+    have h3 : (3 : ℝ) < π := pi_gt_three
+    have h9 : (9 : ℝ) < π ^ 2 := by nlinarith
+    rw [div_le_div_iff₀ (by positivity) (by norm_num)]
+    nlinarith
+  have hnonpos : 1 - (0.6931471803 : ℝ)⁻¹ ≤ 0 := by norm_num
+  have hnum : -(1 / 4 : ℝ) ≤ 4 / 9 * (1 - (0.6931471803 : ℝ)⁻¹) := by norm_num
+  have hstep : 4 / 9 * (1 - (0.6931471803 : ℝ)⁻¹) ≤
+      4 / π ^ 2 * (1 - (0.6931471803 : ℝ)⁻¹) :=
+    mul_le_mul_of_nonpos_right hlt hnonpos
+  have hkey : -(1 / 4 : ℝ) ≤ 4 / π ^ 2 * log (log (q : ℝ)) := by
+    have hmono : 4 / π ^ 2 * (1 - (0.6931471803 : ℝ)⁻¹) ≤ 4 / π ^ 2 * log (log (q : ℝ)) :=
+      mul_le_mul_of_nonneg_left (le_trans hsub hll) (by positivity)
+    linarith
+  have hmul : -(1 / 4 : ℝ) * s ≤ 4 / π ^ 2 * s * log (log (q : ℝ)) := by
+    have := mul_le_mul_of_nonneg_right hkey (le_of_lt hs0)
+    calc -(1 / 4 : ℝ) * s = -(1 / 4 : ℝ) * s := rfl
+      _ ≤ (4 / π ^ 2 * log (log (q : ℝ))) * s := this
+      _ = 4 / π ^ 2 * s * log (log (q : ℝ)) := by ring
+  have hcoef : 4 / π ^ 2 * s * (log (q : ℝ) / 2) = 2 / π ^ 2 * s * log (q : ℝ) := by
+    field_simp
+    ring
+  rw [hdiv, hlogs, hcoef]
+  linarith [hmul]
 
 /-- The even branch, assembled from the two leaves: bound every partial sum by the truncated
 harmonic-range estimate at the truncation length `H = sqrt q`, which lies in `[1, q]`, and then

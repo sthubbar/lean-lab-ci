@@ -36,7 +36,25 @@ theorem local_arc_core_unit_phase1622 (N : ℕ) (n : ℤ) :
         primeFourier111 N z ^ 2 *
           Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ ≤
       ∫ z in -(1 / (N : ℝ))..(1 / (N : ℝ)), ‖primeFourier111 N z‖ ^ 2 := by
-  sorry
+  have hmod : ∀ z : ℝ, ‖primeFourier111 N z ^ 2 *
+      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ =
+      ‖primeFourier111 N z‖ ^ 2 := by
+    intro z
+    rw [norm_mul, norm_pow, Complex.norm_exp_ofReal_mul_I, mul_one]
+  rcases Nat.eq_zero_or_pos N with hN | hN
+  · subst hN
+    simp
+  · have hN1 : 1 ≤ N := hN
+    have hpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+    have hle : -(1 / (N : ℝ)) ≤ 1 / (N : ℝ) := by
+      have h : (0 : ℝ) ≤ 1 / (N : ℝ) := by positivity
+      linarith
+    have hcont : Continuous (fun z : ℝ => ‖primeFourier111 N z‖ ^ 2) :=
+      (continuous_prime_fourier111 N hN1).norm.pow 2
+    refine intervalIntegral.norm_integral_le_of_norm_le hle ?_
+      (hcont.intervalIntegrable _ _)
+    filter_upwards with z _
+    rw [hmod]
 
 /-- LEAF. The local square mean value on the core. The integral, over the interval of
 length two over N around the origin, of the squared modulus of the prime Fourier series

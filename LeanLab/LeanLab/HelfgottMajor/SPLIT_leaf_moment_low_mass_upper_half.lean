@@ -50,7 +50,39 @@ theorem leaf_upper_half_mass_height_split (q : ℕ) [NeZero q] (χ : DirichletCh
       Set.indicator {ρ | 1 / 2 < ρ.val.re ∧ 1 / 2 < |ρ.val.im|}
         (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
           ‖gaussianMellin δ ρ.val‖ ^ 2) ρ) := by
-  sorry
+  classical
+  haveI : Fintype {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+      |ρ.im| ≤ 1} := (leaf_moment_window_finite q χ 1).fintype
+  rw [tsum_fintype, tsum_fintype, tsum_fintype, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl ?_
+  intro ρ _
+  by_cases hr : (1 : ℝ) / 2 < (ρ : ℂ).re
+  · rw [Set.indicator_of_mem (show ρ ∈ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re} from hr)]
+    by_cases hi : |(ρ : ℂ).im| ≤ 1 / 2
+    · rw [Set.indicator_of_mem (show ρ ∈ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+          0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re ∧ |ρ.val.im| ≤ 1 / 2}
+          from ⟨hr, hi⟩),
+        Set.indicator_of_notMem (show ρ ∉ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+          0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re ∧ 1 / 2 < |ρ.val.im|}
+          from fun h => absurd h.2 (not_lt.mpr hi))]
+      ring
+    · rw [Set.indicator_of_notMem (show ρ ∉ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+          0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re ∧ |ρ.val.im| ≤ 1 / 2}
+          from fun h => hi h.2),
+        Set.indicator_of_mem (show ρ ∈ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+          0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re ∧ 1 / 2 < |ρ.val.im|}
+          from ⟨hr, lt_of_not_ge hi⟩)]
+      ring
+  · rw [Set.indicator_of_notMem (show ρ ∉ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re} from hr),
+      Set.indicator_of_notMem (show ρ ∉ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re ∧ |ρ.val.im| ≤ 1 / 2}
+        from fun h => hr h.1),
+      Set.indicator_of_notMem (show ρ ∉ {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ 1} | 1 / 2 < ρ.val.re ∧ 1 / 2 < |ρ.val.im|}
+        from fun h => hr h.1)]
+    ring
 
 /-- LEAF. Low sub-band of the upper half.  On the zeros of `L χ` in the strip with
 `|im ρ| ≤ 1 / 2` and `1 / 2 < re ρ`, the multiplicity-weighted squared Mellin mass is at
