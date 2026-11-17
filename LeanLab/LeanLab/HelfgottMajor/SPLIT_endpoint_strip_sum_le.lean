@@ -60,7 +60,20 @@ theorem endpoint_real_zero_sum_le (q : ℕ) [NeZero q] (χ : DirichletCharacter 
     (hχ : χ.IsPrimitive) (hq : 2 * π ≤ (q : ℝ)) :
     (∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ (2 * π / q)).toFinset.filter
         (fun ρ => ρ.im = 0), (ZeroCount1623.mult χ ρ : ℝ)) ≤ 1 := by
-  sorry
+  set s := (ZeroCount1623.stripZeros_finite χ (2 * π / q)).toFinset.filter (fun ρ => ρ.im = 0)
+  have h_nonneg : ∀ ρ ∈ s, 0 ≤ (ZeroCount1623.mult χ ρ : ℝ) := by
+    intro ρ _; exact Nat.cast_nonneg _
+  have h_card : s.card ≤ 1 := by
+    sorry
+  have h_mult_le_one : ∀ ρ ∈ s, (ZeroCount1623.mult χ ρ : ℝ) ≤ 1 := by
+    sorry
+  calc
+    (∑ ρ ∈ s, (ZeroCount1623.mult χ ρ : ℝ)) ≤ s.card • (1 : ℝ) :=
+      Finset.sum_le_card_nsmul s (fun ρ => (ZeroCount1623.mult χ ρ : ℝ)) 1 h_mult_le_one
+    _ ≤ (1 : ℕ) • (1 : ℝ) := by
+      have : (s.card : ℝ) ≤ 1 := by exact_mod_cast h_card
+      simpa using this
+    _ = 1 := by simp
 
 /-- LEAF. The zeros above the real axis.  Below the endpoint height `2 * π / q`, which is at
 most one on this range, the strip carries at most two units of multiplicity at positive
