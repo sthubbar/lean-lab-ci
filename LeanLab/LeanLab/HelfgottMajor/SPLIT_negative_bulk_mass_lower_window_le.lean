@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_negative_bulk_mass_window_le
+import LeanLab.HelfgottMajor.LowerWindowPartition901
 
 /-!
 Split of `negative_bulk_mass_lower_window_le` in
@@ -25,7 +26,8 @@ strictly smaller than the volume of the window and it carries no mean weight int
 volume of the near piece is strictly smaller than the volume of the window and it carries half of
 the shifted log weight integral. The assembly is the partition of the ordinate window at minus
 fifteen eighths, the addition of the two inequalities, and the arithmetic of the budgets. It has no
-sorry of its own. All three leaves are OPEN.
+sorry of its own. The partition has a proof from a separately checked summable-mass helper.
+The far and near estimates remain OPEN.
 
 AI wrote this Lean code. Binary Goldbach is open.
 -/
@@ -55,9 +57,10 @@ theorem negative_bulk_mass_lower_window_partition (q : ℕ) [NeZero q] (χ : Dir
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
         Set.indicator {ρ | -(15 / 8) < ρ.val.im ∧ ρ.val.im ≤ -(7 / 4) ∧ |ρ.val.im| ≤ 2}
           (fun ρ => mellinMassTerm χ δ ρ.val) ρ) := by
-  -- Required: the pointwise disjoint union of the two indicator sets and the additivity of the sum
-  -- over the zero set of the strip below height `T`.
-  sorry
+  exact lower_window_mass_partition_of_summable (α := ZeroCount1623.ZeroIdx χ T)
+    (fun ρ => ρ.val.im)
+    (fun ρ => mellinMassTerm χ δ ρ.val) (-(15 / 8)) (-(7 / 4)) 2
+    (by norm_num) (ZeroCount1623.summable_zeroIdx χ T _)
 
 /-- LEAF 2 of 3, the far eighth of the window, from minus two up to minus fifteen eighths. The mass
 over that piece is at most three sixteenths of the shifted log weight integral over the height
@@ -73,9 +76,8 @@ theorem negative_bulk_mass_lower_window_far_le (q : ℕ) [NeZero q] (χ : Dirich
       (3 / 16) * (∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) - (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389)) := by
-  -- Required: the already decayed profile on the last eighth of the window, an explicit count of
-  -- the ordinates it holds, and a pointwise envelope for the mass charged to the shifted log weight
-  -- integral alone.
+  -- The source sampling argument needs a zero-location input and a quantitative zero count.
+  -- Neither the source argument nor the available count supplies this restricted derivative budget.
   sorry
 
 /-- LEAF 3 of 3, the near piece of the window, strictly above minus fifteen eighths and at most
@@ -96,9 +98,8 @@ theorem negative_bulk_mass_lower_window_near_le (q : ℕ) [NeZero q] (χ : Diric
       (3 / 16) * (∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) - (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389)) := by
-  -- Required: an explicit count of the ordinates in this piece together with a pointwise envelope
-  -- for the mass on it, charged to half of the mean weight and three sixteenths of the shifted log
-  -- weight.
+  -- The source sampling argument retains endpoint terms. It does not allocate the stated shares
+  -- of the two integrals to this window without additional analytic estimates.
   sorry
 
 /-- The statement of `negative_bulk_mass_lower_window_le`, assembled from the three leaves: the

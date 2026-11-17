@@ -29,7 +29,7 @@ theorem LEAF_Sg_pole_pair_condition (X K : ℕ)
     (z : Fin (K + 1) → Σ r : ℕ, DirichletCharacter ℂ r × ℂ)
     (Sg : Fin (K + 1) → Fin (K + 1) → ℕ → ℂ) :
     (∀ n ∈ evenJ131 X, Sg 0 0 n = (Sing n : ℂ)) →
-    (∀ n ∈ evenJ131 X, Sg 0 0 n = (Sing n : ℂ)) := by sorry
+    (∀ n ∈ evenJ131 X, Sg 0 0 n = (Sing n : ℂ)) := by norm_num
 
 /-- LEAF. The trivial `Sg` (zero off the pole pair) satisfies the uniform bound `‖Sg i j n‖ ≤ S(n)`
 because `S(n) ≥ 0` and `‖0‖ = 0`. -/
