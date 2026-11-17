@@ -34,14 +34,112 @@ size of the contour parameter has integral at most forty five over `2 < t ≤ 7/
 calculus step on the left half of the window, where `log t` is still small. -/
 theorem principal_log_weight_sq_window_pos_majorant_low :
     (∫ t in Set.Ioc (2 : ℝ) (7 / 2), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ 45 := by
-  sorry
+  have h₁ : ∀ t ∈ Set.Ioc (2 : ℝ) (7 / 2 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ 361 / 17 := by
+    intro t ht
+    have ht₂ : (2 : ℝ) < t := ht.1
+    have ht₃ : t ≤ (7 / 2 : ℝ) := ht.2
+    have ht₄ : 0 < t := by linarith
+    have hlog : Real.log t ≤ t - 1 := Real.log_le_sub_one_of_pos ht₄
+    have hsum : Real.log t + 7 ≤ t + 6 := by linarith
+    have hsum' : t + 6 ≤ 19 / 2 := by linarith
+    have hsq : (Real.log t + 7) ^ 2 ≤ (19 / 2 : ℝ) ^ 2 := by
+      have h₁ : 0 ≤ Real.log t + 7 := by linarith [Real.log_pos (by norm_num : (1 : ℝ) < 2)]
+      have h₂ : 0 ≤ (19 / 2 : ℝ) := by norm_num
+      nlinarith
+    have hden : (17 / 4 : ℝ) ≤ 1 / 4 + t ^ 2 := by nlinarith
+    have hpos : 0 < 1 / 4 + t ^ 2 := by positivity
+    have hpos' : 0 < (17 / 4 : ℝ) := by norm_num
+    have h₂ : (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ (19 / 2 : ℝ) ^ 2 / (17 / 4 : ℝ) := by
+      apply div_le_div_of_le_left (by positivity) (by positivity)
+      <;> nlinarith
+    have h₃ : (19 / 2 : ℝ) ^ 2 / (17 / 4 : ℝ) = 361 / 17 := by norm_num
+    rw [h₃] at h₂
+    linarith
+  have h₂ : (∫ t in Set.Ioc (2 : ℝ) (7 / 2 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ ∫ t in Set.Ioc (2 : ℝ) (7 / 2 : ℝ), (361 / 17 : ℝ) := by
+    have h₃ : ContinuousOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) (Set.Icc (2 : ℝ) (7 / 2 : ℝ)) := by
+      apply ContinuousOn.div
+      · apply ContinuousOn.pow
+        exact (Real.continuousOn_log.mono (fun x hx => by linarith [hx.1, hx.2])).add continuousOn_const
+      · exact ContinuousOn.add (ContinuousOn.pow continuousOn_id 2) continuousOn_const
+      · intro x hx
+        have : 0 < x := by linarith [hx.1, hx.2]
+        positivity
+    have h₄ : IntegrableOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) (Set.Ioc (2 : ℝ) (7 / 2 : ℝ)) := by
+      have h₅ : IntegrableOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) (Set.Icc (2 : ℝ) (7 / 2 : ℝ)) := h₃.integrableOn_Icc
+      exact h₅.mono_set Set.Ioc_subset_Icc_self
+    have h₅ : IntegrableOn (fun _ : ℝ => (361 / 17 : ℝ)) (Set.Ioc (2 : ℝ) (7 / 2 : ℝ)) := by
+      apply integrableOn_const
+    have h₆ : ∀ t ∈ Set.Ioc (2 : ℝ) (7 / 2 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ (361 / 17 : ℝ) := by
+      intro t ht
+      exact h₁ t ht
+    exact MeasureTheory.setIntegral_mono_on h₄ h₅ (measurableSet_Ioc) h₆
+  have h₃ : ∫ t in Set.Ioc (2 : ℝ) (7 / 2 : ℝ), (361 / 17 : ℝ) = (3 / 2 : ℝ) * (361 / 17 : ℝ) := by
+    simp [Real.volume_Ioc, mul_comm]
+    <;> norm_num
+    <;> field_simp
+    <;> ring_nf
+    <;> norm_num
+  have h₄ : (3 / 2 : ℝ) * (361 / 17 : ℝ) ≤ 45 := by norm_num
+  calc
+    (∫ t in Set.Ioc (2 : ℝ) (7 / 2 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ ∫ t in Set.Ioc (2 : ℝ) (7 / 2 : ℝ), (361 / 17 : ℝ) := h₂
+    _ = (3 / 2 : ℝ) * (361 / 17 : ℝ) := by rw [h₃]
+    _ ≤ 45 := by norm_num
 
 /-- LEAF. The upper half of the window: the squared logarithmic majorant divided by the squared
 size of the contour parameter has integral at most thirty over `7/2 < t ≤ 5`.  This is the
 calculus step on the right half of the window, where the denominator has grown. -/
 theorem principal_log_weight_sq_window_pos_majorant_high :
     (∫ t in Set.Ioc (7 / 2) 5, (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ 30 := by
-  sorry
+  have h₁ : ∀ t ∈ Set.Ioc (7 / 2 : ℝ) (5 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ 242 / 25 := by
+    intro t ht
+    have ht₂ : (7 / 2 : ℝ) < t := ht.1
+    have ht₃ : t ≤ (5 : ℝ) := ht.2
+    have ht₄ : 0 < t := by linarith
+    have hlog : Real.log t ≤ t - 1 := Real.log_le_sub_one_of_pos ht₄
+    have hsum : Real.log t + 7 ≤ t + 6 := by linarith
+    have hsum' : t + 6 ≤ 11 := by linarith
+    have hsq : (Real.log t + 7) ^ 2 ≤ (11 : ℝ) ^ 2 := by
+      have h₁ : 0 ≤ Real.log t + 7 := by linarith [Real.log_pos (by norm_num : (1 : ℝ) < 2)]
+      have h₂ : 0 ≤ (11 : ℝ) := by norm_num
+      nlinarith
+    have hden : (25 / 2 : ℝ) ≤ 1 / 4 + t ^ 2 := by nlinarith
+    have hpos : 0 < 1 / 4 + t ^ 2 := by positivity
+    have hpos' : 0 < (25 / 2 : ℝ) := by norm_num
+    have h₂ : (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ (11 : ℝ) ^ 2 / (25 / 2 : ℝ) := by
+      apply div_le_div_of_le_left (by positivity) (by positivity)
+      <;> nlinarith
+    have h₃ : (11 : ℝ) ^ 2 / (25 / 2 : ℝ) = 242 / 25 := by norm_num
+    rw [h₃] at h₂
+    linarith
+  have h₂ : (∫ t in Set.Ioc (7 / 2 : ℝ) (5 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ ∫ t in Set.Ioc (7 / 2 : ℝ) (5 : ℝ), (242 / 25 : ℝ) := by
+    have h₃ : ContinuousOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) (Set.Icc (7 / 2 : ℝ) (5 : ℝ)) := by
+      apply ContinuousOn.div
+      · apply ContinuousOn.pow
+        exact (Real.continuousOn_log.mono (fun x hx => by linarith [hx.1, hx.2])).add continuousOn_const
+      · exact ContinuousOn.add (ContinuousOn.pow continuousOn_id 2) continuousOn_const
+      · intro x hx
+        have : 0 < x := by linarith [hx.1, hx.2]
+        positivity
+    have h₄ : IntegrableOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) (Set.Ioc (7 / 2 : ℝ) (5 : ℝ)) := by
+      have h₅ : IntegrableOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) (Set.Icc (7 / 2 : ℝ) (5 : ℝ)) := h₃.integrableOn_Icc
+      exact h₅.mono_set Set.Ioc_subset_Icc_self
+    have h₅ : IntegrableOn (fun _ : ℝ => (242 / 25 : ℝ)) (Set.Ioc (7 / 2 : ℝ) (5 : ℝ)) := by
+      apply integrableOn_const
+    have h₆ : ∀ t ∈ Set.Ioc (7 / 2 : ℝ) (5 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ (242 / 25 : ℝ) := by
+      intro t ht
+      exact h₁ t ht
+    exact MeasureTheory.setIntegral_mono_on h₄ h₅ (measurableSet_Ioc) h₆
+  have h₃ : ∫ t in Set.Ioc (7 / 2 : ℝ) (5 : ℝ), (242 / 25 : ℝ) = (3 / 2 : ℝ) * (242 / 25 : ℝ) := by
+    simp [Real.volume_Ioc, mul_comm]
+    <;> norm_num
+    <;> field_simp
+    <;> ring_nf
+    <;> norm_num
+  have h₄ : (3 / 2 : ℝ) * (242 / 25 : ℝ) ≤ 30 := by norm_num
+  calc
+    (∫ t in Set.Ioc (7 / 2 : ℝ) (5 : ℝ), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ ∫ t in Set.Ioc (7 / 2 : ℝ) (5 : ℝ), (242 / 25 : ℝ) := h₂
+    _ = (3 / 2 : ℝ) * (242 / 25 : ℝ) := by rw [h₃]
+    _ ≤ 30 := by norm_num
 
 /-- The weight is the logarithmic derivative of the zeta function on the left line divided by the
 contour parameter, so its squared size is the squared logarithmic derivative divided by the
