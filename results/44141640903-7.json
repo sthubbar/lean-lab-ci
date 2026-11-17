@@ -738,6 +738,66 @@
    "file": "LeanLab/LeanLab/Song2020/DecompJ1132.lean",
    "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
    "seconds": 196
+  },
+  {
+   "file": "LeanLab/LeanLab/Song2020/SPLIT_typeII_per_RS.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/SparseTernary/Gluing.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/SparseTernary/RepAssembly.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/SteinStein1965/Statements.lean",
+   "result": "0 closed of 7 declarations, 0 of 7 sites named a tactic, 3 errors, first: maximum recursion depth has been reached use `set_option maxRecDepth <num>` to increase limit use `set_option diagnostics true` to get diagnostic information",
+   "seconds": 17
+  },
+  {
+   "file": "LeanLab/LeanLab/Tao2012/Decomp137b.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Tchudakov1938/DecompJ578.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 19
+  },
+  {
+   "file": "LeanLab/LeanLab/Tchudakov1938/DecompJ601.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 24
+  },
+  {
+   "file": "LeanLab/LeanLab/Teravainen2016/Counting.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/State1535.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 17
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Statements.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 17
+  },
+  {
+   "file": "LeanLab/LeanLab/Tolev2009/Statements.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 12
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Gaps2.lean",
+   "result": "no candidate sites",
+   "seconds": 0
   }
  ],
  "summary": {
@@ -745,7 +805,7 @@
   "declarations_closed": 2,
   "sites": 2,
   "skipped": 3,
-  "seconds": 11359
+  "seconds": 11467
  },
  "selftest": {
   "ok": true,
