@@ -1055,7 +1055,259 @@ theorem normalized_bottom_boundary
         0.9964 * ((25 : ℝ) / π) ^ ((1 - σ) / 2) * Real.log 50)
     (σ : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) :
     ‖normalizer ((σ : ℂ) + 50 * I) * riemannZeta ((σ : ℂ) + 50 * I)‖ ≤ 1 := by
-  sorry
+  have h50pos : (0 : ℝ) < 50 := by norm_num
+  have hLpos : (0 : ℝ) < Real.log 50 := Real.log_pos (by norm_num)
+  have hL1 : (1 : ℝ) ≤ Real.log 50 := by
+    rw [Real.le_log_iff_exp_le (by norm_num : (0 : ℝ) < 50)]
+    linarith [Real.exp_one_lt_three]
+  have hright : ∀ τ ∈ Set.Icc (1 / 2 : ℝ) 1,
+      ‖normalizer ((τ : ℂ) + 50 * I) * riemannZeta ((τ : ℂ) + 50 * I)‖ ≤
+        (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 := by
+    intro τ hτ
+    have hτ0 : τ ∈ Set.Icc (0 : ℝ) 1 := ⟨by linarith [hτ.1], hτ.2⟩
+    have hΓ : ‖Complex.Gamma (((τ : ℂ) + 50 * I) / 2)‖ ≤
+        Real.sqrt (2 * π) * (50 / 2) ^ ((τ - 1) / 2) * Real.exp (-π * 50 / 4) *
+          (1 + 1 / 50 ^ 2) :=
+      (LeanLab.RamareSaouter2003.Decomp579c.gamma_relative τ 50 hτ0 le_rfl).2
+    have hS : ‖Complex.sqrt (Complex.sin (π * ((τ : ℂ) + 50 * I) / 2))‖ ≤
+        Real.exp (π * 50 / 4) / Real.sqrt 2 * (1 + 1 / 50 ^ 2) := by
+      rw [cnorm_sqrt]
+      exact sin_half_upper τ 50 hτ0 le_rfl
+    have hΛ : Real.log 50 ≤ ‖Complex.log (-(((τ : ℂ) + 50 * I)) * I)‖ := by
+      rw [cneg_mul_I_lit τ]
+      exact log_norm_ge τ 50 h50pos
+    have hΛpos : (0 : ℝ) < ‖Complex.log (-(((τ : ℂ) + 50 * I)) * I)‖ :=
+      lt_of_lt_of_le hLpos hΛ
+    have hpi : ‖(π : ℂ) ^ (-(((τ : ℂ) + 50 * I)) / 2)‖ = π ^ (-(τ / 2)) := by
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+      congr 1
+      simp
+      ring
+    have hnorm : ‖normalizer ((τ : ℂ) + 50 * I)‖ =
+        π ^ (-(τ / 2)) * ‖Complex.Gamma (((τ : ℂ) + 50 * I) / 2)‖ *
+          ‖Complex.sqrt (Complex.sin (π * ((τ : ℂ) + 50 * I) / 2))‖ /
+            ‖Complex.log (-(((τ : ℂ) + 50 * I)) * I)‖ := by
+      rw [normalizer, norm_div, norm_mul, norm_mul, hpi]
+    have hN : ‖normalizer ((τ : ℂ) + 50 * I)‖ ≤
+        ((2 * π) / 50) ^ ((1 - τ) / 2) * (1 + 1 / 50 ^ 2) ^ 2 / Real.log 50 := by
+      rw [hnorm]
+      have h0 : (0 : ℝ) ≤ π ^ (-(τ / 2)) := by positivity
+      have stepA : π ^ (-(τ / 2)) * ‖Complex.Gamma (((τ : ℂ) + 50 * I) / 2)‖ *
+          ‖Complex.sqrt (Complex.sin (π * ((τ : ℂ) + 50 * I) / 2))‖ ≤
+          π ^ (-(τ / 2)) * (Real.sqrt (2 * π) * (50 / 2) ^ ((τ - 1) / 2) *
+            Real.exp (-π * 50 / 4) * (1 + 1 / 50 ^ 2)) *
+            (Real.exp (π * 50 / 4) / Real.sqrt 2 * (1 + 1 / 50 ^ 2)) :=
+        mul_le_mul (mul_le_mul_of_nonneg_left hΓ h0) hS (by positivity) (by positivity)
+      have stepB : π ^ (-(τ / 2)) * (Real.sqrt (2 * π) * (50 / 2) ^ ((τ - 1) / 2) *
+            Real.exp (-π * 50 / 4) * (1 + 1 / 50 ^ 2)) *
+            (Real.exp (π * 50 / 4) / Real.sqrt 2 * (1 + 1 / 50 ^ 2)) =
+          ((2 * π) / 50) ^ ((1 - τ) / 2) * (1 + 1 / 50 ^ 2) ^ 2 := by
+        rw [← key_factor τ 50 h50pos]
+        ring
+      have stepC1 : π ^ (-(τ / 2)) * ‖Complex.Gamma (((τ : ℂ) + 50 * I) / 2)‖ *
+            ‖Complex.sqrt (Complex.sin (π * ((τ : ℂ) + 50 * I) / 2))‖ /
+              ‖Complex.log (-(((τ : ℂ) + 50 * I)) * I)‖ ≤
+          π ^ (-(τ / 2)) * ‖Complex.Gamma (((τ : ℂ) + 50 * I) / 2)‖ *
+            ‖Complex.sqrt (Complex.sin (π * ((τ : ℂ) + 50 * I) / 2))‖ / Real.log 50 := by
+        rw [div_le_div_iff₀ hΛpos hLpos]
+        exact mul_le_mul_of_nonneg_left hΛ (by positivity)
+      have stepC2 : π ^ (-(τ / 2)) * ‖Complex.Gamma (((τ : ℂ) + 50 * I) / 2)‖ *
+            ‖Complex.sqrt (Complex.sin (π * ((τ : ℂ) + 50 * I) / 2))‖ / Real.log 50 ≤
+          π ^ (-(τ / 2)) * (Real.sqrt (2 * π) * (50 / 2) ^ ((τ - 1) / 2) *
+            Real.exp (-π * 50 / 4) * (1 + 1 / 50 ^ 2)) *
+            (Real.exp (π * 50 / 4) / Real.sqrt 2 * (1 + 1 / 50 ^ 2)) / Real.log 50 :=
+        div_le_div_of_nonneg_right stepA hLpos.le
+      rw [← stepB]
+      exact stepC1.trans stepC2
+    have hζ := h50 τ hτ
+    have hcancel : ((2 * π) / 50) ^ ((1 - τ) / 2) * ((25 : ℝ) / π) ^ ((1 - τ) / 2) = 1 := by
+      rw [← Real.mul_rpow (by positivity : (0 : ℝ) ≤ 2 * π / 50)
+        (by positivity : (0 : ℝ) ≤ 25 / π)]
+      rw [show 2 * π / 50 * (25 / π) = 1 by field_simp; ring]
+      exact Real.one_rpow _
+    have hnum2 : (((2 * π) / 50) ^ ((1 - τ) / 2) * (1 + 1 / 50 ^ 2) ^ 2 / Real.log 50) *
+        ((0.9964 : ℝ) * ((25 : ℝ) / π) ^ ((1 - τ) / 2) * Real.log 50) =
+        (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 := by
+      have hLne : Real.log 50 ≠ 0 := ne_of_gt hLpos
+      have hXY := hcancel
+      field_simp
+      nlinarith [hXY]
+    calc ‖normalizer ((τ : ℂ) + 50 * I) * riemannZeta ((τ : ℂ) + 50 * I)‖
+        = ‖normalizer ((τ : ℂ) + 50 * I)‖ * ‖riemannZeta ((τ : ℂ) + 50 * I)‖ := norm_mul _ _
+      _ ≤ (((2 * π) / 50) ^ ((1 - τ) / 2) * (1 + 1 / 50 ^ 2) ^ 2 / Real.log 50) *
+            ((0.9964 : ℝ) * ((25 : ℝ) / π) ^ ((1 - τ) / 2) * Real.log 50) :=
+          mul_le_mul hN hζ (norm_nonneg _) (by positivity)
+      _ = (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 := hnum2
+  have hfac : ∀ z : ℂ, ‖normalizer z * riemannZeta z‖ =
+      ‖(π : ℂ) ^ (-z / 2) * Complex.Gamma (z / 2) * riemannZeta z‖ *
+        ‖Complex.sqrt (Complex.sin (π * z / 2))‖ / ‖Complex.log (-z * I)‖ := by
+    intro z
+    have h1 : normalizer z * riemannZeta z =
+        ((π : ℂ) ^ (-z / 2) * Complex.Gamma (z / 2) * riemannZeta z) *
+          Complex.sqrt (Complex.sin (π * z / 2)) / Complex.log (-z * I) := by
+      rw [normalizer]
+      ring
+    rw [h1, norm_div, norm_mul]
+  by_cases hle : σ ≤ 1 / 2
+  · have hτ : (1 - σ) ∈ Set.Icc (1 / 2 : ℝ) 1 := ⟨by linarith, by linarith [hσ.1]⟩
+    have hNw := hright (1 - σ) hτ
+    set s : ℂ := (σ : ℂ) + 50 * I with hsdef
+    set w : ℂ := ((1 - σ : ℝ) : ℂ) + 50 * I with hwdef
+    have hsre : s.re = σ := by simp [s]
+    have hwre : w.re = 1 - σ := by simp [w]
+    have hconjw : 1 - s = starRingEnd ℂ w := by
+      rw [hsdef, hwdef]
+      apply Complex.ext <;> simp
+    have hcast50 : (((50 : ℝ)) : ℂ) = (50 : ℂ) := by norm_num
+    have hSwpos : (0 : ℝ) < ‖Complex.sqrt (Complex.sin (π * w / 2))‖ := by
+      rw [cnorm_sqrt]
+      have h := sin_half_lower (1 - σ) 50 le_rfl
+      simp only [hcast50] at h
+      rw [← hwdef] at h
+      have h0 : (0 : ℝ) < Real.exp (π * 50 / 4) / Real.sqrt 2 * (1 - 1 / 50 ^ 2) := by
+        have h1 : (1 : ℝ) - 1 / 50 ^ 2 > 0 := by norm_num
+        positivity
+      linarith
+    have hLwpos : (0 : ℝ) < ‖Complex.log (-w * I)‖ := by
+      have h : Real.log 50 ≤ ‖Complex.log (-w * I)‖ := by
+        rw [hwdef, cneg_mul_I_lit (1 - σ)]
+        exact log_norm_ge (1 - σ) 50 h50pos
+      linarith
+    have hΛw : ‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ ≤
+        ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) *
+          (‖Complex.log (-w * I)‖ / ‖Complex.sqrt (Complex.sin (π * w / 2))‖) := by
+      have h : ‖normalizer w * riemannZeta w‖ ≤ (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 := hNw
+      rw [hfac w] at h
+      have hSne : ‖Complex.sqrt (Complex.sin (π * w / 2))‖ ≠ 0 := hSwpos.ne'
+      have hLne : ‖Complex.log (-w * I)‖ ≠ 0 := hLwpos.ne'
+      have hid : (‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ *
+            ‖Complex.sqrt (Complex.sin (π * w / 2))‖ / ‖Complex.log (-w * I)‖) *
+              (‖Complex.log (-w * I)‖ / ‖Complex.sqrt (Complex.sin (π * w / 2))‖) =
+          ‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ := by
+        rw [div_mul_div_comm]
+        rw [show ‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ *
+              ‖Complex.sqrt (Complex.sin (π * w / 2))‖ * ‖Complex.log (-w * I)‖ =
+            ‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ *
+              (‖Complex.sqrt (Complex.sin (π * w / 2))‖ * ‖Complex.log (-w * I)‖) by ring]
+        rw [show ‖Complex.log (-w * I)‖ * ‖Complex.sqrt (Complex.sin (π * w / 2))‖ =
+            ‖Complex.sqrt (Complex.sin (π * w / 2))‖ * ‖Complex.log (-w * I)‖ by ring]
+        exact mul_div_cancel_right₀ _ (mul_ne_zero hSne hLne)
+      rw [← hid]
+      exact mul_le_mul_of_nonneg_right h (by positivity)
+    have hSle : ‖Complex.sqrt (Complex.sin (π * s / 2))‖ ≤
+        ‖Complex.sqrt (Complex.sin (π * w / 2))‖ := by
+      rw [cnorm_sqrt, cnorm_sqrt]
+      apply Real.sqrt_le_sqrt
+      have h1 := sin_half_norm_sq σ 50
+      have h2 := sin_half_norm_sq (1 - σ) 50
+      simp only [hcast50] at h1 h2
+      rw [← hsdef] at h1
+      rw [← hwdef] at h2
+      have h3 : Real.sin (π * (1 - σ) / 2) = Real.cos (π * σ / 2) := by
+        have he : π * (1 - σ) / 2 = π / 2 - π * σ / 2 := by ring
+        rw [he, Real.sin_pi_div_two_sub]
+      rw [h3] at h2
+      have hsc : Real.sin (π * σ / 2) ^ 2 + Real.sinh (π * 50 / 2) ^ 2 ≤
+          Real.cos (π * σ / 2) ^ 2 + Real.sinh (π * 50 / 2) ^ 2 := by
+        have hx0 : 0 ≤ π * σ / 2 := by nlinarith [Real.pi_pos, hσ.1]
+        have hle2 : π * σ / 2 ≤ π / 2 - π * σ / 2 := by nlinarith [Real.pi_pos]
+        have hmono : Real.sin (π * σ / 2) ≤ Real.sin (π / 2 - π * σ / 2) :=
+          Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith [Real.pi_pos])
+            (by linarith [Real.pi_pos]) hle2
+        rw [Real.sin_pi_div_two_sub] at hmono
+        have hnn : 0 ≤ Real.sin (π * σ / 2) :=
+          Real.sin_nonneg_of_nonneg_of_le_pi hx0 (by nlinarith [Real.pi_pos])
+        nlinarith [hmono, hnn]
+      nlinarith [h1, h2, hsc, norm_nonneg (Complex.sin (π * s / 2)),
+        norm_nonneg (Complex.sin (π * w / 2))]
+    have hLwle : ‖Complex.log (-w * I)‖ ≤ Real.log 50 * (1 + 1 / 1000) := by
+      have h1 : ‖Complex.log (-w * I)‖ ≤ Real.log 50 + 1 / 1000 := by
+        rw [hwdef, cneg_mul_I_lit (1 - σ)]
+        exact log_norm_le_small (1 - σ) 50 ⟨by linarith [hσ.2], by linarith [hσ.1]⟩ le_rfl
+      nlinarith [hL1, h1]
+    have hLsge : Real.log 50 ≤ ‖Complex.log (-s * I)‖ := by
+      rw [hsdef, cneg_mul_I_lit σ]
+      exact log_norm_ge σ 50 h50pos
+    have hLsne : (0 : ℝ) < ‖Complex.log (-s * I)‖ := lt_of_lt_of_le hLpos hLsge
+    have hchain : ‖(π : ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) * riemannZeta s‖ =
+        ‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ := by
+      calc ‖(π : ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) * riemannZeta s‖
+          = ‖(π : ℂ) ^ (-(1 - s) / 2) * Complex.Gamma ((1 - s) / 2) * riemannZeta (1 - s)‖ :=
+            completed_norm_symm s (by rw [hsre]; exact hσ.1) (by rw [hsre]; exact hσ.2)
+              (by simp [s])
+        _ = ‖(π : ℂ) ^ (-(starRingEnd ℂ (1 - s)) / 2) * Complex.Gamma ((starRingEnd ℂ (1 - s)) / 2) *
+              riemannZeta (starRingEnd ℂ (1 - s))‖ := (completed_norm_conj (1 - s)).symm
+        _ = ‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ := by
+            rw [hconjw]; simp
+    rw [hfac s, hchain]
+    have hSspos : (0 : ℝ) < ‖Complex.sqrt (Complex.sin (π * s / 2))‖ := by
+      rw [cnorm_sqrt]
+      have h := sin_half_lower σ 50 le_rfl
+      simp only [hcast50] at h
+      rw [← hsdef] at h
+      have h0 : (0 : ℝ) < Real.exp (π * 50 / 4) / Real.sqrt 2 * (1 - 1 / 50 ^ 2) := by
+        have h1 : (1 : ℝ) - 1 / 50 ^ 2 > 0 := by norm_num
+        positivity
+      linarith
+    have hBpos : (0 : ℝ) ≤ (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 := by norm_num
+    rw [div_le_iff₀ hLsne]
+    have hstep1 : ‖(π : ℂ) ^ (-w / 2) * Complex.Gamma (w / 2) * riemannZeta w‖ *
+          ‖Complex.sqrt (Complex.sin (π * s / 2))‖ ≤
+        ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) *
+          (‖Complex.log (-w * I)‖ / ‖Complex.sqrt (Complex.sin (π * w / 2))‖) *
+            ‖Complex.sqrt (Complex.sin (π * s / 2))‖ :=
+      mul_le_mul_of_nonneg_right hΛw (le_of_lt hSspos)
+    have h2a : ‖Complex.log (-w * I)‖ * ‖Complex.sqrt (Complex.sin (π * s / 2))‖ ≤
+        Real.log 50 * (1 + 1 / 1000) * ‖Complex.sqrt (Complex.sin (π * w / 2))‖ := by
+      have h := mul_le_mul hLwle hSle (norm_nonneg _) (by positivity)
+      simpa only [mul_comm, mul_left_comm, mul_assoc] using h
+    have hstep2 : ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) *
+          (‖Complex.log (-w * I)‖ / ‖Complex.sqrt (Complex.sin (π * w / 2))‖) *
+            ‖Complex.sqrt (Complex.sin (π * s / 2))‖ ≤
+        ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) * (1 + 1 / 1000) * ‖Complex.log (-s * I)‖ := by
+      have hdiv : ‖Complex.log (-w * I)‖ * ‖Complex.sqrt (Complex.sin (π * s / 2))‖ /
+            ‖Complex.sqrt (Complex.sin (π * w / 2))‖ ≤ Real.log 50 * (1 + 1 / 1000) := by
+        rw [div_le_iff₀ hSwpos]
+        exact h2a
+      have harr : ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) *
+            (‖Complex.log (-w * I)‖ / ‖Complex.sqrt (Complex.sin (π * w / 2))‖) *
+              ‖Complex.sqrt (Complex.sin (π * s / 2))‖ =
+          ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) *
+            ((‖Complex.log (-w * I)‖ * ‖Complex.sqrt (Complex.sin (π * s / 2))‖) /
+              ‖Complex.sqrt (Complex.sin (π * w / 2))‖) := by
+        field_simp
+      have h5 : ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) * (Real.log 50 * (1 + 1 / 1000)) ≤
+          ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) * (1 + 1 / 1000) * ‖Complex.log (-s * I)‖ := by
+        have h6 : (0 : ℝ) ≤ (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 * (1 + 1 / 1000) := by norm_num
+        have h7 : ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) * (Real.log 50 * (1 + 1 / 1000)) =
+            ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 * (1 + 1 / 1000)) * Real.log 50 := by ring
+        rw [h7]
+        exact mul_le_mul_of_nonneg_left hLsge h6
+      rw [harr]
+      calc ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) *
+            ((‖Complex.log (-w * I)‖ * ‖Complex.sqrt (Complex.sin (π * s / 2))‖) /
+              ‖Complex.sqrt (Complex.sin (π * w / 2))‖)
+          ≤ ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) * (Real.log 50 * (1 + 1 / 1000)) :=
+            mul_le_mul_of_nonneg_left hdiv hBpos
+        _ ≤ ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) * (1 + 1 / 1000) * ‖Complex.log (-s * I)‖ := h5
+    refine (hstep1.trans hstep2).trans ?_
+    rw [one_mul]
+    have hB1 : (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 * (1 + 1 / 1000) ≤ 1 := by
+      have he : (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 * (1 + 1 / 1000) =
+          (2491 / 2500 : ℝ) * (2501 / 2500) ^ 2 * (1001 / 1000) := by norm_num
+      have hR : (2491 / 2500 : ℝ) * (2501 / 2500) ^ 2 * (1001 / 1000) ≤ 1 := by norm_num
+      exact he.le.trans hR
+    have hmm : ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 * (1 + 1 / 1000)) * ‖Complex.log (-s * I)‖ ≤
+        ‖Complex.log (-s * I)‖ := by
+      nlinarith [hB1, hLsne]
+    calc ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2) * (1 + 1 / 1000) * ‖Complex.log (-s * I)‖
+        = ((0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 * (1 + 1 / 1000)) * ‖Complex.log (-s * I)‖ := by ring
+      _ ≤ ‖Complex.log (-s * I)‖ := hmm
+  · push_neg at hle
+    have h := hright σ ⟨le_of_lt hle, hσ.2⟩
+    refine h.trans ?_
+    have hfin : (1 : ℝ) - (0.9964 : ℝ) * (1 + 1 / 50 ^ 2) ^ 2 > 0 := by norm_num
+    linarith
 
 /-- Backlund p. 368, the half-strip maximum argument with explicit damping.
 The regularity, three boundary edges and damped top bounds are premises.
