@@ -21,6 +21,9 @@ import LeanLab.KumchevLiu2007.Decomp1534a
 import LeanLab.KumchevLiu2007.Decomp1534c
 import LeanLab.KumchevLiu2007.Decomp506a
 import LeanLab.KumchevLiu2007.Decomp506b
+import LeanLab.KumchevLiu2007.Trunc129Sifted
+import LeanLab.KumchevLiu2007.Trunc129Window
+import LeanLab.KumchevLiu2007.Trunc129Main
 
 namespace LeanLab.KumchevLiu2007.Task129L
 
@@ -223,6 +226,16 @@ theorem residual_full_range_extension (A : ℝ) (hA : 0 < A) :
         (fun v => X - ((X ^ (7 / 12 + ε / 2))) ≤ (v.1 : ℝ) ∧ (v.1 : ℝ) < X ∧
           Real.sqrt ((X ^ (7 / 12 + ε / 2))) / 2 ≤ (v.2 : ℝ) ∧ (v.2 : ℝ) < Real.sqrt ((X ^ (7 / 12 + ε / 2))) ∧ v.1 + v.2 ^ 2 = n)).filter (fun v => v.1.Prime ∧ v.2.Prime)).card : ℝ))|) X H : ℝ) ≤
           C * H / Real.log X ^ A := by
-  exact residual_full_range_extension_of_transition_agy61 A hA sorry
+  -- PROVED 2026-11-17: the transition regime is supplied by the truncated window sieve
+  -- route of Trunc129BV, Trunc129Sieve, Trunc129Mass, Trunc129Sifted, Trunc129Window and
+  -- Trunc129Main, pages 16 and 17 displays 56 to 59 rerun on the truncated window.
+  exact residual_full_range_extension_of_transition_agy61 A hA
+    (Trunc129.transition_of_inputs A hA
+      (fun A' B δ ε hA' hB hδ hδ1 hε hε1 =>
+        Trunc129.trunc_sifted_sieve_bound A' B δ ε hA' hB hδ hδ1 hε hε1)
+      (fun B δ ε hB hδ hε hε1 => Trunc129.trunc_residual_le_sifted B δ ε hB hδ hε hε1)
+      (fun ε hε hε1 => Trunc129.trunc_integerMain_lower ε hε hε1))
+
+#print axioms residual_full_range_extension
 
 end LeanLab.KumchevLiu2007.Task129L
