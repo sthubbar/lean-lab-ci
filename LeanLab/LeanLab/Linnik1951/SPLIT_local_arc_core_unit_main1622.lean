@@ -40,7 +40,16 @@ is nonnegative. This is the step which turns the modulus of the real number into
 number itself, and it carries no damping, no modulus and no scale error. -/
 theorem local_arc_core_unit_conv_nonneg1622 (n : ℕ) (hn : 4 ≤ n) :
     0 ≤ logConvolution1622 n := by
-  sorry
+  rw [logConvolution1622]
+  apply Finset.sum_nonneg
+  intro m hm
+  obtain ⟨hm2, hmn⟩ := Finset.mem_Icc.mp hm
+  have hmge : (2 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm2
+  have hnm : 2 ≤ n - m := by omega
+  have hnmge : (2 : ℝ) ≤ ((n - m : ℕ) : ℝ) := by exact_mod_cast hnm
+  have h1 : (0 : ℝ) < Real.log (m : ℝ) := Real.log_pos (by linarith)
+  have h2 : (0 : ℝ) < Real.log ((n - m : ℕ) : ℝ) := Real.log_pos (by linarith)
+  exact div_nonneg (by norm_num) (mul_pos h1 h2).le
 
 /-- LEAF. Size of the convolution. Every denominator in the sum is the product of two
 logarithms of integers which are at least two, hence is at least the square of the
@@ -50,7 +59,40 @@ four is at most the residual divided by the square of the logarithm of two. This
 counting estimate on one finite sum, with no damping and no scale error in it. -/
 theorem local_arc_core_unit_conv_size1622 (n : ℕ) (hn : 4 ≤ n) :
     logConvolution1622 n ≤ (n : ℝ) / Real.log 2 ^ 2 := by
-  sorry
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hsq : (0 : ℝ) < Real.log 2 * Real.log 2 := mul_pos hlog2 hlog2
+  have hterm : ∀ m ∈ Finset.Icc 2 (n - 2),
+      1 / (Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ)) ≤
+        1 / (Real.log 2 * Real.log 2) := by
+    intro m hm
+    obtain ⟨hm2, hmn⟩ := Finset.mem_Icc.mp hm
+    have hmge : (2 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm2
+    have hnm : 2 ≤ n - m := by omega
+    have hnmge : (2 : ℝ) ≤ ((n - m : ℕ) : ℝ) := by exact_mod_cast hnm
+    have h1 : Real.log 2 ≤ Real.log (m : ℝ) := Real.log_le_log (by norm_num) hmge
+    have h2 : Real.log 2 ≤ Real.log ((n - m : ℕ) : ℝ) := Real.log_le_log (by norm_num) hnmge
+    have h1' : (0 : ℝ) < Real.log (m : ℝ) := lt_of_lt_of_le hlog2 h1
+    have hprod : Real.log 2 * Real.log 2 ≤
+        Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ) :=
+      mul_le_mul h1 h2 hlog2.le h1'.le
+    exact one_div_le_one_div_of_le hsq hprod
+  have hcard : (Finset.Icc 2 (n - 2)).card = n - 3 := by
+    rw [Nat.card_Icc]
+    omega
+  have hle : ((Finset.Icc 2 (n - 2)).card : ℝ) ≤ (n : ℝ) := by
+    rw [hcard]
+    exact_mod_cast (by omega : n - 3 ≤ n)
+  have hc : (0 : ℝ) ≤ 1 / (Real.log 2 * Real.log 2) := by positivity
+  rw [logConvolution1622]
+  calc ∑ m ∈ Finset.Icc 2 (n - 2),
+        1 / (Real.log (m : ℝ) * Real.log ((n - m : ℕ) : ℝ))
+      ≤ ∑ _m ∈ Finset.Icc 2 (n - 2), 1 / (Real.log 2 * Real.log 2) :=
+        Finset.sum_le_sum hterm
+    _ = ((Finset.Icc 2 (n - 2)).card : ℝ) * (1 / (Real.log 2 * Real.log 2)) := by
+        rw [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ (n : ℝ) * (1 / (Real.log 2 * Real.log 2)) :=
+        mul_le_mul_of_nonneg_right hle hc
+    _ = (n : ℝ) / Real.log 2 ^ 2 := by rw [mul_one_div, pow_two]
 
 /-- LEAF. The scale comparison. For every positive constant there are a positive constant
 and a threshold so that, past the threshold, the first constant times N is at most the
