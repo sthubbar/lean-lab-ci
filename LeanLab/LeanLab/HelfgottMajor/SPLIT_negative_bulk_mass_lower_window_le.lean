@@ -1,5 +1,4 @@
 import LeanLab.HelfgottMajor.SPLIT_negative_bulk_mass_window_le
-import LeanLab.HelfgottMajor.LowerWindowPartition901
 
 /-!
 Split of `negative_bulk_mass_lower_window_le` in
@@ -26,8 +25,7 @@ strictly smaller than the volume of the window and it carries no mean weight int
 volume of the near piece is strictly smaller than the volume of the window and it carries half of
 the shifted log weight integral. The assembly is the partition of the ordinate window at minus
 fifteen eighths, the addition of the two inequalities, and the arithmetic of the budgets. It has no
-sorry of its own. The partition has a proof from a separately checked summable-mass helper.
-The far and near estimates remain OPEN.
+sorry of its own. All three leaves are OPEN.
 
 AI wrote this Lean code. Binary Goldbach is open.
 -/
@@ -36,6 +34,20 @@ namespace LeanLab.HelfgottMajor.Decomp431a
 open Real LeanLab.HelfgottArcs Decomp269a Decomp269b Decomp389b
 open MeasureTheory Set Filter Asymptotics
 open scoped Topology FourierTransform
+
+/-- The mass of the union of two disjoint sets is the sum of the two masses, for a summand on a
+finite index type. Finiteness is what makes every series below summable. -/
+private lemma tsum_indicator_split {α : Type*} [Finite α] (s₁ s₂ s : Set α) (f : α → ℝ)
+    (hdisj : Disjoint s₁ s₂) (hunion : s₁ ∪ s₂ = s) :
+    (∑' x, s.indicator f x) = (∑' x, s₁.indicator f x) + (∑' x, s₂.indicator f x) := by
+  classical
+  have h₁ : Summable (fun x => s₁.indicator f x) := Summable.of_finite
+  have h₂ : Summable (fun x => s₂.indicator f x) := Summable.of_finite
+  refine (tsum_congr ?_).trans (h₁.tsum_add h₂)
+  intro x
+  have h := Set.indicator_union_of_disjoint hdisj (f := f)
+  rw [hunion] at h
+  exact congrFun h x
 
 /-- LEAF 1 of 3, the partition of the window at minus fifteen eighths. The mass over the closed
 window from minus two to minus seven quarters equals the mass over the part of the window at
@@ -57,10 +69,34 @@ theorem negative_bulk_mass_lower_window_partition (q : ℕ) [NeZero q] (χ : Dir
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
         Set.indicator {ρ | -(15 / 8) < ρ.val.im ∧ ρ.val.im ≤ -(7 / 4) ∧ |ρ.val.im| ≤ 2}
           (fun ρ => mellinMassTerm χ δ ρ.val) ρ) := by
-  exact lower_window_mass_partition_of_summable (α := ZeroCount1623.ZeroIdx χ T)
-    (fun ρ => ρ.val.im)
-    (fun ρ => mellinMassTerm χ δ ρ.val) (-(15 / 8)) (-(7 / 4)) 2
-    (by norm_num) (ZeroCount1623.summable_zeroIdx χ T _)
+  classical
+  have hfin : ({ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+      |ρ.im| ≤ T}).Finite := ZeroCount1623.stripZeros_finite χ T
+  haveI : Finite {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+      |ρ.im| ≤ T} := hfin.to_subtype
+  refine tsum_indicator_split
+    (s₁ := {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+        |ρ.im| ≤ T} | ρ.val.im ≤ -(15 / 8) ∧ |ρ.val.im| ≤ 2})
+    (s₂ := {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+        |ρ.im| ≤ T} | -(15 / 8) < ρ.val.im ∧ ρ.val.im ≤ -(7 / 4) ∧ |ρ.val.im| ≤ 2})
+    (s := {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧
+        |ρ.im| ≤ T} | ρ.val.im ≤ -(7 / 4) ∧ |ρ.val.im| ≤ 2})
+    (f := fun ρ => mellinMassTerm χ δ ρ.val) ?_ ?_
+  · rw [Set.disjoint_left]
+    intro x hx hy
+    simp only [Set.mem_setOf_eq] at hx hy
+    linarith [hx.1, hy.1]
+  · ext x
+    simp only [Set.mem_union, Set.mem_setOf_eq]
+    constructor
+    · rintro (⟨h1, h2⟩ | ⟨h1, h2, h3⟩)
+      · exact ⟨by linarith, h2⟩
+      · exact ⟨h2, h3⟩
+    · rintro ⟨h1, h2⟩
+      by_cases h3 : x.val.im ≤ -(15 / 8)
+      · exact Or.inl ⟨h3, h2⟩
+      · exact Or.inr ⟨by linarith, h1, h2⟩
+
 
 /-- LEAF 2 of 3, the far eighth of the window, from minus two up to minus fifteen eighths. The mass
 over that piece is at most three sixteenths of the shifted log weight integral over the height
@@ -76,8 +112,9 @@ theorem negative_bulk_mass_lower_window_far_le (q : ℕ) [NeZero q] (χ : Dirich
       (3 / 16) * (∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) - (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389)) := by
-  -- The source sampling argument needs a zero-location input and a quantitative zero count.
-  -- Neither the source argument nor the available count supplies this restricted derivative budget.
+  -- Required: the already decayed profile on the last eighth of the window, an explicit count of
+  -- the ordinates it holds, and a pointwise envelope for the mass charged to the shifted log weight
+  -- integral alone.
   sorry
 
 /-- LEAF 3 of 3, the near piece of the window, strictly above minus fifteen eighths and at most
@@ -98,8 +135,9 @@ theorem negative_bulk_mass_lower_window_near_le (q : ℕ) [NeZero q] (χ : Diric
       (3 / 16) * (∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) - (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389)) := by
-  -- The source sampling argument retains endpoint terms. It does not allocate the stated shares
-  -- of the two integrals to this window without additional analytic estimates.
+  -- Required: an explicit count of the ordinates in this piece together with a pointwise envelope
+  -- for the mass on it, charged to half of the mean weight and three sixteenths of the shifted log
+  -- weight.
   sorry
 
 /-- The statement of `negative_bulk_mass_lower_window_le`, assembled from the three leaves: the
