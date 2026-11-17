@@ -1,0 +1,11 @@
+{
+ "run_id": "44046781240",
+ "shards_reported": 8,
+ "files": 1153,
+ "declarations_closed": 1,
+ "sites": 1,
+ "skipped": 70,
+ "closed": [
+  "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/DecompF728.lean LEAF_Sg_pole_pair_condition by norm_num"
+ ]
+}
