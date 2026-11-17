@@ -46,7 +46,18 @@ theorem leaf_band_union_membership (a b : ℝ) :
         (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧
             a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧
             (4*a + b ≤ 15/8 ∨ 17/8 ≤ 4*a + b))) := by
-  sorry
+  intro h
+  rcases h with (((h | h) | h) | h) | h
+  · obtain ⟨h1, h2, h3, h4, h5⟩ := h
+    exact Or.inl ⟨h1, h2, h3, h4, h5⟩
+  · obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩ := h
+    exact Or.inr (Or.inl ⟨h1, h2, h3, h4, h5, h6, h7, h8, Or.inl h9, Or.inl h10⟩)
+  · obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9⟩ := h
+    exact Or.inr (Or.inl ⟨h1, h2, h3, h4, h5, h6, h7, by linarith, Or.inr h8, Or.inl h9⟩)
+  · obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩ := h
+    exact Or.inr (Or.inr ⟨h1, h2, h3, h4, h5, h6, h7, Or.inl h8⟩)
+  · obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩ := h
+    exact Or.inr (Or.inr ⟨h1, h2, h3, h4, h5, h6, h7, Or.inr h8⟩)
 
 /-- LEAF: the computation of the split. The integral of `1 / (a b^2)` over the union of the five
 convex pieces is at least `13/10`; a floating point quadrature gives about `1.3941`, so there is a
@@ -61,7 +72,32 @@ and its integrand is at most `512`; off the union the integrand is zero. Hence `
 everywhere. -/
 theorem leaf_band_union_integrand_bound (a b : ℝ) :
     |(if ((((((2273/10000 ≤ b ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1) ∨ (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1 ∧ 4*a + 3*b ≤ 15/8 ∧ 17/8 ≤ 4*a + 7*b ∧ a + b ≤ 7/16 ∧ 2273/10000 ≤ a)) ∨ (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1 ∧ 4*a + 3*b ≤ 15/8 ∧ 17/8 ≤ 4*a + 5*b ∧ 2273/10000 ≤ a)) ∨ (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧ 4*a + b ≤ 15/8)) ∨ (1/8 ≤ b ∧ b ≤ 2273/10000 ∧ b ≤ a ∧ a ≤ 1/2 ∧ 9/16 ≤ a + 2*b ∧ a + 2*b ≤ 1 ∧ 17/8 ≤ 4*a + 3*b ∧ 17/8 ≤ 4*a + b))) then 1/(a*b^2) else 0)| ≤ 1000 := by
-  sorry
+  split_ifs with h
+  · have hb : (1/8 : ℝ) ≤ b := by
+      rcases h with (((h | h) | h) | h) | h
+      · obtain ⟨h1, -⟩ := h; linarith
+      · obtain ⟨h1, -⟩ := h; exact h1
+      · obtain ⟨h1, -⟩ := h; exact h1
+      · obtain ⟨h1, -⟩ := h; exact h1
+      · obtain ⟨h1, -⟩ := h; exact h1
+    have hba : b ≤ a := by
+      rcases h with (((h | h) | h) | h) | h
+      · obtain ⟨-, h2, -⟩ := h; exact h2
+      · obtain ⟨-, -, h2, -⟩ := h; exact h2
+      · obtain ⟨-, -, h2, -⟩ := h; exact h2
+      · obtain ⟨-, -, h2, -⟩ := h; exact h2
+      · obtain ⟨-, -, h2, -⟩ := h; exact h2
+    have ha : (1/8 : ℝ) ≤ a := le_trans hb hba
+    have hb0 : (0:ℝ) < b := by linarith
+    have ha0 : (0:ℝ) < a := by linarith
+    have hsq : (1/64 : ℝ) ≤ b^2 := by nlinarith
+    have h512 : (1/512 : ℝ) ≤ a*b^2 := by
+      have := mul_le_mul ha hsq (by norm_num : (0:ℝ) ≤ 1/64) (by linarith : (0:ℝ) ≤ a)
+      linarith
+    rw [abs_of_nonneg (by positivity : (0:ℝ) ≤ 1/(a*b^2))]
+    rw [div_le_iff₀ (by positivity : (0:ℝ) < a*b^2)]
+    nlinarith
+  · simp
 
 /-- The quadrature of the target, assembled from the geometric step, the computation over the five
 convex pieces and the pointwise bound: the union of the five pieces lies in the target region and

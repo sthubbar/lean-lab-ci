@@ -81,7 +81,44 @@ every positive `ε` below one tenth, so it is not vacuous. -/
 theorem leaf_section4Block_endpoint_order (ε : ℝ) (hε : 0 < ε) (hε10 : ε ≤ 1 / 10) :
     ∃ X : ℝ, 1 ≤ X ∧ ∀ x : ℝ, X ≤ x →
       Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ x ^ (0.45 - 2 * ε / 3) := by
-  sorry
+  have hc : (1 / 4 : ℝ) ≤ 0.45 - 2 * ε / 3 := by linarith
+  have h1e : (1 : ℝ) ≤ Real.exp 9 := Real.one_le_exp (by norm_num)
+  refine ⟨Real.exp 9, h1e, ?_⟩
+  intro x hx
+  have hx1 : (1 : ℝ) ≤ x := le_trans h1e hx
+  have hx0 : (0 : ℝ) < x := lt_of_lt_of_le zero_lt_one hx1
+  have hu9 : (9 : ℝ) ≤ Real.log x := by
+    have h := Real.log_le_log (Real.exp_pos 9) hx
+    rwa [Real.log_exp] at h
+  set u : ℝ := Real.log x with hudef
+  have hu0 : (0 : ℝ) < u := by rw [hudef]; linarith
+  have hu9' : (9 : ℝ) ≤ u := by rw [hudef]; exact hu9
+  set v : ℝ := u ^ (1 / 3 : ℝ) with hvdef
+  have hv0 : 0 ≤ v := by rw [hvdef]; exact Real.rpow_nonneg hu0.le _
+  have hv3 : v ^ 3 = u := by
+    rw [hvdef, ← Real.rpow_natCast, ← Real.rpow_mul hu0.le,
+      show (1 / 3 : ℝ) * ((3 : ℕ) : ℝ) = 1 by norm_num, Real.rpow_one]
+  have hvcube : v * v * v = u := by rw [← hv3]; ring
+  have hv2 : (2 : ℝ) ≤ v := by
+    by_contra hcon
+    have hvlt : v < 2 := lt_of_not_ge hcon
+    have h1 : v * v < 4 := by nlinarith [hvlt, hv0]
+    have h2 : v * v * v < 4 * 2 := by nlinarith [h1, hvlt, hv0]
+    linarith [hvcube, hu9']
+  have hvv : (4 : ℝ) ≤ v * v := by
+    have h := mul_le_mul hv2 hv2 (by norm_num : (0 : ℝ) ≤ 2) hv0
+    linarith
+  have hvle : v ≤ u / 4 := by
+    have h4 : v * 4 ≤ v * (v * v) := mul_le_mul_of_nonneg_left hvv hv0
+    nlinarith [h4, hvcube]
+  have hle : v ≤ (0.45 - 2 * ε / 3) * u := by
+    have h2 : u / 4 ≤ (0.45 - 2 * ε / 3) * u := by nlinarith [hu0.le, hc]
+    linarith
+  calc Real.exp (Real.log x ^ (1 / 3 : ℝ))
+      = Real.exp v := by rw [← hudef, ← hvdef]
+    _ ≤ Real.exp ((0.45 - 2 * ε / 3) * u) := Real.exp_le_exp.mpr hle
+    _ = Real.exp ((0.45 - 2 * ε / 3) * Real.log x) := by rw [hudef]
+    _ = x ^ (0.45 - 2 * ε / 3) := by rw [Real.rpow_def_of_pos hx0, mul_comm]
 
 /-- The block sum is continuous in the height, so every interval integral of its norm
 exists. The coefficient, the character value and the index are fixed; the only dependence on
