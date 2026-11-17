@@ -50,7 +50,138 @@ theorem leaf_section4Block_positive_large_endpoints :
       0 ≤ Real.exp (Real.log x ^ (1 / 3 : ℝ)) ∧
         Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ x ^ (0.45 - 2 * ε / 3) ∧
           x ^ (0.45 - 2 * ε / 3) - Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ x ^ (1 / 2 : ℝ) := by
-  sorry
+  use 1 / 200
+  constructor
+  · norm_num
+  · intro ε hε hεη x hx
+    have hx_pos : 0 < x := by linarith [Real.exp_pos 30]
+    have hx_ge_one : 1 ≤ x := by
+      have h₁ : (1 : ℝ) ≤ Real.exp 30 := by linarith [Real.add_one_le_exp 30]
+      linarith
+    have hlog : 30 ≤ Real.log x := by
+      have h₁ : Real.log (Real.exp 30) ≤ Real.log x := Real.log_le_log (by positivity) hx
+      have h₂ : Real.log (Real.exp 30) = 30 := by rw [Real.log_exp]
+      linarith
+    have hlog_pos : 0 < Real.log x := by linarith
+    
+    constructor
+    · -- 0 ≤ exp((log x)^(1/3))
+      exact le_of_lt (Real.exp_pos _)
+    · constructor
+      · -- exp((log x)^(1/3)) ≤ x^(0.45 - 2ε/3)
+        have h₁ : 0 < Real.log x := hlog_pos
+        have h₂ : 0 < x := hx_pos
+        have h₃ : 0 < x ^ (0.45 - 2 * ε / 3 : ℝ) := by positivity
+        have h₄ : (0.45 : ℝ) - 2 * ε / 3 > 0 := by
+          have h₅ : ε < 1 / 200 := hεη
+          norm_num at h₅ ⊢ <;> linarith
+        -- Take log of both sides: need (log x)^(1/3) ≤ (0.45 - 2ε/3) * log x
+        -- Let L = log x ≥ 30. Then L^(1/3) ≤ c * L where c = 0.45 - 2ε/3.
+        -- This is equivalent to 1 ≤ c * L^(2/3) since L^(1/3) > 0.
+        -- Since L ≥ 30, L^(2/3) ≥ 30^(2/3) > 9 (because 9^3 = 729 < 900 = 30^2).
+        -- And c > 67/150 ≈ 0.4467, so c * 9 > 4 > 1.
+        have h₅ : Real.log x ^ (1 / 3 : ℝ) ≤ (0.45 - 2 * ε / 3 : ℝ) * Real.log x := by
+          have h₆ : 0 < Real.log x := hlog_pos
+          have h₇ : (0.45 : ℝ) - 2 * ε / 3 > 67 / 150 := by
+            norm_num at hεη ⊢ <;> linarith
+          -- 30^(2/3) > 9
+          have h₈ : (30 : ℝ) ^ (2 / 3 : ℝ) > 9 := by
+            by_contra! h
+            have h₉ : (30 : ℝ) ^ (2 / 3 : ℝ) ≤ 9 := by linarith
+            have h₁₀ : ((30 : ℝ) ^ (2 / 3 : ℝ)) ^ 3 ≤ 9 ^ 3 := by
+              gcongr
+            have h₁₁ : ((30 : ℝ) ^ (2 / 3 : ℝ)) ^ 3 = 30 ^ 2 := by
+              have h₁₂ : 0 ≤ (30 : ℝ) := by norm_num
+              have h₁₃ : ((30 : ℝ) ^ (2 / 3 : ℝ)) ^ 3 = (30 : ℝ) ^ ((2 / 3 : ℝ) * 3) := by
+                rw [show ((30 : ℝ) ^ (2 / 3 : ℝ)) ^ 3 = (30 : ℝ) ^ ((2 / 3 : ℝ) * 3 : ℝ) by
+                  rw [Real.rpow_mul h₁₂ (by norm_num) (by norm_num)]
+                  <;> norm_num]
+                <;> norm_num
+              rw [h₁₃]
+              norm_num
+            have h₁₄ : 9 ^ 3 = 729 := by norm_num
+            have h₁₅ : 30 ^ 2 = 900 := by norm_num
+            have h₁₆ : (30 : ℝ) ^ 2 ≤ 9 ^ 3 := by linarith
+            norm_num at h₁₆ ⊢
+          -- c * L^(2/3) ≥ c * 30^(2/3) > (67/150) * 9 > 1
+          have h₉ : (Real.log x : ℝ) ≥ 30 := hlog
+          have h₁₀ : (Real.log x : ℝ) ^ (2 / 3 : ℝ) ≥ (30 : ℝ) ^ (2 / 3 : ℝ) := by
+            apply Real.rpow_le_rpow
+            · linarith
+            · linarith
+          have h₁₁ : (0.45 - 2 * ε / 3 : ℝ) * (Real.log x) ^ (2 / 3 : ℝ) > 1 := by
+            calc
+              (0.45 - 2 * ε / 3 : ℝ) * (Real.log x) ^ (2 / 3 : ℝ) ≥ (0.45 - 2 * ε / 3 : ℝ) * (30 : ℝ) ^ (2 / 3 : ℝ) := by
+                gcongr <;> nlinarith
+              _ > (67 / 150 : ℝ) * (30 : ℝ) ^ (2 / 3 : ℝ) := by gcongr
+              _ > (67 / 150 : ℝ) * 9 := by gcongr <;> nlinarith
+              _ = 603 / 150 := by norm_num
+              _ > 1 := by norm_num
+          -- 1 ≤ c * L^(2/3), so L^(1/3) ≤ c * L (dividing both sides by L^(1/3) > 0)
+          have h₁₂ : 0 < (Real.log x : ℝ) ^ (2 / 3 : ℝ) := Real.rpow_pos_of_pos (by linarith) _
+          have h₁₃ : 1 ≤ (0.45 - 2 * ε / 3 : ℝ) * (Real.log x) ^ (2 / 3 : ℝ) := by linarith
+          have h₁₄ : Real.log x ^ (1 / 3 : ℝ) > 0 := Real.rpow_pos_of_pos h₆ _
+          -- Prove: (log x)^(1/3) * (log x)^(2/3) = log x
+          have h₁₅ : Real.log x ^ (1 / 3 : ℝ) * (Real.log x) ^ (2 / 3 : ℝ) = Real.log x := by
+            have h₁₆ : 0 < Real.log x := hlog_pos
+            have h₁₇ : Real.log x ^ (1 / 3 : ℝ) * (Real.log x) ^ (2 / 3 : ℝ) = (Real.log x) ^ ((1 / 3 : ℝ) + (2 / 3 : ℝ)) := by
+              rw [← Real.rpow_add h₁₆]
+              <;> ring_nf
+            rw [h₁₇]
+            norm_num [h₁₆]
+            <;> field_simp [Real.rpow_pos_of_pos h₁₆]
+            <;> ring_nf
+          calc
+            Real.log x ^ (1 / 3 : ℝ) = Real.log x ^ (1 / 3 : ℝ) * 1 := by ring
+            _ ≤ Real.log x ^ (1 / 3 : ℝ) * ((0.45 - 2 * ε / 3 : ℝ) * (Real.log x) ^ (2 / 3 : ℝ)) := by
+              gcongr
+            _ = (0.45 - 2 * ε / 3 : ℝ) * (Real.log x ^ (1 / 3 : ℝ) * (Real.log x) ^ (2 / 3 : ℝ)) := by ring
+            _ = (0.45 - 2 * ε / 3 : ℝ) * Real.log x := by rw [h₁₅]
+          <;> linarith
+        -- Now: exp((log x)^(1/3)) ≤ exp((0.45 - 2ε/3) * log x) = x^(0.45 - 2ε/3)
+        have h₆ : Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ Real.exp ((0.45 - 2 * ε / 3 : ℝ) * Real.log x) := by
+          gcongr
+        have h₇ : Real.exp ((0.45 - 2 * ε / 3 : ℝ) * Real.log x) = x ^ (0.45 - 2 * ε / 3 : ℝ) := by
+          have h₇₁ : Real.log (x ^ (0.45 - 2 * ε / 3 : ℝ)) = (0.45 - 2 * ε / 3 : ℝ) * Real.log x := by
+            rw [Real.log_rpow (by positivity) (by positivity)]
+            <;> ring_nf
+          have h₇₂ : (0.45 - 2 * ε / 3 : ℝ) * Real.log x = Real.log (x ^ (0.45 - 2 * ε / 3 : ℝ)) := by
+            rw [eq_comm]
+            exact h₇₁
+          calc
+            Real.exp ((0.45 - 2 * ε / 3 : ℝ) * Real.log x) = Real.exp (Real.log (x ^ (0.45 - 2 * ε / 3 : ℝ))) := by rw [h₇₂]
+            _ = x ^ (0.45 - 2 * ε / 3 : ℝ) := by
+              rw [Real.exp_log]
+              exact h₃
+        calc
+          Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ Real.exp ((0.45 - 2 * ε / 3 : ℝ) * Real.log x) := h₆
+          _ = x ^ (0.45 - 2 * ε / 3 : ℝ) := h₇
+      · -- x^(0.45 - 2ε/3) - exp((log x)^(1/3)) ≤ x^(1/2)
+        have h₆ : 0 < Real.exp (Real.log x ^ (1 / 3 : ℝ)) := Real.exp_pos _
+        have h₇ : (0.45 : ℝ) - 2 * ε / 3 ≤ (1 / 2 : ℝ) := by
+          norm_num at hεη ⊢ <;> linarith
+        have h₈ : x ^ (0.45 - 2 * ε / 3 : ℝ) ≤ x ^ (1 / 2 : ℝ) := by
+          have h₉ : 1 ≤ x := hx_ge_one
+          have h₁₀ : (0.45 - 2 * ε / 3 : ℝ) ≤ 1 / 2 := h₇
+          have h₁₁ : 0 ≤ (1 / 2 : ℝ) - (0.45 - 2 * ε / 3 : ℝ) := by linarith
+          have h₁₂ : 1 ≤ x ^ ((1 / 2 : ℝ) - (0.45 - 2 * ε / 3 : ℝ)) := by
+            apply Real.one_le_rpow
+            · linarith
+            · linarith
+          have h₁₃ : 0 ≤ x ^ (0.45 - 2 * ε / 3 : ℝ) := by positivity
+          calc
+            x ^ (0.45 - 2 * ε / 3 : ℝ) = x ^ (0.45 - 2 * ε / 3 : ℝ) * 1 := by ring
+            _ ≤ x ^ (0.45 - 2 * ε / 3 : ℝ) * x ^ ((1 / 2 : ℝ) - (0.45 - 2 * ε / 3 : ℝ)) := by
+              gcongr <;> nlinarith
+            _ = x ^ (1 / 2 : ℝ) := by
+              rw [← Real.rpow_add (by linarith)]
+              <;> ring_nf
+              <;> field_simp [Real.rpow_pos_of_pos hx_pos]
+              <;> ring_nf
+        calc
+          x ^ (0.45 - 2 * ε / 3 : ℝ) - Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ x ^ (0.45 - 2 * ε / 3 : ℝ) := by
+            linarith [h₆]
+          _ ≤ x ^ (1 / 2 : ℝ) := h₈
 
 /-- LEAF 2 of 5. Step: Cauchy-Schwarz in the height. For a nonnegative function on a range
 whose endpoints are ordered, the square of the integral is at most the length of the range
