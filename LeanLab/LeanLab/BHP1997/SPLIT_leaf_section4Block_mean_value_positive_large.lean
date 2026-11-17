@@ -50,7 +50,50 @@ theorem leaf_section4Block_positive_large_endpoints :
       0 ≤ Real.exp (Real.log x ^ (1 / 3 : ℝ)) ∧
         Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ x ^ (0.45 - 2 * ε / 3) ∧
           x ^ (0.45 - 2 * ε / 3) - Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ x ^ (1 / 2 : ℝ) := by
-  sorry
+  refine ⟨1 / 200, by norm_num, ?_⟩
+  intro ε hε hεη x hx
+  have hx0 : 0 < x := lt_of_lt_of_le (Real.exp_pos 30) hx
+  have hlog30 : 30 ≤ Real.log x := by
+    have h := Real.log_le_log (Real.exp_pos 30) hx
+    rwa [Real.log_exp] at h
+  have hu0 : 0 ≤ Real.log x := by linarith
+  have hv0 : 0 ≤ Real.log x ^ (1 / 3 : ℝ) := Real.rpow_nonneg hu0 _
+  have hv3 : (Real.log x ^ (1 / 3 : ℝ)) ^ 3 = Real.log x := by
+    simpa [one_div] using
+      Real.rpow_inv_natCast_pow (x := Real.log x) (n := 3) hu0 (by norm_num)
+  have hv3ge : 3 ≤ Real.log x ^ (1 / 3 : ℝ) := by
+    by_contra hlt
+    rw [not_le] at hlt
+    have h3 : (Real.log x ^ (1 / 3 : ℝ)) ^ 3 < 3 ^ 3 := pow_lt_pow_left₀ hlt hv0 (n := 3) (by norm_num)
+    rw [hv3] at h3
+    norm_num at h3
+    linarith
+  have hv2 : 9 ≤ (Real.log x ^ (1 / 3 : ℝ)) ^ 2 := by
+    have h := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 3) hv3ge 2
+    norm_num at h
+    linarith
+  have hvle : Real.log x ^ (1 / 3 : ℝ) ≤ 0.4 * Real.log x := by
+    have hpos : 0 < Real.log x ^ (1 / 3 : ℝ) := by linarith
+    have hfac : 0 ≤ 0.4 * (Real.log x ^ (1 / 3 : ℝ)) ^ 2 - 1 := by linarith
+    have hprod := mul_nonneg (le_of_lt hpos) hfac
+    nlinarith [hprod, hv3]
+  have hc : (0.4 : ℝ) ≤ 0.45 - 2 * ε / 3 := by linarith
+  refine ⟨le_of_lt (Real.exp_pos _), ?_, ?_⟩
+  · rw [Real.rpow_def_of_pos hx0]
+    refine Real.exp_le_exp.mpr ?_
+    have hstep : (0.4 : ℝ) * Real.log x ≤ (0.45 - 2 * ε / 3) * Real.log x :=
+      mul_le_mul_of_nonneg_right hc hu0
+    linarith
+  · have hx1 : 1 ≤ x := by
+      have h1 : (1 : ℝ) ≤ Real.exp 30 := by
+        have := Real.add_one_le_exp 30
+        linarith
+      linarith
+    have hc12 : 0.45 - 2 * ε / 3 ≤ 1 / 2 := by linarith
+    have hle : x ^ (0.45 - 2 * ε / 3) ≤ x ^ (1 / 2 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le hx1 hc12
+    have hpos := Real.exp_pos (Real.log x ^ (1 / 3 : ℝ))
+    linarith
 
 /-- LEAF 2 of 5. Step: Cauchy-Schwarz in the height. For a nonnegative function on a range
 whose endpoints are ordered, the square of the integral is at most the length of the range
