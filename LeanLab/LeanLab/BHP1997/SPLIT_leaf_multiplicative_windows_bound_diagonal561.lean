@@ -30,7 +30,17 @@ theorem leaf_diagonal_window_identity561 :
               ‖∑ m ∈ (support561 Y).filter
                   (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + T / 2),
                 centered561 Y b v χ m‖ ^ 2) := by
-  sorry
+  intro Y T hY hT hTY b v q E
+  refine Finset.sum_congr rfl (fun χ _ => ?_)
+  apply intervalIntegral.integral_congr
+  intro y hy
+  have hab : Y - T / 2 ≤ 3 * Y - T / 4 := by linarith
+  rw [Set.uIcc_of_le hab] at hy
+  have hypos : 0 < y := by linarith [hy.1]
+  have hz : y * (T / (2 * y)) = T / 2 := by
+    have hy0 : y ≠ 0 := ne_of_gt hypos
+    field_simp
+  simp only [hz]
 
 /-- LEAF. Step two, the covering. A window of fixed length T over 2 at a centre
 y is covered by finitely many members of the multiplicative family, the members
@@ -62,7 +72,37 @@ theorem leaf_diagonal_ladder_sum_le_bound561 :
           multiplicativeWindowMoment561 Y z b v q E ≤ M) →
         (∑ j ∈ Finset.range 3,
             multiplicativeWindowMoment561 Y (T / (6 * Y) * 2 ^ j) b v q E) ≤ K * M := by
-  sorry
+  refine ⟨4, by norm_num, ?_⟩
+  intro Y T hY hT hTY b v q E M hM hmult
+  have hYpos : (0 : ℝ) < Y := by linarith
+  have hXY : (0 : ℝ) ≤ T / (6 * Y) := by positivity
+  have hkey : ∀ j ∈ Finset.range 3,
+      multiplicativeWindowMoment561 Y (T / (6 * Y) * 2 ^ j) b v q E ≤ M := by
+    intro j hj
+    have hj3 : j < 3 := Finset.mem_range.mp hj
+    have h2j1 : (1 : ℝ) ≤ (2 : ℝ) ^ j := one_le_pow₀ (a := (2 : ℝ)) (by norm_num)
+    have h2j4 : (2 : ℝ) ^ j ≤ 4 := by
+      have h2 : (2 : ℝ) ^ (2 : ℕ) = 4 := by norm_num
+      calc (2 : ℝ) ^ j ≤ (2 : ℝ) ^ (2 : ℕ) :=
+            pow_le_pow_right₀ (a := (2 : ℝ)) (by norm_num) (by omega : j ≤ 2)
+        _ = 4 := h2
+    refine hmult _ ?_ ?_
+    · calc T / (6 * Y) = T / (6 * Y) * 1 := by ring
+        _ ≤ T / (6 * Y) * (2 : ℝ) ^ j := mul_le_mul_of_nonneg_left h2j1 hXY
+    · have hstep : T / (6 * Y) * 4 = 2 * T / (3 * Y) := by
+        field_simp
+        ring
+      calc T / (6 * Y) * (2 : ℝ) ^ j ≤ T / (6 * Y) * 4 :=
+            mul_le_mul_of_nonneg_left h2j4 hXY
+        _ = 2 * T / (3 * Y) := hstep
+        _ ≤ 6 * T / Y := by
+            rw [div_le_div_iff₀ (by positivity : (0 : ℝ) < 3 * Y) hYpos]
+            nlinarith [hT]
+  calc ∑ j ∈ Finset.range 3,
+        multiplicativeWindowMoment561 Y (T / (6 * Y) * 2 ^ j) b v q E
+      ≤ ∑ j ∈ Finset.range 3, M := Finset.sum_le_sum hkey
+    _ = 3 * M := by simp
+    _ ≤ 4 * M := by linarith
 
 /-- The split target, assembled from the three leaves above. The rewrite turns the
 diagonal window into the fixed window, the covering bounds the fixed window by the
