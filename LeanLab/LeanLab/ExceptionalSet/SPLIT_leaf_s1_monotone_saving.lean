@@ -75,7 +75,13 @@ theorem leaf_s1_saving_sign_pos :
           |iteratedDeriv 1 f x / (1 : ℕ).factorial| ≤ (N : ℝ) ^ (-(Θ * (1 : ℕ)))) →
         (∀ x ∈ Set.Icc (N : ℝ) (2 * N), 0 < iteratedDeriv 1 f x) →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  have h := leaf_s1_monotone_saving θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  rcases h with ⟨B, c, N₀, hB, hc, hN₀, hbody⟩
+  refine ⟨B, c, N₀, hB, hc, hN₀, fun N hN f k hk3 hsm hder hδk hf' hpos => ?_⟩
+  apply hbody N hN f k hk3 hsm hder hδk hf'
+  left
+  exact hpos
 
 /-- LEAF. The decreasing case: the target with the disjunction on the sign of `f'` replaced
 by its second disjunct, `f' < 0` on the whole of `[N, 2N]`.  As in the increasing case every
@@ -96,7 +102,13 @@ theorem leaf_s1_saving_sign_neg :
           |iteratedDeriv 1 f x / (1 : ℕ).factorial| ≤ (N : ℝ) ^ (-(Θ * (1 : ℕ)))) →
         (∀ x ∈ Set.Icc (N : ℝ) (2 * N), iteratedDeriv 1 f x < 0) →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  have h := leaf_s1_monotone_saving θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  rcases h with ⟨B, c, N₀, hB, hc, hN₀, hbody⟩
+  refine ⟨B, c, N₀, hB, hc, hN₀, fun N hN f k hk3 hsm hder hδk hf' hneg => ?_⟩
+  apply hbody N hN f k hk3 hsm hder hδk hf'
+  right
+  exact hneg
 
 /-- LEAF. The comparison that lets the two cases share one pair of constants: for `N ≥ 1`,
 `k ≥ 1` and `0 < c ≤ c'` the smaller gain gives the larger exponent, so that
@@ -106,7 +118,12 @@ at `c = c'` the two exponents coincide and the inequality is an equality, so the
 theorem leaf_s1_exponent_merge (N : ℝ) (hN : 1 ≤ N) (k : ℕ) (hk : 0 < k) (c c' : ℝ)
     (hc : 0 < c) (hcc' : c ≤ c') :
     1 - c' / (k : ℝ) ^ 2 ≤ 1 - c / (k : ℝ) ^ 2 := by
-  sorry
+  have hk2pos : (0 : ℝ) < (k : ℝ) ^ 2 := by
+    have hkpos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast hk
+    positivity
+  have hdiv : c / (k : ℝ) ^ 2 ≤ c' / (k : ℝ) ^ 2 :=
+    (div_le_div_right hk2pos).mpr hcc'
+  linarith
 
 /-! ### Assembly -/
 
