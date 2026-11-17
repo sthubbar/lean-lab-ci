@@ -41,6 +41,9 @@ theorem negative_bottom_gaussian_upper_window_high_low (δ : ℝ) {t : ℝ}
     (hlo : -(17 / 16) ≤ t) (hhi : t ≤ -(67 / 64)) :
     ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ≤
       (3 / 2) * ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖ := by
+  -- attempt using monotonicity of modulus on the window; requires numeric bound
+  have hpos : 0 ≤ ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖ := norm_nonneg _
+  -- placeholder for numeric verification
   sorry
 
 /-- LEAF 2 of 4. The second quarter of the window, from minus sixty seven sixty fourths to minus
