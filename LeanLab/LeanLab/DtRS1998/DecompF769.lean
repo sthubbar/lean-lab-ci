@@ -46,7 +46,18 @@ theorem leaf_offset_to_prime_list {B L : ℕ} {Ds : List ℕ}
       (List.range (L / 2 + 1)).all (fun j =>
         qs.any (fun q => decide
           (q ≤ B + 2 * j ∧ (B + 2 * j - q).Prime))) = true := by
-  sorry
+  refine ⟨Ds.map (fun d => B - d), ?_⟩
+  apply List.all_eq_true.mpr
+  intro j hj
+  have hjL := List.mem_range.mp hj
+  obtain ⟨d, hd, hp⟩ := hcover (2 * j) (by omega) ⟨j, rfl⟩
+  apply List.any_eq_true.mpr
+  refine ⟨B - d, List.mem_map.mpr ⟨d, hd, rfl⟩, ?_⟩
+  apply decide_eq_true
+  have hdB := hD d hd
+  constructor
+  · omega
+  · convert hp using 1 <;> omega
 
 /-! ### LEAF 2-24: Group certificates (OPEN, published computation) -/
 
