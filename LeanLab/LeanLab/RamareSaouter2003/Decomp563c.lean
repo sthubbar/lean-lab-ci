@@ -1,5 +1,6 @@
 import Mathlib
 import LeanLab.PNTPort.ZetaZeros.Count
+import LeanLab.RamareSaouter2003.Decomp579c
 
 /-!
 Backlund pp. 363 through 368 displays 57 through 73.
@@ -433,6 +434,617 @@ theorem normalized_vertical_boundary
           rw [div_mul_eq_mul_div, one_mul]
           rw [div_le_iff₀ hlogpos']
           linarith
+
+
+/-! ## Elementary estimates shared by the two boundary leaves -/
+
+private lemma half_arg (σ t : ℝ) :
+    π * ((σ : ℂ) + (t : ℂ) * I) / 2 =
+      (((π * σ / 2 : ℝ)) : ℂ) + (((π * t / 2 : ℝ)) : ℂ) * I := by
+  push_cast
+  ring
+
+private lemma sin_add_norm_sq (a b : ℝ) :
+    ‖Complex.sin ((a : ℂ) + (b : ℂ) * I)‖ ^ 2 = Real.sin a ^ 2 + Real.sinh b ^ 2 := by
+  have hsin : Complex.sin ((a : ℂ) + (b : ℂ) * I) =
+      ((Real.sin a * Real.cosh b : ℝ) : ℂ) +
+        ((Real.cos a * Real.sinh b : ℝ) : ℂ) * I := by
+    rw [Complex.sin_add_mul_I, ← Complex.ofReal_sin, ← Complex.ofReal_cos,
+      ← Complex.ofReal_cosh, ← Complex.ofReal_sinh]
+    push_cast
+    ring
+  rw [hsin, Complex.norm_add_mul_I, Real.sq_sqrt (by positivity)]
+  nlinarith [Real.cosh_sq' b, Real.sin_sq_add_cos_sq a]
+
+private lemma sin_half_norm_sq (σ t : ℝ) :
+    ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ ^ 2 =
+      Real.sin (π * σ / 2) ^ 2 + Real.sinh (π * t / 2) ^ 2 := by
+  rw [half_arg, sin_add_norm_sq]
+
+private lemma exp_neg_le_inv_sq (t : ℝ) (ht : 50 ≤ t) :
+    Real.exp (-(π * t / 2)) ≤ 1 / t ^ 2 := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hlog : Real.log t ≤ t := by
+    have h := Real.log_le_sub_one_of_pos ht0
+    linarith
+  have hπ : (2 : ℝ) ≤ π := by linarith [Real.pi_gt_three]
+  have hexp2 : Real.exp (-(2 * Real.log t)) = 1 / t ^ 2 := by
+    have h2 : Real.exp (-(2 * Real.log t)) = (Real.exp (-(Real.log t))) ^ 2 := by
+      rw [show -(2 * Real.log t) = ((2 : ℕ) : ℝ) * (-(Real.log t)) by push_cast; ring,
+        Real.exp_nat_mul]
+    rw [h2, Real.exp_neg, Real.exp_log ht0]
+    ring
+  have hle : -(π * t / 2) ≤ -(2 * Real.log t) := by
+    have hst : (0 : ℝ) < Real.sqrt t := Real.sqrt_pos.mpr ht0
+    have hlog2 : Real.log t ≤ 2 * Real.sqrt t := by
+      have hls : Real.log (Real.sqrt t) ≤ Real.sqrt t - 1 :=
+        Real.log_le_sub_one_of_pos hst
+      have h2 : Real.log t = 2 * Real.log (Real.sqrt t) := by
+        rw [Real.log_sqrt ht0.le]; ring
+      linarith
+    have hbig : 4 * Real.sqrt t ≤ π * t / 2 := by
+      have h7 : (7 : ℝ) ≤ Real.sqrt t := by
+        have h49 : Real.sqrt 49 = 7 := by norm_num
+        rw [← h49]
+        exact Real.sqrt_le_sqrt (by linarith)
+      have hsq : Real.sqrt t * Real.sqrt t = t := Real.mul_self_sqrt ht0.le
+      nlinarith [h7, hsq, Real.sqrt_nonneg t, Real.pi_gt_three]
+    linarith
+  rw [← hexp2]
+  exact Real.exp_le_exp.mpr hle
+
+private lemma sinh_half_lower (t : ℝ) (ht : 50 ≤ t) :
+    Real.exp (π * t / 2) / 2 * (1 - 1 / t ^ 2) ≤ Real.sinh (π * t / 2) := by
+  have hexp : Real.exp (-(π * t / 2)) ≤ 1 / t ^ 2 := exp_neg_le_inv_sq t ht
+  have hE1 : (1 : ℝ) ≤ Real.exp (π * t / 2) := by
+    rw [← Real.exp_zero]
+    exact Real.exp_le_exp.mpr (by positivity)
+  have hEpos : (0 : ℝ) < Real.exp (π * t / 2) := Real.exp_pos _
+  have hu : (0 : ℝ) ≤ 1 / t ^ 2 := by positivity
+  have hEu : Real.exp (-(π * t / 2)) ≤ Real.exp (π * t / 2) * (1 / t ^ 2) := by
+    calc Real.exp (-(π * t / 2)) ≤ 1 / t ^ 2 := hexp
+      _ = 1 * (1 / t ^ 2) := (one_mul _).symm
+      _ ≤ Real.exp (π * t / 2) * (1 / t ^ 2) := mul_le_mul_of_nonneg_right hE1 hu
+  rw [Real.sinh_eq]
+  nlinarith [hEu]
+
+private lemma sin_half_lower (σ t : ℝ) (ht : 50 ≤ t) :
+    Real.exp (π * t / 4) / Real.sqrt 2 * (1 - 1 / t ^ 2) ≤
+      Real.sqrt ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hu1 : 1 / t ^ 2 ≤ 1 := by
+    rw [div_le_one (by positivity)]
+    nlinarith
+  have hsinh : Real.exp (π * t / 2) / 2 * (1 - 1 / t ^ 2) ≤ Real.sinh (π * t / 2) :=
+    sinh_half_lower t ht
+  have hSin : Real.sinh (π * t / 2) ≤ ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ := by
+    have h2 : Real.sinh (π * t / 2) ^ 2 ≤
+        ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ ^ 2 := by
+      rw [sin_half_norm_sq]
+      nlinarith [sq_nonneg (Real.sin (π * σ / 2))]
+    have hS0 : (0 : ℝ) ≤ Real.sinh (π * t / 2) :=
+      (Real.sinh_pos_iff.mpr (by positivity : (0 : ℝ) < π * t / 2)).le
+    nlinarith [h2, hS0, norm_nonneg (Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2))]
+  have hEeq : Real.sqrt (Real.exp (π * t / 2)) = Real.exp (π * t / 4) := by
+    have hsq : Real.exp (π * t / 2) = (Real.exp (π * t / 4)) ^ 2 := by
+      rw [sq, ← Real.exp_add]
+      congr 1
+      ring
+    rw [hsq, Real.sqrt_sq (Real.exp_pos _).le]
+  have hstep1 : Real.exp (π * t / 4) / Real.sqrt 2 * (1 - 1 / t ^ 2) ≤
+      Real.sqrt (Real.exp (π * t / 2) / 2 * (1 - 1 / t ^ 2)) := by
+    rw [Real.sqrt_mul (by positivity : (0 : ℝ) ≤ Real.exp (π * t / 2) / 2),
+      Real.sqrt_div (by positivity : (0 : ℝ) ≤ Real.exp (π * t / 2)) 2, hEeq]
+    have h1u : (1 : ℝ) - 1 / t ^ 2 ≤ Real.sqrt (1 - 1 / t ^ 2) := by
+      have h0 : (0 : ℝ) ≤ 1 - 1 / t ^ 2 := by linarith
+      calc (1 : ℝ) - 1 / t ^ 2 = Real.sqrt ((1 - 1 / t ^ 2) ^ 2) :=
+            (Real.sqrt_sq h0).symm
+        _ ≤ Real.sqrt (1 - 1 / t ^ 2) := by
+            apply Real.sqrt_le_sqrt
+            have hp : (0 : ℝ) < 1 / t ^ 2 := by positivity
+            nlinarith
+    exact mul_le_mul_of_nonneg_left h1u (by positivity)
+  have hstep2 : Real.sqrt (Real.exp (π * t / 2) / 2 * (1 - 1 / t ^ 2)) ≤
+      Real.sqrt (Real.sinh (π * t / 2)) := Real.sqrt_le_sqrt hsinh
+  have hstep3 : Real.sqrt (Real.sinh (π * t / 2)) ≤
+      Real.sqrt ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ := Real.sqrt_le_sqrt hSin
+  exact hstep1.trans (hstep2.trans hstep3)
+
+private lemma sin_half_upper (σ t : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) (ht : 50 ≤ t) :
+    Real.sqrt ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ ≤
+      Real.exp (π * t / 4) / Real.sqrt 2 * (1 + 1 / t ^ 2) := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hσ1 : σ ≤ 1 := hσ.2
+  have hexp : Real.exp (-(π * t / 2)) ≤ 1 / t ^ 2 := exp_neg_le_inv_sq t ht
+  have hcosh : Real.cosh (π * t / 2) = Real.exp (π * t / 2) * (1 + Real.exp (-(π * t))) / 2 := by
+    rw [Real.cosh_eq]
+    have h1 : Real.exp (-(π * t / 2)) = Real.exp (π * t / 2) * Real.exp (-(π * t)) := by
+      rw [← Real.exp_add]
+      congr 1
+      ring
+    rw [h1]
+    ring
+  have hSin : ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ ≤ Real.cosh (π * t / 2) := by
+    have h2 : ‖Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)‖ ^ 2 ≤
+        Real.cosh (π * t / 2) ^ 2 := by
+      rw [sin_half_norm_sq, Real.cosh_sq']
+      have hs2 : Real.sin (π * σ / 2) ^ 2 ≤ 1 := by
+        have h := Real.abs_sin_le_one (π * σ / 2)
+        nlinarith [h, abs_nonneg (Real.sin (π * σ / 2)), sq_abs (Real.sin (π * σ / 2))]
+      nlinarith [hs2]
+    nlinarith [h2, norm_nonneg (Complex.sin (π * ((σ : ℂ) + (t : ℂ) * I) / 2)),
+      (Real.cosh_pos (π * t / 2)).le]
+  have hEeq : Real.sqrt (Real.exp (π * t / 2)) = Real.exp (π * t / 4) := by
+    have hsq : Real.exp (π * t / 2) = (Real.exp (π * t / 4)) ^ 2 := by
+      rw [sq, ← Real.exp_add]
+      congr 1
+      ring
+    rw [hsq, Real.sqrt_sq (Real.exp_pos _).le]
+  have hcosh' : Real.cosh (π * t / 2) = Real.exp (π * t / 2) * (1 + Real.exp (-(π * t))) / 2 := hcosh
+  have h1 : Real.sqrt (Real.cosh (π * t / 2)) ≤
+      Real.exp (π * t / 4) / Real.sqrt 2 * (1 + 1 / t ^ 2) := by
+    have hE1 : Real.exp (-(π * t)) ≤ 1 / t ^ 2 := by
+      calc Real.exp (-(π * t)) ≤ Real.exp (-(π * t / 2)) := by
+            apply Real.exp_le_exp.mpr
+            have := Real.pi_pos
+            nlinarith [ht0]
+        _ ≤ 1 / t ^ 2 := hexp
+    have hC : Real.cosh (π * t / 2) ≤
+        Real.exp (π * t / 2) * (1 + 1 / t ^ 2) / 2 := by
+      rw [hcosh']
+      have hEp : (0:ℝ) < Real.exp (π * t / 2) := Real.exp_pos _
+      nlinarith [hE1, hEp]
+    refine (Real.sqrt_le_sqrt hC).trans ?_
+    rw [Real.sqrt_div (by positivity : (0:ℝ) ≤ Real.exp (π * t / 2) * (1 + 1 / t ^ 2)) 2,
+      Real.sqrt_mul (by positivity : (0:ℝ) ≤ Real.exp (π * t / 2)), hEeq]
+    have h1u : Real.sqrt (1 + 1 / t ^ 2) ≤ 1 + 1 / t ^ 2 := by
+      have h0 : (0:ℝ) ≤ 1 + 1 / t ^ 2 := by positivity
+      calc Real.sqrt (1 + 1 / t ^ 2) ≤ Real.sqrt ((1 + 1 / t ^ 2) ^ 2) := by
+            apply Real.sqrt_le_sqrt
+            have hp : (0 : ℝ) < 1 / t ^ 2 := by positivity
+            nlinarith
+        _ = 1 + 1 / t ^ 2 := Real.sqrt_sq h0
+    calc Real.exp (π * t / 4) * Real.sqrt (1 + 1 / t ^ 2) / Real.sqrt 2
+        = Real.exp (π * t / 4) / Real.sqrt 2 * Real.sqrt (1 + 1 / t ^ 2) := by ring
+      _ ≤ Real.exp (π * t / 4) / Real.sqrt 2 * (1 + 1 / t ^ 2) :=
+          mul_le_mul_of_nonneg_left h1u (by positivity)
+  exact (Real.sqrt_le_sqrt hSin).trans h1
+
+private lemma cneg_add_mul_I (σ t : ℝ) :
+    -(((σ : ℂ) + (t : ℂ) * I)) * I = (t : ℂ) - (σ : ℂ) * I := by
+  have h1 : ((t : ℂ) * I) * I = -(t : ℂ) := by rw [mul_assoc, Complex.I_mul_I]; ring
+  have key : ((σ : ℂ) + (t : ℂ) * I) * I = (σ : ℂ) * I - (t : ℂ) := by
+    rw [add_mul, h1]; ring
+  calc -(((σ : ℂ) + (t : ℂ) * I)) * I = -(((σ : ℂ) + (t : ℂ) * I) * I) := by ring
+    _ = -((σ : ℂ) * I - (t : ℂ)) := by rw [key]
+    _ = (t : ℂ) - (σ : ℂ) * I := by ring
+
+private lemma cneg_mul_I_lit (σ : ℝ) :
+    -(((σ : ℂ) + 50 * I)) * I = (50 : ℂ) - (σ : ℂ) * I := by
+  have h1 : ((50 : ℂ) * I) * I = -(50 : ℂ) := by rw [mul_assoc, Complex.I_mul_I]; ring
+  have key : ((σ : ℂ) + 50 * I) * I = (σ : ℂ) * I - (50 : ℂ) := by
+    rw [add_mul, h1]; ring
+  calc -(((σ : ℂ) + 50 * I)) * I = -(((σ : ℂ) + 50 * I) * I) := by ring
+    _ = -((σ : ℂ) * I - (50 : ℂ)) := by rw [key]
+    _ = (50 : ℂ) - (σ : ℂ) * I := by ring
+
+private lemma log_norm_ge (σ t : ℝ) (ht : 0 < t) :
+    Real.log t ≤ ‖Complex.log ((t : ℂ) - (σ : ℂ) * I)‖ := by
+  have hre : (Complex.log ((t : ℂ) - (σ : ℂ) * I)).re =
+      Real.log ‖(t : ℂ) - (σ : ℂ) * I‖ := Complex.log_re _
+  have hnorm2 : ‖(t : ℂ) - (σ : ℂ) * I‖ ^ 2 = t ^ 2 + σ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    simp
+    ring
+  have htn : t ≤ ‖(t : ℂ) - (σ : ℂ) * I‖ := by
+    have h0 := norm_nonneg ((t : ℂ) - (σ : ℂ) * I)
+    nlinarith [hnorm2, h0]
+  have hlog : Real.log t ≤ Real.log ‖(t : ℂ) - (σ : ℂ) * I‖ := Real.log_le_log ht htn
+  have hle := Complex.re_le_norm (Complex.log ((t : ℂ) - (σ : ℂ) * I))
+  linarith [hre, hlog, hle]
+
+private lemma arg_abs_le_sin {θ : ℝ} (hcos : 0 < Real.cos θ) (hmem : θ ∈ Set.Ioc (-π) π) :
+    |θ| ≤ π / 2 * |Real.sin θ| := by
+  have h1 : θ < π / 2 := by
+    by_contra h
+    push_neg at h
+    have h2 : Real.cos θ ≤ 0 := Real.cos_nonpos_of_pi_div_two_le_of_le h (by linarith [hmem.2])
+    linarith
+  have h2 : -(π / 2) < θ := by
+    by_contra h
+    push_neg at h
+    have hφ1 : π / 2 ≤ -θ := by linarith
+    have hφ2 : -θ ≤ π + π / 2 := by linarith [hmem.1]
+    have h5 : Real.cos (-θ) ≤ 0 := Real.cos_nonpos_of_pi_div_two_le_of_le hφ1 hφ2
+    rw [Real.cos_neg] at h5
+    linarith
+  have habs : |θ| < π / 2 := abs_lt.mpr ⟨h2, h1⟩
+  have hθπ : |θ| ≤ π := by
+    rw [abs_le]
+    constructor <;> linarith [Real.pi_pos, hmem.1, hmem.2]
+  have hx0 : 0 ≤ 2 * |θ| / π := by positivity
+  have hx1 : 2 * |θ| / π ≤ 1 := by
+    rw [div_le_one (by linarith [Real.pi_pos])]
+    nlinarith [Real.pi_pos]
+  have hle := Real.le_sin_mul hx0 hx1
+  have harg : π / 2 * (2 * |θ| / π) = |θ| := by
+    field_simp
+  rw [harg, ← Real.abs_sin_eq_sin_abs_of_abs_le_pi hθπ] at hle
+  rw [div_le_iff₀ (by linarith [Real.pi_pos] : (0:ℝ) < π)] at hle
+  nlinarith
+
+/-- The main factor identity, at any positive height. -/
+private lemma key_factor (σ t : ℝ) (ht : 0 < t) :
+    π ^ (-(σ / 2)) * (Real.sqrt (2 * π) * (t / 2) ^ ((σ - 1) / 2) *
+      Real.exp (-π * t / 4)) * (Real.exp (π * t / 4) / Real.sqrt 2) =
+      ((2 * π) / t) ^ ((1 - σ) / 2) := by
+  have h2 : (t / 2) ^ ((σ - 1) / 2) = ((t / 2) ^ ((1 - σ) / 2))⁻¹ := by
+    rw [← Real.rpow_neg (by positivity : (0 : ℝ) ≤ t / 2)]
+    congr 1
+    ring
+  have h1 : π ^ (-(σ / 2)) * Real.sqrt π = π ^ ((1 - σ) / 2) := by
+    rw [show Real.sqrt π = π ^ ((1 : ℝ) / 2) by rw [Real.sqrt_eq_rpow],
+      ← Real.rpow_add Real.pi_pos]
+    congr 1
+    ring
+  have h3 : π ^ ((1 - σ) / 2) * ((t / 2) ^ ((1 - σ) / 2))⁻¹ =
+      ((2 * π) / t) ^ ((1 - σ) / 2) := by
+    rw [← div_eq_mul_inv,
+      ← Real.div_rpow (le_of_lt Real.pi_pos) (by positivity : (0 : ℝ) ≤ t / 2)]
+    congr 1
+    field_simp
+  have hsq2 : Real.sqrt (2 * π) = Real.sqrt 2 * Real.sqrt π :=
+    Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2) π
+  have e : Real.exp (-π * t / 4) * Real.exp (π * t / 4) = 1 := by
+    rw [← Real.exp_add, show -π * t / 4 + π * t / 4 = 0 by ring, Real.exp_zero]
+  rw [h2, hsq2]
+  have hsplit : π ^ (-(σ / 2)) * (Real.sqrt 2 * Real.sqrt π * ((t / 2) ^ ((1 - σ) / 2))⁻¹ *
+      Real.exp (-π * t / 4)) * (Real.exp (π * t / 4) / Real.sqrt 2) =
+      (π ^ (-(σ / 2)) * Real.sqrt π) * ((t / 2) ^ ((1 - σ) / 2))⁻¹ *
+        (Real.exp (-π * t / 4) * Real.exp (π * t / 4)) := by
+    field_simp
+  rw [hsplit, e, mul_one, h1, h3]
+
+/-- `‖Γ(conj z)‖ = ‖Γ z‖`-type invariance of the completed zeta modulus. -/
+private lemma completed_norm_conj (z : ℂ) :
+    ‖(π : ℂ) ^ (-(starRingEnd ℂ z) / 2) * Complex.Gamma ((starRingEnd ℂ z) / 2) *
+        riemannZeta (starRingEnd ℂ z)‖ =
+      ‖(π : ℂ) ^ (-z / 2) * Complex.Gamma (z / 2) * riemannZeta z‖ := by
+  rw [norm_mul, norm_mul, norm_mul, norm_mul,
+    Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos,
+    Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+  have h1 : (-(starRingEnd ℂ z) / 2).re = (-z / 2).re := by simp
+  have h2 : ‖Complex.Gamma ((starRingEnd ℂ z) / 2)‖ = ‖Complex.Gamma (z / 2)‖ := by
+    have hc : (starRingEnd ℂ (z / 2)) = (starRingEnd ℂ z) / 2 := by
+      rw [map_div₀ (starRingEnd ℂ) z 2, map_ofNat]
+    rw [← hc, Complex.Gamma_conj, Complex.norm_conj]
+  have h3 : ‖riemannZeta (starRingEnd ℂ z)‖ = ‖riemannZeta z‖ := by
+    rw [riemannZeta_conj, Complex.norm_conj]
+  rw [h1, h2, h3]
+
+/-- `π^{-s/2} Γ(s/2) ζ(s)` has the same modulus at `s` and at `1 - s`. -/
+private lemma completed_norm_symm (s : ℂ) (h0 : 0 ≤ s.re) (h1 : s.re ≤ 1) (him : s.im ≠ 0) :
+    ‖(π : ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) * riemannZeta s‖ =
+      ‖(π : ℂ) ^ (-(1 - s) / 2) * Complex.Gamma ((1 - s) / 2) * riemannZeta (1 - s)‖ := by
+  set w : ℂ := 1 - s with hwdef
+  have hwre : w.re = 1 - s.re := by simp [w]
+  have hwim : w.im = -s.im := by simp [w]
+  have him' : w.im ≠ 0 := by rw [hwim]; exact neg_ne_zero.mpr him
+  have hwne : ∀ n : ℕ, w ≠ -n := by
+    intro n h
+    have hi : w.im = 0 := by
+      have h2 := congr_arg Complex.im h
+      simpa using h2
+    exact him' hi
+  have hwne1 : w ≠ 1 := by
+    intro h
+    have hi : w.im = 0 := by
+      have h2 := congr_arg Complex.im h
+      simpa using h2
+    exact him' hi
+  have hFE := riemannZeta_one_sub (s := w) hwne hwne1
+  have h1w : 1 - w = s := by simp [w]
+  rw [h1w] at hFE
+  have hG1 : Complex.Gamma (s / 2) ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n h
+    have hi : (s / 2).im = 0 := by
+      have h2 := congr_arg Complex.im h
+      simpa using h2
+    have h3 : (s / 2).im = s.im / 2 := by simp
+    rw [h3] at hi
+    have : s.im = 0 := by linarith
+    exact him this
+  have hG2 : Complex.Gamma w ≠ 0 := Complex.Gamma_ne_zero hwne
+  have hG3 : Complex.Gamma (w / 2) ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n h
+    have hi : (w / 2).im = 0 := by
+      have h2 := congr_arg Complex.im h
+      simpa using h2
+    have h3 : (w / 2).im = w.im / 2 := by simp
+    rw [h3] at hi
+    have : w.im = 0 := by linarith
+    exact him' this
+  have hG4 : Complex.Gamma ((w + 1) / 2) ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n h
+    have hi : ((w + 1) / 2).im = 0 := by
+      have h2 := congr_arg Complex.im h
+      simpa using h2
+    have h3 : ((w + 1) / 2).im = w.im / 2 := by simp
+    rw [h3] at hi
+    have : w.im = 0 := by linarith
+    exact him' this
+  have hcosne : Complex.cos (π * w / 2) ≠ 0 := by
+    intro hc
+    rw [Complex.cos_eq_zero_iff] at hc
+    obtain ⟨k, hk⟩ := hc
+    have hi : w.im = 0 := by
+      have h2 := congr_arg Complex.im hk
+      have h3 : (((2 * (k : ℂ) + 1) * π / 2)).im = 0 := by simp
+      rw [h3] at h2
+      simpa using h2
+    exact him' hi
+  have hA : ‖Complex.Gamma (s / 2)‖ ≠ 0 := by
+    rw [norm_ne_zero_iff]; exact hG1
+  have hB : ‖Complex.Gamma ((w + 1) / 2)‖ ≠ 0 := by
+    rw [norm_ne_zero_iff]; exact hG4
+  have hD : ‖Complex.Gamma (w / 2)‖ ≠ 0 := by
+    rw [norm_ne_zero_iff]; exact hG3
+  have hC : ‖Complex.cos (π * w / 2)‖ ≠ 0 := by
+    rw [norm_ne_zero_iff]; exact hcosne
+  have hRefl : ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma ((w + 1) / 2)‖ =
+      π / ‖Complex.cos (π * w / 2)‖ := by
+    have h := congr_arg norm (Complex.Gamma_mul_Gamma_one_sub ((w + 1) / 2))
+    rw [norm_mul] at h
+    have ha : 1 - (w + 1) / 2 = s / 2 := by rw [hwdef]; ring
+    have hb : Complex.sin (π * ((w + 1) / 2)) = Complex.cos (π * w / 2) := by
+      have he : π * ((w + 1) / 2) = π * w / 2 + π / 2 := by ring
+      rw [he, Complex.sin_add_pi_div_two]
+    rw [ha, hb] at h
+    rw [mul_comm ‖Complex.Gamma (s / 2)‖ ‖Complex.Gamma ((w + 1) / 2)‖, h, norm_div]
+    simp
+  have hDup : ‖Complex.Gamma (w / 2)‖ * ‖Complex.Gamma ((w + 1) / 2)‖ =
+      ‖Complex.Gamma w‖ * ((2 : ℝ) ^ s.re * Real.sqrt π) := by
+    have h := congr_arg norm (Complex.Gamma_mul_Gamma_add_half (w / 2))
+    rw [norm_mul] at h
+    have ha : w / 2 + 1 / 2 = (w + 1) / 2 := by ring
+    have hb : 2 * (w / 2) = w := by ring
+    rw [ha, hb] at h
+    have hc2 : ‖(2 : ℂ) ^ (1 - w)‖ = (2 : ℝ) ^ s.re := by
+      have hcast : (2 : ℂ) = (((2 : ℝ)) : ℂ) := by push_cast; ring
+      rw [hcast, Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2)]
+      congr 1
+      simp only [Complex.sub_re, Complex.one_re, hwre]
+      ring
+    have hp2 : ‖((((Real.sqrt π) : ℝ)) : ℂ)‖ = Real.sqrt π := by
+      rw [Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos (Real.sqrt_pos.mpr Real.pi_pos)]
+    rw [h]
+    rw [norm_mul, norm_mul, hc2, hp2]
+    ring
+  have hkey : ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma w‖ * ‖Complex.cos (π * w / 2)‖ =
+      Real.sqrt π * (2 : ℝ) ^ (-s.re) * ‖Complex.Gamma (w / 2)‖ := by
+    have hAB : ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma ((w + 1) / 2)‖ *
+        ‖Complex.cos (π * w / 2)‖ = π := by
+      rw [hRefl]
+      field_simp
+    have hkey2 : ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma w‖ *
+        ((2 : ℝ) ^ s.re * Real.sqrt π) * ‖Complex.cos (π * w / 2)‖ =
+        ‖Complex.Gamma (w / 2)‖ * π := by
+      calc ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma w‖ *
+            ((2 : ℝ) ^ s.re * Real.sqrt π) * ‖Complex.cos (π * w / 2)‖
+          = (‖Complex.Gamma (s / 2)‖ * ‖Complex.cos (π * w / 2)‖) *
+              (‖Complex.Gamma w‖ * ((2 : ℝ) ^ s.re * Real.sqrt π)) := by ring
+        _ = (‖Complex.Gamma (s / 2)‖ * ‖Complex.cos (π * w / 2)‖) *
+              (‖Complex.Gamma (w / 2)‖ * ‖Complex.Gamma ((w + 1) / 2)‖) := by rw [hDup]
+        _ = ‖Complex.Gamma (w / 2)‖ * (‖Complex.Gamma (s / 2)‖ *
+              ‖Complex.Gamma ((w + 1) / 2)‖ * ‖Complex.cos (π * w / 2)‖) := by ring
+        _ = ‖Complex.Gamma (w / 2)‖ * π := by rw [hAB]
+    have h2p : (0 : ℝ) < (2 : ℝ) ^ s.re * Real.sqrt π := by positivity
+    have hrp : (2 : ℝ) ^ (-s.re) * (2 : ℝ) ^ s.re = 1 := by
+      rw [← Real.rpow_add (by norm_num : (0 : ℝ) < 2), show -s.re + s.re = 0 by ring,
+        Real.rpow_zero]
+    have hsq : Real.sqrt π * Real.sqrt π = π := by
+      rw [← sq]; exact Real.sq_sqrt (le_of_lt Real.pi_pos)
+    refine mul_right_cancel₀ h2p.ne' ?_
+    calc ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma w‖ * ‖Complex.cos (π * w / 2)‖ *
+          ((2 : ℝ) ^ s.re * Real.sqrt π)
+        = ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma w‖ *
+            ((2 : ℝ) ^ s.re * Real.sqrt π) * ‖Complex.cos (π * w / 2)‖ := by ring
+      _ = ‖Complex.Gamma (w / 2)‖ * π := hkey2
+      _ = (Real.sqrt π * (2 : ℝ) ^ (-s.re) * ‖Complex.Gamma (w / 2)‖) *
+            ((2 : ℝ) ^ s.re * Real.sqrt π) := by
+          rw [show Real.sqrt π * (2 : ℝ) ^ (-s.re) * ‖Complex.Gamma (w / 2)‖ *
+              ((2 : ℝ) ^ s.re * Real.sqrt π)
+              = ‖Complex.Gamma (w / 2)‖ * (Real.sqrt π * Real.sqrt π) *
+                ((2 : ℝ) ^ (-s.re) * (2 : ℝ) ^ s.re) by ring, hsq, hrp]
+          ring
+  have hζ : ‖riemannZeta s‖ = 2 * (2 * π) ^ (-(1 - s.re)) * ‖Complex.Gamma w‖ *
+      ‖Complex.cos (π * w / 2)‖ * ‖riemannZeta w‖ := by
+    have h1 : ‖(2 : ℂ)‖ = 2 := by norm_num
+    have h2 : ‖(2 * (π : ℂ)) ^ (-w)‖ = (2 * π : ℝ) ^ (-(1 - s.re)) := by
+      have hcast : (2 * (π : ℂ)) = (((2 * π : ℝ)) : ℂ) := by push_cast; ring
+      rw [hcast, Complex.norm_cpow_eq_rpow_re_of_pos (by positivity : (0 : ℝ) < 2 * π)]
+      simp only [Complex.neg_re, hwre]
+    rw [hFE, norm_mul, norm_mul, norm_mul, norm_mul, h1, h2]
+  have hLHS : ‖(π : ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) * riemannZeta s‖ =
+      π ^ (-s.re / 2) * (‖Complex.Gamma (s / 2)‖ * ‖riemannZeta s‖) := by
+    rw [norm_mul, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+    have h : (-s / 2).re = -s.re / 2 := by simp
+    rw [h]
+    ring
+  have hRHS : ‖(π : ℂ) ^ (-(1 - s) / 2) * Complex.Gamma ((1 - s) / 2) *
+      riemannZeta (1 - s)‖ =
+      π ^ (-(1 - s.re) / 2) * (‖Complex.Gamma (w / 2)‖ * ‖riemannZeta w‖) := by
+    rw [← hwdef, norm_mul, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+    have h : (-(1 - s) / 2).re = -(1 - s.re) / 2 := by simp
+    rw [h]
+    ring
+  have hconst : π ^ (-s.re / 2) * (2 * (2 * π : ℝ) ^ (-(1 - s.re))) *
+      (Real.sqrt π * (2 : ℝ) ^ (-s.re)) = π ^ (-(1 - s.re) / 2) := by
+    have hpi : π ^ (-s.re / 2) * π ^ (-(1 - s.re)) * π ^ ((1 : ℝ) / 2) =
+        π ^ (-(1 - s.re) / 2) := by
+      rw [← Real.rpow_add Real.pi_pos, ← Real.rpow_add Real.pi_pos]
+      congr 1
+      ring
+    have h2e : (2 * (2 : ℝ) ^ (-(1 - s.re))) * (2 : ℝ) ^ (-s.re) = 1 := by
+      have hxy : (2 : ℝ) ^ (-(1 - s.re)) * (2 : ℝ) ^ (-s.re) = (2 : ℝ) ^ (-1 : ℝ) := by
+        rw [← Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
+        congr 1
+        ring
+      rw [mul_assoc, hxy, show (2 : ℝ) ^ (-1 : ℝ) = 1 / 2 by
+        rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2), Real.rpow_one]; norm_num]
+      norm_num
+    have h2π : (2 * π : ℝ) ^ (-(1 - s.re)) =
+        (2 : ℝ) ^ (-(1 - s.re)) * π ^ (-(1 - s.re)) :=
+      Real.mul_rpow (by norm_num : (0 : ℝ) ≤ 2) (le_of_lt Real.pi_pos)
+    calc π ^ (-s.re / 2) * (2 * (2 * π : ℝ) ^ (-(1 - s.re))) *
+          (Real.sqrt π * (2 : ℝ) ^ (-s.re))
+        = (π ^ (-s.re / 2) * π ^ (-(1 - s.re)) * π ^ ((1 : ℝ) / 2)) *
+            ((2 * (2 : ℝ) ^ (-(1 - s.re))) * (2 : ℝ) ^ (-s.re)) := by
+          rw [h2π, Real.sqrt_eq_rpow]
+          ring
+      _ = π ^ (-(1 - s.re) / 2) * 1 := by rw [hpi, h2e]
+      _ = π ^ (-(1 - s.re) / 2) := by ring
+  rw [hLHS, hRHS, hζ]
+  rw [show π ^ (-s.re / 2) * (‖Complex.Gamma (s / 2)‖ *
+        (2 * (2 * π : ℝ) ^ (-(1 - s.re)) * ‖Complex.Gamma w‖ *
+          ‖Complex.cos (π * w / 2)‖ * ‖riemannZeta w‖)) =
+      π ^ (-s.re / 2) * (2 * (2 * π : ℝ) ^ (-(1 - s.re))) *
+        (‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma w‖ *
+          ‖Complex.cos (π * w / 2)‖) * ‖riemannZeta w‖ by ring]
+  rw [hkey]
+  rw [show π ^ (-s.re / 2) * (2 * (2 * π : ℝ) ^ (-(1 - s.re))) *
+        (Real.sqrt π * (2 : ℝ) ^ (-s.re) * ‖Complex.Gamma (w / 2)‖) *
+          ‖riemannZeta w‖ =
+      (π ^ (-s.re / 2) * (2 * (2 * π : ℝ) ^ (-(1 - s.re))) *
+        (Real.sqrt π * (2 : ℝ) ^ (-s.re))) *
+        (‖Complex.Gamma (w / 2)‖ * ‖riemannZeta w‖) by ring]
+  rw [hconst]
+
+set_option maxHeartbeats 2000000 in
+private lemma log_norm_le (σ t : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) (ht : 50 ≤ t) :
+    ‖Complex.log ((t : ℂ) - (σ : ℂ) * I)‖ ≤ Real.log t + 1 / t ^ 2 := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hσ0 : 0 ≤ σ := hσ.1
+  have hσ1 : σ ≤ 1 := hσ.2
+  set z : ℂ := (t : ℂ) - (σ : ℂ) * I with hzdef
+  have hzre : z.re = t := by simp [z]
+  have hzim : z.im = -σ := by simp [z]
+  have hzn2 : ‖z‖ ^ 2 = t ^ 2 + σ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hzre, hzim]
+    ring
+  have hzn : t ≤ ‖z‖ := by
+    have h0 := norm_nonneg z
+    nlinarith [hzn2, h0]
+  have hznpos : (0 : ℝ) < ‖z‖ := by linarith
+  have hL1 : 1 ≤ Real.log t := by
+    rw [Real.le_log_iff_exp_le ht0]
+    linarith [Real.exp_one_lt_three]
+  have hu0 : (0 : ℝ) < 1 / t ^ 2 := by positivity
+  have hu25 : 1 / t ^ 2 ≤ 1 / 2500 := by
+    apply one_div_le_one_div_of_le (by norm_num)
+    nlinarith
+  have hσ2 : σ ^ 2 ≤ 1 := by nlinarith
+  have hre_bound : Real.log ‖z‖ ≤ Real.log t + 1 / (2 * t ^ 2) := by
+    have hsplit : Real.log ‖z‖ = Real.log t + Real.log (‖z‖ / t) := by
+      rw [← Real.log_mul (ne_of_gt ht0) (by positivity), mul_div_cancel₀ _ (ne_of_gt ht0)]
+    have hq : Real.log (‖z‖ / t) ≤ ‖z‖ / t - 1 :=
+      Real.log_le_sub_one_of_pos (by positivity)
+    have h4 : (‖z‖ - t) * (‖z‖ + t) = σ ^ 2 := by nlinarith [hzn2]
+    have h6 : ‖z‖ - t ≤ σ ^ 2 / (2 * t) := by
+      have h5 : 2 * t ≤ ‖z‖ + t := by linarith
+      have h7 : (0 : ℝ) ≤ ‖z‖ - t := by linarith
+      rw [le_div_iff₀ (by positivity : (0 : ℝ) < 2 * t)]
+      nlinarith [h4, h5, h7]
+    have h8 : ‖z‖ / t - 1 = (‖z‖ - t) / t := by
+      field_simp
+    have h9 : Real.log (‖z‖ / t) ≤ 1 / (2 * t ^ 2) := by
+      rw [h8] at hq
+      have h10 : (‖z‖ - t) / t ≤ (σ ^ 2 / (2 * t)) / t :=
+        div_le_div_of_nonneg_right h6 ht0.le
+      have h11 : (σ ^ 2 / (2 * t)) / t = σ ^ 2 / (2 * t ^ 2) := by
+        field_simp
+      have h12 : σ ^ 2 / (2 * t ^ 2) ≤ 1 / (2 * t ^ 2) :=
+        div_le_div_of_nonneg_right hσ2 (by positivity)
+      linarith [hq, h10, h11, h12]
+    rw [hsplit]
+    linarith
+  have hcos : 0 < Real.cos z.arg := by
+    have hz : z ≠ 0 := by
+      intro h
+      rw [h] at hzn
+      simp at hzn
+      linarith
+    rw [Complex.cos_arg hz, hzre]
+    positivity
+  have hsinabs : |Real.sin z.arg| = σ / ‖z‖ := by
+    rw [Complex.sin_arg, hzim, abs_div, abs_neg, abs_of_nonneg hσ0, abs_of_pos hznpos]
+  have harg : |z.arg| ≤ π / 2 * (σ / t) := by
+    refine (arg_abs_le_sin hcos (Complex.arg_mem_Ioc z)).trans ?_
+    rw [hsinabs]
+    have h1 : σ / ‖z‖ ≤ σ / t := by
+      rw [div_le_div_iff₀ (by positivity) (by positivity)]
+      nlinarith
+    exact mul_le_mul_of_nonneg_left h1 (by positivity)
+  have harg2 : z.arg ^ 2 ≤ (π / 2) ^ 2 * (1 / t ^ 2) := by
+    have h1 : (σ / t) ^ 2 ≤ 1 / t ^ 2 := by
+      calc (σ / t) ^ 2 = σ ^ 2 / t ^ 2 := by rw [div_pow]
+        _ ≤ 1 / t ^ 2 := div_le_div_of_nonneg_right hσ2 (by positivity)
+    have h2 : z.arg ^ 2 ≤ (π / 2 * (σ / t)) ^ 2 := by
+      have h0 : (0:ℝ) ≤ π / 2 * (σ / t) := by positivity
+      nlinarith [harg, abs_nonneg z.arg, sq_abs z.arg, h0]
+    nlinarith [h2, h1, Real.pi_pos]
+  have hL3 : (3 : ℝ) ≤ Real.log t := by
+    rw [Real.le_log_iff_exp_le ht0]
+    have h3 : Real.exp 3 = (Real.exp 1) ^ 3 := by
+      rw [show (3 : ℝ) = 1 + 1 + 1 by norm_num, Real.exp_add, Real.exp_add]
+      ring
+    have h1 : Real.exp 1 < 3 := Real.exp_one_lt_three
+    have hp : (0 : ℝ) < Real.exp 1 := Real.exp_pos 1
+    have hsq1 : (Real.exp 1) ^ 2 < 9 := by nlinarith [h1, hp]
+    have : Real.exp 3 < 27 := by rw [h3]; nlinarith [hsq1, h1, hp]
+    linarith
+  have harith : (Real.log t + 1 / (2 * t ^ 2)) ^ 2 + (π / 2) ^ 2 * (1 / t ^ 2) ≤
+      (Real.log t + 1 / t ^ 2) ^ 2 := by
+    have hpi2 : (π / 2) ^ 2 ≤ 5 / 2 := by
+      have h := Real.pi_lt_d2
+      nlinarith [Real.pi_pos]
+    have hstep : (5 / 2 : ℝ) * (1 / t ^ 2) ≤
+        (Real.log t + 3 * (1 / t ^ 2) / 4) * (1 / t ^ 2) := by
+      apply mul_le_mul_of_nonneg_right _ (le_of_lt hu0)
+      nlinarith [hL3, hu0]
+    have hstep2 : (π / 2) ^ 2 * (1 / t ^ 2) ≤ (5 / 2) * (1 / t ^ 2) :=
+      mul_le_mul_of_nonneg_right hpi2 (le_of_lt hu0)
+    have hdiff : (Real.log t + 1 / t ^ 2) ^ 2 - (Real.log t + 1 / (2 * t ^ 2)) ^ 2 =
+        (3 / 4) * (1 / t ^ 2) ^ 2 + Real.log t * (1 / t ^ 2) := by ring
+    linarith [hdiff, hstep, hstep2]
+  have hsq : ‖Complex.log z‖ ^ 2 ≤ (Real.log t + 1 / t ^ 2) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, Complex.log_re, Complex.log_im]
+    have hR : Real.log ‖z‖ ^ 2 ≤ (Real.log t + 1 / (2 * t ^ 2)) ^ 2 := by
+      have h0 : 0 ≤ Real.log ‖z‖ := Real.log_nonneg (by linarith)
+      nlinarith [hre_bound]
+    have hA : z.arg ^ 2 ≤ (π / 2) ^ 2 * (1 / t ^ 2) := harg2
+    nlinarith [hR, hA, harith]
+  have h0 : (0 : ℝ) ≤ ‖Complex.log z‖ := norm_nonneg _
+  have hLL : (0 : ℝ) ≤ Real.log t + 1 / t ^ 2 := by linarith
+  have h3 : (‖Complex.log z‖ - (Real.log t + 1 / t ^ 2)) *
+      (‖Complex.log z‖ + (Real.log t + 1 / t ^ 2)) ≤ 0 := by nlinarith [hsq]
+  have h4 : (0 : ℝ) < ‖Complex.log z‖ + (Real.log t + 1 / t ^ 2) := by linarith
+  nlinarith [h3, h4]
+
+/-- A coarse upper bound for the logarithm denominator. -/
+private lemma log_norm_le_small (σ t : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) (ht : 50 ≤ t) :
+    ‖Complex.log ((t : ℂ) - (σ : ℂ) * I)‖ ≤ Real.log t + 1 / 1000 := by
+  have h1 : ‖Complex.log ((t : ℂ) - (σ : ℂ) * I)‖ ≤ Real.log t + 1 / t ^ 2 :=
+    log_norm_le σ t hσ ht
+  have h2 : 1 / t ^ 2 ≤ 1 / 2500 := by
+    apply one_div_le_one_div_of_le (by norm_num)
+    nlinarith
+  linarith [h1, h2]
+
 
 /-- LEAF. Backlund pp. 366 through 368 displays 70, 71 and 73.
 The height-fifty half-edge and normalized symmetry control the bottom edge.
@@ -1175,13 +1787,149 @@ theorem normalized_half_strip
   exact half_strip_of_damped_top (fun s : ℂ => normalizer s * riemannZeta s)
     normalized_regular hv hb normalized_damped_top σ t hσ ht
 
+
+/-- `3 ≤ log t` for `t ≥ 50`. -/
+private lemma three_le_log {t : ℝ} (ht : 50 ≤ t) : (3 : ℝ) ≤ Real.log t := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  rw [Real.le_log_iff_exp_le ht0]
+  have h3 : Real.exp 3 = Real.exp 1 * Real.exp 1 * Real.exp 1 := by
+    rw [show (3 : ℝ) = 1 + 1 + 1 by norm_num, Real.exp_add, Real.exp_add]
+  have h1 : Real.exp 1 < 3 := Real.exp_one_lt_three
+  have hp : (0 : ℝ) < Real.exp 1 := Real.exp_pos 1
+  have hsq1 : Real.exp 1 * Real.exp 1 < 9 := by nlinarith [h1, hp]
+  have h27 : Real.exp 1 * Real.exp 1 * Real.exp 1 < 27 := by nlinarith [hsq1, h1, hp]
+  linarith [h27, h3]
+
+/-- The elementary arithmetic of the lower normalization bound. -/
+private lemma arith_core {u L : ℝ} (hu0 : 0 < u) (hu1 : u ≤ 1 / 2500) (hL : 3 ≤ L) :
+    1 ≤ (1 - u) ^ 2 / (L + u) * ((1 / (1 - 4 * u)) * L) := by
+  have h4u : (0 : ℝ) < 1 - 4 * u := by nlinarith
+  have hden : (0 : ℝ) < L + u := by linarith
+  have hcore : (L + u) * (1 - 4 * u) ≤ (1 - u) ^ 2 * L := by
+    have hm : (0 : ℝ) ≤ u * L := mul_nonneg hu0.le (by linarith)
+    nlinarith [hL, hu0, hu1, hm]
+  have key : (1 - u) ^ 2 / (L + u) * ((1 / (1 - 4 * u)) * L) =
+      (1 - u) ^ 2 * L / ((L + u) * (1 - 4 * u)) := by
+    field_simp
+  rw [key, le_div_iff₀ (by positivity : (0 : ℝ) < (L + u) * (1 - 4 * u)), one_mul]
+  linarith [hcore]
+
 /-- LEAF. Backlund p. 365 displays 60 through 68, lower normalization bound.
 This involves only Gamma, sine, logarithm and powers, with no zeta value.
 The factor one minus four over t squared is inverted algebraically. -/
 theorem normalizer_lower (σ t : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) (ht : 50 ≤ t) :
     1 ≤ ‖normalizer ((σ : ℂ) + t * I)‖ *
       (t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t) := by
-  sorry
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hu0 : (0 : ℝ) < 1 / t ^ 2 := by positivity
+  have hu25 : 1 / t ^ 2 ≤ 1 / 2500 := by
+    apply one_div_le_one_div_of_le (by norm_num)
+    nlinarith
+  have hL1 : 1 ≤ Real.log t := by
+    rw [Real.le_log_iff_exp_le ht0]
+    linarith [Real.exp_one_lt_three]
+  have hΓ := (LeanLab.RamareSaouter2003.Decomp579c.gamma_relative σ t hσ ht).1
+  have hS : Real.exp (π * t / 4) / Real.sqrt 2 * (1 - 1 / t ^ 2) ≤
+      ‖Complex.sqrt (Complex.sin (π * ((σ : ℂ) + t * I) / 2))‖ := by
+    rw [cnorm_sqrt]
+    exact sin_half_lower σ t ht
+  have hΛ : ‖Complex.log (-(((σ : ℂ) + t * I)) * I)‖ ≤ Real.log t + 1 / t ^ 2 := by
+    rw [cneg_add_mul_I σ t]
+    exact log_norm_le σ t hσ ht
+  have hΛpos : (0 : ℝ) < ‖Complex.log (-(((σ : ℂ) + t * I)) * I)‖ := by
+    rw [cneg_add_mul_I σ t]
+    have h := log_norm_ge σ t ht0
+    linarith
+  have hpi : ‖(π : ℂ) ^ (-(((σ : ℂ) + t * I)) / 2)‖ = π ^ (-(σ / 2)) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+    congr 1
+    simp
+    ring
+  have hnorm : ‖normalizer ((σ : ℂ) + t * I)‖ =
+      π ^ (-(σ / 2)) * ‖Complex.Gamma (((σ : ℂ) + t * I) / 2)‖ *
+        ‖Complex.sqrt (Complex.sin (π * ((σ : ℂ) + t * I) / 2))‖ /
+          ‖Complex.log (-(((σ : ℂ) + t * I)) * I)‖ := by
+    rw [normalizer, norm_div, norm_mul, norm_mul, hpi]
+  have hprod : ((2 * π) / t) ^ ((1 - σ) / 2) * (1 - 1 / t ^ 2) ^ 2 =
+      π ^ (-(σ / 2)) * (Real.sqrt (2 * π) * (t / 2) ^ ((σ - 1) / 2) *
+        Real.exp (-π * t / 4) * (1 - 1 / t ^ 2)) *
+      (Real.exp (π * t / 4) / Real.sqrt 2 * (1 - 1 / t ^ 2)) := by
+    rw [← key_factor σ t ht0]
+    ring_nf
+  have hden : (0 : ℝ) < Real.log t + 1 / t ^ 2 := by positivity
+  have hmain : ((2 * π) / t) ^ ((1 - σ) / 2) * (1 - 1 / t ^ 2) ^ 2 /
+      (Real.log t + 1 / t ^ 2) ≤ ‖normalizer ((σ : ℂ) + t * I)‖ := by
+    rw [hnorm, hprod]
+    have h0 : (0 : ℝ) ≤ π ^ (-(σ / 2)) := by positivity
+    have hu1' : 1 / t ^ 2 ≤ 1 := by
+      rw [div_le_one (by positivity)]
+      nlinarith
+    have hposS : (0 : ℝ) ≤ Real.exp (π * t / 4) / Real.sqrt 2 * (1 - 1 / t ^ 2) := by
+      have ha : (0 : ℝ) < Real.exp (π * t / 4) / Real.sqrt 2 := by positivity
+      nlinarith [ha]
+    have hposK : (0 : ℝ) ≤ π ^ (-(σ / 2)) *
+        ‖Complex.Gamma (((σ : ℂ) + t * I) / 2)‖ :=
+      mul_nonneg h0 (norm_nonneg _)
+    have stepA : π ^ (-(σ / 2)) * (Real.sqrt (2 * π) * (t / 2) ^ ((σ - 1) / 2) *
+        Real.exp (-π * t / 4) * (1 - 1 / t ^ 2)) *
+        (Real.exp (π * t / 4) / Real.sqrt 2 * (1 - 1 / t ^ 2)) ≤
+        π ^ (-(σ / 2)) * ‖Complex.Gamma (((σ : ℂ) + t * I) / 2)‖ *
+          ‖Complex.sqrt (Complex.sin (π * ((σ : ℂ) + t * I) / 2))‖ :=
+      mul_le_mul (mul_le_mul_of_nonneg_left hΓ h0) hS hposS hposK
+    have stepB : π ^ (-(σ / 2)) * ‖Complex.Gamma (((σ : ℂ) + t * I) / 2)‖ *
+          ‖Complex.sqrt (Complex.sin (π * ((σ : ℂ) + t * I) / 2))‖ /
+            (Real.log t + 1 / t ^ 2)
+        ≤ π ^ (-(σ / 2)) * ‖Complex.Gamma (((σ : ℂ) + t * I) / 2)‖ *
+          ‖Complex.sqrt (Complex.sin (π * ((σ : ℂ) + t * I) / 2))‖ /
+            ‖Complex.log (-(((σ : ℂ) + t * I)) * I)‖ := by
+      rw [div_le_div_iff₀ hden hΛpos]
+      exact mul_le_mul_of_nonneg_left hΛ (by positivity)
+    have stepC : π ^ (-(σ / 2)) * (Real.sqrt (2 * π) * (t / 2) ^ ((σ - 1) / 2) *
+        Real.exp (-π * t / 4) * (1 - 1 / t ^ 2)) *
+        (Real.exp (π * t / 4) / Real.sqrt 2 * (1 - 1 / t ^ 2)) /
+          (Real.log t + 1 / t ^ 2)
+        ≤ π ^ (-(σ / 2)) * ‖Complex.Gamma (((σ : ℂ) + t * I) / 2)‖ *
+          ‖Complex.sqrt (Complex.sin (π * ((σ : ℂ) + t * I) / 2))‖ /
+            (Real.log t + 1 / t ^ 2) :=
+      div_le_div_of_nonneg_right stepA hden.le
+    linarith [stepB, stepC]
+  have hcancel : ((2 * π) / t) ^ ((1 - σ) / 2) * (t / (2 * π)) ^ ((1 - σ) / 2) = 1 := by
+    rw [← Real.mul_rpow (by positivity : (0 : ℝ) ≤ 2 * π / t)
+      (by positivity : (0 : ℝ) ≤ t / (2 * π))]
+    rw [show 2 * π / t * (t / (2 * π)) = 1 by field_simp]
+    exact Real.one_rpow _
+  have hL3' : (3 : ℝ) ≤ Real.log t := three_le_log ht
+  have harith : 1 ≤ (1 - 1 / t ^ 2) ^ 2 / (Real.log t + 1 / t ^ 2) *
+      (t ^ 2 / (t ^ 2 - 4) * Real.log t) := by
+    have hratio : t ^ 2 / (t ^ 2 - 4) = 1 / (1 - 4 * (1 / t ^ 2)) := by
+      field_simp
+    rw [hratio]
+    exact arith_core hu0 hu25 hL3'
+  have hCF : 1 ≤ ((2 * π) / t) ^ ((1 - σ) / 2) * (1 - 1 / t ^ 2) ^ 2 /
+      (Real.log t + 1 / t ^ 2) *
+        (t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t) := by
+    have hcongr : ((2 * π) / t) ^ ((1 - σ) / 2) * (1 - 1 / t ^ 2) ^ 2 /
+        (Real.log t + 1 / t ^ 2) *
+          (t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t) =
+        (1 - 1 / t ^ 2) ^ 2 / (Real.log t + 1 / t ^ 2) *
+          (t ^ 2 / (t ^ 2 - 4) * Real.log t) := by
+      have hd1 : Real.log t + 1 / t ^ 2 ≠ 0 := by positivity
+      have hd2 : t ^ 2 - 4 ≠ 0 := by nlinarith
+      have hstep : ((2 * π) / t) ^ ((1 - σ) / 2) * (1 - 1 / t ^ 2) ^ 2 /
+          (Real.log t + 1 / t ^ 2) *
+            (t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t) =
+          (1 - 1 / t ^ 2) ^ 2 / (Real.log t + 1 / t ^ 2) *
+            (t ^ 2 / (t ^ 2 - 4) * Real.log t) *
+              (((2 * π) / t) ^ ((1 - σ) / 2) * (t / (2 * π)) ^ ((1 - σ) / 2)) := by
+        field_simp
+      rw [hstep, hcancel, mul_one]
+    rw [hcongr]
+    exact harith
+  have hF : (0 : ℝ) ≤ t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t := by
+    have h1 : (0:ℝ) < t ^ 2 - 4 := by nlinarith
+    have h2 : (0:ℝ) < Real.log t := Real.log_pos (by linarith)
+    positivity
+  exact le_trans hCF (mul_le_mul_of_nonneg_right hmain hF)
 
 /-- Backlund p. 363 display 56, the exact original strip implication.
 CONDITIONAL ON the remaining strictly smaller normalized analytic leaves. -/
