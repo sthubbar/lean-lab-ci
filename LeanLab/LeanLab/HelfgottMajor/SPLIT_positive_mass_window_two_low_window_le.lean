@@ -55,12 +55,8 @@ theorem positive_mass_window_two_low_window_norm_summable (q : ℕ) [NeZero q]
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} => ‖mellinMassTerm χ δ ρ.val‖) := by
   exact ZeroCount1623.summable_zeroIdx χ T _
 
-/-- LEAF 2 of 4, the window decomposition. Given the convergence of the band family, the sum
-over the ordinates above three halves and at most seven quarters is the sum over the ordinates
-above three halves and at most thirteen eighths, plus the sum over the ordinates above thirteen
-eighths and at most seven quarters. As a statement this is the additivity of the zero sum over a
-disjoint cut of the band, and it is the only place where the convergence leaf is spent. -/
-private lemma band_indicator_add_low (c x : ℝ) :
+/-- The pointwise additivity of the indicator of the band `(3/2, 7/4]` cut at `13/8`. -/
+private lemma band_indicator_add_low_window (c x : ℝ) :
     (if (3 / 2 : ℝ) < x ∧ x ≤ 7 / 4 then c else 0) =
       (if (3 / 2 : ℝ) < x ∧ x ≤ 13 / 8 then c else 0) +
         (if (13 / 8 : ℝ) < x ∧ x ≤ 7 / 4 then c else 0) := by
@@ -87,6 +83,11 @@ private lemma band_indicator_add_low (c x : ℝ) :
       exact ha (lt_trans (show (3 / 2 : ℝ) < 13 / 8 by norm_num) hcon.1)
     simp [hA, hB, hC]
 
+/-- LEAF 2 of 4, the window decomposition. Given the convergence of the band family, the sum
+over the ordinates above three halves and at most seven quarters is the sum over the ordinates
+above three halves and at most thirteen eighths, plus the sum over the ordinates above thirteen
+eighths and at most seven quarters. As a statement this is the additivity of the zero sum over a
+disjoint cut of the band, and it is the only place where the convergence leaf is spent. -/
 theorem positive_mass_window_two_low_window_window_split (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hT : 1 ≤ T)
     (hs : Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
@@ -115,7 +116,7 @@ theorem positive_mass_window_two_low_window_window_split (q : ℕ) [NeZero q]
   rw [← h1.tsum_add h2]
   refine tsum_congr fun ρ => ?_
   simpa only [Set.indicator_apply, Set.mem_ofPred_eq, Pi.add_apply] using
-    band_indicator_add_low ‖mellinMassTerm χ δ ρ.val‖ ρ.val.im
+    band_indicator_add_low_window ‖mellinMassTerm χ δ ρ.val‖ ρ.val.im
 
 /-- LEAF 3 of 4, the lower half of the band. The multiplicity weighted sum of the Gaussian
 Mellin norms over the zeros whose ordinate lies above three halves and at most thirteen eighths
