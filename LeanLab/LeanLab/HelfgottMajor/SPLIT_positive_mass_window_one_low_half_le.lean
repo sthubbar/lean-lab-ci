@@ -40,7 +40,8 @@ theorem positive_mass_window_one_low_half_norm_summable (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (δ T : ℝ) (hT : 1 ≤ T) :
     Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} => ‖mellinMassTerm χ δ ρ.val‖) := by
-  sorry
+  classical
+  exact positive_mass_window_one_norm_summable q χ δ T hT
 
 /-- LEAF 2 of 4, the window decomposition. Given the convergence of the band family, the sum over
 the ordinates above one and at most five quarters is the sum over the ordinates above one and at
