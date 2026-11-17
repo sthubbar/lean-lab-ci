@@ -69,6 +69,28 @@ theorem leaf_majorant_origin_wide524 (w : ℝ) (H : ℕ) (hw0 : 0 < w)
         c₀ + ∑ h ∈ Icc 1 H, A h * cos (2 * π * ((h : ℝ) * x)) := by
   sorry
 
+/-! The three facts about `eC` needed by the transfer step. They are private
+because the parent file states its own copies privately. -/
+
+private theorem eC_eq524shift (t : ℝ) :
+    eC t = Complex.exp ((2 * π * t : ℝ) * Complex.I) := by
+  unfold eC
+  congr 1
+  push_cast
+  ring
+
+private theorem eC_re524shift (t : ℝ) : (eC t).re = cos (2 * π * t) := by
+  rw [eC_eq524shift, Complex.exp_ofReal_mul_I_re]
+
+private theorem eC_norm524shift (t : ℝ) : ‖eC t‖ = 1 := by
+  rw [eC_eq524shift, Complex.norm_exp_ofReal_mul_I]
+
+private theorem eC_mul524shift (s t : ℝ) : eC s * eC t = eC (s + t) := by
+  simp only [eC_eq524shift, ← Complex.exp_add]
+  congr 1
+  push_cast
+  ring
+
 /-- LEAF. The transfer step: given a real cosine majorant of the indicator of
 `[0, b - a)` with constant at most `b - a + 4 / (H + 1)` and coefficients at
 most `4 / h` in modulus, there are a constant and complex coefficients within
@@ -89,7 +111,58 @@ theorem leaf_majorant_shift_and_complexify524 (a b : ℝ) (hab : a < b)
       (∀ h ∈ Icc 1 H, ‖c h‖ ≤ 4 / (h : ℝ)) ∧
       ∀ x : ℝ, (if a ≤ Int.fract x ∧ Int.fract x < b then (1 : ℝ) else 0) ≤
         c₀ + (∑ h ∈ Icc 1 H, c h * eC ((h : ℝ) * x)).re := by
-  sorry
+  classical
+  obtain ⟨c₀, A, hc₀, hA, hdom⟩ := hM
+  refine ⟨c₀, fun h => (A h : ℂ) * eC (-((h : ℝ) * a)), hc₀, ?_, ?_⟩
+  · intro h hh
+    rw [norm_mul, eC_norm524shift, mul_one, Complex.norm_real, Real.norm_eq_abs]
+    exact hA h hh
+  · intro x
+    set u : ℝ := Int.fract (x - a) with hudef
+    have hufract : Int.fract u = u := by
+      rw [hudef, Int.fract_fract]
+    have hdom' : (if 0 ≤ Int.fract u ∧ Int.fract u < b - a then (1 : ℝ) else 0)
+        ≤ c₀ + ∑ h ∈ Icc 1 H, A h * cos (2 * π * ((h : ℝ) * u)) := by
+      simpa [hufract] using hdom u
+    have hsum : (∑ h ∈ Icc 1 H,
+          ((A h : ℂ) * eC (-((h : ℝ) * a))) * eC ((h : ℝ) * x)).re
+        = ∑ h ∈ Icc 1 H, A h * cos (2 * π * ((h : ℝ) * u)) := by
+      rw [Complex.re_sum]
+      refine Finset.sum_congr rfl ?_
+      intro h _
+      have hmul : ((A h : ℂ) * eC (-((h : ℝ) * a))) * eC ((h : ℝ) * x)
+          = (A h : ℂ) * eC ((h : ℝ) * (x - a)) := by
+        rw [mul_assoc, eC_mul524shift]
+        congr 2
+        push_cast
+        ring
+      have harg : 2 * π * ((h : ℝ) * (x - a))
+          = 2 * π * ((h : ℝ) * u) + ((↑((h : ℤ) * ⌊x - a⌋) : ℝ) * (2 * π)) := by
+        have hdec : x - a = u + ((⌊x - a⌋ : ℤ) : ℝ) := (Int.fract_add_floor (x - a)).symm
+        conv_lhs => rw [hdec]
+        push_cast
+        ring
+      rw [hmul, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, zero_mul,
+        sub_zero, eC_re524shift, harg, Real.cos_add_int_mul_two_pi]
+    have hstep : (if a ≤ Int.fract x ∧ Int.fract x < b then (1 : ℝ) else 0)
+        ≤ (if 0 ≤ Int.fract u ∧ Int.fract u < b - a then (1 : ℝ) else 0) := by
+      by_cases hx : a ≤ Int.fract x ∧ Int.fract x < b
+      · rw [if_pos hx]
+        have hxu : u = Int.fract x - a := by
+          rw [hudef]
+          have hdec : x - a = (Int.fract x - a) + ((⌊x⌋ : ℤ) : ℝ) := by
+            have h := Int.fract_add_floor x
+            push_cast
+            linarith
+          rw [hdec, Int.fract_add_intCast]
+          exact Int.fract_eq_self.mpr
+            ⟨by linarith [hx.1], by nlinarith [Int.fract_lt_one x, ha]⟩
+        rw [hufract, if_pos ⟨by rw [hxu]; linarith [hx.1],
+          by rw [hxu]; linarith [hx.2]⟩]
+      · rw [if_neg hx]
+        split_ifs <;> norm_num
+    rw [hsum]
+    exact hstep.trans hdom'
 
 /-- The target of the parent file in the small-width regime, assembled from the
 two width bands of the origin construction and the transfer step. -/
