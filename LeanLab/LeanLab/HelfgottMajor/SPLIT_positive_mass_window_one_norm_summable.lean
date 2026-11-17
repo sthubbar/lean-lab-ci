@@ -18,7 +18,7 @@ zeros of the `L`-function on a compact set is spent. The third leaf is the passa
 zero set to the summability of the norm family over it.
 
 The assembly is the subset of the ball set by the band set, taken from the first two leaves, and
-then the third leaf. It has no sorry of its own. All three leaves are OPEN.
+then the third leaf. It has no sorry of its own. All three leaves are proved below.
 -/
 
 namespace LeanLab.HelfgottMajor.Decomp431a
@@ -34,7 +34,29 @@ theorem positive_mass_window_one_zero_norm_le (q : ℕ) [NeZero q]
     (hzero : DirichletCharacter.LFunction χ ρ = 0) (hre0 : 0 < ρ.re) (hre1 : ρ.re < 1)
     (him : |ρ.im| ≤ T) :
     ‖ρ‖ ≤ 1 + T := by
-  sorry
+  have h := Complex.norm_le_abs_re_add_abs_im ρ
+  have h1 : |ρ.re| ≤ 1 := by rw [abs_of_pos hre0]; linarith
+  linarith
+
+/-- The zeros of a differentiable function that is not identically zero, cut down by any closed
+ball, form a finite set. The zero set is discrete because the function is analytic on the whole
+plane and does not vanish identically, and a closed ball is compact, so a discrete subset of it is
+finite. This is the compactness input shared by both cases of the second leaf. -/
+private lemma pmw1_finite_zeros_ball (f : ℂ → ℂ) (R : ℝ) (hf : Differentiable ℂ f)
+    (hne : ∃ z, f z ≠ 0) : {z : ℂ | ‖z‖ ≤ R ∧ f z = 0}.Finite := by
+  obtain ⟨w, hw⟩ := hne
+  have ha : AnalyticOnNhd ℂ f Set.univ := fun z _ => hf.analyticAt z
+  have hd : f ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℂ := by
+    simpa [Filter.codiscrete] using ha.preimage_zero_mem_codiscreteWithin hw (Set.mem_univ w)
+      isConnected_univ
+  have hclosed : IsClosed (f ⁻¹' {0}) := isClosed_singleton.preimage hf.continuous
+  have hdiscrete : IsDiscrete (f ⁻¹' {0}) := by
+    simpa using (mem_codiscrete'.mp hd).2
+  have hcompact := (isCompact_closedBall (0 : ℂ) R).inter_right hclosed
+  have hfinite := hcompact.finite (hdiscrete.mono Set.inter_subset_right)
+  convert hfinite using 1
+  ext z
+  simp [Metric.mem_closedBall, dist_zero_right]
 
 /-- LEAF 2 of 3, the zero set in the ball is finite. There are only finitely many zeros of the
 `L`-function of modulus `q` in the closed ball of radius `1 + T` around the origin. This is the
@@ -44,7 +66,25 @@ point of the zero set carries only finitely many of them. -/
 theorem positive_mass_window_one_zero_set_closedBall_finite (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (T : ℝ) (hT : 1 ≤ T) :
     ({ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ ‖ρ‖ ≤ 1 + T}).Finite := by
-  sorry
+  by_cases hχ : χ = 1
+  · subst χ
+    have hf := pmw1_finite_zeros_ball (DirichletCharacter.LFunctionTrivChar₁ q) (1 + T)
+      (DirichletCharacter.differentiable_LFunctionTrivChar₁ q)
+      ⟨1, DirichletCharacter.LFunctionTrivChar₁_apply_one_ne_zero q⟩
+    refine ((Set.finite_singleton (1 : ℂ)).union hf).subset ?_
+    rintro z ⟨hz0, hzR⟩
+    rcases eq_or_ne z 1 with rfl | hz1
+    · exact Or.inl rfl
+    · refine Or.inr ⟨hzR, ?_⟩
+      have hz0' : DirichletCharacter.LFunctionTrivChar q z = 0 := hz0
+      simp only [DirichletCharacter.LFunctionTrivChar₁, Function.update_of_ne hz1, hz0',
+        mul_zero]
+  · have hf := pmw1_finite_zeros_ball (DirichletCharacter.LFunction χ) (1 + T)
+      (DirichletCharacter.differentiable_LFunction hχ)
+      ⟨2, DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ) (by norm_num)⟩
+    refine hf.subset ?_
+    rintro z ⟨hz0, hzR⟩
+    exact ⟨hzR, hz0⟩
 
 /-- LEAF 3 of 3, a finite band carries a summable family. If the zeros of the band form a finite
 set, then the family of the Gaussian Mellin norms over them is summable: a family on a finite
@@ -56,7 +96,11 @@ theorem positive_mass_window_one_window_summable_of_finite (q : ℕ) [NeZero q]
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}).Finite) :
     Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} => ‖mellinMassTerm χ δ ρ.val‖) := by
-  sorry
+  haveI : Finite {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} := hfin.to_subtype
+  letI := Fintype.ofFinite {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}
+  exact (hasSum_fintype _).summable
 
 /-- The statement of `positive_mass_window_one_norm_summable`, proved from the three leaves.
 The band set is a subset of the zero set in the closed ball by the first leaf, so the second leaf
