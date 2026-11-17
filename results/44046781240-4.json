@@ -684,6 +684,71 @@
    "file": "LeanLab/LeanLab/Song2020/Decomp139b.lean",
    "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
    "seconds": 192
+  },
+  {
+   "file": "LeanLab/LeanLab/Song2020/SPLIT_lambda_sum_per_h.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Stein1965/Decomp114.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Teravainen2016/MainInputs.lean",
+   "result": "0 closed of 6 declarations, 0 of 6 sites named a tactic, 0 errors",
+   "seconds": 42
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/AlmostEqual.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 17
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp361b.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 17
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp379a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 20
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary78/Bennett/NTChi.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Tolev2009/Major83.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Gaps1.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/RecordsSummary.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Rows1.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Rows5.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/task507/Task507Leaves.lean",
+   "result": "no candidate sites",
+   "seconds": 0
   }
  ],
  "summary": {
@@ -691,7 +756,7 @@
   "declarations_closed": 1,
   "sites": 1,
   "skipped": 3,
-  "seconds": 6681
+  "seconds": 6780
  },
  "selftest": {
   "ok": true,
