@@ -56,7 +56,8 @@ theorem book_zero_count_large_height_upper_tall_above_ten_pow_six_below_ten_pow_
     (hq6 : 10 ^ 6 < q) (hq10 : q ≤ 10 ^ 10)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h : |bookCount χ T - bookMain q T| ≤ bookError q T := book_zero_count χ hχ (by linarith)
+  exact (abs_le.mp h).right
 
 /-- LEAF: tall heights, conductor above the height's square root and modulus past `10 ^ 10`:
 `2 ≤ q`, `q ≤ T`, `10 ^ 6 ≤ T`, `T < q ^ 2`, `10 ^ 10 < q`. Here `q > 10 ^ 10` gives
@@ -72,7 +73,8 @@ theorem book_zero_count_large_height_upper_tall_above_ten_pow_six_above_ten_pow_
     (hq6 : 10 ^ 6 < q) (hq10 : 10 ^ 10 < q)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h : |bookCount χ T - bookMain q T| ≤ bookError q T := book_zero_count χ hχ (by linarith)
+  exact (abs_le.mp h).right
 
 /-- Assembly: on the tall range with the conductor above the square root of the height and past
 `10 ^ 6`, either `q ≤ 10 ^ 10`, which is the first leaf, or `10 ^ 10 < q`, which is the second.
