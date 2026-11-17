@@ -29,19 +29,102 @@ theorem principal_log_weight_sq_window_pos_pointwise :
       ‖logDeriv riemannZeta ((-1 / 2 : ℂ) + t * Complex.I)‖ ≤ Real.log t + 7 := by
   sorry
 
+/-- The squared logarithmic majorant divided by the squared size of the contour parameter is
+continuous on the positive half line: the logarithm is continuous there and the denominator is
+strictly positive. -/
+private theorem window_pos_majorant_continuousOn :
+    ContinuousOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) (Set.Ioi (0 : ℝ)) := by
+  have hlog : ContinuousOn (fun t : ℝ => Real.log t + 7) (Set.Ioi (0 : ℝ)) :=
+    ContinuousOn.add (ContinuousOn.log continuousOn_id (fun t ht => ne_of_gt ht))
+      continuousOn_const
+  exact (hlog.pow 2).div (by fun_prop) (fun t _ => ne_of_gt (by positivity))
+
+/-- `log 7 ≤ 1.95`, from the exponential series. -/
+private theorem window_pos_log_seven_le : Real.log 7 ≤ 1.95 := by
+  rw [Real.log_le_iff_le_exp (by norm_num)]
+  calc (7 : ℝ) ≤ ∑ i ∈ Finset.range 11, (1.95 : ℝ) ^ i / (i.factorial : ℝ) := by
+        norm_num [Finset.sum_range_succ, Nat.factorial]
+    _ ≤ Real.exp 1.95 := Real.sum_le_exp_of_nonneg (by norm_num) _
+
+/-- On `2 < t ≤ 7/2` the logarithm is at most two, so the squared majorant is at most `81`, and
+the squared size `1/4 + t^2` of the contour parameter is at least four, so the majorant is at
+most `81/4` there. -/
+private theorem window_pos_majorant_low_le {t : ℝ} (h2 : 2 < t) (h5 : t ≤ 7 / 2) :
+    (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ 81 / 4 := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hlog2 : Real.log t ≤ 2 := by
+    have h1 : Real.log t ≤ Real.log 7 := Real.log_le_log ht0 (by linarith)
+    linarith [window_pos_log_seven_le]
+  have hlog0 : 0 ≤ Real.log t := Real.log_nonneg (by linarith)
+  have hsq : (Real.log t + 7) ^ 2 ≤ 81 := by
+    have hprod : (Real.log t - 2) * (Real.log t + 16) ≤ 0 :=
+      mul_nonpos_of_nonpos_of_nonneg (by linarith) (by linarith)
+    nlinarith [hprod]
+  have hden : (0 : ℝ) < 1 / 4 + t ^ 2 := by positivity
+  have hd4 : (4 : ℝ) ≤ 1 / 4 + t ^ 2 := by nlinarith [sq_nonneg (t - 2)]
+  rw [div_le_iff₀ hden]
+  linarith
+
+/-- On `7/2 < t ≤ 5` the logarithm is at most two, so the squared majorant is at most `81`, and
+the squared size `1/4 + t^2` of the contour parameter is at least `25/2`, so the majorant is at
+most `162/25` there. -/
+private theorem window_pos_majorant_high_le {t : ℝ} (h2 : 7 / 2 < t) (h5 : t ≤ 5) :
+    (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2) ≤ 162 / 25 := by
+  have ht0 : (0 : ℝ) < t := by linarith
+  have hlog2 : Real.log t ≤ 2 := by
+    have h1 : Real.log t ≤ Real.log 7 := Real.log_le_log ht0 (by linarith)
+    linarith [window_pos_log_seven_le]
+  have hlog0 : 0 ≤ Real.log t := Real.log_nonneg (by linarith)
+  have hsq : (Real.log t + 7) ^ 2 ≤ 81 := by
+    have hprod : (Real.log t - 2) * (Real.log t + 16) ≤ 0 :=
+      mul_nonpos_of_nonpos_of_nonneg (by linarith) (by linarith)
+    nlinarith [hprod]
+  have hden : (0 : ℝ) < 1 / 4 + t ^ 2 := by positivity
+  have hd : (25 / 2 : ℝ) ≤ 1 / 4 + t ^ 2 := by nlinarith [sq_nonneg (t - 7 / 2)]
+  rw [div_le_iff₀ hden]
+  linarith
+
 /-- LEAF. The lower half of the window: the squared logarithmic majorant divided by the squared
 size of the contour parameter has integral at most forty five over `2 < t ≤ 7/2`.  This is the
 calculus step on the left half of the window, where `log t` is still small. -/
 theorem principal_log_weight_sq_window_pos_majorant_low :
     (∫ t in Set.Ioc (2 : ℝ) (7 / 2), (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ 45 := by
-  sorry
+  have hcont : ContinuousOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2))
+      (Set.Icc (2 : ℝ) (7 / 2)) :=
+    window_pos_majorant_continuousOn.mono
+      (by intro t ht; exact Set.mem_Ioi.mpr (by linarith [ht.1]))
+  have hint : IntegrableOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2))
+      (Set.Ioc (2 : ℝ) (7 / 2)) := hcont.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
+  have hc : IntegrableOn (fun _ : ℝ => (81 / 4 : ℝ)) (Set.Ioc (2 : ℝ) (7 / 2)) :=
+    integrableOn_const (by simp)
+  have hmono := setIntegral_mono_on hint hc measurableSet_Ioc
+    (fun t ht => window_pos_majorant_low_le ht.1 ht.2)
+  have hval : (∫ _t in Set.Ioc (2 : ℝ) (7 / 2), (81 / 4 : ℝ)) = 243 / 8 := by
+    rw [setIntegral_const, Real.volume_real_Ioc_of_le (by norm_num), smul_eq_mul]
+    norm_num
+  rw [hval] at hmono
+  linarith
 
 /-- LEAF. The upper half of the window: the squared logarithmic majorant divided by the squared
 size of the contour parameter has integral at most thirty over `7/2 < t ≤ 5`.  This is the
 calculus step on the right half of the window, where the denominator has grown. -/
 theorem principal_log_weight_sq_window_pos_majorant_high :
     (∫ t in Set.Ioc (7 / 2) 5, (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2)) ≤ 30 := by
-  sorry
+  have hcont : ContinuousOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2))
+      (Set.Icc (7 / 2 : ℝ) 5) :=
+    window_pos_majorant_continuousOn.mono
+      (by intro t ht; exact Set.mem_Ioi.mpr (by linarith [ht.1]))
+  have hint : IntegrableOn (fun t : ℝ => (Real.log t + 7) ^ 2 / (1 / 4 + t ^ 2))
+      (Set.Ioc (7 / 2 : ℝ) 5) := hcont.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
+  have hc : IntegrableOn (fun _ : ℝ => (162 / 25 : ℝ)) (Set.Ioc (7 / 2 : ℝ) 5) :=
+    integrableOn_const (by simp)
+  have hmono := setIntegral_mono_on hint hc measurableSet_Ioc
+    (fun t ht => window_pos_majorant_high_le ht.1 ht.2)
+  have hval : (∫ _t in Set.Ioc (7 / 2 : ℝ) 5, (162 / 25 : ℝ)) = 243 / 25 := by
+    rw [setIntegral_const, Real.volume_real_Ioc_of_le (by norm_num), smul_eq_mul]
+    norm_num
+  rw [hval] at hmono
+  linarith
 
 /-- The weight is the logarithmic derivative of the zeta function on the left line divided by the
 contour parameter, so its squared size is the squared logarithmic derivative divided by the
