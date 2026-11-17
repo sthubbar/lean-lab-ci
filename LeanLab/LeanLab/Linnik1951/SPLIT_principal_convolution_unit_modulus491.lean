@@ -39,7 +39,10 @@ theorem principal_arc_compare_unit491 (hG : LeanLab.DERZ1997.GRH) :
           ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
             logFourier520 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := principal_arc_compare491 hG
+  refine ⟨C, hC, N0, ?_⟩
+  intro N hN q hq hqQ hq1 n _hn
+  exact h N hN q hq hqQ n
 
 /-- LEAF. The tail step, at unit modulus. The arc integral of the squared model series
 differs from its full period integral by the two tails of length one half minus the
@@ -55,7 +58,10 @@ theorem logFourier_arc_tail_unit491 :
             logFourier520 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) -
           ∫ z in (-(1 / 2) : ℝ)..(1 / 2), logFourier520 N z ^ 2 * Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := logFourier_arc_convolution491
+  refine ⟨C, hC, N0, ?_⟩
+  intro N hN q hq hqQ hq1 n
+  exact h N hN q hq hqQ n
 
 /-- LEAF. The exact full period step, at unit modulus. The full period integral of the
 squared model series against the exponential phase is the exactly damped logarithmic
