@@ -69,7 +69,25 @@ theorem leaf_low_j0_strip_index_bounded (γ δ κ : ℝ) (N : ℕ) (a b : ℝ) (
     (hheight : 4 * calE γ κ N ^ (2 / 3 : ℝ) + 2 ≤ calE γ κ N ^ (3 / 4 : ℝ))
     (hh : |(b - a) - (h : ℝ) / 2| ≤ F γ N ^ (δ - 1)) :
     (|h| : ℝ) ≤ calE γ κ N ^ (3 / 4 : ℝ) := by
-  sorry
+  have hX1 : 1 ≤ F γ N := by
+    unfold LeanLab.ExceptionalSet.BrudernPerelli1998.F
+    exact Real.one_le_exp (Real.rpow_nonneg (Real.log_natCast_nonneg N) γ)
+  have hE0 : 0 < calE γ κ N := Real.exp_pos _
+  have haI : -(calE γ κ N ^ (2 / 3 : ℝ)) ≤ a ∧ a ≤ calE γ κ N ^ (2 / 3 : ℝ) := ha.2
+  have hbI : -(calE γ κ N ^ (2 / 3 : ℝ)) ≤ b ∧ b ≤ calE γ κ N ^ (2 / 3 : ℝ) := hb.2
+  have hab : |b - a| ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) := by
+    rw [abs_le]
+    constructor <;> linarith [haI.1, haI.2, hbI.1, hbI.2]
+  have hrad : F γ N ^ (δ - 1) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos hX1 (by linarith)
+  have hhab := abs_le.mp hab
+  have hhh := abs_le.mp hh
+  have hhalf : |((h : ℝ) / 2)| ≤ 2 * calE γ κ N ^ (2 / 3 : ℝ) + 1 := by
+    rw [abs_le]
+    constructor <;> linarith [hhab.1, hhab.2, hhh.1, hhh.2, hrad]
+  have hhalf' := abs_le.mp hhalf
+  rw [abs_le]
+  constructor <;> linarith [hhalf'.1, hhalf'.2, hheight]
 
 /-- Assembly. The two steps above localize the large values of the assigned lower
 block phase. The width is fixed at one so that `δ ≤ 1`, the eventual threshold is
