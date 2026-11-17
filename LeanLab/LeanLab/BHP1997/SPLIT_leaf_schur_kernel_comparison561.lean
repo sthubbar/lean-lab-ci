@@ -23,7 +23,10 @@ applied to the two products. No integral, no set and no constant appears. -/
 theorem leaf_four_moduli_amgm561 (p q r s : ℝ) (hp : 0 ≤ p) (hq : 0 ≤ q)
     (hr : 0 ≤ r) (hs : 0 ≤ s) :
     p * q * r * s ≤ (p ^ 2 * s ^ 2 + q ^ 2 * r ^ 2) / 2 := by
-  sorry
+  have hps : 0 ≤ p * s := mul_nonneg hp hs
+  have hqr : 0 ≤ q * r := mul_nonneg hq hr
+  have hsq : 0 ≤ (p * s - q * r) ^ 2 := sq_nonneg _
+  nlinarith
 
 /-- LEAF. The change of variable in the crossed term. The kernel weight is
 unchanged when the sign of its argument flips, so exchanging the two names of
