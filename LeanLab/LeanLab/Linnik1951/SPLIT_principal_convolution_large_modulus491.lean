@@ -50,7 +50,27 @@ theorem principal_arc_compare_large_modulus491 (hG : LeanLab.DERZ1997.GRH) :
               Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 /
             Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  obtain ⟨C1, hC1, N1, h1⟩ := principal_arc_compare491 hG
+  refine ⟨C1, hC1, max 128 N1, ?_⟩
+  intro N hN q hq hqQ hq2 hqsmall n hn4 hnN
+  have hN1 : N1 < N := lt_of_le_of_lt (le_trans (le_max_left _ _) (le_max_right _ _)) hN
+  have hNr : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (show 1 ≤ N by omega)
+  have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (show 0 < q by omega)
+  have hpow : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos (by linarith) _
+  have hR : 0 < (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) := mul_pos hqpos hpow
+  have hS : 0 < Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := Real.sqrt_pos.mpr hR
+  have hlog : 0 ≤ Real.log N := Real.log_nonneg hNr
+  have hqge : 2 ≤ q := hq2
+  have hqbig : (N : ℝ) ^ (1 / 20 : ℝ) ≤ (q : ℝ) := hqsmall
+  have hnge : 4 ≤ n := hn4
+  have : ‖principalIntegral491 N q n -
+      ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+        logFourier520 N z ^ 2 *
+          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
+      C1 * (N : ℝ) * Real.log N ^ 13 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
+    have h := h1 N hN1 q hq hqQ n
+    exact h
+  exact this
 
 /-- LEAF. The full period step of the large modulus case. The arc integral of the
 model series square, with the residual exponential, is the exactly damped logarithmic
@@ -68,7 +88,27 @@ theorem principal_full_period_large_modulus491 :
           ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ)‖ ≤
           C * (N : ℝ) * Real.log N ^ 13 /
             ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  obtain ⟨C2, hC2, N2, h2⟩ := logFourier_arc_convolution491
+  refine ⟨C2, hC2, max 128 N2, ?_⟩
+  intro N hN q hq hqQ hq2 hqsmall n hn4 hnN
+  have hN2 : N2 < N := lt_of_le_of_lt (le_trans (le_max_left _ _) (le_max_right _ _)) hN
+  have hNr : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (show 1 ≤ N by omega)
+  have hqpos : (0 : ℝ) < (q : ℝ) := by exact_mod_cast (show 0 < q by omega)
+  have hpow : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos (by linarith) _
+  have hR : 0 < (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) := mul_pos hqpos hpow
+  have hS : 0 < Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := Real.sqrt_pos.mpr hR
+  have hlog : 0 ≤ Real.log N := Real.log_nonneg hNr
+  have hqge : 2 ≤ q := hq2
+  have hqbig : (N : ℝ) ^ (1 / 20 : ℝ) ≤ (q : ℝ) := hqsmall
+  have hnge : 4 ≤ n := hn4
+  have : ‖(∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+          logFourier520 N z ^ 2 *
+            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) -
+        ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ)‖ ≤
+        C2 * (N : ℝ) * Real.log N ^ 13 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
+    have h := h2 N hN2 q hq hqQ n
+    exact h
+  exact this
 
 /-- The principal convolution estimate at a large modulus, assembled from the two
 case steps. The statement is the sealed one, unchanged. The triangle inequality
