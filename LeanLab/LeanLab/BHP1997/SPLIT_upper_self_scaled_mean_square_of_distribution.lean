@@ -89,7 +89,12 @@ theorem upper_self_scaled_exceptional_card_emptyset
     ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q →
       (((fun _ _ _ => (∅ : Finset (DirichletCharacter ℂ q))) A x q).card : ℝ) ≤
         C * (q : ℝ) ^ (1 / 2 : ℝ) * Real.log x ^ (-2 * A) := by
-  sorry
+  use 0
+  intro x hx q hq
+  have h₁ : (((fun _ _ _ => (∅ : Finset (DirichletCharacter ℂ q))) A x q).card : ℝ) = 0 := by
+    simp [Finset.card_empty, Nat.cast_zero]
+  rw [h₁]
+  norm_num
 
 /-- The split statement, assembled from the three LEAF statements above with no sorry: the divisor
 bound at exponent two for `b1` together with the short interval distribution clause at the self
