@@ -1,4 +1,4 @@
-import LeanLab.RamareSaouter2003.Decomp290c
+import LeanLab.RamareSaouter2003.ZeroTerm594
 import LeanLab.RamareSaouter2003.Decomp1531a
 
 /-!

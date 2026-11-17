@@ -1,4 +1,4 @@
-import LeanLab.RamareSaouter2003.Decomp290c
+import LeanLab.RamareSaouter2003.ZeroTerm594
 
 /-!
 P0099 p. 19, the finite near part after display 13.

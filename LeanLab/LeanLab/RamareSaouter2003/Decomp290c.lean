@@ -1,21 +1,18 @@
-import LeanLab.RamareSaouter2003.Lemma1Zeta
+import LeanLab.RamareSaouter2003.ZeroTerm594
+import LeanLab.RamareSaouter2003.Decomp378d
+import LeanLab.RamareSaouter2003.Decomp378b
 
 /-!
 P0099, Lemma 4 and the zero sum in display 13 on printed p. 19.
 The corrected constant in Ramare 2023 Lemma 1.1 cancels in the difference.
 AI wrote this Lean code. Binary Goldbach is OPEN.
-The four analytic leaves are OPEN. The sum splitting proof is bookkeeping.
+The analytic helpers are separated from the shared zero term definition.
+The sum splitting proof is bookkeeping.
 -/
 
 namespace LeanLab.RamareSaouter2003.Decomp290c
 
 open Real Chebyshev Smooth Thm4Assembly L3Zeta
-
-/-- The zero term in display 13, printed p. 19, after zero_term_factor. -/
-noncomputable def zeroTerm (m : ℕ) (X u : ℝ) (i : ZI) : ℂ :=
-  (Complex.exp (u * (i.1 : ℂ)) - 1) / (i.1 : ℂ) * (X : ℂ) ^ (i.1 : ℂ) *
-    ∫ t in (0 : ℝ)..1,
-      (((1 + (m * u) * t : ℝ) : ℂ) ^ (i.1 : ℂ)) * (fm m t : ℂ)
 
 /-- The near part of the real zero sum, printed pp. 19 and 20, display 15. -/
 noncomputable def nearSum (m : ℕ) (X u T : ℝ) : ℝ :=
@@ -31,7 +28,7 @@ ordinate tail, before the smoothing terms are considered. -/
 theorem reciprocal_tail_summable (m : ℕ) (hm : 1 ≤ m) :
     Summable (fun i : ZI => if (1000 : ℝ) < |gZ i| then
       1 / |gZ i| ^ (m + 1) else 0) := by
-  sorry
+  exact Decomp378b.reciprocal_tail_summable m hm
 
 /-- LEAF. P0099 p. 19, the finite near zero part after display 13.
 Only finitely many terms have absolute ordinate at most 1000.
@@ -39,7 +36,7 @@ This asserts finite support, without estimating their number or size. -/
 theorem near_support_finite (m : ℕ) (X u : ℝ) :
     (Function.support (fun i : ZI => if |gZ i| ≤ (1000 : ℝ) then
       zeroTerm m X u i else 0)).Finite := by
-  sorry
+  exact Decomp359a.near_support_finite m X u
 
 /-- LEAF. P0099 p. 20, display 14 and the bound on exp u rho minus one.
 The far zero terms have a fixed nonnegative multiple of the reciprocal
@@ -49,10 +46,10 @@ theorem far_norm_majorant (m : ℕ) (X u : ℝ) (hm : 2 ≤ m)
     ∃ C : ℝ, 0 ≤ C ∧ ∀ i : ZI,
       ‖if (1000 : ℝ) < |gZ i| then zeroTerm m X u i else 0‖ ≤
         C * (if (1000 : ℝ) < |gZ i| then 1 / |gZ i| ^ (m + 1) else 0) := by
-  sorry
+  exact Decomp359c.far_norm_majorant m X u hm hX hu hmu
 
 /-- Convergence from finite near support, a reciprocal tail and its majorant.
-CONDITIONAL ON the three smaller convergence leaves. -/
+All three convergence ingredients are proved by the existing analytic helpers. -/
 theorem zeroTerm_summable (m : ℕ) (X u : ℝ) (hm : 2 ≤ m)
     (hX : 10 ^ 12 ≤ X) (hu : 0 < u) (hmu : (m : ℝ) * u ≤ 0.0001) :
     Summable (zeroTerm m X u) := by
@@ -83,7 +80,7 @@ theorem weighted_formula_total (m : ℕ) (X u : ℝ) (hm : 2 ≤ m)
         ∫ t in (0 : ℝ)..1,
           (1 / 2) * (Real.log (1 - 1 / (Real.exp u * ((1 + m * u * t) * X)) ^ 2) -
             Real.log (1 - 1 / ((1 + m * u * t) * X) ^ 2)) * fm m t := by
-  sorry
+  exact Decomp378d.weighted_formula_total m X u hm hX hu hmu
 
 /-- Splitting the actual zero sum at T. The only premise is summability.
 This applies Mathlib's real part and indicator identities. -/
