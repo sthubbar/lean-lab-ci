@@ -64,7 +64,10 @@ at `N = 0` the window value satisfies `F(γ,0)/2 < ν_n`, so the half-open inequ
 strict. -/
 theorem leaf_even_index_window_frequency_gap (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
     ∀ N : ℕ, ∀ n : ℕ, n ∈ window γ N → F γ N ≤ 2 * ((nu γ n : ℤ) : ℝ) := by
-  sorry
+  intro N n hn
+  rw [window, Finset.mem_filter] at hn
+  have hlt : F γ N / 2 < ((nu γ n : ℤ) : ℝ) := hn.2.1
+  linarith
 
 /-- Assembly of `leaf_coprime_even_index`: the domination leaf bounds the real part of the
 major arc integral by the frequency, the window leaf bounds the frequency below by half the
