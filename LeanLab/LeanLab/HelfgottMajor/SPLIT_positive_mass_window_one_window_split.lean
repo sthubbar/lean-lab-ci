@@ -19,11 +19,30 @@ bounded above by that norm family and nonnegative, so both halves converge.
 
 The assembly spends the three leaves and nothing else: the pointwise identity is turned into an
 identity of sums and the sum of the two halves is separated into the sum of the two sums. It has
-no sorry of its own. All three leaves are OPEN.
+no sorry of its own. All three leaves are PROVED.
 -/
 
 namespace LeanLab.HelfgottMajor.Decomp431a
 open Real LeanLab.HelfgottArcs Decomp269a Decomp269b Decomp389b
+
+/-- The real cut `(1, 3 / 2]` at `5 / 4`, at a constant value. -/
+private lemma band_indicator_add_window_one (c x : ℝ) :
+    (if (1 : ℝ) < x ∧ x ≤ 3 / 2 then c else 0) =
+      (if (1 : ℝ) < x ∧ x ≤ 5 / 4 then c else 0) +
+        (if (5 / 4 : ℝ) < x ∧ x ≤ 3 / 2 then c else 0) := by
+  by_cases hA : (1 : ℝ) < x ∧ x ≤ 3 / 2
+  · have ha : (1 : ℝ) < x := hA.1
+    have hb : x ≤ 3 / 2 := hA.2
+    by_cases h2 : x ≤ 5 / 4
+    · have hB : (1 : ℝ) < x ∧ x ≤ 5 / 4 := ⟨ha, h2⟩
+      have hC : ¬ ((5 / 4 : ℝ) < x ∧ x ≤ 3 / 2) := fun h => absurd h.1 (not_lt.mpr h2)
+      simp [hA, hB, hC]
+    · have hB : ¬ ((1 : ℝ) < x ∧ x ≤ 5 / 4) := fun h => absurd h.2 h2
+      have hC : (5 / 4 : ℝ) < x ∧ x ≤ 3 / 2 := ⟨by linarith, hb⟩
+      simp [hA, hB, hC]
+  · have hB : ¬ ((1 : ℝ) < x ∧ x ≤ 5 / 4) := fun h => hA ⟨h.1, by linarith [h.2]⟩
+    have hC : ¬ ((5 / 4 : ℝ) < x ∧ x ≤ 3 / 2) := fun h => hA ⟨by linarith [h.1], h.2⟩
+    simp [hA, hB, hC]
 
 /-- LEAF 1 of 3, the cut of the band at five quarters, pointwise at one zero. The indicator of the
 band of ordinates above one and at most three halves is, at every zero of the strip below height
@@ -42,7 +61,9 @@ theorem positive_mass_window_one_window_pointwise (q : ℕ) [NeZero q]
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ +
         Set.indicator {ρ | 5 / 4 < ρ.val.im ∧ ρ.val.im ≤ 3 / 2}
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ := by
-  sorry
+  classical
+  simpa only [Set.indicator_apply, Set.mem_ofPred_eq, Pi.add_apply] using
+    band_indicator_add_window_one ‖mellinMassTerm χ δ ρ.val‖ ρ.val.im
 
 /-- LEAF 2 of 3, the convergence of the lower half. Given the summability of the norm family over
 the zeros of the strip below height `T`, the same family weighted by the indicator of the
@@ -57,7 +78,8 @@ theorem positive_mass_window_one_window_low_summable (q : ℕ) [NeZero q]
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} =>
         Set.indicator {ρ | 1 < ρ.val.im ∧ ρ.val.im ≤ 5 / 4}
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) := by
-  sorry
+  classical
+  exact hs.indicator _
 
 /-- LEAF 3 of 3, the convergence of the upper half. Under the same summability hypothesis, the
 family weighted by the indicator of the ordinates above five quarters and at most three halves is
@@ -72,7 +94,8 @@ theorem positive_mass_window_one_window_high_summable (q : ℕ) [NeZero q]
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T} =>
         Set.indicator {ρ | 5 / 4 < ρ.val.im ∧ ρ.val.im ≤ 3 / 2}
           (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) := by
-  sorry
+  classical
+  exact hs.indicator _
 
 /-- The cut band identity of `positive_mass_window_one_window_split`. The pointwise identity of the
 first leaf holds at every zero, so the sums over the zeros agree with the sum of the summands of

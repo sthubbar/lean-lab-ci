@@ -56,6 +56,151 @@ theorem very_low_band_conductor_le_seventeen {T : ℝ} (hT : 1 ≤ T)
   have : q ≤ 17 := by omega
   exact_mod_cast this
 
+/-! ### Reflection of a strip zero under the functional equation.
+
+The private lemmas below supply the symmetry of the completed `L`-function used by the leaf
+`very_low_real_zero_reflect`: the Gamma factor is analytic and non-vanishing on the critical
+strip, the functional equation of a primitive character reads the order of `L(·, χ)` at `ρ` off
+the order of `L(·, χ⁻¹)` at `1 - ρ`, and the conjugation symmetry of `ZeroCount1623` closes the
+circle back to `χ`. -/
+
+omit [NeZero q] in
+/-- The Gamma factor of the functional equation does not vanish on the right of the imaginary
+axis, in particular on the open critical strip. -/
+private lemma vlow_gammaFactor_ne_zero (χ : DirichletCharacter ℂ q) {s : ℂ} (hs : 0 < s.re) :
+    χ.gammaFactor s ≠ 0 := by
+  classical
+  unfold DirichletCharacter.gammaFactor
+  split_ifs
+  · exact Complex.Gammaℝ_ne_zero_of_re_pos hs
+  · apply Complex.Gammaℝ_ne_zero_of_re_pos
+    simp only [Complex.add_re, Complex.one_re]
+    linarith
+
+/-- The Gamma factor of the functional equation is analytic on the right of the imaginary axis. -/
+private lemma vlow_gammaFactor_analyticAt (χ : DirichletCharacter ℂ q) {s : ℂ} (hs : 0 < s.re) :
+    AnalyticAt ℂ χ.gammaFactor s := by
+  classical
+  have hinv : AnalyticAt ℂ (fun z => (χ.gammaFactor z)⁻¹) s := by
+    apply Differentiable.analyticAt
+    unfold DirichletCharacter.gammaFactor
+    split_ifs
+    · exact Complex.differentiable_Gammaℝ_inv
+    · exact Complex.differentiable_Gammaℝ_inv.comp (differentiable_id.add_const 1)
+  have h := hinv.inv (inv_ne_zero (vlow_gammaFactor_ne_zero χ hs))
+  have he : (fun z => (χ.gammaFactor z)⁻¹)⁻¹ = χ.gammaFactor := by
+    funext z
+    simp only [Pi.inv_apply, inv_inv]
+  rwa [he] at h
+
+/-- The functional equation reflects a strip zero of a primitive character to its inverse: a
+zero `ρ` of `L(·, χ)` in the open strip is a zero of `L(·, χ⁻¹)` at `1 - ρ`. -/
+private lemma vlow_primitive_zero_reflection (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
+    {ρ : ℂ} (hρ : DirichletCharacter.LFunction χ ρ = 0) (h0 : 0 < ρ.re) (h1 : ρ.re < 1) :
+    DirichletCharacter.LFunction χ⁻¹ (1 - ρ) = 0 := by
+  have hρ0 : ρ ≠ 0 := by
+    intro h
+    simp [h] at h0
+  have hc : DirichletCharacter.completedLFunction χ ρ = 0 := by
+    have h := χ.LFunction_eq_completed_div_gammaFactor ρ (Or.inl hρ0)
+    rw [hρ] at h
+    exact (div_eq_zero_iff).mp h.symm |>.resolve_right (vlow_gammaFactor_ne_zero χ h0)
+  have hi : χ⁻¹.IsPrimitive := by
+    rw [DirichletCharacter.isPrimitive_def, DirichletCharacter.conductor_inv]
+    exact hχ
+  have he := hi.completedLFunction_one_sub ρ
+  simp only [inv_inv, hc, mul_zero] at he
+  have hr : 1 - ρ ≠ 0 := by
+    intro h
+    have := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.zero_re] at this
+    linarith
+  rw [DirichletCharacter.LFunction_eq_completed_div_gammaFactor _ _ (Or.inl hr), he, zero_div]
+
+/-- One half of the order reflection: the order of `L(·, χ)` at a strip point `ρ` is at most the
+order of `L(·, χ⁻¹)` at `1 - ρ`, read off the functional equation. -/
+private lemma vlow_primitive_order_reflection_le (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
+    {ρ : ℂ} (h0 : 0 < ρ.re) (h1 : ρ.re < 1) :
+    analyticOrderAt (DirichletCharacter.LFunction χ) ρ ≤
+      analyticOrderAt (DirichletCharacter.LFunction χ⁻¹) (1 - ρ) := by
+  have hi : χ⁻¹.IsPrimitive := by
+    rw [DirichletCharacter.isPrimitive_def, DirichletCharacter.conductor_inv]
+    exact hχ
+  have hq : (q : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne q)
+  let H : ℂ → ℂ := fun s => (q : ℂ) ^ (s - 1 / 2) * DirichletCharacter.rootNumber χ⁻¹ *
+    χ.gammaFactor s * (χ⁻¹.gammaFactor (1 - s))⁻¹
+  have hρ1 : ρ ≠ 1 := by intro h; simp [h] at h1
+  have hH : AnalyticAt ℂ H ρ := by
+    have hpow : AnalyticAt ℂ (fun s : ℂ => (q : ℂ) ^ (s - 1 / 2)) ρ := by
+      apply Differentiable.analyticAt
+      intro s
+      exact (differentiableAt_id.sub_const _).const_cpow (Or.inl hq)
+    have hg2 : AnalyticAt ℂ (fun s : ℂ => (χ⁻¹.gammaFactor (1 - s))⁻¹) ρ := by
+      classical
+      apply Differentiable.analyticAt
+      unfold DirichletCharacter.gammaFactor
+      split_ifs
+      · exact Complex.differentiable_Gammaℝ_inv.comp (differentiable_id.const_sub 1)
+      · exact Complex.differentiable_Gammaℝ_inv.comp
+          ((differentiable_id.const_sub 1).add_const 1)
+    exact ((hpow.mul analyticAt_const).mul (vlow_gammaFactor_analyticAt χ h0)).mul hg2
+  have hL : AnalyticAt ℂ (DirichletCharacter.LFunction χ) ρ := by
+    have hd : DifferentiableOn ℂ (DirichletCharacter.LFunction χ) {(1 : ℂ)}ᶜ := fun s hs =>
+      (DirichletCharacter.differentiableAt_LFunction χ s (Or.inl hs)).differentiableWithinAt
+    exact hd.analyticAt (isOpen_compl_singleton.mem_nhds hρ1)
+  have hopen : IsOpen {s : ℂ | 0 < s.re ∧ s.re < 1} :=
+    (isOpen_lt continuous_const Complex.continuous_re).inter
+      (isOpen_lt Complex.continuous_re continuous_const)
+  have hev : (DirichletCharacter.LFunction χ⁻¹ ∘ fun s : ℂ => 1 - s) =ᶠ[𝓝 ρ]
+      H * DirichletCharacter.LFunction χ := by
+    filter_upwards [hopen.mem_nhds (show ρ ∈ {s : ℂ | 0 < s.re ∧ s.re < 1} from ⟨h0, h1⟩)]
+      with s hs
+    have hs0 : s ≠ 0 := by
+      intro h
+      have := hs.1
+      simp [h] at this
+    have hr : 1 - s ≠ 0 := by
+      intro h
+      have := congrArg Complex.re h
+      simp only [Complex.sub_re, Complex.one_re, Complex.zero_re] at this
+      linarith [hs.2]
+    have hg := vlow_gammaFactor_ne_zero χ hs.1
+    have hc : DirichletCharacter.completedLFunction χ s =
+        DirichletCharacter.LFunction χ s * χ.gammaFactor s := by
+      rw [χ.LFunction_eq_completed_div_gammaFactor s (Or.inl hs0), div_mul_cancel₀ _ hg]
+    have he := hi.completedLFunction_one_sub s
+    rw [inv_inv] at he
+    simp only [Function.comp_apply, Pi.mul_apply, H]
+    rw [DirichletCharacter.LFunction_eq_completed_div_gammaFactor _ _ (Or.inl hr), he, hc,
+      div_eq_mul_inv]
+    ring
+  have hcomp : analyticOrderAt (DirichletCharacter.LFunction χ⁻¹ ∘ fun s : ℂ => 1 - s) ρ =
+      analyticOrderAt (DirichletCharacter.LFunction χ⁻¹) (1 - ρ) := by
+    have hg : AnalyticAt ℂ (fun s : ℂ => 1 - s) ρ :=
+      (differentiable_id.const_sub (1 : ℂ)).analyticAt ρ
+    have hd : deriv (fun s : ℂ => 1 - s) ρ ≠ 0 := by
+      rw [deriv_const_sub, deriv_id'']
+      norm_num
+    exact analyticOrderAt_comp_of_deriv_ne_zero hg hd
+  rw [← hcomp, analyticOrderAt_congr hev, analyticOrderAt_mul hH hL]
+  exact le_add_self
+
+/-- The functional equation keeps the multiplicity of a strip zero of a primitive character,
+with the character inverted: `mult χ⁻¹ (1 - ρ) = mult χ ρ`. -/
+private lemma vlow_primitive_mult_reflection (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
+    {ρ : ℂ} (h0 : 0 < ρ.re) (h1 : ρ.re < 1) :
+    mult χ⁻¹ (1 - ρ) = mult χ ρ := by
+  have hi : χ⁻¹.IsPrimitive := by
+    rw [DirichletCharacter.isPrimitive_def, DirichletCharacter.conductor_inv]
+    exact hχ
+  have ha := vlow_primitive_order_reflection_le χ hχ h0 h1
+  have hb := vlow_primitive_order_reflection_le χ⁻¹ hi
+    (ρ := 1 - ρ) (by simp only [Complex.sub_re, Complex.one_re]; linarith)
+    (by simp only [Complex.sub_re, Complex.one_re]; linarith)
+  rw [inv_inv, sub_sub_cancel] at hb
+  unfold mult analyticOrderNatAt
+  rw [le_antisymm hb ha]
+
 /-- LEAF. Symmetry of the completed `L`-function at a real zero: a real strip zero `ρ` of a
 primitive `χ` reflects to the real strip zero `1 - ρ` of the same `L`-function, with the same
 multiplicity. The vanishing is carried by `Λ(s) = ε * Λ(1 - s)` with `|ε| = 1` together with the
@@ -65,7 +210,39 @@ zero is treated at a time, and no bound on any multiplicity is asserted. -/
 theorem very_low_real_zero_reflect (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) {T : ℝ}
     {ρ : ℂ} (hρ : ρ ∈ stripZeros χ T) (him : ρ.im = 0) :
     1 - ρ ∈ stripZeros χ T ∧ mult χ (1 - ρ) = mult χ ρ := by
-  sorry
+  have hL : DirichletCharacter.LFunction χ ρ = 0 := hρ.1
+  have h0 : 0 < ρ.re := hρ.2.1
+  have h1 : ρ.re < 1 := hρ.2.2.1
+  have hT0 : 0 ≤ T := le_trans (abs_nonneg ρ.im) hρ.2.2.2
+  have hρ1 : ρ ≠ 1 := by
+    intro h
+    rw [h] at h1
+    norm_num at h1
+  have h0' : 0 < (1 - ρ).re := by simp only [Complex.sub_re, Complex.one_re]; linarith
+  have h1' : (1 - ρ).re < 1 := by simp only [Complex.sub_re, Complex.one_re]; linarith
+  -- conjugation fixes the real point, so the inverse character vanishes there too
+  have hinv0 : DirichletCharacter.LFunction χ⁻¹ ρ = 0 := by
+    have h := LFunction_inv_conj χ hρ1
+    rw [Complex.conj_eq_iff_im.mpr him, hL] at h
+    simpa using h
+  have hinvprim : χ⁻¹.IsPrimitive := by
+    rw [DirichletCharacter.isPrimitive_def, DirichletCharacter.conductor_inv]
+    exact hχ
+  have hvanish : DirichletCharacter.LFunction χ (1 - ρ) = 0 := by
+    have h := vlow_primitive_zero_reflection (χ := χ⁻¹) hinvprim hinv0 h0 h1
+    rwa [inv_inv] at h
+  refine ⟨⟨hvanish, h0', h1', ?_⟩, ?_⟩
+  · have him' : (1 - ρ).im = 0 := by
+      simp only [Complex.sub_im, Complex.one_im, him, sub_zero]
+    rw [him']
+    simpa using hT0
+  · have hb : mult χ (1 - ρ) = mult χ⁻¹ ρ := by
+      have h := vlow_primitive_mult_reflection (χ := χ⁻¹) hinvprim h0 h1
+      rwa [inv_inv] at h
+    rw [hb]
+    calc mult χ⁻¹ ρ = mult χ⁻¹ (conj ρ) := by
+          rw [Complex.conj_eq_iff_im.mpr him]
+      _ = mult χ ρ := mult_inv_conj χ hρ1
 
 /-- LEAF. Simplicity in the upper half, the only step that needs the zeros: for a primitive `χ`
 of conductor at most `17`, a real strip zero with `1/2 ≤ Re ρ` is not a critical point of `L`,

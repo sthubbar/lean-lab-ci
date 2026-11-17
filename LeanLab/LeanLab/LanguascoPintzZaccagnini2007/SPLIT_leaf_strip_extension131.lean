@@ -83,7 +83,17 @@ theorem leaf_strip_large_P131 (η : ℝ) (hη : 0 < η) :
           |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) →
         ∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n → Nonexceptional131 Cstar E n →
           |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n := by
-  sorry
+  -- The branch `X^(9/20) ≤ P` is empty: the admissible range stops at `X^(41/100) < X^(9/20)`.
+  refine ⟨2, ?_⟩
+  intro X hX P E Cstar hAdm hP n hn hlt hnone
+  have hXr : (1 : ℝ) < (X : ℝ) := by
+    have h2 : (2 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+    linarith
+  have hexp : ((41 : ℝ) / 100) < (9 : ℝ) / 20 := by norm_num
+  have hmono : (X : ℝ) ^ ((41 : ℝ) / 100) < (X : ℝ) ^ ((9 : ℝ) / 20) :=
+    Real.rpow_lt_rpow_of_exponent_lt hXr hexp
+  have hchain : (X : ℝ) ^ ((9 : ℝ) / 20) ≤ (X : ℝ) ^ ((41 : ℝ) / 100) := le_trans hP hAdm.2
+  exact absurd hchain (not_le.mpr hmono)
 
 /-- LEAF. The strip and the admissible range are inhabited: at `X = 12` the even integer `6` lies in
 `evenWindow131 12`, lies below `2X/3`, and does not lie in `evenJ131 12`; at `X = 1` the parameter
