@@ -1,4 +1,4 @@
-import LeanLab.HelfgottMajor.Decomp511b
+import LeanLab.HelfgottMajor.Decomp639Contour
 import LeanLab.HelfgottMajor.Gamma503
 import LeanLab.HelfgottMajor.BookL1523
 import Mathlib
@@ -68,16 +68,6 @@ theorem main_coefficient_bound (σ : ℝ) (hσ0 : 0 ≤ σ) (hσ1 : σ ≤ 1) :
       dsimp [b]
       ring
     _ ≤ _ := hsum
-
-/-- The exact main coefficient of Theorem 3.1, page 10, display 3.2. -/
-noncomputable def mainCoefficient (σ t d : ℝ) : ℝ :=
-  min 2 (3.3 * sqrt t / (2 * π * |d|)) *
-    (1 + max ((7.83 : ℝ) ^ (1 - σ)) ((1.63 : ℝ) ^ (σ - 1))) *
-    ((3 / 2 : ℝ) / min (t / (2 * π * |d|)) (sqrt t)) ^ (1 - σ)
-
-/-- The first error coefficient of Theorem 3.1, page 10, display 3.2. -/
-noncomputable def firstCoefficient (σ t : ℝ) : ℝ :=
-  (1 + (1 + sqrt 2) / t) * t ^ (σ / 2)
 
 /-- The last error coefficient on the strip, page 10, display 3.2.
 Here P_sigma is its printed first branch, since sigma lies between zero and one. -/
@@ -431,6 +421,28 @@ theorem gaussian_tail_cutoff (δ τ σ : ℝ) (hδ : δ ≠ 0) (hτ : 0 < |τ|)
   rw [← cutoff_exponent δ τ hδ]
   simpa only [neg_div] using h
 
+/-- The unevaluated norm comparison for the final ray in P0014 page 25, display 3.64.
+The positive endpoint removes the power singularity. -/
+theorem real_ray_tail_le_integral (δ : ℝ) (s : ℂ) (a : ℝ) (ha : 0 < a) :
+    ‖∫ x : ℝ in Set.Ioi a, (x : ℂ) ^ (s - 1) *
+      ((exp (-x ^ 2 / 2) : ℂ) * LeanLab.HelfgottArcs.e (δ * x))‖ ≤
+      ∫ x : ℝ in Set.Ioi a, exp (-x ^ 2 / 2) * x ^ (s.re - 1) := by
+  calc
+    _ ≤ ∫ x : ℝ in Set.Ioi a, ‖(x : ℂ) ^ (s - 1) *
+        ((exp (-x ^ 2 / 2) : ℂ) * LeanLab.HelfgottArcs.e (δ * x))‖ :=
+      MeasureTheory.norm_integral_le_integral_norm _
+    _ = _ := by
+      apply MeasureTheory.integral_congr_ae
+      filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+      have hxpos : 0 < x := ha.trans hx
+      have he : ‖LeanLab.HelfgottArcs.e (δ * x)‖ = 1 := by
+        simp [LeanLab.HelfgottArcs.e, Complex.norm_exp, Complex.mul_re]
+      rw [norm_mul, norm_mul, he, mul_one,
+        Complex.norm_cpow_eq_rpow_re_of_pos hxpos,
+        Complex.norm_real, Real.norm_eq_abs, abs_of_pos (exp_pos _)]
+      simp only [Complex.sub_re, Complex.one_re]
+      exact mul_comm _ _
+
 /-- LEAF OPEN contour reduction. P0014 pages 23 to 25, displays 3.56 and 3.59 to 3.64,
 and page 25 after display 3.64 using A.36. The real tail is left unevaluated.
 This retains the steepest descent contour, its main coefficient, the initial segment
@@ -445,7 +457,35 @@ theorem opposite_positive_contour_before_tail (δ : ℝ) (s : ℂ)
       firstCoefficient s.re |s.im| * exp (-0.4798 * |s.im|) +
       (∫ x : ℝ in Set.Ioi (min (|s.im| / (2 * π * |δ|)) (5 / 4 * sqrt |s.im|)),
         exp (-x ^ 2 / 2) * x ^ (s.re - 1)) := by
-  sorry
+  have hd : δ ≠ 0 := by intro h; simp [h] at hsign
+  have htpos : 0 < |s.im| := by linarith
+  let a := min (|s.im| / (2 * π * |δ|)) (5 / 4 * sqrt |s.im|)
+  have ha : 0 < a := by
+    dsimp [a]
+    exact lt_min (div_pos htpos (by positivity)) (by positivity)
+  have hgeom := Decomp639Contour.realEndpoint_lower δ s.im hd htpos
+  have hep : 0 < Decomp639Contour.realEndpoint δ s.im := ha.trans_le hgeom
+  have htail := real_ray_tail_le_integral δ s _ hep
+  have hmono : (∫ x : ℝ in Set.Ioi (Decomp639Contour.realEndpoint δ s.im),
+      exp (-x ^ 2 / 2) * x ^ (s.re - 1)) ≤
+      ∫ x : ℝ in Set.Ioi a, exp (-x ^ 2 / 2) * x ^ (s.re - 1) := by
+    apply MeasureTheory.setIntegral_mono_set
+      (gaussian_tail_bound s.re a hσ0.le (by linarith) ha).1
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+      have hxpos : 0 < x := ha.trans hx
+      positivity
+    · exact Filter.Eventually.of_forall (fun x hx => lt_of_le_of_lt hgeom hx)
+  have hmain := Decomp639Contour.saddle_segment_bound δ s hσ0 hσ1 ht hsign
+  have hfirst := Decomp639Contour.initial_segment_bound δ s hσ0 hσ1 ht hsign
+  rw [Decomp639Contour.contour_shift δ s hσ0 hσ1 ht hsign]
+  calc
+    _ ≤ ‖Decomp639Contour.initialIntegral δ s‖ +
+        ‖Decomp639Contour.saddleIntegral δ s‖ +
+        ‖∫ x : ℝ in Set.Ioi (Decomp639Contour.realEndpoint δ s.im),
+          (x : ℂ) ^ (s - 1) * ((exp (-x ^ 2 / 2) : ℂ) *
+            LeanLab.HelfgottArcs.e (δ * x))‖ :=
+      (norm_add_le _ _).trans (add_le_add (norm_add_le _ _) (le_refl _))
+    _ ≤ _ := by linarith only [hmain, hfirst, htail, hmono]
 
 /-- Raw boundary adapter for the contour reduction. P0014 pages 23 to 25, displays 3.56 and 3.59 to 3.64,
 and page 25 after display 3.64 using A.36. The real tail is left unevaluated.
