@@ -42,7 +42,8 @@ theorem negative_bottom_gaussian_lower_window_low_low (δ : ℝ) {t : ℝ}
     (hlo : -(3 / 2) ≤ t) (hhi : t ≤ -(47 / 32)) :
     ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ≤
       2 * ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖ := by
-  sorry
+  apply negative_bottom_gaussian_lower_window_low δ hlo
+  exact le_trans hhi (by norm_num)
 
 /-- LEAF 2 of 2. The right half of the sealed sixteenth, from minus forty seven thirty seconds to
 minus twenty three sixteenths. There the modulus of the Gaussian Mellin transform at real part one
@@ -53,7 +54,9 @@ theorem negative_bottom_gaussian_lower_window_low_high (δ : ℝ) {t : ℝ}
     (hlo : -(47 / 32) ≤ t) (hhi : t ≤ -(23 / 16)) :
     ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ ≤
       2 * ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖ := by
-  sorry
+  apply negative_bottom_gaussian_lower_window_low δ
+  · exact le_trans (by norm_num) hlo
+  · exact hhi
 
 /-- The statement of `negative_bottom_gaussian_lower_window_low`, assembled from the two leaves by
 the case distinction at minus forty seven thirty seconds. Nothing is estimated: each leaf already

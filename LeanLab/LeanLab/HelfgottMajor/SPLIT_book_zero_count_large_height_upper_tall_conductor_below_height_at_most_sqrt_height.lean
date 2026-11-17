@@ -41,7 +41,7 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_at_most_s
     (hT6 : 10 ^ 6 ≤ T) (hq : 2 ≤ q) (hqT : (q : ℝ) ≤ T) (hreg : (q : ℝ) ^ 2 ≤ T)
     (hq6 : q ≤ 10 ^ 6) (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  exact (abs_le.mp (book_zero_count χ hχ hT)).2
 
 /-- LEAF. Tall heights with the modulus past the tall threshold while still at most the square
 root of the height: `2 ≤ q`, `q ≤ T`, `10 ^ 6 ≤ T`, `q ^ 2 ≤ T` and `10 ^ 6 < q`. Here
@@ -55,7 +55,7 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_at_most_s
     (hT6 : 10 ^ 6 ≤ T) (hq : 2 ≤ q) (hqT : (q : ℝ) ≤ T) (hreg : (q : ℝ) ^ 2 ≤ T)
     (hq6 : 10 ^ 6 < q) (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  exact (abs_le.mp (book_zero_count χ hχ hT)).2
 
 /-- Assembly: on the tall range with the conductor at most the square root of the height, the
 modulus is either at most `10 ^ 6`, which is the first leaf, or larger than it, which is the

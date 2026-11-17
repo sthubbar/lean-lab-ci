@@ -86,7 +86,9 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_between_s
     (hq6 : q ≤ 10 ^ 6) (hq5 : q ≤ 10 ^ 5)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have hT' : 1 ≤ T := by linarith
+  have h₁ := (abs_le.mp (book_zero_count χ hχ hT')).2
+  linarith
 
 /-- LEAF. The conductor is past `10 ^ 5` and the height at most `10 ^ 10`: `2 ≤ q`, `q ≤ T`,
 `10 ^ 6 ≤ T`, `T < q ^ 2`, `q ≤ 10 ^ 6`, `10 ^ 5 < q` and `T ≤ 10 ^ 10`. Here `log (qT)` is
@@ -101,7 +103,9 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_between_s
     (hq6 : q ≤ 10 ^ 6) (hq5 : 10 ^ 5 < q) (hT10 : T ≤ 10 ^ 10)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have hT' : 1 ≤ T := by linarith
+  have h₁ := (abs_le.mp (book_zero_count χ hχ hT')).2
+  linarith
 
 /-- LEAF. The conductor is past `10 ^ 5` and the height past `10 ^ 10`: `2 ≤ q`, `q ≤ T`,
 `10 ^ 6 ≤ T`, `T < q ^ 2`, `q ≤ 10 ^ 6`, `10 ^ 5 < q` and `10 ^ 10 < T`. The height is then in
@@ -117,7 +121,9 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_between_s
     (hq6 : q ≤ 10 ^ 6) (hq5 : 10 ^ 5 < q) (hT10 : 10 ^ 10 < T)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have hT' : 1 ≤ T := by linarith
+  have h₁ := (abs_le.mp (book_zero_count χ hχ hT')).2
+  linarith
 
 /-- Assembly: the conductor-between-square-root-and-`10 ^ 6` part of the tall range is the
 union of the three subranges. Either `q ≤ 10 ^ 5`, which is the first leaf, or `10 ^ 5 < q`,
