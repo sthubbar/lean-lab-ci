@@ -96,6 +96,13 @@ private theorem conductor_le_two_of_tall (q : ℕ) [NeZero q] (t : ℝ)
   have hfin : q ≤ 2 := by omega
   exact_mod_cast hfin
 
+/-- The `tsum` defining `zeroCount` as the sum over its finite index type: the support of the
+indicator `zeroWeight` is exactly the subype of zeros of the strip below the height. -/
+private theorem zero_count_eq_zero_idx (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    zeroCount χ t = ∑' ρ : ZeroCount1623.ZeroIdx χ t, (ZeroCount1623.mult χ ρ.val : ℝ) := by
+  unfold zeroCount zeroWeight
+  exact (tsum_subtype _ _).symm
+
 /-- LEAF. Short piece of the window, `t ≤ 2 * π * exp 1 * exp 1 = 46.43…`.  The height is below
 `46.43` and, the product being at most `2 * π * exp 1 * exp 1 * exp 1 * exp 1`, the conductor is
 below `172`; so the counted set is the critical strip zeros of a bounded height for a finite list
@@ -110,7 +117,8 @@ theorem zero_count_high_window_short (q : ℕ) [NeZero q] (χ : DirichletCharact
     (hshort : t ≤ 2 * π * exp 1 * exp 1) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Middle piece of the window,
 `2 * π * exp 1 * exp 1 ≤ t ≤ 2 * π * exp 1 * exp 1 * exp 1`, with the conductor cap `q ≤ 7`
@@ -127,7 +135,8 @@ theorem zero_count_high_window_middle (q : ℕ) [NeZero q] (χ : DirichletCharac
     (htall : t ≤ 2 * π * exp 1 * exp 1 * exp 1) (hq : (q : ℝ) ≤ 7) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Tall piece of the window with the conductor at most `1`, `2 * π * exp 1 * exp 1 *
 exp 1 ≤ t`.  The height is past `126.19` and the product at most `2 * π * exp 1 * exp 1 * exp 1 *
@@ -142,7 +151,8 @@ theorem zero_count_high_window_tall_level_one (q : ℕ) [NeZero q] (χ : Dirichl
     (htall : 2 * π * exp 1 * exp 1 * exp 1 ≤ t) (hq : (q : ℝ) ≤ 1) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Tall piece of the window with the conductor strictly above `1` and at most `2`, which
 is the case `q = 2`: `2 * π * exp 1 * exp 1 * exp 1 ≤ t` and `2 * t ≤ 2 * π * exp 1 * exp 1 *
@@ -156,7 +166,8 @@ theorem zero_count_high_window_tall_level_two (q : ℕ) [NeZero q] (χ : Dirichl
     (htall : 2 * π * exp 1 * exp 1 * exp 1 ≤ t) (hq1 : 1 < (q : ℝ)) (hq : (q : ℝ) ≤ 2) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- The sealed statement, assembled from the three height pieces of the window and the split of
 the tall piece by the conductor: below `2 * π * exp 1 * exp 1` the short leaf, up to
