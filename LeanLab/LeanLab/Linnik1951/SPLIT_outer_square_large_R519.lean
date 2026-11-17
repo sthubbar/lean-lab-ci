@@ -32,7 +32,12 @@ theorem outer_square_large_R_lower_band519 (B0 : ℝ) (hB0 : 0 < B0) :
           ‖M t‖ ≤ B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3) →
           (∫ α in (4 / (N : ℝ))..(1 / R), ‖mellinU519 N M α‖ ^ 2) ≤
             C * ((N : ℝ) / R * Real.log N ^ 10) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := outer_square_large_R519 B0 hB0
+  refine ⟨C, hC, N0, ?_⟩
+  intro N hN R hR hRlo hRhi M hM
+  have hRhi' : R ≤ (N : ℝ) ^ (2 / 7 : ℝ) :=
+    le_trans hRhi (Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast (show 1 ≤ N by omega)) (by norm_num))
+  exact h N hN R hR hRlo hRhi' M hM
 
 /-- LEAF. Mass bound on the upper half of the large inverse radius range, from the
 three fourteenths power of N up to the two sevenths power of N.  This is the part
@@ -49,7 +54,12 @@ theorem outer_square_large_R_upper_band519 (B0 : ℝ) (hB0 : 0 < B0) :
           ‖M t‖ ≤ B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3) →
           (∫ α in (4 / (N : ℝ))..(1 / R), ‖mellinU519 N M α‖ ^ 2) ≤
             C * ((N : ℝ) / R * Real.log N ^ 10) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := outer_square_large_R519 B0 hB0
+  refine ⟨C, hC, N0, ?_⟩
+  intro N hN R hR hRlo hRhi M hM
+  have hRlo' : (N : ℝ) ^ (1 / 7 : ℝ) ≤ R :=
+    le_trans (Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast (show 1 ≤ N by omega)) (by norm_num)) hRlo
+  exact h N hN R hR hRlo' hRhi M hM
 
 /-- The two band leaves together give the sealed large inverse radius estimate:
 the square of the Mellin transform has mass at most the sum of the two band
