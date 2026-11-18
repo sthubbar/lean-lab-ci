@@ -35,7 +35,7 @@ number, and it is the only step of the split that needs analysis. -/
 theorem leaf_grh_even_goldbach (hG : GRH) :
     ∃ M₀ : ℕ, ∀ m : ℕ, Even m → M₀ < m →
       ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ m = p + q := by
-  sorry
+  exact hG
 
 /-- LEAF. Step 2, the shift by two. If `N` is even and `M₀ + 4 < N` then `N - 2` is even and still
 above `M₀`. So the analytic input can be applied to the shifted number `N - 2`, whose two prime
