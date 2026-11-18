@@ -48,7 +48,35 @@ theorem leaf_block_threshold (c1 c2 c4 ρ : ℝ) (hc1 : 0 < c1) (hc4 : 0 < c4) (
     (hρc : ρ ≤ 3 * c4 / (4 * c1)) :
     ∃ P0 : ℝ, 1 ≤ P0 ∧ ∀ n : ℕ, 2 ≤ n → (n : ℝ) < karN0 c1 c2 c4 → ∀ P : ℝ, P0 ≤ P →
       8 * Real.pi * ((n : ℝ) + 1) ≤ P ^ ((c4 / 2) * ((n : ℝ) + 1 + ρ) - c1 * ρ) := by
-  sorry
+  set g : ℝ := 3 * c4 / 4 with hg
+  have hgpos : 0 < g := by rw [hg]; positivity
+  set B : ℝ := 8 * Real.pi * (karN0 c1 c2 c4 + 1) with hB
+  have hk : (12 : ℝ) ≤ karN0 c1 c2 c4 := le_max_left _ _
+  have hBpos : 0 < B := by
+    rw [hB]
+    exact mul_pos (by positivity) (by linarith)
+  refine ⟨max 1 (B ^ (1 / g)), le_max_left _ _, ?_⟩
+  intro n hn hnk P hP
+  have hP1 : 1 ≤ P := le_trans (le_max_left _ _) hP
+  have hPB : B ^ (1 / g) ≤ P := le_trans (le_max_right _ _) hP
+  have hc1ρ : c1 * ρ ≤ 3 * c4 / 4 := by
+    have h1 := mul_le_mul_of_nonneg_left hρc hc1.le
+    have e : c1 * (3 * c4 / (4 * c1)) = 3 * c4 / 4 := by field_simp
+    linarith
+  have hn2 : (2 : ℝ) ≤ n := by exact_mod_cast hn
+  have hexp : g ≤ (c4 / 2) * ((n : ℝ) + 1 + ρ) - c1 * ρ := by
+    have h1 : (c4 / 2) * 3 ≤ (c4 / 2) * ((n : ℝ) + 1 + ρ) :=
+      mul_le_mul_of_nonneg_left (by linarith) (by positivity)
+    rw [hg]
+    linarith
+  calc 8 * Real.pi * ((n : ℝ) + 1) ≤ B := by
+        rw [hB]
+        exact mul_le_mul_of_nonneg_left (by linarith) (by positivity)
+    _ = (B ^ (1 / g)) ^ g := by
+        rw [← Real.rpow_mul hBpos.le, one_div, inv_mul_cancel₀ hgpos.ne', Real.rpow_one]
+    _ ≤ P ^ g := Real.rpow_le_rpow (Real.rpow_nonneg hBpos.le _) hPB hgpos.le
+    _ ≤ P ^ ((c4 / 2) * ((n : ℝ) + 1 + ρ) - c1 * ρ) :=
+        Real.rpow_le_rpow_of_exponent_le hP1 hexp
 
 /- Where the saving comes from: Karacuba's Lemma 2 at the `s`-th coefficient, `2 <= s <= n`.
 The approximation `A/q` with `q <= [P^(c2 s)] < m^s` gives `tau >= c3 s - log 2 / log P`, and
@@ -185,3 +213,5 @@ theorem leaf_small_block_sum_bound_split (h2 : KarLemma2) :
         rw [hrw]
         exact mul_le_mul_of_nonneg_right (by linarith) hPownn
       linarith
+
+#print axioms LeanLab.ExceptionalSet.U1539.KaracubaSplit.leaf_block_threshold
