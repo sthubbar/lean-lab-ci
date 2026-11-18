@@ -49,7 +49,31 @@ theorem prime_minor_multi_525_long {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) (ϑ : ℝ
           ‖∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else (∑ n ∈ (Finset.range (X + 1)).filter (fun n => n.Prime), ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 * ee (-(N * α))‖ ^ 2
         else 0)) ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  obtain ⟨C₁, hC₁, h₁⟩ := prime_minor_multi_525 hϕ ϑ hϑ hϑ'
+  refine ⟨C₁, hC₁, fun X hX hR => _⟩
+  have hT := h₁ X hX hR
+  have hdom :
+      (∑ N ∈ Finset.Icc 1 X,
+        (if (Nat.sqrt X + X) / 2 < N then
+          ‖∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else (∑ n ∈ (Finset.range (X + 1)).filter (fun n => n.Prime), ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 * ee (-(N * α))‖ ^ 2
+        else 0)) ≤
+      (∑ N ∈ Finset.Icc 1 X,
+        ‖∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else (∑ n ∈ (Finset.range (X + 1)).filter (fun n => n.Prime), ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 * ee (-(N * α))‖ ^ 2) := by
+    apply Finset.sum_le_sum
+    intro N _
+    by_cases h : (Nat.sqrt X + X) / 2 < N
+    · simp [h]
+      <;> le_refl
+    · simp [h]
+      positivity
+  calc
+    (∑ N ∈ Finset.Icc 1 X,
+        (if (Nat.sqrt X + X) / 2 < N then
+          ‖∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else (∑ n ∈ (Finset.range (X + 1)).filter (fun n => n.Prime), ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 * ee (-(N * α))‖ ^ 2
+        else 0))
+      ≤ (∑ N ∈ Finset.Icc 1 X,
+        ‖∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else (∑ n ∈ (Finset.range (X + 1)).filter (fun n => n.Prime), ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 * ee (-(N * α))‖ ^ 2) := hdom
+    _ ≤ C₁ * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 * Real.log X ^ 5 := hT
 
 /-! ## Assembled split -/
 
