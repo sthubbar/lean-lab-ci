@@ -276,6 +276,307 @@ private theorem integral_pair_pow_real (n P B : ℕ) (A C : Fin P → Fin n → 
 
 end mvt_helpers
 
+/-! ### Power sums determine a finite tuple up to permutation -/
+
+section power_sum_determines
+
+private theorem eval_esymm_eq (m r : ℕ) (z : Fin m → ℚ) :
+    MvPolynomial.eval z (MvPolynomial.esymm (Fin m) ℚ r)
+      = ∑ t ∈ Finset.univ.powersetCard r, ∏ i ∈ t, z i := by
+  simp [MvPolynomial.esymm]
+
+private theorem newton_num (m k : ℕ) (z : Fin m → ℚ) :
+    (k : ℚ) * (∑ t ∈ Finset.univ.powersetCard k, ∏ i ∈ t, z i)
+      = (-1 : ℚ) ^ (k + 1) * ∑ a ∈ (Finset.HasAntidiagonal.antidiagonal k).filter (fun a => a.1 < k),
+          (-1 : ℚ) ^ a.1 * (∑ t ∈ Finset.univ.powersetCard a.1, ∏ i ∈ t, z i)
+            * (∑ i, z i ^ a.2) := by
+  have h := MvPolynomial.mul_esymm_eq_sum (Fin m) ℚ k
+  have h2 := congrArg (MvPolynomial.eval z) h
+  simpa [MvPolynomial.psum, MvPolynomial.eval_X, eval_esymm_eq] using h2
+
+private theorem esymm_eq_of_psum_eq (m : ℕ) (x y : Fin m → ℚ)
+    (hxy : ∀ j : ℕ, 1 ≤ j → j ≤ m → ∑ i, x i ^ j = ∑ i, y i ^ j) :
+    ∀ k : ℕ, k ≤ m → (∑ t ∈ Finset.univ.powersetCard k, ∏ i ∈ t, x i)
+      = (∑ t ∈ Finset.univ.powersetCard k, ∏ i ∈ t, y i) := by
+  intro k
+  induction k using Nat.strong_induction_on with
+  | _ k ih =>
+    intro hk
+    rcases Nat.eq_zero_or_pos k with h0 | hpos
+    · subst h0; simp
+    · have hx := newton_num m k x
+      have hy := newton_num m k y
+      have hS : (∑ a ∈ (Finset.HasAntidiagonal.antidiagonal k).filter (fun a => a.1 < k),
+          (-1 : ℚ) ^ a.1 * (∑ t ∈ Finset.univ.powersetCard a.1, ∏ i ∈ t, x i)
+            * (∑ i, x i ^ a.2))
+        = (∑ a ∈ (Finset.HasAntidiagonal.antidiagonal k).filter (fun a => a.1 < k),
+          (-1 : ℚ) ^ a.1 * (∑ t ∈ Finset.univ.powersetCard a.1, ∏ i ∈ t, y i)
+            * (∑ i, y i ^ a.2)) := by
+        refine Finset.sum_congr rfl (fun a ha => ?_)
+        simp only [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal] at ha
+        obtain ⟨hsum, hlt⟩ := ha
+        have h2 : 1 ≤ a.2 := by omega
+        have h3 : a.2 ≤ m := by omega
+        rw [ih a.1 hlt (by omega), hxy a.2 h2 h3]
+      rw [hS] at hx
+      have hmain : (k : ℚ) * (∑ t ∈ Finset.univ.powersetCard k, ∏ i ∈ t, x i)
+          = (k : ℚ) * (∑ t ∈ Finset.univ.powersetCard k, ∏ i ∈ t, y i) := hx.trans hy.symm
+      exact mul_left_cancel₀ (by positivity) hmain
+
+private theorem multiset_eq_of_psum_eq (m : ℕ) (x y : Fin m → ℚ)
+    (hxy : ∀ j : ℕ, 1 ≤ j → j ≤ m → ∑ i, x i ^ j = ∑ i, y i ^ j) :
+    Finset.univ.val.map x = Finset.univ.val.map y := by
+  have hesymm := esymm_eq_of_psum_eq m x y hxy
+  have hcardU : (Finset.univ.val : Multiset (Fin m)).card = m := by simp
+  have hesymm' : ∀ r ≤ m,
+      (Finset.univ.val.map x).esymm r = (Finset.univ.val.map y).esymm r := by
+    intro r hr
+    rw [Finset.esymm_map_val, Finset.esymm_map_val]
+    exact hesymm r hr
+  have hpoly :
+      (Multiset.map (fun t => Polynomial.X - Polynomial.C t) (Finset.univ.val.map x)).prod
+        = (Multiset.map (fun t => Polynomial.X - Polynomial.C t) (Finset.univ.val.map y)).prod := by
+    refine Polynomial.ext (fun k => ?_)
+    by_cases hk : k ≤ m
+    · have hx1 : (Multiset.map (fun t => Polynomial.X - Polynomial.C t)
+            (Finset.univ.val.map x)).prod.coeff k
+          = (-1) ^ (m - k) * (Finset.univ.val.map x).esymm (m - k) := by
+        have h := Multiset.prod_X_sub_C_coeff (R := ℚ) (Finset.univ.val.map x) (k := k) (by
+          rw [Multiset.card_map, hcardU]; exact hk)
+        simpa [hcardU] using h
+      have hy1 : (Multiset.map (fun t => Polynomial.X - Polynomial.C t)
+            (Finset.univ.val.map y)).prod.coeff k
+          = (-1) ^ (m - k) * (Finset.univ.val.map y).esymm (m - k) := by
+        have h := Multiset.prod_X_sub_C_coeff (R := ℚ) (Finset.univ.val.map y) (k := k) (by
+          rw [Multiset.card_map, hcardU]; exact hk)
+        simpa [hcardU] using h
+      rw [hx1, hy1, hesymm' (m - k) (by omega)]
+    · have hx0 : (Multiset.map (fun t => Polynomial.X - Polynomial.C t)
+            (Finset.univ.val.map x)).prod.coeff k = 0 := by
+        apply Polynomial.coeff_eq_zero_of_natDegree_lt
+        rw [Polynomial.natDegree_multiset_prod_X_sub_C_eq_card, Multiset.card_map, hcardU]
+        omega
+      have hy0 : (Multiset.map (fun t => Polynomial.X - Polynomial.C t)
+            (Finset.univ.val.map y)).prod.coeff k = 0 := by
+        apply Polynomial.coeff_eq_zero_of_natDegree_lt
+        rw [Polynomial.natDegree_multiset_prod_X_sub_C_eq_card, Multiset.card_map, hcardU]
+        omega
+      rw [hx0, hy0]
+  calc Finset.univ.val.map x
+      = (Multiset.map (fun t => Polynomial.X - Polynomial.C t)
+          (Finset.univ.val.map x)).prod.roots := by
+        rw [Polynomial.roots_multiset_prod_X_sub_C]
+    _ = (Multiset.map (fun t => Polynomial.X - Polynomial.C t)
+          (Finset.univ.val.map y)).prod.roots := by rw [hpoly]
+    _ = Finset.univ.val.map y := by rw [Polynomial.roots_multiset_prod_X_sub_C]
+
+
+private theorem multiset_eq_of_pow_sum_eq (n : ℕ) (x y : Fin n → ℕ)
+    (h : ∀ j : ℕ, 1 ≤ j → j ≤ n → ∑ i, x i ^ j = ∑ i, y i ^ j) :
+    Finset.univ.val.map x = Finset.univ.val.map y := by
+  have hq : (Finset.univ.val.map x).map (fun a : ℕ => (a : ℚ))
+      = (Finset.univ.val.map y).map (fun a : ℕ => (a : ℚ)) := by
+    have h' := multiset_eq_of_psum_eq n (fun i => (x i : ℚ)) (fun i => (y i : ℚ)) ?_
+    · simpa only [Multiset.map_map, Function.comp_def] using h'
+    · intro j hj1 hj2
+      have h2 : ((∑ i, x i ^ j : ℕ) : ℚ) = ((∑ i, y i ^ j : ℕ) : ℚ) := by
+        rw [h j hj1 hj2]
+      push_cast at h2 ⊢
+      exact h2
+  exact Multiset.map_injective (f := fun a : ℕ => (a : ℚ)) Nat.cast_injective hq
+
+private theorem univ_val_map_succ {α : Type*} (n : ℕ) (f : Fin (n + 1) → α) :
+    (Finset.univ : Finset (Fin (n + 1))).val.map f
+      = f 0 ::ₘ (Finset.univ : Finset (Fin n)).val.map (fun i => f i.succ) := by
+  rw [Fin.univ_succ, Finset.cons_val, Finset.map_val]
+  simp [Function.comp_def]
+
+private theorem card_heads_le_factorial {α : Type*} [Fintype α] [DecidableEq α] :
+    ∀ (n : ℕ) (M : Multiset α), M.card = n →
+      (Finset.univ.filter (fun h : Fin n → α => Finset.univ.val.map h = M)).card ≤ n.factorial := by
+  intro n
+  induction n with
+  | zero =>
+    intro M hM
+    have hM0 : M = 0 := by
+      rw [← Multiset.card_eq_zero]
+      exact hM
+    subst hM0
+    simp
+  | succ n ih =>
+    intro M hM
+    set S : Finset (Fin (n + 1) → α) :=
+      Finset.univ.filter (fun h => Finset.univ.val.map h = M) with hS
+    have hmaps : Set.MapsTo (fun h : Fin (n + 1) → α => h 0) (↑S) (↑M.toFinset) := by
+      intro h hh
+      simp only [hS, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_coe] at hh
+      change h 0 ∈ M.toFinset
+      rw [Multiset.mem_toFinset, ← hh]
+      exact Multiset.mem_map_of_mem h (show (0 : Fin (n + 1)) ∈ (Finset.univ : Finset (Fin (n + 1))).val by simp)
+    have hsplit : S.card = ∑ v ∈ M.toFinset, (S.filter (fun h => h 0 = v)).card :=
+      Finset.card_eq_sum_card_fiberwise hmaps
+    have hfib : ∀ v ∈ M.toFinset, (S.filter (fun h => h 0 = v)).card ≤ n.factorial := by
+      intro v hv
+      have hvm : v ∈ M := Multiset.mem_toFinset.mp hv
+      set T : Finset (Fin n → α) :=
+        Finset.univ.filter (fun g => Finset.univ.val.map g = M.erase v) with hT
+      have hMe : (M.erase v).card = n := by
+        rw [Multiset.card_erase_of_mem hvm, hM]
+        rfl
+      have hTcard : T.card ≤ n.factorial := by
+        rw [hT]
+        exact ih (M.erase v) hMe
+      have hsub : (S.filter (fun h => h 0 = v))
+          ⊆ T.image (fun g : Fin n → α => Fin.cases v g) := by
+        intro h hh
+        simp only [Finset.mem_filter, hS, Finset.mem_univ, true_and] at hh
+        obtain ⟨hmap, h0v⟩ := hh
+        refine Finset.mem_image.mpr ⟨(fun i : Fin n => h i.succ), ?_, ?_⟩
+        · simp only [hT, Finset.mem_filter, Finset.mem_univ, true_and]
+          have h1 := univ_val_map_succ n h
+          have h2 : M = v ::ₘ (Finset.univ.val.map fun i : Fin n => h i.succ) := by
+            rw [← hmap, h1, h0v]
+          rw [h2, Multiset.erase_cons_head]
+        · funext k
+          refine Fin.cases ?_ (fun i => rfl) k
+          exact h0v.symm
+      calc (S.filter (fun h => h 0 = v)).card
+          ≤ (T.image (fun g : Fin n → α => Fin.cases v g)).card := Finset.card_le_card hsub
+        _ ≤ T.card := Finset.card_image_le
+        _ ≤ n.factorial := hTcard
+    calc S.card = ∑ v ∈ M.toFinset, (S.filter (fun h => h 0 = v)).card := hsplit
+      _ ≤ ∑ v ∈ M.toFinset, n.factorial := Finset.sum_le_sum hfib
+      _ = M.toFinset.card * n.factorial := by
+          rw [Finset.sum_const, smul_eq_mul]
+      _ ≤ (n + 1) * n.factorial := by
+          have hc : M.toFinset.card ≤ M.card := Multiset.toFinset_card_le M
+          rw [hM] at hc
+          exact Nat.mul_le_mul_right _ hc
+      _ = (n + 1).factorial := by rw [Nat.factorial_succ]
+
+
+private theorem multiset_eq_of_pow_sum_eq' (n P : ℕ) (x y : Fin n → Fin P)
+    (h : ∀ j : ℕ, 1 ≤ j → j ≤ n →
+      (∑ i, ((x i).val + 1) ^ j) = (∑ i, ((y i).val + 1) ^ j)) :
+    Finset.univ.val.map x = Finset.univ.val.map y := by
+  have hnat : Finset.univ.val.map (fun i => (x i).val + 1)
+      = Finset.univ.val.map (fun i => (y i).val + 1) :=
+    multiset_eq_of_pow_sum_eq n (fun i => (x i).val + 1) (fun i => (y i).val + 1) h
+  have key : (Finset.univ.val.map x).map (fun v : Fin P => v.val + 1)
+      = (Finset.univ.val.map y).map (fun v : Fin P => v.val + 1) := by
+    simpa only [Multiset.map_map, Function.comp_def] using hnat
+  exact Multiset.map_injective (f := fun v : Fin P => v.val + 1)
+    (fun a b hab => Fin.ext (by simpa using hab)) key
+
+private theorem card_fibre_le (n k B : ℕ) (hB : B = n + k) (x : Fin B → Fin P) :
+    (Finset.univ.filter (fun y : Fin B → Fin P => ∀ j : Fin n,
+        ∑ i, (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+          = ∑ i, (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))).card
+      ≤ P ^ k * n.factorial := by
+  subst hB
+  set head : (Fin (n + k) → Fin P) → (Fin n → Fin P) :=
+    fun y i => y (Fin.castAdd k i) with hhead
+  set tail : (Fin (n + k) → Fin P) → (Fin k → Fin P) :=
+    fun y i => y (Fin.natAdd n i) with htail
+  set S : Finset (Fin (n + k) → Fin P) :=
+    Finset.univ.filter (fun y => ∀ j : Fin n,
+        ∑ i, (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+          = ∑ i, (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)) with hS
+  have hsumsplit : ∀ (z : Fin (n + k) → Fin P) (j : ℕ),
+      (∑ i : Fin (n + k), (((z i).val + 1 : ℕ) : ℝ) ^ j)
+        = (∑ i : Fin n, (((head z i).val + 1 : ℕ) : ℝ) ^ j)
+          + (∑ i : Fin k, (((tail z i).val + 1 : ℕ) : ℝ) ^ j) := by
+    intro z j
+    rw [Fin.sum_univ_add (f := fun i : Fin (n + k) => (((z i).val + 1 : ℕ) : ℝ) ^ j)]
+  have hhead_eq : ∀ y y0 : Fin (n + k) → Fin P, y ∈ S → y0 ∈ S → tail y = tail y0 →
+      Finset.univ.val.map (head y) = Finset.univ.val.map (head y0) := by
+    intro y y0 hy hy0 hty
+    simp only [hS, Finset.mem_filter, Finset.mem_univ, true_and] at hy hy0
+    have key : ∀ j : ℕ, 1 ≤ j → j ≤ n →
+        (∑ i, ((head y i).val + 1) ^ j) = (∑ i, ((head y0 i).val + 1) ^ j) := by
+      intro j hj1 hj2
+      have hre : ((∑ i, ((head y i).val + 1) ^ j : ℕ) : ℝ)
+          = ((∑ i, ((head y0 i).val + 1) ^ j : ℕ) : ℝ) := by
+        set jj : Fin n := ⟨j - 1, by omega⟩ with hjj
+        have hjj1 : ((jj : ℕ) + 1) = j := by
+          simp only [hjj]
+          omega
+        have e1 : (∑ i : Fin (n + k), (((y i).val + 1 : ℕ) : ℝ) ^ j)
+            = (∑ i : Fin (n + k), (((x i).val + 1 : ℕ) : ℝ) ^ j) := by
+          have h := (hy jj).symm
+          rwa [hjj1] at h
+        have e2 : (∑ i : Fin (n + k), (((y0 i).val + 1 : ℕ) : ℝ) ^ j)
+            = (∑ i : Fin (n + k), (((x i).val + 1 : ℕ) : ℝ) ^ j) := by
+          have h := (hy0 jj).symm
+          rwa [hjj1] at h
+        have hty' : (∑ i : Fin k, (((tail y i).val + 1 : ℕ) : ℝ) ^ j)
+            = (∑ i : Fin k, (((tail y0 i).val + 1 : ℕ) : ℝ) ^ j) := by rw [hty]
+        rw [hsumsplit y j] at e1
+        rw [hsumsplit y0 j] at e2
+        rw [hty'] at e1
+        push_cast at e1 e2
+        have h3 : (∑ i : Fin n, (((head y i).val : ℝ) + 1) ^ j)
+            + (∑ i : Fin k, (((tail y0 i).val : ℝ) + 1) ^ j)
+            = (∑ i : Fin n, (((head y0 i).val : ℝ) + 1) ^ j)
+              + (∑ i : Fin k, (((tail y0 i).val : ℝ) + 1) ^ j) := by
+          linarith [e1, e2]
+        have h4 : (∑ i : Fin n, (((head y i).val : ℝ) + 1) ^ j)
+            = (∑ i : Fin n, (((head y0 i).val : ℝ) + 1) ^ j) := by
+          linarith [h3]
+        rw [Nat.cast_sum, Nat.cast_sum]
+        push_cast
+        exact h4
+      exact_mod_cast hre
+    exact multiset_eq_of_pow_sum_eq' n P (head y) (head y0) key
+  have hrec : ∀ z : Fin (n + k) → Fin P, Fin.append (head z) (tail z) = z := by
+    intro z
+    funext i
+    refine Fin.addCases (motive := fun i => Fin.append (head z) (tail z) i = z i) ?_ ?_ i
+    · intro i
+      rw [Fin.append_left]
+    · intro i
+      rw [Fin.append_right]
+  have hfib : ∀ t : Fin k → Fin P, (S.filter (fun y => tail y = t)).card ≤ n.factorial := by
+    intro t
+    by_cases hne : (S.filter (fun y => tail y = t)).Nonempty
+    · obtain ⟨y0, hy0⟩ := hne
+      simp only [Finset.mem_filter] at hy0
+      obtain ⟨hy0S, hy0t⟩ := hy0
+      have hinjOn : Set.InjOn head ↑(S.filter (fun y => tail y = t)) := by
+        intro y1 h1 y2 h2 heq
+        simp only [Finset.mem_coe, Finset.mem_filter] at h1 h2
+        rw [← hrec y1, ← hrec y2, heq, h1.2, h2.2]
+      have himg : (S.filter (fun y => tail y = t)).image head
+          ⊆ (Finset.univ.filter (fun h : Fin n → Fin P =>
+              Finset.univ.val.map h = Finset.univ.val.map (head y0))) := by
+        intro h hh
+        obtain ⟨y, hy, rfl⟩ := Finset.mem_image.mp hh
+        simp only [Finset.mem_filter] at hy
+        obtain ⟨hyS, hyt⟩ := hy
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+        exact hhead_eq y y0 hyS hy0S (by rw [hyt, hy0t])
+      calc (S.filter (fun y => tail y = t)).card
+          = ((S.filter (fun y => tail y = t)).image head).card :=
+            (Finset.card_image_of_injOn hinjOn).symm
+        _ ≤ (Finset.univ.filter (fun h : Fin n → Fin P =>
+              Finset.univ.val.map h = Finset.univ.val.map (head y0))).card :=
+            Finset.card_le_card himg
+        _ ≤ n.factorial := card_heads_le_factorial n _ (by simp)
+    · rw [Finset.not_nonempty_iff_eq_empty.mp hne]
+      exact Nat.zero_le _
+  calc S.card = ∑ t : Fin k → Fin P, (S.filter (fun y => tail y = t)).card := by
+        have hm : Set.MapsTo tail (↑S) (↑(Finset.univ : Finset (Fin k → Fin P))) :=
+          fun y _ => Finset.mem_univ _
+        have h := Finset.card_eq_sum_card_fiberwise (f := tail) (s := S)
+          (t := (Finset.univ : Finset (Fin k → Fin P))) hm
+        simpa using h
+    _ ≤ ∑ t : Fin k → Fin P, n.factorial := Finset.sum_le_sum (fun t _ => hfib t)
+    _ = P ^ k * n.factorial := by
+        rw [Finset.sum_const, smul_eq_mul, Finset.card_univ, Fintype.card_fun]
+        simp
+
+end power_sum_determines
+
 /-! ### Leaves -/
 
 /-- LEAF. The identity that turns the target into a count: the modulus is expanded and the
@@ -376,7 +677,135 @@ theorem leaf_solution_count_at_one :
       < (20 * n : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * l) *
             ((P : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * (1 - 1 / (n : ℝ)) ^ l) *
              (P : ℝ) ^ ((2 * (n * l + (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊)) : ℝ) - ((n * (n + 1) : ℕ) : ℝ) / 2)) := by
-  sorry
+  intro n hn l hl P hP
+  subst hl
+  simp only [Nat.cast_one]
+  set c : ℕ := ⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊ with hc
+  have hfib : ∀ x : Fin (n * 1 + c) → Fin P,
+      (Finset.univ.filter (fun y : Fin (n * 1 + c) → Fin P => ∀ j : Fin n,
+          ∑ i, (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+            = ∑ i, (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))).card
+        ≤ P ^ c * n.factorial := fun x => card_fibre_le n c (n * 1 + c) (by rw [Nat.mul_one]) x
+  have hstep1 : (∑ x : Fin (n * 1 + c) → Fin P,
+      ∑ y : Fin (n * 1 + c) → Fin P,
+        (if (∀ j : Fin n,
+            ∑ i : Fin (n * 1 + c), (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+              = ∑ i : Fin (n * 1 + c), (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))
+          then (1 : ℝ) else 0))
+      ≤ (P : ℝ) ^ (n * 1 + c) * ((P : ℝ) ^ c * (n.factorial : ℝ)) := by
+    have h1 : ∀ x : Fin (n * 1 + c) → Fin P,
+        (∑ y : Fin (n * 1 + c) → Fin P,
+          (if (∀ j : Fin n,
+              ∑ i : Fin (n * 1 + c), (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+                = ∑ i : Fin (n * 1 + c), (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))
+            then (1 : ℝ) else 0))
+        = ((Finset.univ.filter (fun y : Fin (n * 1 + c) → Fin P => ∀ j : Fin n,
+            ∑ i, (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+              = ∑ i, (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))).card : ℝ) := by
+      intro x
+      simpa using (Finset.sum_boole (fun y : Fin (n * 1 + c) → Fin P => ∀ j : Fin n,
+          ∑ i : Fin (n * 1 + c), (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+            = ∑ i : Fin (n * 1 + c), (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))
+        (Finset.univ : Finset (Fin (n * 1 + c) → Fin P)))
+    calc (∑ x : Fin (n * 1 + c) → Fin P,
+        ∑ y : Fin (n * 1 + c) → Fin P,
+          (if (∀ j : Fin n,
+              ∑ i : Fin (n * 1 + c), (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+                = ∑ i : Fin (n * 1 + c), (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))
+            then (1 : ℝ) else 0))
+        = ∑ x : Fin (n * 1 + c) → Fin P,
+            ((Finset.univ.filter (fun y : Fin (n * 1 + c) → Fin P => ∀ j : Fin n,
+              ∑ i, (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+                = ∑ i, (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))).card : ℝ) :=
+          Finset.sum_congr rfl (fun x _ => h1 x)
+      _ ≤ ∑ _x : Fin (n * 1 + c) → Fin P, ((P ^ c * n.factorial : ℕ) : ℝ) := by
+          apply Finset.sum_le_sum
+          intro x _
+          have h := hfib x
+          exact_mod_cast h
+      _ = (P : ℝ) ^ (n * 1 + c) * ((P : ℝ) ^ c * (n.factorial : ℝ)) := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fun, nsmul_eq_mul]
+          simp only [Fintype.card_fin]
+          push_cast
+          ring
+  have hP1 : (1 : ℝ) ≤ (P : ℝ) := by exact_mod_cast hP
+  have hPpos : (0 : ℝ) < (P : ℝ) := by exact_mod_cast hP
+  have hnpos : (0 : ℝ) < (n : ℝ) := by
+    have : 0 < n := by omega
+    exact_mod_cast this
+  have hbase : (1 : ℝ) ≤ 20 * (n : ℝ) := by
+    have h12 : (12 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+    nlinarith
+  have hE : (n : ℝ) ≤ ((n * (n + 1) : ℕ) : ℝ) / 2 := by
+    have hcast : ((n * (n + 1) : ℕ) : ℝ) = (n : ℝ) * ((n : ℝ) + 1) := by
+      push_cast
+      ring
+    rw [hcast]
+    have h1 : (1 : ℝ) ≤ (n : ℝ) := by
+      have : 1 ≤ n := by omega
+      exact_mod_cast this
+    nlinarith
+  have hfac1 : (n.factorial : ℝ) ≤ (n : ℝ) ^ n := by
+    have h := Nat.factorial_le_pow n
+    exact_mod_cast h
+  have hfac2 : (n : ℝ) ^ n < (20 * (n : ℝ)) ^ n := by
+    exact pow_lt_pow_left₀ (by nlinarith : (n : ℝ) < 20 * (n : ℝ)) (le_of_lt hnpos)
+      (by omega : n ≠ 0)
+  have hfac3 : (20 * (n : ℝ)) ^ n ≤ (20 * (n : ℝ)) ^ (((n * (n + 1) : ℕ) : ℝ) / 2) := by
+    rw [← Real.rpow_natCast (20 * (n : ℝ)) n]
+    exact Real.rpow_le_rpow_of_exponent_le hbase hE
+  have hfac : (n.factorial : ℝ) < (20 * (n : ℝ)) ^ (((n * (n + 1) : ℕ) : ℝ) / 2) :=
+    lt_of_le_of_lt hfac1 (lt_of_lt_of_le hfac2 hfac3)
+  have hEid : ((n * (n + 1) : ℕ) : ℝ) / 2 * (1 - 1 / (n : ℝ)) ^ 1
+      + ((2 * (n * 1 + c) : ℝ) - ((n * (n + 1) : ℕ) : ℝ) / 2)
+      = (2 * (n * 1 + c) : ℝ) - ((n : ℝ) + 1) / 2 := by
+    have hn0 : (n : ℝ) ≠ 0 := ne_of_gt hnpos
+    push_cast
+    field_simp
+    ring
+  have hcomb : (P : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * (1 - 1 / (n : ℝ)) ^ 1)
+      * (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - ((n * (n + 1) : ℕ) : ℝ) / 2)
+      = (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - ((n : ℝ) + 1) / 2) := by
+    rw [← Real.rpow_add hPpos, hEid]
+  have hpexp : (2 * (n * 1 + c) : ℝ) - (n : ℝ)
+      ≤ (2 * (n * 1 + c) : ℝ) - ((n : ℝ) + 1) / 2 := by
+    have h1 : (1 : ℝ) ≤ (n : ℝ) := by
+      have : 1 ≤ n := by omega
+      exact_mod_cast this
+    nlinarith
+  have hPle : (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - (n : ℝ))
+      ≤ (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - ((n : ℝ) + 1) / 2) :=
+    Real.rpow_le_rpow_of_exponent_le hP1 hpexp
+  have hpow1 : (P : ℝ) ^ (n * 1 + c) = (P : ℝ) ^ (((n * 1 + c : ℕ)) : ℝ) :=
+    (Real.rpow_natCast (P : ℝ) (n * 1 + c)).symm
+  have hpow2 : (P : ℝ) ^ c = (P : ℝ) ^ ((c : ℕ) : ℝ) :=
+    (Real.rpow_natCast (P : ℝ) c).symm
+  have heq1 : (P : ℝ) ^ (((n * 1 + c : ℕ)) : ℝ) * (P : ℝ) ^ ((c : ℕ) : ℝ)
+      = (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - (n : ℝ)) := by
+    rw [← Real.rpow_add hPpos]
+    congr 1
+    push_cast
+    ring
+  calc (∑ x : Fin (n * 1 + c) → Fin P,
+      ∑ y : Fin (n * 1 + c) → Fin P,
+        (if (∀ j : Fin n,
+            ∑ i : Fin (n * 1 + c), (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+              = ∑ i : Fin (n * 1 + c), (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))
+          then (1 : ℝ) else 0))
+      ≤ (P : ℝ) ^ (n * 1 + c) * ((P : ℝ) ^ c * (n.factorial : ℝ)) := hstep1
+    _ = (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - (n : ℝ)) * (n.factorial : ℝ) := by
+        rw [hpow1, hpow2, ← mul_assoc, heq1]
+    _ ≤ (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - ((n : ℝ) + 1) / 2) * (n.factorial : ℝ) := by
+        apply mul_le_mul_of_nonneg_right hPle (by positivity)
+    _ < (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - ((n : ℝ) + 1) / 2) * (20 * (n : ℝ)) ^ (((n * (n + 1) : ℕ) : ℝ) / 2) := by
+        apply mul_lt_mul_of_pos_left hfac (by positivity)
+    _ = (20 * n : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * 1) *
+            ((P : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * (1 - 1 / (n : ℝ)) ^ 1) *
+             (P : ℝ) ^ ((2 * (n * 1 + c) : ℝ) - ((n * (n + 1) : ℕ) : ℝ) / 2)) := by
+        rw [hcomb]
+        simp only [Nat.cast_one, mul_one]
+        ring
+
 
 /-- LEAF. The same threshold bound for `l ≥ 2`, in the same counting form. This is the
 step that needs genuine mean value input rather than the elementary determination count:
