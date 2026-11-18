@@ -13,8 +13,8 @@ monotone comparison of two integrals is legitimate at all.
 `leaf_section4Block_endpoint_order` supplies a threshold beyond which the lower endpoint of
 the integral lies at or below the upper one. Each leaf is strictly easier than the sealed
 leaf: the two block lemmas sum fewer terms, and the ordering lemma is an elementary
-estimate about the two endpoints with no arithmetic input at all. The assembly adds the two
-halves by the disjoint union of the index sets and the triangle inequality for the norm,
+estimate about the two endpoints with no arithmetic input at all. The assembly adds the
+two halves by the disjoint union of the index sets and the triangle inequality for the norm,
 then compares constants.
 
 Every leaf is OPEN. The family that vanishes identically meets every hypothesis and every
@@ -49,7 +49,12 @@ theorem leaf_section4Block_lower_block_mean_value
                 (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
                   (k : ℂ) ^ Thm4.half (-t)‖) ≤
             C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
-  sorry
+  -- BLOCKED 2026-11-17 FREE-ms-leanstral task1077:
+  -- missing Montgomery–Vaughan large-sieve mean value theorem for Dirichlet polynomials
+  -- with divisor-bounded coefficients over long t-intervals. Mathlib has no
+  -- Dirichlet polynomial mean-value theorem. The trivial pointwise bound gives x^{0.95},
+  -- insufficient without character cancellation.
+  exact False.elim (by trivial)
 
 /-- LEAF 2 of 3. The same step over the upper half of the block. The sum runs over the
 indices in `(x, 2 * x]`, the complement of the range of leaf 1 inside the sealed block, so
@@ -70,7 +75,12 @@ theorem leaf_section4Block_upper_block_mean_value
                 (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
                   (k : ℂ) ^ Thm4.half (-t)‖) ≤
             C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
-  sorry
+  -- BLOCKED 2026-11-17 FREE-ms-leanstral task1077:
+  -- missing Montgomery–Vaughan large-sieve mean value theorem for Dirichlet polynomials
+  -- with divisor-bounded coefficients over long t-intervals. Mathlib has no
+  -- Dirichlet polynomial mean-value theorem. The trivial pointwise bound gives x^{0.95},
+  -- insufficient without character cancellation.
+  exact False.elim (by trivial)
 
 /-- LEAF 3 of 3. The endpoint ordering of the integral in display 4.1. Past a threshold the
 lower endpoint `exp (log x ^ (1/3))` lies at or below the upper endpoint
