@@ -369,4 +369,188 @@ theorem prime_short_interval_character_universal_fails :
   exact prime_short_interval_character_statement_fails 1 (1 / 10) (by norm_num)
     (by norm_num) (by norm_num) (h 1 (1 / 10) (by norm_num) (by norm_num) (by norm_num))
 
+/-- The residue class 3 modulo 6 supplies at least Y/6 - 1 reciprocal
+logarithm weights. This is an elementary check on page 5 hypothesis A1.2,
+with the page 15 choice of f1. -/
+theorem odd_multiple_three_weight_sum_ge (X Y : ℝ) (hY : 0 ≤ Y) (h : 3 < X - Y) :
+    (Y / 6 - 1) / Real.log X ≤
+      ∑ m ∈ primeWindow X Y,
+        (if m.Coprime 2 ∧ ¬m.Coprime 6 then 1 / Real.log (m : ℝ) else 0 : ℝ) := by
+  have hL : 0 < Real.log X := Real.log_pos (by linarith)
+  have hmem : ∀ k ∈ Finset.Ico ⌈(X - Y - 3) / 6⌉₊ ⌈(X - 3) / 6⌉₊,
+      X - Y ≤ ((6 * k + 3 : ℕ) : ℝ) ∧ ((6 * k + 3 : ℕ) : ℝ) < X := by
+    intro k hk
+    obtain ⟨hk1, hk2⟩ := Finset.mem_Ico.mp hk
+    have h1 : (X - Y - 3) / 6 ≤ (k : ℝ) := Nat.ceil_le.mp hk1
+    have h2 : (k : ℝ) < (X - 3) / 6 := Nat.lt_ceil.mp hk2
+    push_cast
+    constructor <;> linarith
+  have hclass : ∀ k : ℕ, (6 * k + 3).Coprime 2 ∧ ¬(6 * k + 3).Coprime 6 := by
+    intro k
+    constructor
+    · exact Nat.coprime_two_right.mpr ⟨3 * k + 1, by omega⟩
+    · intro hc
+      have hc3 := ((Nat.coprime_mul_iff_right (m := 2) (n := 3)).mp hc).2
+      have hd : 3 ∣ 6 * k + 3 := ⟨2 * k + 1, by omega⟩
+      exact (Nat.prime_three.coprime_iff_not_dvd.mp hc3.symm) hd
+  have hsub :
+      (Finset.Ico ⌈(X - Y - 3) / 6⌉₊ ⌈(X - 3) / 6⌉₊).image
+          (fun k : ℕ => 6 * k + 3) ⊆ primeWindow X Y := by
+    intro m hm
+    obtain ⟨k, hk, rfl⟩ := Finset.mem_image.mp hm
+    obtain ⟨h1, h2⟩ := hmem k hk
+    simp only [primeWindow, Finset.mem_filter, Finset.mem_range]
+    exact ⟨Nat.lt_succ_of_le (Nat.le_floor h2.le), h1, h2⟩
+  have hcard : Y / 6 - 1 ≤
+      ((⌈(X - 3) / 6⌉₊ - ⌈(X - Y - 3) / 6⌉₊ : ℕ) : ℝ) := by
+    have hb : (X - 3) / 6 ≤ (⌈(X - 3) / 6⌉₊ : ℝ) := Nat.le_ceil _
+    have ha : (⌈(X - Y - 3) / 6⌉₊ : ℝ) < (X - Y - 3) / 6 + 1 :=
+      Nat.ceil_lt_add_one (by linarith)
+    have hn : ⌈(X - 3) / 6⌉₊ ≤
+        (⌈(X - 3) / 6⌉₊ - ⌈(X - Y - 3) / 6⌉₊) + ⌈(X - Y - 3) / 6⌉₊ := by omega
+    have hn' : (⌈(X - 3) / 6⌉₊ : ℝ) ≤
+        ((⌈(X - 3) / 6⌉₊ - ⌈(X - Y - 3) / 6⌉₊ : ℕ) : ℝ) +
+          (⌈(X - Y - 3) / 6⌉₊ : ℝ) := by exact_mod_cast hn
+    linarith
+  calc
+    _ ≤ ∑ _k ∈ Finset.Ico ⌈(X - Y - 3) / 6⌉₊ ⌈(X - 3) / 6⌉₊,
+        1 / Real.log X := by
+      rw [Finset.sum_const, Nat.card_Ico, nsmul_eq_mul, mul_one_div]
+      exact div_le_div_of_nonneg_right hcard hL.le
+    _ ≤ ∑ k ∈ Finset.Ico ⌈(X - Y - 3) / 6⌉₊ ⌈(X - 3) / 6⌉₊,
+        (if (6 * k + 3).Coprime 2 ∧ ¬(6 * k + 3).Coprime 6 then
+          1 / Real.log ((6 * k + 3 : ℕ) : ℝ) else 0 : ℝ) := by
+      refine Finset.sum_le_sum fun k hk => ?_
+      obtain ⟨h1, h2⟩ := hmem k hk
+      rw [ite_eq_left (hclass k)]
+      exact one_div_le_one_div_of_le (Real.log_pos (by linarith))
+        (Real.log_le_log (by linarith) h2.le)
+    _ = ∑ m ∈ (Finset.Ico ⌈(X - Y - 3) / 6⌉₊ ⌈(X - 3) / 6⌉₊).image
+        (fun k : ℕ => 6 * k + 3),
+        (if m.Coprime 2 ∧ ¬m.Coprime 6 then 1 / Real.log (m : ℝ) else 0 : ℝ) := by
+      rw [Finset.sum_image]
+      intro x _ y _ hxy
+      dsimp only at hxy
+      omega
+    _ ≤ _ := by
+      refine Finset.sum_le_sum_of_subset_of_nonneg hsub fun m hm _ => ?_
+      split_ifs
+      · have hm' := (Finset.mem_filter.mp hm).2
+        exact le_of_lt (one_div_pos.mpr (Real.log_pos (by linarith [hm'.1])))
+      · exact le_rfl
+
+/-- For the whole window above 3, subtracting the coprime-level-six sum
+from the coprime-level-two sum cancels every prime. Only the negative
+reciprocal logarithms on the residue class 3 modulo 6 remain. -/
+theorem principal_two_six_sum_diff (X Y : ℝ) (h : 3 < X - Y) :
+    (∑ m ∈ (primeWindow X Y).filter
+        (fun m : ℕ => ((X - Y ≤ (m : ℝ)) ∧ (m : ℝ) < X) ∧ m.Coprime 2),
+        ((if m.Prime then (1 : ℂ) else 0) - ((1 / Real.log (m : ℝ) : ℝ) : ℂ))) -
+      (∑ m ∈ (primeWindow X Y).filter
+        (fun m : ℕ => ((X - Y ≤ (m : ℝ)) ∧ (m : ℝ) < X) ∧ m.Coprime 6),
+        ((if m.Prime then (1 : ℂ) else 0) - ((1 / Real.log (m : ℝ) : ℝ) : ℂ))) =
+      -∑ m ∈ primeWindow X Y,
+        ((if m.Coprime 2 ∧ ¬m.Coprime 6 then
+          1 / Real.log (m : ℝ) else 0 : ℝ) : ℂ) := by
+  rw [Finset.sum_filter, Finset.sum_filter, ← Finset.sum_sub_distrib,
+    ← Finset.sum_neg_distrib]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  have hm' := (Finset.mem_filter.mp hm).2
+  have hm3 : 3 < m := by exact_mod_cast (show (3 : ℝ) < (m : ℝ) by linarith [hm'.1])
+  have hc : m.Coprime 6 → m.Coprime 2 := fun hc =>
+    ((Nat.coprime_mul_iff_right (m := 2) (n := 3)).mp hc).1
+  simp only [hm', true_and]
+  by_cases hp : m.Prime
+  · have hc2 : m.Coprime 2 := hp.coprime_iff_not_dvd.mpr (by
+      intro hd
+      have := Nat.le_of_dvd (by norm_num : 0 < 2) hd
+      omega)
+    have hc3 : m.Coprime 3 := hp.coprime_iff_not_dvd.mpr (by
+      intro hd
+      have := Nat.le_of_dvd (by norm_num : 0 < 3) hd
+      omega)
+    have hc6 : m.Coprime 6 := Nat.coprime_mul_iff_right.mpr ⟨hc2, hc3⟩
+    rw [ite_eq_left hc2, ite_eq_left hc6,
+      ite_eq_right (show ¬(m.Coprime 2 ∧ ¬m.Coprime 6) from fun h => h.2 hc6)]
+    simp only [sub_self, Complex.ofReal_zero, neg_zero]
+  · by_cases hc2 : m.Coprime 2
+    · by_cases hc6 : m.Coprime 6
+      · rw [ite_eq_left hc2, ite_eq_left hc6,
+          ite_eq_right (show ¬(m.Coprime 2 ∧ ¬m.Coprime 6) from fun h => h.2 hc6)]
+        simp only [sub_self, Complex.ofReal_zero, neg_zero]
+      · rw [ite_eq_left hc2, ite_eq_right hc6, ite_eq_right hp,
+          ite_eq_left (show m.Coprime 2 ∧ ¬m.Coprime 6 from ⟨hc2, hc6⟩)]
+        simp only [zero_sub, sub_zero]
+    · have hc6 : ¬m.Coprime 6 := fun h6 => hc2 (hc h6)
+      rw [ite_eq_right hc2, ite_eq_right hc6,
+        ite_eq_right (show ¬(m.Coprime 2 ∧ ¬m.Coprime 6) from fun h => hc2 h.1)]
+      simp only [sub_self, Complex.ofReal_zero, neg_zero]
+
+/-- A standalone refutation of the third leaf for every B > 1/5.
+Levels 2 and 6 alone contradict its bound, without a prime number theorem
+or either of the other leaves. The concrete instance is B = 1, epsilon =
+1/10 and the full window at one of these two levels. -/
+theorem principal_prime_count_level_exceeding_one_fails (B ε : ℝ) (hB : 1 / 5 < B)
+    (hε : 0 < ε) (hε1 : ε ≤ 11 / 36) :
+    ¬ (∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X : ℝ, X0 ≤ X →
+      ∀ q : ℕ, 2 ≤ q → (q : ℝ) ≤ Real.log X ^ B →
+      ∀ u v : ℝ,
+        X - windowY X ε ≤ u → u ≤ v → v ≤ X →
+        ‖∑ m ∈ (primeWindow X (windowY X ε)).filter
+            (fun m : ℕ => (u ≤ (m : ℝ) ∧ (m : ℝ) < v) ∧ m.Coprime q),
+            ((if m.Prime then (1 : ℂ) else 0) - ((1 / Real.log (m : ℝ) : ℝ) : ℂ))‖ ≤
+          C * windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ)) := by
+  rintro ⟨C, X0, hC, -, hst⟩
+  have hT1 : Filter.Tendsto (fun X : ℝ => Real.log X ^ (5 * B - 1)) Filter.atTop Filter.atTop :=
+    (tendsto_rpow_atTop (by linarith)).comp Real.tendsto_log_atTop
+  have hT2 : Filter.Tendsto (fun X : ℝ => Real.log X ^ B) Filter.atTop Filter.atTop :=
+    (tendsto_rpow_atTop (by linarith)).comp Real.tendsto_log_atTop
+  have hT3 : Filter.Tendsto (fun X : ℝ => X ^ (7 / 12 + ε / 2)) Filter.atTop Filter.atTop :=
+    tendsto_rpow_atTop (by positivity)
+  have hT4 : Filter.Tendsto (fun X : ℝ => X ^ (1 - (7 / 12 + ε / 2))) Filter.atTop
+      Filter.atTop := tendsto_rpow_atTop (by linarith)
+  obtain ⟨X, h1, h2, h3, h4, h5, h6⟩ :=
+    ((hT1.eventually_gt_atTop (24 * C)).and ((hT2.eventually_ge_atTop 6).and
+      ((hT3.eventually_ge_atTop 12).and ((hT4.eventually_ge_atTop 2).and
+        ((Filter.eventually_ge_atTop X0).and (Filter.eventually_ge_atTop (8 : ℝ))))))).exists
+  have hX0 : 0 < X := by linarith
+  have hL : 0 < Real.log X := Real.log_pos (by linarith)
+  have hY12 : 12 ≤ windowY X ε := h3
+  have hXY : X = windowY X ε * X ^ (1 - (7 / 12 + ε / 2)) := by
+    rw [windowY, ← Real.rpow_add hX0]
+    ring_nf
+    rw [Real.rpow_one]
+  have hYX : 3 < X - windowY X ε := by nlinarith
+  have hq2 : ((2 : ℕ) : ℝ) ≤ Real.log X ^ B := by push_cast; linarith
+  have hq6 : ((6 : ℕ) : ℝ) ≤ Real.log X ^ B := by push_cast; linarith
+  have hd2 := hst X h5 2 le_rfl hq2 (X - windowY X ε) X le_rfl (by linarith) le_rfl
+  have hd6 := hst X h5 6 (by norm_num) hq6 (X - windowY X ε) X le_rfl (by linarith) le_rfl
+  have hdiff := principal_two_six_sum_diff X (windowY X ε) hYX
+  have hlow := odd_multiple_three_weight_sum_ge X (windowY X ε) (by linarith) hYX
+  have hnorm : (windowY X ε / 6 - 1) / Real.log X ≤
+      2 * (C * windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ)) := by
+    have habs : (∑ m ∈ primeWindow X (windowY X ε),
+        (if m.Coprime 2 ∧ ¬m.Coprime 6 then 1 / Real.log (m : ℝ) else 0 : ℝ)) ≤
+        ‖-∑ m ∈ primeWindow X (windowY X ε),
+          ((if m.Coprime 2 ∧ ¬m.Coprime 6 then
+            1 / Real.log (m : ℝ) else 0 : ℝ) : ℂ)‖ := by
+      rw [norm_neg, ← Complex.ofReal_sum, Complex.norm_real, Real.norm_eq_abs]
+      exact le_abs_self _
+    rw [← hdiff] at habs
+    exact hlow.trans (habs.trans ((norm_sub_le _ _).trans (by linarith)))
+  have hTL : Real.log X ^ (5 * B - 1) * Real.log X = (Real.log X ^ B) ^ (5 : ℕ) := by
+    calc
+      _ = Real.log X ^ (5 * B - 1) * Real.log X ^ (1 : ℝ) := by rw [Real.rpow_one]
+      _ = Real.log X ^ (5 * B - 1 + 1) := (Real.rpow_add hL _ _).symm
+      _ = Real.log X ^ (B * ((5 : ℕ) : ℝ)) := by congr 1; push_cast; ring
+      _ = _ := by rw [Real.rpow_mul hL.le, Real.rpow_natCast]
+  have hT : 0 < Real.log X ^ (5 * B - 1) := Real.rpow_pos_of_pos hL _
+  rw [zpow_neg, zpow_ofNat, ← hTL, div_le_iff₀ hL] at hnorm
+  have hfin : 2 * (C * windowY X ε * (Real.log X ^ (5 * B - 1) * Real.log X)⁻¹) *
+      Real.log X = 2 * C * windowY X ε / Real.log X ^ (5 * B - 1) := by field_simp
+  rw [hfin, le_div_iff₀ hT] at hnorm
+  nlinarith [mul_nonneg (show (0 : ℝ) ≤ windowY X ε / 12 - 1 by linarith) hT.le,
+    mul_pos (show (0 : ℝ) < windowY X ε by linarith)
+      (show (0 : ℝ) < Real.log X ^ (5 * B - 1) - 24 * C by linarith)]
+
 end LeanLab.KumchevLiu2007.Task556a
