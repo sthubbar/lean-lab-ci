@@ -56,7 +56,11 @@ theorem leaf_block2 :
       (∀ j : ℕ, 250000001 ≤ j → j < 375000001 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
-  sorry
+  obtain ⟨qs, hlen, hp, hc⟩ := Decomp500a.table2_row_27
+  refine ⟨qs, ?_, hp, ?_⟩
+  · omega
+  · intro j hj1 hj2
+    exact hc j (by omega)
 
 /-- LEAF Fourth sub-block: indices 375000001 ≤ j < 500000001 are covered by
 one list of at most 55 primes, each listed prime q satisfying
