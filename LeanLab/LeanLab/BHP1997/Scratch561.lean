@@ -1,0 +1,24 @@
+import LeanLab.BHP1997.SPLIT_leaf_long_prefix_replacement561
+
+#check Real.rpow_nonneg
+#check Real.rpow_nonneg_of_nonneg
+#check Nat.floor_pos
+#check Nat.floor_le
+#check Nat.le_floor
+#check Nat.floor_lt
+#check Nat.floor_eq_zero
+#check Nat.floor_add_one
+#check Nat.lt_floor_add_one
+#check Finset.sum_const_zero
+#check Finset.card_filter_le
+#check norm_sum_le
+#check Finset.sum_le_sum
+#check Finset.sum_sub_distrib
+#check Finset.mul_sum
+#check Finset.sum_mul
+#check Finset.sum_congr
+#check Complex.div_def
+#check Complex.div_eq_mul_inv
+#check Nat.cast_div
+#check Nat.cast_ofNat
+#check Nat.cast_pos

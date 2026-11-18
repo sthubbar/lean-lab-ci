@@ -38,7 +38,13 @@ theorem leaf_long_model_difference561 (ε D x u : ℝ) (a b : ℝ → ℕ → �
               polynomial512 (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊) (b x)
                 ((r : ℝ) / q + s) *
               @fourier 1 (-(N : ℤ)) ((((r : ℝ) / q + s) : ℝ) : AddCircle (1 : ℝ))))) := by
-  sorry
+  unfold longPrincipal561
+  rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun q _ => ?_)
+  rw [← Finset.mul_sum, ← Finset.mul_sum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun r _ => ?_)
+  dsimp only
+  ring
 
 /-- LEAF: Triangle step.  The norm of the sum of the single arc errors is at most
 the sum of their norms, and each of those is at most the per-arc budget supplied
@@ -72,7 +78,18 @@ theorem leaf_long_model_norm_le561 (ε D x u A C₀ : ℝ) (a b : ℝ → ℕ �
         (∑ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q), (C₀ * Real.log x ^ (-(A + 6 * D + 3)) *
             (Real.log x ^ (4 * D) / ((q : ℝ) * length512 ε x)) *
             (∑ m ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊, ‖b x m‖))) := by
-  sorry
+  refine le_trans (norm_sum_le _ _) ?_
+  refine le_trans (Finset.sum_le_sum (fun q _ => norm_sum_le _ _)) ?_
+  intro q hq r hr
+  have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq).1
+  have hq2 : q ≤ ⌊Real.log x ^ (2 * D)⌋₊ := (Finset.mem_Icc.mp hq).2
+  have hL1 : 1 ≤ Real.log x ^ (2 * D) := Nat.floor_pos.mp (by omega)
+  have hL0 : 0 ≤ Real.log x ^ (2 * D) := le_trans hL1 (by norm_num)
+  have hqL : (q : ℝ) ≤ Real.log x ^ (2 * D) := by
+    have hfloor := Nat.floor_le hL0
+    have hcast : (q : ℝ) ≤ (⌊Real.log x ^ (2 * D)⌋₊ : ℝ) := by exact_mod_cast hq2
+    exact le_trans hcast hfloor
+  exact h q hq1 hqL r hr
 
 /-- LEAF: Moduli collection step.  If the short block is at least half a unit long
 and the block position is at least eight, then the double sum of the per-arc
@@ -88,7 +105,14 @@ theorem leaf_long_model_budget_collection561 (ε D x A C₀ : ℝ) (b : ℝ → 
             (Real.log x ^ (4 * D) / ((q : ℝ) * length512 ε x)) *
             (∑ m ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊, ‖b x m‖)))) ≤
       max 1 C₀ * Real.log x ^ (-A) * (∑ m ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊, ‖b x m‖) := by
-  sorry
+  have hfloor1 : ⌊length512 ε x⌋₊ = 0 := by
+    apply Nat.floor_eq_zero.mpr
+    exact lt_trans hY (by norm_num)
+  have hfloor2 : ⌊2 * length512 ε x⌋₊ = 0 := by
+    apply Nat.floor_eq_zero.mpr
+    linarith [hY]
+  rw [hfloor1, hfloor2]
+  simp
 
 /-- LEAF: Degenerate block step.  If the block length is below one half then both
 floors of the block range are zero, the range of indices of the short block is
