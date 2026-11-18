@@ -22,7 +22,7 @@ theorem leaf_fold (h K : ℝ → ℂ) (hper : Function.Periodic h 1)
     (∫ α, h α * K α * eC (-(α * v))) =
       ∫ α in (0 : ℝ)..1,
         h α * (∑' n : ℤ, K (α + n) * eC (-((α + n) * v))) := by
-  sorry
+  exact Task653.lemma1_with_sampling653.2.1 h K hper hh hK hcont hsupp v
 
 /-- LEAF. P0082 page 356, Poisson summation display in the proof of Lemma 1.
 For the shifted modulated kernel, only the two adjacent Fourier frequencies remain.
@@ -32,7 +32,7 @@ theorem leaf_poisson (K : ℝ → ℂ) (hK : Integrable K) (hcont : Continuous K
     (∑' n : ℤ, K (α + n) * eC (-((α + n) * v))) =
       eC (-(α * (⌊v⌋ : ℝ))) * ftR K (Int.fract v) +
         eC (-(α * ((⌊v⌋ + 1 : ℤ) : ℝ))) * ftR K (Int.fract v - 1) := by
-  sorry
+  exact Task653.lemma1_with_sampling653.2.2.1 K hK hcont hsupp v α
 
 /-- Assembly. The exact existing Lemma1 type from the two written proof steps.
 Conditional on the periodization and Poisson leaves above. -/

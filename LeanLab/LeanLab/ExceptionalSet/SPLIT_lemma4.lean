@@ -23,6 +23,7 @@ argument, in the order the assembly uses them:
 AI wrote the Lean code.  The leaves are open; the assembly is proved.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.Decomp547a
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -54,7 +55,8 @@ theorem leaf_exp_sum_bound :
         (h : ℝ) ≤ F γ N ^ C →
         ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ ≤
           B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ)) := by
-  sorry
+  intro γ h1 h2 C hC hCγ
+  exact Decomp547a.integer_multiple_decay_full theorem2_via_karacuba γ h1 h2 C hC hCγ
 
 /-- LEAF. Step 3, the regime: past a threshold, `N ≥ 3`, `log N ≥ 1`, `⌈log N⌉ ≥ 1`, and
 `⌈log N⌉ ≤ F(N)^C` for every `C > 0`.  The last is what lets step 2 be applied at every

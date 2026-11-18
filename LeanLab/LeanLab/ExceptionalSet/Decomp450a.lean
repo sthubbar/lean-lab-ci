@@ -24,7 +24,7 @@ theorem leaf_translate_norm (K : ℝ → ℂ) (hK : Integrable K) (hcont : Conti
     ∀ S : TopologicalSpace.Compacts ℝ,
       Summable (fun n : ℤ =>
         ‖((⟨K, hcont⟩ : C(ℝ, ℂ)).comp (ContinuousMap.addRight (n : ℝ))).restrict S‖) := by
-  sorry
+  exact Task653.lemma1_with_sampling653.2.2.2 K hK hcont hsupp
 
 /-- P0082 page 356, the transform computation before the Poisson display.
 Modulation of an arbitrary kernel shifts the Fourier variable by v. -/

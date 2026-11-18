@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.Decomp371a
+import LeanLab.ExceptionalSet.Decomp550a
 import LeanLab.ExceptionalSet.SPLIT_lemma4
 
 /-!
@@ -30,7 +31,7 @@ theorem leaf_one_sided_majorant :
         (∀ h ∈ Finset.range H, ‖c h‖ ≤ C) ∧
         ∀ x : ℝ, (if a ≤ Int.fract x ∧ Int.fract x < b then (1 : ℝ) else 0) ≤
           c₀ + ∑ h ∈ Finset.range H, (c h * eC (((h : ℝ) + 1) * x)).re := by
-  sorry
+  exact Decomp550a.one_sided_majorant_supplied
 
 /-- P0082 page 359 Lemma 4, elementary base case of the one sided
 majorant at cutoff one. A constant polynomial suffices at this cutoff.

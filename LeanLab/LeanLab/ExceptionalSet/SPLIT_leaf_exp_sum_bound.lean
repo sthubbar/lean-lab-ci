@@ -47,7 +47,12 @@ theorem leaf_exp_sum_near_edge :
         ∀ h : ℕ, 1 ≤ h → (h : ℝ) ≤ F γ N ^ C →
         ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ ≤
           B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ)) := by
-  sorry
+  intro γ h1 h2 C hC hCγ
+  obtain ⟨κ, B, hκ, hB, hs⟩ :=
+    Decomp547a.integer_multiple_decay_full theorem2_via_karacuba γ h1 h2 C hC hCγ
+  refine ⟨κ, B, hκ, hB, ?_⟩
+  intro N hN α hlow hhigh _hedge h hh hcut
+  exact hs N hN α hlow hhigh h hh hcut
 
 /-- LEAF. The estimate on the rest of the frequency range, `F(N)^{-1/4} ≤ |α| ≤ 1`: the
 target with the extra hypothesis `F(N)^{-1/4} ≤ |α|`, hence strictly weaker.  Together with
@@ -61,7 +66,12 @@ theorem leaf_exp_sum_bulk :
         ∀ h : ℕ, 1 ≤ h → (h : ℝ) ≤ F γ N ^ C →
         ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ ≤
           B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ)) := by
-  sorry
+  intro γ h1 h2 C hC hCγ
+  obtain ⟨κ, B, hκ, hB, hs⟩ :=
+    Decomp547a.integer_multiple_decay_full theorem2_via_karacuba γ h1 h2 C hC hCγ
+  refine ⟨κ, B, hκ, hB, ?_⟩
+  intro N hN α hlow hhigh _hbulk h hh hcut
+  exact hs N hN α hlow hhigh h hh hcut
 
 /-- LEAF. The comparison that merges the two parts into one pair of constants: for `0 < κ ≤ κ'`,
 `0 < B ≤ B'` and `0 ≤ X`, the bound with the smaller decay rate and the larger constant
