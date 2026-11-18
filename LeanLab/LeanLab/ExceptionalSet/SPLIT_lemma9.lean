@@ -56,6 +56,135 @@ theorem leaf_gap_unit (γ : ℝ) (δ : ℝ) (hδ₀ : 0 < δ) (hδ₁ : δ ≤ 1
     exact Real.rpow_nonneg hlog.le γ
   exact Real.rpow_le_one_of_one_le_of_nonpos hF (by linarith)
 
+/-! ### LEAF 2 is false -/
+
+/-- `leaf_height_domination` is FALSE: for `γ = 5/4`, `δ = 1`, `κ = 1`,
+  `2 * F γ N ^ δ + 2 = 2 * exp((log N)^(5/4)) + 2` grows strictly faster than
+  `calE γ κ N ^ (2/3) = exp((2/3) * (log N)^(1/2))`, since `(log N)^(5/4)` outgrows
+  `(2/3) * (log N)^(1/2)`. Hence no `N₁` can make the inequality hold for all `N ≥ N₁`. -/
+theorem exp_domination_fails (N : ℕ) (hN : 3 ≤ N) :
+    2 * Real.exp ((Real.log (N : ℝ)) ^ (5 / 4 : ℝ)) + 2 >
+      Real.exp ((2 / 3 : ℝ) * (Real.log (N : ℝ)) ^ (1 / 2 : ℝ)) := by
+  have h₁ : Real.log (N : ℝ) ≥ Real.log 3 := Real.log_le_log (by positivity) (by exact_mod_cast hN)
+  have h₂ : Real.log (N : ℝ) > 1 := by
+    have h₂₁ : Real.log 3 > 1 := by
+      -- log 3 > 1 because 3 > e ≈ 2.718
+      have h : Real.exp 1 < 3 := by
+        -- e < 3: use the series expansion bound
+        -- exp 1 = 1 + 1 + 1/2! + 1/3! + ... < 1 + 1 + 1/2 + 1/4 + 1/8 + ... = 3
+        -- Strict inequality because 1/3! < 1/4, etc.
+        norm_num [Real.exp_pos]
+        <;>
+        (try linarith [Real.exp_pos])
+        <;>
+        (try nlinarith [Real.exp_pos])
+      have h₂ : Real.log 3 > 1 := by
+        rw [Real.one_lt_log_iff (by positivity)]
+        linarith
+      exact h₂
+    linarith
+  -- (log N)^(5/4) > log N since log N > 1 and 5/4 > 1 (compare logs)
+  have h₃ : (Real.log (N : ℝ) : ℝ) ^ (5 / 4 : ℝ) > Real.log (N : ℝ) := by
+    have h₃₁ : 1 < Real.log (N : ℝ) := by linarith
+    have h₃₂ : Real.log ((Real.log (N : ℝ)) ^ (5 / 4 : ℝ)) > Real.log (Real.log (N : ℝ)) := by
+      have h₃₃ : Real.log ((Real.log (N : ℝ)) ^ (5 / 4 : ℝ)) = (5 / 4 : ℝ) * Real.log (Real.log (N : ℝ)) := by
+        rw [Real.log_rpow (by positivity)]
+      rw [h₃₃]
+      have h₃₄ : Real.log (Real.log (N : ℝ)) > 0 := by
+        apply Real.log_pos
+        linarith [h₃₁]
+      nlinarith [h₃₄]
+    have h₃₃ : Real.log (Real.log (N : ℝ)) > 0 := by
+      apply Real.log_pos
+      linarith [h₃₁]
+    have h₃₄ : (Real.log (N : ℝ)) ^ (5 / 4 : ℝ) > Real.log (N : ℝ) := by
+      by_contra h
+      have h₃₅ : (Real.log (N : ℝ)) ^ (5 / 4 : ℝ) ≤ Real.log (N : ℝ) := by linarith
+      have h₃₆ : Real.log ((Real.log (N : ℝ)) ^ (5 / 4 : ℝ)) ≤ Real.log (Real.log (N : ℝ)) := by
+        apply Real.log_le_log
+        · positivity
+        · linarith
+      linarith [h₃₂]
+    exact h₃₄
+  -- log N > (2/3) * (log N)^(1/2) since log N > 1
+  have h₄ : Real.log (N : ℝ) > (2 / 3 : ℝ) * (Real.log (N : ℝ) : ℝ) ^ (1 / 2 : ℝ) := by
+    have h₄₁ : 1 < Real.log (N : ℝ) := by linarith
+    have h₄₂ : Real.log ((Real.log (N : ℝ)) ^ (1 / 2 : ℝ)) < Real.log (Real.log (N : ℝ)) := by
+      have h₄₃ : Real.log ((Real.log (N : ℝ)) ^ (1 / 2 : ℝ)) = (1 / 2 : ℝ) * Real.log (Real.log (N : ℝ)) := by
+        rw [Real.log_rpow (by positivity)]
+      rw [h₄₃]
+      have h₄₄ : Real.log (Real.log (N : ℝ)) > 0 := by
+        apply Real.log_pos
+        linarith [h₄₁]
+      nlinarith [h₄₄]
+    have h₄₃ : Real.log (Real.log (N : ℝ)) > 0 := by
+      apply Real.log_pos
+      linarith [h₄₁]
+    have h₄₄ : (Real.log (N : ℝ)) ^ (1 / 2 : ℝ) < Real.log (N : ℝ) := by
+      by_contra h
+      have h₄₅ : (Real.log (N : ℝ)) ^ (1 / 2 : ℝ) ≥ Real.log (N : ℝ) := by linarith
+      have h₄₆ : Real.log ((Real.log (N : ℝ)) ^ (1 / 2 : ℝ)) ≥ Real.log (Real.log (N : ℝ)) := by
+        apply Real.log_le_log
+        · positivity
+        · linarith
+      linarith [h₄₂]
+    linarith
+  -- Chain: (log N)^(5/4) > log N > (2/3) * (log N)^(1/2)
+  have h₅ : (Real.log (N : ℝ) : ℝ) ^ (5 / 4 : ℝ) > (2 / 3 : ℝ) * (Real.log (N : ℝ) : ℝ) ^ (1 / 2 : ℝ) := by
+    linarith
+  -- Exponentiate: exp((log N)^(5/4)) > exp((2/3) * (log N)^(1/2))
+  have h₆ : Real.exp ((Real.log (N : ℝ) : ℝ) ^ (5 / 4 : ℝ)) > Real.exp ((2 / 3 : ℝ) * (Real.log (N : ℝ) : ℝ) ^ (1 / 2 : ℝ)) := by
+    apply Real.exp_lt_exp.mpr
+    linarith
+  -- 2 * exp((log N)^(5/4)) > exp((2/3) * (log N)^(1/2))
+  have h₇ : 2 * Real.exp ((Real.log (N : ℝ) : ℝ) ^ (5 / 4 : ℝ)) > Real.exp ((2 / 3 : ℝ) * (Real.log (N : ℝ) : ℝ) ^ (1 / 2 : ℝ)) := by
+    have h₇₁ : Real.exp ((Real.log (N : ℝ) : ℝ) ^ (5 / 4 : ℝ)) > 0 := Real.exp_pos _
+    have h₇₂ : Real.exp ((2 / 3 : ℝ) * (Real.log (N : ℝ) : ℝ) ^ (1 / 2 : ℝ)) > 0 := Real.exp_pos _
+    nlinarith [h₆]
+  -- 2 * exp((log N)^(5/4)) + 2 > exp((2/3) * (log N)^(1/2))
+  linarith
+
+theorem leaf_height_domination_false :
+    ¬ (∀ (γ : ℝ), 1 < γ → γ < 3 / 2 → ∀ (δ κ : ℝ), 0 < δ → 0 < κ →
+        ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N → 2 * F γ N ^ δ + 2 ≤ calE γ κ N ^ (2 / 3 : ℝ)) := by
+  intro h
+  have h₁ := h (5 / 4) (by norm_num) (by norm_num) (1 : ℝ) (1 : ℝ) (by norm_num) (by norm_num)
+  obtain ⟨N₁, hN₁⟩ := h₁
+  have h₂ := hN₁ (max N₁ 3) (by exact le_max_left)
+  have h₃ : (max N₁ 3 : ℕ) ≥ 3 := by
+    norm_cast <;> exact le_max_right _ 3
+  have h₄ : 2 * F (5 / 4) (max N₁ 3) ^ (1 : ℝ) + 2 > calE (5 / 4) (1 : ℝ) (max N₁ 3) ^ (2 / 3 : ℝ) := by
+    have h₄₁ : exp_domination_fails (max N₁ 3) h₃
+    have h₄₂ : F (5 / 4) (max N₁ 3 : ℕ) ^ (1 : ℝ) = Real.exp ((Real.log (max N₁ 3 : ℝ) : ℝ) ^ (5 / 4 : ℝ)) := by
+      simp [F]
+      <;> norm_num
+      <;> field_simp [Real.rpow_def]
+      <;> ring_nf
+      <;> norm_num
+    have h₄₃ : calE (5 / 4) (1 : ℝ) (max N₁ 3 : ℕ) = Real.exp ((Real.log (max N₁ 3 : ℝ) : ℝ) ^ (1 / 2 : ℝ)) := by
+      simp [calE]
+      <;> norm_num
+      <;> field_simp [Real.rpow_def]
+      <;> ring_nf
+      <;> norm_num
+    have h₄₄ : calE (5 / 4) (1 : ℝ) (max N₁ 3 : ℕ) ^ (2 / 3 : ℝ) = Real.exp ((2 / 3 : ℝ) * (Real.log (max N₁ 3 : ℝ) : ℝ) ^ (1 / 2 : ℝ)) := by
+      rw [h₄₃]
+      have h₄₄₁ : Real.exp ((Real.log (max N₁ 3 : ℝ) : ℝ) ^ (1 / 2 : ℝ)) > 0 := Real.exp_pos _
+      have h₄₄₂ : Real.exp ((Real.log (max N₁ 3 : ℝ) : ℝ) ^ (1 / 2 : ℝ)) ^ (2 / 3 : ℝ) =
+          Real.exp ((2 / 3 : ℝ) * (Real.log (max N₁ 3 : ℝ) : ℝ) ^ (1 / 2 : ℝ)) := by
+        rw [show (Real.log (max N₁ 3 : ℝ) : ℝ) ^ (1 / 2 : ℝ) = Real.log (Real.exp ((Real.log (max N₁ 3 : ℝ) : ℝ) ^ (1 / 2 : ℝ))) by
+          field_simp [Real.log_exp]
+          <;> ring_nf]
+        rw [Real.exp_rpow (by positivity)]
+        <;> field_simp [Real.rpow_def]
+        <;> ring_nf
+        <;> norm_num
+      rw [h₄₄₂]
+    rw [h₄₂] at *
+    rw [h₄₄] at *
+    simpa [h₄₁] using h₄₁
+  linarith
+
 /-! ### Assembly -/
 
 /-- `lemma9` from the three leaves of this file. -/
