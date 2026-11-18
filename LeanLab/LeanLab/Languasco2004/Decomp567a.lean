@@ -47,7 +47,8 @@ theorem prime_to_rough47 :
           pieceSum 2 47 true N (localization N ε) n <
             roughModel47 N (localization N ε) n -
               K * ε * scale N (localization N ε) n)).card : ℝ) ≤
-          C * windowLength N ε / Real.log N ^ B := by sorry
+          C * windowLength N ε / Real.log N ^ B := by
+  sorry
 
 /-- LEAF. Jia page 275, first integral of Lemma 25, using Lemma 21
 on page 262 and the second and third comparisons on page 270.
