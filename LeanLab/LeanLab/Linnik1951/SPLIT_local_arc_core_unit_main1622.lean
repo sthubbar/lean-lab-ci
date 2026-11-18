@@ -30,6 +30,7 @@ the number itself, applies the estimate of the damped convolution, and then the 
 comparison with the reciprocal of the square of the logarithm of two.
 -/
 import LeanLab.Linnik1951.SPLIT_local_arc_core_unit1622
+import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
 namespace LeanLab.Linnik1951
 
@@ -99,6 +100,98 @@ and a threshold so that, past the threshold, the first constant times N is at mo
 second constant times N times the thirteenth power of the logarithm of N times the sum of
 the two scale errors at the unit modulus. This is a statement about N alone: no
 convolution, no residual and no exponential damping occurs in it. -/
+private theorem local_arc_core_unit_scale_bracket1622 (N : ℕ) (hN1 : 1 ≤ N) :
+    (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+      1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) ≤
+      2 / (N : ℝ) ^ (1 / 14 : ℝ) := by
+  have hNr : (0 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (by omega : 0 ≤ N)
+  have hfirst : 1 / (N : ℝ) ^ (1 / 7 : ℝ) ≤ 1 / (N : ℝ) ^ (1 / 14 : ℝ) := by
+    exact one_div_le_one_div_of_le (by positivity)
+      (Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast hN1) (by norm_num))
+  have hsqrt : 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) =
+      1 / (N : ℝ) ^ (1 / 14 : ℝ) := by
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hNr,
+      show (1 / 7 : ℝ) * (1 / 2 : ℝ) = 1 / 14 by ring]
+  rw [hsqrt]
+  calc
+    1 / (N : ℝ) ^ (1 / 7 : ℝ) + 1 / (N : ℝ) ^ (1 / 14 : ℝ) ≤
+        1 / (N : ℝ) ^ (1 / 14 : ℝ) + 1 / (N : ℝ) ^ (1 / 14 : ℝ) :=
+      add_le_add_right hfirst _
+    _ = 2 / (N : ℝ) ^ (1 / 14 : ℝ) := by ring
+
+private theorem local_arc_core_unit_scale_factor_tendsto_zero1622 (c : ℝ) (hc : 0 < c) :
+    Filter.Tendsto (fun N : ℕ =>
+      c * Real.log N ^ 13 *
+        (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+          1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)))) Filter.atTop (nhds 0) := by
+  have hreal : Filter.Tendsto (fun x : ℝ => Real.log x ^ 13 / x ^ (1 / 14 : ℝ))
+      Filter.atTop (nhds 0) :=
+    (isLittleO_log_rpow_rpow_atTop 13 (by positivity : (0 : ℝ) < 1 / 14)).tendsto_div_nhds_zero
+  have hnat : Filter.Tendsto (fun N : ℕ => Real.log N ^ 13 / (N : ℝ) ^ (1 / 14 : ℝ))
+      Filter.atTop (nhds 0) := by
+    simpa using hreal.comp (tendsto_natCast_atTop_atTop)
+  have hupper : Filter.Tendsto (fun N : ℕ =>
+      2 * c * (Real.log N ^ 13 / (N : ℝ) ^ (1 / 14 : ℝ)))
+      Filter.atTop (nhds 0) := by
+    simpa [mul_assoc] using hnat.const_mul (2 * c)
+  refine Filter.Tendsto.squeeze' tendsto_const_nhds hupper
+    (Filter.Eventually.of_forall ?_) (Filter.Eventually.of_forall ?_)
+  · intro N
+    by_cases hN : N = 0
+    · simp [hN]
+    · have hN1 : (1 : ℕ) ≤ N := by omega
+      have hlog : 0 ≤ Real.log N := Real.log_nonneg hN1
+      positivity
+  · intro N
+    by_cases hN : N = 0
+    · simp [hN]
+    · have hN1 : (1 : ℕ) ≤ N := by omega
+      have hlog : 0 ≤ Real.log N := Real.log_nonneg hN1
+      have hb := local_arc_core_unit_scale_bracket1622 N hN1
+      have hmul := mul_le_mul_of_nonneg_left hb
+        (mul_nonneg hc.le (pow_nonneg hlog 13))
+      calc
+        c * Real.log N ^ 13 *
+            (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+              1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) ≤
+            c * Real.log N ^ 13 * (2 / (N : ℝ) ^ (1 / 14 : ℝ)) := hmul
+        _ = 2 * c * (Real.log N ^ 13 / (N : ℝ) ^ (1 / 14 : ℝ)) := by ring
+
+private theorem local_arc_core_unit_scale_false1622 :
+    ¬ (∀ C : ℝ, 0 < C → ∃ c : ℝ, 0 < c ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
+      C * (N : ℝ) ≤ c * (N : ℝ) * Real.log N ^ 13 *
+        (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+          1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)))) := by
+  intro h
+  obtain ⟨c, hc, N0, hN0⟩ := h 1 one_pos
+  have htend := local_arc_core_unit_scale_factor_tendsto_zero1622 c hc
+  have hev : ∀ᶠ N : ℕ in Filter.atTop,
+      c * Real.log N ^ 13 *
+        (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+          1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) < 1 := by
+    filter_upwards [htend.eventually (eventually_lt_nhds (by norm_num : (0 : ℝ) < 1))] with N hN
+    exact hN
+  filter_upwards [hev, Filter.eventually_gt_atTop N0] with N hsmall hN
+  have hbound := hN0 N hN
+  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast Nat.zero_lt_of_lt hN
+  have hmul : (N : ℝ) *
+      (c * Real.log N ^ 13 *
+        (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+          1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)))) < (N : ℝ) := by
+    calc
+      (N : ℝ) * (c * Real.log N ^ 13 *
+          (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+            1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)))) ≤
+          (N : ℝ) * 1 := by
+            exact mul_le_mul_of_nonneg_left (le_of_lt hsmall) hNpos.le
+      _ = (N : ℝ) := by ring
+  have hbound' : (1 : ℝ) * (N : ℝ) ≤ (N : ℝ) *
+      (c * Real.log N ^ 13 *
+        (1 / (N : ℝ) ^ (1 / 7 : ℝ) +
+          1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)))) := by
+    simpa [mul_assoc, mul_comm, mul_left_comm] using hbound
+  linarith
+
 theorem local_arc_core_unit_scale1622 (C : ℝ) (hC : 0 < C) :
     ∃ c : ℝ, 0 < c ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
       C * (N : ℝ) ≤ c * (N : ℝ) * Real.log N ^ 13 *
