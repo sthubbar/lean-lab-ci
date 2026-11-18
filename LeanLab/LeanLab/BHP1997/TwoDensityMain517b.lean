@@ -16,8 +16,10 @@ the consequence as three one variable steps and proves the exact algebra between
 * `two_pair_riemann`: the double sum over integers with the densities `1 / (log a log b)` is
   the E2 integral of page 51 at `s = log m / log Z`. No prime number theorem is used in this
   step. It is split here into its two one variable passages from a sum to an integral,
-  `leaf_two_pair_riemann_first` and `leaf_two_pair_riemann_second`, which are the two open
-  leaves.
+  `leaf_two_pair_riemann_first` and `leaf_two_pair_riemann_second`, both proved in this
+  file. The second one exchanges the sum over the second variable with the integral over the
+  first exponent and then compares, for each fixed first exponent, the sum over the second
+  variable with its integral cell by cell, so no exchange of two integrals is needed.
 
 `two_pair_density_pointwise` is proved from these three statements.
 
@@ -2499,2319 +2501,729 @@ theorem leaf_two_pair_riemann_first (ω : ℝ → ℝ)
       _ ≤ _ := h3
   exact hW.trans (hlab ▸ hstep)
 
-/-! ### NEW: the discarded region as a function of the second exponent `β` -/
+/-! ### Stage 17: `leaf_two_pair_riemann_second`, the second outer variable -/
 
-/-- `lowerTwoDiscarded` in `β` at fixed `α`: every atom is `β ≤ L` or `L ≤ β` with `L` affine in
-`α`, so between consecutive switch points the truth value does not change. -/
-theorem sect_same_beta {ε α β β' : ℝ}
-    (h0 : (1+7*(2*(1/16-1/10^5)))/15-ε ≤ β ↔ (1+7*(2*(1/16-1/10^5)))/15-ε ≤ β')
-    (h1 : β ≤ α ↔ β' ≤ α)
-    (h3 : α + 2*β ≤ 1 ↔ α + 2*β' ≤ 1)
-    (h4 : α + 2*β ≤ 1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε ↔
-          α + 2*β' ≤ 1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε)
-    (h5 : 4*α + 7*β ≤ 2+2*(1/16-1/10^5)-ε ↔ 4*α + 7*β' ≤ 2+2*(1/16-1/10^5)-ε)
-    (h6 : 1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α + β ↔
-          1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α + β')
-    (h7 : 4*α + 5*β ≤ 2+2*(1/16-1/10^5)-ε ↔ 4*α + 5*β' ≤ 2+2*(1/16-1/10^5)-ε)
-    (h8 : 1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α + β ↔
-          1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α + β')
-    (h12 : β ≤ (36*(2*(1/16-1/10^5))-2)/11-ε ↔ β' ≤ (36*(2*(1/16-1/10^5))-2)/11-ε)
-    (h11 : 2*β - (2*(1/16-1/10^5)) + ε ≤ α ↔ 2*β' - (2*(1/16-1/10^5)) + ε ≤ α)
-    (h13 : |4*α + 3*β - 2| ≤ 2*(1/16-1/10^5)-ε ↔ |4*α + 3*β' - 2| ≤ 2*(1/16-1/10^5)-ε)
-    (h14 : |4*α + β - 2| ≤ 2*(1/16-1/10^5)-ε ↔ |4*α + β' - 2| ≤ 2*(1/16-1/10^5)-ε) :
+/-- P0069 page 51 display 5.17, second outer variable. The region E2 as a function of the second exponent: constant when no switch point
+lies in `[β, β']`. -/
+theorem two_pair_beta_region_const {ε α β β' : ℝ} (hβ : β ≤ β')
+    (hno : ∀ τ ∈ ([(1+7*(2*(1/16-1/10^5)))/15-ε, α, (1-α)/2,
+        (1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε-α)/2,
+        (2+2*(1/16-1/10^5)-ε-4*α)/7,
+        1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α,
+        (36*(2*(1/16-1/10^5))-2)/11-ε,
+        (2+2*(1/16-1/10^5)-ε-4*α)/5,
+        1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α,
+        (α+2*(1/16-1/10^5)-ε)/2,
+        (2-(2*(1/16-1/10^5)-ε)-4*α)/3, (2+(2*(1/16-1/10^5)-ε)-4*α)/3,
+        2-(2*(1/16-1/10^5)-ε)-4*α, 2+(2*(1/16-1/10^5)-ε)-4*α] : List ℝ),
+      ¬(β ≤ τ ∧ τ ≤ β')) :
     (lowerTwoDiscarded ε α β ↔ lowerTwoDiscarded ε α β') := by
+  have lo : ∀ τ : ℝ, ¬(β ≤ τ ∧ τ ≤ β') → (τ ≤ β ↔ τ ≤ β') := by
+    intro τ h
+    constructor
+    · intro g; exact le_trans g hβ
+    · intro g
+      by_contra hc
+      exact h ⟨le_of_lt (not_le.1 hc), g⟩
+  have hi : ∀ τ : ℝ, ¬(β ≤ τ ∧ τ ≤ β') → (β ≤ τ ↔ β' ≤ τ) := by
+    intro τ h
+    constructor
+    · intro g
+      by_contra hc
+      exact h ⟨g, le_of_lt (not_le.1 hc)⟩
+    · intro g; exact le_trans hβ g
+  have a1 : (1+7*(2*(1/16-1/10^5)))/15-ε ≤ β ↔ (1+7*(2*(1/16-1/10^5)))/15-ε ≤ β' :=
+    lo ((1+7*(2*(1/16-1/10^5)))/15-ε)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or]))
+  have a2 : β ≤ α ↔ β' ≤ α :=
+    hi α (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+  have a3 : α+2*β ≤ 1 ↔ α+2*β' ≤ 1 := by
+    have h := hi ((1-α)/2) (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    constructor <;> intro g
+    · have := h.1 (by linarith); linarith
+    · have := h.2 (by linarith); linarith
+  have a4 : α+2*β ≤ 1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε ↔
+      α+2*β' ≤ 1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε := by
+    have h := hi ((1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε-α)/2)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    constructor <;> intro g
+    · have := h.1 (by linarith); linarith
+    · have := h.2 (by linarith); linarith
+  have a5 : 4*α+7*β ≤ 2+2*(1/16-1/10^5)-ε ↔ 4*α+7*β' ≤ 2+2*(1/16-1/10^5)-ε := by
+    have h := hi ((2+2*(1/16-1/10^5)-ε-4*α)/7)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    constructor <;> intro g
+    · have := h.1 (by linarith); linarith
+    · have := h.2 (by linarith); linarith
+  have a6 : 1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α+β ↔
+      1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α+β' := by
+    have h := lo (1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    constructor <;> intro g
+    · have := h.1 (by linarith); linarith
+    · have := h.2 (by linarith); linarith
+  have a7 : β ≤ (36*(2*(1/16-1/10^5))-2)/11-ε ↔ β' ≤ (36*(2*(1/16-1/10^5))-2)/11-ε :=
+    hi ((36*(2*(1/16-1/10^5))-2)/11-ε)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+  have a8 : 4*α+5*β ≤ 2+2*(1/16-1/10^5)-ε ↔ 4*α+5*β' ≤ 2+2*(1/16-1/10^5)-ε := by
+    have h := hi ((2+2*(1/16-1/10^5)-ε-4*α)/5)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    constructor <;> intro g
+    · have := h.1 (by linarith); linarith
+    · have := h.2 (by linarith); linarith
+  have a9 : 1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α+β ↔
+      1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε ≤ α+β' := by
+    have h := lo (1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    constructor <;> intro g
+    · have := h.1 (by linarith); linarith
+    · have := h.2 (by linarith); linarith
+  have a10 : 2*β-(2*(1/16-1/10^5))+ε ≤ α ↔ 2*β'-(2*(1/16-1/10^5))+ε ≤ α := by
+    have h := hi ((α+2*(1/16-1/10^5)-ε)/2)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    constructor <;> intro g
+    · have := h.1 (by linarith); linarith
+    · have := h.2 (by linarith); linarith
+  have a11 : |4*α+3*β-2| ≤ 2*(1/16-1/10^5)-ε ↔ |4*α+3*β'-2| ≤ 2*(1/16-1/10^5)-ε := by
+    have hl := lo ((2-(2*(1/16-1/10^5)-ε)-4*α)/3)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    have hu := hi ((2+(2*(1/16-1/10^5)-ε)-4*α)/3)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    rw [abs_le, abs_le]
+    constructor
+    · rintro ⟨g1, g2⟩
+      have k1 := hl.1 (by linarith)
+      have k2 := hu.1 (by linarith)
+      exact ⟨by linarith, by linarith⟩
+    · rintro ⟨g1, g2⟩
+      have k1 := hl.2 (by linarith)
+      have k2 := hu.2 (by linarith)
+      exact ⟨by linarith, by linarith⟩
+  have a12 : |4*α+β-2| ≤ 2*(1/16-1/10^5)-ε ↔ |4*α+β'-2| ≤ 2*(1/16-1/10^5)-ε := by
+    have hl := lo (2-(2*(1/16-1/10^5)-ε)-4*α)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    have hu := hi (2+(2*(1/16-1/10^5)-ε)-4*α)
+      (hno _ (by simp only [List.mem_cons, eq_self, true_or, or_true]))
+    rw [abs_le, abs_le]
+    constructor
+    · rintro ⟨g1, g2⟩
+      have k1 := hl.1 (by linarith)
+      have k2 := hu.1 (by linarith)
+      exact ⟨by linarith, by linarith⟩
+    · rintro ⟨g1, g2⟩
+      have k1 := hl.2 (by linarith)
+      have k2 := hu.2 (by linarith)
+      exact ⟨by linarith, by linarith⟩
   unfold lowerTwoDiscarded upperPairRegion
-  rw [h0, h1, h3, h4, h5, h6, h7, h8, h12, h11, h13, h14]
+  rw [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12]
 
-/-- The discarded region at fixed `α` is a measurable set in the integer variable `t` with
-`β = log t / log Z`. -/
-private theorem measurableSet_lowerTwo_beta {ε α Z : ℝ} :
-    MeasurableSet {t : ℝ | lowerTwoDiscarded ε α (Real.log t / Real.log Z)} := by
-  unfold lowerTwoDiscarded upperPairRegion
-  measurability
-
-/-- Buchstab's function is measurable: continuous off the single point `1`. -/
-private theorem measurable_buchstab_new {ω : ℝ → ℝ}
-    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
-    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω) : Measurable ω := by
-  refine measurable_of_continuousOn_compl_singleton (1 : ℝ) ?_
-  intro x hx
-  simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hx
-  rcases lt_or_gt_of_ne hx with h | h
-  · have hev : (fun _ : ℝ => (0 : ℝ)) =ᶠ[nhds x] ω := by
-      filter_upwards [isOpen_Iio.mem_nhds h] with y hy
-      exact (hz y hy).symm
-    exact (continuousAt_const.congr hev).continuousWithinAt
-  · exact (hω.1.continuousAt (Ici_mem_nhds h)).continuousWithinAt
-
-/-- The `α`-integrand of the second passage is measurable in the integer variable `t`. -/
-private theorem phi_measurable {ω : ℝ → ℝ} (hωm : Measurable ω) {ε Z s α : ℝ} :
-    Measurable (fun t : ℝ => if lowerTwoDiscarded ε α (Real.log t / Real.log Z) then
-      ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α else 0) := by
-  have hs : MeasurableSet {t : ℝ | lowerTwoDiscarded ε α (Real.log t / Real.log Z)} :=
-    measurableSet_lowerTwo_beta
-  have hf : Measurable (fun t : ℝ =>
-      ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α) := by
-    measurability
-  exact Measurable.ite hs hf measurable_const
-
-
-
-/-! ### NEW: elementary sum estimates -/
-
-/-- `log v - log u ≤ (v - u)/u` for `0 < u ≤ v` (copy of the target's `log_sub_log_le_div`,
-restated here so that the WIP compiles on its own). -/
-theorem log_sub_log_le_div_new {a t : ℝ} (ha : 0 < a) (hat : a ≤ t) :
-    Real.log t - Real.log a ≤ (t - a) / a := by
-  have ht : 0 < t := lt_of_lt_of_le ha hat
-  rw [← Real.log_div ht.ne' ha.ne']
-  have h1 : Real.log (t / a) ≤ t / a - 1 := Real.log_le_sub_one_of_pos (by positivity)
-  have h2 : t / a - 1 = (t - a) / a := by rw [div_sub_one ha.ne']
-  linarith
-
-/-- `1/n ≤ log (n/(n-1))` for `n ≥ 2`. -/
-private theorem inv_le_log_ratio {n : ℕ} (hn : 2 ≤ n) :
-    1/(n:ℝ) ≤ Real.log ((n:ℝ)/((n:ℝ)-1)) := by
-  have hn2 : (2:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
-  have h1 : (0:ℝ) < (n:ℝ) - 1 := by linarith
-  have hx : (0:ℝ) < (n:ℝ)/((n:ℝ)-1) := by positivity
-  have h := Real.one_sub_inv_le_log_of_pos (x := (n:ℝ)/((n:ℝ)-1)) hx
-  have e : 1 - ((n:ℝ)/((n:ℝ)-1))⁻¹ = 1/(n:ℝ) := by
-    rw [inv_div]
-    field_simp
+/-- P0069 page 51 display 5.17, second outer variable. The two Buchstab arguments on one cell and their distance. -/
+theorem two_pair_beta_osc_arg {D x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) (hD : D ≤ 1)
+    (hu : 1 ≤ (D - y) / y) :
+    1 ≤ (D - x) / x ∧ |(D - y) / y - (D - x) / x| ≤ (y - x) / (x * y) := by
+  have hy : 0 < y := lt_of_lt_of_le hx hxy
+  have h1 : 1 * y ≤ D - y := (le_div_iff₀ hy).1 hu
+  have hD0 : 0 ≤ D := by linarith
+  refine ⟨(le_div_iff₀ hx).2 (by linarith), ?_⟩
+  have e : (D - x) / x - (D - y) / y = D * (y - x) / (x * y) := by
+    rw [div_sub_div _ _ hx.ne' hy.ne']
+    congr 1
     ring
-  rwa [e] at h
+  have hyx : 0 ≤ y - x := by linarith
+  have hxy0 : 0 < x * y := mul_pos hx hy
+  rw [abs_sub_comm, e, abs_of_nonneg (div_nonneg (mul_nonneg hD0 hyx) hxy0.le)]
+  exact div_le_div_of_nonneg_right (mul_le_of_le_one_left hyx hD) hxy0.le
 
-/-- `∑_{N < n ≤ B} 1/(n log^2 n) ≤ 1/log N` for `N ≥ 4`, by telescoping
-`1/(n log^2 n) ≤ 1/log (n-1) - 1/log n`. -/
-private theorem sum_inv_log_sq_le {N B : ℕ} (hN : 4 ≤ N) :
-    (∑ n ∈ Finset.Ioc N B, 1 / ((n:ℝ) * Real.log (n:ℝ)^2)) ≤ 1 / Real.log (N:ℝ) := by
-  have hN2 : (2:ℝ) ≤ (N:ℝ) := by exact_mod_cast (by omega : 2 ≤ N)
-  have hlogN : 0 < Real.log (N:ℝ) := by
-    have h : Real.log 2 ≤ Real.log (N:ℝ) := Real.log_le_log (by norm_num) hN2
-    have h2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+/-- P0069 page 51 display 5.17, second outer variable. The cell oscillation from the oscillation of the Buchstab value and of the weight. -/
+theorem two_pair_beta_osc_final {wn wt α P Q t : ℝ} (hα : 1/10 ≤ α) (ht : 0 < t)
+    (hw : |wn - wt| ≤ 20 / t) (h0 : 0 ≤ wt) (h1 : wt ≤ 1) (hQ : 0 < Q) (hQP : Q ≤ P)
+    (hP : t / 4 ≤ P) (hR : 1 / Q - 1 / P ≤ 20 / t ^ 2) :
+    |wn / α / P - wt / α / Q| ≤ 1000 / t ^ 2 := by
+  have hα0 : 0 < α := by linarith
+  have hP0 : 0 < P := lt_of_lt_of_le hQ hQP
+  have ht4 : 0 < t / 4 := by linarith
+  have key : wn / α / P - wt / α / Q =
+      (1 / α) * ((wn - wt) / P - wt * (1 / Q - 1 / P)) := by ring
+  have hX : |(wn - wt) / P| ≤ 80 / t ^ 2 := by
+    rw [abs_div, abs_of_pos hP0]
+    have h := div_le_div₀ (div_nonneg (by norm_num) ht.le) hw ht4 hP
+    have e : 20 / t / (t / 4) = 80 / t ^ 2 := by ring
+    rw [e] at h
+    exact h
+  have hR0 : 0 ≤ 1 / Q - 1 / P := sub_nonneg.2 (one_div_le_one_div_of_le hQ hQP)
+  have hY0 : 0 ≤ wt * (1 / Q - 1 / P) := mul_nonneg h0 hR0
+  have hY1 : wt * (1 / Q - 1 / P) ≤ 20 / t ^ 2 := by
+    have := mul_le_mul h1 hR hR0 zero_le_one
     linarith
-  have hstep : ∀ n ∈ Finset.Ioc N B,
-      1 / ((n:ℝ) * Real.log (n:ℝ)^2) ≤
-        1 / Real.log ((n:ℝ) - 1) - 1 / Real.log (n:ℝ) := by
-    intro n hn
-    obtain ⟨h1, -⟩ := Finset.mem_Ioc.mp hn
-    have hn2 : 2 ≤ n := by omega
-    have hn5 : 5 ≤ n := by omega
-    have hnR : (2:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn2
-    have hn5R : (5:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn5
-    have hn0 : (0:ℝ) < (n:ℝ) := by linarith
-    have hln : 0 < Real.log (n:ℝ) := by
-      have h : Real.log 2 ≤ Real.log (n:ℝ) := Real.log_le_log (by norm_num) hnR
-      have h2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
-      linarith
-    have hlm : 0 < Real.log ((n:ℝ) - 1) := Real.log_pos (by linarith)
-    have hlm_le : Real.log ((n:ℝ) - 1) ≤ Real.log (n:ℝ) :=
-      Real.log_le_log (by linarith) (by linarith)
-    have e1 : 1 / Real.log ((n:ℝ) - 1) - 1 / Real.log (n:ℝ) =
-        Real.log ((n:ℝ)/((n:ℝ)-1)) / (Real.log ((n:ℝ)-1) * Real.log (n:ℝ)) := by
-      rw [Real.log_div hn0.ne' (by linarith : ((n:ℝ)-1) ≠ 0)]
-      field_simp
-    have hinv : 1/(n:ℝ) ≤ Real.log ((n:ℝ)/((n:ℝ)-1)) := inv_le_log_ratio hn2
-    have hA : (1/(n:ℝ)) / (Real.log ((n:ℝ)-1) * Real.log (n:ℝ)) ≤
-        Real.log ((n:ℝ)/((n:ℝ)-1)) / (Real.log ((n:ℝ)-1) * Real.log (n:ℝ)) :=
-      div_le_div_of_nonneg_right hinv (by positivity)
-    have e2 : (1/(n:ℝ)) / (Real.log ((n:ℝ)-1) * Real.log (n:ℝ)) =
-        1/((n:ℝ) * (Real.log ((n:ℝ)-1) * Real.log (n:ℝ))) := by
-      field_simp
-    have hmul : Real.log ((n:ℝ)-1) * Real.log (n:ℝ) ≤ Real.log (n:ℝ)^2 := by
-      have h1 : Real.log ((n:ℝ)-1) * Real.log (n:ℝ) ≤ Real.log (n:ℝ) * Real.log (n:ℝ) :=
-        mul_le_mul_of_nonneg_right hlm_le hln.le
-      calc Real.log ((n:ℝ)-1) * Real.log (n:ℝ) ≤ Real.log (n:ℝ) * Real.log (n:ℝ) := h1
-        _ = Real.log (n:ℝ)^2 := by ring
-    have hB : 1/((n:ℝ) * Real.log (n:ℝ)^2) ≤
-        (1/(n:ℝ)) / (Real.log ((n:ℝ)-1) * Real.log (n:ℝ)) := by
-      rw [e2]
-      apply one_div_le_one_div_of_le (by positivity)
-      exact mul_le_mul_of_nonneg_left hmul hn0.le
-    rw [e1]
-    exact hB.trans hA
-  refine (Finset.sum_le_sum hstep).trans ?_
-  have htel : ∀ B' : ℕ, N ≤ B' →
-      (∑ n ∈ Finset.Ioc N B', (1 / Real.log ((n:ℝ) - 1) - 1 / Real.log (n:ℝ)))
-        = 1 / Real.log (N:ℝ) - 1 / Real.log (B':ℝ) := by
-    intro B' hB'
-    induction B', hB' using Nat.le_induction with
-    | base => simp
-    | succ b hb ih =>
-      rw [Finset.sum_Ioc_succ_top hb, ih]
-      have hcast : ((b + 1 : ℕ) : ℝ) = (b:ℝ) + 1 := by push_cast; ring
-      have hsub : (b:ℝ) + 1 - 1 = (b:ℝ) := by ring
-      rw [hcast, hsub]
-      ring
-  rcases le_or_gt N B with h | h
-  · rw [htel B h]
-    have hB0 : (0:ℝ) ≤ 1 / Real.log (B:ℝ) := by
-      rcases Nat.eq_zero_or_pos B with hB | hB
-      · rw [hB]; simp
-      · have hB1 : (2:ℝ) ≤ (B:ℝ) := by
-          have : 2 ≤ B := by omega
-          exact_mod_cast this
-        have h2 : 0 < Real.log (B:ℝ) := by
-          have h3 : Real.log 2 ≤ Real.log (B:ℝ) := Real.log_le_log (by norm_num) hB1
-          have h4 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
-          linarith
-        exact le_of_lt (one_div_pos.mpr h2)
-    linarith
-  · have hempty : Finset.Ioc N B = ∅ := Finset.Ioc_eq_empty (by omega)
-    rw [hempty, Finset.sum_empty]
-    positivity
-
-/-- `∑_{A < n ≤ B} 1/(n^2 log^k n) ≤ 1/(A log^k A)` for `A ≥ 4`, `1 ≤ k`. -/
-private theorem sum_inv_sq_log_pow_le {A B : ℕ} (hA : 2 ≤ A) {k : ℕ} (hk : 1 ≤ k) :
-    (∑ n ∈ Finset.Ioc A B, 1 / ((n:ℝ)^2 * Real.log (n:ℝ)^k)) ≤
-      1 / ((A:ℝ) * Real.log (A:ℝ)^k) := by
-  have hA2 : (2:ℝ) ≤ (A:ℝ) := by exact_mod_cast hA
-  have hA0 : (0:ℝ) < (A:ℝ) := by linarith
-  have hlogA : 0 < Real.log (A:ℝ) := by
-    have h : Real.log 2 ≤ Real.log (A:ℝ) := Real.log_le_log (by norm_num) hA2
-    have h2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
-    linarith
-  have hstep : ∀ n ∈ Finset.Ioc A B, 1 / ((n:ℝ)^2 * Real.log (n:ℝ)^k) ≤
-      (1 / Real.log (A:ℝ)^k) * (1 / ((n:ℝ)^2)) := by
-    intro n hn
-    obtain ⟨h1, -⟩ := Finset.mem_Ioc.mp hn
-    have hnA : (A:ℝ) ≤ (n:ℝ) := by exact_mod_cast le_of_lt h1
-    have hn0 : (0:ℝ) < (n:ℝ) := by linarith
-    have hln : 0 < Real.log (n:ℝ) := lt_of_lt_of_le hlogA (Real.log_le_log hA0 hnA)
-    have hle : Real.log (A:ℝ)^k ≤ Real.log (n:ℝ)^k :=
-      pow_le_pow_left₀ hlogA.le (Real.log_le_log hA0 hnA) k
-    have hb : 1 / ((n:ℝ)^2 * Real.log (n:ℝ)^k) ≤ 1 / ((n:ℝ)^2 * Real.log (A:ℝ)^k) := by
-      apply one_div_le_one_div_of_le (by positivity)
-      exact mul_le_mul_of_nonneg_left hle (by positivity)
-    have e : 1 / ((n:ℝ)^2 * Real.log (A:ℝ)^k) = (1 / Real.log (A:ℝ)^k) * (1 / ((n:ℝ)^2)) := by
-      field_simp
-    linarith [hb, e.le, e.ge]
-  refine (Finset.sum_le_sum hstep).trans ?_
-  rw [← Finset.mul_sum]
-  have hsq : (∑ n ∈ Finset.Ioc A B, 1 / ((n:ℝ)^2)) ≤ 1 / (A:ℝ) := sum_inv_sq_le (by omega)
-  have hfin : (1 / Real.log (A:ℝ)^k) * (1 / (A:ℝ)) = 1 / ((A:ℝ) * Real.log (A:ℝ)^k) := by
-    field_simp
-  calc (1 / Real.log (A:ℝ)^k) * (∑ n ∈ Finset.Ioc A B, 1 / ((n:ℝ)^2))
-      ≤ (1 / Real.log (A:ℝ)^k) * (1 / (A:ℝ)) :=
-        mul_le_mul_of_nonneg_left hsq (by positivity)
-    _ = 1 / ((A:ℝ) * Real.log (A:ℝ)^k) := hfin
-
-
-
-/-! ### NEW: the discarded region is constant on a `b`-cell with no switch point -/
-
-set_option maxHeartbeats 4000000 in
-/-- The switch points of `E₂` as a function of the second exponent `β` at fixed `α`, `s`: if none
-of them lies in `[β, β']` then the region takes the same value at `β` and `β'`. -/
-private theorem cell_region_const_beta {ε α s β β' : ℝ} (hββ' : β ≤ β')
-    (hno : ∀ τ ∈ (([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-        (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-        (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-        1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        (α + 2*(1/16-1/10^5) - ε)/2,
-        (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        2 - (2*(1/16-1/10^5) - ε) - 4*α,
-        2 + (2*(1/16-1/10^5) - ε) - 4*α,
-        (s - α)/2] : List ℝ).toFinset), ¬(β ≤ τ ∧ τ ≤ β')) :
-    (lowerTwoDiscarded ε α β ↔ lowerTwoDiscarded ε α β') := by
-  refine sect_same_beta (h0 := ?_) (h1 := ?_) (h3 := ?_) (h4 := ?_) (h5 := ?_) (h6 := ?_)
-    (h7 := ?_) (h8 := ?_) (h12 := ?_) (h11 := ?_) (h13 := ?_) (h14 := ?_)
-  · -- `c₁ - ε ≤ β`
-    have hz := hno ((1+7*(2*(1/16-1/10^5)))/15-ε) (by simp)
-    constructor
-    · intro h; linarith
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-  · -- `β ≤ α`
-    have hz := hno (α) (by simp)
-    constructor
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-    · intro h; linarith
-  · -- `α + 2β ≤ 1`
-    have hz := hno ((1-α)/2) (by simp)
-    constructor
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-    · intro h; linarith
-  · -- `α + 2β ≤ c₃ - 2ε`
-    have hz := hno ((1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2) (by simp)
-    constructor
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-    · intro h; linarith
-  · -- `4α + 7β ≤ 2 + θ - ε`
-    have hz := hno ((2 + 2*(1/16-1/10^5) - ε - 4*α)/7) (by simp)
-    constructor
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-    · intro h; linarith
-  · -- `c₅ ≤ α + β`
-    have hz := hno (1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α) (by simp)
-    constructor
-    · intro h; linarith
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-  · -- `4α + 5β ≤ 2 + θ - ε`
-    have hz := hno ((2 + 2*(1/16-1/10^5) - ε - 4*α)/5) (by simp)
-    constructor
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-    · intro h; linarith
-  · -- `c₇ ≤ α + β`
-    have hz := hno (1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α) (by simp)
-    constructor
-    · intro h; linarith
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-  · -- `β ≤ (36θ - 2)/11 - ε`
-    have hz := hno ((36*(2*(1/16-1/10^5))-2)/11-ε) (by simp)
-    constructor
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-    · intro h; linarith
-  · -- `2β - θ + ε ≤ α`
-    have hz := hno ((α + 2*(1/16-1/10^5) - ε)/2) (by simp)
-    constructor
-    · intro h
-      by_contra hc
-      refine hz ⟨?_, ?_⟩ <;> linarith
-    · intro h; linarith
-  · -- `|4α + 3β - 2| ≤ θ - ε`
-    have hzu := hno ((2 + (2*(1/16-1/10^5) - ε) - 4*α)/3) (by simp : ((2 + (2*(1/16-1/10^5) - ε) - 4*α)/3) ∈ ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-        (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-        (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-        1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        (α + 2*(1/16-1/10^5) - ε)/2,
-        (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        2 - (2*(1/16-1/10^5) - ε) - 4*α,
-        2 + (2*(1/16-1/10^5) - ε) - 4*α,
-        (s - α)/2] : List ℝ).toFinset)
-    have hzl := hno ((2 - (2*(1/16-1/10^5) - ε) - 4*α)/3) (by simp : ((2 - (2*(1/16-1/10^5) - ε) - 4*α)/3) ∈ ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-        (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-        (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-        1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        (α + 2*(1/16-1/10^5) - ε)/2,
-        (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        2 - (2*(1/16-1/10^5) - ε) - 4*α,
-        2 + (2*(1/16-1/10^5) - ε) - 4*α,
-        (s - α)/2] : List ℝ).toFinset)
-    rw [abs_le, abs_le]
-    constructor
-    · intro h
-      obtain ⟨h1, h2⟩ := h
-      constructor
-      · linarith
-      · by_contra hc
-        refine hzu ⟨?_, ?_⟩ <;> linarith
-    · intro h
-      obtain ⟨h1, h2⟩ := h
-      constructor
-      · by_contra hc
-        refine hzl ⟨?_, ?_⟩ <;> linarith
-      · linarith
-  · -- `|4α + β - 2| ≤ θ - ε`
-    have hzu := hno (2 + (2*(1/16-1/10^5) - ε) - 4*α) (by simp : (2 + (2*(1/16-1/10^5) - ε) - 4*α) ∈ ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-        (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-        (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-        1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        (α + 2*(1/16-1/10^5) - ε)/2,
-        (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        2 - (2*(1/16-1/10^5) - ε) - 4*α,
-        2 + (2*(1/16-1/10^5) - ε) - 4*α,
-        (s - α)/2] : List ℝ).toFinset)
-    have hzl := hno (2 - (2*(1/16-1/10^5) - ε) - 4*α) (by simp : (2 - (2*(1/16-1/10^5) - ε) - 4*α) ∈ ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-        (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-        (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-        1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        (α + 2*(1/16-1/10^5) - ε)/2,
-        (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        2 - (2*(1/16-1/10^5) - ε) - 4*α,
-        2 + (2*(1/16-1/10^5) - ε) - 4*α,
-        (s - α)/2] : List ℝ).toFinset)
-    rw [abs_le, abs_le]
-    constructor
-    · intro h
-      obtain ⟨h1, h2⟩ := h
-      constructor
-      · linarith
-      · by_contra hc
-        refine hzu ⟨?_, ?_⟩ <;> linarith
-    · intro h
-      obtain ⟨h1, h2⟩ := h
-      constructor
-      · by_contra hc
-        refine hzl ⟨?_, ?_⟩ <;> linarith
-      · linarith
-
-
-/-! ### NEW: the good cell oscillation in the `b` variable -/
-
-/-- `(s - α - β)/β` is antitone in `β > 0`. -/
-private theorem arg_beta_anti {s α β β' : ℝ} (hβ : 0 < β) (hβ' : 0 < β') (h : β ≤ β')
-    (hsa : α ≤ s) :
-    (s - α - β')/β' ≤ (s - α - β)/β := by
-  have e1 : (s - α - β')/β' = (s - α)/β' - 1 := by
-    rw [sub_div, div_self (ne_of_gt hβ')]
-  have e2 : (s - α - β)/β = (s - α)/β - 1 := by
-    rw [sub_div, div_self (ne_of_gt hβ)]
-  rw [e1, e2]
-  have h1 : (s - α)/β' ≤ (s - α)/β := by
-    have hsa0 : 0 ≤ s - α := by linarith
-    exact div_le_div_of_nonneg_left hsa0 hβ h
+  have hZ : |(wn - wt) / P - wt * (1 / Q - 1 / P)| ≤ 100 / t ^ 2 := by
+    have hX' := abs_le.1 hX
+    have e : (100:ℝ) / t ^ 2 = 80 / t ^ 2 + 20 / t ^ 2 := by ring
+    rw [abs_le, e]
+    exact ⟨by linarith [hX'.1], by linarith [hX'.2]⟩
+  have hα1 : 1 / α ≤ 10 := by
+    rw [div_le_iff₀ hα0]; linarith
+  rw [key, abs_mul, abs_of_pos (one_div_pos.2 hα0)]
+  have := mul_le_mul hα1 hZ (abs_nonneg _) (by norm_num)
+  have e : (10:ℝ) * (100 / t ^ 2) = 1000 / t ^ 2 := by ring
   linarith
 
-set_option maxHeartbeats 1000000 in
-/-- One good `b`-cell: if the region does not change across the cell and the Buchstab argument
-stays on one side of one, the `α`-integrand of the second passage moves by at most
-`200 log Z / ((n-1) log^2 (n-1))` over the cell. -/
-private theorem phi_cell_osc {ω : ℝ → ℝ}
+/-- P0069 page 51 display 5.17, second outer variable. Good cell oscillation in the second variable. -/
+theorem two_pair_beta_osc {ω : ℝ → ℝ}
     (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
     (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
-    {ε Z s α : ℝ} (hZ : 1 < Z) {n : ℕ} (hn : 4 ≤ n) {t : ℝ}
-    (ht1 : (n:ℝ) - 1 ≤ t) (ht2 : t ≤ (n:ℝ))
-    (hα1 : 1/10 ≤ α) (hα2 : α ≤ 1/2) (hs0 : 1/2 ≤ s) (hs : s ≤ 1)
-    (hreg : lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) ↔
-            lowerTwoDiscarded ε α (Real.log t/Real.log Z))
-    (hcase : 1 ≤ (s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z) ∨
-             (s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z) < 1) :
-    |(if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-        ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) -
-      (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-        ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤
-      200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by
+    {L s α t n : ℝ} (hL : 0 < L) (hα : 1/10 ≤ α) (hs : s ≤ 1)
+    (ht : 2 ≤ t) (htn : t ≤ n) (hnt : n ≤ t + 1)
+    (hβt : 1/10 ≤ Real.log t / L)
+    (hu : 1 ≤ (s - α - Real.log n / L) / (Real.log n / L)) :
+    |ω ((s - α - Real.log n / L) / (Real.log n / L)) / α / (n * Real.log n ^ 2) -
+      ω ((s - α - Real.log t / L) / (Real.log t / L)) / α / (t * Real.log t ^ 2)| ≤
+      1000 / t ^ 2 := by
+  have ht0 : 0 < t := by linarith
+  have hn0 : 0 < n := by linarith
+  have hl2 : (1/2:ℝ) ≤ Real.log 2 := by
+    have := Real.log_two_gt_d9
+    norm_num at this ⊢
+    linarith
+  have ha : (1/2:ℝ) ≤ Real.log t := le_trans hl2 (Real.log_le_log (by norm_num) ht)
+  have hab : Real.log t ≤ Real.log n := Real.log_le_log ht0 htn
+  have hba0 : Real.log n - Real.log t ≤ (n - t) / t := log_sub_log_le_div ht0 htn
+  have hba : Real.log n - Real.log t ≤ 1 / t :=
+    le_trans hba0 (div_le_div_of_nonneg_right (by linarith) ht0.le)
+  generalize Real.log t = a at *
+  generalize Real.log n = b at *
+  have ha0 : 0 < a := by linarith
+  have hb0 : 0 < b := by linarith
+  have hx0 : 0 < a / L := div_pos ha0 hL
+  have hxy : a / L ≤ b / L := div_le_div_of_nonneg_right hab hL.le
+  obtain ⟨hut, harg⟩ := two_pair_beta_osc_arg (D := s - α) hx0 hxy (by linarith) hu
+  -- the argument difference is at most 20 / t
+  have harg2 : (b / L - a / L) / (a / L * (b / L)) ≤ 20 / t := by
+    have hnum : b / L - a / L ≤ 1 / t / L := by
+      rw [← sub_div]
+      exact div_le_div_of_nonneg_right hba hL.le
+    have hden : 1 / 10 * (1 / 2 / L) ≤ a / L * (b / L) := by
+      have h2 : 1 / 2 / L ≤ b / L := div_le_div_of_nonneg_right (by linarith) hL.le
+      exact mul_le_mul hβt h2 (div_nonneg (by norm_num) hL.le) hx0.le
+    have hden0 : 0 < 1 / 10 * (1 / 2 / L) := mul_pos (by norm_num) (div_pos (by norm_num) hL)
+    have h := div_le_div₀ (div_nonneg (div_nonneg zero_le_one ht0.le) hL.le) hnum hden0 hden
+    have e : 1 / t / L / (1 / 10 * (1 / 2 / L)) = 20 / t := by
+      have hL' := hL.ne'
+      have ht' := ht0.ne'
+      field_simp; ring
+    rw [e] at h
+    exact h
+  have hw : |ω ((s - α - b / L) / (b / L)) - ω ((s - α - a / L) / (a / L))| ≤ 20 / t :=
+    le_trans (buchstab_lipschitz_abs hω hz hu hut) (le_trans harg harg2)
+  have hw0 : 0 ≤ ω ((s - α - a / L) / (a / L)) := two_density_buchstab_nonneg hω hz _
+  have hw1 : ω ((s - α - a / L) / (a / L)) ≤ 1 :=
+    LeanLab.ChenDoubleSieve.Wu04Functional.extended_buchstab_le_one hω hz _
+  -- the weights
+  have ha2 : (1/4:ℝ) ≤ a ^ 2 := by nlinarith [mul_nonneg (sub_nonneg.2 ha) (sub_nonneg.2 ha)]
+  have hb2 : a ^ 2 ≤ b ^ 2 := pow_le_pow_left₀ ha0.le hab 2
+  have hQ0 : 0 < t * a ^ 2 := mul_pos ht0 (pow_pos ha0 2)
+  have hQ4 : t / 4 ≤ t * a ^ 2 := by
+    have := mul_le_mul_of_nonneg_left ha2 ht0.le
+    linarith
+  have hQP : t * a ^ 2 ≤ n * b ^ 2 := mul_le_mul htn hb2 (sq_nonneg a) hn0.le
+  have hP0 : 0 < n * b ^ 2 := lt_of_lt_of_le hQ0 hQP
+  have hPt : t * b ^ 2 ≤ n * b ^ 2 := mul_le_mul_of_nonneg_right htn (sq_nonneg b)
+  have hR : 1 / (t * a ^ 2) - 1 / (n * b ^ 2) ≤ 20 / t ^ 2 := by
+    rw [div_sub_div _ _ hQ0.ne' hP0.ne', one_mul, mul_one]
+    have h1 : n * b ^ 2 - t * a ^ 2 ≤ 5 * b ^ 2 := by
+      have e : n * b ^ 2 - t * a ^ 2 = (n - t) * b ^ 2 + (t * (b - a)) * (b + a) := by ring
+      have k1 : (n - t) * b ^ 2 ≤ 1 * b ^ 2 :=
+        mul_le_mul_of_nonneg_right (by linarith) (sq_nonneg b)
+      have k2 : t * (b - a) ≤ 1 := by
+        have := mul_le_mul_of_nonneg_left hba ht0.le
+        rwa [mul_one_div_cancel ht0.ne'] at this
+      have k3 : (t * (b - a)) * (b + a) ≤ 1 * (b + a) :=
+        mul_le_mul_of_nonneg_right k2 (by linarith)
+      have k4 : 2 * b ≤ 4 * b ^ 2 := by
+        nlinarith [mul_nonneg hb0.le (by linarith : (0:ℝ) ≤ 2 * b - 1)]
+      rw [e]
+      linarith
+    have h2 : t ^ 2 * b ^ 2 / 4 ≤ t * a ^ 2 * (n * b ^ 2) := by
+      have := mul_le_mul hQ4 hPt (mul_nonneg ht0.le (sq_nonneg b)) hQ0.le
+      have e : t / 4 * (t * b ^ 2) = t ^ 2 * b ^ 2 / 4 := by ring
+      linarith
+    have h20 : 0 < t ^ 2 * b ^ 2 / 4 :=
+      div_pos (mul_pos (pow_pos ht0 2) (pow_pos hb0 2)) (by norm_num)
+    have h := div_le_div₀ (mul_nonneg (by norm_num) (sq_nonneg b)) h1 h20 h2
+    have e : 5 * b ^ 2 / (t ^ 2 * b ^ 2 / 4) = 20 / t ^ 2 := by
+      have hb' := hb0.ne'
+      have ht' := ht0.ne'
+      field_simp; ring
+    rw [e] at h
+    exact h
+  exact two_pair_beta_osc_final hα ht0 hw hw0 hw1 hQ0 hQP (le_trans hQ4 hQP) hR
+
+/-- The numerator of the density is at most 10 in absolute value. -/
+theorem two_pair_beta_num_abs_le {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε8 : ε ≤ 1/10^8) (s α β : ℝ) :
+    |(if lowerTwoDiscarded ε α β then ω ((s - α - β) / β) / α else 0)| ≤ 10 := by
+  by_cases h : lowerTwoDiscarded ε α β
+  · simp only [h, ↓reduceIte]
+    obtain ⟨h1, h2, _⟩ := h
+    have hc : (1/10:ℝ) ≤ (1+7*(2*(1/16-1/10^5)))/15 - 1/10^8 := by norm_num
+    have hα : (1/10:ℝ) ≤ α := by linarith
+    have hα0 : (0:ℝ) < α := by linarith
+    have h0 := two_density_buchstab_nonneg hω hz ((s - α - β) / β)
+    have h1' := LeanLab.ChenDoubleSieve.Wu04Functional.extended_buchstab_le_one hω hz
+      ((s - α - β) / β)
+    rw [abs_of_nonneg (div_nonneg h0 hα0.le), div_le_iff₀ hα0]
+    linarith
+  · simp only [h, ↓reduceIte, abs_zero]
+    norm_num
+
+/-- Abstract size bound. -/
+theorem two_pair_beta_abs_div_le {N t : ℝ} (hN : |N| ≤ 10) (ht : 2 ≤ t) :
+    |N / (t * Real.log t ^ 2)| ≤ 40 / t := by
+  have ht0 : (0:ℝ) < t := by linarith
+  have hl : (1/2:ℝ) ≤ Real.log t := by
+    have h2 : Real.log 2 ≤ Real.log t := Real.log_le_log (by norm_num) ht
+    have h := Real.log_two_gt_d9
+    linarith
+  have hl2 : (1/4:ℝ) ≤ Real.log t ^ 2 := by nlinarith
+  have h2 : t * (1/4) ≤ t * Real.log t ^ 2 := mul_le_mul_of_nonneg_left hl2 ht0.le
+  have hD : (0:ℝ) < t * Real.log t ^ 2 := by linarith
+  have h1 : |N| * t ≤ 10 * t := mul_le_mul_of_nonneg_right hN ht0.le
+  rw [abs_div, abs_of_pos hD, div_le_div_iff₀ hD ht0]
+  linarith
+
+/-- A measurable function bounded on `(a, b]` is interval integrable. -/
+theorem two_pair_beta_ii_of_bound {f : ℝ → ℝ} (hf : Measurable f) (C : ℝ) {a b : ℝ}
+    (hab : a ≤ b) (h : ∀ x, a < x → |f x| ≤ C) : IntervalIntegrable f volume a b := by
+  rw [intervalIntegrable_iff, Set.uIoc_of_le hab]
+  have hmeas := hf.aestronglyMeasurable (μ := volume)
+  refine MeasureTheory.Integrable.of_bound hmeas.restrict C ?_
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with x hx
+  rw [Real.norm_eq_abs]
+  exact h x hx.1
+
+/-- Joint measurability of the numerator. -/
+theorem two_pair_beta_num_measurable {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω) (ε s : ℝ) :
+    Measurable (fun p : ℝ × ℝ =>
+      if lowerTwoDiscarded ε p.1 p.2 then ω ((s - p.1 - p.2) / p.2) / p.1 else 0) := by
+  have hωm : Measurable ω := two_density_buchstab_measurable hω hz
+  have harg : Measurable (fun p : ℝ × ℝ => (s - p.1 - p.2) / p.2) :=
+    ((measurable_const.sub measurable_fst).sub measurable_snd).div measurable_snd
+  exact Measurable.ite (two_density_region_measurable ε)
+    ((hωm.comp harg).div measurable_fst) measurable_const
+
+/-- P0069 page 51 display 5.17, second outer variable. Size of the density in the second variable. -/
+theorem two_pair_beta_density_abs_le {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε8 : ε ≤ 1/10^8) (Z s α : ℝ) {t : ℝ} (ht : 2 ≤ t) :
+    |(if lowerTwoDiscarded ε α (Real.log t / Real.log Z) then
+        ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α else 0) /
+        (t * Real.log t ^ 2)| ≤ 40 / t :=
+  two_pair_beta_abs_div_le
+    (two_pair_beta_num_abs_le hω hz hε8 s α (Real.log t / Real.log Z)) ht
+
+/-- P0069 page 51 display 5.17, second outer variable. Integrability of the density in the second variable. -/
+theorem two_pair_beta_density_integrable {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε8 : ε ≤ 1/10^8) (Z s α : ℝ) {u v : ℝ} (hu : 2 ≤ u) (huv : u ≤ v) :
+    IntervalIntegrable (fun t : ℝ =>
+      (if lowerTwoDiscarded ε α (Real.log t / Real.log Z) then
+        ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α else 0) /
+        (t * Real.log t ^ 2)) volume u v := by
+  have hg : Measurable (fun t : ℝ => ((α, Real.log t / Real.log Z) : ℝ × ℝ)) :=
+    measurable_const.prodMk (Real.measurable_log.div_const _)
+  have hnum : Measurable (fun t : ℝ =>
+      (if lowerTwoDiscarded ε α (Real.log t / Real.log Z) then
+        ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α else 0)) :=
+    (two_pair_beta_num_measurable hω hz ε s).comp hg
+  have hden : Measurable (fun t : ℝ => t * Real.log t ^ 2) :=
+    measurable_id.mul (Real.measurable_log.pow_const 2)
+  refine two_pair_beta_ii_of_bound (hnum.div hden) 20 huv ?_
+  intro x hx
+  have hx2 : 2 ≤ x := by linarith
+  have hx0 : (0:ℝ) < x := by linarith
+  have hb := two_pair_beta_density_abs_le hω hz hε8 Z s α hx2
+  have h20 : 40 / x ≤ 20 := by
+    rw [div_le_iff₀ hx0]
+    linarith
+  exact hb.trans h20
+
+/-- Algebra behind the change of variables. -/
+theorem two_pair_beta_subst_alg {α β L t w : ℝ} (hα : α ≠ 0) (hβ : β ≠ 0) (hL : L ≠ 0)
+    (ht : t ≠ 0) :
+    w / (α * β ^ 2) * (1 / (t * L)) = w / α / (t * (β * L) ^ 2) * L := by
+  field_simp
+
+/-- P0069 page 51 display 5.17, second outer variable. Change of variables `b = Z ^ β` in the inner integral. -/
+theorem two_pair_beta_subst (ω : ℝ → ℝ) (ε s α : ℝ) {Z : ℝ} (hZ : 1 < Z) :
+    (∫ β in (1/10:ℝ)..(1/2:ℝ),
+        if lowerTwoDiscarded ε α β then ω ((s-α-β)/β)/(α*β^2) else 0) / Real.log Z =
+      ∫ t in Z ^ (1/10:ℝ)..Z ^ (1/2:ℝ),
+        (if lowerTwoDiscarded ε α (Real.log t / Real.log Z) then
+          ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α else 0) /
+          (t * Real.log t ^ 2) := by
+  have hL : 0 < Real.log Z := Real.log_pos hZ
+  have hLne : Real.log Z ≠ 0 := ne_of_gt hL
+  have h := integral_log_subst hZ
+    (fun β : ℝ => if lowerTwoDiscarded ε α β then ω ((s-α-β)/β)/(α*β^2) else 0)
+  rw [← h, div_eq_iff hLne, ← intervalIntegral.integral_mul_const]
+  refine intervalIntegral.integral_congr fun t ht => ?_
+  have hmin : min (Z ^ (1/10:ℝ)) (Z ^ (1/2:ℝ)) = Z ^ (1/10:ℝ) :=
+    min_eq_left (Real.rpow_le_rpow_of_exponent_le hZ.le (by norm_num))
+  have ht_ge : Z ^ (1/10:ℝ) ≤ t := by
+    rw [Set.uIcc, hmin] at ht
+    exact ht.1
+  have hZt : (1:ℝ) < Z ^ (1/10:ℝ) := Real.one_lt_rpow hZ (by norm_num)
+  have ht1 : (1:ℝ) < t := by linarith
+  have ht0 : t ≠ 0 := by
+    intro h0
+    rw [h0] at ht1
+    linarith
+  have hlt : 0 < Real.log t := Real.log_pos ht1
+  have hβ : Real.log t / Real.log Z ≠ 0 := ne_of_gt (div_pos hlt hL)
+  have hsplit : Real.log t = Real.log t / Real.log Z * Real.log Z := by
+    field_simp
+  by_cases hind : lowerTwoDiscarded ε α (Real.log t / Real.log Z)
+  · simp only [hind, ↓reduceIte]
+    by_cases hα : α = 0
+    · rw [hα]
+      simp
+    · have e := two_pair_beta_subst_alg
+        (w := ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)))
+        hα hβ hLne ht0
+      rw [← hsplit] at e
+      exact e
+  · simp only [hind, ↓reduceIte]
+    simp
+
+/-- Each summand is integrable in the first exponent. -/
+theorem two_pair_beta_summand_integrable {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε8 : ε ≤ 1/10^8) (s c d : ℝ) :
+    IntervalIntegrable (fun α : ℝ =>
+      (if lowerTwoDiscarded ε α c then ω ((s - α - c) / c) / α else 0) / d)
+      volume (1/10) (1/2) := by
+  have hg : Measurable (fun α : ℝ => ((α, c) : ℝ × ℝ)) :=
+    measurable_id.prodMk measurable_const
+  have hnum : Measurable (fun α : ℝ =>
+      (if lowerTwoDiscarded ε α c then ω ((s - α - c) / c) / α else 0)) :=
+    (two_pair_beta_num_measurable hω hz ε s).comp hg
+  refine two_pair_beta_ii_of_bound (hnum.div_const d) (10 / |d|) (by norm_num) ?_
+  intro x _
+  rw [abs_div]
+  exact div_le_div_of_nonneg_right (two_pair_beta_num_abs_le hω hz hε8 s x c) (abs_nonneg d)
+
+/-- A pointwise finite sum of interval integrable functions. -/
+theorem two_pair_beta_sum_ii (S : Finset ℕ) (f : ℕ → ℝ → ℝ) {a b : ℝ}
+    (h : ∀ i ∈ S, IntervalIntegrable (f i) volume a b) :
+    IntervalIntegrable (fun x => ∑ i ∈ S, f i x) volume a b := by
+  have he : (fun x => ∑ i ∈ S, f i x) = ∑ i ∈ S, f i := by
+    funext x
+    rw [Finset.sum_apply]
+  rw [he]
+  exact IntervalIntegrable.sum S h
+
+/-- Abstract exchange of a finite sum with an interval integral. -/
+theorem two_pair_beta_swap_aux (S : Finset ℕ) (f : ℕ → ℝ → ℝ) (d : ℕ → ℝ) {a b : ℝ}
+    (h : ∀ i ∈ S, IntervalIntegrable (fun x => f i x / d i) volume a b) :
+    (∑ i ∈ S, (∫ x in a..b, f i x) / d i) = ∫ x in a..b, ∑ i ∈ S, f i x / d i := by
+  refine Eq.symm (Eq.trans (intervalIntegral.integral_finsetSum (μ := volume) h) ?_)
+  refine Finset.sum_congr rfl fun i _ => ?_
+  exact intervalIntegral.integral_div (d i) (f i)
+
+/-- P0069 page 51 display 5.17, second outer variable. The sum over the second variable is integrable in the first exponent. -/
+theorem two_pair_beta_sum_integrable {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε8 : ε ≤ 1/10^8) (s L : ℝ) (N : ℕ) :
+    IntervalIntegrable (fun α : ℝ => ∑ b ∈ Finset.Icc 1 N,
+      (if lowerTwoDiscarded ε α (Real.log (b:ℝ) / L) then
+        ω ((s - α - Real.log (b:ℝ) / L) / (Real.log (b:ℝ) / L)) / α else 0) /
+        ((b:ℝ) * Real.log (b:ℝ) ^ 2)) volume (1/10) (1/2) :=
+  two_pair_beta_sum_ii (Finset.Icc 1 N)
+    (fun (b : ℕ) (α : ℝ) =>
+      (if lowerTwoDiscarded ε α (Real.log (b:ℝ) / L) then
+        ω ((s - α - Real.log (b:ℝ) / L) / (Real.log (b:ℝ) / L)) / α else 0) /
+        ((b:ℝ) * Real.log (b:ℝ) ^ 2))
+    (fun b _ => two_pair_beta_summand_integrable hω hz hε8 s (Real.log (b:ℝ) / L)
+      ((b:ℝ) * Real.log (b:ℝ) ^ 2))
+
+/-- P0069 page 51 display 5.17, second outer variable. Exchange of the sum over the second variable with the integral over the first
+exponent. -/
+theorem two_pair_beta_sum_swap {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε8 : ε ≤ 1/10^8) (s L : ℝ) (N : ℕ) :
+    (∑ b ∈ Finset.Icc 1 N, (∫ α in (1/10:ℝ)..(1/2:ℝ),
+        if lowerTwoDiscarded ε α (Real.log (b:ℝ) / L) then
+          ω ((s - α - Real.log (b:ℝ) / L) / (Real.log (b:ℝ) / L)) / α else 0) /
+        ((b:ℝ) * Real.log (b:ℝ) ^ 2)) =
+      ∫ α in (1/10:ℝ)..(1/2:ℝ), ∑ b ∈ Finset.Icc 1 N,
+        (if lowerTwoDiscarded ε α (Real.log (b:ℝ) / L) then
+          ω ((s - α - Real.log (b:ℝ) / L) / (Real.log (b:ℝ) / L)) / α else 0) /
+          ((b:ℝ) * Real.log (b:ℝ) ^ 2) :=
+  two_pair_beta_swap_aux (Finset.Icc 1 N)
+    (fun (b : ℕ) (α : ℝ) =>
+      if lowerTwoDiscarded ε α (Real.log (b:ℝ) / L) then
+        ω ((s - α - Real.log (b:ℝ) / L) / (Real.log (b:ℝ) / L)) / α else 0)
+    (fun b => (b:ℝ) * Real.log (b:ℝ) ^ 2)
+    (fun b _ => two_pair_beta_summand_integrable hω hz hε8 s (Real.log (b:ℝ) / L)
+      ((b:ℝ) * Real.log (b:ℝ) ^ 2))
+
+/-- P0069 page 51 display 5.17, the passage from the sum over the second outer variable to the
+integral, for one fixed first exponent `α`: the sum over the integers `b` of the E2 density
+`[E₂] ω((s - α - β) / β) / (α b log^2 b)`, `β = log b / log Z`, is its integral over
+`b ∈ [Z^(1/10), Z^(1/2)]` up to `4400 / A`, for any integer `3 ≤ A ≤ Z^(1/10)`. On each cell
+the density moves by `1000 / (n - 1)^2`, except on the at most `30` cells that carry one of
+the fourteen switch points of the region in the second exponent or the point `(s - α) / 2` at
+which the Buchstab argument crosses one, where the crude bound `80 / (n - 1)` is used. -/
+theorem two_pair_beta_riemann {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε8 : ε ≤ 1/10^8) {Z s : ℝ} (α : ℝ) (hZ : 1 < Z) (hs : s ≤ 1)
+    {A N : ℕ} (hA : 3 ≤ A) (hAN : A ≤ N)
+    (hAZ : (A:ℝ) ≤ Z ^ (1/10:ℝ)) (hNZ : Z ^ (1/2:ℝ) ≤ (N:ℝ)) :
+    |(∑ b ∈ Finset.Icc 1 N,
+        (if lowerTwoDiscarded ε α (Real.log (b:ℝ) / Real.log Z) then
+          ω ((s - α - Real.log (b:ℝ) / Real.log Z) / (Real.log (b:ℝ) / Real.log Z)) / α
+          else 0) / ((b:ℝ) * Real.log (b:ℝ) ^ 2)) -
+      ∫ t in Z ^ (1/10:ℝ)..Z ^ (1/2:ℝ),
+        (if lowerTwoDiscarded ε α (Real.log t / Real.log Z) then
+          ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α else 0) /
+          (t * Real.log t ^ 2)| ≤ 4400 / (A:ℝ) := by
   have hZ0 : (0:ℝ) < Z := by linarith
   have hLZ : 0 < Real.log Z := Real.log_pos hZ
-  have hn4 : (4:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
-  have hn0 : (0:ℝ) < (n:ℝ) := by linarith
-  have hnm : (3:ℝ) ≤ (n:ℝ) - 1 := by linarith
-  have hnm0 : (0:ℝ) < (n:ℝ) - 1 := by linarith
-  have ht0 : (0:ℝ) < t := by linarith
-  have hα0 : (0:ℝ) < α := by linarith
-  have hlogn : 0 < Real.log (n:ℝ) := Real.log_pos (by linarith)
-  have hlogt : 0 < Real.log t := Real.log_pos (by linarith)
-  have hlogm : 0 < Real.log ((n:ℝ)-1) := Real.log_pos (by linarith)
-  have hβn : 0 < Real.log (n:ℝ)/Real.log Z := div_pos hlogn hLZ
-  have hβt : 0 < Real.log t/Real.log Z := div_pos hlogt hLZ
-  have hlogn_le : Real.log ((n:ℝ)-1) ≤ Real.log (n:ℝ) := Real.log_le_log hnm0 (by linarith)
-  have hβle : Real.log t/Real.log Z ≤ Real.log (n:ℝ)/Real.log Z :=
-    div_le_div_of_nonneg_right (Real.log_le_log ht0 ht2) hLZ.le
-  have harganti : (s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z) ≤
-      (s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z) :=
-    arg_beta_anti hβt hβn hβle (by linarith)
-  have hβdiff : Real.log (n:ℝ)/Real.log Z - Real.log t/Real.log Z ≤
-      1/(((n:ℝ)-1)*Real.log Z) := by
-    rw [← sub_div]
-    have e : 1/(((n:ℝ)-1)*Real.log Z) = (1/((n:ℝ)-1))/Real.log Z := by field_simp
-    rw [e]
-    apply div_le_div_of_nonneg_right _ hLZ.le
-    have h1 : Real.log (n:ℝ) - Real.log t ≤ ((n:ℝ) - t)/t := log_sub_log_le_div_new ht0 ht2
-    have h2 : ((n:ℝ) - t)/t ≤ ((n:ℝ) - t)/((n:ℝ) - 1) :=
-      div_le_div_of_nonneg_left (by linarith) hnm0 (by linarith)
-    have h3 : ((n:ℝ) - t)/((n:ℝ) - 1) ≤ 1/((n:ℝ) - 1) := by
-      rw [div_le_div_iff₀ hnm0 hnm0]
-      nlinarith
-    linarith
-  rcases hcase with hu | hlt
-  · -- the Buchstab argument is at least one at both points
-    have hut : 1 ≤ (s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z) := le_trans hu harganti
-    have hlip := buchstab_lipschitz_abs hω hz hu hut
-    by_cases hD : lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z)
-    · have hDt : lowerTwoDiscarded ε α (Real.log t/Real.log Z) := hreg.mp hD
-      rw [if_pos hD, if_pos hDt, ← sub_div, abs_div, abs_of_pos hα0]
-      -- the argument difference
-      have e1 : (s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z) =
-          (s - α)/(Real.log (n:ℝ)/Real.log Z) - 1 := by
-        rw [sub_div, div_self (ne_of_gt hβn)]
-      have e2 : (s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z) =
-          (s - α)/(Real.log t/Real.log Z) - 1 := by
-        rw [sub_div, div_self (ne_of_gt hβt)]
-      have hargdiff : |(s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z) -
-          (s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z)| ≤
-          Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by
-        rw [e1, e2]
-        have hmul : ((s - α)/(Real.log (n:ℝ)/Real.log Z) - 1) -
-            ((s - α)/(Real.log t/Real.log Z) - 1) =
-            (s - α) * (1/(Real.log (n:ℝ)/Real.log Z) - 1/(Real.log t/Real.log Z)) := by ring
-        rw [hmul, abs_mul]
-        have habs1 : |s - α| ≤ 1 := by
-          rw [abs_le]; constructor <;> linarith
-        have hb2 : |1/(Real.log (n:ℝ)/Real.log Z) - 1/(Real.log t/Real.log Z)| ≤
-            Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by
-          have hnum0 : 0 ≤ Real.log (n:ℝ)/Real.log Z - Real.log t/Real.log Z := by linarith
-          have hβl : 0 < Real.log ((n:ℝ)-1)/Real.log Z := div_pos hlogm hLZ
-          have ht_ge : Real.log ((n:ℝ)-1)/Real.log Z ≤ Real.log t/Real.log Z :=
-            div_le_div_of_nonneg_right (Real.log_le_log hnm0 ht1) hLZ.le
-          have hn_ge : Real.log ((n:ℝ)-1)/Real.log Z ≤ Real.log (n:ℝ)/Real.log Z :=
-            div_le_div_of_nonneg_right (Real.log_le_log hnm0 (by linarith)) hLZ.le
-          have hden : Real.log ((n:ℝ)-1)/Real.log Z * (Real.log ((n:ℝ)-1)/Real.log Z) ≤
-              Real.log (n:ℝ)/Real.log Z * (Real.log t/Real.log Z) :=
-            mul_le_mul hn_ge ht_ge (le_of_lt hβl) (le_trans (le_of_lt hβl) hn_ge)
-          have e3 : 1/(Real.log (n:ℝ)/Real.log Z) - 1/(Real.log t/Real.log Z) =
-              (Real.log t/Real.log Z - Real.log (n:ℝ)/Real.log Z) /
-                ((Real.log (n:ℝ)/Real.log Z)*(Real.log t/Real.log Z)) := by
-            field_simp
-          have habs : |1/(Real.log (n:ℝ)/Real.log Z) - 1/(Real.log t/Real.log Z)| =
-              (Real.log (n:ℝ)/Real.log Z - Real.log t/Real.log Z) /
-                ((Real.log (n:ℝ)/Real.log Z)*(Real.log t/Real.log Z)) := by
-            have hsig : |Real.log t/Real.log Z - Real.log (n:ℝ)/Real.log Z| =
-                (Real.log (n:ℝ)/Real.log Z - Real.log t/Real.log Z) := by
-              rw [abs_sub_comm, abs_of_nonneg hnum0]
-            rw [e3, abs_div, abs_of_pos (mul_pos hβn hβt), hsig]
-          have h3a : (Real.log (n:ℝ)/Real.log Z - Real.log t/Real.log Z) /
-              (Real.log (n:ℝ)/Real.log Z * (Real.log t/Real.log Z)) ≤
-              (1/(((n:ℝ)-1)*Real.log Z)) /
-                (Real.log (n:ℝ)/Real.log Z * (Real.log t/Real.log Z)) :=
-            div_le_div_of_nonneg_right hβdiff (by positivity)
-          have h3b : (1/(((n:ℝ)-1)*Real.log Z)) /
-                (Real.log (n:ℝ)/Real.log Z * (Real.log t/Real.log Z)) ≤
-              (1/(((n:ℝ)-1)*Real.log Z)) /
-                (Real.log ((n:ℝ)-1)/Real.log Z * (Real.log ((n:ℝ)-1)/Real.log Z)) :=
-            div_le_div_of_nonneg_left (by positivity) (by positivity) hden
-          have hfin : (1/(((n:ℝ)-1)*Real.log Z)) /
-              (Real.log ((n:ℝ)-1)/Real.log Z * (Real.log ((n:ℝ)-1)/Real.log Z)) =
-              Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by
-            field_simp
-          rw [habs]
-          linarith [h3a, h3b, hfin]
-        calc |s - α| * |1/(Real.log (n:ℝ)/Real.log Z) - 1/(Real.log t/Real.log Z)|
-            ≤ 1 * (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) :=
-              mul_le_mul habs1 hb2 (abs_nonneg _) (by norm_num)
-          _ = Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by ring
-      have h1 : |ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z)) -
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))| ≤
-          Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := hlip.trans hargdiff
-      have hb : |ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z)) -
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))| / α ≤
-          (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) / (1/10) := by
-        have hb1 : |ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z)) -
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))| / α ≤
-            (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) / α :=
-          div_le_div_of_nonneg_right h1 hα0.le
-        have hb2 : (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) / α ≤
-            (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) / (1/10) :=
-          div_le_div_of_nonneg_left (by positivity) (by norm_num) hα1
-        linarith
-      have h2 : (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) / (1/10) ≤
-          200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by
-        have ee1 : (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) / (1/10) =
-            10 * (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) := by field_simp
-        have ee2 : 200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) =
-            200 * (Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) := by ring
-        rw [ee1, ee2]
-        apply mul_le_mul_of_nonneg_right (by norm_num) (by positivity)
-      linarith [hb, h2]
-    · have hDt : ¬ lowerTwoDiscarded ε α (Real.log t/Real.log Z) := fun h => hD (hreg.mpr h)
-      rw [if_neg hD, if_neg hDt, sub_zero, abs_zero]
-      positivity
-  · -- the Buchstab argument is below one at both points, so both values vanish
-    have hnt : (s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z) < 1 :=
-      lt_of_le_of_lt harganti hlt
-    have e1 : (if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-        ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) = 0 := by
-      by_cases hD : lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z)
-      · rw [if_pos hD, hz _ hnt, zero_div]
-      · rw [if_neg hD]
-    have e2 : (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-        ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0) = 0 := by
-      by_cases hD : lowerTwoDiscarded ε α (Real.log t/Real.log Z)
-      · rw [if_pos hD, hz _ hlt, zero_div]
-      · rw [if_neg hD]
-    rw [e1, e2, sub_zero, abs_zero]
-    positivity
-
-
-/-! ### NEW: weight monotonicity, cell oscillation and the integrand bound -/
-
-/-- `u log^2 u` is monotone on `[1, ∞)`, so `1/(u log^2 u)` is antitone there. -/
-private theorem weight_mono {a b : ℝ} (ha : 1 < a) (hab : a ≤ b) :
-    1/(b * Real.log b^2) ≤ 1/(a * Real.log a^2) := by
-  have ha0 : (0:ℝ) < a := by linarith
-  have hb0 : (0:ℝ) < b := by linarith
-  have hla0 : 0 < Real.log a := Real.log_pos ha
-  have hla : 0 ≤ Real.log a := Real.log_nonneg ha.le
-  have hlab : Real.log a ≤ Real.log b := Real.log_le_log ha0 hab
-  have hlb : 0 ≤ Real.log b := le_trans hla hlab
-  have h1 : a * Real.log a^2 ≤ b * Real.log b^2 := by
-    have h2 : Real.log a^2 ≤ Real.log b^2 := by
-      apply pow_le_pow_left₀ hla hlab
-    exact mul_le_mul hab h2 (by positivity) (by linarith)
-  exact one_div_le_one_div_of_le (by positivity) h1
-
-/-- On the cell `[n-1, n]` the weight moves by at most its drop `1/((n-1)log^2(n-1)) -
-1/(n log^2 n)`. -/
-private theorem weight_cell_osc {n : ℕ} (hn : 4 ≤ n) {t : ℝ}
-    (ht1 : (n:ℝ) - 1 ≤ t) (ht2 : t ≤ (n:ℝ)) :
-    |1/((n:ℝ) * Real.log (n:ℝ)^2) - 1/(t * Real.log t^2)| ≤
-      1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2) := by
-  have hn4 : (4:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
-  have ht2' : t ≤ (n:ℝ) := ht2
-  have hle1 : (1:ℝ) < t := by linarith
-  have hle2 : (1:ℝ) < (n:ℝ) - 1 := by linarith
-  have hWt : 1/((n:ℝ) * Real.log (n:ℝ)^2) ≤ 1/(t * Real.log t^2) :=
-    weight_mono hle1 ht2'
-  have hWm : 1/(t * Real.log t^2) ≤ 1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) :=
-    weight_mono hle2 ht1
-  rw [abs_of_nonpos (by linarith)]
-  linarith
-
-/-- Telescoping weight drop: `∑_{N < n ≤ B} (w(n-1) - w(n)) = w(N) - w(B) ≤ w(N)`. -/
-private theorem tel_weight {N B : ℕ} (hN : 4 ≤ N) :
-    (∑ n ∈ Finset.Ioc N B,
-        (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2))) ≤
-      1/((N:ℝ) * Real.log (N:ℝ)^2) := by
-  have htel : ∀ B' : ℕ, N ≤ B' →
-      (∑ n ∈ Finset.Ioc N B',
-          (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2)))
-        = 1/((N:ℝ) * Real.log (N:ℝ)^2) - 1/((B':ℝ) * Real.log (B':ℝ)^2) := by
-    intro B' hB'
-    induction B', hB' using Nat.le_induction with
-    | base => simp
-    | succ b hb ih =>
-      rw [Finset.sum_Ioc_succ_top hb, ih]
-      have hcast : ((b + 1 : ℕ) : ℝ) = (b:ℝ) + 1 := by push_cast; ring
-      have hsub : (b:ℝ) + 1 - 1 = (b:ℝ) := by ring
-      rw [hcast, hsub]
-      ring
-  rcases le_or_gt N B with h | h
-  · rw [htel B h]
-    have hN4 : (4:ℝ) ≤ (N:ℝ) := by exact_mod_cast hN
-    have hpos : (0:ℝ) < 1/((B:ℝ) * Real.log (B:ℝ)^2) := by
-      have hB4 : (4:ℝ) ≤ (B:ℝ) := by
-        have : 4 ≤ B := by omega
-        exact_mod_cast this
-      have hlog : 0 < Real.log (B:ℝ) := Real.log_pos (by linarith)
-      positivity
-    linarith
-  · have hempty : Finset.Ioc N B = ∅ := Finset.Ioc_eq_empty (by omega)
-    rw [hempty, Finset.sum_empty]
-    have hN4 : (4:ℝ) ≤ (N:ℝ) := by exact_mod_cast hN
-    have hlog : 0 < Real.log (N:ℝ) := Real.log_pos (by linarith)
-    positivity
-
-/-- `|Φ| ≤ 10` for the `α`-integrand of the second passage, for `α, β ≥ 1/10`. -/
-private theorem phi_abs_le {ω : ℝ → ℝ}
-    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
-    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
-    {ε Z s α β : ℝ} (hα1 : 1/10 ≤ α) :
-    |(if lowerTwoDiscarded ε α β then ω ((s - α - β)/β)/α else 0)| ≤ 10 := by
-  have hα0 : (0:ℝ) < α := by linarith
-  have hw1 : ω ((s - α - β)/β) ≤ 1 :=
-    LeanLab.ChenDoubleSieve.Wu04Functional.extended_buchstab_le_one hω hz _
-  have hw0 : 0 ≤ ω ((s - α - β)/β) :=
-    Decomp514a.two_density_buchstab_nonneg hω hz _
-  have hinv : 1/α ≤ 10 := by
-    rw [div_le_iff₀ hα0]
-    linarith
-  by_cases h : lowerTwoDiscarded ε α β
-  · rw [if_pos h, abs_div, abs_of_pos hα0]
-    rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ ω ((s - α - β)/β))]
-    rw [div_le_iff₀ hα0]
-    calc ω ((s - α - β)/β) ≤ 1 := hw1
-      _ ≤ 10 * α := by nlinarith
-  · rw [if_neg h, abs_zero]
-    norm_num
-
-
-
-/-- `1/(t log^2 t)` times the `α`-integrand is at most `10/(t log^2 t)`. -/
-private theorem phi_weight_abs_le {ω : ℝ → ℝ}
-    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
-    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
-    {ε Z s α : ℝ} (hα1 : 1/10 ≤ α) (t : ℝ) (ht : 1 < t) :
-    |(1/(t * Real.log t^2)) *
-      (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-        ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤
-      10 * (1/(t * Real.log t^2)) := by
-  have hw : 0 < 1/(t * Real.log t^2) := by
-    have : 0 < Real.log t := Real.log_pos ht
-    positivity
-  have h1 : |if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-      ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0| ≤ 10 :=
-    phi_abs_le hω hz (ε := ε) (Z := Z) (s := s) (α := α) (β := Real.log t/Real.log Z) hα1
-  calc |(1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)|
-      = (1/(t * Real.log t^2)) *
-        |if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0| := by
-        rw [abs_mul, abs_of_pos hw]
-    _ ≤ (1/(t * Real.log t^2)) * 10 := mul_le_mul_of_nonneg_left h1 (le_of_lt hw)
-    _ = 10 * (1/(t * Real.log t^2)) := by ring
-
-/-! ### NEW: the second passage at one point `α` -/
-
-set_option maxHeartbeats 150000000 in
-/-- The sum over the integer variable against the integral, cell by cell: the first half of the
-second passage, with the weight telescoping. -/
-private theorem second_passage_cell {ω : ℝ → ℝ}
-    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
-    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
-    {ε Z s : ℝ} (hε8 : ε ≤ 1/10^8) (hZ : 1 < Z) (hZbig : (2:ℝ)^20 ≤ Z)
-    (hs0 : 1/2 ≤ s) (hs1 : s ≤ 1) {α : ℝ} (hα1 : 1/10 ≤ α) (hα2 : α ≤ 1/2) :
-    |(∑ b ∈ Finset.Ioc ⌊Z^(1/10:ℝ)⌋₊ ⌊Z^(1/2:ℝ)⌋₊,
-        (1/((b:ℝ) * Real.log (b:ℝ)^2)) *
-          (if lowerTwoDiscarded ε α (Real.log (b:ℝ)/Real.log Z) then
-            ω ((s - α - Real.log (b:ℝ)/Real.log Z)/(Real.log (b:ℝ)/Real.log Z))/α else 0)) -
-      (∫ t in ((⌊Z^(1/10:ℝ)⌋₊ : ℝ))..((⌊Z^(1/2:ℝ)⌋₊ : ℝ)), (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0))| ≤
-      500000 * (1 + Real.log Z) /
-        (((⌊Z^(1/10:ℝ)⌋₊ : ℝ) - 1) * Real.log ((⌊Z^(1/10:ℝ)⌋₊ : ℝ) - 1)^2) := by
-  classical
-  have hZ0 : (0:ℝ) < Z := by linarith
-  have hLZ : (0:ℝ) < Real.log Z := Real.log_pos hZ
-  set u : ℝ := Z^(1/10:ℝ) with hu
-  set v : ℝ := Z^(1/2:ℝ) with hv
-  set B0 : ℕ := ⌊u⌋₊ with hB0
-  set B1 : ℕ := ⌊v⌋₊ with hB1
-  have hu4 : (4:ℝ) ≤ u := by
-    have h1 : ((2:ℝ)^20)^(1/10:ℝ) ≤ Z^(1/10:ℝ) :=
-      Real.rpow_le_rpow (by positivity) hZbig (by norm_num)
-    have h2 : ((2:ℝ)^20)^(1/10:ℝ) = 4 := by
-      rw [← Real.rpow_natCast (2:ℝ) 20, ← Real.rpow_mul (by norm_num : (0:ℝ) ≤ 2)]
-      norm_num
-    rw [hu]
-    linarith
-  have hu0 : (0:ℝ) < u := by linarith
-  have huv : u ≤ v := by
-    rw [hu, hv]
-    exact Real.rpow_le_rpow_of_exponent_le hZ.le (by norm_num)
-  have hB0ge : 4 ≤ B0 := by
-    rw [hB0]
-    exact Nat.le_floor (by push_cast; exact hu4)
-  have hB0le : ((B0:ℝ)) ≤ u := by
-    rw [hB0]; exact Nat.floor_le (by positivity)
-  have hB1le : ((B1:ℝ)) ≤ v := by
-    rw [hB1]; exact Nat.floor_le (by positivity)
-  have hB0B1 : B0 ≤ B1 := by
-    have h1 : (B0:ℝ) ≤ v := le_trans hB0le huv
-    rw [hB1]
-    exact Nat.le_floor h1
-  have hB0w : (1:ℝ) ≤ (B0:ℝ) := by
-    have : 1 ≤ B0 := by omega
-    exact_mod_cast this
-  have hB0R4 : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast hB0ge
-  have huB1 : u ≤ (B1:ℝ) := by
-    -- `u + 1 ≤ v` and `v - 1 ≤ B1`
-    have hvpow : v = u^5 := by
-      rw [hu, hv, ← Real.rpow_natCast]
-      rw [show (1/2:ℝ) = (1/10:ℝ) * 5 by norm_num, Real.rpow_mul (le_of_lt hZ0)]
-      norm_num
-    have huv1 : u + 1 ≤ v := by
-      rw [hvpow]
-      have hpow : (4:ℝ)^4 ≤ u^4 := pow_le_pow_left₀ (by norm_num) hu4 4
-      have hmul : u * 4^4 ≤ u^5 := by
-        rw [show u^5 = u * u^4 by ring]
-        exact mul_le_mul_of_nonneg_left hpow (by linarith)
-      nlinarith [hmul, hu4]
-    have hfl : v - 1 ≤ (B1:ℝ) := by
-      rw [hB1]
-      have := Nat.lt_floor_add_one v
-      linarith
-    linarith
-  have hε8' : ε ≤ 1/8 := by linarith
-  -- the switch points and the bad cells
-  set T : Finset ℝ := ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-        (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-        (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-        (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-        1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-        (α + 2*(1/16-1/10^5) - ε)/2,
-        (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-        2 - (2*(1/16-1/10^5) - ε) - 4*α,
-        2 + (2*(1/16-1/10^5) - ε) - 4*α,
-        (s - α)/2] : List ℝ).toFinset with hT
-  set P : ℕ → Prop := fun n => ∃ τ ∈ T, Real.log ((n:ℝ)-1)/Real.log Z ≤ τ ∧
-    τ ≤ Real.log (n:ℝ)/Real.log Z with hP
-  -- the per cell allowance
-  -- the `α`-integrand is measurable and bounded by `10 / (t log^2 t)`
-  have hΦmeas : Measurable (fun t : ℝ => if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-      ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0) :=
-    phi_measurable (measurable_buchstab_new hω hz) (Z := Z) (s := s) (α := α) (ε := ε)
-  have hWmeas : Measurable (fun t : ℝ => 1/(t * Real.log t^2)) := by measurability
-  have hphimeas : Measurable (fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) := hWmeas.mul hΦmeas
-  have hphib : ∀ t : ℝ, 1 < t → |(fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t| ≤
-        10 * (1/(t * Real.log t^2)) := by
+  have hAR : (3:ℝ) ≤ A := by exact_mod_cast hA
+  have hA0 : (0:ℝ) < A := by linarith
+  have hZle : Z ^ (1/10:ℝ) ≤ Z ^ (1/2:ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hZ.le (by norm_num)
+  have hc : (1/10:ℝ) + 2/10^8 ≤ (1+7*(2*(1/16-1/10^5)))/15 := by norm_num
+  have hDlow : ∀ β : ℝ, lowerTwoDiscarded ε α β → 1/10 < β ∧ β ≤ α ∧ α ≤ 1/2 := by
+    intro β h
+    obtain ⟨h1, h2, h3, -, -⟩ := h
+    exact ⟨by linarith, h2, h3⟩
+  set φ : ℝ → ℝ := fun t =>
+      (if lowerTwoDiscarded ε α (Real.log t / Real.log Z) then
+        ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α else 0) /
+        (t * Real.log t ^ 2) with hφ
+  have hφpos : ∀ t : ℝ, lowerTwoDiscarded ε α (Real.log t / Real.log Z) → φ t =
+      ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) / α /
+        (t * Real.log t ^ 2) := fun t h => by simp only [hφ, if_pos h]
+  have hφneg : ∀ t : ℝ, ¬ lowerTwoDiscarded ε α (Real.log t / Real.log Z) → φ t = 0 :=
+    fun t h => by simp only [hφ, if_neg h, zero_div]
+  -- the density vanishes off the exponent range
+  have hlow : ∀ t : ℝ, 0 < t → t ≤ Z ^ (1/10:ℝ) → φ t = 0 := by
+    intro t ht0 ht
+    have hl : Real.log t ≤ Real.log (Z ^ (1/10:ℝ)) := Real.log_le_log ht0 ht
+    rw [Real.log_rpow hZ0] at hl
+    have hβ : Real.log t / Real.log Z ≤ 1/10 := by rw [div_le_iff₀ hLZ]; linarith
+    exact hφneg t fun h => by linarith [(hDlow _ h).1]
+  have hhigh : ∀ t : ℝ, Z ^ (1/2:ℝ) < t → φ t = 0 := by
     intro t ht
-    have hw : 0 < 1/(t * Real.log t^2) := by
-      have : 0 < Real.log t := Real.log_pos ht
-      positivity
-    have h1 : |if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-        ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0| ≤ 10 :=
-      phi_abs_le hω hz (ε := ε) (Z := Z) (s := s) (α := α) (β := Real.log t/Real.log Z) hα1
-    calc |(1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)|
-        = (1/(t * Real.log t^2)) *
-          |if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0| := by
-          rw [abs_mul, abs_of_pos hw]
-      _ ≤ (1/(t * Real.log t^2)) * 10 := mul_le_mul_of_nonneg_left h1 (le_of_lt hw)
-      _ = 10 * (1/(t * Real.log t^2)) := by ring
-  -- `phi_cell_osc`'s constant, shifted: `200 log Z / ((n-1) log^2 (n-1))`, the weight drop, and
-  -- the allowance of a cell carrying a jump
-  have hint : ∀ n : ℕ, B0 < n →
-      IntervalIntegrable (fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) volume ((n:ℝ) - 1) (n:ℝ) := by
-    intro n hn
-    have hn5 : (5:ℝ) ≤ (n:ℝ) := by
-      have : 5 ≤ n := by omega
-      exact_mod_cast this
-    rw [intervalIntegrable_iff]
-    have hle : ((n:ℝ) - 1) ≤ (n:ℝ) := by linarith
-    rw [Set.uIoc_of_le hle]
-    refine MeasureTheory.Integrable.of_bound hphimeas.aestronglyMeasurable.restrict
-      (10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))) ?_
-    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with x hx
-    have hx1 : (1:ℝ) < x := by linarith [hx.1]
-    have hbx := hphib x hx1
-    have hmono : 1/(x * Real.log x^2) ≤ 1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) :=
-      weight_mono (by linarith : (1:ℝ) < (n:ℝ) - 1) (le_of_lt hx.1)
-    have hpos : (0:ℝ) < 1/(x * Real.log x^2) := by
-      have : 0 < Real.log x := Real.log_pos hx1
-      positivity
-    rw [Real.norm_eq_abs]
-    exact hbx.trans (mul_le_mul_of_nonneg_left hmono (by norm_num))
-  have hδ0 : ∀ n : ℕ, B0 < n → 0 ≤
-      ((1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-          (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))
-        + 10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2))
-        + (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0)) := by
-    intro n hn
-    have hnR : (B0:ℝ) < (n:ℝ) := by exact_mod_cast hn
-    have hn2 : (2:ℝ) ≤ (n:ℝ) := by linarith
-    have hnm1 : (1:ℝ) < (n:ℝ) - 1 := by linarith
-    have hdrop : 0 ≤ 1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2) := by
-      have h := weight_mono hnm1 (by linarith : ((n:ℝ)-1) ≤ (n:ℝ))
-      linarith
-    have hWn : 0 ≤ 1/((n:ℝ) * Real.log (n:ℝ)^2) := by
-      have : 0 < Real.log (n:ℝ) := Real.log_pos (by linarith)
-      positivity
-    have hcoef : 0 ≤ 200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by
-      have h1 : 0 < Real.log ((n:ℝ)-1) := Real.log_pos hnm1
-      positivity
-    have hthird : 0 ≤ (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0) := by
-      split_ifs
-      · have : 0 < Real.log (B0:ℝ) := Real.log_pos (by linarith)
-        positivity
-      · norm_num
-    have := mul_nonneg hWn hcoef
-    linarith
-  -- the per cell oscillation
-  have hosc : ∀ n : ℕ, B0 < n → ∀ t ∈ Set.Icc ((n:ℝ) - 1) (n:ℝ),
-      |(fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) (n:ℝ) -
-       (fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t| ≤
-      ((1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-          (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))
-        + 10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2))
-        + (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0)) := by
-    intro n hn t ht
-    obtain ⟨ht1, ht2⟩ := ht
-    have hn4n : 4 ≤ n := by omega
-    have hn5n : 5 ≤ n := by omega
-    have hnR : (B0:ℝ) < (n:ℝ) := by exact_mod_cast hn
-    have hn5 : (5:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn5n
-    have hn4 : (4:ℝ) ≤ (n:ℝ) := by linarith
-    have hn0 : (0:ℝ) < (n:ℝ) := by linarith
-    have hnm0 : (0:ℝ) < (n:ℝ) - 1 := by linarith
-    have hnm1 : (1:ℝ) < (n:ℝ) - 1 := by linarith
-    have ht1' : (4:ℝ) ≤ t := by linarith
-    have ht0 : (0:ℝ) < t := by linarith
-    have ht1'' : (1:ℝ) < t := by linarith
-    have htn : t ≤ (n:ℝ) := ht2
-    have hWosc : |1/((n:ℝ) * Real.log (n:ℝ)^2) - 1/(t * Real.log t^2)| ≤
-        1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2) :=
-      weight_cell_osc hn4n ht1 ht2
-    have hWn0 : (0:ℝ) < 1/((n:ℝ) * Real.log (n:ℝ)^2) := by
-      have : 0 < Real.log (n:ℝ) := Real.log_pos (by linarith)
-      positivity
-    have hWB0 : (0:ℝ) ≤ 1/((B0:ℝ) * Real.log (B0:ℝ)^2) := by
-      have : 0 < Real.log (B0:ℝ) := Real.log_pos (by linarith)
-      positivity
-    have hB0t : (B0:ℝ) ≤ t := by
-      have h1 : (B0:ℝ) + 1 ≤ (n:ℝ) := by
-        have h2 : B0 + 1 ≤ n := by omega
-        exact_mod_cast h2
-      linarith
-    have hB0n : (B0:ℝ) ≤ (n:ℝ) := by
-      have h2 : B0 ≤ n := by omega
-      exact_mod_cast h2
-    by_cases hPn : P n
-    · -- a cell carrying a jump: the crude bound
-      have hthird : (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0) =
-          20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) := by rw [if_pos hPn]
-      have hWB0t : 1/(t * Real.log t^2) ≤ 1/((B0:ℝ) * Real.log (B0:ℝ)^2) :=
-        weight_mono (by linarith : (1:ℝ) < (B0:ℝ)) hB0t
-      have hWB0n : 1/((n:ℝ) * Real.log (n:ℝ)^2) ≤ 1/((B0:ℝ) * Real.log (B0:ℝ)^2) :=
-        weight_mono (by linarith : (1:ℝ) < (B0:ℝ)) hB0n
-      have h1 : |(1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-          (if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-            ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0)| ≤
-          10 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) := by
-        have h2 := hphib _ (by linarith : (1:ℝ) < (n:ℝ))
-        exact h2.trans (mul_le_mul_of_nonneg_left hWB0n (by norm_num))
-      have h2 : |(1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤
-          10 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) := by
-        have h3 := hphib t ht1''
-        exact h3.trans (mul_le_mul_of_nonneg_left hWB0t (by norm_num))
-      have htri : |(1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            (if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-              ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) -
-          (1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤
-          20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) := by
-        refine abs_sub_le_iff.mpr ⟨?_, ?_⟩
-        · linarith [abs_le.mp h2, abs_le.mp h1]
-        · linarith [abs_le.mp h1, abs_le.mp h2]
-      have hcoef : (0:ℝ) ≤ 200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by
-        have : 0 < Real.log ((n:ℝ)-1) := Real.log_pos hnm1
-        positivity
-      have hdrop : 0 ≤ 1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2) := by
-        have hm := weight_mono hnm1 (by linarith : ((n:ℝ)-1) ≤ (n:ℝ))
-        linarith
-      have := mul_nonneg hWn0.le hcoef
-      rw [hthird]
-      linarith
-    · -- a good cell
-      have hthird : (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0) = 0 := by
-        rw [if_neg hPn]
-      -- no switch point in the cell
-      have hnoCell : ∀ τ ∈ ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-          (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-          (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-          (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-          (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-          1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-          1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-          (α + 2*(1/16-1/10^5) - ε)/2,
-          (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-          (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-          2 - (2*(1/16-1/10^5) - ε) - 4*α,
-          2 + (2*(1/16-1/10^5) - ε) - 4*α,
-          (s - α)/2] : List ℝ).toFinset,
-          ¬(Real.log ((n:ℝ)-1)/Real.log Z ≤ τ ∧ τ ≤ Real.log (n:ℝ)/Real.log Z) := by
-        intro τ hτ hc
-        have hτT : τ ∈ T := by
-          rw [hT]
-          simpa using hτ
-        exact hPn ⟨τ, hτT, hc⟩
-      have hβt0 : (0:ℝ) < Real.log t/Real.log Z :=
-        div_pos (Real.log_pos ht1'') hLZ
-      have hβn0 : (0:ℝ) < Real.log (n:ℝ)/Real.log Z :=
-        div_pos (Real.log_pos (by linarith)) hLZ
-      have hβtn : Real.log t/Real.log Z ≤ Real.log (n:ℝ)/Real.log Z :=
-        div_le_div_of_nonneg_right (Real.log_le_log ht0 htn) hLZ.le
-      have hβm_t : Real.log ((n:ℝ)-1)/Real.log Z ≤ Real.log t/Real.log Z :=
-        div_le_div_of_nonneg_right (Real.log_le_log hnm0 ht1) hLZ.le
-      -- restrict the switch points to the sub-cell `[β_t, β_n]`
-      have hnoSub : ∀ τ ∈ ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-          (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-          (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-          (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-          (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-          1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-          1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-          (α + 2*(1/16-1/10^5) - ε)/2,
-          (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-          (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-          2 - (2*(1/16-1/10^5) - ε) - 4*α,
-          2 + (2*(1/16-1/10^5) - ε) - 4*α,
-          (s - α)/2] : List ℝ).toFinset,
-          ¬(Real.log t/Real.log Z ≤ τ ∧ τ ≤ Real.log (n:ℝ)/Real.log Z) := by
-        intro τ hτ hc
-        exact hnoCell τ hτ ⟨le_trans hβm_t hc.1, hc.2⟩
-      have hreg0 := cell_region_const_beta (ε := ε) (α := α) (s := s) hβtn hnoSub
-      -- the Buchstab argument case
-      have hargTh := hnoCell _ (by simp : (s - α)/2 ∈ ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-          (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-          (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-          (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-          (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-          1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-          1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-          (α + 2*(1/16-1/10^5) - ε)/2,
-          (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-          (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-          2 - (2*(1/16-1/10^5) - ε) - 4*α,
-          2 + (2*(1/16-1/10^5) - ε) - 4*α,
-          (s - α)/2] : List ℝ).toFinset)
-      have hcase : 1 ≤ (s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z) ∨
-          (s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z) < 1 := by
-        by_contra hc
-        push_neg at hc
-        obtain ⟨h1, h2⟩ := hc
-        have e1 : (s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z) =
-            (s - α)/(Real.log (n:ℝ)/Real.log Z) - 1 := by
-          rw [sub_div, div_self (ne_of_gt hβn0)]
-        have e2 : (s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z) =
-            (s - α)/(Real.log t/Real.log Z) - 1 := by
-          rw [sub_div, div_self (ne_of_gt hβt0)]
-        rw [e1] at h1
-        rw [e2] at h2
-        -- `2 β_t ≤ s - α < 2 β_n`, so `(s - α)/2` sits strictly between the two switch points
-        have h2a : (2:ℝ) ≤ (s - α)/(Real.log t/Real.log Z) := by linarith
-        have h1a : (s - α)/(Real.log (n:ℝ)/Real.log Z) < 2 := by linarith
-        have h2ge : 2 * (Real.log t/Real.log Z) ≤ s - α := by
-          have := (le_div_iff₀ hβt0).mp h2a
-          linarith
-        have h1lt : s - α < 2 * (Real.log (n:ℝ)/Real.log Z) := by
-          have := (div_lt_iff₀ hβn0).mp h1a
-          linarith
-        refine hargTh ⟨?_, ?_⟩
-        · rw [le_div_iff₀ (by norm_num : (0:ℝ) < 2)]
-          linarith
-        · rw [div_le_iff₀ (by norm_num : (0:ℝ) < 2)]
-          linarith
-      -- the cell oscillation of `Φ`
-      have hΦosc : |(if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-            ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) -
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤
-          200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) :=
-        phi_cell_osc hω hz (ε := ε) (Z := Z) (s := s) (α := α) (n := n) hZ
-          hn4n ht1 ht2 hα1 hα2 hs0 hs1 hreg0.symm hcase
-      have hΦt : |(if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤ 10 :=
-        phi_abs_le hω hz (ε := ε) (Z := Z) (s := s) (α := α) (β := Real.log t/Real.log Z) hα1
-      -- split the difference of the two products
-      have hsplit : (1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            (if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-              ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) -
-          (1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0) =
-          (1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            ((if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-              ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) -
-             (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) +
-          ((1/((n:ℝ) * Real.log (n:ℝ)^2)) - 1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0) := by
-        ring
-      have h1 : |(1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            ((if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-              ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) -
-             (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0))| ≤
-          (1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) := by
-        rw [abs_mul, abs_of_pos hWn0]
-        exact mul_le_mul_of_nonneg_left hΦosc hWn0.le
-      have hdrop0 : (0:ℝ) ≤ 1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) -
-          1/((n:ℝ) * Real.log (n:ℝ)^2) := by
-        have hm := weight_mono hnm1 (by linarith : ((n:ℝ)-1) ≤ (n:ℝ))
-        linarith
-      have h2 : |((1/((n:ℝ) * Real.log (n:ℝ)^2)) - 1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤
-          10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2)) := by
-        rw [abs_mul]
-        calc |1/((n:ℝ) * Real.log (n:ℝ)^2) - 1/(t * Real.log t^2)| *
-              |(if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-                ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)|
-            ≤ (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2)) * 10 :=
-              mul_le_mul hWosc hΦt (abs_nonneg _) hdrop0
-          _ = 10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) -
-                1/((n:ℝ) * Real.log (n:ℝ)^2)) := by ring
-      have htri := abs_add_le ((1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            ((if lowerTwoDiscarded ε α (Real.log (n:ℝ)/Real.log Z) then
-              ω ((s - α - Real.log (n:ℝ)/Real.log Z)/(Real.log (n:ℝ)/Real.log Z))/α else 0) -
-             (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)))
-          (((1/((n:ℝ) * Real.log (n:ℝ)^2)) - 1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0))
-      rw [hsplit, hthird, add_zero]
-      linarith [h1, h2, htri]
-  -- the cell by cell comparison of the sum and the integral over `(B0, B1]`
-  have hcell : |(∑ n ∈ Finset.Ioc B0 B1,
-        (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) (n:ℝ)) -
-      (∫ t in (B0:ℝ)..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)| ≤
-      (∑ n ∈ Finset.Ioc B0 B1,
-        ((1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))
-          + 10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2))
-          + (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0))) :=
-    sum_sub_integral_le_of_cell _ _ B0 hδ0 hint hosc B1 hB0B1
-  -- the number of cells carrying a jump
-  have hTcard : T.card ≤ 15 := by
-    rw [hT]
-    have h := List.toFinset_card_le (l := ([α, (1+7*(2*(1/16-1/10^5)))/15-ε,
-      (36*(2*(1/16-1/10^5))-2)/11-ε, (1-α)/2,
-      (1/2 + (1+22*(2*(1/16-1/10^5)))/60 - 2*ε - α)/2,
-      (2 + 2*(1/16-1/10^5) - ε - 4*α)/7,
-      (2 + 2*(1/16-1/10^5) - ε - 4*α)/5,
-      1/2 - ((2*(1/16-1/10^5)) + 3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-      1/2 - ((2*(1/16-1/10^5)) + ((1+7*(2*(1/16-1/10^5)))/15-ε))/4 + ε - α,
-      (α + 2*(1/16-1/10^5) - ε)/2,
-      (2 - (2*(1/16-1/10^5) - ε) - 4*α)/3,
-      (2 + (2*(1/16-1/10^5) - ε) - 4*α)/3,
-      2 - (2*(1/16-1/10^5) - ε) - 4*α,
-      2 + (2*(1/16-1/10^5) - ε) - 4*α,
-      (s - α)/2] : List ℝ))
-    simpa using h
-  have hbadcard : ((Finset.Ioc B0 B1).filter P).card ≤ 30 := by
-    have h2T : ((Finset.Ioc B0 B1).filter P).card ≤ 2 * T.card := by
-      set S : Finset ℕ := (T.image (fun τ => Nat.floor (Z ^ τ) + 1)) ∪
-        (T.image (fun τ => Nat.floor (Z ^ τ))) with hS
-      have hsub : (Finset.Ioc B0 B1).filter P ⊆ S := by
-        intro n hn
-        obtain ⟨hn1, hnP⟩ := Finset.mem_filter.mp hn
-        obtain ⟨τ, hτT, hP1, hP2⟩ := hnP
-        have hn2 : 2 ≤ n := by
-          have := (Finset.mem_Ioc.mp hn1).1
-          omega
-        have hcast : (((n - 1 : ℕ) : ℝ)) = (n:ℝ) - 1 := by
-          have h1n : 1 ≤ n := by omega
-          rw [Nat.cast_sub h1n]
-          simp
-        have hn1' : 1 ≤ n - 1 := by omega
-        have hlog1 : Real.log (((n - 1 : ℕ) : ℝ)) / Real.log Z ≤ τ := by
-          rw [hcast]; exact hP1
-        have hlog2 : τ ≤ Real.log ((((n - 1 : ℕ) : ℝ)) + 1) / Real.log Z := by
-          rw [hcast]
-          have e : ((n:ℝ) - 1) + 1 = (n:ℝ) := by ring
-          rw [e]; exact hP2
-        have hfl := switch_cell_floor hZ (a := n - 1) hn1' hlog1 hlog2
-        rw [hS]
-        simp only [Finset.mem_union, Finset.mem_image]
-        have hpred : (n - 1) + 1 = n := Nat.sub_add_cancel (by omega : 1 ≤ n)
-        rcases hfl with h | h
-        · refine Or.inl ⟨τ, hτT, ?_⟩
-          rw [h, hpred]
-        · refine Or.inr ⟨τ, hτT, ?_⟩
-          rw [h, hpred]
-      calc ((Finset.Ioc B0 B1).filter P).card ≤ S.card := Finset.card_le_card hsub
-        _ ≤ (T.image (fun τ => Nat.floor (Z ^ τ) + 1)).card +
-              (T.image (fun τ => Nat.floor (Z ^ τ))).card := Finset.card_union_le _ _
-        _ ≤ T.card + T.card := by
-            have h1 := Finset.card_image_le (s := T) (f := fun τ => Nat.floor (Z ^ τ) + 1)
-            have h2 := Finset.card_image_le (s := T) (f := fun τ => Nat.floor (Z ^ τ))
-            omega
-        _ = 2 * T.card := by ring
-    exact le_trans h2T (by omega)
-  -- the sum of the allowances
-  have hsumδ : (∑ n ∈ Finset.Ioc B0 B1,
-        ((1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))
-          + 10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2))
-          + (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0))) ≤
-      500000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-    have hB0_4 : 4 ≤ B0 := hB0ge
-    have hB0R4'' : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast hB0_4
-    have hlogB0 : 0 < Real.log ((B0:ℝ) - 1) := Real.log_pos (by linarith)
-    have hlogle1 : (1:ℝ) ≤ Real.log ((B0:ℝ) - 1) := by
-      have h : Real.log 3 ≤ Real.log ((B0:ℝ) - 1) := by
-        apply Real.log_le_log (by norm_num)
-        linarith
-      have h4 : (1:ℝ) ≤ Real.log 3 := by
-        rw [Real.le_log_iff_exp_le (by norm_num)]
-        linarith [Real.exp_one_lt_d9]
-      linarith
-    have hden : 0 < ((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2 :=
-      mul_pos (by linarith) (pow_pos hlogB0 2)
-    have hden4 : 0 < ((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^4 :=
-      mul_pos (by linarith) (pow_pos hlogB0 4)
-    have hWB0 : 0 ≤ 1/((B0:ℝ) * Real.log (B0:ℝ)^2) := by
-      have hlogB : 0 < Real.log (B0:ℝ) := Real.log_pos (by linarith)
-      positivity
-    rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
-    -- the first piece: `∑ w(n) A(n) ≤ 200 log Z / ((B0-1) log^4 (B0-1))`
-    have hshift : (∑ n ∈ Finset.Ioc B0 B1,
-          1/(((n:ℝ)-1)^2 * Real.log ((n:ℝ)-1)^4)) =
-        ∑ m ∈ Finset.Ioc (B0 - 1) (B1 - 1), 1/((m:ℝ)^2 * Real.log (m:ℝ)^4) := by
-      refine Finset.sum_bij (fun n _ => n - 1) ?_ ?_ ?_ ?_
-      · intro n hn
-        obtain ⟨h1, h2⟩ := Finset.mem_Ioc.mp hn
-        exact Finset.mem_Ioc.mpr ⟨by omega, by omega⟩
-      · intro n1 hn1 n2 hn2 he
-        obtain ⟨h1, _⟩ := Finset.mem_Ioc.mp hn1
-        obtain ⟨h3, _⟩ := Finset.mem_Ioc.mp hn2
-        omega
-      · intro m hm
-        obtain ⟨h1, h2⟩ := Finset.mem_Ioc.mp hm
-        refine ⟨m + 1, Finset.mem_Ioc.mpr ⟨by omega, by omega⟩, by omega⟩
-      · intro n hn
-        obtain ⟨h1, _⟩ := Finset.mem_Ioc.mp hn
-        have e : (((n - 1 : ℕ)) : ℝ) = (n:ℝ) - 1 := by
-          rw [Nat.cast_sub (by omega : 1 ≤ n)]
-          simp
-        rw [e]
-    have hpiece1 : (∑ n ∈ Finset.Ioc B0 B1,
-          (1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))) ≤
-        200 * Real.log Z / (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^4) := by
-      have hstep : ∀ n ∈ Finset.Ioc B0 B1,
-          (1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-            (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) ≤
-          200 * Real.log Z * (1/(((n:ℝ)-1)^2 * Real.log ((n:ℝ)-1)^4)) := by
-        intro n hn
-        have hn2 : 2 ≤ n := by
-          have := (Finset.mem_Ioc.mp hn).1
-          omega
-        have hnR2 : (2:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn2
-        have hB0_5 : 4 ≤ B0 := hB0ge
-        have hn5 : (5:ℝ) ≤ (n:ℝ) := by
-          have h1 : (B0:ℝ) + 1 ≤ (n:ℝ) := by
-            have h3 : B0 + 1 ≤ n := by
-              have := (Finset.mem_Ioc.mp hn).1
-              omega
-            exact_mod_cast h3
-          have h2 : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast hB0_4
-          linarith
-        have hnm1 : (1:ℝ) < (n:ℝ) - 1 := by linarith
-        have hlogm : 0 < Real.log ((n:ℝ)-1) := Real.log_pos hnm1
-        have hW : 1/((n:ℝ) * Real.log (n:ℝ)^2) ≤ 1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) :=
-          weight_mono hnm1 (by linarith : ((n:ℝ)-1) ≤ (n:ℝ))
-        have hpos : 0 < 1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) := by positivity
-        calc (1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-              (200 * Real.log Z / (((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))
-            = 200 * Real.log Z * ((1/((n:ℝ) * Real.log (n:ℝ)^2)) *
-                (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))) := by ring
-          _ ≤ 200 * Real.log Z * ((1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2)) *
-                (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2))) := by
-              apply mul_le_mul_of_nonneg_left _ (by positivity)
-              exact mul_le_mul_of_nonneg_right hW (le_of_lt hpos)
-          _ = 200 * Real.log Z * (1/(((n:ℝ)-1)^2 * Real.log ((n:ℝ)-1)^4)) := by
-              congr 1
-              field_simp
-      refine (Finset.sum_le_sum hstep).trans ?_
-      rw [← Finset.mul_sum, hshift]
-      have hsum := sum_inv_sq_log_pow_le (A := B0 - 1) (B := B1 - 1)
-        (by omega : 2 ≤ B0 - 1) (k := 4) (by norm_num)
-      have hcast1 : (((B0 - 1 : ℕ)) : ℝ) = (B0:ℝ) - 1 := by
-        rw [Nat.cast_sub (by omega : 1 ≤ B0)]
-        simp
-      rw [hcast1, one_div] at hsum
-      have hfin : (0:ℝ) ≤ 200 * Real.log Z := by positivity
-      exact mul_le_mul_of_nonneg_left hsum hfin
-    -- the second piece: the telescoping weight drop
-    have hpiece2 : (∑ n ∈ Finset.Ioc B0 B1,
-          10 * (1/(((n:ℝ)-1) * Real.log ((n:ℝ)-1)^2) - 1/((n:ℝ) * Real.log (n:ℝ)^2))) ≤
-        10 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) := by
-      rw [← Finset.mul_sum]
-      have htel := tel_weight (N := B0) (B := B1) (by omega : 4 ≤ B0)
-      linarith
-    -- the third piece: the cells carrying a jump
-    have hpiece3 : (∑ n ∈ Finset.Ioc B0 B1,
-          (if P n then 20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) else 0)) ≤
-        600 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) := by
-      rw [Finset.sum_ite, Finset.sum_const, Finset.sum_const_zero, add_zero, nsmul_eq_mul]
-      have hc : ((Finset.Ioc B0 B1).filter P).card ≤ 30 := hbadcard
-      have hcR : (((Finset.Ioc B0 B1).filter P).card : ℝ) ≤ 30 := by exact_mod_cast hc
-      calc (((Finset.Ioc B0 B1).filter P).card : ℝ) *
-            (20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)))
-          ≤ 30 * (20 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2))) := by
-            apply mul_le_mul_of_nonneg_right hcR
-            positivity
-        _ = 600 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) := by ring
-    -- the bookkeeping: `W(B0) ≤ 2/den` and `1/log^4 ≤ 1/log^2`
-    have hWB0le : 1/((B0:ℝ) * Real.log (B0:ℝ)^2) ≤ 2/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by
-      have hW1 : 1/((B0:ℝ) * Real.log (B0:ℝ)^2) ≤ 1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) :=
-        weight_mono (by linarith : (1:ℝ) < (B0:ℝ) - 1) (by linarith : ((B0:ℝ)-1) ≤ (B0:ℝ))
-      have h2 : 1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) ≤
-          2 * (1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)) := by
-        have hpos : (0:ℝ) < 1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by positivity
-        linarith
-      calc 1/((B0:ℝ) * Real.log (B0:ℝ)^2)
-          ≤ 1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := hW1
-        _ ≤ 2 * (1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)) := h2
-        _ = 2/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by rw [mul_one_div]
-    have hlogle : ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2 ≤ ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^4 := by
-      have h2 : Real.log ((B0:ℝ)-1)^2 ≤ Real.log ((B0:ℝ)-1)^4 :=
-        pow_le_pow_right₀ hlogle1 (by norm_num : 2 ≤ 4)
-      exact mul_le_mul_of_nonneg_left h2 (by linarith)
-    have hpiece1' : 200 * Real.log Z / (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^4) ≤
-        200 * Real.log Z / (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) :=
-      div_le_div_of_nonneg_left (by positivity) hden hlogle
-    have htot : 200 * Real.log Z / (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)
-        + 20/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)
-        + 1200/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) ≤
-        500000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-      have hlogZ0 : 0 ≤ Real.log Z := le_of_lt hLZ
-      have hden0 : ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2 ≠ 0 := ne_of_gt hden
-      have e : 200 * Real.log Z / (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)
-          + 20/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)
-          + 1200/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)
-          = (200 * Real.log Z + 1220)/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by
-        field_simp
-        ring
-      rw [e, div_le_div_iff₀ hden hden]
-      have h1 : 200 * Real.log Z + 1220 ≤ 500000 * (1 + Real.log Z) := by linarith
-      exact mul_le_mul_of_nonneg_right h1 hden.le
-    have h10 : 10 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) ≤
-        20/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by
-      have h := mul_le_mul_of_nonneg_left hWB0le (by norm_num : (0:ℝ) ≤ 10)
-      calc 10 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2))
-          ≤ 10 * (2/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)) := h
-        _ = 20/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by ring
-    have h600 : 600 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2)) ≤
-        1200/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by
-      have h := mul_le_mul_of_nonneg_left hWB0le (by norm_num : (0:ℝ) ≤ 600)
-      calc 600 * (1/((B0:ℝ) * Real.log (B0:ℝ)^2))
-          ≤ 600 * (2/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)) := h
-        _ = 1200/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by ring
-    linarith [hpiece1, hpiece1', hpiece2, hpiece3, h10, h600, htot]
-  exact hcell.trans hsumδ
-
-
-
-set_option maxHeartbeats 20000000 in
-/-- The second passage of display 5.17 at one point `α`. -/
-private theorem second_passage_pointwise {ω : ℝ → ℝ}
-    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
-    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
-    {ε Z s : ℝ} (hε8 : ε ≤ 1/10^8)
-    (hZ : 1 < Z) (hZbig : (2:ℝ)^20 ≤ Z)
-    (hs0 : 1/2 ≤ s) (hs1 : s ≤ 1)
-    {α : ℝ} (hα1 : 1/10 ≤ α) (hα2 : α ≤ 1/2) :
-    |(∑ b ∈ Finset.Ioc ⌊Z^(1/10:ℝ)⌋₊ ⌊Z^(1/2:ℝ)⌋₊,
-        (1/((b:ℝ) * Real.log (b:ℝ)^2)) *
-          (if lowerTwoDiscarded ε α (Real.log (b:ℝ)/Real.log Z) then
-            ω ((s - α - Real.log (b:ℝ)/Real.log Z)/(Real.log (b:ℝ)/Real.log Z))/α else 0)) -
-      (1/Real.log Z) * (∫ β in (1/10:ℝ)..(1/2:ℝ),
-        (if lowerTwoDiscarded ε α β then ω ((s - α - β)/β)/(α*β^2) else 0))| ≤
-      1000000 * (1 + Real.log Z) / (((⌊Z^(1/10:ℝ)⌋₊ : ℝ) - 1) * Real.log ((⌊Z^(1/10:ℝ)⌋₊ : ℝ) - 1)^2) := by
-  classical
-  have hZ0 : (0:ℝ) < Z := by linarith
-  have hLZ : (0:ℝ) < Real.log Z := Real.log_pos hZ
-  set u : ℝ := Z^(1/10:ℝ) with hu
-  set v : ℝ := Z^(1/2:ℝ) with hv
-  set B0 : ℕ := ⌊u⌋₊ with hB0
-  set B1 : ℕ := ⌊v⌋₊ with hB1
-  have hu4 : (4:ℝ) ≤ u := by
-    have h1 : ((2:ℝ)^20)^(1/10:ℝ) ≤ Z^(1/10:ℝ) :=
-      Real.rpow_le_rpow (by positivity) hZbig (by norm_num)
-    have h2 : ((2:ℝ)^20)^(1/10:ℝ) = 4 := by
-      rw [← Real.rpow_natCast (2:ℝ) 20, ← Real.rpow_mul (by norm_num : (0:ℝ) ≤ 2)]
-      norm_num
-    rw [hu]
-    linarith
-  have hu0 : (0:ℝ) < u := by linarith
-  have huv : u ≤ v := by
-    rw [hu, hv]
-    exact Real.rpow_le_rpow_of_exponent_le hZ.le (by norm_num)
-  have hB0ge : 4 ≤ B0 := by
-    rw [hB0]
-    exact Nat.le_floor (by push_cast; exact hu4)
-  have hB0le : ((B0:ℝ)) ≤ u := by
-    rw [hB0]; exact Nat.floor_le (by positivity)
-  have hB1le : ((B1:ℝ)) ≤ v := by
-    rw [hB1]; exact Nat.floor_le (by positivity)
-  have hB0B1 : B0 ≤ B1 := by
-    have h1 : (B0:ℝ) ≤ v := le_trans hB0le huv
-    rw [hB1]
-    exact Nat.le_floor h1
-  have hB0w : (1:ℝ) ≤ (B0:ℝ) := by
-    have : 1 ≤ B0 := by omega
-    exact_mod_cast this
-  have hB0R4 : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast hB0ge
-  have huB1 : u ≤ (B1:ℝ) := by
-    -- `u + 1 ≤ v` and `v - 1 ≤ B1`
-    have hvpow : v = u^5 := by
-      rw [hu, hv, ← Real.rpow_natCast]
-      rw [show (1/2:ℝ) = (1/10:ℝ) * 5 by norm_num, Real.rpow_mul (le_of_lt hZ0)]
-      norm_num
-    have huv1 : u + 1 ≤ v := by
-      rw [hvpow]
-      have hpow : (4:ℝ)^4 ≤ u^4 := pow_le_pow_left₀ (by norm_num) hu4 4
-      have hmul : u * 4^4 ≤ u^5 := by
-        rw [show u^5 = u * u^4 by ring]
-        exact mul_le_mul_of_nonneg_left hpow (by linarith)
-      nlinarith [hmul, hu4]
-    have hfl : v - 1 ≤ (B1:ℝ) := by
-      rw [hB1]
-      have := Nat.lt_floor_add_one v
-      linarith
-    linarith
-  have hε8' : ε ≤ 1/8 := by linarith  -- the `α`-integrand is measurable, and bounded by `10 / (t log^2 t)`
-  have hΦmeas : Measurable (fun t : ℝ => if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-      ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0) :=
-    phi_measurable (measurable_buchstab_new hω hz) (Z := Z) (s := s) (α := α) (ε := ε)
-  have hWmeas : Measurable (fun t : ℝ => 1/(t * Real.log t^2)) := by measurability
-  have hphimeas : Measurable (fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) :=
-    hWmeas.mul hΦmeas
-  have hphib : ∀ t : ℝ, 1 < t → |(1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)| ≤
-        10 * (1/(t * Real.log t^2)) :=
-    fun t ht => phi_weight_abs_le hω hz hα1 t ht
-  -- the sum against the integral, from the extracted cell comparison
-  have hcell0 : |(∑ b ∈ Finset.Ioc B0 B1,
-        (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) (b:ℝ)) -
-      (∫ t in (B0:ℝ)..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)| ≤
-      500000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-    have h := second_passage_cell (ω := ω) hω hz hε8 hZ hZbig hs0 hs1 hα1 hα2
-    have e1 : (⌊Z^(1/10:ℝ)⌋₊ : ℕ) = B0 := by rw [hB0, hu]
-    have e2 : (⌊Z^(1/2:ℝ)⌋₊ : ℕ) = B1 := by rw [hB1, hv]
-    rw [e1, e2] at h
-    exact h
-  -- the change of variables `t = Z^β`
-  have hsub : (1/Real.log Z) * (∫ β in (1/10:ℝ)..(1/2:ℝ),
-        (if lowerTwoDiscarded ε α β then ω ((s - α - β)/β)/(α*β^2) else 0)) =
-      ∫ t in u..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t := by
-    have h := integral_log_subst (Z := Z) hZ
-      (g := fun β : ℝ => if lowerTwoDiscarded ε α β then ω ((s - α - β)/β)/(α*β^2) else 0)
-    rw [hu, hv, ← h, ← intervalIntegral.integral_const_mul]
-    refine intervalIntegral.integral_congr fun t ht => ?_
-    have ht0 : (0:ℝ) < t := by
-      rw [Set.uIcc_of_le huv] at ht
-      linarith [ht.1, hu0]
-    have hlt : 0 < Real.log t := Real.log_pos (by
-      rw [Set.uIcc_of_le huv] at ht
-      linarith [ht.1, hu4])
-    have hβ0 : (0:ℝ) < Real.log t / Real.log Z := div_pos hlt hLZ
-    by_cases hD : lowerTwoDiscarded ε α (Real.log t/Real.log Z)
-    · rw [if_pos hD, if_pos hD]
-      field_simp
-    · rw [if_neg hD, if_neg hD]
-      ring
-  -- the two slivers
-  have hsliver : |(∫ t in u..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) -
-      (∫ t in (B0:ℝ)..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-        (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-          ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)| ≤
-      500000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-    have hB0_1 : ((B0:ℝ)) ≤ u := hB0le
-    have huB1' : u ≤ (B1:ℝ) := huB1
-    have hB1v : ((B1:ℝ)) ≤ v := hB1le
-    -- integrability of the pieces
-    have hInt : ∀ p q : ℝ, (1:ℝ) < p → p ≤ q → IntervalIntegrable
-        (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) volume p q := by
-      intro p q hp hpq
-      · rw [intervalIntegrable_iff]
-        rw [Set.uIoc_of_le hpq]
-        refine MeasureTheory.Integrable.of_bound hphimeas.aestronglyMeasurable.restrict
-          (10 * (1/(p * Real.log p^2))) ?_
-        filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with x hx
-        have hx1 : (1:ℝ) < x := lt_of_lt_of_le hp (le_of_lt hx.1)
-        have hbx := hphib x hx1
-        have hmono : 1/(x * Real.log x^2) ≤ 1/(p * Real.log p^2) :=
-          weight_mono hp (le_of_lt hx.1)
-        have hposx : (0:ℝ) < 1/(x * Real.log x^2) := by
-          have : 0 < Real.log x := Real.log_pos hx1
-          positivity
-        rw [Real.norm_eq_abs]
-        exact hbx.trans (mul_le_mul_of_nonneg_left hmono (by norm_num))
-    have hsplit1 : (∫ t in u..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) =
-        (∫ t in u..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) +
-        (∫ t in (B1:ℝ)..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) :=
-      (intervalIntegral.integral_add_adjacent_intervals (hInt u _ (by linarith) huB1')
-        (hInt _ v (by linarith) hB1v)).symm
-    have hsplit2 : (∫ t in (B0:ℝ)..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) =
-        (∫ t in (B0:ℝ)..u, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) +
-        (∫ t in u..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) :=
-      (intervalIntegral.integral_add_adjacent_intervals (hInt _ _ (by linarith) hB0_1)
-        (hInt _ _ (by linarith) huB1')).symm
-    -- the lower sliver vanishes
-    have hzero : (∫ t in (B0:ℝ)..u, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) = 0 := by
-      apply integral_eq_zero_of_open hB0_1
-      intro x hx1 hx2
-      have hx0 : (0:ℝ) < x := by linarith
-      have hxlog : 0 < Real.log x := Real.log_pos (by linarith)
-      have hxle : Real.log x / Real.log Z ≤ 1/10 := by
-        rw [div_le_iff₀ hLZ]
-        have h2 : Real.log x ≤ Real.log u := Real.log_le_log hx0 (le_of_lt hx2)
-        rw [hu, Real.log_rpow hZ0] at h2
-        nlinarith [h2, hLZ]
-      by_cases hD : lowerTwoDiscarded ε α (Real.log x / Real.log Z)
-      · rw [if_pos hD]
-        obtain ⟨hc, -⟩ := hD
-        have hc' : (1+7*(2*(1/16-1/10^5)))/15 - 1/8 ≤ 1/10 := by norm_num
-        linarith
-      · rw [if_neg hD, mul_zero]
-    -- the upper sliver is short
-    have hupper : |(∫ t in (B1:ℝ)..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)| ≤
-        10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) := by
-      have hb1 : (1:ℝ) < (B1:ℝ) := by
-        have : (4:ℝ) ≤ (B1:ℝ) := le_trans hB0R4 (by exact_mod_cast hB0B1)
-        linarith
-      have hbnd := intervalIntegral.norm_integral_le_of_norm_le_const
-        (a := (B1:ℝ)) (b := v) (C := 10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)))
-        (f := fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0))
-        (by
-          intro x hx
-          rw [Set.uIoc_of_le hB1v] at hx
-          have hx1 : (1:ℝ) < x := lt_of_lt_of_le hb1 (le_of_lt hx.1)
-          have hbx := hphib x hx1
-          have hmono : 1/(x * Real.log x^2) ≤ 1/((B1:ℝ) * Real.log (B1:ℝ)^2) :=
-            weight_mono hb1 (le_of_lt hx.1)
-          exact hbx.trans (mul_le_mul_of_nonneg_left hmono (by norm_num)))
-      rw [Real.norm_eq_abs] at hbnd
-      rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ v - (B1:ℝ))] at hbnd
-      refine hbnd.trans ?_
-      have hlen : v - (B1:ℝ) ≤ 1 := by
-        rw [hB1]
-        linarith [Nat.lt_floor_add_one v]
-      have hpos : (0:ℝ) ≤ 10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) := by
-        have : (0:ℝ) < Real.log (B1:ℝ) := Real.log_pos hb1
-        positivity
-      calc 10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) * (v - (B1:ℝ))
-          ≤ 10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) * 1 := by
-            apply mul_le_mul_of_nonneg_left hlen
-            positivity
-        _ = 10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) := by ring
-    -- assemble
-    rw [hsplit1, hsplit2, hzero, zero_add]
-    have htri : |(∫ t in u..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) +
-        (∫ t in (B1:ℝ)..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) -
-      (∫ t in u..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)| ≤
-        10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) := by
-      have e : (∫ t in u..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) +
-          (∫ t in (B1:ℝ)..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) -
-        (∫ t in u..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-            (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-              ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) =
-        (∫ t in (B1:ℝ)..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) := by
-        ring
-      rw [e]
-      exact hupper
-    have hB1le' : (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) ≤
-        2 * (1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)) := by
-      have hB1_4 : (4:ℝ) ≤ (B1:ℝ) := le_trans hB0R4 (by exact_mod_cast hB0B1)
-      have hlogB1 : (1:ℝ) < Real.log (B1:ℝ) := by
-        have h : Real.log 3 < Real.log (B1:ℝ) := by
-          apply Real.log_lt_log (by norm_num)
-          linarith
-        have h3 : (1:ℝ) ≤ Real.log 3 := by
-          rw [Real.le_log_iff_exp_le (by norm_num)]
-          linarith [Real.exp_one_lt_d9]
-        linarith
-      have hlogB0 : 0 < Real.log ((B0:ℝ)-1) := Real.log_pos (by
-        have : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast (by omega : 4 ≤ B0)
-        linarith)
-      have hden0 : 0 < ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2 :=
-        mul_pos (by linarith) (pow_pos hlogB0 2)
-      have hcomp : ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2 ≤ (B1:ℝ) * Real.log (B1:ℝ)^2 := by
-        have h1 : ((B0:ℝ)-1) ≤ (B1:ℝ) := by linarith
-        have h2 : Real.log ((B0:ℝ)-1) ≤ Real.log (B1:ℝ) := by
-          apply Real.log_le_log (by linarith); linarith
-        have h3 : Real.log ((B0:ℝ)-1)^2 ≤ Real.log (B1:ℝ)^2 :=
-          pow_le_pow_left₀ (le_of_lt hlogB0) h2 2
-        exact mul_le_mul h1 h3 (by positivity) (by linarith)
-      have h0 := one_div_le_one_div_of_le hden0 hcomp
-      have hpos : (0:ℝ) < 1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) := by positivity
-      linarith
-    have hfin2 : 10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) ≤
-        500000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-      have hlogB0' : 0 < Real.log ((B0:ℝ)-1) := Real.log_pos (by
-        have : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast (by omega : 4 ≤ B0)
-        linarith)
-      have hden0 : 0 < ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2 :=
-        mul_pos (by linarith) (pow_pos hlogB0' 2)
-      have hlogle1 : (1:ℝ) ≤ Real.log ((B0:ℝ)-1) := by
-        have h : Real.log 3 ≤ Real.log ((B0:ℝ)-1) := by
-          apply Real.log_le_log (by norm_num)
-          have : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast (by omega : 4 ≤ B0)
-          linarith
-        have h3 : (1:ℝ) ≤ Real.log 3 := by
-          rw [Real.le_log_iff_exp_le (by norm_num)]
-          linarith [Real.exp_one_lt_d9]
-        linarith
-      have hlogZ0 : 0 ≤ Real.log Z := le_of_lt hLZ
-      rw [le_div_iff₀ hden0]
-      have h10 := mul_le_mul_of_nonneg_left hB1le' (by norm_num : (0:ℝ) ≤ 10)
-      have h20 : (10:ℝ) * (2 * (1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2))) *
-          (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) = 20 := by
-        have hB0m1 : ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2 ≠ 0 := by
-          have h1 : (0:ℝ) < (B0:ℝ) - 1 := by linarith
-          have h2 : 0 < Real.log ((B0:ℝ)-1) := Real.log_pos (by linarith)
-          exact ne_of_gt (mul_pos h1 (pow_pos h2 2))
-        have hB0nz : (B0:ℝ) - 1 ≠ 0 := by linarith
-        field_simp [hB0m1, hB0nz]
-        ring
-      calc 10 * (1/((B1:ℝ) * Real.log (B1:ℝ)^2)) * (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)
-          ≤ (10 * (2 * (1/(((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2)))) *
-              (((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2) :=
-            mul_le_mul_of_nonneg_right h10 hden0.le
-        _ = 20 := h20
-        _ ≤ 500000 * (1 + Real.log Z) := by nlinarith [hlogZ0]
-    exact htri.trans hfin2
-  -- the final assembly
-  have hassemble : |(∑ n ∈ Finset.Ioc B0 B1,
-        (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) (n:ℝ)) -
-      (1/Real.log Z) * (∫ β in (1/10:ℝ)..(1/2:ℝ),
-        (if lowerTwoDiscarded ε α β then ω ((s - α - β)/β)/(α*β^2) else 0))| ≤
-      1000000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-    rw [hsub]
-    have h1 := abs_sub_le ((∑ n ∈ Finset.Ioc B0 B1,
-        (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) (n:ℝ)))
-      (∫ t in (B0:ℝ)..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)
-      (∫ t in u..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)
-    have h2 : |(∫ t in (B0:ℝ)..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) -
-        (∫ t in u..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)| =
-        |(∫ t in u..v, (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t) -
-        (∫ t in (B0:ℝ)..(B1:ℝ), (fun t : ℝ => (1/(t * Real.log t^2)) *
-          (if lowerTwoDiscarded ε α (Real.log t/Real.log Z) then
-            ω ((s - α - Real.log t/Real.log Z)/(Real.log t/Real.log Z))/α else 0)) t)| :=
-      abs_sub_comm _ _
-    rw [h2] at h1
-    have hdbl : 500000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2)
-        + 500000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2)
-        = 1000000 * (1 + Real.log Z) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-        have hB0m1 : ((B0:ℝ)-1) * Real.log ((B0:ℝ)-1)^2 ≠ 0 := by
-          have h1 : (0:ℝ) < (B0:ℝ) - 1 := by linarith
-          have h2 : 0 < Real.log ((B0:ℝ)-1) := Real.log_pos (by linarith)
-          exact ne_of_gt (mul_pos h1 (pow_pos h2 2))
-        have hB0nz : (B0:ℝ) - 1 ≠ 0 := by linarith
-        field_simp [hB0m1, hB0nz]
-        ring
-    linarith [h1, hcell0, hsliver, hdbl]
-  -- rewrite the range and the constant
-  rw [hB0, hB1, hu]
-  exact hassemble
-
-
-/-! ### NEW: the tail of the sum vanishes, and the leaf -/
-
-/-- The summand of the second passage vanishes outside `(Z^(1/10), Z^(1/2)]`. -/
-private theorem second_passage_summand_zero {ω : ℝ → ℝ}
-    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
-    {ε x s : ℝ} (hZ1 : 1 < scaleZ ε x) (hε8 : ε ≤ 1/10^8)
-    {α : ℝ} (hα1 : 1/10 ≤ α) (hα2 : α ≤ 1/2) {b : ℕ}
-    (hb : expo ε x b ≤ 1/10 ∨ 1/2 < expo ε x b) :
-    (1/((b:ℝ) * Real.log (b:ℝ)^2)) *
-      (if lowerTwoDiscarded ε α (expo ε x b) then
-        ω ((s - α - expo ε x b) / expo ε x b) / α else 0) = 0 := by
-  rw [expo] at hb ⊢
-  have hzero : (if lowerTwoDiscarded ε α (Real.log (b:ℝ)/Real.log (scaleZ ε x)) then
-      ω ((s - α - Real.log (b:ℝ)/Real.log (scaleZ ε x))/(Real.log (b:ℝ)/Real.log (scaleZ ε x)))/α
-      else 0) = 0 := by
-    rw [if_neg]
-    intro hLT
-    obtain ⟨hc, hba, ha, -⟩ := hLT
-    rcases hb with hb | hb
-    · have hcut : (1/10:ℝ) < (1+7*(2*(1/16-1/10^5)))/15 - 1/10^8 := by norm_num
-      have hcut' : (1/10:ℝ) < (1+7*(2*(1/16-1/10^5)))/15 - ε := by linarith
-      linarith
-    · linarith
-  rw [hzero, mul_zero]
-
-/-- A negative power of `x` is at most a negative power of `log x`, times a constant. -/
-private theorem rpow_neg_le_log_rpow {A c x : ℝ} (hA : 0 < A) (hc : 0 < c) (hx : 1 < x) :
-    x ^ (-c) ≤ (A/c)^A * Real.log x ^ (-A) := by
-  have hx0 : 0 < x := by linarith
-  have hlog : 0 < Real.log x := Real.log_pos hx
-  have hr : 0 < c/A := div_pos hc hA
-  have hAc : 0 < A/c := div_pos hA hc
-  have h1 : Real.log x ≤ x^(c/A)/(c/A) := log_le_rpow_div hx0 hr
-  have h2 : Real.log x ^ A ≤ (x^(c/A)/(c/A))^A := Real.rpow_le_rpow hlog.le h1 hA.le
-  have h3 : (x^(c/A)/(c/A))^A = x^c / (c/A)^A := by
-    rw [Real.div_rpow (le_of_lt (Real.rpow_pos_of_pos hx0 _)) hr.le]
-    congr 1
-    rw [← Real.rpow_mul (le_of_lt hx0)]
-    have e : c / A * A = c := by field_simp
-    rw [e]
-  have hmul : (A/c)^A * (c/A)^A = 1 := by
-    have hm : (A/c) * (c/A) = 1 := by field_simp
-    calc (A/c)^A * (c/A)^A = ((A/c) * (c/A))^A := (Real.mul_rpow hAc.le hr.le).symm
-      _ = 1 := by rw [hm, Real.one_rpow]
-  have h4 : ((c/A)^A)⁻¹ = (A/c)^A := inv_eq_of_mul_eq_one_left hmul
-  have h5 : (x^(c/A)/(c/A))^A = x^c * (A/c)^A := by
-    rw [h3, div_eq_mul_inv, h4]
-  rw [h5] at h2
-  rw [Real.rpow_neg (le_of_lt hx0), Real.rpow_neg hlog.le, inv_eq_one_div, inv_eq_one_div]
-  have eR : (A/c)^A * (1 / Real.log x ^ A) = (A/c)^A / Real.log x ^ A := mul_one_div _ _
-  rw [eR, div_le_div_iff₀ (Real.rpow_pos_of_pos hx0 c) (Real.rpow_pos_of_pos hlog A)]
-  linarith [h2]
-
-
-set_option maxHeartbeats 8000000 in
-/-- P0069 page 51, display 5.17: the leaf's statement, from `second_passage_pointwise`. -/
-theorem leaf_two_pair_riemann_second_new (ω : ℝ → ℝ)
-    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
-    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
-    {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1/10^8) :
-    ∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ m : ℕ, ⌊x ^ (11 / 20 + ε)⌋₊ < m →
-      m ≤ ⌊2 * x ^ (11 / 20 + ε)⌋₊ →
-      |(∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-          (∫ α in (1/10:ℝ)..(1/2:ℝ),
-            if lowerTwoDiscarded ε α (expo ε x b) then
-              ω ((Real.log m / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
-            else 0) / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) -
-        lowerTwoDensityAt ω ε (Real.log m / Real.log (scaleZ ε x)) /
-          Real.log (scaleZ ε x)| ≤ C * Real.log x ^ (-A) := by
-  intro A hA
-  refine ⟨max (max (Real.exp ((2:ℝ)^(A+1))) ((2:ℝ)^40))
-      (10^7 * (400*(A+1)/11)^(A+1)), fun x hx m hm1 hm2 => ?_⟩
-  have hx40 : (2:ℝ)^40 ≤ x := ((le_max_right _ _).trans (le_max_left _ _)).trans hx
-  have hxexp : Real.exp ((2:ℝ)^(A+1)) ≤ x := ((le_max_left _ _).trans (le_max_left _ _)).trans hx
-  have hxC : (10^7 : ℝ) * (400*(A+1)/11)^(A+1) ≤ x := (le_max_right _ _).trans hx
-  have hx1 : (1:ℝ) ≤ x := le_trans (by norm_num) hx40
-  have hx0 : (0:ℝ) < x := by linarith
-  obtain ⟨hY49, -, -, -, hl, hlX1, hlX2⟩ :=
-    two_pair_scale_facts hε hε8 hA hx40 hxexp (by nlinarith [hx40] : (0:ℝ) ^ 2 ≤ x)
-  have hY4 : (4:ℝ) ≤ x ^ (11 / 20 + ε) := le_trans (by norm_num) hY49
-  have hY0 : (0:ℝ) < x ^ (11 / 20 + ε) := by linarith
-  have hZval : scaleZ ε x = 4 * x ^ (11 / 20 + ε) := rfl
-  have hZ4 : (4:ℝ) ≤ scaleZ ε x := by rw [hZval]; linarith
-  have hZbig : (2:ℝ)^20 ≤ scaleZ ε x := by
-    rw [hZval]; nlinarith [hY49]
-  have hZ1 : 1 < scaleZ ε x := by linarith
-  have hZ0 : (0:ℝ) < scaleZ ε x := by linarith
-  have hLZ : 0 < Real.log (scaleZ ε x) := Real.log_pos hZ1
-  have hmR : (0:ℝ) < (m:ℝ) := by
-    have h : 0 < m := Nat.lt_of_le_of_lt (Nat.zero_le _) hm1
-    exact_mod_cast h
-  have hmGt : x ^ (11 / 20 + ε) < (m:ℝ) := by
-    have h3 : x ^ (11 / 20 + ε) < (⌊x ^ (11 / 20 + ε)⌋₊ : ℝ) + 1 := by
-      have := Nat.lt_floor_add_one (x ^ (11 / 20 + ε))
-      exact_mod_cast this
-    have h4 : (⌊x ^ (11 / 20 + ε)⌋₊ : ℝ) + 1 ≤ (m:ℝ) := by
-      have h5 : ⌊x ^ (11 / 20 + ε)⌋₊ + 1 ≤ m := hm1
-      exact_mod_cast h5
-    linarith
-  have hmLe : (m:ℝ) ≤ 2 * x ^ (11 / 20 + ε) := by
-    have h2 : (m:ℝ) ≤ (⌊2 * x ^ (11 / 20 + ε)⌋₊ : ℝ) := by exact_mod_cast hm2
-    have h3 : (⌊2 * x ^ (11 / 20 + ε)⌋₊ : ℝ) ≤ 2 * x ^ (11 / 20 + ε) :=
-      Nat.floor_le (by positivity)
-    linarith
-  -- the exponent `s = log m / log Z`
-  have hs0 : (1/2:ℝ) ≤ Real.log (m:ℝ) / Real.log (scaleZ ε x) := by
-    rw [le_div_iff₀ hLZ]
-    have h1 : Real.log (x ^ (11 / 20 + ε)) ≤ Real.log (m:ℝ) :=
-      Real.log_le_log hY0 (le_of_lt hmGt)
-    have h2 : Real.log (scaleZ ε x) = Real.log 4 + Real.log (x ^ (11 / 20 + ε)) := by
-      rw [hZval, Real.log_mul (by norm_num) (ne_of_gt hY0)]
-    have h4 : Real.log 4 ≤ Real.log (x ^ (11 / 20 + ε)) :=
-      Real.log_le_log (by norm_num) hY4
-    rw [h2]
-    linarith
-  have hs1 : Real.log (m:ℝ) / Real.log (scaleZ ε x) ≤ 1 := by
-    rw [div_le_iff₀ hLZ]
-    have h1 : Real.log (m:ℝ) ≤ Real.log (2 * x ^ (11 / 20 + ε)) :=
-      Real.log_le_log (by linarith) hmLe
-    have h2 : Real.log (2 * x ^ (11 / 20 + ε)) ≤ Real.log (scaleZ ε x) := by
-      apply Real.log_le_log (by linarith)
-      rw [hZval]; linarith
-    linarith
-  -- the inner `α`-integrals are integrable
-  have hαInt : ∀ b : ℕ, IntervalIntegrable
-      (fun α : ℝ => if lowerTwoDiscarded ε α (expo ε x b) then
-        ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
-        else 0) volume (1/10) (1/2) := by
-    intro b
-    have hmeas : Measurable (fun α : ℝ => if lowerTwoDiscarded ε α (expo ε x b) then
-        ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
-        else 0) := by
-      have hωm : Measurable ω := measurable_buchstab_new hω hz
-      have hs1' : MeasurableSet {α : ℝ | lowerTwoDiscarded ε α (expo ε x b)} := by
-        unfold lowerTwoDiscarded upperPairRegion
-        measurability
-      have hf : Measurable (fun α : ℝ =>
-          ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α) := by
-        measurability
-      exact Measurable.ite hs1' hf measurable_const
-    rw [intervalIntegrable_iff, Set.uIoc_of_le (by norm_num : (1/10:ℝ) ≤ 1/2)]
-    refine MeasureTheory.Integrable.of_bound hmeas.aestronglyMeasurable.restrict 10 ?_
-    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with a ha
-    have ha1 : (1/10:ℝ) ≤ a := le_of_lt ha.1
-    rw [Real.norm_eq_abs]
-    exact phi_abs_le hω hz (ε := ε) (Z := scaleZ ε x) (s := Real.log (m:ℝ) / Real.log (scaleZ ε x))
-      (α := a) (β := expo ε x b) ha1
-  -- the sum over `b` and the `α`-integral commute
-  have hexch : (∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        (∫ α in (1/10:ℝ)..(1/2:ℝ),
-          if lowerTwoDiscarded ε α (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
-          else 0) / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) =
-      ∫ α in (1/10:ℝ)..(1/2:ℝ), ∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε α (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
-          else 0) := by
-    have hpt : ∀ b : ℕ, (∫ α in (1/10:ℝ)..(1/2:ℝ),
-          (if lowerTwoDiscarded ε α (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
-          else 0)) / ((b : ℝ) * Real.log (b : ℝ) ^ 2) =
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) * (∫ α in (1/10:ℝ)..(1/2:ℝ),
-          (if lowerTwoDiscarded ε α (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
-          else 0)) := fun b => by ring
-    simp_rw [hpt, ← intervalIntegral.integral_const_mul]
-    rw [← intervalIntegral.integral_finset_sum (fun b _ => (hαInt b).const_mul _)]
-  -- the truncation of the `b`-sum to `(B0, B1]`
-  set B0 : ℕ := ⌊(scaleZ ε x)^(1/10:ℝ)⌋₊ with hB0
-  set B1 : ℕ := ⌊(scaleZ ε x)^(1/2:ℝ)⌋₊ with hB1
-  have hZpow20 : (2:ℝ) ≤ (scaleZ ε x)^(1/20:ℝ) := by
-    have h1 : ((2:ℝ)^20)^(1/20:ℝ) ≤ (scaleZ ε x)^(1/20:ℝ) :=
-      Real.rpow_le_rpow (by positivity) hZbig (by norm_num)
-    have h2 : ((2:ℝ)^20)^(1/20:ℝ) = 2 := by
-      rw [← Real.rpow_natCast (2:ℝ) 20, ← Real.rpow_mul (by norm_num : (0:ℝ) ≤ 2)]
-      norm_num
-    linarith
-  have hpow4 : (4:ℝ) ≤ (scaleZ ε x)^(1/10:ℝ) := by
-    have h1 : ((2:ℝ)^20)^(1/10:ℝ) ≤ (scaleZ ε x)^(1/10:ℝ) :=
-      Real.rpow_le_rpow (by positivity) hZbig (by norm_num)
-    have h2 : ((2:ℝ)^20)^(1/10:ℝ) = 4 := by
-      rw [← Real.rpow_natCast (2:ℝ) 20, ← Real.rpow_mul (by norm_num : (0:ℝ) ≤ 2)]
-      norm_num
-    linarith
-  have hB0ge : 4 ≤ B0 := by
-    rw [hB0]; exact Nat.le_floor (by push_cast; linarith)
-  have hB0R4 : (4:ℝ) ≤ (B0:ℝ) := by exact_mod_cast hB0ge
-  have hB0le : ((B0:ℝ)) ≤ (scaleZ ε x)^(1/10:ℝ) := Nat.floor_le (by positivity)
-  have hB1le : ((B1:ℝ)) ≤ (scaleZ ε x)^(1/2:ℝ) := Nat.floor_le (by positivity)
-  have hB0B1 : B0 ≤ B1 := by
-    have h1 : (B0:ℝ) ≤ (scaleZ ε x)^(1/10:ℝ) := hB0le
-    have h2 : (scaleZ ε x)^(1/10:ℝ) ≤ (scaleZ ε x)^(1/2:ℝ) :=
-      Real.rpow_le_rpow_of_exponent_le hZ1.le (by norm_num)
-    rw [hB1]
-    exact Nat.le_floor (le_trans h1 h2)
-  have hB1N : B1 ≤ ⌊2 * x ^ (11 / 20 + ε)⌋₊ := by
-    apply Nat.le_floor
-    push_cast
-    have hB1z : (B1:ℝ) ≤ (scaleZ ε x)^(1/2:ℝ) := hB1le
-    have h4 : (4:ℝ)^(1/2:ℝ) = 2 := by
-      rw [← Real.sqrt_eq_rpow, show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq (by norm_num)]
-    rw [hZval, Real.mul_rpow (by norm_num) (le_of_lt hY0), h4] at hB1z
-    have hYh : (x ^ (11/20 + ε))^(1/2:ℝ) ≤ x ^ (11/20 + ε) := by
-      have h1 : (x ^ (11/20 + ε))^(1/2:ℝ) ≤ (x ^ (11/20 + ε))^(1:ℝ) :=
-        Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
-      rwa [Real.rpow_one] at h1
-    linarith
-  -- each summand outside `(B0, B1]` vanishes
-  have htrunc : ∀ a : ℝ, 1/10 ≤ a → a ≤ 1/2 →
-      (∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0)) =
-      ∑ b ∈ Finset.Ioc B0 B1,
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0) := by
-    intro a ha1 ha2
-    refine (Finset.sum_subset ?_ ?_).symm
-    · intro b hb
-      obtain ⟨hb1, hb2⟩ := Finset.mem_Ioc.mp hb
-      exact Finset.mem_Icc.mpr ⟨by omega, le_trans hb2 hB1N⟩
-    · intro b hb hnb
-      simp only [Finset.mem_Icc] at hb
-      simp only [Finset.mem_Ioc, not_and, not_lt] at hnb
-      have hb1 : 1 ≤ b := hb.1
-      have hbR1 : (1:ℝ) ≤ (b:ℝ) := by exact_mod_cast hb1
-      have hlogb : 0 ≤ Real.log (b:ℝ) := Real.log_nonneg hbR1
-      have hcase : b ≤ B0 ∨ B1 < b := by
-        by_contra hc
-        push_neg at hc
-        exact hnb hc.1 hc.2
-      rcases hcase with hble | hbgt
-      · have hβ : Real.log (b:ℝ) / Real.log (scaleZ ε x) ≤ 1/10 := by
-          rw [div_le_iff₀ hLZ]
-          have h1 : Real.log (b:ℝ) ≤ Real.log (B0:ℝ) := by
-            rcases Nat.eq_zero_or_pos b with h0 | hpos
-            · omega
-            · exact Real.log_le_log (by exact_mod_cast hpos) (by exact_mod_cast hble)
-          have h2 : Real.log (B0:ℝ) ≤ Real.log ((scaleZ ε x)^(1/10:ℝ)) :=
-            Real.log_le_log (by linarith) hB0le
-          rw [Real.log_rpow hZ0] at h2
-          linarith
-        have := second_passage_summand_zero (ω := ω) hω
-          (x := x) (s := Real.log (m:ℝ) / Real.log (scaleZ ε x)) (ε := ε) hZ1 hε8
-          (α := a) ha1 ha2 (b := b) (Or.inl hβ)
-        exact this
-      · have hβ : 1/2 < Real.log (b:ℝ) / Real.log (scaleZ ε x) := by
-          rw [lt_div_iff₀ hLZ]
-          have h1 : Real.log ((scaleZ ε x)^(1/2:ℝ)) < Real.log (b:ℝ) := by
-            apply Real.log_lt_log (Real.rpow_pos_of_pos hZ0 _)
-            have h3 : (B1:ℝ) + 1 ≤ (b:ℝ) := by
-              have : B1 + 1 ≤ b := by omega
-              exact_mod_cast this
-            have hZlt : (scaleZ ε x)^(1/2:ℝ) < (B1:ℝ) + 1 := by
-              rw [hB1]
-              exact Nat.lt_floor_add_one _
-            linarith
-          rw [Real.log_rpow hZ0] at h1
-          linarith
-        have := second_passage_summand_zero (ω := ω) hω
-          (x := x) (s := Real.log (m:ℝ) / Real.log (scaleZ ε x)) (ε := ε) hZ1 hε8
-          (α := a) ha1 ha2 (b := b) (Or.inr hβ)
-        exact this
-  -- integrability of the two functions of `α`
-  have hGbound : ∀ a : ℝ, 1/10 ≤ a → |(∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0))| ≤
-      10 * (∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊, 1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) := by
-    intro a ha
-    have hstep : ∀ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        |(1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0)| ≤ 10 * (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) := by
-      intro b hb
-      have hb1 : 1 ≤ b := (Finset.mem_Icc.mp hb).1
-      have hlogb : 0 ≤ Real.log (b:ℝ) := Real.log_nonneg (by exact_mod_cast hb1)
-      have hw : 0 ≤ 1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2) := by
-        rcases eq_or_lt_of_le hb1 with h | h
-        · simp [← h]
-        · have h1 : (1:ℝ) < (b:ℝ) := by exact_mod_cast h
-          have h2 : 0 < Real.log (b:ℝ) := Real.log_pos h1
-          positivity
-      have hone : |(if lowerTwoDiscarded ε a (expo ε x b) then
-          ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0)| ≤ 10 :=
-        phi_abs_le hω hz (ε := ε) (Z := scaleZ ε x)
-          (s := Real.log (m:ℝ) / Real.log (scaleZ ε x)) (α := a) (β := expo ε x b) ha
-      calc |(1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-            (if lowerTwoDiscarded ε a (expo ε x b) then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-            else 0)|
-          = (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-            |(if lowerTwoDiscarded ε a (expo ε x b) then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-            else 0)| := by rw [abs_mul, abs_of_nonneg hw]
-        _ ≤ (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) * 10 := mul_le_mul_of_nonneg_left hone hw
-        _ = 10 * (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) := by ring
-    calc |(∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-          (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-            (if lowerTwoDiscarded ε a (expo ε x b) then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-            else 0))|
-        ≤ ∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-          |(1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-            (if lowerTwoDiscarded ε a (expo ε x b) then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-            else 0)| := Finset.abs_sum_le_sum_abs _ _
-      _ ≤ ∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊, 10 * (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) :=
-          Finset.sum_le_sum hstep
-      _ = 10 * (∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊, 1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) := by
-          rw [Finset.mul_sum]
-  have hGmeas : Measurable (fun a : ℝ => ∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0)) := by
-    have hωm : Measurable ω := measurable_buchstab_new hω hz
-    apply Finset.measurable_sum
+    have hl : Real.log (Z ^ (1/2:ℝ)) < Real.log t :=
+      Real.log_lt_log (Real.rpow_pos_of_pos hZ0 _) ht
+    rw [Real.log_rpow hZ0] at hl
+    have hβ : 1/2 < Real.log t / Real.log Z := by rw [lt_div_iff₀ hLZ]; linarith
+    exact hφneg t fun h => by linarith [(hDlow _ h).2.1, (hDlow _ h).2.2]
+  -- the sum starts at the anchor
+  have hsum : (∑ b ∈ Finset.Icc 1 N, φ (b:ℝ)) = ∑ b ∈ Finset.Ioc A N, φ (b:ℝ) := by
+    have hI : Finset.Icc 1 N = Finset.Ioc 0 N := by
+      ext b
+      simp only [Finset.mem_Icc, Finset.mem_Ioc]
+      omega
+    rw [hI, ← Finset.sum_Ioc_consecutive (fun b : ℕ => φ (b:ℝ)) (Nat.zero_le A) hAN,
+      Finset.sum_eq_zero, zero_add]
     intro b hb
-    apply Measurable.mul measurable_const
-    have hs1' : MeasurableSet {α : ℝ | lowerTwoDiscarded ε α (expo ε x b)} := by
-      unfold lowerTwoDiscarded upperPairRegion
-      measurability
-    have hf : Measurable (fun α : ℝ =>
-        ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α) := by
-      measurability
-    exact Measurable.ite hs1' hf measurable_const
-  have hGint : IntervalIntegrable (fun a : ℝ => ∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0)) volume (1/10) (1/2) := by
-    rw [intervalIntegrable_iff, Set.uIoc_of_le (by norm_num : (1/10:ℝ) ≤ 1/2)]
-    refine MeasureTheory.Integrable.of_bound hGmeas.aestronglyMeasurable.restrict
-      (10 * (∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊, 1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2))) ?_
-    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with aa haa
-    rw [Real.norm_eq_abs]
-    exact hGbound aa (le_of_lt haa.1)
-  have hdens : lowerTwoDensityAt ω ε (Real.log (m:ℝ) / Real.log (scaleZ ε x)) / Real.log (scaleZ ε x) =
-      ∫ a in (1/10:ℝ)..(1/2:ℝ), (1 / Real.log (scaleZ ε x)) *
-        (∫ β in (1/10:ℝ)..(1/2:ℝ),
-          (if lowerTwoDiscarded ε a β then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0)) := by
-    unfold lowerTwoDensityAt
-    rw [div_eq_inv_mul, ← intervalIntegral.integral_const_mul]
-    simp only [one_div]
-  -- the inner `β`-integral is integrable and bounded by `400`
-  have hβb : ∀ a : ℝ, 1/10 ≤ a → |∫ β in (1/10:ℝ)..(1/2:ℝ),
-      (if lowerTwoDiscarded ε a β then
-        ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0)| ≤ 400 := by
-    intro a ha
-    have hbnd := intervalIntegral.norm_integral_le_of_norm_le_const
-      (a := (1/10:ℝ)) (b := (1/2:ℝ)) (C := 1000)
-      (f := fun β : ℝ => if lowerTwoDiscarded ε a β then
-        ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0)
-      (by
-        intro b hb
-        rw [Set.uIoc_of_le (by norm_num : (1/10:ℝ) ≤ 1/2)] at hb
-        rw [Real.norm_eq_abs]
-        by_cases hD : lowerTwoDiscarded ε a b
-        · rw [if_pos hD, abs_div]
-          have ha0 : (0:ℝ) < a := by linarith
-          have hb0 : (0:ℝ) < b := by linarith [hb.1]
-          have hnum : |ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - b) / b)| ≤ 1 := by
-            rw [abs_le]
-            exact ⟨by linarith [Decomp514a.two_density_buchstab_nonneg hω hz ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - b) / b)],
-              LeanLab.ChenDoubleSieve.Wu04Functional.extended_buchstab_le_one hω hz _⟩
-          have hden : (1/1000:ℝ) ≤ a * b^2 := by nlinarith [ha, hb.1, ha0, hb0]
-          rw [abs_of_pos (by positivity : (0:ℝ) < a * b^2)]
-          rw [div_le_iff₀ (by positivity : (0:ℝ) < a * b^2)]
-          nlinarith [hnum]
-        · rw [if_neg hD, abs_zero]; norm_num)
-    rw [Real.norm_eq_abs] at hbnd
-    refine hbnd.trans ?_
-    norm_num
-  have hDint : IntervalIntegrable (fun a : ℝ => (1 / Real.log (scaleZ ε x)) *
-      (∫ β in (1/10:ℝ)..(1/2:ℝ),
-        (if lowerTwoDiscarded ε a β then
-          ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0)))
-      volume (1/10) (1/2) := by
-    rw [intervalIntegrable_iff, Set.uIoc_of_le (by norm_num : (1/10:ℝ) ≤ 1/2)]
-    refine MeasureTheory.Integrable.of_bound ?_ 400 ?_
-    ·
-      -- measurability of the inner integral as a function of `α`
-      have h2m : Measurable (fun p : ℝ × ℝ =>
-            if lowerTwoDiscarded ε p.1 p.2 then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - p.1 - p.2) / p.2) / (p.1 * p.2 ^ 2)
-            else 0) := by
-        have hωm : Measurable ω := measurable_buchstab_new hω hz
-        have hs1' : MeasurableSet {p : ℝ × ℝ | lowerTwoDiscarded ε p.1 p.2} := by
-          unfold lowerTwoDiscarded upperPairRegion
-          measurability
-        have hf : Measurable (fun p : ℝ × ℝ =>
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - p.1 - p.2) / p.2) / (p.1 * p.2 ^ 2)) := by
-          measurability
-        exact Measurable.ite hs1' hf measurable_const
-      have hraw : StronglyMeasurable (fun p : ℝ × ℝ =>
-          (Set.Ioc (1/10:ℝ) (1/2)).indicator
-            (fun q : ℝ => if lowerTwoDiscarded ε p.1 q then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - p.1 - q) / q) / (p.1 * q ^ 2)
-            else 0) p.2) := by
-        refine h2m.stronglyMeasurable.indicator ?_
-        exact measurableSet_Ioc.preimage measurable_snd
-      have hind : StronglyMeasurable (Function.uncurry (fun a q : ℝ =>
-          (Set.Ioc (1/10:ℝ) (1/2)).indicator
-            (fun q' : ℝ => if lowerTwoDiscarded ε a q' then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - q') / q') / (a * q' ^ 2)
-            else 0) q)) := hraw
-      have hsm := StronglyMeasurable.integral_prod_right (ν := volume) hind
-      have e : (fun a : ℝ => ∫ β in (1/10:ℝ)..(1/2:ℝ),
-          (if lowerTwoDiscarded ε a β then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0)) =
-          (fun a : ℝ => ∫ β, (Set.Ioc (1/10:ℝ) (1/2)).indicator
-            (fun q : ℝ => if lowerTwoDiscarded ε a q then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - q) / q) / (a * q ^ 2)
-            else 0) β) := by
-        funext a
-        rw [intervalIntegral.integral_of_le (by norm_num : (1/10:ℝ) ≤ 1/2),
-          ← MeasureTheory.integral_indicator measurableSet_Ioc]
-      have hfin : AEStronglyMeasurable (fun a : ℝ => ∫ β in (1/10:ℝ)..(1/2:ℝ),
-          (if lowerTwoDiscarded ε a β then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0))
-          (volume.restrict (Set.Ioc (1/10:ℝ) (1/2))) := by
-        rw [e]
-        exact hsm.measurable.aestronglyMeasurable.restrict
-      exact hfin.const_mul _
-    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with a ha
-      rw [Real.norm_eq_abs]
-      have hlogZ1 : (1:ℝ) ≤ Real.log (scaleZ ε x) := by
-        have h : Real.log 4 ≤ Real.log (scaleZ ε x) := Real.log_le_log (by norm_num) hZ4
-        have h2 : (1:ℝ) ≤ Real.log 4 := by
-          have h4 : (0.5:ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
-          have h5 : Real.log 4 = 2 * Real.log 2 := by
-            rw [show (4:ℝ) = 2 ^ (2:ℕ) by norm_num, Real.log_pow]
-            push_cast
-            ring
-          linarith
-        linarith
-      calc |(1 / Real.log (scaleZ ε x)) *
-            (∫ β in (1/10:ℝ)..(1/2:ℝ),
-              (if lowerTwoDiscarded ε a β then
-                ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0))|
-          = |1 / Real.log (scaleZ ε x)| *
-            |∫ β in (1/10:ℝ)..(1/2:ℝ),
-              (if lowerTwoDiscarded ε a β then
-                ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0)| :=
-            abs_mul _ _
-        _ ≤ 1 * 400 := by
-            apply mul_le_mul
-            · rw [abs_of_pos (by positivity : (0:ℝ) < 1 / Real.log (scaleZ ε x))]
-              rw [div_le_one (by linarith)]
-              exact hlogZ1
-            · exact hβb a (le_of_lt ha.1)
-            · exact abs_nonneg _
-            · norm_num
-        _ = 400 := by norm_num
-  -- the pointwise comparison
-  have hpt : ∀ a : ℝ, 1/10 ≤ a → a ≤ 1/2 →
-      |(∑ b ∈ Finset.Ioc B0 B1, (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (Real.log (b : ℝ) / Real.log (scaleZ ε x)) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - Real.log (b : ℝ) / Real.log (scaleZ ε x)) /
-              (Real.log (b : ℝ) / Real.log (scaleZ ε x))) / a else 0)) -
-        (1 / Real.log (scaleZ ε x)) *
-          (∫ β in (1/10:ℝ)..(1/2:ℝ),
-            (if lowerTwoDiscarded ε a β then
-              ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0))| ≤
-        1000000 * (1 + Real.log (scaleZ ε x)) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-    intro a ha1 ha2
-    have h := second_passage_pointwise (ω := ω) hω hz (ε := ε) (Z := scaleZ ε x)
-      (s := Real.log (m:ℝ) / Real.log (scaleZ ε x)) hε8 hZ1 hZbig hs0 hs1 ha1 ha2
-    rw [← hB0, ← hB1] at h
-    simpa [expo] using h
-  -- the integral of the difference
-  rw [hexch, hdens]
-  rw [← intervalIntegral.integral_sub hGint hDint]
-  refine (intervalIntegral.abs_integral_le_integral_abs (by norm_num : (1/10:ℝ) ≤ 1/2)).trans ?_
-  have hpt' : ∀ a ∈ Set.Icc (1/10:ℝ) (1/2),
-      |(∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
-        (1 / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) *
-          (if lowerTwoDiscarded ε a (expo ε x b) then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - expo ε x b) / expo ε x b) / a
-          else 0)) -
-        (1 / Real.log (scaleZ ε x)) *
-        (∫ β in (1/10:ℝ)..(1/2:ℝ),
-          (if lowerTwoDiscarded ε a β then
-            ω ((Real.log (m:ℝ) / Real.log (scaleZ ε x) - a - β) / β) / (a * β ^ 2) else 0))| ≤
-        1000000 * (1 + Real.log (scaleZ ε x)) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) := by
-    intro a ha
-    rw [htrunc a ha.1 ha.2]
-    exact hpt a ha.1 ha.2
-  refine (intervalIntegral.integral_mono_on (by norm_num : (1/10:ℝ) ≤ 1/2) (hGint.sub hDint).abs
-    intervalIntegrable_const hpt').trans ?_
-  rw [intervalIntegral.integral_const, smul_eq_mul]
-  -- the final numerical comparison
-  have hx27 : (27:ℝ) ≤ Real.log x := by
-    have h2 : Real.log ((2:ℝ)^40) ≤ Real.log x := Real.log_le_log (by norm_num) hx40
-    have h3 : Real.log ((2:ℝ)^40) = 40 * Real.log 2 := by
-      rw [Real.log_pow]; push_cast; ring
-    have h4 : (0.693:ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
-    rw [h3] at h2
+    obtain ⟨hb1, hb2⟩ := Finset.mem_Ioc.mp hb
+    exact hlow b (by exact_mod_cast hb1) (le_trans (by exact_mod_cast hb2) hAZ)
+  -- the integral runs between the integer anchors
+  have hint : ∀ u v : ℝ, 2 ≤ u → u ≤ v → IntervalIntegrable φ volume u v :=
+    fun u v hu huv => two_pair_beta_density_integrable hω hz hε8 Z s α hu huv
+  have hint_eq : (∫ t in (A:ℝ)..(N:ℝ), φ t) = ∫ t in Z ^ (1/10:ℝ)..Z ^ (1/2:ℝ), φ t := by
+    have e1 : (∫ t in (A:ℝ)..Z ^ (1/10:ℝ), φ t) = 0 :=
+      integral_eq_zero_of_open hAZ (fun x hx1 hx2 => hlow x (by linarith) hx2.le)
+    have e2 : (∫ t in Z ^ (1/2:ℝ)..(N:ℝ), φ t) = 0 :=
+      integral_eq_zero_of_open hNZ (fun x hx1 _ => hhigh x hx1)
+    have i1 := hint A (Z ^ (1/10:ℝ)) (by linarith) hAZ
+    have i2 := hint (Z ^ (1/10:ℝ)) (Z ^ (1/2:ℝ)) (by linarith) hZle
+    have i3 := hint (Z ^ (1/2:ℝ)) N (by linarith) hNZ
+    rw [← intervalIntegral.integral_add_adjacent_intervals (i1.trans i2) i3, e2, add_zero,
+      ← intervalIntegral.integral_add_adjacent_intervals i1 i2, e1, zero_add]
+  -- the switch points
+  obtain ⟨T, hTu, hTl, hTcard⟩ : ∃ T : Finset ℝ, (s-α)/2 ∈ T ∧
+      (∀ τ ∈ ([(1+7*(2*(1/16-1/10^5)))/15-ε, α, (1-α)/2,
+        (1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε-α)/2,
+        (2+2*(1/16-1/10^5)-ε-4*α)/7,
+        1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α,
+        (36*(2*(1/16-1/10^5))-2)/11-ε,
+        (2+2*(1/16-1/10^5)-ε-4*α)/5,
+        1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α,
+        (α+2*(1/16-1/10^5)-ε)/2,
+        (2-(2*(1/16-1/10^5)-ε)-4*α)/3, (2+(2*(1/16-1/10^5)-ε)-4*α)/3,
+        2-(2*(1/16-1/10^5)-ε)-4*α, 2+(2*(1/16-1/10^5)-ε)-4*α] : List ℝ), τ ∈ T) ∧ T.card ≤ 15 :=
+    ⟨insert ((s-α)/2) ([(1+7*(2*(1/16-1/10^5)))/15-ε, α, (1-α)/2,
+        (1/2+(1+22*(2*(1/16-1/10^5)))/60-2*ε-α)/2,
+        (2+2*(1/16-1/10^5)-ε-4*α)/7,
+        1/2-((2*(1/16-1/10^5))+3*((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α,
+        (36*(2*(1/16-1/10^5))-2)/11-ε,
+        (2+2*(1/16-1/10^5)-ε-4*α)/5,
+        1/2-((2*(1/16-1/10^5))+((1+7*(2*(1/16-1/10^5)))/15-ε))/4+ε-α,
+        (α+2*(1/16-1/10^5)-ε)/2,
+        (2-(2*(1/16-1/10^5)-ε)-4*α)/3, (2+(2*(1/16-1/10^5)-ε)-4*α)/3,
+        2-(2*(1/16-1/10^5)-ε)-4*α, 2+(2*(1/16-1/10^5)-ε)-4*α] : List ℝ).toFinset,
+      Finset.mem_insert_self _ _,
+      fun τ hτ => Finset.mem_insert_of_mem (List.mem_toFinset.mpr hτ),
+      (Finset.card_insert_le _ _).trans
+        (Nat.succ_le_succ ((List.toFinset_card_le _).trans (le_of_eq rfl)))⟩
+  set bad : ℕ → Prop := fun a => ∃ τ ∈ T,
+      Real.log (a:ℝ) / Real.log Z ≤ τ ∧ τ ≤ Real.log ((a:ℝ)+1) / Real.log Z with hbad
+  set δ : ℕ → ℝ := fun n => 1000 / ((n:ℝ)-1)^2 +
+      (if bad (n-1) then 80 / ((n:ℝ)-1) else 0) with hδ
+  have hδ0 : ∀ n : ℕ, A < n → 0 ≤ δ n := by
+    intro n hn
+    have hnA : (A:ℝ) + 1 ≤ n := by exact_mod_cast hn
+    have h1 : (0:ℝ) ≤ 1000 / ((n:ℝ)-1)^2 := by positivity
+    have h2 : (0:ℝ) ≤ (if bad (n-1) then 80 / ((n:ℝ)-1) else 0) := by
+      split_ifs
+      · exact div_nonneg (by norm_num) (by linarith)
+      · exact le_refl _
+    show 0 ≤ 1000 / ((n:ℝ)-1)^2 + (if bad (n-1) then 80 / ((n:ℝ)-1) else 0)
     linarith
-  have hlogZ_le : (1 + Real.log (scaleZ ε x)) ≤ 4 * Real.log x := by
-    have h1 : Real.log (scaleZ ε x) = Real.log 4 + Real.log (x ^ (11 / 20 + ε)) := by
-      rw [hZval, Real.log_mul (by norm_num) (ne_of_gt hY0)]
-    have h5 : Real.log (x ^ (11 / 20 + ε)) = (11/20 + ε) * Real.log x := Real.log_rpow hx0 _
-    have h6 : (11/20 + ε) * Real.log x ≤ Real.log x := by
-      have h7 : (11/20 + ε) ≤ 1 := by linarith
-      nlinarith [Real.log_nonneg hx1]
-    have h8 : Real.log 4 ≤ 4 := by
-      have h9 := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 4)
+  have hcell : ∀ n : ℕ, A < n → IntervalIntegrable φ volume ((n:ℝ)-1) (n:ℝ) := by
+    intro n hn
+    have hnA : (A:ℝ) + 1 ≤ n := by exact_mod_cast hn
+    exact hint _ _ (by linarith) (by linarith)
+  have hosc : ∀ n : ℕ, A < n → ∀ t ∈ Set.Icc ((n:ℝ)-1) (n:ℝ), |φ (n:ℝ) - φ t| ≤ δ n := by
+    intro n hn t ht
+    have hnA : (A:ℝ) + 1 ≤ n := by exact_mod_cast hn
+    have hn1 : 1 ≤ n := by omega
+    have hcast : (((n - 1 : ℕ)) : ℝ) = (n:ℝ) - 1 := by
+      push_cast [Nat.cast_sub hn1]; ring
+    have ht2 : (2:ℝ) ≤ t := by linarith [ht.1]
+    have ht0 : (0:ℝ) < t := by linarith
+    have hk0 : (0:ℝ) < (n:ℝ) - 1 := by linarith
+    have hcrude : |φ (n:ℝ) - φ t| ≤ 80 / ((n:ℝ)-1) := by
+      have h1 : |φ (n:ℝ)| ≤ 40 / (n:ℝ) :=
+        two_pair_beta_density_abs_le hω hz hε8 Z s α (by linarith)
+      have h2 : |φ t| ≤ 40 / t := two_pair_beta_density_abs_le hω hz hε8 Z s α ht2
+      have h3 : 40 / (n:ℝ) ≤ 40 / ((n:ℝ)-1) :=
+        div_le_div_of_nonneg_left (by norm_num) hk0 (by linarith)
+      have h4 : 40 / t ≤ 40 / ((n:ℝ)-1) :=
+        div_le_div_of_nonneg_left (by norm_num) hk0 ht.1
+      have h5 : 80 / ((n:ℝ)-1) = 40 / ((n:ℝ)-1) + 40 / ((n:ℝ)-1) := by ring
+      have h6 := abs_add_le (φ (n:ℝ)) (-φ t)
+      rw [abs_neg, ← sub_eq_add_neg] at h6
       linarith
-    have h10 : (1:ℝ) ≤ Real.log x := by linarith
+    have hsq0 : (0:ℝ) ≤ 1000 / ((n:ℝ)-1)^2 := by positivity
+    show |φ (n:ℝ) - φ t| ≤ 1000 / ((n:ℝ)-1)^2 + (if bad (n-1) then 80 / ((n:ℝ)-1) else 0)
+    by_cases hb : bad (n-1)
+    · rw [if_pos hb]; linarith
+    · rw [if_neg hb, add_zero]
+      have hβle : Real.log t / Real.log Z ≤ Real.log (n:ℝ) / Real.log Z :=
+        div_le_div_of_nonneg_right (Real.log_le_log ht0 ht.2) hLZ.le
+      have hβge : Real.log ((n:ℝ)-1) / Real.log Z ≤ Real.log t / Real.log Z :=
+        div_le_div_of_nonneg_right (Real.log_le_log hk0 ht.1) hLZ.le
+      have hnoT : ∀ τ ∈ T,
+          ¬(Real.log t / Real.log Z ≤ τ ∧ τ ≤ Real.log (n:ℝ) / Real.log Z) := by
+        intro τ hτ hin
+        apply hb
+        refine ⟨τ, hτ, ?_, ?_⟩
+        · rw [hcast]; linarith [hin.1]
+        · rw [hcast, show (n:ℝ) - 1 + 1 = (n:ℝ) by ring]; exact hin.2
+      have hreg := two_pair_beta_region_const (ε := ε) (α := α) hβle
+        (fun τ hτ => hnoT τ (hTl τ hτ))
+      by_cases hD : lowerTwoDiscarded ε α (Real.log (n:ℝ) / Real.log Z)
+      · have hDt := hreg.mpr hD
+        obtain ⟨hβt, -, -⟩ := hDlow _ hDt
+        obtain ⟨hβn, hαn, -⟩ := hDlow _ hD
+        have hα10 : 1/10 ≤ α := by linarith
+        have hβn0 : 0 < Real.log (n:ℝ) / Real.log Z := by linarith
+        have hβt0 : 0 < Real.log t / Real.log Z := by linarith
+        have hτu := hnoT ((s-α)/2) hTu
+        rw [hφpos _ hD, hφpos _ hDt]
+        by_cases hu : Real.log (n:ℝ) / Real.log Z ≤ (s-α)/2
+        · have hu1 : 1 ≤ (s - α - Real.log (n:ℝ) / Real.log Z) /
+              (Real.log (n:ℝ) / Real.log Z) := by
+            rw [le_div_iff₀ hβn0]; linarith
+          have h := two_pair_beta_osc hω hz hLZ hα10 hs ht2 ht.2 (by linarith [ht.1])
+            hβt.le hu1
+          have h2 : 1000 / t^2 ≤ 1000 / ((n:ℝ)-1)^2 :=
+            div_le_div_of_nonneg_left (by norm_num) (by positivity)
+              (pow_le_pow_left₀ hk0.le ht.1 2)
+          exact h.trans h2
+        · have hn' : (s-α)/2 < Real.log (n:ℝ) / Real.log Z := not_le.mp hu
+          have ht' : (s-α)/2 < Real.log t / Real.log Z := by
+            by_contra hcon
+            exact hτu ⟨not_lt.mp hcon, hn'.le⟩
+          have z1 : ω ((s - α - Real.log (n:ℝ) / Real.log Z) /
+              (Real.log (n:ℝ) / Real.log Z)) = 0 :=
+            hz _ (by rw [div_lt_one hβn0]; linarith)
+          have z2 : ω ((s - α - Real.log t / Real.log Z) / (Real.log t / Real.log Z)) = 0 :=
+            hz _ (by rw [div_lt_one hβt0]; linarith)
+          rw [z1, z2]
+          simp only [zero_div, sub_zero, abs_zero]
+          exact hsq0
+      · have hDt : ¬ lowerTwoDiscarded ε α (Real.log t / Real.log Z) :=
+          fun h => hD (hreg.mp h)
+        rw [hφneg _ hD, hφneg _ hDt, sub_zero, abs_zero]
+        exact hsq0
+  have hcells := sum_sub_integral_le_of_cell φ δ A hδ0 hcell hosc N hAN
+  -- the sum of the per cell bounds
+  have hsum1 : (∑ n ∈ Finset.Ioc A N, 1000 / ((n:ℝ)-1)^2) ≤ 2000 / (A:ℝ) := by
+    have hshift : (∑ n ∈ Finset.Ioc A N, 1000 / ((n:ℝ)-1)^2) =
+        ∑ a ∈ Finset.Ioc (A-1) (N-1), 1000 * (1 / (a:ℝ)^2) := by
+      rw [← sum_Ioc_shift (A := A) (B := N) (by omega) (fun a => 1000 * (1 / (a:ℝ)^2))]
+      refine Finset.sum_congr rfl fun n hmem => ?_
+      obtain ⟨h1, -⟩ := Finset.mem_Ioc.mp hmem
+      show 1000 / ((n:ℝ)-1)^2 = 1000 * (1 / (((n - 1 : ℕ)) : ℝ)^2)
+      rw [Nat.cast_sub (by omega : 1 ≤ n), Nat.cast_one]
+      ring
+    rw [hshift, ← Finset.mul_sum]
+    have hsq := sum_inv_sq_le (A := A-1) (B := N-1) (by omega)
+    rw [Nat.cast_sub (by omega : 1 ≤ A), Nat.cast_one] at hsq
+    have h1 : 1 / ((A:ℝ) - 1) ≤ 2 / (A:ℝ) := by
+      rw [div_le_div_iff₀ (by linarith) hA0]; linarith
+    have h2 := mul_le_mul_of_nonneg_left (hsq.trans h1) (by norm_num : (0:ℝ) ≤ 1000)
+    have e : (1000:ℝ) * (2 / (A:ℝ)) = 2000 / (A:ℝ) := by ring
     linarith
-  -- `log^2 (B0-1) ≥ 1/4` and `(B0-1) ≥ Z^(1/20)`
-  have hB0m1 : (scaleZ ε x)^(1/20:ℝ) ≤ (B0:ℝ) - 1 := by
-    have h2 := hZpow20
-    have h3 : (scaleZ ε x)^(1/10:ℝ) = (scaleZ ε x)^(1/20:ℝ) * (scaleZ ε x)^(1/20:ℝ) := by
-      rw [← Real.rpow_add hZ0]; norm_num
-    have h4 : ((B0:ℝ)) ≥ (scaleZ ε x)^(1/10:ℝ) - 1 := by
-      have h5 := Nat.floor_le (show (0:ℝ) ≤ (scaleZ ε x)^(1/10:ℝ) by positivity)
-      push_cast at h5
-      have h6 := Nat.sub_one_lt_floor ((scaleZ ε x)^(1/10:ℝ))
-      linarith
-    rw [h3] at h4
-    nlinarith [h2, h4]
-  have hlogB0 : (1/2:ℝ) ≤ Real.log ((B0:ℝ) - 1) := by
-    have h2 : (2:ℝ) ≤ (B0:ℝ) - 1 := by linarith [hB0R4]
-    have h3 : Real.log 2 ≤ Real.log ((B0:ℝ) - 1) := Real.log_le_log (by norm_num) h2
-    have h4 : (0.5:ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hsum2 : (∑ n ∈ Finset.Ioc A N, (if bad (n-1) then 80 / ((n:ℝ)-1) else 0)) ≤
+      2400 / (A:ℝ) := by
+    rw [← Finset.sum_filter]
+    have hterm : ∀ n ∈ (Finset.Ioc A N).filter (fun n => bad (n-1)),
+        80 / ((n:ℝ)-1) ≤ 80 / (A:ℝ) := by
+      intro n hn
+      obtain ⟨h1, -⟩ := Finset.mem_Ioc.mp (Finset.mem_filter.mp hn).1
+      have hnA : (A:ℝ) + 1 ≤ n := by exact_mod_cast h1
+      exact div_le_div_of_nonneg_left (by norm_num) hA0 (by linarith)
+    have hle := Finset.sum_le_card_nsmul _ _ _ hterm
+    rw [nsmul_eq_mul] at hle
+    have hcard : ((Finset.Ioc A N).filter (fun n => bad (n-1))).card ≤ 30 := by
+      have hc := card_filter_Ioc_shift (A := A) (B := N) (by omega : 1 ≤ A) bad
+      have h := bad_cell_count hZ T bad (fun a ha => ha) (A := A-1) (B := N-1) (by omega)
+      have h2 : 2 * T.card ≤ 30 := by omega
+      convert (le_of_eq hc).trans (h.trans h2)
+    have h30 : (((Finset.Ioc A N).filter (fun n => bad (n-1))).card : ℝ) ≤ 30 := by
+      exact_mod_cast hcard
+    have h80 : (0:ℝ) ≤ 80 / (A:ℝ) := by positivity
+    have h3 := mul_le_mul_of_nonneg_right h30 h80
+    have e : (30:ℝ) * (80 / (A:ℝ)) = 2400 / (A:ℝ) := by ring
     linarith
-  have hden : (scaleZ ε x)^(1/20:ℝ) / 4 ≤ ((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2 := by
-    have h2 : (1/4:ℝ) ≤ Real.log ((B0:ℝ) - 1)^2 := by nlinarith
-    have h3 : (0:ℝ) < (scaleZ ε x)^(1/20:ℝ) := Real.rpow_pos_of_pos hZ0 _
-    nlinarith [hB0m1, h2, h3]
-  have hERR : 1000000 * (1 + Real.log (scaleZ ε x)) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) ≤
-      4000000 * (1 + Real.log (scaleZ ε x)) * (scaleZ ε x)^(-(1/20:ℝ)) := by
-    have hpos : (0:ℝ) < ((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2 := by
-      have h1 : (0:ℝ) < (B0:ℝ) - 1 := by linarith
-      have h2 : (0:ℝ) < Real.log ((B0:ℝ) - 1) := by linarith
-      positivity
-    have hz0 : (0:ℝ) < (scaleZ ε x)^(1/20:ℝ) := Real.rpow_pos_of_pos hZ0 _
-    have hstep : 1000000 * (1 + Real.log (scaleZ ε x)) / (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2) ≤
-        1000000 * (1 + Real.log (scaleZ ε x)) / ((scaleZ ε x)^(1/20:ℝ) / 4) := by
-      apply div_le_div_of_nonneg_left (by positivity) (by positivity) hden
-    have heq : 1000000 * (1 + Real.log (scaleZ ε x)) / ((scaleZ ε x)^(1/20:ℝ) / 4) =
-        4000000 * (1 + Real.log (scaleZ ε x)) * ((scaleZ ε x)^(1/20:ℝ))⁻¹ := by
-      field_simp
-      norm_num
-    rw [Real.rpow_neg (le_of_lt hZ0)]
-    linarith [hstep, heq.le, heq.ge]
-  have hZpow_le : (scaleZ ε x)^(-(1/20:ℝ)) ≤ x ^ (-(11/400:ℝ)) := by
-    have h1 : x ^ (11/400:ℝ) ≤ (scaleZ ε x)^(1/20:ℝ) := by
-      rw [hZval]
-      have h2 : (4 * x ^ (11/20 + ε))^(1/20:ℝ) =
-          4^(1/20:ℝ) * (x ^ (11/20 + ε))^(1/20:ℝ) := Real.mul_rpow (by norm_num) (le_of_lt hY0)
-      rw [h2, ← Real.rpow_mul (le_of_lt hx0)]
-      have h3 : x ^ (11/400:ℝ) ≤ x ^ ((11/20 + ε) * (1/20)) := by
-        apply Real.rpow_le_rpow_of_exponent_le hx1
-        nlinarith
-      have h4 : (1:ℝ) ≤ 4^(1/20:ℝ) := by
-        calc (1:ℝ) = 1^(1/20:ℝ) := by rw [Real.one_rpow]
-          _ ≤ 4^(1/20:ℝ) := Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
-      have h5 : (0:ℝ) < x ^ ((11/20 + ε) * (1/20)) := Real.rpow_pos_of_pos hx0 _
-      nlinarith [h3, h4, h5, Real.rpow_pos_of_pos hx0 (11/400:ℝ)]
-    rw [Real.rpow_neg (le_of_lt hZ0), Real.rpow_neg (le_of_lt hx0)]
-    exact (inv_le_inv₀ (Real.rpow_pos_of_pos hZ0 _) (Real.rpow_pos_of_pos hx0 _)).mpr h1
-  -- assemble the constant
-  have hA1 : (0:ℝ) < A + 1 := by linarith
-  have hcpos : (0:ℝ) < 11/400 := by norm_num
-  have hlogA : x ^ (-(11/400:ℝ)) ≤ ((A+1)/(11/400))^(A+1) * Real.log x ^ (-(A+1)) :=
-    rpow_neg_le_log_rpow hA1 hcpos (by linarith)
-  have hlognonneg : (0:ℝ) ≤ Real.log x := Real.log_nonneg hx1
-  have hstep1 : (2/5:ℝ) * (1000000 * (1 + Real.log (scaleZ ε x)) /
-      (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2)) ≤
-      (2/5:ℝ) * (4000000 * (1 + Real.log (scaleZ ε x)) * (scaleZ ε x)^(-(1/20:ℝ))) :=
-    mul_le_mul_of_nonneg_left hERR (by norm_num)
-  have hstep2 : (2/5:ℝ) * (4000000 * (1 + Real.log (scaleZ ε x)) * (scaleZ ε x)^(-(1/20:ℝ))) ≤
-      (2/5:ℝ) * (4000000 * (4 * Real.log x) * x ^ (-(11/400:ℝ))) := by
-    apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 2/5)
-    have h3 : (0:ℝ) ≤ (1 + Real.log (scaleZ ε x)) := by
-      have h5 : 0 ≤ Real.log (scaleZ ε x) := Real.log_nonneg hZ1.le
-      linarith
-    have hz : (0:ℝ) ≤ (scaleZ ε x)^(-(1/20:ℝ)) := Real.rpow_nonneg hZ0.le _
-    calc 4000000 * (1 + Real.log (scaleZ ε x)) * (scaleZ ε x)^(-(1/20:ℝ))
-        = 4000000 * ((1 + Real.log (scaleZ ε x)) * (scaleZ ε x)^(-(1/20:ℝ))) := by ring
-      _ ≤ 4000000 * ((4 * Real.log x) * (scaleZ ε x)^(-(1/20:ℝ))) := by
-          apply mul_le_mul_of_nonneg_left _ (by norm_num)
-          exact mul_le_mul_of_nonneg_right hlogZ_le hz
-      _ ≤ 4000000 * ((4 * Real.log x) * x ^ (-(11/400:ℝ))) := by
-          apply mul_le_mul_of_nonneg_left _ (by norm_num)
-          exact mul_le_mul_of_nonneg_left hZpow_le (by linarith)
-      _ = 4000000 * (4 * Real.log x) * x ^ (-(11/400:ℝ)) := by ring
-  have hstep3 : (2/5:ℝ) * (4000000 * (4 * Real.log x) * x ^ (-(11/400:ℝ))) ≤
-      (2/5:ℝ) * (4000000 * (4 * ((A+1)/(11/400))^(A+1) * Real.log x ^ (-(A+1))) * Real.log x) := by
-    apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 2/5)
-    have h1 : Real.log x * x ^ (-(11/400:ℝ)) ≤
-        Real.log x * (((A+1)/(11/400))^(A+1) * Real.log x ^ (-(A+1:ℝ))) :=
-      mul_le_mul_of_nonneg_left hlogA hlognonneg
-    calc 4000000 * (4 * Real.log x) * x ^ (-(11/400:ℝ))
-        = 16000000 * (Real.log x * x ^ (-(11/400:ℝ))) := by ring
-      _ ≤ 16000000 * (Real.log x * (((A+1)/(11/400))^(A+1) * Real.log x ^ (-(A+1:ℝ)))) := by
-          apply mul_le_mul_of_nonneg_left h1 (by norm_num)
-      _ = 4000000 * (4 * ((A+1)/(11/400))^(A+1) * Real.log x ^ (-(A+1:ℝ))) * Real.log x := by ring
-  have hstep4 : (2/5:ℝ) * (4000000 * (4 * ((A+1)/(11/400))^(A+1) * Real.log x ^ (-(A+1))) * Real.log x) =
-      (2/5:ℝ) * (4000000 * (4 * ((A+1)/(11/400))^(A+1))) * Real.log x ^ (-A) := by
-    have hlogpos : (0:ℝ) < Real.log x := by linarith
-    have e : Real.log x ^ (-A:ℝ) = Real.log x ^ (-(A+1:ℝ)) * Real.log x := by
-      have h1 : (-A:ℝ) = -(A+1) + 1 := by ring
-      rw [h1, Real.rpow_add hlogpos, Real.rpow_one]
-    rw [e]
-    ring
-  have hconst : (2/5:ℝ) * (4000000 * (4 * ((A+1)/(11/400))^(A+1))) ≤
-      10^7 * (400*(A+1)/11)^(A+1) := by
-    have he : ((A+1)/(11/400)) = (400*(A+1)/11) := by field_simp
-    rw [he]
-    have hpos : (0:ℝ) < (400*(A+1)/11)^(A+1) := by positivity
-    nlinarith [hpos]
-  have hlognn : (0:ℝ) ≤ Real.log x ^ (-A) := Real.rpow_nonneg hlognonneg _
-  have hfinal : (2/5:ℝ) * (1000000 * (1 + Real.log (scaleZ ε x)) /
-      (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2)) ≤
-      (10^7 * (400*(A+1)/11)^(A+1)) * Real.log x ^ (-A) := by
-    calc (2/5:ℝ) * (1000000 * (1 + Real.log (scaleZ ε x)) /
-          (((B0:ℝ) - 1) * Real.log ((B0:ℝ) - 1)^2))
-        ≤ (2/5:ℝ) * (4000000 * (1 + Real.log (scaleZ ε x)) * (scaleZ ε x)^(-(1/20:ℝ))) := hstep1
-      _ ≤ (2/5:ℝ) * (4000000 * (4 * Real.log x) * x ^ (-(11/400:ℝ))) := hstep2
-      _ ≤ (2/5:ℝ) * (4000000 * (4 * ((A+1)/(11/400))^(A+1) * Real.log x ^ (-(A+1))) * Real.log x) := hstep3
-      _ = (2/5:ℝ) * (4000000 * (4 * ((A+1)/(11/400))^(A+1))) * Real.log x ^ (-A) := hstep4
-      _ ≤ (10^7 * (400*(A+1)/11)^(A+1)) * Real.log x ^ (-A) :=
-          mul_le_mul_of_nonneg_right hconst hlognn
-  have hfac : (1/2:ℝ) - 1/10 = 2/5 := by norm_num
-  have hCle : (10^7 : ℝ) * (400*(A+1)/11)^(A+1) ≤
-      max (max (Real.exp ((2:ℝ)^(A+1))) ((2:ℝ)^40)) (10^7 * (400*(A+1)/11)^(A+1)) :=
-    le_max_right _ _
-  refine (le_trans ?_ (mul_le_mul_of_nonneg_right hCle hlognn))
-  rw [hfac]
-  exact hfinal
+  have hδsum : (∑ n ∈ Finset.Ioc A N, δ n) ≤ 4400 / (A:ℝ) := by
+    have hsplit : (∑ n ∈ Finset.Ioc A N, δ n) =
+        (∑ n ∈ Finset.Ioc A N, 1000 / ((n:ℝ)-1)^2) +
+        (∑ n ∈ Finset.Ioc A N, (if bad (n-1) then 80 / ((n:ℝ)-1) else 0)) := by
+      rw [← Finset.sum_add_distrib]
+    have e : 2000 / (A:ℝ) + 2400 / (A:ℝ) = 4400 / (A:ℝ) := by ring
+    linarith
+  show |(∑ b ∈ Finset.Icc 1 N, φ (b:ℝ)) - ∫ t in Z ^ (1/10:ℝ)..Z ^ (1/2:ℝ), φ t| ≤
+    4400 / (A:ℝ)
+  rw [hsum, ← hint_eq]
+  exact hcells.trans hδsum
 
 /-- LEAF: P0069 page 51, display 5.17, the E2 sum of display 5.15 at one point `m` of J, the
 passage from the sum over the second outer variable to the integral of page 51. The sum over
@@ -4833,8 +3245,141 @@ theorem leaf_two_pair_riemann_second (ω : ℝ → ℝ)
               ω ((Real.log m / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
             else 0) / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) -
         lowerTwoDensityAt ω ε (Real.log m / Real.log (scaleZ ε x)) /
-          Real.log (scaleZ ε x)| ≤ C * Real.log x ^ (-A) :=
-  leaf_two_pair_riemann_second_new ω hω hz hε hε8
+          Real.log (scaleZ ε x)| ≤ C * Real.log x ^ (-A) := by
+  intro A hA
+  obtain ⟨Cabs, hCabs0, hCabs⟩ := rpow_neg_mul_log_rpow_le (c := 11/200) (by norm_num) (j := 0) A
+  refine ⟨max (3520 * Cabs) ((2:ℝ)^40), fun x hx m hm1 hm2 => ?_⟩
+  have h40 : (2:ℝ) ^ 40 ≤ x := (le_max_right _ _).trans hx
+  have hx1 : (1:ℝ) ≤ x := le_trans (by norm_num) h40
+  have hx0 : (0:ℝ) < x := by linarith
+  have hY20 : (2:ℝ) ^ 20 ≤ x ^ (11/20 + ε) := by
+    refine shortY_ge_of_sq_le hε hx1 ?_
+    rw [show ((2:ℝ) ^ 20) ^ 2 = (2:ℝ) ^ 40 by norm_num]
+    exact h40
+  have hy4 : (4:ℝ) ≤ x ^ (11/20 + ε) := le_trans (by norm_num) hY20
+  have hy0 : (0:ℝ) < x ^ (11/20 + ε) := by linarith
+  have hZ1 : 1 < scaleZ ε x := (scaleZ_rpow_ge hε hε8 hx1).2
+  have hZ0 : (0:ℝ) < scaleZ ε x := by linarith
+  have hZD : 0 < Real.log (scaleZ ε x) := Real.log_pos hZ1
+  have hZdef : scaleZ ε x = 4 * x ^ (11/20 + ε) := by unfold scaleZ shortY; rfl
+  -- `Z^(1/2) ≤ ⌊2 Y⌋`
+  have hYsq : (2:ℝ) ≤ (x ^ (11/20 + ε)) ^ (1/2:ℝ) := by
+    have h := Real.sqrt_le_sqrt hy4
+    have h4 : Real.sqrt 4 = (2:ℝ) := by
+      rw [show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq (by norm_num)]
+    rw [h4, Real.sqrt_eq_rpow] at h
+    exact h
+  have hYsq0 : (0:ℝ) ≤ (x ^ (11/20 + ε)) ^ (1/2:ℝ) := by positivity
+  have hYsqsq : ((x ^ (11/20 + ε)) ^ (1/2:ℝ)) ^ 2 = x ^ (11/20 + ε) := by
+    rw [pow_two, ← Real.rpow_add (by linarith)]
+    norm_num
+  have hZs : (scaleZ ε x) ^ (1/2:ℝ) = 2 * (x ^ (11/20 + ε)) ^ (1/2:ℝ) := by
+    unfold scaleZ shortY
+    rw [Real.mul_rpow (x := (4:ℝ)) (y := x ^ (11/20 + ε)) (z := (1/2:ℝ)) (by norm_num) (le_of_lt hy0)]
+    have h4 : (4:ℝ) ^ (1/2:ℝ) = 2 := by
+      rw [← Real.sqrt_eq_rpow, show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq (by norm_num)]
+    rw [h4]
+  have hZB : (scaleZ ε x) ^ (1/2:ℝ) ≤ ((⌊2 * x ^ (11/20 + ε)⌋₊ : ℕ) : ℝ) := by
+    rw [hZs]
+    have hmain : 2 * (x ^ (11/20 + ε)) ^ (1/2:ℝ) ≤ 2 * x ^ (11/20 + ε) - 1 := by
+      nlinarith [hYsq, hYsq0, hYsqsq, hy4]
+    have hfloor : 2 * x ^ (11/20 + ε) - 1 ≤ ((⌊2 * x ^ (11/20 + ε)⌋₊ : ℕ) : ℝ) := by
+      have h := Nat.lt_floor_add_one (2 * x ^ (11/20 + ε))
+      linarith
+    linarith
+  -- `4 ≤ Z^(1/10)` and `x^(11/200) ≤ Z^(1/10)`
+  have hZ4 : (4:ℝ) ≤ scaleZ ε x ^ (1/10:ℝ) := by
+    have h410 : (4:ℝ) ^ (10:ℝ) = 1048576 := by
+      rw [show (10:ℝ) = ((10:ℕ):ℝ) by norm_num, Real.rpow_natCast]; norm_num
+    have hZbig : (4:ℝ) ^ (10:ℝ) ≤ scaleZ ε x := by
+      rw [h410, hZdef]
+      have : (1048576:ℝ) = (2:ℝ)^20 := by norm_num
+      linarith
+    calc (4:ℝ) = ((4:ℝ) ^ (10:ℝ)) ^ (1/10:ℝ) := by
+          rw [← Real.rpow_mul (by norm_num)]; norm_num
+      _ ≤ scaleZ ε x ^ (1/10:ℝ) := Real.rpow_le_rpow (by positivity) hZbig (by norm_num)
+  have hZx : x ^ (11/200:ℝ) ≤ scaleZ ε x ^ (1/10:ℝ) := by
+    have hbase : x ^ ((11:ℝ)/20) ≤ scaleZ ε x := by
+      have hshort : x ^ ((11:ℝ)/20) ≤ x ^ (11/20 + ε) :=
+        Real.rpow_le_rpow_of_exponent_le hx1 (by linarith)
+      rw [hZdef]; linarith
+    have h2 : x ^ (11/200:ℝ) = (x ^ ((11:ℝ)/20)) ^ (1/10:ℝ) := by
+      rw [← Real.rpow_mul hx0.le]; norm_num
+    rw [h2]
+    exact Real.rpow_le_rpow (Real.rpow_nonneg hx0.le _) hbase (by norm_num)
+  -- the integer anchor `A0 = ⌊Z^(1/10)⌋`
+  have hA0le : ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) ≤ scaleZ ε x ^ (1/10:ℝ) :=
+    Nat.floor_le (by positivity)
+  have hA0ge : scaleZ ε x ^ (1/10:ℝ) / 2 ≤ ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) := by
+    have h := Nat.lt_floor_add_one (scaleZ ε x ^ (1/10:ℝ))
+    linarith
+  have hA03 : 3 ≤ ⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ := by
+    apply Nat.le_floor
+    push_cast
+    linarith
+  have hA0N : ⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ ≤ ⌊2 * x ^ (11/20 + ε)⌋₊ := by
+    have h : ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) ≤ ((⌊2 * x ^ (11/20 + ε)⌋₊ : ℕ) : ℝ) :=
+      hA0le.trans ((Real.rpow_le_rpow_of_exponent_le hZ1.le (by norm_num)).trans hZB)
+    exact_mod_cast h
+  -- `s ≤ 1`
+  have hm0 : 0 < m := by omega
+  have hs : Real.log m / Real.log (scaleZ ε x) ≤ 1 := by
+    rw [div_le_one hZD]
+    apply Real.log_le_log (by exact_mod_cast hm0)
+    have h1 : (m:ℝ) ≤ ((⌊2 * x ^ (11/20 + ε)⌋₊ : ℕ) : ℝ) := by exact_mod_cast hm2
+    have h2 := Nat.floor_le (show (0:ℝ) ≤ 2 * x ^ (11/20 + ε) by positivity)
+    rw [hZdef]; linarith
+  -- exchange the sum with the integral over the first exponent
+  have hswap := two_pair_beta_sum_swap hω hz hε8 (Real.log m / Real.log (scaleZ ε x))
+    (Real.log (scaleZ ε x)) ⌊2 * x ^ (11/20 + ε)⌋₊
+  have hSint := two_pair_beta_sum_integrable hω hz hε8 (Real.log m / Real.log (scaleZ ε x))
+    (Real.log (scaleZ ε x)) ⌊2 * x ^ (11/20 + ε)⌋₊
+  have hIint := two_density_outer_integrable hω hz hε8 (Real.log m / Real.log (scaleZ ε x))
+  have key := intervalIntegral.norm_integral_le_of_norm_le_const
+    (a := (1/10:ℝ)) (b := (1/2:ℝ))
+    (C := 4400 / ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ))
+    (f := fun α : ℝ => (∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11/20 + ε)⌋₊,
+        (if lowerTwoDiscarded ε α (Real.log (b:ℝ) / Real.log (scaleZ ε x)) then
+          ω ((Real.log m / Real.log (scaleZ ε x) - α -
+            Real.log (b:ℝ) / Real.log (scaleZ ε x)) /
+            (Real.log (b:ℝ) / Real.log (scaleZ ε x))) / α else 0) /
+          ((b:ℝ) * Real.log (b:ℝ) ^ 2)) -
+      (∫ b in (1/10:ℝ)..(1/2:ℝ), if lowerTwoDiscarded ε α b then
+        ω ((Real.log m / Real.log (scaleZ ε x) - α - b) / b) / (α * b^2) else 0) /
+        Real.log (scaleZ ε x))
+    (fun α _ => by
+      rw [Real.norm_eq_abs, two_pair_beta_subst ω ε _ α hZ1]
+      exact two_pair_beta_riemann hω hz hε8 α hZ1 hs hA03 hA0N hA0le hZB)
+  rw [intervalIntegral.integral_sub hSint (hIint.div_const _), intervalIntegral.integral_div,
+    ← hswap, Real.norm_eq_abs] at key
+  have hgoal : |(∑ b ∈ Finset.Icc 1 ⌊2 * x ^ (11 / 20 + ε)⌋₊,
+          (∫ α in (1/10:ℝ)..(1/2:ℝ),
+            if lowerTwoDiscarded ε α (expo ε x b) then
+              ω ((Real.log m / Real.log (scaleZ ε x) - α - expo ε x b) / expo ε x b) / α
+            else 0) / ((b : ℝ) * Real.log (b : ℝ) ^ 2)) -
+        lowerTwoDensityAt ω ε (Real.log m / Real.log (scaleZ ε x)) /
+          Real.log (scaleZ ε x)| ≤
+      4400 / ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) * |(1/2:ℝ) - 1/10| := key
+  refine hgoal.trans ?_
+  -- absorb the power saving
+  have hcabs := hCabs x (by linarith)
+  rw [Real.rpow_zero, mul_one] at hcabs
+  have hxp : x ^ (-(11/200:ℝ)) = (x ^ (11/200:ℝ))⁻¹ := Real.rpow_neg hx0.le _
+  have hXpos : 0 < x ^ (11/200:ℝ) := Real.rpow_pos_of_pos hx0 _
+  have hA0pos : (0:ℝ) < ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) := by linarith
+  have h1 : 4400 / ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) ≤ 8800 * (x ^ (11/200:ℝ))⁻¹ := by
+    rw [← div_eq_mul_inv, div_le_div_iff₀ hA0pos hXpos]
+    linarith
+  have habs : |(1/2:ℝ) - 1/10| = 2/5 := by rw [abs_of_pos] <;> norm_num
+  have hL : 0 ≤ Real.log x ^ (-A) := Real.rpow_nonneg (Real.log_nonneg hx1) _
+  calc 4400 / ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) * |(1/2:ℝ) - 1/10|
+      = 4400 / ((⌊scaleZ ε x ^ (1/10:ℝ)⌋₊ : ℕ) : ℝ) * (2/5) := by rw [habs]
+    _ ≤ 8800 * (x ^ (11/200:ℝ))⁻¹ * (2/5) := mul_le_mul_of_nonneg_right h1 (by norm_num)
+    _ = 3520 * x ^ (-(11/200:ℝ)) := by rw [hxp]; ring
+    _ ≤ 3520 * (Cabs * Real.log x ^ (-A)) := mul_le_mul_of_nonneg_left hcabs (by norm_num)
+    _ = (3520 * Cabs) * Real.log x ^ (-A) := by ring
+    _ ≤ max (3520 * Cabs) ((2:ℝ)^40) * Real.log x ^ (-A) :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) hL
 
 /-- P0069 page 51, display 5.17, the E2 sum of display 5.15 at one point `m` of J, the passage
 from sums to the integral of page 51. The sum over the integer pairs `b < a` with exponents in
