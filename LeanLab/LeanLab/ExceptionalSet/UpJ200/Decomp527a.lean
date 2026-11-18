@@ -1,3 +1,6 @@
+import LeanLab.HeathBrown1985.Lemma1
+import LeanLab.ExceptionalSet.BG2026Prop81Chain
+import LeanLab.PNTPort.DirichletZF.Siegel
 import LeanLab.ExceptionalSet.UpJ200.Decomp559b
 import LeanLab.ExceptionalSet.UpJ200.Decomp559a
 import LeanLab.ExceptionalSet.UpJ200.Decomp371a
@@ -15,6 +18,13 @@ Existing Supply465 arguments are reused with the upstream floor window.
 No file in this import closure imports Decomp505a.
 AI wrote the Lean code. Goldbach is open.
 -/
+
+/-! P0082 page 354. Preserve the paper growth name in downstream proofs.
+The analytic import also defines a root scalar F. This export names the
+existing paper function and introduces no new kernel declaration. -/
+namespace LeanLab.ExceptionalSet
+export BrudernPerelli1998 (F)
+end LeanLab.ExceptionalSet
 
 /-! Upstream reuse of Endpoint465. All mathematical hypotheses are retained. -/
 namespace LeanLab.ExceptionalSet.UpJ200.Decomp527a
@@ -886,6 +896,282 @@ theorem near_zero_log_margin (E L : ℝ) (hE : 1 ≤ E) (hL : 0 < L)
 end LeanLab.ExceptionalSet.UpJ200.Decomp527a
 
 
+namespace LeanLab.ExceptionalSet.UpJ200.Decomp527a
+
+/-- P0082 page 358 display 9. Equal lifts of primitive characters have
+identical levels and the original characters are heterogeneously equal. -/
+theorem primitive_eq_of_lift_eq652 (r q M : ℕ) [NeZero M]
+    (χ : DirichletCharacter ℂ r) (ψ : DirichletCharacter ℂ q)
+    (hχ : χ.IsPrimitive) (hψ : ψ.IsPrimitive) (hr : r ∣ M) (hq : q ∣ M)
+    (heq : DirichletCharacter.changeLevel hr χ = DirichletCharacter.changeLevel hq ψ) :
+    r = q ∧ HEq χ ψ := by
+  have hlevel : r = q := by
+    calc
+      r = χ.conductor := hχ.symm
+      _ = (DirichletCharacter.changeLevel hr χ).conductor :=
+        (DirichletCharacter.conductor_changeLevel χ hr).symm
+      _ = (DirichletCharacter.changeLevel hq ψ).conductor := congrArg _ heq
+      _ = ψ.conductor := DirichletCharacter.conductor_changeLevel ψ hq
+      _ = q := hψ
+  subst q
+  exact ⟨rfl, heq_of_eq (DirichletCharacter.changeLevel_injective hr heq)⟩
+
+
+/-- P0082 page 358 display 9. A width at most one quarter puts the
+whole selected interval strictly to the right of zero. -/
+theorem selected_zero_pos652 (a P β : ℝ) (ha : a ≤ 1 / 4) (hP : 2 ≤ P)
+    (hβ : 1 - a / Real.log P ≤ β) : 0 < β := by
+  have hlog2 : (1 / 4 : ℝ) < Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hlogP : Real.log 2 ≤ Real.log P := Real.log_le_log (by norm_num) hP
+  have hlogP0 : 0 < Real.log P := by linarith
+  have hlt : a / Real.log P < 1 := (div_lt_one hlogP0).mpr (by linarith)
+  linarith
+
+
+open LeanLab.PNTPort.DirichletZF
+
+/-- P0082 page 358 display 9. A principal primitive character has no real
+zero strictly between zero and one. -/
+theorem primitive_principal_nonvanishing652 (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hp : χ.IsPrimitive) (β : ℝ)
+    (hβ0 : 0 < β) (hβ1 : β < 1) : χ = 1 → χ.LFunction β ≠ 0 := by
+  intro heq hz
+  have hq : q = 1 := by
+    have hc : χ.conductor = q := hp
+    rw [heq, DirichletCharacter.conductor_one] at hc
+    exact hc.symm
+  subst q
+  have hneg := (riemannZeta_real_neg hβ0 hβ1).2
+  rw [heq, DirichletCharacter.LFunction_modOne_eq] at hz
+  rw [hz] at hneg
+  simp at hneg
+
+
+/-- P0082 page 358 display 9. The product modulus of two characters
+below P has zero free logarithmic scale at most K log P. -/
+theorem log_product_scale652 (M : ℕ) [NeZero M] (P : ℝ) (hP : 2 ≤ P)
+    (hM : (M : ℝ) ≤ P ^ 2) :
+    Real.log (Bt M 0) ≤ (Real.log (6 * Z) / Real.log 2 + 2) * Real.log P := by
+  have hM0 : (0 : ℝ) < M := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne M)
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hlogP : Real.log 2 ≤ Real.log P := Real.log_le_log (by norm_num) hP
+  have h6 : (0 : ℝ) < 6 * Z := by have := one_le_Z; linarith
+  have hL : 0 ≤ Real.log (6 * Z) := Real.log_nonneg (by have := one_le_Z; linarith)
+  have hlogM : Real.log (M : ℝ) ≤ 2 * Real.log P := by
+    have h := Real.log_le_log hM0 hM
+    rwa [Real.log_pow] at h
+  have hconstant : Real.log (6 * Z) ≤ Real.log (6 * Z) / Real.log 2 * Real.log P := by
+    rw [div_mul_eq_mul_div, le_div_iff₀ hlog2]
+    exact mul_le_mul_of_nonneg_left hlogP hL
+  have hb : Bt M 0 = (6 * Z) * M := by unfold Bt; simp; ring
+  rw [hb, Real.log_mul h6.ne' hM0.ne']
+  nlinarith only [hconstant, hlogM]
+
+
+/-- P0082 page 358 display 9. The shared strip is inside the proved
+zero free box at every product modulus bounded by P squared. -/
+theorem selection_strip_inside652 (c a P β : ℝ) (hc : 0 < c) (ha0 : 0 ≤ a)
+    (ha : a ≤ c / (2 * (Real.log (6 * Z) / Real.log 2 + 2)))
+    (M : ℕ) [NeZero M] (hP : 2 ≤ P) (hM : (M : ℝ) ≤ P ^ 2)
+    (hβ : 1 - a / Real.log P ≤ β) :
+    1 - c / Real.log (Bt M 0) < β := by
+  have hL : 0 ≤ Real.log (6 * Z) := Real.log_nonneg (by have := one_le_Z; linarith)
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hK : 0 < Real.log (6 * Z) / Real.log 2 + 2 := by positivity
+  have hlogP : 0 < Real.log P := Real.log_pos (by linarith)
+  have hlogM : 0 < Real.log (Bt M 0) := by linarith [one_le_log_Bt (N := M) 0]
+  have hbound := log_product_scale652 M P hP hM
+  have hak : a * (Real.log (6 * Z) / Real.log 2 + 2) ≤ c / 2 := by
+    have h := (le_div_iff₀ (by positivity : 0 < 2 * (Real.log (6 * Z) / Real.log 2 + 2))).mp ha
+    nlinarith only [h]
+  have hmul := mul_le_mul_of_nonneg_left hbound ha0
+  have hmul' := mul_le_mul_of_nonneg_right hak hlogP.le
+  have hdiv : a / Real.log P < c / Real.log (Bt M 0) := by
+    rw [div_lt_div_iff₀ hlogP hlogM]
+    nlinarith only [hmul, hmul', mul_pos hc hlogP]
+  linarith
+
+
+open LeanLab.ExceptionalSet.UpJ200.Decomp559b
+
+/-- P0082 page 358 display 9. One absolute strip has either no
+primitive real zero or exactly one zero of one primitive real character. -/
+theorem selected_real_zero652 :
+    ∃ a : ℝ, 0 < a ∧ ∀ P : ℝ, 2 ≤ P →
+      ∃ r : ℕ, 1 ≤ r ∧ (r : ℝ) ≤ P ∧ SelectedRealZero a P r := by
+  classical
+  obtain ⟨c, c', hc, hc', H⟩ := zero_free_region_real
+  let K := Real.log (6 * Z) / Real.log 2 + 2
+  have hL : 0 ≤ Real.log (6 * Z) := Real.log_nonneg (by have := one_le_Z; linarith)
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hK : 0 < K := by dsimp [K]; positivity
+  let a := min (c / (2 * K)) (1 / 4)
+  have ha : 0 < a := lt_min (div_pos hc (by positivity)) (by norm_num)
+  have ha4 : a ≤ 1 / 4 := min_le_right _ _
+  have hac : a ≤ c / (2 * K) := min_le_left _ _
+  refine ⟨a, ha, ?_⟩
+  intro P hP
+  have hP0 : 0 < P := by linarith
+  have hP1 : 1 ≤ P := by linarith
+  have hP2 : P ≤ P ^ 2 := by nlinarith
+  have hpositive (β : ℝ) (hβ : 1 - a / Real.log P ≤ β) : 0 < β :=
+    selected_zero_pos652 a P β ha4 hP hβ
+  have hbox (M : ℕ) [NeZero M] (hM : (M : ℝ) ≤ P ^ 2)
+      (β : ℝ) (hβ : 1 - a / Real.log P ≤ β) :
+      1 - c / Real.log (Bt M 0) < β :=
+    selection_strip_inside652 c a P β hc ha.le hac M hP hM hβ
+  by_cases hfree : ∀ (q : ℕ) (_ : NeZero q) (χ : DirichletCharacter ℂ q),
+      1 ≤ q → (q : ℝ) ≤ P → χ.IsPrimitive →
+        ∀ σ : ℝ, 1 - a / Real.log P ≤ σ → σ < 1 → χ.LFunction σ ≠ 0
+  · exact ⟨1, le_rfl, by exact_mod_cast hP1, Or.inl ⟨rfl, hfree⟩⟩
+  push Not at hfree
+  obtain ⟨r, hrzero, χ, hr1, hrP, hp, β, hβ, hβ1, hz⟩ := hfree
+  letI : NeZero r := hrzero
+  have hχ : χ ≠ 1 := fun heq => primitive_principal_nonvanishing652 r χ hp β (hpositive β hβ) hβ1 heq hz
+  have hβbox := hbox r (hrP.trans hP2) β hβ
+  have hreal : χ ^ 2 = 1 := by
+    rcases (H r χ hχ).1 (β : ℂ) hz with hleft | hright
+    · simp only [Complex.ofReal_re, Complex.ofReal_im] at hleft
+      exact False.elim (not_lt_of_ge hleft hβbox)
+    · exact hright.2.2.1
+  refine ⟨r, hr1, hrP, Or.inr ⟨hrzero, χ, β, hp, hreal, hχ,
+    hpositive β hβ, hβ, hβ1, hz, ?_⟩⟩
+  intro q hqzero ψ hq1 hqP hψ σ hσ hσ1 hσzero
+  letI : NeZero q := hqzero
+  have hψne : ψ ≠ 1 :=
+    fun heq => primitive_principal_nonvanishing652 q ψ hψ σ (hpositive σ hσ) hσ1 heq hσzero
+  let M := q * r
+  haveI : NeZero M := ⟨Nat.mul_ne_zero (NeZero.ne q) (NeZero.ne r)⟩
+  have hM : (M : ℝ) ≤ P ^ 2 := by
+    dsimp [M]
+    push_cast
+    nlinarith only [mul_le_mul hqP hrP (Nat.cast_nonneg r) hP0.le]
+  let dq : q ∣ M := Nat.dvd_mul_right q r
+  let dr : r ∣ M := Nat.dvd_mul_left r q
+  have hψlift : DirichletCharacter.changeLevel dq ψ ≠ 1 :=
+    fun heq => hψne ((DirichletCharacter.changeLevel_eq_one_iff dq).mp heq)
+  have hχlift : DirichletCharacter.changeLevel dr χ ≠ 1 :=
+    fun heq => hχ ((DirichletCharacter.changeLevel_eq_one_iff dr).mp heq)
+  have hσlift : (DirichletCharacter.changeLevel dq ψ).LFunction σ = 0 := by
+    rw [DirichletCharacter.LFunction_changeLevel dq ψ (Or.inl hψne), hσzero, zero_mul]
+  have hβlift : (DirichletCharacter.changeLevel dr χ).LFunction β = 0 := by
+    rw [DirichletCharacter.LFunction_changeLevel dr χ (Or.inl hχ), hz, zero_mul]
+  have hlogM : 0 < Real.log (Bt M 0) := by linarith [one_le_log_Bt (N := M) 0]
+  obtain ⟨hlifts, hzeros⟩ := (H M (DirichletCharacter.changeLevel dq ψ) hψlift).2
+    (DirichletCharacter.changeLevel dr χ) hχlift (σ : ℂ) (β : ℂ) hσlift hβlift
+    (by simpa only [Complex.ofReal_re] using (hbox M hM σ hσ).le)
+    (by simp only [Complex.ofReal_im, abs_zero]; positivity)
+    (by simpa only [Complex.ofReal_re] using (hbox M hM β hβ).le)
+    (by simp only [Complex.ofReal_im, abs_zero]; positivity)
+  obtain ⟨hlevels, hcharacters⟩ := primitive_eq_of_lift_eq652 q r M ψ χ hψ hp dq dr hlifts
+  exact ⟨hlevels, hcharacters, Complex.ofReal_injective hzeros⟩
+
+/-- P0082 page 358 display 10. The proved Siegel bound gives an
+absolute inverse square root zero free interval for real characters.
+The constant is ineffective. No exceptional zero is assumed to exist. -/
+theorem quadratic_zero_free_half652 :
+    ∃ b : ℝ, 0 < b ∧ ∀ (r : ℕ) [NeZero r]
+      (χ : DirichletCharacter ℂ r), χ ≠ 1 → χ ^ 2 = 1 →
+        ∀ β : ℝ, 1 - b * (r : ℝ) ^ (-(1 / 2 : ℝ)) < β → β ≤ 1 →
+          χ.LFunction β ≠ 0 := by
+  obtain ⟨c, hc, hs⟩ := siegel_zero (1 / 2 : ℝ) (by norm_num)
+  refine ⟨c * (8 : ℝ) ^ (-(1 / 2 : ℝ)), by positivity, ?_⟩
+  intro r hr χ hχ hχ2 β hβ hβ1 hz
+  let M := 8 * r
+  haveI : NeZero M := ⟨Nat.mul_ne_zero (by norm_num) (NeZero.ne r)⟩
+  have hM8 : 8 ≤ M := by have := Nat.pos_of_ne_zero (NeZero.ne r); omega
+  have hd : r ∣ M := Dvd.intro_left 8 rfl
+  have hzl : (DirichletCharacter.changeLevel hd χ).LFunction β = 0 := by
+    rw [L_lift hd hχ, hz, zero_mul]
+  have hb := hs M hM8 _ (lift_ne_one hd hχ) (lift_sq hd hχ2) β hβ1 hzl
+  have hr0 : (0 : ℝ) < r := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne r)
+  have hMr : (M : ℝ) = 8 * r := by simp [M]
+  rw [hMr, Real.mul_rpow (by norm_num) hr0.le] at hb
+  nlinarith only [hb, hβ]
+
+/-- P0082 page 363 case ii a. For every fixed width, a selected
+nonprincipal conductor exceeds every fixed bound when the cutoff grows. -/
+theorem selected_conductor_eventually_large652 (a B : ℝ) (ha : 0 < a) (hB : 1 ≤ B) :
+    ∃ P₀ : ℝ, 2 ≤ P₀ ∧ ∀ P : ℝ, P₀ ≤ P → ∀ r : ℕ,
+      SelectedRealZero a P r → r = 1 ∨ B ≤ (r : ℝ) := by
+  obtain ⟨b, hb, H⟩ := quadratic_zero_free_half652
+  have hB0 : 0 < B := by linarith
+  let t := b * B ^ (-(1 / 2 : ℝ))
+  have ht : 0 < t := by dsimp [t]; positivity
+  let L := a / t + 1
+  refine ⟨max 2 (Real.exp L), le_max_left _ _, ?_⟩
+  intro P hP r hs
+  by_cases hr : r = 1
+  · exact Or.inl hr
+  right
+  by_contra hsmall
+  have hrB : (r : ℝ) < B := lt_of_not_ge hsmall
+  obtain ⟨hrzero, χ, β, hp, hreal, hχ, hβ0, hβ, hβ1, hz, huniq⟩ :=
+    hs.resolve_left (fun h => hr h.1)
+  letI : NeZero r := hrzero
+  have hr0 : (0 : ℝ) < r := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne r)
+  have hP2 : 2 ≤ P := (le_max_left _ _).trans hP
+  have hP0 : 0 < P := by linarith
+  have hlog : L ≤ Real.log P := by
+    have h := Real.log_le_log (Real.exp_pos L) ((le_max_right _ _).trans hP)
+    simpa only [Real.log_exp] using h
+  have hlogP : 0 < Real.log P := Real.log_pos (by linarith)
+  have hdiv : a / Real.log P < t := by
+    rw [div_lt_iff₀ hlogP]
+    have hmul := mul_le_mul_of_nonneg_right hlog ht.le
+    dsimp [L] at hmul
+    have hid : (a / t + 1) * t = a + t := by field_simp [ht.ne']
+    rw [hid] at hmul
+    nlinarith only [hmul, ht]
+  have hpows : B ^ (-(1 / 2 : ℝ)) ≤ (r : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    Real.rpow_le_rpow_of_nonpos hr0 hrB.le (by norm_num)
+  have hscale := mul_le_mul_of_nonneg_left hpows hb.le
+  have hstrip : 1 - b * (r : ℝ) ^ (-(1 / 2 : ℝ)) < β := by
+    dsimp [t] at hdiv
+    linarith
+  exact H r χ hχ hreal β hstrip hβ1.le hz
+
+/-- P0082 page 363 case ii a. The coprime conductor ratio is uniformly
+small for selected nonprincipal conductors at sufficiently large cutoffs. -/
+theorem selected_totient_small652 (a η : ℝ) (ha : 0 < a) (hη : 0 < η) :
+    ∃ P₀ : ℝ, 2 ≤ P₀ ∧ ∀ P : ℝ, P₀ ≤ P → ∀ r : ℕ,
+      SelectedRealZero a P r → r = 1 ∨ (r : ℝ) / (Nat.totient r : ℝ) ^ 2 ≤ η := by
+  obtain ⟨P₀, hP₀, H⟩ := selected_conductor_eventually_large652 a
+    (max 1 (16 / η ^ 2)) ha (le_max_left _ _)
+  refine ⟨P₀, hP₀, ?_⟩
+  intro P hP r hs
+  rcases H P hP r hs with hr | hlarge
+  · exact Or.inl hr
+  · right
+    have hrpos : (0 : ℝ) < r := lt_of_lt_of_le zero_lt_one
+      ((le_max_left _ _).trans hlarge)
+    exact LeanLab.ExceptionalSet.BG2026.r_div_totient_sq_le hη
+      (by exact_mod_cast hrpos) ((le_max_right _ _).trans hlarge)
+
+/-- P0082 page 364 case ii d. The small conductor cutoff gives an
+ineffective zero free interval at the inverse fourteenth E scale. -/
+theorem small_conductor_zero_free652 :
+    ∃ b : ℝ, 0 < b ∧ ∀ E : ℝ, 1 ≤ E → ∀ (r : ℕ) [NeZero r]
+      (χ : DirichletCharacter ℂ r), χ ≠ 1 → χ ^ 2 = 1 →
+        (r : ℝ) ≤ E ^ (1 / 7 : ℝ) →
+        ∀ β : ℝ, 1 - b * E ^ (-(1 / 14 : ℝ)) < β → β ≤ 1 →
+          χ.LFunction β ≠ 0 := by
+  obtain ⟨b, hb, H⟩ := quadratic_zero_free_half652
+  refine ⟨b, hb, ?_⟩
+  intro E hE r hr χ hχ hreal hrE β hβ hβ1
+  have hE0 : 0 < E := lt_of_lt_of_le zero_lt_one hE
+  have hr0 : (0 : ℝ) < r := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne r)
+  have hp : E ^ (-(1 / 14 : ℝ)) ≤ (r : ℝ) ^ (-(1 / 2 : ℝ)) := by
+    calc
+      _ = (E ^ (1 / 7 : ℝ)) ^ (-(1 / 2 : ℝ)) := by
+        rw [← Real.rpow_mul hE0.le]
+        norm_num
+      _ ≤ _ := Real.rpow_le_rpow_of_nonpos hr0 hrE (by norm_num)
+  have hscale := mul_le_mul_of_nonneg_left hp hb.le
+  exact H r χ hχ hreal β (by linarith) hβ1
+
+end LeanLab.ExceptionalSet.UpJ200.Decomp527a
+
 /- task527 installed section pointwise.txt -/
 namespace LeanLab.ExceptionalSet.UpJ200.Decomp527a
 open Real Finset
@@ -953,8 +1239,88 @@ theorem leaf_pointwise_major_character (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2
                 (¬ ∃ p : ℕ, p.Prime ∧ p ∣ r ∧ 3 < p ∧ ¬ (p : ℤ) ∣ nu γ n + j) →
                 (r : ℝ) ≤ calE γ κ N ^ (1 / 7 : ℝ) →
                   c * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)) ≤ Y) := by
-  sorry
-
+  obtain ⟨a, hapos, hselect⟩ := selected_real_zero652
+  obtain ⟨δa, hδa, ha⟩ := LeanLab.ExceptionalSet.UpJ200.Decomp559b.leaf_absent_selected γ h1 h2 a hapos
+  obtain ⟨δb, hδb, hb⟩ := LeanLab.ExceptionalSet.UpJ200.Decomp559b.leaf_coprime_selected γ h1 h2 a hapos
+  obtain ⟨δd, hδd, hd⟩ := LeanLab.ExceptionalSet.UpJ200.Decomp559b.leaf_prime_product_selected γ h1 h2 a hapos
+  obtain ⟨δe, hδe, he⟩ := LeanLab.ExceptionalSet.UpJ200.Decomp559b.leaf_near_zero_selected γ h1 h2 a hapos
+  refine ⟨min δa (min δb (min δd δe)), lt_min hδa (lt_min hδb (lt_min hδd hδe)), ?_⟩
+  intro δ hδ hδsmall
+  have hdeltas := lt_min_iff.mp hδsmall
+  have hdeltas' := lt_min_iff.mp hdeltas.2
+  have hdeltas'' := lt_min_iff.mp hdeltas'.2
+  obtain ⟨κa, hκa, ha⟩ := ha δ hδ hdeltas.1
+  obtain ⟨κb, hκb, hb⟩ := hb δ hδ hdeltas'.1
+  obtain ⟨κd, hκd, hd⟩ := hd δ hδ hdeltas''.1
+  obtain ⟨κe, hκe, he⟩ := he δ hδ hdeltas''.2
+  refine ⟨min κa (min κb (min κd κe)), lt_min hκa (lt_min hκb (lt_min hκd hκe)), ?_⟩
+  intro κ hκ hκsmall
+  have hkappas := le_min_iff.mp hκsmall
+  have hkappas' := le_min_iff.mp hkappas.2
+  have hkappas'' := le_min_iff.mp hkappas'.2
+  obtain ⟨ca, Aa, hca, hAa, Na, ha⟩ := ha κ hκ hkappas.1
+  obtain ⟨cb, Ab, hcb, hAb, Nb, hb⟩ := hb κ hκ hkappas'.1
+  obtain ⟨cd, Ad, hcd, hAd, Nd, hd⟩ := hd κ hκ hkappas''.1
+  obtain ⟨ce, Ae, hce, hAe, Ne, he⟩ := he κ hκ hkappas''.2
+  let c := min ca (min cb (min cd ce))
+  let A := Aa + Ab + Ad + Ae
+  have hc : 0 < c := lt_min hca (lt_min hcb (lt_min hcd hce))
+  have hA : 0 < A := by dsimp [A]; positivity
+  have hlog : Filter.Tendsto (fun N : ℕ => Real.log N) Filter.atTop Filter.atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hF : Filter.Tendsto (fun N : ℕ => F γ N) Filter.atTop Filter.atTop :=
+    Real.tendsto_exp_atTop.comp ((tendsto_rpow_atTop (by linarith : 0 < γ)).comp hlog)
+  have hP : Filter.Tendsto (fun N : ℕ => F γ N ^ (6 * δ)) Filter.atTop Filter.atTop :=
+    (tendsto_rpow_atTop (by positivity : 0 < 6 * δ)).comp hF
+  obtain ⟨Np, hNp⟩ := Filter.eventually_atTop.mp (hP.eventually_ge_atTop 2)
+  refine ⟨c, A, hc, hA, max Np (max Na (max Nb (max Nd Ne))), ?_⟩
+  intro N hN
+  have hNs := max_le_iff.mp hN
+  have hNs' := max_le_iff.mp hNs.2
+  have hNs'' := max_le_iff.mp hNs'.2
+  have hNs''' := max_le_iff.mp hNs''.2
+  obtain ⟨r, hr, hrP, hs⟩ := hselect _ (hNp N hNs.1)
+  refine ⟨r, hr, hrP, LeanLab.ExceptionalSet.UpJ200.Decomp559b.selected_shape a _ r hs, ?_⟩
+  intro j hj n hn heven hm
+  dsimp only
+  have hX : 0 ≤ F γ N := (Real.exp_pos _).le
+  have hP0 : 0 ≤ F γ N ^ (6 * δ) := Real.rpow_nonneg hX _
+  have hD : 0 ≤ divisorError r (F γ N ^ (6 * δ)) (nu γ n + j) := by
+    unfold divisorError
+    apply add_nonneg
+    · apply mul_nonneg (by positivity)
+      exact sum_nonneg (fun q _ => by positivity)
+    · apply mul_nonneg (by positivity)
+      exact tsum_nonneg (fun q => by split_ifs <;> positivity)
+  have hca' : c ≤ ca := min_le_left _ _
+  have hcb' : c ≤ cb := (min_le_right _ _).trans (min_le_left _ _)
+  have hcd' : c ≤ cd := (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))
+  have hce' : c ≤ ce := (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _))
+  have hAa' : Aa ≤ A := by dsimp [A]; linarith
+  have hAb' : Ab ≤ A := by dsimp [A]; linarith
+  have hAd' : Ad ≤ A := by dsimp [A]; linarith
+  have hAe' : Ae ≤ A := by dsimp [A]; linarith
+  have transfer (ci Ai w : ℝ) (hw : 0 ≤ w) (hci : c ≤ ci) (hAi : Ai ≤ A)
+      (h : ci * F γ N * w ≤ (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + j)).re +
+        Ai * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + j)) :
+      c * F γ N * w ≤ (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + j)).re +
+        A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + j) := by
+    have hleft := mul_le_mul_of_nonneg_right hci (mul_nonneg hX hw)
+    have hright := mul_le_mul_of_nonneg_right hAi (mul_nonneg hX hD)
+    nlinarith only [hleft, hright, h]
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro hcase
+    have hh := ha N hNs'.1 r hr hrP hs j hj n hn heven hm hcase
+    simpa only [mul_one] using transfer ca Aa 1 (by norm_num) hca' hAa' (by simpa using hh)
+  · intro hcase hgcd
+    have hh := hb N hNs''.1 r hr hrP hs j hj n hn heven hm hcase hgcd
+    simpa only [mul_one] using transfer cb Ab 1 (by norm_num) hcb' hAb' (by simpa using hh)
+  · intro hgcd hprime
+    have hh := hd N hNs'''.1 r hr hrP hs j hj n hn heven hm hgcd hprime
+    simpa only [mul_one] using transfer cd Ad 1 (by norm_num) hcd' hAd' (by simpa using hh)
+  · intro hgcd hprime hsmall
+    exact transfer ce Ae _ (Real.rpow_nonneg (Real.exp_pos _).le _) hce' hAe'
+      (he N hNs'''.2 r hr hrP hs j hj n hn heven hm hgcd hprime hsmall)
 end LeanLab.ExceptionalSet.UpJ200.Decomp527a
 
 
@@ -1343,5 +1709,120 @@ theorem zero_gap_scale_absorbed (γ κ : ℝ) (hγ : γ < 3 / 2) (hκ : 0 < κ) 
     have hN : 0 ≤ κ * Real.log (N : ℝ) ^ a := by linarith
     exact hN
   exact near_zero_log_margin _ _ hE hlogpos hsq
+
+end LeanLab.ExceptionalSet.UpJ200.Decomp527a
+
+
+namespace LeanLab.ExceptionalSet.UpJ200.Decomp527a
+open Finset
+
+/-- P0082 page 359 display 12. The first Euler product excludes all
+prime divisors of the conductor times the positive frequency. -/
+noncomputable def singularEulerFactor652 (r m : ℕ) : ℝ :=
+  ∏' p : ℕ, if p.Prime ∧ ¬ p ∣ r * m then
+    1 - 1 / ((p : ℝ) - 1) ^ 2 else 1
+
+
+end LeanLab.ExceptionalSet.UpJ200.Decomp527a
+
+
+namespace LeanLab.ExceptionalSet.UpJ200.Decomp527a
+open Finset
+
+/-- P0082 page 359 display 12. Every local factor and the full first
+Euler product lie between zero and one. -/
+theorem singularEulerFactor_bounds652 (r m : ℕ) :
+    0 ≤ singularEulerFactor652 r m ∧ singularEulerFactor652 r m ≤ 1 := by
+  have hlocal (p : ℕ) :
+      0 ≤ (if p.Prime ∧ ¬ p ∣ r * m then 1 - 1 / ((p : ℝ) - 1) ^ 2 else 1) ∧
+      (if p.Prime ∧ ¬ p ∣ r * m then 1 - 1 / ((p : ℝ) - 1) ^ 2 else 1) ≤ 1 := by
+    split_ifs with hp
+    · have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hp.1.two_le
+      have hd : 0 < (p : ℝ) - 1 := by linarith
+      have hsq : 1 ≤ ((p : ℝ) - 1) ^ 2 := by nlinarith
+      have hfrac : (1 : ℝ) / ((p : ℝ) - 1) ^ 2 ≤ 1 :=
+        (div_le_one (sq_pos_of_pos hd)).mpr hsq
+      exact ⟨sub_nonneg.mpr hfrac, sub_le_self _ (by positivity)⟩
+    · norm_num
+  unfold singularEulerFactor652
+  exact ⟨tprod_nonneg (fun p => (hlocal p).1), tprod_le_of_prod_le' le_rfl (fun s =>
+    Finset.prod_le_one₀ (fun p _ => (hlocal p).1) (fun p _ => (hlocal p).2))⟩
+
+
+end LeanLab.ExceptionalSet.UpJ200.Decomp527a
+
+
+namespace LeanLab.ExceptionalSet.UpJ200.Decomp527a
+open Finset
+
+/-- P0082 page 359 display 12. The real Euler expression for the
+exceptional singular factor at a positive natural frequency. On the paper domain
+the character value at minus one is real, so its real part gives the
+printed sign. The values at conductor zero or frequency zero extend the formula.
+No major arc expansion is asserted by this definition. -/
+noncomputable def exceptionalSingular652 (r : ℕ) (χ : DirichletCharacter ℂ r)
+    (m : ℕ) : ℝ :=
+  (χ (-1 : ZMod r)).re * (ArithmeticFunction.moebius (r / Nat.gcd r m) : ℝ) *
+    ((r : ℝ) / ((r.totient : ℝ) * ((r / Nat.gcd r m).totient : ℝ)) *
+      singularEulerFactor652 r m *
+      ∏ p ∈ m.primeFactors.filter (fun p => ¬ p ∣ r), (1 + 1 / ((p : ℝ) - 1)))
+
+
+end LeanLab.ExceptionalSet.UpJ200.Decomp527a
+
+
+namespace LeanLab.ExceptionalSet.UpJ200.Decomp527a
+open Finset
+
+/-- P0082 page 363 case ii a from page 359 display 12. At a positive
+frequency coprime to the conductor the explicit exceptional singular
+factor is at most r over phi r squared times m over phi m in absolute value. -/
+theorem exceptionalSingular_coprime_bound652 (r : ℕ) [NeZero r]
+    (χ : DirichletCharacter ℂ r) (m : ℕ) (hm : 1 ≤ m) (hcop : Nat.Coprime r m) :
+    |exceptionalSingular652 r χ m| ≤
+      (r : ℝ) / (r.totient : ℝ) ^ 2 * ((m : ℝ) / (m.totient : ℝ)) := by
+  let s := m.primeFactors.filter (fun p => ¬ p ∣ r)
+  let A := singularEulerFactor652 r m
+  let B := ∏ p ∈ s, (1 + 1 / ((p : ℝ) - 1))
+  let w := (r : ℝ) / ((r.totient : ℝ) * (r.totient : ℝ))
+  have hfactor (p : ℕ) (hp : p ∈ m.primeFactors) : 1 ≤ (1 + 1 / ((p : ℝ) - 1)) := by
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).two_le
+    have hd : 0 < (p : ℝ) - 1 := by linarith
+    exact le_add_of_nonneg_right (by positivity)
+  have hB0 : 0 ≤ B := Finset.prod_nonneg (fun p hp =>
+    zero_le_one.trans (hfactor p (Finset.mem_filter.mp hp).1))
+  have hB : B ≤ (m : ℝ) / (m.totient : ℝ) := by
+    calc
+      _ ≤ ∏ p ∈ m.primeFactors, (1 + 1 / ((p : ℝ) - 1)) :=
+        Finset.prod_le_prod_of_subset_of_one_le₀ (Finset.filter_subset _ _)
+          (fun p hp => zero_le_one.trans (hfactor p (Finset.mem_filter.mp hp).1))
+          (fun p hp _ => hfactor p hp)
+      _ = ∏ p ∈ m.primeFactors, (p : ℝ) / ((p : ℝ) - 1) := by
+        apply Finset.prod_congr rfl
+        intro p hp
+        have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).two_le
+        have hd : (p : ℝ) - 1 ≠ 0 := by linarith
+        field_simp [hd]; ring
+      _ = (m : ℝ) / (m.totient : ℝ) :=
+        (LeanLab.HeathBrown1985.div_totient_eq_prod m hm).symm
+  have hA : 0 ≤ A ∧ A ≤ 1 := singularEulerFactor_bounds652 r m
+  have hw : 0 ≤ w := by dsimp [w]; positivity
+  have hbig : 0 ≤ w * A * B := mul_nonneg (mul_nonneg hw hA.1) hB0
+  have hχ : |(χ (-1 : ZMod r)).re| ≤ 1 :=
+    (Complex.abs_re_le_norm _).trans (χ.norm_le_one _)
+  have hμ : |(ArithmeticFunction.moebius r : ℝ)| ≤ 1 := by
+    exact_mod_cast ArithmeticFunction.abs_moebius_le_one (n := r)
+  have hcoef : |(χ (-1 : ZMod r)).re| * |(ArithmeticFunction.moebius r : ℝ)| ≤ 1 := by
+    simpa only [mul_one] using mul_le_mul hχ hμ (abs_nonneg _) zero_le_one
+  rw [exceptionalSingular652, hcop.gcd_eq_one, Nat.div_one, pow_two]
+  change |(χ (-1 : ZMod r)).re * (ArithmeticFunction.moebius r : ℝ) * (w * A * B)| ≤
+    w * ((m : ℝ) / (m.totient : ℝ))
+  rw [abs_mul, abs_mul, abs_of_nonneg hbig]
+  calc
+    _ ≤ 1 * (w * A * B) := mul_le_mul_of_nonneg_right hcoef hbig
+    _ = w * (A * B) := by ring
+    _ ≤ w * (1 * ((m : ℝ) / (m.totient : ℝ))) :=
+      mul_le_mul_of_nonneg_left (mul_le_mul hA.2 hB hB0 zero_le_one) hw
+    _ = _ := by ring
 
 end LeanLab.ExceptionalSet.UpJ200.Decomp527a

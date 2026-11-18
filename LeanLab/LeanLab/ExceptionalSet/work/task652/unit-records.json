@@ -1,0 +1,75 @@
+{
+  "selected_zero_pos652": {
+    "twin": "A strip width at most one quarter and a cutoff at least two force every real point of the strip to be positive.",
+    "instance": "Width one quarter, cutoff two and real point one.",
+    "next": "prove principal nonvanishing and compare logarithmic scales"
+  },
+  "primitive_principal_nonvanishing652": {
+    "twin": "A principal primitive Dirichlet character has no real zero strictly between zero and one.",
+    "instance": "The principal character of level one at the point one half.",
+    "next": "bound the logarithm at every product modulus"
+  },
+  "log_product_scale652": {
+    "twin": "If the nonzero modulus M is at most P squared and P is at least two, log Bt M zero is at most log six Z divided by log two plus two, times log P.",
+    "instance": "Modulus one and cutoff two.",
+    "next": "put the uniform strip strictly inside the common zero free box"
+  },
+  "selection_strip_inside652": {
+    "twin": "A nonnegative width at most c divided by twice the logarithmic scale puts the closed selected strip strictly inside the c box at every modulus at most P squared.",
+    "instance": "c one, cutoff two, modulus one, point one and positive width equal to the smaller of one over twice K and one quarter.",
+    "next": "select the unique primitive real zero with no new admission"
+  },
+  "selected_real_zero652": {
+    "twin": "There is one positive absolute width a such that at every cutoff P at least two either every primitive L function has no real zero in the selected interval or exactly one nonprincipal primitive real character and one zero account for all real zeros in that interval.",
+    "instance": "Cutoff two. The checked output has a positive width and a conductor between one and two. The exact original selection type is also checked.",
+    "next": "remove the original selection admission from the pointwise proof dependency"
+  },
+  "quadratic_zero_free_half652": {
+    "twin": "There is a positive absolute ineffective b such that every nonprincipal real Dirichlet character of nonzero level r has no real zero beta at most one with beta greater than one minus b times r to minus one half. This is a derived alternative using the existing proved Siegel theorem. It does not assert the effective constant of the printed display.",
+    "instance": "The real nonprincipal character chi8 at level eight and beta one lies in this interval. Its nonvanishing is checked.",
+    "next": "deduce growth of every selected nonprincipal conductor",
+    "source": "P0082 page 358 display 10 and the proved PNTPort DirichletZF Siegel zero theorem"
+  },
+  "selected_conductor_eventually_large652": {
+    "twin": "For each positive strip width a and fixed real bound B at least one, there is a cutoff threshold at least two such that every selected conductor beyond that threshold either equals one or is at least B. The threshold is ineffective through the proved Siegel bound.",
+    "instance": "B is two. The proved absolute selection width supplies an actual selected conductor at the constructed threshold, so this input family is nonempty.",
+    "next": "reuse the proved totient estimate in the selected coprime case",
+    "source": "P0082 page 363 case ii a with the ineffective zero gap alternative"
+  },
+  "selected_totient_small652": {
+    "twin": "For every positive strip width and every positive eta, every selected conductor at sufficiently large cutoff either equals one or has r divided by phi r squared at most eta. This is a qualitative smallness statement with an ineffective threshold.",
+    "instance": "Eta is one quarter. The proved absolute selection supplies an actual selected conductor at the constructed threshold.",
+    "next": "finish the serial folder rebuild and audit the four remaining coefficient inputs",
+    "source": "P0082 page 363 case ii a using the existing proved totient estimate"
+  },
+  "small_conductor_zero_free652": {
+    "twin": "There is a positive absolute ineffective b such that a real nonprincipal character with conductor r at most E to one seventh has no real zero beta at most one and greater than one minus b times E to minus one fourteenth. This derived alternative removes the logarithmic loss by using the proved ineffective Siegel bound.",
+    "instance": "E is eight to the seventh power, r is eight, the character is chi8 and beta is one.",
+    "next": "resume the sequential baseline and report the remaining analytic coefficient gaps",
+    "source": "P0082 page 364 case ii d via the proved ineffective zero gap alternative"
+  },
+  "singularEulerFactor652": {
+    "twin": "The first Euler factor in the exceptional singular series is the product over primes not dividing r times m of one minus one over p minus one squared. Nonprime indices contribute one.",
+    "instance": "The factor at conductor four and frequency two. Its finite products converge by an antitone bounded limit.",
+    "source": "P0082 page 359 display 12",
+    "next": "prove the first Euler factor lies between zero and one"
+  },
+  "singularEulerFactor_bounds652": {
+    "twin": "For every natural conductor and frequency the first exceptional Euler factor lies between zero and one.",
+    "instance": "Conductor four and frequency two.",
+    "source": "P0082 page 359 display 12",
+    "next": "state the complete real exceptional singular expression"
+  },
+  "exceptionalSingular652": {
+    "twin": "For positive natural conductor and frequency the real exceptional singular expression is the real part of chi at minus one times mu of r over gcd r m times r over phi r phi of r over gcd r m times the first Euler product and the product of one plus one over p minus one over primes dividing m but not r. For a real character the real part is the printed sign. The values at conductor zero or frequency zero are extensions and have no source claim. This numeric definition does not assert the major arc expansion.",
+    "instance": "For the real character chi4 at conductor four and frequency two the expression equals twice the first Euler factor.",
+    "source": "P0082 page 359 display 12",
+    "next": "bound the explicit expression in the coprime case"
+  },
+  "exceptionalSingular_coprime_bound652": {
+    "twin": "At every positive frequency coprime to a nonzero conductor the absolute value of the explicit exceptional singular expression is at most r over phi r squared times m over phi m. This arithmetic bound does not identify that expression with a term of R1.",
+    "instance": "The real character chi4 at conductor four and the coprime positive frequency three. The principal character of modulus three at frequency two also checks, and its Mobius factor is minus one.",
+    "source": "P0082 page 363 case ii a using page 359 display 12",
+    "next": "retain the separate analytic expansion as blocked and complete the audits"
+  }
+}
