@@ -465,6 +465,363 @@ theorem major_lower293 (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε : �
         (∫ α in major293 X, integrand293 s l1 l2 μ γ η ε X α).re := by
   sorry
 
+/-! ### Proof of the trivial arc leaf, P0079 page 10, Section 5, display 17
+
+The helper lemmas below sit in their own namespace `TrivialSmall293`. The paper bounds the powers
+of two sums trivially, applies Cauchy-Schwarz, and bounds the tail mean square of the prime sums
+by periodicity and Parseval. Here the periodic splitting is replaced by a pointwise majorant of
+the kernel tail by two narrow Fejer kernels, and the Prime Number Theorem by Chebyshev's bound.
+AI wrote this Lean code. Goldbach is open. -/
+
+namespace TrivialSmall293
+open CountIntegral293
+
+/-- Closed form of the kernel away from zero. -/
+theorem kernel_eq_of_ne293 (η β : ℝ) (hη : η ≠ 0) (hβ : β ≠ 0) :
+    kernel293 η β = sin (Real.pi * η * β) ^ 2 / (Real.pi ^ 2 * β ^ 2) := by
+  have harg : Real.pi * η * β ≠ 0 := mul_ne_zero (mul_ne_zero Real.pi_ne_zero hη) hβ
+  unfold kernel293
+  rw [Real.sinc_of_ne_zero harg]
+  field_simp
+
+/-- Standard majorant. Outside [-T, T] the kernel is at most four times the sum of a narrow Fejer kernel and its shift by T. -/
+theorem tail_kernel_le293 (η T α : ℝ) (hT : 0 < T) (hα : T < |α|) :
+    kernel293 η α ≤ 4 * (kernel293 (1 / (2 * T)) α + kernel293 (1 / (2 * T)) (α - T)) := by
+  have hα0 : α ≠ 0 := by
+    intro h; rw [h, abs_zero] at hα; linarith
+  have hαT : α - T ≠ 0 := by
+    intro h
+    have : α = T := by linarith
+    rw [this, abs_of_pos hT] at hα; linarith
+  have hη' : (1 / (2 * T) : ℝ) ≠ 0 := by positivity
+  have hprod : 0 ≤ (α + T) * (3 * α - T) := by
+    rcases abs_cases α with ⟨h, _⟩ | ⟨h, _⟩
+    · rw [h] at hα; exact (mul_pos (by linarith) (by linarith)).le
+    · rw [h] at hα; exact (mul_pos_of_neg_of_neg (by linarith) (by linarith)).le
+  have hsq : (α - T) ^ 2 ≤ 4 * α ^ 2 := by nlinarith only [hprod]
+  have hα2 : 0 < α ^ 2 := by positivity
+  have hαT2 : 0 < (α - T) ^ 2 := by positivity
+  have hpi2 : 0 < Real.pi ^ 2 := by positivity
+  have hA : 0 < Real.pi ^ 2 * α ^ 2 := mul_pos hpi2 hα2
+  have h1 : kernel293 η α ≤ 1 / (Real.pi ^ 2 * α ^ 2) := by
+    rw [le_div_iff₀ hA]
+    have h := kernel_mul_sq_le293 η α
+    have h' := mul_le_mul_of_nonneg_right h hpi2.le
+    have e : 1 / Real.pi ^ 2 * Real.pi ^ 2 = 1 := by field_simp
+    rw [e] at h'
+    linarith only [h']
+  set θ : ℝ := Real.pi * (1 / (2 * T)) * α with hθ
+  have hshift : Real.pi * (1 / (2 * T)) * (α - T) = θ - Real.pi / 2 := by
+    rw [hθ]; field_simp
+  have hsin : sin (Real.pi * (1 / (2 * T)) * (α - T)) ^ 2 = cos θ ^ 2 := by
+    rw [hshift, Real.sin_sub_pi_div_two, neg_sq]
+  rw [kernel_eq_of_ne293 _ α hη' hα0, kernel_eq_of_ne293 _ (α - T) hη' hαT, hsin]
+  have hc : cos θ ^ 2 / (Real.pi ^ 2 * (4 * α ^ 2)) ≤
+      cos θ ^ 2 / (Real.pi ^ 2 * (α - T) ^ 2) :=
+    div_le_div_of_nonneg_left (sq_nonneg _) (mul_pos hpi2 hαT2)
+      (mul_le_mul_of_nonneg_left hsq hpi2.le)
+  have hsc : sin θ ^ 2 + cos θ ^ 2 = 1 := Real.sin_sq_add_cos_sq θ
+  have e2 : cos θ ^ 2 / (Real.pi ^ 2 * (4 * α ^ 2)) =
+      cos θ ^ 2 / 4 * (1 / (Real.pi ^ 2 * α ^ 2)) := by
+    field_simp
+  have e3 : sin θ ^ 2 / (Real.pi ^ 2 * α ^ 2) = sin θ ^ 2 * (1 / (Real.pi ^ 2 * α ^ 2)) := by
+    ring
+  have hpos : 0 ≤ 1 / (Real.pi ^ 2 * α ^ 2) := by positivity
+  rw [e2] at hc
+  rw [e3]
+  nlinarith only [h1, hc, hsc, hpos, mul_nonneg (sq_nonneg (sin θ)) hpos]
+
+/-- Conjugating the additive character negates the phase. -/
+theorem character_conj293 (u : ℝ) :
+    (starRingEnd ℂ) (character293 u) = character293 (-u) := by
+  unfold character293
+  rw [← Complex.exp_conj, map_mul, Complex.conj_ofReal, Complex.conj_I]
+  congr 1
+  push_cast
+  ring
+
+/-- Expansion of the squared prime sum as a double character sum. -/
+theorem primeSum_sq_expansion293 (ε X l a β : ℝ) :
+    ((‖primeSum293 ε X (l * (β + a))‖ ^ 2 : ℝ) : ℂ) =
+      ∑ x ∈ ((range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ))) ×ˢ
+          ((range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ))),
+        (((Real.log (x.1 : ℝ) * Real.log (x.2 : ℝ) : ℝ) : ℂ) *
+          character293 (l * ((x.1 : ℝ) - (x.2 : ℝ)) * a)) *
+          character293 (l * ((x.1 : ℝ) - (x.2 : ℝ)) * β) := by
+  rw [Complex.ofReal_pow, ← Complex.mul_conj']
+  unfold primeSum293
+  rw [map_sum, Finset.sum_mul_sum, Finset.sum_product]
+  apply sum_congr rfl
+  intro p _
+  apply sum_congr rfl
+  intro q _
+  dsimp only
+  rw [map_mul, Complex.conj_ofReal, character_conj293]
+  have h : character293 (l * ((p : ℝ) - (q : ℝ)) * a) * character293 (l * ((p : ℝ) - (q : ℝ)) * β) =
+      character293 ((p : ℝ) * (l * (β + a))) * character293 (-((q : ℝ) * (l * (β + a)))) := by
+    rw [← character_add293, ← character_add293]
+    congr 1
+    ring
+  rw [Complex.ofReal_mul]
+  linear_combination -(((Real.log (p : ℝ) : ℝ) : ℂ) * ((Real.log (q : ℝ) : ℝ) : ℂ)) * h
+
+/-- Only the diagonal survives a tent no wider than |l|. -/
+theorem diag_sum293 (P : Finset ℕ) (l a η' : ℝ) (hη : 0 < η') (hl : η' ≤ |l|) :
+    ∑ x ∈ P ×ˢ P,
+        (((Real.log (x.1 : ℝ) * Real.log (x.2 : ℝ) : ℝ) : ℂ) *
+          character293 (l * ((x.1 : ℝ) - (x.2 : ℝ)) * a)) *
+          ((max 0 (η' - |l * ((x.1 : ℝ) - (x.2 : ℝ))|) : ℝ) : ℂ) =
+      ((η' * ∑ p ∈ P, (Real.log (p : ℝ)) ^ 2 : ℝ) : ℂ) := by
+  rw [Finset.sum_product, Complex.ofReal_mul, Complex.ofReal_sum, Finset.mul_sum]
+  apply sum_congr rfl
+  intro p hp
+  rw [Finset.sum_eq_single p]
+  · have h0 : character293 0 = 1 := by simp [character293]
+    simp only [sub_self, mul_zero, zero_mul, h0, abs_zero, sub_zero, max_eq_right hη.le, mul_one]
+    push_cast
+    ring
+  · intro q _ hne
+    have hz : ((p : ℤ) - (q : ℤ)) ≠ 0 := sub_ne_zero.mpr (by exact_mod_cast hne.symm)
+    have h1 : ((1 : ℤ) : ℝ) ≤ ((|(p : ℤ) - (q : ℤ)| : ℤ) : ℝ) :=
+      Int.cast_le.mpr (Int.one_le_abs hz)
+    push_cast at h1
+    have h2 : |l| ≤ |l * ((p : ℝ) - (q : ℝ))| := by
+      rw [abs_mul]
+      exact le_mul_of_one_le_right (abs_nonneg l) h1
+    have h3 : max 0 (η' - |l * ((p : ℝ) - (q : ℝ))|) = 0 := max_eq_left (by linarith)
+    simp only [h3, Complex.ofReal_zero, mul_zero]
+  · intro h
+    exact absurd hp h
+
+/-- Parseval with the Fejer kernel. A kernel no wider than |l| sees only the diagonal of the squared prime sum. -/
+theorem prime_meansq293 (ε X l a η' : ℝ) (hη : 0 < η') (hl : η' ≤ |l|) :
+    Integrable (fun α : ℝ => ‖primeSum293 ε X (l * α)‖ ^ 2 * kernel293 η' (α - a)) ∧
+    ∫ α : ℝ, ‖primeSum293 ε X (l * α)‖ ^ 2 * kernel293 η' (α - a) =
+      η' * ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)), (log p) ^ 2 := by
+  constructor
+  · have hk : Integrable (fun α : ℝ => kernel293 η' (α - a)) :=
+      (kernel_integrable293 η').comp_sub_right a
+    have hc : Continuous (fun α : ℝ => ‖primeSum293 ε X (l * α)‖ ^ 2) := by
+      unfold primeSum293 character293
+      fun_prop
+    have hb : ∀ α : ℝ, ‖‖primeSum293 ε X (l * α)‖ ^ 2‖ ≤
+        (∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)), |log p|) ^ 2 := by
+      intro α
+      rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+      exact pow_le_pow_left₀ (norm_nonneg _) (primeSum_norm_le293 _ _ _) 2
+    exact hk.bdd_mul hc.aestronglyMeasurable (Eventually.of_forall hb)
+  · have h1 : ∫ α : ℝ, ‖primeSum293 ε X (l * α)‖ ^ 2 * kernel293 η' (α - a) =
+        ∫ β : ℝ, ‖primeSum293 ε X (l * (β + a))‖ ^ 2 * kernel293 η' β := by
+      have h := integral_sub_right_eq_self (μ := volume)
+        (fun β : ℝ => ‖primeSum293 ε X (l * (β + a))‖ ^ 2 * kernel293 η' β) a
+      simp only [sub_add_cancel] at h
+      exact h
+    have h2 : ∀ β : ℝ, ((‖primeSum293 ε X (l * (β + a))‖ ^ 2 * kernel293 η' β : ℝ) : ℂ) =
+        (∑ x ∈ ((range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ))) ×ˢ
+          ((range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ))),
+        (((Real.log (x.1 : ℝ) * Real.log (x.2 : ℝ) : ℝ) : ℂ) *
+          character293 (l * ((x.1 : ℝ) - (x.2 : ℝ)) * a)) *
+          character293 (l * ((x.1 : ℝ) - (x.2 : ℝ)) * β)) * (kernel293 η' β : ℂ) := by
+      intro β
+      rw [Complex.ofReal_mul, primeSum_sq_expansion293]
+    have hi := finite_kernel_integral293
+      (((range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ))) ×ˢ
+          ((range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ))))
+      (fun x : ℕ × ℕ => ((Real.log (x.1 : ℝ) * Real.log (x.2 : ℝ) : ℝ) : ℂ) *
+          character293 (l * ((x.1 : ℝ) - (x.2 : ℝ)) * a))
+      (fun x : ℕ × ℕ => l * ((x.1 : ℝ) - (x.2 : ℝ))) η' hη
+    have hC : ((∫ β : ℝ, ‖primeSum293 ε X (l * (β + a))‖ ^ 2 * kernel293 η' β : ℝ) : ℂ) =
+        ((η' * ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)),
+          (Real.log (p : ℝ)) ^ 2 : ℝ) : ℂ) := by
+      rw [← integral_complex_ofReal]
+      exact (integral_congr_ae (Eventually.of_forall h2)).trans
+        (hi.trans (diag_sum293 _ l a η' hη hl))
+    rw [h1]
+    exact Complex.ofReal_injective hC
+
+/-- Chebyshev's bound theta(X) ≤ log 4 * X, weighted by one more logarithm. -/
+theorem prime_log_sq_sum_le293 (ε X : ℝ) (hX : 1 ≤ X) :
+    ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)), (log p) ^ 2 ≤
+      log 4 * X * log X := by
+  have hX0 : (0 : ℝ) ≤ X := by linarith
+  have hlogX : 0 ≤ log X := Real.log_nonneg hX
+  have h1 : ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)),
+      (log p) ^ 2 ≤
+      ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)),
+        log X * log p := by
+    refine Finset.sum_le_sum fun p hp => ?_
+    rw [Finset.mem_filter, Finset.mem_range] at hp
+    obtain ⟨hpX, hpp, -⟩ := hp
+    have hp1 : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hpp.one_lt.le
+    have hple : (p : ℝ) ≤ X :=
+      le_trans (by exact_mod_cast Nat.lt_succ_iff.mp hpX) (Nat.floor_le hX0)
+    have hlp : 0 ≤ log (p : ℝ) := Real.log_nonneg hp1
+    have hle : log (p : ℝ) ≤ log X := Real.log_le_log (by linarith) hple
+    rw [sq]
+    exact mul_le_mul_of_nonneg_right hle hlp
+  have h2 : ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)),
+      log (p : ℝ) ≤ Chebyshev.theta X := by
+    unfold Chebyshev.theta
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
+    · intro p hp
+      rw [Finset.mem_filter, Finset.mem_range] at hp
+      rw [Finset.mem_filter, Finset.mem_Ioc]
+      exact ⟨⟨hp.2.1.pos, Nat.lt_succ_iff.mp hp.1⟩, hp.2.1⟩
+    · intro p hp _
+      rw [Finset.mem_filter] at hp
+      exact Real.log_nonneg (by exact_mod_cast hp.2.one_lt.le)
+  calc _ ≤ ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)),
+        log X * log p := h1
+    _ = log X * ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)),
+        log (p : ℝ) := by rw [Finset.mul_sum]
+    _ ≤ log X * (log 4 * X) :=
+        mul_le_mul_of_nonneg_left (h2.trans (Chebyshev.theta_le_log4_mul_x hX0)) hlogX
+    _ = log 4 * X * log X := by ring
+
+/-- P0079 page 4. The cutoff L = log_2 (ε X / (2 M)) tends to infinity and L^2 dominates any multiple of log X. -/
+theorem cutoff_eventually293 (s : ℕ) (μ : ℕ → ℝ) (ε : ℝ) (hs : 2 ≤ s) (hμ : ∀ i, μ i ≠ 0)
+    (hε : 0 < ε) (C : ℝ) :
+    ∀ᶠ X : ℝ in atTop, C ≤ cutoff293 s μ ε X ∧ C * log X ≤ (cutoff293 s μ ε X) ^ 2 := by
+  have hM : 0 < ∑ i : Fin s, |μ i| :=
+    Finset.sum_pos (fun i _ => abs_pos.mpr (hμ i)) ⟨⟨0, by omega⟩, Finset.mem_univ _⟩
+  have hc : 0 < ε / (2 * ∑ i : Fin s, |μ i|) := by positivity
+  filter_upwards [eventually_ge_atTop (1 : ℝ),
+    tendsto_log_atTop.eventually_ge_atTop
+      (2 * |log (ε / (2 * ∑ i : Fin s, |μ i|))| + 6 * |C|)] with X hX hl
+  have hXpos : 0 < X := by linarith
+  have hcut : cutoff293 s μ ε X =
+      (log (ε / (2 * ∑ i : Fin s, |μ i|)) + log X) / log 2 := by
+    unfold cutoff293
+    rw [show ε * X / (2 * ∑ i : Fin s, |μ i|) = ε / (2 * ∑ i : Fin s, |μ i|) * X by ring,
+      logb, log_mul hc.ne' hXpos.ne']
+  rw [hcut]
+  generalize log (ε / (2 * ∑ i : Fin s, |μ i|)) = a at hl
+  generalize log X = l at hl
+  have h2 : 0 < log 2 := log_pos (by norm_num)
+  have h2' : log 2 ≤ 1 := by have := Real.log_two_lt_d9; linarith
+  have ha := neg_abs_le a
+  have hC0 := abs_nonneg C
+  have hCle := le_abs_self C
+  have ha0 := abs_nonneg a
+  have ht : l / 2 ≤ a + l := by linarith
+  have ht0 : 0 ≤ a + l := by linarith
+  have hdiv : a + l ≤ (a + l) / log 2 := by
+    rw [le_div_iff₀ h2]; nlinarith
+  refine ⟨by linarith, ?_⟩
+  have h1 : C * l ≤ |C| * l := mul_le_mul_of_nonneg_right hCle (by linarith)
+  have h3 : |C| * l ≤ (l / 2) ^ 2 := by nlinarith
+  have h4 : (l / 2) ^ 2 ≤ ((a + l) / log 2) ^ 2 :=
+    pow_le_pow_left₀ (by linarith) (by linarith) 2
+  linarith
+
+/-- P0079 page 4, display 14. Every point of the trivial arc lies beyond L squared. -/
+theorem trivial_mem293 (X L α : ℝ) (h : α ∈ trivial293 X L) : L ^ 2 < |α| := by
+  simp only [trivial293, major293, minor293, Set.mem_compl_iff, Set.mem_union, Set.mem_ofPred_eq,
+    not_or, not_and, not_le] at h
+  exact h.2 h.1
+
+/-- P0079 page 4, display 14. The trivial arc is a measurable set. -/
+theorem trivial_measurable293 (X L : ℝ) : MeasurableSet (trivial293 X L) := by
+  have habs : Measurable (fun α : ℝ => |α|) := continuous_abs.measurable
+  have hmaj : MeasurableSet (major293 X) := measurableSet_le habs measurable_const
+  have hmin : MeasurableSet (minor293 X L) :=
+    (measurableSet_lt measurable_const habs).inter (measurableSet_le habs measurable_const)
+  exact (hmaj.union hmin).compl
+
+/-- P0079 page 10, Section 5. The trivial arc bound at a fixed large X: the powers of two sums
+are bounded trivially, the product of the prime sums by the arithmetic and geometric mean
+inequality, and the squared prime sums by Parseval against narrow Fejer kernels. -/
+theorem trivial_bound293 (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε X : ℝ) (hX : 1 ≤ X)
+    (hL : 0 < cutoff293 s μ ε X)
+    (h1 : 1 / (2 * (cutoff293 s μ ε X) ^ 2) ≤ |l1|)
+    (h2 : 1 / (2 * (cutoff293 s μ ε X) ^ 2) ≤ |l2|) :
+    ‖∫ α in trivial293 X (cutoff293 s μ ε X), integrand293 s l1 l2 μ γ η ε X α‖ ≤
+      (cutoff293 s μ ε X) ^ s * (4 / (cutoff293 s μ ε X) ^ 2) * (log 4 * X * log X) := by
+  set L := cutoff293 s μ ε X with hLdef
+  set T : ℝ := L ^ 2 with hTdef
+  have hT : 0 < T := by positivity
+  set η' : ℝ := 1 / (2 * T) with hη'def
+  have hη' : 0 < η' := by positivity
+  set Sg : ℝ := ∑ p ∈ (range (⌊X⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ ε * X ≤ (p : ℝ)),
+    (log p) ^ 2 with hSgdef
+  obtain ⟨i10, e10⟩ := prime_meansq293 ε X l1 0 η' hη' h1
+  obtain ⟨i1T, e1T⟩ := prime_meansq293 ε X l1 T η' hη' h1
+  obtain ⟨i20, e20⟩ := prime_meansq293 ε X l2 0 η' hη' h2
+  obtain ⟨i2T, e2T⟩ := prime_meansq293 ε X l2 T η' hη' h2
+  let G : ℝ → ℝ := fun α => L ^ s * (2 *
+    ((‖primeSum293 ε X (l1 * α)‖ ^ 2 * kernel293 η' (α - 0) +
+      ‖primeSum293 ε X (l1 * α)‖ ^ 2 * kernel293 η' (α - T)) +
+     (‖primeSum293 ε X (l2 * α)‖ ^ 2 * kernel293 η' (α - 0) +
+      ‖primeSum293 ε X (l2 * α)‖ ^ 2 * kernel293 η' (α - T))))
+  have hGi : Integrable G := (((i10.add i1T).add (i20.add i2T)).const_mul 2).const_mul (L ^ s)
+  have hGint : ∫ α, G α = L ^ s * (4 / T) * Sg := by
+    have : ∫ α, G α = L ^ s * (2 * ((η' * Sg + η' * Sg) + (η' * Sg + η' * Sg))) := by
+      simp only [G]
+      have hadd := integral_add (i10.add i1T) (i20.add i2T)
+      simp only [Pi.add_apply] at hadd
+      rw [integral_const_mul, integral_const_mul, hadd,
+        integral_add i10 i1T, integral_add i20 i2T, e10, e1T, e20, e2T]
+    rw [this, hη'def]
+    field_simp
+    ring
+  have hGnn : ∀ α, 0 ≤ G α := by
+    intro α
+    have := kernel_nonneg293 η' (α - 0)
+    have := kernel_nonneg293 η' (α - T)
+    simp only [G]
+    positivity
+  have hN : ((Icc 1 ⌊L⌋₊).card : ℝ) ≤ L := by
+    rw [Nat.card_Icc, Nat.add_sub_cancel]
+    exact Nat.floor_le hL.le
+  have hpt : ∀ α ∈ trivial293 X L, ‖integrand293 s l1 l2 μ γ η ε X α‖ ≤ G α := by
+    intro α hα
+    have hα' : T < |α| := trivial_mem293 X L α hα
+    have hk := tail_kernel_le293 η T α hT hα'
+    have hk0 := kernel_nonneg293 η α
+    have hprod : ‖∏ i : Fin s, powerSum293 L (μ i * α)‖ ≤ L ^ s := by
+      calc
+        _ ≤ ∏ i : Fin s, ‖powerSum293 L (μ i * α)‖ := norm_prod_le _ _
+        _ ≤ ∏ _ : Fin s, L := prod_le_prod₀ (fun _ _ => norm_nonneg _)
+          (fun i _ => (powerSum_norm_le293 _ _).trans hN)
+        _ = _ := by simp
+    have hnorm : ‖integrand293 s l1 l2 μ γ η ε X α‖ =
+        ‖primeSum293 ε X (l1 * α)‖ * ‖primeSum293 ε X (l2 * α)‖ *
+          ‖∏ i : Fin s, powerSum293 L (μ i * α)‖ * kernel293 η α := by
+      simp only [integrand293, norm_mul, character_norm293, mul_one, Complex.norm_real,
+        Real.norm_eq_abs, abs_of_nonneg hk0, ← hLdef]
+    rw [hnorm]
+    set x := ‖primeSum293 ε X (l1 * α)‖
+    set y := ‖primeSum293 ε X (l2 * α)‖
+    set pr := ‖∏ i : Fin s, powerSum293 L (μ i * α)‖
+    have hx : 0 ≤ x := norm_nonneg _
+    have hy : 0 ≤ y := norm_nonneg _
+    have hpr : 0 ≤ pr := norm_nonneg _
+    have hLs : 0 ≤ L ^ s := by positivity
+    have hk' : 0 ≤ kernel293 η' α + kernel293 η' (α - T) :=
+      add_nonneg (kernel_nonneg293 _ _) (kernel_nonneg293 _ _)
+    have hxy : x * y ≤ (x ^ 2 + y ^ 2) / 2 := by nlinarith [sq_nonneg (x - y)]
+    calc
+      x * y * pr * kernel293 η α ≤ ((x ^ 2 + y ^ 2) / 2) * L ^ s *
+          (4 * (kernel293 η' α + kernel293 η' (α - T))) :=
+        mul_le_mul (mul_le_mul hxy hprod hpr (by positivity)) hk hk0 (by positivity)
+      _ = G α := by
+        simp only [G, sub_zero]
+        ring
+  have hfi : Integrable (integrand293 s l1 l2 μ γ η ε X) :=
+    integrand_integrable293 s l1 l2 μ γ η ε X
+  calc
+    _ ≤ ∫ α in trivial293 X L, ‖integrand293 s l1 l2 μ γ η ε X α‖ :=
+      norm_integral_le_integral_norm _
+    _ ≤ ∫ α in trivial293 X L, G α :=
+      setIntegral_mono_on hfi.norm.integrableOn hGi.integrableOn
+        (trivial_measurable293 X L) hpt
+    _ ≤ ∫ α, G α := setIntegral_le_integral hGi (Eventually.of_forall hGnn)
+    _ = L ^ s * (4 / T) * Sg := hGint
+    _ ≤ L ^ s * (4 / T) * (log 4 * X * log X) :=
+      mul_le_mul_of_nonneg_left (prime_log_sq_sum_le293 ε X hX) (by positivity)
+
+end TrivialSmall293
+
 /-- LEAF. P0079 page 10, Section 5, display 17. The trivial arc is little o
 of X times L to the power s. The tolerance is explicit. -/
 theorem trivial_small293 (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε : ℝ)
@@ -473,7 +830,48 @@ theorem trivial_small293 (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε : 
     ∀ δ : ℝ, 0 < δ → ∀ᶠ X : ℝ in atTop,
       ‖∫ α in trivial293 X (cutoff293 s μ ε X), integrand293 s l1 l2 μ γ η ε X α‖ ≤
         δ * X * (cutoff293 s μ ε X) ^ s := by
-  sorry
+  intro δ hδ
+  have ha1 : 0 < |l1| := abs_pos.mpr h1
+  have ha2 : 0 < |l2| := abs_pos.mpr h2
+  set C : ℝ := max (max 1 (4 * log 4 / δ)) (max (1 / (2 * |l1|)) (1 / (2 * |l2|))) with hC
+  have hC1 : 1 ≤ C := (le_max_left _ _).trans (le_max_left _ _)
+  have hCδ : 4 * log 4 / δ ≤ C := (le_max_right _ _).trans (le_max_left _ _)
+  have hCl1 : 1 / (2 * |l1|) ≤ C := (le_max_left _ _).trans (le_max_right _ _)
+  have hCl2 : 1 / (2 * |l2|) ≤ C := (le_max_right _ _).trans (le_max_right _ _)
+  filter_upwards [TrivialSmall293.cutoff_eventually293 s μ ε hs hμ hε C, eventually_ge_atTop 1]
+    with X hX hX1
+  obtain ⟨hCL, hCL2⟩ := hX
+  set L := cutoff293 s μ ε X with hLdef
+  have hL1 : 1 ≤ L := hC1.trans hCL
+  have hL : 0 < L := by linarith
+  have hLL : L ≤ L ^ 2 := by nlinarith
+  have hlogX : 0 ≤ log X := log_nonneg hX1
+  have key : ∀ l : ℝ, 0 < |l| → 1 / (2 * |l|) ≤ C → 1 / (2 * L ^ 2) ≤ |l| := by
+    intro l hl hCl
+    have h3 : 1 / (2 * |l|) ≤ L ^ 2 := (hCl.trans hCL).trans hLL
+    rw [div_le_iff₀ (by positivity)] at h3 ⊢
+    nlinarith
+  have hb := TrivialSmall293.trivial_bound293 s l1 l2 μ γ η ε X hX1 hL
+    (key l1 ha1 hCl1) (key l2 ha2 hCl2)
+  refine hb.trans ?_
+  have h4 : 4 * log 4 * log X ≤ δ * L ^ 2 := by
+    have h5 : 4 * log 4 / δ * log X ≤ L ^ 2 :=
+      (mul_le_mul_of_nonneg_right hCδ hlogX).trans hCL2
+    have h6 : δ * (4 * log 4 / δ * log X) ≤ δ * L ^ 2 := mul_le_mul_of_nonneg_left h5 hδ.le
+    have h7 : δ * (4 * log 4 / δ * log X) = 4 * log 4 * log X := by field_simp
+    linarith
+  have hLs : 0 ≤ L ^ s := by positivity
+  have hX0 : 0 ≤ X := by linarith
+  have h8 : L ^ s * (4 / L ^ 2) * (log 4 * X * log X) =
+      (4 * log 4 * log X) / L ^ 2 * (X * L ^ s) := by
+    field_simp
+  have h9 : (4 * log 4 * log X) / L ^ 2 ≤ δ := by
+    rw [div_le_iff₀ (by positivity)]
+    exact h4
+  rw [h8]
+  calc
+    _ ≤ δ * (X * L ^ s) := mul_le_mul_of_nonneg_right h9 (by positivity)
+    _ = _ := by ring
 
 /-- LEAF. P0079 pages 11 to 12, displays 40 to 43 and their conclusions.
 The two cases share the estimate. A positive tolerance absorbs the little o term.
