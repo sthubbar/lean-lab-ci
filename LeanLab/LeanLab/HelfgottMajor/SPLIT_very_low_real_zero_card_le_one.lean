@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_very_low_mult_le
+import LeanLab.PNTPort.DirichletZF.SiegelSigns
 
 /-!
 # Split of `very_low_real_zero_card_le_one`
@@ -43,7 +44,16 @@ axis, and the statement is only about the one `L`-function of conductor one. -/
 theorem very_low_real_zero_modulus_one (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
     {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) (hq : q = 1) :
     ∀ ρ ∈ stripZeros χ T, ρ.im = 0 → False := by
-  sorry
+  intro ρ hρ him
+  subst hq
+  have hcast : ρ = ((ρ.re : ℝ) : ℂ) := by apply Complex.ext <;> simp [him]
+  have hL : DirichletCharacter.LFunction χ ((ρ.re : ℝ) : ℂ) = 0 := by
+    rw [← hcast]
+    exact hρ.1
+  rw [DirichletCharacter.LFunction_modOne_eq] at hL
+  have hneg := (LeanLab.PNTPort.DirichletZF.riemannZeta_real_neg hρ.2.1 hρ.2.2.1).2
+  rw [hL] at hneg
+  simp at hneg
 
 /-- LEAF. Case of a real valued character of conductor at least two. On the band `1 ≤ T`,
 `q * T ≤ 2πe`, a primitive character taking only real values has at most one zero of the open
