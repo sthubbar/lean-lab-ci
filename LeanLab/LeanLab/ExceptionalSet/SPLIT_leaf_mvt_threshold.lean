@@ -359,6 +359,195 @@ theorem leaf_integral_eq_solution_count :
   · rw [if_pos h, if_pos (hc.mp h)]
   · rw [if_neg h, if_neg (fun hh => h (hc.mpr hh))]
 
+/-! ### The elementary count at `l = 1`: Newton identities and fixing the free entries -/
+
+/-- Newton identities, Mathlib `MvPolynomial.mul_esymm_eq_sum`: equal power sums of orders
+`1..n` give equal elementary symmetric functions of two real `n`-tuples. -/
+private theorem esymm_eq_aux (n : ℕ) (u v : Fin n → ℝ)
+    (h : ∀ j : Fin n, ∑ i : Fin n, u i ^ ((j : ℕ) + 1) = ∑ i : Fin n, v i ^ ((j : ℕ) + 1))
+    (k : ℕ) (hk : k ≤ n) :
+    MvPolynomial.aeval u (MvPolynomial.esymm (Fin n) ℝ k)
+      = MvPolynomial.aeval v (MvPolynomial.esymm (Fin n) ℝ k) := by
+  induction k using Nat.strong_induction_on with
+  | _ k ih =>
+    rcases Nat.eq_zero_or_pos k with rfl | hpos
+    · simp
+    · have hu := congrArg (MvPolynomial.aeval u) (MvPolynomial.mul_esymm_eq_sum (Fin n) ℝ k)
+      have hv := congrArg (MvPolynomial.aeval v) (MvPolynomial.mul_esymm_eq_sum (Fin n) ℝ k)
+      simp only [map_mul, map_natCast, map_sum, map_pow, map_neg, map_one] at hu hv
+      have hk0 : (k:ℝ) ≠ 0 := by positivity
+      apply mul_left_cancel₀ hk0
+      rw [hu, hv]
+      congr 1
+      apply Finset.sum_congr rfl
+      intro a ha
+      rw [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal] at ha
+      rw [ih a.1 ha.2 (by omega)]
+      congr 1
+      have hb : a.2 - 1 < n := by omega
+      have h1 := h ⟨a.2 - 1, hb⟩
+      have e : a.2 - 1 + 1 = a.2 := by omega
+      dsimp only at h1
+      simp only [e] at h1
+      simp only [MvPolynomial.psum, map_sum, map_pow, MvPolynomial.aeval_X]
+      exact h1
+
+/-- Two real `n`-tuples with equal power sums of orders `1..n` have the same roots of
+`prod (X - u_i)`, so every entry of one is an entry of the other. -/
+private theorem exists_eq_of_psum_eq (n : ℕ) (u v : Fin n → ℝ)
+    (h : ∀ j : Fin n, ∑ i : Fin n, u i ^ ((j : ℕ) + 1) = ∑ i : Fin n, v i ^ ((j : ℕ) + 1))
+    (i : Fin n) : ∃ t : Fin n, u i = v t := by
+  have he : ∀ k ≤ n, (Multiset.map u Finset.univ.val).esymm k
+      = (Multiset.map v Finset.univ.val).esymm k := by
+    intro k hk
+    rw [← MvPolynomial.aeval_esymm_eq_multiset_esymm (Fin n) ℝ k u,
+      ← MvPolynomial.aeval_esymm_eq_multiset_esymm (Fin n) ℝ k v]
+    exact esymm_eq_aux n u v h k hk
+  have hp : ((Multiset.map u Finset.univ.val).map fun t => Polynomial.X - Polynomial.C t).prod
+      = ((Multiset.map v Finset.univ.val).map fun t => Polynomial.X - Polynomial.C t).prod := by
+    rw [Multiset.prod_X_sub_X_eq_sum_esymm, Multiset.prod_X_sub_X_eq_sum_esymm]
+    simp only [Multiset.card_map, Finset.card_val, Finset.card_univ, Fintype.card_fin]
+    apply Finset.sum_congr rfl
+    intro j hj
+    rw [he j (by have := Finset.mem_range.mp hj; omega)]
+  have hp' : ∏ t : Fin n, (Polynomial.X - Polynomial.C (u t))
+      = ∏ t : Fin n, (Polynomial.X - Polynomial.C (v t)) := by
+    rw [Finset.prod_eq_multiset_prod, Finset.prod_eq_multiset_prod]
+    simpa only [Multiset.map_map, Function.comp_def] using hp
+  have h2 := congrArg (Polynomial.eval (u i)) hp'
+  simp only [Polynomial.eval_prod, Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C] at h2
+  rw [Finset.prod_eq_zero (Finset.mem_univ i) (sub_self _)] at h2
+  obtain ⟨t, -, ht⟩ := Finset.prod_eq_zero_iff.mp h2.symm
+  exact ⟨t, sub_eq_zero.mp ht⟩
+
+private theorem card_le_of_valueset {α : Type*} (n : ℕ) (s : Finset (Fin n → α))
+    (h : ∀ g ∈ s, ∀ g' ∈ s, ∀ i, ∃ t, g i = g' t) : s.card ≤ n ^ n := by
+  rcases s.eq_empty_or_nonempty with rfl | ⟨g0, hg0⟩
+  · simp
+  · have key : ∀ g ∈ s, ∃ φ : Fin n → Fin n, ∀ i, g i = g0 (φ i) := by
+      intro g hg
+      choose φ hφ using h g hg g0 hg0
+      exact ⟨φ, hφ⟩
+    have hle : s.card ≤ (Finset.univ : Finset (Fin n → Fin n)).card := by
+      apply Finset.card_le_card_of_injOn
+        (fun g => if hg : g ∈ s then Classical.choose (key g hg) else fun i => i)
+        (fun _ _ => Finset.mem_univ _)
+      intro g hg g' hg' e
+      have hg1 : g ∈ s := Finset.mem_coe.mp hg
+      have hg1' : g' ∈ s := Finset.mem_coe.mp hg'
+      simp only [hg1, hg1', dif_pos] at e
+      funext i
+      rw [Classical.choose_spec (key g hg1) i, Classical.choose_spec (key g' hg1') i, e]
+    simpa using hle
+
+private theorem card_T (n m P : ℕ)
+    (hN : ∀ (u v : Fin n → ℝ),
+      (∀ j : Fin n, ∑ i : Fin n, u i ^ ((j : ℕ) + 1) = ∑ i : Fin n, v i ^ ((j : ℕ) + 1)) →
+        ∀ i : Fin n, ∃ t : Fin n, u i = v t)
+    (c : Fin n → ℝ) (T : Finset (Fin (n + m) → Fin P))
+    (hT : ∀ y ∈ T, ∀ j : Fin n,
+      ∑ i : Fin (n + m), (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1) = c j) :
+    T.card ≤ n ^ n * P ^ m := by
+  have h1 := Finset.card_le_mul_card_image
+    (f := fun y : Fin (n + m) → Fin P => fun i : Fin m => y (Fin.natAdd n i)) T (n ^ n) ?_
+  · refine h1.trans (Nat.mul_le_mul_left _ ?_)
+    refine (Finset.card_le_univ _).trans ?_
+    simp
+  · intro r _
+    have hinj : Set.InjOn (fun y : Fin (n + m) → Fin P => fun i : Fin n => y (Fin.castAdd m i))
+        ((T.filter (fun y => (fun i : Fin m => y (Fin.natAdd n i)) = r) : Finset _) : Set _) := by
+      intro y hy y' hy' e
+      have hy1 := (Finset.mem_filter.mp (Finset.mem_coe.mp hy)).2
+      have hy1' := (Finset.mem_filter.mp (Finset.mem_coe.mp hy')).2
+      funext i
+      refine Fin.addCases (fun k => ?_) (fun k => ?_) i
+      · exact congrFun e k
+      · exact (congrFun hy1 k).trans (congrFun hy1' k).symm
+    rw [← Finset.card_image_of_injOn hinj]
+    apply card_le_of_valueset
+    intro g hg g' hg' i
+    obtain ⟨y, hy, rfl⟩ := Finset.mem_image.mp hg
+    obtain ⟨y', hy', rfl⟩ := Finset.mem_image.mp hg'
+    obtain ⟨hyT, hyr⟩ := Finset.mem_filter.mp hy
+    obtain ⟨hyT', hyr'⟩ := Finset.mem_filter.mp hy'
+    have hpow : ∀ j : Fin n,
+        ∑ i : Fin n, (fun i : Fin n => (((y (Fin.castAdd m i)).val + 1 : ℕ) : ℝ)) i ^ ((j : ℕ) + 1)
+          = ∑ i : Fin n, (fun i : Fin n => (((y' (Fin.castAdd m i)).val + 1 : ℕ) : ℝ)) i ^ ((j : ℕ) + 1) := by
+      intro j
+      have a := hT y hyT j
+      have a' := hT y' hyT' j
+      rw [Fin.sum_univ_add] at a a'
+      have tl : ∀ k : Fin m, y (Fin.natAdd n k) = y' (Fin.natAdd n k) :=
+        fun k => (congrFun hyr k).trans (congrFun hyr' k).symm
+      simp only [tl] at a
+      simp only
+      linarith
+    obtain ⟨t, ht⟩ := hN _ _ hpow i
+    refine ⟨t, ?_⟩
+    have h2 : (y (Fin.castAdd m i)).val + 1 = (y' (Fin.castAdd m t)).val + 1 :=
+      Nat.cast_injective (R := ℝ) ht
+    show y (Fin.castAdd m i) = y' (Fin.castAdd m t)
+    exact Fin.ext (by omega)
+
+private theorem count_pairs_le (n m P : ℕ)
+    (hN : ∀ (u v : Fin n → ℝ),
+      (∀ j : Fin n, ∑ i : Fin n, u i ^ ((j : ℕ) + 1) = ∑ i : Fin n, v i ^ ((j : ℕ) + 1)) →
+        ∀ i : Fin n, ∃ t : Fin n, u i = v t)
+    (B : ℕ) (hB : B = n + m) :
+    (∑ x : Fin B → Fin P, ∑ y : Fin B → Fin P,
+      (if (∀ j : Fin n,
+          ∑ i : Fin B, (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)
+            = ∑ i : Fin B, (((y i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1))
+        then (1 : ℝ) else 0))
+    ≤ (n : ℝ) ^ n * (P : ℝ) ^ (n + m) * (P : ℝ) ^ m := by
+  subst hB
+  refine (Finset.sum_le_sum (g := fun _ => (n : ℝ) ^ n * (P : ℝ) ^ m) (fun x _ => ?_)).trans
+    (le_of_eq ?_)
+  · rw [Finset.sum_boole]
+    refine le_trans (Nat.cast_le.mpr (card_T n m P hN
+      (fun j => ∑ i : Fin (n + m), (((x i).val + 1 : ℕ) : ℝ) ^ ((j : ℕ) + 1)) _
+      (fun y hy j => ((Finset.mem_filter.mp hy).2 j).symm))) ?_
+    push_cast
+    exact le_rfl
+  · rw [Finset.sum_const]
+    simp only [Fintype.card_pi, Finset.prod_const, Finset.card_univ, Fintype.card_fin,
+      nsmul_eq_mul, Nat.cast_pow]
+    ring
+
+private theorem leaf_one_arith (n F P : ℕ) (hn : 12 ≤ n) (hP : 0 < P) :
+    (n : ℝ) ^ n * (P : ℝ) ^ (n + F) * (P : ℝ) ^ F
+      < (20 * (n : ℝ)) ^ ((n : ℝ) * ((n : ℝ) + 1) / 2) *
+          ((P : ℝ) ^ ((n : ℝ) * ((n : ℝ) + 1) / 2 * (1 - 1 / (n : ℝ))) *
+           (P : ℝ) ^ (2 * ((n : ℝ) + (F : ℝ)) - (n : ℝ) * ((n : ℝ) + 1) / 2)) := by
+  have hn0 : (12 : ℝ) ≤ n := by exact_mod_cast hn
+  have hnpos : (0 : ℝ) < n := by linarith
+  have hP1 : (1 : ℝ) ≤ P := by exact_mod_cast hP
+  have hPpos : (0 : ℝ) < P := by linarith
+  have h1 : (n : ℝ) ^ n < (20 * (n : ℝ)) ^ ((n : ℝ) * ((n : ℝ) + 1) / 2) := by
+    have ha : (n : ℝ) ^ n < (20 * (n : ℝ)) ^ n :=
+      pow_lt_pow_left₀ (by linarith) hnpos.le (by omega)
+    have hb : (20 * (n : ℝ)) ^ n = (20 * (n : ℝ)) ^ (n : ℝ) := (Real.rpow_natCast _ _).symm
+    have hc : (20 * (n : ℝ)) ^ (n : ℝ) ≤ (20 * (n : ℝ)) ^ ((n : ℝ) * ((n : ℝ) + 1) / 2) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+      nlinarith
+    calc (n : ℝ) ^ n < (20 * (n : ℝ)) ^ n := ha
+      _ = (20 * (n : ℝ)) ^ (n : ℝ) := hb
+      _ ≤ _ := hc
+  have h2 : (P : ℝ) ^ (n + F) * (P : ℝ) ^ F
+      ≤ (P : ℝ) ^ ((n : ℝ) * ((n : ℝ) + 1) / 2 * (1 - 1 / (n : ℝ))) *
+           (P : ℝ) ^ (2 * ((n : ℝ) + (F : ℝ)) - (n : ℝ) * ((n : ℝ) + 1) / 2) := by
+    rw [← Real.rpow_add hPpos, ← pow_add, ← Real.rpow_natCast]
+    apply Real.rpow_le_rpow_of_exponent_le hP1
+    have he : (n : ℝ) * ((n : ℝ) + 1) / 2 * (1 - 1 / (n : ℝ)) = ((n : ℝ) + 1) * ((n : ℝ) - 1) / 2 := by
+      field_simp
+    rw [he]
+    push_cast
+    nlinarith
+  have hpos : 0 < (P : ℝ) ^ (n + F) * (P : ℝ) ^ F := by positivity
+  have hnn : (0 : ℝ) ≤ (20 * (n : ℝ)) ^ ((n : ℝ) * ((n : ℝ) + 1) / 2) := by positivity
+  rw [mul_assoc]
+  exact mul_lt_mul h1 h2 hpos hnn
+
 /-- LEAF. The threshold exponent bound at `l = 1`, in counting form and with the diagonal
 power taken out: at `b = n + [n(n+1)/4 + 1]` the number of pairs of `b`-tuples in `[1, P]`
 with equal power sums up to order `n` is below `(20 n)^(n(n+1)/2)` times
@@ -376,7 +565,16 @@ theorem leaf_solution_count_at_one :
       < (20 * n : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * l) *
             ((P : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * (1 - 1 / (n : ℝ)) ^ l) *
              (P : ℝ) ^ ((2 * (n * l + (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊)) : ℝ) - ((n * (n + 1) : ℕ) : ℝ) / 2)) := by
-  sorry
+  intro n hn l hl P hP
+  subst hl
+  refine lt_of_le_of_lt
+    (count_pairs_le n (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊) P
+      (exists_eq_of_psum_eq n)
+      (n * 1 + (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊)) (by rw [Nat.mul_one])) ?_
+  have key := leaf_one_arith n (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊) P hn hP
+  generalize (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊) = F at key ⊢
+  simp only [Nat.cast_one, mul_one, pow_one, Nat.cast_mul, Nat.cast_add]
+  exact key
 
 /-- LEAF. The same threshold bound for `l ≥ 2`, in the same counting form. This is the
 step that needs genuine mean value input rather than the elementary determination count:
