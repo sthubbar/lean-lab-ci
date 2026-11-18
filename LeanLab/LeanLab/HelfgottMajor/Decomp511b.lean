@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Gamma503
+import LeanLab.HelfgottMajor.Ray640
 import Mathlib
 
 /-!
@@ -347,7 +348,7 @@ theorem optimized_rotated_ray_bound (δ : ℝ) (s : ℂ) (hδ : 0 < δ) (hσ : 0
       mul_le_mul_of_nonneg_right he (by positivity)
     _ = _ := by ring
 
-/-- LEAF OPEN contour identity. P0014 page 26, the replacement of the positive real ray
+/-- LEAF: Exact contour identity. P0014 page 26, the replacement of the positive real ray
 by C prime before displays 3.65 and 3.66, parametrized by x times exp of i theta.
 Positive real part makes the small arc vanish. The ray angle is below pi over four.
 The actual rotated kernel integrability and every real norm estimate are proved separately. -/
@@ -355,10 +356,33 @@ theorem positive_ray_rotation (δ θ : ℝ) (s : ℂ) (hδ : 0 < δ) (hσ : 0 < 
     (ht : 100 ≤ s.im) (hθ0 : 0 < θ) (hθ1 : θ < π / 4) :
     gaussianMellin δ s = Complex.exp ((θ : ℂ) * Complex.I * s) *
       (∫ x : ℝ in Ioi 0, rotatedKernel δ θ s x) := by
-  sorry
+  have hcos : 0 < cos (2 * θ) :=
+    cos_pos_of_mem_Ioo ⟨by linarith [pi_pos], by linarith⟩
+  have hphase : 0 ≤ δ * sin θ := mul_nonneg hδ.le
+    (sin_nonneg_of_nonneg_of_le_pi hθ0.le (by linarith [pi_pos]))
+  have hp (x : ℝ) : Ray640.logKernel δ s (x + (θ : ℂ) * Complex.I) =
+      Complex.exp ((θ : ℂ) * Complex.I * s) *
+        (exp x • rotatedKernel δ θ s (exp x)) := by
+    simpa only [rotatedKernel, Complex.real_smul, smul_eq_mul, mul_assoc] using
+      Ray640.logarithmic_ray_pullback δ θ x s
+  have hreal : Integrable (fun x : ℝ => Ray640.logKernel δ s x) := by
+    simp_rw [Ray640.logarithmic_real_pullback]
+    exact (integrable_comp_exp _).mpr (twisted_mellin_integrable δ s hσ)
+  have hrotated : Integrable (fun x : ℝ =>
+      Ray640.logKernel δ s (x + (θ : ℂ) * Complex.I)) := by
+    simp_rw [hp]
+    exact ((integrable_comp_exp _).mpr
+      (rotated_ray_majorant δ θ s hσ hcos hphase).1).const_mul _
+  have h := Ray640.logarithmic_rotation δ θ s hσ hδ.le (by linarith) hθ0.le hθ1
+    hreal hrotated
+  simp_rw [Ray640.logarithmic_real_pullback, hp] at h
+  rw [integral_const_mul, integral_comp_exp] at h
+  rw [integral_comp_exp (fun t : ℝ => (t : ℂ) ^ (s - 1) •
+    ((exp (-t ^ 2 / 2) : ℂ) * e (δ * t)))] at h
+  simpa only [gaussianMellin, mellin] using h
 
 /-- The positive height case of display 3.66, from the contour identity and the proved ray bound.
-P0014 page 26. CONDITIONAL ON positive_ray_rotation only. -/
+P0014 page 26. The contour identity and the ray bound are proved. -/
 theorem positive_raised_of_rotation (δ : ℝ) (s : ℂ) (hδ : 0 < δ) (hσ : 0 < s.re)
     (ht : 100 ≤ s.im) :
     ‖gaussianMellin δ s‖ ≤ exp (π / 2) / 2 *
@@ -370,7 +394,7 @@ theorem positive_raised_of_rotation (δ : ℝ) (s : ℂ) (hδ : 0 < δ) (hσ : 0
 /-- Raised contour bound from the exact contour identity. P0014 page 26, display 3.66.
 This is the general positive real part estimate, before the integration by parts reduction.
 It retains the exact Gamma factor and the printed exponential coefficient.
-CONDITIONAL ON positive_ray_rotation. The real ray estimate and reflection are proved. -/
+The contour identity, real ray estimate and reflection are proved. -/
 theorem same_raised_contour (δ : ℝ) (s : ℂ) (hσ : 0 < s.re)
     (ht : 100 ≤ |s.im|) (hsign : 0 < δ * s.im) :
     ‖gaussianMellin δ s‖ ≤ exp (π / 2) / 2 *
