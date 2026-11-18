@@ -5,6 +5,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Perelli1996.Definitions103
 import LeanLab.Perelli1996.Parseval103
 import LeanLab.Perelli1996.Farey103
+import LeanLab.Perelli1996.NairMean103
 
 namespace LeanLab.Perelli1996.Decomp103
 open Finset Real Polynomial MeasureTheory
@@ -41,7 +42,7 @@ theorem leaf_nair_mean (F : ℤ[X]) (hF : Admissible F) :
       H ≤ N ^ (1 / (F.natDegree : ℝ)) →
       ∑ n ∈ win F N H, majorWeight (Fv F n).toNat N ^ 2 ≤
         C * H * Real.log N ^ d := by
-  sorry
+  exact Nair103.nair_mean_explicit F hF.1 hF.2
 
 /-- The polynomial window holds at most H plus one integers. -/
 theorem card_win_le (F : ℤ[X]) {N H : ℝ} (hN : 0 ≤ N) (hH : 0 ≤ H) :
