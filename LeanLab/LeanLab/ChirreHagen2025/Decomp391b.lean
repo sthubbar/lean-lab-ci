@@ -106,7 +106,11 @@ This isolates the zero input before the audited scalar integration on page 120.
 It contains neither a Mangoldt sum nor a psi estimate. -/
 theorem zero_sum_reduction (x : ℝ) (hx : 100000 ≤ x) :
     ‖∑' ρ, Decomp391a.zeroTerm x ρ‖ ≤ 0.047 / Real.sqrt x + correctedTail x := by
-  sorry
+  have hz := Decomp391a.zero_sum_bound x hx
+  unfold correctedTail
+  split_ifs with hsmall
+  · simpa only [Decomp429e.zeroTailError, if_pos hsmall] using hz
+  · simpa only [Decomp429e.zeroTailError, if_neg hsmall] using hz
 
 /-- JRT page 3 Lemma 9, using the corrected scalar route.
 CONDITIONAL ON the explicit formula and the zero sum reduction. -/
