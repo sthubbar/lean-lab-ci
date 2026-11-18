@@ -1,4 +1,5 @@
 import LeanLab.LanguascoPintzZaccagnini2007.Decomp481a
+import LeanLab.PNTPort.DirichletZF.RealZero
 
 /-!
 The real and nonreal character cases of P0045 preprint page 6.
@@ -51,7 +52,354 @@ Iwaniec 1974 supplies the nonreal character zero free region. -/
 theorem iwaniec_zero_free481 : IwaniecStatement481 := by
   sorry
 
-/-- LEAF. OPEN. P0045 page 5 before Lemma 4.1 and page 6, first proof paragraph.
+/-! Inlined proof of `real_exceptional_conductor481`. These private lemmas are copies of the
+proved lemmas of `Decomp484a` and `SPLIT_real_exceptional_conductor481`, which import this file and
+so cannot be called from here. No statement is changed and nothing is assumed. -/
+
+section RealInline481b
+
+open Complex LeanLab.PNTPort.DirichletZF
+
+/-- P0045 page 5, display 8, change of logarithmic scale in the classical region.
+The auxiliary factor in Bt is absorbed in one absolute positive constant. -/
+private theorem log_Bt_comparison484_inl481b :
+    ∃ K : ℝ, 0 < K ∧ ∀ r : ℕ, 1 ≤ r → ∀ t : ℝ,
+      Real.log (Bt r t) ≤ K * Real.log ((r : ℝ) * (|t| + 2)) := by
+  have hZ : 0 < Z := Z_pos
+  let B : ℝ := 3 * Z
+  have hB : 1 ≤ B := by dsimp [B]; linarith [one_le_Z]
+  have hB0 : 0 < B := by linarith
+  have hlB : 0 ≤ Real.log B := Real.log_nonneg hB
+  have hl2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  refine ⟨1 + Real.log B / Real.log 2, by positivity, ?_⟩
+  intro r hr t
+  have hr1 : (1 : ℝ) ≤ r := by exact_mod_cast hr
+  have hr0 : (0 : ℝ) < r := by linarith
+  let A : ℝ := (r : ℝ) * (|t| + 2)
+  have hA2 : 2 ≤ A := by
+    dsimp [A]
+    nlinarith [mul_nonneg hr0.le (abs_nonneg t)]
+  have hA0 : 0 < A := by linarith
+  have hlogA : Real.log 2 ≤ Real.log A := Real.log_le_log (by norm_num) hA2
+  have hBt : Bt r t ≤ B * A := by
+    dsimp [Bt, B, A]
+    nlinarith [show 0 ≤ (r : ℝ) * |t| * Z by positivity]
+  have hBt0 : 0 < Bt r t := by dsimp [Bt]; positivity
+  have hscale : Real.log B ≤ Real.log B / Real.log 2 * Real.log A := by
+    have hm := mul_le_mul_of_nonneg_left hlogA (div_nonneg hlB hl2.le)
+    simpa [div_mul_cancel₀ _ hl2.ne'] using hm
+  calc Real.log (Bt r t) ≤ Real.log (B * A) := Real.log_le_log hBt0 hBt
+    _ = Real.log B + Real.log A := Real.log_mul hB0.ne' hA0.ne'
+    _ ≤ (1 + Real.log B / Real.log 2) * Real.log A := by nlinarith
+
+/-- P0045 page 5 before Lemma 4.1, nonreal zeros of nonprincipal characters.
+The only exceptional zero in the proved classical region is real. -/
+private theorem nonprincipal_nonreal_gap484_inl481b :
+    ∃ b : ℝ, 0 < b ∧ ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
+      χ ≠ 1 → ∀ ρ : ℂ, Lfun481 χ ρ = 0 → ρ.im ≠ 0 →
+        b / Real.log ((r : ℝ) * (|ρ.im| + 2)) ≤ 1 - ρ.re := by
+  obtain ⟨c, c', hc, _, hreg⟩ := zero_free_region_real
+  obtain ⟨K, hK, hcomp⟩ := log_Bt_comparison484_inl481b
+  refine ⟨c / K, div_pos hc hK, ?_⟩
+  intro r hr χ hχ ρ hρ him
+  have hr0 : r ≠ 0 := by omega
+  letI : NeZero r := ⟨hr0⟩
+  have hzero : DirichletCharacter.LFunction χ ρ = 0 := by simpa [Lfun481, hr0] using hρ
+  have hgap : c / Real.log (Bt r ρ.im) ≤ 1 - ρ.re := by
+    rcases (hreg r χ hχ).1 ρ hzero with h | h
+    · linarith
+    · exact (him h.2.2.2).elim
+  have hlogBt : 0 < Real.log (Bt r ρ.im) := by linarith [one_le_log_Bt (N := r) ρ.im]
+  have hr1 : (1 : ℝ) ≤ r := by exact_mod_cast hr
+  have hA : 1 < (r : ℝ) * (|ρ.im| + 2) := by
+    nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ r) (abs_nonneg ρ.im)]
+  have hlogA : 0 < Real.log ((r : ℝ) * (|ρ.im| + 2)) := Real.log_pos hA
+  apply le_trans _ hgap
+  rw [div_div, div_le_div_iff₀ (mul_pos hK hlogA) hlogBt]
+  exact mul_le_mul_of_nonneg_left (hcomp r hr ρ.im) hc.le
+
+/-- P0045 page 5, the primitive principal case of the nonreal zero region.
+The compact low height strip and the classical zeta region cover all heights. -/
+private theorem zeta_gap484_inl481b :
+    ∃ b : ℝ, 0 < b ∧ ∀ ρ : ℂ, riemannZeta ρ = 0 →
+      b / Real.log (|ρ.im| + 2) ≤ 1 - ρ.re := by
+  obtain ⟨σ, hσ, hbox⟩ := ZetaNoZerosInBox 3
+  obtain ⟨A, hA, hlarge⟩ := ZetaZeroFree1
+  have hσgap : 0 < 1 - σ := sub_pos.mpr hσ
+  have hl2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  refine ⟨min ((1 - σ) * Real.log 2) A, lt_min (by positivity) hA.1, ?_⟩
+  intro ρ hρ
+  have hre : ρ.re < 1 := lt_of_not_ge fun h => riemannZeta_ne_zero_of_one_le_re h hρ
+  have hrepr : (ρ.re : ℂ) + (ρ.im : ℂ) * I = ρ := by
+    simpa [mul_comm] using ρ.re_add_im
+  have hlog : 0 < Real.log (|ρ.im| + 2) := Real.log_pos (by linarith [abs_nonneg ρ.im])
+  by_cases ht : |ρ.im| ≤ 3
+  · have hs : ρ.re < σ := by
+      by_contra h
+      exact hbox ρ.im ht ρ.re (le_of_not_gt h) (by rwa [hrepr])
+    have hlogs : Real.log 2 ≤ Real.log (|ρ.im| + 2) :=
+      Real.log_le_log (by norm_num) (by linarith [abs_nonneg ρ.im])
+    rw [div_le_iff₀ hlog]
+    calc min ((1 - σ) * Real.log 2) A ≤ (1 - σ) * Real.log 2 := min_le_left _ _
+      _ ≤ (1 - σ) * Real.log (|ρ.im| + 2) := mul_le_mul_of_nonneg_left hlogs (by linarith)
+      _ ≤ (1 - ρ.re) * Real.log (|ρ.im| + 2) := by nlinarith
+  · have ht3 : 3 < |ρ.im| := lt_of_not_ge ht
+    have hzero : riemannZeta ((ρ.re : ℂ) + (ρ.im : ℂ) * I) = 0 := by rwa [hrepr]
+    have hleft : ρ.re < 1 - A / Real.log |ρ.im| := by
+      by_contra hn
+      have he := hlarge ρ.re ρ.im ht3 ⟨by simpa using le_of_not_gt hn, hre⟩
+      exact he hzero
+    have hlogt : 0 < Real.log |ρ.im| := Real.log_pos (by linarith)
+    have hlogs : Real.log |ρ.im| ≤ Real.log (|ρ.im| + 2) :=
+      Real.log_le_log (by linarith) (by linarith)
+    calc min ((1 - σ) * Real.log 2) A / Real.log (|ρ.im| + 2)
+        ≤ A / Real.log (|ρ.im| + 2) := div_le_div_of_nonneg_right (min_le_right _ _) hlog.le
+      _ ≤ A / Real.log |ρ.im| := div_le_div_of_nonneg_left hA.1.le hlogt hlogs
+      _ ≤ 1 - ρ.re := by linarith
+
+/-- P0045 pages 5 and 6, the classical gap for primitive characters at nonreal zeros.
+Primitivity reduces the principal case to zeta at modulus one. -/
+private theorem primitive_nonreal_gap484_inl481b :
+    ∃ b : ℝ, 0 < b ∧ ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
+      χ.IsPrimitive → ∀ ρ : ℂ, Lfun481 χ ρ = 0 → ρ.im ≠ 0 →
+        b / Real.log ((r : ℝ) * (|ρ.im| + 2)) ≤ 1 - ρ.re := by
+  obtain ⟨b₁, hb₁, hnon⟩ := nonprincipal_nonreal_gap484_inl481b
+  obtain ⟨b₂, hb₂, hzeta⟩ := zeta_gap484_inl481b
+  refine ⟨min b₁ b₂, lt_min hb₁ hb₂, ?_⟩
+  intro r hr χ hprim ρ hρ him
+  have hr0 : r ≠ 0 := by omega
+  letI : NeZero r := ⟨hr0⟩
+  have hr1 : (1 : ℝ) ≤ r := by exact_mod_cast hr
+  have hlog : 0 ≤ Real.log ((r : ℝ) * (|ρ.im| + 2)) :=
+    Real.log_nonneg (by
+      nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ r) (abs_nonneg ρ.im)])
+  by_cases hχ : χ = 1
+  · have hrone : r = 1 := by
+      rw [DirichletCharacter.isPrimitive_def, hχ, DirichletCharacter.conductor_one] at hprim
+      exact hprim.symm
+    subst r
+    have hζ : riemannZeta ρ = 0 := by
+      simpa [Lfun481, hχ, DirichletCharacter.LFunction_modOne_eq] using hρ
+    have he := hzeta ρ hζ
+    simp only [Nat.cast_one, one_mul] at hlog ⊢
+    exact (div_le_div_of_nonneg_right (min_le_right _ _) hlog).trans he
+  · exact (div_le_div_of_nonneg_right (min_le_left _ _) hlog).trans (hnon r hr χ hχ ρ hρ him)
+
+end RealInline481b
+
+/-- The real zero case, from the real zero lower bound alone: for a modulus `r ≥ 1`, a
+character with real values, and a genuine zero of the L function at the real point `1 - δ` with
+`0 < δ ≤ H / log X`, the modulus is at least `c * Lg X ^ 2`, with one constant `c` for all `X`.
+This is the lower bound `a * r ^ (-1/2) ≤ δ` rearranged, with `Lg X = log X / log 2`. -/
+private theorem leaf_real_zero_conductor481_inl481b (hzero : RealZeroStatement481)
+    (H : ℝ) (hH : 1 ≤ H) :
+    ∃ c : ℝ, 0 < c ∧ ∀ X : ℕ, ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
+      (∀ a, (χ a).im = 0) → ∀ δ : ℝ, 0 < δ → δ ≤ H / Real.log X →
+        Lfun481 χ (1 - (δ : ℂ)) = 0 → c * Lg X ^ 2 ≤ (r : ℝ) := by
+  obtain ⟨a, ha, hbound⟩ := hzero
+  have hH0 : 0 < H := by linarith
+  refine ⟨(a / H) ^ 2 * (Real.log 2) ^ 2, by positivity, ?_⟩
+  intro X r hr χ hreal δ hδ hδle hpt
+  have hlog2 : Real.log 2 ≠ 0 := (Real.log_pos one_lt_two).ne'
+  have hR1 : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr
+  have hR : (0 : ℝ) < (r : ℝ) := by linarith
+  rcases eq_or_lt_of_le (Real.log_natCast_nonneg X) with h0 | hpos
+  · have hLg : Lg X = 0 := by rw [Lg, Real.logb, ← h0]; simp
+    rw [hLg]
+    simp
+  · have hstep : a * (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ H / Real.log X :=
+      le_trans (hbound r hr χ hreal δ hδ hpt) hδle
+    rw [Real.rpow_neg hR.le, ← Real.sqrt_eq_rpow, ← div_eq_mul_inv] at hstep
+    rw [div_le_div_iff₀ (Real.sqrt_pos.2 hR) hpos] at hstep
+    have hsq : (a * Real.log X) ^ 2 ≤ H ^ 2 * (r : ℝ) := by
+      have hp := pow_le_pow_left₀ (by positivity : (0:ℝ) ≤ a * Real.log X) hstep 2
+      simp only [mul_pow, Real.sq_sqrt hR.le] at hp
+      simpa [mul_pow] using hp
+    have hgoal : (a / H) ^ 2 * (Real.log 2) ^ 2 * Lg X ^ 2 = (a * Real.log X) ^ 2 / H ^ 2 := by
+      rw [Lg, Real.logb]
+      field_simp
+    rw [hgoal, div_le_iff₀ (by positivity : (0:ℝ) < H ^ 2)]
+    linarith
+
+/-- The zero free region for real characters off the real axis, in the form the box uses:
+some `b > 0` has `b / log (r (|t| + 2)) ≤ H / log X` for every zero of the box with real character
+and nonzero imaginary part. Such a zero cannot sit inside `re ≥ 1 - b / log (r (|t| + 2))`, where
+the L function does not vanish, and the box puts it at `re ≥ 1 - H / log X`, so the two radii are
+ordered. -/
+private theorem leaf_real_nonreal_threshold481_inl481b :
+    ∃ b : ℝ, 0 < b ∧ ∀ X : ℕ, 1 < X → ∀ H T P : ℝ,
+      ∀ z ∈ zeroBox481 X H T P, (∀ a, (z.2.1 a).im = 0) → z.2.2.im ≠ 0 →
+        b / Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤ H / Real.log X := by
+  obtain ⟨b, hb, hregion⟩ := primitive_nonreal_gap484_inl481b
+  refine ⟨b, hb, ?_⟩
+  intro X hX H T P z hz hreal him
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hz
+  -- The region places the nonreal zero at least `b / log (r (|t| + 2))` to the left of one.
+  have hzreg : b / Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤ 1 - z.2.2.re :=
+    hregion z.1 h1 z.2.1 h3 z.2.2 h4 him
+  -- The box puts the zero at real part at least `1 - H / log X`, so the gap to one is at most
+  -- `H / log X`. The two radii are therefore ordered.
+  have hgap : 1 - z.2.2.re ≤ H / Real.log X := by
+    linarith [h5]
+  exact le_trans hzreg hgap
+
+/-- From that radius to the conductor bound: for a fixed `H ≥ 1` and `T ≥ 1`, if every
+nonreal zero of the box satisfies the radius inequality at every height, then the modulus of such
+a zero is at least `c * Lg X ^ 2` for all large `X`, uniformly in the major arc parameter `P`.
+The box gives `|im| ≤ T`, so `r ≥ X ^ (b / H) / (T + 2)`, and an exponential in `X` beats
+`Lg X ^ 2` for large `X`. -/
+private theorem leaf_real_nonreal_conductor481_inl481b (H T : ℝ) (hH : 1 ≤ H) (hT : 1 ≤ T) :
+    ∀ b : ℝ, 0 < b →
+      (∀ X : ℕ, 1 < X → ∀ P : ℝ, ∀ z ∈ zeroBox481 X H T P,
+        (∀ a, (z.2.1 a).im = 0) → z.2.2.im ≠ 0 →
+          b / Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤ H / Real.log X) →
+      ∃ c : ℝ, 0 < c ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∀ P : ℝ,
+        AdmissibleP131 X P → ∀ z ∈ zeroBox481 X H T P,
+          (∀ a, (z.2.1 a).im = 0) → z.2.2.im ≠ 0 → c * Lg X ^ 2 ≤ (z.1 : ℝ) := by
+  intro b hb hhyp
+  have hH0 : 0 < H := by linarith
+  have hT0 : (0 : ℝ) < T + 2 := by linarith
+  set q := b / H with hqval
+  have hq : 0 < q := by rw [hqval]; exact div_pos hb hH0
+  have hq2 : 0 < q ^ 2 := pow_pos hq 2
+  have key : ∀ X : ℕ, 2 ≤ X → (Real.log X) ^ 2 ≤ 4 / q ^ 2 * (X : ℝ) ^ q := by
+    intro X hX2
+    have hX1' : (1 : ℝ) < (X : ℝ) := by
+      have h : 1 < X := by omega
+      exact_mod_cast h
+    have hXpos : (0 : ℝ) < (X : ℝ) := by linarith
+    have hlogX : 0 ≤ Real.log X := le_of_lt (Real.log_pos hX1')
+    have hypos : 0 < (X : ℝ) ^ (q / 2) := Real.rpow_pos_of_pos hXpos _
+    have hlogXeq : Real.log X = (2 / q) * Real.log ((X : ℝ) ^ (q / 2)) := by
+      rw [Real.log_rpow hXpos]
+      field_simp
+    have hb1 : Real.log ((X : ℝ) ^ (q / 2)) ≤ (X : ℝ) ^ (q / 2) := by
+      have h := Real.log_le_sub_one_of_pos hypos
+      linarith
+    have hbound : Real.log X ≤ (2 / q) * (X : ℝ) ^ (q / 2) := by
+      rw [hlogXeq]
+      exact mul_le_mul_of_nonneg_left hb1 (by positivity)
+    have hsq := pow_le_pow_left₀ hlogX hbound 2
+    have hpow : ((X : ℝ) ^ (q / 2)) ^ 2 = (X : ℝ) ^ q := by
+      rw [← Real.rpow_natCast ((X : ℝ) ^ (q / 2)) 2, ← Real.rpow_mul hXpos.le]
+      congr 1
+      ring
+    calc (Real.log X) ^ 2 ≤ ((2 / q) * (X : ℝ) ^ (q / 2)) ^ 2 := hsq
+      _ = 4 / q ^ 2 * (X : ℝ) ^ q := by
+            rw [mul_pow, hpow]
+            field_simp
+            ring
+  refine ⟨(Real.log 2) ^ 2 * q ^ 2 / (4 * (T + 2)), by positivity, 2, ?_⟩
+  intro X hX P hP z hz hreal him
+  have hz' : z ∈ zeroBox481 X H T P := hz
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hz'
+  have hX2 : 2 ≤ X := hX
+  have hX1' : (1 : ℝ) < (X : ℝ) := by
+    have h : 1 < X := by omega
+    exact_mod_cast h
+  have hXpos : (0 : ℝ) < (X : ℝ) := by linarith
+  have hlogX : 0 < Real.log X := Real.log_pos hX1'
+  have hr1 : (1 : ℝ) ≤ (z.1 : ℝ) := by exact_mod_cast h1
+  have hrpos : (0 : ℝ) < (z.1 : ℝ) := by linarith
+  have hCpos : (0 : ℝ) < (z.1 : ℝ) * (|z.2.2.im| + 2) :=
+    mul_pos hrpos (by positivity)
+  have hC1 : (1 : ℝ) < (z.1 : ℝ) * (|z.2.2.im| + 2) := by
+    have h2' : (2 : ℝ) ≤ |z.2.2.im| + 2 := by
+      have hnn := abs_nonneg z.2.2.im
+      linarith
+    have hm := mul_le_mul hr1 h2' (by norm_num : (0 : ℝ) ≤ 2) (le_of_lt hrpos)
+    linarith
+  have hlogC : 0 < Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) := Real.log_pos hC1
+  have hDpos : (0 : ℝ) < (z.1 : ℝ) * (T + 2) := mul_pos hrpos hT0
+  have hle : (z.1 : ℝ) * (|z.2.2.im| + 2) ≤ (z.1 : ℝ) * (T + 2) :=
+    mul_le_mul_of_nonneg_left (by have := h7; linarith) (le_of_lt hrpos)
+  have hlogle : Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤
+      Real.log ((z.1 : ℝ) * (T + 2)) := Real.log_le_log hCpos hle
+  have hstep : b * Real.log X ≤ H * Real.log ((z.1 : ℝ) * (T + 2)) := by
+    have hd := hhyp X (by omega) P z hz hreal him
+    rw [div_le_div_iff₀ hlogC hlogX] at hd
+    have hm := mul_le_mul_of_nonneg_left hlogle (le_of_lt hH0)
+    linarith
+  have hqle : q * Real.log X ≤ Real.log ((z.1 : ℝ) * (T + 2)) := by
+    rw [hqval, div_mul_eq_mul_div, div_le_iff₀ hH0]
+    linarith
+  have hexp : (X : ℝ) ^ q ≤ (z.1 : ℝ) * (T + 2) := by
+    have e1 : (X : ℝ) ^ q = Real.exp (Real.log X * q) := by
+      rw [mul_comm, ← Real.log_rpow hXpos, Real.exp_log (Real.rpow_pos_of_pos hXpos q)]
+    rw [e1]
+    have h1 : Real.exp (Real.log X * q) ≤ Real.exp (Real.log ((z.1 : ℝ) * (T + 2))) :=
+      Real.exp_le_exp.2 (by rw [mul_comm]; exact hqle)
+    rwa [Real.exp_log hDpos] at h1
+  have hk := key X hX2
+  have hm : q ^ 2 / 4 * (Real.log X) ^ 2 ≤ q ^ 2 / 4 * (4 / q ^ 2 * (X : ℝ) ^ q) :=
+    mul_le_mul_of_nonneg_left hk (by positivity)
+  have hsimp : q ^ 2 / 4 * (4 / q ^ 2 * (X : ℝ) ^ q) = (X : ℝ) ^ q := by
+    field_simp
+  rw [hsimp] at hm
+  have hm4 := mul_le_mul_of_nonneg_left hm (by norm_num : (0 : ℝ) ≤ 4)
+  have heq : 4 * (q ^ 2 / 4 * (Real.log X) ^ 2) = q ^ 2 * (Real.log X) ^ 2 := by ring
+  rw [heq] at hm4
+  have hcval : (Real.log 2) ^ 2 * q ^ 2 / (4 * (T + 2)) * Lg X ^ 2 =
+      q ^ 2 * (Real.log X) ^ 2 / (4 * (T + 2)) := by
+    rw [Lg, Real.logb]
+    field_simp
+  rw [hcval, div_le_iff₀ (by positivity : (0 : ℝ) < 4 * (T + 2))]
+  have hfin : q ^ 2 * (Real.log X) ^ 2 ≤ 4 * (X : ℝ) ^ q := by linarith
+  nlinarith [hfin, hexp, hDpos]
+
+/-- The real zero case inside the box: a zero of the box whose imaginary part vanishes is the
+real point `1 - δ` with `δ = 1 - re`, `0 < δ` and `δ ≤ H / log X`, so the real zero case applies to
+it with one constant and with a threshold that does not depend on the character, the height, the
+major arc parameter or the modulus. -/
+private theorem leaf_real_zero_box481_inl481b (hzero : RealZeroStatement481) (H T : ℝ) (hH : 1 ≤ H) :
+    ∃ c : ℝ, 0 < c ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∀ P : ℝ,
+      AdmissibleP131 X P → ∀ z ∈ zeroBox481 X H T P,
+        (∀ a, (z.2.1 a).im = 0) → z.2.2.im = 0 → c * Lg X ^ 2 ≤ (z.1 : ℝ) := by
+  obtain ⟨c, hc, h⟩ := leaf_real_zero_conductor481_inl481b hzero H hH
+  refine ⟨c, hc, 0, ?_⟩
+  intro X _ P _ z hz hreal him
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hz
+  set d : ℝ := 1 - z.2.2.re with hdval
+  have hdpos : 0 < d := by rw [hdval]; linarith
+  have hdle : d ≤ H / Real.log X := by rw [hdval]; linarith
+  have hzz : z.2.2 = ((z.2.2.re : ℝ) : ℂ) := by
+    apply Complex.ext
+    · simp
+    · simpa using him
+  have hcast : (1 : ℂ) - (d : ℂ) = ((z.2.2.re : ℝ) : ℂ) := by
+    rw [hdval]; push_cast; ring
+  have hzpt : Lfun481 z.2.1 (1 - (d : ℂ)) = 0 := by
+    rw [hcast, ← hzz]
+    exact h4
+  exact h X z.1 h1 z.2.1 hreal d hdpos hdle hzpt
+
+/-- The split target: the statement of `real_exceptional_conductor481`, proved from the four leaves
+by the case distinction `im = 0` or `im ≠ 0`, with the smaller constant and the larger threshold. -/
+private theorem real_exceptional_conductor481_split_inl481b (hzero : RealZeroStatement481)
+    (H T : ℝ) (hH : 1 ≤ H) (hT : 1 ≤ T) :
+    ∃ c : ℝ, 0 < c ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∀ P : ℝ,
+      AdmissibleP131 X P → ∀ z ∈ zeroBox481 X H T P,
+        (∀ a, (z.2.1 a).im = 0) → c * Lg X ^ 2 ≤ (z.1 : ℝ) := by
+  obtain ⟨c₁, hc₁, X₁, hreal⟩ := leaf_real_zero_box481_inl481b hzero H T hH
+  obtain ⟨b, hb, hthr⟩ := leaf_real_nonreal_threshold481_inl481b
+  obtain ⟨c₂, hc₂, X₂, hnonreal⟩ := leaf_real_nonreal_conductor481_inl481b H T hH hT b hb
+    (fun X hX P z hz him hIm => hthr X hX H T P z hz him hIm)
+  refine ⟨min c₁ c₂, lt_min hc₁ hc₂, max X₁ X₂, ?_⟩
+  intro X hX P hAdm z hz him
+  have hle₁ : X₁ ≤ X := le_trans (le_max_left _ _) hX
+  have hle₂ : X₂ ≤ X := le_trans (le_max_right _ _) hX
+  have hsq : (0 : ℝ) ≤ Lg X ^ 2 := sq_nonneg (Lg X)
+  by_cases hIm : z.2.2.im = 0
+  · have h := hreal X hle₁ P hAdm z hz him hIm
+    have hmin : min c₁ c₂ * Lg X ^ 2 ≤ c₁ * Lg X ^ 2 :=
+      mul_le_mul_of_nonneg_right (min_le_left _ _) hsq
+    linarith
+  · have h := hnonreal X hle₂ P hAdm z hz him hIm
+    have hmin : min c₁ c₂ * Lg X ^ 2 ≤ c₂ * Lg X ^ 2 :=
+      mul_le_mul_of_nonneg_right (min_le_right _ _) hsq
+    linarith
+
+/-- PROVED. P0045 page 5 before Lemma 4.1 and page 6, first proof paragraph.
 The real zero bound gives the quadratic conductor bound.
 Nonreal zeros of real characters also require the classical zero free region.
 The primitive principal character is excluded for large X at bounded height. -/
@@ -59,18 +407,383 @@ theorem real_exceptional_conductor481 (hzero : RealZeroStatement481)
     (H T : ℝ) (hH : 1 ≤ H) (hT : 1 ≤ T) :
     ∃ c : ℝ, 0 < c ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∀ P : ℝ,
       AdmissibleP131 X P → ∀ z ∈ zeroBox481 X H T P,
-        (∀ a, (z.2.1 a).im = 0) → c * Lg X ^ 2 ≤ (z.1 : ℝ) := by
-  sorry
+        (∀ a, (z.2.1 a).im = 0) → c * Lg X ^ 2 ≤ (z.1 : ℝ) :=
+  real_exceptional_conductor481_split_inl481b hzero H T hH hT
 
-/-- LEAF. OPEN. P0045 page 6, last proof paragraph and display 10.
+/-! Inlined proof of `nonreal_exceptional_radical481`. These private lemmas are copies of the
+proved lemmas of `SPLIT_nonreal_exceptional_radical481`, which imports this file and so cannot be
+called from here. No statement is changed and nothing is assumed. -/
+
+private theorem lpz481_oddRad_pos (r : ℕ) : 0 < oddRad131 r := by
+  rw [oddRad131]
+  refine Finset.prod_pos ?_
+  intro p hp
+  have h2 : 2 < p := (Finset.mem_filter.mp hp).2
+  omega
+
+/-- The Iwaniec denominator is positive at conductor at least one. -/
+private theorem lpz481_denom_pos {r : ℕ} {t : ℝ} (hr : 1 ≤ r) :
+    0 < iwaniecDenom481 r t := by
+  have hr1 : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr
+  have hr0 : (0 : ℝ) ≤ (r : ℝ) := by linarith
+  have habs : (2 : ℝ) ≤ |t| + 2 := by linarith [abs_nonneg t]
+  have hprod : (2 : ℝ) ≤ (r : ℝ) * (|t| + 2) := by
+    have h := mul_le_mul hr1 habs (by norm_num : (0 : ℝ) ≤ 2) hr0
+    simpa using h
+  have hlog2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+  have hLpos : 0 < Real.log ((r : ℝ) * (|t| + 2)) := Real.log_pos (by linarith)
+  have hLge : Real.log 2 ≤ Real.log ((r : ℝ) * (|t| + 2)) :=
+    Real.log_le_log (by norm_num) hprod
+  have h2L : 0 < Real.log (2 * Real.log ((r : ℝ) * (|t| + 2))) := by
+    apply Real.log_pos
+    linarith
+  have hterm : 0 ≤ (Real.log ((r : ℝ) * (|t| + 2)) *
+      Real.log (2 * Real.log ((r : ℝ) * (|t| + 2)))) ^ ((3 : ℝ) / 4) :=
+    Real.rpow_nonneg (le_of_lt (mul_pos hLpos h2L)) _
+  have hodd1 : (1 : ℝ) ≤ (oddRad131 r : ℝ) := by
+    have h1 : 1 ≤ oddRad131 r := by have := lpz481_oddRad_pos r; omega
+    exact_mod_cast h1
+  have hodd : 0 < Real.log (2 * (oddRad131 r : ℝ)) := by
+    apply Real.log_pos
+    linarith
+  have hrw : iwaniecDenom481 r t
+      = 4 * 10 ^ 4 * (Real.log (2 * (oddRad131 r : ℝ)) +
+          (Real.log ((r : ℝ) * (|t| + 2)) *
+            Real.log (2 * Real.log ((r : ℝ) * (|t| + 2)))) ^ ((3 : ℝ) / 4)) := rfl
+  rw [hrw]
+  exact mul_pos (by norm_num) (by linarith)
+
+/-- The zero free region in the shape the box uses. -/
+private theorem leaf_iwaniec_bound481_inl481b (hiw : IwaniecStatement481)
+    (H T : ℝ) (hH : 1 ≤ H) (hT : 1 ≤ T) :
+    ∀ X : ℕ, 2 ≤ X → ∀ P : ℝ, ∀ z ∈ zeroBox481 X H T P,
+      (∃ a, (z.2.1 a).im ≠ 0) →
+        Real.log X / H ≤ iwaniecDenom481 z.1 z.2.2.im := by
+  intro X hX P z hz him
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hz
+  have hHpos : 0 < H := by linarith
+  have hX2 : (2 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+  have hlogX : 0 < Real.log X := Real.log_pos (by linarith)
+  have hD : 0 < iwaniecDenom481 z.1 z.2.2.im := lpz481_denom_pos h1
+  have hnot : ¬ (1 - 1 / iwaniecDenom481 z.1 z.2.2.im < z.2.2.re) := by
+    intro hlt
+    exact (hiw z.1 h1 z.2.1 h3 him z.2.2 hlt) h4
+  have hle : z.2.2.re ≤ 1 - 1 / iwaniecDenom481 z.1 z.2.2.im := not_lt.mp hnot
+  have hstep : (1 : ℝ) / iwaniecDenom481 z.1 z.2.2.im ≤ H / Real.log X := by linarith
+  have hmul : Real.log X ≤ H * iwaniecDenom481 z.1 z.2.2.im := by
+    have h := (div_le_div_iff₀ hD hlogX).mp hstep
+    linarith
+  rw [div_le_iff₀ hHpos]
+  linarith [mul_comm H (iwaniecDenom481 z.1 z.2.2.im)]
+
+/-- `log y ≤ 6 * y ^ (1/6)` for `y ≥ 0`. -/
+private theorem lpz481_log_le_six_rpow {y : ℝ} (hy : 0 ≤ y) :
+    Real.log y ≤ 6 * y ^ ((1 : ℝ) / 6) := by
+  have h := Real.log_le_rpow_div hy (show (0 : ℝ) < 1 / 6 by norm_num)
+  have h6 : y ^ ((1 : ℝ) / 6) / ((1 : ℝ) / 6) = 6 * y ^ ((1 : ℝ) / 6) := by
+    rw [div_eq_mul_inv, show ((1 : ℝ) / 6)⁻¹ = 6 by norm_num]
+    ring
+  linarith [h, h6]
+
+/-- The size of the second summand of the denominator only. -/
+private theorem leaf_denom_upper_bound481_inl481b (T : ℝ) (hT : 1 ≤ T) :
+    ∃ C : ℝ, 0 < C ∧ ∀ X : ℕ, 2 ≤ X → ∀ P H : ℝ, AdmissibleP131 X P →
+      ∀ z ∈ zeroBox481 X H T P,
+        (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) *
+          Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)))) ^ (3 / 4 : ℝ)
+          ≤ C * (Real.log X) ^ (7 / 8 : ℝ) := by
+  have hlog2pos : (0 : ℝ) < Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hT2 : 0 ≤ Real.log (T + 2) := Real.log_nonneg (by linarith)
+  set A : ℝ := (41 : ℝ) / 100 + Real.log (T + 2) / Real.log 2 with hAdef
+  have hApos : 0 < A := by
+    rw [hAdef]
+    have h : 0 ≤ Real.log (T + 2) / Real.log 2 := div_nonneg hT2 hlog2pos.le
+    linarith
+  have hDpos : 0 < 6 * (2 : ℝ) ^ ((1 : ℝ) / 6) :=
+    mul_pos (by norm_num) (Real.rpow_pos_of_pos (by norm_num) ((1 : ℝ) / 6))
+  refine ⟨(6 * (2 : ℝ) ^ ((1 : ℝ) / 6)) ^ ((3 : ℝ) / 4) * A ^ ((7 : ℝ) / 8), ?_, ?_⟩
+  · exact mul_pos (Real.rpow_pos_of_pos hDpos ((3 : ℝ) / 4))
+      (Real.rpow_pos_of_pos hApos ((7 : ℝ) / 8))
+  · intro X hX P H hP z hz
+    obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hz
+    obtain ⟨hPa, hPb⟩ := hP
+    have hX2 : (2 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+    have hXpos : (0 : ℝ) < (X : ℝ) := by linarith
+    have hlogX : 0 < Real.log X := Real.log_pos (by linarith)
+    have hlogXge : Real.log 2 ≤ Real.log X := Real.log_le_log (by norm_num) hX2
+    have hR1 : (1 : ℝ) ≤ (z.1 : ℝ) := by exact_mod_cast h1
+    have hR0 : (0 : ℝ) < (z.1 : ℝ) := by linarith
+    have ha2 : (2 : ℝ) ≤ |z.2.2.im| + 2 := by linarith [abs_nonneg z.2.2.im]
+    have hapos : (0 : ℝ) < |z.2.2.im| + 2 := by linarith
+    have hra : 0 < (z.1 : ℝ) * (|z.2.2.im| + 2) := mul_pos hR0 hapos
+    have hge2 : (2 : ℝ) ≤ (z.1 : ℝ) * (|z.2.2.im| + 2) := by
+      have h := mul_le_mul hR1 ha2 (by norm_num : (0 : ℝ) ≤ 2) (by linarith : (0 : ℝ) ≤ (z.1 : ℝ))
+      simpa using h
+    have hPle : (z.1 : ℝ) ≤ (X : ℝ) ^ ((41 : ℝ) / 100) := h2.trans hPb
+    have him : |z.2.2.im| + 2 ≤ T + 2 := by linarith
+    have hmul : (z.1 : ℝ) * (|z.2.2.im| + 2) ≤ (X : ℝ) ^ ((41 : ℝ) / 100) * (T + 2) :=
+      mul_le_mul hPle him (by linarith) (Real.rpow_pos_of_pos hXpos _).le
+    have hlogmul : Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2))
+        ≤ Real.log ((X : ℝ) ^ ((41 : ℝ) / 100) * (T + 2)) := Real.log_le_log hra hmul
+    have hlogsplit : Real.log ((X : ℝ) ^ ((41 : ℝ) / 100) * (T + 2))
+        = (41 : ℝ) / 100 * Real.log X + Real.log (T + 2) := by
+      rw [Real.log_mul (ne_of_gt (Real.rpow_pos_of_pos hXpos _)) (by linarith : (T + 2 : ℝ) ≠ 0),
+        Real.log_rpow hXpos]
+    have hl : Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤ A * Real.log X := by
+      have hge1 : (1 : ℝ) ≤ Real.log X / Real.log 2 := by
+        rw [le_div_iff₀ hlog2pos]
+        linarith
+      have hTstep : Real.log (T + 2) ≤ Real.log (T + 2) / Real.log 2 * Real.log X := by
+        have h := mul_le_mul_of_nonneg_left hge1 hT2
+        rw [mul_one] at h
+        calc Real.log (T + 2) ≤ Real.log (T + 2) * (Real.log X / Real.log 2) := h
+          _ = Real.log (T + 2) / Real.log 2 * Real.log X := by ring
+      have hAexp : A * Real.log X
+          = (41 : ℝ) / 100 * Real.log X + Real.log (T + 2) / Real.log 2 * Real.log X := by
+        rw [hAdef]
+        ring
+      linarith
+    have hlpos : 0 < Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) := Real.log_pos (by linarith)
+    set l : ℝ := Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) with hldef
+    have hl0 : 0 < l := hlpos
+    have hlog2le : Real.log 2 ≤ l := Real.log_le_log (by norm_num) hge2
+    have h2l1 : 1 < 2 * l := by linarith [Real.log_two_gt_d9]
+    have hlog2l : 0 < Real.log (2 * l) := Real.log_pos h2l1
+    have hbasepos : 0 ≤ l * Real.log (2 * l) := (mul_pos hl0 hlog2l).le
+    have hbase : l * Real.log (2 * l) ≤ 6 * (2 : ℝ) ^ ((1 : ℝ) / 6) * l ^ ((7 : ℝ) / 6) := by
+      have hlog : Real.log (2 * l) ≤ 6 * (2 * l) ^ ((1 : ℝ) / 6) :=
+        lpz481_log_le_six_rpow (by linarith)
+      have hmr : (2 * l) ^ ((1 : ℝ) / 6) = (2 : ℝ) ^ ((1 : ℝ) / 6) * l ^ ((1 : ℝ) / 6) :=
+        Real.mul_rpow (by norm_num) hl0.le
+      have hl76 : l ^ ((7 : ℝ) / 6) = l * l ^ ((1 : ℝ) / 6) := by
+        have h : (7 : ℝ) / 6 = 1 + 1 / 6 := by norm_num
+        rw [h, Real.rpow_add hl0, Real.rpow_one]
+      have hstep : l * Real.log (2 * l) ≤ l * (6 * ((2 : ℝ) ^ ((1 : ℝ) / 6) * l ^ ((1 : ℝ) / 6))) := by
+        have h := mul_le_mul_of_nonneg_left hlog hl0.le
+        rwa [hmr] at h
+      rw [hl76]
+      nlinarith [hstep, Real.rpow_pos_of_pos hl0 ((1 : ℝ) / 6)]
+    have hpow : (l * Real.log (2 * l)) ^ ((3 : ℝ) / 4)
+        ≤ (6 * (2 : ℝ) ^ ((1 : ℝ) / 6) * l ^ ((7 : ℝ) / 6)) ^ ((3 : ℝ) / 4) :=
+      Real.rpow_le_rpow hbasepos hbase (by norm_num)
+    have hpow2 : (6 * (2 : ℝ) ^ ((1 : ℝ) / 6) * l ^ ((7 : ℝ) / 6)) ^ ((3 : ℝ) / 4)
+        = (6 * (2 : ℝ) ^ ((1 : ℝ) / 6)) ^ ((3 : ℝ) / 4) * l ^ ((7 : ℝ) / 8) := by
+      rw [Real.mul_rpow (by positivity) (Real.rpow_nonneg hl0.le _),
+        ← Real.rpow_mul hl0.le]
+      norm_num
+    have hlA : l ^ ((7 : ℝ) / 8) ≤ A ^ ((7 : ℝ) / 8) * (Real.log X) ^ ((7 : ℝ) / 8) := by
+      have h1' : l ^ ((7 : ℝ) / 8) ≤ (A * Real.log X) ^ ((7 : ℝ) / 8) :=
+        Real.rpow_le_rpow hl0.le hl (by norm_num)
+      rwa [Real.mul_rpow hApos.le hlogX.le] at h1'
+    calc (l * Real.log (2 * l)) ^ ((3 : ℝ) / 4)
+        ≤ (6 * (2 : ℝ) ^ ((1 : ℝ) / 6)) ^ ((3 : ℝ) / 4) * l ^ ((7 : ℝ) / 8) := hpow.trans_eq hpow2
+      _ ≤ (6 * (2 : ℝ) ^ ((1 : ℝ) / 6)) ^ ((3 : ℝ) / 4) *
+            (A ^ ((7 : ℝ) / 8) * (Real.log X) ^ ((7 : ℝ) / 8)) :=
+          mul_le_mul_of_nonneg_left hlA (le_of_lt (Real.rpow_pos_of_pos hDpos _))
+      _ = ((6 * (2 : ℝ) ^ ((1 : ℝ) / 6)) ^ ((3 : ℝ) / 4) * A ^ ((7 : ℝ) / 8)) *
+            (Real.log X) ^ ((7 : ℝ) / 8) := by ring
+
+private theorem lpz481_rpow_eighth_pow {x : ℝ} (hx : 0 < x) :
+    (x ^ ((1 : ℝ) / 8)) ^ 8 = x := by
+  have h1 : (x ^ ((1 : ℝ) / 8)) ^ 8 = (x ^ ((1 : ℝ) / 8)) ^ (8 : ℝ) :=
+    (Real.rpow_natCast _ 8).symm
+  rw [h1, ← Real.rpow_mul hx.le]
+  norm_num
+
+/-- Helper: `C * H < L ^ (1/8)` once `(C H) ^ 8 + 1 ≤ L`. -/
+private theorem lpz481_ch_lt_eighth {C H L : ℝ} (hCH : 0 < C * H)
+    (hL : (C * H) ^ 8 + 1 ≤ L) : C * H < L ^ ((1 : ℝ) / 8) := by
+  have hLpos : 0 < L := by
+    have h0 : (0 : ℝ) ≤ (C * H) ^ 8 := by positivity
+    linarith
+  have hDpos : 0 < L ^ ((1 : ℝ) / 8) := Real.rpow_pos_of_pos hLpos _
+  have hD8 : (L ^ ((1 : ℝ) / 8)) ^ 8 = L := lpz481_rpow_eighth_pow hLpos
+  have hlt : (C * H) ^ 8 < (L ^ ((1 : ℝ) / 8)) ^ 8 := by
+    rw [hD8]
+    nlinarith [pow_pos hCH 8]
+  by_contra hcon
+  push_neg at hcon
+  have := pow_le_pow_left₀ (le_of_lt hDpos) hcon 8
+  linarith
+
+/-- The growth comparison. -/
+private theorem leaf_log_growth_excludes481_inl481b (C : ℝ) (hC : 0 < C) (H : ℝ) (hH : 1 ≤ H) :
+    ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+      C * (Real.log X) ^ (7 / 8 : ℝ) < Real.log X / H := by
+  have hHpos : 0 < H := by linarith
+  have hCH : 0 < C * H := mul_pos hC hHpos
+  obtain ⟨N, hN⟩ := exists_nat_gt (Real.exp ((C * H) ^ 8 + 1))
+  have hN1 : (0 : ℝ) < (N : ℝ) := by
+    have hpos : (0 : ℝ) < Real.exp ((C * H) ^ 8 + 1) := Real.exp_pos _
+    linarith
+  refine ⟨N, fun X hX => ?_⟩
+  have hL : (C * H) ^ 8 + 1 ≤ Real.log X := by
+    have h1 : (C * H) ^ 8 + 1 ≤ Real.log (N : ℝ) := by
+      have h := Real.log_le_log (Real.exp_pos ((C * H) ^ 8 + 1)) (le_of_lt hN)
+      rwa [Real.log_exp] at h
+    have h2 : Real.log (N : ℝ) ≤ Real.log (X : ℝ) :=
+      Real.log_le_log hN1 (by exact_mod_cast hX)
+    linarith
+  have hLpos : 0 < Real.log X := by
+    have h0 : (0 : ℝ) ≤ (C * H) ^ 8 := by positivity
+    linarith
+  set D : ℝ := (Real.log X) ^ ((1 : ℝ) / 8) with hDdef
+  have hDpos : 0 < D := Real.rpow_pos_of_pos hLpos _
+  have hCHltD : C * H < D := lpz481_ch_lt_eighth hCH hL
+  have hsplit : (Real.log X) ^ (7 / 8 : ℝ) = Real.log X / D := by
+    have h78 : (7 : ℝ) / 8 = 1 - 1 / 8 := by norm_num
+    rw [h78, Real.rpow_sub hLpos, Real.rpow_one, hDdef]
+  have hkey : C * (Real.log X / D) = (C * Real.log X) / D := by ring
+  rw [hsplit, hkey, div_lt_div_iff₀ hDpos hHpos]
+  nlinarith [mul_pos hLpos (sub_pos.mpr hCHltD)]
+
+/-- `Lg X = log X / log 2`. -/
+private theorem lpz481_Lg_eq (X : ℕ) : Lg X = Real.log X / Real.log 2 := by
+  rw [Lg, Real.log_div_log]
+
+/-- Growth helper for the assembly. -/
+private theorem lpz481_growth_helper (D H : ℝ) (hD : 0 < D) (hH : 1 ≤ H) :
+    ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+      Real.log 2 + 2 * Real.log (Lg X) + D * (Real.log X) ^ (7 / 8 : ℝ)
+        ≤ Real.log X / (4 * 10 ^ 4 * H) := by
+  set K : ℝ := 4 * 10 ^ 4 * H with hKdef
+  have hKpos : 0 < K := by positivity
+  set E : ℝ := (15 + D) * K with hEdef
+  have hEpos : 0 < E := by
+    rw [hEdef]
+    have : 0 < 15 + D := by linarith
+    exact mul_pos this hKpos
+  obtain ⟨N, hN⟩ := exists_nat_gt (Real.exp (E ^ 8 + 1))
+  refine ⟨max N 3, fun X hX => ?_⟩
+  have hXN : N ≤ X := le_trans (le_max_left _ _) hX
+  have hX3 : 3 ≤ X := le_trans (le_max_right _ _) hX
+  have hNpos : (0 : ℝ) < (N : ℝ) := by
+    have := Real.exp_pos (E ^ 8 + 1)
+    linarith
+  have hLbig : E ^ 8 + 1 ≤ Real.log X := by
+    have h1 : E ^ 8 + 1 ≤ Real.log (N : ℝ) := by
+      have h := Real.log_le_log (Real.exp_pos (E ^ 8 + 1)) (le_of_lt hN)
+      rwa [Real.log_exp] at h
+    have h2 : Real.log (N : ℝ) ≤ Real.log (X : ℝ) :=
+      Real.log_le_log hNpos (by exact_mod_cast hXN)
+    linarith
+  have hLpos : 0 < Real.log X := by
+    have h1 : (1 : ℝ) < (X : ℝ) := by
+      have h : (3 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX3
+      linarith
+    exact Real.log_pos h1
+  have hLone : 1 ≤ Real.log X := by
+    have h3X : (3 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX3
+    have h13 : (1 : ℝ) < Real.log 3 := by
+      rw [Real.lt_log_iff_exp_lt (by norm_num)]
+      linarith [Real.exp_one_lt_d9]
+    have h3 : Real.log 3 ≤ Real.log X := Real.log_le_log (by norm_num) h3X
+    linarith
+  set L : ℝ := Real.log X with hLdef
+  have hLpos' : 0 < L := hLpos
+  have hLone' : 1 ≤ L := hLone
+  have h78one : (1 : ℝ) ≤ L ^ ((7 : ℝ) / 8) := by
+    have h := Real.rpow_le_rpow (by norm_num : (0 : ℝ) ≤ 1) hLone' (by norm_num : (0 : ℝ) ≤ 7 / 8)
+    rwa [Real.one_rpow] at h
+  have hlog2 : Real.log 2 ≤ L ^ ((7 : ℝ) / 8) := by
+    have h := Real.log_two_lt_d9
+    linarith
+  have hLgbound : Real.log (Lg X) ≤ 1 + 6 * L ^ ((1 : ℝ) / 6) := by
+    have hlog2pos : (0 : ℝ) < Real.log 2 := by linarith [Real.log_two_gt_d9]
+    have hLgpos : 0 < Lg X := by
+      rw [lpz481_Lg_eq]
+      exact div_pos hLpos' hlog2pos
+    have hLgle : Lg X ≤ 2 * L := by
+      rw [lpz481_Lg_eq, div_le_iff₀ hlog2pos]
+      nlinarith [Real.log_two_gt_d9, hLpos']
+    have hstep1 : Real.log (Lg X) ≤ Real.log (2 * L) := Real.log_le_log hLgpos hLgle
+    have hstep2 : Real.log (2 * L) = Real.log 2 + Real.log L := by
+      rw [Real.log_mul (by norm_num) (ne_of_gt hLpos')]
+    have hstep3 : Real.log L ≤ 6 * L ^ ((1 : ℝ) / 6) := lpz481_log_le_six_rpow hLpos'.le
+    have hstep4 : Real.log 2 ≤ 1 := by linarith [Real.log_two_lt_d9]
+    linarith
+  have h16le : L ^ ((1 : ℝ) / 6) ≤ L ^ ((7 : ℝ) / 8) :=
+    Real.rpow_le_rpow_of_exponent_le hLone' (by norm_num)
+  have hMain : (15 + D) * L ^ ((7 : ℝ) / 8) ≤ L / K := by
+    have hKE : E ≤ L ^ ((1 : ℝ) / 8) := le_of_lt (lpz481_ch_lt_eighth hEpos hLbig)
+    have hsplit : L ^ ((7 : ℝ) / 8) * L ^ ((1 : ℝ) / 8) = L := by
+      rw [← Real.rpow_add hLpos', show (7 : ℝ) / 8 + 1 / 8 = 1 by norm_num, Real.rpow_one]
+    rw [le_div_iff₀ hKpos]
+    calc (15 + D) * L ^ ((7 : ℝ) / 8) * K
+        = L ^ ((7 : ℝ) / 8) * E := by rw [hEdef]; ring
+      _ ≤ L ^ ((7 : ℝ) / 8) * L ^ ((1 : ℝ) / 8) :=
+          mul_le_mul_of_nonneg_left hKE (le_of_lt (Real.rpow_pos_of_pos hLpos' _))
+      _ = L := hsplit
+  have hExp : Real.log 2 + 2 * Real.log (Lg X) + D * L ^ ((7 : ℝ) / 8)
+      ≤ (15 + D) * L ^ ((7 : ℝ) / 8) := by
+    have h16pos : 0 < L ^ ((1 : ℝ) / 6) := Real.rpow_pos_of_pos hLpos' _
+    nlinarith [hlog2, hLgbound, h16le, h78one]
+  have hfin := hExp.trans hMain
+  rwa [hKdef] at hfin
+
+/-- The split target: the statement of `nonreal_exceptional_radical481`, proved from the three
+leaves through `oddRad131`, with constant one. -/
+private theorem nonreal_exceptional_radical481_split_inl481b (hiw : IwaniecStatement481)
+    (H T : ℝ) (hH : 1 ≤ H) (hT : 1 ≤ T) :
+    ∃ c : ℝ, 0 < c ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∀ P : ℝ,
+      AdmissibleP131 X P → ∀ z ∈ zeroBox481 X H T P,
+        (∃ a, (z.2.1 a).im ≠ 0) → c * Lg X ^ 2 ≤ (oddRad131 z.1 : ℝ) := by
+  obtain ⟨C, hC, hden⟩ := leaf_denom_upper_bound481_inl481b T hT
+  obtain ⟨X₁, hX₁⟩ := lpz481_growth_helper C H hC hH
+  refine ⟨1, one_pos, max X₁ 3, ?_⟩
+  intro X hX P hP z hz him
+  have hX1 : X₁ ≤ X := le_trans (le_max_left _ _) hX
+  have hX3 : 3 ≤ X := le_trans (le_max_right _ _) hX
+  have h2 : 2 ≤ X := by omega
+  have hHpos : 0 < H := by linarith
+  have hlogX : 0 < Real.log X := Real.log_pos (by exact_mod_cast h2)
+  have hlow : Real.log X / H ≤ iwaniecDenom481 z.1 z.2.2.im :=
+    leaf_iwaniec_bound481_inl481b hiw H T hH hT X h2 P z hz him
+  have hup : (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) *
+      Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)))) ^ (3 / 4 : ℝ)
+      ≤ C * (Real.log X) ^ (7 / 8 : ℝ) := hden X h2 P H hP z hz
+  have hgro : Real.log 2 + 2 * Real.log (Lg X) + C * (Real.log X) ^ (7 / 8 : ℝ)
+      ≤ Real.log X / (4 * 10 ^ 4 * H) := hX₁ X hX1
+  have hdenom : iwaniecDenom481 z.1 z.2.2.im
+      = 4 * 10 ^ 4 * (Real.log (2 * (oddRad131 z.1 : ℝ)) +
+          (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) *
+            Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)))) ^ (3 / 4 : ℝ)) := rfl
+  rw [hdenom] at hlow
+  have hstep : Real.log X / H ≤
+      4 * 10 ^ 4 * (Real.log (2 * (oddRad131 z.1 : ℝ)) + C * (Real.log X) ^ (7 / 8 : ℝ)) := by
+    nlinarith [hlow, hup]
+  have hmain : Real.log X / (4 * 10 ^ 4 * H) - C * (Real.log X) ^ (7 / 8 : ℝ)
+      ≤ Real.log (2 * (oddRad131 z.1 : ℝ)) := by
+    rw [sub_le_iff_le_add, div_le_iff₀ (by positivity : (0 : ℝ) < 4 * 10 ^ 4 * H)]
+    rw [div_le_iff₀ hHpos] at hstep
+    nlinarith [hstep]
+  have hLgpos : 0 < Lg X := by
+    rw [lpz481_Lg_eq]
+    exact div_pos hlogX (by linarith [Real.log_two_gt_d9])
+  have hexpand : Real.log (2 * Lg X ^ 2) = Real.log 2 + 2 * Real.log (Lg X) := by
+    rw [Real.log_mul (x := (2 : ℝ)) (y := Lg X ^ 2) (by norm_num)
+      (pow_ne_zero 2 (ne_of_gt hLgpos)), Real.log_pow]
+    push_cast
+    ring
+  have hkey : Real.log (2 * Lg X ^ 2) ≤ Real.log (2 * (oddRad131 z.1 : ℝ)) := by
+    rw [hexpand]
+    linarith [hgro, hmain]
+  have hoddpos : (0 : ℝ) < (oddRad131 z.1 : ℝ) := by
+    have h := lpz481_oddRad_pos z.1
+    exact_mod_cast h
+  have := (Real.log_le_log_iff (by positivity : (0 : ℝ) < 2 * Lg X ^ 2) (by positivity)).mp hkey
+  have hfin : Lg X ^ 2 ≤ (oddRad131 z.1 : ℝ) := by linarith
+  simpa using hfin
+
+/-- PROVED. P0045 page 6, last proof paragraph and display 10.
 The Iwaniec region gives odd radical growth for nonreal exceptional characters.
 This states the weaker quadratic conclusion actually used by the corollary. -/
 theorem nonreal_exceptional_radical481 (hiw : IwaniecStatement481)
     (H T : ℝ) (hH : 1 ≤ H) (hT : 1 ≤ T) :
     ∃ c : ℝ, 0 < c ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∀ P : ℝ,
       AdmissibleP131 X P → ∀ z ∈ zeroBox481 X H T P,
-        (∃ a, (z.2.1 a).im ≠ 0) → c * Lg X ^ 2 ≤ (oddRad131 z.1 : ℝ) := by
-  sorry
+        (∃ a, (z.2.1 a).im ≠ 0) → c * Lg X ^ 2 ≤ (oddRad131 z.1 : ℝ) :=
+  nonreal_exceptional_radical481_split_inl481b hiw H T hH hT
 
 /-- LEAF. P0045 page 6, first proof paragraph following display 10.
 Transfer the conductor lower bound through the three classified possibilities. -/
