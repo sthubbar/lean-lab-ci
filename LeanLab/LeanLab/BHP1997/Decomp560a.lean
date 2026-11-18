@@ -554,11 +554,95 @@ theorem rademacher_gamma_ratio_proved :
       simpa [gammaRatio] using this) s hsl hsu
   simpa [gammaRatio] using h
 
+/-- Left edge equality for the Gamma quotient at Q plus one. On real part minus one
+half the Gamma recurrence gives the norm exactly as half the norm of Q plus one plus s.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem gammaRatio_succ_left_edge_eq {Q : ℝ} (hQ : 0 ≤ Q) {s : ℂ}
+    (hs : s.re = -(1 / 2 : ℝ)) :
+    ‖gammaRatio (Q + 1) s‖ = ‖(Q : ℂ) + 1 + s‖ / 2 := by
+  obtain ⟨w, hwd⟩ : ∃ w : ℂ, w = ((Q + 1 : ℝ) : ℂ) / 2 + s / 2 := ⟨_, rfl⟩
+  have hwre : 0 < w.re := by rw [hwd]; simp [hs]; linarith
+  have hw : w ≠ 0 := by intro h; rw [h] at hwre; simp at hwre
+  have hG : Complex.Gamma w ≠ 0 := Complex.Gamma_ne_zero_of_re_pos hwre
+  have he : ((Q + 1 : ℝ) : ℂ) / 2 + (1 - s) / 2 = (starRingEnd ℂ) (w + 1) := by
+    rw [hwd]
+    apply Complex.ext <;> simp [Complex.div_re, Complex.div_im, hs] <;> ring
+  have hw2 : w = ((Q : ℂ) + 1 + s) / 2 := by rw [hwd]; push_cast; ring
+  rw [gammaRatio, ← hwd, he, Complex.Gamma_conj, Complex.norm_div, Complex.norm_conj,
+    Complex.Gamma_add_one w hw, norm_mul, mul_div_cancel_right₀ _ (norm_ne_zero_iff.mpr hG),
+    hw2, norm_div]
+  simp
+
+/-- The Gamma quotient at Q plus one has no zero on the closed strip, since both
+Gamma arguments have positive real part there.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem gammaRatio_succ_ne_zero {Q : ℝ} (hQ : 0 ≤ Q) {s : ℂ}
+    (hsl : -(1 / 2 : ℝ) ≤ s.re) (hsu : s.re ≤ 1 / 2) :
+    gammaRatio (Q + 1) s ≠ 0 := by
+  have hu : 0 < (((Q + 1 : ℝ) : ℂ) / 2 + s / 2).re := by simp; linarith
+  have hv : 0 < (((Q + 1 : ℝ) : ℂ) / 2 + (1 - s) / 2).re := by simp; linarith
+  exact div_ne_zero (Complex.Gamma_ne_zero_of_re_pos hv) (Complex.Gamma_ne_zero_of_re_pos hu)
+
+/-- Linear growth of the reciprocal Gamma quotient at Q plus one on the closed strip.
+The reciprocal equals the quotient at Q plus two at minus s divided by a factor
+bounded away from zero, and the proved Lemma 1 bound applies.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem gammaRatio_succ_inv_growth {Q : ℝ} (hQ : 0 ≤ Q) {s : ℂ}
+    (hsl : -(1 / 2 : ℝ) ≤ s.re) (hsu : s.re ≤ 1 / 2) :
+    ‖(gammaRatio (Q + 1) s)⁻¹‖ ≤ (2 * Q + 7) * (|s.im| + 1) ^ (1 : ℝ) := by
+  obtain ⟨u, hud⟩ : ∃ u : ℂ, u = ((Q + 1 : ℝ) : ℂ) / 2 + s / 2 := ⟨_, rfl⟩
+  have hure : u.re = Q / 2 + 1 / 2 + s.re / 2 := by rw [hud]; simp; ring
+  have hu0 : u ≠ 0 := by intro h; rw [h] at hure; simp at hure; linarith
+  have hun : 1 / 4 ≤ ‖u‖ := by
+    have := Complex.abs_re_le_norm u
+    rw [hure, abs_of_pos (by linarith)] at this
+    linarith
+  have hid : (gammaRatio (Q + 1) s)⁻¹ = gammaRatio (Q + 2) (-s) / u := by
+    have e1 : ((Q + 2 : ℝ) : ℂ) / 2 + (1 - -s) / 2 = u + 1 := by rw [hud]; push_cast; ring
+    have e2 : ((Q + 2 : ℝ) : ℂ) / 2 + -s / 2 = ((Q + 1 : ℝ) : ℂ) / 2 + (1 - s) / 2 := by
+      push_cast; ring
+    rw [gammaRatio, gammaRatio, e1, e2, ← hud, Complex.Gamma_add_one u hu0, inv_div]
+    field_simp
+  have hb := rademacher_gamma_ratio_proved (Q + 2) (by linarith) (-s)
+    (by simp; linarith) (by simp; linarith)
+  have hb' : ‖gammaRatio (Q + 2) (-s)‖ ≤ (‖((Q + 2 : ℝ) : ℂ) + 1 + -s‖ / 2) ^ (1 / 2 - (-s).re) := hb
+  have hbase : 1 ≤ ‖((Q + 2 : ℝ) : ℂ) + 1 + -s‖ / 2 := by
+    have := Complex.abs_re_le_norm (((Q + 2 : ℝ) : ℂ) + 1 + -s)
+    have e : (((Q + 2 : ℝ) : ℂ) + 1 + -s).re = Q + 3 - s.re := by simp; ring
+    rw [e, abs_of_pos (by linarith)] at this
+    linarith
+  have hup : ‖((Q + 2 : ℝ) : ℂ) + 1 + -s‖ ≤ Q + 7 / 2 + |s.im| := by
+    have h1 := Complex.norm_le_abs_re_add_abs_im (((Q + 2 : ℝ) : ℂ) + 1 + -s)
+    have e : (((Q + 2 : ℝ) : ℂ) + 1 + -s).re = Q + 3 - s.re := by simp; ring
+    have e' : (((Q + 2 : ℝ) : ℂ) + 1 + -s).im = -s.im := by simp
+    rw [e, e', abs_of_pos (by linarith), abs_neg] at h1
+    linarith
+  have hpw : (‖((Q + 2 : ℝ) : ℂ) + 1 + -s‖ / 2) ^ (1 / 2 - (-s).re) ≤
+      ‖((Q + 2 : ℝ) : ℂ) + 1 + -s‖ / 2 := by
+    calc _ ≤ (‖((Q + 2 : ℝ) : ℂ) + 1 + -s‖ / 2) ^ (1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le hbase (by simp; linarith)
+      _ = _ := Real.rpow_one _
+  have habs : 0 ≤ |s.im| := abs_nonneg _
+  rw [hid, norm_div, Real.rpow_one, div_le_iff₀ (by linarith)]
+  have : (2 * Q + 7) * (|s.im| + 1) * (1 / 4) ≤ (2 * Q + 7) * (|s.im| + 1) * ‖u‖ :=
+    mul_le_mul_of_nonneg_left hun (by positivity)
+  nlinarith [hb'.trans hpw]
+
 /-- LEAF. Rademacher pages 192 and 193 Theorem 1, displays 2.2, 2.3 and 2.32.
 Specialize to a equal to minus one half, b equal to one half, gamma equal to
 minus one and delta equal to zero. Replace Q by Q plus one and multiply the
 analytic multiplier by exp of one half minus s times log two.
-This is a harmonic boundary construction with no Gamma function. OPEN. -/
+The printed route is a harmonic boundary construction with no Gamma function.
+PROVED 2026-11-17 by a different route: the witness is the reciprocal of the
+Gamma quotient at Q plus one, and its lower bound uses gammaRatio_tangent_bound.
+So this is not an independent second proof of display 5.1, and Theorem 1 in
+its general form is not formalized here. -/
 theorem leaf_strip_multiplier {Q : ℝ} (hQ : 0 ≤ Q) :
     ∃ φ : ℂ → ℂ,
       DiffContOnCl ℂ φ (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2)) ∧
@@ -569,7 +653,45 @@ theorem leaf_strip_multiplier {Q : ℝ} (hQ : 0 ≤ Q) :
       (∀ s : ℂ, s.re = 1 / 2 → ‖φ s‖ = 1) ∧
       (∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re → s.re ≤ 1 / 2 →
         (‖(Q : ℂ) + 1 + s‖ / 2) ^ (s.re - 1 / 2) ≤ ‖φ s‖) := by
-  sorry
+  have hQ1 : 0 ≤ Q + 1 := by linarith
+  refine ⟨fun s => (gammaRatio (Q + 1) s)⁻¹, ?_, ⟨2 * Q + 7, 1, by linarith, one_pos, ?_⟩,
+    ?_, ?_, ?_⟩
+  · apply (gammaRatio_diffContOnCl hQ1).inv
+    intro s hs
+    have hs' : s.re ∈ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+      have hh : closure (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2)) ⊆
+          Complex.re ⁻¹' Icc (-(1 / 2 : ℝ)) (1 / 2) :=
+        closure_minimal (by intro z hz; exact ⟨hz.1.le, hz.2.le⟩)
+          (isClosed_Icc.preimage Complex.continuous_re)
+      exact hh hs
+    exact gammaRatio_succ_ne_zero hQ hs'.1 hs'.2
+  · intro s hsl hsu
+    exact gammaRatio_succ_inv_growth hQ hsl hsu
+  · intro s hs
+    simp only [norm_inv]
+    rw [gammaRatio_succ_left_edge_eq hQ hs]
+  · intro s hs
+    simp only [norm_inv]
+    rw [gammaRatio, gamma_ratio_right_edge hQ1 hs, inv_one]
+  · intro s hsl hsu
+    have hT := gammaRatio_tangent_bound (P := Q + 1) (c := 0) hQ1 (by linarith)
+      (fun z hz => by
+        rw [gammaRatio_succ_left_edge_eq hQ hz]
+        apply le_of_eq
+        push_cast
+        ring_nf) s hsl hsu
+    have hcast : ((Q + 1 : ℝ) : ℂ) + ((0 : ℝ) : ℂ) + s = (Q : ℂ) + 1 + s := by push_cast; ring
+    rw [hcast] at hT
+    have hb : 0 < ‖(Q : ℂ) + 1 + s‖ / 2 := by
+      have hh := Complex.abs_re_le_norm ((Q : ℂ) + 1 + s)
+      have e : ((Q : ℂ) + 1 + s).re = Q + 1 + s.re := by simp
+      rw [e, abs_of_pos (by linarith)] at hh
+      linarith
+    have hpos : 0 < ‖gammaRatio (Q + 1) s‖ :=
+      norm_pos_iff.mpr (gammaRatio_succ_ne_zero hQ hsl hsu)
+    simp only [norm_inv]
+    rw [show s.re - 1 / 2 = -(1 / 2 - s.re) by ring, Real.rpow_neg hb.le]
+    exact inv_anti₀ hpos hT
 
 /-- Rademacher page 195 after display 3.8, the constant-bound maximum step.
 CONDITIONAL ON explicit linear exponential growth and the two boundary bounds. -/
