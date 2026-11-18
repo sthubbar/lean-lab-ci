@@ -16,6 +16,7 @@ import Mathlib
 import LeanLab.ChirreHagen2025.SmoothY
 import LeanLab.ChirreHagen2025.ThetaPsi
 import LeanLab.Routes.U1556Sweep
+import LeanLab.task393.DqtAssembly
 
 namespace LeanLab.Task393
 
@@ -31,12 +32,13 @@ Plain math: `D ≥ 0` is supported near prime powers `p^k`, `k ≥ 2`; when `δ�
 so the ratio is about `0.27 log X / (L² √X) < 10^-8` at `X = 10^13`; when `δ√y ≥ 1`,
 `D ≤ θ(√((1+δ)y)) - θ(√y) + O(y^{1/3})` and Brun-Titchmarsh give `D² << δ² y log² y`, ratio
 `<< δ`. Splitting `∫_2^∞` at `X` and bounding the tail with `W(y/X) = (X/y)^4` is the bookkeeping.
-Carried over from `Routes.U1556Sweep` unchanged. Unit task393. -/
+Carried over from `Routes.U1556Sweep` unchanged. Now proved through `dpt_W_full` in DqtAssembly.
+Unit task393. -/
 theorem leaf_dpt_W_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 10 ^ 13 ≤ X) :
     IntegrableOn (fun y => Dpt δ y ^ 2 * W (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Dpt δ y ^ 2 * W (y / X)
         ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
-  sorry
+  exact dpt_W_full hδ hδ1 hX
 
 /-- Twin of `Routes.U1556Sweep.dqt_W_le`, the parent's statement verbatim in this namespace and
 proved from `leaf_dpt_W_le`: `Dqt` and `Dpt` are the same term written through two names, so the

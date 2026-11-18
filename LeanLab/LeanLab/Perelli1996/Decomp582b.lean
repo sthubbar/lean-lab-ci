@@ -8,6 +8,7 @@ import LeanLab.Perelli1996.Ramanujan103
 import LeanLab.Perelli1996.Localization103
 import LeanLab.Perelli1996.Decomp320a
 import LeanLab.Perelli1996.Decomp400d
+import LeanLab.Perelli1996.DivMeanDiscrete
 
 namespace LeanLab.Perelli1996.Decomp400e
 open Finset Real Polynomial MeasureTheory
@@ -1005,10 +1006,28 @@ theorem principal_mean (F : ℤ[X]) (hF : Admissible F)
       nlinarith [mul_nonneg hCP.le hnon,
         mul_nonneg (show 0 ≤ 2 + 4 * Real.sqrt CM by positivity) hsmall]
 
+/-- Page 487 equation 28. Final real arithmetic of the divisor mean bound. -/
+theorem divisor_mean_arith (K a H L BA Y lY : ℝ) (D : ℕ) (hK : 0 ≤ K) (ha : 0 ≤ a)
+    (hH : 0 ≤ H) (hBA : BA ≤ H) (hY : Y ≤ H) (hl0 : 0 ≤ lY) (hl : lY ≤ L) (hL : 1 ≤ L) :
+    K * (a * BA + Y) * (1 + lY) ^ D ≤ K * (a + 1) * 2 ^ D * H * L ^ ((D : ℕ) : ℝ) := by
+  rw [Real.rpow_natCast]
+  have h1 : a * BA + Y ≤ (a + 1) * H := by
+    nlinarith [mul_le_mul_of_nonneg_left hBA ha]
+  have h2 : (1 + lY) ^ D ≤ (2 * L) ^ D :=
+    pow_le_pow_left₀ (by linarith) (by linarith) D
+  rw [mul_pow] at h2
+  calc K * (a * BA + Y) * (1 + lY) ^ D ≤ K * ((a + 1) * H) * (2 ^ D * L ^ D) :=
+        mul_le_mul (mul_le_mul_of_nonneg_left h1 hK) h2 (pow_nonneg (by linarith) _)
+          (mul_nonneg hK (mul_nonneg (by linarith) hH))
+    _ = _ := by ring
+
 /-- LEAF. Page 487 equation 28, by the polynomial divisor mean used on page 481
 between equations 3 and 4. Only the arithmetic divisor weight is averaged here.
-This is the shorter Theorem 2 interval. The general polynomial reduction
-beyond the hypotheses of Nair 1992 remains OPEN. -/
+This is the shorter Theorem 2 interval. PROVED 2026-11-17 by an elementary
+route in place of the Nair 1992 citation: the totient weight is at most the divisor
+count, a Landreau type majorant by a small divisor, root clustering modulo
+prime powers for the monic normalization, and the weighted divisor power sum.
+See DivMeanDiscrete.discrete_divisor_mean. -/
 theorem leaf_divisor_mean (F : ℤ[X]) (hF : Admissible F) :
     ∃ d : ℝ, 0 ≤ d ∧ ∀ ε : ℝ, 0 < ε →
       ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
@@ -1017,7 +1036,129 @@ theorem leaf_divisor_mean (F : ℤ[X]) (hF : Admissible F) :
       ∑ n ∈ win F N H,
         ((Fv F n).toNat : ℝ) * (Fv F n).toNat.divisors.card /
           (Fv F n).toNat.totient ≤ C * H * Real.log N ^ d := by
-  sorry
+  have hD := fun A B M Y : ℕ =>
+    LeanLab.Perelli1996.DivMean.discrete_divisor_mean F hF.1 hF.2 A B M Y
+  have hT := LeanLab.Perelli1996.DivMean.self_le_totient_mul_card_divisors
+  have hk1 : 1 ≤ F.natDegree := hF.1
+  have hkR : (1 : ℝ) ≤ (F.natDegree : ℝ) := by exact_mod_cast hk1
+  have hkpos : (0 : ℝ) < (F.natDegree : ℝ) := by linarith
+  refine ⟨((2 ^ (2 ^ (72 * F.natDegree ^ 2 + F.natDegree)) : ℕ) : ℝ), Nat.cast_nonneg _, ?_⟩
+  intro ε hε
+  obtain ⟨c, NC, hc, hNC, hcut⟩ := Decomp88.leaf_cutoff F hF
+  obtain ⟨NP, hNP, hpos⟩ := Decomp320a.window_pos F hF
+  have hδ : 0 < 6 * (F.natDegree : ℝ) * ε := by positivity
+  obtain ⟨NT, hNT⟩ := Filter.eventually_atTop.mp
+    ((tendsto_rpow_atTop hδ).eventually (Filter.eventually_ge_atTop
+      ((F.leadingCoeff.toNat : ℝ) ^ (F.natDegree - 1) * c)))
+  have hK0 : (0 : ℝ) < ((6 * F.natDegree : ℕ) : ℝ) ^ (12 * F.natDegree) :=
+    pow_pos (by exact_mod_cast (show 0 < 6 * F.natDegree by omega)) _
+  have ha0 : (0 : ℝ) ≤ (F.leadingCoeff.toNat : ℝ) := Nat.cast_nonneg _
+  refine ⟨((6 * F.natDegree : ℕ) : ℝ) ^ (12 * F.natDegree) *
+      ((F.leadingCoeff.toNat : ℝ) + 1) *
+      2 ^ (2 ^ (2 ^ (72 * F.natDegree ^ 2 + F.natDegree))),
+    max (max NC NP) (max NT (Real.exp 1)),
+    mul_pos (mul_pos hK0 (by linarith)) (pow_pos (by norm_num) _),
+    hNC.trans ((le_max_left _ _).trans (le_max_left _ _)), ?_⟩
+  intro N H hN hH hHu
+  have hNC' : NC ≤ N := ((le_max_left _ _).trans (le_max_left _ _)).trans hN
+  have hNP' : NP ≤ N := ((le_max_right _ _).trans (le_max_left _ _)).trans hN
+  have hNT' : NT ≤ N := ((le_max_left _ _).trans (le_max_right _ _)).trans hN
+  have hNE : Real.exp 1 ≤ N := ((le_max_right _ _).trans (le_max_right _ _)).trans hN
+  have hN3 : 3 ≤ N := hNC.trans hNC'
+  have hN0 : 0 < N := by linarith
+  have hN1 : 1 ≤ N := by linarith
+  have hL1 : 1 ≤ Real.log N := by
+    simpa using Real.log_le_log (Real.exp_pos 1) hNE
+  have hH1 : 1 ≤ H := (Real.one_le_rpow hN1 (by positivity)).trans hH
+  have hH0 : 0 ≤ H := by linarith
+  have hHu' : H ≤ N ^ (1 / (F.natDegree : ℝ)) :=
+    hHu.trans (Real.rpow_le_rpow_of_exponent_le hN1 (by linarith))
+  have hx1 : N ^ (1 / (F.natDegree : ℝ)) ≤ N := by
+    calc N ^ (1 / (F.natDegree : ℝ)) ≤ N ^ (1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le hN1 (by rw [div_le_one hkpos]; exact hkR)
+      _ = N := Real.rpow_one N
+  have hHN : H ≤ N := hHu'.trans hx1
+  have hx0 : 0 ≤ N ^ (1 / (F.natDegree : ℝ)) := Real.rpow_nonneg hN0.le _
+  have hcut' := hcut N H hNC' hH0 hHu'
+  have hpos' := hpos N H hNP'
+  -- the hypotheses of the discrete mean
+  have h1 : ∀ n ∈ Finset.Icc ⌈N ^ (1 / (F.natDegree : ℝ))⌉₊ ⌊N ^ (1 / (F.natDegree : ℝ)) + H⌋₊,
+      0 < F.eval (n : ℤ) ∧ (F.eval (n : ℤ)).toNat ≤ ⌊c * N⌋₊ := by
+    intro n hn
+    have hn' : n ∈ win F N H := hn
+    have hp : 0 < (Fv F n).toNat := hpos' n hn'
+    have hp2 : 0 < Fv F n := by omega
+    exact ⟨hp2, (hcut' n hn').2⟩
+  have hexp : (N ^ (1 / (6 * (F.natDegree : ℝ)) + ε)) ^ (6 * F.natDegree) =
+      N ^ (6 * (F.natDegree : ℝ) * ε) * N := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hN0.le]
+    have h6 : (6 * (F.natDegree : ℝ)) ≠ 0 := by positivity
+    have he : (1 / (6 * (F.natDegree : ℝ)) + ε) * ((6 * F.natDegree : ℕ) : ℝ) =
+        6 * (F.natDegree : ℝ) * ε + 1 := by
+      rw [Nat.cast_mul, Nat.cast_ofNat, add_mul, one_div, inv_mul_cancel₀ h6]
+      ring
+    rw [he, Real.rpow_add hN0, Real.rpow_one]
+  have hYH : H < (⌊H⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one H
+  have hreal : (F.leadingCoeff.toNat : ℝ) ^ (F.natDegree - 1) * (⌊c * N⌋₊ : ℝ) <
+      ((⌊H⌋₊ : ℝ) + 1) ^ (6 * F.natDegree) := by
+    calc (F.leadingCoeff.toNat : ℝ) ^ (F.natDegree - 1) * (⌊c * N⌋₊ : ℝ)
+        ≤ (F.leadingCoeff.toNat : ℝ) ^ (F.natDegree - 1) * (c * N) :=
+          mul_le_mul_of_nonneg_left (Nat.floor_le (by positivity)) (pow_nonneg ha0 _)
+      _ = ((F.leadingCoeff.toNat : ℝ) ^ (F.natDegree - 1) * c) * N := by ring
+      _ ≤ N ^ (6 * (F.natDegree : ℝ) * ε) * N :=
+          mul_le_mul_of_nonneg_right (hNT N hNT') hN0.le
+      _ = (N ^ (1 / (6 * (F.natDegree : ℝ)) + ε)) ^ (6 * F.natDegree) := hexp.symm
+      _ ≤ H ^ (6 * F.natDegree) := pow_le_pow_left₀ (Real.rpow_nonneg hN0.le _) hH _
+      _ < ((⌊H⌋₊ : ℝ) + 1) ^ (6 * F.natDegree) := pow_lt_pow_left₀ hYH hH0 (by omega)
+  have hnat : F.leadingCoeff.toNat ^ (F.natDegree - 1) * ⌊c * N⌋₊ <
+      (⌊H⌋₊ + 1) ^ (6 * F.natDegree) := by exact_mod_cast hreal
+  have hD' := hD ⌈N ^ (1 / (F.natDegree : ℝ))⌉₊ ⌊N ^ (1 / (F.natDegree : ℝ)) + H⌋₊
+    ⌊c * N⌋₊ ⌊H⌋₊ h1 hnat
+  -- termwise bound by the divisor square
+  have hterm : ∀ n ∈ win F N H,
+      ((Fv F n).toNat : ℝ) * (Fv F n).toNat.divisors.card / (Fv F n).toNat.totient ≤
+        (((F.eval (n : ℤ)).toNat.divisors.card : ℝ)) ^ 2 := by
+    intro n hn
+    have hm : 0 < (Fv F n).toNat := hpos' n hn
+    change _ ≤ (((Fv F n).toNat.divisors.card : ℝ)) ^ 2
+    generalize (Fv F n).toNat = m at hm ⊢
+    have hφ : (0 : ℝ) < (m.totient : ℝ) := by exact_mod_cast Nat.totient_pos.mpr hm
+    have hR : (m : ℝ) ≤ (m.totient : ℝ) * (m.divisors.card : ℝ) := by
+      exact_mod_cast hT m hm
+    have hτ : (0 : ℝ) ≤ (m.divisors.card : ℝ) := Nat.cast_nonneg _
+    rw [div_le_iff₀ hφ]
+    nlinarith [mul_le_mul_of_nonneg_right hR hτ]
+  -- the window length and the logarithm
+  have hBA : ((⌊N ^ (1 / (F.natDegree : ℝ)) + H⌋₊ - ⌈N ^ (1 / (F.natDegree : ℝ))⌉₊ : ℕ) : ℝ)
+      ≤ H := by
+    rcases le_total ⌈N ^ (1 / (F.natDegree : ℝ))⌉₊ ⌊N ^ (1 / (F.natDegree : ℝ)) + H⌋₊
+      with h | h
+    · rw [Nat.cast_sub h]
+      have e1 := Nat.floor_le (add_nonneg hx0 hH0)
+      have e2 := Nat.le_ceil (N ^ (1 / (F.natDegree : ℝ)))
+      linarith
+    · rw [Nat.sub_eq_zero_of_le h, Nat.cast_zero]
+      exact hH0
+  have hYle : (⌊H⌋₊ : ℝ) ≤ H := Nat.floor_le hH0
+  have hY1 : (1 : ℝ) ≤ (⌊H⌋₊ : ℝ) := by
+    exact_mod_cast (Nat.le_floor (by simpa using hH1) : 1 ≤ ⌊H⌋₊)
+  have hlY0 : 0 ≤ Real.log (⌊H⌋₊ : ℝ) := Real.log_nonneg hY1
+  have hlYN : Real.log (⌊H⌋₊ : ℝ) ≤ Real.log N :=
+    Real.log_le_log (by linarith) (hYle.trans hHN)
+  have hc1 : ((F.leadingCoeff.toNat *
+        (⌊N ^ (1 / (F.natDegree : ℝ)) + H⌋₊ - ⌈N ^ (1 / (F.natDegree : ℝ))⌉₊) + ⌊H⌋₊ : ℕ) : ℝ) =
+      (F.leadingCoeff.toNat : ℝ) *
+        ((⌊N ^ (1 / (F.natDegree : ℝ)) + H⌋₊ - ⌈N ^ (1 / (F.natDegree : ℝ))⌉₊ : ℕ) : ℝ) +
+        (⌊H⌋₊ : ℝ) := by
+    rw [Nat.cast_add, Nat.cast_mul]
+  calc ∑ n ∈ win F N H,
+        ((Fv F n).toNat : ℝ) * (Fv F n).toNat.divisors.card / (Fv F n).toNat.totient
+      ≤ ∑ n ∈ win F N H, (((F.eval (n : ℤ)).toNat.divisors.card : ℝ)) ^ 2 :=
+        Finset.sum_le_sum hterm
+    _ ≤ _ := hD'
+    _ ≤ _ := by
+      rw [hc1]
+      exact divisor_mean_arith _ _ _ _ _ _ _ _ hK0.le ha0 hH0 hBA hYle hlY0 hlYN hL1
 
 /-- Page 487 equation 28. The weighted finite singular series is bounded
 by the pointwise Ramanujan tail and the sum of its divisor weights. -/
@@ -1068,8 +1209,8 @@ theorem weighted_tail (F : ℤ[X]) (N H P c K : ℝ)
     _ = _ := (Finset.mul_sum _ _ _).symm
 
 /-- Page 487 equation 28. Assemble the weighted Ramanujan tail from
-its proved arithmetic tail and the shorter polynomial divisor mean.
-CONDITIONAL ON leaf_divisor_mean. -/
+its proved arithmetic tail and the shorter polynomial divisor mean,
+leaf_divisor_mean, which is now proved. -/
 theorem singular_tail (F : ℤ[X]) (hF : Admissible F)
     (A ε : ℝ) (hA : 0 < A) (hε : 0 < ε) :
     ∃ B₀ : ℝ, 0 < B₀ ∧ ∀ B : ℝ, B₀ ≤ B →

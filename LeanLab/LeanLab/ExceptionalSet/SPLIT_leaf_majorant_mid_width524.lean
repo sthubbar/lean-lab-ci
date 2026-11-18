@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_interval_majorant524
+import LeanLab.ExceptionalSet.Selberg524
 
 /-!
 Split of `LeanLab.ExceptionalSet.Decomp524a.leaf_majorant_mid_width524`, the
@@ -41,7 +42,7 @@ theorem leaf_cosine_majorant_low_width524 (w : ℝ) (H : ℕ) (hw1 : 1 / 3 < w)
       (∀ h ∈ Icc 1 H, |g h| ≤ 4 / (h : ℝ)) ∧
       ∀ θ : ℝ, (if |θ| ≤ w / 2 then (1 : ℝ) else 0) ≤
         c₀ + ∑ h ∈ Icc 1 H, g h * cos (2 * π * ((h : ℝ) * θ)) := by
-  sorry
+  exact LeanLab.ExceptionalSet.Selberg524.selberg_cosine_majorant524 w H (by linarith) hC
 
 /-- LEAF. The middle part of the intermediate width range, `7 / 20 < w ≤ 9 / 20`: the same
 centred construction, with the constant `c₀ ≤ w + 4 / (H + 1)` and coefficients `|g h| ≤ 4 / h`
@@ -55,7 +56,7 @@ theorem leaf_cosine_majorant_mid_width524 (w : ℝ) (H : ℕ) (hw1 : 7 / 20 < w)
       (∀ h ∈ Icc 1 H, |g h| ≤ 4 / (h : ℝ)) ∧
       ∀ θ : ℝ, (if |θ| ≤ w / 2 then (1 : ℝ) else 0) ≤
         c₀ + ∑ h ∈ Icc 1 H, g h * cos (2 * π * ((h : ℝ) * θ)) := by
-  sorry
+  exact LeanLab.ExceptionalSet.Selberg524.selberg_cosine_majorant524 w H (by linarith) hC
 
 /-- LEAF. The high part of the intermediate width range, `9 / 20 < w < 1 / 2`: the same
 centred construction, with the constant `c₀ ≤ w + 4 / (H + 1)` and coefficients `|g h| ≤ 4 / h`
@@ -68,7 +69,7 @@ theorem leaf_cosine_majorant_high_width524 (w : ℝ) (H : ℕ) (hw1 : 9 / 20 < w
       (∀ h ∈ Icc 1 H, |g h| ≤ 4 / (h : ℝ)) ∧
       ∀ θ : ℝ, (if |θ| ≤ w / 2 then (1 : ℝ) else 0) ≤
         c₀ + ∑ h ∈ Icc 1 H, g h * cos (2 * π * ((h : ℝ) * θ)) := by
-  sorry
+  exact LeanLab.ExceptionalSet.Selberg524.selberg_cosine_majorant524 w H (by linarith) hC
 
 /-! ### Elementary facts about `eC`, proved -/
 
