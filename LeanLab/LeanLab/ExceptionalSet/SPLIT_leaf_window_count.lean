@@ -85,7 +85,25 @@ theorem leaf_window_count_four_dvd_high :
       (((Finset.Icc (N + 1) (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
           (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ 4 ∣ n)).card : ℝ)
         ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := by
-  sorry
+  obtain ⟨C, N0, hC, hN0, hbound⟩ := leaf_window_count
+  refine ⟨C, N0, hC, hN0, ?_⟩
+  intro N hN
+  have hsub : ((Finset.Icc (N + 1) (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
+      (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ 4 ∣ n))
+      ⊆ ((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)
+        (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
+      (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)) := by
+    intro n hn
+    simp only [Finset.mem_filter, Finset.mem_Icc] at hn ⊢
+    obtain ⟨⟨hlo, hhi⟩, hev, hg, _⟩ := hn
+    exact ⟨⟨by omega, hhi⟩, hev, hg⟩
+  calc (((Finset.Icc (N + 1) (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ 4 ∣ n)).card : ℝ)
+      ≤ (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)
+            (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ) := by
+        exact_mod_cast Finset.card_le_card hsub
+    _ ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := hbound N hN
 
 /-- LEAF 4 of 4, the high half of the window in the class of indices not divisible by `4`: some
 nonnegative `C` bounds the even `n` of `[N + 1, N + R]` that are not a sum of two primes and are
