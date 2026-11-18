@@ -29,7 +29,7 @@ summand is the constant one, and the character sum reduces to the plain sum of t
 coefficient minus its density. -/
 theorem upper_self_scaled_principal_trivial_character (q m : ℕ) :
     (1 : DirichletCharacter ℂ q) (m : ZMod q) = 1 := by
-  sorry
+  simp [DirichletCharacter.one_apply]
 
 /-- LEAF: the initial segment is empty below the level. Second step, the easy end of the truncation:
 rightInterval is the interval from the floor of the level Y to the floor of 2Y, so every index in it
