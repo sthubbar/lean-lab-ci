@@ -16,6 +16,7 @@ with the sum of the three branches, the pointwise size of each branch, and the i
 that lets the double integral of that sum split into three. No new definition.
 -/
 import LeanLab.BHP1997.DensitySlope517
+import LeanLab.BHP1997.HighVariationQuadrature517
 
 namespace LeanLab.BHP1997.LowerShortC165
 open Classical Complex Decomp132 DecompC165b DecompC165d Decomp514a
@@ -98,13 +99,13 @@ private theorem integrand_eq_pieces {ε : ℝ} (a b : ℝ) :
     · have h3 : a+3*b < (99/100:ℝ) := by linarith
       by_cases hD : lowerTwoDiscarded ε a b <;> simp [hD, h1, h2, h3]
 
-/-- LEAF: the branch of the majorant taken when `1 ≤ a + 3 b`, integrated over the box, is at
-most `3/2`. A quadrature gives about 1.49. -/
+/-- The branch of the majorant taken when `1 ≤ a + 3 b`, integrated over the box, is at
+most `3/2`. A quadrature gives about 1.49. Proved in `HighVariationQuadrature517`. -/
 theorem leaf_variation_high_integral {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1/10^8) :
     (∫ a in (1/10:ℝ)..(1/2:ℝ), ∫ b in (1/10:ℝ)..(1/2:ℝ),
       (if 1 ≤ a+3*b then
-        (if lowerTwoDiscarded ε a b then 1/(a*b*(99/100-a-b)*(1-a-b)) else 0) else 0)) ≤ 3/2 := by
-  sorry
+        (if lowerTwoDiscarded ε a b then 1/(a*b*(99/100-a-b)*(1-a-b)) else 0) else 0)) ≤ 3/2 :=
+  variation_high_integral_le hε8
 
 private theorem mIiob {f : ℝ → ℝ} {lo hi M : ℝ}
     (hm : Measurable f) (h1 : ∀ x ∈ Set.Ioc lo hi, ‖f x‖ ≤ M)
