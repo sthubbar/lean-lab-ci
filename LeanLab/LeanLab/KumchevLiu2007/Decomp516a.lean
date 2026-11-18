@@ -7,6 +7,7 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.KumchevLiu2007.Decomp1534a
 import LeanLab.KumchevLiu2007.Decomp1534c
 import LeanLab.KumchevLiu2007.Decomp506a
+import LeanLab.KumchevLiu2007.LargeEpsilon628
 
 namespace LeanLab.KumchevLiu2007.Task516a
 
@@ -68,10 +69,11 @@ private lemma logrpow_le_exp_three_quarters (B : ℝ) (hB : 0 < B) :
   apply Real.exp_le_exp.mpr
   linarith [mul_comm (Real.log L) B]
 
-/-- LEAF. Page 8 Proposition 1 display 33 with the page 15 weights and
-hypotheses, in the written range on page 16 after display 55. The short
-interval character estimates and Lemma 3.4 remain analytic inputs.
-This is the weighted mean square estimate before Chebyshev counting. -/
+/-- Page 8 Proposition 1 display 33 with the page 15 weights, in the written
+range on page 16 after display 55. CONDITIONAL ON Task628.major_arc_block
+and Task628.rough_block_bulk. The repaired short block proof uses the clean
+shifted Fourier kernel estimate and the proved initial Gallagher interval.
+It does not use the refuted Task556 character route. -/
 theorem eq33_weighted_mean_square (A : ℝ) (hA : 0 < A) :
     let windowY (X ε : ℝ) : ℝ := X ^ (7 / 12 + ε / 2)
     let windowPairs (X Y : ℝ) (n : ℕ) : Finset (ℕ × ℕ) := ((Finset.range (⌊X⌋₊ + 1)).product (Finset.range (⌊Real.sqrt Y⌋₊ + 1))).filter (fun v => X - Y ≤ (v.1 : ℝ) ∧ (v.1 : ℝ) < X ∧ Real.sqrt Y / 2 ≤ (v.2 : ℝ) ∧ (v.2 : ℝ) < Real.sqrt Y ∧ v.1 + v.2 ^ 2 = n)
@@ -85,7 +87,8 @@ theorem eq33_weighted_mean_square (A : ℝ) (hA : 0 < A) :
         X0 ≤ X → X ^ (7 / 18 + ε) ≤ H → H ≤ X ^ (1 - ε) →
         (∑ n ∈ (Finset.range (⌊X + H⌋₊ + 1)).filter (fun n : ℕ => X < (n : ℝ)),
           err53 X ε B n ^ 2) ≤ C * H * windowY X ε / Real.log X ^ A := by
-  sorry
+  exact Eq33Window1117.eq33_weighted_mean_square_of_blocks A hA
+    (Task628.weighted_block_mean_square A hA)
 
 /-- Page 16 display 53 follows from Proposition 1 display 33 by the
 finite Chebyshev inequality. CONDITIONAL on eq33_weighted_mean_square. -/
@@ -165,11 +168,12 @@ theorem eq53_prop1 (A : ℝ) (hA : 0 < A) :
     (by simpa only [mul_comm (T ^ 2)] using (hcnt.trans hsum).trans_eq heq.symm)
 
 
-/-- LEAF, UNWRITTEN RESIDUE. Display 53 of page 16 when epsilon exceeds
-5 over 18 and H exceeds X to the 1 minus epsilon. For epsilon at most 5 over 18
-this range reduces to the written one by the support of the windows, proved
-in `Decomp129.eq53_full_range`. The paper treats epsilon as a small fixed number and
-does not write this case; it is recorded as BLOCKED NO WRITTEN PROOF in PROGRESS.md. -/
+/-- UNWRITTEN RESIDUE. Display 53 of page 16 when epsilon exceeds
+five eighteenths and H exceeds X to one minus epsilon. CONDITIONAL ON the
+two repaired block inputs and Task628.low_H_large_eps. The latter keeps
+only epsilon above eleven thirty sixths, H below X to seven eighteenths
+plus epsilon and H at most Y. The paper does not state that residue.
+The sealed statement is preserved. No paper error is asserted. -/
 theorem eq53_large_eps (A : ℝ) (hA : 0 < A) :
     let windowY (X ε : ℝ) : ℝ := X ^ (7 / 12 + ε / 2)
     let windowPairs (X Y : ℝ) (n : ℕ) : Finset (ℕ × ℕ) := ((Finset.range (⌊X⌋₊ + 1)).product (Finset.range (⌊Real.sqrt Y⌋₊ + 1))).filter (fun v => X - Y ≤ (v.1 : ℝ) ∧ (v.1 : ℝ) < X ∧ Real.sqrt Y / 2 ≤ (v.2 : ℝ) ∧ (v.2 : ℝ) < Real.sqrt Y ∧ v.1 + v.2 ^ 2 = n)
@@ -184,7 +188,7 @@ theorem eq53_large_eps (A : ℝ) (hA : 0 < A) :
         (cntIoc (fun n => InH2 n ∧
           Real.sqrt (windowY X ε) * Real.log X ^ (-A) < err53 X ε B n) X H : ℝ) ≤
           C * H / Real.log X ^ A := by
-  sorry
+  exact Task628.large_eps_from_repaired_blocks A hA
 
 /-- LEAF. Page 14 display 48, the lower bound of P2 of n, P by
 log P to the minus 1 on H2, together with Lemma 3.8 display 49 with y equal to H
