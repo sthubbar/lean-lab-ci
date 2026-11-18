@@ -28,257 +28,29 @@ theorem leaf561_integrand_continuous561 (ε x : ℝ) (a b : ℕ → ℂ) (N : �
     (continuous_finset_sum _ (fun k _ => continuous_const.mul (hfour _))))
     (hfour _)
 
-/-! #### Private estimates for the containment and separation steps -/
-
-private lemma length512_pos561 {ε x : ℝ} (hx : 0 < x) : 0 < length512 ε x :=
-  Real.rpow_pos_of_pos hx _
-
-private lemma order512_base561 (ε x : ℝ) (hx : 0 < x) :
-    ((length512 ε x) ^ (2 * ((1 : ℝ) / 16 - 1 / 10 ^ 5) : ℝ)) ^ ((1 : ℝ) / 2)
-      = (length512 ε x) ^ ((1 : ℝ) / 16 - 1 / 10 ^ 5) := by
-  have hexp : (2 : ℝ) * ((1 : ℝ) / 16 - 1 / 10 ^ 5) * ((1 : ℝ) / 2)
-      = (1 : ℝ) / 16 - 1 / 10 ^ 5 := by norm_num
-  rw [← Real.rpow_mul (le_of_lt (length512_pos561 (ε := ε) hx)), hexp]
-
-private lemma order512_eq_zero561 (ε x : ℝ) (hx : 0 ≤ length512 ε x)
-    (h : length512 ε x ≤ 1) : order512 ε x = 0 := by
-  have h1 : (length512 ε x) ^ (2 * ((1 : ℝ) / 16 - 1 / 10 ^ 5) : ℝ) ≤ 1 :=
-    Real.rpow_le_one hx h (by norm_num)
-  have h2 : ((length512 ε x) ^ (2 * ((1 : ℝ) / 16 - 1 / 10 ^ 5) : ℝ)) ^ ((1 : ℝ) / 2) ≤ 1 :=
-    Real.rpow_le_one (Real.rpow_nonneg hx _) h1 (by norm_num)
-  unfold order512
-  rw [Nat.floor_eq_zero]
-  linarith
-
-private lemma order512_le561 (ε x : ℝ) (hx : 0 < x) :
-    (order512 ε x : ℝ) ≤ (length512 ε x) ^ ((1 : ℝ) / 16 - 1 / 10 ^ 5) / 2 := by
-  unfold order512
-  rw [order512_base561 ε x hx]
-  exact Nat.floor_le
-    (div_nonneg (le_of_lt (Real.rpow_pos_of_pos (length512_pos561 (ε := ε) hx)
-      ((1 : ℝ) / 16 - 1 / 10 ^ 5))) two_pos.le)
-
-private lemma order512_ge561 (ε x : ℝ) (hx : 0 < x) :
-    (length512 ε x) ^ ((1 : ℝ) / 16 - 1 / 10 ^ 5) / 2 - 1 < (order512 ε x : ℝ) := by
-  unfold order512
-  rw [order512_base561 ε x hx]
-  have h := Nat.lt_floor_add_one ((length512 ε x) ^ ((1 : ℝ) / 16 - 1 / 10 ^ 5) / 2)
-  linarith
-
-/-- For a positive `a` and a positive `b`, the two logarithmic powers occurring in the
-arc half widths are eventually smaller than the corresponding powers of `x`. -/
-private lemma eventually_log_small561 (a b D : ℝ) (ha : 0 < a) (hb : 0 < b) :
-    ∀ᶠ x : ℝ in Filter.atTop,
-      Real.log x ^ (4 * D) < x ^ (a / 4) ∧ 2 ≤ x ^ (a / 4) ∧
-        Real.log x ^ (2 * D) + 1 < x ^ (a * b) / 2 := by
-  have h4 : (fun x : ℝ => Real.log x ^ (4 * D)) =o[Filter.atTop] (fun x : ℝ => x ^ (a / 4)) :=
-    isLittleO_log_rpow_rpow_atTop (s := a / 4) (4 * D) (by linarith)
-  have h2 : (fun x : ℝ => Real.log x ^ (2 * D)) =o[Filter.atTop] (fun x : ℝ => x ^ (a * b / 8)) :=
-    isLittleO_log_rpow_rpow_atTop (s := a * b / 8) (2 * D) (by positivity)
-  have hone : ∀ᶠ x : ℝ in Filter.atTop, (1 : ℝ) < x := Filter.eventually_gt_atTop (1 : ℝ)
-  have k4 : ∀ᶠ x : ℝ in Filter.atTop, 2 * Real.log x ^ (4 * D) ≤ x ^ (a / 4) := by
-    refine ((h4.const_mul_left 2).eventuallyLE.and hone).mono ?_
-    rintro x ⟨hx, hx1⟩
-    have hx0 : (0 : ℝ) < x := by linarith
-    rw [Real.norm_of_nonneg
-        (mul_nonneg two_pos.le (Real.rpow_nonneg (Real.log_nonneg hx1.le) _)),
-      Real.norm_of_nonneg (Real.rpow_nonneg hx0.le _)] at hx
-    exact hx
-  have k2 : ∀ᶠ x : ℝ in Filter.atTop, 2 * Real.log x ^ (2 * D) ≤ x ^ (a * b / 8) := by
-    refine ((h2.const_mul_left 2).eventuallyLE.and hone).mono ?_
-    rintro x ⟨hx, hx1⟩
-    have hx0 : (0 : ℝ) < x := by linarith
-    rw [Real.norm_of_nonneg
-        (mul_nonneg two_pos.le (Real.rpow_nonneg (Real.log_nonneg hx1.le) _)),
-      Real.norm_of_nonneg (Real.rpow_nonneg hx0.le _)] at hx
-    exact hx
-  have hu : ∀ᶠ x : ℝ in Filter.atTop, 2 ≤ x ^ (a / 4) :=
-    (tendsto_rpow_atTop (by linarith : (0 : ℝ) < a / 4)).eventually
-      (Filter.eventually_ge_atTop (2 : ℝ))
-  have hv : ∀ᶠ x : ℝ in Filter.atTop, 4 ≤ x ^ (a * b / 8) :=
-    (tendsto_rpow_atTop (by positivity : (0 : ℝ) < a * b / 8)).eventually
-      (Filter.eventually_ge_atTop (4 : ℝ))
-  refine (k4.and (hu.and (k2.and (hv.and hone)))).mono ?_
-  rintro x ⟨hx4, hu2, hx2, hv4, hx1⟩
-  have hx0 : (0 : ℝ) < x := by linarith
-  have hpos : 0 < Real.log x ^ (4 * D) := Real.rpow_pos_of_pos (Real.log_pos hx1) _
-  have hv0 : (0 : ℝ) < x ^ (a * b / 8) := Real.rpow_pos_of_pos hx0 _
-  have hAB : (x ^ (a * b / 8)) ^ 8 = x ^ (a * b) := by
-    rw [← Real.rpow_natCast, ← Real.rpow_mul hx0.le]
-    congr 1
-    push_cast
-    ring
-  have h48 : 4 * x ^ (a * b / 8) ≤ x ^ (a * b) := by
-    have h1 : (4 : ℝ) ≤ (x ^ (a * b / 8)) ^ 7 := by
-      calc (4 : ℝ) ≤ 4 ^ 7 := by norm_num
-        _ ≤ (x ^ (a * b / 8)) ^ 7 := pow_le_pow_left₀ (by norm_num) hv4 7
-    have h2 : 4 * x ^ (a * b / 8) ≤ (x ^ (a * b / 8)) ^ 8 := by
-      calc 4 * x ^ (a * b / 8) ≤ (x ^ (a * b / 8)) ^ 7 * x ^ (a * b / 8) :=
-            mul_le_mul_of_nonneg_right h1 (le_of_lt hv0)
-        _ = (x ^ (a * b / 8)) ^ 8 := by ring
-    rwa [hAB] at h2
-  exact ⟨by linarith, hu2, by nlinarith⟩
-
-/-- The half width of a single arc is smaller than the gap separating the centre from
-the left end of the complete period. -/
-private lemma arc_width_lt561 (ε D x : ℝ) (hx : 1 < x) (ha : 0 < 11 / 20 + ε)
-    (hlog4 : Real.log x ^ (4 * D) < x ^ ((11 / 20 + ε) / 4))
-    (hu2 : 2 ≤ x ^ ((11 / 20 + ε) / 4))
-    (q : ℕ) (hq : 1 ≤ q) (hqo : q ≤ order512 ε x) :
-    Real.log x ^ (4 * D) / (q * length512 ε x)
-      < 1 / ((q : ℝ) * (order512 ε x : ℝ)) := by
-  have hx0 : (0 : ℝ) < x := by linarith
-  have hLpos : 0 < length512 ε x := length512_pos561 hx0
-  have hL1 : 1 ≤ length512 ε x := Real.one_le_rpow hx.le ha.le
-  have hlogpos : 0 < Real.log x ^ (4 * D) := Real.rpow_pos_of_pos (Real.log_pos hx) _
-  have hspos : (0 : ℝ) < x ^ ((11 / 20 + ε) / 4) := Real.rpow_pos_of_pos hx0 _
-  have hqpos : (0 : ℝ) < q := by exact_mod_cast hq
-  have hordpos : (0 : ℝ) < (order512 ε x : ℝ) := by exact_mod_cast lt_of_lt_of_le hq hqo
-  have hw : x ^ ((11 / 20 + ε) / 2)
-      = x ^ ((11 / 20 + ε) / 4) * x ^ ((11 / 20 + ε) / 4) := by
-    rw [← Real.rpow_add hx0]
-    congr 1
-    ring
-  have hww : x ^ ((11 / 20 + ε) / 2) * x ^ ((11 / 20 + ε) / 2) = length512 ε x := by
-    show x ^ ((11 / 20 + ε) / 2) * x ^ ((11 / 20 + ε) / 2) = x ^ (11 / 20 + ε)
-    rw [← Real.rpow_add hx0]
-    congr 1
-    ring
-  have hord : (order512 ε x : ℝ) ≤ x ^ ((11 / 20 + ε) / 2) := by
-    have h2 := order_square_le_length561 ε x hL1
-    have hs : (order512 ε x : ℝ) ≤ Real.sqrt (length512 ε x) := by
-      rw [← Real.sqrt_sq (Nat.cast_nonneg (order512 ε x))]
-      exact Real.sqrt_le_sqrt h2
-    have he : Real.sqrt (length512 ε x) = x ^ ((11 / 20 + ε) / 2) := by
-      rw [Real.sqrt_eq_rpow]
-      show (x ^ (11 / 20 + ε)) ^ ((1 : ℝ) / 2) = x ^ ((11 / 20 + ε) / 2)
-      rw [← Real.rpow_mul hx0.le]
-      congr 1
-      ring
-    rwa [he] at hs
-  have hloglt : Real.log x ^ (4 * D) < x ^ ((11 / 20 + ε) / 2) := by
-    have h2 : (1 : ℝ) < x ^ ((11 / 20 + ε) / 4) := by linarith
-    rw [hw]
-    calc Real.log x ^ (4 * D) < x ^ ((11 / 20 + ε) / 4) := hlog4
-      _ = x ^ ((11 / 20 + ε) / 4) * 1 := by ring
-      _ < x ^ ((11 / 20 + ε) / 4) * x ^ ((11 / 20 + ε) / 4) :=
-          mul_lt_mul_of_pos_left h2 hspos
-  have hnum : Real.log x ^ (4 * D) * (order512 ε x : ℝ) < length512 ε x := by
-    calc Real.log x ^ (4 * D) * (order512 ε x : ℝ)
-        ≤ Real.log x ^ (4 * D) * x ^ ((11 / 20 + ε) / 2) :=
-          mul_le_mul_of_nonneg_left hord (le_of_lt hlogpos)
-      _ < x ^ ((11 / 20 + ε) / 2) * x ^ ((11 / 20 + ε) / 2) :=
-          mul_lt_mul_of_pos_right hloglt
-            (Real.rpow_pos_of_pos hx0 ((11 / 20 + ε) / 2))
-      _ = length512 ε x := hww
-  rw [div_lt_div_iff₀ (by positivity) (by positivity)]
-  nlinarith [hnum, hqpos, hordpos, hLpos]
-
-/-- Twice the number of arcs, weighted by the common half width factor, stays below one. -/
-private lemma arc_widths_sum_lt561 (ε D x : ℝ) (hx : 1 < x) (ha : 0 < 11 / 20 + ε)
-    (hlog4 : Real.log x ^ (4 * D) < x ^ ((11 / 20 + ε) / 4))
-    (hu2 : 2 ≤ x ^ ((11 / 20 + ε) / 4))
-    (q₁ q₂ : ℕ) (h₁ : q₁ ≤ order512 ε x) (h₂ : q₂ ≤ order512 ε x) :
-    Real.log x ^ (4 * D) / length512 ε x * ((q₁ : ℝ) + q₂) < 1 := by
-  have hx0 : (0 : ℝ) < x := by linarith
-  have hLpos : 0 < length512 ε x := length512_pos561 hx0
-  have hL1 : 1 ≤ length512 ε x := Real.one_le_rpow hx.le ha.le
-  have hlogpos : 0 < Real.log x ^ (4 * D) := Real.rpow_pos_of_pos (Real.log_pos hx) _
-  have hspos : (0 : ℝ) < x ^ ((11 / 20 + ε) / 4) := Real.rpow_pos_of_pos hx0 _
-  have hw : x ^ ((11 / 20 + ε) / 2)
-      = x ^ ((11 / 20 + ε) / 4) * x ^ ((11 / 20 + ε) / 4) := by
-    rw [← Real.rpow_add hx0]
-    congr 1
-    ring
-  have hww : x ^ ((11 / 20 + ε) / 2) * x ^ ((11 / 20 + ε) / 2) = length512 ε x := by
-    show x ^ ((11 / 20 + ε) / 2) * x ^ ((11 / 20 + ε) / 2) = x ^ (11 / 20 + ε)
-    rw [← Real.rpow_add hx0]
-    congr 1
-    ring
-  have hord : (order512 ε x : ℝ) ≤ x ^ ((11 / 20 + ε) / 2) := by
-    have h2 := order_square_le_length561 ε x hL1
-    have hs : (order512 ε x : ℝ) ≤ Real.sqrt (length512 ε x) := by
-      rw [← Real.sqrt_sq (Nat.cast_nonneg (order512 ε x))]
-      exact Real.sqrt_le_sqrt h2
-    have he : Real.sqrt (length512 ε x) = x ^ ((11 / 20 + ε) / 2) := by
-      rw [Real.sqrt_eq_rpow]
-      show (x ^ (11 / 20 + ε)) ^ ((1 : ℝ) / 2) = x ^ ((11 / 20 + ε) / 2)
-      rw [← Real.rpow_mul hx0.le]
-      congr 1
-      ring
-    rwa [he] at hs
-  have h2log : 2 * Real.log x ^ (4 * D) < x ^ ((11 / 20 + ε) / 2) := by
-    rw [hw]
-    have hstep : 2 * Real.log x ^ (4 * D) < 2 * x ^ ((11 / 20 + ε) / 4) := by linarith
-    have hstep2 : 2 * x ^ ((11 / 20 + ε) / 4)
-        ≤ x ^ ((11 / 20 + ε) / 4) * x ^ ((11 / 20 + ε) / 4) := by
-      nlinarith [hu2, hspos]
-    linarith
-  have hmono : ((q₁ : ℝ) + q₂) ≤ 2 * (order512 ε x : ℝ) := by
-    have h1 : (q₁ : ℝ) ≤ (order512 ε x : ℝ) := by exact_mod_cast h₁
-    have h2 : (q₂ : ℝ) ≤ (order512 ε x : ℝ) := by exact_mod_cast h₂
-    linarith
-  have hstep1 : Real.log x ^ (4 * D) / length512 ε x * ((q₁ : ℝ) + q₂)
-      ≤ Real.log x ^ (4 * D) / length512 ε x * (2 * x ^ ((11 / 20 + ε) / 2)) := by
-    apply mul_le_mul_of_nonneg_left _ (by positivity)
-    calc ((q₁ : ℝ) + q₂) ≤ 2 * (order512 ε x : ℝ) := hmono
-      _ ≤ 2 * x ^ ((11 / 20 + ε) / 2) := by linarith
-  have hstep2 : Real.log x ^ (4 * D) / length512 ε x * (2 * x ^ ((11 / 20 + ε) / 2))
-      = 2 * Real.log x ^ (4 * D) / x ^ ((11 / 20 + ε) / 2) := by
-    rw [← hww]
-    field_simp
-  have hstep3 : 2 * Real.log x ^ (4 * D) / x ^ ((11 / 20 + ε) / 2) < 1 := by
-    rw [div_lt_one (by positivity)]
-    exact h2log
-  linarith
-
-/-- Distinct reduced fractions with moduli `q₁`, `q₂` are at distance at least
-`1/(q₁ q₂)`. -/
-private lemma rational_separation561 (q₁ q₂ r₁ r₂ : ℕ) (hq₁ : 1 ≤ q₁) (hq₂ : 1 ≤ q₂)
-    (hr₁ : r₁ ≤ q₁) (hr₂ : r₂ ≤ q₂) (hc₁ : Nat.Coprime r₁ q₁) (hc₂ : Nat.Coprime r₂ q₂)
-    (hne : (q₁, r₁) ≠ (q₂, r₂)) :
-    1 / ((q₁ : ℝ) * q₂) ≤ |(r₁ : ℝ) / q₁ - (r₂ : ℝ) / q₂| := by
-  have hmul : r₁ * q₂ ≠ r₂ * q₁ := by
-    intro h
-    have hd₁ : q₁ ∣ q₂ := by
-      have hd : q₁ ∣ r₁ * q₂ := by rw [h]; exact dvd_mul_left q₁ r₂
-      exact hc₁.symm.dvd_of_dvd_mul_left hd
-    have hd₂ : q₂ ∣ q₁ := by
-      have hd : q₂ ∣ r₂ * q₁ := by rw [← h]; exact dvd_mul_left q₂ r₁
-      exact hc₂.symm.dvd_of_dvd_mul_left hd
-    have heq : q₁ = q₂ := Nat.dvd_antisymm hd₁ hd₂
-    have h₁ : r₁ * q₂ = r₂ * q₂ := by rw [heq] at h; exact h
-    have h₂ : r₁ = r₂ := by
-      rcases Nat.eq_zero_or_pos q₂ with h0 | h0
-      · omega
-      · exact Nat.eq_of_mul_eq_mul_right h0 h₁
-    exact hne (by rw [heq, h₂])
-  have hq₁R : (0 : ℝ) < q₁ := by exact_mod_cast hq₁
-  have hq₂R : (0 : ℝ) < q₂ := by exact_mod_cast hq₂
-  have hkey : (r₁ : ℝ) / q₁ - (r₂ : ℝ) / q₂
-      = ((r₁ : ℝ) * q₂ - (r₂ : ℝ) * q₁) / ((q₁ : ℝ) * q₂) := by
-    field_simp
-  have hcast : ((r₁ : ℝ) * q₂ - (r₂ : ℝ) * q₁)
-      = (((r₁ : ℤ) * q₂ - (r₂ : ℤ) * q₁ : ℤ) : ℝ) := by
-    push_cast
-    ring
-  have hne0 : ((r₁ : ℤ) * q₂ - (r₂ : ℤ) * q₁ : ℤ) ≠ 0 := by
-    intro h
-    apply hmul
-    have h' : (r₁ : ℤ) * (q₂ : ℤ) = (r₂ : ℤ) * (q₁ : ℤ) := by linarith
-    exact_mod_cast h'
-  have hge : (1 : ℝ) ≤ |((r₁ : ℤ) * q₂ - (r₂ : ℤ) * q₁ : ℤ)| := by
-    have h := Int.one_le_abs hne0
-    exact_mod_cast h
-  have hq₁q₂ : (0 : ℝ) < (q₁ : ℝ) * q₂ := mul_pos hq₁R hq₂R
-  have hge' : (1 : ℝ) ≤ |(((r₁ : ℤ) * q₂ - (r₂ : ℤ) * q₁ : ℤ) : ℝ)| := by
-    rw [← Int.cast_abs]
-    exact hge
-  calc (1 : ℝ) / ((q₁ : ℝ) * q₂)
-      ≤ |(((r₁ : ℤ) * q₂ - (r₂ : ℤ) * q₁ : ℤ) : ℝ)| / ((q₁ : ℝ) * q₂) :=
-        div_le_div_of_nonneg_right hge' hq₁q₂.le
-    _ = |(r₁ : ℝ) / q₁ - (r₂ : ℝ) / q₂| := by
-        rw [hkey, abs_div, abs_of_pos hq₁q₂, ← hcast]
+/-- Elementary real algebra for the containment step: a centre `rr/qr` with `1 ≤ rr ≤ qr`,
+a modulus at most half the Farey order and a small half width keep the arc inside the
+complete period. -/
+private theorem arc_algebra561 (rr qr Qr W Y t : ℝ) (hr1 : 1 ≤ rr) (hrq : rr ≤ qr)
+    (hq1 : 1 ≤ qr) (h2q : 2 * qr ≤ Qr) (h4 : 4 * W ≤ Y) (hWQ : W * Qr ≤ Y)
+    (hY : 0 < Y)
+    (ht1 : rr / qr - W / (qr * Y) ≤ t) (ht2 : t ≤ rr / qr + W / (qr * Y)) :
+    1 / Qr < t ∧ t ≤ 1 + 1 / Qr := by
+  have hq0 : 0 < qr := by linarith
+  have hQ0 : 0 < Qr := by linarith
+  have hw1 : W / (qr * Y) ≤ 1 / (4 * qr) := by
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith [mul_le_mul_of_nonneg_left h4 hq0.le]
+  have hw2 : W / (qr * Y) ≤ 1 / Qr := by
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith [mul_le_mul_of_nonneg_right hq1 hY.le]
+  have hl : 1 / Qr ≤ 1 / (2 * qr) := one_div_le_one_div_of_le (by positivity) h2q
+  have ha : 1 / qr ≤ rr / qr := div_le_div_of_nonneg_right hr1 hq0.le
+  have hb : rr / qr ≤ 1 := (div_le_one hq0).2 hrq
+  have e1 : 1 / (2 * qr) = (1 / qr) / 2 := by rw [one_div, one_div, mul_inv]; ring
+  have e2 : 1 / (4 * qr) = (1 / qr) / 4 := by rw [one_div, one_div, mul_inv]; ring
+  have hp : 0 < 1 / qr := by positivity
+  constructor <;> linarith
 
 /-- LEAF. Containment step.  Every arc of the major arcs lies inside the complete
 period of the circle.  The left end of the period is the reciprocal of the Farey order,
@@ -293,81 +65,132 @@ theorem leaf561_arcs_inside_period561 (ε D : ℝ) :
         Set.Icc ((r : ℝ) / q - Real.log x ^ (4 * D) / (q * length512 ε x))
             ((r : ℝ) / q + Real.log x ^ (4 * D) / (q * length512 ε x)) ⊆
           period512 ε x := by
-  by_cases ha : (0 : ℝ) < 11 / 20 + ε
-  · obtain ⟨X, hX⟩ := Filter.eventually_atTop.1
-      (eventually_log_small561 (11 / 20 + ε) ((1 : ℝ) / 16 - 1 / 10 ^ 5) D ha (by norm_num))
-    refine ⟨max X 2, ?_⟩
-    intro x hx q hq r hr
-    obtain ⟨hlog4, hu2, hlog2⟩ := hX x (le_trans (le_max_left _ _) hx)
-    have hxgt : (1 : ℝ) < x := lt_of_lt_of_le (by norm_num) (le_trans (le_max_right _ _) hx)
-    have hx1 : (1 : ℝ) ≤ x := le_of_lt hxgt
-    have hx0 : (0 : ℝ) < x := by linarith
-    have hLpos : 0 < length512 ε x := length512_pos561 hx0
-    have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq).1
-    have hq2 : q ≤ min (order512 ε x) ⌊Real.log x ^ (2 * D)⌋₊ := (Finset.mem_Icc.mp hq).2
-    have hqord : q ≤ order512 ε x := le_trans hq2 (min_le_left _ _)
-    have hqlog : q ≤ ⌊Real.log x ^ (2 * D)⌋₊ := le_trans hq2 (min_le_right _ _)
-    have hqpos : (0 : ℝ) < q := by exact_mod_cast hq1
-    have hordpos : (0 : ℝ) < (order512 ε x : ℝ) := by
-      exact_mod_cast lt_of_lt_of_le hq1 hqord
-    have hr1 : 1 ≤ r := (Finset.mem_Icc.mp (Finset.mem_filter.mp hr).1).1
-    have hrle : r ≤ q := (Finset.mem_Icc.mp (Finset.mem_filter.mp hr).1).2
-    have hqo : q < order512 ε x := by
-      have hqle : (q : ℝ) ≤ Real.log x ^ (2 * D) := by
-        calc (q : ℝ) ≤ (⌊Real.log x ^ (2 * D)⌋₊ : ℝ) := by exact_mod_cast hqlog
-          _ ≤ Real.log x ^ (2 * D) :=
-              Nat.floor_le (Real.rpow_nonneg (Real.log_nonneg hx1) _)
-      have hlb := order512_ge561 ε x hx0
-      have hLb : (length512 ε x) ^ ((1 : ℝ) / 16 - 1 / 10 ^ 5)
-          = x ^ ((11 / 20 + ε) * ((1 : ℝ) / 16 - 1 / 10 ^ 5)) :=
-        (Real.rpow_mul hx0.le (11 / 20 + ε) ((1 : ℝ) / 16 - 1 / 10 ^ 5)).symm
-      rw [hLb] at hlb
-      have : (q : ℝ) < (order512 ε x : ℝ) := by linarith
-      exact_mod_cast this
-    have hqordR : (q : ℝ) + 1 ≤ (order512 ε x : ℝ) := by
-      have h' : q + 1 ≤ order512 ε x := hqo
-      exact_mod_cast h'
-    have hW := arc_width_lt561 ε D x hxgt ha hlog4 hu2 q hq1 hqord
-    intro s hs
-    obtain ⟨hs1, hs2⟩ := hs
-    have h1 : (1 : ℝ) / q ≤ (r : ℝ) / q := by
-      have hr : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr1
-      gcongr
-    have h2 : (1 : ℝ) / (order512 ε x : ℝ)
-        ≤ (1 : ℝ) / q - 1 / ((q : ℝ) * (order512 ε x : ℝ)) := by
-      have heq : (1 : ℝ) / q - 1 / ((q : ℝ) * (order512 ε x : ℝ))
-          = ((order512 ε x : ℝ) - 1) / ((q : ℝ) * (order512 ε x : ℝ)) := by
-        field_simp
-      rw [heq, div_le_div_iff₀ (by positivity) (by positivity)]
-      nlinarith
-    have hrq : (r : ℝ) / q ≤ 1 := by
-      rw [div_le_one hqpos]
-      exact_mod_cast hrle
-    have hWle : Real.log x ^ (4 * D) / (q * length512 ε x)
-        ≤ 1 / (order512 ε x : ℝ) := by
-      have hle1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq1
-      have h1 : (1 : ℝ) / ((q : ℝ) * (order512 ε x : ℝ))
-          ≤ 1 / (order512 ε x : ℝ) := by
-        apply one_div_le_one_div_of_le hordpos
-        calc (order512 ε x : ℝ) = 1 * (order512 ε x : ℝ) := by ring
-          _ ≤ (q : ℝ) * (order512 ε x : ℝ) :=
-              mul_le_mul_of_nonneg_right hle1 (le_of_lt hordpos)
+  by_cases hc : (11 / 20 + ε : ℝ) ≤ 0
+  · refine ⟨1, fun x hx q hq => ?_⟩
+    exfalso
+    have hY : length512 ε x ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos hx hc
+    have hY0 : 0 ≤ length512 ε x := Real.rpow_nonneg (by linarith) _
+    have h1 : length512 ε x ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ) ≤ 1 :=
+      Real.rpow_le_one hY0 hY (by norm_num)
+    have h2 : (length512 ε x ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ)) ^ (1 / 2 : ℝ) ≤ 1 :=
+      Real.rpow_le_one (Real.rpow_nonneg hY0 _) h1 (by norm_num)
+    have hQ : order512 ε x = 0 := by
+      unfold order512
+      rw [Nat.floor_eq_zero]
       linarith
-    unfold period512
-    exact Set.mem_Ioc.mpr ⟨by linarith, by linarith⟩
-  · push_neg at ha
-    refine ⟨1, ?_⟩
-    intro x hx q hq r hr
-    have hL1 : length512 ε x ≤ 1 := by
-      show x ^ (11 / 20 + ε) ≤ 1
-      exact Real.rpow_le_one_of_one_le_of_nonpos hx ha
-    have hnn : (0 : ℝ) ≤ length512 ε x := by
-      show (0 : ℝ) ≤ x ^ (11 / 20 + ε)
-      exact Real.rpow_nonneg (by linarith) _
-    have hord : order512 ε x = 0 := order512_eq_zero561 ε x hnn hL1
-    rw [hord] at hq
-    simp only [Finset.mem_Icc, Nat.zero_min] at hq
+    obtain ⟨a, b⟩ := Finset.mem_Icc.mp hq
+    have := b.trans (min_le_left _ _)
     omega
+  · have hc0 : (0 : ℝ) < 11 / 20 + ε := lt_of_not_ge hc
+    have hp1 : (0 : ℝ) < (11 / 20 + ε) * (1 / 16 - 1 / 10 ^ 5) :=
+      mul_pos hc0 (by norm_num)
+    have hp2 : (0 : ℝ) < (11 / 20 + ε) * (1 - (1 / 16 - 1 / 10 ^ 5)) :=
+      mul_pos hc0 (by norm_num)
+    have eA := (isLittleO_log_rpow_rpow_atTop (2 * D) hp1).def
+      (by norm_num : (0 : ℝ) < 1 / 8)
+    have eB := (isLittleO_log_rpow_rpow_atTop (4 * D) hc0).def
+      (by norm_num : (0 : ℝ) < 1 / 4)
+    have eC := (isLittleO_log_rpow_rpow_atTop (4 * D) hp2).def
+      (by norm_num : (0 : ℝ) < 1)
+    have eE := (tendsto_rpow_atTop hp1).eventually_ge_atTop 4
+    have e1 := Filter.eventually_ge_atTop (1 : ℝ)
+    have hall : ∀ᶠ x : ℝ in Filter.atTop,
+        ∀ q ∈ Finset.Icc 1 (min (order512 ε x) ⌊Real.log x ^ (2 * D)⌋₊),
+        ∀ r ∈ (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q),
+          Set.Icc ((r : ℝ) / q - Real.log x ^ (4 * D) / (q * length512 ε x))
+              ((r : ℝ) / q + Real.log x ^ (4 * D) / (q * length512 ε x)) ⊆
+            period512 ε x := by
+      filter_upwards [eA, eB, eC, eE, e1] with x hA hB hC hE hx1 q hq r hr
+      have hx0 : (0 : ℝ) ≤ x := by linarith
+      have hxp : (0 : ℝ) < x := by linarith
+      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg hx0 _)] at hA hB hC
+      have hA' := (le_abs_self _).trans hA
+      have hB' := (le_abs_self _).trans hB
+      have hC' := (le_abs_self _).trans hC
+      have hT : (length512 ε x ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ)) ^ (1 / 2 : ℝ) =
+          x ^ ((11 / 20 + ε) * (1 / 16 - 1 / 10 ^ 5) : ℝ) := by
+        unfold length512
+        rw [← Real.rpow_mul hx0, ← Real.rpow_mul hx0]
+        congr 1
+        ring
+      have hQ : order512 ε x = ⌊x ^ ((11 / 20 + ε) * (1 / 16 - 1 / 10 ^ 5) : ℝ) / 2⌋₊ := by
+        unfold order512
+        rw [hT]
+      have hYdef : length512 ε x = x ^ (11 / 20 + ε : ℝ) := rfl
+      have hYpos : 0 < length512 ε x := by rw [hYdef]; exact Real.rpow_pos_of_pos hxp _
+      have hTpos : 0 < x ^ ((11 / 20 + ε) * (1 / 16 - 1 / 10 ^ 5) : ℝ) :=
+        Real.rpow_pos_of_pos hxp _
+      have hVT : x ^ ((11 / 20 + ε) * (1 - (1 / 16 - 1 / 10 ^ 5)) : ℝ) *
+          x ^ ((11 / 20 + ε) * (1 / 16 - 1 / 10 ^ 5) : ℝ) = length512 ε x := by
+        rw [hYdef, ← Real.rpow_add hxp]
+        congr 1
+        ring
+      have hQle : (order512 ε x : ℝ) ≤ x ^ ((11 / 20 + ε) * (1 / 16 - 1 / 10 ^ 5) : ℝ) / 2 := by
+        rw [hQ]; exact Nat.floor_le (by positivity)
+      have hQlt : x ^ ((11 / 20 + ε) * (1 / 16 - 1 / 10 ^ 5) : ℝ) / 2 <
+          (order512 ε x : ℝ) + 1 := by
+        rw [hQ]; exact Nat.lt_floor_add_one _
+      obtain ⟨hq1, hqm⟩ := Finset.mem_Icc.mp hq
+      have hqP : (q : ℝ) ≤ Real.log x ^ (2 * D) :=
+        (Nat.le_floor_iff' (by omega)).mp (hqm.trans (min_le_right _ _))
+      obtain ⟨hrI, -⟩ := Finset.mem_filter.mp hr
+      obtain ⟨hr1, hrq⟩ := Finset.mem_Icc.mp hrI
+      have hq1' : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+      have hr1' : (1 : ℝ) ≤ r := by exact_mod_cast hr1
+      have hrq' : (r : ℝ) ≤ q := by exact_mod_cast hrq
+      have hW0 : 0 ≤ Real.log x ^ (4 * D) := Real.rpow_nonneg (Real.log_nonneg hx1) _
+      have hV0 : 0 ≤ x ^ ((11 / 20 + ε) * (1 - (1 / 16 - 1 / 10 ^ 5)) : ℝ) :=
+        Real.rpow_nonneg hx0 _
+      have hWQ : Real.log x ^ (4 * D) * (order512 ε x : ℝ) ≤ length512 ε x := by
+        have := mul_le_mul hC' hQle (Nat.cast_nonneg _) (by linarith)
+        nlinarith
+      intro t ht
+      obtain ⟨ht1, ht2⟩ := ht
+      unfold period512
+      exact arc_algebra561 r q (order512 ε x) (Real.log x ^ (4 * D)) (length512 ε x) t
+        hr1' hrq' hq1' (by linarith) (by rw [hYdef]; linarith) hWQ hYpos ht1 ht2
+    obtain ⟨X, hX⟩ := Filter.eventually_atTop.mp hall
+    exact ⟨X, hX⟩
+
+/-- Standard fact: two different reduced fractions have different cross products. -/
+private lemma farey_cross_ne561 (q₁ q₂ r₁ r₂ : ℕ) (hq₁ : 1 ≤ q₁)
+    (h₁ : Nat.Coprime r₁ q₁) (h₂ : Nat.Coprime r₂ q₂) (hne : (q₁, r₁) ≠ (q₂, r₂)) :
+    r₁ * q₂ ≠ r₂ * q₁ := by
+  intro h
+  have d₁ : q₁ ∣ q₂ := by
+    apply Nat.Coprime.dvd_of_dvd_mul_left h₁.symm
+    rw [h]
+    exact Dvd.intro_left _ rfl
+  have d₂ : q₂ ∣ q₁ := by
+    apply Nat.Coprime.dvd_of_dvd_mul_left h₂.symm
+    rw [← h]
+    exact Dvd.intro_left _ rfl
+  have hqq : q₁ = q₂ := Nat.dvd_antisymm d₁ d₂
+  subst hqq
+  have hrr : r₁ = r₂ := Nat.eq_of_mul_eq_mul_right (by omega) h
+  exact hne (by rw [hrr])
+
+/-- Farey separation: cross products differing by at least one put the centres at least
+`1/(q₁ q₂)` apart, which exceeds the sum of the two half widths. -/
+private lemma arc_half_sep561 (q₁ q₂ r₁ r₂ : ℕ) (hq₁ : 1 ≤ q₁) (hq₂ : 1 ≤ q₂)
+    (hlt : r₁ * q₂ + 1 ≤ r₂ * q₁) (L4 L2 Y : ℝ) (hL4 : 0 ≤ L4)
+    (hq₁L : (q₁ : ℝ) ≤ L2) (hq₂L : (q₂ : ℝ) ≤ L2) (hY : 0 < Y)
+    (hsmall : 2 * L4 * L2 < Y)
+    (h : (r₂ : ℝ) / q₂ - L4 / (q₂ * Y) ≤ (r₁ : ℝ) / q₁ + L4 / (q₁ * Y)) : False := by
+  have p₁ : (0 : ℝ) < q₁ := by exact_mod_cast hq₁
+  have p₂ : (0 : ℝ) < q₂ := by exact_mod_cast hq₂
+  have hP : (0 : ℝ) < q₁ * q₂ * Y := by positivity
+  have hm := mul_le_mul_of_nonneg_right h hP.le
+  have e₁ : ((r₂ : ℝ) / q₂ - L4 / (q₂ * Y)) * (q₁ * q₂ * Y) = r₂ * q₁ * Y - L4 * q₁ := by
+    field_simp
+  have e₂ : ((r₁ : ℝ) / q₁ + L4 / (q₁ * Y)) * (q₁ * q₂ * Y) = r₁ * q₂ * Y + L4 * q₂ := by
+    field_simp
+  rw [e₁, e₂] at hm
+  have hc : (r₁ : ℝ) * q₂ + 1 ≤ r₂ * q₁ := by exact_mod_cast hlt
+  have hcY := mul_le_mul_of_nonneg_right hc hY.le
+  have b₁ := mul_le_mul_of_nonneg_left hq₁L hL4
+  have b₂ := mul_le_mul_of_nonneg_left hq₂L hL4
+  nlinarith
 
 /-- LEAF. Separation step.  Two distinct arcs are disjoint.  Two different reduced
 fractions with moduli at most the Farey order differ by at least the reciprocal of the
@@ -386,78 +209,57 @@ theorem leaf561_arcs_pairwise_disjoint561 (ε D : ℝ) :
               ((r₁ : ℝ) / q₁ + Real.log x ^ (4 * D) / (q₁ * length512 ε x)))
             (Set.Icc ((r₂ : ℝ) / q₂ - Real.log x ^ (4 * D) / (q₂ * length512 ε x))
               ((r₂ : ℝ) / q₂ + Real.log x ^ (4 * D) / (q₂ * length512 ε x))) := by
-  by_cases ha : (0 : ℝ) < 11 / 20 + ε
-  · obtain ⟨X, hX⟩ := Filter.eventually_atTop.1
-      (eventually_log_small561 (11 / 20 + ε) ((1 : ℝ) / 16 - 1 / 10 ^ 5) D ha (by norm_num))
-    refine ⟨max X 2, ?_⟩
-    intro x hx q₁ hq₁ r₁ hr₁ q₂ hq₂ r₂ hr₂ hne
-    obtain ⟨hlog4, hu2, hlog2⟩ := hX x (le_trans (le_max_left _ _) hx)
-    have hxgt : (1 : ℝ) < x := lt_of_lt_of_le (by norm_num) (le_trans (le_max_right _ _) hx)
-    have hx1 : (1 : ℝ) ≤ x := le_of_lt hxgt
-    have hx0 : (0 : ℝ) < x := by linarith
-    have hLpos : 0 < length512 ε x := length512_pos561 hx0
-    have hq₁1 : 1 ≤ q₁ := (Finset.mem_Icc.mp hq₁).1
-    have hq₁o : q₁ ≤ order512 ε x := le_trans (Finset.mem_Icc.mp hq₁).2 (min_le_left _ _)
-    have hq₂1 : 1 ≤ q₂ := (Finset.mem_Icc.mp hq₂).1
-    have hq₂o : q₂ ≤ order512 ε x := le_trans (Finset.mem_Icc.mp hq₂).2 (min_le_left _ _)
-    have hq₁pos : (0 : ℝ) < q₁ := by exact_mod_cast hq₁1
-    have hq₂pos : (0 : ℝ) < q₂ := by exact_mod_cast hq₂1
-    have hr₁1 : 1 ≤ r₁ := (Finset.mem_Icc.mp (Finset.mem_filter.mp hr₁).1).1
-    have hr₁le : r₁ ≤ q₁ := (Finset.mem_Icc.mp (Finset.mem_filter.mp hr₁).1).2
-    have hr₂1 : 1 ≤ r₂ := (Finset.mem_Icc.mp (Finset.mem_filter.mp hr₂).1).1
-    have hr₂le : r₂ ≤ q₂ := (Finset.mem_Icc.mp (Finset.mem_filter.mp hr₂).1).2
-    have hcop₁ : Nat.Coprime r₁ q₁ := (Finset.mem_filter.mp hr₁).2
-    have hcop₂ : Nat.Coprime r₂ q₂ := (Finset.mem_filter.mp hr₂).2
-    have hsep := rational_separation561 q₁ q₂ r₁ r₂ hq₁1 hq₂1 hr₁le hr₂le hcop₁ hcop₂ hne
-    have hWsum := arc_widths_sum_lt561 ε D x hxgt ha hlog4 hu2 q₁ q₂ hq₁o hq₂o
-    have hsum : Real.log x ^ (4 * D) / (q₁ * length512 ε x)
-          + Real.log x ^ (4 * D) / (q₂ * length512 ε x)
-        < |(r₁ : ℝ) / q₁ - (r₂ : ℝ) / q₂| := by
-      have heq : Real.log x ^ (4 * D) / (q₁ * length512 ε x)
-            + Real.log x ^ (4 * D) / (q₂ * length512 ε x)
-          = Real.log x ^ (4 * D) / length512 ε x * ((q₁ : ℝ) + q₂) / ((q₁ : ℝ) * q₂) := by
-        field_simp
-        ring
-      rw [heq]
-      calc Real.log x ^ (4 * D) / length512 ε x * ((q₁ : ℝ) + q₂) / ((q₁ : ℝ) * q₂)
-          < 1 / ((q₁ : ℝ) * q₂) := by
-            rw [div_lt_div_iff₀ (by positivity) (by positivity)]
-            simpa using mul_lt_mul_of_pos_right hWsum
-              (mul_pos hq₁pos hq₂pos : (0 : ℝ) < (q₁ : ℝ) * q₂)
-        _ ≤ |(r₁ : ℝ) / q₁ - (r₂ : ℝ) / q₂| := hsep
-    rw [Set.disjoint_left]
-    intro s hs1 hs2
-    obtain ⟨ha1, ha2⟩ := hs1
-    obtain ⟨hb1, hb2⟩ := hs2
-    have h₁ : |s - (r₁ : ℝ) / q₁| ≤ Real.log x ^ (4 * D) / (q₁ * length512 ε x) := by
-      rw [abs_sub_le_iff]
-      constructor <;> linarith
-    have h₂ : |s - (r₂ : ℝ) / q₂| ≤ Real.log x ^ (4 * D) / (q₂ * length512 ε x) := by
-      rw [abs_sub_le_iff]
-      constructor <;> linarith
-    have htri : |(r₁ : ℝ) / q₁ - (r₂ : ℝ) / q₂|
-        ≤ Real.log x ^ (4 * D) / (q₁ * length512 ε x)
-          + Real.log x ^ (4 * D) / (q₂ * length512 ε x) := by
-      calc |(r₁ : ℝ) / q₁ - (r₂ : ℝ) / q₂|
-          = |((r₁ : ℝ) / q₁ - s) + (s - (r₂ : ℝ) / q₂)| := by ring_nf
-        _ ≤ |(r₁ : ℝ) / q₁ - s| + |s - (r₂ : ℝ) / q₂| := abs_add_le _ _
-        _ = |s - (r₁ : ℝ) / q₁| + |s - (r₂ : ℝ) / q₂| := by
-            rw [abs_sub_comm ((r₁ : ℝ) / q₁) s]
-        _ ≤ _ := by linarith
-    linarith
-  · push_neg at ha
-    refine ⟨1, ?_⟩
-    intro x hx q₁ hq₁ r₁ hr₁ q₂ hq₂ r₂ hr₂ hne
-    have hL1 : length512 ε x ≤ 1 := by
-      show x ^ (11 / 20 + ε) ≤ 1
-      exact Real.rpow_le_one_of_one_le_of_nonpos hx ha
-    have hnn : (0 : ℝ) ≤ length512 ε x := by
-      show (0 : ℝ) ≤ x ^ (11 / 20 + ε)
-      exact Real.rpow_nonneg (by linarith) _
-    have hord : order512 ε x = 0 := order512_eq_zero561 ε x hnn hL1
-    rw [hord] at hq₁
-    simp only [Finset.mem_Icc, Nat.zero_min] at hq₁
+  by_cases hc : 11 / 20 + ε ≤ 0
+  · refine ⟨1, fun x hx q₁ hq₁ => ?_⟩
+    exfalso
+    have hY1 : length512 ε x ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos hx hc
+    have hY0 : 0 ≤ length512 ε x := Real.rpow_nonneg (by linarith) _
+    have hA : length512 ε x ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ) ≤ 1 :=
+      Real.rpow_le_one hY0 hY1 (by norm_num)
+    have hA0 : 0 ≤ length512 ε x ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ) := Real.rpow_nonneg hY0 _
+    have hB : (length512 ε x ^ (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ)) ^ (1 / 2 : ℝ) ≤ 1 :=
+      Real.rpow_le_one hA0 hA (by norm_num)
+    have hQ : order512 ε x = 0 := by
+      unfold order512
+      rw [Nat.floor_eq_zero]
+      linarith
+    have h := (Finset.mem_Icc.mp hq₁)
+    have h2 := le_trans h.2 (min_le_left _ _)
+    rw [hQ] at h2
     omega
+  · have hcpos : 0 < 11 / 20 + ε := lt_of_not_ge hc
+    have hlo := (isLittleO_log_rpow_rpow_atTop (4 * D + 2 * D) hcpos).def
+      (show (0 : ℝ) < 1 / 4 by norm_num)
+    obtain ⟨X₀, hX₀⟩ := Filter.eventually_atTop.mp hlo
+    refine ⟨max 2 X₀, fun x hx q₁ hq₁ r₁ hr₁ q₂ hq₂ r₂ hr₂ hne => ?_⟩
+    have hx2 : (2 : ℝ) ≤ x := le_trans (le_max_left _ _) hx
+    have hxX : X₀ ≤ x := le_trans (le_max_right _ _) hx
+    have hlog : 0 < Real.log x := Real.log_pos (by linarith)
+    have hYpos : 0 < length512 ε x := Real.rpow_pos_of_pos (by linarith) _
+    have hYeq : length512 ε x = x ^ (11 / 20 + ε) := rfl
+    have hL4 : 0 ≤ Real.log x ^ (4 * D) := Real.rpow_nonneg hlog.le _
+    have hL2 : 0 ≤ Real.log x ^ (2 * D) := Real.rpow_nonneg hlog.le _
+    have hs := hX₀ x hxX
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, Real.rpow_add hlog, ← hYeq,
+      abs_of_nonneg (mul_nonneg hL4 hL2), abs_of_pos hYpos] at hs
+    have hsmall : 2 * Real.log x ^ (4 * D) * Real.log x ^ (2 * D) < length512 ε x := by
+      nlinarith
+    have hq₁' := Finset.mem_Icc.mp hq₁
+    have hq₂' := Finset.mem_Icc.mp hq₂
+    have hr₁' := (Finset.mem_filter.mp hr₁).2
+    have hr₂' := (Finset.mem_filter.mp hr₂).2
+    have hq₁L : (q₁ : ℝ) ≤ Real.log x ^ (2 * D) :=
+      le_trans (Nat.cast_le.mpr (le_trans hq₁'.2 (min_le_right _ _))) (Nat.floor_le hL2)
+    have hq₂L : (q₂ : ℝ) ≤ Real.log x ^ (2 * D) :=
+      le_trans (Nat.cast_le.mpr (le_trans hq₂'.2 (min_le_right _ _))) (Nat.floor_le hL2)
+    have hcross := farey_cross_ne561 q₁ q₂ r₁ r₂ hq₁'.1 hr₁' hr₂' hne
+    rw [Set.disjoint_left]
+    intro t ht₁ ht₂
+    rcases Nat.lt_or_gt_of_ne hcross with hlt | hgt
+    · exact arc_half_sep561 q₁ q₂ r₁ r₂ hq₁'.1 hq₂'.1 hlt _ _ _ hL4 hq₁L hq₂L hYpos hsmall
+        (le_trans ht₂.1 ht₁.2)
+    · exact arc_half_sep561 q₂ q₁ r₂ r₁ hq₂'.1 hq₁'.1 hgt _ _ _ hL4 hq₂L hq₁L hYpos hsmall
+        (le_trans ht₁.1 ht₂.2)
 
 /-- LEAF. Union additivity step.  For a continuous integrand and a two level family of
 closed arcs that is pairwise disjoint, the integral over the union is the iterated sum of
@@ -472,32 +274,36 @@ theorem leaf561_union_integral561 (f : ℝ → ℂ) (hf : Continuous f)
         (Set.Icc (c q₂ r₂ - w q₂ r₂) (c q₂ r₂ + w q₂ r₂))) :
     (∫ t in (⋃ q ∈ S, ⋃ r ∈ T q, Set.Icc (c q r - w q r) (c q r + w q r)), f t) =
       ∑ q ∈ S, ∑ r ∈ T q, ∫ t in Set.Icc (c q r - w q r) (c q r + w q r), f t := by
-  classical
-  have hint : ∀ q r, IntegrableOn f (Set.Icc (c q r - w q r) (c q r + w q r)) :=
-    fun q r => hf.integrableOn_Icc
+  have hint : ∀ q r, IntegrableOn f (Set.Icc (c q r - w q r) (c q r + w q r)) volume :=
+    fun q r => hf.continuousOn.integrableOn_Icc
   have hinner : ∀ q ∈ S,
       (∫ t in (⋃ r ∈ T q, Set.Icc (c q r - w q r) (c q r + w q r)), f t) =
         ∑ r ∈ T q, ∫ t in Set.Icc (c q r - w q r) (c q r + w q r), f t := by
     intro q hq
-    refine integral_biUnion_finset (T q) (fun r _ => measurableSet_Icc) ?_
+    refine MeasureTheory.integral_biUnion_finset (T q) (fun r _ => measurableSet_Icc) ?_
       (fun r _ => hint q r)
     intro r₁ hr₁ r₂ hr₂ hne
     exact hdisj q hq r₁ hr₁ q hq r₂ hr₂ (fun h => hne (Prod.mk.inj h).2)
-  have hdisj' : Set.Pairwise (↑S) (fun q₁ q₂ =>
-      Disjoint (⋃ r ∈ T q₁, Set.Icc (c q₁ r - w q₁ r) (c q₁ r + w q₁ r))
-        (⋃ r ∈ T q₂, Set.Icc (c q₂ r - w q₂ r) (c q₂ r + w q₂ r))) := by
-    intro q₁ hq₁ q₂ hq₂ hne
-    rw [Set.disjoint_left]
-    rintro s hs1 hs2
-    simp only [Set.mem_iUnion] at hs1 hs2
-    obtain ⟨r₁, hr₁, hs1⟩ := hs1
-    obtain ⟨r₂, hr₂, hs2⟩ := hs2
-    exact Set.disjoint_left.mp
-      (hdisj q₁ hq₁ r₁ hr₁ q₂ hq₂ r₂ hr₂ (fun h => hne (Prod.mk.inj h).1)) hs1 hs2
-  rw [integral_biUnion_finset S
-    (fun q _ => Finset.measurableSet_biUnion _ (fun r _ => measurableSet_Icc))
-    hdisj' (fun q _ => integrableOn_finset_iUnion.2 (fun r _ => hint q r))]
-  exact Finset.sum_congr rfl (fun q hq => hinner q hq)
+  have houter :
+      (∫ t in (⋃ q ∈ S, ⋃ r ∈ T q, Set.Icc (c q r - w q r) (c q r + w q r)), f t) =
+        ∑ q ∈ S, ∫ t in (⋃ r ∈ T q, Set.Icc (c q r - w q r) (c q r + w q r)), f t := by
+    refine MeasureTheory.integral_biUnion_finset S
+      (s := fun q => ⋃ r ∈ T q, Set.Icc (c q r - w q r) (c q r + w q r))
+      (fun q _ => Finset.measurableSet_biUnion _ (fun r _ => measurableSet_Icc)) ?_ ?_
+    · intro q₁ hq₁ q₂ hq₂ hne
+      show Disjoint (⋃ r ∈ T q₁, Set.Icc (c q₁ r - w q₁ r) (c q₁ r + w q₁ r))
+        (⋃ r ∈ T q₂, Set.Icc (c q₂ r - w q₂ r) (c q₂ r + w q₂ r))
+      rw [Set.disjoint_left]
+      intro t h1 h2
+      simp only [Set.mem_iUnion] at h1 h2
+      obtain ⟨r₁, hr₁, h1⟩ := h1
+      obtain ⟨r₂, hr₂, h2⟩ := h2
+      exact Set.disjoint_left.mp
+        (hdisj q₁ hq₁ r₁ hr₁ q₂ hq₂ r₂ hr₂ (fun h => hne (Prod.mk.inj h).1)) h1 h2
+    · intro q _
+      exact (MeasureTheory.integrableOn_finset_iUnion).mpr (fun r _ => hint q r)
+  rw [houter]
+  exact Finset.sum_congr rfl hinner
 
 /-- A single arc: the set integral over the closed interval equals the integral in the
 local variable of the arc, with the centre moved into the integrand. -/
