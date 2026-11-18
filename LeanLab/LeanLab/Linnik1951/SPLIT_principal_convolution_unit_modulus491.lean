@@ -20,6 +20,7 @@ the identity to name the second endpoint, and folds both into the printed size.
 No analytic input is invented here, and no declaration is introduced.
 -/
 import LeanLab.Linnik1951.SPLIT_principal_convolution491
+import LeanLab.Linnik1951.PrincipalArc491
 
 namespace LeanLab.Linnik1951
 
