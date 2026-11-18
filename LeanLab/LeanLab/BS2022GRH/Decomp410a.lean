@@ -16,6 +16,28 @@ Source https://doi.org/10.1090/S0025-5718-1976-0457374-X. -/
 theorem rh_reciprocal_upper (hRH : RiemannHypothesis) (x : ℝ) (hx : 64 ≤ x) :
     (∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p) ≤
       log (log x) + DecompC169c.mertensConstant + (3 * log x + 4) / (8 * π * √x) := by
+  have h₁ : 0 < x := by linarith
+  have h₂ : 1 < x := by linarith
+  have h₃ : 0 < Real.log x := Real.log_pos (by linarith)
+  have h₄ : Real.log x ≥ Real.log 64 := Real.log_le_log (by linarith) hx
+  have h₅ : 0 < Real.sqrt x := Real.sqrt_pos (by linarith)
+  have h₆ : 0 < 8 * Real.pi * Real.sqrt x := by positivity
+  -- Abel summation reduces the prime reciprocal sum to Chebyshev's θ:
+  --   ∑_{p≤x} 1/p = θ(x)/(x log x) + ∫₂^x θ(t)·(log t + 1)/(t² log² t) dt .
+  -- Under RH, Schoenfeld 1976 Theorem 10 gives |θ(t) − t| ≤ √t log² t / (8π) for t ≥ 599,
+  -- and Corollary 2 (display 6.21) gives exactly the stated error (3 log x + 4)/(8π√x)
+  -- for x ≥ 13.5. Neither the θ bound nor its reciprocal corollary exists in Mathlib
+  -- v4.35.0 (NumberTheory.Chebyshev and NumberTheory.SumPrimeReciprocals are elementary;
+  -- LSeries.RiemannZeta states RiemannHypothesis but derives no quantitative consequence
+  -- from it; grep: RiemannHypothesis occurs only at its definition) nor in this project
+  -- (PaperInputs148.Lemma1J is CITED; ThetaInputs224 carries only unconditional ε·t/log t
+  -- bounds; DecompC169c.reciprocal_error_le_twelve gives |error| ≤ 12/log x, which is far
+  -- too weak to imply the √x rate for any x ≥ 64: 12/log 64 ≈ 2.88 vs 0.082).
+  -- The available hypotheses therefore cannot close the goal; the leaf is OUT OF REACH
+  -- in this session without Schoenfeld's explicit RH prime-count bound.
+  have h₇ : (∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p) ≤
+      log (log x) + DecompC169c.mertensConstant + (3 * log x + 4) / (8 * π * √x) := by
+    sorry
   sorry
 
 /-- The lower half of Schoenfeld Corollary 3 p. 341 display 6.23.
