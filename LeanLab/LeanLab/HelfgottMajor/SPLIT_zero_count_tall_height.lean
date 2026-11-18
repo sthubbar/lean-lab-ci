@@ -34,6 +34,56 @@ The assembly `zero_count_tall_height_split` is exactly that four way case split.
 namespace LeanLab.HelfgottMajor.Decomp388a
 open Real DecompJ1153
 
+/-- The set cut out by the indicator inside `zeroWeight` is `stripZeros`, the strip zero set
+truncated at the height `t`. -/
+private theorem zeroWeight_set_eq (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ t}
+      = ZeroCount1623.stripZeros χ t := by
+  ext ρ
+  simp [ZeroCount1623.stripZeros]
+
+/-- `zeroCount` is the multiplicity weighted finite sum over the strip zeros at height `t`.
+The strip zero set is finite, so the `tsum` defining `zeroCount` collapses to a finite sum over
+its `toFinset`, and on that set the indicator weight is exactly the analytic multiplicity. -/
+private theorem zeroCount_eq_finset (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    zeroCount χ t = ∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ t).toFinset,
+      (ZeroCount1623.mult χ ρ : ℝ) := by
+  classical
+  have hset := zeroWeight_set_eq q χ t
+  have hfin : (ZeroCount1623.stripZeros χ t).Finite := ZeroCount1623.stripZeros_finite χ t
+  have hzero : ∀ ρ : ℂ, ρ ∉ (ZeroCount1623.stripZeros χ t) → zeroWeight χ t ρ = 0 := by
+    intro ρ hρ
+    have h' : ρ ∉ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧
+        ρ.re < 1 ∧ |ρ.im| ≤ t} := by rw [hset]; exact hρ
+    simp [zeroWeight, h']
+  have houtside : ∀ ρ : ℂ, ρ ∉ hfin.toFinset → zeroWeight χ t ρ = 0 := by
+    intro ρ hρ
+    exact hzero ρ (fun hc => hρ (hfin.mem_toFinset.mpr hc))
+  have hinside : ∀ ρ : ℂ, ρ ∈ hfin.toFinset → zeroWeight χ t ρ = (ZeroCount1623.mult χ ρ : ℝ) := by
+    intro ρ hρ
+    have hc : ρ ∈ ZeroCount1623.stripZeros χ t := hfin.mem_toFinset.mp hρ
+    simp [zeroWeight, ZeroCount1623.mult, hset, hc]
+  unfold zeroCount
+  rw [tsum_eq_sum (f := zeroWeight χ t) houtside]
+  exact Finset.sum_congr rfl (fun ρ hρ => hinside ρ hρ)
+
+/-- The `tsum` over `ZeroCount1623.ZeroIdx` is the value of `zeroCount`: both are the finite
+sum of the multiplicities over the strip zeros at height `t`. -/
+private theorem zeroCount_eq_tsum (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    zeroCount χ t = ∑' ρ : ZeroCount1623.ZeroIdx χ t, (ZeroCount1623.mult χ ρ.val : ℝ) := by
+  rw [zeroCount_eq_finset q χ t,
+    ← ZeroCount1623.tsum_zeroIdx χ t (fun z => (ZeroCount1623.mult χ z : ℝ))]
+
+/-- The explicit upper count of the strip zeros at height `t`, in the form produced by the
+analytic input `ZeroCount1623.strip_count`: the multiplicity weighted count of the strip zeros
+with `|im| ≤ t` is at most the Stirling main term plus half a logarithm plus `17.7`. -/
+private theorem zeroCount_le_strip_count (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hχ : χ.IsPrimitive) (t : ℝ) (ht : 1 ≤ t) :
+    zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
+      0.5 * log (q * t) + 17.7 := by
+  rw [zeroCount_eq_tsum q χ t]
+  exact ZeroCount1623.strip_count χ hχ t ht
+
 /-- LEAF: Very low height, `1 ≤ t ≤ 2` and `2 * π * exp 1 ≤ q * t`. The range bound forces
 `q ≥ π * exp 1`, so the conductor is bounded away from `1` but the height is not: only zeros
 with `|Im ρ| ≤ 2` are counted, with total analytic multiplicity at most a fixed multiple of
@@ -56,7 +106,7 @@ theorem zero_count_tall_band_low (q : ℕ) [NeZero q] (χ : DirichletCharacter �
     (hqt : 2 * π * exp 1 ≤ q * t) (hhi : q * t ≤ 2 * π * exp 1 * exp 1) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  exact zeroCount_le_strip_count q χ hχ t ht
 
 /-- LEAF: Middle bounded band, `2 ≤ t` and
 `2 * π * exp 1 * exp 1 ≤ q * t ≤ 2 * π * exp 1 * exp 1 * exp 1`. The ratio inside the
@@ -70,7 +120,7 @@ theorem zero_count_tall_band_mid (q : ℕ) [NeZero q] (χ : DirichletCharacter �
     (hhi : q * t ≤ 2 * π * exp 1 * exp 1 * exp 1) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  exact zeroCount_le_strip_count q χ hχ t ht
 
 /-- LEAF: Asymptotic band, `2 ≤ t` and `2 * π * exp 1 * exp 1 * exp 1 ≤ q * t`. The only
 leaf carrying the analytic content of the tall range: the argument principle on the rectangle
@@ -84,7 +134,7 @@ theorem zero_count_tall_band_high (q : ℕ) [NeZero q] (χ : DirichletCharacter 
     (hlo : 2 * π * exp 1 * exp 1 * exp 1 ≤ q * t) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  exact zeroCount_le_strip_count q χ hχ t ht
 
 /-- The explicit upper count at tall heights, assembled from the four ranges. Below height `2`
 the count is covered by the low height leaf; above it, the size of
