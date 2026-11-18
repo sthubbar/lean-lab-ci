@@ -50,7 +50,56 @@ theorem leaf_moment_nu_low (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               (fun n : ℕ => n ≤ N),
             (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
             ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := by
-  sorry
+  classical
+  -- Use the full-window bound from SPLIT_lemma7's leaf_moment_nu
+  obtain ⟨δ₀, hδ₀, hδ₀'⟩ := leaf_moment_nu γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, hκ₀'⟩ := hδ₀' δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨B, hB, N₀, hN⟩ := hκ₀' κ hκ hκsmall
+  refine ⟨B, hB, N₀, fun N hN_le => ?_⟩
+  
+  -- Full-window bound for this N
+  have hfull : (∑ n ∈ ((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)),
+    (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
+    ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := hN N hN_le
+  
+  -- The lower-half filter set is a subset of the full window filter set
+  have hsub : (((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)).filter
+      (fun n : ℕ => n ≤ N))
+    ⊆ ((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)) := by
+    apply Finset.filter_subset
+  
+  -- Every summand is a real square, hence nonnegative (for all n : ℕ)
+  have hnonneg : ∀ (n : ℕ), 0 ≤ (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2 := by
+    intro n
+    exact sq_nonneg _
+  
+  -- Sum monotonicity over the subset
+  have hsum : (∑ n ∈ (((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)).filter
+      (fun n : ℕ => n ≤ N)),
+    (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
+    ≤ (∑ n ∈ ((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)),
+    (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2) := by
+    apply Finset.sum_le_sum_of_subset_of_nonneg hsub
+    intro n hn hns
+    exact hnonneg n
+  
+  -- Chain with the full-window bound
+  calc
+    (∑ n ∈ (((Finset.range (2 * N + 1)).filter
+        (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)).filter
+        (fun n : ℕ => n ≤ N)),
+      (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
+    ≤ (∑ n ∈ ((Finset.range (2 * N + 1)).filter
+        (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)),
+      (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2) := hsum
+    _ ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := hfull
 
 /-- LEAF: the upper half `N < n` of the same index range of the same second
 moment of Lemma 7, over `F γ N / 2 < F γ n <= F γ N`, `n <= 2N + 1`: the squared
@@ -69,7 +118,56 @@ theorem leaf_moment_nu_high (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               (fun n : ℕ => ¬ n ≤ N),
             (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
             ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := by
-  sorry
+  classical
+  -- Use the full-window bound from SPLIT_lemma7's leaf_moment_nu
+  obtain ⟨δ₀, hδ₀, hδ₀'⟩ := leaf_moment_nu γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, hκ₀'⟩ := hδ₀' δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨B, hB, N₀, hN⟩ := hκ₀' κ hκ hκsmall
+  refine ⟨B, hB, N₀, fun N hN_le => ?_⟩
+  
+  -- Full-window bound for this N
+  have hfull : (∑ n ∈ ((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)),
+    (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
+    ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := hN N hN_le
+  
+  -- The upper-half filter set is a subset of the full window filter set
+  have hsub : (((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)).filter
+      (fun n : ℕ => ¬ n ≤ N))
+    ⊆ ((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)) := by
+    apply Finset.filter_subset
+  
+  -- Every summand is a real square, hence nonnegative (for all n : ℕ)
+  have hnonneg : ∀ (n : ℕ), 0 ≤ (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2 := by
+    intro n
+    exact sq_nonneg _
+  
+  -- Sum monotonicity over the subset
+  have hsum : (∑ n ∈ (((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)).filter
+      (fun n : ℕ => ¬ n ≤ N)),
+    (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
+    ≤ (∑ n ∈ ((Finset.range (2 * N + 1)).filter
+      (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)),
+    (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2) := by
+    apply Finset.sum_le_sum_of_subset_of_nonneg hsub
+    intro n hn hns
+    exact hnonneg n
+  
+  -- Chain with the full-window bound
+  calc
+    (∑ n ∈ (((Finset.range (2 * N + 1)).filter
+        (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)).filter
+        (fun n : ℕ => ¬ n ≤ N)),
+      (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2)
+    ≤ (∑ n ∈ ((Finset.range (2 * N + 1)).filter
+        (fun n : ℕ => F γ N / 2 < F γ n ∧ F γ n ≤ F γ N)),
+      (F γ N / 2 - (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re) ^ 2) := hsum
+    _ ≤ B * N * F γ N ^ 2 * calE γ κ N ^ (-(17 / 60 : ℝ)) := hfull
 
 /-! ### Assembly -/
 

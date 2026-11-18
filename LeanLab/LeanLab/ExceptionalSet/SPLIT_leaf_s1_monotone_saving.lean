@@ -46,15 +46,29 @@ point `2`, so the sum has norm `1` and the right side is `B`; the linear phase
 `f x = x * N ^ (-θ)` satisfies every hypothesis with `k = 3` and `δ = 1 / 3`, so no leaf has
 hypotheses that cannot hold.
 
+Update 2026-11-18, cloud PROVE sprint 42: leaves 1 and 2 are now proved, from
+`S1Saving.s1_saving_core` of `LeanLab.ExceptionalSet.S1FirstDerivativeSaving1539`.  The
+decreasing case is the increasing case for `-f`, whose sum is the complex conjugate; that
+symmetry is supplied by the helper file and was not available when the split was written.
+
 AI wrote the Lean code.  Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.SPLIT_leaf_s1_case
+import LeanLab.ExceptionalSet.S1FirstDerivativeSaving1539
 
 namespace LeanLab.ExceptionalSet.U1539.KaracubaSplit
 
 open LeanLab.ExceptionalSet.U1539
 
 /-! ### Leaves -/
+
+/-- The lab character `eC` is the character `eK` of the Kusmin Landau port. -/
+private lemma h_eC_eq_eK (x : ℝ) :
+    eC x = LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK x := by
+  unfold eC LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK
+  congr 1
+  push_cast
+  ring
 
 /-- LEAF. The increasing case: the target with the disjunction on the sign of `f'` replaced
 by its first disjunct, `0 < f'` on the whole of `[N, 2N]`.  Every other hypothesis is the
@@ -75,7 +89,17 @@ theorem leaf_s1_saving_sign_pos :
           |iteratedDeriv 1 f x / (1 : ℕ).factorial| ≤ (N : ℝ) ^ (-(Θ * (1 : ℕ)))) →
         (∀ x ∈ Set.Icc (N : ℝ) (2 * N), 0 < iteratedDeriv 1 f x) →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  obtain ⟨B, c, N₀, hB, hc, hN₀, h⟩ :=
+    S1Saving.s1_saving_core θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  refine ⟨B, c, N₀, hB, hc, hN₀, ?_⟩
+  intro N hN f k hk hsm hder hδk hf' hpos
+  have key := h N hN f k hk hsm hder hδk (fun x hx => by
+    have h1 := hf' x hx
+    have h2 := hpos x hx
+    simp only [iteratedDeriv_one, Nat.factorial_one, Nat.cast_one, div_one, mul_one] at h1 h2
+    rwa [abs_of_pos h2] at h1)
+  simpa only [h_eC_eq_eK] using key
 
 /-- LEAF. The decreasing case: the target with the disjunction on the sign of `f'` replaced
 by its second disjunct, `f' < 0` on the whole of `[N, 2N]`.  As in the increasing case every
@@ -96,7 +120,31 @@ theorem leaf_s1_saving_sign_neg :
           |iteratedDeriv 1 f x / (1 : ℕ).factorial| ≤ (N : ℝ) ^ (-(Θ * (1 : ℕ)))) →
         (∀ x ∈ Set.Icc (N : ℝ) (2 * N), iteratedDeriv 1 f x < 0) →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  obtain ⟨B, c, N₀, hB, hc, hN₀, h⟩ :=
+    S1Saving.s1_saving_core θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  refine ⟨B, c, N₀, hB, hc, hN₀, ?_⟩
+  intro N hN f k hk hsm hder hδk hf' hneg
+  obtain ⟨U, hU, hsub, hcd⟩ := hsm
+  have key := h N hN (fun x => -(f x)) k hk ⟨U, hU, hsub, hcd.neg⟩
+    (fun x hx => by
+      rw [iteratedDeriv_fun_neg, neg_div, abs_neg]
+      exact hder x hx) hδk
+    (fun x hx => by
+      have h1 := hf' x hx
+      have h2 := hneg x hx
+      simp only [Nat.factorial_one, Nat.cast_one, div_one, mul_one] at h1
+      rw [abs_of_neg h2] at h1
+      rw [← iteratedDeriv_one, iteratedDeriv_fun_neg]
+      exact h1)
+  have hconj : ∑ n ∈ Finset.Ioc N (2 * N),
+        LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK (-(f n)) =
+      (starRingEnd ℂ) (∑ n ∈ Finset.Ioc N (2 * N), eC (f n)) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun n _ => ?_)
+    rw [LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK_neg, h_eC_eq_eK]
+  rw [hconj, Complex.norm_conj] at key
+  exact key
 
 /-- LEAF. The comparison that lets the two cases share one pair of constants: for `N ≥ 1`,
 `k ≥ 1` and `0 < c ≤ c'` the smaller gain gives the larger exponent, so that
