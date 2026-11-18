@@ -58,6 +58,21 @@ theorem leaf_section4Block_mean_value_negative_large_lower_t
             C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
   sorry
 
+/-- The upper half of an ordered interval is bounded by the whole interval when the
+integrand is nonnegative. Additivity at the split point gives the comparison. -/
+private theorem upper_half_le_whole {f : ℝ → ℝ} {L T U : ℝ}
+    (hLT : L ≤ T) (hTU : T ≤ U)
+    (h₁ : IntervalIntegrable f volume L T)
+    (h₂ : IntervalIntegrable f volume T U)
+    (hpos : ∀ t, 0 ≤ f t) :
+    (∫ t in T..U, f t) ≤ ∫ t in L..U, f t := by
+  have hadd := intervalIntegral.integral_add_adjacent_intervals h₁ h₂
+  have n₁ : 0 ≤ ∫ t in L..T, f t :=
+    intervalIntegral.integral_nonneg_of_forall hLT (fun t => hpos t)
+  have n₂ : 0 ≤ ∫ t in T..U, f t :=
+    intervalIntegral.integral_nonneg_of_forall hTU (fun t => hpos t)
+  linarith
+
 /-- LEAF 2 of 2. The mean value at the negative height over the upper half of the
 height interval, from the geometric midpoint `x ^ ((0.45 - 2 * eps / 3) / 2)` up
 to the right endpoint `x ^ (0.45 - 2 * eps / 3)`. As leaf 1, over the other half;
@@ -80,6 +95,12 @@ theorem leaf_section4Block_mean_value_negative_large_upper_t
                 (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
                   (k : ℂ) ^ Thm4.half (-t)‖) ≤
             C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
+  obtain ⟨η₀, hη₀, H⟩ := h4 B
+  refine ⟨min η₀ (1 / 200), lt_min hη₀ (by norm_num), ?_⟩
+  intro ε hε hεη m n hm0 hn0 hgrp a b ha hb A hA
+  have hthm : Thm4.Theorem4 ε B :=
+    H ε hε (hεη.trans_le (min_le_left _ _))
+  have hfull := hthm
   sorry
 
 /-- The integrand of the block mean value is continuous in the height variable.
