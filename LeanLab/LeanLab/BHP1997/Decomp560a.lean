@@ -282,6 +282,278 @@ theorem gamma_ratio_left_edge {Q : ℝ} (hQ : 0 ≤ Q) {s : ℂ} (hs : s.re = -(
     ring
   nlinarith [norm_nonneg w, norm_nonneg ((Q : ℂ) + 1 + s)]
 
+/-- Supporting line of the convex function r times arctan r at the point tau.
+The line touches the graph at r equal to tau. Auxiliary to the tangent multiplier.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem arctan_supporting_line (τ r : ℝ) :
+    -(τ ^ 2 / (1 + τ ^ 2)) + (Real.arctan τ + τ / (1 + τ ^ 2)) * r ≤ r * Real.arctan r := by
+  set β : ℝ := Real.arctan τ + τ / (1 + τ ^ 2) with hβ
+  have hm : ∀ x : ℝ, HasDerivAt (fun x : ℝ => Real.arctan x + x / (1 + x ^ 2))
+      (2 / (1 + x ^ 2) ^ 2) x := by
+    intro x
+    have h1 := Real.hasDerivAt_arctan x
+    have hd : HasDerivAt (fun x : ℝ => 1 + x ^ 2) (2 * x) x := by
+      simpa using ((hasDerivAt_pow 2 x).const_add 1)
+    have h2 := (hasDerivAt_id' x).div hd (by positivity)
+    convert h1.add h2 using 1
+    field_simp
+    ring
+  have hmono : Monotone (fun x : ℝ => Real.arctan x + x / (1 + x ^ 2)) :=
+    monotone_of_deriv_nonneg (fun x => (hm x).differentiableAt)
+      (fun x => by rw [(hm x).deriv]; positivity)
+  have hk : ∀ x : ℝ, HasDerivAt (fun x : ℝ => x * Real.arctan x - β * x)
+      (Real.arctan x + x / (1 + x ^ 2) - β) x := by
+    intro x
+    have h := ((hasDerivAt_id' x).mul (Real.hasDerivAt_arctan x)).sub
+      ((hasDerivAt_id' x).const_mul β)
+    convert h using 1
+    ring
+  have hkd : Differentiable ℝ (fun x : ℝ => x * Real.arctan x - β * x) :=
+    fun x => (hk x).differentiableAt
+  have key : τ * Real.arctan τ - β * τ ≤ r * Real.arctan r - β * r := by
+    rcases le_total τ r with h | h
+    · have hmo : MonotoneOn (fun x : ℝ => x * Real.arctan x - β * x) (Ici τ) := by
+        apply monotoneOn_of_deriv_nonneg (convex_Ici τ) hkd.continuous.continuousOn
+          hkd.differentiableOn
+        intro x hx
+        rw [interior_Ici] at hx
+        rw [(hk x).deriv]
+        have := hmono hx.le
+        simp only at this
+        linarith
+      exact hmo (mem_Ici.mpr le_rfl) h h
+    · have hmo : AntitoneOn (fun x : ℝ => x * Real.arctan x - β * x) (Iic τ) := by
+        apply antitoneOn_of_deriv_nonpos (convex_Iic τ) hkd.continuous.continuousOn
+          hkd.differentiableOn
+        intro x hx
+        rw [interior_Iic] at hx
+        rw [(hk x).deriv]
+        have := hmono hx.le
+        simp only at this
+        linarith
+      exact hmo h (mem_Iic.mpr le_rfl) h
+  have he : τ * Real.arctan τ - β * τ = -(τ ^ 2 / (1 + τ ^ 2)) := by
+    rw [hβ]
+    field_simp
+    ring
+  linarith
+
+/-- Norm of a complex power of half a point in the right half plane, with the
+argument written as an arctangent. Auxiliary to the tangent multiplier.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem cpow_half_norm {W : ℂ} (hW : 0 < W.re) (w : ℂ) :
+    ‖(W / 2) ^ w‖ = (‖W‖ / 2) ^ w.re * Real.exp (-(w.im * Real.arctan (W.im / W.re))) := by
+  have hne : W / 2 ≠ 0 := by
+    intro h
+    have hh := congrArg Complex.re h
+    simp at hh
+    linarith
+  have harg : Complex.arg (W / 2) = Real.arctan (W.im / W.re) := by
+    have h1 : Complex.arg (W / 2) = Complex.arg W := by
+      rw [show W / 2 = ((1 / 2 : ℝ) : ℂ) * W by push_cast; ring]
+      exact Complex.arg_real_mul W (by norm_num)
+    have h2 : |Complex.arg W| < Real.pi / 2 :=
+      Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hW)
+    rw [h1, ← Complex.tan_arg, Real.arctan_tan (abs_lt.mp h2).1 (abs_lt.mp h2).2]
+  rw [Complex.norm_cpow_of_ne_zero hne, harg, Real.exp_neg, div_eq_mul_inv, norm_div,
+    mul_comm w.im]
+  simp
+
+/-- Phragmen Lindelof on the strip of real part between minus one half and one half
+for functions of linear exponential growth, placed early for the tangent bound.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem strip_maximum_of_exp_growth {f : ℂ → ℂ} {C B M : ℝ}
+    (hf : DiffContOnCl ℂ f (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2)))
+    (hC : 0 < C) (hB : 0 < B)
+    (hg : ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re → s.re ≤ 1 / 2 →
+      ‖f s‖ ≤ C * Real.exp (B * |s.im|))
+    (hl : ∀ s : ℂ, s.re = -(1 / 2 : ℝ) → ‖f s‖ ≤ M)
+    (hr : ∀ s : ℂ, s.re = 1 / 2 → ‖f s‖ ≤ M)
+    {s : ℂ} (hsl : -(1 / 2 : ℝ) ≤ s.re) (hsu : s.re ≤ 1 / 2) :
+    ‖f s‖ ≤ M := by
+  have he : ∀ᶠ x : ℝ in atTop, x ≤ Real.exp ((Real.pi / 2) * x) := by
+    have hh := (isLittleO_rpow_exp_pos_mul_atTop (1 : ℝ) Real.pi_div_two_pos).bound (by norm_num : (0 : ℝ) < 1)
+    filter_upwards [hh] with x hx
+    simp only [Real.rpow_one, Real.norm_eq_abs, Real.abs_exp, one_mul] at hx
+    exact (le_abs_self x).trans hx
+  have hb : ∃ c < Real.pi / (1 / 2 - -(1 / 2 : ℝ)), ∃ D : ℝ,
+      f =O[comap (_root_.abs ∘ Complex.im) atTop ⊓
+        𝓟 (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2))]
+          fun z => Real.exp (D * Real.exp (c * |z.im|)) := by
+    refine ⟨Real.pi / 2, by norm_num; linarith [Real.pi_pos], B,
+      Asymptotics.IsBigO.of_bound C ?_⟩
+    have he' : ∀ᶠ z : ℂ in comap (_root_.abs ∘ Complex.im) atTop,
+        |z.im| ≤ Real.exp ((Real.pi / 2) * |z.im|) := tendsto_comap.eventually he
+    have hs' : ∀ᶠ z : ℂ in 𝓟 (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2)),
+        z.re ∈ Ioo (-(1 / 2 : ℝ)) (1 / 2) := Filter.eventually_principal.mpr (by intro z hz; exact hz)
+    filter_upwards [he'.filter_mono inf_le_left, hs'.filter_mono inf_le_right] with z hz hs
+    simp only [Real.norm_eq_abs, Real.abs_exp]
+    exact (hg z hs.1.le hs.2.le).trans
+      (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hz hB.le)) hC.le)
+  exact PhragmenLindelof.vertical_strip hf hb hl hr hsl hsu
+
+/-- General tangent bound for the Gamma quotient on the closed strip. The multiplier
+is a complex power times the exponential of a supporting line of t times arctan,
+then Phragmen Lindelof gives the bound at the touching point.
+CONDITIONAL ON the stated left edge bound, which is a hypothesis.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem gammaRatio_tangent_bound {P c : ℝ} (hP : 0 ≤ P) (hc : 1 / 2 < P + c)
+    (hleft : ∀ s : ℂ, s.re = -(1 / 2 : ℝ) →
+      ‖gammaRatio P s‖ ≤ ‖(P : ℂ) + c + s‖ / 2) :
+    ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re → s.re ≤ 1 / 2 →
+      ‖gammaRatio P s‖ ≤ (‖(P : ℂ) + c + s‖ / 2) ^ (1 / 2 - s.re) := by
+  intro s0 hs0l hs0u
+  have hX0 : 0 < P + c + s0.re := by linarith
+  obtain ⟨τ, hτ⟩ : ∃ τ : ℝ, τ = s0.im / (P + c + s0.re) := ⟨_, rfl⟩
+  obtain ⟨α, hα⟩ : ∃ α : ℝ, α = -(τ ^ 2 / (1 + τ ^ 2)) := ⟨_, rfl⟩
+  obtain ⟨β, hβ⟩ : ∃ β : ℝ, β = Real.arctan τ + τ / (1 + τ ^ 2) := ⟨_, rfl⟩
+  obtain ⟨m, hm⟩ : ∃ m : ℂ → ℂ, m = fun s : ℂ => (((P : ℂ) + c + s) / 2) ^ (s - 1 / 2) *
+      Complex.exp (α * ((P : ℂ) + c + s) - I * β * s) := ⟨_, rfl⟩
+  have hWre : ∀ s : ℂ, ((P : ℂ) + c + s).re = P + c + s.re := by intro s; simp
+  have hWim : ∀ s : ℂ, ((P : ℂ) + c + s).im = s.im := by intro s; simp
+  have hmnorm : ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re →
+      ‖m s‖ = (‖(P : ℂ) + c + s‖ / 2) ^ (s.re - 1 / 2) *
+        Real.exp (α * (P + c + s.re) + β * s.im -
+          s.im * Real.arctan (s.im / (P + c + s.re))) := by
+    intro s hs
+    have hW : 0 < ((P : ℂ) + c + s).re := by rw [hWre]; linarith
+    rw [hm]
+    simp only
+    rw [norm_mul, cpow_half_norm hW, Complex.norm_exp, hWre, hWim, mul_assoc, ← Real.exp_add]
+    have e1 : (s - 1 / 2 : ℂ).re = s.re - 1 / 2 := by simp
+    have e2 : (s - 1 / 2 : ℂ).im = s.im := by simp
+    have e3 : ((α : ℂ) * ((P : ℂ) + c + s) - I * β * s).re = α * (P + c + s.re) + β * s.im := by
+      simp
+    rw [e1, e2, e3]
+    congr 2
+    ring
+  have hK : ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re →
+      α * (P + c + s.re) + β * s.im - s.im * Real.arctan (s.im / (P + c + s.re)) ≤ 0 := by
+    intro s hs
+    have hX : 0 < P + c + s.re := by linarith
+    have h := arctan_supporting_line τ (s.im / (P + c + s.re))
+    rw [← hα, ← hβ] at h
+    have h' := mul_le_mul_of_nonneg_right h hX.le
+    have e1 : (α + β * (s.im / (P + c + s.re))) * (P + c + s.re) =
+        α * (P + c + s.re) + β * s.im := by field_simp
+    have e2 : s.im / (P + c + s.re) * Real.arctan (s.im / (P + c + s.re)) * (P + c + s.re) =
+        s.im * Real.arctan (s.im / (P + c + s.re)) := by field_simp
+    linarith
+  have hK0 : α * (P + c + s0.re) + β * s0.im -
+      s0.im * Real.arctan (s0.im / (P + c + s0.re)) = 0 := by
+    have ht0 : s0.im = τ * (P + c + s0.re) := by rw [hτ]; field_simp
+    rw [← hτ, ht0, hα, hβ]
+    field_simp
+    ring
+  have hbase : ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re →
+      (P + c - 1 / 2) / 2 ≤ ‖(P : ℂ) + c + s‖ / 2 := by
+    intro s hs
+    have hh := Complex.abs_re_le_norm ((P : ℂ) + c + s)
+    rw [hWre, abs_of_pos (by linarith)] at hh
+    linarith
+  have hδ : 0 < (P + c - 1 / 2) / 2 := by linarith
+  have hmle : ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re →
+      ‖m s‖ ≤ (‖(P : ℂ) + c + s‖ / 2) ^ (s.re - 1 / 2) := by
+    intro s hs
+    rw [hmnorm s hs]
+    exact mul_le_of_le_one_right (Real.rpow_nonneg (by positivity) _)
+      (Real.exp_le_one_iff.mpr (hK s hs))
+  obtain ⟨C, B, hC, hB, hg⟩ := gammaRatio_strip_growth hP
+  have hpow : ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re → s.re ≤ 1 / 2 →
+      (‖(P : ℂ) + c + s‖ / 2) ^ (s.re - 1 / 2) ≤ max 1 ((P + c - 1 / 2) / 2)⁻¹ := by
+    intro s hl hu
+    have hx := hbase s hl
+    rcases le_total 1 (‖(P : ℂ) + c + s‖ / 2) with h1 | h1
+    · exact (Real.rpow_le_one_of_one_le_of_nonpos h1 (by linarith)).trans (le_max_left _ _)
+    · have hpos : 0 < ‖(P : ℂ) + c + s‖ / 2 := hδ.trans_le hx
+      calc
+        _ ≤ (‖(P : ℂ) + c + s‖ / 2) ^ (-1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_ge hpos h1 (by linarith)
+        _ = (‖(P : ℂ) + c + s‖ / 2)⁻¹ := Real.rpow_neg_one _
+        _ ≤ ((P + c - 1 / 2) / 2)⁻¹ := inv_anti₀ hδ hx
+        _ ≤ _ := le_max_right _ _
+  have hf : DiffContOnCl ℂ (fun z => m z * gammaRatio P z)
+      (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2)) := by
+    have hmd : DiffContOnCl ℂ m (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2)) := by
+      apply DifferentiableOn.diffContOnCl
+      intro s hs
+      have hs' : s.re ∈ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+        have hh : closure (Complex.re ⁻¹' Ioo (-(1 / 2 : ℝ)) (1 / 2)) ⊆
+            Complex.re ⁻¹' Icc (-(1 / 2 : ℝ)) (1 / 2) :=
+          closure_minimal (by intro z hz; exact ⟨hz.1.le, hz.2.le⟩)
+            (isClosed_Icc.preimage Complex.continuous_re)
+        exact hh hs
+      have hsl : ((P : ℂ) + c + s) / 2 ∈ Complex.slitPlane := by
+        apply Complex.mem_slitPlane_iff.mpr
+        left
+        simp
+        linarith [hs'.1]
+      have h1 : DifferentiableAt ℂ
+          (fun s : ℂ => (((P : ℂ) + c + s) / 2) ^ (s - 1 / 2)) s :=
+        DifferentiableAt.cpow (by fun_prop) (by fun_prop) hsl
+      have h2 : DifferentiableAt ℂ
+          (fun s : ℂ => Complex.exp (α * ((P : ℂ) + c + s) - I * β * s)) s := by fun_prop
+      rw [hm]
+      exact (h1.mul h2).differentiableWithinAt
+    simpa only [smul_eq_mul] using hmd.smul (gammaRatio_diffContOnCl hP)
+  have hD : 0 < max 1 ((P + c - 1 / 2) / 2)⁻¹ := lt_max_of_lt_left one_pos
+  have hfg : ∀ z : ℂ, -(1 / 2 : ℝ) ≤ z.re → z.re ≤ 1 / 2 →
+      ‖m z * gammaRatio P z‖ ≤
+        (max 1 ((P + c - 1 / 2) / 2)⁻¹ * C) * Real.exp (B * |z.im|) := by
+    intro z hzl hzu
+    rw [norm_mul, mul_assoc]
+    exact mul_le_mul ((hmle z hzl).trans (hpow z hzl hzu)) (hg z hzl hzu) (norm_nonneg _) hD.le
+  have hl : ∀ z : ℂ, z.re = -(1 / 2 : ℝ) → ‖m z * gammaRatio P z‖ ≤ 1 := by
+    intro z hz
+    have hb : 0 < ‖(P : ℂ) + c + z‖ / 2 := hδ.trans_le (hbase z hz.ge)
+    have h1 := hmle z hz.ge
+    rw [hz, show (-(1 / 2 : ℝ) - 1 / 2) = -1 by norm_num, Real.rpow_neg_one] at h1
+    rw [norm_mul]
+    calc
+      _ ≤ (‖(P : ℂ) + c + z‖ / 2)⁻¹ * (‖(P : ℂ) + c + z‖ / 2) :=
+        mul_le_mul h1 (hleft z hz) (norm_nonneg _) (inv_nonneg.mpr hb.le)
+      _ = 1 := inv_mul_cancel₀ hb.ne'
+  have hr : ∀ z : ℂ, z.re = 1 / 2 → ‖m z * gammaRatio P z‖ ≤ 1 := by
+    intro z hz
+    have h1 := hmle z (by rw [hz]; norm_num)
+    rw [hz, sub_self, Real.rpow_zero] at h1
+    rw [norm_mul, gammaRatio, gamma_ratio_right_edge hP hz, mul_one]
+    exact h1
+  have hmax := strip_maximum_of_exp_growth hf (mul_pos hD hC) hB hfg hl hr hs0l hs0u
+  rw [norm_mul, hmnorm s0 hs0l, hK0, Real.exp_zero, mul_one] at hmax
+  have hb0 : 0 < ‖(P : ℂ) + c + s0‖ / 2 := hδ.trans_le (hbase s0 hs0l)
+  have hmax' : ‖gammaRatio P s0‖ * (‖(P : ℂ) + c + s0‖ / 2) ^ (s0.re - 1 / 2) ≤ 1 := by
+    rw [mul_comm]; exact hmax
+  have hh := (le_div_iff₀ (Real.rpow_pos_of_pos hb0 (s0.re - 1 / 2))).mpr hmax'
+  convert hh using 1
+  rw [show (1 / 2 : ℝ) - s0.re = -(s0.re - 1 / 2) by ring, Real.rpow_neg hb0.le]
+  simp only [one_div]
+
+/-- Rademacher Lemma 1 display 5.1 for the ordinary Gamma quotient, with no open leaf.
+This is the tangent bound with shift one and the proved left edge.
+Source Rademacher 1959, On the Phragmen Lindelof theorem and some applications,
+page 197 Lemma 1 display 5.1 and pages 192 to 193 Theorem 1.
+Standard mathematics, proved. -/
+theorem rademacher_gamma_ratio_proved :
+    ∀ Q : ℝ, 0 ≤ Q → ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re → s.re ≤ 1 / 2 →
+      ‖Complex.Gamma ((Q : ℂ) / 2 + (1 - s) / 2) /
+        Complex.Gamma ((Q : ℂ) / 2 + s / 2)‖ ≤
+        (‖(Q : ℂ) + 1 + s‖ / 2) ^ (1 / 2 - s.re) := by
+  intro Q hQ s hsl hsu
+  have h := gammaRatio_tangent_bound (P := Q) (c := 1) hQ (by linarith)
+    (fun z hz => by
+      have := gamma_ratio_left_edge hQ hz
+      simpa [gammaRatio] using this) s hsl hsu
+  simpa [gammaRatio] using h
+
 /-- LEAF. Rademacher pages 192 and 193 Theorem 1, displays 2.2, 2.3 and 2.32.
 Specialize to a equal to minus one half, b equal to one half, gamma equal to
 minus one and delta equal to zero. Replace Q by Q plus one and multiply the

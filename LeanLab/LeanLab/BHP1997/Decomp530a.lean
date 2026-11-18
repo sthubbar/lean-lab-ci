@@ -6,6 +6,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import Mathlib
 import LeanLab.BHP1997.Repair499Euler
+import LeanLab.BHP1997.Decomp560a
 
 namespace LeanLab.BHP1997.DecompC165a.Contour230
 
@@ -537,13 +538,13 @@ theorem gamma_quotient_normalization {δ : ℝ} (hδ : 0 < δ) (hδhalf : δ < 1
 /-- LEAF. P0069 page 22, Lemma 8, Rademacher reference 28.
 Rademacher page 197, Lemma 1, display 5.1. This is the printed ordinary
 Gamma quotient estimate with its exact constant. It covers both character
-parities through Q equal to zero or one. OPEN. -/
+parities through Q equal to zero or one. PROVED. -/
 theorem leaf_rademacher_gamma_ratio :
     ∀ Q : ℝ, 0 ≤ Q → ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re → s.re ≤ 1 / 2 →
       ‖Complex.Gamma ((Q : ℂ) / 2 + (1 - s) / 2) /
         Complex.Gamma ((Q : ℂ) / 2 + s / 2)‖ ≤
         (‖(Q : ℂ) + 1 + s‖ / 2) ^ (1 / 2 - s.re) := by
-  sorry
+  exact LeanLab.BHP1997.Decomp560a.rademacher_gamma_ratio_proved
 
 /-- Rademacher pages 197 to 199, the conductor-uniform Gamma input has constant one.
 CONDITIONAL ON the exact printed ordinary Gamma ratio leaf. -/
