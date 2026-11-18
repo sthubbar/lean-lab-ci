@@ -1,4 +1,7 @@
 import LeanLab.HelfgottMajor.SPLIT_polya_vinogradov_4_20
+import LeanLab.HelfgottMajor.EvenPVKernel
+import LeanLab.HelfgottMajor.EvenPVSums
+import LeanLab.HelfgottMajor.EvenPVNumeric
 
 /-!
 Split of `leaf_even_case`, the even branch of the explicit Polya-Vinogradov inequality of the
@@ -36,7 +39,36 @@ theorem leaf_even_fourier_truncation_bound {q : ℕ} [NeZero q] (χ : DirichletC
     (hH_one : 1 ≤ H) (hH_q : H ≤ (q : ℝ)) :
     ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖ ≤
       (q : ℝ) / H + 4 / π ^ 2 * sqrt q * log H + 1 / 4 * sqrt q := by
-  sorry
+  -- Proof, AI written: Gauss sum completion with a smoothing window of length `L`
+  -- (`even_pv_kernel_bound`), the sine sum bounds of `EvenPVSums`, and the numerics of
+  -- `EvenPVNumeric`; `L = 1` for `q ≤ 128` and `L = Nat.sqrt q + 1` above.
+  have hq2 : 2 ≤ q := by
+    have h0 := NeZero.ne q
+    omega
+  refine le_trans ?_ (even_pv_min_le hq2 H hH_one)
+  have hpos : (0 : ℝ) ≤ 1 / (2 * sqrt q) := by positivity
+  rcases le_or_gt q 128 with hsm | hlg
+  · have hk := even_pv_kernel_bound χ hχ hq h_even n 1 le_rfl
+    have hsum : ∑ a ∈ Finset.Ioo 0 q,
+        min (1 / sin (π * a / q)) (1 / (((1 : ℕ) : ℝ) * sin (π * a / q) ^ 2)) ≤
+        ∑ a ∈ Finset.Ioo 0 q, 1 / sin (π * a / q) :=
+      Finset.sum_le_sum fun a _ => min_le_left _ _
+    have h1 := mul_le_mul_of_nonneg_left (hsum.trans (sum_inv_sin_le hq2)) hpos
+    have h2 := even_pv_small hq2 hsm
+    have h3 : (((1 : ℕ) : ℝ) - 1) / 2 = 0 := by simp
+    linarith
+  · have hsq : Nat.sqrt q * Nat.sqrt q ≤ q := Nat.sqrt_le q
+    have hAq : 2 * (Nat.sqrt q + 1) < q := by
+      by_contra hcon
+      have hs3 : Nat.sqrt q ≤ 3 := by nlinarith
+      have : q ≤ 8 := by omega
+      omega
+    have hk := even_pv_kernel_bound χ hχ hq h_even n (Nat.sqrt q + 1) (by omega)
+    have hs := sum_min_inv_sin_le (q := q) (A := Nat.sqrt q + 1) (L := Nat.sqrt q + 1)
+      (by omega) (by omega) hAq
+    have h1 := mul_le_mul_of_nonneg_left hs hpos
+    have h2 := even_pv_large hlg.le
+    linarith
 
 /-- LEAF: the choice of the truncation length and the arithmetic of the constants. For `q` at
 least `2`, the bound of the first leaf taken at `H = sqrt q`, that is
