@@ -38,7 +38,12 @@ theorem short_arc_model_replace520 (hG : LeanLab.DERZ1997.GRH) :
             Complex.exp (((2 * Real.pi * z * (n : ℝ) : ℝ) : ℂ) * Complex.I))‖ ≤
         C * (N : ℝ) * Real.log N ^ 13 *
           (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := principal_model520 hG
+  refine ⟨C, hC, max N0 1, ?_⟩
+  intro N hN q hq hqQ n hn
+  have hN0 : N0 < N := lt_of_le_of_lt (le_max_left _ _) hN
+  have hb := h N hN0 q hq hqQ n hn
+  exact hb
 
 /-- The two spellings of the phase on the short arc give the same integral. -/
 private lemma arc_phase_order520 (N q : ℕ) (n : ℤ) :
