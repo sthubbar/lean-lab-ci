@@ -36,15 +36,13 @@ theorem log_arg_le (q : ℕ) [NeZero q] (t : ℝ) (ht : 100 ≤ t) :
     Real.log ((q : ℝ) * (t + 1) / (2 * Real.pi * Real.exp 1))
       ≤ Real.log (q : ℝ) + Real.log (t + 1) := by
   have hq : (0 : ℝ) < (q : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)
-  have ht1 : (0 : ℝ) < t + 1 := by linarith
-  have hc : (0 : ℝ) < 2 * Real.pi * Real.exp 1 := by positivity
-  rw [Real.log_div (mul_ne_zero hq.ne' ht1.ne') hc.ne', Real.log_mul hq.ne' ht1.ne']
-  have he : (1 : ℝ) < Real.exp 1 := by
-    have := Real.add_one_le_exp 1
-    linarith
-  have h6 : (6 : ℝ) ≤ 2 * Real.pi * Real.exp 1 := by
-    nlinarith [Real.pi_gt_three, he]
-  have hpos : (0 : ℝ) ≤ Real.log (2 * Real.pi * Real.exp 1) := Real.log_nonneg (by linarith)
+  have ht' : (0 : ℝ) < t + 1 := by linarith
+  have hpi : (3 : ℝ) < Real.pi := Real.pi_gt_three
+  have he : (2 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp (1 : ℝ)]
+  have hc : (1 : ℝ) ≤ 2 * Real.pi * Real.exp 1 := by nlinarith
+  have hc0 : (0 : ℝ) < 2 * Real.pi * Real.exp 1 := by linarith
+  rw [Real.log_div (mul_pos hq ht').ne' hc0.ne', Real.log_mul hq.ne' ht'.ne']
+  have hcl := Real.log_nonneg hc
   linarith
 
 /-- LEAF. The modulus half of the exponential dominance. The coefficient `(t + 1) / (2 * pi)` is
@@ -63,34 +61,25 @@ theorem main_q_half_le (q : ℕ) [NeZero q] (t : ℝ) (ht : 100 ≤ t) :
 whose series starts with the cubic `(0.6 * t) ^ 3 / 6`. -/
 theorem main_height_half_le (q : ℕ) [NeZero q] (t : ℝ) (ht : 100 ≤ t) :
     (t + 1) / (2 * Real.pi) * Real.log (t + 1) ≤ Real.exp (0.6 * t) / 4 := by
-  have ht0 : (0 : ℝ) < t := by linarith
-  have ht1 : (0 : ℝ) < t + 1 := by linarith
-  have hcoef : (0 : ℝ) ≤ (t + 1) / (2 * Real.pi) := by positivity
-  have hlog : Real.log (t + 1) ≤ t + 1 := by
-    have := Real.log_le_sub_one_of_pos ht1
+  have hpi : (3 : ℝ) < Real.pi := Real.pi_gt_three
+  have hy : (0 : ℝ) < t + 1 := by linarith
+  have hlog : Real.log (t + 1) ≤ t := by
+    have h := Real.log_le_sub_one_of_pos hy
     linarith
-  have step1 : (t + 1) / (2 * Real.pi) * Real.log (t + 1)
-      ≤ (t + 1) / (2 * Real.pi) * (t + 1) :=
-    mul_le_mul_of_nonneg_left hlog hcoef
-  have hx : (0 : ℝ) < 0.6 * t := by linarith
-  have hser := Real.sum_le_exp_of_nonneg hx.le 4
-  have hx3 : (0.6 * t) ^ 3 / 6 ≤ Real.exp (0.6 * t) := by
-    have hsum : (0.6 * t) ^ 3 / 6
-        ≤ ∑ i ∈ Finset.range 4, (0.6 * t) ^ i / (i.factorial : ℝ) := by
-      simp only [Finset.sum_range_succ, Finset.sum_range_zero, Nat.factorial]
-      norm_num
-      nlinarith [hx, sq_nonneg (0.6 * t), pow_pos hx 3]
-    linarith
-  have hquad : (t + 1) / (2 * Real.pi) * (t + 1) ≤ Real.exp (0.6 * t) / 4 := by
-    have h1 : (t + 1) ^ 2 ≤ 4 * t ^ 2 := by nlinarith [ht]
-    have h2 : (t + 1) / (2 * Real.pi) * (t + 1) = (t + 1) ^ 2 / (2 * Real.pi) := by
-      field_simp
-    rw [h2]
-    have h3 : (t + 1) ^ 2 / (2 * Real.pi) ≤ (0.6 * t) ^ 3 / 24 := by
-      rw [div_le_div_iff₀ (by positivity) (by norm_num)]
-      nlinarith [Real.pi_gt_three, ht, sq_nonneg t, pow_pos ht0 3]
-    have h4 : (0.6 * t) ^ 3 / 24 ≤ Real.exp (0.6 * t) / 4 := by linarith
-    linarith
+  have hlog0 : 0 ≤ Real.log (t + 1) := Real.log_nonneg (by linarith)
+  have hexp : (0.6 * t) ^ 3 / 6 ≤ Real.exp (0.6 * t) := by
+    have h := Real.pow_div_factorial_le_exp (0.6 * t) (by linarith) 3
+    have e : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+    rw [e] at h
+    exact h
+  have h1 : (t + 1) / (2 * Real.pi) ≤ (t + 1) / 6 :=
+    div_le_div_of_nonneg_left hy.le (by norm_num) (by linarith)
+  have h2 : (t + 1) / (2 * Real.pi) * Real.log (t + 1) ≤ (t + 1) / 6 * t :=
+    mul_le_mul h1 hlog hlog0 (by positivity)
+  have h3 : (t + 1) / 6 * t ≤ (0.6 * t) ^ 3 / 6 / 4 := by
+    have ht0 : (0 : ℝ) ≤ t := by linarith
+    nlinarith [mul_nonneg ht0 (by linarith : (0 : ℝ) ≤ t - 100),
+      mul_nonneg (sq_nonneg t) (by linarith : (0 : ℝ) ≤ t - 100)]
   linarith
 
 /-- The target, assembled from the three steps. The main term is the coefficient times the
@@ -113,3 +102,6 @@ theorem book_main_le_half_exp_split (q : ℕ) [NeZero q] (t : ℝ) (ht : 100 ≤
           + (t + 1) / (2 * Real.pi) * Real.log (t + 1) := by ring
     _ ≤ exp (0.6 * t) / 4 + exp (0.6 * t) / 4 := by linarith
     _ = exp (0.6 * t) / 2 := by ring
+
+#print axioms LeanLab.HelfgottMajor.Decomp269c.log_arg_le
+#print axioms LeanLab.HelfgottMajor.Decomp269c.main_height_half_le
