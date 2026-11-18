@@ -93,8 +93,8 @@ theorem zero_count_high_conductor_above_sixth_power (q : ℕ) [NeZero q]
 
 /-- Assembly: the asymptotic range is the union of the three conductor regimes.  Either
 `q ^ 2 ≤ t`, which is the first leaf, or `t < q ^ 2`, and then the modulus is either at most
-`10 ^ 6` or larger than it, which are the second and third leaves.  Every hypothesis of the split
-statement is handed on unchanged, and no leaf outside the branch that is taken is used. -/
+`10 ^ 6` or larger than it, which are the second and third leaves.  Every hypothesis of the
+split statement is handed on unchanged, and no leaf outside the branch that is taken is used. -/
 theorem zero_count_high_asymptotic_height_split (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (t : ℝ) (ht : 1 ≤ t) (ht2 : 2 ≤ t)
     (hbig : 2 * π * exp 1 * exp 1 * exp 1 * exp 1 ≤ q * t)
