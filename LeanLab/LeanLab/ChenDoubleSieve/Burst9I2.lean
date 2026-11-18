@@ -1,5 +1,6 @@
 import LeanLab.ChenDoubleSieve.Burst9Psi2Panels
 import LeanLab.ChenDoubleSieve.Task562Supply
+import LeanLab.ChenDoubleSieve.Task587R0J16
 
 /-!
 # Burst 9: the 52 bounds `I_{2,i}(row) ≤ U`, Wu 2004 Lemma 5.2, page 26
@@ -97,7 +98,20 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.000074833`; the bound adds 0.1 percent. -/
 theorem I2_r0_16 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 7 ≤ (18727/250000000 : ℝ) := by
-  sorry
+  have e : I2 ω (tableParams 0) 7 = buchstabSup ω 2 (fun _ => (10/29 : ℝ)) (fun _ => (25/61 : ℝ)) := by
+    norm_num [I2, tableParams]
+  rw [e]
+  have h_tail (φ : ℝ) (hφ : (7/2 : ℝ) ≤ φ) :
+      buchstabIntegral ω 2 (fun _ => (10/29 : ℝ)) (fun _ => (25/61 : ℝ)) φ ≤ (18727/250000000 : ℝ) := by
+    have := LeanLab.ChenDoubleSieve.Task587.r0j16_tail hω hφ
+    simpa [LeanLab.ChenDoubleSieve.Task587.r0j16_lo, LeanLab.ChenDoubleSieve.Task587.r0j16_hi] using this
+  apply csSup_le
+  · exact ⟨buchstabIntegral ω 2 (fun _ => (10/29 : ℝ)) (fun _ => (25/61 : ℝ)) 2, 2, le_rfl, rfl⟩
+  · rintro v ⟨φ, hφ, rfl⟩
+    by_cases ht : φ ≤ (7/2 : ℝ)
+    · -- short range: need a bound
+      sorry
+    · exact h_tail φ (le_of_not_ge ht)
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,17}` defining `I_{2,17}(s, s', κ₁, κ₂, κ₃)`, for row 1 of Table 1,
