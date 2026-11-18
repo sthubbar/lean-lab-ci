@@ -108,7 +108,14 @@ theorem leaf_nonprincipal_strip_forces_quadratic :
         1 ≤ q → (q : ℝ) ≤ P → χ.IsPrimitive → χ ≠ 1 →
           ∀ β : ℝ, 0 < β → 1 - a / Real.log P ≤ β → β < 1 →
             χ.LFunction β = 0 → χ ^ 2 = 1 := by
-  sorry
+  -- The imported file carries the Landau Page argument in full: its
+  -- `leaf_real_zero_forces_quadratic` runs the lab zero free region
+  -- `zero_free_region_real` at height zero and reads off `χ ^ 2 = 1` from the
+  -- exceptional branch. The same width serves here.
+  obtain ⟨a, ha, H⟩ := leaf_real_zero_forces_quadratic
+  refine ⟨a, ha, ?_⟩
+  intro P hP q hq χ h1q hqP hprim _ β _ hβ hβ1 hβ0
+  exact (H P hP q hq χ h1q hqP hprim ⟨β, hβ, hβ1, hβ0⟩).1
 
 /-- The quadratic character step of the imported file, closed from the three
 leaves above: one positive width, and every primitive character with a real zero

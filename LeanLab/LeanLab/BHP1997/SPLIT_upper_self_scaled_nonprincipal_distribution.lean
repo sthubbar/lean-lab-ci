@@ -434,6 +434,296 @@ private lemma filter_rightInterval {t : ℝ} {A B : ℕ} (hA : 1 ≤ A) :
     have h3 : m ≤ ⌊t⌋₊ := le_trans h2 (min_le_right _ _)
     exact (Nat.le_floor_iff' (by omega)).mp h3
 
+
+/-! ### The level ladder: a variable rough level as fixed level fibres
+
+The `g` term needed only the least prime factor of `m`, so its level `m ^ c1` became the fixed level
+of one peel prime. The `h`, `j` and `kept` terms sum over prime factors inside a window, so their
+cofactor keeps a level that still depends on `m`. The identity below replaces any level `M` by a
+lower level `z` plus one fibre per prime of `[z, M)`, and each fibre carries the *fixed* level of
+that prime, with an index range that is an interval. That is the page 53 Buchstab step in the form
+the three remaining leaves need. -/
+
+/-- A real level can be rounded up to a natural level without changing the page 53 indicator. -/
+private lemma upperRough_eq_roughIndicator_ceil {n : ℕ} (hn : 2 ≤ n) (L : ℝ) :
+    upperRough n L = Task308.roughIndicator n ⌈L⌉₊ := by
+  rw [upperRough_eq_minFac hn, roughIndicator_eq_minFac hn]
+  have key : L ≤ (n.minFac : ℝ) ↔ ⌈L⌉₊ ≤ n.minFac := by
+    constructor
+    · intro h
+      exact Nat.ceil_le.mpr h
+    · intro h
+      exact le_trans (Nat.le_ceil L) (by exact_mod_cast h)
+  by_cases h : L ≤ (n.minFac : ℝ)
+  · rw [if_pos h, if_pos (key.mp h)]
+  · rw [if_neg h, if_neg (fun hc => h (key.mpr hc))]
+
+/-- The level ladder. For `1 ≤ z ≤ M` the rough indicator at level `M` is the indicator at the
+lower level `z` minus the fibre of every prime of `[z, M)` that is a least prime factor. Each fibre
+is a rough indicator at the fixed level of its own prime. -/
+private lemma roughIndicator_level_decomp {n z M : ℕ} (hn : 1 ≤ n) (hz : 1 ≤ z) (hzM : z ≤ M) :
+    Task308.roughIndicator n M =
+      Task308.roughIndicator n z -
+        ∑ p ∈ Finset.Ico z M,
+          (if p.Prime ∧ p ∣ n then Task308.roughIndicator n p else 0) := by
+  rcases Nat.lt_or_ge n 2 with hn2 | hn2
+  · -- `n = 1`: no prime divides `n`, and both indicators are one
+    have hn1 : n = 1 := by omega
+    subst hn1
+    have hzero : ∀ p ∈ Finset.Ico z M,
+        (if p.Prime ∧ p ∣ 1 then Task308.roughIndicator 1 p else 0) = (0 : ℝ) := by
+      intro p _
+      rw [if_neg]
+      rintro ⟨hpp, hpd⟩
+      have hle : p ≤ 1 := Nat.le_of_dvd (by norm_num) hpd
+      have h2 := hpp.two_le
+      omega
+    rw [Finset.sum_eq_zero hzero, sub_zero]
+    simp [Task308.roughIndicator]
+  · -- `n ≥ 2`: only the least prime factor can contribute
+    have hqP : n.minFac.Prime := Nat.minFac_prime (by omega)
+    have hqd : n.minFac ∣ n := Nat.minFac_dvd n
+    have hterm : ∀ p ∈ Finset.Ico z M,
+        (if p.Prime ∧ p ∣ n then Task308.roughIndicator n p else 0) =
+          (if p = n.minFac then (1 : ℝ) else 0) := by
+      intro p _
+      by_cases hc : p.Prime ∧ p ∣ n
+      · have hle : n.minFac ≤ p := Nat.minFac_le_of_dvd hc.1.two_le hc.2
+        rw [if_pos hc, roughIndicator_eq_minFac hn2 p]
+        by_cases hpe : p = n.minFac
+        · rw [if_pos (le_of_eq hpe), if_pos hpe]
+        · rw [if_neg (by omega : ¬ p ≤ n.minFac), if_neg hpe]
+      · rw [if_neg hc, if_neg]
+        rintro rfl
+        exact hc ⟨hqP, hqd⟩
+    have hsum : ∑ p ∈ Finset.Ico z M, (if p = n.minFac then (1 : ℝ) else 0) =
+        if n.minFac ∈ Finset.Ico z M then (1 : ℝ) else 0 := by
+      by_cases hq : n.minFac ∈ Finset.Ico z M
+      · rw [if_pos hq, Finset.sum_eq_single n.minFac]
+        · rw [if_pos rfl]
+        · intro b _ hb
+          rw [if_neg hb]
+        · intro hq'
+          exact absurd hq hq'
+      · rw [if_neg hq, Finset.sum_eq_zero]
+        intro p hp
+        by_cases hpq : p = n.minFac
+        · rw [if_pos hpq]
+          exact absurd (hpq ▸ hp) hq
+        · rw [if_neg hpq]
+    rw [Finset.sum_congr rfl hterm, hsum, roughIndicator_eq_minFac hn2 M,
+      roughIndicator_eq_minFac hn2 z]
+    by_cases h1 : M ≤ n.minFac
+    · have hzq : z ≤ n.minFac := le_trans hzM h1
+      have hnot : n.minFac ∉ Finset.Ico z M := by
+        simp only [Finset.mem_Ico]; omega
+      rw [if_pos h1, if_pos hzq, if_neg hnot]
+      norm_num
+    · have hqM : n.minFac < M := by omega
+      by_cases h2 : z ≤ n.minFac
+      · have hin : n.minFac ∈ Finset.Ico z M := Finset.mem_Ico.mpr ⟨h2, hqM⟩
+        rw [if_neg h1, if_pos h2, if_pos hin]
+        norm_num
+      · have hin : n.minFac ∉ Finset.Ico z M := by
+          simp only [Finset.mem_Ico]; omega
+        rw [if_neg h1, if_neg h2, if_neg hin]
+        norm_num
+
+
+/-- The level condition of one fibre, read as an interval condition on the cofactor: a prime `p`
+is below the level `(d n) ^ c` exactly when the cofactor `n` exceeds `p ^ (1/c) / d`. This is what
+turns the ladder's variable upper end into an interval on the summed variable. -/
+private lemma peel_level_iff {c : ℝ} (hc : 0 < c) {d p n : ℕ} (hd : 1 ≤ d) (hn : 1 ≤ n) :
+    (p : ℝ) < ((d : ℝ) * n) ^ c ↔ (p : ℝ) ^ (1 / c) / d < n := by
+  have hd0 : (0 : ℝ) < (d : ℝ) := by exact_mod_cast hd
+  have hn0 : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
+  have hp0 : (0 : ℝ) ≤ (p : ℝ) := by positivity
+  have hdn : (0 : ℝ) ≤ (d : ℝ) * (n : ℝ) := by positivity
+  have hp_eq : ((p : ℝ) ^ (1 / c)) ^ c = (p : ℝ) := by
+    rw [← Real.rpow_mul hp0, one_div_mul_cancel hc.ne', Real.rpow_one]
+  constructor
+  · intro h
+    have h1 : (p : ℝ) ^ (1 / c) < (d : ℝ) * (n : ℝ) := by
+      by_contra hcon
+      push_neg at hcon
+      have hle : ((d : ℝ) * (n : ℝ)) ^ c ≤ ((p : ℝ) ^ (1 / c)) ^ c :=
+        Real.rpow_le_rpow hdn hcon hc.le
+      rw [hp_eq] at hle
+      linarith
+    exact (div_lt_iff₀ hd0).mpr (by rw [mul_comm]; exact h1)
+  · intro h
+    have h1 : (p : ℝ) ^ (1 / c) < (d : ℝ) * (n : ℝ) := by
+      have h2 := (div_lt_iff₀ hd0).mp h
+      rw [mul_comm] at h2
+      exact h2
+    have h2 : ((p : ℝ) ^ (1 / c)) ^ c < ((d : ℝ) * (n : ℝ)) ^ c :=
+      Real.rpow_lt_rpow (by positivity) h1 hc
+    rwa [hp_eq] at h2
+
+
+/-! ### The `h` term: fibres of one outer prime factor
+
+`upperH` sums over the prime factors of `m` inside the page 53 window. The lemma below isolates one
+outer prime `p1` and rewrites its contribution as a sum over the cofactor `n = m / p1`, with the
+window read on `n` as an explicit condition. That is the reindexing the `h`, `j` and `kept` leaves
+need; the conditions themselves are turned into intervals by `peel_level_iff` when the bound is
+applied. -/
+
+/-- The multiples of one prime inside an interval, with the page 53 window and the rough cofactor
+carried to the cofactor variable. -/
+private lemma upperH_fibre_reindex {ε : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q) {L K p1 : ℕ}
+    (hp1 : p1.Prime) :
+    ∑ m ∈ Finset.Ioc L K,
+        (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) then
+          ((upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q) else 0)
+      = χ (p1 : ZMod q) *
+          ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+            (if (((p1 : ℝ) * n) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * n) ^ upperC4 ε)
+              then ((upperRough n (((p1 : ℝ) * n) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)
+              else 0) := by
+  have hp1pos : 0 < p1 := hp1.pos
+  have hp1one : 1 ≤ p1 := by omega
+  -- split the conjunction so that the divisibility test can reindex
+  have hsplit : ∀ m : ℕ,
+      (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) then
+        ((upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q) else 0)
+      = (if p1 ∣ m then
+          (if ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) then
+            ((upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q) else 0)
+          else 0) := by
+    intro m
+    by_cases h : p1 ∣ m <;>
+      by_cases h2 : ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) <;>
+      simp [h, h2]
+  rw [Finset.sum_congr rfl (fun m _ => hsplit m)]
+  rw [Rough514.sum_dvd_reindex hp1one L K
+    (fun m => if ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) then
+        ((upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q) else 0)]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  have hdiv : (p1 * n) / p1 = n := Nat.mul_div_cancel_left n hp1pos
+  have hcast : (((p1 * n : ℕ)) : ℝ) = (p1 : ℝ) * (n : ℝ) := by push_cast; ring
+  have hchi : χ (((p1 * n : ℕ)) : ZMod q) = χ (p1 : ZMod q) * χ (n : ZMod q) := by
+    push_cast
+    rw [map_mul]
+  rw [hdiv, hcast, hchi]
+  by_cases hw : ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+      (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε
+  · rw [if_pos hw, if_pos hw]
+    ring
+  · rw [if_neg hw, if_neg hw]
+    ring
+
+
+/-- The page 53 window read on the cofactor: for a prime `p1 ≥ 2` and a positive exponent `c`, the
+two window tests `(p1 n) ^ c ≤ p1` and `p1 < (p1 n) ^ c` are the two halves of an interval in `n`,
+with the endpoint `p1 ^ (1 / c - 1)`. -/
+private lemma window_interval {c : ℝ} (hc : 0 < c) {p1 n : ℕ} (hp1 : 1 ≤ p1) (hn : 1 ≤ n) :
+    (((p1 : ℝ) * n) ^ c ≤ (p1 : ℝ) ↔ n ≤ (p1 : ℝ) ^ (1 / c - 1)) ∧
+      ((p1 : ℝ) < ((p1 : ℝ) * n) ^ c ↔ (p1 : ℝ) ^ (1 / c - 1) < n) := by
+  have hp1R : (0 : ℝ) < (p1 : ℝ) := by exact_mod_cast hp1
+  have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
+  have hpnR : (0 : ℝ) < (p1 : ℝ) * (n : ℝ) := by positivity
+  have hsub : (p1 : ℝ) ^ (1 / c - 1) = (p1 : ℝ) ^ (1 / c) / (p1 : ℝ) := by
+    rw [Real.rpow_sub hp1R (1 / c) 1, Real.rpow_one]
+  constructor
+  · -- the upper test
+    have heq : ((p1 : ℝ) ^ (1 / c)) ^ c = (p1 : ℝ) := by
+      rw [← Real.rpow_mul hp1R.le, one_div_mul_cancel hc.ne', Real.rpow_one]
+    constructor
+    · intro h
+      have h1 : (p1 : ℝ) * (n : ℝ) ≤ (p1 : ℝ) ^ (1 / c) := by
+        by_contra hcon
+        push_neg at hcon
+        have hle : ((p1 : ℝ) ^ (1 / c)) ^ c < (((p1 : ℝ) * (n : ℝ))) ^ c :=
+          Real.rpow_lt_rpow (by positivity) hcon hc
+        rw [heq] at hle
+        linarith
+      rw [hsub, le_div_iff₀ hp1R]
+      calc (n : ℝ) * (p1 : ℝ) = (p1 : ℝ) * (n : ℝ) := by ring
+        _ ≤ (p1 : ℝ) ^ (1 / c) := h1
+    · intro h
+      have h2 : (p1 : ℝ) * (n : ℝ) ≤ (p1 : ℝ) ^ (1 / c) := by
+        rw [hsub, le_div_iff₀ hp1R] at h
+        calc (p1 : ℝ) * (n : ℝ) = (n : ℝ) * (p1 : ℝ) := by ring
+          _ ≤ (p1 : ℝ) ^ (1 / c) := h
+      have h3 := Real.rpow_le_rpow (le_of_lt hpnR) h2 hc.le
+      rwa [heq] at h3
+  · -- the lower test, from the fibre level identity
+    have hiff := peel_level_iff (c := c) hc (d := p1) (p := p1) (n := n) hp1 hn
+    rw [hsub]
+    exact hiff
+
+
+/-- The `h` term reindexed by its outer prime factor. The page 53 fibre sum of `upperH` over the
+interval is the double sum over the outer prime `p1` and the cofactor, with the window carried to
+the cofactor variable. This is the sum level form of `upperH_fibre_reindex`. -/
+private lemma upperH_sum_reindex {ε : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q) {L K : ℕ} :
+    ∑ m ∈ Finset.Ioc L K, ((upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)
+      = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          χ (p1 : ZMod q) *
+            ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+              (if (((p1 : ℝ) * n) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                  (p1 : ℝ) < ((p1 : ℝ) * n) ^ upperC4 ε)
+                then ((upperRough n (((p1 : ℝ) * n) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)
+                else 0) := by
+  have hper : ∀ m ∈ Finset.Ioc L K,
+      ((upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q) =
+        ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then ((upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q)
+            else 0) := by
+    intro m hm
+    obtain ⟨hmL, hmK⟩ := Finset.mem_Ioc.mp hm
+    have hm0 : 0 < m := by omega
+    have hset : m.primeFactors.filter
+          (fun p : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (m : ℝ) ^ upperC4 ε)
+        = ((Finset.Icc 2 K).filter Nat.Prime).filter
+            (fun p1 => p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) := by
+      ext p
+      simp only [Finset.mem_filter, Finset.mem_Icc, Nat.mem_primeFactors]
+      constructor
+      · rintro ⟨⟨hpp, hpd, -⟩, hW⟩
+        exact ⟨⟨⟨hpp.two_le, (Nat.le_of_dvd hm0 hpd).trans hmK⟩, hpp⟩, hpd, hW⟩
+      · rintro ⟨⟨⟨h2p, hpK⟩, hpp⟩, hpd, hW⟩
+        exact ⟨⟨hpp, hpd, by omega⟩, hW⟩
+    unfold upperH
+    rw [hset, Finset.sum_filter]
+    push_cast
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun p1 _ => ?_
+    by_cases h : (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+    · rw [if_pos h, if_pos h]
+    · rw [if_neg h, if_neg h]
+      simp
+  calc ∑ m ∈ Finset.Ioc L K, ((upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)
+      = ∑ m ∈ Finset.Ioc L K, ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then ((upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q)
+            else 0) := Finset.sum_congr rfl hper
+    _ = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          ∑ m ∈ Finset.Ioc L K,
+            (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+              then ((upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q)
+              else 0) := Finset.sum_comm
+    _ = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          χ (p1 : ZMod q) *
+            ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+              (if (((p1 : ℝ) * n) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                  (p1 : ℝ) < ((p1 : ℝ) * n) ^ upperC4 ε)
+                then ((upperRough n (((p1 : ℝ) * n) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)
+                else 0) := by
+        refine Finset.sum_congr rfl fun p1 hp1 => ?_
+        exact upperH_fibre_reindex (ε := ε) χ (L := L) (K := K) (p1 := p1)
+          (Finset.mem_filter.mp hp1).2
+
+
 /-! ### The `g` term: the self scaled rough sum at a fixed scale -/
 
 /-- The frozen level constant `c1` of page 53 is positive under the standing smallness of `ε`. -/
@@ -687,6 +977,1263 @@ private lemma log_scale_transfer {A l lX : ℝ} (hA : 0 < A) (hl : 1 ≤ l)
     _ = (((11 / 20 : ℝ) ^ (A + 3))⁻¹) * l ^ (-(A + 3)) := h2
     _ ≤ (((11 / 20 : ℝ) ^ (A + 3))⁻¹) * l ^ (-A) :=
         mul_le_mul_of_nonneg_left h3 (by positivity)
+
+
+/-! ### The `h` term: the recentring factor inside the reindexed double sum
+
+`upperH` sums the rough indicator of the cofactor over the prime factors of `m` inside the window of
+page 53. `upperH_sum_reindex` moves the outer prime factor out; the two lemmas below do the same with
+the recentring factor `log m / log Y` carried along, which is what the leaf's summand has. The factor
+of `m = p1 * n` is `log (p1 * n) / log Y`, so it passes to the cofactor variable unchanged. -/
+
+/-- The `h` term of one outer prime factor, reindexed by the cofactor, with the recentring factor
+carried along. -/
+private lemma upperH_fibre_reindex_weighted {ε Y : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q)
+    {L K p1 : ℕ} (hp1 : p1.Prime) :
+    ∑ m ∈ Finset.Ioc L K,
+        (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) then
+          ((Real.log (m : ℝ) / Real.log Y * upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) *
+            χ (m : ZMod q) else 0)
+      = χ (p1 : ZMod q) *
+          ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+            (if (((p1 : ℝ) * n) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * n) ^ upperC4 ε)
+              then ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                upperRough n (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)
+              else 0) := by
+  have hp1pos : 0 < p1 := hp1.pos
+  have hp1one : 1 ≤ p1 := by omega
+  have hsplit : ∀ m : ℕ,
+      (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) then
+        ((Real.log (m : ℝ) / Real.log Y * upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) *
+          χ (m : ZMod q) else 0)
+      = (if p1 ∣ m then
+          (if ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) then
+            ((Real.log (m : ℝ) / Real.log Y * upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) *
+              χ (m : ZMod q) else 0)
+          else 0) := by
+    intro m
+    by_cases h : p1 ∣ m <;>
+      by_cases h2 : ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) <;>
+      simp [h, h2]
+  rw [Finset.sum_congr rfl (fun m _ => hsplit m)]
+  rw [Rough514.sum_dvd_reindex hp1one L K
+    (fun m => if ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) then
+        ((Real.log (m : ℝ) / Real.log Y * upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) *
+          χ (m : ZMod q) else 0)]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  have hdiv : (p1 * n) / p1 = n := Nat.mul_div_cancel_left n hp1pos
+  have hcast : (((p1 * n : ℕ)) : ℝ) = (p1 : ℝ) * (n : ℝ) := by push_cast; ring
+  have hchi : χ (((p1 * n : ℕ)) : ZMod q) = χ (p1 : ZMod q) * χ (n : ZMod q) := by
+    push_cast
+    rw [map_mul]
+  rw [hdiv, hcast, hchi]
+  by_cases hw : ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+      (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε
+  · rw [if_pos hw, if_pos hw]
+    push_cast
+    ring
+  · rw [if_neg hw, if_neg hw]
+    ring
+
+/-- The `h` term reindexed by its outer prime factor, with the recentring factor inside the double
+sum. -/
+private lemma upperH_weighted_reindex {ε Y : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q) {L K : ℕ} :
+    ∑ m ∈ Finset.Ioc L K,
+        ((Real.log (m : ℝ) / Real.log Y * upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)
+      = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          χ (p1 : ZMod q) *
+            ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+              (if (((p1 : ℝ) * n) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                  (p1 : ℝ) < ((p1 : ℝ) * n) ^ upperC4 ε)
+                then ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                  upperRough n (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)
+                else 0) := by
+  have hper : ∀ m ∈ Finset.Ioc L K,
+      ((Real.log (m : ℝ) / Real.log Y * upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q) =
+        ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then ((Real.log (m : ℝ) / Real.log Y *
+              upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q)
+            else 0) := by
+    intro m hm
+    obtain ⟨hmL, hmK⟩ := Finset.mem_Ioc.mp hm
+    have hm0 : 0 < m := by omega
+    have hset : m.primeFactors.filter
+          (fun p : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (m : ℝ) ^ upperC4 ε)
+        = ((Finset.Icc 2 K).filter Nat.Prime).filter
+            (fun p1 => p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) := by
+      ext p
+      simp only [Finset.mem_filter, Finset.mem_Icc, Nat.mem_primeFactors]
+      constructor
+      · rintro ⟨⟨hpp, hpd, -⟩, hW⟩
+        exact ⟨⟨⟨hpp.two_le, (Nat.le_of_dvd hm0 hpd).trans hmK⟩, hpp⟩, hpd, hW⟩
+      · rintro ⟨⟨⟨h2p, hpK⟩, hpp⟩, hpd, hW⟩
+        exact ⟨⟨hpp, hpd, by omega⟩, hW⟩
+    have hinner : upperH ε (m : ℝ) m =
+        ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) else 0) := by
+      unfold upperH
+      rw [hset, Finset.sum_filter]
+    rw [hinner, Finset.mul_sum]
+    rw [Complex.ofReal_sum, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun p1 _ => ?_
+    by_cases h : (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+    · rw [if_pos h, if_pos h]
+    · rw [if_neg h, if_neg h]
+      simp
+  calc ∑ m ∈ Finset.Ioc L K,
+        ((Real.log (m : ℝ) / Real.log Y * upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)
+      = ∑ m ∈ Finset.Ioc L K, ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then ((Real.log (m : ℝ) / Real.log Y *
+              upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q)
+            else 0) := Finset.sum_congr rfl hper
+    _ = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          ∑ m ∈ Finset.Ioc L K,
+            (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+              then ((Real.log (m : ℝ) / Real.log Y *
+                upperRough (m / p1) ((m : ℝ) ^ upperC1 ε) : ℝ) : ℂ) * χ (m : ZMod q)
+              else 0) := Finset.sum_comm
+    _ = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          χ (p1 : ZMod q) *
+            ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+              (if (((p1 : ℝ) * n) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                  (p1 : ℝ) < ((p1 : ℝ) * n) ^ upperC4 ε)
+                then ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                  upperRough n (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)
+                else 0) := by
+        refine Finset.sum_congr rfl fun p1 hp1 => ?_
+        exact upperH_fibre_reindex_weighted (Y := Y) χ (L := L) (K := K) (p1 := p1)
+          (Finset.mem_filter.mp hp1).2
+
+
+/-- The page 53 rough indicator is at most one. -/
+private lemma roughIndicator_le_one (n z : ℕ) : Task308.roughIndicator n z ≤ 1 := by
+  unfold Task308.roughIndicator
+  split_ifs <;> norm_num
+
+/-- The page 53 rough indicator is antitone in the level: a larger level divides out more integers.
+-/
+private lemma roughIndicator_le_of_le {n z z' : ℕ} (h : z ≤ z') :
+    Task308.roughIndicator n z' ≤ Task308.roughIndicator n z := by
+  have h01 : Task308.roughIndicator n z = 0 ∨ Task308.roughIndicator n z = 1 := by
+    unfold Task308.roughIndicator
+    split_ifs <;> simp
+  have key : Task308.roughIndicator n z = 0 → Task308.roughIndicator n z' = 0 := by
+    intro h0
+    unfold Task308.roughIndicator at h0 ⊢
+    by_cases hh : n = 1 ∨ z' ≤ n.minFac
+    · have h2 : n = 1 ∨ z ≤ n.minFac := hh.elim Or.inl (fun h3 => Or.inr (le_trans h h3))
+      rw [if_pos h2] at h0
+      exact absurd h0 (by norm_num)
+    · rw [if_neg hh]
+  rcases h01 with h0 | h1
+  · rw [h0, key h0]
+  · rw [h1]; exact roughIndicator_le_one n z'
+
+/-- The level ladder in its reduced form: the rough indicator at level `M` is the indicator at a
+lower level `z` minus the single fibre of the least prime factor in the window `[z, M)`. Composing
+`roughIndicator_level_decomp` with the fact that only the least prime factor can carry a fibre. -/
+private lemma roughIndicator_eq_sub_minFac {n z M : ℕ} (hn : 2 ≤ n) (hzM : z ≤ M) :
+    Task308.roughIndicator n M =
+      Task308.roughIndicator n z -
+        (if z ≤ n.minFac ∧ n.minFac < M then (1 : ℝ) else 0) := by
+  unfold Task308.roughIndicator
+  by_cases hz : z ≤ n.minFac
+  · by_cases hM : n.minFac < M
+    · rw [if_neg (by omega : ¬ (n = 1 ∨ M ≤ n.minFac)),
+          if_pos (by omega : n = 1 ∨ z ≤ n.minFac),
+          if_pos (by omega : z ≤ n.minFac ∧ n.minFac < M)]
+      norm_num
+    · rw [if_pos (by omega : n = 1 ∨ M ≤ n.minFac),
+          if_pos (by omega : n = 1 ∨ z ≤ n.minFac),
+          if_neg (by omega : ¬ (z ≤ n.minFac ∧ n.minFac < M))]
+      norm_num
+  · rw [if_neg (by omega : ¬ (n = 1 ∨ M ≤ n.minFac)),
+        if_neg (by omega : ¬ (n = 1 ∨ z ≤ n.minFac)),
+        if_neg (by omega : ¬ (z ≤ n.minFac ∧ n.minFac < M))]
+    norm_num
+
+/-- The two window tests of page 53 read as the two ends of an interval in the cofactor. -/
+private lemma window_nat_iff {c : ℝ} (hc : 0 < c) {p1 n : ℕ} (hp1 : 1 ≤ p1) (hn : 1 ≤ n) :
+    (((p1 : ℝ) * (n : ℝ)) ^ c ≤ (p1 : ℝ) ↔ n ≤ ⌊(p1 : ℝ) ^ (1 / c - 1)⌋₊) ∧
+      ((p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ c ↔ ⌊(p1 : ℝ) ^ (1 / c - 1)⌋₊ < n) := by
+  obtain ⟨h1, h2⟩ := window_interval (c := c) hc hp1 hn
+  have hb : (0 : ℝ) ≤ (p1 : ℝ) ^ (1 / c - 1) := by positivity
+  constructor
+  · rw [h1, Nat.le_floor_iff hb]
+  · rw [h2]
+    exact (Nat.floor_lt hb).symm
+
+/-- A sub-interval of an integer interval cut out by two further bounds is again an integer
+interval. -/
+private lemma filter_window_Ioc {a b p q : ℕ} :
+    (Finset.Ioc a b).filter (fun n : ℕ => n ≤ q ∧ p < n) = Finset.Ioc (max a p) (min b q) := by
+  ext n
+  simp only [Finset.mem_filter, Finset.mem_Ioc]
+  constructor <;> intro h <;> omega
+
+/-- The `h` term's fourth frozen constant is positive and below one under the standing smallness of
+`ε`. -/
+private lemma upperC4_pos {ε : ℝ} (hε8 : ε ≤ 1 / 10 ^ 8) : 0 < upperC4 ε := by
+  unfold upperC4
+  have h2 : (2 * (1 / 16 - 1 / 10 ^ 5) / 8 : ℝ) = 1 / 64 - 1 / 400000 := by norm_num
+  rw [h2]
+  linarith
+
+/-- `upperC4 ε < 1` under the standing smallness of `ε`. -/
+private lemma upperC4_lt_one {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    upperC4 ε < 1 := by
+  unfold upperC4
+  have h2 : (2 * (1 / 16 - 1 / 10 ^ 5) / 8 : ℝ) = 1 / 64 - 1 / 400000 := by norm_num
+  rw [h2]
+  linarith
+
+/-- A natural below the ceiling of a real is below that real. -/
+private lemma nat_lt_ceil_iff {L : ℝ} {p : ℕ} : p < ⌈L⌉₊ ↔ (p : ℝ) < L := by
+  rw [← not_le, Nat.ceil_le, not_le]
+
+/-- One term of the level ladder: a prime dividing `n` carries a rough indicator at its own level
+exactly when it is the least prime factor of `n`. -/
+private lemma ladder_term_eq {n p : ℕ} (hn : 2 ≤ n) :
+    (if p.Prime ∧ p ∣ n then Task308.roughIndicator n p else 0) =
+      (if p = n.minFac then (1 : ℝ) else 0) := by
+  by_cases hc : p.Prime ∧ p ∣ n
+  · obtain ⟨hpp, hpd⟩ := hc
+    have hle : n.minFac ≤ p := Nat.minFac_le_of_dvd hpp.two_le hpd
+    rw [if_pos ⟨hpp, hpd⟩, roughIndicator_eq_minFac hn p]
+    by_cases hpe : p = n.minFac
+    · rw [if_pos (le_of_eq hpe), if_pos hpe]
+    · rw [if_neg (by omega : ¬ p ≤ n.minFac), if_neg hpe]
+  · rw [if_neg hc]
+    symm
+    by_cases hpe : p = n.minFac
+    · rw [if_pos hpe]
+      exfalso
+      apply hc
+      rw [hpe]
+      exact ⟨Nat.minFac_prime (by omega), Nat.minFac_dvd n⟩
+    · rw [if_neg hpe]
+
+/-- The ladder fibres summed over the primes: the number of primes of `[z, P)` that divide `n` and
+lie below the level `L` is one exactly when the least prime factor of `n` lies in `[z, L)`. -/
+private lemma ladder_sum_eq {n z P : ℕ} {L : ℝ} (hn : 2 ≤ n) (hP : ⌈L⌉₊ ≤ P) :
+    (∑ p ∈ Finset.Ico z P,
+        (if p.Prime ∧ (p : ℝ) < L ∧ p ∣ n then Task308.roughIndicator n p else 0)) =
+      (if z ≤ n.minFac ∧ (n.minFac : ℝ) < L then (1 : ℝ) else 0) := by
+  have hterm : ∀ p ∈ Finset.Ico z P,
+      (if p.Prime ∧ (p : ℝ) < L ∧ p ∣ n then Task308.roughIndicator n p else 0) =
+        (if p = n.minFac ∧ (p : ℝ) < L then (1 : ℝ) else 0) := by
+    intro p _
+    by_cases hc : p.Prime ∧ (p : ℝ) < L ∧ p ∣ n
+    · obtain ⟨hpp, hpL, hpd⟩ := hc
+      have hle : n.minFac ≤ p := Nat.minFac_le_of_dvd hpp.two_le hpd
+      rw [if_pos ⟨hpp, hpL, hpd⟩, roughIndicator_eq_minFac hn p]
+      by_cases hpe : p = n.minFac
+      · rw [if_pos (by omega : p ≤ n.minFac), if_pos ⟨hpe, hpL⟩]
+      · rw [if_neg (by omega : ¬ p ≤ n.minFac), if_neg (by rintro ⟨h, -⟩; exact hpe h)]
+    · by_cases h2 : p = n.minFac ∧ (p : ℝ) < L
+      · exfalso
+        apply hc
+        refine ⟨?_, h2.2, ?_⟩
+        · rw [h2.1]; exact Nat.minFac_prime (by omega)
+        · rw [h2.1]; exact Nat.minFac_dvd n
+      · rw [if_neg hc, if_neg h2]
+  rw [Finset.sum_congr rfl hterm]
+  by_cases hq : z ≤ n.minFac ∧ (n.minFac : ℝ) < L
+  · have hML : n.minFac < ⌈L⌉₊ := nat_lt_ceil_iff.mpr hq.2
+    have hmem : n.minFac ∈ Finset.Ico z P := Finset.mem_Ico.mpr ⟨hq.1, lt_of_lt_of_le hML hP⟩
+    rw [if_pos hq, Finset.sum_eq_single n.minFac]
+    · rw [if_pos ⟨rfl, hq.2⟩]
+    · intro b _ hb
+      rw [if_neg (by rintro ⟨hbe, -⟩; exact hb hbe)]
+    · intro hnot
+      exact absurd hmem hnot
+  · rw [if_neg hq]
+    refine Finset.sum_eq_zero fun p hp => ?_
+    rw [if_neg]
+    rintro ⟨hpe, hpL⟩
+    apply hq
+    refine ⟨?_, ?_⟩
+    · have := (Finset.mem_Ico.mp hp).1
+      omega
+    · rwa [← hpe]
+
+/-- The level ladder in the form the `h`, `j` and `kept` leaves use: the self scaled rough indicator
+of the cofactor is the indicator at a fixed lower level minus the fibres of the primes of
+`[z, P)` below the level. -/
+private lemma rough_level_decomp_fibre {n z P : ℕ} {L : ℝ} (hn : 2 ≤ n)
+    (hz : z ≤ ⌈L⌉₊) (hP : ⌈L⌉₊ ≤ P) :
+    upperRough n L =
+      Task308.roughIndicator n z -
+        ∑ p ∈ Finset.Ico z P,
+          (if p.Prime ∧ (p : ℝ) < L ∧ p ∣ n then Task308.roughIndicator n p else 0) := by
+  rw [upperRough_eq_roughIndicator_ceil hn, roughIndicator_eq_sub_minFac hn hz, ladder_sum_eq hn hP]
+  congr 1
+  by_cases h1 : z ≤ n.minFac
+  · by_cases h3 : n.minFac < ⌈L⌉₊
+    · rw [if_pos ⟨h1, h3⟩, if_pos ⟨h1, nat_lt_ceil_iff.mp h3⟩]
+    · rw [if_neg (by rintro ⟨-, hc⟩; exact h3 hc),
+        if_neg (by rintro ⟨-, hc⟩; exact h3 (nat_lt_ceil_iff.mpr hc))]
+  · rw [if_neg (by rintro ⟨h, -⟩; exact h1 h), if_neg (by rintro ⟨h, -⟩; exact h1 h)]
+
+
+/-- The lower window test forces the cofactor above one: a prime in the window `[m ^ c1, m ^ c4)` with
+`c4 < 1` can only be a strict divisor, so `n ≥ 2`. -/
+private lemma window_ge_two {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {p1 n : ℕ}
+    (hp1 : 1 ≤ p1)
+    (hw : ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+      (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) : 2 ≤ n := by
+  rcases Nat.eq_zero_or_pos n with h0 | hpos
+  · rw [h0] at hw
+    simp only [Nat.cast_zero, mul_zero] at hw
+    have hc4 : 0 < upperC4 ε := upperC4_pos hε8
+    rw [Real.zero_rpow hc4.ne'] at hw
+    have hpos1 : (0 : ℝ) ≤ (p1 : ℝ) := by positivity
+    linarith [hw.2]
+  · obtain ⟨-, h2⟩ := window_nat_iff (c := upperC4 ε) (upperC4_pos hε8) hp1 hpos
+    have h3 : ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ < n := h2.mp hw.2
+    have hc4 : upperC4 ε < 1 := upperC4_lt_one hε hε8
+    have hc4pos : 0 < upperC4 ε := upperC4_pos hε8
+    have hexp : (0 : ℝ) < 1 / upperC4 ε - 1 := by
+      rw [sub_pos, lt_div_iff₀ hc4pos]
+      linarith
+    have hgt : (1 : ℝ) ≤ (p1 : ℝ) ^ (1 / upperC4 ε - 1) := by
+      calc (1 : ℝ) = (1 : ℝ) ^ (1 / upperC4 ε - 1) := (Real.one_rpow _).symm
+        _ ≤ (p1 : ℝ) ^ (1 / upperC4 ε - 1) :=
+            Real.rpow_le_rpow (by norm_num) (by exact_mod_cast hp1) hexp.le
+    have h4 : ((1 : ℕ) : ℝ) ≤ (p1 : ℝ) ^ (1 / upperC4 ε - 1) := by exact_mod_cast hgt
+    have h5 : 1 ≤ ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ := Nat.le_floor h4
+    omega
+
+/-- The level ladder summed over one fibre: the self scaled rough sum of the cofactor is the fixed
+level rough sum minus the sums of its least prime factor fibres, summed over the primes of `[z, P)`.
+
+This is the identity the `h`, `j` and `kept` leaves need: every piece on the right has a *fixed*
+rough level, so it is a rough character sum over an interval and can be bounded by
+`Rough514.rough_character_interval`. -/
+private lemma fibre_ladder_identity {ε : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q) {Y : ℝ}
+    {L K Pmax : ℕ} {p1 z : ℕ}
+    (hS2 : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+      (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε), 2 ≤ n)
+    (hzS : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+      (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+      z ≤ ⌈((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε⌉₊)
+    (hPS : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+      (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+      ⌈((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε⌉₊ ≤ Pmax) :
+    ∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+          upperRough n (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)
+      = ∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+          (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+          ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+            Task308.roughIndicator n z : ℝ) : ℂ) * χ (n : ZMod q) -
+        ∑ p ∈ Finset.Ico z Pmax,
+          ∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+            (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+            (if p.Prime ∧ (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ∧ p ∣ n then
+              ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                Task308.roughIndicator n p : ℝ) : ℂ) * χ (n : ZMod q)
+              else 0) := by
+  set S : Finset ℕ := (Finset.Ioc (L / p1) (K / p1)).filter
+    (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+      (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) with hS
+  set F : ℕ → ℂ := fun n =>
+    ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+      upperRough n (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q) with hF
+  set G : ℕ → ℂ := fun n =>
+    ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+      Task308.roughIndicator n z : ℝ) : ℂ) * χ (n : ZMod q) with hG
+  set H : ℕ → ℕ → ℂ := fun p n =>
+    (if p.Prime ∧ (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ∧ p ∣ n then
+      ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+        Task308.roughIndicator n p : ℝ) : ℂ) * χ (n : ZMod q)
+      else 0) with hH
+  have key : ∀ n ∈ S, F n = G n - ∑ p ∈ Finset.Ico z Pmax, H p n := by
+    intro n hn
+    rw [hS] at hn
+    simp only [hF, hG, hH]
+    rw [rough_level_decomp_fibre (hn := hS2 n hn) (hz := hzS n hn) (hP := hPS n hn)]
+    rw [mul_sub, Complex.ofReal_sub, sub_mul]
+    congr 1
+    rw [Finset.mul_sum, Complex.ofReal_sum, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    by_cases hc : (p.Prime ∧ (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ∧ p ∣ n)
+    · rw [if_pos hc, if_pos hc]
+    · rw [if_neg hc, if_neg hc]
+      simp
+  calc ∑ n ∈ S, F n
+      = ∑ n ∈ S, (G n - ∑ p ∈ Finset.Ico z Pmax, H p n) := Finset.sum_congr rfl key
+    _ = ∑ n ∈ S, G n - ∑ n ∈ S, ∑ p ∈ Finset.Ico z Pmax, H p n := by
+        rw [Finset.sum_sub_distrib]
+    _ = ∑ n ∈ S, G n - ∑ p ∈ Finset.Ico z Pmax, ∑ n ∈ S, H p n := by rw [Finset.sum_comm]
+
+
+/-- The page 53 window on one fibre as an integer interval in the cofactor. -/
+private lemma filter_window_eq_Ioc {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {p1 a b : ℕ}
+    (hp1 : 1 ≤ p1) :
+    (Finset.Ioc a b).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) =
+      Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+        (min b ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊) := by
+  have hpred : ∀ n : ℕ,
+      (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) ↔
+      (n ≤ ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ ∧ ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ < n) := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with h0 | hpos
+    · subst h0
+      have hc4 : 0 < upperC4 ε := upperC4_pos hε8
+      have hzero : ((p1 : ℝ) * ((0 : ℕ) : ℝ)) ^ upperC4 ε = 0 := by
+        rw [Nat.cast_zero, mul_zero, Real.zero_rpow hc4.ne']
+      constructor
+      · rintro ⟨-, h2⟩
+        rw [hzero] at h2
+        have hp1R : (0 : ℝ) ≤ (p1 : ℝ) := by positivity
+        linarith
+      · rintro ⟨-, h2⟩
+        exact absurd h2 (by omega)
+    · obtain ⟨h1, -⟩ := window_nat_iff (c := upperC1 ε) (upperC1_pos hε8) hp1 hpos
+      obtain ⟨-, h2⟩ := window_nat_iff (c := upperC4 ε) (upperC4_pos hε8) hp1 hpos
+      exact ⟨fun h => ⟨h1.mp h.1, h2.mp h.2⟩, fun h => ⟨h1.mpr h.1, h2.mpr h.2⟩⟩
+  calc (Finset.Ioc a b).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε)
+      = (Finset.Ioc a b).filter
+          (fun n : ℕ => n ≤ ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ ∧
+            ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ < n) := by
+        refine Finset.filter_congr fun n _ => ?_
+        exact hpred n
+    _ = Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+          (min b ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊) := filter_window_Ioc
+
+/-- The fixed level part of one fibre of `h`: Abel summation against the monotone recentring factor,
+with the prefix bound of the rough character sum over an interval. -/
+private lemma fibre_A_le {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) {Y : ℝ} {L K p1 z : ℕ} {C0 A : ℝ}
+    (hp1 : p1.Prime) (hY2 : 2 ≤ Y) (hKY : (K : ℝ) ≤ 2 * Y) (hz1 : 1 ≤ z)
+    (hC0 : 0 ≤ C0)
+    (hpre : ∀ a b : ℕ, 1 ≤ a → (b : ℝ) ≤ 2 * Y →
+      ‖∑ n ∈ Finset.Ioc a b, ((Task308.roughIndicator n z : ℝ) : ℂ) * χ (n : ZMod q)‖ ≤
+        C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) :
+    ‖∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+          Task308.roughIndicator n z : ℝ) : ℂ) * χ (n : ZMod q)‖ ≤
+      4 * (C0 * ((K / p1 : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) := by
+  have hp1one : 1 ≤ p1 := le_trans (by norm_num) hp1.two_le
+  have hY0 : (0 : ℝ) < Y := by linarith
+  have hlogY : 0 < Real.log Y := Real.log_pos (by linarith)
+  have hlogX : 0 < Real.log (2 * Y) := Real.log_pos (by linarith)
+  have hc4p : 0 < upperC4 ε := upperC4_pos hε8
+  have hc4l : upperC4 ε < 1 := upperC4_lt_one hε hε8
+  have hexp : (0 : ℝ) < 1 / upperC4 ε - 1 := by
+    rw [sub_pos, lt_div_iff₀ hc4p]; linarith
+  have hpp1 : 1 ≤ ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ := by
+    have hgt : (1 : ℝ) ≤ (p1 : ℝ) ^ (1 / upperC4 ε - 1) := by
+      calc (1 : ℝ) = (1 : ℝ) ^ (1 / upperC4 ε - 1) := (Real.one_rpow _).symm
+        _ ≤ (p1 : ℝ) ^ (1 / upperC4 ε - 1) :=
+            Real.rpow_le_rpow (by norm_num) (by exact_mod_cast hp1one) hexp.le
+    exact Nat.le_floor (by exact_mod_cast hgt)
+  rw [filter_window_eq_Ioc hε hε8 hp1one]
+  by_cases hle : max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ ≤
+      min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊
+  · have hbK : (min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊) ≤ K / p1 := min_le_left _ _
+    have hbK' : ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) ≤ (K : ℝ) := by
+      have h1 : ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ)
+          ≤ ((K / p1 : ℕ) : ℝ) := by exact_mod_cast hbK
+      have h2 : ((K / p1 : ℕ) : ℝ) ≤ (K : ℝ) := by exact_mod_cast Nat.div_le_self K p1
+      linarith
+    have hbX : ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) ≤ 2 * Y :=
+      le_trans hbK' hKY
+    have ha1 : 1 ≤ max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ :=
+      le_trans hpp1 (le_max_right _ _)
+    have hb1 : 1 ≤ min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ := le_trans ha1 hle
+    have hposb : (0 : ℝ) < ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) := by
+      have : (0 : ℕ) < min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ := by omega
+      exact_mod_cast this
+    -- the recentring factor at the top of the fibre is at most two
+    have hgb : Real.log ((p1 : ℝ) *
+        ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ)) / Real.log Y ≤ 2 := by
+      rw [div_le_iff₀ hlogY]
+      have h3 : (K / p1 : ℕ) * p1 ≤ K := Nat.div_mul_le_self K p1
+      have h4 : ((K / p1 : ℕ) * p1 : ℝ) ≤ (K : ℝ) := by exact_mod_cast h3
+      have h5 : ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ)
+          ≤ ((K / p1 : ℕ) : ℝ) := by exact_mod_cast hbK
+      have h1 : (p1 : ℝ) * ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) ≤ (K : ℝ) := by
+        nlinarith
+      have h2 : Real.log ((p1 : ℝ) * ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ))
+          ≤ Real.log (2 * Y) := Real.log_le_log (by positivity) (le_trans h1 hKY)
+      have h6 : Real.log (2 * Y) ≤ 2 * Real.log Y := by
+        rw [Real.log_mul (by norm_num) hY0.ne']
+        have h7 : Real.log 2 ≤ Real.log Y := Real.log_le_log (by norm_num) hY2
+        linarith
+      linarith
+    have hM0 : (0 : ℝ) ≤ C0 * ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) *
+        Real.log (2 * Y) ^ (-(A + 6)) :=
+      mul_nonneg (mul_nonneg hC0 (le_of_lt hposb)) (Real.rpow_nonneg hlogX.le _)
+    have hterm : ∀ n : ℕ,
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+          Task308.roughIndicator n z : ℝ) : ℂ) * χ (n : ZMod q) =
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y : ℝ) : ℂ) *
+          (((Task308.roughIndicator n z : ℝ) : ℂ) * χ (n : ZMod q)) := by
+      intro n; push_cast; ring
+    rw [Finset.sum_congr rfl (fun n _ => hterm n)]
+    refine le_trans (sum_mono_mul_le_of_prefix
+      (f := fun n : ℕ => ((Task308.roughIndicator n z : ℝ) : ℂ) * χ (n : ZMod q))
+      (g := fun n : ℕ => Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y)
+      (A := max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+      (B := min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊) hle hM0 ?_ ?_ ?_ ?_) ?_
+    · -- nonnegativity at the left end
+      refine div_nonneg (Real.log_nonneg ?_) hlogY.le
+      have h1 : (1 : ℝ) ≤ ((max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ + 1 : ℕ) : ℝ) := by
+        have h2 : (1 : ℕ) ≤ max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ + 1 := by omega
+        exact_mod_cast h2
+      have h3 : (1 : ℝ) ≤ (p1 : ℝ) := by exact_mod_cast hp1one
+      nlinarith
+    · -- nonnegativity at the right end
+      refine div_nonneg (Real.log_nonneg ?_) hlogY.le
+      have h3 : (1 : ℝ) ≤ (p1 : ℝ) := by exact_mod_cast hp1one
+      have h4 : (1 : ℝ) ≤ ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) := by
+        exact_mod_cast hb1
+      nlinarith
+    · -- monotonicity of the recentring factor
+      intro m hm
+      refine div_le_div_of_nonneg_right ?_ hlogY.le
+      have hm1 : 1 ≤ m := by
+        have := (Finset.mem_Ioc.mp hm).1
+        omega
+      have hmR : (1 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm1
+      have h3 : (1 : ℝ) ≤ (p1 : ℝ) := by exact_mod_cast hp1one
+      have hmp : (0 : ℝ) < (p1 : ℝ) * (m : ℝ) := by nlinarith
+      refine Real.log_le_log hmp ?_
+      push_cast
+      nlinarith
+    · -- the prefix bound from `rough_character_interval`
+      intro k hk1 hk2
+      have hkX : (k : ℝ) ≤ 2 * Y := le_trans (by exact_mod_cast hk2) hbX
+      have hb := hpre (max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊) k ha1 hkX
+      refine le_trans hb ?_
+      have hL : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) := Real.rpow_nonneg hlogX.le _
+      have hk : (k : ℝ) ≤ ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) := by
+        exact_mod_cast hk2
+      exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hk hC0) hL
+    · -- the arithmetic
+      have h1 : (0 : ℝ) ≤ C0 * Real.log (2 * Y) ^ (-(A + 6)) :=
+        mul_nonneg hC0 (Real.rpow_nonneg hlogX.le _)
+      have h2 : ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ)
+          ≤ ((K / p1 : ℕ) : ℝ) := by exact_mod_cast hbK
+      have h3 : (0 : ℝ) ≤ ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) :=
+        le_of_lt hposb
+      have h4 : (2 : ℝ) * (Real.log ((p1 : ℝ) *
+          ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ)) / Real.log Y) *
+          (C0 * ((min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ : ℕ) : ℝ) *
+            Real.log (2 * Y) ^ (-(A + 6)))
+          ≤ 2 * 2 * (C0 * ((K / p1 : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) := by
+        nlinarith [hgb, h1, h2, h3]
+      linarith
+  · rw [Finset.Ioc_eq_empty_of_le (by omega : min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ ≤
+      max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊), Finset.sum_empty, norm_zero]
+    have hp : (0 : ℝ) ≤ ((K / p1 : ℕ) : ℝ) := by positivity
+    have h1 : (0 : ℝ) ≤ C0 * ((K / p1 : ℕ) : ℝ) := mul_nonneg hC0 hp
+    have h2 : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) := Real.rpow_nonneg hlogX.le _
+    linarith [mul_nonneg h1 h2]
+
+
+/-- The two frozen page 53 exponents are at most a third under the standing smallness of `ε`. -/
+private lemma upperC1_le_third {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    upperC1 ε ≤ 1 / 3 := by
+  unfold upperC1
+  have h2 : (7 * (2 * (1 / 16 - 1 / 10 ^ 5)) : ℝ) = 7 * (1 / 8 - 1 / 50000) := by norm_num
+  rw [h2]; linarith
+
+/-- The fourth frozen page 53 exponent is at most a third under the standing smallness of `ε`. -/
+private lemma upperC4_le_third {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    upperC4 ε ≤ 1 / 3 := by
+  unfold upperC4
+  have h2 : (2 * (1 / 16 - 1 / 10 ^ 5) : ℝ) = 1 / 8 - 1 / 50000 := by norm_num
+  rw [h2]; linarith
+
+/-- The exponent comparison behind the lower end of the prime fibres: with `c1, c4 ≤ 1/3` one has
+`(1/c4 - 1) (1/c1 - 2) ≥ 1`. -/
+private lemma exponent_product_ge_one {c1 c4 : ℝ} (h1 : 0 < c1) (h1c : c1 ≤ 1 / 3)
+    (h4 : 0 < c4) (h4c : c4 ≤ 1 / 3) : 1 ≤ (1 / c4 - 1) * (1 / c1 - 2) := by
+  have h1' : 3 ≤ 1 / c1 := by
+    rw [le_div_iff₀ h1]; nlinarith
+  have h4' : 3 ≤ 1 / c4 := by
+    rw [le_div_iff₀ h4]; nlinarith
+  have e1 : 1 ≤ 1 / c1 - 2 := by linarith
+  have e4 : 2 ≤ 1 / c4 - 1 := by linarith
+  have e0 : (0 : ℝ) ≤ 1 / c4 - 1 := by linarith
+  nlinarith [e1, e4, e0]
+
+/-- The lower end of a prime fibre of the ladder is at least the prime itself: `p` is either below
+the window's low end, or so large that the level condition `p < (p1 n) ^ c1` already forces
+`n > thr` with `thr ≥ p`. This is what makes `A / p ≥ 1` for the Abel step. -/
+private lemma thr_ge_of_gt {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {p1 p : ℕ} (hp1 : p1.Prime)
+    (hp : p.Prime) {A0 : ℕ} (hA0 : ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ ≤ A0) (hpA : A0 < p) :
+    (p : ℝ) ≤ (p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ) := by
+  have hc1 : 0 < upperC1 ε := upperC1_pos hε8
+  have hc4 : 0 < upperC4 ε := upperC4_pos hε8
+  have hc1c : upperC1 ε ≤ 1 / 3 := upperC1_le_third hε hε8
+  have hc4c : upperC4 ε ≤ 1 / 3 := upperC4_le_third hε hε8
+  have hp2 : 2 ≤ p := hp.two_le
+  have hp1R : (1 : ℝ) ≤ (p1 : ℝ) := by
+    have := hp1.two_le
+    exact_mod_cast (le_trans (by norm_num) this)
+  have hpR : (0 : ℝ) < (p : ℝ) := by exact_mod_cast (by omega : 0 < p)
+  have hp1pos : (0 : ℝ) < (p1 : ℝ) := by linarith
+  -- `p` exceeds the window's low end `p1 ^ (1/c4 - 1)`
+  have hlt : (p1 : ℝ) ^ (1 / upperC4 ε - 1) < (p : ℝ) := by
+    have hnat : (⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ : ℕ) + 1 ≤ p := by omega
+    have h1 : (((⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ : ℕ) + 1 : ℕ) : ℝ) ≤ (p : ℝ) := by
+      exact_mod_cast hnat
+    push_cast at h1
+    have h2 := Nat.lt_floor_add_one ((p1 : ℝ) ^ (1 / upperC4 ε - 1))
+    linarith
+  -- hence `p ^ (1/c1 - 1) > p1 ^ ((1/c4 - 1) (1/c1 - 1)) ≥ p1`
+  have hexp4 : (0 : ℝ) < 1 / upperC4 ε - 1 := by
+    rw [sub_pos, lt_div_iff₀ hc4]; linarith
+  have hexp1 : (0 : ℝ) < 1 / upperC1 ε - 1 := by
+    rw [sub_pos, lt_div_iff₀ hc1]; linarith
+  have hexp2 : (0 : ℝ) < 1 / upperC1 ε - 2 := by
+    have h3 : (3 : ℝ) ≤ 1 / upperC1 ε := by
+      rw [le_div_iff₀ hc1]; nlinarith
+    linarith
+  have hprod : 1 ≤ (1 / upperC4 ε - 1) * (1 / upperC1 ε - 2) :=
+    exponent_product_ge_one hc1 hc1c hc4 hc4c
+  have hkey : (p : ℝ) ^ (1 / upperC1 ε - 2) ≥ (p1 : ℝ) := by
+    have h1 : ((p1 : ℝ) ^ (1 / upperC4 ε - 1)) ^ (1 / upperC1 ε - 2) <
+        (p : ℝ) ^ (1 / upperC1 ε - 2) :=
+      Real.rpow_lt_rpow (by positivity) hlt hexp2
+    have h2 : ((p1 : ℝ) ^ (1 / upperC4 ε - 1)) ^ (1 / upperC1 ε - 2) =
+        (p1 : ℝ) ^ ((1 / upperC4 ε - 1) * (1 / upperC1 ε - 2)) := by
+      rw [← Real.rpow_mul (by positivity)]
+    have h3 : (p1 : ℝ) ^ (1 : ℝ) ≤ (p1 : ℝ) ^ ((1 / upperC4 ε - 1) * (1 / upperC1 ε - 2)) :=
+      Real.rpow_le_rpow_of_exponent_le hp1R hprod
+    rw [Real.rpow_one] at h3
+    linarith [h1, h2, h3]
+  -- `thr = p ^ (1/c1 - 1) / p1 = p ^ (1/c1 - 2) * p / p1 ≥ p`
+  have hsplit : (p : ℝ) ^ (1 / upperC1 ε) =
+      (p : ℝ) ^ (1 / upperC1 ε - 2) * (p : ℝ) * (p : ℝ) := by
+    rw [show 1 / upperC1 ε = (1 / upperC1 ε - 2) + 2 by ring]
+    rw [Real.rpow_add hpR, show (2 : ℝ) = 1 + 1 by norm_num, Real.rpow_add hpR,
+      Real.rpow_one]
+    ring
+  rw [hsplit, le_div_iff₀ hp1pos]
+  have hP1 : (1 : ℝ) ≤ (p : ℝ) := by
+    have : 1 ≤ p := by omega
+    exact_mod_cast this
+  have hPe : (1 : ℝ) ≤ (p : ℝ) ^ (1 / upperC1 ε - 2) := Real.one_le_rpow hP1 hexp2.le
+  calc (p : ℝ) * (p1 : ℝ) ≤ (p : ℝ) * (p : ℝ) ^ (1 / upperC1 ε - 2) :=
+        mul_le_mul_of_nonneg_left hkey hpR.le
+    _ ≤ (p : ℝ) * ((p : ℝ) ^ (1 / upperC1 ε - 2) * (p : ℝ)) := by
+        refine mul_le_mul_of_nonneg_left ?_ hpR.le
+        have hPpos : (0 : ℝ) < (p : ℝ) ^ (1 / upperC1 ε - 2) :=
+          Real.rpow_pos_of_pos hpR _
+        nlinarith [hPpos, hP1]
+    _ = (p : ℝ) ^ (1 / upperC1 ε - 2) * (p : ℝ) * (p : ℝ) := by ring
+
+
+/-- One prime fibre of the ladder reindexed: the fibre over the multiples of `p` becomes a sum over
+the cofactor `k = n / p` with the fixed level `p`, the level condition `p < (p1 n) ^ c1` becoming the
+lower end `⌊p ^ (1/c1) / p1⌋` of the interval in `k`. -/
+private lemma fibre_B_reindex {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) {Y : ℝ} {L K p1 p : ℕ} (hp1 : p1.Prime) (hp : p.Prime) :
+    ∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+        (if p.Prime ∧ (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ∧ p ∣ n then
+          ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+            Task308.roughIndicator n p : ℝ) : ℂ) * χ (n : ZMod q)
+          else 0)
+      = χ (p : ZMod q) *
+          ∑ k ∈ Finset.Ioc
+              (max (max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+                ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ / p)
+              (min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ / p),
+            ((Real.log ((p1 : ℝ) * (p : ℝ) * (k : ℝ)) / Real.log Y *
+              Task308.roughIndicator k p : ℝ) : ℂ) * χ (k : ZMod q) := by
+  have hp1one : 1 ≤ p1 := le_trans (by norm_num) hp1.two_le
+  have hp2 : 2 ≤ p := hp.two_le
+  have hc1 : 0 < upperC1 ε := upperC1_pos hε8
+  -- the level condition is a lower bound on the cofactor
+  have hlevel : ∀ n : ℕ,
+      (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ↔
+        ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ < n := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with h0 | hpos
+    · subst h0
+      have hz : ((p1 : ℝ) * ((0 : ℕ) : ℝ)) ^ upperC1 ε = 0 := by
+        rw [Nat.cast_zero, mul_zero, Real.zero_rpow hc1.ne']
+      rw [hz]
+      have h0' : (0 : ℝ) ≤ (p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ) := by positivity
+      constructor
+      · intro h
+        have hpR : (0 : ℝ) ≤ (p : ℝ) := by positivity
+        linarith
+      · intro h
+        exact absurd h (by omega)
+    · have hiff := peel_level_iff (c := upperC1 ε) hc1 (d := p1) (p := p) (n := n) hp1one hpos
+      have h0' : (0 : ℝ) ≤ (p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ) := by positivity
+      rw [hiff]
+      exact ⟨fun h => (Nat.floor_lt h0').mpr h, fun h => (Nat.floor_lt h0').mp h⟩
+  rw [filter_window_eq_Ioc hε hε8 hp1one]
+  -- the prime test is redundant, and the level condition joins the lower end
+  have hif : ∀ n : ℕ,
+      (if p.Prime ∧ (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ∧ p ∣ n then
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+          Task308.roughIndicator n p : ℝ) : ℂ) * χ (n : ZMod q)
+        else 0)
+      = (if ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ < n ∧ p ∣ n then
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+          Task308.roughIndicator n p : ℝ) : ℂ) * χ (n : ZMod q)
+        else 0) := by
+    intro n
+    by_cases h : ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ < n ∧ p ∣ n
+    · rw [if_pos ⟨hp, (hlevel n).mpr h.1, h.2⟩, if_pos h]
+    · rw [if_neg, if_neg h]
+      rintro ⟨-, hlev, hdvd⟩
+      exact h ⟨(hlevel n).mp hlev, hdvd⟩
+  rw [Finset.sum_congr rfl (fun n _ => hif n)]
+  have hset : (Finset.Ioc (max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+        (min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊)).filter
+        (fun n => ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ < n ∧ p ∣ n)
+      = (Finset.Ioc (max (max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+          ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊)
+          (min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊)).filter (fun n => p ∣ n) := by
+    ext n
+    simp only [Finset.mem_filter, Finset.mem_Ioc]
+    constructor
+    · rintro ⟨⟨h1, h2⟩, h3, h4⟩
+      exact ⟨⟨by omega, h2⟩, h4⟩
+    · rintro ⟨⟨h1, h2⟩, h4⟩
+      exact ⟨⟨by omega, h2⟩, by omega, h4⟩
+  rw [← Finset.sum_filter, hset, Finset.sum_filter]
+  -- reindex the multiples of `p`
+  rw [Rough514.sum_dvd_reindex (by omega : 1 ≤ p) _ _
+    (fun m => ((Real.log ((p1 : ℝ) * (m : ℝ)) / Real.log Y *
+      Task308.roughIndicator m p : ℝ) : ℂ) * χ (m : ZMod q))]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  have hchi : χ (((p * k : ℕ)) : ZMod q) = χ (p : ZMod q) * χ (k : ZMod q) := by
+    push_cast
+    rw [map_mul]
+  have hrough : Task308.roughIndicator (p * k) p = Task308.roughIndicator k p := by
+    rw [Rough514.rough_prime_mul hp, if_pos (le_refl p)]
+  have harg : ((p1 : ℝ) * (((p * k : ℕ)) : ℝ)) = (p1 : ℝ) * (p : ℝ) * (k : ℝ) := by
+    push_cast
+    ring
+  rw [hchi, hrough, harg]
+  ring
+
+
+set_option maxHeartbeats 20000000 in
+/-- One prime fibre of the ladder, bounded: after the reindexing of `fibre_B_reindex` the sum over the
+cofactor has the fixed level `p ≥ X ^ (c1/2)`, so Abel summation against the monotone recentring
+factor and `Rough514.rough_character_interval` bound it by `4 C0 (K / (p1 p)) (log X) ^ (-(A+6))`. -/
+private lemma fibre_B_le {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) {Y : ℝ} {L K p1 z p : ℕ} {C0 A : ℝ}
+    (hp1 : p1.Prime) (hp : p.Prime) (hpz : z ≤ p)
+    (hY2 : 2 ≤ Y) (hKY : (K : ℝ) ≤ 2 * Y) (hzX : (2 * Y) ^ (upperC1 ε / 2) ≤ (z : ℝ))
+    (hC0 : 0 ≤ C0)
+    (hpre : ∀ (ζ a b : ℕ), (2 * Y) ^ (upperC1 ε / 2) ≤ (ζ : ℝ) → 1 ≤ a → (b : ℝ) ≤ 2 * Y →
+      ‖∑ n ∈ Finset.Ioc a b, ((Task308.roughIndicator n ζ : ℝ) : ℂ) * χ (n : ZMod q)‖ ≤
+        C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) :
+    ‖∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+        (if p.Prime ∧ (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ∧ p ∣ n then
+          ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+            Task308.roughIndicator n p : ℝ) : ℂ) * χ (n : ZMod q)
+          else 0)‖ ≤
+      4 * (C0 * ((K / p1 / p : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) := by
+  have hp1one : 1 ≤ p1 := le_trans (by norm_num) hp1.two_le
+  have hp2 : 2 ≤ p := hp.two_le
+  have hp0 : 0 < p := by omega
+  have hY0 : (0 : ℝ) < Y := by linarith
+  have hlogY : 0 < Real.log Y := Real.log_pos (by linarith)
+  have hlogX : 0 < Real.log (2 * Y) := Real.log_pos (by linarith)
+  have hp1R : (0 : ℝ) < (p1 : ℝ) := by exact_mod_cast hp1.pos
+  have hpL : (0 : ℝ) < (p : ℝ) := by exact_mod_cast hp0
+  have hp1ge : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast (by omega : 1 ≤ p)
+  have hp1oneR : (1 : ℝ) ≤ (p1 : ℝ) := by exact_mod_cast hp1one
+  rw [fibre_B_reindex hε hε8 χ hp1 hp]
+  set A0 : ℕ := max (max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+    ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ with hA0def
+  set B0 : ℕ := min (K / p1) ⌊(p1 : ℝ) ^ (1 / upperC1 ε - 1)⌋₊ with hB0def
+  rw [norm_mul]
+  have hχ1 : ‖χ (p : ZMod q)‖ ≤ 1 := DirichletCharacter.norm_le_one χ _
+  -- the lower end of the cofactor interval is at least one
+  have hpA0 : p ≤ A0 := by
+    by_contra hcon
+    push_neg at hcon
+    have hA0pp : ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊ ≤
+        max (max (L / p1) ⌊(p1 : ℝ) ^ (1 / upperC4 ε - 1)⌋₊)
+          ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ :=
+      le_trans (le_max_right _ _) (le_max_left _ _)
+    have hthr : (p : ℝ) ≤ (p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ) :=
+      thr_ge_of_gt hε hε8 hp1 hp hA0pp (by rw [← hA0def]; exact hcon)
+    have hfl : p ≤ ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ := Nat.le_floor hthr
+    have h1 : ⌊(p : ℝ) ^ (1 / upperC1 ε) / (p1 : ℝ)⌋₊ ≤ A0 := by
+      rw [hA0def]; exact le_max_right _ _
+    omega
+  by_cases hbA : A0 / p ≤ B0 / p
+  · have ha1 : 1 ≤ A0 / p := Nat.one_le_div_iff hp0 |>.mpr hpA0
+    have hbB : B0 ≤ K / p1 := by rw [hB0def]; exact min_le_left _ _
+    have hbp : ((B0 / p : ℕ) : ℝ) ≤ ((K / p1 / p : ℕ) : ℝ) := by
+      exact_mod_cast (Nat.div_le_div_right hbB)
+    have hbX : ((B0 / p : ℕ) : ℝ) ≤ 2 * Y := by
+      have h1 : ((K / p1 / p : ℕ) : ℝ) ≤ (K : ℝ) := by
+        have h2 : K / p1 / p ≤ K := le_trans (Nat.div_le_self _ _) (Nat.div_le_self _ _)
+        exact_mod_cast h2
+      linarith
+    have hposb : (0 : ℝ) < ((B0 / p : ℕ) : ℝ) := by
+      have : (0 : ℕ) < B0 / p := lt_of_lt_of_le (by omega : 0 < A0 / p) hbA
+      exact_mod_cast this
+    -- the recentring factor at the top of the cofactor interval is at most two
+    have hgb : Real.log ((p1 : ℝ) * (p : ℝ) * ((B0 / p : ℕ) : ℝ)) / Real.log Y ≤ 2 := by
+      rw [div_le_iff₀ hlogY]
+      have h1 : (p : ℝ) * ((B0 / p : ℕ) : ℝ) ≤ (B0 : ℝ) := by
+        have h2 : p * (B0 / p) ≤ B0 := Nat.mul_div_le B0 p
+        exact_mod_cast h2
+      have h3 : (B0 : ℝ) ≤ ((K / p1 : ℕ) : ℝ) := by exact_mod_cast hbB
+      have h3' : ((K / p1 : ℕ) : ℝ) * (p1 : ℝ) ≤ (K : ℝ) := by
+        have h2 : (K / p1) * p1 ≤ K := Nat.div_mul_le_self K p1
+        exact_mod_cast h2
+      have h4 : (p1 : ℝ) * (p : ℝ) * ((B0 / p : ℕ) : ℝ) ≤ (K : ℝ) := by nlinarith [hp1R]
+      have h5 : Real.log ((p1 : ℝ) * (p : ℝ) * ((B0 / p : ℕ) : ℝ)) ≤ Real.log (2 * Y) :=
+        Real.log_le_log (by positivity) (le_trans h4 hKY)
+      have h6 : Real.log (2 * Y) ≤ 2 * Real.log Y := by
+        rw [Real.log_mul (by norm_num) hY0.ne']
+        have h7 : Real.log 2 ≤ Real.log Y := Real.log_le_log (by norm_num) hY2
+        linarith
+      linarith
+    set g : ℕ → ℝ := fun k => Real.log ((p1 : ℝ) * (p : ℝ) * (k : ℝ)) / Real.log Y with hgdef
+    set F : ℕ → ℂ := fun k => ((Task308.roughIndicator k p : ℝ) : ℂ) * χ (k : ZMod q) with hFdef
+    set M : ℝ := C0 * ((B0 / p : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6)) with hMdef
+    have hM0 : (0 : ℝ) ≤ M := by
+      rw [hMdef]
+      exact mul_nonneg (mul_nonneg hC0 (le_of_lt hposb)) (Real.rpow_nonneg hlogX.le _)
+    have hterm : ∀ k : ℕ,
+        ((Real.log ((p1 : ℝ) * (p : ℝ) * (k : ℝ)) / Real.log Y *
+          Task308.roughIndicator k p : ℝ) : ℂ) * χ (k : ZMod q) = (g k : ℂ) * F k := by
+      intro k; rw [hgdef, hFdef]; push_cast; ring
+    have hga : (0 : ℝ) ≤ g (A0 / p + 1) := by
+      rw [hgdef]
+      refine div_nonneg (Real.log_nonneg ?_) hlogY.le
+      have h1 : (1 : ℝ) ≤ ((A0 / p + 1 : ℕ) : ℝ) := by
+        have h2 : (1 : ℕ) ≤ A0 / p + 1 := by omega
+        exact_mod_cast h2
+      have h3 : (1 : ℝ) ≤ (p1 : ℝ) * (p : ℝ) := by nlinarith [hp1oneR, hp1ge]
+      nlinarith [h3, h1]
+    have hgb2 : (0 : ℝ) ≤ g (B0 / p) := by
+      rw [hgdef]
+      refine div_nonneg (Real.log_nonneg ?_) hlogY.le
+      have h4 : (1 : ℝ) ≤ ((B0 / p : ℕ) : ℝ) := by
+        have : (1 : ℕ) ≤ B0 / p := by omega
+        exact_mod_cast this
+      have h3 : (1 : ℝ) ≤ (p1 : ℝ) * (p : ℝ) := by nlinarith [hp1oneR, hp1ge]
+      nlinarith [h3, h4]
+    have hinc : ∀ m ∈ Finset.Ioc (A0 / p) (B0 / p - 1), g m ≤ g (m + 1) := by
+      intro m hm
+      rw [hgdef]
+      refine div_le_div_of_nonneg_right ?_ hlogY.le
+      have hm1 : 1 ≤ m := by
+        have := (Finset.mem_Ioc.mp hm).1
+        omega
+      have hmR : (1 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm1
+      have h3 : (1 : ℝ) ≤ (p1 : ℝ) * (p : ℝ) := by nlinarith [hp1oneR, hp1ge]
+      refine Real.log_le_log (by nlinarith [h3, hmR]) ?_
+      push_cast
+      nlinarith
+    have hP : ∀ k, A0 / p ≤ k → k ≤ B0 / p → ‖∑ m ∈ Finset.Ioc (A0 / p) k, F m‖ ≤ M := by
+      intro k hk1 hk2
+      have hkX : (k : ℝ) ≤ 2 * Y := le_trans (by exact_mod_cast hk2) hbX
+      have hlev : (2 * Y) ^ (upperC1 ε / 2) ≤ (p : ℝ) := le_trans hzX (by exact_mod_cast hpz)
+      have hb := hpre p (A0 / p) k hlev ha1 hkX
+      rw [hMdef]
+      refine le_trans hb ?_
+      have hL : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) := Real.rpow_nonneg hlogX.le _
+      have hk : (k : ℝ) ≤ ((B0 / p : ℕ) : ℝ) := by exact_mod_cast hk2
+      exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hk hC0) hL
+    have hAbel : ‖∑ k ∈ Finset.Ioc (A0 / p) (B0 / p), (g k : ℂ) * F k‖ ≤ 2 * g (B0 / p) * M :=
+      sum_mono_mul_le_of_prefix hbA hM0 hga hgb2 hinc hP
+    rw [Finset.sum_congr rfl (fun k _ => hterm k)]
+    calc ‖χ (p : ZMod q)‖ * ‖∑ k ∈ Finset.Ioc (A0 / p) (B0 / p), (g k : ℂ) * F k‖
+        ≤ 1 * ‖∑ k ∈ Finset.Ioc (A0 / p) (B0 / p), (g k : ℂ) * F k‖ :=
+          mul_le_mul_of_nonneg_right hχ1 (norm_nonneg _)
+      _ = ‖∑ k ∈ Finset.Ioc (A0 / p) (B0 / p), (g k : ℂ) * F k‖ := one_mul _
+      _ ≤ 2 * g (B0 / p) * M := hAbel
+      _ = 2 * (Real.log ((p1 : ℝ) * (p : ℝ) * ((B0 / p : ℕ) : ℝ)) / Real.log Y) *
+            (C0 * ((B0 / p : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) := by rw [hgdef, hMdef]
+      _ ≤ 4 * (C0 * ((K / p1 / p : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) := by
+          have h1 : (0 : ℝ) ≤ C0 * Real.log (2 * Y) ^ (-(A + 6)) :=
+            mul_nonneg hC0 (Real.rpow_nonneg hlogX.le _)
+          have h3 : (0 : ℝ) ≤ ((B0 / p : ℕ) : ℝ) := le_of_lt hposb
+          nlinarith [hgb, h1, hbp, h3]
+  · rw [Finset.Ioc_eq_empty_of_le (by omega : B0 / p ≤ A0 / p)]
+    simp only [Finset.sum_empty, norm_zero, mul_zero]
+    have hp' : (0 : ℝ) ≤ ((K / p1 / p : ℕ) : ℝ) := by positivity
+    have h1 : (0 : ℝ) ≤ C0 * ((K / p1 / p : ℕ) : ℝ) := mul_nonneg hC0 hp'
+    have h2 : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) := Real.rpow_nonneg hlogX.le _
+    linarith [mul_nonneg h1 h2]
+
+
+
+set_option maxHeartbeats 20000000 in
+/-- The `h` term of the self scaled upper coefficient at a fixed scale: the ladder decomposition turns
+it into one fixed level rough character sum plus one sum of prime fibres, each a rough character sum
+over an interval at a fixed level at least `(2 Y) ^ (c1/2)`, and the two reciprocal sums over `p1` and
+`p` cost only logarithms. -/
+private lemma upperH_self_bound {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    ∀ A : ℝ, 0 < A → ∃ C : ℝ, 0 < C ∧ ∀ Y : ℝ, C ≤ Y → ∀ q : ℕ, 1 ≤ q →
+      (q : ℝ) ≤ Real.log Y ^ A → ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
+      ∀ L K : ℕ, 1 ≤ L → (L : ℝ) ≤ Y → ⌊Y⌋₊ ≤ L → (K : ℝ) ≤ 2 * Y →
+        ‖∑ m ∈ Finset.Ioc L K,
+          ((Real.log (m : ℝ) / Real.log Y * upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)‖ ≤
+          C * Y * Real.log Y ^ (-A) := by
+  intro A hA
+  obtain ⟨C0, hC0pos, hC0⟩ :=
+    Rough514.rough_character_interval (c := upperC1 ε / 2) (A := A + 6)
+      (by linarith [upperC1_pos hε8]) (by linarith)
+  refine ⟨max (96 * C0) 4, ?_, ?_⟩
+  · exact lt_of_lt_of_le (by norm_num : (0 : ℝ) < 4) (le_max_right _ _)
+  intro Y hY q hq hqA χ hχ L K hL hLY hLf hKY
+  have hCl : (max (96 * C0) 4 : ℝ) ≤ Y := hY
+  have hC4 : (4 : ℝ) ≤ Y := le_trans (le_max_right _ _) hCl
+  have hY2 : 2 ≤ Y := by linarith
+  have hY0 : (0 : ℝ) < Y := by linarith
+  have hlogY : 0 < Real.log Y := Real.log_pos (by linarith)
+  have hC0Y : C0 ≤ 2 * Y := by
+    have h1 : (0 : ℝ) ≤ C0 := hC0pos.le
+    have h2 : C0 ≤ 96 * C0 := by nlinarith
+    have h3 : 96 * C0 ≤ max (96 * C0) 4 := le_max_left _ _
+    linarith
+  have hlogY1 : (1 : ℝ) ≤ Real.log Y := by
+    rw [Real.le_log_iff_exp_le hY0]
+    exact Real.exp_one_lt_three.le.trans (by linarith)
+  have hc1 : 0 < upperC1 ε := upperC1_pos hε8
+  have hc1le : upperC1 ε ≤ 1 := upperC1_le_one hε
+  -- the fixed level and the top level of the ladder
+  have hX : (2 * Y) ^ (upperC1 ε / 2) ≤ Y ^ upperC1 ε := level_ge hc1 hY2
+  set z : ℕ := ⌈(2 * Y) ^ (upperC1 ε / 2)⌉₊ with hzdef
+  set Pmax : ℕ := ⌈(K : ℝ) ^ upperC1 ε⌉₊ with hPdef
+  have hzX : (2 * Y) ^ (upperC1 ε / 2) ≤ (z : ℝ) := Nat.le_ceil _
+  have hz1 : 1 ≤ z := by
+    have h1 : (1 : ℝ) ≤ (2 * Y) ^ (upperC1 ε / 2) := by
+      have h2 : (1 : ℝ) ≤ 2 * Y := by linarith
+      calc (1 : ℝ) = (1 : ℝ) ^ (upperC1 ε / 2) := (Real.one_rpow _).symm
+        _ ≤ (2 * Y) ^ (upperC1 ε / 2) := Real.rpow_le_rpow (by norm_num) h2 (by positivity)
+    have h2 : (1 : ℝ) ≤ (z : ℝ) := by
+      rw [hzdef]
+      exact le_trans h1 (Nat.le_ceil _)
+    exact_mod_cast h2
+  -- the modulus is within the log power the interval estimate asks for
+  have hlogX : 0 < Real.log (2 * Y) := Real.log_pos (by linarith)
+  have hqA' : (q : ℝ) ≤ Real.log (2 * Y) ^ (A + 6) := by
+    have h1 : Real.log Y ≤ Real.log (2 * Y) := Real.log_le_log hY0 (by linarith)
+    have h3 : Real.log Y ^ A ≤ Real.log (2 * Y) ^ (A + 6) := by
+      have h4 : Real.log Y ^ A ≤ Real.log (2 * Y) ^ A :=
+        Real.rpow_le_rpow hlogY.le h1 hA.le
+      have h5 : Real.log (2 * Y) ^ A ≤ Real.log (2 * Y) ^ (A + 6) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+      linarith
+    linarith
+  have hpre : ∀ (ζ a b : ℕ), (2 * Y) ^ (upperC1 ε / 2) ≤ (ζ : ℝ) → 1 ≤ a → (b : ℝ) ≤ 2 * Y →
+      ‖∑ n ∈ Finset.Ioc a b, ((Task308.roughIndicator n ζ : ℝ) : ℂ) * χ (n : ZMod q)‖ ≤
+        C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6)) := by
+    intro ζ a b hζ ha hb
+    exact hC0 (2 * Y) hC0Y q hq hqA' χ hχ ζ hζ a b ha hb
+  -- reindex the `h` term by its outer prime factor
+  rw [upperH_weighted_reindex (Y := Y) χ]
+  simp only [← Finset.sum_filter]
+  refine le_trans (norm_sum_le _ _) ?_
+  have hfibre : ∀ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+      ‖χ (p1 : ZMod q) *
+          ∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+            (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+            ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+              upperRough n (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε) : ℝ) : ℂ) * χ (n : ZMod q)‖ ≤
+        4 * (C0 * ((K / p1 : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) +
+          4 * (C0 * ((K / p1 : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) *
+            (1 + Real.log Pmax) := by
+    intro p1 hp1mem
+    obtain ⟨hp1K, hp1P⟩ := Finset.mem_filter.mp hp1mem
+    have hp1le : p1 ≤ K := (Finset.mem_Icc.mp hp1K).2
+    have hp1 : p1.Prime := hp1P
+    have hp1one : 1 ≤ p1 := le_trans (by norm_num) hp1.two_le
+    have hmK : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε), p1 * n ≤ K := by
+      intro n hn
+      obtain ⟨hnI, -⟩ := Finset.mem_filter.mp hn
+      have h1 : n ≤ K / p1 := (Finset.mem_Ioc.mp hnI).2
+      calc p1 * n ≤ p1 * (K / p1) := Nat.mul_le_mul_left _ h1
+        _ ≤ K := Nat.mul_div_le K p1
+    have hmY : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε), Y ≤ (p1 : ℝ) * (n : ℝ) := by
+      intro n hn
+      obtain ⟨hnI, -⟩ := Finset.mem_filter.mp hn
+      have h1 : L / p1 < n := (Finset.mem_Ioc.mp hnI).1
+      have h2 : L < p1 * n := by
+        have h3 : L / p1 + 1 ≤ n := by omega
+        have h4 : p1 * (L / p1 + 1) ≤ p1 * n := Nat.mul_le_mul_left _ h3
+        have h5 : L < p1 * (L / p1 + 1) := by
+          have h6 := Nat.div_add_mod L p1
+          have h7 : L % p1 < p1 := Nat.mod_lt _ (by omega : 0 < p1)
+          have h8 : p1 * (L / p1 + 1) = p1 * (L / p1) + p1 := by ring
+          omega
+        omega
+      have h6 : (L : ℝ) + 1 ≤ ((p1 * n : ℕ) : ℝ) := by
+        have h7 : L + 1 ≤ p1 * n := by omega
+        exact_mod_cast h7
+      push_cast at h6
+      have h7 : (Y : ℝ) < (L : ℝ) + 1 := by
+        have h8 : (⌊Y⌋₊ : ℝ) ≤ (L : ℝ) := by exact_mod_cast hLf
+        have h9 : Y < (⌊Y⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one Y
+        linarith
+      linarith
+    have hS2 : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε), 2 ≤ n := by
+      intro n hn
+      exact window_ge_two hε hε8 hp1one (Finset.mem_filter.mp hn).2
+    have hzS : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+        z ≤ ⌈((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε⌉₊ := by
+      intro n hn
+      rw [hzdef]
+      have h1 : (Y : ℝ) ^ upperC1 ε ≤ ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε :=
+        Real.rpow_le_rpow hY0.le (hmY n hn) hc1.le
+      exact Nat.ceil_le.mpr (le_trans (le_trans hX h1) (Nat.le_ceil _))
+    have hPS : ∀ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+        (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+        ⌈((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε⌉₊ ≤ Pmax := by
+      intro n hn
+      rw [hPdef]
+      have h1 : ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (K : ℝ) ^ upperC1 ε := by
+        refine Real.rpow_le_rpow (by positivity) ?_ hc1.le
+        have h2 : ((p1 * n : ℕ) : ℝ) ≤ (K : ℝ) := by exact_mod_cast (hmK n hn)
+        push_cast at h2 ⊢
+        exact h2
+      exact Nat.ceil_le.mpr (le_trans h1 (Nat.le_ceil _))
+    have hAB := fibre_ladder_identity (Y := Y) χ hS2 hzS hPS
+    rw [hAB]
+    refine le_trans (norm_mul_le _ _) ?_
+    refine le_trans (mul_le_mul_of_nonneg_right (DirichletCharacter.norm_le_one χ _)
+      (norm_nonneg _)) ?_
+    rw [one_mul]
+    refine le_trans (norm_sub_le _ _) ?_
+    refine add_le_add ?_ ?_
+    · refine fibre_A_le hε hε8 χ hp1 (by linarith) hKY hz1 hC0pos.le ?_
+      exact fun a b ha hb => hpre z a b hzX ha hb
+    · refine le_trans (norm_sum_le _ _) ?_
+      refine le_trans (Finset.sum_le_sum (g := fun p =>
+        (4 * (C0 * ((K / p1 / p : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6)))))
+        (fun p hpI => ?_)) ?_
+      · by_cases hpp : p.Prime
+        · exact fibre_B_le (p := p) (z := z) hε hε8 χ hp1 hpp (Finset.mem_Ico.mp hpI).1
+            (by linarith) hKY hzX hC0pos.le hpre
+        · have hzero : (∑ n ∈ (Finset.Ioc (L / p1) (K / p1)).filter
+              (fun n : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε),
+              (if p.Prime ∧ (p : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ∧ p ∣ n then
+                ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                  Task308.roughIndicator n p : ℝ) : ℂ) * χ (n : ZMod q)
+                else 0)) = 0 :=
+            Finset.sum_eq_zero (fun n _ => if_neg (fun h => hpp h.1))
+          rw [hzero, norm_zero]
+          exact mul_nonneg (by norm_num)
+            (mul_nonneg (mul_nonneg hC0pos.le (by positivity)) (Real.rpow_nonneg hlogX.le _))
+      · have h1 : ∑ p ∈ Finset.Ico z Pmax, ((K / p1 / p : ℕ) : ℝ) ≤
+            ((K / p1 : ℕ) : ℝ) * (1 + Real.log Pmax) := by
+          have h2 : ∑ p ∈ Finset.Ico z Pmax, ((K / p1 / p : ℕ) : ℝ) ≤
+              ∑ p ∈ Finset.Ico z Pmax, ((K / p1 : ℕ) : ℝ) / (p : ℝ) := by
+            refine Finset.sum_le_sum fun p _ => ?_
+            simpa using Nat.cast_div_le (α := ℝ) (m := K / p1) (n := p)
+          have h3 : ∑ p ∈ Finset.Ico z Pmax, ((K / p1 : ℕ) : ℝ) / (p : ℝ) =
+              ((K / p1 : ℕ) : ℝ) * ∑ p ∈ Finset.Ico z Pmax, (1 : ℝ) / (p : ℝ) := by
+            rw [Finset.mul_sum]
+            refine Finset.sum_congr rfl fun p _ => by ring
+          have h4 : ∑ p ∈ Finset.Ico z Pmax, (1 : ℝ) / (p : ℝ) ≤ 1 + Real.log Pmax := by
+            have hsub : Finset.Ico z Pmax ⊆ Finset.Icc 1 Pmax := by
+              intro p hp
+              obtain ⟨hzp, hpP⟩ := Finset.mem_Ico.mp hp
+              exact Finset.mem_Icc.mpr ⟨by omega, by omega⟩
+            refine le_trans (Finset.sum_le_sum_of_subset_of_nonneg hsub
+              (fun _ _ _ => by positivity)) ?_
+            have hh := harmonic_le_one_add_log Pmax
+            rw [harmonic_eq_sum_Icc] at hh
+            push_cast at hh
+            simpa [one_div] using hh
+          calc ∑ p ∈ Finset.Ico z Pmax, ((K / p1 / p : ℕ) : ℝ)
+              ≤ ∑ p ∈ Finset.Ico z Pmax, ((K / p1 : ℕ) : ℝ) / (p : ℝ) := h2
+            _ = ((K / p1 : ℕ) : ℝ) * ∑ p ∈ Finset.Ico z Pmax, (1 : ℝ) / (p : ℝ) := h3
+            _ ≤ ((K / p1 : ℕ) : ℝ) * (1 + Real.log Pmax) :=
+                mul_le_mul_of_nonneg_left h4 (by positivity)
+        calc ∑ p ∈ Finset.Ico z Pmax,
+              4 * (C0 * ((K / p1 / p : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6)))
+            = 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) *
+                ∑ p ∈ Finset.Ico z Pmax, ((K / p1 / p : ℕ) : ℝ) := by
+              rw [Finset.mul_sum]
+              refine Finset.sum_congr rfl fun p _ => by ring
+          _ ≤ 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) *
+                (((K / p1 : ℕ) : ℝ) * (1 + Real.log Pmax)) := by
+              refine mul_le_mul_of_nonneg_left h1 ?_
+              exact mul_nonneg (mul_nonneg (by norm_num) hC0pos.le) (Real.rpow_nonneg hlogX.le _)
+          _ = 4 * (C0 * ((K / p1 : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) *
+                (1 + Real.log Pmax) := by ring
+  -- the outer sum over the prime factors
+  refine le_trans (Finset.sum_le_sum hfibre) ?_
+  have hLnn : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) := Real.rpow_nonneg hlogX.le _
+  have hsum1 : ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, ((K / p1 : ℕ) : ℝ) ≤
+      (K : ℝ) * (1 + Real.log (K : ℝ)) := by
+    have h2 : ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, ((K / p1 : ℕ) : ℝ) ≤
+        ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (K : ℝ) / (p1 : ℝ) := by
+      refine Finset.sum_le_sum fun p _ => ?_
+      simpa using Nat.cast_div_le (α := ℝ) (m := K) (n := p)
+    have h3 : ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (K : ℝ) / (p1 : ℝ) =
+        (K : ℝ) * ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ) := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun p _ => by ring
+    have h4 : ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ) ≤
+        1 + Real.log (K : ℝ) := prime_inv_sum_le K
+    calc ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, ((K / p1 : ℕ) : ℝ)
+        ≤ ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (K : ℝ) / (p1 : ℝ) := h2
+      _ = (K : ℝ) * ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ) := h3
+      _ ≤ (K : ℝ) * (1 + Real.log (K : ℝ)) := mul_le_mul_of_nonneg_left h4 (by positivity)
+  have hlogK0 : (0 : ℝ) ≤ Real.log (K : ℝ) := by
+    rcases Nat.eq_zero_or_pos K with h0 | hpos
+    · rw [h0]; simp
+    · exact Real.log_nonneg (by exact_mod_cast hpos)
+  have hlogK : Real.log (K : ℝ) ≤ 2 * Real.log Y := by
+    have h1 : Real.log (K : ℝ) ≤ Real.log (2 * Y) := by
+      rcases Nat.eq_zero_or_pos K with h0 | hpos
+      · rw [h0]; simp only [Nat.cast_zero, Real.log_zero]; linarith
+      · exact Real.log_le_log (by exact_mod_cast hpos) hKY
+    have h2 : Real.log (2 * Y) ≤ 2 * Real.log Y := by
+      rw [Real.log_mul (by norm_num) hY0.ne']
+      have h3 : Real.log 2 ≤ Real.log Y := Real.log_le_log (by norm_num) hY2
+      linarith
+    linarith
+  have hlogP0 : (0 : ℝ) ≤ Real.log (Pmax : ℝ) := by
+    rcases Nat.eq_zero_or_pos Pmax with h0 | hpos
+    · rw [h0]; simp
+    · exact Real.log_nonneg (by exact_mod_cast hpos)
+  have hlogP : Real.log (Pmax : ℝ) ≤ 2 * Real.log Y := by
+    have hKc1 : (K : ℝ) ^ upperC1 ε ≤ (K : ℝ) := by
+      rcases Nat.lt_or_ge K 2 with h | h
+      · interval_cases K
+        · rw [Nat.cast_zero, Real.zero_rpow hc1.ne']
+        · rw [Nat.cast_one, Real.one_rpow]
+      · have h2 : (1 : ℝ) ≤ (K : ℝ) := by
+          exact_mod_cast (le_trans (by norm_num : (1 : ℕ) ≤ 2) h)
+        calc (K : ℝ) ^ upperC1 ε ≤ (K : ℝ) ^ (1 : ℝ) :=
+              Real.rpow_le_rpow_of_exponent_le h2 hc1le
+          _ = (K : ℝ) := Real.rpow_one _
+    have h1 : (Pmax : ℝ) ≤ (K : ℝ) := by
+      rw [hPdef]
+      have h2 : ⌈(K : ℝ) ^ upperC1 ε⌉₊ ≤ K := Nat.ceil_le.mpr hKc1
+      exact_mod_cast h2
+    rcases Nat.eq_zero_or_pos Pmax with h0 | hpos
+    · rw [h0]; simp only [Nat.cast_zero, Real.log_zero]; linarith
+    · exact le_trans (Real.log_le_log (by exact_mod_cast hpos) h1) hlogK
+  -- combine
+  have hstep : ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+      (4 * (C0 * ((K / p1 : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) +
+        4 * (C0 * ((K / p1 : ℕ) : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) * (1 + Real.log Pmax))
+      = 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * (2 + Real.log Pmax) *
+          ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, ((K / p1 : ℕ) : ℝ) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun p _ => by ring
+  rw [hstep]
+  -- the logarithms
+  have hlogXge : Real.log Y ≤ Real.log (2 * Y) := Real.log_le_log hY0 (by linarith)
+  have hLXle : Real.log (2 * Y) ^ (-(A + 6)) ≤ Real.log Y ^ (-(A + 6)) :=
+    Real.rpow_le_rpow_of_nonpos hlogY hlogXge (by linarith)
+  have hpow : Real.log Y ^ (-(A + 6)) * (Real.log Y * Real.log Y) = Real.log Y ^ (-(A + 4)) := by
+    rw [show Real.log Y * Real.log Y = Real.log Y ^ (2 : ℝ) from by rw [Real.rpow_two]; ring]
+    rw [← Real.rpow_add hlogY]
+    congr 1
+    ring
+  have hlY : (0 : ℝ) ≤ Real.log Y ^ (-A) := Real.rpow_nonneg hlogY.le _
+  have hl4 : Real.log Y ^ (-(A + 4)) ≤ Real.log Y ^ (-A) :=
+    Real.rpow_le_rpow_of_exponent_le hlogY1 (by linarith)
+  have hYnn : (0 : ℝ) ≤ Y := hY0.le
+  have h1 : (2 + Real.log Pmax) ≤ 4 * Real.log Y := by linarith
+  have h2 : (1 + Real.log (K : ℝ)) ≤ 3 * Real.log Y := by linarith
+  have hp2 : (0 : ℝ) ≤ 2 + Real.log Pmax := by linarith
+  have hp3 : (0 : ℝ) ≤ 1 + Real.log (K : ℝ) := by linarith
+  have hprod : (2 + Real.log Pmax) * ((K : ℝ) * (1 + Real.log (K : ℝ))) ≤
+      (4 * Real.log Y) * ((2 * Y) * (3 * Real.log Y)) := by
+    refine mul_le_mul h1 (mul_le_mul hKY h2 hp3 (by linarith)) (by nlinarith [hp2, hp3])
+      (by nlinarith [hlogY1])
+  have hW : Real.log (2 * Y) ^ (-(A + 6)) * ((4 * Real.log Y) * ((2 * Y) * (3 * Real.log Y)))
+      ≤ 24 * Y * Real.log Y ^ (-A) := by
+    have hWy : (0 : ℝ) ≤ 4 * Real.log Y * ((2 * Y) * (3 * Real.log Y)) := by
+      have h3 : (0 : ℝ) ≤ Real.log Y := hlogY.le
+      nlinarith [h3, hYnn]
+    have hsplit : Real.log (2 * Y) ^ (-(A + 6)) * ((4 * Real.log Y) * ((2 * Y) * (3 * Real.log Y)))
+        = 24 * Y * (Real.log (2 * Y) ^ (-(A + 6)) * (Real.log Y * Real.log Y)) := by ring
+    rw [hsplit]
+    refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+    refine le_trans (mul_le_mul_of_nonneg_right hLXle (by positivity)) ?_
+    rw [hpow]
+    exact hl4
+  calc 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * (2 + Real.log Pmax) *
+        ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, ((K / p1 : ℕ) : ℝ)
+      ≤ 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) *
+          ((2 + Real.log Pmax) * ((K : ℝ) * (1 + Real.log (K : ℝ)))) := by
+        have hnn : (0 : ℝ) ≤ 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) := by positivity
+        have hstep2 := mul_le_mul_of_nonneg_left hsum1 hp2
+        calc 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * (2 + Real.log Pmax) *
+              ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, ((K / p1 : ℕ) : ℝ)
+            = 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) *
+                ((2 + Real.log Pmax) * ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+                  ((K / p1 : ℕ) : ℝ)) := by ring
+          _ ≤ 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) *
+                ((2 + Real.log Pmax) * ((K : ℝ) * (1 + Real.log (K : ℝ)))) :=
+              mul_le_mul_of_nonneg_left hstep2 hnn
+    _ ≤ 4 * C0 * Real.log (2 * Y) ^ (-(A + 6)) *
+          ((4 * Real.log Y) * ((2 * Y) * (3 * Real.log Y))) := by
+        refine mul_le_mul_of_nonneg_left hprod ?_
+        positivity
+    _ = 4 * C0 * (Real.log (2 * Y) ^ (-(A + 6)) * ((4 * Real.log Y) * ((2 * Y) * (3 * Real.log Y)))) := by
+        ring
+    _ ≤ 4 * C0 * (24 * Y * Real.log Y ^ (-A)) := by
+        refine mul_le_mul_of_nonneg_left hW ?_
+        exact mul_nonneg (by norm_num) hC0pos.le
+    _ = 96 * C0 * Y * Real.log Y ^ (-A) := by ring
+    _ ≤ max (96 * C0) 4 * Y * Real.log Y ^ (-A) := by
+        have h4 : 96 * C0 ≤ max (96 * C0) 4 := le_max_left _ _
+        have h6 : (0 : ℝ) ≤ Y * Real.log Y ^ (-A) := mul_nonneg hYnn hlY
+        calc 96 * C0 * Y * Real.log Y ^ (-A) = (96 * C0) * (Y * Real.log Y ^ (-A)) := by ring
+          _ ≤ max (96 * C0) 4 * (Y * Real.log Y ^ (-A)) := mul_le_mul_of_nonneg_right h4 h6
+          _ = max (96 * C0) 4 * Y * Real.log Y ^ (-A) := by ring
 
 /-! ### The four terms of the identity, one at a time -/
 
@@ -1025,7 +2572,153 @@ theorem leaf_h_term_nonprincipal
             ((Real.log (m : ℝ) / Real.log (x ^ (11 / 20 + ε)) *
               upperH ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)‖ ≤
             C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  intro A hA
+  obtain ⟨CH, hCHpos, hCH⟩ := upperH_self_bound hε hε8 (A + 1) (by linarith)
+  set b : ℝ := 11 / 20 + ε with hbdef
+  have hb0 : 0 < b := by rw [hbdef]; linarith
+  have hb1 : b ≤ 1 := by rw [hbdef]; linarith
+  refine ⟨max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+    (CH * (20 / 11 : ℝ) ^ (A + 1))) 4, fun x hx q hq hqA χ hχ t ht => ?_⟩
+  have hx4 : (4 : ℝ) ≤ x := le_trans (le_max_right _ _) hx
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hx1 : (1 : ℝ) ≤ x := by linarith
+  -- the threshold reaches every part of the constant
+  have hexpb : Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1) ≤ x :=
+    le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hx
+  have hbase_le : max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1 ≤ Real.log x :=
+    (Real.le_log_iff_exp_le hx0).mpr hexpb
+  have hlogx1 : (1 : ℝ) ≤ Real.log x := le_trans (le_max_right _ _) hbase_le
+  have hlogx0 : 0 < Real.log x := by linarith
+  have hlogx_big : (20 / 11 : ℝ) ^ (A + 1) ≤ Real.log x := by
+    have h1 : (20 / 11 : ℝ) ^ (A + 1) ≤
+        max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1 :=
+      le_trans (le_max_right (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1)))
+        (le_max_left _ 1)
+    linarith
+  have hlogCHbase : Real.log CH / b + 1 ≤ Real.log x := by
+    have h1 : Real.log CH / b + 1 ≤
+        max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1 :=
+      le_trans (le_max_left (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1)))
+        (le_max_left _ 1)
+    linarith
+  set Y : ℝ := x ^ b with hYdef
+  have hY0 : (0 : ℝ) < Y := by rw [hYdef]; exact Real.rpow_pos_of_pos hx0 _
+  have hY1 : (1 : ℝ) ≤ Y := by rw [hYdef]; exact Real.one_le_rpow hx1 hb0.le
+  have hlogY : Real.log Y = b * Real.log x := by rw [hYdef]; exact Real.log_rpow hx0 _
+  have hlogY0 : 0 < Real.log Y := by rw [hlogY]; nlinarith
+  have hCHY : CH ≤ Y := by
+    have hdiv : Real.log CH / b ≤ Real.log x - 1 := by linarith
+    have h2 : Real.log CH ≤ Real.log x * b := by
+      rw [div_le_iff₀ hb0] at hdiv
+      nlinarith [hdiv, hb0]
+    have h3 : CH = Real.exp (Real.log CH) := (Real.exp_log hCHpos).symm
+    have h4 : x ^ b = Real.exp (Real.log x * b) := Real.rpow_def_of_pos hx0 b
+    rw [hYdef, h3, h4]
+    exact Real.exp_le_exp.mpr h2
+  -- the modulus bound at the core's exponent
+  have hqY : (q : ℝ) ≤ Real.log Y ^ (A + 1) := by
+    have hbm : (1 : ℝ) ≤ b * (20 / 11 : ℝ) := by rw [hbdef]; nlinarith
+    have hone : (1 : ℝ) ≤ (b * (20 / 11 : ℝ)) ^ (A + 1) := Real.one_le_rpow hbm (by linarith)
+    have hbx : (b * (20 / 11 : ℝ)) ^ (A + 1) =
+        b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1) := Real.mul_rpow hb0.le (by norm_num)
+    have hone' : (1 : ℝ) ≤ b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1) := by
+      rw [← hbx]; exact hone
+    have hA0 : (0 : ℝ) ≤ Real.log x ^ A := Real.rpow_nonneg hlogx0.le _
+    have hsplit : Real.log x ^ (A + 1) = Real.log x ^ A * Real.log x := by
+      rw [show (A + 1 : ℝ) = A + 1 by ring, Real.rpow_add hlogx0, Real.rpow_one]
+    have hstep : Real.log x ^ A * (20 / 11 : ℝ) ^ (A + 1) ≤ Real.log x ^ A * Real.log x :=
+      mul_le_mul_of_nonneg_left hlogx_big hA0
+    have hkey : Real.log x ^ A ≤ b ^ (A + 1) * Real.log x ^ (A + 1) := by
+      rw [hsplit]
+      have hbA : (0 : ℝ) < b ^ (A + 1) := Real.rpow_pos_of_pos hb0 _
+      calc Real.log x ^ A = 1 * Real.log x ^ A := by ring
+        _ ≤ (b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1)) * Real.log x ^ A :=
+            mul_le_mul_of_nonneg_right hone' hA0
+        _ = b ^ (A + 1) * (Real.log x ^ A * (20 / 11 : ℝ) ^ (A + 1)) := by ring
+        _ ≤ b ^ (A + 1) * (Real.log x ^ A * Real.log x) :=
+            mul_le_mul_of_nonneg_left hstep hbA.le
+    rw [hlogY, Real.mul_rpow hb0.le hlogx0.le]
+    linarith
+  have hLpos : 1 ≤ ⌊Y⌋₊ := Nat.floor_pos.mpr hY1
+  set L : ℕ := ⌊Y⌋₊ with hLdef
+  set B : ℕ := ⌊2 * Y⌋₊ with hBdef
+  set K : ℕ := min B ⌊t⌋₊ with hKdef
+  have hYB : Finset.Ioc ⌊x ^ (11 / 20 + ε)⌋₊ ⌊2 * x ^ (11 / 20 + ε)⌋₊ = Finset.Ioc L B := by
+    rw [← hbdef, ← hYdef, hLdef, hBdef]
+  have hS : (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t) = Finset.Ioc L K := by
+    have h := filter_rightInterval (t := t) (A := L) (B := B) hLpos
+    rw [rightInterval, hYB]
+    simpa [hKdef] using h
+  rw [hS]
+  rcases Nat.lt_or_ge L K with hLK | hLK
+  · have hLY : (L : ℝ) ≤ Y := by rw [hLdef]; exact Nat.floor_le (by linarith)
+    have hLf : ⌊Y⌋₊ ≤ L := by rw [hLdef]
+    have hKY : (K : ℝ) ≤ 2 * Y := by
+      rw [hKdef]
+      exact le_trans (by exact_mod_cast min_le_left B ⌊t⌋₊) (Nat.floor_le (by linarith))
+    have hcore := hCH Y hCHY q hq hqY χ hχ L K hLpos hLY hLf hKY
+    refine le_trans hcore ?_
+    -- `log Y` is `b log x` and the exponent shift costs `(20/11)^(A+1)`
+    have hpow : Real.log Y ^ (-(A + 1)) = b ^ (-(A + 1)) * Real.log x ^ (-(A + 1)) := by
+      rw [hlogY, Real.mul_rpow hb0.le hlogx0.le]
+    have hbm1 : (1 : ℝ) ≤ b * (20 / 11 : ℝ) := by rw [hbdef]; nlinarith
+    have hone : (1 : ℝ) ≤ b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1) := by
+      have h2 : (1 : ℝ) ≤ (b * (20 / 11 : ℝ)) ^ (A + 1) := Real.one_le_rpow hbm1 (by linarith)
+      rwa [Real.mul_rpow hb0.le (by norm_num)] at h2
+    have hbp : (0 : ℝ) < b ^ (A + 1) := Real.rpow_pos_of_pos hb0 _
+    have hstep : b ^ (-(A + 1)) ≤ (20 / 11 : ℝ) ^ (A + 1) := by
+      rw [Real.rpow_neg hb0.le, inv_eq_one_div, div_le_iff₀ hbp]
+      simpa [mul_comm] using hone
+    have hlxn : (0 : ℝ) ≤ Real.log x ^ (-(A + 1)) := Real.rpow_nonneg hlogx0.le _
+    have hYnn : (0 : ℝ) ≤ Y := hY0.le
+    have hmid : CH * Y * (b ^ (-(A + 1)) * Real.log x ^ (-(A + 1))) ≤
+        CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1))) := by
+      have h0 : (0 : ℝ) ≤ CH * Y := mul_nonneg hCHpos.le hYnn
+      exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hstep hlxn) h0
+    have hexp2 : Real.log x ^ (-(A + 1)) ≤ Real.log x ^ (-A) :=
+      Real.rpow_le_rpow_of_exponent_le hlogx1 (by linarith)
+    have htail : Y * Real.log x ^ (-(A + 1)) ≤ Y * Real.log x ^ (-A) :=
+      mul_le_mul_of_nonneg_left hexp2 hYnn
+    have hfin : CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1))) ≤
+        max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+          (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * Y * Real.log x ^ (-A) := by
+      have hC : max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+          (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 ≤ x := hx
+      have h1 : CH * (20 / 11 : ℝ) ^ (A + 1) ≤
+          max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 := by
+        exact le_trans (le_max_right _ _) (le_max_left _ _)
+      have h2 : (0 : ℝ) ≤ Y * Real.log x ^ (-A) :=
+        mul_nonneg hYnn (Real.rpow_nonneg hlogx0.le _)
+      have heq : CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1)))
+          = (CH * (20 / 11 : ℝ) ^ (A + 1)) * (Y * Real.log x ^ (-(A + 1))) := by ring
+      have heq2 : max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * Y * Real.log x ^ (-A)
+          = max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * (Y * Real.log x ^ (-A)) := by ring
+      rw [heq, heq2]
+      calc (CH * (20 / 11 : ℝ) ^ (A + 1)) * (Y * Real.log x ^ (-(A + 1)))
+          ≤ (CH * (20 / 11 : ℝ) ^ (A + 1)) * (Y * Real.log x ^ (-A)) :=
+            mul_le_mul_of_nonneg_left htail (by positivity)
+        _ ≤ max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+              (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * (Y * Real.log x ^ (-A)) :=
+            mul_le_mul_of_nonneg_right h1 h2
+    calc CH * Y * Real.log Y ^ (-(A + 1))
+        = CH * Y * (b ^ (-(A + 1)) * Real.log x ^ (-(A + 1))) := by rw [hpow]
+      _ ≤ CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1))) := hmid
+      _ ≤ max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * Y * Real.log x ^ (-A) := hfin
+      _ = max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
+          rw [← hbdef, hYdef]
+  · rw [Finset.Ioc_eq_empty_of_le hLK, Finset.sum_empty, norm_zero]
+    have h1 : (0 : ℝ) ≤ max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+        (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 := by
+      have h2 : (0 : ℝ) < Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1) :=
+        Real.exp_pos _
+      exact le_trans (le_trans h2.le (le_max_left _ _)) (le_max_left _ _)
+    have h3 : (0 : ℝ) ≤ x ^ (11 / 20 + ε) := by positivity
+    exact mul_nonneg (mul_nonneg h1 h3) (Real.rpow_nonneg hlogx0.le _)
 
 /-- LEAF: the `j` term of the identity. The third term of the page 53 raw weight, the sum over two
 decreasing prime factors at levels between `m ^ c1` and `m ^ c4` of the sifted indicator of the
