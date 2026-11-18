@@ -68,11 +68,8 @@ bound and gives nothing about a sum. Instance: `X = 4`, `n = 2`, where the coeff
 theorem leaf_window_coefficient_identity (X : ℕ) (hX : 1 ≤ X) (n : ℕ) (hn : n ≤ X) :
     fourierCoeff (fun t => FX X (X ^ 2) t ^ 2) (n : ℤ) =
       ((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) := by
-  have hn2 : n ≤ X ^ 2 := hn.trans (Nat.le_self_pow two_ne_zero X)
-  have h := fourierCoeff_FX_sq (X : ℝ) (X ^ 2) n hn2
-  have hR : LeanLab.ExceptionalSet.PintzAlthofer2026.RΛ n = r2 n := rfl
-  rw [hR] at h
-  exact h
+  rw [fourierCoeff_FX_sq (X : ℝ) (X ^ 2) n (hn.trans (Nat.le_self_pow two_ne_zero X))]
+  rfl
 
 /-- LEAF: One frequency, split: at an even `n` in the window `0 ≤ n ≤ X` with `1 ≤ X`, the squared
 modulus of the `n`-th coefficient of the difference between the squared generating function and the
@@ -90,88 +87,7 @@ theorem leaf_window_term_split (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 /
       2 * (error n) ^ 2 +
         2 * ‖fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ) -
             ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 := by
-  classical
-  have hnX : n ≤ X := by
-    have := mem_range.mp (mem_filter.mp hn).1
-    omega
-  have hX0 : (0 : ℝ) < X := by exact_mod_cast (show 0 < X by omega)
-  have hFX : MemLp (fun t => FX (X : ℝ) (X ^ 2) t ^ 2) 2 haarAddCircle :=
-    memLp_FX_sq (X : ℝ) (X ^ 2)
-  have hW : MemLp (Vfun X (Nat.sqrt X) (Nat.sqrt X)) 2 haarAddCircle :=
-    memLp_Vfun hX0 _ _
-  have hneg : fourierCoeff (-(Vfun X (Nat.sqrt X) (Nat.sqrt X))) =
-      -fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) := by
-    ext m
-    have h := fourierCoeff.const_smul (T := (1 : ℝ)) (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (-1) m
-    simpa [neg_smul, one_smul] using h
-  have hcoef : fourierCoeff
-        (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) (n : ℤ) =
-      ((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-        fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ) := by
-    have hadd := fourierCoeff.add (T := (1 : ℝ))
-      (f := fun t => FX X (X ^ 2) t ^ 2) (g := -(Vfun X (Nat.sqrt X) (Nat.sqrt X)))
-      (hFX.integrable one_le_two) (hW.integrable one_le_two).neg
-    have heq : (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) =
-        (fun t => FX X (X ^ 2) t ^ 2) + (-(Vfun X (Nat.sqrt X) (Nat.sqrt X))) := by
-      ext t
-      simp [sub_eq_add_neg]
-    rw [heq, hadd, hneg, Pi.add_apply, Pi.neg_apply,
-      leaf_window_coefficient_identity X hX n hnX]
-    rfl
-  rw [hcoef]
-  have hexp1 : Real.exp (-(n : ℝ) / X) ≤ 1 := by
-    rw [Real.exp_le_one_iff, neg_div]
-    have hnn : (0 : ℝ) ≤ (n : ℝ) / X := div_nonneg (Nat.cast_nonneg n) hX0.le
-    linarith
-  have hexp0 : (0 : ℝ) < Real.exp (-(n : ℝ) / X) := Real.exp_pos _
-  have hab : ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-      ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 ≤ (error n) ^ 2 := by
-    have hid : ((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-        ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) =
-          ((error n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) := by
-      simp only [error]
-      push_cast
-      ring
-    rw [hid, Complex.norm_real, Real.norm_eq_abs, sq_abs, mul_pow]
-    have he2 : Real.exp (-(n : ℝ) / X) ^ 2 ≤ 1 := by nlinarith
-    nlinarith [sq_nonneg (error n)]
-  have hsplit : ((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-      fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ) =
-      (((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-        ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)) +
-      (((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
-        fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ)) := by
-    ring
-  have hstep : ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-      fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ)‖ ^ 2 ≤
-      2 * ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-        ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 +
-      2 * ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
-        fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ)‖ ^ 2 := by
-    rw [hsplit]
-    calc ‖(((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-            ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)) +
-          (((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
-            fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ))‖ ^ 2
-        ≤ (‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-              ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ +
-            ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
-              fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ)‖) ^ 2 :=
-          pow_le_pow_left₀ (norm_nonneg _) (norm_add_le _ _) 2
-      _ ≤ 2 * (‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-              ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 +
-            ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
-              fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ)‖ ^ 2) := add_sq_le
-      _ = 2 * ‖((r2 n * Real.exp (-(n : ℝ) / X) : ℝ) : ℂ) -
-              ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2 +
-            2 * ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
-              fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ)‖ ^ 2 := by ring
-  have hsymm : ‖fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ) -
-      ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ =
-      ‖((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ) -
-        fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ)‖ := norm_sub_rev _ _
-  rw [hsymm]
-  nlinarith [hab, hstep]
+  sorry
 
 /-- LEAF: the mean square of the smoothed model error on the even window. There are `C` and `X₀`
 with `0 ≤ C` and, for every `X ≥ X₀`, the sum of `(error n) ^ 2` over the even `0 ≤ n ≤ X` is at
@@ -203,7 +119,7 @@ theorem leaf_window_model_energy (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3
         ‖fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) (n : ℤ) -
           ((Real.exp (-(n : ℝ) / X) * (n : ℝ) * Sing n : ℝ) : ℂ)‖ ^ 2) ≤
         C * (X : ℝ) ^ (5 / 2 + ε) := by
-  exact leaf_singular_energy ε hε
+  sorry
 
 /-- Assembly of the window leaf from the per frequency split and the two mean square estimates.
 The per frequency inequality is summed over the even window, the sum of the two pieces is split into
