@@ -1,4 +1,6 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_very_low_mult_le
+import LeanLab.HelfgottMajor.RealAxisBand
+import LeanLab.PNTPort.DirichletZF.SiegelSigns
 
 /-!
 # Split of `very_low_mult_le_one_of_im_eq_zero` (`HelfgottMajor/SPLIT_book_count_band_very_low_mult_le`)
@@ -253,7 +255,26 @@ theorem very_low_real_zero_deriv_ne_zero_half (χ : DirichletCharacter ℂ q) (h
     (hq : (q : ℝ) ≤ 17) {T : ℝ} {ρ : ℂ} (hρ : ρ ∈ stripZeros χ T) (him : ρ.im = 0)
     (hhalf : 1 / 2 ≤ ρ.re) :
     deriv (DirichletCharacter.LFunction χ) ρ ≠ 0 := by
-  sorry
+  -- The real point `ρ` is the coercion of `ρ.re`, and it is a zero of `L(·, χ)` there.
+  have h0 : 0 < ρ.re := hρ.2.1
+  have h1 : ρ.re < 1 := hρ.2.2.1
+  have hcast : ρ = ((ρ.re : ℝ) : ℂ) := by
+    apply Complex.ext <;> simp [him]
+  have hL : DirichletCharacter.LFunction χ ((ρ.re : ℝ) : ℂ) = 0 := by
+    rw [← hcast]
+    exact hρ.1
+  have hq' : q ≤ 17 := by exact_mod_cast hq
+  rcases eq_or_ne q 1 with hq1 | hq1
+  · -- conductor one: the `L`-function is the zeta function, which is negative on `(0, 1)`
+    subst hq1
+    rw [DirichletCharacter.LFunction_modOne_eq] at hL
+    have hneg := (LeanLab.PNTPort.DirichletZF.riemannZeta_real_neg h0 h1).2
+    rw [hL] at hneg
+    simp at hneg
+  · -- conductor at most seventeen and not one: no zero on the positive real axis at all
+    exact absurd hL
+      (LeanLab.HelfgottMajor.RealAxisKernel.LFunction_ofReal_ne_zero_of_le_seventeen χ
+        (LeanLab.HelfgottMajor.RealAxisKernel.ne_one_of_isPrimitive χ hχ hq1) hq' h0)
 
 /-- A zero of `L(·, χ)` where the derivative does not vanish has order exactly one, hence
 multiplicity at most one: the first two iterated derivatives are `L` itself, which vanishes, and
