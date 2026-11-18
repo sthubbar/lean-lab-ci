@@ -12,6 +12,9 @@ adds the two bounds with the triangle inequality and adds the constants.
 -/
 import LeanLab.Linnik1951.Decomp520a
 import LeanLab.Linnik1951.PrincipalTail491
+import LeanLab.Linnik1951.LogFourierMass491
+import LeanLab.Linnik1951.PrimeArcRadius520
+import LeanLab.Linnik1951.ArcCross520
 
 namespace LeanLab.Linnik1951
 open Finset MeasureTheory
@@ -23,6 +26,77 @@ private theorem split_range520 {N : ℕ} (hN : 3 < N) :
   have hN1 : 1 ≤ N := by omega
   have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (show 0 < N by omega)
   exact ⟨hN1, Real.rpow_pos_of_pos hNpos _, hNpos, Real.log_nonneg (by exact_mod_cast hN1)⟩
+
+/-- Scale facts for the short arc, standard real arithmetic. With lam the fourth
+root of N and R the product of q and the seventh root of N, on the range of the
+leaf R lies between two and lam, lam is at least one, its fourth power is N, the
+square of q is at most N and the logarithm of N is at least one. -/
+private theorem arc_scale520 {N q : ℕ} (hN : 128 < N) (hq : 1 ≤ q)
+    (hqQ : (q : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ)) :
+    2 ≤ (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ∧
+      (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤ (N : ℝ) ^ (1 / 4 : ℝ) ∧
+      1 ≤ (N : ℝ) ^ (1 / 4 : ℝ) ∧
+      (N : ℝ) ^ (1 / 4 : ℝ) * (N : ℝ) ^ (1 / 4 : ℝ) *
+        ((N : ℝ) ^ (1 / 4 : ℝ) * (N : ℝ) ^ (1 / 4 : ℝ)) = (N : ℝ) ∧
+      (q : ℝ) ^ 2 ≤ (N : ℝ) ∧ 1 ≤ Real.log N := by
+  have hn : (128 : ℝ) ≤ N := by exact_mod_cast hN.le
+  have hN1 : (1 : ℝ) ≤ N := by linarith
+  have hN0 : (0 : ℝ) < N := by linarith
+  have hτ2 : (2 : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) := by
+    have hh := Real.rpow_le_rpow (by norm_num : (0 : ℝ) ≤ 128) hn
+      (by norm_num : (0 : ℝ) ≤ 1 / 7)
+    have he : (128 : ℝ) ^ (1 / 7 : ℝ) = 2 := by
+      rw [show (128 : ℝ) = 2 ^ (7 : ℝ) by norm_num, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rwa [he] at hh
+  have hqr : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  have hlam1 : 1 ≤ (N : ℝ) ^ (1 / 4 : ℝ) := Real.one_le_rpow hN1 (by norm_num)
+  have h4 : (N : ℝ) ^ (1 / 4 : ℝ) * (N : ℝ) ^ (1 / 4 : ℝ) *
+      ((N : ℝ) ^ (1 / 4 : ℝ) * (N : ℝ) ^ (1 / 4 : ℝ)) = (N : ℝ) := by
+    rw [← Real.rpow_add hN0, ← Real.rpow_add hN0]
+    norm_num
+  have hR : (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤ (N : ℝ) ^ (1 / 4 : ℝ) := by
+    have h1 : (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤
+        (N : ℝ) ^ (1 / 10 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) :=
+      mul_le_mul_of_nonneg_right hqQ (Real.rpow_nonneg hN0.le _)
+    have h2 : (N : ℝ) ^ (1 / 10 : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) ≤ (N : ℝ) ^ (1 / 4 : ℝ) := by
+      rw [← Real.rpow_add hN0]
+      exact Real.rpow_le_rpow_of_exponent_le hN1 (by norm_num)
+    exact h1.trans h2
+  have hq4 : (q : ℝ) ≤ (N : ℝ) ^ (1 / 4 : ℝ) :=
+    hqQ.trans (Real.rpow_le_rpow_of_exponent_le hN1 (by norm_num))
+  have hq2 : (q : ℝ) ^ 2 ≤ (N : ℝ) := by
+    have ha : (q : ℝ) ^ 2 ≤ (N : ℝ) ^ (1 / 4 : ℝ) * (N : ℝ) ^ (1 / 4 : ℝ) := by nlinarith
+    have hb : (N : ℝ) ^ (1 / 4 : ℝ) * (N : ℝ) ^ (1 / 4 : ℝ) ≤ (N : ℝ) := by nlinarith
+    exact ha.trans hb
+  have hl : 1 ≤ Real.log N := by
+    have hN3' : (3 : ℝ) < N := by linarith
+    simpa only [Real.log_exp] using Real.log_le_log (Real.exp_pos 1)
+      (Real.exp_one_lt_three.trans hN3').le
+  exact ⟨by nlinarith, hR, hlam1, h4, hq2, hl⟩
+
+/-- Real arithmetic collecting the four terms of the arc comparison into the
+single term of the leaf. -/
+private theorem arc_collect520 (C N R lam l13 : ℝ) (hC : 0 < C) (hN : 0 < N)
+    (hR : 0 < R) (hRlam : R ≤ lam) (hl : 1 ≤ l13) :
+    3 * (C * N / R * l13) + 2 * N * (1 / R) + lam * (C * N / (lam * lam) * l13) +
+        2 * N / lam ≤ (4 * C + 4) * N * l13 * (1 / R) := by
+  have hlam : 0 < lam := lt_of_lt_of_le hR hRlam
+  have hy : N / lam ≤ N / R := div_le_div_of_nonneg_left hN.le hR hRlam
+  have hy0 : 0 ≤ N / lam := by positivity
+  have hx0 : 0 ≤ N / R := by positivity
+  have e1 : lam * (C * N / (lam * lam) * l13) = C * l13 * (N / lam) := by
+    field_simp
+  have e2 : 3 * (C * N / R * l13) = 3 * C * l13 * (N / R) := by ring
+  have e3 : 2 * N * (1 / R) = 2 * (N / R) := by ring
+  have e4 : 2 * N / lam = 2 * (N / lam) := by ring
+  have e5 : (4 * C + 4) * N * l13 * (1 / R) = (4 * C + 4) * l13 * (N / R) := by ring
+  rw [e1, e2, e3, e4, e5]
+  have hCl : 0 ≤ C * l13 := by positivity
+  have h1 : C * l13 * (N / lam) ≤ C * l13 * (N / R) := mul_le_mul_of_nonneg_left hy hCl
+  have h2 : 2 * (N / R) ≤ 2 * l13 * (N / R) := by nlinarith
+  have h3 : 2 * (N / lam) ≤ 2 * l13 * (N / R) := by nlinarith
+  nlinarith
 
 /-- LEAF. First error term, displays 6.1 to 6.3 of the surrounding development:
 on the short arc the principal square is replaced by the square of the full
@@ -38,7 +112,65 @@ theorem short_arc_model_replace520 (hG : LeanLab.DERZ1997.GRH) :
             Complex.exp (((2 * Real.pi * z * (n : ℝ) : ℝ) : ℂ) * Complex.I))‖ ≤
         C * (N : ℝ) * Real.log N ^ 13 *
           (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨C, hC, h⟩ := principal_arc_mean_square_radius520 hG
+  refine ⟨4 * C + 4, by positivity, 128, ?_⟩
+  intro N hN q hq hqQ n _
+  obtain ⟨hR2, hRlam, hlam1, h4, hq2, hl⟩ := arc_scale520 hN hq hqQ
+  have hN1 : 1 ≤ N := by omega
+  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (show 0 < N by omega)
+  set R : ℝ := (q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ) with hRdef
+  set lam : ℝ := (N : ℝ) ^ (1 / 4 : ℝ) with hlamdef
+  have hR0 : 0 < R := by linarith
+  have hlam0 : 0 < lam := by linarith
+  have hR0lam : R ≤ lam * lam := by nlinarith
+  have hRsq : R ^ 2 ≤ (N : ℝ) := by nlinarith
+  have hlam2 : (2 : ℝ) ≤ lam * lam := by linarith
+  have hlamsq : (lam * lam) ^ 2 ≤ (N : ℝ) := by rw [sq]; exact h4.le
+  have hA := h N hN q hq hq2 R hR2 hRsq
+  have hB := h N hN q hq hq2 (lam * lam) hlam2 hlamsq
+  have hξ : 0 < 1 / (lam * lam) := by positivity
+  have hξδ : 1 / (lam * lam) ≤ 1 / R := one_div_le_one_div_of_le hR0 hR0lam
+  have hδh : 1 / R ≤ 1 / 2 := one_div_le_one_div_of_le (by norm_num) hR2
+  have hMass := logFourier_mass491 N hN1 (1 / (lam * lam)) hξ.le (hξδ.trans hδh)
+  have hS : ∀ z : ℝ, 1 / (lam * lam) ≤ |z| → |z| ≤ 1 / R →
+      ‖logFourier520 N z‖ ^ 2 ≤ (N : ℝ) := by
+    intro z hz1 hz2
+    have hzpos : 0 < |z| := lt_of_lt_of_le hξ hz1
+    have hz0 : z ≠ 0 := abs_pos.mp hzpos
+    have hd := logFourier_decay491 N hN1 z hz0 (hz2.trans hδh)
+    have hinv : 1 / |z| ≤ lam * lam := by
+      rw [div_le_iff₀ hzpos]
+      have := (div_le_iff₀ (by positivity : 0 < lam * lam)).mp hz1
+      linarith
+    have hle : ‖logFourier520 N z‖ ≤ lam * lam := hd.trans hinv
+    calc ‖logFourier520 N z‖ ^ 2 ≤ (lam * lam) ^ 2 :=
+          pow_le_pow_left₀ (norm_nonneg _) hle 2
+      _ ≤ (N : ℝ) := hlamsq
+  have hφc : Continuous (fun z : ℝ =>
+      Complex.exp (((2 * Real.pi * z * (n : ℝ) : ℝ) : ℂ) * Complex.I)) := by
+    fun_prop
+  have hmain := arc_square_replace520 (principalPrime520 N q) (logFourier520 N)
+    (continuous_principal520 N q hN1) (logFourier_continuous_radius520 N hN1)
+    (fun z : ℝ => Complex.exp (((2 * Real.pi * z * (n : ℝ) : ℝ) : ℂ) * Complex.I))
+    hφc (fun z => Complex.norm_exp_ofReal_mul_I _)
+    (1 / R) (1 / (lam * lam)) lam _ _ _ (N : ℝ) hξ hξδ hlam0 hA hB hMass hS
+  have hint : principalIntegral520 N q n =
+      ∫ z in -(1 / R)..(1 / R), principalPrime520 N q z ^ 2 *
+        Complex.exp (((2 * Real.pi * z * (n : ℝ) : ℝ) : ℂ) * Complex.I) := by
+    unfold principalIntegral520
+    apply intervalIntegral.integral_congr
+    intro z _
+    simp only []
+    rw [show ((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I =
+      ((2 * Real.pi * z * (n : ℝ) : ℝ) : ℂ) * Complex.I by push_cast; ring]
+  rw [hint]
+  refine hmain.trans ?_
+  have hcol := arc_collect520 C (N : ℝ) R lam (Real.log N ^ 13) hC hNpos hR0 hRlam
+    (one_le_pow₀ hl)
+  have hfin : 3 * (C * (N : ℝ) / R * Real.log N ^ 13) + 2 * (N : ℝ) * (1 / R) +
+      lam * (C * (N : ℝ) / (lam * lam) * Real.log N ^ 13) + 2 * (N : ℝ) / lam ≤
+      (4 * C + 4) * (N : ℝ) * Real.log N ^ 13 * (1 / R) := hcol
+  linarith [hfin]
 
 /-- The two spellings of the phase on the short arc give the same integral. -/
 private lemma arc_phase_order520 (N q : ℕ) (n : ℤ) :
