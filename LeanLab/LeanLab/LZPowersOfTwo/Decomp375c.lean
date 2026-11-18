@@ -4,6 +4,7 @@ AI wrote this Lean code. Goldbach is open.
 -/
 import LeanLab.LZPowersOfTwo.Decomp375b
 import LeanLab.LZPowersOfTwo.ModelFourier353
+import LeanLab.LZPowersOfTwo.ModelTail396
 
 open Real Finset MeasureTheory Filter
 noncomputable section
@@ -33,7 +34,10 @@ theorem major_model_tail375 (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε
       ‖(∫ α : ℝ, majorModel353 s l1 l2 μ γ η ε X α) -
         (∫ α in major293 X, majorModel353 s l1 l2 μ γ η ε X α)‖ ≤
           δ * X * (cutoff293 s μ ε X) ^ s := by
-  sorry
+  -- P0079 page 10, display 36: the inverse-square decay majorModel_decay396 from
+  -- display 32 and the kernel bound, integrated off the arc |α| ≤ X^(1/3) / X in
+  -- majorModel_tail_bound396, gives the factor C / X^(1/3), which tends to zero.
+  exact major_model_tail396 s l1 l2 μ γ η ε hs h1 h2 hr hμ hη hε hε'
 
 /-- P0079 pages 9 to 10, display 34. CONDITIONAL ON major_full_lower375
 and major_model_tail375. This is the exact sealed continuous-major target. -/
