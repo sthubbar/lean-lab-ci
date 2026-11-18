@@ -123,7 +123,44 @@ theorem leaf_offwindow_negative (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 
         ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2
         else 0)
         ≤ C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  classical
+  obtain ⟨C, hC, X₀, hbound⟩ :=
+    leaf_arc_energy_offwindow Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  refine ⟨C, hC, max X₀ 1, ?_⟩
+  intro X hX
+  have hX₀ : X₀ ≤ X := le_trans (le_max_left _ _) hX
+  have hXpos : 0 < X := by omega
+  have hbase := summable_offwindow_coeff_sq X hXpos
+  have hnegSum : Summable (fun n : ℤ => if n < 0 then
+      ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2
+      else 0) :=
+    Summable.of_nonneg_of_le (fun n => by split_ifs <;> positivity)
+      (fun n => by split_ifs <;> first | exact le_rfl | positivity) hbase
+  have hoffSum : Summable (fun n : ℤ =>
+      if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+      else ‖fourierCoeff
+        (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2) :=
+    Summable.of_nonneg_of_le (fun n => by split_ifs <;> positivity)
+      (fun n => by split_ifs <;> first | exact le_rfl | positivity) hbase
+  have hle : ∀ n : ℤ,
+      (if n < 0 then
+        ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2
+        else 0) ≤
+      (if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+        else ‖fourierCoeff
+          (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2) := by
+    intro n
+    by_cases hneg : n < 0
+    · have hnS : n ∉ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) := by
+        intro hm
+        have hmem := mem_window_bounds X n hm
+        omega
+      simp [hneg, hnS]
+    · by_cases hmS : n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ))
+      · simp [hneg, hmS]
+      · simp [hneg, hmS]
+  have hsum := tsum_le_tsum hle hnegSum hoffSum
+  exact hsum.trans (hbound X hX₀)
 
 /-- LEAF. The short frequencies that the even window misses: there are `C` and `X₀` with `0 ≤ C`
 and, for every `X ≥ X₀`, the squared Fourier coefficient energy of the difference between the
