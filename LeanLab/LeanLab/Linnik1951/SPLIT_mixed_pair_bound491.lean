@@ -40,7 +40,71 @@ positive modulus is at least a quarter of the square root of the modulus. This
 is a bound in the modulus alone, with no frequency, no `N` and no logarithm. -/
 theorem gauss_coeff_le_totient491 (q : ℕ) (χ : DirichletCharacter ℂ q) :
     ‖conjugateGauss491 q χ‖ ≤ 4 * (q.totient : ℝ) := by
-  sorry
+  have h_sum_card : ((Finset.range q).filter (fun a => Nat.Coprime a q)).card = q.totient := by
+    rw [Nat.totient]
+    <;> simp [Nat.Coprime_symm]
+  
+  have h_norm : ‖conjugateGauss491 q χ‖ ≤ (q.totient : ℝ) := by
+    have h₁ : conjugateGauss491 q χ = ⋆(∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+      χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) := rfl
+    rw [h₁]
+    have h₂ : ‖(⋆(∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+        χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) : ℂ)‖ =
+        ‖(∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+          χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) : ℂ‖ := by
+      rw [Complex.norm_star]
+    rw [h₂]
+    have h₃ : ‖(∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+        χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) : ℂ‖ ≤
+        ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+          ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ := by
+      apply Finset.norm_sum_le
+    have h₄ : ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+        ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ ≤
+        ((Finset.range q).filter (fun a => Nat.Coprime a q)).card := by
+      apply Finset.sum_le_sum
+      intro a ha
+      have h₄₁ : ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ ≤ 1 := by
+        have h₄₂ : ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ =
+            ‖χ a‖ * ‖Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ := by
+          rw [norm_mul]
+        rw [h₄₂]
+        have h₄₃ : ‖χ a‖ ≤ 1 := by
+          exact DirichletCharacter.norm_le_one χ (a : ZMod q)
+        have h₄₄ : ‖Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ = 1 := by
+          have h₄₄₁ : ‖Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ = 1 := by
+            rw [Complex.norm_exp_ofReal_mul_I]
+            <;> norm_cast
+          rw [h₄₄₁]
+        have h₄₅ : ‖χ a‖ * ‖Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ ≤ 1 := by
+          have h₄₅₁ : ‖χ a‖ * ‖Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ = ‖χ a‖ * 1 := by
+            rw [h₄₄]
+          rw [h₄₅₁]
+          have h₄₅₂ : (0 : ℝ) ≤ ‖χ a‖ := norm_nonneg _
+          nlinarith
+        linarith
+      linarith
+    have h₅ : ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+        ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ ≤ (q.totient : ℝ) := by
+      calc
+        ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+          ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ ≤
+          ((Finset.range q).filter (fun a => Nat.Coprime a q)).card := h₄
+        _ = (q.totient : ℕ) := by rw [h_sum_card]
+        _ ≤ (q.totient : ℝ) := by exact_mod_cast Nat.zero_le _
+    calc
+      ‖(∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+          χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) : ℂ‖ ≤
+          ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
+            ‖χ a * Complex.exp (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ := h₃
+      _ ≤ (q.totient : ℝ) := h₅
+  
+  have h_final : ‖conjugateGauss491 q χ‖ ≤ 4 * (q.totient : ℝ) := by
+    have h₁ : ‖conjugateGauss491 q χ‖ ≤ (q.totient : ℝ) := h_norm
+    have h₂ : (0 : ℝ) ≤ (q.totient : ℝ) := by positivity
+    nlinarith
+  
+  exact h_final
 
 /-- LEAF. Coefficient step of equation 5.5, phase half. The residue phase of any
 character at a positive modulus is at most the totient of that modulus, since it
