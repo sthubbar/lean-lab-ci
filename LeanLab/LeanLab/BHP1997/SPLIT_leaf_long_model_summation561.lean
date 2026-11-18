@@ -38,7 +38,13 @@ theorem leaf_long_model_difference561 (ε D x u : ℝ) (a b : ℝ → ℕ → �
               polynomial512 (Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊) (b x)
                 ((r : ℝ) / q + s) *
               @fourier 1 (-(N : ℤ)) ((((r : ℝ) / q + s) : ℝ) : AddCircle (1 : ℝ))))) := by
-  sorry
+  unfold longPrincipal561
+  rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun q _ => ?_)
+  rw [← Finset.mul_sum, ← Finset.mul_sum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun r _ => ?_)
+  dsimp only
+  ring
 
 /-- LEAF: Triangle step.  The norm of the sum of the single arc errors is at most
 the sum of their norms, and each of those is at most the per-arc budget supplied
