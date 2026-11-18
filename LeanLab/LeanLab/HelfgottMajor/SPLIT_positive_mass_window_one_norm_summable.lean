@@ -34,9 +34,11 @@ theorem positive_mass_window_one_zero_norm_le (q : ℕ) [NeZero q]
     (hzero : DirichletCharacter.LFunction χ ρ = 0) (hre0 : 0 < ρ.re) (hre1 : ρ.re < 1)
     (him : |ρ.im| ≤ T) :
     ‖ρ‖ ≤ 1 + T := by
-  have h := Complex.norm_le_abs_re_add_abs_im ρ
-  have h1 : |ρ.re| ≤ 1 := by rw [abs_of_pos hre0]; linarith
-  linarith
+  have hre_abs : |ρ.re| = ρ.re := abs_of_pos hre0
+  have hre_le : |ρ.re| ≤ 1 := by rw [hre_abs]; linarith
+  calc
+    ‖ρ‖ ≤ |ρ.re| + |ρ.im| := Complex.norm_le_abs_re_add_abs_im ρ
+    _ ≤ 1 + T := by linarith
 
 /-- The zeros of a differentiable function that is not identically zero, cut down by any closed
 ball, form a finite set. The zero set is discrete because the function is analytic on the whole
