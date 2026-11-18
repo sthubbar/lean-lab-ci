@@ -1,4 +1,5 @@
 import LeanLab.LiuWang2002.CheckData569c
+import LeanLab.LiuWang2002.CheckData569cTail
 
 /-!
 Strictly smaller supplies for the sealed Decomp460b leaf.
@@ -22,7 +23,7 @@ This tail is a proper subrange of Task460.primorial_c4_upper.
 Source page 356, display 5.1 star, derived integer certificate. -/
 theorem primorial_c4_upper_tail (n : ℕ) (hn : 12016384 < n) (hn' : n ≤ 16000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact range569cTail n hn hn'
 
 /-- The checked part and open tail have concrete integer witnesses.
 The join belongs only to the checked part.
