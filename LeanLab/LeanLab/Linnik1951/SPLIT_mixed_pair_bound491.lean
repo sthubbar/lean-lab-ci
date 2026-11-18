@@ -15,35 +15,6 @@ open Finset MeasureTheory
 open Filter
 open scoped Topology
 
-/-- The principal character is one on the reduced residues, so the left ordered
-sum of `characterPair491` against one is the residue phase of the other
-character. -/
-private lemma sum_principal_pair491 (q : ℕ) (n : ℤ) (ψ : DirichletCharacter ℂ q) :
-    (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-        (1 : DirichletCharacter ℂ q) a * ψ a *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) =
-      residuePhase555 q n ψ := by
-  unfold residuePhase555
-  apply Finset.sum_congr rfl
-  intro a ha
-  have hunit : IsUnit ((a : ℕ) : ZMod q) :=
-    (ZMod.isUnit_iff_coprime a q).mpr (Finset.mem_filter.mp ha).2
-  simp [MulChar.one_apply hunit]
-
-/-- The principal character is one on the reduced residues, so the right ordered
-sum of `characterPair491` against one is again the residue phase. -/
-private lemma sum_principal_pair491' (q : ℕ) (n : ℤ) (ψ : DirichletCharacter ℂ q) :
-    (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-        ψ a * (1 : DirichletCharacter ℂ q) a *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) =
-      residuePhase555 q n ψ := by
-  unfold residuePhase555
-  apply Finset.sum_congr rfl
-  intro a ha
-  have hunit : IsUnit ((a : ℕ) : ZMod q) :=
-    (ZMod.isUnit_iff_coprime a q).mpr (Finset.mem_filter.mp ha).2
-  simp [MulChar.one_apply hunit]
-
 /-- LEAF. Reduction step of equation 5.5. The two ordered pairs of one
 nonprincipal character with the principal character are equal, so the ordered
 pair under the norm is at most twice the single ordered pair, and that single
@@ -60,161 +31,88 @@ theorem mixed_pair_reduction491 (N q : ℕ) (n : ℤ) (χ : DirichletCharacter �
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
           ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
             ‖characterPrime280 χ N z‖) := by
-  classical
-  have hφpos : (0 : ℝ) < (q.totient : ℝ) := by
-    have hq0 : 0 < q := by omega
-    exact_mod_cast Nat.totient_pos.mpr hq0
-  set r : ℝ := 1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) with hr
-  have hrpos : 0 < r := by
-    rw [hr]
-    positivity
-  have hsym : characterPair491 N q n 1 χ = characterPair491 N q n χ 1 := by
-    unfold characterPair491
-    rw [sum_principal_pair491 q n χ, sum_principal_pair491' q n χ]
-    have hint : (∫ z in -r..r, characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-          characterPrime280 χ N z *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) =
-        ∫ z in -r..r, characterPrime280 χ N z *
-          characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I) := by
-      apply intervalIntegral.integral_congr
-      intro z _
-      ring
-    rw [hint]
+  have hsum : (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+      (1 : DirichletCharacter ℂ q) a * χ a * Complex.exp
+        (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) =
+      residuePhase555 q n χ := by
+    unfold residuePhase555
+    apply Finset.sum_congr rfl
+    intro a ha
+    have hcop : Nat.Coprime a q := (Finset.mem_filter.mp ha).2
+    have hunit : IsUnit ((a : ℕ) : ZMod q) := (ZMod.isUnit_iff_coprime a q).mpr hcop
+    rw [MulChar.one_apply hunit, one_mul]
+  have hsum' : (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
+      χ a * (1 : DirichletCharacter ℂ q) a * Complex.exp
+        (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)) =
+      residuePhase555 q n χ := by
+    rw [← hsum]
+    apply Finset.sum_congr rfl
+    intro a _
     ring
-  have hpair : characterPair491 N q n χ 1 =
-      (1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-        conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-        (∫ z in -r..r, characterPrime280 χ N z *
-          characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) := by
-    unfold characterPair491
-    rw [sum_principal_pair491' q n χ]
-  rw [hsym, hpair]
-  have hG1 : ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ ≤ 1 :=
-    mixed_principal_gauss491 q hq
-  have hpt : ∀ z : ℝ, ‖characterPrime280 χ N z *
-        characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ =
-      ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ * ‖characterPrime280 χ N z‖ := by
-    intro z
-    rw [norm_mul, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, mul_comm]
-  have hInt : ‖∫ z in -r..r, characterPrime280 χ N z *
-        characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
-      ∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-        ‖characterPrime280 χ N z‖ := by
-    refine (intervalIntegral.norm_integral_le_integral_norm (by linarith : -r ≤ r)).trans ?_
-    refine le_of_eq ?_
+  have hint : (∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+      characterPrime280 χ N z * characterPrime280 (1 : DirichletCharacter ℂ q) N z *
+        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) =
+      ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+      characterPrime280 (1 : DirichletCharacter ℂ q) N z * characterPrime280 χ N z *
+        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I) := by
     apply intervalIntegral.integral_congr
     intro z _
-    exact hpt z
-  have hnorm : ‖(1 / (q.totient : ℂ) ^ 2)‖ = 1 / (q.totient : ℝ) ^ 2 := by
+    simp only
+    ring
+  have hsymm : characterPair491 N q n χ 1 = characterPair491 N q n 1 χ := by
+    unfold characterPair491
+    rw [hsum, hsum', hint]
+    ring
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hw : (0 : ℝ) < 1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by positivity
+  have hab : -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) ≤
+      1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by linarith
+  have hI : ‖∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+      characterPrime280 (1 : DirichletCharacter ℂ q) N z * characterPrime280 χ N z *
+        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)‖ ≤
+      ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+        (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+      ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
+        ‖characterPrime280 χ N z‖ := by
+    refine (intervalIntegral.norm_integral_le_integral_norm hab).trans_eq ?_
+    apply intervalIntegral.integral_congr
+    intro z _
+    simp only
+    rw [norm_mul, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
+  have hG1 := mixed_principal_gauss491 q hq
+  have hφ : ‖(1 : ℂ) / (q.totient : ℂ) ^ 2‖ = 1 / (q.totient : ℝ) ^ 2 := by
     rw [norm_div, norm_one, norm_pow, Complex.norm_natCast]
-  have hA : (0 : ℝ) ≤ ‖(1 / (q.totient : ℂ) ^ 2)‖ := norm_nonneg _
-  have hB : (0 : ℝ) ≤ ‖conjugateGauss491 q χ‖ := norm_nonneg _
-  have hC : (0 : ℝ) ≤ ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ := norm_nonneg _
-  have hD : (0 : ℝ) ≤ ‖residuePhase555 q n χ‖ := norm_nonneg _
-  have hM0 : (0 : ℝ) ≤ ∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-      ‖characterPrime280 χ N z‖ :=
-    intervalIntegral.integral_nonneg (by linarith) (fun z _ => by positivity)
-  have hpairnorm :
-      ‖(1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-        conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-        (∫ z in -r..r, characterPrime280 χ N z *
-          characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ ≤
-      ‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ / (q.totient : ℝ) ^ 2 *
-        (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-          ‖characterPrime280 χ N z‖) := by
-    have step1 : ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ *
-        ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ * ‖residuePhase555 q n χ‖ *
-        ‖(∫ z in -r..r, characterPrime280 χ N z *
-          characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ ≤
-      ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ *
-        ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ * ‖residuePhase555 q n χ‖ *
-        (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-          ‖characterPrime280 χ N z‖) :=
-      mul_le_mul_of_nonneg_left hInt
-        (mul_nonneg (mul_nonneg (mul_nonneg hA hB) hC) hD)
-    have step2 : ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ *
-        ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ * ‖residuePhase555 q n χ‖ *
-        (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-          ‖characterPrime280 χ N z‖) ≤
-      ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ * 1 *
-        ‖residuePhase555 q n χ‖ *
-        (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-          ‖characterPrime280 χ N z‖) := by
-      have h1 : ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ *
-          ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ ≤
-          ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ * 1 :=
-        mul_le_mul_of_nonneg_left hG1 (mul_nonneg hA hB)
-      have h2 : ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ *
-          ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ * ‖residuePhase555 q n χ‖ ≤
-          ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ * 1 *
-            ‖residuePhase555 q n χ‖ :=
-        mul_le_mul_of_nonneg_right h1 hD
-      exact mul_le_mul_of_nonneg_right h2 hM0
-    have step3 : ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ * 1 *
-        ‖residuePhase555 q n χ‖ *
-        (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-          ‖characterPrime280 χ N z‖) =
-      ‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ / (q.totient : ℝ) ^ 2 *
-        (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-          ‖characterPrime280 χ N z‖) := by
-      rw [hnorm]
-      ring
-    calc ‖(1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-          conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-          (∫ z in -r..r, characterPrime280 χ N z *
-            characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖
-        = ‖(1 / (q.totient : ℂ) ^ 2)‖ * ‖conjugateGauss491 q χ‖ *
-            ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ * ‖residuePhase555 q n χ‖ *
-            ‖(∫ z in -r..r, characterPrime280 χ N z *
-              characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-              Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ := by
-          rw [norm_mul, norm_mul, norm_mul, norm_mul]
-      _ ≤ _ := step1
-      _ ≤ _ := step2
-      _ = _ := step3
-  calc ‖(1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-        conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-        (∫ z in -r..r, characterPrime280 χ N z *
-          characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I)) +
-      (1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-        conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-        (∫ z in -r..r, characterPrime280 χ N z *
-          characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-          Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖
-      ≤ ‖(1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-          conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-          (∫ z in -r..r, characterPrime280 χ N z *
-            characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ +
-        ‖(1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-          conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-          (∫ z in -r..r, characterPrime280 χ N z *
-            characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ :=
-        norm_add_le _ _
-    _ = 2 * ‖(1 / (q.totient : ℂ) ^ 2) * conjugateGauss491 q χ *
-          conjugateGauss491 q (1 : DirichletCharacter ℂ q) * residuePhase555 q n χ *
-          (∫ z in -r..r, characterPrime280 χ N z *
-            characterPrime280 (1 : DirichletCharacter ℂ q) N z *
-            Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I))‖ := by
-        ring
-    _ ≤ 2 * (‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ / (q.totient : ℝ) ^ 2 *
-          (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-            ‖characterPrime280 χ N z‖)) := by
-        linarith
-    _ = 2 * (‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ /
+  rw [hsymm, ← two_mul, norm_mul]
+  unfold characterPair491
+  rw [hsum, norm_mul, norm_mul, norm_mul, norm_mul, hφ]
+  have h2 : ‖(2 : ℂ)‖ = 2 := by simp
+  rw [h2]
+  set J : ℝ := ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+      (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+      ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
+        ‖characterPrime280 χ N z‖ with hJ
+  set I0 : ℂ := ∫ z in -(1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))..
+      (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))),
+      characterPrime280 (1 : DirichletCharacter ℂ q) N z * characterPrime280 χ N z *
+        Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I) with hI0
+  have hK : (0 : ℝ) ≤ ‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ /
+      (q.totient : ℝ) ^ 2 := by positivity
+  have hprod : ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ * ‖I0‖ ≤ 1 * J :=
+    mul_le_mul hG1 hI (norm_nonneg _) zero_le_one
+  calc 2 * (1 / (q.totient : ℝ) ^ 2 *
+          ‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ *
+          ‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ * ‖I0‖)
+      = 2 * (‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ /
           (q.totient : ℝ) ^ 2) *
-          (∫ z in -r..r, ‖characterPrime280 (1 : DirichletCharacter ℂ q) N z‖ *
-            ‖characterPrime280 χ N z‖) := by
-        ring
+          (‖conjugateGauss491 q (1 : DirichletCharacter ℂ q)‖ * ‖I0‖) := by ring
+    _ ≤ 2 * (‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ /
+          (q.totient : ℝ) ^ 2) * (1 * J) :=
+        mul_le_mul_of_nonneg_left hprod (by positivity)
+    _ = _ := by ring
 
 /-- LEAF. Coefficient step of equation 5.5, Gauss half. The conjugate Gauss
 coefficient of any character at a modulus is at most four times the totient of
@@ -223,37 +121,23 @@ positive modulus is at least a quarter of the square root of the modulus. This
 is a bound in the modulus alone, with no frequency, no `N` and no logarithm. -/
 theorem gauss_coeff_le_totient491 (q : ℕ) (χ : DirichletCharacter ℂ q) :
     ‖conjugateGauss491 q χ‖ ≤ 4 * (q.totient : ℝ) := by
-  classical
-  unfold conjugateGauss491
   have hcard : ((range q).filter (fun a => Nat.Coprime a q)).card = q.totient := by
     rw [Nat.totient_eq_card_coprime]
-    congr 1
-    apply Finset.filter_congr
-    intro a _
-    exact Nat.coprime_comm
-  have hterm : (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-        ‖χ a * Complex.exp
-          (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖) ≤
-      (q.totient : ℝ) := by
-    have h1 : ∀ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-        ‖χ a * Complex.exp
-          (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ ≤ (1 : ℝ) := by
-      intro a ha
-      rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
-      exact χ.norm_le_one _
-    calc (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-          ‖χ a * Complex.exp
-            (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖)
-        ≤ ∑ _a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ) :=
-          Finset.sum_le_sum h1
-      _ = (((range q).filter (fun a => Nat.Coprime a q)).card : ℝ) := by simp
-      _ = (q.totient : ℝ) := by rw [hcard]
-  have hmain := (norm_star (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-        χ a * Complex.exp
-          (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I))).le.trans
-      ((norm_sum_le _ _).trans hterm)
-  have hφ0 : (0 : ℝ) ≤ (q.totient : ℝ) := by positivity
-  nlinarith
+    exact congrArg Finset.card (Finset.filter_congr fun a _ => Nat.coprime_comm)
+  have h : ‖conjugateGauss491 q χ‖ ≤ (q.totient : ℝ) := by
+    unfold conjugateGauss491
+    rw [norm_star]
+    refine (norm_sum_le _ _).trans ?_
+    have hle := Finset.sum_le_card_nsmul ((range q).filter (fun a => Nat.Coprime a q))
+      (fun a : ℕ => ‖χ a * Complex.exp
+        (((2 * Real.pi * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖) (1 : ℝ)
+      (fun a _ => by
+        rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
+        exact DirichletCharacter.norm_le_one χ _)
+    rw [hcard, nsmul_eq_mul, mul_one] at hle
+    exact hle
+  have h0 : (0 : ℝ) ≤ (q.totient : ℝ) := Nat.cast_nonneg _
+  linarith
 
 /-- LEAF. Coefficient step of equation 5.5, phase half. The residue phase of any
 character at a positive modulus is at most the totient of that modulus, since it
@@ -262,33 +146,19 @@ bound of the phase; it carries no frequency dependence beyond the fixed
 frequency and no `N`. -/
 theorem residue_phase_le_totient491 (q : ℕ) (n : ℤ) (χ : DirichletCharacter ℂ q) :
     ‖residuePhase555 q n χ‖ ≤ (q.totient : ℝ) := by
-  classical
-  unfold residuePhase555
   have hcard : ((range q).filter (fun a => Nat.Coprime a q)).card = q.totient := by
     rw [Nat.totient_eq_card_coprime]
-    congr 1
-    apply Finset.filter_congr
-    intro a _
-    exact Nat.coprime_comm
+    exact congrArg Finset.card (Finset.filter_congr fun a _ => Nat.coprime_comm)
+  unfold residuePhase555
   refine (norm_sum_le _ _).trans ?_
-  have hterm : (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-        ‖χ a * Complex.exp
-          (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖) ≤
-      (((range q).filter (fun a => Nat.Coprime a q)).card : ℝ) := by
-    have h1 : ∀ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-        ‖χ a * Complex.exp
-          (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖ ≤ (1 : ℝ) := by
-      intro a ha
+  have hle := Finset.sum_le_card_nsmul ((range q).filter (fun a => Nat.Coprime a q))
+    (fun a : ℕ => ‖χ a * Complex.exp
+      (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖) (1 : ℝ)
+    (fun a _ => by
       rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
-      exact χ.norm_le_one _
-    calc (∑ a ∈ (range q).filter (fun a => Nat.Coprime a q),
-          ‖χ a * Complex.exp
-            (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q) : ℝ) : ℂ) * Complex.I)‖)
-        ≤ ∑ _a ∈ (range q).filter (fun a => Nat.Coprime a q), (1 : ℝ) :=
-          Finset.sum_le_sum h1
-      _ = (((range q).filter (fun a => Nat.Coprime a q)).card : ℝ) := by simp
-  rw [hcard] at hterm
-  exact hterm
+      exact DirichletCharacter.norm_le_one χ _)
+  rw [hcard, nsmul_eq_mul, mul_one] at hle
+  exact hle
 
 /-- LEAF. Mass step of equation 5.5 at the totient scale. For every nonprincipal
 character the unsigned mixed mass of the principal character series against that
