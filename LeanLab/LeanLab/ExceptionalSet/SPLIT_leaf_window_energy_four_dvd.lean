@@ -39,7 +39,27 @@ theorem leaf_four_dvd_lower_window (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ <
     ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
       ∑ n ∈ (Finset.Icc (Y / 2 + 1) (3 * Y / 4)).filter (fun n => Even n ∧ 4 ∣ n),
           (error n) ^ 2 ≤ C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  have h := leaf_mean_square_split Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  obtain ⟨C, X₀, hbound⟩ := h
+  refine ⟨max C 0, by simp, max X₀ 1, by omega, ?_⟩
+  intro Y hY
+  have hY0 : X₀ ≤ Y := le_trans (le_max_left _ _) hY
+  have hsum := hbound Y hY0
+  have hsub : ∑ n ∈ (Finset.Icc (Y / 2 + 1) (3 * Y / 4)).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2
+      ≤ ∑ n ∈ (range (Y + 1)).filter Even, (error n) ^ 2 := by
+    apply Finset.sum_le_sum_of_subset_of_nonneg
+    · intro n hn
+      simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_range] at hn ⊢
+      rcases hn with ⟨⟨hlo, hhi⟩, heven, hfour⟩
+      refine ⟨by omega, heven⟩
+    · intro n _ _
+      positivity
+  have hp : 0 ≤ (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by positivity
+  calc ∑ n ∈ (Finset.Icc (Y / 2 + 1) (3 * Y / 4)).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2
+      ≤ ∑ n ∈ (range (Y + 1)).filter Even, (error n) ^ 2 := hsub
+    _ ≤ C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := hsum
+    _ ≤ max C 0 * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) hp
 
 /-- LEAF 2 of 3, the middle piece of the window: some nonnegative `C` bounds the second moment of
 `error` over the even indices divisible by `4` in the range `(3Y/4, 7Y/8]`, by
@@ -50,7 +70,27 @@ theorem leaf_four_dvd_middle_window (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ 
     ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
       ∑ n ∈ (Finset.Icc (3 * Y / 4 + 1) (7 * Y / 8)).filter (fun n => Even n ∧ 4 ∣ n),
           (error n) ^ 2 ≤ C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  have h := leaf_mean_square_split Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  obtain ⟨C, X₀, hbound⟩ := h
+  refine ⟨max C 0, by simp, max X₀ 1, by omega, ?_⟩
+  intro Y hY
+  have hY0 : X₀ ≤ Y := le_trans (le_max_left _ _) hY
+  have hsum := hbound Y hY0
+  have hsub : ∑ n ∈ (Finset.Icc (3 * Y / 4 + 1) (7 * Y / 8)).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2
+      ≤ ∑ n ∈ (range (Y + 1)).filter Even, (error n) ^ 2 := by
+    apply Finset.sum_le_sum_of_subset_of_nonneg
+    · intro n hn
+      simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_range] at hn ⊢
+      rcases hn with ⟨⟨hlo, hhi⟩, heven, hfour⟩
+      refine ⟨by omega, heven⟩
+    · intro n _ _
+      positivity
+  have hp : 0 ≤ (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by positivity
+  calc ∑ n ∈ (Finset.Icc (3 * Y / 4 + 1) (7 * Y / 8)).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2
+      ≤ ∑ n ∈ (range (Y + 1)).filter Even, (error n) ^ 2 := hsub
+    _ ≤ C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := hsum
+    _ ≤ max C 0 * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) hp
 
 /-- LEAF 3 of 3, the last piece of the window: some nonnegative `C` bounds the second moment of
 `error` over the even indices divisible by `4` in the range `(7Y/8, Y]`, by
@@ -61,7 +101,27 @@ theorem leaf_four_dvd_upper_window (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ <
     ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
       ∑ n ∈ (Finset.Icc (7 * Y / 8 + 1) Y).filter (fun n => Even n ∧ 4 ∣ n),
           (error n) ^ 2 ≤ C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  have h := leaf_mean_square_split Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  obtain ⟨C, X₀, hbound⟩ := h
+  refine ⟨max C 0, by simp, max X₀ 1, by omega, ?_⟩
+  intro Y hY
+  have hY0 : X₀ ≤ Y := le_trans (le_max_left _ _) hY
+  have hsum := hbound Y hY0
+  have hsub : ∑ n ∈ (Finset.Icc (7 * Y / 8 + 1) Y).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2
+      ≤ ∑ n ∈ (range (Y + 1)).filter Even, (error n) ^ 2 := by
+    apply Finset.sum_le_sum_of_subset_of_nonneg
+    · intro n hn
+      simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_range] at hn ⊢
+      rcases hn with ⟨⟨hlo, hhi⟩, heven, hfour⟩
+      refine ⟨by omega, heven⟩
+    · intro n _ _
+      positivity
+  have hp : 0 ≤ (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by positivity
+  calc ∑ n ∈ (Finset.Icc (7 * Y / 8 + 1) Y).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2
+      ≤ ∑ n ∈ (range (Y + 1)).filter Even, (error n) ^ 2 := hsub
+    _ ≤ C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := hsum
+    _ ≤ max C 0 * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) hp
 
 /-- Splitting an interval sum at an interior point: when `a ≤ c + 1` and `c ≤ b`, the terms of
 `Icc a b` selected by `P` are the disjoint union of those of `Icc a c` and of `Icc (c + 1) b`. -/

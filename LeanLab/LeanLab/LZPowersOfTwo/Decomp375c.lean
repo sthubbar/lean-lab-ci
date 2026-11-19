@@ -5,6 +5,7 @@ AI wrote this Lean code. Goldbach is open.
 import LeanLab.LZPowersOfTwo.Decomp375b
 import LeanLab.LZPowersOfTwo.ModelFourier353
 import LeanLab.LZPowersOfTwo.ModelTail396
+import LeanLab.LZPowersOfTwo.FullModel396
 
 open Real Finset MeasureTheory Filter
 noncomputable section
@@ -21,7 +22,11 @@ theorem major_full_lower375 (s : ℕ) (l1 l2 : ℝ) (μ : ℕ → ℝ) (γ η ε
       (1 - (13 / 4 : ℝ) * l1 * ε) / (2 * |l1 * l2|) * η ^ 2 * X *
         (cutoff293 s μ ε X) ^ s ≤
           (∫ α : ℝ, majorModel353 s l1 l2 μ γ η ε X α).re := by
-  sorry
+  -- P0079 page 10, displays 36 and 37: the finite transform full_model_transform396
+  -- turns the full-line model into a sum over exponent tuples of rectangle integrals,
+  -- each at least (1 - 3 lambda1 epsilon) eta^2 X / (2 |lambda1 lambda2|), and the
+  -- floor margin model_floor_margin375 spends one quarter lambda1 epsilon on the count.
+  exact major_full_lower396 s l1 l2 μ γ η ε hs h1 h2 hr hμ hη hε hε'
 
 /-- LEAF. P0079 page 10, display 36, its O of eta squared X to the two thirds
 L to the s truncation term, obtained from display 32 and the kernel bound.

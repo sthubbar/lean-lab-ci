@@ -50,7 +50,51 @@ theorem leaf_block_even (ε : ℝ) (hε : 0 < ε) :
       (((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter
           (fun n => Even n ∧ ¬ IsGoldbachSum (2 * n ^ 2))).card : ℝ)
         ≤ C * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε)) := by
-  sorry
+  obtain ⟨C₀, hC₀⟩ := perelliPintz ε hε
+  have hθ : 0 < 4 / 5 + ε := by linarith
+  have h_two_pow_nonneg (j : ℕ) : 0 ≤ (((2 : ℕ) ^ j : ℕ) : ℝ) := Nat.cast_nonneg _
+  have h_pow_eq (j : ℕ) : ((((2 : ℕ) ^ (j + 1) : ℕ) : ℝ) ^ (4 / 5 + ε))
+      = (2 : ℝ) ^ (4 / 5 + ε) * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε)) := by
+    have hc : ((((2 : ℕ) ^ (j + 1) : ℕ) : ℝ)) = 2 * ((((2 : ℕ) ^ j : ℕ) : ℝ)) := by
+      rw [pow_succ]; push_cast; ring
+    rw [hc, Real.mul_rpow (by norm_num) (h_two_pow_nonneg j)]
+  have h_sub (j : ℕ) : ((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter
+      (fun n => Even n ∧ ¬ IsGoldbachSum (2 * n ^ 2))) ⊆
+      ((Finset.Icc 1 (2 ^ (j + 1))).filter (fun n => ¬ IsGoldbachSum (2 * n ^ 2))) := by
+    intro n hn
+    rcases Finset.mem_filter.mp hn with ⟨hnIcc, _, hnGold⟩
+    rcases Finset.mem_Icc.mp hnIcc with ⟨h1, h2⟩
+    have h1' : 1 ≤ n := by
+      have : 1 ≤ 2 ^ j := Nat.one_le_pow _ _ (by norm_num)
+      omega
+    exact Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨h1', h2⟩, hnGold⟩
+  have hE1 : (EPoly 2 1 : ℝ) = 1 := by
+    have h : EPoly 2 1 = 1 := by
+      unfold EPoly
+      have hfilter : (Finset.Icc 1 1).filter (fun n => ¬ IsGoldbachSum (2 * n ^ 2)) = {1} := by
+        ext n
+        simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_singleton]
+        constructor
+        · rintro ⟨⟨h1, h2⟩, hg⟩; omega
+        · rintro rfl; exact ⟨⟨le_rfl, le_rfl⟩, by simpa using not_goldbach_two⟩
+      rw [hfilter]; simp
+    simpa using h
+  have hC₀_nonneg : 0 ≤ C₀ := by
+    have h1 := hC₀ 1 le_rfl
+    have hpow1 : (((1 : ℕ) : ℝ) ^ (4 / 5 + ε)) = 1 := by
+      push_cast; exact Real.one_rpow _
+    rw [hpow1, mul_one] at h1
+    rw [hE1] at h1
+    linarith
+  refine ⟨C₀ * (2 : ℝ) ^ (4 / 5 + ε), mul_nonneg hC₀_nonneg (Real.rpow_nonneg (by norm_num) _), fun j => ?_⟩
+  calc (((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter
+          (fun n => Even n ∧ ¬ IsGoldbachSum (2 * n ^ 2))).card : ℝ)
+      ≤ (EPoly 2 (2 ^ (j + 1)) : ℝ) := by
+        unfold EPoly
+        exact Nat.cast_le.mpr (Finset.card_le_card (h_sub j))
+    _ ≤ C₀ * ((((2 : ℕ) ^ (j + 1) : ℕ) : ℝ) ^ (4 / 5 + ε)) := hC₀ (2 ^ (j + 1)) (Nat.one_le_pow _ _ (by norm_num))
+    _ = C₀ * ((2 : ℝ) ^ (4 / 5 + ε) * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε))) := by rw [h_pow_eq j]
+    _ = (C₀ * (2 : ℝ) ^ (4 / 5 + ε)) * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε)) := by ring
 
 /-- LEAF. Step 2 of the split: the same count for the odd `n` of the dyadic block
 `2 ^ j < n ≤ 2 ^ (j + 1)`, that is for the class `2 mod 8` of `2 n ^ 2`, where the local density
@@ -61,7 +105,51 @@ theorem leaf_block_odd (ε : ℝ) (hε : 0 < ε) :
       (((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter
           (fun n => Odd n ∧ ¬ IsGoldbachSum (2 * n ^ 2))).card : ℝ)
         ≤ C * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε)) := by
-  sorry
+  obtain ⟨C₀, hC₀⟩ := perelliPintz ε hε
+  have hθ : 0 < 4 / 5 + ε := by linarith
+  have h_two_pow_nonneg (j : ℕ) : 0 ≤ (((2 : ℕ) ^ j : ℕ) : ℝ) := Nat.cast_nonneg _
+  have h_pow_eq (j : ℕ) : ((((2 : ℕ) ^ (j + 1) : ℕ) : ℝ) ^ (4 / 5 + ε))
+      = (2 : ℝ) ^ (4 / 5 + ε) * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε)) := by
+    have hc : ((((2 : ℕ) ^ (j + 1) : ℕ) : ℝ)) = 2 * ((((2 : ℕ) ^ j : ℕ) : ℝ)) := by
+      rw [pow_succ]; push_cast; ring
+    rw [hc, Real.mul_rpow (by norm_num) (h_two_pow_nonneg j)]
+  have h_sub (j : ℕ) : ((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter
+      (fun n => Odd n ∧ ¬ IsGoldbachSum (2 * n ^ 2))) ⊆
+      ((Finset.Icc 1 (2 ^ (j + 1))).filter (fun n => ¬ IsGoldbachSum (2 * n ^ 2))) := by
+    intro n hn
+    rcases Finset.mem_filter.mp hn with ⟨hnIcc, _, hnGold⟩
+    rcases Finset.mem_Icc.mp hnIcc with ⟨h1, h2⟩
+    have h1' : 1 ≤ n := by
+      have : 1 ≤ 2 ^ j := Nat.one_le_pow _ _ (by norm_num)
+      omega
+    exact Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨h1', h2⟩, hnGold⟩
+  have hE1 : (EPoly 2 1 : ℝ) = 1 := by
+    have h : EPoly 2 1 = 1 := by
+      unfold EPoly
+      have hfilter : (Finset.Icc 1 1).filter (fun n => ¬ IsGoldbachSum (2 * n ^ 2)) = {1} := by
+        ext n
+        simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_singleton]
+        constructor
+        · rintro ⟨⟨h1, h2⟩, hg⟩; omega
+        · rintro rfl; exact ⟨⟨le_rfl, le_rfl⟩, by simpa using not_goldbach_two⟩
+      rw [hfilter]; simp
+    simpa using h
+  have hC₀_nonneg : 0 ≤ C₀ := by
+    have h1 := hC₀ 1 le_rfl
+    have hpow1 : (((1 : ℕ) : ℝ) ^ (4 / 5 + ε)) = 1 := by
+      push_cast; exact Real.one_rpow _
+    rw [hpow1, mul_one] at h1
+    rw [hE1] at h1
+    linarith
+  refine ⟨C₀ * (2 : ℝ) ^ (4 / 5 + ε), mul_nonneg hC₀_nonneg (Real.rpow_nonneg (by norm_num) _), fun j => ?_⟩
+  calc (((Finset.Icc (2 ^ j + 1) (2 ^ (j + 1))).filter
+          (fun n => Odd n ∧ ¬ IsGoldbachSum (2 * n ^ 2))).card : ℝ)
+      ≤ (EPoly 2 (2 ^ (j + 1)) : ℝ) := by
+        unfold EPoly
+        exact Nat.cast_le.mpr (Finset.card_le_card (h_sub j))
+    _ ≤ C₀ * ((((2 : ℕ) ^ (j + 1) : ℕ) : ℝ) ^ (4 / 5 + ε)) := hC₀ (2 ^ (j + 1)) (Nat.one_le_pow _ _ (by norm_num))
+    _ = C₀ * ((2 : ℝ) ^ (4 / 5 + ε) * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε))) := by rw [h_pow_eq j]
+    _ = (C₀ * (2 : ℝ) ^ (4 / 5 + ε)) * ((((2 : ℕ) ^ j : ℕ) : ℝ) ^ (4 / 5 + ε)) := by ring
 
 /-! ### Bookkeeping, no sorry -/
 
