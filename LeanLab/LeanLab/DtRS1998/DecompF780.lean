@@ -39,7 +39,11 @@ theorem LEAF_quarter_four_sub_two :
         qs.any (fun q => decide
           (q ≤ 6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  obtain ⟨qs, hp, hc⟩ := cover_quarter_four k hk
+  refine ⟨qs, hp, ?_⟩
+  intro j hj1 hj2
+  exact hc j (by omega) (by omega)
 
 /-- LEAF 3 of 4: the third sub-block of the fourth quarter,
 `437500001 ≤ j ≤ 468750000`, is covered by some prime list. -/
@@ -50,7 +54,11 @@ theorem LEAF_quarter_four_sub_three :
         qs.any (fun q => decide
           (q ≤ 6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  obtain ⟨qs, hp, hc⟩ := cover_quarter_four k hk
+  refine ⟨qs, hp, ?_⟩
+  intro j hj1 hj2
+  exact hc j (by omega) (by omega)
 
 /-- LEAF 4 of 4: the fourth sub-block of the fourth quarter,
 `468750001 ≤ j ≤ 500000000`, is covered by some prime list. -/
@@ -61,7 +69,11 @@ theorem LEAF_quarter_four_sub_four :
         qs.any (fun q => decide
           (q ≤ 6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  obtain ⟨qs, hp, hc⟩ := cover_quarter_four k hk
+  refine ⟨qs, hp, ?_⟩
+  intro j hj1 hj2
+  exact hc j (by omega) (by omega)
 
 /-- Assembly of the four sub-block leaves into the full fourth quarter.
 The four lists concatenate, primality is inherited entry by entry, and the
