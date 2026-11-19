@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.Decomp446a
+import LeanLab.ExceptionalSet.UpJ200.Decomp527a
 
 /-!
 Split of the even major arc coefficient estimate `leaf_even_coefficient_lower` of Decomp446a.
@@ -39,8 +40,8 @@ theorem leaf_even_coefficient_lower_even_index (γ : ℝ) (h1 : 1 < γ) (h2 : γ
           ((((window γ N).filter (fun n : ℕ => Even (nu γ n))).filter (fun n : ℕ =>
             (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re <
               c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
-                B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
-  sorry
+                B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) :=
+  LeanLab.ExceptionalSet.UpJ200.Decomp527a.even_index_from_inputs γ h1 h2
 
 /-- LEAF. Odd index piece: the same eventual counting bound as the whole estimate, restricted to
 the indices of the window whose floor value `ν_n` is odd. On those indices the even adjacent
@@ -53,8 +54,8 @@ theorem leaf_even_coefficient_lower_odd_index (γ : ℝ) (h1 : 1 < γ) (h2 : γ 
           ((((window γ N).filter (fun n : ℕ => ¬ Even (nu γ n))).filter (fun n : ℕ =>
             (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <
               c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
-                B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
-  sorry
+                B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) :=
+  LeanLab.ExceptionalSet.UpJ200.Decomp527a.odd_index_from_inputs γ h1 h2
 
 /-- Assembly. The even adjacent coefficient count over the floor window follows from the two parity
 pieces: the even adjacent integer of an index with even `ν_n` is `ν_n`, and of an index with odd
