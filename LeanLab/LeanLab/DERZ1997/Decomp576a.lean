@@ -1,3 +1,4 @@
+import LeanLab.BHP1997.Decomp530a
 import LeanLab.DERZ1997.Decomp1529a
 import LeanLab.DERZ1997.Decomp576b
 import LeanLab.DERZ1997.Decomp576c
@@ -7,7 +8,8 @@ import LeanLab.DERZ1997.Decomp576d
 Independent supply for primitive_argument_bound370.
 The target file is not imported and remains sealed.
 Trudgian https://arxiv.org/abs/1206.1844v4 pages 4 to 9.
-The split retains real-part powers, Backlund pairing and the right limit.
+The development retains real-part powers, Backlund pairing and the right limit.
+The primitive convexity input is proved. Only horizontal_of_jensen576 remains admitted.
 The constants 6, 1.5 and 0.7 are derived loose budgets, not printed constants.
 AI wrote the Lean code. Goldbach is open.
 -/
@@ -96,7 +98,7 @@ theorem realPartPower_differentiable576 {q : ℕ} [NeZero q]
   change DifferentiableAt ℂ (fun s => (f s + conj (f (conj s))) / 2) s
   exact ((hf s).add hconj).div_const 2
 
-/-- The norm of the analytic real-part power is bounded by the larger shifted norm.
+/-- LEAF. The norm of the analytic real-part power is bounded by the larger shifted norm.
 Trudgian pages 7 and 8, displays 4.5 and 4.7, before logarithmic integration.
 Both shifted values are retained for complex characters.
 -/
@@ -149,22 +151,6 @@ theorem horizontal_of_jensen576 {q : ℕ} [NeZero q]
       atTop (𝓝 1))
     {B : ℝ} (hB : ∀ ε > 0, ∀ᶠ k in atTop, jensenMass576 χ T (N k) ≤ B + ε) :
     |horizontal576 χ T| ≤ B + 1.5 := by
-  sorry
-
-/-- LEAF. CONDITIONAL ON Rademacher 1959 Theorem 3, printed page 199,
-the unnumbered display following 6.2. The positive-eta range matches the source.
-Trudgian page 8, display 4.6, cites this same bound.
-REREAD U-1697 checked the local primary PDF rather than the failed web page.
-
-This is a modulus bound only, with no Jensen count or contour argument.
--/
-theorem primitive_convexity576 {q : ℕ} [NeZero q]
-    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
-    {η : ℝ} (hη0 : 0 < η) (hη1 : η ≤ 1 / 2) (s : ℂ)
-    (hs0 : -η ≤ s.re) (hs1 : s.re ≤ 1 + η) :
-    ‖DirichletCharacter.LFunction χ s‖ ≤
-      ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ^ ((1 + η - s.re) / 2) *
-        (riemannZeta ((1 + η : ℝ) : ℂ)).re := by
   sorry
 
 /-! ### The Jensen mass bound
@@ -849,7 +835,10 @@ theorem log_zeta_five_quarters_le_two :
   refine (Real.log_le_iff_le_exp h2).mpr ?_
   linarith
 
-/-- The mean of the logarithm on the Jensen circle. -/
+/-- LEAF. The integrated logarithm mean on the Jensen circle has the explicit growth budget.
+Trudgian pages 7 to 9, displays 4.5, 4.7 to 4.9 and 4.12.
+Both shifted norms and actual circle logarithm integrability are used.
+-/
 theorem integral_log_realPartPower_le {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
     (hne : χ ≠ 1) {T : ℝ} (hT : 1 ≤ |T|) (n : ℕ)
     (hconv : ∀ (η : ℝ), 0 < η → η ≤ 1 / 2 → ∀ (s : ℂ), -η ≤ s.re → s.re ≤ 1 + η →
@@ -860,17 +849,6 @@ theorem integral_log_realPartPower_le {q : ℕ} [NeZero q] (χ : DirichletCharac
         ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖)
       ≤ (n : ℝ) * (Real.log ((q : ℝ) * |T|) * (9 / 7)
           + 2 * Real.pi * Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re)) := by
-  have hζ1 : (1 : ℝ) ≤ (riemannZeta ((5 / 4 : ℝ) : ℂ)).re := one_le_zeta_five_quarters
-  have hζpos : (0 : ℝ) < (riemannZeta ((5 / 4 : ℝ) : ℂ)).re := by linarith
-  have hq : (0 : ℝ) < (q : ℝ) := Nat.cast_pos.mpr (NeZero.pos q)
-  have hM0 : 0 ≤ Real.log ((q : ℝ) * |T|) := by
-    refine Real.log_nonneg ?_
-    have hq1 : (1 : ℝ) ≤ (q : ℝ) := by
-      have h1 : 1 ≤ q := NeZero.one_le
-      exact_mod_cast h1
-    have h2 : (1 : ℝ) * 1 ≤ (q : ℝ) * |T| :=
-      mul_le_mul hq1 hT zero_le_one (le_of_lt hq)
-    simpa using h2
   have hpoint : ∀ φ ∈ Set.Icc (0:ℝ) (2 * Real.pi),
       Real.log ‖realPartPower576 χ T n ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖
         ≤ (n : ℝ) * (max 0 (-(9 / 14) * Real.cos φ) * Real.log ((q : ℝ) * |T|)
@@ -906,20 +884,18 @@ theorem integral_log_realPartPower_le {q : ℕ} [NeZero q] (χ : DirichletCharac
     rw [intervalIntegral.integral_const_mul, integral_max_neg_cos_mul,
       intervalIntegral.integral_const]
     simp
-  by_cases hint : IntervalIntegrable (fun φ : ℝ =>
-      Real.log ‖realPartPower576 χ T n ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖)
-      volume 0 (2 * Real.pi)
-  · have hmono := intervalIntegral.integral_mono_on
-      (by positivity : (0:ℝ) ≤ 2 * Real.pi) hint hg_int hpoint
-    rw [hgval] at hmono
-    exact hmono
-  · rw [intervalIntegral.integral_undef hint]
-    refine mul_nonneg (Nat.cast_nonneg n) ?_
-    have h1 : 0 ≤ Real.log ((q : ℝ) * |T|) * (9 / 7) := by positivity
-    have h2 : 0 ≤ 2 * Real.pi * Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re) := by
-      have h3 : 0 ≤ Real.log ((riemannZeta ((5 / 4 : ℝ) : ℂ)).re) := Real.log_nonneg hζ1
-      positivity
-    linarith
+  have hint : IntervalIntegrable (fun φ : ℝ =>
+      Real.log ‖realPartPower576 χ T n
+        ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖)
+      volume 0 (2 * Real.pi) := by
+    have hm : MeromorphicOn (realPartPower576 χ T n)
+        (Metric.sphere (5 / 4 : ℂ) |(9 / 7 : ℝ)|) :=
+      fun z _ => ((realPartPower_differentiable576 χ hne T n).analyticAt z).meromorphicAt
+    simpa [CircleIntegrable, circleMap] using hm.circleIntegrable_log_norm
+  have hmono := intervalIntegral.integral_mono_on
+    (by positivity : (0 : ℝ) ≤ 2 * Real.pi) hint hg_int hpoint
+  rw [hgval] at hmono
+  exact hmono
 
 /-- The centre value of the Jensen mass is not small when the power argument
 tends to a real direction. -/
@@ -2353,9 +2329,443 @@ theorem eventually_good_height576 {q : ℕ} [NeZero q]
     · simp
     · simp [abs_of_pos ht0]
 
+namespace Convexity585
+open Asymptotics
+open LeanLab.BHP1997.Decomp560a LeanLab.BHP1997.Decomp530a Decomp576aWip
+
+/-- The full Archimedean quotient has the exact conductor-free Rademacher bound.
+Rademacher printed pages 197 and 198, Lemmas 1 and 2, displays 5.1 and 5.3.
+The even case uses the ordinary Gamma ratio. The odd case uses its sharp
+shift-zero tangent bound. Both parities retain the factor two pi.
+-/
+theorem gamma_factor_bound585 {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (s : ℂ) (hs0 : -(1 / 2 : ℝ) ≤ s.re) (hs1 : s.re ≤ 1 / 2) :
+    ‖χ⁻¹.gammaFactor (1 - s) / χ.gammaFactor s‖ ≤
+      (‖s + 1‖ / (2 * Real.pi)) ^ (1 / 2 - s.re) := by
+  have haux (Q : ℝ)
+      (hg : ‖Complex.Gamma ((Q : ℂ) / 2 + (1 - s) / 2) /
+          Complex.Gamma ((Q : ℂ) / 2 + s / 2)‖ ≤
+        (‖s + 1‖ / 2) ^ (1 / 2 - s.re)) :
+      ‖Complex.Gammaℝ ((Q : ℂ) + 1 - s) / Complex.Gammaℝ ((Q : ℂ) + s)‖ ≤
+        (‖s + 1‖ / (2 * Real.pi)) ^ (1 / 2 - s.re) := by
+    rw [Complex.Gammaℝ_def, Complex.Gammaℝ_def, mul_div_mul_comm,
+      ← Complex.cpow_sub _ _ (Complex.ofReal_ne_zero.mpr Real.pi_ne_zero)]
+    rw [show -((Q : ℂ) + 1 - s) / 2 - (-((Q : ℂ) + s) / 2) = s - 1 / 2 by ring]
+    rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+    rw [show (s - 1 / 2).re = s.re - 1 / 2 by simp]
+    rw [show ((Q : ℂ) + 1 - s) / 2 = (Q : ℂ) / 2 + (1 - s) / 2 by ring,
+      show ((Q : ℂ) + s) / 2 = (Q : ℂ) / 2 + s / 2 by ring]
+    calc
+      _ ≤ Real.pi ^ (s.re - 1 / 2) * (‖s + 1‖ / 2) ^ (1 / 2 - s.re) :=
+        mul_le_mul_of_nonneg_left hg (Real.rpow_nonneg Real.pi_pos.le _)
+      _ = (‖s + 1‖ / (2 * Real.pi)) ^ (1 / 2 - s.re) := by
+        rw [show s.re - 1 / 2 = -(1 / 2 - s.re) by ring,
+          Real.rpow_neg Real.pi_pos.le]
+        rw [show ‖s + 1‖ / (2 * Real.pi) = (‖s + 1‖ / 2) / Real.pi by ring,
+          Real.div_rpow (by positivity) Real.pi_pos.le]
+        ring
+  have hi : χ⁻¹.Even ↔ χ.Even := by
+    simp only [DirichletCharacter.Even, MulChar.inv_apply_eq_inv', inv_eq_one]
+  by_cases he : χ.Even
+  · simp only [DirichletCharacter.gammaFactor, ite_eq_left he, ite_eq_left (hi.mpr he)]
+    have hg := rademacher_gamma_ratio_proved 0 (by norm_num) s hs0 hs1
+    have hh := haux 0 (by simpa [add_comm] using hg)
+    simpa using hh
+  · have hin : ¬χ⁻¹.Even := fun h => he (hi.mp h)
+    simp only [DirichletCharacter.gammaFactor, ite_eq_right he, ite_eq_right hin]
+    have hg := gammaRatio_tangent_bound (P := 1) (c := 0) (by norm_num) (by norm_num)
+      (fun z hz => by
+        have hh := gammaRatio_succ_left_edge_eq (Q := 0) (by norm_num) hz
+        simpa using hh.le) s hs0 hs1
+    have hh := haux 1 (by simpa [gammaRatio, add_comm] using hg)
+    simpa only [Complex.ofReal_one, add_comm s 1, sub_add_eq_add_sub] using hh
+
+/-- The primitive functional equation gives an exact norm identity on real part below one.
+Rademacher printed pages 198 and 199, the equation preceding display 6.2.
+The nonprincipal modulus restriction also handles the value at zero.
+The proved Gauss sum norm supplies a root number of norm one.
+-/
+theorem primitive_norm_functional585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
+    (s : ℂ) (hs : s.re < 1) :
+    ‖χ.LFunction s‖ = (q : ℝ) ^ (1 / 2 - s.re) *
+      ‖χ⁻¹.gammaFactor (1 - s) / χ.gammaFactor s‖ * ‖χ⁻¹.LFunction (1 - s)‖ := by
+  have hN : q ≠ 1 := fun h => hne (DirichletCharacter.level_one' χ h)
+  have hg : χ⁻¹.gammaFactor (1 - s) ≠ 0 := by
+    classical
+    unfold DirichletCharacter.gammaFactor
+    split_ifs
+    · exact Complex.Gammaℝ_ne_zero_of_re_pos (by simp; linarith)
+    · exact Complex.Gammaℝ_ne_zero_of_re_pos (by simp; linarith)
+  have he := hχ.completedLFunction_one_sub (1 - s)
+  simp only [sub_sub_cancel] at he
+  have hright : χ⁻¹.completedLFunction (1 - s) =
+      χ⁻¹.LFunction (1 - s) * χ⁻¹.gammaFactor (1 - s) := by
+    exact ((eq_div_iff hg).mp
+      (χ⁻¹.LFunction_eq_completed_div_gammaFactor (1 - s) (Or.inr hN))).symm
+  have hval : χ.LFunction s = (q : ℂ) ^ (1 / 2 - s) * χ.rootNumber *
+      (χ⁻¹.gammaFactor (1 - s) / χ.gammaFactor s) * χ⁻¹.LFunction (1 - s) := by
+    rw [χ.LFunction_eq_completed_div_gammaFactor s (Or.inr hN), he, hright]
+    rw [show (1 : ℂ) - s - 1 / 2 = 1 / 2 - s by ring]
+    ring
+  rw [hval, norm_mul, norm_mul, norm_mul, rootNumber_norm χ hχ, mul_one,
+    Complex.norm_natCast_cpow_of_pos (NeZero.pos q)]
+  simp
+
+/-- Rademacher exact left boundary bound for primitive nonprincipal characters.
+Printed page 199, display 6.2, including eta equal to one half.
+The right boundary series majorant and exact Gamma quotient are proved inputs.
+-/
+theorem primitive_left_boundary585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
+    {η : ℝ} (hη0 : 0 < η) (hη1 : η ≤ 1 / 2) (s : ℂ) (hs : s.re = -η) :
+    ‖χ.LFunction s‖ ≤
+      ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ^ (1 / 2 + η) *
+        (riemannZeta ((1 + η : ℝ) : ℂ)).re := by
+  have hfe := primitive_norm_functional585 χ hχ hne s (by rw [hs]; linarith)
+  have hγ := gamma_factor_bound585 χ s (by rw [hs]; linarith) (by rw [hs]; linarith)
+  have hL := LFunction_norm_le_zeta χ⁻¹ (s := 1 - s) (by simp [hs]; linarith)
+  have hL' : ‖χ⁻¹.LFunction (1 - s)‖ ≤ (riemannZeta ((1 + η : ℝ) : ℂ)).re := by
+    simpa only [Complex.sub_re, Complex.one_re, hs, sub_neg_eq_add] using hL
+  rw [hs, sub_neg_eq_add] at hfe hγ
+  rw [hfe]
+  calc
+    _ ≤ (q : ℝ) ^ (1 / 2 + η) *
+        ((‖s + 1‖ / (2 * Real.pi)) ^ (1 / 2 + η) *
+          (riemannZeta ((1 + η : ℝ) : ℂ)).re) := by
+      have hh := mul_le_mul hγ hL' (norm_nonneg _) (Real.rpow_nonneg (by positivity) _)
+      simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hh (Real.rpow_nonneg (Nat.cast_nonneg q) _)
+    _ = ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ^ (1 / 2 + η) *
+        (riemannZeta ((1 + η : ℝ) : ℂ)).re := by
+      rw [show (q : ℝ) * ‖s + 1‖ / (2 * Real.pi) =
+          (q : ℝ) * (‖s + 1‖ / (2 * Real.pi)) by ring,
+        Real.mul_rpow (Nat.cast_nonneg q) (by positivity)]
+      ring
+
+/-- Primitive nonprincipal L-functions have a proved linear exponential majorant on the whole working strip.
+Rademacher printed page 195 display 3.1, the growth condition used on page 199.
+The explicit derived budget is sixty-four times q squared times exp of twice
+the absolute imaginary part. The positive half-plane bound and the
+functional equation give this without a cited finite-order input.
+-/
+theorem primitive_strip_growth585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1) :
+    ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, -(1 / 2 : ℝ) ≤ s.re → s.re ≤ 3 / 2 →
+      ‖χ.LFunction s‖ ≤ C * Real.exp (2 * |s.im|) := by
+  have hq : (0 : ℝ) < q := Nat.cast_pos.mpr (NeZero.pos q)
+  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast NeZero.one_le (n := q)
+  have hright {ψ : DirichletCharacter ℂ q} (hψ : ψ ≠ 1) (z : ℂ)
+      (hz0 : 1 / 4 ≤ z.re) (hz1 : z.re ≤ 3 / 2) :
+      ‖ψ.LFunction z‖ ≤ 4 * (q : ℝ) * (|z.im| + 2) := by
+    have hzpos : 0 < z.re := by linarith
+    have hn : ‖z‖ ≤ |z.im| + 2 := by
+      have hh := Complex.norm_le_abs_re_add_abs_im z
+      rw [abs_of_pos hzpos] at hh
+      linarith
+    have hh := LeanLab.PNTPort.DirichletZF.norm_LFunction_le hψ hzpos
+    apply hh.trans
+    rw [div_le_iff₀ hzpos]
+    calc
+      _ ≤ (q : ℝ) * (|z.im| + 2) := mul_le_mul_of_nonneg_left hn hq.le
+      _ ≤ 4 * (q : ℝ) * (|z.im| + 2) * z.re := by
+        have hh' := mul_le_mul_of_nonneg_left (show (1 : ℝ) ≤ 4 * z.re by linarith)
+          (show 0 ≤ (q : ℝ) * (|z.im| + 2) by positivity)
+        nlinarith
+  have hpoly (s : ℂ) (hs0 : -(1 / 2 : ℝ) ≤ s.re) (hs1 : s.re ≤ 3 / 2) :
+      ‖χ.LFunction s‖ ≤ 4 * (q : ℝ) ^ 2 * (|s.im| + 4) ^ 2 := by
+    by_cases hs : 1 / 4 ≤ s.re
+    · have hh := hright hne s hs hs1
+      apply hh.trans
+      have hu := abs_nonneg s.im
+      have hq2 : (q : ℝ) ≤ (q : ℝ) ^ 2 := by nlinarith
+      have ha : |s.im| + 2 ≤ (|s.im| + 4) ^ 2 := by nlinarith
+      calc
+        _ ≤ 4 * (q : ℝ) ^ 2 * (|s.im| + 2) := by gcongr
+        _ ≤ _ := by gcongr
+    · have hs' : s.re < 1 / 4 := lt_of_not_ge hs
+      have hfe := primitive_norm_functional585 χ hχ hne s (by linarith)
+      have hγ := gamma_factor_bound585 χ s hs0 (by linarith)
+      have hqpow : (q : ℝ) ^ (1 / 2 - s.re) ≤ q :=
+        Real.rpow_le_self_of_one_le hq1 (by linarith)
+      have hn : ‖s + 1‖ ≤ |s.im| + 4 := by
+        have hh := Complex.norm_le_abs_re_add_abs_im (s + 1)
+        simp only [Complex.add_re, Complex.one_re, Complex.add_im, Complex.one_im, add_zero] at hh
+        rw [abs_of_pos (by linarith : 0 < s.re + 1)] at hh
+        linarith
+      have hbase : ‖s + 1‖ / (2 * Real.pi) ≤ |s.im| + 4 :=
+        (div_le_self (norm_nonneg _) (by linarith [Real.pi_gt_three])).trans hn
+      have hγ' : ‖χ⁻¹.gammaFactor (1 - s) / χ.gammaFactor s‖ ≤ |s.im| + 4 := by
+        apply hγ.trans
+        apply (Real.rpow_le_rpow (by positivity) hbase (by linarith)).trans
+        exact Real.rpow_le_self_of_one_le (by linarith [abs_nonneg s.im]) (by linarith)
+      have hL := hright (inv_ne_one.mpr hne) (1 - s)
+        (by simp only [Complex.sub_re, Complex.one_re]; linarith)
+        (by simp only [Complex.sub_re, Complex.one_re]; linarith)
+      have hL' : ‖χ⁻¹.LFunction (1 - s)‖ ≤ 4 * (q : ℝ) * (|s.im| + 4) := by
+        simp only [Complex.sub_im, Complex.one_im, zero_sub, abs_neg] at hL
+        exact hL.trans (by nlinarith)
+      rw [hfe]
+      calc
+        _ ≤ (q : ℝ) * (|s.im| + 4) * (4 * (q : ℝ) * (|s.im| + 4)) := by gcongr
+        _ = _ := by ring
+  refine ⟨64 * (q : ℝ) ^ 2, by positivity, ?_⟩
+  intro s hs0 hs1
+  have hu : 0 ≤ |s.im| := abs_nonneg _
+  have he : |s.im| + 4 ≤ 4 * Real.exp |s.im| := by
+    have hh := Real.add_one_le_exp |s.im|
+    linarith
+  have he2 : (|s.im| + 4) ^ 2 ≤ 16 * Real.exp (2 * |s.im|) := by
+    calc
+      _ ≤ (4 * Real.exp |s.im|) ^ 2 := (sq_le_sq₀ (by positivity) (by positivity)).mpr he
+      _ = _ := by rw [mul_pow, ← Real.exp_nat_mul]; norm_num
+  apply (hpoly s hs0 hs1).trans
+  calc
+    _ ≤ 4 * (q : ℝ) ^ 2 * (16 * Real.exp (2 * |s.im|)) :=
+      mul_le_mul_of_nonneg_left he2 (by positivity)
+    _ = _ := by ring
+
+/-- LEAF. The exact variable norm envelope follows from both boundary bounds and linear exponential growth.
+Rademacher printed page 195, Theorem 2 display 3.4, specialized to the L-function strip.
+A supporting line for t times arctan t corrects the variable-power modulus loss.
+Its exponential is at most one everywhere and equals one at the target point.
+Mathlib Phragmen-Lindelof then supplies the closed-strip bound.
+-/
+theorem weighted_strip_bound585 {η K A C B : ℝ}
+    (hη0 : 0 < η) (hη1 : η ≤ 1 / 2) (hK : 0 < K) (_hA : 0 < A)
+    (hC : 0 < C) (hB : 0 < B) (f : ℂ → ℂ)
+    (hf : DiffContOnCl ℂ f (Complex.re ⁻¹' Ioo (-η) (1 + η)))
+    (hg : ∀ s : ℂ, -η ≤ s.re → s.re ≤ 1 + η → ‖f s‖ ≤ C * Real.exp (B * |s.im|))
+    (hl : ∀ s : ℂ, s.re = -η → ‖f s‖ ≤ A * (K * ‖s + 1‖) ^ (1 / 2 + η))
+    (hr : ∀ s : ℂ, s.re = 1 + η → ‖f s‖ ≤ A)
+    (s0 : ℂ) (hs0 : -η ≤ s0.re) (hs1 : s0.re ≤ 1 + η) :
+    ‖f s0‖ ≤ A * (K * ‖s0 + 1‖) ^ ((1 + η - s0.re) / 2) := by
+  let b : ℝ := 1 + η
+  let τ : ℝ := s0.im / (1 + s0.re)
+  let α : ℝ := -(τ ^ 2 / (1 + τ ^ 2))
+  let β : ℝ := Real.arctan τ + τ / (1 + τ ^ 2)
+  let m : ℂ → ℂ := fun s => ((K : ℂ) * (s + 1)) ^ ((s - (b : ℂ)) / 2) *
+    Complex.exp (((α : ℂ) * (s + 1) - I * (β : ℂ) * s) / 2)
+  have hX {s : ℂ} (hs : -η ≤ s.re) : 0 < 1 + s.re := by linarith
+  have hbase {s : ℂ} (hs : -η ≤ s.re) : 0 < K * ‖s + 1‖ := by
+    apply mul_pos hK
+    apply norm_pos_iff.mpr
+    apply Complex.ne_zero_of_re_pos
+    simpa [add_comm] using hX hs
+  have hnorm (s : ℂ) (hs : -η ≤ s.re) :
+      ‖m s‖ = (K * ‖s + 1‖) ^ ((s.re - b) / 2) *
+        Real.exp ((α * (1 + s.re) + β * s.im - s.im * Real.arctan (s.im / (1 + s.re))) / 2) := by
+    have harg : Complex.arg ((K : ℂ) * (s + 1)) = Real.arctan (s.im / (1 + s.re)) := by
+      rw [Complex.arg_real_mul _ hK]
+      have hh : |Complex.arg (s + 1)| < Real.pi / 2 :=
+        Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl (by simpa [add_comm] using hX hs))
+      have ht := Real.arctan_tan (abs_lt.mp hh).1 (abs_lt.mp hh).2
+      rw [Complex.tan_arg] at ht
+      simpa [add_comm] using ht.symm
+    have hn : (K : ℂ) * (s + 1) ≠ 0 := mul_ne_zero
+      (Complex.ofReal_ne_zero.mpr hK.ne')
+      (Complex.ne_zero_of_re_pos (by simpa [add_comm] using hX hs))
+    have he1 : ((s - (b : ℂ)) / 2).re = (s.re - b) / 2 := by simp
+    have he2 : ((s - (b : ℂ)) / 2).im = s.im / 2 := by simp
+    have he3 : (((α : ℂ) * (s + 1) - I * (β : ℂ) * s) / 2).re =
+        (α * (1 + s.re) + β * s.im) / 2 := by
+      simp only [Complex.div_ofNat_re, Complex.sub_re, Complex.mul_re, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.add_re, Complex.one_re, Complex.mul_im,
+        Complex.I_re, Complex.I_im, Complex.add_im, Complex.one_im]
+      ring
+    dsimp only [m]
+    rw [norm_mul, Complex.norm_cpow_of_ne_zero hn, harg, he1, he2,
+      Complex.norm_exp, he3, norm_mul, Complex.norm_of_nonneg hK.le]
+    have he : (α * (1 + s.re) + β * s.im - s.im * Real.arctan (s.im / (1 + s.re))) / 2 =
+        (α * (1 + s.re) + β * s.im) / 2 - Real.arctan (s.im / (1 + s.re)) * (s.im / 2) := by ring
+    rw [he, Real.exp_sub]
+    ring
+  have hE (s : ℂ) (hs : -η ≤ s.re) :
+      α * (1 + s.re) + β * s.im - s.im * Real.arctan (s.im / (1 + s.re)) ≤ 0 := by
+    have hh := arctan_supporting_line τ (s.im / (1 + s.re))
+    change α + β * (s.im / (1 + s.re)) ≤
+      (s.im / (1 + s.re)) * Real.arctan (s.im / (1 + s.re)) at hh
+    have hh' := mul_le_mul_of_nonneg_right hh (hX hs).le
+    have he1 : (α + β * (s.im / (1 + s.re))) * (1 + s.re) =
+        α * (1 + s.re) + β * s.im := by field_simp [(hX hs).ne']
+    have he2 : (s.im / (1 + s.re)) * Real.arctan (s.im / (1 + s.re)) * (1 + s.re) =
+        s.im * Real.arctan (s.im / (1 + s.re)) := by field_simp [(hX hs).ne']
+    linarith
+  have hE0 : α * (1 + s0.re) + β * s0.im - s0.im * Real.arctan (s0.im / (1 + s0.re)) = 0 := by
+    have ht : τ * (1 + s0.re) = s0.im := div_mul_cancel₀ _ (hX hs0).ne'
+    change α * (1 + s0.re) + β * s0.im - s0.im * Real.arctan τ = 0
+    have he : α + β * τ - τ * Real.arctan τ = 0 := by
+      dsimp [α, β]
+      field_simp
+      ring
+    calc
+      _ = (α + β * τ - τ * Real.arctan τ) * (1 + s0.re) := by rw [← ht]; ring
+      _ = 0 := by rw [he, zero_mul]
+  have hml (s : ℂ) (hs : -η ≤ s.re) :
+      ‖m s‖ ≤ (K * ‖s + 1‖) ^ ((s.re - b) / 2) := by
+    rw [hnorm s hs]
+    exact mul_le_of_le_one_right (Real.rpow_nonneg (by positivity) _)
+      (Real.exp_le_one_iff.mpr (by linarith [hE s hs]))
+  let M : ℝ := 1 + (K * (1 - η))⁻¹
+  have hlow : 0 < K * (1 - η) := mul_pos hK (by linarith)
+  have hM : 0 < M := by dsimp [M]; positivity
+  have hmb (s : ℂ) (hsl : -η ≤ s.re) (hsu : s.re ≤ b) : ‖m s‖ ≤ M := by
+    have he0 : (s.re - b) / 2 ≤ 0 := by linarith
+    have he1 : -(1 : ℝ) ≤ (s.re - b) / 2 := by dsimp [b]; linarith
+    have hbaselow : K * (1 - η) ≤ K * ‖s + 1‖ := by
+      have hh := Complex.abs_re_le_norm (s + 1)
+      rw [abs_of_pos (by simpa [add_comm] using hX hsl)] at hh
+      apply mul_le_mul_of_nonneg_left _ hK.le
+      simp only [Complex.add_re, Complex.one_re] at hh
+      linarith
+    by_cases hb : 1 ≤ K * ‖s + 1‖
+    · have hh := Real.rpow_le_one_of_one_le_of_nonpos hb he0
+      exact (hml s hsl).trans (hh.trans (by dsimp [M]; linarith [inv_nonneg.mpr hlow.le]))
+    · have hh := Real.rpow_le_rpow_of_exponent_ge (hbase hsl) (le_of_not_ge hb) he1
+      rw [Real.rpow_neg_one] at hh
+      have hi := inv_anti₀ hlow hbaselow
+      exact (hml s hsl).trans (hh.trans (hi.trans (by dsimp [M]; linarith)))
+  have hmd : DiffContOnCl ℂ m (Complex.re ⁻¹' Ioo (-η) b) := by
+    apply DifferentiableOn.diffContOnCl
+    intro s hs
+    have hcl : closure (Complex.re ⁻¹' Ioo (-η) b) ⊆ Complex.re ⁻¹' Icc (-η) b :=
+      closure_minimal (by intro z hz; exact ⟨hz.1.le, hz.2.le⟩)
+        (isClosed_Icc.preimage Complex.continuous_re)
+    have hsr := (hcl hs).1
+    have hp : (K : ℂ) * (s + 1) ∈ Complex.slitPlane := by
+      apply Or.inl
+      simp only [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.add_re, Complex.one_re, zero_mul, sub_zero]
+      exact mul_pos hK (by linarith [hX hsr])
+    change DifferentiableWithinAt ℂ (fun s : ℂ =>
+      ((K : ℂ) * (s + 1)) ^ ((s - (b : ℂ)) / 2) *
+        Complex.exp (((α : ℂ) * (s + 1) - I * (β : ℂ) * s) / 2)) _ s
+    apply DifferentiableAt.differentiableWithinAt
+    apply DifferentiableAt.mul
+    · exact DifferentiableAt.cpow (by fun_prop) (by fun_prop) hp
+    · fun_prop
+  let F : ℂ → ℂ := fun s => m s * f s
+  have hFd : DiffContOnCl ℂ F (Complex.re ⁻¹' Ioo (-η) b) := by
+    simpa only [F, b, smul_eq_mul] using hmd.smul hf
+  have hFg (s : ℂ) (hsl : -η ≤ s.re) (hsu : s.re ≤ b) :
+      ‖F s‖ ≤ (M * C) * Real.exp (B * |s.im|) := by
+    dsimp only [F]
+    rw [norm_mul]
+    exact (mul_le_mul (hmb s hsl hsu) (hg s hsl hsu) (norm_nonneg _) hM.le).trans_eq (by ring)
+  have hFl (s : ℂ) (hs : s.re = -η) : ‖F s‖ ≤ A := by
+    have hb0 := hbase (s := s) (by rw [hs])
+    have hm' := hml s (by rw [hs])
+    have hpow : (s.re - b) / 2 = -(1 / 2 + η) := by dsimp [b]; rw [hs]; ring
+    rw [hpow] at hm'
+    have hp : (K * ‖s + 1‖) ^ (-(1 / 2 + η)) * (K * ‖s + 1‖) ^ (1 / 2 + η) = 1 := by
+      rw [← Real.rpow_add hb0, neg_add_cancel, Real.rpow_zero]
+    change ‖m s * f s‖ ≤ A
+    rw [norm_mul]
+    calc
+      _ ≤ (K * ‖s + 1‖) ^ (-(1 / 2 + η)) * (A * (K * ‖s + 1‖) ^ (1 / 2 + η)) :=
+        mul_le_mul hm' (hl s hs) (norm_nonneg _) (Real.rpow_nonneg (by positivity) _)
+      _ = A * ((K * ‖s + 1‖) ^ (-(1 / 2 + η)) * (K * ‖s + 1‖) ^ (1 / 2 + η)) := by ring
+      _ = A := by rw [hp, mul_one]
+  have hFr (s : ℂ) (hs : s.re = b) : ‖F s‖ ≤ A := by
+    have hm' := hml s (by dsimp [b] at hs; linarith)
+    rw [hs, sub_self, zero_div, Real.rpow_zero] at hm'
+    change ‖m s * f s‖ ≤ A
+    rw [norm_mul]
+    exact (mul_le_mul_of_nonneg_right hm' (norm_nonneg _)).trans (by simpa only [one_mul] using hr s hs)
+  have hd : 0 < b - -η := by dsimp [b]; linarith
+  let c : ℝ := (Real.pi / (b - -η)) / 2
+  have hc : 0 < c := by dsimp [c]; positivity
+  have hclt : c < Real.pi / (b - -η) := by dsimp [c]; have := div_pos Real.pi_pos hd; linarith
+  have he : ∀ᶠ t : ℝ in atTop, t ≤ Real.exp (c * t) := by
+    have hh := (isLittleO_rpow_exp_pos_mul_atTop (1 : ℝ) hc).bound (by norm_num : (0 : ℝ) < 1)
+    filter_upwards [hh] with t ht
+    simp only [Real.rpow_one, Real.norm_eq_abs, Real.abs_exp, one_mul] at ht
+    exact (le_abs_self t).trans ht
+  have hbound : ∃ d < Real.pi / (b - -η), ∃ E : ℝ,
+      F =O[comap (_root_.abs ∘ Complex.im) atTop ⊓ 𝓟 (Complex.re ⁻¹' Ioo (-η) b)]
+        fun z => Real.exp (E * Real.exp (d * |z.im|)) := by
+    refine ⟨c, hclt, B, Asymptotics.IsBigO.of_bound (M * C) ?_⟩
+    have he' : ∀ᶠ z : ℂ in comap (_root_.abs ∘ Complex.im) atTop,
+        |z.im| ≤ Real.exp (c * |z.im|) := tendsto_comap.eventually he
+    have hs' : ∀ᶠ z : ℂ in 𝓟 (Complex.re ⁻¹' Ioo (-η) b), z.re ∈ Ioo (-η) b :=
+      Filter.eventually_principal.mpr (by intro z hz; exact hz)
+    filter_upwards [he'.filter_mono inf_le_left, hs'.filter_mono inf_le_right] with z hz hs
+    simp only [Real.norm_eq_abs, Real.abs_exp]
+    exact (hFg z hs.1.le hs.2.le).trans
+      (mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hz hB.le))
+        (mul_pos hM hC).le)
+  have hmax := PhragmenLindelof.vertical_strip hFd hbound hFl hFr hs0 hs1
+  have hm0 : ‖m s0‖ = (K * ‖s0 + 1‖) ^ ((s0.re - b) / 2) := by
+    rw [hnorm s0 hs0, hE0, zero_div, Real.exp_zero, mul_one]
+  change ‖m s0 * f s0‖ ≤ A at hmax
+  rw [norm_mul, hm0] at hmax
+  rw [show (1 + η - s0.re) / 2 = -((s0.re - b) / 2) by dsimp [b]; ring,
+    Real.rpow_neg (hbase hs0).le, ← div_eq_mul_inv]
+  exact (le_div_iff₀ (Real.rpow_pos_of_pos (hbase hs0) _)).mpr (by nlinarith)
+
+end Convexity585
+
+/-- LEAF. Rademacher 1959 Theorem 3, printed page 199,
+the unnumbered display following 6.2. The positive-eta range matches the source.
+Trudgian page 8, display 4.6, cites this same bound.
+The Gamma quotient, primitive strip growth and exact supporting-line
+interpolation are proved here. No cited analytic premise remains.
+This is a modulus bound only, with no Jensen count or contour argument.
+-/
+theorem primitive_convexity576 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
+    {η : ℝ} (hη0 : 0 < η) (hη1 : η ≤ 1 / 2) (s : ℂ)
+    (hs0 : -η ≤ s.re) (hs1 : s.re ≤ 1 + η) :
+    ‖DirichletCharacter.LFunction χ s‖ ≤
+      ((q : ℝ) * ‖s + 1‖ / (2 * Real.pi)) ^ ((1 + η - s.re) / 2) *
+        (riemannZeta ((1 + η : ℝ) : ℂ)).re := by
+  obtain ⟨C, hC, hg⟩ := Convexity585.primitive_strip_growth585 χ hχ hne
+  let K : ℝ := (q : ℝ) / (2 * Real.pi)
+  let A : ℝ := (riemannZeta ((1 + η : ℝ) : ℂ)).re
+  have hK : 0 < K := by dsimp [K]; have : (0 : ℝ) < q := Nat.cast_pos.mpr (NeZero.pos q); positivity
+  have hA : 0 < A := by
+    have hz : χ.LFunction ((1 + η : ℝ) : ℂ) ≠ 0 :=
+      DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hne) (by simp; linarith)
+    have hh := Decomp576aWip.LFunction_norm_le_zeta χ (s := ((1 + η : ℝ) : ℂ)) (by simp; linarith)
+    exact (norm_pos_iff.mpr hz).trans_le (by simpa [A] using hh)
+  have he (z : ℂ) : K * ‖z + 1‖ = (q : ℝ) * ‖z + 1‖ / (2 * Real.pi) := by dsimp [K]; ring
+  have hl : ∀ z : ℂ, z.re = -η → ‖χ.LFunction z‖ ≤ A * (K * ‖z + 1‖) ^ (1 / 2 + η) := by
+    intro z hz
+    rw [he, mul_comm A]
+    exact Convexity585.primitive_left_boundary585 χ hχ hne hη0 hη1 z hz
+  have hr : ∀ z : ℂ, z.re = 1 + η → ‖χ.LFunction z‖ ≤ A := by
+    intro z hz
+    have hh := Decomp576aWip.LFunction_norm_le_zeta χ (s := z) (by rw [hz]; linarith)
+    simpa only [hz] using hh
+  have hf : DiffContOnCl ℂ (DirichletCharacter.LFunction χ)
+      (Complex.re ⁻¹' Ioo (-η) (1 + η)) :=
+    (DirichletCharacter.differentiable_LFunction hne).differentiableOn.diffContOnCl
+  have hh := Convexity585.weighted_strip_bound585 hη0 hη1 hK hA hC (by norm_num : (0 : ℝ) < 2)
+    (DirichletCharacter.LFunction χ) hf (fun z hz0 hz1 => hg z (by linarith) (by linarith))
+    hl hr s hs0 hs1
+  apply hh.trans_eq
+  rw [he]
+  ring
+
+/-- The Jensen mass budget now follows without a cited convexity premise.
+Trudgian pages 7 to 9, displays 4.4 to 4.9 and 4.12.
+The centre recurrence remains explicit. Rademacher Theorem 3 is proved above.
+-/
+theorem jensen_mass_unconditional585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
+    {T : ℝ} (hT : 1 ≤ |T|) (N : ℕ → ℕ) (hN : StrictMono N)
+    (hcentre : Tendsto (fun k =>
+      (DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I) ^ N k).re /
+        ‖DirichletCharacter.LFunction χ ((5 / 4 : ℂ) + (T : ℂ) * I)‖ ^ N k)
+      atTop (𝓝 1))
+ :
+    ∀ ε > 0, ∀ᶠ k in atTop,
+      jensenMass576 χ T (N k) ≤ 0.25 * Real.log ((q : ℝ) * |T|) + 6 + ε := by
+  exact jensen_mass_bound576 χ hχ hne hT N hN hcentre
+    (fun η hη0 hη1 s hs0 hs1 => primitive_convexity576 χ hχ hne hη0 hη1 s hs0 hs1)
+
 /-- A single good horizontal segment has the derived loose budget.
 Trudgian pages 4 to 9, displays 2.8, 3.9 and 4.2 to 4.12.
-CONDITIONAL ON horizontal_of_jensen576 and jensen_mass_bound576.
+CONDITIONAL ON horizontal_of_jensen576. The Jensen mass and convexity inputs are proved.
 -/
 theorem horizontal_bound576 {q : ℕ} [NeZero q]
     (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
@@ -2373,7 +2783,7 @@ theorem horizontal_bound576 {q : ℕ} [NeZero q]
 
 /-- The good-height contour bound adds the two horizontal budgets and the vertical budget.
 Trudgian pages 3 to 9, displays 2.3 and 4.12.
-CONDITIONAL ON the two power-Jensen leaves and vertical_bound576.
+CONDITIONAL ON horizontal_of_jensen576. The Jensen mass and vertical inputs are proved.
 -/
 theorem argument_good_bound576 {q : ℕ} [NeZero q]
     (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hne : χ ≠ 1)
@@ -2433,5 +2843,1049 @@ theorem primitive_argument_bound576 {q : ℕ} [NeZero q] (χ : DirichletCharacte
     |Filter.limUnder (𝓝[>] T) (argument576 χ)| ≤ 0.5 * Real.log (q * T) + 15.7 := by
   obtain ⟨A, hA⟩ := argument_right_limit576 χ hχ hne hT
   exact argument_bound_of_limit576 χ hχ hne hT hA
+
+
+/-! ### Continuous phases and finite Jensen weights
+Trudgian pages 3 to 7. These helpers use no open analytic leaf.
+-/
+
+namespace Backlund585
+open MeromorphicOn Metric
+
+/-- A nonzero continuous complex curve on a closed real interval has a continuous logarithm with a prescribed endpoint value.
+Trudgian page 4, the continuous argument used before display 2.8.
+The anchor is any point of the interval. Mathlib supplies the covering lift.
+-/
+theorem continuous_log585 {a b : ℝ} (hab : a ≤ b) {f : ℝ → ℂ}
+    (hf : ContinuousOn f (Icc a b)) (hzero : ∀ x ∈ Icc a b, f x ≠ 0)
+    (x₀ : ℝ) (hx₀ : x₀ ∈ Icc a b) :
+    ∃ g : ℝ → ℂ, ContinuousOn g (Icc a b) ∧ g x₀ = Complex.log (f x₀) ∧
+      ∀ x ∈ Icc a b, Complex.exp (g x) = f x := by
+  let F : ℝ → ℂ := IccExtend hab (fun x : Icc a b => f x)
+  have hF : Continuous F := by
+    exact continuous_IccExtend_iff.mpr (continuousOn_iff_continuous_domRestrict.mp hf)
+  have hFzero : ∀ x, F x ≠ 0 := fun x => hzero _ (projIcc a b hab x).property
+  have hsc : IsSimplyConnected (univ : Set ℝ) := by
+    let := (convex_univ : Convex ℝ (univ : Set ℝ)).contractibleSpace univ_nonempty
+    exact inferInstanceAs (SimplyConnectedSpace (univ : Set ℝ))
+  obtain ⟨g, hg, hexp⟩ := Complex.exists_continuousOn_eqOn_exp_comp hsc isOpen_univ
+    hF.continuousOn (by simpa only [mem_image, mem_univ, true_and, not_exists] using
+      hFzero)
+  have heq : ∀ x ∈ Icc a b, Complex.exp (g x) = f x := by
+    intro x hx
+    simpa only [Function.comp_apply, F, IccExtend, projIcc_of_mem hab hx]
+      using hexp (mem_univ x)
+  refine ⟨fun x => g x - g x₀ + Complex.log (f x₀),
+    ((hg.mono (subset_univ _)).sub continuousOn_const).add continuousOn_const,
+    by simp, ?_⟩
+  intro x hx
+  rw [Complex.exp_add, Complex.exp_sub, heq x hx, heq x₀ hx₀,
+    Complex.exp_log (hzero x₀ hx₀)]
+  exact div_mul_cancel₀ _ (hzero x₀ hx₀)
+
+/-- The real part of a power is its norm power times the cosine of the multiplied lifted phase.
+Trudgian page 4, display 2.7, with the exponential lift written explicitly.
+-/
+theorem power_re_phase585 {z w : ℂ} (h : Complex.exp w = z) (n : ℕ) :
+    (z ^ n).re = ‖z‖ ^ n * Real.cos ((n : ℝ) * w.im) := by
+  rw [← h, ← Complex.exp_nat_mul, Complex.exp_re, Complex.norm_exp,
+    ← Real.exp_nat_mul]
+  simp
+
+/-- LEAF. A continuous phase reaches an intermediate level for the first time.
+Trudgian pages 4 and 5, Lemma 2 and display 3.1.
+Every preceding parameter has strictly smaller phase. No monotonicity is assumed.
+-/
+theorem first_passage585 {a b : ℝ} (hab : a ≤ b) {θ : ℝ → ℝ}
+    (hθ : ContinuousOn θ (Icc a b)) {c : ℝ} (ha : θ a < c) (hb : c ≤ θ b) :
+    ∃ x ∈ Ioc a b, θ x = c ∧ ∀ y ∈ Ico a x, θ y < c := by
+  have hnonempty : (Icc a b ∩ θ ⁻¹' {c}).Nonempty := by
+    obtain ⟨x, hx, he⟩ := intermediate_value_Icc hab hθ ⟨ha.le, hb⟩
+    exact ⟨x, hx, he⟩
+  have hcompact : IsCompact (Icc a b ∩ θ ⁻¹' {c}) :=
+    isCompact_Icc.of_isClosed_subset
+      (hθ.preimage_isClosed_of_isClosed isClosed_Icc isClosed_singleton) inter_subset_left
+  obtain ⟨x, hx, hmin⟩ := hcompact.exists_isLeast hnonempty
+  have hxc : θ x = c := hx.2
+  have hax : a < x := by
+    refine lt_of_le_of_ne hx.1.1 ?_
+    intro he
+    have : θ a = c := he ▸ hxc
+    linarith
+  refine ⟨x, ⟨hax, hx.1.2⟩, hxc, ?_⟩
+  intro y hy
+  by_contra h
+  have hcy : c ≤ θ y := le_of_not_gt h
+  obtain ⟨z, hz, he⟩ := intermediate_value_Icc hy.1
+    (hθ.mono (Icc_subset_Icc le_rfl (hy.2.le.trans hx.1.2))) ⟨ha.le, hcy⟩
+  have hzmin : x ≤ z := hmin ⟨⟨hz.1, hz.2.trans (hy.2.le.trans hx.1.2)⟩, he⟩
+  exact (not_le_of_gt hy.2) (hzmin.trans hz.2)
+
+/-- First passages through strictly increasing levels occur in strict order.
+Trudgian page 5, the ordered zero selection preceding display 3.4.
+-/
+theorem first_passages585 {a b : ℝ} (hab : a ≤ b) {θ : ℝ → ℝ}
+    (hθ : ContinuousOn θ (Icc a b)) {n : ℕ} (c : Fin n → ℝ)
+    (hc : StrictMono c) (ha : ∀ i, θ a < c i) (hb : ∀ i, c i ≤ θ b) :
+    ∃ x : Fin n → ℝ, StrictMono x ∧
+      ∀ i, x i ∈ Ioc a b ∧ θ (x i) = c i ∧ ∀ y ∈ Ico a (x i), θ y < c i := by
+  have hall : ∀ i, ∃ x ∈ Ioc a b, θ x = c i ∧ ∀ y ∈ Ico a x, θ y < c i :=
+    fun i => first_passage585 hab hθ (ha i) (hb i)
+  choose x hx hval hbefore using hall
+  refine ⟨x, ?_, fun i => ⟨hx i, hval i, hbefore i⟩⟩
+  intro i j hij
+  by_contra h
+  have hji : x j ≤ x i := le_of_not_gt h
+  rcases hji.eq_or_lt with heq | hlt
+  · have hh := congrArg θ heq
+    rw [hval j, hval i] at hh
+    exact (ne_of_lt (hc hij)) hh.symm
+  · have hh := hbefore i (x j) ⟨(hx j).1.le, hlt⟩
+    rw [hval j] at hh
+    exact (not_lt_of_gt (hc hij)) hh
+
+/-- Half-integer phase levels give zeros of the real part power.
+Trudgian page 4, display 2.7 and the phase counting before display 2.8.
+-/
+theorem power_re_zero_of_level585 {z w : ℂ} (h : Complex.exp w = z) (n : ℕ) (m : ℤ)
+    (hlevel : (n : ℝ) * w.im = Real.pi / 2 + (m : ℝ) * Real.pi) :
+    (z ^ n).re = 0 := by
+  rw [power_re_phase585 h n, hlevel, Real.cos_add_int_mul_pi, Real.cos_pi_div_two,
+    mul_zero, mul_zero]
+
+/-- A continuous exponential lift differentiates to the logarithmic derivative.
+Trudgian pages 3 and 4, display 2.3 and segment C3.
+Mathlib supplies the inverse derivative rule over the real scalars.
+-/
+theorem hasDerivAt_log_lift585 {f g : ℝ → ℂ} {f' : ℂ} {x : ℝ}
+    (hg : ContinuousAt g x) (hf : HasDerivAt f f' x)
+    (hexp : Complex.exp ∘ g =ᶠ[𝓝 x] f) :
+    HasDerivAt g (f' / f x) x := by
+  have heq : Complex.exp (g x) = f x := hexp.eq_of_nhds
+  have hinv : Function.LeftInverse
+      ((Complex.exp (g x))⁻¹ • (1 : ℂ →L[ℝ] ℂ))
+      (Complex.exp (g x) • (1 : ℂ →L[ℝ] ℂ)) := by
+    intro z
+    simp [Complex.exp_ne_zero]
+  have hd := HasFDerivAt.of_comp_of_leftInverse hg
+    (Complex.hasStrictFDerivAt_exp_real (g x)).hasFDerivAt hf.hasFDerivAt hexp hinv
+  convert hd.hasDerivAt using 1
+  simp [heq, div_eq_mul_inv, mul_comm]
+
+/-- The logarithmic derivative integral equals the endpoint difference of a continuous logarithm.
+Trudgian pages 3 and 4, display 2.3 and the oriented segment C3.
+-/
+theorem integral_log_lift585 {a b : ℝ} (hab : a ≤ b) {f f' g : ℝ → ℂ}
+    (hg : ContinuousOn g (Icc a b)) (hf : ∀ x ∈ Ioo a b, HasDerivAt f (f' x) x)
+    (hexp : ∀ x ∈ Icc a b, Complex.exp (g x) = f x)
+    (hint : IntervalIntegrable (fun x => f' x / f x)
+      MeasureTheory.volume a b) :
+    (∫ x in a..b, f' x / f x) = g b - g a := by
+  apply intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab hg _ hint
+  intro x hx
+  apply hasDerivAt_log_lift585
+  · exact (hg x ⟨hx.1.le, hx.2.le⟩).continuousAt (Icc_mem_nhds hx.1 hx.2)
+  · exact hf x hx
+  · filter_upwards [Icc_mem_nhds hx.1 hx.2] with y hy using hexp y hy
+
+/-- LEAF. An entire function nonzero on a horizontal segment has a continuous real phase.
+Trudgian pages 3 and 4, displays 2.3 and 2.7 to 2.8.
+The right endpoint phase is the principal argument. Its variation equals the
+imaginary logarithmic derivative integral. Every power has the expected cosine formula.
+-/
+theorem holomorphic_segment_phase585 {a b : ℝ} (hab : a ≤ b)
+    (f : ℂ → ℂ) (hf : Differentiable ℂ f) (w : ℂ)
+    (hzero : ∀ x ∈ Icc a b, f ((x : ℂ) + w) ≠ 0) :
+    ∃ θ : ℝ → ℝ, ContinuousOn θ (Icc a b) ∧
+      θ b = Complex.arg (f ((b : ℂ) + w)) ∧
+      (∀ x ∈ Icc a b, ∀ n : ℕ,
+        (f ((x : ℂ) + w) ^ n).re =
+          ‖f ((x : ℂ) + w)‖ ^ n * Real.cos ((n : ℝ) * θ x)) ∧
+      (∫ x in a..b, logDeriv f ((x : ℂ) + w)).im = θ b - θ a := by
+  have hcont : Continuous (fun x : ℝ => f ((x : ℂ) + w)) :=
+    hf.continuous.comp (by fun_prop)
+  obtain ⟨g, hg, hgb, hexp⟩ := continuous_log585 hab hcont.continuousOn hzero b
+    (right_mem_Icc.mpr hab)
+  refine ⟨fun x => (g x).im, Complex.continuous_im.comp_continuousOn hg,
+    by simp only [hgb, Complex.log_im], ?_, ?_⟩
+  · intro x hx n
+    exact power_re_phase585 (hexp x hx) n
+  · have hlogc : ContinuousOn (fun x : ℝ => logDeriv f ((x : ℂ) + w)) (Icc a b) := by
+      intro x hx
+      have hc : ContinuousAt (logDeriv f) ((x : ℂ) + w) :=
+        ((hf.analyticAt _).deriv).continuousAt.div (hf.continuous.continuousAt) (hzero x hx)
+      exact (hc.comp (f := fun y : ℝ => (y : ℂ) + w) (by fun_prop)).continuousWithinAt
+    have hderiv : ∀ x ∈ Ioo a b,
+        HasDerivAt (fun y : ℝ => f ((y : ℂ) + w)) (deriv f ((x : ℂ) + w)) x := by
+      intro x _
+      have hd := ((hf ((x : ℂ) + w)).hasDerivAt.comp (x : ℂ)
+        ((hasDerivAt_id (x : ℂ)).add_const w)).comp_ofReal
+      simpa using hd
+    have hi := integral_log_lift585 hab hg hderiv hexp
+      (by simpa only [logDeriv_apply] using
+        hlogc.intervalIntegrable_of_Icc (μ := MeasureTheory.volume) hab)
+    simpa only [Complex.sub_im, logDeriv_apply] using congrArg Complex.im hi
+
+/-- A phase increase greater than n pi produces n distinct interior cosine zeros.
+Trudgian page 4, the inequality preceding display 2.8.
+Half-integer levels are chosen with the floor function and ordered first passages.
+-/
+theorem phase_zero_count585 {a b : ℝ} (hab : a ≤ b) {θ : ℝ → ℝ}
+    (hθ : ContinuousOn θ (Icc a b)) {n : ℕ}
+    (hn : (n : ℝ) * Real.pi < θ b - θ a) :
+    ∃ x : Fin n → ℝ, StrictMono x ∧
+      ∀ i, x i ∈ Ioo a b ∧ Real.cos (θ (x i)) = 0 := by
+  let m : ℤ := ⌊θ a / Real.pi - 1 / 2⌋ + 1
+  let c : Fin n → ℝ := fun i => Real.pi / 2 + ((m : ℝ) + (i : ℝ)) * Real.pi
+  have hlo : θ a / Real.pi - 1 / 2 < (m : ℝ) := by
+    simpa only [m, Int.cast_add, Int.cast_one] using Int.lt_floor_add_one (θ a / Real.pi - 1 / 2)
+  have hhi : (m : ℝ) ≤ θ a / Real.pi - 1 / 2 + 1 := by
+    have h := Int.floor_le (θ a / Real.pi - 1 / 2)
+    dsimp [m]
+    push_cast
+    linarith
+  have hquot : θ a / Real.pi * Real.pi = θ a := div_mul_cancel₀ _ Real.pi_ne_zero
+  have hc : StrictMono c := by
+    intro i j hij
+    have hh : (i : ℝ) < (j : ℝ) := by exact_mod_cast hij
+    dsimp [c]
+    nlinarith [Real.pi_pos]
+  have ha : ∀ i, θ a < c i := by
+    intro i
+    have hh := mul_lt_mul_of_pos_right hlo Real.pi_pos
+    have hi : 0 ≤ (i : ℝ) := Nat.cast_nonneg i.val
+    dsimp [c]
+    nlinarith [mul_nonneg hi Real.pi_pos.le]
+  have hb : ∀ i, c i ≤ θ b := by
+    intro i
+    have hi : (i : ℝ) + 1 ≤ n := by exact_mod_cast i.isLt
+    have hh := mul_le_mul_of_nonneg_right hhi Real.pi_pos.le
+    have hi' := mul_le_mul_of_nonneg_right hi Real.pi_pos.le
+    dsimp [c]
+    nlinarith
+  obtain ⟨x, hx, hval⟩ := first_passages585 hab hθ c hc ha hb
+  refine ⟨x, hx, fun i => ⟨?_, ?_⟩⟩
+  · refine ⟨(hval i).1.1, lt_of_le_of_ne (hval i).1.2 ?_⟩
+    intro heq
+    have hv := (hval i).2.1
+    rw [heq] at hv
+    have hi : (i : ℝ) + 1 ≤ n := by exact_mod_cast i.isLt
+    have hh := mul_le_mul_of_nonneg_right hhi Real.pi_pos.le
+    have hi' := mul_le_mul_of_nonneg_right hi Real.pi_pos.le
+    dsimp [c] at hv
+    nlinarith
+  · rw [(hval i).2.1]
+    have heq : c i = Real.pi / 2 + ((m + (i : ℕ) : ℤ) : ℝ) * Real.pi := by
+      simp [c]
+    rw [heq, Real.cos_add_int_mul_pi, Real.cos_pi_div_two, mul_zero]
+
+/-- LEAF. The logarithmic weights of any finite set of distinct zeros are bounded by the Jensen mean difference.
+Trudgian page 4 display 2.9 and page 7 display 4.3.
+The function is entire and nonzero at the centre. Analytic zero orders are at least one.
+Mathlib supplies Jensen formula. This statement does not construct reflected partners.
+-/
+theorem finite_zero_jensen585 (f : ℂ → ℂ) (hf : Differentiable ℂ f)
+    (c : ℂ) {R : ℝ} (hR : 0 < R) (hc : f c ≠ 0) (S : Finset ℂ)
+    (hS : ∀ z ∈ S, ‖c - z‖ < R ∧ f z = 0) :
+    (∑ z ∈ S, Real.log (R / ‖c - z‖)) ≤
+      Real.circleAverage (fun z => Real.log ‖f z‖) c R - Real.log ‖f c‖ := by
+  classical
+  have hA : AnalyticOnNhd ℂ f (closedBall c R) := fun z _ => hf.analyticAt z
+  have hU : AnalyticOnNhd ℂ f (univ : Set ℂ) := fun z _ => hf.analyticAt z
+  let D := MeromorphicOn.divisor f (closedBall c R)
+  let W : ℂ → ℝ := fun z => (D z : ℝ) * Real.log (R / ‖c - z‖)
+  have hD0 : D c = 0 := by
+    rw [show D c = _ from hA.divisor_apply (by simp [hR.le]),
+      (hf.analyticAt c).analyticOrderAt_eq_zero.mpr hc]
+    simp
+  have hW0 : ∀ z, 0 ≤ W z := by
+    intro z
+    by_cases hz : z ∈ closedBall c R
+    · by_cases hzc : z = c
+      · simp [W, hzc, hD0]
+      · have hn : 0 < ‖c - z‖ := norm_pos_iff.mpr (sub_ne_zero.mpr (Ne.symm hzc))
+        apply mul_nonneg (show 0 ≤ (D z : ℝ) by exact_mod_cast hA.divisor_nonneg z)
+        apply Real.log_nonneg
+        exact (one_le_div hn).mpr (by simpa only [mem_closedBall, dist_eq_norm'] using hz)
+    · have hd : D z = 0 := Function.locallyFinsuppWithin.apply_eq_zero_of_notMem _ hz
+      simp [W, hd]
+  have hterm : ∀ z ∈ S, Real.log (R / ‖c - z‖) ≤ W z := by
+    intro z hz
+    have hzc : z ≠ c := by intro h; exact hc (h ▸ (hS z hz).2)
+    have hzball : z ∈ closedBall c R := by
+      simpa only [mem_closedBall, dist_eq_norm'] using (hS z hz).1.le
+    have hord : analyticOrderAt f z ≠ ⊤ :=
+      hU.analyticOrderAt_ne_top_of_isPreconnected isPreconnected_univ
+        (x := c) (y := z) (by simp) (by simp)
+        (by rw [(hf.analyticAt c).analyticOrderAt_eq_zero.mpr hc]; simp)
+    obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp hord
+    have hn0 : n ≠ 0 := by
+      intro hn0
+      have hz0 : analyticOrderAt f z = 0 := by rw [← hn, hn0]; rfl
+      exact ((hf.analyticAt z).analyticOrderAt_eq_zero.mp hz0) (hS z hz).2
+    have hDz : (1 : ℝ) ≤ D z := by
+      dsimp [D]
+      rw [hA.divisor_apply hzball, ← hn]
+      simpa using (show (1 : ℝ) ≤ (n : ℝ) by exact_mod_cast Nat.one_le_iff_ne_zero.mpr hn0)
+    have hlog0 : 0 ≤ Real.log (R / ‖c - z‖) :=
+      Real.log_nonneg ((one_le_div (norm_pos_iff.mpr (sub_ne_zero.mpr (Ne.symm hzc)))).mpr
+        (hS z hz).1.le)
+    simpa only [one_mul] using mul_le_mul_of_nonneg_right hDz hlog0
+  let K := (D.finiteSupport (isCompact_closedBall c R)).toFinset ∪ S
+  have hsupport : Function.support W ⊆ K := by
+    intro z hz
+    apply Finset.mem_union_left
+    apply (D.finiteSupport (isCompact_closedBall c R)).mem_toFinset.mpr
+    by_contra hd
+    exact hz (by simp [W, (show D z = 0 from not_not.mp hd)])
+  have hsum : (∑ z ∈ S, Real.log (R / ‖c - z‖)) ≤ ∑ᶠ z, W z := by
+    rw [finsum_eq_sum_of_support_subset W hsupport]
+    exact (Finset.sum_le_sum hterm).trans
+      (Finset.sum_le_sum_of_subset_of_nonneg Finset.subset_union_right (fun z _ _ => hW0 z))
+  have hj := AnalyticOnNhd.circleAverage_log_norm (f := f) (c := c) (R := R) hR.ne'
+    (by simpa only [abs_of_pos hR] using hA) hc
+  rw [abs_of_pos hR] at hj
+  have heq : (∑ᶠ z, W z) =
+      Real.circleAverage (fun z => Real.log ‖f z‖) c R - Real.log ‖f c‖ := by
+    rw [hj]
+    simp only [W, D, div_eq_mul_inv, add_sub_cancel_right]
+  exact hsum.trans_eq heq
+
+
+/-- The normalized path exp of i t has nonzero real part at its first full pi turn.
+Trudgian page 4, Lemma 2 wording after display 3.1.
+This is evidence for a source QUESTION about literal threshold attainment.
+It does not refute the sealed horizontal argument bound.
+-/
+theorem integer_first_passage_not_zero585 :
+    (∀ t ∈ Ico (0 : ℝ) Real.pi, |t| < Real.pi) ∧
+    |Real.pi| = Real.pi ∧ (Complex.exp ((Real.pi : ℂ) * I)).re ≠ 0 := by
+  refine ⟨fun t ht => ?_, abs_of_pos Real.pi_pos, ?_⟩
+  · simpa only [abs_of_nonneg ht.1] using ht.2
+  · simp
+
+/-- An absolute phase change greater than n pi gives n distinct interior cosine zeros.
+Trudgian page 4, the absolute variation inequality before display 2.8.
+The negative variation case uses cosine symmetry.
+-/
+theorem phase_zero_count_abs585 {a b : ℝ} (hab : a ≤ b) {θ : ℝ → ℝ}
+    (hθ : ContinuousOn θ (Icc a b)) {n : ℕ}
+    (hn : (n : ℝ) * Real.pi < |θ b - θ a|) :
+    ∃ x : Fin n → ℝ, StrictMono x ∧
+      ∀ i, x i ∈ Ioo a b ∧ Real.cos (θ (x i)) = 0 := by
+  by_cases h : 0 ≤ θ b - θ a
+  · rw [abs_of_nonneg h] at hn
+    exact phase_zero_count585 hab hθ hn
+  · have hh : (n : ℝ) * Real.pi < -θ b - -θ a := by
+      rw [abs_of_neg (lt_of_not_ge h)] at hn
+      linarith
+    obtain ⟨x, hx, hval⟩ := phase_zero_count585 hab hθ.neg hh
+    exact ⟨x, hx, fun i => ⟨(hval i).1, by simpa using (hval i).2⟩⟩
+
+/-- A far right zero has at least two log-radius weights at the fixed circle parameters.
+Trudgian page 6, display 3.10 and the threshold argument after display 3.11.
+The threshold is one, the centre is five quarters and the radius is nine sevenths.
+-/
+theorem far_zero_weight585 {x : ℝ} (hx0 : 1 ≤ x)
+    (hx1 : x ≤ 1 / 2 + Real.sqrt 2 * (1 / 2 + 1 / 4))
+    (hxc : x ≠ 5 / 4) :
+    2 * Real.log (12 / 7 : ℝ) ≤ Real.log ((9 / 7 : ℝ) / |5 / 4 - x|) := by
+  have hs : Real.sqrt 2 ≤ 3 / 2 := by
+    apply Real.sqrt_le_iff.mpr
+    norm_num
+  have hdist : |5 / 4 - x| ≤ 7 / 16 := by
+    rw [abs_le]
+    constructor <;> nlinarith
+  have hd : 0 < |(5 / 4 : ℝ) - x| := abs_pos.mpr (sub_ne_zero.mpr hxc.symm)
+  have hratio : (12 / 7 : ℝ) ^ 2 ≤ (9 / 7) / |5 / 4 - x| := by
+    rw [le_div_iff₀ hd]
+    nlinarith
+  have hh := Real.log_le_log (by norm_num : (0 : ℝ) < (12 / 7) ^ 2) hratio
+  simpa only [Real.log_pow, Nat.cast_ofNat] using hh
+
+/-- The reflected partner of a right zero below the threshold one lies inside the Jensen circle.
+Trudgian page 6, the paragraph before display 3.11.
+The reflection inequality is explicit. No partner is constructed by this geometric step.
+-/
+theorem near_partner_in_circle585 {x y : ℝ} (hx1 : x < 1)
+    (hy : y ≤ 1 / 2) (hpair : 1 - x ≤ y) :
+    |(5 / 4 : ℝ) - y| < 9 / 7 := by
+  rw [abs_of_nonneg (by linarith : 0 ≤ (5 / 4 : ℝ) - y)]
+  linarith
+
+/-- A finite set covering the cosine zeros bounds continuous phase variation by its cardinality plus one times pi.
+Trudgian page 4, the inequality before display 2.8.
+The proof uses the strict ordered crossing construction and finite cardinality.
+-/
+theorem phase_variation_le_card585 {a b : ℝ} (hab : a ≤ b) {θ : ℝ → ℝ}
+    (hθ : ContinuousOn θ (Icc a b)) (S : Finset ℝ)
+    (hS : ∀ x ∈ Ioo a b, Real.cos (θ x) = 0 → x ∈ S) :
+    |θ b - θ a| ≤ ((S.card : ℝ) + 1) * Real.pi := by
+  classical
+  by_contra hn
+  have hn' : ((S.card + 1 : ℕ) : ℝ) * Real.pi < |θ b - θ a| := by
+    push_cast
+    exact lt_of_not_ge hn
+  obtain ⟨x, hx, hval⟩ := phase_zero_count_abs585 hab hθ hn'
+  let e : Fin (S.card + 1) → S := fun i => ⟨x i, hS (x i) (hval i).1 (hval i).2⟩
+  have he : Function.Injective e := by
+    intro i j hij
+    exact hx.injective (congrArg Subtype.val hij)
+  have hh := Fintype.card_le_of_injective e he
+  simp only [Fintype.card_fin, Fintype.card_coe] at hh
+  omega
+
+/-- LEAF. Distinct paired and unpaired zeros inside the Jensen circle give the Backlund count budget.
+Trudgian page 6 display 3.9 and page 7 display 4.3.
+The pair distance product and unpaired distance bounds remain explicit.
+The proved Backlund log weight and finite-zero Jensen theorem are reused.
+-/
+theorem paired_zero_jensen585 {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (f : ℂ → ℂ) (hf : Differentiable ℂ f) (c : ℂ) {r a : ℝ}
+    (hr : 1 < r) (ha : 0 < a) (hc : f c ≠ 0)
+    (x y : ι → ℂ) (u : κ → ℂ)
+    (hinj : Function.Injective (Sum.elim (Sum.elim x y) u))
+    (hx : ∀ i, ‖c - x i‖ < r * a ∧ f (x i) = 0)
+    (hy : ∀ i, ‖c - y i‖ < r * a ∧ f (y i) = 0)
+    (hu : ∀ i, ‖c - u i‖ < r * a ∧ f (u i) = 0)
+    (hp : ∀ i, ‖c - x i‖ * ‖c - y i‖ ≤ a ^ 2)
+    (hu' : ∀ i, ‖c - u i‖ ≤ a) :
+    (2 * (Fintype.card ι : ℝ) + (Fintype.card κ : ℝ)) * Real.log r ≤
+      Real.circleAverage (fun z => Real.log ‖f z‖) c (r * a) - Real.log ‖f c‖ := by
+  classical
+  let z : (ι ⊕ ι) ⊕ κ → ℂ := Sum.elim (Sum.elim x y) u
+  let S : Finset ℂ := Finset.univ.image z
+  have hS : ∀ v ∈ S, ‖c - v‖ < r * a ∧ f v = 0 := by
+    intro v hv
+    obtain ⟨i, _, rfl⟩ := Finset.mem_image.mp hv
+    rcases i with (i | i) | i
+    · exact hx i
+    · exact hy i
+    · exact hu i
+  have hj := finite_zero_jensen585 f hf c (mul_pos (by linarith) ha) hc S hS
+  have hsum : (∑ v ∈ S, Real.log (r * a / ‖c - v‖)) =
+      (∑ i, Real.log (r * a / ‖c - x i‖)) +
+      (∑ i, Real.log (r * a / ‖c - y i‖)) +
+      ∑ i, Real.log (r * a / ‖c - u i‖) := by
+    dsimp only [S]
+    rw [Finset.sum_image (fun i _ j _ h => hinj h)]
+    simp only [Fintype.sum_sum_type, Sum.elim_inl, Sum.elim_inr]
+  rw [hsum] at hj
+  have hpos {v : ℂ} (hv : f v = 0) : 0 < ‖c - v‖ := by
+    apply norm_pos_iff.mpr
+    intro heq
+    have heq' : c = v := sub_eq_zero.mp heq
+    exact hc (heq' ▸ hv)
+  have hw := Decomp576b.backlund_log_weight576 (Finset.univ : Finset ι) (Finset.univ : Finset κ)
+    (by linarith : 0 < r) ha (fun i => ‖c - x i‖) (fun i => ‖c - y i‖)
+    (fun i => ‖c - u i‖) (fun i _ => hpos (hx i).2) (fun i _ => hpos (hy i).2)
+    (fun i _ => hp i) (fun i _ => ⟨hpos (hu i).2, hu' i⟩)
+  simp only [Finset.card_univ, Finset.sum_add_distrib] at hw
+  exact hw.trans hj
+
+
+/-- LEAF. A zero-free horizontal L-function segment has a continuous lifted phase with the power cosine formula.
+Trudgian pages 3 and 4, displays 2.3 and 2.7 to 2.8.
+The phase is anchored to the principal argument at real part two.
+Its oriented endpoint difference is exactly horizontal576 times pi.
+-/
+theorem horizontal_phase_lift585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hne : χ ≠ 1) (T : ℝ)
+    (hgood : ∀ σ ∈ Icc (1 / 2 : ℝ) 2,
+      DirichletCharacter.LFunction χ ((σ : ℂ) + (T : ℂ) * I) ≠ 0) :
+    ∃ θ : ℝ → ℝ, ContinuousOn θ (Icc (1 / 2 : ℝ) 2) ∧
+      θ 2 = Complex.arg (DirichletCharacter.LFunction χ ((2 : ℂ) + (T : ℂ) * I)) ∧
+      (∀ σ ∈ Icc (1 / 2 : ℝ) 2, ∀ n : ℕ,
+        realPartPower576 χ T n (σ : ℂ) =
+          ((‖DirichletCharacter.LFunction χ ((σ : ℂ) + (T : ℂ) * I)‖ ^ n *
+            Real.cos ((n : ℝ) * θ σ) : ℝ) : ℂ)) ∧
+      horizontal576 χ T = (θ (1 / 2) - θ 2) / Real.pi := by
+  obtain ⟨θ, hθ, hright, hpow, hint⟩ := holomorphic_segment_phase585
+    (by norm_num : (1 / 2 : ℝ) ≤ 2) (DirichletCharacter.LFunction χ)
+    (DirichletCharacter.differentiable_LFunction hne) ((T : ℂ) * I) hgood
+  refine ⟨θ, hθ, hright, ?_, ?_⟩
+  · intro σ hσ n
+    rw [realPartPower_real576, hpow σ hσ n]
+  · unfold horizontal576
+    rw [intervalIntegral.integral_symm (a := (1 / 2 : ℝ)) (b := 2), Complex.neg_im, hint]
+    ring
+
+/-- The horizontal signed argument is bounded by the number of real-part power zeros plus one divided by the power.
+Trudgian page 4, the inequality before display 2.8.
+Any finite set covering the interior zeros suffices. No reflected pairing is used.
+-/
+theorem horizontal_card_bound585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hne : χ ≠ 1) (T : ℝ)
+    (hgood : ∀ σ ∈ Icc (1 / 2 : ℝ) 2,
+      DirichletCharacter.LFunction χ ((σ : ℂ) + (T : ℂ) * I) ≠ 0)
+    {N : ℕ} (hN : 0 < N) (S : Finset ℝ)
+    (hS : ∀ σ ∈ Ioo (1 / 2 : ℝ) 2,
+      realPartPower576 χ T N (σ : ℂ) = 0 → σ ∈ S) :
+    |horizontal576 χ T| ≤ ((S.card : ℝ) + 1) / N := by
+  obtain ⟨θ, hθ, _, hpow, hint⟩ := horizontal_phase_lift585 χ hne T hgood
+  have hzeros : ∀ σ ∈ Ioo (1 / 2 : ℝ) 2,
+      Real.cos ((N : ℝ) * θ σ) = 0 → σ ∈ S := by
+    intro σ hσ hz
+    apply hS σ hσ
+    rw [hpow σ ⟨hσ.1.le, hσ.2.le⟩ N, hz, mul_zero, Complex.ofReal_zero]
+  have hh := phase_variation_le_card585 (by norm_num : (1 / 2 : ℝ) ≤ 2)
+    (hθ.const_mul (N : ℝ)) S hzeros
+  have hNreal : (0 : ℝ) < N := Nat.cast_pos.mpr hN
+  rw [hint, abs_div, abs_of_pos Real.pi_pos]
+  apply (div_le_iff₀ Real.pi_pos).mpr
+  rw [div_mul_eq_mul_div]
+  apply (le_div_iff₀ hNreal).mpr
+  have hphase : |(N : ℝ) * θ 2 - (N : ℝ) * θ (1 / 2)| =
+      (N : ℝ) * |θ (1 / 2) - θ 2| := by
+    rw [← mul_sub, abs_mul, abs_of_pos hNreal, abs_sub_comm]
+  rw [hphase] at hh
+  nlinarith
+
+/-- The fixed Jensen mass has exactly the circle mean normalization from the source.
+Trudgian page 7 display 4.3 and page 9 display 4.12.
+The power is positive, so the normalization denominator is nonzero.
+-/
+theorem jensen_mass_mean585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (T : ℝ) {n : ℕ} (hn : 0 < n) :
+    (2 * (n : ℝ) * Real.log (12 / 7 : ℝ)) * jensenMass576 χ T n =
+      Real.circleAverage (fun z => Real.log ‖realPartPower576 χ T n z‖)
+        (5 / 4 : ℂ) (9 / 7 : ℝ) -
+      Real.log ‖realPartPower576 χ T n (5 / 4 : ℂ)‖ := by
+  have hmean : Real.circleAverage (fun z => Real.log ‖realPartPower576 χ T n z‖)
+      (5 / 4 : ℂ) (9 / 7 : ℝ) =
+      (1 / (2 * Real.pi)) * (∫ φ in (0 : ℝ)..2 * Real.pi,
+        Real.log ‖realPartPower576 χ T n
+          ((5 / 4 : ℂ) + (9 / 7 : ℂ) * Complex.exp ((φ : ℂ) * I))‖) := by
+    simp [Real.circleAverage, circleMap, smul_eq_mul, one_div]
+  rw [hmean]
+  unfold jensenMass576
+  have hd : 2 * (n : ℝ) * Real.log (12 / 7 : ℝ) ≠ 0 := by
+    have : 0 < Real.log (12 / 7 : ℝ) := Real.log_pos (by norm_num)
+    positivity
+  exact mul_div_cancel₀ _ hd
+
+open MeromorphicOn Metric
+
+/-- The fixed Jensen mass bounds the finite zero weights with its exact factor of twice the power times log radius.
+Trudgian page 7 display 4.3 and page 9 display 4.12.
+The real-part power is nonzero at the centre. No phase crossing or reflected partner is assumed silently.
+-/
+theorem jensen_zero_weights585 {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hne : χ ≠ 1) (T : ℝ) {n : ℕ} (hn : 0 < n)
+    (hc : realPartPower576 χ T n (5 / 4 : ℂ) ≠ 0) (S : Finset ℂ)
+    (hS : ∀ z ∈ S, ‖(5 / 4 : ℂ) - z‖ < 9 / 7 ∧ realPartPower576 χ T n z = 0) :
+    (∑ z ∈ S, Real.log ((9 / 7 : ℝ) / ‖(5 / 4 : ℂ) - z‖)) ≤
+      (2 * (n : ℝ) * Real.log (12 / 7 : ℝ)) * jensenMass576 χ T n := by
+  have hh := finite_zero_jensen585 (realPartPower576 χ T n)
+    (realPartPower_differentiable576 χ hne T n) (5 / 4 : ℂ) (by norm_num) hc S hS
+  rw [← jensen_mass_mean585 χ T hn] at hh
+  exact hh
+
+/-- LEAF. Heath-Brown's partial-radius pairing still gives two log-radius weights per right zero.
+Trudgian page 6, displays 3.10 and 3.11 and their concluding sum.
+The fixed threshold is one. Only partners of zeros below that threshold are
+selected inside the circle. Far right zeros receive the same weight alone.
+The reflected zeros are supplied explicitly and are pairwise distinct.
+-/
+theorem partial_paired_zero_jensen585 {ι : Type*} [Fintype ι]
+    (f : ℂ → ℂ) (hf : Differentiable ℂ f) (hc : f (5 / 4 : ℂ) ≠ 0)
+    (x y : ι → ℝ) (hinj : Function.Injective (Sum.elim x y))
+    (hx : ∀ i, 1 / 2 ≤ x i ∧ x i ≤ 1 / 2 + Real.sqrt 2 * (1 / 2 + 1 / 4))
+    (hy : ∀ i, y i ≤ 1 / 2 ∧ 1 - x i ≤ y i)
+    (hfx : ∀ i, f (x i : ℂ) = 0) (hfy : ∀ i, f (y i : ℂ) = 0) :
+    2 * (Fintype.card ι : ℝ) * Real.log (12 / 7 : ℝ) ≤
+      Real.circleAverage (fun z => Real.log ‖f z‖) (5 / 4 : ℂ) (9 / 7 : ℝ) -
+        Real.log ‖f (5 / 4 : ℂ)‖ := by
+  classical
+  let P : Finset ι := Finset.univ.filter (fun i => x i < 1)
+  let X : Finset ℂ := Finset.univ.image (fun i => (x i : ℂ))
+  let Y : Finset ℂ := P.image (fun i => (y i : ℂ))
+  have hnorm (v : ℝ) : ‖(5 / 4 : ℂ) - (v : ℂ)‖ = |(5 / 4 : ℝ) - v| := by
+    have heq : (5 / 4 : ℂ) - (v : ℂ) = (((5 / 4 : ℝ) - v : ℝ) : ℂ) := by push_cast; rfl
+    rw [heq, Complex.norm_real, Real.norm_eq_abs]
+  have hxinj : Function.Injective (fun i => (x i : ℂ)) := by
+    intro i j h
+    exact Sum.inl_injective (hinj (show Sum.elim x y (.inl i) = Sum.elim x y (.inl j) from
+      Complex.ofReal_injective h))
+  have hyinj : Function.Injective (fun i => (y i : ℂ)) := by
+    intro i j h
+    exact Sum.inr_injective (hinj (show Sum.elim x y (.inr i) = Sum.elim x y (.inr j) from
+      Complex.ofReal_injective h))
+  have hdisj : Disjoint X Y := by
+    apply Finset.disjoint_left.mpr
+    intro z hzX hzY
+    obtain ⟨i, _, hi⟩ := Finset.mem_image.mp hzX
+    obtain ⟨j, _, hj⟩ := Finset.mem_image.mp hzY
+    have heq := hinj (show Sum.elim x y (.inl i) = Sum.elim x y (.inr j) from
+      Complex.ofReal_injective (hi.trans hj.symm))
+    cases heq
+  have hS : ∀ z ∈ X ∪ Y, ‖(5 / 4 : ℂ) - z‖ < 9 / 7 ∧ f z = 0 := by
+    intro z hz
+    rcases Finset.mem_union.mp hz with hz | hz
+    · obtain ⟨i, _, rfl⟩ := Finset.mem_image.mp hz
+      refine ⟨?_, hfx i⟩
+      rw [hnorm]
+      have hh := Decomp576b.unpaired_distance576 (by norm_num : (0 : ℝ) ≤ 1 / 4) (hx i).1 (hx i).2
+      norm_num at hh
+      linarith
+    · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hz
+      refine ⟨?_, hfy i⟩
+      rw [hnorm]
+      exact near_partner_in_circle585 (Finset.mem_filter.mp hi).2 (hy i).1 (hy i).2
+  have hj := finite_zero_jensen585 f hf (5 / 4 : ℂ) (by norm_num : (0 : ℝ) < 9 / 7)
+    hc (X ∪ Y) hS
+  rw [Finset.sum_union hdisj] at hj
+  dsimp only [X, Y] at hj
+  rw [Finset.sum_image (fun i _ j _ h => hxinj h),
+    Finset.sum_image (fun i _ j _ h => hyinj h)] at hj
+  simp only [hnorm] at hj
+  have hpos (v : ℝ) (hv : f (v : ℂ) = 0) : 0 < |(5 / 4 : ℝ) - v| := by
+    apply abs_pos.mpr
+    intro heq
+    have hv' : (v : ℂ) = 5 / 4 := by
+      have : v = 5 / 4 := (sub_eq_zero.mp heq).symm
+      rw [this]
+      norm_num
+    exact hc (hv' ▸ hv)
+  have hweights : ∀ i, 2 * Real.log (12 / 7 : ℝ) ≤
+      Real.log ((9 / 7 : ℝ) / |5 / 4 - x i|) +
+        if i ∈ P then Real.log ((9 / 7 : ℝ) / |5 / 4 - y i|) else 0 := by
+    intro i
+    by_cases hi : i ∈ P
+    · rw [ite_eq_left hi]
+      have hp := Decomp576b.paired_distance576 (by norm_num : (0 : ℝ) ≤ 1 / 4)
+        (hx i).1 (hx i).2 (hy i).1 (hy i).2
+      have hh := Decomp576b.paired_jensen_weight576 (by norm_num : (0 : ℝ) < 12 / 7)
+        (by norm_num : (0 : ℝ) < 3 / 4) (hpos _ (hfx i)) (hpos _ (hfy i))
+        (by norm_num at hp ⊢; exact hp)
+      norm_num at hh
+      exact hh
+    · rw [ite_eq_right hi, add_zero]
+      apply far_zero_weight585 (by simpa [P] using hi) (hx i).2
+      exact fun h => (hpos _ (hfx i)).ne' (by rw [h]; norm_num)
+  have hh := Finset.sum_le_sum (s := Finset.univ) (fun i _ => hweights i)
+  simp only [Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, nsmul_eq_mul] at hh
+  have hfilter : (∑ i, if i ∈ P then Real.log ((9 / 7 : ℝ) / |5 / 4 - y i|) else 0) =
+      ∑ i ∈ P, Real.log ((9 / 7 : ℝ) / |5 / 4 - y i|) := by
+    rw [← Finset.sum_filter]
+    simp
+  rw [hfilter] at hh
+  nlinarith
+
+/-- A direct variable complex-power normalization has a strict modulus loss.
+Rademacher printed pages 193 to 195, displays 2.3 and 3.4, auxiliary route check.
+At s equal to i and eta equal to one quarter its modulus exceeds the printed
+norm power. This is an obstruction to that normalization, not to Theorem 3.
+-/
+theorem naive_envelope_loss585 :
+    ‖(1 + I : ℂ) ^ (((5 / 4 : ℂ) - I) / 2)‖ >
+      ‖(1 + I : ℂ)‖ ^ (5 / 8 : ℝ) := by
+  have hz : (1 + I : ℂ) ≠ 0 := by intro h; have := congrArg Complex.re h; norm_num at this
+  rw [Complex.norm_cpow_of_ne_zero hz]
+  have hre : ((((5 / 4 : ℂ) - I) / 2)).re = 5 / 8 := by norm_num
+  have him : ((((5 / 4 : ℂ) - I) / 2)).im = -(1 / 2 : ℝ) := by norm_num
+  rw [hre, him]
+  have hp : 0 < Complex.arg (1 + I) := by
+    have hnonneg : 0 ≤ Complex.arg (1 + I) := Complex.arg_nonneg_iff.mpr (by norm_num)
+    have hne : Complex.arg (1 + I) ≠ 0 := by
+      intro heq
+      have hh := Complex.arg_eq_zero_iff.mp heq
+      norm_num at hh
+    exact lt_of_le_of_ne hnonneg hne.symm
+  have he : Real.exp (Complex.arg (1 + I) * (-(1 / 2 : ℝ))) < 1 :=
+    Real.exp_lt_one_iff.mpr (by nlinarith)
+  have hn : 0 < ‖(1 + I : ℂ)‖ ^ (5 / 8 : ℝ) :=
+    Real.rpow_pos_of_pos (norm_pos_iff.mpr hz) _
+  exact (lt_div_iff₀ (Real.exp_pos _)).mpr (by nlinarith)
+
+/-- A concrete reflected pair with nonzero centre and an included partner. -/
+
+example :
+    2 * Real.log (12 / 7 : ℝ) ≤
+      Real.circleAverage (fun z : ℂ => Real.log ‖(z - 3 / 4) * (z - 1 / 4)‖)
+        (5 / 4 : ℂ) (9 / 7 : ℝ) - Real.log ‖((5 / 4 : ℂ) - 3 / 4) * (5 / 4 - 1 / 4)‖ := by
+  have hinj : Function.Injective
+      (Sum.elim (fun _ : Fin 1 => (3 / 4 : ℝ)) (fun _ : Fin 1 => (1 / 4 : ℝ))) := by
+    intro i j h
+    rcases i with i | i <;> rcases j with j | j
+    · exact congrArg Sum.inl (Subsingleton.elim _ _)
+    · norm_num at h
+    · norm_num at h
+    · exact congrArg Sum.inr (Subsingleton.elim _ _)
+  have hh := partial_paired_zero_jensen585
+    (fun z : ℂ => (z - 3 / 4) * (z - 1 / 4)) (by fun_prop) (by norm_num)
+    (fun _ : Fin 1 => (3 / 4 : ℝ)) (fun _ : Fin 1 => (1 / 4 : ℝ)) hinj
+    (by intro i; constructor; norm_num; have := Real.one_le_sqrt.mpr (by norm_num : (1 : ℝ) ≤ 2); nlinarith)
+    (by intro i; norm_num) (by intro i; norm_num) (by intro i; norm_num)
+  simpa using hh
+
+end Backlund585
+
+namespace GammaPhase585
+
+open Complex Filter Topology Set
+
+/-- Finite symmetric Gamma approximants equal their reflected Euler product.
+Trudgian pages 6 and 7, auxiliary identity for the Gamma phase in display 3.12.
+Mathlib supplies GammaSeq and its limit.
+-/
+theorem GammaSeq_reflected_ratio585 (z : ℂ) (h : ℝ) (hz : z.im ≠ 0)
+    {n : ℕ} (hn : 0 < n) :
+    Complex.GammaSeq (z + h) n * Complex.GammaSeq (z - h) n /
+        Complex.GammaSeq z n ^ 2 =
+      ∏ k ∈ Finset.range (n + 1), (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)⁻¹ := by
+  have hzn (k : ℕ) : z + k ≠ 0 := by
+    intro he
+    exact hz (by simpa using congrArg Complex.im he)
+  have hzp (k : ℕ) : z + h + k ≠ 0 := by
+    intro he
+    exact hz (by simpa using congrArg Complex.im he)
+  have hzm (k : ℕ) : z - h + k ≠ 0 := by
+    intro he
+    exact hz (by simpa using congrArg Complex.im he)
+  have hprod : (∏ k ∈ Finset.range (n + 1), (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)⁻¹) =
+      (∏ k ∈ Finset.range (n + 1), (z + k)) ^ 2 /
+        ((∏ k ∈ Finset.range (n + 1), (z + h + k)) *
+          (∏ k ∈ Finset.range (n + 1), (z - h + k))) := by
+    have heq (k : ℕ) : (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)⁻¹ =
+        (z + k) ^ 2 / ((z + h + k) * (z - h + k)) := by
+      rw [show 1 - (h : ℂ) ^ 2 / (z + k) ^ 2 =
+          ((z + k) ^ 2 - (h : ℂ) ^ 2) / (z + k) ^ 2 by field_simp [hzn k], inv_div]
+      congr 1
+      ring
+    simp_rw [heq]
+    rw [Finset.prod_div_distrib, Finset.prod_pow, Finset.prod_mul_distrib]
+  rw [hprod]
+  have hnc : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+  have hfac : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+  have hp : (∏ k ∈ Finset.range (n + 1), (z + k)) ≠ 0 := Finset.prod_ne_zero_iff.mpr (fun k _ => hzn k)
+  have hpp : (∏ k ∈ Finset.range (n + 1), (z + h + k)) ≠ 0 := Finset.prod_ne_zero_iff.mpr (fun k _ => hzp k)
+  have hpm : (∏ k ∈ Finset.range (n + 1), (z - h + k)) ≠ 0 := Finset.prod_ne_zero_iff.mpr (fun k _ => hzm k)
+  rw [Complex.GammaSeq, Complex.GammaSeq, Complex.GammaSeq,
+    Complex.cpow_add _ _ hnc, Complex.cpow_sub _ _ hnc]
+  have hpow : (n : ℂ) ^ z ≠ 0 := Complex.cpow_ne_zero_iff.mpr (Or.inl hnc)
+  have hpowh : (n : ℂ) ^ (h : ℂ) ≠ 0 := Complex.cpow_ne_zero_iff.mpr (Or.inl hnc)
+  field_simp [hp, hpp, hpm, hpow, hpowh, hfac]
+
+/-- The symmetric reflected Euler products converge to the symmetric Gamma ratio.
+Trudgian pages 6 and 7, auxiliary limit for display 3.12.
+-/
+theorem Gamma_reflected_ratio_tendsto585 (z : ℂ) (h : ℝ) (hz : z.im ≠ 0) :
+    Tendsto (fun n : ℕ => ∏ k ∈ Finset.range (n + 1),
+      (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)⁻¹) atTop
+      (𝓝 (Complex.Gamma (z + h) * Complex.Gamma (z - h) / Complex.Gamma z ^ 2)) := by
+  have hΓ : Complex.Gamma z ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n he
+    exact hz (by simpa using congrArg Complex.im he)
+  have hh := ((Complex.GammaSeq_tendsto_Gamma (z + h)).mul
+    (Complex.GammaSeq_tendsto_Gamma (z - h))).div
+    ((Complex.GammaSeq_tendsto_Gamma z).pow 2) (pow_ne_zero _ hΓ)
+  apply hh.congr'
+  filter_upwards [eventually_gt_atTop (0 : ℕ)] with n hn
+  exact GammaSeq_reflected_ratio585 z h hz hn
+
+/-- Each reflected logarithm has phase at most pi divided by two.
+Terms beyond the first have the summable three-quarters rational bound.
+Trudgian pages 6 and 7, derived auxiliary estimate for display 3.12.
+This is a coarse independent bound and does not assert display 3.13.
+-/
+theorem reflection_log_term_bounds585 (z : ℂ) (h : ℝ)
+    (hc : 1 / 4 ≤ z.re) (hy : 1 / 2 ≤ |z.im|) (hh : h ^ 2 ≤ 9 / 32) (k : ℕ) :
+    |(Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)).im| ≤ Real.pi / 2 ∧
+      (1 ≤ k → |(Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)).im| ≤
+        (3 / 4 : ℝ) / ((k : ℝ) * ((k : ℝ) + 1))) := by
+  let u : ℂ := (h : ℂ) ^ 2 / (z + k) ^ 2
+  have hnk : (0 : ℝ) ≤ k := Nat.cast_nonneg _
+  have hy2 : (1 / 4 : ℝ) ≤ z.im ^ 2 := by
+    have ht := mul_self_le_mul_self (by norm_num : (0 : ℝ) ≤ 1 / 2) hy
+    norm_num only [← sq, sq_abs] at ht
+    exact ht
+  have hnorm : ‖u‖ = h ^ 2 / ‖z + k‖ ^ 2 := by
+    simp only [u, norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, sq_abs]
+  have hden : ‖z + k‖ ^ 2 = (z.re + k) ^ 2 + z.im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    simp [pow_two]
+  have hd : (5 / 16 : ℝ) ≤ ‖z + k‖ ^ 2 := by
+    rw [hden]
+    have hx : 1 / 4 ≤ z.re + k := by linarith
+    nlinarith [sq_nonneg (z.re + (k : ℝ) - 1 / 4)]
+  have hdpos : 0 < ‖z + k‖ ^ 2 := by linarith
+  have hu : ‖u‖ ≤ 9 / 10 := by
+    rw [hnorm, div_le_iff₀ hdpos]
+    nlinarith
+  have hre : 0 < (1 - u).re := by
+    have hr := Complex.re_le_norm u
+    simp only [Complex.sub_re, Complex.one_re]
+    linarith
+  refine ⟨?_, ?_⟩
+  · change |(Complex.log (1 - u)).im| ≤ Real.pi / 2
+    rw [Complex.log_im]
+    exact (Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hre)).le
+  · intro hk
+    have hkR : (1 : ℝ) ≤ k := by exact_mod_cast hk
+    have hdtail : (25 / 16 : ℝ) ≤ ‖z + k‖ ^ 2 := by
+      rw [hden]
+      have hx : 5 / 4 ≤ z.re + k := by linarith
+      nlinarith [sq_nonneg (z.re + (k : ℝ) - 5 / 4), sq_nonneg z.im]
+    have hu2 : ‖u‖ ≤ 1 / 2 := by
+      rw [hnorm, div_le_iff₀ hdpos]
+      nlinarith
+    have hdp : (3 / 4 : ℝ) * (k : ℝ) * ((k : ℝ) + 1) ≤ ‖z + k‖ ^ 2 := by
+      rw [hden]
+      have hx : (k : ℝ) + 1 / 4 ≤ z.re + k := by linarith
+      have hx2 : ((k : ℝ) + 1 / 4) ^ 2 ≤ (z.re + k) ^ 2 :=
+        (sq_le_sq₀ (by positivity) (by linarith)).mpr hx
+      nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ (k : ℝ) - 1) hnk, sq_nonneg z.im]
+    have hKpos : 0 < (k : ℝ) * ((k : ℝ) + 1) := by positivity
+    have hnum : 2 * h ^ 2 * ((k : ℝ) * ((k : ℝ) + 1)) ≤
+        (3 / 4 : ℝ) * ‖z + k‖ ^ 2 := by
+      have hhm := mul_le_mul_of_nonneg_right hh (le_of_lt hKpos)
+      nlinarith
+    have htwo : 2 * ‖u‖ ≤ (3 / 4 : ℝ) / ((k : ℝ) * ((k : ℝ) + 1)) := by
+      rw [hnorm, ← mul_div_assoc, div_le_div_iff₀ hdpos hKpos]
+      exact hnum
+    have hlog := Complex.norm_log_one_add_half_le_self
+      (z := -u) (by simpa only [norm_neg] using hu2)
+    have hlog' : ‖Complex.log (1 - u)‖ ≤ 2 * ‖u‖ := by
+      simp only [norm_neg, ← sub_eq_add_neg] at hlog
+      nlinarith [norm_nonneg u]
+    exact (Complex.abs_im_le_norm _).trans (hlog'.trans htwo)
+
+/-- The finite reflected logarithm sum has absolute phase at most pi over two plus three quarters.
+Trudgian pages 6 and 7, derived auxiliary estimate for display 3.12.
+The rational tail telescopes exactly.
+-/
+theorem reflection_log_sum_bound585 (z : ℂ) (h : ℝ)
+    (hc : 1 / 4 ≤ z.re) (hy : 1 / 2 ≤ |z.im|) (hh : h ^ 2 ≤ 9 / 32) (n : ℕ) :
+    |(∑ k ∈ Finset.range (n + 1), -Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)).im| ≤
+      Real.pi / 2 + 3 / 4 := by
+  have htel : (∑ k ∈ Finset.range n,
+      (1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 2))) = 1 - 1 / ((n : ℝ) + 1) := by
+    have ht := Finset.sum_range_sub (fun k : ℕ => -(1 / ((k : ℝ) + 1))) n
+    norm_num [sub_eq_add_neg, add_assoc] at ht
+    rw [Finset.sum_add_distrib, Finset.sum_neg_distrib] at ht
+    rw [Finset.sum_sub_distrib]
+    simp only [one_div]
+    linarith
+  have heq (k : ℕ) : (3 / 4 : ℝ) / (((k + 1 : ℕ) : ℝ) * (((k + 1 : ℕ) : ℝ) + 1)) =
+      (3 / 4 : ℝ) * (1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 2)) := by
+    push_cast
+    field_simp [show (k : ℝ) + 1 ≠ 0 by positivity, show (k : ℝ) + 2 ≠ 0 by positivity]
+    ring
+  have htail : (∑ k ∈ Finset.range n,
+      (3 / 4 : ℝ) / (((k + 1 : ℕ) : ℝ) * (((k + 1 : ℕ) : ℝ) + 1))) ≤ 3 / 4 := by
+    simp_rw [heq]
+    rw [← Finset.mul_sum, htel]
+    have hnonneg : 0 ≤ 1 / ((n : ℝ) + 1) := by positivity
+    nlinarith
+  calc
+    _ = |∑ k ∈ Finset.range (n + 1), -(Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)).im| := by
+      have ht := map_sum Complex.imCLM
+        (fun k : ℕ => -Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)) (Finset.range (n + 1))
+      simpa only [Complex.imCLM_apply, Complex.neg_im] using congrArg (fun t : ℝ => |t|) ht
+    _ ≤ ∑ k ∈ Finset.range (n + 1), |(Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)).im| := by
+      simpa only [abs_neg] using Finset.abs_sum_le_sum_abs
+        (fun k : ℕ => -(Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)).im) (Finset.range (n + 1))
+    _ = |(Complex.log (1 - (h : ℂ) ^ 2 / z ^ 2)).im| +
+        ∑ k ∈ Finset.range n, |(Complex.log (1 - (h : ℂ) ^ 2 / (z + (k + 1 : ℕ)) ^ 2)).im| := by
+      rw [Finset.sum_range_succ']
+      simp [add_comm]
+    _ ≤ Real.pi / 2 + ∑ k ∈ Finset.range n,
+        (3 / 4 : ℝ) / (((k + 1 : ℕ) : ℝ) * (((k + 1 : ℕ) : ℝ) + 1)) := by
+      apply add_le_add
+      · simpa using (reflection_log_term_bounds585 z h hc hy hh 0).1
+      · exact Finset.sum_le_sum (fun k _ =>
+          (reflection_log_term_bounds585 z h hc hy hh (k + 1)).2 (by omega))
+    _ ≤ Real.pi / 2 + 3 / 4 := by linarith
+
+/-- The symmetric Gamma ratio has a phase within pi over two plus three quarters.
+Trudgian pages 6 and 7, derived auxiliary estimate for display 3.12.
+A compact subsequence passes the finite phase estimate to the Gamma limit.
+-/
+theorem Gamma_reflection_phase_bound585 (z : ℂ) (h : ℝ)
+    (hc : 1 / 4 ≤ z.re) (hy : 1 / 2 ≤ |z.im|) (hh : h ^ 2 ≤ 9 / 32) :
+    ∃ θ : ℝ, |θ| ≤ Real.pi / 2 + 3 / 4 ∧
+      Complex.Gamma (z + h) * Complex.Gamma (z - h) / Complex.Gamma z ^ 2 =
+        (‖Complex.Gamma (z + h) * Complex.Gamma (z - h) / Complex.Gamma z ^ 2‖ : ℂ) *
+          Complex.exp ((θ : ℂ) * I) := by
+  have hz : z.im ≠ 0 := by intro he; rw [he, abs_zero] at hy; linarith
+  let P : ℕ → ℂ := fun n => ∏ k ∈ Finset.range (n + 1),
+    (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)⁻¹
+  let S : ℕ → ℂ := fun n => ∑ k ∈ Finset.range (n + 1),
+    -Complex.log (1 - (h : ℂ) ^ 2 / (z + k) ^ 2)
+  let θn : ℕ → ℝ := fun n => (S n).im
+  have hθn : ∀ n, θn n ∈ Icc (-(Real.pi / 2 + 3 / 4)) (Real.pi / 2 + 3 / 4) :=
+    fun n => abs_le.mp (reflection_log_sum_bound585 z h hc hy hh n)
+  obtain ⟨θ, hθ, φ, hφ, hlim⟩ := isCompact_Icc.tendsto_subseq hθn
+  have hne (k : ℕ) : 1 - (h : ℂ) ^ 2 / (z + k) ^ 2 ≠ 0 := by
+    have hzn : z + k ≠ 0 := by intro he; exact hz (by simpa using congrArg Complex.im he)
+    have hzp : z + k + h ≠ 0 := by intro he; exact hz (by simpa using congrArg Complex.im he)
+    have hzm : z + k - h ≠ 0 := by intro he; exact hz (by simpa using congrArg Complex.im he)
+    have heq : 1 - (h : ℂ) ^ 2 / (z + k) ^ 2 =
+        ((z + k + h) * (z + k - h)) / (z + k) ^ 2 := by
+      field_simp [hzn]
+      ring
+    rw [heq]
+    exact div_ne_zero (mul_ne_zero hzp hzm) (pow_ne_zero _ hzn)
+  have hexp (n : ℕ) : Complex.exp (S n) = P n := by
+    dsimp only [S, P]
+    rw [Complex.exp_sum]
+    apply Finset.prod_congr rfl
+    intro k hk
+    rw [Complex.exp_neg, Complex.exp_log (hne k)]
+  have hpolar (n : ℕ) : P n = (‖P n‖ : ℂ) * Complex.exp ((θn n : ℂ) * I) := by
+    rw [← hexp n, Complex.norm_exp, Complex.ofReal_exp, ← Complex.exp_add]
+    congr 1
+    exact (Complex.re_add_im (S n)).symm
+  have hP := (Gamma_reflected_ratio_tendsto585 z h hz).comp hφ.tendsto_atTop
+  have hnorm := (Complex.continuous_ofReal.tendsto _).comp hP.norm
+  have hphase := ((Complex.continuous_ofReal.tendsto _).comp hlim).mul_const I
+  have hphaseExp := (Complex.continuous_exp.tendsto _).comp hphase
+  have hpolarLim := hnorm.mul hphaseExp
+  have heq := tendsto_nhds_unique hP (hpolarLim.congr'
+    (Eventually.of_forall (fun n => (hpolar (φ n)).symm)))
+  exact ⟨θ, abs_le.mpr hθ, heq⟩
+
+/-- The principal argument of the symmetric Gamma ratio has the same coarse bound.
+Trudgian pages 6 and 7, derived auxiliary estimate for display 3.12.
+The estimate is strictly less than pi, so no branch ambiguity remains.
+-/
+theorem Gamma_reflection_arg_bound585 (z : ℂ) (h : ℝ)
+    (hc : 1 / 4 ≤ z.re) (hy : 1 / 2 ≤ |z.im|) (hh : h ^ 2 ≤ 9 / 32) :
+    |Complex.arg (Complex.Gamma (z + h) * Complex.Gamma (z - h) / Complex.Gamma z ^ 2)| ≤
+      Real.pi / 2 + 3 / 4 := by
+  obtain ⟨θ, hθ, heq⟩ := Gamma_reflection_phase_bound585 z h hc hy hh
+  have hz : z.im ≠ 0 := by intro he; rw [he, abs_zero] at hy; linarith
+  have hΓ (t : ℝ) : Complex.Gamma (z + t) ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n he
+    exact hz (by simpa using congrArg Complex.im he)
+  have hΓ0 : Complex.Gamma z ≠ 0 := by simpa using hΓ 0
+  have hΓm : Complex.Gamma (z - h) ≠ 0 := by simpa [sub_eq_add_neg] using hΓ (-h)
+  have hratio : Complex.Gamma (z + h) * Complex.Gamma (z - h) / Complex.Gamma z ^ 2 ≠ 0 :=
+    div_ne_zero (mul_ne_zero (hΓ h) hΓm) (pow_ne_zero _ hΓ0)
+  have hlog := Complex.log_exp (x := (θ : ℂ) * I)
+    (by simp; have ht := (abs_le.mp hθ).1; linarith [Real.pi_gt_three])
+    (by simp; have ht := (abs_le.mp hθ).2; linarith [Real.pi_gt_three])
+  have harg : Complex.arg (Complex.exp ((θ : ℂ) * I)) = θ := by
+    rw [← Complex.log_im, hlog]
+    simp
+  rw [heq, Complex.arg_real_mul _ (norm_pos_iff.mpr hratio), harg]
+  exact hθ
+
+/-- The symmetric Gamma ratio stays in the principal logarithm slit plane.
+Trudgian pages 6 and 7, branch control for the phase in display 3.12.
+-/
+theorem Gamma_reflection_slitPlane585 (z : ℂ) (h : ℝ)
+    (hc : 1 / 4 ≤ z.re) (hy : 1 / 2 ≤ |z.im|) (hh : h ^ 2 ≤ 9 / 32) :
+    Complex.Gamma (z + h) * Complex.Gamma (z - h) / Complex.Gamma z ^ 2 ∈ Complex.slitPlane := by
+  apply Complex.mem_slitPlane_iff_arg.mpr
+  have hz : z.im ≠ 0 := by intro he; rw [he, abs_zero] at hy; linarith
+  have hΓ (t : ℝ) : Complex.Gamma (z + t) ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n he
+    exact hz (by simpa using congrArg Complex.im he)
+  refine ⟨?_, ?_⟩
+  · intro he
+    have hb := Gamma_reflection_arg_bound585 z h hc hy hh
+    rw [he, abs_of_pos Real.pi_pos] at hb
+    linarith [Real.pi_gt_three]
+  · have hΓ0 : Complex.Gamma z ≠ 0 := by simpa using hΓ 0
+    have hΓm : Complex.Gamma (z - h) ≠ 0 := by simpa [sub_eq_add_neg] using hΓ (-h)
+    exact div_ne_zero (mul_ne_zero (hΓ h) hΓm) (pow_ne_zero _ hΓ0)
+
+/-- The continuous symmetric Gamma phase has absolute value at most pi over two plus three quarters.
+Trudgian pages 6 and 7, derived auxiliary estimate for display 3.12.
+The digamma integral equals the principal logarithm of the symmetric Gamma ratio.
+-/
+theorem Gamma_reflection_integral_bound585 (z : ℂ) (h : ℝ)
+    (hc : 1 / 4 ≤ z.re) (hy : 1 / 2 ≤ |z.im|) (h0 : 0 ≤ h) (hh : h ^ 2 ≤ 9 / 32) :
+    |(∫ t in (0 : ℝ)..h, Complex.digamma (z + t) - Complex.digamma (z - t)).im| ≤
+      Real.pi / 2 + 3 / 4 := by
+  have hz : z.im ≠ 0 := by intro he; rw [he, abs_zero] at hy; linarith
+  have hpole (t : ℝ) : ∀ n : ℕ, z + t ≠ -(n : ℂ) := by
+    intro n he
+    exact hz (by simpa using congrArg Complex.im he)
+  have hΓ (t : ℝ) : Complex.Gamma (z + t) ≠ 0 := Complex.Gamma_ne_zero (hpole t)
+  have hD (t : ℝ) : DifferentiableAt ℂ Complex.Gamma (z + t) :=
+    Complex.differentiableAt_Gamma _ (hpole t)
+  have hΓ0 : Complex.Gamma z ≠ 0 := by simpa using hΓ 0
+  have hΓm (t : ℝ) : Complex.Gamma (z - t) ≠ 0 := by
+    simpa [sub_eq_add_neg] using hΓ (-t)
+  let R : ℝ → ℂ := fun t => Complex.Gamma (z + t) * Complex.Gamma (z - t) / Complex.Gamma z ^ 2
+  have hRn (t : ℝ) : R t ≠ 0 :=
+    div_ne_zero (mul_ne_zero (hΓ t) (hΓm t)) (pow_ne_zero _ hΓ0)
+  have hRslit (t : ℝ) (ht : t ∈ Icc (0 : ℝ) h) : R t ∈ Complex.slitPlane :=
+    Gamma_reflection_slitPlane585 z t hc hy ((sq_le_sq₀ ht.1 h0).mpr ht.2 |>.trans hh)
+  have hdR (t : ℝ) : HasDerivAt R
+      (R t * (Complex.digamma (z + t) - Complex.digamma (z - t))) t := by
+    have hp := ((hD t).hasDerivAt.comp (t : ℂ)
+      ((hasDerivAt_id (t : ℂ)).const_add z)).comp_ofReal
+    have hDm : DifferentiableAt ℂ Complex.Gamma (z - t) := by
+      simpa [sub_eq_add_neg] using hD (-t)
+    have hm := (hDm.hasDerivAt.comp (t : ℂ)
+      ((hasDerivAt_id (t : ℂ)).const_sub z)).comp_ofReal
+    have hd := (hp.mul hm).div_const (Complex.Gamma z ^ 2)
+    convert hd using 1 <;>
+      simp only [R, Function.comp_def, mul_one, mul_neg_one, Complex.digamma_def, logDeriv]
+    · funext u
+      simp only [Pi.mul_apply]
+    · simp only [Pi.div_apply]
+      field_simp [hΓ t, hΓm t, hΓ0]
+      ring
+  have hlogd (t : ℝ) (ht : t ∈ Icc (0 : ℝ) h) :
+      HasDerivAt (fun t => Complex.log (R t))
+        (Complex.digamma (z + t) - Complex.digamma (z - t)) t := by
+    have hd := (hdR t).clog_real (hRslit t ht)
+    simpa only [mul_div_cancel_left₀ _ (hRn t)] using hd
+  have hlogc : ContinuousOn (fun t => Complex.log (R t)) (Icc (0 : ℝ) h) :=
+    fun t ht => ((hdR t).continuousAt.clog (hRslit t ht)).continuousWithinAt
+  have hA (t : ℝ) : AnalyticAt ℂ Complex.Gamma (z + t) :=
+    (Meromorphic.Gamma (z + t)).analyticAt (hD t).continuousAt
+  have hψ (t : ℝ) : ContinuousAt Complex.digamma (z + t) := by
+    simpa only [Complex.digamma_def, logDeriv] using
+      (hA t).deriv.continuousAt.div (hA t).continuousAt (hΓ t)
+  have hpcont : Continuous (fun t : ℝ => Complex.digamma (z + t)) := by
+    apply continuous_iff_continuousAt.mpr
+    intro t
+    exact (hψ t).comp (f := fun u : ℝ => z + (u : ℂ)) (by fun_prop)
+  have hmcont : Continuous (fun t : ℝ => Complex.digamma (z - t)) := by
+    simpa only [Function.comp_def, sub_eq_add_neg, Complex.ofReal_neg] using hpcont.comp (continuous_neg : Continuous fun t : ℝ => -t)
+  have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le h0 hlogc
+    (fun t ht => hlogd t ⟨ht.1.le, ht.2.le⟩) ((hpcont.sub hmcont).intervalIntegrable 0 h)
+  have hR0 : R 0 = 1 := by
+    dsimp only [R]
+    simp only [Complex.ofReal_zero, add_zero, sub_zero]
+    field_simp [hΓ0]
+  rw [hR0, Complex.log_one, sub_zero] at hi
+  have him := congrArg Complex.im hi
+  rw [Complex.log_im] at him
+  rw [him]
+  exact Gamma_reflection_arg_bound585 z h hc hy hh
+
+/-- At the Backlund parameters the continuous symmetric Gamma phase obeys the coarse bound.
+Trudgian pages 6 and 7, displays 3.12 and 3.14 with eta one quarter.
+This proves an independent uniform estimate, not the sharper printed G formula.
+-/
+theorem Gamma_reflection_parameter_bound585 (a T δ : ℝ)
+    (ha : 0 ≤ a) (hT : 1 ≤ |T|) (hδ : 0 ≤ δ)
+    (hδmax : δ ≤ Real.sqrt 2 * (3 / 4)) :
+    |(∫ t in (0 : ℝ)..(δ / 2),
+      Complex.digamma (((1 / 4 + a / 2 : ℝ) : ℂ) + (T / 2 : ℂ) * I + t) -
+      Complex.digamma (((1 / 4 + a / 2 : ℝ) : ℂ) + (T / 2 : ℂ) * I - t)).im| ≤
+      Real.pi / 2 + 3 / 4 := by
+  apply Gamma_reflection_integral_bound585
+  · norm_num
+    linarith
+  · norm_num
+    rw [abs_div, abs_of_pos (by norm_num : (0 : ℝ) < 2)]
+    linarith
+  · positivity
+  · have hs : (Real.sqrt 2) ^ 2 = 2 := Real.sq_sqrt (by norm_num)
+    have hsq := (sq_le_sq₀ hδ (by positivity : (0 : ℝ) ≤ Real.sqrt 2 * (3 / 4))).mpr hδmax
+    nlinarith
+
+end GammaPhase585
 
 end LeanLab.DERZ1997.Decomp576a

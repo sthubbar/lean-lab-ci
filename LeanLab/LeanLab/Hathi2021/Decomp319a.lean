@@ -5,6 +5,8 @@ The three analytic inputs stay open. The sealed original file is unchanged.
 AI wrote this Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.Hathi2021.Decomp570a
+import LeanLab.Hathi2021.Decomp570b
+import LeanLab.Hathi2021.Decomp570c
 
 open Finset Real MeasureTheory Filter Topology LeanLab.Hathi2021.Decomp115
 
@@ -15,8 +17,8 @@ The major arc coefficient is kept separate from both minor arc estimates. -/
 theorem major_arc_lower (C δ : ℝ) (hC : 1 < C) (hδ : 0 < δ) :
     ∃ N₀ : ℕ, ∀ n₁ n₂ : ℕ,
       Odd n₁ → Odd n₂ → N₀ ≤ n₂ → n₂ < n₁ → (n₁ : ℝ) ≤ C * n₂ →
-      (556388 / 100000 * Real.pi ^ 2 / 16 - δ) * scale n₁ n₂ ≤ R1 n₁ n₂ := by
-  sorry
+      (556388 / 100000 * Real.pi ^ 2 / 16 - δ) * scale n₁ n₂ ≤ R1 n₁ n₂ :=
+  Decomp570a.major_arc_lower C δ hC hδ
 
 /-- LEAF. Pages 194 to 196, the R2 display in Lemma 2.4 with k equal to 82.
 The absolute real exceptional contribution has order N1 N2 L to power 81.
@@ -24,8 +26,8 @@ The three elementary limit steps are proved separately. -/
 theorem exceptional_arc_order_bound (C : ℝ) (hC : 1 < C) :
     ∃ K : ℝ, 0 ≤ K ∧ ∃ N₀ : ℕ, ∀ n₁ n₂ : ℕ,
       Odd n₁ → Odd n₂ → N₀ ≤ n₂ → n₂ < n₁ → (n₁ : ℝ) ≤ C * n₂ →
-      |R2 n₁ n₂| ≤ K * ((n₁ : ℝ) * n₂ * L n₁ ^ 81) := by
-  sorry
+      |R2 n₁ n₂| ≤ K * ((n₁ : ℝ) * n₂ * L n₁ ^ 81) :=
+  Decomp570b.exceptional_arc_order_bound C hC
 
 /-- Pages 194 to 196, Lemma 2.4 at k equal to 82.
 The exceptional contribution divided by N1 N2 L to power 82 tends to zero. -/
@@ -43,8 +45,8 @@ theorem remaining_arc_upper (C δ : ℝ) (hC : 1 < C) (hδ : 0 < δ) :
     ∃ N₀ : ℕ, ∀ n₁ n₂ : ℕ,
       Odd n₁ → Odd n₂ → N₀ ≤ n₂ → n₂ < n₁ → (n₁ : ℝ) ≤ C * n₂ →
       |R3 n₁ n₂| ≤ ((108238 / 10) * (PairLinnik.lam : ℝ) ^ (82 - 16) + δ) *
-        scale n₁ n₂ := by
-  sorry
+        scale n₁ n₂ :=
+  Decomp570c.remaining_arc_upper C δ hC hδ
 
 /-- Page 199. The exact sealed leaf statement assembled from three analytic leaves.
 CONDITIONAL ON the three separate analytic arc estimates. -/
