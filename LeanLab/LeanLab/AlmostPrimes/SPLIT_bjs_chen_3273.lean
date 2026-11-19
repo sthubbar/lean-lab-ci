@@ -55,10 +55,13 @@ theorem bjs_chen_3273_leaf_count_mid (N : ℕ) (hN : Even N)
     (hhi : (N : ℝ) ≤ Real.exp (Real.exp 32.83)) :
     (1 / 10000 : ℝ) * (N : ℝ) / (Real.log (N : ℝ)) ^ 2 <
       ((Finset.range N).filter (fun p => p.Prime ∧ bigOmega (N - p) ≤ 2)).card := by
-  -- BLOCKED 2026-11-14 FREE-nv-nemotron task416 bjs_chen_3273_leaf_count_mid: OUT OF REACH
-  -- Same missing result as the low leaf: unconditional lower bound on chenCount N.
-  -- The library only has conditional results assuming unproved sieve bounds (Thm44Bound, Thm50Bound, Thm51Bound).
-  -- The parametric version at 32.73 is in AT3273.lean (margin_bP) but the concrete bounds are not proved.
+  -- BLOCKED 2026-11-19 FREE-nv-nemosuper task1559 bjs_chen_3273_leaf_count_mid: OUT OF REACH
+  -- Attempted proof via BJS3At (32.78) failed: error "Unknown identifier `U_ge`" at line 62,
+  -- and even with U_ge the bound (2/10000)*U_N*N/log²N < chenCount N only gives (2/10^7)*N/log²N,
+  -- weaker than the needed (1/10000)*N/log²N. The unconditional lower bound on chenCount N
+  -- requires BJS sieve bounds Thm44Bound/Thm50Bound/Thm51Bound (or LevelBV/LevelBVTriples),
+  -- none proved in the library. Searches: grep for chenCount lower bounds, Thm44Bound, LevelBV
+  -- across LeanLab/ shows only conditional results. No unconditional lower bound exists.
   sorry
 
 /-- LEAF. The counting step of the sieve on the top sub-range `N > exp (exp 32.83)`, where no
