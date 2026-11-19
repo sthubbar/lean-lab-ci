@@ -1,3 +1,7 @@
+import LeanLab.Ported.Prove2Me.LL_Decomp551a_primorial_c5_upper_second
+import LeanLab.Ported.Prove2Me.LL_Decomp551a_primorial_c5_upper_first
+import LeanLab.Ported.Prove2Me.LL_Decomp551a_primorial_c5_lower_second
+import LeanLab.Ported.Prove2Me.LL_Decomp551a_primorial_c5_lower_first
 import Mathlib
 
 /-!
@@ -14,14 +18,14 @@ certificate strictly above 16000000 through 20000000. This is a proper
 subrange of Task460.primorial_c5_lower. No analytic input is assumed. -/
 theorem primorial_c5_lower_first (n : ℕ) (hn : 16000000 < n) (hn' : n ≤ 20000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.LL_Decomp551a.primorial_c5_lower_first n hn hn'
 
 /-- LEAF. Schoenfeld page 356, display 5.1 star, derived integer
 certificate strictly above 20000000 through 24000000. This is a proper
 subrange of Task460.primorial_c5_lower. No analytic input is assumed. -/
 theorem primorial_c5_lower_second (n : ℕ) (hn : 20000000 < n) (hn' : n ≤ 24000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.LL_Decomp551a.primorial_c5_lower_second n hn hn'
 
 /-- Each new subrange has a concrete integer witness. The midpoint
 belongs only to the first subrange. Derived domains for Schoenfeld
@@ -46,14 +50,14 @@ certificate strictly above 24000000 through 28000000. This is a proper
 subrange of Task460.primorial_c5_upper. No analytic input is assumed. -/
 theorem primorial_c5_upper_first (n : ℕ) (hn : 24000000 < n) (hn' : n ≤ 28000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.LL_Decomp551a.primorial_c5_upper_first n hn hn'
 
 /-- LEAF. Schoenfeld page 356, display 5.1 star, derived integer
 certificate strictly above 28000000 through 32000000. This is a proper
 subrange of Task460.primorial_c5_upper. No analytic input is assumed. -/
 theorem primorial_c5_upper_second (n : ℕ) (hn : 28000000 < n) (hn' : n ≤ 32000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.LL_Decomp551a.primorial_c5_upper_second n hn hn'
 
 /-- Each new subrange has a concrete integer witness. The midpoint
 belongs only to the first subrange. Derived domains for Schoenfeld
