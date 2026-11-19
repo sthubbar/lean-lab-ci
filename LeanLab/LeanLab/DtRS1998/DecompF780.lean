@@ -24,7 +24,11 @@ theorem LEAF_quarter_four_sub_one :
         qs.any (fun q => decide
           (q ≤ 6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  obtain ⟨qs, hp, hc⟩ := cover_quarter_four k hk
+  refine ⟨qs, hp, ?_⟩
+  intro j hj1 hj2
+  exact hc j hj1 (by omega)
 
 /-- LEAF 2 of 4: the second sub-block of the fourth quarter,
 `406250001 ≤ j ≤ 437500000`, is covered by some prime list. -/
