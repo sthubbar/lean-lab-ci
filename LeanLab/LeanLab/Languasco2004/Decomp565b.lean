@@ -42,7 +42,10 @@ theorem model_pair_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         modelPair false N (localization N ε) n < (mainRest + 0.0000004) * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  -- Deep analytic result: requires Iwaniec sieve lower bound for pair mass.
+  -- No existing lemma in the codebase provides this exceptional-set estimate.
+  sorry
 
 /-- LEAF. Jia pages 284 and 285 after display 63, using Lemma 20 on pages 261 and 262.
 Only the model triple sum is bounded by its three reduced logarithmic integrals. -/
