@@ -42,7 +42,15 @@ theorem leaf_eighth_first_250 :
       (∀ j : ℕ, j < 31250001 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 250 + 2 * j ∧ (10 ^ 250 + 2 * j - q).Prime)) = true) := by
-  sorry
+  refine ⟨[10 ^ 250 - 677, 10 ^ 250 - 983], by norm_num, ?_, ?_⟩
+  · intro q hq
+    simp only [List.mem_cons, List.mem_singleton] at hq
+    rcases hq with rfl | rfl
+    · sorry
+    · sorry
+  · intro j hj
+    simp only [List.any_cons, List.any_nil, Bool.or_false]
+    decide
 
 /-- LEAF Second eighth of the target quarter: the index range
 31250001 <= j < 62500001 is covered by one list of at most 15 primes, each
