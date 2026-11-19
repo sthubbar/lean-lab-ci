@@ -27,6 +27,7 @@ is `LeanLab.ChirreHagen2025.U1348.ThetaRel6`, supplied under RH by
 import Mathlib
 import LeanLab.ChirreHagen2025.SmoothTheorem2
 import LeanLab.Routes.U1522Frontier
+import LeanLab.task393.DqtAssembly
 
 namespace LeanLab.Routes.U1556
 
@@ -265,7 +266,8 @@ theorem dqt_W_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 1
     IntegrableOn (fun y => Dqt δ y ^ 2 * W (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Dqt δ y ^ 2 * W (y / X)
         ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
-  sorry
+  simpa only [Dqt, LeanLab.ChirreHagen2025.Dpt, LeanLab.ChirreHagen2025.fpt]
+    using LeanLab.Task393.dpt_W_full (δ := δ) (X := X) hδ hδ1 hX
 
 /-! ### Assembly -/
 
