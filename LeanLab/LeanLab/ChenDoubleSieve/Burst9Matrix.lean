@@ -21303,8 +21303,8 @@ theorem entry_5_8 : (candidateMatrixQ 5 8 : ℝ) ≤ integralMatrix 5 8 := by
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{7,1} = ∫_{1}^{2.2} Ξ₁(t; 2.8, 3.34) dt ≥ 1649911/10⁷`.
 scipy value 0.1649911916, margin 0.92e−7. -/
-theorem entry_6_0 : (candidateMatrixQ 6 0 : ℝ) ≤ integralMatrix 6 0 := by
-  sorry
+theorem entry_6_0 : (candidateMatrixQ 6 0 : ℝ) ≤ integralMatrix 6 0 :=
+  LeanLab.ChenDoubleSieve.Burst9MatrixCol0.c6_entry_6_0_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{7,2} = ∫_{2.2}^{2.3} Ξ₁(t; 2.8, 3.34) dt ≥ 233852/10⁷`.
 scipy value 0.0233852365, margin 0.36e−7. -/
@@ -21348,8 +21348,8 @@ theorem entry_6_8 : (candidateMatrixQ 6 8 : ℝ) ≤ integralMatrix 6 8 := by
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{8,1} = ∫_{1}^{2.2} Ξ₁(t; 2.9, 3.19) dt ≥ 1737478/10⁷`.
 scipy value 0.1737478561, margin 0.56e−7. -/
-theorem entry_7_0 : (candidateMatrixQ 7 0 : ℝ) ≤ integralMatrix 7 0 := by
-  sorry
+theorem entry_7_0 : (candidateMatrixQ 7 0 : ℝ) ≤ integralMatrix 7 0 :=
+  LeanLab.ChenDoubleSieve.Burst9MatrixCol0.c7_entry_7_0_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{8,2} = ∫_{2.2}^{2.3} Ξ₁(t; 2.9, 3.19) dt ≥ 236829/10⁷`.
 scipy value 0.0236829970, margin 0.97e−7. -/
