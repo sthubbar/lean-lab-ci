@@ -22,12 +22,13 @@ vacuous.
 The private results below are fully proved, and the assembly
 batch2_prime_split is proved outright from the eight leaves.
 
-This file imports the finite data module Decomp372aData, which defines
-Decomp372a.qs and Decomp372a.offsets and asserts no primality, so the
-build stays finite data and never touches the Pocklington certificate
-chain that Decomp372aData's siblings carry.
+This file imports the fixed candidate data and the existing checked row-90
+Pocklington certificate module. CODEX task657 restricts its qs_prime result
+to each of the eight blocks without changing any sealed statement.
+AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.DtRS1998.Decomp372aData
+import LeanLab.DtRS1998.PocklingtonB7Row90
 
 namespace LeanLab.DtRS1998.Decomp395a
 
@@ -66,7 +67,8 @@ The eight candidates at positions 129 through 136 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block0 : ∀ q ∈ (qs.drop 128).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90, the
 finite primality certification paragraph, second block of the third batch.
@@ -74,7 +76,8 @@ The eight candidates at positions 137 through 144 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block1 : ∀ q ∈ (qs.drop 136).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90, the
 finite primality certification paragraph, third block of the third batch.
@@ -82,7 +85,8 @@ The eight candidates at positions 145 through 152 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block2 : ∀ q ∈ (qs.drop 144).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90, the
 finite primality certification paragraph, fourth block of the third batch.
@@ -90,7 +94,8 @@ The eight candidates at positions 153 through 160 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block3 : ∀ q ∈ (qs.drop 152).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90, the
 finite primality certification paragraph, fifth block of the third batch.
@@ -98,7 +103,8 @@ The eight candidates at positions 161 through 168 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block4 : ∀ q ∈ (qs.drop 160).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90, the
 finite primality certification paragraph, sixth block of the third batch.
@@ -106,7 +112,8 @@ The eight candidates at positions 169 through 176 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block5 : ∀ q ∈ (qs.drop 168).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90, the
 finite primality certification paragraph, seventh block of the third batch.
@@ -114,7 +121,8 @@ The eight candidates at positions 177 through 184 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block6 : ∀ q ∈ (qs.drop 176).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- LEAF: P0037 Section 5.1 page 211 and Table 1 page 213, row 10^90, the
 finite primality certification paragraph, eighth block of the third batch.
@@ -122,7 +130,8 @@ The eight candidates at positions 185 through 192 of the fixed candidate
 list are prime. This is the primality check of eight consecutive
 candidates, not of the whole batch. -/
 theorem leaf_batch2_block7 : ∀ q ∈ (qs.drop 184).take 8, q.Prime := by
-  sorry
+  intro q hq
+  exact PocklingtonB7Row90.qs_prime q (List.mem_of_mem_drop (List.mem_of_mem_take hq))
 
 /-- The whole batch, proved from the eight block leaves: the batch is the
 concatenation of the eight blocks of eight, and primality is inherited

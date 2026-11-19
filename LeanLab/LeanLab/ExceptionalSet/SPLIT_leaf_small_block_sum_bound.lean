@@ -104,6 +104,270 @@ theorem leaf_polynomial_block_sum (h2 : KarLemma2) :
                   ((a : ℝ) + (y : ℝ)))‖ ≤ 1 / 2 * (K * (m : ℝ) ^ (1 - ρ)) := by
   sorry
 
+/-- `e(t) = exp(2πit)`: its real and imaginary parts and its Lipschitz constant `4π`. -/
+private theorem eC_re (t : ℝ) : (eC t).re = Real.cos (2 * Real.pi * t) := by
+  rw [eC, show (2 : ℂ) * (Real.pi : ℂ) * Complex.I * (t : ℂ) = ((2 * Real.pi * t : ℝ) : ℂ) * Complex.I by
+    push_cast; ring]
+  exact Complex.exp_ofReal_mul_I_re _
+
+private theorem eC_im (t : ℝ) : (eC t).im = Real.sin (2 * Real.pi * t) := by
+  rw [eC, show (2 : ℂ) * (Real.pi : ℂ) * Complex.I * (t : ℂ) = ((2 * Real.pi * t : ℝ) : ℂ) * Complex.I by
+    push_cast; ring]
+  exact Complex.exp_ofReal_mul_I_im _
+
+/-- `e(t) = exp(2πit)` is Lipschitz with constant `4π`. -/
+private theorem norm_eC_sub_le (u v : ℝ) : ‖eC u - eC v‖ ≤ 4 * Real.pi * |u - v| := by
+  have h1 : ‖eC u - eC v‖ ≤ |(eC u - eC v).re| + |(eC u - eC v).im| :=
+    Complex.norm_le_abs_re_add_abs_im _
+  have h2 : |(eC u - eC v).re| = |Real.cos (2 * Real.pi * u) - Real.cos (2 * Real.pi * v)| := by
+    rw [Complex.sub_re, eC_re, eC_re]
+  have h3 : |(eC u - eC v).im| = |Real.sin (2 * Real.pi * u) - Real.sin (2 * Real.pi * v)| := by
+    rw [Complex.sub_im, eC_im, eC_im]
+  have h4 : |Real.cos (2 * Real.pi * u) - Real.cos (2 * Real.pi * v)| ≤ 2 * Real.pi * |u - v| := by
+    have := Real.abs_cos_sub_cos_le (2 * Real.pi * u) (2 * Real.pi * v)
+    rw [show 2 * Real.pi * u - 2 * Real.pi * v = 2 * Real.pi * (u - v) by ring, abs_mul,
+      abs_of_pos (by positivity : (0:ℝ) < 2 * Real.pi)] at this
+    exact this
+  have h5 : |Real.sin (2 * Real.pi * u) - Real.sin (2 * Real.pi * v)| ≤ 2 * Real.pi * |u - v| := by
+    have := Real.abs_sin_sub_sin_le (2 * Real.pi * u) (2 * Real.pi * v)
+    rw [show 2 * Real.pi * u - 2 * Real.pi * v = 2 * Real.pi * (u - v) by ring, abs_mul,
+      abs_of_pos (by positivity : (0:ℝ) < 2 * Real.pi)] at this
+    exact this
+  rw [h2, h3] at h1
+  linarith
+
+/-- The block Taylor remainder: on a block `[a, a+m)` inside `[N, N+P]`, the `n`-th Taylor
+polynomial at the left end misses `f` by at most `(n+1) P^{-c1(n+1)} m^{n+1}`. -/
+private theorem taylor_remainder_block
+    {c0 c1 c2 c3 : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hP : 0 < P)
+    {a m : ℕ} (ha : N ≤ a) (ham : a + m ≤ N + P) :
+    ∀ y : ℕ, y ≤ m →
+      |f ((a : ℝ) + (y : ℝ)) -
+        taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
+          ((a : ℝ) + (y : ℝ))|
+        ≤ ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1) := by
+  obtain ⟨U, hUopen, hUI, hCf⟩ := hH.1
+  have hCn := hH.2.1
+  have hPr : (0 : ℝ) < (P : ℝ) := by exact_mod_cast hP
+  have haR : (N : ℝ) ≤ (a : ℝ) := by exact_mod_cast ha
+  have hamR : (a : ℝ) + (m : ℝ) ≤ (N : ℝ) + (P : ℝ) := by
+    have h : ((a + m : ℕ) : ℝ) ≤ ((N + P : ℕ) : ℝ) := by exact_mod_cast ham
+    push_cast at h
+    linarith
+  have hsub : Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)) ⊆ U := by
+    intro z hz
+    exact hUI ⟨by linarith [hz.1], by linarith [hz.2]⟩
+  rcases Nat.eq_zero_or_pos m with hm0 | hmpos
+  · subst hm0
+    intro y hy
+    have hy0 : y = 0 := by omega
+    subst hy0
+    rw [Nat.cast_zero, add_zero, taylorWithinEval_self, sub_self, abs_zero]
+    positivity
+  · have hab : (a : ℝ) < (a : ℝ) + (m : ℝ) := by
+      have : (0 : ℝ) < (m : ℝ) := by exact_mod_cast hmpos
+      linarith
+    have hu : UniqueDiffOn ℝ (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) := uniqueDiffOn_Icc hab
+    have hCdiff : ContDiffOn ℝ (n + 1) f (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) :=
+      hCf.mono (fun z hz => hsub hz)
+    have hCbd : ∀ z ∈ Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)),
+        ‖iteratedDerivWithin (n + 1) f (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) z‖
+          ≤ ((n + 1).factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := by
+      intro z hz
+      have hzU : z ∈ U := hsub hz
+      have hcont : ContDiffAt ℝ (n + 1) f z := hCf.contDiffAt (hUopen.mem_nhds hzU)
+      have heq : iteratedDerivWithin (n + 1) f (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) z
+          = iteratedDeriv (n + 1) f z := iteratedDerivWithin_eq_iteratedDeriv hu hcont hz
+      have hzI : z ∈ Set.Icc (N : ℝ) ((N : ℝ) + (P : ℝ)) :=
+        ⟨by linarith [hz.1], by linarith [hz.2]⟩
+      have hb := hCn z hzI
+      have hb' : ‖iteratedDeriv (n + 1) f z‖ / ((n + 1).factorial : ℝ)
+          ≤ (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := by
+        rw [← Real.norm_eq_abs, norm_div, Real.norm_natCast] at hb
+        exact hb
+      have hfac : (0 : ℝ) < ((n + 1).factorial : ℝ) := by positivity
+      rw [div_le_iff₀ hfac] at hb'
+      rw [heq, Real.norm_eq_abs]
+      calc |iteratedDeriv (n + 1) f z| = ‖iteratedDeriv (n + 1) f z‖ := (Real.norm_eq_abs _).symm
+        _ ≤ ((n + 1).factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := by
+            rw [mul_comm]; exact hb'
+    intro y hy
+    have hym : (y : ℝ) ≤ (m : ℝ) := by exact_mod_cast hy
+    have hy0 : (0 : ℝ) ≤ (y : ℝ) := Nat.cast_nonneg y
+    have hx : (a : ℝ) + (y : ℝ) ∈ Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)) := by
+      refine ⟨by linarith, by linarith⟩
+    have hmain := taylor_mean_remainder_bound (f := f) (a := (a : ℝ)) (b := (a : ℝ) + (m : ℝ))
+      (C := ((n + 1).factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))))
+      (x := (a : ℝ) + (y : ℝ)) (n := n) hab.le hCdiff hx hCbd
+    rw [Real.norm_eq_abs] at hmain
+    refine hmain.trans ?_
+    have hxa : (a : ℝ) + (y : ℝ) - (a : ℝ) = (y : ℝ) := by ring
+    rw [hxa]
+    have hpow : (y : ℝ) ^ (n + 1) ≤ (m : ℝ) ^ (n + 1) := pow_le_pow_left₀ hy0 hym _
+    have hPnn : (0 : ℝ) ≤ (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) := Real.rpow_nonneg hPr.le _
+    have hfs : ((n + 1).factorial : ℝ) = ((n : ℝ) + 1) * (n.factorial : ℝ) := by
+      rw [Nat.factorial_succ]
+      push_cast
+      ring
+    have hfac : (0 : ℝ) < ((n.factorial : ℕ) : ℝ) := by positivity
+    rw [hfs]
+    rw [show ((n : ℝ) + 1) * (n.factorial : ℝ) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) *
+        (y : ℝ) ^ (n + 1) / (n.factorial : ℝ)
+        = ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (y : ℝ) ^ (n + 1) by
+      field_simp]
+    exact mul_le_mul_of_nonneg_left hpow (by positivity)
+
+
+/-- Changing each term of a block sum by a remainder bounded by `ε` costs `m * 4π ε`. -/
+private theorem sum_eC_le_add {g h : ℕ → ℝ} {m : ℕ} {ε : ℝ}
+    (_hε : 0 ≤ ε) (hgh : ∀ y, y < m → |g y - h y| ≤ ε) :
+    ‖∑ y ∈ Finset.range m, eC (g y)‖ ≤
+      ‖∑ y ∈ Finset.range m, eC (h y)‖ + (m : ℝ) * (4 * Real.pi * ε) := by
+  have hdecomp : ∑ y ∈ Finset.range m, eC (g y) =
+      (∑ y ∈ Finset.range m, eC (h y)) + ∑ y ∈ Finset.range m, (eC (g y) - eC (h y)) := by
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl (fun y _ => by ring)
+  have hb : ‖∑ y ∈ Finset.range m, (eC (g y) - eC (h y))‖ ≤ (m : ℝ) * (4 * Real.pi * ε) := by
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ y ∈ Finset.range m, ‖eC (g y) - eC (h y)‖
+        ≤ ∑ y ∈ Finset.range m, (4 * Real.pi * ε) := by
+          refine Finset.sum_le_sum (fun y hy => ?_)
+          refine (norm_eC_sub_le _ _).trans ?_
+          exact mul_le_mul_of_nonneg_left (hgh y (Finset.mem_range.1 hy))
+            (by positivity)
+      _ = (m : ℝ) * (4 * Real.pi * ε) := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  rw [hdecomp]
+  linarith [norm_add_le (∑ y ∈ Finset.range m, eC (h y))
+    (∑ y ∈ Finset.range m, (eC (g y) - eC (h y)))]
+
+/-- The p. 248 Taylor reduction: on a block `[a, a+m)` inside `[N, N+P]` the exponential sum
+over `f` is that over the `n`-th Taylor polynomial at `a`, up to `m` times the remainder
+`4π (n+1) P^{-c1(n+1)} m^{n+1}`. -/
+private theorem block_sum_taylor_reduction
+    {c0 c1 c2 c3 : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hP : 0 < P)
+    {a m : ℕ} (ha : N ≤ a) (ham : a + m ≤ N + P) :
+    ‖∑ x ∈ Finset.Ico a (a + m), eC (f x)‖ ≤
+      ‖∑ y ∈ Finset.range m,
+        eC (taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
+          ((a : ℝ) + (y : ℝ)))‖ +
+      (m : ℝ) * (4 * Real.pi * (((n : ℝ) + 1) *
+        (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1))) := by
+  have hrem := taylor_remainder_block hH hP ha ham
+  have hε : (0 : ℝ) ≤ ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1) := by
+    have hPr : (0 : ℝ) < (P : ℝ) := by exact_mod_cast hP
+    have := Real.rpow_nonneg hPr.le (-(c1 * ((n + 1 : ℕ) : ℝ)))
+    positivity
+  have hfun : ∀ y : ℕ, y < m →
+      |f ((a : ℝ) + (y : ℝ)) - taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ)))
+        (a : ℝ) ((a : ℝ) + (y : ℝ))| ≤
+        ((n : ℝ) + 1) * (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1) :=
+    fun y hy => hrem y (le_of_lt hy)
+  have h := sum_eC_le_add (g := fun y => f ((a : ℝ) + (y : ℝ)))
+    (h := fun y => taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
+      ((a : ℝ) + (y : ℝ))) (m := m) (ε := ((n : ℝ) + 1) *
+        (P : ℝ) ^ (-(c1 * ((n + 1 : ℕ) : ℝ))) * (m : ℝ) ^ (n + 1)) hε hfun
+  rw [Finset.sum_Ico_eq_sum_range, show a + m - a = m by omega]
+  simpa using h
+
+/-- The saving swallows the Taylor remainder: if the block length `m` is at least one and at
+most `P^(c1 - c4/2)`, `rho > 0`, and `P` is past the threshold `8 pi D <= P^((c4/2)(D + rho)
+- c1 rho)` with `D = n + 1`, then the whole remainder contribution
+`m * 4 pi (D P^(-c1 D) m^D)` of a block is at most `(1/2) m^(1 - rho)`, half of the saving
+that the block estimate spends. -/
+private lemma saving_absorbs_remainder
+    {c1 c4 ρ D P m : ℝ} (hP : 1 < P) (hm : 1 ≤ m) (hρ : 0 < ρ) (hD : 0 ≤ D)
+    (hAm : m ≤ P ^ (c1 - c4 / 2))
+    (hthr : 8 * Real.pi * D ≤ P ^ ((c4 / 2) * (D + ρ) - c1 * ρ)) :
+    m * (4 * Real.pi * (D * P ^ (-(c1 * D)) * m ^ D)) ≤ 1 / 2 * m ^ (1 - ρ) := by
+  have hP0 : (0 : ℝ) < P := by linarith
+  have hm0 : (0 : ℝ) < m := by linarith
+  have hDρ : 0 ≤ D + ρ := by linarith
+  -- the block length against the block power
+  have hpow : m ^ (D + ρ) ≤ P ^ ((c1 - c4 / 2) * (D + ρ)) := by
+    calc m ^ (D + ρ) ≤ (P ^ (c1 - c4 / 2)) ^ (D + ρ) :=
+          Real.rpow_le_rpow hm0.le hAm hDρ
+      _ = P ^ ((c1 - c4 / 2) * (D + ρ)) := (Real.rpow_mul hP0.le _ _).symm
+  -- the three exponents cancel
+  have hcancel : (c4 / 2) * (D + ρ) - c1 * ρ + ((c1 - c4 / 2) * (D + ρ)) + -(c1 * D) = 0 := by
+    ring
+  have hprod : P ^ ((c4 / 2) * (D + ρ) - c1 * ρ) * P ^ ((c1 - c4 / 2) * (D + ρ)) *
+      P ^ (-(c1 * D)) = 1 := by
+    rw [← Real.rpow_add hP0, ← Real.rpow_add hP0, hcancel, Real.rpow_zero]
+  -- so the whole bracket is at most one
+  have hkey : 8 * Real.pi * D * P ^ (-(c1 * D)) * m ^ (D + ρ) ≤ 1 := by
+    have hnn1 : (0 : ℝ) ≤ P ^ ((c4 / 2) * (D + ρ) - c1 * ρ) := Real.rpow_nonneg hP0.le _
+    have hnn2 : (0 : ℝ) ≤ P ^ ((c1 - c4 / 2) * (D + ρ)) := Real.rpow_nonneg hP0.le _
+    have hnn3 : (0 : ℝ) ≤ P ^ (-(c1 * D)) := Real.rpow_nonneg hP0.le _
+    have hstep : 8 * Real.pi * D * m ^ (D + ρ) ≤
+        P ^ ((c4 / 2) * (D + ρ) - c1 * ρ) * P ^ ((c1 - c4 / 2) * (D + ρ)) :=
+      mul_le_mul hthr hpow (Real.rpow_nonneg hm0.le _) hnn1
+    calc 8 * Real.pi * D * P ^ (-(c1 * D)) * m ^ (D + ρ)
+        = (8 * Real.pi * D * m ^ (D + ρ)) * P ^ (-(c1 * D)) := by ring
+      _ ≤ (P ^ ((c4 / 2) * (D + ρ) - c1 * ρ) * P ^ ((c1 - c4 / 2) * (D + ρ))) *
+            P ^ (-(c1 * D)) := mul_le_mul_of_nonneg_right hstep hnn3
+      _ = 1 := hprod
+  -- the remainder is `(1/2) m^(1-rho)` times that bracket
+  have hfac : m * (4 * Real.pi * (D * P ^ (-(c1 * D)) * m ^ D)) =
+      1 / 2 * m ^ (1 - ρ) * (8 * Real.pi * D * P ^ (-(c1 * D)) * m ^ (D + ρ)) := by
+    have hmD : m ^ (1 - ρ) * m ^ (D + ρ) = m ^ (D + 1) := by
+      rw [← Real.rpow_add hm0]
+      congr 1
+      ring
+    have hmD1 : m * m ^ D = m ^ (D + 1) := by
+      have h := Real.rpow_add hm0 (1 : ℝ) D
+      rw [Real.rpow_one] at h
+      rw [← h]
+      congr 1
+      ring
+    calc m * (4 * Real.pi * (D * P ^ (-(c1 * D)) * m ^ D))
+        = 4 * Real.pi * D * P ^ (-(c1 * D)) * (m * m ^ D) := by ring
+      _ = 4 * Real.pi * D * P ^ (-(c1 * D)) * m ^ (D + 1) := by rw [hmD1]
+      _ = 4 * Real.pi * D * P ^ (-(c1 * D)) * (m ^ (1 - ρ) * m ^ (D + ρ)) := by rw [hmD]
+      _ = 1 / 2 * m ^ (1 - ρ) * (8 * Real.pi * D * P ^ (-(c1 * D)) * m ^ (D + ρ)) := by ring
+  rw [hfac]
+  have hsave : (0 : ℝ) ≤ 1 / 2 * m ^ (1 - ρ) := by positivity
+  calc 1 / 2 * m ^ (1 - ρ) * (8 * Real.pi * D * P ^ (-(c1 * D)) * m ^ (D + ρ))
+      ≤ 1 / 2 * m ^ (1 - ρ) * 1 := mul_le_mul_of_nonneg_left hkey hsave
+    _ = 1 / 2 * m ^ (1 - ρ) := by ring
+
+
+/-- The p. 248 reduction with the remainder removed: on a block of length `m` inside `[N, N+P]`
+the exponential sum over `f` is at most the exponential sum over the `n`-th Taylor polynomial at
+the left end plus half of the saving `m^(1-rho)`. This is `block_sum_taylor_reduction` with its
+remainder term absorbed by `saving_absorbs_remainder`, and it leaves nothing but the polynomial
+sum. -/
+private theorem block_sum_reduced_to_polynomial
+    {c0 c1 c2 c3 c4 ρ : ℝ} {N P n : ℕ} {f : ℝ → ℝ} {T : Finset ℕ}
+    (hH : KarHyp c0 c1 c2 c3 N P n f T) (hP : 1 < P) (hρ : 0 < ρ)
+    {a m : ℕ} (ha : N ≤ a) (ham : a + m ≤ N + P) (hm : 1 ≤ m)
+    (hAm : (m : ℝ) ≤ (P : ℝ) ^ (c1 - c4 / 2))
+    (hthr : 8 * Real.pi * ((n : ℝ) + 1) ≤
+      (P : ℝ) ^ ((c4 / 2) * ((n : ℝ) + 1 + ρ) - c1 * ρ)) :
+    ‖∑ x ∈ Finset.Ico a (a + m), eC (f x)‖ ≤
+      ‖∑ y ∈ Finset.range m,
+        eC (taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
+          ((a : ℝ) + (y : ℝ)))‖ + 1 / 2 * (m : ℝ) ^ (1 - ρ) := by
+  have hP0 : 0 < P := Nat.zero_lt_of_lt hP
+  have hm0 : (0 : ℝ) < (m : ℝ) := by exact_mod_cast (Nat.zero_lt_of_lt (lt_of_lt_of_le Nat.zero_lt_one hm))
+  have hm1 : (1 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
+  have hD : (0 : ℝ) ≤ (n : ℝ) + 1 := by positivity
+  have hred := block_sum_taylor_reduction hH hP0 ha ham
+  have habs := saving_absorbs_remainder (c1 := c1) (c4 := c4) (ρ := ρ) (D := (n : ℝ) + 1)
+    (P := (P : ℝ)) (m := (m : ℝ)) (by exact_mod_cast hP) hm1 hρ hD hAm hthr
+  -- the two power mismatches between the two statements
+  have hDcast : (n : ℝ) + 1 = (((n + 1 : ℕ)) : ℝ) := by push_cast; ring
+  have hmpow : (m : ℝ) ^ (n + 1) = (m : ℝ) ^ ((n : ℝ) + 1) := by
+    rw [hDcast, Real.rpow_natCast]
+  have hPpow : (P : ℝ) ^ (-(c1 * (((n + 1 : ℕ)) : ℝ))) =
+      (P : ℝ) ^ (-(c1 * ((n : ℝ) + 1))) := by
+    rw [hDcast]
+  rw [hmpow, hPpow] at hred
+  linarith [hred, habs]
+
+
 /-- LEAF: The p. 248 Taylor step, with the remainder removed. On a block `[a, a+m)` inside
 `[N, N+P]` of length `1 <= m <= P^(c1 - c4/2)`, with `0 < rho` and `P` above the threshold
 `8 pi (n+1) <= P^((c4/2)(n+1+rho) - c1 rho)`, the block sum over `f` is at most the block sum
@@ -123,7 +387,7 @@ theorem leaf_taylor_block_reduction
       ‖∑ y ∈ Finset.range m,
         eC (taylorWithinEval f n (Set.Icc (a : ℝ) ((a : ℝ) + (m : ℝ))) (a : ℝ)
           ((a : ℝ) + (y : ℝ)))‖ + 1 / 2 * (m : ℝ) ^ (1 - ρ) := by
-  sorry
+  exact block_sum_reduced_to_polynomial hH hP hρ ha ham hm hAm hthr
 
 /-! ### Assembly -/
 

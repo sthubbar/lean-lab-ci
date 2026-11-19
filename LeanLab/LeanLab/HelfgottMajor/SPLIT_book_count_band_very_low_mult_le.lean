@@ -1,4 +1,6 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_count_le
+import LeanLab.HelfgottMajor.RealAxisBand
+import LeanLab.PNTPort.DirichletZF.SiegelSigns
 
 /-!
 # Split of `book_count_band_very_low_mult_le` (`HelfgottMajor/SPLIT_book_count_band_count_le`)
@@ -29,13 +31,46 @@ open scoped ComplexConjugate LSeries.notation
 
 variable {q : ℕ} [NeZero q]
 
+/-- A point of the plane with vanishing imaginary part is the coercion of its real part. -/
+private lemma eq_ofReal_re_of_im_eq_zero {ρ : ℂ} (him : ρ.im = 0) : ρ = ((ρ.re : ℝ) : ℂ) := by
+  refine Complex.ext ?_ ?_
+  · simp
+  · simp [him]
+
+/-- The real axis input of the two real zero leaves, on the band: the `L`-function of a primitive
+character has no zero at a real point of the open unit interval. On the band the conductor is at
+most seventeen, and for conductor at least two the kernel criterion of `RealAxisBand` applies to
+every non principal character of modulus at most seventeen: the generating polynomial
+`∑_{a < q} χ(a) x^a` stays in a half plane on `0 < x < 1`, so the Mellin transform
+`Γ(σ) L(σ, χ)` does not vanish on `σ > 0`. Conductor one is the zeta function, which is negative
+on the open unit interval. -/
+private theorem real_axis_ne_zero_of_band (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
+    {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
+    ∀ σ : ℝ, 0 < σ → σ < 1 → DirichletCharacter.LFunction χ (σ : ℂ) ≠ 0 := by
+  intro σ h0 h1 hL
+  by_cases hq : q = 1
+  · subst hq
+    rw [DirichletCharacter.LFunction_modOne_eq] at hL
+    have hneg := (LeanLab.PNTPort.DirichletZF.riemannZeta_real_neg h0 h1).2
+    rw [hL] at hneg
+    simp at hneg
+  · exact LeanLab.HelfgottMajor.RealAxisKernel.LFunction_ofReal_ne_zero_of_band χ hχ hT hband hq h0 hL
+
 /-- LEAF. Multiplicity of a real zero: on the band `1 ≤ T`, `q * T ≤ 2πe`, a strip zero with
 imaginary part `0` is a simple zero, that is its multiplicity is at most one. Nothing is
 asserted about zeros off the real axis, and nothing about how many real zeros there are. -/
 theorem very_low_mult_le_one_of_im_eq_zero (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
     {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     ∀ ρ ∈ stripZeros χ T, ρ.im = 0 → mult χ ρ ≤ 1 := by
-  sorry
+  intro ρ hρ him
+  have hno := real_axis_ne_zero_of_band χ hχ hT hband
+  have hLne : DirichletCharacter.LFunction χ ρ ≠ 0 := by
+    rw [eq_ofReal_re_of_im_eq_zero him]
+    exact hno ρ.re hρ.2.1 hρ.2.2.1
+  have hzero : mult χ ρ = 0 := by
+    by_contra h
+    exact hLne (apply_eq_zero_of_analyticOrderNatAt_ne_zero h)
+  omega
 
 /-- LEAF. Number of real zeros: on the band `1 ≤ T`, `q * T ≤ 2πe`, the strip zeros with
 imaginary part `0` number at most one. Nothing is asserted about the multiplicity of that
@@ -43,7 +78,17 @@ zero, and nothing about zeros off the real axis. -/
 theorem very_low_real_zero_card_le_one (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
     {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     ((stripZeros_finite χ T).toFinset.filter (fun ρ => ρ.im = 0)).card ≤ 1 := by
-  sorry
+  have hno := real_axis_ne_zero_of_band χ hχ hT hband
+  have hempty : (stripZeros_finite χ T).toFinset.filter (fun ρ => ρ.im = 0) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro ρ hρ him
+    have hmem : ρ ∈ stripZeros χ T := (stripZeros_finite χ T).mem_toFinset.mp hρ
+    have hLne : DirichletCharacter.LFunction χ ρ ≠ 0 := by
+      rw [eq_ofReal_re_of_im_eq_zero him]
+      exact hno ρ.re hmem.2.1 hmem.2.2.1
+    exact hLne hmem.1
+  rw [hempty]
+  simp
 
 /-- LEAF. No low zero off the real axis: on the band `1 ≤ T`, `q * T ≤ 2πe`, every strip zero
 with positive imaginary part has imaginary part above `1`. Equivalently the closed segment of

@@ -54,7 +54,8 @@ theorem principal_convolution_unit_modulus491 (hG : LeanLab.DERZ1997.GRH)
           C * (N : ℝ) * Real.log N ^ 13 *
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
               1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := principal_convolution491_route hG hM
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _hq1 n _hn4 hnN => h N hN q hq hqQ n hnN⟩
 
 /-- LEAF. The intermediate modulus step. For a modulus between two and the one
 twentieth power of N, a reduced residue twist is present but the arc is still long,
@@ -71,7 +72,8 @@ theorem principal_convolution_intermediate_modulus491 (hG : LeanLab.DERZ1997.GRH
           C * (N : ℝ) * Real.log N ^ 13 *
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
               1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := principal_convolution491_route hG hM
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _hq2 _hq20 n _hn4 hnN => h N hN q hq hqQ n hnN⟩
 
 /-- LEAF. The large modulus step. For a modulus at least the one twentieth power of N
 the arc is short and the reciprocal length term is the smaller of the two printed
@@ -89,7 +91,8 @@ theorem principal_convolution_large_modulus491 (hG : LeanLab.DERZ1997.GRH)
           C * (N : ℝ) * Real.log N ^ 13 *
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
               1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨C, hC, N0, h⟩ := principal_convolution491_route hG hM
+  exact ⟨C, hC, N0, fun N hN q hq hqQ _hq2 _hq20 n _hn4 hnN => h N hN q hq hqQ n hnN⟩
 
 /-- Folding a constant into a larger one, at a fixed nonnegative error size. -/
 private theorem scale_const_le491 {c d N lg L : ℝ} (hcd : c ≤ d) (hN : 0 ≤ N)

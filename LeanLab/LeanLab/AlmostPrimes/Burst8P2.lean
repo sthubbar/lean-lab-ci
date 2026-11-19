@@ -225,6 +225,14 @@ def Conditions43 (N : ℕ) : Prop :=
 ε = ε(400, 10^{12}) = 5.543 · 10^{-4} from (3.8). -/
 def ParamConditions43 : Prop := (4 : ℝ) * 10 ^ 18 ≤ X2v3 ∧ (5.543e-4 : ℝ) ≤ 1 / 74
 
+/-- PROVED. The left side of `theorem42_bracket` is nonnegative for N ≥ X₂, since U_N > 0
+and log N > 0. -/
+theorem theorem42_lhs_nonneg (N : ℕ) (hX : X2v3 ≤ (N : ℝ)) :
+    0 ≤ 5 * ((setA N).card : ℝ) * UN N / Real.log (N : ℝ) := by
+  have hU := UN_pos N
+  have hL : 0 ≤ Real.log (N : ℝ) := Real.log_natCast_nonneg N
+  positivity
+
 /-- LEAF: cited and deep. P0019, Theorem 4.2, p. 11 and 12, as evaluated in the proof of
 Theorem 1.3, p. 13, with (Y₀, α₁, α₂, C) = (7.9, 7, 2, 3.98), u₀ = 400, δ = 1.3, α = 0.25,
 M = 40, ε = 5.543 · 10^{-4}, C₁(ε) = 113, C₂(ε) = 114, ξ ≤ 801 and ε₁(X₂, δ) = 1/11.
