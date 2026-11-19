@@ -37,6 +37,14 @@ that case analysis.  The target `zero_count_high_bounded_height` is not used in 
 namespace LeanLab.HelfgottMajor.Decomp388a
 open Real DecompJ1153
 
+/-- `zeroCount` as the sum over its finite index type: the support of the indicator
+`zeroWeight` is exactly the subtype of the strip zeros below the height `t`. -/
+private theorem zero_count_eq_zero_idx (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    zeroCount χ t = ∑' ρ : ZeroCount1623.ZeroIdx χ t, (ZeroCount1623.mult χ ρ.val : ℝ) := by
+  unfold zeroCount zeroWeight
+  exact (tsum_subtype _ _).symm
+
+
 /-- LEAF. Tiny box of the region, `t ≤ 100`.  With `q ≤ t ≤ 100` both parameters lie in
 `[2, 100]`, and `2 * π * exp 4 ≤ q * t` keeps the two logarithms of the right side at least
 `3` and `log (2 * π * exp 4)` respectively, so the main term `3 * t / π` and the half log term
@@ -49,7 +57,8 @@ theorem zero_count_bounded_height_tiny (q : ℕ) [NeZero q] (χ : DirichletChara
     (hqt : (q : ℝ) ≤ t) (htiny : t ≤ 100) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Low height, `100 ≤ t ≤ 10 ^ 4`.  The conductor is at most the height, so both are at
 most `10 ^ 4` and `log (q * t)` is at most `2 * log (10 ^ 4)`; the main term, whose argument is
@@ -62,7 +71,8 @@ theorem zero_count_bounded_height_low (q : ℕ) [NeZero q] (χ : DirichletCharac
     (hqt : (q : ℝ) ≤ t) (h100 : 100 ≤ t) (hlow : t ≤ 10 ^ 4) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Tall height, small conductor: `10 ^ 4 ≤ t ≤ 10 ^ 6` and `q ≤ 10 ^ 4`.  Splitting
 `log (q * t / (2 * π * exp 1))` into `log t - log (2 * π * exp 1) + log q` exhibits the main
@@ -77,7 +87,8 @@ theorem zero_count_bounded_height_tall_small_conductor (q : ℕ) [NeZero q]
     (hth : t ≤ 10 ^ 6) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Tall height, large conductor: `10 ^ 4 ≤ t ≤ 10 ^ 6` and `10 ^ 4 ≤ q ≤ t`.  Both
 parameters lie in `[10 ^ 4, 10 ^ 6]`, so `log (q * t)` lies between `2 * log (10 ^ 4)` and
@@ -92,7 +103,8 @@ theorem zero_count_bounded_height_tall_large_conductor (q : ℕ) [NeZero q]
     (hth : t ≤ 10 ^ 6) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- The bounded height region, assembled from its four subregions: the box `t ≤ 100`, the low
 height band `100 ≤ t ≤ 10 ^ 4`, and the tall band `10 ^ 4 ≤ t ≤ 10 ^ 6` split by whether

@@ -97,7 +97,8 @@ jobs:
         run: |
           export PATH="$HOME/.elan/bin:$PATH"
           cd LeanLab
-          MODS=$(find "LeanLab/$F" -name '*.lean' -not -path '*/old/*' -not -path '*/build/*' | sed 's/\.lean$//; s#/#.#g' | sort)
+          # lrefresh 20261119T1150Z: a path with a hyphen, Pintz2021/proposed/U1634-reshape-20261108, is no Lean module; lake said unknown target and main-check failed 09:56Z 11-19. Skip such paths.
+          MODS=$(find "LeanLab/$F" -name '*.lean' -not -path '*/old/*' -not -path '*/build/*' | sed 's/\.lean$//; s#/#.#g' | grep -v -- '-' | sort)
           echo "MAIN CHECK building $F: $(echo "$MODS" | wc -w) modules"
           if lake build $MODS 2>&1 | grep -v '^✔' | tee "$RUNNER_TEMP/build.log"; test "${PIPESTATUS[0]}" -eq 0; then
             echo "MAIN CHECK OK $F" | tee -a "$GITHUB_STEP_SUMMARY"
