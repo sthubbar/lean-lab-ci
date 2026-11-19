@@ -44,7 +44,29 @@ theorem analytic_lower_bound (C ε : ℝ) (hC : 1 < C) (hε : 0 < ε) :
       Odd n₁ → Odd n₂ → N₀ ≤ n₂ → n₂ < n₁ → (n₁ : ℝ) ≤ C * n₂ →
       (PairLinnik.margin101 (108238 / 10) 82 - ε) *
         ((n₁ : ℝ) * n₂ * logScale n₁ ^ 82) ≤ weightedCount n₁ n₂ := by
-  sorry
+  have hmargin : 0 < PairLinnik.margin101 (108238 / 10) 82 :=
+    PairLinnik.p0101_reproduced.1
+  by_cases hεge : PairLinnik.margin101 (108238 / 10) 82 ≤ ε
+  · refine ⟨16, ?_⟩
+    intro n₁ n₂ ho₁ ho₂ hn hlt hratio
+    have hcoef : PairLinnik.margin101 (108238 / 10) 82 - ε ≤ 0 := by linarith
+    have hnonneg : 0 ≤ weightedCount n₁ n₂ := by
+      classical
+      unfold weightedCount
+      apply Finset.sum_nonneg
+      intro x _
+      split_ifs with h
+      · apply Finset.prod_nonneg
+        intro i _
+        apply Real.log_nonneg
+        have hp := h.1 i
+        exact_mod_cast hp.one_lt.le
+      · exact le_rfl
+    have hmain : (PairLinnik.margin101 (108238 / 10) 82 - ε) *
+        ((n₁ : ℝ) * n₂ * logScale n₁ ^ 82) ≤ 0 := by
+      nlinarith [mul_nonneg (by positivity : 0 ≤ (n₁ : ℝ) * n₂) (by positivity : 0 ≤ logScale n₁ ^ 82)]
+    linarith
+  · sorry
 
 /-- LEAF. Page 199, the closing numerical inequality at k = 82. -/
 theorem margin_pos : 0 < PairLinnik.margin101 (108238 / 10) 82 := by
