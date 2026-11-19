@@ -7668,7 +7668,528 @@ theorem c4_entry_4_0_leaf :
     linarith [hL, hprod]
   linarith [hmul, hJ3, hJ2, hsig_all]
 
+/-! ### Row 6 of column 0: `Xi1 (14/5) (167/50)`
+
+Same shape as row 4: `s = 14/5` and `sp = 167/50`, so `sp - 2 = 67/50` and
+`sp - sp/s - 1 = 803/700` both lie inside `[1, 11/5]` and the panel splits three ways. -/
+
+/-- `log (9/5)` from above (`x = 2/7`, 14 terms). -/
+theorem c6_log_9_5_hi : log (9/5 : ℝ) ≤ (0.5877866649021194 : ℝ) := by
+  have h := log_enclosure (y := (9/5 : ℝ)) (x := (2/7 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) 14
+  refine le_trans h.2 ?_
+  norm_num [Finset.sum_range_succ]
+
+/-- `log (117/50)` from above (`x = 67/167`, 22 terms). -/
+theorem c6_log_117_50_hi : log (117/50 : ℝ) ≤ (0.8501509293696101 : ℝ) := by
+  have h := log_enclosure (y := (117/50 : ℝ)) (x := (67/167 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) 22
+  refine le_trans h.2 ?_
+  norm_num [Finset.sum_range_succ]
+
+/-- `log (4000/1053)`, the `sigma0` coefficient of row 6, from below. -/
+theorem c6_log_c_lo : (1.3346511279282 : ℝ) ≤ log (4000/1053 : ℝ) := by
+  have h16 : log (16 : ℝ) = 4 * log 2 := by
+    rw [show (16 : ℝ) = 2 ^ 4 by norm_num, Real.log_pow]
+    push_cast
+    ring
+  have hden : log ((9/5) * (117/50) : ℝ) = log (9/5) + log (117/50) :=
+    Real.log_mul (by norm_num) (by norm_num)
+  have harg : (4000/1053 : ℝ) = 16 / ((9/5) * (117/50)) := by norm_num
+  rw [harg, Real.log_div (by norm_num) (by norm_num), h16, hden]
+  have h9 := c6_log_9_5_hi
+  have hQ := c6_log_117_50_hi
+  have h2 := log_two_bounds.1
+  linarith [h9, hQ, h2]
+
+/-- Two-sided enclosure of `log (110/67)` (`x = 43/177`, 16 terms). -/
+theorem c6_log_110_67 : (0.4957877464014501 : ℝ) ≤ log (110/67 : ℝ) ∧
+    log (110/67 : ℝ) ≤ (0.4957877464014502 : ℝ) := by
+  have h := log_enclosure (y := (110/67 : ℝ)) (x := (43/177 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) 16
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (938/803)` (`x = 135/1741`, 16 terms). -/
+theorem c6_log_938_803 : (0.155395235059463 : ℝ) ≤ log (938/803 : ℝ) ∧
+    log (938/803 : ℝ) ≤ (0.1553952350594631 : ℝ) := by
+  have h := log_enclosure (y := (938/803 : ℝ)) (x := (135/1741 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) 16
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (3141/1400)` (`x = 1741/4541`, 16 terms). -/
+theorem c6_log_3141 : (0.80806898393529 : ℝ) ≤ log (3141/1400 : ℝ) ∧
+    log (3141/1400 : ℝ) ≤ (0.80806898393534 : ℝ) := by
+  have h := log_enclosure (y := (3141/1400 : ℝ)) (x := (1741/4541 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) 16
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (277/100)` (`x = 177/377`, 18 terms). -/
+theorem c6_log_277 : (1.018847320199198 : ℝ) ≤ log (277/100 : ℝ) ∧
+    log (277/100 : ℝ) ≤ (1.018847320201017 : ℝ) := by
+  have h := log_enclosure (y := (277/100 : ℝ)) (x := (177/377 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) 18
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+/-- Two-sided enclosure of `log (307/280)` (`x = 27/587`, 14 terms). -/
+theorem c6_log_307_280 : (0.0920581444179475 : ℝ) ≤ log (307/280 : ℝ) ∧
+    log (307/280 : ℝ) ≤ (0.092058144417948 : ℝ) := by
+  have h := log_enclosure (y := (307/280 : ℝ)) (x := (27/587 : ℝ))
+    (by norm_num) (by norm_num) (by norm_num) 14
+  constructor
+  · refine le_trans ?_ h.1
+    norm_num [Finset.sum_range_succ]
+  · refine le_trans h.2 ?_
+    norm_num [Finset.sum_range_succ]
+
+set_option maxHeartbeats 2000000 in
+/-- `L1 = ∫_{803/700}^{67/50} log (t+1)/t` from below: midpoint `1741/1400`, 12 terms,
+ratio `15/349`. -/
+theorem c6_L1_lower :
+    (0.12534915114012 : ℝ) ≤ ∫ t in (803/700 : ℝ)..(67/50 : ℝ), log (t + 1) / t := by
+  have hxr : ∀ t ∈ uIcc (803/700 : ℝ) (67/50),
+      |(1741/1400 - t) / (1741/1400 + 1)| ≤ 15/349 := by
+    intro t ht
+    rw [uIcc_of_le (by norm_num)] at ht
+    have h1 : |(1741/1400 : ℝ) - t| ≤ 27/280 := by
+      rw [abs_le]
+      constructor <;> linarith [ht.1, ht.2]
+    have hden : (1741/1400 : ℝ) + 1 = 3141/1400 := by norm_num
+    rw [abs_div, abs_of_pos (by norm_num : (0 : ℝ) < 1741/1400 + 1), hden]
+    have h3 : |(1741/1400 : ℝ) - t| / (3141/1400) ≤ (27/280) / (3141/1400) :=
+      div_le_div_of_nonneg_right h1 (by norm_num)
+    have h4 : (27/280 : ℝ) / (3141/1400) = 15/349 := by norm_num
+    linarith [h3, h4]
+  have h := log_succ_integral_lower (a := (803/700 : ℝ)) (b := (67/50 : ℝ))
+    (c := (1741/1400 : ℝ)) (r := (15/349 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) hxr 12
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
+  norm_num [Nat.choose] at h
+  ring_nf at h
+  have hint : (∫ t in (803/700 : ℝ)..(67/50 : ℝ), log (1 + t) * t⁻¹) =
+      ∫ t in (803/700 : ℝ)..(67/50 : ℝ), log (t + 1) / t := by
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    have h1 : (1 + t : ℝ) = t + 1 := by ring
+    rw [h1]
+    ring
+  rw [hint] at h
+  have hc1 := c6_log_3141
+  have hba := c6_log_938_803
+  have hprod : (0.80806898393529 : ℝ) * (0.155395235059463 : ℝ) ≤
+      log (3141/1400 : ℝ) * log (938/803 : ℝ) :=
+    mul_le_mul hc1.1 hba.1 (by norm_num : (0 : ℝ) ≤ (0.155395235059463 : ℝ))
+      (by linarith [hc1.1] : (0 : ℝ) ≤ log (3141/1400))
+  linarith [h, hprod, hc1.1, hba.1, hba.2]
+
+set_option maxHeartbeats 2000000 in
+/-- `L2 = ∫_{67/50}^{11/5} log (t+1)/t` from below: midpoint `177/100`, 16 terms,
+ratio `43/554`. -/
+theorem c6_L2_lower :
+    (0.4967287880154 : ℝ) ≤ ∫ t in (67/50 : ℝ)..(11/5 : ℝ), log (t + 1) / t := by
+  have hxr : ∀ t ∈ uIcc (67/50 : ℝ) (11/5),
+      |(177/100 - t) / (177/100 + 1)| ≤ 43/277 := by
+    intro t ht
+    rw [uIcc_of_le (by norm_num)] at ht
+    have h1 : |(177/100 : ℝ) - t| ≤ 43/100 := by
+      rw [abs_le]
+      constructor <;> linarith [ht.1, ht.2]
+    have hden : (177/100 : ℝ) + 1 = 277/100 := by norm_num
+    rw [abs_div, abs_of_pos (by norm_num : (0 : ℝ) < 177/100 + 1), hden]
+    have h3 : |(177/100 : ℝ) - t| / (277/100) ≤ (43/100) / (277/100) :=
+      div_le_div_of_nonneg_right h1 (by norm_num)
+    have h4 : (43/100 : ℝ) / (277/100) = 43/277 := by norm_num
+    linarith [h3, h4]
+  have h := log_succ_integral_lower (a := (67/50 : ℝ)) (b := (11/5 : ℝ))
+    (c := (177/100 : ℝ)) (r := (43/277 : ℝ)) (by norm_num) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) hxr 16
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
+  norm_num [Nat.choose] at h
+  ring_nf at h
+  have hint : (∫ t in (67/50 : ℝ)..(11/5 : ℝ), log (1 + t) * t⁻¹) =
+      ∫ t in (67/50 : ℝ)..(11/5 : ℝ), log (t + 1) / t := by
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    have h1 : (1 + t : ℝ) = t + 1 := by ring
+    rw [h1]
+    ring
+  rw [hint] at h
+  have hc2 := c6_log_277
+  have hba := c6_log_110_67
+  have hprod : (1.018847320199198 : ℝ) * (0.4957877464014501 : ℝ) ≤
+      log (277/100 : ℝ) * log (110/67 : ℝ) :=
+    mul_le_mul hc2.1 hba.1 (by norm_num : (0 : ℝ) ≤ (0.4957877464014501 : ℝ))
+      (by linarith [hc2.1] : (0 : ℝ) ≤ log (277/100))
+  linarith [h, hprod, hc2.1, hba.1, hba.2]
+
+set_option maxHeartbeats 2000000 in
+/-- `∫_{803/700}^{67/50} log (117/50 - t)/(2t)` from above: alternating series around
+`1741/1400`, ratio `27/307`, 16 terms. -/
+theorem c6_int_log_affine :
+    (∫ t in (803/700 : ℝ)..(67/50 : ℝ), log ((117/50 : ℝ) - t) / (2 * t)) ≤
+      (0.00722932227751 : ℝ) := by
+  have hxr : ∀ t ∈ Set.Icc (803/700 : ℝ) (67/50),
+      |(t - 1741/1400) / ((117/50 : ℝ) - 1741/1400)| ≤ 27/307 := by
+    intro t ht
+    have h1 : |t - (1741/1400 : ℝ)| ≤ 27/280 := by
+      rw [abs_le]
+      constructor <;> linarith [ht.1, ht.2]
+    rw [abs_div, abs_of_pos (by norm_num : (0 : ℝ) < 117/50 - 1741/1400)]
+    rw [div_le_div_iff₀ (by norm_num : (0 : ℝ) < 117/50 - 1741/1400)
+      (by norm_num : (0 : ℝ) < 307)]
+    nlinarith [h1]
+  have h := integral_log_affine_upper (a := (803/700 : ℝ)) (b := (67/50 : ℝ))
+    (al := (117/50 : ℝ)) (m := (1741/1400 : ℝ)) (r := (27/307 : ℝ)) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) hxr 16
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
+  simp only [integral_pow_sub_div (a := (803/700 : ℝ)) (b := (67/50 : ℝ))
+    (by norm_num) (by norm_num)] at h
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
+  norm_num [Nat.choose] at h
+  have h1 := c6_log_307_280
+  have h2 := c6_log_938_803
+  have hprod : log (307/280) * log (938/803) ≤
+      (0.092058144417948 : ℝ) * (0.1553952350594631 : ℝ) :=
+    mul_le_mul h1.2 h2.2 (by linarith [h2.1] : (0 : ℝ) ≤ log (938/803))
+      (by norm_num : (0 : ℝ) ≤ (0.092058144417948 : ℝ))
+  nlinarith [h, h2.1, h2.2, hprod]
+
+/-- The middle window of row 6, split into `log (t+1)`, `log (9/5)` and `log (117/50 - t)`. -/
+theorem c6_J3_eq :
+    (∫ t in (803/700 : ℝ)..(67/50 : ℝ),
+        log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t)) =
+      (1/2) * (∫ t in (803/700 : ℝ)..(67/50 : ℝ), log (t + 1) / t) -
+        (1/2) * log (9/5) * log (938/803) -
+        (∫ t in (803/700 : ℝ)..(67/50 : ℝ), log (117/50 - t) / (2 * t)) := by
+  have hI1 : IntervalIntegrable (fun t : ℝ => log (t + 1) / t) volume (803/700 : ℝ) (67/50 : ℝ) :=
+    log_succ_div_integrable_exp (by norm_num) (by norm_num)
+  have hI2 : IntervalIntegrable (fun t : ℝ => 1 / t) volume (803/700 : ℝ) (67/50 : ℝ) :=
+    inv_integrable_exp (by norm_num) (by norm_num)
+  have hI3 : IntervalIntegrable (fun t : ℝ => log (117/50 - t) / (2 * t)) volume
+      (803/700 : ℝ) (67/50 : ℝ) := by
+    refine ContinuousOn.intervalIntegrable ?_
+    rw [uIcc_of_le (by norm_num)]
+    refine ContinuousOn.div ?_ ?_ ?_
+    · refine Real.continuousOn_log.comp ?_ ?_
+      · exact continuousOn_const.sub continuousOn_id
+      · intro t ht
+        have h2 : (0 : ℝ) < 117/50 - t := by linarith [ht.2]
+        exact ne_of_gt h2
+    · exact continuousOn_const.mul continuousOn_id
+    · intro t ht
+      have h2 : (0 : ℝ) < t := by linarith [ht.1]
+      exact ne_of_gt (by positivity)
+  have hpt : ∀ t ∈ uIcc (803/700 : ℝ) (67/50),
+      log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t) =
+        (1/2) * (log (t + 1) / t) - (1/2) * log (9/5) * (1 / t) -
+          log (117/50 - t) / (2 * t) := by
+    intro t ht
+    rw [uIcc_of_le (by norm_num)] at ht
+    have h1 : (0 : ℝ) < t + 1 := by linarith [ht.1]
+    have h3 : (0 : ℝ) < 117/50 - t := by linarith [ht.2]
+    have hden : ((9/5) * (117/50 - t) : ℝ) ≠ 0 := by positivity
+    rw [Real.log_div (ne_of_gt h1) hden,
+      Real.log_mul (by norm_num : (9/5 : ℝ) ≠ 0) (ne_of_gt h3)]
+    field_simp
+    ring
+  rw [intervalIntegral.integral_congr hpt]
+  rw [intervalIntegral.integral_sub
+      ((hI1.const_mul (1/2)).sub (hI2.const_mul (1/2 * log (9/5)))) hI3]
+  rw [intervalIntegral.integral_sub (hI1.const_mul (1/2)) (hI2.const_mul (1/2 * log (9/5)))]
+  rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
+    integral_one_div_exp (by norm_num) (by norm_num)]
+  rw [show ((67/50 : ℝ) / (803/700)) = (938/803 : ℝ) by norm_num]
+
+/-- The upper window of row 6, split into `log (t+1)` and `log (1053/250)`. -/
+theorem c6_J2_eq :
+    (∫ t in (67/50 : ℝ)..(11/5 : ℝ), log ((t + 1) ^ 2 / (1053/250)) / (2 * t)) =
+      (∫ t in (67/50 : ℝ)..(11/5 : ℝ), log (t + 1) / t) -
+        (1/2) * log (1053/250) * log (110/67) := by
+  have hI1 : IntervalIntegrable (fun t : ℝ => log (t + 1) / t) volume (67/50 : ℝ) (11/5 : ℝ) :=
+    log_succ_div_integrable_exp (by norm_num) (by norm_num)
+  have hI2 : IntervalIntegrable (fun t : ℝ => 1 / t) volume (67/50 : ℝ) (11/5 : ℝ) :=
+    inv_integrable_exp (by norm_num) (by norm_num)
+  have hpt : ∀ t ∈ uIcc (67/50 : ℝ) (11/5),
+      log ((t + 1) ^ 2 / (1053/250)) / (2 * t) =
+        log (t + 1) / t - (1/2) * log (1053/250) * (1 / t) := by
+    intro t ht
+    rw [uIcc_of_le (by norm_num)] at ht
+    have h1 : (0 : ℝ) < t + 1 := by linarith [ht.1]
+    have hnum : ((t + 1) ^ 2 : ℝ) ≠ 0 := by positivity
+    rw [Real.log_div hnum (by norm_num : (1053/250 : ℝ) ≠ 0), Real.log_pow]
+    push_cast
+    field_simp
+  rw [intervalIntegral.integral_congr hpt]
+  rw [intervalIntegral.integral_sub hI1 (hI2.const_mul (1/2 * log (1053/250)))]
+  rw [intervalIntegral.integral_const_mul,
+    integral_one_div_exp (by norm_num) (by norm_num)]
+  rw [show ((11/5 : ℝ) / (67/50)) = (110/67 : ℝ) by norm_num]
+
+/-- On `(1, 11/5)` the row-6 kernel is the `sigma0` term plus its two windows. -/
+theorem c6_xi1_eq {t : ℝ} (ht : t ∈ Set.uIoo (1 : ℝ) (11/5)) :
+    Wu04Functional.Xi1 (14/5) (167/50) t =
+      log (4000/1053) * (Wu04Integral.sigma0 t / (2 * t)) +
+        Wu04Functional.ind (67/50) 3 t * (log ((t + 1) ^ 2 / (1053/250)) / (2 * t)) +
+        Wu04Functional.ind (803/700) (67/50) t *
+          (log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t)) := by
+  rw [Set.uIoo, min_eq_left (by norm_num : (1 : ℝ) ≤ 11/5),
+    max_eq_right (by norm_num : (1 : ℝ) ≤ 11/5)] at ht
+  unfold Wu04Functional.Xi1
+  have hA : ((14/5 : ℝ) - 1) * (167/50 - 1) = 1053/250 := by norm_num
+  have hB : (16 : ℝ) / (1053/250) = 4000/1053 := by norm_num
+  have hC : (167/50 : ℝ) - 2 = 67/50 := by norm_num
+  have hD : (167/50 : ℝ) - 167/50/(14/5) - 1 = 803/700 := by norm_num
+  have hE : (14/5 : ℝ) - 1 = 9/5 := by norm_num
+  have hF : (167/50 : ℝ) - 1 = 117/50 := by norm_num
+  rw [hA, hB, hC, hD, hE, hF]
+  ring
+
+/-- `integralMatrix 6 0` is the `Xi1 (14/5) (167/50)` quadrature on `[1, 11/5]`. -/
+theorem integralMatrix_6_0_eq :
+    Wu04Table.integralMatrix 6 0 =
+      ∫ t in (1 : ℝ)..(11/5 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t := by
+  simp only [Wu04Table.integralMatrix, Wu04Table.tableKernel, Wu04Functional.grid,
+    Wu04Functional.tableSp]
+  norm_num
+
+/-- **`entry_6_0` of Wu's Section 7 matrix**, certified on the `[1, 11/5]` panel. -/
+theorem c6_entry_6_0_leaf :
+    (Wu04Table.candidateMatrixQ 6 0 : ℝ) ≤ Wu04Table.integralMatrix 6 0 := by
+  have hc : (Wu04Table.candidateMatrixQ 6 0 : ℝ) = 1649911 / 10^7 := by
+    norm_num [Wu04Table.candidateMatrixQ]
+  rw [hc, integralMatrix_6_0_eq]
+  have hS1 : ∀ t ∈ Set.uIoo (1 : ℝ) (803/700),
+      log (4000/1053) * (Wu04Integral.sigma0 t / (2 * t)) =
+        Wu04Functional.Xi1 (14/5) (167/50) t := by
+    intro t ht
+    rw [Set.uIoo, min_eq_left (by norm_num : (1 : ℝ) ≤ 803/700),
+      max_eq_right (by norm_num : (1 : ℝ) ≤ 803/700)] at ht
+    have ht' : t ∈ Set.uIoo (1 : ℝ) (11/5) := by
+      rw [Set.uIoo, min_eq_left (by norm_num : (1 : ℝ) ≤ 11/5),
+        max_eq_right (by norm_num : (1 : ℝ) ≤ 11/5)]
+      exact ⟨ht.1, by linarith [ht.2]⟩
+    rw [c6_xi1_eq ht']
+    have e1 : Wu04Functional.ind (67/50) 3 t = 0 := by
+      unfold Wu04Functional.ind
+      exact if_neg (by rintro ⟨h1, -⟩; linarith [ht.2])
+    have e2 : Wu04Functional.ind (803/700) (67/50) t = 0 := by
+      unfold Wu04Functional.ind
+      exact if_neg (by rintro ⟨h1, -⟩; linarith [ht.2])
+    rw [e1, e2]
+    ring
+  have hS2 : ∀ t ∈ Set.uIoo (803/700 : ℝ) (67/50),
+      (log (4000/1053) * (Wu04Integral.sigma0 t / (2 * t)) +
+          log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t)) =
+        Wu04Functional.Xi1 (14/5) (167/50) t := by
+    intro t ht
+    rw [Set.uIoo, min_eq_left (by norm_num : (803/700 : ℝ) ≤ 67/50),
+      max_eq_right (by norm_num : (803/700 : ℝ) ≤ 67/50)] at ht
+    have ht' : t ∈ Set.uIoo (1 : ℝ) (11/5) := by
+      rw [Set.uIoo, min_eq_left (by norm_num : (1 : ℝ) ≤ 11/5),
+        max_eq_right (by norm_num : (1 : ℝ) ≤ 11/5)]
+      exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
+    rw [c6_xi1_eq ht']
+    have e1 : Wu04Functional.ind (67/50) 3 t = 0 := by
+      unfold Wu04Functional.ind
+      exact if_neg (by rintro ⟨h1, -⟩; linarith [ht.2])
+    have e2 : Wu04Functional.ind (803/700) (67/50) t = 1 := by
+      unfold Wu04Functional.ind
+      exact if_pos ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+    rw [e1, e2]
+    ring
+  have hS3 : ∀ t ∈ Set.uIoo (67/50 : ℝ) (11/5),
+      (log (4000/1053) * (Wu04Integral.sigma0 t / (2 * t)) +
+          log ((t + 1) ^ 2 / (1053/250)) / (2 * t)) =
+        Wu04Functional.Xi1 (14/5) (167/50) t := by
+    intro t ht
+    rw [Set.uIoo, min_eq_left (by norm_num : (67/50 : ℝ) ≤ 11/5),
+      max_eq_right (by norm_num : (67/50 : ℝ) ≤ 11/5)] at ht
+    have ht' : t ∈ Set.uIoo (1 : ℝ) (11/5) := by
+      rw [Set.uIoo, min_eq_left (by norm_num : (1 : ℝ) ≤ 11/5),
+        max_eq_right (by norm_num : (1 : ℝ) ≤ 11/5)]
+      exact ⟨by linarith [ht.1], ht.2⟩
+    rw [c6_xi1_eq ht']
+    have e1 : Wu04Functional.ind (67/50) 3 t = 1 := by
+      unfold Wu04Functional.ind
+      exact if_pos ⟨le_of_lt ht.1, by linarith [ht.2]⟩
+    have e2 : Wu04Functional.ind (803/700) (67/50) t = 0 := by
+      unfold Wu04Functional.ind
+      exact if_neg (by rintro ⟨-, h2⟩; linarith [ht.1])
+    rw [e1, e2]
+    ring
+  have hI1 : IntervalIntegrable (fun t : ℝ => Wu04Functional.Xi1 (14/5) (167/50) t) volume
+      (1 : ℝ) (803/700) :=
+    ((sigma0_div_two_integrable_Icc (a := (1 : ℝ)) (b := (803/700 : ℝ)) (by norm_num)
+      (by norm_num) (by norm_num)).const_mul (log (4000/1053))).congr_uIoo hS1
+  have hJ3int : IntervalIntegrable (fun t : ℝ => log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t))
+      volume (803/700 : ℝ) (67/50) := by
+    refine ContinuousOn.intervalIntegrable ?_
+    rw [uIcc_of_le (by norm_num)]
+    refine ContinuousOn.div ?_ ?_ ?_
+    · refine Real.continuousOn_log.comp ?_ ?_
+      · refine ContinuousOn.div (continuousOn_id.add continuousOn_const) ?_ ?_
+        · exact continuousOn_const.mul (continuousOn_const.sub continuousOn_id)
+        · intro t ht
+          have h4 : (0 : ℝ) < 117/50 - t := by linarith [ht.2]
+          exact ne_of_gt (by positivity)
+      · intro t ht
+        have h5 : (0 : ℝ) < t + 1 := by linarith [ht.1]
+        have h6 : (0 : ℝ) < 117/50 - t := by linarith [ht.2]
+        exact ne_of_gt (by positivity)
+    · exact continuousOn_const.mul continuousOn_id
+    · intro t ht
+      have h5 : (0 : ℝ) < t := by linarith [ht.1]
+      exact ne_of_gt (by positivity)
+  have hJ2int : IntervalIntegrable (fun t : ℝ => log ((t + 1) ^ 2 / (1053/250)) / (2 * t))
+      volume (67/50 : ℝ) (11/5) := by
+    refine ContinuousOn.intervalIntegrable ?_
+    rw [uIcc_of_le (by norm_num)]
+    refine ContinuousOn.div ?_ ?_ ?_
+    · refine Real.continuousOn_log.comp ?_ ?_
+      · exact (continuousOn_id.add continuousOn_const).pow 2 |>.div_const (1053/250)
+      · intro t ht
+        have h5 : (0 : ℝ) < t + 1 := by linarith [ht.1]
+        exact ne_of_gt (by positivity)
+    · exact continuousOn_const.mul continuousOn_id
+    · intro t ht
+      have h5 : (0 : ℝ) < t := by linarith [ht.1]
+      exact ne_of_gt (by positivity)
+  have hI2 : IntervalIntegrable (fun t : ℝ => Wu04Functional.Xi1 (14/5) (167/50) t) volume
+      (803/700 : ℝ) (67/50) :=
+    (((sigma0_div_two_integrable_Icc (a := (803/700 : ℝ)) (b := (67/50 : ℝ)) (by norm_num)
+      (by norm_num) (by norm_num)).const_mul (log (4000/1053))).add hJ3int).congr_uIoo hS2
+  have hI3 : IntervalIntegrable (fun t : ℝ => Wu04Functional.Xi1 (14/5) (167/50) t) volume
+      (67/50 : ℝ) (11/5) :=
+    (((sigma0_div_two_integrable_Icc (a := (67/50 : ℝ)) (b := (11/5 : ℝ)) (by norm_num)
+      (by norm_num) (by norm_num)).const_mul (log (4000/1053))).add hJ2int).congr_uIoo hS3
+  have hsplit : (∫ t in (1 : ℝ)..(11/5 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t) =
+      (∫ t in (1 : ℝ)..(803/700 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t) +
+        (∫ t in (803/700 : ℝ)..(67/50 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t) +
+        (∫ t in (67/50 : ℝ)..(11/5 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t) := by
+    have h12 := intervalIntegral.integral_add_adjacent_intervals hI1 hI2
+    have hI12 : IntervalIntegrable (fun t : ℝ => Wu04Functional.Xi1 (14/5) (167/50) t) volume
+        (1 : ℝ) (67/50) := hI1.trans hI2
+    have h123 := intervalIntegral.integral_add_adjacent_intervals hI12 hI3
+    linarith [h12, h123]
+  have e1 : (∫ t in (1 : ℝ)..(803/700 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t) =
+      log (4000/1053) * (∫ t in (1 : ℝ)..(803/700 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    rw [intervalIntegral.integral_congr_uIoo (f := fun t : ℝ =>
+        Wu04Functional.Xi1 (14/5) (167/50) t)
+      (g := fun t : ℝ => log (4000/1053) * (Wu04Integral.sigma0 t / (2 * t)))
+      (fun t ht => (hS1 t ht).symm)]
+    rw [intervalIntegral.integral_const_mul]
+  have e2 : (∫ t in (803/700 : ℝ)..(67/50 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t) =
+      log (4000/1053) * (∫ t in (803/700 : ℝ)..(67/50 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        (∫ t in (803/700 : ℝ)..(67/50 : ℝ),
+          log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t)) := by
+    rw [intervalIntegral.integral_congr_uIoo (f := fun t : ℝ =>
+        Wu04Functional.Xi1 (14/5) (167/50) t)
+      (g := fun t : ℝ => log (4000/1053) * (Wu04Integral.sigma0 t / (2 * t)) +
+        log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t))
+      (fun t ht => (hS2 t ht).symm)]
+    rw [intervalIntegral.integral_add
+      ((sigma0_div_two_integrable_Icc (a := (803/700 : ℝ)) (b := (67/50 : ℝ)) (by norm_num)
+        (by norm_num) (by norm_num)).const_mul (log (4000/1053))) hJ3int]
+    rw [intervalIntegral.integral_const_mul]
+  have e3 : (∫ t in (67/50 : ℝ)..(11/5 : ℝ), Wu04Functional.Xi1 (14/5) (167/50) t) =
+      log (4000/1053) * (∫ t in (67/50 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        (∫ t in (67/50 : ℝ)..(11/5 : ℝ), log ((t + 1) ^ 2 / (1053/250)) / (2 * t)) := by
+    rw [intervalIntegral.integral_congr_uIoo (f := fun t : ℝ =>
+        Wu04Functional.Xi1 (14/5) (167/50) t)
+      (g := fun t : ℝ => log (4000/1053) * (Wu04Integral.sigma0 t / (2 * t)) +
+        log ((t + 1) ^ 2 / (1053/250)) / (2 * t))
+      (fun t ht => (hS3 t ht).symm)]
+    rw [intervalIntegral.integral_add
+      ((sigma0_div_two_integrable_Icc (a := (67/50 : ℝ)) (b := (11/5 : ℝ)) (by norm_num)
+        (by norm_num) (by norm_num)).const_mul (log (4000/1053))) hJ2int]
+    rw [intervalIntegral.integral_const_mul]
+  rw [hsplit, e1, e2, e3]
+  have hs12 := intervalIntegral.integral_add_adjacent_intervals
+    (sigma0_div_two_integrable_Icc (a := (1 : ℝ)) (b := (803/700 : ℝ)) (by norm_num)
+      (by norm_num) (by norm_num))
+    (sigma0_div_two_integrable_Icc (a := (803/700 : ℝ)) (b := (67/50 : ℝ)) (by norm_num)
+      (by norm_num) (by norm_num))
+  have hs123 := intervalIntegral.integral_add_adjacent_intervals
+    ((sigma0_div_two_integrable_Icc (a := (1 : ℝ)) (b := (803/700 : ℝ)) (by norm_num)
+      (by norm_num) (by norm_num)).trans
+      (sigma0_div_two_integrable_Icc (a := (803/700 : ℝ)) (b := (67/50 : ℝ)) (by norm_num)
+        (by norm_num) (by norm_num)))
+    (sigma0_div_two_integrable_Icc (a := (67/50 : ℝ)) (b := (11/5 : ℝ)) (by norm_num)
+      (by norm_num) (by norm_num))
+  have hsig_all : log (4000/1053) * (∫ t in (1 : ℝ)..(803/700 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+      log (4000/1053) * (∫ t in (803/700 : ℝ)..(67/50 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+      log (4000/1053) * (∫ t in (67/50 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+      log (4000/1053) * (∫ t in (1 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    have hfac : log (4000/1053) *
+          (∫ t in (1 : ℝ)..(803/700 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        log (4000/1053) *
+          (∫ t in (803/700 : ℝ)..(67/50 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        log (4000/1053) *
+          (∫ t in (67/50 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+        log (4000/1053) *
+          ((∫ t in (1 : ℝ)..(803/700 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+            (∫ t in (803/700 : ℝ)..(67/50 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+            (∫ t in (67/50 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t))) := by
+      ring
+    have hsum : (∫ t in (1 : ℝ)..(803/700 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        (∫ t in (803/700 : ℝ)..(67/50 : ℝ), Wu04Integral.sigma0 t / (2 * t)) +
+        (∫ t in (67/50 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t)) =
+        (∫ t in (1 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t)) :=
+      by linarith [hs12, hs123]
+    rw [hfac, hsum]
+  have hsig := b9_I_sigma
+  have hc6 := c6_log_c_lo
+  have hmul : (1.3346511279282 : ℝ) * (223918324286684761/20000000000000000000) ≤
+      log (4000/1053 : ℝ) *
+        (∫ t in (1 : ℝ)..(11/5 : ℝ), Wu04Integral.sigma0 t / (2 * t)) := by
+    refine mul_le_mul hc6 hsig (by norm_num) ?_
+    linarith [hc6]
+  have hJ3 : (0.0097756298139 : ℝ) ≤
+      ∫ t in (803/700 : ℝ)..(67/50 : ℝ),
+        log ((t + 1) / ((9/5) * (117/50 - t))) / (2 * t) := by
+    rw [c6_J3_eq]
+    have hL := c6_L1_lower
+    have hU := c6_int_log_affine
+    have h95 := c6_log_9_5_hi
+    have hba := c6_log_938_803
+    have hprod : log (9/5 : ℝ) * log (938/803 : ℝ) ≤
+        (0.5877866649021194 : ℝ) * (0.1553952350594631 : ℝ) :=
+      mul_le_mul h95 hba.2 (by linarith [hba.1] : (0 : ℝ) ≤ log (938/803)) (by norm_num)
+    linarith [hL, hU, hprod]
+  have hJ2 : (0.1402728683504 : ℝ) ≤
+      ∫ t in (67/50 : ℝ)..(11/5 : ℝ), log ((t + 1) ^ 2 / (1053/250)) / (2 * t) := by
+    rw [c6_J2_eq]
+    have hL := c6_L2_lower
+    have hP : log (1053/250 : ℝ) ≤ (1.43793759427174 : ℝ) := by
+      have h1 := c6_log_9_5_hi
+      have h2 := c6_log_117_50_hi
+      have hm : log (1053/250 : ℝ) = log (9/5) + log (117/50) := by
+        rw [← Real.log_mul (by norm_num : (9/5 : ℝ) ≠ 0) (by norm_num : (117/50 : ℝ) ≠ 0)]
+        norm_num
+      rw [hm]
+      linarith [h1, h2]
+    have h110 := c6_log_110_67
+    have hprod : log (1053/250 : ℝ) * log (110/67 : ℝ) ≤
+        (1.43793759427174 : ℝ) * (0.4957877464014502 : ℝ) :=
+      mul_le_mul hP h110.2 (by linarith [h110.1] : (0 : ℝ) ≤ log (110/67)) (by norm_num)
+    linarith [hL, hprod]
+  linarith [hmul, hJ3, hJ2, hsig_all]
+
 end LeanLab.ChenDoubleSieve.Burst9MatrixCol0
 
 #print axioms LeanLab.ChenDoubleSieve.Burst9MatrixCol0.c4_entry_4_0_leaf
 #print axioms LeanLab.ChenDoubleSieve.Burst9MatrixCol0.c8_entry_8_0_leaf
+#print axioms LeanLab.ChenDoubleSieve.Burst9MatrixCol0.c6_entry_6_0_leaf
