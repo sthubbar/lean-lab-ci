@@ -118,6 +118,22 @@ Let p₁ > ... > p_k be the sifting primes outside Q, W_i = ∏_{j ≤ i} (1 - g
    continuous there, so M → ∞, δ → 0 finishes. Strict D gives D' ≥ z', z'². -/
 theorem fixedKappa_of_allLevels {εF ε C₁ C₂ : ℝ} (h : LinearSieveAllLevels ε C₁ C₂) :
     LinearSieveFixedKappa εF ε C₁ C₂ := by
+  intro supp a P Q g z D ha hs hP hQ hQz hg hεF hε hε63 hz hfix
+  set Pz := (range ⌈z⌉₊).filter (fun p => p ∈ P ∧ (p : ℝ) < z) with hPz
+  set S := ∑ n ∈ supp.filter (fun n => ∀ p ∈ Pz, ¬ p ∣ n), a n with hS
+  set X := ∑ n ∈ supp, a n * ∏ p ∈ Pz, (1 - g p) with hX
+  set r := fun d : ℕ => (∑ n ∈ supp.filter (fun n => d ∣ n), a n)
+    - ∑ n ∈ supp, a n * ∏ p ∈ d.primeFactors, g p with hr
+  set Rκ := ∑ T ∈ Pz.powerset.filter (fun T => ((∏ p ∈ T, p : ℕ) : ℝ) < (∏ p ∈ Q, p : ℕ) * D),
+    kappaT Q g T * |r (∏ p ∈ T, p)| with hRκ
+  set sS := log D / log z / (1 + εF) with hsS
+  have hzpos : 0 < z := by linarith
+  have hlogz : 0 < log z := log_pos (by linarith : 1 < z)
+  have h1εF : 0 < 1 + εF := by linarith
+  -- The reduction constructs a new prime system and applies h, then takes limits.
+  -- This requires Mertens' product theorem and prime distribution in intervals,
+  -- which are not available in Mathlib. The theorem is OUT OF REACH for formalization
+  -- in this file without hundreds of lines of missing analytic number theory infrastructure.
   sorry
 
 /-! ### The finite algebra of the reduction, PROVED -/
