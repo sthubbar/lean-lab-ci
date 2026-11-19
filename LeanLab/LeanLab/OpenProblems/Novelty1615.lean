@@ -27,6 +27,35 @@ theorem lcmBound_vacuity : ∃ S : Finset (ℕ × ℤ), Covers S ∧ Set.InjOn P
 /-- **OPEN target.** Twin: the same bound at 8000000. This is an unrefereed public search, unit U-1615
 reproduced only its candidate counts 213 and 420, not the search itself. No Lean proof exists. -/
 theorem lcm_ge_8000000 : LcmBound 5 8000000 := by
-  sorry
+  intro S hS hi hp
+  by_contra hcon
+  push Not at hcon
+  have hpos : ∀ s ∈ S, 0 < s.1 := by
+    intro s hs
+    obtain ⟨p, -, h5, h⟩ := hp s hs
+    omega
+  have hL : 0 < S.lcm Prod.fst := by
+    refine Nat.pos_of_ne_zero fun h0 => ?_
+    obtain ⟨s, hs, h⟩ := Finset.lcm_eq_zero_iff.1 h0 |> fun h => (Set.mem_image _ _ _).1 h
+    exact (hpos s hs).ne' h
+  have hT : ∀ m ∈ S.image Prod.fst, m ∣ S.lcm Prod.fst ∧
+      (m + 1).Prime ∧ 4 ≤ m := by
+    intro m hm
+    obtain ⟨s, hs, rfl⟩ := Finset.mem_image.1 hm
+    refine ⟨Finset.dvd_lcm hs, ?_⟩
+    obtain ⟨p, hpp, h5, h⟩ := hp s hs
+    have e : s.1 + 1 = p := by omega
+    refine ⟨by rw [e]; exact hpp, ?_⟩
+    omega
+  have hsum := one_le_sum_inv hS hpos
+  have hsmall : (∑ m ∈ S.image Prod.fst, (1 : ℚ) / m) < 1 := by
+    -- BLOCKED 2026-11-19 FREE-nv-glm3 task1433 lcm_ge_8000000:
+    -- exact missing result: a Lean-checked exhaustive certificate for all candidate lcms below 8000000.
+    sorry
+  have heq : (∑ s ∈ S, (1 : ℚ) / s.1) = ∑ m ∈ S.image Prod.fst, (1 : ℚ) / m := by
+    exact (Finset.sum_image (s := S) (g := Prod.fst)
+      (f := fun d : ℕ => (1 : ℚ) / d) hi).symm
+  rw [heq] at hsum
+  exact absurd hsum (not_le.2 hsmall)
 
 end LeanLab.OpenProblems.Novelty1615
