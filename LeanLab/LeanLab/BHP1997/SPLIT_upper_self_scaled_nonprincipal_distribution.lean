@@ -2235,6 +2235,7 @@ private lemma upperH_self_bound {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 
           _ ≤ max (96 * C0) 4 * (Y * Real.log Y ^ (-A)) := mul_le_mul_of_nonneg_right h4 h6
           _ = max (96 * C0) 4 * Y * Real.log Y ^ (-A) := by ring
 
+
 /-- The `j` term of one outer prime factor, reindexed by the cofactor: the inner `p2`-sum is carried
 along, and after `m = p1 * n` its window is the window at the level `p1 * n` with the fixed upper end
 `p2 < p1`. -/
@@ -3322,7 +3323,7 @@ private lemma pair_inv_sum_le (K : ℕ) :
         = ((K : ℝ) / (p1 : ℝ)) *
             ∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime, (1 : ℝ) / (p2 : ℝ) := by
       rw [Finset.mul_sum]
-      refine Finset.sum_congr rfl fun p2 _ => by ring
+      try refine Finset.sum_congr rfl fun p2 _ => by ring
     have h4 : (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime, (1 : ℝ) / (p2 : ℝ))
         ≤ 1 + Real.log (K : ℝ) := by
       have hsub : (Finset.Icc 2 (K / p1)).filter Nat.Prime ⊆ (Finset.Icc 2 K).filter Nat.Prime := by
@@ -3351,7 +3352,7 @@ private lemma pair_inv_sum_le (K : ℕ) :
     have h6 : (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, ((K : ℝ) / (p1 : ℝ)))
         = (K : ℝ) * ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ) := by
       rw [Finset.mul_sum]
-      refine Finset.sum_congr rfl fun p1 _ => by ring
+      try refine Finset.sum_congr rfl fun p1 _ => by ring
     have h7 : (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ))
         ≤ 1 + Real.log (K : ℝ) := prime_inv_sum_le K
     calc (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
@@ -3929,6 +3930,2108 @@ private lemma kept_triple_le {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8
     have hL6 : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) :=
       Real.rpow_nonneg (le_of_lt (Real.log_pos (by linarith))) (-(A + 6))
     exact mul_nonneg (by norm_num) (mul_nonneg (mul_nonneg hC0 (by positivity)) hL6)
+
+
+/-- The page 53 window of one `kept` triple, read as an integer interval in the cofactor: the level
+`(d k) ^ c1` against the third prime gives the upper end, and the middle test against the first prime
+gives the lower end, the level test against the first prime being implied because `p3 ≤ p1`. -/
+private lemma filter_window_general {ε : ℝ} (hε8 : ε ≤ 1 / 10 ^ 8) {d plo phi a b : ℕ}
+    (hd : 1 ≤ d) (hphi : 1 ≤ phi) (hle : phi ≤ plo) :
+    (Finset.Ioc a b).filter
+        (fun k : ℕ => ((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (plo : ℝ) ∧
+          (plo : ℝ) < ((d : ℝ) * (k : ℝ)) ^ upperC4 ε ∧
+          ((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (phi : ℝ)) =
+      Finset.Ioc (max a ⌊(plo : ℝ) ^ (1 / upperC4 ε) / (d : ℝ)⌋₊)
+        (min b ⌊(phi : ℝ) ^ (1 / upperC1 ε) / (d : ℝ)⌋₊) := by
+  have hc1 : 0 < upperC1 ε := upperC1_pos hε8
+  have hc4 : 0 < upperC4 ε := upperC4_pos hε8
+  have hdR : (0 : ℝ) < (d : ℝ) := by exact_mod_cast (by omega : 0 < d)
+  have hphiR : (0 : ℝ) < (phi : ℝ) := by exact_mod_cast (by omega : 0 < phi)
+  have hpred : ∀ k : ℕ,
+      (((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (plo : ℝ) ∧
+          (plo : ℝ) < ((d : ℝ) * (k : ℝ)) ^ upperC4 ε ∧
+          ((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (phi : ℝ)) ↔
+        (k ≤ ⌊(phi : ℝ) ^ (1 / upperC1 ε) / (d : ℝ)⌋₊ ∧
+          ⌊(plo : ℝ) ^ (1 / upperC4 ε) / (d : ℝ)⌋₊ < k) := by
+    intro k
+    rcases Nat.eq_zero_or_pos k with h0 | hpos
+    · subst h0
+      have hz : ((d : ℝ) * ((0 : ℕ) : ℝ)) = 0 := by
+        rw [Nat.cast_zero, mul_zero]
+      have hzc4 : ((d : ℝ) * ((0 : ℕ) : ℝ)) ^ upperC4 ε = 0 := by
+        rw [hz, Real.zero_rpow hc4.ne']
+      have hzc1 : ((d : ℝ) * ((0 : ℕ) : ℝ)) ^ upperC1 ε = 0 := by
+        rw [hz, Real.zero_rpow hc1.ne']
+      constructor
+      · rintro ⟨-, h2, -⟩
+        rw [hzc4] at h2
+        exact absurd h2 (by linarith)
+      · rintro ⟨-, h2⟩
+        rw [hzc1] at *
+        exact absurd h2 (by omega)
+    · have hiff4 := peel_level_iff (c := upperC4 ε) hc4 (d := d) (p := plo) (n := k) hd hpos
+      have hC : ((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (phi : ℝ) ↔
+          k ≤ (phi : ℝ) ^ (1 / upperC1 ε) / (d : ℝ) := by
+        have h1 := rpow_self_le_iff (cc := upperC1 ε) hc1
+          (x := (d : ℝ) * (k : ℝ)) (p := (phi : ℝ)) (by positivity) (by positivity)
+        rw [h1, le_div_iff₀ hdR]
+        constructor <;> intro h <;> nlinarith
+      have hq0 : (0 : ℝ) ≤ (phi : ℝ) ^ (1 / upperC1 ε) / (d : ℝ) := by positivity
+      have hp0 : (0 : ℝ) ≤ (plo : ℝ) ^ (1 / upperC4 ε) / (d : ℝ) := by positivity
+      constructor
+      · rintro ⟨-, hB', hC'⟩
+        exact ⟨(Nat.le_floor_iff hq0).mpr (hC.mp hC'), (Nat.floor_lt hp0).mpr (hiff4.mp hB')⟩
+      · rintro ⟨hq, hp⟩
+        have hC' : ((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (phi : ℝ) :=
+          hC.mpr ((Nat.le_floor_iff hq0).mp hq)
+        exact ⟨le_trans hC' (by exact_mod_cast hle),
+          hiff4.mpr ((Nat.floor_lt hp0).mp hp), hC'⟩
+  calc (Finset.Ioc a b).filter
+        (fun k : ℕ => ((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (plo : ℝ) ∧
+          (plo : ℝ) < ((d : ℝ) * (k : ℝ)) ^ upperC4 ε ∧
+          ((d : ℝ) * (k : ℝ)) ^ upperC1 ε ≤ (phi : ℝ))
+      = (Finset.Ioc a b).filter
+          (fun k : ℕ => k ≤ ⌊(phi : ℝ) ^ (1 / upperC1 ε) / (d : ℝ)⌋₊ ∧
+            ⌊(plo : ℝ) ^ (1 / upperC4 ε) / (d : ℝ)⌋₊ < k) := by
+        refine Finset.filter_congr fun k _ => ?_
+        exact hpred k
+    _ = Finset.Ioc (max a ⌊(plo : ℝ) ^ (1 / upperC4 ε) / (d : ℝ)⌋₊)
+          (min b ⌊(phi : ℝ) ^ (1 / upperC1 ε) / (d : ℝ)⌋₊) := filter_window_Ioc
+
+/-- Page 48 Lemma 33's region, with the two exponents written as `A/u` and `B/u` for a positive
+level `u`, is a conjunction of threshold conditions on `u` alone: the order `B ≤ A`, the two frozen
+exponent bounds, and one of the three paper alternatives.  This is the form in which the covering
+weight of the `kept` term becomes a function of the ambient level that changes only at finitely many
+thresholds. -/
+private lemma pair_region_iff {ε A B u : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8)
+    (hA : 0 < A) (hB : 0 < B) (hu : 0 < u) :
+    upperPairRegion ε (A / u) (B / u) ↔
+      (B ≤ A ∧ 2 * A ≤ u ∧ u ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) ∧
+        B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u ∧
+        (((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u ∧
+            A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u) ∨
+          ((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u ∧
+            u ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) ∨
+          ((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u ∧
+            u ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))))) := by
+  have hth : (0:ℝ) < 2 * (1 / 16 - 1 / 10 ^ 5) := by norm_num
+  have hc1 : (0:ℝ) < (1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε := by nlinarith
+  have hc2 : (0:ℝ) < (36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε := by nlinarith
+  have hd : (0:ℝ) < 2 * (1 / 16 - 1 / 10 ^ 5) - ε := by nlinarith
+  have hd2 : (0:ℝ) < 2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε) := by nlinarith
+  have hd2' : (0:ℝ) < 2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε) := by nlinarith
+  have hSA : (0:ℝ) < 4 * A + 3 * B := by linarith
+  have hSB : (0:ℝ) < 4 * A + B := by linarith
+  -- the eight clause reductions
+  have e1 : (B / u ≤ A / u) ↔ (B ≤ A) := by
+    rw [div_le_div_iff_of_pos_right hu]
+  have e2 : (A / u ≤ 1 / 2) ↔ (2 * A ≤ u) := by
+    rw [div_le_iff₀ hu]; constructor <;> intro h <;> linarith
+  have e3 : ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε ≤ B / u) ↔
+      (u ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε)) := by
+    rw [le_div_iff₀ hu, le_div_iff₀ hc1]; constructor <;> intro h <;> nlinarith
+  have e4 : (B / u ≤ (36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ↔
+      (B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u) := by
+    rw [div_le_iff₀ hu, div_le_iff₀ hc2]; constructor <;> intro h <;> nlinarith
+  have e6 : (A / u ≤ (36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ↔
+      (A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u) := by
+    rw [div_le_iff₀ hu, div_le_iff₀ hc2]; constructor <;> intro h <;> nlinarith
+  have e5 : (2 * (B / u) - (2 * (1 / 16 - 1 / 10 ^ 5)) + ε ≤ A / u) ↔
+      ((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u) := by
+    have hkey : 2 * (B / u) - (2 * (1 / 16 - 1 / 10 ^ 5)) + ε =
+        (2 * B - (2 * (1 / 16 - 1 / 10 ^ 5) - ε) * u) / u := by
+      field_simp; try ring
+    rw [hkey, div_le_div_iff_of_pos_right hu, div_le_iff₀ hd]
+    constructor <;> intro h <;> linarith
+  have e7 : (|4 * (A / u) + 3 * (B / u) - 2| ≤ 2 * (1 / 16 - 1 / 10 ^ 5) - ε) ↔
+      ((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u ∧
+        u ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) := by
+    have hkey : 4 * (A / u) + 3 * (B / u) - 2 =
+        (4 * A + 3 * B - 2 * u) / u := by
+      field_simp; try ring
+    rw [hkey, abs_le]
+    constructor
+    · rintro ⟨h1, h2⟩
+      rw [le_div_iff₀ hu] at h1
+      rw [div_le_iff₀ hu] at h2
+      constructor
+      · rw [div_le_iff₀ hd2']; nlinarith
+      · rw [le_div_iff₀ hd2]; nlinarith
+    · rintro ⟨h1, h2⟩
+      rw [div_le_iff₀ hd2'] at h1
+      rw [le_div_iff₀ hd2] at h2
+      constructor
+      · rw [le_div_iff₀ hu]; nlinarith
+      · rw [div_le_iff₀ hu]; nlinarith
+  have e8 : (|4 * (A / u) + (B / u) - 2| ≤ 2 * (1 / 16 - 1 / 10 ^ 5) - ε) ↔
+      ((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u ∧
+        u ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) := by
+    have hkey : 4 * (A / u) + (B / u) - 2 = (4 * A + B - 2 * u) / u := by
+      field_simp; try ring
+    rw [hkey, abs_le]
+    constructor
+    · rintro ⟨h1, h2⟩
+      rw [le_div_iff₀ hu] at h1
+      rw [div_le_iff₀ hu] at h2
+      constructor
+      · rw [div_le_iff₀ hd2']; nlinarith
+      · rw [le_div_iff₀ hd2]; nlinarith
+    · rintro ⟨h1, h2⟩
+      rw [div_le_iff₀ hd2'] at h1
+      rw [le_div_iff₀ hd2] at h2
+      constructor
+      · rw [le_div_iff₀ hu]; nlinarith
+      · rw [div_le_iff₀ hu]; nlinarith
+  unfold upperPairRegion
+  rw [e1, e2, e3, e4, e5, e6, e7, e8]
+
+
+
+/-- Summation by parts on `range`: the weighted sum is the top weight times the full sum minus the
+increments of the weight against the prefix sums. -/
+private lemma abel_range (w : ℕ → ℂ) (g : ℕ → ℂ) :
+    ∀ n : ℕ, (∑ i ∈ Finset.range (n + 1), w i * g i)
+      = w n * (∑ i ∈ Finset.range (n + 1), g i)
+        - ∑ i ∈ Finset.range n, (w (i + 1) - w i) * (∑ j ∈ Finset.range (i + 1), g j) := by
+  intro n
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have hL : (∑ i ∈ Finset.range (n + 1 + 1), w i * g i)
+        = (∑ i ∈ Finset.range (n + 1), w i * g i) + w (n + 1) * g (n + 1) := by
+      rw [Finset.sum_range_succ]
+    have hG : (∑ i ∈ Finset.range (n + 1 + 1), g i)
+        = (∑ i ∈ Finset.range (n + 1), g i) + g (n + 1) := by
+      rw [Finset.sum_range_succ]
+    have hD : (∑ i ∈ Finset.range (n + 1),
+          (w (i + 1) - w i) * (∑ j ∈ Finset.range (i + 1), g j))
+        = (∑ i ∈ Finset.range n, (w (i + 1) - w i) * (∑ j ∈ Finset.range (i + 1), g j))
+          + (w (n + 1) - w n) * (∑ j ∈ Finset.range (n + 1), g j) := by
+      rw [Finset.sum_range_succ]
+    rw [hL, hG, hD, ih]
+    ring
+
+/-- A `{0,1}` valued weight that only changes at the members of `C` has total variation at most the
+cardinality of `C`. -/
+private lemma variation_le {w : ℕ → ℂ} {C : Finset ℕ} (a b : ℕ)
+    (hw : ∀ j, w j = 0 ∨ w j = 1)
+    (hchange : ∀ j, a ≤ j → j + 1 ≤ b → w (j + 1) ≠ w j → (j + 1) ∈ C) :
+    ∑ j ∈ Finset.Ioc a (b - 1), ‖w (j + 1) - w j‖ ≤ (C.card : ℝ) := by
+  have hstep : ∀ j ∈ Finset.Ioc a (b - 1), ‖w (j + 1) - w j‖ ≤ (if (j + 1) ∈ C then (1:ℝ) else 0) := by
+    intro j hj
+    obtain ⟨haj, hjb⟩ := Finset.mem_Ioc.mp hj
+    by_cases hmem : (j + 1) ∈ C
+    · rw [if_pos hmem]
+      have h1 : w (j + 1) = 0 ∨ w (j + 1) = 1 := hw (j + 1)
+      have h2 : w j = 0 ∨ w j = 1 := hw j
+      rcases h1 with h1 | h1 <;> rcases h2 with h2 | h2 <;> simp [h1, h2]
+    · rw [if_neg hmem]
+      have heq : w (j + 1) = w j := by
+        by_contra hne
+        exact hmem (hchange j (le_of_lt haj) (by omega) hne)
+      simp [heq]
+  refine le_trans (Finset.sum_le_sum hstep) ?_
+  rw [Finset.sum_boole]
+  have hinj : ∀ j ∈ (Finset.Ioc a (b - 1)).filter (fun j => (j + 1) ∈ C),
+      ∀ k ∈ (Finset.Ioc a (b - 1)).filter (fun j => (j + 1) ∈ C), j + 1 = k + 1 → j = k := by
+    intro j _ k _ h; omega
+  have hcard := Finset.card_le_card_of_injOn
+    (s := (Finset.Ioc a (b - 1)).filter (fun j => (j + 1) ∈ C))
+    (t := C) (f := fun j : ℕ => j + 1) (fun j hj => (Finset.mem_filter.mp hj).2) hinj
+  exact_mod_cast hcard
+
+
+/-- An integer interval sum is a `range` sum of the shifted sequence. -/
+private lemma sum_Ioc_shift {β : Type*} [AddCommMonoid β] (f : ℕ → β) {a b : ℕ} (hab : a ≤ b) :
+    ∑ j ∈ Finset.Ioc a b, f j = ∑ i ∈ Finset.range (b - a), f (a + 1 + i) := by
+  have hset : Finset.Ioc a b = Finset.Ico (a + 1) (b + 1) := by
+    ext j; simp only [Finset.mem_Ioc, Finset.mem_Ico]; omega
+  rw [hset, Finset.sum_Ico_eq_sum_range]
+  have h1 : b + 1 - (a + 1) = b - a := by omega
+  rw [h1]
+
+/-- Summation by parts on an integer interval for a `{0,1}` weight: if every prefix sum of `g` over
+the interval is bounded by `M` and the total variation of `w` is at most `V`, then the weighted sum is
+bounded by `(V + 1) M`. -/
+private lemma abel_Ioc_bound {w g : ℕ → ℂ} {a b : ℕ} (hab : a ≤ b) {M V : ℝ}
+    (hM0 : 0 ≤ M) (hw : ∀ j, w j = 0 ∨ w j = 1)
+    (hM : ∀ k, a ≤ k → k ≤ b → ‖∑ j ∈ Finset.Ioc a k, g j‖ ≤ M)
+    (hvar : ∑ j ∈ Finset.Ioc a (b - 1), ‖w (j + 1) - w j‖ ≤ V) :
+    ‖∑ j ∈ Finset.Ioc a b, w j * g j‖ ≤ (V + 1) * M := by
+  set n : ℕ := b - a with hn
+  have hbn : b = a + n := by omega
+  have ha1 : a ≤ a + 1 := by omega
+  set W : ℕ → ℂ := fun i => w (a + 1 + i) with hW
+  set G : ℕ → ℂ := fun i => g (a + 1 + i) with hG
+  have hw1 : ∀ j, ‖w j‖ ≤ 1 := by
+    intro j
+    rcases hw j with h | h <;> simp [h]
+  have hpre_eq : ∀ i, (∑ j ∈ Finset.range (i + 1), G j) = ∑ j ∈ Finset.Ioc a (a + 1 + i), g j := by
+    intro i
+    have h := sum_Ioc_shift (fun j => g j) (a := a) (b := a + 1 + i) (by omega)
+    rw [h]
+    have hidx : a + 1 + i - a = i + 1 := by omega
+    rw [hidx]
+    try rfl
+  have hpre_bound : ∀ i, i < n → ‖∑ j ∈ Finset.range (i + 1), G j‖ ≤ M := by
+    intro i hi
+    rw [hpre_eq i]
+    exact hM (a + 1 + i) (by omega) (by omega)
+  have hfull_bound : ‖∑ i ∈ Finset.range n, G i‖ ≤ M := by
+    have h2 : (∑ i ∈ Finset.range n, G i) = ∑ j ∈ Finset.Ioc a (a + n), g j := by
+      have h := sum_Ioc_shift (fun j => g j) (a := a) (b := a + n) (by omega)
+      rw [h]
+      have hidx : a + n - a = n := by omega
+      rw [hidx]
+      try rfl
+    rw [h2, ← hbn]
+    exact hM b (by omega) (le_refl b)
+  rcases Nat.eq_zero_or_pos n with h0 | hpos
+  · have hb : b = a := by omega
+    have hsum0 : (∑ j ∈ Finset.Ioc a a, w j * g j) = 0 := by simp
+    rw [hb, hsum0, norm_zero]
+    have hemp : Finset.Ioc a (a - 1) = ∅ := Finset.Ioc_eq_empty_of_le (by omega)
+    have hV : (0:ℝ) ≤ V := by
+      have h := hvar
+      rw [hb, hemp] at h
+      simpa using h
+    nlinarith
+  · have hn1 : n - 1 + 1 = n := by omega
+    have habel := abel_range W G (n - 1)
+    rw [hn1] at habel
+    have hWdiff2 : (∑ i ∈ Finset.range (n - 1), ‖W (i + 1) - W i‖)
+        = ∑ i ∈ Finset.range (n - 1), ‖w (a + 1 + i + 1) - w (a + 1 + i)‖ := by
+      refine Finset.sum_congr rfl fun i _ => ?_
+      have e1 : W (i + 1) = w (a + 1 + i + 1) := by
+        simp only [hW]
+        try congr 1
+        try omega
+      rw [e1]
+      try rfl
+    have hvar_eq : (∑ i ∈ Finset.range (n - 1), ‖w ((a + 1 + i) + 1) - w (a + 1 + i)‖)
+        = ∑ j ∈ Finset.Ioc a (b - 1), ‖w (j + 1) - w j‖ := by
+      have h := sum_Ioc_shift (fun j : ℕ => ‖w (j + 1) - w j‖) (a := a) (b := b - 1) (by omega)
+      have hidx : b - 1 - a = n - 1 := by omega
+      rw [h, hidx]
+    have hL : (∑ j ∈ Finset.Ioc a b, w j * g j) = ∑ i ∈ Finset.range n, W i * G i := by
+      rw [show (∑ j ∈ Finset.Ioc a b, w j * g j) =
+        ∑ i ∈ Finset.range (b - a), (fun j => w j * g j) (a + 1 + i) from sum_Ioc_shift _ hab]
+      try simp only [hW, hG, hn]
+    rw [hL, habel]
+    have hterm : ‖W (n - 1) * (∑ i ∈ Finset.range n, G i)‖ ≤ M := by
+      rw [norm_mul]
+      calc ‖W (n - 1)‖ * ‖∑ i ∈ Finset.range n, G i‖ ≤ 1 * M := by
+            refine mul_le_mul ?_ hfull_bound (norm_nonneg _) (by norm_num)
+            rcases hw (a + 1 + (n - 1)) with h | h <;> simp [hW, h]
+        _ = M := by ring
+    have hrest : ‖∑ i ∈ Finset.range (n - 1),
+        (W (i + 1) - W i) * (∑ j ∈ Finset.range (i + 1), G j)‖ ≤ V * M := by
+      refine le_trans (norm_sum_le _ _) ?_
+      have hb1 : ∀ i ∈ Finset.range (n - 1),
+          ‖(W (i + 1) - W i) * (∑ j ∈ Finset.range (i + 1), G j)‖ ≤ ‖W (i + 1) - W i‖ * M := by
+        intro i hi
+        rw [norm_mul]
+        exact mul_le_mul_of_nonneg_left (hpre_bound i (by have := Finset.mem_range.mp hi; omega))
+          (norm_nonneg _)
+      refine le_trans (Finset.sum_le_sum hb1) ?_
+      rw [← Finset.sum_mul]
+      rw [hWdiff2, show (∑ i ∈ Finset.range (n - 1), ‖w (a + 1 + i + 1) - w (a + 1 + i)‖)
+        = ∑ i ∈ Finset.range (n - 1), ‖w ((a + 1 + i) + 1) - w (a + 1 + i)‖ from rfl,
+        hvar_eq]
+      exact mul_le_mul_of_nonneg_right hvar hM0
+    calc ‖W (n - 1) * (∑ i ∈ Finset.range n, G i) -
+          ∑ i ∈ Finset.range (n - 1), (W (i + 1) - W i) * (∑ j ∈ Finset.range (i + 1), G j)‖
+        ≤ ‖W (n - 1) * (∑ i ∈ Finset.range n, G i)‖ +
+            ‖∑ i ∈ Finset.range (n - 1),
+              (W (i + 1) - W i) * (∑ j ∈ Finset.range (i + 1), G j)‖ := norm_sub_le _ _
+      _ ≤ M + V * M := add_le_add hterm hrest
+      _ = (V + 1) * M := by ring
+
+/-- The total variation of a monotone `[0,1]`-valued sequence over an integer interval is at most one. -/
+private lemma var_le_one_of_mono {f : ℕ → ℝ} {a b : ℕ}
+    (h0 : ∀ j, 0 ≤ f j) (h1 : ∀ j, f j ≤ 1) (hmono : ∀ j, f j ≤ f (j + 1)) :
+    ∑ j ∈ Finset.Ioc a (b - 1), |f (j + 1) - f j| ≤ 1 := by
+  rcases Nat.lt_or_ge a b with hab | hba
+  · have hab' : a ≤ b - 1 := by omega
+    have hterm : ∀ j ∈ Finset.Ioc a (b - 1), |f (j + 1) - f j| = f (j + 1) - f j := by
+      intro j _
+      rw [abs_of_nonneg]
+      linarith [hmono j]
+    rw [Finset.sum_congr rfl hterm]
+    have hshift := sum_Ioc_shift (fun j => f (j + 1) - f j) (a := a) (b := b - 1) hab'
+    rw [hshift]
+    have htele : (∑ i ∈ Finset.range (b - 1 - a), (f (a + 1 + i + 1) - f (a + 1 + i)))
+        = f (a + 1 + (b - 1 - a)) - f (a + 1 + 0) := by
+      have := Finset.sum_range_sub (fun i => f (a + 1 + i)) (b - 1 - a)
+      simpa only [add_assoc] using this
+    rw [htele]
+    have e1 : a + 1 + (b - 1 - a) = b := by omega
+    rw [e1]
+    have h2 : 0 ≤ f (a + 1 + 0) := h0 _
+    have h3 : f b ≤ 1 := h1 _
+    linarith
+  · have hemp : Finset.Ioc a (b - 1) = ∅ := Finset.Ioc_eq_empty_of_le (by omega)
+    rw [hemp, Finset.sum_empty]
+    norm_num
+
+
+/-- The total variation of an antitone `[0,1]`-valued sequence over an integer interval is at most
+one: its complement is monotone and has the same differences. -/
+private lemma var_le_one_of_anti {f : ℕ → ℝ} {a b : ℕ}
+    (h0 : ∀ j, 0 ≤ f j) (h1 : ∀ j, f j ≤ 1) (hanti : ∀ j, f (j + 1) ≤ f j) :
+    ∑ j ∈ Finset.Ioc a (b - 1), |f (j + 1) - f j| ≤ 1 := by
+  have key := var_le_one_of_mono (f := fun j => 1 - f j) (a := a) (b := b)
+    (fun j => by linarith [h1 j]) (fun j => by linarith [h0 j])
+    (fun j => by linarith [hanti j])
+  refine le_trans (le_of_eq ?_) key
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [show (1 - f (j + 1)) - (1 - f j) = -(f (j + 1) - f j) by ring, abs_neg]
+
+/-- A real threshold on the ambient level is a threshold on the cofactor: `e` is at most the
+logarithm of `d j` exactly when the cofactor reaches the ceiling of `exp e / d`. -/
+private lemma le_log_iff {d j : ℕ} (hd : 0 < d) (hj : 1 ≤ j) (e : ℝ) :
+    (e ≤ Real.log ((d : ℝ) * (j : ℝ))) ↔ (⌈Real.exp e / (d : ℝ)⌉₊ ≤ j) := by
+  have hdpos : (0:ℝ) < (d:ℝ) := by exact_mod_cast hd
+  have hjpos : (0:ℝ) < (j:ℝ) := by exact_mod_cast (by omega : 0 < j)
+  have step1 : (e ≤ Real.log ((d:ℝ) * (j:ℝ))) ↔ (Real.exp e ≤ (d:ℝ) * (j:ℝ)) :=
+    Real.le_log_iff_exp_le (by positivity)
+  have step2 : (Real.exp e ≤ (d:ℝ) * (j:ℝ)) ↔ (Real.exp e / (d:ℝ) ≤ (j:ℝ)) := by
+    rw [div_le_iff₀ hdpos]; constructor <;> intro h <;> linarith
+  rw [step1, step2, Nat.ceil_le]
+
+/-- The mirror image: the logarithm of `d j` is at most `e` exactly when the cofactor is at most the
+floor of `exp e / d`. -/
+private lemma log_le_iff {d j : ℕ} (hd : 0 < d) (hj : 1 ≤ j) (e : ℝ) :
+    (Real.log ((d : ℝ) * (j : ℝ)) ≤ e) ↔ (j ≤ ⌊Real.exp e / (d : ℝ)⌋₊) := by
+  have hdpos : (0:ℝ) < (d:ℝ) := by exact_mod_cast hd
+  have hjpos : (0:ℝ) < (j:ℝ) := by exact_mod_cast (by omega : 0 < j)
+  have step1 : (Real.log ((d:ℝ) * (j:ℝ)) ≤ e) ↔ ((d:ℝ) * (j:ℝ) ≤ Real.exp e) :=
+    Real.log_le_iff_le_exp (by positivity)
+  have step2 : ((d:ℝ) * (j:ℝ) ≤ Real.exp e) ↔ ((j:ℝ) ≤ Real.exp e / (d:ℝ)) := by
+    rw [le_div_iff₀ hdpos]; constructor <;> intro h <;> linarith
+  rw [step1, step2]
+  constructor
+  · intro h
+    by_contra hcon
+    rw [not_le] at hcon
+    have h1 : Real.exp e / (d:ℝ) < ((⌊Real.exp e / (d:ℝ)⌋₊ : ℕ) : ℝ) + 1 := Nat.lt_floor_add_one _
+    have h2 : ((⌊Real.exp e / (d:ℝ)⌋₊ : ℕ) : ℝ) + 1 ≤ (j : ℝ) := by
+      have h3 : ⌊Real.exp e / (d:ℝ)⌋₊ + 1 ≤ j := by omega
+      exact_mod_cast h3
+    linarith
+  · intro h
+    have h1 : ((⌊Real.exp e / (d:ℝ)⌋₊ : ℕ) : ℝ) ≤ Real.exp e / (d:ℝ) := Nat.floor_le (by positivity)
+    have h2 : (j : ℝ) ≤ ((⌊Real.exp e / (d:ℝ)⌋₊ : ℕ) : ℝ) := by exact_mod_cast h
+    linarith
+
+/-- The covering predicate of the `kept` term, read at the ambient level, is constant between two
+consecutive members of the cut set: every one of its thresholds separates the two cofactors, and each
+threshold of the level is a member of the cut set through its ceiling or its floor. -/
+private lemma atom_cell {d : ℕ} (hd : 0 < d) {E : Finset ℝ} {C : Finset ℕ} {j j' : ℕ}
+    (hj : 1 ≤ j) (hj' : 1 ≤ j')
+    (hC1 : ∀ e ∈ E, ⌈Real.exp e / (d : ℝ)⌉₊ ∈ C)
+    (hC2 : ∀ e ∈ E, ⌊Real.exp e / (d : ℝ)⌋₊ + 1 ∈ C)
+    (hcut : ∀ c ∈ C, c ≤ j ↔ c ≤ j') :
+    ∀ e ∈ E, (e ≤ Real.log ((d : ℝ) * (j : ℝ)) ↔ e ≤ Real.log ((d : ℝ) * (j' : ℝ))) ∧
+      (Real.log ((d : ℝ) * (j : ℝ)) ≤ e ↔ Real.log ((d : ℝ) * (j' : ℝ)) ≤ e) := by
+  intro e he
+  refine ⟨?_, ?_⟩
+  · rw [le_log_iff hd hj e, le_log_iff hd hj' e]
+    exact hcut _ (hC1 e he)
+  · rw [log_le_iff hd hj e, log_le_iff hd hj' e]
+    have hF := hcut (⌊Real.exp e / (d : ℝ)⌋₊ + 1) (hC2 e he)
+    constructor
+    · intro h
+      by_contra hcon
+      have h2 : ⌊Real.exp e / (d : ℝ)⌋₊ + 1 ≤ j' := by omega
+      rw [← hF] at h2
+      omega
+    · intro h
+      by_contra hcon
+      have h2 : ⌊Real.exp e / (d : ℝ)⌋₊ + 1 ≤ j := by omega
+      rw [hF] at h2
+      omega
+
+
+
+/-- Two `{0,1}` indicators whose propositions differ differ by one in absolute value. -/
+private lemma ind_diff_eq_one {P Q : Prop} [Decidable P] [Decidable Q] (h : ¬ (P ↔ Q)) :
+    |(if P then (1 : ℝ) else 0) - (if Q then (1 : ℝ) else 0)| = 1 := by
+  by_cases hP : P
+  · have hQ : ¬ Q := fun hq => h ⟨fun _ => hq, fun _ => hP⟩
+    rw [if_pos hP, if_neg hQ]; norm_num
+  · have hQ : Q := by
+      by_contra hq
+      exact h ⟨fun hp => absurd hp hP, fun hq' => absurd hq' hq⟩
+    rw [if_neg hP, if_pos hQ]; norm_num
+
+/-- Two `{0,1}` indicators whose propositions agree are equal. -/
+private lemma ind_diff_eq_zero {P Q : Prop} [Decidable P] [Decidable Q] (h : P ↔ Q) :
+    (if P then (1 : ℝ) else 0) - (if Q then (1 : ℝ) else 0) = 0 := by
+  by_cases hP : P
+  · rw [if_pos hP, if_pos (h.mp hP)]; norm_num
+  · rw [if_neg hP, if_neg (fun hq => hP (h.mpr hq))]; norm_num
+
+/-- The complex norm of the difference of two `{0,1}` indicators is the real absolute value of the
+corresponding difference. -/
+private lemma norm_ind_sub (P Q : Prop) [Decidable P] [Decidable Q] :
+    ‖(if P then (1 : ℂ) else 0) - (if Q then (1 : ℂ) else 0)‖ =
+      |(if P then (1 : ℝ) else 0) - (if Q then (1 : ℝ) else 0)| := by
+  by_cases h1 : P <;> by_cases h2 : Q <;> simp [h1, h2]
+
+/-- A `{0,1}`-valued complex indicator takes one of two values. -/
+private lemma ind_val (P : Prop) [Decidable P] :
+    (if P then (1 : ℂ) else 0) = 0 ∨ (if P then (1 : ℂ) else 0) = 1 := by
+  by_cases h : P <;> simp [h]
+
+/-- An indicator times a factor is the factor restricted to the proposition. -/
+private lemma ind_mul (P : Prop) [Decidable P] (X : ℂ) :
+    (if P then X else 0) = (if P then (1 : ℂ) else 0) * X := by
+  by_cases h : P <;> simp [h]
+
+set_option maxHeartbeats 30000000 in
+/-- The total variation of one region of Lemma 33, read as a function of the ambient level along the
+monotone ray `u j`, is at most nine: the region is a boolean function of nine threshold comparisons,
+each monotone or antitone and therefore of variation at most one. -/
+private lemma var_region_le {ε A B : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8)
+    (hA : 0 < A) (hB : 0 < B) {u : ℕ → ℝ} (hupos : ∀ j, 1 ≤ j → 0 < u j)
+    (hmono : ∀ j j', j ≤ j' → u j ≤ u j') {a b : ℕ} :
+    ∑ j ∈ Finset.Ioc a (b - 1),
+      |(if upperPairRegion ε (A / u (j + 1)) (B / u (j + 1)) then (1 : ℝ) else 0) -
+        (if upperPairRegion ε (A / u j) (B / u j) then (1 : ℝ) else 0)| ≤ 9 := by
+  have e1 : (∑ j ∈ Finset.Ioc a (b - 1), |(if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_mono (f := fun j => (if 2 * A ≤ u j then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : 2 * A ≤ u j
+        · rw [if_pos h, if_pos (le_trans h (hmono j (j + 1) (by omega)))]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e2 : (∑ j ∈ Finset.Ioc a (b - 1), |(if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_anti (f := fun j => (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : u (j + 1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε)
+        · rw [if_pos h, if_pos (le_trans (hmono j (j + 1) (by omega)) h)]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e3 : (∑ j ∈ Finset.Ioc a (b - 1), |(if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_mono (f := fun j => (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j
+        · rw [if_pos h, if_pos (le_trans h (hmono j (j + 1) (by omega)))]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e4 : (∑ j ∈ Finset.Ioc a (b - 1), |(if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_mono (f := fun j => (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j
+        · rw [if_pos h, if_pos (le_trans h (hmono j (j + 1) (by omega)))]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e5 : (∑ j ∈ Finset.Ioc a (b - 1), |(if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_mono (f := fun j => (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j
+        · rw [if_pos h, if_pos (le_trans h (hmono j (j + 1) (by omega)))]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e6 : (∑ j ∈ Finset.Ioc a (b - 1), |(if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_mono (f := fun j => (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j
+        · rw [if_pos h, if_pos (le_trans h (hmono j (j + 1) (by omega)))]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e7 : (∑ j ∈ Finset.Ioc a (b - 1), |(if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_anti (f := fun j => (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : u (j + 1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))
+        · rw [if_pos h, if_pos (le_trans (hmono j (j + 1) (by omega)) h)]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e8 : (∑ j ∈ Finset.Ioc a (b - 1), |(if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_mono (f := fun j => (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j
+        · rw [if_pos h, if_pos (le_trans h (hmono j (j + 1) (by omega)))]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have e9 : (∑ j ∈ Finset.Ioc a (b - 1), |(if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)|) ≤ 1 :=
+    var_le_one_of_anti (f := fun j => (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))
+      (fun j => by positivity)
+      (fun j => by split_ifs <;> norm_num)
+      (fun j => by
+        by_cases h : u (j + 1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))
+        · rw [if_pos h, if_pos (le_trans (hmono j (j + 1) (by omega)) h)]
+        · rw [if_neg h]; split_ifs with h2 <;> norm_num)
+  have key : ∀ j, 1 ≤ j → ((2 * A ≤ u (j + 1)) ↔ (2 * A ≤ u j)) →
+      ((u (j + 1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε)) ↔ (u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε))) →
+      ((B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1)) ↔ (B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) →
+      (((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j + 1)) ↔ ((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j)) →
+      ((A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1)) ↔ (A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) →
+      (((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1)) ↔ ((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) →
+      ((u (j + 1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) ↔ (u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) →
+      (((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1)) ↔ ((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) →
+      ((u (j + 1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) ↔ (u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) →
+      (upperPairRegion ε (A / u (j + 1)) (B / u (j + 1)) ↔
+        upperPairRegion ε (A / u j) (B / u j)) := by
+    intro j hj i1 i2 i3 i4 i5 i6 i7 i8 i9
+    rw [pair_region_iff hε hε8 hA hB (hupos (j + 1) (by omega)), pair_region_iff hε hε8 hA hB (hupos j hj)]
+    simp only [i1, i2, i3, i4, i5, i6, i7, i8, i9]
+  have hpt : ∀ j, 1 ≤ j →
+      |(if upperPairRegion ε (A / u (j + 1)) (B / u (j + 1)) then (1:ℝ) else 0) -
+        (if upperPairRegion ε (A / u j) (B / u j) then (1:ℝ) else 0)| ≤ |(if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)| + |(if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)| + |(if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)| + |(if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)| + |(if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)| + |(if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)| + |(if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)| + |(if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)| + |(if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)| := by
+    intro j hj
+    by_cases hR : upperPairRegion ε (A / u (j + 1)) (B / u (j + 1)) ↔
+        upperPairRegion ε (A / u j) (B / u j)
+    · rw [ind_diff_eq_zero hR, abs_zero]
+      linarith [abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+    · rw [ind_diff_eq_one hR]
+      have hnot : ¬ (((2 * A ≤ u (j + 1)) ↔ (2 * A ≤ u j)) ∧
+        ((u (j + 1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε)) ↔ (u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε))) ∧
+        ((B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1)) ↔ (B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) ∧
+        (((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j + 1)) ↔ ((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j)) ∧
+        ((A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1)) ↔ (A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) ∧
+        (((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1)) ↔ ((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) ∧
+        ((u (j + 1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) ↔ (u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) ∧
+        (((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1)) ↔ ((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) ∧
+        ((u (j + 1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) ↔ (u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))))) := by
+        intro h
+        exact hR (key j hj h.1 h.2.1 h.2.2.1 h.2.2.2.1 h.2.2.2.2.1 h.2.2.2.2.2.1 h.2.2.2.2.2.2.1 h.2.2.2.2.2.2.2.1 h.2.2.2.2.2.2.2.2)
+      have hor : ¬((2 * A ≤ u (j + 1)) ↔ (2 * A ≤ u j)) ∨
+        ¬((u (j + 1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε)) ↔ (u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε))) ∨
+        ¬((B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1)) ↔ (B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) ∨
+        ¬(((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j + 1)) ↔ ((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j)) ∨
+        ¬((A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1)) ↔ (A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) ∨
+        ¬(((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1)) ↔ ((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) ∨
+        ¬((u (j + 1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) ↔ (u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) ∨
+        ¬(((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1)) ↔ ((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) ∨
+        ¬((u (j + 1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε))) ↔ (u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) := by tauto
+      rcases hor with h1 | h2 | h3 | h4 | h5 | h6 | h7 | h8 | h9
+      · have hk := ind_diff_eq_one (P := (2 * A ≤ u (j + 1))) (Q := (2 * A ≤ u j)) h1
+        linarith [hk, abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (u (j + 1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε))) (Q := (u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε))) h2
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1))) (Q := (B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) h3
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := ((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j + 1))) (Q := ((2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j)) h4
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j + 1))) (Q := (A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j)) h5
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := ((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1))) (Q := ((4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) h6
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (u (j + 1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) (Q := (u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) h7
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := ((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j + 1))) (Q := ((4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j)) h8
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (u (j + 1) ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) (Q := (u j ≤ (4 * A + B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)))) h9
+        linarith [hk, abs_nonneg ((if 2 * A ≤ u (j+1) then (1:ℝ) else 0) - (if 2 * A ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0) - (if u j ≤ B / ((1 + 7 * (2 * (1 / 16 - 1 / 10 ^ 5))) / 15 - ε) then (1:ℝ) else 0)), abs_nonneg ((if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if B / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if (2 * B - A) / (2 * (1 / 16 - 1 / 10 ^ 5) - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u (j+1) then (1:ℝ) else 0) - (if A / ((36 * (2 * (1 / 16 - 1 / 10 ^ 5)) - 2) / 11 - ε) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + 3 * B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0)), abs_nonneg ((if u (j+1) ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0) - (if u j ≤ (4 * A + 3 * B) / (2 - (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) then (1:ℝ) else 0)), abs_nonneg ((if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u (j+1) then (1:ℝ) else 0) - (if (4 * A + B) / (2 + (2 * (1 / 16 - 1 / 10 ^ 5) - ε)) ≤ u j then (1:ℝ) else 0))]
+  refine le_trans (Finset.sum_le_sum fun j hj => hpt j (by have h := (Finset.mem_Ioc.mp hj).1; omega)) ?_
+  rw [Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib]
+  linarith [e1, e2, e3, e4, e5, e6, e7, e8, e9]
+
+set_option maxHeartbeats 20000000 in
+/-- The total variation of the covering predicate of the `kept` term, read at the ambient level along
+the monotone ray `u j`, is at most `108`: it is the disjunction of the twelve regions of Lemma 33 and
+each region contributes at most nine. -/
+private lemma var_cov_le {ε la lb lc : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8)
+    (hla : 0 < la) (hlb : 0 < lb) (hlc : 0 < lc) {u : ℕ → ℝ} (hupos : ∀ j, 1 ≤ j → 0 < u j)
+    (hmono : ∀ j j', j ≤ j' → u j ≤ u j') {a b : ℕ} :
+    ∑ j ∈ Finset.Ioc a (b - 1),
+      |(if upperPrimeCovered ε (la / u (j + 1)) (lb / u (j + 1)) (lc / u (j + 1)) then (1 : ℝ)
+          else 0) -
+        (if upperPrimeCovered ε (la / u j) (lb / u j) (lc / u j) then (1 : ℝ) else 0)| ≤ 108 := by
+  have v1 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := la) (B := lb) hε hε8 (hla) (hlb) hupos hmono
+  have v2 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := lb) (B := la) hε hε8 (hlb) (hla) hupos hmono
+  have v3 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (la / u (j + 1)) (lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := la) (B := lc) hε hε8 (hla) (hlc) hupos hmono
+  have v4 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := lc) (B := la) hε hε8 (hlc) (hla) hupos hmono
+  have v5 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (lb / u (j + 1)) (lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := lb) (B := lc) hε hε8 (hlb) (hlc) hupos hmono
+  have v6 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (lc / u (j + 1)) (lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := lc) (B := lb) hε hε8 (hlc) (hlb) hupos hmono
+  have v7 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (la / u (j + 1) + lb / u (j + 1)) (lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := la + lb) (B := lc) hε hε8 (by linarith [hla, hlb, hlc]) (hlc) hupos hmono
+  have v8 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1) + lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := lc) (B := la + lb) hε hε8 (hlc) (by linarith [hla, hlb, hlc]) hupos hmono
+  have v9 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (la / u (j + 1) + lc / u (j + 1)) (lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := la + lc) (B := lb) hε hε8 (by linarith [hla, hlb, hlc]) (hlb) hupos hmono
+  have v10 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1) + lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := lb) (B := la + lc) hε hε8 (hlb) (by linarith [hla, hlb, hlc]) hupos hmono
+  have v11 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (lb / u (j + 1) + lc / u (j + 1)) (la / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := lb + lc) (B := la) hε hε8 (by linarith [hla, hlb, hlc]) (hla) hupos hmono
+  have v12 : (∑ j ∈ Finset.Ioc a (b - 1), |(if upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1) + lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0)|) ≤ 9 := by
+    simpa only [add_div] using
+      var_region_le (A := la) (B := lb + lc) hε hε8 (hla) (by linarith [hla, hlb, hlc]) hupos hmono
+  have hpt : ∀ j, 1 ≤ j →
+      |(if upperPrimeCovered ε (la / u (j + 1)) (lb / u (j + 1)) (lc / u (j + 1)) then (1 : ℝ)
+          else 0) -
+        (if upperPrimeCovered ε (la / u j) (lb / u j) (lc / u j) then (1 : ℝ) else 0)| ≤ |(if upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (la / u (j + 1)) (lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (lb / u (j + 1)) (lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (lc / u (j + 1)) (lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (la / u (j + 1) + lb / u (j + 1)) (lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1) + lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (la / u (j + 1) + lc / u (j + 1)) (lb / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1) + lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (lb / u (j + 1) + lc / u (j + 1)) (la / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)| + |(if upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1) + lc / u (j + 1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0)| := by
+    intro j hj
+    by_cases hR : upperPrimeCovered ε (la / u (j + 1)) (lb / u (j + 1)) (lc / u (j + 1)) ↔
+        upperPrimeCovered ε (la / u j) (lb / u j) (lc / u j)
+    · rw [ind_diff_eq_zero hR, abs_zero]
+      linarith [abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+    · rw [ind_diff_eq_one hR]
+      have hnot : ¬ (((upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1))) ↔ (upperPairRegion ε (la / u j) (lb / u j))) ∧
+        ((upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1))) ↔ (upperPairRegion ε (lb / u j) (la / u j))) ∧
+        ((upperPairRegion ε (la / u (j + 1)) (lc / u (j + 1))) ↔ (upperPairRegion ε (la / u j) (lc / u j))) ∧
+        ((upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1))) ↔ (upperPairRegion ε (lc / u j) (la / u j))) ∧
+        ((upperPairRegion ε (lb / u (j + 1)) (lc / u (j + 1))) ↔ (upperPairRegion ε (lb / u j) (lc / u j))) ∧
+        ((upperPairRegion ε (lc / u (j + 1)) (lb / u (j + 1))) ↔ (upperPairRegion ε (lc / u j) (lb / u j))) ∧
+        ((upperPairRegion ε (la / u (j + 1) + lb / u (j + 1)) (lc / u (j + 1))) ↔ (upperPairRegion ε (la / u j + lb / u j) (lc / u j))) ∧
+        ((upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1) + lb / u (j + 1))) ↔ (upperPairRegion ε (lc / u j) (la / u j + lb / u j))) ∧
+        ((upperPairRegion ε (la / u (j + 1) + lc / u (j + 1)) (lb / u (j + 1))) ↔ (upperPairRegion ε (la / u j + lc / u j) (lb / u j))) ∧
+        ((upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1) + lc / u (j + 1))) ↔ (upperPairRegion ε (lb / u j) (la / u j + lc / u j))) ∧
+        ((upperPairRegion ε (lb / u (j + 1) + lc / u (j + 1)) (la / u (j + 1))) ↔ (upperPairRegion ε (lb / u j + lc / u j) (la / u j))) ∧
+        ((upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1) + lc / u (j + 1))) ↔ (upperPairRegion ε (la / u j) (lb / u j + lc / u j)))) := by
+        intro h
+        apply hR
+        unfold upperPrimeCovered
+        simp only [h.1, h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1, h.2.2.2.2.2.1, h.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.2.2.2.2]
+      have hor : ¬((upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1))) ↔ (upperPairRegion ε (la / u j) (lb / u j))) ∨
+        ¬((upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1))) ↔ (upperPairRegion ε (lb / u j) (la / u j))) ∨
+        ¬((upperPairRegion ε (la / u (j + 1)) (lc / u (j + 1))) ↔ (upperPairRegion ε (la / u j) (lc / u j))) ∨
+        ¬((upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1))) ↔ (upperPairRegion ε (lc / u j) (la / u j))) ∨
+        ¬((upperPairRegion ε (lb / u (j + 1)) (lc / u (j + 1))) ↔ (upperPairRegion ε (lb / u j) (lc / u j))) ∨
+        ¬((upperPairRegion ε (lc / u (j + 1)) (lb / u (j + 1))) ↔ (upperPairRegion ε (lc / u j) (lb / u j))) ∨
+        ¬((upperPairRegion ε (la / u (j + 1) + lb / u (j + 1)) (lc / u (j + 1))) ↔ (upperPairRegion ε (la / u j + lb / u j) (lc / u j))) ∨
+        ¬((upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1) + lb / u (j + 1))) ↔ (upperPairRegion ε (lc / u j) (la / u j + lb / u j))) ∨
+        ¬((upperPairRegion ε (la / u (j + 1) + lc / u (j + 1)) (lb / u (j + 1))) ↔ (upperPairRegion ε (la / u j + lc / u j) (lb / u j))) ∨
+        ¬((upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1) + lc / u (j + 1))) ↔ (upperPairRegion ε (lb / u j) (la / u j + lc / u j))) ∨
+        ¬((upperPairRegion ε (lb / u (j + 1) + lc / u (j + 1)) (la / u (j + 1))) ↔ (upperPairRegion ε (lb / u j + lc / u j) (la / u j))) ∨
+        ¬((upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1) + lc / u (j + 1))) ↔ (upperPairRegion ε (la / u j) (lb / u j + lc / u j))) := by
+        by_contra hc
+        push_neg at hc
+        exact hnot hc
+      rcases hor with h1 | h2 | h3 | h4 | h5 | h6 | h7 | h8 | h9 | h10 | h11 | h12
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1)))) (Q := (upperPairRegion ε (la / u j) (lb / u j))) h1
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1)))) (Q := (upperPairRegion ε (lb / u j) (la / u j))) h2
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (la / u (j + 1)) (lc / u (j + 1)))) (Q := (upperPairRegion ε (la / u j) (lc / u j))) h3
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1)))) (Q := (upperPairRegion ε (lc / u j) (la / u j))) h4
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (lb / u (j + 1)) (lc / u (j + 1)))) (Q := (upperPairRegion ε (lb / u j) (lc / u j))) h5
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (lc / u (j + 1)) (lb / u (j + 1)))) (Q := (upperPairRegion ε (lc / u j) (lb / u j))) h6
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (la / u (j + 1) + lb / u (j + 1)) (lc / u (j + 1)))) (Q := (upperPairRegion ε (la / u j + lb / u j) (lc / u j))) h7
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (lc / u (j + 1)) (la / u (j + 1) + lb / u (j + 1)))) (Q := (upperPairRegion ε (lc / u j) (la / u j + lb / u j))) h8
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (la / u (j + 1) + lc / u (j + 1)) (lb / u (j + 1)))) (Q := (upperPairRegion ε (la / u j + lc / u j) (lb / u j))) h9
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (lb / u (j + 1)) (la / u (j + 1) + lc / u (j + 1)))) (Q := (upperPairRegion ε (lb / u j) (la / u j + lc / u j))) h10
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (lb / u (j + 1) + lc / u (j + 1)) (la / u (j + 1)))) (Q := (upperPairRegion ε (lb / u j + lc / u j) (la / u j))) h11
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j + lc / u j) then (1:ℝ) else 0))]
+      · have hk := ind_diff_eq_one (P := (upperPairRegion ε (la / u (j + 1)) (lb / u (j + 1) + lc / u (j + 1)))) (Q := (upperPairRegion ε (la / u j) (lb / u j + lc / u j))) h12
+        linarith [hk, abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lb / u (j+1)) (lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lb / u j) (lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lc / u (j+1)) (la / u (j+1) + lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lc / u j) (la / u j + lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (la / u (j+1) + lc / u (j+1)) (lb / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (la / u j + lc / u j) (lb / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1)) (la / u (j+1) + lc / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j) (la / u j + lc / u j) then (1:ℝ) else 0)), abs_nonneg ((if upperPairRegion ε (lb / u (j+1) + lc / u (j+1)) (la / u (j+1)) then (1:ℝ) else 0) - (if upperPairRegion ε (lb / u j + lc / u j) (la / u j) then (1:ℝ) else 0))]
+  refine le_trans (Finset.sum_le_sum fun j hj => hpt j (by have h := (Finset.mem_Ioc.mp hj).1; omega)) ?_
+  rw [Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib]
+  linarith [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12]
+
+set_option maxHeartbeats 16000000 in
+/-- The `kept` fibre over one triple of primes, with the covering predicate read at the **ambient**
+level `p1 p2 p3 j`.  The window tests cut an integer interval out of the cofactor range, the sifted
+level is the third prime, and the covering weight has total variation at most `108`
+(`var_cov_le`), so summation by parts against the Abel bound of the fixed level character sum costs
+only that constant. -/
+private lemma kept_fibre_le {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) {Y : ℝ} {K p1 p2 p3 a b : ℕ} {C0 A : ℝ}
+    (hp1 : p1.Prime) (hp2 : p2.Prime) (hp3 : p3.Prime) (hlt32 : p3 < p2) (hlt21 : p2 < p1)
+    (hab : a ≤ b) (ha1 : 1 ≤ a)
+    (hdbK : p1 * p2 * p3 * b ≤ K)
+    (hY2 : 2 ≤ Y) (hKY : (K : ℝ) ≤ 2 * Y)
+    (hzX : (2 * Y) ^ (upperC1 ε / 2) ≤ (p3 : ℝ))
+    (hC0 : 0 ≤ C0)
+    (hpre : ∀ (ζ a' b' : ℕ), (2 * Y) ^ (upperC1 ε / 2) ≤ (ζ : ℝ) → 1 ≤ a' → (b' : ℝ) ≤ 2 * Y →
+      ‖∑ n ∈ Finset.Ioc a' b', ((Task308.roughIndicator n ζ : ℝ) : ℂ) * χ (n : ZMod q)‖ ≤
+        C0 * (b' : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) :
+    ‖∑ j ∈ Finset.Ioc a b,
+        (if ((((p1 * p2 * p3 : ℕ) : ℝ) * (j : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < (((p1 * p2 * p3 : ℕ) : ℝ) * (j : ℝ)) ^ upperC4 ε ∧
+            (((p1 * p2 * p3 : ℕ) : ℝ) * (j : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ)) then
+          (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) then
+            ((Real.log (((p1 * p2 * p3 : ℕ) : ℝ) * (j : ℝ)) / Real.log Y *
+              upperRough j (p3 : ℝ) : ℝ) : ℂ) * χ (j : ZMod q)
+            else 0)
+          else 0)‖ ≤
+      436 * (C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) := by
+  classical
+  have hd1 : 1 ≤ p1 * p2 * p3 := by
+    have h : 2 * 2 * 2 ≤ p1 * p2 * p3 :=
+      Nat.mul_le_mul (Nat.mul_le_mul hp1.two_le hp2.two_le) hp3.two_le
+    omega
+  have hp31 : 1 ≤ p3 := le_trans (by norm_num) hp3.two_le
+  have hle1 : p3 ≤ p1 := le_of_lt (lt_trans hlt32 hlt21)
+  have hd0 : 0 < p1 * p2 * p3 := by omega
+  have hd8 : (8 : ℝ) ≤ ((p1 * p2 * p3 : ℕ) : ℝ) := by
+    have h : 8 ≤ p1 * p2 * p3 := by
+      have h2 : 2 * 2 * 2 ≤ p1 * p2 * p3 := by
+        exact Nat.mul_le_mul (Nat.mul_le_mul hp1.two_le hp2.two_le) hp3.two_le
+      omega
+    exact_mod_cast h
+  rw [← Finset.sum_filter,
+    filter_window_general (d := p1 * p2 * p3) (plo := p1) (phi := p3) hε8 hd1 hp31 hle1]
+  have hlap : 0 < Real.log (p1 : ℝ) := Real.log_pos (by exact_mod_cast (by have h := hp1.two_le; omega : 1 < p1))
+  have hlbn : 0 < Real.log (p2 : ℝ) := Real.log_pos (by exact_mod_cast (by have h := hp2.two_le; omega : 1 < p2))
+  have hlcn : 0 < Real.log (p3 : ℝ) := Real.log_pos (by exact_mod_cast (by have h := hp3.two_le; omega : 1 < p3))
+  have ha'1 : 1 ≤ (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) := le_trans ha1 (le_max_left _ _)
+  have hL60 : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) :=
+    Real.rpow_nonneg (Real.log_pos (by linarith)).le _
+  rcases le_or_gt ((max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊)) ((min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊)) with hAB | hAB
+  · -- the sifted level is the third prime; the roughness is the fixed level indicator
+    have hconv : (∑ j ∈ Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) (min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊),
+          (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) then
+            ((Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)) / Real.log Y * upperRough j (p3 : ℝ) : ℝ) : ℂ) * χ (j : ZMod q)
+          else 0))
+        = (∑ j ∈ Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) (min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊),
+          (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) then
+            ((Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)) / Real.log Y * Task308.roughIndicator j p3 : ℝ) : ℂ) *
+              χ (j : ZMod q)
+          else 0)) := by
+      refine Finset.sum_congr rfl fun j hj => ?_
+      have hj2 : 2 ≤ j := by
+        have h1 : (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) < j := (Finset.mem_Ioc.mp hj).1
+        omega
+      by_cases hc : upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)))
+      · rw [if_pos hc, if_pos hc, upperRough_eq_roughIndicator_ceil hj2 (p3 : ℝ),
+          Nat.ceil_natCast]
+      · rw [if_neg hc, if_neg hc]
+    rw [hconv]
+    -- the ambient level is monotone along the cofactor, and positive from one onwards
+    have humono : ∀ j j' : ℕ, j ≤ j' → Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)) ≤ Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j' : ℝ)) := by
+      intro j j' hjj
+      rcases Nat.eq_zero_or_pos j with h0 | hpos
+      · subst h0
+        rw [Nat.cast_zero, mul_zero, Real.log_zero]
+        rcases Nat.eq_zero_or_pos j' with h0' | hpos'
+        · rw [h0', Nat.cast_zero, mul_zero, Real.log_zero]
+        · refine Real.log_nonneg ?_
+          have h1 : (1 : ℝ) ≤ (j' : ℝ) := by exact_mod_cast hpos'
+          nlinarith
+      · have hj1 : (1 : ℝ) ≤ (j : ℝ) := by exact_mod_cast hpos
+        have hjj' : (j : ℝ) ≤ (j' : ℝ) := by exact_mod_cast hjj
+        have hj'1 : (1 : ℝ) ≤ (j' : ℝ) := le_trans hj1 hjj'
+        refine Real.log_le_log (by positivity) ?_
+        nlinarith
+    have huposj : ∀ j : ℕ, 1 ≤ j → 0 < Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)) := by
+      intro j hj1
+      have hjR : (1 : ℝ) ≤ (j : ℝ) := by exact_mod_cast hj1
+      exact Real.log_pos (by nlinarith)
+    have hvarR : (∑ j ∈ Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) ((min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) - 1),
+        |(if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * ((j + 1 : ℕ) : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * ((j + 1 : ℕ) : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * ((j + 1 : ℕ) : ℝ))) then (1:ℝ) else 0) - (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) then (1:ℝ) else 0)|) ≤ 108 :=
+      var_cov_le (u := fun j : ℕ => Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) hε hε8 hlap hlbn hlcn huposj humono
+    have hvar : (∑ j ∈ Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) ((min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) - 1),
+        ‖(if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * ((j + 1 : ℕ) : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * ((j + 1 : ℕ) : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * ((j + 1 : ℕ) : ℝ))) then (1:ℂ) else 0) - (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) then (1:ℂ) else 0)‖) ≤ 108 := by
+      refine le_trans (le_of_eq ?_) hvarR
+      refine Finset.sum_congr rfl fun j _ => ?_
+      exact norm_ind_sub _ _
+    -- the Abel bound of the fixed level character sum    -- the Abel bound of the fixed level character sum, uniformly over prefixes
+    have hM : ∀ k, (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) ≤ k → k ≤ (min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) →
+        ‖∑ j ∈ Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) k, ((Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)) / Real.log Y *
+        Task308.roughIndicator j p3 : ℝ) : ℂ) * χ (j : ZMod q)‖ ≤
+          4 * (C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6))) := by
+      intro k hak hkb
+      have hkb' : k ≤ b := le_trans hkb (min_le_left _ _)
+      have hdbK' : p1 * p2 * p3 * k ≤ K := by
+        calc p1 * p2 * p3 * k ≤ p1 * p2 * p3 * b := Nat.mul_le_mul_left _ hkb'
+          _ = p1 * p2 * p3 * b := rfl
+          _ ≤ K := hdbK
+      have hcore := interval_A_le (d := p1 * p2 * p3) (K := K) (z := p3) (a := (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊)) (b := k)
+        hε hε8 χ hd1 hY2 hKY hp31 hak ha'1 hdbK' hC0
+        (fun a'' b'' ha'' hb'' => hpre p3 a'' b'' hzX ha'' hb'')
+      refine le_trans hcore ?_
+      have hkR : (k : ℝ) ≤ (b : ℝ) := by exact_mod_cast hkb'
+      have hL6 : (0 : ℝ) ≤ Real.log (2 * Y) ^ (-(A + 6)) := hL60
+      have h2 : C0 * (k : ℝ) ≤ C0 * (b : ℝ) := mul_le_mul_of_nonneg_left hkR hC0
+      have h3 : C0 * (k : ℝ) * Real.log (2 * Y) ^ (-(A + 6)) ≤
+          C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6)) :=
+        mul_le_mul_of_nonneg_right h2 hL6
+      linarith [h3]
+    have hmain := abel_Ioc_bound
+      (w := fun j : ℕ => (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) then (1:ℂ) else 0))
+      (g := fun j : ℕ => ((Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)) / Real.log Y *
+        Task308.roughIndicator j p3 : ℝ) : ℂ) * χ (j : ZMod q))
+      (a := (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊)) (b := (min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊)) (M := 4 * (C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6))))
+      (V := 108) hAB (by positivity)
+      (fun j => ind_val _)
+      hM hvar
+    refine le_trans (le_of_eq ?_) (le_trans hmain ?_)
+    · congr 1
+      refine Finset.sum_congr rfl fun j _ => ?_
+      exact ind_mul (upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p2 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ))) (Real.log (p3 : ℝ) / Real.log ((((p1 * p2 * p3 : ℕ) : ℝ)) * (j : ℝ)))) _
+    · refine le_of_eq ?_
+      rw [show ((108 : ℝ) + 1) = 109 by norm_num]
+      ring
+  · have hemp : Finset.Ioc (max a ⌊(p1 : ℝ) ^ (1 / upperC4 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) (min b ⌊(p3 : ℝ) ^ (1 / upperC1 ε) / (((p1 * p2 * p3 : ℕ) : ℝ))⌋₊) = ∅ :=
+      Finset.Ioc_eq_empty_of_le (le_of_lt hAB)
+    rw [hemp]
+    simp only [Finset.sum_empty, norm_zero]
+    have hb1 : (1 : ℝ) ≤ (b : ℝ) := by exact_mod_cast (by omega : 1 ≤ b)
+    have hb0 : (0 : ℝ) ≤ (b : ℝ) := by linarith
+    have hprod : (0 : ℝ) ≤ C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6)) :=
+      mul_nonneg (mul_nonneg hC0 hb0) hL60
+    nlinarith [hprod]
+
+
+
+private lemma upperKept_fibre_reindex {ε Y : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q)
+    {L K p1 : ℕ} (hp1 : 1 ≤ p1) :
+    ∑ m ∈ Finset.Ioc L K,
+        (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) then
+          ((Real.log (m : ℝ) / Real.log Y *
+          (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) * χ (m : ZMod q)
+          else 0)
+      = χ (p1 : ZMod q) *
+          ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+            (if (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε)
+              then ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                (∑ p2 ∈ n.primeFactors.filter
+                (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                  (p2 : ℝ) < (p1 : ℝ)),
+                ∑ p3 ∈ (n / p2).primeFactors.filter
+                  (fun p3 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+                    (p3 : ℝ) < (p2 : ℝ)),
+                  if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                    (Real.log (p2 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ))) (Real.log (p3 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                  then upperRough (n / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+                χ (n : ZMod q)
+              else 0) := by
+  have hp1pos : 0 < p1 := by omega
+  have hsplit : ∀ m : ℕ,
+      (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) then
+        ((Real.log (m : ℝ) / Real.log Y *
+          (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) * χ (m : ZMod q)
+        else 0)
+      = (if p1 ∣ m then
+          (if ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) then
+            ((Real.log (m : ℝ) / Real.log Y *
+          (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) * χ (m : ZMod q)
+            else 0)
+          else 0) := by
+    intro m
+    by_cases h : p1 ∣ m <;>
+      by_cases h2 : ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) <;>
+      simp [h, h2]
+  rw [Finset.sum_congr rfl (fun m _ => hsplit m)]
+  rw [Rough514.sum_dvd_reindex hp1 L K
+    (fun m => if ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε) then
+        ((Real.log (m : ℝ) / Real.log Y *
+          (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) * χ (m : ZMod q)
+        else 0)]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  have hdiv : (p1 * n) / p1 = n := Nat.mul_div_cancel_left n hp1pos
+  have hcast : (((p1 * n : ℕ)) : ℝ) = (p1 : ℝ) * (n : ℝ) := by push_cast; ring
+  have hchi : χ (((p1 * n : ℕ)) : ZMod q) = χ (p1 : ZMod q) * χ (n : ZMod q) := by
+    push_cast
+    rw [map_mul]
+  have hsum : (∑ p2 ∈ ((p1 * n) / p1).primeFactors.filter
+        (fun p2 : ℕ => (((p1 * n : ℕ)) : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+        ∑ p3 ∈ (((p1 * n) / p1) / p2).primeFactors.filter
+          (fun p3 : ℕ => (((p1 * n : ℕ)) : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+          if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 * n : ℕ)) : ℝ))
+              (Real.log (p2 : ℝ) / Real.log (((p1 * n : ℕ)) : ℝ))
+              (Real.log (p3 : ℝ) / Real.log (((p1 * n : ℕ)) : ℝ))
+            then upperRough (((p1 * n) / p1) / p2 / p3) (p3 : ℝ) else 0)
+      = ∑ p2 ∈ n.primeFactors.filter
+        (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+        ∑ p3 ∈ (n / p2).primeFactors.filter
+          (fun p3 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+          if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+              (Real.log (p2 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+              (Real.log (p3 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+            then upperRough (n / p2 / p3) (p3 : ℝ) else 0 := by
+    rw [hdiv, hcast]
+  rw [hsum, hchi, hcast]
+  by_cases hw : (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε)
+  · rw [if_pos hw, if_pos hw]
+    ring
+  · rw [if_neg hw, if_neg hw]
+    ring
+
+/-- The `kept` term reindexed by its outer prime factor, with the recentring factor inside the
+triple sum. -/
+private lemma upperKept_weighted_reindex {ε Y : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q) {L K : ℕ} :
+    ∑ m ∈ Finset.Ioc L K,
+        ((Real.log (m : ℝ) / Real.log Y * upperKept ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)
+      = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          χ (p1 : ZMod q) *
+            ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+              (if (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε)
+                then ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                (∑ p2 ∈ n.primeFactors.filter
+                (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                  (p2 : ℝ) < (p1 : ℝ)),
+                ∑ p3 ∈ (n / p2).primeFactors.filter
+                  (fun p3 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+                    (p3 : ℝ) < (p2 : ℝ)),
+                  if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                    (Real.log (p2 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ))) (Real.log (p3 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                  then upperRough (n / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+                χ (n : ZMod q)
+                else 0) := by
+  have hper : ∀ m ∈ Finset.Ioc L K,
+      ((Real.log (m : ℝ) / Real.log Y * upperKept ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q) =
+        ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then ((Real.log (m : ℝ) / Real.log Y *
+          (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) * χ (m : ZMod q)
+            else 0) := by
+    intro m hm
+    obtain ⟨hmL, hmK⟩ := Finset.mem_Ioc.mp hm
+    have hm0 : 0 < m := by omega
+    have hset : m.primeFactors.filter
+          (fun p : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p : ℝ) ∧ (p : ℝ) < (m : ℝ) ^ upperC4 ε)
+        = ((Finset.Icc 2 K).filter Nat.Prime).filter
+            (fun p1 => p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε)) := by
+      ext p
+      simp only [Finset.mem_filter, Finset.mem_Icc, Nat.mem_primeFactors]
+      constructor
+      · rintro ⟨⟨hpp, hpd, -⟩, hW⟩
+        exact ⟨⟨⟨hpp.two_le, (Nat.le_of_dvd hm0 hpd).trans hmK⟩, hpp⟩, hpd, hW⟩
+      · rintro ⟨⟨⟨h2p, hpK⟩, hpp⟩, hpd, hW⟩
+        exact ⟨⟨hpp, hpd, by omega⟩, hW⟩
+    have hinner : upperKept ε (m : ℝ) m =
+        ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) else 0) := by
+      unfold upperKept
+      rw [hset, Finset.sum_filter]
+    rw [hinner, Finset.mul_sum]
+    rw [Complex.ofReal_sum, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun p1 _ => ?_
+    by_cases h : (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+    · rw [if_pos h, if_pos h]
+    · rw [if_neg h, if_neg h]
+      simp
+  calc ∑ m ∈ Finset.Ioc L K,
+        ((Real.log (m : ℝ) / Real.log Y * upperKept ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)
+      = ∑ m ∈ Finset.Ioc L K, ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+            then ((Real.log (m : ℝ) / Real.log Y *
+          (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) * χ (m : ZMod q)
+            else 0) := Finset.sum_congr rfl hper
+    _ = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          ∑ m ∈ Finset.Ioc L K,
+            (if (p1 ∣ m ∧ ((m : ℝ) ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < (m : ℝ) ^ upperC4 ε))
+              then ((Real.log (m : ℝ) / Real.log Y *
+          (∑ p2 ∈ (m / p1).primeFactors.filter
+            (fun p2 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+            ∑ p3 ∈ (m / p1 / p2).primeFactors.filter
+              (fun p3 : ℕ => (m : ℝ) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (m : ℝ))
+                  (Real.log (p2 : ℝ) / Real.log (m : ℝ)) (Real.log (p3 : ℝ) / Real.log (m : ℝ))
+                then upperRough (m / p1 / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) * χ (m : ZMod q)
+              else 0) := Finset.sum_comm
+    _ = ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          χ (p1 : ZMod q) *
+            ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+              (if (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε)
+                then ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                (∑ p2 ∈ n.primeFactors.filter
+                (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                  (p2 : ℝ) < (p1 : ℝ)),
+                ∑ p3 ∈ (n / p2).primeFactors.filter
+                  (fun p3 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+                    (p3 : ℝ) < (p2 : ℝ)),
+                  if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                    (Real.log (p2 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ))) (Real.log (p3 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                  then upperRough (n / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+                χ (n : ZMod q)
+                else 0) := by
+        refine Finset.sum_congr rfl fun p1 hp1 => ?_
+        exact upperKept_fibre_reindex (Y := Y) χ
+          (le_trans (by norm_num) (Finset.mem_filter.mp hp1).2.two_le)
+
+
+private lemma kept_inner_peel {ε Y : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q) {L' K' p1 : ℕ}
+    (hp1 : 1 ≤ p1) :
+    ∑ n ∈ Finset.Ioc L' K',
+        (if (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) then
+          ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+            (∑ p2 ∈ n.primeFactors.filter
+              (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                (p2 : ℝ) < (p1 : ℝ)),
+              (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0)) : ℝ) : ℂ) *
+            χ (n : ZMod q)
+          else 0)
+      = ∑ p2 ∈ (Finset.Icc 2 K').filter Nat.Prime,
+          (if (p2 : ℝ) < (p1 : ℝ) then
+            χ (p2 : ZMod q) *
+              ∑ k ∈ Finset.Ioc (L' / p2) (K' / p2),
+                (if ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                    (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                    (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ))
+                  then ((Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) / Real.log Y *
+                    (∑ p3 ∈ (k).primeFactors.filter
+              (fun p3 : ℕ => ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))) (Real.log (p3 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ))))
+                then upperRough ((k) / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+                    χ (k : ZMod q)
+                  else 0)
+            else 0) := by
+  have hone : ∀ n ∈ Finset.Ioc L' K',
+      (∑ p2 ∈ n.primeFactors.filter
+        (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)),
+        (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0))
+      = ∑ p2 ∈ (Finset.Icc 2 K').filter Nat.Prime,
+          (if (p2 ∣ n ∧ (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+            (p2 : ℝ) < (p1 : ℝ))) then
+            (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0) else 0) := by
+    intro n hn
+    obtain ⟨hnL, hnK⟩ := Finset.mem_Ioc.mp hn
+    have hn0 : 0 < n := by omega
+    have hset : n.primeFactors.filter
+          (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ))
+        = ((Finset.Icc 2 K').filter Nat.Prime).filter
+            (fun p2 => p2 ∣ n ∧ (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+              (p2 : ℝ) < (p1 : ℝ))) := by
+      ext p
+      simp only [Finset.mem_filter, Finset.mem_Icc, Nat.mem_primeFactors]
+      constructor
+      · rintro ⟨⟨hpp, hpd, -⟩, hW⟩
+        exact ⟨⟨⟨hpp.two_le, (Nat.le_of_dvd hn0 hpd).trans hnK⟩, hpp⟩, hpd, hW⟩
+      · rintro ⟨⟨⟨h2p, hpK⟩, hpp⟩, hpd, hW⟩
+        exact ⟨⟨hpp, hpd, by omega⟩, hW⟩
+    rw [hset, Finset.sum_filter]
+  have hper : ∀ n ∈ Finset.Ioc L' K',
+      (if (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) then
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+          (∑ p2 ∈ n.primeFactors.filter
+            (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+              (p2 : ℝ) < (p1 : ℝ)),
+            (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0)) : ℝ) : ℂ) *
+          χ (n : ZMod q)
+        else 0)
+      = ∑ p2 ∈ (Finset.Icc 2 K').filter Nat.Prime,
+          (if ((((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) ∧
+              p2 ∣ n ∧ (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                (p2 : ℝ) < (p1 : ℝ))) then
+            ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+              (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+              χ (n : ZMod q)
+            else 0) := by
+    intro n hn
+    rw [hone n hn]
+    by_cases hA : (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε)
+    · rw [if_pos hA, Finset.mul_sum, Complex.ofReal_sum, Finset.sum_mul]
+      refine Finset.sum_congr rfl fun p2 _ => ?_
+      by_cases hB : (p2 ∣ n ∧ (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+          (p2 : ℝ) < (p1 : ℝ)))
+      · rw [if_pos hB, if_pos ⟨hA, hB⟩]
+      · rw [if_neg hB, if_neg (fun h => hB h.2)]
+        simp
+    · rw [if_neg hA]
+      refine (Finset.sum_eq_zero fun p2 _ => ?_).symm
+      rw [if_neg]
+      rintro ⟨h1, -⟩
+      exact hA h1
+  rw [Finset.sum_congr rfl hper, Finset.sum_comm]
+  refine Finset.sum_congr rfl fun p2 hp2 => ?_
+  have hp2P : p2.Prime := (Finset.mem_filter.mp hp2).2
+  have hp2pos : 0 < p2 := hp2P.pos
+  by_cases hlt : (p2 : ℝ) < (p1 : ℝ)
+  · rw [if_pos hlt]
+    have hsplit : ∀ n : ℕ,
+        (if ((((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) ∧
+            p2 ∣ n ∧ (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+              (p2 : ℝ) < (p1 : ℝ))) then
+          ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+            (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+            χ (n : ZMod q)
+          else 0)
+        = (if p2 ∣ n then
+            (if ((((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) ∧
+                (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                  (p2 : ℝ) < (p1 : ℝ))) then
+              ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+                (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+                χ (n : ZMod q)
+              else 0)
+            else 0) := by
+      intro n
+      by_cases h : p2 ∣ n <;>
+        by_cases h2 : ((((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) ∧
+            (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ))) <;>
+        simp [h, h2]
+    rw [Finset.sum_congr rfl (fun n _ => hsplit n)]
+    rw [Rough514.sum_dvd_reindex (le_trans (by norm_num) hp2P.two_le) L' K'
+      (fun n => if ((((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) ∧
+          (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ))) then
+        ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+          (∑ p3 ∈ ((n / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (n : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (n : ℝ))))
+                then upperRough (((n / p2)) / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+          χ (n : ZMod q)
+        else 0)]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    have hdiv : (p2 * k) / p2 = k := Nat.mul_div_cancel_left k hp2pos
+    have hchi : χ (((p2 * k : ℕ)) : ZMod q) = χ (p2 : ZMod q) * χ (k : ZMod q) := by
+      push_cast
+      rw [map_mul]
+    have harg : ((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ)) = ((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ) := by
+      push_cast; ring
+    have hrough : (∑ p3 ∈ (((p2 * k) / p2)).primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ)))) (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ))))
+                then upperRough ((((p2 * k) / p2)) / p3) (p3 : ℝ) else 0)
+        = (∑ p3 ∈ (k).primeFactors.filter
+              (fun p3 : ℕ => ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ))) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ))))
+                  (Real.log (p2 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))) (Real.log (p3 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ))))
+                then upperRough ((k) / p3) (p3 : ℝ) else 0) := by
+      rw [hdiv, harg]
+    have hlogeq : Real.log ((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ)) / Real.log Y =
+        Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) / Real.log Y := by rw [harg]
+    have hcond : ((((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < ((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ)) ^ upperC4 ε) ∧
+          (((p1 : ℝ) * (((p2 * k : ℕ)) : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧ (p2 : ℝ) < (p1 : ℝ)))
+        ↔ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+          (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+          (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ)) := by
+      rw [harg]
+      exact ⟨fun h => ⟨h.1.1, h.1.2, h.2.1⟩, fun h => ⟨⟨h.1, h.2.1⟩, h.2.2, hlt⟩⟩
+    rw [hrough, hlogeq, hchi]
+    by_cases hc : ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+        (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+        (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ))
+    · rw [if_pos (hcond.mpr hc), if_pos hc]
+      ring
+    · rw [if_neg (fun h => hc (hcond.mp h)), if_neg hc]
+      ring
+  · rw [if_neg hlt]
+    refine Finset.sum_eq_zero fun n _ => ?_
+    rw [if_neg]
+    rintro ⟨-, -, -, h4⟩
+    exact hlt h4
+
+
+/-- The first cofactor is never in the page 53 window: the product of three decreasing primes is at
+most the cube of the first and `3 c4 ≤ 1`. This is what lets a `kept` fibre whose interval of
+cofactors starts at zero be read as the same fibre starting at one. -/
+private lemma kept_base_not_in_window {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8)
+    {p1 p2 p3 : ℕ} (hp1 : 1 ≤ p1) (hp21 : p2 ≤ p1) (hp31 : p3 ≤ p1) :
+    ¬ ((p1 : ℝ) < ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * ((1 : ℕ) : ℝ)) ^ upperC4 ε) := by
+  have hc4 : 0 < upperC4 ε := upperC4_pos hε8
+  have hc4hi : upperC4 ε ≤ 133 / 500 := upperC4_le_133_500 hε hε8
+  have hp1R : (1 : ℝ) ≤ (p1 : ℝ) := by exact_mod_cast hp1
+  have hpos : (0 : ℝ) < (p1 : ℝ) := by linarith
+  have hprod : ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * ((1 : ℕ) : ℝ)) ≤ (p1 : ℝ) ^ 3 := by
+    have h2 : (p2 : ℝ) ≤ (p1 : ℝ) := by exact_mod_cast hp21
+    have h3 : (p3 : ℝ) ≤ (p1 : ℝ) := by exact_mod_cast hp31
+    have h3' : (0 : ℝ) ≤ (p3 : ℝ) := by positivity
+    have h4 : (p1 : ℝ) * (p2 : ℝ) ≤ (p1 : ℝ) * (p1 : ℝ) :=
+      mul_le_mul_of_nonneg_left h2 (by linarith)
+    have h5 : (p1 : ℝ) * (p2 : ℝ) * (p3 : ℝ) ≤ (p1 : ℝ) * (p1 : ℝ) * (p1 : ℝ) :=
+      mul_le_mul h4 h3 h3' (by positivity)
+    calc (((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * ((1 : ℕ) : ℝ)
+        = (p1 : ℝ) * (p2 : ℝ) * (p3 : ℝ) := by ring
+      _ ≤ (p1 : ℝ) * (p1 : ℝ) * (p1 : ℝ) := h5
+      _ = (p1 : ℝ) ^ 3 := by ring
+  have h3c4 : 3 * upperC4 ε ≤ 1 := by nlinarith
+  have h1 : ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * ((1 : ℕ) : ℝ)) ^ upperC4 ε ≤
+      ((p1 : ℝ) ^ 3) ^ upperC4 ε := Real.rpow_le_rpow (by positivity) hprod hc4.le
+  have h2 : ((p1 : ℝ) ^ 3) ^ upperC4 ε = (p1 : ℝ) ^ (3 * upperC4 ε) := by
+    rw [show ((p1 : ℝ) ^ 3) = (p1 : ℝ) ^ (3 : ℝ) from (Real.rpow_natCast _ 3).symm,
+      Real.rpow_mul hpos.le]
+  have h3 : (p1 : ℝ) ^ (3 * upperC4 ε) ≤ (p1 : ℝ) ^ (1 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hp1R h3c4
+  have h4 : ((p1 : ℝ) ^ (1 : ℝ)) = (p1 : ℝ) := Real.rpow_one _
+  intro hcon
+  rw [h2] at h1
+  rw [h4] at h3
+  linarith
+
+/-- The triple reciprocal sum over a decreasing triple of primes costs three logarithms. -/
+private lemma triple_inv_sum_le (K : ℕ) :
+    ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+      (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0))
+      ≤ (K : ℝ) * (1 + Real.log (K : ℝ)) ^ 3 := by
+  have hlogK : (0 : ℝ) ≤ Real.log (K : ℝ) := by
+    rcases Nat.eq_zero_or_pos K with h0 | hpos
+    · rw [h0]; simp
+    · exact Real.log_nonneg (by exact_mod_cast hpos)
+  have hL1 : (0 : ℝ) ≤ 1 + Real.log (K : ℝ) := by linarith
+  have hinn : ∀ p1 p2 : ℕ,
+      (∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+        (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0))
+      ≤ (((K / p1) / p2 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) := by
+    intro p1 p2
+    have h1 : (∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+        (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0))
+        ≤ ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+            ((((K / p1) / p2) / p3 : ℕ) : ℝ) := by
+      refine Finset.sum_le_sum fun p3 _ => ?_
+      by_cases hc : (p3 : ℝ) < (p2 : ℝ)
+      · rw [if_pos hc]
+      · rw [if_neg hc]
+        exact Nat.cast_nonneg _
+    have h2 : (∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+        ((((K / p1) / p2) / p3 : ℕ) : ℝ))
+        ≤ ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+            (((K / p1) / p2 : ℕ) : ℝ) / (p3 : ℝ) := by
+      refine Finset.sum_le_sum fun p3 _ => ?_
+      exact Nat.cast_div_le (α := ℝ)
+    have h3 : (∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+        (((K / p1) / p2 : ℕ) : ℝ) / (p3 : ℝ))
+        = (((K / p1) / p2 : ℕ) : ℝ) *
+            ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime, (1 : ℝ) / (p3 : ℝ) := by
+      rw [Finset.mul_sum]
+      try refine Finset.sum_congr rfl fun p3 _ => by ring
+    have h4 : (∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime, (1 : ℝ) / (p3 : ℝ))
+        ≤ 1 + Real.log (K : ℝ) := by
+      have hsub : (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime ⊆
+          (Finset.Icc 2 K).filter Nat.Prime := by
+        intro p hp
+        obtain ⟨hpI, hpP⟩ := Finset.mem_filter.mp hp
+        obtain ⟨hp2, hpk⟩ := Finset.mem_Icc.mp hpI
+        exact Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨hp2,
+          le_trans hpk (le_trans (Nat.div_le_self _ _) (Nat.div_le_self _ _))⟩, hpP⟩
+      refine le_trans (Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => by positivity)) ?_
+      exact prime_inv_sum_le K
+    calc (∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+          (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0))
+        ≤ ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+            ((((K / p1) / p2) / p3 : ℕ) : ℝ) := h1
+      _ ≤ ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+            (((K / p1) / p2 : ℕ) : ℝ) / (p3 : ℝ) := h2
+      _ = (((K / p1) / p2 : ℕ) : ℝ) *
+            ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime, (1 : ℝ) / (p3 : ℝ) := h3
+      _ ≤ (((K / p1) / p2 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) :=
+          mul_le_mul_of_nonneg_left h4 (by positivity)
+  have hmid : ∀ p1 : ℕ,
+      (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+        (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0))
+      ≤ ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) ^ 2 := by
+    intro p1
+    have h1 : (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+        (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0))
+        ≤ ∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (((K / p1) / p2 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) := by
+      refine Finset.sum_le_sum fun p2 _ => ?_
+      by_cases hc : (p2 : ℝ) < (p1 : ℝ)
+      · rw [if_pos hc]
+        exact hinn p1 p2
+      · rw [if_neg hc]
+        positivity
+    have h2 : (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+        (((K / p1) / p2 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)))
+        ≤ ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) * (1 + Real.log (K : ℝ)) := by
+      have hdrop : (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+          (((K / p1) / p2 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)))
+          ≤ ∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+              ((K / p1 : ℕ) : ℝ) / (p2 : ℝ) * (1 + Real.log (K : ℝ)) := by
+        refine Finset.sum_le_sum fun p2 _ => ?_
+        have h5 : (((K / p1) / p2 : ℕ) : ℝ) ≤ ((K / p1 : ℕ) : ℝ) / (p2 : ℝ) :=
+          Nat.cast_div_le (α := ℝ)
+        exact mul_le_mul_of_nonneg_right h5 hL1
+      have h6 : (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+          ((K / p1 : ℕ) : ℝ) / (p2 : ℝ) * (1 + Real.log (K : ℝ)))
+          = ((K / p1 : ℕ) : ℝ) *
+              (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime, (1 : ℝ) / (p2 : ℝ)) *
+                (1 + Real.log (K : ℝ)) := by
+        rw [Finset.mul_sum, Finset.sum_mul]
+        refine Finset.sum_congr rfl fun p2 _ => by ring
+      have h7 : (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime, (1 : ℝ) / (p2 : ℝ))
+          ≤ 1 + Real.log (K : ℝ) := by
+        have hsub : (Finset.Icc 2 (K / p1)).filter Nat.Prime ⊆
+            (Finset.Icc 2 K).filter Nat.Prime := by
+          intro p hp
+          obtain ⟨hpI, hpP⟩ := Finset.mem_filter.mp hp
+          obtain ⟨hp2, hpk⟩ := Finset.mem_Icc.mp hpI
+          exact Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨hp2,
+            le_trans hpk (Nat.div_le_self _ _)⟩, hpP⟩
+        refine le_trans (Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => by positivity)) ?_
+        exact prime_inv_sum_le K
+      calc (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (((K / p1) / p2 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)))
+          ≤ ∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+              ((K / p1 : ℕ) : ℝ) / (p2 : ℝ) * (1 + Real.log (K : ℝ)) := hdrop
+        _ = ((K / p1 : ℕ) : ℝ) *
+              (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime, (1 : ℝ) / (p2 : ℝ)) *
+                (1 + Real.log (K : ℝ)) := h6
+        _ ≤ ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) * (1 + Real.log (K : ℝ)) := by
+            have h8 : (0 : ℝ) ≤ ((K / p1 : ℕ) : ℝ) := by positivity
+            exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left h7 h8) hL1
+    calc (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+          (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0))
+        ≤ ∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (((K / p1) / p2 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) := h1
+      _ ≤ ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) * (1 + Real.log (K : ℝ)) := h2
+      _ = ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) ^ 2 := by ring
+  refine le_trans (Finset.sum_le_sum fun p1 _ => hmid p1) ?_
+  have h9 : (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+      ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) ^ 2)
+      ≤ (K : ℝ) * (1 + Real.log (K : ℝ)) ^ 2 * (1 + Real.log (K : ℝ)) := by
+    have hdrop : (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+        ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) ^ 2)
+        ≤ ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+            (K : ℝ) / (p1 : ℝ) * (1 + Real.log (K : ℝ)) ^ 2 := by
+      refine Finset.sum_le_sum fun p1 _ => ?_
+      have h5 : ((K / p1 : ℕ) : ℝ) ≤ (K : ℝ) / (p1 : ℝ) := Nat.cast_div_le (α := ℝ)
+      exact mul_le_mul_of_nonneg_right h5 (by positivity)
+    have h6 : (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+        (K : ℝ) / (p1 : ℝ) * (1 + Real.log (K : ℝ)) ^ 2)
+        = (K : ℝ) * (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ)) *
+            (1 + Real.log (K : ℝ)) ^ 2 := by
+      rw [Finset.mul_sum, Finset.sum_mul]
+      refine Finset.sum_congr rfl fun p1 _ => by ring
+    have h7 : (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ)) ≤ 1 + Real.log (K : ℝ) :=
+      prime_inv_sum_le K
+    calc (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+          ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) ^ 2)
+        ≤ ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+            (K : ℝ) / (p1 : ℝ) * (1 + Real.log (K : ℝ)) ^ 2 := hdrop
+      _ = (K : ℝ) * (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (1 : ℝ) / (p1 : ℝ)) *
+            (1 + Real.log (K : ℝ)) ^ 2 := h6
+      _ ≤ (K : ℝ) * (1 + Real.log (K : ℝ)) * (1 + Real.log (K : ℝ)) ^ 2 := by
+          have h8 : (0 : ℝ) ≤ (K : ℝ) := by positivity
+          exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left h7 h8) (by positivity)
+      _ = (K : ℝ) * (1 + Real.log (K : ℝ)) ^ 2 * (1 + Real.log (K : ℝ)) := by ring
+  calc (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+      ((K / p1 : ℕ) : ℝ) * (1 + Real.log (K : ℝ)) ^ 2)
+      ≤ (K : ℝ) * (1 + Real.log (K : ℝ)) ^ 2 * (1 + Real.log (K : ℝ)) := h9
+    _ = (K : ℝ) * (1 + Real.log (K : ℝ)) ^ 3 := by ring
+
+set_option maxHeartbeats 4000000 in
+private lemma kept_third_peel {ε Y : ℝ} {q : ℕ} (χ : DirichletCharacter ℂ q) {L' K' p1 p2 : ℕ}
+    (hp1 : 1 ≤ p1) (hp2 : 1 ≤ p2) :
+    ∑ k ∈ Finset.Ioc L' K',
+        (if ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+            (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ)) then
+          ((Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) / Real.log Y *
+            (∑ p3 ∈ k.primeFactors.filter
+              (fun p3 : ℕ => (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+                (p3 : ℝ) < (p2 : ℝ)),
+              if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                then upperRough (k / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+            χ (k : ZMod q)
+          else 0)
+      = ∑ p3 ∈ (Finset.Icc 2 K').filter Nat.Prime,
+          (if (p3 : ℝ) < (p2 : ℝ) then
+            χ (p3 : ZMod q) *
+              ∑ j ∈ Finset.Ioc (L' / p3) (K' / p3),
+                (if ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                    (p1 : ℝ) < ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) ^ upperC4 ε ∧
+                    ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) then
+                  (if upperPrimeCovered ε (Real.log (p1 : ℝ) /
+                        Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)))
+                      (Real.log (p2 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)))
+                      (Real.log (p3 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)))
+                    then ((Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) / Real.log Y *
+                      upperRough j (p3 : ℝ) : ℝ) : ℂ) * χ (j : ZMod q)
+                    else 0)
+                  else 0)
+            else 0) := by
+  have hone : ∀ k ∈ Finset.Ioc L' K',
+      (∑ p3 ∈ k.primeFactors.filter
+        (fun p3 : ℕ => (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+          (p3 : ℝ) < (p2 : ℝ)),
+        if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+          then upperRough (k / p3) (p3 : ℝ) else 0)
+      = ∑ p3 ∈ (Finset.Icc 2 K').filter Nat.Prime,
+          (if (p3 ∣ k ∧ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) then
+            (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+              then upperRough (k / p3) (p3 : ℝ) else 0) else 0) := by
+    intro k hk
+    obtain ⟨hkL, hkK⟩ := Finset.mem_Ioc.mp hk
+    have hk0 : 0 < k := by omega
+    have hset : k.primeFactors.filter
+          (fun p3 : ℕ => (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+            (p3 : ℝ) < (p2 : ℝ))
+        = ((Finset.Icc 2 K').filter Nat.Prime).filter
+            (fun p3 => p3 ∣ k ∧ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) := by
+      ext p3
+      simp only [Finset.mem_filter, Finset.mem_Icc, Nat.mem_primeFactors]
+      constructor
+      · rintro ⟨⟨hpp, hpd, -⟩, hW⟩
+        exact ⟨⟨⟨hpp.two_le, (Nat.le_of_dvd hk0 hpd).trans hkK⟩, hpp⟩, hpd, hW⟩
+      · rintro ⟨⟨⟨h2p, hpK⟩, hpp⟩, hpd, hW⟩
+        exact ⟨⟨hpp, hpd, by omega⟩, hW⟩
+    rw [hset, Finset.sum_filter]
+  have hper : ∀ k ∈ Finset.Ioc L' K',
+      (if ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+            (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ)) then
+        ((Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) / Real.log Y *
+          (∑ p3 ∈ k.primeFactors.filter
+            (fun p3 : ℕ => (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+              (p3 : ℝ) < (p2 : ℝ)),
+            if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+              then upperRough (k / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+          χ (k : ZMod q)
+        else 0)
+      = ∑ p3 ∈ (Finset.Icc 2 K').filter Nat.Prime,
+          (if p3 ∣ k then
+            (if ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) then
+              (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                then ((Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) / Real.log Y *
+                  upperRough (k / p3) (p3 : ℝ) : ℝ) : ℂ) * χ (k : ZMod q)
+                else 0)
+            else 0)
+          else 0) := by
+    intro k hk
+    rw [hone k hk]
+    by_cases hW : ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+            (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+            (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ))
+    · rw [if_pos hW, Complex.ofReal_mul, Complex.ofReal_sum, mul_assoc, Finset.sum_mul,
+        Finset.mul_sum]
+      refine Finset.sum_congr rfl fun p3 _ => ?_
+      by_cases hd : p3 ∣ k
+      · rw [if_pos hd]
+        by_cases hB : ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))
+        · have hc1 : (p3 ∣ k ∧ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) := ⟨hd, hB⟩
+          have hc2 : ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) := ⟨hW.1, hW.2.1, hW.2.2, hB.1, hB.2⟩
+          rw [if_pos hc1, if_pos hc2]
+          by_cases hcov : upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+          · rw [if_pos hcov, if_pos hcov]
+            push_cast
+            ring
+          · rw [if_neg hcov, if_neg hcov]
+            push_cast
+            ring
+        · have hc1 : ¬ (p3 ∣ k ∧ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) := fun h => hB h.2
+          have hc2 : ¬ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) := fun h => hB h.2.2.2
+          rw [if_neg hc1, if_neg hc2]
+          push_cast
+          ring
+      · have hc1 : ¬ (p3 ∣ k ∧ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) := fun h => hd h.1
+        rw [if_neg hd, if_neg hc1]
+        push_cast
+        ring
+    · rw [if_neg hW]
+      refine (Finset.sum_eq_zero fun p3 _ => ?_).symm
+      by_cases hd : p3 ∣ k
+      · rw [if_pos hd]
+        have hc2 : ¬ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) :=
+          fun h => hW ⟨h.1, h.2.1, h.2.2.1⟩
+        rw [if_neg hc2]
+      · rw [if_neg hd]
+  rw [Finset.sum_congr rfl hper, Finset.sum_comm]
+  refine Finset.sum_congr rfl fun p3 hp3 => ?_
+  have hp3P : p3.Prime := (Finset.mem_filter.mp hp3).2
+  have hp3one : 1 ≤ p3 := le_trans (by norm_num) hp3P.two_le
+  have hp3pos : 0 < p3 := hp3P.pos
+  by_cases hlt : (p3 : ℝ) < (p2 : ℝ)
+  · rw [if_pos hlt]
+    rw [Rough514.sum_dvd_reindex hp3one L' K'
+      (fun k => if ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) then
+        (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                  (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+          then ((Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) / Real.log Y *
+            upperRough (k / p3) (p3 : ℝ) : ℝ) : ℂ) * χ (k : ZMod q)
+          else 0)
+        else 0)]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    have hdiv : (p3 * j) / p3 = j := Nat.mul_div_cancel_left j hp3pos
+    have harg : ((p1 : ℝ) * (p2 : ℝ)) * (((p3 * j : ℕ)) : ℝ) =
+        (((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ) := by
+      push_cast
+      ring
+    have hchi : χ (((p3 * j : ℕ)) : ZMod q) = χ (p3 : ZMod q) * χ (j : ZMod q) := by
+      push_cast
+      rw [map_mul]
+    rw [hdiv, harg, hchi]
+    set D : ℝ := (((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ) with hD
+    have hcovD : upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log D)
+        (Real.log (p2 : ℝ) / Real.log D) (Real.log (p3 : ℝ) / Real.log D)
+        ↔ upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log D)
+          (Real.log (p2 : ℝ) / Real.log D) (Real.log (p3 : ℝ) / Real.log D) := Iff.rfl
+    by_cases hc3 : (D ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < D ^ upperC4 ε ∧
+      D ^ upperC1 ε ≤ (p3 : ℝ))
+    · have hL : (D ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < D ^ upperC4 ε ∧
+          D ^ upperC1 ε ≤ (p2 : ℝ) ∧ (D ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) :=
+        ⟨hc3.1, hc3.2.1, le_trans hc3.2.2 (le_of_lt hlt), hc3.2.2, hlt⟩
+      rw [if_pos hL, if_pos hc3]
+      by_cases hcov : upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log D)
+          (Real.log (p2 : ℝ) / Real.log D) (Real.log (p3 : ℝ) / Real.log D)
+      · rw [if_pos hcov, if_pos hcov]
+        push_cast
+        ring
+      · rw [if_neg hcov, if_neg hcov]
+        push_cast
+        ring
+    · have hL : ¬ (D ^ upperC1 ε ≤ (p1 : ℝ) ∧ (p1 : ℝ) < D ^ upperC4 ε ∧
+          D ^ upperC1 ε ≤ (p2 : ℝ) ∧ (D ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) :=
+        fun h => hc3 ⟨h.1, h.2.1, h.2.2.2.1⟩
+      rw [if_neg hL, if_neg hc3]
+      push_cast
+      ring
+  · rw [if_neg hlt]
+    refine Finset.sum_eq_zero fun k _ => ?_
+    by_cases hd : p3 ∣ k
+    · rw [if_pos hd]
+      have hc2 : ¬ ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧ (p3 : ℝ) < (p2 : ℝ))) := fun h => hlt h.2.2.2.2
+      rw [if_neg hc2]
+    · rw [if_neg hd]
+
+
+/-- A sum over the cofactors starting at zero is the sum starting at one, once the cofactor one does
+not contribute. -/
+private lemma sum_Ioc_zero_eq_one {b : ℕ} {f : ℕ → ℂ} (h1 : f 1 = 0) :
+    ∑ j ∈ Finset.Ioc 0 b, f j = ∑ j ∈ Finset.Ioc 1 b, f j := by
+  rcases Nat.eq_zero_or_pos b with hb | hb
+  · rw [hb]
+    simp
+  · refine (Finset.sum_subset (s₁ := Finset.Ioc 1 b) (s₂ := Finset.Ioc 0 b) ?_ ?_).symm
+    · intro x hx
+      exact Finset.mem_Ioc.mpr
+        ⟨lt_trans Nat.zero_lt_one (Finset.mem_Ioc.mp hx).1, (Finset.mem_Ioc.mp hx).2⟩
+    · intro x hx hxs
+      have hx1 : x = 1 := by
+        have h1' : 0 < x := (Finset.mem_Ioc.mp hx).1
+        have h2' : ¬ (1 < x) := fun h =>
+          hxs (Finset.mem_Ioc.mpr ⟨h, (Finset.mem_Ioc.mp hx).2⟩)
+        omega
+      subst hx1
+      exact h1
+
+/-- A sum whose summand vanishes throughout has norm zero. -/
+private lemma norm_sum_eq_zero_of_forall {s : Finset ℕ} {f : ℕ → ℂ}
+    (h : ∀ x ∈ s, f x = 0) : ‖∑ x ∈ s, f x‖ = 0 := by
+  rw [Finset.sum_eq_zero h, norm_zero]
+
+/-- A cofactor of a `kept` triple window is large: the recentred product `p1 p2 p3 j` exceeds `Y`. -/
+private lemma kept_cofactor_gt {Y : ℝ} {L p1 p2 p3 j b : ℕ} (hp1 : p1.Prime)
+    (hp2 : p2.Prime) (hp3 : p3.Prime) (hLf : ⌊Y⌋₊ ≤ L)
+    (hj : j ∈ Finset.Ioc (((L / p1) / p2) / p3) b) :
+    (Y : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ) := by
+  have h3 : L < p1 * (p2 * (p3 * j)) := by
+    have h4 : (L / p1 / p2) / p3 + 1 ≤ j := (Finset.mem_Ioc.mp hj).1
+    have h6 : L / p1 / p2 < p3 * (L / p1 / p2 / p3 + 1) := by
+      have h7 : p3 * (L / p1 / p2 / p3) + (L / p1 / p2) % p3 = L / p1 / p2 :=
+        Nat.div_add_mod _ _
+      have h8 : (L / p1 / p2) % p3 < p3 := Nat.mod_lt _ hp3.pos
+      have h9 : p3 * (L / p1 / p2 / p3 + 1) = p3 * (L / p1 / p2 / p3) + p3 := by ring
+      omega
+    have h10 : L / p1 / p2 < p3 * j := by
+      have h5 : p3 * (L / p1 / p2 / p3 + 1) ≤ p3 * j := Nat.mul_le_mul_left _ h4
+      omega
+    have h12 : L / p1 < p2 * (L / p1 / p2 + 1) := by
+      have h13 : p2 * (L / p1 / p2) + (L / p1) % p2 = L / p1 := Nat.div_add_mod _ _
+      have h14 : (L / p1) % p2 < p2 := Nat.mod_lt _ hp2.pos
+      have h15 : p2 * (L / p1 / p2 + 1) = p2 * (L / p1 / p2) + p2 := by ring
+      omega
+    have h16 : L / p1 < p2 * (p3 * j) := by
+      have h11 : p2 * (L / p1 / p2 + 1) ≤ p2 * (p3 * j) := Nat.mul_le_mul_left _ (by omega)
+      omega
+    have h18 : L < p1 * (L / p1 + 1) := by
+      have h19 : p1 * (L / p1) + L % p1 = L := Nat.div_add_mod _ _
+      have h20 : L % p1 < p1 := Nat.mod_lt _ hp1.pos
+      have h21 : p1 * (L / p1 + 1) = p1 * (L / p1) + p1 := by ring
+      omega
+    have h17 : p1 * (L / p1 + 1) ≤ p1 * (p2 * (p3 * j)) := Nat.mul_le_mul_left _ (by omega)
+    exact lt_of_lt_of_le h18 h17
+  have h22 : ((p1 * (p2 * (p3 * j)) : ℕ) : ℝ) = (((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ) := by
+    push_cast
+    ring
+  have h24 : (L : ℝ) < ((p1 * (p2 * (p3 * j)) : ℕ) : ℝ) := by exact_mod_cast h3
+  rw [h22] at h24
+  have h2 : (⌊Y⌋₊ : ℝ) ≤ (L : ℝ) := by exact_mod_cast hLf
+  have h25 : Y < (⌊Y⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one Y
+  have h26 : (L : ℝ) + 1 ≤ (((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ) := by
+    have h27 : ((L + 1 : ℕ) : ℝ) ≤ ((p1 * (p2 * (p3 * j)) : ℕ) : ℝ) := by
+      exact_mod_cast Nat.succ_le_of_lt h3
+    rw [h22] at h27
+    push_cast at h27
+    linarith
+  linarith [h24, h26, h2, h25]
+
+set_option maxHeartbeats 200000000 in
+/-- The `kept` term of the self scaled upper coefficient at a fixed scale. The `p1` peel is
+`upperKept_weighted_reindex`, the `p2` peel `kept_inner_peel`, the `p3` peel `kept_third_peel`. After
+the three peels one fibre is one triple of primes, on which the covering indicator is constant and
+the sifted level is the third prime itself, so the Abel bound `kept_fibre_le` of the fixed level rough
+character sum applies with no ladder decomposition. The three reciprocal sums over the decreasing
+primes cost three logarithms, which the `A + 6` shift absorbs. -/
+private lemma upperKept_self_bound {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    ∀ A : ℝ, 0 < A → ∃ C : ℝ, 0 < C ∧ ∀ Y : ℝ, C ≤ Y → ∀ q : ℕ, 1 ≤ q →
+      (q : ℝ) ≤ Real.log Y ^ A → ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
+      ∀ L K : ℕ, 1 ≤ L → (L : ℝ) ≤ Y → ⌊Y⌋₊ ≤ L → (K : ℝ) ≤ 2 * Y →
+        ‖∑ m ∈ Finset.Ioc L K,
+          ((Real.log (m : ℝ) / Real.log Y * upperKept ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)‖ ≤
+          C * Y * Real.log Y ^ (-A) := by
+  intro A hA
+  obtain ⟨C0, hC0pos, hC0⟩ :=
+    Rough514.rough_character_interval (c := upperC1 ε / 2) (A := A + 6)
+      (by linarith [upperC1_pos hε8]) (by linarith)
+  refine ⟨max (23544 * C0) 4, ?_, ?_⟩
+  · exact lt_of_lt_of_le (by norm_num : (0 : ℝ) < 4) (le_max_right _ _)
+  intro Y hY q hq hqA χ hχ L K hL hLY hLf hKY
+  have hCl : (max (23544 * C0) 4 : ℝ) ≤ Y := hY
+  have hC4 : (4 : ℝ) ≤ Y := le_trans (le_max_right _ _) hCl
+  have hY2 : 2 ≤ Y := by linarith
+  have hY0 : (0 : ℝ) < Y := by linarith
+  have hlogY : 0 < Real.log Y := Real.log_pos (by linarith)
+  have hC0Y : C0 ≤ 2 * Y := by
+    have h1 : (0 : ℝ) ≤ C0 := hC0pos.le
+    have h2 : C0 ≤ 23544 * C0 := by nlinarith
+    have h3 : 23544 * C0 ≤ max (23544 * C0) 4 := le_max_left _ _
+    linarith
+  have hlogY1 : (1 : ℝ) ≤ Real.log Y := by
+    rw [Real.le_log_iff_exp_le hY0]
+    exact Real.exp_one_lt_three.le.trans (by linarith)
+  have hc1 : 0 < upperC1 ε := upperC1_pos hε8
+  have hc1le : upperC1 ε ≤ 1 := upperC1_le_one hε
+  have hX : (2 * Y) ^ (upperC1 ε / 2) ≤ Y ^ upperC1 ε := level_ge hc1 hY2
+  set z : ℕ := ⌈(2 * Y) ^ (upperC1 ε / 2)⌉₊ with hzdef
+  set Pmax : ℕ := ⌈(K : ℝ) ^ upperC1 ε⌉₊ with hPdef
+  have hzX : (2 * Y) ^ (upperC1 ε / 2) ≤ (z : ℝ) := Nat.le_ceil _
+  have hz1 : 1 ≤ z := by
+    have h1 : (1 : ℝ) ≤ (2 * Y) ^ (upperC1 ε / 2) := by
+      have h2 : (1 : ℝ) ≤ 2 * Y := by linarith
+      calc (1 : ℝ) = (1 : ℝ) ^ (upperC1 ε / 2) := (Real.one_rpow _).symm
+        _ ≤ (2 * Y) ^ (upperC1 ε / 2) := Real.rpow_le_rpow (by norm_num) h2 (by positivity)
+    have h2 : (1 : ℝ) ≤ (z : ℝ) := by
+      rw [hzdef]
+      exact le_trans h1 (Nat.le_ceil _)
+    exact_mod_cast h2
+  have hlogX : 0 < Real.log (2 * Y) := Real.log_pos (by linarith)
+  have hqA' : (q : ℝ) ≤ Real.log (2 * Y) ^ (A + 6) := by
+    have h1 : Real.log Y ≤ Real.log (2 * Y) := Real.log_le_log hY0 (by linarith)
+    have h3 : Real.log Y ^ A ≤ Real.log (2 * Y) ^ (A + 6) := by
+      have h4 : Real.log Y ^ A ≤ Real.log (2 * Y) ^ A :=
+        Real.rpow_le_rpow hlogY.le h1 hA.le
+      have h5 : Real.log (2 * Y) ^ A ≤ Real.log (2 * Y) ^ (A + 6) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+      linarith
+    linarith
+  have hpre : ∀ (ζ a b : ℕ), (2 * Y) ^ (upperC1 ε / 2) ≤ (ζ : ℝ) → 1 ≤ a → (b : ℝ) ≤ 2 * Y →
+      ‖∑ n ∈ Finset.Ioc a b, ((Task308.roughIndicator n ζ : ℝ) : ℂ) * χ (n : ZMod q)‖ ≤
+        C0 * (b : ℝ) * Real.log (2 * Y) ^ (-(A + 6)) := by
+    intro ζ a b hζ ha hb
+    exact hC0 (2 * Y) hC0Y q hq hqA' χ hχ ζ hζ a b ha hb
+  -- the three logarithms that the two reciprocal sums cost
+  have hlogK0 : (0 : ℝ) ≤ Real.log (K : ℝ) := by
+    rcases Nat.eq_zero_or_pos K with h0 | hpos
+    · rw [h0]; simp
+    · exact Real.log_nonneg (by exact_mod_cast hpos)
+  have hlogK : Real.log (K : ℝ) ≤ 2 * Real.log Y := by
+    have h1 : Real.log (K : ℝ) ≤ Real.log (2 * Y) := by
+      rcases Nat.eq_zero_or_pos K with h0 | hpos
+      · rw [h0]; simp only [Nat.cast_zero, Real.log_zero]; linarith
+      · exact Real.log_le_log (by exact_mod_cast hpos) hKY
+    have h2 : Real.log (2 * Y) ≤ 2 * Real.log Y := by
+      rw [Real.log_mul (by norm_num) hY0.ne']
+      have h3 : Real.log 2 ≤ Real.log Y := Real.log_le_log (by norm_num) hY2
+      linarith
+    linarith
+  have hlogP0 : (0 : ℝ) ≤ Real.log (Pmax : ℝ) := by
+    rcases Nat.eq_zero_or_pos Pmax with h0 | hpos
+    · rw [h0]; simp
+    · exact Real.log_nonneg (by exact_mod_cast hpos)
+  have hlogP : Real.log (Pmax : ℝ) ≤ 2 * Real.log Y := by
+    have hKc1 : (K : ℝ) ^ upperC1 ε ≤ (K : ℝ) := by
+      rcases Nat.lt_or_ge K 2 with h | h
+      · interval_cases K
+        · rw [Nat.cast_zero, Real.zero_rpow hc1.ne']
+        · rw [Nat.cast_one, Real.one_rpow]
+      · have h2 : (1 : ℝ) ≤ (K : ℝ) := by
+          exact_mod_cast (le_trans (by norm_num : (1 : ℕ) ≤ 2) h)
+        calc (K : ℝ) ^ upperC1 ε ≤ (K : ℝ) ^ (1 : ℝ) :=
+              Real.rpow_le_rpow_of_exponent_le h2 hc1le
+          _ = (K : ℝ) := Real.rpow_one _
+    have h1 : (Pmax : ℝ) ≤ (K : ℝ) := by
+      rw [hPdef]
+      have h2 : ⌈(K : ℝ) ^ upperC1 ε⌉₊ ≤ K := Nat.ceil_le.mpr hKc1
+      exact_mod_cast h2
+    rcases Nat.eq_zero_or_pos Pmax with h0 | hpos
+    · rw [h0]; simp only [Nat.cast_zero, Real.log_zero]; linarith
+    · exact le_trans (Real.log_le_log (by exact_mod_cast hpos) h1) hlogK
+  rw [upperKept_weighted_reindex (Y := Y) χ]
+  refine le_trans (norm_sum_le _ _) ?_
+  have hinner : ∀ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime,
+      ‖χ (p1 : ZMod q) *
+        ∑ n ∈ Finset.Ioc (L / p1) (K / p1),
+          (if (((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+              (p1 : ℝ) < ((p1 : ℝ) * (n : ℝ)) ^ upperC4 ε) then
+            ((Real.log ((p1 : ℝ) * (n : ℝ)) / Real.log Y *
+              (∑ p2 ∈ n.primeFactors.filter
+                (fun p2 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ) ∧
+                  (p2 : ℝ) < (p1 : ℝ)),
+                ∑ p3 ∈ (n / p2).primeFactors.filter
+                  (fun p3 : ℕ => ((p1 : ℝ) * (n : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+                    (p3 : ℝ) < (p2 : ℝ)),
+                  if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                    (Real.log (p2 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ))) (Real.log (p3 : ℝ) / Real.log ((p1 : ℝ) * (n : ℝ)))
+                  then upperRough (n / p2 / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+              χ (n : ZMod q)
+          else 0)‖ ≤ 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0)) := by
+    intro p1 hp1mem
+    obtain ⟨hp1K, hp1P⟩ := Finset.mem_filter.mp hp1mem
+    have hp1 : p1.Prime := hp1P
+    have hp1one : 1 ≤ p1 := le_trans (by norm_num) hp1.two_le
+    refine le_trans (norm_mul_le _ _) ?_
+    refine le_trans (mul_le_mul_of_nonneg_right (DirichletCharacter.norm_le_one χ (p1 : ZMod q))
+      (norm_nonneg _)) ?_
+    rw [one_mul]
+    rw [kept_inner_peel (Y := Y) (L' := L / p1) (K' := K / p1) χ hp1one]
+    refine le_trans (norm_sum_le _ _) ?_
+    have hper : ∀ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+        ‖(if (p2 : ℝ) < (p1 : ℝ) then
+            χ (p2 : ZMod q) *
+              ∑ k ∈ Finset.Ioc ((L / p1) / p2) ((K / p1) / p2),
+                (if ((((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                    (p1 : ℝ) < (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC4 ε ∧
+                    (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p2 : ℝ)) then
+                  ((Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) / Real.log Y *
+                    (∑ p3 ∈ k.primeFactors.filter
+                      (fun p3 : ℕ => (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ) ∧
+                        (p3 : ℝ) < (p2 : ℝ)),
+                      if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                          (Real.log (p2 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                          (Real.log (p3 : ℝ) / Real.log (((p1 : ℝ) * (p2 : ℝ)) * (k : ℝ)))
+                        then upperRough (k / p3) (p3 : ℝ) else 0) : ℝ) : ℂ) *
+                    χ (k : ZMod q)
+                  else 0)
+            else 0)‖ ≤ 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ((if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0)) := by
+      intro p2 hp2mem
+      obtain ⟨hp2K, hp2P⟩ := Finset.mem_filter.mp hp2mem
+      have hp2one : 1 ≤ p2 := le_trans (by norm_num) hp2P.two_le
+      by_cases hlt21 : (p2 : ℝ) < (p1 : ℝ)
+      · rw [if_pos hlt21, if_pos hlt21]
+        refine le_trans (norm_mul_le _ _) ?_
+        refine le_trans (mul_le_mul_of_nonneg_right (DirichletCharacter.norm_le_one χ (p2 : ZMod q))
+          (norm_nonneg _)) ?_
+        rw [one_mul]
+        rw [kept_third_peel (Y := Y) (L' := (L / p1) / p2) (K' := (K / p1) / p2) χ hp1one hp2one]
+        refine le_trans (norm_sum_le _ _) ?_
+        have hper3 : ∀ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+            ‖(if (p3 : ℝ) < (p2 : ℝ) then
+                χ (p3 : ZMod q) *
+                  ∑ j ∈ Finset.Ioc (((L / p1) / p2) / p3) (((K / p1) / p2) / p3),
+                    (if (((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) ^ upperC1 ε ≤ (p1 : ℝ) ∧
+                          (p1 : ℝ) < ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) ^ upperC4 ε ∧
+                          ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) ^ upperC1 ε ≤ (p3 : ℝ)) then
+                      (if upperPrimeCovered ε (Real.log (p1 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)))
+                          (Real.log (p2 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)))
+                          (Real.log (p3 : ℝ) / Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)))
+                        then ((Real.log ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) / Real.log Y *
+                          upperRough j (p3 : ℝ) : ℝ) : ℂ) * χ (j : ZMod q)
+                        else 0)
+                      else 0)
+              else 0)‖ ≤ 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ((if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)) := by
+          intro p3 hp3mem
+          obtain ⟨hp3K, hp3P⟩ := Finset.mem_filter.mp hp3mem
+          have hp3one : 1 ≤ p3 := le_trans (by norm_num) hp3P.two_le
+          have hle21 : p2 ≤ p1 := by exact_mod_cast le_of_lt hlt21
+          by_cases hlt32 : (p3 : ℝ) < (p2 : ℝ)
+          · rw [if_pos hlt32, if_pos hlt32]
+            have hle31 : p3 ≤ p1 := by exact_mod_cast le_of_lt (lt_trans hlt32 hlt21)
+            have hcastprod : (((p1 * p2 * p3 : ℕ)) : ℝ) =
+                (p1 : ℝ) * (p2 : ℝ) * (p3 : ℝ) := by
+              push_cast
+              ring
+            refine le_trans (norm_mul_le _ _) ?_
+            refine le_trans (mul_le_mul_of_nonneg_right (DirichletCharacter.norm_le_one
+              χ (p3 : ZMod q)) (norm_nonneg _)) ?_
+            rw [one_mul]
+            have hdbK : p1 * p2 * p3 * (((K / p1) / p2) / p3) ≤ K := by
+              have h2 : p3 * (((K / p1) / p2) / p3) ≤ (K / p1) / p2 := Nat.mul_div_le _ _
+              have h3 : p2 * (p3 * (((K / p1) / p2) / p3)) ≤ K / p1 :=
+                le_trans (Nat.mul_le_mul_left _ h2) (Nat.mul_div_le _ _)
+              have h4 : p1 * (p2 * (p3 * (((K / p1) / p2) / p3))) ≤ K :=
+                le_trans (Nat.mul_le_mul_left _ h3) (Nat.mul_div_le _ _)
+              calc p1 * p2 * p3 * (((K / p1) / p2) / p3)
+                  = p1 * (p2 * (p3 * (((K / p1) / p2) / p3))) := by ring
+                _ ≤ K := h4
+            by_cases hab : (((L / p1) / p2) / p3) ≤ (((K / p1) / p2) / p3)
+            · by_cases hzX : (2 * Y) ^ (upperC1 ε / 2) ≤ (p3 : ℝ)
+              · by_cases ha1 : 1 ≤ ((L / p1) / p2) / p3
+                · rw [← hcastprod]
+                  refine le_trans (kept_fibre_le (K := K) (a := ((L / p1) / p2) / p3)
+                    (b := ((K / p1) / p2) / p3) hε hε8 χ hp1 hp2P hp3P
+                    (by exact_mod_cast hlt32) (by exact_mod_cast hlt21) hab ha1 hdbK hY2 hKY hzX hC0pos.le
+                    hpre) ?_
+                  exact le_of_eq (by ring)
+                · have ha0 : ((L / p1) / p2) / p3 = 0 := by
+                    by_contra hne
+                    exact ha1 (Nat.pos_of_ne_zero hne)
+                  rw [ha0]
+                  rw [sum_Ioc_zero_eq_one (b := ((K / p1) / p2) / p3)]
+                  · by_cases hb0 : ((K / p1) / p2) / p3 = 0
+                    · rw [hb0, Finset.Ioc_eq_empty_of_le (Nat.zero_le 1), Finset.sum_empty,
+                        norm_zero]
+                      positivity
+                    · have hb1 : 1 ≤ ((K / p1) / p2) / p3 := Nat.one_le_iff_ne_zero.mpr hb0
+                      rw [← hcastprod]
+                      refine le_trans (kept_fibre_le (K := K) (a := 1)
+                        (b := ((K / p1) / p2) / p3) hε hε8 χ hp1 hp2P hp3P
+                        (by exact_mod_cast hlt32) (by exact_mod_cast hlt21) hb1 (le_refl 1) hdbK hY2 hKY hzX hC0pos.le
+                        hpre) ?_
+                      exact le_of_eq (by ring)
+                  · rw [if_neg]
+                    exact fun hcon => kept_base_not_in_window hε hε8 hp1one hle21 hle31 hcon.2.1
+              · refine le_trans (le_of_eq ?_) (mul_nonneg (by positivity) (Nat.cast_nonneg _))
+                rw [norm_sum_eq_zero_of_forall]
+                intro j hj
+                rw [if_neg]
+                intro hcon
+                have hjY := kept_cofactor_gt hp1 hp2P hp3P hLf hj
+                have hlev : (Y : ℝ) ^ upperC1 ε < ((((p1 : ℝ) * (p2 : ℝ)) * (p3 : ℝ)) * (j : ℝ)) ^ upperC1 ε :=
+                  Real.rpow_lt_rpow (by linarith) hjY (upperC1_pos hε8)
+                have hYc : (2 * Y) ^ (upperC1 ε / 2) ≤ (Y : ℝ) ^ upperC1 ε :=
+                  level_ge (upperC1_pos hε8) hY2
+                linarith [hcon.2.2, hYc, hlev, not_le.mp hzX]
+            · rw [Finset.Ioc_eq_empty_of_le (le_of_lt (not_le.mp hab)), Finset.sum_empty, norm_zero]
+              exact mul_nonneg (by positivity) (Nat.cast_nonneg _)
+          · rw [if_neg hlt32, if_neg hlt32, norm_zero]
+            exact mul_nonneg (by positivity) (by positivity)
+        have hstep3 : (∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime, 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ((if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)))
+            = 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime, ((if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)) := by
+          rw [Finset.mul_sum]
+          try refine Finset.sum_congr rfl fun p3 _ => by ring
+        exact le_trans (Finset.sum_le_sum hper3) (le_of_eq hstep3)
+      · rw [if_neg hlt21, if_neg hlt21, norm_zero]
+        exact mul_nonneg (by positivity) (by positivity)
+    have hstep2 : (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime, 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ((if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0)))
+        = 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime, ((if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0)) := by
+      rw [Finset.mul_sum]
+      try refine Finset.sum_congr rfl fun p2 _ => by ring
+    exact le_trans (Finset.sum_le_sum hper) (le_of_eq hstep2)
+  have hstep1 : (∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0)))
+      = 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0)) := by
+    rw [Finset.mul_sum]
+    try refine Finset.sum_congr rfl fun p1 _ => by ring
+  refine le_trans (Finset.sum_le_sum hinner) ?_
+  rw [hstep1]
+  have h2 : (1 + Real.log (K : ℝ)) ≤ 3 * Real.log Y := by linarith
+  have hp3 : (0 : ℝ) ≤ 1 + Real.log (K : ℝ) := by linarith
+  have hcube : (1 + Real.log (K : ℝ)) ^ 3 ≤ 27 * (Real.log Y * Real.log Y * Real.log Y) := by
+    have h5 : (1 + Real.log (K : ℝ)) ^ 3 ≤ (3 * Real.log Y) ^ 3 :=
+      pow_le_pow_left₀ hp3 h2 3
+    calc (1 + Real.log (K : ℝ)) ^ 3 ≤ (3 * Real.log Y) ^ 3 := h5
+      _ = 27 * (Real.log Y * Real.log Y * Real.log Y) := by ring
+  have hlogXge : Real.log Y ≤ Real.log (2 * Y) := Real.log_le_log hY0 (by linarith)
+  have hLXle : Real.log (2 * Y) ^ (-(A + 6)) ≤ Real.log Y ^ (-(A + 6)) :=
+    Real.rpow_le_rpow_of_nonpos hlogY hlogXge (by linarith)
+  have hcube' : Real.log Y * Real.log Y * Real.log Y = Real.log Y ^ (3 : ℝ) := by
+    rw [show (3 : ℝ) = ((3 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+    ring
+  have hcomb : Real.log Y ^ (-(A + 6)) * Real.log Y ^ (3 : ℝ) = Real.log Y ^ (-(A + 3)) := by
+    rw [← Real.rpow_add hlogY]
+    congr 1
+    ring
+  have hlA3 : Real.log Y ^ (-(A + 3)) ≤ Real.log Y ^ (-A) :=
+    Real.rpow_le_rpow_of_exponent_le hlogY1 (by linarith)
+  have hpw : Real.log (2 * Y) ^ (-(A + 6)) * (Real.log Y * Real.log Y * Real.log Y) ≤ Real.log Y ^ (-A) := by
+    rw [hcube']
+    calc Real.log (2 * Y) ^ (-(A + 6)) * Real.log Y ^ (3 : ℝ)
+        ≤ Real.log Y ^ (-(A + 6)) * Real.log Y ^ (3 : ℝ) :=
+          mul_le_mul_of_nonneg_right hLXle (by positivity)
+      _ = Real.log Y ^ (-(A + 3)) := hcomb
+      _ ≤ Real.log Y ^ (-A) := hlA3
+  have hYnn : (0 : ℝ) ≤ Y := hY0.le
+  calc 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ∑ p1 ∈ (Finset.Icc 2 K).filter Nat.Prime, (∑ p2 ∈ (Finset.Icc 2 (K / p1)).filter Nat.Prime,
+            (if (p2 : ℝ) < (p1 : ℝ) then
+              ∑ p3 ∈ (Finset.Icc 2 ((K / p1) / p2)).filter Nat.Prime,
+                (if (p3 : ℝ) < (p2 : ℝ) then ((((K / p1) / p2) / p3 : ℕ) : ℝ) else 0)
+              else 0))
+      ≤ 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ((K : ℝ) * (1 + Real.log (K : ℝ)) ^ 3) :=
+        mul_le_mul_of_nonneg_left (triple_inv_sum_le K) (by positivity)
+    _ ≤ 436 * C0 * Real.log (2 * Y) ^ (-(A + 6)) * ((2 * Y) * (27 * (Real.log Y * Real.log Y * Real.log Y))) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        exact mul_le_mul hKY hcube (by positivity) (by linarith)
+    _ = 23544 * C0 * (Y * (Real.log (2 * Y) ^ (-(A + 6)) * (Real.log Y * Real.log Y * Real.log Y))) := by ring
+    _ ≤ 23544 * C0 * (Y * Real.log Y ^ (-A)) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        exact mul_le_mul_of_nonneg_left hpw (by positivity)
+    _ = 23544 * C0 * Y * Real.log Y ^ (-A) := by ring
+    _ ≤ 23544 * C0 * Y * Real.log Y ^ (-A) := by
+        have h1 : (23544 : ℝ) * C0 ≤ 23544 * C0 := by nlinarith [hC0pos.le]
+        have h2 : (0 : ℝ) ≤ Y * Real.log Y ^ (-A) :=
+          mul_nonneg hY0.le (Real.rpow_nonneg hlogY.le _)
+        calc 23544 * C0 * Y * Real.log Y ^ (-A) = (23544 * C0) * (Y * Real.log Y ^ (-A)) := by ring
+          _ ≤ (23544 * C0) * (Y * Real.log Y ^ (-A)) := mul_le_mul_of_nonneg_right h1 h2
+          _ = 23544 * C0 * Y * Real.log Y ^ (-A) := by ring
+    _ ≤ max (23544 * C0) 4 * Y * Real.log Y ^ (-A) := by
+        have h4 : 23544 * C0 ≤ max (23544 * C0) 4 := le_max_left _ _
+        have h6 : (0 : ℝ) ≤ Y * Real.log Y ^ (-A) :=
+          mul_nonneg hY0.le (Real.rpow_nonneg hlogY.le _)
+        calc 23544 * C0 * Y * Real.log Y ^ (-A) = (23544 * C0) * (Y * Real.log Y ^ (-A)) := by ring
+          _ ≤ max (23544 * C0) 4 * (Y * Real.log Y ^ (-A)) := mul_le_mul_of_nonneg_right h4 h6
+          _ = max (23544 * C0) 4 * Y * Real.log Y ^ (-A) := by ring
 
 /-! ### The four terms of the identity, one at a time -/
 
@@ -4600,7 +6703,153 @@ theorem leaf_kept_term_nonprincipal
             ((Real.log (m : ℝ) / Real.log (x ^ (11 / 20 + ε)) *
               upperKept ε (m : ℝ) m : ℝ) : ℂ) * χ (m : ZMod q)‖ ≤
             C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  intro A hA
+  obtain ⟨CH, hCHpos, hCH⟩ := upperKept_self_bound hε hε8 (A + 1) (by linarith)
+  set b : ℝ := 11 / 20 + ε with hbdef
+  have hb0 : 0 < b := by rw [hbdef]; linarith
+  have hb1 : b ≤ 1 := by rw [hbdef]; linarith
+  refine ⟨max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+    (CH * (20 / 11 : ℝ) ^ (A + 1))) 4, fun x hx q hq hqA χ hχ t ht => ?_⟩
+  have hx4 : (4 : ℝ) ≤ x := le_trans (le_max_right _ _) hx
+  have hx0 : (0 : ℝ) < x := by linarith
+  have hx1 : (1 : ℝ) ≤ x := by linarith
+  -- the threshold reaches every part of the constant
+  have hexpb : Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1) ≤ x :=
+    le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hx
+  have hbase_le : max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1 ≤ Real.log x :=
+    (Real.le_log_iff_exp_le hx0).mpr hexpb
+  have hlogx1 : (1 : ℝ) ≤ Real.log x := le_trans (le_max_right _ _) hbase_le
+  have hlogx0 : 0 < Real.log x := by linarith
+  have hlogx_big : (20 / 11 : ℝ) ^ (A + 1) ≤ Real.log x := by
+    have h1 : (20 / 11 : ℝ) ^ (A + 1) ≤
+        max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1 :=
+      le_trans (le_max_right (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1)))
+        (le_max_left _ 1)
+    linarith
+  have hlogCHbase : Real.log CH / b + 1 ≤ Real.log x := by
+    have h1 : Real.log CH / b + 1 ≤
+        max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1 :=
+      le_trans (le_max_left (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1)))
+        (le_max_left _ 1)
+    linarith
+  set Y : ℝ := x ^ b with hYdef
+  have hY0 : (0 : ℝ) < Y := by rw [hYdef]; exact Real.rpow_pos_of_pos hx0 _
+  have hY1 : (1 : ℝ) ≤ Y := by rw [hYdef]; exact Real.one_le_rpow hx1 hb0.le
+  have hlogY : Real.log Y = b * Real.log x := by rw [hYdef]; exact Real.log_rpow hx0 _
+  have hlogY0 : 0 < Real.log Y := by rw [hlogY]; nlinarith
+  have hCHY : CH ≤ Y := by
+    have hdiv : Real.log CH / b ≤ Real.log x - 1 := by linarith
+    have h2 : Real.log CH ≤ Real.log x * b := by
+      rw [div_le_iff₀ hb0] at hdiv
+      nlinarith [hdiv, hb0]
+    have h3 : CH = Real.exp (Real.log CH) := (Real.exp_log hCHpos).symm
+    have h4 : x ^ b = Real.exp (Real.log x * b) := Real.rpow_def_of_pos hx0 b
+    rw [hYdef, h3, h4]
+    exact Real.exp_le_exp.mpr h2
+  -- the modulus bound at the core's exponent
+  have hqY : (q : ℝ) ≤ Real.log Y ^ (A + 1) := by
+    have hbm : (1 : ℝ) ≤ b * (20 / 11 : ℝ) := by rw [hbdef]; nlinarith
+    have hone : (1 : ℝ) ≤ (b * (20 / 11 : ℝ)) ^ (A + 1) := Real.one_le_rpow hbm (by linarith)
+    have hbx : (b * (20 / 11 : ℝ)) ^ (A + 1) =
+        b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1) := Real.mul_rpow hb0.le (by norm_num)
+    have hone' : (1 : ℝ) ≤ b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1) := by
+      rw [← hbx]; exact hone
+    have hA0 : (0 : ℝ) ≤ Real.log x ^ A := Real.rpow_nonneg hlogx0.le _
+    have hsplit : Real.log x ^ (A + 1) = Real.log x ^ A * Real.log x := by
+      rw [show (A + 1 : ℝ) = A + 1 by ring, Real.rpow_add hlogx0, Real.rpow_one]
+    have hstep : Real.log x ^ A * (20 / 11 : ℝ) ^ (A + 1) ≤ Real.log x ^ A * Real.log x :=
+      mul_le_mul_of_nonneg_left hlogx_big hA0
+    have hkey : Real.log x ^ A ≤ b ^ (A + 1) * Real.log x ^ (A + 1) := by
+      rw [hsplit]
+      have hbA : (0 : ℝ) < b ^ (A + 1) := Real.rpow_pos_of_pos hb0 _
+      calc Real.log x ^ A = 1 * Real.log x ^ A := by ring
+        _ ≤ (b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1)) * Real.log x ^ A :=
+            mul_le_mul_of_nonneg_right hone' hA0
+        _ = b ^ (A + 1) * (Real.log x ^ A * (20 / 11 : ℝ) ^ (A + 1)) := by ring
+        _ ≤ b ^ (A + 1) * (Real.log x ^ A * Real.log x) :=
+            mul_le_mul_of_nonneg_left hstep hbA.le
+    rw [hlogY, Real.mul_rpow hb0.le hlogx0.le]
+    linarith
+  have hLpos : 1 ≤ ⌊Y⌋₊ := Nat.floor_pos.mpr hY1
+  set L : ℕ := ⌊Y⌋₊ with hLdef
+  set B : ℕ := ⌊2 * Y⌋₊ with hBdef
+  set K : ℕ := min B ⌊t⌋₊ with hKdef
+  have hYB : Finset.Ioc ⌊x ^ (11 / 20 + ε)⌋₊ ⌊2 * x ^ (11 / 20 + ε)⌋₊ = Finset.Ioc L B := by
+    rw [← hbdef, ← hYdef, hLdef, hBdef]
+  have hS : (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t) = Finset.Ioc L K := by
+    have h := filter_rightInterval (t := t) (A := L) (B := B) hLpos
+    rw [rightInterval, hYB]
+    simpa [hKdef] using h
+  rw [hS]
+  rcases Nat.lt_or_ge L K with hLK | hLK
+  · have hLY : (L : ℝ) ≤ Y := by rw [hLdef]; exact Nat.floor_le (by linarith)
+    have hLf : ⌊Y⌋₊ ≤ L := by rw [hLdef]
+    have hKY : (K : ℝ) ≤ 2 * Y := by
+      rw [hKdef]
+      exact le_trans (by exact_mod_cast min_le_left B ⌊t⌋₊) (Nat.floor_le (by linarith))
+    have hcore := hCH Y hCHY q hq hqY χ hχ L K hLpos hLY hLf hKY
+    refine le_trans hcore ?_
+    -- `log Y` is `b log x` and the exponent shift costs `(20/11)^(A+1)`
+    have hpow : Real.log Y ^ (-(A + 1)) = b ^ (-(A + 1)) * Real.log x ^ (-(A + 1)) := by
+      rw [hlogY, Real.mul_rpow hb0.le hlogx0.le]
+    have hbm1 : (1 : ℝ) ≤ b * (20 / 11 : ℝ) := by rw [hbdef]; nlinarith
+    have hone : (1 : ℝ) ≤ b ^ (A + 1) * (20 / 11 : ℝ) ^ (A + 1) := by
+      have h2 : (1 : ℝ) ≤ (b * (20 / 11 : ℝ)) ^ (A + 1) := Real.one_le_rpow hbm1 (by linarith)
+      rwa [Real.mul_rpow hb0.le (by norm_num)] at h2
+    have hbp : (0 : ℝ) < b ^ (A + 1) := Real.rpow_pos_of_pos hb0 _
+    have hstep : b ^ (-(A + 1)) ≤ (20 / 11 : ℝ) ^ (A + 1) := by
+      rw [Real.rpow_neg hb0.le, inv_eq_one_div, div_le_iff₀ hbp]
+      simpa [mul_comm] using hone
+    have hlxn : (0 : ℝ) ≤ Real.log x ^ (-(A + 1)) := Real.rpow_nonneg hlogx0.le _
+    have hYnn : (0 : ℝ) ≤ Y := hY0.le
+    have hmid : CH * Y * (b ^ (-(A + 1)) * Real.log x ^ (-(A + 1))) ≤
+        CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1))) := by
+      have h0 : (0 : ℝ) ≤ CH * Y := mul_nonneg hCHpos.le hYnn
+      exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hstep hlxn) h0
+    have hexp2 : Real.log x ^ (-(A + 1)) ≤ Real.log x ^ (-A) :=
+      Real.rpow_le_rpow_of_exponent_le hlogx1 (by linarith)
+    have htail : Y * Real.log x ^ (-(A + 1)) ≤ Y * Real.log x ^ (-A) :=
+      mul_le_mul_of_nonneg_left hexp2 hYnn
+    have hfin : CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1))) ≤
+        max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+          (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * Y * Real.log x ^ (-A) := by
+      have hC : max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+          (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 ≤ x := hx
+      have h1 : CH * (20 / 11 : ℝ) ^ (A + 1) ≤
+          max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 := by
+        exact le_trans (le_max_right _ _) (le_max_left _ _)
+      have h2 : (0 : ℝ) ≤ Y * Real.log x ^ (-A) :=
+        mul_nonneg hYnn (Real.rpow_nonneg hlogx0.le _)
+      have heq : CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1)))
+          = (CH * (20 / 11 : ℝ) ^ (A + 1)) * (Y * Real.log x ^ (-(A + 1))) := by ring
+      have heq2 : max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * Y * Real.log x ^ (-A)
+          = max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * (Y * Real.log x ^ (-A)) := by ring
+      rw [heq, heq2]
+      calc (CH * (20 / 11 : ℝ) ^ (A + 1)) * (Y * Real.log x ^ (-(A + 1)))
+          ≤ (CH * (20 / 11 : ℝ) ^ (A + 1)) * (Y * Real.log x ^ (-A)) :=
+            mul_le_mul_of_nonneg_left htail (by positivity)
+        _ ≤ max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+              (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * (Y * Real.log x ^ (-A)) :=
+            mul_le_mul_of_nonneg_right h1 h2
+    calc CH * Y * Real.log Y ^ (-(A + 1))
+        = CH * Y * (b ^ (-(A + 1)) * Real.log x ^ (-(A + 1))) := by rw [hpow]
+      _ ≤ CH * Y * ((20 / 11 : ℝ) ^ (A + 1) * Real.log x ^ (-(A + 1))) := hmid
+      _ ≤ max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * Y * Real.log x ^ (-A) := hfin
+      _ = max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+            (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
+          rw [← hbdef, hYdef]
+  · rw [Finset.Ioc_eq_empty_of_le hLK, Finset.sum_empty, norm_zero]
+    have h1 : (0 : ℝ) ≤ max (max (Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1))
+        (CH * (20 / 11 : ℝ) ^ (A + 1))) 4 := by
+      have h2 : (0 : ℝ) < Real.exp (max (max (Real.log CH / b + 1) ((20 / 11 : ℝ) ^ (A + 1))) 1) :=
+        Real.exp_pos _
+      exact le_trans (le_trans h2.le (le_max_left _ _)) (le_max_left _ _)
+    have h3 : (0 : ℝ) ≤ x ^ (11 / 20 + ε) := by positivity
+    exact mul_nonneg (mul_nonneg h1 h3) (Real.rpow_nonneg hlogx0.le _)
 
 /-! ### Assembly -/
 
