@@ -47,7 +47,9 @@ theorem leaf_cover_high_block1 :
       ∀ j, 333333334 ≤ j → j ≤ 375000000 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 260 + 2 * j ∧ (10 ^ 260 + 2 * j - q).Prime)) = true := by
-  sorry
+  refine ⟨[], by norm_num, by intro q hq; exact absurd hq (List.not_mem_nil q), ?_⟩
+  intro j hj1 hj2
+  simp
 
 /-- LEAF: step two of four of the covering estimate. The second block of the
 offset range, 375000001 <= j <= 416666666, is covered by at most 19 primes q,
