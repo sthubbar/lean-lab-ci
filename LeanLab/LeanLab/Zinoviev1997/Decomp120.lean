@@ -1,6 +1,8 @@
 import LeanLab.Zinoviev1997.ArcArithmetic
 import LeanLab.Zinoviev1997.ModelFormula
 import LeanLab.Zinoviev1997.State1546
+import LeanLab.Zinoviev1997.LocalBudgets
+import LeanLab.PNTPort.Vinogradov.MajorArc
 
 namespace LeanLab.Zinoviev1997.Decomp120
 open Real Finset ArithmeticFunction LeanLab.CircleOrth MeasureTheory
@@ -2043,6 +2045,1319 @@ theorem prime_reduction (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
       Real.sqrt N * Real.log N ^ 2 := by
   exact prime_reduction_proof N hN q hq a ha hac z hz
 
+/-- Supporting range check for Proposition 1.4 in display 3.2 on page 349.
+The modulus condition holds at every point above the prime tail cutoff. -/
+theorem residue_modulus_range (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
+    (q : ℕ) (hq : q ≤ arcCutoff N) {u : ℝ} (hu : Real.sqrt N ≤ u) :
+    (10 : ℝ) ^ 9 ≤ u ∧ (q : ℝ) ≤ u ^ (0.37 : ℝ) := by
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hL : 46 ≤ Real.log N := log_1e20_ge.trans
+    (Real.log_le_log (by positivity) hN)
+  have hbase : (46 : ℝ) ^ 2 < (1 / 1.1) * Real.exp (0.185 * 46) := by
+    have he : (2.7182818283 : ℝ) ^ 8 < Real.exp 8 := by
+      have hh := pow_lt_pow_left₀ Real.exp_one_gt_d9 (by norm_num)
+        (by norm_num : (8 : ℕ) ≠ 0)
+      simpa only [← Real.exp_nat_mul, Nat.cast_ofNat, mul_one] using hh
+    have he' : Real.exp 8 ≤ Real.exp (0.185 * 46) := Real.exp_le_exp.mpr (by norm_num)
+    have hn : (46 : ℝ) ^ 2 < (1 / 1.1) * (2.7182818283 : ℝ) ^ 8 := by norm_num
+    linarith
+  have hpow := power_exp_extend 2 46 0.185 (1 / 1.1) (Real.log N)
+    (by norm_num) hL (by norm_num) hbase
+  have hcut : (arcCutoff N : ℝ) ≤ 1.1 * Real.log N ^ 2 := Nat.floor_le (by positivity)
+  have hqR : (q : ℝ) ≤ (arcCutoff N : ℝ) := by exact_mod_cast hq
+  have hs : (0 : ℝ) < Real.sqrt N := Real.sqrt_pos.mpr hNpos
+  have hsqrt : (10 : ℝ) ^ 10 ≤ Real.sqrt N :=
+    (Real.le_sqrt (by positivity) hNpos.le).mpr (by nlinarith [hN])
+  refine ⟨by linarith, ?_⟩
+  have heq : (Real.sqrt (N : ℝ)) ^ (0.37 : ℝ) = Real.exp (0.185 * Real.log N) := by
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hNpos.le, Real.rpow_def_of_pos hNpos]
+    congr 1
+    ring
+  have hqu : (q : ℝ) ≤ (Real.sqrt (N : ℝ)) ^ (0.37 : ℝ) := by
+    rw [heq]
+    linarith
+  exact hqu.trans (Real.rpow_le_rpow hs.le hu (by norm_num))
+
+/-- The Abel weight in display 3.2 on page 349. -/
+noncomputable def residueWeight (x : ℂ) (u : ℝ) : ℂ :=
+  Complex.exp (-x * u) * (Real.log u : ℂ)
+
+/-- The derivative of the Abel weight used in display 3.3 on page 350. -/
+theorem residueWeight_hasDerivAt (x : ℂ) {u : ℝ} (hu : u ≠ 0) :
+    HasDerivAt (residueWeight x)
+      (Complex.exp (-x * u) * ((1 / u : ℝ) - x * (Real.log u : ℂ))) u := by
+  have he := ((Complex.ofRealCLM.hasDerivAt (x := u)).const_mul (-x)).cexp
+  have hl := (Real.hasDerivAt_log hu).ofReal_comp
+  convert he.mul hl using 1
+  · funext v
+    simp [residueWeight]
+  · simp only [Complex.ofRealCLM_apply, Complex.ofReal_one, mul_one, one_div]
+    ring
+
+
+/-- The pointwise derivative estimate following display 3.3 on page 350. -/
+theorem residueWeight_deriv_norm (x : ℂ) {u : ℝ} (hu : 1 ≤ u) :
+    ‖deriv (residueWeight x) u‖ ≤
+      (1 / u + ‖x‖ * Real.log u) * Real.exp (-x.re * u) := by
+  have hu0 : 0 < u := by linarith
+  rw [(residueWeight_hasDerivAt x hu0.ne').deriv, norm_mul, Complex.norm_exp]
+  have hr : (-x * (u : ℂ)).re = -x.re * u := by simp
+  rw [hr]
+  have hlog : 0 ≤ Real.log u := Real.log_nonneg hu
+  have hn : ‖((1 / u : ℝ) : ℂ) - x * (Real.log u : ℂ)‖ ≤
+      1 / u + ‖x‖ * Real.log u := by
+    calc
+      _ ≤ ‖((1 / u : ℝ) : ℂ)‖ + ‖x * (Real.log u : ℂ)‖ := norm_sub_le _ _
+      _ = _ := by simp [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hu0.le,
+        abs_of_nonneg hlog]
+  exact (mul_le_mul_of_nonneg_left hn (Real.exp_pos _).le).trans_eq (mul_comm _ _)
+
+
+/-- Abel summation for the prime progression count in display 3.2 on pages 349 to 350.
+Both endpoint terms are retained. -/
+theorem residue_finite_abel (x : ℂ) (q l : ℕ) {A B : ℝ}
+    (hA : 1 ≤ A) (hAB : A ≤ B) :
+    (∑ n ∈ Finset.Ioc ⌊A⌋₊ ⌊B⌋₊,
+      if n.Prime ∧ n % q = l % q then residueWeight x n else 0) =
+      residueWeight x B * (State1546.piMod B q l : ℂ) -
+      residueWeight x A * (State1546.piMod A q l : ℂ) -
+      ∫ u in Set.Ioc A B, deriv (residueWeight x) u * (State1546.piMod u q l : ℂ) := by
+  classical
+  let c : ℕ → ℂ := fun n => if n.Prime ∧ n % q = l % q then 1 else 0
+  have hsum : ∀ u : ℝ, (∑ n ∈ Finset.Icc 0 ⌊u⌋₊, c n) =
+      (State1546.piMod u q l : ℂ) := by
+    intro u
+    simp only [c, State1546.piMod, Finset.Iic_eq_Icc]
+    simp
+  have hd : ∀ u ∈ Set.Icc A B, HasDerivAt (residueWeight x)
+      (Complex.exp (-x * u) * ((1 / u : ℝ) - x * (Real.log u : ℂ))) u := by
+    intro u hu
+    exact residueWeight_hasDerivAt x (by linarith [hu.1])
+  have hc : ContinuousOn (fun u : ℝ => Complex.exp (-x * u) *
+      ((1 / u : ℝ) - x * (Real.log u : ℂ))) (Set.Icc A B) := by
+    have h0 : ∀ u ∈ Set.Icc A B, u ≠ 0 := by intro u hu; linarith [hu.1]
+    have hlog : ContinuousOn (fun u : ℝ => (Real.log u : ℂ)) (Set.Icc A B) :=
+      Complex.continuous_ofReal.comp_continuousOn (Real.continuousOn_log.mono (by
+        intro u hu
+        simpa only [Set.mem_compl_iff, Set.mem_singleton_iff] using h0 u hu))
+    have hinv : ContinuousOn (fun u : ℝ => ((1 / u : ℝ) : ℂ)) (Set.Icc A B) :=
+      Complex.continuous_ofReal.comp_continuousOn
+        (continuousOn_const.div continuousOn_id h0)
+    exact (Complex.continuous_exp.comp_continuousOn
+      (continuousOn_const.mul Complex.continuous_ofReal.continuousOn)).mul
+        (hinv.sub (continuousOn_const.mul hlog))
+  have hab := sum_mul_eq_sub_sub_integral_mul c (by linarith : 0 ≤ A) hAB
+    (fun u hu => (hd u hu).differentiableAt)
+    (hc.integrableOn_Icc.congr_fun (fun u hu => (hd u hu).deriv.symm) measurableSet_Icc)
+  simp_rw [hsum] at hab
+  convert hab using 1
+  apply Finset.sum_congr rfl
+  intro n hn
+  simp only [c]
+  split_ifs <;> simp
+
+
+/-- The upper endpoint term in Abel summation vanishes as stated on page 350. -/
+theorem residue_boundary_tendsto (x : ℂ) (hx : 0 < x.re) (q l : ℕ) :
+    Filter.Tendsto (fun u : ℝ => residueWeight x u * (State1546.piMod u q l : ℂ))
+      Filter.atTop (nhds 0) := by
+  have ht : Filter.Tendsto (fun u : ℝ => 2 * (u ^ 2 * Real.exp (-x.re * u)))
+      Filter.atTop (nhds 0) := by
+    simpa only [Real.rpow_ofNat, mul_zero] using
+      (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero 2 x.re hx).const_mul 2
+  apply squeeze_zero_norm' _ ht
+  filter_upwards [Filter.eventually_ge_atTop (1 : ℝ)] with u hu
+  have hu0 : 0 < u := by linarith
+  have hlog0 : 0 ≤ Real.log u := Real.log_nonneg hu
+  have hlog : Real.log u ≤ u := by linarith [Real.log_le_sub_one_of_pos hu0]
+  have hpi : ‖(State1546.piMod u q l : ℂ)‖ ≤ 2 * u := by
+    rw [Complex.norm_natCast]
+    have hc : State1546.piMod u q l ≤ ⌊u⌋₊ + 1 := by
+      unfold State1546.piMod
+      exact (Finset.card_filter_le _ _).trans_eq (Nat.card_Iic _)
+    have hc' : (State1546.piMod u q l : ℝ) ≤ (⌊u⌋₊ : ℝ) + 1 := by exact_mod_cast hc
+    linarith [Nat.floor_le hu0.le]
+  have hn : ‖residueWeight x u‖ = Real.exp (-x.re * u) * Real.log u := by
+    rw [residueWeight, norm_mul, Complex.norm_exp, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_nonneg hlog0]
+    simp
+  rw [norm_mul, hn]
+  calc
+    _ ≤ (Real.exp (-x.re * u) * u) * (2 * u) :=
+      mul_le_mul (mul_le_mul_of_nonneg_left hlog (Real.exp_pos _).le) hpi
+        (norm_nonneg _) (by positivity)
+    _ = _ := by ring
+
+
+/-- The continuous model is the improper integral on page 352. -/
+theorem continuousModel_integral (N : ℕ) (hN : 0 < N) (z : ℝ) :
+    (∫ u in Set.Ioi (3 : ℝ), Complex.exp
+      (-((((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z)) * u)) =
+      continuousModel N z := by
+  let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+  have hNpos : (0 : ℝ) < N := by exact_mod_cast hN
+  have hx : 0 < x.re := by simp [x]; positivity
+  have hh := integral_exp_mul_complex_Ioi (a := -x) (by simpa using hx) (3 : ℝ)
+  change (∫ u in Set.Ioi (3 : ℝ), Complex.exp (-x * u)) = Complex.exp (-3 * x) / x
+  rw [hh]
+  norm_num only [Complex.ofReal_ofNat]
+  have he : -x * (3 : ℂ) = -3 * x := by ring
+  rw [he, div_neg, neg_div, neg_neg]
+
+
+/-- Corrected increment form of the progression estimate used on page 349.
+CONDITIONAL ON the explicit Proposition 1.4 error bound at every valid argument.
+The lower endpoint main term is subtracted along with the lower endpoint count. -/
+theorem residue_count_increment_bound (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
+    (q l : ℕ) (hq : q ≤ arcCutoff N)
+    (hcount : ∀ {t : ℝ}, (10 : ℝ) ^ 9 ≤ t → (q : ℝ) ≤ t ^ (0.37 : ℝ) →
+      |(State1546.piMod t q l : ℝ) - State1546.zinLi t / (Nat.totient q : ℝ)| ≤
+        1.3 * Real.sqrt t * Real.log t + 10 ^ 8)
+    {u : ℝ} (hu : Real.sqrt N ≤ u) :
+    |((State1546.piMod u q l : ℝ) - State1546.piMod (Real.sqrt N) q l) -
+      (State1546.zinLi u - State1546.zinLi (Real.sqrt N)) / (Nat.totient q : ℝ)| ≤
+        2.6 * Real.sqrt u * Real.log u + 2 * 10 ^ 8 := by
+  obtain ⟨hA9, hqA⟩ := residue_modulus_range N hN q hq (u := Real.sqrt N) le_rfl
+  obtain ⟨hu9, hqu⟩ := residue_modulus_range N hN q hq hu
+  have hEA := hcount hA9 hqA
+  have hEu := hcount hu9 hqu
+  have hlogA : 0 ≤ Real.log (Real.sqrt N) := Real.log_nonneg (by linarith)
+  have hlogu : Real.log (Real.sqrt N) ≤ Real.log u :=
+    Real.log_le_log (by linarith) hu
+  have hsqrtu : Real.sqrt (Real.sqrt N) ≤ Real.sqrt u := Real.sqrt_le_sqrt hu
+  have hmon : Real.sqrt (Real.sqrt N) * Real.log (Real.sqrt N) ≤
+      Real.sqrt u * Real.log u :=
+    mul_le_mul hsqrtu hlogu hlogA (Real.sqrt_nonneg _)
+  have heq : ((State1546.piMod u q l : ℝ) - State1546.piMod (Real.sqrt N) q l) -
+      (State1546.zinLi u - State1546.zinLi (Real.sqrt N)) / (Nat.totient q : ℝ) =
+      ((State1546.piMod u q l : ℝ) - State1546.zinLi u / (Nat.totient q : ℝ)) -
+      ((State1546.piMod (Real.sqrt N) q l : ℝ) -
+        State1546.zinLi (Real.sqrt N) / (Nat.totient q : ℝ)) := by ring
+  rw [heq]
+  exact (abs_sub _ _).trans (by linarith)
+
+
+/-- The reflected Fourier sign of the Ramanujan identity on page 351. -/
+theorem residue_phase_sum (q a : ℕ) (hq : 0 < q) (hac : Nat.Coprime a q) :
+    (∑ l ∈ (Finset.range q).filter (fun l => Nat.Coprime l q),
+      ee (-((a : ℝ) * l / q))) = (μ q : ℂ) := by
+  have hc : IsCoprime (-(a : ℤ)) (q : ℤ) := by
+    exact (show IsCoprime (a : ℤ) (q : ℤ) by exact_mod_cast hac.isCoprime).neg_left
+  have hh := LeanLab.PNTPort.Vinogradov.ramanujan_coprime (by omega : 1 ≤ q) hc
+  convert hh using 1
+  apply Finset.sum_congr rfl
+  intro l hl
+  unfold ee LeanLab.PNTPort.LargeSieve.e
+  congr 1
+  push_cast
+  ring
+
+
+/-- The residue aggregation step of Lemma 3.1 on pages 351 to 352.
+CONDITIONAL ON the stated uniform error for each reduced residue tail. -/
+theorem residueExpansion_error_of_tail (N q a : ℕ) (hq : 0 < q)
+    (hac : Nat.Coprime a q) (z E : ℝ)
+    (hE : ∀ l ∈ (Finset.range q).filter (fun l => Nat.Coprime l q),
+      ‖residueTail N q l z - continuousModel N z / (Nat.totient q : ℂ)‖ ≤ E) :
+    ‖residueExpansion N q a z -
+      (((μ q : ℝ) / Nat.totient q : ℝ) : ℂ) * continuousModel N z‖ ≤
+        (Nat.totient q : ℝ) * E := by
+  classical
+  have hcard : ((Finset.range q).filter (fun l => Nat.Coprime l q)).card = Nat.totient q := by
+    simpa only [Nat.coprime_comm] using (Nat.totient_eq_card_coprime q).symm
+  have hmain : (∑ l ∈ (Finset.range q).filter (fun l => Nat.Coprime l q),
+      ee (-((a : ℝ) * l / q)) * (continuousModel N z / (Nat.totient q : ℂ))) =
+      (((μ q : ℝ) / Nat.totient q : ℝ) : ℂ) * continuousModel N z := by
+    rw [← Finset.sum_mul, residue_phase_sum q a hq hac]
+    push_cast
+    ring
+  rw [residueExpansion, ← hmain, ← Finset.sum_sub_distrib]
+  calc
+    _ ≤ ∑ l ∈ (Finset.range q).filter (fun l => Nat.Coprime l q),
+        ‖ee (-((a : ℝ) * l / q)) * residueTail N q l z -
+          ee (-((a : ℝ) * l / q)) * (continuousModel N z / (Nat.totient q : ℂ))‖ :=
+      norm_sum_le _ _
+    _ ≤ ∑ l ∈ (Finset.range q).filter (fun l => Nat.Coprime l q), E := by
+      apply Finset.sum_le_sum
+      intro l hl
+      rw [← mul_sub, norm_mul, norm_ee, one_mul]
+      exact hE l hl
+    _ = _ := by simp [hcard, mul_comm]
+
+
+/-- A polynomial envelope for the first integral of display 3.4 on page 350. -/
+theorem residue_log_square_envelope {N u : ℝ} (hN : 1 ≤ N) (hu : 1 ≤ u) :
+    Real.sqrt u * Real.log u ^ 2 ≤
+      Real.sqrt N / 2 * (1 + u / N) * (Real.log N + u / N) ^ 2 := by
+  have hNpos : 0 < N := by linarith
+  have hupos : 0 < u := by linarith
+  have hlogu : 0 ≤ Real.log u := Real.log_nonneg hu
+  have hlog : Real.log u ≤ Real.log N + u / N := by
+    have hh := Real.log_le_sub_one_of_pos (div_pos hupos hNpos)
+    rw [Real.log_div hupos.ne' hNpos.ne'] at hh
+    linarith
+  have hsN : 0 < Real.sqrt N := Real.sqrt_pos.mpr hNpos
+  have hsU : 0 ≤ Real.sqrt u := Real.sqrt_nonneg _
+  have hs : Real.sqrt u ≤ Real.sqrt N / 2 * (1 + u / N) := by
+    have hsN2 := Real.sq_sqrt hNpos.le
+    have hsU2 := Real.sq_sqrt hupos.le
+    have hh : 2 * Real.sqrt u * Real.sqrt N ≤ N + u := by
+      nlinarith [sq_nonneg (Real.sqrt u - Real.sqrt N)]
+    have hdiv : Real.sqrt N / 2 * (1 + u / N) = (N + u) / (2 * Real.sqrt N) := by
+      field_simp [hNpos.ne', hsN.ne']
+      nlinarith [hsN2]
+    rw [hdiv, le_div_iff₀ (by positivity)]
+    nlinarith
+  exact mul_le_mul hs (pow_le_pow_left₀ hlogu hlog 2) (sq_nonneg _) (by positivity)
+
+
+/-- Integer Gamma moments for the polynomial envelope of display 3.4 on page 350. -/
+theorem residue_exponential_moment (N : ℝ) (hN : 0 < N) (k : ℕ) :
+    IntegrableOn (fun u : ℝ => (u / N) ^ k * Real.exp (-u / N)) (Set.Ioi 0) ∧
+    (∫ u in Set.Ioi (0 : ℝ), (u / N) ^ k * Real.exp (-u / N)) = N * (k.factorial : ℝ) := by
+  have hi := integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ))
+    (s := (k : ℝ)) (b := 1 / N) (by exact lt_of_lt_of_le (by norm_num : (-1 : ℝ) < 0) (Nat.cast_nonneg k)) (by norm_num) (by positivity)
+  have hbase : IntegrableOn (fun u : ℝ => u ^ k * Real.exp (-u / N)) (Set.Ioi 0) := by
+    simpa only [Real.rpow_one, Real.rpow_natCast, neg_mul, neg_div, one_div_mul_eq_div] using hi
+  have he := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := ((k + 1 : ℕ) : ℝ))
+    (r := 1 / N) (by positivity) (by positivity)
+  have hsub : (((k + 1 : ℕ) : ℝ) - 1) = (k : ℝ) := by push_cast; ring
+  have hgamma : Real.Gamma ((k + 1 : ℕ) : ℝ) = (k.factorial : ℝ) := by
+    simpa only [Nat.cast_add, Nat.cast_one] using Real.Gamma_nat_eq_factorial k
+  have he' : (∫ u in Set.Ioi (0 : ℝ), u ^ k * Real.exp (-u / N)) =
+      N ^ (k + 1) * (k.factorial : ℝ) := by
+    simp only [hsub, Real.rpow_natCast, one_div_one_div, hgamma] at he
+    convert he using 1
+    congr 1
+    funext u
+    congr 1
+    ring
+  have hf : (fun u : ℝ => (u / N) ^ k * Real.exp (-u / N)) =
+      (fun u : ℝ => (u ^ k * Real.exp (-u / N)) / N ^ k) := by
+    funext u
+    ring
+  rw [hf]
+  refine ⟨hbase.div_const _, ?_⟩
+  rw [integral_div, he', pow_succ]
+  field_simp [hN.ne']
+
+
+/-- The first integral bound used in display 3.4 on pages 350 to 351.
+A polynomial envelope replaces the printed split at N. -/
+theorem residue_log_square_integral (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N) :
+    (∫ u in Set.Ioi (3 : ℝ), Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)) ≤
+      1.15 * (N : ℝ) * Real.sqrt N * Real.log N ^ 2 := by
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hN1 : (1 : ℝ) ≤ N := by linarith
+  have hL : 46 ≤ Real.log N := log_1e20_ge.trans
+    (Real.log_le_log (by positivity) hN)
+  let g : ℕ → ℝ → ℝ := fun k u => (u / N) ^ k * Real.exp (-u / N)
+  let c : ℕ → ℝ := fun k => if k = 0 then Real.sqrt N / 2 * Real.log N ^ 2
+    else if k = 1 then Real.sqrt N / 2 * (Real.log N ^ 2 + 2 * Real.log N)
+    else if k = 2 then Real.sqrt N / 2 * (2 * Real.log N + 1)
+    else Real.sqrt N / 2
+  let P : ℝ → ℝ := fun u => ∑ k ∈ Finset.range 4, c k * g k u
+  have hgi : ∀ k : ℕ, IntegrableOn (g k) (Set.Ioi 0) :=
+    fun k => (residue_exponential_moment N hNpos k).1
+  have hPi : IntegrableOn P (Set.Ioi 0) := by
+    exact integrable_finsetSum _ (fun k hk => (hgi k).const_mul _)
+  have hPeq : ∀ u : ℝ, P u =
+      Real.sqrt N / 2 * (1 + u / N) * (Real.log N + u / N) ^ 2 * Real.exp (-u / N) := by
+    intro u
+    simp [P, Finset.sum_range_succ, c, g]
+    ring
+  have hPnonneg : ∀ u : ℝ, 0 < u → 0 ≤ P u := by
+    intro u hu
+    rw [hPeq]
+    positivity
+  have hAE : ∀ᵐ u ∂volume.restrict (Set.Ioi (3 : ℝ)),
+      ‖Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)‖ ≤ P u := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    rw [Real.norm_of_nonneg (by positivity), hPeq]
+    exact mul_le_mul_of_nonneg_right (residue_log_square_envelope hN1 (by linarith [Set.mem_Ioi.mp hu]))
+      (Real.exp_pos _).le
+  have hP3 : IntegrableOn P (Set.Ioi (3 : ℝ)) := hPi.mono_set (by
+    intro u hu
+    exact lt_trans (by norm_num : (0 : ℝ) < 3) (Set.mem_Ioi.mp hu))
+  have hfi : IntegrableOn (fun u : ℝ => Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N))
+      (Set.Ioi (3 : ℝ)) := hP3.mono' (by fun_prop) hAE
+  have hcomp : (∫ u in Set.Ioi (3 : ℝ), Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)) ≤
+      ∫ u in Set.Ioi (0 : ℝ), P u := by
+    refine (integral_mono_ae hfi hP3 ?_).trans ?_
+    · filter_upwards [hAE] with u hu
+      exact (le_abs_self _).trans hu
+    · apply setIntegral_mono_set hPi
+      · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+        exact hPnonneg u hu
+      · exact ae_of_all _ (fun u hu => lt_trans (by norm_num : (0 : ℝ) < 3) (Set.mem_Ioi.mp hu))
+  have hInt : (∫ u in Set.Ioi (0 : ℝ), P u) =
+      (N : ℝ) * Real.sqrt N * (Real.log N ^ 2 + 3 * Real.log N + 4) := by
+    rw [show P = (fun u : ℝ => ∑ k ∈ Finset.range 4, c k * g k u) from rfl,
+      integral_finsetSum _ (fun k hk => (hgi k).const_mul _)]
+    simp_rw [integral_const_mul]
+    have hm : ∀ k : ℕ, (∫ u in Set.Ioi (0 : ℝ), g k u) = (N : ℝ) * (k.factorial : ℝ) :=
+      fun k => (residue_exponential_moment N hNpos k).2
+    simp_rw [hm]
+    simp [Finset.sum_range_succ, c]
+    ring
+  rw [hInt] at hcomp
+  have hpoly : Real.log N ^ 2 + 3 * Real.log N + 4 ≤ 1.15 * Real.log N ^ 2 := by
+    nlinarith
+  have hh := mul_le_mul_of_nonneg_left hpoly (by positivity : 0 ≤ (N : ℝ) * Real.sqrt N)
+  nlinarith
+
+
+/-- The second integral estimate in display 3.4 on pages 350 to 351.
+The Gamma moments give a bound of square root pi times square root N times log N plus one half. -/
+theorem residue_log_half_integral (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N) :
+    (∫ u in Set.Ioi (3 : ℝ), Real.log u / Real.sqrt u * Real.exp (-u / N)) ≤
+      0.05 * Real.sqrt N * Real.log N ^ 2 := by
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hL : 46 ≤ Real.log N := log_1e20_ge.trans
+    (Real.log_le_log (by positivity) hN)
+  let J : ℝ → ℝ → ℝ := fun s u => u ^ s * Real.exp (-u / N)
+  have hJi : ∀ s : ℝ, -1 < s → IntegrableOn (J s) (Set.Ioi 0) := by
+    intro s hs
+    simpa only [J, Real.rpow_one, neg_mul, neg_div, one_div_mul_eq_div] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := s)
+        (b := 1 / (N : ℝ)) hs (by norm_num) (by positivity)
+  have hJv : ∀ s : ℝ, -1 < s →
+      (∫ u in Set.Ioi (0 : ℝ), J s u) = (N : ℝ) ^ (s + 1) * Real.Gamma (s + 1) := by
+    intro s hs
+    have hh := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := s + 1) (r := 1 / (N : ℝ))
+      (by linarith) (by positivity)
+    simp only [add_sub_cancel_right, one_div_one_div] at hh
+    convert hh using 1
+    congr 1
+    funext u
+    dsimp [J]
+    congr 1
+    ring
+  let H : ℝ → ℝ := fun u => Real.log N * J (-1 / 2) u + (1 / (N : ℝ)) * J (1 / 2) u
+  have hHi : IntegrableOn H (Set.Ioi 0) :=
+    ((hJi (-1 / 2) (by norm_num)).const_mul _).add
+      ((hJi (1 / 2) (by norm_num)).const_mul _)
+  have hHeq : ∀ u : ℝ, 0 < u → H u =
+      (Real.log N + u / N) / Real.sqrt u * Real.exp (-u / N) := by
+    intro u hu
+    have hs : Real.sqrt u ≠ 0 := (Real.sqrt_pos.mpr hu).ne'
+    have hs2 := Real.sq_sqrt hu.le
+    dsimp only [H, J]
+    rw [show (-1 / 2 : ℝ) = -(1 / 2 : ℝ) by ring, Real.rpow_neg hu.le,
+      ← Real.sqrt_eq_rpow]
+    field_simp
+    nlinarith [hs2]
+  have hHnonneg : ∀ u : ℝ, 0 < u → 0 ≤ H u := by
+    intro u hu
+    rw [hHeq u hu]
+    positivity
+  have hAE : ∀ᵐ u ∂volume.restrict (Set.Ioi (3 : ℝ)),
+      ‖Real.log u / Real.sqrt u * Real.exp (-u / N)‖ ≤ H u := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu3 : 3 < u := hu
+    have hu0 : 0 < u := by linarith
+    have hlog0 : 0 ≤ Real.log u := Real.log_nonneg (by linarith)
+    have hlog : Real.log u ≤ Real.log N + u / N := by
+      have hh := Real.log_le_sub_one_of_pos (div_pos hu0 hNpos)
+      rw [Real.log_div hu0.ne' hNpos.ne'] at hh
+      linarith
+    rw [Real.norm_of_nonneg (by positivity), hHeq u hu0]
+    gcongr
+  have hH3 : IntegrableOn H (Set.Ioi (3 : ℝ)) :=
+    hHi.mono_set (fun u hu => lt_trans (by norm_num : (0 : ℝ) < 3) hu)
+  have hfi : IntegrableOn (fun u : ℝ => Real.log u / Real.sqrt u * Real.exp (-u / N))
+      (Set.Ioi (3 : ℝ)) := hH3.mono' (by fun_prop) hAE
+  have hcomp : (∫ u in Set.Ioi (3 : ℝ), Real.log u / Real.sqrt u * Real.exp (-u / N)) ≤
+      ∫ u in Set.Ioi (0 : ℝ), H u := by
+    refine (integral_mono_ae hfi hH3 ?_).trans ?_
+    · filter_upwards [hAE] with u hu
+      exact (le_abs_self _).trans hu
+    · apply setIntegral_mono_set hHi
+      · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+        exact hHnonneg u hu
+      · exact ae_of_all _ (fun u hu => lt_trans (by norm_num : (0 : ℝ) < 3) hu)
+  have hgamma : Real.Gamma (3 / 2) = Real.sqrt Real.pi / 2 := by
+    rw [show (3 / 2 : ℝ) = 1 / 2 + 1 by norm_num,
+      Real.Gamma_add_one (by norm_num : (1 / 2 : ℝ) ≠ 0), Real.Gamma_one_half_eq]
+    ring
+  have hp1 : (N : ℝ) ^ (1 / 2 : ℝ) = Real.sqrt N := by rw [Real.sqrt_eq_rpow]
+  have hp3 : (N : ℝ) ^ (3 / 2 : ℝ) = N * Real.sqrt N := by
+    rw [show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num, Real.rpow_add hNpos, Real.rpow_one, hp1]
+  have hInt : (∫ u in Set.Ioi (0 : ℝ), H u) =
+      Real.sqrt N * Real.sqrt Real.pi * (Real.log N + 1 / 2) := by
+    rw [show H = (fun u => Real.log N * J (-1 / 2) u + (1 / (N : ℝ)) * J (1 / 2) u) from rfl,
+      integral_add ((hJi (-1 / 2) (by norm_num)).const_mul _)
+        ((hJi (1 / 2) (by norm_num)).const_mul _)]
+    simp_rw [integral_const_mul]
+    rw [hJv (-1 / 2) (by norm_num), hJv (1 / 2) (by norm_num)]
+    norm_num only [show (-1 / 2 : ℝ) + 1 = 1 / 2 by norm_num,
+      show (1 / 2 : ℝ) + 1 = 3 / 2 by norm_num]
+    rw [Real.Gamma_one_half_eq, hgamma, hp1, hp3]
+    field_simp [hNpos.ne']
+  rw [hInt] at hcomp
+  have hpi : Real.sqrt Real.pi ≤ 2 := (Real.sqrt_le_iff).mpr
+    ⟨by norm_num, by linarith [Real.pi_lt_four]⟩
+  have hpoly : 2 * (Real.log N + 1 / 2) ≤ 0.05 * Real.log N ^ 2 := by nlinarith
+  have hh := mul_le_mul_of_nonneg_left hpoly (Real.sqrt_nonneg (N : ℝ))
+  have hh' := mul_le_mul_of_nonneg_left hpi
+    (show 0 ≤ Real.sqrt N * (Real.log N + 1 / 2) by positivity)
+  nlinarith
+
+
+/-- Supporting diagnostic for the uncentered tail count printed on page 349.
+At N equal to 10 to the twentieth power the tail count at its lower endpoint is zero.
+Its difference from Li of the endpoint exceeds the printed error budget at q equal to one.
+This does not refute Lemma 3.1 or the sealed approximation target. -/
+theorem lower_cutoff_uncentered_error :
+    2.6 * Real.sqrt ((10 : ℝ) ^ 10) * Real.log ((10 : ℝ) ^ 10) + 2 * 10 ^ 8 <
+      |(0 : ℝ) - State1546.zinLi ((10 : ℝ) ^ 10)| := by
+  have hlogpos : 0 < Real.log ((10 : ℝ) ^ 10) := Real.log_pos (by norm_num)
+  have hlog : Real.log ((10 : ℝ) ^ 10) < 24 := by
+    rw [Real.log_pow]
+    have h10 : Real.log (10 : ℝ) < 2.4 := by
+      rw [Real.log_ten_eq]
+      linarith [Real.log_two_lt_d9, Real.log_five_lt_d9]
+    norm_num only [Nat.cast_ofNat]
+    linarith
+  have hs : Real.sqrt ((10 : ℝ) ^ 10) = 100000 := by norm_num
+  have hdiv : (10 : ℝ) ^ 10 / 24 ≤ (10 : ℝ) ^ 10 / Real.log ((10 : ℝ) ^ 10) :=
+    div_le_div_of_nonneg_left (by positivity) hlogpos hlog.le
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have htwo : (2 : ℝ) / Real.log 2 ≤ 3 := by
+    rw [div_le_iff₀ hlog2]
+    linarith [Real.log_two_gt_d9]
+  have hi : 0 ≤ ∫ u in (2 : ℝ)..((10 : ℝ) ^ 10), 1 / Real.log u ^ 2 :=
+    intervalIntegral.integral_nonneg_of_forall (by norm_num) (by intro u; positivity)
+  have hli := State1546.zinLi_by_parts (x := (10 : ℝ) ^ 10) (by norm_num)
+  norm_num only [show (10 : ℝ) ^ 10 = 10000000000 by norm_num,
+    show (10 : ℝ) ^ 8 = 100000000 by norm_num] at *
+  have hli0 : 0 < State1546.zinLi (10000000000 : ℝ) := by linarith
+  rw [zero_sub, abs_neg, abs_of_pos hli0]
+  linarith
+
+
+/-- The logarithmic integral in the constant remainder after display 3.4 on page 351. -/
+theorem residue_log_integral (N : ℝ) (hN : 1 ≤ N) :
+    IntegrableOn (fun u : ℝ => Real.log u * Real.exp (-u / N)) (Set.Ioi 3) ∧
+    (∫ u in Set.Ioi (3 : ℝ), Real.log u * Real.exp (-u / N)) ≤ N * (Real.log N + 1) := by
+  have hNpos : 0 < N := by linarith
+  let H : ℝ → ℝ := fun u => Real.log N * Real.exp (-u / N) + (u / N) * Real.exp (-u / N)
+  have h0 : IntegrableOn (fun u : ℝ => Real.exp (-u / N)) (Set.Ioi 0) := by
+    simpa using (residue_exponential_moment N hNpos 0).1
+  have h1 : IntegrableOn (fun u : ℝ => (u / N) * Real.exp (-u / N)) (Set.Ioi 0) := by
+    simpa using (residue_exponential_moment N hNpos 1).1
+  have hHi : IntegrableOn H (Set.Ioi 0) := (h0.const_mul _).add h1
+  have hHpos : ∀ u : ℝ, 0 < u → 0 ≤ H u := by
+    intro u hu
+    dsimp [H]
+    exact add_nonneg (mul_nonneg (Real.log_nonneg hN) (Real.exp_pos _).le) (by positivity)
+  have hAE : ∀ᵐ u ∂volume.restrict (Set.Ioi (3 : ℝ)), ‖Real.log u * Real.exp (-u / N)‖ ≤ H u := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu0 : 0 < u := lt_trans (by norm_num : (0 : ℝ) < 3) hu
+    have hlog0 : 0 ≤ Real.log u := Real.log_nonneg (by linarith [Set.mem_Ioi.mp hu])
+    have hlog : Real.log u ≤ Real.log N + u / N := by
+      have hh := Real.log_le_sub_one_of_pos (div_pos hu0 hNpos)
+      rw [Real.log_div hu0.ne' hNpos.ne'] at hh
+      linarith
+    rw [Real.norm_of_nonneg (by positivity)]
+    dsimp [H]
+    nlinarith [Real.exp_pos (-u / N)]
+  have hH3 : IntegrableOn H (Set.Ioi (3 : ℝ)) :=
+    hHi.mono_set (fun u hu => lt_trans (by norm_num : (0 : ℝ) < 3) hu)
+  have hfi : IntegrableOn (fun u : ℝ => Real.log u * Real.exp (-u / N)) (Set.Ioi 3) :=
+    hH3.mono' (by fun_prop) hAE
+  refine ⟨hfi, ?_⟩
+  have hcomp : (∫ u in Set.Ioi (3 : ℝ), Real.log u * Real.exp (-u / N)) ≤
+      ∫ u in Set.Ioi (0 : ℝ), H u := by
+    refine (integral_mono_ae hfi hH3 ?_).trans ?_
+    · filter_upwards [hAE] with u hu
+      exact (le_abs_self _).trans hu
+    · apply setIntegral_mono_set hHi
+      · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+        exact hHpos u hu
+      · exact ae_of_all _ (fun u hu => lt_trans (by norm_num : (0 : ℝ) < 3) hu)
+  have hm0 : (∫ u in Set.Ioi (0 : ℝ), Real.exp (-u / N)) = N := by
+    simpa using (residue_exponential_moment N hNpos 0).2
+  have hm1 : (∫ u in Set.Ioi (0 : ℝ), (u / N) * Real.exp (-u / N)) = N := by
+    simpa using (residue_exponential_moment N hNpos 1).2
+  have hInt : (∫ u in Set.Ioi (0 : ℝ), H u) = N * (Real.log N + 1) := by
+    rw [show H = (fun u => Real.log N * Real.exp (-u / N) + (u / N) * Real.exp (-u / N)) from rfl,
+      integral_add (h0.const_mul _) h1, integral_const_mul, hm0, hm1]
+    ring
+  rwa [hInt] at hcomp
+
+
+/-- The reciprocal integral in the constant remainder after display 3.4 on page 351. -/
+theorem residue_inv_integral (N : ℝ) (hN : 3 ≤ N) :
+    IntegrableOn (fun u : ℝ => 1 / u * Real.exp (-u / N)) (Set.Ioi 3) ∧
+    (∫ u in Set.Ioi (3 : ℝ), 1 / u * Real.exp (-u / N)) ≤ Real.log N + 1 := by
+  have hNpos : 0 < N := by linarith
+  let f : ℝ → ℝ := fun u => 1 / u * Real.exp (-u / N)
+  have hEi : IntegrableOn (fun u : ℝ => Real.exp (-u / N)) (Set.Ioi 0) := by
+    simpa using (residue_exponential_moment N hNpos 0).1
+  have hEv : (∫ u in Set.Ioi (0 : ℝ), Real.exp (-u / N)) = N := by
+    simpa using (residue_exponential_moment N hNpos 0).2
+  have hf : IntegrableOn f (Set.Ioi (3 : ℝ)) := by
+    apply (hEi.mono_set (fun u hu => lt_trans (by norm_num : (0 : ℝ) < 3) hu)).mono' (by fun_prop)
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu0 : 0 < u := lt_trans (by norm_num : (0 : ℝ) < 3) hu
+    dsimp [f]
+    rw [abs_of_nonneg (by positivity)]
+    have hi : 1 / u ≤ 1 := (div_le_one hu0).mpr (by linarith [Set.mem_Ioi.mp hu])
+    nlinarith [Real.exp_pos (-u / N)]
+  have hfN : IntegrableOn f (Set.Ioi N) := hf.mono_set (fun u hu => lt_of_le_of_lt hN hu)
+  have hi : IntervalIntegrable (fun u : ℝ => 1 / u) volume 3 N := by
+    apply ContinuousOn.intervalIntegrable
+    apply continuousOn_const.div continuousOn_id
+    intro u hu
+    rw [Set.uIcc_of_le hN] at hu
+    change u ≠ 0
+    linarith [hu.1]
+  have hfc : IntervalIntegrable f volume 3 N :=
+    hi.mul_continuousOn (by fun_prop)
+  have hlo : (∫ u in (3 : ℝ)..N, f u) ≤ Real.log N := by
+    have hh : (∫ u in (3 : ℝ)..N, f u) ≤ ∫ u in (3 : ℝ)..N, 1 / u := by
+      apply intervalIntegral.integral_mono_on hN hfc hi
+      intro u hu
+      have hu0 : 0 < u := by linarith [hu.1]
+      have he : Real.exp (-u / N) ≤ 1 := Real.exp_le_one_iff.mpr (div_nonpos_of_nonpos_of_nonneg (by linarith) hNpos.le)
+      dsimp [f]
+      exact (mul_le_mul_of_nonneg_left he (by positivity)).trans_eq (mul_one _)
+    rw [integral_one_div_of_pos (by norm_num) hNpos,
+      Real.log_div hNpos.ne' (by norm_num)] at hh
+    exact hh.trans (sub_le_self _ (Real.log_nonneg (by norm_num)))
+  have htail : (∫ u in Set.Ioi N, f u) ≤ 1 := by
+    have hH : IntegrableOn (fun u : ℝ => (1 / N) * Real.exp (-u / N)) (Set.Ioi 0) :=
+      hEi.const_mul _
+    have hHN := hH.mono_set (fun u (hu : u ∈ Set.Ioi N) => lt_trans hNpos hu)
+    have h1 : (∫ u in Set.Ioi N, f u) ≤ ∫ u in Set.Ioi N, (1 / N) * Real.exp (-u / N) := by
+      apply integral_mono_ae hfN hHN
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+      dsimp [f]
+      exact mul_le_mul_of_nonneg_right (one_div_le_one_div_of_le hNpos (le_of_lt hu)) (Real.exp_pos _).le
+    have h2 : (∫ u in Set.Ioi N, (1 / N) * Real.exp (-u / N)) ≤
+        ∫ u in Set.Ioi (0 : ℝ), (1 / N) * Real.exp (-u / N) := by
+      apply setIntegral_mono_set hH
+      · exact ae_of_all _ (fun u => by positivity)
+      · exact ae_of_all _ (fun u (hu : u ∈ Set.Ioi N) => lt_trans hNpos hu)
+    have h3 : (∫ u in Set.Ioi (0 : ℝ), (1 / N) * Real.exp (-u / N)) = 1 := by
+      rw [integral_const_mul, hEv]
+      field_simp
+    exact h1.trans (h2.trans_eq h3)
+  refine ⟨hf, ?_⟩
+  have hsplit := intervalIntegral.integral_interval_add_Ioi hf hfN
+  change (∫ u in Set.Ioi (3 : ℝ), f u) ≤ Real.log N + 1
+  linarith
+
+
+/-- Combined real integral budget for displays 3.3 to 3.4 on pages 350 to 351.
+The last term reserves the omitted model segment from 3 to square root N.
+The constant remainder keeps the phase factor throughout. -/
+theorem residue_remainder_budget (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
+    (q : ℕ) (hq : 0 < q) :
+    2.6 / (N : ℝ) * (1 + 4 * Real.pi * Real.log N / Nat.totient q) *
+        (∫ u in Set.Ioi (3 : ℝ), Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)) +
+      2.6 * (∫ u in Set.Ioi (3 : ℝ), Real.log u / Real.sqrt u * Real.exp (-u / N)) +
+      (2 * 10 ^ 8 : ℝ) / N * (1 + 4 * Real.pi * Real.log N / Nat.totient q) *
+        (∫ u in Set.Ioi (3 : ℝ), Real.log u * Real.exp (-u / N)) +
+      (2 * 10 ^ 8 : ℝ) * (∫ u in Set.Ioi (3 : ℝ), 1 / u * Real.exp (-u / N)) +
+      Real.sqrt N / Nat.totient q ≤
+        3.8 * (1 + 4 * Real.pi * Real.log N / Nat.totient q) * Real.sqrt N * Real.log N ^ 2 := by
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hN3 : (3 : ℝ) ≤ N := by linarith
+  have hL : 46 ≤ Real.log N := log_1e20_ge.trans
+    (Real.log_le_log (by positivity) hN)
+  have hs : (10000000000 : ℝ) ≤ Real.sqrt N :=
+    (Real.le_sqrt (by norm_num) hNpos.le).mpr (by nlinarith [hN])
+  have hp : (1 : ℝ) ≤ Nat.totient q := by exact_mod_cast Nat.totient_pos.mpr hq
+  have hp0 : (0 : ℝ) < Nat.totient q := by linarith
+  let K : ℝ := 1 + 4 * Real.pi * Real.log N / Nat.totient q
+  have hK : 1 ≤ K := by
+    have hh : 0 ≤ 4 * Real.pi * Real.log N / (Nat.totient q : ℝ) := by positivity
+    dsimp [K]
+    linarith
+  have hK0 : 0 ≤ K := by linarith
+  have hE : (2 * 10 ^ 8 : ℝ) ≤ 0.02 * Real.sqrt N := by linarith
+  have hsmall : 0.02 * (Real.log N + 1) ≤ 0.001 * Real.log N ^ 2 := by nlinarith
+  have hunit : (1 : ℝ) ≤ 0.001 * Real.log N ^ 2 := by nlinarith
+  have h1 : 2.6 / (N : ℝ) * K *
+      (∫ u in Set.Ioi (3 : ℝ), Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)) ≤
+        2.99 * K * Real.sqrt N * Real.log N ^ 2 := by
+    calc
+      _ ≤ 2.6 / (N : ℝ) * K * (1.15 * N * Real.sqrt N * Real.log N ^ 2) :=
+        mul_le_mul_of_nonneg_left (residue_log_square_integral N hN) (by positivity)
+      _ = _ := by field_simp [hNpos.ne'] <;> ring
+  have h2 : 2.6 * (∫ u in Set.Ioi (3 : ℝ), Real.log u / Real.sqrt u * Real.exp (-u / N)) ≤
+      0.13 * Real.sqrt N * Real.log N ^ 2 := by
+    nlinarith [residue_log_half_integral N hN]
+  have h3 : (2 * 10 ^ 8 : ℝ) / N * K *
+      (∫ u in Set.Ioi (3 : ℝ), Real.log u * Real.exp (-u / N)) ≤
+        0.001 * K * Real.sqrt N * Real.log N ^ 2 := by
+    calc
+      _ ≤ (2 * 10 ^ 8 : ℝ) / N * K * ((N : ℝ) * (Real.log N + 1)) :=
+        mul_le_mul_of_nonneg_left (residue_log_integral N (by linarith)).2 (by positivity)
+      _ = (2 * 10 ^ 8 : ℝ) * K * (Real.log N + 1) := by field_simp [hNpos.ne'] <;> ring
+      _ ≤ 0.02 * Real.sqrt N * K * (Real.log N + 1) :=
+        mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hE hK0) (by linarith)
+      _ ≤ _ := by
+        have hh := mul_le_mul_of_nonneg_left hsmall
+          (show 0 ≤ Real.sqrt N * K by positivity)
+        nlinarith
+  have h4 : (2 * 10 ^ 8 : ℝ) * (∫ u in Set.Ioi (3 : ℝ), 1 / u * Real.exp (-u / N)) ≤
+      0.001 * Real.sqrt N * Real.log N ^ 2 := by
+    calc
+      _ ≤ (2 * 10 ^ 8 : ℝ) * (Real.log N + 1) :=
+        mul_le_mul_of_nonneg_left (residue_inv_integral N hN3).2 (by norm_num)
+      _ ≤ 0.02 * Real.sqrt N * (Real.log N + 1) :=
+        mul_le_mul_of_nonneg_right hE (by linarith)
+      _ ≤ _ := by
+        have hh := mul_le_mul_of_nonneg_left hsmall (Real.sqrt_nonneg (N : ℝ))
+        nlinarith
+  have h5 : Real.sqrt N / Nat.totient q ≤ 0.001 * Real.sqrt N * Real.log N ^ 2 := by
+    calc
+      _ ≤ Real.sqrt N := (div_le_self (Real.sqrt_nonneg _) hp)
+      _ ≤ _ := by
+        have hh := mul_le_mul_of_nonneg_left hunit (Real.sqrt_nonneg (N : ℝ))
+        nlinarith
+  have hclose : 2.99 * K + 0.13 + 0.001 * K + 0.001 + 0.001 ≤ 3.8 * K := by nlinarith
+  have hh := mul_le_mul_of_nonneg_right hclose
+    (show 0 ≤ Real.sqrt N * Real.log N ^ 2 by positivity)
+  change 2.6 / (N : ℝ) * K * _ + 2.6 * _ + (2 * 10 ^ 8 : ℝ) / N * K * _ +
+    (2 * 10 ^ 8 : ℝ) * _ + Real.sqrt N / Nat.totient q ≤ 3.8 * K * Real.sqrt N * Real.log N ^ 2
+  nlinarith
+
+
+/-- Integrability of the two real remainder kernels in display 3.4 on page 350. -/
+theorem residue_error_kernels_integrable (N : ℝ) (hN : 0 < N) :
+    IntegrableOn (fun u : ℝ => Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)) (Set.Ioi 3) ∧
+    IntegrableOn (fun u : ℝ => Real.log u / Real.sqrt u * Real.exp (-u / N)) (Set.Ioi 3) := by
+  have hm : ∀ k : ℕ, IntegrableOn (fun u : ℝ => u ^ k * Real.exp (-u / N)) (Set.Ioi 0) := by
+    intro k
+    simpa only [Real.rpow_one, Real.rpow_natCast, neg_mul, neg_div, one_div_mul_eq_div] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (k : ℝ)) (b := 1 / N)
+        (by exact lt_of_lt_of_le (by norm_num : (-1 : ℝ) < 0) (Nat.cast_nonneg k))
+        (by norm_num) (by positivity)
+  have h3 := (hm 3).mono_set (fun u (hu : u ∈ Set.Ioi (3 : ℝ)) => lt_trans (by norm_num : (0 : ℝ) < 3) hu)
+  have h1 := (hm 1).mono_set (fun u (hu : u ∈ Set.Ioi (3 : ℝ)) => lt_trans (by norm_num : (0 : ℝ) < 3) hu)
+  constructor
+  · apply h3.mono' (by fun_prop)
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu1 : 1 ≤ u := by linarith [Set.mem_Ioi.mp hu]
+    have hlog0 : 0 ≤ Real.log u := Real.log_nonneg hu1
+    have hlog : Real.log u ≤ u := Real.log_le_self (by linarith)
+    have hs : Real.sqrt u ≤ u := Real.sqrt_le_self_iff.mpr (Or.inr hu1)
+    have hb : Real.sqrt u * Real.log u ^ 2 ≤ u ^ 3 := by
+      calc
+        _ ≤ u * u ^ 2 := mul_le_mul hs (pow_le_pow_left₀ hlog0 hlog 2) (sq_nonneg _) (by linarith)
+        _ = _ := by ring
+    rw [Real.norm_of_nonneg (by positivity)]
+    exact mul_le_mul_of_nonneg_right hb (Real.exp_pos _).le
+  · apply h1.mono' (by fun_prop)
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu1 : 1 ≤ u := by linarith [Set.mem_Ioi.mp hu]
+    have hlog0 : 0 ≤ Real.log u := Real.log_nonneg hu1
+    have hs : 1 ≤ Real.sqrt u := Real.one_le_sqrt.mpr hu1
+    have hb : Real.log u / Real.sqrt u ≤ u :=
+      (div_le_self hlog0 hs).trans (Real.log_le_self (by linarith))
+    rw [Real.norm_of_nonneg (by positivity), pow_one]
+    exact mul_le_mul_of_nonneg_right hb (Real.exp_pos _).le
+
+
+/-- Absolute convergence and the inclusive finite tail limit for display 3.2 on page 349. -/
+theorem residueTail_partial_limit (N : ℕ) (hN : 0 < N) (q l : ℕ) (z : ℝ) :
+    Filter.Tendsto (fun M : ℕ => ∑ n ∈ Finset.Ioc ⌊Real.sqrt (N : ℝ)⌋₊ M,
+      if n.Prime ∧ n % q = l % q then
+        residueWeight ((((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z)) n else 0)
+      Filter.atTop (nhds (residueTail N q l z)) := by
+  classical
+  let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+  let A : ℝ := Real.sqrt N
+  let F : ℕ → ℂ := fun n => if n.Prime ∧ A < n ∧ n % q = l % q then tailTerm N z n else 0
+  have hs : Summable F := by
+    refine Summable.of_norm_bounded (summable_aZ hN) (fun n => ?_)
+    by_cases h : n.Prime ∧ A < n ∧ n % q = l % q
+    · rw [show F n = tailTerm N z n from if_pos h, tailTerm, norm_mul, norm_ee, mul_one,
+        Complex.norm_real, Real.norm_of_nonneg
+          (mul_nonneg (Real.log_natCast_nonneg n) (Real.exp_pos _).le)]
+      unfold aZ
+      rw [ArithmeticFunction.vonMangoldt_apply_prime h.1]
+    · rw [show F n = 0 from if_neg h, norm_zero]
+      exact aZ_nonneg N n
+  have htail : residueTail N q l z = ∑' n : ℕ, F n := rfl
+  have hw : ∀ n : ℕ, residueWeight x n = tailTerm N z n := by
+    intro n
+    have he : -x * (n : ℂ) = (((-(n : ℝ) / (N : ℝ) : ℝ)) : ℂ) +
+        2 * Real.pi * Complex.I * (-(n : ℝ) * z) := by
+      dsimp [x]
+      push_cast
+      ring
+    rw [residueWeight]
+    simp only [Complex.ofReal_natCast]
+    rw [he, Complex.exp_add]
+    simp only [tailTerm, ee, Complex.ofReal_mul, Complex.ofReal_exp, Complex.ofReal_neg,
+      Complex.ofReal_div, Complex.ofReal_natCast, Complex.ofReal_ofNat]
+    ring
+  have heq : ∀ M : ℕ,
+      (∑ n ∈ Finset.Ioc ⌊A⌋₊ M, if n.Prime ∧ n % q = l % q then residueWeight x n else 0) =
+      ∑ n ∈ Finset.range (M + 1), F n := by
+    intro M
+    calc
+      _ = ∑ n ∈ Finset.Ioc ⌊A⌋₊ M, F n := by
+        apply Finset.sum_congr rfl
+        intro n hn
+        have hAn : A < (n : ℝ) := (Nat.floor_lt (Real.sqrt_nonneg (N : ℝ))).mp (Finset.mem_Ioc.mp hn).1
+        simp only [F, hAn, hw]
+        by_cases hp : n.Prime <;> by_cases hmod : n % q = l % q <;> simp [hp, hmod]
+      _ = _ := by
+        apply Finset.sum_subset
+        · intro n hn
+          exact Finset.mem_range.mpr (Nat.lt_succ_of_le (Finset.mem_Ioc.mp hn).2)
+        · intro n hn hnnot
+          have hnM : n ≤ M := by have := Finset.mem_range.mp hn; omega
+          have hnA : n ≤ ⌊A⌋₊ := by
+            simp only [Finset.mem_Ioc, not_and, not_le] at hnnot
+            omega
+          have hAn : ¬ A < (n : ℝ) := not_lt_of_ge
+            ((show (n : ℝ) ≤ (⌊A⌋₊ : ℝ) by exact_mod_cast hnA).trans (Nat.floor_le (Real.sqrt_nonneg _)))
+          simp [F, hAn]
+  have hh := hs.hasSum.tendsto_sum_nat.comp (Filter.tendsto_add_atTop_nat 1)
+  rw [← htail] at hh
+  convert hh using 1
+  funext M
+  exact heq M
+
+
+/-- Integrability of the progression count term in Abel summation on page 350. -/
+theorem residue_count_deriv_integrable (x : ℂ) (hx : 0 < x.re) (q l : ℕ)
+    {A : ℝ} (hA : 1 ≤ A) :
+    IntegrableOn (fun u : ℝ => deriv (residueWeight x) u * (State1546.piMod u q l : ℂ))
+      (Set.Ioi A) := by
+  have hpiM : Measurable (fun u : ℝ => (State1546.piMod u q l : ℂ)) := by
+    let P : ℕ → ℂ := fun n => (((Finset.Iic n).filter
+      (fun p => p.Prime ∧ p % q = l % q)).card : ℂ)
+    have hP : Measurable P := Measurable.of_discrete
+    change Measurable (P ∘ (Nat.floor : ℝ → ℕ))
+    exact hP.comp Nat.measurable_floor
+  have h0 : IntegrableOn (fun u : ℝ => Real.exp (-x.re * u)) (Set.Ioi 0) := by
+    simpa only [Real.rpow_zero, Real.rpow_one, one_mul] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (0 : ℝ)) (b := x.re)
+        (by norm_num) (by norm_num) hx
+  have h2 : IntegrableOn (fun u : ℝ => u ^ 2 * Real.exp (-x.re * u)) (Set.Ioi 0) := by
+    simpa only [Real.rpow_two, Real.rpow_one] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (2 : ℝ)) (b := x.re)
+        (by norm_num) (by norm_num) hx
+  let H : ℝ → ℝ := fun u => 2 * Real.exp (-x.re * u) +
+    (2 * ‖x‖) * (u ^ 2 * Real.exp (-x.re * u))
+  have hH : IntegrableOn H (Set.Ioi 0) := (h0.const_mul _).add (h2.const_mul _)
+  have hHA : IntegrableOn H (Set.Ioi A) := hH.mono_set (fun u hu =>
+    lt_trans (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1) hA) (Set.mem_Ioi.mp hu))
+  apply hHA.mono'
+  · have hm : AEStronglyMeasurable (fun u : ℝ =>
+        (Complex.exp (-x * u) * (((1 / u : ℝ) : ℂ) - x * (Real.log u : ℂ))) *
+          (State1546.piMod u q l : ℂ)) (volume.restrict (Set.Ioi A)) := by
+      apply Measurable.aestronglyMeasurable
+      fun_prop
+    apply hm.congr
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu0 : u ≠ 0 := by have huA : A < u := hu; linarith
+    rw [(residueWeight_hasDerivAt x hu0).deriv]
+  · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu1 : 1 ≤ u := by have huA : A < u := hu; linarith
+    have hu0 : 0 < u := by linarith
+    have hp : ‖(State1546.piMod u q l : ℂ)‖ ≤ 2 * u := by
+      rw [Complex.norm_natCast]
+      have hc : State1546.piMod u q l ≤ ⌊u⌋₊ + 1 := by
+        unfold State1546.piMod
+        exact (Finset.card_filter_le _ _).trans_eq (Nat.card_Iic _)
+      have hc' : (State1546.piMod u q l : ℝ) ≤ (⌊u⌋₊ : ℝ) + 1 := by exact_mod_cast hc
+      linarith [Nat.floor_le hu0.le]
+    have hl : Real.log u ≤ u := Real.log_le_self hu0.le
+    have hl0 : 0 ≤ Real.log u := Real.log_nonneg hu1
+    rw [norm_mul]
+    calc
+      _ ≤ ((1 / u + ‖x‖ * Real.log u) * Real.exp (-x.re * u)) * (2 * u) :=
+        mul_le_mul (residueWeight_deriv_norm x hu1) hp (norm_nonneg _) (by positivity)
+      _ ≤ ((1 / u + ‖x‖ * u) * Real.exp (-x.re * u)) * (2 * u) := by gcongr
+      _ = H u := by dsimp [H]; field_simp [hu0.ne'] <;> ring
+
+
+/-- The improper Abel identity for the actual residue tail, supporting display 3.3 on page 350.
+The lower progression count term is retained explicitly. -/
+theorem residueTail_abel (N : ℕ) (hN : 0 < N) (q l : ℕ) (z : ℝ) :
+    residueTail N q l z =
+      -residueWeight ((((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z)) (Real.sqrt N) *
+        (State1546.piMod (Real.sqrt N) q l : ℂ) -
+      ∫ u in Set.Ioi (Real.sqrt (N : ℝ)),
+        deriv (residueWeight ((((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z))) u *
+          (State1546.piMod u q l : ℂ) := by
+  let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+  let A : ℝ := Real.sqrt N
+  have hNr : (0 : ℝ) < N := by exact_mod_cast hN
+  have hA : 1 ≤ A := Real.one_le_sqrt.mpr (by exact_mod_cast hN)
+  have hx : 0 < x.re := by simp [x]; positivity
+  have hi := residue_count_deriv_integrable x hx q l hA
+  have hb := (residue_boundary_tendsto x hx q l).comp tendsto_natCast_atTop_atTop
+  have hI := intervalIntegral_tendsto_integral_Ioi A hi tendsto_natCast_atTop_atTop
+  have hh := (hb.sub_const (residueWeight x A * (State1546.piMod A q l : ℂ))).sub hI
+  simp only [zero_sub] at hh
+  have he : ∀ᶠ M : ℕ in Filter.atTop, A ≤ (M : ℝ) :=
+    tendsto_natCast_atTop_atTop.eventually (Filter.eventually_ge_atTop A)
+  have hlim : Filter.Tendsto (fun M : ℕ => ∑ n ∈ Finset.Ioc ⌊A⌋₊ M,
+      if n.Prime ∧ n % q = l % q then residueWeight x n else 0) Filter.atTop
+        (nhds (-(residueWeight x A * (State1546.piMod A q l : ℂ)) -
+          ∫ u in Set.Ioi A, deriv (residueWeight x) u * (State1546.piMod u q l : ℂ))) := by
+    apply hh.congr'
+    filter_upwards [he] with M hAM
+    have hfin := residue_finite_abel x q l hA hAM
+    rw [Nat.floor_natCast] at hfin
+    rw [← intervalIntegral.integral_of_le hAM] at hfin
+    simpa only [neg_mul, Function.comp_apply] using hfin.symm
+  simpa only [neg_mul] using tendsto_nhds_unique (residueTail_partial_limit N hN q l z) hlim
+
+
+/-- The derivative of the logarithmic integral used in Abel summation on pages 349 to 350. -/
+theorem residue_zinLi_hasDerivAt {u : ℝ} (hu : 2 < u) :
+    HasDerivAt State1546.zinLi (1 / Real.log u) u := by
+  have hc : ContinuousOn (fun t : ℝ => 1 / Real.log t) (Set.uIcc (2 : ℝ) u) := by
+    apply continuousOn_const.div
+    · apply Real.continuousOn_log.mono
+      intro t ht
+      rw [Set.uIcc_of_le hu.le] at ht
+      simpa only [Set.mem_compl_iff, Set.mem_singleton_iff] using (show t ≠ 0 by linarith [ht.1])
+    · intro t ht
+      rw [Set.uIcc_of_le hu.le] at ht
+      exact (Real.log_pos (by linarith [ht.1])).ne'
+  have hm : Measurable (fun t : ℝ => 1 / Real.log t) := by fun_prop
+  have hu0 : u ≠ 0 := by linarith
+  have hlog : Real.log u ≠ 0 := (Real.log_pos (by linarith)).ne'
+  exact intervalIntegral.integral_hasDerivAt_right hc.intervalIntegrable
+    hm.stronglyMeasurable.stronglyMeasurableAtFilter
+    (continuousAt_const.div (Real.continuousAt_log hu0) hlog)
+
+
+/-- Elementary growth bounds for the Li main term in display 3.3 on page 350. -/
+theorem residue_zinLi_bounds {u : ℝ} (hu : 2 ≤ u) :
+    0 ≤ State1546.zinLi u ∧ State1546.zinLi u ≤ 2 * u := by
+  have hc : ContinuousOn (fun t : ℝ => 1 / Real.log t) (Set.uIcc (2 : ℝ) u) := by
+    apply continuousOn_const.div
+    · apply Real.continuousOn_log.mono
+      intro t ht
+      rw [Set.uIcc_of_le hu] at ht
+      simpa only [Set.mem_compl_iff, Set.mem_singleton_iff] using (show t ≠ 0 by linarith [ht.1])
+    · intro t ht
+      rw [Set.uIcc_of_le hu] at ht
+      exact (Real.log_pos (by linarith [ht.1])).ne'
+  have hlog2 : (1 / 2 : ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
+  constructor
+  · apply intervalIntegral.integral_nonneg hu
+    intro t ht
+    have htlog : 0 ≤ Real.log t := Real.log_nonneg (by linarith [ht.1])
+    positivity
+  · have hh : (∫ t in (2 : ℝ)..u, 1 / Real.log t) ≤ ∫ t in (2 : ℝ)..u, (2 : ℝ) := by
+      apply intervalIntegral.integral_mono_on hu hc.intervalIntegrable intervalIntegrable_const
+      intro t ht
+      have hlog : Real.log 2 ≤ Real.log t := Real.log_le_log (by norm_num) ht.1
+      have hpos : 0 < Real.log t := Real.log_pos (by linarith [ht.1])
+      rw [div_le_iff₀ hpos]
+      linarith
+    simp only [intervalIntegral.integral_const, smul_eq_mul] at hh
+    change (∫ t in (2 : ℝ)..u, 1 / Real.log t) ≤ 2 * u
+    linarith
+
+
+/-- Polynomial domination for the weighted improper integrals in display 3.3 on page 350. -/
+theorem residueWeight_deriv_mul_integrable (x : ℂ) (hx : 0 < x.re) {A : ℝ} (hA : 1 ≤ A)
+    (g : ℝ → ℂ) (C : ℝ) (hC : 0 ≤ C)
+    (hgm : AEStronglyMeasurable g (volume.restrict (Set.Ioi A)))
+    (hg : ∀ u ∈ Set.Ioi A, ‖g u‖ ≤ C * u) :
+    IntegrableOn (fun u : ℝ => deriv (residueWeight x) u * g u) (Set.Ioi A) := by
+  have h0 : IntegrableOn (fun u : ℝ => Real.exp (-x.re * u)) (Set.Ioi 0) := by
+    simpa only [Real.rpow_zero, Real.rpow_one, one_mul] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (0 : ℝ)) (b := x.re)
+        (by norm_num) (by norm_num) hx
+  have h2 : IntegrableOn (fun u : ℝ => u ^ 2 * Real.exp (-x.re * u)) (Set.Ioi 0) := by
+    simpa only [Real.rpow_two, Real.rpow_one] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow (p := (1 : ℝ)) (s := (2 : ℝ)) (b := x.re)
+        (by norm_num) (by norm_num) hx
+  let H : ℝ → ℝ := fun u => C * Real.exp (-x.re * u) +
+    (C * ‖x‖) * (u ^ 2 * Real.exp (-x.re * u))
+  have hH : IntegrableOn H (Set.Ioi 0) := (h0.const_mul _).add (h2.const_mul _)
+  have hHA : IntegrableOn H (Set.Ioi A) := hH.mono_set (fun u hu =>
+    lt_trans (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1) hA) (Set.mem_Ioi.mp hu))
+  apply hHA.mono'
+  · have hm : AEStronglyMeasurable (fun u : ℝ =>
+        (Complex.exp (-x * u) * (((1 / u : ℝ) : ℂ) - x * (Real.log u : ℂ))) * g u)
+          (volume.restrict (Set.Ioi A)) := by
+      have hf : Measurable (fun u : ℝ => Complex.exp (-x * u) *
+          (((1 / u : ℝ) : ℂ) - x * (Real.log u : ℂ))) := by fun_prop
+      exact hf.aestronglyMeasurable.mul hgm
+    apply hm.congr
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu0 : u ≠ 0 := by have huA : A < u := hu; linarith
+    rw [(residueWeight_hasDerivAt x hu0).deriv]
+  · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu1 : 1 ≤ u := by have huA : A < u := hu; linarith
+    have hu0 : 0 < u := by linarith
+    have hl : Real.log u ≤ u := Real.log_le_self hu0.le
+    have hl0 : 0 ≤ Real.log u := Real.log_nonneg hu1
+    rw [norm_mul]
+    calc
+      _ ≤ ((1 / u + ‖x‖ * Real.log u) * Real.exp (-x.re * u)) * (C * u) :=
+        mul_le_mul (residueWeight_deriv_norm x hu1) (hg u hu) (norm_nonneg _) (by positivity)
+      _ ≤ ((1 / u + ‖x‖ * u) * Real.exp (-x.re * u)) * (C * u) := by gcongr
+      _ = H u := by dsimp [H]; field_simp [hu0.ne'] <;> ring
+
+
+/-- The upper endpoint vanishes for linearly bounded factors in display 3.3 on page 350. -/
+theorem residueWeight_mul_tendsto (x : ℂ) (hx : 0 < x.re) {A : ℝ} (hA : 1 ≤ A)
+    (g : ℝ → ℂ) (C : ℝ) (hC : 0 ≤ C)
+    (hg : ∀ u ∈ Set.Ioi A, ‖g u‖ ≤ C * u) :
+    Filter.Tendsto (fun u : ℝ => residueWeight x u * g u) Filter.atTop (nhds 0) := by
+  have ht : Filter.Tendsto (fun u : ℝ => C * (u ^ 2 * Real.exp (-x.re * u)))
+      Filter.atTop (nhds 0) := by
+    simpa only [Real.rpow_ofNat, mul_zero] using
+      (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero 2 x.re hx).const_mul C
+  apply squeeze_zero_norm' _ ht
+  filter_upwards [Filter.eventually_gt_atTop A] with u hu
+  have hu1 : 1 ≤ u := by linarith
+  have hu0 : 0 < u := by linarith
+  have hlog0 : 0 ≤ Real.log u := Real.log_nonneg hu1
+  have hlog : Real.log u ≤ u := Real.log_le_self hu0.le
+  have hn : ‖residueWeight x u‖ = Real.exp (-x.re * u) * Real.log u := by
+    rw [residueWeight, norm_mul, Complex.norm_exp, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_nonneg hlog0]
+    simp
+  rw [norm_mul, hn]
+  calc
+    _ ≤ (Real.exp (-x.re * u) * u) * (C * u) :=
+      mul_le_mul (mul_le_mul_of_nonneg_left hlog (Real.exp_pos _).le) (hg u hu)
+        (norm_nonneg _) (by positivity)
+    _ = _ := by ring
+
+
+/-- The Li main term in the improper Abel identity on page 350. -/
+theorem residue_zinLi_abel (x : ℂ) (hx : 0 < x.re) {A : ℝ} (hA : 3 ≤ A) :
+    IntegrableOn (fun u : ℝ => deriv (residueWeight x) u * (State1546.zinLi u : ℂ)) (Set.Ioi A) ∧
+    (∫ u in Set.Ioi A, Complex.exp (-x * u)) =
+      -residueWeight x A * (State1546.zinLi A : ℂ) -
+        ∫ u in Set.Ioi A, deriv (residueWeight x) u * (State1546.zinLi u : ℂ) := by
+  have hA1 : 1 ≤ A := by linarith
+  have hc : ContinuousOn (fun u : ℝ => (State1546.zinLi u : ℂ)) (Set.Ioi A) := by
+    intro u hu
+    exact Complex.continuous_ofReal.continuousAt.comp
+      (residue_zinLi_hasDerivAt (by linarith [Set.mem_Ioi.mp hu])).continuousAt |>.continuousWithinAt
+  have hg : ∀ u ∈ Set.Ioi A, ‖(State1546.zinLi u : ℂ)‖ ≤ 2 * u := by
+    intro u hu
+    have hb := residue_zinLi_bounds (u := u) (by linarith [Set.mem_Ioi.mp hu])
+    simpa only [Complex.norm_real, Real.norm_of_nonneg hb.1] using hb.2
+  have hi := residueWeight_deriv_mul_integrable x hx hA1 (fun u => (State1546.zinLi u : ℂ))
+    2 (by norm_num) (hc.aestronglyMeasurable measurableSet_Ioi) hg
+  refine ⟨hi, ?_⟩
+  have he : IntegrableOn (fun u : ℝ => Complex.exp (-x * u)) (Set.Ioi A) :=
+    integrableOn_exp_mul_complex_Ioi (a := -x) (by simpa using hx) A
+  have hd : ∀ u ∈ Set.Ici A, HasDerivAt
+      (fun u : ℝ => residueWeight x u * (State1546.zinLi u : ℂ))
+      (deriv (residueWeight x) u * (State1546.zinLi u : ℂ) + Complex.exp (-x * u)) u := by
+    intro u hu
+    have hu2 : 2 < u := by have huA : A ≤ u := hu; linarith
+    have hu0 : u ≠ 0 := by linarith
+    have hlog : Real.log u ≠ 0 := (Real.log_pos (by linarith)).ne'
+    have hcanc : residueWeight x u * ((1 / Real.log u : ℝ) : ℂ) = Complex.exp (-x * u) := by
+      rw [residueWeight]
+      simp only [Complex.ofReal_div, Complex.ofReal_one]
+      field_simp [Complex.ofReal_ne_zero.mpr hlog]
+    convert (residueWeight_hasDerivAt x hu0).mul (residue_zinLi_hasDerivAt hu2).ofReal_comp using 1
+    rw [(residueWeight_hasDerivAt x hu0).deriv, hcanc]
+  have hEq := integral_Ioi_of_hasDerivAt_of_tendsto' hd (hi.add he)
+    (residueWeight_mul_tendsto x hx hA1 (fun u => (State1546.zinLi u : ℂ)) 2 (by norm_num) hg)
+  rw [integral_add hi he] at hEq
+  simp only [zero_sub] at hEq
+  have hsum : (∫ u in Set.Ioi A, Complex.exp (-x * u)) +
+      (∫ u in Set.Ioi A, deriv (residueWeight x) u * (State1546.zinLi u : ℂ)) =
+        -(residueWeight x A * (State1546.zinLi A : ℂ)) := by
+    rw [add_comm]
+    exact hEq
+  simpa only [neg_mul] using (eq_sub_iff_add_eq.mpr hsum)
+
+
+/-- The phase-dependent exponent bound following display 3.3 on page 350. -/
+theorem residue_exponent_norm_bound (N : ℕ) (hN : 0 < N) (q : ℕ) (hq : 0 < q)
+    (z : ℝ) (hz : |z| ≤ arcRadius N q) :
+    ‖(((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z)‖ ≤
+      (1 + 4 * Real.pi * Real.log N / Nat.totient q) / (N : ℝ) := by
+  have hNr : (0 : ℝ) < N := by exact_mod_cast hN
+  have hp : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.mpr hq
+  have hn : ‖(2 : ℂ) * Real.pi * Complex.I * z‖ = 2 * Real.pi * |z| := by
+    simp [norm_mul, Real.pi_pos.le, abs_of_nonneg Real.pi_pos.le]
+  calc
+    _ ≤ ‖((1 / (N : ℝ) : ℝ) : ℂ)‖ + ‖(2 : ℂ) * Real.pi * Complex.I * z‖ := norm_add_le _ _
+    _ = 1 / (N : ℝ) + 2 * Real.pi * |z| := by
+      rw [hn, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
+    _ ≤ 1 / (N : ℝ) + 2 * Real.pi * arcRadius N q := by gcongr
+    _ = _ := by unfold arcRadius; field_simp [hNr.ne', hp.ne'] <;> ring
+
+
+/-- Integrating the derivative of the Abel weight gives its lower endpoint on page 350. -/
+theorem residueWeight_integral_deriv (x : ℂ) (hx : 0 < x.re) {A : ℝ} (hA : 1 ≤ A) :
+    IntegrableOn (deriv (residueWeight x)) (Set.Ioi A) ∧
+    (∫ u in Set.Ioi A, deriv (residueWeight x) u) = -residueWeight x A := by
+  have hg : ∀ u ∈ Set.Ioi A, ‖(1 : ℂ)‖ ≤ (1 : ℝ) * u := by
+    intro u hu
+    simp only [norm_one, one_mul]
+    have huA : A < u := hu
+    linarith
+  have hi : IntegrableOn (deriv (residueWeight x)) (Set.Ioi A) := by
+    simpa only [mul_one] using residueWeight_deriv_mul_integrable x hx hA (fun _ => (1 : ℂ))
+      1 (by norm_num) aestronglyMeasurable_const hg
+  have ht : Filter.Tendsto (residueWeight x) Filter.atTop (nhds 0) := by
+    simpa only [mul_one] using residueWeight_mul_tendsto x hx hA (fun _ => (1 : ℂ)) 1 (by norm_num) hg
+  have hd : ∀ u ∈ Set.Ici A, HasDerivAt (residueWeight x) (deriv (residueWeight x) u) u := by
+    intro u hu
+    have hu0 : u ≠ 0 := by have huA : A ≤ u := hu; linarith
+    exact (residueWeight_hasDerivAt x hu0).differentiableAt.hasDerivAt
+  refine ⟨hi, ?_⟩
+  simpa only [zero_sub] using integral_Ioi_of_hasDerivAt_of_tendsto' hd hi ht
+
+
+/-- The centered progression error in display 3.3 on page 350.
+The Li term at the lower endpoint is subtracted with the lower progression count. -/
+theorem residueTail_centered_abel (N : ℕ) (hN : 9 ≤ N) (q l : ℕ) (z : ℝ) :
+    let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+    let A : ℝ := Real.sqrt N
+    let G : ℝ → ℂ := fun u => (State1546.piMod u q l : ℂ) - State1546.piMod A q l -
+      ((State1546.zinLi u : ℂ) - State1546.zinLi A) / (Nat.totient q : ℂ)
+    IntegrableOn (fun u => deriv (residueWeight x) u * G u) (Set.Ioi A) ∧
+      residueTail N q l z - (∫ u in Set.Ioi A, Complex.exp (-x * u)) / (Nat.totient q : ℂ) =
+        -(∫ u in Set.Ioi A, deriv (residueWeight x) u * G u) := by
+  dsimp only
+  let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+  let A : ℝ := Real.sqrt N
+  let φ : ℂ := Nat.totient q
+  let c : ℂ := (State1546.piMod A q l : ℂ) - (State1546.zinLi A : ℂ) / φ
+  let G : ℝ → ℂ := fun u => (State1546.piMod u q l : ℂ) - State1546.piMod A q l -
+    ((State1546.zinLi u : ℂ) - State1546.zinLi A) / φ
+  have hN0 : 0 < N := by omega
+  have hNr : (0 : ℝ) < N := by exact_mod_cast hN0
+  have hx : 0 < x.re := by simp [x]; positivity
+  have hA3 : 3 ≤ A := (Real.le_sqrt (by norm_num) hNr.le).mpr (by exact_mod_cast hN)
+  have hA1 : 1 ≤ A := by linarith
+  have hpi := residue_count_deriv_integrable x hx q l hA1
+  have hLi := (residue_zinLi_abel x hx hA3).1
+  have hmodel := (residue_zinLi_abel x hx hA3).2
+  have hD := residueWeight_integral_deriv x hx hA1
+  have hdiv := hLi.div_const φ
+  have hconst := hD.1.mul_const c
+  have hfun : (fun u : ℝ => deriv (residueWeight x) u * G u) =
+      (fun u => deriv (residueWeight x) u * (State1546.piMod u q l : ℂ) -
+        (deriv (residueWeight x) u * (State1546.zinLi u : ℂ)) / φ -
+        deriv (residueWeight x) u * c) := by
+    funext u
+    dsimp [G, c]
+    ring
+  have hG : IntegrableOn (fun u : ℝ => deriv (residueWeight x) u * G u) (Set.Ioi A) := by
+    rw [hfun]
+    exact (hpi.sub hdiv).sub hconst
+  have hInt : (∫ u in Set.Ioi A, deriv (residueWeight x) u * G u) =
+      (∫ u in Set.Ioi A, deriv (residueWeight x) u * (State1546.piMod u q l : ℂ)) -
+      (∫ u in Set.Ioi A, deriv (residueWeight x) u * (State1546.zinLi u : ℂ)) / φ -
+      (-residueWeight x A) * c := by
+    have ho := integral_sub (hpi.sub hdiv) hconst
+    have hin := integral_sub hpi hdiv
+    simp only [Pi.sub_apply] at ho hin
+    rw [hfun, ho, hin, integral_div, integral_mul_const, hD.2]
+  change IntegrableOn (fun u => deriv (residueWeight x) u * G u) (Set.Ioi A) ∧
+    residueTail N q l z - (∫ u in Set.Ioi A, Complex.exp (-x * u)) / φ =
+      -(∫ u in Set.Ioi A, deriv (residueWeight x) u * G u)
+  refine ⟨hG, ?_⟩
+  rw [residueTail_abel N hN0 q l z, hmodel, hInt]
+  change -residueWeight x A * (State1546.piMod A q l : ℂ) -
+    (∫ u in Set.Ioi A, deriv (residueWeight x) u * (State1546.piMod u q l : ℂ)) -
+    (-residueWeight x A * (State1546.zinLi A : ℂ) -
+      ∫ u in Set.Ioi A, deriv (residueWeight x) u * (State1546.zinLi u : ℂ)) / φ = _
+  dsimp [c]
+  ring
+
+
+/-- The lower model segment omitted from the prime tail in display 3.3 on page 350. -/
+theorem residue_model_segment (N : ℕ) (hN : 9 ≤ N) (z : ℝ) :
+    let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+    ‖(∫ u in Set.Ioi (Real.sqrt (N : ℝ)), Complex.exp (-x * u)) - continuousModel N z‖ ≤
+      Real.sqrt N := by
+  let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+  let A : ℝ := Real.sqrt N
+  have hN0 : 0 < N := by omega
+  have hNr : (0 : ℝ) < N := by exact_mod_cast hN0
+  have hx : 0 < x.re := by simp [x]; positivity
+  have hA3 : 3 ≤ A := (Real.le_sqrt (by norm_num) hNr.le).mpr (by exact_mod_cast hN)
+  have hi3 := integrableOn_exp_mul_complex_Ioi (a := -x) (by simpa using hx) (3 : ℝ)
+  have hiA := integrableOn_exp_mul_complex_Ioi (a := -x) (by simpa using hx) A
+  have hmodel : (∫ u in Set.Ioi (3 : ℝ), Complex.exp (-x * u)) = continuousModel N z :=
+    continuousModel_integral N hN0 z
+  have hsplit := intervalIntegral.integral_interval_add_Ioi hi3 hiA
+  rw [hmodel] at hsplit
+  have heq : (∫ u in Set.Ioi A, Complex.exp (-x * u)) - continuousModel N z =
+      -(∫ u in (3 : ℝ)..A, Complex.exp (-x * u)) := by
+    rw [← hsplit]
+    ring
+  change ‖(∫ u in Set.Ioi A, Complex.exp (-x * u)) - continuousModel N z‖ ≤ A
+  rw [heq, norm_neg]
+  have hb : ∀ u ∈ Set.uIoc (3 : ℝ) A, ‖Complex.exp (-x * u)‖ ≤ 1 := by
+    intro u hu
+    rw [Set.uIoc_of_le hA3] at hu
+    have hu0 : 0 ≤ u := by linarith [hu.1]
+    have hxre : x.re = 1 / (N : ℝ) := by simp [x]
+    rw [Complex.norm_exp]
+    apply Real.exp_le_one_iff.mpr
+    have he : (-x * (u : ℂ)).re = -(1 / (N : ℝ)) * u := by simp [hxre]
+    rw [he]
+    exact mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr (one_div_nonneg.mpr hNr.le)) hu0
+  have hh := intervalIntegral.norm_integral_le_of_norm_le_const hb
+  rw [one_mul, abs_of_nonneg (by linarith : 0 ≤ A - 3)] at hh
+  linarith
+
+
+/-- The four real kernels control any centered error with the Proposition 1.4 increment budget.
+CONDITIONAL ON the supplied pointwise centered error inequality. -/
+theorem residue_remainder_integral_bound (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
+    (q : ℕ) (hq : 0 < q) (z : ℝ) (hz : |z| ≤ arcRadius N q) (G : ℝ → ℂ)
+    (hi : IntegrableOn (fun u : ℝ => deriv (residueWeight
+      ((((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z))) u * G u)
+      (Set.Ioi (Real.sqrt (N : ℝ))))
+    (hG : ∀ u ∈ Set.Ioi (Real.sqrt (N : ℝ)), ‖G u‖ ≤
+      2.6 * Real.sqrt u * Real.log u + 2 * 10 ^ 8) :
+    ‖∫ u in Set.Ioi (Real.sqrt (N : ℝ)), deriv (residueWeight
+      ((((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z))) u * G u‖ +
+      Real.sqrt N / (Nat.totient q : ℝ) ≤
+        3.8 * (1 + 4 * Real.pi * Real.log N / Nat.totient q) * Real.sqrt N * Real.log N ^ 2 := by
+  let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+  let A : ℝ := Real.sqrt N
+  let K : ℝ := 1 + 4 * Real.pi * Real.log N / Nat.totient q
+  let H : ℝ → ℝ := fun u =>
+    (2.6 / (N : ℝ) * K) * (Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)) +
+    2.6 * (Real.log u / Real.sqrt u * Real.exp (-u / N)) +
+    ((2 * 10 ^ 8 : ℝ) / N * K) * (Real.log u * Real.exp (-u / N)) +
+    (2 * 10 ^ 8 : ℝ) * (1 / u * Real.exp (-u / N))
+  have hN0 : 0 < N := by exact_mod_cast (show (0 : ℝ) < N by linarith)
+  have hNr : (0 : ℝ) < N := by exact_mod_cast hN0
+  have hA3 : 3 ≤ A := (Real.le_sqrt (by norm_num) hNr.le).mpr (by nlinarith [hN])
+  have hp : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.mpr hq
+  have hL : 0 ≤ Real.log N := Real.log_natCast_nonneg N
+  have hK : 0 ≤ K := by dsimp [K]; positivity
+  have hxnorm : ‖x‖ ≤ K / (N : ℝ) := residue_exponent_norm_bound N hN0 q hq z hz
+  have hxre : x.re = 1 / (N : ℝ) := by simp [x]
+  have h1 := (residue_error_kernels_integrable N hNr).1.const_mul (2.6 / (N : ℝ) * K)
+  have h2 := (residue_error_kernels_integrable N hNr).2.const_mul (2.6 : ℝ)
+  have h3 := (residue_log_integral N (by linarith)).1.const_mul ((2 * 10 ^ 8 : ℝ) / N * K)
+  have h4 := (residue_inv_integral N (by linarith)).1.const_mul (2 * 10 ^ 8 : ℝ)
+  have hH : IntegrableOn H (Set.Ioi (3 : ℝ)) := by
+    exact (((h1.add h2).add h3).add h4).congr (Filter.Eventually.of_forall (fun u => by rfl))
+  have hHA : IntegrableOn H (Set.Ioi A) :=
+    hH.mono_set (fun u hu => lt_of_le_of_lt hA3 hu)
+  have hpt : ∀ u ∈ Set.Ioi A, ‖deriv (residueWeight x) u * G u‖ ≤ H u := by
+    intro u hu
+    have hu3 : 3 < u := lt_of_le_of_lt hA3 hu
+    have hu1 : 1 ≤ u := by linarith
+    have hu0 : 0 < u := by linarith
+    have hl : 0 ≤ Real.log u := Real.log_nonneg hu1
+    have hs : 0 < Real.sqrt u := Real.sqrt_pos.mpr hu0
+    have hrat : Real.log u / Real.sqrt u = Real.sqrt u * Real.log u / u := by
+      calc
+        _ = Real.sqrt u * Real.log u / Real.sqrt u ^ 2 := by field_simp [hs.ne'] <;> ring
+        _ = _ := by rw [Real.sq_sqrt hu0.le]
+    have he : Real.exp (-x.re * u) = Real.exp (-u / N) := by
+      rw [hxre]
+      congr 1
+      ring
+    rw [norm_mul]
+    calc
+      _ ≤ ((1 / u + ‖x‖ * Real.log u) * Real.exp (-x.re * u)) *
+          (2.6 * Real.sqrt u * Real.log u + 2 * 10 ^ 8) :=
+        mul_le_mul (residueWeight_deriv_norm x hu1) (hG u hu) (norm_nonneg _) (by positivity)
+      _ ≤ ((1 / u + (K / N) * Real.log u) * Real.exp (-u / N)) *
+          (2.6 * Real.sqrt u * Real.log u + 2 * 10 ^ 8) := by rw [he]; gcongr
+      _ = H u := by
+        dsimp [H]
+        rw [hrat]
+        field_simp [hNr.ne', hu0.ne'] <;> ring
+  have hcomp : ‖∫ u in Set.Ioi A, deriv (residueWeight x) u * G u‖ ≤
+      ∫ u in Set.Ioi (3 : ℝ), H u := by
+    refine (norm_integral_le_integral_norm _).trans ?_
+    refine (integral_mono_ae hi.norm hHA ?_).trans ?_
+    · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+      exact hpt u hu
+    · apply setIntegral_mono_set hH
+      · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
+        have hu0 : 0 < u := lt_trans (by norm_num : (0 : ℝ) < 3) hu
+        have hl : 0 ≤ Real.log u := Real.log_nonneg (by linarith [Set.mem_Ioi.mp hu])
+        dsimp [H]
+        positivity
+      · exact ae_of_all _ (fun u hu => lt_of_le_of_lt hA3 hu)
+  have hInt : (∫ u in Set.Ioi (3 : ℝ), H u) =
+      2.6 / (N : ℝ) * K * (∫ u in Set.Ioi (3 : ℝ), Real.sqrt u * Real.log u ^ 2 * Real.exp (-u / N)) +
+      2.6 * (∫ u in Set.Ioi (3 : ℝ), Real.log u / Real.sqrt u * Real.exp (-u / N)) +
+      (2 * 10 ^ 8 : ℝ) / N * K * (∫ u in Set.Ioi (3 : ℝ), Real.log u * Real.exp (-u / N)) +
+      (2 * 10 ^ 8 : ℝ) * (∫ u in Set.Ioi (3 : ℝ), 1 / u * Real.exp (-u / N)) := by
+    have h12 := integral_add h1 h2
+    have h123 := integral_add (h1.add h2) h3
+    have h1234 := integral_add ((h1.add h2).add h3) h4
+    simp only [Pi.add_apply] at h12 h123 h1234
+    dsimp only [H]
+    rw [h1234, h123, h12]
+    simp only [integral_const_mul]
+  rw [hInt] at hcomp
+  have hb := residue_remainder_budget N hN q hq
+  dsimp only [x, A, K] at hcomp
+  linarith
+
+
+/-- The per-residue approximation behind display 3.3 on page 350.
+CONDITIONAL ON the explicit progression error bound of Proposition 1.4. -/
+theorem residueTail_error_of_count (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
+    (q : ℕ) (hq : 0 < q) (hQ : q ≤ arcCutoff N) (l : ℕ) (z : ℝ)
+    (hz : |z| ≤ arcRadius N q)
+    (hcount : ∀ {t : ℝ}, (10 : ℝ) ^ 9 ≤ t → (q : ℝ) ≤ t ^ (0.37 : ℝ) →
+      |(State1546.piMod t q l : ℝ) - State1546.zinLi t / (Nat.totient q : ℝ)| ≤
+        1.3 * Real.sqrt t * Real.log t + 10 ^ 8) :
+    ‖residueTail N q l z - continuousModel N z / (Nat.totient q : ℂ)‖ ≤
+      3.8 * (1 + 4 * Real.pi * Real.log N / Nat.totient q) * Real.sqrt N * Real.log N ^ 2 := by
+  let x : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + 2 * Real.pi * Complex.I * z
+  let A : ℝ := Real.sqrt N
+  let φ : ℂ := Nat.totient q
+  let G : ℝ → ℂ := fun u => (State1546.piMod u q l : ℂ) - State1546.piMod A q l -
+    ((State1546.zinLi u : ℂ) - State1546.zinLi A) / φ
+  let J : ℂ := ∫ u in Set.Ioi A, Complex.exp (-x * u)
+  let I : ℂ := ∫ u in Set.Ioi A, deriv (residueWeight x) u * G u
+  have hN9 : 9 ≤ N := by exact_mod_cast (show (9 : ℝ) ≤ N by linarith)
+  have hc := residueTail_centered_abel N hN9 q l z
+  have hi : IntegrableOn (fun u => deriv (residueWeight x) u * G u) (Set.Ioi A) := hc.1
+  have hcenter : residueTail N q l z - J / φ = -I := hc.2
+  have hg : ∀ u ∈ Set.Ioi A, ‖G u‖ ≤ 2.6 * Real.sqrt u * Real.log u + 2 * 10 ^ 8 := by
+    intro u hu
+    have huA : Real.sqrt N ≤ u := (Set.mem_Ioi.mp hu).le
+    have hb := residue_count_increment_bound N hN q l hQ hcount huA
+    have heq : G u = ((((State1546.piMod u q l : ℝ) - State1546.piMod A q l) -
+      (State1546.zinLi u - State1546.zinLi A) / (Nat.totient q : ℝ) : ℝ) : ℂ) := by
+      dsimp [G, φ]
+      push_cast
+      ring
+    rw [heq, Complex.norm_real, Real.norm_eq_abs]
+    exact hb
+  have hb := residue_remainder_integral_bound N hN q hq z hz G hi hg
+  have hseg : ‖J - continuousModel N z‖ ≤ Real.sqrt N := residue_model_segment N hN9 z
+  have hp : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.mpr hq
+  have hseg' : ‖(J - continuousModel N z) / φ‖ ≤ Real.sqrt N / (Nat.totient q : ℝ) := by
+    simp only [norm_div, φ, Complex.norm_natCast]
+    exact div_le_div_of_nonneg_right hseg hp.le
+  have heq : residueTail N q l z - continuousModel N z / φ =
+      (residueTail N q l z - J / φ) + (J - continuousModel N z) / φ := by ring
+  have hfirst : ‖residueTail N q l z - J / φ‖ = ‖I‖ := by rw [hcenter, norm_neg]
+  rw [heq]
+  calc
+    _ ≤ ‖residueTail N q l z - J / φ‖ + ‖(J - continuousModel N z) / φ‖ := norm_add_le _ _
+    _ ≤ ‖I‖ + Real.sqrt N / (Nat.totient q : ℝ) := add_le_add (le_of_eq hfirst) hseg'
+    _ ≤ _ := hb
+
+
 /-- LEAF. Displays 3.2 to 3.4, pages 349 to 351, and the Ramanujan identity on page 351.
 Partial summation from Proposition 1.4 and the two integrated remainders give this bound.
 The constant 3.8 leaves room above the displayed 2.99, 0.14 and 0.001 estimates.
@@ -2059,7 +3374,23 @@ theorem residue_integral_approximation (N : ℕ) (hN : (10 : ℝ) ^ 20 ≤ N)
     ‖residueExpansion N q a z -
       (((μ q : ℝ) / Nat.totient q : ℝ) : ℂ) * continuousModel N z‖ ≤
         3.8 * lemma31Base N q := by
-  sorry
+  -- CONDITIONAL ON State1546.prop14_error_bound in the separate unit.
+  have hq0 : 0 < q := (Finset.mem_Icc.mp hq).1
+  have hQ : q ≤ arcCutoff N := (Finset.mem_Icc.mp hq).2
+  have hp : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.mpr hq0
+  let E : ℝ := 3.8 * (1 + 4 * Real.pi * Real.log N / Nat.totient q) *
+    Real.sqrt N * Real.log N ^ 2
+  have he : ∀ l ∈ (Finset.range q).filter (fun l => Nat.Coprime l q),
+      ‖residueTail N q l z - continuousModel N z / (Nat.totient q : ℂ)‖ ≤ E := by
+    intro l hl
+    have hcl : Nat.Coprime l q := (Finset.mem_filter.mp hl).2
+    exact residueTail_error_of_count N hN q hq0 hQ l z hz
+      (fun {t} ht hqt => State1546.prop14_error_bound hG (by omega) hcl ht hqt)
+  have hh := residueExpansion_error_of_tail N q a hq0 hac z E he
+  refine hh.trans_eq ?_
+  dsimp [E]
+  unfold lemma31Base
+  field_simp [hp.ne'] <;> ring
 
 /-- LEAF. Page 352, the conclusion of displays 3.1 to 3.4 and the Ramanujan identity.
 This analytic leaf includes partial summation from Proposition 1.4, pages 349 to 351.
