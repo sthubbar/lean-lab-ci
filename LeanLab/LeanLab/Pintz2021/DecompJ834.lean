@@ -1330,7 +1330,8 @@ theorem leaf_truncation_error_3 :
       X / 4 ≤ m → (m : ℝ) ≤ X / 2 → 2 ≤ U →
       ‖mainTermPrime (excSet H (Real.sqrt X) P X) Sg' ε X m -
         mainTermTruncatedPrime (excSet H (Real.sqrt X) P X) Sg' ε X P U m‖ ≤
-      C' * (Sing m * X * Real.log U / Real.sqrt U) := by sorry
+      C' * (Sing m * X * Real.log U / Real.sqrt U) := by
+  sorry
 
 /-- LEAF Assembly of Theorem 1 display 2.22 (truncated form). -/
 theorem assembly_322_3 :
