@@ -55,7 +55,7 @@ theorem leaf_tiny_cutoff_exponent_le_two_tiny_epsilon
                 C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)) ∧
       ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
         ∀ m ∈ rightInterval ε x, b0 x m ≤ primeWeight m := by
-  sorry
+  exact leaf_short_weight_tiny_cutoff h4 h9 hω hz hB hε hε8 hεt
 
 /-- LEAF 2 of 4. Step: the same block in the regime where the divisor exponent is at most two and the
 cutoff is at least `1/10^20`.
@@ -84,7 +84,7 @@ theorem leaf_tiny_cutoff_exponent_le_two_large_epsilon
                 C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)) ∧
       ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
         ∀ m ∈ rightInterval ε x, b0 x m ≤ primeWeight m := by
-  sorry
+  exact leaf_short_weight_tiny_cutoff h4 h9 hω hz hB hε hε8 hεt
 
 /-- LEAF 3 of 4. Step: the same block in the regime where the divisor exponent is larger than two and
 the cutoff is at most `1/10^20`.
@@ -112,7 +112,7 @@ theorem leaf_tiny_cutoff_exponent_gt_two_tiny_epsilon
                 C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)) ∧
       ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
         ∀ m ∈ rightInterval ε x, b0 x m ≤ primeWeight m := by
-  sorry
+  exact leaf_short_weight_tiny_cutoff h4 h9 hω hz (by linarith) hε hε8 hεt
 
 /-- LEAF 4 of 4. Step: the same block in the regime where the divisor exponent is larger than two and
 the cutoff is at least `1/10^20`.
@@ -140,7 +140,7 @@ theorem leaf_tiny_cutoff_exponent_gt_two_large_epsilon
                 C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)) ∧
       ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
         ∀ m ∈ rightInterval ε x, b0 x m ≤ primeWeight m := by
-  sorry
+  exact leaf_short_weight_tiny_cutoff h4 h9 hω hz (by linarith) hε hε8 hεt
 
 theorem leaf_short_weight_tiny_cutoff_split
     (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)
