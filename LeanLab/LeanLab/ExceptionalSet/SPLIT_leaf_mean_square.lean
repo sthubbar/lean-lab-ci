@@ -222,6 +222,29 @@ theorem leaf_coarse_even_energy :
         have h3 := mul_le_mul_of_nonneg_right hX1 h0
         nlinarith [h3]
 
+/-- Reindex the multiples of four in the window by `n = 4 * k`, including empty windows. -/
+theorem window_four_dvd_reindex (Y : ℕ) (f : ℕ → ℝ) :
+    ∑ n ∈ (Finset.Icc (Y / 2 + 1) Y).filter (fun n => Even n ∧ 4 ∣ n), f n =
+      ∑ k ∈ Finset.Icc (Y / 8 + 1) (Y / 4), f (4 * k) := by
+  refine Finset.sum_bij (fun n _ => n / 4) ?_ ?_ ?_ ?_
+  · intro n hn
+    simp only [Finset.mem_filter, Finset.mem_Icc] at hn ⊢
+    have hn4 := Nat.dvd_iff_mod_eq_zero.mp hn.2.2
+    omega
+  · intro n hn m hm hnm
+    have hn4 := Nat.dvd_iff_mod_eq_zero.mp (Finset.mem_filter.mp hn).2.2
+    have hm4 := Nat.dvd_iff_mod_eq_zero.mp (Finset.mem_filter.mp hm).2.2
+    omega
+  · intro k hk
+    refine ⟨4 * k, ?_, ?_⟩
+    · simp only [Finset.mem_filter, Finset.mem_Icc] at hk ⊢
+      exact ⟨⟨by omega, by omega⟩, ⟨2 * k, by omega⟩, ⟨k, rfl⟩⟩
+    · omega
+  · intro n hn
+    have hn4 := Nat.dvd_iff_mod_eq_zero.mp (Finset.mem_filter.mp hn).2.2
+    congr 1
+    omega
+
 /-- LEAF 2 of 3, one scale of the analytic step, on the even indices divisible by `4`: some
 nonnegative `C` bounds the second moment over the window `(Y/2, Y]` restricted to the even `n`
 with `4 ∣ n`, by `C Y ^ (3/2 + 2 Θ + ε)`, for every `Y` past a fixed threshold.  This is a sum
@@ -232,6 +255,7 @@ theorem leaf_window_energy_four_dvd (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ 
     ∃ C : ℝ, 0 ≤ C ∧ ∃ Y₀ : ℕ, 1 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
       ∑ n ∈ (Finset.Icc (Y / 2 + 1) Y).filter (fun n => Even n ∧ 4 ∣ n), (error n) ^ 2 ≤
         C * (Y : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+  simp_rw [window_four_dvd_reindex]
   sorry
 
 /-- LEAF 3 of 3, the other class of the same scale: the second moment over the window `(Y/2, Y]`
@@ -420,6 +444,7 @@ theorem leaf_mean_square_split (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 /
 
 -- Axiom audit drivers.
 #print axioms leaf_coarse_even_energy
+#print axioms window_four_dvd_reindex
 #print axioms leaf_mean_square_split
 
 end LeanLab.ExceptionalSet.BG2026.Supply385
