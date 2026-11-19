@@ -1,3 +1,4 @@
+import LeanLab.HelfgottMajor.Decomp454c
 import LeanLab.HelfgottMajor.Decomp526a
 import LeanLab.HelfgottMajor.Decomp503a
 import LeanLab.HelfgottMajor.Lemma41Terms
@@ -444,5 +445,197 @@ theorem assembly_of_components (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     field_simp [hsne]
   rw [heq]
   linarith
+
+end LeanLab.HelfgottMajor.SplitGaussian123
+
+namespace LeanLab.HelfgottMajor.SplitGaussian123
+open Real MeasureTheory
+
+/-- Derived convergence support for P0014 page 41 display 4.33.
+The two sided exponential and Gaussian envelope is summable under a polynomial
+multiplicity count in each unit shell. No pairing or sharp density bound is used.
+CONDITIONAL ON hcount, the explicit count input. -/
+theorem tail_envelope_summable_of_shell_count {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (δ T C : ℝ) (hT : 1 ≤ T)
+    (hcount : ∀ n : ℕ,
+      (∑' ρ : {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+          0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} // ⌊|ρ.val.im|⌋₊ = n},
+        (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val.val : ℝ)) ≤
+          C * ((n : ℝ) + 1) ^ 2) :
+    Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} =>
+      (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+        (exp (-0.1598 * |ρ.val.im|) +
+          if δ = 0 then 0 else exp (-0.1065 * (|ρ.val.im| / (π * |δ|)) ^ 2))) := by
+  classical
+  let I := {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+    0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}
+  have hfinite (n : ℕ) : {ρ : I | ⌊|ρ.val.im|⌋₊ = n}.Finite := by
+    apply ((ZeroCount1623.stripZeros_finite χ ((n : ℝ) + 1)).preimage
+      (f := Subtype.val) Subtype.val_injective.injOn).subset
+    intro ρ hρ
+    refine ⟨ρ.property.1, ρ.property.2.1, ρ.property.2.2.1, ?_⟩
+    have h := Nat.lt_floor_add_one |ρ.val.im|
+    rw [hρ] at h
+    exact h.le
+  have hs (a : ℝ) (ha : 0 < a) :
+      Summable (fun ρ : I =>
+        (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+          exp (-a * |ρ.val.im|)) :=
+    Decomp454c.summable_exp_real_of_shell_count (fun ρ : I => |ρ.val.im|)
+      (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ))
+      C a ha (fun _ => Nat.cast_nonneg _) (fun _ => abs_nonneg _) hfinite hcount
+  have he := hs 0.1598 (by norm_num)
+  have hg : Summable (fun ρ : I =>
+      (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+        if δ = 0 then 0 else exp (-0.1065 * (|ρ.val.im| / (π * |δ|)) ^ 2)) := by
+    by_cases hδ : δ = 0
+    · simp [hδ]
+    · simp only [if_neg hδ]
+      have hd : 0 < (π * |δ|) ^ 2 := sq_pos_of_pos (mul_pos pi_pos (abs_pos.mpr hδ))
+      apply (hs (0.1065 / (π * |δ|) ^ 2) (by positivity)).of_norm_bounded
+      intro ρ
+      rw [Real.norm_of_nonneg (by positivity)]
+      apply mul_le_mul_of_nonneg_left _ (Nat.cast_nonneg _)
+      apply exp_le_exp.mpr
+      have ht : 1 ≤ |ρ.val.im| := hT.trans ρ.property.2.2.2.le
+      have hsquare : |ρ.val.im| ≤ |ρ.val.im| ^ 2 := by nlinarith
+      rw [div_pow]
+      have hh := div_le_div_of_nonneg_right hsquare hd.le
+      convert mul_le_mul_of_nonpos_left hh (show -(0.1065 : ℝ) ≤ 0 by norm_num) using 1 <;> ring
+  convert he.add hg using 1
+  ext ρ
+  exact mul_add _ _ _
+
+
+set_option maxHeartbeats 800000 in
+/-- Derived count adapter for P0014 page 38 display 4.26 and page 41 display 4.33.
+CONDITIONAL ON ZeroCount1623.book_zero_count. This coarse polynomial bound proves
+convergence only and does not replace the disputed sharp density estimate. -/
+theorem tail_shell_count_le_quadratic {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (T : ℝ) (n : ℕ) :
+    (∑' ρ : {ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} // ⌊|ρ.val.im|⌋₊ = n},
+      (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val.val : ℝ)) ≤
+        (2 * (q : ℝ) + 18) * ((n : ℝ) + 1) ^ 2 := by
+  classical
+  let I := {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+    0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}
+  let J := {ρ : I // ⌊|ρ.val.im|⌋₊ = n}
+  let j : J → ZeroCount1623.ZeroIdx χ ((n : ℝ) + 1) := fun ρ =>
+    ⟨ρ.val.val, ρ.val.property.1, ρ.val.property.2.1, ρ.val.property.2.2.1, by
+      have h := Nat.lt_floor_add_one |ρ.val.val.im|
+      rw [ρ.property] at h
+      exact h.le⟩
+  have hj : Function.Injective j := by
+    intro a b h
+    apply Subtype.ext
+    apply Subtype.ext
+    exact congrArg (fun z : ZeroCount1623.ZeroIdx χ ((n : ℝ) + 1) => z.val) h
+  haveI : Finite J := Finite.of_injective j hj
+  have hs : Summable (fun ρ : J =>
+      (ZeroCount1623.mult χ ρ.val.val : ℝ)) := Summable.of_finite
+  have hc : (∑' ρ : J, (ZeroCount1623.mult χ ρ.val.val : ℝ)) ≤
+      ∑' ρ : ZeroCount1623.ZeroIdx χ ((n : ℝ) + 1),
+        (ZeroCount1623.mult χ ρ.val : ℝ) :=
+    hs.tsum_le_tsum_of_inj j hj (fun _ _ => Nat.cast_nonneg _)
+      (fun _ => le_rfl) (ZeroCount1623.summable_zeroIdx χ ((n : ℝ) + 1) _)
+  have hU : 1 ≤ (n : ℝ) + 1 := by linarith only [Nat.cast_nonneg (α := ℝ) n]
+  have hq : (1 : ℝ) ≤ q := by exact_mod_cast NeZero.pos q
+  have hq0 : (0 : ℝ) < q := by positivity
+  have hU0 : 0 < (n : ℝ) + 1 := by positivity
+  have hlog : log ((q : ℝ) * ((n : ℝ) + 1)) ≤ (q : ℝ) * ((n : ℝ) + 1) := by
+    linarith only [log_le_sub_one_of_pos (mul_pos hq0 hU0)]
+  have hratio : (q : ℝ) * ((n : ℝ) + 1) / (2 * π * exp 1) ≤
+      (q : ℝ) * ((n : ℝ) + 1) := by
+    apply div_le_self (by positivity)
+    nlinarith only [pi_gt_three, Real.add_one_le_exp (1 : ℝ)]
+  have hlogratio : log ((q : ℝ) * ((n : ℝ) + 1) / (2 * π * exp 1)) ≤
+      (q : ℝ) * ((n : ℝ) + 1) :=
+    (log_le_log (by positivity) hratio).trans hlog
+  have hdiv : ((n : ℝ) + 1) / π ≤ (n : ℝ) + 1 :=
+    div_le_self hU0.le (by linarith [pi_gt_three])
+  have hmain : ((n : ℝ) + 1) / π *
+      log ((q : ℝ) * ((n : ℝ) + 1) / (2 * π * exp 1)) ≤
+        (q : ℝ) * ((n : ℝ) + 1) ^ 2 := by
+    calc
+      _ ≤ (((n : ℝ) + 1) / π) * ((q : ℝ) * ((n : ℝ) + 1)) :=
+        mul_le_mul_of_nonneg_left hlogratio (by positivity)
+      _ ≤ ((n : ℝ) + 1) * ((q : ℝ) * ((n : ℝ) + 1)) :=
+        mul_le_mul_of_nonneg_right hdiv (by positivity)
+      _ = _ := by ring
+  have hgrowth : 0 ≤ (q : ℝ) * (((n : ℝ) + 1) ^ 2 - ((n : ℝ) + 1)) :=
+    mul_nonneg hq0.le (by nlinarith only [hU])
+  have hU2 : 1 ≤ ((n : ℝ) + 1) ^ 2 := by nlinarith only [hU]
+  have hc' := ZeroCount1623.strip_count χ hχ ((n : ℝ) + 1) hU
+  change (∑' ρ : J, (ZeroCount1623.mult χ ρ.val.val : ℝ)) ≤ _
+  exact hc.trans (hc'.trans (by nlinarith only [hmain, hlog, hgrowth, hU2]))
+
+/-- P0014 page 41 display 4.33, convergence without a pairing assumption.
+CONDITIONAL ON hcor and the shared count ZeroCount1623.book_zero_count.
+This proves the summability half of tail_mass_of_corollary for all shifts. -/
+theorem tail_mass_summable_of_corollary {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (δ T : ℝ)
+    (hT : max (4 * π ^ 2 * |δ|) 100 ≤ T)
+    (hcor : ∀ s : ℂ, 0 ≤ s.re → s.re ≤ 1 → max 100 (4 * π ^ 2 * |δ|) ≤ |s.im| →
+      ‖gaussianMellin δ s‖ + ‖gaussianMellin δ (1 - s)‖ ≤ 4.226 * corEnvelope δ s.im) :
+    Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} => mellinMassTerm χ δ ρ.val) := by
+  have hT1 : 1 ≤ T := by have := (le_max_right _ _).trans hT; linarith
+  have hs := tail_envelope_summable_of_shell_count χ δ T (2 * (q : ℝ) + 18) hT1
+    (tail_shell_count_le_quadratic χ hχ T)
+  apply (hs.mul_left 4.226).of_norm_bounded
+  intro ρ
+  rw [Real.norm_of_nonneg (by unfold mellinMassTerm; positivity)]
+  calc
+    _ ≤ _ := zero_mass_le_envelope χ δ T hT hcor ρ
+    _ ≤ _ := by
+      have he := mul_le_mul_of_nonneg_left (corEnvelope_le δ ρ.val.im)
+        (show 0 ≤ (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * 4.226
+          by positivity)
+      convert he using 1 <;> ring
+
+
+/-- A pairing free comparison for P0014 page 41 display 4.33.
+CONDITIONAL ON hcor and the explicit summability hsum.
+Both signs and analytic multiplicities remain in the envelope sum. -/
+theorem tail_mass_le_two_sided_envelope {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) (δ T : ℝ)
+    (hT : max (4 * π ^ 2 * |δ|) 100 ≤ T)
+    (hcor : ∀ s : ℂ, 0 ≤ s.re → s.re ≤ 1 → max 100 (4 * π ^ 2 * |δ|) ≤ |s.im| →
+      ‖gaussianMellin δ s‖ + ‖gaussianMellin δ (1 - s)‖ ≤ 4.226 * corEnvelope δ s.im)
+    (hsum : Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} =>
+      (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+        (exp (-0.1598 * |ρ.val.im|) +
+          if δ = 0 then 0 else exp (-0.1065 * (|ρ.val.im| / (π * |δ|)) ^ 2)))) :
+    Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} => mellinMassTerm χ δ ρ.val) ∧
+    (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}, mellinMassTerm χ δ ρ.val) ≤
+      4.226 * (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|},
+        (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+          (exp (-0.1598 * |ρ.val.im|) +
+            if δ = 0 then 0 else exp (-0.1065 * (|ρ.val.im| / (π * |δ|)) ^ 2))) := by
+  have hp (ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|}) :
+      mellinMassTerm χ δ ρ.val ≤
+        4.226 * ((analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+          (exp (-0.1598 * |ρ.val.im|) +
+            if δ = 0 then 0 else exp (-0.1065 * (|ρ.val.im| / (π * |δ|)) ^ 2))) := by
+    refine (zero_mass_le_envelope χ δ T hT hcor ρ).trans ?_
+    have he := mul_le_mul_of_nonneg_left (corEnvelope_le δ ρ.val.im)
+      (show 0 ≤ (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) * 4.226
+        by positivity)
+    convert he using 1 <;> ring
+  have hm : Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|} => mellinMassTerm χ δ ρ.val) := by
+    apply (hsum.mul_left 4.226).of_norm_bounded
+    intro ρ
+    rw [Real.norm_of_nonneg (by unfold mellinMassTerm; positivity)]
+    exact hp ρ
+  refine ⟨hm, ?_⟩
+  exact (hm.tsum_le_tsum hp (hsum.mul_left 4.226)).trans_eq (tsum_mul_left)
 
 end LeanLab.HelfgottMajor.SplitGaussian123

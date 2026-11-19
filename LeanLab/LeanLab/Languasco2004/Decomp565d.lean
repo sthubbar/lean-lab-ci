@@ -23,6 +23,53 @@ def weightedCofactors (model : Bool) (N Y M : ℝ) (n : ℕ) (a : ℕ → ℝ) :
   ∑ m ∈ (range (n + 1)).filter (fun m : ℕ => M < (m : ℝ) ∧ (m : ℝ) ≤ 2 * M),
     a m * (cofactorCount model N Y n m : ℝ)
 
+/-- Page 260 Lemma 19: nonnegative weights give nonnegative cofactor sums. -/
+lemma weightedCofactors_nonneg (model : Bool) (N Y M : ℝ) (n : ℕ) (a : ℕ → ℝ)
+    (ha : ∀ m, 0 ≤ a m) :
+    0 ≤ weightedCofactors model N Y M n a := by
+  exact sum_nonneg fun m _ => mul_nonneg (ha m) (Nat.cast_nonneg _)
+
+/-- Page 260 Lemma 19: the absolute error allowance makes the tolerance positive. -/
+lemma rough_tolerance_pos (N Y M B : ℝ) (n : ℕ) (a : ℕ → ℝ)
+    (hN : 1 < N) (hY : 0 < Y) (ha : ∀ m, 0 ≤ a m) :
+    0 < singular n * weightedCofactors true N Y M n a / log N ^ (2 : ℕ) +
+      Y / log N ^ B := by
+  exact add_pos_of_nonneg_of_pos
+    (div_nonneg (mul_nonneg (singular_nonneg n)
+      (weightedCofactors_nonneg true N Y M n a ha)) (sq_nonneg _))
+    (div_pos hY (Real.rpow_pos_of_pos (Real.log_pos hN) B))
+
+/-- Page 260 Lemma 19: increasing the positive error constant shrinks the exceptional set. -/
+lemma rough_exceptional_antitone (N ε M B D₁ D₂ : ℝ) (a : ℕ → ℝ)
+    (hN : 1 < N) (ha : ∀ m, 0 ≤ a m) (hD : D₁ ≤ D₂) :
+    ((window N ε).filter (fun n =>
+      D₂ * (singular n * weightedCofactors true N (localization N ε) M n a /
+          log N ^ (2 : ℕ) + localization N ε / log N ^ B) <
+        |weightedCofactors false N (localization N ε) M n a -
+          singular n / log N * weightedCofactors true N (localization N ε) M n a|)).card ≤
+    ((window N ε).filter (fun n =>
+      D₁ * (singular n * weightedCofactors true N (localization N ε) M n a /
+          log N ^ (2 : ℕ) + localization N ε / log N ^ B) <
+        |weightedCofactors false N (localization N ε) M n a -
+          singular n / log N * weightedCofactors true N (localization N ε) M n a|)).card := by
+  apply card_le_card
+  intro n hn
+  obtain ⟨hn, hbad⟩ := mem_filter.mp hn
+  refine mem_filter.mpr ⟨hn, lt_of_le_of_lt ?_ hbad⟩
+  exact mul_le_mul_of_nonneg_right hD
+    (rough_tolerance_pos N (localization N ε) M B n a hN
+      (Real.rpow_pos_of_pos (lt_trans zero_lt_one hN) _) ha).le
+
+/-- Page 260 Lemma 19: the lower endpoint is an admissible dyadic scale for small epsilon. -/
+lemma rough_scale_bounds (N ε : ℝ) (hN : 1 ≤ N) (hε : 0 < ε)
+    (hsmall : ε ≤ (16 / 135 : ℝ) ^ 3) :
+    (localization N ε) ^ (119 / 135 : ℝ) ≤
+      (localization N ε) ^ (1 - delta ε) := by
+  have hY : 1 ≤ localization N ε :=
+    Real.one_le_rpow hN (by linarith)
+  exact Real.rpow_le_rpow_of_exponent_le hY
+    (by have := Source565.delta_cutoff ε hε hsmall; linarith)
+
 /-- LEAF. Jia page 260, Lemma 19, unnumbered displayed asymptotic formula.
 The written proof invokes Lemmas 5 and 18. The relative error of order
 one divided by log N and the absolute error of order Y divided by log N to B
@@ -54,5 +101,9 @@ theorem rough_zero_weights (N Y M : ℝ) (n : ℕ) :
 
 #print axioms lemma19_rough_input
 #print axioms rough_zero_weights
+#print axioms weightedCofactors_nonneg
+#print axioms rough_tolerance_pos
+#print axioms rough_exceptional_antitone
+#print axioms rough_scale_bounds
 end
 end LeanLab.Languasco2004.Decomp565d
