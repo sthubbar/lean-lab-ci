@@ -1,0 +1,77 @@
+[
+  {
+    "declaration": "entry_0_0",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_0_1",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_0_2",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_0_3",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_0_4",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_1_0",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_1_1",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_1_2",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_1_3",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_2_0",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_2_1",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_2_2",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_2_3",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_3_0",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  },
+  {
+    "declaration": "entry_5_0",
+    "matching_leaf_helper": false,
+    "positive_target": true
+  }
+]

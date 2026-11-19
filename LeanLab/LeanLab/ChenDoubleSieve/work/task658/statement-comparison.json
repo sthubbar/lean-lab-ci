@@ -1,0 +1,32 @@
+[
+  {
+    "name": "r3Nine_short",
+    "same_statement_modulo_whitespace_and_theorem_name": true,
+    "lab_statement": "theorem r3Nine_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 (fun _ => (25 / 89 : ℝ)) (fun _ => (2 / 5 : ℝ)) φ ≤ (12408337 / 1000000000 : ℝ) ",
+    "source_statement": "theorem r3Nine_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 (fun _ => (25 / 89 : ℝ)) (fun _ => (2 / 5 : ℝ)) φ ≤\n      (12408337 / 1000000000 : ℝ) "
+  },
+  {
+    "name": "r3Ten_short",
+    "same_statement_modulo_whitespace_and_theorem_name": true,
+    "lab_statement": "theorem r3Ten_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3TenLo r3TenHi φ ≤ (2710363 / 500000000 : ℝ) ",
+    "source_statement": "theorem r3Ten_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3TenLo r3TenHi φ ≤ (2710363 / 500000000 : ℝ) "
+  },
+  {
+    "name": "r3Eleven_short",
+    "same_statement_modulo_whitespace_and_theorem_name": true,
+    "lab_statement": "theorem r3Eleven_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3ElevenLo r3ElevenHi φ ≤ (1821597 / 500000000 : ℝ) ",
+    "source_statement": "theorem r3Eleven_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3ElevenLo r3ElevenHi φ ≤ (1821597 / 500000000 : ℝ) "
+  },
+  {
+    "name": "r3Thirteen_short",
+    "same_statement_modulo_whitespace_and_theorem_name": true,
+    "lab_statement": "theorem r3Thirteen_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3ThirteenLo r3ThirteenHi φ ≤ (8106273 / 1000000000 : ℝ) ",
+    "source_statement": "theorem r3Thirteen_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3ThirteenLo r3ThirteenHi φ ≤ (8106273 / 1000000000 : ℝ) "
+  },
+  {
+    "name": "r3Fourteen_short",
+    "same_statement_modulo_whitespace_and_theorem_name": true,
+    "lab_statement": "theorem r3Fourteen_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3FourteenLo r3FourteenHi φ ≤ (2640381 / 1000000000 : ℝ) ",
+    "source_statement": "theorem r3Fourteen_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :\n    buchstabIntegral ω 1 r3FourteenLo r3FourteenHi φ ≤ (2640381 / 1000000000 : ℝ) "
+  }
+]

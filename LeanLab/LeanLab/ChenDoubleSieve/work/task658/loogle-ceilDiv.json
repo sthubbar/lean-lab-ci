@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning ceilDiv_le_iff_le_mul.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Algebra.Order.Floor.Div", "name": "ceilDiv_le_iff_le_mul", "type": " {\u03b1 : Type u_2} [Semiring \u03b1] [PartialOrder \u03b1] [CeilDiv \u03b1 \u03b1] {a b c : \u03b1} (ha : 0 < a) : b \u2308/\u2309 a \u2264 c \u2194 b \u2264 a * c"}]}

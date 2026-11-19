@@ -1,3 +1,5 @@
+import LeanLab.ChenDoubleSieve.FinalDisplay
+import LeanLab.ChenDoubleSieve.KernelIntegrability
 import LeanLab.ChenDoubleSieve.Decomp275b
 import LeanLab.ChenDoubleSieve.Discretization
 import LeanLab.ChenDoubleSieve.TableInputsBridge
@@ -90,7 +92,7 @@ are finite integrals, that is, each of the nine kernels `Ξ₂(·; sᵢ)`, `i �
 `i ≥ 5`, is integrable on `[1, 3]`. -/
 theorem table_kernel_integrable :
     ∀ i : Fin 9, IntervalIntegrable (Wu04Table.tableKernel i) volume 1 3 := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Burst8P2.table_kernel_integrable
 
 /-- LEAF. Wu 2004 displays 7.1 and 7.2, page 30, the matrix `A` of page 31 computed by Wu with
 Maple: the rational candidate entries of `Wu04Table.candidateMatrixQ` are lower bounds for the
@@ -110,7 +112,7 @@ theorem theorem1_final_display {F f : ℝ → ℝ} (hF : IsLinearSieve F f)
     (hR : RepresentsCorrections F f δ H h) {c : ℝ} (hc : c < H 2.2) {ε : ℝ} (hε : 0 < ε) :
     ∃ N₀ : ℕ, ∀ N, Even N → N₀ ≤ N →
       (D N : ℝ) ≤ (1 + ε) * (8 * (1 - c) / (1 - 2 * δ)) * Θ N := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Burst8P2.theorem1_final_display hF hδ0 hδ1 hR hc hε
 
 /-! ### Proved glue -/
 
