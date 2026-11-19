@@ -31,6 +31,27 @@ theorem scaling_term_nonneg (q : ℕ) (hq : 2 ≤ q) (theta : ℝ) (hth : 5 ≤ 
     exact Real.one_lt_rpow h1 ht
   exact div_nonneg hqpow.le (mul_nonneg htot.le hlog.le)
 
+/-- Helper: the RHS with `2 + epsilon` is strictly positive for `q ≥ 2`. -/
+theorem rhs_pos (q : ℕ) (hq : 2 ≤ q) (theta epsilon : ℝ) (hth : 5 ≤ theta) (heps : 0 < epsilon) :
+    0 < (2 + epsilon) * (q : ℝ) ^ theta /
+      ((Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta)) := by
+  have hnonneg := scaling_term_nonneg q hq theta hth
+  have h2pos : (0 : ℝ) < 2 + epsilon := by linarith
+  have hnum : 0 < (2 + epsilon) * (q : ℝ) ^ theta := by
+    have hq0 : (0 : ℝ) < q := by exact_mod_cast (by omega : 0 < q)
+    have hqpow : (0 : ℝ) < (q : ℝ) ^ theta := Real.rpow_pos_of_pos hq0 theta
+    exact mul_pos h2pos hqpow
+  have hden : 0 < (Nat.totient q : ℝ) * Real.log ((q : ℝ) ^ theta) := by
+    have htot : (0 : ℝ) < Nat.totient q := by
+      exact_mod_cast Nat.totient_pos.mpr (by omega : 0 < q)
+    have hlog : (0 : ℝ) < Real.log ((q : ℝ) ^ theta) := by
+      apply Real.log_pos
+      have h1 : (1 : ℝ) < q := by exact_mod_cast (by omega : 1 < q)
+      have ht : 0 < theta := by linarith
+      exact Real.one_lt_rpow h1 ht
+    exact mul_pos htot hlog
+  exact div_pos hnum hden
+
 theorem leaf2_low (theta : ℝ) (hth : 5 ≤ theta) (epsilon : ℝ)
     (heps : 0 < epsilon) (hlow : theta ≤ 1 + 2 / epsilon) :
   ∃ Q : ℕ, ∀ q : ℕ, Q ≤ q → 1 ≤ q →
