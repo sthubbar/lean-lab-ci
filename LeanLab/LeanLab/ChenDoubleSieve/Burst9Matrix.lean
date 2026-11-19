@@ -21258,8 +21258,8 @@ theorem entry_4_8 : (candidateMatrixQ 4 8 : ℝ) ≤ integralMatrix 4 8 := by
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{6,1} = ∫_{1}^{2.2} Ξ₁(t; 2.7, 3.47) dt ≥ 1602317/10⁷`.
 scipy value 0.1602317488, margin 0.49e−7. -/
-theorem entry_5_0 : (candidateMatrixQ 5 0 : ℝ) ≤ integralMatrix 5 0 := by
-  sorry
+theorem entry_5_0 : (candidateMatrixQ 5 0 : ℝ) ≤ integralMatrix 5 0 :=
+  LeanLab.ChenDoubleSieve.Burst9MatrixCol0.c5_entry_5_0_leaf
 
 /-- LEAF. Wu 2004 display 7.2, kernel of display 3.21, page 14: `a_{6,2} = ∫_{2.2}^{2.3} Ξ₁(t; 2.7, 3.47) dt ≥ 234607/10⁷`.
 scipy value 0.0234607924, margin 0.92e−7. -/
