@@ -21,7 +21,11 @@ theorem cover_quarter_two_block_one :
         qs.any (fun q => decide
           (q ≤ 6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  obtain ⟨qs, hqs, hcov⟩ := cover_quarter_two k hk
+  refine ⟨qs, hqs, ?_⟩
+  intro j hj1 hj2
+  exact hcov j hj1 (by omega)
 
 /-- LEAF. Step 2 of 4: the second index block of the quarter,
 `156250001 ≤ j < 187500001`, is covered by a list of primes that works for
