@@ -28,12 +28,46 @@ false as cut rather than as work still to do.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Decomp556a
+import LeanLab.BHP1997.Prime514
 
 namespace LeanLab.KumchevLiu2007.Task556a
 
 open Real Complex MeasureTheory LeanLab.KumchevLiu2007
 open scoped BigOperators Topology
 attribute [local instance] Classical.propDecidable
+
+/-- The existing prime number theorem port, transported to the half-open
+integer intervals used by the level-one defect. -/
+private theorem pnt_half_open_integer_interval (A : ℝ) (hA : 0 < A) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℝ, 2 ≤ X → ∀ a b : ℝ,
+      0 ≤ a → a ≤ b → b ≤ X →
+      |∑ m ∈ Finset.Ico ⌈a⌉₊ ⌈b⌉₊,
+          (LeanLab.BHP1997.Decomp132.primeWeight m - 1 / Real.log (m : ℝ))| ≤
+        C * X / Real.log X ^ A := by
+  obtain ⟨C, hC⟩ := LeanLab.BHP1997.Prime514.pnt_short_interval A hA
+  refine ⟨C, le_trans (le_max_left _ _) (le_max_right _ _), ?_⟩
+  intro X hX a b ha hab hb
+  let L : ℕ := ⌈a⌉₊ - 1
+  let U : ℕ := ⌈b⌉₊ - 1
+  have hI : Finset.Ico ⌈a⌉₊ ⌈b⌉₊ = Finset.Ioc L U := by
+    ext m
+    simp only [Finset.mem_Ico, Finset.mem_Ioc, L, U]
+    omega
+  have hL : (0 : ℝ) ≤ L := by
+    dsimp [L]
+    exact_mod_cast Nat.zero_le _
+  have hU : (U : ℝ) ≤ X := by
+    dsimp [U]
+    have hceil : ⌈b⌉₊ ≤ ⌈X⌉₊ := Nat.ceil_le_ceil.mpr hb
+    have hfloor : (⌈X⌉₊ : ℝ) ≤ X + 1 := by
+      exact_mod_cast Nat.lt_ceil (add_one_le_iff.mpr hb)
+    omega
+  have hLU : L ≤ U := by
+    dsimp [L, U]
+    have hceil : ⌈a⌉₊ ≤ ⌈b⌉₊ := Nat.ceil_le_ceil.mpr hab
+    omega
+  have hp := hC X hX L U hL hLU hU
+  simpa only [hI, Nat.floor_eq_natCast] using hp
 
 /-- LEAF. Step one of the split, the nontrivial character case of hypothesis
 A1.2. With the character not trivial the smooth weight leaves the defect, so
@@ -65,6 +99,9 @@ theorem leaf_principal_prime_count_level_one (B ε : ℝ) (hB : 0 < B) (hε : 0 
             (fun m : ℕ => u ≤ (m : ℝ) ∧ (m : ℝ) < v),
             ((if m.Prime then (1 : ℂ) else 0) - ((1 / Real.log (m : ℝ) : ℝ) : ℂ))‖ ≤
           C * windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ) := by
+  obtain ⟨C, hC, hPNT⟩ := pnt_half_open_integer_interval (5 * B + 1) (by positivity)
+  refine ⟨C + 1, by positivity, max 2 (C + 1), by positivity, le_max_right _ _, ?_⟩
+  intro X hX u v hu huv hv
   sorry
 
 /-- LEAF. Step three of the split, the trivial character at level above one.
