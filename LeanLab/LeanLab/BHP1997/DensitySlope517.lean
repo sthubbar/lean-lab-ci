@@ -20,6 +20,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp514a
 import LeanLab.BHP1997.BandRegion635
+import LeanLab.Ported.Prove2Me.DensitySlope517
 
 namespace LeanLab.BHP1997.LowerShortC165
 open Classical Complex Decomp132 DecompC165b DecompC165d Decomp514a
@@ -711,7 +712,7 @@ theorem leaf_two_variation_quadrature {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1
         (if 1 ≤ a+3*b then 1/(a*b*(99/100-a-b)*(1-a-b))
           else if 99/100 ≤ a+3*b then (107/200)/(a*b^3) else (7/200)/(a*b^3))
       else 0)) ≤ 2 := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.DensitySlope517.leaf_two_variation_quadrature hε hε8
 
 /-- P0069 page 51, display 5.17 for the E2 sum, the integral with `1` replaced by `s`, an upper
 bound for the upward variation. For `s ∈ [99/100, 1]` the integral over the box of the positive
