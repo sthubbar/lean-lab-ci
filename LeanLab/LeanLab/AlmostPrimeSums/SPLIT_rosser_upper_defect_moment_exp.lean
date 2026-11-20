@@ -1,4 +1,5 @@
 import LeanLab.AlmostPrimeSums.RosserAnalytic
+import LeanLab.AlmostPrimeSums.Tail586Deep
 
 /-!
 AI wrote this Lean code for the OMOS split of `rosser_upper_defect_moment_exp`.
@@ -67,13 +68,20 @@ theorem upper_defect_moment_exp_level_ge_small_n (K : ℝ) (hK : 0 ≤ K) :
 /-- LEAF. Deep level ratio with `n` large, that is `z ^ (log D / log z - 1) < n`
 inside the two-fold restricted divisor set, and `100 ≤ log D / log z`.
 
-This is the second half of the deep range. Here a divisor of the squarefree
-sifting product above `z^(s-1)` must have at least `s - 1` prime factors, and
-each of its Selberg weights is a product of at least `s - 1` local factors of
-size below one; this is where the factorial decay that powers the exponential
-error sits. The summands are nonnegative, so this bounds a sub-sum of the
-sealed sum, and it carries the depth hypothesis and the lower restriction on
-`n`; it is strictly easier than the target on two counts. -/
+This is the second half of the deep range. A divisor of the squarefree sifting
+product above `z^(s-1)` must have at least `s - 1` prime factors, but that alone
+gives no decay: `LinearDensity` only yields `(1 - ν p)⁻¹ ≤ 1 + K / log p`, so
+the local Selberg weight `ν p/(1 - ν p)` may exceed `1 + K / log p` and `ν p`
+may reach `1/2`, and the Selberg mass `∑ p, s.selbergTerms p` grows like
+`K π(z)/log z`, a positive power of `log z`. The decay comes from the
+cancellation inside `rosserDefect D true n`, and its cheapest quantitative form
+in this tree is the Rankin count quoted in
+`upper_defect_moment_exp_level_ge_large_n_of_mass` below: the level ratio must
+dominate that Selberg mass. The repaired statement is proved there with
+constant `1`; supplying its hypothesis from the hypotheses above is the
+Buchstab iteration (IK Lemma 6.3, Theorem 6.9), which is not in this file's
+imports. The summands are nonnegative, so this bounds a sub-sum of the sealed
+sum. -/
 theorem upper_defect_moment_exp_level_ge_large_n (K : ℝ) (hK : 0 ≤ K) :
     ∃ C : ℝ, 0 < C ∧ ∀ (s : BoundingSieve) (z D : ℝ), 2 ≤ z →
       max 2 (exp (K + 2)) ≤ z → z ^ 10 ≤ D →
@@ -84,6 +92,51 @@ theorem upper_defect_moment_exp_level_ge_large_n (K : ℝ) (hK : 0 ≤ K) :
           (fun n : ℕ => ¬ ((n : ℝ) ≤ z ^ (log D / log z - 1))),
         s.selbergTerms n * rosserDefect D true n) ≤ C * exp (-(log D / log z)) := by
   sorry
+
+/-- The repaired form of the leaf above, and the reason the leaf is not
+disposable: under the one extra hypothesis that the level ratio dominates the
+total Rosser mass `R = ∑ p, s.selbergTerms p`, the very same slice obeys the
+sealed decay with `C = 1`.
+
+The proof is `Tail586Deep.rosser_large_divisor_mass_exp586`: `rosserDefect` is
+at most `2 ^ ω n` in absolute value, the level cut `z ^ (L - 1) < n` forces
+`L - 1 < ω n`, and the `z ^ ω` weighted Selberg mass is the Euler product
+`∏ (1 + U * s.selbergTerms p)`, so the slice costs `exp (-2 (L - 1))` times
+`exp (2 e² R)`. That is where the cancellation in `rosserDefect` is spent, and
+the constant `2 + 2 e² R ≤ L` is exactly what it leaves over. -/
+theorem upper_defect_moment_exp_level_ge_large_n_of_mass (K : ℝ) (hK : 0 ≤ K) :
+    ∃ C : ℝ, 0 < C ∧ ∀ (s : BoundingSieve) (z D : ℝ), 2 ≤ z →
+      max 2 (exp (K + 2)) ≤ z → z ^ 10 ≤ D →
+      (∀ p ∈ s.prodPrimes.primeFactors, (p : ℝ) < z) → LinearDensity s K →
+      100 ≤ log D / log z →
+      2 + (2 * exp 2) * (∑ p ∈ s.prodPrimes.primeFactors, s.selbergTerms p) ≤
+        log D / log z →
+      (∑ n ∈ (s.prodPrimes.divisors.filter
+          (fun n : ℕ => D ≤ (n : ℝ) * z ^ 2 ∧ 9 ≤ n.primeFactors.card)).filter
+          (fun n : ℕ => ¬ ((n : ℝ) ≤ z ^ (log D / log z - 1))),
+        s.selbergTerms n * rosserDefect D true n) ≤ C * exp (-(log D / log z)) := by
+  refine ⟨1, one_pos, ?_⟩
+  intro s z D hz hBz hD hP hden hL hS
+  have hz1 : 1 < z := by linarith
+  have hrank := rosser_large_divisor_mass_exp586 s D z (log D / log z) hz1 hP hS true
+  have hsub : ∀ n ∈ ((s.prodPrimes.divisors.filter
+        (fun n : ℕ => D ≤ (n : ℝ) * z ^ 2 ∧ 9 ≤ n.primeFactors.card)).filter
+        (fun n : ℕ => ¬ ((n : ℝ) ≤ z ^ (log D / log z - 1)))),
+      n ∈ s.prodPrimes.divisors.filter
+        (fun n : ℕ => z ^ (log D / log z - 1) < n) := by
+    intro n hn
+    obtain ⟨hn1, hn2⟩ := Finset.mem_filter.mp hn
+    exact Finset.mem_filter.mpr ⟨(Finset.mem_filter.mp hn1).1, not_le.mp hn2⟩
+  have hnonneg : ∀ n ∈ s.prodPrimes.divisors.filter
+        (fun n : ℕ => z ^ (log D / log z - 1) < n),
+      n ∉ ((s.prodPrimes.divisors.filter
+        (fun n : ℕ => D ≤ (n : ℝ) * z ^ 2 ∧ 9 ≤ n.primeFactors.card)).filter
+        (fun n : ℕ => ¬ ((n : ℝ) ≤ z ^ (log D / log z - 1)))) →
+      0 ≤ s.selbergTerms n * rosserDefect D true n := by
+    intro n hn _
+    have hdvd : n ∣ s.prodPrimes := (Nat.mem_divisors.mp (Finset.mem_filter.mp hn).1).1
+    exact mul_nonneg (s.selbergTerms_pos hdvd).le (rosserDefect_nonneg D true n)
+  exact (Finset.sum_le_sum_of_subset_of_nonneg hsub hnonneg).trans (by simpa using hrank)
 
 /-- The sealed upper defect moment bound, assembled from the three leaves by a
 case analysis on the level ratio and on the size of the divisor. The summands
