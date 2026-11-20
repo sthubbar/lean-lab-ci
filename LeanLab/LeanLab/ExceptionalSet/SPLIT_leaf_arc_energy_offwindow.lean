@@ -177,7 +177,42 @@ theorem leaf_offwindow_short (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4
         ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2
         else 0)
         ≤ C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  classical
+  obtain ⟨C, hC, X₀, hbound⟩ :=
+    leaf_arc_energy_offwindow Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  refine ⟨C, hC, max X₀ 1, ?_⟩
+  intro X hX
+  have hX₀ : X₀ ≤ X := le_trans (le_max_left _ _) hX
+  have hXpos : 0 < X := by omega
+  have hbase := summable_offwindow_coeff_sq X hXpos
+  have hshort : Summable (fun n : ℤ => if 0 ≤ n ∧ n ≤ (X : ℤ) ∧
+      n ∉ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then
+      ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2
+      else 0) :=
+    Summable.of_nonneg_of_le (fun n => by positivity)
+      (fun n => by split_ifs with h <;> first | exact le_rfl | positivity) hbase
+  have hcomp : Summable (fun n : ℤ =>
+      if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+      else ‖fourierCoeff
+        (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2) :=
+    Summable.of_nonneg_of_le (fun n => by positivity)
+      (fun n => by split_ifs with h <;> first | exact le_rfl | positivity) hbase
+  have hle : ∀ n : ℤ,
+      (if 0 ≤ n ∧ n ≤ (X : ℤ) ∧
+          n ∉ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then
+        ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2
+        else 0) ≤
+      (if n ∈ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) then 0
+        else ‖fourierCoeff
+          (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t) n‖ ^ 2) := by
+    intro n
+    by_cases hcond : 0 ≤ n ∧ n ≤ (X : ℤ) ∧
+      n ∉ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ))
+    · have hnm : n ∉ ((range (X + 1)).filter Even).image (fun k : ℕ => (k : ℤ)) := hcond.2.2
+      simp [hcond, hnm]
+    · simp only [hcond, ↓reduceIte]
+      split_ifs <;> positivity
+  exact le_trans (Summable.tsum_le_tsum hle hshort hcomp) (hbound X hX₀)
 
 /-- LEAF. The frequencies above the window: there are `C` and `X₀` with `0 ≤ C` and, for every
 `X ≥ X₀`, the squared Fourier coefficient energy of the difference between the squared generating
