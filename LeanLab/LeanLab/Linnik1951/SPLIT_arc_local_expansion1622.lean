@@ -74,6 +74,20 @@ theorem local_arc_core_unit1622 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBound280
           c * (N : ℝ) * Real.log N ^ 13 * (1 / (N : ℝ) ^ (1 / 7 : ℝ) + 1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
   sorry
 
+/-- The main term of the local expansion vanishes at a residual at most three, so at such
+a residual the parent expansion is exactly the small residual bound. -/
+private theorem mainTerm_zero_of_le_three1622 {N q : ℕ} {n : ℤ} (hn : n ≤ 3) :
+    ((((ArithmeticFunction.moebius q : ℝ) ^ 2 / (q.totient : ℝ) ^ 2 : ℝ) : ℂ) *
+        LeanLab.Perelli1996.Ramanujan103.ramanujanSum q n.toNat *
+        ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ)) = 0 := by
+  have hL : logConvolution1622 n.toNat = 0 := by
+    unfold logConvolution1622
+    exact Finset.sum_eq_zero (fun m hm => by
+      simp only [Finset.mem_Icc] at hm
+      omega)
+  rw [hL]
+  simp
+
 /-- LEAF. The small residual step. At a residual at most three the convolution is an
 empty sum, so the target main term vanishes and the local arc integral alone must
 be bounded by the two error sizes. No singular series occurs. -/
@@ -84,7 +98,12 @@ theorem local_arc_small_residual1622 (hG : LeanLab.DERZ1997.GRH) (hM : MellinBou
         n ≤ N →
         ‖localArc1622 N q n‖ ≤
           c * (N : ℝ) * Real.log N ^ 13 * (1 / (N : ℝ) ^ (1 / 7 : ℝ) + 1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨B, hB, N0, hP⟩ := arc_local_expansion1622 hG hM
+  refine ⟨B, hB, N0, ?_⟩
+  intro N hN q hq hqQ n hn hnN
+  have h := hP N hN q hq hqQ n hnN
+  rw [mainTerm_zero_of_le_three1622 hn, sub_zero] at h
+  exact h
 
 /-- The local major arc expansion, from the two shoulder and core errors and the two
 residual cases. The target statement is unchanged. -/
