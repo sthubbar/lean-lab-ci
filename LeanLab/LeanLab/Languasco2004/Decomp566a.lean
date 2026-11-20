@@ -42,7 +42,41 @@ theorem region11_transfer :
       (E.card : ℝ) ≤ C * windowLength N ε / Real.log N ^ B ∧
       ∀ n ∈ window N ε, n ∉ E →
         model11 * scale N (localization N ε) n ≤
-          pieceSum 1 11 true N (localization N ε) n + η * scale N (localization N ε) n := by sorry
+          pieceSum 1 11 true N (localization N ε) n + η * scale N (localization N ε) n := by
+  intro η hη
+  by_cases hle : model11 ≤ η
+  · -- η ≥ model11: scale and pieceSum are nonnegative, so E := ∅ works for every N ≥ 2.
+    have h_easy : ∀ (e : ℝ), 0 < e → model11 ≤ e →
+        (∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε B : ℝ, 0 < ε → ε < ε₀ → 0 < B →
+          ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N → ∃ E : Finset ℕ,
+            (E.card : ℝ) ≤ C * windowLength N ε / Real.log N ^ B ∧
+            ∀ n ∈ window N ε, n ∉ E →
+              model11 * scale N (localization N ε) n ≤
+                pieceSum 1 11 true N (localization N ε) n + e * scale N (localization N ε) n) := by
+      intro e he hle
+      use 1, 2
+      constructor <;> norm_num
+      intro ε B hε hεe hB
+      use 0, 2
+      intro N hN
+      use ∅
+      constructor <;> norm_num [Finset.card_empty]
+      intro n hn hne
+      have hscale : 0 ≤ scale N (localization N ε) n := by
+        have hN : 1 ≤ N := by linarith
+        have hY : 1 ≤ localization N ε := by
+          have hN₁ : 1 < N := by linarith
+          have h₁ : 1 ≤ N ^ (7 / 12 + ε) := Real.one_le_rpow hN (by linarith)
+          simpa [localization] using h₁
+        exact Decomp316a.scale_nonneg n hN hY
+      have hpiece : 0 ≤ pieceSum 1 11 true N (localization N ε) n :=
+        pieceSum_nonneg 1 11 true N (localization N ε) n
+      nlinarith [hscale, hpiece]
+    exact h_easy η hη hle
+  · -- η < model11: the remaining integers require Jia 1996 Lemma 24's Omega11
+    -- single-region exceptional-set estimate, which is not available in Mathlib
+    -- or in this repository (every sibling region transfer stays CONDITIONAL on OPEN leaves).
+    sorry
 
 /-- Jia page 270: the exact sealed region11_lower statement follows from the numerical
 certificate and the analytic transfer. CONDITIONAL ON region11_transfer only. -/
