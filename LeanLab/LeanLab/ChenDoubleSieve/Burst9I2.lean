@@ -304,7 +304,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.007422200`; the bound adds 0.1 percent. -/
 theorem I2_r2_10 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 2) 1 ≤ (3714811/500000000 : ℝ) := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Task587.I2_r2_10_from_short hω hz
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,11}` defining `I_{2,11}(s, s', κ₁, κ₂, κ₃)`, for row 3 of Table 1,
