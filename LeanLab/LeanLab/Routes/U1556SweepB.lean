@@ -424,6 +424,1169 @@ theorem elementary_dqt_bound_exceeds_target_at_threshold :
   norm_num at hs ⊢
   nlinarith only [hs]
 
+/-! ### Route C: the ψ–θ step for `W_{3/2}`, by parts on `fpt = ψ - θ`
+
+`Dqt δ y = fpt ((1+δ)y) - fpt y`; `fpt` is nondecreasing and `fpt u ≤ 2√u` for `u ≥ 10^13`.
+Shifting the range in the two halves of the difference turns a range integral of `Dqt y · φ y` into
+the boundary pieces `∫ fpt u (φ (u/(1+δ))/(1+δ) - φ u)`, which cost one factor `δ` and a derivative
+of `φ`.  Everything below is a `private` brick for `dqt_Wa_le`. -/
+
+private theorem Wa_three_halves_of_le {X y : ℝ} (hX : 0 < X) (hy : 0 < y) (h : y ≤ X) :
+    Wa (3 / 2) (y / X) = X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ) := by
+  have h1 : y / X ≤ 1 := (div_le_one hX).mpr h
+  have he : (3 : ℝ) / 2 - 2 = -(1 / 2 : ℝ) := by norm_num
+  have hy2 : y ^ (-1 / 2 : ℝ) = (y ^ (1 / 2 : ℝ))⁻¹ := by
+    rw [show (-1 / 2 : ℝ) = -(1 / 2) by norm_num]
+    exact Real.rpow_neg hy.le (1 / 2)
+  have hy3 : y ^ (-(1 / 2) : ℝ) = (y ^ (1 / 2 : ℝ))⁻¹ := Real.rpow_neg hy.le (1 / 2)
+  have hX3 : X ^ (-(1 / 2) : ℝ) = (X ^ (1 / 2 : ℝ))⁻¹ := Real.rpow_neg hX.le (1 / 2)
+  unfold Wa
+  rw [if_pos h1, abs_of_pos (div_pos hy hX), he, Real.div_rpow hy.le hX.le, hy3, hX3, hy2,
+    div_inv_eq_mul]
+  ring
+
+private theorem Wa_three_halves_of_gt {X y : ℝ} (hX : 0 < X) (hy : 0 < y) (h : X < y) :
+    Wa (3 / 2) (y / X) = X ^ (7 / 2 : ℝ) * y ^ (-7 / 2 : ℝ) := by
+  have h1 : ¬ (y / X ≤ 1) := by
+    rw [div_le_one hX]; exact not_le.mpr h
+  have he : -2 - (3 : ℝ) / 2 = -(7 / 2 : ℝ) := by norm_num
+  have hy2 : y ^ (-7 / 2 : ℝ) = (y ^ (7 / 2 : ℝ))⁻¹ := by
+    rw [show (-7 / 2 : ℝ) = -(7 / 2) by norm_num]
+    exact Real.rpow_neg hy.le (7 / 2)
+  have hy3 : y ^ (-(7 / 2) : ℝ) = (y ^ (7 / 2 : ℝ))⁻¹ := Real.rpow_neg hy.le (7 / 2)
+  have hX3 : X ^ (-(7 / 2) : ℝ) = (X ^ (7 / 2 : ℝ))⁻¹ := Real.rpow_neg hX.le (7 / 2)
+  unfold Wa
+  rw [if_neg h1, he, Real.div_rpow hy.le hX.le, hy3, hX3, hy2, div_inv_eq_mul]
+  ring
+
+/-- `y · W_{3/2}(y/X) = X^{7/2} y^{-5/2}` above the centre. -/
+private theorem mul_Wa_three_halves_of_gt {X y : ℝ} (hX : 0 < X) (h : X < y) :
+    y * Wa (3 / 2) (y / X) = X ^ (7 / 2 : ℝ) * y ^ (-5 / 2 : ℝ) := by
+  have hy0 : 0 < y := lt_trans hX h
+  have hpow : y * y ^ (-7 / 2 : ℝ) = y ^ (-5 / 2 : ℝ) := by
+    nth_rewrite 1 [← Real.rpow_one y]
+    rw [← Real.rpow_add hy0]
+    norm_num
+  rw [Wa_three_halves_of_gt hX hy0 h]
+  calc y * (X ^ (7 / 2 : ℝ) * y ^ (-7 / 2 : ℝ))
+      = (y * y ^ (-7 / 2 : ℝ)) * X ^ (7 / 2 : ℝ) := by ring
+    _ = X ^ (7 / 2 : ℝ) * y ^ (-5 / 2 : ℝ) := by rw [hpow]; ring
+
+/-- `y · W_{3/2}(y/X) = X^{1/2} y^{1/2}` below the centre. -/
+private theorem mul_Wa_three_halves_of_le {X y : ℝ} (hX : 0 < X) (hy : 0 < y) (h : y ≤ X) :
+    y * Wa (3 / 2) (y / X) = X ^ (1 / 2 : ℝ) * y ^ (1 / 2 : ℝ) := by
+  have hpow : y * y ^ (-1 / 2 : ℝ) = y ^ (1 / 2 : ℝ) := by
+    nth_rewrite 1 [← Real.rpow_one y]
+    rw [← Real.rpow_add hy]
+    norm_num
+  rw [Wa_three_halves_of_le hX hy h]
+  calc y * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ))
+      = (y * y ^ (-1 / 2 : ℝ)) * X ^ (1 / 2 : ℝ) := by ring
+    _ = X ^ (1 / 2 : ℝ) * y ^ (1 / 2 : ℝ) := by rw [hpow]; ring
+
+private theorem integrableOn_y_Wa3_right {X : ℝ} (hX : 0 < X) :
+    IntegrableOn (fun y : ℝ => y * Wa (3 / 2) (y / X)) (Ioi X) := by
+  have h : IntegrableOn (fun y : ℝ => X ^ (7 / 2 : ℝ) * y ^ (-5 / 2 : ℝ)) (Ioi X) :=
+    (integrableOn_Ioi_rpow_of_lt (by norm_num) hX).const_mul _
+  refine h.congr_fun (fun y hy => ?_) measurableSet_Ioi
+  exact (mul_Wa_three_halves_of_gt hX hy).symm
+
+private theorem integrableOn_y_Wa3_left {X c : ℝ} (hX : 0 < X) (hc : 0 ≤ c) (hcX : c ≤ X) :
+    IntegrableOn (fun y : ℝ => y * Wa (3 / 2) (y / X)) (Ioc c X) := by
+  have hi : IntervalIntegrable (fun y : ℝ => y ^ (1 / 2 : ℝ)) volume c X :=
+    intervalIntegral.intervalIntegrable_rpow (Or.inl (by norm_num))
+  have h : IntegrableOn (fun y : ℝ => X ^ (1 / 2 : ℝ) * y ^ (1 / 2 : ℝ)) (Ioc c X) :=
+    (intervalIntegrable_iff_integrableOn_Ioc_of_le hcX).mp (hi.const_mul _)
+  refine h.congr_fun (fun y hy => ?_) measurableSet_Ioc
+  have hy0 : 0 < y := lt_of_le_of_lt hc hy.1
+  exact (mul_Wa_three_halves_of_le hX hy0 hy.2).symm
+
+private theorem integrableOn_y_Wa3 {X c : ℝ} (hX : 0 < X) (hc : 0 ≤ c) :
+    IntegrableOn (fun y : ℝ => y * Wa (3 / 2) (y / X)) (Ioi c) := by
+  rcases le_or_gt c X with h | h
+  · have h1 := integrableOn_y_Wa3_left hX hc h
+    have h2 := integrableOn_y_Wa3_right hX
+    have hu : Ioc c X ∪ Ioi X = Ioi c := Ioc_union_Ioi_eq_Ioi h
+    rw [← hu]
+    exact h1.union h2
+  · refine (integrableOn_y_Wa3_right hX).mono_set ?_
+    exact Ioi_subset_Ioi h.le
+
+private theorem integral_y_Wa3_Ioi_le {X : ℝ} (hX : 0 < X) :
+    ∫ y in Ioi X, y * Wa (3 / 2) (y / X) ≤ X ^ 2 := by
+  have hcongr : ∫ y in Ioi X, y * Wa (3 / 2) (y / X)
+      = ∫ y in Ioi X, X ^ (7 / 2 : ℝ) * y ^ (-5 / 2 : ℝ) := by
+    apply setIntegral_congr_fun measurableSet_Ioi
+    intro y hy
+    exact mul_Wa_three_halves_of_gt hX hy
+  rw [hcongr, integral_const_mul,
+    integral_Ioi_rpow_of_lt (by norm_num : (-5 / 2 : ℝ) < -1) hX]
+  have e : (-5 / 2 : ℝ) + 1 = -(3 / 2) := by norm_num
+  have hinvX : X ^ (-(3 / 2) : ℝ) = (X ^ (3 / 2 : ℝ))⁻¹ := Real.rpow_neg hX.le (3 / 2)
+  rw [e, hinvX]
+  have hXp : X ^ (3 / 2 : ℝ) ≠ 0 := (Real.rpow_pos_of_pos hX _).ne'
+  have e2 : X ^ (7 / 2 : ℝ) * (-(X ^ (3 / 2 : ℝ))⁻¹ / -(3 / 2))
+      = (2 / 3 : ℝ) * X ^ 2 := by
+    have hsub : X ^ (7 / 2 : ℝ) / X ^ (3 / 2 : ℝ) = X ^ 2 := by
+      rw [← Real.rpow_sub hX, show (7 / 2 : ℝ) - 3 / 2 = 2 by norm_num, Real.rpow_two]
+    field_simp at hsub ⊢
+    linarith [hsub]
+  rw [e2]
+  nlinarith [sq_nonneg X]
+
+private theorem interval_y_Wa3_le {X c : ℝ} (hX : 0 < X) (hc : 0 ≤ c) (hcX : c ≤ X) :
+    ∫ y in Ioc c X, y * Wa (3 / 2) (y / X) ≤ X ^ 2 := by
+  have hpt : ∀ y ∈ Ioc c X, y * Wa (3 / 2) (y / X) ≤ X := by
+    intro y hy
+    have hy0 : 0 < y := lt_of_le_of_lt hc hy.1
+    rw [mul_Wa_three_halves_of_le hX hy0 hy.2]
+    have hyt : y ^ (1 / 2 : ℝ) ≤ X ^ (1 / 2 : ℝ) :=
+      Real.rpow_le_rpow hy0.le hy.2 (by norm_num)
+    have hs : X ^ (1 / 2 : ℝ) * X ^ (1 / 2 : ℝ) = X := by
+      rw [← Real.rpow_add hX, show (1 : ℝ) / 2 + 1 / 2 = 1 by norm_num, Real.rpow_one]
+    calc X ^ (1 / 2 : ℝ) * y ^ (1 / 2 : ℝ) ≤ X ^ (1 / 2 : ℝ) * X ^ (1 / 2 : ℝ) :=
+          mul_le_mul_of_nonneg_left hyt (Real.rpow_nonneg hX.le _)
+      _ = X := hs
+  have hconst : IntegrableOn (fun _ : ℝ => X) (Ioc c X) := integrableOn_const (by simp)
+  have hle := setIntegral_mono_on (integrableOn_y_Wa3_left hX hc hcX) hconst
+    measurableSet_Ioc hpt
+  have hval : ∫ _y in Ioc c X, X = ∫ y in c..X, X :=
+    (intervalIntegral.integral_of_le hcX).symm
+  rw [hval, intervalIntegral.integral_const, smul_eq_mul] at hle
+  have h2 : X * (X - c) ≤ X * X := by nlinarith [hX]
+  nlinarith [hle, h2, sq_nonneg X]
+
+private theorem integral_y_Wa3_Ioi_cut_le {X c : ℝ} (hX : 0 < X) (hc : 0 ≤ c) :
+    ∫ y in Ioi c, y * Wa (3 / 2) (y / X) ≤ 2 * X ^ 2 := by
+  rcases le_or_gt c X with h | h
+  · have h1 := interval_y_Wa3_le hX hc h
+    have h2 := integral_y_Wa3_Ioi_le hX
+    have hu : Ioc c X ∪ Ioi X = Ioi c := Ioc_union_Ioi_eq_Ioi h
+    rw [← hu, setIntegral_union (Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi
+      (integrableOn_y_Wa3_left hX hc h) (integrableOn_y_Wa3_right hX)]
+    linarith
+  · have h2 := integral_y_Wa3_Ioi_le hX
+    have hmono : ∫ y in Ioi c, y * Wa (3 / 2) (y / X)
+        ≤ ∫ y in Ioi X, y * Wa (3 / 2) (y / X) :=
+      setIntegral_mono_set (integrableOn_y_Wa3_right hX)
+        ((ae_restrict_iff' measurableSet_Ioi).mpr
+          (Filter.Eventually.of_forall fun y hy => mul_nonneg (le_of_lt (lt_trans hX hy))
+            (Wa_nonneg _ _)))
+        (Filter.Eventually.of_forall (Ioi_subset_Ioi h.le))
+    linarith [show (0 : ℝ) ≤ X ^ 2 from sq_nonneg X]
+
+/-- Shifting the range of the `fpt` factor: `∫ (fpt ((1+δ)y)) y^r` costs the factor
+`(1+δ)^{-(1+r)}` and moves the range to `((1+δ)a, (1+δ)b)`. -/
+private theorem fpt_rpow_comp {δ r a b : ℝ} (hδ : 0 < δ)
+    (hpos : ∀ y ∈ uIcc a b, 0 < y) :
+    ∫ y in a..b, fpt ((1 + δ) * y) * y ^ r
+      = (1 + δ) ^ (-(1 + r)) * ∫ u in (1 + δ) * a..(1 + δ) * b, fpt u * u ^ r := by
+  have hk : (0 : ℝ) < 1 + δ := by linarith
+  have hpt : ∀ y ∈ uIcc a b,
+      fpt ((1 + δ) * y) * y ^ r
+        = (1 + δ) ^ (-r) * (fpt ((1 + δ) * y) * ((1 + δ) * y) ^ r) := by
+    intro y hy
+    have hy0 : 0 < y := hpos y hy
+    have hmul : 0 < (1 + δ) * y := mul_pos hk hy0
+    rw [Real.mul_rpow hk.le hy0.le]
+    have hinv : (1 + δ) ^ (-r) * (1 + δ) ^ r = 1 := by
+      rw [← Real.rpow_add hk]
+      simp
+    have hre : (1 + δ) ^ (-r) * (fpt ((1 + δ) * y) * ((1 + δ) ^ r * y ^ r))
+        = fpt ((1 + δ) * y) * y ^ r * ((1 + δ) ^ (-r) * (1 + δ) ^ r) := by ring
+    rw [hre, hinv, mul_one]
+  rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_const_mul,
+    intervalIntegral.integral_comp_mul_left (fun u => fpt u * u ^ r) hk.ne', smul_eq_mul,
+    ← Real.rpow_neg_one (1 + δ), ← mul_assoc, ← Real.rpow_add hk]
+  congr 2
+  ring
+
+private theorem continuousOn_rpow_neg_half :
+    ContinuousOn (fun y : ℝ => y ^ (-1 / 2 : ℝ)) (Ioi (0 : ℝ)) := by
+  intro x hx
+  exact (Real.continuousAt_rpow_const x (-1 / 2) (Or.inl (ne_of_gt hx))).continuousWithinAt
+
+private theorem continuousOn_rpow_neg_seven_half :
+    ContinuousOn (fun y : ℝ => y ^ (-7 / 2 : ℝ)) (Ioi (0 : ℝ)) := by
+  intro x hx
+  exact (Real.continuousAt_rpow_const x (-7 / 2) (Or.inl (ne_of_gt hx))).continuousWithinAt
+
+/-- `fpt u · u^{-1/2} ≤ 2` above `10^13`. -/
+private theorem fpt_mul_rpow_neg_half_le {u : ℝ} (hu : 10 ^ 13 ≤ u) :
+    fpt u * u ^ (-1 / 2 : ℝ) ≤ 2 := by
+  have hu0 : 0 < u := lt_of_lt_of_le (by norm_num) hu
+  have h1 : fpt u ≤ 2 * u ^ (1 / 2 : ℝ) := by
+    have := LeanLab.Task393.fpt_le_two_sqrt hu
+    rwa [Real.sqrt_eq_rpow] at this
+  have h2 : (0 : ℝ) < u ^ (-1 / 2 : ℝ) := Real.rpow_pos_of_pos hu0 _
+  have h3 : u ^ (1 / 2 : ℝ) * u ^ (-1 / 2 : ℝ) = 1 := by
+    rw [← Real.rpow_add hu0]
+    norm_num
+  nlinarith [h2, h3, h1]
+
+/-- `fpt u · u^{-7/2} ≤ 2 u^{-3}` above `10^13`. -/
+private theorem fpt_mul_rpow_neg_seven_half_le {u : ℝ} (hu : 10 ^ 13 ≤ u) :
+    fpt u * u ^ (-7 / 2 : ℝ) ≤ 2 * u ^ (-3 : ℝ) := by
+  have hu0 : 0 < u := lt_of_lt_of_le (by norm_num) hu
+  have h1 : fpt u ≤ 2 * u ^ (1 / 2 : ℝ) := by
+    have := LeanLab.Task393.fpt_le_two_sqrt hu
+    rwa [Real.sqrt_eq_rpow] at this
+  have h2 : (0 : ℝ) < u ^ (-7 / 2 : ℝ) := Real.rpow_pos_of_pos hu0 _
+  have h3 : u ^ (1 / 2 : ℝ) * u ^ (-7 / 2 : ℝ) = u ^ (-3 : ℝ) := by
+    rw [← Real.rpow_add hu0]
+    norm_num
+  nlinarith [h2, h3, h1]
+
+/-- `∫_c^{(1+δ)c} fpt u u^{-1/2} ≤ 2δc`: the endpoint piece costs the length. -/
+private theorem integral_fpt_neg_half_le {c δ : ℝ} (hc : 10 ^ 13 ≤ c) (hδ : 0 < δ) :
+    ∫ u in c..(1 + δ) * c, fpt u * u ^ (-1 / 2 : ℝ) ≤ 2 * δ * c := by
+  have hc0 : 0 < c := lt_of_lt_of_le (by norm_num) hc
+  have hcc : c ≤ (1 + δ) * c := by nlinarith
+  have hcc0 : (0 : ℝ) ≤ c := hc0.le
+  have hi : IntervalIntegrable (fun u : ℝ => fpt u * u ^ (-1 / 2 : ℝ)) volume c ((1 + δ) * c) :=
+    fpt_mono.intervalIntegrable.mul_continuousOn
+      (continuousOn_rpow_neg_half.mono (by
+        intro x hx
+        rw [Set.uIcc_of_le hcc] at hx
+        exact lt_of_lt_of_le hc0 hx.1))
+  have hconst : IntervalIntegrable (fun _ : ℝ => (2 : ℝ)) volume c ((1 + δ) * c) :=
+    intervalIntegrable_const
+  have hle : ∫ u in c..(1 + δ) * c, fpt u * u ^ (-1 / 2 : ℝ)
+      ≤ ∫ u in c..(1 + δ) * c, (2 : ℝ) := by
+    apply intervalIntegral.integral_mono_on hcc hi hconst
+    intro u hu
+    exact fpt_mul_rpow_neg_half_le (le_trans hc hu.1)
+  rw [intervalIntegral.integral_const] at hle
+  have : (1 + δ) * c - c = δ * c := by ring
+  rw [this, smul_eq_mul] at hle
+  linarith
+
+/-- `∫_s^t fpt u u^{-7/2} ≤ s^{-2}` for `s ≤ t` above `10^13`. -/
+private theorem integral_fpt_neg_seven_half_le {s t : ℝ} (hs : 10 ^ 13 ≤ s) (hst : s ≤ t) :
+    ∫ u in s..t, fpt u * u ^ (-7 / 2 : ℝ) ≤ s ^ (-2 : ℝ) := by
+  have hs0 : 0 < s := lt_of_lt_of_le (by norm_num) hs
+  have hs0' : (0 : ℝ) ≤ s := hs0.le
+  have hnot : (0 : ℝ) ∉ Set.uIcc s t := by
+    rw [Set.uIcc_of_le hst]
+    intro h
+    exact absurd h.1 (not_le.mpr hs0)
+  have hi : IntervalIntegrable (fun u : ℝ => fpt u * u ^ (-7 / 2 : ℝ)) volume s t :=
+    fpt_mono.intervalIntegrable.mul_continuousOn
+      (continuousOn_rpow_neg_seven_half.mono (by
+        intro x hx
+        rw [Set.uIcc_of_le hst] at hx
+        exact lt_of_lt_of_le hs0 hx.1))
+  have hg : IntervalIntegrable (fun u : ℝ => 2 * u ^ (-3 : ℝ)) volume s t :=
+    (intervalIntegral.intervalIntegrable_rpow (Or.inr hnot)).const_mul _
+  have hle : ∫ u in s..t, fpt u * u ^ (-7 / 2 : ℝ)
+      ≤ ∫ u in s..t, 2 * u ^ (-3 : ℝ) := by
+    apply intervalIntegral.integral_mono_on hst hi hg
+    intro u hu
+    exact fpt_mul_rpow_neg_seven_half_le (le_trans hs hu.1)
+  rw [intervalIntegral.integral_const_mul,
+    integral_rpow (Or.inr (And.intro (by norm_num) hnot))] at hle
+  have e : (-3 : ℝ) + 1 = -2 := by norm_num
+  have ht2 : (0 : ℝ) ≤ t ^ (-2 : ℝ) := Real.rpow_nonneg (hs0'.trans hst) _
+  rw [e] at hle
+  have hval : 2 * ((t ^ (-2 : ℝ) - s ^ (-2 : ℝ)) / -2) = s ^ (-2 : ℝ) - t ^ (-2 : ℝ) := by
+    ring
+  rw [hval] at hle
+  linarith
+
+private theorem pos_on_uIcc {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+    ∀ y ∈ uIcc a b, 0 < y := by
+  intro y hy
+  rw [Set.uIcc_of_le hab] at hy
+  linarith [hy.1]
+
+/-- The head of the mass range: `∫_2^U Dqt y y^{-1/2} ≤ 2δU`, by parts. -/
+private theorem dqt_neg_half_head_le {δ U : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1) (hU : 10 ^ 13 ≤ U) :
+    ∫ y in (2 : ℝ)..U, Dpt δ y * y ^ (-1 / 2 : ℝ) ≤ 2 * δ * U := by
+  have h2U : (2 : ℝ) ≤ U := le_trans (by norm_num) hU
+  have h2δ : (1 + δ) * 2 ≤ U := by nlinarith
+  have hUk : U ≤ (1 + δ) * U := by nlinarith
+  have h2δ2 : (2 : ℝ) ≤ (1 + δ) * 2 := by nlinarith
+  have hc : (0 : ℝ) < 1 + δ := by linarith
+  have hpos1 := pos_on_uIcc (by norm_num : (0:ℝ) < 2) h2U
+  have hpos2 := pos_on_uIcc (by positivity : (0:ℝ) < (1 + δ) * 2) h2δ
+  have hpos3 := pos_on_uIcc (by linarith : (0:ℝ) < U) hUk
+  have hpos4 := pos_on_uIcc (by norm_num : (0:ℝ) < 2) h2δ2
+  have hi1 : IntervalIntegrable (fun y : ℝ => fpt ((1 + δ) * y) * y ^ (-1 / 2 : ℝ))
+      volume (2 : ℝ) U :=
+    (fpt_mono.comp (fun a b hab => by nlinarith)).intervalIntegrable.mul_continuousOn
+      (continuousOn_rpow_neg_half.mono (fun x hx => hpos1 x hx))
+  have hi0 : IntervalIntegrable (fun y : ℝ => fpt y * y ^ (-1 / 2 : ℝ)) volume (2 : ℝ) U :=
+    fpt_mono.intervalIntegrable.mul_continuousOn
+      (continuousOn_rpow_neg_half.mono (fun x hx => hpos1 x hx))
+  have hsplit : ∫ y in (2 : ℝ)..U, Dpt δ y * y ^ (-1 / 2 : ℝ)
+      = (∫ y in (2 : ℝ)..U, fpt ((1 + δ) * y) * y ^ (-1 / 2 : ℝ))
+        - ∫ y in (2 : ℝ)..U, fpt y * y ^ (-1 / 2 : ℝ) := by
+    rw [← intervalIntegral.integral_sub hi1 hi0]
+    apply intervalIntegral.integral_congr
+    intro y _
+    unfold Dpt
+    ring
+  have hsubst : ∫ y in (2 : ℝ)..U, fpt ((1 + δ) * y) * y ^ (-1 / 2 : ℝ)
+      = (1 + δ) ^ (-(1 / 2) : ℝ) * ∫ u in (1 + δ) * 2..(1 + δ) * U,
+          fpt u * u ^ (-1 / 2 : ℝ) := by
+    have h := fpt_rpow_comp (δ := δ) (r := -1 / 2) (a := 2) (b := U) hδ hpos1
+    rw [h, show -(1 + (-1 / 2)) = -(1 / 2 : ℝ) by norm_num]
+  have hI1nn : 0 ≤ ∫ u in (1 + δ) * 2..(1 + δ) * U, fpt u * u ^ (-1 / 2 : ℝ) := by
+    refine intervalIntegral.integral_nonneg (h2δ.trans hUk) (fun u hu => ?_)
+    exact mul_nonneg (fpt_nonneg u) (Real.rpow_nonneg (by linarith [hu.1]) _)
+  have hcoef : (1 + δ) ^ (-(1 / 2) : ℝ) ≤ 1 := by
+    have h := Real.rpow_le_rpow_of_nonpos zero_lt_one (by linarith : (1 : ℝ) ≤ 1 + δ)
+      (show -(1 / 2 : ℝ) ≤ 0 by norm_num)
+    simpa using h
+  have hadd1 : ∫ u in (1 + δ) * 2..(1 + δ) * U, fpt u * u ^ (-1 / 2 : ℝ)
+      = (∫ u in (1 + δ) * 2..U, fpt u * u ^ (-1 / 2 : ℝ))
+        + ∫ u in U..(1 + δ) * U, fpt u * u ^ (-1 / 2 : ℝ) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (fpt_mono.intervalIntegrable.mul_continuousOn
+        (continuousOn_rpow_neg_half.mono (fun x hx => hpos2 x hx)))
+      (fpt_mono.intervalIntegrable.mul_continuousOn
+        (continuousOn_rpow_neg_half.mono (fun x hx => hpos3 x hx)))).symm
+  have hadd0 : ∫ u in (2 : ℝ)..U, fpt u * u ^ (-1 / 2 : ℝ)
+      = (∫ u in (2 : ℝ)..(1 + δ) * 2, fpt u * u ^ (-1 / 2 : ℝ))
+        + ∫ u in (1 + δ) * 2..U, fpt u * u ^ (-1 / 2 : ℝ) :=
+    (intervalIntegral.integral_add_adjacent_intervals
+      (fpt_mono.intervalIntegrable.mul_continuousOn
+        (continuousOn_rpow_neg_half.mono (fun x hx => hpos4 x hx)))
+      (fpt_mono.intervalIntegrable.mul_continuousOn
+        (continuousOn_rpow_neg_half.mono (fun x hx => hpos2 x hx)))).symm
+  have hmid_nn : 0 ≤ ∫ u in (2 : ℝ)..(1 + δ) * 2, fpt u * u ^ (-1 / 2 : ℝ) := by
+    refine intervalIntegral.integral_nonneg h2δ2 (fun u hu => ?_)
+    exact mul_nonneg (fpt_nonneg u) (Real.rpow_nonneg (by linarith [hu.1]) _)
+  have hend := integral_fpt_neg_half_le hU hδ
+  rw [hsplit, hsubst]
+  linarith [mul_le_mul_of_nonneg_right hcoef hI1nn, hI1nn, hend, hadd1, hadd0, hmid_nn]
+
+private theorem intervalIntegrable_fpt_neg_seven_half {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+    IntervalIntegrable (fun u : ℝ => fpt u * u ^ (-7 / 2 : ℝ)) volume a b := by
+  refine fpt_mono.intervalIntegrable.mul_continuousOn ?_
+  intro x hx
+  rw [Set.uIcc_of_le hab] at hx
+  exact (Real.continuousAt_rpow_const x (-7 / 2)
+    (Or.inl (ne_of_gt (lt_of_lt_of_le ha hx.1)))).continuousWithinAt
+
+
+/-- The `T`-topped piece of the tail decays with the full `δ`: `∫_T^{(1+δ)T} fpt u u^{-7/2} ≤ 2δT^{-2}`. -/
+private theorem integral_fpt_neg_seven_half_shift_le {T δ : ℝ} (hT : 10 ^ 13 ≤ T) (hδ : 0 < δ) :
+    ∫ u in T..((1 + δ) * T), fpt u * u ^ (-7 / 2 : ℝ) ≤ 2 * δ * T ^ (-2 : ℝ) := by
+  have hT0 : 0 < T := lt_of_lt_of_le (by norm_num) hT
+  have hk : (0 : ℝ) < 1 + δ := by linarith
+  have hTT : T ≤ (1 + δ) * T := by nlinarith
+  have hnot : (0 : ℝ) ∉ Set.uIcc T ((1 + δ) * T) := by
+    rw [Set.uIcc_of_le hTT]
+    intro h
+    exact absurd h.1 (not_le.mpr hT0)
+  have hi : IntervalIntegrable (fun u : ℝ => fpt u * u ^ (-7 / 2 : ℝ)) volume T ((1 + δ) * T) :=
+    intervalIntegrable_fpt_neg_seven_half hT0 hTT
+  have hg : IntervalIntegrable (fun u : ℝ => 2 * u ^ (-3 : ℝ)) volume T ((1 + δ) * T) :=
+    (intervalIntegral.intervalIntegrable_rpow (Or.inr hnot)).const_mul _
+  have hle : ∫ u in T..((1 + δ) * T), fpt u * u ^ (-7 / 2 : ℝ)
+      ≤ ∫ u in T..((1 + δ) * T), 2 * u ^ (-3 : ℝ) := by
+    apply intervalIntegral.integral_mono_on hTT hi hg
+    intro u hu
+    exact fpt_mul_rpow_neg_seven_half_le (le_trans hT hu.1)
+  rw [intervalIntegral.integral_const_mul,
+    integral_rpow (Or.inr (And.intro (by norm_num) hnot))] at hle
+  have e : (-3 : ℝ) + 1 = -2 := by norm_num
+  rw [e] at hle
+  have hval : 2 * ((((1 + δ) * T) ^ (-2 : ℝ) - T ^ (-2 : ℝ)) / -2)
+      = T ^ (-2 : ℝ) - ((1 + δ) * T) ^ (-2 : ℝ) := by ring
+  rw [hval] at hle
+  -- `1 - (1+δ)^{-2} ≤ 2δ`
+  have hm : ((1 + δ) * T) ^ (-2 : ℝ) = (1 + δ) ^ (-2 : ℝ) * T ^ (-2 : ℝ) := by
+    rw [Real.mul_rpow hk.le hT0.le]
+  have hc : 1 - (1 + δ) ^ (-2 : ℝ) ≤ 2 * δ := by
+    have h2 : (1 + δ) ^ (-2 : ℝ) = ((1 + δ) ^ 2)⁻¹ := by
+      rw [Real.rpow_neg hk.le]
+      norm_num
+    have h3 : (0 : ℝ) < (1 + δ) ^ 2 := by positivity
+    rw [h2]
+    have h4 : (1 : ℝ) - ((1 + δ) ^ 2)⁻¹ = ((1 + δ) ^ 2 - 1) / (1 + δ) ^ 2 := by
+      field_simp
+    rw [h4, div_le_iff₀ h3]
+    nlinarith [sq_nonneg δ, hδ]
+  have hTnn : (0 : ℝ) ≤ T ^ (-2 : ℝ) := Real.rpow_nonneg hT0.le _
+  rw [hm] at hle
+  nlinarith [hle, hc, hTnn, hδ]
+
+
+set_option maxHeartbeats 1000000 in
+/-- The large range `y > 1/(4δ²)`: the pointwise bound `Dqt ≤ (9/2)L²δ√y` gives
+`∫_{Ioi T} Dqt² W ≤ (81/4)L⁴δ² · 2X²`. -/
+private theorem dqt_large_range_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13)
+    (hX : 10 ^ 13 ≤ X) :
+    ∫ y in Ioi (1 / (4 * δ ^ 2)), Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ 81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2 * (2 * X ^ 2) := by
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) hX
+  have hδpos : (0 : ℝ) < δ := hδ
+  have hT2 : (2 : ℝ) ≤ 1 / (4 * δ ^ 2) := by
+    rw [le_div_iff₀ (by positivity)]
+    nlinarith [pow_le_pow_left₀ hδ.le hδ1 2]
+  have hT0 : (0 : ℝ) ≤ 1 / (4 * δ ^ 2) := by positivity
+  have hiD : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X))
+      (Ioi (1 / (4 * δ ^ 2))) := by
+    have h := (dqt_Wa_elementary hδ hX0).1
+    have h' : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
+      simpa only [LeanLab.Routes.U1556.Dqt, Dpt, fpt] using h
+    exact h'.mono_set (Ioi_subset_Ioi hT2)
+  have hiW : IntegrableOn (fun y : ℝ => y * Wa (3 / 2) (y / X)) (Ioi (1 / (4 * δ ^ 2))) :=
+    integrableOn_y_Wa3 hX0 hT0
+  have hpt : ∀ y ∈ Ioi (1 / (4 * δ ^ 2)),
+      Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+        ≤ (81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2) * (y * Wa (3 / 2) (y / X)) := by
+    intro y hy
+    have hy0 : 0 < y := lt_of_lt_of_le (by positivity) hy.le
+    have hD : 0 ≤ Dpt δ y := Dpt_nonneg hδ.le hy0.le
+    have hl := LeanLab.Task393.asm_Dpt_le_large hδ hδ1 hy
+    have h1 : Dpt δ y ^ 2 ≤ (9 / 2 * Real.log (2.0001 / δ) ^ 2 * (δ * Real.sqrt y)) ^ 2 := by
+      have := hl
+      nlinarith [hD, this]
+    have h2 : (9 / 2 * Real.log (2.0001 / δ) ^ 2 * (δ * Real.sqrt y)) ^ 2
+        = 81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2 * y := by
+      have hs : Real.sqrt y * Real.sqrt y = y := Real.mul_self_sqrt hy0.le
+      rw [mul_pow, mul_pow, mul_pow]
+      rw [Real.sq_sqrt hy0.le]
+      ring
+    rw [h2] at h1
+    calc Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+        ≤ (81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2 * y) * Wa (3 / 2) (y / X) :=
+          mul_le_mul_of_nonneg_right h1 (Wa_nonneg _ _)
+      _ = (81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2) * (y * Wa (3 / 2) (y / X)) := by ring
+  have hcmp := setIntegral_mono_on hiD (hiW.const_mul _) measurableSet_Ioi hpt
+  rw [integral_const_mul] at hcmp
+  have hcut := integral_y_Wa3_Ioi_cut_le hX0 hT0
+  have hcoef : (0 : ℝ) ≤ 81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2 := by positivity
+  calc ∫ y in Ioi (1 / (4 * δ ^ 2)), Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ (81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2)
+          * ∫ y in Ioi (1 / (4 * δ ^ 2)), y * Wa (3 / 2) (y / X) := hcmp
+    _ ≤ (81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2) * (2 * X ^ 2) :=
+        mul_le_mul_of_nonneg_left hcut hcoef
+
+
+/-- `W_{3/2}(y/X) = X^{7/2} y^{-7/2}` on `y ≥ X` (including `y = X`). -/
+private theorem Wa_three_halves_of_ge {X y : ℝ} (hX : 0 < X) (hy : 0 < y) (h : X ≤ y) :
+    Wa (3 / 2) (y / X) = X ^ (7 / 2 : ℝ) * y ^ (-7 / 2 : ℝ) := by
+  rcases eq_or_lt_of_le h with he | hlt
+  · rw [← he, div_self hX.ne']
+    have h1 : Wa (3 / 2) (1 : ℝ) = 1 := by
+      unfold Wa
+      simp
+    rw [h1]
+    have h2 : X ^ (7 / 2 : ℝ) * X ^ (-7 / 2 : ℝ) = 1 := by
+      rw [← Real.rpow_add hX]
+      norm_num
+    exact h2.symm
+  · exact Wa_three_halves_of_gt hX hy hlt
+
+
+set_option maxHeartbeats 2000000 in
+/-- The `(X,T]` part of the mass range, `(X/y)^{7/2}` branch, by parts:
+`∫_X^T Dqt y W_{3/2}(y/X) ≤ 3δX^{3/2} + 128δ^5 X^{7/2}` at `T = 1/(4δ²)`. -/
+private theorem dqt_neg_seven_half_tail_le {δ X T : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13)
+    (hX : 10 ^ 13 ≤ X) (hXT : X ≤ T) (hkX : (1 + δ) * X ≤ T) (hTdef : T = 1 / (4 * δ ^ 2)) :
+    ∫ y in X..T, Dpt δ y * Wa (3 / 2) (y / X)
+      ≤ 3 * δ * X ^ (3 / 2 : ℝ) + 128 * δ ^ 5 * X ^ (7 / 2 : ℝ) := by
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) hX
+  have hT0 : (0 : ℝ) < T := lt_of_lt_of_le hX0 hXT
+  have hT13 : 10 ^ 13 ≤ T := le_trans hX hXT
+  have hk : (0 : ℝ) < 1 + δ := by linarith
+  have hTT : T ≤ (1 + δ) * T := by nlinarith
+  have hXk : X ≤ (1 + δ) * X := by nlinarith
+  have hkX0 : (0 : ℝ) < (1 + δ) * X := by positivity
+  have hpos : ∀ y ∈ uIcc X T, 0 < y := by
+    intro y hy
+    rw [Set.uIcc_of_le hXT] at hy
+    linarith [hy.1]
+  set I1 : ℝ := ∫ u in (1 + δ) * X..(1 + δ) * T, fpt u * u ^ (-7 / 2 : ℝ) with hI1
+  set Lh : ℝ := ∫ u in (1 + δ) * X..T, fpt u * u ^ (-7 / 2 : ℝ) with hLh
+  set Lt : ℝ := ∫ u in T..(1 + δ) * T, fpt u * u ^ (-7 / 2 : ℝ) with hLt
+  set I0 : ℝ := ∫ u in X..T, fpt u * u ^ (-7 / 2 : ℝ) with hI0
+  have hiA : IntervalIntegrable (fun y : ℝ => fpt ((1 + δ) * y) * y ^ (-7 / 2 : ℝ))
+      volume X T := by
+    refine (fpt_mono.comp (fun a b hab => by nlinarith)).intervalIntegrable.mul_continuousOn ?_
+    exact continuousOn_rpow_neg_seven_half.mono (fun x hx => hpos x hx)
+  have hiB : IntervalIntegrable (fun y : ℝ => fpt y * y ^ (-7 / 2 : ℝ)) volume X T :=
+    intervalIntegrable_fpt_neg_seven_half hX0 hXT
+  have hcongr : ∫ y in X..T, Dpt δ y * Wa (3 / 2) (y / X)
+      = X ^ (7 / 2 : ℝ) * ∫ y in X..T,
+          (fpt ((1 + δ) * y) * y ^ (-7 / 2 : ℝ) - fpt y * y ^ (-7 / 2 : ℝ)) := by
+    rw [← intervalIntegral.integral_const_mul]
+    apply intervalIntegral.integral_congr
+    intro y hy
+    rw [Set.uIcc_of_le hXT] at hy
+    have hy0 : 0 < y := by linarith [hy.1]
+    show Dpt δ y * Wa (3 / 2) (y / X)
+      = X ^ (7 / 2 : ℝ) * (fpt ((1 + δ) * y) * y ^ (-7 / 2 : ℝ) - fpt y * y ^ (-7 / 2 : ℝ))
+    rw [Wa_three_halves_of_ge hX0 hy0 hy.1]
+    unfold Dpt
+    ring
+  have hsubst : ∫ y in X..T, fpt ((1 + δ) * y) * y ^ (-7 / 2 : ℝ)
+      = (1 + δ) ^ (5 / 2 : ℝ) * I1 := by
+    rw [hI1]
+    have h := fpt_rpow_comp (δ := δ) (r := -7 / 2) (a := X) (b := T) hδ hpos
+    rw [h, show -(1 + (-7 / 2)) = (5 / 2 : ℝ) by norm_num]
+  have hval : ∫ y in X..T, Dpt δ y * Wa (3 / 2) (y / X)
+      = X ^ (7 / 2 : ℝ) * ((1 + δ) ^ (5 / 2 : ℝ) * I1 - I0) := by
+    rw [hcongr, intervalIntegral.integral_sub hiA hiB, hsubst, ← hI0]
+  have hsplit : I1 = Lh + Lt := by
+    rw [hI1, hLh, hLt]
+    exact (intervalIntegral.integral_add_adjacent_intervals
+      (intervalIntegrable_fpt_neg_seven_half (by positivity) hkX)
+      (intervalIntegrable_fpt_neg_seven_half hT0 hTT)).symm
+  have hmono : Lh ≤ I0 := by
+    rw [hLh, hI0]
+    refine intervalIntegral.integral_mono_interval hXk hkX le_rfl ?_ hiB
+    exact ae_restrict_of_forall_mem measurableSet_Ioc
+      (fun y hy => mul_nonneg (fpt_nonneg y) (Real.rpow_nonneg (by linarith [hy.1]) _))
+  have hLb : Lh ≤ ((1 + δ) * X) ^ (-2 : ℝ) := by
+    rw [hLh]
+    exact integral_fpt_neg_seven_half_le (le_trans hX (by nlinarith)) hkX
+  have hLb' : (0 : ℝ) ≤ Lh := by
+    rw [hLh]
+    refine intervalIntegral.integral_nonneg hkX (fun u hu => ?_)
+    exact mul_nonneg (fpt_nonneg u) (Real.rpow_nonneg (by linarith [hu.1]) _)
+  have hLtb : Lt ≤ 2 * δ * T ^ (-2 : ℝ) := by
+    rw [hLt]
+    exact integral_fpt_neg_seven_half_shift_le hT13 hδ
+  have hLt' : (0 : ℝ) ≤ Lt := by
+    rw [hLt]
+    refine intervalIntegral.integral_nonneg hTT (fun u hu => ?_)
+    exact mul_nonneg (fpt_nonneg u) (Real.rpow_nonneg (by linarith [hu.1]) _)
+  have hcoef : (1 + δ) ^ (5 / 2 : ℝ) - 1 ≤ 3 * δ := by
+    have h1 : (1 + δ) ^ (5 / 2 : ℝ) = (1 + δ) ^ (2 : ℕ) * (1 + δ) ^ (1 / 2 : ℝ) := by
+      have h2' : (1 + δ) ^ (2 : ℕ) = (1 + δ) ^ (2 : ℝ) := (Real.rpow_natCast (1 + δ) 2).symm
+      rw [h2', show (5 / 2 : ℝ) = 2 + 1 / 2 by norm_num, Real.rpow_add hk]
+    have h2 : (1 + δ) ^ (1 / 2 : ℝ) = √(1 + δ) := (Real.sqrt_eq_rpow _).symm
+    have h3 : √(1 + δ) ≤ 1 + δ / 2 := by
+      have h0 : (0 : ℝ) ≤ 1 + δ / 2 := by linarith
+      rw [Real.sqrt_le_iff]
+      exact ⟨h0, by nlinarith⟩
+    have h5 : (1 + δ) ^ (2 : ℕ) = 1 + 2 * δ + δ ^ 2 := by ring
+    rw [h1, h2, h5]
+    nlinarith [hδ, le_trans hδ1 (by norm_num : (1 : ℝ) / 10 ^ 13 ≤ 1)]
+  have h4 : (1 + δ) ^ (5 / 2 : ℝ) ≤ 4 := by
+    have h3r : (1 + δ) ^ (5 / 2 : ℝ) ≤ (1 + δ) ^ (3 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
+    have h3n : (1 + δ) ^ (3 : ℝ) = (1 + δ) ^ (3 : ℕ) := Real.rpow_natCast (1 + δ) 3
+    have h8 : (1 + δ) ^ (3 : ℕ) ≤ (2 : ℝ) ^ (3 : ℕ) :=
+      pow_le_pow_left₀ (a := 1 + δ) (b := 2) (by linarith)
+        (by linarith [le_trans hδ1 (by norm_num : (1 : ℝ) / 10 ^ 13 ≤ 1)]) 3
+    have h8' : (2 : ℝ) ^ (3 : ℕ) = 8 := by norm_num
+    rw [h3n] at h3r
+    linarith [h3r, h8, h8'.le]
+  have hT2 : T ^ (-2 : ℝ) = 16 * δ ^ 4 := by
+    have h2 : T ^ (2 : ℝ) = (16 * δ ^ 4)⁻¹ := by
+      rw [Real.rpow_two, hTdef]
+      have h : (1 / (4 * δ ^ 2)) ^ 2 = 1 / (16 * δ ^ 4) := by
+        field_simp
+        ring
+      rw [h]
+      field_simp
+    rw [Real.rpow_neg hT0.le 2, h2, inv_inv]
+  have key : (1 + δ) ^ (5 / 2 : ℝ) * I1 - I0
+      ≤ 3 * δ * ((1 + δ) * X) ^ (-2 : ℝ) + 8 * δ * T ^ (-2 : ℝ) := by
+    have h0a : (0 : ℝ) ≤ ((1 + δ) * X) ^ (-2 : ℝ) := Real.rpow_nonneg (by positivity) _
+    have h0b : (0 : ℝ) ≤ T ^ (-2 : ℝ) := Real.rpow_nonneg hT0.le _
+    have e1 : ((1 + δ) ^ (5 / 2 : ℝ) - 1) * Lh ≤ 3 * δ * ((1 + δ) * X) ^ (-2 : ℝ) := by
+      nlinarith [hcoef, hLb, hLb', h0a]
+    have e2 : (1 + δ) ^ (5 / 2 : ℝ) * Lt ≤ 8 * δ * T ^ (-2 : ℝ) := by
+      nlinarith [h4, hLtb, hLt', h0b, hδ]
+    have e3 : (1 + δ) ^ (5 / 2 : ℝ) * I1
+        = (1 + δ) ^ (5 / 2 : ℝ) * Lh + (1 + δ) ^ (5 / 2 : ℝ) * Lt := by
+      rw [hsplit]
+      ring
+    have e4 : (1 + δ) ^ (5 / 2 : ℝ) * Lh = ((1 + δ) ^ (5 / 2 : ℝ) - 1) * Lh + Lh := by ring
+    linarith [e1, e2, e3, e4, hmono]
+  have hA1 : ((1 + δ) * X) ^ (-2 : ℝ) ≤ X ^ (-2 : ℝ) :=
+    Real.rpow_le_rpow_of_nonpos hX0 (by nlinarith) (by norm_num)
+  have hA2 : X ^ (7 / 2 : ℝ) * X ^ (-2 : ℝ) = X ^ (3 / 2 : ℝ) := by
+    rw [← Real.rpow_add hX0]
+    norm_num
+  have hX32nn : (0 : ℝ) ≤ X ^ (3 / 2 : ℝ) := Real.rpow_nonneg hX0.le _
+  have hX72nn : (0 : ℝ) ≤ X ^ (7 / 2 : ℝ) := Real.rpow_nonneg hX0.le _
+  have step := mul_le_mul_of_nonneg_left key hX72nn
+  have hfin : X ^ (7 / 2 : ℝ) * (3 * δ * ((1 + δ) * X) ^ (-2 : ℝ) + 8 * δ * T ^ (-2 : ℝ))
+      ≤ 3 * δ * X ^ (3 / 2 : ℝ) + 128 * δ ^ 5 * X ^ (7 / 2 : ℝ) := by
+    have h2 : X ^ (7 / 2 : ℝ) * X ^ (-2 : ℝ) ≤ X ^ (3 / 2 : ℝ) := le_of_eq hA2
+    have hp1 : X ^ (7 / 2 : ℝ) * ((1 + δ) * X) ^ (-2 : ℝ) ≤ X ^ (3 / 2 : ℝ) :=
+      (mul_le_mul_of_nonneg_left hA1 hX72nn).trans h2
+    have hp2 : X ^ (7 / 2 : ℝ) * T ^ (-2 : ℝ) = 16 * δ ^ 4 * X ^ (7 / 2 : ℝ) := by
+      rw [hT2]
+      ring
+    have e1 : 3 * δ * (X ^ (7 / 2 : ℝ) * ((1 + δ) * X) ^ (-2 : ℝ)) ≤ 3 * δ * X ^ (3 / 2 : ℝ) :=
+      mul_le_mul_of_nonneg_left hp1 (by positivity)
+    have e2 : 8 * δ * (X ^ (7 / 2 : ℝ) * T ^ (-2 : ℝ)) ≤ 128 * δ ^ 5 * X ^ (7 / 2 : ℝ) := by
+      rw [hp2]
+      nlinarith [hX72nn, hδ]
+    have e3 : X ^ (7 / 2 : ℝ) * (3 * δ * ((1 + δ) * X) ^ (-2 : ℝ) + 8 * δ * T ^ (-2 : ℝ))
+        = 3 * δ * (X ^ (7 / 2 : ℝ) * ((1 + δ) * X) ^ (-2 : ℝ))
+          + 8 * δ * (X ^ (7 / 2 : ℝ) * T ^ (-2 : ℝ)) := by ring
+    rw [e3]
+    linarith [e1, e2]
+  rw [hval]
+  linarith [step, hfin]
+
+
+/-- `log ((1+δ)y) ≤ 2 log (2.0001/δ)` on the mass range `y ≤ 1/(4δ²)`. -/
+private theorem log_one_add_mul_le {δ y : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13)
+    (hy : 0 < y) (hyT : y ≤ 1 / (4 * δ ^ 2)) :
+    Real.log ((1 + δ) * y) ≤ 2 * Real.log (2.0001 / δ) := by
+  have hk : (0 : ℝ) < 1 + δ := by linarith
+  have h1 : (1 + δ) * y ≤ (1 + δ) * (1 / (4 * δ ^ 2)) := by nlinarith
+  have h2 : (1 + δ) * (1 / (4 * δ ^ 2)) ≤ (2.0001 / δ) ^ 2 := by
+    rw [div_pow, show (1 + δ) * (1 / (4 * δ ^ 2)) = (1 + δ) / (4 * δ ^ 2) by ring]
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith [hδ, hδ1]
+  have h3 : Real.log ((2.0001 / δ) ^ 2) = 2 * Real.log (2.0001 / δ) := by
+    rw [Real.log_pow]
+    push_cast
+    ring
+  calc Real.log ((1 + δ) * y) ≤ Real.log ((2.0001 / δ) ^ 2) :=
+        Real.log_le_log (by positivity) (h1.trans h2)
+    _ = 2 * Real.log (2.0001 / δ) := h3
+
+/-- `W_{3/2}(y/X) ≤ 1` above the centre. -/
+private theorem Wa_three_halves_le_one {X y : ℝ} (hX : 0 < X) (hy : 0 < y) (h : X ≤ y) :
+    Wa (3 / 2) (y / X) ≤ 1 := by
+  have hx1 : (1 : ℝ) ≤ y / X := (one_le_div hX).mpr h
+  have hpos : (0 : ℝ) < y / X := by linarith
+  unfold Wa
+  split_ifs with hle
+  · have he : y / X = 1 := le_antisymm hle hx1
+    rw [he]
+    simp
+  · rw [show -2 - (3 : ℝ) / 2 = -(7 / 2) by norm_num, Real.rpow_neg hpos.le]
+    exact inv_le_one_of_one_le₀ (Real.one_le_rpow hx1 (by norm_num))
+
+/-- The `(X,T]` piece of the mass range, `(X/y)^{7/2}` branch. -/
+private theorem dqt_mass_mid_le {δ X T : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13)
+    (hX : 10 ^ 13 ≤ X) (hXT : X ≤ T) (hkX : (1 + δ) * X ≤ T) (hTdef : T = 1 / (4 * δ ^ 2)) :
+    ∫ y in Ioc X T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ Real.log (2.0001 / δ) ^ 2 / 3
+          * (3 * δ * X ^ (3 / 2 : ℝ) + 128 * δ ^ 5 * X ^ (7 / 2 : ℝ)) := by
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) hX
+  have hk : (0 : ℝ) < 1 + δ := by linarith
+  have hkX0 : (0 : ℝ) < (1 + δ) * X := by positivity
+  have h2X : (2 : ℝ) < X := by linarith
+  have hL0 : (0 : ℝ) ≤ Real.log (2.0001 / δ) := by
+    have := LeanLab.Task393.asm_L_ge hδ hδ1
+    linarith
+  have hiD : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioc X T) := by
+    have h := (dqt_Wa_elementary hδ hX0).1
+    have h' : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
+      simpa only [LeanLab.Routes.U1556.Dqt, Dpt, fpt] using h
+    exact h'.mono_set (fun y hy => lt_trans h2X hy.1)
+  have hiWa : IntegrableOn (fun y : ℝ => Wa (3 / 2) (y / X)) (Ioc X T) := by
+    refine (integrableOn_const (C := (1 : ℝ)) (s := Ioc X T) (by simp)).mono'
+      ((measurable_Wa_div (3 / 2) X).aestronglyMeasurable) ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with y hy
+    rw [Real.norm_eq_abs, abs_of_nonneg (Wa_nonneg _ _)]
+    exact Wa_three_halves_le_one hX0 (lt_trans hX0 hy.1) hy.1.le
+  have hiP : IntegrableOn (fun y : ℝ => Real.log (2.0001 / δ) ^ 2 / 3
+      * (Dpt δ y * Wa (3 / 2) (y / X))) (Ioc X T) := by
+    refine (hiWa.const_mul (Real.log (2.0001 / δ) ^ 2 / 3
+      * (Real.log (2.0001 / δ) ^ 2 / 3))).mono'
+      (((LeanLab.Task393.asm_measurable_Dpt δ).mul
+        (measurable_Wa_div (3 / 2) X)).const_mul
+        (Real.log (2.0001 / δ) ^ 2 / 3)).aestronglyMeasurable ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with y hy
+    have hy0 : 0 < y := lt_trans hX0 hy.1
+    have hD : 0 ≤ Dpt δ y := Dpt_nonneg hδ.le hy0.le
+    have hsmall : Dpt δ y ≤ Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y) :=
+      LeanLab.Task393.Dpt_le_small hδ hδ1 (by linarith [hy.1]) (hTdef ▸ hy.2)
+    have hlog := log_one_add_mul_le hδ hδ1 hy0 (hTdef ▸ hy.2)
+    have hc : (0 : ℝ) ≤ Real.log (2.0001 / δ) / 6 := by linarith
+    have hcc : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 2 / 3 := by positivity
+    have h2 : Dpt δ y ≤ Real.log (2.0001 / δ) ^ 2 / 3 := by
+      have h9 : Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y)
+          ≤ Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ)) :=
+        mul_le_mul_of_nonneg_left hlog hc
+      have h10 : Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ))
+          = Real.log (2.0001 / δ) ^ 2 / 3 := by ring
+      linarith [hsmall, h9, h10.le]
+    have hW := Wa_nonneg (3 / 2) (y / X)
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg hcc (mul_nonneg hD hW))]
+    calc Real.log (2.0001 / δ) ^ 2 / 3 * (Dpt δ y * Wa (3 / 2) (y / X))
+        ≤ Real.log (2.0001 / δ) ^ 2 / 3
+            * (Real.log (2.0001 / δ) ^ 2 / 3 * Wa (3 / 2) (y / X)) :=
+          mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right h2 hW) hcc
+      _ = Real.log (2.0001 / δ) ^ 2 / 3 * (Real.log (2.0001 / δ) ^ 2 / 3)
+            * Wa (3 / 2) (y / X) := by ring
+  have hpt : ∀ y ∈ Ioc X T,
+      Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+        ≤ Real.log (2.0001 / δ) ^ 2 / 3 * (Dpt δ y * Wa (3 / 2) (y / X)) := by
+    intro y hy
+    have hy0 : 0 < y := lt_trans hX0 hy.1
+    have hD : 0 ≤ Dpt δ y := Dpt_nonneg hδ.le hy0.le
+    have hsmall : Dpt δ y ≤ Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y) :=
+      LeanLab.Task393.Dpt_le_small hδ hδ1 (by linarith [hy.1]) (hTdef ▸ hy.2)
+    have hlog := log_one_add_mul_le hδ hδ1 hy0 (hTdef ▸ hy.2)
+    have hc : (0 : ℝ) ≤ Real.log (2.0001 / δ) / 6 := by linarith
+    have h2 : Dpt δ y ≤ Real.log (2.0001 / δ) ^ 2 / 3 := by
+      have h9 : Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y)
+          ≤ Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ)) :=
+        mul_le_mul_of_nonneg_left hlog hc
+      have h10 : Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ))
+          = Real.log (2.0001 / δ) ^ 2 / 3 := by ring
+      linarith [hsmall, h9, h10.le, h10.ge]
+    have hW := Wa_nonneg (3 / 2) (y / X)
+    have hstep : Dpt δ y ^ 2 ≤ Dpt δ y * (Real.log (2.0001 / δ) ^ 2 / 3) := by
+      nlinarith [hD, h2]
+    calc Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+        ≤ (Dpt δ y * (Real.log (2.0001 / δ) ^ 2 / 3)) * Wa (3 / 2) (y / X) :=
+          mul_le_mul_of_nonneg_right hstep hW
+      _ = Real.log (2.0001 / δ) ^ 2 / 3 * (Dpt δ y * Wa (3 / 2) (y / X)) := by ring
+  have hcmp := setIntegral_mono_on hiD hiP measurableSet_Ioc hpt
+  rw [integral_const_mul] at hcmp
+  have hwand : ∫ y in Ioc X T, Dpt δ y * Wa (3 / 2) (y / X) ≤ 3 * δ * X ^ (3 / 2 : ℝ)
+      + 128 * δ ^ 5 * X ^ (7 / 2 : ℝ) := by
+    have heq : ∫ y in Ioc X T, Dpt δ y * Wa (3 / 2) (y / X)
+        = ∫ y in X..T, Dpt δ y * Wa (3 / 2) (y / X) :=
+      (intervalIntegral.integral_of_le hXT).symm
+    rw [heq]
+    exact dqt_neg_seven_half_tail_le hδ hδ1 hX hXT hkX hTdef
+  calc ∫ y in Ioc X T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ Real.log (2.0001 / δ) ^ 2 / 3 * ∫ y in Ioc X T, Dpt δ y * Wa (3 / 2) (y / X) := hcmp
+    _ ≤ Real.log (2.0001 / δ) ^ 2 / 3
+          * (3 * δ * X ^ (3 / 2 : ℝ) + 128 * δ ^ 5 * X ^ (7 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hwand (by positivity)
+
+/-- The short `(X,T]` piece (when `T ≤ (1+δ)X`): crude `W ≤ 1`, `Dqt ≤ L²/3`. -/
+private theorem dqt_short_le {δ X T : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13)
+    (hX : 10 ^ 13 ≤ X) (hXT : X ≤ T) (hTle : T ≤ (1 + δ) * X) (hTdef : T = 1 / (4 * δ ^ 2)) :
+    ∫ y in Ioc X T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ Real.log (2.0001 / δ) ^ 4 / 9 * δ * X := by
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) hX
+  have hk : (0 : ℝ) < 1 + δ := by linarith
+  have h2X : (2 : ℝ) < X := by linarith
+  have hL0 : (0 : ℝ) ≤ Real.log (2.0001 / δ) := by
+    have := LeanLab.Task393.asm_L_ge hδ hδ1
+    linarith
+  have hiD : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioc X T) := by
+    have h := (dqt_Wa_elementary hδ hX0).1
+    have h' : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
+      simpa only [LeanLab.Routes.U1556.Dqt, Dpt, fpt] using h
+    exact h'.mono_set (fun y hy => lt_trans h2X hy.1)
+  have hpt : ∀ y ∈ Ioc X T,
+      Dpt δ y ^ 2 * Wa (3 / 2) (y / X) ≤ Real.log (2.0001 / δ) ^ 4 / 9 := by
+    intro y hy
+    have hy0 : 0 < y := lt_trans hX0 hy.1
+    have hD : 0 ≤ Dpt δ y := Dpt_nonneg hδ.le hy0.le
+    have hsmall : Dpt δ y ≤ Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y) :=
+      LeanLab.Task393.Dpt_le_small hδ hδ1 (by linarith [hy.1]) (hTdef ▸ hy.2)
+    have hlog := log_one_add_mul_le hδ hδ1 hy0 (hTdef ▸ hy.2)
+    have hc : (0 : ℝ) ≤ Real.log (2.0001 / δ) / 6 := by linarith
+    have h2 : Dpt δ y ≤ Real.log (2.0001 / δ) ^ 2 / 3 := by
+      have h9 : Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y)
+          ≤ Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ)) :=
+        mul_le_mul_of_nonneg_left hlog hc
+      have h10 : Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ))
+          = Real.log (2.0001 / δ) ^ 2 / 3 := by ring
+      linarith [hsmall, h9, h10.le, h10.ge]
+    have hW := Wa_three_halves_le_one hX0 hy0 hy.1.le
+    have hW0 := Wa_nonneg (3 / 2) (y / X)
+    have hsq : Dpt δ y ^ 2 ≤ (Real.log (2.0001 / δ) ^ 2 / 3) ^ 2 := by nlinarith
+    calc Dpt δ y ^ 2 * Wa (3 / 2) (y / X) ≤ (Real.log (2.0001 / δ) ^ 2 / 3) ^ 2 * 1 := by
+          have h1 : Dpt δ y ^ 2 * Wa (3 / 2) (y / X) ≤ Dpt δ y ^ 2 * 1 :=
+            mul_le_mul_of_nonneg_left hW (sq_nonneg _)
+          nlinarith [h1, hsq]
+      _ = Real.log (2.0001 / δ) ^ 4 / 9 := by ring
+  have hconst : IntegrableOn (fun _ : ℝ => Real.log (2.0001 / δ) ^ 4 / 9) (Ioc X T) :=
+    integrableOn_const (by simp)
+  have hcmp := setIntegral_mono_on hiD hconst measurableSet_Ioc hpt
+  have hlen : ∫ _y in Ioc X T, Real.log (2.0001 / δ) ^ 4 / 9
+      = Real.log (2.0001 / δ) ^ 4 / 9 * (T - X) := by
+    rw [← intervalIntegral.integral_of_le hXT, intervalIntegral.integral_const, smul_eq_mul]
+    ring
+  rw [hlen] at hcmp
+  have hTX : T - X ≤ δ * X := by nlinarith [hTle]
+  have h0 : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 4 / 9 := by positivity
+  calc ∫ y in Ioc X T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ Real.log (2.0001 / δ) ^ 4 / 9 * (T - X) := hcmp
+    _ ≤ Real.log (2.0001 / δ) ^ 4 / 9 * (δ * X) := mul_le_mul_of_nonneg_left hTX h0
+    _ = Real.log (2.0001 / δ) ^ 4 / 9 * δ * X := by ring
+
+
+private theorem intervalIntegrable_dqt_rpow {δ U r : ℝ} (hδ : 0 < δ) (h2U : (2 : ℝ) ≤ U)
+    (hr : IntervalIntegrable (fun y : ℝ => y ^ r) volume (2 : ℝ) U) :
+    IntervalIntegrable (fun y : ℝ => Dpt δ y * y ^ r) volume (2 : ℝ) U := by
+  have hi : IntervalIntegrable (fun y : ℝ => fpt ((1 + δ) * y) - fpt y) volume (2 : ℝ) U :=
+    (fpt_mono.comp (fun a b hab => by nlinarith)).intervalIntegrable.sub
+      fpt_mono.intervalIntegrable
+  have hcont : ContinuousOn (fun y : ℝ => y ^ r) (Set.uIcc (2 : ℝ) U) := by
+    intro x hx
+    rw [Set.uIcc_of_le h2U] at hx
+    exact (Real.continuousAt_rpow_const x r
+      (Or.inl (ne_of_gt (by linarith [hx.1] : (0 : ℝ) < x)))).continuousWithinAt
+  have h := hi.mul_continuousOn hcont
+  simpa only [Dpt] using h
+
+/-- The `(2,U]` piece of the mass range, `(X/y)^{1/2}` branch:
+`∫_{(2,U]} Dqt² W ≤ (L²/3) · X^{1/2} · 2δU` for `U ≤ min(X, 1/(4δ²))`. -/
+private theorem dqt_mass_head_le {δ X U : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13)
+    (hX : 10 ^ 13 ≤ X) (hU : 10 ^ 13 ≤ U) (hUX : U ≤ X) (hUT : U ≤ 1 / (4 * δ ^ 2)) :
+    ∫ y in Ioc (2 : ℝ) U, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ Real.log (2.0001 / δ) ^ 2 / 3 * (X ^ (1 / 2 : ℝ) * (2 * δ * U)) := by
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) hX
+  have h2U : (2 : ℝ) ≤ U := le_trans (by norm_num) hU
+  have hiD : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioc (2 : ℝ) U) := by
+    have h := (dqt_Wa_elementary hδ hX0).1
+    have h' : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
+      simpa only [LeanLab.Routes.U1556.Dqt, Dpt, fpt] using h
+    exact h'.mono_set Set.Ioc_subset_Ioi_self
+  have hi0 : IntegrableOn (fun y : ℝ => Dpt δ y * y ^ (-1 / 2 : ℝ)) (Ioc (2 : ℝ) U) :=
+    (intervalIntegrable_iff_integrableOn_Ioc_of_le h2U).mp
+      (intervalIntegrable_dqt_rpow (r := -1 / 2) hδ h2U
+        (intervalIntegral.intervalIntegrable_rpow (Or.inr (fun h => by
+          rw [Set.uIcc_of_le h2U] at h
+          linarith [h.1]))))
+  have hi1 : IntegrableOn (fun y : ℝ => X ^ (1 / 2 : ℝ) * (Dpt δ y * y ^ (-1 / 2 : ℝ)))
+      (Ioc (2 : ℝ) U) := hi0.const_mul _
+  have hiR : IntegrableOn (fun y : ℝ => Dpt δ y * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ)))
+      (Ioc (2 : ℝ) U) := by
+    refine hi1.congr_fun (fun y _ => ?_) measurableSet_Ioc
+    ring
+  have hc : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 2 / 3 := by positivity
+  have hiP : IntegrableOn (fun y : ℝ => Real.log (2.0001 / δ) ^ 2 / 3
+      * (Dpt δ y * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ)))) (Ioc (2 : ℝ) U) :=
+    hiR.const_mul _
+  have hpt : ∀ y ∈ Ioc (2 : ℝ) U,
+      Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+        ≤ Real.log (2.0001 / δ) ^ 2 / 3
+          * (Dpt δ y * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ))) := by
+    intro y hy
+    have hy0 : 0 < y := lt_trans (by norm_num) hy.1
+    have hD : 0 ≤ Dpt δ y := Dpt_nonneg hδ.le hy0.le
+    have hsmall : Dpt δ y ≤ Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y) :=
+      LeanLab.Task393.Dpt_le_small hδ hδ1 hy.1 (hy.2.trans hUT)
+    have hlog := log_one_add_mul_le hδ hδ1 hy0 (hy.2.trans hUT)
+    have hL0 : (0 : ℝ) ≤ Real.log (2.0001 / δ) := by
+      have := LeanLab.Task393.asm_L_ge hδ hδ1
+      linarith
+    have hc6 : (0 : ℝ) ≤ Real.log (2.0001 / δ) / 6 := by linarith
+    have h2 : Dpt δ y ≤ Real.log (2.0001 / δ) ^ 2 / 3 := by
+      have h9 : Real.log (2.0001 / δ) / 6 * Real.log ((1 + δ) * y)
+          ≤ Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ)) :=
+        mul_le_mul_of_nonneg_left hlog hc6
+      have h10 : Real.log (2.0001 / δ) / 6 * (2 * Real.log (2.0001 / δ))
+          = Real.log (2.0001 / δ) ^ 2 / 3 := by ring
+      linarith [hsmall, h9, h10.le]
+    have hW : Wa (3 / 2) (y / X) = X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ) :=
+      Wa_three_halves_of_le hX0 hy0 (hy.2.trans hUX)
+    rw [hW]
+    have hw' : (0 : ℝ) ≤ X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ) := by positivity
+    calc Dpt δ y ^ 2 * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ))
+        ≤ (Dpt δ y * (Real.log (2.0001 / δ) ^ 2 / 3))
+            * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ)) := by
+          refine mul_le_mul_of_nonneg_right ?_ hw'
+          nlinarith [hD, h2]
+      _ = Real.log (2.0001 / δ) ^ 2 / 3
+            * (Dpt δ y * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ))) := by ring
+  have hcmp := setIntegral_mono_on hiD hiP measurableSet_Ioc hpt
+  rw [integral_const_mul] at hcmp
+  -- the `y^{-1/2}` integral is `≤ 2δU`
+  have hfac : ∫ y in Ioc (2 : ℝ) U, Dpt δ y * (X ^ (1 / 2 : ℝ) * y ^ (-1 / 2 : ℝ))
+      = X ^ (1 / 2 : ℝ) * ∫ y in Ioc (2 : ℝ) U, Dpt δ y * y ^ (-1 / 2 : ℝ) := by
+    rw [← integral_const_mul]
+    apply setIntegral_congr_fun measurableSet_Ioc
+    intro y _
+    ring
+  rw [hfac] at hcmp
+  have hhead : ∫ y in Ioc (2 : ℝ) U, Dpt δ y * y ^ (-1 / 2 : ℝ) ≤ 2 * δ * U := by
+    rw [(intervalIntegral.integral_of_le h2U).symm]
+    exact dqt_neg_half_head_le hδ (le_trans hδ1 (by norm_num)) hU
+  have hX12 : (0 : ℝ) ≤ X ^ (1 / 2 : ℝ) := Real.rpow_nonneg hX0.le _
+  have hstep : X ^ (1 / 2 : ℝ) * ∫ y in Ioc (2 : ℝ) U, Dpt δ y * y ^ (-1 / 2 : ℝ)
+      ≤ X ^ (1 / 2 : ℝ) * (2 * δ * U) := mul_le_mul_of_nonneg_left hhead hX12
+  calc ∫ y in Ioc (2 : ℝ) U, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+      ≤ Real.log (2.0001 / δ) ^ 2 / 3
+          * (X ^ (1 / 2 : ℝ) * ∫ y in Ioc (2 : ℝ) U, Dpt δ y * y ^ (-1 / 2 : ℝ)) := hcmp
+    _ ≤ Real.log (2.0001 / δ) ^ 2 / 3 * (X ^ (1 / 2 : ℝ) * (2 * δ * U)) :=
+        mul_le_mul_of_nonneg_left hstep hc
+
+
+/-- `δ log²(2.0001/δ) ≤ 10⁻⁹` for `0 < δ ≤ 10⁻¹³`: write `1/δ = 10¹³u` and use
+`log (2.0001·10¹³u) ≤ 31 + log u ≤ 39 u^{1/8}`. -/
+private theorem delta_log_sq_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) :
+    δ * Real.log (2.0001 / δ) ^ 2 ≤ 1 / 10 ^ 9 := by
+  set L : ℝ := Real.log (2.0001 / δ) with hLdef
+  set u : ℝ := 1 / (δ * 10 ^ 13) with hu
+  have hu1 : (1 : ℝ) ≤ u := by
+    rw [hu, le_div_iff₀ (by positivity : (0 : ℝ) < δ * 10 ^ 13)]
+    nlinarith [hδ1, hδ]
+  have hu0 : (0 : ℝ) < u := by linarith
+  have hδeq : δ = 1 / (10 ^ 13 * u) := by
+    rw [hu]
+    field_simp
+  have hδ0 : (0 : ℝ) < 1 / (10 ^ 13 * u) := by positivity
+  have ht : (2.0001 / δ) = 2.0001 * 10 ^ 13 * u := by
+    rw [hδeq]
+    field_simp
+  have hlog : L ≤ 31 + Real.log u := by
+    rw [hLdef, ht, Real.log_mul (by positivity) hu0.ne']
+    have h31 : Real.log (2.0001 * 10 ^ 13) ≤ 31 := by
+      rw [Real.log_le_iff_le_exp (by positivity)]
+      exact LeanLab.Task393.asm_le_exp31
+    linarith
+  have hlogu : Real.log u ≤ 8 * u ^ (1 / 8 : ℝ) := by
+    have h := Real.log_le_rpow_div hu0.le (by norm_num : (0 : ℝ) < 1 / 8)
+    calc Real.log u ≤ u ^ (1 / 8 : ℝ) / (1 / 8) := h
+      _ = 8 * u ^ (1 / 8 : ℝ) := by ring
+  have hu8 : (1 : ℝ) ≤ u ^ (1 / 8 : ℝ) := Real.one_le_rpow hu1 (by norm_num)
+  have hLb : L ≤ 39 * u ^ (1 / 8 : ℝ) := by
+    nlinarith [hlog, hlogu, hu8]
+  have hL0 : (0 : ℝ) ≤ L := by
+    rw [hLdef]
+    have := LeanLab.Task393.asm_L_ge hδ hδ1
+    linarith
+  have hLsq : L ^ 2 ≤ 1521 * u ^ (1 / 4 : ℝ) := by
+    have hsq := mul_self_le_mul_self hL0 hLb
+    have e : (39 * u ^ (1 / 8 : ℝ)) ^ 2 = 1521 * u ^ (1 / 4 : ℝ) := by
+      rw [mul_pow]
+      have h2 : (u ^ (1 / 8 : ℝ)) ^ (2 : ℕ) = u ^ (1 / 4 : ℝ) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul hu0.le]
+        norm_num
+      rw [h2]
+      norm_num
+    calc L ^ 2 ≤ (39 * u ^ (1 / 8 : ℝ)) ^ 2 := by simpa [pow_two] using hsq
+      _ = 1521 * u ^ (1 / 4 : ℝ) := e
+  have hstep : δ * L ^ 2 ≤ (1521 / 10 ^ 13) * u ^ (-(3 / 4) : ℝ) := by
+    have h1 : δ * L ^ 2 ≤ δ * (1521 * u ^ (1 / 4 : ℝ)) :=
+      mul_le_mul_of_nonneg_left hLsq hδ.le
+    have h2 : δ * (1521 * u ^ (1 / 4 : ℝ))
+        = (1521 / 10 ^ 13) * u ^ (-(3 / 4) : ℝ) := by
+      rw [hδeq]
+      have e2 : (1 / (10 ^ 13 * u) : ℝ) * (1521 * u ^ (1 / 4 : ℝ))
+          = (1521 / 10 ^ 13) * u ^ (-(3 / 4) : ℝ) := by
+        rw [show (-(3 / 4) : ℝ) = (1 / 4 : ℝ) + (-1) by ring, Real.rpow_add hu0,
+          Real.rpow_neg_one]
+        field_simp
+      linarith [e2]
+    linarith [h1, h2.le, h2.ge]
+  have hpow1 : u ^ (-(3 / 4) : ℝ) ≤ 1 := by
+    have h := Real.rpow_le_rpow_of_nonpos zero_lt_one hu1 (by norm_num : (-(3 / 4) : ℝ) ≤ 0)
+    simpa using h
+  have hc : (0 : ℝ) ≤ 1521 / 10 ^ 13 := by norm_num
+  have hfin : (1521 / 10 ^ 13) * u ^ (-(3 / 4) : ℝ) ≤ 1 / 10 ^ 9 := by
+    nlinarith [hpow1, hc]
+  rw [hLdef] at hstep ⊢
+  linarith [hstep, hfin]
+
+
+
+private theorem rpow_X_three_halves {X : ℝ} (hX : 0 < X) :
+    X ^ (3 / 2 : ℝ) = X * Real.sqrt X := by
+  rw [show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num, Real.rpow_add hX, Real.rpow_one,
+    ← Real.sqrt_eq_rpow]
+
+private theorem sqrt_X_bound {X : ℝ} (hX : 10 ^ 13 ≤ X) :
+    (3162277 : ℝ) ≤ Real.sqrt X := by
+  have h1 : (3162277 : ℝ) ≤ Real.sqrt (10 ^ 13) := by
+    rw [Real.le_sqrt' (by norm_num)]
+    norm_num
+  exact h1.trans (Real.sqrt_le_sqrt hX)
+
+/-- The large-range piece is under `3/10` of the budget. -/
+private theorem dqt_num_large {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) :
+    81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2 * (2 * X ^ 2)
+      ≤ (1 / 5) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) := by
+  set P : ℝ := δ * Real.log (2.0001 / δ) ^ 2 with hP
+  have hPle : P ≤ 1 / 10 ^ 9 := by rw [hP]; exact delta_log_sq_le hδ hδ1
+  have hP0 : 0 ≤ P := by rw [hP]; positivity
+  have hX2 : (0 : ℝ) ≤ X ^ 2 := sq_nonneg X
+  have key : 81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2 * (2 * X ^ 2)
+      = (81 / 2) * P ^ 2 * X ^ 2 := by rw [hP]; ring
+  have tgt : (1 / 5) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+      = (1 / 5) * (1 / 10 ^ 6) * P * X ^ 2 := by rw [hP]; ring
+  rw [key, tgt]
+  have hsq : P ^ 2 ≤ (1 / 10 ^ 9) * P := by nlinarith [hPle, hP0]
+  have h1 : (81 / 2) * P ^ 2 * X ^ 2 ≤ (81 / 2) * ((1 / 10 ^ 9) * P) * X ^ 2 := by
+    have h0 : (0 : ℝ) ≤ (81 / 2) * X ^ 2 := by positivity
+    nlinarith [hsq, hX2, h0]
+  have h2 : (81 / 2) * ((1 / 10 ^ 9) * P) * X ^ 2
+      ≤ (1 / 5) * (1 / 10 ^ 6) * P * X ^ 2 := by
+    have h0 : (0 : ℝ) ≤ P * X ^ 2 := by positivity
+    nlinarith [h0]
+  linarith [h1, h2]
+
+/-- The `(2,U]` mass piece (with `U ≤ X`) is under `1/4` of the budget. -/
+private theorem dqt_num_head {δ X : ℝ} (hδ : 0 < δ) (hX : 10 ^ 13 ≤ X) :
+    Real.log (2.0001 / δ) ^ 2 / 3 * (X ^ (1 / 2 : ℝ) * (2 * δ * X))
+      ≤ (1 / 4) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  set s : ℝ := Real.sqrt X with hs
+  have hs0 : 0 < s := by rw [hs]; exact Real.sqrt_pos.mpr hX0
+  have hss : s * s = X := by rw [hs]; exact Real.mul_self_sqrt hX0.le
+  have hs3 : (2.7 : ℝ) * 10 ^ 6 ≤ s := by
+    rw [hs]
+    linarith [sqrt_X_bound hX]
+  set P : ℝ := δ * Real.log (2.0001 / δ) ^ 2 with hP
+  have hP0 : 0 ≤ P := by rw [hP]; positivity
+  have key : Real.log (2.0001 / δ) ^ 2 / 3 * (X ^ (1 / 2 : ℝ) * (2 * δ * X))
+      = (2 / 3) * P * s ^ 3 := by
+    have h1 : X ^ (1 / 2 : ℝ) = s := by rw [hs, Real.sqrt_eq_rpow]
+    rw [h1, hP, ← hss]
+    ring
+  have tgt : (1 / 4) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+      = (1 / 4) * (1 / 10 ^ 6) * P * s ^ 4 := by
+    rw [hP, ← hss]
+    ring
+  rw [key, tgt]
+  rcases eq_or_lt_of_le hP0 with hPz | hPpos
+  · rw [← hPz]; simp
+  · have h0 : (0 : ℝ) < P * s ^ 3 := by positivity
+    nlinarith [h0, hs3, hPpos, hs0]
+
+/-- The `3δX^{3/2}` mass piece is under `2/5` of the budget. -/
+private theorem dqt_num_mid {δ X : ℝ} (hδ : 0 < δ) (hX : 10 ^ 13 ≤ X) :
+    Real.log (2.0001 / δ) ^ 2 / 3 * (3 * δ * X ^ (3 / 2 : ℝ))
+      ≤ (2 / 5) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  set s : ℝ := Real.sqrt X with hs
+  have hs0 : 0 < s := by rw [hs]; exact Real.sqrt_pos.mpr hX0
+  have hss : s * s = X := by rw [hs]; exact Real.mul_self_sqrt hX0.le
+  have hs3 : (2.5 : ℝ) * 10 ^ 6 ≤ s := by
+    rw [hs]
+    linarith [sqrt_X_bound hX]
+  set P : ℝ := δ * Real.log (2.0001 / δ) ^ 2 with hP
+  have hP0 : 0 ≤ P := by rw [hP]; positivity
+  have key : Real.log (2.0001 / δ) ^ 2 / 3 * (3 * δ * X ^ (3 / 2 : ℝ)) = P * s ^ 3 := by
+    have h1 : X ^ (3 / 2 : ℝ) = X * s := by
+      rw [rpow_X_three_halves hX0, hs]
+    rw [h1, hP, ← hss]
+    ring
+  have tgt : (2 / 5) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+      = (2 / 5) * (1 / 10 ^ 6) * P * s ^ 4 := by
+    rw [hP, ← hss]
+    ring
+  rw [key, tgt]
+  rcases eq_or_lt_of_le hP0 with hPz | hPpos
+  · rw [← hPz]; simp
+  · have h0 : (0 : ℝ) < P * s ^ 3 := by positivity
+    nlinarith [h0, hs3, hPpos, hs0]
+
+
+/-- The `δ^5 X^{7/2}` piece is under `1/100` of the budget. -/
+private theorem dqt_num_top {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 10 ^ 13 ≤ X)
+    (hXT : X ≤ 1 / (4 * δ ^ 2)) :
+    Real.log (2.0001 / δ) ^ 2 / 3 * (128 * δ ^ 5 * X ^ (7 / 2 : ℝ))
+      ≤ (1 / 100) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hTv : (1 / (4 * δ ^ 2) : ℝ) ^ (3 / 2 : ℝ) = 1 / (8 * δ ^ 3) := by
+    have h1 : (4 * δ ^ 2 : ℝ) ^ (3 / 2 : ℝ) = 8 * δ ^ 3 := by
+      rw [show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num, Real.rpow_add (by positivity),
+        Real.rpow_one, ← Real.sqrt_eq_rpow]
+      have h2 : Real.sqrt (4 * δ ^ 2) = 2 * δ := by
+        rw [show (4 : ℝ) * δ ^ 2 = (2 * δ) ^ 2 by ring, Real.sqrt_sq (by positivity)]
+      rw [h2]
+      ring
+    rw [one_div, Real.inv_rpow (by positivity : (0 : ℝ) ≤ 4 * δ ^ 2), h1, one_div]
+  have hd4 : δ ^ 4 * X ^ (3 / 2 : ℝ) ≤ δ / 8 := by
+    have hT : X ^ (3 / 2 : ℝ) ≤ (1 / (4 * δ ^ 2)) ^ (3 / 2 : ℝ) :=
+      Real.rpow_le_rpow hX0.le hXT (by norm_num)
+    rw [hTv] at hT
+    have h2 : δ ^ 4 * (1 / (8 * δ ^ 3)) = δ / 8 := by
+      field_simp
+    have h3 : (0 : ℝ) ≤ δ ^ 4 := by positivity
+    calc δ ^ 4 * X ^ (3 / 2 : ℝ) ≤ δ ^ 4 * (1 / (8 * δ ^ 3)) :=
+          mul_le_mul_of_nonneg_left hT h3
+      _ = δ / 8 := h2
+  set P : ℝ := δ * Real.log (2.0001 / δ) ^ 2 with hP
+  have hPle : P ≤ 1 / 10 ^ 9 := by rw [hP]; exact delta_log_sq_le hδ hδ1
+  have hP0 : 0 ≤ P := by rw [hP]; positivity
+  have hL2 : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 2 := sq_nonneg _
+  have hX2 : (0 : ℝ) ≤ X ^ 2 := sq_nonneg X
+  -- `δ^5 X^{7/2} = X² · δ · (δ⁴ X^{3/2}) ≤ δ²X²/8`
+  have h72 : X ^ (7 / 2 : ℝ) = X ^ (2 : ℝ) * X ^ (3 / 2 : ℝ) := by
+    rw [show (7 / 2 : ℝ) = 2 + 3 / 2 by norm_num, Real.rpow_add hX0]
+  have hX2eq : X ^ (2 : ℝ) = X ^ 2 := Real.rpow_natCast X 2
+  have key : δ ^ 5 * X ^ (7 / 2 : ℝ) = X ^ 2 * (δ * (δ ^ 4 * X ^ (3 / 2 : ℝ))) := by
+    rw [h72, hX2eq]
+    ring
+  have hb : X ^ 2 * (δ * (δ ^ 4 * X ^ (3 / 2 : ℝ))) ≤ X ^ 2 * (δ * (δ / 8)) := by
+    have s1 : δ * (δ ^ 4 * X ^ (3 / 2 : ℝ)) ≤ δ * (δ / 8) := by
+      nlinarith [hd4, hδ]
+    exact mul_le_mul_of_nonneg_left s1 hX2
+  have hP2 : Real.log (2.0001 / δ) ^ 2 * δ ^ 2 * X ^ 2 ≤ (1 / 10 ^ 13) * (P * X ^ 2) := by
+    have e : Real.log (2.0001 / δ) ^ 2 * δ ^ 2 * X ^ 2 = δ * P * X ^ 2 := by
+      rw [hP]; ring
+    rw [e]
+    have h0 : (0 : ℝ) ≤ P * X ^ 2 := by positivity
+    nlinarith [hPle, hP0, h0, hδ1, hδ, hX2]
+  have hstep1 : δ ^ 5 * X ^ (7 / 2 : ℝ) ≤ δ ^ 2 * X ^ 2 / 8 := by
+    rw [key]
+    nlinarith [hb, hδ, hX2]
+  have key2 : Real.log (2.0001 / δ) ^ 2 / 3 * (128 * δ ^ 5 * X ^ (7 / 2 : ℝ))
+      ≤ (16 / 3) * Real.log (2.0001 / δ) ^ 2 * δ ^ 2 * X ^ 2 := by
+    have h0 : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 2 / 3 * 128 := by positivity
+    calc Real.log (2.0001 / δ) ^ 2 / 3 * (128 * δ ^ 5 * X ^ (7 / 2 : ℝ))
+        ≤ Real.log (2.0001 / δ) ^ 2 / 3 * (128 * (δ ^ 2 * X ^ 2 / 8)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by positivity : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 2 / 3)
+          nlinarith [hstep1]
+      _ = (16 / 3) * Real.log (2.0001 / δ) ^ 2 * δ ^ 2 * X ^ 2 := by ring
+  have tgt : (1 / 100) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+      = (1 / 10 ^ 8) * Real.log (2.0001 / δ) ^ 2 * δ * X ^ 2 := by ring
+  rw [tgt]
+  have hfin : (16 / 3) * Real.log (2.0001 / δ) ^ 2 * δ ^ 2 * X ^ 2
+      ≤ (1 / 10 ^ 8) * Real.log (2.0001 / δ) ^ 2 * δ * X ^ 2 := by
+    have h0 : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 2 * δ * X ^ 2 := by positivity
+    nlinarith [h0, hδ]
+  linarith [key2, hfin]
+
+/-- The short-range piece is under `1/100` of the budget (`T ≤ (1+δ)X` forces `X ≳ 1/δ²`). -/
+private theorem dqt_num_short {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 10 ^ 13 ≤ X)
+    (hTle : 1 / (4 * δ ^ 2) ≤ (1 + δ) * X) :
+    Real.log (2.0001 / δ) ^ 4 / 9 * δ * X
+      ≤ (1 / 100) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) := by
+  have hX0 : (0 : ℝ) < X := by linarith
+  set L := Real.log (2.0001 / δ) with hLdef
+  set P : ℝ := δ * L ^ 2 with hP
+  have hPle : P ≤ 1 / 10 ^ 9 := by rw [hP, hLdef]; exact delta_log_sq_le hδ hδ1
+  have hP0 : 0 ≤ P := by rw [hP]; positivity
+  have hL2 : (0 : ℝ) ≤ L ^ 2 := sq_nonneg _
+  -- `1/X ≤ 8δ²`
+  have hinv : 1 / X ≤ 8 * δ ^ 2 := by
+    have h1 : 1 / (4 * δ ^ 2) ≤ 2 * X := by nlinarith [hTle, hδ]
+    rw [div_le_iff₀ (by positivity : (0 : ℝ) < 4 * δ ^ 2)] at h1
+    rw [div_le_iff₀ hX0]
+    nlinarith [h1, hδ]
+  -- `L² ≤ 9·10⁻⁸ X`
+  have hLX : L ^ 2 ≤ (9 / 10 ^ 8) * X := by
+    have h1 : L ^ 2 * (1 / X) ≤ L ^ 2 * (8 * δ ^ 2) :=
+      mul_le_mul_of_nonneg_left hinv hL2
+    have h2 : L ^ 2 * (1 / X) = L ^ 2 / X := by ring
+    have h3 : L ^ 2 = (L ^ 2 / X) * X := by field_simp
+    have h4 : (L ^ 2 / X) * X ≤ (8 * δ ^ 2 * L ^ 2) * X := by
+      have h0 : (0 : ℝ) ≤ X := hX0.le
+      nlinarith [h1, h2, h0]
+    have h5 : 8 * δ ^ 2 * L ^ 2 = 8 * δ * P := by rw [hP]; ring
+    have h6 : 8 * δ * P ≤ 8 * δ * (1 / 10 ^ 9) := by
+      have h0 : (0 : ℝ) ≤ 8 * δ := by positivity
+      nlinarith [hPle, h0]
+    have h7 : 8 * δ * (1 / 10 ^ 9) * X ≤ (9 / 10 ^ 8) * X := by nlinarith [hX0, hδ]
+    calc L ^ 2 = (L ^ 2 / X) * X := h3
+      _ ≤ (8 * δ ^ 2 * L ^ 2) * X := h4
+      _ = (8 * δ * P) * X := by rw [h5]
+      _ ≤ (8 * δ * (1 / 10 ^ 9)) * X := by
+          have h0 : (0 : ℝ) ≤ X := hX0.le
+          nlinarith [h6, h0]
+      _ ≤ (9 / 10 ^ 8) * X := h7
+  have tgt : (1 / 100) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+      = (1 / 10 ^ 8) * P * X ^ 2 := by
+    rw [hP, hLdef]; ring
+  have key : Real.log (2.0001 / δ) ^ 4 / 9 * δ * X = (1 / 9) * L ^ 2 * P * X := by
+    rw [hP, hLdef]; ring
+  rw [tgt, key]
+  have h0 : (0 : ℝ) ≤ (1 / 9) * P * X := by positivity
+  have hstep : (1 / 9 : ℝ) * L ^ 2 * P * X ≤ (1 / 9) * ((9 / 10 ^ 8) * X) * P * X := by
+    nlinarith [hLX, h0, hP0, hX0]
+  have hfin : (1 / 9 : ℝ) * ((9 / 10 ^ 8) * X) * P * X = (1 / 10 ^ 8) * P * X ^ 2 := by ring
+  linarith [hstep, hfin.le, hfin.ge]
+
 /-- LEAF. Unit U-1556. Unconditional: for `0 < δ ≤ 10^-13`, `X ≥ 10^13`, with
 `D = (ψ - θ)((1+δ)y) - (ψ - θ)(y)`, `D² W_{3/2}(y/X)` is integrable on `y > 2` and its integral
 is at most `10^-6 δ log²(2.0001/δ) X²`. Plain math: as `U1556.dqt_W_le`; the heavier weight
@@ -432,8 +1595,109 @@ theorem dqt_Wa_le {δ X : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1 / 10 ^ 13) (hX : 
     IntegrableOn (fun y => Dqt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) ∧
       ∫ y in Ioi 2, Dqt δ y ^ 2 * Wa (3 / 2) (y / X)
         ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
-  refine ⟨(dqt_Wa_elementary hδ (by linarith)).1, ?_⟩
-  sorry
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) hX
+  refine ⟨?_, ?_⟩
+  · -- integrability, from `dqt_Wa_elementary`
+    have h := (dqt_Wa_elementary hδ hX0).1
+    exact h
+  · -- the value bound, proved for `Dpt` and transported to `Dqt`
+    have hmain : ∫ y in Ioi (2 : ℝ), Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+        ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by
+      set T : ℝ := 1 / (4 * δ ^ 2) with hTdef
+      have hT2 : (2 : ℝ) ≤ T := by
+        rw [hTdef, le_div_iff₀ (by positivity)]
+        nlinarith [pow_le_pow_left₀ hδ.le hδ1 2]
+      have hT13 : 10 ^ 13 ≤ T := by
+        rw [hTdef, le_div_iff₀ (by positivity)]
+        nlinarith [pow_le_pow_left₀ hδ.le hδ1 2]
+      have hiD : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi 2) := by
+        have h := (dqt_Wa_elementary hδ hX0).1
+        simpa only [LeanLab.Routes.U1556.Dqt, Dpt, fpt] using h
+      have hiA : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioc (2 : ℝ) T) :=
+        hiD.mono_set Set.Ioc_subset_Ioi_self
+      have hiB : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioi T) :=
+        hiD.mono_set (Ioi_subset_Ioi hT2)
+      have hsplit : ∫ y in Ioi (2 : ℝ), Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+          = (∫ y in Ioc (2 : ℝ) T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X))
+            + ∫ y in Ioi T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X) := by
+        rw [← Ioc_union_Ioi_eq_Ioi hT2,
+          setIntegral_union (Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi hiA hiB]
+      -- the large range
+      have hlarge : ∫ y in Ioi T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+          ≤ 81 / 4 * Real.log (2.0001 / δ) ^ 4 * δ ^ 2 * (2 * X ^ 2) := by
+        rw [show T = 1 / (4 * δ ^ 2) from hTdef]
+        exact dqt_large_range_le hδ hδ1 hX
+      have hlarge' : ∫ y in Ioi T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+          ≤ (1 / 5) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) :=
+        hlarge.trans (dqt_num_large hδ hδ1)
+      -- the mass range, by cases on `T` against `X`
+      have hmass : ∫ y in Ioc (2 : ℝ) T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+          ≤ (1 / 4) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+            + (2 / 5) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+            + (1 / 100) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) := by
+        rcases le_or_gt T X with hTX | hTX
+        · -- `T ≤ X`: one head piece at `U = T`
+          have h1 := dqt_mass_head_le hδ hδ1 hX hT13 hTX (le_of_eq hTdef)
+          have h2 : Real.log (2.0001 / δ) ^ 2 / 3 * (X ^ (1 / 2 : ℝ) * (2 * δ * T))
+              ≤ Real.log (2.0001 / δ) ^ 2 / 3 * (X ^ (1 / 2 : ℝ) * (2 * δ * X)) := by
+            have h0 : (0 : ℝ) ≤ Real.log (2.0001 / δ) ^ 2 / 3 := by positivity
+            refine mul_le_mul_of_nonneg_left ?_ h0
+            have h1 : (0 : ℝ) < X ^ (1 / 2 : ℝ) * (2 * δ) := by positivity
+            nlinarith [hTX, hδ, h1]
+          have h3 := dqt_num_head hδ hX
+          have hsum : (∫ y in Ioc (2 : ℝ) T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X))
+              ≤ (1 / 4) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) :=
+            le_trans h1 (le_trans h2 h3)
+          have h0 : (0 : ℝ) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by positivity
+          linarith [hsum, h0]
+        · -- `X < T`: head at `U = X`, then `(X,T]` by parts or crudely
+          have h2X : (2 : ℝ) ≤ X := le_trans (by norm_num) hX
+          have h1 := dqt_mass_head_le hδ hδ1 hX hX le_rfl (le_of_lt hTX)
+          have h2 := dqt_num_head hδ hX
+          have hiC : IntegrableOn (fun y : ℝ => Dpt δ y ^ 2 * Wa (3 / 2) (y / X)) (Ioc X T) :=
+            hiD.mono_set (fun y hy => by
+              have h2x : (2 : ℝ) < X := by linarith
+              exact lt_trans h2x hy.1)
+          have hu : Ioc (2 : ℝ) X ∪ Ioc X T = Ioc (2 : ℝ) T := Ioc_union_Ioc_eq_Ioc h2X hTX.le
+          have hsp : ∫ y in Ioc (2 : ℝ) T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+              = (∫ y in Ioc (2 : ℝ) X, Dpt δ y ^ 2 * Wa (3 / 2) (y / X))
+                + ∫ y in Ioc X T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X) := by
+            rw [← hu]
+            refine setIntegral_union ?_ measurableSet_Ioc
+              (hiD.mono_set Set.Ioc_subset_Ioi_self) hiC
+            rw [Set.disjoint_left]
+            intro y hy hy'
+            exact absurd hy'.1 (not_lt.mpr hy.2)
+          have htail : ∫ y in Ioc X T, Dpt δ y ^ 2 * Wa (3 / 2) (y / X)
+              ≤ (2 / 5) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2)
+                + (1 / 100) * (1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2) := by
+            rcases le_or_gt ((1 + δ) * X) T with hS | hS
+            · have h1 := dqt_mass_mid_le hδ hδ1 hX hTX.le hS hTdef
+              have h2 : Real.log (2.0001 / δ) ^ 2 / 3
+                    * (3 * δ * X ^ (3 / 2 : ℝ) + 128 * δ ^ 5 * X ^ (7 / 2 : ℝ))
+                  = Real.log (2.0001 / δ) ^ 2 / 3 * (3 * δ * X ^ (3 / 2 : ℝ))
+                    + Real.log (2.0001 / δ) ^ 2 / 3 * (128 * δ ^ 5 * X ^ (7 / 2 : ℝ)) := by ring
+              have h3 := dqt_num_mid hδ hX
+              have h4 := dqt_num_top hδ hδ1 hX hTX.le
+              rw [h2] at h1
+              have h0 : (0 : ℝ) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 :=
+                by positivity
+              linarith [h1, h3, h4, h0]
+            · have hTle : T ≤ (1 + δ) * X := le_of_lt hS
+              have h1 := dqt_short_le hδ hδ1 hX hTX.le hTle hTdef
+              have hSle : (1 / (4 * δ ^ 2)) ≤ (1 + δ) * X := by
+                rw [← hTdef]
+                exact hTle
+              have h2 := dqt_num_short hδ hδ1 hX hSle
+              have h0 : (0 : ℝ) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 :=
+                by positivity
+              linarith [h1, h2, h0]
+          nlinarith [h1, h2, hsp.le, hsp.ge, htail]
+      rw [hsplit]
+      have h0 : (0 : ℝ) ≤ 1 / 10 ^ 6 * δ * Real.log (2.0001 / δ) ^ 2 * X ^ 2 := by positivity
+      linarith [hlarge', hmass, h0]
+    simpa only [LeanLab.Routes.U1556.Dqt, Dpt, fpt] using hmain
+
 
 /-- CONDITIONAL INPUT, named: the θ mean square with weight `W_a` at every centre `X ≥ X0`.
 `WeightedJθa 2` is U-1522's `WeightedJθ`. Unit U-1556. -/
