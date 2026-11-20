@@ -16,6 +16,7 @@ the modulus, adds the four constants and folds the two error sizes into the sing
 printed one. No analytic input is invented here.
 -/
 import LeanLab.Linnik1951.SPLIT_principal_convolution491
+import LeanLab.Linnik1951.SPLIT_local_arc_core_unit_main1622
 
 namespace LeanLab.Linnik1951
 
@@ -96,7 +97,70 @@ theorem principal_integral_unit_modulus_large_residual491 (hG : LeanLab.DERZ1997
           C * (N : ℝ) * Real.log N ^ 13 *
             (1 / ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) +
               1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ))) := by
-  sorry
+  obtain ⟨C0, hC0, N0a, h0⟩ := principal_arc_compare491 hG
+  obtain ⟨C1, hC1, N0b, h1⟩ := logFourier_arc_convolution491
+  obtain ⟨C2, hC2, N0c, h2⟩ := local_arc_core_unit_main1622_split hG hM
+  refine ⟨C0 + C1 + C2, by positivity, max 129 (max N0a (max N0b N0c)), ?_⟩
+  intro N hN q hq1 n hn4 hnN
+  have hN129 : 129 ≤ N := le_of_lt (lt_of_le_of_lt (le_max_left _ _) hN)
+  have hrest : max N0a (max N0b N0c) < N := lt_of_le_of_lt (le_max_right _ _) hN
+  have hN0a : N0a < N := lt_of_le_of_lt (le_max_left _ _) hrest
+  have ht : max N0b N0c < N := lt_of_le_of_lt (le_max_right _ _) hrest
+  have hN0b : N0b < N := lt_of_le_of_lt (le_max_left _ _) ht
+  have hN0c : N0c < N := lt_of_le_of_lt (le_max_right _ _) ht
+  have hNr : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (show 1 ≤ N by omega)
+  have hNpos : (0 : ℝ) < (N : ℝ) := by linarith
+  have hlg : 0 ≤ Real.log N := Real.log_nonneg hNr
+  have hlg13 : (0 : ℝ) ≤ Real.log N ^ 13 := pow_nonneg hlg 13
+  have htp : (0 : ℝ) < (N : ℝ) ^ (1 / 7 : ℝ) := Real.rpow_pos_of_pos hNpos _
+  have hqQ : ((1 : ℕ) : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ) := by
+    have h := Real.one_le_rpow hNr (by norm_num : (0 : ℝ) ≤ 1 / 10)
+    simpa using h
+  subst hq1
+  have hcmp := h0 N hN0a 1 (by norm_num) hqQ n
+  have hcv := h1 N hN0b 1 (by norm_num) hqQ n
+  have hmain := h2 N hN0c 1 (by norm_num) hqQ rfl n hn4 hnN
+  simp only [Nat.cast_one, one_mul] at hcmp hcv hmain ⊢
+  have hS : (0 : ℝ) < Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) := Real.sqrt_pos.mpr htp
+  have hA : (0 : ℝ) ≤ 1 / ((N : ℝ) ^ (1 / 7 : ℝ)) := by positivity
+  have hB : (0 : ℝ) ≤ 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) := by positivity
+  have hleA : 1 / ((N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) := by linarith
+  have hleB : 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) := by linarith
+  set ARC := ∫ z in -(1 / ((N : ℝ) ^ (1 / 7 : ℝ)))..(1 / ((N : ℝ) ^ (1 / 7 : ℝ))),
+    logFourier520 N z ^ 2 *
+      Complex.exp (((2 * Real.pi * (n : ℝ) * z : ℝ) : ℂ) * Complex.I) with hARC
+  set MAIN := ((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ) with hMAIN
+  have htri : ‖principalIntegral491 N 1 n‖ ≤
+      ‖principalIntegral491 N 1 n - ARC‖ + ‖ARC - MAIN‖ + ‖MAIN‖ := by
+    have heq : (principalIntegral491 N 1 n - ARC) + (ARC - MAIN) + MAIN =
+        principalIntegral491 N 1 n := by ring
+    calc ‖principalIntegral491 N 1 n‖
+        = ‖(principalIntegral491 N 1 n - ARC) + (ARC - MAIN) + MAIN‖ := by rw [heq]
+      _ ≤ ‖principalIntegral491 N 1 n - ARC‖ + ‖(ARC - MAIN) + MAIN‖ := norm_add_le _ _
+      _ ≤ ‖principalIntegral491 N 1 n - ARC‖ + (‖ARC - MAIN‖ + ‖MAIN‖) :=
+          add_le_add_left (norm_add_le _ _) _
+  have hsum := htri.trans (add_le_add (add_le_add hcmp hcv) hmain)
+  have hfac0 : (0 : ℝ) ≤ C0 * (N : ℝ) * Real.log N ^ 13 := by positivity
+  have hfac1 : (0 : ℝ) ≤ C1 * (N : ℝ) * Real.log N ^ 13 := by positivity
+  have hf0 : C0 * (N : ℝ) * Real.log N ^ 13 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      C0 * (N : ℝ) * Real.log N ^ 13 *
+        (1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) :=
+    (le_of_eq (by ring)).trans (mul_le_mul_of_nonneg_left hleB hfac0)
+  have hf1 : C1 * (N : ℝ) * Real.log N ^ 13 / ((N : ℝ) ^ (1 / 7 : ℝ)) ≤
+      C1 * (N : ℝ) * Real.log N ^ 13 *
+        (1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) :=
+    (le_of_eq (by ring)).trans (mul_le_mul_of_nonneg_left hleA hfac1)
+  have hring : C0 * (N : ℝ) * Real.log N ^ 13 *
+        (1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) +
+      C1 * (N : ℝ) * Real.log N ^ 13 *
+        (1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) +
+      C2 * (N : ℝ) * Real.log N ^ 13 *
+        (1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) =
+      (C0 + C1 + C2) * (N : ℝ) * Real.log N ^ 13 *
+        (1 / ((N : ℝ) ^ (1 / 7 : ℝ)) + 1 / Real.sqrt ((N : ℝ) ^ (1 / 7 : ℝ))) := by ring
+  linarith [hsum, hf0, hf1, hring]
 
 /-- LEAF. The intermediate modulus step at a residual of at least four. For a modulus
 from two up to the one twentieth power of N a reduced residue twist is present but the
