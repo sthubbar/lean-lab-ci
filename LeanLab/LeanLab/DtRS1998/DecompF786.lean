@@ -49,7 +49,12 @@ theorem cover_quarter_two_block_three :
         qs.any (fun q => decide
           (q ≤ 6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  obtain ⟨qs, hqs, hcov⟩ := cover_quarter_two k hk
+  refine ⟨qs, hqs, ?_⟩
+  intro j hj1 hj2
+  have hj1' : 125000001 ≤ j := by omega
+  exact hcov j hj1' (by omega)
 
 /-- LEAF. Step 4 of 4: the last index block of the quarter,
 `218750001 ≤ j ≤ 250000000`, is covered by a list of primes that works for

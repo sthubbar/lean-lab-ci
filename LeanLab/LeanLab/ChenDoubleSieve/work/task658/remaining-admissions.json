@@ -1,0 +1,572 @@
+[
+  {
+    "file": "Burst4Split.lean",
+    "declaration": "corrections_real",
+    "reason": "The correction representative construction and sharp comparison estimates remain open. Existing integrability and final display implications are now reused. The positive candidate matrix rules out a zero lower bound shortcut."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "declaration": "proposition1",
+    "reason": "The correction representative construction and sharp comparison estimates remain open. Existing integrability and final display implications are now reused. The positive candidate matrix rules out a zero lower bound shortcut."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "declaration": "corollary1",
+    "reason": "The correction representative construction and sharp comparison estimates remain open. Existing integrability and final display implications are now reused. The positive candidate matrix rules out a zero lower bound shortcut."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "declaration": "proposition3",
+    "reason": "The correction representative construction and sharp comparison estimates remain open. Existing integrability and final display implications are now reused. The positive candidate matrix rules out a zero lower bound shortcut."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "declaration": "proposition4",
+    "reason": "The correction representative construction and sharp comparison estimates remain open. Existing integrability and final display implications are now reused. The positive candidate matrix rules out a zero lower bound shortcut."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "declaration": "table1_Psi2",
+    "reason": "The correction representative construction and sharp comparison estimates remain open. Existing integrability and final display implications are now reused. The positive candidate matrix rules out a zero lower bound shortcut."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "declaration": "integral_matrix_bound",
+    "reason": "The correction representative construction and sharp comparison estimates remain open. Existing integrability and final display implications are now reused. The positive candidate matrix rules out a zero lower bound shortcut."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "declaration": "prop1_upper_eps",
+    "reason": "The sharp upper or lower sieve candidate and switching estimate is still needed. Existing generic assembly does not prove this analytic input."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "declaration": "prop1_lower_eps",
+    "reason": "The sharp upper or lower sieve candidate and switching estimate is still needed. Existing generic assembly does not prove this analytic input."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "declaration": "proposition2_H",
+    "reason": "The sharp upper or lower sieve candidate and switching estimate is still needed. Existing generic assembly does not prove this analytic input."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "declaration": "proposition2_h",
+    "reason": "The sharp upper or lower sieve candidate and switching estimate is still needed. Existing generic assembly does not prove this analytic input."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "declaration": "lemma51",
+    "reason": "The sharp upper or lower sieve candidate and switching estimate is still needed. Existing generic assembly does not prove this analytic input."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "declaration": "lemma52",
+    "reason": "The sharp upper or lower sieve candidate and switching estimate is still needed. Existing generic assembly does not prove this analytic input."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_9",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_10",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_11",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_12",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_13",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_14",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_15",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_16",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_17",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_18",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r0_19",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_9",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_10",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_11",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_12",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_13",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_14",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_15",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_16",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r1_17",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r2_9",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r2_10",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r2_11",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r2_13",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r2_14",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r2_16",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r3_9",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r3_10",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r3_11",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r3_13",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "declaration": "I2_r3_14",
+    "reason": "This assembly file is held by active task1553. Row four now has clean Task587 bounds. Other rows still need their compact certificates. No active owner file was edited."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_0_0",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_0_1",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_0_2",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_0_3",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_0_4",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_1_0",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_1_1",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_1_2",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_1_3",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_2_0",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_2_1",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_2_2",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_2_3",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_3_0",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "declaration": "entry_5_0",
+    "reason": "No matching proved local leaf was found by the matrix reuse scan. Positivity alone is insufficient for the positive candidate entry. A certified lower quadrature estimate on this exact interval is needed."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "declaration": "weighted_sieve_power",
+    "reason": "The existing standard functions do not supply the sharp weighted sieve estimates or certified integral evaluation. The analytic input remains open."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "declaration": "positive_estimates",
+    "reason": "The existing standard functions do not supply the sharp weighted sieve estimates or certified integral evaluation. The analytic input remains open."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "declaration": "negative_estimates",
+    "reason": "The existing standard functions do not supply the sharp weighted sieve estimates or certified integral evaluation. The analytic input remains open."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "declaration": "integral_evaluation",
+    "reason": "The existing standard functions do not supply the sharp weighted sieve estimates or certified integral evaluation. The analytic input remains open."
+  },
+  {
+    "file": "Decomp315a.lean",
+    "declaration": "first_half",
+    "reason": "The existing first half transport exposes an unproved averaged crossing compensation term. The pointwise reserve sign does not prove that term."
+  },
+  {
+    "file": "Decomp315b.lean",
+    "declaration": "lower_F0",
+    "reason": "The finite sharp lower linear sieve estimate feeding this asymptotic statement remains open."
+  },
+  {
+    "file": "Decomp315b.lean",
+    "declaration": "lower_F4",
+    "reason": "The finite sharp lower linear sieve estimate feeding this asymptotic statement remains open."
+  },
+  {
+    "file": "Decomp315b.lean",
+    "declaration": "lower_F5",
+    "reason": "The finite sharp lower linear sieve estimate feeding this asymptotic statement remains open."
+  },
+  {
+    "file": "Decomp315c.lean",
+    "declaration": "basic_upper",
+    "reason": "The corresponding finite upper sieve estimate or switched prime product limit remains open."
+  },
+  {
+    "file": "Decomp315c.lean",
+    "declaration": "switched_upper",
+    "reason": "The corresponding finite upper sieve estimate or switched prime product limit remains open."
+  },
+  {
+    "file": "Decomp315c.lean",
+    "declaration": "refined_upper",
+    "reason": "The corresponding finite upper sieve estimate or switched prime product limit remains open."
+  },
+  {
+    "file": "Decomp347j.lean",
+    "declaration": "crossing_compensation",
+    "reason": "The transport identity isolates the crossing defect. No bound for its averaged compensation has been proved."
+  },
+  {
+    "file": "Decomp348a.lean",
+    "declaration": "main0_lower",
+    "reason": "The sharp finite lower linear sieve estimate with the required remainder is open."
+  },
+  {
+    "file": "Decomp348b.lean",
+    "declaration": "main4_lower",
+    "reason": "The sharp finite lower linear sieve estimate for the fourth main sum is open."
+  },
+  {
+    "file": "Decomp348c.lean",
+    "declaration": "main5_lower",
+    "reason": "The sharp finite lower linear sieve estimate for the fifth main sum is open."
+  },
+  {
+    "file": "Decomp349a.lean",
+    "declaration": "basic_finite_upper",
+    "reason": "The sharp finite basic upper linear sieve estimate is open."
+  },
+  {
+    "file": "Decomp349b.lean",
+    "declaration": "switched_finite_upper",
+    "reason": "The switched finite sieve estimate and its prime product asymptotic are open."
+  },
+  {
+    "file": "Decomp349b.lean",
+    "declaration": "switched_sum_tendsto",
+    "reason": "The switched finite sieve estimate and its prime product asymptotic are open."
+  },
+  {
+    "file": "Decomp349c.lean",
+    "declaration": "refined_finite_upper",
+    "reason": "The refined finite sieve estimate and its prime product asymptotic are open."
+  },
+  {
+    "file": "Decomp349c.lean",
+    "declaration": "refined_sum_tendsto",
+    "reason": "The refined finite sieve estimate and its prime product asymptotic are open."
+  },
+  {
+    "file": "Decomp363b.lean",
+    "declaration": "linear_sieve_with_remainder",
+    "reason": "Bombieri Vinogradov inputs exist in the lab. They do not construct the sharp linear sieve inequality with this remainder."
+  },
+  {
+    "file": "Decomp366a.lean",
+    "declaration": "pair_linear_sieve_with_remainder",
+    "reason": "The pair sequence sharp linear sieve inequality with the displayed remainder is open."
+  },
+  {
+    "file": "Decomp367a.lean",
+    "declaration": "pair_linear_sieve_with_remainder",
+    "reason": "The lab maximal Bombieri Vinogradov theorem is available. The pair sequence sharp linear sieve inequality still needs a separate proof."
+  },
+  {
+    "file": "Decomp587g.lean",
+    "declaration": "r0j18_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. The required row one compact certificate is not proved here."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "declaration": "r2j9_short",
+    "reason": "Active task659 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "declaration": "r2j10_short",
+    "reason": "Active task659 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "declaration": "r2j11_short",
+    "reason": "Active task659 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "declaration": "r2j13_short",
+    "reason": "Active task659 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "declaration": "r2j14_short",
+    "reason": "Active task659 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "declaration": "r2j16_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "declaration": "r1j9_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "declaration": "r1j10_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "declaration": "r1j11_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "declaration": "r1j13_short",
+    "reason": "Active task660 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "declaration": "r1j14_short",
+    "reason": "Active task660 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "declaration": "r1j15_short",
+    "reason": "Active task660 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "declaration": "r1j16_short",
+    "reason": "Active task660 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "declaration": "r1j17_short",
+    "reason": "Active task660 owns this port unit. Its distinct compact certificates were left to that owner."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "declaration": "r0j9_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "declaration": "r0j10_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "declaration": "r0j11_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "declaration": "r0j13_short",
+    "reason": "The accepted row four certificate has different endpoints and a fixed domain. Direct reuse fails. New compact certificates are required."
+  },
+  {
+    "file": "Decomp587l.lean",
+    "declaration": "r0j14_short",
+    "reason": "New main includes accepted raw proofs for this unit and assigns their port to task661. These sources were not absent. No duplicate port was attempted."
+  },
+  {
+    "file": "Decomp587l.lean",
+    "declaration": "r0j15_short",
+    "reason": "New main includes accepted raw proofs for this unit and assigns their port to task661. These sources were not absent. No duplicate port was attempted."
+  },
+  {
+    "file": "Decomp587l.lean",
+    "declaration": "r0j16_short",
+    "reason": "New main includes accepted raw proofs for this unit and assigns their port to task661. These sources were not absent. No duplicate port was attempted."
+  },
+  {
+    "file": "Decomp587l.lean",
+    "declaration": "r0j17_short",
+    "reason": "New main includes accepted raw proofs for this unit and assigns their port to task661. These sources were not absent. No duplicate port was attempted."
+  },
+  {
+    "file": "Decomp587l.lean",
+    "declaration": "r0j19_short",
+    "reason": "New main includes accepted raw proofs for this unit and assigns their port to task661. These sources were not absent. No duplicate port was attempted."
+  },
+  {
+    "file": "DecompJ344.lean",
+    "declaration": "thm2_analytic_link",
+    "reason": "The rational comparison hypothesis does not supply the analytic Chen sieve estimates needed for the conclusion."
+  },
+  {
+    "file": "Statements.lean",
+    "declaration": "wu2004_thm1",
+    "reason": "This cited paper result still depends on the open sharp sieve, correction or numerical inputs. It is CONDITIONAL and is not claimed PROVED."
+  },
+  {
+    "file": "Statements.lean",
+    "declaration": "wu2004_thm2",
+    "reason": "This cited paper result still depends on the open sharp sieve, correction or numerical inputs. It is CONDITIONAL and is not claimed PROVED."
+  },
+  {
+    "file": "Statements.lean",
+    "declaration": "wu2004_thm3",
+    "reason": "This cited paper result still depends on the open sharp sieve, correction or numerical inputs. It is CONDITIONAL and is not claimed PROVED."
+  },
+  {
+    "file": "Statements.lean",
+    "declaration": "wu2004_thm4",
+    "reason": "This cited paper result still depends on the open sharp sieve, correction or numerical inputs. It is CONDITIONAL and is not claimed PROVED."
+  },
+  {
+    "file": "Statements.lean",
+    "declaration": "wu2004_thm5",
+    "reason": "This cited paper result still depends on the open sharp sieve, correction or numerical inputs. It is CONDITIONAL and is not claimed PROVED."
+  },
+  {
+    "file": "Statements.lean",
+    "declaration": "wu2008",
+    "reason": "This cited paper result still depends on the open sharp sieve, correction or numerical inputs. It is CONDITIONAL and is not claimed PROVED."
+  },
+  {
+    "file": "Statements.lean",
+    "declaration": "chen1978_quoted",
+    "reason": "This cited paper result still depends on the open sharp sieve, correction or numerical inputs. It is CONDITIONAL and is not claimed PROVED."
+  }
+]

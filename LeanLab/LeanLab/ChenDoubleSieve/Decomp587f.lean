@@ -1,3 +1,8 @@
+import LeanLab.Ported.Prove2Me.Decomp587fR3FourteenShort
+import LeanLab.Ported.Prove2Me.Decomp587fR3ThirteenShort
+import LeanLab.Ported.Prove2Me.Decomp587fR3ElevenShort
+import LeanLab.Ported.Prove2Me.Decomp587fR3TenShort
+import LeanLab.Ported.Prove2Me.Decomp587fR3NineShort
 import LeanLab.ChenDoubleSieve.Task587EarlySupply
 
 /-!
@@ -19,7 +24,7 @@ This statement has no supremum and is strictly smaller than the original leaf. -
 theorem r3Nine_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :
     buchstabIntegral ω 1 (fun _ => (25 / 89 : ℝ)) (fun _ => (2 / 5 : ℝ)) φ ≤ (12408337 / 1000000000 : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587fR3NineShort.solution hω hz hφ hφtop
 
 /-- The exact original I2_r3_9 bound follows from its compact profile leaf and proved tail.
 Wu 2004 page 26, Table 1 row four page 30. CONDITIONAL ON r3Nine_short. -/
@@ -42,7 +47,7 @@ This statement has no supremum and is strictly smaller than the original leaf. -
 theorem r3Ten_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :
     buchstabIntegral ω 1 r3TenLo r3TenHi φ ≤ (2710363 / 500000000 : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587fR3TenShort.solution hω hz hφ hφtop
 
 /-- The exact original I2_r3_10 bound follows from its compact profile leaf and proved tail.
 Wu 2004 page 26, Table 1 row four page 30. CONDITIONAL ON r3Ten_short. -/
@@ -65,7 +70,7 @@ This statement has no supremum and is strictly smaller than the original leaf. -
 theorem r3Eleven_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :
     buchstabIntegral ω 1 r3ElevenLo r3ElevenHi φ ≤ (1821597 / 500000000 : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587fR3ElevenShort.solution hω hz hφ hφtop
 
 /-- The exact original I2_r3_11 bound follows from its compact profile leaf and proved tail.
 Wu 2004 page 26, Table 1 row four page 30. CONDITIONAL ON r3Eleven_short. -/
@@ -88,7 +93,7 @@ This statement has no supremum and is strictly smaller than the original leaf. -
 theorem r3Thirteen_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :
     buchstabIntegral ω 1 r3ThirteenLo r3ThirteenHi φ ≤ (8106273 / 1000000000 : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587fR3ThirteenShort.solution hω hz hφ hφtop
 
 /-- The exact original I2_r3_13 bound follows from its compact profile leaf and proved tail.
 Wu 2004 page 26, Table 1 row four page 30. CONDITIONAL ON r3Thirteen_short. -/
@@ -111,7 +116,7 @@ This statement has no supremum and is strictly smaller than the original leaf. -
 theorem r3Fourteen_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (13 / 5 : ℝ)) :
     buchstabIntegral ω 1 r3FourteenLo r3FourteenHi φ ≤ (2640381 / 1000000000 : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587fR3FourteenShort.solution hω hz hφ hφtop
 
 /-- The exact original I2_r3_14 bound follows from its compact profile leaf and proved tail.
 Wu 2004 page 26, Table 1 row four page 30. CONDITIONAL ON r3Fourteen_short. -/

@@ -1,0 +1,2551 @@
+[
+  {
+    "file": "BuchstabBounds.lean",
+    "lines": 120,
+    "sha256": "50b82c5a64a1bc403438ce0113f688e607dfa8e01116f99497d8c1350f00449a",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "BuchstabSharp.lean",
+    "lines": 41,
+    "sha256": "70b70ce726928bb2de4b3fb4b6fdd742bee281477ceb26f6f544f691dcbe205c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabBounds"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "BuchstabTail.lean",
+    "lines": 99,
+    "sha256": "33fd89b8309ef2d5e7690aea6b9358e2f34008f3bf5272a96804d4e09eeebdf5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabSharp"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Burst4Split.lean",
+    "lines": 195,
+    "sha256": "e1fdb595002c4ae7b10eb6ec98f261a372cfe9b72187fddb54ecf26fbb1e33ce",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.Discretization",
+      "LeanLab.ChenDoubleSieve.TableInputsBridge"
+    ],
+    "declarations": 12
+  },
+  {
+    "file": "Burst8P2.lean",
+    "lines": 3421,
+    "sha256": "e00b2cae60434fbb0d0884570d13baac60eb66392cf76822117d1b7e2dc194bf",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Burst4Split",
+      "LeanLab.ChenDoubleSieve.Xi2Signs",
+      "LeanLab.ChenDoubleSieve.NormalizerPositive"
+    ],
+    "declarations": 91
+  },
+  {
+    "file": "Burst9I2.lean",
+    "lines": 635,
+    "sha256": "24b904fb5264c8de9e415c7528bca3ef252a7a6b33bbca9c50b1df2cf5ec7538",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Burst9Psi2Panels",
+      "LeanLab.ChenDoubleSieve.Task562Supply"
+    ],
+    "declarations": 56
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "lines": 21528,
+    "sha256": "9b55397ef6d057da29501f40084c4177f2549f89f7fca08dce8d13bd34d221ac",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Table1Algebra",
+      "LeanLab.ChenDoubleSieve.Burst9MatrixCol0"
+    ],
+    "declarations": 1049
+  },
+  {
+    "file": "Burst9MatrixCol0.lean",
+    "lines": 8727,
+    "sha256": "072bcf2fa69c0f4f7a1ab28cb062782b5be947bdb5db94dbb5f595d281911860",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Table1Algebra"
+    ],
+    "declarations": 217
+  },
+  {
+    "file": "Burst9Psi2.lean",
+    "lines": 72,
+    "sha256": "baf9237ae895c219672346f002225d64a03d9858b701020f661274944f9529c3",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Burst9Psi2Scalar",
+      "LeanLab.ChenDoubleSieve.Burst9I2"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Burst9Psi2Panels.lean",
+    "lines": 270,
+    "sha256": "7da956851595fceff3e6bb38c3b2caa52373b95cdd035eaa98f14fde677385d9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.KCertificate",
+      "LeanLab.ChenDoubleSieve.I2Range",
+      "LeanLab.ChenDoubleSieve.I1Bounds"
+    ],
+    "declarations": 11
+  },
+  {
+    "file": "Burst9Psi2Scalar.lean",
+    "lines": 121,
+    "sha256": "3d53f51f4a336dbda583b11c26fe871db4a7da6c656913ea4c0576ee87a23c1f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Burst9Psi2Panels"
+    ],
+    "declarations": 24
+  },
+  {
+    "file": "Burst9Top.lean",
+    "lines": 114,
+    "sha256": "aa95eea200c1098a9c69294d05e17d7dde58953222bae99e1c023f860a73ed8d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Burst8P2",
+      "LeanLab.ChenDoubleSieve.Burst9Psi2",
+      "LeanLab.ChenDoubleSieve.Burst9Matrix"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp275a.lean",
+    "lines": 26,
+    "sha256": "2dfbcea582ea3afed1cce5cabb9b7c1bb678c771ff1ca3315a854866be8878d9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp275b.lean",
+    "lines": 695,
+    "sha256": "4217196576bc2e0ae6c2b8e8ba350676c322eb27b93ca3ecace77b7440e97660",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275a",
+      "LeanLab.ChenDoubleSieve.Decomp275d",
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Sum"
+    ],
+    "declarations": 25
+  },
+  {
+    "file": "Decomp275c.lean",
+    "lines": 15,
+    "sha256": "cf395a1b991957673d18033fac1b75ace75d327807746d2bd5a43e33cf8d1d76",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": 1
+  },
+  {
+    "file": "Decomp275d.lean",
+    "lines": 64,
+    "sha256": "c5c3c6230b557a1dc0c2f5fbadae241e7cbeca5ae60142f9c09b0a7c76caa767",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp275e.lean",
+    "lines": 91,
+    "sha256": "5ab931e3534114c3f50010c13ad9c72c1a6fd41d1a022bb2a7acf5d2bfc521dc",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.JCertificate"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Decomp275f.lean",
+    "lines": 96,
+    "sha256": "e743771642926b96c04e9d4165de78baaf510a973ac2c491d6505f0d1e5f5306",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275e",
+      "LeanLab.ChenDoubleSieve.KCertificate"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp275g.lean",
+    "lines": 210,
+    "sha256": "706d0be2dd157079e1960748cce3005fdb27f24db45c632defd3184778549244",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275f"
+    ],
+    "declarations": 15
+  },
+  {
+    "file": "Decomp275h.lean",
+    "lines": 159,
+    "sha256": "6a68f24eec39510284efb77a60b2da875a29494cf3254375e960677c16b8ef0e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp275i.lean",
+    "lines": 142,
+    "sha256": "4ef67b54162c1c0acd24afb5df38d8c74294facae56b0aa0a82b13dc0d433dc8",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275h"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp275j.lean",
+    "lines": 48,
+    "sha256": "55a2b9d972b05308e33bd8b1fbbde35055fd2889af7a32902e45272ab5f45620",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.Lemma42"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp315a.lean",
+    "lines": 1737,
+    "sha256": "b41b1c423f03216b32036f98a73e22423988079a49774cb12bc6a5e161cdbdf8",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21Chen",
+      "LeanLab.ChenDoubleSieve.Decomp275j"
+    ],
+    "declarations": 86
+  },
+  {
+    "file": "Decomp315b.lean",
+    "lines": 55,
+    "sha256": "62c589a84e17fd8af51278db1a216751e7a32d50a9674734738c0aa78b5db641",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp315c.lean",
+    "lines": 63,
+    "sha256": "80c0d38090d35f43387387bc14fa7f1c039f216e174d39ad08edc2ae6a9cac9c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp315d.lean",
+    "lines": 8769,
+    "sha256": "416cc8fea2c8b35f224dc638f1ef39c46b4f577736d83dae5e4d7ec5462dc1c9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275i"
+    ],
+    "declarations": 349
+  },
+  {
+    "file": "Decomp315e.lean",
+    "lines": 54,
+    "sha256": "232c185ca732c134d61f6a030f348226c3610de0443d073d0692626072fca5ee",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp315d",
+      "LeanLab.ChenDoubleSieve.Decomp275e",
+      "LeanLab.ChenDoubleSieve.Decomp275f",
+      "LeanLab.ChenDoubleSieve.Decomp275g",
+      "LeanLab.ChenDoubleSieve.Decomp350b",
+      "LeanLab.ChenDoubleSieve.Decomp350c"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp347a.lean",
+    "lines": 96,
+    "sha256": "ec184fb25cff099d70da0457604337bf251a7be346fc8a8c78dcd82007be587c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp315a"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp347b.lean",
+    "lines": 227,
+    "sha256": "845d143600498e79a068bd4da3a18620e633582958f511d8004ddd763d50f070",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp315a"
+    ],
+    "declarations": 15
+  },
+  {
+    "file": "Decomp347c.lean",
+    "lines": 81,
+    "sha256": "6981b6018e69faefca905ff563cdfa20bc06c98b302ad431f7662f7bbab28d80",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp315a"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp347d.lean",
+    "lines": 109,
+    "sha256": "262197777d652c4163df298e717a15f801e85a67a3802a0428da07527497eb4f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp347c"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp347e.lean",
+    "lines": 101,
+    "sha256": "b8e7037f2e630703e6f2d8b631f7ab603b66206a5348e5fa4b00ded8d9d03aa9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp347d"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp347f.lean",
+    "lines": 125,
+    "sha256": "566709af5e76f2024cdfdef602a94f27fa2f914744b131762ba2fc6ab264c1ba",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp347b",
+      "LeanLab.ChenDoubleSieve.Burst8P2"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp347g.lean",
+    "lines": 130,
+    "sha256": "24e68d43ce68d63e75add82708f800d298e7e6f8006402db76a6a72bc5d4979c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp347e"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp347h.lean",
+    "lines": 74,
+    "sha256": "227f5263e7554d0345406e25875872381c2b9d81a19602500be8ac4881d4d9ab",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp347a",
+      "LeanLab.ChenDoubleSieve.Decomp347f",
+      "LeanLab.ChenDoubleSieve.Decomp347g"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp347i.lean",
+    "lines": 131,
+    "sha256": "2e6bde0190d30eb49a4bb5367a816003ee8c1bc7ff3f4ee8be9ee8719da3b84d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp347b"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp347j.lean",
+    "lines": 112,
+    "sha256": "c466cc6c8ffe6d0b944e48a743cc2aea504e447c3bfa2df60290a4016d57ea90",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp347h"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp348a.lean",
+    "lines": 853,
+    "sha256": "971ace9c3d512c657f25e21317667a00338cd71fc944fdf0f06e7e15003a7525",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.Section3",
+      "LeanLab.BS2022GRH.PortedMertens"
+    ],
+    "declarations": 41
+  },
+  {
+    "file": "Decomp348b.lean",
+    "lines": 2782,
+    "sha256": "c4054abe1bc55703b5585657a531c4fb980c9f32591ec6bfc3d3aeda164e2cbc",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348a"
+    ],
+    "declarations": 56
+  },
+  {
+    "file": "Decomp348c.lean",
+    "lines": 5530,
+    "sha256": "4de9036f1e6b0da95dc055249d4e803ef6f5bc16035e2235724925016195f55b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348a"
+    ],
+    "declarations": 97
+  },
+  {
+    "file": "Decomp348d.lean",
+    "lines": 214,
+    "sha256": "a4d879adf09de9fc1913ec78327716c91e9478dbabfa6f21c5383413fee10871",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348b",
+      "LeanLab.ChenDoubleSieve.Decomp348c",
+      "LeanLab.ChenDoubleSieve.Decomp315a"
+    ],
+    "declarations": 14
+  },
+  {
+    "file": "Decomp348e.lean",
+    "lines": 96,
+    "sha256": "4d7920abcf865f7700992fa7f5777209144173785704069783802f5a3a1580af",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348d"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp348f.lean",
+    "lines": 91,
+    "sha256": "ec4f51b99527f0f90817d4073e4e471b7e145b2eeb5da266543afc35aab985e7",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348e"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp348g.lean",
+    "lines": 78,
+    "sha256": "5d7d4f545730c8261a0a5d86bd0cd07b56836ecf9a647147126e095747485639",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348f"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp348h.lean",
+    "lines": 170,
+    "sha256": "d68c00d80feecddc0ae9f9ca5494d59f5015216544119fd03701f72367eb8354",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348g"
+    ],
+    "declarations": 16
+  },
+  {
+    "file": "Decomp348i.lean",
+    "lines": 63,
+    "sha256": "dfcc48891d4e73695088f5159c2c2fb76a44315e9422f5f5261a8d2a3bf8abb1",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348h"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp348j.lean",
+    "lines": 55,
+    "sha256": "fd79ff3e481528a1f067832cf277bca47f7989612ba5f57ff45fbe8fe158f408",
+    "imports": [
+      "LeanLab.ChenPrimeExceptional.Task101PowerCutoffs",
+      "LeanLab.ChenDoubleSieve.Decomp348i"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp348k.lean",
+    "lines": 119,
+    "sha256": "a08303a58963725d6cc6c609e497b42bc44e07f7360d50deaf2368d44cf56e9a",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348h"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp348l.lean",
+    "lines": 161,
+    "sha256": "6607569c579fc189acfda7830a8d09d282f49ceaf8c3737163cab9cd76c2b360",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348k"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Decomp348m.lean",
+    "lines": 82,
+    "sha256": "d83904629ae1d2ff03160d734f203f334ec1e13f6deb46b1e3a70c44d46acc8e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348k"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp348n.lean",
+    "lines": 123,
+    "sha256": "5ceaca9a215a366b9996af88849790e5e4686336f420feb6b7dbf338e76e58e7",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348m"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Decomp348o.lean",
+    "lines": 57,
+    "sha256": "77e061fac7ee310df1cc5b4490bb319def842a36d60fbbbe6d003cb32c343b29",
+    "imports": [
+      "LeanLab.AlmostPrimeSums.Decomp1527c",
+      "LeanLab.ChenDoubleSieve.Decomp348n"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp348p.lean",
+    "lines": 114,
+    "sha256": "67902a69185d5b4a7aa967b4292f4523cea3d560fd1d81eec35b2ef59412889e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348o"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Decomp348v.lean",
+    "lines": 47,
+    "sha256": "955aa591a9a7e9769a8f052f83e6f086322308a9cd1b3fc6bf8a9d0c7cc48702",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348n",
+      "LeanLab.ChenDoubleSieve.Decomp348l",
+      "LeanLab.ChenDoubleSieve.Decomp348j"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp349a.lean",
+    "lines": 2366,
+    "sha256": "438215fd8496d044c89f5307f582fa09ba26aa203013862228d4ce404cccf5bc",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363f"
+    ],
+    "declarations": 70
+  },
+  {
+    "file": "Decomp349b.lean",
+    "lines": 133,
+    "sha256": "3993daad5d66e5876f53ecb936c3f73d8b22f796344e29b3fece0993dbf14efb",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349a"
+    ],
+    "declarations": 12
+  },
+  {
+    "file": "Decomp349c.lean",
+    "lines": 202,
+    "sha256": "c0c229cabb16085c9d7041fe50ecd43b8ce8e8087e62dc515baac3b9ea8ad71d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349b",
+      "LeanLab.ChenDoubleSieve.Decomp367d"
+    ],
+    "declarations": 16
+  },
+  {
+    "file": "Decomp349d.lean",
+    "lines": 247,
+    "sha256": "f1ea09c686cf243384788f5424835f2cdd4c0b0cdc83473b31b636859ca983a1",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349c"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp349e.lean",
+    "lines": 121,
+    "sha256": "8ac664ff5670decd25a293ac586e58fbe76469f61d4dbd1a88a922c3b21a708b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349d"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp349f.lean",
+    "lines": 138,
+    "sha256": "1e72e47ab02ebfdf82153befbf7fa22cfbd80b866dbbff82739aee308a8b1437",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349e",
+      "LeanLab.ChenDoubleSieve.Decomp363h"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp349g.lean",
+    "lines": 271,
+    "sha256": "81d7aebdb87ed8fc2c729e8be1cb645f35432f1c7560238e6e536ec9697f03b1",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349f",
+      "LeanLab.ChenDoubleSieve.Decomp366b",
+      "LeanLab.ChenDoubleSieve.Decomp366f"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp349h.lean",
+    "lines": 184,
+    "sha256": "af18a6c8f3e71a6fc6b9d5c127487901f9a95cecf381e4e3f659ee325a3dca2f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349g"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Decomp349i.lean",
+    "lines": 185,
+    "sha256": "de6fc38c9c19278b499579ca04de932e1c4bf1ea6df6e397f6de494ed7b5e850",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349h",
+      "LeanLab.ChenDoubleSieve.Decomp348o"
+    ],
+    "declarations": 12
+  },
+  {
+    "file": "Decomp349j.lean",
+    "lines": 78,
+    "sha256": "c10740cfaa8f0ae175759208905f2589b871ef893f30f8c6371e9a4d144a685f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349i"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp349k.lean",
+    "lines": 107,
+    "sha256": "f5587c0103b4ff5622906436a91529d1631c0f57a4677ecac7fd34d785cad0b1",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349j"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp349l.lean",
+    "lines": 113,
+    "sha256": "a26dcccbd6051ea0fdcefb84127abfb0f649e194fee47092baeb2d3fda4d5570",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349k"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp349m.lean",
+    "lines": 118,
+    "sha256": "f1fab5d8e5cff63bc92053f1526736226a745e2bcebb68cf75ee76adafa84997",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349l"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp349n.lean",
+    "lines": 68,
+    "sha256": "a126e35b3cc40348b18aedff1e8e6fdb9f6affb5ccad927175bfd13643f59b17",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349m"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp349o.lean",
+    "lines": 103,
+    "sha256": "7d7c785122a46773e74b94780db3ac905fd60c1a373c7237895830057aa59b4c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp349n"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp350a.lean",
+    "lines": 257,
+    "sha256": "f8b21475958ec47ef1a8c0b92e5a7d5bd138ba1581e3bf2556a42eb16d13ff6a",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.BuchstabTail",
+      "LeanLab.ChenDoubleSieve.Decomp350f",
+      "LeanLab.ChenDoubleSieve.Decomp350k"
+    ],
+    "declarations": 8
+  },
+  {
+    "file": "Decomp350b.lean",
+    "lines": 87,
+    "sha256": "d867c3504159190af6f3a1d41494b8d8e9a515d49602c3c52ad5218efd795ffa",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350g"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp350c.lean",
+    "lines": 98,
+    "sha256": "db7ed55419007a4f5821c417811bce78183266bcc1579ac0c0308d229cf469d8",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350h"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp350d.lean",
+    "lines": 120,
+    "sha256": "8c7f5431622405c369dd1ae36fb002e94e9a5c302ac4cc8b8ea8316a810ad9f7",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350a"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp350e.lean",
+    "lines": 111,
+    "sha256": "c43d779a3875b0a548a6679816ff099b55a4ef3d0af08ce4ff14155ff593ccfd",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350a"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp350f.lean",
+    "lines": 155,
+    "sha256": "7217557fff08850f4226f823fca53e87ece7aa5747cb36d73c682b4510bea45f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp275b",
+      "LeanLab.ChenDoubleSieve.BuchstabBounds",
+      "LeanLab.ChenDoubleSieve.JPanelArithmetic",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate",
+      "Mathlib.Analysis.Convex.SpecificFunctions.Basic"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Decomp350g.lean",
+    "lines": 262,
+    "sha256": "027b9a235fb10138a682ae7a233a4c32c5a0d922dfd8dc8d9abbbc7fc474892c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350d",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": 12
+  },
+  {
+    "file": "Decomp350h.lean",
+    "lines": 305,
+    "sha256": "d1a728b50352512109909cdbfb8a050e3b54c5c5b12239ea5eb4fe6f815aee0b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350e",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": 23
+  },
+  {
+    "file": "Decomp350i.lean",
+    "lines": 197,
+    "sha256": "bdfe939c65ff230b866892644fecf0bbe9b7ea65ac3bce405a913e84ff9e9dbe",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350f",
+      "Mathlib.Analysis.SpecialFunctions.Bernstein"
+    ],
+    "declarations": 23
+  },
+  {
+    "file": "Decomp350j.lean",
+    "lines": 96,
+    "sha256": "541b3644081bc781731de1628dc6db70b3128ab397bb7d3153265c830b7c7b1d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350i"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp350k.lean",
+    "lines": 111,
+    "sha256": "cf0d81de01ed17af346e0127d9b8dbdc7da5f990de7b8d2c84b46575e10f44d4",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp350j"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp363a.lean",
+    "lines": 70,
+    "sha256": "faedd95bf25451c2ef176b4aa140897c4eb76d6d80d60565fcb1125ac62170c5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348o"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp363b.lean",
+    "lines": 375,
+    "sha256": "4fc663850f864c563187925ea3941447e9ae736a92b2f68e31808ac998576637",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363c",
+      "LeanLab.PNTPort.BVMax.PrimesUncond"
+    ],
+    "declarations": 16
+  },
+  {
+    "file": "Decomp363c.lean",
+    "lines": 167,
+    "sha256": "3889249acf36a6e7c98b06f670c2a1ce59b7e16b7abd416bf561dab4c94325f0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363a",
+      "LeanLab.ChenDoubleSieve.Decomp348p"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp363d.lean",
+    "lines": 130,
+    "sha256": "7a3d0423c06f706cd41b39a12434391dbce511ac27e2575f9823d927fde4e6a4",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363b"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Decomp363e.lean",
+    "lines": 80,
+    "sha256": "6875ebb6190f3eee22082a5876b5b8987c0a374e3ea97a2ab5eeeb92aba84fc2",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363d"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp363f.lean",
+    "lines": 100,
+    "sha256": "8c1e780c9341cdca88fabba7e7afafb894e8f1c89d6682eb137f622fbef34ea6",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363e"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp363g.lean",
+    "lines": 213,
+    "sha256": "1c4662026c904c33a9814275eb32827b64a571305257abe24086042b250cdb60",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363f"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Decomp363h.lean",
+    "lines": 182,
+    "sha256": "fea7d9cd354c25afdcb97ac6b4d420aba50feae3e2e0cb1eda08b6e0fffbc78e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363g"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp363i.lean",
+    "lines": 44,
+    "sha256": "b94225af1db100491daaaa7d12835ac3b7ac352a47840bddcdf93b88629b337c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363h"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp366a.lean",
+    "lines": 78,
+    "sha256": "3ce5b859c522b1a451a70ae8e048edf073e8d5083c33873fca49bd6fae17c064",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366h",
+      "LeanLab.ChenDoubleSieve.Decomp363b",
+      "LeanLab.ChenDoubleSieve.Decomp348b"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp366b.lean",
+    "lines": 2159,
+    "sha256": "b7d7bb164a7e6d0eeb40cfc2c41a376a1fd709cd9e7db07a82b7b63f922b9133",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366c"
+    ],
+    "declarations": 28
+  },
+  {
+    "file": "Decomp366c.lean",
+    "lines": 82,
+    "sha256": "481030b43f38113e40b92773a8962f5405a3f891bacd6055f85febe09fd226f0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367c",
+      "LeanLab.ChenDoubleSieve.Decomp367d"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Decomp366d.lean",
+    "lines": 171,
+    "sha256": "44321d9a7dbb20e4cd0dd24788edb611ae08eea460538fb42030d47787bc1424",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366c"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp366e.lean",
+    "lines": 120,
+    "sha256": "689b5f18d651d5c79dba84aab4448c62b74c02a44ce980f227f3459c62d9938f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366c",
+      "LeanLab.ChenDoubleSieve.Decomp363c"
+    ],
+    "declarations": 8
+  },
+  {
+    "file": "Decomp366f.lean",
+    "lines": 139,
+    "sha256": "ff358952dc69e78976e2b9bebfc33ad0d7933229043a5ee8522eb1c8e22fe23e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366d"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp366g.lean",
+    "lines": 148,
+    "sha256": "0630f3131f5db667d9c3e57faffe8482af8d8fbe8f78a93a56c32a31434849f0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366a",
+      "LeanLab.ChenDoubleSieve.Decomp366d",
+      "LeanLab.ChenDoubleSieve.Decomp363d"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp366h.lean",
+    "lines": 216,
+    "sha256": "a07bea553375a7f12b46f7b9884aa2033827aa3db190443fb14aa38d8588f806",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366e",
+      "LeanLab.ChenDoubleSieve.Decomp363b",
+      "LeanLab.ChenDoubleSieve.Decomp367k"
+    ],
+    "declarations": 12
+  },
+  {
+    "file": "Decomp366i.lean",
+    "lines": 100,
+    "sha256": "f4a92ba5508b51f58c7737fc19f3e5fe5d848b40408d8be1e2125a712feb37a7",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366b"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Decomp366j.lean",
+    "lines": 75,
+    "sha256": "8ebfb2661728dbec0c1e2274bc0f929a893a7831a4036f386c765cff8e9caf65",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366f"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp366k.lean",
+    "lines": 91,
+    "sha256": "d2e74178a2482464566f960d6b124f6f5e0e7e3dcc7aa8d1853a6c49295299a8",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp366j"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp367a.lean",
+    "lines": 689,
+    "sha256": "b720f9fbb6d827a1d71179129ac423aa780dc53457ee0637c2e24eb630fe718c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367e",
+      "LeanLab.ChenDoubleSieve.Decomp363b",
+      "LeanLab.ChenDoubleSieve.Decomp348c",
+      "LeanLab.PNTPort.BVMax.PrimesUncond"
+    ],
+    "declarations": 24
+  },
+  {
+    "file": "Decomp367b.lean",
+    "lines": 77,
+    "sha256": "39549cadf86f28743778616da0a4e46150d670ae1f77cbe173b4fe11bd6be430",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp348j",
+      "LeanLab.ChenDoubleSieve.Decomp348l"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp367c.lean",
+    "lines": 121,
+    "sha256": "dd4401c18c9cb4c6b03006c07de84d2e442cadc429d2eb487f13c84100511a9c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367b"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp367d.lean",
+    "lines": 136,
+    "sha256": "f4af7b9ea93b225d937a7e7d678bec9a70207567a28add4f1d738179027e1540",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367c",
+      "LeanLab.ChenDoubleSieve.Decomp348v"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Decomp367e.lean",
+    "lines": 120,
+    "sha256": "3e8658ce63376820d364fc86e5c878b987bde91d23f64edc05ac86eac5757981",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367b",
+      "LeanLab.ChenDoubleSieve.Decomp363c"
+    ],
+    "declarations": 8
+  },
+  {
+    "file": "Decomp367f.lean",
+    "lines": 57,
+    "sha256": "256798076b627a016f8f1ca6944eefdd2d01366175ce9979559a5a0b6b7c3e7d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367a",
+      "LeanLab.ChenDoubleSieve.Decomp363d"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp367g.lean",
+    "lines": 106,
+    "sha256": "553f1b3ecf3f72cccb712f8b619996b610335a759e1a767f1cfebf8ed10d6a64",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367d"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp367h.lean",
+    "lines": 75,
+    "sha256": "3f429cdc2d4ee08e4a537fda67a2927641c908f71f6cc377312db82e332b9bb5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367b"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp367i.lean",
+    "lines": 117,
+    "sha256": "acbf3a9368bac50a9042971c44b8d2c08babae232f24e1c3dc63649b4023936f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367f"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp367j.lean",
+    "lines": 94,
+    "sha256": "2626b9498c5941f44700ec9d6f957a881d58f4b873989b546df508458262184d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367i"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Decomp367k.lean",
+    "lines": 90,
+    "sha256": "1907c566d40902d2d3c1921a7bee657bf25c04475b767d63b1cd1d06ff002619",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp367j"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp392a.lean",
+    "lines": 125,
+    "sha256": "bfd9f7f46f6455898e014560b7318eebd734133db8e1d778fd1977c3c08995f8",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363e",
+      "LeanLab.ChenDoubleSieve.Decomp348d",
+      "LeanLab.ChenDoubleSieve.NormalizerPositive"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp392b.lean",
+    "lines": 141,
+    "sha256": "8df137e503c324fc294e3911c25481e19652947171cc250fd5870acd8c50e807",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363d",
+      "Mathlib.NumberTheory.ArithmeticFunction.Moebius"
+    ],
+    "declarations": 14
+  },
+  {
+    "file": "Decomp392c.lean",
+    "lines": 152,
+    "sha256": "9ff97c04f5ea85d4dfc3ac82245f0bfbd8f1b257cb2e393a03874f5e1a1bdbab",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Decomp392d.lean",
+    "lines": 149,
+    "sha256": "4c44d327c42a9edbc783a8215bb00c2559ed466a3f6f6def8a3eedc740a029f6",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp392c"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp392e.lean",
+    "lines": 129,
+    "sha256": "c5fc57200bf961e5a41619c1c38a7cf181f5ce2a15237b8d166b7fb226568295",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp363d"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Decomp562b.lean",
+    "lines": 35,
+    "sha256": "d011469c562b48815dddebbc093bcc464ad017308f760d7579535c54a7cd6de5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Supply"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp587a.lean",
+    "lines": 46,
+    "sha256": "2b45a0ded132435b5d0222899ecd4eac198956d1ddb6469998c8d0b87440863e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp587f",
+      "LeanLab.ChenDoubleSieve.Task587Row3NineSupply"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp587b.lean",
+    "lines": 39,
+    "sha256": "281a7edce41a340687c0a927f904413173ce99dbb9ffcfddbc48986b7f680186",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp587f",
+      "LeanLab.ChenDoubleSieve.Task587Row3TenSupply"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp587c.lean",
+    "lines": 39,
+    "sha256": "871b88b8a13059c6f5e4dcb0fb374c91c490f6fb8eb853c0a91b62178a62f94d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp587f",
+      "LeanLab.ChenDoubleSieve.Task587Row3ElevenSupply"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp587d.lean",
+    "lines": 39,
+    "sha256": "8f1cddaa507bb04412a62e5eca06da0eb9f4a43d5ff86414332cf3cc4e39bb3a",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp587f",
+      "LeanLab.ChenDoubleSieve.Task587Row3FourteenSupply"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp587e.lean",
+    "lines": 39,
+    "sha256": "3a03cf6428d3cb525357d6f9716fcb4be615959daa86e4f418ab4a5a09082f8f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Decomp587f",
+      "LeanLab.ChenDoubleSieve.Task587Row3ThirteenSupply"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Decomp587f.lean",
+    "lines": 129,
+    "sha256": "3bb2222117f14b8323c2b8efbdd144eb3c668ce02a1b16b57577a9eeb380ebdf",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587EarlySupply"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp587g.lean",
+    "lines": 80,
+    "sha256": "b4a9f2d6c6a5a1b79fdd68d47526c23b2e270de5caf5232e7e04c8249ef184a0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587R0J18",
+      "LeanLab.ChenDoubleSieve.Task587PairMoments"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Decomp587h.lean",
+    "lines": 134,
+    "sha256": "27bbf1499117b82cde198d129b1cfdc29ed5b8118855eda1fd71d1dd98d7649f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587R2J9",
+      "LeanLab.ChenDoubleSieve.Task587R2J10",
+      "LeanLab.ChenDoubleSieve.Task587R2J11",
+      "LeanLab.ChenDoubleSieve.Task587R2J13",
+      "LeanLab.ChenDoubleSieve.Task587R2J14"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp587i.lean",
+    "lines": 187,
+    "sha256": "91d6995dd00755672fa11a4c16ee8cee12e68b2b62eff27dd926ee061fd170bc",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587R2J16",
+      "LeanLab.ChenDoubleSieve.Task587R1J9",
+      "LeanLab.ChenDoubleSieve.Task587R1J10",
+      "LeanLab.ChenDoubleSieve.Task587R1J11",
+      "LeanLab.ChenDoubleSieve.Task587R1J12"
+    ],
+    "declarations": 11
+  },
+  {
+    "file": "Decomp587j.lean",
+    "lines": 134,
+    "sha256": "77e8640278cb5e52c5c73fd4c3867a09dc40ef795119e2f1e1d4ec13fb992c7f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587R1J13",
+      "LeanLab.ChenDoubleSieve.Task587R1J14",
+      "LeanLab.ChenDoubleSieve.Task587R1J15",
+      "LeanLab.ChenDoubleSieve.Task587R1J16",
+      "LeanLab.ChenDoubleSieve.Task587R1J17"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Decomp587k.lean",
+    "lines": 373,
+    "sha256": "2092f2fc0e05401be769be84aba86a1f40f51a10678a2ed612a29fab53a29ff1",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587R0J9",
+      "LeanLab.ChenDoubleSieve.Task587R0J10",
+      "LeanLab.ChenDoubleSieve.Task587R0J11",
+      "LeanLab.ChenDoubleSieve.Task587R0J12",
+      "LeanLab.ChenDoubleSieve.Task587R0J13"
+    ],
+    "declarations": 22
+  },
+  {
+    "file": "Decomp587l.lean",
+    "lines": 134,
+    "sha256": "0e4aa0ebaea1c544b92eda490c59e2987b3e13c58abdf6ecc9547293aa813c42",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587R0J14",
+      "LeanLab.ChenDoubleSieve.Task587R0J15",
+      "LeanLab.ChenDoubleSieve.Task587R0J16",
+      "LeanLab.ChenDoubleSieve.Task587R0J17",
+      "LeanLab.ChenDoubleSieve.Task587R0J19"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "DecompJ344.lean",
+    "lines": 26,
+    "sha256": "421faa7909638ba72ca5bd757f9849ec31d21a5ac7e988a978621b27bdac826f",
+    "imports": [
+      "Mathlib",
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Discretization.lean",
+    "lines": 141,
+    "sha256": "b97619e673dd64141d225c0eef6e62140c83ca741d04d6b5965aec3ee78323a9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Table1Algebra"
+    ],
+    "declarations": 8
+  },
+  {
+    "file": "EndpointIntegrals.lean",
+    "lines": 66,
+    "sha256": "e7e10039df52833d226de8460fb4743177815d565b30485c8633b981efc5ded2",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "FiniteLowerInstance.lean",
+    "lines": 50,
+    "sha256": "5d43c28a3ff1cf66945c34dbd8c1b2430ad4668340af62ba6066304e1c1cb2bb",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.NormalizerPositive"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "FunctionalStatements.lean",
+    "lines": 176,
+    "sha256": "6a76f08606134f1da7d7ef7fddcb04f50726b6048483cf44f87095c8712d8b44",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Section3",
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": 27
+  },
+  {
+    "file": "I1Bounds.lean",
+    "lines": 122,
+    "sha256": "e087ef94ec120ae525c068d430ac18e27b1d6a171ae7915a4b505ed279d126f7",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabBounds",
+      "LeanLab.ChenDoubleSieve.XiKernelBounds",
+      "LeanLab.ChenDoubleSieve.ReducedIntegral"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "I1Numerics.lean",
+    "lines": 58,
+    "sha256": "8e292112ad5b85dbf66ad5636ad66bfa7d9b90f2e66d9046dd70345ce0bf6da1",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Reduction",
+      "LeanLab.ChenDoubleSieve.ReducedCertificate"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "I1Reduction.lean",
+    "lines": 133,
+    "sha256": "2f7fa09f339029cb53d46b05ee3183292b8e8d2d5f10b26c297e27f8b798e33b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Bounds"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "I1Sharp.lean",
+    "lines": 75,
+    "sha256": "820061633427a971c5d0e55afd255faff9c4e8304b402154841b6d158c35b29f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Numerics",
+      "LeanLab.ChenDoubleSieve.BuchstabSharp"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "I1Tail.lean",
+    "lines": 90,
+    "sha256": "139fa3785eeb67e351f54f93301a096a7404787a8cae1a972904b6779d1eba29",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Sharp",
+      "LeanLab.ChenDoubleSieve.BuchstabTail"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "I1TailNumerics.lean",
+    "lines": 78,
+    "sha256": "bb4ff7c4706f3780ba65d1f359fa9e9194e14bb953f4c0028b3a157422c9ee96",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Tail",
+      "LeanLab.ChenDoubleSieve.ReducedCertificate"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "I2Range.lean",
+    "lines": 46,
+    "sha256": "63c76068732af7334be69b66ae1bb49008efef0d66e690ecdaeb09f8965814ae",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabBounds"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "JCertificate.lean",
+    "lines": 149,
+    "sha256": "51654f288b101a3bfb70f5c8ebd6368c9e163db14a6db21bd9c5e4b1e4103efe",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.JPanelArithmetic",
+      "LeanLab.ChenDoubleSieve.ReducedCertificate"
+    ],
+    "declarations": 19
+  },
+  {
+    "file": "JPanelArithmetic.lean",
+    "lines": 89,
+    "sha256": "e9d5c93a154a4b17049ace34ac94905f04010a61f9c822551e4f11908c87a460",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.LogIntegralPanels"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "KCertificate.lean",
+    "lines": 126,
+    "sha256": "330cf23202423ec446d96787ee73cab1b11775a34f4e6e5c64eaf8f58151251d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.KPanelArithmetic",
+      "LeanLab.ChenDoubleSieve.JCertificate"
+    ],
+    "declarations": 19
+  },
+  {
+    "file": "KPanelArithmetic.lean",
+    "lines": 84,
+    "sha256": "1adec13a124077f13ca85d8c5ddd87c21a456868c5d9d41d65e493bb243619e4",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.KPanels",
+      "LeanLab.ChenDoubleSieve.JPanelArithmetic"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "KPanels.lean",
+    "lines": 122,
+    "sha256": "3324213fb707bc6ad1991cefcffffef493e64a8d4b5c67bad149bfb3d1043516",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.LogIntegralPanels"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Lemma41.lean",
+    "lines": 298,
+    "sha256": "fb1664dccbc0c5cd79d66531e2c1ca7c0100e06efe2bad93441365641b08a229",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 21
+  },
+  {
+    "file": "Lemma41Err.lean",
+    "lines": 97,
+    "sha256": "b9c33de4920284b1f484e75413b0fd3469de056dbe72ec033f3a594932d69f2b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Lemma41Uk.lean",
+    "lines": 194,
+    "sha256": "81a07185ff305896cde7ac1ca7e06a286265c17e959a412aa7a72df359d3e56b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41Err"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Lemma42.lean",
+    "lines": 645,
+    "sha256": "a823eea5563f4c1ee0dc61c75dded8eeaecb2a2779a84ca52e539d0d1a985998",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41",
+      "LeanLab.ChenDoubleSieve.Lemma42Comb",
+      "LeanLab.ChenDoubleSieve.Lemma42Arith"
+    ],
+    "declarations": 47
+  },
+  {
+    "file": "Lemma42Arith.lean",
+    "lines": 74,
+    "sha256": "31dc205288837a32f56fdfe16be52a3a1ab43c9db682ea1411d6862ca7924853",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 1
+  },
+  {
+    "file": "Lemma42Comb.lean",
+    "lines": 129,
+    "sha256": "14f761261702fb8a1dca530ba7daa355cf59aea7a106794622383efdc54d5f27",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Lemma42Uk.lean",
+    "lines": 125,
+    "sha256": "abf4d1db2a67d3000565e1ee49b370a511e1b426a4817358f3d907234eac3cc5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41Uk",
+      "LeanLab.ChenDoubleSieve.Lemma42"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "LogIntegralPanels.lean",
+    "lines": 119,
+    "sha256": "1359743ed8c00632bc2ecdebdec61d35c257b2843c2729913baa5535faa4ec3b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "NormalizerPositive.lean",
+    "lines": 60,
+    "sha256": "cea8d53167552979ee310cfbdb2c6835486504af5001e40483977821b4f85376",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.TupleInstance",
+      "LeanLab.ChenDoubleSieve.Section3Supremum"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "ParityBlind.lean",
+    "lines": 118,
+    "sha256": "1ed5036837e38978cc3a69ebfdca5aff531051df829f00495efcb9fbc9aa149c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "PowerRemainder.lean",
+    "lines": 74,
+    "sha256": "abacbe31d45f6bddfe905a0fe23f2b7dd548080b92e8fec78c92b78db1b92872",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma42Uk"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "PrintedPsi1.lean",
+    "lines": 56,
+    "sha256": "795992858b3833511ed9ef5d7613a963e1cec4fa88e3758480ccbb35e9116216",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1TailNumerics",
+      "LeanLab.ChenDoubleSieve.KCertificate"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Psi1Numerics.lean",
+    "lines": 44,
+    "sha256": "3c86a2f29009c9c25ace994180f8c4f7eee380d5ff45974129d5cf0fa3f2d21c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Numerics",
+      "LeanLab.ChenDoubleSieve.KCertificate"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "ReducedCertificate.lean",
+    "lines": 71,
+    "sha256": "50c68aface71cf9e453e364ae4a95ea2372d8477b55f1dbba509b7a958fe8d49",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.ReducedIntegral",
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": 8
+  },
+  {
+    "file": "ReducedIntegral.lean",
+    "lines": 92,
+    "sha256": "a1872e81fe221842f7098f2f73733c746778590ecf802f6dba389d6915c79597",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Section3.lean",
+    "lines": 214,
+    "sha256": "f415fbb84ce0add293b7b769357cc9a0dcc1ad3edbe26f88354ffc2b63002908",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41Uk",
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": 30
+  },
+  {
+    "file": "Section3Supremum.lean",
+    "lines": 77,
+    "sha256": "82311c3b92d971451bf8538e0c11780ec8bf3ae9f4d5a86ab131710ed05b6f8d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Section3"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Section7Algebra.lean",
+    "lines": 79,
+    "sha256": "b1e1539779e24bfa8aa6456792af17c80f7d0327ec9dff96a8a7f4e41cc6cd66",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "SelbergUpper.lean",
+    "lines": 223,
+    "sha256": "46d77630fb16badcebae0597c5ef9cf58d108dc204a99433126c0ee72be23ecf",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements",
+      "LeanLab.SchnirelmannGoldbach.S1.Final",
+      "LeanLab.ChenExplicit.TwinCNumeric"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "SigmaCertificate.lean",
+    "lines": 125,
+    "sha256": "034cbd7fb873f66880066cb2d11447fbe0d1379491f335b9525bdeb31d4841f7",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": 12
+  },
+  {
+    "file": "SigmaIntegral.lean",
+    "lines": 132,
+    "sha256": "956a628a95b33c1d8d36bda02073dcf0e4e2feb353efe72d00565f5e55c4bf6a",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "SigmaKernel.lean",
+    "lines": 100,
+    "sha256": "27df497c3abd542a516319960cb4d83dd2491a9854792fbdaa0f446606e7ef29",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.SigmaCertificate"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Statements.lean",
+    "lines": 200,
+    "sha256": "34c49d75c39e30417cf98d97e198386d1051140ee2d3067971cb5aa2d3a19b4e",
+    "imports": [
+      "Mathlib",
+      "LeanLab.ChenExplicit.Reductions"
+    ],
+    "declarations": 39
+  },
+  {
+    "file": "Table1Algebra.lean",
+    "lines": 122,
+    "sha256": "6e2639518eb1e8091cc459ded3c7da1ed2718054c7d071454a277edac3780745",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.Section7Algebra"
+    ],
+    "declarations": 11
+  },
+  {
+    "file": "TableInputsBridge.lean",
+    "lines": 80,
+    "sha256": "4b41434a394bf5d199c5e4592ca539b9ea1f04df414cd31b080b42b5e8bcf0e6",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Xi2Signs",
+      "LeanLab.ChenDoubleSieve.PrintedPsi1",
+      "LeanLab.ChenDoubleSieve.Table1Algebra"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Task562Boxes.lean",
+    "lines": 196,
+    "sha256": "ad9ee81c3f897095767902c96715dadf795ead9c51f771d2ed385a50619a0fc5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Burst9Psi2Panels",
+      "LeanLab.ChenDoubleSieve.BuchstabTail"
+    ],
+    "declarations": 10
+  },
+  {
+    "file": "Task562Chambers.lean",
+    "lines": 107,
+    "sha256": "d6cdaadb74411884a7af534280679dda5ce2d87b3b5fbabec7bdc2f3ada6ec9e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Volume"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task562Coefficient.lean",
+    "lines": 92,
+    "sha256": "d1974485a672753ec65b70d0e063bfc8bce464b776d482b97ee2b893b950e42e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Polynomial",
+      "LeanLab.ChenDoubleSieve.Task562Moments"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Task562Envelope.lean",
+    "lines": 193,
+    "sha256": "423702bbd1114c27ce16eeaa72389e19d6fdcf927becd0bbd2e23a804e6f332f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Volume"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Task562ListCheck.lean",
+    "lines": 21,
+    "sha256": "e0833f884c3d687527ca5dc4443f0806b85ab6c7744499214ea94182724e83d5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562ListData",
+      "LeanLab.ChenDoubleSieve.Task562Polynomial"
+    ],
+    "declarations": 1
+  },
+  {
+    "file": "Task562ListData.lean",
+    "lines": 2805,
+    "sha256": "ade1fe7ed6b6810a0d907ccf5244b6482b40120c43db864d80528e931d37ffcf",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562ListTools"
+    ],
+    "declarations": 22
+  },
+  {
+    "file": "Task562ListIdentity.lean",
+    "lines": 29,
+    "sha256": "e20333b1709f6a200ba701d258b86166a419e1f2c760802e0468464d73d558f0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562ListData",
+      "LeanLab.ChenDoubleSieve.Task562Polynomial"
+    ],
+    "declarations": 1
+  },
+  {
+    "file": "Task562ListTools.lean",
+    "lines": 64,
+    "sha256": "215f51972b484f70095375856fe8d9ece790a156fb45fb8b899c86e883fb8f01",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Moments"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Task562Moments.lean",
+    "lines": 143,
+    "sha256": "fa0a328e362935c3e492d83eb1ae64943e28f0cac0afea4c6e88340aabb58149",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Volume"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Task562Polynomial.lean",
+    "lines": 147,
+    "sha256": "407f17b4647254911f8a5c56d302c2ee65bc69c58b86d59e8eba21af46403144",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Envelope"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Task562Supply.lean",
+    "lines": 46,
+    "sha256": "b413c121a5a6fb3c92cb6020210ade6edd298161a50a9df6bf6b7ea239b46be8",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562ListIdentity",
+      "LeanLab.ChenDoubleSieve.Task562ListCheck"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Task562Volume.lean",
+    "lines": 141,
+    "sha256": "9414be9b506189588cd0f41505c031a16bc943ce7d73aeb1e7aa6b76169444a9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Boxes"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587BoxMoments.lean",
+    "lines": 79,
+    "sha256": "6d0934c6fa4d5502c76b2bbf9ab5cb2b6c0c96a24b64eee3fb6d279b3f2579fa",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587PolynomialTools"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587CellCertificate.lean",
+    "lines": 120,
+    "sha256": "1b3acc3c6ff1175a488b8fbc4eb8dde1a51bb2fbc13567e6ad4902bb8e0489f4",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587SharpTail",
+      "LeanLab.ChenDoubleSieve.Task587PolynomialTools",
+      "LeanLab.ChenDoubleSieve.Task587Kernel",
+      "LeanLab.ChenDoubleSieve.Task562Boxes"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Task587EarlySupply.lean",
+    "lines": 109,
+    "sha256": "fd1775c3c7dda206b04ad810225a89ce35cec1d976dd2ac4ee78fe0b7f3e8df0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587SharpTail",
+      "LeanLab.ChenDoubleSieve.Task587Kernel",
+      "LeanLab.ChenDoubleSieve.Task562Boxes",
+      "LeanLab.ChenDoubleSieve.Task587Row3NineIdentity",
+      "LeanLab.ChenDoubleSieve.Task587Row3TenCertificate",
+      "LeanLab.ChenDoubleSieve.Task587Row3ElevenCertificate",
+      "LeanLab.ChenDoubleSieve.Task587Row3ThirteenCertificate",
+      "LeanLab.ChenDoubleSieve.Task587Row3FourteenCertificate"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Task587FirstMoments.lean",
+    "lines": 151,
+    "sha256": "e624bbf7305c64f48f6424a3737cc95bc089c5cedc85270715cf7c349742f8cf",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Task587Kernel.lean",
+    "lines": 54,
+    "sha256": "5a91bd348a86e8790301935b3da7ace0f3496195cd681d211c086045e2c7a460",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Tail"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Task587KernelFive.lean",
+    "lines": 36,
+    "sha256": "f38e4561511f8db676a12bba8886e306a061e0ce74ba47e9fc0b9e6c78ec92f1",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Kernel",
+      "LeanLab.ChenDoubleSieve.Task587TailFive"
+    ],
+    "declarations": 1
+  },
+  {
+    "file": "Task587MixedMoments.lean",
+    "lines": 132,
+    "sha256": "357525e6921982c05a4b6fbe0339a524c6e4f4da4d91c4024ee108688ff38347",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587PolynomialTools"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587Obstructions.lean",
+    "lines": 47,
+    "sha256": "650f3105e457e60ac8c94e26515d45a914b35828dacf7cf8350ba4bb94783299",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.I1Reduction",
+      "LeanLab.ChenDoubleSieve.BuchstabTail"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Task587PairMoments.lean",
+    "lines": 158,
+    "sha256": "096de8676febb625a10b9ee077ea288a73d6b159ec38ee7bd293207b003db186",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Task587PolynomialTools.lean",
+    "lines": 119,
+    "sha256": "2c2022ba49b8825a54cff8041ea1e221baf4be670042f74cd578f1a2c3dc172b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task562Moments"
+    ],
+    "declarations": 9
+  },
+  {
+    "file": "Task587R0J10.lean",
+    "lines": 182,
+    "sha256": "b3fc7a4aa79f17adf7ccd4ea13d0a5f692bae9b6e2014cf7b5384167df4e8967",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J11.lean",
+    "lines": 187,
+    "sha256": "fe7a3aab6f5431e5357b323d8c0a42763da11a73e18fd6dce727a4701c527c0b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J12.lean",
+    "lines": 466,
+    "sha256": "e9a6959cea2bff2cbe30a5d4e15b4f711fd49f3d7cfbda5a2a5611c3826d1d98",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J13.lean",
+    "lines": 183,
+    "sha256": "8ac202c47b80c989844495b116aa0a68049d588f51a1784aad1eb3a8ad09a4d0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J14.lean",
+    "lines": 187,
+    "sha256": "dbef0b159ccea7d828d393b569d89ee32839a147dda88b32ea1bb10939e7f909",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J15.lean",
+    "lines": 183,
+    "sha256": "ec26c252e290613972f4a20925d559780291eefaef6344323c4f1b9d36a643c4",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J16.lean",
+    "lines": 518,
+    "sha256": "67496a824bd5398344d36b6ea779dd4b29e078c99b3a18050611f313fda4a1fd",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J17.lean",
+    "lines": 518,
+    "sha256": "0c934b49123414dc96be81431b69692de33f8f75c266abde00f70df56422e3af",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J18.lean",
+    "lines": 485,
+    "sha256": "f5e74cae33d8cdf1913298ac95ad8fadc67b7ce0ba9f0d2a27b8b68c166ccbfe",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 5
+  },
+  {
+    "file": "Task587R0J19.lean",
+    "lines": 523,
+    "sha256": "7f914d2fb767e1500da90f7e603332027dc1cc2424a6b7330150515a76b43577",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R0J9.lean",
+    "lines": 466,
+    "sha256": "62bee82129ef606c53d6996320d0fec60ce4c2b981124435617a416380d6fb4f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J10.lean",
+    "lines": 182,
+    "sha256": "375a35ecd1669456376bd9a001fb0336963b0db8483fdf31234af3e6ae1b19ee",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J11.lean",
+    "lines": 187,
+    "sha256": "bd3eaea37b1c2e16e826bb75d49ca9211d09e1f5449c4d12849411619fdc5f24",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J12.lean",
+    "lines": 466,
+    "sha256": "7ea3572aa9d6fe8fda85de3e49ab759644b22f42fd97b2f50915c1a452b7e4ab",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J13.lean",
+    "lines": 183,
+    "sha256": "eb67d338a797d58dbaa8ac7d7601d464d0bdbd214d915e5c9d2949c058846d1a",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J14.lean",
+    "lines": 187,
+    "sha256": "531235aae207abf0f88065b3bcb0980be8640f86c31b561b3d1fe1bdefa3bb80",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J15.lean",
+    "lines": 183,
+    "sha256": "d19edd444fc048df2116bb70998718e4e1f7faddcaf0eddeda82f551588cefc0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J16.lean",
+    "lines": 518,
+    "sha256": "6ab44de64f456eb66e0ddea324074169ab0fbdd012ad10dc2e59a2bb4b6da2ee",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J17.lean",
+    "lines": 518,
+    "sha256": "5f8988d057772e8b9d18b35844c9f44c26a3dedb48d1c4a32823fba94bd3931e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R1J9.lean",
+    "lines": 466,
+    "sha256": "5f62de1bdca1c179188487aeb2584e7fe9d829abd36b09fa2b0de22cce1e9123",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R2J10.lean",
+    "lines": 182,
+    "sha256": "7a917c8a629a1ee2a0d99c7880cb14bbb69c9883f097ca79397d9d2ed5485272",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R2J11.lean",
+    "lines": 187,
+    "sha256": "c2eb3f5197811eac1f6f4ed3d8aef650748084fe5356d4d66ae895af89d10400",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R2J13.lean",
+    "lines": 183,
+    "sha256": "215d91eb7b67587c9aa20cde78410cba0ba71a23a136624b25bcfc07ab84d61d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R2J14.lean",
+    "lines": 187,
+    "sha256": "7b3c1778436317f3a01bcfc4f6e67d050e30c6c6acf15b1b4979caca865ba0f6",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R2J16.lean",
+    "lines": 518,
+    "sha256": "7a7cb12a6c46d5fda59a3127e13a4881c2461a31c78a51b59ba90a64daf00158",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587R2J9.lean",
+    "lines": 466,
+    "sha256": "b27306537552a170b881d05b6b9107b83864f39d3b8b5255149f7961fcc92f57",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587CellCertificate",
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments",
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments",
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587Row3ElevenCertificate.lean",
+    "lines": 168,
+    "sha256": "505ecb62b9968f40b551d1eeed3ceb7f37a17d076d3c5817f072473317742ee7",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3ElevenPoly"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587Row3ElevenPoly.lean",
+    "lines": 57,
+    "sha256": "4ffb7a2bf45a075aa2e7ff3dc817ac2e216d1ae88fb742e7a8347abe2ced141c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587Row3ElevenSupply.lean",
+    "lines": 44,
+    "sha256": "dc6f4ff2657cfce1b1103d5e9b885db0b78ef7d50b2693028ee087a3c15afa89",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3ElevenCertificate",
+      "LeanLab.ChenDoubleSieve.Task587Kernel",
+      "LeanLab.ChenDoubleSieve.Task562Boxes"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Task587Row3FourteenCertificate.lean",
+    "lines": 168,
+    "sha256": "501d11f63949af168db99b5982951f76c4cb2ad87a21a36a075229c9ded004b5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3FourteenPoly"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587Row3FourteenPoly.lean",
+    "lines": 57,
+    "sha256": "eca5146398c3af5e6ca4c75a76f8c8dbab6469a786006ea032db1bbd3cba46d5",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587FirstMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587Row3FourteenSupply.lean",
+    "lines": 44,
+    "sha256": "1d0c5338b46fdce225d8ff41c1ac7469f723142625a25ec8275571f08e50dfd9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3FourteenCertificate",
+      "LeanLab.ChenDoubleSieve.Task587Kernel",
+      "LeanLab.ChenDoubleSieve.Task562Boxes"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Task587Row3NineData.lean",
+    "lines": 432,
+    "sha256": "0a053af9f2c8bfcd8a609db7ecafc1427f8bf4f17fe6e18d136cc66eb4220c8b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3NinePoly"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Task587Row3NineIdentity.lean",
+    "lines": 41,
+    "sha256": "57b556b132e094dc616ad63547cf00e2632a66ed9f365777a80250d05ae3c8e9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3NineData"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Task587Row3NinePoly.lean",
+    "lines": 61,
+    "sha256": "7edf6d7701df96fe89e32a9873579c7e0ceba702ddd4c60e6dfa88d9ae47e263",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587PolynomialTools"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587Row3NineSupply.lean",
+    "lines": 61,
+    "sha256": "9bbd064507778fc41c7ca6cfe10764bce51b7a826800bc7bd86b94f4e8ec2187",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Tail",
+      "LeanLab.ChenDoubleSieve.Task587Row3NineIdentity",
+      "LeanLab.ChenDoubleSieve.Task562Boxes"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Task587Row3TenCertificate.lean",
+    "lines": 168,
+    "sha256": "22815abc56395e0fc54e02901bfa8d7aa21e757ef9d7620e94290463bcada405",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3TenPoly"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587Row3TenPoly.lean",
+    "lines": 57,
+    "sha256": "499559e655cde77e0b92357ea589b8ba8c5a05e0f656adb15c762b27975d8e23",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587MixedMoments"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Task587Row3TenSupply.lean",
+    "lines": 44,
+    "sha256": "3397e4b7ce5ff62ccc892379577b8dc3e229404d0a69ba2680cf008f51a9f806",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3TenCertificate",
+      "LeanLab.ChenDoubleSieve.Task587Kernel",
+      "LeanLab.ChenDoubleSieve.Task562Boxes"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Task587Row3ThirteenCertificate.lean",
+    "lines": 452,
+    "sha256": "c9de90299c779367e9778d9b4c27d0769d410e5187b40078b91b0beb848a4ed9",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3ThirteenPoly"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587Row3ThirteenPoly.lean",
+    "lines": 64,
+    "sha256": "8539f003fe22a1d4bee1c4fe55ea2ffe381532dc91998e1e59f465169d150a03",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587BoxMoments"
+    ],
+    "declarations": 8
+  },
+  {
+    "file": "Task587Row3ThirteenSupply.lean",
+    "lines": 59,
+    "sha256": "caa9b3232e88f2a2331c21fe588a0bc6ff67457dc1f49e78cd896740fef0ccdc",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Row3ThirteenCertificate",
+      "LeanLab.ChenDoubleSieve.Task587KernelFive",
+      "LeanLab.ChenDoubleSieve.Task562Boxes"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Task587SharpTail.lean",
+    "lines": 151,
+    "sha256": "3d848f0950043b9f6801b21dd4392dfc437a879629d313d7958d3f0f5815b5f3",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587TailFiveFormula"
+    ],
+    "declarations": 12
+  },
+  {
+    "file": "Task587Tail.lean",
+    "lines": 147,
+    "sha256": "7d931815c73a7970aa0fbd25c6493955708e28509ce62acb1da21776a00b418a",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.BuchstabTail",
+      "LeanLab.ChenDoubleSieve.Burst9Psi2Panels"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "Task587TailFive.lean",
+    "lines": 121,
+    "sha256": "6131748e76d1c1ac5bcd48e6fb3f436a3d86b196b62e959efa0edf8d313f071b",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587TailFiveData"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Task587TailFiveData.lean",
+    "lines": 26,
+    "sha256": "a5cc31106f1167194c4f68e3f16746308f4dad498f544cd999737b09ae14b8bd",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587TailFiveFormula"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Task587TailFiveFormula.lean",
+    "lines": 128,
+    "sha256": "637bdfccaf0d428e1b12a5562396fbb9c6942a4c0f2fd4cdb4a3c8ab36f481fa",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Task587Tail"
+    ],
+    "declarations": 6
+  },
+  {
+    "file": "TupleInstance.lean",
+    "lines": 124,
+    "sha256": "6d5e2b142a42cfb5cfc351d8de455156bdce26b1c9f6e1488bc56cf895670a27",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.TupleLevel",
+      "LeanLab.ChenDoubleSieve.SigmaIntegral"
+    ],
+    "declarations": 8
+  },
+  {
+    "file": "TupleLevel.lean",
+    "lines": 78,
+    "sha256": "81eab8b6ed91831c9c82f139da946620c8183e34e0bbcc6c44331df1f89721ca",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Section3",
+      "LeanLab.ChenDoubleSieve.PowerRemainder"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "TuplePowerSaving.lean",
+    "lines": 53,
+    "sha256": "5aa8b4ee7aaf41b752336bc91dcd5f945db856db11c8bac309808b93ba3801b0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.TupleLevel"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "TwinInstance.lean",
+    "lines": 60,
+    "sha256": "dda44b7ab2911254288704f5069993b377caa2afd61cd4f7009001bdb5a1109c",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma42Uk"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "TwinUpperLink.lean",
+    "lines": 58,
+    "sha256": "f68d1014e2301c42fe84cbf5ee49b963caa360afb7eaecfca42331555cf19cb0",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Statements",
+      "LeanLab.Brun1919.Final"
+    ],
+    "declarations": 2
+  },
+  {
+    "file": "Wu2008Lemma21.lean",
+    "lines": 360,
+    "sha256": "5833cf087911b922c5c1ccc3f8f74b2a2a6013cf4166bbf4d269039db384ad73",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41"
+    ],
+    "declarations": 17
+  },
+  {
+    "file": "Wu2008Lemma21Chen.lean",
+    "lines": 60,
+    "sha256": "fb0d13e706024ba829a32ff7ec6322d8f2bcccf281c98400897d4086aaf1f40f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21Err",
+      "LeanLab.ChenDoubleSieve.Statements"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Wu2008Lemma21Err.lean",
+    "lines": 137,
+    "sha256": "baa2cd94f4c3f52eea87574308a51b232831c66c1f379b40ba52ba59365cb8ef",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma21",
+      "LeanLab.ChenDoubleSieve.Lemma41Err"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "Wu2008Lemma22Err.lean",
+    "lines": 161,
+    "sha256": "ba217bfd983339461b2987b68508b258901d35513be93257a72b9f10fa59fd26",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Sum"
+    ],
+    "declarations": 7
+  },
+  {
+    "file": "Wu2008Lemma22Fixed.lean",
+    "lines": 437,
+    "sha256": "a540d59c3e8be6dea9ebd9be251739a8378fd1a95beb1446a71a3e9e95ce2892",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 38
+  },
+  {
+    "file": "Wu2008Lemma22Gap.lean",
+    "lines": 107,
+    "sha256": "5cc3f20498b1f1bd09fad4cddb6fcf4135bd4a79d5f53bac593afe3d17f50f60",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 30
+  },
+  {
+    "file": "Wu2008Lemma22Int.lean",
+    "lines": 386,
+    "sha256": "c392b3f4b2432f2957800d611a29c5fffeff3cc3382d6945503f1f1449ff6f5d",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Real"
+    ],
+    "declarations": 44
+  },
+  {
+    "file": "Wu2008Lemma22Parity.lean",
+    "lines": 104,
+    "sha256": "680ea264c170c377cad819d0819e85bd213bf41bfedd0a66f7f667205af8026e",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Real"
+    ],
+    "declarations": 3
+  },
+  {
+    "file": "Wu2008Lemma22Real.lean",
+    "lines": 439,
+    "sha256": "d4fac86aafed29cb7706197c092ee6f1a0ee8a91f064c9ab091454f2a7a18fba",
+    "imports": [
+      "Mathlib"
+    ],
+    "declarations": 37
+  },
+  {
+    "file": "Wu2008Lemma22Sum.lean",
+    "lines": 451,
+    "sha256": "ede49b5728f1a549c528bd1dfb828f704e62bc6066661e581599b906b81a4fef",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.Lemma41",
+      "LeanLab.ChenDoubleSieve.Wu2008Lemma22Int"
+    ],
+    "declarations": 39
+  },
+  {
+    "file": "Xi2Signs.lean",
+    "lines": 93,
+    "sha256": "573bbebd96ef79d544b7b76f481e0aa59e403483745c25d3d0475a3337e17644",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.XiKernelBounds"
+    ],
+    "declarations": 4
+  },
+  {
+    "file": "XiKernelBounds.lean",
+    "lines": 85,
+    "sha256": "4ab04829466fcb0214b78897277db0b6037065acc73dc61ec3f913689889bd7f",
+    "imports": [
+      "LeanLab.ChenDoubleSieve.FunctionalStatements",
+      "LeanLab.ChenDoubleSieve.SigmaKernel"
+    ],
+    "declarations": 3
+  }
+]
