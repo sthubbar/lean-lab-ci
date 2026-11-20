@@ -19,7 +19,9 @@ open MeasureTheory Filter
 `exp 60 / 4`. This step uses only the monotonicity of `exp` and the hypothesis `100 ≤ t`. -/
 theorem exp_sixty_div_four_le_quarter_exp (t : ℝ) (ht : 100 ≤ t) :
     exp (0.6 * (100 : ℝ)) / 4 ≤ exp (0.6 * t) / 4 := by
-  sorry
+  have hmono : exp (0.6 * (100 : ℝ)) ≤ exp (0.6 * t) :=
+    Real.exp_le_exp.mpr (by linarith)
+  linarith
 
 /-- LEAF. The conductor estimate at the base height. For every nonzero natural `q`,
 `0.15 * log q + 3.389 ≤ exp 60 / 4`. This is the only step in which `q` enters, and the
