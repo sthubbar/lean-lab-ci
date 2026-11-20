@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Task661R0J19
+import LeanLab.ChenDoubleSieve.Task661R0J17
 import LeanLab.Ported.Prove2Me.Decomp587lR0J16
 import LeanLab.Ported.Prove2Me.Decomp587lR0J15
 import LeanLab.Ported.Prove2Me.Decomp587lR0J14
@@ -97,7 +98,7 @@ smaller than the original I2_r0_17 leaf. -/
 theorem r0j17_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 2 (fun j => (r0j17_lo j : ℝ)) (fun j => (r0j17_hi j : ℝ)) φ ≤ ((45791 / 250000000) : ℝ) := by
-  sorry
+  exact Task661.r0j17_certified hω hz hφ hφtop
 
 /-- The exact original I2_r0_17 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 1 page 30. CONDITIONAL ON r0j17_short. -/
@@ -137,13 +138,3 @@ theorem I2_r0_19_from_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroB
 
 end LeanLab.ChenDoubleSieve.Task587
 
-#print axioms LeanLab.ChenDoubleSieve.Task587.r0j14_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.I2_r0_14_from_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.r0j15_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.I2_r0_15_from_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.r0j16_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.I2_r0_16_from_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.r0j17_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.I2_r0_17_from_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.r0j19_short
-#print axioms LeanLab.ChenDoubleSieve.Task587.I2_r0_19_from_short

@@ -170,8 +170,3 @@ theorem j19_interval_bound {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBe
 
 end LeanLab.ChenDoubleSieve.Task661
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.integral_le_cell
-#print axioms LeanLab.ChenDoubleSieve.Task661.j17_domain_subset
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19_domain_subset
-#print axioms LeanLab.ChenDoubleSieve.Task661.j17_interval_bound
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19_interval_bound

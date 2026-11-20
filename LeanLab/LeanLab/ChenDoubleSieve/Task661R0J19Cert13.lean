@@ -21,48 +21,41 @@ def j19Tree104 : CTree :=
 
 theorem j19Check104 : checkJ19 7680998 7691612 j19Tree104 = true := by decide +kernel
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19Check104
 
 def j19Tree105 : CTree :=
   (.S4 1 (.S4 1 (.S2 0 (.S4 1 (.S2 0 .B (.S4 1 (.S4 1 .B .B .B .B) (.S2 0 .B .B) (.S3 1 .B .B .B) .B)) (.S2 0 .B (.S3 2 (.S2 0 .B .B) .B .B)) (.S3 1 (.S2 0 (.S3 1 .B .B (.S2 0 .B .B)) .B) .B (.S3 1 .B .B .B)) .B) (.S2 0 (.S4 1 .B (.S3 2 .B .I .I) .I .I) .I)) (.S2 0 (.S3 2 (.S3 2 (.S2 0 (.S3 2 .B .B (.S3 2 .B .B .B)) .B) .B (.S3 2 (.S3 2 .B .B .B) .B .B)) (.S2 0 (.S2 0 .B .B) (.S2 0 (.S2 1 (.S2 2 .B .I) .I) .I)) (.S2 0 .B .I)) (.S2 0 .I .I)) (.S2 0 (.S2 0 (.S2 0 (.S3 1 .B (.S2 2 (.S2 3 .B .I) .I) .I) .I) .I) (.S2 0 .I .I)) (.S2 0 .I .I)) (.S3 2 (.S2 0 (.S2 0 (.S3 2 (.S3 2 (.S3 2 .B .B .B) .B (.S2 1 .B .I)) (.S2 1 (.S2 0 .B .I) .I) (.S3 2 (.S3 2 .B .I .I) .I .I)) (.S3 2 (.S3 2 (.S3 2 .B .I .I) .I .I) .I .I)) (.S2 0 .I .I)) (.S2 0 (.S2 0 .I .I) (.S2 0 .I .I)) (.S2 0 (.S2 0 .I .I) (.S2 0 .I .I))) (.S2 0 (.S2 0 (.S3 1 .I .I .I) (.S3 1 .I .I .I)) (.S2 0 (.S3 1 .I .I .I) (.S3 1 .I .I .I))) (.S2 0 (.S4 1 .I .I .I .I) (.S4 1 .I (.S2 0 .I .I) (.S2 0 .I .I) .I)))
 
 theorem j19Check105 : checkJ19 7691612 7712840 j19Tree105 = true := by decide +kernel
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19Check105
 
 def j19Tree106 : CTree :=
   (.S4 1 (.S4 1 .B (.S2 0 .B .I) (.S3 1 (.S3 1 .B .I .I) .I .I) .I) (.S3 2 (.S2 0 (.S2 0 .B .I) .I) (.S2 0 .I .I) .I) (.S2 0 .I .I) .I)
 
 theorem j19Check106 : checkJ19 7712840 7755296 j19Tree106 = true := by decide +kernel
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19Check106
 
 def j19Tree107 : CTree :=
   (.S4 1 (.S2 0 .B .I) (.S3 2 .B .I .I) .I .I)
 
 theorem j19Check107 : checkJ19 7755296 7925120 j19Tree107 = true := by decide +kernel
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19Check107
 
 def j19Tree108 : CTree :=
   (.S4 1 .I .I (.S3 1 .I .I .B) .B)
 
 theorem j19Check108 : checkJ19 7925120 8604416 j19Tree108 = true := by decide +kernel
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19Check108
 
 def j19Tree109 : CTree :=
   (.S4 1 .B .B .B .B)
 
 theorem j19Check109 : checkJ19 8604416 9963008 j19Tree109 = true := by decide +kernel
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19Check109
 
 def j19Tree110 : CTree :=
   .T
 
 theorem j19Check110 : checkJ19 9963008 12680192 j19Tree110 = true := by decide +kernel
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.j19Check110
 
 end LeanLab.ChenDoubleSieve.Task661

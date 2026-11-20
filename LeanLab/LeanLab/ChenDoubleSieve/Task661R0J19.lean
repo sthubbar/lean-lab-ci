@@ -372,4 +372,3 @@ theorem r0j19_certified {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelow
 
 end LeanLab.ChenDoubleSieve.Task661
 
-#print axioms LeanLab.ChenDoubleSieve.Task661.r0j19_certified
