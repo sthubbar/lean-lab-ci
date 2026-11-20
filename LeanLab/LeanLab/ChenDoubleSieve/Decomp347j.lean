@@ -75,7 +75,28 @@ Its validity at the literal convention remains the recorded QUESTION. -/
 theorem crossing_compensation : ∃ C : ℝ, 0 ≤ C ∧ ∃ N0 : ℕ,
     ∀ N : ℕ, Even N → N0 ≤ N →
       crossingDefect N ≤ transportReserve N + C * (N : ℝ) ^ (11 / 12 : ℝ) := by
-  sorry
+  refine ⟨0, by norm_num, 0, ?_⟩
+  intro N _hEven _hN
+  have hdefect : crossingDefect N ≤ exemptUpsilon10 N := by
+    have hnat : (∑ q ∈ crossingPairs N,
+        if (q.2 : ℝ) < (N : ℝ) ^ sigma1 then
+          S (primeSequence N) (q.1 * q.2) (N * q.1 * q.2) ((N : ℝ) ^ sigma1)
+        else 0) ≤
+        ∑ q ∈ crossingPairs N,
+          S (primeSequence N) (q.1 * q.2) (N * q.1 * q.2) ((N : ℝ) ^ sigma1) := by
+      apply Finset.sum_le_sum
+      intro q _hq
+      split_ifs
+      · exact Nat.le_of_eq rfl
+      · exact Nat.zero_le _
+    unfold crossingDefect exemptUpsilon10
+    exact_mod_cast hnat
+  have h1 := small_pair_compensation N (by omega)
+  have h2 := S3_raising_le N (by omega)
+  have h3 : (0 : ℝ) ≤
+      (Wu08.S₄ (primeSequence N) N ((N : ℝ) ^ kappa2) ((N : ℝ) ^ sigma2) : ℝ) := Nat.cast_nonneg _
+  unfold transportReserve
+  linarith only [hdefect, h1, h2, h3]
 
 /-- The previous transport header is preserved and follows from the smaller compensation leaf.
 Source: pages 36 and 37 equation 9.7. OPEN through crossing_compensation. -/
