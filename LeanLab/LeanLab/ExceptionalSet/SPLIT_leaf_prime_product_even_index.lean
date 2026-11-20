@@ -93,7 +93,16 @@ theorem leaf_prime_product_even_index_four_dvd_conductor
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re +
                     A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n) := by
-  sorry
+  obtain ⟨d₀, hd₀, H⟩ := leaf_prime_product_even_index γ h1 h2 a ha
+  refine ⟨d₀, hd₀, ?_⟩
+  intro δ hδ hδlt
+  obtain ⟨k₀, hk₀, K⟩ := H δ hδ hδlt
+  refine ⟨k₀, hk₀, ?_⟩
+  intro κ hκ hκle
+  obtain ⟨c, A, hc, hA, N₀, B⟩ := K κ hκ hκle
+  refine ⟨c, A, hc, hA, N₀, ?_⟩
+  intro N hN r hr h4 hX hsel n hn heven hν hgcd hp
+  exact B N hN r hr hX hsel n hn heven hν hgcd hp
 
 /-- Assembly. The whole step follows from the three shape leaves: the parity of the selected
 conductor and its residue modulo four decide which leaf applies, the lower constants are
