@@ -1,0 +1,17 @@
+{
+  "new_declarations": 702,
+  "new_proofs": 430,
+  "new_data": 272,
+  "moved_proofs": 18,
+  "closed_literal_leaves": 6,
+  "sorry_before": 121,
+  "sorry_after": 115,
+  "sorry_delta": -6,
+  "closed_statement_axiom_reports": 10,
+  "match_count": 730,
+  "baseline_initial": 257,
+  "baseline_passed": 39,
+  "baseline_deferred": 218,
+  "baseline_final_passed": 40,
+  "baseline_final_deferred": 217
+}
