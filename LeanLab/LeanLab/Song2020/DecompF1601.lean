@@ -1,0 +1,74 @@
+/-
+AI wrote the Lean code. FREE-nv-glm4 task1601, 2026-11-19.
+Source: Song 2020, https://arxiv.org/pdf/2012.06322, Section 4, printed page 9.
+SPLIT of logarithmic_transfer139 in Decomp139b.lean: the page 9 transfer from
+Lemma 4 and Lemma 5 to the inverse fourth logarithm error.
+Binary Goldbach is open.
+-/
+import LeanLab.Song2020.Decomp139b
+
+namespace LeanLab.Song2020.DecompF1601
+
+open LeanLab.Song2020 LeanLab.Song2020.State1562
+
+noncomputable section
+
+/-- LEAF. Page 9, first step: Lemma 4 supplies a uniform discrepancy D for f - g
+at every alpha, together with a constant C4 and threshold N4. -/
+theorem leaf_lemma4_D_F1601 (H4 : Lemma4) (γ : ℝ) (hγ : 44 / 45 < γ) (hγ1 : γ < 1) :
+    ∃ C₄ : ℝ, ∃ N₄ : ℕ, ∀ n : ℕ, N₄ ≤ n → ∀ y : ℝ,
+      (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 →
+      ∃ D : ℝ, 0 ≤ D ∧ (∀ α : ℝ, ‖fS γ n y α - gS n y α‖ ≤ D) := by
+  sorry
+
+/-- LEAF. Page 9, second step: Lemma 5 bounds the sum of the two mean squares
+by a constant C5 times n to the one minus gamma times y. -/
+theorem leaf_lemma5_ms_F1601 (γ : ℝ) (hγ : 44 / 45 < γ) (hγ1 : γ < 1) :
+    ∃ C₅ : ℝ, 0 ≤ C₅ ∧ ∃ N₅ : ℕ, ∀ n : ℕ, N₅ ≤ n → ∀ y : ℝ,
+      (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 →
+      ((∫ α in (0 : ℝ)..1, ‖fS γ n y α‖ ^ 2) +
+        (∫ α in (0 : ℝ)..1, ‖gS n y α‖ ^ 2)) ≤ C₅ * ((n : ℝ) ^ (1 - γ) * y) := by
+  sorry
+
+/-- LEAF. Page 9, third step: given the Lemma 4 discrepancy D and the Lemma 5
+mean square scale, the product 2*D times the sum of mean squares is bounded by
+C times y squared over log to the fourth n at the exact printed window.
+This is the logarithmic saving step, QUESTION Q139c. -/
+theorem leaf_final_transfer_F1601 (γ : ℝ) (hγ : 44 / 45 < γ) (hγ1 : γ < 1)
+    (C₅ : ℝ) (hC₅ : 0 ≤ C₅) :
+    ∃ C : ℝ, ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+      (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 →
+      ∀ D : ℝ, 0 ≤ D → (∀ α : ℝ, ‖fS γ n y α - gS n y α‖ ≤ D) →
+        2 * D * ((∫ α in (0 : ℝ)..1, ‖fS γ n y α‖ ^ 2) +
+          (∫ α in (0 : ℝ)..1, ‖gS n y α‖ ^ 2)) ≤
+            C * (y ^ 2 / Real.log (n : ℝ) ^ 4) := by
+  sorry
+
+/-- Assembly of the page 9 logarithmic transfer from the three leaves.
+The statement after the name is the exact target copied character for character. -/
+theorem logarithmic_transfer139_F1601 (H4 : Lemma4) :
+    ∀ γ : ℝ, 44 / 45 < γ → γ < 1 →
+      ∃ C : ℝ, ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,
+        (n : ℝ) ^ songExponent γ < y → y ≤ (n : ℝ) / 3 →
+        ∃ D : ℝ, 0 ≤ D ∧ (∀ α : ℝ, ‖fS γ n y α - gS n y α‖ ≤ D) ∧
+          2 * D * ((∫ α in (0 : ℝ)..1, ‖fS γ n y α‖ ^ 2) +
+            (∫ α in (0 : ℝ)..1, ‖gS n y α‖ ^ 2)) ≤
+              C * (y ^ 2 / Real.log (n : ℝ) ^ 4) := by
+  intro γ hγ hγ1
+  obtain ⟨C₄, N₄, h₄⟩ := leaf_lemma4_D_F1601 H4 γ hγ hγ1
+  obtain ⟨C₅, hC₅, N₅, h₅⟩ := leaf_lemma5_ms_F1601 γ hγ hγ1
+  obtain ⟨C, N₀, h₀⟩ := leaf_final_transfer_F1601 γ hγ hγ1 C₅ hC₅
+  refine ⟨C, max N₀ (max N₄ N₅), ?_⟩
+  intro n hn y hy hy3
+  obtain ⟨D, hD0, hD⟩ := h₄ n (by omega) y hy hy3
+  have hms := h₅ n (by omega) y hy hy3
+  exact ⟨D, hD0, hD, h₀ n (by omega) y hy hy3 D hD0 hD⟩
+
+end
+
+end LeanLab.Song2020.DecompF1601
+
+#print axioms LeanLab.Song2020.DecompF1601.leaf_lemma4_D_F1601
+#print axioms LeanLab.Song2020.DecompF1601.leaf_lemma5_ms_F1601
+#print axioms LeanLab.Song2020.DecompF1601.leaf_final_transfer_F1601
+#print axioms LeanLab.Song2020.DecompF1601.logarithmic_transfer139_F1601
