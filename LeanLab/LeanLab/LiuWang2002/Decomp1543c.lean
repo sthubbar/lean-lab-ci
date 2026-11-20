@@ -848,8 +848,20 @@ External input: Rosser and Schoenfeld 1975, page 265, displays 5.1 and 5.3.
 The elementary triangle step is `task147_S1_triangle`; the cited input stays open. -/
 theorem lemma62_S1 (c : ℝ) (N : ℕ) (hL : 3100 ≤ Real.log N) (α : ℝ) :
     ‖Ssum (lam1 (Uf N)) c N α‖ ≤ 1.02 * Uf N := by
-  unfold Ssum
-  sorry
+  have hN : (0 : ℝ) < N := (task141_logs N hL).1
+  have hNL : Real.exp 30.95 ≤ (N : ℝ) :=
+    (Real.le_log_iff_exp_le hN).mp (by linarith)
+  have hU : Real.exp 9.634 ≤ Uf N := by
+    simpa only [Vaughan109.U, Uf, neg_div] using Decomp109b.U_lower (N : ℝ) hNL
+  have hs : (∑ n ∈ Icc 1 ⌊Uf N⌋₊, (vonMangoldt n : ℝ)) ≤
+      ∑ n ∈ range (⌊Uf N⌋₊ + 1), (vonMangoldt n : ℝ) := by
+    apply sum_le_sum_of_subset_of_nonneg
+    · intro n hn
+      exact mem_range.mpr (Nat.lt_succ_of_le (mem_Icc.mp hn).2)
+    · intro n hn hnot
+      exact vonMangoldt_nonneg
+  exact (task147_S1_triangle c N (Uf N) α).trans
+    (hs.trans ((Decomp109b.psi_bound _ hU).trans (Decomp109b.root_absorb _ hU)))
 
 
 /-- LEAF. Unit U-1543. The `S1` term is absorbed in the middle term of (6.2) p. 168:

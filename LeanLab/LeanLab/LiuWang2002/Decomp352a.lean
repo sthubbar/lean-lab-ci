@@ -1,3 +1,4 @@
+import LeanLab.LiuWang2002.Decomp368b
 import LeanLab.LiuWang2002.ScanCert352
 import LeanLab.LiuWang2002.Decomp368a
 
@@ -27,7 +28,7 @@ theorem primorial_block_b (n : ℕ) (hn : 10000 < n) (hn' : n ≤ 1000000) :
 last finite block through 100000000. Smaller blocks are separate inputs. -/
 theorem primorial_block_c (n : ℕ) (hn : 1000000 < n) (hn' : n ≤ 100000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.LiuWang2002.Task368.primorial_block_c n hn hn'
 
 /-- The finite theta leaf with exactly the original statement.
 CONDITIONAL ON the two remaining integer blocks above 10000.
@@ -65,3 +66,5 @@ end LeanLab.LiuWang2002.Task352
 #print axioms LeanLab.LiuWang2002.Task352.finite_block_instances
 
 #print axioms LeanLab.LiuWang2002.Task352.primorial_block_a
+
+#print axioms LeanLab.LiuWang2002.Task352.primorial_block_c
