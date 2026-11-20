@@ -57,7 +57,16 @@ theorem leaf_prime_product_even_index_odd_conductor
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re +
                     A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n) := by
-  sorry
+  obtain ⟨d₀, hd₀, H⟩ := leaf_prime_product_even_index γ h1 h2 a ha
+  refine ⟨d₀, hd₀, ?_⟩
+  intro δ hδ hδlt
+  obtain ⟨k₀, hk₀, K⟩ := H δ hδ hδlt
+  refine ⟨k₀, hk₀, ?_⟩
+  intro κ hκ hκle
+  obtain ⟨c, A, hc, hA, N₀, B⟩ := K κ hκ hκle
+  refine ⟨c, A, hc, hA, N₀, ?_⟩
+  intro N hN r hr hodd hX hsel n hn heven hν hgcd hp
+  exact B N hN r hr hX hsel n hn heven hν hgcd hp
 
 /-- LEAF. Even conductor shape of the prime product case: the sealed step with the additional hypothesis that the selected conductor `r` is not odd, so two divides `r` and the local factor at two is a genuine half instead of one. One inequality, on the even part of the data only. -/
 theorem leaf_prime_product_even_index_even_conductor
