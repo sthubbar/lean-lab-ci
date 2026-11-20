@@ -8,6 +8,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 -/
 import Mathlib
 import LeanLab.ChenDoubleSieve.Task587R1J16
+import LeanLab.ChenDoubleSieve.Task587R1J17
 set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 namespace LeanLab.Ported.Prove2Me.Decomp587jR1J16
@@ -4806,3 +4807,114 @@ end LeanLab.Ported.Prove2Me.Decomp587jR1J16
 #print axioms LeanLab.Ported.Prove2Me.Decomp587jR1J16.SolBuchstabR1J16.interval_bound
 #print axioms LeanLab.Ported.Prove2Me.Decomp587jR1J16.SolBuchstabR1J16.tail_bound
 #print axioms LeanLab.Ported.Prove2Me.Decomp587jR1J16.r1j16_short
+
+/-!
+CODEX task665 public bridge for Wu 2004 D2,17 page 26, Table 1 row two page 30.
+The existing Prove2Me verifier is unchanged.
+Mission 87d77bf0, accepted theorem LL_Decomp587j.r1j16_short.
+Author kmehltretter82. Apache 2.0. Accepted 2026-11-19.
+AI wrote this new bridge. Binary Goldbach is open.
+-/
+namespace LeanLab.Ported.Prove2Me.Decomp587jR1J16.SolBuchstabR1J16
+open Real Set MeasureTheory LeanLab.ChenDoubleSieve.Wu04Functional LeanLab.ChenDoubleSieve.Task587
+
+/-- An accepted tree bounds the exact row two D2,17 integral on its phi interval. -/
+theorem task665_r1j17_interval_bound {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
+    {pa pb : Nat} {t : CTree} {φ : ℝ}
+    (hpa : (pa : ℝ) / D_grid ≤ φ) (hpb : φ ≤ (pb : ℝ) / D_grid)
+    (hchk : (match evalTree pa pb t (.c31 A_num B_num B_num 432752) with
+      | some v => Nat.ble v 92979000
+      | none => false) = true) :
+    buchstabIntegral ω 2 (fun j => (r1j17_lo j : ℝ)) (fun j => (r1j17_hi j : ℝ)) φ ≤
+      ((92979 / 1000000000) : ℝ) := by
+  let targetCell : Cell4 := .c31 A_num B_num B_num 432752
+  have integral_le_cell {ω : ℝ → ℝ} (φ : ℝ) {lo hi : Fin 4 → ℝ} {c : Cell4}
+      (hInt : IntegrableOn (integrand4 ω φ) (Cell4.set c) volume)
+      (hn : ∀ x ∈ (Cell4.set c), 0 ≤ integrand4 ω φ x)
+      (hsub : ∀ x ∈ domain lo hi, (x 0, x 1, x 2, x 3) ∈ (Cell4.set c)) :
+      buchstabIntegral ω 2 lo hi φ ≤ ∫ x in (Cell4.set c), integrand4 ω φ x := by
+    let e3 : (Fin 3 → ℝ) ≃ᵐ (ℝ × ℝ × ℝ) :=
+      (MeasurableEquiv.piFinSuccAbove (fun _ : Fin 3 => ℝ) 0).trans
+        (MeasurableEquiv.prodCongr (MeasurableEquiv.refl ℝ) (MeasurableEquiv.finTwoArrow (α := ℝ)))
+    let e4 : (Fin 4 → ℝ) ≃ᵐ R4 :=
+      (MeasurableEquiv.piFinSuccAbove (fun _ : Fin 4 => ℝ) 0).trans
+        (MeasurableEquiv.prodCongr (MeasurableEquiv.refl ℝ) e3)
+    have hmp3 : MeasurePreserving e3 volume volume := by
+      have h1 := MeasureTheory.volume_preserving_piFinSuccAbove (fun _ : Fin 3 => ℝ) 0
+      have h2 : MeasurePreserving
+          (MeasurableEquiv.prodCongr (MeasurableEquiv.refl ℝ) (MeasurableEquiv.finTwoArrow (α := ℝ)))
+          (volume.prod volume) (volume.prod (volume.prod volume)) :=
+        (MeasurePreserving.id volume).prod (MeasureTheory.volume_preserving_finTwoArrow ℝ)
+      exact h2.comp h1
+    have hmp : MeasurePreserving e4 volume volume := by
+      have h1 := MeasureTheory.volume_preserving_piFinSuccAbove (fun _ : Fin 4 => ℝ) 0
+      have h2 : MeasurePreserving (MeasurableEquiv.prodCongr (MeasurableEquiv.refl ℝ) e3)
+          (volume.prod volume) (volume.prod volume) :=
+        (MeasurePreserving.id volume).prod hmp3
+      exact h2.comp h1
+    have he4_apply : ∀ x : Fin 4 → ℝ, e4 x = (x 0, x 1, x 2, x 3) := fun _ => rfl
+    have hfun : (fun x : Fin 4 → ℝ =>
+        ω ((φ - ∑ j, x j) / x ⟨2, by omega⟩) / ((∏ j, x j) * x ⟨2, by omega⟩)) =
+        (fun x : Fin 4 → ℝ => integrand4 ω φ (e4 x)) := by
+      ext x
+      simp only [integrand4, he4_apply, Fin.sum_univ_four, Fin.prod_univ_four]
+      have hnum : (φ - (x 0 + x 1 + x 2 + x 3)) / x ⟨2, by omega⟩ =
+          (φ - (x 0 + x 1 + x 2 + x 3)) / x 2 := rfl
+      have hden : (x 0 * x 1 * x 2 * x 3) * x ⟨2, by omega⟩ = x 0 * x 1 * x 2 * x 2 * x 3 := by
+        change (x 0 * x 1 * x 2 * x 3) * x 2 = x 0 * x 1 * x 2 * x 2 * x 3
+        ring
+      rw [hnum, hden]
+    have hi' : IntegrableOn (fun x : Fin 4 → ℝ => integrand4 ω φ (e4 x)) (e4 ⁻¹' (Cell4.set c)) volume :=
+      (hmp.integrableOn_comp_preimage e4.measurableEmbedding).2 hInt
+    have hn' : 0 ≤ᵐ[volume.restrict (e4 ⁻¹' (Cell4.set c))] (fun x => integrand4 ω φ (e4 x)) := by
+      filter_upwards [ae_restrict_mem ((Cell4.measurableSet_set c).preimage e4.measurable)] with x hx
+      exact hn (e4 x) hx
+    have hs : domain lo hi ⊆ e4 ⁻¹' (Cell4.set c) := by
+      intro x hx
+      simpa only [mem_preimage, he4_apply] using hsub x hx
+    unfold buchstabIntegral
+    rw [hfun]
+    calc
+      (∫ x in domain lo hi, integrand4 ω φ (e4 x)) ≤
+          ∫ x in e4 ⁻¹' (Cell4.set c), integrand4 ω φ (e4 x) :=
+        setIntegral_mono_set hi' hn' (Filter.Eventually.of_forall hs)
+      _ = ∫ x in (Cell4.set c), integrand4 ω φ x :=
+        hmp.setIntegral_preimage_emb e4.measurableEmbedding (integrand4 ω φ) (Cell4.set c)
+
+  have j17_domain_subset (x : Fin 4 → ℝ)
+      (hx : x ∈ domain (fun j => (r1j17_lo j : ℝ)) (fun j => (r1j17_hi j : ℝ))) :
+      (x 0, x 1, x 2, x 3) ∈ Cell4.set targetCell := by
+    rcases hx with ⟨hm, hb⟩
+    have h0 := (hb 0).1
+    have h2 := (hb 2).2
+    have h3 := hb 3
+    norm_num [r1j17_lo, r1j17_hi] at h0 h2 h3
+    have ha : gval A_num = (25 / 72 : ℝ) := by norm_num [gval, A_num, D_grid]
+    have hb' : gval B_num = (100 / 243 : ℝ) := by norm_num [gval, B_num, D_grid]
+    have hc : (10 / 23 : ℝ) ≤ gval 432752 := by norm_num [gval, D_grid]
+    change gval A_num ≤ x 0 ∧ x 0 ≤ x 1 ∧ x 1 ≤ x 2 ∧ x 2 ≤ gval B_num ∧
+      gval B_num ≤ x 3 ∧ x 3 ≤ gval 432752
+    rw [ha, hb']
+    exact ⟨h0, hm (by decide : (0 : Fin 4) ≤ 1), hm (by decide : (1 : Fin 4) ≤ 2),
+      h2, h3.1, h3.2.trans hc⟩
+
+  change (match evalTree pa pb t targetCell with
+    | some v => Nat.ble v 92979000
+    | none => false) = true at hchk
+  cases heval : evalTree pa pb t targetCell with
+  | none => rw [heval] at hchk; cases hchk
+  | some v =>
+    rw [heval] at hchk
+    have hv : v ≤ 92979000 := Nat.ble_eq.mp hchk
+    have hb := evalTree_sound hω hz hpa hpb t targetCell (by norm_num [Cell4.valid, targetCell, A_num, B_num]) heval
+    have hr : (v : ℝ) / S_scale ≤ ((92979 / 1000000000) : ℝ) := by
+      calc
+        (v : ℝ) / S_scale ≤ (92979000 : ℝ) / S_scale :=
+          div_le_div_of_nonneg_right (by exact_mod_cast hv) (by norm_num [S_scale])
+        _ = ((92979 / 1000000000) : ℝ) := by norm_num [S_scale]
+    exact (integral_le_cell (c := targetCell) φ
+      (integrand4_integrableOn hω hz φ (c := targetCell) (by norm_num [Cell4.valid, targetCell, A_num, B_num]))
+      (integrand4_nonneg hω hz φ (c := targetCell) (by norm_num [Cell4.valid, targetCell, A_num, B_num])) j17_domain_subset).trans (hb.trans hr)
+
+end LeanLab.Ported.Prove2Me.Decomp587jR1J16.SolBuchstabR1J16
+#print axioms LeanLab.Ported.Prove2Me.Decomp587jR1J16.SolBuchstabR1J16.task665_r1j17_interval_bound
