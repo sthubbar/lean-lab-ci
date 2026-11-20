@@ -1,3 +1,4 @@
+import LeanLab.ChenDoubleSieve.Decomp587j
 import LeanLab.ChenDoubleSieve.Burst9Psi2Panels
 import LeanLab.ChenDoubleSieve.Task562Supply
 
@@ -195,7 +196,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.020011158`; the bound adds 0.1 percent. -/
 theorem I2_r1_13 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 1) 4 ≤ (20031169/1000000000 : ℝ) := by
-  sorry
+  exact Task587.I2_r1_13_from_short hω hz
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,14}` defining `I_{2,14}(s, s', κ₁, κ₂, κ₃)`, for row 2 of Table 1,
@@ -204,7 +205,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.009158153`; the bound adds 0.1 percent. -/
 theorem I2_r1_14 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 1) 5 ≤ (9167311/1000000000 : ℝ) := by
-  sorry
+  exact Task587.I2_r1_14_from_short hω hz
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,15}` defining `I_{2,15}(s, s', κ₁, κ₂, κ₃)`, for row 2 of Table 1,
@@ -213,7 +214,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.002885098`; the bound adds 0.1 percent. -/
 theorem I2_r1_15 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 1) 6 ≤ (2887983/1000000000 : ℝ) := by
-  sorry
+  exact Task587.I2_r1_15_from_short hω hz
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,16}` defining `I_{2,16}(s, s', κ₁, κ₂, κ₃)`, for row 2 of Table 1,
@@ -222,7 +223,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.000070715`; the bound adds 0.1 percent. -/
 theorem I2_r1_16 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 1) 7 ≤ (35393/500000000 : ℝ) := by
-  sorry
+  exact Task587.I2_r1_16_from_short hω hz
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,17}` defining `I_{2,17}(s, s', κ₁, κ₂, κ₃)`, for row 2 of Table 1,
