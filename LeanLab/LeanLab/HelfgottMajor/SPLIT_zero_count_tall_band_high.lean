@@ -33,6 +33,13 @@ that case analysis.  The target `zero_count_tall_band_high` is not used in this 
 namespace LeanLab.HelfgottMajor.Decomp388a
 open Real DecompJ1153
 
+/-- The `tsum` defining `zeroCount` as a sum over its finite index type: the support of the
+indicator `zeroWeight` is exactly the subtype of zeros of the strip below the height. -/
+private theorem zero_count_eq_zero_idx (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    zeroCount χ t = ∑' ρ : ZeroCount1623.ZeroIdx χ t, (ZeroCount1623.mult χ ρ.val : ℝ) := by
+  unfold zeroCount zeroWeight
+  exact (tsum_subtype _ _).symm
+
 /-- LEAF. Bounded window of the band, `q * t ≤ 2 * π * exp 1 * exp 1 * exp 1 * exp 1`.  The
 product bound and `2 ≤ t` give `q ≤ π * exp 4 < 172`, and the product bound and `1 ≤ q` give
 `t ≤ 2 * π * exp 4 < 344`; on that finite range the count is compared with the fixed `17.7` and
@@ -45,7 +52,8 @@ theorem zero_count_high_window (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ
     (hwin : q * t ≤ 2 * π * exp 1 * exp 1 * exp 1 * exp 1) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Bounded height case, `2 * π * exp 4 ≤ q * t`, `q ≤ t` and `t ≤ 10 ^ 6`.  The
 conductor is at most the height and the height is at most `10 ^ 6`, so both parameters range
@@ -58,7 +66,8 @@ theorem zero_count_high_bounded_height (q : ℕ) [NeZero q] (χ : DirichletChara
     (hqt : (q : ℝ) ≤ t) (hth : t ≤ 10 ^ 6) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Asymptotic height case, `2 * π * exp 4 ≤ q * t`, `q ≤ t` and `10 ^ 6 ≤ t`.  The
 argument principle on the rectangle `-1 ≤ σ ≤ 2`, `|τ| ≤ t` counts the zeros, the archimedean
@@ -73,7 +82,8 @@ theorem zero_count_high_asymptotic_height (q : ℕ) [NeZero q] (χ : DirichletCh
     (hqt : (q : ℝ) ≤ t) (hth : 10 ^ 6 ≤ t) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- LEAF. Conductor above height, `2 * π * exp 4 ≤ q * t` and `t ≤ q`.  Here `log (q * t)`
 is at most `2 * log q` and `log (q * t / (2 * π * exp 1))` is at least `log q - log (2 * π)`,
@@ -86,7 +96,8 @@ theorem zero_count_high_conductor_above_height (q : ℕ) [NeZero q]
     (hbig : 2 * π * exp 1 * exp 1 * exp 1 * exp 1 ≤ q * t) (hqt : t ≤ (q : ℝ)) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  rw [zero_count_eq_zero_idx]
+  exact ZeroCount1623.strip_count χ hχ t ht
 
 /-- The sealed statement, assembled from the four regions of the band: the bounded window, the
 bounded height case with conductor below height, the asymptotic height case, and the case of
