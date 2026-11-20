@@ -1,0 +1,234 @@
+{
+  "modules": [
+    "LeanLab.ChenDoubleSieve.Burst4Split",
+    "LeanLab.ChenDoubleSieve.Burst8P2",
+    "LeanLab.ChenDoubleSieve.Burst9Top",
+    "LeanLab.ChenDoubleSieve.Decomp347f",
+    "LeanLab.ChenDoubleSieve.Decomp347h",
+    "LeanLab.ChenDoubleSieve.Decomp347j",
+    "LeanLab.ChenDoubleSieve.Decomp587l",
+    "LeanLab.ChenDoubleSieve.FinalDisplay",
+    "LeanLab.ChenDoubleSieve.KernelIntegrability",
+    "LeanLab.ChenDoubleSieve.Task661CellCore",
+    "LeanLab.ChenDoubleSieve.Task661Instances",
+    "LeanLab.ChenDoubleSieve.Task661R0J17Cert0",
+    "LeanLab.ChenDoubleSieve.Task661R0J19",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert0",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert1",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert10",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert11",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert12",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert13",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert2",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert3",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert4",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert5",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert6",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert7",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert8",
+    "LeanLab.ChenDoubleSieve.Task661R0J19Cert9",
+    "LeanLab.Ported.Prove2Me.Decomp587lR0J14",
+    "LeanLab.Ported.Prove2Me.Decomp587lR0J15",
+    "LeanLab.Ported.Prove2Me.Decomp587lR0J16"
+  ],
+  "requested": 346,
+  "printed": 346,
+  "clean": 314,
+  "conditional": {
+    "LeanLab.ChenDoubleSieve.Burst4Split.corrections_real": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst4Split.proposition1": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst4Split.corollary1": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst4Split.proposition3": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst4Split.proposition4": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst4Split.table1_Psi2": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst4Split.integral_matrix_bound": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst4Split.wu2004_thm1_of_split": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.prop1_upper_eps": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.prop1_lower_eps": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.Hk_nonneg": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.hk_nonneg": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.proposition1": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.proposition2_H": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.proposition2_h": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.corollary1": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.l61_inputs": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.lemma51": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.lemma61_eq2": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.lemma61_eq3": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.lemma61_eq3_inst": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.proposition3": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.lemma52": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.proposition4": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.corrections_real": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst8P2.wu2004_thm1_of_p2": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Burst9Top.wu2004_thm1_of_p3": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Task347.crossing_compensation": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Task347.first_half_transport": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Task347.first_half_supplied": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Task587.r0j17_short": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "LeanLab.ChenDoubleSieve.Task587.I2_r0_17_from_short": [
+      "propext",
+      "sorryAx",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "foreign": {},
+  "new_bad": {},
+  "exit": 0
+}

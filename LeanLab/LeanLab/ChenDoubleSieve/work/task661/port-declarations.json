@@ -1,0 +1,3618 @@
+[
+  {
+    "j": 14,
+    "kind": "inductive",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree",
+    "short": "SegTree",
+    "private": false,
+    "sig": "inductive SegTree where"
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree.top",
+    "short": "SegTree.top",
+    "private": false,
+    "sig": "def SegTree.top : SegTree \u2192 Nat\n  | .L v => v\n  | .N m _ _ => m\n\ndef SegTree.isValid : Nat \u2192 SegTree \u2192 Bool\n  | 0, .L _ => true\n  | d + 1, .N m l r =>\n      l.isValid d && r.isValid d && Nat.ble l.top m && Nat.ble r.top m\n  | _, _ => false\n\ndef SegTree.get : Nat \u2192 SegTree \u2192 Nat \u2192 Nat\n  | 0, .L v, _ => v\n  | d + 1, .N _ l r, k =>\n      let half "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree.isValid",
+    "short": "SegTree.isValid",
+    "private": false,
+    "sig": "def SegTree.isValid : Nat \u2192 SegTree \u2192 Bool\n  | 0, .L _ => true\n  | d + 1, .N m l r =>\n      l.isValid d && r.isValid d && Nat.ble l.top m && Nat.ble r.top m\n  | _, _ => false\n\ndef SegTree.get : Nat \u2192 SegTree \u2192 Nat \u2192 Nat\n  | 0, .L v, _ => v\n  | d + 1, .N _ l r, k =>\n      let half "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree.get",
+    "short": "SegTree.get",
+    "private": false,
+    "sig": "def SegTree.get : Nat \u2192 SegTree \u2192 Nat \u2192 Nat\n  | 0, .L v, _ => v\n  | d + 1, .N _ l r, k =>\n      let half "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree.getAux",
+    "short": "SegTree.getAux",
+    "private": false,
+    "sig": "def SegTree.getAux : SegTree \u2192 Nat \u2192 Nat \u2192 Nat\n  | .L v, _, _ => v\n  | .N _ l r, half, k =>\n      match Nat.ble half k with\n      | false => l.getAux (half / 2) k\n      | true => r.getAux (half / 2) (k - half)\n\ndef SegTree.rangeMax : Nat \u2192 SegTree \u2192 Nat \u2192 Nat \u2192 Nat\n  | 0, .L v, _, _ => v\n  | d + 1, .N m l r, lo, hi =>\n      let half "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree.rangeMax",
+    "short": "SegTree.rangeMax",
+    "private": false,
+    "sig": "def SegTree.rangeMax : Nat \u2192 SegTree \u2192 Nat \u2192 Nat \u2192 Nat\n  | 0, .L v, _, _ => v\n  | d + 1, .N m l r, lo, hi =>\n      let half "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree.get_le_top",
+    "short": "SegTree.get_le_top",
+    "private": false,
+    "sig": "theorem SegTree.get_le_top {d : Nat} {t : SegTree} (hv : t.isValid d = true)\n    {k : Nat} (hk : k < 2 ^ d) : t.get d k \u2264 t.top "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.SegTree.get_le_rangeMax",
+    "short": "SegTree.get_le_rangeMax",
+    "private": false,
+    "sig": "theorem SegTree.get_le_rangeMax {d : Nat} {t : SegTree} (hv : t.isValid d = true)\n    {lo hi k : Nat} (hlo : lo \u2264 k) (hhi : k \u2264 hi) (hk : k < 2 ^ d) :\n    t.get d k \u2264 t.rangeMax d lo hi "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.K_grid",
+    "short": "K_grid",
+    "private": false,
+    "sig": "def K_grid : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.S_scale",
+    "short": "S_scale",
+    "private": false,
+    "sig": "def S_scale : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.M4_val",
+    "short": "M4_val",
+    "private": false,
+    "sig": "def M4_val : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.V_last",
+    "short": "V_last",
+    "private": false,
+    "sig": "def V_last : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.U_tree",
+    "short": "U_tree",
+    "private": false,
+    "sig": "def U_tree : SegTree "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.V_tree",
+    "short": "V_tree",
+    "private": false,
+    "sig": "def V_tree : SegTree "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.getV",
+    "short": "getV",
+    "private": false,
+    "sig": "def getV (k : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.getU",
+    "short": "getU",
+    "private": false,
+    "sig": "def getU (k : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.allPow2",
+    "short": "allPow2",
+    "private": false,
+    "sig": "def allPow2 : Nat \u2192 Nat \u2192 (Nat \u2192 Bool) \u2192 Bool\n  | 0, base, p => p base\n  | d + 1, base, p => allPow2 d base p && allPow2 d (base + 2 ^ d) p\n\ntheorem allPow2_spec {d base : Nat} {p : Nat \u2192 Bool} (h : allPow2 d base p = true)\n    {k : Nat} (hlo : base \u2264 k) (hhi : k < base + 2 ^ d) : p k = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.allPow2_spec",
+    "short": "allPow2_spec",
+    "private": false,
+    "sig": "theorem allPow2_spec {d base : Nat} {p : Nat \u2192 Bool} (h : allPow2 d base p = true)\n    {k : Nat} (hlo : base \u2264 k) (hhi : k < base + 2 ^ d) : p k = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.ble_false_iff",
+    "short": "ble_false_iff",
+    "private": false,
+    "sig": "theorem ble_false_iff {a b : Nat} : Nat.ble a b = false \u2194 b < a "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.max2",
+    "short": "max2",
+    "private": false,
+    "sig": "def max2 (a b : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.min2",
+    "short": "min2",
+    "private": false,
+    "sig": "def min2 (a b : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.le_max2_left",
+    "short": "le_max2_left",
+    "private": false,
+    "sig": "theorem le_max2_left (a b : Nat) : a \u2264 max2 a b "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.le_max2_right",
+    "short": "le_max2_right",
+    "private": false,
+    "sig": "theorem le_max2_right (a b : Nat) : b \u2264 max2 a b "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.mono_dec_le",
+    "short": "mono_dec_le",
+    "private": false,
+    "sig": "theorem mono_dec_le {f : Nat \u2192 Nat} {a b : Nat}\n    (h : \u2200 k, a \u2264 k \u2192 k < b \u2192 f (k + 1) \u2264 f k)\n    {i j : Nat} (ha : a \u2264 i) (hij : i \u2264 j) (hb : j \u2264 b) : f j \u2264 f i "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.mono_inc_le",
+    "short": "mono_inc_le",
+    "private": false,
+    "sig": "theorem mono_inc_le {f : Nat \u2192 Nat} {a b : Nat}\n    (h : \u2200 k, a \u2264 k \u2192 k < b \u2192 f k \u2264 f (k + 1))\n    {i j : Nat} (ha : a \u2264 i) (hij : i \u2264 j) (hb : j \u2264 b) : f i \u2264 f j "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstabUB_fallback",
+    "short": "buchstabUB_fallback",
+    "private": false,
+    "sig": "def buchstabUB_fallback (k0 k1 : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstabUB",
+    "short": "buchstabUB",
+    "private": false,
+    "sig": "def buchstabUB (k0 k1 : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.getU_le_buchstabUB_fallback",
+    "short": "getU_le_buchstabUB_fallback",
+    "private": false,
+    "sig": "theorem getU_le_buchstabUB_fallback\n    (hm0 : \u2200 i j, i \u2264 j \u2192 j \u2264 255 \u2192 getU j \u2264 getU i)\n    (hm1 : \u2200 i j, 256 \u2264 i \u2192 i \u2264 j \u2192 j \u2264 450 \u2192 getU i \u2264 getU j)\n    (hm2 : \u2200 i j, 450 \u2264 i \u2192 i \u2264 j \u2192 j \u2264 631 \u2192 getU j \u2264 getU i)\n    (hm3 : \u2200 i j, 631 \u2264 i \u2192 i \u2264 j \u2192 j \u2264 767 \u2192 getU i \u2264 getU j)\n    {k0 k1 k : Nat} (h0 : k0 \u2264 k) (h1 : k \u2264 k1) (hk : k < 768) :\n    getU k \u2264 buchstabUB_fallback k0 k1 "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkBuchstabStepWith",
+    "short": "checkBuchstabStepWith",
+    "private": false,
+    "sig": "def checkBuchstabStepWith (gV gU : Nat \u2192 Nat) (k : Nat) : Bool "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.validBuchstab_V256",
+    "short": "validBuchstab_V256",
+    "private": false,
+    "sig": "theorem validBuchstab_V256 : S_scale \u2264 getV 256 "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.validBuchstab_p0",
+    "short": "validBuchstab_p0",
+    "private": false,
+    "sig": "theorem validBuchstab_p0 : allPow2 9 0 (checkBuchstabStepWith getV getU) = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.validBuchstab_p1",
+    "short": "validBuchstab_p1",
+    "private": false,
+    "sig": "theorem validBuchstab_p1 : allPow2 9 512 (checkBuchstabStepWith getV getU) = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.getU1023_le_M4",
+    "short": "getU1023_le_M4",
+    "private": false,
+    "sig": "theorem getU1023_le_M4 : getU 1023 \u2264 M4_val "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_0",
+    "short": "monoU_0",
+    "private": false,
+    "sig": "theorem monoU_0 : allPow2 8 0 (fun k => match Nat.ble k 254 with | true => Nat.ble (getU (k + 1)) (getU k) | false => true) = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_1",
+    "short": "monoU_1",
+    "private": false,
+    "sig": "theorem monoU_1 : allPow2 8 256 (fun k => match Nat.ble k 449 with | true => Nat.ble (getU k) (getU (k + 1)) | false => true) = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_2",
+    "short": "monoU_2",
+    "private": false,
+    "sig": "theorem monoU_2 : allPow2 8 448 (fun k => match Nat.ble 450 k, Nat.ble k 630 with | true, true => Nat.ble (getU (k + 1)) (getU k) | _, _ => true) = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_3",
+    "short": "monoU_3",
+    "private": false,
+    "sig": "theorem monoU_3 : allPow2 8 512 (fun k => match Nat.ble 631 k, Nat.ble k 766 with | true, true => Nat.ble (getU k) (getU (k + 1)) | _, _ => true) = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_0_spec",
+    "short": "monoU_0_spec",
+    "private": false,
+    "sig": "theorem monoU_0_spec {k : Nat} (hk : k < 255) : getU (k + 1) \u2264 getU k "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_1_spec",
+    "short": "monoU_1_spec",
+    "private": false,
+    "sig": "theorem monoU_1_spec {k : Nat} (hlo : 256 \u2264 k) (hhi : k < 450) : getU k \u2264 getU (k + 1) "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_2_spec",
+    "short": "monoU_2_spec",
+    "private": false,
+    "sig": "theorem monoU_2_spec {k : Nat} (hlo : 450 \u2264 k) (hhi : k < 631) : getU (k + 1) \u2264 getU k "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.monoU_3_spec",
+    "short": "monoU_3_spec",
+    "private": false,
+    "sig": "theorem monoU_3_spec {k : Nat} (hlo : 631 \u2264 k) (hhi : k < 767) : getU k \u2264 getU (k + 1) "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.validBuchstab_all",
+    "short": "validBuchstab_all",
+    "private": false,
+    "sig": "theorem validBuchstab_all {k : Nat} (hk : k < 1024) : checkBuchstabStepWith getV getU k = true "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.W_scale",
+    "short": "W_scale",
+    "private": false,
+    "sig": "def W_scale : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.D_in",
+    "short": "D_in",
+    "private": false,
+    "sig": "def D_in : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.A1_num",
+    "short": "A1_num",
+    "private": false,
+    "sig": "def A1_num : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.B1_num",
+    "short": "B1_num",
+    "private": false,
+    "sig": "def B1_num : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.D_out",
+    "short": "D_out",
+    "private": false,
+    "sig": "def D_out : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.A0_num",
+    "short": "A0_num",
+    "private": false,
+    "sig": "def A0_num : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.B0_num",
+    "short": "B0_num",
+    "private": false,
+    "sig": "def B0_num : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.StepPhi",
+    "short": "StepPhi",
+    "private": false,
+    "sig": "def StepPhi : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.ceilDiv",
+    "short": "ceilDiv",
+    "private": false,
+    "sig": "def ceilDiv (a b : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.le_mul_ceilDiv",
+    "short": "le_mul_ceilDiv",
+    "private": false,
+    "sig": "theorem le_mul_ceilDiv {a b : Nat} (hb : 0 < b) : a \u2264 b * ceilDiv a b "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.wInv",
+    "short": "wInv",
+    "private": false,
+    "sig": "def wInv (a b : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.wInvSqIn",
+    "short": "wInvSqIn",
+    "private": false,
+    "sig": "def wInvSqIn (a b : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.wDiagIn",
+    "short": "wDiagIn",
+    "private": false,
+    "sig": "def wDiagIn (a b : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.sumUpTo",
+    "short": "sumUpTo",
+    "private": false,
+    "sig": "def sumUpTo : Nat \u2192 (Nat \u2192 Nat) \u2192 Nat\n  | 0, _ => 0\n  | n + 1, f => sumUpTo n f + f n\n\ndef sumRange (lo len : Nat) (f : Nat \u2192 Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.sumRange",
+    "short": "sumRange",
+    "private": false,
+    "sig": "def sumRange (lo len : Nat) (f : Nat \u2192 Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.N12_of",
+    "short": "N12_of",
+    "private": false,
+    "sig": "def N12_of (m : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_sumWith",
+    "short": "F_sumWith",
+    "private": false,
+    "sig": "def F_sumWith (ub : Nat \u2192 Nat \u2192 Nat) (m N12 : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_tree",
+    "short": "F_tree",
+    "private": false,
+    "sig": "def F_tree : SegTree "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_tail_val",
+    "short": "F_tail_val",
+    "private": false,
+    "sig": "def F_tail_val : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.getF",
+    "short": "getF",
+    "private": false,
+    "sig": "def getF (m : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_UB",
+    "short": "F_UB",
+    "private": false,
+    "sig": "def F_UB (m0 m1 : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkFStep",
+    "short": "checkFStep",
+    "private": false,
+    "sig": "def checkFStep (m : Nat) : Bool "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.W12_ub8",
+    "short": "W12_ub8",
+    "private": false,
+    "sig": "def W12_ub8 : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.validF_tree",
+    "short": "validF_tree",
+    "private": false,
+    "sig": "theorem validF_tree : F_tree.isValid 7 = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.validF_tail",
+    "short": "validF_tail",
+    "private": false,
+    "sig": "theorem validF_tail : M4_val * W12_ub8 \u2264 F_tail_val * W_scale * W_scale "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_0_16",
+    "short": "checkF_0_16",
+    "private": false,
+    "sig": "theorem checkF_0_16   : allPow2 4 0 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_16_20",
+    "short": "checkF_16_20",
+    "private": false,
+    "sig": "theorem checkF_16_20  : allPow2 2 16 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_20_24",
+    "short": "checkF_20_24",
+    "private": false,
+    "sig": "theorem checkF_20_24  : allPow2 2 20 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_24_28",
+    "short": "checkF_24_28",
+    "private": false,
+    "sig": "theorem checkF_24_28  : allPow2 2 24 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_28_32",
+    "short": "checkF_28_32",
+    "private": false,
+    "sig": "theorem checkF_28_32  : allPow2 2 28 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_32_48",
+    "short": "checkF_32_48",
+    "private": false,
+    "sig": "theorem checkF_32_48  : allPow2 4 32 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_48_64",
+    "short": "checkF_48_64",
+    "private": false,
+    "sig": "theorem checkF_48_64  : allPow2 4 48 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_64_128",
+    "short": "checkF_64_128",
+    "private": false,
+    "sig": "theorem checkF_64_128 : allPow2 6 64 checkFStep = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkF_all",
+    "short": "checkF_all",
+    "private": false,
+    "sig": "theorem checkF_all {m : Nat} (hm : m < 128) :\n    F_sumWith buchstabUB m (N12_of m) \u2264 getF m * W_scale * W_scale "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.outerSumWith",
+    "short": "outerSumWith",
+    "private": false,
+    "sig": "def outerSumWith (fub : Nat \u2192 Nat \u2192 Nat) (p : Nat) : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.targetBoundNat",
+    "short": "targetBoundNat",
+    "private": false,
+    "sig": "def targetBoundNat : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.outerTailSum",
+    "short": "outerTailSum",
+    "private": false,
+    "sig": "def outerTailSum : Nat "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkOuter_all_bool",
+    "short": "checkOuter_all_bool",
+    "private": false,
+    "sig": "theorem checkOuter_all_bool : allPow2 7 0 (fun p => Nat.ble (outerSumWith F_UB p) targetBoundNat) = true "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkOuter_tail",
+    "short": "checkOuter_tail",
+    "private": false,
+    "sig": "theorem checkOuter_tail : outerTailSum \u2264 targetBoundNat "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.checkOuter_spec",
+    "short": "checkOuter_spec",
+    "private": false,
+    "sig": "theorem checkOuter_spec {p : Nat} (hp : p < 128) :\n    outerSumWith F_UB p \u2264 targetBoundNat "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_integral_eq",
+    "short": "buchstab_integral_eq",
+    "private": true,
+    "sig": "private lemma buchstab_integral_eq {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {a b : \u211d} (ha : 2 \u2264 a) (hab : a \u2264 b) :\n    b * \u03c9 b - a * \u03c9 a = \u222b s in (a - 1)..(b - 1), \u03c9 s "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_nonneg_on_Icc",
+    "short": "buchstab_nonneg_on_Icc",
+    "private": true,
+    "sig": "private lemma buchstab_nonneg_on_Icc {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) :\n    \u2200 n : \u2115, \u2200 u : \u211d, 1 \u2264 u \u2192 u \u2264 (n : \u211d) + 2 \u2192 0 \u2264 \u03c9 u "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_nonneg",
+    "short": "buchstab_nonneg",
+    "private": true,
+    "sig": "private lemma buchstab_nonneg {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (u : \u211d) : 0 \u2264 \u03c9 u "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.integral_inv_le_trapezoid",
+    "short": "integral_inv_le_trapezoid",
+    "private": true,
+    "sig": "private lemma integral_inv_le_trapezoid {a b : \u211d} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b s in a..b, (1 / s : \u211d) \u2264 (b - a) / 2 * (1 / a + 1 / b) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.integral_inv_sq_eq",
+    "short": "integral_inv_sq_eq",
+    "private": true,
+    "sig": "private lemma integral_inv_sq_eq {a b : \u211d} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b s in a..b, (1 / (s * s) : \u211d) = 1 / a - 1 / b "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.integral_sub_div_cube_eq",
+    "short": "integral_sub_div_cube_eq",
+    "private": true,
+    "sig": "private lemma integral_sub_div_cube_eq {a b : \u211d} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b s in a..b, ((b - s) / (s * s * s) : \u211d) = (b - a) ^ 2 / (2 * a * a * b) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_max_propagate",
+    "short": "buchstab_max_propagate",
+    "private": true,
+    "sig": "private lemma buchstab_max_propagate {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {a M : \u211d}\n    (ha : 1 \u2264 a) (hbase : \u2200 u \u2208 Icc a (a + 1), \u03c9 u \u2264 M) :\n    \u2200 u : \u211d, a \u2264 u \u2192 \u03c9 u \u2264 M "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.affine_div_le_of_endpoints",
+    "short": "affine_div_le_of_endpoints",
+    "private": true,
+    "sig": "private lemma affine_div_le_of_endpoints {a b u c va M : \u211d} (hab : a < b)\n    (hau : a \u2264 u) (hub : u \u2264 b)\n    (h1 : va \u2264 c * a) (h2 : va + (b - a) * M \u2264 c * b) :\n    va + (u - a) * M \u2264 c * u "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.tk",
+    "short": "tk",
+    "private": true,
+    "sig": "private def tk (k : Nat) : \u211d "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_table_sound_aux",
+    "short": "buchstab_table_sound_aux",
+    "private": true,
+    "sig": "private lemma buchstab_table_sound_aux {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    (gV gU : \u2115 \u2192 \u2115)\n    (hV256 : S_scale \u2264 gV 256)\n    (hall : \u2200 k < 1024, checkBuchstabStepWith gV gU k = true) :\n    (\u2200 k \u2264 1024, tk k * \u03c9 (tk k) \u2264 (gV k : \u211d) / S_scale) \u2227\n    (\u2200 k < 1024, \u2200 u \u2208 Icc (tk k) (tk (k + 1)), \u03c9 u \u2264 (gU k : \u211d) / S_scale) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_table_sound",
+    "short": "buchstab_table_sound",
+    "private": true,
+    "sig": "private lemma buchstab_table_sound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) :\n    (\u2200 k \u2264 1024, tk k * \u03c9 (tk k) \u2264 (getV k : \u211d) / S_scale) \u2227\n    (\u2200 k < 1024, \u2200 u \u2208 Icc (tk k) (tk (k + 1)), \u03c9 u \u2264 (getU k : \u211d) / S_scale) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_le_M4",
+    "short": "buchstab_le_M4",
+    "private": true,
+    "sig": "private lemma buchstab_le_M4 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {u : \u211d} (hu : 4 \u2264 u) :\n    \u03c9 u \u2264 (M4_val : \u211d) / S_scale "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.getU_le_buchstabUB",
+    "short": "getU_le_buchstabUB",
+    "private": true,
+    "sig": "private lemma getU_le_buchstabUB {k0 k1 k : \u2115} (h0 : k0 \u2264 k) (h1 : k \u2264 k1) (hk : k < 768) :\n    getU k \u2264 buchstabUB k0 k1 "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.M4_le_buchstabUB",
+    "short": "M4_le_buchstabUB",
+    "private": true,
+    "sig": "private lemma M4_le_buchstabUB {k0 k1 : \u2115} (hk1 : 768 \u2264 k1) :\n    M4_val \u2264 buchstabUB k0 k1 "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstab_le_buchstabUB",
+    "short": "buchstab_le_buchstabUB",
+    "private": true,
+    "sig": "private lemma buchstab_le_buchstabUB {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {k0 k1 : \u2115}\n    (hk01 : k0 \u2264 k1) {u : \u211d} (hlo : tk k0 \u2264 u) (hhi : u \u2264 tk (k1 + 1)) :\n    \u03c9 u \u2264 (buchstabUB k0 k1 : \u211d) / S_scale "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.sumUpTo_eq_finset_sum",
+    "short": "sumUpTo_eq_finset_sum",
+    "private": true,
+    "sig": "private lemma sumUpTo_eq_finset_sum (n : \u2115) (f : \u2115 \u2192 \u2115) :\n    (sumUpTo n f : \u211d) = \u2211 i \u2208 Finset.range n, (f i : \u211d) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.sumRange_eq_finset_sum",
+    "short": "sumRange_eq_finset_sum",
+    "private": true,
+    "sig": "private lemma sumRange_eq_finset_sum (lo len : \u2115) (f : \u2115 \u2192 \u2115) :\n    (sumRange lo len f : \u211d) = \u2211 k \u2208 Finset.Ico lo (lo + len), (f k : \u211d) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.sum_upper_tri",
+    "short": "sum_upper_tri",
+    "private": true,
+    "sig": "private lemma sum_upper_tri {\u03b1 : Type*} [AddCommMonoid \u03b1] (N : \u2115) (f : \u2115 \u00d7 \u2115 \u2192 \u03b1) :\n    \u2211 c \u2208 ((Finset.range N) \u00d7\u02e2 (Finset.range N)).filter (fun p => p.1 \u2264 p.2), f c =\n      \u2211 j \u2208 Finset.range N, (f (j, j) + \u2211 k \u2208 Finset.Ico (j + 1) N, f (j, k)) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.setIntegral_union_le_of_nonneg",
+    "short": "setIntegral_union_le_of_nonneg",
+    "private": true,
+    "sig": "private lemma setIntegral_union_le_of_nonneg {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {A B : Set \u03b1} {f : \u03b1 \u2192 \u211d} (hA : MeasurableSet A) (hB : MeasurableSet B)\n    (hnnB : \u2200 x \u2208 B, 0 \u2264 f x) (hintA : IntegrableOn f A \u03bc) (hintB : IntegrableOn f B \u03bc) :\n    \u222b x in A \u222a B, f x \u2202\u03bc \u2264 (\u222b x in A, f x \u2202\u03bc) + (\u222b x in B, f x \u2202\u03bc) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.integrableOn_biUnion_finset",
+    "short": "integrableOn_biUnion_finset",
+    "private": true,
+    "sig": "private lemma integrableOn_biUnion_finset {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {\u03b9 : Type*} [DecidableEq \u03b9] (s : Finset \u03b9) (A : \u03b9 \u2192 Set \u03b1) {f : \u03b1 \u2192 \u211d}\n    (hint : \u2200 i \u2208 s, IntegrableOn f (A i) \u03bc) :\n    IntegrableOn f (\u22c3 i \u2208 s, A i) \u03bc "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.setIntegral_le_sum_biUnion",
+    "short": "setIntegral_le_sum_biUnion",
+    "private": true,
+    "sig": "private lemma setIntegral_le_sum_biUnion {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {\u03b9 : Type*} [DecidableEq \u03b9] (s : Finset \u03b9) (A : \u03b9 \u2192 Set \u03b1) (D : Set \u03b1) {f : \u03b1 \u2192 \u211d}\n    (hD : D \u2286 \u22c3 i \u2208 s, A i)\n    (hmeas : \u2200 i \u2208 s, MeasurableSet (A i))\n    (hnn : \u2200 i \u2208 s, \u2200 x \u2208 A i, 0 \u2264 f x)\n    (hint : \u2200 i \u2208 s, IntegrableOn f (A i) \u03bc) :\n    \u222b x in D, f x \u2202\u03bc \u2264 \u2211 i \u2208 s, \u222b x in A i, f x \u2202\u03bc "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.wInv_bound_den",
+    "short": "wInv_bound_den",
+    "private": true,
+    "sig": "private lemma wInv_bound_den {D a b : \u2115} (hD : 0 < D) (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b t in ((a : \u211d) / D)..((b : \u211d) / D), (1 / t : \u211d) \u2264 (wInv a b : \u211d) / W_scale "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.wInvSqIn_bound",
+    "short": "wInvSqIn_bound",
+    "private": true,
+    "sig": "private lemma wInvSqIn_bound {a b : \u2115} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b t in ((a : \u211d) / D_in)..((b : \u211d) / D_in), (1 / (t * t) : \u211d) \u2264 (wInvSqIn a b : \u211d) / W_scale "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.tri2",
+    "short": "tri2",
+    "private": true,
+    "sig": "private def tri2 (a b : \u211d) : Set (\u211d \u00d7 \u211d) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.tri2_measurable",
+    "short": "tri2_measurable",
+    "private": true,
+    "sig": "private lemma tri2_measurable (a b : \u211d) : MeasurableSet (tri2 a b) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.tri2_compact",
+    "short": "tri2_compact",
+    "private": true,
+    "sig": "private lemma tri2_compact (a b : \u211d) : IsCompact (tri2 a b) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.tri2_weight_le",
+    "short": "tri2_weight_le",
+    "private": true,
+    "sig": "private lemma tri2_weight_le {a b : \u211d} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b p in tri2 a b, (1 / (p.1 * p.1 * p.2) : \u211d) \u2264 (b - a) ^ 2 / (2 * a * a * b) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.wDiagIn_bound",
+    "short": "wDiagIn_bound",
+    "private": true,
+    "sig": "private lemma wDiagIn_bound {a b : \u2115} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b p in tri2 ((a : \u211d) / D_in) ((b : \u211d) / D_in), (1 / (p.1 * p.1 * p.2) : \u211d) \u2264\n      (wDiagIn a b : \u211d) / ((W_scale : \u211d) * W_scale) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.rect2_weight_eq",
+    "short": "rect2_weight_eq",
+    "private": true,
+    "sig": "private lemma rect2_weight_eq {a1 b1 a2 b2 : \u211d} (h1 : a1 \u2264 b1) (h2 : a2 \u2264 b2) :\n    \u222b p in Icc a1 b1 \u00d7\u02e2 Icc a2 b2, (1 / (p.1 * p.1 * p.2) : \u211d) =\n      (\u222b t in a1..b1, (1 / (t * t) : \u211d)) * (\u222b t in a2..b2, (1 / t : \u211d)) "
+  },
+  {
+    "j": 14,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_fn",
+    "short": "F_fn",
+    "private": true,
+    "sig": "private def F_fn (\u03c9 : \u211d \u2192 \u211d) (s : \u211d) : \u211d "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.nat_grid_step_le",
+    "short": "nat_grid_step_le",
+    "private": true,
+    "sig": "private lemma nat_grid_step_le {A B N hh i : \u2115} (hAB : A \u2264 B) (hNh : N * hh = B - A) (hi : i < N) :\n    A + i * hh + hh \u2264 B "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.nat_grid_step_pos",
+    "short": "nat_grid_step_pos",
+    "private": true,
+    "sig": "private lemma nat_grid_step_pos {A B N hh : \u2115} (hAB : A < B) (hNh : N * hh = B - A) : 0 < hh "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.cover1d_nat",
+    "short": "cover1d_nat",
+    "private": true,
+    "sig": "private lemma cover1d_nat {D A B N hh : \u2115} (hD : 0 < D) (hN : 0 < N) (hhh : 0 < hh)\n    (hNh : N * hh = B - A) (hAB : A \u2264 B) {x : \u211d}\n    (hxlo : (A : \u211d) / D \u2264 x) (hxhi : x \u2264 (B : \u211d) / D) :\n    \u2203 i < N, ((A + i * hh : \u2115) : \u211d) / D \u2264 x \u2227 x \u2264 ((A + i * hh + hh : \u2115) : \u211d) / D "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.inner2d_integrableOn",
+    "short": "inner2d_integrableOn",
+    "private": true,
+    "sig": "private lemma inner2d_integrableOn {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {s : \u211d} (hs : (206 * 319 : \u211d) / D_in \u2264 s)\n    {E : Set (\u211d \u00d7 \u211d)} (hE : IsCompact E)\n    (hsub : E \u2286 Icc ((A1_num : \u211d) / D_in) ((B1_num : \u211d) / D_in) \u00d7\u02e2\n                Icc ((A1_num : \u211d) / D_in) ((B1_num : \u211d) / D_in)) :\n    IntegrableOn (fun p : \u211d \u00d7 \u211d => \u03c9 ((s - p.1 - p.2) / p.1) / (p.1 * p.1 * p.2)) E volume "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_fn_bound_of_sum",
+    "short": "F_fn_bound_of_sum",
+    "private": true,
+    "sig": "private lemma F_fn_bound_of_sum {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (ub : \u2115 \u2192 \u2115 \u2192 \u2115)\n    (hub : \u2200 k0 k1 : \u2115, k0 \u2264 k1 \u2192 \u2200 u : \u211d, tk k0 \u2264 u \u2192 u \u2264 tk (k1 + 1) \u2192 \u03c9 u \u2264 (ub k0 k1 : \u211d) / S_scale)\n    {m N12 : \u2115} (hN : 0 < N12) (hd : N12 \u2223 (B1_num - A1_num))\n    {s : \u211d}\n    (hs_lo : (((206 + m) * 319 : \u2115) : \u211d) / D_in \u2264 s)\n    (hs_hi : s \u2264 (((207 + m) * 319 : \u2115) : \u211d) / D_in) :\n    F_fn \u03c9 s \u2264 (F_sumWith ub m N12 : \u211d) / ((S_scale : \u211d) * W_scale * W_scale) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_fn_le_getF",
+    "short": "F_fn_le_getF",
+    "private": true,
+    "sig": "private lemma F_fn_le_getF {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {m : \u2115} (hm : m < 128) {s : \u211d}\n    (hs_lo : (((206 + m) * 319 : \u2115) : \u211d) / D_in \u2264 s)\n    (hs_hi : s \u2264 (((207 + m) * 319 : \u2115) : \u211d) / D_in) :\n    F_fn \u03c9 s \u2264 (getF m : \u211d) / S_scale "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_fn_le_tail",
+    "short": "F_fn_le_tail",
+    "private": true,
+    "sig": "private lemma F_fn_le_tail {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (_hz : ZeroBelowOne \u03c9)\n    {s : \u211d} (hs : ((334 * 319 : \u2115) : \u211d) / D_in \u2264 s) :\n    F_fn \u03c9 s \u2264 (F_tail_val : \u211d) / S_scale "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.F_fn_le_F_UB",
+    "short": "F_fn_le_F_UB",
+    "private": true,
+    "sig": "private lemma F_fn_le_F_UB {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {m0 m1 : \u2115} (hm01 : m0 \u2264 m1) {s : \u211d}\n    (hs_lo : (((206 + m0) * 319 : \u2115) : \u211d) / D_in \u2264 s)\n    (hs_hi : s \u2264 (((206 + m1 + 1) * 319 : \u2115) : \u211d) / D_in) :\n    F_fn \u03c9 s \u2264 (F_UB m0 m1 : \u211d) / S_scale "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.buchstabIntegral_r0j14_eq_iterated",
+    "short": "buchstabIntegral_r0j14_eq_iterated",
+    "private": true,
+    "sig": "private lemma buchstabIntegral_r0j14_eq_iterated {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j14_lo j : \u211d)) (fun j => (r0j14_hi j : \u211d)) \u03c6 =\n      \u222b x0 in Icc ((A0_num : \u211d) / D_out) ((B0_num : \u211d) / D_out), (1 / x0) * F_fn \u03c9 (\u03c6 - x0) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.outer_integrableOn",
+    "short": "outer_integrableOn",
+    "private": true,
+    "sig": "private lemma outer_integrableOn {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) :\n    IntegrableOn (fun x0 : \u211d => (1 / x0) * F_fn \u03c9 (\u03c6 - x0))\n      (Icc ((A0_num : \u211d) / D_out) ((B0_num : \u211d) / D_out)) volume "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.r0j14_outer_bound",
+    "short": "r0j14_outer_bound",
+    "private": false,
+    "sig": "lemma r0j14_outer_bound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (_hz : ZeroBelowOne \u03c9)\n    (fub : \u2115 \u2192 \u2115 \u2192 \u2115)\n    (hfub : \u2200 m0 m1 : \u2115, m0 \u2264 m1 \u2192 \u2200 s : \u211d,\n      (((206 + m0) * 319 : \u2115) : \u211d) / D_in \u2264 s \u2192\n      s \u2264 (((206 + m1 + 1) * 319 : \u2115) : \u211d) / D_in \u2192\n      F_fn \u03c9 s \u2264 (fub m0 m1 : \u211d) / S_scale)\n    {\u03c6 : \u211d} {p : \u2115}\n    (hp_lo : (((240 + p) * StepPhi : \u2115) : \u211d) / D_out \u2264 \u03c6)\n    (hp_hi : \u03c6 \u2264 (((241 + p) * StepPhi : \u2115) : \u211d) / D_out)\n    (hcert : outerSumWith fub p \u2264 targetBoundNat) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j14_lo j : \u211d)) (fun j => (r0j14_hi j : \u211d)) \u03c6 \u2264\n      ((14345377 / 1000000000) : \u211d) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.r0j14_outer_bound_default",
+    "short": "r0j14_outer_bound_default",
+    "private": false,
+    "sig": "lemma r0j14_outer_bound_default {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} {p : \u2115} (hp : p < 128)\n    (hp_lo : (((240 + p) * StepPhi : \u2115) : \u211d) / D_out \u2264 \u03c6)\n    (hp_hi : \u03c6 \u2264 (((241 + p) * StepPhi : \u2115) : \u211d) / D_out) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j14_lo j : \u211d)) (fun j => (r0j14_hi j : \u211d)) \u03c6 \u2264\n      ((14345377 / 1000000000) : \u211d) "
+  },
+  {
+    "j": 14,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.SolBuchstabR0J14.r0j14_tail_bound",
+    "short": "r0j14_tail_bound",
+    "private": false,
+    "sig": "lemma r0j14_tail_bound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : ((368 * StepPhi : \u2115) : \u211d) / D_out \u2264 \u03c6) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j14_lo j : \u211d)) (fun j => (r0j14_hi j : \u211d)) \u03c6 \u2264\n      ((14345377 / 1000000000) : \u211d) "
+  },
+  {
+    "j": 14,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J14.solution",
+    "short": "solution",
+    "private": false,
+    "sig": "theorem solution {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (_h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j14_lo j : \u211d)) (fun j => (r0j14_hi j : \u211d)) \u03c6 \u2264\n      ((14345377 / 1000000000) : \u211d) "
+  },
+  {
+    "j": 15,
+    "kind": "inductive",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree",
+    "short": "SegTree",
+    "private": false,
+    "sig": "inductive SegTree where"
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree.top",
+    "short": "SegTree.top",
+    "private": false,
+    "sig": "def SegTree.top : SegTree \u2192 Nat\n  | .L v => v\n  | .N m _ _ => m\n\ndef SegTree.isValid : Nat \u2192 SegTree \u2192 Bool\n  | 0, .L _ => true\n  | d + 1, .N m l r =>\n      l.isValid d && r.isValid d && Nat.ble l.top m && Nat.ble r.top m\n  | _, _ => false\n\ndef SegTree.get : Nat \u2192 SegTree \u2192 Nat \u2192 Nat\n  | 0, .L v, _ => v\n  | d + 1, .N _ l r, k =>\n      let half "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree.isValid",
+    "short": "SegTree.isValid",
+    "private": false,
+    "sig": "def SegTree.isValid : Nat \u2192 SegTree \u2192 Bool\n  | 0, .L _ => true\n  | d + 1, .N m l r =>\n      l.isValid d && r.isValid d && Nat.ble l.top m && Nat.ble r.top m\n  | _, _ => false\n\ndef SegTree.get : Nat \u2192 SegTree \u2192 Nat \u2192 Nat\n  | 0, .L v, _ => v\n  | d + 1, .N _ l r, k =>\n      let half "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree.get",
+    "short": "SegTree.get",
+    "private": false,
+    "sig": "def SegTree.get : Nat \u2192 SegTree \u2192 Nat \u2192 Nat\n  | 0, .L v, _ => v\n  | d + 1, .N _ l r, k =>\n      let half "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree.getAux",
+    "short": "SegTree.getAux",
+    "private": false,
+    "sig": "def SegTree.getAux : SegTree \u2192 Nat \u2192 Nat \u2192 Nat\n  | .L v, _, _ => v\n  | .N _ l r, half, k =>\n      match Nat.ble half k with\n      | false => l.getAux (half / 2) k\n      | true => r.getAux (half / 2) (k - half)\n\ndef SegTree.rangeMax : Nat \u2192 SegTree \u2192 Nat \u2192 Nat \u2192 Nat\n  | 0, .L v, _, _ => v\n  | d + 1, .N m l r, lo, hi =>\n      let half "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree.rangeMax",
+    "short": "SegTree.rangeMax",
+    "private": false,
+    "sig": "def SegTree.rangeMax : Nat \u2192 SegTree \u2192 Nat \u2192 Nat \u2192 Nat\n  | 0, .L v, _, _ => v\n  | d + 1, .N m l r, lo, hi =>\n      let half "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree.get_le_top",
+    "short": "SegTree.get_le_top",
+    "private": false,
+    "sig": "theorem SegTree.get_le_top {d : Nat} {t : SegTree} (hv : t.isValid d = true)\n    {k : Nat} (hk : k < 2 ^ d) : t.get d k \u2264 t.top "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.SegTree.get_le_rangeMax",
+    "short": "SegTree.get_le_rangeMax",
+    "private": false,
+    "sig": "theorem SegTree.get_le_rangeMax {d : Nat} {t : SegTree} (hv : t.isValid d = true)\n    {lo hi k : Nat} (hlo : lo \u2264 k) (hhi : k \u2264 hi) (hk : k < 2 ^ d) :\n    t.get d k \u2264 t.rangeMax d lo hi "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.K_grid",
+    "short": "K_grid",
+    "private": false,
+    "sig": "def K_grid : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.S_scale",
+    "short": "S_scale",
+    "private": false,
+    "sig": "def S_scale : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.M4_val",
+    "short": "M4_val",
+    "private": false,
+    "sig": "def M4_val : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.M3_val",
+    "short": "M3_val",
+    "private": false,
+    "sig": "def M3_val : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.V_last",
+    "short": "V_last",
+    "private": false,
+    "sig": "def V_last : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.U_tree",
+    "short": "U_tree",
+    "private": false,
+    "sig": "def U_tree : SegTree "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.V_tree",
+    "short": "V_tree",
+    "private": false,
+    "sig": "def V_tree : SegTree "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.getV",
+    "short": "getV",
+    "private": false,
+    "sig": "def getV (k : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.getU",
+    "short": "getU",
+    "private": false,
+    "sig": "def getU (k : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.allPow2",
+    "short": "allPow2",
+    "private": false,
+    "sig": "def allPow2 : Nat \u2192 Nat \u2192 (Nat \u2192 Bool) \u2192 Bool\n  | 0, base, p => p base\n  | d + 1, base, p => allPow2 d base p && allPow2 d (base + 2 ^ d) p\n\ntheorem allPow2_spec {d base : Nat} {p : Nat \u2192 Bool} (h : allPow2 d base p = true)\n    {k : Nat} (hlo : base \u2264 k) (hhi : k < base + 2 ^ d) : p k = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.allPow2_spec",
+    "short": "allPow2_spec",
+    "private": false,
+    "sig": "theorem allPow2_spec {d base : Nat} {p : Nat \u2192 Bool} (h : allPow2 d base p = true)\n    {k : Nat} (hlo : base \u2264 k) (hhi : k < base + 2 ^ d) : p k = true "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkBuchstabStepWith",
+    "short": "checkBuchstabStepWith",
+    "private": false,
+    "sig": "def checkBuchstabStepWith (gV gU : Nat \u2192 Nat) (k : Nat) : Bool "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.ble_false_iff",
+    "short": "ble_false_iff",
+    "private": false,
+    "sig": "theorem ble_false_iff {a b : Nat} : Nat.ble a b = false \u2194 b < a "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.max2",
+    "short": "max2",
+    "private": false,
+    "sig": "def max2 (a b : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.min2",
+    "short": "min2",
+    "private": false,
+    "sig": "def min2 (a b : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.le_max2_left",
+    "short": "le_max2_left",
+    "private": false,
+    "sig": "theorem le_max2_left (a b : Nat) : a \u2264 max2 a b "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.le_max2_right",
+    "short": "le_max2_right",
+    "private": false,
+    "sig": "theorem le_max2_right (a b : Nat) : b \u2264 max2 a b "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.mono_dec_le",
+    "short": "mono_dec_le",
+    "private": false,
+    "sig": "theorem mono_dec_le {f : Nat \u2192 Nat} {a b : Nat}\n    (h : \u2200 k, a \u2264 k \u2192 k < b \u2192 f (k + 1) \u2264 f k)\n    {i j : Nat} (ha : a \u2264 i) (hij : i \u2264 j) (hb : j \u2264 b) : f j \u2264 f i "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.mono_inc_le",
+    "short": "mono_inc_le",
+    "private": false,
+    "sig": "theorem mono_inc_le {f : Nat \u2192 Nat} {a b : Nat}\n    (h : \u2200 k, a \u2264 k \u2192 k < b \u2192 f k \u2264 f (k + 1))\n    {i j : Nat} (ha : a \u2264 i) (hij : i \u2264 j) (hb : j \u2264 b) : f i \u2264 f j "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstabUB_fallback",
+    "short": "buchstabUB_fallback",
+    "private": false,
+    "sig": "def buchstabUB_fallback (k0 k1 : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstabUB",
+    "short": "buchstabUB",
+    "private": false,
+    "sig": "def buchstabUB (k0 k1 : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.getU_le_buchstabUB_fallback",
+    "short": "getU_le_buchstabUB_fallback",
+    "private": false,
+    "sig": "theorem getU_le_buchstabUB_fallback\n    (hm0 : \u2200 i j, i \u2264 j \u2192 j \u2264 255 \u2192 getU j \u2264 getU i)\n    (hm1 : \u2200 i j, 256 \u2264 i \u2192 i \u2264 j \u2192 j \u2264 450 \u2192 getU i \u2264 getU j)\n    (hm2 : \u2200 i j, 450 \u2264 i \u2192 i \u2264 j \u2192 j \u2264 631 \u2192 getU j \u2264 getU i)\n    (hm3 : \u2200 i j, 631 \u2264 i \u2192 i \u2264 j \u2192 j \u2264 767 \u2192 getU i \u2264 getU j)\n    {k0 k1 k : Nat} (h0 : k0 \u2264 k) (h1 : k \u2264 k1) (hk : k < 768) :\n    getU k \u2264 buchstabUB_fallback k0 k1 "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.validBuchstab_V256",
+    "short": "validBuchstab_V256",
+    "private": false,
+    "sig": "theorem validBuchstab_V256 : S_scale \u2264 getV 256 "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.validBuchstab_p0",
+    "short": "validBuchstab_p0",
+    "private": false,
+    "sig": "theorem validBuchstab_p0 : allPow2 9 0 (checkBuchstabStepWith getV getU) = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.validBuchstab_p1",
+    "short": "validBuchstab_p1",
+    "private": false,
+    "sig": "theorem validBuchstab_p1 : allPow2 9 512 (checkBuchstabStepWith getV getU) = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.getU1023_le_M4",
+    "short": "getU1023_le_M4",
+    "private": false,
+    "sig": "theorem getU1023_le_M4 : getU 1023 \u2264 M4_val "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.getU767_le_M3",
+    "short": "getU767_le_M3",
+    "private": false,
+    "sig": "theorem getU767_le_M3 : getU 767 \u2264 M3_val "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_0",
+    "short": "monoU_0",
+    "private": false,
+    "sig": "theorem monoU_0 : allPow2 8 0 (fun k => match Nat.ble k 254 with | true => Nat.ble (getU (k + 1)) (getU k) | false => true) = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_1",
+    "short": "monoU_1",
+    "private": false,
+    "sig": "theorem monoU_1 : allPow2 8 256 (fun k => match Nat.ble k 449 with | true => Nat.ble (getU k) (getU (k + 1)) | false => true) = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_2",
+    "short": "monoU_2",
+    "private": false,
+    "sig": "theorem monoU_2 : allPow2 8 448 (fun k => match Nat.ble 450 k, Nat.ble k 630 with | true, true => Nat.ble (getU (k + 1)) (getU k) | _, _ => true) = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_3",
+    "short": "monoU_3",
+    "private": false,
+    "sig": "theorem monoU_3 : allPow2 8 512 (fun k => match Nat.ble 631 k, Nat.ble k 766 with | true, true => Nat.ble (getU k) (getU (k + 1)) | _, _ => true) = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_0_spec",
+    "short": "monoU_0_spec",
+    "private": false,
+    "sig": "theorem monoU_0_spec {k : Nat} (hk : k < 255) : getU (k + 1) \u2264 getU k "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_1_spec",
+    "short": "monoU_1_spec",
+    "private": false,
+    "sig": "theorem monoU_1_spec {k : Nat} (hlo : 256 \u2264 k) (hhi : k < 450) : getU k \u2264 getU (k + 1) "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_2_spec",
+    "short": "monoU_2_spec",
+    "private": false,
+    "sig": "theorem monoU_2_spec {k : Nat} (hlo : 450 \u2264 k) (hhi : k < 631) : getU (k + 1) \u2264 getU k "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.monoU_3_spec",
+    "short": "monoU_3_spec",
+    "private": false,
+    "sig": "theorem monoU_3_spec {k : Nat} (hlo : 631 \u2264 k) (hhi : k < 767) : getU k \u2264 getU (k + 1) "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.validBuchstab_all",
+    "short": "validBuchstab_all",
+    "private": false,
+    "sig": "theorem validBuchstab_all {k : Nat} (hk : k < 1024) : checkBuchstabStepWith getV getU k = true "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.W_scale",
+    "short": "W_scale",
+    "private": false,
+    "sig": "def W_scale : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.D_in",
+    "short": "D_in",
+    "private": false,
+    "sig": "def D_in : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.A1_num",
+    "short": "A1_num",
+    "private": false,
+    "sig": "def A1_num : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.B1_num",
+    "short": "B1_num",
+    "private": false,
+    "sig": "def B1_num : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.A2_num",
+    "short": "A2_num",
+    "private": false,
+    "sig": "def A2_num : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.B2_num",
+    "short": "B2_num",
+    "private": false,
+    "sig": "def B2_num : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.S_step_in",
+    "short": "S_step_in",
+    "private": false,
+    "sig": "def S_step_in : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.D_out",
+    "short": "D_out",
+    "private": false,
+    "sig": "def D_out : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.A0_num",
+    "short": "A0_num",
+    "private": false,
+    "sig": "def A0_num : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.B0_num",
+    "short": "B0_num",
+    "private": false,
+    "sig": "def B0_num : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.StepPhi",
+    "short": "StepPhi",
+    "private": false,
+    "sig": "def StepPhi : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.ceilDiv",
+    "short": "ceilDiv",
+    "private": false,
+    "sig": "def ceilDiv (a b : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.le_mul_ceilDiv",
+    "short": "le_mul_ceilDiv",
+    "private": false,
+    "sig": "theorem le_mul_ceilDiv {a b : Nat} (hb : 0 < b) : a \u2264 b * ceilDiv a b "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.wInv",
+    "short": "wInv",
+    "private": false,
+    "sig": "def wInv (a b : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.wInvSqIn",
+    "short": "wInvSqIn",
+    "private": false,
+    "sig": "def wInvSqIn (a b : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.sumUpTo",
+    "short": "sumUpTo",
+    "private": false,
+    "sig": "def sumUpTo : Nat \u2192 (Nat \u2192 Nat) \u2192 Nat\n  | 0, _ => 0\n  | n + 1, f => sumUpTo n f + f n\n\ndef N1_of (m : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.N1_of",
+    "short": "N1_of",
+    "private": false,
+    "sig": "def N1_of (m : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.N2_of",
+    "short": "N2_of",
+    "private": false,
+    "sig": "def N2_of (m : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_sumWith",
+    "short": "F_sumWith",
+    "private": false,
+    "sig": "def F_sumWith (ub : Nat \u2192 Nat \u2192 Nat) (m N1 N2 : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_tree",
+    "short": "F_tree",
+    "private": false,
+    "sig": "def F_tree : SegTree "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_tail_val",
+    "short": "F_tail_val",
+    "private": false,
+    "sig": "def F_tail_val : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.getF",
+    "short": "getF",
+    "private": false,
+    "sig": "def getF (m : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_UB",
+    "short": "F_UB",
+    "private": false,
+    "sig": "def F_UB (m0 m1 : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkFStep",
+    "short": "checkFStep",
+    "private": false,
+    "sig": "def checkFStep (m : Nat) : Bool "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.W12_ub8",
+    "short": "W12_ub8",
+    "private": false,
+    "sig": "def W12_ub8 : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.validF_tree",
+    "short": "validF_tree",
+    "private": false,
+    "sig": "theorem validF_tree : F_tree.isValid 6 = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.validF_tail",
+    "short": "validF_tail",
+    "private": false,
+    "sig": "theorem validF_tail : M3_val * W12_ub8 \u2264 F_tail_val * W_scale * W_scale "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkF_0_16",
+    "short": "checkF_0_16",
+    "private": false,
+    "sig": "theorem checkF_0_16  : allPow2 4 0 checkFStep = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkF_16_20",
+    "short": "checkF_16_20",
+    "private": false,
+    "sig": "theorem checkF_16_20 : allPow2 2 16 checkFStep = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkF_20_24",
+    "short": "checkF_20_24",
+    "private": false,
+    "sig": "theorem checkF_20_24 : allPow2 2 20 checkFStep = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkF_24_28",
+    "short": "checkF_24_28",
+    "private": false,
+    "sig": "theorem checkF_24_28 : allPow2 2 24 checkFStep = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkF_28_32",
+    "short": "checkF_28_32",
+    "private": false,
+    "sig": "theorem checkF_28_32 : allPow2 2 28 checkFStep = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkF_32_64",
+    "short": "checkF_32_64",
+    "private": false,
+    "sig": "theorem checkF_32_64 : allPow2 5 32 checkFStep = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkF_all",
+    "short": "checkF_all",
+    "private": false,
+    "sig": "theorem checkF_all {m : Nat} (hm : m < 64) :\n    F_sumWith buchstabUB m (N1_of m) (N2_of m) \u2264 getF m * W_scale * W_scale "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.outerSumWith",
+    "short": "outerSumWith",
+    "private": false,
+    "sig": "def outerSumWith (fub : Nat \u2192 Nat \u2192 Nat) (p : Nat) : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.targetBoundNat",
+    "short": "targetBoundNat",
+    "private": false,
+    "sig": "def targetBoundNat : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.outerTailSum",
+    "short": "outerTailSum",
+    "private": false,
+    "sig": "def outerTailSum : Nat "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkOuter_all_bool",
+    "short": "checkOuter_all_bool",
+    "private": false,
+    "sig": "theorem checkOuter_all_bool : allPow2 6 0 (fun p => Nat.ble (outerSumWith F_UB p) targetBoundNat) = true "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkOuter_tail",
+    "short": "checkOuter_tail",
+    "private": false,
+    "sig": "theorem checkOuter_tail : outerTailSum \u2264 targetBoundNat "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.checkOuter_spec",
+    "short": "checkOuter_spec",
+    "private": false,
+    "sig": "theorem checkOuter_spec {p : Nat} (hp : p < 64) :\n    outerSumWith F_UB p \u2264 targetBoundNat "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_integral_eq",
+    "short": "buchstab_integral_eq",
+    "private": true,
+    "sig": "private lemma buchstab_integral_eq {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {a b : \u211d} (ha : 2 \u2264 a) (hab : a \u2264 b) :\n    b * \u03c9 b - a * \u03c9 a = \u222b s in (a - 1)..(b - 1), \u03c9 s "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_nonneg_on_Icc",
+    "short": "buchstab_nonneg_on_Icc",
+    "private": true,
+    "sig": "private lemma buchstab_nonneg_on_Icc {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) :\n    \u2200 n : \u2115, \u2200 u : \u211d, 1 \u2264 u \u2192 u \u2264 (n : \u211d) + 2 \u2192 0 \u2264 \u03c9 u "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_nonneg",
+    "short": "buchstab_nonneg",
+    "private": true,
+    "sig": "private lemma buchstab_nonneg {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (u : \u211d) : 0 \u2264 \u03c9 u "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.integral_inv_le_trapezoid",
+    "short": "integral_inv_le_trapezoid",
+    "private": true,
+    "sig": "private lemma integral_inv_le_trapezoid {a b : \u211d} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b s in a..b, (1 / s : \u211d) \u2264 (b - a) / 2 * (1 / a + 1 / b) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.integral_inv_sq_eq",
+    "short": "integral_inv_sq_eq",
+    "private": true,
+    "sig": "private lemma integral_inv_sq_eq {a b : \u211d} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b s in a..b, (1 / (s * s) : \u211d) = 1 / a - 1 / b "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_max_propagate",
+    "short": "buchstab_max_propagate",
+    "private": true,
+    "sig": "private lemma buchstab_max_propagate {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {a M : \u211d}\n    (ha : 1 \u2264 a) (hbase : \u2200 u \u2208 Icc a (a + 1), \u03c9 u \u2264 M) :\n    \u2200 u : \u211d, a \u2264 u \u2192 \u03c9 u \u2264 M "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.affine_div_le_of_endpoints",
+    "short": "affine_div_le_of_endpoints",
+    "private": true,
+    "sig": "private lemma affine_div_le_of_endpoints {a b u c va M : \u211d} (hab : a < b)\n    (hau : a \u2264 u) (hub : u \u2264 b)\n    (h1 : va \u2264 c * a) (h2 : va + (b - a) * M \u2264 c * b) :\n    va + (u - a) * M \u2264 c * u "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.tk",
+    "short": "tk",
+    "private": true,
+    "sig": "private def tk (k : Nat) : \u211d "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_table_sound_aux",
+    "short": "buchstab_table_sound_aux",
+    "private": true,
+    "sig": "private lemma buchstab_table_sound_aux {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    (gV gU : \u2115 \u2192 \u2115)\n    (hV256 : S_scale \u2264 gV 256)\n    (hall : \u2200 k < 1024, checkBuchstabStepWith gV gU k = true) :\n    (\u2200 k \u2264 1024, tk k * \u03c9 (tk k) \u2264 (gV k : \u211d) / S_scale) \u2227\n    (\u2200 k < 1024, \u2200 u \u2208 Icc (tk k) (tk (k + 1)), \u03c9 u \u2264 (gU k : \u211d) / S_scale) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_table_sound",
+    "short": "buchstab_table_sound",
+    "private": true,
+    "sig": "private lemma buchstab_table_sound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) :\n    (\u2200 k \u2264 1024, tk k * \u03c9 (tk k) \u2264 (getV k : \u211d) / S_scale) \u2227\n    (\u2200 k < 1024, \u2200 u \u2208 Icc (tk k) (tk (k + 1)), \u03c9 u \u2264 (getU k : \u211d) / S_scale) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_le_M4",
+    "short": "buchstab_le_M4",
+    "private": true,
+    "sig": "private lemma buchstab_le_M4 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {u : \u211d} (hu : 4 \u2264 u) :\n    \u03c9 u \u2264 (M4_val : \u211d) / S_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_le_M3",
+    "short": "buchstab_le_M3",
+    "private": true,
+    "sig": "private lemma buchstab_le_M3 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {u : \u211d} (hu : 3 \u2264 u) :\n    \u03c9 u \u2264 (M3_val : \u211d) / S_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.getU_le_buchstabUB",
+    "short": "getU_le_buchstabUB",
+    "private": true,
+    "sig": "private lemma getU_le_buchstabUB {k0 k1 k : \u2115} (h0 : k0 \u2264 k) (h1 : k \u2264 k1) (hk : k < 768) :\n    getU k \u2264 buchstabUB k0 k1 "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.M4_le_buchstabUB",
+    "short": "M4_le_buchstabUB",
+    "private": true,
+    "sig": "private lemma M4_le_buchstabUB {k0 k1 : \u2115} (hk1 : 768 \u2264 k1) :\n    M4_val \u2264 buchstabUB k0 k1 "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstab_le_buchstabUB",
+    "short": "buchstab_le_buchstabUB",
+    "private": true,
+    "sig": "private lemma buchstab_le_buchstabUB {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {k0 k1 : \u2115}\n    (hk01 : k0 \u2264 k1) {u : \u211d} (hlo : tk k0 \u2264 u) (hhi : u \u2264 tk (k1 + 1)) :\n    \u03c9 u \u2264 (buchstabUB k0 k1 : \u211d) / S_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.sumUpTo_eq_finset_sum",
+    "short": "sumUpTo_eq_finset_sum",
+    "private": true,
+    "sig": "private lemma sumUpTo_eq_finset_sum (n : \u2115) (f : \u2115 \u2192 \u2115) :\n    (sumUpTo n f : \u211d) = \u2211 i \u2208 Finset.range n, (f i : \u211d) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.setIntegral_union_le_of_nonneg",
+    "short": "setIntegral_union_le_of_nonneg",
+    "private": true,
+    "sig": "private lemma setIntegral_union_le_of_nonneg {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {A B : Set \u03b1} {f : \u03b1 \u2192 \u211d} (hA : MeasurableSet A) (hB : MeasurableSet B)\n    (hnnB : \u2200 x \u2208 B, 0 \u2264 f x) (hintA : IntegrableOn f A \u03bc) (hintB : IntegrableOn f B \u03bc) :\n    \u222b x in A \u222a B, f x \u2202\u03bc \u2264 (\u222b x in A, f x \u2202\u03bc) + (\u222b x in B, f x \u2202\u03bc) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.integrableOn_biUnion_finset",
+    "short": "integrableOn_biUnion_finset",
+    "private": true,
+    "sig": "private lemma integrableOn_biUnion_finset {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {\u03b9 : Type*} [DecidableEq \u03b9] (s : Finset \u03b9) (A : \u03b9 \u2192 Set \u03b1) {f : \u03b1 \u2192 \u211d}\n    (hint : \u2200 i \u2208 s, IntegrableOn f (A i) \u03bc) :\n    IntegrableOn f (\u22c3 i \u2208 s, A i) \u03bc "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.setIntegral_le_sum_biUnion",
+    "short": "setIntegral_le_sum_biUnion",
+    "private": true,
+    "sig": "private lemma setIntegral_le_sum_biUnion {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {\u03b9 : Type*} [DecidableEq \u03b9] (s : Finset \u03b9) (A : \u03b9 \u2192 Set \u03b1) (D : Set \u03b1) {f : \u03b1 \u2192 \u211d}\n    (hD : D \u2286 \u22c3 i \u2208 s, A i)\n    (hmeas : \u2200 i \u2208 s, MeasurableSet (A i))\n    (hnn : \u2200 i \u2208 s, \u2200 x \u2208 A i, 0 \u2264 f x)\n    (hint : \u2200 i \u2208 s, IntegrableOn f (A i) \u03bc) :\n    \u222b x in D, f x \u2202\u03bc \u2264 \u2211 i \u2208 s, \u222b x in A i, f x \u2202\u03bc "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.wInv_bound_den",
+    "short": "wInv_bound_den",
+    "private": true,
+    "sig": "private lemma wInv_bound_den {D a b : \u2115} (hD : 0 < D) (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b t in ((a : \u211d) / D)..((b : \u211d) / D), (1 / t : \u211d) \u2264 (wInv a b : \u211d) / W_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.wInvSqIn_bound",
+    "short": "wInvSqIn_bound",
+    "private": true,
+    "sig": "private lemma wInvSqIn_bound {a b : \u2115} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b t in ((a : \u211d) / D_in)..((b : \u211d) / D_in), (1 / (t * t) : \u211d) \u2264 (wInvSqIn a b : \u211d) / W_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.rect2_weight_eq",
+    "short": "rect2_weight_eq",
+    "private": true,
+    "sig": "private lemma rect2_weight_eq {a1 b1 a2 b2 : \u211d} (h1 : a1 \u2264 b1) (h2 : a2 \u2264 b2) :\n    \u222b p in Icc a1 b1 \u00d7\u02e2 Icc a2 b2, (1 / (p.1 * p.1 * p.2) : \u211d) =\n      (\u222b t in a1..b1, (1 / (t * t) : \u211d)) * (\u222b t in a2..b2, (1 / t : \u211d)) "
+  },
+  {
+    "j": 15,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_fn",
+    "short": "F_fn",
+    "private": true,
+    "sig": "private def F_fn (\u03c9 : \u211d \u2192 \u211d) (s : \u211d) : \u211d "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.nat_grid_step_le",
+    "short": "nat_grid_step_le",
+    "private": true,
+    "sig": "private lemma nat_grid_step_le {A B N hh i : \u2115} (hAB : A \u2264 B) (hNh : N * hh = B - A) (hi : i < N) :\n    A + i * hh + hh \u2264 B "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.nat_grid_step_pos",
+    "short": "nat_grid_step_pos",
+    "private": true,
+    "sig": "private lemma nat_grid_step_pos {A B N hh : \u2115} (hAB : A < B) (hNh : N * hh = B - A) : 0 < hh "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.cover1d_nat",
+    "short": "cover1d_nat",
+    "private": true,
+    "sig": "private lemma cover1d_nat {D A B N hh : \u2115} (hD : 0 < D) (hN : 0 < N) (hhh : 0 < hh)\n    (hNh : N * hh = B - A) (hAB : A \u2264 B) {x : \u211d}\n    (hxlo : (A : \u211d) / D \u2264 x) (hxhi : x \u2264 (B : \u211d) / D) :\n    \u2203 i < N, ((A + i * hh : \u2115) : \u211d) / D \u2264 x \u2227 x \u2264 ((A + i * hh + hh : \u2115) : \u211d) / D "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.inner2d_integrableOn",
+    "short": "inner2d_integrableOn",
+    "private": true,
+    "sig": "private lemma inner2d_integrableOn {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {s : \u211d} (hs : ((211 * S_step_in : \u2115) : \u211d) / D_in \u2264 s)\n    {E : Set (\u211d \u00d7 \u211d)} (hE : IsCompact E)\n    (hsub : E \u2286 Icc ((A1_num : \u211d) / D_in) ((B1_num : \u211d) / D_in) \u00d7\u02e2\n                Icc ((A2_num : \u211d) / D_in) ((B2_num : \u211d) / D_in)) :\n    IntegrableOn (fun p : \u211d \u00d7 \u211d => \u03c9 ((s - p.1 - p.2) / p.1) / (p.1 * p.1 * p.2)) E volume "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_fn_bound_of_sum",
+    "short": "F_fn_bound_of_sum",
+    "private": true,
+    "sig": "private lemma F_fn_bound_of_sum {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (ub : \u2115 \u2192 \u2115 \u2192 \u2115)\n    (hub : \u2200 k0 k1 : \u2115, k0 \u2264 k1 \u2192 \u2200 u : \u211d, tk k0 \u2264 u \u2192 u \u2264 tk (k1 + 1) \u2192 \u03c9 u \u2264 (ub k0 k1 : \u211d) / S_scale)\n    {m N1 N2 : \u2115} (hN1 : 0 < N1) (hN2 : 0 < N2)\n    (hd1 : N1 \u2223 (B1_num - A1_num)) (hd2 : N2 \u2223 (B2_num - A2_num))\n    {s : \u211d}\n    (hs_lo : (((211 + m) * S_step_in : \u2115) : \u211d) / D_in \u2264 s)\n    (hs_hi : s \u2264 (((212 + m) * S_step_in : \u2115) : \u211d) / D_in) :\n    F_fn \u03c9 s \u2264 (F_sumWith ub m N1 N2 : \u211d) / ((S_scale : \u211d) * W_scale * W_scale) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_fn_le_getF",
+    "short": "F_fn_le_getF",
+    "private": true,
+    "sig": "private lemma F_fn_le_getF {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {m : \u2115} (hm : m < 64) {s : \u211d}\n    (hs_lo : (((211 + m) * S_step_in : \u2115) : \u211d) / D_in \u2264 s)\n    (hs_hi : s \u2264 (((212 + m) * S_step_in : \u2115) : \u211d) / D_in) :\n    F_fn \u03c9 s \u2264 (getF m : \u211d) / S_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_fn_le_tail",
+    "short": "F_fn_le_tail",
+    "private": true,
+    "sig": "private lemma F_fn_le_tail {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (_hz : ZeroBelowOne \u03c9)\n    {s : \u211d} (hs : ((275 * S_step_in : \u2115) : \u211d) / D_in \u2264 s) :\n    F_fn \u03c9 s \u2264 (F_tail_val : \u211d) / S_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.F_fn_le_F_UB",
+    "short": "F_fn_le_F_UB",
+    "private": true,
+    "sig": "private lemma F_fn_le_F_UB {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {m0 m1 : \u2115} (hm01 : m0 \u2264 m1) {s : \u211d}\n    (hs_lo : (((211 + m0) * S_step_in : \u2115) : \u211d) / D_in \u2264 s)\n    (hs_hi : s \u2264 (((211 + m1 + 1) * S_step_in : \u2115) : \u211d) / D_in) :\n    F_fn \u03c9 s \u2264 (F_UB m0 m1 : \u211d) / S_scale "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.buchstabIntegral_box_eq_iterated",
+    "short": "buchstabIntegral_box_eq_iterated",
+    "private": true,
+    "sig": "private lemma buchstabIntegral_box_eq_iterated {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j15_lo j : \u211d)) (fun j => (r0j15_hi j : \u211d)) \u03c6 =\n      \u222b x0 in Icc ((A0_num : \u211d) / D_out) ((B0_num : \u211d) / D_out), (1 / x0) * F_fn \u03c9 (\u03c6 - x0) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.outer_integrableOn",
+    "short": "outer_integrableOn",
+    "private": true,
+    "sig": "private lemma outer_integrableOn {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) :\n    IntegrableOn (fun x0 : \u211d => (1 / x0) * F_fn \u03c9 (\u03c6 - x0))\n      (Icc ((A0_num : \u211d) / D_out) ((B0_num : \u211d) / D_out)) volume "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.outer_bound",
+    "short": "outer_bound",
+    "private": false,
+    "sig": "lemma outer_bound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (_hz : ZeroBelowOne \u03c9)\n    (fub : \u2115 \u2192 \u2115 \u2192 \u2115)\n    (hfub : \u2200 m0 m1 : \u2115, m0 \u2264 m1 \u2192 \u2200 s : \u211d,\n      (((211 + m0) * S_step_in : \u2115) : \u211d) / D_in \u2264 s \u2192\n      s \u2264 (((211 + m1 + 1) * S_step_in : \u2115) : \u211d) / D_in \u2192\n      F_fn \u03c9 s \u2264 (fub m0 m1 : \u211d) / S_scale)\n    {\u03c6 : \u211d} {p : \u2115}\n    (hp_lo : (((256 + p) * StepPhi : \u2115) : \u211d) / D_out \u2264 \u03c6)\n    (hp_hi : \u03c6 \u2264 (((257 + p) * StepPhi : \u2115) : \u211d) / D_out)\n    (hcert : outerSumWith fub p \u2264 targetBoundNat) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j15_lo j : \u211d)) (fun j => (r0j15_hi j : \u211d)) \u03c6 \u2264\n      ((662003 / 125000000) : \u211d) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.outer_bound_default",
+    "short": "outer_bound_default",
+    "private": false,
+    "sig": "lemma outer_bound_default {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} {p : \u2115} (hp : p < 64)\n    (hp_lo : (((256 + p) * StepPhi : \u2115) : \u211d) / D_out \u2264 \u03c6)\n    (hp_hi : \u03c6 \u2264 (((257 + p) * StepPhi : \u2115) : \u211d) / D_out) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j15_lo j : \u211d)) (fun j => (r0j15_hi j : \u211d)) \u03c6 \u2264\n      ((662003 / 125000000) : \u211d) "
+  },
+  {
+    "j": 15,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.SolBuchstabR0J15.tail_bound",
+    "short": "tail_bound",
+    "private": false,
+    "sig": "lemma tail_bound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : ((320 * StepPhi : \u2115) : \u211d) / D_out \u2264 \u03c6) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j15_lo j : \u211d)) (fun j => (r0j15_hi j : \u211d)) \u03c6 \u2264\n      ((662003 / 125000000) : \u211d) "
+  },
+  {
+    "j": 15,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J15.solution",
+    "short": "solution",
+    "private": false,
+    "sig": "theorem solution {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (_h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j15_lo j : \u211d)) (fun j => (r0j15_hi j : \u211d)) \u03c6 \u2264\n      ((662003 / 125000000) : \u211d) "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.S_scale",
+    "short": "S_scale",
+    "private": false,
+    "sig": "def S_scale : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.D_grid",
+    "short": "D_grid",
+    "private": false,
+    "sig": "def D_grid : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.A_num",
+    "short": "A_num",
+    "private": false,
+    "sig": "def A_num : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.B_num",
+    "short": "B_num",
+    "private": false,
+    "sig": "def B_num : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.TargetNat",
+    "short": "TargetNat",
+    "private": false,
+    "sig": "def TargetNat : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.PaTail",
+    "short": "PaTail",
+    "private": false,
+    "sig": "def PaTail : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.W_ub_nat",
+    "short": "W_ub_nat",
+    "private": false,
+    "sig": "def W_ub_nat : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "inductive",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4",
+    "short": "Cell4",
+    "private": false,
+    "sig": "inductive Cell4 where"
+  },
+  {
+    "j": 16,
+    "kind": "inductive",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.CTree",
+    "short": "CTree",
+    "private": false,
+    "sig": "inductive CTree where"
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.ceilDiv",
+    "short": "ceilDiv",
+    "private": false,
+    "sig": "def ceilDiv (a b : Nat) : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.min2",
+    "short": "min2",
+    "private": false,
+    "sig": "def min2 (a b : Nat) : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.max2",
+    "short": "max2",
+    "private": false,
+    "sig": "def max2 (a b : Nat) : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.le_mul_ceilDiv",
+    "short": "le_mul_ceilDiv",
+    "private": false,
+    "sig": "theorem le_mul_ceilDiv {a b : Nat} (hb : 0 < b) : a \u2264 b * ceilDiv a b "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.min2_le_left",
+    "short": "min2_le_left",
+    "private": false,
+    "sig": "theorem min2_le_left (a b : Nat) : min2 a b \u2264 a "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.min2_le_right",
+    "short": "min2_le_right",
+    "private": false,
+    "sig": "theorem min2_le_right (a b : Nat) : min2 a b \u2264 b "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.left_le_max2",
+    "short": "left_le_max2",
+    "private": false,
+    "sig": "theorem left_le_max2 (a b : Nat) : a \u2264 max2 a b "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.right_le_max2",
+    "short": "right_le_max2",
+    "private": false,
+    "sig": "theorem right_le_max2 (a b : Nat) : b \u2264 max2 a b "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.posPow4",
+    "short": "posPow4",
+    "private": false,
+    "sig": "def posPow4 (a b : Nat) : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.box4Hs48",
+    "short": "box4Hs48",
+    "private": false,
+    "sig": "def box4Hs48 (h0 h1 h2 h3 R : Nat) : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalVertInt",
+    "short": "evalVertInt",
+    "private": false,
+    "sig": "def evalVertInt (pa num fprod x0 x1 x2 x3 : Nat) : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalVertW",
+    "short": "evalVertW",
+    "private": false,
+    "sig": "def evalVertW (num dfprod x0 x1 x2 x3 : Nat) : Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalIntCell",
+    "short": "evalIntCell",
+    "private": false,
+    "sig": "def evalIntCell (pa : Nat) : Cell4 \u2192 Nat\n  | .c4 a b =>\n    let h "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalWCell",
+    "short": "evalWCell",
+    "private": false,
+    "sig": "def evalWCell (nm dm : Nat) : Cell4 \u2192 Nat\n  | .c4 a b =>\n    let h "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.cellVol48",
+    "short": "cellVol48",
+    "private": false,
+    "sig": "def cellVol48 : Cell4 \u2192 Nat\n  | .c4 a b => let h "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.cellLoHi",
+    "short": "cellLoHi",
+    "private": false,
+    "sig": "def cellLoHi : Cell4 \u2192 Nat \u00d7 Nat \u00d7 Nat \u00d7 Nat \u00d7 Nat \u00d7 Nat \u00d7 Nat \u00d7 Nat\n  | .c4 a b => (a, a, a, a, b, b, b, b)\n  | .c31 a0 b0 a1 b1 => (a0, a0, a0, a1, b0, b0, b0, b1)\n  | .c13 a0 b0 a1 b1 => (a0, a1, a1, a1, b0, b1, b1, b1)\n  | .c22 a0 b0 a1 b1 => (a0, a0, a1, a1, b0, b0, b1, b1)\n  | .c211 a0 b0 a1 b1 a2 b2 => (a0, a0, a1, a2, b0, b0, b1, b2)\n  | .c121 a0 b0 a1 b1 a2 b2 => (a0, a1, a1, a2, b0, b1, b1, b2)\n  | .c112 a0 b0 a1 b1 a2 b2 => (a0, a1, a2, a2, b0, b1, b2, b2)\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 => (a0, a1, a2, a3, b0, b1, b2, b3)\n\ndef canSplit (a b : Nat) : Bool "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.canSplit",
+    "short": "canSplit",
+    "private": false,
+    "sig": "def canSplit (a b : Nat) : Bool "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalBndCell",
+    "short": "evalBndCell",
+    "private": false,
+    "sig": "def evalBndCell (pa pb : Nat) (c : Cell4) : Option Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalMainLeaf",
+    "short": "evalMainLeaf",
+    "private": false,
+    "sig": "def evalMainLeaf (pa pb : Nat) : CTree \u2192 Cell4 \u2192 Option Nat\n  | .Z, c =>\n    let (l0, l1, l2, l3, _, _, _, _) "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalWLeaf",
+    "short": "evalWLeaf",
+    "private": false,
+    "sig": "def evalWLeaf : CTree \u2192 Cell4 \u2192 Option Nat\n  | .T, c =>\n    let (l0, _, _, _, _, _, _, _) "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalGen",
+    "short": "evalGen",
+    "private": false,
+    "sig": "def evalGen (leaf : CTree \u2192 Cell4 \u2192 Option Nat) : CTree \u2192 Cell4 \u2192 Option Nat\n  | .Z, c => leaf .Z c\n  | .I, c => leaf .I c\n  | .T, c => leaf .T c\n  | .B, c => leaf .B c\n  | .S5 0 t0 t1 t2 t3 t4, .c4 a b =>\n    match canSplit a b with\n    | false => none\n    | true =>\n      let m "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalTree",
+    "short": "evalTree",
+    "private": false,
+    "sig": "def evalTree (pa pb : Nat) (t : CTree) (c : Cell4) : Option Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalWTree",
+    "short": "evalWTree",
+    "private": false,
+    "sig": "def evalWTree (t : CTree) (c : Cell4) : Option Nat "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.initCell",
+    "short": "initCell",
+    "private": false,
+    "sig": "def initCell : Cell4 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.checkInterval",
+    "short": "checkInterval",
+    "private": false,
+    "sig": "def checkInterval (pa pb : Nat) (t : CTree) : Bool "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.weight_tree",
+    "short": "weight_tree",
+    "private": false,
+    "sig": "def weight_tree : CTree "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_weight_tree",
+    "short": "check_weight_tree",
+    "private": false,
+    "sig": "theorem check_weight_tree :\n    (match evalWTree weight_tree initCell with | some v => Nat.ble v W_ub_nat | none => false) = true "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_tail_1",
+    "short": "check_tail_1",
+    "private": false,
+    "sig": "theorem check_tail_1 : W_ub_nat * B_num \u2264 TargetNat * (PaTail - 4 * B_num) "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_tail_2",
+    "short": "check_tail_2",
+    "private": false,
+    "sig": "theorem check_tail_2 : 7 * W_ub_nat \u2264 12 * TargetNat "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_tail_pos",
+    "short": "check_tail_pos",
+    "private": false,
+    "sig": "theorem check_tail_pos : 5 * B_num \u2264 PaTail "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.tree_0",
+    "short": "tree_0",
+    "private": false,
+    "sig": "def tree_0 : CTree "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.tree_1",
+    "short": "tree_1",
+    "private": false,
+    "sig": "def tree_1 : CTree "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.tree_2",
+    "short": "tree_2",
+    "private": false,
+    "sig": "def tree_2 : CTree "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.tree_3",
+    "short": "tree_3",
+    "private": false,
+    "sig": "def tree_3 : CTree "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.tree_4",
+    "short": "tree_4",
+    "private": false,
+    "sig": "def tree_4 : CTree "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_intv_0",
+    "short": "check_intv_0",
+    "private": false,
+    "sig": "theorem check_intv_0 : checkInterval (7245824) (7247593) tree_0 = true "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_intv_1",
+    "short": "check_intv_1",
+    "private": false,
+    "sig": "theorem check_intv_1 : checkInterval (7247593) (7251131) tree_1 = true "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_intv_2",
+    "short": "check_intv_2",
+    "private": false,
+    "sig": "theorem check_intv_2 : checkInterval (7251131) (7265283) tree_2 = true "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_intv_3",
+    "short": "check_intv_3",
+    "private": false,
+    "sig": "theorem check_intv_3 : checkInterval (7265283) (7718147) tree_3 = true "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.check_intv_4",
+    "short": "check_intv_4",
+    "private": false,
+    "sig": "theorem check_intv_4 : checkInterval (7718147) (7870281) tree_4 = true "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstab_integral_eq",
+    "short": "buchstab_integral_eq",
+    "private": true,
+    "sig": "private lemma buchstab_integral_eq {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {a b : \u211d} (ha : 2 \u2264 a) (hab : a \u2264 b) :\n    b * \u03c9 b - a * \u03c9 a = \u222b s in (a - 1)..(b - 1), \u03c9 s "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstab_nonneg_on_Icc",
+    "short": "buchstab_nonneg_on_Icc",
+    "private": true,
+    "sig": "private lemma buchstab_nonneg_on_Icc {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) :\n    \u2200 n : \u2115, \u2200 u : \u211d, 1 \u2264 u \u2192 u \u2264 (n : \u211d) + 2 \u2192 0 \u2264 \u03c9 u "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstab_nonneg",
+    "short": "buchstab_nonneg",
+    "private": true,
+    "sig": "private lemma buchstab_nonneg {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (u : \u211d) : 0 \u2264 \u03c9 u "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integral_inv_le_trapezoid",
+    "short": "integral_inv_le_trapezoid",
+    "private": true,
+    "sig": "private lemma integral_inv_le_trapezoid {a b : \u211d} (ha : 0 < a) (hab : a \u2264 b) :\n    \u222b s in a..b, (1 / s : \u211d) \u2264 (b - a) / 2 * (1 / a + 1 / b) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstab_max_propagate",
+    "short": "buchstab_max_propagate",
+    "private": true,
+    "sig": "private lemma buchstab_max_propagate {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) {a M : \u211d}\n    (ha : 1 \u2264 a) (hbase : \u2200 u \u2208 Icc a (a + 1), \u03c9 u \u2264 M) :\n    \u2200 u : \u211d, a \u2264 u \u2192 \u03c9 u \u2264 M "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstab_le_seven_twelfths",
+    "short": "buchstab_le_seven_twelfths",
+    "private": true,
+    "sig": "private lemma buchstab_le_seven_twelfths {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {u : \u211d} (hu : 2 \u2264 u) : \u03c9 u \u2264 7 / 12 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstab_le_one",
+    "short": "buchstab_le_one",
+    "private": true,
+    "sig": "private lemma buchstab_le_one {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (u : \u211d) : \u03c9 u \u2264 1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstab_le_max_inv",
+    "short": "buchstab_le_max_inv",
+    "private": true,
+    "sig": "private lemma buchstab_le_max_inv {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9)\n    {umin u : \u211d} (h1 : 1 \u2264 umin) (hle : umin \u2264 u) :\n    \u03c9 u \u2264 max (7 / 12 : \u211d) (1 / umin) "
+  },
+  {
+    "j": 16,
+    "kind": "abbrev",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.R4",
+    "short": "R4",
+    "private": false,
+    "sig": "abbrev R4 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval",
+    "short": "gval",
+    "private": false,
+    "sig": "def gval (k : Nat) : \u211d "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.hDpos",
+    "short": "hDpos",
+    "private": true,
+    "sig": "private lemma hDpos : (0 : \u211d) < D_grid "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.hSpos",
+    "short": "hSpos",
+    "private": true,
+    "sig": "private lemma hSpos : (0 : \u211d) < S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval_le",
+    "short": "gval_le",
+    "private": true,
+    "sig": "private lemma gval_le {a b : Nat} (h : a \u2264 b) : gval a \u2264 gval b "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval_lt",
+    "short": "gval_lt",
+    "private": true,
+    "sig": "private lemma gval_lt {a b : Nat} (h : a < b) : gval a < gval b "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval_pos",
+    "short": "gval_pos",
+    "private": true,
+    "sig": "private lemma gval_pos {a : Nat} (h : 0 < a) : 0 < gval a "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval_sub",
+    "short": "gval_sub",
+    "private": true,
+    "sig": "private lemma gval_sub {a b : Nat} (h : a \u2264 b) : gval b - gval a = ((b - a : Nat) : \u211d) / D_grid "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval_add",
+    "short": "gval_add",
+    "private": true,
+    "sig": "private lemma gval_add (a b : Nat) : gval (a + b) = gval a + gval b "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval_2mul",
+    "short": "gval_2mul",
+    "private": true,
+    "sig": "private lemma gval_2mul (a : Nat) : gval (2 * a) = 2 * gval a "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.gval_3mul",
+    "short": "gval_3mul",
+    "private": true,
+    "sig": "private lemma gval_3mul (a : Nat) : gval (3 * a) = 3 * gval a "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.div_eq_one_add_sub_div",
+    "short": "div_eq_one_add_sub_div",
+    "private": true,
+    "sig": "private lemma div_eq_one_add_sub_div {x l : \u211d} (hl : l \u2260 0) : x / l = 1 + (x - l) / l "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.inv_u_div_weight",
+    "short": "inv_u_div_weight",
+    "private": true,
+    "sig": "private lemma inv_u_div_weight {x0 x1 x2 x3 rem : \u211d} (hx2 : x2 \u2260 0) :\n    (1 / (rem / x2)) / (x0 * x1 * x2 * x2 * x3) = 1 / (x0 * x1 * x2 * x3 * rem) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.weight_mul_vol",
+    "short": "weight_mul_vol",
+    "private": true,
+    "sig": "private lemma weight_mul_vol {D x0 x1 x2 x3 v : \u211d} (hD : D \u2260 0) :\n    (1 / ((x0 / D) * (x1 / D) * (x2 / D) * (x2 / D) * (x3 / D))) * (v / (48 * D ^ 4)) =\n      (D * v) / (48 * x0 * x1 * x2 * x2 * x3) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.vertInt_alg",
+    "short": "vertInt_alg",
+    "private": true,
+    "sig": "private lemma vertInt_alg {D v f x0 x1 x2 x3 rem : \u211d} (hD : D \u2260 0) :\n    (v / D ^ 4) / f * (1 / ((x0 / D) * (x1 / D) * (x2 / D) * (x3 / D) * (rem / D))) =\n      (D * v) / (f * x0 * x1 * x2 * x3 * rem) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.vertW_alg",
+    "short": "vertW_alg",
+    "private": true,
+    "sig": "private lemma vertW_alg {D nm dm v f x0 x1 x2 x3 : \u211d} (hD : D \u2260 0) :\n    ((nm / dm) * ((v / D ^ 4) / f)) * (1 / ((x0 / D) * (x1 / D) * (x2 / D) * (x2 / D) * (x3 / D))) =\n      (nm * D * v) / (dm * f * x0 * x1 * x2 * x2 * x3) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.canSplit_mid",
+    "short": "canSplit_mid",
+    "private": true,
+    "sig": "private lemma canSplit_mid {a b : Nat} (h : canSplit a b = true) :\n    a < (a + b) / 2 \u2227 (a + b) / 2 < b "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.box",
+    "short": "Cell4.box",
+    "private": true,
+    "sig": "private def Cell4.box : Cell4 \u2192 Set R4 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.set",
+    "short": "Cell4.set",
+    "private": false,
+    "sig": "def Cell4.set : Cell4 \u2192 Set R4\n  | .c4 a b =>\n      {x : R4 | gval a \u2264 x.1 \u2227 x.1 \u2264 x.2.1 \u2227 x.2.1 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b}\n  | .c31 a0 b0 a1 b1 =>\n      {x : R4 | gval a0 \u2264 x.1 \u2227 x.1 \u2264 x.2.1 \u2227 x.2.1 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 gval b0 \u2227\n                gval a1 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b1}\n  | .c13 a0 b0 a1 b1 =>\n      {x : R4 | gval a0 \u2264 x.1 \u2227 x.1 \u2264 gval b0 \u2227\n                gval a1 \u2264 x.2.1 \u2227 x.2.1 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b1}\n  | .c22 a0 b0 a1 b1 =>\n      {x : R4 | gval a0 \u2264 x.1 \u2227 x.1 \u2264 x.2.1 \u2227 x.2.1 \u2264 gval b0 \u2227\n                gval a1 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b1}\n  | .c211 a0 b0 a1 b1 a2 b2 =>\n      {x : R4 | gval a0 \u2264 x.1 \u2227 x.1 \u2264 x.2.1 \u2227 x.2.1 \u2264 gval b0 \u2227\n                gval a1 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 gval b1 \u2227 gval a2 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b2}\n  | .c121 a0 b0 a1 b1 a2 b2 =>\n      {x : R4 | gval a0 \u2264 x.1 \u2227 x.1 \u2264 gval b0 \u2227\n                gval a1 \u2264 x.2.1 \u2227 x.2.1 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 gval b1 \u2227\n                gval a2 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b2}\n  | .c112 a0 b0 a1 b1 a2 b2 =>\n      {x : R4 | gval a0 \u2264 x.1 \u2227 x.1 \u2264 gval b0 \u2227 gval a1 \u2264 x.2.1 \u2227 x.2.1 \u2264 gval b1 \u2227\n                gval a2 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b2}\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      {x : R4 | gval a0 \u2264 x.1 \u2227 x.1 \u2264 gval b0 \u2227 gval a1 \u2264 x.2.1 \u2227 x.2.1 \u2264 gval b1 \u2227\n                gval a2 \u2264 x.2.2.1 \u2227 x.2.2.1 \u2264 gval b2 \u2227 gval a3 \u2264 x.2.2.2 \u2227 x.2.2.2 \u2264 gval b3}\n\nprivate lemma Cell4.set_subset_box (c : Cell4) : c.set \u2286 c.box "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.set_subset_box",
+    "short": "Cell4.set_subset_box",
+    "private": true,
+    "sig": "private lemma Cell4.set_subset_box (c : Cell4) : c.set \u2286 c.box "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.isClosed_set",
+    "short": "Cell4.isClosed_set",
+    "private": true,
+    "sig": "private lemma Cell4.isClosed_set (c : Cell4) : IsClosed c.set "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.isCompact_box",
+    "short": "Cell4.isCompact_box",
+    "private": true,
+    "sig": "private lemma Cell4.isCompact_box (c : Cell4) : IsCompact c.box "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.isCompact_set",
+    "short": "Cell4.isCompact_set",
+    "private": true,
+    "sig": "private lemma Cell4.isCompact_set (c : Cell4) : IsCompact c.set "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.measurableSet_set",
+    "short": "Cell4.measurableSet_set",
+    "private": false,
+    "sig": "lemma Cell4.measurableSet_set (c : Cell4) : MeasurableSet c.set "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.convex_box",
+    "short": "Cell4.convex_box",
+    "private": true,
+    "sig": "private lemma Cell4.convex_box (c : Cell4) : Convex \u211d c.box "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.Cell4.valid_bounds",
+    "short": "Cell4.valid_bounds",
+    "private": true,
+    "sig": "private lemma Cell4.valid_bounds {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) :\n    let (l0, l1, l2, l3, u0, u1, u2, u3) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.setIntegral_union_le_of_nonneg",
+    "short": "setIntegral_union_le_of_nonneg",
+    "private": true,
+    "sig": "private lemma setIntegral_union_le_of_nonneg {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {A B : Set \u03b1} {f : \u03b1 \u2192 \u211d} (hA : MeasurableSet A) (hB : MeasurableSet B)\n    (hnnB : \u2200 x \u2208 B, 0 \u2264 f x) (hintA : IntegrableOn f A \u03bc) (hintB : IntegrableOn f B \u03bc) :\n    \u222b x in A \u222a B, f x \u2202\u03bc \u2264 (\u222b x in A, f x \u2202\u03bc) + (\u222b x in B, f x \u2202\u03bc) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.setIntegral_le_of_subset_union2",
+    "short": "setIntegral_le_of_subset_union2",
+    "private": true,
+    "sig": "private lemma setIntegral_le_of_subset_union2 {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {S A B : Set \u03b1} {f : \u03b1 \u2192 \u211d}\n    (hsub : S \u2286 A \u222a B) (hA : MeasurableSet A) (hB : MeasurableSet B)\n    (hnnA : \u2200 x \u2208 A, 0 \u2264 f x) (hnnB : \u2200 x \u2208 B, 0 \u2264 f x)\n    (hintA : IntegrableOn f A \u03bc) (hintB : IntegrableOn f B \u03bc) :\n    \u222b x in S, f x \u2202\u03bc \u2264 (\u222b x in A, f x \u2202\u03bc) + (\u222b x in B, f x \u2202\u03bc) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.setIntegral_le_of_subset_union3",
+    "short": "setIntegral_le_of_subset_union3",
+    "private": true,
+    "sig": "private lemma setIntegral_le_of_subset_union3 {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {S A B C : Set \u03b1} {f : \u03b1 \u2192 \u211d}\n    (hsub : S \u2286 A \u222a (B \u222a C)) (hA : MeasurableSet A) (hB : MeasurableSet B) (hC : MeasurableSet C)\n    (hnnA : \u2200 x \u2208 A, 0 \u2264 f x) (hnnB : \u2200 x \u2208 B, 0 \u2264 f x) (hnnC : \u2200 x \u2208 C, 0 \u2264 f x)\n    (hintA : IntegrableOn f A \u03bc) (hintB : IntegrableOn f B \u03bc) (hintC : IntegrableOn f C \u03bc) :\n    \u222b x in S, f x \u2202\u03bc \u2264 (\u222b x in A, f x \u2202\u03bc) + (\u222b x in B, f x \u2202\u03bc) + (\u222b x in C, f x \u2202\u03bc) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.setIntegral_le_of_subset_union4",
+    "short": "setIntegral_le_of_subset_union4",
+    "private": true,
+    "sig": "private lemma setIntegral_le_of_subset_union4 {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {S A B C D : Set \u03b1} {f : \u03b1 \u2192 \u211d}\n    (hsub : S \u2286 A \u222a (B \u222a (C \u222a D)))\n    (hA : MeasurableSet A) (hB : MeasurableSet B) (hC : MeasurableSet C) (hD : MeasurableSet D)\n    (hnnA : \u2200 x \u2208 A, 0 \u2264 f x) (hnnB : \u2200 x \u2208 B, 0 \u2264 f x) (hnnC : \u2200 x \u2208 C, 0 \u2264 f x) (hnnD : \u2200 x \u2208 D, 0 \u2264 f x)\n    (hintA : IntegrableOn f A \u03bc) (hintB : IntegrableOn f B \u03bc) (hintC : IntegrableOn f C \u03bc) (hintD : IntegrableOn f D \u03bc) :\n    \u222b x in S, f x \u2202\u03bc \u2264 (\u222b x in A, f x \u2202\u03bc) + (\u222b x in B, f x \u2202\u03bc) + (\u222b x in C, f x \u2202\u03bc) + (\u222b x in D, f x \u2202\u03bc) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.setIntegral_le_of_subset_union5",
+    "short": "setIntegral_le_of_subset_union5",
+    "private": true,
+    "sig": "private lemma setIntegral_le_of_subset_union5 {\u03b1 : Type*} [MeasurableSpace \u03b1] {\u03bc : Measure \u03b1}\n    {S A B C D E : Set \u03b1} {f : \u03b1 \u2192 \u211d}\n    (hsub : S \u2286 A \u222a (B \u222a (C \u222a (D \u222a E))))\n    (hA : MeasurableSet A) (hB : MeasurableSet B) (hC : MeasurableSet C) (hD : MeasurableSet D) (hE : MeasurableSet E)\n    (hnnA : \u2200 x \u2208 A, 0 \u2264 f x) (hnnB : \u2200 x \u2208 B, 0 \u2264 f x) (hnnC : \u2200 x \u2208 C, 0 \u2264 f x) (hnnD : \u2200 x \u2208 D, 0 \u2264 f x) (hnnE : \u2200 x \u2208 E, 0 \u2264 f x)\n    (hintA : IntegrableOn f A \u03bc) (hintB : IntegrableOn f B \u03bc) (hintC : IntegrableOn f C \u03bc) (hintD : IntegrableOn f D \u03bc) (hintE : IntegrableOn f E \u03bc) :\n    \u222b x in S, f x \u2202\u03bc \u2264 (\u222b x in A, f x \u2202\u03bc) + (\u222b x in B, f x \u2202\u03bc) + (\u222b x in C, f x \u2202\u03bc) + (\u222b x in D, f x \u2202\u03bc) + (\u222b x in E, f x \u2202\u03bc) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.setIntegral_slice",
+    "short": "setIntegral_slice",
+    "private": true,
+    "sig": "private lemma setIntegral_slice {\u03b2 : Type*} [MeasurableSpace \u03b2] {\u03bd : Measure \u03b2} [SFinite \u03bd]\n    {a b : \u211d} (hab : a \u2264 b) {T : \u211d \u2192 Set \u03b2} {f : \u211d \u00d7 \u03b2 \u2192 \u211d}\n    (hT : \u2200 x, MeasurableSet (T x))\n    (hmeas : MeasurableSet {p : \u211d \u00d7 \u03b2 | p.1 \u2208 Icc a b \u2227 p.2 \u2208 T p.1})\n    (hint : IntegrableOn f {p : \u211d \u00d7 \u03b2 | p.1 \u2208 Icc a b \u2227 p.2 \u2208 T p.1} (volume.prod \u03bd)) :\n    \u222b p in {p : \u211d \u00d7 \u03b2 | p.1 \u2208 Icc a b \u2227 p.2 \u2208 T p.1}, f p \u2202(volume.prod \u03bd) =\n      \u222b x in a..b, \u222b y in T x, f (x, y) \u2202\u03bd "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.cell4SetGen",
+    "short": "cell4SetGen",
+    "private": true,
+    "sig": "private def cell4SetGen (l0 u0 l1 u1 l2 u2 l3 u3 : \u211d) (m01 m12 m23 : Bool) : Set R4 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.setIntegral_cell4SetGen",
+    "short": "setIntegral_cell4SetGen",
+    "private": true,
+    "sig": "private lemma setIntegral_cell4SetGen {l0 u0 l1 u1 l2 u2 l3 u3 : \u211d} {m01 m12 m23 : Bool}\n    (h0 : l0 \u2264 u0) (h1 : l1 \u2264 u1) (h2 : l2 \u2264 u2) (h3 : l3 \u2264 u3)\n    (hm01 : m01 = true \u2192 l1 \u2264 l0 \u2227 u0 \u2264 u1)\n    (hm12 : m12 = true \u2192 l2 \u2264 l1 \u2227 u1 \u2264 u2)\n    (hm23 : m23 = true \u2192 l3 \u2264 l2 \u2227 u2 \u2264 u3)\n    {g : R4 \u2192 \u211d} (hg : Continuous g) :\n    \u222b x in cell4SetGen l0 u0 l1 u1 l2 u2 l3 u3 m01 m12 m23, g x =\n      \u222b x0 in l0..u0, \u222b x1 in (if m01 then x0 else l1)..u1,\n        \u222b x2 in (if m12 then x1 else l2)..u2,\n          \u222b x3 in (if m23 then x2 else l3)..u3, g (x0, x1, x2, x3) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integral_sub_pow",
+    "short": "integral_sub_pow",
+    "private": true,
+    "sig": "private lemma integral_sub_pow {a b : \u211d} (n : \u2115) :\n    \u222b t in a..b, (b - t) ^ n = (b - a) ^ (n + 1) / (n + 1) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integral_sub_mul_pow",
+    "short": "integral_sub_mul_pow",
+    "private": true,
+    "sig": "private lemma integral_sub_mul_pow {a b : \u211d} (n : \u2115) :\n    \u222b t in a..b, (t - a) * (b - t) ^ n = (b - a) ^ (n + 2) / ((n + 1) * (n + 2)) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter1_w0",
+    "short": "iter1_w0",
+    "private": true,
+    "sig": "private lemma iter1_w0 {a b : \u211d} : \u222b x in a..b, (b - x) = (b - a) ^ 2 / 2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter1_w1",
+    "short": "iter1_w1",
+    "private": true,
+    "sig": "private lemma iter1_w1 {a b : \u211d} : \u222b x in a..b, (x - a) = (b - a) ^ 2 / 2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter1_c",
+    "short": "iter1_c",
+    "private": true,
+    "sig": "private lemma iter1_c {a b : \u211d} : \u222b _ in a..b, (1 : \u211d) = b - a "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter2_w0",
+    "short": "iter2_w0",
+    "private": true,
+    "sig": "private lemma iter2_w0 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, (b - x1) = (b - a) ^ 3 / 6 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter2_w1",
+    "short": "iter2_w1",
+    "private": true,
+    "sig": "private lemma iter2_w1 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, (x1 - x0) = (b - a) ^ 3 / 6 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter2_w2",
+    "short": "iter2_w2",
+    "private": true,
+    "sig": "private lemma iter2_w2 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b _ in x0..b, (x0 - a) = (b - a) ^ 3 / 6 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter2_c",
+    "short": "iter2_c",
+    "private": true,
+    "sig": "private lemma iter2_c {a b : \u211d} :\n    \u222b x0 in a..b, \u222b _ in x0..b, (1 : \u211d) = (b - a) ^ 2 / 2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter3_w0",
+    "short": "iter3_w0",
+    "private": true,
+    "sig": "private lemma iter3_w0 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, (b - x2) = (b - a) ^ 4 / 24 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter3_w1",
+    "short": "iter3_w1",
+    "private": true,
+    "sig": "private lemma iter3_w1 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, (x2 - x1) = (b - a) ^ 4 / 24 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter3_w2",
+    "short": "iter3_w2",
+    "private": true,
+    "sig": "private lemma iter3_w2 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b _ in x1..b, (x1 - x0) = (b - a) ^ 4 / 24 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter3_w3",
+    "short": "iter3_w3",
+    "private": true,
+    "sig": "private lemma iter3_w3 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b _ in x1..b, (x0 - a) = (b - a) ^ 4 / 24 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter3_c",
+    "short": "iter3_c",
+    "private": true,
+    "sig": "private lemma iter3_c {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b _ in x1..b, (1 : \u211d) = (b - a) ^ 3 / 6 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter4_w0",
+    "short": "iter4_w0",
+    "private": true,
+    "sig": "private lemma iter4_w0 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, \u222b x3 in x2..b, (b - x3) = (b - a) ^ 5 / 120 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter4_w1",
+    "short": "iter4_w1",
+    "private": true,
+    "sig": "private lemma iter4_w1 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, \u222b x3 in x2..b, (x3 - x2) = (b - a) ^ 5 / 120 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter4_w2",
+    "short": "iter4_w2",
+    "private": true,
+    "sig": "private lemma iter4_w2 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, \u222b _ in x2..b, (x2 - x1) = (b - a) ^ 5 / 120 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter4_w3",
+    "short": "iter4_w3",
+    "private": true,
+    "sig": "private lemma iter4_w3 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, \u222b _ in x2..b, (x1 - x0) = (b - a) ^ 5 / 120 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter4_w4",
+    "short": "iter4_w4",
+    "private": true,
+    "sig": "private lemma iter4_w4 {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, \u222b _ in x2..b, (x0 - a) = (b - a) ^ 5 / 120 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter4_c",
+    "short": "iter4_c",
+    "private": true,
+    "sig": "private lemma iter4_c {a b : \u211d} :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, \u222b _ in x2..b, (1 : \u211d) = (b - a) ^ 4 / 24 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w1",
+    "short": "w1",
+    "private": true,
+    "sig": "private def w1 (a b : \u211d) : Bool \u2192 \u211d \u2192 \u211d\n  | false, x => (b - x) / (b - a)\n  | true,  x => (x - a) / (b - a)\n\nprivate def v1 (a b : \u211d) : Bool \u2192 \u211d\n  | false => a\n  | true  => b\n\nprivate def w2 (a b : \u211d) : Fin 3 \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, x1 => (b - x1) / (b - a)\n  | \u27e81, _\u27e9, x0, x1 => (x1 - x0) / (b - a)\n  | \u27e82, _\u27e9, x0, _ => (x0 - a) / (b - a)\n\nprivate def v2 (a b : \u211d) : Fin 3 \u2192 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a)\n  | \u27e81, _\u27e9 => (a, b)\n  | \u27e82, _\u27e9 => (b, b)\n\nprivate def w3 (a b : \u211d) : Fin 4 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, x2 => (b - x2) / (b - a)\n  | \u27e81, _\u27e9, _, x1, x2 => (x2 - x1) / (b - a)\n  | \u27e82, _\u27e9, x0, x1, _ => (x1 - x0) / (b - a)\n  | \u27e83, _\u27e9, x0, _, _ => (x0 - a) / (b - a)\n\nprivate def v3 (a b : \u211d) : Fin 4 \u2192 \u211d \u00d7 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a, a)\n  | \u27e81, _\u27e9 => (a, a, b)\n  | \u27e82, _\u27e9 => (a, b, b)\n  | \u27e83, _\u27e9 => (b, b, b)\n\nprivate def w4 (a b : \u211d) : Fin 5 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, _, x3 => (b - x3) / (b - a)\n  | \u27e81, _\u27e9, _, _, x2, x3 => (x3 - x2) / (b - a)\n  | \u27e82, _\u27e9, _, x1, x2, _ => (x2 - x1) / (b - a)\n  | \u27e83, _\u27e9, x0, x1, _, _ => (x1 - x0) / (b - a)\n  | \u27e84, _\u27e9, x0, _, _, _ => (x0 - a) / (b - a)\n\nprivate def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v1",
+    "short": "v1",
+    "private": true,
+    "sig": "private def v1 (a b : \u211d) : Bool \u2192 \u211d\n  | false => a\n  | true  => b\n\nprivate def w2 (a b : \u211d) : Fin 3 \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, x1 => (b - x1) / (b - a)\n  | \u27e81, _\u27e9, x0, x1 => (x1 - x0) / (b - a)\n  | \u27e82, _\u27e9, x0, _ => (x0 - a) / (b - a)\n\nprivate def v2 (a b : \u211d) : Fin 3 \u2192 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a)\n  | \u27e81, _\u27e9 => (a, b)\n  | \u27e82, _\u27e9 => (b, b)\n\nprivate def w3 (a b : \u211d) : Fin 4 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, x2 => (b - x2) / (b - a)\n  | \u27e81, _\u27e9, _, x1, x2 => (x2 - x1) / (b - a)\n  | \u27e82, _\u27e9, x0, x1, _ => (x1 - x0) / (b - a)\n  | \u27e83, _\u27e9, x0, _, _ => (x0 - a) / (b - a)\n\nprivate def v3 (a b : \u211d) : Fin 4 \u2192 \u211d \u00d7 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a, a)\n  | \u27e81, _\u27e9 => (a, a, b)\n  | \u27e82, _\u27e9 => (a, b, b)\n  | \u27e83, _\u27e9 => (b, b, b)\n\nprivate def w4 (a b : \u211d) : Fin 5 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, _, x3 => (b - x3) / (b - a)\n  | \u27e81, _\u27e9, _, _, x2, x3 => (x3 - x2) / (b - a)\n  | \u27e82, _\u27e9, _, x1, x2, _ => (x2 - x1) / (b - a)\n  | \u27e83, _\u27e9, x0, x1, _, _ => (x1 - x0) / (b - a)\n  | \u27e84, _\u27e9, x0, _, _, _ => (x0 - a) / (b - a)\n\nprivate def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w2",
+    "short": "w2",
+    "private": true,
+    "sig": "private def w2 (a b : \u211d) : Fin 3 \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, x1 => (b - x1) / (b - a)\n  | \u27e81, _\u27e9, x0, x1 => (x1 - x0) / (b - a)\n  | \u27e82, _\u27e9, x0, _ => (x0 - a) / (b - a)\n\nprivate def v2 (a b : \u211d) : Fin 3 \u2192 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a)\n  | \u27e81, _\u27e9 => (a, b)\n  | \u27e82, _\u27e9 => (b, b)\n\nprivate def w3 (a b : \u211d) : Fin 4 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, x2 => (b - x2) / (b - a)\n  | \u27e81, _\u27e9, _, x1, x2 => (x2 - x1) / (b - a)\n  | \u27e82, _\u27e9, x0, x1, _ => (x1 - x0) / (b - a)\n  | \u27e83, _\u27e9, x0, _, _ => (x0 - a) / (b - a)\n\nprivate def v3 (a b : \u211d) : Fin 4 \u2192 \u211d \u00d7 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a, a)\n  | \u27e81, _\u27e9 => (a, a, b)\n  | \u27e82, _\u27e9 => (a, b, b)\n  | \u27e83, _\u27e9 => (b, b, b)\n\nprivate def w4 (a b : \u211d) : Fin 5 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, _, x3 => (b - x3) / (b - a)\n  | \u27e81, _\u27e9, _, _, x2, x3 => (x3 - x2) / (b - a)\n  | \u27e82, _\u27e9, _, x1, x2, _ => (x2 - x1) / (b - a)\n  | \u27e83, _\u27e9, x0, x1, _, _ => (x1 - x0) / (b - a)\n  | \u27e84, _\u27e9, x0, _, _, _ => (x0 - a) / (b - a)\n\nprivate def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v2",
+    "short": "v2",
+    "private": true,
+    "sig": "private def v2 (a b : \u211d) : Fin 3 \u2192 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a)\n  | \u27e81, _\u27e9 => (a, b)\n  | \u27e82, _\u27e9 => (b, b)\n\nprivate def w3 (a b : \u211d) : Fin 4 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, x2 => (b - x2) / (b - a)\n  | \u27e81, _\u27e9, _, x1, x2 => (x2 - x1) / (b - a)\n  | \u27e82, _\u27e9, x0, x1, _ => (x1 - x0) / (b - a)\n  | \u27e83, _\u27e9, x0, _, _ => (x0 - a) / (b - a)\n\nprivate def v3 (a b : \u211d) : Fin 4 \u2192 \u211d \u00d7 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a, a)\n  | \u27e81, _\u27e9 => (a, a, b)\n  | \u27e82, _\u27e9 => (a, b, b)\n  | \u27e83, _\u27e9 => (b, b, b)\n\nprivate def w4 (a b : \u211d) : Fin 5 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, _, x3 => (b - x3) / (b - a)\n  | \u27e81, _\u27e9, _, _, x2, x3 => (x3 - x2) / (b - a)\n  | \u27e82, _\u27e9, _, x1, x2, _ => (x2 - x1) / (b - a)\n  | \u27e83, _\u27e9, x0, x1, _, _ => (x1 - x0) / (b - a)\n  | \u27e84, _\u27e9, x0, _, _, _ => (x0 - a) / (b - a)\n\nprivate def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w3",
+    "short": "w3",
+    "private": true,
+    "sig": "private def w3 (a b : \u211d) : Fin 4 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, x2 => (b - x2) / (b - a)\n  | \u27e81, _\u27e9, _, x1, x2 => (x2 - x1) / (b - a)\n  | \u27e82, _\u27e9, x0, x1, _ => (x1 - x0) / (b - a)\n  | \u27e83, _\u27e9, x0, _, _ => (x0 - a) / (b - a)\n\nprivate def v3 (a b : \u211d) : Fin 4 \u2192 \u211d \u00d7 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a, a)\n  | \u27e81, _\u27e9 => (a, a, b)\n  | \u27e82, _\u27e9 => (a, b, b)\n  | \u27e83, _\u27e9 => (b, b, b)\n\nprivate def w4 (a b : \u211d) : Fin 5 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, _, x3 => (b - x3) / (b - a)\n  | \u27e81, _\u27e9, _, _, x2, x3 => (x3 - x2) / (b - a)\n  | \u27e82, _\u27e9, _, x1, x2, _ => (x2 - x1) / (b - a)\n  | \u27e83, _\u27e9, x0, x1, _, _ => (x1 - x0) / (b - a)\n  | \u27e84, _\u27e9, x0, _, _, _ => (x0 - a) / (b - a)\n\nprivate def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v3",
+    "short": "v3",
+    "private": true,
+    "sig": "private def v3 (a b : \u211d) : Fin 4 \u2192 \u211d \u00d7 \u211d \u00d7 \u211d\n  | \u27e80, _\u27e9 => (a, a, a)\n  | \u27e81, _\u27e9 => (a, a, b)\n  | \u27e82, _\u27e9 => (a, b, b)\n  | \u27e83, _\u27e9 => (b, b, b)\n\nprivate def w4 (a b : \u211d) : Fin 5 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, _, x3 => (b - x3) / (b - a)\n  | \u27e81, _\u27e9, _, _, x2, x3 => (x3 - x2) / (b - a)\n  | \u27e82, _\u27e9, _, x1, x2, _ => (x2 - x1) / (b - a)\n  | \u27e83, _\u27e9, x0, x1, _, _ => (x1 - x0) / (b - a)\n  | \u27e84, _\u27e9, x0, _, _, _ => (x0 - a) / (b - a)\n\nprivate def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w4",
+    "short": "w4",
+    "private": true,
+    "sig": "private def w4 (a b : \u211d) : Fin 5 \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d \u2192 \u211d\n  | \u27e80, _\u27e9, _, _, _, x3 => (b - x3) / (b - a)\n  | \u27e81, _\u27e9, _, _, x2, x3 => (x3 - x2) / (b - a)\n  | \u27e82, _\u27e9, _, x1, x2, _ => (x2 - x1) / (b - a)\n  | \u27e83, _\u27e9, x0, x1, _, _ => (x1 - x0) / (b - a)\n  | \u27e84, _\u27e9, x0, _, _, _ => (x0 - a) / (b - a)\n\nprivate def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v4",
+    "short": "v4",
+    "private": true,
+    "sig": "private def v4 (a b : \u211d) : Fin 5 \u2192 R4\n  | \u27e80, _\u27e9 => (a, a, a, a)\n  | \u27e81, _\u27e9 => (a, a, a, b)\n  | \u27e82, _\u27e9 => (a, a, b, b)\n  | \u27e83, _\u27e9 => (a, b, b, b)\n  | \u27e84, _\u27e9 => (b, b, b, b)\n\nprivate lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.pow_div_const_mul_inv",
+    "short": "pow_div_const_mul_inv",
+    "private": true,
+    "sig": "private lemma pow_div_const_mul_inv {x c : \u211d} (hx : x \u2260 0) (n : \u2115) :\n    x ^ (n + 1) / c * x\u207b\u00b9 = x ^ n * c\u207b\u00b9 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter_w1",
+    "short": "iter_w1",
+    "private": true,
+    "sig": "private lemma iter_w1 {a b : \u211d} (hab : a < b) (e : Bool) :\n    \u222b x in a..b, w1 a b e x = (b - a) / 2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter_w2",
+    "short": "iter_w2",
+    "private": true,
+    "sig": "private lemma iter_w2 {a b : \u211d} (hab : a < b) (i : Fin 3) :\n    \u222b x0 in a..b, \u222b x1 in x0..b, w2 a b i x0 x1 = (b - a) ^ 2 / 6 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter_w3",
+    "short": "iter_w3",
+    "private": true,
+    "sig": "private lemma iter_w3 {a b : \u211d} (hab : a < b) (i : Fin 4) :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, w3 a b i x0 x1 x2 = (b - a) ^ 3 / 24 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.iter_w4",
+    "short": "iter_w4",
+    "private": true,
+    "sig": "private lemma iter_w4 {a b : \u211d} (hab : a < b) (i : Fin 5) :\n    \u222b x0 in a..b, \u222b x1 in x0..b, \u222b x2 in x1..b, \u222b x3 in x2..b, w4 a b i x0 x1 x2 x3 = (b - a) ^ 4 / 120 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c4_set_eq",
+    "short": "c4_set_eq",
+    "private": true,
+    "sig": "private lemma c4_set_eq (a b : Nat) :\n    (Cell4.c4 a b).set = cell4SetGen (gval a) (gval b) (gval a) (gval b) (gval a) (gval b) (gval a) (gval b) true true true "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c31_set_eq",
+    "short": "c31_set_eq",
+    "private": true,
+    "sig": "private lemma c31_set_eq (a0 b0 a1 b1 : Nat) :\n    (Cell4.c31 a0 b0 a1 b1).set = cell4SetGen (gval a0) (gval b0) (gval a0) (gval b0) (gval a0) (gval b0) (gval a1) (gval b1) true true false "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c13_set_eq",
+    "short": "c13_set_eq",
+    "private": true,
+    "sig": "private lemma c13_set_eq (a0 b0 a1 b1 : Nat) :\n    (Cell4.c13 a0 b0 a1 b1).set = cell4SetGen (gval a0) (gval b0) (gval a1) (gval b1) (gval a1) (gval b1) (gval a1) (gval b1) false true true "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c22_set_eq",
+    "short": "c22_set_eq",
+    "private": true,
+    "sig": "private lemma c22_set_eq (a0 b0 a1 b1 : Nat) :\n    (Cell4.c22 a0 b0 a1 b1).set = cell4SetGen (gval a0) (gval b0) (gval a0) (gval b0) (gval a1) (gval b1) (gval a1) (gval b1) true false true "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c211_set_eq",
+    "short": "c211_set_eq",
+    "private": true,
+    "sig": "private lemma c211_set_eq (a0 b0 a1 b1 a2 b2 : Nat) :\n    (Cell4.c211 a0 b0 a1 b1 a2 b2).set = cell4SetGen (gval a0) (gval b0) (gval a0) (gval b0) (gval a1) (gval b1) (gval a2) (gval b2) true false false "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c121_set_eq",
+    "short": "c121_set_eq",
+    "private": true,
+    "sig": "private lemma c121_set_eq (a0 b0 a1 b1 a2 b2 : Nat) :\n    (Cell4.c121 a0 b0 a1 b1 a2 b2).set = cell4SetGen (gval a0) (gval b0) (gval a1) (gval b1) (gval a1) (gval b1) (gval a2) (gval b2) false true false "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c112_set_eq",
+    "short": "c112_set_eq",
+    "private": true,
+    "sig": "private lemma c112_set_eq (a0 b0 a1 b1 a2 b2 : Nat) :\n    (Cell4.c112 a0 b0 a1 b1 a2 b2).set = cell4SetGen (gval a0) (gval b0) (gval a1) (gval b1) (gval a2) (gval b2) (gval a2) (gval b2) false false true "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.c1111_set_eq",
+    "short": "c1111_set_eq",
+    "private": true,
+    "sig": "private lemma c1111_set_eq (a0 b0 a1 b1 a2 b2 a3 b3 : Nat) :\n    (Cell4.c1111 a0 b0 a1 b1 a2 b2 a3 b3).set = cell4SetGen (gval a0) (gval b0) (gval a1) (gval b1) (gval a2) (gval b2) (gval a3) (gval b3) false false false "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.cell4_vol_eq",
+    "short": "cell4_vol_eq",
+    "private": true,
+    "sig": "private lemma cell4_vol_eq {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) :\n    \u222b _ in c.set, (1 : \u211d) = ((cellVol48 c : Nat) : \u211d) / (48 * (D_grid : \u211d) ^ 4) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.convex_bary3",
+    "short": "convex_bary3",
+    "private": true,
+    "sig": "private lemma convex_bary3 {E : Type*} [AddCommGroup E] [Module \u211d E]\n    {S : Set E} {f : E \u2192 \u211d} (hf : ConvexOn \u211d S f)\n    {x0 x1 x2 : E} (hx0 : x0 \u2208 S) (hx1 : x1 \u2208 S) (hx2 : x2 \u2208 S)\n    {c0 c1 c2 : \u211d} (hc0 : 0 \u2264 c0) (hc1 : 0 \u2264 c1) (hc2 : 0 \u2264 c2) (hsum : c0 + c1 + c2 = 1) :\n    f (c0 \u2022 x0 + c1 \u2022 x1 + c2 \u2022 x2) \u2264 c0 * f x0 + c1 * f x1 + c2 * f x2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.convex_bary4",
+    "short": "convex_bary4",
+    "private": true,
+    "sig": "private lemma convex_bary4 {E : Type*} [AddCommGroup E] [Module \u211d E]\n    {S : Set E} {f : E \u2192 \u211d} (hf : ConvexOn \u211d S f)\n    {x0 x1 x2 x3 : E} (hx0 : x0 \u2208 S) (hx1 : x1 \u2208 S) (hx2 : x2 \u2208 S) (hx3 : x3 \u2208 S)\n    {c0 c1 c2 c3 : \u211d} (hc0 : 0 \u2264 c0) (hc1 : 0 \u2264 c1) (hc2 : 0 \u2264 c2) (hc3 : 0 \u2264 c3)\n    (hsum : c0 + c1 + c2 + c3 = 1) :\n    f (c0 \u2022 x0 + c1 \u2022 x1 + c2 \u2022 x2 + c3 \u2022 x3) \u2264\n      c0 * f x0 + c1 * f x1 + c2 * f x2 + c3 * f x3 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.convex_bary5",
+    "short": "convex_bary5",
+    "private": true,
+    "sig": "private lemma convex_bary5 {E : Type*} [AddCommGroup E] [Module \u211d E]\n    {S : Set E} {f : E \u2192 \u211d} (hf : ConvexOn \u211d S f)\n    {x0 x1 x2 x3 x4 : E} (hx0 : x0 \u2208 S) (hx1 : x1 \u2208 S) (hx2 : x2 \u2208 S) (hx3 : x3 \u2208 S) (hx4 : x4 \u2208 S)\n    {c0 c1 c2 c3 c4 : \u211d} (hc0 : 0 \u2264 c0) (hc1 : 0 \u2264 c1) (hc2 : 0 \u2264 c2) (hc3 : 0 \u2264 c3) (hc4 : 0 \u2264 c4)\n    (hsum : c0 + c1 + c2 + c3 + c4 = 1) :\n    f (c0 \u2022 x0 + c1 \u2022 x1 + c2 \u2022 x2 + c3 \u2022 x3 + c4 \u2022 x4) \u2264\n      c0 * f x0 + c1 * f x1 + c2 * f x2 + c3 * f x3 + c4 * f x4 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.log_concave_pair",
+    "short": "log_concave_pair",
+    "private": true,
+    "sig": "private lemma log_concave_pair {u v a b : \u211d} (hu : 0 < u) (hv : 0 < v)\n    (ha : 0 \u2264 a) (hb : 0 \u2264 b) (hab : a + b = 1) :\n    a * Real.log u + b * Real.log v \u2264 Real.log (a * u + b * v) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.log_inv_prod5_convex",
+    "short": "log_inv_prod5_convex",
+    "private": true,
+    "sig": "private lemma log_inv_prod5_convex (p : \u211d) :\n    ConvexOn \u211d {x : R4 | 0 < x.1 \u2227 0 < x.2.1 \u2227 0 < x.2.2.1 \u2227 0 < x.2.2.2 \u2227\n      0 < p - x.1 - x.2.1 - x.2.2.1 - x.2.2.2}\n      (fun x : R4 => 1 / (x.1 * x.2.1 * x.2.2.1 * x.2.2.2 * (p - x.1 - x.2.1 - x.2.2.1 - x.2.2.2))) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.weight4_convex",
+    "short": "weight4_convex",
+    "private": true,
+    "sig": "private lemma weight4_convex :\n    ConvexOn \u211d {x : R4 | 0 < x.1 \u2227 0 < x.2.1 \u2227 0 < x.2.2.1 \u2227 0 < x.2.2.2}\n      (fun x : R4 => 1 / (x.1 * x.2.1 * x.2.2.1 * x.2.2.1 * x.2.2.2)) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w1_nonneg",
+    "short": "w1_nonneg",
+    "private": true,
+    "sig": "private lemma w1_nonneg {a b x : \u211d} (hab : a < b) (hx : x \u2208 Icc a b) (e : Bool) : 0 \u2264 w1 a b e x "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w2_nonneg",
+    "short": "w2_nonneg",
+    "private": true,
+    "sig": "private lemma w2_nonneg {a b x0 x1 : \u211d} (hab : a < b) (h0 : a \u2264 x0) (h01 : x0 \u2264 x1) (h1 : x1 \u2264 b)\n    (i : Fin 3) : 0 \u2264 w2 a b i x0 x1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w3_nonneg",
+    "short": "w3_nonneg",
+    "private": true,
+    "sig": "private lemma w3_nonneg {a b x0 x1 x2 : \u211d} (hab : a < b) (h0 : a \u2264 x0) (h01 : x0 \u2264 x1)\n    (h12 : x1 \u2264 x2) (h2 : x2 \u2264 b) (i : Fin 4) : 0 \u2264 w3 a b i x0 x1 x2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w4_nonneg",
+    "short": "w4_nonneg",
+    "private": true,
+    "sig": "private lemma w4_nonneg {a b x0 x1 x2 x3 : \u211d} (hab : a < b) (h0 : a \u2264 x0) (h01 : x0 \u2264 x1)\n    (h12 : x1 \u2264 x2) (h23 : x2 \u2264 x3) (h3 : x3 \u2264 b) (i : Fin 5) : 0 \u2264 w4 a b i x0 x1 x2 x3 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v1_mem",
+    "short": "v1_mem",
+    "private": true,
+    "sig": "private lemma v1_mem {a b : \u211d} (hab : a \u2264 b) (e : Bool) : v1 a b e \u2208 Icc a b "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v2_mem",
+    "short": "v2_mem",
+    "private": true,
+    "sig": "private lemma v2_mem {a b : \u211d} (hab : a \u2264 b) (i : Fin 3) :\n    (v2 a b i).1 \u2208 Icc a b \u2227 (v2 a b i).2 \u2208 Icc a b "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v3_mem",
+    "short": "v3_mem",
+    "private": true,
+    "sig": "private lemma v3_mem {a b : \u211d} (hab : a \u2264 b) (i : Fin 4) :\n    (v3 a b i).1 \u2208 Icc a b \u2227 (v3 a b i).2.1 \u2208 Icc a b \u2227 (v3 a b i).2.2 \u2208 Icc a b "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.v4_mem",
+    "short": "v4_mem",
+    "private": true,
+    "sig": "private lemma v4_mem {a b : \u211d} (hab : a \u2264 b) (i : Fin 5) :\n    (v4 a b i).1 \u2208 Icc a b \u2227 (v4 a b i).2.1 \u2208 Icc a b \u2227\n    (v4 a b i).2.2.1 \u2208 Icc a b \u2227 (v4 a b i).2.2.2 \u2208 Icc a b "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.convex_bary1_coord",
+    "short": "convex_bary1_coord",
+    "private": true,
+    "sig": "private lemma convex_bary1_coord {S : Set R4} {f : R4 \u2192 \u211d} (hf : ConvexOn \u211d S f)\n    {a b t : \u211d} (hab : a < b) (ht : t \u2208 Icc a b)\n    {q : Bool \u2192 R4} (hq : \u2200 e, q e \u2208 S) {p : R4}\n    (heq : w1 a b false t \u2022 q false + w1 a b true t \u2022 q true = p) :\n    f p \u2264 \u2211 e : Bool, w1 a b e t * f (q e) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.convex_bary2_coord",
+    "short": "convex_bary2_coord",
+    "private": true,
+    "sig": "private lemma convex_bary2_coord {S : Set R4} {f : R4 \u2192 \u211d} (hf : ConvexOn \u211d S f)\n    {a b x0 x1 : \u211d} (hab : a < b) (h0 : a \u2264 x0) (h01 : x0 \u2264 x1) (h1 : x1 \u2264 b)\n    {q : Fin 3 \u2192 R4} (hq : \u2200 i, q i \u2208 S) {p : R4}\n    (heq : w2 a b 0 x0 x1 \u2022 q 0 + w2 a b 1 x0 x1 \u2022 q 1 + w2 a b 2 x0 x1 \u2022 q 2 = p) :\n    f p \u2264 \u2211 i : Fin 3, w2 a b i x0 x1 * f (q i) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.convex_bary3_coord",
+    "short": "convex_bary3_coord",
+    "private": true,
+    "sig": "private lemma convex_bary3_coord {S : Set R4} {f : R4 \u2192 \u211d} (hf : ConvexOn \u211d S f)\n    {a b x0 x1 x2 : \u211d} (hab : a < b) (h0 : a \u2264 x0) (h01 : x0 \u2264 x1) (h12 : x1 \u2264 x2) (h2 : x2 \u2264 b)\n    {q : Fin 4 \u2192 R4} (hq : \u2200 i, q i \u2208 S) {p : R4}\n    (heq : w3 a b 0 x0 x1 x2 \u2022 q 0 + w3 a b 1 x0 x1 x2 \u2022 q 1 +\n           w3 a b 2 x0 x1 x2 \u2022 q 2 + w3 a b 3 x0 x1 x2 \u2022 q 3 = p) :\n    f p \u2264 \u2211 i : Fin 4, w3 a b i x0 x1 x2 * f (q i) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.convex_bary4_coord",
+    "short": "convex_bary4_coord",
+    "private": true,
+    "sig": "private lemma convex_bary4_coord {S : Set R4} {f : R4 \u2192 \u211d} (hf : ConvexOn \u211d S f)\n    {a b x0 x1 x2 x3 : \u211d} (hab : a < b) (h0 : a \u2264 x0) (h01 : x0 \u2264 x1)\n    (h12 : x1 \u2264 x2) (h23 : x2 \u2264 x3) (h3 : x3 \u2264 b)\n    {q : Fin 5 \u2192 R4} (hq : \u2200 i, q i \u2208 S) {p : R4}\n    (heq : w4 a b 0 x0 x1 x2 x3 \u2022 q 0 + w4 a b 1 x0 x1 x2 x3 \u2022 q 1 +\n           w4 a b 2 x0 x1 x2 x3 \u2022 q 2 + w4 a b 3 x0 x1 x2 x3 \u2022 q 3 +\n           w4 a b 4 x0 x1 x2 x3 \u2022 q 4 = p) :\n    f p \u2264 \u2211 i : Fin 5, w4 a b i x0 x1 x2 x3 * f (q i) "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.vertSumReal",
+    "short": "vertSumReal",
+    "private": true,
+    "sig": "private def vertSumReal (f : R4 \u2192 \u211d) : Cell4 \u2192 \u211d\n  | .c4 a b =>\n    let a' "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary1_sum",
+    "short": "bary1_sum",
+    "private": true,
+    "sig": "private lemma bary1_sum {a b x : \u211d} (h : b - a \u2260 0) :\n    (b - x) / (b - a) + (x - a) / (b - a) = 1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary1_id",
+    "short": "bary1_id",
+    "private": true,
+    "sig": "private lemma bary1_id {a b x : \u211d} (h : b - a \u2260 0) :\n    (b - x) / (b - a) * a + (x - a) / (b - a) * b = x "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary1_const",
+    "short": "bary1_const",
+    "private": true,
+    "sig": "private lemma bary1_const {a b x c : \u211d} (h : b - a \u2260 0) :\n    (b - x) / (b - a) * c + (x - a) / (b - a) * c = c "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary2_sum",
+    "short": "bary2_sum",
+    "private": true,
+    "sig": "private lemma bary2_sum {a b x0 x1 : \u211d} (h : b - a \u2260 0) :\n    (b - x1) / (b - a) + (x1 - x0) / (b - a) + (x0 - a) / (b - a) = 1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary2_const",
+    "short": "bary2_const",
+    "private": true,
+    "sig": "private lemma bary2_const {a b x0 x1 c : \u211d} (h : b - a \u2260 0) :\n    (b - x1) / (b - a) * c + (x1 - x0) / (b - a) * c + (x0 - a) / (b - a) * c = c "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary2_id0",
+    "short": "bary2_id0",
+    "private": true,
+    "sig": "private lemma bary2_id0 {a b x0 x1 : \u211d} (h : b - a \u2260 0) :\n    (b - x1) / (b - a) * a + (x1 - x0) / (b - a) * a + (x0 - a) / (b - a) * b = x0 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary2_id1",
+    "short": "bary2_id1",
+    "private": true,
+    "sig": "private lemma bary2_id1 {a b x0 x1 : \u211d} (h : b - a \u2260 0) :\n    (b - x1) / (b - a) * a + (x1 - x0) / (b - a) * b + (x0 - a) / (b - a) * b = x1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary3_sum",
+    "short": "bary3_sum",
+    "private": true,
+    "sig": "private lemma bary3_sum {a b x0 x1 x2 : \u211d} (h : b - a \u2260 0) :\n    (b - x2) / (b - a) + (x2 - x1) / (b - a) + (x1 - x0) / (b - a) + (x0 - a) / (b - a) = 1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary3_const",
+    "short": "bary3_const",
+    "private": true,
+    "sig": "private lemma bary3_const {a b x0 x1 x2 c : \u211d} (h : b - a \u2260 0) :\n    (b - x2) / (b - a) * c + (x2 - x1) / (b - a) * c + (x1 - x0) / (b - a) * c + (x0 - a) / (b - a) * c = c "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary3_id0",
+    "short": "bary3_id0",
+    "private": true,
+    "sig": "private lemma bary3_id0 {a b x0 x1 x2 : \u211d} (h : b - a \u2260 0) :\n    (b - x2) / (b - a) * a + (x2 - x1) / (b - a) * a + (x1 - x0) / (b - a) * a + (x0 - a) / (b - a) * b = x0 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary3_id1",
+    "short": "bary3_id1",
+    "private": true,
+    "sig": "private lemma bary3_id1 {a b x0 x1 x2 : \u211d} (h : b - a \u2260 0) :\n    (b - x2) / (b - a) * a + (x2 - x1) / (b - a) * a + (x1 - x0) / (b - a) * b + (x0 - a) / (b - a) * b = x1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary3_id2",
+    "short": "bary3_id2",
+    "private": true,
+    "sig": "private lemma bary3_id2 {a b x0 x1 x2 : \u211d} (h : b - a \u2260 0) :\n    (b - x2) / (b - a) * a + (x2 - x1) / (b - a) * b + (x1 - x0) / (b - a) * b + (x0 - a) / (b - a) * b = x2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary4_id0",
+    "short": "bary4_id0",
+    "private": true,
+    "sig": "private lemma bary4_id0 {a b x0 x1 x2 x3 : \u211d} (h : b - a \u2260 0) :\n    (b - x3) / (b - a) * a + (x3 - x2) / (b - a) * a + (x2 - x1) / (b - a) * a +\n    (x1 - x0) / (b - a) * a + (x0 - a) / (b - a) * b = x0 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary4_id1",
+    "short": "bary4_id1",
+    "private": true,
+    "sig": "private lemma bary4_id1 {a b x0 x1 x2 x3 : \u211d} (h : b - a \u2260 0) :\n    (b - x3) / (b - a) * a + (x3 - x2) / (b - a) * a + (x2 - x1) / (b - a) * a +\n    (x1 - x0) / (b - a) * b + (x0 - a) / (b - a) * b = x1 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary4_id2",
+    "short": "bary4_id2",
+    "private": true,
+    "sig": "private lemma bary4_id2 {a b x0 x1 x2 x3 : \u211d} (h : b - a \u2260 0) :\n    (b - x3) / (b - a) * a + (x3 - x2) / (b - a) * a + (x2 - x1) / (b - a) * b +\n    (x1 - x0) / (b - a) * b + (x0 - a) / (b - a) * b = x2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.bary4_id3",
+    "short": "bary4_id3",
+    "private": true,
+    "sig": "private lemma bary4_id3 {a b x0 x1 x2 x3 : \u211d} (h : b - a \u2260 0) :\n    (b - x3) / (b - a) * a + (x3 - x2) / (b - a) * b + (x2 - x1) / (b - a) * b +\n    (x1 - x0) / (b - a) * b + (x0 - a) / (b - a) * b = x3 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w1_cont",
+    "short": "w1_cont",
+    "private": true,
+    "sig": "private lemma w1_cont (a b : \u211d) (e : Bool) : Continuous (fun x => w1 a b e x) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w2_cont",
+    "short": "w2_cont",
+    "private": true,
+    "sig": "private lemma w2_cont (a b : \u211d) (i : Fin 3) : Continuous (fun p : \u211d \u00d7 \u211d => w2 a b i p.1 p.2) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w3_cont",
+    "short": "w3_cont",
+    "private": true,
+    "sig": "private lemma w3_cont (a b : \u211d) (i : Fin 4) : Continuous (fun p : \u211d \u00d7 \u211d \u00d7 \u211d => w3 a b i p.1 p.2.1 p.2.2) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.w4_cont",
+    "short": "w4_cont",
+    "private": true,
+    "sig": "private lemma w4_cont (a b : \u211d) (i : Fin 5) : Continuous (fun p : R4 => w4 a b i p.1 p.2.1 p.2.2.1 p.2.2.2) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.hh_cell4",
+    "short": "hh_cell4",
+    "private": true,
+    "sig": "private lemma hh_cell4 (c : Cell4) (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) {f : R4 \u2192 \u211d}\n    (hcont : ContinuousOn f c.box) (hconv : ConvexOn \u211d c.box f) :\n    \u222b x in c.set, f x \u2264 vertSumReal f c "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integral_ind_le",
+    "short": "integral_ind_le",
+    "private": true,
+    "sig": "private lemma integral_ind_le {h r : \u211d} (hh : 0 \u2264 h) :\n    \u222b y in (0 : \u211d)..h, (if y \u2264 r then (1 : \u211d) else 0) = max 0 r - max 0 (r - h) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integral_sub_mul_const_pow",
+    "short": "integral_sub_mul_const_pow",
+    "private": true,
+    "sig": "private lemma integral_sub_mul_const_pow (n : \u2115) {a b r c : \u211d} (hc : c \u2260 0) :\n    \u222b y in a..b, (r - c * y) ^ (n + 1) =\n      ((r - c * a) ^ (n + 2) - (r - c * b) ^ (n + 2)) / (c * (n + 2)) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integral_posPow_succ",
+    "short": "integral_posPow_succ",
+    "private": true,
+    "sig": "private lemma integral_posPow_succ (n : \u2115) {h r c : \u211d} (hh : 0 \u2264 h) (hc : 0 < c) :\n    \u222b y in (0 : \u211d)..h, (max 0 (r - c * y)) ^ (n + 1) =\n      ((max 0 r) ^ (n + 2) - (max 0 (r - c * h)) ^ (n + 2)) / (c * (n + 2)) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.posPow4_cast",
+    "short": "posPow4_cast",
+    "private": true,
+    "sig": "private lemma posPow4_cast (R b : Nat) :\n    ((posPow4 R b : Nat) : \u211d) / (D_grid : \u211d) ^ 4 = (max 0 (gval R - gval b)) ^ 4 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.volume_singleton_R4",
+    "short": "volume_singleton_R4",
+    "private": true,
+    "sig": "private lemma volume_singleton_R4 (p : R4) : volume ({p} : Set R4) = 0 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.box4_halfspace_vol",
+    "short": "box4_halfspace_vol",
+    "private": true,
+    "sig": "private lemma box4_halfspace_vol {l0 l1 l2 l3 u0 u1 u2 u3 pb : Nat}\n    (h0 : l0 \u2264 u0) (h1 : l1 \u2264 u1) (h2 : l2 \u2264 u2) (h3 : l3 \u2264 u3) :\n    \u222b _ in (Icc (gval l0) (gval u0) \u00d7\u02e2 Icc (gval l1) (gval u1) \u00d7\u02e2\n            Icc (gval l2) (gval u2) \u00d7\u02e2 Icc (gval l3) (gval u3)) \u2229\n           {x : R4 | x.1 + x.2.1 + 2 * x.2.2.1 + x.2.2.2 \u2264 gval pb}, (1 : \u211d) \u2264\n      ((box4Hs48 (u0 - l0) (u1 - l1) (u2 - l2) (u3 - l3) (pb - (l0 + l1 + l2 + l2 + l3)) : Nat) : \u211d) /\n        (48 * (D_grid : \u211d) ^ 4) "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integrand4",
+    "short": "integrand4",
+    "private": false,
+    "sig": "def integrand4 (\u03c9 : \u211d \u2192 \u211d) (\u03c6 : \u211d) (x : R4) : \u211d "
+  },
+  {
+    "j": 16,
+    "kind": "def",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.weight4",
+    "short": "weight4",
+    "private": true,
+    "sig": "private def weight4 (x : R4) : \u211d "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integrand4_nonneg",
+    "short": "integrand4_nonneg",
+    "private": false,
+    "sig": "lemma integrand4_nonneg {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (\u03c6 : \u211d) {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) :\n    \u2200 x \u2208 c.set, 0 \u2264 integrand4 \u03c9 \u03c6 x "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.integrand4_integrableOn",
+    "short": "integrand4_integrableOn",
+    "private": false,
+    "sig": "lemma integrand4_integrableOn {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    (\u03c6 : \u211d) {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) :\n    IntegrableOn (integrand4 \u03c9 \u03c6) c.set volume "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.weight4_integrableOn",
+    "short": "weight4_integrableOn",
+    "private": true,
+    "sig": "private lemma weight4_integrableOn {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) :\n    IntegrableOn weight4 c.set volume "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.weight4_nonneg",
+    "short": "weight4_nonneg",
+    "private": true,
+    "sig": "private lemma weight4_nonneg {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) : \u2200 x \u2208 c.set, 0 \u2264 weight4 x "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.one_add_sum_le_prod",
+    "short": "one_add_sum_le_prod",
+    "private": true,
+    "sig": "private lemma one_add_sum_le_prod {a0 a1 a2 a3 : \u211d}\n    (h0 : 0 \u2264 a0) (h1 : 0 \u2264 a1) (h2 : 0 \u2264 a2) (h3 : 0 \u2264 a3) :\n    1 + a0 + a1 + 2 * a2 + a3 \u2264 (1 + a0) * (1 + a1) * (1 + a2) * (1 + a2) * (1 + a3) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.boundary_denom_boost",
+    "short": "boundary_denom_boost",
+    "private": true,
+    "sig": "private lemma boundary_denom_boost {l0 l1 l2 l3 x0 x1 x2 x3 pa \u03c6 : \u211d}\n    (hl0 : 0 < l0) (hl01 : l0 \u2264 l1) (hl12 : l1 \u2264 l2) (hl23 : l2 \u2264 l3)\n    (hx0 : l0 \u2264 x0) (hx1 : l1 \u2264 x1) (hx2 : l2 \u2264 x2) (hx3 : l3 \u2264 x3)\n    (hpa : pa \u2264 \u03c6) (hRa : 0 < pa - l0 - l1 - 2 * l2 - l3)\n    (hu1 : x2 \u2264 \u03c6 - x0 - x1 - x2 - x3) :\n    l0 * l1 * l2 * l2 * l3 * (1 + (pa - l0 - l1 - 2 * l2 - l3) / (l2 + l3)) \u2264\n      x0 * x1 * x2 * x3 * (\u03c6 - x0 - x1 - x2 - x3) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.vertInt_ceil_bound",
+    "short": "vertInt_ceil_bound",
+    "private": true,
+    "sig": "private lemma vertInt_ceil_bound {pa vprod fprod x0 x1 x2 x3 : Nat}\n    (hx0 : 0 < x0) (hx1 : 0 < x1) (hx2 : 0 < x2) (hx3 : 0 < x3) (hf : 0 < fprod)\n    (hpa : x0 + x1 + x2 + x3 < pa) :\n    ((vprod : \u211d) / (D_grid : \u211d) ^ 4) / (fprod : \u211d) *\n      (1 / (gval x0 * gval x1 * gval x2 * gval x3 * (gval pa - gval x0 - gval x1 - gval x2 - gval x3))) \u2264\n      (evalVertInt pa (S_scale * D_grid * vprod) fprod x0 x1 x2 x3 : \u211d) / S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.vertW_ceil_bound",
+    "short": "vertW_ceil_bound",
+    "private": true,
+    "sig": "private lemma vertW_ceil_bound {nm dm vprod fprod x0 x1 x2 x3 : Nat}\n    (hdm : 0 < dm) (hf : 0 < fprod) (hx0 : 0 < x0) (hx1 : 0 < x1) (hx2 : 0 < x2) (hx3 : 0 < x3) :\n    (((nm : \u211d) / dm) * (((vprod : \u211d) / (D_grid : \u211d) ^ 4) / (fprod : \u211d))) *\n      weight4 (gval x0, gval x1, gval x2, gval x3) \u2264\n      (evalVertW (nm * S_scale * D_grid * vprod) (dm * fprod) x0 x1 x2 x3 : \u211d) / S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.sum4_lt",
+    "short": "sum4_lt",
+    "private": true,
+    "sig": "private lemma sum4_lt {x0 x1 x2 x3 u0 u1 u2 u3 pa : Nat}\n    (h0 : x0 \u2264 u0) (h1 : x1 \u2264 u1) (h2 : x2 \u2264 u2) (h3 : x3 \u2264 u3)\n    (hp : u0 + u1 + u2 + u3 < pa) : x0 + x1 + x2 + x3 < pa "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.mul_sum2_le",
+    "short": "mul_sum2_le",
+    "private": true,
+    "sig": "private lemma mul_sum2_le {c x1 x2 y1 y2 : \u211d}\n    (h1 : c * x1 \u2264 y1) (h2 : c * x2 \u2264 y2) : c * (x1 + x2) \u2264 y1 + y2 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.mul_sum4_le",
+    "short": "mul_sum4_le",
+    "private": true,
+    "sig": "private lemma mul_sum4_le {c x1 x2 x3 x4 y1 y2 y3 y4 : \u211d}\n    (h1 : c * x1 \u2264 y1) (h2 : c * x2 \u2264 y2) (h3 : c * x3 \u2264 y3) (h4 : c * x4 \u2264 y4) :\n    c * (x1 + x2 + x3 + x4) \u2264 y1 + y2 + y3 + y4 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.mul_sum5_le",
+    "short": "mul_sum5_le",
+    "private": true,
+    "sig": "private lemma mul_sum5_le {c x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 : \u211d}\n    (h1 : c * x1 \u2264 y1) (h2 : c * x2 \u2264 y2) (h3 : c * x3 \u2264 y3) (h4 : c * x4 \u2264 y4) (h5 : c * x5 \u2264 y5) :\n    c * (x1 + x2 + x3 + x4 + x5) \u2264 y1 + y2 + y3 + y4 + y5 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.mul_sum3_le",
+    "short": "mul_sum3_le",
+    "private": true,
+    "sig": "private lemma mul_sum3_le {c x1 x2 x3 y1 y2 y3 : \u211d}\n    (h1 : c * x1 \u2264 y1) (h2 : c * x2 \u2264 y2) (h3 : c * x3 \u2264 y3) :\n    c * (x1 + x2 + x3) \u2264 y1 + y2 + y3 "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalIntCell_bound",
+    "short": "evalIntCell_bound",
+    "private": true,
+    "sig": "private lemma evalIntCell_bound {pa : Nat} {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c))\n    (hpa_ge : let (_, _, _, _, u0, u1, u2, u3) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalWCell_bound",
+    "short": "evalWCell_bound",
+    "private": true,
+    "sig": "private lemma evalWCell_bound {nm dm : Nat} (hdm : 0 < dm) {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) :\n    ((nm : \u211d) / dm) * vertSumReal weight4 c \u2264 (evalWCell nm dm c : \u211d) / S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalBndCell_sound",
+    "short": "evalBndCell_sound",
+    "private": true,
+    "sig": "private lemma evalBndCell_sound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {pa pb : Nat} {\u03c6 : \u211d} (hpa : gval pa \u2264 \u03c6) (hpb : \u03c6 \u2264 gval pb)\n    {c : Cell4} (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) {v : Nat} (heval : evalBndCell pa pb c = some v) :\n    \u222b x in c.set, integrand4 \u03c9 \u03c6 x \u2264 (v : \u211d) / S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalGen_sound",
+    "short": "evalGen_sound",
+    "private": true,
+    "sig": "private lemma evalGen_sound {leaf : CTree \u2192 Cell4 \u2192 Option Nat} {g : R4 \u2192 \u211d}\n    (hg_nn : \u2200 {c : Cell4}, ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c) \u2192 \u2200 x \u2208 c.set, 0 \u2264 g x)\n    (hg_int : \u2200 {c : Cell4}, ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c) \u2192 IntegrableOn g c.set volume)\n    (hZ : \u2200 {c : Cell4} {v : Nat}, ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c) \u2192 leaf .Z c = some v \u2192 \u222b x in c.set, g x \u2264 (v : \u211d) / S_scale)\n    (hI : \u2200 {c : Cell4} {v : Nat}, ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c) \u2192 leaf .I c = some v \u2192 \u222b x in c.set, g x \u2264 (v : \u211d) / S_scale)\n    (hT : \u2200 {c : Cell4} {v : Nat}, ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c) \u2192 leaf .T c = some v \u2192 \u222b x in c.set, g x \u2264 (v : \u211d) / S_scale)\n    (hB : \u2200 {c : Cell4} {v : Nat}, ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c) \u2192 leaf .B c = some v \u2192 \u222b x in c.set, g x \u2264 (v : \u211d) / S_scale)\n    (t : CTree) (c : Cell4) (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) {v : Nat}\n    (heval : evalGen leaf t c = some v) :\n    \u222b x in c.set, g x \u2264 (v : \u211d) / S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalTree_sound",
+    "short": "evalTree_sound",
+    "private": false,
+    "sig": "lemma evalTree_sound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {pa pb : Nat} {\u03c6 : \u211d} (hpa : gval pa \u2264 \u03c6) (hpb : \u03c6 \u2264 gval pb)\n    (t : CTree) (c : Cell4) (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) {v : Nat}\n    (heval : evalTree pa pb t c = some v) :\n    \u222b x in c.set, integrand4 \u03c9 \u03c6 x \u2264 (v : \u211d) / S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.evalWTree_sound",
+    "short": "evalWTree_sound",
+    "private": true,
+    "sig": "private lemma evalWTree_sound (t : CTree) (c : Cell4) (hv : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) c)) {v : Nat}\n    (heval : evalWTree t c = some v) :\n    \u222b x in c.set, weight4 x \u2264 (v : \u211d) / S_scale "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.initCell_valid",
+    "short": "initCell_valid",
+    "private": true,
+    "sig": "private lemma initCell_valid : ((fun c : Cell4 => match c with\n| .c4 a b => 0 < a \u2227 a < b\n  | .c31 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c13 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c22 a0 b0 a1 b1 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1\n  | .c211 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c121 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c112 a0 b0 a1 b1 a2 b2 => 0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2\n  | .c1111 a0 b0 a1 b1 a2 b2 a3 b3 =>\n      0 < a0 \u2227 a0 < b0 \u2227 b0 \u2264 a1 \u2227 a1 < b1 \u2227 b1 \u2264 a2 \u2227 a2 < b2 \u2227 b2 \u2264 a3 \u2227 a3 < b3\n) initCell) "
+  },
+  {
+    "j": 16,
+    "kind": "lemma",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.buchstabIntegral_eq_setIntegral",
+    "short": "buchstabIntegral_eq_setIntegral",
+    "private": true,
+    "sig": "private lemma buchstabIntegral_eq_setIntegral (\u03c9 : \u211d \u2192 \u211d) (\u03c6 : \u211d) :\n    buchstabIntegral \u03c9 2 (fun j => (r0j16_lo j : \u211d)) (fun j => (r0j16_hi j : \u211d)) \u03c6 =\n      \u222b x in initCell.set, integrand4 \u03c9 \u03c6 x "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.interval_bound",
+    "short": "interval_bound",
+    "private": false,
+    "sig": "theorem interval_bound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {pa pb : Nat} {t : CTree} {\u03c6 : \u211d}\n    (hpa : (pa : \u211d) / D_grid \u2264 \u03c6) (hpb : \u03c6 \u2264 (pb : \u211d) / D_grid)\n    (hchk : checkInterval pa pb t = true) :\n    buchstabIntegral \u03c9 2 (fun j => (r0j16_lo j : \u211d)) (fun j => (r0j16_hi j : \u211d)) \u03c6 \u2264\n      ((18727 / 250000000) : \u211d) "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.SolBuchstabR0J16.tail_bound",
+    "short": "tail_bound",
+    "private": false,
+    "sig": "theorem tail_bound {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : (PaTail : \u211d) / D_grid \u2264 \u03c6) :\n    buchstabIntegral \u03c9 2 (fun j => (r0j16_lo j : \u211d)) (fun j => (r0j16_hi j : \u211d)) \u03c6 \u2264\n      ((18727 / 250000000) : \u211d) "
+  },
+  {
+    "j": 16,
+    "kind": "theorem",
+    "name": "LeanLab.Ported.Prove2Me.R0J16.solution",
+    "short": "solution",
+    "private": false,
+    "sig": "theorem solution {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (_h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 2 (fun j => (r0j16_lo j : \u211d)) (fun j => (r0j16_hi j : \u211d)) \u03c6 \u2264\n      ((18727 / 250000000) : \u211d) "
+  }
+]

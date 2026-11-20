@@ -1,3 +1,7 @@
+import LeanLab.ChenDoubleSieve.Task661R0J19
+import LeanLab.Ported.Prove2Me.Decomp587lR0J16
+import LeanLab.Ported.Prove2Me.Decomp587lR0J15
+import LeanLab.Ported.Prove2Me.Decomp587lR0J14
 import LeanLab.ChenDoubleSieve.Task587R0J14
 import LeanLab.ChenDoubleSieve.Task587R0J15
 import LeanLab.ChenDoubleSieve.Task587R0J16
@@ -24,7 +28,7 @@ smaller than the original I2_r0_14 leaf. -/
 theorem r0j14_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 1 (fun j => (r0j14_lo j : ℝ)) (fun j => (r0j14_hi j : ℝ)) φ ≤ ((14345377 / 1000000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.R0J14.solution hω hz hφ hφtop
 
 /-- The exact original I2_r0_14 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 1 page 30. CONDITIONAL ON r0j14_short. -/
@@ -47,7 +51,7 @@ smaller than the original I2_r0_15 leaf. -/
 theorem r0j15_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 1 (fun j => (r0j15_lo j : ℝ)) (fun j => (r0j15_hi j : ℝ)) φ ≤ ((662003 / 125000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.R0J15.solution hω hz hφ hφtop
 
 /-- The exact original I2_r0_15 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 1 page 30. CONDITIONAL ON r0j15_short. -/
@@ -70,7 +74,7 @@ smaller than the original I2_r0_16 leaf. -/
 theorem r0j16_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 2 (fun j => (r0j16_lo j : ℝ)) (fun j => (r0j16_hi j : ℝ)) φ ≤ ((18727 / 250000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.R0J16.solution hω hz hφ hφtop
 
 /-- The exact original I2_r0_16 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 1 page 30. CONDITIONAL ON r0j16_short. -/
@@ -116,7 +120,7 @@ smaller than the original I2_r0_19 leaf. -/
 theorem r0j19_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 2 (fun j => (r0j19_lo j : ℝ)) (fun j => (r0j19_hi j : ℝ)) φ ≤ ((70737 / 1000000000) : ℝ) := by
-  sorry
+  exact Task661.r0j19_certified hω hz hφ hφtop
 
 /-- The exact original I2_r0_19 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 1 page 30. CONDITIONAL ON r0j19_short. -/
@@ -132,3 +136,4 @@ theorem I2_r0_19_from_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroB
   convert hb using 1 <;> norm_num [I2, tableParams, r0j19_lo, r0j19_hi] <;> congr 1 <;> ext j <;> fin_cases j <;> norm_num
 
 end LeanLab.ChenDoubleSieve.Task587
+

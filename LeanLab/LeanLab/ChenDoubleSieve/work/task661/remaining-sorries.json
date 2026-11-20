@@ -1,0 +1,577 @@
+[
+  {
+    "file": "Burst4Split.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst4Split.corrections_real",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst4Split.proposition1",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst4Split.corollary1",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst4Split.proposition3",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst4Split.proposition4",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst4Split.table1_Psi2",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst4Split.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst4Split.integral_matrix_bound",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst8P2.prop1_upper_eps",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst8P2.prop1_lower_eps",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst8P2.proposition2_H",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst8P2.proposition2_h",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst8P2.lemma51",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst8P2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst8P2.lemma52",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_9",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_10",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_11",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_12",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_13",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_14",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_15",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_16",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_17",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_18",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_19",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_9",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_10",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_11",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_12",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_13",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_14",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_15",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_16",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_17",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_9",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_10",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_11",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_13",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_14",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_16",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_9",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_10",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_11",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_13",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9I2.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_14",
+    "reason": "The file is actively claimed by another worker. Compact certificates and their exact from_short assemblies are separate declarations. No original parent body was changed."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_0",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_1",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_2",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_3",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_4",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_0",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_1",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_2",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_3",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_0",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_1",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_2",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_3",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_3_0",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Burst9Matrix.lean",
+    "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_5_0",
+    "reason": "The positive candidate needs a certified lower quadrature for this row. Nonnegativity, a left endpoint rectangle and bounds for other rows do not establish it. The three matrix source audit attempts are recorded above."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task275.weighted_sieve_power",
+    "reason": "The weighted sieve and component analytic estimates remain open. The rational numerical hypothesis alone contains no integral information. The exact printed rounded threshold also needs directed numerical certification."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task275.positive_estimates",
+    "reason": "The weighted sieve and component analytic estimates remain open. The rational numerical hypothesis alone contains no integral information. The exact printed rounded threshold also needs directed numerical certification."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task275.negative_estimates",
+    "reason": "The weighted sieve and component analytic estimates remain open. The rational numerical hypothesis alone contains no integral information. The exact printed rounded threshold also needs directed numerical certification."
+  },
+  {
+    "file": "Decomp275b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task275.integral_evaluation",
+    "reason": "The weighted sieve and component analytic estimates remain open. The rational numerical hypothesis alone contains no integral information. The exact printed rounded threshold also needs directed numerical certification."
+  },
+  {
+    "file": "Decomp315a.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task315.first_half",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp315b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task315.lower_F0",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp315b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task315.lower_F4",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp315b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task315.lower_F5",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp315c.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task315.basic_upper",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp315c.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task315.switched_upper",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp315c.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task315.refined_upper",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp347j.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task347.crossing_compensation",
+    "reason": "The existing outline questions the literal crossing convention. No asymptotic counterexample is proved here, so no FALSE claim is made. The reserve inclusion and its finite comparison remain open."
+  },
+  {
+    "file": "Decomp348a.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task348.main0_lower",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp348b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task348.main4_lower",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp348c.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task348.main5_lower",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp349a.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task349.basic_finite_upper",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task349.switched_finite_upper",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp349b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task349.switched_sum_tendsto",
+    "reason": "The moving ordered prime tuple limit needs a partial summation theorem with the exact domain. Single prime PNT, the coordinate substitutions and the tail inequality do not establish that limit. The three source audit attempts are recorded above."
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task349.refined_finite_upper",
+    "reason": "The dependency audit leaves a finite sieve, moving prime tuple limit, correction representation or certified matrix input open. The downstream assembly does not prove its input. Further source work was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp349c.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task349.refined_sum_tendsto",
+    "reason": "The moving ordered prime tuple limit needs a partial summation theorem with the exact domain. Single prime PNT, the coordinate substitutions and the tail inequality do not establish that limit. The three source audit attempts are recorded above."
+  },
+  {
+    "file": "Decomp363b.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task363.linear_sieve_with_remainder",
+    "reason": "The finite sharp Rosser sieve inequality is open. Mathlib BoundingSieve, the existing BV remainder proof and nonnegativity do not supply this inequality. The three source audit attempts are recorded above."
+  },
+  {
+    "file": "Decomp366a.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task366.pair_linear_sieve_with_remainder",
+    "reason": "The finite sharp Rosser sieve inequality is open. Mathlib BoundingSieve, the existing BV remainder proof and nonnegativity do not supply this inequality. The three source audit attempts are recorded above."
+  },
+  {
+    "file": "Decomp367a.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task367.pair_linear_sieve_with_remainder",
+    "reason": "The finite sharp Rosser sieve inequality is open. Mathlib BoundingSieve, the existing BV remainder proof and nonnegativity do not supply this inequality. The three source audit attempts are recorded above."
+  },
+  {
+    "file": "Decomp587f.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r3Nine_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587f.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r3Ten_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587f.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r3Eleven_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587f.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r3Thirteen_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587f.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r3Fourteen_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587g.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r0j18_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r2j9_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r2j10_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r2j11_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r2j13_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587h.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r2j14_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r2j16_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j9_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j10_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587i.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j11_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j13_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j14_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j15_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j16_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587j.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r1j17_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r0j9_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r0j10_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r0j11_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587k.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r0j13_short",
+    "reason": "The compact upper bound still needs its own finite certificate. The completed ports do not prove this different domain or parameter row. Further kernel generation was deferred at the hard shift budget."
+  },
+  {
+    "file": "Decomp587l.lean",
+    "name": "LeanLab.ChenDoubleSieve.Task587.r0j17_short",
+    "reason": "The shared domain bridge and first eight interval checks are proved. Seventy two of the eighty generated phi intervals still need Lean kernel checks. Python generation alone is not a proof. The three approaches and the measured shift budget decision are recorded above."
+  },
+  {
+    "file": "DecompJ344.lean",
+    "name": "LeanLab.ChenDoubleSieve.thm2_analytic_link",
+    "reason": "The weighted sieve and component analytic estimates remain open. The rational numerical hypothesis alone contains no integral information. The exact printed rounded threshold also needs directed numerical certification."
+  },
+  {
+    "file": "Statements.lean",
+    "name": "LeanLab.ChenDoubleSieve.wu2004_thm1",
+    "reason": "This cited paper theorem has open analytic and numerical dependencies in the decomposition graph. It is CONDITIONAL on those inputs. No assumption-free proof was obtained."
+  },
+  {
+    "file": "Statements.lean",
+    "name": "LeanLab.ChenDoubleSieve.wu2004_thm2",
+    "reason": "This cited paper theorem has open analytic and numerical dependencies in the decomposition graph. It is CONDITIONAL on those inputs. No assumption-free proof was obtained."
+  },
+  {
+    "file": "Statements.lean",
+    "name": "LeanLab.ChenDoubleSieve.wu2004_thm3",
+    "reason": "This cited paper theorem has open analytic and numerical dependencies in the decomposition graph. It is CONDITIONAL on those inputs. No assumption-free proof was obtained."
+  },
+  {
+    "file": "Statements.lean",
+    "name": "LeanLab.ChenDoubleSieve.wu2004_thm4",
+    "reason": "This cited paper theorem has open analytic and numerical dependencies in the decomposition graph. It is CONDITIONAL on those inputs. No assumption-free proof was obtained."
+  },
+  {
+    "file": "Statements.lean",
+    "name": "LeanLab.ChenDoubleSieve.wu2004_thm5",
+    "reason": "This cited paper theorem has open analytic and numerical dependencies in the decomposition graph. It is CONDITIONAL on those inputs. No assumption-free proof was obtained."
+  },
+  {
+    "file": "Statements.lean",
+    "name": "LeanLab.ChenDoubleSieve.wu2008",
+    "reason": "This cited paper theorem has open analytic and numerical dependencies in the decomposition graph. It is CONDITIONAL on those inputs. No assumption-free proof was obtained."
+  },
+  {
+    "file": "Statements.lean",
+    "name": "LeanLab.ChenDoubleSieve.chen1978_quoted",
+    "reason": "This cited paper theorem has open analytic and numerical dependencies in the decomposition graph. It is CONDITIONAL on those inputs. No assumption-free proof was obtained."
+  }
+]
