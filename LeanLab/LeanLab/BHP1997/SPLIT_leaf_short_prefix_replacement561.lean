@@ -36,7 +36,9 @@ theorem leaf_short_modulus_decomposition561 (ε D x u v : ℝ) (b : ℕ → ℂ)
         ∫ t in (-(Real.log x ^ (4 * D) / (q * length512 ε x)))..
             (Real.log x ^ (4 * D) / (q * length512 ε x)),
           integrand512 ε x (fun _ => 1) (fun _ => 1) N t) := by
-  sorry
+  unfold longPrincipal561 principalArc512
+  simp only [Finset.mul_sum]
+  rw [← Finset.sum_sub_distrib]
 
 /-- LEAF. Replacement at a single modulus.  Assuming the prefix distribution of
 the short coefficients against every character of a small modulus, the difference
