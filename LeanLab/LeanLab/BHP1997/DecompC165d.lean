@@ -7,6 +7,7 @@ AI wrote the Lean code. CODEX task165. Goldbach is open.
 import LeanLab.BHP1997.Certificate312Total
 import LeanLab.BHP1997.LowerShortC165
 import LeanLab.BHP1997.DecompC165dBase312
+import LeanLab.BHP1997.UpperShortC165Leaves
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b
@@ -76,26 +77,21 @@ theorem right_density_mono {ε B0 B1 v0 v1 : ℝ} {b0 b1 : ℝ → ℕ → ℝ} 
     (hs : ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ m ∈ rightInterval ε x, b0 x m ≤ b1 x m) : v0 ≤ v1 :=
   DecompC165b.right_density_mono hε h0 h1 hs
 
-/-- LEAF. Page 53, the upper short weight b1. The four-term Buchstab
+/-- Page 53, the upper short weight b1. The four-term Buchstab
 identity is gm minus hm plus jm minus km. Delete only km terms where
 Lemma 33 is unavailable. The printed integral formula gives v1 below 2.2.
-Repeat the page 52 normalization. The analytic estimates and certified
-Buchstab integral remain OPEN. U-1609 dropped the unprinted `1 ≤ v1`. -/
+DESIGN QUEUE Q1, run 20261120T0802Z-11103: the exact-density leaf
+DecompC165dBase312.upper_short_coefficient is FALSE as stated, fable sprint 21,
+so this step is re-pointed at the slack route of UpperShortC165Leaves:
+v1 is the paper value plus half its margin below 2.2. Statement unchanged.
+CONDITIONAL on the one LEAF upper_normalized_raw_conditions_slack. -/
 theorem upper_short_weight (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) :
     ∃ B0 η : ℝ, 0 < η ∧ ∀ B ε : ℝ, B0 ≤ B → 0 < ε → ε < η →
       ∃ (v1 : ℝ) (b1 : ℝ → ℕ → ℝ),
         v1 < 2.2 ∧ RightConditions ε B v1 b1 ∧
         ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
-          ∀ m ∈ rightInterval ε x, primeWeight m ≤ b1 x m := by
-  obtain ⟨ω, hω, hz, B0, η, hη, hweight⟩ := upper_short_weight_analytic h4 h9
-  refine ⟨B0, min η (1/10^8), lt_min hη (by norm_num), ?_⟩
-  intro B ε hB hε hεη
-  have hεsmall : ε ≤ 1/10^8 :=
-    (lt_of_lt_of_le hεη (min_le_right _ _)).le
-  obtain ⟨v1, b1, hdensity, hright, X, hsandwich⟩ :=
-    hweight B ε hB hε (lt_of_lt_of_le hεη (min_le_left _ _))
-  exact ⟨v1, b1, upper_density_bound hω hz hε.le hεsmall hdensity,
-    hright, X, hsandwich⟩
+          ∀ m ∈ rightInterval ε x, primeWeight m ≤ b1 x m :=
+  upper_short_weight_of_slack_leaf h4 h9
 
 /-- Pages 43 to 53, combine the two short constructions at one common
 divisor exponent and epsilon cutoff. This is the exact statement of
