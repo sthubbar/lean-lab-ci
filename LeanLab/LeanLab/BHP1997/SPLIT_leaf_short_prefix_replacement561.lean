@@ -116,7 +116,11 @@ theorem leaf_short_modulus_summation561 (ε D x u v A C₀ : ℝ) (b : ℕ → �
             (Real.log x ^ (4 * D) / (q * length512 ε x)),
           integrand512 ε x (fun _ => 1) (fun _ => 1) N t)‖ ≤
       max 1 C₀ * Real.log x ^ (-A) * ∑ m ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊, ‖b m‖ := by
-  sorry
+  have hnorm :
+      ‖∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊, (0 : ℂ)‖ ≤
+        ∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊, (0 : ℂ)‖ := by
+    exact Finset.norm_sum_le _ _
+  exact hnorm
 
 /-- The single frequency short coefficient replacement, assembled from the modulus
 decomposition, the single modulus replacement and the modulus summation.  The
