@@ -71,7 +71,11 @@ theorem cover_quarter_two_block_four :
         qs.any (fun q => decide
           (q ≤ 6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (6 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hk
+  obtain ⟨qs, hqs, hcov⟩ := cover_quarter_two k hk
+  refine ⟨qs, hqs, ?_⟩
+  intro j hj1 hj2
+  exact hcov j (by omega) hj2
 
 /-- A witness for the left factor of a concatenation is a witness for the
 concatenation. Used to rejoin the block lists below. -/
