@@ -1,3 +1,7 @@
+import LeanLab.Ported.Prove2Me.Decomp587jR1J16
+import LeanLab.Ported.Prove2Me.Decomp587jR1J15
+import LeanLab.Ported.Prove2Me.Decomp587jR1J14
+import LeanLab.Ported.Prove2Me.Decomp587jR1J13
 import LeanLab.ChenDoubleSieve.Task587R1J13
 import LeanLab.ChenDoubleSieve.Task587R1J14
 import LeanLab.ChenDoubleSieve.Task587R1J15
@@ -24,7 +28,7 @@ smaller than the original I2_r1_13 leaf. -/
 theorem r1j13_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 1 (fun j => (r1j13_lo j : ℝ)) (fun j => (r1j13_hi j : ℝ)) φ ≤ ((20031169 / 1000000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587jR1J13.r1j13_short hω hz hφ hφtop
 
 /-- The exact original I2_r1_13 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 2 page 30. CONDITIONAL ON r1j13_short. -/
@@ -47,7 +51,7 @@ smaller than the original I2_r1_14 leaf. -/
 theorem r1j14_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 1 (fun j => (r1j14_lo j : ℝ)) (fun j => (r1j14_hi j : ℝ)) φ ≤ ((9167311 / 1000000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587jR1J14.r1j14_short hω hz hφ hφtop
 
 /-- The exact original I2_r1_14 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 2 page 30. CONDITIONAL ON r1j14_short. -/
@@ -70,7 +74,7 @@ smaller than the original I2_r1_15 leaf. -/
 theorem r1j15_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 1 (fun j => (r1j15_lo j : ℝ)) (fun j => (r1j15_hi j : ℝ)) φ ≤ ((2887983 / 1000000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587jR1J15.r1j15_short hω hz hφ hφtop
 
 /-- The exact original I2_r1_15 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 2 page 30. CONDITIONAL ON r1j15_short. -/
@@ -93,7 +97,7 @@ smaller than the original I2_r1_16 leaf. -/
 theorem r1j16_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 2 (fun j => (r1j16_lo j : ℝ)) (fun j => (r1j16_hi j : ℝ)) φ ≤ ((35393 / 500000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Decomp587jR1J16.r1j16_short hω hz hφ hφtop
 
 /-- The exact original I2_r1_16 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 2 page 30. CONDITIONAL ON r1j16_short. -/
