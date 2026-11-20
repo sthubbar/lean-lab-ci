@@ -37,6 +37,7 @@ hypothesis of the statement, so `P^{-1/n²}` is not `P^{-1/0}`; `P ≥ 1` makes 
 `ρ, c0 > 0` keep the exponents positive, and `4 + L² ≥ 4` keeps every denominator away from zero.
 -/
 import LeanLab.ExceptionalSet.KaracubaSplit
+import LeanLab.ExceptionalSet.WBoundMoments1678
 
 namespace LeanLab.ExceptionalSet.U1539.KaracubaSplit
 
