@@ -81,6 +81,42 @@ theorem leaf_very_short_shift_quarter
                   Thm2.delta χ * v0 / Real.log (x ^ (11 / 20 + ε)))‖ ^ 2 ≤
                     C * ((q : ℝ) * sieveQ ε x) ^ 2 *
                       x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
+  intro A hA
+  obtain ⟨Ch, hCh⟩ := hchar (2 * A) (by linarith)
+  obtain ⟨Cbd, hCbd⟩ := hbd
+  obtain ⟨Ccard, hCcard⟩ := hcard A hA
+  refine ⟨|Ch| + |Cbd| + |Ccard| + 3, ?_⟩
+  intro x hx q hq hqQ hq2 z hzlo hzup hzcell hz12
+  have hx0 : (0 : ℝ) < x := by
+    have : (0 : ℝ) ≤ |Ch| + |Cbd| + |Ccard| + 3 := by positivity
+    linarith
+  have hX : (0 : ℝ) < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos hx0 _
+  have hlogx : (0 : ℝ) < Real.log x := Real.log_pos (by linarith [hx, abs_nonneg Ch, abs_nonneg Cbd, abs_nonneg Ccard])
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  have hq2' : (q : ℝ) ≤ 2 := by exact_mod_cast hq2
+  have hqQ' : (q : ℝ) ≤ sieveQ ε x := by exact_mod_cast hqQ
+  have hq_log : (q : ℝ) ≤ Real.log x ^ (2 * A) := by
+    have : (q : ℝ) ≤ sieveQ ε x := hqQ'
+    -- sieveQ ε x ≤ x^(something small), and log x ^ (2A) grows, so for large x this holds
+    -- We use the trivial bound: q ≤ 2 ≤ log x ^ (2A) for x ≥ e
+    have hlog2 : (2 : ℝ) ≤ Real.log x ^ (2 * A) := by
+      have h1 : (1 : ℝ) < Real.log x := by
+        have : Real.exp 1 ≤ x := by
+          -- need x ≥ e, which follows from x ≥ |Ch|+|Cbd|+|Ccard|+3 ≥ 3 > e
+          have h3 : (3 : ℝ) ≤ x := by
+            have : (0 : ℝ) ≤ |Ch| + |Cbd| + |Ccard| := by positivity
+            linarith
+          calc Real.exp 1 ≤ 3 := by norm_num
+            _ ≤ x := h3
+        rw [← Real.le_log_iff_exp_le (by linarith)]
+        exact this
+      have hpos : (0 : ℝ) ≤ 2 * A := by linarith
+      have := Real.rpow_le_rpow_of_exponent_le (by linarith) hpos (by linarith : (1 : ℝ) ≤ 2 * A)
+      -- Actually we need 1 ≤ log x, so (log x)^(2A) ≥ 1^(2A) = 1, but we need ≥ 2
+      -- Let's use a different approach: since log x > 1, (log x)^(2A) > 1, but we need ≥ 2
+      -- For large enough x, log x ≥ 2^(1/(2A)), so this holds
+      sorry
+    linarith
   sorry
 
 /-- LEAF 2 of 3. Step: the intermediate shift, `(sieveQ ε x) / (2 x^(11/20+ε)) <= z <= (sieveQ ε x) /
