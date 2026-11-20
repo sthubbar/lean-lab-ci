@@ -134,6 +134,9 @@ Inputs include Montgomery and Vaughan 1974 and Montgomery 1968 through Lemma 4.3
 theorem typeII_bound (x α : ℝ) (a : ℤ) (q : ℕ) (δ : ℝ)
     (h : MinorHyp x α a q δ) (hq : x ^ ((1 : ℝ) / 3) / 6 < q) :
     ‖II α x‖ ≤ 0.272652 * x ^ ((5 : ℝ) / 6) * Real.log x ^ ((3 : ℝ) / 2) := by
+  unfold II weighted
+  apply norm_sum_le
+  intro n hn
   sorry
 
 /-- LEAF. Page 9 equation 2.23. A derived allowance for the retained even contribution. -/
