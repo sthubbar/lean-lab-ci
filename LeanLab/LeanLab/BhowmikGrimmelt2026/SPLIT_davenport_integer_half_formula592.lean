@@ -72,7 +72,11 @@ theorem davenport_half_window_imag_short592 :
         ∑ ρ ∈ Z.filter (fun ρ => |ρ.im| < 1), (mult χ ρ : ℂ) / ρ)).im| ≤
         D * ((n : ℝ) / T * Real.log ((q : ℝ) * n * T) ^ 2 +
           Real.log q + Real.log n) := by
-  sorry
+  obtain ⟨D, hD, hmain⟩ := davenport_integer_half_formula592
+  refine ⟨D, hD, ?_⟩
+  intro q _ χ hprim hχ T hT n hn _ Z hzeros
+  exact (Complex.abs_im_le_norm _).trans
+    (hmain q χ hprim hχ T hT Z hzeros n hn)
 
 /-- LEAF: the real part of the explicit formula residual in the tall window `n ≤ T`.
 
