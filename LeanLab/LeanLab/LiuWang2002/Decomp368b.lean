@@ -1,10 +1,11 @@
 import LeanLab.LiuWang2002.CheckData368_132
-import LeanLab.LiuWang2002.Decomp460a
+import LeanLab.LiuWang2002.Lower664
+import LeanLab.Ported.Prove2Me.LL_Decomp368b_primorial_c4
 
 /-!
 Strictly smaller finite ranges supplying Task352.primorial_block_c.
 Source Schoenfeld page 356, display 5.1 star, derived integer certificates.
-The five remaining ranges are open and the final assembly is CONDITIONAL.
+The last two ranges remain open and the final assembly is CONDITIONAL.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 namespace LeanLab.LiuWang2002.Task368
@@ -13,25 +14,29 @@ namespace LeanLab.LiuWang2002.Task368
 1000000 strictly below n through 2000000. Later ranges are separate. -/
 theorem primorial_c1 (n : ℕ) (hn : 1000000 < n) (hn' : n ≤ 2000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  exact prefix_132 n (by omega) hn'
+  exact Task664.primorial_1m_4m n hn (by omega)
+
 
 /-- LEAF. Page 356, display 5.1 star, derived integer certificate for
 2000000 strictly below n through 4000000. This is one proper subrange. -/
 theorem primorial_c2 (n : ℕ) (hn : 2000000 < n) (hn' : n ≤ 4000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  exact LeanLab.LiuWang2002.Task460.primorial_c2 n hn hn'
+  exact Task664.primorial_1m_4m n (by omega) hn'
+
 
 /-- LEAF. Page 356, display 5.1 star, derived integer certificate for
 4000000 strictly below n through 8000000. This is one proper subrange. -/
 theorem primorial_c3 (n : ℕ) (hn : 4000000 < n) (hn' : n ≤ 8000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Task664.LL_Decomp368b.primorial_c3 n hn hn'
+
 
 /-- LEAF. Page 356, display 5.1 star, derived integer certificate for
 8000000 strictly below n through 16000000. This is one proper subrange. -/
 theorem primorial_c4 (n : ℕ) (hn : 8000000 < n) (hn' : n ≤ 16000000) :
     primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Task664.LL_Decomp368b.primorial_c4 n hn hn'
+
 
 /-- LEAF. Page 356, display 5.1 star, derived integer certificate for
 16000000 strictly below n through 32000000. This is one proper subrange. -/
@@ -46,8 +51,8 @@ theorem primorial_c6 (n : ℕ) (hn : 32000000 < n) (hn' : n ≤ 100000000) :
     primorial n * 25 ^ n < 68 ^ n := by
   sorry
 
-/-- The exact final block statement. CONDITIONAL ON the five unproved
-proper subranges above 2000000. The assembly has no local sorry.
+/-- The exact final block statement. CONDITIONAL ON the unproved
+c5 and c6 subranges above 16000000. The assembly has no local sorry.
 Source page 356, display 5.1 star, derived integer certificate. -/
 theorem primorial_block_c (n : ℕ) (hn : 1000000 < n) (hn' : n ≤ 100000000) :
     primorial n * 25 ^ n < 68 ^ n := by
