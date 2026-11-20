@@ -78,7 +78,16 @@ theorem leaf_large_conductor_odd_index (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2
               c * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)) ≤
                 (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
                   A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, H⟩ := leaf_pointwise_large_conductor γ h1 h2
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ hδlt
+  obtain ⟨κ₀, hκ₀, H⟩ := H δ hδ hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ hκle
+  obtain ⟨c, A, hc, hA, N₀, H⟩ := H κ hκ hκle
+  refine ⟨c, A, hc, hA, N₀, ?_⟩
+  intro N hN r hr hrP hrcap n hn heven hm hgcd
+  exact H N hN r hr hrP hrcap 1 (Or.inr rfl) n hn heven hm hgcd
 
 /-- Assembly of `leaf_pointwise_large_conductor` from the two frequency halves and the slack of the
 divisor envelope. -/
