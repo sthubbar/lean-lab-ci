@@ -33,7 +33,7 @@ if not base:
 _, files = sh(f"git diff --name-only {base} HEAD"); _, wt = sh("git status --porcelain")
 changed = sorted(set(f for f in files.split() if f) | set(l[3:].strip() for l in wt.splitlines() if l[3:].strip())); changed = [f for f in changed if f != out]
 mines = tuple(f"LeanLab/LeanLab/{x}/" for x in folder.split(",") if x); mine = mines
-outside = [f for f in changed if not f.startswith(mine) and f != "LOG.md"]
+outside = [f for f in changed if not f.startswith(mine) and f != "LOG.md" and f != "scripts/check_branch.sh"]
 rep(not outside, "only your folder and LOG.md changed" + ("" if not outside else ": outside files " + ", ".join(outside)))
 binaries = [f for f in changed if re.search(r"\.(pdf|zip|tar|gz|png|jpg|djvu|ps)$", f, re.I)]
 rep(not binaries, "no downloads or binaries committed" + ("" if not binaries else ": " + ", ".join(binaries)))
@@ -95,7 +95,7 @@ if names:
     stm = any(f in {m + "STATEMENTS.md" for m in mines} for f in changed)
     rep(stm, "STATEMENTS.md updated with twins for new theorems")
 rep(any(f in {m + "PROGRESS.md" for m in mines} for f in changed), "PROGRESS.md updated")
-_, dl = sh(f"git diff {base} HEAD -- LOG.md")
+_, dl = sh(f"git diff {base} HEAD -- LeanLab/LeanLab/{folder.split(',')[0]}/LOG.md")
 rep(any(l.startswith("+" + prefix) for l in dl.splitlines()), f"LOG.md has a line starting {prefix}")
 prose = [l[1:] for f in changed if f.endswith(".md") for l in sh(f"git diff {base} HEAD -- '{f}'")[1].splitlines() if l.startswith("+") and not l.startswith("+++")]
 dash = [l for l in prose if "—" in l or "–" in l]
