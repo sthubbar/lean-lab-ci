@@ -53,7 +53,15 @@ theorem leaf_absent_even_low_half (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re +
                     A * F γ N * divisorError 1 (F γ N ^ (6 * δ)) (nu γ n) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hδ⟩ := leaf_absent_even_index γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ' hδlt
+  obtain ⟨κ₀, hκ₀, hκ⟩ := hδ δ hδ' hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ' hκle
+  obtain ⟨c, A, hc, hA, N₀, hN⟩ := hκ κ hκ' hκle
+  exact ⟨c, A, hc, hA, N₀,
+    fun N hN' hs n hn heven _ hm => hN N hN' hs n hn heven hm⟩
 
 /-- Weakening: the full even-frequency statement implies its statement with an
 extra side hypothesis `Hside n N` inserted (and immediately discarded). -/
