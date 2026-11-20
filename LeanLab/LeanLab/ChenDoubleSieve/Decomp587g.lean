@@ -1,3 +1,4 @@
+import LeanLab.Ported.Prove2Me.Decomp587g
 import LeanLab.ChenDoubleSieve.Task587R0J18
 import LeanLab.ChenDoubleSieve.Task587PairMoments
 
@@ -62,7 +63,7 @@ smaller than the original I2_r0_18 leaf. -/
 theorem r0j18_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :
     buchstabIntegral ω 2 (fun j => (r0j18_lo j : ℝ)) (fun j => (r0j18_hi j : ℝ)) φ ≤ ((155569 / 1000000000) : ℝ) := by
-  sorry
+  exact LeanLab.Ported.Prove2Me.Task662.solution hω hz hφ hφtop
 
 /-- The exact original I2_r0_18 statement follows from its smaller profile certificate.
 Wu 2004 page 26, Table 1 row 1 page 30. CONDITIONAL ON r0j18_short. -/
