@@ -53,7 +53,7 @@ theorem leaf_absent_odd_low_half (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
                     A * F γ N * divisorError 1 (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+  exact leaf_absent_odd_index γ h1 h2 a ha
 
 /-- LEAF. Upper half of the frequency range: at an odd floor value `ν_n` of the window whose upper
 neighbour is larger than three quarters of `F γ N`, the real part of the major arc integral at
