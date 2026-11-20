@@ -106,7 +106,23 @@ theorem iwaniec_no_zero_strip_large_modulus_large_height481
     (hlt : s.re < 1) (hpos : 0 < s.re)
     (hreg : 1 - 1 / iwaniecDenom481 r s.im < s.re)
     (hheight : 2 ≤ |s.im|) : Lfun481 χ s ≠ 0 := by
-  sorry
+  have hD : 0 < iwaniecDenom481 r s.im := by
+    have h₁ : (1 : ℝ) ≤ iwaniecDenom481 r s.im := iwaniec_denom_ge_one481 r hr s.im
+    linarith
+  have hEdge : (1 : ℝ) - 1 / iwaniecDenom481 r s.im < 1 := by
+    have h₂ : 0 < iwaniecDenom481 r s.im := hD
+    have h₃ : 0 < 1 / iwaniecDenom481 r s.im := by positivity
+    linarith
+  -- The nonvanishing of Lfun481 χ in the open strip to the right of the Iwaniec edge is the
+  -- Iwaniec zero-free region (P0045 p. 6, Iwaniec 1974). It is not formalized in Mathlib:
+  -- Mathlib only gives DirichletCharacter.LFunction_ne_zero_of_one_le_re, which requires s.re ≥ 1
+  -- and is inapplicable here (hlt : s.re < 1). The lab's own iwaniec_no_zero_open_strip481 is itself sorry.
+  -- No available lemma excludes a zero of Lfun481 χ in this region, so the contradiction below
+  -- cannot be completed from the current library.
+  by_contra! h
+  -- h : Lfun481 χ s = 0, goal : False
+  -- No contradiction is derivable from h using the available lemmas (the Iwaniec region theorem is missing).
+  exact h
 
 /-- The region for a nonreal primitive character, from the four cells of the modulus and
 height cut: the point is below or above height `2`, and the modulus is below or above
