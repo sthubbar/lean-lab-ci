@@ -57,7 +57,16 @@ theorem leaf_prime_product_odd_short_conductor (γ : ℝ) (h1 : 1 < γ) (h2 : γ
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
                     A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hδ⟩ := leaf_prime_product_odd_index γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ' hδlt
+  obtain ⟨κ₀, hκ₀, hκ⟩ := hδ δ hδ' hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ' hκle
+  obtain ⟨c, A, hc, hA, N₀, hN⟩ := hκ κ hκ' hκle
+  exact ⟨c, A, hc, hA, N₀,
+    fun N hN' r hr hrP hs _ n hn hodd hm hgcd hprime =>
+      hN N hN' r hr hrP hs n hn hodd hm hgcd hprime⟩
 
 /-- LEAF. Middle conductor case of the single odd-index frequency: when the modulus exceeds
 the third power of the truncation scale but stays inside the nine halves power, the real part
