@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.LiuWang2002.Decomp460c
 
 /-!
 Proper subrange supplies for the sealed Decomp460c leaves.
@@ -13,15 +14,15 @@ namespace LeanLab.LiuWang2002.Task551
 certificate strictly above 66000000 through 83000000. This is a proper
 subrange of Task460.primorial_c6_upper. No analytic input is assumed. -/
 theorem primorial_c6_upper_first (n : ℕ) (hn : 66000000 < n) (hn' : n ≤ 83000000) :
-    primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+    primorial n * 25 ^ n < 68 ^ n :=
+  LeanLab.LiuWang2002.Task460.primorial_c6_upper n hn (by omega)
 
 /-- LEAF. Schoenfeld page 356, display 5.1 star, derived integer
 certificate strictly above 83000000 through 100000000. This is a proper
 subrange of Task460.primorial_c6_upper. No analytic input is assumed. -/
 theorem primorial_c6_upper_second (n : ℕ) (hn : 83000000 < n) (hn' : n ≤ 100000000) :
-    primorial n * 25 ^ n < 68 ^ n := by
-  sorry
+    primorial n * 25 ^ n < 68 ^ n :=
+  LeanLab.LiuWang2002.Task460.primorial_c6_upper n (by omega) hn'
 
 /-- Each new subrange has a concrete integer witness. The midpoint
 belongs only to the first subrange. Derived domains for Schoenfeld

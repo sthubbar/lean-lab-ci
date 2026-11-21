@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_arc_energy
+import LeanLab.ExceptionalSet.SPLIT_leaf_mean_square
 
 /-!
 Split of `LeanLab.ExceptionalSet.BG2026.Decomp522a.leaf_arc_energy`: the even frequency window
@@ -186,7 +187,17 @@ theorem leaf_window_error_energy (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3
     ∃ C : ℝ, 0 ≤ C ∧ ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
       (∑ n ∈ (range (X + 1)).filter Even, (error n) ^ 2) ≤
         C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  obtain ⟨C, X₀, h⟩ :=
+    LeanLab.ExceptionalSet.BG2026.Supply385.leaf_mean_square_split Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  refine ⟨max C 0, le_max_right _ _, X₀, ?_⟩
+  intro X hX
+  have hbound := h X hX
+  have hpow : 0 ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    Real.rpow_nonneg (Nat.cast_nonneg X) _
+  have hmax : C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) ≤
+      max C 0 * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+    mul_le_mul_of_nonneg_right (le_max_left _ _) hpow
+  linarith
 
 /-- LEAF: The reconstruction residual of the truncated arc model on the even window: there are `C`
 and `X₀` with `0 ≤ C` and, for every `X ≥ X₀`, the sum over the even `0 ≤ n ≤ X` of the squared
