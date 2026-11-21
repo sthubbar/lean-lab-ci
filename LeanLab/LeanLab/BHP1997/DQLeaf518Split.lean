@@ -24,6 +24,7 @@ spellings agree by unfolding.
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
 -/
 import LeanLab.BHP1997.LowerShortC165
+import LeanLab.BHP1997.Lemma29
 
 namespace LeanLab.BHP1997.DQLeaf518Split
 open Classical Complex DecompC165b LowerShortC165
@@ -75,6 +76,21 @@ theorem leaf_518_E_M0 (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) (ω :
           C * (x ^ (11 / 20 + ε) / (x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2) *
             Real.log x ^ (-A') := by
   sorry
+
+/-- Page 44, the scalar kernel estimate with the factor six in the range of 1.9. -/
+theorem lemma29_ineq_six {t z T : ℝ} (hz : 0 ≤ z) (hz1 : z ≤ 1)
+    (hT : 0 < T) (hzT : z ≤ 6 / T) :
+    ‖Complex.exp ((1 / 2 + t * I) * (Real.log (1 + z) : ℝ)) - 1‖ ^ 2 /
+        ‖(1 / 2 + t * I : ℂ)‖ ^ 2 ≤ 324 / (T ^ 2 + t ^ 2) := by
+  have hT6 : 0 < T / 6 := by positivity
+  have hzT6 : z ≤ 1 / (T / 6) := by
+    convert hzT using 1 <;> field_simp
+  have hkernel := Lemma29.lemma29_ineq (t := t) hz hz1 hT6 hzT6
+  refine hkernel.trans ?_
+  have hd6 : 0 < (T / 6) ^ 2 + t ^ 2 := by positivity
+  have hd : 0 < T ^ 2 + t ^ 2 := by positivity
+  apply (div_le_div_iff₀ hd6 hd).mpr
+  nlinarith [sq_nonneg t]
 
 /-- LEAF: page 43 Lemma 29, the mean square bound. P0069 Baker Harman Pintz 1997: for a
 Dirichlet polynomial over J with coefficients satisfying (3.1), (5.1) over `E^c \ {χ0}` and
