@@ -290,6 +290,18 @@ theorem prime_minor_multi_525_mid {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) (ϑ : ℝ)
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
   sorry
 
+/-- A nonnegative indexed family is bounded above by the sum of the same family
+over its full index set. -/
+private lemma sum_filter_le_525 (X : ℕ) (g : ℕ → ℝ) (c : ℕ → Prop)
+    [DecidablePred c] (hg : ∀ N, 0 ≤ g N) :
+    (∑ N ∈ Finset.Icc 1 X, (if c N then g N else 0)) ≤
+      ∑ N ∈ Finset.Icc 1 X, g N := by
+  refine Finset.sum_le_sum ?_
+  intro N _
+  by_cases hc : c N
+  · simp [hc]
+  · simp [hc, hg N]
+
 /-- LEAF: the upper long range of the cutoff, where N is above the midpoint between the square root of X and X. This is the longer of the two ranges on which the minor arc saving has to be used, and the bound is the same power budget. -/
 theorem prime_minor_multi_525_long {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) (ϑ : ℝ) (hϑ : 0 < ϑ) (hϑ' : ϑ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ X : ℕ, 2 ≤ X → 2 ≤ (X : ℝ) ^ ϑ →
@@ -298,7 +310,26 @@ theorem prime_minor_multi_525_long {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) (ϑ : ℝ
           ‖∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else (∑ n ∈ (Finset.range (X + 1)).filter (fun n => n.Prime), ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 * ee (-(N * α))‖ ^ 2
         else 0)) ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+  obtain ⟨C, hC, hfull⟩ := prime_minor_multi_525 hϕ ϑ hϑ hϑ'
+  refine ⟨C, hC, ?_⟩
+  intro X hX hR
+  let g : ℕ → ℝ := fun N =>
+    ‖∫ α in (0 : ℝ)..1, if MajorArc X ((X : ℝ) ^ ϑ) α then 0 else
+      (∑ n ∈ (Finset.range (X + 1)).filter (fun n => n.Prime),
+        ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 *
+        ee (-(N * α))‖ ^ 2
+  have hg : ∀ N, 0 ≤ g N := by
+    intro N
+    exact sq_nonneg (norm_nonneg _)
+  have hpartial : (∑ N ∈ Finset.Icc 1 X,
+      (if (Nat.sqrt X + X) / 2 < N then g N else 0)) ≤
+      ∑ N ∈ Finset.Icc 1 X, g N :=
+    sum_filter_le_525 X g (fun N => (Nat.sqrt X + X) / 2 < N) hg
+  have hfull' := hfull X hX hR
+  change (∑ N ∈ Finset.Icc 1 X, g N) ≤
+    C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) * (X : ℝ) ^ 3 *
+      Real.log X ^ 5 at hfull'
+  exact hpartial.trans hfull'
 
 /-! ## Assembled split -/
 
