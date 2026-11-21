@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp587j
+import LeanLab.ChenDoubleSieve.Decomp587f
 import LeanLab.ChenDoubleSieve.Decomp587k
 import LeanLab.ChenDoubleSieve.Decomp587i
 import LeanLab.ChenDoubleSieve.Decomp587g
@@ -460,7 +461,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.003639554`; the bound adds 0.1 percent. -/
 theorem I2_r3_11 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 3) 2 ≤ (1821597/500000000 : ℝ) := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Task587.I2_r3_11_from_short hω hz
 
 /-- Wu 2004 Lemma 5.2, page 26: `I_{2,12}` for row 4 of Table 1 is at most `0.000e+00`, by
 degenerate, one coordinate is pinned since κ₃ = s, so the bound is 0. CONDITIONAL ON IsBuchstab and ZeroBelowOne, through `ω ≤ 1`. PROVED. -/
