@@ -1568,6 +1568,23 @@ private theorem leaf_singular_series_converges_of_summable (H X P : ℝ)
   rw [dif_pos hc]
   exact hc.choose_spec
 
+/-- Convergent pair series determine the main term uniquely. -/
+theorem mainTermPrime_eq_of_converges {E : Set ExcPair}
+    {Sg Sg' : ExcPair → ExcPair → ℕ → ℂ} {ε X : ℝ} {m : ℕ}
+    (hSg : ∀ z ∈ E, ∀ w ∈ E, Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg z w m)))
+    (hSg' : ∀ z ∈ E, ∀ w ∈ E, Tendsto (singPartialPrime z w m) atTop (𝓝 (Sg' z w m))) :
+    mainTermPrime E Sg ε X m = mainTermPrime E Sg' ε X m := by
+  unfold mainTermPrime
+  apply finsum_congr
+  intro z
+  apply finsum_congr
+  intro hz
+  apply finsum_congr
+  intro w
+  apply finsum_congr
+  intro hw
+  rw [tendsto_nhds_unique (hSg z hz w hw) (hSg' z hz w hw)]
+
 /-- LEAF arXiv:1804.05561v1 display 10.25: the main term error is `O_ε(𝔖(m) X e^{-c_ε H}) +
 O_ε(X^{1-ε₀})` for the actual series, with `ε₀` and `c_ε` existential as in Theorem 1.
 DECISION 2026-10-31 architect PC 20261031T2333Z-383, replaces two retired leaves above. 
@@ -1761,5 +1778,5 @@ theorem assembly_221 :
 end
 end LeanLab.Pintz2021.DecompJ579
 
+#print axioms LeanLab.Pintz2021.DecompJ579.mainTermPrime_eq_of_converges
 #print axioms LeanLab.Pintz2021.DecompJ579.assembly_221
-

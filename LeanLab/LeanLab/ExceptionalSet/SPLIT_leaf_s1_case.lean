@@ -18,6 +18,7 @@ The step is cut into three leaves:
 AI wrote the Lean code, Claude. Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.KaracubaSplit
+import LeanLab.ExceptionalSet.S1FirstDerivativeSaving1539
 
 namespace LeanLab.ExceptionalSet.U1539.KaracubaSplit
 
@@ -42,7 +43,74 @@ theorem leaf_s1_monotone_saving :
         ((∀ x ∈ Set.Icc (N : ℝ) (2 * N), 0 < iteratedDeriv 1 f x) ∨
           (∀ x ∈ Set.Icc (N : ℝ) (2 * N), iteratedDeriv 1 f x < 0)) →
         ‖∑ n ∈ Finset.Ioc N (2 * N), eC (f n)‖ ≤ B * (N : ℝ) ^ (1 - c / (k : ℝ) ^ 2) := by
-  sorry
+  intro θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  obtain ⟨B, c, N₀, hB, hc, hN₀, hcore⟩ :=
+    LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1Saving.s1_saving_core
+      θ Θ Θ₀ δ hδ0 hδ1 hΘ0 hΘθ hθΘ₀ hΘ₀1
+  refine ⟨B, c, N₀, hB, hc, hN₀, ?_⟩
+  intro N hN f k hk3 hsm hder hδk hf' hsgn
+  -- the two characters agree
+  have hCK : ∀ x : ℝ, eC x = LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK x := by
+    intro x
+    simp only [eC, LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK]
+    congr 1
+    push_cast
+    ring
+  -- the first derivative hypothesis in the form used by the first derivative saving
+  have hder' : ∀ x ∈ Set.Icc (N : ℝ) (2 * N),
+      (N : ℝ) ^ (-θ) ≤ |deriv f x| ∧ |deriv f x| ≤ (N : ℝ) ^ (-Θ) := by
+    intro x hx
+    have h := hf' x hx
+    simpa [iteratedDeriv_one] using h
+  have hsgn' : (∀ x ∈ Set.Icc (N : ℝ) (2 * N), 0 < deriv f x) ∨
+      (∀ x ∈ Set.Icc (N : ℝ) (2 * N), deriv f x < 0) := by
+    rcases hsgn with h | h
+    · exact Or.inl (fun x hx => by simpa [iteratedDeriv_one] using h x hx)
+    · exact Or.inr (fun x hx => by simpa [iteratedDeriv_one] using h x hx)
+  have hsum : (∑ n ∈ Finset.Ioc N (2 * N), eC (f n)) =
+      ∑ n ∈ Finset.Ioc N (2 * N), LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK (f n) :=
+    Finset.sum_congr rfl (fun n _ => hCK (f n))
+  rw [hsum]
+  rcases hsgn' with hpos | hneg
+  · have hposb : ∀ x ∈ Set.Icc (N : ℝ) (2 * N),
+        (N : ℝ) ^ (-θ) ≤ deriv f x ∧ deriv f x ≤ (N : ℝ) ^ (-Θ) := by
+      intro x hx
+      have h := hder' x hx
+      rw [abs_of_pos (hpos x hx)] at h
+      exact h
+    exact hcore N hN f k hk3 hsm hder hδk hposb
+  · -- `f` is decreasing: its negative is increasing, and conjugating fixes the norm
+    set g : ℝ → ℝ := fun x => -f x with hg
+    have hsg : ∀ x ∈ Set.Icc (N : ℝ) (2 * N),
+        (N : ℝ) ^ (-θ) ≤ deriv g x ∧ deriv g x ≤ (N : ℝ) ^ (-Θ) := by
+      intro x hx
+      have h := hder' x hx
+      have h0 := hneg x hx
+      rw [abs_of_neg h0] at h
+      have hdx : deriv g x = - deriv f x := by
+        simpa [hg] using (deriv.neg (f := f) (x := x))
+      rw [hdx]
+      exact h
+    have hderg : ∀ x ∈ Set.Icc (N : ℝ) (2 * N),
+        |iteratedDeriv k g x / k.factorial| ≤ (N : ℝ) ^ (-(Θ₀ * k)) := by
+      intro x hx
+      have hnegk : iteratedDeriv k g x = -iteratedDeriv k f x := by
+        simpa [hg] using (iteratedDeriv_neg k f x)
+      rw [hnegk, neg_div, abs_neg]
+      exact hder x hx
+    have hsmg : ∃ U : Set ℝ, IsOpen U ∧ Set.Icc (N : ℝ) (2 * N) ⊆ U ∧ ContDiffOn ℝ k g U := by
+      obtain ⟨U, hUo, hUsub, hUc⟩ := hsm
+      exact ⟨U, hUo, hUsub, by simpa [hg] using hUc.neg⟩
+    have hb := hcore N hN g k hk3 hsmg hderg hδk hsg
+    have hconj : (∑ n ∈ Finset.Ioc N (2 * N),
+          LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK (g n)) =
+        (starRingEnd ℂ) (∑ n ∈ Finset.Ioc N (2 * N),
+          LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK (f n)) := by
+      rw [map_sum]
+      refine Finset.sum_congr rfl (fun n _ => ?_)
+      simpa [hg] using (LeanLab.BakerHarmanPintz1997.PortedVanDerCorput.eK_neg (f n))
+    rw [hconj, Complex.norm_conj] at hb
+    exact hb
 
 /-- LEAF. Step 3 of the split, the range below `N₀`: for `0 < c ≤ 1` the trivial bound
 `‖Σ_{n ∈ (N, 2N]} e(f n)‖ ≤ N` and `N ^ (c / k ^ 2) ≤ N₀ ^ (1 / 9)`, valid for `1 ≤ N < N₀`
