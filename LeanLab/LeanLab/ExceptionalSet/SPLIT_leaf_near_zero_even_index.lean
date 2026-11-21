@@ -78,7 +78,16 @@ theorem leaf_near_zero_even_large_prime_short (γ : ℝ) (h1 : 1 < γ) (h2 : γ 
                 c * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)) ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re +
                     A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hδ⟩ := leaf_near_zero_even_index γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ' hδlt
+  obtain ⟨κ₀, hκ₀, hκ⟩ := hδ δ hδ' hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ' hκle
+  obtain ⟨c, A, hc, hA, N₀, hN⟩ := hκ κ hκ' hκle
+  refine ⟨c, A, hc, hA, N₀, ?_⟩
+  intro N hN' r hr hrP hsel _ _ n hn heven hm hgcd hnop hrE
+  exact hN N hN' r hr hrP hsel n hn heven hm hgcd hnop hrE
 
 /-- LEAF. Large-prime conductor, long modulus: when some prime above three divides the
 modulus and the modulus exceeds the fourteenth power of the truncation scale, the real part of
