@@ -293,7 +293,20 @@ theorem leaf_arc_energy_window (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 /
       (∑ n ∈ (range (X + 1)).filter Even,
         ‖fourierCoeff (fun t => FX X (X ^ 2) t ^ 2 - Vfun X (Nat.sqrt X) (Nat.sqrt X) t)
           (n : ℤ)‖ ^ 2) ≤ C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  obtain ⟨Ce, Xe, hE⟩ := leaf_mean_square_split Θ hΘ1 hΘ2 hZF ε hε hsublinear
+  have hE' : ∃ Ce : ℝ, 0 ≤ Ce ∧ ∃ Xe : ℕ, ∀ X : ℕ, Xe ≤ X →
+      ∑ n ∈ (range (X + 1)).filter Even, (error n) ^ 2 ≤
+        Ce * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
+    refine ⟨max Ce 0, le_max_right _ _, Xe, ?_⟩
+    intro X hX
+    have h := hE X hX
+    have hpow : 0 ≤ (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+      Real.rpow_nonneg (Nat.cast_nonneg X) _
+    have hmax : Ce * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) ≤
+        max Ce 0 * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) :=
+      mul_le_mul_of_nonneg_right (le_max_left _ _) hpow
+    linarith
+  exact window_of_error_mean_square Θ hΘ1 hΘ2 hZF ε hε hsublinear hE'
 
 /-- LEAF. The complement of the even frequency window only: there are `C` and `X₀` with `0 ≤ C` and,
 for every `X ≥ X₀`, the squared Fourier coefficient energy of the difference on the integers that
