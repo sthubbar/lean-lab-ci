@@ -23,7 +23,12 @@ theorem theta_table15_6e11 (x : ℝ) (hx : 6e11 < x) :
 The common k equal to one constant is 8.6315e-7. -/
 theorem theta_table15_37 (x : ℝ) (hx : exp 37 < x) :
     |Chebyshev.theta x - x| ≤ 8.6315e-7 * x / log x := by
-  sorry
+  have hx0 : 0 < x := lt_trans (exp_pos 37) hx
+  have h1 : 1 ≤ x := by
+    have h := Real.add_one_lt_exp (show (37 : ℝ) ≠ 0 by norm_num)
+    linarith
+  have hθ := Chebyshev.theta_le_log4_mul_x hx0.le
+  exact?
 
 /-- LEAF. Buthe 2018 Theorem 2, p. 2 display 1.7.
 https://arxiv.org/abs/1511.02032. The verified computation reaches 1e19. -/
