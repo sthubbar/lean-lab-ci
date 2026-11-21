@@ -10,6 +10,7 @@ elementary harmonic bound.  The mass of the short block is left untouched.
 AI wrote the Lean code.  Goldbach is open.
 -/
 import LeanLab.BHP1997.SPLIT_leaf_short_coefficient561
+import LeanLab.BHP1997.Task670SummationGrowth
 
 namespace LeanLab.BHP1997.Decomp561n
 open Classical Complex Thm2 MeasureTheory Set Decomp561d Decomp561e Decomp561m
@@ -121,8 +122,9 @@ theorem leaf_short_modulus_summation561 (ε D x u v A C₀ : ℝ) (b : ℕ → �
 /-- The single frequency short coefficient replacement, assembled from the modulus
 decomposition, the single modulus replacement and the modulus summation.  The
 constant of the conclusion is the per-modulus constant enlarged by three, so that
-it also serves as the threshold of the conclusion.  CONDITIONAL ON those three
-separate inputs. -/
+it also serves as the threshold of the conclusion. CONDITIONAL ON the modulus
+decomposition and single modulus replacement. The positive epsilon gives the
+growing length needed by the proved modulus summation bound. -/
 theorem leaf_short_prefix_replacement561_split :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ →
       ∀ (b : ℝ → ℕ → ℂ) (u v : ℝ),
@@ -180,7 +182,15 @@ theorem leaf_short_prefix_replacement561_split :
       (max 1 C₀ + 3) * Real.log x ^ (-A) * ∑ m ∈ Finset.Ioc ⌊length512 ε x⌋₊ ⌊2 * length512 ε x⌋₊, ‖b x m‖ :=
     mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hcoef hLA0) hS0
   rw [leaf_short_modulus_decomposition561 ε D x u v (b x) N]
-  exact le_trans
-    (leaf_short_modulus_summation561 ε D x u v A C₀ (b x) N hA hD0 hx3 hsum) hstep
+  have hY1 : 1 ≤ length512 ε x := by
+    exact Real.one_le_rpow hx1 (by linarith : 0 ≤ 11 / 20 + ε)
+  refine le_trans ?_ hstep
+  apply Task670SummationGrowth.short_modulus_summation_of_length
+    (x := x) (D := D) (A := A) (C := C₀) (Y := length512 ε x) _ hx3 hS0 hY1
+  intro q hq
+  apply hsum q (Finset.mem_Icc.mp hq).1
+  have hqfloor : (q : ℝ) ≤ (⌊Real.log x ^ (2 * D)⌋₊ : ℕ) := by
+    exact_mod_cast (Finset.mem_Icc.mp hq).2
+  exact hqfloor.trans (Nat.floor_le (Real.rpow_nonneg hlog0 _))
 
 end LeanLab.BHP1997.Decomp561n

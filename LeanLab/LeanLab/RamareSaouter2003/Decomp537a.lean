@@ -1,4 +1,6 @@
 import LeanLab.RamareSaouter2003.Circle419
+import LeanLab.RamareSaouter2003.Decomp563b
+import LeanLab.RamareSaouter2003.Decomp563c
 
 /-!
 Backlund pp. 362 to 369, displays 54, 56 and 77.
@@ -3273,7 +3275,7 @@ theorem strip56_of_boundary
     (σ t : ℝ) (hσ : σ ∈ Set.Icc (0 : ℝ) 1) (ht : 50 ≤ t) :
     ‖riemannZeta ((σ : ℂ) + t * I)‖ ≤
       t ^ 2 / (t ^ 2 - 4) * (t / (2 * π)) ^ ((1 - σ) / 2) * Real.log t := by
-  sorry
+  exact LeanLab.RamareSaouter2003.Decomp563c.strip56_of_boundary h54 h50 σ t hσ ht
 
 /-- Backlund p. 363, display 56, with the bottom-edge data made explicit.
 CONDITIONAL ON Euler summation, the H table, its remainder and strip theory. -/
@@ -3462,7 +3464,7 @@ theorem reflection76 (σ t : ℝ) (hσ : σ ∈ Set.Icc (-1 / 2 : ℝ) 0) (ht : 
     ‖riemannZeta ((σ : ℂ) + t * I)‖ ≤
       (t / (2 * π)) ^ (1 / 2 - σ) * (1 + 1 / (2 * t ^ 2)) *
         ‖riemannZeta (((1 - σ : ℝ) : ℂ) + t * I)‖ := by
-  sorry
+  exact LeanLab.RamareSaouter2003.Decomp563b.reflection76 σ t hσ ht
 
 /-- Backlund p. 369, the saving absorbs the functional-equation error. -/
 theorem saving_absorbs (t : ℝ) (ht : 50 ≤ t) :
