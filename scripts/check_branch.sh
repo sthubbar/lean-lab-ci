@@ -8,7 +8,9 @@
 # Added 2026-10-21 by Steve with Claude, so reviewers read one file instead of redoing the work.
 set -uo pipefail
 FOLDER="${1:?folder}"; TAG="${2:?tag}"
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"; cd "$ROOT"
+# ROOT, lrefresh 20261121T0500Z: the repository the caller stands in, so a copy run from /tmp checks the caller's worktree;
+# the old path-based root became / for such a copy, a gap the Helfgott burst hit 11-20. CHECK_ROOT overrides.
+ROOT="${CHECK_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "$(dirname "$0")/.." && pwd))}"; cd "$ROOT"
 export PATH="$HOME/.elan/bin:$PATH"
 FOLDER=$(echo "$FOLDER" | tr -d " " | sed -E "s#(^|,)(\./)?(LeanLab/)*#\1#g; s#/(,|$)#\1#g"); F1="${FOLDER%%,*}"
 OUT="LeanLab/LeanLab/$F1/build/$TAG-CHECK.txt"; mkdir -p "$(dirname "$OUT")"
