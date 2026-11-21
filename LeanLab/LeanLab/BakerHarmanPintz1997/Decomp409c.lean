@@ -104,7 +104,10 @@ theorem middle_prime_transfer :
       (∀ x k, ‖a x k‖ ≤ tau k ^ B) → (∀ x k, ‖b x k‖ ≤ tau k ^ B) →
       Ev (fun x => z x = x ^ (0.1 : ℝ) ∧ M x ≤ N x ∧ N x ≤ x ^ (0.4 : ℝ)) →
       Holds42 ε fun x k => primePart 1 x (a x) (b x) (M x) (N x) (wof x) (z x) k := by
-  sorry
+  obtain ⟨ε0, hε0, h13⟩ := lemma13
+  refine ⟨ε0, hε0, ?_⟩
+  intro ε hε hεsmall B a b M N z ha hb hcond
+  exact h13 ε hε hεsmall B a b M N z ha hb hcond
 
 /-- LEAF. OPEN. Page 31, pm above x to 0.46.
 The source uses the cofactor upper bound x to 0.18 and the two displayed ratios,
