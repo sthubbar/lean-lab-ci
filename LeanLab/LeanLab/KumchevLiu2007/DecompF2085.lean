@@ -62,7 +62,32 @@ inequality using the log power comparison. -/
 theorem upper_margin_F2085 {X B A Y : ℝ} (hX : 3 ≤ X) (hY : 0 ≤ Y)
     (hAB : A + 2 ≤ 4 * B) :
     Y * (Real.log X ^ B) ^ (-4 : ℤ) ≤ Y / Real.log X ^ (A + 2) := by
-  sorry
+  rcases eq_or_lt_of_le hY with (rfl | hYpos)
+  · simp
+  · have hX1 : 1 < X := by linarith
+    have hlog_pos : 0 < Real.log X := Real.log_pos hX1
+    have h_one_lt_log3 : 1 < Real.log (3 : ℝ) := by
+      have h := Real.log_lt_log (Real.exp_pos 1) Real.exp_one_lt_three
+      rwa [Real.log_exp 1] at h
+    have hlog_ge_one : 1 ≤ Real.log X := by
+      have hle : Real.log (3 : ℝ) ≤ Real.log X :=
+        Real.log_le_log (by norm_num) hX
+      linarith
+    have h_base_pos : 0 < Real.log X ^ B := Real.rpow_pos_of_pos hlog_pos B
+    have h_base_ge_one : 1 ≤ Real.log X ^ B :=
+      Real.one_le_rpow_of_one_le hlog_ge_one B
+    have h_exp_le : (A + 2 : ℝ) ≤ 4 * B := hAB
+    have h_zpow_eq : (Real.log X ^ B) ^ (-4 : ℤ) = ((Real.log X ^ B) ^ (4 : ℤ))⁻¹ := by
+      rw [zpow_neg]
+    have h_target : ((Real.log X ^ B) ^ (4 : ℤ))⁻¹ ≤ (Real.log X ^ (A + 2))⁻¹ := by
+      rw [inv_le_inv₀ (zpow_pos h_base_pos _) (Real.rpow_pos_of_pos hlog_pos _)]
+      have h_pow_eq : (Real.log X ^ B) ^ (4 : ℤ) = Real.log X ^ (4 * B) := by
+        rw [zpow_natCast, Real.rpow_natCast, ← Real.rpow_mul hlog_pos.le]
+        ring
+      rw [h_pow_eq]
+      exact Real.rpow_le_rpow_of_exponent_le hlog_ge_one h_exp_le
+    rw [div_eq_mul_inv, h_zpow_eq]
+    exact mul_le_mul_of_nonneg_left h_target hYpos.le
 
 /-- Assembly. The exact statement of Task628.rough_block_bulk, proved from
 the three leaves above with no sorry of its own. The proof picks B0 large
