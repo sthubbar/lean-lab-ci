@@ -37,7 +37,7 @@ together with the Iwaniec leaf it asserted that the box holds no zero of a nonre
 large `X`. P0045 page 6 does not claim that and it is not known unconditionally, so the leaf was
 unprovable from the source rather than shown false, and the earlier assembly closed by `False.elim`.
 The leaf now bounds only the second summand `(l log (2 l)) ^ (3 / 4)`, which is elementary from
-`l ≤ (41 / 100) log X + log (T + 2)` and `log y ≤ 6 y ^ (1 / 6)`. The assembly then reads
+`l ≤ (41 / 100) log X + log (T + 3)` and `log y ≤ 6 y ^ (1 / 6)`. The assembly then reads
 `log X / H ≤ 4 * 10 ^ 4 * (log (2 r') + C * (log X) ^ (7 / 8))` as
 `log (2 r') ≥ log X / (4 * 10 ^ 4 * H) - C * (log X) ^ (7 / 8)`, which exceeds `log (2 L²)` for
 large `X`, so `Lg X ^ 2 ≤ oddRad131 z.1` and the target follows through `oddRad131` with constant
@@ -64,19 +64,19 @@ private theorem lpz481_denom_pos {r : ℕ} {t : ℝ} (hr : 1 ≤ r) :
     0 < iwaniecDenom481 r t := by
   have hr1 : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr
   have hr0 : (0 : ℝ) ≤ (r : ℝ) := by linarith
-  have habs : (2 : ℝ) ≤ |t| + 2 := by linarith [abs_nonneg t]
-  have hprod : (2 : ℝ) ≤ (r : ℝ) * (|t| + 2) := by
+  have habs : (2 : ℝ) ≤ |t| + 3 := by linarith [abs_nonneg t]
+  have hprod : (2 : ℝ) ≤ (r : ℝ) * (|t| + 3) := by
     have h := mul_le_mul hr1 habs (by norm_num : (0 : ℝ) ≤ 2) hr0
     simpa using h
   have hlog2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
-  have hLpos : 0 < Real.log ((r : ℝ) * (|t| + 2)) := Real.log_pos (by linarith)
-  have hLge : Real.log 2 ≤ Real.log ((r : ℝ) * (|t| + 2)) :=
+  have hLpos : 0 < Real.log ((r : ℝ) * (|t| + 3)) := Real.log_pos (by linarith)
+  have hLge : Real.log 2 ≤ Real.log ((r : ℝ) * (|t| + 3)) :=
     Real.log_le_log (by norm_num) hprod
-  have h2L : 0 < Real.log (2 * Real.log ((r : ℝ) * (|t| + 2))) := by
+  have h2L : 0 < Real.log (2 * Real.log ((r : ℝ) * (|t| + 3))) := by
     apply Real.log_pos
     linarith
-  have hterm : 0 ≤ (Real.log ((r : ℝ) * (|t| + 2)) *
-      Real.log (2 * Real.log ((r : ℝ) * (|t| + 2)))) ^ ((3 : ℝ) / 4) :=
+  have hterm : 0 ≤ (Real.log ((r : ℝ) * (|t| + 3)) *
+      Real.log (2 * Real.log ((r : ℝ) * (|t| + 3)))) ^ ((3 : ℝ) / 4) :=
     Real.rpow_nonneg (le_of_lt (mul_pos hLpos h2L)) _
   have hodd1 : (1 : ℝ) ≤ (oddRad131 r : ℝ) := by
     have h1 : 1 ≤ oddRad131 r := by have := lpz481_oddRad_pos r; omega
@@ -86,8 +86,8 @@ private theorem lpz481_denom_pos {r : ℕ} {t : ℝ} (hr : 1 ≤ r) :
     linarith
   have hrw : iwaniecDenom481 r t
       = 4 * 10 ^ 4 * (Real.log (2 * (oddRad131 r : ℝ)) +
-          (Real.log ((r : ℝ) * (|t| + 2)) *
-            Real.log (2 * Real.log ((r : ℝ) * (|t| + 2)))) ^ ((3 : ℝ) / 4)) := rfl
+          (Real.log ((r : ℝ) * (|t| + 3)) *
+            Real.log (2 * Real.log ((r : ℝ) * (|t| + 3)))) ^ ((3 : ℝ) / 4)) := rfl
   rw [hrw]
   exact mul_pos (by norm_num) (by linarith)
 
@@ -127,15 +127,15 @@ private theorem lpz481_log_le_six_rpow {y : ℝ} (hy : 0 ≤ y) :
 theorem leaf_denom_upper_bound481 (T : ℝ) (hT : 1 ≤ T) :
     ∃ C : ℝ, 0 < C ∧ ∀ X : ℕ, 2 ≤ X → ∀ P H : ℝ, AdmissibleP131 X P →
       ∀ z ∈ zeroBox481 X H T P,
-        (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) *
-          Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)))) ^ (3 / 4 : ℝ)
+        (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)) *
+          Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)))) ^ (3 / 4 : ℝ)
           ≤ C * (Real.log X) ^ (7 / 8 : ℝ) := by
   have hlog2pos : (0 : ℝ) < Real.log 2 := by linarith [Real.log_two_gt_d9]
-  have hT2 : 0 ≤ Real.log (T + 2) := Real.log_nonneg (by linarith)
-  set A : ℝ := (41 : ℝ) / 100 + Real.log (T + 2) / Real.log 2 with hAdef
+  have hT2 : 0 ≤ Real.log (T + 3) := Real.log_nonneg (by linarith)
+  set A : ℝ := (41 : ℝ) / 100 + Real.log (T + 3) / Real.log 2 with hAdef
   have hApos : 0 < A := by
     rw [hAdef]
-    have h : 0 ≤ Real.log (T + 2) / Real.log 2 := div_nonneg hT2 hlog2pos.le
+    have h : 0 ≤ Real.log (T + 3) / Real.log 2 := div_nonneg hT2 hlog2pos.le
     linarith
   have hDpos : 0 < 6 * (2 : ℝ) ^ ((1 : ℝ) / 6) :=
     mul_pos (by norm_num) (Real.rpow_pos_of_pos (by norm_num) ((1 : ℝ) / 6))
@@ -151,38 +151,38 @@ theorem leaf_denom_upper_bound481 (T : ℝ) (hT : 1 ≤ T) :
     have hlogXge : Real.log 2 ≤ Real.log X := Real.log_le_log (by norm_num) hX2
     have hR1 : (1 : ℝ) ≤ (z.1 : ℝ) := by exact_mod_cast h1
     have hR0 : (0 : ℝ) < (z.1 : ℝ) := by linarith
-    have ha2 : (2 : ℝ) ≤ |z.2.2.im| + 2 := by linarith [abs_nonneg z.2.2.im]
-    have hapos : (0 : ℝ) < |z.2.2.im| + 2 := by linarith
-    have hra : 0 < (z.1 : ℝ) * (|z.2.2.im| + 2) := mul_pos hR0 hapos
-    have hge2 : (2 : ℝ) ≤ (z.1 : ℝ) * (|z.2.2.im| + 2) := by
+    have ha2 : (2 : ℝ) ≤ |z.2.2.im| + 3 := by linarith [abs_nonneg z.2.2.im]
+    have hapos : (0 : ℝ) < |z.2.2.im| + 3 := by linarith
+    have hra : 0 < (z.1 : ℝ) * (|z.2.2.im| + 3) := mul_pos hR0 hapos
+    have hge2 : (2 : ℝ) ≤ (z.1 : ℝ) * (|z.2.2.im| + 3) := by
       have h := mul_le_mul hR1 ha2 (by norm_num : (0 : ℝ) ≤ 2) (by linarith : (0 : ℝ) ≤ (z.1 : ℝ))
       simpa using h
     have hPle : (z.1 : ℝ) ≤ (X : ℝ) ^ ((41 : ℝ) / 100) := h2.trans hPb
-    have him : |z.2.2.im| + 2 ≤ T + 2 := by linarith
-    have hmul : (z.1 : ℝ) * (|z.2.2.im| + 2) ≤ (X : ℝ) ^ ((41 : ℝ) / 100) * (T + 2) :=
+    have him : |z.2.2.im| + 3 ≤ T + 3 := by linarith
+    have hmul : (z.1 : ℝ) * (|z.2.2.im| + 3) ≤ (X : ℝ) ^ ((41 : ℝ) / 100) * (T + 3) :=
       mul_le_mul hPle him (by linarith) (Real.rpow_pos_of_pos hXpos _).le
-    have hlogmul : Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2))
-        ≤ Real.log ((X : ℝ) ^ ((41 : ℝ) / 100) * (T + 2)) := Real.log_le_log hra hmul
-    have hlogsplit : Real.log ((X : ℝ) ^ ((41 : ℝ) / 100) * (T + 2))
-        = (41 : ℝ) / 100 * Real.log X + Real.log (T + 2) := by
-      rw [Real.log_mul (ne_of_gt (Real.rpow_pos_of_pos hXpos _)) (by linarith : (T + 2 : ℝ) ≠ 0),
+    have hlogmul : Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3))
+        ≤ Real.log ((X : ℝ) ^ ((41 : ℝ) / 100) * (T + 3)) := Real.log_le_log hra hmul
+    have hlogsplit : Real.log ((X : ℝ) ^ ((41 : ℝ) / 100) * (T + 3))
+        = (41 : ℝ) / 100 * Real.log X + Real.log (T + 3) := by
+      rw [Real.log_mul (ne_of_gt (Real.rpow_pos_of_pos hXpos _)) (by linarith : (T + 3 : ℝ) ≠ 0),
         Real.log_rpow hXpos]
-    have hl : Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) ≤ A * Real.log X := by
+    have hl : Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)) ≤ A * Real.log X := by
       have hge1 : (1 : ℝ) ≤ Real.log X / Real.log 2 := by
         rw [le_div_iff₀ hlog2pos]
         linarith
-      have hTstep : Real.log (T + 2) ≤ Real.log (T + 2) / Real.log 2 * Real.log X := by
+      have hTstep : Real.log (T + 3) ≤ Real.log (T + 3) / Real.log 2 * Real.log X := by
         have h := mul_le_mul_of_nonneg_left hge1 hT2
         rw [mul_one] at h
-        calc Real.log (T + 2) ≤ Real.log (T + 2) * (Real.log X / Real.log 2) := h
-          _ = Real.log (T + 2) / Real.log 2 * Real.log X := by ring
+        calc Real.log (T + 3) ≤ Real.log (T + 3) * (Real.log X / Real.log 2) := h
+          _ = Real.log (T + 3) / Real.log 2 * Real.log X := by ring
       have hAexp : A * Real.log X
-          = (41 : ℝ) / 100 * Real.log X + Real.log (T + 2) / Real.log 2 * Real.log X := by
+          = (41 : ℝ) / 100 * Real.log X + Real.log (T + 3) / Real.log 2 * Real.log X := by
         rw [hAdef]
         ring
       linarith
-    have hlpos : 0 < Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) := Real.log_pos (by linarith)
-    set l : ℝ := Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) with hldef
+    have hlpos : 0 < Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)) := Real.log_pos (by linarith)
+    set l : ℝ := Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)) with hldef
     have hl0 : 0 < l := hlpos
     have hlog2le : Real.log 2 ≤ l := Real.log_le_log (by norm_num) hge2
     have h2l1 : 1 < 2 * l := by linarith [Real.log_two_gt_d9]
@@ -377,15 +377,15 @@ theorem nonreal_exceptional_radical481_split (hiw : IwaniecStatement481)
   have hlogX : 0 < Real.log X := Real.log_pos (by exact_mod_cast h2)
   have hlow : Real.log X / H ≤ iwaniecDenom481 z.1 z.2.2.im :=
     leaf_iwaniec_bound481 hiw H T hH hT X h2 P z hz him
-  have hup : (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) *
-      Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)))) ^ (3 / 4 : ℝ)
+  have hup : (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)) *
+      Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)))) ^ (3 / 4 : ℝ)
       ≤ C * (Real.log X) ^ (7 / 8 : ℝ) := hden X h2 P H hP z hz
   have hgro : Real.log 2 + 2 * Real.log (Lg X) + C * (Real.log X) ^ (7 / 8 : ℝ)
       ≤ Real.log X / (4 * 10 ^ 4 * H) := hX₁ X hX1
   have hdenom : iwaniecDenom481 z.1 z.2.2.im
       = 4 * 10 ^ 4 * (Real.log (2 * (oddRad131 z.1 : ℝ)) +
-          (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)) *
-            Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 2)))) ^ (3 / 4 : ℝ)) := rfl
+          (Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)) *
+            Real.log (2 * Real.log ((z.1 : ℝ) * (|z.2.2.im| + 3)))) ^ (3 / 4 : ℝ)) := rfl
   rw [hdenom] at hlow
   have hstep : Real.log X / H ≤
       4 * 10 ^ 4 * (Real.log (2 * (oddRad131 z.1 : ℝ)) + C * (Real.log X) ^ (7 / 8 : ℝ)) := by

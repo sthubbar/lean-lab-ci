@@ -1,0 +1,14 @@
+import LeanLab.LanguascoPintzZaccagnini2007.Decomp481c
+import LeanLab.LanguascoPintzZaccagnini2007.Decomp484a
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_nonreal_exceptional_radical481
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_no_zero_open_strip481
+
+#print axioms LeanLab.LPZ2007.exceptional_radical481
+#print axioms LeanLab.LPZ2007.explicit_formula_reduction481
+#print axioms LeanLab.LPZ2007.indexed_zero_count481
+#print axioms LeanLab.LPZ2007.primitive_nonreal_gap484
+#print axioms LeanLab.LPZ2007.nonprincipal_nonreal_gap484
+#print axioms LeanLab.LPZ2007.nonreal_exceptional_radical481
+#print axioms LeanLab.LPZ2007.nonreal_exceptional_radical481_split
+#print axioms LeanLab.LPZ2007.leaf_denom_upper_bound481
+#print axioms LeanLab.LPZ2007.iwaniec_zero_free481

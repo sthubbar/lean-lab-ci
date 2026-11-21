@@ -45,21 +45,21 @@ theorem iwaniec_denom_ge_one481 (r : ℕ) (hr : 1 ≤ r) (t : ℝ) :
   have h3 : Real.log 2 ≤ Real.log (2 * (oddRad131 r : ℝ)) := by
     apply Real.log_le_log (by norm_num) h2
 
-  have hl_base : 2 ≤ (r : ℝ) * (|t| + 2) := by
+  have hl_base : 2 ≤ (r : ℝ) * (|t| + 3) := by
     have hr_re : 1 ≤ (r : ℝ) := by exact_mod_cast hr
     have ht : 0 ≤ |t| := abs_nonneg t
     nlinarith
-  have hlog2 : Real.log 2 ≤ Real.log ((r : ℝ) * (|t| + 2)) := by
+  have hlog2 : Real.log 2 ≤ Real.log ((r : ℝ) * (|t| + 3)) := by
     apply Real.log_le_log (by norm_num) hl_base
 
   have h_log2_pos : 0 < Real.log 2 := by
     apply Real.log_pos (by norm_num)
 
-  have hl2_pos : 0 ≤ Real.log ((r : ℝ) * (|t| + 2)) * Real.log (2 * Real.log ((r : ℝ) * (|t| + 2))) := by
-    have hl_pos : 0 ≤ Real.log ((r : ℝ) * (|t| + 2)) := le_of_lt (lt_of_lt_of_le h_log2_pos hlog2)
-    have hl2_inner_pos : 0 ≤ Real.log (2 * Real.log ((r : ℝ) * (|t| + 2))) := by
+  have hl2_pos : 0 ≤ Real.log ((r : ℝ) * (|t| + 3)) * Real.log (2 * Real.log ((r : ℝ) * (|t| + 3))) := by
+    have hl_pos : 0 ≤ Real.log ((r : ℝ) * (|t| + 3)) := le_of_lt (lt_of_lt_of_le h_log2_pos hlog2)
+    have hl2_inner_pos : 0 ≤ Real.log (2 * Real.log ((r : ℝ) * (|t| + 3))) := by
       apply Real.log_nonneg
-      have hl_inner_2 : 2 * Real.log 2 ≤ 2 * Real.log ((r : ℝ) * (|t| + 2)) := by nlinarith
+      have hl_inner_2 : 2 * Real.log 2 ≤ 2 * Real.log ((r : ℝ) * (|t| + 3)) := by nlinarith
       have he : Real.exp 1 < 4 := by
         calc
           Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
@@ -77,7 +77,7 @@ theorem iwaniec_denom_ge_one481 (r : ℕ) (hr : 1 ≤ r) (t : ℝ) :
       have : (1 : ℝ) ≤ 2 * Real.log 2 := by nlinarith [log2_ge]
       linarith
     positivity
-  have hpow_pos : 0 ≤ (Real.log ((r : ℝ) * (|t| + 2)) * Real.log (2 * Real.log ((r : ℝ) * (|t| + 2)))) ^ (3/4 : ℝ) := by
+  have hpow_pos : 0 ≤ (Real.log ((r : ℝ) * (|t| + 3)) * Real.log (2 * Real.log ((r : ℝ) * (|t| + 3)))) ^ (3/4 : ℝ) := by
     apply Real.rpow_nonneg
     exact hl2_pos
 
