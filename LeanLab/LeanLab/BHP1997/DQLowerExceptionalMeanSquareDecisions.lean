@@ -171,6 +171,292 @@ theorem leaf_count_scale (ω : ℝ → ℝ) {ε : ℝ} (hε : 0 < ε) (hε8 : ε
           C * ((q : ℝ) * sieveQ ε x) ^ 2 * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
   sorry
 
+/-! ### Helpers for the regularity leaf: positivity, norms of the `t`-integrand, continuity -/
+
+/-- `T0 = exp(L^(1/3)) > 0`. -/
+theorem perronT0_pos (x : ℝ) : 0 < perronT0 x := by
+  unfold perronT0
+  positivity
+
+/-- The integers of `J = (x^(11/20+ε), 2 x^(11/20+ε)]` are positive. -/
+private lemma one_le_of_mem_rightInterval {ε x : ℝ} {m : ℕ} (hm : m ∈ rightInterval ε x) :
+    1 ≤ m := by
+  unfold rightInterval at hm
+  rw [Finset.mem_Ioc] at hm
+  omega
+
+/-- For `m ≥ 1` and `s = 1/2 + it`, `‖m^s‖ = m^(1/2)`. -/
+private lemma norm_natCast_cpow_half {m : ℕ} (hm : 1 ≤ m) (t : ℝ) :
+    ‖(m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ = (m : ℝ) ^ (1 / 2 : ℝ) := by
+  have hm0 : (0 : ℝ) < (m : ℝ) := by exact_mod_cast hm
+  have hcast : ((m : ℂ)) = ((m : ℝ) : ℂ) := by push_cast; ring
+  rw [hcast, Complex.norm_cpow_eq_rpow_re_of_pos hm0]
+  have hre : (((1 / 2 : ℂ) + (t : ℂ) * I)).re = 1 / 2 := by simp
+  rw [hre]
+
+/-- For `m ≥ 1` and `s = 1/2 + it`, `‖m^s‖ ≥ 1`. -/
+private lemma one_le_norm_natCast_cpow_half {m : ℕ} (hm : 1 ≤ m) (t : ℝ) :
+    (1 : ℝ) ≤ ‖(m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ := by
+  rw [norm_natCast_cpow_half hm t]
+  have h1 : (1 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
+  calc (1 : ℝ) = (1 : ℝ) ^ (1 / 2 : ℝ) := by simp
+    _ ≤ (m : ℝ) ^ (1 / 2 : ℝ) := Real.rpow_le_rpow (by norm_num) h1 (by norm_num)
+
+/-- `‖G(1/2 + it, χ)‖` is bounded uniformly in `t` by the sum of the absolute weights:
+each term is `b_m χ(m)` times `m^(-1/2-it)`, of modulus `m^(-1/2) ≤ 1`. -/
+private lemma norm_lowerG_le (ω : ℝ → ℝ) (ε x : ℝ) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) (t : ℝ) :
+    ‖lowerG ω ε x χ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ≤
+      ∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m| := by
+  unfold lowerG
+  refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun m hm => ?_)
+  have hm1 := one_le_of_mem_rightInterval hm
+  have hden1 := one_le_norm_natCast_cpow_half hm1 t
+  have hχ : ‖χ (m : ZMod q)‖ ≤ 1 := χ.norm_le_one (m : ZMod q)
+  have hb : (0 : ℝ) ≤ |lowerShortWeight ω ε x m| := abs_nonneg _
+  rw [norm_div, norm_mul, Complex.norm_real, Real.norm_eq_abs]
+  have h1 : |lowerShortWeight ω ε x m| * ‖χ (m : ZMod q)‖ ≤ |lowerShortWeight ω ε x m| := by
+    nlinarith [hχ, hb]
+  have h2 : |lowerShortWeight ω ε x m| * ‖χ (m : ZMod q)‖ /
+      ‖(m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ≤
+        |lowerShortWeight ω ε x m| * ‖χ (m : ZMod q)‖ := by
+    rw [div_le_iff₀ (by linarith)]
+    have h := mul_le_mul_of_nonneg_left hden1 (by positivity :
+      (0 : ℝ) ≤ |lowerShortWeight ω ε x m| * ‖χ (m : ZMod q)‖)
+    simpa using h
+  exact h2.trans h1
+
+/-- `t ↦ G(1/2 + it, χ)` is continuous: a finite sum of `t ↦ m^(-1/2-it)`. -/
+private lemma continuous_lowerG (ω : ℝ → ℝ) (ε x : ℝ) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) :
+    Continuous fun t : ℝ => lowerG ω ε x χ ((1 / 2 : ℂ) + (t : ℂ) * I) := by
+  unfold lowerG
+  refine continuous_finsetSum _ fun m hm => ?_
+  have hm1 := one_le_of_mem_rightInterval hm
+  have hexp : Continuous fun t : ℝ => ((1 / 2 : ℂ) + (t : ℂ) * I) := by fun_prop
+  have hmne : ((m : ℂ)) ≠ 0 := by
+    have hm0 : (0 : ℝ) < (m : ℝ) := by exact_mod_cast hm1
+    have h := ne_of_gt hm0
+    exact_mod_cast h
+  have hcp : Continuous fun t : ℝ => (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) :=
+    hexp.const_cpow (Or.inl hmne)
+  have hne : ∀ t : ℝ, ((m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) ≠ 0 := by
+    intro t h
+    have h1 := one_le_norm_natCast_cpow_half hm1 t
+    rw [h, norm_zero] at h1
+    linarith
+  exact (continuous_const.mul continuous_const).div hcp hne
+
+/-- `‖(y : ℂ)^(1/2+it)‖ = y^(1/2)` for `y > 0`. -/
+private lemma norm_ofReal_cpow_half {y : ℝ} (hy : 0 < y) (t : ℝ) :
+    ‖(y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ = y ^ (1 / 2 : ℝ) := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos hy]
+  have : (((1 / 2 : ℂ) + (t : ℂ) * I)).re = 1 / 2 := by simp
+  rw [this]
+
+/-- `1/2 + it` is never zero. -/
+private lemma half_add_mul_I_ne_zero (t : ℝ) : ((1 / 2 : ℂ) + (t : ℂ) * I) ≠ 0 := by
+  intro h
+  have hre : (((1 / 2 : ℂ) + (t : ℂ) * I)).re = 1 / 2 := by simp
+  rw [h] at hre
+  norm_num at hre
+
+/-- `‖1/2 + it‖ ≥ 1/2`. -/
+private lemma half_le_norm_half_add_mul_I (t : ℝ) :
+    (1 / 2 : ℝ) ≤ ‖((1 / 2 : ℂ) + (t : ℂ) * I)‖ := by
+  have hre : (((1 / 2 : ℂ) + (t : ℂ) * I)).re = 1 / 2 := by simp
+  calc (1 / 2 : ℝ) = (((1 / 2 : ℂ) + (t : ℂ) * I)).re := by rw [hre]
+    _ ≤ ‖((1 / 2 : ℂ) + (t : ℂ) * I)‖ := Complex.re_le_norm _
+
+/-- `H` is continuous at every `y > 0`: its integrand is continuous in `t`, bounded by a
+constant on the contour, and continuous in `y`. -/
+private lemma continuousAt_perronH (ω : ℝ → ℝ) (ε x : ℝ) (q : ℕ) {y₀ : ℝ} (hy : 0 < y₀) :
+    ContinuousAt (fun y => perronH ω ε x q y) y₀ := by
+  set β := ∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m| with hβdef
+  have hβ0 : 0 ≤ β := Finset.sum_nonneg fun _ _ => abs_nonneg _
+  have hy₀ : (0 : ℝ) < 3 / 2 * y₀ := by linarith
+  set B := β * ((3 / 2 * y₀) ^ (1 / 2 : ℝ)) with hBdef
+  have hG : Continuous fun t : ℝ => lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I) :=
+    continuous_lowerG ω ε x (1 : DirichletCharacter ℂ q)
+  unfold perronH
+  refine ContinuousAt.const_mul (intervalIntegral.continuousAt_of_dominated_interval
+    (F := fun (y : ℝ) t => lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I) *
+      ((y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I))) (bound := fun _ => B) (μ := volume)
+    ?_ ?_ intervalIntegrable_const ?_) (((2 * Real.pi : ℝ)) : ℂ)⁻¹
+  · refine Filter.Eventually.of_forall fun y => ?_
+    have h1 : Continuous fun t : ℝ => ((y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) := by
+      have hexp : Continuous fun t : ℝ => ((1 / 2 : ℂ) + (t : ℂ) * I) := by fun_prop
+      exact hexp.const_cpow (Or.inr half_add_mul_I_ne_zero)
+    exact (hG.mul h1).aestronglyMeasurable
+  · filter_upwards [Ioo_mem_nhds (by linarith : y₀ / 2 < y₀) (by linarith : y₀ < 3 / 2 * y₀)]
+      with y hy'
+    refine Filter.Eventually.of_forall fun t _ => ?_
+    have hy0 : 0 < y := by linarith [hy'.1]
+    have hyle : y ≤ 3 / 2 * y₀ := by linarith [hy'.2]
+    rw [norm_mul, norm_ofReal_cpow_half hy0 t]
+    calc ‖lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I)‖ * y ^ (1 / 2 : ℝ)
+        ≤ β * y ^ (1 / 2 : ℝ) :=
+          mul_le_mul_of_nonneg_right (norm_lowerG_le ω ε x 1 t)
+            (Real.rpow_nonneg hy0.le _)
+      _ ≤ β * ((3 / 2 * y₀) ^ (1 / 2 : ℝ)) :=
+          mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hy0.le hyle (by norm_num)) hβ0
+      _ = B := by rw [hBdef]
+  · refine Filter.Eventually.of_forall fun t _ => ?_
+    exact continuousAt_const.mul ((Complex.continuous_ofReal.continuousAt).cpow
+      continuousAt_const (Complex.ofReal_mem_slitPlane.2 hy))
+
+/-- `W` is continuous at every `y > 0`, uniformly in `z ≥ 0`. -/
+private lemma continuousAt_perronW (ω : ℝ → ℝ) (ε x : ℝ) (q : ℕ) (z : ℝ) {y₀ : ℝ}
+    (hy : 0 < y₀) (hz : 0 ≤ z) :
+    ContinuousAt (fun y => perronW ω ε x q y z) y₀ := by
+  set β := ∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m| with hβdef
+  have hβ0 : 0 ≤ β := Finset.sum_nonneg fun _ _ => abs_nonneg _
+  have hy₀ : (0 : ℝ) < 3 / 2 * y₀ := by linarith
+  set B := β * (((3 / 2 * y₀) * (1 + z)) ^ (1 / 2 : ℝ) +
+    (3 / 2 * y₀) ^ (1 / 2 : ℝ)) * 2 with hBdef
+  have hG : Continuous fun t : ℝ => lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I) :=
+    continuous_lowerG ω ε x (1 : DirichletCharacter ℂ q)
+  unfold perronW
+  refine ContinuousAt.const_mul (intervalIntegral.continuousAt_of_dominated_interval
+    (F := fun (y : ℝ) t => lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I) *
+      ((((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+        (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I))
+    (bound := fun _ => B) (μ := volume) ?_ ?_ intervalIntegrable_const ?_) (((2 * Real.pi : ℝ)) : ℂ)⁻¹
+  · refine Filter.Eventually.of_forall fun y => ?_
+    have hexp : Continuous fun t : ℝ => ((1 / 2 : ℂ) + (t : ℂ) * I) := by fun_prop
+    have h1 : Continuous fun t : ℝ =>
+        (((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) :=
+      hexp.const_cpow (Or.inr half_add_mul_I_ne_zero)
+    have h2 : Continuous fun t : ℝ => ((y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) :=
+      hexp.const_cpow (Or.inr half_add_mul_I_ne_zero)
+    exact ((hG.mul (h1.sub h2)).div hexp half_add_mul_I_ne_zero).aestronglyMeasurable
+  · filter_upwards [Ioo_mem_nhds (by linarith : y₀ / 2 < y₀) (by linarith : y₀ < 3 / 2 * y₀)]
+      with y hy'
+    refine Filter.Eventually.of_forall fun t _ => ?_
+    have hy0 : 0 < y := by linarith [hy'.1]
+    have hyle : y ≤ 3 / 2 * y₀ := by linarith [hy'.2]
+    have hyz0 : 0 < y + y * z := by nlinarith
+    have hAnorm : ‖(((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ =
+        (y + y * z) ^ (1 / 2 : ℝ) := norm_ofReal_cpow_half hyz0 t
+    have hBnorm : ‖(y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ = y ^ (1 / 2 : ℝ) :=
+      norm_ofReal_cpow_half hy0 t
+    have hle1 : (y + y * z) ^ (1 / 2 : ℝ) ≤ ((3 / 2 * y₀) * (1 + z)) ^ (1 / 2 : ℝ) := by
+      apply Real.rpow_le_rpow (by positivity) _ (by norm_num)
+      nlinarith
+    have hle2 : y ^ (1 / 2 : ℝ) ≤ (3 / 2 * y₀) ^ (1 / 2 : ℝ) :=
+      Real.rpow_le_rpow hy0.le hyle (by norm_num)
+    have hS : ‖(((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+        (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ≤
+        ((3 / 2 * y₀) * (1 + z)) ^ (1 / 2 : ℝ) + (3 / 2 * y₀) ^ (1 / 2 : ℝ) := by
+      calc _ ≤ ‖(((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ +
+            ‖(y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ := norm_sub_le _ _
+        _ = (y + y * z) ^ (1 / 2 : ℝ) + y ^ (1 / 2 : ℝ) := by rw [hAnorm, hBnorm]
+        _ ≤ _ := add_le_add hle1 hle2
+    have hs := half_le_norm_half_add_mul_I t
+    have hspos : (0 : ℝ) < ‖((1 / 2 : ℂ) + (t : ℂ) * I)‖ := by linarith
+    rw [norm_div, norm_mul]
+    have h1 : ‖lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I)‖ *
+        ‖(((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+          (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ≤
+        β * (((3 / 2 * y₀) * (1 + z)) ^ (1 / 2 : ℝ) + (3 / 2 * y₀) ^ (1 / 2 : ℝ)) :=
+      mul_le_mul (norm_lowerG_le ω ε x 1 t) hS (norm_nonneg _) hβ0
+    have h2 : ‖lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I)‖ *
+        ‖(((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+          (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ /
+        ‖((1 / 2 : ℂ) + (t : ℂ) * I)‖ ≤
+        β * (((3 / 2 * y₀) * (1 + z)) ^ (1 / 2 : ℝ) + (3 / 2 * y₀) ^ (1 / 2 : ℝ)) / (1 / 2) :=
+      div_le_div₀ (by positivity) h1 (by norm_num) hs
+    have h3 : β * (((3 / 2 * y₀) * (1 + z)) ^ (1 / 2 : ℝ) + (3 / 2 * y₀) ^ (1 / 2 : ℝ)) /
+        (1 / 2) = B := by
+      rw [hBdef]; ring
+    calc ‖lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I)‖ *
+          ‖(((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+            (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ / ‖((1 / 2 : ℂ) + (t : ℂ) * I)‖
+        ≤ _ := h2
+      _ = B := h3
+  · refine Filter.Eventually.of_forall fun t _ => ?_
+    have hbase : ContinuousAt (fun y : ℝ => ((y + y * z : ℝ) : ℂ)) y₀ :=
+      Complex.continuous_ofReal.continuousAt.comp (by fun_prop)
+    have hmem : ((y₀ + y₀ * z : ℝ) : ℂ) ∈ Complex.slitPlane :=
+      Complex.ofReal_mem_slitPlane.2 (by nlinarith)
+    have h1 : ContinuousAt (fun y : ℝ =>
+        ((y + y * z : ℝ) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) y₀ :=
+      hbase.cpow continuousAt_const hmem
+    have h2 : ContinuousAt (fun y : ℝ => (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) y₀ :=
+      Complex.continuous_ofReal.continuousAt.cpow continuousAt_const
+        (Complex.ofReal_mem_slitPlane.2 hy)
+    exact ((continuousAt_const.mul (h1.sub h2)).div continuousAt_const
+      (half_add_mul_I_ne_zero t))
+
+
+/-! ### Bounds for `H` and for the window count, and integrability of a bounded integrand -/
+
+/-- `‖H(y)‖ ≤ (2π)^(-1) 2 T0 β y^(1/2)` for `y > 0`, where `β = Σ |b0(m)|` bounds `G` on the
+contour. -/
+private lemma norm_perronH_le (ω : ℝ → ℝ) (ε x : ℝ) (q : ℕ) {y : ℝ} (hy : 0 < y) :
+    ‖perronH ω ε x q y‖ ≤ (2 * Real.pi)⁻¹ * (2 * perronT0 x) *
+      ((∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m|) * y ^ (1 / 2 : ℝ)) := by
+  have hT0 := perronT0_pos x
+  unfold perronH
+  rw [norm_mul]
+  have hc : ‖(((2 * Real.pi : ℝ)) : ℂ)⁻¹‖ = (2 * Real.pi)⁻¹ := by
+    rw [norm_inv, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by positivity)]
+  rw [hc]
+  have hInt : ‖∫ t in (-perronT0 x)..(perronT0 x),
+      lowerG ω ε x (1 : DirichletCharacter ℂ q) ((1 / 2 : ℂ) + (t : ℂ) * I) *
+        (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ≤
+      ((∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m|) * y ^ (1 / 2 : ℝ)) *
+        |perronT0 x - -perronT0 x| := by
+    refine intervalIntegral.norm_integral_le_of_norm_le_const fun t _ => ?_
+    rw [norm_mul, norm_ofReal_cpow_half hy t]
+    exact mul_le_mul_of_nonneg_right (norm_lowerG_le ω ε x 1 t) (Real.rpow_nonneg hy.le _)
+  refine le_trans (mul_le_mul_of_nonneg_left hInt (by positivity)) (le_of_eq ?_)
+  rw [abs_of_pos (by linarith)]
+  ring
+
+/-- The window count of numbers of `J` in `[y, y + yz]`, times the constant `c`, is bounded by
+`#J · ‖c‖`. -/
+private lemma norm_windowCount_le (s : Finset ℕ) (z : ℝ) (c : ℂ) (y : ℝ) :
+    ‖∑ m ∈ s, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then c else 0‖ ≤ (s.card : ℝ) * ‖c‖ := by
+  classical
+  rw [← Finset.sum_filter]
+  refine (norm_sum_le _ _).trans ?_
+  have h2 : ∑ m ∈ s.filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z), ‖c‖ =
+      ((s.filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z)).card : ℝ) * ‖c‖ := by
+    rw [Finset.sum_const, nsmul_eq_mul]
+  rw [h2]
+  have h3 : ((s.filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z)).card : ℝ) ≤
+      (s.card : ℝ) := by
+    exact_mod_cast Finset.card_filter_le s _
+  exact mul_le_mul_of_nonneg_right h3 (norm_nonneg c)
+
+/-- The window count, as a function of `y`, is measurable. -/
+private lemma measurable_windowCount (s : Finset ℕ) (z : ℝ) (c : ℂ) :
+    Measurable fun y : ℝ => ∑ m ∈ s, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then c else 0 := by
+  classical
+  refine Finset.measurable_sum _ fun m _ => ?_
+  have h1 : MeasurableSet {y : ℝ | y ≤ (m : ℝ)} :=
+    measurableSet_le measurable_id measurable_const
+  have h2 : MeasurableSet {y : ℝ | (m : ℝ) ≤ y + y * z} :=
+    measurableSet_le measurable_const
+      (measurable_id.add (measurable_id.mul measurable_const) :
+        Measurable fun y : ℝ => y + y * z)
+  exact Measurable.ite (h1.inter h2) measurable_const measurable_const
+
+/-- A measurable function bounded on `Ioc a b` has interval integrable squared norm. -/
+private lemma intervalIntegrable_norm_sq_of_bounded {f : ℝ → ℂ} {a b C : ℝ} (hab : a ≤ b)
+    (hmeas : AEStronglyMeasurable f (volume.restrict (Set.Ioc a b)))
+    (hbdd : ∀ y ∈ Set.Ioc a b, ‖f y‖ ≤ C) :
+    IntervalIntegrable (fun y : ℝ => ‖f y‖ ^ 2) volume a b := by
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hab]
+  refine IntegrableOn.of_bound ?_ ?_ (C ^ 2) ?_
+  · rw [Real.volume_Ioc]; exact ENNReal.ofReal_lt_top
+  · exact hmeas.norm.pow 2
+  · filter_upwards [ae_restrict_mem measurableSet_Ioc] with y hy
+    have h1 := hbdd y hy
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    exact pow_le_pow_left₀ (norm_nonneg (f y)) h1 2
+
 /-- LEAF: the definitions of `W` on page 43 and `H` on page 52, regularity in `y`. P0069
 Baker Harman Pintz 1997: for `y > 0` both are integrals over the compact segment
 `[-T0, T0]` of integrands continuous in `(y, t)`, so they are continuous in `y`; the window
@@ -186,7 +472,66 @@ theorem leaf_regularity (ω : ℝ → ℝ) (ε : ℝ) :
             (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z),
             ((lowerV0 ω ε / Real.log (x ^ (11 / 20 + ε)) : ℝ) : ℂ)‖ ^ 2) volume
         (x ^ (11 / 20 + ε) / 2) (3 * x ^ (11 / 20 + ε)) := by
-  sorry
+  classical
+  intro x hx q z hz
+  have hY : 0 < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos (by linarith) _
+  have hab : x ^ (11 / 20 + ε) / 2 ≤ 3 * x ^ (11 / 20 + ε) := by linarith
+  have hβ : 0 ≤ ∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m| :=
+    Finset.sum_nonneg fun _ _ => abs_nonneg _
+  constructor
+  · have hcont : ContinuousOn
+        (fun y => perronW ω ε x q y z - (z : ℂ) * perronH ω ε x q y)
+        (Set.Icc (x ^ (11 / 20 + ε) / 2) (3 * x ^ (11 / 20 + ε))) := by
+      intro y hy
+      have hy0 : 0 < y := by linarith [hy.1, hY]
+      exact ((continuousAt_perronW ω ε x q z hy0 hz).sub
+        (continuousAt_const.mul (continuousAt_perronH ω ε x q hy0))).continuousWithinAt
+    exact (hcont.norm.pow 2).intervalIntegrable_of_Icc hab
+  · simp only [Finset.sum_filter]
+    set c : ℂ := ((lowerV0 ω ε / Real.log (x ^ (11 / 20 + ε)) : ℝ) : ℂ) with hc
+    set s : Finset ℕ := rightInterval ε x with hs
+    have hmeasH : AEStronglyMeasurable (fun y => perronH ω ε x q y)
+        (volume.restrict (Set.Ioc (x ^ (11 / 20 + ε) / 2) (3 * x ^ (11 / 20 + ε)))) := by
+      refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioc
+      intro y hy
+      exact (continuousAt_perronH ω ε x q (by linarith [hy.1, hY])).continuousWithinAt
+    have hmeasS : AEStronglyMeasurable
+        (fun y : ℝ => ∑ m ∈ s, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then c else 0)
+        (volume.restrict (Set.Ioc (x ^ (11 / 20 + ε) / 2) (3 * x ^ (11 / 20 + ε)))) :=
+      (measurable_windowCount s z c).aestronglyMeasurable
+    refine intervalIntegrable_norm_sq_of_bounded (f := fun y =>
+      (z : ℂ) * perronH ω ε x q y -
+        ∑ m ∈ s, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then c else 0)
+      (C := |z| * ((2 * Real.pi)⁻¹ * (2 * perronT0 x) *
+        ((∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m|) *
+          (3 * x ^ (11 / 20 + ε)) ^ (1 / 2 : ℝ))) + (s.card : ℝ) * ‖c‖) hab ?_ ?_
+    · exact (hmeasH.const_mul (z : ℂ)).sub hmeasS
+    · intro y hy
+      have hy0 : 0 < y := by linarith [hy.1, hY]
+      have hyle : y ≤ 3 * x ^ (11 / 20 + ε) := hy.2
+      have hHy : ‖perronH ω ε x q y‖ ≤ (2 * Real.pi)⁻¹ * (2 * perronT0 x) *
+          ((∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m|) *
+            (3 * x ^ (11 / 20 + ε)) ^ (1 / 2 : ℝ)) := by
+        refine (norm_perronH_le ω ε x q hy0).trans ?_
+        refine mul_le_mul_of_nonneg_left ?_ (by
+          have h1 : (0 : ℝ) < (2 * Real.pi)⁻¹ := inv_pos.2 (by positivity)
+          have h2 : (0 : ℝ) < 2 * perronT0 x := by
+            have := perronT0_pos x; linarith
+          positivity)
+        exact mul_le_mul_of_nonneg_left
+          (Real.rpow_le_rpow hy0.le hyle (by norm_num)) hβ
+      calc ‖(z : ℂ) * perronH ω ε x q y -
+            ∑ m ∈ s, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then c else 0‖
+          ≤ ‖(z : ℂ) * perronH ω ε x q y‖ +
+            ‖∑ m ∈ s, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then c else 0‖ := norm_sub_le _ _
+        _ = |z| * ‖perronH ω ε x q y‖ +
+            ‖∑ m ∈ s, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then c else 0‖ := by
+              rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+        _ ≤ |z| * ((2 * Real.pi)⁻¹ * (2 * perronT0 x) *
+              ((∑ m ∈ rightInterval ε x, |lowerShortWeight ω ε x m|) *
+                (3 * x ^ (11 / 20 + ε)) ^ (1 / 2 : ℝ))) + (s.card : ℝ) * ‖c‖ :=
+              add_le_add (mul_le_mul_of_nonneg_left hHy (abs_nonneg z))
+                (norm_windowCount_le s z c y)
 
 /-! ### Proved steps -/
 
