@@ -27,6 +27,57 @@ theorem book_count_band_above_one_mult_le_card_level_thirteen_F1607 (χ : Dirich
       (fun ρ => 0 ≤ ρ.im ∧ 1 < ρ.im)).card ≤ 1 := by
   sorry
 
+/-- Reduction of units of `ZMod 14` to units of `ZMod 7` is injective: a unit of `ZMod 14` is
+odd, so two units with equal residues modulo `7` and both below `14` coincide. This is the
+group-theoretic content of the absence of primitive characters of modulus `14`. -/
+private lemma unitsMap_seven_fourteen_injective :
+    Function.Injective (ZMod.unitsMap (show 7 ∣ 14 by norm_num)) := by
+  intro a b hab
+  have hcast : ((a : ZMod 14).cast : ZMod 7) = ((b : ZMod 14).cast : ZMod 7) := by
+    have h := congrArg (fun u : (ZMod 7)ˣ => ((u : ZMod 7))) hab
+    simpa only [ZMod.unitsMap_val] using h
+  rw [ZMod.cast_eq_val, ZMod.cast_eq_val] at hcast
+  have hmod : a.val.val % 7 = b.val.val % 7 := by
+    rw [← ZMod.natCast_eq_natCast_iff']
+    exact hcast
+  have halt : a.val.val < 14 := ZMod.val_lt _
+  have hblt : b.val.val < 14 := ZMod.val_lt _
+  have hcopa : Nat.Coprime a.val.val 14 := by
+    have hu : IsUnit ((a.val.val : ZMod 14)) := by
+      rw [ZMod.natCast_zmod_val]
+      exact a.isUnit
+    exact (ZMod.isUnit_iff_coprime _ _).mp hu
+  have hcopb : Nat.Coprime b.val.val 14 := by
+    have hu : IsUnit ((b.val.val : ZMod 14)) := by
+      rw [ZMod.natCast_zmod_val]
+      exact b.isUnit
+    exact (ZMod.isUnit_iff_coprime _ _).mp hu
+  have hodd_a : a.val.val % 2 = 1 := by
+    have h2 : Nat.Coprime a.val.val 2 := hcopa.coprime_dvd_right (by norm_num)
+    obtain ⟨k, hk⟩ := Nat.coprime_two_right.mp h2
+    omega
+  have hodd_b : b.val.val % 2 = 1 := by
+    have h2 : Nat.Coprime b.val.val 2 := hcopb.coprime_dvd_right (by norm_num)
+    obtain ⟨k, hk⟩ := Nat.coprime_two_right.mp h2
+    omega
+  have hvals : a.val.val = b.val.val := by omega
+  exact Units.ext (ZMod.val_injective 14 hvals)
+
+/-- There is no primitive character of modulus `14`: every character of that level factors
+through level `7`, since the reduction of unit groups is an isomorphism, so its conductor is
+at most `7`. -/
+private lemma not_primitive_level_fourteen (χ : DirichletCharacter ℂ 14) : ¬ χ.IsPrimitive := by
+  intro hχ
+  have hFT : DirichletCharacter.FactorsThrough χ 7 := by
+    rw [DirichletCharacter.factorsThrough_iff_ker_unitsMap (show 7 ∣ 14 by norm_num)]
+    intro x hx
+    have hx1 : x = 1 := unitsMap_seven_fourteen_injective (by rw [hx, map_one])
+    simp [hx1]
+  have hcond : χ.conductor ≤ 7 :=
+    Nat.sInf_le ((DirichletCharacter.mem_conductorSet_iff χ).mpr hFT)
+  have hone : χ.conductor = 14 := (DirichletCharacter.isPrimitive_def χ).mp hχ
+  omega
+
 /-- LEAF. Conductor fourteen: for a primitive character of modulus exactly `14` the strip
 zeros of `L(·, χ)` with imaginary part in `(1, 2πe / 14]` number at most one, counted
 without multiplicity. The window height is below `1.23`, so this is one finite check
@@ -35,7 +86,8 @@ theorem book_count_band_above_one_mult_le_card_level_fourteen_F1607 (χ : Dirich
     (hχ : χ.IsPrimitive) (hq : q = 14) :
     ((stripZeros_finite χ (2 * Real.pi * Real.exp 1 / (q : ℝ))).toFinset.filter
       (fun ρ => 0 ≤ ρ.im ∧ 1 < ρ.im)).card ≤ 1 := by
-  sorry
+  subst hq
+  exact absurd hχ (not_primitive_level_fourteen χ)
 
 /-- LEAF. Conductor fifteen: for a primitive character of modulus exactly `15` the strip
 zeros of `L(·, χ)` with imaginary part in `(1, 2πe / 15]` number at most one, counted
