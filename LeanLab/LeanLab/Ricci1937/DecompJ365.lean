@@ -9,6 +9,8 @@ import LeanLab.Ricci1937.Section2
 import LeanLab.Ricci1937.SigmaBar
 import LeanLab.PNTSieve.BrunBlocksRel
 import LeanLab.SchnirelmannGoldbach.PureSieve
+import LeanLab.Ricci1937.Case5
+import LeanLab.Ricci1937.Case5Index
 
 /-!
 Ricci 1937, Theorem D, pages 88 and 89.
@@ -7340,6 +7342,44 @@ theorem decompJ365_W_3_15 : TheoremDW 3 15 :=
 /-- LEAF. Page 90, the Z half of Theorem D for (2, 366). -/
 theorem decompJ365_Z_2_366 : TheoremDZ 2 366 := by
   exact decompJ365_Z_of_lower decompJ365_Z_lower_2_366
+
+/-- Necessary scalar conditions for the page 89 saved support argument at the fifth pair.
+These conditions do not assert a lower bound for the integer count. -/
+lemma decompJ365_case_five_exponent_requirements (δ κ τ r : ℝ)
+    (hτ : 0 ≤ τ) (hδ : 1 / 3 < δ) (hcut : 1 / 367 < δ * r)
+    (hκ : 0 < κ) (hsave : δ * (1 + 2 * τ) ≤ 1 - κ) :
+    τ < 1 ∧ (1 + 2 * τ) / 367 < r := by
+  have hδ0 : 0 < δ := by linarith
+  have hr0 : 0 < r := by nlinarith
+  have hm0 : 0 < 1 + 2 * τ := by linarith
+  have hsmall : δ * (1 + 2 * τ) < 1 := by linarith
+  constructor
+  · nlinarith
+  · have hc := mul_lt_mul_of_pos_right hcut hm0
+    have hs := mul_lt_mul_of_pos_right hsmall hr0
+    nlinarith
+
+/-- The printed page 90 parameters cannot meet the scalar hypotheses of the saved support route.
+This is not a negation of TheoremDW. -/
+lemma decompJ365_case_five_printed_no_saved_exponent :
+    ¬ ∃ δ κ : ℝ, 1 / 3 < δ ∧ 1 / 367 < δ * exp (-ω5) ∧
+      0 < κ ∧ δ * (1 + 2 * tauBar5) ≤ 1 - κ := by
+  rintro ⟨δ, κ, hδ, hcut, hκ, hsave⟩
+  have hτ : 0 ≤ tauBar5 := by linarith [tauBar5_gt]
+  have hreq := decompJ365_case_five_exponent_requirements δ κ tauBar5 (exp (-ω5))
+    hτ hδ hcut hκ hsave
+  have hh := mul_lt_mul_of_pos_right hreq.2 (exp_pos ω5)
+  have he : exp (-ω5) * exp ω5 = 1 := by
+    rw [exp_neg, inv_mul_cancel₀ (exp_ne_zero _)]
+  rw [he] at hh
+  nlinarith [case5_rule_value_gt]
+
+/-- With the page 88 index correction, even the first scalar saved support constraint fails.
+This is not a negation of TheoremDW. -/
+lemma decompJ365_case_five_corrected_no_saved_exponent :
+    ¬ ∃ δ κ : ℝ, 1 / 3 < δ ∧ 0 < κ ∧ δ * (1 + 2 * tauBar10) ≤ 1 - κ := by
+  rintro ⟨δ, κ, hδ, hκ, hsave⟩
+  nlinarith [tauBar10_gt_one]
 
 /-- LEAF. Page 90, the W half of Theorem D for (2, 366). -/
 theorem decompJ365_W_2_366 : TheoremDW 2 366 := by sorry
