@@ -14,10 +14,13 @@ out in the assembly below.
 AI wrote the Lean code.  Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.SPLIT_lemma9
+import LeanLab.ExceptionalSet.DQLemma9Decisions
 
 namespace LeanLab.ExceptionalSet.U1539
 
 open LeanLab.ExceptionalSet.BrudernPerelli1998 (F)
+open Filter
+open scoped Topology
 
 /-! ### The parity identity -/
 
@@ -36,6 +39,82 @@ private theorem two_mul_phie_eq (γ : ℝ) (N : ℕ) (α : ℝ) :
   split_ifs <;> ring
 
 /-! ### The two leaf estimates -/
+
+/-- The minor-arc estimate supplied by Theorem 2 in the range actually used by the
+paper, namely `0 < δ < γ - 1`.  The weaker bound with exponent `-1/3` and constant
+`1/8` follows once `calE γ κ N` is at least `64`.  -/
+private theorem full_sum_minor_arc_small_delta
+    (γ δ : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ < 3 / 2)
+    (hδ₀ : 0 < δ) (hδ₁ : δ < γ - 1) :
+    ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+      ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ α : ℝ,
+        F γ N ^ (δ - 1) < |α| → |α| ≤ F γ N ^ δ →
+        ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (α * F γ n)‖
+          ≤ (N : ℝ) * calE γ κ N ^ (-(1 / 3 : ℝ)) / 8 := by
+  obtain ⟨κ₀, hκ₀, hunif⟩ :=
+    DQLemma9.shift_minor_of_theorem2 theorem2_via_karacuba γ hγ₁ hγ₂ δ hδ₀ hδ₁
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ hκκ₀
+  obtain ⟨N₁, hN₁⟩ := hunif κ hκ hκκ₀
+  have hp : 0 < 3 - 2 * γ := by linarith
+  have ht : Tendsto (fun N : ℕ => κ * Real.log (N : ℝ) ^ (3 - 2 * γ)) atTop atTop :=
+    ((tendsto_rpow_atTop hp).comp
+      (Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop)).const_mul_atTop hκ
+  obtain ⟨N₂, hthr⟩ := eventually_atTop.mp (ht.eventually_ge_atTop (Real.log 64))
+  refine ⟨max N₁ N₂, ?_⟩
+  intro N hN α hα₀ hα₁
+  have hN₁ : N₁ ≤ N := (le_max_left _ _).trans hN
+  have hN₂le : N₂ ≤ N := (le_max_right _ _).trans hN
+  have hcalE : 64 ≤ calE γ κ N := by
+    have hle := hthr N hN₂le
+    unfold calE
+    have he : Real.exp (Real.log 64) ≤
+        Real.exp (κ * Real.log (N : ℝ) ^ (3 - 2 * γ)) :=
+      Real.exp_le_exp.mpr hle
+    simpa only [Real.exp_log (by norm_num : (0 : ℝ) < 64)] using he
+  have hpos : 0 < calE γ κ N := lt_of_lt_of_le (by norm_num) hcalE
+  have h23 : 8 ≤ calE γ κ N ^ (2 / 3 : ℝ) := by
+    have hmono : (64 : ℝ) ^ (2 / 3 : ℝ) ≤ calE γ κ N ^ (2 / 3 : ℝ) :=
+      Real.rpow_le_rpow hcalE (by norm_num) (by positivity)
+    have h64 : (64 : ℝ) ^ (2 / 3 : ℝ) = 16 := by
+      rw [show (64 : ℝ) = (2 : ℝ) ^ 6 by norm_num,
+        Real.rpow_mul (by norm_num) (by norm_num),
+        Real.rpow_mul (by norm_num) (by norm_num)]
+      norm_num
+    linarith
+  have hbound : calE γ κ N ^ (-(1 : ℝ)) ≤
+      calE γ κ N ^ (-(1 / 3 : ℝ)) / 8 := by
+    have hthird : 0 < calE γ κ N ^ (1 / 3 : ℝ) :=
+      Real.rpow_pos_of_pos hpos _
+    have hcube : (calE γ κ N ^ (1 / 3 : ℝ)) ^ 3 = calE γ κ N := by
+      rw [← Real.rpow_mul hpos.le (by norm_num : (1 / 3 : ℝ) * 3 = 1),
+        Real.rpow_one]
+    have hsquare : (calE γ κ N ^ (1 / 3 : ℝ)) ^ 2 =
+        calE γ κ N ^ (2 / 3 : ℝ) := by
+      rw [← Real.rpow_mul hpos.le (by norm_num : (1 / 3 : ℝ) * 2 = 2 / 3)]
+    have hinv : (calE γ κ N ^ (1 / 3 : ℝ)) ^ (-(3 : ℝ)) =
+        calE γ κ N ^ (-(1 : ℝ)) := by
+      rw [← Real.rpow_mul hpos.le (by norm_num : (1 / 3 : ℝ) * (-3) = -1)]
+    have hinv3 : (calE γ κ N ^ (1 / 3 : ℝ)) ^ (-(1 : ℝ)) =
+        calE γ κ N ^ (-(1 / 3 : ℝ)) := by
+      rw [← Real.rpow_mul hpos.le (by norm_num : (1 / 3 : ℝ) * (-1) = -1 / 3)]
+    have haux : 8 * (calE γ κ N ^ (1 / 3 : ℝ)) ^ (-(3 : ℝ)) ≤
+        (calE γ κ N ^ (1 / 3 : ℝ)) ^ (-(1 : ℝ)) := by
+      rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 8)]
+      apply (le_div_iff₀ (by positivity : (0 : ℝ) < (calE γ κ N ^ (1 / 3 : ℝ)) ^ 3)).mpr
+      rw [hcube] at *
+      have hsq := h23
+      rw [hsquare] at hsq
+      nlinarith
+    rw [hinv, hinv3]
+    exact haux
+  have hshift := hunif κ hκ hκκ₀ N hN₁ α hα₀ (by linarith)
+  calc
+    ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (α * F γ n)‖
+        ≤ (N : ℝ) * calE γ κ N ^ (-(1 : ℝ)) := hshift
+    _ ≤ (N : ℝ) * calE γ κ N ^ (-(1 / 3 : ℝ)) / 8 := by
+      gcongr
+      exact hbound
 
 /-- LEAF 1 of the split of `leaf_gap_core`: the full exponential sum is small once `α` is
 away from the origin.  For `1 < γ < 3/2` and `0 < δ < 1`, if `F γ N ^ (δ - 1) < |α|` and
