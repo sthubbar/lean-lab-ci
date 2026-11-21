@@ -1,7 +1,6 @@
 import LeanLab.ChenDoubleSieve.Decomp587j
 import LeanLab.ChenDoubleSieve.Decomp587f
 import LeanLab.ChenDoubleSieve.Decomp587k
-import LeanLab.ChenDoubleSieve.Decomp587l
 import LeanLab.ChenDoubleSieve.Decomp587i
 import LeanLab.ChenDoubleSieve.Decomp587g
 import LeanLab.ChenDoubleSieve.Burst9Psi2Panels
@@ -50,7 +49,14 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.009333120`; the bound adds 0.1 percent. -/
 theorem I2_r0_10 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 1 ≤ (9342453/1000000000 : ℝ) := by
-  sorry
+  have e : I2 ω (tableParams 0) 1 = buchstabSup ω 1 (![1/(tableParams 0).k1, 1/(tableParams 0).k1, 1/(tableParams 0).k2]) (![1/(tableParams 0).k2, 1/(tableParams 0).k2, 1/(tableParams 0).s]) := rfl
+  have hb := buchstabSup_le_box (extended_buchstab_le_one hω hz) (n := 1)
+    ((![1/(tableParams 0).k1, 1/(tableParams 0).k1, 1/(tableParams 0).k2]) : Fin (1 + 2) → ℝ) ((![1/(tableParams 0).k2, 1/(tableParams 0).k2, 1/(tableParams 0).s]) : Fin (1 + 2) → ℝ)
+    (by intro j; fin_cases j <;> norm_num [tableParams])
+    (by intro j; fin_cases j <;> norm_num [tableParams])
+  rw [e]
+  refine hb.trans ?_
+  norm_num [tableParams, Fin.prod_univ_succ]
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,11}` defining `I_{2,11}(s, s', κ₁, κ₂, κ₃)`, for row 1 of Table 1,
@@ -86,7 +92,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.014331046`; the bound adds 0.1 percent. -/
 theorem I2_r0_14 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 5 ≤ (14345377/1000000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r0_14_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,15}` defining `I_{2,15}(s, s', κ₁, κ₂, κ₃)`, for row 1 of Table 1,
@@ -95,7 +101,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.005290733`; the bound adds 0.1 percent. -/
 theorem I2_r0_15 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 6 ≤ (662003/125000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r0_15_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,16}` defining `I_{2,16}(s, s', κ₁, κ₂, κ₃)`, for row 1 of Table 1,
@@ -104,7 +110,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.000074833`; the bound adds 0.1 percent. -/
 theorem I2_r0_16 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 7 ≤ (18727/250000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r0_16_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,17}` defining `I_{2,17}(s, s', κ₁, κ₂, κ₃)`, for row 1 of Table 1,
@@ -113,7 +119,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.000182981`; the bound adds 0.1 percent. -/
 theorem I2_r0_17 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 8 ≤ (45791/250000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r0_17_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,18}` defining `I_{2,18}(s, s', κ₁, κ₂, κ₃)`, for row 1 of Table 1,
@@ -131,7 +137,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.000070666`; the bound adds 0.1 percent. -/
 theorem I2_r0_19 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 0) 10 ≤ (70737/1000000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r0_19_from_short hω hz
+  sorry
 
 /-- Wu 2004 Lemma 5.2, page 26: `I_{2,20}` for row 1 of Table 1 is at most `6.515e-05`, by
 the box bound of `buchstabSup_le_box`. CONDITIONAL ON IsBuchstab and ZeroBelowOne, through `ω ≤ 1`. PROVED. -/
@@ -238,7 +244,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.000092886`; the bound adds 0.1 percent. -/
 theorem I2_r1_17 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 1) 8 ≤ (92979/1000000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r1_17_from_short hω hz
+  sorry
 
 /-- Wu 2004 Lemma 5.2, page 26: `I_{2,18}` for row 2 of Table 1 is at most `2.662e-04`, by
 the box bound of `buchstabSup_le_box`. CONDITIONAL ON IsBuchstab and ZeroBelowOne, through `ω ≤ 1`. PROVED. -/
@@ -299,7 +305,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.017250368`; the bound adds 0.1 percent. -/
 theorem I2_r2_9 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 2) 0 ≤ (8633809/500000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r2_9_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,10}` defining `I_{2,10}(s, s', κ₁, κ₂, κ₃)`, for row 3 of Table 1,
@@ -308,7 +314,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.007422200`; the bound adds 0.1 percent. -/
 theorem I2_r2_10 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 2) 1 ≤ (3714811/500000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r2_10_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,11}` defining `I_{2,11}(s, s', κ₁, κ₂, κ₃)`, for row 3 of Table 1,
@@ -317,7 +323,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.005337382`; the bound adds 0.1 percent. -/
 theorem I2_r2_11 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 2) 2 ≤ (5342719/1000000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r2_11_from_short hω hz
+  sorry
 
 /-- Wu 2004 Lemma 5.2, page 26: `I_{2,12}` for row 3 of Table 1 is at most `0.000e+00`, by
 degenerate, one coordinate is pinned since κ₃ = s, so the bound is 0. CONDITIONAL ON IsBuchstab and ZeroBelowOne, through `ω ≤ 1`. PROVED. -/
@@ -348,7 +354,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.005443656`; the bound adds 0.1 percent. -/
 theorem I2_r2_14 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 2) 5 ≤ (54491/10000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r2_14_from_short hω hz
+  sorry
 
 /-- Wu 2004 Lemma 5.2, page 26: `I_{2,15}` for row 3 of Table 1 is at most `0.000e+00`, by
 degenerate, one coordinate is pinned since κ₃ = s, so the bound is 0. CONDITIONAL ON IsBuchstab and ZeroBelowOne, through `ω ≤ 1`. PROVED. -/
@@ -444,7 +450,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.012395941`; the bound adds 0.1 percent. -/
 theorem I2_r3_9 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 3) 0 ≤ (12408337/1000000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r3_9_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,10}` defining `I_{2,10}(s, s', κ₁, κ₂, κ₃)`, for row 4 of Table 1,
@@ -453,7 +459,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.005415311`; the bound adds 0.1 percent. -/
 theorem I2_r3_10 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 3) 1 ≤ (2710363/500000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r3_10_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,11}` defining `I_{2,11}(s, s', κ₁, κ₂, κ₃)`, for row 4 of Table 1,
@@ -484,7 +490,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.008098175`; the bound adds 0.1 percent. -/
 theorem I2_r3_13 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 3) 4 ≤ (8106273/1000000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r3_13_from_short hω hz
+  sorry
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,14}` defining `I_{2,14}(s, s', κ₁, κ₂, κ₃)`, for row 4 of Table 1,
@@ -493,7 +499,7 @@ One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A sc
 with the exact ω, zero below one, gave `0.002637743`; the bound adds 0.1 percent. -/
 theorem I2_r3_14 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
     I2 ω (tableParams 3) 5 ≤ (2640381/1000000000 : ℝ) := by
-  exact LeanLab.ChenDoubleSieve.Task587.I2_r3_14_from_short hω hz
+  sorry
 
 /-- Wu 2004 Lemma 5.2, page 26: `I_{2,15}` for row 4 of Table 1 is at most `0.000e+00`, by
 degenerate, one coordinate is pinned since κ₃ = s, so the bound is 0. CONDITIONAL ON IsBuchstab and ZeroBelowOne, through `ω ≤ 1`. PROVED. -/
