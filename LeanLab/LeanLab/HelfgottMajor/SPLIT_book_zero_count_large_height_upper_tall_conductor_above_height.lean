@@ -58,7 +58,8 @@ theorem book_zero_count_large_height_upper_tall_conductor_above_height_below_squ
     (hqs : (q : ℝ) ≤ T ^ 2)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h : |bookCount χ T - bookMain q T| ≤ bookError q T := book_zero_count χ hχ (by linarith)
+  exact (abs_le.mp h).right
 
 /-- LEAF: Conductor beyond the square of the height, in the bottom decade of the tall range:
 `2 ≤ q`, `T ^ 2 ≤ q`, `10 ^ 6 ≤ T ≤ 10 ^ 7`, under `2 * π * exp 1 ≤ q * T`. Now `log q` is the
@@ -72,7 +73,8 @@ theorem book_zero_count_large_height_upper_tall_conductor_above_height_beyond_sq
     (hqs : T ^ 2 ≤ (q : ℝ))
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h : |bookCount χ T - bookMain q T| ≤ bookError q T := book_zero_count χ hχ (by linarith)
+  exact (abs_le.mp h).right
 
 /-- LEAF: Conductor above the height but at most its square, above the bottom of the tall range:
 `2 ≤ q`, `T ≤ q`, `q ≤ T ^ 2`, `10 ^ 7 ≤ T`, under `2 * π * exp 1 ≤ q * T`. Here `log (q T)` is at
@@ -87,7 +89,8 @@ theorem book_zero_count_large_height_upper_tall_conductor_above_height_below_squ
     (hqs : (q : ℝ) ≤ T ^ 2)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h : |bookCount χ T - bookMain q T| ≤ bookError q T := book_zero_count χ hχ (by linarith)
+  exact (abs_le.mp h).right
 
 /-- LEAF: Conductor beyond the square of the height, above the bottom of the tall range:
 `2 ≤ q`, `T ^ 2 ≤ q`, `10 ^ 7 ≤ T`, under `2 * π * exp 1 ≤ q * T`. Both parameters are large, so
@@ -103,7 +106,8 @@ theorem book_zero_count_large_height_upper_tall_conductor_above_height_beyond_sq
     (hqs : T ^ 2 ≤ (q : ℝ))
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  have h : |bookCount χ T - bookMain q T| ≤ bookError q T := book_zero_count χ hχ (by linarith)
+  exact (abs_le.mp h).right
 
 /-- Assembly: the conductor-above-height range follows from the four range leaves. Either the
 height is at most `10 ^ 7`, and the bottom pair applies, or it is above it, and the tall pair
