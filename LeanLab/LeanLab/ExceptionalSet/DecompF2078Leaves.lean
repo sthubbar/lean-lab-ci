@@ -1,0 +1,83 @@
+/-
+Leaves of the split of `lemma4` in ExceptionalSet/State1539.lean, task FREE-nv-minimax2 task2078.
+
+The target is `lemma4 : Lemma4` in State1539.lean, class CITED.
+Lemma 4 of P0082 (p. 359) is proved from Theorem 2 with `c = 1/2` by Vinogradov's
+equidistribution argument: a Fejer-kernel majorant controls the discrepancy of the
+fractional-part count by exponential sums, which Theorem 2 bounds.
+
+This file holds the five steps of that argument, in the order the assembly in
+DecompF2078.lean uses them.  Every step below is one LEAF.  AI wrote the Lean code.
+Binary Goldbach is open.
+-/
+import LeanLab.ExceptionalSet.State1539
+
+namespace LeanLab.ExceptionalSet.U1539
+
+open Real Finset Filter
+open LeanLab.ExceptionalSet.BrudernPerelli1998 (F)
+
+/-- LEAF: Step 1 of Vinogradov's argument, the Fejer-kernel majorant: for every `H`,
+the excess of the number of `N/2 < n ≤ N` with `z₂ ≤ {αF(n)} < z₁` over `(z₁ - z₂)N/2`
+is at most `4N/(H+1)` plus the first `H` exponential sums at frequencies `hα`, each
+weighted by `4N/(h+1)`.  This is the standard discrepancy bound for the indicator of
+an interval of fractional parts. -/
+theorem leaf_F2078_fejer_majorant (γ α z₁ z₂ : ℝ) (N H : ℕ)
+    (hz₂ : 0 ≤ z₂) (hz1 : z₂ < z₁) (hz₁ : z₁ ≤ 1) :
+    |(((Finset.Ioc (N / 2) N).filter (fun n : ℕ =>
+        z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁)).card : ℝ)
+      - (z₁ - z₂) * N / 2| ≤
+    4 * N / ((H : ℝ) + 1) +
+      4 * N * ∑ h ∈ Finset.Icc 1 H,
+        ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ / ((h : ℝ) + 1) := by
+  sorry
+
+/-- LEAF: Step 2, the exponential-sum input at frequencies `hα`: each sum
+`Σ_{N/2 < n ≤ N} e(hαF(n))` is bounded by `B N exp(-κ (log N)^{3-2γ})` uniformly
+in `h ≤ F(N)^C`, for `F(N)^{-1/2} < |α| ≤ 1`.  This follows from Theorem 2
+(specialised at `c = 1/2`) applied at frequency `hα` on the index range
+`N/2 < n ≤ N`. -/
+theorem leaf_F2078_exp_sum_bound :
+    ∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∀ C : ℝ, 0 < C → C < γ - 1 →
+      ∃ κ B : ℝ, 0 < κ ∧ 0 < B ∧ ∀ N : ℕ, 1 ≤ N → ∀ α : ℝ,
+        F γ N ^ (-(1 / 2 : ℝ)) < |α| → |α| ≤ 1 → ∀ h : ℕ, 1 ≤ h →
+        (h : ℝ) ≤ F γ N ^ C →
+        ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ ≤
+          B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ)) := by
+  sorry
+
+/-- LEAF: Step 3, the logarithmic regime: past a threshold depending on `γ` and `C`,
+`N ≥ 3`, `log N ≥ 1`, `⌈log N⌉ ≥ 1`, and `⌈log N⌉ ≤ F(N)^C` for every `C > 0`.
+This lets step 2 be applied at every integer frequency `h ≤ ⌈log N⌉`. -/
+theorem leaf_F2078_log_regime :
+    ∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∀ C : ℝ, 0 < C →
+      ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+        3 ≤ N ∧ 1 ≤ Real.log N ∧ (1 : ℝ) ≤ (Nat.ceil (Real.log N) : ℝ) ∧
+        (Nat.ceil (Real.log N) : ℝ) ≤ F γ N ^ C := by
+  sorry
+
+/-- LEAF: Step 4, the bookkeeping of the geometric decay: with `H = ⌈log N⌉`, the
+term `4N/(H+1)` and the sum of the exponential-sum bounds weighted by `1/(h+1)` are
+both dominated by `B N exp(-κ (log N)^{3-2γ})` for a strictly smaller `κ` and a
+large enough `B`, once `N ≥ 3`. -/
+theorem leaf_F2078_absorption :
+    ∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∀ κ₁ B₁ : ℝ, 0 < κ₁ → 0 < B₁ →
+      ∃ κ B : ℝ, 0 < κ ∧ 1 ≤ B ∧ ∀ N : ℕ, 3 ≤ N →
+        4 * N / ((Nat.ceil (Real.log N) : ℝ) + 1) +
+          4 * N * (B₁ * N * Real.exp (-κ₁ * Real.log N ^ (3 - 2 * γ))
+            * ∑ h ∈ Finset.Icc 1 (Nat.ceil (Real.log N)), 1 / ((h : ℝ) + 1))
+          ≤ B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ)) := by
+  sorry
+
+/-- LEAF: Step 5, the finitely many small `N`: below any fixed bound the trivial
+bound `|count - (z₁ - z₂)N/2| ≤ N` is absorbed by a large constant times
+`N exp(-κ (log N)^{3-2γ})`, since on that finite range the `exp` factor is bounded below. -/
+theorem leaf_F2078_small_N :
+    ∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∀ κ : ℝ, 0 < κ → ∀ N₀ : ℕ, ∃ B : ℝ, 0 ≤ B ∧
+      ∀ N : ℕ, 1 ≤ N → N ≤ N₀ → ∀ α z₁ z₂ : ℝ, 0 ≤ z₂ → z₂ < z₁ → z₁ ≤ 1 →
+        |(((Finset.Ioc (N / 2) N).filter (fun n : ℕ =>
+            z₂ ≤ Int.fract (α * F γ n) ∧ Int.fract (α * F γ n) < z₁)).card : ℝ)
+          - (z₁ - z₂) * N / 2| ≤ B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ)) := by
+  sorry
+
+end LeanLab.ExceptionalSet.U1539

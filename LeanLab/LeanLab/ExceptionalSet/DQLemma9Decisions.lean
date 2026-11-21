@@ -14,8 +14,8 @@ State1539Data264. Proved here with no open step of their own:
 * `lemma9_of_theorem2_lemma4`: the exact type `Lemma9` from `Theorem2` and `Lemma4`;
 * `leaf_inv_sq_tail_l9`, the tail bound for the sum of `1/h^2`.
 
-The open steps left are two LEAF statements of classical Fourier analysis for the
-explicit trapezoid `trapL9`, display 40 page 370: the decay of its Fourier
+The two LEAF statements of classical Fourier analysis for the explicit trapezoid
+`trapL9`, display 40 page 370, are proved below: the decay of its Fourier
 coefficients and the pointwise convergence of its Fourier series. `PhiDQ5` of
 DQ5Decisions is written out here as its defining sum, so the leaf A and leaf B types
 match DQ5 up to unfolding that definition.
@@ -230,6 +230,165 @@ falls on `[1/2 - Δ/4, 1/2]` and is 0 on `[1/2, 1)`. -/
 noncomputable def trapL9 (Δ β : ℝ) : ℝ :=
   max 0 (min 1 (min (4 * Int.fract β / Δ) (4 * (1 / 2 - Int.fract β) / Δ)))
 
+/-! Proved helpers for the coefficient leaf below, AI written, run CLOUD-burst20261120b-lemma9_fourier. -/
+
+theorem trapL9_profile_zero_one (Δ : ℝ) (hΔ0 : 0 < Δ) :
+    max 0 (min 1 (min (4 * (0 : ℝ) / Δ) (4 * (1 / 2 - 0) / Δ))) =
+      max 0 (min 1 (min (4 * (1 : ℝ) / Δ) (4 * (1 / 2 - 1) / Δ))) := by
+  rw [max_eq_left, max_eq_left]
+  · exact (min_le_right _ _).trans ((min_le_right _ _).trans
+      (div_nonpos_of_nonpos_of_nonneg (by norm_num) hΔ0.le))
+  · exact (min_le_right _ _).trans ((min_le_left _ _).trans (by simp))
+
+theorem trapL9_continuous (Δ : ℝ) (hΔ0 : 0 < Δ) : Continuous (fun β => trapL9 Δ β) := by
+  have hg : Continuous (fun x : ℝ => max 0 (min 1 (min (4 * x / Δ) (4 * (1 / 2 - x) / Δ)))) := by
+    fun_prop
+  exact (hg.continuousOn (s := Set.Icc 0 1)).comp_fract'' (trapL9_profile_zero_one Δ hΔ0)
+
+theorem trapL9_eq_profile (Δ : ℝ) (hΔ0 : 0 < Δ) {t : ℝ} (h0 : 0 ≤ t) (h1 : t ≤ 1) :
+    trapL9 Δ t = max 0 (min 1 (min (4 * t / Δ) (4 * (1 / 2 - t) / Δ))) := by
+  rcases h1.lt_or_eq with h1 | rfl
+  · unfold trapL9; rw [Int.fract_eq_self.2 ⟨h0, h1⟩]
+  · unfold trapL9; rw [Int.fract_one]; exact trapL9_profile_zero_one Δ hΔ0
+
+theorem trapL9_piece1 (d : ℝ) (hd0 : 0 < d) (hd1 : d ≤ 1 / 4) {t : ℝ} (h0 : 0 ≤ t) (h1 : t ≤ d) :
+    trapL9 (4 * d) t = 1 / d * t + 0 := by
+  have h4 : 0 < 4 * d := by linarith
+  rw [trapL9_eq_profile _ h4 h0 (by linarith)]
+  have e : 4 * t / (4 * d) = 1 / d * t := by field_simp
+  have a1 : 4 * t / (4 * d) ≤ 4 * (1 / 2 - t) / (4 * d) :=
+    div_le_div_of_nonneg_right (by linarith) h4.le
+  have a2 : 4 * t / (4 * d) ≤ 1 := (div_le_one h4).2 (by linarith)
+  have a3 : 0 ≤ 4 * t / (4 * d) := div_nonneg (by linarith) h4.le
+  rw [min_eq_left a1, min_eq_right a2, max_eq_right a3, e, add_zero]
+
+theorem trapL9_piece2 (d : ℝ) (hd0 : 0 < d) (hd1 : d ≤ 1 / 4) {t : ℝ} (h0 : d ≤ t)
+    (h1 : t ≤ 1 / 2 - d) : trapL9 (4 * d) t = 0 * t + 1 := by
+  have h4 : 0 < 4 * d := by linarith
+  rw [trapL9_eq_profile _ h4 (by linarith) (by linarith)]
+  have a1 : 1 ≤ 4 * t / (4 * d) := (le_div_iff₀ h4).2 (by linarith)
+  have a2 : 1 ≤ 4 * (1 / 2 - t) / (4 * d) := (le_div_iff₀ h4).2 (by linarith)
+  rw [min_eq_left (le_min a1 a2), max_eq_right zero_le_one]; ring
+
+theorem trapL9_piece3 (d : ℝ) (hd0 : 0 < d) (hd1 : d ≤ 1 / 4) {t : ℝ} (h0 : 1 / 2 - d ≤ t)
+    (h1 : t ≤ 1 / 2) : trapL9 (4 * d) t = -(1 / d) * t + 1 / (2 * d) := by
+  have h4 : 0 < 4 * d := by linarith
+  rw [trapL9_eq_profile _ h4 (by linarith) (by linarith)]
+  have e : 4 * (1 / 2 - t) / (4 * d) = -(1 / d) * t + 1 / (2 * d) := by field_simp; ring
+  have a1 : 4 * (1 / 2 - t) / (4 * d) ≤ 4 * t / (4 * d) :=
+    div_le_div_of_nonneg_right (by linarith) h4.le
+  have a2 : 4 * (1 / 2 - t) / (4 * d) ≤ 1 := (div_le_one h4).2 (by linarith)
+  have a3 : 0 ≤ 4 * (1 / 2 - t) / (4 * d) := div_nonneg (by linarith) h4.le
+  rw [min_eq_right a1, min_eq_right a2, max_eq_right a3, e]
+
+theorem trapL9_piece4 (d : ℝ) (hd0 : 0 < d) {t : ℝ} (h0 : 1 / 2 ≤ t) (h1 : t ≤ 1) :
+    trapL9 (4 * d) t = 0 * t + 0 := by
+  have h4 : 0 < 4 * d := by linarith
+  rw [trapL9_eq_profile _ h4 (by linarith) h1]
+  have a : 4 * (1 / 2 - t) / (4 * d) ≤ 0 := div_nonpos_of_nonpos_of_nonneg (by linarith) h4.le
+  rw [max_eq_left ((min_le_right _ _).trans ((min_le_right _ _).trans a))]; ring
+
+theorem integral_lin_exp_l9 (a : ℂ) (ha : a ≠ 0) (p q x y : ℝ) :
+    ∫ t in x..y, ((p : ℂ) * t + q) * Complex.exp (a * t) =
+      Complex.exp (a * y) * (((p : ℂ) * y + q) / a - p / a ^ 2) -
+        Complex.exp (a * x) * (((p : ℂ) * x + q) / a - p / a ^ 2) := by
+  apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+  · intro s _
+    have hl : HasDerivAt (fun s : ℝ => (s : ℂ)) 1 s := by
+      simpa using (hasDerivAt_id s).ofReal_comp
+    have he : HasDerivAt (fun s : ℝ => Complex.exp (a * s)) (Complex.exp (a * s) * (a * 1)) s :=
+      (hl.const_mul a).cexp
+    have hp : HasDerivAt (fun s : ℝ => ((p : ℂ) * s + q) / a - p / a ^ 2) (p * 1 / a) s :=
+      (((hl.const_mul (p : ℂ)).add_const (q : ℂ)).div_const a).sub_const _
+    convert he.mul hp using 1
+    field_simp
+    ring
+  · apply Continuous.intervalIntegrable
+    fun_prop
+
+
+theorem hcheck_trapL9_eq (d : ℝ) (hd0 : 0 < d) (hd1 : d ≤ 1 / 4) (h : ℤ) (hh : h ≠ 0) :
+    hcheck (fun t => (trapL9 (4 * d) t : ℂ)) h =
+      1 / ((d : ℂ) * (-(2 * π * Complex.I * h)) ^ 2) *
+        (1 - Complex.exp (-(2 * π * Complex.I * h) * d) -
+          Complex.exp (-(2 * π * Complex.I * h) * (1 / 2 - d)) +
+          Complex.exp (-(2 * π * Complex.I * h) * (1 / 2))) := by
+  set a : ℂ := -(2 * π * Complex.I * h) with ha_def
+  have ha : a ≠ 0 := by
+    rw [ha_def, neg_ne_zero]
+    simp [Real.pi_ne_zero, Complex.I_ne_zero, hh]
+  have h4 : 0 < 4 * d := by linarith
+  have hc : Continuous (fun t : ℝ => (trapL9 (4 * d) t : ℂ) * Complex.exp (a * t)) :=
+    (Complex.continuous_ofReal.comp (trapL9_continuous _ h4)).mul (by fun_prop)
+  have hii : ∀ x y : ℝ, IntervalIntegrable
+      (fun t : ℝ => (trapL9 (4 * d) t : ℂ) * Complex.exp (a * t)) MeasureTheory.volume x y :=
+    fun x y => hc.intervalIntegrable x y
+  have hI : hcheck (fun t => (trapL9 (4 * d) t : ℂ)) h =
+      ∫ t in (0 : ℝ)..1, (trapL9 (4 * d) t : ℂ) * Complex.exp (a * t) := by
+    unfold hcheck
+    apply intervalIntegral.integral_congr
+    intro t _
+    simp only [eC, ha_def]
+    congr 2
+    push_cast
+    ring
+  have piece : ∀ (x y p q : ℝ), x ≤ y → (∀ t, x ≤ t → t ≤ y → trapL9 (4 * d) t = p * t + q) →
+      ∫ t in x..y, (trapL9 (4 * d) t : ℂ) * Complex.exp (a * t) =
+        Complex.exp (a * y) * (((p : ℂ) * y + q) / a - p / a ^ 2) -
+          Complex.exp (a * x) * (((p : ℂ) * x + q) / a - p / a ^ 2) := by
+    intro x y p q hxy hpq
+    rw [← integral_lin_exp_l9 a ha p q x y]
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le hxy] at ht
+    simp only
+    rw [hpq t ht.1 ht.2]
+    push_cast
+    ring
+  rw [hI, ← intervalIntegral.integral_add_adjacent_intervals (hii 0 d) (hii d 1),
+    ← intervalIntegral.integral_add_adjacent_intervals (hii d (1 / 2 - d)) (hii (1 / 2 - d) 1),
+    ← intervalIntegral.integral_add_adjacent_intervals (hii (1 / 2 - d) (1 / 2)) (hii (1 / 2) 1),
+    piece 0 d (1 / d) 0 hd0.le (fun t h0 h1 => trapL9_piece1 d hd0 hd1 h0 h1),
+    piece d (1 / 2 - d) 0 1 (by linarith) (fun t h0 h1 => trapL9_piece2 d hd0 hd1 h0 h1),
+    piece (1 / 2 - d) (1 / 2) (-(1 / d)) (1 / (2 * d)) (by linarith)
+      (fun t h0 h1 => trapL9_piece3 d hd0 hd1 h0 h1),
+    piece (1 / 2) 1 0 0 (by norm_num) (fun t h0 h1 => trapL9_piece4 d hd0 h0 h1)]
+  have hd : (d : ℂ) ≠ 0 := by exact_mod_cast hd0.ne'
+  push_cast
+  field_simp
+  simp only [mul_zero, Complex.exp_zero]
+  ring
+
+
+theorem norm_exp_l9 (h : ℤ) (x : ℝ) : ‖Complex.exp (-(2 * π * Complex.I * h) * x)‖ = 1 := by
+  rw [Complex.norm_exp]
+  simp
+
+theorem hcheck_trapL9_le_half (d : ℝ) (hd0 : 0 < d) (h : ℤ) :
+    ‖hcheck (fun t => (trapL9 (4 * d) t : ℂ)) h‖ ≤ 1 / 2 := by
+  have h4 : 0 < 4 * d := by linarith
+  have hc : Continuous (fun t : ℝ => (trapL9 (4 * d) t : ℂ) * eC (-(t * h))) :=
+    (Complex.continuous_ofReal.comp (trapL9_continuous _ h4)).mul (by unfold eC; fun_prop)
+  unfold hcheck
+  rw [← intervalIntegral.integral_add_adjacent_intervals (hc.intervalIntegrable 0 (1 / 2))
+    (hc.intervalIntegrable (1 / 2) 1)]
+  have h2 : ∫ t in (1 / 2 : ℝ)..1, (trapL9 (4 * d) t : ℂ) * eC (-(t * h)) = 0 := by
+    rw [← intervalIntegral.integral_zero (a := (1 / 2 : ℝ)) (b := 1) (μ := MeasureTheory.volume)]
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num)] at ht
+    simp only
+    rw [trapL9_piece4 d hd0 ht.1 ht.2]
+    simp
+  rw [h2, add_zero]
+  have hb := intervalIntegral.norm_integral_le_of_norm_le_const (a := (0 : ℝ)) (b := 1 / 2)
+    (C := 1) (f := fun t : ℝ => (trapL9 (4 * d) t : ℂ) * eC (-(t * h))) (fun t _ => by
+      rw [norm_mul, norm_eC, mul_one, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonneg (le_max_left _ _)]
+      exact max_le zero_le_one (min_le_left _ _))
+  refine hb.trans (le_of_eq ?_)
+  norm_num
+
 /-- LEAF: P0082 page 370 display 40. The Fourier coefficients `c_h = ∫_0^1 ψ(t) e(-ht) dt`
 of the trapezoid `ψ = trapL9 Δ` satisfy `|c_h| ≤ 1/2` and, for `h ≠ 0`,
 `|c_h| ≤ 4/(π² Δ h²) ≤ 41/(100 Δ h²)`. The paper derives the decay "by the Poisson summation
@@ -239,7 +398,44 @@ of an interval of length `1/2 - Δ/4` with the normalized indicator of `[0, Δ/4
 theorem leaf_trapezoid_coeff_l9 (Δ : ℝ) (hΔ0 : 0 < Δ) (hΔ1 : Δ < 1) (h : ℤ) :
     ‖hcheck (fun t => (trapL9 Δ t : ℂ)) h‖ ≤ 1 / 2 ∧
       (h ≠ 0 → ‖hcheck (fun t => (trapL9 Δ t : ℂ)) h‖ ≤ 41 / 100 / (Δ * (h : ℝ) ^ 2)) := by
-  sorry
+  obtain ⟨d, rfl⟩ : ∃ d, Δ = 4 * d := ⟨Δ / 4, by ring⟩
+  have hd0 : 0 < d := by linarith
+  have hd1 : d ≤ 1 / 4 := by linarith
+  refine ⟨hcheck_trapL9_le_half d hd0 h, fun hh => ?_⟩
+  rw [hcheck_trapL9_eq d hd0 hd1 h hh]
+  have e1 := norm_exp_l9 h d
+  have e2 := norm_exp_l9 h (1 / 2 - d)
+  have e3 := norm_exp_l9 h (1 / 2)
+  push_cast at e2 e3
+  have hS : ‖1 - Complex.exp (-(2 * π * Complex.I * h) * d) -
+          Complex.exp (-(2 * π * Complex.I * h) * (1 / 2 - d)) +
+          Complex.exp (-(2 * π * Complex.I * h) * (1 / 2))‖ ≤ 4 := by
+    have t1 := norm_add_le (1 - Complex.exp (-(2 * π * Complex.I * h) * d) -
+      Complex.exp (-(2 * π * Complex.I * h) * (1 / 2 - d)))
+      (Complex.exp (-(2 * π * Complex.I * h) * (1 / 2)))
+    have t2 := norm_sub_le (1 - Complex.exp (-(2 * π * Complex.I * h) * d))
+      (Complex.exp (-(2 * π * Complex.I * h) * (1 / 2 - d)))
+    have t3 := norm_sub_le (1 : ℂ) (Complex.exp (-(2 * π * Complex.I * h) * d))
+    rw [norm_one] at t3
+    linarith
+  have hh2 : (0 : ℝ) < (h : ℝ) ^ 2 := by positivity
+  have hpi : (3.14 : ℝ) < π := Real.pi_gt_d2
+  have hN : ‖1 / ((d : ℂ) * (-(2 * π * Complex.I * h)) ^ 2)‖ = 1 / (d * (4 * π ^ 2 * (h : ℝ) ^ 2)) := by
+    rw [norm_div, norm_one, norm_mul, norm_pow, norm_neg]
+    simp [Complex.norm_real, abs_of_pos hd0, abs_of_pos Real.pi_pos, mul_pow]
+    norm_num
+  rw [norm_mul, hN]
+  have hD : 0 < d * (4 * π ^ 2 * (h : ℝ) ^ 2) := by positivity
+  calc 1 / (d * (4 * π ^ 2 * (h : ℝ) ^ 2)) * ‖_‖ ≤ 1 / (d * (4 * π ^ 2 * (h : ℝ) ^ 2)) * 4 :=
+        mul_le_mul_of_nonneg_left hS (by positivity)
+    _ ≤ 41 / 100 / (4 * d * (h : ℝ) ^ 2) := by
+        rw [div_mul_eq_mul_div, one_mul, div_le_div_iff₀ hD (by positivity)]
+        have : (9.8 : ℝ) < π ^ 2 := by nlinarith
+        nlinarith [mul_pos hd0 hh2]
+
+theorem trapL9_periodic (Δ : ℝ) : Function.Periodic (fun t : ℝ => (trapL9 Δ t : ℂ)) 1 := by
+  intro t
+  simp only [trapL9, Int.fract_add_one]
 
 /-- LEAF: P0082 page 370, the expansion `ψ(α) = Σ_h c_h e(hα)` written below display 39.
 `trapL9 Δ` is continuous and 1-periodic and its coefficients are absolutely summable by
@@ -248,7 +444,39 @@ Mathlib's `hasSum_fourier_series_of_summable`. No cited input. -/
 theorem leaf_trapezoid_series_l9 (Δ : ℝ) (hΔ0 : 0 < Δ) (hΔ1 : Δ < 1) (β : ℝ) :
     HasSum (fun h : ℤ => hcheck (fun t => (trapL9 Δ t : ℂ)) h * eC (h * β))
       (trapL9 Δ β : ℂ) := by
-  sorry
+  let F : C(UnitAddCircle, ℂ) :=
+    ⟨(trapL9_periodic Δ).lift, continuous_coinduced_dom.mpr
+      (Complex.continuous_ofReal.comp (trapL9_continuous Δ hΔ0))⟩
+  have hcoef : ∀ n : ℤ, fourierCoeff F n = hcheck (fun t => (trapL9 Δ t : ℂ)) n := by
+    intro n
+    rw [fourierCoeff_eq_intervalIntegral _ n 0, zero_add, one_div_one, one_smul]
+    unfold hcheck
+    apply intervalIntegral.integral_congr
+    intro t _
+    simp only [F, ContinuousMap.coe_mk, Function.Periodic.lift_coe, fourier_coe_apply, smul_eq_mul,
+      eC]
+    rw [mul_comm]
+    congr 2
+    push_cast
+    ring
+  have hsum : Summable (fourierCoeff F) := by
+    rw [show fourierCoeff F = fun n => hcheck (fun t => (trapL9 Δ t : ℂ)) n from funext hcoef]
+    refine Summable.of_norm_bounded_eventually (g := fun n : ℤ => 41 / 100 / Δ * (1 / (n : ℝ) ^ 2))
+      ((Real.summable_one_div_int_pow.mpr one_lt_two).mul_left _) ?_
+    have : {(0 : ℤ)}ᶜ ∈ Filter.cofinite := (Set.finite_singleton 0).compl_mem_cofinite
+    filter_upwards [this] with n hn
+    refine ((leaf_trapezoid_coeff_l9 Δ hΔ0 hΔ1 n).2 hn).trans (le_of_eq ?_)
+    field_simp
+  have := has_pointwise_sum_fourier_series_of_summable hsum (β : UnitAddCircle)
+  convert this using 1
+  · funext n
+    rw [hcoef, smul_eq_mul, fourier_coe_apply]
+    congr 1
+    unfold eC
+    congr 1
+    push_cast
+    ring
+  · simp [F, Function.Periodic.lift_coe]
 
 /-- P0082 page 370 display 40 and the expansion above it, in the form used below:
 the smoothed parity cutoff, its shape, its Fourier series and the decay of its

@@ -1,5 +1,5 @@
 import LeanLab.ExceptionalSet.PrimeTail385
-import LeanLab.ExceptionalSet.Decomp404c
+import LeanLab.ExceptionalSet.Decomp371b
 
 /-!
 Supply for the finite scale tail on P0082 page 365 before display 24.

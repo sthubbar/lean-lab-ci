@@ -1,0 +1,21 @@
+{
+  "time": "2026-11-21T16:50:56.496513+00:00",
+  "initial_commit": "ec868987a693629e4daad898c2942dd2bde0565a",
+  "current_commit": "1eed7095f9571c329d7f419ea02d598208e3f438",
+  "changed_since_manifest": [
+    "Decomp404c.lean",
+    "Decomp428b.lean",
+    "SPLIT_lemma4.lean"
+  ],
+  "added_since_manifest": [
+    "RefuteLowJ1Small672.lean",
+    "RealZeroLower672.lean"
+  ],
+  "explanation": "Main was merged at 16:45 UTC. Its SPLIT_lemma4 proof is retained. Decomp404c and Decomp428b were rebuilt after the import cycle closure. RefuteLowJ1Small672 was built and checked independently. The sequential audit keeps its initial 540 path list. Its raw BEGIN and EXIT markers give the actual attempts.",
+  "update_time": "2026-11-21T17:09:32.326160+00:00",
+  "separate_build_logs": [
+    "build/codex-task672-low-j1-build.log",
+    "build/codex-task672-real-zero-build.log",
+    "build/codex-task672-tail.log"
+  ]
+}

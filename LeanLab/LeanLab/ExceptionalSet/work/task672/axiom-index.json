@@ -1,0 +1,330 @@
+{
+  "time": "2026-11-21T18:01:02.549777+00:00",
+  "source": "build/codex-task672.log",
+  "new_declarations": 27,
+  "original_closure_targets": 5,
+  "indexed_reports": [
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_profile_zero_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15572,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_profile_zero_one"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_continuous",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15573,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_continuous"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_eq_profile",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15574,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_eq_profile"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece1",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15575,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece1"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece2",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15576,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece2"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece3",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15577,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece3"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece4",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15578,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece4"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.integral_lin_exp_l9",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15579,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.integral_lin_exp_l9"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.hcheck_trapL9_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15580,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.hcheck_trapL9_eq"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.norm_exp_l9",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15581,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.norm_exp_l9"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.hcheck_trapL9_le_half",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15582,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.hcheck_trapL9_le_half"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_periodic",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15584,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_periodic"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.realZeroGapHalf672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15643,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.realZeroGapHalf672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.landauRealZeroHyp_proved672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15644,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.landauRealZeroHyp_proved672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.realZeroDistanceHyp_proved672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15645,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.realZeroDistanceHyp_proved672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_index672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15646,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.low_j1_index672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_scale672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15647,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.low_j1_scale672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_counterexample672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15648,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.low_j1_counterexample672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_off_lattice_false672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15649,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.low_j1_off_lattice_false672"
+    },
+    {
+      "name": "_private.LeanLab.ExceptionalSet.S1CaseSupply672.0.LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_monotone_saving",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 6882,
+      "requested_name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_monotone_saving"
+    },
+    {
+      "name": "_private.LeanLab.ExceptionalSet.S1CaseSupply672.0.LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_small_N_boundary",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 6885,
+      "requested_name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_small_N_boundary"
+    },
+    {
+      "name": "_private.LeanLab.ExceptionalSet.S1CaseSupply672.0.LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_deriv_sign",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 6888,
+      "requested_name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_deriv_sign"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.firstDerivativeCase672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15650,
+      "requested_name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.firstDerivativeCase672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.singularSeries_eq_hb672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15651,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.singularSeries_eq_hb672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.hb_singular_totient_lower672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15652,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.hb_singular_totient_lower672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.singularSeriesEvenLowerBP_proved672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15653,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.singularSeriesEvenLowerBP_proved672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.singSeriesLowerHyp_proved672",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15654,
+      "requested_name": "LeanLab.ExceptionalSet.Task672.singSeriesLowerHyp_proved672"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.leaf_trapezoid_coeff_l9",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15583,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.leaf_trapezoid_coeff_l9"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.leaf_trapezoid_series_l9",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15585,
+      "requested_name": "LeanLab.ExceptionalSet.DQLemma9.leaf_trapezoid_series_l9"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.leaf_s1_case",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15630,
+      "requested_name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.leaf_s1_case"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Decomp524a.leaf_interval_majorant524",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15609,
+      "requested_name": "LeanLab.ExceptionalSet.Decomp524a.leaf_interval_majorant524"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Decomp404c.leaf_tail_integral",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "log_line": 15604,
+      "requested_name": "LeanLab.ExceptionalSet.Decomp404c.leaf_tail_integral"
+    }
+  ],
+  "missing_or_foreign": [],
+  "note": "This indexes actual multiline Lean outputs in the canonical log, including private names printed with a Lake info prefix. It is not a replacement build or a fabricated axiom report."
+}

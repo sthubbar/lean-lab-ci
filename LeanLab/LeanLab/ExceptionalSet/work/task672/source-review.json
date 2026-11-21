@@ -1,0 +1,264 @@
+{
+  "review_time": "2026-11-21T17:06:34.945783+00:00",
+  "commit": "fb48f9bbac1d474630d983272cb92169424d225b",
+  "basis": "The page images were reread after the proof work. MATCH refers to the stated derived twin and source context. It does not identify a derived explicit constant or lab audit with a literal printed theorem.",
+  "new_declarations": [
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_profile_zero_one",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_profile_zero_one (\u0394 : \u211d) (h\u03940 : 0 < \u0394) : max 0 (min 1 (min (4 * (0 : \u211d) / \u0394) (4 * (1 / 2 - 0) / \u0394))) = max 0 (min 1 (min (4 * (1 : \u211d) / \u0394) (4 * (1 / 2 - 1) / \u0394)))"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_continuous",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_continuous (\u0394 : \u211d) (h\u03940 : 0 < \u0394) : Continuous (fun \u03b2 => trapL9 \u0394 \u03b2)"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_eq_profile",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_eq_profile (\u0394 : \u211d) (h\u03940 : 0 < \u0394) {t : \u211d} (h0 : 0 \u2264 t) (h1 : t \u2264 1) : trapL9 \u0394 t = max 0 (min 1 (min (4 * t / \u0394) (4 * (1 / 2 - t) / \u0394)))"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece1",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_piece1 (d : \u211d) (hd0 : 0 < d) (hd1 : d \u2264 1 / 4) {t : \u211d} (h0 : 0 \u2264 t) (h1 : t \u2264 d) : trapL9 (4 * d) t = 1 / d * t + 0"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece2",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_piece2 (d : \u211d) (hd0 : 0 < d) (hd1 : d \u2264 1 / 4) {t : \u211d} (h0 : d \u2264 t) (h1 : t \u2264 1 / 2 - d) : trapL9 (4 * d) t = 0 * t + 1"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece3",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_piece3 (d : \u211d) (hd0 : 0 < d) (hd1 : d \u2264 1 / 4) {t : \u211d} (h0 : 1 / 2 - d \u2264 t) (h1 : t \u2264 1 / 2) : trapL9 (4 * d) t = -(1 / d) * t + 1 / (2 * d)"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_piece4",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_piece4 (d : \u211d) (hd0 : 0 < d) {t : \u211d} (h0 : 1 / 2 \u2264 t) (h1 : t \u2264 1) : trapL9 (4 * d) t = 0 * t + 0"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.integral_lin_exp_l9",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem integral_lin_exp_l9 (a : \u2102) (ha : a \u2260 0) (p q x y : \u211d) : \u222b t in x..y, ((p : \u2102) * t + q) * Complex.exp (a * t) = Complex.exp (a * y) * (((p : \u2102) * y + q) / a - p / a ^ 2) - Complex.exp (a * x) * (((p : \u2102) * x + q) / a - p / a ^ 2)"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.hcheck_trapL9_eq",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem hcheck_trapL9_eq (d : \u211d) (hd0 : 0 < d) (hd1 : d \u2264 1 / 4) (h : \u2124) (hh : h \u2260 0) : hcheck (fun t => (trapL9 (4 * d) t : \u2102)) h = 1 / ((d : \u2102) * (-(2 * \u03c0 * Complex.I * h)) ^ 2) * (1 - Complex.exp (-(2 * \u03c0 * Complex.I * h) * d) - Complex.exp (-(2 * \u03c0 * Complex.I * h) * (1 / 2 - d)) + Complex.exp (-(2 * \u03c0 * Complex.I * h) * (1 / 2)))"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.norm_exp_l9",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem norm_exp_l9 (h : \u2124) (x : \u211d) : \u2016Complex.exp (-(2 * \u03c0 * Complex.I * h) * x)\u2016 = 1"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.hcheck_trapL9_le_half",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem hcheck_trapL9_le_half (d : \u211d) (hd0 : 0 < d) (h : \u2124) : \u2016hcheck (fun t => (trapL9 (4 * d) t : \u2102)) h\u2016 \u2264 1 / 2"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.DQLemma9.trapL9_periodic",
+      "status": "MATCH",
+      "source": "P0082 page 370 display 40",
+      "scope": "Derived helper for the corrected even translate trapezoid already defined on main. The literal printed psi remains a separate QUESTION.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma9Decisions.lean",
+      "statement": "theorem trapL9_periodic (\u0394 : \u211d) : Function.Periodic (fun t : \u211d => (trapL9 \u0394 t : \u2102)) 1"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.realZeroGapHalf672",
+      "status": "MATCH",
+      "source": "P0082 page 358 display 10",
+      "scope": "Derived existence-only bound from the proved lab Siegel theorem. No effective constant or existence of a positive real zero is asserted.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/RealZeroLower672.lean",
+      "statement": "theorem realZeroGapHalf672 : \u2203 c : \u211d, 0 < c \u2227 \u2200 (r : \u2115) (_ : NeZero r) (\u03c7 : DirichletCharacter \u2102 r), \u03c7 \u2260 1 \u2192 \u03c7 ^ 2 = 1 \u2192 \u2200 \u03b2 : \u211d, \u03b2 \u2264 1 \u2192 \u03c7.LFunction \u03b2 = 0 \u2192 c * (r : \u211d) ^ (-(1 / 2 : \u211d)) \u2264 1 - \u03b2"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.landauRealZeroHyp_proved672",
+      "status": "MATCH",
+      "source": "P0082 page 358 display 10",
+      "scope": "Derived existence-only bound from the proved lab Siegel theorem. No effective constant or existence of a positive real zero is asserted.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/RealZeroLower672.lean",
+      "statement": "theorem landauRealZeroHyp_proved672 : UpJ200.DQLeafCoprimeSelected.LandauRealZeroHyp"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.realZeroDistanceHyp_proved672",
+      "status": "MATCH",
+      "source": "P0082 page 358 display 10",
+      "scope": "Derived existence-only bound from the proved lab Siegel theorem. No effective constant or existence of a positive real zero is asserted.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/RealZeroLower672.lean",
+      "statement": "theorem realZeroDistanceHyp_proved672 : UpJ200.DQLeafNearZeroSelected.RealZeroDistanceHyp"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_index672",
+      "status": "MATCH",
+      "source": "P0082 pages 368 and 369 displays 35 through 39",
+      "scope": "Audit of the sealed threshold-free lab auxiliary, not a paper assertion. The paper uses an asymptotic parameter regime.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/RefuteLowJ1Small672.lean",
+      "statement": "theorem low_j1_index672 : indices_low_j1 (5 / 4) 4 = {3}"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_scale672",
+      "status": "MATCH",
+      "source": "P0082 pages 368 and 369 displays 35 through 39",
+      "scope": "Audit of the sealed threshold-free lab auxiliary, not a paper assertion. The paper uses an asymptotic parameter regime.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/RefuteLowJ1Small672.lean",
+      "statement": "theorem low_j1_scale672 : F (5 / 4) 4 ^ (6 * (1 / 100 : \u211d)) < 2 \u2227 F (5 / 4) 4 ^ (6 * (1 / 100 : \u211d)) / F (5 / 4) 4 < 3 / 8 \u2227 F (5 / 4) 4 ^ ((1 / 100 : \u211d) - 1) < 1 / 4 \u2227 1 \u2264 calE (5 / 4) 10 4 ^ (2 / 3 : \u211d) \u2227 4 * calE (5 / 4) 10 4 ^ (-(5 / 6 : \u211d)) < 1"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_counterexample672",
+      "status": "MATCH",
+      "source": "P0082 pages 368 and 369 displays 35 through 39",
+      "scope": "Audit of the sealed threshold-free lab auxiliary, not a paper assertion. The paper uses an asymptotic parameter regime.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/RefuteLowJ1Small672.lean",
+      "statement": "theorem low_j1_counterexample672 : (3 / 8 : \u211d) \u2208 oddDomain (F (5 / 4) 4 ^ (6 * (1 / 100 : \u211d))) (F (5 / 4) 4) (calE (5 / 4) 10 4) \u2227 (5 / 8 : \u211d) \u2208 oddDomain (F (5 / 4) 4 ^ (6 * (1 / 100 : \u211d))) (F (5 / 4) 4) (calE (5 / 4) 10 4) \u2227 (\u2200 h : \u2124, (|h| : \u211d) \u2264 calE (5 / 4) 10 4 ^ (3 / 4 : \u211d) \u2192 F (5 / 4) 4 ^ ((1 / 100 : \u211d) - 1) < |((5 / 8 : \u211d) - 3 / 8) - (h : \u211d) / 2|) \u2227 \u00ac (\u2016blockPhase (indices_low_j1 (5 / 4) 4) (fun n => F (5 / 4) n - (1 : \u2124)) ((5 / 8 : \u211d) - 3 / 8)\u2016 \u2264 (4 : \u211d) * calE (5 / 4) 10 4 ^ (-(5 / 6 : \u211d)))"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.low_j1_off_lattice_false672",
+      "status": "MATCH",
+      "source": "P0082 pages 368 and 369 displays 35 through 39",
+      "scope": "Audit of the sealed threshold-free lab auxiliary, not a paper assertion. The paper uses an asymptotic parameter regime.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/RefuteLowJ1Small672.lean",
+      "statement": "theorem low_j1_off_lattice_false672 : \u00ac (\u2200 (\u03b3 \u03b4 \u03ba : \u211d) (N : \u2115) (a b : \u211d), 1 < \u03b3 \u2192 \u03b3 < 3 / 2 \u2192 0 < \u03b4 \u2192 \u03b4 \u2264 1 \u2192 0 < \u03ba \u2192 a \u2208 oddDomain (F \u03b3 N ^ (6 * \u03b4)) (F \u03b3 N) (calE \u03b3 \u03ba N) \u2192 b \u2208 oddDomain (F \u03b3 N ^ (6 * \u03b4)) (F \u03b3 N) (calE \u03b3 \u03ba N) \u2192 (\u2200 h : \u2124, (|h| : \u211d) \u2264 calE \u03b3 \u03ba N ^ (3 / 4 : \u211d) \u2192 F \u03b3 N ^ (\u03b4 - 1) < |(b - a) - (h : \u211d) / 2|) \u2192 \u2016blockPhase (indices_low_j1 \u03b3 N) (fun n => F \u03b3 n - (1 : \u2124)) (b - a)\u2016 \u2264 (N : \u211d) * calE \u03b3 \u03ba N ^ (-(5 / 6 : \u211d)))"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_monotone_saving",
+      "status": "MATCH",
+      "source": "P0082 pages 370 and 371 and Karacuba 1971 page 244",
+      "scope": "Derived singleton first derivative extension. Karacuba prints derivative orders at least two. The extension is not attributed as his literal theorem.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/S1CaseSupply672.lean",
+      "statement": "private theorem leaf_s1_monotone_saving : \u2200 \u03b8 \u0398 \u0398\u2080 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < 1 \u2192 0 < \u0398 \u2192 \u0398 < \u03b8 \u2192 \u03b8 < \u0398\u2080 \u2192 \u0398\u2080 < 1 \u2192 \u2203 B c N\u2080 : \u211d, 0 < B \u2227 0 < c \u2227 0 < N\u2080 \u2227 \u2200 N : \u2115, N\u2080 \u2264 (N : \u211d) \u2192 \u2200 (f : \u211d \u2192 \u211d) (k : \u2115), 3 \u2264 k \u2192 (\u2203 U : Set \u211d, IsOpen U \u2227 Set.Icc (N : \u211d) (2 * N) \u2286 U \u2227 ContDiffOn \u211d k f U) \u2192 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), |iteratedDeriv k f x / k.factorial| \u2264 (N : \u211d) ^ (-(\u0398\u2080 * k))) \u2192 \u03b4 * k \u2264 1 \u2192 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), (N : \u211d) ^ (-(\u03b8 * (1 : \u2115))) \u2264 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2227 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2264 (N : \u211d) ^ (-(\u0398 * (1 : \u2115)))) \u2192 ((\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), 0 < iteratedDeriv 1 f x) \u2228 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), iteratedDeriv 1 f x < 0)) \u2192 \u2016\u2211 n \u2208 Finset.Ioc N (2 * N), eC (f n)\u2016 \u2264 B * (N : \u211d) ^ (1 - c / (k : \u211d) ^ 2)"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_small_N_boundary",
+      "status": "MATCH",
+      "source": "P0082 pages 370 and 371 and Karacuba 1971 page 244",
+      "scope": "Derived singleton first derivative extension. Karacuba prints derivative orders at least two. The extension is not attributed as his literal theorem.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/S1CaseSupply672.lean",
+      "statement": "private theorem leaf_s1_small_N_boundary : \u2200 \u03b8 \u0398 \u0398\u2080 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < 1 \u2192 0 < \u0398 \u2192 \u0398 < \u03b8 \u2192 \u03b8 < \u0398\u2080 \u2192 \u0398\u2080 < 1 \u2192 \u2200 c N\u2080 : \u211d, 0 < c \u2192 c \u2264 1 \u2192 0 < N\u2080 \u2192 \u2203 B : \u211d, 0 < B \u2227 \u2200 N : \u2115, 1 \u2264 N \u2192 (N : \u211d) < N\u2080 \u2192 \u2200 (f : \u211d \u2192 \u211d) (k : \u2115), 3 \u2264 k \u2192 (\u2203 U : Set \u211d, IsOpen U \u2227 Set.Icc (N : \u211d) (2 * N) \u2286 U \u2227 ContDiffOn \u211d k f U) \u2192 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), |iteratedDeriv k f x / k.factorial| \u2264 (N : \u211d) ^ (-(\u0398\u2080 * k))) \u2192 \u03b4 * k \u2264 1 \u2192 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), (N : \u211d) ^ (-(\u03b8 * (1 : \u2115))) \u2264 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2227 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2264 (N : \u211d) ^ (-(\u0398 * (1 : \u2115)))) \u2192 \u2016\u2211 n \u2208 Finset.Ioc N (2 * N), eC (f n)\u2016 \u2264 B * (N : \u211d) ^ (1 - c / (k : \u211d) ^ 2)"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.leaf_s1_deriv_sign",
+      "status": "MATCH",
+      "source": "P0082 pages 370 and 371 and Karacuba 1971 page 244",
+      "scope": "Derived singleton first derivative extension. Karacuba prints derivative orders at least two. The extension is not attributed as his literal theorem.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/S1CaseSupply672.lean",
+      "statement": "private theorem leaf_s1_deriv_sign : \u2200 N : \u2115, 1 \u2264 N \u2192 \u2200 (f : \u211d \u2192 \u211d) (k : \u2115) (\u03b8 \u0398 : \u211d), 3 \u2264 k \u2192 0 < \u0398 \u2192 \u0398 < \u03b8 \u2192 (\u2203 U : Set \u211d, IsOpen U \u2227 Set.Icc (N : \u211d) (2 * N) \u2286 U \u2227 ContDiffOn \u211d k f U) \u2192 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), (N : \u211d) ^ (-(\u03b8 * (1 : \u2115))) \u2264 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2227 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2264 (N : \u211d) ^ (-(\u0398 * (1 : \u2115)))) \u2192 ((\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), 0 < iteratedDeriv 1 f x) \u2228 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), iteratedDeriv 1 f x < 0))"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.U1539.KaracubaSplit.S1CaseSupply672.firstDerivativeCase672",
+      "status": "MATCH",
+      "source": "P0082 pages 370 and 371 and Karacuba 1971 page 244",
+      "scope": "Derived singleton first derivative extension. Karacuba prints derivative orders at least two. The extension is not attributed as his literal theorem.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/S1CaseSupply672.lean",
+      "statement": "theorem firstDerivativeCase672 : \u2200 \u03b8 \u0398 \u0398\u2080 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < 1 \u2192 0 < \u0398 \u2192 \u0398 < \u03b8 \u2192 \u03b8 < \u0398\u2080 \u2192 \u0398\u2080 < 1 \u2192 \u2203 B c : \u211d, 0 < B \u2227 0 < c \u2227 \u2200 N : \u2115, 1 \u2264 N \u2192 \u2200 (f : \u211d \u2192 \u211d) (k : \u2115), 3 \u2264 k \u2192 (\u2203 U : Set \u211d, IsOpen U \u2227 Set.Icc (N : \u211d) (2 * N) \u2286 U \u2227 ContDiffOn \u211d k f U) \u2192 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), |iteratedDeriv k f x / k.factorial| \u2264 (N : \u211d) ^ (-(\u0398\u2080 * k))) \u2192 \u03b4 * k \u2264 1 \u2192 (\u2200 x \u2208 Set.Icc (N : \u211d) (2 * N), (N : \u211d) ^ (-(\u03b8 * (1 : \u2115))) \u2264 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2227 |iteratedDeriv 1 f x / (1 : \u2115).factorial| \u2264 (N : \u211d) ^ (-(\u0398 * (1 : \u2115)))) \u2192 \u2016\u2211 n \u2208 Finset.Ioc N (2 * N), eC (f n)\u2016 \u2264 B * (N : \u211d) ^ (1 - c / (k : \u211d) ^ 2)"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.singularSeries_eq_hb672",
+      "status": "MATCH",
+      "source": "P0082 page 358 display 11 and page 362 case i",
+      "scope": "Derived explicit twin constant comparison and exact existing named inputs. Positive even m is retained.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/SingularSeriesLower672.lean",
+      "statement": "theorem singularSeries_eq_hb672 (m : \u2115) (hm : 1 \u2264 m) : UpJ200.DQLeafAbsentSelected.singularSeries m = LeanLab.HeathBrown1985.singular m"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.hb_singular_totient_lower672",
+      "status": "MATCH",
+      "source": "P0082 page 358 display 11 and page 362 case i",
+      "scope": "Derived explicit twin constant comparison and exact existing named inputs. Positive even m is retained.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/SingularSeriesLower672.lean",
+      "statement": "theorem hb_singular_totient_lower672 (m : \u2115) (hm : 1 \u2264 m) (heven : Even m) : LeanLab.ChenExplicit.twinC * ((m : \u211d) / (m.totient : \u211d)) \u2264 LeanLab.HeathBrown1985.singular m"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.singularSeriesEvenLowerBP_proved672",
+      "status": "MATCH",
+      "source": "P0082 page 358 display 11 and page 362 case i",
+      "scope": "Derived explicit twin constant comparison and exact existing named inputs. Positive even m is retained.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/SingularSeriesLower672.lean",
+      "statement": "theorem singularSeriesEvenLowerBP_proved672 : UpJ200.DQLeafAbsentSelected.SingularSeriesEvenLowerBP"
+    },
+    {
+      "name": "LeanLab.ExceptionalSet.Task672.singSeriesLowerHyp_proved672",
+      "status": "MATCH",
+      "source": "P0082 page 358 display 11 and page 362 case i",
+      "scope": "Derived explicit twin constant comparison and exact existing named inputs. Positive even m is retained.",
+      "file": "LeanLab/LeanLab/ExceptionalSet/SingularSeriesLower672.lean",
+      "statement": "theorem singSeriesLowerHyp_proved672 : UpJ200.DQLeafCoprimeSelected.SingSeriesLowerHyp"
+    }
+  ],
+  "existing_targets": [
+    {
+      "name": "DQLemma9.leaf_trapezoid_coeff_l9",
+      "status": "MATCH",
+      "scope": "Same corrected trapezoid and sealed explicit bound."
+    },
+    {
+      "name": "DQLemma9.leaf_trapezoid_series_l9",
+      "status": "MATCH",
+      "scope": "Continuous Fourier expansion of the same corrected trapezoid."
+    },
+    {
+      "name": "KaracubaSplit.leaf_s1_case",
+      "status": "MATCH",
+      "scope": "Derived first derivative singleton extension with the sealed type unchanged."
+    },
+    {
+      "name": "Decomp524a.leaf_interval_majorant524",
+      "status": "MATCH",
+      "scope": "Derived finite interval majorant for the omitted discrepancy argument. Constant four is not printed."
+    },
+    {
+      "name": "Decomp404c.leaf_tail_integral",
+      "status": "MATCH",
+      "scope": "Derived two logarithm relaxation of page 365 display 24. The printed bound has one logarithm."
+    }
+  ],
+  "literal_source_questions": [
+    {
+      "status": "MISMATCH",
+      "scope": "The literal printed sum over all integer translates for psi has half-period symmetry. The main definition and imported proof use the corrected even translate trapezoid. Preserve the existing paper QUESTION."
+    },
+    {
+      "status": "QUESTION",
+      "scope": "The earlier closing constant choice for the lemma9 contradiction is retained as a QUESTION. No new paper error claim is made."
+    }
+  ],
+  "paper_hashes": {
+    "papers/P0082.pdf": "dc6b46b2b2c8395b5498f04e258b88e348e53e8f2d8f0305e35c6a2ad78bad66",
+    "papers/Karacuba1971-TrudyMIAN112.pdf": "1d2e426aca750b8129682c8b8886ee0f3b82d457e0e46b9d3b3a86a6290a0f78"
+  }
+}

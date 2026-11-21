@@ -57,6 +57,18 @@ theorem leaf_J_part131 (η : ℝ) :
   intro X P E Cstar _ hrel n hn hge hnone
   exact hrel n (leaf_window_ge_mem_J131 hn hge) hnone
 
+/-- Helper: for `X ≥ 2`, the cut `X^(9/20)` lies above the admissible top `X^(41/100)`,
+so the hypothesis `P ≤ X^(9/20)` in `leaf_strip_small_P131` is redundant. -/
+theorem admissibleP_le_cut131 {X : ℕ} (hX : 2 ≤ X) {P : ℝ}
+    (hAdm : AdmissibleP131 X P) : P ≤ (X : ℝ) ^ ((9 : ℝ) / 20) := by
+  have hXr : (1 : ℝ) < (X : ℝ) := by
+    have h2 : (2 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX
+    linarith
+  have hexp : ((41 : ℝ) / 100) < (9 : ℝ) / 20 := by norm_num
+  have hmono : (X : ℝ) ^ ((41 : ℝ) / 100) < (X : ℝ) ^ ((9 : ℝ) / 20) :=
+    Real.rpow_lt_rpow_of_exponent_lt hXr hexp
+  exact le_trans hAdm.2 (le_of_lt hmono)
+
 /-- LEAF. The strip `X/2 ≤ n < 2X/3` at the small arc parameter, `P ≤ X^(9/20)`: the relative
 major arc estimate for those `n` at the same `P`, `E`, `Cstar` as the `J(X)` estimate. This is the
 half of the strip that the hypothesis on `J(X)` does not supply, and it is strictly smaller than

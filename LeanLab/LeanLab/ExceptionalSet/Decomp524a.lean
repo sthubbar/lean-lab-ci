@@ -1,6 +1,8 @@
 import LeanLab.ExceptionalSet.Decomp371a
 import LeanLab.ExceptionalSet.PhaseInterval446
 import LeanLab.ExceptionalSet.UpJ200.Decomp450e
+import LeanLab.ExceptionalSet.Selberg524
+import LeanLab.ExceptionalSet.Decomp550a
 
 /-!
 P0082 pages354 and359, Theorem2 and Lemma4, and page364 before Lemma8.
@@ -34,19 +36,53 @@ theorem leaf_interval_majorant524 (a b : ℝ) (hab : a < b)
       ∀ x : ℝ, (if a ≤ Int.fract x ∧ Int.fract x < b then (1 : ℝ) else 0) ≤
         c₀ + (∑ h ∈ Icc 1 H, c h * eC ((h : ℝ) * x)).re := by
   classical
-  by_cases hH : H ≤ 3
-  · refine ⟨1, fun _ => 0, ?_, ?_, ?_⟩
-    · have hd : (0 : ℝ) < (H : ℝ) + 1 := by positivity
-      have hH3 : (H : ℝ) ≤ 3 := by exact_mod_cast hH
-      have hr : (1 : ℝ) ≤ 4 / ((H : ℝ) + 1) := (le_div_iff₀ hd).mpr (by linarith)
-      linarith
+  by_cases hC : 1 ≤ b - a + 4 / ((H : ℝ) + 1)
+  · refine ⟨1, fun _ => 0, hC, ?_, ?_⟩
     · intro h hh
-      simpa only [norm_zero] using
-        (div_nonneg (by norm_num : (0 : ℝ) ≤ 4) (Nat.cast_nonneg h))
+      simpa using (div_nonneg (by norm_num : (0 : ℝ) ≤ 4) (Nat.cast_nonneg h))
     · intro x
       simp only [zero_mul, Finset.sum_const_zero, Complex.zero_re, add_zero]
       split_ifs <;> norm_num
-  · sorry
+  · have hw : 0 < b - a := sub_pos.mpr hab
+    obtain ⟨c₀, g, hc₀, hg, hpt⟩ :=
+      LeanLab.ExceptionalSet.Selberg524.selberg_cosine_majorant524
+        (b - a) H hw (lt_of_not_ge hC)
+    let m : ℝ := (a + b) / 2
+    refine ⟨c₀, fun h => (g h : ℂ) * eC (-((h : ℝ) * m)), hc₀, ?_, ?_⟩
+    · intro h hh
+      rw [norm_mul, LeanLab.ExceptionalSet.U1539.norm_eC, mul_one,
+        Complex.norm_real, Real.norm_eq_abs]
+      exact hg h hh
+    · intro x
+      have hind : (if a ≤ Int.fract x ∧ Int.fract x < b then (1 : ℝ) else 0) ≤
+          (if |Int.fract x - m| ≤ (b - a) / 2 then (1 : ℝ) else 0) := by
+        by_cases hx : a ≤ Int.fract x ∧ Int.fract x < b
+        · have hx' : |Int.fract x - m| ≤ (b - a) / 2 := by
+            rw [abs_le]
+            dsimp [m]
+            constructor <;> linarith [hx.1, hx.2]
+          simp [hx, hx']
+        · simp only [if_neg hx]
+          split_ifs <;> norm_num
+      have hphase (h : ℕ) :
+          ((g h : ℂ) * eC (-((h : ℝ) * m)) * eC ((h : ℝ) * x)).re =
+            g h * cos (2 * π * ((h : ℝ) * (Int.fract x - m))) := by
+        rw [mul_assoc, ← LeanLab.ExceptionalSet.Fejer467.phase_add]
+        rw [show -((h : ℝ) * m) + (h : ℝ) * x = (h : ℝ) * (x - m) by ring]
+        have he : eC ((h : ℝ) * (x - m)) =
+            eC ((h : ℝ) * (Int.fract x - m)) := by
+          rw [mul_sub, mul_sub, LeanLab.ExceptionalSet.Fejer467.phase_sub,
+            LeanLab.ExceptionalSet.Fejer467.phase_sub,
+            LeanLab.ExceptionalSet.Decomp550a.phase_fract]
+        rw [he, Complex.re_ofReal_mul]
+        simp [eC, Complex.exp_re]
+      have hsum : (∑ h ∈ Icc 1 H,
+          ((g h : ℂ) * eC (-((h : ℝ) * m))) * eC ((h : ℝ) * x)).re =
+          ∑ h ∈ Icc 1 H, g h * cos (2 * π * ((h : ℝ) * (Int.fract x - m))) := by
+        rw [Complex.re_sum]
+        exact Finset.sum_congr rfl (fun h _ => hphase h)
+      rw [hsum]
+      exact hind.trans (hpt (Int.fract x - m))
 
 /-- P0082 page359 Lemma4, unnumbered display. Summing a Fourier
 majorant reduces the interval count to its constant term and harmonic sums.

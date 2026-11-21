@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.Decomp371b
+import LeanLab.ExceptionalSet.Decomp428b
 
 /-!
 P0082 page 365 display 24. Separate the finite scale tail estimate from
@@ -98,7 +99,7 @@ theorem leaf_tail_integral : ∃ C : ℝ, 0 < C ∧
         (∫ α in (majorArcs P X)ᶜ ∩ Set.Icc (-P) P,
           Sp P X α ^ 2 * (Kfun Δ α : ℂ) * eC (-(α * v)))‖ ≤
             C * X * Real.log X ^ 2 / (Δ * P) := by
-  sorry
+  exact LeanLab.ExceptionalSet.Decomp428b.leaf_tail_integral_supplied
 
 /-- Assembly. P0082 page 365 display 24. This has the exact existing
 leaf_tail statement. Only the finite scale tail estimate remains open. -/

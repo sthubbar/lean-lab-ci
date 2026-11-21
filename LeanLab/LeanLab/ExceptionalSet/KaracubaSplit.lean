@@ -36,6 +36,7 @@ AI wrote the Lean code, Claude. Binary Goldbach is OPEN.
 -/
 import LeanLab.ExceptionalSet.State1539
 import LeanLab.ExceptionalSet.Decomp538a
+import LeanLab.ExceptionalSet.S1CaseSupply672
 
 namespace LeanLab.ExceptionalSet.U1539.KaracubaSplit
 
@@ -267,7 +268,8 @@ needs `r ≥ 2`. When `S` has an element `s ≥ 2` the bridge below reaches Theo
 `c0 = δ/2`; only `S = {1}` is left. Not in Karacuba. Not known to be false: the resonance
 example `1/f' ≈ A(1 + ε cos 2πf)` gives only `|Σ| ≈ εN` with `ε ≈ N^{-k(Θ0-θ)}`, which the
 `c` of the statement absorbs. Not used by Brudern-Perelli, whose `k` tends to infinity. -/
-theorem leaf_s1_case : LeafS1Case := by sorry
+theorem leaf_s1_case : LeafS1Case := by
+  exact S1CaseSupply672.firstDerivativeCase672
 
 /-! ### Proved assembly -/
 
