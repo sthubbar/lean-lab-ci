@@ -40,10 +40,17 @@ theorem remainder_lower :
       (((window N ε).filter (fun n => pieceSum 3 4 false N (localization N ε) n <
         0.289310 * scale N (localization N ε) n)).card : ℝ) ≤
       C * windowLength N ε / Real.log N ^ B := by
-  -- BLOCKED 2026-11-15 FREE-ms-leanstral task520 remainder_lower
-  -- OUT OF REACH: same as region4_lower - requires the complementary bound from
-  -- Jia Lemma 26 for pieceSum 3 4 false with coefficient 0.289310.
-  -- This is the group-3-without-region-4 estimate. No CITED lemma provides it.
+  -- BLOCKED 2026-11-21 FREE-nv-minimax3 task2177 remainder_lower
+  -- OUT OF REACH: attempted 2026-11-21 the only elementary route (filter_subset +
+  -- card_le_card); trace_state left the goal
+  --   card ≤ 1 * windowLength N ε / Real.log N ^ B with only card ≤ card(window N ε)
+  -- available, which is false for large N since Real.log N ^ B → ∞.
+  -- Requires Jia 1996 Lemma 26 display 65 large-sieve/Gallagher small-value bound for
+  -- pieceSum 3 4 false with coefficient 0.289310. LeanSearch queries on large sieve
+  -- exceptional set and sieve sum below constant times main term returned only
+  -- Mathlib SelbergSieve BoundingSieve (no exceptional-set count bound); Loogle query
+  -- (filter _ _).card ≤ _ / Real.log _ ^ _ returned 0 declarations. Not in Mathlib,
+  -- not CITED in Decomp279a/Decomp316c/GroupSplit548.
   sorry
 
 /-- Jia Lemma 26: the exact sealed group3_lower statement follows
