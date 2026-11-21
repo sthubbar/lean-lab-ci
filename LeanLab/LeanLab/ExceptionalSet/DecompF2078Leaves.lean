@@ -11,6 +11,7 @@ DecompF2078.lean uses them.  Every step below is one LEAF.  AI wrote the Lean co
 Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.Decomp547a
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -44,7 +45,60 @@ theorem leaf_F2078_exp_sum_bound :
         (h : ℝ) ≤ F γ N ^ C →
         ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (h * α * F γ n)‖ ≤
           B * N * Real.exp (-κ * Real.log N ^ (3 - 2 * γ)) := by
-  sorry
+  intro γ hγ1 hγ2 C hC hCγ
+  exact Decomp547a.integer_multiple_decay_full theorem2_via_karacuba γ hγ1 hγ2 C hC hCγ
+
+/-! ### Helpers for the logarithmic regime -/
+
+/-- For every `N ≥ 3` the real logarithm of `N` is at least `1`, since `3 > e` and
+`log` is monotone. -/
+theorem f2078_log_ge_one (N : ℕ) (hN : 3 ≤ N) : 1 ≤ Real.log N := by
+  have hx : Real.exp 1 ≤ (N : ℝ) := by
+    calc Real.exp 1 ≤ 3 := le_of_lt Real.exp_one_lt_three
+      _ ≤ N := by exact_mod_cast hN
+  exact (Real.le_log_iff_exp_le (by positivity)).mpr hx
+
+/-- The ceiling of a real number that is at least `1` is at least `1`. -/
+theorem f2078_ceil_ge_one (x : ℝ) (hx : 1 ≤ x) : (1 : ℝ) ≤ (Nat.ceil x : ℝ) := by
+  calc (1 : ℝ) ≤ x := hx
+    _ ≤ (Nat.ceil x : ℝ) := Nat.le_ceil x
+
+/-- The ceiling of a logarithm that is at least `1` is at most twice that logarithm. -/
+theorem f2078_ceil_le_two_log (N : ℕ) (hN : 1 ≤ Real.log N) :
+    (Nat.ceil (Real.log N) : ℝ) ≤ 2 * Real.log N := by
+  have h1 : (Nat.ceil (Real.log N) : ℝ) < Real.log N + 1 := Nat.ceil_lt_add_one (by positivity)
+  linarith
+
+/-- For `1 < γ` and every `C > 0`, past a threshold twice the logarithm is at most
+`C` times its `γ`-th power: `(log N)^{γ-1} → ∞`. -/
+theorem f2078_two_log_le_rpow (γ : ℝ) (hγ : 1 < γ) (C : ℝ) (hC : 0 < C) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → 2 * Real.log N ≤ C * Real.log N ^ γ := by
+  have h1 : Filter.Tendsto (fun x : ℝ ↦ x ^ (γ - 1)) Filter.atTop Filter.atTop :=
+    tendsto_rpow_atTop (by linarith)
+  have h2 : Filter.Tendsto (fun x : ℝ ↦ C * x ^ (γ - 1)) Filter.atTop Filter.atTop :=
+    Filter.Tendsto.const_mul_atTop hC h1
+  obtain ⟨M, hM⟩ := Filter.tendsto_atTop_atTop.mp h2 2
+  have h3 : Filter.Tendsto (fun n : ℕ ↦ Real.log n) Filter.atTop Filter.atTop :=
+    Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  obtain ⟨N₀, hN₀⟩ := Filter.tendsto_atTop_atTop.mp h3 (max M 1)
+  refine ⟨N₀, fun N hN => ?_⟩
+  have hlog_ge : max M 1 ≤ Real.log N := hN₀ N hN
+  have hlog_M : M ≤ Real.log N := le_trans (le_max_left _ _) hlog_ge
+  have hlog_pos : 0 < Real.log N := by
+    calc 0 < 1 := zero_lt_one
+      _ ≤ max M 1 := le_max_right _ _
+      _ ≤ Real.log N := hlog_ge
+  have h4 := hM (Real.log N) hlog_M
+  have h5 : 2 * Real.log N ≤ (C * Real.log N ^ (γ - 1)) * Real.log N := by
+    nlinarith
+  have h6 : Real.log N ^ (γ - 1) * Real.log N = Real.log N ^ γ := by
+    have h7 : Real.log N = Real.log N ^ (1 : ℝ) := (Real.rpow_one _).symm
+    nth_rw 2 [h7]
+    rw [← Real.rpow_add hlog_pos]
+    ring_nf
+  calc 2 * Real.log N ≤ (C * Real.log N ^ (γ - 1)) * Real.log N := h5
+    _ = C * (Real.log N ^ (γ - 1) * Real.log N) := mul_assoc _ _ _
+    _ = C * Real.log N ^ γ := by rw [h6]
 
 /-- LEAF: Step 3, the logarithmic regime: past a threshold depending on `γ` and `C`,
 `N ≥ 3`, `log N ≥ 1`, `⌈log N⌉ ≥ 1`, and `⌈log N⌉ ≤ F(N)^C` for every `C > 0`.
@@ -54,7 +108,23 @@ theorem leaf_F2078_log_regime :
       ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
         3 ≤ N ∧ 1 ≤ Real.log N ∧ (1 : ℝ) ≤ (Nat.ceil (Real.log N) : ℝ) ∧
         (Nat.ceil (Real.log N) : ℝ) ≤ F γ N ^ C := by
-  sorry
+  intro γ hγ1 _hγ2 C hC
+  obtain ⟨N₁, hN₁⟩ := f2078_two_log_le_rpow γ hγ1 C hC
+  refine ⟨max N₁ 3, fun N hN => ?_⟩
+  have h3 : 3 ≤ N := le_trans (le_max_right _ _) hN
+  have hlog1 : 1 ≤ Real.log N := f2078_log_ge_one N h3
+  have hceil1 : (1 : ℝ) ≤ (Nat.ceil (Real.log N) : ℝ) := f2078_ceil_ge_one _ hlog1
+  have hceil2 : (Nat.ceil (Real.log N) : ℝ) ≤ 2 * Real.log N := f2078_ceil_le_two_log N hlog1
+  have hdiv : 2 * Real.log N ≤ C * Real.log N ^ γ := hN₁ N (le_trans (le_max_left _ _) hN)
+  have hF : F γ N ^ C = Real.exp (C * Real.log N ^ γ) := by
+    unfold F
+    rw [← Real.exp_mul, mul_comm]
+  have hkey : (Nat.ceil (Real.log N) : ℝ) ≤ Real.exp (C * Real.log N ^ γ) := by
+    calc (Nat.ceil (Real.log N) : ℝ) ≤ 2 * Real.log N := hceil2
+      _ ≤ C * Real.log N ^ γ := hdiv
+      _ ≤ C * Real.log N ^ γ + 1 := by linarith
+      _ ≤ Real.exp (C * Real.log N ^ γ) := Real.add_one_le_exp _
+  exact ⟨h3, hlog1, hceil1, by rw [hF]; exact hkey⟩
 
 /-- LEAF: Step 4, the bookkeeping of the geometric decay: with `H = ⌈log N⌉`, the
 term `4N/(H+1)` and the sum of the exponential-sum bounds weighted by `1/(h+1)` are
