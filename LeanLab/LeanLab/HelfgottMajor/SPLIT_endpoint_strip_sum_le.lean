@@ -22,6 +22,7 @@ compares the total with the evaluated right hand side.
 namespace LeanLab.HelfgottMajor.Decomp388a
 open Real DecompJ1153
 open scoped Classical
+open scoped ComplexConjugate
 
 /-- The weighted count over the strip splits into the zeros on the real axis, the zeros with
 positive imaginary part and the zeros with negative imaginary part.  Every term is a
@@ -73,6 +74,72 @@ theorem endpoint_positive_im_sum_le (q : ℕ) [NeZero q] (χ : DirichletCharacte
         (fun ρ => 0 < ρ.im), (ZeroCount1623.mult χ ρ : ℝ)) ≤ 2 := by
   sorry
 
+/-- Raising the level of a character commutes with taking the inverse: `changeLevel` is a monoid
+homomorphism into a commutative group. -/
+private lemma changeLevel_inv {n m : ℕ} (hm : n ∣ m) (χ : DirichletCharacter ℂ n) :
+    (DirichletCharacter.changeLevel hm χ)⁻¹ = DirichletCharacter.changeLevel hm χ⁻¹ :=
+  (map_inv (DirichletCharacter.changeLevel (R := ℂ) hm) χ).symm
+
+/-- A character factors through `d` exactly when its inverse does: the inverse of a character of
+level `d` raised to level `n` is the inverse raised to level `n`. -/
+private lemma factorsThrough_inv_imp {n : ℕ} (χ : DirichletCharacter ℂ n) {d : ℕ}
+    (h : DirichletCharacter.FactorsThrough χ d) :
+    DirichletCharacter.FactorsThrough χ⁻¹ d := by
+  obtain ⟨hd, χ₀, rfl⟩ := h
+  exact ⟨hd, χ₀⁻¹, changeLevel_inv hd χ₀⟩
+
+/-- The conductor is invariant under taking the inverse. -/
+private lemma factorsThrough_inv_iff {n : ℕ} (χ : DirichletCharacter ℂ n) {d : ℕ} :
+    DirichletCharacter.FactorsThrough χ d ↔ DirichletCharacter.FactorsThrough χ⁻¹ d :=
+  ⟨factorsThrough_inv_imp χ, fun h => by simpa using factorsThrough_inv_imp χ⁻¹ h⟩
+
+/-- The conductor is invariant under taking the inverse. -/
+private lemma conductor_inv {n : ℕ} (χ : DirichletCharacter ℂ n) :
+    (χ⁻¹).conductor = χ.conductor := by
+  have h : DirichletCharacter.conductorSet χ⁻¹ = DirichletCharacter.conductorSet χ := by
+    ext d
+    simp only [DirichletCharacter.mem_conductorSet_iff]
+    exact (factorsThrough_inv_iff χ).symm
+  unfold DirichletCharacter.conductor
+  rw [h]
+
+/-- Primitivity is invariant under taking the inverse. -/
+private lemma isPrimitive_inv {q : ℕ} (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) :
+    (χ⁻¹).IsPrimitive := by
+  rw [DirichletCharacter.isPrimitive_def] at hχ ⊢
+  rwa [conductor_inv]
+
+/-- The zeros of the strip of `χ` below height `T` with negative imaginary part correspond, by
+conjugation, to the zeros of the strip of `χ⁻¹` below height `T` with positive imaginary part,
+multiplicities included.  This is the same bijection as in `bookCount_inv`, cut at the real
+axis instead of at the height `T`. -/
+private lemma neg_im_sum_eq_pos_im_sum_inv (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
+    (T : ℝ) :
+    (∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ T).toFinset.filter
+        (fun ρ => ρ.im < 0), (ZeroCount1623.mult χ ρ : ℝ)) =
+      ∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ⁻¹ T).toFinset.filter
+        (fun ρ => 0 < ρ.im), (ZeroCount1623.mult χ⁻¹ ρ : ℝ) := by
+  refine Finset.sum_nbij' (fun ρ => conj ρ) (fun ρ => conj ρ) ?_ ?_ ?_ ?_ ?_
+  · intro ρ hρ
+    simp only [Finset.mem_filter, Set.Finite.mem_toFinset] at hρ ⊢
+    exact ⟨ZeroCount1623.stripZeros_conj χ hρ.1, by simpa using hρ.2⟩
+  · intro ρ hρ
+    simp only [Finset.mem_filter, Set.Finite.mem_toFinset] at hρ ⊢
+    have h := ZeroCount1623.stripZeros_conj χ⁻¹ hρ.1
+    rw [inv_inv] at h
+    exact ⟨h, by simpa using hρ.2⟩
+  · intro ρ _
+    simp
+  · intro ρ _
+    simp
+  · intro ρ hρ
+    simp only [Finset.mem_filter, Set.Finite.mem_toFinset] at hρ
+    have h1 : ρ ≠ 1 := by
+      intro h
+      rw [h] at hρ
+      simp [ZeroCount1623.stripZeros] at hρ
+    rw [ZeroCount1623.mult_inv_conj χ h1]
+
 /-- LEAF. The zeros below the real axis.  The mirror of the positive side: below the endpoint
 height the strip carries at most two units of multiplicity at negative imaginary part, so the
 weighted sum of that piece is at most `2`.  It is a separate step because nothing pairs a zero
@@ -81,7 +148,8 @@ theorem endpoint_negative_im_sum_le (q : ℕ) [NeZero q] (χ : DirichletCharacte
     (hχ : χ.IsPrimitive) (hq : 2 * π ≤ (q : ℝ)) :
     (∑ ρ ∈ (ZeroCount1623.stripZeros_finite χ (2 * π / q)).toFinset.filter
         (fun ρ => ρ.im < 0), (ZeroCount1623.mult χ ρ : ℝ)) ≤ 2 := by
-  sorry
+  rw [neg_im_sum_eq_pos_im_sum_inv q χ (2 * π / q)]
+  exact endpoint_positive_im_sum_le q χ⁻¹ (isPrimitive_inv χ hχ) hq
 
 /-- The value of the right hand side at the endpoint height.  Because `q * (2 * π / q)` is
 `2 * π` the main term there is `-1 / q` and the error is `0.15 * log (2 * π) + 3.389`, so the
