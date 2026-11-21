@@ -1,0 +1,1 @@
+{"count": 1, "header": "Found one declaration mentioning Real.summable_pow_mul_exp_neg_nat_mul.\n", "heartbeats": 0, "hits": [{"doc": null, "module": "Mathlib.Analysis.SpecialFunctions.Exp", "name": "Real.summable_pow_mul_exp_neg_nat_mul", "type": " (k : \u2115) {r : \u211d} (hr : 0 < r) : Summable fun n => \u2191n ^ k * Real.exp (-r * \u2191n)"}]}

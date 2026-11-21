@@ -1,3 +1,4 @@
+import LeanLab.HelfgottMajor.SPLIT_principal_contour_identity
 import LeanLab.HelfgottMajor.SPLIT_explicit_formula_remainder_E
 import LeanLab.HelfgottMajor.Principal457
 import LeanLab.HelfgottMajor.Contour457
@@ -26,7 +27,7 @@ theorem principal_contour_identity (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
     Schi etaHeart χ δ x - (if q = 1 then fhat etaHeart (-δ) * x else 0) +
       lowZeros χ δ x T + highZeros χ δ x T =
         -(log (2 * π) : ℂ) - principalContour δ x := by
-  sorry
+  exact SPLIT_principal_contour_identity.principal_contour_identity_split x hx q χ hχ δ T hq hT hzeros
 
 /-- LEAF. P0014 pages 34 and 35, displays 4.12 to 4.15, with q equal to one.
 Only the continued Mellin contour integral is bounded. The factor six uses the existing
