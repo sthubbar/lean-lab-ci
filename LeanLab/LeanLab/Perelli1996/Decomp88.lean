@@ -10,6 +10,7 @@ import LeanLab.Perelli1996.LocalBounds88
 import LeanLab.Perelli1996.Linear88
 import LeanLab.Perelli1996.Decomp103
 import LeanLab.Perelli1996.Decomp103b
+import LeanLab.Perelli1996.Character632
 
 namespace LeanLab.Perelli1996.Decomp88
 open Finset Real Polynomial MeasureTheory

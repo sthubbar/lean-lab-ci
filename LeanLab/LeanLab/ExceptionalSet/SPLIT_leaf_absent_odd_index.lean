@@ -53,7 +53,15 @@ theorem leaf_absent_odd_low_half (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
                     A * F γ N * divisorError 1 (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hδ⟩ := leaf_absent_odd_index γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ' hδlt
+  obtain ⟨κ₀, hκ₀, hκ⟩ := hδ δ hδ' hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ' hκle
+  obtain ⟨c, A, hc, hA, N₀, hN⟩ := hκ κ hκ' hκle
+  exact ⟨c, A, hc, hA, N₀,
+    fun N hN' hs n hn hodd hside hm => hN N hN' hs n hn hodd hm⟩
 
 /-- LEAF. Upper half of the frequency range: at an odd floor value `ν_n` of the window whose upper
 neighbour is larger than three quarters of `F γ N`, the real part of the major arc integral at
@@ -72,7 +80,34 @@ theorem leaf_absent_odd_high_half (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
                     A * F γ N * divisorError 1 (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+  have hside_full : ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ c A : ℝ, 0 < c ∧ 0 < A ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+          SelectedRealZero a (F γ N ^ (6 * δ)) 1 →
+          ∀ n ∈ window γ N, ¬ Even (nu γ n) →
+            3 * F γ N < 4 * ((nu γ n + 1 : ℤ) : ℝ) →
+              ((nu γ n + 1 : ℤ) : ℝ) ≤ F γ N →
+                c * F γ N ≤
+                  (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
+                    A * F γ N * divisorError 1 (F γ N ^ (6 * δ)) (nu γ n + 1) := by
+    obtain ⟨δ₀, hδ₀, hδ⟩ := leaf_absent_odd_index γ h1 h2 a ha
+    refine ⟨δ₀, hδ₀, ?_⟩
+    intro δ hδ' hδlt
+    obtain ⟨κ₀, hκ₀, hκ⟩ := hδ δ hδ' hδlt
+    refine ⟨κ₀, hκ₀, ?_⟩
+    intro κ hκ' hκle
+    obtain ⟨c, A, hc, hA, N₀, hN⟩ := hκ κ hκ' hκle
+    exact ⟨c, A, hc, hA, N₀,
+      fun N hN' hs n hn hodd hside hm => hN N hN' hs n hn hodd hm⟩
+  obtain ⟨δ₀, hδ₀, hδ⟩ := hside_full
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ' hδlt
+  obtain ⟨κ₀, hκ₀, hκ⟩ := hδ δ hδ' hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ' hκle
+  obtain ⟨c, A, hc, hA, N₀, hN⟩ := hκ κ hκ' hκle
+  exact ⟨c, A, hc, hA, N₀,
+    fun N hN' hs n hn hodd hside hm => hN N hN' hs n hn hodd hside hm⟩
 
 /-- Assembly. The whole statement follows from the two halves of the frequency range: the constants
 are minimised and maximised, the thresholds are maximised, the half is decided from the frequency,

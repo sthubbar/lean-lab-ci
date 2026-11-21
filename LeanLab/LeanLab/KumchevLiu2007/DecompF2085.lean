@@ -53,7 +53,34 @@ theorem lower_margin_F2085 (B ε : ℝ) (hε : 0 < ε) (hε' : ε ≤ 7 / 18) :
     ∃ X1 : ℝ, 3 ≤ X1 ∧ ∀ X : ℝ, X1 ≤ X →
       windowY X ε ^ (2 / 3 + ε / 4) ≤
         X ^ (7 / 18 + ε) * (Real.log X ^ B) ^ (-4 : ℤ) := by
-  sorry
+  have ht := (isLittleO_log_rpow_rpow_atTop B (by positivity : (0 : ℝ) < ε / 16)).bound
+    (by norm_num : (0 : ℝ) < 1)
+  obtain ⟨X0, h0⟩ := Filter.eventually_atTop.mp ht
+  refine ⟨max 3 X0, le_max_left _ _, fun X hX => ?_⟩
+  have hX3 : 3 ≤ X := (le_max_left _ _).trans hX
+  have hX0 : 0 < X := by linarith
+  have hL : 0 < Real.log X := Real.log_pos (by linarith)
+  have hP : 0 < Real.log X ^ B := Real.rpow_pos_of_pos hL B
+  have h := h0 X ((le_max_right _ _).trans hX)
+  rw [one_mul, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos hP,
+    abs_of_pos (Real.rpow_pos_of_pos hX0 _)] at h
+  have h4 : (Real.log X ^ B) ^ 4 ≤ X ^ (ε / 4) := by
+    calc (Real.log X ^ B) ^ 4 ≤ (X ^ (ε / 16)) ^ 4 := pow_le_pow_left₀ hP.le h 4
+      _ = X ^ (ε / 4) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul hX0.le]
+        congr 1
+        push_cast
+        ring
+  unfold windowY
+  rw [← Real.rpow_mul hX0.le, zpow_neg, zpow_ofNat, ← div_eq_mul_inv,
+    le_div_iff₀ (pow_pos hP 4)]
+  have hexp : (7 / 12 + ε / 2) * (2 / 3 + ε / 4) + ε / 4 ≤ 7 / 18 + ε := by
+    nlinarith
+  calc X ^ ((7 / 12 + ε / 2) * (2 / 3 + ε / 4)) * (Real.log X ^ B) ^ 4
+      ≤ X ^ ((7 / 12 + ε / 2) * (2 / 3 + ε / 4)) * X ^ (ε / 4) := by gcongr
+    _ = X ^ ((7 / 12 + ε / 2) * (2 / 3 + ε / 4) + ε / 4) := by
+        rw [← Real.rpow_add hX0]
+    _ ≤ X ^ (7 / 18 + ε) := Real.rpow_le_rpow_of_exponent_le (by linarith) hexp
 
 /-- LEAF. The upper block bound windowY X epsilon times log X to the B
 to the minus 4 is at most windowY X epsilon over log X to the A plus 2
@@ -62,7 +89,19 @@ inequality using the log power comparison. -/
 theorem upper_margin_F2085 {X B A Y : ℝ} (hX : 3 ≤ X) (hY : 0 ≤ Y)
     (hAB : A + 2 ≤ 4 * B) :
     Y * (Real.log X ^ B) ^ (-4 : ℤ) ≤ Y / Real.log X ^ (A + 2) := by
-  sorry
+  have hX0 : 0 < X := by linarith
+  have hL1 : 1 ≤ Real.log X := by
+    rw [Real.le_log_iff_exp_le hX0]
+    exact Real.exp_one_lt_three.le.trans hX
+  have hL : 0 < Real.log X := by linarith
+  have he : (Real.log X ^ B) ^ 4 = Real.log X ^ (4 * B) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hL.le]
+    congr 1
+    push_cast
+    ring
+  rw [zpow_neg, zpow_ofNat, he, ← div_eq_mul_inv]
+  exact div_le_div_of_nonneg_left hY (Real.rpow_pos_of_pos hL _)
+    (Real.rpow_le_rpow_of_exponent_le hL1 hAB)
 
 /-- Assembly. The exact statement of Task628.rough_block_bulk, proved from
 the three leaves above with no sorry of its own. The proof picks B0 large
