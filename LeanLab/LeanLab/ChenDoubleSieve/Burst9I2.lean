@@ -4,6 +4,7 @@ import LeanLab.ChenDoubleSieve.Decomp587i
 import LeanLab.ChenDoubleSieve.Decomp587g
 import LeanLab.ChenDoubleSieve.Burst9Psi2Panels
 import LeanLab.ChenDoubleSieve.Task562Supply
+import LeanLab.ChenDoubleSieve.Decomp587h
 
 /-!
 # Burst 9: the 52 bounds `I_{2,i}(row) ≤ U`, Wu 2004 Lemma 5.2, page 26
@@ -335,8 +336,8 @@ theorem I2_r2_12 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
 One certified quadrature: Wu evaluated it numerically for Table 1, page 30. A scipy recomputation
 with the exact ω, zero below one, gave `0.015654394`; the bound adds 0.1 percent. -/
 theorem I2_r2_13 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω) :
-    I2 ω (tableParams 2) 4 ≤ (489689/31250000 : ℝ) := by
-  sorry
+    I2 ω (tableParams 2) 4 ≤ (489689/31250000 : ℝ) :=
+  LeanLab.ChenDoubleSieve.Task587.I2_r2_13_from_short hω hz
 
 /-- LEAF. Wu 2004 Lemma 5.2, page 26: the maximum over `φ ≥ 2` of the Buchstab integral over
 `D_{2,14}` defining `I_{2,14}(s, s', κ₁, κ₂, κ₃)`, for row 3 of Table 1,

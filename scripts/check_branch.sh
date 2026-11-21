@@ -85,7 +85,9 @@ if names:
     open("/tmp/LeanLabAxCheck.lean", "w").write(src)
     rc, ax = sh("lake env lean /tmp/LeanLabAxCheck.lean", cwd="LeanLab")
     ok3 = {"propext", "Classical.choice", "Quot.sound"}
-    lines = [l for l in ax.splitlines() if "depends on axioms" in l or "does not depend on any axioms" in l]
+    # MULTILINE AXIOMS, lrefresh 20261120T2300Z: Lean wraps a long axiom list over several lines, so the old one-line read missed a sorryAx
+    # or Lean.ofReduceBool on a continuation line and printed PASS; the cited-wall session saw it on initial_segment_bound 11-20.
+    lines = [" ".join(m.group(0).split()) for m in re.finditer(r"[^\n]*?(?:depends on axioms: \[[^\]]*\]|does not depend on any axioms)", ax)]
     bad = [l for l in lines if "depends on axioms" in l and not set(re.findall(r"[\w.]+", l.split("depends on axioms")[1])) <= ok3]
     rep(len(lines) >= len(names), f"#print axioms ran for {len(lines)} of {len(names)} theorems" + ("" if rc == 0 else f", lean exit {rc}"))
     # lproof 2026-11-01 PROPOSAL: was WARN for every foreign axiom, so Lean.ofReduceBool passed CI; now only a sorryAx from an open LEAF is a WARN.
