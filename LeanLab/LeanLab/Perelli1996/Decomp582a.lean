@@ -493,7 +493,31 @@ theorem leaf_short_character_mean (F : ℤ[X]) (hF : Admissible F)
       ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ Real.log N ^ B →
         characterEnergy ⌊c * N⌋₊ q (meanOrder F N H B) ≤
           K * N * Real.log N ^ (-D) := by
-  sorry
+  refine ⟨1, 3, by positivity, by norm_num, ?_⟩
+  intro N H hN hH hHu q hq1 hqP
+  let : NeZero q := ⟨by omega⟩
+  have hN0 : 0 < N := by linarith
+  have hlogN : 0 < Real.log N := by
+    have hN3 : 3 ≤ N := hN
+    have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast hN3
+    exact Real.log_pos_of_lt (by have := Real.exp_one_lt_d9; omega)
+  unfold characterEnergy
+  rw [← integral_finsetSum]
+  · have hcont : Continuous (fun η : ℝ =>
+        ∑ χ : DirichletCharacter ℂ q, ‖twistedRemainder ⌊c * N⌋₊ χ η‖ ^ 2) := by
+      apply continuous_finsetSum
+      intro χ hχ
+      exact (continuous_twistedRemainder ⌊c * N⌋₊ χ).norm.pow 2
+    have hbound : ∑ χ : DirichletCharacter ℂ q,
+        ∫ η in Set.Icc (-(1 / ((q : ℝ) * meanOrder F N H B)))
+          (1 / ((q : ℝ) * meanOrder F N H B)),
+          ‖twistedRemainder ⌊c * N⌋₊ χ η‖ ^ 2 ≤
+        Real.log N ^ (-D) := by
+      exact hDensity q (max 2 N) (1 / 2) (by norm_num) (by norm_num) (by norm_num)
+        (fun _ => ∅) (by simp)
+    exact hbound
+  · intro χ hχ
+    exact ((continuous_twistedRemainder ⌊c * N⌋₊ χ).norm.pow 2).integrableOn_Icc
 
 /-- LEAF. Pages 484 and 487, the character expansion before equation 16
 and character orthogonality in equation 31. This is only the finite
