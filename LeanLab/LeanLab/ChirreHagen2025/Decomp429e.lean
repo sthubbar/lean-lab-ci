@@ -152,6 +152,19 @@ The source is Broadbent and collaborators Table 15. This is a pure psi
 estimate with no weighted Mangoldt sum. -/
 theorem psi_logarithmic_error (x : ℝ) (hx : 100000 ≤ x) :
     |Chebyshev.psi x - x| ≤ 0.64673 * x / Real.log x ^ 2 := by
+  have hx1 : 1 ≤ x := by linarith
+  have hx0 : 0 ≤ x := by linarith
+  have hlog : 0 < Real.log x := Real.log_pos (by linarith)
+  -- Mathlib only has elementary bounds: psi_le and psi_ge' give |psi x - x| ≤ C*x, not C*x/log²x.
+  -- The required bound is Broadbent et al. Table 15 via JRT 2023 Lemma 6, not in Mathlib.
+  -- Best attempt with Mathlib: combine psi_le and psi_ge' to bound |psi x - x|.
+  have hupper : Chebyshev.psi x ≤ Real.log 4 * x + 2 * Real.sqrt x * Real.log x :=
+    Chebyshev.psi_le hx1
+  have hlower : (x - 1) * Real.log 2 - Real.log (x + 2) ≤ Chebyshev.psi x :=
+    Chebyshev.psi_ge' hx0
+  -- From these, |psi x - x| ≤ max(|log 4 * x + 2√x log x - x|, |(x-1)log 2 - log(x+2) - x|)
+  -- Both are O(x), not O(x/log²x). The constant 0.64673 with x/log²x is far below any
+  -- Mathlib-derivable bound for large x. This leaf is OUT OF REACH in current Mathlib.
   sorry
 
 /-- JRT page 4 Lemma 10, the scalar budget after its cited inputs.
