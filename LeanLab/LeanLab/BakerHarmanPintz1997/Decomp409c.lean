@@ -84,6 +84,91 @@ theorem large_prime_ratios {x m n p : ℝ} (hx : 0 < x) (hn : 0 < n)
         congr 1
         norm_num
 
+/-- The region zero test is exactly the displayed pm bound at most x to 0.4. -/
+theorem primeRegion_eq_zero_iff (x : ℝ) (m p : ℕ) :
+    primeRegion x m p = 0 ↔ ((m * p : ℕ) : ℝ) ≤ x ^ (0.4 : ℝ) := by
+  unfold primeRegion
+  split_ifs with h1 h2
+  · simp
+  · simp [h1]
+  · simp [h1]
+  · simp [h1]
+
+/-- The region one test is the middle displayed pm window. -/
+theorem primeRegion_eq_one_iff (x : ℝ) (m p : ℕ) :
+    primeRegion x m p = 1 ↔
+      ¬ ((m * p : ℕ) : ℝ) ≤ x ^ (0.4 : ℝ) ∧ ((m * p : ℕ) : ℝ) ≤ x ^ (0.46 : ℝ) := by
+  unfold primeRegion
+  split_ifs with h1 h2
+  · simp [h1]
+  · simp
+  · simp [h1, h2]
+  · simp [h1, h2]
+
+/-- The region two test is the displayed pm bound above x to 0.46. -/
+theorem primeRegion_eq_two_iff (x : ℝ) (m p : ℕ) :
+    primeRegion x m p = 2 ↔ ¬ ((m * p : ℕ) : ℝ) ≤ x ^ (0.46 : ℝ) := by
+  unfold primeRegion
+  split_ifs with h1 h2
+  · simp [h1]
+  · simp [h1]
+  · simp [h2]
+  · simp
+
+/-- The rough indicator psi is a 0 or 1 complex number, so its norm is at most one. -/
+theorem psi_norm_le (n : ℕ) (z : ℝ) : ‖psi n z‖ ≤ 1 := by
+  unfold psi
+  split_ifs <;> simp
+
+/-- Page 31 pointwise bound for the small pm range: each summand carries at most
+one unit of psi, so the norm is bounded by the divisor sum of the coefficient norms
+times the prime count of k / (m * n). -/
+theorem primePart_zero_norm_le (x : ℝ) (a b : ℕ → ℂ) (M N w z : ℝ) (k : ℕ) :
+    ‖primePart 0 x a b M N w z k‖ ≤
+      ∑ m ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+        if m * n ∣ k then ‖a m‖ * ‖b n‖ *
+          (((k / (m * n)).primeFactors.filter
+            (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+              (fun p => primeRegion x m p = 0)).card else 0 := by
+  unfold primePart
+  calc
+    _ ≤ ∑ m ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+        ‖if m * n ∣ k then a m * b n *
+          ∑ p ∈ ((k / (m * n)).primeFactors.filter
+            (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+              (fun p => primeRegion x m p = 0), psi (k / (m * n) / p) (p : ℝ)
+        else 0‖ := norm_sum_le _ _ |>.trans (Finset.sum_le_sum fun m _ => norm_sum_le _ _)
+    _ ≤ ∑ m ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+        if m * n ∣ k then ‖a m‖ * ‖b n‖ *
+          ∑ p ∈ ((k / (m * n)).primeFactors.filter
+            (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+              (fun p => primeRegion x m p = 0), ‖psi (k / (m * n) / p) (p : ℝ)‖
+        else 0 := by
+      apply Finset.sum_le_sum
+      intro m hm
+      apply Finset.sum_le_sum
+      intro n hn
+      by_cases hd : m * n ∣ k
+      · simp only [hd, ite_true, norm_mul]
+        exact mul_le_mul_of_nonneg_left (norm_sum_le _ _) (mul_nonneg (norm_nonneg _)
+          (norm_nonneg _))
+      · simp [hd]
+    _ ≤ _ := by
+      apply Finset.sum_le_sum
+      intro m hm
+      apply Finset.sum_le_sum
+      intro n hn
+      by_cases hd : m * n ∣ k
+      · simp only [hd, ite_true]
+        refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+        calc
+          _ ≤ ∑ p ∈ ((k / (m * n)).primeFactors.filter
+              (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+                (fun p => primeRegion x m p = 0), (1 : ℝ) :=
+            Finset.sum_le_sum fun p _ => psi_norm_le _ _
+          _ = _ := by simp
+      · simp [hd]
+
 /-- LEAF. OPEN. Page 31, the contribution with pm at most x to 0.4.
 This is the terminating repeated Buchstab procedure, with the divisor bounded
 coefficients treated as in the proof of Lemma13. It is only one prime error range. -/
