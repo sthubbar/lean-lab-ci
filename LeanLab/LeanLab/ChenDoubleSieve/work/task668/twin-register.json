@@ -1,0 +1,2459 @@
+[
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT",
+    "kind": "abbrev",
+    "statement": "abbrev Params4DT",
+    "plain": "A parameter packet is a vector of seventeen natural numbers."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_x",
+    "kind": "def",
+    "statement": "def Params4DT.D_x (p : Params4DT) : Nat",
+    "plain": "Select the D_x entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_p",
+    "kind": "def",
+    "statement": "def Params4DT.D_p (p : Params4DT) : Nat",
+    "plain": "Select the D_p entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.A_n",
+    "kind": "def",
+    "statement": "def Params4DT.A_n (p : Params4DT) : Nat",
+    "plain": "Select the A_n entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.B_n",
+    "kind": "def",
+    "statement": "def Params4DT.B_n (p : Params4DT) : Nat",
+    "plain": "Select the B_n entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.C_n",
+    "kind": "def",
+    "statement": "def Params4DT.C_n (p : Params4DT) : Nat",
+    "plain": "Select the C_n entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.S_v",
+    "kind": "def",
+    "statement": "def Params4DT.S_v (p : Params4DT) : Nat",
+    "plain": "Select the S_v entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.S_3",
+    "kind": "def",
+    "statement": "def Params4DT.S_3 (p : Params4DT) : Nat",
+    "plain": "Select the S_3 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.S_4",
+    "kind": "def",
+    "statement": "def Params4DT.S_4 (p : Params4DT) : Nat",
+    "plain": "Select the S_4 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_x2",
+    "kind": "def",
+    "statement": "def Params4DT.D_x2 (p : Params4DT) : Nat",
+    "plain": "Select the D_x2 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_x4",
+    "kind": "def",
+    "statement": "def Params4DT.D_x4 (p : Params4DT) : Nat",
+    "plain": "Select the D_x4 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_x5",
+    "kind": "def",
+    "statement": "def Params4DT.D_x5 (p : Params4DT) : Nat",
+    "plain": "Select the D_x5 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_x6",
+    "kind": "def",
+    "statement": "def Params4DT.D_x6 (p : Params4DT) : Nat",
+    "plain": "Select the D_x6 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_p2",
+    "kind": "def",
+    "statement": "def Params4DT.D_p2 (p : Params4DT) : Nat",
+    "plain": "Select the D_p2 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_p3",
+    "kind": "def",
+    "statement": "def Params4DT.D_p3 (p : Params4DT) : Nat",
+    "plain": "Select the D_p3 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.D_p4",
+    "kind": "def",
+    "statement": "def Params4DT.D_p4 (p : Params4DT) : Nat",
+    "plain": "Select the D_p4 entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.B_sc",
+    "kind": "def",
+    "statement": "def Params4DT.B_sc (p : Params4DT) : Nat",
+    "plain": "Select the B_sc entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.C_sc",
+    "kind": "def",
+    "statement": "def Params4DT.C_sc (p : Params4DT) : Nat",
+    "plain": "Select the C_sc entry from the fixed order parameter vector."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "ceilDiv",
+    "kind": "def",
+    "statement": "def ceilDiv (a b : Nat) : Nat",
+    "plain": "The rounded quotient is the natural quotient of a plus b minus one by b."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "subPow3",
+    "kind": "def",
+    "statement": "def subPow3 (r h : Nat) : Nat",
+    "plain": "Cube the nonnegative natural difference between r and h."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "subPow4",
+    "kind": "def",
+    "statement": "def subPow4 (r h : Nat) : Nat",
+    "plain": "Raise the nonnegative natural difference between r and h to the fourth power."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut3Pos",
+    "kind": "def",
+    "statement": "def cut3Pos (h0 h1 h2 r : Nat) : Nat",
+    "plain": "Sum the four positive terms in the three dimensional truncated cube formula."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut3Neg",
+    "kind": "def",
+    "statement": "def cut3Neg (h0 h1 h2 r : Nat) : Nat",
+    "plain": "Sum the four negative terms in the three dimensional truncated cube formula."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut3Num",
+    "kind": "def",
+    "statement": "def cut3Num (p : Params4DT) (dx0 dx1 dx2 r : Nat) : Nat",
+    "plain": "Compute the scaled three dimensional volume below the affine cut, using the full volume when the cut contains the box."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "ramp3Pos",
+    "kind": "def",
+    "statement": "def ramp3Pos (h0 h1 h2 r : Nat) : Nat",
+    "plain": "Sum the four positive terms in the integrated three dimensional truncated power formula."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "ramp3Neg",
+    "kind": "def",
+    "statement": "def ramp3Neg (h0 h1 h2 r : Nat) : Nat",
+    "plain": "Sum the four negative terms in the integrated three dimensional truncated power formula."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "ramp3Num",
+    "kind": "def",
+    "statement": "def ramp3Num (p : Params4DT) (dx0 dx1 dx2 r : Nat) : Nat",
+    "plain": "Compute the scaled integral of the positive affine ramp over a three dimensional box."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut4Pos",
+    "kind": "def",
+    "statement": "def cut4Pos (h0 h1 h2 h3 r : Nat) : Nat",
+    "plain": "Sum the eight positive terms in the four dimensional truncated fourth power formula."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut4Neg",
+    "kind": "def",
+    "statement": "def cut4Neg (h0 h1 h2 h3 r : Nat) : Nat",
+    "plain": "Sum the eight negative terms in the four dimensional truncated fourth power formula."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut4Num",
+    "kind": "def",
+    "statement": "def cut4Num (p : Params4DT) (dx0 dx1 dx2 dx3 r : Nat) : Nat",
+    "plain": "Compute the scaled four dimensional volume below the affine cut."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "CellKind",
+    "kind": "inductive",
+    "statement": "inductive CellKind where\n  | box | tri01 | tri12 | simp",
+    "plain": "The cell shapes are a box, a triangle in coordinates zero and one, a triangle in coordinates one and two, and an ordered simplex."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "BoxTree3",
+    "kind": "inductive",
+    "statement": "inductive BoxTree3 where\n  | lf\n  | s0 (l r : BoxTree3)\n  | s1 (l r : BoxTree3)\n  | s2 (l r : BoxTree3)\n  | sd01 (c0 m c1 : BoxTree3)\n  | sd12 (c0 m c1 : BoxTree3)\n  | sd012 (c0 m01 m12 c1 : BoxTree3)",
+    "plain": "A three dimensional subdivision tree records leaves and binary, triangular and simplex subdivisions."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "BoxTree4",
+    "kind": "inductive",
+    "statement": "inductive BoxTree4 where\n  | lf\n  | s0 (l r : BoxTree4)\n  | s1 (l r : BoxTree4)\n  | s2 (l r : BoxTree4)\n  | s3 (l r : BoxTree4)\n  | sd01 (c0 m c1 : BoxTree4)\n  | sd12 (c0 m c1 : BoxTree4)\n  | sd012 (c0 m01 m12 c1 : BoxTree4)",
+    "plain": "A four dimensional subdivision tree records leaves and subdivisions of the ordered first three coordinates and the fourth interval."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "tree3Valid",
+    "kind": "def",
+    "statement": "def tree3Valid : CellKind → BoxTree3 → Bool\n  | _, .lf => true\n  | .box, .s0 l r => tree3Valid .box l && tree3Valid .box r\n  | .tri12, .s0 l r => tree3Valid .tri12 l && tree3Valid .tri12 r\n  | .box, .s1 l r => tree3Valid .box l && tree3Valid .box r\n  | .box, .s2 l r => tree3Valid .box l && tree3Valid .box r\n  | .tri01, .s2 l r => tree3Valid .tri01 l && tree3Valid .tri01 r\n  | .tri01, .sd01 c0 m c1 => tree3Valid .tri01 c0 && tree3Valid .box m && tree3Valid .tri01 c1\n  | .tri12, .sd12 c0 m c1 => tree3Valid .tri12 c0 && tree3Valid .box m && tree3Valid .tri12 c1\n  | .simp, .sd012 c0 m01 m12 c1 =>\n      tree3Valid .simp c0 && tree3Valid .tri01 m01 && tree3Valid .tri12 m12 && tree3Valid .simp c1\n  | _, _ => false",
+    "plain": "Check that each three dimensional subdivision matches its parent cell shape."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "tree4Valid",
+    "kind": "def",
+    "statement": "def tree4Valid : CellKind → BoxTree4 → Bool\n  | _, .lf => true\n  | .box, .s0 l r => tree4Valid .box l && tree4Valid .box r\n  | .tri12, .s0 l r => tree4Valid .tri12 l && tree4Valid .tri12 r\n  | .box, .s1 l r => tree4Valid .box l && tree4Valid .box r\n  | .box, .s2 l r => tree4Valid .box l && tree4Valid .box r\n  | .tri01, .s2 l r => tree4Valid .tri01 l && tree4Valid .tri01 r\n  | knd, .s3 l r => tree4Valid knd l && tree4Valid knd r\n  | .tri01, .sd01 c0 m c1 => tree4Valid .tri01 c0 && tree4Valid .box m && tree4Valid .tri01 c1\n  | .tri12, .sd12 c0 m c1 => tree4Valid .tri12 c0 && tree4Valid .box m && tree4Valid .tri12 c1\n  | .simp, .sd012 c0 m01 m12 c1 =>\n      tree4Valid .simp c0 && tree4Valid .tri01 m01 && tree4Valid .tri12 m12 && tree4Valid .simp c1\n  | _, _ => false",
+    "plain": "Check that each four dimensional subdivision matches its parent cell shape."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "facDen",
+    "kind": "def",
+    "statement": "def facDen : CellKind → Nat\n  | .box => 1\n  | .tri01 => 2\n  | .tri12 => 2\n  | .simp => 6",
+    "plain": "The volume symmetry divisor is one for a box, two for a triangle, and six for the ordered simplex."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "nVerts3",
+    "kind": "def",
+    "statement": "def nVerts3 : CellKind → Nat\n  | .box => 8\n  | .tri01 => 6\n  | .tri12 => 6\n  | .simp => 4",
+    "plain": "The vertex count is eight for a box, six for a triangular prism, and four for a simplex."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "sumVerts3",
+    "kind": "def",
+    "statement": "def sumVerts3 (f : Nat → Nat → Nat → Nat) :\n    CellKind → Nat → Nat → Nat → Nat → Nat → Nat → Nat\n  | .box, a0, b0, a1, b1, a2, b2 =>\n      f a0 a1 a2 + f a0 a1 b2 + f a0 b1 a2 + f a0 b1 b2 +\n      f b0 a1 a2 + f b0 a1 b2 + f b0 b1 a2 + f b0 b1 b2\n  | .tri01, a0, b0, _, _, a2, b2 =>\n      f a0 a0 a2 + f a0 a0 b2 + f a0 b0 a2 + f a0 b0 b2 + f b0 b0 a2 + f b0 b0 b2\n  | .tri12, a0, b0, a1, b1, _, _ =>\n      f a0 a1 a1 + f b0 a1 a1 + f a0 a1 b1 + f b0 a1 b1 + f a0 b1 b1 + f b0 b1 b1\n  | .simp, a0, b0, _, _, _, _ =>\n      f a0 a0 a0 + f a0 a0 b0 + f a0 b0 b0 + f b0 b0 b0",
+    "plain": "Sum the supplied natural valued function over the vertices of the selected three dimensional shape."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "eval4Leaf",
+    "kind": "def",
+    "statement": "def eval4Leaf (p : Params4DT) (p_n : Nat) (knd : CellKind)\n    (n0a n0b n1a n1b n2a n2b n3a n3b : Nat) : Nat",
+    "plain": "Compute the natural value used to certify a four dimensional leaf. Soundness uses the explicit parameter, cell and parameter range conditions."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "eval4TransLeaf",
+    "kind": "def",
+    "statement": "def eval4TransLeaf (p : Params4DT) (pa_n : Nat) (knd : CellKind)\n    (n0a n0b n1a n1b n2a n2b n3a n3b : Nat) : Nat",
+    "plain": "Compute the natural value used to certify a four dimensional leaf beyond a fixed transition parameter."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "evalTree4",
+    "kind": "def",
+    "statement": "def evalTree4 (lfFn : CellKind → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat) :\n    CellKind → BoxTree4 → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat\n  | knd, .lf, a0, b0, a1, b1, a2, b2, a3, b3 => lfFn knd a0 b0 a1 b1 a2 b2 a3 b3\n  | knd, .s0 l r, a0, b0, a1, b1, a2, b2, a3, b3 =>\n      let m := (a0 + b0) / 2\n      evalTree4 lfFn knd l a0 m a1 b1 a2 b2 a3 b3 + evalTree4 lfFn knd r m b0 a1 b1 a2 b2 a3 b3\n  | knd, .s1 l r, a0, b0, a1, b1, a2, b2, a3, b3 =>\n      let m := (a1 + b1) / 2\n      evalTree4 lfFn knd l a0 b0 a1 m a2 b2 a3 b3 + evalTree4 lfFn knd r a0 b0 m b1 a2 b2 a3 b3\n  | knd, .s2 l r, a0, b0, a1, b1, a2, b2, a3, b3 =>\n      let m := (a2 + b2) / 2\n      evalTree4 lfFn knd l a0 b0 a1 b1 a2 m a3 b3 + evalTree4 lfFn knd r a0 b0 a1 b1 m b2 a3 b3\n  | knd, .s3 l r, a0, b0, a1, b1, a2, b2, a3, b3 =>\n      let m := (a3 + b3) / 2\n      evalTree4 lfFn knd l a0 b0 a1 b1 a2 b2 a3 m + evalTree4 lfFn knd r a0 b0 a1 b1 a2 b2 m b3\n  | _, .sd01 c0 md c1, a, b, _, _, a2, b2, a3, b3 =>\n      let m := (a + b) / 2\n      evalTree4 lfFn .tri01 c0 a m a m a2 b2 a3 b3 +\n      evalTree4 lfFn .box md a m m b a2 b2 a3 b3 +\n      evalTree4 lfFn .tri01 c1 m b m b a2 b2 a3 b3\n  | _, .sd12 c0 md c1, a0, b0, a, b, _, _, a3, b3 =>\n      let m := (a + b) / 2\n      evalTree4 lfFn .tri12 c0 a0 b0 a m a m a3 b3 +\n      evalTree4 lfFn .box md a0 b0 a m m b a3 b3 +\n      evalTree4 lfFn .tri12 c1 a0 b0 m b m b a3 b3\n  | _, .sd012 c0 m01 m12 c1, a, b, _, _, _, _, a3, b3 =>\n      let m := (a + b) / 2\n      evalTree4 lfFn .simp c0 a m a m a m a3 b3 +\n      evalTree4 lfFn .tri01 m01 a m a m m b a3 b3 +\n      evalTree4 lfFn .tri12 m12 a m m b m b a3 b3 +\n      evalTree4 lfFn .simp c1 m b m b m b a3 b3",
+    "plain": "Evaluate the supplied natural leaf function along the four dimensional tree using the stated subdivision rules."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "addPair",
+    "kind": "def",
+    "statement": "def addPair (x y : Nat × Nat) : Nat × Nat",
+    "plain": "Add pairs of natural numbers coordinate by coordinate."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "evalMpLeaf",
+    "kind": "def",
+    "statement": "def evalMpLeaf (p : Params4DT) (pa_n pb_n : Nat) (knd : CellKind)\n    (n0a n0b n1a n1b n2a n2b : Nat) : Nat × Nat",
+    "plain": "Evaluate the directed positive and negative bounds used for decreasing parameter intervals."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "evalMmLeaf",
+    "kind": "def",
+    "statement": "def evalMmLeaf (p : Params4DT) (pa_n pb_n : Nat) (knd : CellKind)\n    (n0a n0b n1a n1b n2a n2b : Nat) : Nat × Nat",
+    "plain": "Evaluate the directed positive and negative bounds used for increasing parameter intervals."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "evalTree3",
+    "kind": "def",
+    "statement": "def evalTree3 (lfFn : CellKind → Nat → Nat → Nat → Nat → Nat → Nat → Nat × Nat) :\n    CellKind → BoxTree3 → Nat → Nat → Nat → Nat → Nat → Nat → Nat × Nat\n  | knd, .lf, a0, b0, a1, b1, a2, b2 => lfFn knd a0 b0 a1 b1 a2 b2\n  | knd, .s0 l r, a0, b0, a1, b1, a2, b2 =>\n      let m := (a0 + b0) / 2\n      addPair (evalTree3 lfFn knd l a0 m a1 b1 a2 b2) (evalTree3 lfFn knd r m b0 a1 b1 a2 b2)\n  | knd, .s1 l r, a0, b0, a1, b1, a2, b2 =>\n      let m := (a1 + b1) / 2\n      addPair (evalTree3 lfFn knd l a0 b0 a1 m a2 b2) (evalTree3 lfFn knd r a0 b0 m b1 a2 b2)\n  | knd, .s2 l r, a0, b0, a1, b1, a2, b2 =>\n      let m := (a2 + b2) / 2\n      addPair (evalTree3 lfFn knd l a0 b0 a1 b1 a2 m) (evalTree3 lfFn knd r a0 b0 a1 b1 m b2)\n  | _, .sd01 c0 md c1, a, b, _, _, a2, b2 =>\n      let m := (a + b) / 2\n      addPair (addPair (evalTree3 lfFn .tri01 c0 a m a m a2 b2)\n                       (evalTree3 lfFn .box md a m m b a2 b2))\n              (evalTree3 lfFn .tri01 c1 m b m b a2 b2)\n  | _, .sd12 c0 md c1, a0, b0, a, b, _, _ =>\n      let m := (a + b) / 2\n      addPair (addPair (evalTree3 lfFn .tri12 c0 a0 b0 a m a m)\n                       (evalTree3 lfFn .box md a0 b0 a m m b))\n              (evalTree3 lfFn .tri12 c1 a0 b0 m b m b)\n  | _, .sd012 c0 m01 m12 c1, a, b, _, _, _, _ =>\n      let m := (a + b) / 2\n      addPair (addPair (evalTree3 lfFn .simp c0 a m a m a m)\n                       (evalTree3 lfFn .tri01 m01 a m a m m b))\n              (addPair (evalTree3 lfFn .tri12 m12 a m m b m b)\n                       (evalTree3 lfFn .simp c1 m b m b m b))\n\nnoncomputable section\n\nset_option quotPrecheck false in\nnotation \"IsBuchstabCore\" => (fun (ω : ℝ → ℝ) =>\n  ContinuousOn ω (Set.Ici 1) ∧\n  (∀ u, 1 ≤ u → u ≤ 2 → ω u = 1 / u) ∧\n  (∀ u, 2 < u → HasDerivAt (fun t => t * ω t) (ω (u - 1)) u) ∧\n  (∀ u, u < 1 → ω u = 0))",
+    "plain": "Evaluate and combine natural pairs along the three dimensional tree using the stated subdivision rules."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.A_R",
+    "kind": "def",
+    "statement": "def Params4DT.A_R (p : Params4DT) : ℝ",
+    "plain": "The real endpoint is its natural numerator divided by the coordinate grid denominator."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.B_R",
+    "kind": "def",
+    "statement": "def Params4DT.B_R (p : Params4DT) : ℝ",
+    "plain": "The real endpoint is its natural numerator divided by the coordinate grid denominator."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "Params4DT.C_R",
+    "kind": "def",
+    "statement": "def Params4DT.C_R (p : Params4DT) : ℝ",
+    "plain": "The real endpoint is its natural numerator divided by the coordinate grid denominator."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cell3Set",
+    "kind": "def",
+    "statement": "def cell3Set (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) : Set (Fin 3 → ℝ)",
+    "plain": "Define the interval and order constraints for the selected shape. A triangle uses one shared interval for its ordered coordinate pair."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cell4Set",
+    "kind": "def",
+    "statement": "def cell4Set (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) : Set (Fin 4 → ℝ)",
+    "plain": "Define the selected first three coordinate cell and an independent fourth closed interval."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "equivFin4_3",
+    "kind": "def",
+    "statement": "def equivFin4_3 : (Fin 4 → ℝ) ≃ᵐ ℝ × (Fin 3 → ℝ)",
+    "plain": "Separate the last coordinate of a four coordinate vector from the first three coordinates."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "sumVerts3R",
+    "kind": "def",
+    "statement": "def sumVerts3R (f : (Fin 3 → ℝ) → ℝ) :\n    CellKind → ℝ → ℝ → ℝ → ℝ → ℝ → ℝ → ℝ\n  | .box, a0, b0, a1, b1, a2, b2 =>\n      f ![a0, a1, a2] + f ![a0, a1, b2] + f ![a0, b1, a2] + f ![a0, b1, b2] +\n      f ![b0, a1, a2] + f ![b0, a1, b2] + f ![b0, b1, a2] + f ![b0, b1, b2]\n  | .tri01, a0, b0, _, _, a2, b2 =>\n      f ![a0, a0, a2] + f ![a0, a0, b2] + f ![a0, b0, a2] + f ![a0, b0, b2] +\n      f ![b0, b0, a2] + f ![b0, b0, b2]\n  | .tri12, a0, b0, a1, b1, _, _ =>\n      f ![a0, a1, a1] + f ![b0, a1, a1] + f ![a0, a1, b1] + f ![b0, a1, b1] +\n      f ![a0, b1, b1] + f ![b0, b1, b1]\n  | .simp, a0, b0, _, _, _, _ =>\n      f ![a0, a0, a0] + f ![a0, a0, b0] + f ![a0, b0, b0] + f ![b0, b0, b0]",
+    "plain": "Sum the supplied real valued function over the vertices of the selected three dimensional shape."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "centroid3R",
+    "kind": "def",
+    "statement": "def centroid3R : CellKind → ℝ → ℝ → ℝ → ℝ → ℝ → ℝ → (Fin 3 → ℝ)\n  | .box, a0, b0, a1, b1, a2, b2 => ![(a0 + b0) / 2, (a1 + b1) / 2, (a2 + b2) / 2]\n  | .tri01, a0, b0, _, _, a2, b2 => ![(2 * a0 + b0) / 3, (a0 + 2 * b0) / 3, (a2 + b2) / 2]\n  | .tri12, a0, b0, a1, b1, _, _ => ![(a0 + b0) / 2, (2 * a1 + b1) / 3, (a1 + 2 * b1) / 3]\n  | .simp, a0, b0, _, _, _, _ => ![(3 * a0 + b0) / 4, (a0 + b0) / 2, (a0 + 3 * b0) / 4]\n\nset_option quotPrecheck false in\nnotation \"cell3Ok\" => (fun (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) =>\n  a0 ≤ b0 ∧ a1 ≤ b1 ∧ a2 ≤ b2 ∧\n  match knd with\n  | .box => True\n  | .tri01 => a0 = a1 ∧ b0 = b1\n  | .tri12 => a1 = a2 ∧ b1 = b2\n  | .simp => a0 = a1 ∧ b0 = b1 ∧ a1 = a2 ∧ b1 = b2)",
+    "plain": "Compute the standard affine vertex barycenter formula for the selected cell shape."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut3SumR",
+    "kind": "def",
+    "statement": "def cut3SumR (h0 h1 h2 R : ℝ) : ℝ",
+    "plain": "Define the alternating sum of eight positive part cubes at the subset sums of three shifts."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "ramp3SumR",
+    "kind": "def",
+    "statement": "def ramp3SumR (h0 h1 h2 R : ℝ) : ℝ",
+    "plain": "Define the alternating sum of eight positive part fourth powers at the subset sums of three shifts."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "cut4SumR",
+    "kind": "def",
+    "statement": "def cut4SumR (h0 h1 h2 h3 R : ℝ) : ℝ",
+    "plain": "Define the alternating sum of sixteen positive part fourth powers at the subset sums of four shifts."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "I_fn",
+    "kind": "def",
+    "statement": "def I_fn (p : Params4DT) (ω : ℝ → ℝ) (φ : ℝ) : ℝ",
+    "plain": "Integrate omega of the affine quotient over the ordered four dimensional domain, divided by the product of all coordinates and another factor of coordinate two."
+  },
+  {
+    "file": "Buchstab4DTCore",
+    "name": "G_fn",
+    "kind": "def",
+    "statement": "def G_fn (p : Params4DT) (φ : ℝ) (y : Fin 3 → ℝ) : ℝ",
+    "plain": "Integrate the reciprocal of the fourth coordinate times the remaining affine difference up to the clipped support boundary."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab_integral_eq",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_integral_eq {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {a b : ℝ} (ha : 2 ≤ a) (hab : a ≤ b) :\n    b * ω b - a * ω a = ∫ s in (a - 1)..(b - 1), ω s",
+    "plain": "The difference of endpoint values of u times omega u equals the integral of omega on the interval shifted down by one."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab_nonneg_on_Icc",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_nonneg_on_Icc {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) :\n    ∀ n : ℕ, ∀ u : ℝ, 1 ≤ u → u ≤ (n : ℝ) + 2 → 0 ≤ ω u",
+    "plain": "The Buchstab function is nonnegative on every interval from one to n plus two."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab_nonneg",
+    "kind": "lemma",
+    "statement": "lemma buchstab_nonneg {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    (u : ℝ) : 0 ≤ ω u",
+    "plain": "The zero extended Buchstab function is nonnegative everywhere."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab_max_propagate",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_max_propagate {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) {a M : ℝ}\n    (ha : 2 ≤ a) (hM : ∀ u ∈ Icc a (a + 1), ω u ≤ M) :\n    ∀ n : ℕ, ∀ u ∈ Icc a (a + 1 + (n : ℝ)), ω u ≤ M",
+    "plain": "An upper bound on one unit interval above two propagates to all later unit intervals."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab_le_two_thirds",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_le_two_thirds {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {u : ℝ} (hu : 2 ≤ u) : ω u ≤ 2 / 3",
+    "plain": "The Buchstab function is at most two thirds for every argument at least two."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab_le_max_inv_two_thirds",
+    "kind": "lemma",
+    "statement": "lemma buchstab_le_max_inv_two_thirds {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {u : ℝ} (hu : 1 ≤ u) : ω u ≤ max (1 / u) (2 / 3)",
+    "plain": "For arguments at least one, the Buchstab function is at most the larger of the reciprocal argument and two thirds."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab_le_one",
+    "kind": "lemma",
+    "statement": "lemma buchstab_le_one {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    (u : ℝ) : ω u ≤ 1",
+    "plain": "The zero extended Buchstab function is at most one everywhere."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "setIntegral_prod_symm'",
+    "kind": "lemma",
+    "statement": "private lemma setIntegral_prod_symm' {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]\n    {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]\n    {s : Set α} {t : Set β} (f : α × β → ℝ) (hf : IntegrableOn f (s ×ˢ t) (μ.prod ν)) :\n    ∫ z in s ×ˢ t, f z ∂(μ.prod ν) = ∫ y in t, ∫ x in s, f (x, y) ∂μ ∂ν",
+    "plain": "An integrable function on a product set has the iterated integral with the second coordinate integrated outside."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "integrableOn_setIntegral_right",
+    "kind": "lemma",
+    "statement": "private lemma integrableOn_setIntegral_right {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]\n    {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]\n    {s : Set α} {t : Set β} {f : α × β → ℝ} (hf : IntegrableOn f (s ×ˢ t) (μ.prod ν)) :\n    IntegrableOn (fun x => ∫ y in t, f (x, y) ∂ν) s μ",
+    "plain": "Integrating an integrable function in the second coordinate gives an integrable function of the first coordinate."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "integrableOn_setIntegral_left",
+    "kind": "lemma",
+    "statement": "private lemma integrableOn_setIntegral_left {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]\n    {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]\n    {s : Set α} {t : Set β} {f : α × β → ℝ} (hf : IntegrableOn f (s ×ˢ t) (μ.prod ν)) :\n    IntegrableOn (fun y => ∫ x in s, f (x, y) ∂μ) t ν",
+    "plain": "Integrating an integrable function in the first coordinate gives an integrable function of the second coordinate."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "integrableOn_indicator_of_subset",
+    "kind": "lemma",
+    "statement": "private lemma integrableOn_indicator_of_subset {α : Type*} [MeasurableSpace α] {μ : Measure α}\n    {s t : Set α} {f : α → ℝ} (ht : MeasurableSet t) (hts : t ⊆ s) (hf : IntegrableOn f t μ) :\n    IntegrableOn (t.indicator f) s μ",
+    "plain": "The indicator of an integrable function on a measurable subset is integrable on the larger set."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "sw3",
+    "kind": "def",
+    "statement": "private def sw3 : ℝ × (ℝ × ℝ) ≃ᵐ ℝ × (ℝ × ℝ)",
+    "plain": "Cycle the nested triple from x, y, z to z, x, y."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "sw3_apply",
+    "kind": "lemma",
+    "statement": "private lemma sw3_apply (x y z : ℝ) : sw3 (x, (y, z)) = (z, (x, y))",
+    "plain": "The coordinate exchange acts by the stated permutation of the triple."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "sw3_symm_apply",
+    "kind": "lemma",
+    "statement": "private lemma sw3_symm_apply (z x y : ℝ) : sw3.symm (z, (x, y)) = (x, (y, z))",
+    "plain": "The inverse coordinate exchange sends the nested triple z, x, y to x, y, z."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "measurePreserving_sw3",
+    "kind": "lemma",
+    "statement": "private lemma measurePreserving_sw3 :\n    MeasurePreserving sw3 (volume.prod (volume.prod volume)) (volume.prod (volume.prod volume))",
+    "plain": "The cyclic coordinate exchange preserves product Lebesgue measure."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "convex_tri2",
+    "kind": "lemma",
+    "statement": "private lemma convex_tri2 (a b : ℝ) :\n    Convex ℝ {p : ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2 ∈ Icc a b ∧ p.1 ≤ p.2}",
+    "plain": "The closed triangle given by a at most x at most y at most b is convex."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "convex_simp3",
+    "kind": "lemma",
+    "statement": "private lemma convex_simp3 (a b : ℝ) :\n    Convex ℝ {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2}",
+    "plain": "The closed ordered three dimensional simplex between a and b is convex."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "convexOn_inv_prod",
+    "kind": "lemma",
+    "statement": "lemma convexOn_inv_prod {E : Type*} [AddCommGroup E] [Module ℝ E]\n    {S : Set E} (hS : Convex ℝ S) {k : ℕ} (L : Fin k → E → ℝ)\n    (haff : ∀ i, ∀ x ∈ S, ∀ y ∈ S, ∀ a b : ℝ, 0 ≤ a → 0 ≤ b → a + b = 1 →\n      L i (a • x + b • y) = a * L i x + b * L i y)\n    (hpos : ∀ i, ∀ x ∈ S, 0 < L i x) :\n    ConvexOn ℝ S (fun x => (∏ i : Fin k, L i x)⁻¹)",
+    "plain": "The reciprocal of a product of positive affine functions is convex on a convex set."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "hh1_Icc",
+    "kind": "lemma",
+    "statement": "lemma hh1_Icc {a b : ℝ} (hab : a ≤ b) {f : ℝ → ℝ}\n    (hconv : ConvexOn ℝ (Icc a b) f) (hcont : ContinuousOn f (Icc a b)) :\n    ∫ x in a..b, f x ≤ ((b - a) / 2) * (f a + f b)",
+    "plain": "For a continuous convex function, the interval integral is at most the interval length times the average of the two endpoint values."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "jensen1_Icc",
+    "kind": "lemma",
+    "statement": "lemma jensen1_Icc {a b : ℝ} (hab : a ≤ b) {f : ℝ → ℝ}\n    (hconv : ConvexOn ℝ (Icc a b) f) (hcont : ContinuousOn f (Icc a b)) :\n    (b - a) * f ((a + b) / 2) ≤ ∫ x in a..b, f x",
+    "plain": "For a continuous convex function, the interval integral is at least the interval length times its midpoint value."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "hh2_tri",
+    "kind": "lemma",
+    "statement": "private lemma hh2_tri {a b : ℝ} (hab : a ≤ b) {f : ℝ × ℝ → ℝ}\n    (hconv : ConvexOn ℝ {p : ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2 ∈ Icc a b ∧ p.1 ≤ p.2} f)\n    (hcont : ContinuousOn f {p : ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2 ∈ Icc a b ∧ p.1 ≤ p.2}) :\n    ∫ y in a..b, ∫ x in a..y, f (x, y) ≤\n      ((b - a) ^ 2 / 6) * (f (a, a) + f (a, b) + f (b, b))",
+    "plain": "For a continuous convex function on a triangle, its integral is at most the triangle area times the average of its three vertex values."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "tri2_cyclic_integral_eq",
+    "kind": "lemma",
+    "statement": "private lemma tri2_cyclic_integral_eq {a b : ℝ} (hab : a ≤ b) {f : ℝ × ℝ → ℝ}\n    (hcont : ContinuousOn f {p : ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2 ∈ Icc a b ∧ p.1 ≤ p.2}) :\n    ∫ y in a..b, ∫ x in a..y, f (a + b - y, b + x - y) =\n      ∫ y in a..b, ∫ x in a..y, f (x, y)",
+    "plain": "Cyclically permuting the barycentric coordinates of a triangle preserves the integral of a continuous function."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "jensen2_tri",
+    "kind": "lemma",
+    "statement": "private lemma jensen2_tri {a b : ℝ} (hab : a ≤ b) {f : ℝ × ℝ → ℝ}\n    (hconv : ConvexOn ℝ {p : ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2 ∈ Icc a b ∧ p.1 ≤ p.2} f)\n    (hcont : ContinuousOn f {p : ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2 ∈ Icc a b ∧ p.1 ≤ p.2}) :\n    ((b - a) ^ 2 / 2) * f ((2 * a + b) / 3, (a + 2 * b) / 3) ≤\n      ∫ y in a..b, ∫ x in a..y, f (x, y)",
+    "plain": "For a continuous convex function on a triangle, its integral is at least its value at the barycenter times the triangle area."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "hh3_simp",
+    "kind": "lemma",
+    "statement": "private lemma hh3_simp {a b : ℝ} (hab : a ≤ b) {f : ℝ × ℝ × ℝ → ℝ}\n    (hconv : ConvexOn ℝ {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2} f)\n    (hcont : ContinuousOn f {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2}) :\n    ∫ z in a..b, ∫ y in a..z, ∫ x in a..y, f (x, y, z) ≤\n      ((b - a) ^ 3 / 24) * (f (a, a, a) + f (a, a, b) + f (a, b, b) + f (b, b, b))",
+    "plain": "For a continuous convex function on an ordered three dimensional simplex, its integral is at most the simplex volume times the average of its four vertex values."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "simp3_eq_setIntegral",
+    "kind": "lemma",
+    "statement": "private lemma simp3_eq_setIntegral {a b : ℝ} (hab : a ≤ b) {g : ℝ × ℝ × ℝ → ℝ}\n    (hg : ContinuousOn g {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2}) :\n    ∫ z in a..b, ∫ y in a..z, ∫ x in a..y, g (x, y, z) =\n      ∫ p in {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2},\n        g p ∂(volume.prod (volume.prod volume))",
+    "plain": "The nested interval integral on the ordered simplex equals its set integral for a continuous integrand."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "simp3_cyclic_integral_eq",
+    "kind": "lemma",
+    "statement": "private lemma simp3_cyclic_integral_eq {a b : ℝ} (hab : a ≤ b) {f : ℝ × ℝ × ℝ → ℝ}\n    (hcont : ContinuousOn f {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2}) :\n    ∫ z in a..b, ∫ y in a..z, ∫ x in a..y, f (a + b - z, b + x - z, b + y - z) =\n      ∫ z in a..b, ∫ y in a..z, ∫ x in a..y, f (x, y, z)",
+    "plain": "Cyclically permuting simplex barycentric coordinates preserves the integral of a continuous function."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "jensen3_simp",
+    "kind": "lemma",
+    "statement": "private lemma jensen3_simp {a b : ℝ} (hab : a ≤ b) {f : ℝ × ℝ × ℝ → ℝ}\n    (hconv : ConvexOn ℝ {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2} f)\n    (hcont : ContinuousOn f {p : ℝ × ℝ × ℝ | p.1 ∈ Icc a b ∧ p.2.1 ∈ Icc a b ∧ p.2.2 ∈ Icc a b ∧ p.1 ≤ p.2.1 ∧ p.2.1 ≤ p.2.2}) :\n    ((b - a) ^ 3 / 6) * f ((3 * a + b) / 4, (a + b) / 2, (a + 3 * b) / 4) ≤\n      ∫ z in a..b, ∫ y in a..z, ∫ x in a..y, f (x, y, z)",
+    "plain": "For a continuous convex function on a three dimensional simplex, its integral is at least the simplex volume times its value at the barycenter."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "volume_preserving_equivFin4_3",
+    "kind": "lemma",
+    "statement": "lemma volume_preserving_equivFin4_3 :\n    MeasurePreserving equivFin4_3 (volume : Measure (Fin 4 → ℝ))\n      ((volume : Measure ℝ).prod (volume : Measure (Fin 3 → ℝ)))",
+    "plain": "Separating the last coordinate preserves Lebesgue measure."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "equivFin3_prod",
+    "kind": "def",
+    "statement": "private def equivFin3_prod : (Fin 3 → ℝ) ≃ᵐ ℝ × (ℝ × ℝ)",
+    "plain": "Represent a three coordinate vector as a nested product of three real numbers."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "volume_preserving_equivFin3_prod",
+    "kind": "lemma",
+    "statement": "private lemma volume_preserving_equivFin3_prod :\n    MeasurePreserving equivFin3_prod (volume : Measure (Fin 3 → ℝ))\n      ((volume : Measure ℝ).prod ((volume : Measure ℝ).prod (volume : Measure ℝ)))",
+    "plain": "The three coordinate product representation preserves Lebesgue measure."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "equivFin3_prod_apply",
+    "kind": "lemma",
+    "statement": "private lemma equivFin3_prod_apply (x : Fin 3 → ℝ) :\n    equivFin3_prod x = (x 0, (x 1, x 2))",
+    "plain": "The product representation of a three coordinate vector has coordinates zero, one and two in that order."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "equivFin4_3_apply",
+    "kind": "lemma",
+    "statement": "lemma equivFin4_3_apply (x : Fin 4 → ℝ) :\n    equivFin4_3 x = (x 3, ![x 0, x 1, x 2])",
+    "plain": "The separated pair consists of coordinate three and the vector of coordinates zero, one and two."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "cell4Set_eq_preimage",
+    "kind": "lemma",
+    "statement": "lemma cell4Set_eq_preimage (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3 =\n      equivFin4_3 ⁻¹' (Icc a3 b3 ×ˢ cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "A four dimensional cell is the inverse image of the product of its last interval and first three coordinate cell."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "cell3Set_isClosed",
+    "kind": "lemma",
+    "statement": "lemma cell3Set_isClosed (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    IsClosed (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every cell of this dimension is closed."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "cell3Set_isCompact",
+    "kind": "lemma",
+    "statement": "lemma cell3Set_isCompact (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    IsCompact (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every bounded cell of this dimension is compact."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "cell4Set_isClosed",
+    "kind": "lemma",
+    "statement": "lemma cell4Set_isClosed (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    IsClosed (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every cell of this dimension is closed."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "cell4Set_isCompact",
+    "kind": "lemma",
+    "statement": "lemma cell4Set_isCompact (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    IsCompact (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every bounded cell of this dimension is compact."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "cell3Set_convex",
+    "kind": "lemma",
+    "statement": "lemma cell3Set_convex (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    Convex ℝ (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every cell of this dimension is convex."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "cell4Set_convex",
+    "kind": "lemma",
+    "statement": "lemma cell4Set_convex (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    Convex ℝ (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every cell of this dimension is convex."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "integral_cell3_eq_iter",
+    "kind": "lemma",
+    "statement": "lemma integral_cell3_eq_iter (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ}\n    (h0 : a0 ≤ b0) (h1 : a1 ≤ b1) (h2 : a2 ≤ b2)\n    {f : (Fin 3 → ℝ) → ℝ} (hcont : ContinuousOn f (cell3Set knd a0 b0 a1 b1 a2 b2)) :\n    ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, f x =\n      match knd with\n      | .box => ∫ x0 in a0..b0, ∫ x1 in a1..b1, ∫ x2 in a2..b2, f ![x0, x1, x2]\n      | .tri01 => ∫ x2 in a2..b2, ∫ x1 in a0..b0, ∫ x0 in a0..x1, f ![x0, x1, x2]\n      | .tri12 => ∫ x0 in a0..b0, ∫ x2 in a1..b1, ∫ x1 in a1..x2, f ![x0, x1, x2]\n      | .simp => ∫ x2 in a0..b0, ∫ x1 in a0..x2, ∫ x0 in a0..x1, f ![x0, x1, x2]",
+    "plain": "The integral on each three dimensional ordered cell equals its nested interval integral."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "hh_cell3",
+    "kind": "lemma",
+    "statement": "lemma hh_cell3 (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ}\n    (hok : cell3Ok knd a0 b0 a1 b1 a2 b2)\n    {f : (Fin 3 → ℝ) → ℝ}\n    (hconv : ConvexOn ℝ (cell3Set knd a0 b0 a1 b1 a2 b2) f)\n    (hcont : ContinuousOn f (cell3Set knd a0 b0 a1 b1 a2 b2)) :\n    ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, f x ≤\n      ((b0 - a0) * (b1 - a1) * (b2 - a2) / ((facDen knd : ℝ) * (nVerts3 knd : ℝ))) *\n        sumVerts3R f knd a0 b0 a1 b1 a2 b2",
+    "plain": "A continuous convex function on a valid three dimensional cell has integral bounded above by the vertex sum times the volume divided by the vertex count."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "jensen_cell3",
+    "kind": "lemma",
+    "statement": "lemma jensen_cell3 (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ}\n    (hok : cell3Ok knd a0 b0 a1 b1 a2 b2)\n    {f : (Fin 3 → ℝ) → ℝ}\n    (hconv : ConvexOn ℝ (cell3Set knd a0 b0 a1 b1 a2 b2) f)\n    (hcont : ContinuousOn f (cell3Set knd a0 b0 a1 b1 a2 b2)) :\n    ((b0 - a0) * (b1 - a1) * (b2 - a2) / (facDen knd : ℝ)) *\n        f (centroid3R knd a0 b0 a1 b1 a2 b2) ≤\n      ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, f x",
+    "plain": "A continuous convex function on a valid three dimensional cell has integral bounded below by the cell volume times the function at its barycenter."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "hh_cell4",
+    "kind": "lemma",
+    "statement": "lemma hh_cell4 (knd : CellKind) {a0 b0 a1 b1 a2 b2 a3 b3 : ℝ}\n    (hok : cell3Ok knd a0 b0 a1 b1 a2 b2) (h3 : a3 ≤ b3)\n    {f : (Fin 4 → ℝ) → ℝ}\n    (hconv : ConvexOn ℝ (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3) f)\n    (hcont : ContinuousOn f (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)) :\n    ∫ x in cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3, f x ≤\n      ((b0 - a0) * (b1 - a1) * (b2 - a2) * (b3 - a3) / ((facDen knd : ℝ) * (2 * (nVerts3 knd : ℝ)))) *\n        sumVerts3R (fun y => f ![y 0, y 1, y 2, a3] + f ![y 0, y 1, y 2, b3]) knd a0 b0 a1 b1 a2 b2",
+    "plain": "The four dimensional upper quadrature is obtained by applying the vertex rule to the first three coordinates and the endpoint rule to the fourth."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "integral_ind_le_sub",
+    "kind": "lemma",
+    "statement": "lemma integral_ind_le_sub {c h R : ℝ} (hc : 0 < c) (hh : 0 ≤ h) :\n    ∫ t in Icc (0 : ℝ) h, ({t : ℝ | c * t ≤ R}).indicator (fun _ => (1 : ℝ)) t =\n      (max 0 R - max 0 (R - c * h)) / c",
+    "plain": "The integral of the indicator of a positive affine cut over an interval is its clipped support length."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "integral_posPow_sub",
+    "kind": "lemma",
+    "statement": "private lemma integral_posPow_sub {c h R : ℝ} (hc : 0 < c) (hh : 0 ≤ h) (k : ℕ) :\n    ∫ t in (0 : ℝ)..h, (max 0 (R - c * t)) ^ (k + 1) =\n      ((max 0 R) ^ (k + 2) - (max 0 (R - c * h)) ^ (k + 2)) / (c * ((k : ℝ) + 2))",
+    "plain": "The interval integral of the positive part of an affine function to power k plus one is the difference of its endpoint positive parts to power k plus two divided by the slope and k plus two."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "vol_cut_box3_eq",
+    "kind": "lemma",
+    "statement": "lemma vol_cut_box3_eq {a0 b0 a1 b1 a2 b2 L : ℝ}\n    (h0 : a0 ≤ b0) (h1 : a1 ≤ b1) (h2 : a2 ≤ b2) :\n    ∫ x in cell3Set .box a0 b0 a1 b1 a2 b2,\n        ({x : Fin 3 → ℝ | x 0 + x 1 + 2 * x 2 ≤ L}).indicator (fun _ => (1 : ℝ)) x =\n      cut3SumR (b0 - a0) (b1 - a1) (2 * (b2 - a2)) (L - (a0 + a1 + 2 * a2)) / 12",
+    "plain": "The volume below the affine cut in a three dimensional box equals the alternating truncated cube formula with its exact normalization."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "int_ramp_box3_eq",
+    "kind": "lemma",
+    "statement": "lemma int_ramp_box3_eq {a0 b0 a1 b1 a2 b2 L : ℝ}\n    (h0 : a0 ≤ b0) (h1 : a1 ≤ b1) (h2 : a2 ≤ b2) :\n    ∫ x in cell3Set .box a0 b0 a1 b1 a2 b2, max 0 (L - (x 0 + x 1 + 2 * x 2)) =\n      ramp3SumR (b0 - a0) (b1 - a1) (2 * (b2 - a2)) (L - (a0 + a1 + 2 * a2)) / 48",
+    "plain": "The integral of the positive affine ramp in a three dimensional box equals the alternating truncated fourth power formula with its exact normalization."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "vol_cut_box4_eq",
+    "kind": "lemma",
+    "statement": "lemma vol_cut_box4_eq {a0 b0 a1 b1 a2 b2 a3 b3 L : ℝ}\n    (h0 : a0 ≤ b0) (h1 : a1 ≤ b1) (h2 : a2 ≤ b2) (h3 : a3 ≤ b3) :\n    ∫ x in cell4Set .box a0 b0 a1 b1 a2 b2 a3 b3,\n        ({x : Fin 4 → ℝ | x 0 + x 1 + 2 * x 2 + x 3 ≤ L}).indicator (fun _ => (1 : ℝ)) x =\n      cut4SumR (b0 - a0) (b1 - a1) (2 * (b2 - a2)) (b3 - a3) (L - (a0 + a1 + 2 * a2 + a3)) / 48",
+    "plain": "The volume below the affine cut in a four dimensional box equals the alternating truncated fourth power formula with its exact normalization."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "volume_fin3_coord_eq_zero",
+    "kind": "lemma",
+    "statement": "lemma volume_fin3_coord_eq_zero (i : Fin 3) (m : ℝ) :\n    volume ({x : Fin 3 → ℝ | x i = m}) = 0",
+    "plain": "A coordinate hyperplane in three dimensional Euclidean space has Lebesgue measure zero."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "setIntegral_biUnion_finset_ae",
+    "kind": "lemma",
+    "statement": "private lemma setIntegral_biUnion_finset_ae {α ι : Type*} [MeasurableSpace α] {μ : Measure α}\n    [DecidableEq ι] (t : Finset ι) {s : ι → Set α} {f : α → ℝ}\n    (hs : ∀ i ∈ t, MeasurableSet (s i))\n    (hd : Set.Pairwise (t : Set ι) (fun i j => AEDisjoint μ (s i) (s j)))\n    (hf : ∀ i ∈ t, IntegrableOn f (s i) μ) :\n    ∫ x in ⋃ i ∈ t, s i, f x ∂μ = ∑ i ∈ t, ∫ x in s i, f x ∂μ",
+    "plain": "The integral over a finite union of measurable sets with negligible overlaps is the sum of the integrals over its members."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "volume_fin3_eq_coord_zero",
+    "kind": "lemma",
+    "statement": "private lemma volume_fin3_eq_coord_zero {i j : Fin 3} (hij : i ≠ j) :\n    volume ({x : Fin 3 → ℝ | x i = x j}) = 0",
+    "plain": "The set where two distinct coordinates coincide has three dimensional Lebesgue measure zero."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "s3_antitone_le",
+    "kind": "lemma",
+    "statement": "lemma s3_antitone_le (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ}\n    (hok : cell3Ok knd a0 b0 a1 b1 a2 b2)\n    {g : ℝ → ℝ} (hgnn : ∀ s, 0 ≤ g s) (hganti : Antitone g)\n    (hint : IntegrableOn (fun x : Fin 3 → ℝ => g (x 0 + x 1 + 2 * x 2)) (cell3Set .box a0 b0 a1 b1 a2 b2) volume) :\n    ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, g (x 0 + x 1 + 2 * x 2) ≤\n      (1 / (facDen knd : ℝ)) * ∫ x in cell3Set .box a0 b0 a1 b1 a2 b2, g (x 0 + x 1 + 2 * x 2)",
+    "plain": "For a nonnegative decreasing function of x0 plus x1 plus twice x2, the integral on a valid ordered cell is at most the enclosing box integral divided by the shape factorial."
+  },
+  {
+    "file": "Buchstab4DTGeom",
+    "name": "buchstab4dt_geom",
+    "kind": "theorem",
+    "statement": "theorem buchstab4dt_geom :\n(∀ {ω : ℝ → ℝ}, IsBuchstabCore ω → ∀ u, 0 ≤ ω u) ∧\n(∀ {ω : ℝ → ℝ}, IsBuchstabCore ω → ∀ {u : ℝ}, 1 ≤ u → ω u ≤ max (1 / u) (2 / 3)) ∧\n(∀ {ω : ℝ → ℝ}, IsBuchstabCore ω → ∀ u, ω u ≤ 1) ∧\n(∀ {E : Type} [AddCommGroup E] [Module ℝ E] {S : Set E}, Convex ℝ S →\n  ∀ {k : ℕ} (L : Fin k → E → ℝ),\n    (∀ i, ∀ x ∈ S, ∀ y ∈ S, ∀ a b : ℝ, 0 ≤ a → 0 ≤ b → a + b = 1 →\n      L i (a • x + b • y) = a * L i x + b * L i y) →\n    (∀ i, ∀ x ∈ S, 0 < L i x) →\n    ConvexOn ℝ S (fun x => (∏ i : Fin k, L i x)⁻¹)) ∧\n(∀ {a b : ℝ}, a ≤ b → ∀ {f : ℝ → ℝ}, ConvexOn ℝ (Icc a b) f → ContinuousOn f (Icc a b) →\n  ∫ x in a..b, f x ≤ ((b - a) / 2) * (f a + f b)) ∧\n(∀ {a b : ℝ}, a ≤ b → ∀ {f : ℝ → ℝ}, ConvexOn ℝ (Icc a b) f → ContinuousOn f (Icc a b) →\n  (b - a) * f ((a + b) / 2) ≤ ∫ x in a..b, f x) ∧\n(MeasurePreserving equivFin4_3 (volume : Measure (Fin 4 → ℝ))\n  ((volume : Measure ℝ).prod (volume : Measure (Fin 3 → ℝ)))) ∧\n(∀ x : Fin 4 → ℝ, equivFin4_3 x = (x 3, ![x 0, x 1, x 2])) ∧\n(∀ knd a0 b0 a1 b1 a2 b2 a3 b3,\n  cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3 =\n    equivFin4_3 ⁻¹' (Icc a3 b3 ×ˢ cell3Set knd a0 b0 a1 b1 a2 b2)) ∧\n(∀ knd a0 b0 a1 b1 a2 b2, IsClosed (cell3Set knd a0 b0 a1 b1 a2 b2)) ∧\n(∀ knd a0 b0 a1 b1 a2 b2, IsCompact (cell3Set knd a0 b0 a1 b1 a2 b2)) ∧\n(∀ knd a0 b0 a1 b1 a2 b2 a3 b3, IsClosed (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)) ∧\n(∀ knd a0 b0 a1 b1 a2 b2 a3 b3, IsCompact (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)) ∧\n(∀ knd a0 b0 a1 b1 a2 b2, Convex ℝ (cell3Set knd a0 b0 a1 b1 a2 b2)) ∧\n(∀ knd a0 b0 a1 b1 a2 b2 a3 b3, Convex ℝ (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)) ∧\n(∀ (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ}, a0 ≤ b0 → a1 ≤ b1 → a2 ≤ b2 →\n  ∀ {f : (Fin 3 → ℝ) → ℝ}, ContinuousOn f (cell3Set knd a0 b0 a1 b1 a2 b2) →\n  ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, f x =\n    match knd with\n    | .box => ∫ x0 in a0..b0, ∫ x1 in a1..b1, ∫ x2 in a2..b2, f ![x0, x1, x2]\n    | .tri01 => ∫ x2 in a2..b2, ∫ x1 in a0..b0, ∫ x0 in a0..x1, f ![x0, x1, x2]\n    | .tri12 => ∫ x0 in a0..b0, ∫ x2 in a1..b1, ∫ x1 in a1..x2, f ![x0, x1, x2]\n    | .simp => ∫ x2 in a0..b0, ∫ x1 in a0..x2, ∫ x0 in a0..x1, f ![x0, x1, x2]) ∧\n(∀ (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ}, cell3Ok knd a0 b0 a1 b1 a2 b2 →\n  ∀ {f : (Fin 3 → ℝ) → ℝ}, ConvexOn ℝ (cell3Set knd a0 b0 a1 b1 a2 b2) f →\n  ContinuousOn f (cell3Set knd a0 b0 a1 b1 a2 b2) →\n  ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, f x ≤\n    ((b0 - a0) * (b1 - a1) * (b2 - a2) / ((facDen knd : ℝ) * (nVerts3 knd : ℝ))) *\n      sumVerts3R f knd a0 b0 a1 b1 a2 b2) ∧\n(∀ (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ}, cell3Ok knd a0 b0 a1 b1 a2 b2 →\n  ∀ {f : (Fin 3 → ℝ) → ℝ}, ConvexOn ℝ (cell3Set knd a0 b0 a1 b1 a2 b2) f →\n  ContinuousOn f (cell3Set knd a0 b0 a1 b1 a2 b2) →\n  ((b0 - a0) * (b1 - a1) * (b2 - a2) / (facDen knd : ℝ)) *\n      f (centroid3R knd a0 b0 a1 b1 a2 b2) ≤\n    ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, f x) ∧\n(∀ (knd : CellKind) {a0 b0 a1 b1 a2 b2 a3 b3 : ℝ},\n  cell3Ok knd a0 b0 a1 b1 a2 b2 → a3 ≤ b3 →\n  ∀ {f : (Fin 4 → ℝ) → ℝ}, ConvexOn ℝ (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3) f →\n  ContinuousOn f (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3) →\n  ∫ x in cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3, f x ≤\n    ((b0 - a0) * (b1 - a1) * (b2 - a2) * (b3 - a3) / ((facDen knd : ℝ) * (2 * (nVerts3 knd : ℝ)))) *\n      sumVerts3R (fun y => f ![y 0, y 1, y 2, a3] + f ![y 0, y 1, y 2, b3]) knd a0 b0 a1 b1 a2 b2) ∧\n(∀ {c h R : ℝ}, 0 < c → 0 ≤ h →\n  ∫ t in Icc (0 : ℝ) h, ({t : ℝ | c * t ≤ R}).indicator (fun _ => (1 : ℝ)) t =\n    (max 0 R - max 0 (R - c * h)) / c) ∧\n(∀ {a0 b0 a1 b1 a2 b2 L : ℝ}, a0 ≤ b0 → a1 ≤ b1 → a2 ≤ b2 →\n  ∫ x in cell3Set .box a0 b0 a1 b1 a2 b2,\n    ({x : Fin 3 → ℝ | x 0 + x 1 + 2 * x 2 ≤ L}).indicator (fun _ => (1 : ℝ)) x =\n    cut3SumR (b0 - a0) (b1 - a1) (2 * (b2 - a2)) (L - (a0 + a1 + 2 * a2)) / 12) ∧\n(∀ {a0 b0 a1 b1 a2 b2 L : ℝ}, a0 ≤ b0 → a1 ≤ b1 → a2 ≤ b2 →\n  ∫ x in cell3Set .box a0 b0 a1 b1 a2 b2, max 0 (L - (x 0 + x 1 + 2 * x 2)) =\n    ramp3SumR (b0 - a0) (b1 - a1) (2 * (b2 - a2)) (L - (a0 + a1 + 2 * a2)) / 48) ∧\n(∀ {a0 b0 a1 b1 a2 b2 a3 b3 L : ℝ}, a0 ≤ b0 → a1 ≤ b1 → a2 ≤ b2 → a3 ≤ b3 →\n  ∫ x in cell4Set .box a0 b0 a1 b1 a2 b2 a3 b3,\n    ({x : Fin 4 → ℝ | x 0 + x 1 + 2 * x 2 + x 3 ≤ L}).indicator (fun _ => (1 : ℝ)) x =\n    cut4SumR (b0 - a0) (b1 - a1) (2 * (b2 - a2)) (b3 - a3) (L - (a0 + a1 + 2 * a2 + a3)) / 48) ∧\n(∀ (i : Fin 3) (m : ℝ), volume ({x : Fin 3 → ℝ | x i = m}) = 0) ∧\n(∀ (knd : CellKind) {a0 b0 a1 b1 a2 b2 : ℝ},\n  cell3Ok knd a0 b0 a1 b1 a2 b2 →\n  ∀ {g : ℝ → ℝ}, (∀ s, 0 ≤ g s) → Antitone g →\n  IntegrableOn (fun x : Fin 3 → ℝ => g (x 0 + x 1 + 2 * x 2)) (cell3Set .box a0 b0 a1 b1 a2 b2) volume →\n  ∫ x in cell3Set knd a0 b0 a1 b1 a2 b2, g (x 0 + x 1 + 2 * x 2) ≤\n    (1 / (facDen knd : ℝ)) * ∫ x in cell3Set .box a0 b0 a1 b1 a2 b2, g (x 0 + x 1 + 2 * x 2))",
+    "plain": "The conjunction packages the proved Buchstab bounds, convex quadrature rules, cell geometry and exact cut volume identities."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "le_mul_ceilDiv",
+    "kind": "lemma",
+    "statement": "private lemma le_mul_ceilDiv {a b : Nat} (hb : 0 < b) : a ≤ b * ceilDiv a b",
+    "plain": "For a positive natural divisor, a is at most b times the rounded quotient of a by b."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "setIntegral_prod_symm'",
+    "kind": "lemma",
+    "statement": "private lemma setIntegral_prod_symm' {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]\n    {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]\n    {s : Set α} {t : Set β} (f : α × β → ℝ) (hf : IntegrableOn f (s ×ˢ t) (μ.prod ν)) :\n    ∫ z in s ×ˢ t, f z ∂(μ.prod ν) = ∫ y in t, ∫ x in s, f (x, y) ∂μ ∂ν",
+    "plain": "An integrable function on a product set has the iterated integral with the second coordinate integrated outside."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "integrableOn_setIntegral_left",
+    "kind": "lemma",
+    "statement": "private lemma integrableOn_setIntegral_left {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]\n    {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]\n    {s : Set α} {t : Set β} {f : α × β → ℝ} (hf : IntegrableOn f (s ×ˢ t) (μ.prod ν)) :\n    IntegrableOn (fun y => ∫ x in s, f (x, y) ∂μ) t ν",
+    "plain": "Integrating an integrable function in the first coordinate gives an integrable function of the second coordinate."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "buchstab_nonneg",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_nonneg {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) (u : ℝ) : 0 ≤ ω u",
+    "plain": "The zero extended Buchstab function is nonnegative everywhere."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "buchstab_le_max_inv_two_thirds",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_le_max_inv_two_thirds {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) {u : ℝ} (hu : 1 ≤ u) :\n    ω u ≤ max (1 / u) (2 / 3)",
+    "plain": "For arguments at least one, the Buchstab function is at most the larger of the reciprocal argument and two thirds."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "buchstab_le_one",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_le_one {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) (u : ℝ) : ω u ≤ 1",
+    "plain": "The zero extended Buchstab function is at most one everywhere."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "convexOn_inv_prod",
+    "kind": "lemma",
+    "statement": "private lemma convexOn_inv_prod {E : Type} [AddCommGroup E] [Module ℝ E]\n    {S : Set E} (hS : Convex ℝ S) {k : ℕ} (L : Fin k → E → ℝ)\n    (haff : ∀ i, ∀ x ∈ S, ∀ y ∈ S, ∀ a b : ℝ, 0 ≤ a → 0 ≤ b → a + b = 1 →\n      L i (a • x + b • y) = a * L i x + b * L i y)\n    (hpos : ∀ i, ∀ x ∈ S, 0 < L i x) :\n    ConvexOn ℝ S (fun x => (∏ i : Fin k, L i x)⁻¹)",
+    "plain": "The reciprocal of a product of positive affine functions is convex on a convex set."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hh1_Icc",
+    "kind": "lemma",
+    "statement": "private lemma hh1_Icc {a b : ℝ} (hab : a ≤ b) {f : ℝ → ℝ}\n    (hconv : ConvexOn ℝ (Icc a b) f) (hcont : ContinuousOn f (Icc a b)) :\n    ∫ x in a..b, f x ≤ ((b - a) / 2) * (f a + f b)",
+    "plain": "For a continuous convex function, the interval integral is at most the interval length times the average of the two endpoint values."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "jensen1_Icc",
+    "kind": "lemma",
+    "statement": "private lemma jensen1_Icc {a b : ℝ} (hab : a ≤ b) {f : ℝ → ℝ}\n    (hconv : ConvexOn ℝ (Icc a b) f) (hcont : ContinuousOn f (Icc a b)) :\n    (b - a) * f ((a + b) / 2) ≤ ∫ x in a..b, f x",
+    "plain": "For a continuous convex function, the interval integral is at least the interval length times its midpoint value."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "volume_preserving_equivFin4_3",
+    "kind": "lemma",
+    "statement": "private lemma volume_preserving_equivFin4_3 :\n    MeasurePreserving equivFin4_3 (volume : Measure (Fin 4 → ℝ))\n      ((volume : Measure ℝ).prod (volume : Measure (Fin 3 → ℝ)))",
+    "plain": "Separating the last coordinate preserves Lebesgue measure."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "equivFin4_3_apply",
+    "kind": "lemma",
+    "statement": "private lemma equivFin4_3_apply (x : Fin 4 → ℝ) : equivFin4_3 x = (x 3, ![x 0, x 1, x 2])",
+    "plain": "The separated pair consists of coordinate three and the vector of coordinates zero, one and two."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell4Set_eq_preimage",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_eq_preimage (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3 =\n      equivFin4_3 ⁻¹' (Icc a3 b3 ×ˢ cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "A four dimensional cell is the inverse image of the product of its last interval and first three coordinate cell."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell3Set_isClosed",
+    "kind": "lemma",
+    "statement": "private lemma cell3Set_isClosed (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    IsClosed (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every cell of this dimension is closed."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell3Set_isCompact",
+    "kind": "lemma",
+    "statement": "private lemma cell3Set_isCompact (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    IsCompact (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every bounded cell of this dimension is compact."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell4Set_isClosed",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_isClosed (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    IsClosed (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every cell of this dimension is closed."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell4Set_isCompact",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_isCompact (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    IsCompact (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every bounded cell of this dimension is compact."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell3Set_convex",
+    "kind": "lemma",
+    "statement": "private lemma cell3Set_convex (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    Convex ℝ (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every cell of this dimension is convex."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell4Set_convex",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_convex (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    Convex ℝ (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every cell of this dimension is convex."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "sumVerts3R_le",
+    "kind": "lemma",
+    "statement": "private lemma sumVerts3R_le {Dx : ℝ} {gR : (Fin 3 → ℝ) → ℝ} {gN : ℕ → ℕ → ℕ → ℕ} {S : ℝ}\n    (knd : CellKind) {n0a n0b n1a n1b n2a n2b : ℕ}\n    (ht01 : knd = .tri01 → n0a = n1a ∧ n0b = n1b)\n    (ht12 : knd = .tri12 → n1a = n2a ∧ n1b = n2b)\n    (hts : knd = .simp → n0a = n1a ∧ n0b = n1b ∧ n1a = n2a ∧ n1b = n2b)\n    (hp : ∀ a0 a1 a2 : ℕ, (a0 = n0a ∨ a0 = n0b) → (a1 = n1a ∨ a1 = n1b) → (a2 = n2a ∨ a2 = n2b) →\n      gR ![(a0 : ℝ) / Dx, (a1 : ℝ) / Dx, (a2 : ℝ) / Dx] ≤ (gN a0 a1 a2 : ℝ) / S) :\n    sumVerts3R gR knd ((n0a : ℝ) / Dx) ((n0b : ℝ) / Dx) ((n1a : ℝ) / Dx) ((n1b : ℝ) / Dx) ((n2a : ℝ) / Dx) ((n2b : ℝ) / Dx) ≤\n      (sumVerts3 gN knd n0a n0b n1a n1b n2a n2b : ℝ) / S",
+    "plain": "Vertex bounds in natural arithmetic imply the corresponding scaled real vertex sum bound."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "setIntegral_union_le_of_nonneg",
+    "kind": "lemma",
+    "statement": "private lemma setIntegral_union_le_of_nonneg {α : Type*} [MeasurableSpace α] {μ : Measure α}\n    {A B : Set α} {f : α → ℝ} (hA : MeasurableSet A) (hB : MeasurableSet B)\n    (hnnB : ∀ x ∈ B, 0 ≤ f x) (hintA : IntegrableOn f A μ) (hintB : IntegrableOn f B μ) :\n    ∫ x in A ∪ B, f x ∂μ ≤ (∫ x in A, f x ∂μ) + (∫ x in B, f x ∂μ)",
+    "plain": "For a function integrable on two measurable sets and nonnegative on the second, its integral over their union is at most the sum of the two integrals."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "setIntegral_le_sum2_4",
+    "kind": "lemma",
+    "statement": "private lemma setIntegral_le_sum2_4 {A B D : Set (Fin 4 → ℝ)} {f : (Fin 4 → ℝ) → ℝ}\n    (hD : D ⊆ A ∪ B) (hA : MeasurableSet A) (hB : MeasurableSet B)\n    (hnnA : ∀ x ∈ A, 0 ≤ f x) (hnnB : ∀ x ∈ B, 0 ≤ f x)\n    (hintA : IntegrableOn f A volume) (hintB : IntegrableOn f B volume) :\n    ∫ x in D, f x ≤ (∫ x in A, f x) + (∫ x in B, f x)",
+    "plain": "If two measurable sets cover a subset of four dimensional space and the function is integrable and nonnegative on both, its integral over the subset is at most the sum of the two integrals."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx_nat_pos : 0 < D_x",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDp_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp_nat_pos : 0 < D_p",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "A_n_pos",
+    "kind": "lemma",
+    "statement": "private lemma A_n_pos : 0 < A_n",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hAB_nat",
+    "kind": "lemma",
+    "statement": "private lemma hAB_nat : A_n < B_n",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hBC_nat",
+    "kind": "lemma",
+    "statement": "private lemma hBC_nat : B_n < C_n",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "B_n_pos",
+    "kind": "lemma",
+    "statement": "private lemma B_n_pos : 0 < B_n",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "C_n_pos",
+    "kind": "lemma",
+    "statement": "private lemma C_n_pos : 0 < C_n",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hSv_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hSv_nat_pos : 0 < S_v",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hS3_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS3_nat_pos : 0 < S_3",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hS4_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS4_nat_pos : 0 < S_4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hS4_eq",
+    "kind": "lemma",
+    "statement": "private lemma hS4_eq : S_4 = S_3 * 100",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx2_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx2_eq : D_x2 = D_x * D_x",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx4_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx4_eq : D_x4 = D_x2 * D_x2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx5_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx5_eq : D_x5 = D_x4 * D_x",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx6_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx6_eq : D_x6 = D_x4 * D_x2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDp2_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDp2_eq : D_p2 = D_p * D_p",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDp3_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDp3_eq : D_p3 = D_p2 * D_p",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDp4_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDp4_eq : D_p4 = D_p2 * D_p2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hBsc_eq",
+    "kind": "lemma",
+    "statement": "private lemma hBsc_eq : B_sc = D_p * B_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hCsc_eq",
+    "kind": "lemma",
+    "statement": "private lemma hCsc_eq : C_sc = D_p * C_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx2_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx2_nat_pos : 0 < D_x2",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx4_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx4_nat_pos : 0 < D_x4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDp2_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp2_nat_pos : 0 < D_p2",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDp4_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp4_nat_pos : 0 < D_p4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hBsc_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hBsc_nat_pos : 0 < B_sc",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hCsc_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hCsc_nat_pos : 0 < C_sc",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDx_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx_pos : (0 : ℝ) < D_x",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hDp_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp_pos : (0 : ℝ) < D_p",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hSv_pos",
+    "kind": "lemma",
+    "statement": "private lemma hSv_pos : (0 : ℝ) < S_v",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hS3_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS3_pos : (0 : ℝ) < S_3",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hS4_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS4_pos : (0 : ℝ) < S_4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "D_x2_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x2_cast : (D_x2 : ℝ) = (D_x : ℝ) ^ 2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "D_x4_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x4_cast : (D_x4 : ℝ) = (D_x : ℝ) ^ 4",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "D_x5_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x5_cast : (D_x5 : ℝ) = (D_x : ℝ) ^ 5",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "D_x6_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x6_cast : (D_x6 : ℝ) = (D_x : ℝ) ^ 6",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "D_p2_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_p2_cast : (D_p2 : ℝ) = (D_p : ℝ) ^ 2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "D_p3_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_p3_cast : (D_p3 : ℝ) = (D_p : ℝ) ^ 3",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "D_p4_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_p4_cast : (D_p4 : ℝ) = (D_p : ℝ) ^ 4",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "B_sc_le_C_sc",
+    "kind": "lemma",
+    "statement": "private lemma B_sc_le_C_sc : B_sc ≤ C_sc",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "B_sc_cast",
+    "kind": "lemma",
+    "statement": "private lemma B_sc_cast : (B_sc : ℝ) = (D_p : ℝ) * B_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "C_sc_cast",
+    "kind": "lemma",
+    "statement": "private lemma C_sc_cast : (C_sc : ℝ) = (D_p : ℝ) * C_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hA_pos",
+    "kind": "lemma",
+    "statement": "private lemma hA_pos : (0 : ℝ) < A_R",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hAB_lt",
+    "kind": "lemma",
+    "statement": "private lemma hAB_lt : A_R < B_R",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "hBC_lt",
+    "kind": "lemma",
+    "statement": "private lemma hBC_lt : B_R < C_R",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cut3Num_eq",
+    "kind": "lemma",
+    "statement": "lemma cut3Num_eq {dx0 dx1 dx2 r : ℕ} :\n    ((cut3Num dx0 dx1 dx2 r : ℝ) / (12 * (D_p : ℝ) ^ 3 * (D_x : ℝ) ^ 3)) =\n      cut3SumR ((dx0 : ℝ) / D_x) ((dx1 : ℝ) / D_x) (2 * ((dx2 : ℝ) / D_x)) ((r : ℝ) / ((D_p : ℝ) * D_x)) / 12",
+    "plain": "The natural cut volume evaluator equals the scaled real alternating cube formula."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "ramp3Num_eq",
+    "kind": "lemma",
+    "statement": "lemma ramp3Num_eq {dx0 dx1 dx2 r : ℕ} :\n    ((ramp3Num dx0 dx1 dx2 r : ℝ) / (48 * (D_p : ℝ) ^ 4 * (D_x : ℝ) ^ 4)) =\n      ramp3SumR ((dx0 : ℝ) / D_x) ((dx1 : ℝ) / D_x) (2 * ((dx2 : ℝ) / D_x)) ((r : ℝ) / ((D_p : ℝ) * D_x)) / 48",
+    "plain": "The natural ramp evaluator equals the scaled real alternating fourth power formula."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cut4Num_eq",
+    "kind": "lemma",
+    "statement": "private lemma cut4Num_eq {dx0 dx1 dx2 dx3 r : ℕ} :\n    ((cut4Num dx0 dx1 dx2 dx3 r : ℝ) / (48 * (D_p : ℝ) ^ 4 * (D_x : ℝ) ^ 4)) =\n      cut4SumR ((dx0 : ℝ) / D_x) ((dx1 : ℝ) / D_x) (2 * ((dx2 : ℝ) / D_x)) ((dx3 : ℝ) / D_x) ((r : ℝ) / ((D_p : ℝ) * D_x)) / 48",
+    "plain": "The natural four dimensional cut evaluator equals its scaled real alternating fourth power formula."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "integrand4_integrableOn",
+    "kind": "lemma",
+    "statement": "private lemma integrand4_integrableOn {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    (φ : ℝ) {knd : CellKind} {a0 b0 a1 b1 a2 b2 a3 b3 : ℝ}\n    (ha0 : 0 < a0) (ha1 : 0 < a1) (ha2 : 0 < a2) (ha3 : 0 < a3) :\n    IntegrableOn (fun x : Fin 4 → ℝ => ω ((φ - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2))\n      (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3) volume",
+    "plain": "For strictly positive lower coordinate endpoints, the zero extended Buchstab integrand is integrable on a cell of each shape."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell3Valid_ok",
+    "kind": "lemma",
+    "statement": "lemma cell3Valid_ok {knd : CellKind} {a0 b0 a1 b1 a2 b2 : ℕ}\n    (hv : cell3Valid knd a0 b0 a1 b1 a2 b2) :\n    cell3Ok knd ((a0 : ℝ) / D_x) ((b0 : ℝ) / D_x) ((a1 : ℝ) / D_x) ((b1 : ℝ) / D_x) ((a2 : ℝ) / D_x) ((b2 : ℝ) / D_x)",
+    "plain": "Natural coordinate bounds and shape compatibility imply the corresponding real cell bounds and shape compatibility."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell4_leaf_boundary_sound",
+    "kind": "lemma",
+    "statement": "private lemma cell4_leaf_boundary_sound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {p_n : ℕ} {knd : CellKind} {n0a n0b n1a n1b n2a n2b n3a n3b : ℕ}\n    (hv : cell4Valid knd n0a n0b n1a n1b n2a n2b n3a n3b)\n    (hzero : ¬ p_n * D_x ≤ D_p * (n0a + n1a + 2 * n2a + n3a)) :\n    ∫ x in cell4Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x)\n                        ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x)\n                        ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)\n                        ((n3a : ℝ) / D_x) ((n3b : ℝ) / D_x),\n      ω (((p_n : ℝ) / D_p - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n      (ceilDiv (S_4 * D_x * cut4Num (n0b - n0a) (n1b - n1a) (n2b - n2a) (n3b - n3a)\n          (p_n * D_x - D_p * (n0a + n1a + 2 * n2a + n3a)))\n        (48 * facDen knd * D_p4 * n0a * n1a * n2a * n2a * n3a) : ℝ) / S_4",
+    "plain": "When the lower corner lies below the support cutoff, the scaled cutoff volume estimate divided by the lower endpoint reciprocal denominator bounds the integral."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell4_leaf_sound",
+    "kind": "lemma",
+    "statement": "lemma cell4_leaf_sound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {p_n : ℕ} (hp_top : (p_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b n3a n3b : ℕ}\n    (hv : cell4Valid knd n0a n0b n1a n1b n2a n2b n3a n3b) :\n    ∫ x in cell4Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x)\n                        ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x)\n                        ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)\n                        ((n3a : ℝ) / D_x) ((n3b : ℝ) / D_x),\n      ω (((p_n : ℝ) / D_p - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n      (eval4Leaf p_n knd n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / S_4",
+    "plain": "At a grid parameter no larger than five A plus B, each valid four dimensional leaf evaluator bounds the actual Buchstab integral after division by the fourth order scale."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "cell4_trans_leaf_sound",
+    "kind": "lemma",
+    "statement": "lemma cell4_trans_leaf_sound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {pa_n : ℕ} {φ : ℝ} (hφ_lo : (pa_n : ℝ) / D_p ≤ φ)\n    (hpa_ge : D_p * (4 * B_n + C_n) ≤ pa_n * D_x)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b n3a n3b : ℕ}\n    (hv : cell4Valid knd n0a n0b n1a n1b n2a n2b n3a n3b) :\n    ∫ x in cell4Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x)\n                        ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x)\n                        ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)\n                        ((n3a : ℝ) / D_x) ((n3b : ℝ) / D_x),\n      ω ((φ - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n      (eval4TransLeaf pa_n knd n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / S_4",
+    "plain": "If the transition parameter is at least four B plus C, each valid transition leaf evaluator bounds the actual Buchstab integral for every later parameter."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "evalTree4_sound",
+    "kind": "lemma",
+    "statement": "lemma evalTree4_sound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    (lfFn : CellKind → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat)\n    (φ : ℝ)\n    (hlf : ∀ knd n0a n0b n1a n1b n2a n2b n3a n3b,\n      cell4Valid knd n0a n0b n1a n1b n2a n2b n3a n3b →\n      ∫ x in cell4Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x)\n                          ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x) ((n3a : ℝ) / D_x) ((n3b : ℝ) / D_x),\n        ω ((φ - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n        (lfFn knd n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / S_4)\n    (t : BoxTree4) :\n    ∀ (knd : CellKind) (n0a n0b n1a n1b n2a n2b n3a n3b : ℕ),\n      tree4Valid knd t = true →\n      cell4Valid knd n0a n0b n1a n1b n2a n2b n3a n3b →\n      ∫ x in cell4Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x)\n                          ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x) ((n3a : ℝ) / D_x) ((n3b : ℝ) / D_x),\n        ω ((φ - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n        (evalTree4 lfFn knd t n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / S_4",
+    "plain": "A valid subdivision tree whose leaves bound the integrals also bounds the integral over the parent four dimensional cell."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "I_fn_eq_G",
+    "kind": "lemma",
+    "statement": "lemma I_fn_eq_G {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {φ : ℝ} (hφ_top : φ ≤ 5 * A_R + B_R) :\n    I_fn ω φ = ∫ y in cell3Set .simp A_R B_R A_R B_R A_R B_R,\n      (1 / (y 0 * y 1 * y 2)) * G_fn φ y",
+    "plain": "When phi is at most five A plus B, the four dimensional Buchstab integral equals the integral of G weighted by the reciprocal product of the first three coordinates."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "G_fn_sub_eq",
+    "kind": "lemma",
+    "statement": "lemma G_fn_sub_eq {φ1 φ2 : ℝ} (h12 : φ1 < φ2) {y : Fin 3 → ℝ}\n    (hy2 : 0 < y 2) :\n    let m1 := max B_R (min C_R (φ1 - y 0 - y 1 - 2 * y 2))\n    let m2 := max B_R (min C_R (φ2 - y 0 - y 1 - 2 * y 2))\n    G_fn φ2 y - G_fn φ1 y =\n      (∫ x3 in m1..m2, 1 / (x3 * (φ2 - (y 0 + y 1 + y 2) - x3))) -\n      (φ2 - φ1) * (∫ x3 in B_R..m1, 1 / (x3 * (φ1 - (y 0 + y 1 + y 2) - x3) * (φ2 - (y 0 + y 1 + y 2) - x3)))",
+    "plain": "The change in G is its support gain integral minus the parameter difference times the reciprocal loss integral."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "G_fn_integrableOn",
+    "kind": "lemma",
+    "statement": "lemma G_fn_integrableOn {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {φ : ℝ} (hφ_top : φ ≤ 5 * A_R + B_R)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    IntegrableOn (fun y : Fin 3 → ℝ => (1 / (y 0 * y 1 * y 2)) * G_fn φ y)\n      (cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)) volume",
+    "plain": "The clipped reciprocal integral, weighted by the reciprocal product of the first three coordinates, is integrable over a valid cell when phi is at most five A plus B."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "evalTree3_sound",
+    "kind": "lemma",
+    "statement": "lemma evalTree3_sound {F : (Fin 3 → ℝ) → ℝ}\n    (hF_int : ∀ knd n0a n0b n1a n1b n2a n2b, cell3Valid knd n0a n0b n1a n1b n2a n2b →\n      IntegrableOn F (cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)) volume)\n    (lfFn : CellKind → Nat → Nat → Nat → Nat → Nat → Nat → Nat × Nat)\n    (hlf : ∀ knd n0a n0b n1a n1b n2a n2b, cell3Valid knd n0a n0b n1a n1b n2a n2b →\n      let r := lfFn knd n0a n0b n1a n1b n2a n2b\n      ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x), F y ≤\n        ((r.1 : ℝ) - (r.2 : ℝ)) / S_3)\n    (t : BoxTree3) :\n    ∀ (knd : CellKind) (n0a n0b n1a n1b n2a n2b : ℕ),\n      tree3Valid knd t = true →\n      cell3Valid knd n0a n0b n1a n1b n2a n2b →\n      let r := evalTree3 lfFn knd t n0a n0b n1a n1b n2a n2b\n      ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x), F y ≤\n        ((r.1 : ℝ) - (r.2 : ℝ)) / S_3",
+    "plain": "For an integrable real function, a valid three dimensional subdivision preserves its upper bound by the first accumulated natural coefficient minus the second, divided by the third order scale."
+  },
+  {
+    "file": "Buchstab4DTSound4",
+    "name": "buchstab4dt_sound4",
+    "kind": "theorem",
+    "statement": "theorem buchstab4dt_sound4 :\n∀ (p : Params4DT), task668ParamsValid p →\n  (∀ {dx0 dx1 dx2 r : ℕ},\n    ((cut3Num p dx0 dx1 dx2 r : ℝ) / (12 * (p.D_p : ℝ) ^ 3 * (p.D_x : ℝ) ^ 3)) =\n      cut3SumR ((dx0 : ℝ) / p.D_x) ((dx1 : ℝ) / p.D_x) (2 * ((dx2 : ℝ) / p.D_x)) ((r : ℝ) / ((p.D_p : ℝ) * p.D_x)) / 12) ∧\n  (∀ {dx0 dx1 dx2 r : ℕ},\n    ((ramp3Num p dx0 dx1 dx2 r : ℝ) / (48 * (p.D_p : ℝ) ^ 4 * (p.D_x : ℝ) ^ 4)) =\n      ramp3SumR ((dx0 : ℝ) / p.D_x) ((dx1 : ℝ) / p.D_x) (2 * ((dx2 : ℝ) / p.D_x)) ((r : ℝ) / ((p.D_p : ℝ) * p.D_x)) / 48) ∧\n  (∀ {knd n0a n0b n1a n1b n2a n2b}, cell3Valid p knd n0a n0b n1a n1b n2a n2b →\n    cell3Ok knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x) ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x)) ∧\n  (∀ {ω : ℝ → ℝ}, IsBuchstabCore ω → ∀ {p_n : ℕ}, (p_n : ℝ) / p.D_p ≤ 5 * p.A_R + p.B_R →\n    ∀ {knd n0a n0b n1a n1b n2a n2b n3a n3b}, cell4Valid p knd n0a n0b n1a n1b n2a n2b n3a n3b →\n    ∫ x in cell4Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x)\n                        ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x) ((n3a : ℝ) / p.D_x) ((n3b : ℝ) / p.D_x),\n      ω (((p_n : ℝ) / p.D_p - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n      (eval4Leaf p p_n knd n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / p.S_4) ∧\n  (∀ {ω : ℝ → ℝ}, IsBuchstabCore ω → ∀ {pa_n : ℕ} {φ : ℝ}, (pa_n : ℝ) / p.D_p ≤ φ →\n    p.D_p * (4 * p.B_n + p.C_n) ≤ pa_n * p.D_x →\n    ∀ {knd n0a n0b n1a n1b n2a n2b n3a n3b}, cell4Valid p knd n0a n0b n1a n1b n2a n2b n3a n3b →\n    ∫ x in cell4Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x)\n                        ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x) ((n3a : ℝ) / p.D_x) ((n3b : ℝ) / p.D_x),\n      ω ((φ - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n      (eval4TransLeaf p pa_n knd n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / p.S_4) ∧\n  (∀ {ω : ℝ → ℝ}, IsBuchstabCore ω →\n    ∀ (lfFn : CellKind → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat → Nat) (φ : ℝ),\n    (∀ knd n0a n0b n1a n1b n2a n2b n3a n3b, cell4Valid p knd n0a n0b n1a n1b n2a n2b n3a n3b →\n      ∫ x in cell4Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x)\n                          ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x) ((n3a : ℝ) / p.D_x) ((n3b : ℝ) / p.D_x),\n        ω ((φ - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n        (lfFn knd n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / p.S_4) →\n    ∀ (t : BoxTree4) (knd : CellKind) (n0a n0b n1a n1b n2a n2b n3a n3b : ℕ),\n      tree4Valid knd t = true → cell4Valid p knd n0a n0b n1a n1b n2a n2b n3a n3b →\n      ∫ x in cell4Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x)\n                          ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x) ((n3a : ℝ) / p.D_x) ((n3b : ℝ) / p.D_x),\n        ω ((φ - ∑ j, x j) / x 2) / ((∏ j, x j) * x 2) ≤\n        (evalTree4 lfFn knd t n0a n0b n1a n1b n2a n2b n3a n3b : ℝ) / p.S_4) ∧\n  (∀ {ω : ℝ → ℝ}, IsBuchstabCore ω → ∀ {φ : ℝ}, φ ≤ 5 * p.A_R + p.B_R →\n    I_fn p ω φ = ∫ y in cell3Set .simp p.A_R p.B_R p.A_R p.B_R p.A_R p.B_R,\n      (1 / (y 0 * y 1 * y 2)) * G_fn p φ y) ∧\n  (∀ {φ1 φ2 : ℝ}, φ1 < φ2 → ∀ {y : Fin 3 → ℝ}, 0 < y 2 →\n    let m1 := max p.B_R (min p.C_R (φ1 - y 0 - y 1 - 2 * y 2))\n    let m2 := max p.B_R (min p.C_R (φ2 - y 0 - y 1 - 2 * y 2))\n    G_fn p φ2 y - G_fn p φ1 y =\n      (∫ x3 in m1..m2, 1 / (x3 * (φ2 - (y 0 + y 1 + y 2) - x3))) -\n      (φ2 - φ1) * (∫ x3 in p.B_R..m1, 1 / (x3 * (φ1 - (y 0 + y 1 + y 2) - x3) * (φ2 - (y 0 + y 1 + y 2) - x3)))) ∧\n  (∀ {ω : ℝ → ℝ}, IsBuchstabCore ω → ∀ {φ : ℝ}, φ ≤ 5 * p.A_R + p.B_R →\n    ∀ {knd n0a n0b n1a n1b n2a n2b}, cell3Valid p knd n0a n0b n1a n1b n2a n2b →\n    IntegrableOn (fun y : Fin 3 → ℝ => (1 / (y 0 * y 1 * y 2)) * G_fn p φ y)\n      (cell3Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x) ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x)) volume) ∧\n  (∀ {F : (Fin 3 → ℝ) → ℝ},\n    (∀ knd n0a n0b n1a n1b n2a n2b, cell3Valid p knd n0a n0b n1a n1b n2a n2b →\n      IntegrableOn F (cell3Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x) ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x)) volume) →\n    ∀ (lfFn : CellKind → Nat → Nat → Nat → Nat → Nat → Nat → Nat × Nat),\n    (∀ knd n0a n0b n1a n1b n2a n2b, cell3Valid p knd n0a n0b n1a n1b n2a n2b →\n      let r := lfFn knd n0a n0b n1a n1b n2a n2b\n      ∫ y in cell3Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x) ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x), F y ≤\n        ((r.1 : ℝ) - (r.2 : ℝ)) / p.S_3) →\n    ∀ (t : BoxTree3) (knd : CellKind) (n0a n0b n1a n1b n2a n2b : ℕ),\n      tree3Valid knd t = true → cell3Valid p knd n0a n0b n1a n1b n2a n2b →\n      let r := evalTree3 lfFn knd t n0a n0b n1a n1b n2a n2b\n      ∫ y in cell3Set knd ((n0a : ℝ) / p.D_x) ((n0b : ℝ) / p.D_x) ((n1a : ℝ) / p.D_x) ((n1b : ℝ) / p.D_x) ((n2a : ℝ) / p.D_x) ((n2b : ℝ) / p.D_x), F y ≤\n        ((r.1 : ℝ) - (r.2 : ℝ)) / p.S_3)",
+    "plain": "The conjunction packages the proved scaled leaf and subdivision soundness rules and the reduction to three dimensions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "le_mul_ceilDiv",
+    "kind": "lemma",
+    "statement": "private lemma le_mul_ceilDiv {a b : Nat} (hb : 0 < b) : a ≤ b * ceilDiv a b",
+    "plain": "For a positive natural divisor, a is at most b times the rounded quotient of a by b."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "setIntegral_prod_symm'",
+    "kind": "lemma",
+    "statement": "private lemma setIntegral_prod_symm' {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]\n    {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]\n    {s : Set α} {t : Set β} (f : α × β → ℝ) (hf : IntegrableOn f (s ×ˢ t) (μ.prod ν)) :\n    ∫ z in s ×ˢ t, f z ∂(μ.prod ν) = ∫ y in t, ∫ x in s, f (x, y) ∂μ ∂ν",
+    "plain": "An integrable function on a product set has the iterated integral with the second coordinate integrated outside."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "integrableOn_setIntegral_left",
+    "kind": "lemma",
+    "statement": "private lemma integrableOn_setIntegral_left {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]\n    {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]\n    {s : Set α} {t : Set β} {f : α × β → ℝ} (hf : IntegrableOn f (s ×ˢ t) (μ.prod ν)) :\n    IntegrableOn (fun y => ∫ x in s, f (x, y) ∂μ) t ν",
+    "plain": "Integrating an integrable function in the first coordinate gives an integrable function of the second coordinate."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "buchstab_nonneg",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_nonneg {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) (u : ℝ) : 0 ≤ ω u",
+    "plain": "The zero extended Buchstab function is nonnegative everywhere."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "buchstab_le_max_inv_two_thirds",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_le_max_inv_two_thirds {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) {u : ℝ} (hu : 1 ≤ u) :\n    ω u ≤ max (1 / u) (2 / 3)",
+    "plain": "For arguments at least one, the Buchstab function is at most the larger of the reciprocal argument and two thirds."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "buchstab_le_one",
+    "kind": "lemma",
+    "statement": "private lemma buchstab_le_one {ω : ℝ → ℝ} (hω : IsBuchstabCore ω) (u : ℝ) : ω u ≤ 1",
+    "plain": "The zero extended Buchstab function is at most one everywhere."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "convexOn_inv_prod",
+    "kind": "lemma",
+    "statement": "private lemma convexOn_inv_prod {E : Type} [AddCommGroup E] [Module ℝ E]\n    {S : Set E} (hS : Convex ℝ S) {k : ℕ} (L : Fin k → E → ℝ)\n    (haff : ∀ i, ∀ x ∈ S, ∀ y ∈ S, ∀ a b : ℝ, 0 ≤ a → 0 ≤ b → a + b = 1 →\n      L i (a • x + b • y) = a * L i x + b * L i y)\n    (hpos : ∀ i, ∀ x ∈ S, 0 < L i x) :\n    ConvexOn ℝ S (fun x => (∏ i : Fin k, L i x)⁻¹)",
+    "plain": "The reciprocal of a product of positive affine functions is convex on a convex set."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hh1_Icc",
+    "kind": "lemma",
+    "statement": "private lemma hh1_Icc {a b : ℝ} (hab : a ≤ b) {f : ℝ → ℝ}\n    (hconv : ConvexOn ℝ (Icc a b) f) (hcont : ContinuousOn f (Icc a b)) :\n    ∫ x in a..b, f x ≤ ((b - a) / 2) * (f a + f b)",
+    "plain": "For a continuous convex function, the interval integral is at most the interval length times the average of the two endpoint values."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "jensen1_Icc",
+    "kind": "lemma",
+    "statement": "private lemma jensen1_Icc {a b : ℝ} (hab : a ≤ b) {f : ℝ → ℝ}\n    (hconv : ConvexOn ℝ (Icc a b) f) (hcont : ContinuousOn f (Icc a b)) :\n    (b - a) * f ((a + b) / 2) ≤ ∫ x in a..b, f x",
+    "plain": "For a continuous convex function, the interval integral is at least the interval length times its midpoint value."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "volume_preserving_equivFin4_3",
+    "kind": "lemma",
+    "statement": "private lemma volume_preserving_equivFin4_3 :\n    MeasurePreserving equivFin4_3 (volume : Measure (Fin 4 → ℝ))\n      ((volume : Measure ℝ).prod (volume : Measure (Fin 3 → ℝ)))",
+    "plain": "Separating the last coordinate preserves Lebesgue measure."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "equivFin4_3_apply",
+    "kind": "lemma",
+    "statement": "private lemma equivFin4_3_apply (x : Fin 4 → ℝ) : equivFin4_3 x = (x 3, ![x 0, x 1, x 2])",
+    "plain": "The separated pair consists of coordinate three and the vector of coordinates zero, one and two."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell4Set_eq_preimage",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_eq_preimage (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3 =\n      equivFin4_3 ⁻¹' (Icc a3 b3 ×ˢ cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "A four dimensional cell is the inverse image of the product of its last interval and first three coordinate cell."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3Set_isClosed",
+    "kind": "lemma",
+    "statement": "private lemma cell3Set_isClosed (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    IsClosed (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every cell of this dimension is closed."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3Set_isCompact",
+    "kind": "lemma",
+    "statement": "private lemma cell3Set_isCompact (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    IsCompact (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every bounded cell of this dimension is compact."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell4Set_isClosed",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_isClosed (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    IsClosed (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every cell of this dimension is closed."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell4Set_isCompact",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_isCompact (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    IsCompact (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every bounded cell of this dimension is compact."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3Set_convex",
+    "kind": "lemma",
+    "statement": "private lemma cell3Set_convex (knd : CellKind) (a0 b0 a1 b1 a2 b2 : ℝ) :\n    Convex ℝ (cell3Set knd a0 b0 a1 b1 a2 b2)",
+    "plain": "Every cell of this dimension is convex."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell4Set_convex",
+    "kind": "lemma",
+    "statement": "private lemma cell4Set_convex (knd : CellKind) (a0 b0 a1 b1 a2 b2 a3 b3 : ℝ) :\n    Convex ℝ (cell4Set knd a0 b0 a1 b1 a2 b2 a3 b3)",
+    "plain": "Every cell of this dimension is convex."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "sumVerts3R_le",
+    "kind": "lemma",
+    "statement": "private lemma sumVerts3R_le {Dx : ℝ} {gR : (Fin 3 → ℝ) → ℝ} {gN : ℕ → ℕ → ℕ → ℕ} {S : ℝ}\n    (knd : CellKind) {n0a n0b n1a n1b n2a n2b : ℕ}\n    (ht01 : knd = .tri01 → n0a = n1a ∧ n0b = n1b)\n    (ht12 : knd = .tri12 → n1a = n2a ∧ n1b = n2b)\n    (hts : knd = .simp → n0a = n1a ∧ n0b = n1b ∧ n1a = n2a ∧ n1b = n2b)\n    (hp : ∀ a0 a1 a2 : ℕ, (a0 = n0a ∨ a0 = n0b) → (a1 = n1a ∨ a1 = n1b) → (a2 = n2a ∨ a2 = n2b) →\n      gR ![(a0 : ℝ) / Dx, (a1 : ℝ) / Dx, (a2 : ℝ) / Dx] ≤ (gN a0 a1 a2 : ℝ) / S) :\n    sumVerts3R gR knd ((n0a : ℝ) / Dx) ((n0b : ℝ) / Dx) ((n1a : ℝ) / Dx) ((n1b : ℝ) / Dx) ((n2a : ℝ) / Dx) ((n2b : ℝ) / Dx) ≤\n      (sumVerts3 gN knd n0a n0b n1a n1b n2a n2b : ℝ) / S",
+    "plain": "Vertex bounds in natural arithmetic imply the corresponding scaled real vertex sum bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "match_cellKind_ne_box",
+    "kind": "lemma",
+    "statement": "private lemma match_cellKind_ne_box {α : Type*} (knd : CellKind)\n    (a b : α) :\n    knd ≠ .box → (match knd with | .box => a | _ => b) = b",
+    "plain": "For a shape other than the box, a case distinction between box and other shapes selects its second branch."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mm_pos_int_alg",
+    "kind": "lemma",
+    "statement": "private lemma mm_pos_int_alg (a0 b0 a1 b1 a2 b2 Bn Cn sv Dx fd nv Sv S3 : ℝ)\n    (h1 : Dx ≠ 0) (h2 : fd ≠ 0) (h3 : nv ≠ 0) (h4 : Sv ≠ 0) :\n    (b0 / Dx - a0 / Dx) * (b1 / Dx - a1 / Dx) * (b2 / Dx - a2 / Dx) / (fd * nv) *\n      ((Cn / Dx - Bn / Dx) / 2 * (sv / Sv)) * S3 =\n    (S3 * (b0 - a0) * (b1 - a1) * (b2 - a2) * (Cn - Bn) * sv) / (2 * fd * nv * Dx ^ 4 * Sv)",
+    "plain": "The displayed normalized cell volume times the vertex gain bound equals the same quantity after clearing the scale denominators."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mpGainFn",
+    "kind": "def",
+    "statement": "private noncomputable def mpGainFn (p : Params4DT) (pa_n pb_n : ℕ) (knd : CellKind)\n    (n0a n0b n1a n1b n2a n2b : ℕ) : (Fin 3 → ℝ) → ℝ",
+    "plain": "The support gain used for a decreasing interval is the explicit clipped affine indicator bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mpDropFn",
+    "kind": "def",
+    "statement": "private noncomputable def mpDropFn (p : Params4DT) (pa_n pb_n n0b n1b n2b : ℕ) : (Fin 3 → ℝ) → ℝ",
+    "plain": "The support loss used for a decreasing interval is the explicit reciprocal kernel bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mmDropFn",
+    "kind": "def",
+    "statement": "private noncomputable def mmDropFn (p : Params4DT) (pa_n pb_n n0a n0b n1a n1b n2a n2b : ℕ) : (Fin 3 → ℝ) → ℝ",
+    "plain": "The support loss used for an increasing interval is the explicit reciprocal kernel bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mmGainFn",
+    "kind": "def",
+    "statement": "private noncomputable def mmGainFn (p : Params4DT) (pa_n pb_n : ℕ) (knd : CellKind)\n    (n0a n0b n1a n1b n2a n2b : ℕ) : (Fin 3 → ℝ) → ℝ",
+    "plain": "The support gain used for an increasing interval is the explicit clipped affine indicator bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx_nat_pos : 0 < D_x",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDp_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp_nat_pos : 0 < D_p",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "A_n_pos",
+    "kind": "lemma",
+    "statement": "private lemma A_n_pos : 0 < A_n",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hAB_nat",
+    "kind": "lemma",
+    "statement": "private lemma hAB_nat : A_n < B_n",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hBC_nat",
+    "kind": "lemma",
+    "statement": "private lemma hBC_nat : B_n < C_n",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "B_n_pos",
+    "kind": "lemma",
+    "statement": "private lemma B_n_pos : 0 < B_n",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "C_n_pos",
+    "kind": "lemma",
+    "statement": "private lemma C_n_pos : 0 < C_n",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hSv_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hSv_nat_pos : 0 < S_v",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hS3_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS3_nat_pos : 0 < S_3",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hS4_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS4_nat_pos : 0 < S_4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hS4_eq",
+    "kind": "lemma",
+    "statement": "private lemma hS4_eq : S_4 = S_3 * 100",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx2_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx2_eq : D_x2 = D_x * D_x",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx4_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx4_eq : D_x4 = D_x2 * D_x2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx5_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx5_eq : D_x5 = D_x4 * D_x",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx6_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDx6_eq : D_x6 = D_x4 * D_x2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDp2_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDp2_eq : D_p2 = D_p * D_p",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDp3_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDp3_eq : D_p3 = D_p2 * D_p",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDp4_eq",
+    "kind": "lemma",
+    "statement": "private lemma hDp4_eq : D_p4 = D_p2 * D_p2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hBsc_eq",
+    "kind": "lemma",
+    "statement": "private lemma hBsc_eq : B_sc = D_p * B_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hCsc_eq",
+    "kind": "lemma",
+    "statement": "private lemma hCsc_eq : C_sc = D_p * C_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx2_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx2_nat_pos : 0 < D_x2",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx4_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx4_nat_pos : 0 < D_x4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDp2_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp2_nat_pos : 0 < D_p2",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDp4_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp4_nat_pos : 0 < D_p4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hBsc_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hBsc_nat_pos : 0 < B_sc",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hCsc_nat_pos",
+    "kind": "lemma",
+    "statement": "private lemma hCsc_nat_pos : 0 < C_sc",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDx_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDx_pos : (0 : ℝ) < D_x",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hDp_pos",
+    "kind": "lemma",
+    "statement": "private lemma hDp_pos : (0 : ℝ) < D_p",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hSv_pos",
+    "kind": "lemma",
+    "statement": "private lemma hSv_pos : (0 : ℝ) < S_v",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hS3_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS3_pos : (0 : ℝ) < S_3",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hS4_pos",
+    "kind": "lemma",
+    "statement": "private lemma hS4_pos : (0 : ℝ) < S_4",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "D_x2_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x2_cast : (D_x2 : ℝ) = (D_x : ℝ) ^ 2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "D_x4_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x4_cast : (D_x4 : ℝ) = (D_x : ℝ) ^ 4",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "D_x5_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x5_cast : (D_x5 : ℝ) = (D_x : ℝ) ^ 5",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "D_x6_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_x6_cast : (D_x6 : ℝ) = (D_x : ℝ) ^ 6",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "D_p2_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_p2_cast : (D_p2 : ℝ) = (D_p : ℝ) ^ 2",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "D_p3_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_p3_cast : (D_p3 : ℝ) = (D_p : ℝ) ^ 3",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "D_p4_cast",
+    "kind": "lemma",
+    "statement": "private lemma D_p4_cast : (D_p4 : ℝ) = (D_p : ℝ) ^ 4",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "B_sc_le_C_sc",
+    "kind": "lemma",
+    "statement": "private lemma B_sc_le_C_sc : B_sc ≤ C_sc",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "B_sc_cast",
+    "kind": "lemma",
+    "statement": "private lemma B_sc_cast : (B_sc : ℝ) = (D_p : ℝ) * B_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "C_sc_cast",
+    "kind": "lemma",
+    "statement": "private lemma C_sc_cast : (C_sc : ℝ) = (D_p : ℝ) * C_n",
+    "plain": "The indicated cached scale or real cast equals the corresponding product or power of the base parameters."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hA_pos",
+    "kind": "lemma",
+    "statement": "private lemma hA_pos : (0 : ℝ) < A_R",
+    "plain": "The indicated natural scale or endpoint and its real cast are strictly positive under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hAB_lt",
+    "kind": "lemma",
+    "statement": "private lemma hAB_lt : A_R < B_R",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "hBC_lt",
+    "kind": "lemma",
+    "statement": "private lemma hBC_lt : B_R < C_R",
+    "plain": "The indicated consecutive endpoints are ordered under the explicit parameter conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cut3Num_eq",
+    "kind": "lemma",
+    "statement": "private lemma cut3Num_eq : ∀ {dx0 dx1 dx2 r : ℕ},\n    ((cut3Num dx0 dx1 dx2 r : ℝ) / (12 * (D_p : ℝ) ^ 3 * (D_x : ℝ) ^ 3)) =\n      cut3SumR ((dx0 : ℝ) / D_x) ((dx1 : ℝ) / D_x) (2 * ((dx2 : ℝ) / D_x)) ((r : ℝ) / ((D_p : ℝ) * D_x)) / 12",
+    "plain": "The natural cut volume evaluator equals the scaled real alternating cube formula."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "ramp3Num_eq",
+    "kind": "lemma",
+    "statement": "private lemma ramp3Num_eq : ∀ {dx0 dx1 dx2 r : ℕ},\n    ((ramp3Num dx0 dx1 dx2 r : ℝ) / (48 * (D_p : ℝ) ^ 4 * (D_x : ℝ) ^ 4)) =\n      ramp3SumR ((dx0 : ℝ) / D_x) ((dx1 : ℝ) / D_x) (2 * ((dx2 : ℝ) / D_x)) ((r : ℝ) / ((D_p : ℝ) * D_x)) / 48",
+    "plain": "The natural ramp evaluator equals the scaled real alternating fourth power formula."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mp_m_lo_props",
+    "kind": "lemma",
+    "statement": "private lemma mp_m_lo_props {pa_n : ℕ} {φ1 : ℝ} (hpa_le : (pa_n : ℝ) / D_p ≤ φ1)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b)\n    (hlt : B_sc < max B_sc (min C_sc (pa_n * D_x - D_p * (n0b + n1b + 2 * n2b)))) :\n    let m_lo_r : ℝ := ((max B_sc (min C_sc (pa_n * D_x - D_p * (n0b + n1b + 2 * n2b))) : ℕ) : ℝ) / ((D_p : ℝ) * D_x)\n    B_R < m_lo_r ∧ m_lo_r ≤ C_R ∧\n    (∀ y ∈ cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      m_lo_r ≤ φ1 - y 0 - y 1 - 2 * y 2)",
+    "plain": "A nonempty lower clipped support interval has the stated positive endpoint and affine denominator bounds."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mpDropFn_continuousOn",
+    "kind": "lemma",
+    "statement": "private lemma mpDropFn_continuousOn {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ContinuousOn (mpDropFn p pa_n pb_n n0b n1b n2b)\n      (cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x))",
+    "plain": "The reciprocal loss function for decreasing intervals is continuous on each valid cell."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mp_pt_gain",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mp_pt_gain {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b)\n    {y : Fin 3 → ℝ}\n    (hy : y ∈ cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)) :\n    ((1 / (y 0 * y 1 * y 2)) *\n      (∫ x3 in (max B_R (min C_R (φ1 - y 0 - y 1 - 2 * y 2)))..(max B_R (min C_R (φ2 - y 0 - y 1 - 2 * y 2))),\n        1 / (x3 * (φ2 - (y 0 + y 1 + y 2) - x3)))) / (φ2 - φ1) ≤\n      mpGainFn p pa_n pb_n knd n0a n0b n1a n1b n2a n2b y",
+    "plain": "The weighted support gain integral divided by the positive parameter difference is at most the decreasing interval gain bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mp_pt_drop",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mp_pt_drop {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b)\n    {y : Fin 3 → ℝ}\n    (hy : y ∈ cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)) :\n    mpDropFn p pa_n pb_n n0b n1b n2b y ≤\n      (1 / (y 0 * y 1 * y 2)) *\n        (∫ x3 in B_R..(max B_R (min C_R (φ1 - y 0 - y 1 - 2 * y 2))),\n          1 / (x3 * (φ1 - (y 0 + y 1 + y 2) - x3) * (φ2 - (y 0 + y 1 + y 2) - x3)))",
+    "plain": "The weighted reciprocal loss integral is at least the decreasing interval loss bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mp_pt",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mp_pt {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ∀ y ∈ cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      ((1 / (y 0 * y 1 * y 2)) * (G_fn φ2 y - G_fn φ1 y)) / (φ2 - φ1) ≤\n        mpGainFn p pa_n pb_n knd n0a n0b n1a n1b n2a n2b y - mpDropFn p pa_n pb_n n0b n1b n2b y",
+    "plain": "The normalized forward change of the weighted clipped integral is at most the decreasing interval gain bound minus its loss bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mp_pos_bound",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mp_pos_bound {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      mpGainFn p pa_n pb_n knd n0a n0b n1a n1b n2a n2b y ≤\n      ((evalMpLeaf pa_n pb_n knd n0a n0b n1a n1b n2a n2b).1 : ℝ) / S_3",
+    "plain": "The integral of the decreasing interval gain bound is at most the scaled natural gain coefficient."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mp_neg_bound",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mp_neg_bound {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ((evalMpLeaf pa_n pb_n knd n0a n0b n1a n1b n2a n2b).2 : ℝ) / S_3 ≤\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      mpDropFn p pa_n pb_n n0b n1b n2b y",
+    "plain": "The integral of the decreasing interval loss bound is at least the scaled natural loss coefficient."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mp_leaf_sound",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mp_leaf_sound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    (hpb_top : (pb_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    let r := evalMpLeaf pa_n pb_n knd n0a n0b n1a n1b n2a n2b\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      ((1 / (y 0 * y 1 * y 2)) * (G_fn φ2 y - G_fn φ1 y)) / (φ2 - φ1) ≤\n      ((r.1 : ℝ) - (r.2 : ℝ)) / S_3",
+    "plain": "The normalized forward change of the weighted clipped integral is at most the first natural coefficient minus the second, divided by the third order scale."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "mmDropFn_continuousOn",
+    "kind": "lemma",
+    "statement": "private lemma mmDropFn_continuousOn {pa_n pb_n : ℕ}\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ContinuousOn (mmDropFn p pa_n pb_n n0a n0b n1a n1b n2a n2b)\n      (cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x))",
+    "plain": "The reciprocal loss function for increasing intervals is continuous on each valid cell."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_pt_drop",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_pt_drop {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b)\n    {y : Fin 3 → ℝ}\n    (hy : y ∈ cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)) :\n    (1 / (y 0 * y 1 * y 2)) *\n      (∫ x3 in B_R..(max B_R (min C_R (φ1 - y 0 - y 1 - 2 * y 2))),\n        1 / (x3 * (φ1 - (y 0 + y 1 + y 2) - x3) * (φ2 - (y 0 + y 1 + y 2) - x3))) ≤\n      mmDropFn p pa_n pb_n n0a n0b n1a n1b n2a n2b y",
+    "plain": "The weighted reciprocal loss integral is at most the increasing interval loss bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_pt_gain",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_pt_gain {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b)\n    {y : Fin 3 → ℝ}\n    (hy : y ∈ cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x)) :\n    mmGainFn p pa_n pb_n knd n0a n0b n1a n1b n2a n2b y ≤\n      ((1 / (y 0 * y 1 * y 2)) *\n        (∫ x3 in (max B_R (min C_R (φ1 - y 0 - y 1 - 2 * y 2)))..(max B_R (min C_R (φ2 - y 0 - y 1 - 2 * y 2))),\n          1 / (x3 * (φ2 - (y 0 + y 1 + y 2) - x3)))) / (φ2 - φ1)",
+    "plain": "The weighted support gain integral divided by the positive parameter difference is at least the increasing interval gain bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_pt",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_pt {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ∀ y ∈ cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      ((1 / (y 0 * y 1 * y 2)) * (G_fn φ1 y - G_fn φ2 y)) / (φ2 - φ1) ≤\n        mmDropFn p pa_n pb_n n0a n0b n1a n1b n2a n2b y - mmGainFn p pa_n pb_n knd n0a n0b n1a n1b n2a n2b y",
+    "plain": "The normalized reverse change of the weighted clipped integral is at most the increasing interval loss bound minus its gain bound."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_pos_interior",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_pos_interior {pa_n pb_n : ℕ}\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b)\n    (h1 : ¬ pb_n * D_x ≤ D_p * (n0a + n1a + 2 * n2a) + B_sc)\n    (h2 : D_p * (n0b + n1b + 2 * n2b) + C_sc ≤ pa_n * D_x) :\n    let pa : ℝ := (pa_n : ℝ) / D_p\n    let pa_sc := pa_n * D_x\n    let f3 (a0 a1 a2 : Nat) : Nat :=\n      let rb := pa_sc - D_p * (a0 + a1 + a2 + B_n)\n      let rc := pa_sc - D_p * (a0 + a1 + a2 + C_n)\n      ceilDiv (S_v * D_x6 * D_p2) (a0 * a1 * a2 * B_n * rb * rb) +\n      ceilDiv (S_v * D_x6 * D_p2) (a0 * a1 * a2 * C_n * rc * rc)\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      ((C_R - B_R) / 2) *\n        (1 / (y 0 * y 1 * y 2 * B_R * (pa - (y 0 + y 1 + y 2) - B_R) ^ 2) +\n         1 / (y 0 * y 1 * y 2 * C_R * (pa - (y 0 + y 1 + y 2) - C_R) ^ 2)) ≤\n      (ceilDiv (S_3 * (n0b - n0a) * (n1b - n1a) * (n2b - n2a) * (C_n - B_n) * sumVerts3 f3 knd n0a n0b n1a n1b n2a n2b)\n        (2 * facDen knd * nVerts3 knd * D_x4 * S_v) : ℝ) / S_3",
+    "plain": "In the full support interior branch, the increasing interval loss integral is bounded above by the scaled vertex upper quadrature."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_pos_slab",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_pos_slab {pa_n pb_n : ℕ}\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b)\n    (h1 : ¬ pb_n * D_x ≤ D_p * (n0a + n1a + 2 * n2a) + B_sc) :\n    let pb : ℝ := (pb_n : ℝ) / D_p\n    let s_min_n := D_p * (n0a + n1a + 2 * n2a)\n    let pb_sc := pb_n * D_x\n    let rn := ramp3Num (n0b - n0a) (n1b - n1a) (n2b - n2a) (pb_sc - B_sc - s_min_n) -\n              ramp3Num (n0b - n0a) (n1b - n1a) (n2b - n2a) (pb_sc - C_sc - s_min_n)\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      (max 0 (pb - B_R - (y 0 + y 1 + 2 * y 2)) - max 0 (pb - C_R - (y 0 + y 1 + 2 * y 2))) /\n        (((n0a : ℝ) / D_x) * ((n1a : ℝ) / D_x) * ((n2a : ℝ) / D_x) ^ 3 * B_R) ≤\n      (ceilDiv (S_3 * D_x2 * rn) (48 * facDen knd * D_p4 * n0a * n1a * n2a * n2a * n2a * B_n) : ℝ) / S_3",
+    "plain": "In the partial support branch, the increasing interval loss integral is bounded above by the exact truncated affine ramp moment and the minimum reciprocal denominator."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_pos_bound",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_pos_bound {pa_n pb_n : ℕ}\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      mmDropFn p pa_n pb_n n0a n0b n1a n1b n2a n2b y ≤\n      ((evalMmLeaf pa_n pb_n knd n0a n0b n1a n1b n2a n2b).1 : ℝ) / S_3",
+    "plain": "The increasing interval loss integral is at most the first scaled natural coefficient of the leaf evaluator."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_neg_bound",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_neg_bound {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    ((evalMmLeaf pa_n pb_n knd n0a n0b n1a n1b n2a n2b).2 : ℝ) / S_3 ≤\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      mmGainFn p pa_n pb_n knd n0a n0b n1a n1b n2a n2b y",
+    "plain": "The increasing interval gain integral is at least the second scaled natural coefficient of the leaf evaluator."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "cell3_Mm_leaf_sound",
+    "kind": "lemma",
+    "statement": "private lemma cell3_Mm_leaf_sound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {pa_n pb_n : ℕ} {φ1 φ2 : ℝ}\n    (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p)\n    (hpb_top : (pb_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    {knd : CellKind} {n0a n0b n1a n1b n2a n2b : ℕ}\n    (hv : cell3Valid knd n0a n0b n1a n1b n2a n2b) :\n    let r := evalMmLeaf pa_n pb_n knd n0a n0b n1a n1b n2a n2b\n    ∫ y in cell3Set knd ((n0a : ℝ) / D_x) ((n0b : ℝ) / D_x) ((n1a : ℝ) / D_x) ((n1b : ℝ) / D_x) ((n2a : ℝ) / D_x) ((n2b : ℝ) / D_x),\n      ((1 / (y 0 * y 1 * y 2)) * (G_fn φ1 y - G_fn φ2 y)) / (φ2 - φ1) ≤\n      ((r.1 : ℝ) - (r.2 : ℝ)) / S_3",
+    "plain": "The normalized reverse change of the weighted clipped integral is at most the first natural coefficient minus the second, divided by the third order scale."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "root3Valid",
+    "kind": "lemma",
+    "statement": "private lemma root3Valid : cell3Valid .simp A_n B_n A_n B_n A_n B_n",
+    "plain": "The full ordered three dimensional root cell satisfies the coordinate validity conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "root4Valid",
+    "kind": "lemma",
+    "statement": "private lemma root4Valid : cell4Valid .simp A_n B_n A_n B_n A_n B_n B_n C_n",
+    "plain": "The full ordered four dimensional root cell satisfies the coordinate validity conditions."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "diff_le_Mp",
+    "kind": "lemma",
+    "statement": "private lemma diff_le_Mp {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {pa_n pb_n : ℕ} {t : BoxTree3}\n    (hpb_top : (pb_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    (htv : tree3Valid .simp t = true)\n    {φ1 φ2 : ℝ} (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p) :\n    let r := evalTree3 (evalMpLeaf pa_n pb_n) .simp t A_n B_n A_n B_n A_n B_n\n    I_fn ω φ2 - I_fn ω φ1 ≤ (φ2 - φ1) * (((r.1 : ℝ) - (r.2 : ℝ)) / S_3)",
+    "plain": "The forward integral difference is at most the positive parameter difference times the decreasing interval coefficient."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "diff_le_Mm",
+    "kind": "lemma",
+    "statement": "private lemma diff_le_Mm {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {pa_n pb_n : ℕ} {t : BoxTree3}\n    (hpb_top : (pb_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    (htv : tree3Valid .simp t = true)\n    {φ1 φ2 : ℝ} (hpa_le : (pa_n : ℝ) / D_p ≤ φ1) (h12 : φ1 < φ2) (hpb_ge : φ2 ≤ (pb_n : ℝ) / D_p) :\n    let r := evalTree3 (evalMmLeaf pa_n pb_n) .simp t A_n B_n A_n B_n A_n B_n\n    I_fn ω φ1 - I_fn ω φ2 ≤ (φ2 - φ1) * (((r.1 : ℝ) - (r.2 : ℝ)) / S_3)",
+    "plain": "The reverse integral difference is at most the positive parameter difference times the increasing interval coefficient."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "monotone_interval",
+    "kind": "lemma",
+    "statement": "lemma monotone_interval {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {pa_n pb_n : ℕ} {t : BoxTree3}\n    (_hpa_le_pb : pa_n ≤ pb_n) (hpb_top : (pb_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    (htv : tree3Valid .simp t = true)\n    (hok : let r := evalTree3 (evalMmLeaf pa_n pb_n) .simp t A_n B_n A_n B_n A_n B_n; r.1 ≤ r.2)\n    {φ : ℝ} (hlo : (pa_n : ℝ) / D_p ≤ φ) (hhi : φ ≤ (pb_n : ℝ) / D_p) :\n    I_fn ω φ ≤ I_fn ω ((pb_n : ℝ) / D_p)",
+    "plain": "A checked increasing interval bounds the integral by its value at the right endpoint."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "antitone_interval",
+    "kind": "lemma",
+    "statement": "lemma antitone_interval {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {pa_n pb_n : ℕ} {t : BoxTree3}\n    (_hpa_le_pb : pa_n ≤ pb_n) (hpb_top : (pb_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    (htv : tree3Valid .simp t = true)\n    (hok : let r := evalTree3 (evalMpLeaf pa_n pb_n) .simp t A_n B_n A_n B_n A_n B_n; r.1 ≤ r.2)\n    {φ : ℝ} (hlo : (pa_n : ℝ) / D_p ≤ φ) (hhi : φ ≤ (pb_n : ℝ) / D_p) :\n    I_fn ω φ ≤ I_fn ω ((pa_n : ℝ) / D_p)",
+    "plain": "A checked decreasing interval bounds the integral by its value at the left endpoint."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "peak_left_bound",
+    "kind": "lemma",
+    "statement": "lemma peak_left_bound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {bnd_n pa_n ps_n : ℕ} {t3 : BoxTree3} {t4 : BoxTree4}\n    (hpa_le_ps : pa_n ≤ ps_n) (hps_top : (ps_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    (htv3 : tree3Valid .simp t3 = true) (htv4 : tree4Valid .simp t4 = true)\n    (hok : let r := evalTree3 (evalMmLeaf pa_n ps_n) .simp t3 A_n B_n A_n B_n A_n B_n\n           let v := evalTree4 (eval4Leaf ps_n) .simp t4 A_n B_n A_n B_n A_n B_n B_n C_n\n           v * D_p + (r.1 - r.2) * (ps_n - pa_n) * 100 ≤ bnd_n * D_p)\n    {φ : ℝ} (hlo : (pa_n : ℝ) / D_p ≤ φ) (hhi : φ ≤ (ps_n : ℝ) / D_p) :\n    I_fn ω φ ≤ (bnd_n : ℝ) / S_4",
+    "plain": "A checked left half of a peak interval bounds the integral by the target."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "peak_right_bound",
+    "kind": "lemma",
+    "statement": "lemma peak_right_bound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {bnd_n ps_n pb_n : ℕ} {t3 : BoxTree3} {t4 : BoxTree4}\n    (hps_le_pb : ps_n ≤ pb_n) (hpb_top : (pb_n : ℝ) / D_p ≤ 5 * A_R + B_R)\n    (htv3 : tree3Valid .simp t3 = true) (htv4 : tree4Valid .simp t4 = true)\n    (hok : let r := evalTree3 (evalMpLeaf ps_n pb_n) .simp t3 A_n B_n A_n B_n A_n B_n\n           let v := evalTree4 (eval4Leaf ps_n) .simp t4 A_n B_n A_n B_n A_n B_n B_n C_n\n           v * D_p + (r.1 - r.2) * (pb_n - ps_n) * 100 ≤ bnd_n * D_p)\n    {φ : ℝ} (hlo : (ps_n : ℝ) / D_p ≤ φ) (hhi : φ ≤ (pb_n : ℝ) / D_p) :\n    I_fn ω φ ≤ (bnd_n : ℝ) / S_4",
+    "plain": "A checked right half of a peak interval bounds the integral by the target."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "trans_bound",
+    "kind": "lemma",
+    "statement": "lemma trans_bound {ω : ℝ → ℝ} (hω : IsBuchstabCore ω)\n    {bnd_n pa_n : ℕ} {t4 : BoxTree4}\n    (hpa_ge : D_p * (4 * B_n + C_n) ≤ pa_n * D_x)\n    (htv4 : tree4Valid .simp t4 = true)\n    (hok : evalTree4 (eval4TransLeaf pa_n) .simp t4 A_n B_n A_n B_n A_n B_n B_n C_n ≤ bnd_n)\n    {φ : ℝ} (hlo : (pa_n : ℝ) / D_p ≤ φ) :\n    I_fn ω φ ≤ (bnd_n : ℝ) / S_4",
+    "plain": "A checked transition bound controls every later parameter value."
+  },
+  {
+    "file": "Buchstab4DTChaining",
+    "name": "buchstab4dt_chaining",
+    "kind": "theorem",
+    "statement": "theorem buchstab4dt_chaining :\n∀ (p : Params4DT), task668ParamsValid p → ∀ {ω : ℝ → ℝ}, IsBuchstabCore ω →\n  (∀ {pa_n pb_n : ℕ} {t : BoxTree3},\n    pa_n ≤ pb_n → (pb_n : ℝ) / p.D_p ≤ 5 * p.A_R + p.B_R →\n    tree3Valid .simp t = true →\n    (let r := evalTree3 (evalMmLeaf p pa_n pb_n) .simp t p.A_n p.B_n p.A_n p.B_n p.A_n p.B_n; r.1 ≤ r.2) →\n    ∀ {φ : ℝ}, (pa_n : ℝ) / p.D_p ≤ φ → φ ≤ (pb_n : ℝ) / p.D_p →\n    I_fn p ω φ ≤ I_fn p ω ((pb_n : ℝ) / p.D_p)) ∧\n  (∀ {pa_n pb_n : ℕ} {t : BoxTree3},\n    pa_n ≤ pb_n → (pb_n : ℝ) / p.D_p ≤ 5 * p.A_R + p.B_R →\n    tree3Valid .simp t = true →\n    (let r := evalTree3 (evalMpLeaf p pa_n pb_n) .simp t p.A_n p.B_n p.A_n p.B_n p.A_n p.B_n; r.1 ≤ r.2) →\n    ∀ {φ : ℝ}, (pa_n : ℝ) / p.D_p ≤ φ → φ ≤ (pb_n : ℝ) / p.D_p →\n    I_fn p ω φ ≤ I_fn p ω ((pa_n : ℝ) / p.D_p)) ∧\n  (∀ {bnd_n pa_n ps_n : ℕ} {t3 : BoxTree3} {t4 : BoxTree4},\n    pa_n ≤ ps_n → (ps_n : ℝ) / p.D_p ≤ 5 * p.A_R + p.B_R →\n    tree3Valid .simp t3 = true → tree4Valid .simp t4 = true →\n    (let r := evalTree3 (evalMmLeaf p pa_n ps_n) .simp t3 p.A_n p.B_n p.A_n p.B_n p.A_n p.B_n\n     let v := evalTree4 (eval4Leaf p ps_n) .simp t4 p.A_n p.B_n p.A_n p.B_n p.A_n p.B_n p.B_n p.C_n\n     v * p.D_p + (r.1 - r.2) * (ps_n - pa_n) * 100 ≤ bnd_n * p.D_p) →\n    ∀ {φ : ℝ}, (pa_n : ℝ) / p.D_p ≤ φ → φ ≤ (ps_n : ℝ) / p.D_p →\n    I_fn p ω φ ≤ (bnd_n : ℝ) / p.S_4) ∧\n  (∀ {bnd_n ps_n pb_n : ℕ} {t3 : BoxTree3} {t4 : BoxTree4},\n    ps_n ≤ pb_n → (pb_n : ℝ) / p.D_p ≤ 5 * p.A_R + p.B_R →\n    tree3Valid .simp t3 = true → tree4Valid .simp t4 = true →\n    (let r := evalTree3 (evalMpLeaf p ps_n pb_n) .simp t3 p.A_n p.B_n p.A_n p.B_n p.A_n p.B_n\n     let v := evalTree4 (eval4Leaf p ps_n) .simp t4 p.A_n p.B_n p.A_n p.B_n p.A_n p.B_n p.B_n p.C_n\n     v * p.D_p + (r.1 - r.2) * (pb_n - ps_n) * 100 ≤ bnd_n * p.D_p) →\n    ∀ {φ : ℝ}, (ps_n : ℝ) / p.D_p ≤ φ → φ ≤ (pb_n : ℝ) / p.D_p →\n    I_fn p ω φ ≤ (bnd_n : ℝ) / p.S_4) ∧\n  (∀ {bnd_n pa_n : ℕ} {t4 : BoxTree4},\n    p.D_p * (4 * p.B_n + p.C_n) ≤ pa_n * p.D_x →\n    tree4Valid .simp t4 = true →\n    evalTree4 (eval4TransLeaf p pa_n) .simp t4 p.A_n p.B_n p.A_n p.B_n p.A_n p.B_n p.B_n p.C_n ≤ bnd_n →\n    ∀ {φ : ℝ}, (pa_n : ℝ) / p.D_p ≤ φ →\n    I_fn p ω φ ≤ (bnd_n : ℝ) / p.S_4)",
+    "plain": "The conjunction packages the proved monotone interval, antitone interval, peak and transition bounds."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "P",
+    "kind": "def",
+    "statement": "def P : Params4DT",
+    "plain": "Choose Dx 9963008, Dp 10000, A 3435520, B 4083200, C 4528640, Sv ten to the tenth, S3 ten to the thirteenth and S4 ten to the fifteenth. Cache the indicated powers of Dx and Dp and the products Dp times B and Dp times C in the remaining entries."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "targetBoundNat",
+    "kind": "def",
+    "statement": "def targetBoundNat : Nat",
+    "plain": "The target numerator is 183164000000 with output scale 1000000000000000."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "BND_R",
+    "kind": "def",
+    "statement": "private noncomputable def BND_R : ℝ",
+    "plain": "The real target is the target numerator divided by the fourth order output scale."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "hP_valid",
+    "kind": "lemma",
+    "statement": "private lemma hP_valid : task668ParamsValid P",
+    "plain": "The concrete parameter vector satisfies every positivity, ordering and scaling identity used by the verifier."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftTree_0",
+    "kind": "def",
+    "statement": "def leftTree_0 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftValid_0",
+    "kind": "theorem",
+    "statement": "theorem leftValid_0 : tree3Valid .simp leftTree_0 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftOk_0",
+    "kind": "theorem",
+    "statement": "theorem leftOk_0 : let r := evalTree3 (evalMmLeaf P 20000 20150) .simp leftTree_0 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; r.1 ≤ r.2",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftTree_1",
+    "kind": "def",
+    "statement": "def leftTree_1 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftValid_1",
+    "kind": "theorem",
+    "statement": "theorem leftValid_1 : tree3Valid .simp leftTree_1 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftOk_1",
+    "kind": "theorem",
+    "statement": "theorem leftOk_1 : let r := evalTree3 (evalMmLeaf P 20150 20250) .simp leftTree_1 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; r.1 ≤ r.2",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftTree_2",
+    "kind": "def",
+    "statement": "def leftTree_2 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftValid_2",
+    "kind": "theorem",
+    "statement": "theorem leftValid_2 : tree3Valid .simp leftTree_2 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "leftOk_2",
+    "kind": "theorem",
+    "statement": "theorem leftOk_2 : let r := evalTree3 (evalMmLeaf P 20250 20300) .simp leftTree_2 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; r.1 ≤ r.2",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLTree_0",
+    "kind": "def",
+    "statement": "def peakLTree_0 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRTree_0",
+    "kind": "def",
+    "statement": "def peakRTree_0 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Tree_0",
+    "kind": "def",
+    "statement": "def peak4Tree_0 : BoxTree4",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLValid_0",
+    "kind": "theorem",
+    "statement": "theorem peakLValid_0 : tree3Valid .simp peakLTree_0 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRValid_0",
+    "kind": "theorem",
+    "statement": "theorem peakRValid_0 : tree3Valid .simp peakRTree_0 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Valid_0",
+    "kind": "theorem",
+    "statement": "theorem peak4Valid_0 : tree4Valid .simp peak4Tree_0 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLOk_0",
+    "kind": "theorem",
+    "statement": "theorem peakLOk_0 : let r := evalTree3 (evalMmLeaf P 20300 20318) .simp peakLTree_0 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20318) .simp peak4Tree_0 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20318 - 20300) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakROk_0",
+    "kind": "theorem",
+    "statement": "theorem peakROk_0 : let r := evalTree3 (evalMpLeaf P 20318 20327) .simp peakRTree_0 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20318) .simp peak4Tree_0 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20327 - 20318) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLTree_1",
+    "kind": "def",
+    "statement": "def peakLTree_1 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRTree_1",
+    "kind": "def",
+    "statement": "def peakRTree_1 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Tree_1",
+    "kind": "def",
+    "statement": "def peak4Tree_1 : BoxTree4",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLValid_1",
+    "kind": "theorem",
+    "statement": "theorem peakLValid_1 : tree3Valid .simp peakLTree_1 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRValid_1",
+    "kind": "theorem",
+    "statement": "theorem peakRValid_1 : tree3Valid .simp peakRTree_1 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Valid_1",
+    "kind": "theorem",
+    "statement": "theorem peak4Valid_1 : tree4Valid .simp peak4Tree_1 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLOk_1",
+    "kind": "theorem",
+    "statement": "theorem peakLOk_1 : let r := evalTree3 (evalMmLeaf P 20327 20335) .simp peakLTree_1 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20335) .simp peak4Tree_1 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20335 - 20327) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakROk_1",
+    "kind": "theorem",
+    "statement": "theorem peakROk_1 : let r := evalTree3 (evalMpLeaf P 20335 20341) .simp peakRTree_1 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20335) .simp peak4Tree_1 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20341 - 20335) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLTree_2",
+    "kind": "def",
+    "statement": "def peakLTree_2 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRTree_2",
+    "kind": "def",
+    "statement": "def peakRTree_2 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Tree_2",
+    "kind": "def",
+    "statement": "def peak4Tree_2 : BoxTree4",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLValid_2",
+    "kind": "theorem",
+    "statement": "theorem peakLValid_2 : tree3Valid .simp peakLTree_2 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRValid_2",
+    "kind": "theorem",
+    "statement": "theorem peakRValid_2 : tree3Valid .simp peakRTree_2 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Valid_2",
+    "kind": "theorem",
+    "statement": "theorem peak4Valid_2 : tree4Valid .simp peak4Tree_2 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLOk_2",
+    "kind": "theorem",
+    "statement": "theorem peakLOk_2 : let r := evalTree3 (evalMmLeaf P 20341 20346) .simp peakLTree_2 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20346) .simp peak4Tree_2 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20346 - 20341) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakROk_2",
+    "kind": "theorem",
+    "statement": "theorem peakROk_2 : let r := evalTree3 (evalMpLeaf P 20346 20352) .simp peakRTree_2 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20346) .simp peak4Tree_2 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20352 - 20346) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLTree_3",
+    "kind": "def",
+    "statement": "def peakLTree_3 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRTree_3",
+    "kind": "def",
+    "statement": "def peakRTree_3 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Tree_3",
+    "kind": "def",
+    "statement": "def peak4Tree_3 : BoxTree4",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLValid_3",
+    "kind": "theorem",
+    "statement": "theorem peakLValid_3 : tree3Valid .simp peakLTree_3 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakRValid_3",
+    "kind": "theorem",
+    "statement": "theorem peakRValid_3 : tree3Valid .simp peakRTree_3 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peak4Valid_3",
+    "kind": "theorem",
+    "statement": "theorem peak4Valid_3 : tree4Valid .simp peak4Tree_3 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakLOk_3",
+    "kind": "theorem",
+    "statement": "theorem peakLOk_3 : let r := evalTree3 (evalMmLeaf P 20352 20362) .simp peakLTree_3 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20362) .simp peak4Tree_3 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20362 - 20352) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "peakROk_3",
+    "kind": "theorem",
+    "statement": "theorem peakROk_3 : let r := evalTree3 (evalMpLeaf P 20362 20375) .simp peakRTree_3 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; let v := evalTree4 (eval4Leaf P 20362) .simp peak4Tree_3 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n; v * P.D_p + (r.1 - r.2) * (20375 - 20362) * 100 ≤ targetBoundNat * P.D_p",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightTree_0",
+    "kind": "def",
+    "statement": "def rightTree_0 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightValid_0",
+    "kind": "theorem",
+    "statement": "theorem rightValid_0 : tree3Valid .simp rightTree_0 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightOk_0",
+    "kind": "theorem",
+    "statement": "theorem rightOk_0 : let r := evalTree3 (evalMpLeaf P 20375 20405) .simp rightTree_0 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; r.1 ≤ r.2",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightTree_1",
+    "kind": "def",
+    "statement": "def rightTree_1 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightValid_1",
+    "kind": "theorem",
+    "statement": "theorem rightValid_1 : tree3Valid .simp rightTree_1 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightOk_1",
+    "kind": "theorem",
+    "statement": "theorem rightOk_1 : let r := evalTree3 (evalMpLeaf P 20405 20495) .simp rightTree_1 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; r.1 ≤ r.2",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightTree_2",
+    "kind": "def",
+    "statement": "def rightTree_2 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightValid_2",
+    "kind": "theorem",
+    "statement": "theorem rightValid_2 : tree3Valid .simp rightTree_2 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightOk_2",
+    "kind": "theorem",
+    "statement": "theorem rightOk_2 : let r := evalTree3 (evalMpLeaf P 20495 20750) .simp rightTree_2 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; r.1 ≤ r.2",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightTree_3",
+    "kind": "def",
+    "statement": "def rightTree_3 : BoxTree3",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightValid_3",
+    "kind": "theorem",
+    "statement": "theorem rightValid_3 : tree3Valid .simp rightTree_3 = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "rightOk_3",
+    "kind": "theorem",
+    "statement": "theorem rightOk_3 : let r := evalTree3 (evalMpLeaf P 20750 21300) .simp rightTree_3 P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n; r.1 ≤ r.2",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "transTree",
+    "kind": "def",
+    "statement": "def transTree : BoxTree4",
+    "plain": "Store the exact subdivision tree used for this named parameter interval."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "transValid",
+    "kind": "theorem",
+    "statement": "theorem transValid : tree4Valid .simp transTree = true",
+    "plain": "The stored subdivision tree respects every required cell shape."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "transOk",
+    "kind": "theorem",
+    "statement": "theorem transOk : evalTree4 (eval4TransLeaf P 21300) .simp transTree P.A_n P.B_n P.A_n P.B_n P.A_n P.B_n P.B_n P.C_n ≤ targetBoundNat",
+    "plain": "The exact natural arithmetic evaluation of the stored tree satisfies the displayed directed inequality."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "domain_eq_cell4",
+    "kind": "lemma",
+    "statement": "private lemma domain_eq_cell4 :\n    domain (fun j => (r0j17_lo j : ℝ)) (fun j => (r0j17_hi j : ℝ)) =\n      cell4Set .simp P.A_R P.B_R P.A_R P.B_R P.A_R P.B_R P.B_R P.C_R",
+    "plain": "The lab domain with the exact rational endpoints is exactly the simplex cell with the concrete scaled endpoints."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "main_bound",
+    "kind": "theorem",
+    "statement": "theorem main_bound {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (_hφtop : φ ≤ (7 / 2 : ℝ)) :\n    buchstabIntegral ω 2 (fun j => (r0j17_lo j : ℝ)) (fun j => (r0j17_hi j : ℝ)) φ ≤\n      ((45791 / 250000000) : ℝ)",
+    "plain": "For every zero extended Buchstab function and every real parameter from two to seven halves, the row one D2,17 integral is at most 45791 divided by 250000000."
+  },
+  {
+    "file": "Decomp587lR0J17",
+    "name": "r0j17_short",
+    "kind": "theorem",
+    "statement": "theorem r0j17_short {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)\n    {φ : ℝ} (hφ : 2 ≤ φ) (hφtop : φ ≤ (7 / 2 : ℝ)) :\n    buchstabIntegral ω 2 (fun j => (r0j17_lo j : ℝ)) (fun j => (r0j17_hi j : ℝ)) φ ≤\n      ((45791 / 250000000) : ℝ)",
+    "plain": "For every zero extended Buchstab function and every real parameter from two to seven halves, the lab row one D2,17 integral is at most 45791 divided by 250000000."
+  }
+]

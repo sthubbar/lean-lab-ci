@@ -1,4 +1,4 @@
-import LeanLab.ChenDoubleSieve.Burst9Top
+import LeanLab.ChenDoubleSieve.Task659Vacuity
 import LeanLab.ChenDoubleSieve.Decomp587l
 
 /-!
@@ -16,9 +16,8 @@ open Wu04Functional Task587
 theorem short_hypotheses_nonempty :
     ∃ ω : ℝ → ℝ, IsBuchstab ω ∧ ZeroBelowOne ω ∧
       (2 : ℝ) ≤ 2 ∧ (2 : ℝ) ≤ 7 / 2 := by
-  obtain ⟨F, f, ω, hF, hω⟩ := Task275.standard_functions
-  exact ⟨Burst9Top.zeroExt ω, Burst9Top.zeroExt_isBuchstab hω,
-    Burst9Top.zeroExt_zero ω, le_rfl, by norm_num⟩
+  obtain ⟨ω, hω, hz⟩ := Task659Vacuity.exists_buchstab_zeroBelowOne
+  exact ⟨ω, hω, hz, le_rfl, by norm_num⟩
 
 /-- The rational lower corners belong to all five ordered domains. -/
 theorem lower_corners_mem :

@@ -50,3 +50,7 @@ LeanLab/LeanLab/Ported/Prove2Me/Decomp587jR1J13.lean | Prove2Me https://beta.pro
 LeanLab/LeanLab/Ported/Prove2Me/Decomp587jR1J14.lean | Prove2Me https://beta.prove2.me | mission 87d77bf0 | theorem LL_Decomp587j.r1j14_short | kmehltretter82 | Apache 2.0 | Lean 4.35 port using lab definitions
 LeanLab/LeanLab/Ported/Prove2Me/Decomp587jR1J15.lean | Prove2Me https://beta.prove2.me | mission 87d77bf0 | theorem LL_Decomp587j.r1j15_short | kmehltretter82 | Apache 2.0 | Lean 4.35 port using lab definitions
 LeanLab/LeanLab/Ported/Prove2Me/Decomp587jR1J16.lean | Prove2Me https://beta.prove2.me | mission 87d77bf0 | theorem LL_Decomp587j.r1j16_short | kmehltretter82 | Apache 2.0 | Lean 4.35 port using lab definitions
+
+LeanLab/LeanLab/Ported/Prove2Me/LL_Decomp1543c_Core.lean | Prove2Me mission 504a8119 | LL_Decomp1543c.wc_lemma3 | kmehltretter82 | accepted bb7e71c5-a5ed-48f3-b6c5-568b523c390c on 2026-11-19 | Apache 2.0 | https://beta.prove2.me
+
+LeanLab/LeanLab/Ported/Prove2Me/LL_Decomp1543c_wc_lemma3.lean | Prove2Me mission 504a8119 | LL_Decomp1543c.wc_lemma3 | kmehltretter82 | accepted bb7e71c5-a5ed-48f3-b6c5-568b523c390c on 2026-11-19 | Apache 2.0 | https://beta.prove2.me

@@ -1,0 +1,473 @@
+{
+  "analytic": [
+    {
+      "file": "Burst4Split.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst4Split.corrections_real",
+      "statement": "theorem corrections_real {F f : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192\n      \u2203 H h : \u211d \u2192 \u211d, RepresentsCorrections F f \u03b4 H h"
+    },
+    {
+      "file": "Burst4Split.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst4Split.proposition1",
+      "statement": "theorem proposition1 {F f : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 \u2200 s \u2208 Icc (1 : \u211d) 10, 0 \u2264 H s \u2227 0 \u2264 h s"
+    },
+    {
+      "file": "Burst4Split.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst4Split.corollary1",
+      "statement": "theorem corollary1 {F f : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 AntitoneOn H (Icc (1 : \u211d) 10)"
+    },
+    {
+      "file": "Burst4Split.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst4Split.proposition3",
+      "statement": "theorem proposition3 {F f \u03c9 : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) (h\u03c9 : IsBuchstab \u03c9) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 Proposition3 H \u03c9"
+    },
+    {
+      "file": "Burst4Split.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst4Split.proposition4",
+      "statement": "theorem proposition4 {F f \u03c9 : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) (h\u03c9 : IsBuchstab \u03c9) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 Proposition4 H \u03c9"
+    },
+    {
+      "file": "Burst4Split.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst4Split.table1_Psi2",
+      "statement": "theorem table1_Psi2 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) :\n    \u2200 i : Fin 4, tablePsi \u27e8i.val, by omega\u27e9 \u2264 Psi2 \u03c9 (tableParams i)"
+    },
+    {
+      "file": "Burst4Split.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst4Split.integral_matrix_bound",
+      "statement": "theorem integral_matrix_bound : Wu04Table.IntegralMatrixBound"
+    },
+    {
+      "file": "Burst8P2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst8P2.prop1_upper_eps",
+      "statement": "theorem prop1_upper_eps {F f : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 k : \u2115, 1 \u2264 k \u2192 \u2200 s \u2208 Icc (1 : \u211d) 10,\n      \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N\u2080 : \u2115, Wu04.UpperCandidate F \u03b4 k N\u2080 s (-\u03b5)"
+    },
+    {
+      "file": "Burst8P2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst8P2.prop1_lower_eps",
+      "statement": "theorem prop1_lower_eps {F f : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 k : \u2115, 1 \u2264 k \u2192 \u2200 s \u2208 Icc (1 : \u211d) 10,\n      \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N\u2080 : \u2115, Wu04.LowerCandidate f \u03b4 k N\u2080 s (-\u03b5)"
+    },
+    {
+      "file": "Burst8P2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst8P2.proposition2_H",
+      "statement": "theorem proposition2_H {F f : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 \u2200 s sp : \u211d, 2 \u2264 s \u2192 s \u2264 sp \u2192 sp \u2264 10 \u2192\n        H sp + (\u222b t in (s - 1)..(sp - 1), h t / t) \u2264 H s"
+    },
+    {
+      "file": "Burst8P2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst8P2.proposition2_h",
+      "statement": "theorem proposition2_h {F f : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 \u2200 s sp : \u211d, 2 \u2264 s \u2192 s \u2264 sp \u2192 sp \u2264 10 \u2192\n        h sp + (\u222b t in (s - 1)..(sp - 1), H t / t) \u2264 h s"
+    },
+    {
+      "file": "Burst8P2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst8P2.lemma51",
+      "statement": "theorem lemma51 {F f \u03c9 : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) (h\u03c9 : IsBuchstab \u03c9) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 \u2200 s sp : \u211d, Admissible3 s sp \u2192\n        Psi1 \u03c9 s sp + 1 / 2 * (\u222b t in (1 - 1 / s)..(1 - 1 / sp), h (sp * t) / (t * (1 - t))) +\n          H sp \u2264 H s"
+    },
+    {
+      "file": "Burst8P2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst8P2.lemma52",
+      "statement": "theorem lemma52 {F f \u03c9 : \u211d \u2192 \u211d} (hF : IsLinearSieve F f) (h\u03c9 : IsBuchstab \u03c9) :\n    \u2203 \u03b4\u2080 : \u211d, 0 < \u03b4\u2080 \u2227 \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u03b4 < \u03b4\u2080 \u2192 \u2200 H h : \u211d \u2192 \u211d,\n      RepresentsCorrections F f \u03b4 H h \u2192 \u2200 p : Params, Admissible3 p.s p.sp \u2192\n        p.s \u2264 p.k3 \u2192 p.k3 < p.k2 \u2192 p.k2 < p.k1 \u2192 p.k1 \u2264 p.sp \u2192\n        Psi2 \u03c9 p + 4 / 5 * H p.sp + 1 / 5 * H p.k1 +\n          1 / 5 * (\u222b t in (1 - 1 / p.s)..(1 - 1 / p.sp), h (p.sp * t) / (t * (1 - t))) +\n          1 / 5 * (\u222b t in (1 - 1 / p.k2)..(1 - 1 / p.sp), h (p.sp * t) / (t * (1 - t))) +\n          1 / 5 * (\u222b t in (1 - 1 / p.k3)..(1 - 1 / p.sp), h (p.sp * t) / (t * (1 - t))) +\n          1 / 5 * D1 H p + 1 / 5 * D2 H p + 1 / 5 * D3 H p \u2264 H p.s"
+    },
+    {
+      "file": "Decomp275b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task275.weighted_sieve_power",
+      "statement": "theorem weighted_sieve_power : \u2203 C : \u211d, 0 \u2264 C \u2227 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      weighted (sieveTerms N) \u2264 4 * (D12 N : \u211d) + C * (N : \u211d) ^ (11 / 12 : \u211d)"
+    },
+    {
+      "file": "Decomp275b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task275.positive_estimates",
+      "statement": "theorem positive_estimates (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      (integralTerms F f \u03c9 0 - \u03b5) * \u0398 N \u2264 sieveTerms N 0 \u2227\n      (integralTerms F f \u03c9 4 - \u03b5) * \u0398 N \u2264 sieveTerms N 4 \u2227\n      (integralTerms F f \u03c9 5 - \u03b5) * \u0398 N \u2264 sieveTerms N 5"
+    },
+    {
+      "file": "Decomp275b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task275.negative_estimates",
+      "statement": "theorem negative_estimates (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      \u2200 i : Fin 12, i \u2208 ({1, 2, 3, 6, 7, 8, 9, 10, 11} : Finset (Fin 12)) \u2192\n        sieveTerms N i \u2264 (integralTerms F f \u03c9 i + \u03b5) * \u0398 N"
+    },
+    {
+      "file": "Decomp275b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task275.integral_evaluation",
+      "statement": "theorem integral_evaluation (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) :\n    (3344307 : \u211d) / 4000000 \u2264 weighted (integralTerms F f \u03c9) / 4"
+    },
+    {
+      "file": "Decomp315a.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task315.first_half",
+      "statement": "theorem first_half : \u2203 C : \u211d, 0 \u2264 C \u2227 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      2 * sieveTerms N 0 - sieveTerms N 1 - sieveTerms N 3 +\n        sieveTerms N 4 + sieveTerms N 5 - 2 * sieveTerms N 7 -\n        sieveTerms N 9 + deltaOne N \u2264\n      2 * (D12 N : \u211d) + C * (N : \u211d) ^ (11 / 12 : \u211d)"
+    },
+    {
+      "file": "Decomp315b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task315.lower_F0",
+      "statement": "theorem lower_F0 (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      (integralTerms F f \u03c9 0 - \u03b5) * \u0398 N \u2264 sieveTerms N 0"
+    },
+    {
+      "file": "Decomp315b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task315.lower_F4",
+      "statement": "theorem lower_F4 (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      (integralTerms F f \u03c9 4 - \u03b5) * \u0398 N \u2264 sieveTerms N 4"
+    },
+    {
+      "file": "Decomp315b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task315.lower_F5",
+      "statement": "theorem lower_F5 (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      (integralTerms F f \u03c9 5 - \u03b5) * \u0398 N \u2264 sieveTerms N 5"
+    },
+    {
+      "file": "Decomp315c.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task315.basic_upper",
+      "statement": "theorem basic_upper (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      \u2200 i : Fin 12, i \u2208 ({1, 2, 3} : Finset (Fin 12)) \u2192\n        sieveTerms N i \u2264 (integralTerms F f \u03c9 i + \u03b5) * \u0398 N"
+    },
+    {
+      "file": "Decomp315c.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task315.switched_upper",
+      "statement": "theorem switched_upper (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      \u2200 i : Fin 12, i \u2208 ({6, 7, 9} : Finset (Fin 12)) \u2192\n        sieveTerms N i \u2264 (integralTerms F f \u03c9 i + \u03b5) * \u0398 N"
+    },
+    {
+      "file": "Decomp315c.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task315.refined_upper",
+      "statement": "theorem refined_upper (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) : \u2200 \u03b5 : \u211d, 0 < \u03b5 \u2192 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      \u2200 i : Fin 12, i \u2208 ({8, 10, 11} : Finset (Fin 12)) \u2192\n        sieveTerms N i \u2264 (integralTerms F f \u03c9 i + \u03b5) * \u0398 N"
+    },
+    {
+      "file": "Decomp348a.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task348.main0_lower",
+      "statement": "theorem main0_lower (F f : \u211d \u2192 \u211d) (h : IsLinearSieve F f) :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 B : \u211d, 0 < B \u2227 \u2203 N0 : \u2115,\n      \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        main0 f B N - \u03b7 * \u0398 N \u2264 sieveTerms N 0"
+    },
+    {
+      "file": "Decomp348b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task348.main4_lower",
+      "statement": "theorem main4_lower (F f : \u211d \u2192 \u211d) (h : IsLinearSieve F f) :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 B : \u211d, 0 < B \u2227 \u2203 N0 : \u2115,\n      \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        main4 f B N - \u03b7 * \u0398 N \u2264 sieveTerms N 4"
+    },
+    {
+      "file": "Decomp348c.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task348.main5_lower",
+      "statement": "theorem main5_lower (F f : \u211d \u2192 \u211d) (h : IsLinearSieve F f) :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 B : \u211d, 0 < B \u2227 \u2203 N0 : \u2115,\n      \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        main5 f B N - \u03b7 * \u0398 N \u2264 sieveTerms N 5"
+    },
+    {
+      "file": "DecompJ344.lean",
+      "name": "LeanLab.ChenDoubleSieve.thm2_analytic_link",
+      "statement": "theorem thm2_analytic_link (h : (83607 : \u211d) / 100000 \u2264 0.83607) : ChenLower 0.836"
+    }
+  ],
+  "claimed": [
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_9",
+      "statement": "theorem I2_r0_9 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 0 \u2264 (870161/62500000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_10",
+      "statement": "theorem I2_r0_10 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 1 \u2264 (9342453/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_11",
+      "statement": "theorem I2_r0_11 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 2 \u2264 (2272569/500000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_13",
+      "statement": "theorem I2_r0_13 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 4 \u2264 (24633499/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_14",
+      "statement": "theorem I2_r0_14 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 5 \u2264 (14345377/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_15",
+      "statement": "theorem I2_r0_15 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 6 \u2264 (662003/125000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_16",
+      "statement": "theorem I2_r0_16 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 7 \u2264 (18727/250000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_17",
+      "statement": "theorem I2_r0_17 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 8 \u2264 (45791/250000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r0_19",
+      "statement": "theorem I2_r0_19 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 0) 10 \u2264 (70737/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_9",
+      "statement": "theorem I2_r1_9 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 1) 0 \u2264 (14713151/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_10",
+      "statement": "theorem I2_r1_10 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 1) 1 \u2264 (8347739/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_11",
+      "statement": "theorem I2_r1_11 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 1) 2 \u2264 (2294543/500000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r1_17",
+      "statement": "theorem I2_r1_17 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 1) 8 \u2264 (92979/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_9",
+      "statement": "theorem I2_r2_9 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 2) 0 \u2264 (8633809/500000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_10",
+      "statement": "theorem I2_r2_10 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 2) 1 \u2264 (3714811/500000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_11",
+      "statement": "theorem I2_r2_11 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 2) 2 \u2264 (5342719/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_14",
+      "statement": "theorem I2_r2_14 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 2) 5 \u2264 (54491/10000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r2_16",
+      "statement": "theorem I2_r2_16 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 2) 7 \u2264 (42971/500000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_9",
+      "statement": "theorem I2_r3_9 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 3) 0 \u2264 (12408337/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_10",
+      "statement": "theorem I2_r3_10 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 3) 1 \u2264 (2710363/500000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_11",
+      "statement": "theorem I2_r3_11 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 3) 2 \u2264 (1821597/500000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_13",
+      "statement": "theorem I2_r3_13 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 3) 4 \u2264 (8106273/1000000000 : \u211d)"
+    },
+    {
+      "file": "Burst9I2.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Psi2.I2_r3_14",
+      "statement": "theorem I2_r3_14 {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9) :\n    I2 \u03c9 (tableParams 3) 5 \u2264 (2640381/1000000000 : \u211d)"
+    }
+  ],
+  "matrix": [
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_0",
+      "statement": "theorem entry_0_0 : (candidateMatrixQ 0 0 : \u211d) \u2264 integralMatrix 0 0"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_1",
+      "statement": "theorem entry_0_1 : (candidateMatrixQ 0 1 : \u211d) \u2264 integralMatrix 0 1"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_2",
+      "statement": "theorem entry_0_2 : (candidateMatrixQ 0 2 : \u211d) \u2264 integralMatrix 0 2"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_3",
+      "statement": "theorem entry_0_3 : (candidateMatrixQ 0 3 : \u211d) \u2264 integralMatrix 0 3"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_0_4",
+      "statement": "theorem entry_0_4 : (candidateMatrixQ 0 4 : \u211d) \u2264 integralMatrix 0 4"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_0",
+      "statement": "theorem entry_1_0 : (candidateMatrixQ 1 0 : \u211d) \u2264 integralMatrix 1 0"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_1",
+      "statement": "theorem entry_1_1 : (candidateMatrixQ 1 1 : \u211d) \u2264 integralMatrix 1 1"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_2",
+      "statement": "theorem entry_1_2 : (candidateMatrixQ 1 2 : \u211d) \u2264 integralMatrix 1 2"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_1_3",
+      "statement": "theorem entry_1_3 : (candidateMatrixQ 1 3 : \u211d) \u2264 integralMatrix 1 3"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_0",
+      "statement": "theorem entry_2_0 : (candidateMatrixQ 2 0 : \u211d) \u2264 integralMatrix 2 0"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_1",
+      "statement": "theorem entry_2_1 : (candidateMatrixQ 2 1 : \u211d) \u2264 integralMatrix 2 1"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_2",
+      "statement": "theorem entry_2_2 : (candidateMatrixQ 2 2 : \u211d) \u2264 integralMatrix 2 2"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_2_3",
+      "statement": "theorem entry_2_3 : (candidateMatrixQ 2 3 : \u211d) \u2264 integralMatrix 2 3"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_3_0",
+      "statement": "theorem entry_3_0 : (candidateMatrixQ 3 0 : \u211d) \u2264 integralMatrix 3 0"
+    },
+    {
+      "file": "Burst9Matrix.lean",
+      "name": "LeanLab.ChenDoubleSieve.Burst9Matrix.entry_5_0",
+      "statement": "theorem entry_5_0 : (candidateMatrixQ 5 0 : \u211d) \u2264 integralMatrix 5 0"
+    }
+  ],
+  "crossing": [
+    {
+      "file": "Decomp347j.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task347.crossing_compensation",
+      "statement": "theorem crossing_compensation : \u2203 C : \u211d, 0 \u2264 C \u2227 \u2203 N0 : \u2115,\n    \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n      crossingDefect N \u2264 transportReserve N + C * (N : \u211d) ^ (11 / 12 : \u211d)"
+    }
+  ],
+  "sieve": [
+    {
+      "file": "Decomp349a.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task349.basic_finite_upper",
+      "statement": "theorem basic_finite_upper (F f : \u211d \u2192 \u211d) (h : IsLinearSieve F f) :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 B : \u211d, 0 < B \u2227 \u2203 N0 : \u2115,\n      \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        \u2200 i : Fin 12, i \u2208 ({1, 2, 3} : Finset (Fin 12)) \u2192\n          sieveTerms N i \u2264 basicMain F B N i + \u03b7 * \u0398 N"
+    },
+    {
+      "file": "Decomp349b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task349.switched_finite_upper",
+      "statement": "theorem switched_finite_upper :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 N0 : \u2115,\n      \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        \u2200 i : Fin 12, i \u2208 ({6, 7, 9} : Finset (Fin 12)) \u2192\n          sieveTerms N i \u2264 switchedMain N i + \u03b7 * \u0398 N"
+    },
+    {
+      "file": "Decomp349c.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task349.refined_finite_upper",
+      "statement": "theorem refined_finite_upper (\u03c9 : \u211d \u2192 \u211d) (h\u03c9 : IsBuchstab \u03c9) :\n    \u2200 \u03b7 : \u211d, 0 < \u03b7 \u2192 \u2203 N0 : \u2115,\n      \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        \u2200 i : Fin 12, i \u2208 ({8, 10, 11} : Finset (Fin 12)) \u2192\n          sieveTerms N i \u2264 refinedMain \u03c9 N i + \u03b7 * \u0398 N"
+    },
+    {
+      "file": "Decomp363b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task363.linear_sieve_with_remainder",
+      "statement": "theorem linear_sieve_with_remainder (F f : \u211d \u2192 \u211d) (h : IsLinearSieve F f) :\n    \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 C : \u211d, 0 \u2264 C \u2227\n      \u2200 B : \u211d, 0 < B \u2192 \u2203 N0 : \u2115, \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        liMain0 f B N - \u03b4 * (Wu04.li N * lowerDensity N) -\n          C * rawRemainder B N \u2264 sieveTerms N 0"
+    },
+    {
+      "file": "Decomp366a.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task366.pair_linear_sieve_with_remainder",
+      "statement": "theorem pair_linear_sieve_with_remainder (F f : \u211d \u2192 \u211d) (h : IsLinearSieve F f) :\n    \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 C : \u211d, 0 \u2264 C \u2227\n      \u2200 B : \u211d, 0 < B \u2192 \u2203 N0 : \u2115, \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        liMain4 f B N - \u03b4 * \u0398 N * lowerTotientMass4 N -\n          C * rawRemainder4 B N \u2264 sieveTerms N 4"
+    },
+    {
+      "file": "Decomp367a.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task367.pair_linear_sieve_with_remainder",
+      "statement": "theorem pair_linear_sieve_with_remainder (F f : \u211d \u2192 \u211d) (h : IsLinearSieve F f) :\n    \u2200 \u03b4 : \u211d, 0 < \u03b4 \u2192 \u2203 C : \u211d, 0 \u2264 C \u2227\n      \u2200 B : \u211d, 0 < B \u2192 \u2203 N0 : \u2115, \u2200 N : \u2115, Even N \u2192 N0 \u2264 N \u2192\n        liMain5 f B N - \u03b4 * \u0398 N * lowerTotientMass5 N -\n          C * rawRemainder5 B N \u2264 sieveTerms N 5"
+    }
+  ],
+  "tuple": [
+    {
+      "file": "Decomp349b.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task349.switched_sum_tendsto",
+      "statement": "theorem switched_sum_tendsto :\n    \u2200 i : Fin 12, i \u2208 ({6, 7, 9} : Finset (Fin 12)) \u2192\n      Tendsto (fun N : \u2115 => 8 * log N * switchedSum N i) evenAtTop\n        (\ud835\udcdd (integralTerms (fun _ => 0) (fun _ => 0) (fun _ => 0) i))"
+    },
+    {
+      "file": "Decomp349c.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task349.refined_sum_tendsto",
+      "statement": "theorem refined_sum_tendsto (F f \u03c9 : \u211d \u2192 \u211d) (h\u03c9 : IsBuchstab \u03c9) :\n    \u2200 i : Fin 12, i \u2208 ({8, 10, 11} : Finset (Fin 12)) \u2192\n      Tendsto (fun N : \u2115 => log N * refinedSum \u03c9 N i) evenAtTop\n        (\ud835\udcdd (integralTerms F f \u03c9 i))"
+    }
+  ],
+  "compact": [
+    {
+      "file": "Decomp587i.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r2j16_short",
+      "statement": "theorem r2j16_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 2 (fun j => (r2j16_lo j : \u211d)) (fun j => (r2j16_hi j : \u211d)) \u03c6 \u2264 ((42971 / 500000000) : \u211d)"
+    },
+    {
+      "file": "Decomp587i.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r1j9_short",
+      "statement": "theorem r1j9_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r1j9_lo j : \u211d)) (fun j => (r1j9_hi j : \u211d)) \u03c6 \u2264 ((14713151 / 1000000000) : \u211d)"
+    },
+    {
+      "file": "Decomp587i.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r1j10_short",
+      "statement": "theorem r1j10_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r1j10_lo j : \u211d)) (fun j => (r1j10_hi j : \u211d)) \u03c6 \u2264 ((8347739 / 1000000000) : \u211d)"
+    },
+    {
+      "file": "Decomp587i.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r1j11_short",
+      "statement": "theorem r1j11_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r1j11_lo j : \u211d)) (fun j => (r1j11_hi j : \u211d)) \u03c6 \u2264 ((2294543 / 500000000) : \u211d)"
+    },
+    {
+      "file": "Decomp587k.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r0j9_short",
+      "statement": "theorem r0j9_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j9_lo j : \u211d)) (fun j => (r0j9_hi j : \u211d)) \u03c6 \u2264 ((870161 / 62500000) : \u211d)"
+    },
+    {
+      "file": "Decomp587k.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r0j10_short",
+      "statement": "theorem r0j10_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j10_lo j : \u211d)) (fun j => (r0j10_hi j : \u211d)) \u03c6 \u2264 ((9342453 / 1000000000) : \u211d)"
+    },
+    {
+      "file": "Decomp587k.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r0j11_short",
+      "statement": "theorem r0j11_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j11_lo j : \u211d)) (fun j => (r0j11_hi j : \u211d)) \u03c6 \u2264 ((2272569 / 500000000) : \u211d)"
+    },
+    {
+      "file": "Decomp587k.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r0j13_short",
+      "statement": "theorem r0j13_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 1 (fun j => (r0j13_lo j : \u211d)) (fun j => (r0j13_hi j : \u211d)) \u03c6 \u2264 ((24633499 / 1000000000) : \u211d)"
+    },
+    {
+      "file": "Decomp587l.lean",
+      "name": "LeanLab.ChenDoubleSieve.Task587.r0j17_short",
+      "statement": "theorem r0j17_short {\u03c9 : \u211d \u2192 \u211d} (h\u03c9 : IsBuchstab \u03c9) (hz : ZeroBelowOne \u03c9)\n    {\u03c6 : \u211d} (h\u03c6 : 2 \u2264 \u03c6) (h\u03c6top : \u03c6 \u2264 (7 / 2 : \u211d)) :\n    buchstabIntegral \u03c9 2 (fun j => (r0j17_lo j : \u211d)) (fun j => (r0j17_hi j : \u211d)) \u03c6 \u2264 ((45791 / 250000000) : \u211d)"
+    }
+  ],
+  "cited": [
+    {
+      "file": "Statements.lean",
+      "name": "LeanLab.ChenDoubleSieve.wu2004_thm1",
+      "statement": "theorem wu2004_thm1 : GoldbachUpper 7.8209"
+    },
+    {
+      "file": "Statements.lean",
+      "name": "LeanLab.ChenDoubleSieve.wu2004_thm2",
+      "statement": "theorem wu2004_thm2 : ChenLower 0.836"
+    },
+    {
+      "file": "Statements.lean",
+      "name": "LeanLab.ChenDoubleSieve.wu2004_thm3",
+      "statement": "theorem wu2004_thm3 : TwinUpper 3.3996"
+    },
+    {
+      "file": "Statements.lean",
+      "name": "LeanLab.ChenDoubleSieve.wu2004_thm4",
+      "statement": "theorem wu2004_thm4 : TwinChenLower 1.104"
+    },
+    {
+      "file": "Statements.lean",
+      "name": "LeanLab.ChenDoubleSieve.wu2004_thm5",
+      "statement": "theorem wu2004_thm5 : Wu2004Thm5"
+    },
+    {
+      "file": "Statements.lean",
+      "name": "LeanLab.ChenDoubleSieve.wu2008",
+      "statement": "theorem wu2008 : ChenLower 0.899"
+    },
+    {
+      "file": "Statements.lean",
+      "name": "LeanLab.ChenDoubleSieve.chen1978_quoted",
+      "statement": "theorem chen1978_quoted : GoldbachUpper 7.8342"
+    }
+  ]
+}

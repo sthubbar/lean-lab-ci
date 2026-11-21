@@ -1,0 +1,41 @@
+{
+  "Buchstab4DTSound4": [
+    "integral_cell3_eq_iter",
+    "hh_cell3",
+    "jensen_cell3",
+    "hh_cell4",
+    "integral_ind_le_sub",
+    "vol_cut_box3_eq",
+    "int_ramp_box3_eq",
+    "vol_cut_box4_eq",
+    "volume_fin3_coord_eq_zero",
+    "s3_antitone_le"
+  ],
+  "Buchstab4DTChaining": [
+    "integral_cell3_eq_iter",
+    "hh_cell3",
+    "jensen_cell3",
+    "hh_cell4",
+    "integral_ind_le_sub",
+    "vol_cut_box3_eq",
+    "int_ramp_box3_eq",
+    "vol_cut_box4_eq",
+    "volume_fin3_coord_eq_zero",
+    "s3_antitone_le",
+    "cell3Valid_ok",
+    "cell4_leaf_sound",
+    "cell4_trans_leaf_sound",
+    "evalTree4_sound",
+    "I_fn_eq_G",
+    "G_fn_sub_eq",
+    "G_fn_integrableOn",
+    "evalTree3_sound"
+  ],
+  "Decomp587lR0J17": [
+    "monotone_interval",
+    "antitone_interval",
+    "peak_left_bound",
+    "peak_right_bound",
+    "trans_bound"
+  ]
+}

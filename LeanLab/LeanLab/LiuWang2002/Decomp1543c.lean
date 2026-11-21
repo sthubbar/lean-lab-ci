@@ -10,6 +10,7 @@ AI-written Lean code, Claude, 2026-10-26. Checked only by the Lean kernel.
 Ternary Goldbach is a theorem, Helfgott 2013; binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.Ported.Prove2Me.LL_Decomp1543c_wc_lemma3
 import LeanLab.PNTPort.LargeSieve.Basic
 import LeanLab.LiuWang2002.Decomp1543b
 import LeanLab.LiuWang2002.Constants
@@ -24,16 +25,12 @@ open Real Finset ArithmeticFunction
 
 /-! ### Input from another paper -/
 
-/-- Lemma 6.4 p. 169, the statement of Wang-Chen 1994, Lemma 3: for `X ≥ 1`, `q ≥ 15`,
-`∑_{n≤X} min(Y/n, 1/(2‖αn‖)) ≤ 5q + 1.5 q log q + X log q + 5Y q^(-1) log X`. -/
-def WCLemma3 : Prop :=
-  ∀ (α : ℝ) (a : ℤ) (q : ℕ), Dioph α a q → 15 ≤ q → ∀ X Y : ℝ, 1 ≤ X → 0 < Y →
-    ∑ n ∈ Icc 1 ⌊X⌋₊, minK (Y / n) (α * n) ≤
-      5 * q + 1.5 * q * Real.log q + X * Real.log q + 5 * Y / q * Real.log X
 
-/-- CITED, not proved in the lab: Lemma 6.4 p. 169 is [WC, Lemma 3], Wang-Chen, Acta Math.
-Sinica 37 (1994), read with `‖x‖` the distance to the nearest integer. -/
-theorem wc_lemma3 : WCLemma3 := by sorry
+
+/-- Lemma 6.4 on page 169, proved by the attributed Prove2Me port.
+The positive real Y domain is the sealed lab extension of the displayed formula. -/
+theorem wc_lemma3 : WCLemma3 := by
+  exact LeanLab.Ported.Prove2Me.Task667.wc_lemma3
 
 /-- The range (6.3) with `log N ≥ 3100` gives `15 ≤ q ≤ N`. PROVED. -/
 theorem q_range (N : ℕ) (hL : 3100 ≤ Real.log N) (q : ℕ)

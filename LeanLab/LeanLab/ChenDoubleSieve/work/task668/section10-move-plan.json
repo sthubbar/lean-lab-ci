@@ -1,0 +1,10 @@
+[
+  {
+    "name": "integral_evaluation",
+    "exact_header": "theorem integral_evaluation (F f \u03c9 : \u211d \u2192 \u211d) (h : IsLinearSieve F f)\n    (h\u03c9 : IsBuchstab \u03c9) :\n    (3344307 : \u211d) / 4000000 \u2264 weighted (integralTerms F f \u03c9) / 4 "
+  },
+  {
+    "name": "thm2_analytic_link_checked",
+    "exact_header": "theorem thm2_analytic_link_checked (h : (83607 : \u211d) / 100000 \u2264 0.83607) :\n    ChenLower 0.836 "
+  }
+]
