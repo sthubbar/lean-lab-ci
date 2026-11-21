@@ -30,6 +30,7 @@ weaker than the split's main statement.
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.UpJ200.MajorBoundLeavesJ200
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -1083,7 +1084,7 @@ theorem leaf_coefficient_lower (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
                   R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re <
                     c₀ * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)))).card : ℝ) ≤
             B * N * calE γ κ N ^ (-(1 / 12 : ℝ)) := by
-  sorry
+  exact LeanLab.ExceptionalSet.UpJ200.MajorBoundLeavesJ200.leaf_major_coefficient_lower γ h1 h2
 
 /-- LEAF. Step of the proof, the fractional boundary count of display 23, purely a count of
 indices. For `1 < γ < 3/2` and `κ` below a positive cap, the indices of the window whose
