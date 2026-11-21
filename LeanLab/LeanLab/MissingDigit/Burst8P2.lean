@@ -3899,6 +3899,12 @@ theorem main_term_bound : ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε �
       ‖∑ n ∈ starSet g b (g ^ k) H, mainK ε (g ^ k) H n‖ ≤
         C * Real.log ((g ^ k : ℕ) : ℝ) ^ 7 * (starSet g b (g ^ k) H).card := by
   -- OUT OF REACH: requires Lemma 1.8 and Dartyge-Mauduit Lemma 2.6, neither in scope.
+  -- Attempted bound via mainK_eq_reduced-style reduction: sum over b of eC(amb/q) gives q if q|m,
+  -- leaving factor 1/m. The Ramanujan sum c_q(-n) has |c_q(-n)| ≤ φ(q) ≤ q, but summing over
+  -- n ∈ starSet gives no cancellation provable without Lemma 1.8. The kernel integral is bounded
+  -- by 2βH sup|Pm| ≤ 30 X^{23ε/20} (log X)^730 K³. Total trivial bound: N · X^{43ε/20} (log X)^731,
+  -- which exceeds the target (log X)^7 · N for large X. Getting the exact exponent 7 requires the
+  -- Dartyge-Mauduit Lemma 2.6 transfer and Lemma 1.8 cancellation, neither available.
   sorry
 
 /-- `log g ≤ 2 log(g - 1)` for `g ≥ 3`, so the counting exponent `log(g-1)/log g` is at
