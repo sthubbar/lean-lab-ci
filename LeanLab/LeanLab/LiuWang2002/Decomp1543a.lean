@@ -13,6 +13,8 @@ AI-written Lean code, Claude, 2026-10-26. Checked only by the Lean kernel.
 Ternary Goldbach is a theorem, Helfgott 2013; binary Goldbach is OPEN.
 -/
 import Mathlib
+import LeanLab.Ported.Prove2Me.LL_Decomp1543c_Core
+import LeanLab.LiuWang2002.WCDefinitions667
 import LeanLab.LiuWang2002.Vaughan109
 import LeanLab.PNTPort.LargeSieve.Basic
 
@@ -31,11 +33,9 @@ open Real Finset ArithmeticFunction
 /-- `e(x) = exp(2πix)`, p. 144 above (3.8). -/
 noncomputable def e (x : ℝ) : ℂ := Complex.exp (2 * π * Complex.I * x)
 
-/-- `‖x‖`, the distance from `x` to the nearest integer, Lemma 6.3 p. 169. -/
-noncomputable def nint (x : ℝ) : ℝ := |x - round x|
 
-/-- `min(X, 1/(2‖θ‖))`, read as `X` when `θ` is an integer. -/
-noncomputable def minK (X θ : ℝ) : ℝ := if nint θ = 0 then X else min X (1 / (2 * nint θ))
+
+
 
 /-- The range `cN < n ≤ N` of (6.8) p. 169. -/
 noncomputable def rangeN (c : ℝ) (N : ℕ) : Finset ℕ := (Icc 1 N).filter (fun n => c * N < n)
@@ -71,9 +71,7 @@ noncomputable def Uf (N : ℕ) : ℝ := (N : ℝ) ^ ((2 : ℝ) / 5) * Real.log N
 /-- `V = N^(2/5) log^(1/5) N`, (6.6) p. 168. -/
 noncomputable def Vf (N : ℕ) : ℝ := (N : ℝ) ^ ((2 : ℝ) / 5) * Real.log N ^ ((1 : ℝ) / 5)
 
-/-- (6.1) p. 168: `α = a/q + θ/q^2` with `q ≥ 1`, `(a, q) = 1`, `|θ| ≤ 1`. -/
-def Dioph (α : ℝ) (a : ℤ) (q : ℕ) : Prop :=
-  1 ≤ q ∧ Int.gcd a q = 1 ∧ |α - a / q| ≤ 1 / (q : ℝ) ^ 2
+
 
 /-- The dyadic block `M < t ≤ 2M`, cut to `[1, N]`, of (6.11) p. 170. -/
 noncomputable def tBlock (N : ℕ) (M : ℝ) : Finset ℕ := (Icc 1 N).filter (fun t => M < t ∧ (t : ℝ) ≤ 2 * M)
@@ -98,15 +96,12 @@ noncomputable def lRange (N : ℕ) (U X : ℝ) : Finset ℕ := (Icc 1 N).filter 
 
 /-! ### Inputs from other papers -/
 
-/-- Lemma 6.3 p. 169, the statement of Wang-Chen 1994, Lemma 2. -/
-def WCLemma2 : Prop :=
-  ∀ (α : ℝ) (a : ℤ) (q : ℕ), Dioph α a q → ∀ X : ℝ, 0 < X → ∀ (Y : ℕ) (Z : ℤ), 1 ≤ Y →
-    ∑ n ∈ Ioc Z (Z + Y), minK X (α * n) ≤ (((Y / q : ℕ) : ℝ) + 1) * (5 * X + q * Real.log q)
 
-/-- CITED, not proved in the lab: Lemma 6.3 p. 169 is [WC, Lemma 2], Wang-Chen, Acta Math.
-Sinica 37 (1994). The paper says `‖x‖` is the fractional part; we read the distance to the
-nearest integer, which gives the weaker statement and is what the proof of Lemma 6.7 uses. -/
-theorem wc_lemma2 : WCLemma2 := by sorry
+
+/-- Lemma 6.3 on page 169, proved from the accepted stronger single block estimate.
+The distance convention is the unchanged lab definition. -/
+theorem wc_lemma2 : WCLemma2 := by
+  exact LeanLab.Ported.Prove2Me.Task667.wc_lemma2
 
 /-! ### Leaves -/
 
