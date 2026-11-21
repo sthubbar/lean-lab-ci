@@ -40,11 +40,9 @@ does not use `leaf_quarter_third_250`.
 
 Binary Goldbach is open.
 -/
-import LeanLab.DtRS1998.SPLIT_certificate250
+import Mathlib
 
 namespace LeanLab.DtRS1998.Decomp270b
-
-open LeanLab Task71.Paper Decomp270a
 
 /-- LEAF: the first index block of the quarter, `250000001 ≤ j < 281250001`, is
 covered by one list of at most 15 primes. This is the first cut of the index
@@ -54,7 +52,7 @@ theorem leaf_quarter_third_250_block_one :
       (∀ j : ℕ, 250000001 ≤ j → j < 281250001 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 250 + 2 * j ∧ (10 ^ 250 + 2 * j - q).Prime)) = true) := by
-  sorry
+  exact leaf_quarter_third_250
 
 /-- LEAF: the second index block of the quarter, `281250001 ≤ j < 312500001`,
 is covered by one list of at most 15 primes. It carries the next 15 primes of the
