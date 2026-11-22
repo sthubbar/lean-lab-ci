@@ -70,6 +70,11 @@ def JutilaStatement481 : Prop :=
         (∑ z ∈ F, (analyticOrderNatAt (Lfun481 z.2.1) z.2.2 : ℝ)) ≤
           C₀ * Real.exp (4 * H)
 
+lemma Lfun481_zero_modulus {r : ℕ} (χ : DirichletCharacter ℂ r) (s : ℂ) (h : r = 0) : Lfun481 χ s = 0 := by
+  dsimp [Lfun481]
+  <;> split_ifs <;> simp_all [h]
+  <;> rfl
+
 /-- LEAF. CITED. P0045 page 5, Lemma 4.1, Pintz ELAZ 2004 Theorem 10.
 The cited theorem remains external. No proof of it is supplied by P0045. -/
 theorem pintz_explicit_formula481 : Lemma41Statement481 := by
