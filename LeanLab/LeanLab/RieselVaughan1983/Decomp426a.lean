@@ -79,6 +79,17 @@ theorem schoenfeld_exponential_tail (t : ℝ) (ht : 0 < t) (hL : 1950 ≤ log t)
     |psi t - t| < t * sqrt (8 / (17 * Real.pi)) *
       sqrt (sqrt (log t / (9645908801 / 1000000000 : ℝ))) *
       exp (-sqrt (log t / (9645908801 / 1000000000 : ℝ))) := by
+  -- This is Schoenfeld 1976 page 342 Theorem 11, a deep analytic result requiring
+  -- the explicit formula for psi, a quantitative zero-free region for zeta, and
+  -- zero-counting estimates. None of these exist in Mathlib v4.35.0.
+  -- Attempt: apply the explicit formula bound. No such lemma exists.
+  have hL0 : 0 < log t := by linarith
+  have hR : 0 < (9645908801 / 1000000000 : ℝ) := by norm_num
+  have hX : 0 < sqrt (log t / (9645908801 / 1000000000 : ℝ)) :=
+    sqrt_pos.mpr (div_pos hL0 hR)
+  -- The required bound cannot be derived from elementary Chebyshev estimates.
+  -- Mathlib provides only: Chebyshev.psi_le, Chebyshev.abs_psi_sub_theta_le_sqrt_mul_log.
+  -- No explicit formula, no zero-free region, no zero-counting in Mathlib.
   sorry
 
 /-- Numerical tail budget for the page 342 exponential error.
