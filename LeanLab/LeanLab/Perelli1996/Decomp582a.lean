@@ -5,6 +5,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Perelli1996.Definitions582
 import Mathlib.NumberTheory.LSeries.DirichletContinuation
+import LeanLab.PNTPort.DirichletZF.U1482Jensen
 import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
 import LeanLab.PNTPort.LargeSieve.Multiplicative
 import LeanLab.PNTPort.BV.Helpers
@@ -454,6 +455,439 @@ theorem remainder_arc_eq_zmod (M q : ℕ) [NeZero q] (Q : ℝ) :
       rw [← Finset.sum_filter]
       exact Decomp533a.sum_reduced_range_eq_Icc q hq g hends
 
+
+/-- Page 485 equation 21, derived multiplicity fact for all characters. -/
+theorem lfunction_zero_order_pos {q : ℕ} [NeZero q]
+    (χ : DirichletCharacter ℂ q) {ρ : ℂ}
+    (hz : χ.LFunction ρ = 0) (hρ : ρ ≠ 1) :
+    1 ≤ analyticOrderNatAt χ.LFunction ρ := by
+  have ha : AnalyticOnNhd ℂ χ.LFunction ({1}ᶜ : Set ℂ) :=
+    DifferentiableOn.analyticOnNhd
+      (fun z hz => (χ.differentiableAt_LFunction z (Or.inl hz)).differentiableWithinAt)
+      isOpen_compl_singleton
+  have hconn : IsPreconnected ({1}ᶜ : Set ℂ) :=
+    (isConnected_compl_singleton_of_one_lt_rank
+      (Complex.rank_real_complex ▸ Nat.one_lt_ofNat) (1 : ℂ)).isPreconnected
+  have ht : analyticOrderAt χ.LFunction ρ ≠ ⊤ := by
+    apply ha.analyticOrderAt_ne_top_of_isPreconnected hconn
+      (show (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) by norm_num) hρ
+    simp [(ha 2 (by norm_num)).analyticOrderAt_eq_zero.mpr
+      (χ.LFunction_ne_zero_of_one_le_re (Or.inr (by norm_num)) (by norm_num))]
+  have hn : analyticOrderAt χ.LFunction ρ ≠ 0 :=
+    (ha ρ hρ).analyticOrderAt_ne_zero.mpr hz
+  simp only [Nat.one_le_iff_ne_zero, analyticOrderNatAt, ne_eq, ENat.toNat_eq_zero, not_or]
+  exact ⟨hn, ht⟩
+
+/-- Pages 484 and 485 equations 18 and 22, derived finite counting form.
+Every character in S has a strip zero. A bound on finite zero families bounds S.
+CONDITIONAL ON the displayed finite family density bound K. -/
+theorem bad_character_count_le {q : ℕ} [NeZero q] (T σ K : ℝ)
+    (hDensity : ∀ Z : DirichletCharacter ℂ q → Finset ℂ,
+      (∀ χ ρ, ρ ∈ Z χ → χ.LFunction ρ = 0 ∧
+        σ ≤ ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) →
+      (∑ χ : DirichletCharacter ℂ q,
+        ∑ ρ ∈ Z χ, (analyticOrderNatAt χ.LFunction ρ : ℝ)) ≤ K)
+    (S : Finset (DirichletCharacter ℂ q))
+    (hS : ∀ χ ∈ S, ∃ ρ : ℂ, χ.LFunction ρ = 0 ∧
+      σ ≤ ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) : (S.card : ℝ) ≤ K := by
+  classical
+  have hex : ∀ χ : DirichletCharacter ℂ q, ∃ ρ : ℂ,
+      χ ∈ S → χ.LFunction ρ = 0 ∧ σ ≤ ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T := by
+    intro χ
+    by_cases hχ : χ ∈ S
+    · obtain ⟨ρ, hρ⟩ := hS χ hχ
+      exact ⟨ρ, fun _ => hρ⟩
+    · exact ⟨0, fun h => (hχ h).elim⟩
+  choose r hr using hex
+  let Z : DirichletCharacter ℂ q → Finset ℂ := fun χ => if χ ∈ S then {r χ} else ∅
+  have hZ : ∀ χ ρ, ρ ∈ Z χ → χ.LFunction ρ = 0 ∧
+      σ ≤ ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T := by
+    intro χ ρ hρ
+    by_cases hχ : χ ∈ S
+    · have he : ρ = r χ := by simpa [Z, hχ] using hρ
+      subst ρ
+      exact hr χ hχ
+    · simp [Z, hχ] at hρ
+  have heq : (∑ χ : DirichletCharacter ℂ q,
+      ∑ ρ ∈ Z χ, (analyticOrderNatAt χ.LFunction ρ : ℝ)) =
+      ∑ χ ∈ S, (analyticOrderNatAt χ.LFunction (r χ) : ℝ) := by
+    have hi (χ : DirichletCharacter ℂ q) :
+        (∑ ρ ∈ Z χ, (analyticOrderNatAt χ.LFunction ρ : ℝ)) =
+          if χ ∈ S then (analyticOrderNatAt χ.LFunction (r χ) : ℝ) else 0 := by
+      by_cases hχ : χ ∈ S <;> simp [Z, hχ]
+    simp_rw [hi]
+    exact Finset.sum_ite_mem_eq S _
+  calc
+    (S.card : ℝ) = ∑ χ ∈ S, (1 : ℝ) := by simp
+    _ ≤ ∑ χ ∈ S, (analyticOrderNatAt χ.LFunction (r χ) : ℝ) := by
+      apply Finset.sum_le_sum
+      intro χ hχ
+      have hh := hr χ hχ
+      have hne : r χ ≠ 1 := by
+        intro he
+        have := hh.2.2.1
+        simp [he] at this
+      exact_mod_cast lfunction_zero_order_pos χ hh.1 hne
+    _ = _ := heq.symm
+    _ ≤ K := hDensity Z hZ
+
+/-- Page 485 equation 21, auxiliary comparison with Huxley page 435 equation 1.1.
+A fixed positive exponent loss cannot be replaced by a fixed logarithmic loss.
+This compares numerical majorants and asserts nothing about actual zeros. -/
+theorem power_loss_exceeds_log_loss (a b d C : ℝ) (hba : b < a) (hC : 0 ≤ C) :
+    ∃ X₀ : ℝ, 3 ≤ X₀ ∧ ∀ x : ℝ, X₀ ≤ x →
+      C * x ^ b * Real.log x ^ d < x ^ a := by
+  have hb := (isLittleO_log_rpow_rpow_atTop d (sub_pos.mpr hba)).bound
+    (show 0 < 1 / (C + 1) by positivity)
+  obtain ⟨X, hX⟩ := Filter.eventually_atTop.mp hb
+  refine ⟨max 3 X, le_max_left _ _, ?_⟩
+  intro x hx
+  have hx3 : 3 ≤ x := (le_max_left _ _).trans hx
+  have hx0 : 0 < x := by linarith
+  have hL0 : 0 ≤ Real.log x := Real.log_nonneg (by linarith)
+  have hh := hX x ((le_max_right _ _).trans hx)
+  simp only [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg hL0 _),
+    abs_of_nonneg (Real.rpow_nonneg hx0.le _)] at hh
+  have hratio : C / (C + 1) < 1 := by
+    apply (div_lt_one (by positivity : 0 < C + 1)).mpr
+    linarith
+  have hstrict : C * Real.log x ^ d < x ^ (a - b) := by
+    calc
+      _ ≤ C * (1 / (C + 1) * x ^ (a - b)) := mul_le_mul_of_nonneg_left hh hC
+      _ = C / (C + 1) * x ^ (a - b) := by ring
+      _ < 1 * x ^ (a - b) := mul_lt_mul_of_pos_right hratio (Real.rpow_pos_of_pos hx0 _)
+      _ = _ := one_mul _
+  calc
+    _ = x ^ b * (C * Real.log x ^ d) := by ring
+    _ < x ^ b * x ^ (a - b) := mul_lt_mul_of_pos_left hstrict (Real.rpow_pos_of_pos hx0 _)
+    _ = x ^ a := by rw [← Real.rpow_add hx0]; congr 1; ring
+
+/-- Page 487 below equation 31 using page 484 equations 19 and 20.
+For logarithmically small moduli the strong region is wider than the good rectangle.
+This is numerical and does not assert an analytic zero free region. -/
+theorem small_modulus_region_gap (c A B : ℝ) (hc : 0 < c) (hA : 0 < A) (hB : 0 < B) :
+    ∃ N₀ : ℝ, 3 ≤ N₀ ∧ ∀ N q t : ℝ, N₀ ≤ N → 0 < q →
+      q ≤ Real.log N ^ B → |t| ≤ N →
+      A * Real.log (Real.log N) / Real.log N <
+        c / max (q ^ (1 / (4 * B))) (Real.log (|t| + 1) ^ (4 / 5 : ℝ)) := by
+  obtain ⟨N₁, hN₁, hgap⟩ := Decomp88.bad_modulus_lower c A (1 / (4 * B))
+    hc hA (by positivity)
+  refine ⟨max N₁ (Real.exp 2), hN₁.trans (le_max_left _ _), ?_⟩
+  intro N q t hN hq hqsmall ht
+  have hL2 : 2 ≤ Real.log N := by
+    have hh := Real.log_le_log (Real.exp_pos 2) ((le_max_right _ _).trans hN)
+    simpa using hh
+  have hL1 : 1 < Real.log N := by linarith
+  apply lt_of_not_ge
+  intro hbad
+  have hlarge := hgap N q t ((le_max_left _ _).trans hN) hq ht hbad
+  have he : 1 / (2 * (1 / (4 * B))) = 2 * B := by field_simp; ring
+  rw [he] at hlarge
+  have hstrict : Real.log N ^ B < Real.log N ^ (2 * B) :=
+    Real.rpow_lt_rpow_of_exponent_lt hL1 (by linarith)
+  exact (not_lt_of_ge (hlarge.trans hqsmall)) hstrict
+
+/-- Pages 485 and 487 through Perelli and Pintz 1993 page 47 equation 21.
+The exact normalized character energy is bounded by finite short window variances.
+The rounded windows lie between q Q over four and q Q over two.
+The inclusive zero endpoint and principal centering are retained. -/
+theorem characterEnergy_gallagher (M q : ℕ) (hq : 0 < q)
+    (Q : ℝ) (hQ : 0 < Q) (horder : 2 ≤ (q : ℝ) * Q) :
+    ∃ L : DirichletCharacter ℂ q → ℕ,
+      (∀ χ, 0 < L χ ∧ (q : ℝ) * Q / 4 ≤ L χ ∧ (L χ : ℝ) ≤ (q : ℝ) * Q / 2) ∧
+      characterEnergy M q Q ≤
+        ((q : ℝ) / q.totient) * (4 * Real.pi ^ 2 / ((q : ℝ) * Q) ^ 2) *
+          ∑ χ : DirichletCharacter ℂ q, ∑ m ∈ range (M + 1 + L χ),
+            ‖LeanLab.PNTPort.Gallagher.win
+              (fun n => (Λ n : ℂ) * χ n - if χ = 1 then 1 else 0)
+              (M + 1) (L χ) m‖ ^ 2 := by
+  classical
+  have hall (χ : DirichletCharacter ℂ q) :=
+    Decomp88.character_gallagher_real_order M q hq Q hQ horder χ
+      (if χ = 1 then 1 else 0)
+  choose L hL hlo hhi hbound using hall
+  refine ⟨L, fun χ => ⟨hL χ, hlo χ, hhi χ⟩, ?_⟩
+  have hqQ : 0 < (q : ℝ) * Q := mul_pos (by exact_mod_cast hq) hQ
+  have henergy (χ : DirichletCharacter ℂ q) :
+      (∫ η in Set.Icc (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)),
+        ‖twistedRemainder M χ η‖ ^ 2) ≤
+        (4 * Real.pi ^ 2 / ((q : ℝ) * Q) ^ 2) *
+          ∑ m ∈ range (M + 1 + L χ),
+            ‖LeanLab.PNTPort.Gallagher.win
+              (fun n => (Λ n : ℂ) * χ n - if χ = 1 then 1 else 0)
+              (M + 1) (L χ) m‖ ^ 2 := by
+    rw [integral_Icc_eq_integral_Ioc,
+      ← intervalIntegral.integral_of_le (by linarith [one_div_pos.mpr hqQ])]
+    have he (η : ℝ) : twistedRemainder M χ η =
+        (∑ n ∈ range (M + 1), (Λ n : ℂ) * χ n * Kernel.e ((n : ℝ) * η)) -
+          (if χ = 1 then 1 else 0) * Kernel.T 0 (M + 1) η := by
+      by_cases hχ : χ = 1 <;> simp [twistedRemainder, hχ]
+    simp_rw [he]
+    exact hbound χ
+  unfold characterEnergy
+  calc
+    _ ≤ ((q : ℝ) / q.totient) * ∑ χ : DirichletCharacter ℂ q,
+        (4 * Real.pi ^ 2 / ((q : ℝ) * Q) ^ 2) *
+          ∑ m ∈ range (M + 1 + L χ),
+            ‖LeanLab.PNTPort.Gallagher.win
+              (fun n => (Λ n : ℂ) * χ n - if χ = 1 then 1 else 0)
+              (M + 1) (L χ) m‖ ^ 2 := by
+      apply mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun χ _ => henergy χ)
+      positivity
+    _ = _ := by rw [← Finset.mul_sum]; ring
+
+/-- Page 485 equation 21, derived principal character normalization.
+The extra Euler factors preserve zeros and their multiplicities in the positive
+half plane away from the pole at one. -/
+theorem principal_zero_transfer (q : ℕ) [NeZero q] (ρ : ℂ)
+    (hρ0 : 0 < ρ.re) (hρ1 : ρ ≠ 1) :
+    ((1 : DirichletCharacter ℂ q).LFunction ρ = 0 ↔ riemannZeta ρ = 0) ∧
+      analyticOrderNatAt (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q)) ρ =
+        analyticOrderNatAt riemannZeta ρ := by
+  let E : ℂ → ℂ := fun z => ∏ p ∈ q.primeFactors, (1 - (p : ℂ) ^ (-z))
+  have hE : E ρ ≠ 0 := by
+    apply Finset.prod_ne_zero_iff.mpr
+    intro p hp
+    have hprime := Nat.prime_of_mem_primeFactors hp
+    have hp0 : (0 : ℝ) < p := by exact_mod_cast hprime.pos
+    have hp1 : (1 : ℝ) < p := by exact_mod_cast hprime.one_lt
+    have hn : ‖(p : ℂ) ^ (-ρ)‖ < 1 := by
+      rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos hp0,
+        Complex.neg_re]
+      exact Real.rpow_lt_one_of_one_lt_of_neg hp1 (by linarith)
+    intro he
+    have he' : (p : ℂ) ^ (-ρ) = 1 := (sub_eq_zero.mp he).symm
+    rw [he', norm_one] at hn
+    exact (lt_irrefl 1) hn
+  have hFact (z : ℂ) (hz : z ≠ 1) :
+      (1 : DirichletCharacter ℂ q).LFunction z = E z * riemannZeta z := by
+    exact DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta (N := q) hz
+  refine ⟨?_, ?_⟩
+  · rw [hFact ρ hρ1, mul_eq_zero, or_iff_right hE]
+  · have hEa : AnalyticAt ℂ E ρ := by
+      apply Finset.analyticAt_fun_prod
+      intro p hp
+      have hp0 : (p : ℂ) ≠ 0 := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).ne_zero
+      have hps : (p : ℂ) ∈ Complex.slitPlane := Complex.natCast_mem_slitPlane.mpr
+        (Nat.prime_of_mem_primeFactors hp).ne_zero
+      fun_prop
+    have hZa : AnalyticAt ℂ riemannZeta ρ := analyticOn_riemannZeta ρ hρ1
+    have he : DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) =ᶠ[nhds ρ]
+        (fun z => E z * riemannZeta z) := by
+      filter_upwards [eventually_ne_nhds hρ1] with z hz
+      exact hFact z hz
+    unfold analyticOrderNatAt
+    congr 1
+    rw [analyticOrderAt_congr he]
+    change analyticOrderAt (E * riemannZeta) ρ = _
+    rw [analyticOrderAt_mul hEa hZa,
+      analyticOrderAt_eq_zero.mpr (Or.inr hE), zero_add]
+
+/-- Page 485 equation 21, derived local total zero count.
+The existing Jensen estimate covers every character after the principal
+Euler factors are removed. This is not a saving in the real part. -/
+theorem zero_order_window_bound (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (τ : ℝ) (S : Finset ℂ)
+    (hS : ∀ ρ ∈ S, χ.LFunction ρ = 0 ∧ 1 / 2 ≤ ρ.re ∧
+      ρ.re < 1 ∧ |ρ.im - τ| ≤ 1 / 2) :
+    (∑ ρ ∈ S, (analyticOrderNatAt χ.LFunction ρ : ℝ)) ≤
+      Real.log (24 * LeanLab.PNTPort.DirichletZF.Z * q * (|τ| + 4) ^ 2) /
+        Real.log (7 / 6) := by
+  classical
+  by_cases hχ : χ = 1
+  · subst χ
+    have htr (ρ : ℂ) (hρ : ρ ∈ S) := principal_zero_transfer q ρ
+      (by linarith [(hS ρ hρ).2.1])
+      (by intro he; have hh := (hS ρ hρ).2.2.1; simp [he] at hh)
+    have heq : (∑ ρ ∈ S,
+        (analyticOrderNatAt (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q)) ρ : ℝ)) =
+        ∑ ρ ∈ S, (analyticOrderNatAt riemannZeta ρ : ℝ) := by
+      apply Finset.sum_congr rfl
+      intro ρ hρ
+      exact_mod_cast (htr ρ hρ).2
+    rw [heq]
+    have hmem : ∀ ρ ∈ S, ρ ∈ LeanLab.PNTPort.DirichletZF.U1482.RW riemannZeta τ := by
+      intro ρ hρ
+      exact ⟨(htr ρ hρ).1.mp (hS ρ hρ).1, (hS ρ hρ).2⟩
+    have hb := (LeanLab.PNTPort.DirichletZF.U1482.rw_count_zeta τ).2 S hmem
+    apply hb.trans
+    apply div_le_div_of_nonneg_right _ (Real.log_pos (by norm_num : (1 : ℝ) < 7 / 6)).le
+    have hZ := LeanLab.PNTPort.DirichletZF.Z_pos
+    have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+    apply Real.log_le_log (by positivity)
+    have hm := mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_left hq1
+        (show 0 ≤ 24 * LeanLab.PNTPort.DirichletZF.Z by positivity))
+      (sq_nonneg (|τ| + 4))
+    simpa only [mul_one] using hm
+  · exact (LeanLab.PNTPort.DirichletZF.U1482.rw_count_L hχ τ).2 S hS
+
+/-- Page 485 equation 21, auxiliary total count from the local Jensen bound.
+All characters and analytic multiplicities are included. No saving depending
+on the real part is claimed by this total count. -/
+theorem zero_order_total_bound :
+    ∃ C : ℝ, 0 < C ∧ ∀ (q : ℕ) [NeZero q] (T : ℝ), 2 ≤ T →
+      ∀ Z : DirichletCharacter ℂ q → Finset ℂ,
+        (∀ χ ρ, ρ ∈ Z χ → χ.LFunction ρ = 0 ∧
+          1 / 2 ≤ ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) →
+        (∑ χ : DirichletCharacter ℂ q,
+          ∑ ρ ∈ Z χ, (analyticOrderNatAt χ.LFunction ρ : ℝ)) ≤
+            C * (q : ℝ) * T * Real.log ((q : ℝ) * T) := by
+  classical
+  have hl2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hl76 : 0 < Real.log (7 / 6) := Real.log_pos (by norm_num)
+  have hZpos := LeanLab.PNTPort.DirichletZF.Z_pos
+  let A := |Real.log (384 * LeanLab.PNTPort.DirichletZF.Z)| / Real.log 2 + 2
+  have hA : 0 < A := by dsimp [A]; positivity
+  refine ⟨3 * (A / Real.log (7 / 6)), by positivity, ?_⟩
+  intro q _ T hT Z hZeros
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)
+  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hT0 : 0 < T := by linarith
+  have hqT2 : 2 ≤ (q : ℝ) * T := by
+    have hh := mul_le_mul_of_nonneg_right hq1 hT0.le
+    nlinarith
+  let L := Real.log ((q : ℝ) * T)
+  have hL2 : Real.log 2 ≤ L := Real.log_le_log (by norm_num) hqT2
+  have hL0 : 0 < L := hl2.trans_le hL2
+  have hlog (τ : ℝ) (hτ : |τ| ≤ T + 1) :
+      Real.log (24 * LeanLab.PNTPort.DirichletZF.Z * q * (|τ| + 4) ^ 2) /
+        Real.log (7 / 6) ≤ A / Real.log (7 / 6) * L := by
+    have hs : (|τ| + 4) ^ 2 ≤ (4 * T) ^ 2 :=
+      pow_le_pow_left₀ (by positivity) (by linarith) 2
+    have hqSq : (q : ℝ) ≤ (q : ℝ) ^ 2 := by nlinarith
+    have harg : 24 * LeanLab.PNTPort.DirichletZF.Z * q * (|τ| + 4) ^ 2 ≤
+        384 * LeanLab.PNTPort.DirichletZF.Z * ((q : ℝ) * T) ^ 2 := by
+      calc
+        _ ≤ 24 * LeanLab.PNTPort.DirichletZF.Z * q * (4 * T) ^ 2 :=
+          mul_le_mul_of_nonneg_left hs (by positivity)
+        _ ≤ 24 * LeanLab.PNTPort.DirichletZF.Z * (q : ℝ) ^ 2 * (4 * T) ^ 2 :=
+          mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_left hqSq (by positivity)) (sq_nonneg _)
+        _ = _ := by ring
+    have hn := Real.log_le_log (by positivity) harg
+    have he : Real.log (384 * LeanLab.PNTPort.DirichletZF.Z * ((q : ℝ) * T) ^ 2) =
+        Real.log (384 * LeanLab.PNTPort.DirichletZF.Z) + 2 * L := by
+      calc
+        _ = Real.log (384 * LeanLab.PNTPort.DirichletZF.Z) +
+            Real.log (((q : ℝ) * T) ^ 2) := Real.log_mul (by positivity) (by positivity)
+        _ = _ := by simp only [Real.log_pow, Nat.cast_ofNat, L]
+    rw [he] at hn
+    have hab : |Real.log (384 * LeanLab.PNTPort.DirichletZF.Z)| ≤
+        (|Real.log (384 * LeanLab.PNTPort.DirichletZF.Z)| / Real.log 2) * L := by
+      calc
+        _ = (|Real.log (384 * LeanLab.PNTPort.DirichletZF.Z)| / Real.log 2) *
+            Real.log 2 := by field_simp
+        _ ≤ _ := mul_le_mul_of_nonneg_left hL2 (by positivity)
+    have hnum : Real.log (24 * LeanLab.PNTPort.DirichletZF.Z * q * (|τ| + 4) ^ 2) ≤ A * L := by
+      calc
+        _ ≤ Real.log (384 * LeanLab.PNTPort.DirichletZF.Z) + 2 * L := hn
+        _ ≤ |Real.log (384 * LeanLab.PNTPort.DirichletZF.Z)| + 2 * L :=
+          by linarith [le_abs_self (Real.log (384 * LeanLab.PNTPort.DirichletZF.Z))]
+        _ ≤ (|Real.log (384 * LeanLab.PNTPort.DirichletZF.Z)| / Real.log 2) * L + 2 * L :=
+          by linarith [hab]
+        _ = _ := by dsimp [A]; ring
+    calc
+      _ ≤ (A * L) / Real.log (7 / 6) := div_le_div_of_nonneg_right hnum hl76.le
+      _ = _ := by ring
+  let J : ℕ := ⌊2 * T⌋₊ + 1
+  let f : ℂ → ℕ := fun ρ => ⌊ρ.im + T⌋₊
+  let center : ℕ → ℝ := fun j => (j : ℝ) - T + 1 / 2
+  have hJ : (J : ℝ) ≤ 3 * T := by
+    have hf := Nat.floor_le (show 0 ≤ 2 * T by positivity)
+    dsimp [J]
+    push_cast
+    linarith
+  have hχBound (χ : DirichletCharacter ℂ q) :
+      (∑ ρ ∈ Z χ, (analyticOrderNatAt χ.LFunction ρ : ℝ)) ≤
+        3 * T * (A / Real.log (7 / 6) * L) := by
+    have hmap : ∀ ρ ∈ Z χ, f ρ ∈ range J := by
+      intro ρ hρ
+      have him := (hZeros χ ρ hρ).2.2.2
+      have hf : f ρ ≤ ⌊2 * T⌋₊ := Nat.floor_mono (by linarith [(abs_le.mp him).2])
+      apply Finset.mem_range.mpr
+      dsimp [J]
+      omega
+    have hp := Finset.sum_fiberwise_of_maps_to hmap
+      (fun ρ : ℂ => (analyticOrderNatAt χ.LFunction ρ : ℝ))
+    calc
+      _ = ∑ j ∈ range J, ∑ ρ ∈ (Z χ).filter (fun ρ => f ρ = j),
+          (analyticOrderNatAt χ.LFunction ρ : ℝ) := hp.symm
+      _ ≤ ∑ j ∈ range J, A / Real.log (7 / 6) * L := by
+        apply Finset.sum_le_sum
+        intro j hj
+        have hjN : j ≤ ⌊2 * T⌋₊ := by
+          have hh := Finset.mem_range.mp hj
+          dsimp [J] at hh
+          omega
+        have hjR : (j : ℝ) ≤ 2 * T :=
+          (show (j : ℝ) ≤ (⌊2 * T⌋₊ : ℝ) by exact_mod_cast hjN).trans
+            (Nat.floor_le (by positivity))
+        have hc : |center j| ≤ T + 1 := by
+          apply abs_le.mpr
+          dsimp [center]
+          constructor <;> linarith [Nat.cast_nonneg (α := ℝ) j]
+        have hmem : ∀ ρ ∈ (Z χ).filter (fun ρ => f ρ = j),
+            χ.LFunction ρ = 0 ∧ 1 / 2 ≤ ρ.re ∧ ρ.re < 1 ∧
+              |ρ.im - center j| ≤ 1 / 2 := by
+          intro ρ hρ
+          obtain ⟨hρZ, hfj⟩ := Finset.mem_filter.mp hρ
+          have hz := hZeros χ ρ hρZ
+          refine ⟨hz.1, hz.2.1, hz.2.2.1, ?_⟩
+          have hlo : (f ρ : ℝ) ≤ ρ.im + T :=
+            Nat.floor_le (by linarith [(abs_le.mp hz.2.2.2).1])
+          have hhi : ρ.im + T < (f ρ : ℝ) + 1 := Nat.lt_floor_add_one _
+          rw [hfj] at hlo hhi
+          apply abs_le.mpr
+          dsimp [center]
+          constructor <;> linarith
+        exact (zero_order_window_bound q χ (center j) _ hmem).trans (hlog _ hc)
+      _ = (J : ℝ) * (A / Real.log (7 / 6) * L) := by simp
+      _ ≤ _ := mul_le_mul_of_nonneg_right hJ (by positivity)
+  have hcard : Fintype.card (DirichletCharacter ℂ q) ≤ q := by
+    rw [← Nat.card_eq_fintype_card, DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity ℂ q]
+    exact Nat.totient_le q
+  change _ ≤ (3 * (A / Real.log (7 / 6))) * (q : ℝ) * T * L
+  calc
+    _ ≤ ∑ χ : DirichletCharacter ℂ q, 3 * T * (A / Real.log (7 / 6) * L) :=
+      Finset.sum_le_sum (fun χ _ => hχBound χ)
+    _ = (Fintype.card (DirichletCharacter ℂ q) : ℝ) *
+        (3 * T * (A / Real.log (7 / 6) * L)) := by simp
+    _ ≤ (q : ℝ) * (3 * T * (A / Real.log (7 / 6) * L)) :=
+      mul_le_mul_of_nonneg_right (by exact_mod_cast hcard) (by positivity)
+    _ = _ := by ring
+
+/-- Page 485 equation 21, proved restricted range.
+The total Jensen count gives the stated twelve fifths power when sigma is
+between one half and seven twelfths, with logarithmic exponent one.
+The full sealed density leaf retains its larger sigma range. -/
+theorem zero_density_left_strip :
+    ∃ C : ℝ, 0 < C ∧ ∀ (q : ℕ) [NeZero q] (T σ : ℝ),
+      2 ≤ T → 1 / 2 ≤ σ → σ ≤ 7 / 12 →
+      ∀ Z : DirichletCharacter ℂ q → Finset ℂ,
+        (∀ χ ρ, ρ ∈ Z χ → χ.LFunction ρ = 0 ∧
+          σ ≤ ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) →
+        (∑ χ : DirichletCharacter ℂ q,
+          ∑ ρ ∈ Z χ, (analyticOrderNatAt χ.LFunction ρ : ℝ)) ≤
+          C * ((q : ℝ) * T) ^ (12 * (1 - σ) / 5) * Real.log ((q : ℝ) * T) := by
+  obtain ⟨C, hC, htotal⟩ := zero_order_total_bound
+  refine ⟨C, hC, ?_⟩
+  intro q _ T σ hT hσ hσmax Z hZeros
+  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hbase : 1 ≤ (q : ℝ) * T := by
+    have hh := mul_le_mul_of_nonneg_right hq1 (show 0 ≤ T by linarith)
+    nlinarith
+  have hexp : (1 : ℝ) ≤ 12 * (1 - σ) / 5 := by linarith
+  have hpow : (q : ℝ) * T ≤ ((q : ℝ) * T) ^ (12 * (1 - σ) / 5) := by
+    simpa only [Real.rpow_one] using Real.rpow_le_rpow_of_exponent_le hbase hexp
+  have hlog : 0 ≤ Real.log ((q : ℝ) * T) := Real.log_nonneg hbase
+  calc
+    _ ≤ C * (q : ℝ) * T * Real.log ((q : ℝ) * T) :=
+      htotal q T hT Z (fun χ ρ hρ =>
+        ⟨(hZeros χ ρ hρ).1, hσ.trans (hZeros χ ρ hρ).2.1,
+          (hZeros χ ρ hρ).2.2⟩)
+    _ = C * ((q : ℝ) * T) * Real.log ((q : ℝ) * T) := by ring
+    _ ≤ _ := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hpow hC.le) hlog
 
 /-- LEAF. Page 485 equation 21. The Huxley and Ramachandra density estimate.
 This finite subset formulation counts zeros with analytic multiplicity.

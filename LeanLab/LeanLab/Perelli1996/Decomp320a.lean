@@ -100,7 +100,7 @@ theorem leaf_finite_major (F : ℤ[X]) (hF : Admissible F)
         C * N * (Real.log N ^ (1 - B) + Real.log N ^ (-A / 2)) := by
   obtain ⟨CP, NP, hCP, hNP, hprime⟩ := leaf_prime_model F hF c hc A ε B hA hε hB
   obtain ⟨CM, hCM, hmodel⟩ := PrincipalModel320.finite_model_error_scaled c hc
-  obtain ⟨NA, hNA, harc⟩ := arc_parameters F hF ε B hε hB
+  obtain ⟨NA, hNA, harc⟩ := Decomp88.arc_parameters F hF ε B hε hB
   obtain ⟨NW, hNW, hpos⟩ := window_pos F hF
   refine ⟨CP + CM, max (max NP NA) (max NW (Real.exp 1)), by positivity,
     hNP.trans ((le_max_left _ _).trans (le_max_left _ _)), ?_⟩
