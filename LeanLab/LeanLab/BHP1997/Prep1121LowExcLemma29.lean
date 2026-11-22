@@ -109,6 +109,26 @@ theorem leaf_card_le (q : ℕ) (hq : 1 ≤ q) :
   rw [h]
   exact_mod_cast Nat.totient_le q
 
+/-- For `p > 0` and any constant `R`, `R * log x ^ A ≤ x ^ p` for all large `x`. -/
+private lemma eventually_const_mul_log_rpow_le {A p R : ℝ} (hp : 0 < p) :
+    ∀ᶠ x : ℝ in Filter.atTop, R * Real.log x ^ A ≤ x ^ p := by
+  have hx1 : ∀ᶠ x : ℝ in Filter.atTop, (1 : ℝ) ≤ x := Filter.eventually_ge_atTop 1
+  rcases le_or_gt R 0 with hR | hR
+  · filter_upwards [hx1] with x hx
+    have h0 : 0 ≤ Real.log x ^ A := Real.rpow_nonneg (Real.log_nonneg hx) A
+    have h1 : 0 ≤ x ^ p := Real.rpow_nonneg (by linarith : (0 : ℝ) ≤ x) p
+    nlinarith
+  · have hRpos : 0 < R := hR
+    have ho := Asymptotics.isLittleO_iff.1
+      (isLittleO_log_rpow_rpow_atTop A hp) (inv_pos.2 hRpos)
+    filter_upwards [ho, hx1] with x hx hx1'
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (Real.rpow_nonneg (by linarith : (0 : ℝ) ≤ x) p)] at hx
+    have h0 : 0 ≤ Real.log x ^ A := Real.rpow_nonneg (Real.log_nonneg hx1') A
+    rw [abs_of_nonneg h0] at hx
+    have h2 : R * (R⁻¹ * x ^ p) = x ^ p := by field_simp
+    linarith [mul_le_mul_of_nonneg_left hx hRpos.le, h2]
+
 /-- LEAF: page 43, proof of Lemma 29, the error `O(Y^ε)` of [29] Lemma 3.19. Its square,
 integrated over `[Y/2, 3Y]` and summed over at most `q + 1` characters, is
 `≪ q Y^(1+1/50)`, below `(qQ)^2 Y L^(-A)` for large `x`, because `Q` is the integer part of
@@ -118,7 +138,102 @@ theorem leaf_error_arith {ε : ℝ} (hε : 0 < ε) :
       q ≤ sieveQ ε x →
       ((q : ℝ) + 1) * (K * x ^ (11 / 20 + ε) * (x ^ (11 / 20 + ε)) ^ (1 / 50 : ℝ)) ≤
         ((q : ℝ) * sieveQ ε x) ^ 2 * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  intro A hA K hK
+  set c : ℝ := 1 / 16 - 1 / 10 ^ 5 with hcdef
+  clear_value c
+  have hc0 : 0 < c := by rw [hcdef]; norm_num
+  have hhalf : 0 < 2 * c - 1 / 50 := by rw [hcdef]; norm_num
+  have hp : 0 < (11 / 20 + ε) * (2 * c - 1 / 50) := by
+    have h : 0 < 11 / 20 + ε := by linarith
+    positivity
+  -- the Perron error times `log^A` is eventually below `x^((11/20+ε)(2c-1/50))`
+  have h1 : ∀ᶠ x : ℝ in Filter.atTop, 32 * K * Real.log x ^ A ≤
+      x ^ ((11 / 20 + ε) * (2 * c - 1 / 50)) := eventually_const_mul_log_rpow_le hp
+  -- `Q ≈ Y^c` is eventually at least `8`
+  have h2 : ∀ᶠ x : ℝ in Filter.atTop, (8 : ℝ) ≤ x ^ ((11 / 20 + ε) * c) :=
+    (tendsto_rpow_atTop (show 0 < (11 / 20 + ε) * c by positivity)).eventually
+      (Filter.eventually_ge_atTop 8)
+  have h3 : ∀ᶠ x : ℝ in Filter.atTop, (1 : ℝ) ≤ x := Filter.eventually_ge_atTop 1
+  obtain ⟨C, hC⟩ := Filter.eventually_atTop.1 (h1.and (h2.and h3))
+  refine ⟨max C 2, ?_⟩
+  intro x hx q hq1 hqQ
+  obtain ⟨hxC, hx8, hx1⟩ := hC x (le_trans (le_max_left _ _) hx)
+  have hx2 : (2 : ℝ) ≤ x := le_trans (le_max_right _ _) hx
+  have hx0 : (0 : ℝ) < x := by linarith
+  set Y : ℝ := x ^ (11 / 20 + ε) with hYdef
+  set L : ℝ := Real.log x ^ (-A) with hLdef
+  clear_value Y L
+  have hY0 : 0 < Y := by rw [hYdef]; exact Real.rpow_pos_of_pos hx0 _
+  have hlogpos : 0 < Real.log x := Real.log_pos (by linarith)
+  have hLpos : 0 < L := by rw [hLdef]; exact Real.rpow_pos_of_pos hlogpos _
+  have hLaL : Real.log x ^ A * L = 1 := by
+    rw [hLdef, ← Real.rpow_add hlogpos]
+    simp
+  have hq2 : ((q : ℝ) + 1) ≤ 2 * q := by
+    have hq1' : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+    linarith
+  -- `sieveQ` is the floor of `Y^c / 2`
+  have hQeq : (sieveQ ε x : ℝ) = ⌊Y ^ c / 2⌋₊ := by
+    unfold sieveQ
+    rw [← hYdef]
+    have hpow : (Y ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) = Y ^ c := by
+      rw [← Real.rpow_mul hY0.le,
+        show (2 : ℝ) * (1 / 16 - 1 / 10 ^ 5) * (1 / 2) = c by rw [hcdef]; ring]
+    rw [hpow]
+  have h8 : 8 ≤ Y ^ c := by
+    have h := hx8
+    rw [Real.rpow_mul hx0.le, ← hYdef] at h
+    exact h
+  -- the lower bound for the sieve modulus
+  have hQlow : Y ^ c / 4 ≤ (sieveQ ε x : ℝ) := by
+    rw [hQeq]
+    have hfloor := Nat.sub_one_lt_floor (Y ^ c / 2)
+    linarith
+  have hQpos : 0 < (sieveQ ε x : ℝ) := lt_of_lt_of_le (by positivity) hQlow
+  have hYcsq : Y ^ c * Y ^ c = Y ^ (2 * c) := by
+    rw [← Real.rpow_add hY0, show c + c = 2 * c by ring]
+  have hQsq : Y ^ (2 * c) ≤ 16 * (sieveQ ε x : ℝ) ^ 2 := by
+    have h4 : Y ^ c ≤ 4 * (sieveQ ε x : ℝ) := by linarith
+    have h5 : Y ^ c * Y ^ c ≤ (4 * (sieveQ ε x : ℝ)) * (4 * (sieveQ ε x : ℝ)) :=
+      mul_self_le_mul_self (by positivity) h4
+    rw [← hYcsq]
+    nlinarith [h5]
+  -- the `log^A` chunk is below `Y^(2c) / Y^(1/50)`
+  have hlogc : 32 * K * Real.log x ^ A ≤ Y ^ (2 * c - 1 / 50) := by
+    have h := hxC
+    rw [Real.rpow_mul hx0.le, ← hYdef] at h
+    exact h
+  have hYb : 0 < Y ^ (1 / 50 : ℝ) := Real.rpow_pos_of_pos hY0 _
+  rw [Real.rpow_sub hY0] at hlogc
+  have hstep1 : 32 * K * Real.log x ^ A * Y ^ (1 / 50 : ℝ) ≤ Y ^ (2 * c) := by
+    have h := mul_le_mul_of_nonneg_right hlogc hYb.le
+    rwa [div_mul_cancel₀ _ hYb.ne'] at h
+  have hstep2 : 2 * K * Real.log x ^ A * Y ^ (1 / 50 : ℝ) ≤ (sieveQ ε x : ℝ) ^ 2 := by
+    nlinarith [hstep1, hQsq]
+  -- multiply by `log^(-A)`, which cancels the `log^A`
+  have hstep3 : 2 * K * Y ^ (1 / 50 : ℝ) ≤ (q : ℝ) * (sieveQ ε x : ℝ) ^ 2 * L := by
+    have hmul := mul_le_mul_of_nonneg_right hstep2 hLpos.le
+    have he : 2 * K * Real.log x ^ A * Y ^ (1 / 50 : ℝ) * L = 2 * K * Y ^ (1 / 50 : ℝ) := by
+      calc 2 * K * Real.log x ^ A * Y ^ (1 / 50 : ℝ) * L
+          = 2 * K * Y ^ (1 / 50 : ℝ) * (Real.log x ^ A * L) := by ring
+        _ = 2 * K * Y ^ (1 / 50 : ℝ) := by rw [hLaL, mul_one]
+    rw [he] at hmul
+    have hq1' : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+    have hQ2L : 0 ≤ (sieveQ ε x : ℝ) ^ 2 * L := by positivity
+    nlinarith [hmul, hQ2L, hq1']
+  calc ((q : ℝ) + 1) * (K * Y * Y ^ (1 / 50 : ℝ))
+      ≤ (2 * q) * (K * Y * Y ^ (1 / 50 : ℝ)) := by
+        have hKY : 0 ≤ K * Y * Y ^ (1 / 50 : ℝ) := by positivity
+        nlinarith [hq2, hKY]
+    _ = 2 * (q : ℝ) * K * Y * Y ^ (1 / 50 : ℝ) := by ring
+    _ ≤ ((q : ℝ) * sieveQ ε x) ^ 2 * Y * L := by
+        rw [show 2 * (q : ℝ) * K * Y * Y ^ (1 / 50 : ℝ)
+              = 2 * K * Y ^ (1 / 50 : ℝ) * ((q : ℝ) * Y) by ring]
+        have hqY : 0 ≤ (q : ℝ) * Y := by positivity
+        calc 2 * K * Y ^ (1 / 50 : ℝ) * ((q : ℝ) * Y)
+            ≤ ((q : ℝ) * (sieveQ ε x : ℝ) ^ 2 * L) * ((q : ℝ) * Y) :=
+              mul_le_mul_of_nonneg_right hstep3 hqY
+          _ = ((q : ℝ) * sieveQ ε x) ^ 2 * Y * L := by ring
 
 /-- P0069 page 43, Lemma 29, `Y^2 (Y / T2^2) = (qQ)^2 Y` with `T2 = Y / qQ`. PROVED. -/
 theorem y_sq_mul_div_T2_sq {Y P : ℝ} (hY : 0 < Y) (hP : 0 < P) :
