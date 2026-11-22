@@ -1595,11 +1595,1338 @@ theorem zeta_three_half_ge : (2.61237 : ℝ) ≤ (riemannZeta (3 / 2)).re := by
     _ ≤ _ := add_le_add hfin htail
 
 
+private lemma log_two_ub : Real.log 2 ≤ (6931471808:ℝ)/10000000000 := by
+  linarith [Real.log_two_lt_d9]
+
+private lemma norm_deriv_zeta :
+    ‖deriv riemannZeta ((3/2 : ℂ))‖
+      = ∑' (n : ℕ), Real.log (n:ℝ) / ((n:ℝ) * Real.sqrt (n:ℝ)) := by
+  have hs : (1:ℝ) < ((3/2:ℂ)).re := by
+    have h : ((3/2:ℂ)) = ((3:ℂ)/2) := by norm_num
+    rw [h]; norm_num
+  have habs : LSeries.abscissaOfAbsConv (1 : ℕ → ℂ) < ((3/2:ℂ)).re :=
+    lt_of_le_of_lt (LSeries.abscissaOfAbsConv_le_of_le_const
+      (f := fun _ : ℕ => (1:ℂ)) ⟨1, fun n _ => by simp⟩) (by exact_mod_cast hs)
+  have hderiv : deriv riemannZeta ((3/2:ℂ))
+      = - LSeries (LSeries.logMul (1 : ℕ → ℂ)) ((3/2:ℂ)) := by
+    have heq : riemannZeta =ᶠ[nhds ((3/2:ℂ))] (LSeries (1 : ℕ → ℂ)) := by
+      filter_upwards [(isOpen_lt continuous_const Complex.continuous_re).mem_nhds hs]
+        with z hz
+      exact (LSeries_one_eq_riemannZeta hz).symm
+    rw [heq.deriv_eq, LSeries_deriv habs]
+  rw [hderiv, norm_neg]
+  have hterm : ∀ n : ℕ, LSeries.term (LSeries.logMul (1 : ℕ → ℂ)) ((3/2:ℂ)) n
+      = ((Real.log (n:ℝ) / ((n:ℝ) * Real.sqrt (n:ℝ)) : ℝ) : ℂ) := by
+    intro n
+    rcases eq_or_ne n 0 with rfl | hn
+    · rw [LSeries.term_zero]; simp
+    · have hxp : (0:ℝ) < (n:ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+      have hx : (0:ℝ) ≤ (n:ℝ) := le_of_lt hxp
+      have ht : LSeries.term (LSeries.logMul (1 : ℕ → ℂ)) ((3/2:ℂ)) n
+          = Complex.log (n:ℂ) / ((n:ℂ) ^ ((3:ℂ)/2)) := by
+        rw [LSeries.term_of_ne_zero hn]
+        simp [LSeries.logMul]
+      have hpow : (Complex.ofReal (n:ℝ)) ^ ((3:ℂ)/2)
+          = Complex.ofReal ((n:ℝ) * Real.sqrt (n:ℝ)) := by
+        rw [show ((3:ℂ)/2) = Complex.ofReal ((3:ℝ)/2) by norm_num,
+          ← Complex.ofReal_cpow hx, rpow_three_half _ hxp]
+      rw [ht, ← Complex.ofReal_natCast, hpow, ← Complex.ofReal_log hx,
+        ← Complex.ofReal_div]
+  have hL : LSeries (LSeries.logMul (1 : ℕ → ℂ)) ((3/2:ℂ))
+      = ((∑' n : ℕ, Real.log (n:ℝ) / ((n:ℝ) * Real.sqrt (n:ℝ)) : ℝ) : ℂ) := by
+    rw [LSeries, tsum_congr hterm, ← Complex.ofReal_tsum]
+  rw [hL, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg]
+  exact tsum_nonneg (fun n => div_nonneg (Real.log_natCast_nonneg n) (by positivity))
+
+private lemma log2pow_1 : Real.log ((2:ℕ):ℝ) ≤ 1 * ((6931471808:ℝ)/10000000000) := by
+  simpa using log_two_ub
+
+private lemma log2pow_2 : Real.log ((4:ℕ):ℝ) ≤ 2 * ((6931471808:ℝ)/10000000000) := by
+  have e : ((4:ℕ):ℝ) = 2*2 := by norm_num
+  rw [e, Real.log_mul (by norm_num) (by norm_num)]
+  have h2 := log_two_ub
+  push_cast
+  linarith [h2]
+
+private lemma log2pow_3 : Real.log ((8:ℕ):ℝ) ≤ 3 * ((6931471808:ℝ)/10000000000) := by
+  have e : ((8:ℕ):ℝ) = 2*2*2 := by norm_num
+  rw [e, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num)]
+  have h2 := log_two_ub
+  push_cast
+  linarith [h2]
+
+private lemma log2pow_4 : Real.log ((16:ℕ):ℝ) ≤ 4 * ((6931471808:ℝ)/10000000000) := by
+  have e : ((16:ℕ):ℝ) = 2*2*2*2 := by norm_num
+  rw [e, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num)]
+  have h2 := log_two_ub
+  push_cast
+  linarith [h2]
+
+private lemma log2pow_5 : Real.log ((32:ℕ):ℝ) ≤ 5 * ((6931471808:ℝ)/10000000000) := by
+  have e : ((32:ℕ):ℝ) = 2*2*2*2*2 := by norm_num
+  rw [e, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num)]
+  have h2 := log_two_ub
+  push_cast
+  linarith [h2]
+
+private lemma log_2_le : Real.log ((2:ℕ):ℝ) ≤ (6931471808:ℝ)/10000000000 := by
+  have hm := log2pow_1
+  have h := Real.log_div_le_sum_range_add (x := (0:ℝ)/4) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 0/4)/(1 - 0/4)) =
+      Real.log ((2:ℕ):ℝ) - Real.log ((2:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 0/4)/(1 - 0/4) = ((2:ℕ):ℝ)/((2:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((0:ℝ)/4)^(2*i+1)/((2*i+1):ℝ)) +
+      ((0:ℝ)/4)^(2*12+1)/(1 - ((0:ℝ)/4)^2) ≤ (0:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((2:ℕ):ℝ) - Real.log ((2:ℕ):ℝ)) ≤ (0:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_3_le : Real.log ((3:ℕ):ℝ) ≤ (10986122890:ℝ)/10000000000 := by
+  have hm := log2pow_1
+  have h := Real.log_div_le_sum_range_add (x := (1:ℝ)/5) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 1/5)/(1 - 1/5)) =
+      Real.log ((3:ℕ):ℝ) - Real.log ((2:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 1/5)/(1 - 1/5) = ((3:ℕ):ℝ)/((2:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((1:ℝ)/5)^(2*i+1)/((2*i+1):ℝ)) +
+      ((1:ℝ)/5)^(2*12+1)/(1 - ((1:ℝ)/5)^2) ≤ (2027325541:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((3:ℕ):ℝ) - Real.log ((2:ℕ):ℝ)) ≤ (2027325541:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_4_le : Real.log ((4:ℕ):ℝ) ≤ (13862943616:ℝ)/10000000000 := by
+  have hm := log2pow_2
+  have h := Real.log_div_le_sum_range_add (x := (0:ℝ)/8) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 0/8)/(1 - 0/8)) =
+      Real.log ((4:ℕ):ℝ) - Real.log ((4:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 0/8)/(1 - 0/8) = ((4:ℕ):ℝ)/((4:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((0:ℝ)/8)^(2*i+1)/((2*i+1):ℝ)) +
+      ((0:ℝ)/8)^(2*12+1)/(1 - ((0:ℝ)/8)^2) ≤ (0:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((4:ℕ):ℝ) - Real.log ((4:ℕ):ℝ)) ≤ (0:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_5_le : Real.log ((5:ℕ):ℝ) ≤ (16094379130:ℝ)/10000000000 := by
+  have hm := log2pow_2
+  have h := Real.log_div_le_sum_range_add (x := (1:ℝ)/9) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 1/9)/(1 - 1/9)) =
+      Real.log ((5:ℕ):ℝ) - Real.log ((4:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 1/9)/(1 - 1/9) = ((5:ℕ):ℝ)/((4:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((1:ℝ)/9)^(2*i+1)/((2*i+1):ℝ)) +
+      ((1:ℝ)/9)^(2*12+1)/(1 - ((1:ℝ)/9)^2) ≤ (1115717757:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((5:ℕ):ℝ) - Real.log ((4:ℕ):ℝ)) ≤ (1115717757:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_6_le : Real.log ((6:ℕ):ℝ) ≤ (17917594698:ℝ)/10000000000 := by
+  have hm := log2pow_2
+  have h := Real.log_div_le_sum_range_add (x := (2:ℝ)/10) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 2/10)/(1 - 2/10)) =
+      Real.log ((6:ℕ):ℝ) - Real.log ((4:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 2/10)/(1 - 2/10) = ((6:ℕ):ℝ)/((4:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((2:ℝ)/10)^(2*i+1)/((2*i+1):ℝ)) +
+      ((2:ℝ)/10)^(2*12+1)/(1 - ((2:ℝ)/10)^2) ≤ (2027325541:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((6:ℕ):ℝ) - Real.log ((4:ℕ):ℝ)) ≤ (2027325541:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_7_le : Real.log ((7:ℕ):ℝ) ≤ (19459101496:ℝ)/10000000000 := by
+  have hm := log2pow_2
+  have h := Real.log_div_le_sum_range_add (x := (3:ℝ)/11) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 3/11)/(1 - 3/11)) =
+      Real.log ((7:ℕ):ℝ) - Real.log ((4:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 3/11)/(1 - 3/11) = ((7:ℕ):ℝ)/((4:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((3:ℝ)/11)^(2*i+1)/((2*i+1):ℝ)) +
+      ((3:ℝ)/11)^(2*12+1)/(1 - ((3:ℝ)/11)^2) ≤ (2798078940:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((7:ℕ):ℝ) - Real.log ((4:ℕ):ℝ)) ≤ (2798078940:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_8_le : Real.log ((8:ℕ):ℝ) ≤ (20794415424:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (0:ℝ)/16) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 0/16)/(1 - 0/16)) =
+      Real.log ((8:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 0/16)/(1 - 0/16) = ((8:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((0:ℝ)/16)^(2*i+1)/((2*i+1):ℝ)) +
+      ((0:ℝ)/16)^(2*12+1)/(1 - ((0:ℝ)/16)^2) ≤ (0:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((8:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (0:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_9_le : Real.log ((9:ℕ):ℝ) ≤ (21972245782:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (1:ℝ)/17) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 1/17)/(1 - 1/17)) =
+      Real.log ((9:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 1/17)/(1 - 1/17) = ((9:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((1:ℝ)/17)^(2*i+1)/((2*i+1):ℝ)) +
+      ((1:ℝ)/17)^(2*12+1)/(1 - ((1:ℝ)/17)^2) ≤ (588915179:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((9:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (588915179:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_10_le : Real.log ((10:ℕ):ℝ) ≤ (23025850938:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (2:ℝ)/18) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 2/18)/(1 - 2/18)) =
+      Real.log ((10:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 2/18)/(1 - 2/18) = ((10:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((2:ℝ)/18)^(2*i+1)/((2*i+1):ℝ)) +
+      ((2:ℝ)/18)^(2*12+1)/(1 - ((2:ℝ)/18)^2) ≤ (1115717757:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((10:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (1115717757:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_11_le : Real.log ((11:ℕ):ℝ) ≤ (23978952736:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (3:ℝ)/19) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 3/19)/(1 - 3/19)) =
+      Real.log ((11:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 3/19)/(1 - 3/19) = ((11:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((3:ℝ)/19)^(2*i+1)/((2*i+1):ℝ)) +
+      ((3:ℝ)/19)^(2*12+1)/(1 - ((3:ℝ)/19)^2) ≤ (1592268656:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((11:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (1592268656:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_12_le : Real.log ((12:ℕ):ℝ) ≤ (24849066506:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (4:ℝ)/20) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 4/20)/(1 - 4/20)) =
+      Real.log ((12:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 4/20)/(1 - 4/20) = ((12:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((4:ℝ)/20)^(2*i+1)/((2*i+1):ℝ)) +
+      ((4:ℝ)/20)^(2*12+1)/(1 - ((4:ℝ)/20)^2) ≤ (2027325541:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((12:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (2027325541:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_13_le : Real.log ((13:ℕ):ℝ) ≤ (25649493582:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (5:ℝ)/21) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 5/21)/(1 - 5/21)) =
+      Real.log ((13:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 5/21)/(1 - 5/21) = ((13:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((5:ℝ)/21)^(2*i+1)/((2*i+1):ℝ)) +
+      ((5:ℝ)/21)^(2*12+1)/(1 - ((5:ℝ)/21)^2) ≤ (2427539079:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((13:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (2427539079:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_14_le : Real.log ((14:ℕ):ℝ) ≤ (26390573304:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (6:ℝ)/22) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 6/22)/(1 - 6/22)) =
+      Real.log ((14:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 6/22)/(1 - 6/22) = ((14:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((6:ℝ)/22)^(2*i+1)/((2*i+1):ℝ)) +
+      ((6:ℝ)/22)^(2*12+1)/(1 - ((6:ℝ)/22)^2) ≤ (2798078940:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((14:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (2798078940:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_15_le : Real.log ((15:ℕ):ℝ) ≤ (27080502020:ℝ)/10000000000 := by
+  have hm := log2pow_3
+  have h := Real.log_div_le_sum_range_add (x := (7:ℝ)/23) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 7/23)/(1 - 7/23)) =
+      Real.log ((15:ℕ):ℝ) - Real.log ((8:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 7/23)/(1 - 7/23) = ((15:ℕ):ℝ)/((8:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((7:ℝ)/23)^(2*i+1)/((2*i+1):ℝ)) +
+      ((7:ℝ)/23)^(2*12+1)/(1 - ((7:ℝ)/23)^2) ≤ (3143043298:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((15:ℕ):ℝ) - Real.log ((8:ℕ):ℝ)) ≤ (3143043298:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_16_le : Real.log ((16:ℕ):ℝ) ≤ (27725887232:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (0:ℝ)/32) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 0/32)/(1 - 0/32)) =
+      Real.log ((16:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 0/32)/(1 - 0/32) = ((16:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((0:ℝ)/32)^(2*i+1)/((2*i+1):ℝ)) +
+      ((0:ℝ)/32)^(2*12+1)/(1 - ((0:ℝ)/32)^2) ≤ (0:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((16:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (0:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_17_le : Real.log ((17:ℕ):ℝ) ≤ (28332133452:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (1:ℝ)/33) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 1/33)/(1 - 1/33)) =
+      Real.log ((17:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 1/33)/(1 - 1/33) = ((17:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((1:ℝ)/33)^(2*i+1)/((2*i+1):ℝ)) +
+      ((1:ℝ)/33)^(2*12+1)/(1 - ((1:ℝ)/33)^2) ≤ (303123110:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((17:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (303123110:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_18_le : Real.log ((18:ℕ):ℝ) ≤ (28903717590:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (2:ℝ)/34) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 2/34)/(1 - 2/34)) =
+      Real.log ((18:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 2/34)/(1 - 2/34) = ((18:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((2:ℝ)/34)^(2*i+1)/((2*i+1):ℝ)) +
+      ((2:ℝ)/34)^(2*12+1)/(1 - ((2:ℝ)/34)^2) ≤ (588915179:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((18:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (588915179:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_19_le : Real.log ((19:ℕ):ℝ) ≤ (29444389802:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (3:ℝ)/35) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 3/35)/(1 - 3/35)) =
+      Real.log ((19:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 3/35)/(1 - 3/35) = ((19:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((3:ℝ)/35)^(2*i+1)/((2*i+1):ℝ)) +
+      ((3:ℝ)/35)^(2*12+1)/(1 - ((3:ℝ)/35)^2) ≤ (859251285:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((19:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (859251285:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_20_le : Real.log ((20:ℕ):ℝ) ≤ (29957322746:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (4:ℝ)/36) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 4/36)/(1 - 4/36)) =
+      Real.log ((20:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 4/36)/(1 - 4/36) = ((20:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((4:ℝ)/36)^(2*i+1)/((2*i+1):ℝ)) +
+      ((4:ℝ)/36)^(2*12+1)/(1 - ((4:ℝ)/36)^2) ≤ (1115717757:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((20:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (1115717757:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_21_le : Real.log ((21:ℕ):ℝ) ≤ (30445224388:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (5:ℝ)/37) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 5/37)/(1 - 5/37)) =
+      Real.log ((21:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 5/37)/(1 - 5/37) = ((21:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((5:ℝ)/37)^(2*i+1)/((2*i+1):ℝ)) +
+      ((5:ℝ)/37)^(2*12+1)/(1 - ((5:ℝ)/37)^2) ≤ (1359668578:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((21:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (1359668578:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_22_le : Real.log ((22:ℕ):ℝ) ≤ (30910424544:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (6:ℝ)/38) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 6/38)/(1 - 6/38)) =
+      Real.log ((22:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 6/38)/(1 - 6/38) = ((22:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((6:ℝ)/38)^(2*i+1)/((2*i+1):ℝ)) +
+      ((6:ℝ)/38)^(2*12+1)/(1 - ((6:ℝ)/38)^2) ≤ (1592268656:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((22:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (1592268656:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_23_le : Real.log ((23:ℕ):ℝ) ≤ (31354942170:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (7:ℝ)/39) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 7/39)/(1 - 7/39)) =
+      Real.log ((23:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 7/39)/(1 - 7/39) = ((23:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((7:ℝ)/39)^(2*i+1)/((2*i+1):ℝ)) +
+      ((7:ℝ)/39)^(2*12+1)/(1 - ((7:ℝ)/39)^2) ≤ (1814527469:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((23:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (1814527469:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_24_le : Real.log ((24:ℕ):ℝ) ≤ (31780538314:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (8:ℝ)/40) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 8/40)/(1 - 8/40)) =
+      Real.log ((24:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 8/40)/(1 - 8/40) = ((24:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((8:ℝ)/40)^(2*i+1)/((2*i+1):ℝ)) +
+      ((8:ℝ)/40)^(2*12+1)/(1 - ((8:ℝ)/40)^2) ≤ (2027325541:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((24:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (2027325541:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_25_le : Real.log ((25:ℕ):ℝ) ≤ (32188758260:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (9:ℝ)/41) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 9/41)/(1 - 9/41)) =
+      Real.log ((25:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 9/41)/(1 - 9/41) = ((25:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((9:ℝ)/41)^(2*i+1)/((2*i+1):ℝ)) +
+      ((9:ℝ)/41)^(2*12+1)/(1 - ((9:ℝ)/41)^2) ≤ (2231435514:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((25:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (2231435514:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_26_le : Real.log ((26:ℕ):ℝ) ≤ (32580965390:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (10:ℝ)/42) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 10/42)/(1 - 10/42)) =
+      Real.log ((26:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 10/42)/(1 - 10/42) = ((26:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((10:ℝ)/42)^(2*i+1)/((2*i+1):ℝ)) +
+      ((10:ℝ)/42)^(2*12+1)/(1 - ((10:ℝ)/42)^2) ≤ (2427539079:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((26:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (2427539079:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_27_le : Real.log ((27:ℕ):ℝ) ≤ (32958368670:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (11:ℝ)/43) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 11/43)/(1 - 11/43)) =
+      Real.log ((27:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 11/43)/(1 - 11/43) = ((27:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((11:ℝ)/43)^(2*i+1)/((2*i+1):ℝ)) +
+      ((11:ℝ)/43)^(2*12+1)/(1 - ((11:ℝ)/43)^2) ≤ (2616240719:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((27:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (2616240719:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_28_le : Real.log ((28:ℕ):ℝ) ≤ (33322045112:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (12:ℝ)/44) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 12/44)/(1 - 12/44)) =
+      Real.log ((28:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 12/44)/(1 - 12/44) = ((28:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((12:ℝ)/44)^(2*i+1)/((2*i+1):ℝ)) +
+      ((12:ℝ)/44)^(2*12+1)/(1 - ((12:ℝ)/44)^2) ≤ (2798078940:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((28:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (2798078940:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_29_le : Real.log ((29:ℕ):ℝ) ≤ (33672958310:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (13:ℝ)/45) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 13/45)/(1 - 13/45)) =
+      Real.log ((29:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 13/45)/(1 - 13/45) = ((29:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((13:ℝ)/45)^(2*i+1)/((2*i+1):ℝ)) +
+      ((13:ℝ)/45)^(2*12+1)/(1 - ((13:ℝ)/45)^2) ≤ (2973535539:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((29:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (2973535539:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_30_le : Real.log ((30:ℕ):ℝ) ≤ (34011973828:ℝ)/10000000000 := by
+  have hm := log2pow_4
+  have h := Real.log_div_le_sum_range_add (x := (14:ℝ)/46) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 14/46)/(1 - 14/46)) =
+      Real.log ((30:ℕ):ℝ) - Real.log ((16:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 14/46)/(1 - 14/46) = ((30:ℕ):ℝ)/((16:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((14:ℝ)/46)^(2*i+1)/((2*i+1):ℝ)) +
+      ((14:ℝ)/46)^(2*12+1)/(1 - ((14:ℝ)/46)^2) ≤ (3143043298:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((30:ℕ):ℝ) - Real.log ((16:ℕ):ℝ)) ≤ (3143043298:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma log_61_le : Real.log ((61:ℕ):ℝ) ≤ (41108738654:ℝ)/10000000000 := by
+  have hm := log2pow_5
+  have h := Real.log_div_le_sum_range_add (x := (29:ℝ)/93) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 29/93)/(1 - 29/93)) =
+      Real.log ((61:ℕ):ℝ) - Real.log ((32:ℕ):ℝ) := by
+    rw [show ((1:ℝ) + 29/93)/(1 - 29/93) = ((61:ℕ):ℝ)/((32:ℕ):ℝ) by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (∑ i ∈ Finset.range 12, ((29:ℝ)/93)^(2*i+1)/((2*i+1):ℝ)) +
+      ((29:ℝ)/93)^(2*12+1)/(1 - ((29:ℝ)/93)^2) ≤ (3225689807:ℝ)/10000000000 := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  have hL : (1/2) * (Real.log ((61:ℕ):ℝ) - Real.log ((32:ℕ):ℝ)) ≤ (3225689807:ℝ)/10000000000 := by
+    rw [← hA]
+    exact le_trans h hS
+  linarith [hL, hm]
+
+private lemma term_2_le :
+    Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)) ≤ (2450645360:ℝ)/10000000000 := by
+  have hl := log_2_le
+  have hq : (14142135623:ℝ)/10000000000 ≤ Real.sqrt ((2:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_3_le :
+    Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)) ≤ (2114280337:ℝ)/10000000000 := by
+  have hl := log_3_le
+  have hq : (692820323:ℝ)/400000000 ≤ Real.sqrt ((3:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_4_le :
+    Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)) ≤ (1732867952:ℝ)/10000000000 := by
+  have hl := log_4_le
+  have hq : (2:ℝ)/1 ≤ Real.sqrt ((4:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_5_le :
+    Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)) ≤ (1439525032:ℝ)/10000000000 := by
+  have hl := log_5_le
+  have hq : (11180339887:ℝ)/5000000000 ≤ Real.sqrt ((5:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_6_le :
+    Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)) ≤ (1219137901:ℝ)/10000000000 := by
+  have hl := log_6_le
+  have hq : (24494897427:ℝ)/10000000000 ≤ Real.sqrt ((6:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_7_le :
+    Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)) ≤ (1050692721:ℝ)/10000000000 := by
+  have hl := log_7_le
+  have hq : (2645751311:ℝ)/1000000000 ≤ Real.sqrt ((7:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_8_le :
+    Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)) ≤ (918992010:ℝ)/10000000000 := by
+  have hl := log_8_le
+  have hq : (28284271247:ℝ)/10000000000 ≤ Real.sqrt ((8:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_9_le :
+    Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)) ≤ (813786881:ℝ)/10000000000 := by
+  have hl := log_9_le
+  have hq : (3:ℝ)/1 ≤ Real.sqrt ((9:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_10_le :
+    Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)) ≤ (728141341:ℝ)/10000000000 := by
+  have hl := log_10_le
+  have hq : (31622776601:ℝ)/10000000000 ≤ Real.sqrt ((10:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_11_le :
+    Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)) ≤ (657266026:ℝ)/10000000000 := by
+  have hl := log_11_le
+  have hq : (33166247903:ℝ)/10000000000 ≤ Real.sqrt ((11:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_12_le :
+    Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)) ≤ (597775635:ℝ)/10000000000 := by
+  have hl := log_12_le
+  have hq : (34641016151:ℝ)/10000000000 ≤ Real.sqrt ((12:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_13_le :
+    Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)) ≤ (547222274:ℝ)/10000000000 := by
+  have hl := log_13_le
+  have hq : (18027756377:ℝ)/5000000000 ≤ Real.sqrt ((13:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_14_le :
+    Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)) ≤ (503798386:ℝ)/10000000000 := by
+  have hl := log_14_le
+  have hq : (37416573867:ℝ)/10000000000 ≤ Real.sqrt ((14:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_15_le :
+    Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)) ≤ (466143704:ℝ)/10000000000 := by
+  have hl := log_15_le
+  have hq : (19364916731:ℝ)/5000000000 ≤ Real.sqrt ((15:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_16_le :
+    Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)) ≤ (433216988:ℝ)/10000000000 := by
+  have hl := log_16_le
+  have hq : (4:ℝ)/1 ≤ Real.sqrt ((16:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_17_le :
+    Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)) ≤ (404208924:ℝ)/10000000000 := by
+  have hl := log_17_le
+  have hq : (322117627:ℝ)/78125000 ≤ Real.sqrt ((17:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_18_le :
+    Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)) ≤ (378481754:ℝ)/10000000000 := by
+  have hl := log_18_le
+  have hq : (42426406871:ℝ)/10000000000 ≤ Real.sqrt ((18:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_19_le :
+    Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)) ≤ (355526648:ℝ)/10000000000 := by
+  have hl := log_19_le
+  have hq : (8717797887:ℝ)/2000000000 ≤ Real.sqrt ((19:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_20_le :
+    Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)) ≤ (334933051:ℝ)/10000000000 := by
+  have hl := log_20_le
+  have hq : (44721359549:ℝ)/10000000000 ≤ Real.sqrt ((20:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_21_le :
+    Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)) ≤ (316366316:ℝ)/10000000000 := by
+  have hl := log_21_le
+  have hq : (45825756949:ℝ)/10000000000 ≤ Real.sqrt ((21:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_22_le :
+    Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)) ≤ (299551121:ℝ)/10000000000 := by
+  have hl := log_22_le
+  have hq : (23452078799:ℝ)/5000000000 ≤ Real.sqrt ((22:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_23_le :
+    Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)) ≤ (284259018:ℝ)/10000000000 := by
+  have hl := log_23_le
+  have hq : (47958315233:ℝ)/10000000000 ≤ Real.sqrt ((23:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_24_le :
+    Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ)) ≤ (270298968:ℝ)/10000000000 := by
+  have hl := log_24_le
+  have hq : (9797958971:ℝ)/2000000000 ≤ Real.sqrt ((24:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_25_le :
+    Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ)) ≤ (257510067:ℝ)/10000000000 := by
+  have hl := log_25_le
+  have hq : (5:ℝ)/1 ≤ Real.sqrt ((25:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_26_le :
+    Real.log ((26:ℕ):ℝ)/(((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ)) ≤ (245755886:ℝ)/10000000000 := by
+  have hl := log_26_le
+  have hq : (10198039027:ℝ)/2000000000 ≤ Real.sqrt ((26:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_27_le :
+    Real.log ((27:ℕ):ℝ)/(((27:ℕ):ℝ) * Real.sqrt ((27:ℕ):ℝ)) ≤ (234920038:ℝ)/10000000000 := by
+  have hl := log_27_le
+  have hq : (51961524227:ℝ)/10000000000 ≤ Real.sqrt ((27:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((27:ℕ):ℝ) * Real.sqrt ((27:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_28_le :
+    Real.log ((28:ℕ):ℝ)/(((28:ℕ):ℝ) * Real.sqrt ((28:ℕ):ℝ)) ≤ (224902665:ℝ)/10000000000 := by
+  have hl := log_28_le
+  have hq : (52915026221:ℝ)/10000000000 ≤ Real.sqrt ((28:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((28:ℕ):ℝ) * Real.sqrt ((28:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_29_le :
+    Real.log ((29:ℕ):ℝ)/(((29:ℕ):ℝ) * Real.sqrt ((29:ℕ):ℝ)) ≤ (215617634:ℝ)/10000000000 := by
+  have hl := log_29_le
+  have hq : (53851648071:ℝ)/10000000000 ≤ Real.sqrt ((29:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((29:ℕ):ℝ) * Real.sqrt ((29:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma term_30_le :
+    Real.log ((30:ℕ):ℝ)/(((30:ℕ):ℝ) * Real.sqrt ((30:ℕ):ℝ)) ≤ (206990282:ℝ)/10000000000 := by
+  have hl := log_30_le
+  have hq : (219089023:ℝ)/40000000 ≤ Real.sqrt ((30:ℕ):ℝ) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < ((30:ℕ):ℝ) * Real.sqrt ((30:ℕ):ℝ) := by positivity
+  rw [div_le_iff₀ hp]
+  nlinarith [hl, hq]
+
+private lemma partial_sum_le :
+    (∑ n ∈ Finset.range 31, Real.log (n:ℝ)/((n:ℝ) * Real.sqrt (n:ℝ)))
+      ≤ (19702814920:ℝ)/10000000000 := by
+  have h0 : (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) = 0 := by simp
+  have h1 : (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ))) = 0 := by simp
+  have hexp : (∑ n ∈ Finset.range 31, Real.log (n:ℝ)/((n:ℝ) * Real.sqrt (n:ℝ)))
+      = 0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ))) + (Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ))) + (Real.log ((26:ℕ):ℝ)/(((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ))) + (Real.log ((27:ℕ):ℝ)/(((27:ℕ):ℝ) * Real.sqrt ((27:ℕ):ℝ))) + (Real.log ((28:ℕ):ℝ)/(((28:ℕ):ℝ) * Real.sqrt ((28:ℕ):ℝ))) + (Real.log ((29:ℕ):ℝ)/(((29:ℕ):ℝ) * Real.sqrt ((29:ℕ):ℝ))) + (Real.log ((30:ℕ):ℝ)/(((30:ℕ):ℝ) * Real.sqrt ((30:ℕ):ℝ))) := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+  rw [hexp]
+  have s1 : 0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ))) ≤ 0 := by
+    rw [h0, h1]
+    norm_num
+  have s2 : (0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ))) ≤ (0) + ((2450645360:ℝ)/10000000000) := add_le_add s1 term_2_le
+  have s3 : ((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ))) ≤ ((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000) := add_le_add s2 term_3_le
+  have s4 : (((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ))) ≤ (((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000) := add_le_add s3 term_4_le
+  have s5 : ((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ))) ≤ ((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000) := add_le_add s4 term_5_le
+  have s6 : (((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ))) ≤ (((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000) := add_le_add s5 term_6_le
+  have s7 : ((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ))) ≤ ((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000) := add_le_add s6 term_7_le
+  have s8 : (((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ))) ≤ (((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000) := add_le_add s7 term_8_le
+  have s9 : ((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ))) ≤ ((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000) := add_le_add s8 term_9_le
+  have s10 : (((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ))) ≤ (((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000) := add_le_add s9 term_10_le
+  have s11 : ((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ))) ≤ ((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000) := add_le_add s10 term_11_le
+  have s12 : (((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ))) ≤ (((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000) := add_le_add s11 term_12_le
+  have s13 : ((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ))) ≤ ((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000) := add_le_add s12 term_13_le
+  have s14 : (((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ))) ≤ (((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000) := add_le_add s13 term_14_le
+  have s15 : ((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ))) ≤ ((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000) := add_le_add s14 term_15_le
+  have s16 : (((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ))) ≤ (((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000) := add_le_add s15 term_16_le
+  have s17 : ((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ))) ≤ ((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000) := add_le_add s16 term_17_le
+  have s18 : (((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ))) ≤ (((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000) := add_le_add s17 term_18_le
+  have s19 : ((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ))) ≤ ((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000) := add_le_add s18 term_19_le
+  have s20 : (((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ))) ≤ (((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000) := add_le_add s19 term_20_le
+  have s21 : ((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ))) ≤ ((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000) := add_le_add s20 term_21_le
+  have s22 : (((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ))) ≤ (((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000) := add_le_add s21 term_22_le
+  have s23 : ((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ))) ≤ ((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000) := add_le_add s22 term_23_le
+  have s24 : (((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ))) ≤ (((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000) := add_le_add s23 term_24_le
+  have s25 : ((((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ)))) + (Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ))) ≤ ((((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000)) + ((257510067:ℝ)/10000000000) := add_le_add s24 term_25_le
+  have s26 : (((((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ)))) + (Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ)))) + (Real.log ((26:ℕ):ℝ)/(((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ))) ≤ (((((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000)) + ((257510067:ℝ)/10000000000)) + ((245755886:ℝ)/10000000000) := add_le_add s25 term_26_le
+  have s27 : ((((((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ)))) + (Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ)))) + (Real.log ((26:ℕ):ℝ)/(((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ)))) + (Real.log ((27:ℕ):ℝ)/(((27:ℕ):ℝ) * Real.sqrt ((27:ℕ):ℝ))) ≤ ((((((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000)) + ((257510067:ℝ)/10000000000)) + ((245755886:ℝ)/10000000000)) + ((234920038:ℝ)/10000000000) := add_le_add s26 term_27_le
+  have s28 : (((((((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ)))) + (Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ)))) + (Real.log ((26:ℕ):ℝ)/(((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ)))) + (Real.log ((27:ℕ):ℝ)/(((27:ℕ):ℝ) * Real.sqrt ((27:ℕ):ℝ)))) + (Real.log ((28:ℕ):ℝ)/(((28:ℕ):ℝ) * Real.sqrt ((28:ℕ):ℝ))) ≤ (((((((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000)) + ((257510067:ℝ)/10000000000)) + ((245755886:ℝ)/10000000000)) + ((234920038:ℝ)/10000000000)) + ((224902665:ℝ)/10000000000) := add_le_add s27 term_28_le
+  have s29 : ((((((((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ)))) + (Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ)))) + (Real.log ((26:ℕ):ℝ)/(((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ)))) + (Real.log ((27:ℕ):ℝ)/(((27:ℕ):ℝ) * Real.sqrt ((27:ℕ):ℝ)))) + (Real.log ((28:ℕ):ℝ)/(((28:ℕ):ℝ) * Real.sqrt ((28:ℕ):ℝ)))) + (Real.log ((29:ℕ):ℝ)/(((29:ℕ):ℝ) * Real.sqrt ((29:ℕ):ℝ))) ≤ ((((((((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000)) + ((257510067:ℝ)/10000000000)) + ((245755886:ℝ)/10000000000)) + ((234920038:ℝ)/10000000000)) + ((224902665:ℝ)/10000000000)) + ((215617634:ℝ)/10000000000) := add_le_add s28 term_29_le
+  have s30 : (((((((((((((((((((((((((((((0 + (Real.log ((0:ℕ):ℝ)/(((0:ℕ):ℝ) * Real.sqrt ((0:ℕ):ℝ))) + (Real.log ((1:ℕ):ℝ)/(((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)))) + (Real.log ((2:ℕ):ℝ)/(((2:ℕ):ℝ) * Real.sqrt ((2:ℕ):ℝ)))) + (Real.log ((3:ℕ):ℝ)/(((3:ℕ):ℝ) * Real.sqrt ((3:ℕ):ℝ)))) + (Real.log ((4:ℕ):ℝ)/(((4:ℕ):ℝ) * Real.sqrt ((4:ℕ):ℝ)))) + (Real.log ((5:ℕ):ℝ)/(((5:ℕ):ℝ) * Real.sqrt ((5:ℕ):ℝ)))) + (Real.log ((6:ℕ):ℝ)/(((6:ℕ):ℝ) * Real.sqrt ((6:ℕ):ℝ)))) + (Real.log ((7:ℕ):ℝ)/(((7:ℕ):ℝ) * Real.sqrt ((7:ℕ):ℝ)))) + (Real.log ((8:ℕ):ℝ)/(((8:ℕ):ℝ) * Real.sqrt ((8:ℕ):ℝ)))) + (Real.log ((9:ℕ):ℝ)/(((9:ℕ):ℝ) * Real.sqrt ((9:ℕ):ℝ)))) + (Real.log ((10:ℕ):ℝ)/(((10:ℕ):ℝ) * Real.sqrt ((10:ℕ):ℝ)))) + (Real.log ((11:ℕ):ℝ)/(((11:ℕ):ℝ) * Real.sqrt ((11:ℕ):ℝ)))) + (Real.log ((12:ℕ):ℝ)/(((12:ℕ):ℝ) * Real.sqrt ((12:ℕ):ℝ)))) + (Real.log ((13:ℕ):ℝ)/(((13:ℕ):ℝ) * Real.sqrt ((13:ℕ):ℝ)))) + (Real.log ((14:ℕ):ℝ)/(((14:ℕ):ℝ) * Real.sqrt ((14:ℕ):ℝ)))) + (Real.log ((15:ℕ):ℝ)/(((15:ℕ):ℝ) * Real.sqrt ((15:ℕ):ℝ)))) + (Real.log ((16:ℕ):ℝ)/(((16:ℕ):ℝ) * Real.sqrt ((16:ℕ):ℝ)))) + (Real.log ((17:ℕ):ℝ)/(((17:ℕ):ℝ) * Real.sqrt ((17:ℕ):ℝ)))) + (Real.log ((18:ℕ):ℝ)/(((18:ℕ):ℝ) * Real.sqrt ((18:ℕ):ℝ)))) + (Real.log ((19:ℕ):ℝ)/(((19:ℕ):ℝ) * Real.sqrt ((19:ℕ):ℝ)))) + (Real.log ((20:ℕ):ℝ)/(((20:ℕ):ℝ) * Real.sqrt ((20:ℕ):ℝ)))) + (Real.log ((21:ℕ):ℝ)/(((21:ℕ):ℝ) * Real.sqrt ((21:ℕ):ℝ)))) + (Real.log ((22:ℕ):ℝ)/(((22:ℕ):ℝ) * Real.sqrt ((22:ℕ):ℝ)))) + (Real.log ((23:ℕ):ℝ)/(((23:ℕ):ℝ) * Real.sqrt ((23:ℕ):ℝ)))) + (Real.log ((24:ℕ):ℝ)/(((24:ℕ):ℝ) * Real.sqrt ((24:ℕ):ℝ)))) + (Real.log ((25:ℕ):ℝ)/(((25:ℕ):ℝ) * Real.sqrt ((25:ℕ):ℝ)))) + (Real.log ((26:ℕ):ℝ)/(((26:ℕ):ℝ) * Real.sqrt ((26:ℕ):ℝ)))) + (Real.log ((27:ℕ):ℝ)/(((27:ℕ):ℝ) * Real.sqrt ((27:ℕ):ℝ)))) + (Real.log ((28:ℕ):ℝ)/(((28:ℕ):ℝ) * Real.sqrt ((28:ℕ):ℝ)))) + (Real.log ((29:ℕ):ℝ)/(((29:ℕ):ℝ) * Real.sqrt ((29:ℕ):ℝ)))) + (Real.log ((30:ℕ):ℝ)/(((30:ℕ):ℝ) * Real.sqrt ((30:ℕ):ℝ))) ≤ (((((((((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000)) + ((257510067:ℝ)/10000000000)) + ((245755886:ℝ)/10000000000)) + ((234920038:ℝ)/10000000000)) + ((224902665:ℝ)/10000000000)) + ((215617634:ℝ)/10000000000)) + ((206990282:ℝ)/10000000000) := add_le_add s29 term_30_le
+  have hnum : (((((((((((((((((((((((((((((0) + ((2450645360:ℝ)/10000000000)) + ((2114280337:ℝ)/10000000000)) + ((1732867952:ℝ)/10000000000)) + ((1439525032:ℝ)/10000000000)) + ((1219137901:ℝ)/10000000000)) + ((1050692721:ℝ)/10000000000)) + ((918992010:ℝ)/10000000000)) + ((813786881:ℝ)/10000000000)) + ((728141341:ℝ)/10000000000)) + ((657266026:ℝ)/10000000000)) + ((597775635:ℝ)/10000000000)) + ((547222274:ℝ)/10000000000)) + ((503798386:ℝ)/10000000000)) + ((466143704:ℝ)/10000000000)) + ((433216988:ℝ)/10000000000)) + ((404208924:ℝ)/10000000000)) + ((378481754:ℝ)/10000000000)) + ((355526648:ℝ)/10000000000)) + ((334933051:ℝ)/10000000000)) + ((316366316:ℝ)/10000000000)) + ((299551121:ℝ)/10000000000)) + ((284259018:ℝ)/10000000000)) + ((270298968:ℝ)/10000000000)) + ((257510067:ℝ)/10000000000)) + ((245755886:ℝ)/10000000000)) + ((234920038:ℝ)/10000000000)) + ((224902665:ℝ)/10000000000)) + ((215617634:ℝ)/10000000000)) + ((206990282:ℝ)/10000000000) ≤ (19702814920:ℝ)/10000000000 := by norm_num
+  exact le_trans s30 hnum
+
+/- Helpers for `deriv_zeta_three_half_le`: convexity of `log x * x^(-3/2)` on `[3,∞)`, the
+midpoint (Hermite-Hadamard) inequality obtained from the chord inequality, the resulting
+telescoped tail estimate, and the explicit improper integral `∫_{61/2}^∞ log x x^(-3/2)`. -/
+
+private lemma log_three_ge : (16/15 : ℝ) ≤ Real.log 3 := by
+  have h2 : (0.6931471803 : ℝ) ≤ Real.log 2 := Real.log_two_gt_d9.le
+  have h := Real.sum_range_le_log_div (x := (1:ℝ)/5) (by norm_num) (by norm_num) 12
+  have hA : Real.log (((1:ℝ) + 1/5)/(1 - 1/5)) = Real.log 3 - Real.log 2 := by
+    rw [show ((1:ℝ) + 1/5)/(1 - 1/5) = (3:ℝ)/2 by norm_num,
+      Real.log_div (by norm_num) (by norm_num)]
+  have hS : (1/5 : ℝ) ≤ ∑ i ∈ Finset.range 12, ((1:ℝ)/5)^(2*i+1)/((2*i+1):ℝ) := by
+    norm_num [Finset.sum_range_succ, Finset.sum_range_zero]
+  rw [hA] at h
+  linarith [hS, h, h2]
+
+private lemma g_hasDerivAt (x : ℝ) (hx : 0 < x) :
+    HasDerivAt (fun y : ℝ => Real.log y * y ^ ((-(3:ℝ)/2)))
+      (x ^ ((-(5:ℝ)/2)) * (1 - (3/2) * Real.log x)) x := by
+  have h1 : HasDerivAt Real.log x⁻¹ x := Real.hasDerivAt_log hx.ne'
+  have h2 : HasDerivAt (fun y : ℝ => y ^ ((-(3:ℝ)/2))) ((-(3:ℝ)/2) * x ^ ((-(3:ℝ)/2) - 1)) x :=
+    Real.hasDerivAt_rpow_const (p := (-(3:ℝ)/2)) (x := x) (Or.inl hx.ne')
+  have h := h1.mul h2
+  have e : x⁻¹ * x ^ ((-(3:ℝ)/2)) = x ^ ((-(5:ℝ)/2)) := by
+    rw [show x⁻¹ = x ^ (-(1:ℝ)) by rw [Real.rpow_neg_one], ← Real.rpow_add hx]
+    norm_num
+  have h2' : (-(3:ℝ)/2) * x ^ ((-(3:ℝ)/2) - 1) = (-(3:ℝ)/2) * x ^ ((-(5:ℝ)/2)) := by
+    rw [show ((-(3:ℝ)/2) - 1) = (-(5:ℝ)/2) by norm_num]
+  rw [h2'] at h
+  convert h using 1
+  rw [e]
+  ring
+
+private lemma g'_hasDerivAt (x : ℝ) (hx : 0 < x) :
+    HasDerivAt (fun y : ℝ => y ^ ((-(5:ℝ)/2)) * (1 - (3/2) * Real.log y))
+      (x ^ ((-(7:ℝ)/2)) * ((15/4) * Real.log x - 4)) x := by
+  have h1 : HasDerivAt (fun y : ℝ => y ^ ((-(5:ℝ)/2))) ((-(5:ℝ)/2) * x ^ ((-(5:ℝ)/2) - 1)) x :=
+    Real.hasDerivAt_rpow_const (p := (-(5:ℝ)/2)) (x := x) (Or.inl hx.ne')
+  have h2 : HasDerivAt (fun y : ℝ => (1:ℝ) - (3/2) * Real.log y) (0 - (3/2) * x⁻¹) x :=
+    (hasDerivAt_const (x := x) (c := (1:ℝ))).sub ((Real.hasDerivAt_log hx.ne').const_mul (3/2))
+  have h := h1.mul h2
+  have h1' : (-(5:ℝ)/2) * x ^ ((-(5:ℝ)/2) - 1) = (-(5:ℝ)/2) * x ^ ((-(7:ℝ)/2)) := by
+    rw [show ((-(5:ℝ)/2) - 1) = (-(7:ℝ)/2) by norm_num]
+  have e : x ^ ((-(5:ℝ)/2)) * x⁻¹ = x ^ ((-(7:ℝ)/2)) := by
+    rw [show x⁻¹ = x ^ (-(1:ℝ)) by rw [Real.rpow_neg_one], ← Real.rpow_add hx]
+    norm_num
+  have e2 : x ^ ((-(5:ℝ)/2)) * (0 - (3/2) * x⁻¹) = (-(3/2)) * x ^ ((-(7:ℝ)/2)) := by
+    calc x ^ ((-(5:ℝ)/2)) * (0 - (3/2) * x⁻¹) = (-(3/2)) * (x ^ ((-(5:ℝ)/2)) * x⁻¹) := by ring
+      _ = (-(3/2)) * x ^ ((-(7:ℝ)/2)) := by rw [e]
+  rw [h1'] at h
+  convert h using 1
+  rw [e2]
+  ring
+
+private lemma g_convex :
+    ConvexOn ℝ (Ioi (3:ℝ)) (fun y : ℝ => Real.log y * y ^ ((-(3:ℝ)/2))) := by
+  refine convexOn_of_hasDerivWithinAt2_nonneg (D := Ioi (3:ℝ)) (convex_Ioi 3)
+    (f' := fun y : ℝ => y ^ ((-(5:ℝ)/2)) * (1 - (3/2) * Real.log y))
+    (f'' := fun y : ℝ => y ^ ((-(7:ℝ)/2)) * ((15/4) * Real.log y - 4)) ?_ ?_ ?_ ?_
+  · intro x hx
+    have hx0 : (0:ℝ) < x := by linarith [show (3:ℝ) < x from hx]
+    exact ((Real.continuousAt_log hx0.ne').mul
+      (Real.continuousAt_rpow_const x (-(3:ℝ)/2) (Or.inl hx0.ne'))).continuousWithinAt
+  · intro x hx
+    rw [interior_Ioi] at hx
+    exact (g_hasDerivAt x (by linarith [show (3:ℝ) < x from hx])).hasDerivWithinAt
+  · intro x hx
+    rw [interior_Ioi] at hx
+    exact (g'_hasDerivAt x (by linarith [show (3:ℝ) < x from hx])).hasDerivWithinAt
+  · intro x hx
+    rw [interior_Ioi] at hx
+    have hx3 : (3:ℝ) < x := hx
+    have hx0 : (0:ℝ) < x := by linarith
+    have hpos : (0:ℝ) < x ^ ((-(7:ℝ)/2)) := Real.rpow_pos_of_pos hx0 _
+    have hlog : (16/15 : ℝ) ≤ Real.log x := by
+      have h1 : Real.log 3 ≤ Real.log x := Real.log_le_log (by norm_num) hx3.le
+      linarith [log_three_ge]
+    have hbr : (0:ℝ) ≤ (15/4) * Real.log x - 4 := by linarith
+    exact mul_nonneg hpos.le hbr
+
+/-- Midpoint (Hermite-Hadamard) inequality for `log x * x^(-3/2)` on `[m-1/2, m+1/2]`, `m >= 31`:
+the chord inequality `g m <= (g (m-t) + g (m+t))/2` from convexity, integrated over `t in [0,1/2]`. -/
+private lemma midpoint_step (m : ℝ) (hm : 31 ≤ m) :
+    Real.log m * m ^ ((-(3:ℝ)/2)) ≤
+      ∫ x in (m - 1/2)..(m + 1/2), Real.log x * x ^ ((-(3:ℝ)/2)) := by
+  have hpt : ∀ t ∈ Set.Icc (0:ℝ) (1/2),
+      Real.log m * m ^ ((-(3:ℝ)/2)) ≤
+        ((Real.log (m - t) * (m - t) ^ ((-(3:ℝ)/2)) +
+          Real.log (m + t) * (m + t) ^ ((-(3:ℝ)/2)))) / 2 := by
+    intro t ht
+    obtain ⟨ht0, ht1⟩ := ht
+    have hxm : m - t ∈ Set.Ioi (3:ℝ) := by
+      simp only [Set.mem_Ioi]; linarith
+    have hxp : m + t ∈ Set.Ioi (3:ℝ) := by
+      simp only [Set.mem_Ioi]; linarith
+    have h := g_convex.2 hxm hxp (by norm_num : (0:ℝ) ≤ 1/2) (by norm_num : (0:ℝ) ≤ 1/2)
+      (by norm_num : (1/2:ℝ) + 1/2 = 1)
+    have e : (1/2:ℝ) • (m - t) + (1/2:ℝ) • (m + t) = m := by
+      rw [smul_eq_mul, smul_eq_mul]; ring
+    rw [e, smul_eq_mul, smul_eq_mul] at h
+    linarith [h]
+  have hcontg : ∀ x ∈ Set.Icc (m - 1/2) (m + 1/2),
+      ContinuousAt (fun y : ℝ => Real.log y * y ^ ((-(3:ℝ)/2))) x := by
+    intro x hx
+    have hx0 : (0:ℝ) < x := by linarith [hx.1]
+    exact (Real.continuousAt_log hx0.ne').mul
+      (Real.continuousAt_rpow_const x (-(3:ℝ)/2) (Or.inl hx0.ne'))
+  have hint1 : IntervalIntegrable (fun y : ℝ => Real.log y * y ^ ((-(3:ℝ)/2))) volume
+      (m - 1/2) m := by
+    apply ContinuousOn.intervalIntegrable
+    intro x hx
+    rw [Set.uIcc_of_le (by linarith : m - 1/2 ≤ m)] at hx
+    exact (hcontg x ⟨hx.1, by linarith [hx.2]⟩).continuousWithinAt
+  have hint2 : IntervalIntegrable (fun y : ℝ => Real.log y * y ^ ((-(3:ℝ)/2))) volume
+      m (m + 1/2) := by
+    apply ContinuousOn.intervalIntegrable
+    intro x hx
+    rw [Set.uIcc_of_le (by linarith : m ≤ m + 1/2)] at hx
+    exact (hcontg x ⟨by linarith [hx.1], hx.2⟩).continuousWithinAt
+  have hintL : IntervalIntegrable (fun t : ℝ => (Real.log (m - t) * (m - t) ^ ((-(3:ℝ)/2)) +
+      Real.log (m + t) * (m + t) ^ ((-(3:ℝ)/2)))) volume 0 (1/2) := by
+    apply ContinuousOn.intervalIntegrable
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1/2)] at ht
+    have ha0 : (0:ℝ) < m - t := by linarith [ht.1, ht.2]
+    have hb0 : (0:ℝ) < m + t := by linarith [ht.1]
+    have h1 : ContinuousAt (fun s : ℝ => Real.log (m - s) * (m - s) ^ ((-(3:ℝ)/2))) t :=
+      ((Real.continuousAt_log ha0.ne').mul
+        (Real.continuousAt_rpow_const (m - t) (-(3:ℝ)/2) (Or.inl ha0.ne'))).comp
+        (by fun_prop : ContinuousAt (fun s : ℝ => m - s) t)
+    have h2 : ContinuousAt (fun s : ℝ => Real.log (m + s) * (m + s) ^ ((-(3:ℝ)/2))) t :=
+      ((Real.continuousAt_log hb0.ne').mul
+        (Real.continuousAt_rpow_const (m + t) (-(3:ℝ)/2) (Or.inl hb0.ne'))).comp
+        (by fun_prop : ContinuousAt (fun s : ℝ => m + s) t)
+    exact (h1.add h2).continuousWithinAt
+  have hi1 : IntervalIntegrable (fun t : ℝ => Real.log (m - t) * (m - t) ^ ((-(3:ℝ)/2)))
+      volume 0 (1/2) := by
+    apply ContinuousOn.intervalIntegrable
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1/2)] at ht
+    have ha0 : (0:ℝ) < m - t := by linarith [ht.1, ht.2]
+    exact (((Real.continuousAt_log ha0.ne').mul
+      (Real.continuousAt_rpow_const (m - t) (-(3:ℝ)/2) (Or.inl ha0.ne'))).comp
+      (by fun_prop : ContinuousAt (fun s : ℝ => m - s) t)).continuousWithinAt
+  have hi2 : IntervalIntegrable (fun t : ℝ => Real.log (m + t) * (m + t) ^ ((-(3:ℝ)/2)))
+      volume 0 (1/2) := by
+    apply ContinuousOn.intervalIntegrable
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1/2)] at ht
+    have hb0 : (0:ℝ) < m + t := by linarith [ht.1]
+    exact (((Real.continuousAt_log hb0.ne').mul
+      (Real.continuousAt_rpow_const (m + t) (-(3:ℝ)/2) (Or.inl hb0.ne'))).comp
+      (by fun_prop : ContinuousAt (fun s : ℝ => m + s) t)).continuousWithinAt
+  have hmono : (∫ t in (0:ℝ)..(1/2), Real.log m * m ^ ((-(3:ℝ)/2))) ≤
+      ∫ t in (0:ℝ)..(1/2), ((Real.log (m - t) * (m - t) ^ ((-(3:ℝ)/2)) +
+        Real.log (m + t) * (m + t) ^ ((-(3:ℝ)/2)))) / 2 :=
+    intervalIntegral.integral_mono_on (f := fun _ => Real.log m * m ^ ((-(3:ℝ)/2)))
+      (g := fun t : ℝ => ((Real.log (m - t) * (m - t) ^ ((-(3:ℝ)/2)) +
+        Real.log (m + t) * (m + t) ^ ((-(3:ℝ)/2)))) / 2)
+      (by norm_num) intervalIntegrable_const (hintL.div_const 2) hpt
+  have hL : (∫ t in (0:ℝ)..(1/2), Real.log m * m ^ ((-(3:ℝ)/2))) =
+      (1/2) * (Real.log m * m ^ ((-(3:ℝ)/2))) := by
+    rw [intervalIntegral.integral_const]
+    simp
+  have hsub : (∫ t in (0:ℝ)..(1/2), Real.log (m - t) * (m - t) ^ ((-(3:ℝ)/2))) =
+      ∫ x in (m - 1/2)..m, Real.log x * x ^ ((-(3:ℝ)/2)) := by
+    have h := intervalIntegral.integral_comp_sub_left
+      (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2))) (a := (0:ℝ)) (b := 1/2) m
+    simpa using h
+  have hadd : (∫ t in (0:ℝ)..(1/2), Real.log (m + t) * (m + t) ^ ((-(3:ℝ)/2))) =
+      ∫ x in m..(m + 1/2), Real.log x * x ^ ((-(3:ℝ)/2)) := by
+    have h := intervalIntegral.integral_comp_add_left
+      (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2))) (a := (0:ℝ)) (b := 1/2) m
+    simpa using h
+  have hR : (∫ t in (0:ℝ)..(1/2), ((Real.log (m - t) * (m - t) ^ ((-(3:ℝ)/2)) +
+      Real.log (m + t) * (m + t) ^ ((-(3:ℝ)/2)))) / 2) =
+      (1/2) * ((∫ x in (m - 1/2)..m, Real.log x * x ^ ((-(3:ℝ)/2))) +
+        ∫ x in m..(m + 1/2), Real.log x * x ^ ((-(3:ℝ)/2))) := by
+    rw [intervalIntegral.integral_div, intervalIntegral.integral_add hi1 hi2, hsub, hadd]
+    ring
+  have hadj := intervalIntegral.integral_add_adjacent_intervals hint1 hint2
+  rw [hL, hR] at hmono
+  linarith [hmono, hadj]
+
+private lemma g_continuousOn :
+    ContinuousOn (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2))) (Set.Ioi 0) :=
+  fun x hx => ((Real.continuousAt_log hx.ne').mul
+    (Real.continuousAt_rpow_const x (-(3:ℝ)/2) (Or.inl hx.ne'))).continuousWithinAt
+
+private lemma g_intervalIntegrable {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+    IntervalIntegrable (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2))) volume a b := by
+  apply ContinuousOn.intervalIntegrable
+  refine g_continuousOn.mono ?_
+  intro x hx
+  simp only [Set.uIcc, Set.mem_Icc] at hx
+  exact lt_of_lt_of_le (lt_min ha hb) hx.1
+
+/-- The tail sum is at most the integral of `log x * x^(-3/2)` from `61/2` on, via the
+midpoint inequality summed over the unit intervals. -/
+private lemma tail_sum_le :
+    (∑' (k : ℕ), Real.log ((k:ℝ)+31) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2)))
+      ≤ ∫ x in Set.Ioi ((61:ℝ)/2), Real.log x * x ^ ((-(3:ℝ)/2)) := by
+  have hstep : ∀ M : ℕ, (∑ k ∈ Finset.range M,
+      Real.log ((k:ℝ)+31) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2)))
+      ≤ ∫ x in ((61:ℝ)/2)..(((M:ℕ):ℝ) + (61:ℝ)/2), Real.log x * x ^ ((-(3:ℝ)/2)) := by
+    intro M
+    induction M with
+    | zero =>
+      simp only [Finset.range_zero, Finset.sum_empty, Nat.cast_zero, zero_add]
+      simp
+    | succ M ih =>
+      rw [Finset.sum_range_succ]
+      have hms : ((M:ℝ) + 31) - 1/2 = ((M:ℕ):ℝ) + (61:ℝ)/2 := by push_cast; ring
+      have hsingle := midpoint_step ((M:ℝ) + 31)
+        (by have h0 : (0:ℝ) ≤ (M:ℝ) := Nat.cast_nonneg M; linarith)
+      rw [hms] at hsingle
+      have hcc : ((M:ℕ):ℝ) + (61:ℝ)/2 + 1 = ((((M+1:ℕ)):ℝ)) + (61:ℝ)/2 := by push_cast; ring
+      have hadj := intervalIntegral.integral_add_adjacent_intervals
+        (f := fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2)))
+        (g_intervalIntegrable (a := (61:ℝ)/2) (b := ((M:ℕ):ℝ) + (61:ℝ)/2)
+          (by norm_num) (by positivity))
+        (g_intervalIntegrable (a := ((M:ℕ):ℝ) + (61:ℝ)/2)
+          (b := ((M:ℕ):ℝ) + (61:ℝ)/2 + 1) (by positivity) (by positivity))
+      rw [hcc] at hadj
+      have h31 : ((M:ℝ) + 31 + 1/2) = ((((M+1:ℕ)):ℝ)) + (61:ℝ)/2 := by push_cast; ring
+      rw [h31] at hsingle
+      linarith [ih, hsingle, hadj]
+  have hsumm : Summable (fun k : ℕ => Real.log ((k:ℝ)+31) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2))) := by
+    have hb : Summable (fun n : ℕ => (n:ℝ) ^ ((-(5:ℝ)/4))) :=
+      Real.summable_nat_rpow.mpr (by norm_num)
+    have hshift : Summable (fun k : ℕ => ((k:ℝ)+31) ^ ((-(5:ℝ)/4))) := by
+      have h := (summable_nat_add_iff 31).mpr hb
+      simpa using h
+    refine Summable.of_nonneg_of_le (fun k => ?_) (fun k => ?_) (hshift.mul_left 4)
+    · have h0 : (0:ℝ) < (k:ℝ)+31 := by positivity
+      exact mul_nonneg (Real.log_nonneg (by linarith : (1:ℝ) ≤ (k:ℝ)+31)) (Real.rpow_nonneg h0.le _)
+    · have h0 : (0:ℝ) < (k:ℝ)+31 := by positivity
+      have hlog : Real.log ((k:ℝ)+31) ≤ 4 * ((k:ℝ)+31) ^ ((1:ℝ)/4) := by
+        have hq : (0:ℝ) < ((k:ℝ)+31) ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos h0 _
+        have h := Real.log_le_sub_one_of_pos hq
+        rw [Real.log_rpow h0] at h
+        nlinarith [h]
+      have e : ((k:ℝ)+31) ^ ((1:ℝ)/4) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2))
+          = ((k:ℝ)+31) ^ ((-(5:ℝ)/4)) := by
+        rw [← Real.rpow_add h0]; norm_num
+      calc Real.log ((k:ℝ)+31) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2))
+          ≤ (4 * ((k:ℝ)+31) ^ ((1:ℝ)/4)) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2)) :=
+            mul_le_mul_of_nonneg_right hlog (Real.rpow_nonneg h0.le _)
+        _ = 4 * ((k:ℝ)+31) ^ ((-(5:ℝ)/4)) := by rw [mul_assoc, e]
+  have hintg : IntegrableOn (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2))) (Set.Ioi ((61:ℝ)/2)) := by
+    have hbase : IntegrableOn (fun x : ℝ => x ^ ((-(5:ℝ)/4))) (Set.Ioi ((61:ℝ)/2)) :=
+      integrableOn_Ioi_rpow_of_lt (by norm_num) (by norm_num)
+    refine Integrable.mono' (hbase.const_mul 4) ?_ ?_
+    · have hmono : ContinuousOn (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2)))
+          (Set.Ioi ((61:ℝ)/2)) :=
+        g_continuousOn.mono (fun x hx => by
+          simp only [Set.mem_Ioi] at hx ⊢
+          linarith)
+      exact hmono.aestronglyMeasurable measurableSet_Ioi
+    · refine (ae_restrict_iff' measurableSet_Ioi).mpr (ae_of_all _ (fun x hx => ?_))
+      have hx0 : (0:ℝ) < x := by linarith [show (61:ℝ)/2 < x from hx]
+      have hlog : Real.log x ≤ 4 * x ^ ((1:ℝ)/4) := by
+        have hq : (0:ℝ) < x ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos hx0 _
+        have h := Real.log_le_sub_one_of_pos hq
+        rw [Real.log_rpow hx0] at h
+        nlinarith [h]
+      have hnn : (0:ℝ) ≤ Real.log x * x ^ ((-(3:ℝ)/2)) :=
+        mul_nonneg (Real.log_nonneg (by linarith [show (61:ℝ)/2 < x from hx] : (1:ℝ) ≤ x))
+          (Real.rpow_nonneg hx0.le _)
+      rw [Real.norm_eq_abs, abs_of_nonneg hnn]
+      have e : x ^ ((1:ℝ)/4) * x ^ ((-(3:ℝ)/2)) = x ^ ((-(5:ℝ)/4)) := by
+        rw [← Real.rpow_add hx0]; norm_num
+      calc Real.log x * x ^ ((-(3:ℝ)/2))
+          ≤ (4 * x ^ ((1:ℝ)/4)) * x ^ ((-(3:ℝ)/2)) :=
+            mul_le_mul_of_nonneg_right hlog (Real.rpow_nonneg hx0.le _)
+        _ = 4 * x ^ ((-(5:ℝ)/4)) := by rw [mul_assoc, e]
+  have hlimsum : Tendsto (fun M : ℕ => ∑ k ∈ Finset.range M,
+      Real.log ((k:ℝ)+31) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2))) atTop
+      (nhds (∑' k : ℕ, Real.log ((k:ℝ)+31) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2)))) :=
+    hsumm.tendsto_sum_tsum_nat
+  have hlimint : Tendsto (fun M : ℕ => ∫ x in ((61:ℝ)/2)..(((M:ℕ):ℝ) + (61:ℝ)/2),
+      Real.log x * x ^ ((-(3:ℝ)/2))) atTop
+      (nhds (∫ x in Set.Ioi ((61:ℝ)/2), Real.log x * x ^ ((-(3:ℝ)/2)))) := by
+    have ht : Tendsto (fun M : ℕ => ((M:ℕ):ℝ) + (61:ℝ)/2) atTop atTop :=
+      tendsto_atTop_add_const_right atTop ((61:ℝ)/2) tendsto_natCast_atTop_atTop
+    exact intervalIntegral_tendsto_integral_Ioi ((61:ℝ)/2) hintg ht
+  exact le_of_tendsto_of_tendsto' hlimsum hlimint hstep
+
+private lemma g_antideriv (x : ℝ) (hx : 0 < x) :
+    HasDerivAt (fun t : ℝ => -2 * (Real.log t * t ^ ((-((1:ℝ)/2)))) - 4 * (t ^ ((-((1:ℝ)/2)))))
+      (Real.log x * x ^ ((-(3:ℝ)/2))) x := by
+  have hlog := Real.hasDerivAt_log hx.ne'
+  have hrpow : HasDerivAt (fun t : ℝ => t ^ ((-((1:ℝ)/2))))
+      ((-((1:ℝ)/2)) * x ^ ((-((1:ℝ)/2)) - 1)) x :=
+    Real.hasDerivAt_rpow_const (p := (-((1:ℝ)/2))) (x := x) (Or.inl hx.ne')
+  have h1 : HasDerivAt (fun t : ℝ => Real.log t * t ^ ((-((1:ℝ)/2))))
+      (x⁻¹ * x ^ ((-((1:ℝ)/2))) + Real.log x * ((-((1:ℝ)/2)) * x ^ ((-((1:ℝ)/2)) - 1))) x :=
+    hlog.mul hrpow
+  have h2 : HasDerivAt (fun t : ℝ => (-2:ℝ) * (Real.log t * t ^ ((-((1:ℝ)/2)))))
+      ((-2) * (x⁻¹ * x ^ ((-((1:ℝ)/2))) + Real.log x * ((-((1:ℝ)/2)) * x ^ ((-((1:ℝ)/2)) - 1)))) x :=
+    h1.const_mul (-2)
+  have h3 : HasDerivAt (fun t : ℝ => (4:ℝ) * t ^ ((-((1:ℝ)/2))))
+      (4 * ((-((1:ℝ)/2)) * x ^ ((-((1:ℝ)/2)) - 1))) x := hrpow.const_mul 4
+  have h := h2.sub h3
+  have e1 : x⁻¹ * x ^ ((-((1:ℝ)/2))) = x ^ ((-(3:ℝ)/2)) := by
+    rw [show x⁻¹ = x ^ (-(1:ℝ)) by rw [Real.rpow_neg_one], ← Real.rpow_add hx]
+    norm_num
+  have e2 : x ^ ((-((1:ℝ)/2)) - 1) = x ^ ((-(3:ℝ)/2)) := by
+    rw [show ((-((1:ℝ)/2)) - 1) = (-(3:ℝ)/2) by norm_num]
+  have hvv : (-2) * (x⁻¹ * x ^ ((-((1:ℝ)/2))) + Real.log x * ((-((1:ℝ)/2)) * x ^ ((-((1:ℝ)/2)) - 1)))
+      - 4 * ((-((1:ℝ)/2)) * x ^ ((-((1:ℝ)/2)) - 1)) = Real.log x * x ^ ((-(3:ℝ)/2)) := by
+    rw [e1, e2]
+    ring
+  rw [hvv] at h
+  exact h
+
+private lemma g_tendsto_antideriv :
+    Tendsto (fun t : ℝ => -2 * (Real.log t * t ^ ((-((1:ℝ)/2)))) - 4 * (t ^ ((-((1:ℝ)/2)))))
+      atTop (nhds 0) := by
+  have h1 : Tendsto (fun t : ℝ => t ^ ((-((1:ℝ)/2)))) atTop (nhds 0) := by
+    exact tendsto_rpow_neg_atTop (y := (1:ℝ)/2) (by norm_num)
+  have h2 : Tendsto (fun t : ℝ => Real.log t * t ^ ((-((1:ℝ)/2)))) atTop (nhds 0) := by
+    have hlog : ∀ t : ℝ, 1 ≤ t → |Real.log t| ≤ 4 * t ^ ((1:ℝ)/4) := by
+      intro t ht
+      have ht0 : (0:ℝ) < t := by linarith
+      rw [abs_of_nonneg (Real.log_nonneg ht)]
+      have hq : (0:ℝ) < t ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos ht0 _
+      have h := Real.log_le_sub_one_of_pos hq
+      rw [Real.log_rpow ht0] at h
+      nlinarith [h]
+    have hb : Tendsto (fun t : ℝ => 4 * t ^ ((-((1:ℝ)/4)))) atTop (nhds 0) := by
+      have h := (tendsto_rpow_neg_atTop (y := (1:ℝ)/4) (by norm_num)).const_mul 4
+      simpa using h
+    refine squeeze_zero_norm' ?_ hb
+    filter_upwards [eventually_ge_atTop (1:ℝ)] with t ht
+    rw [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.rpow_pos_of_pos (by linarith : (0:ℝ) < t) _)]
+    calc |Real.log t| * t ^ ((-((1:ℝ)/2)))
+        ≤ (4 * t ^ ((1:ℝ)/4)) * t ^ ((-((1:ℝ)/2))) := by
+          refine mul_le_mul_of_nonneg_right (hlog t ht) (Real.rpow_nonneg (by linarith) _)
+      _ = 4 * t ^ ((-((1:ℝ)/4))) := by
+          have e : t ^ ((1:ℝ)/4) * t ^ ((-((1:ℝ)/2))) = t ^ ((-((1:ℝ)/4))) := by
+            rw [← Real.rpow_add (by linarith : (0:ℝ) < t)]; norm_num
+          rw [mul_assoc, e]
+  have h3 : Tendsto (fun t : ℝ => (-2) * (Real.log t * t ^ ((-((1:ℝ)/2))))) atTop (nhds ((-2) * 0)) :=
+    tendsto_const_nhds.mul h2
+  have h4 : Tendsto (fun t : ℝ => (4:ℝ) * t ^ ((-((1:ℝ)/2)))) atTop (nhds (4 * 0)) :=
+    tendsto_const_nhds.mul h1
+  have := h3.sub h4
+  simpa using this
+
+private lemma g_integral_Ioi :
+    ∫ x in Set.Ioi ((61:ℝ)/2), Real.log x * x ^ ((-(3:ℝ)/2))
+      = 2 * Real.log ((61:ℝ)/2) / Real.sqrt ((61:ℝ)/2) + 4 / Real.sqrt ((61:ℝ)/2) := by
+  have hc0 : (0:ℝ) < (61:ℝ)/2 := by norm_num
+  have hd : ∀ x ∈ Set.Ici ((61:ℝ)/2), HasDerivAt
+      (fun t : ℝ => -2 * (Real.log t * t ^ ((-((1:ℝ)/2)))) - 4 * (t ^ ((-((1:ℝ)/2)))))
+      (Real.log x * x ^ ((-(3:ℝ)/2))) x := by
+    intro x hx
+    exact g_antideriv x (by linarith [show (61:ℝ)/2 ≤ x from hx])
+  have hint : IntegrableOn (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2))) (Set.Ioi ((61:ℝ)/2)) := by
+    have hbase : IntegrableOn (fun x : ℝ => x ^ ((-(5:ℝ)/4))) (Set.Ioi ((61:ℝ)/2)) :=
+      integrableOn_Ioi_rpow_of_lt (by norm_num) (by norm_num)
+    refine Integrable.mono' (hbase.const_mul 4) ?_ ?_
+    · have hmono : ContinuousOn (fun x : ℝ => Real.log x * x ^ ((-(3:ℝ)/2)))
+          (Set.Ioi ((61:ℝ)/2)) :=
+        g_continuousOn.mono (fun x hx => by
+          simp only [Set.mem_Ioi] at hx ⊢
+          linarith)
+      exact hmono.aestronglyMeasurable measurableSet_Ioi
+    · refine (ae_restrict_iff' measurableSet_Ioi).mpr (ae_of_all _ (fun x hx => ?_))
+      have hx0 : (0:ℝ) < x := by linarith [show (61:ℝ)/2 < x from hx]
+      have hlog : Real.log x ≤ 4 * x ^ ((1:ℝ)/4) := by
+        have hq : (0:ℝ) < x ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos hx0 _
+        have h := Real.log_le_sub_one_of_pos hq
+        rw [Real.log_rpow hx0] at h
+        nlinarith [h]
+      have hnn : (0:ℝ) ≤ Real.log x * x ^ ((-(3:ℝ)/2)) :=
+        mul_nonneg (Real.log_nonneg (by linarith [show (61:ℝ)/2 < x from hx] : (1:ℝ) ≤ x))
+          (Real.rpow_nonneg hx0.le _)
+      rw [Real.norm_eq_abs, abs_of_nonneg hnn]
+      have e : x ^ ((1:ℝ)/4) * x ^ ((-(3:ℝ)/2)) = x ^ ((-(5:ℝ)/4)) := by
+        rw [← Real.rpow_add hx0]; norm_num
+      calc Real.log x * x ^ ((-(3:ℝ)/2))
+          ≤ (4 * x ^ ((1:ℝ)/4)) * x ^ ((-(3:ℝ)/2)) :=
+            mul_le_mul_of_nonneg_right hlog (Real.rpow_nonneg hx0.le _)
+        _ = 4 * x ^ ((-(5:ℝ)/4)) := by rw [mul_assoc, e]
+  have hval := integral_Ioi_of_hasDerivAt_of_tendsto' hd hint g_tendsto_antideriv
+  rw [hval]
+  have hsqrt : ((61:ℝ)/2) ^ ((-((1:ℝ)/2))) = 1 / Real.sqrt ((61:ℝ)/2) := by
+    rw [show (-((1:ℝ)/2)) = -((1:ℝ)/2) by norm_num, Real.rpow_neg hc0.le, ← Real.sqrt_eq_rpow]
+    ring
+  rw [hsqrt]
+  ring
+
+
+private lemma term_eq (n : ℕ) :
+    Real.log (n:ℝ) * (n:ℝ) ^ ((-(3:ℝ)/2)) = Real.log (n:ℝ)/((n:ℝ) * Real.sqrt (n:ℝ)) := by
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp
+  · have h0 : (0:ℝ) < (n:ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+    have e : (n:ℝ) ^ ((-(3:ℝ)/2)) = 1/((n:ℝ) * Real.sqrt (n:ℝ)) := by
+      rw [show ((-(3:ℝ)/2)) = -((3:ℝ)/2) by norm_num, rpow_neg_three_half _ h0]
+    rw [e, mul_one_div]
+
+private lemma g_summable :
+    Summable (fun n : ℕ => Real.log (n:ℝ) * (n:ℝ) ^ ((-(3:ℝ)/2))) := by
+  have hb : Summable (fun n : ℕ => (n:ℝ) ^ ((-(5:ℝ)/4))) :=
+    Real.summable_nat_rpow.mpr (by norm_num)
+  refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_) (hb.mul_left 4)
+  · rcases eq_or_ne n 0 with rfl | hn
+    · simp
+    · exact mul_nonneg (Real.log_natCast_nonneg n) (Real.rpow_nonneg (by positivity) _)
+  · rcases eq_or_ne n 0 with rfl | hn
+    · simp
+    · have h0 : (0:ℝ) < (n:ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+      have hlog : Real.log (n:ℝ) ≤ 4 * (n:ℝ) ^ ((1:ℝ)/4) := by
+        have hq : (0:ℝ) < (n:ℝ) ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos h0 _
+        have h := Real.log_le_sub_one_of_pos hq
+        rw [Real.log_rpow h0] at h
+        nlinarith [h]
+      have e : (n:ℝ) ^ ((1:ℝ)/4) * (n:ℝ) ^ ((-(3:ℝ)/2)) = (n:ℝ) ^ ((-(5:ℝ)/4)) := by
+        rw [← Real.rpow_add h0]; norm_num
+      calc Real.log (n:ℝ) * (n:ℝ) ^ ((-(3:ℝ)/2))
+          ≤ (4 * (n:ℝ) ^ ((1:ℝ)/4)) * (n:ℝ) ^ ((-(3:ℝ)/2)) :=
+            mul_le_mul_of_nonneg_right hlog (Real.rpow_nonneg h0.le _)
+        _ = 4 * (n:ℝ) ^ ((-(5:ℝ)/4)) := by rw [mul_assoc, e]
+
+private lemma g_integral_le :
+    ∫ x in Set.Ioi ((61:ℝ)/2), Real.log x * x ^ ((-(3:ℝ)/2)) ≤ (19619917092:ℝ)/10000000000 := by
+  rw [g_integral_Ioi]
+  have h2 : (0.6931471803 : ℝ) ≤ Real.log 2 := Real.log_two_gt_d9.le
+  have h61 : Real.log (61:ℝ) ≤ (41108738654:ℝ)/10000000000 := by simpa using log_61_le
+  have hlog : Real.log ((61:ℝ)/2) ≤ (34177266851:ℝ)/10000000000 := by
+    rw [Real.log_div (by norm_num) (by norm_num)]
+    linarith
+  have hlogpos : (0:ℝ) ≤ Real.log ((61:ℝ)/2) :=
+    Real.log_nonneg (by norm_num)
+  have hq : (55226805085:ℝ)/10000000000 ≤ Real.sqrt ((61:ℝ)/2) := by
+    rw [Real.le_sqrt (by norm_num) (by norm_num)]
+    norm_num
+  have hp : (0:ℝ) < (55226805085:ℝ)/10000000000 := by norm_num
+  have h1 : 2 * Real.log ((61:ℝ)/2) / Real.sqrt ((61:ℝ)/2)
+      ≤ 2 * ((34177266851:ℝ)/10000000000) / ((55226805085:ℝ)/10000000000) := by
+    refine div_le_div₀ (by linarith) ?_ hp hq
+    linarith
+  have h2' : 4 / Real.sqrt ((61:ℝ)/2) ≤ 4 / ((55226805085:ℝ)/10000000000) :=
+    div_le_div_of_nonneg_left (by norm_num) hp hq
+  have hnum : 2 * ((34177266851:ℝ)/10000000000) / ((55226805085:ℝ)/10000000000)
+      + 4 / ((55226805085:ℝ)/10000000000) ≤ (19619917092:ℝ)/10000000000 := by norm_num
+  linarith
+
+
 /-- LEAF: P0014 page 34, display 4.11, "ζ'(3/2) can be evaluated by Euler-Maclaurin":
 |ζ'(3/2)| ≤ 3.9323. The true value is -3.9322397374..., margin 6.0e-5.
 Class HARD: a certified Euler-Maclaurin evaluation of the derivative with remainder. -/
 theorem deriv_zeta_three_half_le : ‖deriv riemannZeta (3 / 2)‖ ≤ 3.9323 := by
-  sorry
+  rw [norm_deriv_zeta]
+  have hconv : (∑' n : ℕ, Real.log (n:ℝ)/((n:ℝ) * Real.sqrt (n:ℝ)))
+      = ∑' n : ℕ, Real.log (n:ℝ) * (n:ℝ) ^ ((-(3:ℝ)/2)) := by
+    refine tsum_congr (fun n => ?_)
+    exact (term_eq n).symm
+  rw [hconv]
+  rw [← g_summable.sum_add_tsum_nat_add 31]
+  have hfin : (∑ n ∈ Finset.range 31, Real.log (n:ℝ) * (n:ℝ) ^ ((-(3:ℝ)/2)))
+      ≤ (19702814920:ℝ)/10000000000 := by
+    rw [Finset.sum_congr rfl (fun n (_ : n ∈ Finset.range 31) => term_eq n)]
+    exact partial_sum_le
+  have htail : (∑' k : ℕ, Real.log ((k:ℝ)+31) * ((k:ℝ)+31) ^ ((-(3:ℝ)/2)))
+      ≤ (19619917092:ℝ)/10000000000 :=
+    le_trans tail_sum_le g_integral_le
+  have htail' : (∑' k : ℕ, Real.log (((k+31:ℕ)):ℝ) * (((k+31:ℕ)):ℝ) ^ ((-(3:ℝ)/2)))
+      ≤ (19619917092:ℝ)/10000000000 := by
+    simpa [Nat.cast_add] using htail
+  linarith [hfin, htail']
+
 
 /-- P0014 page 34, display 4.11: |ζ'(3/2)/ζ(3/2)| ≤ 1.50527, from the two Euler-Maclaurin
 leaves; 3.9323/2.61237 = 1.505261. -/
