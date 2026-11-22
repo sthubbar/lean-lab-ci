@@ -121,6 +121,9 @@ theorem leaf_remainder_bound481 (H₀ T₀ : ℝ) :
                 (∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
                   gammaPair481 (z i).2.2 (z j).2.2 n).re| ≤
                 B * ((X : ℝ) * Real.exp (-c * H) + X / Real.sqrt T) := by
+  refine ⟨1, 1, 1, by norm_num, by norm_num, by norm_num, fun _ => 1, fun _ => Nat.one_pos, ?_⟩
+  intro H T hH hT
+  refine ⟨1, fun X hX P hP K z Sg h01 h0s hbox hmult h00 hSgb hSge n hn => ?_⟩
   sorry
 
 /-- The split target: the same statement as `pintz_explicit_formula481`, proved from the three
