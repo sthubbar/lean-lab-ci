@@ -7,12 +7,16 @@ prime power series on re s greater than 1. The principal branch Complex.log is n
 used: by LnLCrossing1117 it jumps where the L-function crosses the negative real axis.
 Proved here: GRH nonvanishing on the half plane, the existence of the holomorphic
 logarithm with its normalisation, the separation of the exponent one terms, and the
-assembly. Leaves left: the cited GRH bound for log L, the Cahen Mellin formula on the
-line re s equal to 2 and the shift of that line to re s equal to 1/2 plus 1/ln N.
+assembly. The three former leaves, the GRH bound for log L, the Cahen Mellin formula on
+the line re s equal to 2 and the shift of that line, are proved in Burst1122LogBound,
+Burst1122CahenMellin and Burst1122LineShift, burst session S57.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.SPLIT_grh_mellin_transfer519
 import LeanLab.Linnik1951.LnLCrossing1117
+import LeanLab.Linnik1951.Burst1122LogBound
+import LeanLab.Linnik1951.Burst1122CahenMellin
+import LeanLab.Linnik1951.Burst1122LineShift
 
 namespace LeanLab.Linnik1951.Task519
 
@@ -265,8 +269,9 @@ theorem holomorphic_log_L_b1122 (hG : LeanLab.DERZ1997.GRH) (q : ℕ) [NeZero q]
 
 /-! ### Step 3. The cited GRH bound for the logarithm of L -/
 
-/-- LEAF: P0093 page 159 before equation 5.1, the ERH bound for ln L. HARD.
-Citation wall: the classical bound for log L under the generalized Riemann
+/-- P0093 page 159 before equation 5.1, the ERH bound for ln L. Formerly a HARD LEAF,
+PROVED in burst session S57 by grh_strip_log_bound_proof_b1122 of Burst1122LogBound via
+Borel Caratheodory, with no zero sum. Former citation wall: the classical bound for log L under the generalized Riemann
 hypothesis, Titchmarsh, The Theory of the Riemann Zeta-Function, section 14.2 and
 Montgomery and Vaughan, Multiplicative Number Theory I, chapter 13. Under GRH, for
 N large, q at most N to the 1/7, a nonprincipal character chi and the holomorphic
@@ -282,13 +287,14 @@ theorem grh_strip_log_bound_b1122 (hG : LeanLab.DERZ1997.GRH) :
           (∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
             (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1)) →
           ∀ s : ℂ, 1 / 2 + 1 / Real.log N ≤ s.re → s.re ≤ 2 →
-            ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3 := by
-  sorry
+            ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3 :=
+  grh_strip_log_bound_proof_b1122 hG
 
 /-! ### Step 4. Mellin inversion on re s equal to 2 and the shift of the line -/
 
-/-- LEAF: P0093 page 156 display after equation 4.1 and page 159 before equation 5.1,
-the Cahen Mellin formula on the line re s equal to 2. MEDIUM.
+/-- P0093 page 156 display after equation 4.1 and page 159 before equation 5.1,
+the Cahen Mellin formula on the line re s equal to 2. Formerly a MEDIUM LEAF, PROVED in
+burst session S57 by cahen_mellin_line_two_proof_b1122 of Burst1122CahenMellin.
 For z equal to 1/N + 2 pi i alpha, e to the minus n z is 1/(2 pi i) times the integral
 of Gamma of s times n z to the minus s over re s equal to 2. Inserting the prime power
 series of G, absolutely convergent on that line, and integrating term by term gives
@@ -305,11 +311,12 @@ theorem cahen_mellin_line_two_b1122 (N : ℕ) (hN : 1 ≤ N) (q : ℕ)
           (((k : ℂ) + 1)⁻¹ * χ ((p : ℕ) ^ (k + 1)) *
             (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) : ℂ) *
               Complex.exp
-                ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 1))) : ℝ) * Complex.I)) := by
-  sorry
+                ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 1))) : ℝ) * Complex.I)) :=
+  cahen_mellin_line_two_proof_b1122 N hN q χ G hGs α
 
-/-- LEAF: P0093 page 156 display after equation 4.1 and page 159 before equation 5.1,
-the shift of the Mellin line from re s equal to 2 to re s equal to 1/2 + 1/ln N. MEDIUM.
+/-- P0093 page 156 display after equation 4.1 and page 159 before equation 5.1,
+the shift of the Mellin line from re s equal to 2 to re s equal to 1/2 + 1/ln N. Formerly a
+MEDIUM LEAF, PROVED in burst session S57 by mellin_line_shift_proof_b1122 of Burst1122LineShift.
 Cauchy's theorem on the rectangle with vertical sides on the two lines: G is
 holomorphic on re s greater than 1/2, Gamma decays like e to the minus pi |t| / 2 while
 z to the minus s grows at most like e to the |t| |arg z| with |arg z| less than pi / 2,
@@ -323,8 +330,8 @@ theorem mellin_line_shift_b1122 (N : ℕ) (hN : 2 ≤ N) (G : ℂ → ℂ)
       ((1 / (2 * Real.pi) : ℝ) : ℂ) * ∫ t : ℝ,
         (((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I) ^
           (-((2 : ℂ) + (t : ℂ) * Complex.I)) * Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) *
-            G ((2 : ℂ) + (t : ℂ) * Complex.I) := by
-  sorry
+            G ((2 : ℂ) + (t : ℂ) * Complex.I) :=
+  mellin_line_shift_proof_b1122 N hN G hGd B0 hGb α
 
 
 /-! ### Separation of the exponent one terms -/
