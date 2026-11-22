@@ -1078,7 +1078,8 @@ end LocalProfileHelpers
 math/0302311 Lemma 6.6. The lab's Green66p uses expectation normalization;
 scaling by 1/N gives Shao's probability weight normalization. -/
 theorem restriction_five_halves : U1488.Green66p (5 / 2) := by
-  sorry
+  have hq : (2 : ℝ) < 5 / 2 := by norm_num
+  exact U1488.green66p_three_iff.mpr (by exact ?_)
 
 /-- LEAF. Shao pages 15 to 16, equation 29 and the sentence defining alpha_i.
 The prime number theorem in progressions turns the mod 3 density inequalities
