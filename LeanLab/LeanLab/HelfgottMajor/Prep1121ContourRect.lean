@@ -1177,7 +1177,8 @@ theorem rect_identity {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (hχ 
     intro p hp hneg
     by_cases hp0 : p = 0
     · exact Or.inl hp0
-    · exact Or.inr (poles_off_origin χ hχ hq δ hx T' hp hp0 hneg)
+    · obtain ⟨h1, h2, h3⟩ := LFunction_eq_zero_of_pole χ hχ hq δ hx hp hp0 hneg
+      exact Or.inr ⟨h1, h2, h3, im_abs_le_of_mem_rect hT0 hp⟩
   have hfin : (Complex.Rectangle (zc T') (wc T') ∩
       {p | meromorphicOrderAt (contourIntegrand χ δ x) p < 0}).Finite := by
     have hcpt : IsCompact (Complex.Rectangle (zc T') (wc T')) :=
