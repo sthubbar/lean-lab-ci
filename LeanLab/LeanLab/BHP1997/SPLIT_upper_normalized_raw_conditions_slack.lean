@@ -10,6 +10,7 @@ from the two leaves with no sorry.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.UpperShortC165Leaves
+import LeanLab.BHP1997.Prep1121UpslackRoute
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b
@@ -73,8 +74,6 @@ theorem upper_normalized_raw_conditions_slack_split
       Task308.ShortMeanSquare ε
         (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
           upperDeletedIntegral ω ε + δ) (upperNormCoeff ε lam) := by
-  obtain ⟨lam, Λ, hb, hX, hdist⟩ :=
-    upper_slack_split_rescaled_short_distribution h4 h9 hω hz hε hε8 hδ
-  exact ⟨lam, Λ, hb, hX, hdist, upper_slack_split_mean_square_transfer hδ lam hdist⟩
+  exact upslack_route h4 h9 hω hz hε hε8 hδ
 
 end LeanLab.BHP1997.DecompC165d
