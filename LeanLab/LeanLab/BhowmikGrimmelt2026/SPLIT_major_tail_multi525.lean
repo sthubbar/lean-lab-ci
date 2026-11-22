@@ -20,6 +20,7 @@ The pointwise estimate remains open and the assembly is conditional on it.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp525a
+import LeanLab.BhowmikGrimmelt2026.MajorArcPair
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -47,6 +48,31 @@ theorem multi_tail_pointwise525 {G : ℝ → ℝ} (hG : IsMajorWeight G)
       ‖nearTransform525 G X ((X : ℝ) ^ ϑ) η α -
         bRhat G ((X : ℝ) ^ ϑ) (fun q => η * X * q / (X : ℝ) ^ ϑ) α‖ ≤
         D * η ^ 2 := by
+  classical
+  obtain ⟨Cg, hCg, hGt⟩ := GThat_bound hG.supp hG.smooth (2 + 2 / ϑ)
+  refine ⟨2 * Cg * 5 ^ (-(2 + 2 / ϑ)) * 100, by positivity, ?_⟩
+  intro X hX hR η hη hη1 hscale α hα hm
+  let R : ℝ := (X : ℝ) ^ ϑ
+  let T : ℕ → ℝ := fun q => η * X * q / R
+  have hXp : (0 : ℝ) < X := by exact_mod_cast (by omega : 0 < X)
+  have hX1 : (1 : ℝ) ≤ X := by exact_mod_cast (by omega : 1 ≤ X)
+  have hRp : 0 < R := Real.rpow_pos_of_pos hXp ϑ
+  have hR0 : 0 ≤ R := hRp.le
+  have hR1 : 1 ≤ R := Real.one_le_rpow hX1 hϑ.le
+  have hηX : η * X ≤ X := by nlinarith
+  have hsep : 2 * R ^ 2 < X := by
+    have h2 : 10 * R ^ 2 ≤ X := by nlinarith
+    nlinarith
+  have hRX : R ≤ X := by nlinarith [hR1, sq_nonneg (R - 1)]
+  have hTpos : ∀ q ∈ Finset.Icc 1 ⌊R⌋₊, 0 < T q := by
+    intro q hq
+    have hq1 : 0 < q := by have := (Finset.mem_Icc.mp hq).1; omega
+    have hqp : (0 : ℝ) < (q : ℝ) := by exact_mod_cast hq1
+    dsimp [T, R]
+    positivity
+  obtain ⟨q, hqmem, a, hamem, hclose⟩ := majorArc_center_in_sum525 hXp hRX hα hm
+  have hnear := nearTransform_eq525 hXp hR0 hsep hqmem hamem hclose
+  rw [hnear, bRhat_eq hG.supp hG.even R T hTpos α]
   sorry
 
 /-- PROVED from smoothed_family_bound261 and log_le_sixteen_log5_525.
