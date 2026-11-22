@@ -1100,7 +1100,8 @@ theorem leaf_fractional_boundary (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
               Int.fract (F γ n) < calE γ κ N ^ (-(1 / 8 : ℝ)) ∨
                 1 - calE γ κ N ^ (-(1 / 8 : ℝ)) < Int.fract (F γ n))).card : ℝ) ≤
           B * N * calE γ κ N ^ (-(1 / 8 : ℝ)) := by
-  sorry
+  simpa [LeanLab.ExceptionalSet.UpJ200.DecompJ200.window] using
+    LeanLab.ExceptionalSet.UpJ200.MajorBoundLeavesJ200.leaf_major_fractional_boundary γ h1 h2
 
 /-! ### Assembly -/
 
