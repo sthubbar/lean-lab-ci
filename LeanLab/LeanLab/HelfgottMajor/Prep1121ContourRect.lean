@@ -1008,17 +1008,20 @@ private lemma LFunction_eq_zero_of_pole {q : ℕ} [NeZero q] (χ : DirichletChar
         intro h0
         exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hne) h h0)
 
-/-- LEAF: P0014 page 33, display 4.7, the poles crossed by the shift. A pole p ≠ 0 of F in
-the rectangle is a zero of L(s, χ) with 0 < Re p < 1 and |Im p| ≤ T': off the zeros of L,
-F is holomorphic on Re s above -1 away from 0; there is no zero with Re s ≥ 1, Mathlib
-`LFunction_ne_zero_of_one_le_re`, and the only zero with -1/2 ≤ Re s ≤ 0 is 0,
-`Linnik.ExplicitFormula.zero_left_strip`. MEDIUM. -/
+/-- PROVED. P0014 page 33, display 4.7, the poles crossed by the shift. A pole p ≠ 0 of F in
+the rectangle is a zero of L(s, χ) with 0 < Re p < 1 and |Im p| ≤ T'. RESTATED 2026-11-22 by
+the architect, run 20261122T0802Z-26025: the hypothesis 0 ≤ T' is added. Without it the leaf
+was false as cut, omos_tick 20261122T0644Z: for T' below 0 the rectangle is
+[-1/2, 2] × [T', -T'], which still holds points p ≠ 0 with |Im p| above T', for example
+p = i/2 at T' = -1. Every use has 1 ≤ T', and the paper's rectangle has T' ≥ 1. -/
 theorem poles_off_origin {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (hχ : χ.IsPrimitive) (hq : q ≠ 1) (δ : ℝ) {x : ℝ} (hx : 1 ≤ x) (T' : ℝ) {p : ℂ}
+    (hχ : χ.IsPrimitive) (hq : q ≠ 1) (δ : ℝ) {x : ℝ} (hx : 1 ≤ x) {T' : ℝ} (hT : 0 ≤ T')
+    {p : ℂ}
     (hp : p ∈ Complex.Rectangle (zc T') (wc T')) (hp0 : p ≠ 0)
     (hneg : meromorphicOrderAt (contourIntegrand χ δ x) p < 0) :
     χ.LFunction p = 0 ∧ 0 < p.re ∧ p.re < 1 ∧ |p.im| ≤ T' := by
-  sorry
+  obtain ⟨h1, h2, h3⟩ := LFunction_eq_zero_of_pole χ hχ hq δ hx hp hp0 hneg
+  exact ⟨h1, h2, h3, im_abs_le_of_mem_rect hT hp⟩
 
 /-- LEAF: P0014 page 33, display 4.7, the poles off 0 are simple. At p ≠ 0 with Re p above -1
 the factor G_δ(s) x^s is holomorphic and L'/L has at most a simple pole, so the meromorphic
@@ -1228,3 +1231,4 @@ end LeanLab.HelfgottMajor.Prep1121ContourRect
 #print axioms LeanLab.HelfgottMajor.Prep1121ContourRect.rect_sides_eq
 #print axioms LeanLab.HelfgottMajor.Prep1121ContourRect.mem_rect
 #print axioms LeanLab.HelfgottMajor.Prep1121ContourRect.rect_identity
+#print axioms LeanLab.HelfgottMajor.Prep1121ContourRect.poles_off_origin
