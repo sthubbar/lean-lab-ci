@@ -34,7 +34,15 @@ theorem prop_2_1_58 : ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε
     ∃ C : ℝ, ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X → ∀ H : ℝ,
       (X : ℝ) ^ ((5 : ℝ) / 8 + ε) ≤ H → H ≤ (X : ℝ) ^ (1 - ε) → ∀ α : ℝ,
         ‖S4 X H α - S4sharp ε X H α‖ ≤ C * H * (X : ℝ) ^ (-(c * ε)) := by
-  sorry
+  obtain ⟨ε₀, hε₀, h⟩ := prop_2_1
+  refine ⟨ε₀, hε₀, fun ε hε hεε => ?_⟩
+  obtain ⟨c, hc, C, X₀, hC⟩ := h ε hε hεε
+  refine ⟨c, hc, C, max X₀ 1, fun X hX H hlo hhi α => ?_⟩
+  have hX1 : 1 ≤ X := le_trans (le_max_right _ _) hX
+  have hX1r : (1 : ℝ) ≤ (X : ℝ) := by exact_mod_cast hX1
+  have hlo' : (X : ℝ) ^ ((3 : ℝ) / 5 + ε) ≤ H :=
+    le_trans (Real.rpow_le_rpow_of_exponent_le hX1r (by linarith)) hlo
+  exact hC X (le_trans (le_max_left _ _) hX) H hlo' hhi α
 
 theorem lo_mono {g k : ℕ} (hg : 1 ≤ g) {ε H : ℝ}
     (h : ((g ^ k : ℕ) : ℝ) ^ ((5 : ℝ) / 8 + ε) ≤ H) :
