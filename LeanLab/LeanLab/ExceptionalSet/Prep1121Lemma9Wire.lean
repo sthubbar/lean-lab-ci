@@ -1,6 +1,7 @@
 import LeanLab.ExceptionalSet.Prep1121Trapezoid
 import LeanLab.ExceptionalSet.DQLemma10S1
 import LeanLab.ExceptionalSet.DQLemma4Decisions
+import LeanLab.ExceptionalSet.UpJ200.Decomp539a
 
 /-!
 Prep 2026-11-21, ExceptionalSet route step ES-cited, wiring for `U1539.lemma9`.
@@ -243,5 +244,24 @@ theorem lemma9_of_karacuba_erdosTuran
 
 #print axioms lemma9_of_theorem2_lemma4_wired
 #print axioms lemma9_of_karacuba_erdosTuran
+
+/-- P0082 pages 368 to 369. Both parity phases localize at half integers,
+CONDITIONAL ON the named Karacuba and Erdos-Turan citation walls only. -/
+theorem parity_gap_of_karacuba_erdosTuran
+    (hK : LeanLab.ExceptionalSet.U1539.DQLemma10.KaracubaThm1Named)
+    (hET : LeanLab.ExceptionalSet.DQLemma4.ErdosTuranDQ4)
+    (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
+    ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ j : ℤ, (j = 0 ∨ j = 1) →
+          ∀ t : ℝ, |t| ≤ F γ N ^ δ →
+            N * calE γ κ N ^ (-(5 / 6 : ℝ)) <
+              ‖LeanLab.ExceptionalSet.UpJ200.Decomp539a.parityPhase γ N j t‖ →
+            ∃ h : ℤ, |t - h / 2| ≤ F γ N ^ (δ - 1) := by
+  have h9 := lemma9_of_karacuba_erdosTuran hK hET
+  have h10 := LeanLab.ExceptionalSet.U1539.DQLemma10.lemma10_of_karacuba_named hK
+  exact LeanLab.ExceptionalSet.UpJ200.Decomp539a.parity_gap_of_inputs h9 h10 γ h1 h2
+
+#print axioms parity_gap_of_karacuba_erdosTuran
 
 end LeanLab.ExceptionalSet.Prep1121Lemma9Wire
