@@ -1,14 +1,11 @@
 import LeanLab.HelfgottMajor.ContourKernel669
 import LeanLab.HelfgottMajor.DQSaddleSegmentBound
 import LeanLab.HelfgottMajor.Prep1121A33Window
-import LeanLab.HelfgottMajor.Radius669
 
 /-!
 The original two contour bound statements, with their statements unchanged.
 Shared definitions and proved geometric lemmas moved verbatim to ContourKernel669.
 The saddle proof reuses the assembly supplied by the requested base branch.
-The initial segment proof inlines the assembly of DQInitialSegmentBound, whose module imports
-this one, and the display A.33 computation of Prep1121A33Reduce, for the same reason.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 
@@ -26,23 +23,73 @@ theorem saddle_segment_bound (δ : ℝ) (s : ℂ)
       exp (-BookE.E (|s.im| / (π * δ) ^ 2) * |s.im|) := by
   exact DQSaddleSegmentBound.saddle_segment_bound_of_leaves δ s hσ0 hσ1 ht hsign
 
-/-! ### Display A.33, appendix page 67
 
-The first line of A.33 is the computer checked inequality `a33G u ≤ 0.0763896` on `[0,1]`,
-proved in `Prep1121A33Cells` and `Prep1121A33Window` by certified interval arithmetic over
-`u = 1/υ(ρ)`; the second line is `Radius669.a33_second`. These are inlined here because the
-modules that assemble them import this file. -/
+/-- P0014 displays 3.32 and 3.61. The central saddle radius is at most the square root
+of the absolute height, for every nonzero shift and height. -/
+private theorem saddleRadius_le_sqrt (δ τ : ℝ) (hδ : δ ≠ 0) (hτ : 0 < |τ|) :
+    DQSaddleSegmentBound.saddleRadius δ τ ≤ sqrt |τ| := by
+  set ρ := rho δ τ with hρdef
+  have hρ : 0 < ρ := rho_pos δ τ hδ hτ
+  have hu := ups_gt_one ρ hρ
+  have hj : sqrt (1 + ρ ^ 2) ≤ 1 + ρ := by
+    simpa only [Real.norm_eq_abs, abs_of_pos hρ] using sqrt_one_add_norm_sq_le ρ
+  have hU : BookE.ups ρ ^ 2 = (1 + sqrt (1 + ρ ^ 2)) / 2 := by
+    unfold BookE.ups
+    rw [sq_sqrt (by positivity)]
+  have hY0 : 0 ≤ BookE.ups ρ ^ 2 - BookE.ups ρ := by nlinarith
+  have hY : 2 * (BookE.ups ρ ^ 2 - BookE.ups ρ) ≤ ρ := by nlinarith
+  have hr0sq : DQSaddleSegmentBound.saddleRadius δ τ ^ 2 =
+      ell δ ^ 2 / 2 * (BookE.ups ρ ^ 2 - BookE.ups ρ) := by
+    rw [DQSaddleSegmentBound.saddleRadius, ← hρdef, mul_pow, div_pow, sq_sqrt hY0,
+      sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+  have hM := mul_le_mul_of_nonneg_left hY (sq_nonneg (ell δ))
+  have hell := ell_sq_mul_rho δ τ hδ
+  rw [← hρdef] at hell
+  apply le_sqrt_of_sq_le
+  rw [hr0sq]
+  nlinarith only [hM, hell]
+
+/-- P0014 page 67, second bound of display A.33. This half of the named numerical
+input is elementary and needs no interval computation. -/
+private theorem a33_second (ρ : ℝ) (hρ : 0 < ρ) :
+    (c0 ρ - 1 / sqrt 2) / (c1 ρ * sqrt ρ) ≤ 1 / 2 := by
+  let τ : ℝ := π ^ 2 * ρ
+  have ht : 0 < τ := mul_pos (sq_pos_of_pos pi_pos) hρ
+  have hτ : 0 < |τ| := abs_pos.mpr ht.ne'
+  have hd : (1 : ℝ) ≠ 0 := by norm_num
+  have hρid : rho 1 τ = ρ := by
+    simp only [rho, mul_one, abs_of_pos ht]
+    dsimp only [τ]
+    field_simp
+  have hi : initialRadius 1 τ ≤ sqrt |τ| :=
+    (DQSaddleSegmentBound.saddleRadius_mem 1 τ hd hτ).1.trans (saddleRadius_le_sqrt 1 τ hd hτ)
+  have hE := ell_mul_sqrt_rho 1 τ hd
+  rw [hρid] at hE
+  have hc := c1_pos ρ hρ
+  have hL := ell_pos 1 hd
+  have hs : 0 < sqrt ρ := sqrt_pos.mpr hρ
+  have hst : sqrt |τ| ≠ 0 := (sqrt_pos.mpr hτ).ne'
+  calc
+    (c0 ρ - 1 / sqrt 2) / (c1 ρ * sqrt ρ) =
+        initialRadius 1 τ / (ell 1 * sqrt ρ) := by
+      rw [initialRadius, hρid]
+      field_simp
+      <;> ring
+    _ ≤ sqrt |τ| / (ell 1 * sqrt ρ) := div_le_div_of_nonneg_right hi (by positivity)
+    _ = 1 / 2 := by
+      rw [hE]
+      field_simp
+
 
 /-- P0014 page 16, display 3.25 and page 67, display A.33.
 For `ρ > 0` the parameter `u = 1/υ(ρ)` lies in `(0,1)`. -/
-private theorem a33_u_mem (ρ : ℝ) (hρ : 0 < ρ) :
-    0 < 1 / BookE.ups ρ ∧ 1 / BookE.ups ρ < 1 := by
+private theorem u_mem (ρ : ℝ) (hρ : 0 < ρ) : 0 < 1 / BookE.ups ρ ∧ 1 / BookE.ups ρ < 1 := by
   have hv := ups_gt_one ρ hρ
   exact ⟨by positivity, by rw [div_lt_one (by linarith)]; exact hv⟩
 
 /-- P0014 page 16, display 3.25.
 `√(1+ρ²) = 2υ² - 1` and `ρ² = 4υ²(υ²-1)`. -/
-private theorem a33_ups_sq (ρ : ℝ) (hρ : 0 < ρ) :
+private theorem ups_sq (ρ : ℝ) (hρ : 0 < ρ) :
     √(1 + ρ ^ 2) = 2 * BookE.ups ρ ^ 2 - 1 ∧
       ρ ^ 2 = 4 * BookE.ups ρ ^ 2 * (BookE.ups ρ ^ 2 - 1) := by
   have hs : 0 ≤ √(1 + ρ ^ 2) := sqrt_nonneg _
@@ -57,7 +104,7 @@ private theorem a33_ups_sq (ρ : ℝ) (hρ : 0 < ρ) :
 
 /-- P0014 page 16, display 3.25; Mathlib lookup plus the half angle formula.
 `tan (arctan X / 2) = X / (1 + √(1 + X²))` for `X > 0`. -/
-private theorem a33_tan_half_arctan (X : ℝ) (hX : 0 < X) :
+private theorem tan_half_arctan (X : ℝ) (hX : 0 < X) :
     tan (arctan X / 2) = X / (1 + √(1 + X ^ 2)) := by
   set θ := arctan X / 2 with hθ
   have e1 : arctan X = 2 * θ := by rw [hθ]; ring
@@ -78,12 +125,12 @@ private theorem a33_tan_half_arctan (X : ℝ) (hX : 0 < X) :
 /-- P0014 page 16, display 3.25 and page 18, display 3.34; one clear idea.
 In the variable `u = 1/υ`, `Υ(ρ) = (2-u)√(1+u) / (√(1-u) u + √(4-2u²))`:
 the argument of the arctangent is `X = (2υ-1)a/b` and `√(1+X²) = √(4υ²-2)/b`. -/
-private theorem a33_upsilon_u (ρ : ℝ) (hρ : 0 < ρ) :
+private theorem upsilon_u (ρ : ℝ) (hρ : 0 < ρ) :
     let u := 1 / BookE.ups ρ
     upsilon ρ = (2 - u) * √(1 + u) / (√(1 - u) * u + √(4 - 2 * u ^ 2)) := by
   intro u
   have hv := ups_gt_one ρ hρ
-  obtain ⟨hs1, hρ2⟩ := a33_ups_sq ρ hρ
+  obtain ⟨hs1, hρ2⟩ := ups_sq ρ hρ
   set v := BookE.ups ρ with hvdef
   have hv0 : 0 < v := by linarith
   have hu : u * v = 1 := by simp only [u, ← hvdef]; field_simp
@@ -103,7 +150,7 @@ private theorem a33_upsilon_u (ρ : ℝ) (hρ : 0 < ρ) :
     field_simp
     ring
   have hX0 : 0 < X := by rw [hX]; apply div_pos _ hr0; nlinarith
-  rw [a33_tan_half_arctan X hX0]
+  rw [tan_half_arctan X hX0]
   set T := √(2 * v * (2 * v ^ 2 - 1) * (v + 1)) with hTdef
   have hT0 : 0 ≤ T := sqrt_nonneg _
   have hT : √(1 + X ^ 2) = T / r := by
@@ -151,7 +198,7 @@ private theorem a33_upsilon_u (ρ : ℝ) (hρ : 0 < ρ) :
 
 /-- P0014 page 18, display 3.34; pure calculation.
 `c0 ρ = (√(1+u) Υ + √(1-u))/√2` with `u = 1/υ`. -/
-private theorem a33_c0_u (ρ : ℝ) (hρ : 0 < ρ) :
+private theorem c0_u (ρ : ℝ) (hρ : 0 < ρ) :
     let u := 1 / BookE.ups ρ
     c0 ρ = (√(1 + u) * upsilon ρ + √(1 - u)) / √2 := by
   intro u
@@ -168,14 +215,14 @@ private theorem a33_c0_u (ρ : ℝ) (hρ : 0 < ρ) :
 
 /-- P0014 page 18, display 3.34 and page 16, display 3.25; pure calculation.
 `c1 ρ · ρ = 2(1+u) Υ / u` with `u = 1/υ`, from `ρ = 2υ√(υ²-1)`. -/
-private theorem a33_c1_mul_rho_u (ρ : ℝ) (hρ : 0 < ρ) :
+private theorem c1_mul_rho_u (ρ : ℝ) (hρ : 0 < ρ) :
     let u := 1 / BookE.ups ρ
     c1 ρ * ρ = 2 * (1 + u) * upsilon ρ / u := by
   intro u
   have hv := ups_gt_one ρ hρ
   set v := BookE.ups ρ with hvdef
   have hv0 : 0 < v := by linarith
-  have hρ2 := (a33_ups_sq ρ hρ).2
+  have hρ2 := (ups_sq ρ hρ).2
   rw [← hvdef] at hρ2
   have hd : 0 < v ^ 2 - v := by nlinarith
   have key : √((1 + 1 / v) / (v ^ 2 - v)) * ρ = 2 * (v + 1) := by
@@ -195,7 +242,7 @@ private theorem a33_c1_mul_rho_u (ρ : ℝ) (hρ : 0 < ρ) :
 
 /-- P0014 page 67, display A.33; pure calculation with the relations
 `a² = 1+u`, `b² = 1-u`, `R² = 4-2u²`. Given the three closed forms, the first line of A.33
-is `a33G u`. Checked by a Groebner reduction in sympy. -/
+is `Prep1121A33Cells.a33G u`. Checked by a Groebner reduction in sympy. -/
 private theorem a33_quotient_eq (u U c0v c1r : ℝ) (hu0 : 0 < u) (hu1 : u < 1)
     (hU : U = (2 - u) * √(1 + u) / (√(1 - u) * u + √(4 - 2 * u ^ 2)))
     (h0 : c0v = (√(1 + u) * U + √(1 - u)) / √2)
@@ -227,19 +274,17 @@ private theorem a33_quotient_eq (u U c0v c1r : ℝ) (hu0 : 0 < u) (hu1 : u < 1)
 /-- P0014 page 67, display A.33, first line, in the variable `u = 1/υ(ρ)`. -/
 private theorem a33_first_eq (ρ : ℝ) (hρ : 0 < ρ) :
     (c0 ρ - 1 / √2) / (√2 * c1 ρ * ρ) = Prep1121A33Cells.a33G (1 / BookE.ups ρ) := by
-  have hu := a33_u_mem ρ hρ
+  have hu := u_mem ρ hρ
   rw [mul_assoc]
-  exact a33_quotient_eq _ _ _ _ hu.1 hu.2 (a33_upsilon_u ρ hρ) (a33_c0_u ρ hρ)
-    (a33_c1_mul_rho_u ρ hρ)
+  exact a33_quotient_eq _ _ _ _ hu.1 hu.2 (upsilon_u ρ hρ) (c0_u ρ hρ) (c1_mul_rho_u ρ hρ)
 
 /-- P0014 page 67, display A.33, first line:
 `(c0 - 1/√2)/(√2 c1 ρ) ≤ 0.0763896` for every `ρ > 0`. -/
 private theorem a33_first (ρ : ℝ) (hρ : 0 < ρ) :
     (c0 ρ - 1 / √2) / (√2 * c1 ρ * ρ) ≤ 0.0763896 := by
-  have hB : ((Prep1121A33Cells.a33B : ℚ) : ℝ) = 0.0763896 := by
-    norm_num [Prep1121A33Cells.a33B]
+  have hB : ((Prep1121A33Cells.a33B : ℚ) : ℝ) = 0.0763896 := by norm_num [Prep1121A33Cells.a33B]
   rw [a33_first_eq ρ hρ, ← hB]
-  obtain ⟨h0, h1⟩ := a33_u_mem ρ hρ
+  obtain ⟨h0, h1⟩ := u_mem ρ hρ
   by_cases hw : 1 / 2 ≤ 1 / BookE.ups ρ ∧ 1 / BookE.ups ρ ≤ 4 / 5
   · exact Prep1121A33Window.a33G_le_window _ hw.1 hw.2
   · apply Prep1121A33Cells.a33G_le_outside _ h0 h1.le
@@ -247,21 +292,20 @@ private theorem a33_first (ρ : ℝ) (hρ : 0 < ρ) :
     push_neg at hc
     exact hw ⟨hc.1, hc.2⟩
 
-/-- P0014 page 67, display A.33, both lines: the first from the certified cells, the second
-from `Radius669`. -/
-private theorem a33_bounds (ρ : ℝ) (hρ : 0 < ρ) :
-    (c0 ρ - 1 / √2) / (√2 * c1 ρ * ρ) ≤ 0.0763896 ∧
-      (c0 ρ - 1 / √2) / (c1 ρ * sqrt ρ) ≤ 1 / 2 :=
-  ⟨a33_first ρ hρ, Radius669.a33_second ρ hρ⟩
 
-/-! ### The integration by parts on the segment C1
-
-P0014 pages 24 and 25, displays 3.58 to 3.63 and the bound after 3.63. Inlined from
-`DQInitialSegmentBound`, which imports this file. -/
+/-- P0014 page 67, display A.33, both lines: the numerical input of page 24 holds.
+The first line is proved by certified interval arithmetic in `Prep1121A33Cells` and
+`Prep1121A33Window`, the second by the saddle radius comparison. -/
+private theorem helfgottA33_holds : ∀ ρ : ℝ, 0 < ρ →
+    (c0 ρ - 1 / sqrt 2) / (sqrt 2 * c1 ρ * ρ) ≤ 0.0763896 ∧
+    (c0 ρ - 1 / sqrt 2) / (c1 ρ * sqrt ρ) ≤ 1 / 2 :=
+  fun ρ hρ => ⟨a33_first ρ hρ, a33_second ρ hρ⟩
 
 /-- P0014 page 24, the display after 3.60: by A.33, `ℓ r₋ / √2 ≤ 0.07639 ℓ² ρ`, and
-`ℓ² ρ = 4 |τ|`, so the phase cost is at most `0.30556 |τ|`. -/
-private theorem initialRadius_phase_of_a33 (δ τ : ℝ) (hδ : δ ≠ 0)
+`ℓ² ρ = 4 |τ|`, so the phase cost is at most `0.30556 |τ|`. CONDITIONAL ON `HelfgottA33`. -/
+private theorem initialRadius_phase_of_A33 (hA : ∀ ρ : ℝ, 0 < ρ →
+      (c0 ρ - 1 / sqrt 2) / (sqrt 2 * c1 ρ * ρ) ≤ 0.0763896 ∧
+      (c0 ρ - 1 / sqrt 2) / (c1 ρ * sqrt ρ) ≤ 1 / 2) (δ τ : ℝ) (hδ : δ ≠ 0)
     (hτ : 0 < |τ|) :
     ell δ * initialRadius δ τ / sqrt 2 ≤ 0.30556 * |τ| := by
   have hρ := rho_pos δ τ hδ hτ
@@ -269,7 +313,7 @@ private theorem initialRadius_phase_of_a33 (δ τ : ℝ) (hδ : δ ≠ 0)
   have hL := ell_pos δ hδ
   have hs : 0 < sqrt (2:ℝ) := by positivity
   have hs2 : sqrt (2:ℝ) * sqrt 2 = 2 := mul_self_sqrt (by norm_num)
-  have hX := (a33_bounds _ hρ).1
+  have hX := (hA _ hρ).1
   rw [div_le_iff₀ (by positivity)] at hX
   have he := ell_sq_mul_rho δ τ hδ
   have hkey : ell δ * initialRadius δ τ / sqrt 2 =
@@ -289,15 +333,19 @@ private theorem initialRadius_phase_of_a33 (δ τ : ℝ) (hδ : δ ≠ 0)
     _ = _ := hc2
     _ ≤ _ := by rw [he]; nlinarith
 
-/-- P0014 page 24, display 3.61: `r₋ ≤ √ρ ℓ / 2 ≤ √τ`, from 3.58 and the second line of A.33. -/
-private theorem initialRadius_le_sqrt_of_a33 (δ τ : ℝ) (hδ : δ ≠ 0)
+
+/-- P0014 page 24, display 3.61: `r₋ ≤ √ρ ℓ / 2 ≤ √τ`, from 3.58 and the second line of A.33.
+CONDITIONAL ON `HelfgottA33`. -/
+private theorem initialRadius_le_sqrt_of_A33 (hA : ∀ ρ : ℝ, 0 < ρ →
+      (c0 ρ - 1 / sqrt 2) / (sqrt 2 * c1 ρ * ρ) ≤ 0.0763896 ∧
+      (c0 ρ - 1 / sqrt 2) / (c1 ρ * sqrt ρ) ≤ 1 / 2) (δ τ : ℝ) (hδ : δ ≠ 0)
     (hτ : 0 < |τ|) :
     initialRadius δ τ ≤ sqrt |τ| := by
   have hρ := rho_pos δ τ hδ hτ
   have hc := c1_pos _ hρ
   have hL := ell_pos δ hδ
   have hsr : 0 < sqrt (rho δ τ) := sqrt_pos.mpr hρ
-  have hX := (a33_bounds _ hρ).2
+  have hX := (hA _ hρ).2
   rw [div_le_iff₀ (by positivity)] at hX
   have hm := ell_mul_sqrt_rho δ τ hδ
   have hkey : initialRadius δ τ = ell δ / c1 (rho δ τ) * (c0 (rho δ τ) - 1 / sqrt 2) := rfl
@@ -306,6 +354,7 @@ private theorem initialRadius_le_sqrt_of_a33 (δ τ : ℝ) (hδ : δ ≠ 0)
         mul_le_mul_of_nonneg_left hX (by positivity)
     _ = ell δ * sqrt (rho δ τ) / 2 := by field_simp
     _ = _ := by rw [hm]; ring
+
 
 /-- P0014 page 24 before display 3.59: the direction w = (1 + i)/√2, conjugated for negative
 height, in real and imaginary parts. -/
@@ -380,12 +429,15 @@ private theorem ray_exp_integral (L A K a : ℝ) (hL : 0 < L) (ha : 0 ≤ a) :
   simp only [mul_zero, zero_div, zero_sub]
   ring
 
-/-- P0014 pages 24 and 25, displays 3.59, 3.60 and 3.63 with the bounds after 3.63.
+
+/-- PROVED, formerly the LEAF of this file. P0014 pages 24 and 25, displays 3.59, 3.60 and 3.63
+with the bounds after 3.63.
 Integration by parts on C1 from 0 to `w r₋`: the boundary term is at most
 `r₋^σ / τ · e^{ℓ r₋ / √2 - π τ / 4}`, and the two integrals of display 3.63 are at most
 `(r₋^{σ+2} + √2 r₋^σ) / τ · e^{ℓ r₋ / √2 - π τ / 4}` by `|s| ≥ τ` and
 `∫_0^{r₋} e^{ℓ t / √2} dt ≤ min(√2 / ℓ, r₋) e^{ℓ r₋ / √2}`.
-The exponent keeps the `√2` of display 3.60. -/
+The exponent keeps the `√2` of display 3.60; the printed `ℓ r₋ / 2` on page 25 is a typo
+that the paper's final line does not use. -/
 private theorem initial_ibp_bound (δ : ℝ) (s : ℂ)
     (hσ0 : 0 < s.re) (hσ1 : s.re ≤ 1) (ht : 100 ≤ |s.im|)
     (hsign : δ * s.im < 0) :
@@ -480,9 +532,13 @@ private theorem initial_ibp_bound (δ : ℝ) (s : ℂ)
     _ ≤ _ := hmain
     _ = _ := by ring
 
-/-- LEAF: P0014 pages 24 to 25, displays 3.59 to 3.63 and the bound after 3.63.
-Integration by parts on C1 gives the uniform first coefficient on the critical strip. -/
-theorem initial_segment_bound (δ : ℝ) (s : ℂ)
+/-- P0014 page 25, the conclusion after display 3.63, assembled with no sorry from the
+named hypothesis A.33 and the LEAF `initial_ibp_bound`. The statement after the hypothesis
+is word for word that of `Decomp639Contour.initial_segment_bound`.
+CONDITIONAL ON `HelfgottA33` and on the LEAF `initial_ibp_bound`. -/
+private theorem initial_segment_bound_of_A33 (hA : ∀ ρ : ℝ, 0 < ρ →
+      (c0 ρ - 1 / sqrt 2) / (sqrt 2 * c1 ρ * ρ) ≤ 0.0763896 ∧
+      (c0 ρ - 1 / sqrt 2) / (c1 ρ * sqrt ρ) ≤ 1 / 2) (δ : ℝ) (s : ℂ)
     (hσ0 : 0 < s.re) (hσ1 : s.re ≤ 1) (ht : 100 ≤ |s.im|)
     (hsign : δ * s.im < 0) :
     ‖initialIntegral δ s‖ ≤ firstCoefficient s.re |s.im| *
@@ -490,8 +546,8 @@ theorem initial_segment_bound (δ : ℝ) (s : ℂ)
   have hd : δ ≠ 0 := by intro h; simp [h] at hsign
   have hτ : 0 < |s.im| := by linarith
   have hr := initialRadius_pos δ s.im hd hτ
-  have hphase := initialRadius_phase_of_a33 δ s.im hd hτ
-  have hrad := initialRadius_le_sqrt_of_a33 δ s.im hd hτ
+  have hphase := initialRadius_phase_of_A33 hA δ s.im hd hτ
+  have hrad := initialRadius_le_sqrt_of_A33 hA δ s.im hd hτ
   have hpre := initial_radius_prefactor s.re |s.im| (initialRadius δ s.im) hσ0.le hτ hr hrad
   have hexp := initial_phase_cost |s.im| (ell δ) (initialRadius δ s.im) (abs_nonneg _) hphase
   have hpre0 : 0 ≤ (initialRadius δ s.im ^ (s.re + 2) +
@@ -501,6 +557,18 @@ theorem initial_segment_bound (δ : ℝ) (s : ℂ)
   calc _ ≤ _ := initial_ibp_bound δ s hσ0 hσ1 ht hsign
     _ ≤ _ := mul_le_mul hpre hexp (exp_pos _).le hF0
 
+
+/-- LEAF: P0014 pages 24 to 25, displays 3.59 to 3.63 and the bound after 3.63.
+Integration by parts on C1 gives the uniform first coefficient on the critical strip.
+OPEN. The phase cost uses A.33 and the radius bound of display 3.61. -/
+theorem initial_segment_bound (δ : ℝ) (s : ℂ)
+    (hσ0 : 0 < s.re) (hσ1 : s.re ≤ 1) (ht : 100 ≤ |s.im|)
+    (hsign : δ * s.im < 0) :
+    ‖initialIntegral δ s‖ ≤ firstCoefficient s.re |s.im| *
+      exp (-0.4798 * |s.im|) :=
+  initial_segment_bound_of_A33 helfgottA33_holds δ s hσ0 hσ1 ht hsign
+
 end LeanLab.HelfgottMajor.Decomp639Contour
 
 #print axioms LeanLab.HelfgottMajor.Decomp639Contour.saddle_segment_bound
+#print axioms LeanLab.HelfgottMajor.Decomp639Contour.initial_segment_bound
