@@ -1,4 +1,5 @@
 import LeanLab.RieselVaughan1983.Lemma5Final
+import LeanLab.RieselVaughan1983.Lemma4From393
 import LeanLab.RieselVaughan1983.SieveWeights93
 
 /-! Decomposition of Lemma 5 at the first row used by the lab.
@@ -509,11 +510,32 @@ theorem sieve319 (x : ℝ) (hx : exp 24 ≤ x) (h : ℕ) (hh : 0 < h) :
       le_mul_of_one_le_right (by positivity) hw
     linarith
 
+private lemma weighted_lower_from_approx
+    (h3 : Lemma3.Lemma3ApproxP)
+    (h6 : 8463433 / 1000000 ≤ Lemma4From393.A6 (3 / 2))
+    (h7 : -(9260623 / 1000000) ≤ Lemma4From393.A7 (3 / 2))
+    (h8 : Lemma4From393.A8 (3 / 2) ≤ 9310077 / 1000)
+    (h9 : Lemma4From393.A9 (3 / 2) ≤ 2950889 / 100000)
+    (x : ℝ) (hx : exp 24 ≤ x) :
+    lowerPolynomial x < 8 * Ctw * Lemma3.S2 (sqrt (2 / 3 * x)) := by
+  have hx0 : 0 < x := lt_of_lt_of_le (exp_pos _) hx
+  have hx25 : (25 : ℝ) ≤ x := by linarith [add_one_le_exp (24 : ℝ)]
+  have hl : 0 ≤ log x := log_nonneg (by linarith)
+  have h := (abs_lt.mp (Lemma4From393.lemma4_of h3 x (3 / 2) (by norm_num) (by linarith))).1
+  rw [show x / (3 / 2) = 2 / 3 * x by ring] at h
+  have h6x := mul_le_mul_of_nonneg_right h6 hl
+  have h8x := mul_le_mul_of_nonneg_right h8
+    (rpow_nonneg hx0.le (-(1 / 6 : ℝ)))
+  have h9x := mul_le_mul_of_nonneg_right h9
+    (rpow_nonneg hx0.le (-(1 / 2 : ℝ)))
+  unfold lowerPolynomial
+  linarith
+
 /-- LEAF. Page 54 application of Lemma 4 with lambda = 3/2, using the lower
 A6 and A7 brackets and the upper A8 and A9 brackets in equations 2.20 to 2.22. -/
 theorem weighted_lower (x : ℝ) (hx : exp 24 ≤ x) :
     lowerPolynomial x < 8 * Ctw * Lemma3.S2 (sqrt (2 / 3 * x)) := by
-  sorry
+  exact weighted_lower_from_approx ?_ ?_ ?_ ?_ ?_ x hx
 
 /-- LEAF. Page 55 bound F x > B at the row L = 24, B = 0.97.
 This is stated after multiplication by the positive log x. -/
