@@ -26,7 +26,46 @@ open scoped Topology Interval
 /-- The principal part Σ_{k < N} a_k s^(-(k+1)) at s = 0, a finite Laurent polynomial. -/
 local notation "PP" N "," a => fun s : ℂ => ∑ k ∈ Finset.range N, a k * s ^ (-((k : ℤ) + 1))
 
-/-- LEAF: Ahlfors ch. 4 §3.2, the Laurent principal part at a pole, used at s = 0 on P0014
+/-- Helper for `principal_part_at_origin`: the difference quotient `dslope h 0` of a function
+analytic at 0 is analytic at 0, `HasFPowerSeriesAt.has_fpower_series_dslope_fslope`. -/
+private lemma pp_analytic_dslope {h : ℂ → ℂ} (hh : AnalyticAt ℂ h 0) :
+    AnalyticAt ℂ (dslope h 0) 0 := by
+  obtain ⟨p, hp⟩ := hh
+  exact ⟨_, hp.has_fpower_series_dslope_fslope⟩
+
+/-- Helper for `principal_part_at_origin`, Ahlfors ch. 4 §3.2: peeling one Taylor coefficient
+at a time, s^(-m) h(s) minus a principal part of length m is analytic at 0, for h analytic at 0.
+Induction on m with h s = h 0 + s * dslope h 0 s. -/
+private lemma pp_induct (m : ℕ) : ∀ h : ℂ → ℂ, AnalyticAt ℂ h 0 →
+    ∃ (a : ℕ → ℂ) (g : ℂ → ℂ), AnalyticAt ℂ g 0 ∧
+      ∀ s : ℂ, s ≠ 0 → s ^ (-(m : ℤ)) * h s - ∑ k ∈ Finset.range m, a k * s ^ (-((k : ℤ) + 1))
+        = g s := by
+  induction m with
+  | zero =>
+    intro h hh
+    refine ⟨0, h, hh, fun s _ => ?_⟩
+    simp
+  | succ m ih =>
+    intro h hh
+    obtain ⟨a, g, hg, hgs⟩ := ih (dslope h 0) (pp_analytic_dslope hh)
+    refine ⟨Function.update a m (h 0), g, hg, fun s hs => ?_⟩
+    rw [Finset.sum_range_succ, Function.update_self]
+    have hsum : ∑ k ∈ Finset.range m, Function.update a m (h 0) k * s ^ (-((k : ℤ) + 1))
+        = ∑ k ∈ Finset.range m, a k * s ^ (-((k : ℤ) + 1)) := by
+      refine Finset.sum_congr rfl fun k hk => ?_
+      rw [Function.update_of_ne (Finset.mem_range.mp hk).ne]
+    rw [hsum, ← hgs s hs]
+    have hd : h s = h 0 + s * dslope h 0 s := by
+      have := sub_smul_dslope h 0 s
+      simp only [sub_zero, smul_eq_mul] at this
+      rw [this]; ring
+    have hz : s ^ (-((m + 1 : ℕ) : ℤ)) * s = s ^ (-(m : ℤ)) := by
+      rw [← zpow_add_one₀ hs]; congr 1; push_cast; ring
+    rw [hd, mul_add, ← mul_assoc, hz]
+    push_cast
+    ring
+
+/-- PROVED, S5 burst-20261122 unit P1122-0048, formerly LEAF: Ahlfors ch. 4 §3.2, the Laurent principal part at a pole, used at s = 0 on P0014
 page 33, display 4.7. A function meromorphic at 0 differs from some finite Laurent polynomial
 Σ_{k < N} a_k s^(-(k+1)) by a function meromorphic at 0 with no pole there. MEDIUM: write
 f = s^n h with h analytic, `meromorphicOrderAt_eq_int_iff`, and take the first -n Taylor
@@ -34,7 +73,31 @@ coefficients of h, `HasFPowerSeriesAt`. -/
 theorem principal_part_at_origin {f : ℂ → ℂ} (hf : MeromorphicAt f 0) :
     ∃ (N : ℕ) (a : ℕ → ℂ), MeromorphicAt (f - PP N, a) 0 ∧
       0 ≤ meromorphicOrderAt (f - PP N, a) 0 := by
-  sorry
+  have hPP : ∀ (N : ℕ) (a : ℕ → ℂ), MeromorphicAt (PP N, a) 0 := by
+    intro N a
+    exact MeromorphicAt.fun_sum (s := Finset.range N)
+      (G := fun k (s : ℂ) => a k * s ^ (-((k : ℤ) + 1))) (x := (0 : ℂ))
+      (fun k _ => (MeromorphicAt.const (a k) 0).mul ((MeromorphicAt.id 0).zpow _))
+  have h0 : ∀ a : ℕ → ℂ, (f - PP 0, a) = f := by
+    intro a; funext s; simp
+  rcases hord : meromorphicOrderAt f 0 with _ | n
+  · refine ⟨0, 0, ?_, ?_⟩
+    · rw [h0]; exact hf
+    · rw [h0, hord]; exact le_top
+  by_cases hn : 0 ≤ n
+  · refine ⟨0, 0, ?_, ?_⟩
+    · rw [h0]; exact hf
+    · rw [h0, hord]; exact WithTop.coe_le_coe.mpr hn
+  obtain ⟨h, hh, -, hfe⟩ := (meromorphicOrderAt_eq_int_iff hf).mp hord
+  obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = -(m : ℤ) := ⟨n.natAbs, by omega⟩
+  obtain ⟨a, g, hg, hgs⟩ := pp_induct m h hh
+  refine ⟨m, a, hf.sub (hPP m a), ?_⟩
+  have : (f - PP m, a) =ᶠ[𝓝[≠] 0] g := by
+    filter_upwards [hfe, self_mem_nhdsWithin] with s hs hs0
+    rw [Pi.sub_apply, hs, ← hgs s hs0]
+    simp
+  rw [meromorphicOrderAt_congr this]
+  exact hg.meromorphicOrderAt_nonneg
 
 /-- PROVED. A finite Laurent polynomial in s^(-1) is holomorphic off 0. -/
 theorem principal_differentiableAt (N : ℕ) (a : ℕ → ℂ) {s : ℂ} (hs : s ≠ 0) :
@@ -171,7 +234,110 @@ theorem circle_integral_principal (N : ℕ) (a : ℕ → ℂ) {r : ℝ} (hr : 0 
       Finset.sum_range_succ]
     ring
 
-/-- LEAF: P0014 page 33, display 4.7, the rectangle integral of the principal part, for a
+/-- Helper: x + yI is nonzero when x or y is nonzero. -/
+private lemma hpath_ne (x y : ℝ) (h : x ≠ 0 ∨ y ≠ 0) : ((x : ℂ) + (y : ℂ) * Complex.I) ≠ 0 := by
+  intro h0
+  have h1 := congrArg Complex.re h0
+  have h2 := congrArg Complex.im h0
+  simp at h1 h2
+  rcases h with h | h <;> contradiction
+
+/-- Helper: a primitive F of f off 0 differentiates along a horizontal side avoiding 0. -/
+private lemma hderH {F f : ℂ → ℂ} (hF : ∀ s : ℂ, s ≠ 0 → HasDerivAt F (f s) s) (y : ℝ)
+    (hy : y ≠ 0) (x : ℝ) :
+    HasDerivAt (fun t : ℝ => F ((t : ℂ) + (y : ℂ) * Complex.I)) (f ((x : ℂ) + (y : ℂ) * Complex.I)) x := by
+  have hin : HasDerivAt (fun t : ℝ => (t : ℂ) + (y : ℂ) * Complex.I) 1 x := by
+    simpa using ((hasDerivAt_id x).ofReal_comp).add_const ((y : ℂ) * Complex.I)
+  have := (hF _ (hpath_ne x y (Or.inr hy))).comp x hin
+  rw [mul_one] at this
+  exact this
+
+/-- Helper: along a vertical side avoiding 0 the derivative of F is I • f. -/
+private lemma hderV {F f : ℂ → ℂ} (hF : ∀ s : ℂ, s ≠ 0 → HasDerivAt F (f s) s) (x : ℝ)
+    (hx : x ≠ 0) (y : ℝ) :
+    HasDerivAt (fun t : ℝ => F ((x : ℂ) + (t : ℂ) * Complex.I))
+      (Complex.I • f ((x : ℂ) + (y : ℂ) * Complex.I)) y := by
+  have hin : HasDerivAt (fun t : ℝ => (x : ℂ) + (t : ℂ) * Complex.I) Complex.I y := by
+    simpa using (((hasDerivAt_id y).ofReal_comp).mul_const Complex.I).const_add (x : ℂ)
+  have := (hF _ (hpath_ne x y (Or.inl hx))).comp y hin
+  rw [smul_eq_mul, mul_comm]
+  exact this
+
+/-- Helper: integrability on a horizontal side avoiding 0. -/
+private lemma hintH {f : ℂ → ℂ} (hc : ∀ s : ℂ, s ≠ 0 → ContinuousAt f s) (y : ℝ) (hy : y ≠ 0)
+    (a b : ℝ) : IntervalIntegrable (fun t : ℝ => f ((t : ℂ) + (y : ℂ) * Complex.I)) volume a b := by
+  apply ContinuousOn.intervalIntegrable
+  intro t _
+  apply ContinuousAt.continuousWithinAt
+  exact (hc _ (hpath_ne t y (Or.inr hy))).comp (f := fun t : ℝ => (t : ℂ) + (y : ℂ) * Complex.I)
+    (by fun_prop)
+
+/-- Helper: integrability on a vertical side avoiding 0. -/
+private lemma hintV {f : ℂ → ℂ} (hc : ∀ s : ℂ, s ≠ 0 → ContinuousAt f s) (x : ℝ) (hx : x ≠ 0)
+    (a b : ℝ) : IntervalIntegrable (fun t : ℝ => f ((x : ℂ) + (t : ℂ) * Complex.I)) volume a b := by
+  apply ContinuousOn.intervalIntegrable
+  intro t _
+  apply ContinuousAt.continuousWithinAt
+  exact (hc _ (hpath_ne x t (Or.inl hx))).comp (f := fun t : ℝ => (x : ℂ) + (t : ℂ) * Complex.I)
+    (by fun_prop)
+
+/-- Helper: border integrability for f continuous off 0 when the border avoids 0. -/
+private lemma border_int {f : ℂ → ℂ} (hc : ∀ s : ℂ, s ≠ 0 → ContinuousAt f s) {z w : ℂ}
+    (h1 : z.re ≠ 0) (h2 : z.im ≠ 0) (h3 : w.re ≠ 0) (h4 : w.im ≠ 0) :
+    RectangleBorderIntegrable f z w :=
+  ⟨hintH hc _ h2 _ _, hintH hc _ h4 _ _, hintV hc _ h3 _ _, hintV hc _ h1 _ _⟩
+
+/-- Helper, P0014 page 33, display 4.7: a function with a primitive off 0 has rectangle
+integral 0 when the border avoids 0; each side is a difference of values of the primitive by
+`intervalIntegral.integral_eq_sub_of_hasDerivAt` and the four differences cancel. -/
+private lemma rect_deriv_zero {F f : ℂ → ℂ} (hF : ∀ s : ℂ, s ≠ 0 → HasDerivAt F (f s) s)
+    (hc : ∀ s : ℂ, s ≠ 0 → ContinuousAt f s) {z w : ℂ}
+    (h1 : z.re ≠ 0) (h2 : z.im ≠ 0) (h3 : w.re ≠ 0) (h4 : w.im ≠ 0) :
+    RectangleIntegral f z w = 0 := by
+  have eH : ∀ y : ℝ, y ≠ 0 → ∀ a b : ℝ, HIntegral f a b y =
+      F ((b : ℂ) + (y : ℂ) * Complex.I) - F ((a : ℂ) + (y : ℂ) * Complex.I) := by
+    intro y hy a b
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hderH hF y hy x)
+      (hintH hc y hy a b)
+  have eV : ∀ x : ℝ, x ≠ 0 → ∀ a b : ℝ, VIntegral f x a b =
+      F ((x : ℂ) + (b : ℂ) * Complex.I) - F ((x : ℂ) + (a : ℂ) * Complex.I) := by
+    intro x hx a b
+    unfold VIntegral
+    rw [← intervalIntegral.integral_smul]
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun y _ => hderV hF x hx y)
+      ((hintV hc x hx a b).smul Complex.I)
+  unfold RectangleIntegral
+  rw [eH _ h2, eH _ h4, eV _ h3, eV _ h1]
+  ring
+
+/-- Helper, P0014 page 33, display 4.7: the rectangle integral of b s^(-(k+1)) is 2πi b for
+k = 0, `ResidueTheoremAtOrigin'`, and 0 for k ≥ 1, primitive b s^(-k)/(-k). -/
+private lemma term_rect (b : ℂ) (k : ℕ) {z w : ℂ}
+    (h1 : z.re < 0) (h2 : z.im < 0) (h3 : 0 < w.re) (h4 : 0 < w.im) :
+    RectangleIntegral (fun s : ℂ => b * s ^ (-((k : ℤ) + 1))) z w =
+      2 * π * Complex.I * (if k = 0 then b else 0) := by
+  rcases eq_or_ne k 0 with rfl | hk
+  · have hfun : (fun s : ℂ => b * s ^ (-(((0 : ℕ) : ℤ) + 1))) = fun s => b / s := by
+      funext s; simp [div_eq_mul_inv]
+    rw [hfun, ResidueTheoremAtOrigin' h1 h2 h3 h4]
+    simp only [↓reduceIte]
+    ring
+  · rw [ite_eq_right_iff.mpr (fun h => absurd h hk), mul_zero]
+    have hm : ((-(k : ℤ) : ℤ) : ℂ) ≠ 0 := by
+      push_cast; exact neg_ne_zero.mpr (by exact_mod_cast hk)
+    refine rect_deriv_zero (F := fun s : ℂ => b * (s ^ (-(k : ℤ)) / ((-(k : ℤ) : ℤ) : ℂ)))
+      ?_ ?_ h1.ne h2.ne h3.ne' h4.ne'
+    · intro s hs
+      have := ((hasDerivAt_zpow (-(k : ℤ)) s (Or.inl hs)).div_const
+        ((-(k : ℤ) : ℤ) : ℂ)).const_mul b
+      convert this using 1
+      rw [mul_div_cancel_left₀ _ hm]
+      congr 2
+      ring
+    · intro s hs
+      exact ((differentiableAt_zpow.mpr (Or.inl hs)).const_mul b).continuousAt
+
+/-- PROVED, S5 burst-20261122 unit P1122-0050, formerly LEAF: P0014 page 33, display 4.7, the rectangle integral of the principal part, for a
 rectangle with 0 strictly inside: the normalized rectangle integral of s^(-(k+1)) is 1 for
 k = 0 and 0 for k ≥ 1. MEDIUM: for k = 0, `RectanglePullToNhdOfPole` and the residue 1 of
 1/s, or the explicit side integrals of 1/s; for k ≥ 1, s^(-k)/(-k) is a primitive on the
@@ -179,7 +345,29 @@ border, so each side is a difference of values and the four differences cancel. 
 theorem rect_integral_principal (N : ℕ) (a : ℕ → ℂ) {z w : ℂ} {r : ℝ} (hr : 0 < r)
     (hzr : z.re < -r) (hzi : z.im < -r) (hwr : r < w.re) (hwi : r < w.im) :
     RectangleIntegral' (PP N, a) z w = ∑ k ∈ Finset.range N, if k = 0 then a k else 0 := by
-  sorry
+  have h1 : z.re < 0 := by linarith
+  have h2 : z.im < 0 := by linarith
+  have h3 : 0 < w.re := by linarith
+  have h4 : 0 < w.im := by linarith
+  have key : RectangleIntegral (PP N, a) z w =
+      2 * π * Complex.I * ∑ k ∈ Finset.range N, if k = 0 then a k else 0 := by
+    induction N with
+    | zero => simp [RectangleIntegral, HIntegral, VIntegral]
+    | succ n ih =>
+      have hsplit : (PP (n + 1), a) = (PP n, a) + fun s : ℂ => a n * s ^ (-((n : ℤ) + 1)) := by
+        funext s; simp [Finset.sum_range_succ]
+      rw [hsplit, RectangleBorderIntegrable.add
+        (border_int (fun s hs => (principal_differentiableAt n a hs).continuousAt)
+          h1.ne h2.ne h3.ne' h4.ne')
+        (border_int (fun s hs => ((differentiableAt_zpow.mpr (Or.inl hs)).const_mul
+          (a n)).continuousAt) h1.ne h2.ne h3.ne' h4.ne'),
+        ih, term_rect _ _ h1 h2 h3 h4, Finset.sum_range_succ]
+      ring
+  rw [RectangleIntegral', key, smul_eq_mul]
+  have hI : (2 * π * Complex.I : ℂ) ≠ 0 := by
+    have : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+    exact mul_ne_zero (mul_ne_zero two_ne_zero this) Complex.I_ne_zero
+  field_simp
 
 /-- LEAF: P0014 page 33, display 4.7, linearity of the rectangle integral: subtracting the
 principal part splits the rectangle integral. MEDIUM: P is continuous on the border, which
@@ -278,7 +466,9 @@ theorem rect_cut_origin_of_pieces {f : ℂ → ℂ} {z w : ℂ} {r : ℝ} (hr : 
 
 end LeanLab.HelfgottMajor.Prep1121DCtCut
 
+#print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.principal_part_at_origin
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.principal_differentiableAt
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.closedBall_subset_rect
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.circle_integral_principal
+#print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.rect_integral_principal
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.rect_cut_origin_of_pieces
