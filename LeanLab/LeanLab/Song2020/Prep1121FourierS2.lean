@@ -129,6 +129,96 @@ theorem conj_phase (S : Finset ℕ) (w u : ℕ → ℝ) (h : ℤ) :
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [hc]; congr 2; ring
 
+/-! ## Private partial summation lemmas for `weighted_window_bound`
+
+The four elementary steps needed by the leaf are proved in `RouteS1Abel`, which is not an
+import of this file and whose closure carries the `sorry` of `State1562.song_lemma3`; they
+are restated privately here so that the leaf needs no new import. -/
+
+private theorem window_mem_bounds' (n : ℕ) (y : ℝ) (hy : y ≤ (n : ℝ) / 3) (x : ℕ)
+    (hx : x ∈ (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+      (fun x : ℕ => |(x : ℝ) - (n : ℝ) / 3| < y)) :
+    1 ≤ x ∧ x ≤ n := by
+  rw [Finset.mem_filter] at hx
+  obtain ⟨_, hx⟩ := hx
+  rw [abs_lt] at hx
+  obtain ⟨h1, h2⟩ := hx
+  constructor
+  · have h3 : (0 : ℝ) < (x : ℝ) := by linarith
+    exact Nat.succ_le_of_lt (by exact_mod_cast h3)
+  · have h4 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+    have h3 : (x : ℝ) ≤ (n : ℝ) := by linarith
+    exact_mod_cast h3
+
+private theorem window_eq_Ico' (n : ℕ) (y : ℝ) :
+    ∃ a b : ℕ, (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+      (fun x : ℕ => |(x : ℝ) - (n : ℝ) / 3| < y) = Finset.Ico a b := by
+  by_cases h0 : 0 ≤ (n : ℝ) / 3 - y
+  · refine ⟨Nat.floor ((n : ℝ) / 3 - y) + 1, Nat.ceil ((n : ℝ) / 3 + y), ?_⟩
+    ext x
+    rw [Finset.mem_filter, Finset.mem_range, Finset.mem_Ico, abs_lt]
+    constructor
+    · rintro ⟨_, h1, h2⟩
+      exact ⟨Nat.succ_le_of_lt ((Nat.floor_lt h0).2 (by linarith)), Nat.lt_ceil.2 (by linarith)⟩
+    · rintro ⟨h1, h2⟩
+      have h3 := (Nat.floor_lt h0).1 (Nat.lt_of_succ_le h1)
+      have h4 := Nat.lt_ceil.1 h2
+      exact ⟨by omega, by linarith, by linarith⟩
+  · refine ⟨0, Nat.ceil ((n : ℝ) / 3 + y), ?_⟩
+    rw [not_le] at h0
+    ext x
+    rw [Finset.mem_filter, Finset.mem_range, Finset.mem_Ico, abs_lt]
+    have hx0 : (0 : ℝ) ≤ (x : ℝ) := Nat.cast_nonneg x
+    constructor
+    · rintro ⟨_, h1, h2⟩
+      exact ⟨Nat.zero_le _, Nat.lt_ceil.2 (by linarith)⟩
+    · rintro ⟨_, h2⟩
+      have h4 := Nat.lt_ceil.1 h2
+      exact ⟨by omega, by linarith, by linarith⟩
+
+private theorem sum_Ico_by_parts' (w c : ℕ → ℂ) (a b : ℕ) (hab : a ≤ b) :
+    ∑ x ∈ Finset.Ico a (b + 1), w x * c x =
+      w b * ∑ x ∈ Finset.Ico a (b + 1), c x -
+        ∑ x ∈ Finset.Ico a b, (w (x + 1) - w x) * ∑ z ∈ Finset.Ico a (x + 1), c z := by
+  induction b, hab using Nat.le_induction with
+  | base => simp
+  | succ b hab ih =>
+    rw [Finset.sum_Ico_succ_top (by omega : a ≤ b + 1) (fun x => w x * c x), ih,
+      Finset.sum_Ico_succ_top (by omega : a ≤ b + 1) c,
+      Finset.sum_Ico_succ_top hab
+        (fun x => (w (x + 1) - w x) * ∑ z ∈ Finset.Ico a (x + 1), c z)]
+    ring
+
+private theorem norm_sum_Ico_mul_le' (w c : ℕ → ℂ) (a b : ℕ) (B : ℝ)
+    (hB : ∀ m : ℕ, m ≤ b → ‖∑ x ∈ Finset.Ico a m, c x‖ ≤ B) :
+    ‖∑ x ∈ Finset.Ico a b, w x * c x‖ ≤
+      (‖w (b - 1)‖ + ∑ x ∈ Finset.Ico a (b - 1), ‖w (x + 1) - w x‖) * B := by
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0 (Nat.zero_le _))
+  rcases Nat.lt_or_ge a b with hab | hab
+  · obtain ⟨d, rfl⟩ : ∃ d, b = d + 1 := ⟨b - 1, by omega⟩
+    have had : a ≤ d := by omega
+    rw [sum_Ico_by_parts' w c a d had, Nat.add_sub_cancel, add_mul, Finset.sum_mul]
+    refine (norm_sub_le _ _).trans
+      (add_le_add ?_ ((norm_sum_le _ _).trans (Finset.sum_le_sum ?_)))
+    · rw [norm_mul]
+      exact mul_le_mul_of_nonneg_left (hB _ le_rfl) (norm_nonneg _)
+    · intro x hx
+      rw [norm_mul]
+      have hx2 := (Finset.mem_Ico.1 hx).2
+      exact mul_le_mul_of_nonneg_left (hB _ (by omega)) (norm_nonneg _)
+  · rw [Finset.Ico_eq_empty_of_le hab, Finset.sum_empty, norm_zero]
+    exact mul_nonneg (add_nonneg (norm_nonneg _)
+      (Finset.sum_nonneg (fun _ _ => norm_nonneg _))) hB0
+
+private theorem sum_Ico_telescope' (g : ℕ → ℝ) (a : ℕ) :
+    ∀ b : ℕ, a ≤ b → ∑ x ∈ Finset.Ico a b, (g (x + 1) - g x) = g b - g a := by
+  intro b hab
+  induction b, hab using Nat.le_induction with
+  | base => simp
+  | succ b hab ih =>
+    rw [Finset.sum_Ico_succ_top hab, ih]
+    ring
+
 /-- LEAF: Song 2020, page 4, display after "Partial summation yields":
 the weighted window sum with the weight psWeight, at most 1/γ times n to the 1 minus γ,
 is at most 2/γ times n to the 1 minus γ times any bound B on the exponential sums over the
@@ -140,7 +230,87 @@ theorem weighted_window_bound (γ : ℝ) (hγ0 : 0 < γ) (hγ1 : γ < 1) (n : �
     ‖∑ x ∈ (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
         (fun x : ℕ => |(x : ℝ) - (n : ℝ) / 3| < y), (psWeight γ x : ℂ) * eC (f x)‖ ≤
       2 / γ * (n : ℝ) ^ (1 - γ) * B := by
-  sorry
+  obtain ⟨a, b, hab⟩ := window_eq_Ico' n y
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0)
+  rw [hab]
+  rcases Nat.lt_or_ge a b with hablt | habge
+  · have hseg : ∀ m : ℕ, m ≤ b → ‖∑ x ∈ Finset.Ico a m, eC (f x)‖ ≤ B := by
+      intro m hm
+      have hff : (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+          (fun x : ℕ => |(x : ℝ) - (n : ℝ) / 3| < y ∧ (x : ℝ) ≤ (m : ℝ) - 1) =
+          ((Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+            (fun x : ℕ => |(x : ℝ) - (n : ℝ) / 3| < y)).filter
+              (fun x : ℕ => (x : ℝ) ≤ (m : ℝ) - 1) := by
+        rw [Finset.filter_filter]
+      have hset : Finset.Ico a m = (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+          (fun x : ℕ => |(x : ℝ) - (n : ℝ) / 3| < y ∧ (x : ℝ) ≤ (m : ℝ) - 1) := by
+        rw [hff, hab]
+        ext x
+        simp only [Finset.mem_filter, Finset.mem_Ico]
+        constructor
+        · rintro ⟨h1, h2⟩
+          refine ⟨⟨h1, by omega⟩, ?_⟩
+          have h3 : ((x + 1 : ℕ) : ℝ) ≤ (m : ℝ) := by exact_mod_cast h2
+          push_cast at h3
+          linarith
+        · rintro ⟨⟨h1, _⟩, h2⟩
+          refine ⟨h1, ?_⟩
+          have h3 : ((x + 1 : ℕ) : ℝ) ≤ (m : ℝ) := by
+            push_cast
+            linarith
+          exact_mod_cast h3
+      rw [hset]
+      exact hB _
+    have key := norm_sum_Ico_mul_le' (fun x => (psWeight γ x : ℂ)) (fun x => eC (f x)) a b B hseg
+    refine key.trans (mul_le_mul_of_nonneg_right ?_ hB0)
+    have hmem : b - 1 ∈ Finset.Ico a b := Finset.mem_Ico.mpr ⟨by omega, by omega⟩
+    have hmem' : b - 1 ∈ (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
+        (fun x : ℕ => |(x : ℝ) - (n : ℝ) / 3| < y) := by
+      rw [hab]
+      exact hmem
+    have hb1n : b - 1 ≤ n := (window_mem_bounds' n y hy (b - 1) hmem').2
+    have hpow : ((b - 1 : ℕ) : ℝ) ^ (1 - γ) ≤ (n : ℝ) ^ (1 - γ) :=
+      Real.rpow_le_rpow (Nat.cast_nonneg (b - 1)) (by exact_mod_cast hb1n) (by linarith)
+    have hps0 : ∀ m : ℕ, 0 ≤ psWeight γ m := fun m => by
+      unfold psWeight
+      exact mul_nonneg (by positivity) (Real.rpow_nonneg (Nat.cast_nonneg m) _)
+    have hlast : ‖(psWeight γ (b - 1) : ℂ)‖ ≤ 1 / γ * (n : ℝ) ^ (1 - γ) := by
+      rw [Complex.norm_real, Real.norm_of_nonneg (hps0 (b - 1))]
+      unfold psWeight
+      exact mul_le_mul_of_nonneg_left hpow (by positivity)
+    have hstep : ∀ x ∈ Finset.Ico a (b - 1),
+        ‖(psWeight γ (x + 1) : ℂ) - (psWeight γ x : ℂ)‖ = psWeight γ (x + 1) - psWeight γ x := by
+      intro x _
+      have hnn : 0 ≤ psWeight γ (x + 1) - psWeight γ x := by
+        unfold psWeight
+        rw [← mul_sub]
+        refine mul_nonneg (by positivity) ?_
+        have hmono : (x : ℝ) ^ (1 - γ) ≤ ((x + 1 : ℕ) : ℝ) ^ (1 - γ) :=
+          Real.rpow_le_rpow (Nat.cast_nonneg x) (by push_cast; linarith) (by linarith)
+        linarith
+      rw [← Complex.ofReal_sub, Complex.norm_real]
+      exact Real.norm_of_nonneg hnn
+    have hvar : ∑ x ∈ Finset.Ico a (b - 1),
+        ‖(psWeight γ (x + 1) : ℂ) - (psWeight γ x : ℂ)‖ ≤ 1 / γ * (n : ℝ) ^ (1 - γ) := by
+      have hcongr : ∑ x ∈ Finset.Ico a (b - 1),
+          ‖(psWeight γ (x + 1) : ℂ) - (psWeight γ x : ℂ)‖ =
+          ∑ x ∈ Finset.Ico a (b - 1), (psWeight γ (x + 1) - psWeight γ x) :=
+        Finset.sum_congr rfl hstep
+      have htel : ∑ x ∈ Finset.Ico a (b - 1),
+          (psWeight γ (x + 1) - psWeight γ x) = psWeight γ (b - 1) - psWeight γ a :=
+        sum_Ico_telescope' (fun x => psWeight γ x) a (b - 1) (by omega)
+      rw [hcongr, htel]
+      have hdrop : psWeight γ (b - 1) - psWeight γ a ≤ psWeight γ (b - 1) := by
+        linarith [hps0 a]
+      refine hdrop.trans ?_
+      unfold psWeight
+      exact mul_le_mul_of_nonneg_left hpow (by positivity)
+    calc ‖(psWeight γ (b - 1) : ℂ)‖ +
+          ∑ x ∈ Finset.Ico a (b - 1), ‖(psWeight γ (x + 1) : ℂ) - (psWeight γ x : ℂ)‖
+        ≤ 1 / γ * (n : ℝ) ^ (1 - γ) + 1 / γ * (n : ℝ) ^ (1 - γ) := add_le_add hlast hvar
+      _ = 2 / γ * (n : ℝ) ^ (1 - γ) := by ring
+  · rw [Finset.Ico_eq_empty_of_le habge, Finset.sum_empty, norm_zero]
+    exact mul_nonneg (mul_nonneg (by positivity) (Real.rpow_nonneg (Nat.cast_nonneg n) _)) hB0
 
 /-- LEAF: Song 2020, page 4, last display, "Using the exponent pair (1/2, 1/2)
 ([2], eqn. 3.3.4)": the unweighted sum of e of k x to the γ over any initial segment of the
