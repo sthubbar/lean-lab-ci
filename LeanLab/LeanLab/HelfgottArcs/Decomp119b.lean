@@ -17,7 +17,21 @@ def LemmaA5 : Prop := ∀ ρ : ℝ, 4 ≤ ρ → ∀ δ : ℝ,
 /-- LEAF. Page 75 Lemma A.2, the compact numerical verification left by task81. -/
 theorem a2_compact (δ : ℝ) (h0 : 0 ≤ δ) (h1 : δ ≤ 655) :
     ‖(-2 * π * Complex.I * (δ : ℂ)) ^ 2 * fhat eta2 δ‖ ≤ 31.521 := by
-  sorry
+  by_cases hδ : δ ≤ 7 / 8
+  · have hlow : |δ| ≤ 7 / 8 := by
+      rw [abs_of_nonneg h0]
+      exact hδ
+    have hp : Real.pi < 22 / 7 := by linarith [Real.pi_lt_d20]
+    have hn : ‖-2 * (π : ℂ) * Complex.I * (δ : ℂ)‖ = 2 * π * |δ| := by
+      simp [Complex.norm_real, Real.norm_eq_abs, abs_of_pos pi_pos]
+    rw [norm_mul, norm_pow, hn]
+    have hb : 2 * π * |δ| ≤ 11 / 2 := by nlinarith [Real.pi_pos, abs_nonneg δ]
+    have hs : (2 * π * |δ|) ^ 2 ≤ (11 / 2 : ℝ) ^ 2 :=
+      pow_le_pow_left₀ (by positivity) hb 2
+    have hf := norm_fhat_eta2_le_one δ
+    have hm := mul_le_mul_of_nonneg_left hf (sq_nonneg (2 * π * |δ|))
+    nlinarith
+  · sorry
 
 /-- LEAF. Page 76 equation A.12, the weight is affine in log rho. -/
 theorem weight_affine (ρ t : ℝ) (hρ : 4 ≤ ρ) :
