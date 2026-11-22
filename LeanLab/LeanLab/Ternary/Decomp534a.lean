@@ -5,6 +5,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 -/
 import Mathlib
 import LeanLab.HelfgottArcs.Statements
+import LeanLab.Ternary.SineValue676
 
 namespace LeanLab.Ternary.Task534
 open Real MeasureTheory Set Filter
@@ -239,7 +240,7 @@ before B.36. Existence alone is proved by sineIntegral_has_limit.
 Source: https://personal.math.ubc.ca/~cbm/aands/page_232.htm . -/
 theorem sineIntegral_value_leaf (L : ℝ)
     (hL : Tendsto sineIntegral atTop (𝓝 L)) : L = Real.pi / 2 := by
-  sorry
+  exact Task676.sine_integral_value L hL
 
 /-- The proved existence and separate value leaf give the cited sine integral limit.
 Page 76 and Abramowitz and Stegun page 232 display 5.2.25.

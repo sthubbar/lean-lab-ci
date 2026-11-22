@@ -4,6 +4,7 @@ Separate the band limited approximation from the elementary Gaussian norm step.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.HelfgottArcs.Statements
+import LeanLab.Ternary.Decomp379b
 import LeanLab.Helfgott2013.SectionSevenI
 import LeanLab.Helfgott2013.Conclusion
 
@@ -75,44 +76,12 @@ theorem hfun_bandlimited_error {t : ℝ} (ht : 0 < t) :
       t * 2.80582038 * ((1 + 4 / Real.pi * Real.log 200) / 200) := by
   sorry
 
-/-- The sharp eta plus norm follows from the smaller band limited error input.
-Helfgott major arcs pages 76 and 77 equations B.34 to B.38 and the rounding
-on Helfgott ternary page 56 equation 7.3. CONDITIONAL ON hfun_bandlimited_error. -/
+/-- The sharp eta plus norm is supplied by the independent Fourier proof.
+Helfgott major arcs page 77 equation B.38 and ternary page 56 equation 7.3.
+The proved supply in Decomp379b avoids the older pointwise error input. -/
 theorem etaPlus_abs_le_from_bandlimited_error (t : ℝ) :
     |LeanLab.HelfgottArcs.etaPlus t| ≤ (1.079955 : ℝ) := by
-  by_cases ht : 0 < t
-  · let R : ℝ := (1 + 4 / Real.pi * Real.log 200) / 200
-    have hR : 0 ≤ R := by dsimp [R]; positivity
-    let a := LeanLab.HelfgottArcs.mconv LeanLab.HelfgottArcs.hfun
-      (LeanLab.HelfgottArcs.FH 200) t
-    let b := LeanLab.HelfgottArcs.hfun t
-    let E := Real.exp (-t ^ 2 / 2)
-    have hE : 0 < E := Real.exp_pos _
-    have herr : |a - b| ≤ t * 2.80582038 * R := hfun_bandlimited_error ht
-    have hphi : t ^ 2 * E ≤ 2 / Real.exp 1 := by
-      have h := LeanLab.Helfgott2013.phi_sup t
-      simpa [E, neg_div, Real.exp_neg, div_eq_mul_inv] using h
-    have hd : |(a - b) * t * E| ≤ 2.06440727 * R := by
-      calc
-        _ = |a - b| * (t * E) := by
-          rw [abs_mul, abs_mul, abs_of_pos ht, abs_of_pos hE]; ring
-        _ ≤ (t * 2.80582038 * R) * (t * E) :=
-          mul_le_mul_of_nonneg_right herr (by positivity)
-        _ = (2.80582038 * R) * (t ^ 2 * E) := by ring
-        _ ≤ (2.80582038 * R) * (2 / Real.exp 1) :=
-          mul_le_mul_of_nonneg_left hphi (by positivity)
-        _ = ((2 / Real.exp 1) * 2.80582038) * R := by ring
-        _ ≤ _ := mul_le_mul_of_nonneg_right gaussian_derivative_rounding hR
-    have hb : |b * t * E| ≤ 1 := hfun_gaussian_bump_le ht.le
-    have habs : |a * t * E| ≤ |b * t * E| + |(a - b) * t * E| := by
-      convert abs_add_le (b * t * E) ((a - b) * t * E) using 1; ring
-    unfold LeanLab.HelfgottArcs.etaPlus
-    rw [ite_eq_left ht]
-    calc
-      _ ≤ 1 + 2.06440727 * R := by change |a * t * E| ≤ _; linarith
-      _ ≤ _ := by
-        simpa only [R, ← mul_div_assoc] using LeanLab.Helfgott2013.etaPlus_sup
-  · norm_num [LeanLab.HelfgottArcs.etaPlus, ht]
+  exact EtaBound379.etaPlus_abs_le t
 
 
 end LeanLab.Ternary.Task420

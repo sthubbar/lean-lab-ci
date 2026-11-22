@@ -21,6 +21,7 @@ Ternary Goldbach is a theorem, Helfgott 2013; binary Goldbach is OPEN.
 -/
 import Mathlib
 import LeanLab.Ternary.Statements
+import LeanLab.Ternary.ZeroFreeHigh676
 
 namespace LeanLab.Ternary.U1535
 
@@ -49,13 +50,6 @@ noncomputable def theta (N : ℕ) : ℝ :=
 /-- The weighted ternary statement above `C`: every odd `N ≥ C` has `R3 N > 0`. -/
 def ChenWangWeighted (C : ℝ) : Prop := ∀ N : ℕ, Odd N → C ≤ N → 0 < R3 N
 
-/-- A zero-free region away from the real axis: for every modulus `q ≥ 1`, every Dirichlet
-character `χ` mod `q`, and `s = σ + it` with `|t| ≥ 1` and
-`σ ≥ 1 - 1 / (c log (q (|t| + 2)))`, `L(s, χ) ≠ 0`. -/
-def ZeroFreeHigh (c : ℝ) : Prop :=
-  ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (σ t : ℝ), 1 ≤ |t| →
-    1 - 1 / (c * Real.log (q * (|t| + 2))) ≤ σ →
-      DirichletCharacter.LFunction χ (σ + t * Complex.I) ≠ 0
 
 /-! ### Sealed statements -/
 
@@ -64,10 +58,6 @@ is a sum of three primes, here in the weighted circle method form `R3 N > 0`. Ci
 paper was not read; the threshold and the ≥ sign are from the journal's abstract. -/
 theorem chenWang_weighted : ChenWangWeighted (Real.exp (Real.exp 9.715)) := by sorry
 
-/-- The zero-free region input named in the P0033 abstract, in its classical qualitative
-form, Davenport, Multiplicative Number Theory, chapter 14: some `c > 0` works. Away from
-the real axis no exceptional zero occurs. Cited as a textbook theorem. -/
-theorem zeroFreeHigh_exists : ∃ c : ℝ, 0 < c ∧ ZeroFreeHigh c := by sorry
 
 /-! ### Vacuity instances and links, zero sorry -/
 

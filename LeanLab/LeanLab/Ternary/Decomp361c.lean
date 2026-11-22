@@ -4,7 +4,7 @@ Reuse PNTPort.DirichletZF.RealZero and StrongPNT.ZetaZeroFree1.
 The logarithmic comparison and compact height strip are derived bridges.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Ternary.State1535
+import LeanLab.Ternary.ZeroFreeHigh676
 import LeanLab.PNTPort.DirichletZF.RealZero
 
 namespace LeanLab.Ternary.U1535.Task361
@@ -240,3 +240,14 @@ theorem zeroFreeHigh_exists_decomposed : ∃ c : ℝ, 0 < c ∧ ZeroFreeHigh c :
       (strip_denominator_mono hC (le_max_right _ _) hlu hσ)
 
 end LeanLab.Ternary.U1535.Task361
+
+namespace LeanLab.Ternary.U1535
+
+/-- The zero-free region input named in the P0033 abstract, in its classical qualitative
+form, Davenport, Multiplicative Number Theory, chapter 14: some `c > 0` works. Away from
+the real axis no exceptional zero occurs. Cited as a textbook theorem. -/
+theorem zeroFreeHigh_exists : ∃ c : ℝ, 0 < c ∧ ZeroFreeHigh c := by
+  exact Task361.zeroFreeHigh_exists_decomposed
+
+
+end LeanLab.Ternary.U1535
