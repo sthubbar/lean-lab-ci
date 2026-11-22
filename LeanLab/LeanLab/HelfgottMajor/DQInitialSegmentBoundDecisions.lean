@@ -33,7 +33,7 @@ def HelfgottA33 : Prop :=
     (c0 ρ - 1 / sqrt 2) / (c1 ρ * sqrt ρ) ≤ 1 / 2
 
 /-- P0014 page 24, the display after 3.60: by A.33, `ℓ r₋ / √2 ≤ 0.07639 ℓ² ρ`, and
-`ℓ² ρ = 4 |τ|`, so the phase cost is at most `0.30556 |τ|`. CONDITIONAL ON `HelfgottA33`. -/
+`ℓ² ρ = 4 |τ|`, so the phase cost is at most `0.30556 |τ|`. Now unconditional via `Prep1121A33Reduce.helfgottA33_holds`. -/
 theorem initialRadius_phase_of_A33 (hA : HelfgottA33) (δ τ : ℝ) (hδ : δ ≠ 0)
     (hτ : 0 < |τ|) :
     ell δ * initialRadius δ τ / sqrt 2 ≤ 0.30556 * |τ| := by
@@ -63,7 +63,7 @@ theorem initialRadius_phase_of_A33 (hA : HelfgottA33) (δ τ : ℝ) (hδ : δ �
     _ ≤ _ := by rw [he]; nlinarith
 
 /-- P0014 page 24, display 3.61: `r₋ ≤ √ρ ℓ / 2 ≤ √τ`, from 3.58 and the second line of A.33.
-CONDITIONAL ON `HelfgottA33`. -/
+Now unconditional via `Prep1121A33Reduce.helfgottA33_holds`. -/
 theorem initialRadius_le_sqrt_of_A33 (hA : HelfgottA33) (δ τ : ℝ) (hδ : δ ≠ 0)
     (hτ : 0 < |τ|) :
     initialRadius δ τ ≤ sqrt |τ| := by
@@ -259,7 +259,7 @@ theorem initial_ibp_bound (δ : ℝ) (s : ℂ)
 /-- P0014 page 25, the conclusion after display 3.63, assembled with no sorry from the
 named hypothesis A.33 and the LEAF `initial_ibp_bound`. The statement after the hypothesis
 is word for word that of `Decomp639Contour.initial_segment_bound`.
-CONDITIONAL ON `HelfgottA33` and on the LEAF `initial_ibp_bound`. -/
+Now unconditional via `Prep1121A33Reduce.helfgottA33_holds` and on the LEAF `initial_ibp_bound`. -/
 theorem initial_segment_bound_of_A33 (hA : HelfgottA33) (δ : ℝ) (s : ℂ)
     (hσ0 : 0 < s.re) (hσ1 : s.re ≤ 1) (ht : 100 ≤ |s.im|)
     (hsign : δ * s.im < 0) :
