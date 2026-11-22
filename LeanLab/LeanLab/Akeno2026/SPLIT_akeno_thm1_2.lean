@@ -178,6 +178,18 @@ theorem leaf_sieve_transfer_zero_weight_goldbach
   have hd := h (N : ℝ) hN N hEven (by linarith) le_rfl hbound
   exact isGoldbachSum_of_diffForm hd
 
+/-- A pointwise transfer of the shape of LEAF 2 for all smooth weights would imply
+binary Goldbach for every sufficiently large even integer. The zero weights are smooth,
+and their level sum is zero, so their level hypothesis is vacuous. -/
+private theorem leaf_sieve_transfer_implies_goldbach
+    (h : ∀ (w₁ w₂ : ℝ → ℝ), SmoothWeight (1 / 2) w₁ → SmoothWeight (1 / 2) w₂ →
+      ∃ X₀ : ℝ, 3 ≤ X₀ ∧ ∀ X : ℝ, X₀ ≤ X → ∀ N : ℕ, Even N → X / 2 < (N : ℝ) →
+        (N : ℝ) ≤ X → levelSum 0.1635 2 w₁ w₂ X N ≤ X / Real.log X ^ (2 : ℝ) →
+        DiffForm 4 N) :
+    ∃ X₀ : ℝ, 3 ≤ X₀ ∧ ∀ N : ℕ, Even N → X₀ ≤ (N : ℝ) → IsGoldbachSum N := by
+  have h0 : SmoothWeight (1 / 2) (0 : ℝ → ℝ) := ⟨contDiff_const, by simp [Function.support]⟩
+  exact leaf_sieve_transfer_zero_weight_goldbach (h 0 0 h0 h0)
+
 /-- LEAF 2 of the split. The second step: the weighted sieve of Proposition 4.4, at
 `s = 33.5` and `t = 9.5`. For any two smooth weights supported in `[1/2, 1]` there is a
 height beyond which every even `N ∈ (X/2, X]` whose weighted level sum is at most
@@ -187,23 +199,20 @@ theorem leaf_sieve_transfer (w₁ w₂ : ℝ → ℝ) (hw₁ : SmoothWeight (1 /
     (hw₂ : SmoothWeight (1 / 2) w₂) :
     ∃ X₀ : ℝ, 3 ≤ X₀ ∧ ∀ X : ℝ, X₀ ≤ X → ∀ N : ℕ, Even N → X / 2 < (N : ℝ) →
       (N : ℝ) ≤ X → levelSum 0.1635 2 w₁ w₂ X N ≤ X / Real.log X ^ (2 : ℝ) → DiffForm 4 N := by
-  -- BLOCKED, OUT OF REACH, 2026-11-11. The exact missing result is Proposition 4.4 of
-  -- Akeno 2026, arXiv 2606.29559, at theta = 0.1635, s = 33.5 and t = 9.5, which the lab
-  -- has never formalized. The attempt to apply it, namely
-  --   exact akeno_prop4_4 33.5 9.5 (by norm_num) (by norm_num) w₁ w₂ hw₁ hw₂
-  -- fails with the Lean error Unknown identifier akeno_prop4_4, reported at line 193
-  -- of this file in the attempt run.
-  -- The same unknown identifier error comes from #check for akeno_prop_4_4, prop44,
-  -- prop4_4, weightedSieve, akeno_weighted_sieve, akeno_sieve_transfer, sieve_transfer,
-  -- weighted_sieve_transfer, Prop44, M_k and Mk. Mathlib has no such result: LeanSearch
-  -- for a weighted sieve transfer from a level of distribution returns only
-  -- Mathlib.NumberTheory.SelbergSieve, the generic sieve framework, and no Goldbach
-  -- theorem. The paper states Proposition 4.4 as an almost all statement over N given
-  -- M_k of F, theta and s positive, not as a per N transfer from a level sum bound, so
-  -- this leaf as written is stronger than the paper. The helper
-  -- leaf_sieve_transfer_zero_weight_goldbach above shows that any statement of this shape,
-  -- applied to the zero weights, gives binary Goldbach for every sufficiently large even
-  -- integer, so closing this leaf needs the weighted sieve input itself.
+  -- BLOCKED, OUT OF REACH, 2026-11-22. The exact missing result is the pointwise weighted
+  -- sieve transfer from Akeno 2026, arXiv 2606.29559, Proposition 4.4, at theta = 0.1635,
+  -- s = 33.5 and t = 9.5. My own attempt
+  --   exact akeno_prop4_4 33.5 9.5 (by norm_num) (by norm_num) w1 w2 hw1 hw2
+  -- fails with the Lean error `Unknown identifier akeno_prop4_4` at line 190 of this file.
+  -- A checked search also found no `akeno_prop_4_4`, `prop44`, `prop4_4`, `weightedSieve`,
+  -- `akeno_weighted_sieve`, `akeno_sieve_transfer`, `sieve_transfer`, `weighted_sieve_transfer`,
+  -- `Prop44`, or `Mk` identifier. LeanSearch returned only the generic
+  -- `Mathlib.NumberTheory.SelbergSieve`, and Loogle returned only its six Selberg sieve
+  -- declarations. The paper states Proposition 4.4 as an almost all statement over N, while
+  -- this leaf is pointwise in N. The proved helper
+  -- `leaf_sieve_transfer_implies_goldbach` above shows the exact obstruction: this leaf
+  -- implies binary Goldbach for every sufficiently large even integer because the admissible
+  -- zero weights make the level hypothesis vacuous. Binary Goldbach is open.
   sorry
 
 
