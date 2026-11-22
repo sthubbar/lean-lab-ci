@@ -805,6 +805,13 @@ theorem major_arc_singular_comparison (C η : ℝ) (hC : 1 < C) (hη : 0 < η) :
       Odd n₁ → Odd n₂ → N₀ ≤ n₂ → n₂ < n₁ → (n₁ : ℝ) ≤ C * n₂ →
       Real.pi ^ 2 / 16 * ((n₁ : ℝ) * n₂) * singularMass n₁ n₂ -
         η * scale n₁ n₂ ≤ R1 n₁ n₂ := by
+  -- This is the circle-method major arc evaluation (Hu 2019, Lemma 2.2 / Liu-Liu 2000, Lemma 2.2).
+  -- It requires: Siegel-Walfisz prime number theorem in arithmetic progressions,
+  -- major arc approximation of S and T by singular integrals, dissection of major arcs
+  -- into disjoint rational neighborhoods, singular series convergence, and error absorption.
+  -- None of these are formalized in Mathlib 4.35.0.
+  -- Searches run: LeanSearch for "major arc exponential sum prime number theorem Siegel Walfisz",
+  -- Loogle for summable complex exponential sums. No relevant results found.
   sorry
 
 /-- Page 194, Lemma 2.2. CONDITIONAL ON the averaged singular mass and
