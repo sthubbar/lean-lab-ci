@@ -459,170 +459,97 @@ theorem divisor_tail_moment_split512 (ε D x : ℝ)
   nlinarith [sq_nonneg (smallDivisorTail512 (Real.log x ^ (2 * D)) N -
     largeDivisorTail512 (Real.log x ^ (2 * D)) N)]
 
-/-- LEAF, CITED. R. C. Vaughan, The Hardy-Littlewood Method, Cambridge 1981, chapter 3,
-book page 34, display 3.23, read from the page image of `copies/Vaughan1981-ch3.pdf` pdf
-page 9: for every positive integer m and 0 < X < Y,
-Σ_{X<q≤Y} μ(q)²/φ(q)² Σ_{a ≤ q, (a,q)=1} e(-am/q) ≪ Σ_{d|m} μ(d)²/φ(d) min(d/X, 1),
-with an absolute implied constant. The inner sum is the lab's `ramanujan512 q m`; the
-range X < q ≤ Y over integers is written `Ioc ⌊X⌋₊ M`. Vaughan proves it from 3.14 and the
-elementary fact Σ_{q>Z} φ(q)^{-2} ≪ Z^{-1}, printed under 3.23. Split from
-`leaf_vaughan_tail_reduction512`, REREAD U-1740, 2026-11-21. OPEN. -/
-theorem leaf_vaughan_323_512 :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ N : ℕ, 1 ≤ N → ∀ X : ℝ, 0 < X → ∀ M : ℕ,
-      ‖∑ q ∈ Finset.Ioc ⌊X⌋₊ M,
-          (ArithmeticFunction.moebius q : ℂ) ^ 2 / (Nat.totient q : ℂ) ^ 2 *
-            ramanujan512 q N‖ ≤
-        K * ∑ d ∈ N.divisors,
-          (ArithmeticFunction.moebius d : ℝ) ^ 2 / (Nat.totient d : ℝ) *
-            min ((d : ℝ) / X) 1 := by
+/-- LEAF. Vaughan, The Hardy-Littlewood Method, 1981, chapter 3, book p. 34 display 3.23,
+with the convergent series 3.24 and its Euler product 3.26, copies/Vaughan1981-ch3.pdf pdf p. 9.
+Printed 3.23: the sum over X < q <= Y of mu(q)^2/phi(q)^2 times the sum over reduced a of
+e(-am/q) is << the sum over d | m of mu(d)^2/phi(d) min(d/X, 1). Here X = P, Y tends to infinity,
+m = N even, c_q(-N) is ramanujan512 q N, and sing (N/2) is the product 3.26 at m = N, so the
+left side is the tail of 3.24 beyond P. The weight drops mu(d)^2, which only enlarges the bound.
+Elementary: Ramanujan sum divisor formula, multiplicativity and the Euler product, and the
+tail bound on phi(q)^-2. Not yet formalized. OPEN. REREAD U-1740 2026-11-21. -/
+theorem leaf_vaughan_singular_tail512 :
+    ∃ C₀ : ℝ, 0 ≤ C₀ ∧ ∀ N : ℕ, 0 < N → Even N → ∀ P : ℝ, 1 ≤ P →
+      ‖(∑ q ∈ Finset.Icc 1 ⌊P⌋₊,
+          (ArithmeticFunction.moebius q : ℂ) ^ 2 / (Nat.totient q : ℂ) ^ 2 * ramanujan512 q N) -
+        (sing (N / 2) : ℂ)‖ ≤
+        C₀ * ∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) * min ((d : ℝ) / P) 1 := by
   sorry
 
-/-- LEAF, CITED. Vaughan 1981, book page 34, displays 3.24 and 3.26, read from the page
-image: the series 𝔖₁(m) = Σ_q μ(q)²/φ(q)² Σ_{(a,q)=1} e(-am/q) converges, and
-𝔖₁(m) = Π_{p∤m} (1 - (p-1)^{-2}) Π_{p|m} (1 + (p-1)^{-1}).
-For even m the factor at 2 is 2, and for an odd prime p dividing m the two Euler factors
-differ by the ratio (p-1)/(p-2), so 𝔖₁(m) = 2 C₂ Π_{p|m, p>2} (p-1)/(p-2) = `sing (m/2)`,
-the P0069 page 6 singular series 𝔖(2n) at 2n = m. The q = 0 term is 0 since μ 0 = 0.
-Split from `leaf_vaughan_tail_reduction512`, REREAD U-1740, 2026-11-21. OPEN. -/
-theorem leaf_vaughan_326_512 (N : ℕ) (hN : 2 ≤ N) (hE : Even N) :
-    HasSum (fun q : ℕ => (ArithmeticFunction.moebius q : ℂ) ^ 2 /
-      (Nat.totient q : ℂ) ^ 2 * ramanujan512 q N) (sing (N / 2) : ℂ) := by
-  sorry
-
-/-- P0069 page 8 display 2.7, using Vaughan reference 31 display 3.23.
-QUESTION ANSWERED, REREAD U-1740 2026-11-21 from the page images: the printed center
-of 2.7 writes uvY/ℒ² 𝔖(2n), while display 2.6 and the line before 2.7 carry
-uv/(ℒℒ'), ℒ = log x, ℒ' = log Y. The ℒ² is a print slip: with ℒ² literally, the
-difference would keep uvY(1/(ℒℒ') - 1/ℒ²)𝔖(2n), which is not small since ℒ' is a fixed
-fraction of ℒ. The middle line of 2.7, Y² |Σ_{q>ℒ^{2A}} μ²/φ² c_q(-2n)|², drops the
-whole factor uv/(ℒℒ') as bounded, so this leaf's log x times log Y is the reading the
-printed chain proves. The H Y² ℒ^{-A-7} term is kept and unused.
-CONDITIONAL ON the two cited LEAFs `leaf_vaughan_323_512` and `leaf_vaughan_326_512`;
-the reduction itself is proved here. -/
+/-- LEAF. P0069 page 8 display 2.7, using Vaughan reference 31 display 3.23.
+ANSWER to the earlier QUESTION, REREAD U-1740 2026-11-21: the printed center of 2.7 is
+uvY/L^2 S(2n), with L squared. The line above 2.7 has uv/(LL') times the truncated series, and
+2.2 on page 6 has uvY/(LL'). Since L' = log Y = (11/20 + eps) L, the two centers differ by a
+main term sized factor, so L^2 in 2.7 is a misprint for LL'. This leaf keeps LL', the reading
+under which 2.6, 2.7 and 2.2 agree. The H Y squared logarithmic term printed in 2.7 is kept.
+PROVED 2026-11-21 from leaf_vaughan_singular_tail512, Vaughan 3.23, which is the one open input. -/
 theorem leaf_vaughan_tail_reduction512 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∀ u v : ℝ,
       ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
         ∃ C : ℝ, ∀ x : ℝ, C ≤ x →
           seriesError512 ε D x u v ≤ C * (scale512 ε A x + length512 ε x ^ 2 *
             divisorTailMoment512 ε D x) := by
-  obtain ⟨K, hK0, hK⟩ := leaf_vaughan_323_512
-  refine ⟨1, one_pos, fun ε hε _ u v A _ => ⟨0, fun D _ => ?_⟩⟩
-  refine ⟨max ((|u * v| * K) ^ 2) (Real.exp 2), fun x hx => ?_⟩
-  have hxe : Real.exp 2 ≤ x := (le_max_right _ _).trans hx
-  have he3 : (3 : ℝ) ≤ Real.exp 2 := by linarith [Real.add_one_le_exp (2 : ℝ)]
-  have hx0 : 0 < x := by linarith
-  have hx1 : 1 ≤ x := by linarith
-  have hLx : 2 ≤ Real.log x := by
-    have h := Real.log_le_log (Real.exp_pos 2) hxe
-    rwa [Real.log_exp] at h
+  obtain ⟨C₀, hC₀, hT⟩ := leaf_vaughan_singular_tail512
+  refine ⟨1, one_pos, fun ε hε _ u v A _ => ⟨1, fun D hD => ?_⟩⟩
+  set K : ℝ := (u * v) ^ 2 * C₀ ^ 2 with hK
+  refine ⟨max (Real.exp 2) K, fun x hx => ?_⟩
+  have hx2 : Real.exp 2 ≤ x := le_trans (le_max_left _ _) hx
+  have hKC : K ≤ max (Real.exp 2) K := le_max_right _ _
+  have hx0 : 0 < x := lt_of_lt_of_le (Real.exp_pos 2) hx2
+  have hL : 2 ≤ Real.log x := by
+    rw [← Real.log_exp 2]; exact Real.log_le_log (Real.exp_pos 2) hx2
   have hY0 : 0 < length512 ε x := by unfold length512; positivity
-  have hLY : 1 ≤ Real.log (length512 ε x) := by
-    unfold length512
-    rw [Real.log_rpow hx0]
-    nlinarith
-  have hP0 : 0 < Real.log x ^ (2 * D) := Real.rpow_pos_of_pos (by linarith) _
-  have key : ∀ N ∈ frequencies512 ε x,
+  have hL' : 1 ≤ Real.log (length512 ε x) := by
+    unfold length512; rw [Real.log_rpow hx0]; nlinarith
+  have hP : 1 ≤ Real.log x ^ (2 * D) :=
+    Real.one_le_rpow (by linarith) (by linarith)
+  have hLL : 1 ≤ Real.log x * Real.log (length512 ε x) := by nlinarith
+  have hc : ‖((u : ℂ) * v * (length512 ε x : ℂ) /
+      ((Real.log x : ℂ) * (Real.log (length512 ε x) : ℂ)))‖ ≤ |u * v| * length512 ε x := by
+    have : ((u : ℂ) * v * (length512 ε x : ℂ) /
+        ((Real.log x : ℂ) * (Real.log (length512 ε x) : ℂ))) =
+        ((u * v * length512 ε x / (Real.log x * Real.log (length512 ε x)) : ℝ) : ℂ) := by
+      push_cast; ring
+    rw [this, Complex.norm_real, Real.norm_eq_abs, abs_div, abs_mul (u * v),
+      abs_of_pos hY0, abs_of_pos (show (0 : ℝ) < Real.log x * Real.log (length512 ε x) by linarith)]
+    exact div_le_self (by positivity) hLL
+  have hterm : ∀ N ∈ frequencies512 ε x,
       ‖truncatedMain512 ε D x u v N - expected512 ε x u v N‖ ^ 2 ≤
-        (|u * v| * K) ^ 2 * length512 ε x ^ 2 *
-          (∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
-            min ((d : ℝ) / Real.log x ^ (2 * D)) 1) ^ 2 := by
+        K * (length512 ε x ^ 2 * (∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
+          min ((d : ℝ) / Real.log x ^ (2 * D)) 1) ^ 2) := by
     intro N hN
-    simp only [frequencies512, Finset.mem_filter, Finset.mem_Icc] at hN
-    obtain ⟨⟨hNlo, -⟩, hEv⟩ := hN
-    have hN2 : 2 ≤ N := by
-      have h3 : 2 < ⌈x⌉₊ := Nat.lt_ceil.mpr (by norm_num; linarith)
-      omega
-    let f : ℕ → ℂ := fun q => (ArithmeticFunction.moebius q : ℂ) ^ 2 /
-      (Nat.totient q : ℂ) ^ 2 * ramanujan512 q N
-    have hf0 : f 0 = 0 := by simp [f]
-    have hr : ∀ m : ℕ, ∑ q ∈ Finset.range (m + 1), f q = ∑ q ∈ Finset.Icc 1 m, f q := by
-      intro m
-      induction m with
-      | zero => simp [hf0]
-      | succ k ih => rw [Finset.sum_range_succ, ih, Finset.sum_Icc_succ_top (by omega)]
-    have hsplit : ∀ m : ℕ, ⌊Real.log x ^ (2 * D)⌋₊ ≤ m →
-        ∑ q ∈ Finset.range (m + 1), f q =
-          ∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊, f q +
-            ∑ q ∈ Finset.Ioc ⌊Real.log x ^ (2 * D)⌋₊ m, f q := by
-      intro m hm
-      rw [hr m]
-      induction m, hm using Nat.le_induction with
-      | base => simp
-      | succ k hk ih =>
-        rw [Finset.sum_Icc_succ_top (by omega), ih, Finset.sum_Ioc_succ_top hk, add_assoc]
-    have htail : ‖(sing (N / 2) : ℂ) - ∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊, f q‖ ≤
-        K * ∑ d ∈ N.divisors, (ArithmeticFunction.moebius d : ℝ) ^ 2 /
-          (Nat.totient d : ℝ) * min ((d : ℝ) / Real.log x ^ (2 * D)) 1 := by
-      have ht := ((leaf_vaughan_326_512 N hN2 hEv).tendsto_sum_nat.comp
-        (Filter.tendsto_add_atTop_nat 1)).sub_const
-          (∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊, f q)
-      refine le_of_tendsto ht.norm ?_
-      rw [Filter.eventually_atTop]
-      refine ⟨⌊Real.log x ^ (2 * D)⌋₊, fun m hm => ?_⟩
-      simp only [Function.comp]
-      rw [hsplit m hm, add_sub_cancel_left]
-      exact hK N (by omega) _ hP0 m
-    have hw : (∑ d ∈ N.divisors, (ArithmeticFunction.moebius d : ℝ) ^ 2 /
-          (Nat.totient d : ℝ) * min ((d : ℝ) / Real.log x ^ (2 * D)) 1) ≤
-        ∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
-          min ((d : ℝ) / Real.log x ^ (2 * D)) 1 := by
-      apply Finset.sum_le_sum
-      intro d _
-      have hmu : |((ArithmeticFunction.moebius d : ℤ) : ℝ)| ≤ 1 := by
-        exact_mod_cast ArithmeticFunction.abs_moebius_le_one
-      have hmu2 : ((ArithmeticFunction.moebius d : ℤ) : ℝ) ^ 2 ≤ 1 :=
-        (sq_le_one_iff_abs_le_one _).mpr hmu
-      have hmin : 0 ≤ min ((d : ℝ) / Real.log x ^ (2 * D)) 1 :=
-        le_min (div_nonneg (Nat.cast_nonneg _) hP0.le) zero_le_one
-      have hphi : 0 ≤ (Nat.totient d : ℝ) := Nat.cast_nonneg _
-      gcongr
-    have hdiff : truncatedMain512 ε D x u v N - expected512 ε x u v N =
-        ((u * v * length512 ε x / (Real.log x * Real.log (length512 ε x)) : ℝ) : ℂ) *
-          (∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊, f q - (sing (N / 2) : ℂ)) := by
-      unfold truncatedMain512 expected512
-      push_cast
-      ring
-    have hc : |u * v * length512 ε x / (Real.log x * Real.log (length512 ε x))| ≤
-        |u * v| * length512 ε x := by
-      have hden : 1 ≤ Real.log x * Real.log (length512 ε x) := by nlinarith
-      have hdpos : 0 < Real.log x * Real.log (length512 ε x) := by linarith
-      rw [abs_div, abs_mul, abs_of_pos hY0, abs_of_pos hdpos]
-      exact div_le_self (by positivity) hden
-    have hnorm : ‖truncatedMain512 ε D x u v N - expected512 ε x u v N‖ ≤
-        |u * v| * K * length512 ε x * (∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
-          min ((d : ℝ) / Real.log x ^ (2 * D)) 1) := by
-      rw [hdiff, norm_mul, Complex.norm_real, Real.norm_eq_abs, norm_sub_rev]
-      calc _ ≤ (|u * v| * length512 ε x) *
-            (K * ∑ d ∈ N.divisors, (ArithmeticFunction.moebius d : ℝ) ^ 2 /
-              (Nat.totient d : ℝ) * min ((d : ℝ) / Real.log x ^ (2 * D)) 1) :=
-            mul_le_mul hc htail (norm_nonneg _) (by positivity)
-        _ ≤ (|u * v| * length512 ε x) * (K * ∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
-              min ((d : ℝ) / Real.log x ^ (2 * D)) 1) := by gcongr
-        _ = _ := by ring
-    calc _ ≤ (|u * v| * K * length512 ε x * (∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
-          min ((d : ℝ) / Real.log x ^ (2 * D)) 1)) ^ 2 :=
-          pow_le_pow_left₀ (norm_nonneg _) hnorm 2
-      _ = _ := by ring
-  have hmom : 0 ≤ divisorTailMoment512 ε D x :=
-    Finset.sum_nonneg (fun N _ => sq_nonneg _)
-  have hscale := scale_nonneg512 ε A hx1
-  have hCK : (|u * v| * K) ^ 2 ≤ max ((|u * v| * K) ^ 2) (Real.exp 2) := le_max_left _ _
+    unfold frequencies512 at hN
+    rw [Finset.mem_filter, Finset.mem_Icc] at hN
+    have hN0 : 0 < N := lt_of_lt_of_le (Nat.ceil_pos.mpr hx0) hN.1.1
+    have hTN := hT N hN0 hN.2 _ hP
+    have heq : truncatedMain512 ε D x u v N - expected512 ε x u v N =
+        ((u : ℂ) * v * (length512 ε x : ℂ) /
+          ((Real.log x : ℂ) * (Real.log (length512 ε x) : ℂ))) *
+        ((∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊,
+          (ArithmeticFunction.moebius q : ℂ) ^ 2 / (Nat.totient q : ℂ) ^ 2 *
+            ramanujan512 q N) - (sing (N / 2) : ℂ)) := by
+      unfold truncatedMain512 expected512; ring
+    rw [heq, norm_mul, mul_pow]
+    set T := ∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
+      min ((d : ℝ) / Real.log x ^ (2 * D)) 1
+    have h1 := pow_le_pow_left₀ (norm_nonneg _) hc 2
+    have h2 := pow_le_pow_left₀ (norm_nonneg _) hTN 2
+    calc _ ≤ (|u * v| * length512 ε x) ^ 2 * (C₀ * T) ^ 2 :=
+          mul_le_mul h1 h2 (by positivity) (by positivity)
+      _ = K * (length512 ε x ^ 2 * T ^ 2) := by
+          rw [hK, mul_pow, mul_pow, sq_abs]; ring
+  have hM : 0 ≤ length512 ε x ^ 2 * divisorTailMoment512 ε D x := by
+    unfold divisorTailMoment512; positivity
+  have hS := scale_nonneg512 ε A (show 1 ≤ x by linarith [Real.add_one_le_exp 2])
   calc seriesError512 ε D x u v
-      ≤ ∑ N ∈ frequencies512 ε x, (|u * v| * K) ^ 2 * length512 ε x ^ 2 *
+      ≤ ∑ N ∈ frequencies512 ε x, K * (length512 ε x ^ 2 *
           (∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
-            min ((d : ℝ) / Real.log x ^ (2 * D)) 1) ^ 2 := Finset.sum_le_sum key
-    _ = (|u * v| * K) ^ 2 * (length512 ε x ^ 2 * divisorTailMoment512 ε D x) := by
-      unfold divisorTailMoment512
-      rw [Finset.mul_sum, Finset.mul_sum]
-      apply Finset.sum_congr rfl
-      intro N _
-      ring
-    _ ≤ max ((|u * v| * K) ^ 2) (Real.exp 2) *
-          (length512 ε x ^ 2 * divisorTailMoment512 ε D x) :=
-      mul_le_mul_of_nonneg_right hCK (by positivity)
-    _ ≤ max ((|u * v| * K) ^ 2) (Real.exp 2) *
-          (scale512 ε A x + length512 ε x ^ 2 * divisorTailMoment512 ε D x) :=
-      mul_le_mul_of_nonneg_left (by linarith) ((sq_nonneg _).trans hCK)
+            min ((d : ℝ) / Real.log x ^ (2 * D)) 1) ^ 2) := Finset.sum_le_sum hterm
+    _ = K * (length512 ε x ^ 2 * divisorTailMoment512 ε D x) := by
+        unfold divisorTailMoment512; rw [Finset.mul_sum, Finset.mul_sum]
+    _ ≤ max (Real.exp 2) K * (scale512 ε A x + length512 ε x ^ 2 *
+          divisorTailMoment512 ε D x) := by
+        have hK0 : 0 ≤ K := by rw [hK]; positivity
+        nlinarith
 
 /-- LEAF. P0069 page 8 display 2.8: the small-divisor mean square estimate on K.
 The uniform short interval divisor moment bound used by the paper is not supplied
