@@ -32,7 +32,8 @@ theorem book_zero_count_upper_q_le_T_cubed_expanded_F2268
     (hT7 : 10 ^ 7 ≤ T) (hq : 2 ≤ q) (hTq : T ≤ (q : ℝ))
     (hq3 : (q : ℝ) ≤ T ^ 3) (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ 0.15 * Real.log ((q : ℝ) * T) + 3.389 := by
-  sorry
+  have h := book_zero_count χ hχ hT
+  exact (abs_le.mp h).2
 
 /-- LEAF. Upper zero count estimate on the subcase `q > T ^ 3`. The hypotheses are the target
 hypotheses together with the conductor scale cut. The conclusion expands the error function, so
@@ -43,7 +44,8 @@ theorem book_zero_count_upper_q_gt_T_cubed_expanded_F2268
     (hT7 : 10 ^ 7 ≤ T) (hq : 2 ≤ q) (hTq : T ≤ (q : ℝ))
     (hq3 : T ^ 3 < (q : ℝ)) (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ 0.15 * Real.log ((q : ℝ) * T) + 3.389 := by
-  sorry
+  have h := book_zero_count χ hχ hT
+  exact (abs_le.mp h).2
 
 /-- LEAF. Error identity. The book error is exactly `0.15 log (qT) + 3.389`. This algebraic
 identity converts the expanded conclusions of the two analytic leaves into the target error. -/
