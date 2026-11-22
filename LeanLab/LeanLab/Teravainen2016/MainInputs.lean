@@ -1,12 +1,13 @@
 /-
 P0076 analytic leaves for the four main theorem assemblies.
-Every declaration in this file is unresolved and CONDITIONAL.
+The unresolved analytic leaves remain CONDITIONAL. Elementary deductions are proved.
 No leaf is certified by its cited source or by compilation with sorryAx.
 AI wrote this Lean code. Goldbach is open.
 -/
 import LeanLab.Teravainen2016.BinaryBridge
 import LeanLab.Teravainen2016.ProgressionLifting
 import LeanLab.Teravainen2016.DyadicApproximation
+import LeanLab.Teravainen2016.MainInputsRestriction
 
 namespace LeanLab.Teravainen2016
 
@@ -1516,6 +1517,250 @@ private theorem bohr_card_lower (N : ℕ) (Ω : Finset ℕ) (η : ℝ) (hN : 1 �
 private theorem chiExists_proved : ChiExists :=
   chiExists_of_bohr (fun N Ω η hN hη hη' _ => bohr_card_lower N Ω η hN hη hη')
 
+/-- Page 11, separation of the shorter interval from the bump centre five twelfths. -/
+theorem half_interval_separation {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1)
+    (hout : ¬ (1 / 3 < x ∧ x < 1 / 2)) :
+    1 / 24 < distInt (x - 5 / 12) := by
+  by_cases hx : 0 ≤ x - 5 / 12
+  · rw [distInt_eq_min hx (by linarith)]
+    have hbig : 1 / 2 ≤ x := by
+      by_contra h
+      exact hout ⟨by linarith, by linarith⟩
+    exact lt_min (by linarith) (by linarith)
+  · rw [← distInt_neg (x - 5 / 12), distInt_eq_min (by linarith) (by linarith)]
+    have hsmall : x ≤ 1 / 3 := by
+      by_contra h
+      exact hout ⟨by linarith, by linarith⟩
+    exact lt_min (by linarith) (by linarith)
+
+/-- Page 11, the elementary bump for the shorter interval route.
+Its Fourier complexity is independent of N and its tail is uniformly at most epsilon.
+The polynomial has a small tail rather than exact compact support. -/
+theorem half_interval_bump (ε : ℝ) (hε : 0 < ε) :
+    ∃ Cc : ℕ, ∀ N : ℕ, 0 < N → ∃ ψ : ℤ → ℝ,
+      FourierComplexityLE ψ Cc ∧
+      (∀ n, 0 ≤ ψ n ∧ ψ n ≤ 1) ∧
+      (∀ n : ℤ, |(n : ℝ) / N - 5 / 12| ≤ 1 / 48 → 1 / 2 ≤ ψ n) ∧
+      (∀ n : ℕ, n < N → n ∉ half N → ψ n ≤ ε) := by
+  obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one hε (by norm_num : (1 : ℝ) / 36864 < 1)
+  obtain ⟨d, c, α, hc, g, hg, hg0, hg1, hgsym, hgper, hgood, hfar⟩ :=
+    flat_top_exists k (1 / 48) (by norm_num) (by norm_num)
+  refine ⟨d, fun N hN => ⟨fun n => g ((n : ℝ) / N - 5 / 12), ?_, ?_, ?_, ?_⟩⟩
+  · refine ⟨fun j => c j * eC (-(α j * (5 / 12))), fun j => α j / N, ?_, ?_⟩
+    · intro j
+      simpa only [norm_mul, eC_norm_one, mul_one] using hc j
+    · intro n
+      rw [hg]
+      apply Finset.sum_congr rfl
+      intro j hj
+      rw [mul_assoc, ← eC_add']
+      congr 2
+      ring
+  · intro n
+    exact ⟨hg0 _, hg1 _⟩
+  · intro n hn
+    exact hgood _ ((distInt_le_abs_b _).trans hn)
+  · intro n hn hnout
+    have hNr : (0 : ℝ) < N := by exact_mod_cast hN
+    have hx0 : 0 ≤ (n : ℝ) / N := div_nonneg (Nat.cast_nonneg n) hNr.le
+    have hx1 : (n : ℝ) / N ≤ 1 := (div_le_one hNr).mpr (by exact_mod_cast hn.le)
+    have hout : ¬ (1 / 3 < (n : ℝ) / N ∧ (n : ℝ) / N < 1 / 2) := by
+      intro hx
+      apply hnout
+      refine Finset.mem_filter.mpr ⟨Finset.mem_range.mpr hn, ?_⟩
+      have hleft := (lt_div_iff₀ hNr).mp hx.1
+      have hright := (div_lt_iff₀ hNr).mp hx.2
+      constructor <;> nlinarith
+    have hsep := half_interval_separation hx0 hx1 hout
+    have htail := hfar ((n : ℝ) / N - 5 / 12) (by norm_num at hsep ⊢; exact hsep)
+    change g ((n : ℝ) / N - 5 / 12) ≤ ε
+    apply htail.trans
+    norm_num at hk ⊢
+    exact hk.le
+
+/-- Display 2.2, bounded Fourier complexity gives a uniform pointwise bound. -/
+theorem fourierComplexity_abs_le {χ : ℤ → ℝ} {Cc : ℕ}
+    (hχ : FourierComplexityLE χ Cc) (n : ℤ) : |χ n| ≤ (Cc : ℝ) ^ 2 := by
+  obtain ⟨c, α, hc, hrep⟩ := hχ
+  have hn : ‖(χ n : ℂ)‖ ≤ (Cc : ℝ) ^ 2 := by
+    rw [hrep n]
+    calc ‖∑ j, c j * eC (α j * (n : ℝ))‖
+        ≤ ∑ j, ‖c j * eC (α j * (n : ℝ))‖ := norm_sum_le _ _
+      _ ≤ ∑ _j : Fin Cc, (Cc : ℝ) := by
+        apply Finset.sum_le_sum
+        intro j hj
+        simpa only [norm_mul, eC_norm_one, mul_one] using hc j
+      _ = (Cc : ℝ) ^ 2 := by simp [pow_two]
+  simpa only [Complex.norm_real, Real.norm_eq_abs] using hn
+
+/-- Page 11, a uniform weighted tail bound for the shorter interval bump.
+The total mass premise is explicit and supplies the needed analytic input. -/
+theorem half_interval_weighted_tail (N Cc : ℕ) (f : ℕ → ℝ) (χ ψ : ℤ → ℝ)
+    (t : ℤ) {ε K : ℝ} (hε : 0 ≤ ε) (hf : ∀ n, 0 ≤ f n)
+    (hχ0 : ∀ n, 0 ≤ χ n) (hχ : FourierComplexityLE χ Cc)
+    (htail : ∀ n : ℕ, n < N → n ∉ half N → ψ n ≤ ε)
+    (hmass : ∑ n ∈ range N, f n ≤ K * N) :
+    ∑ n ∈ (range N).filter (fun n => n ∉ half N), f n * χ (t - n) * ψ n
+      ≤ ε * (Cc : ℝ) ^ 2 * K * N := by
+  let S := (range N).filter (fun n => n ∉ half N)
+  have hpoint : ∀ n ∈ S, f n * χ (t - n) * ψ n ≤ (ε * (Cc : ℝ) ^ 2) * f n := by
+    intro n hn
+    obtain ⟨hn, hnout⟩ := mem_filter.mp hn
+    have h1 := mul_le_mul_of_nonneg_left (htail n (mem_range.mp hn) hnout)
+      (mul_nonneg (hf n) (hχ0 (t - (n : ℤ))))
+    have h2 := mul_le_mul_of_nonneg_left ((le_abs_self (χ (t - n))).trans (fourierComplexity_abs_le hχ (t - (n : ℤ))))
+      (hf n)
+    have h3 := mul_le_mul_of_nonneg_right h2 hε
+    nlinarith
+  calc ∑ n ∈ S, f n * χ (t - n) * ψ n
+      ≤ ∑ n ∈ S, (ε * (Cc : ℝ) ^ 2) * f n := sum_le_sum hpoint
+    _ = (ε * (Cc : ℝ) ^ 2) * ∑ n ∈ S, f n := (mul_sum _ _ _).symm
+    _ ≤ (ε * (Cc : ℝ) ^ 2) * ∑ n ∈ range N, f n :=
+      mul_le_mul_of_nonneg_left
+        (sum_le_sum_of_subset_of_nonneg (filter_subset _ _) (fun n _ _ => hf n)) (by positivity)
+    _ ≤ (ε * (Cc : ℝ) ^ 2) * (K * N) := mul_le_mul_of_nonneg_left hmass (by positivity)
+    _ = ε * (Cc : ℝ) ^ 2 * K * N := by ring
+
+#print axioms half_interval_separation
+#print axioms half_interval_bump
+#print axioms fourierComplexity_abs_le
+#print axioms half_interval_weighted_tail
+
+/-- Page 11, localization to the shorter interval from a bumped lower bound.
+The total mass and bumped prime lower bounds remain explicit premises. -/
+theorem half_interval_lower_of_bump (N Cc : ℕ) (f : ℕ → ℝ) (χ ψ : ℤ → ℝ)
+    (t : ℤ) {ε K A : ℝ} (hε : 0 ≤ ε) (hf : ∀ n, 0 ≤ f n)
+    (hχ0 : ∀ n, 0 ≤ χ n) (hχ : FourierComplexityLE χ Cc)
+    (hψ1 : ∀ n : ℕ, n < N → ψ n ≤ 1)
+    (htail : ∀ n : ℕ, n < N → n ∉ half N → ψ n ≤ ε)
+    (hmass : ∑ n ∈ range N, f n ≤ K * N)
+    (hlower : A + ε * (Cc : ℝ) ^ 2 * K * N ≤
+      ∑ n ∈ range N, f n * χ (t - n) * ψ n) :
+    A ≤ ∑ n ∈ half N, f n * χ (t - n) := by
+  have hsub : half N ⊆ range N := filter_subset _ _
+  have hins : (range N).filter (fun n => n ∈ half N) = half N := by
+    ext n
+    simp only [mem_filter]
+    exact ⟨fun h => h.2, fun h => ⟨hsub h, h⟩⟩
+  have hsplit := sum_filter_add_sum_filter_not (s := range N)
+    (p := fun n => n ∈ half N) (f := fun n => f n * χ (t - n) * ψ n)
+  rw [hins] at hsplit
+  have hfirst : (∑ n ∈ half N, f n * χ (t - n) * ψ n) ≤
+      ∑ n ∈ half N, f n * χ (t - n) := by
+    apply sum_le_sum
+    intro n hn
+    have h := mul_le_mul_of_nonneg_left (hψ1 n (mem_range.mp (hsub hn)))
+      (mul_nonneg (hf n) (hχ0 (t - n)))
+    simpa only [mul_one] using h
+  have htail' := half_interval_weighted_tail N Cc f χ ψ t hε hf hχ0 hχ htail hmass
+  linarith
+
+#print axioms half_interval_lower_of_bump
+
+/-- Matomaki Shao Section 4, the dense pair count inside the quarter intervals. -/
+theorem ternary_dense_pair_lower (N a : ℕ) (hN : 200 ≤ N)
+    (ha0 : N ≤ 10 * a) (ha1 : 5 * a ≤ 2 * N) (g₂ g₃ : ℕ → ℝ) {δ : ℝ}
+    (hδ : 0 ≤ δ) (hg₂ : ∀ n, 0 ≤ g₂ n) (hg₃ : ∀ n, 0 ≤ g₃ n)
+    (hl₂ : ∀ n, N ≤ 4 * n → 2 * n < N → δ ≤ g₂ n)
+    (hl₃ : ∀ n, N ≤ 4 * n → 2 * n < N → δ ≤ g₃ n) :
+    δ ^ 2 * N / 50 ≤ ∑ k ∈ range N, g₂ k * g₃ ((N + 2 * N - a - k) % N) := by
+  let S := Ico ((N - a) / 2) ((N - a) / 2 + N / 25)
+  have hwindow : ∀ k ∈ S,
+      k < N ∧ N ≤ 4 * k ∧ 2 * k < N ∧
+      N ≤ 4 * (N - a - k) ∧ 2 * (N - a - k) < N := by
+    intro k hk
+    obtain ⟨hk0, hk1⟩ := mem_Ico.mp hk
+    omega
+  have hsub : S ⊆ range N := fun k hk => mem_range.mpr (hwindow k hk).1
+  have hcard : (N : ℝ) / 50 ≤ (S.card : ℝ) := by
+    have hnat : N ≤ 50 * (N / 25) := by omega
+    have hcast : (N : ℝ) ≤ 50 * (N / 25 : ℕ) := by exact_mod_cast hnat
+    have hs : S.card = N / 25 := by simp [S]
+    rw [hs]
+    linarith
+  have hpoint : ∀ k ∈ S, δ ^ 2 ≤ g₂ k * g₃ ((N + 2 * N - a - k) % N) := by
+    intro k hk
+    obtain ⟨hkN, hk0, hk1, hj0, hj1⟩ := hwindow k hk
+    have hsmall : N - a - k < N := by omega
+    have he : N + 2 * N - a - k = 2 * N + (N - a - k) := by omega
+    have hmod : (N + 2 * N - a - k) % N = N - a - k := by
+      rw [he]
+      simp only [Nat.mul_add_mod_self_right, Nat.mod_eq_of_lt hsmall]
+    rw [hmod, pow_two]
+    exact mul_le_mul (hl₂ k hk0 hk1) (hl₃ _ hj0 hj1) hδ (hg₂ k)
+  calc δ ^ 2 * N / 50 = δ ^ 2 * ((N : ℝ) / 50) := by ring
+    _ ≤ δ ^ 2 * (S.card : ℝ) := mul_le_mul_of_nonneg_left hcard (sq_nonneg δ)
+    _ = ∑ _k ∈ S, δ ^ 2 := by simp [mul_comm]
+    _ ≤ ∑ k ∈ S, g₂ k * g₃ ((N + 2 * N - a - k) % N) := sum_le_sum hpoint
+    _ ≤ ∑ k ∈ range N, g₂ k * g₃ ((N + 2 * N - a - k) % N) :=
+      sum_le_sum_of_subset_of_nonneg hsub (fun k _ _ => mul_nonneg (hg₂ k) (hg₃ _))
+
+/-- Matomaki Shao Section 4, a dense triple lower bound before the Fourier error terms. -/
+theorem ternary_dense_lower (N : ℕ) (hN : 200 ≤ N) (f₁ g₂ g₃ : ℕ → ℝ) {δ : ℝ}
+    (hδ : 0 ≤ δ) (hf₁ : ∀ n, 0 ≤ f₁ n) (hg₂ : ∀ n, 0 ≤ g₂ n) (hg₃ : ∀ n, 0 ≤ g₃ n)
+    (hl₂ : ∀ n, N ≤ 4 * n → 2 * n < N → δ ≤ g₂ n)
+    (hl₃ : ∀ n, N ≤ 4 * n → 2 * n < N → δ ≤ g₃ n)
+    (hmass : δ * N ≤ ∑ n ∈ (range N).filter (fun n => N ≤ 10 * n ∧ 5 * n ≤ 2 * N), f₁ n) :
+    δ ^ 3 / 50 ≤ conv3 N f₁ g₂ g₃ N := by
+  let D := (range N).filter (fun n => N ≤ 10 * n ∧ 5 * n ≤ 2 * N)
+  let R : ℝ := δ ^ 2 * N / 50
+  have hR : 0 ≤ R := by dsimp [R]; positivity
+  have hpoint : ∀ n ∈ D, R * f₁ n ≤
+      ∑ k ∈ range N, f₁ n * g₂ k * g₃ ((N + 2 * N - n - k) % N) := by
+    intro n hn
+    obtain ⟨_, hn0, hn1⟩ := mem_filter.mp hn
+    have h := mul_le_mul_of_nonneg_left
+      (ternary_dense_pair_lower N n hN hn0 hn1 g₂ g₃ hδ hg₂ hg₃ hl₂ hl₃) (hf₁ n)
+    calc R * f₁ n = f₁ n * (δ ^ 2 * N / 50) := by dsimp [R]; ring
+      _ ≤ f₁ n * ∑ k ∈ range N, g₂ k * g₃ ((N + 2 * N - n - k) % N) := h
+      _ = _ := by rw [mul_sum]; apply sum_congr rfl; intro k hk; ring
+  have htotal : (δ ^ 3 / 50) * (N : ℝ) ^ 2 ≤
+      ∑ n ∈ range N, ∑ k ∈ range N, f₁ n * g₂ k * g₃ ((N + 2 * N - n - k) % N) := by
+    calc (δ ^ 3 / 50) * (N : ℝ) ^ 2 = R * (δ * N) := by dsimp [R]; ring
+      _ ≤ R * ∑ n ∈ D, f₁ n := mul_le_mul_of_nonneg_left hmass hR
+      _ = ∑ n ∈ D, R * f₁ n := mul_sum _ _ _
+      _ ≤ ∑ n ∈ D, ∑ k ∈ range N, f₁ n * g₂ k * g₃ ((N + 2 * N - n - k) % N) := sum_le_sum hpoint
+      _ ≤ _ := sum_le_sum_of_subset_of_nonneg (filter_subset _ _)
+        (fun n _ _ => sum_nonneg (fun k _ => mul_nonneg (mul_nonneg (hf₁ n) (hg₂ k)) (hg₃ _)))
+  unfold conv3
+  rw [inv_mul_eq_div, le_div_iff₀ (by positivity : (0 : ℝ) < (N : ℝ) ^ 2)]
+  exact htotal
+
+#print axioms ternary_dense_pair_lower
+#print axioms ternary_dense_lower
+
+example : (1 : ℝ) / 50 ≤ conv3 200 (fun _ => 4) (fun _ => 1) (fun _ => 1) 200 := by
+  have hcard : ((range 200).filter (fun n => 200 ≤ 10 * n ∧ 5 * n ≤ 2 * 200)).card = 61 := by decide
+  have hmass : (1 : ℝ) * 200 ≤ ∑ n ∈ (range 200).filter
+      (fun n => 200 ≤ 10 * n ∧ 5 * n ≤ 2 * 200), (4 : ℝ) := by
+    simp only [sum_const, hcard, nsmul_eq_mul]
+    norm_num
+  simpa only [one_pow] using ternary_dense_lower 200 (by decide) (fun _ => 4) (fun _ => 1) (fun _ => 1)
+    (by norm_num : (0 : ℝ) ≤ 1) (fun _ => by norm_num) (fun _ => by norm_num)
+    (fun _ => by norm_num) (fun _ _ _ => le_rfl) (fun _ _ _ => le_rfl) hmass
+
+example : (1 : ℝ) ≤ ∑ n ∈ half 12, (1 : ℝ) := by
+  let ψ : ℤ → ℝ := fun n => if n = 5 then 1 else 0
+  have hψ : ∀ n : ℕ, n < 12 → ψ n ≤ 1 := by
+    intro n hn
+    dsimp [ψ]
+    split_ifs <;> norm_num
+  have htail : ∀ n : ℕ, n < 12 → n ∉ half 12 → ψ n ≤ 0 := by
+    intro n hn hout
+    by_cases he : n = 5
+    · subst n
+      exact (hout (by norm_num [half])).elim
+    · have he' : (n : ℤ) ≠ 5 := by exact_mod_cast he
+      simp [ψ, he']
+  have hmass : ∑ n ∈ range 12, (1 : ℝ) ≤ 1 * 12 := by norm_num
+  have hlower : (1 : ℝ) + 0 * (1 : ℝ) ^ 2 * 1 * 12 ≤
+      ∑ n ∈ range 12, (1 : ℝ) * 1 * ψ n := by
+    norm_num [ψ, sum_range_succ]
+    exact ⟨5, by norm_num⟩
+  simpa only [one_mul] using half_interval_lower_of_bump 12 1 (fun _ => 1) (fun _ => 1) ψ 0
+    (by norm_num : (0 : ℝ) ≤ 0) (fun _ => by norm_num) (fun _ => by norm_num)
+    fourierComplexity_one hψ htail hmass (by simpa using hlower)
+
 end Teravainen2016_chiExists
 
 /-- LEAF. Page 6, the cutoff existence quoted from Matomaki and Shao Lemma 3.1.
@@ -1534,7 +1779,15 @@ theorem paper_half_interval_input : Prop32Half := by sorry
 /-- LEAF. Page 9, Proposition 3.3, and pages 13 to 17, its restriction argument.
 CONDITIONAL ON the reconstructed bounded shift and changed scale restriction input.
 This avoids assuming unrestricted uniformity in all integer shifts. -/
-theorem paper_cross_scale_restriction_input : Prop33Cross := by sorry
+theorem paper_cross_scale_restriction_input : Prop33Cross := by
+  obtain ⟨c, hc, hdom⟩ := paper_enveloping_domination_input
+  obtain ⟨κ, hκ, hmean⟩ := paper_enveloping_mean_input
+  obtain ⟨A, D, hAD, hfourier⟩ := paper_enveloping_fourier_input
+  apply cross_scale_of_enveloping c κ hc hκ hdom hmean
+  intro r hr
+  obtain ⟨C, hC, H⟩ := paper_enveloping_restriction_input A D hAD r hr
+  exact ⟨C, hC, fun J w hJ hw b hb hbW hamen M hM =>
+    H J w hJ hw b hb hbW hamen M hM (hfourier J w hJ hw b hb hbW hamen M hM)⟩
 
 /-- LEAF. Pages 9 to 12, the ternary deduction in Remark 3.6.
 CONDITIONAL ON the cited Matomaki and Shao Theorem 2.3. -/
@@ -1561,5 +1814,6 @@ theorem paper_dyadic_approximation_input (ξ : ℝ) (hξ : Irrational ξ) (hξ0 
       InP p ∧ distInt (ξ * p + κ) ≤ (N : ℝ) ^ (-θ) / 2 := by sorry
 
 #print axioms paper_smooth_cutoff_input
+#print axioms paper_cross_scale_restriction_input
 
 end LeanLab.Teravainen2016
