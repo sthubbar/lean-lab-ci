@@ -5,8 +5,12 @@ distribution condition for the normalized coefficient at the slack density, and 
 that distribution condition to the short mean square condition for the same rescaling and the same
 slack density. The new file imports only LeanLab.BHP1997.UpperShortC165Leaves, adds no definition,
 and leaves the sealed statement untouched. The assembly
-`upper_normalized_raw_conditions_slack_split` has the statement of the target verbatim and is proved
-from the two leaves with no sorry.
+`upper_normalized_raw_conditions_slack_split` has the statement of the target verbatim. Since
+2026-11-21 it is proved by `upslack_route` of Prep1121UpslackRoute, which follows the paper's own
+route for b1 on page 53, and no longer uses the two leaves below.
+QUESTION, audit burst-20261122 unit P1122-0104: the transfer leaf
+`upper_slack_split_mean_square_transfer` is unfaithful to P0069 and is kept only as history; no
+declaration in the lab uses it. See notes/burst-20261122/BHP1997-0104.md.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.UpperShortC165Leaves
@@ -43,7 +47,11 @@ second moment over the second-moment-exceptional characters is bounded by the sa
 exceptional characters being the ones where a windowed sum is atypically large, and their number is
 then bounded by a saving in the modulus. This leaf keeps the rescaling fixed by taking it as an
 argument, so it asks for the transfer only and never for the existence of the rescaling, which is
-what makes it weaker than the target. -/
+what makes it weaker than the target. QUESTION, audit burst-20261122 unit P1122-0104: unfaithful.
+It derives page 3 condition iv, display 1.9 at every modulus up to Q, from condition iii, display 1.8
+at moduli up to a power of log x only, for an arbitrary `lam`. P0069 never argues this way: 1.9 for
+b1 comes from Lemma 29 on page 43 applied to 5.1 and 5.2, see page 53. Superseded by
+`upslack_route`; no caller. Do not prove; do not route through it. -/
 theorem upper_slack_split_mean_square_transfer
     {ω : ℝ → ℝ} {ε δ : ℝ} (hδ : 0 < δ) (lam : ℝ → ℕ → ℝ)
     (hdist : Task308.ShortDistribution ε
@@ -54,12 +62,10 @@ theorem upper_slack_split_mean_square_transfer
           upperDeletedIntegral ω ε + δ) (upperNormCoeff ε lam) := by
   sorry
 
-/-- The target `upper_normalized_raw_conditions_slack` of UpperShortC165Leaves, verbatim,
-assembled from the two leaves. Take the rescaling, its bound, its eventual lower bound on the right
-interval and the short distribution condition at the slack density from the first leaf, and get the
-short mean square condition for that same rescaling and the same slack density from the transfer
-leaf applied to that distribution condition. No other input is used and the target declaration is
-not used. -/
+/-- The target `upper_normalized_raw_conditions_slack` of UpperShortC165Leaves, verbatim. Rerouted
+to `upslack_route` of Prep1121UpslackRoute, the page 53 route through Lemmas 29, 33 and 34; the two
+leaves above are no longer used, see the QUESTION in the file header. The target declaration is not
+used. -/
 theorem upper_normalized_raw_conditions_slack_split
     (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) {ω : ℝ → ℝ}
     (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
