@@ -18,12 +18,12 @@ Proved here, with no sorry of their own:
 * arcPairs_sum_le: the sum over q at most P and a of |S(q, a)|/phi(q).
 * S2star_M0_L1_of_pieces: the exact statement of S2star_M0_L1.
 
-Open LEAF pieces, both classical facts about the sum of display 8 that the paper
-uses without proof on page 6:
-* complete_gauss_coprime, HARD: the complete quadratic Gauss sum with coprime
+Pieces on the sum of display 8, which the paper uses without proof on page 6,
+all three PROVED by workflow provers of session S37:
+* complete_gauss_coprime, PROVED: the complete quadratic Gauss sum with coprime
   coefficient has modulus at most (2m)^(1/2).
-* complete_gauss_gcd, MEDIUM: removing the common factor of coefficient and modulus.
-* gaussS_moebius, MEDIUM: Moebius inversion of the condition (x, q) = 1 in display 8.
+* complete_gauss_gcd, PROVED: removing the common factor of coefficient and modulus.
+* gaussS_moebius, PROVED: Moebius inversion of the condition (x, q) = 1 in display 8.
 
 AI wrote the Lean code. Binary Goldbach is open.
 -/
@@ -38,33 +38,232 @@ attribute [local instance] Classical.propDecidable
 
 /-! ## The sum S(q, a) of display 8 -/
 
-/-- LEAF: P0088 page 3 display 8 as used on page 6 displays 24 and 26, the complete
+/-! Helpers for complete_gauss_coprime, proved by a workflow prover of session S37. -/
+
+theorem sum_range_zmod_gc (m : ℕ) [NeZero m] (f : ZMod m → ℂ) :
+    ∑ a ∈ Finset.range m, f (a : ZMod m) = ∑ a : ZMod m, f a := by
+  apply Finset.sum_bij (s := Finset.range m) (t := (Finset.univ : Finset (ZMod m))) (fun a _ => (a : ZMod m))
+  · intro a ha; exact Finset.mem_univ _
+  · intro a ha b hb hab
+    have h := congrArg ZMod.val hab
+    simpa [ZMod.val_natCast, Nat.mod_eq_of_lt (Finset.mem_range.mp ha),
+      Nat.mod_eq_of_lt (Finset.mem_range.mp hb)] using h
+  · intro a ha
+    exact ⟨a.val, Finset.mem_range.mpr (ZMod.val_lt a), ZMod.natCast_zmod_val a⟩
+  · intro a ha; rfl
+
+theorem card_two_kernel_gc (m : ℕ) [NeZero m] :
+    (Finset.univ.filter (fun h : ZMod m => 2 * h = 0)).card ≤ 2 := by
+  have hsub : Finset.univ.filter (fun h : ZMod m => 2 * h = 0) ⊆ {0, ((m/2 : ℕ) : ZMod m)} := by
+    intro h hh
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hh
+    have h1 : m ∣ 2 * h.val := by
+      rw [← ZMod.natCast_eq_zero_iff]; push_cast; rw [ZMod.natCast_zmod_val]; exact hh
+    have hlt := ZMod.val_lt h
+    obtain ⟨k, hk⟩ := h1
+    have hk2 : k < 2 := by
+      by_contra hc
+      push Not at hc
+      nlinarith
+    interval_cases k
+    · have : h.val = 0 := by omega
+      rw [ZMod.val_eq_zero] at this
+      simp [this]
+    · have : h.val = m / 2 := by omega
+      have h2 : h = ((m/2 : ℕ) : ZMod m) := by
+        rw [← this, ZMod.natCast_zmod_val]
+      simp [h2]
+  calc _ ≤ ({0, ((m/2 : ℕ) : ZMod m)} : Finset (ZMod m)).card := Finset.card_le_card hsub
+    _ ≤ 2 := Finset.card_le_two
+
+/-- PROVED. P0088 page 3 display 8 as used on page 6 displays 24 and 26, the complete
 quadratic Gauss sum. For m at least one and c coprime to m the sum over y modulo m
-of e(c y^2 / m) has modulus at most (2m)^(1/2); its square modulus is 0, m or 2m.
-Class HARD. -/
+of e(c y^2 / m) has modulus at most (2m)^(1/2), by Weyl differencing: the square
+modulus is a sum over h of e(c h^2/m) times a complete linear sum that vanishes
+unless m divides 2h. -/
 theorem complete_gauss_coprime (m c : ℕ) (hm : 1 ≤ m) (hc : Nat.Coprime c m) :
     ‖∑ y ∈ Finset.range m, U1534.ee (((c * y ^ 2 : ℕ) : ℝ) / (m : ℝ))‖ ≤
       Real.sqrt (2 * m) := by
-  sorry
+  have : NeZero m := ⟨by omega⟩
+  set ψ := (ZMod.stdAddChar (N := m)) with hψ
+  have std_int (a : ℤ) : U1534.ee ((a : ℝ) / m) = ψ (a : ZMod m) := by
+    rw [hψ, ZMod.stdAddChar_coe]
+    unfold U1534.ee
+    congr 1
+    push_cast
+    ring
+  have std_nat (a : ℕ) : U1534.ee ((a : ℝ) / m) = ψ (a : ZMod m) := by
+    simpa using std_int (a : ℤ)
+  set c' : ZMod m := (c : ZMod m) with hc'
+  have hG : ∑ y ∈ Finset.range m, U1534.ee (((c * y ^ 2 : ℕ) : ℝ) / (m : ℝ)) =
+      ∑ x : ZMod m, ψ (c' * x ^ 2) := by
+    simp_rw [std_nat]
+    push_cast
+    exact sum_range_zmod_gc m (fun a => ψ (c' * a ^ 2))
+  rw [hG]
+  set G := ∑ x : ZMod m, ψ (c' * x ^ 2) with hGdef
+  have hconj : (starRingEnd ℂ) G = ∑ y : ZMod m, ψ (-(c' * y ^ 2)) := by
+    rw [hGdef, map_sum]
+    simp_rw [AddChar.map_neg_eq_conj]
+  have hprod : G * (starRingEnd ℂ) G =
+      ∑ h : ZMod m, ψ (c' * h ^ 2) * ∑ y : ZMod m, ψ (y * (2 * c' * h)) := by
+    rw [hconj, hGdef, Finset.sum_mul_sum]
+    simp_rw [Finset.mul_sum]
+    conv_lhs => rw [Finset.sum_comm]
+    conv_rhs => rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun y _ => ?_)
+    rw [← Equiv.sum_comp (Equiv.addRight y)]
+    refine Finset.sum_congr rfl (fun h _ => ?_)
+    simp only [Equiv.coe_addRight]
+    rw [← AddChar.map_add_eq_mul, ← AddChar.map_add_eq_mul]
+    congr 1
+    ring
+  have hprim := ZMod.isPrimitive_stdAddChar m
+  have hprod2 : G * (starRingEnd ℂ) G =
+      ∑ h : ZMod m, ψ (c' * h ^ 2) * (if 2 * h = 0 then (m : ℂ) else 0) := by
+    rw [hprod]
+    refine Finset.sum_congr rfl (fun h _ => ?_)
+    rw [AddChar.sum_mulShift _ hprim, ZMod.card]
+    have hu : IsUnit c' := (ZMod.isUnit_iff_coprime c m).mpr hc
+    have : (2 * c' * h = 0) ↔ (2 * h = 0) := by
+      rw [show 2 * c' * h = c' * (2 * h) by ring]
+      exact hu.mul_right_eq_zero
+    simp only [this]
+    push_cast
+    rfl
+  have hnorm : ‖G‖ ^ 2 ≤ 2 * m := by
+    have e1 : ‖G‖ ^ 2 = ‖G * (starRingEnd ℂ) G‖ := by
+      rw [norm_mul, RCLike.norm_conj, sq]
+    rw [e1, hprod2]
+    refine (norm_sum_le _ _).trans ?_
+    calc ∑ h : ZMod m, ‖ψ (c' * h ^ 2) * (if 2 * h = 0 then (m : ℂ) else 0)‖
+        = ∑ h : ZMod m, (if 2 * h = 0 then (m : ℝ) else 0) := by
+          refine Finset.sum_congr rfl (fun h _ => ?_)
+          rw [norm_mul, hψ, ZMod.stdAddChar_apply, Circle.norm_coe, one_mul]
+          split_ifs <;> simp
+      _ = ((Finset.univ.filter (fun h : ZMod m => 2 * h = 0)).card : ℝ) * m := by
+          rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul]
+      _ ≤ 2 * m := by
+          have := card_two_kernel_gc m
+          have h2 : ((Finset.univ.filter (fun h : ZMod m => 2 * h = 0)).card : ℝ) ≤ 2 := by
+            exact_mod_cast this
+          nlinarith [(Nat.cast_nonneg m : (0:ℝ) ≤ m)]
+  exact Real.le_sqrt_of_sq_le hnorm
 
-/-- LEAF: P0088 page 3 display 8 as used on page 6, the common factor step for the
+/-! Helpers for complete_gauss_gcd, proved by a workflow prover of session S37. -/
+
+lemma ee_add_nat_gcd (x : ℝ) (N : ℕ) : U1534.ee (x + N) = U1534.ee x := by
+  unfold U1534.ee
+  have : (2 * (Real.pi : ℂ) * Complex.I * ((x + N : ℝ) : ℂ)) =
+      2 * Real.pi * Complex.I * (x : ℂ) + (N : ℤ) * (2 * Real.pi * Complex.I) := by
+    push_cast; ring
+  rw [this, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+lemma ee_period_gcd (c' n k y : ℕ) (hn : 0 < n) :
+    U1534.ee (((c' * (n * k + y) ^ 2 : ℕ) : ℝ) / (n : ℝ)) =
+      U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ)) := by
+  have hn' : (n : ℝ) ≠ 0 := by exact_mod_cast hn.ne'
+  have : ((c' * (n * k + y) ^ 2 : ℕ) : ℝ) / (n : ℝ) =
+      ((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ) + ((c' * (n * k ^ 2 + 2 * k * y) : ℕ) : ℝ) := by
+    push_cast; field_simp; ring
+  rw [this, ee_add_nat_gcd]
+
+lemma sum_blocks_gcd (c' n : ℕ) (hn : 0 < n) (g : ℕ) :
+    (∑ y ∈ Finset.range (n * g), U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ))) =
+      (g : ℂ) * ∑ y ∈ Finset.range n, U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ)) := by
+  induction g with
+  | zero => simp
+  | succ k ih =>
+    rw [Nat.mul_succ, Finset.sum_range_add, ih]
+    simp_rw [ee_period_gcd c' n k _ hn]
+    push_cast; ring
+
+/-- PROVED. P0088 page 3 display 8 as used on page 6, the common factor step for the
 complete quadratic sum. With g = (c, m), each term e(c y^2 / m) equals
 e((c/g) y^2 / (m/g)), which has period m/g in y, so the sum over y modulo m is g
-times the sum over y modulo m/g. Class MEDIUM. -/
+times the sum over y modulo m/g. -/
 theorem complete_gauss_gcd (m c : ℕ) (hm : 1 ≤ m) :
     (∑ y ∈ Finset.range m, U1534.ee (((c * y ^ 2 : ℕ) : ℝ) / (m : ℝ))) =
       (Nat.gcd c m : ℂ) * ∑ y ∈ Finset.range (m / Nat.gcd c m),
         U1534.ee ((((c / Nat.gcd c m) * y ^ 2 : ℕ) : ℝ) / ((m / Nat.gcd c m : ℕ) : ℝ)) := by
-  sorry
+  set g := Nat.gcd c m with hg
+  have hgpos : 0 < g := Nat.gcd_pos_of_pos_right _ hm
+  have hm' : m = (m / g) * g := (Nat.div_mul_cancel (Nat.gcd_dvd_right c m)).symm
+  have hc' : c = (c / g) * g := (Nat.div_mul_cancel (Nat.gcd_dvd_left c m)).symm
+  have hnpos : 0 < m / g := Nat.div_pos (Nat.gcd_le_right _ hm) hgpos
+  rw [← sum_blocks_gcd (c / g) (m / g) hnpos g, ← hm']
+  apply Finset.sum_congr rfl
+  intro y _
+  congr 1
+  have hg' : (g : ℝ) ≠ 0 := by exact_mod_cast hgpos.ne'
+  conv_lhs => rw [hc', hm']
+  push_cast
+  field_simp
 
-/-- LEAF: P0088 page 3 display 8, the reduced sum S(q, a) by Moebius inversion of
+/-! Helpers for gaussS_moebius, proved by a workflow prover of session S37. -/
+
+theorem moebius_sum_divisors_complex (n : ℕ) (_hn : 1 ≤ n) :
+    ∑ d ∈ n.divisors, ((ArithmeticFunction.moebius d : ℤ) : ℂ) = if n = 1 then 1 else 0 := by
+  have h := congrArg (fun f : ArithmeticFunction ℤ => f n) ArithmeticFunction.moebius_mul_coe_zeta
+  simp only [ArithmeticFunction.coe_mul_zeta_apply, ArithmeticFunction.one_apply] at h
+  rw [← Int.cast_sum, h]
+  split_ifs <;> simp
+
+theorem filter_dvd_range_eq (a q d : ℕ) (hd : d ∣ q) (hd0 : 0 < d) :
+    ∑ x ∈ (Finset.range q).filter (fun x => d ∣ x), (fun x => U1534.ee (((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ))) x
+      = ∑ y ∈ Finset.range (q / d), U1534.ee ((((a * d) * y ^ 2 : ℕ) : ℝ) / ((q / d : ℕ) : ℝ)) := by
+  obtain ⟨k, rfl⟩ := hd
+  rw [Nat.mul_div_cancel_left k hd0]
+  symm
+  refine Finset.sum_nbij' (fun y => d * y) (fun x => x / d) ?_ ?_ ?_ ?_ ?_
+  · intro y hy
+    simp only [Finset.mem_filter, Finset.mem_range] at hy ⊢
+    exact ⟨Nat.mul_lt_mul_of_pos_left hy hd0, dvd_mul_right _ _⟩
+  · intro x hx
+    simp only [Finset.mem_filter, Finset.mem_range] at hx ⊢
+    exact Nat.div_lt_of_lt_mul hx.1
+  · intro y _
+    simp [Nat.mul_div_cancel_left y hd0]
+  · intro x hx
+    simp only [Finset.mem_filter, Finset.mem_range] at hx
+    exact Nat.mul_div_cancel' hx.2
+  · intro y hy
+    simp only [Finset.mem_range] at hy
+    have hk : 0 < k := by omega
+    congr 1
+    push_cast
+    field_simp
+
+/-- PROVED. P0088 page 3 display 8, the reduced sum S(q, a) by Moebius inversion of
 the condition (x, q) = 1: the residues x = d y with d dividing q give
 S(q, a) = sum over d dividing q of mu(d) times the complete sum over y modulo q/d
-of e(a d y^2 / (q/d)). Class MEDIUM. -/
+of e(a d y^2 / (q/d)). -/
 theorem gaussS_moebius (q a : ℕ) (hq : 1 ≤ q) :
     U1534.gaussS q a = ∑ d ∈ q.divisors, ((ArithmeticFunction.moebius d : ℤ) : ℂ) *
       ∑ y ∈ Finset.range (q / d), U1534.ee ((((a * d) * y ^ 2 : ℕ) : ℝ) / ((q / d : ℕ) : ℝ)) := by
-  sorry
+  unfold U1534.gaussS
+  rw [Finset.sum_filter]
+  have step : ∀ x ∈ Finset.range q,
+      (if Nat.Coprime x q then U1534.ee (((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ)) else 0)
+        = ∑ d ∈ q.divisors, (if d ∣ x then ((ArithmeticFunction.moebius d : ℤ) : ℂ) *
+            U1534.ee (((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ)) else 0) := by
+    intro x _
+    rw [← Finset.sum_filter, ← Finset.sum_mul]
+    have hfil : q.divisors.filter (fun d => d ∣ x) = (Nat.gcd x q).divisors := by
+      ext d
+      simp only [Finset.mem_filter, Nat.mem_divisors, Nat.dvd_gcd_iff]
+      constructor
+      · rintro ⟨⟨h1, h2⟩, h3⟩; exact ⟨⟨h3, h1⟩, Nat.gcd_pos_of_pos_right _ (by omega) |>.ne'⟩
+      · rintro ⟨⟨h3, h1⟩, _⟩; exact ⟨⟨h1, by omega⟩, h3⟩
+    rw [hfil, moebius_sum_divisors_complex _ (Nat.gcd_pos_of_pos_right _ (by omega))]
+    unfold Nat.Coprime
+    split_ifs <;> simp
+  rw [Finset.sum_congr rfl step, Finset.sum_comm]
+  refine Finset.sum_congr rfl fun d hd => ?_
+  rw [← Finset.sum_filter, ← Finset.mul_sum]
+  congr 1
+  have hd' := Nat.mem_divisors.mp hd
+  exact filter_dvd_range_eq a q d hd'.1 (Nat.pos_of_mem_divisors hd)
 
 /-- PROVED. P0088 page 3 display 8, the complete quadratic sum with any coefficient:
 modulus at most (2 m (c, m))^(1/2), from complete_gauss_gcd and complete_gauss_coprime. -/
@@ -463,8 +662,8 @@ theorem eventually_small (B : ℝ) :
 
 /-- The exact statement of Prep1121DKLMajorCut.S2star_M0_L1, P0088 page 6 display 26
 second factor, from S2star_norm_le_on_M0, T2_arc_integral, arcPairs_sum_le,
-gaussS_norm_le and log_one_add_cube_le. No sorry of its own; it rests on the three
-LEAF pieces for the sum of display 8 through gaussS_norm_le. -/
+gaussS_norm_le and log_one_add_cube_le. No sorry anywhere: PROVED,
+CONDITIONAL ON T2BoundProp, display 22 for T2. -/
 theorem S2star_M0_L1_of_pieces (h2 : T2BoundProp) :
     ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
       ∃ C X0 : ℝ, 0 < C ∧ ∀ X H : ℝ, X0 ≤ X →
@@ -598,6 +797,9 @@ example : type_of% @S2star_M0_L1 := S2star_M0_L1_of_pieces
 
 end LeanLab.KumchevLiu2007.Prep1122S2starL1
 
+#print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.complete_gauss_coprime
+#print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.complete_gauss_gcd
+#print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.gaussS_moebius
 #print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.complete_gauss_le
 #print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.card_divisors_le_rpow
 #print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.gaussS_norm_le
