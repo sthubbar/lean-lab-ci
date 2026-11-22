@@ -18,6 +18,14 @@ proved splits. Result: `lemma9_of_theorem2_lemma4_wired` is CONDITIONAL ON `Theo
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 
+/-!
+2026-11-22 addition, same file and same unit. The section "Sharp Erdos-Turan from Selberg's
+majorant" below discharges the Erdos-Turan input of this file: `Lemma4` is proved from the cited
+Karatsuba input alone, through the one-sided Beurling-Selberg majorant of `Selberg524`, and the
+single-wall wires `lemma9_of_karacuba` and `parity_gap_of_karacuba` are the result. The earlier
+two-wall wires of this file are kept unchanged.
+-/
+
 namespace LeanLab.ExceptionalSet.Prep1121Lemma9Wire
 
 open Real Finset Filter
