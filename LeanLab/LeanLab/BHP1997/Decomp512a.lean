@@ -459,20 +459,97 @@ theorem divisor_tail_moment_split512 (ε D x : ℝ)
   nlinarith [sq_nonneg (smallDivisorTail512 (Real.log x ^ (2 * D)) N -
     largeDivisorTail512 (Real.log x ^ (2 * D)) N)]
 
+/-- LEAF. Vaughan, The Hardy-Littlewood Method, 1981, chapter 3, book p. 34 display 3.23,
+with the convergent series 3.24 and its Euler product 3.26, copies/Vaughan1981-ch3.pdf pdf p. 9.
+Printed 3.23: the sum over X < q <= Y of mu(q)^2/phi(q)^2 times the sum over reduced a of
+e(-am/q) is << the sum over d | m of mu(d)^2/phi(d) min(d/X, 1). Here X = P, Y tends to infinity,
+m = N even, c_q(-N) is ramanujan512 q N, and sing (N/2) is the product 3.26 at m = N, so the
+left side is the tail of 3.24 beyond P. The weight drops mu(d)^2, which only enlarges the bound.
+Elementary: Ramanujan sum divisor formula, multiplicativity and the Euler product, and the
+tail bound on phi(q)^-2. Not yet formalized. OPEN. REREAD U-1740 2026-11-21. -/
+theorem leaf_vaughan_singular_tail512 :
+    ∃ C₀ : ℝ, 0 ≤ C₀ ∧ ∀ N : ℕ, 0 < N → Even N → ∀ P : ℝ, 1 ≤ P →
+      ‖(∑ q ∈ Finset.Icc 1 ⌊P⌋₊,
+          (ArithmeticFunction.moebius q : ℂ) ^ 2 / (Nat.totient q : ℂ) ^ 2 * ramanujan512 q N) -
+        (sing (N / 2) : ℂ)‖ ≤
+        C₀ * ∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) * min ((d : ℝ) / P) 1 := by
+  sorry
+
 /-- LEAF. P0069 page 8 display 2.7, using Vaughan reference 31 display 3.23.
-QUESTION: the printed center in 2.7 has log x squared. This leaf retains log x
- times log Y from the sealed target 2.2 and the preceding exact model 2.6.
-It is a normalized reading of that chain, not a literal transcription of 2.7.
-The actual truncated singular series error is reduced to the two divisor moments.
-Retain the harmless nonnegative H Y squared logarithmic error term printed in 2.7.
-The small epsilon and large internal arc parameter conventions are unchanged. OPEN. -/
+ANSWER to the earlier QUESTION, REREAD U-1740 2026-11-21: the printed center of 2.7 is
+uvY/L^2 S(2n), with L squared. The line above 2.7 has uv/(LL') times the truncated series, and
+2.2 on page 6 has uvY/(LL'). Since L' = log Y = (11/20 + eps) L, the two centers differ by a
+main term sized factor, so L^2 in 2.7 is a misprint for LL'. This leaf keeps LL', the reading
+under which 2.6, 2.7 and 2.2 agree. The H Y squared logarithmic term printed in 2.7 is kept.
+PROVED 2026-11-21 from leaf_vaughan_singular_tail512, Vaughan 3.23, which is the one open input. -/
 theorem leaf_vaughan_tail_reduction512 :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∀ u v : ℝ,
       ∀ A : ℝ, 0 < A → ∃ D₀ : ℝ, ∀ D : ℝ, D₀ ≤ D →
         ∃ C : ℝ, ∀ x : ℝ, C ≤ x →
           seriesError512 ε D x u v ≤ C * (scale512 ε A x + length512 ε x ^ 2 *
             divisorTailMoment512 ε D x) := by
-  sorry
+  obtain ⟨C₀, hC₀, hT⟩ := leaf_vaughan_singular_tail512
+  refine ⟨1, one_pos, fun ε hε _ u v A _ => ⟨1, fun D hD => ?_⟩⟩
+  set K : ℝ := (u * v) ^ 2 * C₀ ^ 2 with hK
+  refine ⟨max (Real.exp 2) K, fun x hx => ?_⟩
+  have hx2 : Real.exp 2 ≤ x := le_trans (le_max_left _ _) hx
+  have hKC : K ≤ max (Real.exp 2) K := le_max_right _ _
+  have hx0 : 0 < x := lt_of_lt_of_le (Real.exp_pos 2) hx2
+  have hL : 2 ≤ Real.log x := by
+    rw [← Real.log_exp 2]; exact Real.log_le_log (Real.exp_pos 2) hx2
+  have hY0 : 0 < length512 ε x := by unfold length512; positivity
+  have hL' : 1 ≤ Real.log (length512 ε x) := by
+    unfold length512; rw [Real.log_rpow hx0]; nlinarith
+  have hP : 1 ≤ Real.log x ^ (2 * D) :=
+    Real.one_le_rpow (by linarith) (by linarith)
+  have hLL : 1 ≤ Real.log x * Real.log (length512 ε x) := by nlinarith
+  have hc : ‖((u : ℂ) * v * (length512 ε x : ℂ) /
+      ((Real.log x : ℂ) * (Real.log (length512 ε x) : ℂ)))‖ ≤ |u * v| * length512 ε x := by
+    have : ((u : ℂ) * v * (length512 ε x : ℂ) /
+        ((Real.log x : ℂ) * (Real.log (length512 ε x) : ℂ))) =
+        ((u * v * length512 ε x / (Real.log x * Real.log (length512 ε x)) : ℝ) : ℂ) := by
+      push_cast; ring
+    rw [this, Complex.norm_real, Real.norm_eq_abs, abs_div, abs_mul (u * v),
+      abs_of_pos hY0, abs_of_pos (show (0 : ℝ) < Real.log x * Real.log (length512 ε x) by linarith)]
+    exact div_le_self (by positivity) hLL
+  have hterm : ∀ N ∈ frequencies512 ε x,
+      ‖truncatedMain512 ε D x u v N - expected512 ε x u v N‖ ^ 2 ≤
+        K * (length512 ε x ^ 2 * (∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
+          min ((d : ℝ) / Real.log x ^ (2 * D)) 1) ^ 2) := by
+    intro N hN
+    unfold frequencies512 at hN
+    rw [Finset.mem_filter, Finset.mem_Icc] at hN
+    have hN0 : 0 < N := lt_of_lt_of_le (Nat.ceil_pos.mpr hx0) hN.1.1
+    have hTN := hT N hN0 hN.2 _ hP
+    have heq : truncatedMain512 ε D x u v N - expected512 ε x u v N =
+        ((u : ℂ) * v * (length512 ε x : ℂ) /
+          ((Real.log x : ℂ) * (Real.log (length512 ε x) : ℂ))) *
+        ((∑ q ∈ Finset.Icc 1 ⌊Real.log x ^ (2 * D)⌋₊,
+          (ArithmeticFunction.moebius q : ℂ) ^ 2 / (Nat.totient q : ℂ) ^ 2 *
+            ramanujan512 q N) - (sing (N / 2) : ℂ)) := by
+      unfold truncatedMain512 expected512; ring
+    rw [heq, norm_mul, mul_pow]
+    set T := ∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
+      min ((d : ℝ) / Real.log x ^ (2 * D)) 1
+    have h1 := pow_le_pow_left₀ (norm_nonneg _) hc 2
+    have h2 := pow_le_pow_left₀ (norm_nonneg _) hTN 2
+    calc _ ≤ (|u * v| * length512 ε x) ^ 2 * (C₀ * T) ^ 2 :=
+          mul_le_mul h1 h2 (by positivity) (by positivity)
+      _ = K * (length512 ε x ^ 2 * T ^ 2) := by
+          rw [hK, mul_pow, mul_pow, sq_abs]; ring
+  have hM : 0 ≤ length512 ε x ^ 2 * divisorTailMoment512 ε D x := by
+    unfold divisorTailMoment512; positivity
+  have hS := scale_nonneg512 ε A (show 1 ≤ x by linarith [Real.add_one_le_exp 2])
+  calc seriesError512 ε D x u v
+      ≤ ∑ N ∈ frequencies512 ε x, K * (length512 ε x ^ 2 *
+          (∑ d ∈ N.divisors, 1 / (Nat.totient d : ℝ) *
+            min ((d : ℝ) / Real.log x ^ (2 * D)) 1) ^ 2) := Finset.sum_le_sum hterm
+    _ = K * (length512 ε x ^ 2 * divisorTailMoment512 ε D x) := by
+        unfold divisorTailMoment512; rw [Finset.mul_sum, Finset.mul_sum]
+    _ ≤ max (Real.exp 2) K * (scale512 ε A x + length512 ε x ^ 2 *
+          divisorTailMoment512 ε D x) := by
+        have hK0 : 0 ≤ K := by rw [hK]; positivity
+        nlinarith
 
 /-- LEAF. P0069 page 8 display 2.8: the small-divisor mean square estimate on K.
 The uniform short interval divisor moment bound used by the paper is not supplied
