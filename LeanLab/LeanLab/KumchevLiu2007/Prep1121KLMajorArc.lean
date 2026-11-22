@@ -26,6 +26,7 @@ For epsilon above 7/18 the block range is empty and nothing is used.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.BlockInputs628
+import LeanLab.KumchevLiu2007.QuadraticEnergy674
 
 namespace LeanLab.KumchevLiu2007.Prep1121KLMajor
 
@@ -190,6 +191,62 @@ theorem roughCount_eq_major_add_minor (X Y H P : ℝ) (n : ℕ) :
   intro α _
   simp only [representationPolynomial_eq_prime_mul_rough]
 
+/-- Page 5 display 21: every shifted Fourier character is essentially bounded. -/
+theorem fourier_shift_memLp_top (k : ℤ) (c : ℝ) :
+    MemLp (fun α : ℝ => fourier k ((α - c : ℝ) : AddCircle (1 : ℝ))) ⊤ volume := by
+  apply memLp_top_of_bound (by fun_prop) 1
+  exact Filter.Eventually.of_forall (fun α => by simp [fourier_apply, Circle.norm_coe])
+
+/-- Page 5 display 21: the finite model sum T1 is essentially bounded. -/
+theorem T1_memLp_top (X Y c : ℝ) : MemLp (fun α => T1 X Y (α - c)) ⊤ volume := by
+  unfold T1
+  exact memLp_finsetSum _ (fun m _ => (fourier_shift_memLp_top (m : ℤ) c).const_mul _)
+
+/-- Page 5 display 21: the finite model sum T2 is essentially bounded. -/
+theorem T2_memLp_top (Y P c : ℝ) : MemLp (fun α => T2 Y P (α - c)) ⊤ volume := by
+  unfold T2
+  exact memLp_finsetSum _ (fun m _ => (fourier_shift_memLp_top ((m ^ 2 : ℕ) : ℤ) c).const_mul _)
+
+/-- Page 4 display 15: each closed major arc is measurable. -/
+theorem measurableSet_arc (R : ℝ) (v : ℕ × ℕ) : MeasurableSet (arc R v) := by
+  unfold arc
+  exact measurableSet_le (by fun_prop) measurable_const
+
+/-- Page 5 display 16: the piecewise model S1star is essentially bounded. -/
+theorem S1star_memLp_top (X Y H P : ℝ) : MemLp (S1star X Y H P) ⊤ volume := by
+  unfold S1star
+  exact memLp_finsetSum _ (fun v _ =>
+    ((T1_memLp_top X Y (v.2 / v.1)).const_mul _).indicator
+      (measurableSet_arc (H / P) v).nullMeasurableSet)
+
+/-- Page 5 display 17: the piecewise model S2star is essentially bounded. -/
+theorem S2star_memLp_top (Y H P : ℝ) : MemLp (S2star Y H P) ⊤ volume := by
+  unfold S2star
+  exact memLp_finsetSum _ (fun v _ =>
+    ((T2_memLp_top Y P (v.2 / v.1)).const_mul _).indicator
+      (measurableSet_arc (H / P) v).nullMeasurableSet)
+
+/-- Page 4 display 13: the prime sum is essentially bounded. -/
+theorem primeSum_memLp_top (X Y : ℝ) : MemLp (primeSum X Y) ⊤ volume := by
+  unfold primeSum
+  simpa only [sub_zero] using
+    memLp_finsetSum ((primeWindow X Y).filter Nat.Prime)
+      (fun m _ => fourier_shift_memLp_top (m : ℤ) 0)
+
+/-- Page 4 display 13: the rough sum is essentially bounded. -/
+theorem roughSum_memLp_top (Y P : ℝ) : MemLp (roughSum Y P) ⊤ volume := by
+  unfold roughSum
+  simpa only [sub_zero] using memLp_finsetSum (squareWindow Y)
+    (fun m _ => (fourier_shift_memLp_top ((m ^ 2 : ℕ) : ℤ) 0).const_mul
+      (roughWeight (Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ)) m))
+
+/-- Page 4 display 15: increasing H narrows the major arcs. -/
+theorem majorArcs_antitone {H K P : ℝ} (hH : 0 < H) (hP : 0 < P) (hHK : H ≤ K) :
+    majorArcs K P ⊆ majorArcs H P := by
+  rintro α ⟨q, hq, hqP, a, hcop, hα⟩
+  exact ⟨q, hq, hqP, a, hcop, hα.trans
+    (inv_anti₀ (div_pos hH hP) (div_le_div_of_nonneg_right hHK hP.le))⟩
+
 /-- LEAF: P0088 page 7 display 28, the four term identity. In the block range M0 lies in
 M since Q0 = Y P^(-3) is at least Q = H/P, and every integrand is bounded and
 measurable on the period, so the integral splits over M0 and M minus M0. -/
@@ -202,12 +259,194 @@ theorem major_decomp :
           termB X (windowY X ε) H (Real.log X ^ B) n +
           termC X (windowY X ε) H (Real.log X ^ B) n +
           termD X (windowY X ε) H (Real.log X ^ B) n := by
-  sorry
+  intro B hB ε hε hε'
+  refine ⟨3, ?_⟩
+  intro X H hX hlo hhi n
+  let Y := windowY X ε
+  let P := Real.log X ^ B
+  have hX0 : 0 < X := by linarith
+  have hL1 : 1 ≤ Real.log X := by
+    rw [Real.le_log_iff_exp_le hX0]
+    exact Real.exp_one_lt_three.le.trans hX
+  have hP1 : 1 ≤ P := Real.one_le_rpow hL1 hB.le
+  have hP : 0 < P := by linarith
+  have hY : 0 < Y := Real.rpow_pos_of_pos hX0 _
+  have hH : 0 < H := lt_of_lt_of_le (mul_pos
+    (Real.rpow_pos_of_pos hX0 _) (zpow_pos hP _)) hlo
+  have hHK : H ≤ Y * P ^ (-2 : ℤ) := hhi.trans
+    (mul_le_mul_of_nonneg_left (zpow_le_zpow_right₀ hP1 (by norm_num)) hY.le)
+  have hsub : majorArcs (Y * P ^ (-2 : ℤ)) P ⊆ majorArcs H P :=
+    majorArcs_antitone hH hP hHK
+  let e : ℝ → ℂ := fun α => fourier (-(n : ℤ)) (α : AddCircle (1 : ℝ))
+  let p : ℝ → ℂ := primeSum X Y
+  let r : ℝ → ℂ := roughSum Y P
+  let s : ℝ → ℂ := S1star X Y H P
+  let t : ℝ → ℂ := S2star Y H P
+  let M := Set.Ioc (0 : ℝ) 1 ∩ majorArcs H P
+  let M0 := Set.Ioc (0 : ℝ) 1 ∩ majorArcs (Y * P ^ (-2 : ℤ)) P
+  have he : MemLp e ⊤ volume := by
+    simpa only [sub_zero] using fourier_shift_memLp_top (-(n : ℤ)) 0
+  have hp : MemLp p ⊤ volume := primeSum_memLp_top X Y
+  have hr : MemLp r ⊤ volume := roughSum_memLp_top Y P
+  have hs : MemLp s ⊤ volume := S1star_memLp_top X Y H P
+  have ht : MemLp t ⊤ volume := S2star_memLp_top Y H P
+  have hint (f : ℝ → ℂ) (hf : MemLp f ⊤ volume) (U : Set ℝ)
+      (hU : U ⊆ Set.Ioc (0 : ℝ) 1) : IntegrableOn f U := by
+    have hper : IntegrableOn f (Set.Ioc (0 : ℝ) 1) :=
+      MemLp.integrable (by simp) (hf.mono_measure Measure.restrict_le_self)
+    exact hper.mono_set hU
+  have hB : IntegrableOn (fun α => e α * (p α * (r α - t α))) M :=
+    hint _ (he.mul (r := ⊤) (hp.mul (r := ⊤) (hr.sub ht))) _ Set.inter_subset_left
+  have hpt : IntegrableOn (fun α => e α * (p α * t α)) M :=
+    hint _ (he.mul (r := ⊤) (hp.mul (r := ⊤) ht)) _ Set.inter_subset_left
+  have hst : IntegrableOn (fun α => e α * (s α * t α)) M0 :=
+    hint _ (he.mul (r := ⊤) (hs.mul (r := ⊤) ht)) _ Set.inter_subset_left
+  have hD : IntegrableOn (fun α => e α * ((p α - s α) * t α)) M0 :=
+    hint _ (he.mul (r := ⊤) ((hp.sub hs).mul (r := ⊤) ht)) _ Set.inter_subset_left
+  have hsplit := integral_inter_add_sdiff
+    (measurableSet_majorArcs (Y * P ^ (-2 : ℤ)) P) hpt
+  have hset0 : M ∩ majorArcs (Y * P ^ (-2 : ℤ)) P = M0 := by
+    ext α
+    constructor
+    · exact fun h => ⟨h.1.1, h.2⟩
+    · exact fun h => ⟨⟨h.1, hsub h.2⟩, h.2⟩
+  have hsetC : M \ majorArcs (Y * P ^ (-2 : ℤ)) P =
+      Set.Ioc (0 : ℝ) 1 ∩ (majorArcs H P \ majorArcs (Y * P ^ (-2 : ℤ)) P) := by
+    ext α
+    simp only [M, Set.mem_sdiff, Set.mem_inter_iff]
+    tauto
+  rw [hset0, hsetC] at hsplit
+  change (∫ α in M, e α * (p α * r α)) =
+    (∫ α in M0, e α * (s α * t α)) +
+    (∫ α in M, e α * (p α * (r α - t α))) +
+    (∫ α in Set.Ioc (0 : ℝ) 1 ∩
+      (majorArcs H P \ majorArcs (Y * P ^ (-2 : ℤ)) P), e α * (p α * t α)) +
+    (∫ α in M0, e α * ((p α - s α) * t α))
+  have hfirst : (∫ α in M, e α * (p α * r α)) =
+      (∫ α in M, e α * (p α * (r α - t α))) +
+      (∫ α in M, e α * (p α * t α)) := by
+    rw [← integral_add hB hpt]
+    congr 1
+    ext α
+    ring
+  have hsecond : (∫ α in M0, e α * (p α * t α)) =
+      (∫ α in M0, e α * (s α * t α)) +
+      (∫ α in M0, e α * ((p α - s α) * t α)) := by
+    rw [← integral_add hst hD]
+    congr 1
+    ext α
+    ring
+  rw [hfirst, ← hsplit, hsecond]
+  ring
+
+/-- Page 6 display 22 for j equal to one: partial summation gives the
+geometric bound on any prime window whose lower endpoint is at least three. -/
+theorem T1_geometric_bound {X Y : ℝ} (hlo : 3 ≤ X - Y) (β : ℝ) :
+    ‖T1 X Y β‖ ≤ LeanLab.PNTPort.Vinogradov.G ((primeWindow X Y).card : ℝ) β := by
+  let L : ℕ := ⌈X - Y⌉₊
+  let N : ℕ := ⌈X⌉₊ - L
+  let w : ℕ → ℝ := fun j => 1 / Real.log ((L + j : ℕ) : ℝ)
+  have hL3 : (3 : ℝ) ≤ L := hlo.trans (Nat.le_ceil _)
+  have hLj (j : ℕ) : (3 : ℝ) ≤ (L + j : ℕ) := by
+    push_cast
+    exact hL3.trans (le_add_of_nonneg_right (Nat.cast_nonneg j))
+  have hlog (j : ℕ) : 1 ≤ Real.log ((L + j : ℕ) : ℝ) := by
+    rw [Real.le_log_iff_exp_le (by linarith [hLj j])]
+    exact Real.exp_one_lt_three.le.trans (hLj j)
+  have hw0 (j : ℕ) : 0 ≤ w j := by dsimp [w]; positivity
+  have hw : Antitone w := by
+    intro i j hij
+    apply one_div_le_one_div_of_le
+    · linarith [hlog i]
+    · apply Real.log_le_log
+      · linarith [hLj i]
+      · exact_mod_cast Nat.add_le_add_left hij L
+  have hgeom := Task674.norm_weighted_linear_phase_le w N (L - 1) β hw hw0
+  have hL1 : 1 ≤ L := by exact_mod_cast (show (1 : ℝ) ≤ L by linarith)
+  have hphase (j : ℕ) :
+      LeanLab.PNTPort.LargeSieve.e ((((L - 1 + 1 : ℕ) : ℝ) * β + (j : ℝ) * β)) =
+      fourier ((L + j : ℕ) : ℤ) (β : AddCircle (1 : ℝ)) := by
+    rw [Task556d.fourier_nat_eq_e, Nat.sub_add_cancel hL1]
+    congr 1
+    push_cast
+    ring
+  simp_rw [hphase] at hgeom
+  have heq : T1 X Y β = ∑ j ∈ Finset.range N, w j •
+      fourier ((L + j : ℕ) : ℤ) (β : AddCircle (1 : ℝ)) := by
+    unfold T1
+    rw [Task556d.primeWindow_eq_Ico, Finset.sum_Ico_eq_sum_range]
+    rfl
+  rw [heq]
+  have hw1 : w 0 ≤ 1 := by
+    dsimp [w]
+    exact (one_div_le_one_div_of_le (by norm_num) (hlog 0)).trans (by norm_num)
+  have hcard : ((primeWindow X Y).card : ℝ) = (N : ℝ) := by
+    rw [Task556d.primeWindow_eq_Ico, Nat.card_Ico]
+  rw [hcard]
+  exact hgeom.trans (by
+    simpa using mul_le_mul_of_nonneg_right hw1
+      (LeanLab.PNTPort.Vinogradov.G_nonneg (Nat.cast_nonneg N) β))
+
+/-- Page 6 display 22: distance to the nearest integer is the absolute
+value on the centered half period. -/
+theorem dist0_eq_abs_of_abs_le_half {β : ℝ} (hβ : |β| ≤ 1 / 2) :
+    LeanLab.PNTPort.LargeSieve.dist0 β = |β| := by
+  by_cases h : β = 1 / 2
+  · subst β
+    norm_num [LeanLab.PNTPort.LargeSieve.dist0, round_eq]
+  · have hr : round β = 0 := round_eq_zero_iff.mpr
+      ⟨(abs_le.mp hβ).1, lt_of_le_of_ne (abs_le.mp hβ).2 h⟩
+    simp [LeanLab.PNTPort.LargeSieve.dist0, hr]
+
+/-- Page 6 display 22 for j equal to one on a single prime window.
+The geometric bound and the trivial cardinal bound give the stated decay. -/
+theorem T1_decay_bound {X Y : ℝ} (hlo : 3 ≤ X - Y) (hY : 1 ≤ Y)
+    {β : ℝ} (hβ : |β| ≤ 1 / 2) :
+    ‖T1 X Y β‖ ≤ 4 * Y / (1 + Y * |β|) := by
+  have hgeom := T1_geometric_bound hlo β
+  have hcard := Task556d.primeWindow_card_le (by linarith : 0 ≤ X - Y) hY
+  have htriv : ‖T1 X Y β‖ ≤ 2 * Y := hgeom.trans
+    ((LeanLab.PNTPort.Vinogradov.G_le _ _).trans hcard)
+  have hweight : ‖T1 X Y β‖ * |β| ≤ 1 / 2 := by
+    by_cases hz : |β| = 0
+    · rw [hz, mul_zero]
+      norm_num
+    · have hpos : 0 < |β| := lt_of_le_of_ne (abs_nonneg β) (Ne.symm hz)
+      have hdist : 0 < LeanLab.PNTPort.LargeSieve.dist0 β := by
+        rwa [dist0_eq_abs_of_abs_le_half hβ]
+      have h := hgeom.trans (LeanLab.PNTPort.Vinogradov.G_le_inv hdist)
+      rw [dist0_eq_abs_of_abs_le_half hβ] at h
+      have hmul := (le_div_iff₀ (by positivity : 0 < 2 * |β|)).mp h
+      nlinarith
+  apply (le_div_iff₀ (by positivity : 0 < 1 + Y * |β|)).mpr
+  calc
+    ‖T1 X Y β‖ * (1 + Y * |β|) = ‖T1 X Y β‖ + Y * (‖T1 X Y β‖ * |β|) := by ring
+    _ ≤ 2 * Y + Y * (1 / 2) := add_le_add htriv
+      (mul_le_mul_of_nonneg_left hweight (by linarith))
+    _ ≤ 4 * Y := by linarith
 
 /-- LEAF: P0088 page 6 display 22 for j = 1, from display 21 for f1 = 1/log u by
 partial summation against the geometric sum bound min(Y, 1/(2|beta|)). -/
 theorem T1_bound : T1BoundProp := by
-  sorry
+  intro ε hε hε'
+  have hθ : 0 < (7 / 12 + ε / 2 : ℝ) := by linarith
+  have hθ' : 0 < (1 - (7 / 12 + ε / 2) : ℝ) := by linarith
+  have hlarge : ∀ᶠ X : ℝ in Filter.atTop,
+      4 ≤ windowY X ε ∧ 2 ≤ X ^ (1 - (7 / 12 + ε / 2)) ∧ 3 ≤ X :=
+    ((tendsto_rpow_atTop hθ).eventually_ge_atTop 4).and
+      (((tendsto_rpow_atTop hθ').eventually_ge_atTop 2).and
+        (Filter.eventually_ge_atTop 3))
+  obtain ⟨X0, hX0⟩ := Filter.eventually_atTop.mp hlarge
+  refine ⟨4, X0, by norm_num, ?_⟩
+  intro X hX β hβ
+  obtain ⟨hY4, hratio, hX3⟩ := hX0 X hX
+  have hX0' : 0 < X := by linarith
+  have hXY : X = windowY X ε * X ^ (1 - (7 / 12 + ε / 2)) := by
+    rw [windowY, ← Real.rpow_add hX0']
+    ring_nf
+    rw [Real.rpow_one]
+  have hlo : 3 ≤ X - windowY X ε := by nlinarith
+  exact T1_decay_bound hlo (by linarith) hβ
 
 /-- LEAF: P0088 page 6 display 22 for j = 2, from display 21 for f2 by partial
 summation and the Kuzmin Landau bound, phase derivative 2 beta m at most 1/2. -/
@@ -342,3 +581,18 @@ end LeanLab.KumchevLiu2007.Prep1121KLMajor
 #print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.major_arc_block_of_char_inputs
 #print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.block_range_empty
 #print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.roughCount_eq_major_add_minor
+
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.fourier_shift_memLp_top
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.T1_memLp_top
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.T2_memLp_top
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.measurableSet_arc
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.S1star_memLp_top
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.S2star_memLp_top
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.primeSum_memLp_top
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.roughSum_memLp_top
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.majorArcs_antitone
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.T1_geometric_bound
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.dist0_eq_abs_of_abs_le_half
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.T1_decay_bound
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.major_decomp
+#print axioms LeanLab.KumchevLiu2007.Prep1121KLMajor.T1_bound

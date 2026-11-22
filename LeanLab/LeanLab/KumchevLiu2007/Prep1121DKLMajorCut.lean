@@ -19,6 +19,7 @@ Each final result below admits no step of its own and proves the exact
 statement of the parent leaf. AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Prep1121KLMajorArc
+import LeanLab.KumchevLiu2007.Decomp129
 
 namespace LeanLab.KumchevLiu2007.Prep1121DKLMajorCut
 
@@ -269,7 +270,16 @@ theorem T1_decay :
     ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 → ∃ C X0 : ℝ, 0 < C ∧ ∀ X : ℝ, X0 ≤ X →
       ∀ β : ℝ, 0 < |β| → |β| ≤ 1 / 2 →
         ‖T1 X (windowY X ε) β‖ ≤ C / |β| := by
-  sorry
+  intro ε hε hε'
+  obtain ⟨C, X0, hC, hbound⟩ := Prep1121KLMajor.T1_bound ε hε hε'
+  refine ⟨C, max X0 3, hC, ?_⟩
+  intro X hX β hβ hβ'
+  have hX3 : 3 ≤ X := (le_max_right _ _).trans hX
+  have hY : 0 < windowY X ε := Real.rpow_pos_of_pos (by linarith) _
+  have hden : 0 < 1 + windowY X ε * |β| := by positivity
+  refine (hbound X ((le_max_left _ _).trans hX) β hβ').trans ?_
+  apply (div_le_div_iff₀ hden hβ).mpr
+  nlinarith
 
 /-- PROVED. The split at Y |beta| = 1 behind display 22: a bound a Y^s in the
 range Y |beta| at most one and b Y^s / (Y |beta|) beyond it give
@@ -322,7 +332,121 @@ theorem T2_trivial :
     ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 → ∃ C X0 : ℝ, 0 < C ∧
       ∀ X : ℝ, X0 ≤ X → ∀ β : ℝ,
         ‖T2 (windowY X ε) (Real.log X ^ B) β‖ ≤ C * Real.sqrt (windowY X ε) := by
-  sorry
+  intro B hB ε hε hε'
+  set M := max (Real.exp (1 / B)) (max ((55 * B) ^ 2) 100) with hMdef
+  have hM100 : 100 ≤ M := le_trans (le_max_right _ _) (le_max_right _ _)
+  have hM4 : 4 ≤ M := by linarith
+  refine ⟨4, Real.exp M, by norm_num, ?_⟩
+  intro X hX β
+  have hXpos : 0 < X := lt_of_lt_of_le (Real.exp_pos _) hX
+  set L := Real.log X with hL
+  have hLM : M ≤ L := by rw [← Real.log_exp M]; exact Real.log_le_log (Real.exp_pos _) hX
+  have hL4 : 4 ≤ L := le_trans hM4 hLM
+  have hLB : (55 * B) ^ 2 ≤ L := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hLM
+  have hLe : Real.exp (1 / B) ≤ L := le_trans (le_max_left _ _) hLM
+  have hLpos : 0 < L := by linarith
+  set ℓ := Real.log L with hℓ
+  have hℓB : 1 / B ≤ ℓ := by
+    rw [← Real.log_exp (1 / B)]; exact Real.log_le_log (Real.exp_pos _) hLe
+  have hBℓ : 1 ≤ B * ℓ := by
+    rw [div_le_iff₀ hB] at hℓB; linarith
+  have hℓpos : 0 < ℓ := by
+    by_contra h; push Not at h; nlinarith
+  have hsqL : 55 * B ≤ Real.sqrt L := by
+    have := Real.sqrt_le_sqrt hLB
+    rwa [Real.sqrt_sq (by positivity)] at this
+  have hℓsq : ℓ ≤ 2 * Real.sqrt L := by
+    have h1 := Real.log_le_sub_one_of_pos (Real.sqrt_pos.mpr hLpos)
+    rw [Real.log_sqrt hLpos.le] at h1; linarith
+  have hsqsq : Real.sqrt L * Real.sqrt L = L := Real.mul_self_sqrt hLpos.le
+  have hkey : 2 * B * ℓ ≤ 7 * L / 96 := by
+    have h1 := mul_le_mul_of_nonneg_left hℓsq (by positivity : (0:ℝ) ≤ 2 * B)
+    have h2 := mul_le_mul_of_nonneg_right hsqL (Real.sqrt_nonneg L)
+    nlinarith
+  set e := 7 / 12 + ε / 2 with he
+  have he7 : 7 / 12 ≤ e := by linarith
+  have hYdef : windowY X ε = X ^ e := rfl
+  set Y := windowY X ε with hY
+  have hYpos : 0 < Y := by rw [hYdef]; exact Real.rpow_pos_of_pos hXpos _
+  have hlogY : Real.log Y = e * L := by rw [hYdef]; exact Real.log_rpow hXpos e
+  set P := L ^ B with hP
+  have hPpos : 0 < P := Real.rpow_pos_of_pos hLpos _
+  have hlogP : Real.log P = B * ℓ := Real.log_rpow hLpos B
+  set z0 := Y ^ (1 / 4 : ℝ) * P ^ (-2 : ℤ) with hz0
+  have hz0pos : 0 < z0 := by positivity
+  have hlz : Real.log z0 = e * L / 4 - 2 * (B * ℓ) := by
+    rw [hz0, Real.log_mul (by positivity) (by positivity), Real.log_rpow hYpos,
+      Real.log_zpow, hlogY, hlogP]
+    push_cast; ring
+  have hlz8 : e * L / 8 ≤ Real.log z0 := by
+    rw [hlz]; nlinarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+  have hlz96 : 7 * L / 96 ≤ Real.log z0 := by
+    nlinarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+  have hlzpos : 0 < Real.log z0 := by linarith
+  have hz1 : 1 < z0 := (Real.log_pos_iff hz0pos.le).mp hlzpos
+  have hu : L ^ (-1 : ℝ) = L⁻¹ := Real.rpow_neg_one L
+  have hsY : Real.log (Real.sqrt Y) = e * L / 2 := by
+    rw [Real.log_sqrt hYpos.le, hlogY]
+  have hlog2 : Real.log 2 < 1 := by have := Real.log_two_lt_d9; norm_num at this; linarith
+  have hL100 : 100 ≤ L := hM100.trans hLM
+  have per : ∀ m ∈ squareWindow Y, |f2Weight z0 (m : ℝ)| ≤ 2 := by
+    intro v hv
+    obtain ⟨_, hm2lo, hm2hi⟩ := Finset.mem_filter.mp hv
+    set m : ℝ := (v : ℝ) with hm
+    have hsYpos : 0 < Real.sqrt Y := Real.sqrt_pos.mpr hYpos
+    have hmpos : 0 < m := by linarith
+    have hlmlo : e * L / 2 - Real.log 2 ≤ Real.log m := by
+      have := Real.log_le_log (by positivity) hm2lo
+      rwa [Real.log_div hsYpos.ne' (by norm_num), hsY] at this
+    have hlmhi : Real.log m < e * L / 2 := by
+      have := Real.log_lt_log hmpos hm2hi
+      rwa [hsY] at this
+    have hlm8 : 7 * L / 24 - 1 ≤ Real.log m := by
+      nlinarith [mul_le_mul_of_nonneg_right he7 hLpos.le]
+    have hlm1 : 1 ≤ Real.log m := by linarith
+    have hlmpos : 0 < Real.log m := by linarith
+    have hsm : Real.log (Real.sqrt m) = Real.log m / 2 := Real.log_sqrt hmpos.le
+    have hsmpos : 0 < Real.sqrt m := Real.sqrt_pos.mpr hmpos
+    have hzle : z0 ≤ Real.sqrt m := by
+      rw [← Real.log_le_log_iff hz0pos hsmpos, hsm, hlz]; linarith
+    obtain ⟨hJ0, hJ1⟩ := Task129.f2_integral_bound (u := m) hz1 hzle
+    have hlz1 : 1 ≤ Real.log z0 := by linarith
+    have hsmLog : 0 < Real.log (Real.sqrt m) := by rw [hsm]; positivity
+    have hratio : Real.log (Real.sqrt m / z0) ≤ Real.log (Real.sqrt m) := by
+      rw [Real.log_div hsmpos.ne' hz0pos.ne']
+      linarith
+    have hJ2 : (∫ t in z0..Real.sqrt m, 1 / (t * Real.log t * Real.log (m / t))) ≤
+        1 / Real.log z0 := by
+      refine hJ1.trans ?_
+      have hid : (1 / (Real.log z0 * Real.log (Real.sqrt m))) *
+          Real.log (Real.sqrt m / z0) =
+          Real.log (Real.sqrt m / z0) / (Real.log z0 * Real.log (Real.sqrt m)) := by ring
+      rw [hid, div_le_div_iff₀ (mul_pos hlzpos hsmLog) hlzpos]
+      nlinarith only [mul_le_mul_of_nonneg_right hratio hlzpos.le]
+    have hmInv : 1 / Real.log m ≤ 1 := by
+      simpa using one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 1) hlm1
+    have hzInv : 1 / Real.log z0 ≤ 1 := by
+      simpa using one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 1) hlz1
+    change |1 / Real.log m + ∫ t in z0..Real.sqrt m,
+      1 / (t * Real.log t * Real.log (m / t))| ≤ 2
+    rw [abs_of_nonneg (add_nonneg (by positivity) hJ0)]
+    linarith only [hmInv, hzInv, hJ2]
+  have hcard : ((squareWindow Y).card : ℝ) ≤ Real.sqrt Y + 1 := by
+    have h : (squareWindow Y).card ≤ ⌊Real.sqrt Y⌋₊ + 1 := by
+      unfold squareWindow
+      exact (Finset.card_filter_le _ _).trans (by simp)
+    have h2 : ((⌊Real.sqrt Y⌋₊ : ℕ) : ℝ) ≤ Real.sqrt Y := Nat.floor_le (Real.sqrt_nonneg _)
+    have h3 : ((squareWindow Y).card : ℝ) ≤ ((⌊Real.sqrt Y⌋₊ : ℕ) : ℝ) + 1 := by exact_mod_cast h
+    linarith
+  have hY1 : 1 ≤ Y := Real.one_le_rpow (by linarith [Real.add_one_le_exp M] : 1 ≤ X) (by linarith : 0 ≤ e)
+  have hR1 : 1 ≤ Real.sqrt Y := Real.one_le_sqrt.mpr hY1
+  change ‖T2 Y P β‖ ≤ 4 * Real.sqrt Y
+  refine (trig_norm_le (squareWindow Y) _ (fun m => ((m ^ 2 : ℕ) : ℤ)) _).trans ?_
+  calc
+    _ ≤ ∑ _m ∈ squareWindow Y, (2 : ℝ) := Finset.sum_le_sum fun m hm => by
+      simpa only [Complex.norm_real, Real.norm_eq_abs] using per m hm
+    _ = 2 * ((squareWindow Y).card : ℝ) := by rw [Finset.sum_const, nsmul_eq_mul]; ring
+    _ ≤ 4 * Real.sqrt Y := by linarith
 
 /-- LEAF: P0088 page 6 display 22 for j = 2, the decay bound for 0 < |beta| at
 most Y^(-1/2)/4: the Kuzmin Landau bound for the phase m^2 beta, whose

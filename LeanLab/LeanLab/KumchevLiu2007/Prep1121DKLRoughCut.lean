@@ -18,6 +18,7 @@ Each final result admits no step of its own and proves the exact statement of
 the parent leaf. AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Prep1121KLRoughBulk
+import LeanLab.KumchevLiu2007.SmallCutoff674
 
 namespace LeanLab.KumchevLiu2007.Prep1121DKLRoughCut
 
@@ -51,7 +52,104 @@ theorem first_small_block (A : ℝ) (hA : 0 < A) :
               (fun m : ℕ => t < (m : ℝ) ^ 2 ∧ (m : ℝ) ^ 2 ≤ t + H),
             fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  refine ⟨A + 2, by linarith, ?_⟩
+  intro B hB ε hε hε'
+  obtain ⟨T1, ht1⟩ := Filter.eventually_atTop.mp
+    ((isLittleO_log_rpow_rpow_atTop (A + 4 * B) (by norm_num : (0 : ℝ) < 7 / 72)).bound
+      (by norm_num : (0 : ℝ) < 1))
+  obtain ⟨T2, ht2⟩ := Filter.eventually_atTop.mp
+    ((isLittleO_log_rpow_rpow_atTop (A + 1) (by norm_num : (0 : ℝ) < 7 / 24)).bound
+      (by norm_num : (0 : ℝ) < 1))
+  refine ⟨64, max 3 (max T1 T2), by norm_num, by linarith [le_max_left (3 : ℝ) (max T1 T2)], ?_⟩
+  intro X H hX hlow hhigh α q v hcop hqP hqQ hclose
+  have hX3 : 3 ≤ X := (le_max_left _ _).trans hX
+  have hX0 : 0 < X := by linarith
+  have hX1 : 1 ≤ X := by linarith
+  have hL1 : 1 ≤ Real.log X := by
+    rw [Real.le_log_iff_exp_le hX0]
+    exact Real.exp_one_lt_three.le.trans hX3
+  have hL : 0 < Real.log X := by linarith
+  have hT : 0 < Real.log X ^ A := Real.rpow_pos_of_pos hL _
+  have hP : 0 < Real.log X ^ B := Real.rpow_pos_of_pos hL _
+  have hB0 : 0 ≤ B := by linarith
+  have hP1 : 1 ≤ Real.log X ^ B := Real.one_le_rpow hL1 hB0
+  have hT1 : 1 ≤ Real.log X ^ A := Real.one_le_rpow hL1 hA.le
+  have hY : 1 ≤ windowY X ε := Real.one_le_rpow hX1 (by linarith : 0 ≤ 7 / 12 + ε / 2)
+  have hR : Real.sqrt (windowY X ε) = X ^ (7 / 24 + ε / 4) := by
+    rw [Real.sqrt_eq_rpow, windowY, ← Real.rpow_mul hX0.le]
+    congr 1
+    ring
+  have hR0 : 0 < Real.sqrt (windowY X ε) := Real.sqrt_pos.mpr (by linarith)
+  have hAbs1 : Real.log X ^ A * (Real.log X ^ B) ^ 4 ≤ X ^ (7 / 72 : ℝ) := by
+    have h := ht1 X (((le_max_left _ _).trans (le_max_right _ _)).trans hX)
+    have heq : Real.log X ^ A * (Real.log X ^ B) ^ 4 = Real.log X ^ (A + 4 * B) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul hL.le, ← Real.rpow_add hL]
+      congr 1
+      ring
+    rw [heq]
+    simpa only [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hL (A + 4 * B)),
+      abs_of_pos (Real.rpow_pos_of_pos hX0 (7 / 72 : ℝ)), one_mul] using h
+  have hAbs2 : Real.log X ^ (A + 1) ≤ X ^ (7 / 24 : ℝ) := by
+    have h := ht2 X (((le_max_right _ _).trans (le_max_right _ _)).trans hX)
+    simpa only [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hL (A + 1)),
+      abs_of_pos (Real.rpow_pos_of_pos hX0 (7 / 24 : ℝ)), one_mul] using h
+  have hP4 : 0 < (Real.log X ^ B) ^ 4 := by positivity
+  have hlow' : X ^ (7 / 18 + ε) / (Real.log X ^ B) ^ 4 ≤ H := by
+    simpa only [zpow_neg, zpow_ofNat, div_eq_mul_inv] using hlow
+  have hRT : Real.sqrt (windowY X ε) * Real.log X ^ A ≤ H := by
+    refine le_trans ((le_div_iff₀ hP4).mpr ?_) hlow'
+    calc
+      _ = Real.sqrt (windowY X ε) * (Real.log X ^ A * (Real.log X ^ B) ^ 4) := by ring
+      _ ≤ Real.sqrt (windowY X ε) * X ^ (7 / 72 : ℝ) :=
+        mul_le_mul_of_nonneg_left hAbs1 hR0.le
+      _ = X ^ (7 / 24 + ε / 4 + 7 / 72) := by rw [hR, ← Real.rpow_add hX0]
+      _ ≤ X ^ (7 / 18 + ε) := Real.rpow_le_rpow_of_exponent_le hX1 (by linarith)
+  have hroot : Real.sqrt (windowY X ε) ≤ H :=
+    (le_mul_of_one_le_right hR0.le hT1).trans hRT
+  have hH0 : 0 ≤ H := hR0.le.trans hroot
+  have hHpos : 0 < H := hR0.trans_le hroot
+  have hqpos : (0 : ℝ) < q := hP.trans hqP
+  have hqn : 1 ≤ q := by exact_mod_cast (show 0 < q by exact_mod_cast hqpos)
+  have hHX : H ≤ X := by
+    have hP4one : 1 ≤ (Real.log X ^ B) ^ 4 := one_le_pow₀ hP1
+    have hhigh' : H ≤ windowY X ε / (Real.log X ^ B) ^ 4 := by
+      simpa only [zpow_neg, zpow_ofNat, div_eq_mul_inv] using hhigh
+    refine hhigh'.trans ((div_le_self (by linarith : 0 ≤ windowY X ε) hP4one).trans ?_)
+    simpa only [windowY, Real.rpow_one] using
+      Real.rpow_le_rpow_of_exponent_le hX1 (by linarith : 7 / 12 + ε / 2 ≤ (1 : ℝ))
+  have hqX : (q : ℝ) ≤ X := hqQ.trans ((div_le_self hH0 hP1).trans hHX)
+  have hlogq : Real.log (q : ℝ) ≤ Real.log X := Real.log_le_log hqpos hqX
+  have hJ : 1 + Real.log (q : ℝ) ≤ 2 * Real.log X := by linarith
+  have hTq : Real.log X ^ A ≤ (q : ℝ) :=
+    (Real.rpow_le_rpow_of_exponent_le hL1 (by linarith : A ≤ B)).trans hqP.le
+  have hTL : Real.log X ^ A * Real.log X ≤ Real.log X ^ B := by
+    calc
+      Real.log X ^ A * Real.log X = Real.log X ^ (A + 1) := by
+        rw [Real.rpow_add hL, Real.rpow_one]
+      _ ≤ Real.log X ^ B := Real.rpow_le_rpow_of_exponent_le hL1 (by linarith)
+  have hJR : (1 + Real.log (q : ℝ)) * Real.log X ^ A ≤ 2 * Real.sqrt (windowY X ε) := by
+    calc
+      _ ≤ (2 * Real.log X) * Real.log X ^ A := mul_le_mul_of_nonneg_right hJ hT.le
+      _ = 2 * Real.log X ^ (A + 1) := by rw [Real.rpow_add hL, Real.rpow_one]; ring
+      _ ≤ 2 * X ^ (7 / 24 : ℝ) := by gcongr
+      _ ≤ 2 * Real.sqrt (windowY X ε) := by
+        rw [hR]
+        gcongr
+        linarith
+  have hqPJ : (q : ℝ) * Real.log X ^ B ≤ H := (le_div_iff₀ hP).mp hqQ
+  have hqJ : (q : ℝ) * (1 + Real.log (q : ℝ)) * Real.log X ^ A ≤ 2 * H := by
+    calc
+      _ ≤ (q : ℝ) * (2 * Real.log X) * Real.log X ^ A := by gcongr
+      _ = 2 * (q : ℝ) * (Real.log X ^ A * Real.log X) := by ring
+      _ ≤ 2 * (q : ℝ) * Real.log X ^ B := by gcongr
+      _ ≤ 2 * H := by nlinarith
+  have happ : |α - (v : ℝ) / q| ≤ 1 / (q : ℝ) ^ 2 :=
+    (Eq33RouteD.display41_of_minor (by omega : 0 < q) hqQ hclose).le
+  exact (Task674.unweighted_square_energy_bound (windowY X ε) H α (windowY X ε / 4)
+    (windowY X ε) hY hroot (by positivity) (by linarith) le_rfl
+    hqn hcop happ).trans (Task674.quadratic_budget_le H (Real.sqrt (windowY X ε)) q
+      (1 + Real.log q) (Real.log X ^ A) hH0 hR0 hT hRT hTq hJR hqJ)
+
 
 /-- LEAF: P0088 page 11 Lemma 3.4, applied on page 15 to the first sum of display
 52 with a cutoff z above 2 and at most z1 = Y^(1/6 + eps/2), the genuinely rough

@@ -21,6 +21,7 @@ The H range above Y, recorded as a question in the parent file, is left inside
 each leaf: every leaf keeps the whole written range of H.
 -/
 import LeanLab.KumchevLiu2007.Eq33RouteD
+import LeanLab.KumchevLiu2007.SmallCutoff674
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteD
 
@@ -46,7 +47,16 @@ theorem leaf_small_cutoff_left_half (A : ℝ) (hA : 0 < A) :
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  obtain ⟨B0, hB0, h⟩ := Task674.unweighted_first_sum A hA
+  refine ⟨B0, hB0, ?_⟩
+  intro B hB ε hε
+  obtain ⟨C, X0, hC, hX0, hbound⟩ := h B hB ε hε
+  refine ⟨C, X0, hC, hX0, ?_⟩
+  intro X H hX hH hHU α q a hcop hqP hqQ hclose z hz
+  have hY : 0 < windowY X ε := Real.rpow_pos_of_pos (by linarith) _
+  have hb := hbound X H hX hH hHU α q a hcop hqP hqQ hclose
+    (windowY X ε / 4) (windowY X ε / 2) (by positivity) (by linarith) (by linarith)
+  simpa only [roughWeight_eq_one_of_le_two z hz, one_mul] using hb
 
 /-- LEAF: the small cut-off case on the right half of the window. Same
 trivial weight as the previous leaf, on [Y / 2, Y], where the short sum has the
@@ -65,7 +75,16 @@ theorem leaf_small_cutoff_right_half (A : ℝ) (hA : 0 < A) :
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  obtain ⟨B0, hB0, h⟩ := Task674.unweighted_first_sum A hA
+  refine ⟨B0, hB0, ?_⟩
+  intro B hB ε hε
+  obtain ⟨C, X0, hC, hX0, hbound⟩ := h B hB ε hε
+  refine ⟨C, X0, hC, hX0, ?_⟩
+  intro X H hX hH hHU α q a hcop hqP hqQ hclose z hz
+  have hY : 0 < windowY X ε := Real.rpow_pos_of_pos (by linarith) _
+  have hb := hbound X H hX hH hHU α q a hcop hqP hqQ hclose
+    (windowY X ε / 2) (windowY X ε) (by positivity) (by linarith) (by linarith)
+  simpa only [roughWeight_eq_one_of_le_two z hz, one_mul] using hb
 
 /-- LEAF: the genuinely rough case on the left half of the window. The
 cut-off is above two and at most Y^(1/6 + eps/2), so the rough weight is the
@@ -213,3 +232,6 @@ theorem lemma34_first_sum_split (A : ℝ) (hA : 0 < A) :
     linarith
 
 end LeanLab.KumchevLiu2007.Eq33RouteD
+
+#print axioms LeanLab.KumchevLiu2007.Eq33RouteD.leaf_small_cutoff_left_half
+#print axioms LeanLab.KumchevLiu2007.Eq33RouteD.leaf_small_cutoff_right_half
