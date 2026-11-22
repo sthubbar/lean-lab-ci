@@ -13,6 +13,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp514a
 import LeanLab.BHP1997.Route512MajorMoment
+import LeanLab.BHP1997.SPLIT_leaf_521_mvt
 
 namespace LeanLab.BHP1997.SPLITLeaf521
 open Classical Complex DecompC165b LowerShortC165
@@ -21,12 +22,14 @@ open scoped BigOperators
 /-- LEAF: the mean value theorem for Dirichlet polynomials used for `G` in display 5.21.
 CITED-LEFT: Montgomery and Vaughan 1974, Hilbert's inequality, J. London Math. Soc. 8,
 Corollary 3: `∫_0^T |Σ a_n n^(-it)|^2 dt = Σ |a_n|^2 (T + O(n))`; here on `[-T, T]` as an
-upper bound with an absolute constant `C`. Not in the lab. -/
+upper bound with an absolute constant `C`. Since burst-20261122 unit P1122-0103 it is proved, with
+`C = 6π`, in SPLIT_leaf_521_mvt from the one cited leaf `mv_hilbert_inequality`, Montgomery and
+Vaughan 1974 Theorem 1, as in their proof of Corollary 3. -/
 theorem leaf521_dirichlet_mvt :
     ∃ C : ℝ, ∀ (S : Finset ℕ) (a : ℕ → ℂ) (T : ℝ), 0 ≤ T → (∀ n ∈ S, 1 ≤ n) →
       ∫ t in (-T)..T, ‖∑ n ∈ S, a n * (n : ℂ) ^ (-((t : ℂ) * I))‖ ^ 2 ≤
-        ∑ n ∈ S, (2 * T + C * n) * ‖a n‖ ^ 2 := by
-  sorry
+        ∑ n ∈ S, (2 * T + C * n) * ‖a n‖ ^ 2 :=
+  LeanLab.BHP1997.SPLITLeaf521MVT.leaf521_dirichlet_mvt_of_leaves
 
 /-- P0069 page 3 condition ii with page 7 display 2.5, the divisor moment over J: the
 squares of b0 on J sum to `O(Y L^c)`. PROVED from `lowerShortWeight_divisor_bound` and
